@@ -52,7 +52,7 @@ test family.
   is a clean image-finset re-indexing of the residual; T065's σ_loc
   output is consumed mechanically as the σ-construction unit.
 
-* `SigmaProductClearedInequalitySupplier_from_localized_cor732_output`
+* `SigmaProductClearedInequalitySupplier_from_localized_cor732_output_pointwiseClearing`
   — end-to-end direct lane: composes the bridge with T077's
   `SigmaProductClearedInequalitySupplier_via_pointwise_clearing_supplier`
   to deliver T072's named residual
@@ -228,7 +228,7 @@ The whole chain is closed-form per-`(v, t')` source-restricted
 valuation arithmetic; the only non-mechanical content is the per-τ
 source-restricted clearing residual (the genuine σ-cancellation
 algebraic identity at each Laurent piece). -/
-theorem SigmaProductClearedInequalitySupplier_from_localized_cor732_output
+theorem SigmaProductClearedInequalitySupplier_from_localized_cor732_output_pointwiseClearing
     [DecidableEq A]
     (P : PairOfDefinition A) (T : Finset A) (s : A)
     (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →

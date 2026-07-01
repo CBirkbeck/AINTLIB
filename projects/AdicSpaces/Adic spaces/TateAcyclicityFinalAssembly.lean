@@ -289,39 +289,39 @@ theorem RationalCovering.tateAcyclicity_Part2_direct_per_E_allow_empty
     have D_f_exists : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
         ∃ f, f ∈ S ∧
           (laurentPlusDatum (C.plusDatum f) f₀ = D.1 ∨
-           laurentMinusDatum (C.plusDatum f) f₀ = D.1) := fun D => by
+           laurentMinusDatum (C.plusDatum f) f₀ = D.1) := fun D ↦ by
       rcases (C.mem_refinedVCovers S f₀).mp D.2 with ⟨f, hf, hf_eq⟩ | ⟨f, hf, hf_eq⟩
       · exact ⟨f, hf, Or.inl hf_eq⟩
       · exact ⟨f, hf, Or.inr hf_eq⟩
-    let D_f : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, A := fun D =>
+    let D_f : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, A := fun D ↦
       Classical.choose (D_f_exists D)
     have D_f_mem_S : ∀ D, D_f D ∈ S :=
-      fun D => (Classical.choose_spec (D_f_exists D)).1
+      fun D ↦ (Classical.choose_spec (D_f_exists D)).1
     have D_f_eq : ∀ D, laurentPlusDatum (C.plusDatum (D_f D)) f₀ = D.1 ∨
         laurentMinusDatum (C.plusDatum (D_f D)) f₀ = D.1 :=
-      fun D => (Classical.choose_spec (D_f_exists D)).2
+      fun D ↦ (Classical.choose_spec (D_f_exists D)).2
     have D_sub_plusPiece : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
         rationalOpen D.1.T D.1.s ⊆
-          rationalOpen (C.plusDatum (D_f D)).T (C.plusDatum (D_f D)).s := fun D => by
+          rationalOpen (C.plusDatum (D_f D)).T (C.plusDatum (D_f D)).s := fun D ↦ by
       rcases D_f_eq D with heq | heq
       · rw [← heq]; exact laurentPlus_subset (C.plusDatum (D_f D)) f₀
       · rw [← heq]; exact laurentMinus_subset (C.plusDatum (D_f D)) f₀
     have D_sub_plusPiece_insert : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
         rationalOpen D.1.T D.1.s ⊆
-          rationalOpen (insert (D_f D) C.base.T) C.base.s := fun D =>
+          rationalOpen (insert (D_f D) C.base.T) C.base.s := fun D ↦
       (D_sub_plusPiece D).trans (C.rationalOpen_plusDatum_eq_insert (D_f D)).le
-    let D_E : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, RationalLocData A := fun D =>
+    let D_E : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, RationalLocData A := fun D ↦
       Classical.choose (hS_contain (D_f D) (D_f_mem_S D))
-    have D_E_mem : ∀ D, D_E D ∈ C.covers := fun D =>
+    have D_E_mem : ∀ D, D_E D ∈ C.covers := fun D ↦
       (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).1
     have D_E_sub : ∀ D,
         rationalOpen (insert (D_f D) C.base.T) C.base.s ⊆
-          rationalOpen (D_E D).T (D_E D).s := fun D =>
+          rationalOpen (D_E D).T (D_E D).s := fun D ↦
       (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).2
     have D_sub_DE : ∀ D,
         rationalOpen D.1.T D.1.s ⊆ rationalOpen (D_E D).T (D_E D).s :=
-      fun D => (D_sub_plusPiece_insert D).trans (D_E_sub D)
-    let fV : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, presheafValue D.1 := fun D =>
+      fun D ↦ (D_sub_plusPiece_insert D).trans (D_E_sub D)
+    let fV : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, presheafValue D.1 := fun D ↦
       restrictionMap (D_E D) D.1 (D_sub_DE D) (fC ⟨D_E D, D_E_mem D⟩)
     have fV_compat : ∀ (D₁ D₂ : { D // D ∈ C.refinedVCovers S f₀ })
         (D₃ : RationalLocData A)
@@ -376,7 +376,7 @@ theorem RationalCovering.tateAcyclicity_Part2_direct_per_E_allow_empty
         restrictionMap E.1 D
           ((C.per_E_local_covering S f₀ E hS_per_E).hsubset D hD) (fC E)
       exact hC_compat ⟨D_E ⟨D, D_in_refined⟩, D_E_mem ⟨D, D_in_refined⟩⟩ E D _ _
-    refine ⟨x, fun E => ?_⟩
+    refine ⟨x, fun E ↦ ?_⟩
     by_cases hE_nonempty : (rationalOpen E.1.T E.1.s).Nonempty
     · exact match_of_nonempty E hE_nonempty
     · exact C.empty_piece_eq_of_matches_piece fC hC_compat x F'
@@ -1055,7 +1055,7 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   exact C.tateAcyclicity_Part2_via_hZavyalov_per_E_direct hne hZavyalov_per_E f₀
     fC hC_compat
-    (fun S' hS'_per_E hS'_contain =>
+    (fun S' hS'_per_E hS'_contain ↦
       RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
         hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
         hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
@@ -1100,7 +1100,7 @@ theorem RationalCovering.part2_via_primary_laneA_allow_empty
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
     (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
-    (fun S' hS'_per_E hS'_contain =>
+    (fun S' hS'_per_E hS'_contain ↦
       RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
         hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
         hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
@@ -1195,7 +1195,7 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_st
   exact
     ValuationSpectrum.RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
       (A := A) (C := C) (f₀ := f₀) hne
-      (fun _ =>
+      (fun _ ↦
         exists_refines_cover_per_E_of_standardShape
           (A := A) (C := C) f_D h_shape h_span)
       fC hC_compat lane_B_supplier hLaneA
@@ -1274,7 +1274,7 @@ theorem RationalCovering.part2_via_primary_laneA_standardShape_allow_empty
     ∃ x : presheafValue C.base, ∀ E : { E // E ∈ C.covers },
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   exact C.part2_via_primary_laneA_allow_empty (f₀ := f₀) hne
-    (fun _ =>
+    (fun _ ↦
       exists_refines_cover_per_E_of_standardShape
         (A := A) (C := C) f_D h_shape h_span)
     fC hC_compat lane_B_supplier hLaneA
@@ -1308,7 +1308,7 @@ theorem RationalCovering.part2_via_primary_canonical_allow_empty
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
     (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
-    (fun S' hS'_per_E hS'_contain =>
+    (fun S' hS'_per_E hS'_contain ↦
       RationalCovering.lane_A_supplier_via_primary_canonical C f₀ hLaneA.hNoeth_B
         hLaneA.hLocLift_B hLaneA.hA₀Noeth_B hLaneA.hnoeth_B
         hLaneA.hcont_forward_B hLaneA.τ_preBiv hLaneA.h_plus_compat
@@ -1384,7 +1384,7 @@ theorem RationalCovering.part2_via_primary_canonical_standardShape_allow_empty
     ∃ x : presheafValue C.base, ∀ E : { E // E ∈ C.covers },
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   exact C.part2_via_primary_canonical_allow_empty (f₀ := f₀) hne
-    (fun _ =>
+    (fun _ ↦
       exists_refines_cover_per_E_of_standardShape
         (A := A) (C := C) f_D h_shape h_span)
     fC hC_compat lane_B_supplier hLaneA
@@ -1483,7 +1483,7 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_universa
   refine C.tateAcyclicity_end_to_end_via_primary_laneA (f₀ := f₀) P hne ?_
     hZavyalov_per_E ?_ hLaneA
   · intro x hx
-    exact separation_supplier C x 0 fun D hD => by
+    exact separation_supplier C x 0 fun D hD ↦ by
       rw [hx D hD]
       exact (map_zero (restrictionMapHom C.base D (C.hsubset D hD))).symm
   · intro S' hS'_per_E _hS'_contain E a b hlocal
@@ -1531,7 +1531,7 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty
   refine C.tateAcyclicity_end_to_end_via_primary_laneA (f₀ := f₀) P hne ?_
     hZavyalov_per_E ?_ hLaneA
   · intro x hx
-    exact separation_supplier C hne x 0 fun D hD => by
+    exact separation_supplier C hne x 0 fun D hD ↦ by
       rw [hx D hD]
       exact (map_zero (restrictionMapHom C.base D (C.hsubset D hD))).symm
   · intro S' hS'_per_E hS'_contain E a b hlocal
@@ -1617,13 +1617,13 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   refine ⟨?_, ?_⟩
   · intro x hx
-    exact separation_supplier C hne x 0 fun D hD => by
+    exact separation_supplier C hne x 0 fun D hD ↦ by
       rw [hx D hD]
       exact (map_zero (restrictionMapHom C.base D (C.hsubset D hD))).symm
   · intro f hcompat
     exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
       (f₀ := f₀) hne hZavyalov_per_E f hcompat
-      (fun S' hS'_per_E hS'_contain =>
+      (fun S' hS'_per_E hS'_contain ↦
         RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
           hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
           hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
@@ -1631,7 +1631,7 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
           (hLaneA.plus_section_refined S' hS'_per_E hS'_contain)
           (hLaneA.minus_section_refined S' hS'_per_E hS'_contain)
           (hLaneA.hOverlap S' hS'_per_E hS'_contain))
-      (fun S' hS'_per_E _hS'_contain E hE_nonempty a b hlocal =>
+      (fun S' hS'_per_E _hS'_contain E hE_nonempty a b hlocal ↦
         separation_supplier (C.per_E_local_covering S'.elts f₀ E hS'_per_E)
           (C.per_E_local_covering_nonempty_of_rationalOpen_nonempty
             S'.elts f₀ E hS'_per_E hE_nonempty)
@@ -1669,13 +1669,13 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_allow_e
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   refine ⟨?_, ?_⟩
   · intro x hx
-    exact separation_supplier C hne x 0 fun D hD => by
+    exact separation_supplier C hne x 0 fun D hD ↦ by
       rw [hx D hD]
       exact (map_zero (restrictionMapHom C.base D (C.hsubset D hD))).symm
   · intro f hcompat
     exact C.part2_via_primary_canonical_allow_empty (f₀ := f₀) hne hZavyalov_per_E
       f hcompat
-      (fun S' hS'_per_E _hS'_contain E hE_nonempty a b hlocal =>
+      (fun S' hS'_per_E _hS'_contain E hE_nonempty a b hlocal ↦
         separation_supplier (C.per_E_local_covering S'.elts f₀ E hS'_per_E)
           (C.per_E_local_covering_nonempty_of_rationalOpen_nonempty
             S'.elts f₀ E hS'_per_E hE_nonempty)
@@ -1803,7 +1803,7 @@ theorem RationalCovering.tateAcyclicity_via_primary_standardShape_allow_empty
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   exact C.tateAcyclicity_end_to_end_via_primary_allow_empty
     (f₀ := f₀) P hne separation_supplier
-    (fun _ =>
+    (fun _ ↦
       exists_refines_cover_per_E_of_standardShape
         (A := A) (C := C) f_D h_shape h_span)
     hLaneA
@@ -1880,7 +1880,7 @@ theorem RationalCovering.tateAcyclicity_via_primary_standardShape_canonical_allo
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   exact C.tateAcyclicity_end_to_end_via_primary_canonical_allow_empty
     (f₀ := f₀) P hne separation_supplier
-    (fun _ =>
+    (fun _ ↦
       exists_refines_cover_per_E_of_standardShape
         (A := A) (C := C) f_D h_shape h_span)
     hLaneA
@@ -2536,7 +2536,7 @@ theorem canonicalMap_isPowerBounded_of_mem_A₀
   -- All powers of algebraMap a stay in locSubring (subring closed under powers).
   have hpow : ∀ n : ℕ, (algebraMap A (Localization.Away D.s) a) ^ n ∈
       locSubring D.P D.T D.s :=
-    fun n => (locSubring D.P D.T D.s).pow_mem hmem n
+    fun n ↦ (locSubring D.P D.T D.s).pow_mem hmem n
   -- The range of (D.coeRingHom (algebraMap a))^· lies in D.coeRingHom '' locSubring.
   have hrange : Set.range
       ((D.coeRingHom (algebraMap A (Localization.Away D.s) a)) ^ · :
@@ -2774,7 +2774,7 @@ theorem rationalCovering_hasSeparation_via_normalizedLaurent
     · haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
       exact Subsingleton.elim x y
     · haveI hprime : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
-      have hs_notin : C.base.s ∉ (⊥ : Ideal A) := fun h => hs (Ideal.mem_bot.mp h)
+      have hs_notin : C.base.s ∉ (⊥ : Ideal A) := fun h ↦ hs (Ideal.mem_bot.mp h)
       obtain ⟨v, hv_rat, _⟩ := hSpa ⊥ hprime hs_notin
       obtain ⟨D, hD, _⟩ := C.hcover v hv_rat
       exact absurd ⟨D, hD⟩ hne
@@ -2882,7 +2882,7 @@ theorem rationalCovering_hasGluing_via_normalizedLaurent
       hb_per_f hT_pb_per_f hcont_eval_per_f
       hZavyalov_per_E f₀ lane_A_supplier lane_B_supplier).2 f hcompat
   · -- Empty covering: any x works, pick 0.
-    exact ⟨0, fun ⟨D, hD⟩ => absurd ⟨D, hD⟩ hne⟩
+    exact ⟨0, fun ⟨D, hD⟩ ↦ absurd ⟨D, hD⟩ hne⟩
 
 /-! ### Empty-coverings-tolerant `tateAcyclicity` conjunction via normalized-Laurent
 
@@ -3010,7 +3010,7 @@ theorem tateAcyclicity_via_normalizedLaurent
         hSpa_points normalized_laurent_witness
         hNoeth_B hA_complete_B hnoeth_B hP_A₀Noeth_B
         hb_per_f hT_pb_per_f hcont_eval_per_f
-    refine hsep x 0 (fun D hD => ?_)
+    refine hsep x 0 (fun D hD ↦ ?_)
     rw [show restrictionMap C.base D (C.hsubset D hD) 0 = 0 by
         change restrictionMapHom C.base D _ 0 = 0; exact map_zero _]
     exact hx D hD

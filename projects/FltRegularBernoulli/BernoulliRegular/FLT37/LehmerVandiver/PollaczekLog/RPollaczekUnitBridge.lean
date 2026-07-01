@@ -60,13 +60,7 @@ theorem prod_cyclotomicUnit_pow_eq_pollaczekUnit_val (i : ℕ) :
         (cyclotomicUnit p K b) ^ (b : ℕ) ^ (p - 1 - i)) =
       ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) := by
   unfold pollaczekUnit
-  rw [Units.coe_prod]
-  rw [show (∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
-        cyclotomicUnit p K b ^ (b : ℕ) ^ (p - 1 - i)) =
-      ∏ b ∈ (Finset.Ico 1 ((p - 1) / 2 + 1)).attach,
-        cyclotomicUnit p K (b.1 : ℕ) ^ ((b.1 : ℕ) : ℕ) ^ (p - 1 - i) from
-    (Finset.prod_attach (Finset.Ico 1 ((p - 1) / 2 + 1))
-      (fun b => cyclotomicUnit p K b ^ (b : ℕ) ^ (p - 1 - i))).symm]
+  rw [Units.coe_prod, ← Finset.prod_attach]
   refine Finset.prod_congr rfl fun b _ => ?_
   rw [Units.val_pow_eq_pow_val, pollaczekFactor_val]
 
@@ -102,8 +96,8 @@ theorem zeta_pow_sub_one_prod_eq_pollaczekUnit_sq_mul_zeta_sub_one_pow
       ((((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^
           (2 * ∑ b ∈ Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))) *
       ((pollaczekUnit p K i : 𝓞 K) ^ 2) := by
-  -- The hypothesis `hp_odd` is preserved in the calling convention but not
-  -- used in the algebraic identity itself.
+  -- `hp_odd` is preserved in the statement to match LV004e's calling convention,
+  -- but the identity is purely formal in `𝓞 K` and does not use it.
   let _ := hp_odd
   -- Step 1: per-term factorisation `(ζ^b - 1)^{2·b^E} = (ζ-1)^{2·b^E} · cycl^{2·b^E}`.
   rw [Finset.prod_congr rfl (fun b (_ : b ∈ Ico 1 ((p - 1) / 2 + 1)) =>
@@ -117,10 +111,8 @@ theorem zeta_pow_sub_one_prod_eq_pollaczekUnit_sq_mul_zeta_sub_one_pow
     rw [Finset.prod_congr rfl (fun b (_ : b ∈ Ico 1 ((p - 1) / 2 + 1)) =>
       show cyclotomicUnit p K b ^ (2 * b ^ (p - 1 - i)) =
         (cyclotomicUnit p K b ^ b ^ (p - 1 - i)) ^ 2 from by
-      rw [show (2 * b ^ (p - 1 - i) : ℕ) = b ^ (p - 1 - i) * 2 from by ring, pow_mul])]
-    rw [Finset.prod_pow]
-    congr 1
-    exact prod_cyclotomicUnit_pow_eq_pollaczekUnit_val p K i
+      rw [mul_comm 2 (b ^ (p - 1 - i)), pow_mul]),
+      Finset.prod_pow, prod_cyclotomicUnit_pow_eq_pollaczekUnit_val p K i]
 
 end RPollaczekUnitBridge
 

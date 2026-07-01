@@ -105,9 +105,7 @@ theorem productRestrictionSub_injective_of_product_injective
         restrictionMap C.base D (C.hsubset D hD) y) → x = y) :
     Function.Injective (productRestrictionSub A C) := by
   intro x y hxy
-  apply h
-  intro D hD
-  exact congr_fun hxy ⟨D, hD⟩
+  exact h _ _ fun D hD => congr_fun hxy ⟨D, hD⟩
 
 /-! ### T-EMBED-TOPO-REFINEMENT-TRANSFER (conditional form)
 
@@ -286,9 +284,7 @@ continuous ring homomorphism). The full Π-valued map is continuous by
 `continuous_pi`. -/
 theorem productRestrictionSub_continuous (C : RationalCovering A) :
     Continuous (productRestrictionSub A C) := by
-  refine continuous_pi ?_
-  rintro ⟨D, hD⟩
-  change Continuous (restrictionMap C.base D (C.hsubset D hD))
+  refine continuous_pi fun ⟨D, hD⟩ => ?_
   exact restrictionMapHom_continuous C.base D (C.hsubset D hD)
 
 /-- **T282**: **strengthened** topological refinement transfer.
@@ -377,9 +373,7 @@ def twoElementSubtypePiHomeomorph
       simp only [dif_neg h]
       exact continuous_snd
   · -- continuous_invFun
-    refine continuous_prodMk.mpr ⟨?_, ?_⟩
-    · exact continuous_apply _
-    · exact continuous_apply _
+    exact continuous_prodMk.mpr ⟨continuous_apply _, continuous_apply _⟩
 
 /-! ### T273: Lane C Laurent base case (parametric form)
 
@@ -768,10 +762,8 @@ theorem naturalRefinementMap_continuous
     (hτ : ∀ d : { D // D ∈ V_covers },
       rationalOpen d.1.T d.1.s ⊆ rationalOpen (τ d).1.T (τ d).1.s) :
     Continuous (naturalRefinementMap τ hτ) := by
-  refine continuous_pi ?_
-  intro d
-  unfold naturalRefinementMap
-  exact (restrictionMapHom_continuous (τ d).1 d.1 (hτ d)).comp (continuous_apply (τ d))
+  exact continuous_pi fun d =>
+    (restrictionMapHom_continuous (τ d).1 d.1 (hτ d)).comp (continuous_apply (τ d))
 
 /-- **T285 (commutativity)**: the natural refinement map composes with
 `productRestrictionSub_C` to give `productRestrictionSub_V` (where V is
@@ -787,9 +779,6 @@ theorem naturalRefinementMap_comp
       fun d => restrictionMap C.base d.1
         ((hτ d).trans (C.hsubset (τ d).1 (τ d).2)) x := by
   funext d
-  unfold naturalRefinementMap
-  change restrictionMap (τ d).1 d.1 (hτ d)
-      (restrictionMap C.base (τ d).1 (C.hsubset (τ d).1 (τ d).2) x) = _
   exact congr_fun (restrictionMap_comp C.base (τ d).1 d.1
     (C.hsubset (τ d).1 (τ d).2) (hτ d)) x
 
@@ -1089,10 +1078,9 @@ theorem productRestrictionSub_isInducing_of_sub_inducing
   let proj : (∀ D : { D // D ∈ V_large }, presheafValue D.1) →
               (∀ D : { D // D ∈ V_small }, presheafValue D.1) :=
     fun x ⟨D, hD⟩ => x ⟨D, h_subset hD⟩
-  have h_proj_continuous : Continuous proj := by
-    refine continuous_pi ?_
-    rintro ⟨D, hD⟩
-    exact continuous_apply (⟨D, h_subset hD⟩ : { D // D ∈ V_large })
+  have h_proj_continuous : Continuous proj :=
+    continuous_pi fun ⟨D, hD⟩ =>
+      continuous_apply (⟨D, h_subset hD⟩ : { D // D ∈ V_large })
   -- The composition `proj ∘ pr_large = pr_small` (by proof-irrelevance).
   have hcomp : pr_small = proj ∘ pr_large := by
     rw [hpr_small, hpr_large]
@@ -1206,9 +1194,7 @@ theorem productRestrictionSub_isInducing_of_V_contains_laurent_pair
     funext x ⟨D, hD⟩
     rfl
   · -- hpr_large continuity
-    refine continuous_pi ?_
-    rintro ⟨D, hD⟩
-    exact restrictionMapHom_continuous Base D (hV_subset D hD)
+    exact continuous_pi fun ⟨D, hD⟩ => restrictionMapHom_continuous Base D (hV_subset D hD)
 
 /-- **T291**: `IsInducing` for any `C` whose `C.covers` contains both
 halves of a laurent split at `C.base`. Direct specialisation of T290
@@ -1786,10 +1772,8 @@ def _root_.Homeomorph.piTwoToProd {ι : Type*} [DecidableEq ι]
       · rw [Finset.mem_singleton] at hxb
         subst hxb
         simp [h_ne.symm] }
-  refine (Homeomorph.piCongrLeft
-    (Y := fun i : ↥({a, b} : Finset ι) => α i.1) e).symm.trans ?_
-  refine (Homeomorph.piFinTwo _).trans ?_
-  exact Homeomorph.refl _
+  exact (Homeomorph.piCongrLeft
+    (Y := fun i : ↥({a, b} : Finset ι) => α i.1) e).symm.trans (Homeomorph.piFinTwo _)
 
 /-! ### T-INTERMEDIATE-2COVER-PAIR: 2-cover IsInducing in product form
 
@@ -1816,9 +1800,7 @@ theorem isInducing_2cover_pair
   have h_eq : (fun x : presheafValue D₀ =>
         (restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x,
          restrictionMap D₀ (laurentMinusDatum D₀ f) (laurentMinus_subset D₀ f) x))
-      = h_homeo ∘ productRestrictionSub A (laurentCovering D₀ f) := by
-    funext x
-    apply Prod.ext <;> rfl
+      = h_homeo ∘ productRestrictionSub A (laurentCovering D₀ f) := rfl
   rw [h_eq]
   exact h_homeo.isInducing.comp h_split
 
@@ -2099,9 +2081,6 @@ theorem productRestrictionSub_isInducing_via_tree_refinement
   intro x
   rw [naturalRefinementMap_comp]
   funext d
-  -- Both sides: `restrictionMap C.base d.1 _ x` with possibly different
-  -- subset proofs. Use proof-irrelevance.
-  change restrictionMap C.base d.1 _ x = restrictionMap C.base d.1 _ x
   rfl
 
 /-! ### Wedhorn-faithful (no-disjointness) inducing transfer
@@ -2129,10 +2108,10 @@ theorem isInducing_to_subtype_pi_iff_iInf_induced
     (s : Finset ι) (f : ∀ i : ↥s, X → Y i.1) :
     Topology.IsInducing (fun (x : X) (i : ↥s) => f i x) ↔
       tX = ⨅ i : ↥s, TopologicalSpace.induced (f i) inferInstance := by
-  rw [Topology.isInducing_iff]
-  rw [show (Pi.topologicalSpace : TopologicalSpace ((i : ↥s) → Y i.1)) =
-    ⨅ i : ↥s, TopologicalSpace.induced (fun g => g i) inferInstance from rfl]
-  rw [induced_iInf]
+  rw [Topology.isInducing_iff,
+    show (Pi.topologicalSpace : TopologicalSpace ((i : ↥s) → Y i.1)) =
+      ⨅ i : ↥s, TopologicalSpace.induced (fun g => g i) inferInstance from rfl,
+    induced_iInf]
   simp_rw [induced_compose]
   rfl
 
@@ -2163,10 +2142,7 @@ theorem induced_restrictionMap_eq_iInf_of_inner_topology_iInf
   funext D
   rw [induced_compose]
   congr 1
-  funext x
-  change (restrictionMap D' D.1 (hSub_inner D.1 D.2) ∘
-      restrictionMap D₀ D' h_inter) x = restrictionMap D₀ D.1 _ x
-  exact congr_fun (restrictionMap_comp D₀ D' D.1 h_inter (hSub_inner D.1 D.2)) x
+  exact restrictionMap_comp D₀ D' D.1 h_inter (hSub_inner D.1 D.2)
 
 /-- **Subtype-iInf union with dependent bodies**: if two subtype-indexed
 iInfs `⨅ D : ↥s, fs D` and `⨅ D : ↥u, fu D` agree (on overlapping/each
@@ -2326,7 +2302,6 @@ theorem productRestrictionSub_isInducing_via_tree_refinement_no_disj
   intro x
   rw [naturalRefinementMap_comp]
   funext d
-  change restrictionMap C.base d.1 _ x = restrictionMap C.base d.1 _ x
   rfl
 
 /-! ## Wedhorn 8.34 factorization
@@ -2593,8 +2568,7 @@ theorem LaurentTree.allNodesDisjoint_ofRightBranchList
         (laurentPlusDatum D₀ f)).covers
       ((LaurentTree.ofRightBranchList rest).toCovering
         (laurentMinusDatum D₀ f)).covers
-    rw [LaurentTree.toCovering_leaf_covers]
-    rw [Finset.disjoint_singleton_left]
+    rw [LaurentTree.toCovering_leaf_covers, Finset.disjoint_singleton_left]
     exact h_notin
 
 /-- `ofRightBranchList [f] = node f leaf leaf` — the depth-1 right-
@@ -2636,20 +2610,18 @@ theorem LaurentTree.exists_for_laurentCovering
   · -- allSplitsInducing
     refine ⟨h_split, ?_, ?_⟩ <;> trivial
   · -- allNodesDisjoint
-    refine ⟨h_ne, ?_, ?_, ?_⟩
-    · -- Disjoint (L.toCovering plus).covers (R.toCovering minus).covers
-      -- = Disjoint {plus} {minus} (since L = R = leaf).
-      show Disjoint
+    refine ⟨h_ne, ?_, trivial, trivial⟩
+    -- Disjoint (L.toCovering plus).covers (R.toCovering minus).covers
+    -- = Disjoint {plus} {minus} (since L = R = leaf).
+    show Disjoint
         ((LaurentTree.leaf : LaurentTree A).toCovering
           (laurentPlusDatum D₀ f)).covers
         ((LaurentTree.leaf : LaurentTree A).toCovering
           (laurentMinusDatum D₀ f)).covers
-      rw [LaurentTree.toCovering_leaf_covers,
-          LaurentTree.toCovering_leaf_covers,
-          Finset.disjoint_singleton]
-      exact h_ne
-    · trivial
-    · trivial
+    rw [LaurentTree.toCovering_leaf_covers,
+        LaurentTree.toCovering_leaf_covers,
+        Finset.disjoint_singleton]
+    exact h_ne
 
 /-! ### Graft preservation of inducing + disjointness predicates
 
@@ -2672,13 +2644,10 @@ theorem LaurentTree.allSplitsInducing_graftAt (t : LaurentTree A)
   | node f L R ihL ihR =>
     obtain ⟨h_split_f, h_split_L, h_split_R⟩ :=
       (LaurentTree.allSplitsInducing_node f L R D₀).mp h_outer
-    refine ⟨h_split_f, ?_, ?_⟩
-    · apply ihL (laurentPlusDatum D₀ f) h_split_L
-      intro L' hL'
-      exact h_inner L' (by simp [LaurentTree.leaves_node, hL'])
-    · apply ihR (laurentMinusDatum D₀ f) h_split_R
-      intro L' hL'
-      exact h_inner L' (by simp [LaurentTree.leaves_node, hL'])
+    refine ⟨h_split_f, ihL (laurentPlusDatum D₀ f) h_split_L fun L' hL' =>
+        h_inner L' (by simp [LaurentTree.leaves_node, hL']),
+      ihR (laurentMinusDatum D₀ f) h_split_R fun L' hL' =>
+        h_inner L' (by simp [LaurentTree.leaves_node, hL'])⟩
 
 /-! ### Note on `allNodesDisjoint` preservation under graft
 

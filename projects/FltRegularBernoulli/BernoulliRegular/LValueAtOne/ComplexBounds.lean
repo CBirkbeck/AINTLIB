@@ -107,7 +107,7 @@ lemma neg_log_one_sub_exp_ofReal_mul_I_im {t : ℝ} (ht₀ : 0 < t) (ht₂π : t
 
 /-- Abel summation identity for the damped sine series attached to `sinZeta` at `s = 1`. -/
 lemma hasSum_mul_rpow_sin (x r : ℝ) (hr₀ : 0 ≤ r) (hr₁ : r < 1) :
-    HasSum (fun n : ℕ => (r ^ n / n) * Real.sin (2 * Real.pi * x * n))
+    HasSum (fun n : ℕ ↦ (r ^ n / n) * Real.sin (2 * Real.pi * x * n))
       (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im := by
   let z : ℂ := (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)
   have hz : ‖z‖ < 1 := by
@@ -137,7 +137,7 @@ lemma hasSum_mul_rpow_sin (x r : ℝ) (hr₀ : 0 ≤ r) (hr₁ : r < 1) :
 
 /-- Abel summation identity for the damped cosine series attached to `cosZeta` at `s = 1`. -/
 lemma hasSum_mul_rpow_cos (x r : ℝ) (hr₀ : 0 ≤ r) (hr₁ : r < 1) :
-    HasSum (fun n : ℕ => (r ^ n / n) * Real.cos (2 * Real.pi * x * n))
+    HasSum (fun n : ℕ ↦ (r ^ n / n) * Real.cos (2 * Real.pi * x * n))
       (-Real.log ‖(1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)‖) := by
   let z : ℂ := (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)
   have hz : ‖z‖ < 1 := by
@@ -152,10 +152,10 @@ lemma hasSum_mul_rpow_cos (x r : ℝ) (hr₀ : 0 ≤ r) (hr₁ : r < 1) :
     rw [hz']
     exact hr₁
   have hsum :
-      HasSum (fun n : ℕ => (z ^ n / n).re) (-Complex.log ((1 : ℂ) - z)).re :=
+      HasSum (fun n : ℕ ↦ (z ^ n / n).re) (-Complex.log ((1 : ℂ) - z)).re :=
     (Complex.hasSum_re (Complex.hasSum_taylorSeries_neg_log hz))
   have hsum' :
-      HasSum (fun n : ℕ => (r ^ n / n) * Real.cos (2 * Real.pi * x * n))
+      HasSum (fun n : ℕ ↦ (r ^ n / n) * Real.cos (2 * Real.pi * x * n))
         (-Complex.log ((1 : ℂ) - z)).re := by
     refine hsum.congr_fun ?_
     intro n

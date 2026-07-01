@@ -68,12 +68,9 @@ theorem normalizedFactors_stickelbergerFactor_eq_repeatedSingleton
     cyclotomicGaloisConjugate_ne_bot a⁻¹ hP_ne
   haveI : (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P).IsPrime :=
     cyclotomicGaloisConjugate_isPrime a⁻¹ P
-  have h_prime :
-      Prime (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P) :=
-    Ideal.prime_of_isPrime h_ne inferInstance
   have h_irred :
       Irreducible (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P) :=
-    h_prime.irreducible
+    (Ideal.prime_of_isPrime h_ne inferInstance).irreducible
   rw [normalizedFactors_pow, normalizedFactors_irreducible h_irred, normalize_eq]
 
 /-- The normalized factors of `stickelbergerIdeal P` are the repeated
@@ -128,9 +125,7 @@ theorem normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
   intro a _ha
   rw [Multiset.count_nsmul, Multiset.count_singleton]
   by_cases hQ :
-      Q = cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P
-  · simp [hQ]
-  · simp [hQ]
+      Q = cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P <;> simp [hQ]
 
 /-- A repeated-exponent certificate for an actual source element `gamma`.
 
@@ -158,66 +153,43 @@ theorem span_eq_stickelbergerIdeal_of_repeatedExactExponents
     rwa [Ne, Ideal.span_singleton_eq_bot]
   have hstick_ne : stickelbergerIdeal (p := p) (K := K) P ≠ ⊥ :=
     stickelbergerIdeal_ne_bot hP_ne
+  -- For an irreducible `Q`, the span and Stickelberger multiplicities agree.
+  have h_count_eq : ∀ Q : Ideal (𝓞 K), Irreducible Q →
+      (normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count Q =
+        (normalizedFactors (stickelbergerIdeal (p := p) (K := K) P)).count Q := by
+    intro Q hQ_irred
+    have hcount_span :
+        emultiplicity Q (Ideal.span ({gamma} : Set (𝓞 K))) =
+          (((normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count Q : ℕ) : ℕ∞) := by
+      rw [emultiplicity_eq_count_normalizedFactors hQ_irred hspan_ne, normalize_eq]
+    have hcount_stick :=
+      normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
+        (p := p) (K := K) hP_ne Q
+    have h_exp_Q := h_exp Q
+    rw [← hcount_stick] at h_exp_Q
+    exact_mod_cast hcount_span.symm.trans h_exp_Q
   have h_dvd_left :
       Ideal.span ({gamma} : Set (𝓞 K)) ∣
         stickelbergerIdeal (p := p) (K := K) P := by
-    rw [dvd_iff_normalizedFactors_le_normalizedFactors hspan_ne hstick_ne]
-    rw [Multiset.le_iff_count]
+    rw [dvd_iff_normalizedFactors_le_normalizedFactors hspan_ne hstick_ne,
+      Multiset.le_iff_count]
     intro Q
     by_cases hQ :
         Q ∈ normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))
-    · have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
-      have hQ_irred := hQ_prime.irreducible
-      have hcount_span :
-          emultiplicity Q (Ideal.span ({gamma} : Set (𝓞 K))) =
-            (((normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count
-              (normalize Q) : ℕ) : ℕ∞) :=
-        emultiplicity_eq_count_normalizedFactors hQ_irred hspan_ne
-      have hnorm : normalize Q = Q := by rw [normalize_eq]
-      rw [hnorm] at hcount_span
-      have hcount_stick :=
-        normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
-          (p := p) (K := K) hP_ne Q
-      have h_exp_Q := h_exp Q
-      rw [← hcount_stick] at h_exp_Q
-      have h_eq_count :
-          ((normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count Q : ℕ∞) =
-            (((normalizedFactors (stickelbergerIdeal (p := p) (K := K) P)).count Q) :
-              ℕ∞) := by
-        rw [← hcount_span]
-        exact h_exp_Q
-      exact_mod_cast h_eq_count.le
+    · exact (h_count_eq Q
+        (UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ).irreducible).le
     · rw [Multiset.count_eq_zero.mpr hQ]
       exact Nat.zero_le _
   have h_dvd_right :
       stickelbergerIdeal (p := p) (K := K) P ∣
         Ideal.span ({gamma} : Set (𝓞 K)) := by
-    rw [dvd_iff_normalizedFactors_le_normalizedFactors hstick_ne hspan_ne]
-    rw [Multiset.le_iff_count]
+    rw [dvd_iff_normalizedFactors_le_normalizedFactors hstick_ne hspan_ne,
+      Multiset.le_iff_count]
     intro Q
     by_cases hQ :
         Q ∈ normalizedFactors (stickelbergerIdeal (p := p) (K := K) P)
-    · have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
-      have hQ_irred := hQ_prime.irreducible
-      have hcount_span :
-          emultiplicity Q (Ideal.span ({gamma} : Set (𝓞 K))) =
-            (((normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count
-              (normalize Q) : ℕ) : ℕ∞) :=
-        emultiplicity_eq_count_normalizedFactors hQ_irred hspan_ne
-      have hnorm : normalize Q = Q := by rw [normalize_eq]
-      rw [hnorm] at hcount_span
-      have hcount_stick :=
-        normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
-          (p := p) (K := K) hP_ne Q
-      have h_exp_Q := h_exp Q
-      rw [← hcount_stick] at h_exp_Q
-      have h_eq_count :
-          ((normalizedFactors (stickelbergerIdeal (p := p) (K := K) P)).count Q :
-              ℕ∞) =
-            ((normalizedFactors (Ideal.span ({gamma} : Set (𝓞 K)))).count Q : ℕ∞) := by
-        rw [← hcount_span]
-        exact h_exp_Q.symm
-      exact_mod_cast h_eq_count.le
+    · exact (h_count_eq Q
+        (UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ).irreducible).ge
     · rw [Multiset.count_eq_zero.mpr hQ]
       exact Nat.zero_le _
   exact associated_iff_eq.mp (associated_of_dvd_dvd h_dvd_left h_dvd_right)

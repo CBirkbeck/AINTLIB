@@ -140,8 +140,7 @@ The identity class is `ClassGroup.mk0 (1 : (Ideal (𝓞 K))⁰)`, and
 theorem phiOnClassGroup_one
     {η : 𝓞 K} (h_ref19 : Ref19UniversalHypothesis (p := p) (K := K) η) :
     phiOnClassGroup h_ref19 (1 : ClassGroup (𝓞 K)) = 0 := by
-  rw [← map_one (ClassGroup.mk0 (R := 𝓞 K))]
-  rw [phiOnClassGroup_mk0 h_ref19]
+  rw [← map_one (ClassGroup.mk0 (R := 𝓞 K)), phiOnClassGroup_mk0 h_ref19]
   simp
 
 /-- **Multiplicativity** (additivity in `ZMod p`):

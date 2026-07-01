@@ -19,8 +19,6 @@ Fourier determinant is proved separately in `IndexDeterminant.lean`.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 

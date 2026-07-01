@@ -87,8 +87,7 @@ private theorem pi_coord_mem_uniformity (n : ℕ) :
       p.1 n = p.2 n} ∈
       𝓤 (∀ k, R ⧸ (I ^ k • (⊤ : Submodule R R))) := by
   rw [Pi.uniformity]
-  apply Filter.mem_iInf_of_mem n
-  rw [Filter.mem_comap]
+  refine Filter.mem_iInf_of_mem n (Filter.mem_comap.mpr ?_)
   exact ⟨{p | p.1 = p.2}, Filter.mem_principal_self _, fun ⟨_, _⟩ h => h⟩
 
 /-- `{(x,y) | eval n x = eval n y}` is in the subtype uniformity of AdicCompletion. -/
@@ -96,9 +95,8 @@ private theorem eval_entourage_mem [UniformSpace R] (n : ℕ) :
     {p : AdicCompletion I R × AdicCompletion I R |
       AdicCompletion.eval I R n p.1 =
         AdicCompletion.eval I R n p.2} ∈
-      @uniformity (AdicCompletion I R) instUniformSpaceSubtype := by
-  apply Filter.mem_comap.mpr
-  exact ⟨{p | p.1 n = p.2 n}, pi_coord_mem_uniformity I n,
+      @uniformity (AdicCompletion I R) instUniformSpaceSubtype :=
+  Filter.mem_comap.mpr ⟨{p | p.1 n = p.2 n}, pi_coord_mem_uniformity I n,
     fun ⟨_, _⟩ h => h⟩
 
 /-! ### Topology and uniformity on AdicCompletion via subtype of product -/
@@ -122,8 +120,7 @@ instance adicCompletionT0 : @T0Space (AdicCompletion I R)
   have hpi : @Inseparable _ Pi.topologicalSpace
       (⟨f, hf⟩ : AdicCompletion I R).val (⟨g, hg⟩ : AdicCompletion I R).val :=
     Inseparable.map hinsep continuous_subtype_val
-  rw [@inseparable_pi] at hpi
-  exact (hpi n).eq
+  exact (inseparable_pi.mp hpi n).eq
 
 /-- The set underlying `AdicCompletion I R` inside the product type. -/
 private def adicCompletionSet :
@@ -133,15 +130,11 @@ private def adicCompletionSet :
 
 omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] in
 private theorem adicCompletionSet_isClosed : IsClosed (adicCompletionSet I) := by
-  unfold adicCompletionSet
-  have : {g : ∀ k, R ⧸ (I ^ k • (⊤ : Submodule R R)) |
-      ∀ {m n : ℕ} (hmn : m ≤ n),
-        (AdicCompletion.transitionMap I R hmn) (g n) = g m} =
-    ⋂ (p : ℕ × ℕ) (_ : p.1 ≤ p.2),
-      {g | (AdicCompletion.transitionMap I R ‹p.1 ≤ p.2›) (g p.2) = g p.1} := by
-    ext g; simp only [Set.mem_setOf_eq, Set.mem_iInter]
-    exact ⟨fun h p hp => h hp, fun h m n hmn => h ⟨m, n⟩ hmn⟩
-  rw [this]
+  rw [show adicCompletionSet I =
+      ⋂ (p : ℕ × ℕ) (_ : p.1 ≤ p.2),
+        {g | (AdicCompletion.transitionMap I R ‹p.1 ≤ p.2›) (g p.2) = g p.1} from by
+    ext g; simp only [adicCompletionSet, Set.mem_setOf_eq, Set.mem_iInter]
+    exact ⟨fun h p hp => h hp, fun h m n hmn => h ⟨m, n⟩ hmn⟩]
   exact isClosed_iInter fun ⟨m, n⟩ => isClosed_iInter fun hmn =>
     isClosed_eq (continuous_of_discreteTopology.comp (continuous_apply n))
       (continuous_apply m)
@@ -201,8 +194,7 @@ theorem of_isUniformInducing (hadic : IsAdic I) :
       change ((AdicCompletion.of I R a).val i, (AdicCompletion.of I R b).val i) ∈ D_i
       rw [heval_eq]; exact refl_mem_uniformity hD_i
     · rintro ⟨n, -, hn⟩
-      apply Filter.mem_comap.mpr
-      refine ⟨{p | AdicCompletion.eval I R n p.1 =
+      refine Filter.mem_comap.mpr ⟨{p | AdicCompletion.eval I R n p.1 =
         AdicCompletion.eval I R n p.2}, eval_entourage_mem I n, ?_⟩
       intro ⟨a, b⟩ hab
       apply hn; change b - a ∈ (I ^ n : Ideal R)
@@ -231,8 +223,7 @@ theorem of_denseRange (_hadic : IsAdic I) :
     obtain ⟨W, hW, hWE⟩ := Filter.mem_comap.mp hE
     rw [Pi.uniformity] at hW
     obtain ⟨S, hSfin, V_fn, hV_fn, hW_eq⟩ := (Filter.mem_iInf).mp hW
-    apply Filter.mem_atTop_sets.mpr
-    refine ⟨hSfin.toFinset.sup id, fun m hm => hVU ?_⟩
+    refine Filter.mem_atTop_sets.mpr ⟨hSfin.toFinset.sup id, fun m hm => hVU ?_⟩
     apply hEV; apply hWE; rw [hW_eq]; apply Set.mem_iInter.mpr
     intro ⟨i, hi⟩
     obtain ⟨D_i, hD_i, hD_V⟩ := Filter.mem_comap.mp (hV_fn ⟨i, hi⟩)
@@ -242,15 +233,14 @@ theorem of_denseRange (_hadic : IsAdic I) :
       Finset.le_sup (f := id) (hSfin.mem_toFinset.mpr hi)
     have hle_m : i ≤ m := le_trans hle hm
     have heval : (AdicCompletion.of I R (r m)).val i = x.val i := by
-      have h1 := (AdicCompletion.of I R (r m)).property hle_m
-      have h2 := x.property hle_m
       change AdicCompletion.eval I R i (AdicCompletion.of I R (r m)) = x.val i
       rw [show AdicCompletion.eval I R i (AdicCompletion.of I R (r m)) =
         (AdicCompletion.transitionMap I R hle_m)
-          (AdicCompletion.eval I R m (AdicCompletion.of I R (r m))) from h1.symm,
+          (AdicCompletion.eval I R m (AdicCompletion.of I R (r m))) from
+          ((AdicCompletion.of I R (r m)).property hle_m).symm,
         AdicCompletion.eval_of]
       change (AdicCompletion.transitionMap I R hle_m) (Submodule.Quotient.mk (r m)) = x.val i
-      rw [hr m, h2]
+      rw [hr m, x.property hle_m]
     rw [heval]; exact refl_mem_uniformity hD_i
   exact mem_closure_of_tendsto htendsto
     (Filter.Eventually.of_forall fun n => Set.mem_range.mpr ⟨r n, rfl⟩)
@@ -408,11 +398,10 @@ theorem ker_evalₐ_eq {R : Type*} [CommRing R] (I : Ideal R)
     have hmkQ : AdicCompletion.map I (I ^ n • ⊤ : Submodule R R).mkQ x = 0 := by
       apply AdicCompletion.ext; intro m
       change (I ^ n • ⊤ : Submodule R R).mkQ.reduceModIdeal (I ^ m) (x.val m) = 0
-      by_cases hmn : m ≤ n
+      rcases le_or_gt m n with hmn | hmn
       · rw [show x.val m = AdicCompletion.transitionMap I R hmn (x.val n) from
           (x.property hmn).symm, hxn, map_zero, map_zero]
-      · push_neg at hmn
-        obtain ⟨r, hr_eq⟩ := Submodule.Quotient.mk_surjective _ (x.val m)
+      · obtain ⟨r, hr_eq⟩ := Submodule.Quotient.mk_surjective _ (x.val m)
         have hr_mem : r ∈ (I ^ n • ⊤ : Submodule R R) := by
           rw [← Submodule.Quotient.mk_eq_zero]
           have hT : AdicCompletion.transitionMap I R (le_of_lt hmn) (x.val m) = 0 := by
@@ -434,8 +423,7 @@ theorem ker_evalₐ_eq {R : Type*} [CommRing R] (I : Ideal R)
     · intro c a
       rw [AdicCompletion.ofTensorProduct_tmul, map_smul, AdicCompletion.map_of]
       have ha_mem : (a : R) ∈ (I ^ n : Ideal R) := by
-        have h := a.2; change (a : R) ∈ (I ^ n • ⊤ : Submodule R R) at h
-        simp only [ideal_smul_top_eq_self] at h; exact h
+        simpa only [ideal_smul_top_eq_self] using a.2
       exact Ideal.mul_mem_left _ c (Ideal.mem_map_of_mem _ ha_mem)
     · intro _ _ h1 h2; simp only [map_add]; exact Ideal.add_mem _ h1 h2
   · rw [Ideal.map_le_iff_le_comap]; intro a ha
@@ -463,12 +451,10 @@ theorem map_surjective_of_surjective {R : Type*} [CommRing R] (I : Ideal R)
     intro j; rw [Submodule.map_smul'', hmaptop]
   have hδ : ∀ j : ℕ, ∃ d : M, d ∈ (I ^ j • ⊤ : Submodule R M) ∧ f d = b (j + 1) - b j := by
     intro j
-    have hb : (b (j + 1) - b j) ∈ (I ^ j • ⊤ : Submodule R N) := by
-      have h := (b.2 (Nat.le_succ j)).symm
-      rwa [SModEq.sub_mem] at h
+    have hb : (b (j + 1) - b j) ∈ (I ^ j • ⊤ : Submodule R N) :=
+      SModEq.sub_mem.mp (b.2 (Nat.le_succ j)).symm
     rw [← hmap j, Submodule.mem_map] at hb
-    obtain ⟨d, hd, hfd⟩ := hb
-    exact ⟨d, hd, hfd⟩
+    exact hb
   obtain ⟨a₀, ha₀f⟩ := hf (b 0)
   set δ : ℕ → M := fun j => (hδ j).choose with hδdef
   have hδmem : ∀ j, δ j ∈ (I ^ j • ⊤ : Submodule R M) := fun j => (hδ j).choose_spec.1
@@ -544,8 +530,7 @@ theorem ker_evalₐ_eq_of_fg {R : Type*} [CommRing R] (I : Ideal R) (hI : I.FG) 
       have hcn : c.val n ∈ p := by
         have h0 : AdicCompletion.evalₐ I n (AdicCompletion.mk I R c) = 0 := RingHom.mem_ker.mp hx
         rw [AdicCompletion.evalₐ_mk] at h0
-        have : c.val n ∈ (I ^ n : Ideal R) := Ideal.Quotient.eq_zero_iff_mem.mp h0
-        simpa [hp] using this
+        simpa [hp] using Ideal.Quotient.eq_zero_iff_mem.mp h0
       -- hence `c.val k ∈ Iⁿ•⊤` for all `k ≥ n` (Cauchy).
       have hck : ∀ k, n ≤ k → c.val k ∈ p := by
         intro k hk
@@ -574,19 +559,12 @@ theorem ker_evalₐ_eq_of_fg {R : Type*} [CommRing R] (I : Ideal R) (hI : I.FG) 
     have hstep2 : ∀ z : AdicCompletion I R,
         z ∈ LinearMap.range (AdicCompletion.map I (Submodule.subtype (I ^ n • ⊤ : Submodule R R))) →
         z ∈ Ideal.map (algebraMap R (AdicCompletion I R)) (I ^ n) := by
-      have hpowfg : ∀ m : ℕ, (I ^ m).FG := by
-        intro m
-        induction m with
-        | zero => rw [pow_zero, Ideal.one_eq_top]; exact Module.Finite.fg_top
-        | succ k ih => rw [pow_succ]; exact Submodule.FG.mul ih hI
       have hpfg : (I ^ n • ⊤ : Submodule R R).FG := by
         have he : (I ^ n • ⊤ : Submodule R R) = (I ^ n : Ideal R) := by simp
-        rw [he]; exact hpowfg n
+        rw [he]; exact Submodule.FG.pow hI n
       obtain ⟨r, w, hw⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hpfg
-      have hwmem : ∀ i, w i ∈ (I ^ n : Ideal R) := by
-        intro i
-        have hmem : w i ∈ (I ^ n • ⊤ : Submodule R R) := by
-          rw [← hw]; exact Submodule.subset_span ⟨i, rfl⟩
+      have hwmem : ∀ i, w i ∈ (I ^ n : Ideal R) := fun i => by
+        have hmem : w i ∈ (I ^ n • ⊤ : Submodule R R) := hw ▸ Submodule.subset_span ⟨i, rfl⟩
         simpa using hmem
       set φ : (Fin r → R) →ₗ[R] R := ∑ i, w i • LinearMap.proj i with hφdef
       have hφrange : ∀ c, φ c ∈ (I ^ n • ⊤ : Submodule R R) := by
@@ -633,10 +611,9 @@ theorem ker_evalₐ_eq_of_fg {R : Type*} [CommRing R] (I : Ideal R) (hI : I.FG) 
               (fun a b => AdicCompletion.AdicCauchySequence.add_apply m a b))
             (fun x => (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e))
             Finset.univ
-      intro z hz
-      obtain ⟨xt, rfl⟩ := hz
-      have hmsurj := map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj
-      obtain ⟨η, rfl⟩ := hmsurj xt
+      rintro z ⟨xt, rfl⟩
+      obtain ⟨η, rfl⟩ :=
+        map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj xt
       rw [AdicCompletion.map_comp_apply, LinearMap.subtype_comp_codRestrict, hdecomp η]
       refine Ideal.sum_mem _ fun i _ => ?_
       rw [Algebra.smul_def]

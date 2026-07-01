@@ -45,39 +45,29 @@ noncomputable abbrev additiveZetaPrime :
         (additiveSubfield (L := L) (p := p))).toInteger - 1} :
       Set (𝓞 (additiveSubfield (L := L) (p := p))))
 
-lemma distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime :
-    (distinguishedPrimeAboveP p L).under (𝓞 (additiveSubfield (L := L) (p := p))) =
-      additiveZetaPrime (L := L) (p := p) := by
-  let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-    (distinguishedPrimeAboveP p L).under (𝓞 (additiveSubfield (L := L) (p := p)))
-  haveI : P.IsPrime := inferInstance
-  haveI : P.LiesOver 𝔭 := by
-    dsimp [P]
-    infer_instance
-  simpa [P, additiveZetaPrime] using
+/-- Any prime of `𝓞 L` lying over `𝔭` contracts to the canonical `1 - ζ_p` prime in the
+`p`-cyclotomic subfield. -/
+private lemma under_additiveSubfield_eq_additiveZetaPrime (Q : Ideal (𝓞 L)) [Q.IsPrime]
+    [Q.LiesOver 𝔭] :
+    Q.under (𝓞 (additiveSubfield (L := L) (p := p))) = additiveZetaPrime (L := L) (p := p) := by
+  simpa [additiveZetaPrime] using
     (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver'
       (p := p)
       (K := additiveSubfield (L := L) (p := p))
       (hζ := IsCyclotomicExtension.zeta_spec p ℚ (additiveSubfield (L := L) (p := p)))
-      (P := P))
+      (P := Q.under (𝓞 (additiveSubfield (L := L) (p := p)))))
+
+lemma distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime :
+    (distinguishedPrimeAboveP p L).under (𝓞 (additiveSubfield (L := L) (p := p))) =
+      additiveZetaPrime (L := L) (p := p) :=
+  under_additiveSubfield_eq_additiveZetaPrime p L (distinguishedPrimeAboveP p L)
 
 lemma sigmaOfUnit_smul_distinguishedPrimeAboveP_under_eq_additiveZetaPrime (a : (ZMod p)ˣ) :
     ((sigmaOfUnit (p := p) L a) • distinguishedPrimeAboveP p L).under
         (𝓞 (additiveSubfield (L := L) (p := p))) =
-      additiveZetaPrime (L := L) (p := p) := by
-  let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-    ((sigmaOfUnit (p := p) L a) • distinguishedPrimeAboveP p L).under
-      (𝓞 (additiveSubfield (L := L) (p := p)))
-  haveI : P.IsPrime := inferInstance
-  haveI : P.LiesOver 𝔭 := by
-    dsimp [P]
-    infer_instance
-  simpa [P, additiveZetaPrime] using
-    (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver'
-      (p := p)
-      (K := additiveSubfield (L := L) (p := p))
-      (hζ := IsCyclotomicExtension.zeta_spec p ℚ (additiveSubfield (L := L) (p := p)))
-      (P := P))
+      additiveZetaPrime (L := L) (p := p) :=
+  under_additiveSubfield_eq_additiveZetaPrime p L
+    ((sigmaOfUnit (p := p) L a) • distinguishedPrimeAboveP p L)
 
 end GaloisAction
 

@@ -15,23 +15,15 @@ For a curve `γ` flat of order `n` at `t₀` with `γ(t₀) = s`, the antideriva
 parameter-excised CPV `→ 0` result needed by the sector cancellation argument
 of T-SC-01.
 
-This file restores the F-diff asymptotic subset of the deleted
-`HigherOrderCancel.lean` (git ref `79bcaa5^`, lines 477-1300+) into
-`namespace HungerbuhlerWasem`. Only the asymptotic / FTC chain leading to the
-five headline theorems is restored; the upstream `HasCauchyPVOn`-based
-cancellation API (which depended on the also-deleted `HigherOrderAssembly.lean`)
-is intentionally omitted as it isn't needed for T-SC-01.
+This file provides the F-diff asymptotic chain: the antiderivative-difference
+`F(γ(t)) − F(tangent target) → 0` results (under flatness `n ≥ k ≥ 2`) feeding the
+sector-cancellation argument of T-SC-01.
 
-## Headline theorems
+## Main results
 
-* `integral_pow_inv_eq_FTC` — FTC for `γ'/(γ-s)^k` on a smooth piece.
-* `closed_excised_integral_eq_antideriv_diff` — closed-form excised integral
-  via antiderivative differences.
 * `F_diff_at_tangent_target_tendsto_zero_right` — F-diff vs tangent target → 0
   from the right, under flatness and `n ≥ k`.
 * `F_diff_at_tangent_target_tendsto_zero_left` — mirror form on the left.
-* `cpv_excised_tendsto_zero_of_F_diff_zero` — combined excised-integral form
-  of the F-diff Tendsto hypothesis.
 -/
 
 open Complex Set Filter Topology MeasureTheory
@@ -45,12 +37,12 @@ namespace HungerbuhlerWasem
 `F(z) = -1/[(k-1)(z-s)^{k-1}]` has complex derivative `1/(z-s)^k` at any `z ≠ s`. -/
 theorem hasDerivAt_antiderivative_pow_inv_complex
     {s : ℂ} {k : ℕ} (hk : 2 ≤ k) {z : ℂ} (hz : z ≠ s) :
-    HasDerivAt (fun w => -(↑(k - 1) : ℂ)⁻¹ * ((w - s) ^ (k - 1))⁻¹)
+    HasDerivAt (fun w ↦ -(↑(k - 1) : ℂ)⁻¹ * ((w - s) ^ (k - 1))⁻¹)
       (1 / (z - s) ^ k) z := by
-  have h_pow : HasDerivAt (fun w : ℂ => (w - s) ^ (k - 1))
+  have h_pow : HasDerivAt (fun w : ℂ ↦ (w - s) ^ (k - 1))
       (↑(k - 1) * (z - s) ^ (k - 1 - 1) * 1) z :=
     ((hasDerivAt_id z).sub_const s).pow (k - 1)
-  rw [show k - 1 - 1 = k - 2 from by lia] at h_pow
+  rw [show k - 1 - 1 = k - 2 by lia] at h_pow
   have h_const := (h_pow.inv (pow_ne_zero _ (sub_ne_zero.mpr hz))).const_mul
     (-(↑(k - 1) : ℂ)⁻¹)
   convert h_const using 1
@@ -75,10 +67,10 @@ theorem norm_F_diff_le_segment_bound
       (-(↑(k - 1) : ℂ)⁻¹ * ((z₁ - s) ^ (k - 1))⁻¹)‖ ≤
       (1 / ε ^ k) * ‖z₂ - z₁‖ := by
   have h_deriv : ∀ z ∈ segment ℝ z₁ z₂,
-      HasDerivWithinAt (fun w => -(↑(k - 1) : ℂ)⁻¹ * ((w - s) ^ (k - 1))⁻¹)
+      HasDerivWithinAt (fun w ↦ -(↑(k - 1) : ℂ)⁻¹ * ((w - s) ^ (k - 1))⁻¹)
         (1 / (z - s) ^ k) (segment ℝ z₁ z₂) z := by
     intro z hz
-    have h_ne : z ≠ s := fun heq => by
+    have h_ne : z ≠ s := fun heq ↦ by
       have := h_seg_avoids z hz; rw [heq, sub_self, norm_zero] at this; linarith
     exact (hasDerivAt_antiderivative_pow_inv_complex hk h_ne).hasDerivWithinAt
   have h_bound : ∀ z ∈ segment ℝ z₁ z₂, ‖1 / (z - s) ^ k‖ ≤ 1 / ε ^ k := by
@@ -180,8 +172,8 @@ theorem chord_to_tangent_isLittleO_right
     (h_deriv : HasDerivWithinAt γ L (Ioi t₀) t₀)
     (hL_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L))
     (h_s : γ t₀ = s) :
-    (fun t => ‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖) =o[𝓝[>] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t ↦ ‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖) =o[𝓝[>] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   have h_eventually_bound : ∀ᶠ t in 𝓝[>] t₀,
       ‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖ ≤ 3 * ‖tangentDeviation (γ t - s) L‖ := by
     filter_upwards [eventually_re_pos_right hL h_deriv h_s,
@@ -213,8 +205,8 @@ theorem chord_to_tangent_isLittleO_left
     (h_deriv : HasDerivWithinAt γ L (Iio t₀) t₀)
     (hL_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L))
     (h_s : γ t₀ = s) :
-    (fun t => ‖γ t - s - (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)‖) =o[𝓝[<] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t ↦ ‖γ t - s - (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)‖) =o[𝓝[<] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   have hLneg : (-L) ≠ 0 := neg_ne_zero.mpr hL
   have h_dev_eq : ∀ t, tangentDeviation (γ t - s) (-L) = tangentDeviation (γ t - s) L := by
     intro t
@@ -319,7 +311,7 @@ theorem norm_F_diff_at_tangent_target_le
     field_simp
   have h_F_diff := norm_F_diff_le_segment_bound (z₁ := γ t) (z₂ := tgt) (s := s) hk
     (by linarith : 0 < d / 2)
-    (fun z hz => norm_segment_to_pole_lower_bound_half hd_pos rfl h_tgt h_chord_le hz)
+    (fun z hz ↦ norm_segment_to_pole_lower_bound_half hd_pos rfl h_tgt h_chord_le hz)
   rw [show (-(↑(k - 1) : ℂ)⁻¹ * ((γ t - s) ^ (k - 1))⁻¹) -
       (-(↑(k - 1) : ℂ)⁻¹ * ((tgt - s) ^ (k - 1))⁻¹) =
       -((-(↑(k - 1) : ℂ)⁻¹ * ((tgt - s) ^ (k - 1))⁻¹) -
@@ -331,9 +323,9 @@ theorem norm_F_diff_at_tangent_target_le
 `chord/d^k → 0`. -/
 theorem tendsto_div_pow_zero_of_isLittleO
     {chord d : ℝ → ℝ} {l : Filter ℝ} {n k : ℕ}
-    (h_chord : chord =o[l] (fun t => d t ^ n)) (h_d : Tendsto d l (𝓝 0))
+    (h_chord : chord =o[l] (fun t ↦ d t ^ n)) (h_d : Tendsto d l (𝓝 0))
     (h_d_pos : ∀ᶠ t in l, 0 < d t) (hkn : k ≤ n) :
-    Tendsto (fun t => chord t / d t ^ k) l (𝓝 0) := by
+    Tendsto (fun t ↦ chord t / d t ^ k) l (𝓝 0) := by
   rw [Metric.tendsto_nhds]
   intro ε hε
   filter_upwards [h_chord.bound (by linarith : 0 < ε / 2),
@@ -366,20 +358,20 @@ theorem F_diff_at_tangent_target_tendsto_zero_right
     (h_deriv : HasDerivWithinAt γ L (Ioi t₀) t₀)
     (hL_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L))
     (h_s : γ t₀ = s) (hk : 2 ≤ k) (hkn : k ≤ n) (hn1 : 1 ≤ n) :
-    Tendsto (fun t =>
+    Tendsto (fun t ↦
       ‖(-(↑(k - 1) : ℂ)⁻¹ * ((γ t - s) ^ (k - 1))⁻¹) -
         (-(↑(k - 1) : ℂ)⁻¹ *
           (((s + (‖γ t - s‖ / ‖L‖ : ℝ) • L) - s) ^ (k - 1))⁻¹)‖)
       (𝓝[>] t₀) (𝓝 0) := by
   have h_chord := chord_to_tangent_isLittleO_right h_flat hL h_deriv hL_right h_s
-  have h_d_to_zero : Tendsto (fun t => ‖γ t - s‖) (𝓝[>] t₀) (𝓝 0) := by
+  have h_d_to_zero : Tendsto (fun t ↦ ‖γ t - s‖) (𝓝[>] t₀) (𝓝 0) := by
     have hγ : Tendsto γ (𝓝[>] t₀) (𝓝 s) := h_s ▸ h_deriv.continuousWithinAt
     simpa using (hγ.sub_const s).norm
   have h_d_pos : ∀ᶠ t in 𝓝[>] t₀, 0 < ‖γ t - s‖ := by
     filter_upwards [eventually_ne_right hL h_deriv h_s] with t h
     exact norm_pos_iff.mpr (sub_ne_zero.mpr h)
   have h_const_ratio : Tendsto
-      (fun t => 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖ / ‖γ t - s‖ ^ k))
+      (fun t ↦ 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖ / ‖γ t - s‖ ^ k))
       (𝓝[>] t₀) (𝓝 0) := by
     simpa using
       (tendsto_div_pow_zero_of_isLittleO h_chord h_d_to_zero h_d_pos hkn).const_mul (2 ^ k : ℝ)
@@ -412,7 +404,7 @@ theorem F_diff_at_tangent_target_tendsto_zero_right
           congr 1; rw [div_pow]; field_simp
       _ = 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖L‖ : ℝ) • L‖ / ‖γ t - s‖ ^ k) := by ring
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_const_ratio
-    (Eventually.of_forall fun _ => norm_nonneg _) h_F_diff_le
+    (Eventually.of_forall fun _ ↦ norm_nonneg _) h_F_diff_le
 
 /-- Left-side counterpart of `F_diff_at_tangent_target_tendsto_zero_right`. -/
 theorem F_diff_at_tangent_target_tendsto_zero_left
@@ -421,21 +413,21 @@ theorem F_diff_at_tangent_target_tendsto_zero_left
     (h_deriv : HasDerivWithinAt γ L (Iio t₀) t₀)
     (hL_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L))
     (h_s : γ t₀ = s) (hk : 2 ≤ k) (hkn : k ≤ n) (hn1 : 1 ≤ n) :
-    Tendsto (fun t =>
+    Tendsto (fun t ↦
       ‖(-(↑(k - 1) : ℂ)⁻¹ * ((γ t - s) ^ (k - 1))⁻¹) -
         (-(↑(k - 1) : ℂ)⁻¹ *
           (((s + (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)) - s) ^ (k - 1))⁻¹)‖)
       (𝓝[<] t₀) (𝓝 0) := by
   have hLneg : (-L) ≠ 0 := neg_ne_zero.mpr hL
   have h_chord := chord_to_tangent_isLittleO_left h_flat hL h_deriv hL_left h_s
-  have h_d_to_zero : Tendsto (fun t => ‖γ t - s‖) (𝓝[<] t₀) (𝓝 0) := by
+  have h_d_to_zero : Tendsto (fun t ↦ ‖γ t - s‖) (𝓝[<] t₀) (𝓝 0) := by
     have hγ : Tendsto γ (𝓝[<] t₀) (𝓝 s) := h_s ▸ h_deriv.continuousWithinAt
     simpa using (hγ.sub_const s).norm
   have h_d_pos : ∀ᶠ t in 𝓝[<] t₀, 0 < ‖γ t - s‖ := by
     filter_upwards [eventually_ne_left hL h_deriv h_s] with t h
     exact norm_pos_iff.mpr (sub_ne_zero.mpr h)
   have h_const_ratio : Tendsto
-      (fun t => 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)‖ /
+      (fun t ↦ 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)‖ /
         ‖γ t - s‖ ^ k))
       (𝓝[<] t₀) (𝓝 0) := by
     simpa using
@@ -470,7 +462,7 @@ theorem F_diff_at_tangent_target_tendsto_zero_left
       _ = 2 ^ k * (‖γ t - s - (‖γ t - s‖ / ‖(-L)‖ : ℝ) • (-L)‖ /
             ‖γ t - s‖ ^ k) := by ring
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_const_ratio
-    (Eventually.of_forall fun _ => norm_nonneg _) h_F_diff_le
+    (Eventually.of_forall fun _ ↦ norm_nonneg _) h_F_diff_le
 
 end HungerbuhlerWasem
 

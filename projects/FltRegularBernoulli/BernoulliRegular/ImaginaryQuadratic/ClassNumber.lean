@@ -34,7 +34,7 @@ theorem cast_mul_BernoulliGen_re_eq (hp_odd : p ≠ 2) :
   have h_rhs_re : (∑ a : ZMod p, (legendreDirichlet p) a * (a.val : ℂ)).re =
       ∑ a : ZMod p, ((quadraticChar (ZMod p) a : ℤ) : ℝ) * (a.val : ℝ) := by
     rw [Complex.re_sum]
-    refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [legendreDirichlet_apply, Complex.mul_re]
     have h_eta_im : (((quadraticChar (ZMod p) a : ℤ) : ℂ)).im = 0 := by
       rw [show (((quadraticChar (ZMod p) a : ℤ) : ℂ)) =
@@ -77,7 +77,7 @@ theorem BernoulliGen_re_neg_of_int_sum_neg (hp_odd : p ≠ 2)
   have h_cast : ∑ a : ZMod p, ((quadraticChar (ZMod p) a : ℤ) : ℝ) * (a.val : ℝ) =
       ((∑ a : ZMod p, (quadraticChar (ZMod p) a : ℤ) * (a.val : ℤ) : ℤ) : ℝ) := by
     push_cast
-    refine Finset.sum_congr rfl fun a _ => by ring
+    refine Finset.sum_congr rfl fun a _ ↦ by ring
   rw [h_cast]
   exact_mod_cast h_sum_int_neg
 
@@ -382,13 +382,13 @@ theorem LFunction_one_eq_dedekindZeta_residue_of_CN05 (hp3 : p % 4 = 3)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   have h_tendsto_dedekind := NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT (Kminus p)
   -- The product side: (s-1) · ζ(s) · L(η, s) → L(η, 1).
-  have h_embed : Filter.Tendsto (fun s : ℝ => (s : ℂ))
+  have h_embed : Filter.Tendsto (fun s : ℝ ↦ (s : ℂ))
       (nhdsWithin 1 (Set.Ioi 1)) (nhdsWithin (1 : ℂ) {(1 : ℂ)}ᶜ) :=
     tendsto_nhdsWithin_iff.mpr
       ⟨(Complex.continuous_ofReal.tendsto 1).mono_left nhdsWithin_le_nhds,
         by filter_upwards [self_mem_nhdsWithin] with s hs h
            exact absurd (Complex.ofReal_injective h) (ne_of_gt hs)⟩
-  have h_zeta : Filter.Tendsto (fun s : ℝ => ((s : ℂ) - 1) * riemannZeta (s : ℂ))
+  have h_zeta : Filter.Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) * riemannZeta (s : ℂ))
       (nhdsWithin 1 (Set.Ioi 1)) (nhds 1) :=
     riemannZeta_residue_one.comp h_embed
   -- L(η, ·) is continuous at 1 (L(η) is entire for nontrivial χ).
@@ -397,7 +397,7 @@ theorem LFunction_one_eq_dedekindZeta_residue_of_CN05 (hp3 : p % 4 = 3)
     have h_ne_one : legendreDirichlet p ≠ 1 := legendreDirichlet_ne_one p hp_odd
     exact (DirichletCharacter.differentiable_LFunction h_ne_one).continuous.continuousAt
   have h_L_tendsto : Filter.Tendsto
-      (fun s : ℝ => DirichletCharacter.LFunction (legendreDirichlet p) (s : ℂ))
+      (fun s : ℝ ↦ DirichletCharacter.LFunction (legendreDirichlet p) (s : ℂ))
       (nhdsWithin 1 (Set.Ioi 1))
       (nhds (DirichletCharacter.LFunction (legendreDirichlet p) 1)) :=
     h_L_cont.tendsto.comp (h_embed.mono_right nhdsWithin_le_nhds)
@@ -405,7 +405,7 @@ theorem LFunction_one_eq_dedekindZeta_residue_of_CN05 (hp3 : p % 4 = 3)
   rw [one_mul] at h_product
   -- Rewrite the product as (s-1) · ζ_K(s) via CN-05.
   have h_tendsto_product :
-      Filter.Tendsto (fun s : ℝ => ((s : ℂ) - 1) * NumberField.dedekindZeta (Kminus p) (s : ℂ))
+      Filter.Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) * NumberField.dedekindZeta (Kminus p) (s : ℂ))
       (nhdsWithin 1 (Set.Ioi 1))
       (nhds (DirichletCharacter.LFunction (legendreDirichlet p) 1)) := by
     refine (Filter.tendsto_congr' ?_).mp h_product

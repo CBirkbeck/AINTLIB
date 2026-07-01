@@ -30,10 +30,10 @@ variable (p : ℕ) [hp : Fact p.Prime]
 explicit odd-character evaluation. -/
 theorem oddLProduct_one_eq_prod_oddLValueRhs :
     oddLProduct p (1 : ℂ) =
-      Finset.prod (oddCharacters (p := p)) fun χ => oddLValueRhs p χ := by
+      Finset.prod (oddCharacters (p := p)) fun χ ↦ oddLValueRhs p χ := by
   classical
   unfold oddLProduct
-  refine Finset.prod_congr rfl fun χ hχ => ?_
+  refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_odd : χ.Odd := (Finset.mem_filter.mp hχ).2
   have hχ_ne_one : χ ≠ 1 := by
     rintro rfl
@@ -48,10 +48,10 @@ theorem oddLProduct_one_eq_prod_oddLValueRhs :
 using the explicit even-character evaluation. -/
 theorem evenLProduct_one_eq_prod_evenLValueRhs :
     evenLProduct p (1 : ℂ) =
-      Finset.prod (evenNontrivialCharacters (p := p)) fun χ => evenLValueRhs p χ := by
+      Finset.prod (evenNontrivialCharacters (p := p)) fun χ ↦ evenLValueRhs p χ := by
   classical
   unfold evenLProduct
-  refine Finset.prod_congr rfl fun χ hχ => ?_
+  refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_mem := Finset.mem_filter.mp hχ
   have hχ_even : χ.Even := hχ_mem.2.1
   have hχ_ne_one : χ ≠ 1 := hχ_mem.2.2
@@ -63,7 +63,7 @@ theorem evenLProduct_one_eq_prod_evenLValueRhs :
 lemma card_oddCharacters (hp_odd' : p ≠ 2) :
     (oddCharacters (p := p)).card = (p - 1) / 2 := by
   classical
-  let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
+  let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ ↦ χ.Even
   let O : Finset (DirichletCharacter ℂ p) := oddCharacters (p := p)
   have hdisj : Disjoint E O := by
     refine Finset.disjoint_left.mpr ?_
@@ -175,42 +175,42 @@ theorem odd_character_ne_inv_of_mod_four_eq_one
 `((((Real.pi : ℝ) : ℂ) * Complex.I) / p)` out of the weighted Gauss product
 and rewrite it as a single power. -/
 theorem odd_weightedGaussProduct_eq_scalar_pow_mul (hp_odd' : p ≠ 2) :
-    Finset.prod (oddCharacters (p := p)) (fun χ =>
+    Finset.prod (oddCharacters (p := p)) (fun χ ↦
       ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) =
       (((((Real.pi : ℝ) : ℂ) * Complex.I) / (p : ℂ)) ^ ((p - 1) / 2)) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
   let C : ℂ := ((((Real.pi : ℝ) : ℂ) * Complex.I) / (p : ℂ))
   have hp_ne : (p : ℂ) ≠ 0 := by
     exact_mod_cast hp.out.ne_zero
   calc
-    Finset.prod (oddCharacters (p := p)) (fun χ =>
+    Finset.prod (oddCharacters (p := p)) (fun χ ↦
         ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) =
-      Finset.prod (oddCharacters (p := p)) (fun χ =>
+      Finset.prod (oddCharacters (p := p)) (fun χ ↦
         C * gaussSum χ (ZMod.stdAddChar (N := p))) := by
           refine Finset.prod_congr rfl ?_
           intro χ hχ
           dsimp [C]
           field_simp [hp_ne]
     _ =
-      (Finset.prod (oddCharacters (p := p)) (fun _ : DirichletCharacter ℂ p => C)) *
+      (Finset.prod (oddCharacters (p := p)) (fun _ : DirichletCharacter ℂ p ↦ C)) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
             rw [Finset.prod_mul_distrib]
     _ =
       (C ^ (oddCharacters (p := p)).card) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
             rw [Finset.prod_const]
     _ =
       (C ^ ((p - 1) / 2)) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
             rw [card_oddCharacters (p := p) hp_odd']
     _ =
       (((((Real.pi : ℝ) : ℂ) * Complex.I) / (p : ℂ)) ^ ((p - 1) / 2)) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
             rfl
 
 /-- Package the `K⁺` residue bridge into the exact even-value `hPlus` formula
@@ -227,14 +227,14 @@ consumed by the downstream `hMinus` assembly theorems. -/
 theorem hPlus_formula_of_evenLValueRhs (hp_odd' : p ≠ 2) :
     ((hPlus K : ℕ) : ℂ) =
       maximalRealSubfieldClassNumberFactor (K := K) *
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) := by
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) := by
   calc
     ((hPlus K : ℕ) : ℂ) =
         maximalRealSubfieldClassNumberFactor (K := K) * evenLProduct p (1 : ℂ) :=
           hPlus_formula_of_evenLProduct (p := p) (K := K) hp_odd'
     _ =
         maximalRealSubfieldClassNumberFactor (K := K) *
-          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) := by
+          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) := by
             rw [evenLProduct_one_eq_prod_evenLValueRhs (p := p)]
 
 /-- Package the `K⁺` residue bridge into the exact even-value `hPlus` formula
@@ -242,7 +242,7 @@ consumed by the downstream `hMinus` assembly theorems. -/
 theorem hPlus_formula_of_evenLValues_cyclotomicFactor (hp_odd' : p ≠ 2) :
     ((hPlus K : ℕ) : ℂ) =
       cyclotomicHPlusFactor (K := K) *
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) := by
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) := by
   simpa [cyclotomicHPlusFactor] using
     (hPlus_formula_of_evenLValueRhs (p := p) (K := K) hp_odd')
 
@@ -251,7 +251,7 @@ by the downstream `hMinus` assembly theorem. -/
 theorem hPlus_formula_of_evenLValues (hp_odd' : p ≠ 2) :
     ((hPlus K : ℕ) : ℂ) =
       cyclotomicHPlusFactor (K := K) *
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) :=
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) :=
   hPlus_formula_of_evenLValues_cyclotomicFactor (p := p) (K := K) hp_odd'
 
 set_option linter.unusedSectionVars false
@@ -260,8 +260,8 @@ set_option linter.unusedSectionVars false
 and even evaluations of the character `L`-values. -/
 theorem residue_ready_factorization_explicit_LValues :
     NumberField.dedekindZeta_residue K =
-      ((Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => oddLValueRhs p χ)).re) := by
+      ((Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ oddLValueRhs p χ)).re) := by
   rw [residue_ready_factorization_even_odd (p := p) (K := K),
     evenLProduct_one_eq_prod_evenLValueRhs (p := p),
     oddLProduct_one_eq_prod_oddLValueRhs (p := p)]
@@ -269,10 +269,10 @@ theorem residue_ready_factorization_explicit_LValues :
 /-- Split the product of the odd `L(1, χ)` right-hand sides into the Gauss-sum
 factor and the Bernoulli factor. -/
 theorem oddLValueRhs_product_eq_gauss_product_mul_bernoulli_product :
-    Finset.prod (oddCharacters (p := p)) (fun χ => oddLValueRhs p χ) =
-      Finset.prod (oddCharacters (p := p)) (fun χ =>
+    Finset.prod (oddCharacters (p := p)) (fun χ ↦ oddLValueRhs p χ) =
+      Finset.prod (oddCharacters (p := p)) (fun χ ↦
         ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) *
-        Finset.prod (oddCharacters (p := p)) (fun χ => BernoulliGen χ⁻¹ 1) := by
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1) := by
   classical
   unfold oddLValueRhs
   rw [Finset.prod_mul_distrib]

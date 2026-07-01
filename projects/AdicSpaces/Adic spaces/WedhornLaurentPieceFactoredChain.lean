@@ -116,8 +116,7 @@ theorem laurent_piece_α_s_D_extract
           algebraMap A (Localization.Away s) s_D) :=
     hw_one_le 1 (Finset.mem_singleton.mpr rfl)
   refine ⟨?_, ?_⟩
-  · -- σ_loc ≤ algMap s_D from σ_loc * 1 ≤ σ_loc * (σ_loc⁻¹ * algMap s_D) = algMap s_D.
-    have h_mul :
+  · have h_mul :
         w.vle ((σ_loc : Localization.Away s) * (1 : Localization.Away s))
           ((σ_loc : Localization.Away s) *
             (((σ_loc⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) *
@@ -125,8 +124,7 @@ theorem laurent_piece_α_s_D_extract
       ValuativeRel.mul_vle_mul_right h_one_le_inv (σ_loc : Localization.Away s)
     rw [mul_one, ← mul_assoc, Units.mul_inv, one_mul] at h_mul
     exact h_mul
-  · -- ¬ algMap s_D 0 from σ_loc⁻¹ * (algMap s_D) ≠ 0 (left-multiplication by σ_loc).
-    intro h_s_D_zero
+  · intro h_s_D_zero
     apply hw_ne
     have h_mul :
         w.vle (((σ_loc⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) *

@@ -101,8 +101,6 @@ end IsPthPowerModPrime
 
 section CyclicCriterion
 
-variable {𝔩 : Ideal R}
-
 /-- **Cyclic-group `p`-th-power criterion (unit form).**
 
 In a finite commutative cyclic group `G` with `p ∣ Nat.card G`, an
@@ -118,16 +116,12 @@ follows. -/
 theorem isPthPower_iff_pow_card_div_eq_one {G : Type*} [CommGroup G]
     [Finite G] [IsCyclic G] {p : ℕ} (hp : p ∣ Nat.card G) (u : G) :
     (∃ v : G, u = v ^ p) ↔ u ^ (Nat.card G / p) = 1 := by
-  -- Rephrase membership in the range of `powMonoidHom p`.
+  -- Rephrase membership in the range of `powMonoidHom p`, and compare with the
+  -- kernel of `(· ^ (Nat.card G / p))`.
   have hrange : (∃ v : G, u = v ^ p) ↔ u ∈ (powMonoidHom p : G →* G).range := by
-    refine ⟨fun ⟨v, hv⟩ => ⟨v, hv.symm⟩, ?_⟩
-    rintro ⟨v, hv⟩; exact ⟨v, hv.symm⟩
-  rw [hrange]
-  -- Compare with the kernel of `(· ^ (Nat.card G / p))`.
-  rw [show u ^ (Nat.card G / p) = (powMonoidHom (Nat.card G / p) : G →* G) u from rfl,
+    simp only [MonoidHom.mem_range, powMonoidHom_apply, eq_comm]
+  rw [hrange, show u ^ (Nat.card G / p) = (powMonoidHom (Nat.card G / p) : G →* G) u from rfl,
     ← MonoidHom.mem_ker]
-  -- The card of G is positive (Finite + nonempty since `1 ∈ G`).
-  have hpos : 0 < Nat.card G := Nat.card_pos
   -- Both subgroups have cardinality `Nat.card G / p`.
   have hcardR : Nat.card (powMonoidHom p : G →* G).range = Nat.card G / p := by
     rw [IsCyclic.card_powMonoidHom_range, Nat.gcd_eq_right hp]
@@ -191,25 +185,15 @@ theorem isPthPowerModPrime_iff_pow_card_div_p_eq_one
   refine ⟨fun hxp => ?_, fun hpow => ?_⟩
   · -- `x` is a `p`-th power: extract a unit witness in `R ⧸ 𝔩`.
     obtain ⟨y, hy⟩ := hxp
-    have hy0 : y ≠ 0 := by
-      intro h
-      apply hx0
-      rw [hy, h, zero_pow hp_pos.ne']
-    have heq : u = (Units.mk0 y hy0) ^ p := by
-      apply Units.ext
-      simp [hu_def, hy]
-    have hu_pow : u ^ ((Fintype.card (R ⧸ 𝔩) - 1) / p) = 1 :=
-      hcrit.mp ⟨Units.mk0 y hy0, heq⟩
-    have := congrArg (Units.val) hu_pow
+    have hy0 : y ≠ 0 := fun h => hx0 (by rw [hy, h, zero_pow hp_pos.ne'])
+    have heq : u = Units.mk0 y hy0 ^ p := Units.ext (by simp [hu_def, hy])
+    have := congrArg Units.val (hcrit.mp ⟨Units.mk0 y hy0, heq⟩)
     simpa [hu_def] using this
   · -- The power equals `1` in `R ⧸ 𝔩`: lift to the unit group.
-    have hupow : u ^ ((Fintype.card (R ⧸ 𝔩) - 1) / p) = 1 := by
-      apply Units.ext
-      simpa [hu_def] using hpow
+    have hupow : u ^ ((Fintype.card (R ⧸ 𝔩) - 1) / p) = 1 :=
+      Units.ext (by simpa [hu_def] using hpow)
     obtain ⟨v, hv⟩ := hcrit.mpr hupow
-    refine ⟨(v : R ⧸ 𝔩), ?_⟩
-    have := congrArg (Units.val) hv
-    simpa [hu_def] using this
+    exact ⟨(v : R ⧸ 𝔩), by simpa [hu_def] using congrArg Units.val hv⟩
 
 /-- Hypothesis-free statement: in the same setting, the `p`-th-power
 predicate is equivalent to a single equation in `R ⧸ 𝔩` involving the

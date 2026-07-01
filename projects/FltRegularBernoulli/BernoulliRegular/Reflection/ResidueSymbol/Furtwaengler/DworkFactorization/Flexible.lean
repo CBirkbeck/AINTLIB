@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.Flexible.Part3
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.Flexible.QuotientTargetReduction

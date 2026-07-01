@@ -157,27 +157,14 @@ theorem h_VK_per_t_le_s_D_via_max_element_residual
             ¬ w.vle t_0 (σ_loc : Localization.Away s)) →
         ∀ t ∈ T_D.image (algebraMap A (Localization.Away s)),
           w.vle t (algebraMap A (Localization.Away s) s_D) := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f τ hτ hστ hVK
-  -- V_K witness gives nonempty `T_D.image (algMap)`.
-  have hT_D_image_ne :
-      (T_D.image (algebraMap A (Localization.Away s))).Nonempty := by
-    obtain ⟨t_0, ht_0_mem, _⟩ := hVK
-    exact ⟨t_0, ht_0_mem⟩
-  -- Extract max element via T034's lemma.
+  -- V_K witness gives nonempty `T_D.image (algMap)`; extract max element via T034.
   obtain ⟨τ_max, hτ_max_mem, hτ_max_max⟩ :=
-    Spv.exists_max_vle_of_nonempty w hT_D_image_ne
-  -- Apply max-element residual.
-  have h_τ_max_le_s_D :
-      w.vle τ_max (algebraMap A (Localization.Away s) s_D) :=
-    h_max_element_residual w hw_spa hw_f τ hτ hστ hVK τ_max
-      hτ_max_mem hτ_max_max
-  -- Use T033's intermediate-τ arithmetic with τ := τ_max.
+    Spv.exists_max_vle_of_nonempty w (hVK.imp fun _ h => h.1)
+  -- Apply max-element residual, then T033's intermediate-τ arithmetic with τ := τ_max.
   exact alpha_T_D_per_t_bound_via_intermediate T_D s_D w τ_max
-    h_τ_max_le_s_D hτ_max_max
+    (h_max_element_residual w hw_spa hw_f τ hτ hστ hVK τ_max
+      hτ_max_mem hτ_max_max) hτ_max_max
 
 omit [PlusSubring A] in
 /-- **Structural data discharge via max-element residual under V_K-
@@ -283,17 +270,12 @@ theorem C1SupplierStrong_local_via_max_element_residual_VK
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     C1SupplierStrong_local C := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine C1SupplierStrong_local_via_VK_nonempty_residual P hA₀_le C hopen_base ?_
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨σ_loc, f, h_alg, h_dom, h_max_residual, hv_in_plus, hvf_nz⟩ :=
     h_per_call_components D hD v hv t ht hvt hvD_s
-  refine ⟨σ_loc, f, h_alg, h_dom, ?_, hv_in_plus, hvf_nz⟩
-  exact h_VK_per_t_le_s_D_via_max_element_residual P C.base.T C.base.s
-    hopen_base D.T D.s σ_loc h_max_residual
+  exact ⟨σ_loc, f, h_alg, h_dom,
+    h_VK_per_t_le_s_D_via_max_element_residual P C.base.T C.base.s
+      hopen_base D.T D.s σ_loc h_max_residual, hv_in_plus, hvf_nz⟩
 
 end ValuationSpectrum

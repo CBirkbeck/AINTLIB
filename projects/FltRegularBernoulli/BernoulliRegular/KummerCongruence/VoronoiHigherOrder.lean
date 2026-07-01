@@ -44,16 +44,16 @@ lemma voronoi_sum_mod_p_cubed
                 j ^ (k - 2) * (j * a / p) ^ 2 : ℕ) : ℤ_[p])) =
         (p : ℤ_[p]) ^ 3 * W := by
   -- Per-j witness via voronoi_per_term_quadratic_bound.
-  choose wj hwj using (fun (j : ℕ) (_hj : j ∈ Finset.range p) =>
+  choose wj hwj using (fun (j : ℕ) (_hj : j ∈ Finset.range p) ↦
     voronoi_per_term_quadratic_bound (p := p) a j hk_two)
   -- Permutation: ∑ ((j*a) % p)^k = ∑ j^k as ℤ_p elements (j ↦ (j*a) mod p).
   have h_perm : ((∑ j ∈ Finset.range p, ((j * a) % p) ^ k : ℕ) : ℤ_[p]) =
       ((∑ j ∈ Finset.range p, j ^ k : ℕ) : ℤ_[p]) := by
-    congr 1; exact voronoi_permutation ha_coprime (fun n : ℕ => n ^ k)
+    congr 1; exact voronoi_permutation ha_coprime (fun n : ℕ ↦ n ^ k)
   -- Total function w : ℕ → ℤ_[p] extending wj.
   set w : ℕ → ℤ_[p] :=
-      fun j => if h : j ∈ Finset.range p then wj j h else 0 with hw_def
-  have hw_eq : ∀ (j : ℕ) (hj : j ∈ Finset.range p), w j = wj j hj := fun j hj => by
+      fun j ↦ if h : j ∈ Finset.range p then wj j h else 0 with hw_def
+  have hw_eq : ∀ (j : ℕ) (hj : j ∈ Finset.range p), w j = wj j hj := fun j hj ↦ by
     change (if h : j ∈ Finset.range p then wj j h else 0) = wj j hj; simp [hj]
   -- Final witness: -∑ w j.
   set W_sum : ℤ_[p] := ∑ j ∈ Finset.range p, w j with hW_sum
@@ -69,7 +69,7 @@ lemma voronoi_sum_mod_p_cubed
             (p : ℤ_[p]) ^ 2 * (((j * a / p : ℕ)) : ℤ_[p]) ^ 2 +
         (p : ℤ_[p]) ^ 3 * w j) := by
     rw [Nat.cast_sum]
-    refine Finset.sum_congr rfl fun j hj => ?_
+    refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [hw_eq j hj, Nat.cast_pow]
     exact hwj j hj
   -- Combine permutation and per-j identity.
@@ -84,13 +84,13 @@ lemma voronoi_sum_mod_p_cubed
     rw [← h_perm, h_sum_binom]
   -- Factor (j*a)^m = a^m · j^m for m = k, k-1, k-2.
   have h_ja_pow : ∀ j : ℕ, ((j * a : ℕ) : ℤ_[p]) ^ k =
-      ((a : ℤ_[p])) ^ k * ((j : ℕ) : ℤ_[p]) ^ k := fun j => by push_cast; ring
+      ((a : ℤ_[p])) ^ k * ((j : ℕ) : ℤ_[p]) ^ k := fun j ↦ by push_cast; ring
   have h_ja_pow_sub1 : ∀ j : ℕ, ((j * a : ℕ) : ℤ_[p]) ^ (k - 1) =
       ((a : ℤ_[p])) ^ (k - 1) * ((j : ℕ) : ℤ_[p]) ^ (k - 1) :=
-    fun j => by push_cast; ring
+    fun j ↦ by push_cast; ring
   have h_ja_pow_sub2 : ∀ j : ℕ, ((j * a : ℕ) : ℤ_[p]) ^ (k - 2) =
       ((a : ℤ_[p])) ^ (k - 2) * ((j : ℕ) : ℤ_[p]) ^ (k - 2) :=
-    fun j => by push_cast; ring
+    fun j ↦ by push_cast; ring
   -- Term-by-term rewrite.
   have h_sum_rewrite :
       ∑ j ∈ Finset.range p,
@@ -109,7 +109,7 @@ lemma voronoi_sum_mod_p_cubed
               (((j : ℕ) : ℤ_[p]) ^ (k - 2) *
                 (((j * a / p : ℕ)) : ℤ_[p]) ^ 2) +
         (p : ℤ_[p]) ^ 3 * w j) := by
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [h_ja_pow j, h_ja_pow_sub1 j, h_ja_pow_sub2 j]; ring
   rw [h_sum_rewrite] at h_sum_ℤp
   -- Distribute the four-term sum into four separate sums.
@@ -191,13 +191,13 @@ lemma faulhaber_term_mem_p_cubed
   rcases eq_or_ne i 1 with rfl | hi_ne_one
   · have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
       rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-      exact hp.coprime_iff_not_dvd.mpr fun h =>
+      exact hp.coprime_iff_not_dvd.mpr fun h ↦
         absurd (Nat.le_of_dvd (by omega) h) (by omega)
     set w : ℤ_[p] := (h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hw_def
     have hw_mul : ((2 : ℕ) : ℤ_[p]) * w = 1 := by
       change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
     have hw_mul_Qp : (2 : ℚ_[p]) * ((w : ℤ_[p]) : ℚ_[p]) = 1 := by
-      exact_mod_cast congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hw_mul
+      exact_mod_cast congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hw_mul
     refine ⟨-((Nat.choose (t + 1) 1 : ℤ_[p]) * w * (p : ℤ_[p]) ^ (t - 3)), ?_⟩
     rw [_root_.bernoulli_one,
       show (t + 1 - 1 : ℕ) = 3 + (t - 3) by omega, pow_add]
@@ -252,13 +252,13 @@ lemma faulhaber_term_mem_p_cubed_extended
   rcases eq_or_ne i 1 with rfl | hi_ne_one
   · have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
       rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-      exact hp.coprime_iff_not_dvd.mpr fun h =>
+      exact hp.coprime_iff_not_dvd.mpr fun h ↦
         absurd (Nat.le_of_dvd (by omega) h) (by omega)
     set w : ℤ_[p] := (h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hw_def
     have hw_mul : ((2 : ℕ) : ℤ_[p]) * w = 1 := by
       change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
     have hw_mul_Qp : (2 : ℚ_[p]) * ((w : ℤ_[p]) : ℚ_[p]) = 1 := by
-      exact_mod_cast congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hw_mul
+      exact_mod_cast congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hw_mul
     refine ⟨-((Nat.choose (t + 1) 1 : ℤ_[p]) * w * (p : ℤ_[p]) ^ (t - 3)), ?_⟩
     rw [_root_.bernoulli_one,
       show (t + 1 - 1 : ℕ) = 3 + (t - 3) by omega, pow_add]
@@ -363,7 +363,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed
   have hp : Nat.Prime p := hp.out
   have hp_gt : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm hp_odd)
   -- Per-`i` witness from `faulhaber_term_mem_p_cubed` for i < t - 1.
-  choose w hw using (fun (i : ℕ) (hi : i < t - 1) =>
+  choose w hw using (fun (i : ℕ) (hi : i < t - 1) ↦
     faulhaber_term_mem_p_cubed hp_odd ht_four ht_even ht_lt hi)
   -- W : ℤ_[p] = ∑ w_i over i ∈ range (t - 1).
   set W : ℤ_[p] :=
@@ -375,7 +375,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed
       ∑ i ∈ Finset.range (t + 1),
         bernoulli i * (Nat.choose (t + 1) i : ℚ) * (p : ℚ) ^ (t + 1 - i) := by
     rw [sum_range_pow p t, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     have htp1Q_ne : (((t + 1 : ℕ)) : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     field_simp
   -- Cast to ℚ_[p].
@@ -384,7 +384,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed
       ∑ i ∈ Finset.range (t + 1),
         ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) *
           ((p : ℚ_[p])) ^ (t + 1 - i) := by
-    have := congrArg (fun q : ℚ => (q : ℚ_[p])) h_faulhaber_Q
+    have := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_faulhaber_Q
     push_cast at this; push_cast; exact this
   -- Split off i = t (the leading B_t term).
   have h_split_t : ((t + 1 : ℕ) : ℚ_[p]) *
@@ -423,7 +423,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed
         ∑ i ∈ Finset.attach (Finset.range (t - 1)),
           ((p : ℚ_[p])) ^ 3 *
             ((w i.1 (Finset.mem_range.mp i.2) : ℤ_[p]) : ℚ_[p]) from ?_]
-    · refine Finset.sum_congr rfl fun i _ => ?_
+    · refine Finset.sum_congr rfl fun i _ ↦ ?_
       exact hw i.1 (Finset.mem_range.mp i.2)
     · rw [hW_def]
       simp [PadicInt.coe_sum, Finset.mul_sum]
@@ -444,7 +444,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed_extended
         ((p : ℚ_[p]) ^ 3) * ((W : ℤ_[p]) : ℚ_[p]) := by
   have hp : Nat.Prime p := hp.out
   have hp_gt : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm hp_odd)
-  choose w hw using (fun (i : ℕ) (hi : i < t - 1) =>
+  choose w hw using (fun (i : ℕ) (hi : i < t - 1) ↦
     faulhaber_term_mem_p_cubed_extended hp_odd ht_pp2 ht_even ht_lt ih_B hi)
   set W : ℤ_[p] :=
     ∑ i ∈ Finset.attach (Finset.range (t - 1)),
@@ -454,7 +454,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed_extended
       ∑ i ∈ Finset.range (t + 1),
         bernoulli i * (Nat.choose (t + 1) i : ℚ) * (p : ℚ) ^ (t + 1 - i) := by
     rw [sum_range_pow p t, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     have htp1Q_ne : (((t + 1 : ℕ)) : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     field_simp
   have h_faulhaber_Qp : ((t + 1 : ℕ) : ℚ_[p]) *
@@ -462,7 +462,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed_extended
       ∑ i ∈ Finset.range (t + 1),
         ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) *
           ((p : ℚ_[p])) ^ (t + 1 - i) := by
-    have := congrArg (fun q : ℚ => (q : ℚ_[p])) h_faulhaber_Q
+    have := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_faulhaber_Q
     push_cast at this; push_cast; exact this
   have h_split_t : ((t + 1 : ℕ) : ℚ_[p]) *
         (∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ t) -
@@ -498,7 +498,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted_p_cubed_extended
         ∑ i ∈ Finset.attach (Finset.range (t - 1)),
           ((p : ℚ_[p])) ^ 3 *
             ((w i.1 (Finset.mem_range.mp i.2) : ℤ_[p]) : ℚ_[p]) from ?_]
-    · refine Finset.sum_congr rfl fun i _ => ?_
+    · refine Finset.sum_congr rfl fun i _ ↦ ?_
       exact hw i.1 (Finset.mem_range.mp i.2)
     · rw [hW_def]
       simp [PadicInt.coe_sum, Finset.mul_sum]
@@ -526,7 +526,7 @@ lemma voronoi_sum_mod_p_cubed_Q
   obtain ⟨W, hW⟩ := voronoi_sum_mod_p_cubed ha_coprime hk_two
   refine ⟨W, ?_⟩
   -- Cast hW from ℤ_[p] to ℚ_[p].
-  have h_cast := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hW
+  have h_cast := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hW
   simp only [PadicInt.coe_sub, PadicInt.coe_add, PadicInt.coe_mul,
     PadicInt.coe_pow, PadicInt.coe_natCast, PadicInt.coe_one] at h_cast
   push_cast at h_cast ⊢
@@ -581,7 +581,7 @@ theorem voronoi_congruence_mod_p_sq_of_faulhaber
   have hu_mul : ((k + 1 : ℕ) : ℤ_[p]) * u = 1 := by
     change ((hkp1_unit.unit * hkp1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
   have hu_mul_Qp : ((k + 1 : ℕ) : ℚ_[p]) * ((u : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul
   have hkp1Q_ne : ((k + 1 : ℕ) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
   -- From hW': divide by (k+1) to get S₁ - p·B_k = u·p³·W'.
   set S1 : ℚ_[p] := ((∑ j ∈ Finset.range p, j ^ k : ℕ) : ℚ_[p])

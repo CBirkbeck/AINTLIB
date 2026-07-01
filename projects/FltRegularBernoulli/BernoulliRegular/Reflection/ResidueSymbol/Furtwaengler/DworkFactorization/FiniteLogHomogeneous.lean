@@ -70,10 +70,8 @@ theorem finiteLogProductArgPoly_coeff_mem_Q_pow {x y : 𝓞 R'}
       have hmul : x * y ∈ F.Q * F.Q := Ideal.mul_mem_mul hx hy
       simpa [pow_two] using hmul
     simpa [finiteLogProductArgPoly, Polynomial.coeff_monomial] using hxy
-  have hne1 : 1 ≠ d := fun h =>
-    h1 h.symm
-  have hne2 : 2 ≠ d := fun h =>
-    h2 h.symm
+  have hne1 : 1 ≠ d := Ne.symm h1
+  have hne2 : 2 ≠ d := Ne.symm h2
   simp [finiteLogProductArgPoly, Polynomial.coeff_monomial, hne1, hne2]
 
 /-- Every homogeneous coefficient of
@@ -108,4 +106,3 @@ end FullTeichStickelbergerSetup
 end Furtwaengler
 
 end BernoulliRegular
-

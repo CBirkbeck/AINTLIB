@@ -42,8 +42,9 @@ theorem natCast_mem_Q_pow_factorization_mul_pred (c : ℕ) :
   · have hp : Nat.Prime ℓ := Fact.out
     have hdvd : ℓ ^ c.factorization ℓ ∣ c :=
       (hp.pow_dvd_iff_le_factorization hc).2 le_rfl
-    let T := F.toConductorFlexibleTraceFormStickelbergerSetup
-    exact T.natCast_mem_Q_pow_mul_pred_of_ell_pow_dvd hdvd
+    exact
+      F.toConductorFlexibleTraceFormStickelbergerSetup.natCast_mem_Q_pow_mul_pred_of_ell_pow_dvd
+        hdvd
 
 theorem natCast_mul_mem_Q_pow_factorization_mul_pred_add {c e : ℕ} {z : 𝓞 R'}
     (hz : z ∈ F.Q ^ e) :

@@ -178,23 +178,14 @@ theorem h_max_element_residual_via_base_rational_subset_comap
           (∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
               w.vle t' τ_max) →
           w.vle τ_max (algebraMap A (Localization.Away s) s_D) := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f τ hτ hστ hVK τ_max hτ_max_mem _h_max
-  -- Apply base rational-subset comap residual.
-  have h_comap : comap (algebraMap A (Localization.Away s)) w ∈
-      rationalOpen T_D s_D :=
-    h_base_rational_subset_comap w hw_spa hw_f τ hτ hστ hVK
   -- Extract `t ∈ T_D` with `algMap t = τ_max`.
   obtain ⟨t, ht_mem, hτ_max_eq⟩ := Finset.mem_image.mp hτ_max_mem
-  -- Apply base per-`t` bound at this `t`.
-  have h_v_t : (comap (algebraMap A (Localization.Away s)) w).vle t s_D :=
-    h_comap.2.1 t ht_mem
-  -- Translate via `comap_vle`.
-  rw [comap_vle] at h_v_t
-  exact hτ_max_eq ▸ h_v_t
+  -- Apply the base per-`t` bound (from the comap rational-subset residual),
+  -- then translate via `comap_vle`.
+  rw [← hτ_max_eq, ← comap_vle]
+  exact (h_base_rational_subset_comap w hw_spa hw_f τ hτ hστ hVK).2.1 t ht_mem
 
 /-- **Structural data discharge via base rational-subset comap
 residual** (T047 composed deliverable).
@@ -295,17 +286,13 @@ theorem C1SupplierStrong_local_via_base_rational_subset_comap
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     C1SupplierStrong_local C := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine C1SupplierStrong_local_via_max_element_residual_VK P hA₀_le C hopen_base ?_
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨σ_loc, f, h_alg, h_dom, h_base_residual, hv_in_plus, hvf_nz⟩ :=
     h_per_call_components D hD v hv t ht hvt hvD_s
-  refine ⟨σ_loc, f, h_alg, h_dom, ?_, hv_in_plus, hvf_nz⟩
-  exact h_max_element_residual_via_base_rational_subset_comap
-    P C.base.T C.base.s hopen_base D.T D.s σ_loc h_base_residual
+  exact ⟨σ_loc, f, h_alg, h_dom,
+    h_max_element_residual_via_base_rational_subset_comap
+      P C.base.T C.base.s hopen_base D.T D.s σ_loc h_base_residual,
+    hv_in_plus, hvf_nz⟩
 
 end ValuationSpectrum

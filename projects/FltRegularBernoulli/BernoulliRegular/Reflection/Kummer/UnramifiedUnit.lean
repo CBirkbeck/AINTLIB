@@ -160,57 +160,20 @@ theorem genEqUnitMulPow_of_genIsPowOfPrincipalFractionalIdeal
     (h : P.GenIsPowOfPrincipalFractionalIdeal) :
     P.GenEqUnitMulPow := by
   obtain ⟨β, hβ⟩ := h
-  -- `hβ : toPrincipalIdeal _ _ γ = (toPrincipalIdeal _ _ β)^p`.
-  -- Rewriting via `map_pow`, `(γ) = (β^p)` as fractional ideals.
-  have hγ_pow_β : toPrincipalIdeal (𝓞 K) K P.genUnit =
-      toPrincipalIdeal (𝓞 K) K (β ^ p) := by
-    rw [hβ, map_pow]
-  -- Pass to the underlying spanSingleton equality.
+  -- `hβ : toPrincipalIdeal _ _ γ = (toPrincipalIdeal _ _ β)^p`. Pass to the
+  -- underlying spanSingleton equality `(γ) = (β^p)` as fractional ideals.
   have hspan : spanSingleton (𝓞 K)⁰ ((P.genUnit : K)) =
       spanSingleton (𝓞 K)⁰ (((β ^ p : Kˣ) : K)) := by
-    have h1 := congrArg
-      (fun I : (FractionalIdeal (𝓞 K)⁰ K)ˣ => (I : FractionalIdeal (𝓞 K)⁰ K))
-      hγ_pow_β
-    simp only [coe_toPrincipalIdeal] at h1
-    exact h1
+    have h1 := congrArg Units.val (hβ.trans (map_pow _ β p).symm)
+    simpa only [coe_toPrincipalIdeal] using h1
   -- Apply `spanSingleton_eq_spanSingleton`.
-  have hexists : ∃ u : (𝓞 K)ˣ, u • ((P.genUnit : K)) = (((β ^ p : Kˣ) : K)) :=
-    (FractionalIdeal.spanSingleton_eq_spanSingleton
-      (R := 𝓞 K) (S := (𝓞 K)⁰) (P := K)).mp hspan
-  obtain ⟨u, hu⟩ := hexists
-  -- `hu : u • γ = β^p` in `K`. Solve for `γ`.
+  obtain ⟨u, hu⟩ := (FractionalIdeal.spanSingleton_eq_spanSingleton
+    (R := 𝓞 K) (S := (𝓞 K)⁰) (P := K)).mp hspan
+  -- `hu : u • γ = β^p` in `K`. Solve for `γ`: `γ = u⁻¹ • β^p`.
   refine ⟨u⁻¹, β, ?_⟩
   -- Goal: `(P.gen : K) = (algebraMap _ _ u⁻¹.val) * β^p`.
-  have hcast : ((β ^ p : Kˣ) : K) = (β : K) ^ p := by
-    push_cast; rfl
-  rw [hcast] at hu
-  -- Now `hu : u • (P.genUnit : K) = (β : K) ^ p`.
-  -- `u • x = (algebraMap _ _ u) * x`.
-  have hsmul : u • ((P.genUnit : K)) =
-      (algebraMap (𝓞 K) K (u : 𝓞 K)) * ((P.genUnit : K)) := by
-    rw [Units.smul_def]
-    rfl
-  rw [hsmul] at hu
-  -- `hu : (algebraMap _ _ u) * (P.gen : K) = (β : K)^p`.
-  -- Multiply both sides by `(algebraMap _ _ u⁻¹)`, since the algebraMap is
-  -- a homomorphism and `u * u⁻¹ = 1`.
-  have hu_inv :
-      (algebraMap (𝓞 K) K ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K)) *
-        (algebraMap (𝓞 K) K ((u : (𝓞 K)ˣ) : 𝓞 K)) = 1 := by
-    rw [← map_mul, ← Units.val_mul]
-    simp
-  -- (algebraMap u⁻¹) * (algebraMap u) * γ = (algebraMap u⁻¹) * β^p
-  -- (algebraMap u⁻¹) * β^p = γ
-  -- so γ = (algebraMap u⁻¹) * β^p
-  -- We have (P.genUnit : K) = (P.gen : K).
-  have hgen_unit : (P.genUnit : K) = P.gen := P.genUnit_val
-  rw [hgen_unit] at hu
-  -- hu : (algebraMap u) * P.gen = (β : K)^p
-  -- We want: P.gen = (algebraMap u⁻¹) * (β : K)^p
-  have := congrArg
-    (fun x : K => (algebraMap (𝓞 K) K ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K)) * x) hu
-  rw [← mul_assoc, hu_inv, one_mul] at this
-  exact this
+  have hg : (P.genUnit : K) = u⁻¹ • ((β ^ p : Kˣ) : K) := eq_inv_smul_iff.2 hu
+  rw [← P.genUnit_val, hg, Units.val_pow_eq_pow_val, Units.smul_def, Algebra.smul_def]
 
 /-!
 ### Composite reduction: from the weak form (`(γ) = J^p`) to the unit
@@ -314,13 +277,8 @@ theorem genIsPowOfPrincipalFractionalIdeal_of_genEqUnitMulPow
   -- Goal: `toPrincipalIdeal _ _ P.genUnit = (toPrincipalIdeal _ _ β) ^ p`.
   -- Equivalent at spanSingleton level.
   apply Units.ext
-  rw [coe_toPrincipalIdeal, Units.val_pow_eq_pow_val, coe_toPrincipalIdeal]
-  -- Goal: spanSingleton _ (P.genUnit : K) = spanSingleton _ (β : K) ^ p.
-  rw [spanSingleton_pow]
-  -- Goal: spanSingleton _ (P.genUnit : K) = spanSingleton _ ((β : K) ^ p).
-  rw [P.genUnit_val, hγ]
-  -- Goal: spanSingleton _ ((algebraMap u) * (β:K)^p) = spanSingleton _ ((β:K)^p).
-  rw [← spanSingleton_mul_spanSingleton]
+  rw [coe_toPrincipalIdeal, Units.val_pow_eq_pow_val, coe_toPrincipalIdeal,
+    spanSingleton_pow, P.genUnit_val, hγ, ← spanSingleton_mul_spanSingleton]
   -- Goal: spanSingleton _ (algebraMap u) * spanSingleton _ ((β:K)^p)
   --      = spanSingleton _ ((β:K)^p).
   -- Use `algebraMap u = u • 1`, then `spanSingleton (u • 1) = spanSingleton 1 = 1`.
@@ -330,9 +288,8 @@ theorem genIsPowOfPrincipalFractionalIdeal_of_genEqUnitMulPow
   -- Use `spanSingleton_eq_spanSingleton`: `spanSingleton x = spanSingleton 1`
   -- iff `∃ v : (𝓞 K)ˣ, v • x = 1`, which holds with `v = u⁻¹`.
   rw [show (1 : FractionalIdeal (𝓞 K)⁰ K) =
-    spanSingleton (𝓞 K)⁰ (1 : K) from spanSingleton_one.symm]
-  rw [FractionalIdeal.spanSingleton_eq_spanSingleton
-    (R := 𝓞 K) (S := (𝓞 K)⁰) (P := K)]
+      spanSingleton (𝓞 K)⁰ (1 : K) from spanSingleton_one.symm,
+    FractionalIdeal.spanSingleton_eq_spanSingleton (R := 𝓞 K) (S := (𝓞 K)⁰) (P := K)]
   refine ⟨u⁻¹, ?_⟩
   -- Goal: u⁻¹ • (algebraMap u) = 1.
   rw [Units.smul_def, Algebra.smul_def, ← map_mul, ← Units.val_mul]
@@ -343,3 +300,7 @@ end KummerPresentation
 end BernoulliRegular
 
 end
+
+
+
+

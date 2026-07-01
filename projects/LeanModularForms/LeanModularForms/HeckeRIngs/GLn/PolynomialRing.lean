@@ -229,7 +229,7 @@ lemma T_elem_ppow_in_range (p : ℕ) (hp : p.Prime) (e : Fin 2 → ℕ) (hmono :
       ← T_diag_scalar_mul 2 (p ^ (e 0)) (pow_pos hp.pos _) (ppowDiag 2 p ![0, e 1 - e 0])
         (ppowDiag_pos 2 p hp _)
         (divChain_ppow 2 p _ (by
-          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all [Fin.le_def]))]
+          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all))]
     apply (evalHom 2 p).range.mul_mem
     · rw [← T_pp_pow p hp (e 0), ← T_gen_one_eq_T_pp p hp]
       exact (evalHom 2 p).range.pow_mem (X_one_mem_range p) _
@@ -531,7 +531,7 @@ lemma support_mul_exists (f g : HeckeAlgebra 2) (D : HeckeCoset (GL_pair 2))
   have h : (Finsupp.sum f (fun D₁ b₁ ↦ Finsupp.sum g (fun D₂ b₂ ↦
       b₁ • b₂ • HeckeRing.m (GL_pair 2) (HeckeCoset.rep D₁)
         (HeckeCoset.rep D₂)))) D ≠ 0 := hD
-  simp only [Finsupp.sum, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul] at h
+  simp only [Finsupp.sum, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul] at h
   obtain ⟨D₁, hD₁_mem, h₁⟩ := Finset.exists_ne_zero_of_sum_ne_zero h
   obtain ⟨D₂, hD₂_mem, h₂⟩ := Finset.exists_ne_zero_of_sum_ne_zero h₁
   have hfD₁ := Finsupp.mem_support_iff.mp hD₁_mem
@@ -887,8 +887,8 @@ lemma monomial_eval_kronecker (p : ℕ) (hp : p.Prime)
 private lemma prod_T_gen_pow_eq_two (p : ℕ) (d : Fin 2 →₀ ℕ) :
     (∏ k ∈ d.support, T_gen 2 p k ^ d k) = T_gen 2 p 0 ^ (d 0) * T_gen 2 p 1 ^ (d 1) := by
   rw [Finset.prod_subset (Finset.subset_univ d.support) (fun k _ hk ↦ by
-    rw [Finsupp.notMem_support_iff.mp hk, pow_zero]; rfl)]
-  rw [Fin.prod_univ_two]; rfl
+    rw [Finsupp.notMem_support_iff.mp hk, pow_zero])]
+  rw [Fin.prod_univ_two]
 
 /-- Evaluating `evalHom 2 p R` at the coset `D` expands as
 `∑_{d ∈ supp R} (R.coeff d) · (T_gen(p,0)^{d 0} · T_gen(p,1)^{d 1}) D`. -/
@@ -917,7 +917,7 @@ private lemma evalHom_apply_eq_sum_monomial (p : ℕ) (R : MvPolynomial (Fin 2) 
 theorem evalHom_injective_two (p : ℕ) (hp : p.Prime) :
     Function.Injective (evalHom 2 p) := by
   intro P Q hPQ
-  rw [← sub_eq_zero]; set R := P - Q with hR_def
+  rw [← sub_eq_zero]; set R := P - Q
   have hR : evalHom 2 p R = 0 := by simp [R, map_sub, hPQ]
   by_contra hR_ne
   obtain ⟨s, hs_mem, hs_min⟩ := Finset.exists_min_image R.support
@@ -987,6 +987,5 @@ noncomputable def R_p_isPolynomialRing :
   RingEquiv.ofBijective (Inj.evalHomR n p hp)
     ⟨Inj.evalHomR_injective n p hp (evalHom_injective n p hp),
      Inj.evalHomR_surjective n p hp (T_gen_generates_R_p n p hp)⟩
-
 
 end HeckeRing.GLn

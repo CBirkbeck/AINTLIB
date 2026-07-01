@@ -335,7 +335,7 @@ theorem exists_card_coset_inter_smul_sub_volume_mul_rpow_le
   have hD'bdd : Bornology.IsBounded D' := hTslip.isBounded_image hbdd
   have hD'meas : MeasurableSet D' :=
     (T.symm.toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv).measurableSet_image.mpr hmeas
-  set M' : ℝ≥0 := ‖Ts‖₊ * M with hM'
+  set M' : ℝ≥0 := ‖Ts‖₊ * M
   set φ' : Fin m → (Fin (Fintype.card ι - 1) → ℝ) → (ι → ℝ) := fun j ↦ T.symm ∘ φ j with hφ'
   have hφ'lip : ∀ j, LipschitzWith M' (φ' j) := fun j ↦ hTslip.comp (hφ j)
   have hcov' : frontier D' ⊆ ⋃ j, φ' j '' Set.Icc 0 1 := by
@@ -1003,9 +1003,8 @@ private theorem exists_card_cell_sub_mul_rpow_le_explicit {ι : Type*} [Fintype 
       rw [h]
       exact isClosed_biInter (fun k _ ↦ isClosed_le continuous_const (continuous_apply (g k)))
   have hDsmeas : MeasurableSet Ds := hmeas.inter hOclosed.measurableSet
-  obtain ⟨C, hC⟩ := exists_card_coset_inter_smul_sub_volume_mul_rpow_le T' Ds hDsbdd hDsmeas
+  exact exists_card_coset_inter_smul_sub_volume_mul_rpow_le T' Ds hDsbdd hDsmeas
     (exists_frontier_cover_inter_orthant g s D₀ hbdd hlip)
-  exact ⟨C, hC⟩
 
 /-- **Per-cell effective count.** The implicit-constant form of
 `exists_card_cell_sub_mul_rpow_le_explicit`: for any coset translate `ξ` and any real dilation
@@ -1104,7 +1103,6 @@ private theorem sub_mem_nsmul_of_coord_eq {K : Type*} [Field K] [NumberField K]
   exact (Φ.injective hkey).symm
 
 open NumberField.mixedEmbedding NumberField.mixedEmbedding.fundamentalCone in
-open NumberField.mixedEmbedding in
 /-- **Signed norm class is coset-constant.** If the mixed embeddings of two algebraic integers
 `x, y` differ by a vector of the `m`-sublattice, then `x = y + m·w` for some `w : 𝓞 K`
 (`mixedEmbedding` injective), so the algebraic norm is constant mod `m`
@@ -1718,7 +1716,6 @@ private theorem card_residue_sum_bound_aux {K : Type*} [Field K] [NumberField K]
   rw [← htNd]
   exact hcell p tN htN1
 
-open Ideal in
 open Ideal NumberField.mixedEmbedding NumberField.mixedEmbedding.fundamentalCone
   NumberField.InfinitePlace in
 /-- **Effective count of cone points of `idealSet K J` with a norm residue** (the Widmer / GRS
@@ -3402,7 +3399,7 @@ theorem tendsto_sum_char_mul_cardNormLeResidue_div_of_realized
     (hS : ∀ a ∈ S, ∃ 𝔟 : (Ideal (𝓞 K))⁰,
       ((Ideal.absNorm (𝔟 : Ideal (𝓞 K)) : ZMod c)) = (a : ZMod c))
     (χ : S →* ℂˣ) (hχ : χ ≠ 1) :
-    Filter.Tendsto (fun N : ℕ => (∑ s : S, ((χ s : ℂˣ) : ℂ) *
+    Filter.Tendsto (fun N : ℕ ↦ (∑ s : S, ((χ s : ℂˣ) : ℂ) *
         (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ N ∧
           ((Ideal.absNorm (I : Ideal (𝓞 K)) : ZMod c)) = ((s : (ZMod c)ˣ) : ZMod c)} : ℂ))
         / (N : ℂ))

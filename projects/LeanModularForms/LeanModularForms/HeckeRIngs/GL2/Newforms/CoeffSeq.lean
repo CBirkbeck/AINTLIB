@@ -3,7 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemma
+import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
 
 /-!
 # Newforms: minimal coefficient-sequence API

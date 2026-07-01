@@ -1,6 +1,4 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
-import Mathlib.RingTheory.DedekindDomain.Ideal.Basic
-import Mathlib.RingTheory.UniqueFactorizationDomain.NormalizedFactors
 
 /-!
 # LV010-class-eq-1b: Ideal p-th root cancellation in Dedekind domains
@@ -25,8 +23,6 @@ form), we get `(𝔞·σ𝔞⁻¹) = (β)`, hence `[𝔞] = [σ𝔞]` in the cla
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular
 
 namespace FLT37
@@ -35,7 +31,6 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Ideal p-th root cancellation in a Dedekind domain.** For ideals
 `A, B` of a Dedekind domain `R` with `A, B ≠ ⊥` and `n ≠ 0`,
 `A^n = B^n ⟹ A = B`.
@@ -51,27 +46,17 @@ theorem Ideal.pow_left_inj_of_ne_zero
     {n : ℕ} (hn : n ≠ 0) {A B : Ideal R} (hA : A ≠ ⊥) (hB : B ≠ ⊥)
     (h : A ^ n = B ^ n) :
     A = B := by
-  -- Step 1: nonzero powers
-  have hAn : A ^ n ≠ 0 := pow_ne_zero n hA
-  have hBn : B ^ n ≠ 0 := pow_ne_zero n hB
-  -- Step 2: normalized factors equal
-  have hfact : UniqueFactorizationMonoid.normalizedFactors (A ^ n) =
-      UniqueFactorizationMonoid.normalizedFactors (B ^ n) := by
-    rw [h]
-  rw [UniqueFactorizationMonoid.normalizedFactors_pow,
-      UniqueFactorizationMonoid.normalizedFactors_pow] at hfact
-  -- Step 3: Multiset cancellation
+  have hfact : n • UniqueFactorizationMonoid.normalizedFactors A =
+      n • UniqueFactorizationMonoid.normalizedFactors B := by
+    rw [← UniqueFactorizationMonoid.normalizedFactors_pow,
+      ← UniqueFactorizationMonoid.normalizedFactors_pow, h]
   have hfact' : UniqueFactorizationMonoid.normalizedFactors A =
       UniqueFactorizationMonoid.normalizedFactors B :=
     IsAddTorsionFree.nsmul_right_injective hn hfact
-  -- Step 4: A and B are associated
-  have hassoc : Associated A B :=
+  obtain ⟨u, hu⟩ :=
     (UniqueFactorizationMonoid.associated_iff_normalizedFactors_eq_normalizedFactors
       hA hB).mpr hfact'
-  -- Step 5: For ideals, associated ⟹ equal (units are just ⊤)
-  obtain ⟨u, hu⟩ := hassoc
-  have h_top : (u : Ideal R) = ⊤ := Ideal.isUnit_iff.mp u.isUnit
-  rw [← hu, h_top, Ideal.mul_top]
+  rw [← hu, Ideal.isUnit_iff.mp u.isUnit, Ideal.mul_top]
 
 end CaseI
 

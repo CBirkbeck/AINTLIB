@@ -97,8 +97,8 @@ theorem per_t_chain_of_multi_chain_at
   have h_prod_split : T_D.prod id = t' * (T_D.erase t').prod id :=
     (Finset.mul_prod_erase T_D id ht').symm
   -- Lift per-`t''` lower bound to product lower bound on `T_D.erase t'`.
-  have h_per_t : ∀ t'' ∈ T_D.erase t', w.vle ((fun _ : A => (1 : A)) t'') (id t'') :=
-    fun t'' ht'' => h_T_D_lower_bound t'' (Finset.mem_of_mem_erase ht'')
+  have h_per_t : ∀ t'' ∈ T_D.erase t', w.vle ((fun _ : A ↦ (1 : A)) t'') (id t'') :=
+    fun t'' ht'' ↦ h_T_D_lower_bound t'' (Finset.mem_of_mem_erase ht'')
   have h_others_lower : w.vle (1 : A) ((T_D.erase t').prod id) := by
     have h_pw := Spv.vle_prod_of_pointwise w (T_D.erase t') h_per_t
     rwa [Finset.prod_const_one] at h_pw

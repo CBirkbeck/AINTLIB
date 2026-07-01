@@ -111,7 +111,7 @@ theorem fdBoundaryFun_arg_left (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ < 
   rw [h_eq]
   have h_trig : (↑(Real.cos α) : ℂ) + ↑(-(Real.sin α)) * I =
       Complex.cos ↑(-α) + Complex.sin ↑(-α) * I := by
-    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_neg, Real.sin_neg, ofReal_neg]
+    rw [← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, ofReal_neg]
   rw [h_trig]
   refine Complex.arg_mul_cos_add_sin_mul_I (by positivity) ⟨?_, ?_⟩ <;>
     · rw [hα_def]; nlinarith [Real.pi_pos]
@@ -146,7 +146,7 @@ theorem fdBoundaryFun_arg_right (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ <
   rw [h_eq]
   have h_trig : (↑(Real.cos α) : ℂ) + ↑(Real.sin α) * I =
       Complex.cos ↑α + Complex.sin ↑α * I := by
-    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin]
+    rw [← ofReal_cos, ← ofReal_sin]
   rw [h_trig, Complex.arg_neg_eq_arg_sub_pi_of_im_pos (by simp [mul_im]; positivity),
     Complex.arg_mul_cos_add_sin_mul_I (show (0:ℝ) < 2 * Real.sin α by positivity)
       ⟨by rw [hα_def]; nlinarith [Real.pi_pos], by linarith⟩]
@@ -161,7 +161,7 @@ theorem fdBoundaryFun_arg_diff (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ < 
 /-- The "core" log difference tends to `πi` as `δ → 0⁺`.
 `log(γ(2/5-δ) - i) - log(γ(2/5+δ) - i) → πi`. -/
 theorem fdBoundaryFun_log_diff_core_tendsto (H : ℝ) :
-    Tendsto (fun δ => Complex.log (fdBoundaryFun H (2/5 - δ) - I) -
+    Tendsto (fun δ ↦ Complex.log (fdBoundaryFun H (2/5 - δ) - I) -
       Complex.log (fdBoundaryFun H (2/5 + δ) - I))
       (𝓝[>] 0) (𝓝 (↑Real.pi * I)) := by
   have hkey : ∀ᶠ δ in 𝓝[>] (0:ℝ),
@@ -178,11 +178,11 @@ theorem fdBoundaryFun_log_diff_core_tendsto (H : ℝ) :
       (fdBoundaryFun_sub_i_ne_zero_seg3 H _ (by linarith) (by linarith))
       (fdBoundaryFun_sub_i_norm_symm H hδ_pos hδ),
       fdBoundaryFun_arg_diff H hδ_pos hδ]
-  have htend : Tendsto (fun δ : ℝ => (↑(Real.pi - 5 * δ * Real.pi / 6) : ℂ) * I)
+  have htend : Tendsto (fun δ : ℝ ↦ (↑(Real.pi - 5 * δ * Real.pi / 6) : ℂ) * I)
       (𝓝[>] 0) (𝓝 (↑Real.pi * I)) := by
     simpa using (Continuous.tendsto (by fun_prop :
-      Continuous (fun δ : ℝ => (↑(Real.pi - 5 * δ * Real.pi / 6) : ℂ) * I)) 0).mono_left
+      Continuous (fun δ : ℝ ↦ (↑(Real.pi - 5 * δ * Real.pi / 6) : ℂ) * I)) 0).mono_left
       nhdsWithin_le_nhds
-  exact htend.congr' (hkey.mono fun _ h => h.symm)
+  exact htend.congr' (hkey.mono fun _ h ↦ h.symm)
 
 end

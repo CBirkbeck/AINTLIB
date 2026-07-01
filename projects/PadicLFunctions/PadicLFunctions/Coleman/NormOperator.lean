@@ -218,8 +218,7 @@ theorem toPS_symm_apply (F : PowerSeries ℤ_[p]) : (toPS p).symm F = F := rfl
 theorem toPS_algebraMap (c : PowerSeries ℤ_[p]) :
     toPS p (algebraMap (PowerSeries ℤ_[p]) (PhiAlg p) c) = phiSeries p c := by
   rw [RingHom.algebraMap_toAlgebra]
-  change phiHom p c = phiSeries p c
-  rw [phiHom_apply]
+  exact phiHom_apply p c
 
 /-- The `φ`-`smul` on `PhiAlg p` is multiplication by the `φ`-image. -/
 theorem smul_def (c : PowerSeries ℤ_[p]) (x : PhiAlg p) :
@@ -260,9 +259,7 @@ noncomputable def digitBasis : Module.Basis (Fin p) (PowerSeries ℤ_[p]) (PhiAl
             (PhiAlg.toPS p (∑ j : Fin p, g j • ((1 + PowerSeries.X) ^ (j : ℕ) : PhiAlg p)))
             g := sum_smul_one_add_X_pow_eq g
         rw [hfg] at hf
-        have hex := existsUnique_digits_padicInt p
-          (PhiAlg.toPS p (∑ j : Fin p, g j • ((1 + PowerSeries.X) ^ (j : ℕ) : PhiAlg p)))
-        exact congrFun (hex.unique hf hg) i)
+        exact congrFun ((existsUnique_digits_padicInt p _).unique hf hg) i)
     (-- spanning ← existence of digits
       (Submodule.top_le_span_range_iff_forall_exists_fun (PowerSeries ℤ_[p])).2 fun x => by
         obtain ⟨G, hG, -⟩ := existsUnique_digits_padicInt p (PhiAlg.toPS p x)
@@ -301,9 +298,7 @@ noncomputable def normOp (f : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
 /-- `𝒩` is multiplicative (the relative norm is a monoid hom). RJW TeX 2660. -/
 theorem normOp_mul (f g : PowerSeries ℤ_[p]) :
     normOp (f * g) = normOp f * normOp g := by
-  unfold normOp
-  rw [show (PhiAlg.toPS p).symm (f * g)
-      = (PhiAlg.toPS p).symm f * (PhiAlg.toPS p).symm g from map_mul _ _ _, map_mul]
+  simp only [normOp, map_mul]
 
 /-- `𝒩 1 = 1`. -/
 @[simp]
@@ -443,16 +438,12 @@ is a ring hom, so a unit congruence `f = 1 + C(p^k)·h` gives
 /-- `digitMatrix` is additive (it is `leftMulMatrix ∘ (toPS).symm`, both additive). -/
 theorem digitMatrix_add (f g : PowerSeries ℤ_[p]) :
     digitMatrix (f + g) = digitMatrix f + digitMatrix g := by
-  unfold digitMatrix
-  rw [show (PhiAlg.toPS p).symm (f + g)
-      = (PhiAlg.toPS p).symm f + (PhiAlg.toPS p).symm g from map_add _ _ _, map_add]
+  simp only [digitMatrix, map_add]
 
 /-- `digitMatrix` is multiplicative. -/
 theorem digitMatrix_mul (f g : PowerSeries ℤ_[p]) :
     digitMatrix (f * g) = digitMatrix f * digitMatrix g := by
-  unfold digitMatrix
-  rw [show (PhiAlg.toPS p).symm (f * g)
-      = (PhiAlg.toPS p).symm f * (PhiAlg.toPS p).symm g from map_mul _ _ _, map_mul]
+  simp only [digitMatrix, map_mul]
 
 /-- `digitMatrix 1 = 1`. -/
 @[simp]
@@ -572,14 +563,9 @@ theorem trace_digitMatrix (h : PowerSeries ℤ_[p]) :
   · rw [Fin.val_zero, if_pos rfl, smul_eq_mul, mul_comm]
     congr 1
     -- `repr_0 = ψ h`
-    have hdig : IsDigitDecomp p (PhiAlg.toPS p ((PhiAlg.toPS p).symm h))
-        (fun i => (digitBasis p).repr ((PhiAlg.toPS p).symm h) i) := by
-      rw [IsDigitDecomp, ← sum_smul_one_add_X_pow_eq
-        (fun i => (digitBasis p).repr ((PhiAlg.toPS p).symm h) i)]
-      conv_lhs => rw [← (digitBasis p).sum_repr ((PhiAlg.toPS p).symm h)]
-      exact congrArg (PhiAlg.toPS p) (Finset.sum_congr rfl (fun i _ => by rw [digitBasis_apply]))
-    rw [RingEquiv.apply_symm_apply] at hdig
-    exact (psiSeries_eq_of_isDigitDecomp_padicInt hdig).symm
+    obtain ⟨G, hG, -⟩ := existsUnique_digits_padicInt p h
+    rw [psiSeries_eq_of_isDigitDecomp_padicInt hG,
+      digitBasis_repr_eq ((PhiAlg.toPS p).symm h) G (by rwa [RingEquiv.apply_symm_apply])]
   · intro l _ hl0
     rw [if_neg (by simpa using fun h => hl0 (Fin.ext (by simpa using h))), smul_zero]
   · intro h; exact absurd (Finset.mem_univ _) h
@@ -596,8 +582,7 @@ theorem modEqPow_one_iff_map_toZMod {f g : PowerSeries ℤ_[p]} :
   refine forall_congr' (fun m => ?_)
   rw [PowerSeries.coeff_map, PowerSeries.coeff_map, ← sub_eq_zero, ← map_sub,
     ← RingHom.mem_ker, PadicInt.ker_toZMod, PadicInt.maximalIdeal_eq_span_p,
-    Ideal.mem_span_singleton, pow_one]
-  rw [map_sub]
+    Ideal.mem_span_singleton, pow_one, map_sub]
 
 /-- **The Frobenius identity over `𝔽_p⟦T⟧`** (the engine for part (ii)): `φ(ḡ) = ḡ^p`.
 Over char `p`, `(1+T)^p − 1 = T^p` (freshman's dream), so `φ = subst(T^p) = expand`,
@@ -692,9 +677,8 @@ theorem digitMatrix_col_isDigitDecomp (f : PowerSeries ℤ_[p]) (j : Fin p) :
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [digitMatrix, Algebra.leftMulMatrix_eq_repr_mul, digitBasis_apply (i := i)]
   have hxPS := congrArg (PhiAlg.toPS p) hx
-  rw [map_mul, RingEquiv.apply_symm_apply, digitBasis_apply (i := j),
+  rwa [map_mul, RingEquiv.apply_symm_apply, digitBasis_apply (i := j),
     PhiAlg.toPS_apply, sum_smul_one_add_X_pow_eq] at hxPS
-  exact hxPS
 
 /-- `digitMatrix (1 + C a · h) = 1 + C a • digitMatrix h` (ring-hom additivity +
 multiplicativity + `digitMatrix (C a) = C a • 1`). -/
@@ -867,8 +851,7 @@ theorem normOp_iterate_modEq {k₁ k₂ : ℕ} (h : k₁ ≤ k₂) {f : PowerSer
     rw [hg]
     have hstep : ModEqPow p 1 (normOp^[k₂ - k₁] f * finv) (f * finv) :=
       (normOp_iterate_modEq_self f _).mul_right finv
-    rw [hfinv_mul] at hstep
-    exact hstep
+    rwa [hfinv_mul] at hstep
   -- iterate (iii): `𝒩^{k₁} g ≡ 1 mod p^{k₁+1}`
   have hiter := normOp_iterate_modEq_one hgunit hg1 k₁
   -- `𝒩^{k₁} g = 𝒩^{k₂} f · 𝒩^{k₁} finv`
@@ -879,8 +862,7 @@ theorem normOp_iterate_modEq {k₁ k₂ : ℕ} (h : k₁ ≤ k₂) {f : PowerSer
   have hffinv : normOp^[k₁] f * normOp^[k₁] finv = 1 := by
     rw [← normOp_iterate_mul, hfinv_mul]; simp [Function.iterate_fixed normOp_one]
   have hmul := hiter.mul_right (normOp^[k₁] f)
-  rw [one_mul, mul_assoc, mul_comm (normOp^[k₁] finv) (normOp^[k₁] f), hffinv, mul_one] at hmul
-  exact hmul
+  rwa [one_mul, mul_assoc, mul_comm (normOp^[k₁] finv) (normOp^[k₁] f), hffinv, mul_one] at hmul
 
 /-! ## Compactness of `ℤ_p⟦T⟧` and sequential extraction (T909)
 

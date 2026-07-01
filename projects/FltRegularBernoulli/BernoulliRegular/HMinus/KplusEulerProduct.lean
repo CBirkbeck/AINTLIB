@@ -96,7 +96,7 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
           have hRprime : R.IsPrime := hRfac.1
           have hQ_le_R : Q ≤ R := hRfac.2
           haveI : R.IsPrime := hRprime
-          have hR_ne : R ≠ ⊥ := fun hR_bot =>
+          have hR_ne : R ≠ ⊥ := fun hR_bot ↦
             hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
           haveI : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by
@@ -159,7 +159,7 @@ lemma normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow
   have hPPlus_prime : PPlus.IsPrime := hPPlus_fac.1
   have hI_le_PPlus : I ≤ PPlus := hPPlus_fac.2
   haveI : PPlus.IsPrime := hPPlus_prime
-  have hPPlus_ne : PPlus ≠ ⊥ := fun hPPlus_bot =>
+  have hPPlus_ne : PPlus ≠ ⊥ := fun hPPlus_bot ↦
     hI_ne (le_bot_iff.mp (hPPlus_bot ▸ hI_le_PPlus))
   haveI : NeZero PPlus := ⟨hPPlus_ne⟩
   have hPPlus_dvd : Ideal.absNorm PPlus ∣ (q : ℕ) ^ k := by
@@ -209,7 +209,7 @@ lemma normalizedFactors_card_mul_localResidueDegreePlus_of_absNorm_prime_pow
     simpa [hm] using
       normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
   have hsum_count : ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus = m.card :=
-    Multiset.sum_count_eq_card fun PPlus hPPlus => hsubset (Multiset.mem_toFinset.2 hPPlus)
+    Multiset.sum_count_eq_card fun PPlus hPPlus ↦ hsubset (Multiset.mem_toFinset.2 hPPlus)
   have hnorm_factors : Ideal.absNorm m.prod = (q : ℕ) ^ (d * m.card) := by
     rw [Finset.prod_multiset_count_of_subset m (primesOverFinsetPlus (K := K) (q : ℕ)) hsubset,
       map_prod]
@@ -255,7 +255,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
   classical
   set d := localResidueDegreePlus (p := p) (q : ℕ) hq with hd
   let α : Type _ := {PPlus : Ideal (𝓞 K⁺) // PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)}
-  letI : Fintype α := Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus => by
+  letI : Fintype α := Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by
     simp
   let β : Type _ := {I : NonzeroIdealNF K⁺ // Ideal.absNorm I.1 = (q : ℕ) ^ (d * n)}
   have hd_raw_pos : 0 < localResidueDegree (p := p) (q : ℕ) hq := by
@@ -272,10 +272,10 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
   have hpmap_val :
       ∀ {m : Multiset (Ideal (𝓞 K⁺))}
         (H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)),
-        (Multiset.pmap (fun PPlus hPPlus => (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m := by
+        (Multiset.pmap (fun PPlus hPPlus ↦ (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m := by
     intro m H
     rw [Multiset.map_pmap, Multiset.pmap_eq_map, Multiset.map_id']
-  let toSym : β → Sym α n := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ =>
+  let toSym : β → Sym α n := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦
     let m := UniqueFactorizationMonoid.normalizedFactors I
     let H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) := by
       intro PPlus hPPlus
@@ -289,9 +289,9 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
           normalizedFactors_card_mul_localResidueDegreePlus_of_absNorm_prime_pow
             (p := p) (K := K) hp_odd hq hI_ne hI_norm
       exact Nat.eq_of_mul_eq_mul_left hd_pos hmul
-    ⟨Multiset.pmap (fun PPlus hPPlus => (⟨PPlus, hPPlus⟩ : α)) m H, by
+    ⟨Multiset.pmap (fun PPlus hPPlus ↦ (⟨PPlus, hPPlus⟩ : α)) m H, by
       simp [hm_card]⟩
-  let ofSym : Sym α n → β := fun s =>
+  let ofSym : Sym α n → β := fun s ↦
     let m : Multiset (Ideal (𝓞 K⁺)) := s.1.map Subtype.val
     have hm_card : m.card = n := by
       simp [m]
@@ -316,7 +316,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
     have hm_norm : Ideal.absNorm m.prod = (q : ℕ) ^ (d * n) := by
       have hsum_count :
           ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus = m.card :=
-        Multiset.sum_count_eq_card fun PPlus hPPlus =>
+        Multiset.sum_count_eq_card fun PPlus hPPlus ↦
           hm_subset (Multiset.mem_toFinset.2 hPPlus)
       rw [Finset.prod_multiset_count_of_subset m (primesOverFinsetPlus (K := K) (q : ℕ)) hm_subset,
         map_prod]
@@ -345,7 +345,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
         simpa [m] using
           normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
       exact hsubset (Multiset.mem_toFinset.2 hPPlus)
-    change (Multiset.pmap (fun PPlus hPPlus => (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m
+    change (Multiset.pmap (fun PPlus hPPlus ↦ (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m
     rw [hpmap_val H]
   have hofSym_nfactors :
       ∀ s : Sym α n,
@@ -395,7 +395,7 @@ lemma dedekind_prime_power_series_eq_localFactorPlus_at_p
     exact hle.trans_lt (by norm_num)
   rw [dedekindLocalFactorPlus_at_p (p := p) (K := K)]
   trans ∑' k : ℕ, ((p : ℂ) ^ (-s)) ^ k
-  · refine tsum_congr fun k => ?_
+  · refine tsum_congr fun k ↦ ?_
     rw [idealNormMultiplicityNF_p_pow_eq_one_plus (p := p) (K := K) hp_odd k]
     simp only [Nat.cast_one, one_mul]
     rw [Nat.cast_pow, ← Complex.natCast_cpow_natCast_mul p k (-s), mul_comm,
@@ -421,10 +421,10 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
     let α : Type _ := {PPlus : Ideal (𝓞 K⁺) //
       PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)}
     letI : Fintype α :=
-      Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus => by simp
-    let f : ℕ → ℂ := fun k =>
+      Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by simp
+    let f : ℕ → ℂ := fun k ↦
       (idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) : ℂ) * ((((q : ℕ) ^ k : ℕ) : ℂ) ^ (-s))
-    let g : ℕ → ℂ := fun n =>
+    let g : ℕ → ℂ := fun n ↦
       (idealNormMultiplicityNF K⁺ ((q : ℕ) ^ (d * n)) : ℂ) *
         ((((q : ℕ) ^ (d * n) : ℕ) : ℂ) ^ (-s))
     let z : ℂ := (q : ℂ) ^ (-((d : ℂ) * s))
@@ -462,8 +462,8 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
         push_cast
         ring
       rw [hexp, Complex.cpow_mul_nat]
-    have hg_eq : g = fun n : ℕ => (Fintype.card (Sym α n) : ℂ) * z ^ n := funext hg_term
-    have hg_hasSum0 : HasSum (fun n : ℕ => (Fintype.card (Sym α n) : ℂ) * z ^ n)
+    have hg_eq : g = fun n : ℕ ↦ (Fintype.card (Sym α n) : ℂ) * z ^ n := funext hg_term
+    have hg_hasSum0 : HasSum (fun n : ℕ ↦ (Fintype.card (Sym α n) : ℂ) * z ^ n)
         (((1 - z)⁻¹) ^ Fintype.card α) := by
       rw [← tsum_symGeometric α hz]
       exact (summable_tsum_symGeometric α hz).1.hasSum
@@ -471,11 +471,11 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
       simpa [hg_eq] using hg_hasSum0
     have hf_hasSum : HasSum f (((1 - z)⁻¹) ^ Fintype.card α) := by
       refine (hasSum_iff_hasSum_of_ne_zero_bij
-        (f := f) (g := g) (i := fun x : Function.support g => d * x.1) ?_ ?_ ?_).2 hg_hasSum
+        (f := f) (g := g) (i := fun x : Function.support g ↦ d * x.1) ?_ ?_ ?_).2 hg_hasSum
       · intro x y hxy
         exact Subtype.ext <| Nat.eq_of_mul_eq_mul_left hd_pos hxy
       · intro k hk
-        have hk_mult : idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) ≠ 0 := fun hk_zero =>
+        have hk_mult : idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) ≠ 0 := fun hk_zero ↦
           hk (by simp [f, hk_zero])
         have hk_dvd : d ∣ k := by
           by_contra hk_ndvd
@@ -495,7 +495,7 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
     have hα_card : Fintype.card α = localPrimeCountPlus (p := p) (q : ℕ) hq := by
       calc
         Fintype.card α = (primesOverFinsetPlus (K := K) (q : ℕ)).card :=
-          Fintype.card_of_finset' (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus => by simp
+          Fintype.card_of_finset' (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by simp
         _ = localPrimeCountPlus (p := p) (q : ℕ) hq := hcard_finset
     have hf_hasSum' : HasSum f ((dedekindLocalFactor K⁺ (q : ℕ) s)⁻¹) := by
       rw [dedekindLocalFactor_eq_pow_localResidueDegreePlus (p := p) (K := K) hp_odd hq, ← inv_pow]
@@ -506,7 +506,7 @@ lemma dedekindZetaPlus_eq_eulerProduct (hp_odd : p ≠ 2) {s : ℂ} (hs : 1 < s.
     NumberField.dedekindZeta K⁺ s =
       ∏' q : Nat.Primes, (dedekindLocalFactor K⁺ (q : ℕ) s)⁻¹ := by
   rw [dedekindZeta_eq_tprod_primePowerSeriesNF (L := K⁺) hs]
-  exact tprod_congr fun q =>
+  exact tprod_congr fun q ↦
     dedekind_prime_power_series_eq_localFactorPlus (p := p) (K := K) hp_odd hs
 
 lemma evenLProduct_eq_tprod_localFactors {s : ℂ} (hs : 1 < s.re) :
@@ -516,24 +516,24 @@ lemma evenLProduct_eq_tprod_localFactors {s : ℂ} (hs : 1 < s.re) :
           (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹ := by
   classical
   unfold evenLProduct
-  rw [Finset.prod_congr rfl (fun χ _ => LFunction_eq_prime_tprod_of_localFactors p χ hs)]
+  rw [Finset.prod_congr rfl (fun χ _ ↦ LFunction_eq_prime_tprod_of_localFactors p χ hs)]
   exact (Multipliable.tprod_finsetProd
     (s := evenNontrivialCharacters (p := p))
-    (fun χ _ => (DirichletCharacter.LSeries_eulerProduct_hasProd χ hs).multipliable)).symm
+    (fun χ _ ↦ (DirichletCharacter.LSeries_eulerProduct_hasProd χ hs).multipliable)).symm
 
 lemma evenLProduct_eq_eulerProduct {s : ℂ} (hs : 1 < s.re) :
     evenLProduct p s =
       ∏' q : Nat.Primes, (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹ := by
   classical
   rw [evenLProduct_eq_tprod_localFactors (p := p) hs]
-  refine tprod_congr fun q => ?_
+  refine tprod_congr fun q ↦ ?_
   unfold evenCharLocalFactor
   rw [Finset.prod_inv_distrib]
 
 lemma evenCharLocalFactor_at_p {s : ℂ} :
     evenCharLocalFactor (p := p) p s = 1 := by
   classical
-  exact Finset.prod_eq_one fun χ _ => by
+  exact Finset.prod_eq_one fun χ _ ↦ by
     rw [ZMod.natCast_self, MulChar.map_nonunit _ not_isUnit_zero, zero_mul, sub_zero]
 
 lemma localFactorsPlus_agree_prime_ne_p (hp_odd : p ≠ 2)
@@ -569,21 +569,21 @@ theorem dedekindZeta_eq_riemannZeta_mul_evenLProduct_of_one_lt_re
     (hp_odd : p ≠ 2) {s : ℂ} (hs : 1 < s.re) :
     NumberField.dedekindZeta K⁺ s = riemannZeta s * evenLProduct p s := by
   have hmul_riem :
-      Multipliable (fun q : Nat.Primes => (1 - ((q : ℕ) : ℂ) ^ (-s))⁻¹) :=
+      Multipliable (fun q : Nat.Primes ↦ (1 - ((q : ℕ) : ℂ) ^ (-s))⁻¹) :=
     (riemannZeta_eulerProduct_hasProd hs).multipliable
   have hmul_even :
-      Multipliable (fun q : Nat.Primes => (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) := by
+      Multipliable (fun q : Nat.Primes ↦ (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) := by
     classical
     have h1 :
-        (fun q : Nat.Primes => (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) =
-          (fun q : Nat.Primes =>
+        (fun q : Nat.Primes ↦ (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) =
+          (fun q : Nat.Primes ↦
             ∏ χ ∈ evenNontrivialCharacters (p := p),
               (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹) := by
       funext q
       unfold evenCharLocalFactor
       rw [Finset.prod_inv_distrib]
     rw [h1]
-    exact multipliable_prod (s := evenNontrivialCharacters (p := p)) fun χ _ =>
+    exact multipliable_prod (s := evenNontrivialCharacters (p := p)) fun χ _ ↦
       (DirichletCharacter.LSeries_eulerProduct_hasProd χ hs).multipliable
   calc
     NumberField.dedekindZeta K⁺ s
@@ -592,7 +592,7 @@ theorem dedekindZeta_eq_riemannZeta_mul_evenLProduct_of_one_lt_re
     _ = ∏' q : Nat.Primes,
           ((1 - ((q : ℕ) : ℂ) ^ (-s))⁻¹ *
             (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) := by
-            refine tprod_congr fun q => ?_
+            refine tprod_congr fun q ↦ ?_
             rw [localFactorsPlus_agree (p := p) (K := K) hp_odd, mul_inv_rev, mul_comm]
     _ = (∏' q : Nat.Primes, (1 - ((q : ℕ) : ℂ) ^ (-s))⁻¹) *
           (∏' q : Nat.Primes, (evenCharLocalFactor (p := p) (q : ℕ) s)⁻¹) := by
@@ -607,18 +607,18 @@ theorem tendsto_sub_one_mul_riemannZeta_mul_evenLProduct :
       (𝓝 (evenLProduct p (1 : ℂ))) := by
   classical
   have h_cont : Continuous (evenLProduct p) :=
-    continuous_finsetProd _ fun χ hχ =>
+    continuous_finsetProd _ fun χ hχ ↦
       (DirichletCharacter.differentiable_LFunction (Finset.mem_filter.mp hχ).2.2).continuous
-  have h_embed : Filter.Tendsto (fun s : ℝ => (s : ℂ)) (𝓝[>] (1 : ℝ)) (𝓝[≠] (1 : ℂ)) :=
+  have h_embed : Filter.Tendsto (fun s : ℝ ↦ (s : ℂ)) (𝓝[>] (1 : ℝ)) (𝓝[≠] (1 : ℂ)) :=
     tendsto_nhdsWithin_iff.mpr
       ⟨(Complex.continuous_ofReal.tendsto 1).mono_left nhdsWithin_le_nhds,
         by
           filter_upwards [self_mem_nhdsWithin] with s hs h
           exact absurd (Complex.ofReal_injective h) (ne_of_gt hs)⟩
-  have h_zeta : Filter.Tendsto (fun s : ℝ => ((s : ℂ) - 1) * riemannZeta (s : ℂ))
+  have h_zeta : Filter.Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) * riemannZeta (s : ℂ))
       (𝓝[>] (1 : ℝ)) (𝓝 1) :=
     riemannZeta_residue_one.comp h_embed
-  have h_lprod : Filter.Tendsto (fun s : ℝ => evenLProduct p (s : ℂ))
+  have h_lprod : Filter.Tendsto (fun s : ℝ ↦ evenLProduct p (s : ℂ))
       (𝓝[>] (1 : ℝ)) (𝓝 (evenLProduct p 1)) :=
     (h_cont.tendsto 1).comp (h_embed.mono_right nhdsWithin_le_nhds)
   have h_prod := h_zeta.mul h_lprod

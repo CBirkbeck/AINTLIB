@@ -31,20 +31,19 @@ instance : ContinuousConstSMul SL(2, ℤ) UpperHalfPlane where
     show Continuous fun τ ↦ (map (Int.castRingHom ℝ) c) • τ
     exact continuous_const_smul _
 
-
 theorem glMap_T_p_upper_det_pos (p : ℕ) (hp : 0 < p) (b : ℕ) :
     0 < (glMap (T_p_upper p hp b) : GL (Fin 2) ℝ).det.val := by
   show 0 < ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) :
     Matrix (Fin 2) (Fin 2) ℝ).det
   rw [show ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) :
-      Matrix (Fin 2) (Fin 2) ℝ) =
-      ((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ) from rfl]
-  rw [show (((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ)).det =
-      (algebraMap ℚ ℝ) (((T_p_upper p hp b : GL (Fin 2) ℚ).val).det) from
-        (RingHom.map_det _ _).symm]
-  rw [show ((T_p_upper p hp b : GL (Fin 2) ℚ).val).det = (p : ℚ) by
-    simp [T_p_upper, Matrix.GeneralLinearGroup.mkOfDetNeZero,
-      Matrix.det_fin_two, Matrix.of_apply]]
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        ((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ) from rfl,
+    show (((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ)).det =
+        (algebraMap ℚ ℝ) (((T_p_upper p hp b : GL (Fin 2) ℚ).val).det) from
+        (RingHom.map_det _ _).symm,
+    show ((T_p_upper p hp b : GL (Fin 2) ℚ).val).det = (p : ℚ) by
+      simp [T_p_upper, Matrix.GeneralLinearGroup.mkOfDetNeZero,
+        Matrix.det_fin_two, Matrix.of_apply]]
   change 0 < ((p : ℚ) : ℝ)
   exact_mod_cast hp
 
@@ -61,9 +60,8 @@ theorem diamondOp_petersson_unitary
     petN (diamondOp_cusp k d f) (diamondOp_cusp k d g) = petN f g := by
   set γ_sub := (Gamma0MapUnits_surjective d).choose
   exact petN_slash_invariant f g (γ_sub : SL(2, ℤ)) γ_sub.property
-    (fun η hη ↦ slash_Gamma1_eq f η hη) (fun η hη ↦ slash_Gamma1_eq g η hη)
+    (slash_Gamma1_eq f) (slash_Gamma1_eq g)
     (diamondOp_cusp k d f) (diamondOp_cusp k d g) rfl rfl
-
 
 private lemma peterssonAdj_glMap_T_p_upper (p : ℕ) (hp : 0 < p) (b : ℕ) :
     (peterssonAdj (glMap (T_p_upper p hp b)) : Matrix (Fin 2) (Fin 2) ℝ) =
@@ -76,7 +74,6 @@ private lemma peterssonAdj_glMap_T_p_upper (p : ℕ) (hp : 0 < p) (b : ℕ) :
   rw [hcoe, Matrix.adjugate_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [Matrix.of_apply]
-
 
 /-- `glMap (mapGL ℚ γ) = mapGL ℝ γ` for `γ : SL(2, ℤ)`: the composite
 `SL(2, ℤ) → GL(2, ℚ) → GL(2, ℝ)` equals the direct map `mapGL ℝ`. -/
@@ -232,7 +229,7 @@ theorem peterssonInner_sum_left
     have h_sum_int :
         IntegrableOn (fun τ ↦ petersson k g (∑ j ∈ t, F j) τ) D μ_hyp := by
       rw [funext (petersson_sum_right t g F)]
-      exact MeasureTheory.integrable_finset_sum _ h_t
+      exact MeasureTheory.integrable_finsetSum _ h_t
     rw [peterssonInner_add_left D (F i) (∑ j ∈ t, F j) g
         (h_int i (Finset.mem_insert_self i t)) h_sum_int,
       ih h_t, Finset.sum_insert hi]
@@ -248,8 +245,7 @@ theorem peterssonInner_sum_slash_adjoint
     peterssonInner k D (∑ i ∈ s, f ∣[k] α i) g =
       ∑ i ∈ s, peterssonInner k ((α i) • D) f (g ∣[k] peterssonAdj (α i)) := by
   rw [peterssonInner_sum_left s (fun i ↦ f ∣[k] α i) g D h_int]
-  refine Finset.sum_congr rfl fun i hi ↦ ?_
-  exact peterssonInner_slash_adjoint D (α i) (hα i hi) f g
+  exact Finset.sum_congr rfl fun i hi ↦ peterssonInner_slash_adjoint D (α i) (hα i hi) f g
 
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- Finite-union bridge (pure measure-theoretic form). -/
@@ -267,13 +263,10 @@ theorem setIntegral_biUnion_finset_ae
     simp [Set.mem_iUnion]
   have hm' : ∀ i : s, NullMeasurableSet (S i.val) μ :=
     fun i ↦ hm i.val i.property
-  have hd' : Pairwise (fun i j : s ↦ AEDisjoint μ (S i.val) (S j.val)) := by
-    intro i j hij
-    exact hd (Finset.mem_coe.mpr i.property) (Finset.mem_coe.mpr j.property)
+  have hd' : Pairwise (fun i j : s ↦ AEDisjoint μ (S i.val) (S j.val)) :=
+    fun i j hij ↦ hd (Finset.mem_coe.mpr i.property) (Finset.mem_coe.mpr j.property)
       (fun h ↦ hij (Subtype.ext h))
-  have hfi' : IntegrableOn f (⋃ i : s, S i.val) μ := by
-    rw [← h_biU]
-    exact hfi
+  have hfi' : IntegrableOn f (⋃ i : s, S i.val) μ := h_biU ▸ hfi
   rw [h_biU, integral_iUnion_ae hm' hd' hfi', tsum_fintype,
     Finset.sum_coe_sort s (fun i ↦ ∫ x in S i, f x ∂μ)]
 
@@ -421,7 +414,7 @@ theorem measure_glPos_smul_eq (α : GL (Fin 2) ℝ) (hα : 0 < α.det.val)
     μ_hyp (α • S) = μ_hyp S := by
   have h_eq : ((α⁻¹ • ·) : ℍ → ℍ) ⁻¹' S = α • S := by
     ext τ
-    simp [Set.mem_preimage, Set.mem_smul_set_iff_inv_smul_mem]
+    simp only [Set.mem_preimage, Set.mem_smul_set_iff_inv_smul_mem]
   rw [← h_eq]
   exact (measurePreserving_glPos_smul α⁻¹ (det_val_inv_pos hα)).measure_preimage hS
 
@@ -548,7 +541,7 @@ theorem glMap_T_p_upper_inv_mul_M_infty_eq_mapGL_Gamma1
        GL (Fin 2) ℝ).val i j
     rw [h_L, Units.val_mul, h_R1, h_R2]
     fin_cases i <;> fin_cases j <;>
-      simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply] <;> ring
+      simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, mul_comm]
   rw [h_mul, ← mul_assoc, inv_mul_cancel, one_mul]
 
 open UpperHalfPlane ModularGroup MeasureTheory in
@@ -590,13 +583,8 @@ theorem aedisjoint_pairwise_T_p_family
     exact (aedisjoint_glMap_M_infty_T_p_upper hp hpN b.val).symm
   | some b, none, _ => exact aedisjoint_glMap_M_infty_T_p_upper hp hpN b.val
   | some b₁, some b₂, hij =>
-    refine aedisjoint_glMap_T_p_upper_pair hp.pos ?_
-    intro h_eq
-    apply hij
-    have h_val : b₁.val = b₂.val := by
-      have : (b₁.val : ℤ) = (b₂.val : ℤ) := by linarith
-      exact_mod_cast this
-    exact congr_arg some (Fin.ext h_val)
+    refine aedisjoint_glMap_T_p_upper_pair hp.pos fun h_eq ↦ hij ?_
+    exact congr_arg some (Fin.ext (by omega))
 
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- Petersson sum-of-slashes equals the aggregate Hecke-FD biUnion, with an

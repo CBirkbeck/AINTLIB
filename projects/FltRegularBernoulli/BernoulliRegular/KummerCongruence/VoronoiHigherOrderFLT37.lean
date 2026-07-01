@@ -97,7 +97,6 @@ theorem voronoi_congruence_mod_37_sq_sixtyeight
     (by decide : ¬ (37 : ℕ) ∣ (68 + 1))
   intro j hj1 hj2 hj_even hj_not_dvd
   apply bernoulli_mem_padicInt_of_p_not_dvd_den
-  have hj2' : j ≤ 66 := by omega
   interval_cases j <;>
     first
     | (exfalso; revert hj_even; decide)

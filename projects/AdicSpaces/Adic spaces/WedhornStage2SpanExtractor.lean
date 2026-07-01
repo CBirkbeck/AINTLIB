@@ -94,10 +94,8 @@ theorem span_top_via_strengthened_cover_and_outside_rescue
   by_cases hv_base : v ∈ rationalOpen C.base.T C.base.s
   · -- Inside the base: use C.hcover + strengthened cover.
     obtain ⟨D, hD_mem, hv_D⟩ := C.hcover v hv_base
-    obtain ⟨f, hf_mem, _hv_plus, hvf_ne⟩ :=
-      h_cover_D_nonzero D hD_mem v hv_D
-    refine ⟨f, ?_, hvf_ne⟩
-    exact Finset.mem_biUnion.mpr ⟨D, hD_mem, hf_mem⟩
+    obtain ⟨f, hf_mem, _hv_plus, hvf_ne⟩ := h_cover_D_nonzero D hD_mem v hv_D
+    exact ⟨f, Finset.mem_biUnion.mpr ⟨D, hD_mem, hf_mem⟩, hvf_ne⟩
   · -- Outside the base: use the explicit rescue hypothesis.
     exact h_outside_rescue v hv_spa hv_base
 

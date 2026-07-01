@@ -254,18 +254,10 @@ theorem Y_FF_isOpen (π : PseudoUniformizer E) :
   -- The set in question equals Subtype.val ⁻¹' (basicOpen ∪ basicOpen).
   convert continuous_subtype_val.isOpen_preimage _ hopen_union using 1
   ext v
+  -- `↑v ∈ Spa` holds by `v.2`, so the membership conjunct is trivial and the
+  -- remaining `¬(_ ∧ _) ↔ ¬_ ∨ ¬_` is `not_and_or`.
   simp only [Set.mem_preimage, Y_FF, basicOpen_self, Set.mem_setOf_eq,
-    Set.mem_union]
-  refine ⟨fun h => ?_, fun h => ⟨v.2, ?_⟩⟩
-  · -- h : ¬(v.1.vle pWitt 0 ∧ v.1.vle [π] 0) → ¬v.1.vle pWitt 0 ∨ ¬v.1.vle [π] 0
-    rcases not_and_or.mp h.2 with h1 | h2
-    · exact Or.inl h1
-    · exact Or.inr h2
-  · -- ¬v.vle p 0 ∨ ¬v.vle [π] 0 → ¬(both)
-    intro ⟨hp, hπ⟩
-    rcases h with h | h
-    · exact h hp
-    · exact h hπ
+    Set.mem_union, v.2, true_and, not_and_or]
 
 /-! ### Frobenius action on Y_FF -/
 

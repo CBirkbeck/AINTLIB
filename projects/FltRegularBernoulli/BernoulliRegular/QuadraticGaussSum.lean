@@ -46,7 +46,7 @@ noncomputable def classicalGaussSum (p : ℕ) [NeZero p] : ℂ :=
 /-- Counting square roots in `ZMod p`: for `p` odd prime, the number of
 `n : ZMod p` with `n² = t` equals `1 + quadraticChar (ZMod p) t` (as integers). -/
 lemma card_sq_eq_add_quadraticChar {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠ 2) (t : ZMod p) :
-    ((Finset.univ.filter (fun n : ZMod p => n ^ 2 = t)).card : ℤ) =
+    ((Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = t)).card : ℤ) =
       1 + quadraticChar (ZMod p) t := by
   classical
   have h_char : ringChar (ZMod p) ≠ 2 := by rw [ZMod.ringChar_zmod_n]; exact hp_odd
@@ -54,7 +54,7 @@ lemma card_sq_eq_add_quadraticChar {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠
   · -- t = 0: only n = 0 has n² = 0.
     subst ht
     rw [MulChar.map_zero, add_zero]
-    have h_unique : Finset.univ.filter (fun n : ZMod p => n ^ 2 = 0) = {0} := by
+    have h_unique : Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = 0) = {0} := by
       ext n
       simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
       exact pow_eq_zero_iff (by norm_num : 2 ≠ 0)
@@ -75,7 +75,7 @@ lemma card_sq_eq_add_quadraticChar {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠
         rcases (Nat.dvd_prime Nat.prime_two).mp this with h1 | h2
         · exact hp.out.one_lt.ne' h1
         · exact hp_odd h2
-      have ha_ne_neg : a ≠ -a := fun h => by
+      have ha_ne_neg : a ≠ -a := fun h ↦ by
         apply ha_ne
         have h_sum : a + a = 0 := by linear_combination h
         have h_2a : (2 : ZMod p) * a = 0 := by linear_combination h_sum
@@ -83,7 +83,7 @@ lemma card_sq_eq_add_quadraticChar {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠
         · exact absurd h' h_two_ne
         · exact h'
       -- Filter {n : n² = t} = {a, -a}.
-      have h_filter : Finset.univ.filter (fun n : ZMod p => n ^ 2 = t) = {a, -a} := by
+      have h_filter : Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = t) = {a, -a} := by
         ext n
         simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_insert,
           Finset.mem_singleton]
@@ -103,7 +103,7 @@ lemma card_sq_eq_add_quadraticChar {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠
       norm_num
     · -- t non-square: 0 roots, quadraticChar t = -1.
       rw [quadraticChar_neg_one_iff_not_isSquare.mpr h_sq]
-      have h_empty : Finset.univ.filter (fun n : ZMod p => n ^ 2 = t) = ∅ := by
+      have h_empty : Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = t) = ∅ := by
         rw [Finset.eq_empty_iff_forall_notMem]
         intro n hn
         simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hn
@@ -141,20 +141,20 @@ theorem classicalGaussSum_eq_gaussSum_legendreDirichlet
       (1 + (legendreDirichlet p t)) * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) t := by
     unfold classicalGaussSum
     -- Use sum_comp with g = (·^2) and f = stdAddChar.
-    rw [Finset.sum_comp (fun b : ZMod p => (ZMod.stdAddChar : AddChar (ZMod p) ℂ) b)
-        (fun n : ZMod p => n ^ 2)]
+    rw [Finset.sum_comp (fun b : ZMod p ↦ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) b)
+        (fun n : ZMod p ↦ n ^ 2)]
     -- Goal: ∑_{b ∈ image} card • stdAddChar b = ∑_t (1 + η(t)) · stdAddChar t
     -- Extend the LHS sum to all of ZMod p (using that non-squares contribute 0
     -- since 1 + η(b) = 0 for non-squares).
-    have h_extend : ∀ b : ZMod p, b ∉ Finset.image (fun n : ZMod p => n ^ 2) Finset.univ →
+    have h_extend : ∀ b : ZMod p, b ∉ Finset.image (fun n : ZMod p ↦ n ^ 2) Finset.univ →
         (1 + (legendreDirichlet p b)) *
           (ZMod.stdAddChar : AddChar (ZMod p) ℂ) b = 0 := by
       intro b hb
-      have hb_not_sq : ¬ IsSquare b := fun ⟨a, hsq⟩ => by
+      have hb_not_sq : ¬ IsSquare b := fun ⟨a, hsq⟩ ↦ by
         apply hb
         simp only [Finset.mem_image, Finset.mem_univ, true_and]
         exact ⟨a, by rw [pow_two]; exact hsq.symm⟩
-      have hb_ne : b ≠ 0 := fun h => by
+      have hb_ne : b ≠ 0 := fun h ↦ by
         rw [h] at hb_not_sq
         exact hb_not_sq IsSquare.zero
       have h_eta : (legendreDirichlet p) b = -1 := by
@@ -162,21 +162,21 @@ theorem classicalGaussSum_eq_gaussSum_legendreDirichlet
         push_cast; ring
       rw [h_eta]
       ring
-    rw [← Finset.sum_subset (Finset.subset_univ _) (fun b _ hb => h_extend b hb)]
+    rw [← Finset.sum_subset (Finset.subset_univ _) (fun b _ hb ↦ h_extend b hb)]
     -- Now need: ∑_{b ∈ image} card • stdAddChar b =
     --          ∑_{b ∈ image} (1 + η(b)) · stdAddChar b
-    refine Finset.sum_congr rfl (fun b _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ ↦ ?_)
     -- For each b ∈ image, (card : ℂ) = 1 + η(b).
     have h_card := card_sq_eq_add_quadraticChar hp_odd b
     -- Convert card • x = card * x (nat scalar) and handle the nat/int/complex casts.
     rw [nsmul_eq_mul, show ((legendreDirichlet p) b) = ((quadraticChar (ZMod p) b : ℤ) : ℂ) from
       legendreDirichlet_apply p b]
     congr 1
-    have : ((Finset.univ.filter (fun n : ZMod p => n ^ 2 = b)).card : ℤ) =
+    have : ((Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = b)).card : ℤ) =
         1 + quadraticChar (ZMod p) b := h_card
     -- (card : ℂ) via ℤ cast: since card = 1 + qc (int), after casting we have
     -- ((card : ℤ) : ℂ) = 1 + (qc : ℂ)
-    have hℂ : ((Finset.univ.filter (fun n : ZMod p => n ^ 2 = b)).card : ℂ) =
+    have hℂ : ((Finset.univ.filter (fun n : ZMod p ↦ n ^ 2 = b)).card : ℂ) =
         1 + ((quadraticChar (ZMod p) b : ℤ) : ℂ) := by
       exact_mod_cast this
     exact hℂ

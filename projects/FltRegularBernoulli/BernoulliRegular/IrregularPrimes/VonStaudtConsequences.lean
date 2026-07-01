@@ -16,7 +16,7 @@ namespace BernoulliRegular
 
 /-- The finite correction-prime set appearing in von Staudt-Clausen for `B_n`. -/
 def vonStaudtPrimesFor (n : ℕ) : Finset ℕ :=
-  (Finset.range (n + 2)).filter fun q => q.Prime ∧ (q - 1) ∣ n
+  (Finset.range (n + 2)).filter fun q ↦ q.Prime ∧ (q - 1) ∣ n
 
 /-- Public even-index wrapper around mathlib's von Staudt-Clausen theorem. -/
 theorem bernoulli_add_vonStaudtCorrection_mem_int {n : ℕ} (hn_even : Even n) :
@@ -28,17 +28,17 @@ theorem bernoulli_add_vonStaudtCorrection_mem_int {n : ℕ} (hn_even : Even n) :
 
 /-- The correction sum with the `p`-term removed has denominator prime to `p`. -/
 theorem vonStaudtCorrection_rest_den_not_dvd {p n : ℕ} (hp : p.Prime) :
-    ¬ p ∣ (∑ q ∈ (vonStaudtPrimesFor n).filter (fun q => q ≠ p), (1 : ℚ) / q).den := by
-  let F := (vonStaudtPrimesFor n).filter (fun q => q ≠ p)
+    ¬ p ∣ (∑ q ∈ (vonStaudtPrimesFor n).filter (fun q ↦ q ≠ p), (1 : ℚ) / q).den := by
+  let F := (vonStaudtPrimesFor n).filter (fun q ↦ q ≠ p)
   have hprod_coprime : (∏ q ∈ F, ((1 : ℚ) / q).den).Coprime p := by
-    refine Nat.Coprime.prod_left fun q hq => ?_
+    refine Nat.Coprime.prod_left fun q hq ↦ ?_
     simp only [F, vonStaudtPrimesFor, Finset.mem_filter, Finset.mem_range] at hq
     obtain ⟨⟨_, hq_prime, _⟩, hne⟩ := hq
     rw [show ((1 : ℚ) / q).den = q by simp [hq_prime.ne_zero]]
     exact (Nat.coprime_primes hq_prime hp).mpr hne
   have hden_dvd :
       (∑ q ∈ F, (1 : ℚ) / q).den ∣ ∏ q ∈ F, ((1 : ℚ) / q).den :=
-    Finset.Rat.den_sum_dvd_prod_den F fun q => (1 : ℚ) / q
+    Finset.Rat.den_sum_dvd_prod_den F fun q ↦ (1 : ℚ) / q
   have hden_coprime : (∑ q ∈ F, (1 : ℚ) / q).den.Coprime p :=
     Nat.Coprime.of_dvd_left hden_dvd hprod_coprime
   exact (Nat.Prime.coprime_iff_not_dvd hp).1 hden_coprime.symm
@@ -47,7 +47,7 @@ theorem vonStaudtCorrection_rest_den_not_dvd {p n : ℕ} (hp : p.Prime) :
 theorem vonStaudtCorrection_split {p n : ℕ} (hp : p.Prime) (hn_pos : 0 < n)
     (hdiv : p - 1 ∣ n) :
     ∑ q ∈ vonStaudtPrimesFor n, (1 : ℚ) / q =
-      (1 : ℚ) / p + ∑ q ∈ (vonStaudtPrimesFor n).filter (fun q => q ≠ p),
+      (1 : ℚ) / p + ∑ q ∈ (vonStaudtPrimesFor n).filter (fun q ↦ q ≠ p),
         (1 : ℚ) / q := by
   have hp_mem : p ∈ vonStaudtPrimesFor n := by
     rw [vonStaudtPrimesFor, Finset.mem_filter]
@@ -56,7 +56,7 @@ theorem vonStaudtCorrection_split {p n : ℕ} (hp : p.Prime) (hn_pos : 0 < n)
     have hle : p - 1 ≤ n := Nat.le_of_dvd hn_pos hdiv
     omega
   rw [Finset.filter_ne']
-  exact (Finset.add_sum_erase (vonStaudtPrimesFor n) (fun q => (1 : ℚ) / q) hp_mem).symm
+  exact (Finset.add_sum_erase (vonStaudtPrimesFor n) (fun q ↦ (1 : ℚ) / q) hp_mem).symm
 
 /-- If `p - 1 ∣ n`, the denominator of `B_n + 1/p` is prime to `p`. -/
 theorem not_dvd_den_bernoulli_add_inv_of_sub_one_dvd
@@ -64,7 +64,7 @@ theorem not_dvd_den_bernoulli_add_inv_of_sub_one_dvd
     (hdiv : p - 1 ∣ n) :
     ¬ p ∣ (bernoulli n + (1 : ℚ) / p).den := by
   obtain ⟨z, hz⟩ := bernoulli_add_vonStaudtCorrection_mem_int hn_even
-  let R : ℚ := ∑ q ∈ (vonStaudtPrimesFor n).filter (fun q => q ≠ p), (1 : ℚ) / q
+  let R : ℚ := ∑ q ∈ (vonStaudtPrimesFor n).filter (fun q ↦ q ≠ p), (1 : ℚ) / q
   have hRden : ¬ p ∣ R.den := by
     dsimp [R]
     exact vonStaudtCorrection_rest_den_not_dvd (p := p) (n := n) hp
@@ -110,7 +110,7 @@ theorem dvd_den_add_inv_of_dvd_num {p : ℕ} (hp : p.Prime) {q : ℚ}
     exact dvd_mul_left _ _
   have hp_mul : (p : ℤ) ∣ c * (r.den : ℤ) := by
     rwa [hD] at hpD
-  have hnot_int : ¬ (p : ℤ) ∣ (r.den : ℤ) := fun h =>
+  have hnot_int : ¬ (p : ℤ) ∣ (r.den : ℤ) := fun h ↦
     hnot (Int.natCast_dvd_natCast.mp h)
   have hpc : (p : ℤ) ∣ c := by
     rcases Int.Prime.dvd_mul' hp hp_mul with hpc | hprd
@@ -135,7 +135,7 @@ theorem dvd_den_add_inv_of_dvd_num {p : ℕ} (hp : p.Prime) {q : ℚ}
 theorem not_dvd_num_of_add_inv_den_not_dvd
     {p : ℕ} (hp : p.Prime) {q : ℚ}
     (hden_add : ¬ p ∣ (q + (1 : ℚ) / p).den) :
-    ¬ (p : ℤ) ∣ q.num := fun hdiv =>
+    ¬ (p : ℤ) ∣ q.num := fun hdiv ↦
   hden_add (dvd_den_add_inv_of_dvd_num hp hdiv)
 
 /-- If `p - 1 ∣ n`, then `p` cannot divide the reduced numerator of `B_n`. -/
@@ -158,7 +158,7 @@ theorem odd_bernoulli_num_of_even
 theorem not_dvd_num_bernoulli_div_self_of_sub_one_dvd
     {p n : ℕ} (hp : p.Prime) (hn_pos : 0 < n) (hn_even : Even n)
     (hdiv : p - 1 ∣ n) :
-    ¬ (p : ℤ) ∣ (((bernoulli n : ℚ) / n : ℚ).num) := fun hnum =>
+    ¬ (p : ℤ) ∣ (((bernoulli n : ℚ) / n : ℚ).num) := fun hnum ↦
   not_dvd_num_bernoulli_of_sub_one_dvd hp hn_pos hn_even hdiv
     (dvd_num_of_dvd_div_nat_num (q := bernoulli n) hn_pos hnum)
 
@@ -166,7 +166,7 @@ theorem not_dvd_num_bernoulli_div_self_of_sub_one_dvd
 theorem sub_one_not_dvd_of_dvd_num_bernoulli_div_self
     {p n : ℕ} (hp : p.Prime) (hn_pos : 0 < n) (hn_even : Even n)
     (hnum : (p : ℤ) ∣ (((bernoulli n : ℚ) / n : ℚ).num)) :
-    ¬ (p - 1) ∣ n := fun hdiv =>
+    ¬ (p - 1) ∣ n := fun hdiv ↦
   not_dvd_num_bernoulli_div_self_of_sub_one_dvd hp hn_pos hn_even hdiv hnum
 
 /-- Even-index divided Bernoulli numerators are odd. -/
@@ -224,7 +224,7 @@ theorem p_mul_vonStaudtCorrection_mem_padicInt
   push_cast
   rw [← Finset.sum_attach]
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl fun x _ => ?_
+  refine Finset.sum_congr rfl fun x _ ↦ ?_
   have := hz x.1 x.2
   push_cast at this ⊢
   exact this
@@ -257,7 +257,7 @@ theorem vonStaudtCorrection_den_not_dvd_of_not_sub_one_dvd
     {p n : ℕ} (hp : p.Prime) (hnot : ¬ p - 1 ∣ n) :
     ¬ p ∣ (∑ q ∈ vonStaudtPrimesFor n, (1 : ℚ) / q).den := by
   have hfilter :
-      (vonStaudtPrimesFor n).filter (fun q => q ≠ p) = vonStaudtPrimesFor n := by
+      (vonStaudtPrimesFor n).filter (fun q ↦ q ≠ p) = vonStaudtPrimesFor n := by
     apply Finset.filter_true_of_mem
     intro q hq
     rw [vonStaudtPrimesFor, Finset.mem_filter] at hq

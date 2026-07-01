@@ -101,7 +101,7 @@ theorem laurent_VK_branch_decomposition_at
       w.vle t' (σ_loc : Localization.Away s)
   · left; exact h
   · right
-    push_neg at h
+    push Not at h
     obtain ⟨t_0, ht_0_mem, h_not_le⟩ := h
     refine ⟨t_0, ht_0_mem, ?_, h_not_le⟩
     rcases w.vle_total (σ_loc : Localization.Away s) t_0 with h_le | h_le
@@ -159,9 +159,6 @@ theorem alpha_s_D_per_t_chain_or_alpha_T_D_strict_dom_at
   rcases laurent_VK_branch_decomposition_at T_D σ_loc w with h_V_empty | h_V_nonempty
   · -- V_∅ branch: package as α_s_D σ-factored chain via T030.
     left
-    -- The lower-half rational-open membership is `w ∈ rationalOpen (T_D.image) σ_loc`.
-    -- We have h_V_empty : ∀ t' ∈ T_D.image, w.vle t' σ_loc; need ¬ w.vle σ_loc 0
-    -- (auto from σ_loc unit).
     have hw_spa : w ∈ Spa (Localization.Away s) (Localization.Away s)⁺ :=
       h_laurent_α_s_D.1
     have hσ_loc_ne : ¬ w.vle (σ_loc : Localization.Away s) 0 :=

@@ -72,15 +72,7 @@ Under the natural strongly-noetherian Tate setup on `B`, the bivariate
 evaluation hom `example638Bivariate_evalHom B P b : TateAlgebra₂ B →+*
 presheafValue (overlapDatum B P b)` (sending `X ↦ canonicalMap b` and
 `Y ↦ invS`) is continuous for the canonical bivariate Tate topology
-`instTopologicalSpaceTateAlgebra₂` on `TateAlgebra₂ B` (no
-hypothesis-discharge required).
-
-This is the bivariate analog of `tateEvalPresheafHom_continuous_canonical`
-(TopologyComparison.lean:2430). The proof structurally mirrors the
-univariate, using `(hb_canon.mul hb_invS).subset` to derive bivariate
-boundedness, the bivariate basis `tateAlgBasis'₂.hasBasis_nhds_zero`,
-the bivariate coefficient lemma `tateAlgNhd₂_coeff_mem`, and the
-bivariate summable machinery `evalTerm₂_summable` over `Fin 2 →₀ ℕ`. -/
+`instTopologicalSpaceTateAlgebra₂` on `TateAlgebra₂ B`. -/
 theorem tateEvalPresheafHom_bivariate_continuous_canonical
     (B : Type*) [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
     [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B]
@@ -95,46 +87,36 @@ theorem tateEvalPresheafHom_bivariate_continuous_canonical
   set f_canon := D.canonicalMap b
   set f_invS := invS D
   letI τ : TopologicalSpace ↥(TateAlgebra₂ B) := instTopologicalSpaceTateAlgebra₂
-  -- Reduce to continuity at 0.
   apply continuous_of_continuousAt_zero (example638Bivariate_evalHom B P b).toAddMonoidHom
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
   intro V hV
-  -- Step 1: extract open additive subgroup W ⊆ V (presheafValue D is nonarch).
   obtain ⟨W, hWV⟩ := NonarchimedeanRing.is_nonarchimedean V hV
   have hW_open : IsOpen (W : Set (presheafValue D)) := W.isOpen
   have hW_closed : IsClosed (W : Set (presheafValue D)) :=
     AddSubgroup.isClosed_of_isOpen W.toAddSubgroup hW_open
   have hW_nhds : (W : Set (presheafValue D)) ∈ @nhds (presheafValue D) _ 0 :=
     hW_open.mem_nhds W.toAddSubgroup.zero_mem
-  -- Step 2: bivariate range bounded; get U ∈ nhds 0 with bivRange · U ⊆ W.
   have hbiv_bdd : TopologicalRing.IsBounded
       (Set.range (fun n : Fin 2 →₀ ℕ => f_canon ^ (n 0) * f_invS ^ (n 1))) :=
     (hb_canon.mul hb_invS).subset (by
       rintro _ ⟨n, rfl⟩
       exact Set.mul_mem_mul ⟨n 0, rfl⟩ ⟨n 1, rfl⟩)
   obtain ⟨U, hU, hUW⟩ := hbiv_bdd (W : Set (presheafValue D)) hW_nhds
-  -- Step 3: continuity of canonicalMap at 0.
   have hcmU : D.canonicalMap ⁻¹' U ∈ @nhds B _ 0 :=
-    (canonicalMap_continuous D).continuousAt.preimage_mem_nhds
-      (by rw [map_zero]; exact hU)
-  -- Step 4: Extract N with image(P_B.I^N) ⊆ canonicalMap⁻¹(U).
+    (canonicalMap_continuous D).continuousAt.preimage_mem_nhds (by rwa [map_zero])
   let P_B := (IsTateRing.principalPair B).toPairOfDefinition
   obtain ⟨N, -, hN⟩ := P_B.hasBasis_nhds_zero.mem_iff.mp hcmU
-  -- Bivariate canonical basis at 0.
   have hbasis : ((@nhds _ τ (0 : ↥(TateAlgebra₂ B))).HasBasis
       (fun _ : ℕ => True) fun n =>
         (TateAlgebra.tateAlgNhd₂ P_B n : Set ↥(TateAlgebra₂ B))) :=
     TateAlgebra.tateAlgBasis'₂.hasBasis_nhds_zero
   apply hbasis.mem_iff.mpr
   refine ⟨N, trivial, fun h hh => ?_⟩
-  change example638Bivariate_evalHom B P b h ∈ V
   refine hWV ?_
-  -- Each bivariate evalTerm₂ lies in W.
   have hterm_mem : ∀ n : Fin 2 →₀ ℕ,
       TateAlgebraWedhorn.evalTerm₂ D.canonicalMap f_canon f_invS h n ∈
         (W : Set (presheafValue D)) := by
     intro n
-    -- evalTerm₂ = canonicalMap(coeff_n h) * (f_canon^(n 0) * f_invS^(n 1)).
     change D.canonicalMap (MvPowerSeries.coeff n h.val) *
       (f_canon ^ (n 0) * f_invS ^ (n 1)) ∈ (W : Set (presheafValue D))
     rw [mul_comm]
@@ -142,37 +124,22 @@ theorem tateEvalPresheafHom_bivariate_continuous_canonical
     refine ⟨f_canon ^ (n 0) * f_invS ^ (n 1), ⟨n, rfl⟩,
       D.canonicalMap (MvPowerSeries.coeff n h.val), ?_, rfl⟩
     apply hN
-    -- coeff_n h ∈ image P_B.I^N via tateAlgNhd₂_coeff_mem.
     obtain ⟨b', hbI, hbeq⟩ := TateAlgebra.tateAlgNhd₂_coeff_mem P_B N hh n
     rw [← hbeq]
     exact ⟨b', hbI, rfl⟩
-  -- evalTerm₂ is summable; HasSum gives the tsum equals our hom value.
-  have hsum : Summable
-      (TateAlgebraWedhorn.evalTerm₂ D.canonicalMap f_canon f_invS h) :=
-    TateAlgebraWedhorn.evalTerm₂_summable D.canonicalMap
-      (canonicalMap_continuous D) f_canon f_invS hb_canon hb_invS h
   have hhs : HasSum (TateAlgebraWedhorn.evalTerm₂ D.canonicalMap f_canon f_invS h)
-      (example638Bivariate_evalHom B P b h) := by
-    change HasSum _ (∑' n, TateAlgebraWedhorn.evalTerm₂ D.canonicalMap f_canon f_invS h n)
-    exact hsum.hasSum
-  -- W is closed; HasSum is Tendsto on Finset(Fin 2 →₀ ℕ); each partial sum is in W.
-  refine hW_closed.mem_of_tendsto hhs ?_
-  refine Filter.Eventually.of_forall fun s => ?_
-  exact W.toAddSubgroup.sum_mem (fun k _ => hterm_mem k)
+      (example638Bivariate_evalHom B P b h) :=
+    (TateAlgebraWedhorn.evalTerm₂_summable D.canonicalMap
+      (canonicalMap_continuous D) f_canon f_invS hb_canon hb_invS h).hasSum
+  refine hW_closed.mem_of_tendsto hhs <| Filter.Eventually.of_forall fun s => ?_
+  exact W.toAddSubgroup.sum_mem fun k _ => hterm_mem k
 
 /-- **Bivariate canonical-topology continuity of `example638Bivariate_forwardHom`
 (Wedhorn Prop 6.18 + Example 6.39 quotient-lift).**
 
-Descends from `tateEvalPresheafHom_bivariate_continuous_canonical` via the
-ring-quotient map `mk : TateAlgebra₂ B →+* TateAlgebra₂ B ⧸
-bivariateOverlapIdeal b`, which is an open quotient map (topological ring
-quotient). The canonical quotient topology
-`quotientBivariateOverlapIdealTopology b` is the coinduced topology via
-`mk`, so `IsQuotientMap.continuous_iff` transports continuity.
-
-This eliminates the `hcont_forward_overlap` hypothesis previously required
-by `example638Bivariate_equiv` (Wedhorn Example 6.39 / Step A) and by
-`laneA_τ_preBiv` (LaneAReverseRoundTrip.lean). -/
+The forward hom `example638Bivariate_forwardHom B P b`, factored through
+`bivariateOverlapIdeal b`, is continuous for the bivariate overlap
+quotient topology `quotientBivariateOverlapIdealTopology b`. -/
 theorem example638Bivariate_forwardHom_continuous_canonical
     (B : Type*) [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
     [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B]
@@ -193,7 +160,6 @@ theorem example638Bivariate_forwardHom_continuous_canonical
       (inferInstanceAs (CommRing ↥(TateAlgebra₂ B)))
       (TateAlgebra.bivariateOverlapIdeal b) hTR).isQuotientMap
   refine hmk_qm.continuous_iff.mpr ?_
-  change Continuous (example638Bivariate_evalHom B P b)
   exact tateEvalPresheafHom_bivariate_continuous_canonical B P b
 
 end ValuationSpectrum

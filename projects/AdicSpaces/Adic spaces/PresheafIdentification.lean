@@ -303,14 +303,9 @@ Purely algebraic (Wedhorn Proposition 8.30). -/
 theorem fX_eq_one_in_quotient (f : A) :
     (Ideal.Quotient.mk (oneSubfXIdeal f))
       (algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X) = 1 := by
-  rw [← sub_eq_zero]
-  change (Ideal.Quotient.mk _) (algebraMap A _ f * TateAlgebra.X) -
-    (Ideal.Quotient.mk _) 1 = 0
-  rw [← map_sub]
-  apply Ideal.Quotient.eq_zero_iff_mem.mpr
-  rw [show algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X - 1 =
-    -(1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X) from by ring]
-  exact neg_mem (Ideal.subset_span rfl)
+  rw [eq_comm, ← sub_eq_zero, ← map_one (Ideal.Quotient.mk (oneSubfXIdeal f)), ← map_sub,
+    Ideal.Quotient.eq_zero_iff_mem]
+  exact Ideal.subset_span rfl
 
 omit [IsTopologicalRing A] in
 /-- `X` is the two-sided inverse of `algebraMap f` in `A⟨X⟩/(1-fX)`. -/
@@ -417,12 +412,8 @@ theorem oneSubfX_le_ker_of_eval {R : Type*} [CommRing R]
     (f : A) (φ : ↥(TateAlgebra A) →+* R)
     (hφ : φ (algebraMap A _ f) * φ TateAlgebra.X = 1) :
     oneSubfXIdeal f ≤ RingHom.ker φ := by
-  rw [oneSubfXIdeal, Ideal.span_le]
-  intro x hx
-  simp only [Set.mem_singleton_iff] at hx
-  rw [SetLike.mem_coe, RingHom.mem_ker, hx, map_sub,
-    map_one, map_mul, sub_eq_zero]
-  exact hφ.symm
+  simpa only [oneSubfXIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+    RingHom.mem_ker, map_sub, map_one, map_mul, sub_eq_zero] using hφ.symm
 
 /-! #### Coefficient analysis for `(1-fX)` membership -/
 
@@ -588,9 +579,8 @@ noncomputable def invS (D : RationalLocData A) : presheafValue D :=
 omit [NonarchimedeanRing A] in
 /-- `canonicalMap(s) * invS = 1` in `presheafValue D`. -/
 theorem canonicalMap_s_mul_invS (D : RationalLocData A) :
-    D.canonicalMap D.s * invS D = 1 := by
-  change D.canonicalMap D.s * ↑(isUnit_s_in_presheafValue D).unit⁻¹ = 1
-  exact (isUnit_s_in_presheafValue D).mul_val_inv
+    D.canonicalMap D.s * invS D = 1 :=
+  (isUnit_s_in_presheafValue D).mul_val_inv
 
 omit [NonarchimedeanRing A] in
 /-- `invS * canonicalMap(s) = 1` in `presheafValue D`. -/
@@ -666,11 +656,8 @@ theorem evalPresheafHom_oneSubsX [DiscreteTopology A]
 theorem oneSubsX_le_ker_evalPresheafHom [DiscreteTopology A]
     (D : RationalLocData A) :
     oneSubfXIdeal D.s ≤ RingHom.ker (evalPresheafHom D) := by
-  rw [oneSubfXIdeal, Ideal.span_le]
-  intro x hx
-  simp only [Set.mem_singleton_iff] at hx
-  rw [SetLike.mem_coe, RingHom.mem_ker, hx]
-  exact evalPresheafHom_oneSubsX D
+  simpa only [oneSubfXIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+    RingHom.mem_ker] using evalPresheafHom_oneSubsX D
 
 /-- The kernel of `evalPresheafHom` equals the ideal `(1 - sX)`, in the discrete case. -/
 theorem ker_evalPresheafHom [DiscreteTopology A]
@@ -823,19 +810,15 @@ noncomputable instance presheafValueNonarchimedeanAddGroup
 /-- `presheafValue D` is T2 (Hausdorff): it is T0 (from the
 completion) and regular (from the uniform space), hence T3 hence T2. -/
 instance presheafValueT2Space (D : RationalLocData A) :
-    T2Space (presheafValue D) := by
-  haveI : T0Space (presheafValue D) := inferInstance
-  haveI : RegularSpace (presheafValue D) :=
-    UniformSpace.to_regularSpace
-  exact inferInstance
+    T2Space (presheafValue D) :=
+  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  inferInstance
 
 /-- `presheafValue D` is T3: it is T0 and regular. -/
 instance presheafValueT3Space (D : RationalLocData A) :
-    T3Space (presheafValue D) := by
-  haveI : T0Space (presheafValue D) := inferInstance
-  haveI : RegularSpace (presheafValue D) :=
-    UniformSpace.to_regularSpace
-  exact inferInstance
+    T3Space (presheafValue D) :=
+  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  inferInstance
 
 /-! #### Continuity of algebraMap and canonicalMap -/
 
@@ -955,9 +938,8 @@ restricted condition from multi-indices to natural numbers via the
 injective map `toIndex`. -/
 theorem coeff_tendsto_zero (g : ↥(TateAlgebra A)) :
     Filter.Tendsto (fun n => TateAlgebra.coeff n g)
-      Filter.cofinite (nhds (0 : A)) := by
-  exact g.prop.comp
-    (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
+      Filter.cofinite (nhds (0 : A)) :=
+  g.prop.comp (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
 
 /-- The image of coefficients under `canonicalMap` tends to `0` in
 `presheafValue D`, because `canonicalMap` is continuous and the
@@ -1000,9 +982,8 @@ theorem locLiftPresheaf_comp_algebraMap_eq_canonicalMap
     (D : RationalLocData A) :
     (locLiftToPresheaf D).comp
       (algebraMap A (Localization.Away D.s)) =
-      D.canonicalMap := by
-  ext a
-  simp only [RingHom.comp_apply, locLiftToPresheaf_algebraMap]
+      D.canonicalMap :=
+  RingHom.ext (locLiftToPresheaf_algebraMap D)
 
 /-- The ideal `(1 - sX)` is contained in the kernel of ANY ring
 hom `A⟨X⟩ → presheafValue D` that satisfies
@@ -1128,8 +1109,7 @@ omit [TopologicalSpace A] [IsTopologicalRing A] [NonarchimedeanRing A] in
 theorem invSelf_eq_divByS (s : A) :
     IsLocalization.Away.invSelf (S := Localization.Away s) s =
       divByS 1 s := by
-  unfold IsLocalization.Away.invSelf divByS
-  simp [IsLocalization.mk']
+  simp [IsLocalization.Away.invSelf, divByS, IsLocalization.mk']
 
 /-! #### Adic Nullstellensatz instance (Wedhorn Prop 5.30(4) + 7.14) -/
 
@@ -1389,11 +1369,8 @@ This follows from `oneSubfX_le_ker_of_eval` since `phi(s) * phi(X) = 1`. -/
 theorem oneSubsX_le_ker_tateEvalPresheafHom (D : RationalLocData A)
     (hb : TopologicalRing.IsPowerBounded (invS D)) :
     oneSubfXIdeal D.s ≤ RingHom.ker (tateEvalPresheafHom D hb) := by
-  rw [oneSubfXIdeal, Ideal.span_le]
-  intro x hx
-  simp only [Set.mem_singleton_iff] at hx
-  rw [SetLike.mem_coe, RingHom.mem_ker, hx]
-  exact tateEvalPresheafHom_oneSubsX D hb
+  simpa only [oneSubfXIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+    RingHom.mem_ker] using tateEvalPresheafHom_oneSubsX D hb
 
 /-! #### Agreement with locLiftToPresheaf -/
 
@@ -1435,17 +1412,15 @@ theorem tateQuotientToPresheafHom_algebraMap (D : RationalLocData A)
     (a : A) :
     tateQuotientToPresheafHom D hb
       ((Ideal.Quotient.mk _) (algebraMap A _ a)) =
-      D.canonicalMap a := by
-  simp only [tateQuotientToPresheafHom, Ideal.Quotient.lift_mk]
-  exact tateEvalPresheafHom_algebraMap D hb a
+      D.canonicalMap a :=
+  tateEvalPresheafHom_algebraMap D hb a
 
 /-- `tateQuotientToPresheafHom` sends `mk(X)` to `invS D`. -/
 theorem tateQuotientToPresheafHom_X (D : RationalLocData A)
     (hb : TopologicalRing.IsPowerBounded (invS D)) :
     tateQuotientToPresheafHom D hb
-      ((Ideal.Quotient.mk _) TateAlgebra.X) = invS D := by
-  simp only [tateQuotientToPresheafHom, Ideal.Quotient.lift_mk]
-  exact tateEvalPresheafHom_X D hb
+      ((Ideal.Quotient.mk _) TateAlgebra.X) = invS D :=
+  tateEvalPresheafHom_X D hb
 
 end TateEvalPresheaf
 
@@ -1485,8 +1460,7 @@ and both components are surjective: the first is an equivalence
 rings (`coeRingHom_bijective_of_discrete`). -/
 theorem quotientEvalPresheafHom_surjective (D : RationalLocData A) :
     Function.Surjective (quotientEvalPresheafHom D) := by
-  rw [show quotientEvalPresheafHom D = quotientToPresheaf D from
-    (quotientToPresheaf_eq_quotientEvalPresheafHom D).symm]
+  rw [← quotientToPresheaf_eq_quotientEvalPresheafHom D]
   intro y
   obtain ⟨w, rfl⟩ := (coeRingHom_bijective_of_discrete D).2 y
   obtain ⟨q, rfl⟩ :=

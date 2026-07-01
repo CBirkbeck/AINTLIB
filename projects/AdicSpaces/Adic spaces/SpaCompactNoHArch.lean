@@ -105,9 +105,9 @@ lemma exists_uniform_pow_vle_on_compact
   -- The open cover: `U N` = `{w ∈ ↥(Spa A A⁺) : w.1.vle (π^N) a}`, intersected with K.
   -- Each open in `↥(Spa A A⁺)` since `basicOpen` is open in Spv and
   -- the subtype map is continuous.
-  let U : ℕ → Set ↥(Spa A A⁺) := fun N =>
+  let U : ℕ → Set ↥(Spa A A⁺) := fun N ↦
     Subtype.val ⁻¹' (basicOpen (π ^ N) a : Set (Spv A))
-  have hU_open : ∀ N, IsOpen (U N) := fun N =>
+  have hU_open : ∀ N, IsOpen (U N) := fun N ↦
     (isOpen_basicOpen _ _).preimage continuous_subtype_val
   -- The cover is monotone increasing (`U N ⊆ U (N+1)` via `v.vle (π^(N+1)) (π^N)`).
   have hU_mono : ∀ N M, N ≤ M → U N ⊆ U M := by
@@ -121,7 +121,7 @@ lemma exists_uniform_pow_vle_on_compact
       simp only [map_pow]
       have hπ_le_one : (ValuativeRel.valuation A) π ≤ 1 := by
         by_contra h_not
-        push_neg at h_not
+        push Not at h_not
         -- if v(π) > 1, then for the "v(π^n) < 1" set being a nbhd of 0, fails.
         -- Use that the Spa hypothesis gives bounded power.
         -- Actually for our purpose, we use that π is top.nilp. via hπ_tn.
@@ -166,11 +166,11 @@ lemma exists_uniform_pow_vle_on_compact
     · exact h
     · exact absurd h hN_strict
   -- Apply `IsCompact.elim_directed_cover`.
-  have hU_directed : Directed (· ⊆ ·) U := fun N M =>
+  have hU_directed : Directed (· ⊆ ·) U := fun N M ↦
     ⟨max N M, hU_mono N (max N M) (le_max_left N M),
      hU_mono M (max N M) (le_max_right N M)⟩
   obtain ⟨N₀, hN₀⟩ := hK.elim_directed_cover U hU_open hK_cover hU_directed
-  refine ⟨N₀, fun w hw => ?_⟩
+  refine ⟨N₀, fun w hw ↦ ?_⟩
   exact (hN₀ hw).1
 
 variable [IsHuberRing A] [IsTateRing A]
@@ -253,7 +253,7 @@ theorem isClosed_ιSpv_preimage_vleCylinder (g h : A) :
     isClosed_range_ιSpv_inter_vleCylinder g h, ?_⟩
   ext v
   simp only [Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq]
-  exact ⟨fun hh => hh.2, fun hh => ⟨⟨v, rfl⟩, hh⟩⟩
+  exact ⟨fun hh ↦ hh.2, fun hh ↦ ⟨⟨v, rfl⟩, hh⟩⟩
 
 /-- **Sub-leaf of 1.1 — closedness at the `Spv A` level.**
 The half-space `{v ∈ Spv A | v.vle g h}` is closed in the `Spv A` topology.

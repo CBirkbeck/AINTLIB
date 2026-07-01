@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.ProductSource
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part5
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.SignUnitFactor
 
 /-!
 # Ireland--Rosen primary unit factor

@@ -21,7 +21,7 @@ This file records basic `FiniteDimensional` results for modular forms on finite-
 namespace SpherePacking.ModularForms
 
 open scoped MatrixGroups
-open UpperHalfPlane ModularForm
+open UpperHalfPlane
 
 noncomputable section
 

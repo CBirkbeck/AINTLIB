@@ -138,14 +138,14 @@ theorem valuationLocalizationLift_of_spa_rationalOpen_locSubring
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
   obtain ⟨hv, hv_T, hvs⟩ := hv_rat
   have hS := valuationLocalizationLift_powers_subset_primeCompl hvs
-  have hν_A₀ : ∀ a ∈ P.A₀, v.vle a 1 := fun a ha =>
+  have hν_A₀ : ∀ a ∈ P.A₀, v.vle a 1 := fun a ha ↦
     vle_one_of_mem_spa hv (hA₀_le ha)
   have h_cont : (localizationLift (Submonoid.powers s) (Localization.Away s) v hS).IsContinuous :=
     localizationLift_isContinuous_locTopology_of_bounded P T s hopen
       hv.1 hv_T hS
   refine ⟨localizationLift (Submonoid.powers s) (Localization.Away s) v hS,
     ?_, comap_localizationLift _ _ v _⟩
-  refine ⟨h_cont, fun f hf => ?_⟩
+  refine ⟨h_cont, fun f hf ↦ ?_⟩
   -- f ∈ locSubring P T s. Need (lift v).vle f 1.
   letI : ValuativeRel A := v.toValuativeRel
   set ν := ValuativeRel.valuation A with hν_def
@@ -153,7 +153,7 @@ theorem valuationLocalizationLift_of_spa_rationalOpen_locSubring
     intro a ha
     have h_eq := (Valuation.Compatible.vle_iff_le (v := ν) a 1).mp (hν_A₀ a ha)
     rw [map_one] at h_eq; exact h_eq
-  have hν_T_val : ∀ t ∈ T, ν t ≤ ν s := fun t ht =>
+  have hν_T_val : ∀ t ∈ T, ν t ≤ ν s := fun t ht ↦
     (Valuation.Compatible.vle_iff_le (v := ν) t s).mp (hv_T t ht)
   have hS' : Submonoid.powers s ≤ ν.supp.primeCompl := by
     intro x hx

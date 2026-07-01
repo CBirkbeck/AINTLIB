@@ -465,9 +465,12 @@ theorem pi_not_mem_Q_sq_of_ramification
         (Fact.out : Nat.Prime p)).mp hdvd
     exact hpℓ this.symm
   have h_n : (ℓ * p : ℕ) = ℓ ^ (0 + 1) * p := by simp [pow_one]
+  have hℓ_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
+    simp [(Fact.out : Nat.Prime ℓ).ne_zero]
   have h_ram :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ ^ 0 * (ℓ - 1) :=
-    IsCyclotomicExtension.Rat.ramificationIdx_eq (n := ℓ * p) (p := ℓ)
+      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ ^ 0 * (ℓ - 1) := by
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) Q hℓ_ne]
+    exact IsCyclotomicExtension.Rat.ramificationIdx_eq (n := ℓ * p) (p := ℓ)
       (k := 0) (m := p) (K := R') (P := Q) h_n h_ne_dvd
   simp only [pow_zero, one_mul] at h_ram
   -- Step 4: cyclotomic identity ↑ℓ ~ (ζ - 1)^(ℓ-1).

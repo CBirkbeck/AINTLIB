@@ -69,20 +69,7 @@ theorem genBernoulli_eq_zmod_sum [Fact (1 < N)] (χ : DirichletCharacter L N) (k
   have hχ0 : χ (0 : ZMod N) = 0 := χ.map_nonunit not_isUnit_zero
   rw [DirichletCharacter.genBernoulli]
   congr 1
-  rw [show (Finset.univ : Finset (ZMod N))
-      = Finset.image (fun a : ℕ => ((a + 1 : ℕ) : ZMod N)) (range N) from by
-    refine (Finset.eq_univ_of_card _ ?_).symm
-    rw [Finset.card_image_of_injOn, Finset.card_range]
-    · simp [ZMod.card]
-    · intro a ha b hb hab
-      simp only [Finset.coe_range, Set.mem_Iio] at ha hb
-      have hmod := (ZMod.natCast_eq_natCast_iff' (a+1) (b+1) N).1 hab
-      rcases eq_or_ne (a+1) N with h1 | h1 <;> rcases eq_or_ne (b+1) N with h2 | h2
-      · omega
-      · rw [h1, Nat.mod_self, Nat.mod_eq_of_lt (by omega)] at hmod; omega
-      · rw [h2, Nat.mod_self, Nat.mod_eq_of_lt (by omega)] at hmod; omega
-      · rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)] at hmod; omega]
-  rw [Finset.sum_image (by
+  have hinj : Set.InjOn (fun a : ℕ => ((a + 1 : ℕ) : ZMod N)) (range N) := by
     intro a ha b hb hab
     simp only [Finset.coe_range, Set.mem_Iio] at ha hb
     have hmod := (ZMod.natCast_eq_natCast_iff' (a+1) (b+1) N).1 hab
@@ -90,7 +77,12 @@ theorem genBernoulli_eq_zmod_sum [Fact (1 < N)] (χ : DirichletCharacter L N) (k
     · omega
     · rw [h1, Nat.mod_self, Nat.mod_eq_of_lt (by omega)] at hmod; omega
     · rw [h2, Nat.mod_self, Nat.mod_eq_of_lt (by omega)] at hmod; omega
-    · rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)] at hmod; omega)]
+    · rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)] at hmod; omega
+  rw [show (Finset.univ : Finset (ZMod N))
+      = Finset.image (fun a : ℕ => ((a + 1 : ℕ) : ZMod N)) (range N) from by
+    refine (Finset.eq_univ_of_card _ ?_).symm
+    rw [Finset.card_image_of_injOn hinj, Finset.card_range, ZMod.card]]
+  rw [Finset.sum_image hinj]
   refine Finset.sum_congr rfl fun a ha => ?_
   rw [Finset.mem_range] at ha
   rcases eq_or_ne (a + 1) N with hend | hend
@@ -129,10 +121,7 @@ theorem genBernoulli_eq_zero (χ : DirichletCharacter L N) {k : ℕ}
       refine h ?_
       rw [hχ1, he.neg_one_pow]
       exact MulChar.one_apply (isUnit_one.neg)
-    have hk1 : k ≠ 1 := by
-      rcases hk with hχ | hk1
-      · exact absurd hχ1 hχ
-      · exact hk1
+    have hk1 : k ≠ 1 := hk.resolve_left (· hχ1)
     rw [hχ1, genBernoulli_one, bernoulli'_eq_zero_of_odd hodd (by
       rcases hodd with ⟨m, hm⟩
       omega)]
@@ -148,14 +137,12 @@ theorem genBernoulli_eq_zero (χ : DirichletCharacter L N) {k : ℕ}
   set T : L := ∑ b : ZMod N, χ b * B.eval (((b.val : ℕ) : L) / (N : L)) with hT
   -- reflection: `T = χ(−1)·(−1)^k · T` via the negation bijection on `ZMod N`
   have hflip : T = (χ (-1) * (-1 : L) ^ k) * T := by
-    rw [hT, Finset.mul_sum]
-    rw [← Equiv.sum_comp (Equiv.neg (ZMod N))
+    rw [hT, Finset.mul_sum, ← Equiv.sum_comp (Equiv.neg (ZMod N))
       (fun b => χ b * B.eval (((b.val : ℕ) : L) / (N : L)))]
     refine Finset.sum_congr rfl fun b _ => ?_
     rcases eq_or_ne b 0 with rfl | hb0
     · simp only [Equiv.neg_apply, neg_zero, hχ0, zero_mul, mul_zero]
-    · have hneg : (Equiv.neg (ZMod N) b) = -b := rfl
-      rw [hneg]
+    · rw [Equiv.neg_apply]
       have hχneg : χ (-b) = χ (-1) * χ b := by
         rw [show (-b : ZMod N) = -1 * b from by ring, map_mul]
       haveI : NeZero b := ⟨hb0⟩
@@ -170,30 +157,15 @@ theorem genBernoulli_eq_zero (χ : DirichletCharacter L N) {k : ℕ}
       rw [hpt, hrefl, hχneg, hpt2]
       ring
   -- conclude: the factor `1 − χ(−1)(−1)^k = 2 ≠ 0`
-  have hu2 : χ (-1) * χ (-1) = 1 := by
-    rw [← map_mul]
-    simp
+  have hu2 : χ (-1) * χ (-1) = 1 := by simp [← map_mul]
   have hkey : χ (-1) * (-1 : L) ^ k = -1 := by
-    rcases Nat.even_or_odd k with he | ho
-    · rw [he.neg_one_pow] at h ⊢
-      rcases (mul_self_eq_one_iff.1 hu2) with h1 | h1
-      · exact absurd h1 (by simpa using h)
-      · rw [h1]; ring
-    · rw [ho.neg_one_pow] at h ⊢
-      rcases (mul_self_eq_one_iff.1 hu2) with h1 | h1
-      · rw [h1]; ring
-      · exact absurd h1 (by simpa using h)
+    rcases mul_self_eq_one_iff.1 hu2 with h1 | h1 <;>
+      rcases neg_one_pow_eq_or L k with h2 | h2 <;>
+      rw [h1, h2] <;> rw [h1, h2] at h <;> first | exact absurd rfl h | ring
   rw [hkey] at hflip
-  have hT0 : T = 0 := by
-    have h2 : (2 : L) * T = 0 := by linear_combination hflip
-    have h2ne : (2 : L) ≠ 0 := two_ne_zero
-    exact (mul_eq_zero.1 h2).resolve_left h2ne
-  rw [genBernoulli_eq_zmod_sum χ k]
-  have hfold : (∑ b : ZMod N, χ b *
-      Polynomial.eval (((b.val : ℕ) : L) / (N : L))
-        ((Polynomial.bernoulli k).map (algebraMap ℚ L))) = T := by
-    rw [hT, hB, hf]
-  rw [hfold, hT0, mul_zero]
+  have hT0 : T = 0 :=
+    (mul_eq_zero.1 (by linear_combination hflip : (2 : L) * T = 0)).resolve_left two_ne_zero
+  rw [genBernoulli_eq_zmod_sum χ k, ← hT, hT0, mul_zero]
 
 section generatingFunction
 
@@ -224,9 +196,8 @@ theorem genBernoulliPowerSeries_mul (χ : DirichletCharacter L N) :
     intro a
     have h := congrArg (rescale (N : L))
       (Polynomial.bernoulli_generating_function (((a : L) + 1) / (N : L)))
-    rw [map_mul, map_sub, map_one, map_mul, rescale_rescale, rescale_X,
+    rwa [map_mul, map_sub, map_one, map_mul, rescale_rescale, rescale_X,
       div_mul_cancel₀ _ hN, mul_assoc] at h
-    exact h
   -- the χ-weighted sum of the rescaled generating functions is `C N · LHS`
   have hkey : C (N : L) *
         (PowerSeries.mk fun k => χ.genBernoulli k * (k.factorial : L)⁻¹)
@@ -284,14 +255,10 @@ theorem prod_primitiveRoot_mul_sub_one {R : Type*} [CommRing R] [IsDomain R]
   have heval := congrArg (Polynomial.eval 1) hpoly
   simp only [Polynomial.eval_sub, Polynomial.eval_pow, Polynomial.eval_X,
     Polynomial.eval_C, Polynomial.eval_prod, one_pow] at heval
-  calc ∏ c ∈ range M, (ζ ^ c * Y - 1)
-      = ∏ c ∈ range M, -(1 - ζ ^ c * Y) := Finset.prod_congr rfl fun c _ => by ring
-    _ = (-1) ^ M * ∏ c ∈ range M, (1 - ζ ^ c * Y) := by
-        rw [Finset.prod_neg]
-        simp [Finset.card_range]
-    _ = Y ^ M - 1 := by
-        rw [← heval, hM.neg_one_pow]
-        ring
+  rw [show (∏ c ∈ range M, (ζ ^ c * Y - 1)) = ∏ c ∈ range M, -(1 - ζ ^ c * Y) from
+      Finset.prod_congr rfl fun c _ => (neg_sub _ _).symm,
+    Finset.prod_neg, ← heval, Finset.card_range, hM.neg_one_pow]
+  ring
 
 end generatingFunction
 

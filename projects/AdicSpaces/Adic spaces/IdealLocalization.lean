@@ -65,13 +65,11 @@ import of the downstream `Lemma745` file. -/
 private theorem exists_pow_mul_mem_A₀_aux
     (P : PairOfDefinition A) {π : A} (hπ : IsTopologicallyNilpotent π)
     (a : A) : ∃ n : ℕ, π ^ n * a ∈ P.A₀ := by
-  have h_cont : Continuous (· * a : A → A) := continuous_mul_const a
-  have h_open : IsOpen {x : A | x * a ∈ P.A₀} := P.isOpen.preimage h_cont
+  have h_open : IsOpen {x : A | x * a ∈ P.A₀} :=
+    P.isOpen.preimage (continuous_mul_const a)
   have h_zero : (0 : A) ∈ {x : A | x * a ∈ P.A₀} := by
     simp only [Set.mem_setOf_eq, zero_mul, P.A₀.zero_mem]
-  have h_nhds : {x : A | x * a ∈ P.A₀} ∈ nhds (0 : A) :=
-    h_open.mem_nhds h_zero
-  exact (hπ.eventually h_nhds).exists
+  exact (hπ.eventually (h_open.mem_nhds h_zero)).exists
 
 /-- **Clearing denominators into `locSubring`** (S-IDEAL-LOC Step 1).
 
@@ -94,21 +92,15 @@ theorem Localization.Away.exists_unit_locSubring_decomp
   obtain ⟨n, hna⟩ := exists_pow_mul_mem_A₀_aux P hπ_nil a
   have h_mem : algebraMap A (Localization.Away s) (π ^ n * a) ∈ locSubring P T s :=
     algebraMap_mem_locSubring P T s hna
-  have h_s_unit : IsUnit ((algebraMap A (Localization.Away s)) s) :=
-    IsLocalization.map_units _ (⟨s, ⟨1, pow_one s⟩⟩ : Submonoid.powers s)
-  have h_π_unit : IsUnit ((algebraMap A (Localization.Away s)) π) :=
-    hπ_unit.map (algebraMap A (Localization.Away s))
-  have h_sk_unit : IsUnit (((algebraMap A (Localization.Away s)) s) ^ k) :=
-    h_s_unit.pow k
-  have h_πn_unit : IsUnit (((algebraMap A (Localization.Away s)) π) ^ n) :=
-    h_π_unit.pow n
   have h_prod_unit : IsUnit (((algebraMap A (Localization.Away s)) π) ^ n *
-      ((algebraMap A (Localization.Away s)) s) ^ k) := h_πn_unit.mul h_sk_unit
-  set U : (Localization.Away s)ˣ := h_prod_unit.unit with hU_def
+      ((algebraMap A (Localization.Away s)) s) ^ k) :=
+    ((hπ_unit.map (algebraMap A (Localization.Away s))).pow n).mul
+      ((IsLocalization.map_units (Localization.Away s)
+        (⟨s, ⟨1, pow_one s⟩⟩ : Submonoid.powers s)).pow k)
+  set U : (Localization.Away s)ˣ := h_prod_unit.unit
   have hU_val : (U : Localization.Away s) =
       ((algebraMap A (Localization.Away s)) π) ^ n *
-      ((algebraMap A (Localization.Away s)) s) ^ k := by
-    rw [hU_def]; rfl
+      ((algebraMap A (Localization.Away s)) s) ^ k := h_prod_unit.unit_spec
   -- Key: U.val * x = algebraMap (π^n * a).
   have key : (U : Localization.Away s) * x =
       algebraMap A (Localization.Away s) (π ^ n * a) := by
@@ -150,8 +142,7 @@ theorem Localization.Away.mem_ideal_iff_clearing_denominator
   -- d = u⁻¹ * x ∈ q.
   have h_d_eq : (d : Localization.Away s) = (u⁻¹ : (Localization.Away s)ˣ) * x := by
     rw [hxud, ← mul_assoc, u.inv_mul, one_mul]
-  rw [h_d_eq]
-  exact q.mul_mem_left _ hx
+  exact h_d_eq ▸ q.mul_mem_left _ hx
 
 /-! ### Step 3 — topological transfer -/
 
@@ -185,36 +176,19 @@ theorem Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
       Ideal (locSubring P T s)) := by
     intro hcon
     exact hd_notin_q (Ideal.mem_comap.mp hcon)
-  have hd_in_compl : d ∈ (((Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ := hd_notin_contr
-  have h_compl_open : @IsOpen (locSubring P T s)
-      ((locTopology P T s hopen).induced (locSubring P T s).subtype)
-      (((Ideal.comap (locSubring P T s).subtype q :
-          Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ :=
-    h_contr_closed.isOpen_compl
-  have h_nhd_subspace : (((Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ ∈
-      @nhds (locSubring P T s)
-        ((locTopology P T s hopen).induced (locSubring P T s).subtype) d :=
-    @IsOpen.mem_nhds _ _ _ _ h_compl_open hd_in_compl
+  have h_nhd_subspace := h_contr_closed.isOpen_compl.mem_nhds hd_notin_contr
   rw [@nhds_induced] at h_nhd_subspace
   obtain ⟨V₀, hV₀_nhds, hV₀_sub⟩ := Filter.mem_comap.mp h_nhd_subspace
   set V : Set (Localization.Away s) :=
-    V₀ ∩ (locSubring P T s : Set (Localization.Away s)) with hV_def
-  have h_locSubring_open : IsOpen ((locSubring P T s) : Set (Localization.Away s)) :=
-    locSubring_isOpen P T s hopen
-  have h_d_in_locSubring : (d : Localization.Away s) ∈ locSubring P T s := d.property
+    V₀ ∩ (locSubring P T s : Set (Localization.Away s))
   have hV_nhds : V ∈ nhds (d : Localization.Away s) :=
-    Filter.inter_mem hV₀_nhds (h_locSubring_open.mem_nhds h_d_in_locSubring)
+    Filter.inter_mem hV₀_nhds ((locSubring_isOpen P T s hopen).mem_nhds d.property)
   have h_d_eq : (d : Localization.Away s) = (u⁻¹ : (Localization.Away s)ˣ) * x := by
     rw [hxud, ← mul_assoc, u.inv_mul, one_mul]
-  have h_mul_uinv_cont : Continuous (fun y : Localization.Away s =>
-      ((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * y) :=
-    continuous_const.mul continuous_id
   have hV_preimage_nhd_x :
       (fun y : Localization.Away s =>
         ((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * y) ⁻¹' V ∈ nhds x := by
-    apply h_mul_uinv_cont.continuousAt
+    apply (continuous_const.mul continuous_id).continuousAt
     change V ∈ nhds (((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * x)
     rw [← h_d_eq]; exact hV_nhds
   refine Filter.mem_of_superset hV_preimage_nhd_x ?_
@@ -224,13 +198,9 @@ theorem Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
   have h_uinv_y_in_q : (u⁻¹ : (Localization.Away s)ˣ) * y ∈ q :=
     q.mul_mem_left _ hy_in_q
   set z : locSubring P T s := ⟨(u⁻¹ : (Localization.Away s)ˣ) * y, hy_locSub⟩
-  have hz_preim : z ∈ (Subtype.val : locSubring P T s → Localization.Away s) ⁻¹' V₀ :=
-    hy_V₀
   have hz_notin_contr : z ∉ (Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) := hV₀_sub hz_preim
-  apply hz_notin_contr
-  change (z : Localization.Away s) ∈ q
-  exact h_uinv_y_in_q
+      Ideal (locSubring P T s)) := hV₀_sub hy_V₀
+  exact hz_notin_contr h_uinv_y_in_q
 
 /-! ### S-IDEAL-JAC — `locIdeal ≤ Ideal.jacobson ⊥` in `locSubring`
 
@@ -278,13 +248,8 @@ private theorem isUnit_of_algebraMap_isUnit_of_faithfullyFlat
     [Module.FaithfullyFlat R S] {r : R}
     (hr : IsUnit (algebraMap R S r)) : IsUnit r := by
   rw [← Ideal.span_singleton_eq_top] at hr ⊢
-  have h_map : Ideal.map (algebraMap R S) (Ideal.span {r}) =
-      Ideal.span {algebraMap R S r} := by
-    rw [Ideal.map_span, Set.image_singleton]
-  have h_comap := Ideal.comap_map_eq_self_of_faithfullyFlat
-    (A := R) (B := S) (Ideal.span {r})
-  rw [h_map, hr, Ideal.comap_top] at h_comap
-  exact h_comap.symm
+  rw [← Ideal.comap_map_eq_self_of_faithfullyFlat (A := R) (B := S) (Ideal.span {r}),
+    Ideal.map_span, Set.image_singleton, hr, Ideal.comap_top]
 
 omit [IsTopologicalRing A] in
 /-- **S-IDEAL-JAC via faithful-flatness descent**.
@@ -320,16 +285,9 @@ theorem locIdeal_le_jacobson_bot_of_faithfullyFlat
   have hx_jac : algebraMap (locSubring P T s) S x ∈
       Ideal.jacobson (⊥ : Ideal S) := h_jac hx_map
   rw [Ideal.mem_jacobson_bot] at hx_jac
-  have h_unit_S : IsUnit
-      (algebraMap (locSubring P T s) S x *
-        algebraMap (locSubring P T s) S y + 1) :=
-    hx_jac (algebraMap _ S y)
-  have h_eq : algebraMap (locSubring P T s) S x *
-      algebraMap (locSubring P T s) S y + 1 =
-      algebraMap (locSubring P T s) S (x * y + 1) := by
-    rw [map_add, map_mul, map_one]
-  rw [h_eq] at h_unit_S
-  exact isUnit_of_algebraMap_isUnit_of_faithfullyFlat h_unit_S
+  refine isUnit_of_algebraMap_isUnit_of_faithfullyFlat (S := S) ?_
+  rw [map_add, map_mul, map_one]
+  exact hx_jac (algebraMap _ S y)
 
 /-- **Topological-nilpotence transfer for `locIdeal`.**
 

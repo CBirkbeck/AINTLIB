@@ -40,11 +40,11 @@ theorem exponents_modP_eq_zero_of_kummerLogMatrix_relation
     (hrel :
       Matrix.mulVec
           (concreteKummerLogMatrix (p := p) (K := K) hp_three hp_five)
-          (fun a : Fin (kummerLogRank p) => (e a : ZMod p)) =
+          (fun a : Fin (kummerLogRank p) ↦ (e a : ZMod p)) =
         0) :
     ∀ a : Fin (kummerLogRank p), (e a : ZMod p) = 0 := by
   have hv :
-      (fun a : Fin (kummerLogRank p) => (e a : ZMod p)) = 0 :=
+      (fun a : Fin (kummerLogRank p) ↦ (e a : ZMod p)) = 0 :=
     vector_eq_zero_of_det_ne_zero_of_mulVec_eq_zero hdet hrel
   intro a
   exact congr_fun hv a

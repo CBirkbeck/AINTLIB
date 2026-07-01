@@ -300,7 +300,7 @@ theorem hZavyalov_per_E_of_per_D_construction
     rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S :=
-  fun _ => exists_refines_cover_per_E_of_per_D_construction C mk_S_D
+  fun _ ↦ exists_refines_cover_per_E_of_per_D_construction C mk_S_D
     h_in_D h_cover_D h_span
 
 /-! ### T-NULL-PER-E remaining content — reviewer's C1/C2/C3 decomposition
@@ -497,7 +497,7 @@ theorem hZavyalov_per_E_of_singleton_cover
     rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S :=
-  fun _ => exists_nullstellensatz_refinement_per_E_of_singleton_cover
+  fun _ ↦ exists_nullstellensatz_refinement_per_E_of_singleton_cover
     C hC_singleton hZavyalov
 
 /-! ### C1 special case: standard-shape `D`
@@ -547,15 +547,15 @@ theorem rationalOpen_eq_biInter_insert_union
   ext v
   constructor
   · rintro ⟨hv_spa, hvFT, hvs⟩
-    refine ⟨?_, hv_spa, fun t ht => hvFT t (Finset.mem_union_right F ht), hvs⟩
+    refine ⟨?_, hv_spa, fun t ht ↦ hvFT t (Finset.mem_union_right F ht), hvs⟩
     simp only [Set.mem_iInter]
     intro f hf
-    refine ⟨hv_spa, fun t ht => ?_, hvs⟩
+    refine ⟨hv_spa, fun t ht ↦ ?_, hvs⟩
     rcases Finset.mem_insert.mp ht with rfl | ht'
     · exact hvFT t (Finset.mem_union_left T hf)
     · exact hvFT t (Finset.mem_union_right F ht')
   · rintro ⟨hfam, hv_spa, hvT, hvs⟩
-    refine ⟨hv_spa, fun t ht => ?_, hvs⟩
+    refine ⟨hv_spa, fun t ht ↦ ?_, hvs⟩
     rcases Finset.mem_union.mp ht with hF | hT_mem
     · have hmem : v ∈ rationalOpen (insert t T) s := by
         simp only [Set.mem_iInter] at hfam
@@ -590,7 +590,7 @@ theorem per_D_construction_of_standardShape
     (h_shape : ∀ D ∈ C.covers,
       rationalOpen D.T D.s =
         rationalOpen (insert (f_D D) C.base.T) C.base.s) :
-    let mk_S_D : RationalLocData A → Finset A := fun D => {f_D D}
+    let mk_S_D : RationalLocData A → Finset A := fun D ↦ {f_D D}
     (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
     (∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
@@ -625,14 +625,14 @@ theorem exists_refines_cover_per_E_of_standardShape
     ∃ S : Finset A,
       refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S := by
   -- Let `mk_S_D D := {f_D D}`; its `biUnion` equals `C.covers.image f_D`.
-  have hbiUnion : (C.covers.biUnion (fun D => ({f_D D} : Finset A)) : Finset A) =
+  have hbiUnion : (C.covers.biUnion (fun D ↦ ({f_D D} : Finset A)) : Finset A) =
       C.covers.image f_D := by
     ext x
     simp only [Finset.mem_biUnion, Finset.mem_singleton, Finset.mem_image, eq_comm]
   obtain ⟨h_in_D, h_cover_D⟩ :=
     per_D_construction_of_standardShape C f_D h_shape
   refine exists_refines_cover_per_E_of_per_D_construction C
-    (fun D => {f_D D}) h_in_D h_cover_D ?_
+    (fun D ↦ {f_D D}) h_in_D h_cover_D ?_
   rw [hbiUnion]; exact h_span
 
 /-- **`hZavyalov_per_E` supplier via standard-shape per-piece witnesses**.
@@ -657,7 +657,7 @@ theorem hZavyalov_per_E_of_standardShape
     rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S :=
-  fun _ => exists_refines_cover_per_E_of_standardShape C f_D h_shape h_span
+  fun _ ↦ exists_refines_cover_per_E_of_standardShape C f_D h_shape h_span
 
 /-! ### General case: exact minimal missing lemma
 
@@ -812,7 +812,7 @@ spans the unit ideal iff the original does. This is the `refines_span_top`
 clause under the Zavyalov construction `S := T.image (σ⁻¹ * ·)`. -/
 theorem refines_span_top_image_unit_mul [DecidableEq A]
     (σ : Aˣ) {T : Finset A} (hT : Ideal.span (T : Set A) = ⊤) :
-    Ideal.span ((T.image (fun t => (σ.inv : A) * t) : Finset A) : Set A) = ⊤ := by
+    Ideal.span ((T.image (fun t ↦ (σ.inv : A) * t) : Finset A) : Set A) = ⊤ := by
   rw [eq_top_iff, ← hT, Ideal.span_le]
   intro t ht
   -- Write `t = σ * (σ.inv * t)`; since `σ.inv * t ∈ image`, `t` lies in the span.
@@ -847,7 +847,7 @@ theorem spanTop_iff_noCommonZero_spa
     -- have `v(t) = 0` for all `t ∈ T`, else `v(1) = 0`. Since v is a valuation
     -- with `v(1) ≠ 0`, some `v(t) ≠ 0`.
     by_contra h_all
-    push_neg at h_all
+    push Not at h_all
     -- `h_all : ∀ t ∈ T, v.vle t 0`. So `T ⊆ v.supp`.
     have hT_le_supp : (T : Set A) ⊆ (v.supp : Set A) := by
       intro t ht
@@ -1160,7 +1160,7 @@ private theorem exists_nullstellensatz_refinement_of_rationalOpen_empty
     have hle : rationalOpen (insert f C.base.T) C.base.s ⊆
         rationalOpen C.base.T C.base.s := by
       intro w ⟨hwspa, hwT, hws⟩
-      exact ⟨hwspa, fun t ht => hwT t (Finset.mem_insert_of_mem ht), hws⟩
+      exact ⟨hwspa, fun t ht ↦ hwT t (Finset.mem_insert_of_mem ht), hws⟩
     exact absurd (hle hv) (hempty ▸ Set.notMem_empty v)
   · -- Unit ideal: span {1} = ⊤.
     change Ideal.span (({1} : Finset A) : Set A) = ⊤
@@ -1483,7 +1483,7 @@ private theorem exists_nullstellensatz_refinement_per_E_of_rationalOpen_empty
     intro v hv_in_plus
     have hv_base : v ∈ rationalOpen C.base.T C.base.s := by
       obtain ⟨hvspa, hv_T, hv_s⟩ := hv_in_plus
-      exact ⟨hvspa, fun t ht => hv_T t (Finset.mem_insert_of_mem ht), hv_s⟩
+      exact ⟨hvspa, fun t ht ↦ hv_T t (Finset.mem_insert_of_mem ht), hv_s⟩
     exact absurd (hempty ▸ hv_base) (Set.notMem_empty v)
   · -- Span-top: `Ideal.span {1} = ⊤`.
     change Ideal.span (({1} : Finset A) : Set A) = ⊤

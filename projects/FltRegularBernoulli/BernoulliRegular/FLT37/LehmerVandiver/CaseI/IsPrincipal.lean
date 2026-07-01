@@ -107,12 +107,6 @@ theorem caseI_is_principal_of_not_dvd_hPlus
   rw [Ideal.span_singleton_eq_span_singleton] at hαp_span
   obtain ⟨u, hu⟩ := hαp_span
   refine ⟨u⁻¹, α, ?_⟩
-  -- hu : α^p * u = a + ζ * b (or similar — extract precisely)
-  -- u⁻¹ * (a + ζ * b) = u⁻¹ * (α^p * u) = α^p, hence u⁻¹ * (a + ζ * b) = α^p,
-  -- so ↑u⁻¹ * α^p = α^p · u⁻¹ ⁻¹ = ... we want ↑u⁻¹ * α^p = a + ζ * b.
-  -- Actually we have α^p * u = a + ζ b, so a + ζ b = α^p * u, so ↑u⁻¹ * (a + ζ b) = α^p.
-  -- We want ↑u⁻¹ * α^p = a + ζ b. Hmm rearrange:
-  -- ↑u⁻¹ * α^p needs to equal a + ζ b. From hu : α^p * u = a + ζ b (Associated.symm form).
   rw [show (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val * α ^ p =
       α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring]
   rw [← hu]

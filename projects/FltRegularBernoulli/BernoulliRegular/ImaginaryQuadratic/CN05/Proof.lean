@@ -18,7 +18,7 @@ variable (p : ℕ) [hp : Fact p.Prime]
 theorem CN05CoeffEq_at_prime_pow_odd_ne_p (hp3 : p % 4 = 3) (q : ℕ)
     [hq : Fact q.Prime] (hq_odd : q ≠ 2) (hqp : q ≠ p) (k : ℕ) :
     ((idealNormMultiplicity (Kminus p) (q ^ k)) : ℂ) =
-      LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (q ^ k) := by
+      LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (q ^ k) := by
   -- For odd q ≠ p, η(q) ∈ {1, -1}.
   have hq_ne : ((q : ℕ) : ZMod p) ≠ 0 := by
     intro h_zero
@@ -39,7 +39,7 @@ theorem CN05CoeffEq_at_prime_pow_odd_ne_p (hp3 : p % 4 = 3) (q : ℕ)
 /-- **CN-05 coefficient equality at any prime power q^k**. -/
 theorem CN05CoeffEq_at_prime_pow (hp3 : p % 4 = 3) (q : ℕ) (hq : q.Prime) (k : ℕ) :
     ((idealNormMultiplicity (Kminus p) (q ^ k)) : ℂ) =
-      LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (q ^ k) := by
+      LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (q ^ k) := by
   haveI : Fact q.Prime := ⟨hq⟩
   by_cases hqp : q = p
   · rw [hqp]; exact CN05CoeffEq_at_prime_pow_p p hp3 k
@@ -49,9 +49,9 @@ theorem CN05CoeffEq_at_prime_pow (hp3 : p % 4 = 3) (q : ℕ) (hq : q.Prime) (k :
 
 /-- Convolution multiplicativity at coprime arguments. -/
 lemma convolution_one_mul_coprime {m n : ℕ} (hcop : Nat.Coprime m n) :
-    LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (m * n) =
-      (LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) m) *
-      (LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) n) := by
+    LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (m * n) =
+      (LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) m) *
+      (LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) n) := by
   classical
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   -- Convert to ArithmeticFunction multiplicativity.
@@ -69,9 +69,9 @@ lemma convolution_one_mul_coprime {m n : ℕ} (hcop : Nat.Coprime m n) :
   have hm_ne : m ≠ 0 := Nat.pos_iff_ne_zero.mp hm
   have hn_ne : n ≠ 0 := Nat.pos_iff_ne_zero.mp hn
   -- Define arithmetic functions
-  let fOne : ArithmeticFunction ℂ := ⟨fun n => if n = 0 then 0 else 1, by simp⟩
+  let fOne : ArithmeticFunction ℂ := ⟨fun n ↦ if n = 0 then 0 else 1, by simp⟩
   let fEta : ArithmeticFunction ℂ :=
-    ⟨fun n => if n = 0 then 0 else legendreDirichletNat p n, by simp⟩
+    ⟨fun n ↦ if n = 0 then 0 else legendreDirichletNat p n, by simp⟩
   have hfOne_mul : fOne.IsMultiplicative := by
     refine ArithmeticFunction.IsMultiplicative.iff_ne_zero.mpr ⟨?_, ?_⟩
     · change (if (1 : ℕ) = 0 then 0 else 1) = 1
@@ -92,7 +92,7 @@ lemma convolution_one_mul_coprime {m n : ℕ} (hcop : Nat.Coprime m n) :
       change legendreDirichlet p ((x * y : ℕ) : ZMod p) =
         legendreDirichlet p ((x : ℕ) : ZMod p) * legendreDirichlet p ((y : ℕ) : ZMod p)
       push_cast; exact map_mul _ _ _
-  have hconv_eq : ∀ k, 0 < k → LSeries.convolution (fun _ : ℕ => (1 : ℂ))
+  have hconv_eq : ∀ k, 0 < k → LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ))
       (legendreDirichletNat p) k = (fOne * fEta) k := by
     intro k hk
     have hk_ne : k ≠ 0 := Nat.pos_iff_ne_zero.mp hk

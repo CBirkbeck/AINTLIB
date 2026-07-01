@@ -10,7 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.GaloisAction.Basic
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 open scoped Pointwise
 
 namespace BernoulliRegular
@@ -37,6 +37,11 @@ instance characterSubfield_isCyclotomic :
   exact (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin
     (K := ℚ) (L := L) (n := p - 1) (F := characterSubfield (L := L) (p := p)) hζ).2 rfl
 
+instance characterSubfield_isGalois :
+    IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
+  IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
+    (K := ℚ) (L := characterSubfield (L := L) (p := p))
+
 /-- The distinguished prime of the `(p - 1)`-cyclotomic subfield obtained by
 contracting `distinguishedPrimeAboveP`. -/
 noncomputable abbrev distinguishedPrimeAboveP_under_characterSubfield :
@@ -45,14 +50,16 @@ noncomputable abbrev distinguishedPrimeAboveP_under_characterSubfield :
 
 lemma distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver :
     distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L) ∈
-      Ideal.primesOver 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) := by
-  let P : Ideal (𝓞 (characterSubfield (L := L) (p := p))) :=
-    distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
-  haveI : P.IsPrime := inferInstance
-  haveI : P.LiesOver 𝔭 := by
-    dsimp [P, distinguishedPrimeAboveP_under_characterSubfield]
-    infer_instance
-  exact ⟨inferInstance, inferInstance⟩
+      Ideal.primesOver 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) :=
+  ⟨inferInstance, inferInstance⟩
+
+instance distinguishedPrimeAboveP_under_characterSubfield_isPrime :
+    (distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)).IsPrime :=
+  (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver (p := p) (L := L)).1
+
+instance distinguishedPrimeAboveP_under_characterSubfield_liesOver :
+    (distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)).LiesOver 𝔭 :=
+  (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver (p := p) (L := L)).2
 
 /-- The lifted character root, repackaged as an algebraic integer in the
 `(p - 1)`-cyclotomic character subfield. -/
@@ -69,7 +76,7 @@ noncomputable def gaussSumLiftCharacterRootCharacterSubfieldInteger :
 lemma algebraMap_gaussSumLiftCharacterRootCharacterSubfieldInteger :
     algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L)
         (gaussSumLiftCharacterRootCharacterSubfieldInteger (p := p) (L := L)) =
-      gaussSumLiftCharacterRoot (p := p) L := by
+      gaussSumLiftCharacterRoot (p := p) L :=
   rfl
 
 lemma gaussSumLiftCharacterRootCharacterSubfieldInteger_isPrimitiveRoot :
@@ -116,12 +123,13 @@ lemma characterSubfieldPrime_inertiaDeg_eq_one :
     have hmod : 1 ≡ p [MOD p - 1] := by
       rw [Nat.modEq_iff_dvd' hp.out.one_le]
     simpa using (ZMod.natCast_eq_natCast_iff p 1 (p - 1)).2 hmod.symm
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
-    (p := p)
-    (m := p - 1)
-    (K := characterSubfield (L := L) (p := p))
-    (P := Pchar)
-    hm]
+  haveI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
+  haveI : Pchar.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := 𝔭) (P := Pchar)
+  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+      IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
+        (p := p) (m := p - 1)
+        (K := characterSubfield (L := L) (p := p)) (P := Pchar) hm]
   simp [hp_cast]
 
 lemma characterSubfieldPrime_absNorm_eq_p :
@@ -281,8 +289,8 @@ theorem characterSubfieldPrimeUnitGenerator_zpowers (u : (ZMod p)ˣ) :
       (characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Pchar)) := by
   obtain ⟨n, _, hn⟩ :=
     (characterSubfieldPrimeGenerator_isPrimitiveRoot
-      (p := p) (L := L) (Pchar := Pchar)).eq_pow_of_pow_eq_one (by
-        exact ZMod.pow_card_sub_one_eq_one (Units.ne_zero u))
+      (p := p) (L := L) (Pchar := Pchar)).eq_pow_of_pow_eq_one
+        (ZMod.pow_card_sub_one_eq_one (Units.ne_zero u))
   refine ⟨n, ?_⟩
   apply Units.ext
   simpa [zpow_natCast, coe_characterSubfieldPrimeUnitGenerator,
@@ -355,11 +363,8 @@ lemma coe_gaussSumLiftCharacterRootCharacterSubfieldInteger :
 
 /-- The character-side Galois lift restricted to the character subfield. -/
 noncomputable def sigmaOfCharacterUnitCharacterSubfield (b : (ZMod (p - 1))ˣ) :
-    Gal(characterSubfield (L := L) (p := p) / ℚ) := by
-  letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
-    IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
-      (K := ℚ) (L := characterSubfield (L := L) (p := p))
-  exact AlgEquiv.restrictNormalHom
+    Gal(characterSubfield (L := L) (p := p) / ℚ) :=
+  AlgEquiv.restrictNormalHom
     (characterSubfield (L := L) (p := p))
     (sigmaOfCharacterUnit (p := p) L b)
 
@@ -369,10 +374,6 @@ lemma sigmaOfCharacterUnitCharacterSubfield_smul_gaussSumLiftCharacterRootCharac
         gaussSumLiftCharacterRootCharacterSubfieldInteger (p := p) (L := L) =
       gaussSumLiftCharacterRootCharacterSubfieldInteger (p := p) (L := L) ^
         (b : ZMod (p - 1)).val := by
-  letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
-    IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
-      (K := ℚ) (L := characterSubfield (L := L) (p := p))
-  letI : Normal ℚ (characterSubfield (L := L) (p := p)) := inferInstance
   apply NumberField.RingOfIntegers.ext
   apply Subtype.ext
   let x : characterSubfield (L := L) (p := p) :=
@@ -444,8 +445,7 @@ lemma characterSubfieldPrimeGenerator_pow_eq_of_sigmaOfCharacterUnit_smul
     _ =
       characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L) (Pchar := Qchar)
         (Ideal.Quotient.mk Qchar (σ • x)) := by
-          congr 1
-          exact (congrArg (Ideal.Quotient.mk Qchar) hxσ).symm
+          rw [hxσ]
     _ =
       characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L) (Pchar := Qchar)
         (Ideal.Quotient.algEquivOfEqMap
@@ -483,32 +483,20 @@ end CharacterSubfieldPrimeCharacterAction
 
 /-- The discrete logarithm of the distinguished contracted character-side prime
 generator with respect to `characterUnitGenerator`. -/
-noncomputable def distinguishedCharacterPrimeUnitExponent : Fin (p - 1) := by
-  let Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
-  haveI : Pchar.IsPrime :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).1
-  haveI : Pchar.LiesOver 𝔭 :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).2
-  exact characterUnitGeneratorExponent (p := p)
-    (characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Pchar))
+noncomputable def distinguishedCharacterPrimeUnitExponent : Fin (p - 1) :=
+  characterUnitGeneratorExponent (p := p)
+    (characterSubfieldPrimeUnitGenerator (p := p) (L := L)
+      (Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)))
 
 lemma characterUnitGenerator_pow_distinguishedCharacterPrimeUnitExponent :
     characterUnitGenerator (p := p) ^
         (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) =
       characterSubfieldPrimeUnitGenerator (p := p) (L := L)
         (Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)) := by
-  let Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
-  haveI : Pchar.IsPrime :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).1
-  haveI : Pchar.LiesOver 𝔭 :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).2
-  simpa [distinguishedCharacterPrimeUnitExponent, Pchar] using
+  simpa [distinguishedCharacterPrimeUnitExponent] using
     characterUnitGenerator_pow_characterUnitGeneratorExponent (p := p)
-      (characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Pchar))
+      (characterSubfieldPrimeUnitGenerator (p := p) (L := L)
+        (Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)))
 
 lemma distinguishedCharacterPrimeUnitExponent_coprime :
     Nat.Coprime
@@ -521,16 +509,9 @@ lemma distinguishedCharacterPrimeUnitExponent_coprime :
         (p - 1) := by
     rw [characterUnitGenerator_pow_distinguishedCharacterPrimeUnitExponent
       (p := p) (L := L)]
-    let Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
-    haveI : Pchar.IsPrime :=
-      (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-        (p := p) (L := L)).1
-    haveI : Pchar.LiesOver 𝔭 :=
-      (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-        (p := p) (L := L)).2
-    simpa [Pchar] using
-      characterSubfieldPrimeUnitGenerator_isPrimitiveRoot
-        (p := p) (L := L) (Pchar := Pchar)
+    exact characterSubfieldPrimeUnitGenerator_isPrimitiveRoot
+      (p := p) (L := L)
+      (Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L))
   exact (characterUnitGenerator_isPrimitiveRoot (p := p)).pow_iff_coprime
     (Nat.sub_pos_of_lt hp.out.one_lt)
     (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) |>.mp hprim
@@ -573,12 +554,6 @@ lemma characterSubfieldPrimeUnitGenerator_normalizedCharacterPrime :
       characterUnitGenerator (p := p) := by
   let Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
   let Qchar := normalizedCharacterPrime (p := p) (L := L)
-  haveI : Pchar.IsPrime :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).1
-  haveI : Pchar.LiesOver 𝔭 :=
-    (distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver
-      (p := p) (L := L)).2
   have hpow :
       characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Qchar) ^
           (((normalizedCharacterPrimeIndex (p := p) (L := L) : (ZMod (p - 1))ˣ) :
@@ -652,7 +627,6 @@ lemma characterSubfieldPrimeUnitGenerator_normalizedCharacterPrime :
   calc
     characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Qchar) =
       characterUnitGenerator (p := p) ^ k := by
-        symm
         simp [k, characterUnitGenerator_pow_characterUnitGeneratorExponent]
     _ = characterUnitGenerator (p := p) ^ 1 := hkpow
     _ = characterUnitGenerator (p := p) := by simp
@@ -760,10 +734,6 @@ lemma sigmaOfCharacterUnitCharacterSubfield_smul_algebraMap
         (sigmaOfCharacterUnitCharacterSubfield (p := p) (L := L) b • x) =
       sigmaOfCharacterUnit (p := p) L b •
         algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L) x := by
-  letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
-    IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
-      (K := ℚ) (L := characterSubfield (L := L) (p := p))
-  letI : Normal ℚ (characterSubfield (L := L) (p := p)) := inferInstance
   apply NumberField.RingOfIntegers.ext
   change (((sigmaOfCharacterUnitCharacterSubfield (p := p) (L := L) b) •
       ((x : 𝓞 (characterSubfield (L := L) (p := p))) :
@@ -784,10 +754,6 @@ lemma sigmaOfCharacterUnitCharacterSubfield_inv_smul_algebraMap
         ((sigmaOfCharacterUnitCharacterSubfield (p := p) (L := L) b)⁻¹ • x) =
       (sigmaOfCharacterUnit (p := p) L b)⁻¹ •
         algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L) x := by
-  letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
-    IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
-      (K := ℚ) (L := characterSubfield (L := L) (p := p))
-  letI : Normal ℚ (characterSubfield (L := L) (p := p)) := inferInstance
   have hinv :
       ((sigmaOfCharacterUnit (p := p) L b)⁻¹).restrictNormal
           (characterSubfield (L := L) (p := p)) =
@@ -846,10 +812,6 @@ noncomputable def characterSubfieldFixingSubgroup : Subgroup Gal(L / ℚ) :=
 
 lemma sigmaOfUnit_mem_characterSubfieldFixingSubgroup (a : (ZMod p)ˣ) :
     sigmaOfUnit (p := p) L a ∈ characterSubfieldFixingSubgroup (p := p) L := by
-  letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
-    IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
-      (K := ℚ) (L := characterSubfield (L := L) (p := p))
-  letI : Normal ℚ (characterSubfield (L := L) (p := p)) := inferInstance
   rw [characterSubfieldFixingSubgroup, IntermediateField.mem_fixingSubgroup_iff]
   have hrestr :
       AlgEquiv.restrictNormalHom (characterSubfield (L := L) (p := p))
@@ -867,8 +829,7 @@ lemma sigmaOfUnit_mem_characterSubfieldFixingSubgroup (a : (ZMod p)ˣ) :
         (F := characterSubfield (L := L) (p := p))
         (h := Nat.dvd_mul_left (p - 1) p)]
     ext
-    rw [ZMod.unitsMap_val]
-    rw [sigmaOfUnit, stickelbergerGalEquivZMod_sigmaOfExponent]
+    rw [ZMod.unitsMap_val, sigmaOfUnit, stickelbergerGalEquivZMod_sigmaOfExponent]
     simpa using unitExponentOfUnit_cast_pred (p := p) a
   intro x hx
   have happly := congrArg

@@ -110,7 +110,7 @@ at prime powers `n = q^k`:
 def CN05CoeffEq : Prop :=
   ∀ n : ℕ,
     (idealNormMultiplicity (Kminus p) n : ℂ) =
-      LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) n
+      LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) n
 
 /-- **Reduction theorem**: CN-05 follows from the coefficient equality
 `idealNormMultiplicity (Kminus p) n = (1 * η)(n)` (as arithmetic function).
@@ -127,7 +127,7 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   -- LHS as an L-series of idealNormMultiplicity
   have h_LHS : NumberField.dedekindZeta (Kminus p) s =
-      LSeries (fun n : ℕ => (idealNormMultiplicity (Kminus p) n : ℂ)) s := by
+      LSeries (fun n : ℕ ↦ (idealNormMultiplicity (Kminus p) n : ℂ)) s := by
     rw [dedekindZeta_eq_tsum_idealNormMultiplicity (Kminus p) hs]
     unfold LSeries LSeries.term
     congr 1
@@ -137,22 +137,22 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
     · simp [hn, div_eq_mul_inv, Complex.cpow_neg]
   rw [h_LHS]
   -- Express coefficients via coefficient equality
-  have h_coef_eq : (fun n : ℕ => (idealNormMultiplicity (Kminus p) n : ℂ)) =
-      LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) := by
+  have h_coef_eq : (fun n : ℕ ↦ (idealNormMultiplicity (Kminus p) n : ℂ)) =
+      LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) := by
     ext n
     exact h_coeff n
   rw [h_coef_eq]
   -- Use convolution formula for L-series
-  have h_sum1 : LSeriesSummable (fun _ : ℕ => (1 : ℂ)) s := by
-    have : (fun _ : ℕ => (1 : ℂ)) = (1 : ℕ → ℂ) := rfl
+  have h_sum1 : LSeriesSummable (fun _ : ℕ ↦ (1 : ℂ)) s := by
+    have : (fun _ : ℕ ↦ (1 : ℂ)) = (1 : ℕ → ℂ) := rfl
     rw [this]
     exact LSeriesSummable_one_iff.mpr hs
   have h_sum2 : LSeriesSummable (legendreDirichletNat p) s :=
     DirichletCharacter.LSeriesSummable_of_one_lt_re (legendreDirichlet p) hs
   rw [LSeries_convolution' h_sum1 h_sum2]
-  -- LSeries (fun _ => 1) s = ζ s
-  have h_zeta : LSeries (fun _ : ℕ => (1 : ℂ)) s = riemannZeta s := by
-    rw [show (fun _ : ℕ => (1 : ℂ)) = (1 : ℕ → ℂ) from rfl]
+  -- LSeries (fun _ ↦ 1) s = ζ s
+  have h_zeta : LSeries (fun _ : ℕ ↦ (1 : ℂ)) s = riemannZeta s := by
+    rw [show (fun _ : ℕ ↦ (1 : ℂ)) = (1 : ℕ → ℂ) from rfl]
     exact LSeries_one_eq_riemannZeta hs
   -- LSeries legendreDirichletNat s = L(η) s
   have h_Leta : LSeries (legendreDirichletNat p) s =
@@ -163,9 +163,9 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
 /-- Convolution of the constant `1` function with any `g` at `p^k` equals
 `∑_{j=0}^k g(p^j)`. -/
 lemma convolution_one_at_prime_pow {q : ℕ} (hq : q.Prime) (k : ℕ) (g : ℕ → ℂ) :
-    LSeries.convolution (fun _ : ℕ => (1 : ℂ)) g (q^k) =
+    LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) g (q^k) =
       ∑ j ∈ Finset.range (k + 1), g (q^j) := by
-  rw [show LSeries.convolution (fun _ : ℕ => (1 : ℂ)) g (q^k) =
+  rw [show LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) g (q^k) =
       ∑ x ∈ (q^k).divisorsAntidiagonal, 1 * g x.2 from by rw [LSeries.convolution_def]]
   rw [← Nat.map_div_left_divisors, Finset.sum_map]
   rw [Nat.divisors_prime_pow hq, Finset.sum_map]
@@ -198,7 +198,7 @@ for all `k`. This matches the ideal-count at the ramified prime (once that's pro
 
   `(1 * η)(p^k) = η(1) + η(p) + ... + η(p^k) = 1 + 0 + ... + 0 = 1`. -/
 theorem convolution_one_legendreNat_at_prime_pow_p (k : ℕ) :
-    LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (p^k) = 1 := by
+    LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (p^k) = 1 := by
   rw [convolution_one_at_prime_pow hp.out k (legendreDirichletNat p)]
   rw [Finset.sum_range_succ' _ k]
   simp only [pow_zero, legendreDirichletNat_one p]
@@ -220,7 +220,7 @@ lemma legendreDirichletNat_pow (q j : ℕ) :
 /-- **RHS at q ≠ p split** (η(q) = 1): `(1 * η)(q^k) = k+1`. -/
 theorem convolution_one_legendreNat_at_prime_pow_split (q : ℕ) (hq : q.Prime) (k : ℕ)
     (hη : legendreDirichletNat p q = 1) :
-    LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (q^k) = (k + 1 : ℕ) := by
+    LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (q^k) = (k + 1 : ℕ) := by
   rw [convolution_one_at_prime_pow hq k]
   simp_rw [legendreDirichletNat_pow p q, hη, one_pow]
   simp
@@ -228,7 +228,7 @@ theorem convolution_one_legendreNat_at_prime_pow_split (q : ℕ) (hq : q.Prime) 
 /-- **RHS at q ≠ p inert** (η(q) = -1): `(1 * η)(q^k) = 1 if k even, 0 if k odd`. -/
 theorem convolution_one_legendreNat_at_prime_pow_inert (q : ℕ) (hq : q.Prime) (k : ℕ)
     (hη : legendreDirichletNat p q = -1) :
-    LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (q^k) =
+    LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (q^k) =
       if Even k then 1 else 0 := by
   rw [convolution_one_at_prime_pow hq k]
   simp_rw [legendreDirichletNat_pow p q, hη]

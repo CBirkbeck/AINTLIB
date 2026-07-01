@@ -845,7 +845,12 @@ lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
+  haveI hbase : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime p
+  haveI hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(p : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg']
+  exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
 
 lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
@@ -853,7 +858,11 @@ lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
+  have hp_ne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [hp.out.ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(p : ℤ)}) P hp_ne]
+  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
 
 lemma primesOver_at_p_package :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
@@ -873,8 +882,11 @@ lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
-  unfold rationalPrimeIdeal
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
+  haveI hbase : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
+  haveI hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(ℓ : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg',
+    IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
   unfold localResidueDegree unitOfPrimeNe
   rw [← orderOf_units]
   rfl
@@ -887,6 +899,10 @@ lemma primesOver_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime]
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
+  have hℓ_ne : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [(Fact.out : ℓ.Prime).ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) P hℓ_ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd ℓ K P hcop
 
 lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
@@ -979,3 +995,38 @@ lemma dedekindLocalFactor_at_p {s : ℂ} :
 end ZetaFactorisation
 
 end BernoulliRegular
+
+namespace IsPrimitiveRoot
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'`.
+
+For a primitive `n`-th root of unity `ζ` in a number field `K`, this packages the
+corresponding algebraic integer `ζ ∈ 𝓞 K` as a unit of `(𝓞 K)ˣ`.  It is definitionally
+`((h.toInteger_isPrimitiveRoot).isUnit (NeZero.ne n)).unit`, so `↑h.unit' = h.toInteger`
+holds by `IsUnit.unit_spec`, exactly reproducing the old behaviour at every call site. -/
+noncomputable def unit' {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : (NumberField.RingOfIntegers K)ˣ :=
+  (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n)).unit
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'_pow`:
+the `unit'` of a primitive `n`-th root of unity is itself an `n`-th root of unity. -/
+theorem unit'_pow {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : h.unit' ^ n = 1 := by
+  apply Units.ext
+  rw [Units.val_pow_eq_pow_val, Units.val_one, unit', IsUnit.unit_spec]
+  exact h.toInteger_isPrimitiveRoot.pow_eq_one
+
+/-- Compatibility shim restoring the removed `IsPrimitiveRoot.unit'_coe`: the coercion of
+`h.unit'` back to `𝓞 K` is itself a primitive `n`-th root of unity (it is definitionally
+`h.toInteger`). -/
+theorem unit'_coe {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) :
+    IsPrimitiveRoot ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) n := by
+  have hc : ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) = h.toInteger :=
+    IsUnit.unit_spec (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n))
+  rw [hc]
+  exact h.toInteger_isPrimitiveRoot
+
+end IsPrimitiveRoot

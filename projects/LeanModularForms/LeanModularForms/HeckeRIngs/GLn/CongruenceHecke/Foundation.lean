@@ -3,23 +3,24 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.Basic
-import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.StabConjugation
-import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
-import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
-import LeanModularForms.HeckeRIngs.GLn.PolynomialRing
-import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Int.ModEq
 import Mathlib.Data.Nat.ChineseRemainder
 import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Logic.Denumerable
 import Mathlib.Data.Rat.Encodable
+import Mathlib.Logic.Denumerable
+import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 import Mathlib.RingTheory.AlgebraicIndependent.Defs
 import Mathlib.RingTheory.Ideal.Maps
+
+import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
+import LeanModularForms.HeckeRIngs.AbstractHeckeRing.StabConjugation
+import LeanModularForms.HeckeRIngs.GLn.Basic
+import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+import LeanModularForms.HeckeRIngs.GLn.PolynomialRing
+import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
+import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
+import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
 
 /-!
 # Hecke Ring for Congruence Subgroups (Shimura §3.3) — Foundation
@@ -44,16 +45,23 @@ namespace HeckeRing.GLn
     Shimura (3.3.1). -/
 noncomputable def Delta0_submonoid (N : ℕ) : Submonoid (GL (Fin 2) ℚ) where
   carrier := {g | HasIntEntries 2 g ∧ 0 < (↑g : Matrix (Fin 2) (Fin 2) ℚ).det ∧
-    ∃ A : Matrix (Fin 2) (Fin 2) ℤ, (↑g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ) ∧
-      (N : ℤ) ∣ A 1 0 ∧ Int.gcd (A 0 0) N = 1}
+    ∃ A : Matrix (Fin 2) (Fin 2) ℤ,
+      (↑g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ) ∧
+        (N : ℤ) ∣ A 1 0 ∧ Int.gcd (A 0 0) N = 1}
   one_mem' := ⟨hasIntEntries_one 2, by simp, 1,
-    by ext i j; simp [Matrix.map_apply, Matrix.one_apply], by simp, by simp⟩
+    by
+      ext i j
+      simp [Matrix.map_apply, Matrix.one_apply],
+    by simp, by simp⟩
   mul_mem' := by
     intro a b ⟨ha, hda, A, hA, hAN, hAco⟩ ⟨hb, hdb, B, hB, hBN, hBco⟩
     refine ⟨HasIntEntries.mul (n := 2) ha hb,
-      by simp only [GeneralLinearGroup.coe_mul, Matrix.det_mul]; exact mul_pos hda hdb,
+      by
+        simp only [GeneralLinearGroup.coe_mul, Matrix.det_mul]
+        exact mul_pos hda hdb,
       A * B, ?_, ?_, ?_⟩
-    · ext i j; simp [hA, hB, Matrix.mul_apply, Matrix.map_apply]
+    · ext i j
+      simp [hA, hB, Matrix.mul_apply, Matrix.map_apply]
     · simp only [Matrix.mul_apply, Fin.sum_univ_two]
       exact dvd_add (dvd_mul_of_dvd_left hAN _) (dvd_mul_of_dvd_right hBN _)
     · simp only [Matrix.mul_apply, Fin.sum_univ_two]
@@ -74,7 +82,8 @@ lemma Gamma0_le_Delta0 (N : ℕ) [NeZero N] :
   simp only [Delta0_submonoid, Submonoid.mem_mk]
   refine ⟨SLnZ_subgroup_hasIntEntries 2 hmem, ?_,
     (σ : Matrix (Fin 2) (Fin 2) ℤ), rfl, hc, ?_⟩
-  · have hdet := σ.prop; rw [Matrix.det_fin_two] at hdet
+  · have hdet := σ.prop
+    rw [Matrix.det_fin_two] at hdet
     simp only [Matrix.det_fin_two, mapGL_coe_matrix, RingHom.mapMatrix_apply,
       map_apply_coe, algebraMap_int_eq, Int.coe_castRingHom, Matrix.map_apply]
     exact_mod_cast hdet ▸ one_pos
@@ -82,9 +91,13 @@ lemma Gamma0_le_Delta0 (N : ℕ) [NeZero N] :
     obtain ⟨k, hk⟩ := hc
     have hdet : (σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 * (σ : Matrix (Fin 2) (Fin 2) ℤ) 1 1 -
         (σ : Matrix (Fin 2) (Fin 2) ℤ) 0 1 * (σ : Matrix (Fin 2) (Fin 2) ℤ) 1 0 = 1 := by
-      have := σ.prop; rw [Matrix.det_fin_two] at this; linarith
+      have := σ.prop
+      rw [Matrix.det_fin_two] at this
+      linarith
     exact ⟨(σ : Matrix (Fin 2) (Fin 2) ℤ) 1 1,
-      -(σ : Matrix (Fin 2) (Fin 2) ℤ) 0 1 * k, by rw [hk] at hdet; linarith⟩
+      -(σ : Matrix (Fin 2) (Fin 2) ℤ) 0 1 * k, by
+        rw [hk] at hdet
+        linarith⟩
 
 lemma Delta0_le_posDetInt (N : ℕ) :
     Delta0_submonoid N ≤ posDetInt_submonoid 2 :=
@@ -128,9 +141,10 @@ lemma Gamma0_le_SLnZ : (CongruenceSubgroup.Gamma0 N).map (mapGL ℚ) ≤ SLnZ_su
 
 omit [NeZero N] in
 /-- `Γ(N) ≤ Γ₀(N)`: the principal congruence subgroup is contained in Gamma0. -/
-lemma GammaN_le_Gamma0 : CongruenceSubgroup.Gamma N ≤ CongruenceSubgroup.Gamma0 N := fun _ hσ ↦ by
-  rw [CongruenceSubgroup.Gamma_mem] at hσ
-  exact CongruenceSubgroup.Gamma0_mem.mpr hσ.2.2.1
+lemma GammaN_le_Gamma0 : CongruenceSubgroup.Gamma N ≤ CongruenceSubgroup.Gamma0 N :=
+  fun _ hσ ↦ by
+    rw [CongruenceSubgroup.Gamma_mem] at hσ
+    exact CongruenceSubgroup.Gamma0_mem.mpr hσ.2.2.1
 
 omit [NeZero N] in
 private lemma gcd_A11_N_eq_one
@@ -142,8 +156,10 @@ private lemma gcd_A11_N_eq_one
   obtain ⟨k, hk⟩ := hAN
   have hdet_co' : IsCoprime (A 0 0 * A 1 1) (N : ℤ) := by
     have : A 0 0 * A 1 1 = A.det + (A 0 1 * k) * ↑N := by
-      rw [hdet, hk]; ring
-    rw [this]; exact hdet_coprime.add_mul_right_left _
+      rw [hdet, hk]
+      ring
+    rw [this]
+    exact hdet_coprime.add_mul_right_left _
   exact (IsCoprime.mul_left_iff.mp hdet_co').2
 
 private lemma intCast_eq_zero_of_dvd {m n : ℕ} (h : m ∣ n) (x : ℤ)
@@ -153,8 +169,12 @@ private lemma intCast_eq_zero_of_dvd {m n : ℕ} (h : m ∣ n) (x : ℤ)
 
 private lemma intCast_eq_one_of_dvd {m n : ℕ} (h : m ∣ n) (x : ℤ)
     (hx : (x : ZMod n) = 1) : (x : ZMod m) = 1 := by
-  have h2 := intCast_eq_zero_of_dvd h _ (by push_cast; simp [hx] : ((x - 1 : ℤ) : ZMod n) = 0)
-  push_cast at h2; rwa [sub_eq_zero] at h2
+  have hx0 : ((x - 1 : ℤ) : ZMod n) = 0 := by
+    push_cast
+    simp [hx]
+  have h2 := intCast_eq_zero_of_dvd h _ hx0
+  push_cast at h2
+  rwa [sub_eq_zero] at h2
 
 open CongruenceSubgroup in
 private lemma Gamma_le_of_dvd {m n : ℕ} (h : m ∣ n) : Gamma n ≤ Gamma m := by
@@ -167,13 +187,18 @@ private lemma Gamma_le_of_dvd {m n : ℕ} (h : m ∣ n) : Gamma n ≤ Gamma m :=
 
 private lemma int_crt {m n x y : ℤ} (h : x ≡ y [ZMOD ↑(Int.gcd m n)]) :
     ∃ z : ℤ, z ≡ x [ZMOD m] ∧ z ≡ y [ZMOD n] := by
-  rw [Int.modEq_iff_dvd] at h; obtain ⟨k, hk⟩ := h
-  have hbez := Int.gcd_eq_gcd_ab m n; set g := (↑(Int.gcd m n) : ℤ)
+  rw [Int.modEq_iff_dvd] at h
+  obtain ⟨k, hk⟩ := h
+  have hbez := Int.gcd_eq_gcd_ab m n
+  set g := (↑(Int.gcd m n) : ℤ)
   refine ⟨x + m * (Int.gcdA m n * k), ?_, ?_⟩
-  · rw [Int.modEq_iff_dvd]; exact ⟨-(Int.gcdA m n * k), by ring⟩
+  · rw [Int.modEq_iff_dvd]
+    exact ⟨-(Int.gcdA m n * k), by ring⟩
   · rw [Int.modEq_iff_dvd]
     exact ⟨Int.gcdB m n * k,
-      by rw [show y = x + g * k from by linarith, hbez]; ring⟩
+      by
+        rw [show y = x + g * k by linarith, hbez]
+        ring⟩
 
 private lemma intModEq_to_zmod {m : ℕ} {a b : ℤ} (h : a ≡ b [ZMOD ↑m]) :
     (a : ZMod m) = (b : ZMod m) :=
@@ -186,7 +211,8 @@ private lemma SL2_gamma_entry_modEq (N : ℕ) (γ : SpecialLinearGroup (Fin 2) �
   have h := congr_fun₂ (congr_arg Subtype.val hγ) i j
   simp only [map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply, coe_one,
     Int.coe_castRingHom] at h
-  rw [← ZMod.intCast_eq_intCast_iff]; simpa [one_apply] using h.symm
+  rw [← ZMod.intCast_eq_intCast_iff]
+  simpa [one_apply] using h.symm
 
 private lemma crt_lift_reduces_mod {a b : ℕ} [NeZero (Nat.lcm a b)]
     (M : Matrix (Fin 2) (Fin 2) ℤ) (β : SpecialLinearGroup (Fin 2) ℤ)
@@ -212,33 +238,40 @@ private lemma exists_Gamma_factor_of_mem_Gamma_gcd (a b : ℕ) [NeZero a] [NeZer
   have hcompat : ∀ i j : Fin 2,
       ((1 : SpecialLinearGroup (Fin 2) ℤ) i j : ℤ) ≡
       (γ i j : ℤ) [ZMOD ↑(Int.gcd (↑a) (↑b))] := by
-    rw [show (↑(Int.gcd (↑a : ℤ) (↑b : ℤ)) : ℤ) = ↑(Nat.gcd a b) from by simp [Int.gcd]]
+    rw [show (↑(Int.gcd (↑a : ℤ) (↑b : ℤ)) : ℤ) = ↑(Nat.gcd a b) by
+      simp [Int.gcd]]
     exact SL2_gamma_entry_modEq _ γ hγ
   obtain ⟨z00, hz00a, hz00b⟩ := int_crt (hcompat 0 0)
   obtain ⟨z01, hz01a, hz01b⟩ := int_crt (hcompat 0 1)
   obtain ⟨z10, hz10a, hz10b⟩ := int_crt (hcompat 1 0)
   obtain ⟨z11, hz11a, hz11b⟩ := int_crt (hcompat 1 1)
   have hdet_lcm : z00 * z11 - z01 * z10 ≡ 1 [ZMOD ↑(Nat.lcm a b)] := by
-    rw [show (↑(Nat.lcm a b) : ℤ) = ↑(Int.lcm ↑a ↑b) from by simp [Int.lcm, Nat.lcm]]
+    rw [show (↑(Nat.lcm a b) : ℤ) = ↑(Int.lcm ↑a ↑b) by
+      simp [Int.lcm, Nat.lcm]]
     rw [← Int.modEq_and_modEq_iff_modEq_lcm]
     refine ⟨?_, ?_⟩
     · show z00 * z11 - z01 * z10 ≡ 1 * 1 - 0 * 0 [ZMOD ↑a]
       exact (hz00a.mul hz11a).sub (hz01a.mul hz10a)
     · have hdetγ : (γ 0 0 : ℤ) * γ 1 1 - γ 0 1 * γ 1 0 = 1 := by
-        have h := γ.prop; rw [det_fin_two] at h; exact_mod_cast h
+        have h := γ.prop
+        rw [det_fin_two] at h
+        exact_mod_cast h
       show z00 * z11 - z01 * z10 ≡ 1 [ZMOD ↑b]
-      rw [← hdetγ]; exact (hz00b.mul hz11b).sub (hz01b.mul hz10b)
+      rw [← hdetγ]
+      exact (hz00b.mul hz11b).sub (hz01b.mul hz10b)
   set M : Matrix (Fin 2) (Fin 2) ℤ := !![z00, z01; z10, z11]
   have hM_det : (M.map (Int.castRingHom (ZMod (Nat.lcm a b)))).det = 1 := by
     simp only [det_fin_two, M, Matrix.map_apply, Int.coe_castRingHom]
     have h := intModEq_to_zmod hdet_lcm
-    push_cast at h ⊢; exact_mod_cast h
+    push_cast at h ⊢
+    exact_mod_cast h
   obtain ⟨β, hβ⟩ := SL2Reduction.SL2_reduction_surjective (Nat.lcm a b)
     ⟨M.map (Int.castRingHom (ZMod (Nat.lcm a b))), hM_det⟩
   have hβ_mat : (↑(SpecialLinearGroup.map (Int.castRingHom (ZMod (Nat.lcm a b))) β) :
       Matrix (Fin 2) (Fin 2) (ZMod (Nat.lcm a b))) =
       M.map (Int.castRingHom (ZMod (Nat.lcm a b))) := congr_arg Subtype.val hβ
-  have hzM : ∀ i j : Fin 2, (M i j : ZMod a) = ((1 : SpecialLinearGroup (Fin 2) ℤ) i j : ZMod a) ∧
+  have hzM : ∀ i j : Fin 2,
+      (M i j : ZMod a) = ((1 : SpecialLinearGroup (Fin 2) ℤ) i j : ZMod a) ∧
       (M i j : ZMod b) = (γ i j : ZMod b) := by
     intro i j
     fin_cases i <;> fin_cases j <;>
@@ -302,11 +335,12 @@ private lemma Gamma0_mul_apply_one_zero_and_gcd (τ A : Matrix (Fin 2) (Fin 2) �
   · rw [← Int.isCoprime_iff_gcd_eq_one]
     have hmod : (N : ℤ) ∣ ((τ * A) 1 1 - A 1 1) := by
       have : (τ * A) 1 1 - A 1 1 = τ 1 0 * A 0 1 + (τ 1 1 - 1) * A 1 1 := by
-        simp [Matrix.mul_apply, Fin.sum_univ_two]; ring
+        simp [Matrix.mul_apply, Fin.sum_univ_two]
+        ring
       rw [this]
       exact dvd_add (dvd_mul_of_dvd_left hτ10 _) (dvd_mul_of_dvd_left hτ11 _)
     obtain ⟨k, hk⟩ := hmod
-    rw [show (τ * A) 1 1 = A 1 1 + k * ↑N from by linarith]
+    rw [show (τ * A) 1 1 = A 1 1 + k * ↑N by linarith]
     exact (Int.isCoprime_iff_gcd_eq_one.mpr hAco2).add_mul_right_left k
 
 private lemma mapGL_mul_coe_eq_intMatrix (τ δ : SpecialLinearGroup (Fin 2) ℤ)
@@ -317,7 +351,8 @@ private lemma mapGL_mul_coe_eq_intMatrix (τ δ : SpecialLinearGroup (Fin 2) ℤ
         (δ : Matrix (Fin 2) (Fin 2) ℤ)).map (Int.cast : ℤ → ℚ) := by
   simp only [GeneralLinearGroup.coe_mul, mapGL_coe_matrix, map_apply_coe,
     RingHom.mapMatrix_apply, algebraMap_int_eq, Int.coe_castRingHom, hA]
-  ext i j; simp [Matrix.mul_apply, Matrix.map_apply]
+  ext i j
+  simp [Matrix.mul_apply, Matrix.map_apply]
 
 open CongruenceSubgroup in
 private lemma mem_Gamma0_doubleCoset_of_mem_Delta0
@@ -340,7 +375,8 @@ private lemma mem_Gamma0_doubleCoset_of_mem_Delta0
     have := Subgroup.map_injective mapGL_injective h
     rw [show Nat.gcd A.det.natAbs N = Int.gcd A.det N from rfl,
       hdet_coprime, Gamma_one_top] at this
-    rw [sup_comm]; exact this.symm
+    rw [sup_comm]
+    exact this.symm
   obtain ⟨τ_N, hτ_N, τ_a, hτ_a, hσ₁_eq⟩ :=
     Subgroup.mem_sup_of_normal_left.mp (h_top ▸ Subgroup.mem_top σ₁)
   have hτ_N_Gamma0 : τ_N ∈ Gamma0 N := GammaN_le_Gamma0 N hτ_N
@@ -348,14 +384,21 @@ private lemma mem_Gamma0_doubleCoset_of_mem_Delta0
     rwa [Gamma0_mem, ZMod.intCast_zmod_eq_zero_iff_dvd] at hτ_N_Gamma0
   have hτ11 : (N : ℤ) ∣ ((τ_N : Matrix (Fin 2) (Fin 2) ℤ) 1 1 - 1) := by
     rw [Gamma_mem] at hτ_N
-    exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp (by push_cast; simp [hτ_N.2.2.2])
+    exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp (by
+      push_cast
+      simp [hτ_N.2.2.2])
   have hτ_ker : τ_a ∈ (SpecialLinearGroup.map (Int.castRingHom (ZMod A.det.natAbs))).ker := by
-    rw [MonoidHom.mem_ker]; rwa [Gamma_mem'] at hτ_a
+    rw [MonoidHom.mem_ker]
+    rwa [Gamma_mem'] at hτ_a
   obtain ⟨h_sl, hh_sl⟩ := conj_ker_mem_SLnZ 2 α A hA hAdet_ne τ_a hτ_ker
   set γ₂' := h_sl * σ₂
-  have hx_eq' : mapGL ℚ σ₁ * α * mapGL ℚ σ₂ = mapGL ℚ τ_N * α * mapGL ℚ γ₂' := by
+  have hx_eq' :
+      mapGL ℚ σ₁ * α * mapGL ℚ σ₂ = mapGL ℚ τ_N * α * mapGL ℚ γ₂' := by
     rw [hσ₁_eq.symm, map_mul, map_mul, mul_assoc, mul_assoc, mul_assoc]
-    congr 1; rw [← mul_assoc, show mapGL ℚ τ_a * α = α * mapGL ℚ h_sl from by rw [hh_sl]; group,
+    congr 1
+    rw [← mul_assoc, show mapGL ℚ τ_a * α = α * mapGL ℚ h_sl by
+      rw [hh_sl]
+      group,
       mul_assoc]
   obtain ⟨hCN, hCco2⟩ := Gamma0_mul_apply_one_zero_and_gcd N
     (τ_N : Matrix (Fin 2) (Fin 2) ℤ) A hτ10 hτ11 hAN hAco2
@@ -363,10 +406,13 @@ private lemma mem_Gamma0_doubleCoset_of_mem_Delta0
     rw [Gamma0_mem, ZMod.intCast_zmod_eq_zero_iff_dvd]
     refine dvd_apply_one_zero_of_dvd_mul N _ (γ₂' : Matrix (Fin 2) (Fin 2) ℤ) ?_ hCN hCco2
     obtain ⟨_, _, B, hB, hBN, _⟩ := hx_delta
-    have hB_eq : B = (τ_N : Matrix (Fin 2) (Fin 2) ℤ) * A * (γ₂' : Matrix (Fin 2) (Fin 2) ℤ) :=
+    have hB_eq :
+        B = (τ_N : Matrix (Fin 2) (Fin 2) ℤ) * A *
+          (γ₂' : Matrix (Fin 2) (Fin 2) ℤ) :=
       Matrix.map_injective (Int.cast_injective)
         (hB.symm.trans (hx_eq' ▸ mapGL_mul_coe_eq_intMatrix τ_N γ₂' α A hA))
-    rw [← hB_eq]; exact hBN
+    rw [← hB_eq]
+    exact hBN
   rw [DoubleCoset.mem_doubleCoset]
   exact ⟨mapGL ℚ τ_N, Subgroup.mem_map_of_mem _ hτ_N_Gamma0,
     mapGL ℚ γ₂', Subgroup.mem_map_of_mem _ hγ₂'_mem, hx_eq'⟩
@@ -388,14 +434,18 @@ theorem doubleCoset_eq_of_Gamma0_coprimeDet
       ((Gamma0 N).map (mapGL ℚ)) := by
   have hdet_pos := hα.2.1
   have hAdet_pos : 0 < A.det := by
-    exact Int.cast_pos.mp (by rw [(det_intMat_cast 2 A).symm, ← hA]; exact hdet_pos)
+    exact Int.cast_pos.mp (by
+      rw [(det_intMat_cast 2 A).symm, ← hA]
+      exact hdet_pos)
   have hAco2 : Int.gcd (A 1 1) N = 1 :=
     gcd_A11_N_eq_one N A hAN hdet_coprime
-  ext x; constructor
+  ext x
+  constructor
   · intro ⟨hx_dc, hx_delta⟩
     rw [DoubleCoset.mem_doubleCoset] at hx_dc
     obtain ⟨γ₁, hγ₁, γ₂, hγ₂, hx_eq⟩ := hx_dc
-    obtain ⟨σ₁, rfl⟩ := hγ₁; obtain ⟨σ₂, rfl⟩ := hγ₂
+    obtain ⟨σ₁, rfl⟩ := hγ₁
+    obtain ⟨σ₂, rfl⟩ := hγ₂
     rw [SetLike.mem_coe] at hx_delta
     rw [hx_eq] at hx_delta ⊢
     exact mem_Gamma0_doubleCoset_of_mem_Delta0 N α A hA hAN hAco2

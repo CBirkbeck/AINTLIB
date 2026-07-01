@@ -38,19 +38,6 @@ section GaussProduct
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-/-- Conjugation `χ ↦ χ⁻¹` preserves oddness of Dirichlet characters. -/
-lemma odd_inv_mem_oddCharacters {χ : DirichletCharacter ℂ p}
-    (hχ : χ ∈ oddCharacters p) : χ⁻¹ ∈ oddCharacters p := by
-  classical
-  rw [oddCharacters, Finset.mem_filter] at hχ ⊢
-  refine ⟨Finset.mem_univ _, ?_⟩
-  -- `χ⁻¹(-1) = (χ(-1))⁻¹ = (-1)⁻¹ = -1`.
-  change χ⁻¹ (-1) = -1
-  have h_neg_unit : IsUnit ((-1 : ZMod p)) := IsUnit.neg isUnit_one
-  have hχ_neg_one : χ (-1) = -1 := hχ.2
-  rw [MulChar.inv_apply_eq_inv, hχ_neg_one]
-  simp
-
 /-- **G7 (squared form)**: `(∏_{χ odd} τ(χ))² = (-p)^|X⁻|`.
 
 The squared version of section9_detailed Prop 5.3. Avoids the Gauss sum
@@ -68,12 +55,11 @@ theorem gaussSum_oddCharacters_prod_sq :
       ∏ χ ∈ oddCharacters p,
         gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) := by
     refine Finset.prod_bij (fun χ _ => χ⁻¹)
-      (fun χ hχ => odd_inv_mem_oddCharacters p hχ) ?_ ?_ ?_
+      (fun _ hχ => inv_mem_oddCharacters p hχ) ?_ ?_ ?_
     · intro χ₁ _ χ₂ _ hχ
       rw [show χ₁ = (χ₁⁻¹)⁻¹ from (inv_inv _).symm, hχ, inv_inv]
     · intro χ hχ
-      refine ⟨χ⁻¹, odd_inv_mem_oddCharacters p hχ, ?_⟩
-      exact inv_inv _
+      exact ⟨χ⁻¹, inv_mem_oddCharacters p hχ, inv_inv _⟩
     · intro χ _
       rfl
   -- Step 2: `(∏ τ(χ))² = ∏ τ(χ) · ∏ τ(χ⁻¹) = ∏ (τ(χ)·τ(χ⁻¹))`.
@@ -85,16 +71,14 @@ theorem gaussSum_oddCharacters_prod_sq :
       gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) *
         gaussSum χ⁻¹ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) = -(p : ℂ) := by
     intro χ hχ
-    classical
-    rw [oddCharacters, Finset.mem_filter] at hχ
-    have hχ_neg_one : χ (-1) = -1 := hχ.2
+    have hχ_odd : χ.Odd := (Finset.mem_filter.mp hχ).2
+    have hχ_neg_one : χ (-1) = -1 := hχ_odd
+    -- Odd characters are nontrivial: `1` is even, so `χ ≠ 1`.
     have hχ_ne_one : χ ≠ 1 := by
-      intro h
-      rw [h] at hχ_neg_one
-      have : (1 : DirichletCharacter ℂ p) (-1) = 1 :=
-        MulChar.one_apply (IsUnit.neg isUnit_one)
-      rw [this] at hχ_neg_one
-      norm_num at hχ_neg_one
+      rintro rfl
+      have h_one_even : (1 : DirichletCharacter ℂ p).Even :=
+        MulChar.one_apply isUnit_one.neg
+      exact DirichletCharacter.Odd.not_even _ hχ_odd h_one_even
     rw [gaussSum_mul_gaussSum_inv_stdAddChar p hχ_ne_one, hχ_neg_one]
     ring
   rw [Finset.prod_congr rfl h_term, Finset.prod_const]

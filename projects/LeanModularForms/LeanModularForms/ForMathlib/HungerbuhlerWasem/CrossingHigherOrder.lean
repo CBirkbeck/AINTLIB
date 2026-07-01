@@ -99,7 +99,7 @@ theorem hasDerivWithinAt_Ioi_of_tendsto
   obtain ⟨s, hs_mem, hs_diff⟩ := hγ_diff.exists_mem
   exact hasDerivWithinAt_Ioi_iff_Ici.mpr
     (hasDerivWithinAt_Ici_of_tendsto_deriv
-      (fun t ht => (hs_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hs_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hs_mem hL_right)
 
 /-- For a function `γ` with `Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L)` and eventual
@@ -114,7 +114,7 @@ theorem hasDerivWithinAt_Iio_of_tendsto
   obtain ⟨s, hs_mem, hs_diff⟩ := hγ_diff.exists_mem
   exact hasDerivWithinAt_Iio_iff_Iic.mpr
     (hasDerivWithinAt_Iic_of_tendsto_deriv
-      (fun t ht => (hs_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hs_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hs_mem hL_left)
 
 /-- A cutoff-integrability lemma for `c / (z - s)^k`, mirroring
@@ -124,18 +124,18 @@ theorem cpvIntegrandOn_singleMonomial_intervalIntegrable
     (γ : ClosedPwC1Immersion x) {s : ℂ} {S : Finset ℂ} (hs : s ∈ S)
     (c : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
     IntervalIntegrable
-      (fun t => cpvIntegrandOn S (fun z => c / (z - s) ^ k)
+      (fun t ↦ cpvIntegrandOn S (fun z ↦ c / (z - s) ^ k)
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend ε t)
       MeasureTheory.volume 0 1 := by
   classical
   obtain ⟨K, hLip⟩ := ClosedPwC1Immersion.lipschitzWith_extend γ
   set γP : PiecewiseC1Path x x := γ.toPwC1Immersion.toPiecewiseC1Path
   set badSet : Set ℝ := {t | ∃ s' ∈ S, ‖γP.toPath.extend t - s'‖ ≤ ε} with badSet_def
-  set monomial : ℂ → ℂ := fun z => c / (z - s) ^ k
-  set h_curve : ℝ → ℂ := fun t =>
+  set monomial : ℂ → ℂ := fun z ↦ c / (z - s) ^ k
+  set h_curve : ℝ → ℂ := fun t ↦
     monomial (γP.toPath.extend t) * deriv γP.toPath.extend t
   have h_indicator_eq :
-      (fun t => cpvIntegrandOn S monomial γP.toPath.extend ε t) =
+      (fun t ↦ cpvIntegrandOn S monomial γP.toPath.extend ε t) =
       badSetᶜ.indicator h_curve := by
     funext t
     by_cases ht_in : t ∈ badSet
@@ -149,7 +149,7 @@ theorem cpvIntegrandOn_singleMonomial_intervalIntegrable
   have h_M_polar_nonneg : 0 ≤ M_polar :=
     div_nonneg (norm_nonneg _) (pow_nonneg hε.le _)
   have h_M_nonneg : 0 ≤ M := mul_nonneg h_M_polar_nonneg (NNReal.coe_nonneg K)
-  have h_bound_on_compl : ∀ t ∈ badSetᶜ, ‖h_curve t‖ ≤ M := fun t ht_in => by
+  have h_bound_on_compl : ∀ t ∈ badSetᶜ, ‖h_curve t‖ ≤ M := fun t ht_in ↦ by
     simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_exists, not_and,
       not_le, badSet_def] at ht_in
     calc ‖h_curve t‖ = ‖monomial (γP.toPath.extend t)‖ *
@@ -169,7 +169,7 @@ theorem cpvIntegrandOn_singleMonomial_intervalIntegrable
         {t : ℝ | ‖γP.toPath.extend t - s'‖ ≤ ε} := by
       ext t; simp only [badSet_def, Set.mem_setOf_eq, Set.mem_iUnion, Finset.mem_coe, exists_prop]
     rw [h_eq]
-    exact MeasurableSet.biUnion S.countable_toSet fun s' _ =>
+    exact MeasurableSet.biUnion S.countable_toSet fun s' _ ↦
       measurableSet_le (h_γ_meas.sub_const s').norm measurable_const
   rw [intervalIntegrable_iff, h_indicator_eq]
   refine MeasureTheory.IntegrableOn.of_bound measure_Ioc_lt_top

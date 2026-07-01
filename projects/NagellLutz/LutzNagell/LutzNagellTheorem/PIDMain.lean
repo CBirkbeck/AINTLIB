@@ -50,8 +50,9 @@ lemma nsmul_eq_zero_affine_to_jac {x y : K}
     (h : n • (Affine.Point.some _ _ hns) = 0) :
     (n : ℤ) • Jacobian.Point.fromAffine (Affine.Point.some _ _ hns) = 0 := by
   rw [natCast_zsmul]
-  simpa only [map_nsmul, map_zero] using
-    congrArg (Jacobian.Point.toAffineAddEquiv (curveK R K W)).symm h
+  have h' := congrArg (Jacobian.Point.toAffineAddEquiv (curveK R K W)).symm h
+  rw [map_nsmul, map_zero] at h'
+  simpa using h'
 
 omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] [DecidableEq K]
     [IsFractionRing R K] in
@@ -65,14 +66,17 @@ lemma exists_some_of_ne_zero {Q : Affine.Point ((curveK R K W).toAffine)}
 
 /-! ### The powerful denominator theorem (no torsion hypothesis needed) -/
 
-omit [CharZero R] [DecidableEq K] in
-/-- Every prime factor of `den_R(x)` on a curve point has multiplicity at least 2. -/
-theorem den_powerful_of_on_curve {x y : K}
+omit [IsPrincipalIdealRing R] [CharZero R] [DecidableEq K] in
+/-- Every prime factor of `den_R(x)` on a curve point has multiplicity at least 2.
+
+Only needs `R` to be a UFD (not a PID): the proof is a thin wrapper around the
+UFD-general `den_no_simple_prime_factor_of_on_curve`. -/
+theorem den_powerful_of_on_curve [UniqueFactorizationMonoid R] {x y : K}
     (heq : y ^ 2 + algebraMap R K W.a₁ * x * y + algebraMap R K W.a₃ * y =
       x ^ 3 + algebraMap R K W.a₂ * x ^ 2 + algebraMap R K W.a₄ * x + algebraMap R K W.a₆) :
     ∀ q : R, Prime q → q ∣ (IsFractionRing.den R x : R) →
       q ^ 2 ∣ (IsFractionRing.den R x : R) :=
-  fun _ hq hqd => by_contra fun h => den_no_simple_prime_factor_of_on_curve W heq hq hqd h
+  fun _ hq hqd ↦ by_contra fun h ↦ den_no_simple_prime_factor_of_on_curve W heq hq hqd h
 
 /-! ### Odd prime factor case -/
 
@@ -149,7 +153,7 @@ theorem lutz_nagell_integrality_pid
   set P := Affine.Point.some _ _ hpt
   have hP_ne : P ≠ 0 := Affine.Point.some_ne_zero hpt
   have hm_ne_one : addOrderOf P ≠ 1 :=
-    fun h => hP_ne (AddMonoid.addOrderOf_eq_one_iff.mp h)
+    fun h ↦ hP_ne (AddMonoid.addOrderOf_eq_one_iff.mp h)
   by_cases hord2 : addOrderOf P = 2
   · right
     have h2P : (2 : ℕ) • P = 0 := by rw [← hord2, addOrderOf_nsmul_eq_zero]
@@ -159,7 +163,7 @@ theorem lutz_nagell_integrality_pid
     by_cases h_odd : ∃ p, p.Prime ∧ p ≠ 2 ∧ p ∣ addOrderOf P
     · obtain ⟨p, hp, hodd, hpm⟩ := h_odd
       exact integrality_of_odd_prime_factor W hpt hp hodd hpm htor (hsf_all p hp hpm)
-    · push_neg at h_odd
+    · push Not at h_odd
       have h_all_two : ∀ q, q.Prime → q ∣ addOrderOf P → q = 2 := by
         intro q hq hqm; by_contra hne; exact h_odd q hq hne hqm
       have h2_dvd : 2 ∣ addOrderOf P := by
@@ -171,7 +175,7 @@ theorem lutz_nagell_integrality_pid
         rw [h_all_two q hq (hqk₁.trans ⟨2, by omega⟩)] at hqk₁
         obtain ⟨j, hj⟩ := hqk₁; exact ⟨j, by omega⟩
       exact integrality_of_four_dvd_order W hpt h4_dvd htor
-        (hsf_all 2 (by decide) h2_dvd)
+        (hsf_all 2 Nat.prime_two h2_dvd)
 
 /-! ### Discriminant divisibility -/
 
@@ -218,20 +222,31 @@ private lemma kappa_sq_dvd_four_delta (x₀ κ₀ : R)
     (dvd_mul_of_dvd_right hdvd_h_sq _)
 
 omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
+/-- The univariate 3-division polynomial `W.Ψ₃`, evaluated at `x₀`, equals the
+explicit quartic `3x₀⁴ + b₂x₀³ + 3b₄x₀² + 3b₆x₀ + b₈`. This is definitional via the
+mathlib definition of `WeierstrassCurve.Ψ₃`; it bridges the named polynomial to the
+raw expression used internally. -/
+lemma eval_Ψ₃ (x₀ : R) :
+    (W.Ψ₃).eval x₀ =
+      3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 + 3 * W.b₆ * x₀ + W.b₈ := by
+  rw [WeierstrassCurve.Ψ₃]
+  simp only [eval_add, eval_mul, eval_pow, eval_C, eval_X, eval_ofNat]
+
+omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
 /-- **Lutz–Nagell discriminant divisibility over PIDs.**
 
-For integral coordinates on the curve satisfying `κ₀² ∣ 4·Ψ₃(x₀)`,
-either κ₀ = 0 or κ₀² ∣ 4Δ. The hypothesis `κ₀² ∣ 4·Ψ₃(x₀)` follows from
-torsion via the coordinate formula for `2•P`. -/
+For integral coordinates on the curve satisfying `κ₀² ∣ 4·Ψ₃(x₀)`, where `Ψ₃` is
+mathlib's 3-division polynomial `WeierstrassCurve.Ψ₃`, either κ₀ = 0 or κ₀² ∣ 4Δ.
+The hypothesis `κ₀² ∣ 4·Ψ₃(x₀)` follows from torsion via the coordinate formula
+for `2•P`. -/
 theorem lutz_nagell_pid_discriminant
     {x₀ y₀ : R}
     (hcurve : y₀ ^ 2 + W.a₁ * x₀ * y₀ + W.a₃ * y₀ =
       x₀ ^ 3 + W.a₂ * x₀ ^ 2 + W.a₄ * x₀ + W.a₆)
-    (hdvd_Psi3 : (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣
-      4 * (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 +
-        3 * W.b₄ * x₀ ^ 2 + 3 * W.b₆ * x₀ + W.b₈)) :
+    (hdvd_Psi3 : (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣ 4 * (W.Ψ₃).eval x₀) :
     (2 * y₀ + W.a₁ * x₀ + W.a₃) = 0 ∨
     (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣ 4 * W.Δ := by
+  rw [eval_Ψ₃] at hdvd_Psi3
   by_cases hκ : 2 * y₀ + W.a₁ * x₀ + W.a₃ = 0
   · exact Or.inl hκ
   · exact Or.inr (kappa_sq_dvd_four_delta W x₀ _ (kappa_sq_eq_Psi2Sq W hcurve) hdvd_Psi3)
@@ -260,7 +275,7 @@ private lemma curveR_equation_of_isInteger
     simp only [map_add, map_mul, map_pow]; linear_combination hQ
   exact IsFractionRing.injective R K h
 
-omit [CharZero R] in
+omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
 private lemma addOrderOf_ne_two_of_kappa_ne_zero
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
     {x₀ y₀ : R} (hx : algebraMap R K x₀ = x) (hy : algebraMap R K y₀ = y)
@@ -270,7 +285,7 @@ private lemma addOrderOf_ne_two_of_kappa_ne_zero
   have h2P : (2 : ℕ) • Affine.Point.some _ _ hns = 0 := by
     convert addOrderOf_nsmul_eq_zero (x := Affine.Point.some _ _ hns) using 2; exact h2.symm
   have h2Jac := nsmul_eq_zero_affine_to_jac W h2P
-  have hψ₂ := evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns 2 h2Jac
+  have hψ₂ := evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveK R K W) hns 2 h2Jac
   rw [WeierstrassCurve.ψ_two, WeierstrassCurve.ψ₂,
       WeierstrassCurve.Affine.evalEval_polynomialY] at hψ₂
   simp only [curveK_a₁, curveK_a₃] at hψ₂
@@ -287,7 +302,7 @@ private lemma Phi2_eval_eq (x : K) :
     eval x ((curveK R K W).Φ 2) =
       x * eval x (curveK R K W).Ψ₂Sq - eval x (curveK R K W).Ψ₃ := by
   conv_lhs =>
-    rw [show (curveK R K W).Φ 2 = X * (curveK R K W).Ψ₂Sq - (curveK R K W).Ψ₃ from by
+    rw [show (curveK R K W).Φ 2 = X * (curveK R K W).Ψ₂Sq - (curveK R K W).Ψ₃ by
       rw [WeierstrassCurve.Φ, WeierstrassCurve.ΨSq_two]
       simp [even_two, WeierstrassCurve.preΨ_three, WeierstrassCurve.preΨ_one]]
   simp only [eval_sub, eval_mul, eval_X]
@@ -353,19 +368,19 @@ private lemma kappa_sq_dvd_four_Psi3_of_torsion
   set P := Affine.Point.some _ _ hpt; set κ₀ := 2 * y₀ + W.a₁ * x₀ + W.a₃
   have hm_pos : 0 < addOrderOf P := htor.addOrderOf_pos
   have hord_ne1 : addOrderOf P ≠ 1 :=
-    fun h => Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
+    fun h ↦ Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
   have hord_ne2 : addOrderOf P ≠ 2 :=
     addOrderOf_ne_two_of_kappa_ne_zero W hpt hx hy hκ
   have hord_gt2 : 2 < addOrderOf P := by omega
-  have h2P_ne : (2 : ℕ) • P ≠ 0 := fun h =>
+  have h2P_ne : (2 : ℕ) • P ≠ 0 := fun h ↦
     absurd (Nat.le_of_dvd (by omega) (addOrderOf_dvd_of_nsmul_eq_zero h))
       (not_le.mpr hord_gt2)
   obtain ⟨x', y', hns', h2P_eq⟩ := exists_some_of_ne_zero W h2P_ne
   have hsf_2P : ∀ p : ℕ, p.Prime → p ∣ addOrderOf (Affine.Point.some _ _ hns') →
-      Squarefree (p : R) := fun p hp hpd =>
+      Squarefree (p : R) := fun p hp hpd ↦
     hsf_all p hp (hpd.trans (by
       rw [← h2P_eq]; exact addOrderOf_dvd_of_mem_zmultiples ⟨2, rfl⟩))
-  have hcoord := x_coord_nsmul_eq W hpt (show (2 : ℤ) ≠ 0 by norm_num) hns' (by
+  have hcoord := x_coord_nsmul_eq (curveK R K W) hpt (show (2 : ℤ) ≠ 0 by norm_num) hns' (by
     rw [show (2 : ℤ) = ↑(2 : ℕ) from rfl, natCast_zsmul]; exact h2P_eq)
   rw [PsiSq_two_eval_eq, Phi2_eval_eq] at hcoord
   have hkappa_sq_K : (algebraMap R K κ₀) ^ 2 = eval x (curveK R K W).Ψ₂Sq := by
@@ -430,46 +445,43 @@ theorem lutz_nagell_cubicDisc_discriminant (ha₁ : W.a₁ = 0) (ha₃ : W.a₃ 
     y₀ = 0 ∨ y₀ ^ 2 ∣ 4 * W.a₄ ^ 3 + 27 * W.a₆ ^ 2 + 4 * W.a₂ ^ 3 * W.a₆ -
       W.a₂ ^ 2 * W.a₄ ^ 2 - 18 * W.a₂ * W.a₄ * W.a₆ := by
   rcases lutz_nagell_pid_discriminant_of_torsion W hpt htor hsf_all hx hy with hκ | hdvd
-  · left; simp only [ha₁, ha₃, mul_zero, add_zero] at hκ
+  · left; simp only [ha₁, ha₃, add_zero] at hκ
     exact mul_left_cancel₀ two_ne_zero (by linear_combination hκ)
   · by_cases hy₀ : y₀ = 0
     · exact Or.inl hy₀
     · right
       have hcurve_gen : y₀ ^ 2 + W.a₁ * x₀ * y₀ + W.a₃ * y₀ =
           x₀ ^ 3 + W.a₂ * x₀ ^ 2 + W.a₄ * x₀ + W.a₆ := by
-        rw [ha₁, ha₃]; simp; linear_combination hcurve
+        rw [ha₁, ha₃]; linear_combination hcurve
       have hκ_ne : 2 * y₀ + W.a₁ * x₀ + W.a₃ ≠ 0 := by
-        simp only [ha₁, ha₃, mul_zero, add_zero, zero_mul, zero_add]
-        exact fun h => hy₀ ((mul_eq_zero.mp h).resolve_left two_ne_zero)
+        simp only [ha₁, ha₃, add_zero, zero_mul]
+        exact fun h ↦ hy₀ ((mul_eq_zero.mp h).resolve_left two_ne_zero)
       have h4Psi3 := kappa_sq_dvd_four_Psi3_of_torsion W hpt htor hsf_all hx hy
         (kappa_sq_eq_Psi2Sq W hcurve_gen) hκ_ne
-      -- Extract y₀² | Ψ₃ from (2y₀)² | 4Ψ₃
       rw [ha₁, ha₃] at h4Psi3
-      simp only [mul_zero, add_zero, zero_mul] at h4Psi3
-      rw [show (2 * y₀) ^ 2 = 4 * y₀ ^ 2 from by ring] at h4Psi3
+      simp only [add_zero, zero_mul] at h4Psi3
+      rw [show (2 * y₀) ^ 2 = 4 * y₀ ^ 2 by ring] at h4Psi3
       have hΨ₃' : y₀ ^ 2 ∣ 3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
           3 * W.b₆ * x₀ + W.b₈ :=
-        (mul_dvd_mul_iff_left (show (4 : R) ≠ 0 from by norm_num)).mp h4Psi3
-      -- (f')² = (12x₀+4a₂)·y₀² - Ψ₃, so y₀² | (f')²
+        (mul_dvd_mul_iff_left (show (4 : R) ≠ 0 by norm_num)).mp h4Psi3
       have h_fprime_sq : y₀ ^ 2 ∣
           (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 := by
         rw [show (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 =
             (12 * x₀ + 4 * W.a₂) *
               (x₀ ^ 3 + W.a₂ * x₀ ^ 2 + W.a₄ * x₀ + W.a₆) -
             (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
-              3 * W.b₆ * x₀ + W.b₈) from by
+              3 * W.b₆ * x₀ + W.b₈) by
           simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄,
             WeierstrassCurve.b₆, WeierstrassCurve.b₈, ha₁, ha₃]; ring,
           ← hcurve]
         exact dvd_sub (dvd_mul_of_dvd_right dvd_rfl _) hΨ₃'
-      -- Bézout: c₁·y₀² + c₂·(f')² = cubicDisc
       rw [show 4 * W.a₄ ^ 3 + 27 * W.a₆ ^ 2 + 4 * W.a₂ ^ 3 * W.a₆ -
           W.a₂ ^ 2 * W.a₄ ^ 2 - 18 * W.a₂ * W.a₄ * W.a₆ =
         -(27 * x₀ ^ 3 + 27 * W.a₂ * x₀ ^ 2 + 27 * W.a₄ * x₀ -
           4 * W.a₂ ^ 3 + 18 * W.a₂ * W.a₄ - 27 * W.a₆) *
           y₀ ^ 2 +
         (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ - W.a₂ ^ 2 + 4 * W.a₄) *
-          (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 from by
+          (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 by
         rw [hcurve]; ring]
       exact dvd_add (dvd_mul_of_dvd_right dvd_rfl _)
         (dvd_mul_of_dvd_right h_fprime_sq _)

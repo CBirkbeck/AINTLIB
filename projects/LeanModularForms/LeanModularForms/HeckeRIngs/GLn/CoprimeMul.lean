@@ -26,7 +26,7 @@ Scalar double cosets T(c,...,c) act by scaling.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2
 -/
 
-open Matrix Subgroup.Commensurable Pointwise HeckeRing DoubleCoset Matrix.SpecialLinearGroup
+open Matrix HeckeRing DoubleCoset Matrix.SpecialLinearGroup
 
 open scoped Pointwise
 
@@ -51,8 +51,6 @@ lemma DivChain_mul (a b : Fin n → ℕ) (ha : DivChain n a) (hb : DivChain n b)
   simp [diagMat_val _ _ ha, diagMat_val _ _ hb, diagMat_val _ _ (pi_mul_pos n a b ha hb),
     Pi.mul_apply, Matrix.diagonal_mul_diagonal, Nat.cast_mul]
 
-variable [NeZero n]
-
 end DiagMul
 
 variable [NeZero n]
@@ -73,7 +71,6 @@ private lemma nonempty_decompQuot (D : HeckeCoset (GL_pair n)) :
     simpa [HeckeRing.HeckeCoset_deg] using HeckeRing.HeckeCoset_deg_pos (GL_pair n) D
 
 section Scalar
-open scoped Classical
 
 omit [NeZero n] in
 /-- A scalar diagonal `GL_n(ℚ)` matrix equals the scalar multiple of the identity. -/
@@ -247,7 +244,6 @@ theorem T_diag_scalar_mul (c : ℕ) (hc : 0 < c) (b : Fin n → ℕ) (hb_pos : �
 end Scalar
 
 section Coprime
-open scoped Classical
 
 private def congMod (d : ℕ) (σ : SpecialLinearGroup (Fin n) ℤ) : Prop :=
   ∀ i j, (d : ℤ) ∣ (σ.1 i j - if i = j then 1 else 0)
@@ -348,7 +344,8 @@ private lemma CRTProd_mul' (d d' : ℕ) (a b : SpecialLinearGroup (Fin n) ℤ)
     ∃ p q, a * b = p * q ∧ congMod n d p ∧ congMod n d' q := by
   obtain ⟨p₁, q₁, rfl, hp₁, hq₁⟩ := ha
   obtain ⟨p₂, q₂, rfl, hp₂, hq₂⟩ := hb
-  refine ⟨p₁ * (q₁ * p₂ * q₁⁻¹), q₁ * q₂, by group, ?_, congMod_mul n d' _ _ hq₁ hq₂⟩
+  refine ⟨p₁ * (q₁ * p₂ * q₁⁻¹), q₁ * q₂, by group, ?_,
+    congMod_mul n d' _ _ hq₁ hq₂⟩
   have h := congMod_conj n d q₁⁻¹ p₂ hp₂
   rw [inv_inv] at h
   exact congMod_mul n d _ _ hp₁ h

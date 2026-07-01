@@ -55,9 +55,8 @@ theorem zetaUnit_pow_eq_of_zmod_eq {m n : ℕ}
   let ζu : (𝓞 K)ˣ := ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit
   change ζu ^ m = ζu ^ n
   have hord : orderOf ζu = p := by
-    rw [← orderOf_units]
-    show orderOf (ζu : 𝓞 K) = p
-    rw [show (ζu : 𝓞 K) = (zeta_spec p ℚ K).toInteger from IsUnit.unit_spec _]
+    rw [← orderOf_units,
+      show (ζu : 𝓞 K) = (zeta_spec p ℚ K).toInteger from IsUnit.unit_spec _]
     exact ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.eq_orderOf).symm
   rw [pow_eq_pow_iff_modEq, hord]
   exact (ZMod.natCast_eq_natCast_iff m n p).mp h
@@ -67,7 +66,7 @@ theorem zeta_pow_eq_of_zmod_eq {m n : ℕ}
     (h : (m : ZMod p) = (n : ZMod p)) :
     ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m =
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ n := by
-  have h_unit := congrArg (fun u : (𝓞 K)ˣ => (u : 𝓞 K))
+  have h_unit := congrArg (fun u : (𝓞 K)ˣ ↦ (u : 𝓞 K))
     (zetaUnit_pow_eq_of_zmod_eq (p := p) (K := K) h)
   simpa only [Units.val_pow_eq_pow_val, IsUnit.unit_spec] using h_unit
 
@@ -113,11 +112,7 @@ theorem normalizedCyclotomicUnitKWithExponent_sq_val (a e : ℕ)
   let ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
   let c : 𝓞 K := FLT37.cyclotomicUnit p K a
   change (ζ ^ e * c) ^ 2 = ζ ^ (2 * e) * c ^ 2
-  rw [pow_two, pow_two]
-  calc
-    (ζ ^ e * c) * (ζ ^ e * c) = (ζ ^ e * ζ ^ e) * (c * c) := by ring
-    _ = ζ ^ (e + e) * (c * c) := by rw [← pow_add]
-    _ = ζ ^ (2 * e) * (c * c) := by rw [two_mul]
+  rw [mul_pow, ← pow_mul, mul_comm e 2]
 
 /-- Conjugating the quotient unit contributes the expected zeta factor:
 `σ((1 - ζ^a) / (1 - ζ)) = ζ^(1-a) * (1 - ζ^a) / (1 - ζ)`.
@@ -148,7 +143,9 @@ theorem ringOfIntegersComplexConj_cyclotomicUnit_eq_zeta_pow_mul_self
       _ = ζ * (ζ ^ (p - 1) * ringOfIntegersComplexConj K (c a)) := by
         rw [← mul_assoc, mul_comm ζ (ζ ^ (p - 1)), ← pow_succ,
           Nat.sub_one_add_one (Fact.out : Nat.Prime p).ne_zero]
-      _ = -ζ * c (p - a) := by rw [hσ']; ring
+      _ = -ζ * c (p - a) := by
+        rw [hσ']
+        ring
   have hpair : c a = -ζ ^ a * c (p - a) := by
     simpa [c, ζ] using
       FLT37.cyclotomicUnit_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub
@@ -157,15 +154,10 @@ theorem ringOfIntegersComplexConj_cyclotomicUnit_eq_zeta_pow_mul_self
   change -ζ * c (p - a) = ζ ^ (p + 1 - a) * c a
   rw [hpair]
   have ha_le_succ : a ≤ p + 1 := le_trans ha_le (Nat.le_succ p)
-  calc
-    -ζ * c (p - a)
-        = ζ ^ (p + 1 - a) * (-ζ ^ a * c (p - a)) := by
-          rw [show ζ ^ (p + 1 - a) * (-ζ ^ a * c (p - a)) =
-              -(ζ ^ (p + 1 - a) * ζ ^ a) * c (p - a) by ring,
-            ← pow_add, Nat.sub_add_cancel ha_le_succ]
-          rw [show p + 1 = p.succ by rfl, pow_succ, hζp]
-          ring
-    _ = ζ ^ (p + 1 - a) * (-ζ ^ a * c (p - a)) := rfl
+  rw [show ζ ^ (p + 1 - a) * (-ζ ^ a * c (p - a)) =
+      -(ζ ^ (p + 1 - a) * ζ ^ a) * c (p - a) by ring,
+    ← pow_add, Nat.sub_add_cancel ha_le_succ, pow_succ, hζp]
+  ring
 
 /-- The normalized K-side unit is fixed by complex conjugation when the
 exponent satisfies the TeX congruence `2 * e = 1 - a mod p`. -/
@@ -202,16 +194,11 @@ theorem unitsComplexConj_normalizedCyclotomicUnitKWithExponent
     simp
   have hmod :
       (((p - 1) * e + (p + 1 - a) : ℕ) : ZMod p) = (e : ZMod p) := by
-    rw [Nat.cast_add, Nat.cast_mul, hpred, hsub, ← he]
-    rw [Nat.cast_mul]
+    rw [Nat.cast_add, Nat.cast_mul, hpred, hsub, ← he, Nat.cast_mul]
     ring
   have hpow : ζ ^ ((p - 1) * e + (p + 1 - a)) = ζ ^ e := by
     simpa [ζ] using zeta_pow_eq_of_zmod_eq (p := p) (K := K) hmod
-  calc
-    (ζ ^ (p - 1)) ^ e * (ζ ^ (p + 1 - a) * c)
-        = ζ ^ ((p - 1) * e + (p + 1 - a)) * c := by
-          rw [← pow_mul, ← mul_assoc, ← pow_add]
-    _ = ζ ^ e * c := by rw [hpow]
+  rw [← pow_mul, ← mul_assoc, ← pow_add, hpow]
 
 theorem unitsComplexConj_normalizedCyclotomicUnitK
     (hp_odd : p ≠ 2) (a : ℕ) (ha : a.Coprime p) (ha_pos : 1 ≤ a) (ha_le : a ≤ p) :
@@ -247,8 +234,7 @@ theorem unitsComplexConj_normalizedCyclotomicUnitKOfRange
       normalizedCyclotomicUnitKOfRange (p := p) (K := K) a ha_two ha_le := by
   apply unitsComplexConj_normalizedCyclotomicUnitK (p := p) (K := K) hp_odd
   · omega
-  · have hhalf : (p - 1) / 2 ≤ p := by omega
-    omega
+  · omega
 
 /-- The normalized K-side unit descends to the maximal real subfield. -/
 theorem exists_normalizedCyclotomicUnitPlus
@@ -260,10 +246,8 @@ theorem exists_normalizedCyclotomicUnitPlus
   let u : (𝓞 K)ˣ := normalizedCyclotomicUnitKOfRange (p := p) (K := K) a ha_two ha_le
   have hunit := unitsComplexConj_normalizedCyclotomicUnitKOfRange
     (p := p) (K := K) hp_odd a ha_two ha_le
-  have hfixed : ringOfIntegersComplexConj K (u : 𝓞 K) = (u : 𝓞 K) := by
-    have hval := congrArg (fun v : (𝓞 K)ˣ => (v : 𝓞 K)) hunit
-    change ringOfIntegersComplexConj K (u : 𝓞 K) = (u : 𝓞 K) at hval
-    exact hval
+  have hfixed : ringOfIntegersComplexConj K (u : 𝓞 K) = (u : 𝓞 K) :=
+    congrArg (fun v : (𝓞 K)ˣ ↦ (v : 𝓞 K)) hunit
   exact (ringOfIntegersComplexConj_eq_self_iff K (u : 𝓞 K)).mp hfixed
 
 /-- The normalized real cyclotomic unit as an element of `𝓞 K⁺`. -/
@@ -333,9 +317,7 @@ theorem normalizedCyclotomicUnitKOfRange_sq_val_eq_realCyclotomicUnit
   let e := normalizedCyclotomicUnitExponent p a
   let ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
   let c : 𝓞 K := FLT37.cyclotomicUnit p K a
-  have ha_le_p : a ≤ p := by
-    have hhalf : (p - 1) / 2 ≤ p := by omega
-    omega
+  have ha_le_p : a ≤ p := by omega
   have ha_le_succ : a ≤ p + 1 := le_trans ha_le_p (Nat.le_succ p)
   have hsub : ((p + 1 - a : ℕ) : ZMod p) = 1 - (a : ZMod p) := by
     rw [Nat.cast_sub ha_le_succ, Nat.cast_add, Nat.cast_one]
@@ -350,9 +332,7 @@ theorem normalizedCyclotomicUnitKOfRange_sq_val_eq_realCyclotomicUnit
   unfold FLT37.realCyclotomicUnit
   change ζ ^ (2 * e) * c ^ 2 = c * ringOfIntegersComplexConj K c
   rw [ringOfIntegersComplexConj_cyclotomicUnit_eq_zeta_pow_mul_self
-    (p := p) (K := K) a (by omega) ha_le_p]
-  change ζ ^ (2 * e) * c ^ 2 = c * (ζ ^ (p + 1 - a) * c)
-  rw [hpow]
+    (p := p) (K := K) a (by omega) ha_le_p, hpow]
   ring
 
 /-- Plus-side square identity: the square of the normalized descended unit is

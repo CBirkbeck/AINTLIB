@@ -180,7 +180,6 @@ theorem one_vle_prod_of_pointwise_lower_bound
   letI : ValuativeRel A := w.toValuativeRel
   induction T using Finset.induction_on with
   | empty =>
-      simp only [Finset.prod_empty]
       exact (w.vle_total 1 1).elim id id
   | insert a T' ha ih =>
       rw [Finset.prod_insert ha]
@@ -188,9 +187,7 @@ theorem one_vle_prod_of_pointwise_lower_bound
         h_lower a (Finset.mem_insert_self a T')
       have h_T' : w.vle (1 : A) (T'.prod id) :=
         ih (fun t ht => h_lower t (Finset.mem_insert_of_mem ht))
-      have h_one_eq : (1 : A) = (1 : A) * (1 : A) := (one_mul 1).symm
-      conv_lhs => rw [h_one_eq]
-      exact ValuativeRel.mul_vle_mul h_a h_T'
+      exact (one_mul (1 : A)).symm ▸ ValuativeRel.mul_vle_mul h_a h_T'
 
 /-- **Per-element extraction from a multi-element product upper bound**.
 
@@ -282,13 +279,9 @@ theorem vle_of_dominating_unit_multi_corrected_at
     (h_prod : w.vle (T_D.prod id) D_s)
     (h_lower : ∀ t' ∈ T_D, w.vle (1 : A) t') :
     (∀ t' ∈ T_D, w.vle t' D_s) ∧ ¬ w.vle D_s 0 := by
-  classical
   refine ⟨vle_per_t_of_prod_vle_of_lower_bound w h_prod h_lower, ?_⟩
   intro h_D_s_zero
-  have h_one_le_prod : w.vle (1 : A) (T_D.prod id) :=
-    one_vle_prod_of_pointwise_lower_bound w h_lower
-  have h_one_le_D_s : w.vle (1 : A) D_s := w.vle_trans h_one_le_prod h_prod
-  have h_one_le_zero : w.vle (1 : A) 0 := w.vle_trans h_one_le_D_s h_D_s_zero
-  exact w.not_vle_one_zero h_one_le_zero
+  exact w.not_vle_one_zero (w.vle_trans (w.vle_trans
+    (one_vle_prod_of_pointwise_lower_bound w h_lower) h_prod) h_D_s_zero)
 
 end ValuationSpectrum

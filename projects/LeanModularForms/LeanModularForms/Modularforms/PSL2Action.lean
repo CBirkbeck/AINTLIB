@@ -59,7 +59,6 @@ private def pslSmul : PSL(2, ℤ) → ℍ → ℍ :=
   Quotient.lift (fun (a : SL(2, ℤ)) (τ : ℍ) ↦ a • τ) (by
     intro a b hab
     funext τ
-    change a • τ = b • τ
     rw [show b = a * (a⁻¹ * b) by group, mul_smul,
       center_SL2Z_smul_eq _ (QuotientGroup.leftRel_apply.mp hab)])
 
@@ -282,7 +281,8 @@ private theorem fdo_PSL_pairwise_disjoint :
   have hba : (b⁻¹ * a) • σ₁ = σ₂ := by rw [mul_smul, ← h_eq, inv_smul_smul]
   exfalso
   apply hne
-  have hc := c_eq_zero hσ₁ (hba ▸ hσ₂)
+  have hc : ((b⁻¹ * a : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 1 0 = 0 := by
+    rcases eq_one_or_neg_one_of_mem_fdo_mem_fdo hσ₁ (hba ▸ hσ₂) with h | h <;> rw [h] <;> rfl
   obtain ⟨n, hn⟩ := exists_eq_T_zpow_of_c_eq_zero hc
   have hn0 := eq_zero_of_mem_fdo_of_T_zpow_mem_fdo hσ₁ (hn σ₁ ▸ (hba ▸ hσ₂))
   have htriv : ∀ z : ℍ, (b⁻¹ * a) • z = z := fun z ↦ by
@@ -458,13 +458,13 @@ theorem center_SL2R_smul_eq (c : SL(2, ℝ)) (hc : c ∈ Subgroup.center SL(2, �
     · exact .inl (by linarith)
     · exact .inr (by linarith)
   have hζ_ne : ζ ≠ 0 := by rcases hζ_cases with rfl | rfl <;> norm_num
-  have h00 : ((c : Matrix (Fin 2) (Fin 2) ℝ)) 0 0 = ζ := by
+  have h00 : (c : Matrix (Fin 2) (Fin 2) ℝ) 0 0 = ζ := by
     simpa [Matrix.scalar_apply, Matrix.diagonal] using (congr_fun (congr_fun hζ_eq 0) 0).symm
-  have h11 : ((c : Matrix (Fin 2) (Fin 2) ℝ)) 1 1 = ζ := by
+  have h11 : (c : Matrix (Fin 2) (Fin 2) ℝ) 1 1 = ζ := by
     simpa [Matrix.scalar_apply, Matrix.diagonal] using (congr_fun (congr_fun hζ_eq 1) 1).symm
-  have h01 : ((c : Matrix (Fin 2) (Fin 2) ℝ)) 0 1 = 0 := by
+  have h01 : (c : Matrix (Fin 2) (Fin 2) ℝ) 0 1 = 0 := by
     simpa [Matrix.scalar_apply, Matrix.diagonal] using (congr_fun (congr_fun hζ_eq 0) 1).symm
-  have h10 : ((c : Matrix (Fin 2) (Fin 2) ℝ)) 1 0 = 0 := by
+  have h10 : (c : Matrix (Fin 2) (Fin 2) ℝ) 1 0 = 0 := by
     simpa [Matrix.scalar_apply, Matrix.diagonal] using (congr_fun (congr_fun hζ_eq 1) 0).symm
   have hζ_ne_C : (ζ : ℂ) ≠ 0 := by exact_mod_cast hζ_ne
   apply UpperHalfPlane.ext
@@ -477,7 +477,6 @@ private def pslSmul_R : PSL(2, ℝ) → ℍ → ℍ :=
   Quotient.lift (fun (a : SL(2, ℝ)) (τ : ℍ) ↦ a • τ) (by
     intro a b hab
     funext τ
-    change a • τ = b • τ
     rw [show b = a * (a⁻¹ * b) by group, mul_smul,
       center_SL2R_smul_eq _ (QuotientGroup.leftRel_apply.mp hab)])
 
@@ -723,4 +722,3 @@ theorem GLPos_to_PSL_R_term_smul_set (α' : GL(2, ℝ)⁺) (S : Set ℍ) :
   simp [Set.mem_smul_set, GLPos_to_PSL_R_term_smul]
 
 end PSL_R_action
-

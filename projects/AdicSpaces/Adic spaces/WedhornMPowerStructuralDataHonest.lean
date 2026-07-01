@@ -2,8 +2,8 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornStructuralInequalityFromSigmaPower
 import «Adic spaces».WedhornMultiBranchSubsetInequality
+import «Adic spaces».WedhornStructuralInequalityFromSigmaPower
 
 /-!
 # Wedhorn M-power-decay: honest supplier without T_D non-vanishing
@@ -160,35 +160,18 @@ theorem h_M_power_decay_from_honest_structural_data
     localizationLocSubringPlusSubring P T s
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro τ hτ w hw_spa hw_f hστ
-  -- Get the σ-factored per-`t'` inequalities from the supplier.
   have h_sigma_factored := h_honest w hw_spa hw_f τ hτ hστ
-  -- Per-`t'` conclusion: cancel σ_loc.
-  refine ⟨fun t' ht' => ?_, ?_⟩
-  · exact (vle_iff_mul_unit_right w σ_loc t'
+  have h_per_t : ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
+      w.vle t' (algebraMap A (Localization.Away s) s_D) := fun t' ht' ↦
+    (vle_iff_mul_unit_right w σ_loc t'
       (algebraMap A (Localization.Away s) s_D)).mp (h_sigma_factored t' ht')
-  -- s_D non-vanishing: case split on τ.
-  · rw [mem_localizedTestFamily_iff] at hτ
-    rcases hτ with rfl | hτ_in_T_D
-    · -- α_s_D branch: direct via strict-domination.
-      exact not_vle_zero_of_strict_dominator hστ.2
-    · -- α_T_D branch: contradiction using σ-factored at t' = τ.
-      intro h_α_s_D_zero
-      have h_sf_τ := h_sigma_factored τ hτ_in_T_D
-      -- h_sf_τ : w.vle (τ * σ_loc) (α s_D * σ_loc)
-      -- From h_α_s_D_zero, multiply by σ_loc: w.vle (α s_D * σ_loc) 0.
-      have h1 : w.vle (algebraMap A (Localization.Away s) s_D *
-          (σ_loc : Localization.Away s)) 0 := by
-        have := w.mul_vle_mul_left h_α_s_D_zero (σ_loc : Localization.Away s)
-        rwa [zero_mul] at this
-      -- Chain: w.vle (τ * σ_loc) 0.
-      have h2 : w.vle (τ * (σ_loc : Localization.Away s)) 0 := w.vle_trans h_sf_τ h1
-      -- Cancel σ_loc on the right: w.vle τ 0.
-      have h3 : w.vle τ 0 := by
-        rw [show (0 : Localization.Away s) =
-              0 * (σ_loc : Localization.Away s) from (zero_mul _).symm] at h2
-        exact (vle_iff_mul_unit_right w σ_loc τ 0).mp h2
-      -- Contradicts strict-domination.
-      exact not_vle_zero_of_strict_dominator hστ.2 h3
+  refine ⟨h_per_t, ?_⟩
+  rw [mem_localizedTestFamily_iff] at hτ
+  rcases hτ with rfl | hτ_in_T_D
+  · exact not_vle_zero_of_strict_dominator hστ.2
+  · intro h_α_s_D_zero
+    exact not_vle_zero_of_strict_dominator hστ.2
+      (w.vle_trans (h_per_t τ hτ_in_T_D) h_α_s_D_zero)
 
 /-- **Caller-facing bridge from the honest supplier to rational-open
 containment**.

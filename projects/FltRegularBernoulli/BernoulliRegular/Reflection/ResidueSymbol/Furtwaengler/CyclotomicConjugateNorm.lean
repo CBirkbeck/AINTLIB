@@ -78,7 +78,7 @@ theorem cyclotomicStabilizer_card_eq_ramificationIdxIn_mul_inertiaDegIn
         (P.under ℤ).inertiaDegIn (𝓞 K) := by
   classical
   letI : Fintype (MulAction.orbit (CyclotomicUnitDelta p) P) :=
-    Set.fintypeRange (fun a : CyclotomicUnitDelta p => a • P)
+    Set.fintypeRange (fun a : CyclotomicUnitDelta p ↦ a • P)
   have horbit_card :
       Fintype.card (MulAction.orbit (CyclotomicUnitDelta p) P) =
         (cyclotomicConjugates (p := p) (K := K) P).card := by
@@ -126,14 +126,14 @@ theorem cyclotomicConjugate_fiber_card_eq_ramificationIdxIn_mul_inertiaDegIn
       {a : CyclotomicUnitDelta p //
         cyclotomicGaloisConjugate (p := p) (K := K) a P = Q} ≃
         MulAction.stabilizer (CyclotomicUnitDelta p) P := {
-    toFun := fun a =>
+    toFun := fun a ↦
       ⟨b⁻¹ * a.1, by
         rw [MulAction.mem_stabilizer_iff]
         change cyclotomicGaloisConjugate (p := p) (K := K) (b⁻¹ * a.1) P = P
         rw [cyclotomicGaloisConjugate_mul, a.2, ← hb]
         rw [← cyclotomicGaloisConjugate_mul, inv_mul_cancel,
           cyclotomicGaloisConjugate_one]⟩
-    invFun := fun c =>
+    invFun := fun c ↦
       ⟨b * c.1, by
         rw [← hb, cyclotomicGaloisConjugate_mul]
         have hc : cyclotomicGaloisConjugate (p := p) (K := K) c.1 P = P := by
@@ -182,7 +182,8 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       Ideal.relNorm ℤ P = (P.under ℤ) ^ f := by
     have h := Ideal.relNorm_eq_pow_of_isMaximal (R := ℤ) (S := 𝓞 K) P (P.under ℤ)
     dsimp [f]
-    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ)]
+    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ),
+      ← Ideal.inertiaDeg_eq_inertiaDeg' (p := P.under ℤ) (q := P)]
     exact h
   have hprimes :
       ((P.under ℤ).primesOver (𝓞 K)).toFinset =
@@ -207,7 +208,8 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       haveI : Q.LiesOver (P.under ℤ) :=
         ⟨(under_eq_of_mem_cyclotomicConjugates (p := p) (K := K) hQ).symm⟩
       dsimp [e]
-      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ)]
+      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ),
+        ← Ideal.ramificationIdx_eq_ramificationIdx' (q := Q) (hp := h_under_ne)]
   rw [extendedRelNormIdeal, hrel, Ideal.map_pow, hmap_under]
   dsimp [e, f]
   rw [← Finset.prod_pow]
@@ -232,8 +234,8 @@ theorem cyclotomicConjugateProductIdeal_prime_eq_extendedRelNormIdeal
         ∏ Q ∈ cyclotomicConjugates (p := p) (K := K) P, Q ^ d
     rw [Finset.prod_comp
       (s := (Finset.univ : Finset (CyclotomicUnitDelta p)))
-      (f := fun Q : Ideal (𝓞 K) => Q)
-      (g := fun a : CyclotomicUnitDelta p =>
+      (f := fun Q : Ideal (𝓞 K) ↦ Q)
+      (g := fun a : CyclotomicUnitDelta p ↦
         cyclotomicGaloisConjugate (p := p) (K := K) a P)]
     change
       ∏ Q ∈ cyclotomicConjugates (p := p) (K := K) P,
@@ -266,7 +268,7 @@ private theorem cyclotomicConjugateProductIdeal_multiset_prod_eq_extendedRelNorm
   | cons P m ih =>
       have hP : P.IsPrime ∧ P ≠ ⊥ := hm P (by simp)
       haveI : P.IsPrime := hP.1
-      have hm' : ∀ Q, Q ∈ m → Q.IsPrime ∧ Q ≠ ⊥ := fun Q hQ =>
+      have hm' : ∀ Q, Q ∈ m → Q.IsPrime ∧ Q ≠ ⊥ := fun Q hQ ↦
         hm Q (by simp [hQ])
       rw [Multiset.prod_cons, cyclotomicConjugateProductIdeal_mul,
         extendedRelNormIdeal_mul,
@@ -286,7 +288,7 @@ theorem cyclotomicConjugateProductIdeal_eq_extendedRelNormIdeal
     cyclotomicConjugateProductIdeal_multiset_prod_eq_extendedRelNormIdeal
       (p := p) (K := K)
       (UniqueFactorizationMonoid.normalizedFactors B)
-      (fun P hP => by
+      (fun P hP ↦ by
         obtain ⟨hP_prime, hP_ne, _hP_max⟩ := isPrime_of_mem_normalizedFactors hP
         exact ⟨hP_prime, hP_ne⟩)
 
@@ -349,7 +351,7 @@ theorem cyclotomicRingOfIntegersEquiv_inv_notMem_of_absNorm_span_coprime
           cyclotomicConjugateProductIdeal (p := p) (K := K) B := by
       unfold cyclotomicConjugateProductIdeal
       exact Finset.dvd_prod_of_mem
-        (fun b : CyclotomicUnitDelta p =>
+        (fun b : CyclotomicUnitDelta p ↦
           cyclotomicGaloisConjugate (p := p) (K := K) b B)
         (Finset.mem_univ a)
     rwa [Ideal.dvd_iff_le] at hdvd

@@ -72,9 +72,8 @@ theorem vle_C_base_s_of_dominating_branch_at
     (hf : f = (σ : A) * a)
     (hστ : v.vle (σ : A) τ)
     (h_branch_chain : v.vle (τ * a) C_base_s) :
-    v.vle f C_base_s := by
-  rw [hf]
-  exact vle_replace_dominating_at v hστ h_branch_chain
+    v.vle f C_base_s :=
+  hf ▸ vle_replace_dominating_at v hστ h_branch_chain
 
 /-- **Wedhorn-shape branch candidate inequality**. Specialisation of
 `vle_C_base_s_of_dominating_branch_at` to the explicit candidate shape
@@ -101,11 +100,8 @@ theorem vle_cancel_unit_left
     (h : v.vle ((σ : A) * a) b) :
     v.vle a (((σ⁻¹ : Aˣ) : A) * b) := by
   letI : ValuativeRel A := v.toValuativeRel
-  have hmul : ((σ⁻¹ : Aˣ) : A) * ((σ : A) * a) ≤ᵥ ((σ⁻¹ : Aˣ) : A) * b :=
-    ValuativeRel.mul_vle_mul_right h ((σ⁻¹ : Aˣ) : A)
-  have hinv : ((σ⁻¹ : Aˣ) : A) * ((σ : A) * a) = a := by
-    rw [← mul_assoc, Units.inv_mul, one_mul]
-  rwa [hinv] at hmul
+  have hmul := ValuativeRel.mul_vle_mul_right h ((σ⁻¹ : Aˣ) : A)
+  rwa [← mul_assoc, Units.inv_mul, one_mul] at hmul
 
 /-- **Iff form of unit left-cancellation**: a `vle`-relation involving a
 unit factor on the left can be cancelled in either direction. -/
@@ -114,11 +110,8 @@ theorem vle_cancel_unit_left_iff
     v.vle ((σ : A) * a) b ↔ v.vle a (((σ⁻¹ : Aˣ) : A) * b) := by
   letI : ValuativeRel A := v.toValuativeRel
   refine ⟨vle_cancel_unit_left v, fun h => ?_⟩
-  have hmul : ((σ : A)) * a ≤ᵥ ((σ : A)) * (((σ⁻¹ : Aˣ) : A) * b) :=
-    ValuativeRel.mul_vle_mul_right h ((σ : A))
-  have hinv : ((σ : A)) * (((σ⁻¹ : Aˣ) : A) * b) = b := by
-    rw [← mul_assoc, Units.mul_inv, one_mul]
-  rwa [hinv] at hmul
+  have hmul := ValuativeRel.mul_vle_mul_right h ((σ : A))
+  rwa [← mul_assoc, Units.mul_inv, one_mul] at hmul
 
 /-! ### Subset-direction residual (recorded for the next ticket)
 

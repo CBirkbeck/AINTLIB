@@ -108,8 +108,7 @@ lemma Spv.vle_prod_of_pointwise
   letI : ValuativeRel A := v.toValuativeRel
   induction T using Finset.induction_on with
   | empty =>
-    simp only [Finset.prod_empty]
-    exact (v.vle_total 1 1).elim id id
+    simpa only [Finset.prod_empty] using (v.vle_total 1 1).elim id id
   | insert a T' ha ih =>
     rw [Finset.prod_insert ha, Finset.prod_insert ha]
     exact ValuativeRel.mul_vle_mul (h a (Finset.mem_insert_self a T'))
@@ -167,9 +166,7 @@ theorem rationalOpen_subset_via_strict_sigma_domination
   -- Apply σ-domination at w to pick the witnessing τ.
   obtain ⟨τ, hτ_mem, hστ⟩ := hσ w hw_spa
   -- Apply the τ-case-analysis hypothesis to extract D.T inequalities + non-degeneracy.
-  obtain ⟨hwD, hwDs⟩ := hT_test_compat τ hτ_mem w hw_spa hw_f hστ
-  -- Conclude w ∈ R(D.T, D.s).
-  exact ⟨hw_spa, hwD, hwDs⟩
+  exact ⟨hw_spa, hT_test_compat τ hτ_mem w hw_spa hw_f hστ⟩
 
 /-- **Strict-domination forces non-degeneracy** (smallest valuation
 arithmetic helper toward multi-element σ-clearing).
@@ -190,11 +187,8 @@ this discharges the **non-degeneracy half** of the multi-element
 σ-clearing conjunction `(∀ t' ∈ D.T, w.vle t' D.s) ∧ ¬ w.vle D.s 0`. -/
 lemma not_vle_zero_of_strict_dominator
     {w : Spv A} {x y : A} (h_strict : ¬ w.vle x y) :
-    ¬ w.vle x 0 := by
-  intro hw_x0
-  apply h_strict
-  letI : ValuativeRel A := w.toValuativeRel
-  exact ValuativeRel.vle_trans hw_x0 (ValuativeRel.zero_vle y)
+    ¬ w.vle x 0 :=
+  fun hw_x0 => h_strict (w.vle_trans hw_x0 (w.zero_vle y))
 
 /-- **Discharge of `hT_test_compat` for the empty `D.T` case** with
 `T_test := {D.s}`.
@@ -226,12 +220,9 @@ lemma hT_test_compat_of_empty_D_T
       (w.vle (σ : A) τ ∧ ¬ w.vle τ (σ : A)) →
         (∀ t' ∈ D.T, w.vle t' D.s) ∧ ¬ w.vle D.s 0 := by
   intro τ hτ w _hw_spa _hw_f hστ
-  rw [Finset.mem_singleton] at hτ
-  subst hτ
-  refine ⟨?_, not_vle_zero_of_strict_dominator hστ.2⟩
-  intro t' ht'
-  rw [hD_empty] at ht'
-  exact absurd ht' (Finset.notMem_empty t')
+  obtain rfl := Finset.mem_singleton.mp hτ
+  exact ⟨fun t' ht' => absurd (hD_empty ▸ ht') (Finset.notMem_empty t'),
+    not_vle_zero_of_strict_dominator hστ.2⟩
 
 /-! ## Remaining obligation: per-`t'` inequalities for arbitrary `D.T`
 

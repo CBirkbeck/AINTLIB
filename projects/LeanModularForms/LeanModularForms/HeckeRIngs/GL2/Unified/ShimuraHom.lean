@@ -38,7 +38,6 @@ automorphism of `End`.
 -/
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup HeckeRing.GLn
-open HeckeRing
 open scoped Pointwise MatrixGroups ModularForm UpperHalfPlane
 
 namespace HeckeRing.GL2.Unified
@@ -296,7 +295,7 @@ lemma lunipPsi_injective (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) :
         GeneralLinearGroup.mkOfDetNeZero, Matrix.mul_apply, Fin.sum_univ_two,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.of_apply, Matrix.cons_val_fin_one, Matrix.empty_val'] <;>
-      (try simp) <;> (try field_simp) <;> (try ring)
+      (try simp); (try field_simp); (try ring)
   rw [hmat] at hmem
   obtain ⟨γ, hγ, hγeq⟩ := Subgroup.mem_map.mp hmem
   have hentry : ((γ : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℚ) =
@@ -315,11 +314,8 @@ lemma lunipPsi_injective (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) :
       field_simp
     rw [hm] at h1
     push_cast at h1
-    have h2 : (N : ℚ) * (m * p) = (N : ℚ) * ((r' : ℚ) - r) := by
-      ring_nf
-      ring_nf at h1
-      linarith
-    have h3 : (m : ℚ) * p = (r' : ℚ) - r := mul_left_cancel₀ hNQ h2
+    have h3 : (m : ℚ) * p = (r' : ℚ) - r :=
+      mul_left_cancel₀ hNQ (by ring_nf; ring_nf at h1; linarith)
     exact_mod_cast (by linarith : (p : ℚ) * m = (r' : ℚ) - r)
   have habs : (p : ℤ) ∣ (r' : ℤ) - r := ⟨m, hkey.symm⟩
   have hzero : ((r' : ℤ) - r) = 0 := by

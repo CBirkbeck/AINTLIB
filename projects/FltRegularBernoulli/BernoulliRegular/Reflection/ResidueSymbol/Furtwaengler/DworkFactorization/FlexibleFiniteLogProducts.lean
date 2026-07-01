@@ -49,9 +49,8 @@ theorem finiteLogPowCoord_mem_Q {x : 𝓞 R'} (hx : x ∈ F.Q) (n : ℕ) :
   | zero =>
       simp [finiteLogPowCoord]
   | succ n ih =>
-      have hprod : finiteLogProductCoord (finiteLogPowCoord n x) x ∈ F.Q :=
+      simpa [Nat.succ_eq_add_one, finiteLogProductCoord_powCoord] using
         F.finiteLogProductCoord_mem_Q ih hx
-      simpa [Nat.succ_eq_add_one, finiteLogProductCoord_powCoord] using hprod
 
 theorem finiteLog_powCoord (N n : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
     F.finiteLog N (finiteLogPowCoord n x) (F.finiteLogPowCoord_mem_Q hx n) =
@@ -62,9 +61,8 @@ theorem finiteLog_powCoord (N n : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
   | succ n ih =>
       have hpow_mem : finiteLogPowCoord n x ∈ F.Q :=
         F.finiteLogPowCoord_mem_Q hx n
-      have hx_mem : x ∈ F.Q := hx
       have hprod_mem : finiteLogProductCoord (finiteLogPowCoord n x) x ∈ F.Q :=
-        F.finiteLogProductCoord_mem_Q hpow_mem hx_mem
+        F.finiteLogProductCoord_mem_Q hpow_mem hx
       have hsub :
           finiteLogPowCoord (Nat.succ n) x -
               finiteLogProductCoord (finiteLogPowCoord n x) x ∈ F.Q ^ (N + 1) := by
@@ -79,8 +77,8 @@ theorem finiteLog_powCoord (N n : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
             F.finiteLog_eq_of_sub_mem _ _ hsub
         _ =
           F.finiteLog N (finiteLogPowCoord n x) hpow_mem +
-            F.finiteLog N x hx_mem :=
-            F.finiteLog_add_add_mul N hpow_mem hx_mem
+            F.finiteLog N x hx :=
+            F.finiteLog_add_add_mul N hpow_mem hx
         _ = n • F.finiteLog N x hx + F.finiteLog N x hx := by
             rw [ih]
         _ = Nat.succ n • F.finiteLog N x hx := by
@@ -160,9 +158,8 @@ theorem finiteLogFinsetProductCoord_mem_Q {ι : Type*}
       have hs : ∀ i ∈ s, x i ∈ F.Q := fun i hi => hx i (Finset.mem_insert_of_mem hi)
       have hcoord : finiteLogFinsetProductCoord s x ∈ F.Q := ih hs
       have haQ : x a ∈ F.Q := hx a (Finset.mem_insert_self a s)
-      have hprod : finiteLogProductCoord (finiteLogFinsetProductCoord s x) (x a) ∈ F.Q :=
+      simpa [finiteLogProductCoord_finsetProductCoord_insert (a := a) ha x] using
         F.finiteLogProductCoord_mem_Q hcoord haQ
-      simpa [finiteLogProductCoord_finsetProductCoord_insert (a := a) ha x] using hprod
 
 theorem finiteLog_finsetProductCoord {ι : Type*} (N : ℕ)
     {s : Finset ι} {x : ι → 𝓞 R'} (hx : ∀ i ∈ s, x i ∈ F.Q) :
@@ -232,19 +229,16 @@ theorem finiteLog_add_eq_zero_of_productCoord_mem_Q_pow_succ {N : ℕ}
     {x y : 𝓞 R'} (hx : x ∈ F.Q) (hy : y ∈ F.Q)
     (hxy : finiteLogProductCoord x y ∈ F.Q ^ (N + 1)) :
     F.finiteLog N x hx + F.finiteLog N y hy = 0 := by
-  have hprod_zero :
-      F.finiteLog N (finiteLogProductCoord x y) (F.finiteLogProductCoord_mem_Q hx hy) =
-        0 :=
+  simpa [F.finiteLog_add_add_mul N hx hy] using
     F.finiteLog_eq_zero_of_mem_Q_pow_succ (F.finiteLogProductCoord_mem_Q hx hy) hxy
-  simpa [F.finiteLog_add_add_mul N hx hy] using hprod_zero
 
 theorem finiteLog_eq_neg_of_productCoord_mem_Q_pow_succ {N : ℕ}
     {x y : 𝓞 R'} (hx : x ∈ F.Q) (hy : y ∈ F.Q)
     (hxy : finiteLogProductCoord x y ∈ F.Q ^ (N + 1)) :
     F.finiteLog N y hy = -F.finiteLog N x hx := by
-  have hsum := F.finiteLog_add_eq_zero_of_productCoord_mem_Q_pow_succ hx hy hxy
   have hsum' : F.finiteLog N y hy + F.finiteLog N x hx = 0 := by
-    simpa [add_comm] using hsum
+    simpa [add_comm] using
+      F.finiteLog_add_eq_zero_of_productCoord_mem_Q_pow_succ hx hy hxy
   exact eq_neg_of_add_eq_zero_left hsum'
 
 theorem finiteLog_add_eq_zero_of_productCoord_eq_zero {N : ℕ}

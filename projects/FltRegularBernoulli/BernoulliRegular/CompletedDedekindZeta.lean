@@ -41,8 +41,6 @@ unconditionally (see `prod_rootNumber_eq_one_of_dedekindFE` in `GaussSumProduct`
 
 noncomputable section
 
-open Complex
-
 namespace BernoulliRegular
 
 section CompletedDedekindZeta
@@ -94,7 +92,7 @@ theorem prod_rootNumber_eq_one_of_cleanFE
   have h_Λ_ne : completedDedekindZetaCyclotomic p s ≠ 0 := by
     unfold completedDedekindZetaCyclotomic
     exact mul_ne_zero (completedRiemannZeta_ne_zero_of_one_lt_re hs)
-      (Finset.prod_ne_zero_iff.mpr fun χ _ => completedLFunction_ne_zero_of_one_lt_re χ hs)
+      (Finset.prod_ne_zero_iff.mpr fun χ _ ↦ completedLFunction_ne_zero_of_one_lt_re χ hs)
   -- From h_half: p^{...} · Λ_K(s) = p^{...} · (∏ W_χ) · Λ_K(s).
   -- Cancel p^{...} and Λ_K(s).
   have h_eq : (1 : ℂ) *

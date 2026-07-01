@@ -182,10 +182,8 @@ theorem pointwise_clearing_via_pow_cancellation
     (h_chain : v.vle (t' * D_s ^ N) (D_s ^ (N + 1)))
     (h_D_s_ne : ¬ v.vle D_s 0) :
     v.vle t' D_s := by
-  have h_aligned : v.vle (D_s ^ N * t') (D_s ^ N * D_s) := by
-    rw [pow_succ, mul_comm t' (D_s ^ N)] at h_chain
-    exact h_chain
-  exact vle_mul_pow_cancel_left h_D_s_ne N t' D_s h_aligned
+  rw [pow_succ, mul_comm t' (D_s ^ N)] at h_chain
+  exact vle_mul_pow_cancel_left h_D_s_ne N t' D_s h_chain
 
 omit [IsTopologicalRing A] in
 /-- **Pointwise clearing supplier via σ-power cancellation supplier**
@@ -257,10 +255,9 @@ theorem per_piece_subset_supplier_via_pow_cancellation_supplier
     ∀ t' ∈ D_T,
       rationalOpen (insert f T_base) s ∩
           rationalOpen ({(1 : A)} : Finset A) t' ⊆
-        rationalOpen ({t'} : Finset A) D_s := by
-  refine per_piece_subset_supplier_via_pointwise_clearing T_base D_T s D_s f ?_
-  intro t' ht'
-  exact pointwise_clearing_supplier_via_pow_cancellation s D_s f t'
-    (h_pow_chain_uniform t' ht')
+        rationalOpen ({t'} : Finset A) D_s :=
+  per_piece_subset_supplier_via_pointwise_clearing T_base D_T s D_s f
+    fun t' ht' => pointwise_clearing_supplier_via_pow_cancellation s D_s f t'
+      (h_pow_chain_uniform t' ht')
 
 end ValuationSpectrum

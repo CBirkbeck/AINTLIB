@@ -61,7 +61,7 @@ theorem orthogonalProjectionComplex_real_smul_self (c : ℝ) (L : ℂ) (hL : L �
   have h_coeff : (c • L * starRingEnd ℂ L).re / Complex.normSq L = c := by
     rw [Complex.real_smul, mul_assoc, starRingEnd_apply]
     simp only [Complex.star_def, Complex.mul_conj, ← Complex.ofReal_mul, Complex.ofReal_re]
-    exact mul_div_cancel_of_imp fun h => absurd h hns
+    exact mul_div_cancel_of_imp fun h ↦ absurd h hns
   rw [h_coeff]
 
 /-- Tangent deviation of a real scalar multiple of `L` vanishes. -/
@@ -104,12 +104,12 @@ This captures Definition 3.2 from Hungerbuhler-Wasem. -/
 structure IsFlatOfOrder (γ : ℝ → ℂ) (t₀ : ℝ) (n : ℕ) : Prop where
   right_flat : ∀ L : ℂ, L ≠ 0 →
     Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L) →
-    (fun t => ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[>] t₀]
-      (fun t => ‖γ t - γ t₀‖ ^ n)
+    (fun t ↦ ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[>] t₀]
+      (fun t ↦ ‖γ t - γ t₀‖ ^ n)
   left_flat : ∀ L : ℂ, L ≠ 0 →
     Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L) →
-    (fun t => ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[<] t₀]
-      (fun t => ‖γ t - γ t₀‖ ^ n)
+    (fun t ↦ ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[<] t₀]
+      (fun t ↦ ‖γ t - γ t₀‖ ^ n)
 
 /-- Flatness of order 1 from a derivative limit on either side, packaged as a
 common helper for the left and right variants. The set `u` is the open ray
@@ -117,19 +117,19 @@ common helper for the left and right variants. The set `u` is the open ray
 private theorem tangentDeviation_isLittleO_of_hasDerivWithinAt
     {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ} (hL : L ≠ 0) {u : Set ℝ}
     (hderiv : HasDerivWithinAt γ L u t₀) :
-    (fun t => ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[u] t₀]
-      (fun t => ‖γ t - γ t₀‖ ^ 1) := by
+    (fun t ↦ ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[u] t₀]
+      (fun t ↦ ‖γ t - γ t₀‖ ^ 1) := by
   simp only [pow_one]
   rw [Asymptotics.isLittleO_norm_norm]
-  set r := fun t => γ t - γ t₀ - (t - t₀) • L with hr_def
+  set r := fun t ↦ γ t - γ t₀ - (t - t₀) • L with hr_def
   have hr := hasDerivWithinAt_iff_isLittleO.mp hderiv
-  have h_eq : ∀ t, tangentDeviation (γ t - γ t₀) L = tangentDeviation (r t) L := fun t => by
-    rw [show γ t - γ t₀ = (t - t₀) • L + r t from by simp [hr_def],
+  have h_eq : ∀ t, tangentDeviation (γ t - γ t₀) L = tangentDeviation (r t) L := fun t ↦ by
+    rw [show γ t - γ t₀ = (t - t₀) • L + r t by simp [hr_def],
       tangentDeviation_add, tangentDeviation_real_smul_self _ _ hL, zero_add]
-  have hO : (fun t => tangentDeviation (r t) L) =O[𝓝[u] t₀] r :=
+  have hO : (fun t ↦ tangentDeviation (r t) L) =O[𝓝[u] t₀] r :=
     Asymptotics.isBigO_iff.mpr
-      ⟨2, Eventually.of_forall fun _ => norm_tangentDeviation_le _ _ hL⟩
-  have hO2 : (fun t => t - t₀) =O[𝓝[u] t₀] (fun t => γ t - γ t₀) := by
+      ⟨2, Eventually.of_forall fun _ ↦ norm_tangentDeviation_le _ _ hL⟩
+  have hO2 : (fun t ↦ t - t₀) =O[𝓝[u] t₀] (fun t ↦ γ t - γ t₀) := by
     rw [Asymptotics.isBigO_iff]
     refine ⟨2 / ‖L‖, ?_⟩
     filter_upwards [hr.def (by positivity : (0 : ℝ) < ‖L‖ / 2)] with t ht
@@ -138,7 +138,7 @@ private theorem tangentDeviation_isLittleO_of_hasDerivWithinAt
     have hr_eq : ‖r t‖ ≤ ‖L‖ / 2 * ‖t - t₀‖ := ht
     rw [div_mul_eq_mul_div, le_div_iff₀ (norm_pos_iff.mpr hL)]
     nlinarith [norm_nonneg (γ t - γ t₀), (norm_smul (t - t₀) L).symm]
-  exact ((hO.trans_isLittleO hr).trans_isBigO hO2).congr_left fun t => (h_eq t).symm
+  exact ((hO.trans_isLittleO hr).trans_isBigO hO2).congr_left fun t ↦ (h_eq t).symm
 
 /-- Right-sided flatness of order 1 from a right derivative limit. -/
 private theorem tangentDeviation_isLittleO_right
@@ -146,12 +146,12 @@ private theorem tangentDeviation_isLittleO_right
     (hγ_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L))
     (hγ_cont : ContinuousAt γ t₀)
     (hγ_diff : ∀ᶠ t in 𝓝[>] t₀, DifferentiableAt ℝ γ t) :
-    (fun t => ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[>] t₀]
-      (fun t => ‖γ t - γ t₀‖ ^ 1) := by
+    (fun t ↦ ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[>] t₀]
+      (fun t ↦ ‖γ t - γ t₀‖ ^ 1) := by
   obtain ⟨s, hs_mem, hs_diff⟩ := hγ_diff.exists_mem
   exact tangentDeviation_isLittleO_of_hasDerivWithinAt hL <|
     hasDerivWithinAt_Ioi_iff_Ici.mpr <| hasDerivWithinAt_Ici_of_tendsto_deriv
-      (fun t ht => (hs_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hs_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hs_mem hγ_right
 
 /-- Left-sided flatness of order 1 from a left derivative limit. -/
@@ -160,12 +160,12 @@ private theorem tangentDeviation_isLittleO_left
     (hγ_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L))
     (hγ_cont : ContinuousAt γ t₀)
     (hγ_diff : ∀ᶠ t in 𝓝[<] t₀, DifferentiableAt ℝ γ t) :
-    (fun t => ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[<] t₀]
-      (fun t => ‖γ t - γ t₀‖ ^ 1) := by
+    (fun t ↦ ‖tangentDeviation (γ t - γ t₀) L‖) =o[𝓝[<] t₀]
+      (fun t ↦ ‖γ t - γ t₀‖ ^ 1) := by
   obtain ⟨s, hs_mem, hs_diff⟩ := hγ_diff.exists_mem
   exact tangentDeviation_isLittleO_of_hasDerivWithinAt hL <|
     hasDerivWithinAt_Iio_iff_Iic.mpr <| hasDerivWithinAt_Iic_of_tendsto_deriv
-      (fun t ht => (hs_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hs_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hs_mem hγ_left
 
 /-- Every piecewise C¹ immersion is flat of order 1 at any interior point.
@@ -176,20 +176,20 @@ theorem isFlatOfOrder_one (γ : PwC1Immersion x y) (t₀ : ℝ)
     IsFlatOfOrder (γ : ℝ → ℂ) t₀ 1 := by
   have hcont : ContinuousAt (γ : ℝ → ℂ) t₀ := γ.continuous.continuousAt
   have hcl : IsClosed ((↑γ.toPiecewiseC1Path.partition : Set ℝ) \ {t₀}) :=
-    (γ.toPiecewiseC1Path.partition.finite_toSet.subset diff_subset).isClosed
+    (γ.toPiecewiseC1Path.partition.finite_toSet.subset sdiff_subset).isClosed
   have hmem : (↑γ.toPiecewiseC1Path.partition \ {t₀} : Set ℝ)ᶜ ∈ 𝓝 t₀ :=
-    hcl.isOpen_compl.mem_nhds (mem_compl (fun h => h.2 rfl))
+    hcl.isOpen_compl.mem_nhds (mem_compl (fun h ↦ h.2 rfl))
   have hIoo : Ioo (0 : ℝ) 1 ∈ 𝓝 t₀ := Ioo_mem_nhds ht₀.1 ht₀.2
   have hdiff_aux : ∀ {u : Set ℝ} (_ : ∀ t ∈ u, t ≠ t₀),
-      ∀ᶠ t in 𝓝[u] t₀, DifferentiableAt ℝ (γ : ℝ → ℂ) t := fun {u} hne => by
+      ∀ᶠ t in 𝓝[u] t₀, DifferentiableAt ℝ (γ : ℝ → ℂ) t := fun {u} hne ↦ by
     filter_upwards [nhdsWithin_le_nhds hmem, nhdsWithin_le_nhds hIoo,
       self_mem_nhdsWithin] with t ht₁ ht₂ ht₃
-    exact γ.toPiecewiseC1Path.differentiable_off_extend t ht₂ fun hm => ht₁ ⟨hm, hne t ht₃⟩
-  refine ⟨fun L hL hL_right => ?_, fun L hL hL_left => ?_⟩
+    exact γ.toPiecewiseC1Path.differentiable_off_extend t ht₂ fun hm ↦ ht₁ ⟨hm, hne t ht₃⟩
+  refine ⟨fun L hL hL_right ↦ ?_, fun L hL hL_left ↦ ?_⟩
   · exact tangentDeviation_isLittleO_right (γ : ℝ → ℂ) t₀ L hL hL_right hcont
-      (hdiff_aux fun _ ht => ne_of_gt (mem_Ioi.mp ht))
+      (hdiff_aux fun _ ht ↦ ne_of_gt (mem_Ioi.mp ht))
   · exact tangentDeviation_isLittleO_left (γ : ℝ → ℂ) t₀ L hL hL_left hcont
-      (hdiff_aux fun _ ht => ne_of_lt (mem_Iio.mp ht))
+      (hdiff_aux fun _ ht ↦ ne_of_lt (mem_Iio.mp ht))
 
 /-- **Condition (A')** from Hungerbuhler-Wasem: for each singular point `s` in `S₀`
 and each parameter `t₀` where `γ(t₀) = s`, the curve must be flat of order

@@ -20,7 +20,7 @@ Proposition 3.4.
   equivalent to associativity of multiplication in the Hecke ring.
 -/
 
-open Classical MulOpposite Set DoubleCoset Subgroup
+open Classical
 
 open scoped Pointwise
 
@@ -29,8 +29,6 @@ namespace HeckeRing
 variable {G : Type*} [Group G]
 
 variable (P : HeckePair G) (Z : Type*) [CommRing Z]
-
-open Finsupp
 
 private lemma smulOrbit_map_injective (g β : P.Δ) :
     Function.Injective (fun i : decompQuot P g ↦
@@ -91,7 +89,7 @@ private lemma decompQuot_inv_mul_out_eq {g : P.Δ} (a b : decompQuot P g)
     (s : G) (hs : s ∈ P.H)
     (hb : b = (⟦⟨s * (a.out : G), P.H.mul_mem hs a.out.2⟩⟧ : decompQuot P g)) :
     (⟦⟨s⁻¹ * (b.out : G), P.H.mul_mem (P.H.inv_mem hs) b.out.2⟩⟧ : decompQuot P g) = a := by
-  rw [(Quotient.out_eq' a).symm, Quotient.eq'', QuotientGroup.leftRel_apply]
+  rw [← Quotient.out_eq' a, Quotient.eq'', QuotientGroup.leftRel_apply]
   have h := Quotient.out_eq' b
   nth_rewrite 2 [hb] at h
   rw [Quotient.eq'', QuotientGroup.leftRel_apply] at h
@@ -249,7 +247,7 @@ private lemma decompQuot_j_recover_via_uniformShift (g₂ g₁ : P.Δ) (D : Heck
       P.H.mul_mem (conjAct_inv_mem_of_subgroupOf P (g₂ : G) n₀) j₀.out.2⟩⟧ :
       decompQuot P g₁) = j' := by
   intro n₀ hn₀_conj j₀
-  rw [(Quotient.out_eq' j').symm, Quotient.eq'', QuotientGroup.leftRel_apply]
+  rw [← Quotient.out_eq' j', Quotient.eq'', QuotientGroup.leftRel_apply]
   have h_j₀ := Quotient.out_eq' j₀
   rw [Quotient.eq'', QuotientGroup.leftRel_apply] at h_j₀
   convert h_j₀ using 1
@@ -380,7 +378,7 @@ private lemma rep_mem_H_of_smulOrbit_eq (g₂ β₀ : P.Δ) (i₀ : decompQuot P
   simp only [Set.singleton_mul, Set.mem_image] at hβ
   obtain ⟨h, hh, hβ_eq⟩ := hβ
   have hβ' : (g₂ : G)⁻¹ * (i₀.out : G)⁻¹ * (β₀ : G)⁻¹ * β = h := by
-    rw [hβ_eq.symm]; group
+    rw [← hβ_eq]; group
   exact hβ' ▸ hh
 
 /-- The HeckeLeftCoset class `⟦β·k₀·g₁'⟧` equals `⟦α·i₀·g₂'·k'·g₁'⟧` provided
@@ -515,7 +513,7 @@ private lemma finsupp_sum_single_orbit (orbit : Finset (HeckeLeftCoset P)) (val 
     (f : HeckeLeftCoset P → ℤ → ℤ) (hf0 : ∀ a, f a 0 = 0)
     (hfadd : ∀ a b₁ b₂, f a (b₁ + b₂) = f a b₁ + f a b₂) :
     (∑ j ∈ orbit, Finsupp.single j val).sum f = ∑ j ∈ orbit, f j val := by
-  rw [← Finsupp.sum_finset_sum_index (h_zero := hf0) (h_add := hfadd)]
+  rw [← Finsupp.sum_finsetSum_index (h_zero := hf0) (h_add := hfadd)]
   exact Finset.sum_congr rfl fun j _ ↦ Finsupp.sum_single_index (hf0 j)
 
 /-- Positive case of `smul_assoc_key`: if some `D₀ ∈ (m g₂ g₁).support` covers `x₀`,
@@ -570,13 +568,13 @@ private lemma smul_assoc_key (g₁ g₂ β₀ : P.Δ) :
         Finsupp.single i (1 * b₂) := by
   simp only [mul_one, one_mul]
   ext x₀
-  simp only [Finsupp.sum_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp only [Finsupp.sum_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
   simp_rw [Finset.sum_ite_eq']
   rw [finsupp_sum_single_orbit P _ 1 _ (fun a ↦ by simp)
     (fun a b₁ b₂ ↦ by split_ifs <;> simp [*])]
   by_cases h_ex : ∃ D₀ ∈ (m P g₂ g₁).support, x₀ ∈ smulOrbit P (HeckeCoset.rep D₀) β₀
   · exact smul_assoc_key_apply_pos P g₁ g₂ β₀ x₀ h_ex
-  · push_neg at h_ex
+  · push Not at h_ex
     exact smul_assoc_key_apply_neg P g₁ g₂ β₀ x₀ h_ex
 
 private lemma smul_assoc_singles_lhs_apply (D₁ D₂ : HeckeCoset P) (a₁ a₂ : ℤ)
@@ -586,7 +584,7 @@ private lemma smul_assoc_singles_lhs_apply (D₁ D₂ : HeckeCoset P) (a₁ a₂
     a₁ * a₂ * c₀ *
       (m P D₂.rep D₁.rep).sum
         (fun D b₁ ↦ if x₀ ∈ smulOrbit P D.rep m₀.rep then b₁ else (0 : ℤ)) := by
-  simp only [Finsupp.sum_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp only [Finsupp.sum_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
   simp_rw [Finset.sum_ite_eq']
   have h_lhs : (a₂ • a₁ • m P D₂.rep D₁.rep).sum
       (fun D b₁ ↦ if x₀ ∈ smulOrbit P D.rep m₀.rep then b₁ * c₀ else (0 : ℤ)) =
@@ -607,7 +605,7 @@ private lemma smul_assoc_singles_rhs_apply (D₁ D₂ : HeckeCoset P) (a₁ a₂
     a₁ * a₂ * c₀ *
       ∑ j ∈ smulOrbit P D₂.rep m₀.rep,
         if x₀ ∈ smulOrbit P D₁.rep j.rep then (1 : ℤ) else 0 := by
-  simp only [Finsupp.sum_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp only [Finsupp.sum_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
   simp_rw [Finset.sum_ite_eq']
   rw [finsupp_sum_single_orbit P _ (a₂ * c₀) _ (fun a ↦ by simp)
     (fun a b₁ b₂ ↦ by split_ifs <;> simp [*, mul_add])]
@@ -628,7 +626,7 @@ private lemma smul_assoc_singles_sum_eq (D₁ D₂ : HeckeCoset P) (a₁ a₂ : 
   have key := smul_assoc_key P D₁.rep D₂.rep m₀.rep
   simp only [mul_one, one_mul] at key
   have key_pt := DFunLike.congr_fun key x₀
-  simp only [Finsupp.sum_apply, Finsupp.finset_sum_apply, Finsupp.single_apply] at key_pt
+  simp only [Finsupp.sum_apply, Finsupp.finsetSum_apply, Finsupp.single_apply] at key_pt
   simp_rw [Finset.sum_ite_eq'] at key_pt
   rw [key_pt]
   exact finsupp_sum_single_orbit P _ 1 _ (fun a ↦ by simp)

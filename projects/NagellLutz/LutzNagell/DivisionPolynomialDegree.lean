@@ -377,7 +377,7 @@ lemma ΨSq_ne_zero [NoZeroDivisors R] {n : ℤ} (h : (n : R) ≠ 0) : W.ΨSq n �
     · rcases Int.natAbs_eq_iff.mp hm with rfl | rfl <;>
         rw [hm, Nat.lt_add_left_iff_pos, Nat.not_lt_eq, Nat.le_zero] at hn <;>
         push_cast [hn, ΨSq_neg, ΨSq_one] <;>
-        exact fun h' => h <| C_injective <| by push_cast [hn, C_neg, C_1, h', neg_zero, C_0]; rfl
+        exact fun h' ↦ h <| C_injective <| by push_cast [hn, C_neg, C_1, h', neg_zero, C_0]; rfl
 
 end ΨSq
 

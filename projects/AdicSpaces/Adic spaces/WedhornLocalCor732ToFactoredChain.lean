@@ -132,23 +132,23 @@ theorem h_T_test_compat_loc_canonical_via_M_power_decay
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   exact h_T_test_compat_loc_canonical_via_Wedhorn_structural P T s hopen T_D s_D σ_loc
     -- α_s_D suppliers (specialised at τ = algebraMap s_D):
-    (fun w hw_spa hw_f hστ =>
+    (fun w hw_spa hw_f hστ ↦
       ((h_M_power_decay w hw_spa hw_f
         (algebraMap A (Localization.Away s) s_D)
         (Finset.mem_insert_self _ _) hστ).2.1))
-    (fun w hw_spa hw_f hστ =>
+    (fun w hw_spa hw_f hστ ↦
       ((h_M_power_decay w hw_spa hw_f
         (algebraMap A (Localization.Away s) s_D)
         (Finset.mem_insert_self _ _) hστ).1))
     -- α_T_D suppliers:
-    (fun τ hτ w hw_spa hw_f hστ =>
+    (fun τ hτ w hw_spa hw_f hστ ↦
       ((h_M_power_decay w hw_spa hw_f τ
         (Finset.mem_insert_of_mem hτ) hστ).2.1))
-    (fun τ hτ w hw_spa hw_f hστ =>
+    (fun τ hτ w hw_spa hw_f hστ ↦
       ((h_M_power_decay w hw_spa hw_f τ
         (Finset.mem_insert_of_mem hτ) hστ).1))
     -- α_T_D s_D non-degeneracy:
-    (fun τ hτ w hw_spa hw_f hστ =>
+    (fun τ hτ w hw_spa hw_f hστ ↦
       ((h_M_power_decay w hw_spa hw_f τ
         (Finset.mem_insert_of_mem hτ) hστ).2.2))
 

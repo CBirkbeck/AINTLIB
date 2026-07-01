@@ -130,10 +130,8 @@ theorem LFunction_pos_of_real_quadratic_of_one_lt
       simp [h_each]
     · rw [hX_def, tsum_eq_zero_of_not_summable h_summ]; simp
   -- X is real, so exp X is a positive real
-  have hX_re_cast : ((X.re : ℝ) : ℂ) = X := by
-    apply Complex.ext
-    · simp
-    · simp [hX_im]
+  have hX_re_cast : ((X.re : ℝ) : ℂ) = X :=
+    Complex.conj_eq_iff_re.mp (Complex.conj_eq_iff_im.mpr hX_im)
   rw [← hX_re_cast]
   refine ⟨?_, ?_⟩
   · exact Complex.exp_ofReal_im X.re
@@ -154,13 +152,9 @@ theorem LFunction_one_pos_of_real_quadratic
   -- The sequence t n = 1 + 1/(n+1) tends to 1, with each t n > 1.
   set t : ℕ → ℝ := fun n => 1 + 1 / (n + 1 : ℝ) with ht_def
   have h_t_tendsto : Tendsto t atTop (𝓝 (1 : ℝ)) := by
-    have h1 : Tendsto (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1)) atTop (𝓝 0) := by
-      rw [show (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1)) =
-        fun n : ℕ => (((n : ℝ) + 1))⁻¹ from by simp [one_div]]
-      exact (tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds).inv_tendsto_atTop
-    simpa [t] using h1.const_add 1
-  have h_tC_tendsto : Tendsto (fun n => ((t n : ℝ) : ℂ)) atTop (𝓝 (1 : ℂ)) := by
-    exact (Complex.continuous_ofReal.tendsto 1).comp h_t_tendsto
+    simpa [t] using (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).const_add 1
+  have h_tC_tendsto : Tendsto (fun n => ((t n : ℝ) : ℂ)) atTop (𝓝 (1 : ℂ)) :=
+    (Complex.continuous_ofReal.tendsto 1).comp h_t_tendsto
   have h_gt_one : ∀ n : ℕ, 1 < t n := by
     intro n
     simp only [t]

@@ -108,9 +108,8 @@ theorem pointwise_pow_decay_at
     (hArch : letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
     {τ : A} (hτ_ne : ¬ v.vle τ 0) :
-    ∃ N : ℕ, v.vle (π ^ N) τ := by
-  obtain ⟨N, hbasic⟩ := exists_mem_basicOpen_pow_of_tn hv hπ_tn hArch hτ_ne
-  exact ⟨N, hbasic.1⟩
+    ∃ N : ℕ, v.vle (π ^ N) τ :=
+  (exists_mem_basicOpen_pow_of_tn hv hπ_tn hArch hτ_ne).imp fun _ h => h.1
 
 omit [IsTopologicalRing A] in
 /-- **Cor 7.32 σ-strict-domination supplier**, repackaged for the
@@ -188,10 +187,7 @@ theorem subset_inequality_via_sigma_decay_C_base_s_ne_at
     have h_step :
         w.vle ((σ : A) * D_s ^ N * D_s) ((σ : A) * D_s ^ N * 0) :=
       ValuativeRel.mul_vle_mul_right h_D_s_zero ((σ : A) * D_s ^ N)
-    rw [mul_zero] at h_step
-    have heq : (σ : A) * D_s ^ N * D_s = (σ : A) * D_s ^ (N + 1) := by
-      rw [mul_assoc, ← pow_succ]
-    rw [heq] at h_step
+    rw [mul_zero, mul_assoc, ← pow_succ] at h_step
     exact w.vle_trans h_C_decay h_step
   exact subset_inequality_of_multi_chain_with_decay_at w N hf
     h_D_s_ne hw_f h_T_D_lower h_C_decay

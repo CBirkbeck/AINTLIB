@@ -69,7 +69,7 @@ theorem hw_3_3_clean_full_mero
     (hMero : ∀ s ∈ S, MeromorphicAt f s)
     (hCondB : SatisfiesConditionB γ.toPwC1Immersion f S)
     (hCondA : SatisfiesConditionA' γ.toPwC1Immersion f S
-      (fun s =>
+      (fun s ↦
         (HungerbuhlerWasem.PolarPartDecomposition.ofMeromorphicWithCondB
           hU_open hS_in_U hf
           (γ := γ.toPwC1Immersion) hMero hCondB).order s))

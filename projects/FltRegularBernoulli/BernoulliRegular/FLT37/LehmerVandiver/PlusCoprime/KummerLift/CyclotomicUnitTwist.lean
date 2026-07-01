@@ -38,7 +38,7 @@ This file's main result is the building block for LV005c1b's aggregate
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open IsCyclotomicExtension
 open scoped NumberField
 
 namespace BernoulliRegular
@@ -63,16 +63,12 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val) - 1) *
         (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) =
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val * b) - 1 := by
-  -- Apply σ_a as a ring hom to (ζ - 1) · cyclotomicUnit b = ζ^b - 1.
   set σ : 𝓞 K →+* 𝓞 K :=
     MulSemiringAction.toRingHom Gal(K/ℚ) (𝓞 K)
       (cyclotomicSigmaOfUnit (p := p) K a)
   have h_eq := zeta_sub_one_mul_cyclotomicUnit p K b
   have h_apply := congrArg σ h_eq
-  -- σ is a ring hom; propagate over · and -; reduce ζ^b under σ.
   simp only [map_mul, map_sub, map_one, map_pow] at h_apply
-  -- h_apply : (σ ζ - 1) · σ(cyclotomicUnit b) = σ(ζ)^b - 1.
-  -- σ(ζ) = ζ^{a.val} (cyclotomicSigmaOfUnit_smul_zetaInteger).
   have hσζ : σ ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val) := by
     change cyclotomicSigmaOfUnit (p := p) K a •
@@ -81,26 +77,13 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one
     rw [show ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
       cyclotomicZetaInteger (p := p) K from rfl,
       cyclotomicSigmaOfUnit_smul_zetaInteger]
-  rw [hσζ, ← pow_mul] at h_apply
-  exact h_apply
+  rwa [hσζ, ← pow_mul] at h_apply
 
 /-- **`a.val · b` and `((a · b).val)` are congruent mod `p` for `a : (ZMod p)ˣ`.**
 A clean form of the defining identity for ZMod multiplication. -/
 private theorem val_mul_eq_val_mul_mod (a : (ZMod p)ˣ) (b : ℕ) :
     (a : ZMod p).val * b ≡ ((a : ZMod p) * b).val [MOD p] := by
-  -- Both sides reduce to (a.val * b) mod p in ZMod p.
-  -- Use ZMod.val_natCast and ZMod.cast_id.
-  have h1 : ((((a : ZMod p).val * b : ℕ) : ZMod p)) =
-      (a : ZMod p) * (b : ZMod p) := by
-    rw [Nat.cast_mul, ZMod.natCast_val, ZMod.cast_id]
-  have h2 : ((((a : ZMod p) * b).val : ℕ) : ZMod p) =
-      (a : ZMod p) * (b : ZMod p) := by
-    rw [ZMod.natCast_val, ZMod.cast_id]
-  -- So the two natural numbers cast to the same element in ZMod p, i.e.,
-  -- they are congruent mod p.
-  have h_eq : (((a : ZMod p).val * b : ℕ) : ZMod p) =
-      ((((a : ZMod p) * b).val : ℕ) : ZMod p) := h1.trans h2.symm
-  rwa [ZMod.natCast_eq_natCast_iff'] at h_eq
+  simp only [← ZMod.natCast_eq_natCast_iff, Nat.cast_mul, ZMod.natCast_val, ZMod.cast_id]
 
 /-- **Factor-wise σ-twist for cyclotomic units (ring-level)**: for
 `a ∈ (ZMod p)ˣ` and `b : ℕ`,
@@ -115,11 +98,9 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_cyclotomicUnit
     (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) *
         cyclotomicUnit p K ((a : ZMod p).val) =
       cyclotomicUnit p K (((a : ZMod p) * b).val) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
   set ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
   have hζ_sub_one_ne_zero : (ζ - 1 : 𝓞 K) ≠ 0 :=
     (zeta_spec p ℚ K).zeta_sub_one_prime'.ne_zero
-  -- Multiply both sides by (ζ - 1) and cancel using IsDomain.
   refine mul_right_cancel₀ hζ_sub_one_ne_zero ?_
   have h_aux :=
     cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one p K a b
@@ -129,24 +110,9 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_cyclotomicUnit
   have h_rhs_zsub : (ζ - 1) * cyclotomicUnit p K (((a : ZMod p) * b).val) =
       ζ ^ (((a : ZMod p) * b).val) - 1 :=
     zeta_sub_one_mul_cyclotomicUnit p K _
-  -- ζ has order p, so ζ^{m} = ζ^{n} when m ≡ n (mod p).
-  have hζ_p : ζ ^ p = 1 := by
-    have hζ_prim : IsPrimitiveRoot ζ p := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot
-    exact hζ_prim.pow_eq_one
-  have hmod := val_mul_eq_val_mul_mod p a b
-  -- ζ^{a.val · b} = ζ^{((a · b).val)} via mod-p exponent reduction.
-  have h_pow_eq :
-      ζ ^ ((a : ZMod p).val * b) = ζ ^ (((a : ZMod p) * b).val) := by
-    -- Use: ζ^m = ζ^{m % p} via ζ^p = 1 (apply iteratively to both sides).
-    have h_lhs : ζ ^ ((a : ZMod p).val * b) =
-        ζ ^ (((a : ZMod p).val * b) % p) := by
-      conv_lhs => rw [← Nat.mod_add_div ((a : ZMod p).val * b) p, pow_add,
-        pow_mul, hζ_p, one_pow, mul_one]
-    have h_rhs : ζ ^ (((a : ZMod p) * b).val) =
-        ζ ^ ((((a : ZMod p) * b).val) % p) := by
-      rw [Nat.mod_eq_of_lt ((a : ZMod p) * b).val_lt]
-    rw [h_lhs, h_rhs, hmod]
-  -- Now compute LHS · (ζ - 1).
+  have hζ_p : ζ ^ p = 1 := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one
+  have h_pow_eq : ζ ^ ((a : ZMod p).val * b) = ζ ^ (((a : ZMod p) * b).val) :=
+    pow_eq_pow_of_modEq (val_mul_eq_val_mul_mod p a b) hζ_p
   calc (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) *
           cyclotomicUnit p K ((a : ZMod p).val) * (ζ - 1)
       = (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) *

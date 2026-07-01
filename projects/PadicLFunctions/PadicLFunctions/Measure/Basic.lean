@@ -112,7 +112,6 @@ theorem norm_apply_le (μ : PadicMeasure p X) (f : C(X, ℤ_[p])) : ‖μ f‖ �
     simp [hf]
   rcases eq_or_ne f 0 with rfl | hf
   · simp
-  -- the sup norm is attained, and is a power of `p`
   obtain ⟨x₀, -, hx₀'⟩ := isCompact_univ.exists_isMaxOn Set.univ_nonempty
     ((map_continuous f).norm.continuousOn)
   have hx₀ : ∀ x, ‖f x‖ ≤ ‖f x₀‖ := fun x => hx₀' (Set.mem_univ x)
@@ -122,9 +121,8 @@ theorem norm_apply_le (μ : PadicMeasure p X) (f : C(X, ℤ_[p])) : ‖μ f‖ �
     simpa [h] using hx₀ x
   have hnorm : ‖f‖ = ‖f x₀‖ :=
     le_antisymm ((f.norm_le (norm_nonneg _)).2 hx₀) (f.norm_coe_le_norm x₀)
-  set n := (f x₀).valuation with hn
+  set n := (f x₀).valuation
   have hval : ‖f x₀‖ = (p : ℝ) ^ (-n : ℤ) := PadicInt.norm_eq_zpow_neg_valuation hfx₀
-  -- every value of `f` is divisible by `p ^ n`, so `f = p ^ n • g`
   have hple : ∀ x, ‖f x‖ ≤ (p : ℝ) ^ (-n : ℤ) := fun x => by
     rw [← hval, ← hnorm]; exact f.norm_coe_le_norm x
   have hpn : ((p : ℚ_[p]) ^ n) ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.2 hp.out.ne_zero)
@@ -175,10 +173,10 @@ lemma isOpen_toZModPow_fiber (k : ℕ) (a : ZMod (p ^ k)) :
 (hence continuous). -/
 lemma isLocallyConstant_toZModPow_val (k : ℕ) :
     IsLocallyConstant fun x : ℤ_[p] => (((PadicInt.toZModPow k x).val : ℕ) : ℤ_[p]) :=
-  (IsLocallyConstant.comp (fun s => by
+  IsLocallyConstant.comp (fun s => by
       rw [← Set.biUnion_preimage_singleton]
       exact isOpen_biUnion fun a _ => isOpen_toZModPow_fiber p k a)
-    fun a : ZMod (p ^ k) => ((a.val : ℕ) : ℤ_[p]))
+    fun a : ZMod (p ^ k) => ((a.val : ℕ) : ℤ_[p])
 
 /-- **Density of locally constant functions**: any continuous `f : X → ℤ_[p]` on a
 compact space is uniformly approximated by locally constant functions. The preimages of
@@ -192,12 +190,10 @@ theorem exists_locallyConstant_norm_sub_le (f : C(X, ℤ_[p])) {ε : ℝ} (hε :
     ∃ g : LocallyConstant X ℤ_[p], ‖f - (g : C(X, ℤ_[p]))‖ ≤ ε := by
   obtain ⟨k, hk⟩ := PadicInt.exists_pow_neg_lt p hε
   have hopen := isOpen_toZModPow_fiber p k
-  -- the mod-`p^k` reduction of `f` is locally constant
-  set q : X → ZMod (p ^ k) := fun x => PadicInt.toZModPow k (f x) with hq
+  set q : X → ZMod (p ^ k) := fun x => PadicInt.toZModPow k (f x)
   have hlc : IsLocallyConstant q := fun s => by
     rw [← Set.biUnion_preimage_singleton]
     exact isOpen_biUnion fun a _ => (hopen a).preimage (map_continuous f)
-  -- lift back via the canonical representatives
   refine ⟨⟨fun x => ((q x).val : ℤ_[p]), hlc.comp fun a => ((a.val : ℕ) : ℤ_[p])⟩,
     ((f - _).norm_le hε.le).2 fun x => ?_⟩
   have hgx : PadicInt.toZModPow k (((q x).val : ℤ_[p])) = q x := by
@@ -224,7 +220,6 @@ theorem _root_.LocallyConstant.exists_eq_comp_toZModPow {α : Type*}
     intro m z w
     rw [PadicInt.norm_le_pow_iff_mem_span_pow, ← PadicInt.ker_toZModPow,
       RingHom.mem_ker, map_sub, sub_eq_zero]
-  -- each point has a `toZModPow`-fibre on which `Φ` is constant
   have hpt : ∀ x : ℤ_[p], ∃ n : ℕ, ∀ y : ℤ_[p],
       PadicInt.toZModPow n y = PadicInt.toZModPow n x → Φ y = Φ x := by
     intro x
@@ -237,14 +232,12 @@ theorem _root_.LocallyConstant.exists_eq_comp_toZModPow {α : Type*}
     rw [Metric.mem_ball, dist_eq_norm]
     exact lt_of_le_of_lt ((hker n y x).mp hy) hn
   choose nx hnx using hpt
-  -- finitely many such fibres cover `ℤ_p`
   obtain ⟨t, -, ht⟩ := IsCompact.elim_nhds_subcover isCompact_univ
     (fun x => {y : ℤ_[p] | PadicInt.toZModPow (nx x) y
       = PadicInt.toZModPow (nx x) x})
     (fun x _ => ((isOpen_toZModPow_fiber p (nx x)
       (PadicInt.toZModPow (nx x) x)).mem_nhds rfl))
-  set n : ℕ := t.sup nx with hn
-  -- `Φ` is constant on every `toZModPow n`-fibre
+  set n : ℕ := t.sup nx
   have hconst : ∀ x y : ℤ_[p],
       PadicInt.toZModPow n y = PadicInt.toZModPow n x → Φ y = Φ x := by
     intro x y hy
@@ -255,8 +248,7 @@ theorem _root_.LocallyConstant.exists_eq_comp_toZModPow {α : Type*}
     have hyx : ‖y - x‖ ≤ (p : ℝ) ^ (-(nx xi : ℤ)) := by
       refine ((hker n y x).mp hy).trans ?_
       have hp1 : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.out.one_lt.le
-      have hle : nx xi ≤ n := Finset.le_sup hxi
-      exact zpow_le_zpow_right₀ hp1 (neg_le_neg (by exact_mod_cast hle))
+      exact zpow_le_zpow_right₀ hp1 (neg_le_neg (by exact_mod_cast Finset.le_sup hxi))
     have hyxi : PadicInt.toZModPow (nx xi) y = PadicInt.toZModPow (nx xi) xi := by
       refine (hker _ y xi).mpr ?_
       calc ‖y - xi‖ = ‖(y - x) + (x - xi)‖ := by ring_nf

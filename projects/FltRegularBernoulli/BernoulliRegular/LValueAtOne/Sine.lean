@@ -43,7 +43,7 @@ lemma norm_sum_range_sin_le {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) (n : ℕ) 
       ((∑ i ∈ Finset.range n, z ^ i).im : ℝ) =
         ∑ i ∈ Finset.range n, Real.sin (2 * Real.pi * x * i) := by
     rw [Complex.im_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     rw [show z ^ i = Complex.exp (((2 * Real.pi * x * i : ℝ) : ℂ) * Complex.I) by
       rw [← Complex.exp_nat_mul]
       congr 1
@@ -78,7 +78,7 @@ lemma norm_sum_range_sin_le {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) (n : ℕ) 
 
 /-- Continuity in the exponent of a single shifted sine term. -/
 lemma continuous_shiftedSinTerm (x : ℝ) (i : ℕ) :
-    Continuous fun s : ℝ =>
+    Continuous fun s : ℝ ↦
       Real.sin (2 * Real.pi * x * (i + 1)) / ((i + 1 : ℂ) ^ (s : ℂ)) := by
   refine Continuous.div continuous_const ?_ ?_
   · exact Continuous.const_cpow Complex.continuous_ofReal (Or.inl (Nat.cast_add_one_ne_zero i))
@@ -87,18 +87,18 @@ lemma continuous_shiftedSinTerm (x : ℝ) (i : ℕ) :
 
 /-- Repackage `hasSum_nat_sinZeta` with the harmless zero term removed. -/
 lemma hasSum_shifted_sinZeta (x s : ℝ) (hs : 1 < s) :
-    HasSum (fun n : ℕ => Real.sin (2 * Real.pi * x * (n + 1)) / ((n + 1 : ℂ) ^ (s : ℂ)))
+    HasSum (fun n : ℕ ↦ Real.sin (2 * Real.pi * x * (n + 1)) / ((n + 1 : ℂ) ^ (s : ℂ)))
       (HurwitzZeta.sinZeta x s) := by
-  let f : ℕ → ℂ := fun n => Real.sin (2 * Real.pi * x * n) / ((n : ℂ) ^ (s : ℂ))
+  let f : ℕ → ℂ := fun n ↦ Real.sin (2 * Real.pi * x * n) / ((n : ℂ) ^ (s : ℂ))
   have hfull : HasSum f (HurwitzZeta.sinZeta x s) := by
     simpa [f] using HurwitzZeta.hasSum_nat_sinZeta x (show 1 < ((s : ℂ)).re by simpa)
-  have hshift : HasSum (fun n : ℕ => f (n + 1)) (∑' n : ℕ, f (n + 1)) :=
+  have hshift : HasSum (fun n : ℕ ↦ f (n + 1)) (∑' n : ℕ, f (n + 1)) :=
     ((summable_nat_add_iff 1).2 hfull.summable).hasSum
   have hfull' : HasSum f (f 0 + ∑' n : ℕ, f (n + 1)) := hshift.zero_add
   have hvalue : (∑' n : ℕ, f (n + 1)) = HurwitzZeta.sinZeta x s := by
     have := tendsto_nhds_unique hfull'.tendsto_sum_nat hfull.tendsto_sum_nat
     simpa [f, hs.ne'] using this
-  exact hvalue ▸ hshift.congr_fun (fun n => by simp [f])
+  exact hvalue ▸ hshift.congr_fun (fun n ↦ by simp [f])
 
 /-- Uniform tail bound for the shifted sine Dirichlet series on the half-line `s ≥ 1`. -/
 lemma norm_sum_range_shifted_sin_term_le {x s : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) (hs : 1 ≤ s)
@@ -107,8 +107,8 @@ lemma norm_sum_range_shifted_sin_term_le {x s : ℝ} (hx₀ : 0 < x) (hx₁ : x 
         Real.sin (2 * Real.pi * x * (m + i + 1)) / (((m + i + 1 : ℕ) : ℂ) ^ (s : ℂ))‖ ≤
       (4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖) *
         (1 / (m + 1 : ℝ) ^ s) := by
-  let a : ℕ → ℝ := fun k => 1 / (k + 1 : ℝ) ^ s
-  let z : ℕ → ℂ := fun k => Real.sin (2 * Real.pi * x * (k + 1))
+  let a : ℕ → ℝ := fun k ↦ 1 / (k + 1 : ℝ) ^ s
+  let z : ℕ → ℂ := fun k ↦ Real.sin (2 * Real.pi * x * (k + 1))
   have ha : Antitone a := by
     intro i j hij
     have hij' : (i + 1 : ℝ) ≤ j + 1 := by exact_mod_cast Nat.succ_le_succ hij
@@ -128,7 +128,7 @@ lemma norm_sum_range_shifted_sin_term_le {x s : ℝ} (hx₀ : 0 < x) (hx₁ : x 
         ∑ i ∈ Finset.range k, Real.sin (2 * Real.pi * x * (i + 1)) =
           ∑ i ∈ Finset.range (k + 1), Real.sin (2 * Real.pi * x * i) := by
       simpa [Nat.cast_add, add_assoc, add_comm, add_left_comm] using
-        (Finset.sum_range_add (fun i => Real.sin (2 * Real.pi * x * i)) 1 k).symm
+        (Finset.sum_range_add (fun i ↦ Real.sin (2 * Real.pi * x * i)) 1 k).symm
     rw [show (∑ i ∈ Finset.range k, z i) =
         ((∑ i ∈ Finset.range k, Real.sin (2 * Real.pi * x * (i + 1)) : ℝ) : ℂ) by
           simp [z, Complex.ofReal_sum]]
@@ -139,7 +139,7 @@ lemma norm_sum_range_shifted_sin_term_le {x s : ℝ} (hx₀ : 0 < x) (hx₁ : x 
         Real.sin (2 * Real.pi * x * (m + i + 1)) / (((m + i + 1 : ℕ) : ℂ) ^ (s : ℂ))‖
         = ‖∑ i ∈ Finset.range n, a (m + i) • z (m + i)‖ := by
             congr 1
-            refine Finset.sum_congr rfl fun i hi => ?_
+            refine Finset.sum_congr rfl fun i hi ↦ ?_
             have hcpow :
                 (((m + i + 1 : ℕ) : ℂ) ^ (s : ℂ)) =
                   ((((m + i + 1 : ℕ) : ℝ) ^ s : ℝ) : ℂ) := by
@@ -162,8 +162,8 @@ lemma exists_tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x 
       Tendsto
         (fun n ↦ ∑ i ∈ Finset.range n, if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i)
         atTop (𝓝 l) := by
-  let f : ℕ → ℝ := fun n => if n = 0 then 1 else 1 / n
-  let z : ℕ → ℝ := fun n => if n = 0 then 0 else Real.sin (2 * Real.pi * x * n)
+  let f : ℕ → ℝ := fun n ↦ if n = 0 then 1 else 1 / n
+  let z : ℕ → ℝ := fun n ↦ if n = 0 then 0 else Real.sin (2 * Real.pi * x * n)
   have hf : Antitone f := by
     intro a b hab
     rcases Nat.eq_zero_or_pos a with rfl | ha
@@ -182,11 +182,11 @@ lemma exists_tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x 
     simpa [f]
       using
         (tendsto_one_div_add_atTop_nhds_zero_nat :
-          Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) atTop (𝓝 0))
+          Tendsto (fun n : ℕ ↦ 1 / (n + 1 : ℝ)) atTop (𝓝 0))
   have hpartial :
       ∀ n, ∑ i ∈ Finset.range n, z i = ∑ i ∈ Finset.range n, Real.sin (2 * Real.pi * x * i) := by
     intro n
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     rcases Nat.eq_zero_or_pos i with rfl | hi
     · simp [z]
     · simp [z, hi.ne']
@@ -203,7 +203,7 @@ lemma exists_tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x 
       (fun n ↦ ∑ i ∈ Finset.range n, f i • z i) =
         fun n ↦ ∑ i ∈ Finset.range n, if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i := by
     funext n
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     rcases Nat.eq_zero_or_pos i with rfl | hi
     · simp [f, z]
     · simp [f, z, hi.ne', smul_eq_mul, div_eq_mul_inv, mul_comm]
@@ -216,15 +216,15 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
       (fun n ↦ ∑ i ∈ Finset.range n, if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i)
       atTop (𝓝 (Real.pi * (1 / 2 - x))) := by
   obtain ⟨l, hl⟩ := exists_tendsto_sum_range_sin_div_nat hx₀ hx₁
-  let coeff : ℕ → ℝ := fun n =>
+  let coeff : ℕ → ℝ := fun n ↦
     if n = 0 then 0 else Real.sin (2 * Real.pi * x * n) / n
   have habel :
-      Tendsto (fun r : ℝ => ∑' n, coeff n * r ^ n) (𝓝[<] 1) (𝓝 l) :=
+      Tendsto (fun r : ℝ ↦ ∑' n, coeff n * r ^ n) (𝓝[<] 1) (𝓝 l) :=
     Real.tendsto_tsum_powerSeries_nhdsWithin_lt hl
   have hcoeff :
       Set.EqOn
-        (fun r : ℝ => ∑' n, coeff n * r ^ n)
-        (fun r : ℝ =>
+        (fun r : ℝ ↦ ∑' n, coeff n * r ^ n)
+        (fun r : ℝ ↦
           (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
         (Set.Ioo 0 1) := by
     intro r hr
@@ -233,7 +233,7 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     calc
       ∑' n : ℕ, coeff n * r ^ n
           = ∑' n : ℕ, (r ^ n / n) * Real.sin (2 * Real.pi * x * n) := by
-              refine tsum_congr fun n : ℕ => ?_
+              refine tsum_congr fun n : ℕ ↦ ?_
               rcases n.eq_zero_or_pos with rfl | hn
               · simp [coeff]
               · simp [coeff, hn.ne', div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
@@ -241,7 +241,7 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
             (hasSum_mul_rpow_sin x r hr₀ hr₁).tsum_eq
   have habel' :
       Tendsto
-        (fun r : ℝ =>
+        (fun r : ℝ ↦
           (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
         (𝓝[<] 1) (𝓝 l) :=
     Tendsto.congr' (hcoeff.eventuallyEq_of_mem (Ioo_mem_nhdsLT zero_lt_one)) habel
@@ -267,41 +267,41 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     positivity
   have hcont :
       Tendsto
-        (fun r : ℝ =>
+        (fun r : ℝ ↦
           (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
         (𝓝[<] 1) (𝓝 (Real.pi * (1 / 2 - x))) := by
     have hz :
         Tendsto
-          (fun r : ℝ => (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))
+          (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))
           (𝓝[<] 1)
           (𝓝 ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I))) := by
       have hcont :
-          Continuous fun r : ℝ =>
+          Continuous fun r : ℝ ↦
             (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I) := by
         continuity
       have hcont1 :
           ContinuousAt
-            (fun r : ℝ => (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)) 1 :=
+            (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)) 1 :=
         hcont.continuousAt
       convert tendsto_nhdsWithin_of_tendsto_nhds hcont1.tendsto using 1
       · simp
     have hlog :
         Tendsto
-          (fun r : ℝ =>
+          (fun r : ℝ ↦
             Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)))
           (𝓝[<] 1)
           (𝓝 (Complex.log ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))) :=
       hz.clog hslit
     have him0 :
         Tendsto
-          (fun r : ℝ =>
+          (fun r : ℝ ↦
             (Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
           (𝓝[<] 1)
           (𝓝 ((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im)) :=
       Complex.continuous_im.continuousAt.tendsto.comp hlog
     have hnegim :
         Tendsto
-          (fun r : ℝ =>
+          (fun r : ℝ ↦
             -((Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im))
           (𝓝[<] 1)
           (𝓝 (-((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im))) :=
@@ -324,25 +324,25 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
 /-- The shifted endpoint sine series converges to the same boundary value. -/
 lemma tendsto_sum_range_shifted_sin_one {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     Tendsto
-      (fun n : ℕ => ∑ i ∈ Finset.range n,
+      (fun n : ℕ ↦ ∑ i ∈ Finset.range n,
         Real.sin (2 * Real.pi * x * (i + 1)) / ((i + 1 : ℂ) ^ (1 : ℂ)))
       atTop (nhds (Real.pi * (1 / 2 - x) : ℂ)) := by
-  let F : ℕ → ℂ := fun n =>
+  let F : ℕ → ℂ := fun n ↦
     ((∑ i ∈ Finset.range n, if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i : ℝ) : ℂ)
   have hbase : Tendsto F atTop (nhds (Real.pi * (1 / 2 - x) : ℂ)) := by
     simpa [F] using (tendsto_sum_range_sin_div_nat hx₀ hx₁).ofReal
-  have hshifted : Tendsto (fun n : ℕ => F (n + 1)) atTop (nhds (Real.pi * (1 / 2 - x) : ℂ)) :=
+  have hshifted : Tendsto (fun n : ℕ ↦ F (n + 1)) atTop (nhds (Real.pi * (1 / 2 - x) : ℂ)) :=
     (tendsto_add_atTop_iff_nat 1).2 hbase
-  refine hshifted.congr' <| Filter.Eventually.of_forall fun n => ?_
+  refine hshifted.congr' <| Filter.Eventually.of_forall fun n ↦ ?_
   have hsum :=
     Finset.sum_range_add
-      (fun i : ℕ => (((if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i : ℝ)) : ℂ)) 1 n
+      (fun i : ℕ ↦ (((if i = 0 then 0 else Real.sin (2 * Real.pi * x * i) / i : ℝ)) : ℂ)) 1 n
   simpa [F, add_comm, add_left_comm, add_assoc] using hsum
 
 /-- The shifted sine Dirichlet partial sums are uniformly Cauchy on the half-line `s ≥ 1`. -/
 lemma uniformCauchySeqOn_shiftedSinPartialSums {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     UniformCauchySeqOn
-      (fun n (s : ℝ) => ∑ i ∈ Finset.range n,
+      (fun n (s : ℝ) ↦ ∑ i ∈ Finset.range n,
         Real.sin (2 * Real.pi * x * (i + 1)) / ((i + 1 : ℂ) ^ (s : ℂ)))
       atTop (Set.Ici 1) := by
   rw [Metric.uniformCauchySeqOn_iff]
@@ -392,7 +392,7 @@ lemma uniformCauchySeqOn_shiftedSinPartialSums {x : ℝ} (hx₀ : 0 < x) (hx₁ 
               Real.sin (2 * Real.pi * x * (i + 1)) / ((i + 1 : ℂ) ^ (s : ℂ)))
           < ε := by
     intro m n hm hmn s hs
-    let term : ℕ → ℂ := fun k =>
+    let term : ℕ → ℂ := fun k ↦
       Real.sin (2 * Real.pi * x * (k + 1)) / ((k + 1 : ℂ) ^ (s : ℂ))
     have hsplit :
         ∑ i ∈ Finset.range n, term i =
@@ -435,13 +435,13 @@ lemma uniformCauchySeqOn_shiftedSinPartialSums {x : ℝ} (hx₀ : 0 < x) (hx₁ 
 theorem sinZeta_one_eq_boundary {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     HurwitzZeta.sinZeta x 1 = (Real.pi * (1 / 2 - x) : ℂ) := by
   let boundary : ℂ := (Real.pi * (1 / 2 - x) : ℂ)
-  let S : ℕ → ℝ → ℂ := fun n s =>
+  let S : ℕ → ℝ → ℂ := fun n s ↦
     ∑ i ∈ Finset.range n,
       Real.sin (2 * Real.pi * x * (i + 1)) / ((i + 1 : ℂ) ^ (s : ℂ))
-  let G : ℝ → ℂ := fun s => if hs : s = 1 then boundary else HurwitzZeta.sinZeta x s
+  let G : ℝ → ℂ := fun s ↦ if hs : s = 1 then boundary else HurwitzZeta.sinZeta x s
   have hCauchy : UniformCauchySeqOn S atTop (Set.Ici 1) := by
     simpa [S] using uniformCauchySeqOn_shiftedSinPartialSums (x := x) hx₀ hx₁
-  have hpoint : ∀ s ∈ Set.Ici (1 : ℝ), Tendsto (fun n => S n s) atTop (𝓝 (G s)) := by
+  have hpoint : ∀ s ∈ Set.Ici (1 : ℝ), Tendsto (fun n ↦ S n s) atTop (𝓝 (G s)) := by
     intro s hs
     by_cases hs1 : s = 1
     · simpa [S, G, hs1, boundary] using tendsto_sum_range_shifted_sin_one (x := x) hx₀ hx₁
@@ -451,30 +451,30 @@ theorem sinZeta_one_eq_boundary {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     hCauchy.tendstoUniformlyOn_of_tendsto hpoint
   have hcont : ContinuousOn G (Set.Ici (1 : ℝ)) := by
     apply hunif.continuousOn
-    refine Frequently.of_forall fun n => ?_
+    refine Frequently.of_forall fun n ↦ ?_
     classical
     dsimp [S]
     exact Continuous.continuousOn <|
-      continuous_finsetSum _ fun i _ => continuous_shiftedSinTerm x i
+      continuous_finsetSum _ fun i _ ↦ continuous_shiftedSinTerm x i
   have hG_right : Tendsto G (𝓝[Set.Ioi 1] 1) (𝓝 boundary) := by
     have hG_Ici : Tendsto G (𝓝[Set.Ici 1] 1) (𝓝 boundary) := by
       simpa [G, boundary] using (hcont 1 (by simp)).tendsto
     exact hG_Ici.mono_left (nhdsWithin_mono _ Set.Ioi_subset_Ici_self)
-  have hG_eq : G =ᶠ[𝓝[Set.Ioi 1] 1] fun s : ℝ => HurwitzZeta.sinZeta x s := by
+  have hG_eq : G =ᶠ[𝓝[Set.Ioi 1] 1] fun s : ℝ ↦ HurwitzZeta.sinZeta x s := by
     filter_upwards [eventually_mem_nhdsWithin] with s hs
     have hslt : 1 < s := by simpa using hs
     simp [G, ne_of_gt hslt]
-  have hsin_right : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
+  have hsin_right : Tendsto (fun s : ℝ ↦ HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
       (𝓝 boundary) :=
     Tendsto.congr' hG_eq hG_right
-  have hsin_cont : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
+  have hsin_cont : Tendsto (fun s : ℝ ↦ HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
       (𝓝 (HurwitzZeta.sinZeta x 1)) := by
-    have hcomplex : Tendsto (fun z : ℂ => HurwitzZeta.sinZeta x z) (𝓝 (1 : ℂ))
+    have hcomplex : Tendsto (fun z : ℂ ↦ HurwitzZeta.sinZeta x z) (𝓝 (1 : ℂ))
         (𝓝 (HurwitzZeta.sinZeta x 1)) :=
       ((HurwitzZeta.differentiableAt_sinZeta x) (1 : ℂ)).continuousAt.tendsto
-    have hreal : Tendsto (fun s : ℝ => (s : ℂ)) (𝓝 (1 : ℝ)) (𝓝 (1 : ℂ)) :=
+    have hreal : Tendsto (fun s : ℝ ↦ (s : ℂ)) (𝓝 (1 : ℝ)) (𝓝 (1 : ℂ)) :=
       Complex.continuous_ofReal.continuousAt.tendsto
-    have hcomp : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x (s : ℂ)) (𝓝 (1 : ℝ))
+    have hcomp : Tendsto (fun s : ℝ ↦ HurwitzZeta.sinZeta x (s : ℂ)) (𝓝 (1 : ℝ))
         (𝓝 (HurwitzZeta.sinZeta x 1)) := by
       simpa [Function.comp_def] using hcomplex.comp hreal
     exact hcomp.mono_left nhdsWithin_le_nhds
@@ -496,7 +496,7 @@ theorem sinZeta_toAddCircle_one_eq_boundary {a : ZMod p} (ha : a ≠ 0) :
             push_cast
             rfl
           simpa using congrArg
-            (fun z : ℂ => (((Real.pi : ℝ) : ℂ) * ((1 / 2 : ℂ) - z))) hcast
+            (fun z : ℂ ↦ (((Real.pi : ℝ) : ℂ) * ((1 / 2 : ℂ) - z))) hcast
 
 end LValueAtOne
 

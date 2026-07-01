@@ -15,12 +15,6 @@
 #
 # NOTE: until AINTLIB publishes an olean cache, each side-build compiles the AINTLIB libs it needs
 # from source (via the path-require) — slow. The cache makes this fast; CI also caches .lake/packages.
-#
-# LOCAL builds: this script's `lake update` re-resolves mathlib and (on a near-full disk) tries to
-# clone ~7 GB and fails. To render a single blueprint locally against THIS already-built checkout
-# without any clone, use  scripts/render-blueprint-local.sh <ProjectDir> <BlueprintLib>  instead
-# (mathlib via path, verso packages hardlinked). That is the path actually used to publish the
-# four live blueprints; build-blueprints.sh is the CI-on-a-fresh-runner path.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/_site"; rm -rf "$OUT"; mkdir -p "$OUT"
@@ -31,12 +25,10 @@ PATCH="$ROOT/scripts/patches/verso-blueprint-v4.30-on-v4.31-toolchain.patch"
 BLUEPRINTS=(
   "padic|dev/padic|projects/PadicLFunctions/_blueprint|PadicLFunctionsBlueprint|PadicLFunctionsBlueprintMain|padic"
   "leanmodularforms|dev/leanmodularforms|projects/LeanModularForms/_blueprint|LeanModularFormsBlueprint|LeanModularFormsBlueprintMain|leanmodularforms"
-  # Each blueprint lives on its own dev/<project> branch (one blueprint per branch), so each row gets
-  # its own throwaway worktree. NB this CI path runs `lake update` and needs a fresh runner with disk +
-  # an olean cache; to render a single blueprint locally on the dev machine (no clone), use
-  # scripts/render-blueprint-local.sh <ProjectDir> <BlueprintLib> instead.
-  "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevDensityBlueprint|CebotarevDensityBlueprintMain|chebotarev"
-  "flt-bernoulli|dev/flt-bernoulli|projects/FltRegularBernoulli/_blueprint|BernoulliRegularBlueprint|BernoulliRegularBlueprintMain|flt-bernoulli"
+  "hasseweil|dev/hasse-weil|projects/HasseWeil/_blueprint|HasseWeilBlueprint|HasseWeilBlueprintMain|hasseweil"
+  "adicspaces|dev/adic-spaces|projects/AdicSpaces/_blueprint|AdicSpacesBlueprint|AdicSpacesBlueprintMain|adicspaces"
+  "smo|dev/leanmodularforms|projects/LeanModularForms/_blueprint_smo|LeanModularFormsSMOBlueprint|LeanModularFormsSMOBlueprintMain|smo"
+  # "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevBlueprint|CebotarevBlueprintMain|chebotarev"
 )
 
 build_one() {

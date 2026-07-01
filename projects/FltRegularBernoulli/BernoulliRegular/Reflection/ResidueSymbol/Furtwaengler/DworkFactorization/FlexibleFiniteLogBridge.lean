@@ -83,9 +83,8 @@ theorem finiteLogTermCore_natCast_mul_eq_mk {N n : ℕ} (hn : n ≠ 0)
     _ =
       F.quotientFractionEvalPrimeCompl N
         ((c : 𝓞 R') * ((d : 𝓞 R') * x ^ n)) s := by
-        rw [← F.quotientFractionEvalPrimeCompl_one
-          N (c : 𝓞 R')]
-        rw [← F.quotientFractionEvalPrimeCompl_mul]
+        rw [← F.quotientFractionEvalPrimeCompl_one N (c : 𝓞 R'),
+          ← F.quotientFractionEvalPrimeCompl_mul]
         simp [s]
     _ =
       F.quotientFractionEvalPrimeCompl N
@@ -127,11 +126,10 @@ theorem finiteLogTermCore_arg_zero (N n : ℕ) (h0 : (0 : 𝓞 R') ∈ F.Q) :
   have hell_ne : ((ℓ : 𝓞 R') ^ n.factorization ℓ) ≠ 0 :=
     pow_ne_zero _ (Nat.cast_ne_zero.mpr (Fact.out : Nat.Prime ℓ).ne_zero)
   have hnum : F.finiteLogTermNumerator n 0 h0 = 0 := by
-    have hspec := F.finiteLogTermNumerator_mul_spec hn h0
     have hmul :
         ((ℓ : 𝓞 R') ^ n.factorization ℓ) *
             F.finiteLogTermNumerator n 0 h0 = 0 := by
-      simpa [hn] using hspec
+      simpa [hn] using F.finiteLogTermNumerator_mul_spec hn h0
     exact (mul_eq_zero.mp hmul).resolve_left hell_ne
   rw [finiteLogTermCore, dif_neg hn, hnum]
   exact F.quotientFractionEvalPrimeCompl_eq_zero_of_mem
@@ -154,10 +152,9 @@ theorem finiteLog_eq_zero_of_mem_Q_pow_succ {N : ℕ}
     {x : 𝓞 R'} (hx : x ∈ F.Q) (hxN : x ∈ F.Q ^ (N + 1)) :
     F.finiteLog N x hx = 0 := by
   have h0 : (0 : 𝓞 R') ∈ F.Q := by simp
-  have hsub : x - 0 ∈ F.Q ^ (N + 1) := by simpa using hxN
   calc
     F.finiteLog N x hx = F.finiteLog N 0 h0 :=
-      F.finiteLog_eq_of_sub_mem hx h0 hsub
+      F.finiteLog_eq_of_sub_mem hx h0 (by simpa using hxN)
     _ = 0 := F.finiteLog_arg_zero N h0
 
 end ConductorFlexibleFullTeichStickelbergerSetup

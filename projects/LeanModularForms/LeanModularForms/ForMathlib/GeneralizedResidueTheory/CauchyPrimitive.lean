@@ -39,25 +39,25 @@ private lemma integral_t_mul_deriv_eq {f : ℂ → ℂ} {S : Set ℂ}
     ∫ t in (0 : ℝ)..1,
         t * (deriv f (c + t • (z - c)) * (z - c)) =
       f z - ∫ t in (0 : ℝ)..1, f (c + t • (z - c)) := by
-  let u : ℝ → ℂ := fun t => t
-  let v : ℝ → ℂ := fun t => f (c + t • (z - c))
-  let u' : ℝ → ℂ := fun _ => 1
-  let v' : ℝ → ℂ := fun t => deriv f (c + t • (z - c)) * (z - c)
-  let γ : ℝ → ℂ := fun t => c + t • (z - c)
+  let u : ℝ → ℂ := fun t ↦ t
+  let v : ℝ → ℂ := fun t ↦ f (c + t • (z - c))
+  let u' : ℝ → ℂ := fun _ ↦ 1
+  let v' : ℝ → ℂ := fun t ↦ deriv f (c + t • (z - c)) * (z - c)
+  let γ : ℝ → ℂ := fun t ↦ c + t • (z - c)
   have hγ_cont : Continuous γ := by fun_prop
   have hu_cont : ContinuousOn u (Set.uIcc 0 1) :=
     continuous_ofReal.continuousOn
   have hv_cont : ContinuousOn v (Set.uIcc 0 1) :=
-    hf.continuousOn.comp hγ_cont.continuousOn fun t ht => by
+    hf.continuousOn.comp hγ_cont.continuousOn fun t ht ↦ by
       rw [Set.uIcc_of_le zero_le_one] at ht; exact h_seg t ht
   have hu_deriv : ∀ x ∈ Set.Ioo (min 0 1) (max 0 1),
-      HasDerivAt u (u' x) x := fun _ _ => ofRealCLM.hasDerivAt
-  have hγ_deriv : ∀ t : ℝ, HasDerivAt γ (z - c) t := fun t => by
-    have h2 : HasDerivAt (fun t : ℝ => t • (z - c)) (z - c) t := by
+      HasDerivAt u (u' x) x := fun _ _ ↦ ofRealCLM.hasDerivAt
+  have hγ_deriv : ∀ t : ℝ, HasDerivAt γ (z - c) t := fun t ↦ by
+    have h2 : HasDerivAt (fun t : ℝ ↦ t • (z - c)) (z - c) t := by
       simpa using (hasDerivAt_id t).smul_const (z - c)
     exact h2.const_add c
   have hv_deriv : ∀ x ∈ Set.Ioo (min 0 1) (max 0 1),
-      HasDerivAt v (v' x) x := fun t ht => by
+      HasDerivAt v (v' x) x := fun t ht ↦ by
     simp only [v, v']
     simp only [min_eq_left, max_eq_right, zero_le_one] at ht
     have h_chain : HasDerivAt (f ∘ γ) ((z - c) • deriv f (γ t)) t :=
@@ -70,7 +70,7 @@ private lemma integral_t_mul_deriv_eq {f : ℂ → ℂ} {S : Set ℂ}
     apply ContinuousOn.intervalIntegrable
     rw [Set.uIcc_of_le zero_le_one]
     exact ((hf.contDiffOn hS_open).continuousOn_deriv_of_isOpen hS_open le_rfl).comp
-      hγ_cont.continuousOn (fun t ht => h_seg t ht) |>.mul continuousOn_const
+      hγ_cont.continuousOn (fun t ht ↦ h_seg t ht) |>.mul continuousOn_const
   have h_parts :=
     intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt
       hu_cont hv_cont hu_deriv hv_deriv continuousOn_const.intervalIntegrable hv'_int
@@ -79,18 +79,18 @@ private lemma integral_t_mul_deriv_eq {f : ℂ → ℂ} {S : Set ℂ}
   exact h_parts
 
 private lemma continuous_segmentMap (c w : ℂ) :
-    Continuous (fun t : ℝ => c + t • (w - c)) := by fun_prop
+    Continuous (fun t : ℝ ↦ c + t • (w - c)) := by fun_prop
 
 private lemma segmentIntegrand_aestronglyMeasurable
     {f : ℂ → ℂ} {S : Set ℂ} {c w : ℂ}
     (hf : ContinuousOn f S)
     (h_seg : ∀ t ∈ Icc (0 : ℝ) 1, c + t • (w - c) ∈ S) :
-    AEStronglyMeasurable (fun t : ℝ => f (c + t • (w - c)))
+    AEStronglyMeasurable (fun t : ℝ ↦ f (c + t • (w - c)))
       (volume.restrict (Ioc 0 1)) := by
   have hcontOn : ContinuousOn
-      (fun t : ℝ => f (c + t • (w - c))) (Icc 0 1) :=
+      (fun t : ℝ ↦ f (c + t • (w - c))) (Icc 0 1) :=
     hf.comp (continuous_segmentMap c w).continuousOn
-      (fun t ht => h_seg t ht)
+      (fun t ht ↦ h_seg t ht)
   exact (hcontOn.mono Ioc_subset_Icc_self).aestronglyMeasurable
     measurableSet_Ioc
 
@@ -99,17 +99,17 @@ private lemma segmentDerivIntegrand_aestronglyMeasurable
     (hS_open : IsOpen S) (hf : DifferentiableOn ℂ f S)
     (h_seg : ∀ t ∈ Icc (0 : ℝ) 1, c + t • (z - c) ∈ S) :
     AEStronglyMeasurable
-      (fun t : ℝ => t • deriv f (c + t • (z - c)))
+      (fun t : ℝ ↦ t • deriv f (c + t • (z - c)))
       (volume.restrict (Ioc 0 1)) := by
   have hf'_cont : ContinuousOn (deriv f) S :=
     (hf.contDiffOn hS_open).continuousOn_deriv_of_isOpen
       hS_open le_rfl
   have hcontOn : ContinuousOn
-      (fun t : ℝ => (t : ℂ) • deriv f (c + t • (z - c)))
+      (fun t : ℝ ↦ (t : ℂ) • deriv f (c + t • (z - c)))
       (Icc 0 1) :=
     continuous_ofReal.continuousOn.smul
       (hf'_cont.comp (continuous_segmentMap c z).continuousOn
-        (fun t ht => h_seg t ht))
+        (fun t ht ↦ h_seg t ht))
   exact (hcontOn.mono Ioc_subset_Icc_self).aestronglyMeasurable
     measurableSet_Ioc
 
@@ -117,20 +117,20 @@ private lemma segmentIntegrand_intervalIntegrable
     {f : ℂ → ℂ} {S : Set ℂ} {c z : ℂ}
     (hf : ContinuousOn f S)
     (h_seg : ∀ t ∈ Icc (0 : ℝ) 1, c + t • (z - c) ∈ S) :
-    IntervalIntegrable (fun t => f (c + t • (z - c)))
+    IntervalIntegrable (fun t ↦ f (c + t • (z - c)))
       volume 0 1 := by
   apply ContinuousOn.intervalIntegrable
   rw [uIcc_of_le zero_le_one]
   exact hf.comp (continuous_segmentMap c z).continuousOn
-    (fun t ht => h_seg t ht)
+    (fun t ht ↦ h_seg t ht)
 
 private lemma hasDerivAt_segmentIntegrand {f : ℂ → ℂ}
     {S : Set ℂ} {c z : ℂ} {t : ℝ}
     (hS_open : IsOpen S) (hf : DifferentiableOn ℂ f S)
     (hpt : c + t • (z - c) ∈ S) :
-    HasDerivAt (fun w => f (c + t • (w - c)))
+    HasDerivAt (fun w ↦ f (c + t • (w - c)))
       (t • deriv f (c + t • (z - c))) z := by
-  have hg : HasDerivAt (fun w => c + t • (w - c)) (t : ℂ) z := by
+  have hg : HasDerivAt (fun w ↦ c + t • (w - c)) (t : ℂ) z := by
     rw [show (t : ℂ) = t • (1 : ℂ) by simp]
     exact (((hasDerivAt_id z).sub_const c).const_smul (t : ℝ)).const_add c
   have hval : (t : ℝ) • deriv f (c + t • (z - c)) = deriv f (c + t • (z - c)) * (t : ℂ) := by
@@ -146,7 +146,7 @@ private lemma segmentIntegrand_lipschitzOnWith {f : ℂ → ℂ}
     (hM_bound : ∀ w ∈ Metric.ball z ε,
       ‖deriv f (c + t • (w - c))‖ ≤ M) :
     LipschitzOnWith (Real.toNNReal (|t| * M))
-      (fun w => f (c + t • (w - c))) (Metric.ball z ε) := by
+      (fun w ↦ f (c + t • (w - c))) (Metric.ball z ε) := by
   rw [lipschitzOnWith_iff_dist_le_mul]
   intro x hx y hy
   have hgx : c + t • (x - c) ∈ S :=
@@ -167,7 +167,7 @@ private lemma segmentIntegrand_lipschitzOnWith {f : ℂ → ℂ}
     have h_diff_at : ∀ p ∈
         segment ℝ (c + t • (x - c)) (c + t • (y - c)),
         DifferentiableAt ℂ f p :=
-      fun p hp =>
+      fun p hp ↦
         hf.differentiableAt (hS_open.mem_nhds (h_seg_in_S hp))
     have h_deriv_bound : ∀ p ∈
         segment ℝ (c + t • (x - c)) (c + t • (y - c)),
@@ -210,16 +210,16 @@ private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
     (hf : DifferentiableOn ℂ f S)
     (hε_ball : Metric.ball z ε ⊆ S) :
     HasDerivAt
-      (fun w => ∫ t in (0 : ℝ)..1, f (c + t • (w - c)))
+      (fun w ↦ ∫ t in (0 : ℝ)..1, f (c + t • (w - c)))
       (∫ t in (0 : ℝ)..1, t • deriv f (c + t • (z - c)))
       z := by
-  let F : ℂ → ℝ → ℂ := fun w t => f (c + t • (w - c))
-  let F' : ℝ → ℂ := fun t => t • deriv f (c + t • (z - c))
+  let F : ℂ → ℝ → ℂ := fun w t ↦ f (c + t • (w - c))
+  let F' : ℝ → ℂ := fun t ↦ t • deriv f (c + t • (z - c))
   have h_seg : ∀ w ∈ Metric.ball z ε,
       ∀ t ∈ Icc (0 : ℝ) 1, c + t • (w - c) ∈ S :=
-    fun w hw t ht => segment_subset_convex hS_convex hc (hε_ball hw) t ht
+    fun w hw t ht ↦ segment_subset_convex hS_convex hc (hε_ball hw) t ht
   have h_seg_z : ∀ t ∈ Icc (0 : ℝ) 1, c + t • (z - c) ∈ S :=
-    fun t ht => segment_subset_convex hS_convex hc hz t ht
+    fun t ht ↦ segment_subset_convex hS_convex hc hz t ht
   let ε' := ε / 2
   have hε'_pos : 0 < ε' := by positivity
   have hε'_lt_ε : ε' < ε := half_lt_self hε_pos
@@ -230,16 +230,16 @@ private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
   obtain ⟨M, hM_pos, hM_bound⟩ :
       ∃ M > 0, ∀ w ∈ Metric.ball z ε',
         ∀ t ∈ Icc (0 : ℝ) 1, ‖deriv f (c + t • (w - c))‖ ≤ M := by
-    let segmentMap : ℂ × ℝ → ℂ := fun ⟨w, t⟩ => c + t • (w - c)
+    let segmentMap : ℂ × ℝ → ℂ := fun ⟨w, t⟩ ↦ c + t • (w - c)
     let K := segmentMap '' (Metric.closedBall z ε' ×ˢ Icc (0 : ℝ) 1)
     have hK_compact : IsCompact K :=
       ((isCompact_closedBall z ε').prod isCompact_Icc).image (by fun_prop)
-    have hK_in_S : K ⊆ S := fun p hp => by
+    have hK_in_S : K ⊆ S := fun p hp ↦ by
       obtain ⟨⟨w, t⟩, ⟨hw, ht⟩, rfl⟩ := hp
       exact segment_subset_convex hS_convex hc
         ((Metric.closedBall_subset_ball hε'_lt_ε).trans hε_ball hw) t ht
     obtain ⟨M', hM'⟩ := hK_compact.bddAbove_image (hf'_cont.norm.mono hK_in_S)
-    exact ⟨max M' 1, by positivity, fun w hw t ht =>
+    exact ⟨max M' 1, by positivity, fun w hw t ht ↦
       (hM' ⟨c + t • (w - c),
         ⟨⟨w, t⟩, ⟨Metric.ball_subset_closedBall hw, ht⟩, rfl⟩, rfl⟩).trans (le_max_left _ _)⟩
   have hF_meas : ∀ᶠ w in 𝓝 z,
@@ -247,7 +247,7 @@ private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
     filter_upwards [Metric.ball_mem_nhds z hε'_pos] with w hw
     simp only [uIoc_of_le zero_le_one]
     exact segmentIntegrand_aestronglyMeasurable
-      hf.continuousOn (fun t ht => h_seg w (hε'_ball hw) t ht)
+      hf.continuousOn (fun t ht ↦ h_seg w (hε'_ball hw) t ht)
   have hF_int : IntervalIntegrable (F z) volume 0 1 :=
     segmentIntegrand_intervalIntegrable hf.continuousOn h_seg_z
   have hF'_meas : AEStronglyMeasurable F' (volume.restrict (Set.uIoc 0 1)) := by
@@ -255,15 +255,15 @@ private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
     exact segmentDerivIntegrand_aestronglyMeasurable hS_open hf h_seg_z
   have h_lip : ∀ᵐ t ∂volume, t ∈ Set.uIoc 0 1 →
       LipschitzOnWith (Real.nnabs (|t| * M))
-        (fun w => F w t) (Metric.ball z ε') := MeasureTheory.ae_of_all _ fun t ht_mem => by
+        (fun w ↦ F w t) (Metric.ball z ε') := MeasureTheory.ae_of_all _ fun t ht_mem ↦ by
     simp only [uIoc_of_le zero_le_one] at ht_mem
     have ht : t ∈ Icc (0 : ℝ) 1 := ⟨ht_mem.1.le, ht_mem.2⟩
     rw [Real.nnabs_of_nonneg (mul_nonneg (abs_nonneg t) hM_pos.le)]
     exact segmentIntegrand_lipschitzOnWith hS_open hS_convex hf hc
-      (fun w hw => hε_ball (hε'_ball hw)) ht
-      (fun w hw => hM_bound w hw t ht)
+      (fun w hw ↦ hε_ball (hε'_ball hw)) ht
+      (fun w hw ↦ hM_bound w hw t ht)
   have h_diff : ∀ᵐ t ∂volume, t ∈ Set.uIoc 0 1 →
-      HasDerivAt (fun w => F w t) (F' t) z := MeasureTheory.ae_of_all _ fun t ht_mem => by
+      HasDerivAt (fun w ↦ F w t) (F' t) z := MeasureTheory.ae_of_all _ fun t ht_mem ↦ by
     simp only [uIoc_of_le zero_le_one] at ht_mem
     exact hasDerivAt_segmentIntegrand hS_open hf (h_seg_z t ⟨ht_mem.1.le, ht_mem.2⟩)
   exact (intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_lip
@@ -276,15 +276,15 @@ private lemma hasDerivAt_segmentIntegral {f : ℂ → ℂ}
     (hc : c ∈ S) (hz : z ∈ S)
     (hf : DifferentiableOn ℂ f S) :
     HasDerivAt
-      (fun w => ∫ t in (0 : ℝ)..1,
+      (fun w ↦ ∫ t in (0 : ℝ)..1,
         f (c + t • (w - c)) * (w - c))
       (f z) z := by
   have h_seg_z : ∀ t ∈ Icc (0 : ℝ) 1,
       c + t • (z - c) ∈ S :=
-    fun t ht => segment_subset_convex hS_convex hc hz t ht
+    fun t ht ↦ segment_subset_convex hS_convex hc hz t ht
   obtain ⟨ε, hε_pos, hε_ball⟩ :=
     Metric.isOpen_iff.mp hS_open z hz
-  let H : ℂ → ℂ := fun w =>
+  let H : ℂ → ℂ := fun w ↦
     ∫ t in (0 : ℝ)..1, f (c + t • (w - c))
   have hF_eq : ∀ w,
       (∫ t in (0 : ℝ)..1,
@@ -293,13 +293,13 @@ private lemma hasDerivAt_segmentIntegral {f : ℂ → ℂ}
     intro w
     simp only [H]
     exact intervalIntegral.integral_mul_const (𝕜 := ℂ) _ _
-  suffices HasDerivAt (fun w => H w * (w - c)) (f z) z by
+  suffices HasDerivAt (fun w ↦ H w * (w - c)) (f z) z by
     convert this using 1
     ext w
     exact hF_eq w
-  have h1 : HasDerivAt (fun w => w - c) 1 z :=
+  have h1 : HasDerivAt (fun w ↦ w - c) 1 z :=
     (hasDerivAt_id z).sub_const c
-  let H' : ℂ → ℂ := fun w =>
+  let H' : ℂ → ℂ := fun w ↦
     ∫ t in (0 : ℝ)..1, t * deriv f (c + t • (w - c))
   have h_key : H' z * (z - c) = f z - H z := by
     simp only [H, H']
@@ -327,9 +327,9 @@ theorem holomorphic_convex_primitive
     (hf : DifferentiableOn ℂ f S) :
     ∃ F : ℂ → ℂ, ∀ z ∈ S, HasDerivAt F (f z) z := by
   obtain ⟨c, hc⟩ := hS_ne
-  exact ⟨fun z => ∫ t in (0 : ℝ)..1,
+  exact ⟨fun z ↦ ∫ t in (0 : ℝ)..1,
     f (c + t • (z - c)) * (z - c),
-    fun z hz => hasDerivAt_segmentIntegral hS_convex
+    fun z hz ↦ hasDerivAt_segmentIntegral hS_convex
       hS_open hc hz hf⟩
 
 end

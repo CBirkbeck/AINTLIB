@@ -44,13 +44,13 @@ def normalizedCPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Subgroup (𝓞 K�
 
 theorem neg_one_mem_normalizedCPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     (-1 : (𝓞 K⁺)ˣ) ∈ normalizedCPlus (p := p) (K := K) hp_odd hp_three :=
-  Subgroup.subset_closure (by left; rfl)
+  Subgroup.subset_closure (Or.inl rfl)
 
 theorem normalizedCPlusGenerator_mem (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (i : Fin ((p - 3) / 2)) :
     normalizedCPlusGenerator (p := p) (K := K) hp_odd hp_three i ∈
       normalizedCPlus (p := p) (K := K) hp_odd hp_three :=
-  Subgroup.subset_closure (by right; exact ⟨i, rfl⟩)
+  Subgroup.subset_closure (Or.inr ⟨i, rfl⟩)
 
 theorem normalizedCPlusGenerator_sq_eq_CPlusGenerator
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
@@ -80,11 +80,9 @@ theorem CPlus_le_normalizedCPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
       normalizedCPlus (p := p) (K := K) hp_odd hp_three := by
   unfold CPlus
   rw [Subgroup.closure_le]
-  rintro x (hx | hx)
-  · rcases hx with rfl
-    exact neg_one_mem_normalizedCPlus (p := p) (K := K) hp_odd hp_three
-  · rcases hx with ⟨i, rfl⟩
-    rw [← normalizedCPlusGenerator_sq_eq_CPlusGenerator
+  rintro x (rfl | ⟨i, rfl⟩)
+  · exact neg_one_mem_normalizedCPlus (p := p) (K := K) hp_odd hp_three
+  · rw [← normalizedCPlusGenerator_sq_eq_CPlusGenerator
       (p := p) (K := K) hp_odd hp_three i]
     exact Subgroup.pow_mem _
       (normalizedCPlusGenerator_mem (p := p) (K := K) hp_odd hp_three i) 2
@@ -101,11 +99,9 @@ theorem normalizedCPlus_sq_mem_CPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
   unfold normalizedCPlus at hx
   induction hx using Subgroup.closure_induction with
   | mem x hx =>
-      rcases hx with hx | hx
-      · rcases hx with rfl
-        simp
-      · rcases hx with ⟨i, rfl⟩
-        exact normalizedCPlusGenerator_sq_mem_CPlus
+      rcases hx with rfl | ⟨i, rfl⟩
+      · simp
+      · exact normalizedCPlusGenerator_sq_mem_CPlus
           (p := p) (K := K) hp_odd hp_three i
   | one =>
       simp
@@ -122,10 +118,8 @@ theorem normalizedCPlus_quotient_pow_two_eq_one (hp_odd : p ≠ 2) (hp_three : 3
         (CPlus (p := p) (K := K) hp_three).subgroupOf
           (normalizedCPlus (p := p) (K := K) hp_odd hp_three)) :
     x ^ 2 = 1 := by
-  refine Quotient.inductionOn' x ?_
-  intro x
-  rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff]
-  rw [Subgroup.mem_subgroupOf]
+  refine Quotient.inductionOn' x fun x ↦ ?_
+  rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, Subgroup.mem_subgroupOf]
   simpa using
     normalizedCPlus_sq_mem_CPlus (p := p) (K := K) hp_odd hp_three x.property
 

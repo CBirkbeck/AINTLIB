@@ -126,28 +126,6 @@ theorem dvd_h_of_dvd_hPlus_of_endToEndReflectionAtoms
     (E.toReflectionMinusNontrivialityBridge hp_odd_nat)
     h_plus
 
-/-! ### Concrete bundle factory using Atoms A and B (constructed)
-
-Atoms A (`phiOnClassGroupModPLinear`) and B (`cyclotomicGalActionInstance`)
-are now substantively constructed. The factory below assembles an
-`EndToEndReflectionAtoms` instance from the substantive remainders:
-
-* `η` and `Ref19UniversalHypothesis η` (Atom A's input — the
-  per-γ canonical chain conclusion).
-* `k` and `phi_galois` (Atom D — the Galois weight identification).
-* `phi_nontrivial` (Atom A residual — REF-22 content).
-* `card_unit` (always provable for `p` prime).
-* `componentIdentification` (Atom C — class-group identifications).
-* `componentNontrivial_of_eigenspace` and `k_isIndex` (Atoms C+D
-  bridge content).
-
-The factory uses:
-* `phiOnClassGroupModPLinear` (Atom A constructed)
-* `cyclotomicGalActionInstance` (Atom B constructed)
-
-This concretely demonstrates the composition path with Atoms A and B
-already supplied. -/
-
 /-- **Concrete factory** producing an `EndToEndReflectionAtoms` from
 the substantively remaining inputs (Atoms C, D + Atom A's `η` and
 `Ref19UniversalHypothesis`). -/

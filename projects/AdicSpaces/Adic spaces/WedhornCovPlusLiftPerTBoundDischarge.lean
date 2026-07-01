@@ -169,7 +169,7 @@ theorem WedhornCoverPieceCovPlusPieceLiftPerTBound_via_structural_data
   obtain ⟨h_per_t', h_s_D_ne⟩ :=
     h_struct τ hτ_mem w hw_spa hw_f_membership hστ
   -- Translate per-t' on T_D.image back to per-t on T_D.
-  refine ⟨fun t ht => ?_, h_s_D_ne⟩
+  refine ⟨fun t ht ↦ ?_, h_s_D_ne⟩
   exact h_per_t' (algebraMap A (Localization.Away s) t)
     (Finset.mem_image.mpr ⟨t, ht, rfl⟩)
 

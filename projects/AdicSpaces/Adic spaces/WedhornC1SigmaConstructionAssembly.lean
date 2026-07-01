@@ -175,9 +175,8 @@ theorem pointwise_clearing_supplier_via_sigma_product_cleared_inequality
       v.vle (1 : A) t' →
       ¬ v.vle t' 0 →
       v.vle t' D_s := by
-  intro t' ht' v hv_spa hv_f hv_one_t hv_t_ne
-  exact pointwise_clearing_supplier_via_pow_cancellation s D_s f t'
-    (h_supplier t' ht') v hv_spa hv_f hv_one_t hv_t_ne
+  intro t' ht'
+  exact pointwise_clearing_supplier_via_pow_cancellation s D_s f t' (h_supplier t' ht')
 
 /-- **C1 endgame wrapper from per-call σ-construction boundary**
 (T072 main ticket-named theorem).
@@ -235,9 +234,9 @@ theorem C1SupplierStrong_local_via_sigma_construction_boundary
     h_per_call D hD v hv t ht hvt hvD_s
   refine ⟨σ_choice, f, hv_in_plus, hvf_nz, ?_, h_cover⟩
   -- Convert σ-power-cleared inequality supplier to pointwise clearing.
-  intro t' ht' w hw_spa hw_f hw_one_t hw_t_ne
+  intro t' ht'
   exact pointwise_clearing_supplier_via_pow_cancellation
-    C.base.s D.s f t' (h_pow_supplier t' ht') w hw_spa hw_f hw_one_t hw_t_ne
+    C.base.s D.s f t' (h_pow_supplier t' ht')
 
 /-- **C1 endgame wrapper using the named source-restricted residual
 predicate** (T072 named-Prop variant).
@@ -265,8 +264,6 @@ theorem C1SupplierStrong_local_via_named_sigma_construction_supplier
     C1SupplierStrong_local C := by
   refine C1SupplierStrong_local_via_sigma_construction_boundary C ?_
   intro D hD v hv t ht hvt hvD_s
-  obtain ⟨σ_choice, f, hv_in_plus, hvf_nz, h_supplier, h_cover⟩ :=
-    h_per_call D hD v hv t ht hvt hvD_s
-  exact ⟨σ_choice, f, hv_in_plus, hvf_nz, h_supplier, h_cover⟩
+  exact h_per_call D hD v hv t ht hvt hvD_s
 
 end ValuationSpectrum

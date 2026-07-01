@@ -421,7 +421,7 @@ private lemma not_dvd_primeProductCoprime_of_dvd
     ¬ ((p : ℤ) ∣ primeProductCoprime a l) := by
   unfold primeProductCoprime
   intro h_dvd
-  obtain ⟨q, hq_mem, hq_dvd⟩ := (Prime.dvd_finset_prod_iff (Nat.prime_iff.mp hp_prime) id).mp
+  obtain ⟨q, hq_mem, hq_dvd⟩ := (Prime.dvd_finsetProd_iff (Nat.prime_iff.mp hp_prime) id).mp
     (by exact_mod_cast h_dvd)
   obtain ⟨hq_pf, hqa⟩ := Finset.mem_filter.mp hq_mem
   exact hqa ((Nat.prime_dvd_prime_iff_eq hp_prime

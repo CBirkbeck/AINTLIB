@@ -42,13 +42,9 @@ section diracDivisors
 
 /-- `2` is a unit of `ℤ_p` for odd `p` (its valuation is `0`). -/
 theorem isUnit_two_padicInt (hp2 : p ≠ 2) : IsUnit (2 : ℤ_[p]) := by
-  have hnd : ¬ (p : ℕ) ∣ 2 := by
-    intro hd
-    have : p ≤ 2 := Nat.le_of_dvd (by norm_num) hd
-    have h2 : 2 ≤ p := hp.out.two_le
-    omega
-  have h := PadicInt.isUnit_natCast_of_not_dvd (p := p) hnd
-  rwa [Nat.cast_ofNat] at h
+  have hnd : ¬ (p : ℕ) ∣ 2 := fun hd =>
+    hp2 ((Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).mp hd)
+  simpa using PadicInt.isUnit_natCast_of_not_dvd (p := p) hnd
 
 open Classical in
 /-- The unit of `ℤ_p^×` attached to a natural number `d` coprime to `p`
@@ -59,8 +55,7 @@ noncomputable def unitOfNat (d : ℕ) : ℤ_[p]ˣ :=
 
 theorem unitOfNat_coe {d : ℕ} (hd : ¬ (p : ℕ) ∣ d) :
     ((unitOfNat p d : ℤ_[p]ˣ) : ℤ_[p]) = (d : ℤ_[p]) := by
-  have hu : IsUnit ((d : ℕ) : ℤ_[p]) := PadicInt.isUnit_natCast_of_not_dvd hd
-  rw [unitOfNat, dif_pos hu, IsUnit.unit_spec]
+  rw [unitOfNat, dif_pos (PadicInt.isUnit_natCast_of_not_dvd hd), IsUnit.unit_spec]
 
 /-- R8: the prime-to-`p` divisor power sum
 `σ^p_k(n) = Σ_{0<d∣n, p∤d} d^k` (RJW TeX 2393). -/
@@ -81,16 +76,14 @@ theorem divisorMeasure_moment (n k : ℕ) :
       = ((sigmaP p k n : ℕ) : ℤ_[p]) := by
   rw [divisorMeasure, LinearMap.coe_sum, Finset.sum_apply, sigmaP, Nat.cast_sum]
   refine Finset.sum_congr rfl fun d hd => ?_
-  have hnd : ¬ (p : ℕ) ∣ d := (Finset.mem_filter.1 hd).2
   rw [PadicMeasure.dirac_apply]
   change ((unitOfNat p d : ℤ_[p]ˣ) : ℤ_[p]) ^ k = ((d ^ k : ℕ) : ℤ_[p])
-  rw [unitOfNat_coe p hnd, Nat.cast_pow]
+  rw [unitOfNat_coe p (Finset.mem_filter.1 hd).2, Nat.cast_pow]
 
 end diracDivisors
 
 section twist
 
-/-- The pointwise product of `x` and `x^k` is `x^{k+1}` on `ℤ_p^×`. -/
 private lemma unitsPowCM_one_mul_unitsPowCM (k : ℕ) :
     PadicMeasure.unitsPowCM p 1 * PadicMeasure.unitsPowCM p k
       = PadicMeasure.unitsPowCM p (k + 1) := by
@@ -98,7 +91,6 @@ private lemma unitsPowCM_one_mul_unitsPowCM (k : ℕ) :
   simp only [ContinuousMap.mul_apply, PadicMeasure.unitsPowCM, ContinuousMap.coe_mk, pow_one]
   rw [pow_succ']
 
-/-- The pointwise product of `x⁻¹` and `x` is `1` on `ℤ_p^×`. -/
 private lemma invCM_mul_unitsPowCM_one :
     PadicMeasure.invCM p * PadicMeasure.unitsPowCM p 1 = 1 := by
   refine ContinuousMap.ext fun u => ?_
@@ -106,13 +98,10 @@ private lemma invCM_mul_unitsPowCM_one :
     ContinuousMap.coe_mk, pow_one, ContinuousMap.one_apply]
   rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
 
-/-- The pointwise product of `x` and `x⁻¹` is `1` on `ℤ_p^×`. -/
 private lemma unitsPowCM_one_mul_invCM :
     PadicMeasure.unitsPowCM p 1 * PadicMeasure.invCM p = 1 := by
   rw [mul_comm, invCM_mul_unitsPowCM_one]
 
-/-- The twist by `x` shifts the `k`-th moment up by one: a standalone helper used
-in `unitsTwist`'s `map_mul'` field (and exposed as `unitsTwist_moment`). -/
 private lemma unitsCmul_powCM_one_moment (μ : PadicMeasure p ℤ_[p]ˣ) (k : ℕ) :
     PadicMeasure.unitsCmul p (PadicMeasure.unitsPowCM p 1) μ (PadicMeasure.unitsPowCM p k)
       = μ (PadicMeasure.unitsPowCM p (k + 1)) := by
@@ -142,8 +131,7 @@ noncomputable def unitsTwist : PadicMeasure p ℤ_[p]ˣ ≃+* PadicMeasure p ℤ
       rw [LinearMap.sub_apply, PadicMeasure.units_mul_apply_unitsPowCM,
         unitsCmul_powCM_one_moment, unitsCmul_powCM_one_moment, unitsCmul_powCM_one_moment,
         PadicMeasure.units_mul_apply_unitsPowCM, sub_self]
-    rw [sub_eq_zero] at hzd
-    exact hzd
+    exact sub_eq_zero.mp hzd
   map_add' μ ν := by
     refine LinearMap.ext fun f => ?_
     rw [PadicMeasure.unitsCmul_apply, LinearMap.add_apply, LinearMap.add_apply,
@@ -155,46 +143,33 @@ theorem unitsTwist_moment (μ : PadicMeasure p ℤ_[p]ˣ) (k : ℕ) :
       = μ (PadicMeasure.unitsPowCM p (k + 1)) :=
   unitsCmul_powCM_one_moment p μ k
 
+/-- Multiplying a Dirac by a continuous function rescales it by the value of
+that function at the point: `(φ · δ_g) = φ(g) · δ_g`. The x-twist's action on
+Diracs (`unitsTwist_dirac`) is the special case `φ = x`. -/
+theorem unitsCmul_dirac (φ : C(ℤ_[p]ˣ, ℤ_[p])) (g : ℤ_[p]ˣ) :
+    PadicMeasure.unitsCmul p φ (PadicMeasure.dirac p g)
+      = (φ g) • PadicMeasure.dirac p g := by
+  refine LinearMap.ext fun f => ?_
+  rw [PadicMeasure.unitsCmul_apply, PadicMeasure.dirac_apply, LinearMap.smul_apply,
+    PadicMeasure.dirac_apply, ContinuousMap.mul_apply, smul_eq_mul]
+
 /-- The twist sends Diracs to scaled Diracs: `τ(δ_g) = g·δ_g`. -/
 theorem unitsTwist_dirac (g : ℤ_[p]ˣ) :
     unitsTwist p (PadicMeasure.dirac p g)
       = (g : ℤ_[p]) • PadicMeasure.dirac p g := by
-  refine LinearMap.ext fun f => ?_
-  change PadicMeasure.unitsCmul p (PadicMeasure.unitsPowCM p 1) (PadicMeasure.dirac p g) f
-    = ((g : ℤ_[p]) • PadicMeasure.dirac p g) f
-  rw [PadicMeasure.unitsCmul_apply, PadicMeasure.dirac_apply, LinearMap.smul_apply,
-    PadicMeasure.dirac_apply, ContinuousMap.mul_apply, smul_eq_mul]
+  rw [show unitsTwist p (PadicMeasure.dirac p g)
+      = PadicMeasure.unitsCmul p (PadicMeasure.unitsPowCM p 1) (PadicMeasure.dirac p g) from rfl,
+    unitsCmul_dirac]
   congr 1
-  simp only [PadicMeasure.unitsPowCM, ContinuousMap.coe_mk, pow_one]
+  simp [PadicMeasure.unitsPowCM]
 
 /-- A ring automorphism maps the non-zero-divisors onto the
 non-zero-divisors. -/
 theorem map_nonZeroDivisors_unitsTwist :
     (nonZeroDivisors (PadicMeasure p ℤ_[p]ˣ)).map
         (unitsTwist p).toMonoidHom
-      = nonZeroDivisors (PadicMeasure p ℤ_[p]ˣ) := by
-  -- A ring equiv of a commutative ring preserves the non-zero-divisors in both
-  -- directions; we state the preservation for an arbitrary ring equiv `e` so it can
-  -- be reused for `unitsTwist p` and its inverse.
-  have key : ∀ (e : PadicMeasure p ℤ_[p]ˣ ≃+* PadicMeasure p ℤ_[p]ˣ)
-      (z : PadicMeasure p ℤ_[p]ˣ), z ∈ nonZeroDivisors (PadicMeasure p ℤ_[p]ˣ) →
-      e z ∈ nonZeroDivisors (PadicMeasure p ℤ_[p]ˣ) := by
-    intro e z hz
-    rw [mem_nonZeroDivisors_iff] at hz ⊢
-    have hmul : ∀ w, w * e z = 0 → w = 0 := by
-      intro w hw
-      have hez : e (e.symm w * z) = 0 := by rw [map_mul, RingEquiv.apply_symm_apply, hw]
-      have hzero : e.symm w * z = 0 := by rwa [map_eq_zero_iff _ e.injective] at hez
-      have hsymm : e.symm w = 0 := hz.2 _ hzero
-      have := congrArg e hsymm
-      rwa [RingEquiv.apply_symm_apply, map_zero] at this
-    exact ⟨fun w hw => hmul w (by rwa [mul_comm] at hw), hmul⟩
-  refine Submonoid.ext fun x => ⟨?_, ?_⟩
-  · rintro ⟨y, hy, rfl⟩
-    exact key (unitsTwist p) y hy
-  · intro hx
-    exact ⟨(unitsTwist p).symm x, key (unitsTwist p).symm x hx,
-      RingEquiv.apply_symm_apply _ _⟩
+      = nonZeroDivisors (PadicMeasure p ℤ_[p]ˣ) :=
+  MulEquivClass.map_nonZeroDivisors (unitsTwist p)
 
 /-- R8: the x-twist extended to the total fraction ring `Q(ℤ_p^×)`. -/
 noncomputable def quotientTwist :
@@ -222,9 +197,6 @@ noncomputable def twistedZetaHalf (hp2 : p ≠ 2) : PadicMeasure.QuotientField p
         • (1 : PadicMeasure p ℤ_[p]ˣ))
     * quotientTwist p (PadicMeasure.padicZeta p hp2)
 
-/-- Multiplying by the scaled unit `c·[1]` is the `ℤ_p`-scalar action `c·(−)`.
-There is no `IsScalarTower ℤ_[p] Λ(ℤ_p^×) Λ(ℤ_p^×)` instance, so `smul_mul_assoc`
-does not fire; we unfold the convolution to push the scalar through `1·μ = μ`. -/
 private lemma smul_one_mul' (c : ℤ_[p]) (μ : PadicMeasure p ℤ_[p]ˣ) :
     (c • (1 : PadicMeasure p ℤ_[p]ˣ)) * μ = c • μ := by
   have h : (c • (1 : PadicMeasure p ℤ_[p]ˣ)) * μ
@@ -234,22 +206,19 @@ private lemma smul_one_mul' (c : ℤ_[p]) (μ : PadicMeasure p ℤ_[p]ˣ) :
       PadicMeasure.units_mul_apply]
   rw [h, one_mul]
 
-/-- The halving scalar `1/2 ∈ ℤ_p^×` coerces to `(2 : ℚ_p)⁻¹`. -/
 private lemma coe_inv_two (hp2 : p ≠ 2) :
     ((((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) : ℚ_[p]) = (2 : ℚ_[p])⁻¹ := by
-  set u := (isUnit_two_padicInt p hp2).unit with hu
+  set u := (isUnit_two_padicInt p hp2).unit
   have hspec : ((u : ℤ_[p]ˣ) : ℤ_[p]) = 2 := IsUnit.unit_spec _
   have h2 : (2 : ℤ_[p]) * ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) = 1 := by
     rw [← hspec, ← Units.val_mul, mul_inv_cancel, Units.val_one]
   have h3 : (2 : ℚ_[p]) * (((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) : ℚ_[p]) = 1 := by
     have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) h2
     push_cast at this
-    convert this using 2 <;> norm_cast
+    convert this using 2
+    norm_cast
   exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact h3)
 
-/-- The canonical witness equation behind both the twisted-pseudo-measure property
-and the moment formula: from a witness `νg` of `([g]−[1])·ζ_p ∈ Λ` one obtains the
-witness `(1/2)·τ(νg)` of `(g·[g]−[1])·A₀ ∈ Λ`, where `τ = unitsTwist`. -/
 private lemma twistedZetaHalf_witness_eq (hp2 : p ≠ 2) (g : ℤ_[p]ˣ)
     (νg : PadicMeasure p ℤ_[p]ˣ)
     (hνg : algebraMap _ (PadicMeasure.QuotientField p) (PadicMeasure.dirac p g - 1)
@@ -258,18 +227,15 @@ private lemma twistedZetaHalf_witness_eq (hp2 : p ≠ 2) (g : ℤ_[p]ˣ)
         ((g : ℤ_[p]) • PadicMeasure.dirac p g - 1) * twistedZetaHalf p hp2
       = algebraMap _ _
           ((((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) • unitsTwist p νg) := by
-  -- (a) the twisted Dirac difference is the twist of the plain Dirac difference
   have hkey : (g : ℤ_[p]) • PadicMeasure.dirac p g - 1
       = unitsTwist p (PadicMeasure.dirac p g - 1) := by
     rw [map_sub, unitsTwist_dirac, map_one]
-  -- (c) push the ζ_p witness through quotientTwist
   have hc : quotientTwist p (algebraMap _ (PadicMeasure.QuotientField p)
         (PadicMeasure.dirac p g - 1) * PadicMeasure.padicZeta p hp2)
       = quotientTwist p (algebraMap _ _ νg) := congrArg _ hνg
   rw [map_mul, quotientTwist_algebraMap, quotientTwist_algebraMap] at hc
-  set c : ℤ_[p] := (((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) with hcdef
+  set c : ℤ_[p] := (((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p])
   rw [twistedZetaHalf, hkey]
-  -- (d) commute the scalar factor past the twisted Dirac difference, then use hc
   rw [show algebraMap (PadicMeasure p ℤ_[p]ˣ) (PadicMeasure.QuotientField p)
         (unitsTwist p (PadicMeasure.dirac p g - 1))
       * (algebraMap _ _ (c • (1 : PadicMeasure p ℤ_[p]ˣ))
@@ -307,43 +273,31 @@ theorem twistedZetaHalf_moments (hp2 : p ≠ 2) (b : ℤ_[p]ˣ) {k : ℕ}
       = ((b : ℚ_[p]) ^ k - 1) * (1 - (p : ℚ_[p]) ^ (k - 1))
           * ((zetaNeg (k - 1) : ℚ) : ℚ_[p]) / 2 := by
   obtain ⟨νb, hνb⟩ := PadicMeasure.padicZeta_isPseudoMeasure p hp2 b
-  set c : ℤ_[p] := (((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) with hcdef
-  -- the canonical witness `(1/2)·τ(νb)` agrees with the supplied `ν`
-  have hw := twistedZetaHalf_witness_eq p hp2 b νb hνb
+  set c : ℤ_[p] := (((isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p])
   have hνeq : ν = c • unitsTwist p νb := by
     apply IsFractionRing.injective (PadicMeasure p ℤ_[p]ˣ) (PadicMeasure.QuotientField p)
-    rw [← hν, hw]
-  -- the (k−1)-th moment of `ν` is `(1/2)·(k-th moment of νb)`
+    rw [← hν, twistedZetaHalf_witness_eq p hp2 b νb hνb]
   have hmom : ν (PadicMeasure.unitsPowCM p (k - 1))
       = c * νb (PadicMeasure.unitsPowCM p k) := by
     rw [hνeq, LinearMap.smul_apply, smul_eq_mul, unitsTwist_moment,
       Nat.sub_add_cancel (by omega : 1 ≤ k)]
-  -- the k-th moment of νb is the Kubota–Leopoldt interpolation value
-  have hpz := PadicMeasure.padicZeta_moments p hp2 b (by omega : 0 < k) νb hνb
-  rw [hmom, PadicInt.coe_mul, coe_inv_two p hp2, hpz]
+  rw [hmom, PadicInt.coe_mul, coe_inv_two p hp2,
+    PadicMeasure.padicZeta_moments p hp2 b (by omega : 0 < k) νb hνb]
   field_simp
 
-/-- Uniform congruence at level `p²`: for every unit `u`, raising to the
-exponent `1 + φ(p²)` is the identity modulo `p²`, i.e.
-`u^{1+φ(p²)} ≡ u (mod p²)`. (`u^{φ(p²)} = 1` in `(ℤ/p²)^×` by Lagrange, then
-factor `u^{1+φ(p²)} − u = u·(u^{φ(p²)} − 1)`.) This is the finitary engine
-behind `noMeasure_interpolates_pPow`. -/
 private lemma units_pow_totient_sq_sub_self_mem (u : ℤ_[p]ˣ) :
     ((u : ℤ_[p]) ^ (1 + Nat.totient (p ^ 2)) - (u : ℤ_[p]))
       ∈ (Ideal.span {(p : ℤ_[p]) ^ 2} : Ideal ℤ_[p]) := by
-  haveI : NeZero (p ^ 2) := ⟨pow_ne_zero _ hp.out.ne_zero⟩
-  -- `u^{φ(p²)} = 1` in `(ℤ/p²)^×`, by Lagrange (`pow_card_eq_one'`)
+  have : NeZero (p ^ 2) := ⟨pow_ne_zero _ hp.out.ne_zero⟩
   have hcard : Nat.card (ZMod (p ^ 2))ˣ = Nat.totient (p ^ 2) := by
     rw [Nat.card_eq_fintype_card, ZMod.card_units_eq_totient]
-  have himg : (PadicMeasure.unitsToZModPow p 2 u) ^ Nat.totient (p ^ 2) = 1 := by
-    rw [← hcard]; exact pow_card_eq_one'
-  -- push to `ℤ_p`: `u^{φ(p²)} − 1 ∈ ker(toZModPow 2) = span {p²}`
+  have himg : (PadicMeasure.unitsToZModPow p 2 u) ^ Nat.totient (p ^ 2) = 1 :=
+    hcard ▸ pow_card_eq_one'
   have hmem1 : ((u : ℤ_[p]) ^ Nat.totient (p ^ 2) - 1)
       ∈ (Ideal.span {(p : ℤ_[p]) ^ 2} : Ideal ℤ_[p]) := by
     rw [← PadicInt.ker_toZModPow, RingHom.mem_ker, map_sub, map_pow, map_one,
       ← PadicMeasure.unitsToZModPow_coe, ← Units.val_pow_eq_pow_val, himg,
       Units.val_one, sub_self]
-  -- factor `u^{1+φ(p²)} − u = u·(u^{φ(p²)} − 1)`, a left multiple of the witness
   have hfact : (u : ℤ_[p]) ^ (1 + Nat.totient (p ^ 2)) - (u : ℤ_[p])
       = (u : ℤ_[p]) * ((u : ℤ_[p]) ^ Nat.totient (p ^ 2) - 1) := by
     rw [mul_sub, mul_one, ← pow_succ', Nat.add_comm]
@@ -363,18 +317,14 @@ theorem noMeasure_interpolates_pPow :
     ¬ ∃ θ : PadicMeasure p ℤ_[p]ˣ, ∀ k : ℕ, 0 < k →
       θ (PadicMeasure.unitsPowCM p k) = (p : ℤ_[p]) ^ k := by
   rintro ⟨θ, hθ⟩
-  set K : ℕ := 1 + Nat.totient (p ^ 2) with hK
-  have hp2pos : 0 < p ^ 2 := pow_pos hp.out.pos 2
+  set K : ℕ := 1 + Nat.totient (p ^ 2)
   have htot2 : 2 ≤ Nat.totient (p ^ 2) := by
-    rw [Nat.totient_prime_pow hp.out two_pos]
-    have h2le : 2 ≤ p := hp.out.two_le
-    have hpe : p ^ (2 - 1) = p := by norm_num
-    rw [hpe]
-    calc 2 = 2 * 1 := by norm_num
-      _ ≤ p * (p - 1) := Nat.mul_le_mul h2le (by omega)
+    rw [Nat.totient_prime_pow hp.out two_pos, show 2 - 1 = 1 from rfl, pow_one]
+    have := hp.out.two_le
+    calc 2 = 2 * 1 := (mul_one 2).symm
+      _ ≤ p * (p - 1) := Nat.mul_le_mul this (by omega)
   have hKpos : 0 < K := by omega
   have hppos : (0 : ℝ) < p := by exact_mod_cast hp.out.pos
-  -- (2) sup-norm bound: `‖x^K − x^1‖ ≤ p^{-2}` on `ℤ_p^×`
   have hsup : ‖PadicMeasure.unitsPowCM p K - PadicMeasure.unitsPowCM p 1‖
       ≤ (p : ℝ) ^ (-2 : ℤ) := by
     rw [ContinuousMap.norm_le _ (zpow_nonneg (le_of_lt hppos) _)]
@@ -384,18 +334,14 @@ theorem noMeasure_interpolates_pPow :
     rw [pow_one, show (-2 : ℤ) = (-(2 : ℕ) : ℤ) by norm_num,
       PadicInt.norm_le_pow_iff_mem_span_pow]
     exact units_pow_totient_sq_sub_self_mem p u
-  -- (3) measure bound: `‖θ(x^K) − θ(x^1)‖ ≤ p^{-2}`
   have hmeas : ‖θ (PadicMeasure.unitsPowCM p K) - θ (PadicMeasure.unitsPowCM p 1)‖
       ≤ (p : ℝ) ^ (-2 : ℤ) := by
     rw [← map_sub]
     exact le_trans (PadicMeasure.norm_apply_le p θ _) hsup
-  -- (4) plug in the interpolation values `θ(x^K) = p^K`, `θ(x^1) = p`
   rw [hθ K hKpos, hθ 1 one_pos, pow_one] at hmeas
-  -- compute `‖p^K − p‖ = p^{-1}`: factor `p^K − p = p·(p^{K−1} − 1)`
   have hfactp : (p : ℤ_[p]) ^ K - (p : ℤ_[p])
       = (p : ℤ_[p]) * ((p : ℤ_[p]) ^ (K - 1) - 1) := by
     rw [mul_sub, mul_one, ← pow_succ', Nat.sub_add_cancel (by omega : 1 ≤ K)]
-  -- `‖p^{K−1} − 1‖ = 1`: `‖1‖ = 1 > ‖p^{K−1}‖`, ultrametric isoceles
   have hnormfac : ‖(p : ℤ_[p]) ^ (K - 1) - 1‖ = 1 := by
     have hlt : ‖(p : ℤ_[p]) ^ (K - 1)‖ < ‖(-1 : ℤ_[p])‖ := by
       rw [norm_pow, norm_neg, norm_one, PadicInt.norm_p]
@@ -404,11 +350,9 @@ theorem noMeasure_interpolates_pPow :
       exact pow_lt_one₀ (by positivity) hb (by omega)
     rw [sub_eq_add_neg, PadicInt.norm_add_eq_max_of_ne (ne_of_lt hlt),
       max_eq_right (le_of_lt hlt), norm_neg, norm_one]
-  -- assemble `‖p^K − p‖ = p^{-1}`
   have hnormpK : ‖(p : ℤ_[p]) ^ K - (p : ℤ_[p])‖ = (p : ℝ) ^ (-1 : ℤ) := by
     rw [hfactp, norm_mul, PadicInt.norm_p, hnormfac, mul_one, zpow_neg, zpow_one]
   rw [hnormpK] at hmeas
-  -- (5) contradiction: `p^{-1} ≤ p^{-2}` is false
   have h1lt : (1 : ℝ) < p := by exact_mod_cast hp.out.one_lt
   rw [zpow_le_zpow_iff_right₀ h1lt] at hmeas
   omega
@@ -454,19 +398,13 @@ theorem eisensteinFamily_interpolation (hp2 : p ≠ 2) {k : ℕ} (hk : 4 ≤ k) 
               : ℚ_[p])
           = ((stabilisedCoeff p k n : ℚ) : ℚ_[p]) := by
   refine ⟨fun b ν hν => ?_, fun n hn => ⟨?_, ?_⟩⟩
-  · -- Clause 1: the constant coefficient is `twistedZetaHalf`; apply its moment formula.
-    rw [show PowerSeries.constantCoeff (eisensteinFamily p hp2) = twistedZetaHalf p hp2 from rfl]
+  · rw [show PowerSeries.constantCoeff (eisensteinFamily p hp2) = twistedZetaHalf p hp2 from rfl]
       at hν
-    have hmom := twistedZetaHalf_moments p hp2 b hk ν hν
-    rw [hmom, stabilisedCoeff, if_pos rfl]
+    rw [twistedZetaHalf_moments p hp2 b hk ν hν, stabilisedCoeff, if_pos rfl]
     push_cast
     ring
-  · -- Clause 2a: the `n`-th coefficient (`n ≠ 0`) is the divisor measure, definitionally.
-    rw [show PowerSeries.coeff n (eisensteinFamily p hp2)
-        = algebraMap _ _ (divisorMeasure p n) from by
-      rw [eisensteinFamily, PowerSeries.coeff_mk, if_neg hn]]
-  · -- Clause 2b: the `(k−1)`-th moment of the divisor measure is `σ^p_{k−1}(n) = stabilisedCoeff`.
-    rw [divisorMeasure_moment, stabilisedCoeff, if_neg hn]
+  · rw [eisensteinFamily, PowerSeries.coeff_mk, if_neg hn]
+  · rw [divisorMeasure_moment, stabilisedCoeff, if_neg hn]
     push_cast
     rfl
 

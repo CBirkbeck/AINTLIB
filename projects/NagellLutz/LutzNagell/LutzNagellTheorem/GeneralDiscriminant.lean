@@ -1,5 +1,6 @@
 import LutzNagell.LutzNagellTheorem.GeneralMain
 import LutzNagell.LutzNagellTheorem.GeneralIntegralMultiple
+import LutzNagell.LutzNagellTheorem.PIDMain
 
 /-!
 # General discriminant divisibility for Weierstrass curves
@@ -11,14 +12,19 @@ For a nonzero torsion point `(x₀, y₀) ∈ ℤ²` on a general Weierstrass cu
 ## Main results
 
 * `lutz_nagell_discriminant_general`: the general discriminant divisibility theorem.
+* `lutz_nagell_general`: the combined Lutz–Nagell theorem — a torsion point either has
+  integral coordinates satisfying the discriminant divisibility, or has order `2` with
+  `4x, 8y ∈ ℤ`.
 
 ## Proof outline
 
 1. From the curve equation, `κ₀² = Ψ₂Sq(x₀) = 4x₀³ + b₂x₀² + 2b₄x₀ + b₆`.
 2. Using the coordinate formula for `2•P` and integrality of the doubled point,
-   derive `κ₀² | 4·Ψ₃(x₀)`.
-3. A polynomial identity gives `h(x₀)² ≡ 0 (mod κ₀²)` where `h = 6x² + b₂x + b₄`.
-4. A Bézout identity `d₁·Ψ₂Sq + d₂·h² = 4Δ` yields `κ₀² | 4Δ`.
+   derive the ℚ/ℤ-specific divisibility `κ₀² | 4·Ψ₃(x₀)`.
+3. Feed this divisibility (together with the curve equation) to the general PID lemma
+   `PID.lutz_nagell_pid_discriminant` (over `R = ℤ`), which encapsulates the polynomial
+   identity `h(x₀)² ≡ 0 (mod κ₀²)` and the Bézout step `d₁·Ψ₂Sq + d₂·h² = 4Δ` that
+   conclude `κ₀ = 0 ∨ κ₀² | 4Δ`.
 -/
 
 namespace LutzNagell
@@ -39,48 +45,6 @@ private lemma kappa_sq_eq_Psi2Sq_eval_general
       4 * x₀ ^ 3 + W.b₂ * x₀ ^ 2 + 2 * W.b₄ * x₀ + W.b₆ := by
   simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆]
   nlinarith
-
-/-- The key polynomial identity: h(x)² + 4·Ψ₃(x) = (12x + b₂)·Ψ₂Sq(x).
-Uses the relation `b₂b₆ - b₄² = 4b₈` which holds after unfolding to `aᵢ`. -/
-private lemma h_sq_add_four_prePsi3_eq_general (x₀ : ℤ) :
-    (6 * x₀ ^ 2 + W.b₂ * x₀ + W.b₄) ^ 2 +
-      4 * (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
-           3 * W.b₆ * x₀ + W.b₈) =
-    (12 * x₀ + W.b₂) * (4 * x₀ ^ 3 + W.b₂ * x₀ ^ 2 + 2 * W.b₄ * x₀ + W.b₆) := by
-  simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-             WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-  ring
-
-/-- Bézout identity: d₁·Ψ₂Sq(x) + d₂·h(x)² = 4Δ. -/
-private lemma bezout_general (x₀ : ℤ) :
-    (432 * x₀ ^ 3 + 108 * W.b₂ * x₀ ^ 2 + 216 * W.b₄ * x₀ +
-      (-W.b₂ ^ 3 + 36 * W.b₂ * W.b₄ - 108 * W.b₆)) *
-      (4 * x₀ ^ 3 + W.b₂ * x₀ ^ 2 + 2 * W.b₄ * x₀ + W.b₆) +
-    (-48 * x₀ ^ 2 - 8 * W.b₂ * x₀ + (W.b₂ ^ 2 - 32 * W.b₄)) *
-      (6 * x₀ ^ 2 + W.b₂ * x₀ + W.b₄) ^ 2 = 4 * W.Δ := by
-  simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-             WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.Δ]
-  ring
-
-/-! ### Pure algebra: κ² | Ψ₂Sq(x₀) and κ² | 4·Ψ₃(x₀) imply κ² | 4Δ -/
-
-/-- From κ₀² = Ψ₂Sq(x₀) and κ₀² | 4·Ψ₃(x₀), deduce κ₀² | 4Δ. -/
-private lemma kappa_sq_dvd_four_delta_of_coord_identity
-    (x₀ : ℤ) (κ₀ : ℤ)
-    (hkappa : κ₀ ^ 2 = 4 * x₀ ^ 3 + W.b₂ * x₀ ^ 2 + 2 * W.b₄ * x₀ + W.b₆)
-    (hdvd_prePsi : κ₀ ^ 2 ∣ 4 * (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 +
-        3 * W.b₄ * x₀ ^ 2 + 3 * W.b₆ * x₀ + W.b₈)) :
-    κ₀ ^ 2 ∣ 4 * W.Δ := by
-  set Ψ₂Sq_val := 4 * x₀ ^ 3 + W.b₂ * x₀ ^ 2 + 2 * W.b₄ * x₀ + W.b₆
-  set h_val := 6 * x₀ ^ 2 + W.b₂ * x₀ + W.b₄
-  set Ψ₃_val := 3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
-      3 * W.b₆ * x₀ + W.b₈
-  have hdvd_h_sq : κ₀ ^ 2 ∣ h_val ^ 2 := by
-    have : h_val ^ 2 = (12 * x₀ + W.b₂) * Ψ₂Sq_val - 4 * Ψ₃_val := by
-      linarith [h_sq_add_four_prePsi3_eq_general W x₀]
-    rw [this]; exact dvd_sub (dvd_mul_of_dvd_right ⟨1, by linarith [hkappa]⟩ _) hdvd_prePsi
-  rw [← bezout_general W x₀]
-  exact dvd_add (dvd_mul_of_dvd_right ⟨1, by linarith [hkappa]⟩ _) (dvd_mul_of_dvd_right hdvd_h_sq _)
 
 /-! ### Helpers for the main theorem -/
 
@@ -122,7 +86,7 @@ private lemma Phi2_eval_eq (x : ℚ) :
     eval x ((curveQ W).Φ 2) =
       x * eval x (curveQ W).Ψ₂Sq - eval x (curveQ W).Ψ₃ := by
   conv_lhs =>
-    rw [show (curveQ W).Φ 2 = X * (curveQ W).Ψ₂Sq - (curveQ W).Ψ₃ from by
+    rw [show (curveQ W).Φ 2 = X * (curveQ W).Ψ₂Sq - (curveQ W).Ψ₃ by
       rw [WeierstrassCurve.Φ, WeierstrassCurve.ΨSq_two]
       simp [even_two, WeierstrassCurve.preΨ_three, WeierstrassCurve.preΨ_one]]
   simp only [eval_sub, eval_mul, eval_X]
@@ -171,7 +135,7 @@ private lemma kappa_sq_dvd_four_Psi3
   set P := Affine.Point.some _ _ hpt
   have hm_pos := htor.addOrderOf_pos
   have hord_ne1 : addOrderOf P ≠ 1 :=
-    fun h => Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
+    fun h ↦ Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
   have hord_ne2 : addOrderOf P ≠ 2 :=
     addOrderOf_ne_two_of_kappa_ne_zero W hpt hx hy (by rwa [← hκ₀])
   have hord_gt2 : 2 < addOrderOf P := by omega
@@ -232,11 +196,14 @@ theorem lutz_nagell_discriminant_general
   set κ₀ := 2 * y₀ + W.a₁ * x₀ + W.a₃
   by_cases hκ : κ₀ = 0
   · exact Or.inl hκ
-  · right
-    have hkappa_sq := kappa_sq_eq_Psi2Sq_eval_general W
-      (curveZ_equation_of_integral W hpt hx hy)
-    exact kappa_sq_dvd_four_delta_of_coord_identity W x₀ κ₀ hkappa_sq
-      (kappa_sq_dvd_four_Psi3 W hpt htor hx hy rfl hkappa_sq hκ)
+  · -- Delegate the discriminant conclusion (the `by_cases κ₀ = 0` plus the Bézout
+    -- divisibility step) to the general PID lemma; we only supply the curve equation
+    -- and the ℚ/ℤ-specific Ψ₃ divisibility derived from torsion.
+    have hcurve := curveZ_equation_of_integral W hpt hx hy
+    have hkappa_sq := kappa_sq_eq_Psi2Sq_eval_general W hcurve
+    refine PID.lutz_nagell_pid_discriminant (R := ℤ) W hcurve ?_
+    rw [PID.eval_Ψ₃]
+    exact kappa_sq_dvd_four_Psi3 W hpt htor hx hy rfl hkappa_sq hκ
 
 /-- **Combined Lutz–Nagell theorem for general Weierstrass curves.**
 

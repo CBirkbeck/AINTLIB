@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.FullTeichSetup.Part2
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.FullTeichSetup.DworkSplittingSetup

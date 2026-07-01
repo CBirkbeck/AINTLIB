@@ -50,8 +50,7 @@ variable {p : ℕ} [hpri : Fact p.Prime]
 set_option backward.isDefEq.respectTransparency false in
 /-- **LV010-D principal extraction (general).** Given the class-equality
 discharge plus `¬ p ∣ h⁺`, produces `∃ u, α : u·α^p = a + ζ b` for any
-case-I scenario. Handles both the generic case (factor ≠ 0, applies
-LV010-C) and the degenerate case (factor = 0, takes α = 0). -/
+case-I scenario. -/
 theorem caseI_principal_of_not_dvd_hPlus
     (hp5 : 5 ≤ p) (hp_odd : p ≠ 2)
     [IsCMField (CyclotomicField p ℚ)]
@@ -68,12 +67,10 @@ theorem caseI_principal_of_not_dvd_hPlus
           ζ * (b : 𝓞 (CyclotomicField p ℚ)) := by
   by_cases h_factor_ne :
     (a : 𝓞 (CyclotomicField p ℚ)) + ζ * (b : 𝓞 (CyclotomicField p ℚ)) = 0
-  · -- Degenerate: factor is zero, take α = 0, u = 1.
-    refine ⟨1, 0, ?_⟩
+  · refine ⟨1, 0, ?_⟩
     rw [h_factor_ne, Units.val_one, one_mul, zero_pow]
-    exact (by linarith : p ≠ 0)
-  · -- Generic: apply LV010-C with class-equality input from discharge.
-    refine caseI_is_principal_of_not_dvd_hPlus hp5 hp_odd h_not_dvd
+    exact hpri.out.ne_zero
+  · refine caseI_is_principal_of_not_dvd_hPlus hp5 hp_odd h_not_dvd
       hgcd hcaseI heq hζ h_factor_ne ?_
     intro I hI_nz hI
     exact h_class_eq hgcd hcaseI heq hζ hI_nz hI
@@ -81,13 +78,7 @@ theorem caseI_principal_of_not_dvd_hPlus
 set_option backward.isDefEq.respectTransparency false in
 /-- **LV010-D ex_fin_div under `¬ p ∣ h⁺`.** Mirror of flt-regular's
 `ex_fin_div`, with `IsRegularPrime p` replaced by `¬ p ∣ h⁺(K)` and a
-`CaseIClassEqDischarge p K` parameter.
-
-The proof is mechanical: replace `is_principal hreg ...` by
-`caseI_principal_of_not_dvd_hPlus`, with the class-equality input
-sourced from the discharge predicate. The remainder
-(`exists_int_sum_eq_zero` and the divisibility extraction) is
-regularity-free. -/
+`CaseIClassEqDischarge p K` parameter. -/
 theorem caseI_ex_fin_div_of_not_dvd_hPlus
     (hp5 : 5 ≤ p) (hp_odd : p ≠ 2)
     [IsCMField (CyclotomicField p ℚ)]
@@ -110,11 +101,9 @@ theorem caseI_ex_fin_div_of_not_dvd_hPlus
   have hζ' : IsPrimitiveRoot ζ' p := IsPrimitiveRoot.coe_submonoidClass_iff.2 hζ
   let zetaUnit := (hζ'.toInteger_isPrimitiveRoot.isUnit hpri.out.ne_zero).unit
   have hζ_unit_eq : ζ = (zetaUnit : 𝓞 K) := rfl
-  have hζ_map : (algebraMap (𝓞 K) K) ζ = ζ' := rfl
   obtain ⟨u, α, hu⟩ :=
     caseI_principal_of_not_dvd_hPlus hp5 hp_odd h_not_dvd h_class_eq
       hζ hgcd hcaseI heq
-  -- Rewrite hu to match flt-regular's `is_principal` output shape.
   rw [hζ_unit_eq, mul_comm _ (↑b : 𝓞 K), ← pow_one zetaUnit] at hu
   obtain ⟨k, hk⟩ :=
     FltRegular.CaseI.exists_int_sum_eq_zero hζ' a b 1 hu.symm (by linarith)
@@ -134,14 +123,14 @@ theorem caseI_ex_fin_div_of_not_dvd_hPlus
       mul_comm _ (↑b : 𝓞 K), mul_assoc (↑b : 𝓞 K)]
   congr 2
   · ext
-    simp only [map_pow, NumberField.Units.coe_zpow, hζ_map]
+    simp only [map_pow, NumberField.Units.coe_zpow]
     change ζ' ^ ↑(2 * k % ↑p).natAbs = ζ' ^ (2 * k)
     refine eq_of_div_eq_one ?_
     rw [← zpow_natCast, ← zpow_sub₀ (hζ'.ne_zero hpri.out.ne_zero), hζ'.zpow_eq_one_iff_dvd]
     simp only [natAbs_of_nonneg (emod_nonneg _ hpcoe), ← ZMod.intCast_zmod_eq_zero_iff_dvd,
       Int.cast_sub, ZMod.intCast_mod, Int.cast_mul, sub_self]
   · ext
-    simp only [map_pow, _root_.map_mul, NumberField.Units.coe_zpow, map_units_inv, hζ_map]
+    simp only [map_pow, _root_.map_mul, NumberField.Units.coe_zpow, map_units_inv]
     change ζ' ^ ↑((2 * k - 1) % ↑p).natAbs = ζ' ^ (2 * k) * ζ'⁻¹
     refine eq_of_div_eq_one ?_
     rw [← zpow_natCast, ← zpow_sub_one₀ (hζ'.ne_zero hpri.out.ne_zero), ←
@@ -192,16 +181,13 @@ theorem caseI_easier_of_not_dvd_hPlus
   rw [sum_range] at key
   refine hcaseI (Dvd.dvd.mul_right (Dvd.dvd.mul_right ?_ _) _)
   simpa [FltRegular.f] using
-    dvd_coeff_cycl_integer (by exact hpri.out) hζ (FltRegular.auxf hp5 a b k₁ k₂) key
+    dvd_coeff_cycl_integer hpri.out hζ (FltRegular.auxf hp5 a b k₁ k₂) key
     ⟨0, hpri.out.pos⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **LV010-D case I under `¬ p ∣ h⁺` (full statement).** Mirror of
 flt-regular's `FltRegular.caseI`, with `IsRegularPrime p` replaced by
-`¬ p ∣ h⁺(K)` and a `CaseIClassEqDischarge p K` parameter.
-
-Reuses `FltRegular.CaseI.may_assume` (regularity-free) by abstracting
-the regularity hypothesis. -/
+`¬ p ∣ h⁺(K)` and a `CaseIClassEqDischarge p K` parameter. -/
 theorem caseI_of_not_dvd_hPlus
     (hp_odd : p ≠ 2)
     [IsCMField (CyclotomicField p ℚ)]
@@ -240,11 +226,10 @@ theorem caseI_of_not_dvd_hPlus
   exact caseI_easier_of_not_dvd_hPlus hp5 hp_odd h_not_dvd h_class_eq H2 H3 H5 H1
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **LV010-D CaseIBridge constructor (parametric).** Once a
-`CaseIClassEqDischarge p K` is provided, builds a `CaseIBridge p K`
-term. Specialized to `K = CyclotomicField p ℚ` because the underlying
-LV010-A/B/C engine is. -/
-def caseIBridge_of_classEqDischarge
+/-- **LV010-D CaseIBridge constructor (parametric).** From a
+`CaseIClassEqDischarge p K`, builds a `CaseIBridge p (CyclotomicField p ℚ)`
+term. -/
+theorem caseIBridge_of_classEqDischarge
     (hp_odd : p ≠ 2)
     [IsCMField (CyclotomicField p ℚ)]
     (h_class_eq : CaseIClassEqDischarge p (CyclotomicField p ℚ)) :
@@ -254,12 +239,9 @@ def caseIBridge_of_classEqDischarge
     exact caseI_of_not_dvd_hPlus hp_odd h_not_dvd h_class_eq hcaseI
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **CaseIBridge from regularity (compatibility check).** Demonstrates
-that the parametric `caseIBridge_of_classEqDischarge` composes for
-regular primes via `caseIClassEqDischarge_of_regular`. Useful as a
-sanity check that the LV-route's parametric structure recovers
-flt-regular's case-I bridge for regular primes. -/
-def caseIBridge_of_regular
+/-- **CaseIBridge from regularity (compatibility check).** For a regular
+prime, builds a `CaseIBridge p (CyclotomicField p ℚ)` term. -/
+theorem caseIBridge_of_regular
     (hp_odd : p ≠ 2)
     [IsCMField (CyclotomicField p ℚ)]
     [Fintype (ClassGroup (𝓞 (CyclotomicField p ℚ)))]

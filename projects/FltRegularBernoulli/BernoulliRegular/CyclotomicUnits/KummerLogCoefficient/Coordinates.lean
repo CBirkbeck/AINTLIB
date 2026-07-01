@@ -11,11 +11,6 @@ used by the Kummer logarithm evaluator.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
-open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
@@ -37,7 +32,6 @@ theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_of_mem_parameterIdeal_
     (dworkParameterPowerBasis p K).repr x i -
         (dworkParameterPowerBasis p K).repr y i ∈
       rationalPadicPrimeIdeal p := by
-  classical
   let R₀ : Type := RationalPadicIntegerRing p
   let S : Type _ := DworkCompleteIntegerRing p K
   have hspan : x - y ∈ Ideal.span ({(p : S)} : Set S) := by
@@ -59,8 +53,7 @@ theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_of_mem_parameterIdeal_
       dworkParameterPowerLinearMap p K a =
           dworkParameterPowerLinearMap p K
             ((dworkParameterPowerBasis p K).repr x -
-              (dworkParameterPowerBasis p K).repr y) := by
-            rfl
+              (dworkParameterPowerBasis p K).repr y) := rfl
       _ =
           dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr x) -
             dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr y) :=
@@ -133,7 +126,6 @@ theorem dworkFixedEvenPowerBasis_repr_eq_powerBasis_repr
     (dworkFixedEvenPowerBasis (p := p) (K := K) hp_two).repr x i =
       (dworkParameterPowerBasis p K).repr
         (x : DworkCompleteIntegerRing p K) i.1 := by
-  classical
   let a := (dworkFixedEvenPowerBasis (p := p) (K := K) hp_two).repr x
   have h_even :
       dworkEvenPowerLinearMap (p := p) (K := K) hp_two a = x :=
@@ -219,9 +211,9 @@ noncomputable def dworkParameterQuotientCoeffModP
     (i : Fin (p - 1)) :
     DworkCompleteIntegerRing p K ⧸ (dworkParameterIdeal p K) ^ (p - 1) →
       ZMod p :=
-  fun q =>
+  fun q ↦
     Quotient.liftOn' q
-      (fun x : DworkCompleteIntegerRing p K =>
+      (fun x : DworkCompleteIntegerRing p K ↦
         rationalPadicIntegerToZMod p
           ((dworkParameterPowerBasis p K).repr x i))
       (by
@@ -248,7 +240,7 @@ after mapping the representative into the completed Dwork ring. -/
 noncomputable def valuedLambdaQuotientDworkCoeffModP
     (i : Fin (p - 1)) :
     ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1) → ZMod p :=
-  fun q =>
+  fun q ↦
     dworkParameterQuotientCoeffModP (p := p) (K := K) i
       (Ideal.quotientMap ((dworkParameterIdeal p K) ^ (p - 1))
         (algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K))
@@ -365,7 +357,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_ext
             (dworkParameterPowerBasis p K).repr
               (algebraMap R S s) i := by
       have hmap :=
-        congrArg (fun f => f i)
+        congrArg (fun f ↦ f i)
           ((dworkParameterPowerBasis p K).repr.map_sub
             (algebraMap R S r) (algebraMap R S s))
       simp [z, map_sub] at hmap ⊢
@@ -449,7 +441,7 @@ theorem dworkParameterQuotientCoeffModP_mk_add
       (dworkParameterPowerBasis p K).repr (x + y) i =
         ((dworkParameterPowerBasis p K).repr x +
           (dworkParameterPowerBasis p K).repr y) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
   rw [hrepr]
   change rationalPadicIntegerToZMod p
       ((dworkParameterPowerBasis p K).repr x i +
@@ -474,7 +466,7 @@ theorem dworkParameterQuotientCoeffModP_mk_neg
   have hrepr :
       (dworkParameterPowerBasis p K).repr (-x) i =
         (-(dworkParameterPowerBasis p K).repr x) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
   rw [hrepr]
   change rationalPadicIntegerToZMod p
       (-(dworkParameterPowerBasis p K).repr x i) =
@@ -501,7 +493,7 @@ theorem dworkParameterQuotientCoeffModP_mk_sub
       (dworkParameterPowerBasis p K).repr (x - y) i =
         ((dworkParameterPowerBasis p K).repr x -
           (dworkParameterPowerBasis p K).repr y) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_sub x y)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_sub x y)
   rw [hrepr]
   change rationalPadicIntegerToZMod p
       ((dworkParameterPowerBasis p K).repr x i -
@@ -665,7 +657,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_natCast_mul
       simpa using hzero
   | succ n ih =>
       rw [Nat.cast_succ, add_mul, valuedLambdaQuotientDworkCoeffModP_add, ih]
-      simp
+      push_cast
       ring
 
 omit [NumberField.IsCMField K] in
@@ -685,9 +677,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_intCast_mul
       have h :=
         valuedLambdaQuotientDworkCoeffModP_natCast_mul
           (p := p) (K := K) i (n + 1) x
-      rw [Int.cast_negSucc, Int.cast_negSucc]
-      rw [neg_mul]
-      rw [valuedLambdaQuotientDworkCoeffModP_neg, h]
+      rw [Int.cast_negSucc, Int.cast_negSucc, neg_mul,
+        valuedLambdaQuotientDworkCoeffModP_neg, h]
       ring
 
 omit [NumberField.IsCMField K] in
@@ -722,8 +713,8 @@ theorem dworkParameterQuotientCoeffModP_mk_algebraMap_mul_pow_of_lt
         (((Pi.single (⟨n, hn⟩ : Fin (p - 1)) c :
           Fin (p - 1) → RationalPadicIntegerRing p) i)) := by
   rw [← dworkParameterPowerLinearMap_single_coeff
-    (p := p) (K := K) (i := (⟨n, hn⟩ : Fin (p - 1))) (c := c)]
-  rw [dworkParameterQuotientCoeffModP_mk_powerLinearMap]
+      (p := p) (K := K) (i := (⟨n, hn⟩ : Fin (p - 1))) (c := c),
+    dworkParameterQuotientCoeffModP_mk_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 theorem dworkParameterQuotientCoeffModP_mk_pow_of_lt
@@ -797,21 +788,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
           (dworkParameterApprox p K (p - 1) ^ n) =
         AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
           (dworkParameter p K ^ n) := by
-    calc
-      Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
-          (dworkParameterApprox p K (p - 1) ^ n)
-          =
-        (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
-          (dworkParameterApprox p K (p - 1))) ^ n := by
-          rw [map_pow]
-      _ =
-        (AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
-          (dworkParameter p K)) ^ n := by
-          rw [dworkParameter_evalₐ]
-      _ =
-        AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
-          (dworkParameter p K ^ n) := by
-          rw [map_pow]
+    rw [map_pow, map_pow, dworkParameter_evalₐ]
   rw [hpow]
   have hsingle :
       dworkParameter p K ^ n =
@@ -819,8 +796,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
           (Pi.single (⟨n, hn⟩ : Fin (p - 1))
             (1 : RationalPadicIntegerRing p)) := by
     rw [dworkParameterPowerLinearMap_single]
-  rw [hsingle]
-  rw [valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
+  rw [hsingle, valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_mk_intCast_mul_dworkParameterApprox_pow_of_lt
@@ -841,9 +817,9 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_intCast_mul_dworkParameterApprox_p
         Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
           (dworkParameterApprox p K (p - 1) ^ n)) by
         simp]
-  rw [valuedLambdaQuotientDworkCoeffModP_intCast_mul]
-  rw [valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
-    (p := p) (K := K) i hn]
+  rw [valuedLambdaQuotientDworkCoeffModP_intCast_mul,
+    valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
+      (p := p) (K := K) i hn]
 
 omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_mk_rIntegralRat_mul_dworkParameterApprox_pow_of_lt

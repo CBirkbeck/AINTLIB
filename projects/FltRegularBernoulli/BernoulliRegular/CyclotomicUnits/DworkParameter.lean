@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part18
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.GaloisAction.CyclotomicActionDworkParameter
 
 @[expose] public section
 

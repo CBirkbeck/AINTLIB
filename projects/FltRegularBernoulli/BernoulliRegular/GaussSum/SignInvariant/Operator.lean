@@ -38,12 +38,9 @@ theorem normalizedDft_apply (Φ : ZMod p → ℂ) (x : ZMod p) :
 
 theorem normalizedDft_sq_apply (Φ : ZMod p → ℂ) (x : ZMod p) :
     normalizedDft p (normalizedDft p Φ) x = Φ (-x) := by
-  have hp_nonneg : (0 : ℝ) ≤ p := by
-    exact_mod_cast Nat.zero_le p
-  have hsqrt_ne_real : (Real.sqrt p : ℝ) ≠ 0 :=
-    Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
+  have hp_nonneg : (0 : ℝ) ≤ p := Nat.cast_nonneg p
   have hsqrt_ne : (Real.sqrt p : ℂ) ≠ 0 := by
-    exact_mod_cast hsqrt_ne_real
+    exact_mod_cast Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
   have hscalar :
       (Real.sqrt p : ℂ)⁻¹ * ((Real.sqrt p : ℂ)⁻¹ * (p : ℂ)) = 1 := by
     field_simp [hsqrt_ne]
@@ -54,7 +51,7 @@ theorem normalizedDft_sq_apply (Φ : ZMod p → ℂ) (x : ZMod p) :
     normalizedDft p (normalizedDft p Φ) x
         = ((Real.sqrt p : ℂ)⁻¹ * ((Real.sqrt p : ℂ)⁻¹ * (p : ℂ))) * Φ (-x) := by
             simp [normalizedDft, ZMod.dft_dft, mul_assoc, mul_left_comm, mul_comm]
-    _ = Φ (-x) := by simp [hscalar]
+    _ = Φ (-x) := by rw [hscalar, one_mul]
 
 /-- The normalized DFT squares to pullback along negation. -/
 theorem normalizedDft_sq_eq_negArgument :
@@ -68,18 +65,14 @@ theorem normalizedDft_sq_eq_negArgument :
 def evenSubmodule : Submodule ℂ (ZMod p → ℂ) where
   carrier := {Φ | Function.Even Φ}
   zero_mem' := Function.Even.zero
-  add_mem' := by
-    intro Φ Ψ hΦ hΨ
-    exact hΦ.add hΨ
+  add_mem' hΦ hΨ := hΦ.add hΨ
   smul_mem' c _ hΦ := hΦ.const_smul c
 
 /-- The submodule of odd functions on `ZMod p`. -/
 def oddSubmodule : Submodule ℂ (ZMod p → ℂ) where
   carrier := {Φ | Function.Odd Φ}
   zero_mem' := Function.Odd.zero
-  add_mem' := by
-    intro Φ Ψ hΦ hΨ
-    exact hΦ.add hΨ
+  add_mem' hΦ hΨ := hΦ.add hΨ
   smul_mem' c _ hΦ := hΦ.const_smul c
 
 theorem normalizedDft_maps_even {Φ : ZMod p → ℂ} (hΦ : Function.Even Φ) :
@@ -95,12 +88,12 @@ theorem normalizedDft_maps_odd {Φ : ZMod p → ℂ} (hΦ : Function.Odd Φ) :
 /-- The normalized DFT restricted to the even submodule. -/
 noncomputable def normalizedDftEven :
     evenSubmodule (p := p) →ₗ[ℂ] evenSubmodule (p := p) :=
-  (normalizedDft (p := p)).restrict fun _ hΦ => normalizedDft_maps_even (p := p) hΦ
+  (normalizedDft (p := p)).restrict fun _ hΦ ↦ normalizedDft_maps_even (p := p) hΦ
 
 /-- The normalized DFT restricted to the odd submodule. -/
 noncomputable def normalizedDftOdd :
     oddSubmodule (p := p) →ₗ[ℂ] oddSubmodule (p := p) :=
-  (normalizedDft (p := p)).restrict fun _ hΦ => normalizedDft_maps_odd (p := p) hΦ
+  (normalizedDft (p := p)).restrict fun _ hΦ ↦ normalizedDft_maps_odd (p := p) hΦ
 
 /-- On even functions, the normalized DFT squares to the identity. -/
 theorem normalizedDft_sq_eq_self_of_even {Φ : ZMod p → ℂ} (hΦ : Function.Even Φ) :
@@ -132,11 +125,11 @@ theorem normalizedDftOdd_sq :
 
 /-- The raw Fourier kernel matrix for `ZMod.dft` in the standard basis. -/
 noncomputable def fourierMatrix : Matrix (ZMod p) (ZMod p) ℂ :=
-  Matrix.of fun x k => ZMod.stdAddChar (N := p) (-(x * k))
+  Matrix.of fun x k ↦ ZMod.stdAddChar (N := p) (-(x * k))
 
 /-- The normalized Fourier matrix, i.e. the matrix of `normalizedDft`. -/
 noncomputable def normalizedFourierMatrix : Matrix (ZMod p) (ZMod p) ℂ :=
-  Matrix.of fun x k => (Real.sqrt p : ℂ)⁻¹ * ZMod.stdAddChar (N := p) (-(x * k))
+  Matrix.of fun x k ↦ (Real.sqrt p : ℂ)⁻¹ * ZMod.stdAddChar (N := p) (-(x * k))
 
 theorem normalizedFourierMatrix_eq_smul_fourierMatrix :
     normalizedFourierMatrix p = ((Real.sqrt p : ℂ)⁻¹) • fourierMatrix p := by
@@ -162,7 +155,7 @@ theorem toMatrix_normalizedDft_eq_normalizedFourierMatrix :
   rw [LinearMap.toMatrix_apply, Pi.basisFun_repr]
   rw [normalizedDft_apply]
   simpa [normalizedFourierMatrix, mul_comm] using
-    congrArg (fun z : ℂ => (Real.sqrt p : ℂ)⁻¹ * z)
+    congrArg (fun z : ℂ ↦ (Real.sqrt p : ℂ)⁻¹ * z)
       (dft_basisFun_apply (p := p) (x := k) (k := x))
 
 /-- Determinant reduction from `normalizedDft` to its explicit Fourier matrix. -/
@@ -173,9 +166,9 @@ theorem det_normalizedDft_eq_det_normalizedFourierMatrix :
 
 /-- A fixed equivalence used to reindex `ZMod p` by `Fin p` for matrix
 determinant computations. -/
-noncomputable def zmodEquivFin : ZMod p ≃ Fin p := by
+noncomputable def zmodEquivFin : ZMod p ≃ Fin p :=
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
-  exact (ZMod.finEquiv p).symm.toEquiv
+  (ZMod.finEquiv p).symm.toEquiv
 
 theorem zmodEquivFin_symm_apply (i : Fin p) :
     (zmodEquivFin (p := p)).symm i = (i : ZMod p) := by
@@ -206,11 +199,10 @@ theorem normalizedFourierMatrixFin_eq_smul_fourierMatrixFin :
 stand-in for the original normalized Fourier matrix. -/
 theorem det_normalizedFourierMatrix_eq_det_normalizedFourierMatrixFin :
     Matrix.det (normalizedFourierMatrix p) = Matrix.det (normalizedFourierMatrixFin p) := by
-  change Matrix.det (normalizedFourierMatrix p) =
-    Matrix.det (Matrix.reindex (zmodEquivFin (p := p)) (zmodEquivFin (p := p))
-      (normalizedFourierMatrix p))
-  exact (Matrix.det_reindex_self (zmodEquivFin (p := p)) (normalizedFourierMatrix p)).symm
+  rw [normalizedFourierMatrixFin,
+    Matrix.det_reindex_self (zmodEquivFin (p := p)) (normalizedFourierMatrix p)]
 
 end SignInvariant
 
 end BernoulliRegular
+

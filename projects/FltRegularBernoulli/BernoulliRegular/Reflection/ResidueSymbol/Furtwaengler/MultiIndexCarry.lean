@@ -43,9 +43,8 @@ theorem multiIndexWeight_update_add_eq {f : ℕ}
       multiIndexWeight m + x := by
   unfold multiIndexWeight
   rw [Finset.sum_update_of_mem (s := Finset.univ) (i := i) (f := m) (b := x)
-    (by simp)]
-  rw [Finset.sum_eq_sum_diff_singleton_add (s := Finset.univ) (i := i) (f := m)
-    (by simp)]
+    (by simp), Finset.sdiff_singleton_eq_erase,
+    ← Finset.add_sum_erase Finset.univ m (Finset.mem_univ i)]
   omega
 
 theorem multiIndexValue_update_add_eq {ℓ f : ℕ}
@@ -64,9 +63,9 @@ theorem multiIndexValue_update_add_eq {ℓ f : ℕ}
     · simp [Function.update_of_ne h]
   rw [hupdate]
   rw [Finset.sum_update_of_mem (s := Finset.univ) (i := i)
-    (f := fun j : Fin f => m j * ℓ ^ (j : ℕ)) (b := x * ℓ ^ (i : ℕ)) (by simp)]
-  rw [Finset.sum_eq_sum_diff_singleton_add (s := Finset.univ) (i := i)
-    (f := fun j : Fin f => m j * ℓ ^ (j : ℕ)) (by simp)]
+    (f := fun j : Fin f => m j * ℓ ^ (j : ℕ)) (b := x * ℓ ^ (i : ℕ)) (by simp),
+    Finset.sdiff_singleton_eq_erase,
+    ← Finset.add_sum_erase Finset.univ (fun j : Fin f => m j * ℓ ^ (j : ℕ)) (Finset.mem_univ i)]
   omega
 
 theorem pow_succCyclic_modEq (ℓ : ℕ) (hℓ : 2 ≤ ℓ) {f : ℕ} (i : Fin f) :

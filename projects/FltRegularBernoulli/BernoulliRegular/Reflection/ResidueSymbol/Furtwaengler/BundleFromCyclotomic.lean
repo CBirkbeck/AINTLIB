@@ -112,7 +112,6 @@ noncomputable def mkConcreteSetup
   letI : Field (𝓞 R' ⧸ Q) := residueFieldOfHQ ℓ R' Q hQ
   letI : Fintype (𝓞 R' ⧸ Q) := residueFieldFintype ℓ R' Q hQ
   letI : Algebra (ZMod ℓ) (𝓞 R' ⧸ Q) := algZMod
-  haveI : NeZero ℓ := ⟨hℓ.out.ne_zero⟩
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   -- Build the unit form of the residue-field primitive p-th root.
   let zeta_k : (𝓞 R' ⧸ Q)ˣ := (hzeta_k_val.isUnit hp.out.pos.ne').unit
@@ -726,7 +725,7 @@ def mkDwork_ofFullTeich
           S.toConcreteStickelbergerSetup.π ^ n ∈
         S.toConcreteStickelbergerSetup.Q ^ (n + 1))
     (psi_dwork_factorization : ∀ (N : ℕ) (y : kˣ),
-      S.toConcreteStickelbergerSetup.psiInt ((y : k)) -
+      S.toConcreteStickelbergerSetup.psiInt (y : k) -
         (∑ m ∈ multiIndexLE
             S.toConcreteStickelbergerSetup.f N,
           (∏ i : Fin
@@ -753,7 +752,7 @@ def mkDwork_ofFullTeich
           S.toConcreteStickelbergerSetup.π ^ n ∈
         S.toConcreteStickelbergerSetup.Q ^ (n + 1))
     (psi_dwork_factorization : ∀ (N : ℕ) (y : kˣ),
-      S.toConcreteStickelbergerSetup.psiInt ((y : k)) -
+      S.toConcreteStickelbergerSetup.psiInt (y : k) -
         (∑ m ∈ multiIndexLE
             S.toConcreteStickelbergerSetup.f N,
           (∏ i : Fin

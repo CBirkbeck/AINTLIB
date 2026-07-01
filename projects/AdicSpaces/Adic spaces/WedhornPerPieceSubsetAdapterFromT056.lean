@@ -122,8 +122,7 @@ theorem per_piece_subset_adapter_from_T056_to_T065
           rationalOpen ({(1 : A)} : Finset A) t ⊆
         rationalOpen ({t} : Finset A) D_s := by
   intro t ht
-  obtain ⟨τ, hτ_mem, hτ_eq⟩ := Finset.mem_image.mp ht
-  subst hτ_eq
+  obtain ⟨τ, hτ_mem, rfl⟩ := Finset.mem_image.mp ht
   exact h_per_τ τ hτ_mem
 
 omit [PlusSubring A] in
@@ -307,8 +306,8 @@ theorem C1SupplierStrong_local_via_pointwise_clearing
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨σ_choice, f, hv_in_plus, hvf_nz, h_clearing, h_cover_t⟩ :=
     h_per_call D hD v hv t ht hvt hvD_s
-  refine ⟨σ_choice, f, hv_in_plus, hvf_nz, ?_, h_cover_t⟩
-  exact per_piece_subset_adapter_from_pointwise_clearing
-    C.base.T D.T C.base.s D.s f h_clearing
+  exact ⟨σ_choice, f, hv_in_plus, hvf_nz,
+    per_piece_subset_adapter_from_pointwise_clearing
+      C.base.T D.T C.base.s D.s f h_clearing, h_cover_t⟩
 
 end ValuationSpectrum

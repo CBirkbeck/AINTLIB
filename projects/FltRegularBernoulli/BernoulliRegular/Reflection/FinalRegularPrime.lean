@@ -91,7 +91,7 @@ unconditional) propagates the property to `Cl(𝓞 K⁺)`. -/
 theorem subsingleton_classGroup_maximalRealSubfield_of_subsingleton
     [Subsingleton (ClassGroup (𝓞 K))] :
     Subsingleton (ClassGroup (𝓞 (NumberField.maximalRealSubfield K))) :=
-  Function.Injective.subsingleton (classGroupMap_injective p hp_odd K)
+  (classGroupMap_injective p hp_odd K).subsingleton
 
 include hp_odd in
 /-- Under `Subsingleton (ClassGroup (𝓞 K))`, the totally real class
@@ -103,18 +103,14 @@ theorem hPlus_eq_one_of_subsingleton
   have hsub :
       Subsingleton (ClassGroup (𝓞 (NumberField.maximalRealSubfield K))) :=
     subsingleton_classGroup_maximalRealSubfield_of_subsingleton p hp_odd K
-  refine Nat.le_antisymm ?_ ?_
-  · exact Fintype.card_le_one_iff_subsingleton.mpr hsub
-  · exact Fintype.card_pos
+  exact Nat.le_antisymm (Fintype.card_le_one_iff_subsingleton.mpr hsub) Fintype.card_pos
 
 /-- Under `Subsingleton (ClassGroup (𝓞 K))`, the class number `h K`
 equals one.  Hence `p ∣ h K` holds iff `p = 1`. -/
 theorem h_eq_one_of_subsingleton
     [hsub : Subsingleton (ClassGroup (𝓞 K))] :
-    h K = 1 := by
-  refine Nat.le_antisymm ?_ ?_
-  · exact Fintype.card_le_one_iff_subsingleton.mpr hsub
-  · exact Fintype.card_pos
+    h K = 1 :=
+  Nat.le_antisymm (Fintype.card_le_one_iff_subsingleton.mpr hsub) Fintype.card_pos
 
 include hp hp_odd in
 /-- **`T044b`, regular-prime degenerate case.**
@@ -175,10 +171,8 @@ theorem dvd_h_of_dvd_hPlus_of_regular
   have hPlus_dvd : hPlus K ∣ h K := hPlus_dvd_h p hp_odd K
   have h_dvd : (p : ℕ) ∣ h K := h_plus.trans hPlus_dvd
   have hcop : ¬ (p : ℕ) ∣ h K := by
-    have hreg' : ¬ (p : ℕ) ∣ Fintype.card (ClassGroup (𝓞 (CyclotomicField p ℚ))) :=
-      hp.out.coprime_iff_not_dvd.mp h_reg
     rw [BernoulliRegular.h, heq]
-    exact hreg'
+    exact hp.out.coprime_iff_not_dvd.mp h_reg
   exact hcop h_dvd
 
 end ReflectionFinalRegularPrime

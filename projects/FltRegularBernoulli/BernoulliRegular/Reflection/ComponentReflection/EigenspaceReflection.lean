@@ -69,8 +69,7 @@ def eigenspace (galAction : (ZMod p)ˣ →* Module.End (ZMod p) V) (k : ℕ) :
     simp
   add_mem' {v w} hv hw := by
     intro a
-    rw [map_add]
-    rw [hv a, hw a, smul_add]
+    rw [map_add, hv a, hw a, smul_add]
   neg_mem' {v} hv := by
     intro a
     rw [map_neg, hv a, smul_neg]
@@ -184,8 +183,7 @@ theorem standardEigenspaceProjection_mem_eigenspace
     congr 1
     show (((a⁻¹ * c : (ZMod p)ˣ) : ZMod p) ^ k)⁻¹ =
       ((a : ZMod p) ^ k) • ((c : ZMod p) ^ k)⁻¹
-    rw [Units.val_mul, mul_pow, mul_inv]
-    rw [Units.val_inv_eq_inv_val, inv_pow, inv_inv]
+    rw [Units.val_mul, mul_pow, mul_inv, Units.val_inv_eq_inv_val, inv_pow, inv_inv]
     rfl]
   -- LHS = (p-1)⁻¹ • a^k • ∑_c c^{-k} • σ_c(v)
   -- RHS = a^k • (p-1)⁻¹ • ∑_c c^{-k} • σ_c(v)
@@ -229,8 +227,7 @@ theorem standardEigenspaceProjection_phi_eq
   simp_rw [h_each]
   rw [Finset.sum_const, Finset.card_univ]
   -- Goal: (p-1)⁻¹ • (#(ZMod p)ˣ • phi v) = phi v
-  rw [nsmul_eq_mul, smul_eq_mul, ← mul_assoc]
-  rw [IsUnit.inv_mul_cancel h_card_unit, one_mul]
+  rw [nsmul_eq_mul, smul_eq_mul, ← mul_assoc, IsUnit.inv_mul_cancel h_card_unit, one_mul]
 
 /-- **Concrete `EigenspaceProjectionData` from the standard projection.**
 Bundles the two proofs above into a single `EigenspaceProjectionData`
@@ -290,22 +287,14 @@ theorem geom_sum_zmod_units (a : (ZMod p)ˣ) :
     rw [if_pos rfl]
     simp [Finset.sum_const, Finset.card_range]
   · rw [if_neg ha]
-    have ha' : (a : ZMod p) ≠ 1 := by
-      intro h
-      apply ha
-      apply Units.ext
-      simpa using h
+    have ha' : (a : ZMod p) ≠ 1 := Units.val_eq_one.ne.mpr ha
     -- ∑_{k=0}^{p-2} (a : ZMod p)^k = ((a : ZMod p)^{p-1} - 1) / ((a : ZMod p) - 1)
     rw [geom_sum_eq ha' (p - 1)]
     -- (a : ZMod p)^{p-1} = 1 by Fermat's little theorem
     have ha_pow : ((a : ZMod p)) ^ (p - 1) = 1 := by
       rw [show ((a : ZMod p)) ^ (p - 1) = ((a^(p-1) : (ZMod p)ˣ) : ZMod p) by
             push_cast; rfl]
-      rw [show a ^ (p - 1) = 1 by
-        have : Fintype.card (ZMod p)ˣ = p - 1 := by
-          rw [ZMod.card_units]
-        rw [← this]
-        exact pow_card_eq_one]
+      rw [show a ^ (p - 1) = 1 by rw [← ZMod.card_units]; exact pow_card_eq_one]
       simp
     rw [ha_pow, sub_self, zero_div]
 
@@ -322,15 +311,7 @@ theorem geom_sum_zmod_units_inv (a : (ZMod p)ˣ) :
     rw [Units.val_inv_eq_inv_val, inv_pow]
   simp_rw [h_eq]
   rw [geom_sum_zmod_units a⁻¹]
-  congr 1
-  · ext
-    constructor
-    · intro h
-      apply Units.ext
-      simpa using h
-    · intro h
-      rw [h]
-      rfl
+  simp only [inv_eq_one]
 
 /-- **Substantively PROVED**: `StandardEigenspaceDecompositionComplete` for
 any `(ZMod p)ˣ`-action on a `ZMod p`-module, given that
@@ -472,29 +453,6 @@ theorem mem_fixedByGalAction (galAction : (ZMod p)ˣ →* Module.End (ZMod p) V)
     v ∈ fixedByGalAction galAction a ↔ galAction a v = v :=
   Iff.rfl
 
-/-- **Even-eigenspace inclusion in σ_{-1}-fixed subspace.** Each
-even-character eigenspace lies in the +1-fixed subspace under
-`galAction (-1)`. Requires `p ≠ 2` so that `-1 ≠ 1` in `ZMod p`. -/
-theorem eigenspaceSubmodule_even_le_fixed_neg_one
-    (hp_odd : p ≠ 2)
-    (galAction : (ZMod p)ˣ →* Module.End (ZMod p) V)
-    {i : ℕ} (h_even : Even i) :
-    eigenspaceSubmodule galAction i ≤ fixedByGalAction galAction (-1) := by
-  have h_neg_one_ne : ((-1 : ZMod p)) ≠ 1 := by
-    haveI : Fact (2 < p) := ⟨by
-      have hp_prime : Nat.Prime p := Fact.out
-      have hp_ge : 2 ≤ p := hp_prime.two_le
-      omega⟩
-    exact ZMod.neg_one_ne_one
-  intro v hv
-  show galAction (-1) v = v
-  have := hv (-1)
-  rw [this]
-  rw [show (((-1 : (ZMod p)ˣ) : ZMod p) ^ i) = 1 from by
-    rw [Units.val_neg, Units.val_one]
-    exact (neg_one_pow_eq_one_iff_even h_neg_one_ne).mpr h_even]
-  rw [one_smul]
-
 /-- Helper: `(-1 : ZMod p) ≠ 1` for `p` an odd prime. -/
 private lemma neg_one_ne_one_zmod (hp_odd : p ≠ 2) : ((-1 : ZMod p)) ≠ 1 := by
   haveI : Fact (2 < p) := ⟨by
@@ -517,6 +475,21 @@ private lemma two_ne_zero_zmod (hp_odd : p ≠ 2) : ((2 : ZMod p)) ≠ 0 := by
 /-- Helper: `(2 : ZMod p)` is a unit for `p` an odd prime. -/
 private lemma two_isUnit_zmod (hp_odd : p ≠ 2) : IsUnit ((2 : ZMod p)) :=
   isUnit_iff_ne_zero.mpr (two_ne_zero_zmod hp_odd)
+
+/-- **Even-eigenspace inclusion in σ_{-1}-fixed subspace.** Each
+even-character eigenspace lies in the +1-fixed subspace under
+`galAction (-1)`. Requires `p ≠ 2` so that `-1 ≠ 1` in `ZMod p`. -/
+theorem eigenspaceSubmodule_even_le_fixed_neg_one
+    (hp_odd : p ≠ 2)
+    (galAction : (ZMod p)ˣ →* Module.End (ZMod p) V)
+    {i : ℕ} (h_even : Even i) :
+    eigenspaceSubmodule galAction i ≤ fixedByGalAction galAction (-1) := by
+  intro v hv
+  show galAction (-1) v = v
+  have h_pow : (((-1 : (ZMod p)ˣ) : ZMod p) ^ i) = 1 := by
+    rw [Units.val_neg, Units.val_one]
+    exact (neg_one_pow_eq_one_iff_even (neg_one_ne_one_zmod hp_odd)).mpr h_even
+  rw [hv (-1), h_pow, one_smul]
 
 /-- **π_k commutes with galAction**: for any `b ∈ (ZMod p)ˣ`,
 `π_k(galAction(b)(v)) = galAction(b)(π_k(v))`.
@@ -567,17 +540,14 @@ theorem standardEigenspaceProjection_odd_eq_zero_of_fixed_neg_one
   -- Also: galAction(-1)(π_k(v)) = π_k(galAction(-1)(v)) = π_k(v) (since v is fixed).
   have h_act_pi_alt : galAction (-1) (standardEigenspaceProjection galAction k v) =
       standardEigenspaceProjection galAction k v := by
-    rw [← standardEigenspaceProjection_commute_galAction galAction k (-1) v]
-    rw [hv]
+    rw [← standardEigenspaceProjection_commute_galAction galAction k (-1) v, hv]
   -- Combine: π_k(v) = -π_k(v).
   have h_combined : ((-1 : ZMod p)) • standardEigenspaceProjection galAction k v =
       standardEigenspaceProjection galAction k v := by
     rw [← h_act_pi, h_act_pi_alt]
-  have h_neg_eq : -standardEigenspaceProjection galAction k v =
-      standardEigenspaceProjection galAction k v := by
-    rw [← neg_one_smul (ZMod p), h_combined]
   have h_eq : standardEigenspaceProjection galAction k v =
-      -standardEigenspaceProjection galAction k v := h_neg_eq.symm
+      -standardEigenspaceProjection galAction k v := by
+    rw [← neg_one_smul (ZMod p), h_combined]
   -- Hence 2 • π_k(v) = 0 ⟹ π_k(v) = 0 (2 invertible).
   have h2_smul : (2 : ZMod p) • standardEigenspaceProjection galAction k v = 0 := by
     rw [show (2 : ZMod p) • standardEigenspaceProjection galAction k v =

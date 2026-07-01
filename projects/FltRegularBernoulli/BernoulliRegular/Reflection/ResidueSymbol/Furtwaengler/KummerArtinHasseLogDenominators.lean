@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseLocalModel
-public import BernoulliRegular.FLT37.PrimaryUnits.Part2
+public import BernoulliRegular.FLT37.PrimaryUnits.RealCyclotomicUnitsAndTaylorExpansions
 import Mathlib.Tactic
 
 /-!

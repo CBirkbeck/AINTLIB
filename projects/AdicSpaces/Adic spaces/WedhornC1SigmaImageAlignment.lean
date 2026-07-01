@@ -147,7 +147,7 @@ theorem rationalOpen_anti_mono_T
     {T₁ T₂ : Finset A} (s : A) (h : T₁ ⊆ T₂) :
     rationalOpen T₂ s ⊆ rationalOpen T₁ s := by
   intro w ⟨hw_spa, hw_T₂, hw_s⟩
-  exact ⟨hw_spa, fun t ht => hw_T₂ t (h ht), hw_s⟩
+  exact ⟨hw_spa, fun t ht ↦ hw_T₂ t (h ht), hw_s⟩
 
 omit [IsTopologicalRing A] in
 /-- **Monotonicity of `LaurentCoverPresheafLemma833Assembly` in the
@@ -186,9 +186,9 @@ theorem LaurentCoverPresheafLemma833Assembly_via_subset_alignment
     [DecidableEq A]
     {σ : Aˣ} (T_test : Finset A) (D_T : Finset A) (D_s : A)
     (h_align :
-      D_T ⊆ T_test.image (fun τ => ((σ⁻¹ : Aˣ) : A) * τ)) :
+      D_T ⊆ T_test.image (fun τ ↦ ((σ⁻¹ : Aˣ) : A) * τ)) :
     LaurentCoverPresheafLemma833Assembly (σ := σ) T_test
-      (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
+      (fun τ ↦ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
       (rationalOpen D_T D_s) :=
   LaurentCoverPresheafLemma833Assembly_mono_target
     (rationalOpen_anti_mono_T D_s h_align)
@@ -210,8 +210,8 @@ choice. -/
 theorem image_sigma_inv_image_sigma_eq_self
     [DecidableEq A]
     (σ : Aˣ) (D_T : Finset A) :
-    (D_T.image (fun t => (σ : A) * t)).image
-        (fun τ => ((σ⁻¹ : Aˣ) : A) * τ) = D_T := by
+    (D_T.image (fun t ↦ (σ : A) * t)).image
+        (fun τ ↦ ((σ⁻¹ : Aˣ) : A) * τ) = D_T := by
   ext x
   simp only [Finset.mem_image]
   constructor
@@ -244,11 +244,11 @@ theorem LaurentCoverPresheafLemma833Assembly_via_sigma_shift
     [DecidableEq A]
     {σ : Aˣ} (D_T : Finset A) (D_s : A) :
     LaurentCoverPresheafLemma833Assembly (σ := σ)
-      (D_T.image (fun t => (σ : A) * t))
-      (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
+      (D_T.image (fun t ↦ (σ : A) * t))
+      (fun τ ↦ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
       (rationalOpen D_T D_s) := by
   refine LaurentCoverPresheafLemma833Assembly_via_subset_alignment
-    (D_T.image (fun t => (σ : A) * t)) D_T D_s ?_
+    (D_T.image (fun t ↦ (σ : A) * t)) D_T D_s ?_
   rw [image_sigma_inv_image_sigma_eq_self]
 
 omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
@@ -259,7 +259,7 @@ i.e., `σ⁻¹ * τ` cancels back to a member of `D_T`. -/
 theorem sigma_inv_mem_of_mem_sigma_image
     [DecidableEq A]
     {σ : Aˣ} {D_T : Finset A} {τ : A}
-    (hτ : τ ∈ D_T.image (fun t => (σ : A) * t)) :
+    (hτ : τ ∈ D_T.image (fun t ↦ (σ : A) * t)) :
     ((σ⁻¹ : Aˣ) : A) * τ ∈ D_T := by
   obtain ⟨t, ht, hτ_eq⟩ := Finset.mem_image.mp hτ
   have h_cancel : ((σ⁻¹ : Aˣ) : A) * ((σ : A) * t) = t := by
@@ -315,7 +315,7 @@ theorem rationalOpen_global_subset_via_sigma_shift_t_indexed
     simp
   -- Translate per-piece data from t-indexed to τ-indexed.
   have h_per_piece_τ :
-      ∀ τ ∈ D_T.image (fun t => (σ : A) * t),
+      ∀ τ ∈ D_T.image (fun t ↦ (σ : A) * t),
         rationalOpen (insert f T_base) s ∩
             rationalOpen ({(1 : A)} : Finset A) (((σ⁻¹ : Aˣ) : A) * τ) ⊆
           rationalOpen
@@ -327,7 +327,7 @@ theorem rationalOpen_global_subset_via_sigma_shift_t_indexed
   -- Translate cover hypothesis from t-indexed to τ-indexed.
   have h_cover_τ :
       ∀ w ∈ rationalOpen (insert f T_base) s,
-        ∃ τ ∈ D_T.image (fun t => (σ : A) * t),
+        ∃ τ ∈ D_T.image (fun t ↦ (σ : A) * t),
           w ∈ rationalOpen ({(1 : A)} : Finset A)
             (((σ⁻¹ : Aˣ) : A) * τ) := by
     intro w hw
@@ -337,7 +337,7 @@ theorem rationalOpen_global_subset_via_sigma_shift_t_indexed
     exact hw_in
   -- Apply T057's consumer with the σ-shifted Lemma 8.33 discharge.
   exact rationalOpen_global_subset_via_lemma833_assembly
-    (D_T.image (fun t => (σ : A) * t)) T_base D_T s D_s f
+    (D_T.image (fun t ↦ (σ : A) * t)) T_base D_T s D_s f
     (LaurentCoverPresheafLemma833Assembly_via_sigma_shift D_T D_s)
     h_per_piece_τ h_cover_τ
 
@@ -371,8 +371,8 @@ theorem localizedTestFamily_sigma_rescaled_image_bridge
     [DecidableEq A]
     {σ_loc : Aˣ} (T_D_loc : Finset A) (D_s : A) :
     LaurentCoverPresheafLemma833Assembly (σ := σ_loc)
-      (T_D_loc.image (fun τ => (σ_loc : A) * τ))
-      (fun τ =>
+      (T_D_loc.image (fun τ ↦ (σ_loc : A) * τ))
+      (fun τ ↦
         rationalOpen
           ({((σ_loc⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
       (rationalOpen T_D_loc D_s) :=
@@ -451,8 +451,8 @@ theorem image_sigma_image_sigma_inv_localizedTestFamily
     (σ_loc : (Localization.Away s)ˣ) :
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
     ((localizedTestFamily s T_D s_D).image
-        (fun t => (σ_loc : Localization.Away s) * t)).image
-        (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+        (fun t ↦ (σ_loc : Localization.Away s) * t)).image
+        (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
           Localization.Away s) * τ) =
       localizedTestFamily s T_D s_D := by
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
@@ -503,8 +503,8 @@ theorem LaurentCoverPresheafLemma833Assembly_at_localizedTestFamily
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
     LaurentCoverPresheafLemma833Assembly (σ := σ_loc)
       ((localizedTestFamily s T_D s_D).image
-        (fun t => (σ_loc : Localization.Away s) * t))
-      (fun τ =>
+        (fun t ↦ (σ_loc : Localization.Away s) * t))
+      (fun τ ↦
         rationalOpen
           ({((σ_loc⁻¹ : (Localization.Away s)ˣ) :
             Localization.Away s) * τ} :

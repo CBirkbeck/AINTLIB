@@ -81,7 +81,6 @@ theorem mk_S_D_of_C1_and_compactness
       (∀ f ∈ S, rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
       (∀ v ∈ rationalOpen D.T D.s,
         ∃ f ∈ S, v ∈ rationalOpen (insert f C.base.T) C.base.s) := by
-  classical
   -- The compact set in `↥(Spa A A⁺)`.
   let K : Set ↥(Spa A A⁺) := Subtype.val ⁻¹' rationalOpen D.T D.s
   have hK_compact : IsCompact K :=
@@ -90,10 +89,8 @@ theorem mk_S_D_of_C1_and_compactness
   -- Lift the pointwise C1 hypothesis to a Subtype-indexed witness function.
   have hC1_K : ∀ w : K, ∃ f : A,
       (w.1.1 : Spv A) ∈ rationalOpen (insert f C.base.T) C.base.s ∧
-      rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s := by
-    intro w
-    have hmem : (w.1.1 : Spv A) ∈ rationalOpen D.T D.s := w.2
-    exact hC1 w.1.1 hmem
+      rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s :=
+    fun w => hC1 w.1.1 w.2
   -- Choose a witness function g : K → A.
   let g : K → A := fun w => Classical.choose (hC1_K w)
   have hg_self : ∀ w : K, (w.1.1 : Spv A) ∈
@@ -122,11 +119,8 @@ theorem mk_S_D_of_C1_and_compactness
     -- the finite subcover supplies a `w ∈ T₀` with `v ∈ V w`, and `g w ∈ T₀.image g`.
     intro v hv
     have hv_spa : v ∈ Spa A A⁺ := rationalOpen_subset_spa hv
-    let x : ↥(Spa A A⁺) := ⟨v, hv_spa⟩
-    have hx_K : x ∈ K := hv
-    have hmem : x ∈ ⋃ w ∈ T₀, V w := hT₀_cover hx_K
-    rw [Set.mem_iUnion₂] at hmem
-    obtain ⟨w₀, hw₀_T₀, hx_in⟩ := hmem
+    obtain ⟨w₀, hw₀_T₀, hx_in⟩ :=
+      Set.mem_iUnion₂.mp (hT₀_cover (show (⟨v, hv_spa⟩ : ↥(Spa A A⁺)) ∈ K from hv))
     exact ⟨g w₀, Finset.mem_image.mpr ⟨w₀, hw₀_T₀, rfl⟩, hx_in⟩
 
 end ValuationSpectrum

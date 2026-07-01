@@ -7,10 +7,9 @@ public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 /-!
 # The cyclotomic Frobenius as a norm residue, and Frobenii generate
 
-Two arithmetic inputs of the Frobenius-fibre equidistribution (Gap B / L2), placed *below*
-`ZetaProduct.lean` in the import order (the lemma `cyclotomic_frobenius_acts_as_norm_power`
-currently lives in `Cyclotomic.lean`, which imports `ZetaProduct.lean` — the relevant content
-is (re)stated here so that `ZetaProduct.lean` can consume it without an import cycle).
+Two arithmetic inputs of the Frobenius-fibre equidistribution (Gap B / L2). This file is placed
+*below* `ZetaProduct.lean` in the import order so that `ZetaProduct.lean` can consume
+`cyclotomic_frobenius_acts_as_norm_power` (defined here) without an import cycle.
 
 * `autToPow_frobeniusClass_out`: for `L = K(μ_m)` and a prime `𝔭` of `K` unramified in `L`
   with `N𝔭` coprime to `m`, the image of the Frobenius under the (faithful) cyclotomic

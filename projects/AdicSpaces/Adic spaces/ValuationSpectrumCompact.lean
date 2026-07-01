@@ -86,7 +86,7 @@ With `Prop` carrying the Sierpinski topology and `A × A → Prop` the product t
 sub-basic open set `{r | r (f, s)}` pulls back to `basicOpen f s`, which is precisely one
 of the generating opens of the topology on `Spv A`. Hence the induced topology agrees with
 the given topology on `Spv A` (see `ιSpv_isInducing`). -/
-def ιSpv (v : Spv A) : A × A → Prop := fun p => v.vle p.1 p.2 ∧ ¬ v.vle p.2 0
+def ιSpv (v : Spv A) : A × A → Prop := fun p ↦ v.vle p.1 p.2 ∧ ¬ v.vle p.2 0
 
 @[simp]
 lemma ιSpv_apply (v : Spv A) (f s : A) :
@@ -125,7 +125,7 @@ lemma ιSpv_injective : Function.Injective (ιSpv : Spv A → _) := by
   apply ValuationSpectrum.ext
   funext f s
   have key : ∀ f s : A, ιSpv v₁ (f, s) ↔ ιSpv v₂ (f, s) := by
-    intro f s; exact (congrArg (fun r => r (f, s)) h).to_iff
+    intro f s; exact (congrArg (fun r ↦ r (f, s)) h).to_iff
   exact propext <| by
     rw [vle_iff_ιSpv, vle_iff_ιSpv]
     simp only [key]
@@ -139,11 +139,11 @@ lemma ιSpv_isInducing : Topology.IsInducing (ιSpv : Spv A → (A × A → Prop
   -- Unfold Pi topology to an iInf of single-coordinate induced topologies.
   rw [show (Pi.topologicalSpace :
       TopologicalSpace (A × A → Prop)) = ⨅ p, TopologicalSpace.induced
-        (fun r : A × A → Prop => r p) sierpinskiSpace from rfl]
+        (fun r : A × A → Prop ↦ r p) sierpinskiSpace from rfl]
   rw [induced_iInf]
   -- Each coordinate's pullback of the Sierpinski generator is a basic open.
   have hcoord : ∀ p : A × A,
-      TopologicalSpace.induced ((fun r : A × A → Prop => r p) ∘ ιSpv) sierpinskiSpace =
+      TopologicalSpace.induced ((fun r : A × A → Prop ↦ r p) ∘ ιSpv) sierpinskiSpace =
         TopologicalSpace.generateFrom {basicOpen p.1 p.2} := by
     intro p
     rw [show sierpinskiSpace = TopologicalSpace.generateFrom {{True}} from rfl,
@@ -519,8 +519,8 @@ opens. -/
 theorem compactSpace_iff_subbasic_subcover :
     CompactSpace (Spv A) ↔ ∀ P ⊆ {U : Set (Spv A) | IsSubbasicOpen U},
       ⋃₀ P = Set.univ → ∃ Q ⊆ P, Q.Finite ∧ ⋃₀ Q = Set.univ :=
-  ⟨fun _ => subbasic_subcover_of_compactSpace,
-    fun h => compactSpace_of_subbasic_subcover h⟩
+  ⟨fun _ ↦ subbasic_subcover_of_compactSpace,
+    fun h ↦ compactSpace_of_subbasic_subcover h⟩
 
 
 /-! ### Status of `CompactSpace (Spv A)`
@@ -575,7 +575,7 @@ Bool`. Finishing the compactness proof reduces to showing `IsClosed (Set.range
 `IsValuationChar` axioms. -/
 
 /-- **Bool-valued Huber embedding.** Encodes `v ∈ basicOpen p.1 p.2` as a Bool. -/
-noncomputable def ιSpv_bool (v : Spv A) : A × A → Bool := fun p =>
+noncomputable def ιSpv_bool (v : Spv A) : A × A → Bool := fun p ↦
   @decide (v.vle p.1 p.2 ∧ ¬ v.vle p.2 0) (Classical.dec _)
 
 -- (We state the decidability explicitly via `Classical.dec` rather than relying on
@@ -599,7 +599,7 @@ lemma boolToProp_decide {p : Prop} (hp : Decidable p) : boolToProp (decide p) �
 Sierpinski-valued embedding is the continuous image of the Bool-valued one under
 the coordinate-wise `boolToProp` map. -/
 lemma ιSpv_eq_boolToProp_comp_ιSpv_bool (v : Spv A) :
-    ιSpv v = fun p => boolToProp (ιSpv_bool v p) := by
+    ιSpv v = fun p ↦ boolToProp (ιSpv_bool v p) := by
   funext p
   simp only [ιSpv, ιSpv_bool, boolToProp]
   exact propext (@decide_eq_true_iff _ (Classical.dec _)).symm
@@ -625,13 +625,13 @@ omit [CommRing A] in
 `b ↦ (b = true) : Bool → Prop` with Sierpinski codomain, which pulls back `{True}` to
 `{true}` — open in discrete `Bool`. -/
 lemma continuous_boolToProp_pi :
-    Continuous (fun r : A × A → Bool => (fun p => boolToProp (r p)) : _ → (A × A → Prop)) := by
-  refine continuous_pi fun p => ?_
+    Continuous (fun r : A × A → Bool ↦ (fun p ↦ boolToProp (r p)) : _ → (A × A → Prop)) := by
+  refine continuous_pi fun p ↦ ?_
   -- `fun r => boolToProp (r p) = ((r p = true))` is the composition of `r ↦ r p`
   -- (continuous, `continuous_apply`) with `b ↦ b = true : Bool → Prop` (continuous
   -- since `Bool` is discrete).
-  have h1 : Continuous (fun r : A × A → Bool => r p) := continuous_apply p
-  have h2 : Continuous (fun b : Bool => boolToProp b) := by
+  have h1 : Continuous (fun r : A × A → Bool ↦ r p) := continuous_apply p
+  have h2 : Continuous (fun b : Bool ↦ boolToProp b) := by
     exact continuous_of_discreteTopology
   exact h2.comp h1
 
@@ -655,19 +655,19 @@ def vleOfBool (r : A × A → Bool) (f s : A) : Prop :=
 
 omit [CommRing A] in
 lemma vleOfBool_iff_vleOf_decide (r : A × A → Bool) (f s : A) :
-    vleOfBool r f s ↔ vleOf (fun p => r p = true) f s := by
+    vleOfBool r f s ↔ vleOf (fun p ↦ r p = true) f s := by
   simp only [vleOfBool, vleOf, Bool.not_eq_true]
 
 /-- A `r : A × A → Bool` is a **Bool valuation characteristic** iff the Prop-valued
 function `fun p => r p = true` is a valuation characteristic in the sense of
 `IsValuationChar`. -/
 def IsValuationCharBool (r : A × A → Bool) : Prop :=
-  IsValuationChar (fun p => r p = true)
+  IsValuationChar (fun p ↦ r p = true)
 
 omit [CommRing A] in
 /-- Coordinate-at-a-point evaluation is continuous on `A × A → Bool`. -/
 lemma continuous_coord_bool (p : A × A) :
-    Continuous (fun r : A × A → Bool => r p) := continuous_apply p
+    Continuous (fun r : A × A → Bool ↦ r p) := continuous_apply p
 
 omit [CommRing A] in
 /-- Every singleton in the discrete `Bool` is open; hence `{r | r p = b}` is
@@ -741,7 +741,7 @@ lemma isClosed_vle_total_bool :
   rw [show {r : A × A → Bool | ∀ f s : A, vleOfBool r f s ∨ vleOfBool r s f} =
       ⋂ (f : A), ⋂ (s : A), {r | vleOfBool r f s ∨ vleOfBool r s f} by
     ext r; simp]
-  exact isClosed_iInter fun f => isClosed_iInter fun s =>
+  exact isClosed_iInter fun f ↦ isClosed_iInter fun s ↦
     (isClosed_vleOfBool f s).union (isClosed_vleOfBool s f)
 
 omit [CommRing A] in
@@ -756,7 +756,7 @@ lemma isClosed_vle_trans_bool :
       ⋂ (x : A), ⋂ (y : A), ⋂ (z : A),
         {r | vleOfBool r x y → vleOfBool r y z → vleOfBool r x z} by
     ext r; simp]
-  refine isClosed_iInter fun x => isClosed_iInter fun y => isClosed_iInter fun z => ?_
+  refine isClosed_iInter fun x ↦ isClosed_iInter fun y ↦ isClosed_iInter fun z ↦ ?_
   have rewriteEq :
       {r : A × A → Bool |
         vleOfBool r x y → vleOfBool r y z → vleOfBool r x z} =
@@ -787,7 +787,7 @@ lemma isClosed_vle_add_bool :
       ⋂ (x : A), ⋂ (y : A), ⋂ (z : A),
         {r | vleOfBool r x z → vleOfBool r y z → vleOfBool r (x + y) z} by
     ext r; simp]
-  refine isClosed_iInter fun x => isClosed_iInter fun y => isClosed_iInter fun z => ?_
+  refine isClosed_iInter fun x ↦ isClosed_iInter fun y ↦ isClosed_iInter fun z ↦ ?_
   have rewriteEq :
       {r : A × A → Bool |
         vleOfBool r x z → vleOfBool r y z → vleOfBool r (x + y) z} =
@@ -822,7 +822,7 @@ lemma isClosed_mul_vle_mul_left_bool :
       intro x y z hxy; exact h x y hxy z
     · intro h x y hxy z; simp only [Set.mem_iInter, Set.mem_setOf_eq] at h
       exact h x y z hxy]
-  refine isClosed_iInter fun x => isClosed_iInter fun y => isClosed_iInter fun z => ?_
+  refine isClosed_iInter fun x ↦ isClosed_iInter fun y ↦ isClosed_iInter fun z ↦ ?_
   have rewriteEq :
       {r : A × A → Bool |
         vleOfBool r x y → vleOfBool r (x * z) (y * z)} =
@@ -848,7 +848,7 @@ lemma isClosed_vle_mul_cancel_bool :
       ⋂ (x : A), ⋂ (y : A), ⋂ (z : A),
         {r | ¬ vleOfBool r z 0 → vleOfBool r (x * z) (y * z) → vleOfBool r x y} by
     ext r; simp]
-  refine isClosed_iInter fun x => isClosed_iInter fun y => isClosed_iInter fun z => ?_
+  refine isClosed_iInter fun x ↦ isClosed_iInter fun y ↦ isClosed_iInter fun z ↦ ?_
   have rewriteEq :
       {r : A × A → Bool |
         ¬ vleOfBool r z 0 → vleOfBool r (x * z) (y * z) → vleOfBool r x y} =
@@ -905,7 +905,7 @@ lemma isClosed_apply_iff_bool :
       ⋂ (f : A), ⋂ (s : A),
         {r | (r (f, s) = true) ↔ vleOfBool r f s ∧ ¬ vleOfBool r s 0} by
     ext r; simp]
-  refine isClosed_iInter fun f => isClosed_iInter fun s => ?_
+  refine isClosed_iInter fun f ↦ isClosed_iInter fun s ↦ ?_
   -- `P ↔ Q` = `(¬P ∨ Q) ∧ (P ∨ ¬Q)`.
   have rewriteEq :
       {r : A × A → Bool | (r (f, s) = true) ↔ vleOfBool r f s ∧ ¬ vleOfBool r s 0} =
@@ -960,7 +960,7 @@ lemma isValuationCharBool_iff (r : A × A → Bool) :
       (¬ vleOfBool r 1 0) ∧
       (∀ f s : A, (r (f, s) = true) ↔ vleOfBool r f s ∧ ¬ vleOfBool r s 0) := by
   simp only [IsValuationCharBool, vleOfBool_iff_vleOf_decide]
-  refine ⟨fun hr => ?_, fun hr => ?_⟩
+  refine ⟨fun hr ↦ ?_, fun hr ↦ ?_⟩
   · refine ⟨hr.vle_total, @hr.vle_trans, @hr.vle_add, @hr.mul_vle_mul_left,
       @hr.vle_mul_cancel, hr.not_vle_one_zero, ?_⟩
     intro f s
@@ -1017,9 +1017,9 @@ theorem range_ιSpv_bool :
     -- ιSpv_bool v is a Bool valuation characteristic: transport IsValuationChar via the
     -- factorisation ιSpv v = fun p => ιSpv_bool v p = true.
     change IsValuationCharBool (ιSpv_bool v)
-    change IsValuationChar (fun p => ιSpv_bool v p = true)
+    change IsValuationChar (fun p ↦ ιSpv_bool v p = true)
     -- Convert ιSpv v to `fun p => ιSpv_bool v p = true` pointwise.
-    have hconv : (fun p => ιSpv_bool v p = true) = ιSpv v := by
+    have hconv : (fun p ↦ ιSpv_bool v p = true) = ιSpv v := by
       funext p
       have := ιSpv_eq_boolToProp_comp_ιSpv_bool v
       rw [this]; rfl
@@ -1028,10 +1028,10 @@ theorem range_ιSpv_bool :
   · intro hr
     -- From IsValuationChar (fun p => r p = true), construct v = hr'.toSpv where
     -- hr' : IsValuationChar (fun p => r p = true). Then ιSpv_bool v = r.
-    have hr' : IsValuationChar (fun p => r p = true) := hr
+    have hr' : IsValuationChar (fun p ↦ r p = true) := hr
     refine ⟨hr'.toSpv, ?_⟩
     -- Show ιSpv_bool hr'.toSpv = r.
-    have key : ιSpv hr'.toSpv = fun p => r p = true := ιSpv_toSpv hr'
+    have key : ιSpv hr'.toSpv = fun p ↦ r p = true := ιSpv_toSpv hr'
     funext p
     show ιSpv_bool hr'.toSpv p = r p
     simp only [ιSpv_bool]
@@ -1063,17 +1063,17 @@ lemma isCompact_range_ιSpv_bool :
 `boolToProp` map. -/
 lemma range_ιSpv_eq_image_boolToProp :
     Set.range (ιSpv : Spv A → (A × A → Prop)) =
-      (fun r : A × A → Bool => fun p => boolToProp (r p)) ''
+      (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
         Set.range (ιSpv_bool : Spv A → (A × A → Bool)) := by
   ext s
   constructor
   · rintro ⟨v, rfl⟩
     refine ⟨ιSpv_bool v, ⟨v, rfl⟩, ?_⟩
-    change (fun p => boolToProp (ιSpv_bool v p)) = _
+    change (fun p ↦ boolToProp (ιSpv_bool v p)) = _
     exact (ιSpv_eq_boolToProp_comp_ιSpv_bool v).symm
   · rintro ⟨r, ⟨v, rfl⟩, rfl⟩
     refine ⟨v, ?_⟩
-    change _ = (fun p => boolToProp (ιSpv_bool v p))
+    change _ = (fun p ↦ boolToProp (ιSpv_bool v p))
     exact ιSpv_eq_boolToProp_comp_ιSpv_bool v
 
 /-- `Set.range ιSpv` is compact in the Sierpinski product topology: it is the

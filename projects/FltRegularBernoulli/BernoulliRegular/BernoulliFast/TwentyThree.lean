@@ -36,7 +36,7 @@ theorem not_dvd_bernoulli_twentythree :
 /-- Regularity of `23` from the certified Bernoulli checks. -/
 theorem isRegularPrime_twentythree :
     IsRegularPrime 23 :=
-  (KummerCriterion (p := 23) (by norm_num)).2 not_dvd_bernoulli_twentythree
+  (kummer_criterion (p := 23) (by norm_num)).2 not_dvd_bernoulli_twentythree
 
 /-- FLT for exponent `23`. -/
 theorem fermatLastTheoremFor_twentythree :

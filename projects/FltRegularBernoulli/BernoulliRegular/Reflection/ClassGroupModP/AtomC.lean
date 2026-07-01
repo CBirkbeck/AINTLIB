@@ -146,7 +146,7 @@ eigenspace component is trivially trivial (since `Cl(K)/p` is trivial). -/
 theorem eigenspaceComponentNontrivial_iff_false_of_subsingleton
     [Subsingleton (ClassGroup (𝓞 K))] (i : ℕ) :
     eigenspaceComponentNontrivial p K i ↔ False := by
-  refine ⟨?_, fun h => h.elim⟩
+  refine ⟨?_, fun h ↦ h.elim⟩
   rintro ⟨v, _, hv_ne⟩
   apply hv_ne
   -- Cl(K)/p is a subsingleton because Cl(K) is.
@@ -188,9 +188,9 @@ def ClassGroupComponentIdentification.ofRegular_subsingleton
     [Subsingleton (ClassGroup (𝓞 K))] :
     ClassGroupComponentIdentification p K :=
   ClassGroupComponentIdentification.ofEigenspace p K
-    (h_reflect := fun _ h_comp => absurd h_comp
+    (h_reflect := fun _ h_comp ↦ absurd h_comp
       ((eigenspaceComponentNontrivial_iff_false_of_subsingleton p K _).mp))
-    (h_plus := fun h_dvd => by
+    (h_plus := fun h_dvd ↦ by
       -- (p ∣ hPlus K) is false since hPlus K | h K = 1.
       exfalso
       have hp_prime : p.Prime := Fact.out
@@ -199,7 +199,7 @@ def ClassGroupComponentIdentification.ofRegular_subsingleton
         have hh := hPlus_dvd_h p hp_odd K
         unfold BernoulliRegular.h at hh
         have h_card : Fintype.card (ClassGroup (𝓞 K)) = 1 :=
-          Fintype.card_eq_one_iff.mpr ⟨default, fun _ => Subsingleton.elim _ _⟩
+          Fintype.card_eq_one_iff.mpr ⟨default, fun _ ↦ Subsingleton.elim _ _⟩
         rw [h_card] at hh
         exact Nat.eq_one_of_dvd_one hh
       rw [h_hPlus_eq_one] at h_dvd
@@ -207,7 +207,7 @@ def ClassGroupComponentIdentification.ofRegular_subsingleton
         intro h
         have : p ≤ 1 := Nat.le_of_dvd Nat.one_pos h
         omega))
-    (h_minus := fun ⟨j, _, _, h_comp⟩ => absurd h_comp
+    (h_minus := fun ⟨j, _, _, h_comp⟩ ↦ absurd h_comp
       ((eigenspaceComponentNontrivial_iff_false_of_subsingleton p K j).mp))
 
 /-- **Regular-prime SpiegelungssatzData**: extract from the regular-prime
@@ -247,7 +247,7 @@ theorem subsingleton_classGroupModP_of_coprime [Fintype (ClassGroup (𝓞 K))]
     change (powCoprime h_card_coprime).symm y ^ p = y
     have := (powCoprime h_card_coprime).right_inv y
     simpa [powCoprime] using this
-  refine ⟨fun x y => ?_⟩
+  refine ⟨fun x y ↦ ?_⟩
   obtain ⟨a, rfl⟩ := QuotientGroup.mk_surjective x
   obtain ⟨b, rfl⟩ := QuotientGroup.mk_surjective y
   refine QuotientGroup.eq.mpr ?_
@@ -261,7 +261,7 @@ theorem eigenspaceComponentNontrivial_iff_false_of_coprime
     [Fintype (ClassGroup (𝓞 K))]
     (hreg : p.Coprime (Fintype.card (ClassGroup (𝓞 K)))) (i : ℕ) :
     eigenspaceComponentNontrivial p K i ↔ False := by
-  refine ⟨?_, fun h => h.elim⟩
+  refine ⟨?_, fun h ↦ h.elim⟩
   rintro ⟨v, _, hv_ne⟩
   apply hv_ne
   haveI : Subsingleton (ClassGroupModP K p) :=
@@ -278,9 +278,9 @@ def ClassGroupComponentIdentification.ofRegular
     (hreg : p.Coprime (Fintype.card (ClassGroup (𝓞 K)))) :
     ClassGroupComponentIdentification p K :=
   ClassGroupComponentIdentification.ofEigenspace p K
-    (h_reflect := fun _ h_comp => absurd h_comp
+    (h_reflect := fun _ h_comp ↦ absurd h_comp
       ((eigenspaceComponentNontrivial_iff_false_of_coprime p K hreg _).mp))
-    (h_plus := fun h_dvd => by
+    (h_plus := fun h_dvd ↦ by
       exfalso
       have hp_prime : p.Prime := Fact.out
       have h_not_dvd_h : ¬ (p : ℕ) ∣ Fintype.card (ClassGroup (𝓞 K)) :=
@@ -290,7 +290,7 @@ def ClassGroupComponentIdentification.ofRegular
         unfold BernoulliRegular.h at hh
         convert hh
       exact h_not_dvd_h (h_dvd.trans hdvd))
-    (h_minus := fun ⟨j, _, _, h_comp⟩ => absurd h_comp
+    (h_minus := fun ⟨j, _, _, h_comp⟩ ↦ absurd h_comp
       ((eigenspaceComponentNontrivial_iff_false_of_coprime p K hreg j).mp))
 
 /-- **T044b for regular primes via Atom C**: composes the bridge with
@@ -348,14 +348,14 @@ def ClassGroupComponentIdentification.ofEigenspace_subsingleton
     [Subsingleton (ClassGroup (𝓞 K))] :
     ClassGroupComponentIdentification p K :=
   ClassGroupComponentIdentification.ofEigenspace p K
-    (h_reflect := fun _ h =>
+    (h_reflect := fun _ h ↦
       ((eigenspaceComponentNontrivial_iff_false_of_subsingleton p K _).mp h).elim)
-    (h_plus := fun h_plus => by
+    (h_plus := fun h_plus ↦ by
       exfalso
       have hone : hPlus K = 1 := hPlus_eq_one_of_subsingleton p hp_odd K
       rw [hone] at h_plus
       exact (Nat.Prime.one_lt hp.out).ne' (Nat.dvd_one.mp h_plus))
-    (h_minus := fun h_odd => by
+    (h_minus := fun h_odd ↦ by
       exfalso
       obtain ⟨_, _, _, h⟩ := h_odd
       exact (eigenspaceComponentNontrivial_iff_false_of_subsingleton p K _).mp h)

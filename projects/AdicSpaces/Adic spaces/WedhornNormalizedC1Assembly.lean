@@ -59,7 +59,7 @@ theorem rationalOpen_insert_base_insertDenom_eq
   show rationalOpen (insert f (insert C.base.s C.base.T)) C.base.s =
     rationalOpen (insert f C.base.T) C.base.s
   rw [Finset.insert_comm]
-  exact rationalOpen_insert_s (insert f C.base.T) C.base.s
+  exact rationalOpen_insert_s _ _
 
 /-- **C1-supplier normalization wrapper** — Theorem A on the unnormalized
 side. Takes only `C : RationalCovering A` and a C1 supplier on the
@@ -106,29 +106,21 @@ theorem exists_per_D_finset_via_normalized_C1_supplier
   refine ⟨mk_S_D, ?_, ?_⟩
   · -- Containment.
     intro D hD f hf
-    have h_unfold : mk_S_D D = mk_S_D' D.insertDenom := by simp [mk_S_D, hD]
-    rw [h_unfold] at hf
+    rw [show mk_S_D D = mk_S_D' D.insertDenom from by simp [mk_S_D, hD]] at hf
     have hD' : D.insertDenom ∈ C.insertDenom.covers :=
       Finset.mem_image.mpr ⟨D, hD, rfl⟩
-    have hContain :
-        rationalOpen (insert f C.insertDenom.base.T) C.insertDenom.base.s ⊆
-        rationalOpen D.insertDenom.T D.insertDenom.s :=
-      h_in_D' D.insertDenom hD' f hf
-    rw [rationalOpen_insert_base_insertDenom_eq,
+    have hContain := h_in_D' D.insertDenom hD' f hf
+    rwa [rationalOpen_insert_base_insertDenom_eq,
       RationalLocData.rationalOpen_insertDenom D] at hContain
-    exact hContain
   · -- Coverage.
     intro D hD v hv
-    have h_unfold : mk_S_D D = mk_S_D' D.insertDenom := by simp [mk_S_D, hD]
     have hD' : D.insertDenom ∈ C.insertDenom.covers :=
       Finset.mem_image.mpr ⟨D, hD, rfl⟩
     have hv' : v ∈ rationalOpen D.insertDenom.T D.insertDenom.s := by
-      rw [RationalLocData.rationalOpen_insertDenom D]; exact hv
+      rwa [RationalLocData.rationalOpen_insertDenom D]
     obtain ⟨f, hf, hv_f⟩ := h_cover_D' D.insertDenom hD' v hv'
-    rw [h_unfold]
-    refine ⟨f, hf, ?_⟩
-    rw [← rationalOpen_insert_base_insertDenom_eq C f]
-    exact hv_f
+    rw [show mk_S_D D = mk_S_D' D.insertDenom from by simp [mk_S_D, hD]]
+    exact ⟨f, hf, by rwa [← rationalOpen_insert_base_insertDenom_eq C f]⟩
 
 /-- **`hZavyalov_per_E` via normalized C1 supplier under explicit span
 extractor** — composes the normalized per-D wrapper with

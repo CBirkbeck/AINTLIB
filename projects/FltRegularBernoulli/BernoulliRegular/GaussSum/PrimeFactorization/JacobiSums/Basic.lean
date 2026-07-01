@@ -18,7 +18,7 @@ distinguished-prime exponent along generator powers.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 open scoped Pointwise
 
 namespace BernoulliRegular
@@ -40,11 +40,9 @@ local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
     change gaussSumLift p L (1 : DirichletCharacter ℂ p) = (-1 : L)
     apply (stickelbergerEmbedding p L).injective
     simp [stickelbergerEmbedding_gaussSumLift, gaussSum_one_stdAddChar]
-  rw [hτ]
-  have htop : Ideal.span ({(-1 : 𝓞 L)} : Set (𝓞 L)) = ⊤ := by
-    rw [Ideal.span_singleton_eq_top]
-    exact isUnit_one.neg
-  rw [htop, ← Ideal.one_eq_top, UniqueFactorizationMonoid.normalizedFactors_one]
+  have htop : Ideal.span ({(-1 : 𝓞 L)} : Set (𝓞 L)) = ⊤ :=
+    Ideal.span_singleton_eq_top.mpr isUnit_one.neg
+  rw [hτ, htop, ← Ideal.one_eq_top, UniqueFactorizationMonoid.normalizedFactors_one]
   simp
 
 lemma stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
@@ -53,11 +51,11 @@ lemma stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
   intro h
   have hpow :
       stickelbergerComplexCharacterRoot (p := p) ^ (j : ℕ) = 1 := by
-    have hEval := congrArg
-      (fun χ : DirichletCharacter ℂ p =>
-        χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) h
     simpa [MulChar.pow_apply_coe,
-      stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using hEval
+      stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using
+      congrArg
+        (fun χ : DirichletCharacter ℂ p =>
+          χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) h
   have hjpos : 0 < (j : ℕ) := Fin.pos_iff_ne_zero.mpr hj
   exact
     (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).pow_ne_one_of_pos_of_lt
@@ -104,9 +102,7 @@ lemma stickelbergerEmbedding_jacobiSumLift
     · subst hx1
       simpa [term, hx0] using
         (MulChar.map_nonunit ψ (show ¬ IsUnit (0 : ZMod p) by simp)).symm
-    · unfold term
-      simp [hx0, hx1]
-      simp [f, stickelbergerEmbedding_gaussSumLiftCharacterValue]
+    · simp [term, hx0, hx1, f, stickelbergerEmbedding_gaussSumLiftCharacterValue]
 
 lemma gaussSumLiftCharacterValue_mem_characterSubfield
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
@@ -172,7 +168,7 @@ lemma algebraMap_jacobiSumCharacterSubfieldInteger
     (χ ψ : DirichletCharacter ℂ p) :
     algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L)
         (jacobiSumCharacterSubfieldInteger (p := p) (L := L) χ ψ) =
-      jacobiSumLift (p := p) (L := L) χ ψ := by
+      jacobiSumLift (p := p) (L := L) χ ψ :=
   rfl
 
 lemma gaussSumIntegers_mul_eq_jacobiSumLift_mul_gaussSumIntegers
@@ -208,12 +204,9 @@ lemma jacobiSumLift_ne_zero
     {χ ψ : DirichletCharacter ℂ p} (hχψ : χ * ψ ≠ 1) :
     jacobiSumLift (p := p) (L := L) χ ψ ≠ 0 := by
   intro hzero
-  have hcomp :
-      stickelbergerEmbedding p L
-          (((jacobiSumLift (p := p) (L := L) χ ψ : 𝓞 L) : L)) = 0 := by
-    simp [hzero]
-  rw [stickelbergerEmbedding_jacobiSumLift] at hcomp
-  exact (jacobiSum_ne_zero_stdAddChar (p := p) hχψ) hcomp
+  refine jacobiSum_ne_zero_stdAddChar (p := p) hχψ ?_
+  rw [← stickelbergerEmbedding_jacobiSumLift (p := p) (L := L) χ ψ]
+  simp [hzero]
 
 lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
     Ideal.ramificationIdx
@@ -262,17 +255,20 @@ lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
         (n := p * (p - 1)) (K := L) (p := p) (k := 0) (m := p - 1) (by simp) hm)
   have hmul :
       Ideal.ramificationIdxIn Pchar (𝓞 L) = p - 1 := by
-    have h := Ideal.ramificationIdxIn_mul_ramificationIdxIn'
+    have h := Ideal.ramificationIdxIn_mul_ramificationIdxIn
       (A := ℤ)
       (B := 𝓞 (characterSubfield (L := L) (p := p)))
       (C := 𝓞 L)
       (p := 𝔭) (P := Pchar)
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
       (GAC := Gal(L / ℚ)) (GBC := ↥GBC)
-    rw [hramChar, one_mul, hramTotal] at h
-    exact h
+    rwa [hramChar, one_mul, hramTotal] at h
   haveI : (distinguishedPrimeAboveP p L).LiesOver Pchar := by
     rw [Ideal.liesOver_iff]
+  have hPchar_ne : Pchar ≠ ⊥ :=
+    Ring.ne_bot_of_isMaximal_of_not_isField inferInstance
+      (RingOfIntegers.not_isField (characterSubfield (L := L) (p := p)))
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' Pchar _ hPchar_ne]
   exact (Ideal.ramificationIdxIn_eq_ramificationIdx
       (p := Pchar) (P := distinguishedPrimeAboveP p L) (G := ↥GBC)).symm.trans hmul
 
@@ -287,9 +283,8 @@ lemma jacobiSumLift_distinguishedPrimeExponent_dvd_pred
   have hxchar_ne : xchar ≠ 0 := by
     intro hx
     apply jacobiSumLift_ne_zero (p := p) (L := L) hχψ
-    have hmap := congrArg
-      (algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L)) hx
-    simpa [xchar, algebraMap_jacobiSumCharacterSubfieldInteger] using hmap
+    simpa [xchar, algebraMap_jacobiSumCharacterSubfieldInteger] using
+      congrArg (algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L)) hx
   have hIchar_ne :
       Ideal.span ({xchar} : Set (𝓞 (characterSubfield (L := L) (p := p)))) ≠ ⊥ :=
     Ideal.span_singleton_eq_bot.not.mpr hxchar_ne

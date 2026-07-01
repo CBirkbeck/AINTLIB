@@ -121,28 +121,20 @@ theorem exists_per_D_finset_via_normalized_C1Strong_supplier
   refine ⟨mk_S_D, ?_, ?_⟩
   · -- Containment.
     intro D hD f hf
-    have h_unfold : mk_S_D D = mk_S_D' D.insertDenom := by simp [mk_S_D, hD]
-    rw [h_unfold] at hf
+    rw [show mk_S_D D = mk_S_D' D.insertDenom from by simp [mk_S_D, hD]] at hf
     have hD' : D.insertDenom ∈ C.insertDenom.covers :=
       Finset.mem_image.mpr ⟨D, hD, rfl⟩
-    have hContain :
-        rationalOpen (insert f C.insertDenom.base.T) C.insertDenom.base.s ⊆
-        rationalOpen D.insertDenom.T D.insertDenom.s :=
-      h_in_D' D.insertDenom hD' f hf
-    rw [rationalOpen_insert_base_insertDenom_eq,
-      RationalLocData.rationalOpen_insertDenom D] at hContain
-    exact hContain
+    rw [← rationalOpen_insert_base_insertDenom_eq,
+      ← RationalLocData.rationalOpen_insertDenom D]
+    exact h_in_D' D.insertDenom hD' f hf
   · -- Strengthened coverage (with `¬ v.vle f 0` clause).
     intro D hD v hv
-    have h_unfold : mk_S_D D = mk_S_D' D.insertDenom := by simp [mk_S_D, hD]
     have hD' : D.insertDenom ∈ C.insertDenom.covers :=
       Finset.mem_image.mpr ⟨D, hD, rfl⟩
     have hv' : v ∈ rationalOpen D.insertDenom.T D.insertDenom.s := by
-      rw [RationalLocData.rationalOpen_insertDenom D]; exact hv
+      rwa [RationalLocData.rationalOpen_insertDenom D]
     obtain ⟨f, hf, hv_f, hv_nonzero⟩ := h_cover_D' D.insertDenom hD' v hv'
-    rw [h_unfold]
-    refine ⟨f, hf, ?_, hv_nonzero⟩
-    rw [← rationalOpen_insert_base_insertDenom_eq C f]
-    exact hv_f
+    rw [show mk_S_D D = mk_S_D' D.insertDenom from by simp [mk_S_D, hD]]
+    exact ⟨f, hf, (rationalOpen_insert_base_insertDenom_eq C f).symm ▸ hv_f, hv_nonzero⟩
 
 end ValuationSpectrum

@@ -45,7 +45,7 @@ noncomputable def _root_.PairOfDefinition.quotientHom (P : PairOfDefinition R)
     (I : Ideal R) : P.A₀ →+* (P.A₀.map (Ideal.Quotient.mk I : R →+* R ⧸ I)) :=
   RingHom.codRestrict ((Ideal.Quotient.mk I).comp P.A₀.subtype)
     (P.A₀.map (Ideal.Quotient.mk I : R →+* R ⧸ I))
-    (fun x => ⟨x.1, x.2, rfl⟩)
+    (fun x ↦ ⟨x.1, x.2, rfl⟩)
 
 omit [IsTopologicalRing R] in
 /-- `quotientHom` is surjective: it is the corestriction of `q ∘ subtype` onto its range. -/

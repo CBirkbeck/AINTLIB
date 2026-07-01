@@ -123,9 +123,8 @@ lemma exists_primitive_pPow_factorisation {R : Type*} [CommMonoidWithZero R]
     obtain ⟨m, _, hm2⟩ := (Nat.dvd_prime_pow hp.out).mp ψ.conductor_dvd_level
     exact ⟨m, (Nat.pow_dvd_pow_iff_le_right hp.out.one_lt).mp
       (hm2 ▸ ψ.conductor_dvd_level), hm2⟩
-  have hft : DirichletCharacter.FactorsThrough ψ (p ^ m) := by
-    rw [← hcond]
-    exact ψ.factorsThrough_conductor
+  have hft : DirichletCharacter.FactorsThrough ψ (p ^ m) :=
+    hcond ▸ ψ.factorsThrough_conductor
   obtain ⟨hdvd, ψ₀, hψeq⟩ := hft
   refine ⟨m, hmle, ψ₀, ?_, hψeq⟩
   refine le_antisymm
@@ -162,18 +161,15 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
       = (1 - (θ' ((p : ℕ) : ZMod (D * p ^ m)) : K) * (p : K) ^ (k - 1))
         * LvalNeg (toFieldChar θ') (k - 1) := by
   classical
-  obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
-  -- the primitive `p^m`-th root from the ambient `p^{max n 1}`-th root
+  obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by lia⟩
   have hε' : IsPrimitiveRoot (ε ^ p ^ (max n 1 - m)) (p ^ m) := by
     have h := hε.pow_of_dvd (pow_ne_zero _ hp.out.ne_zero)
       (pow_dvd_pow p (Nat.sub_le (max n 1) m))
     rwa [Nat.pow_div (Nat.sub_le (max n 1) m) hp.out.pos,
       Nat.sub_sub_self hmle] at h
-  -- the twisted moments of `ζ_η` at the primitive core
   have hmom := zetaEta_twisted_moments hD1 hη hζ hD hχ'prim hε' hθ'
     (Nat.succ_pos k')
   simp only [Nat.succ_sub_one] at hmom ⊢
-  -- the character-level key: `χ = χ'·ω^{k'+1}` at level `p^{max n 1}`
   have hkey : DirichletCharacter.changeLevel (pow_dvd_pow p (le_max_left n 1)) χ
       = DirichletCharacter.changeLevel (pow_dvd_pow p hmle) χ'
         * (DirichletCharacter.changeLevel
@@ -181,7 +177,6 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
             (teichmullerCharR p K)) ^ (k' + 1) := by
     rw [← hχ', twistedPChar, mul_assoc, ← mul_pow, inv_mul_cancel, one_pow,
       mul_one]
-  -- pointwise integrand identity on the units
   have hpt : ∀ u : ℤ_[p]ˣ,
       invUnitsCM p K u * (χ.toContinuousMapZp ((u : ℤ_[p]))
           * anglePowCM p K (((k' + 1 : ℕ) : ℤ_[p])) u)
@@ -189,7 +184,6 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
     intro u
     have hu : IsUnit (PadicInt.toZModPow (max n 1) ((u : ℤ_[p]))) :=
       u.isUnit.map _
-    -- character part: `χ(x) = χ'(x)·ω(x)^{k'+1}` at the unit `u`
     have hchar := congrArg (fun ψ : DirichletCharacter (integerRing K)
         (p ^ max n 1) => ψ (PadicInt.toZModPow (max n 1) ((u : ℤ_[p])))) hkey
     simp only [MulChar.coeToFun_mul, Pi.mul_apply] at hchar
@@ -207,17 +201,16 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
       DirichletCharacter.changeLevel_eq_cast_of_dvd (teichmullerCharR p K)
         _ hu.unit, hu.unit_spec] at hchar
     rw [show ZMod.cast (PadicInt.toZModPow (max n 1) ((u : ℤ_[p])))
-        = PadicInt.toZMod ((u : ℤ_[p])) from by
+        = PadicInt.toZMod ((u : ℤ_[p])) by
         rw [← ZMod.castHom_apply (h := dvd_pow_self p
             (Nat.one_le_iff_ne_zero.mp (le_max_right n 1))),
           PadicInt.castHom_toZModPow_eq_toZMod p
             (Nat.one_le_iff_ne_zero.mp (le_max_right n 1))]] at hchar
     rw [show teichmullerCharR p K (PadicInt.toZMod ((u : ℤ_[p])))
         = algebraMap ℤ_[p] (integerRing K)
-            (PadicInt.teichmullerFun p ((u : ℤ_[p]))) from by
+            (PadicInt.teichmullerFun p ((u : ℤ_[p]))) by
         rw [teichmullerCharR, MulChar.ringHomComp_apply,
           PadicInt.teichmullerChar_toZMod]] at hchar
-    -- `ℤ_p`-level collapse: `x⁻¹·ω(x)^{k'+1}·⟨x⟩^{k'+1} = x^{k'}`
     have hZp : PadicMeasure.invCM p u
           * ((PadicInt.teichmullerFun p ((u : ℤ_[p]))) ^ (k' + 1)
             * ((PadicInt.angleUnit p u : ℤ_[p])) ^ (k' + 1))
@@ -228,18 +221,15 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
         rw [PadicInt.teichmuller_mul_angleUnit, pow_succ, mul_comm (u⁻¹),
           mul_assoc, mul_inv_cancel, mul_one]
       have hval := congrArg Units.val hunits
-      rw [Units.val_mul, Units.val_pow_eq_pow_val, Units.val_mul, mul_pow,
+      rwa [Units.val_mul, Units.val_pow_eq_pow_val, Units.val_mul, mul_pow,
         Units.val_pow_eq_pow_val] at hval
-      exact hval
-    -- assemble over the structure map
     rw [show anglePowCM p K (((k' + 1 : ℕ) : ℤ_[p])) u
         = algebraMap ℤ_[p] (integerRing K)
-            (((PadicInt.angleUnit p u : ℤ_[p])) ^ (k' + 1)) from by
+            (((PadicInt.angleUnit p u : ℤ_[p])) ^ (k' + 1)) by
         rw [anglePowCM_apply, PadicInt.onePAdicPow_natCast],
       hchar, invUnitsCM_apply, powCM_apply,
       ← hZp, map_mul, map_mul, map_pow, map_pow]
     ring
-  -- the integrand identity, extended by zero
   have hfun : extendByZero p K
         (invUnitsCM p K * (χ.toContinuousMapZp.comp (PadicMeasure.unitsValCM p)
           * anglePowCM p K (((k' + 1 : ℕ) : ℤ_[p]))))
@@ -262,16 +252,12 @@ theorem Lp_interpolation {D : ℕ} [NeZero D] (hD1 : 1 < D)
           from dif_neg hx,
         ContinuousMap.mul_apply, charFnCM_apply,
         Set.indicator_of_notMem (by simpa using hx), zero_mul]
-  -- the Gauss unit is invertible in `K`
   have hG : (((gaussSum η⁻¹ (AddChar.zmodChar D hζ.pow_eq_one)
       : integerRing K) : K)) ≠ 0 := by
     have hu := gaussSum_isUnit_of_coprime hη hζ hD
-    have h0 : gaussSum η⁻¹ (AddChar.zmodChar D hζ.pow_eq_one)
-        ≠ (0 : integerRing K) := hu.ne_zero
-    exact fun h => h0 (Subtype.coe_injective (by simpa using h))
-  -- conclude
+    exact fun h => hu.ne_zero (Subtype.coe_injective (by simpa using h))
   rw [LpFunction, show (1 : ℤ_[p]) - ((1 : ℤ_[p]) - (((k' + 1 : ℕ) : ℤ_[p])))
-      = (((k' + 1 : ℕ) : ℤ_[p])) from by ring,
+      = (((k' + 1 : ℕ) : ℤ_[p])) by ring,
     zetaEtaCleared_apply, hfun,
     show muEtaCleared p K η hζ hD
         (charFnCM K ℤ_[p] (PadicMeasure.isClopen_units p)

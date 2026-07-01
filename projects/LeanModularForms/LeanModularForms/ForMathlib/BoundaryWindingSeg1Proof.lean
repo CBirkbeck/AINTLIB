@@ -113,9 +113,9 @@ theorem seg1_near_of_linDelta {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
 `z₀.im > √3/2`, the norm `‖z₀‖` exceeds 1. -/
 theorem norm_gt_one_of_re_sq_quarter {z₀ : ℂ} (hz_re_sq : z₀.re ^ 2 = 1/4)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) : 1 < ‖z₀‖ := by
-  nlinarith [Complex.normSq_eq_norm_sq z₀, norm_nonneg z₀,
-    Real.mul_self_sqrt (show (3 : ℝ) ≥ 0 by norm_num), hc_lo, Real.sqrt_nonneg 3,
-    Complex.normSq_apply z₀, hz_re_sq, sq_nonneg z₀.im]
+  nlinarith [Complex.normSq_eq_norm_sq z₀, norm_nonneg z₀, hc_lo, hz_re_sq,
+    Complex.normSq_apply z₀, Real.mul_self_sqrt (show (0 : ℝ) ≤ 3 by norm_num),
+    Real.sqrt_nonneg 3]
 
 /-- For `z₀` on seg1 with `z₀.im > √3/2`, the norm `‖z₀‖` exceeds 1. -/
 theorem norm_gt_one_of_seg1_interior {z₀ : ℂ} (hz_re : z₀.re = 1/2)
@@ -231,14 +231,14 @@ def smoothBoundaryData_seg1_of_ftcHyp {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
   δ := linDelta (seg1Speed H)
   threshold := seg1Threshold H z₀
   hthresh := seg1Threshold_pos hz_re hc_lo hc_hi
-  hδ_pos := fun _ hε _ => linDelta_pos (seg1Speed_pos hH) hε
-  hδ_small := fun ε _ hε_thr => by
+  hδ_pos := fun _ hε _ ↦ linDelta_pos (seg1Speed_pos hH) hε
+  hδ_small := fun ε _ hε_thr ↦ by
     have h_lin_lt_t₀ := linDelta_lt_t₀ hH (hε_thr.trans_le (min_le_right _ _))
     refine lt_min h_lin_lt_t₀ (h_lin_lt_t₀.trans ?_)
     linarith [seg1T₀_lt_one_fifth hH hc_lo]
-  h_far := fun _ _ hε_thr t ht hδt => by
+  h_far := fun _ _ hε_thr t ht hδt ↦ by
     rw [hγ t ht]; exact seg1_far_bound hH hz_re hc_lo hc_hi hε_thr ht hδt
-  h_near := fun ε _ hε_thr t ht => by
+  h_near := fun ε _ hε_thr t ht ↦ by
     have h_eps_arc : ε < ‖z₀‖ - 1 :=
       hε_thr.trans_le ((min_le_left _ _).trans (min_le_left _ _))
     have h_eps_width : ε < z₀.im - Real.sqrt 3 / 2 :=

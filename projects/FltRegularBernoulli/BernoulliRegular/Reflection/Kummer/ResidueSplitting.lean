@@ -34,7 +34,6 @@ theorem residue_X_pow_sub_C_splits_of_residue_isPow
     (X ^ p - C (Ideal.Quotient.mk q η) : (𝓞 K ⧸ q)[X]).Splits := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   haveI : NeZero q := ⟨hbot⟩
-  haveI hmax' : q.IsMaximal := hmax
   haveI : q.IsPrime := hmax.isPrime
   letI : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
   obtain ⟨y, hy⟩ := hpow

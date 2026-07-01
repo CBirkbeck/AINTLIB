@@ -814,7 +814,7 @@ theorem Ideal.exists_factor_of_mem_inter_singleton
         ∃ α : R, α ∈ I ^ (m - k₀) ∧ γ = s * α := by
   obtain ⟨k₀, hk₀⟩ := Ideal.exists_pow_inf_eq_pow_smul I
     (Ideal.span ({s} : Set R))
-  refine ⟨k₀, fun m hm γ hγ_pow hγ_s => ?_⟩
+  refine ⟨k₀, fun m hm γ hγ_pow hγ_s ↦ ?_⟩
   -- γ ∈ I^m • ⊤ ⊓ ⟨s⟩ via smul/mul translation.
   have h_smul_eq : I ^ m • (⊤ : Submodule R R) = I ^ m := by
     rw [Ideal.smul_eq_mul, Ideal.mul_top]
@@ -878,7 +878,7 @@ theorem Ideal.exists_factor_pow_of_mem_inter_pow_singleton
         ∃ α : R, α ∈ I ^ (m - k_E) ∧ γ = s ^ E * α := by
   obtain ⟨k_E, hk_E⟩ := Ideal.exists_pow_inf_eq_pow_smul I
     (Ideal.span ({s ^ E} : Set R))
-  refine ⟨k_E, fun m hm γ hγ_pow hγ_sE => ?_⟩
+  refine ⟨k_E, fun m hm γ hγ_pow hγ_sE ↦ ?_⟩
   -- γ ∈ I^m • ⊤ ⊓ ⟨s^E⟩ via smul/mul translation.
   have h_smul_eq : I ^ m • (⊤ : Submodule R R) = I ^ m := by
     rw [Ideal.smul_eq_mul, Ideal.mul_top]

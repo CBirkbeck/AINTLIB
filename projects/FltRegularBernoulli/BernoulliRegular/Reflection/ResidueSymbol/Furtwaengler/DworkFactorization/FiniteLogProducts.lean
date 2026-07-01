@@ -63,9 +63,8 @@ theorem finiteLog_powCoord (N n : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
   | succ n ih =>
       have hpow_mem : finiteLogPowCoord n x ∈ F.Q :=
         F.finiteLogPowCoord_mem_Q hx n
-      have hx_mem : x ∈ F.Q := hx
       have hprod_mem : finiteLogProductCoord (finiteLogPowCoord n x) x ∈ F.Q :=
-        F.finiteLogProductCoord_mem_Q hpow_mem hx_mem
+        F.finiteLogProductCoord_mem_Q hpow_mem hx
       have hsub :
           finiteLogPowCoord (Nat.succ n) x -
               finiteLogProductCoord (finiteLogPowCoord n x) x ∈ F.Q ^ (N + 1) := by
@@ -80,8 +79,8 @@ theorem finiteLog_powCoord (N n : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
             F.finiteLog_eq_of_sub_mem _ _ hsub
         _ =
           F.finiteLog N (finiteLogPowCoord n x) hpow_mem +
-            F.finiteLog N x hx_mem :=
-            F.finiteLog_add_add_mul N hpow_mem hx_mem
+            F.finiteLog N x hx :=
+            F.finiteLog_add_add_mul N hpow_mem hx
         _ = n • F.finiteLog N x hx + F.finiteLog N x hx := by
             rw [ih]
         _ = Nat.succ n • F.finiteLog N x hx := by

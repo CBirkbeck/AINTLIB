@@ -57,7 +57,7 @@ theorem splits_X_pow_sub_C_iff_isPow {p : ℕ} (hp : p.Prime) (hp' : p ≠ 2)
   obtain ⟨ζ, hζmem⟩ := hζ
   have hp_pos : 0 < p := hp.pos
   rw [mem_primitiveRoots hp_pos] at hζmem
-  refine ⟨fun h_split => ?_, fun ⟨β, hβ⟩ => X_pow_sub_C_splits_of_isPrimitiveRoot hζmem hβ⟩
+  refine ⟨fun h_split ↦ ?_, fun ⟨β, hβ⟩ ↦ X_pow_sub_C_splits_of_isPrimitiveRoot hζmem hβ⟩
   by_contra! h_no_pow
   have h_irred : Irreducible (X ^ p - C η) := by
     rw [show p = p ^ 1 from (pow_one p).symm]
@@ -79,7 +79,7 @@ theorem finrank_splittingField_eq_one_iff_isPow {p : ℕ} (hp : p.Prime) (hp' : 
   rw [← splits_X_pow_sub_C_iff_isPow hp hp' hζ η,
     Polynomial.IsSplittingField.splits_iff (SplittingField (X ^ p - C η)) (X ^ p - C η),
     ← Subalgebra.bot_eq_top_iff_finrank_eq_one]
-  exact ⟨fun h => h.symm, fun h => h.symm⟩
+  exact ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
 
 /-- If `η` is not a global `p`-th power, the Kummer splitting field of
 `X^p - η` has degree exactly `p`. -/

@@ -50,6 +50,7 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 
 instance : Fintype (SL(2, ℤ) ⧸ Gamma1 N) := Subgroup.fintypeQuotientOfFiniteIndex
 
+omit [NeZero N] in
 /-- For `γ ∈ Γ₁(N)`, the weight-`k` slash action on a `Γ₁(N)`-cusp form is trivial. -/
 theorem slash_Gamma1_eq
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -99,12 +100,14 @@ theorem integrableOn_petersson_slash
     |>.aestronglyMeasurable.restrict)
     C (ae_of_all _ fun τ ↦ hC (δ • τ))
 
+omit [NeZero N] in
 private theorem out_one_mem_Gamma1 :
     ((⟦1⟧ : SL(2, ℤ) ⧸ Gamma1 N)).out ∈ Gamma1 N := by
   have h := Quotient.exact ((⟦1⟧ : SL(2, ℤ) ⧸ Gamma1 N).out_eq)
   change (QuotientGroup.leftRel (Gamma1 N)).r _ _ at h
   rw [QuotientGroup.leftRel_apply] at h; simpa using h
 
+omit [NeZero N] in
 private theorem identity_coset_eq_pet
     (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
     peterssonInner k fd
@@ -131,6 +134,7 @@ private theorem measurableSet_fd' : MeasurableSet (fd : Set ℍ) :=
     (isClosed_le (continuous_abs.comp UpperHalfPlane.continuous_re)
       continuous_const)).measurableSet
 
+omit [NeZero N] in
 /-- Each summand of `petN f f` is a non-negative real number. -/
 theorem petN_summand_nonneg
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -177,7 +181,7 @@ theorem petN_add_right
     petN f (g₁ + g₂) = petN f g₁ + petN f g₂ := by
   simp only [petN, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun q _ ↦ ?_
-  rw [show ⇑(g₁ + g₂) ∣[k] q.out⁻¹ = (⇑g₁ ∣[k] q.out⁻¹) + (⇑g₂ ∣[k] q.out⁻¹) from by
+  rw [show ⇑(g₁ + g₂) ∣[k] q.out⁻¹ = (⇑g₁ ∣[k] q.out⁻¹) + (⇑g₂ ∣[k] q.out⁻¹) by
     rw [CuspForm.coe_add]; exact SlashAction.add_slash k _ _ _]
   exact peterssonInner_add_right k fd _ _ _
     (integrableOn_petersson_slash f g₁ (q.out)⁻¹)
@@ -337,7 +341,7 @@ theorem IsFundamentalDomain.smul_of_eq_conjAct
       ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, inv_inv] at this
   · rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
       ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, inv_inv,
-      show g⁻¹ * (g * (h₁ : G_outer) * g⁻¹) * g = (h₁ : G_outer) from by group]
+      show g⁻¹ * (g * (h₁ : G_outer) * g⁻¹) * g = (h₁ : G_outer) by group]
     exact h₁.2
   · show g • ((g⁻¹ * (h₂ : G_outer) * g) • x) = (h₂ : G_outer) • (g • x)
     simp only [smul_smul, mul_inv_cancel_left, mul_assoc]
@@ -359,7 +363,7 @@ theorem IsFundamentalDomain.aedisjoint_smul_of_mul_inv_mem
   rw [one_smul, show ((⟨g₁⁻¹ * g₂, h_mem⟩ : H) • D : Set α) = (g₁⁻¹ * g₂) • D from rfl]
     at h_core
   show μ ((g₁ • D) ∩ (g₂ • D)) = 0
-  rw [show (g₁ • D) ∩ (g₂ • D) = g₁ • (D ∩ ((g₁⁻¹ * g₂) • D)) from by
+  rw [show (g₁ • D) ∩ (g₂ • D) = g₁ • (D ∩ ((g₁⁻¹ * g₂) • D)) by
       rw [Set.smul_set_inter, ← mul_smul, mul_inv_cancel_left], measure_smul]
   exact h_core
 
@@ -551,18 +555,21 @@ noncomputable def slLeftMul (h : SL(2, ℤ)) :
       change (QuotientGroup.leftRel _).r _ _ at hab
       rw [QuotientGroup.leftRel_apply] at hab
       refine QuotientGroup.eq.mpr ?_
-      rw [show (h * a)⁻¹ * (h * b) = a⁻¹ * b from by group]; exact hab)
+      rw [show (h * a)⁻¹ * (h * b) = a⁻¹ * b by group]; exact hab)
 
+omit [NeZero N] in
 @[simp]
 theorem slLeftMul_mk (h g : SL(2, ℤ)) :
     slLeftMul h (QuotientGroup.mk g : SL(2, ℤ) ⧸ Gamma1 N) =
       QuotientGroup.mk (h * g) :=
   rfl
 
+omit [NeZero N] in
 theorem slLeftMul_one (q : SL(2, ℤ) ⧸ Gamma1 N) : slLeftMul 1 q = q := by
   induction q using QuotientGroup.induction_on with
   | _ g => simp
 
+omit [NeZero N] in
 theorem slLeftMul_comp (h₁ h₂ : SL(2, ℤ)) (q : SL(2, ℤ) ⧸ Gamma1 N) :
     slLeftMul h₁ (slLeftMul h₂ q) = slLeftMul (h₁ * h₂) q := by
   induction q using QuotientGroup.induction_on with
@@ -581,7 +588,7 @@ theorem slToPslQuot_slLeftMul (h : SL(2, ℤ)) (q : SL(2, ℤ) ⧸ Gamma1 N) :
           change (QuotientGroup.leftRel _).r _ _
           rw [QuotientGroup.leftRel_apply] at hab ⊢
           rw [show ((QuotientGroup.mk h : PSL(2, ℤ)) * a)⁻¹ *
-              ((QuotientGroup.mk h : PSL(2, ℤ)) * b) = a⁻¹ * b from by group]
+              ((QuotientGroup.mk h : PSL(2, ℤ)) * b) = a⁻¹ * b by group]
           exact hab)
         (slToPslQuot q) := by
   induction q using QuotientGroup.induction_on with
@@ -633,13 +640,13 @@ theorem slToPslQuot_fiber_card_uniform
       show slLeftMul h (slLeftMul h⁻¹ q) = q
       rw [slLeftMul_comp, mul_inv_cancel, slLeftMul_one])
   · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hq ⊢
-    rw [show q₂' = QuotientGroup.mk (QuotientGroup.mk g₂ : PSL(2, ℤ)) from by
+    rw [show q₂' = QuotientGroup.mk (QuotientGroup.mk g₂ : PSL(2, ℤ)) by
       rw [← slToPslQuot_mk]; exact hq₂.symm]
     refine slToPslQuot_slLeftMul_eq_of_eq h q g₁ g₂ ?_ ?_
     · rw [hq, ← slToPslQuot_mk]; exact hq₁.symm
     · rw [hh_def, ← QuotientGroup.mk_inv, ← QuotientGroup.mk_mul]
   · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hq ⊢
-    rw [show q₁' = QuotientGroup.mk (QuotientGroup.mk g₁ : PSL(2, ℤ)) from by
+    rw [show q₁' = QuotientGroup.mk (QuotientGroup.mk g₁ : PSL(2, ℤ)) by
       rw [← slToPslQuot_mk]; exact hq₁.symm]
     refine slToPslQuot_slLeftMul_eq_of_eq h⁻¹ q g₂ g₁ ?_ ?_
     · rw [hq, ← slToPslQuot_mk]; exact hq₂.symm
@@ -692,7 +699,7 @@ theorem setIntegral_SL_tile_eq_PSL_tile (h : ℍ → ℂ)
     rfl
   rw [show ((slToPslQuot q).out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ) =
       ((QuotientGroup.mk γ : PSL(2, ℤ))⁻¹ •
-        ((QuotientGroup.mk q.out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ))) from by
+        ((QuotientGroup.mk q.out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ))) by
       rw [h_eq_PSL, mul_inv_rev, mul_smul]]
   rw [PSL_inv_smul_set_eq_SL q.out fdo, PSL_inv_smul_set_eq_SL γ _]
   symm
@@ -741,13 +748,13 @@ noncomputable def Gamma1QuotEquivOfGamma0
     intro a b hab; change (QuotientGroup.leftRel _).r _ _
     change (QuotientGroup.leftRel _).r _ _ at hab
     rw [QuotientGroup.leftRel_apply] at hab ⊢
-    rw [show (a * γ⁻¹)⁻¹ * (b * γ⁻¹) = γ * (a⁻¹ * b) * γ⁻¹ from by group]
+    rw [show (a * γ⁻¹)⁻¹ * (b * γ⁻¹) = γ * (a⁻¹ * b) * γ⁻¹ by group]
     exact HeckeRing.GL2.Gamma0_normalizes_Gamma1 ⟨γ, hγ⟩ _ hab)
   invFun := Quotient.map (· * γ) (by
     intro a b hab; change (QuotientGroup.leftRel _).r _ _
     change (QuotientGroup.leftRel _).r _ _ at hab
     rw [QuotientGroup.leftRel_apply] at hab ⊢
-    rw [show (a * γ)⁻¹ * (b * γ) = γ⁻¹ * (a⁻¹ * b) * γ from by group]
+    rw [show (a * γ)⁻¹ * (b * γ) = γ⁻¹ * (a⁻¹ * b) * γ by group]
     convert HeckeRing.GL2.Gamma0_normalizes_Gamma1
       ⟨γ⁻¹, (Gamma0 N).inv_mem hγ⟩ _ hab using 1
     simp [mul_assoc])
@@ -756,11 +763,13 @@ noncomputable def Gamma1QuotEquivOfGamma0
   right_inv := fun q ↦ by induction q using Quotient.inductionOn with
     | h δ => simp [Quotient.map_mk, mul_assoc]
 
+omit [NeZero N] in
 @[simp]
 theorem Gamma1QuotEquivOfGamma0_mk (γ : SL(2, ℤ)) (hγ : γ ∈ Gamma0 N)
     (δ : SL(2, ℤ)) :
     Gamma1QuotEquivOfGamma0 γ hγ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ := rfl
 
+omit [NeZero N] in
 /-- The Petersson integrand `petersson k f g` is `Γ₁(N)`-invariant: for `γ ∈ Γ₁(N)`,
 `petersson k f g (γ • τ) = petersson k f g τ`. -/
 theorem petersson_Gamma1_invariant (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -769,6 +778,7 @@ theorem petersson_Gamma1_invariant (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) 
   rw [← petersson_slash_SL, slash_Gamma1_eq f γ hγ, slash_Gamma1_eq g γ hγ]
 
 
+omit [NeZero N] in
 /-- Each `petN` summand equals an integral over a translate of `fd`:
 `peterssonInner k fd (f∣q⁻¹) (g∣q⁻¹) = ∫_{q⁻¹ • fd} petersson k f g dμ`. -/
 theorem petN_summand_eq_setIntegral
@@ -781,6 +791,7 @@ theorem petN_summand_eq_setIntegral
     ← (measurePreserving_smul q.out⁻¹ μ_hyp).setIntegral_image_emb
       (measurableEmbedding_const_smul _)]
 
+omit [NeZero N] in
 /-- Integral over a `Γ₁(N)`-translate of any `SL₂(ℤ)`-coset tile equals the
 integral over the original tile, for `Γ₁(N)`-invariant integrands ([DS] Lemma
 5.5.1): for `η ∈ Γ₁(N)` and any set `S`, `∫_{η • S} h dμ = ∫_S h dμ` when
@@ -791,6 +802,7 @@ theorem setIntegral_Gamma1_smul_eq
     ∫ τ in η • S, h τ ∂μ_hyp = ∫ τ in S, h τ ∂μ_hyp := by
   rw [setIntegral_smul_eq h η S]; congr 1; ext τ; exact h_inv τ
 
+omit [NeZero N] in
 /-- Specialization of `setIntegral_Gamma1_smul_eq` to the Petersson integrand of
 two `Γ₁(N)`-cusp forms: for `η ∈ Γ₁(N)` and any set `S ⊆ ℍ`,
 `∫_{η • S} petersson k f g dμ = ∫_S petersson k f g dμ`. -/
@@ -831,22 +843,23 @@ theorem petN_slash_invariant
   rw [show peterssonInner k fd (⇑f' ∣[k] (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)
       (⇑g' ∣[k] (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹) =
     peterssonInner k fd (⇑f ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹))
-      (⇑g ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)) from by
+      (⇑g ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)) by
     congr 1 <;> [rw [hf']; rw [hg']] <;> rw [← SlashAction.slash_mul]]
   simp only [peterssonInner, petersson_slash_SL, ← setIntegral_smul_eq,
-    show σ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ from by simp [σ]]
+    show σ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ by simp [σ]]
   rw [show γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ =
       (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ *
         (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out) *
-      (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ from by group, mul_smul]
+      (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ by group, mul_smul]
   refine setIntegral_Gamma1_smul_petersson f g _ ?_ _
   rw [show γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ *
       (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out =
     ((⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * (δ * γ⁻¹) *
-     (γ * ((⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * δ)⁻¹ * γ⁻¹))⁻¹ from by group]
+     (γ * ((⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * δ)⁻¹ * γ⁻¹))⁻¹ by group]
   exact (Gamma1 N).inv_mem ((Gamma1 N).mul_mem (out_mem (δ * γ⁻¹))
     (HeckeRing.GL2.Gamma0_normalizes_Gamma1 ⟨γ, hγ⟩ _ ((Gamma1 N).inv_mem (out_mem δ))))
 
+omit [NeZero N] in
 /-- `∫_{q.out⁻¹ • fd} h dμ = ∫_{q.out⁻¹ • fdo} h dμ` for any `h`: the SL-tile
 integrals over `fd` and `fdo` agree (the boundary `fd \ fdo` has measure zero). -/
 theorem setIntegral_SL_tile_fd_eq_fdo
@@ -973,8 +986,3 @@ abbrev union (F : FiniteTileFundamentalDomain μ ι T) : Set X := ⋃ i, F.tile 
 
 
 end FiniteTileFundamentalDomain
-
-
-
-
-

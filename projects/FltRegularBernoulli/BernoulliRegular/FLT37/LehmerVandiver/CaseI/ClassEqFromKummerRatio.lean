@@ -34,9 +34,8 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-/-- A ring iso preserves non-zero-ideal-ness. Inline of
-`PrimaryDescent.map_ne_bot_iff_complexConj_local` to avoid the import (which
-currently transitively pulls in upstream changes in `Primary.lean`). -/
+-- Inline of `PrimaryDescent.map_ne_bot_iff_complexConj_local` to avoid the import,
+-- which currently transitively pulls in upstream changes in `Primary.lean`.
 private theorem map_ne_bot_iff_complexConj_local
     {p : ℕ} [Fact p.Prime] {K : Type} [Field K] [NumberField K]
     [IsCMField K] (𝔞 : Ideal (𝓞 K)) :
@@ -45,7 +44,6 @@ private theorem map_ne_bot_iff_complexConj_local
     (f := (ringOfIntegersComplexConj K).toRingEquiv.toRingHom)
     (ringOfIntegersComplexConj K).injective
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Class equality from principal-fractional-ideal-level identity.**
 If the (multiplicative) ratio of ideal classes `[𝔞]/[σ𝔞]` equals `1`
 in `Cl(K)`, then `[σ𝔞] = [𝔞]`. Trivial group identity, packaged for
@@ -74,9 +72,8 @@ theorem caseI_class_eq_complexConj_of_class_ratio_eq_one
           : nonZeroDivisors (Ideal (𝓞 K))) =
       ClassGroup.mk0
         (⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) := by
-  -- In any group, a / b = 1 ↔ a = b. ClassGroup is a (commutative) group.
-  exact (div_eq_one.mp h_ratio).symm
+          : nonZeroDivisors (Ideal (𝓞 K))) :=
+  (div_eq_one.mp h_ratio).symm
 
 end CaseI
 

@@ -59,8 +59,7 @@ def CaseIAntiKummerLKUnramified : Prop :=
         (caseI_antiRadical_ne_zero (K := CyclotomicField 37 ℚ)
           (by decide : (37 : ℕ) ≠ 2) _hcaseI _hζ hab)))
 
-/-- **FLT37 via the AK chain**: composes Stage2 discharge via AK chain with the
-existing consumer pipeline. The `h_LK_unram_per_case` hypothesis now requires
+/-- **FLT37 via the AK chain.** The `h_LK_unram_per_case` hypothesis requires
 the FLT case-I equation `a^37 + b^37 = c^37`, matching the actual scope of the
 AK chain (the universal IsUnramified is only sound for FLT-satisfying data). -/
 theorem fermatLastTheoremFor_thirtyseven_via_AK_chain
@@ -86,13 +85,10 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain
   have stage2 : FLT37.LehmerVandiver.CaseI.Stage2KummerRatioK 37 (CyclotomicField 37 ℚ) :=
     flt37_stage2_via_AK_chain (K := CyclotomicField 37 ℚ) (p := 37)
       (by decide : (37 : ℕ) ≠ 2) (by decide : (37 : ℕ) ≠ 3) h_VC
-      (fun {_ _ _} heq hcaseI {_} hζ hab => h_LK_unram_per_case heq hcaseI hζ hab)
+      (fun {_ _ _} heq hcaseI {_} hζ hab ↦ h_LK_unram_per_case heq hcaseI hζ hab)
   exact fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseII cor8_19 stage2 kellner caseII
 
-/-- **`¬ 37 ∣ h⁺` from the Cor 8.19 bridge and the shipped local certificate.**
-This is the standard LV005/LV006 composition specialized to FLT37: the concrete
-Pollaczek local non-power certificate feeds the `Cor8_19Bridge` to produce
-`Vandiver37PlusCoprime`, hence the non-divisibility of the plus class number. -/
+/-- **`¬ 37 ∣ h⁺` from the Cor 8.19 bridge and the shipped local certificate.** -/
 theorem not_dvd_hPlus_thirtyseven_of_cor8_19
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32) :
@@ -104,10 +100,7 @@ theorem not_dvd_hPlus_thirtyseven_of_cor8_19
 /-- **Hilbert 94 obstruction for the FLT37 real subfield, from Cor 8.19.**
 
 Once Cor 8.19 gives `37 ∤ h⁺(K_37)`, no unramified cyclic extension of
-`K_37⁺` of degree `37` can exist.  This is the endpoint contradiction used by
-the real Kummer lift part of Stage 2; the remaining work there is to construct
-such an extension from the Kummer radical when the lifted real unit is not a
-37-th power. -/
+`K_37⁺` of degree `37` can exist. -/
 theorem no_h94_extension_thirtyseven_of_cor8_19
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
@@ -129,8 +122,7 @@ theorem no_h94_extension_thirtyseven_of_cor8_19
 
 /-- **FLT37 via the AK chain from Cor 8.19 alone.**
 Compared with `fermatLastTheoremFor_thirtyseven_via_AK_chain`, this form does
-not ask callers to provide `¬ 37 ∣ hPlus` separately; it derives that fact from
-the Cor 8.19 bridge and the shipped real Pollaczek local certificate. -/
+not ask callers to provide `¬ 37 ∣ hPlus` separately. -/
 theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_of_cor8_19
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
@@ -185,12 +177,11 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_of_cor8_19_and_noSecondOrd
       (CyclotomicField 37 ℚ) :=
     flt37_stage2_via_AK_chain (K := CyclotomicField 37 ℚ) (p := 37)
       (by decide : (37 : ℕ) ≠ 2) (by decide : (37 : ℕ) ≠ 3) h_VC
-      (fun {_ _ _} heq hcaseI {_} hζ hab => h_LK_unram_per_case heq hcaseI hζ hab)
+      (fun {_ _ _} heq hcaseI {_} hζ hab ↦ h_LK_unram_per_case heq hcaseI hζ hab)
   exact fermatLastTheoremFor_thirtyseven_of_stage2
     cor8_19 stage2 noSecondOrderIrregular caseII
 
-/-- **FLT37 via the AK chain (from VC)**: simplified form taking only VC.
-Derives cor8_19 from VC via `cor8_19Bridge_of_not_dvd_hPlus`. -/
+/-- **FLT37 via the AK chain (from VC)**: simplified form taking only VC. -/
 theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_of_VC
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (h_VC : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
@@ -224,7 +215,7 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_with_named_residual
     (caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32) :
     FermatLastTheoremFor 37 :=
   fermatLastTheoremFor_thirtyseven_via_AK_chain_of_VC h_VC
-    (fun {_ _ _} heq hcaseI {_} hζ hab => h_LK_unram heq hcaseI hζ hab) kellner caseII
+    (fun {_ _ _} heq hcaseI {_} hζ hab ↦ h_LK_unram heq hcaseI hζ hab) kellner caseII
 
 end BernoulliRegular.FLT37.LehmerVandiver.CaseI
 

@@ -158,7 +158,7 @@ theorem bernoulli_div_mem_padicInt
   have hkQ_ne : ((k : ℕ) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr hk_pos.ne'
   refine ⟨kInv * b, ?_⟩
   have hkInv_mul_Qp : ((k : ℕ) : ℚ_[p]) * ((kInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hkInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hkInv_mul
   have h_div : (((bernoulli k : ℚ) / (k : ℕ) : ℚ) : ℚ_[p]) =
       ((bernoulli k : ℚ) : ℚ_[p]) / ((k : ℕ) : ℚ_[p]) := by push_cast; rfl
   rw [h_div, hb, div_eq_mul_inv, inv_eq_of_mul_eq_one_right hkInv_mul_Qp]
@@ -183,7 +183,7 @@ theorem bernoulli_mem_padicInt_of_not_pSubOne_dvd
   rcases eq_or_ne k 1 with rfl | hk_ne_one
   · have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
       rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-      exact hp.coprime_iff_not_dvd.mpr fun h =>
+      exact hp.coprime_iff_not_dvd.mpr fun h ↦
         absurd (Nat.le_of_dvd (by omega) h) (by omega)
     set w : ℤ_[p] := (h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hw_def
     have hw_mul : ((2 : ℕ) : ℤ_[p]) * w = 1 := by
@@ -257,7 +257,7 @@ lemma faulhaber_term_mem_p_sq
   rcases eq_or_ne i 1 with rfl | hi_ne_one
   · have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
       rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-      exact hp.coprime_iff_not_dvd.mpr fun h =>
+      exact hp.coprime_iff_not_dvd.mpr fun h ↦
         absurd (Nat.le_of_dvd (by omega) h) (by omega)
     set w : ℤ_[p] := (h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hw_def
     have hw_mul : ((2 : ℕ) : ℤ_[p]) * w = 1 := by
@@ -318,7 +318,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted
   have hp : Nat.Prime p := hp.out
   have hp_gt : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm hp_odd)
   -- Per-`i` witness from `faulhaber_term_mem_p_sq` (threading the IH through).
-  choose w hw using (fun (i : ℕ) (hi : i < t) =>
+  choose w hw using (fun (i : ℕ) (hi : i < t) ↦
     faulhaber_term_mem_p_sq hp_odd ht_two ht_even ih_pB hi)
   -- Set witness `W : ℤ_[p]` = ∑ w_i.
   set W : ℤ_[p] :=
@@ -329,7 +329,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted
       ∑ i ∈ Finset.range (t + 1),
         bernoulli i * (Nat.choose (t + 1) i : ℚ) * (p : ℚ) ^ (t + 1 - i) := by
     rw [sum_range_pow p t, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     have htp1Q_ne : (((t + 1 : ℕ)) : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     field_simp
   -- Cast to ℚ_[p].
@@ -337,7 +337,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted
       ∑ i ∈ Finset.range (t + 1),
         ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) *
           ((p : ℚ_[p])) ^ (t + 1 - i) := by
-    have := congrArg (fun q : ℚ => (q : ℚ_[p])) h_faulhaber_Q
+    have := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_faulhaber_Q
     push_cast at this; push_cast; exact this
   -- Split off i = t: the term is `B_t · (t+1) · p`.
   have h_split_sum : ((t + 1 : ℕ) : ℚ_[p]) * (∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ t) -
@@ -357,7 +357,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_weighted
     rw [show (((p : ℚ_[p])) ^ 2 * ((W : ℤ_[p]) : ℚ_[p])) =
         ∑ i ∈ Finset.attach (Finset.range t),
           ((p : ℚ_[p])) ^ 2 * ((w i.1 (Finset.mem_range.mp i.2) : ℤ_[p]) : ℚ_[p]) from ?_]
-    · refine Finset.sum_congr rfl fun i _ => ?_
+    · refine Finset.sum_congr rfl fun i _ ↦ ?_
       exact hw i.1 (Finset.mem_range.mp i.2)
     · rw [hW_def]
       simp [PadicInt.coe_sum, Finset.mul_sum]
@@ -395,7 +395,7 @@ theorem sum_range_pow_sModEq_p_mul_bernoulli
   have hu_mul : ((t + 1 : ℕ) : ℤ_[p]) * u = 1 := by
     change ((htp1_unit.unit * htp1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
   have hu_mul_Qp : ((t + 1 : ℕ) : ℚ_[p]) * ((u : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul
   obtain ⟨W, hW⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd ht_two ht_even ih_pB
   refine ⟨u * W, ?_⟩
   -- Multiply hW by u to divide out (t+1).
@@ -458,7 +458,7 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
     have ih_pB : ∀ j, j < k → 2 ≤ j → Even j →
         ∃ z : ℤ_[p], (p : ℚ_[p]) * ((bernoulli j : ℚ) : ℚ_[p]) = (z : ℚ_[p]) := by
       intro j hj hj_two hj_even
-      exact ih j hj hj_two hj_even (fun j' hj' => h_below j' (Nat.le_trans hj' hj.le))
+      exact ih j hj hj_two hj_even (fun j' hj' ↦ h_below j' (Nat.le_trans hj' hj.le))
     -- Main hypothesis: `¬ p^3 ∣ (k+1)`.
     have h_not_pCube : ¬ (p : ℕ) ^ 3 ∣ (k + 1) := h_below k (le_refl k)
     -- Shared: S_nat := ∑ j^k, cast lemma.
@@ -483,7 +483,7 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
         have hqInv_mul : ((q : ℕ) : ℤ_[p]) * qInv = 1 := by
           change ((hq_unit.unit * hq_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
         have hqInv_mul_Qp : ((q : ℕ) : ℚ_[p]) * ((qInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-          simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hqInv_mul
+          simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hqInv_mul
         obtain ⟨W, hW⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even ih_pB
         have h_kp1_eq : ((k + 1 : ℕ) : ℚ_[p]) = (p : ℚ_[p])^2 * ((q : ℕ) : ℚ_[p]) := by
           have : (k + 1 : ℕ) = p^2 * q := hq
@@ -523,7 +523,7 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
         have hmInv_mul : ((m' : ℕ) : ℤ_[p]) * mInv = 1 := by
           change ((hm'_unit.unit * hm'_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
         have hmInv_mul_Qp : ((m' : ℕ) : ℚ_[p]) * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-          simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hmInv_mul
+          simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
         -- Pre-division form.
         obtain ⟨W, hW⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even ih_pB
         -- Rewrite (k + 1) = p * m'.

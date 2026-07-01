@@ -189,10 +189,6 @@ theorem c1PerWUpperBoundSupplier_of_loc_rational_bound
           ¬ w.vle τ (σ_loc : Localization.Away s) →
         ∀ t ∈ T_D.image (algebraMap A (Localization.Away s)),
           w.vle t (algebraMap A (Localization.Away s) s_D) := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f _τ _hτ _hστ t ht
   exact h_loc_bound w hw_spa hw_f t ht
 
@@ -239,15 +235,10 @@ theorem WedhornC1PerCallSupplyPerWCoverPiece_of_loc_rational_bound
       (_hv_in_plus : v ∈ rationalOpen (insert f C.base.T) C.base.s)
       (_hvf_nz : ¬ v.vle f 0),
       WedhornC1PerCallSupplyPerWCoverPiece P C hopen_base D v := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   intro σ_loc f h_alg h_dom h_loc_bound hv_in_plus hvf_nz
-  refine ⟨σ_loc, f, h_alg, h_dom, ?_, hv_in_plus, hvf_nz⟩
-  exact c1PerWUpperBoundSupplier_of_loc_rational_bound P C.base.T
-    C.base.s hopen_base D.T D.s σ_loc h_loc_bound
+  exact ⟨σ_loc, f, h_alg, h_dom,
+    c1PerWUpperBoundSupplier_of_loc_rational_bound P C.base.T C.base.s
+      hopen_base D.T D.s σ_loc h_loc_bound, hv_in_plus, hvf_nz⟩
 
 /-- **Top-level: `C1SupplierStrong_local C` via cover-piece localized
 rational-bound predicate** (T040 final deliverable).
@@ -295,11 +286,6 @@ theorem C1SupplierStrong_local_via_loc_rational_bound
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     C1SupplierStrong_local C := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine C1SupplierStrong_local_via_per_w_cover_piece_supplier P hA₀_le C
     hopen_base ?_
   intro D hD v hv t ht hvt hvD_s

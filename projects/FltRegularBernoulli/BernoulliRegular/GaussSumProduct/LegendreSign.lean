@@ -40,11 +40,8 @@ theorem legendreDirichlet_L1_rootNumber_relation (hp_three_mod_four : p % 4 = 3)
   have h_not_even : ¬ (legendreDirichlet p).Even := h_odd.not_even
   have h_ne_one : legendreDirichlet p ≠ 1 := legendreDirichlet_ne_one p hp_odd
   -- η⁻¹ = η for η quadratic.
-  have h_quad : (legendreDirichlet p).IsQuadratic := legendreDirichlet_isQuadratic p
-  have h_inv_eq : (legendreDirichlet p)⁻¹ = legendreDirichlet p := by
-    have h_sq : legendreDirichlet p ^ 2 = 1 := h_quad.sq_eq_one
-    have : legendreDirichlet p * legendreDirichlet p = 1 := by rw [← sq]; exact h_sq
-    exact DivisionMonoid.inv_eq_of_mul _ _ this
+  have h_inv_eq : (legendreDirichlet p)⁻¹ = legendreDirichlet p :=
+    (legendreDirichlet_isQuadratic p).inv
   -- L(1, η) = oddLValueRhs p η via T021.
   have h_L1 : DirichletCharacter.LFunction (legendreDirichlet p) 1 =
       oddLValueRhs p (legendreDirichlet p) :=
@@ -75,7 +72,6 @@ theorem legendreDirichlet_L1_rootNumber_relation (hp_three_mod_four : p % 4 = 3)
     norm_num
   -- Rearrange: L(1, η) · √p + π · rootNumber η · B_{1, η} = 0
   rw [h_L1]
-  have h_sq := h_half_sq
   have hI : Complex.I ^ 2 = -1 := Complex.I_sq
   -- Substitute (√p)² = p and simplify.
   -- After substitution:
@@ -98,7 +94,7 @@ theorem legendreDirichlet_L1_rootNumber_relation (hp_three_mod_four : p % 4 = 3)
           (DirichletCharacter.rootNumber (legendreDirichlet p)) *
           (((p : ℂ) ^ (1 / 2 : ℂ)) ^ 2) *
           BernoulliGen (legendreDirichlet p) 1 / (p : ℂ) := by ring
-    rw [expand, hI, h_sq]
+    rw [expand, hI, h_half_sq]
     field_simp
   linear_combination key
 

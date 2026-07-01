@@ -261,8 +261,7 @@ private theorem T_p_lower_mul_T_p_upper_smul_eq_shift_smul
     simp [glMap, T_p_lower, T_p_upper, mapGL_coe_matrix, shiftSL_loc,
       Matrix.GeneralLinearGroup.mkOfDetNeZero, Matrix.GeneralLinearGroup.map,
       Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul,
-      algebraMap_int_eq, Matrix.smul_apply] <;>
-    ring
+      algebraMap_int_eq, Matrix.smul_apply]
 
 open UpperHalfPlane ModularGroup MeasureTheory in
 private theorem T_p_lower_mul_M_infty_smul_eq_M_infty_Gamma1_factor_smul
@@ -405,24 +404,6 @@ many sites. Bundling them as named `Prop`s shrinks the signatures from ~75-line
 multi-cluster forms to a few lines each. Each named Prop is `rfl`-equal to its inline
 form. -/
 
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
 private lemma heckeT_p_cusp_comm_diamondOp_private
     (p : ℕ) (hp : Nat.Prime p) (hpN : Nat.Coprime p N) (d : (ZMod N)ˣ)
     (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
@@ -474,9 +455,9 @@ private lemma toConjAct_GLPos_smul_SL2Z_to_PSL2R
     rw [hc_def, ne_eq, inv_eq_zero]
     exact (Real.sqrt_pos.mpr hdpos).ne'
   -- The `SL(2, ℝ)` representative of `g`.
-  set s : SL(2, ℝ) := GLPos_to_SLR A' with hs_def
-  set mx : SL(2, ℝ) := Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ) x with hmx_def
-  set my : SL(2, ℝ) := Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ) y with hmy_def
+  set s : SL(2, ℝ) := GLPos_to_SLR A'
+  set mx : SL(2, ℝ) := Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ) x
+  set my : SL(2, ℝ) := Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ) y
   -- `s.val = c • A'.val` as matrices.
   have hs_val : (s : Matrix (Fin 2) (Fin 2) ℝ) =
       c • ((A' : GL (Fin 2) ℝ) : Matrix (Fin 2) (Fin 2) ℝ) := rfl
@@ -541,7 +522,7 @@ private lemma toConjAct_GLPos_Gamma_p_α_le_Gamma1_map
     (ConjAct.toConjAct (GLPos_to_PSL_R_term ⟨(α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ), hα⟩) •
         ((Gamma_p_α (N := N) α).map SL2Z_to_PSL2R) : Subgroup PSL(2, ℝ)) ≤
       ((Gamma1 N).map SL2Z_to_PSL2R) := by
-  set A' : GL(2, ℝ)⁺ := ⟨(α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ), hα⟩ with hA'_def
+  set A' : GL(2, ℝ)⁺ := ⟨(α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ), hα⟩
   set g : PSL(2, ℝ) := GLPos_to_PSL_R_term A' with hg_def
   intro z hz
   rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem, ConjAct.smul_def, map_inv,
@@ -698,7 +679,7 @@ private lemma toConjAct_GLPos_Gamma_p_α_T_p_lower_eq_Gamma1_inf_Gamma_up_map
         Subgroup PSL(2, ℝ)) =
       ((Gamma1 N ⊓ Gamma_up p).map SL2Z_to_PSL2R) := by
   set A' : GL(2, ℝ)⁺ := ⟨glMap (T_p_lower p hp.pos),
-    glMap_det_pos_of_rat_det_pos _ (T_p_lower_det_pos p hp.pos)⟩ with hA'_def
+    glMap_det_pos_of_rat_det_pos _ (T_p_lower_det_pos p hp.pos)⟩
   have hA'_val : (A' : GL (Fin 2) ℝ) = (T_p_lower p hp.pos).map (Rat.castHom ℝ) := rfl
   apply le_antisymm
   · -- `K ≤ (Γ₁ ∩ Γ⁰(p)).map`: each `z = g·SL2Z_to_PSL2R(x)·g⁻¹ = SL2Z_to_PSL2R(conjBy x)`,
@@ -878,7 +859,7 @@ private lemma T_p_lower_tile_some_none_notMem_Gamma_up [NeZero N]
   rw [hentry]; push_cast
   rw [show ((b₁.val : ZMod p) * ((aInvOfCoprime N p hpN : ZMod p) * (p : ZMod p))) = 0 by
     rw [ZMod.natCast_self, mul_zero, mul_zero], add_zero]
-  exact (neg_ne_zero.mpr one_ne_zero)
+  exact neg_ne_zero.mpr one_ne_zero
 
 open CongruenceSubgroup in
 /-- For a `none/some` tile pair, `M_∞ · shiftSL_loc b₂⁻¹` has `(0,1)`-entry
@@ -965,7 +946,7 @@ private theorem T_p_lower_tile_transversal_bijective
           ((Gamma1 N).map SL2Z_to_PSL2R) ⧸
             ((ConjAct.toConjAct g • ((Gamma_p_α (N := N) (T_p_lower p hp.pos)).map SL2Z_to_PSL2R)
               ).subgroupOf ((Gamma1 N).map SL2Z_to_PSL2R)))) := by
-  set G : Subgroup PSL(2, ℝ) := (Gamma1 N).map SL2Z_to_PSL2R with hG_def
+  set G : Subgroup PSL(2, ℝ) := (Gamma1 N).map SL2Z_to_PSL2R
   set K : Subgroup PSL(2, ℝ) :=
     ConjAct.toConjAct g • ((Gamma_p_α (N := N) (T_p_lower p hp.pos)).map SL2Z_to_PSL2R)
     with hK_def
@@ -1064,9 +1045,8 @@ private theorem iUnion_T_p_lower_tile_family_isFundamentalDomain_conj
   set r : Option (Fin p) → G := fun i ↦
     ⟨SL2Z_to_PSL2R (T_p_lower_tile_family N p hpN i),
       Subgroup.mem_map_of_mem SL2Z_to_PSL2R (T_p_lower_tile_family_mem_Gamma1 p hpN i)⟩
-    with hr_def
   set e : Option (Fin p) ≃ G ⧸ (K.subgroupOf G) :=
-    Equiv.ofBijective _ (T_p_lower_tile_transversal_bijective p hp hpN g hg) with he_def
+    Equiv.ofBijective _ (T_p_lower_tile_transversal_bijective p hp hpN g hg)
   have hbase : IsFundamentalDomain G (Gamma1_fundDomain_PSL N) μ_hyp :=
     isFundamentalDomain_Gamma1_map_PSL_R (N := N)
   have htool : IsFundamentalDomain (K.subgroupOf G)
@@ -1101,9 +1081,9 @@ theorem isFundamentalDomain_Hecke_tiles_Gamma_p_α
           | some b => (glMap (T_p_upper p hp.pos b.val) : GL (Fin 2) ℝ)) •
           (Gamma1_fundDomain_PSL N : Set ℍ))
       μ_hyp := by
-  set A : GL (Fin 2) ℝ := glMap (T_p_lower p hp.pos) with hA_def
+  set A : GL (Fin 2) ℝ := glMap (T_p_lower p hp.pos)
   have hApos : 0 < A.det.val := glMap_det_pos_of_rat_det_pos _ (T_p_lower_det_pos p hp.pos)
-  set A' : GL(2, ℝ)⁺ := ⟨A, hApos⟩ with hA'_def
+  set A' : GL(2, ℝ)⁺ := ⟨A, hApos⟩
   set g : PSL(2, ℝ) := GLPos_to_PSL_R_term A' with hg_def
   set D : Set ℍ := ⋃ i : Option (Fin p), Hecke_rep_family N p hp.pos hpN i •
     (Gamma1_fundDomain_PSL N : Set ℍ) with hD_def
@@ -1158,9 +1138,8 @@ private lemma N_mul_N_ne_zero_in_zmod_p
   rw [show ((N : ZMod p) * (N : ZMod p)) = (((N : ℤ) * (N : ℤ) : ℤ) : ZMod p) by push_cast; ring,
     Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
   intro h
-  rcases hpZ.dvd_mul.mp h with h | h
-  · exact hN0 (by rw [ZMod.intCast_zmod_eq_zero_iff_dvd]; exact h)
-  · exact hN0 (by rw [ZMod.intCast_zmod_eq_zero_iff_dvd]; exact h)
+  rcases hpZ.dvd_mul.mp h with h | h <;>
+    exact hN0 (by rw [ZMod.intCast_zmod_eq_zero_iff_dvd]; exact h)
 
 /-- Explicit `ℤ`-matrix form of `γ₀(0) · M_∞(0)`, used in the `none` branches of the
 `ds_p_plus_one_family_Gamma1_factor` distinctness analysis. -/
@@ -1410,7 +1389,7 @@ private lemma ds_p_plus_one_family_traceSlash_eq
     with hfib_def
   set e : Option (Fin p) → SL(2, ℤ) ⧸ Gamma_p_α (N := N) (T_p_lower p hp.pos) := fun i ↦
     QuotientGroup.mk ((q'.out : SL(2, ℤ)) *
-      (ds_p_plus_one_family_Gamma1_factor N p hpN i : SL(2, ℤ))⁻¹) with he_def
+      (ds_p_plus_one_family_Gamma1_factor N p hpN i : SL(2, ℤ))⁻¹)
   have he_mem : ∀ i, e i ∈ fib := fun i ↦
     ds_p_plus_one_family_traceSlash_eq_mem_fib (N := N) p hp hpN q' i
   have he_inj : ∀ i₁ i₂, e i₁ = e i₂ → i₁ = i₂ := fun i₁ i₂ hii ↦

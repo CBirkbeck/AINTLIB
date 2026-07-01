@@ -45,8 +45,7 @@ omit [CompleteSpace K] in
 lemma innerInt_add [CompactSpace Y] (ν : MeasureR K Y) (F G : C(X × Y, integerRing K)) :
     innerInt K ν (F + G) = innerInt K ν F + innerInt K ν G :=
   ContinuousMap.ext fun x => by
-    have hcurry : (F + G).curry x = F.curry x + G.curry x := ContinuousMap.ext fun y => rfl
-    simp [hcurry]
+    simp [show (F + G).curry x = F.curry x + G.curry x from rfl]
 
 omit [CompleteSpace K] in
 @[simp]
@@ -54,8 +53,7 @@ lemma innerInt_smul [CompactSpace Y] (c : integerRing K) (ν : MeasureR K Y)
     (F : C(X × Y, integerRing K)) :
     innerInt K ν (c • F) = c • innerInt K ν F :=
   ContinuousMap.ext fun x => by
-    have hcurry : (c • F).curry x = c • F.curry x := ContinuousMap.ext fun y => rfl
-    simp [hcurry]
+    simp [show (c • F).curry x = c • F.curry x from rfl]
 
 omit [CompleteSpace K] in
 @[simp]
@@ -79,7 +77,7 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
   refine eq_of_forall_dist_le fun ε hε => ?_
   obtain ⟨Φ, hΦ⟩ := PadicMeasure.exists_locallyConstant_norm_sub_le' F.curry hε
   classical
-  set R : Finset C(Y, integerRing K) := Φ.range_finite.toFinset with hRdef
+  set R : Finset C(Y, integerRing K) := Φ.range_finite.toFinset
   have hmemR : ∀ x : X, Φ x ∈ R := fun x =>
     Φ.range_finite.mem_toFinset.2 ⟨x, rfl⟩
   set S : integerRing K := ∑ g ∈ R,
@@ -91,15 +89,12 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
     intro x w
     rw [Finset.sum_eq_single (Φ x)]
     · rw [show charFnCM K X (Φ.isLocallyConstant.isClopen_fiber (Φ x)) x = 1 from by
-        simp only [charFnCM_apply, 
-          ]
-        rw [Set.indicator_of_mem (show x ∈ {y | Φ.toFun y = Φ x} from rfl), Pi.one_apply],
+        simp only [charFnCM_apply,
+          Set.indicator_of_mem (show x ∈ {y | Φ.toFun y = Φ x} from rfl), Pi.one_apply],
         one_mul]
     · intro g _ hgx
       rw [show charFnCM K X (Φ.isLocallyConstant.isClopen_fiber g) x = 0 from by
-        simp only [charFnCM_apply, 
-          ]
-        rw [Set.indicator_of_notMem
+        simp only [charFnCM_apply, Set.indicator_of_notMem
           (show x ∉ {y | Φ.toFun y = g} from fun hc => hgx hc.symm)],
         zero_mul]
     · intro hx
@@ -144,11 +139,7 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
       rw [ContinuousMap.norm_le _ hε.le]
       intro y
       set col : C(X, integerRing K) :=
-        ⟨fun x => Φ x y, by
-          have : (fun x => Φ x y)
-              = (fun g : C(Y, integerRing K) => g y) ∘ ⇑Φ := rfl
-          rw [this]
-          exact (continuous_eval_const y).comp Φ.continuous⟩ with hcol
+        ⟨fun x => Φ x y, (continuous_eval_const y).comp Φ.continuous⟩ with hcol
       have hmidy : mid₂ y = μ col := by
         rw [hmid]
         have hcolsum : col = ∑ g ∈ R,
@@ -167,12 +158,9 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
       refine le_trans (norm_apply_le μ _) ?_
       rw [ContinuousMap.norm_le _ hε.le]
       intro x
-      have : ((F.comp ⟨Prod.swap, continuous_swap⟩).curry y - col) x
-          = F.curry x y - Φ x y := by
-        simp [hcol, ContinuousMap.sub_apply]
-      rw [this]
-      calc ‖F.curry x y - Φ x y‖ = ‖(F.curry x - Φ x) y‖ := by
-            rw [ContinuousMap.sub_apply]
+      calc ‖((F.comp ⟨Prod.swap, continuous_swap⟩).curry y - col) x‖
+          = ‖(F.curry x - Φ x) y‖ := by
+            simp [hcol, ContinuousMap.sub_apply]
         _ ≤ ‖F.curry x - Φ x‖ := ContinuousMap.norm_coe_le_norm _ y
         _ ≤ ε := hΦ x
     calc dist (ν (innerInt K μ (F.comp ⟨Prod.swap, continuous_swap⟩))) S

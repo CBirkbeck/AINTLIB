@@ -130,7 +130,7 @@ theorem phiOnClassGroupModPLinear_galois_of_fixed_at_mk0
       phiOnClassGroupModPLinear h_ref19
         (Additive.ofMul (QuotientGroup.mk (ClassGroup.mk0 J) :
           ClassGroupModP K p)) =
-      phiOnClassGroup h_ref19 (ClassGroup.mk0 J) := fun J => rfl
+      phiOnClassGroup h_ref19 (ClassGroup.mk0 J) := fun J ↦ rfl
   rw [h_phi I]
   have h_galAction :
       cyclotomicGalActionInstance (p := p) (K := K) a
@@ -231,7 +231,7 @@ theorem phiOnClassGroupModPLinear_galois_of_fixed
   have h_phi : ∀ d : ClassGroup (𝓞 K),
       phiOnClassGroupModPLinear h_ref19
         (Additive.ofMul (QuotientGroup.mk d : ClassGroupModP K p)) =
-      phiOnClassGroup h_ref19 d := fun _ => rfl
+      phiOnClassGroup h_ref19 d := fun _ ↦ rfl
   rw [h_phi c]
   have h_galAction :
       cyclotomicGalActionInstance (p := p) (K := K) a

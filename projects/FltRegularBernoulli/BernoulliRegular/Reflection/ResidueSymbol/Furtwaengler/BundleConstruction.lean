@@ -84,7 +84,7 @@ theorem psiTraceForm_apply (hzeta : IsPrimitiveRoot zeta_ell ℓ) (x : k) :
 
 /-- Exponent function paired with `psiTraceForm`: `psiExponent x = (Tr x).val`. -/
 noncomputable def psiTraceFormExponent : k → ℕ :=
-  fun x => (Algebra.trace (ZMod ℓ) k x).val
+  fun x ↦ (Algebra.trace (ZMod ℓ) k x).val
 
 @[simp]
 theorem psiTraceFormExponent_apply (x : k) :

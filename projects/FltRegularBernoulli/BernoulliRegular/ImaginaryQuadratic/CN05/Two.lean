@@ -281,13 +281,13 @@ theorem inertiaDeg_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
       have h_card := ncard_primesOver_at_two_inert p hp3 hp3_8
       rw [Set.ncard_eq_one] at h_card
       obtain ⟨x, hx⟩ := h_card
-      refine ⟨fun ⟨a, ha⟩ ⟨b, hb⟩ => ?_⟩
+      refine ⟨fun ⟨a, ha⟩ ⟨b, hb⟩ ↦ ?_⟩
       have ha_eq : a = x := by rw [hx] at ha; exact ha
       have hb_eq : b = x := by rw [hx] at hb; exact hb
       subst ha_eq; subst hb_eq; rfl
     have hP_set : (⟨P, hP⟩ : ↥(Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)))) =
                   e.symm ⟨Qfactor, hQ_mem⟩ := h_sub.elim _ _
-    exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)))) =>
+    exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)))) ↦
       (x : Ideal (𝓞 (Kminus p)))) hP_set
   rw [hP_eq]
   rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
@@ -348,10 +348,10 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
   have hq_gt_one : (1 : ℕ) < 2 := by decide
   obtain ⟨Q₁, hP₁Q₁, hIeq₁⟩ := Ideal.eq_prime_pow_mul_coprime hI_ne P₁
   set a : ℕ := Multiset.count P₁ (UniqueFactorizationMonoid.normalizedFactors I)
-  have hQ₁_ne : Q₁ ≠ ⊥ := fun h => hI_ne (by rw [hIeq₁, h, Ideal.mul_bot])
+  have hQ₁_ne : Q₁ ≠ ⊥ := fun h ↦ hI_ne (by rw [hIeq₁, h, Ideal.mul_bot])
   obtain ⟨Q₂, hP₂Q₂, hQ₁eq⟩ := Ideal.eq_prime_pow_mul_coprime hQ₁_ne P₂
   set b : ℕ := Multiset.count P₂ (UniqueFactorizationMonoid.normalizedFactors Q₁)
-  have hQ₂_ne : Q₂ ≠ ⊥ := fun h => hQ₁_ne (by rw [hQ₁eq, h, Ideal.mul_bot])
+  have hQ₂_ne : Q₂ ≠ ⊥ := fun h ↦ hQ₁_ne (by rw [hQ₁eq, h, Ideal.mul_bot])
   have hI_decomp : I = P₁ ^ a * P₂ ^ b * Q₂ := by rw [hIeq₁, hQ₁eq]; ring
   have hP₁Q₂ : P₁ ⊔ Q₂ = ⊤ := by
     refine top_le_iff.mp ?_
@@ -368,7 +368,7 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     have hRfac := (Ideal.mem_normalizedFactors_iff hQ₂_ne).1 hRmem
     have hRprime : R.IsPrime := hRfac.1
     have hQ₂_le_R : Q₂ ≤ R := hRfac.2
-    have hR_ne : R ≠ ⊥ := fun h => hQ₂_ne (le_bot_iff.mp (hQ₂_le_R.trans_eq h))
+    have hR_ne : R ≠ ⊥ := fun h ↦ hQ₂_ne (le_bot_iff.mp (hQ₂_le_R.trans_eq h))
     haveI : NeZero R := ⟨hR_ne⟩
     have hQ₂_dvd_I : Ideal.absNorm Q₂ ∣ Ideal.absNorm I := by
       rw [hI_decomp, map_mul]; exact dvd_mul_left _ _
@@ -421,7 +421,7 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
   have hq_gt_one : (1 : ℕ) < 2 := by decide
   unfold idealNormMultiplicity
   have h_ideal_ne : ∀ a : ℕ, P₁ ^ a * P₂ ^ (k - a) ≠ ⊥ :=
-    fun a => mul_ne_zero (pow_ne_zero _ hP₁_ne) (pow_ne_zero _ hP₂_ne)
+    fun a ↦ mul_ne_zero (pow_ne_zero _ hP₁_ne) (pow_ne_zero _ hP₂_ne)
   have h_ideal_norm : ∀ a ≤ k, Ideal.absNorm (P₁ ^ a * P₂ ^ (k - a)) = 2 ^ k := by
     intro a ha
     rw [map_mul, map_pow, map_pow, habsNormP₁, habsNormP₂, ← pow_add]
@@ -450,22 +450,22 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
       Multiset.count_singleton, if_neg hP₁₂_ne, mul_zero, mul_one, add_zero] at h_count
     exact h_count
   set S := {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = 2 ^ k}
-  let forward : S → Fin (k + 1) := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ =>
+  let forward : S → Fin (k + 1) := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦
     ⟨(ideal_decomp_at_two_split p hp3 hp7 hP₁_mem hP₂_mem hP_eq hI_ne hI_norm).choose,
       Nat.lt_succ_of_le
         (ideal_decomp_at_two_split p hp3 hp7 hP₁_mem hP₂_mem hP_eq hI_ne hI_norm).choose_spec.1⟩
-  let backward : Fin (k + 1) → S := fun ⟨a, ha⟩ =>
+  let backward : Fin (k + 1) → S := fun ⟨a, ha⟩ ↦
     ⟨⟨P₁ ^ a * P₂ ^ (k - a), h_ideal_ne a⟩, h_ideal_norm a (Nat.lt_succ_iff.mp ha)⟩
   have h_equiv : S ≃ Fin (k + 1) :=
     { toFun := forward
       invFun := backward
-      left_inv := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ => by
+      left_inv := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦ by
         simp only [forward, backward]
         refine Subtype.ext (Subtype.ext ?_)
         simp only
         exact (ideal_decomp_at_two_split p hp3 hp7 hP₁_mem hP₂_mem hP_eq hI_ne
           hI_norm).choose_spec.2.symm
-      right_inv := fun ⟨a, ha⟩ => by
+      right_inv := fun ⟨a, ha⟩ ↦ by
         simp only [forward, backward]
         refine Fin.ext ?_
         simp only
@@ -507,7 +507,7 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
   let m : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
   have hQ_top : Q = ⊤ := by
     by_contra hQ_ne_top
-    have hQ_ne : Q ≠ ⊥ := fun hQ_bot => hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
+    have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
     have hnf_ne : UniqueFactorizationMonoid.normalizedFactors Q ≠ 0 := by
       intro hnf
       apply hQ_ne_top
@@ -516,7 +516,7 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
     have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
     have hRprime : R.IsPrime := hRfac.1
     have hQ_le_R : Q ≤ R := hRfac.2
-    have hR_ne : R ≠ ⊥ := fun hR_bot => hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
+    have hR_ne : R ≠ ⊥ := fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
     haveI : NeZero R := ⟨hR_ne⟩
     have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
     have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ k := by
@@ -577,7 +577,7 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
         let mI : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
         have hQ_top : Q = ⊤ := by
           by_contra hQ_ne_top
-          have hQ_ne : Q ≠ ⊥ := fun hQ_bot => hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
+          have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
           have hnf_ne : UniqueFactorizationMonoid.normalizedFactors Q ≠ 0 := by
             intro hnf
             apply hQ_ne_top
@@ -587,7 +587,7 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
           have hRprime : R.IsPrime := hRfac.1
           have hQ_le_R : Q ≤ R := hRfac.2
           have hR_ne : R ≠ ⊥ :=
-            fun hR_bot => hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
+            fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
           haveI : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
           have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ (2 * m) := by
@@ -627,7 +627,7 @@ lemma legendreDirichletNat_two_of_seven (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
     have := ZMod.exists_sq_eq_two_iff hp_odd
     rw [show ((2 : ℕ) : ZMod p) = (2 : ZMod p) by push_cast; rfl]
     exact this.mpr (Or.inr hp7)
-  exact (legendreDirichletNat_eq_one_iff_isSquare p 2 (fun h => by omega)).mpr h_sq
+  exact (legendreDirichletNat_eq_one_iff_isSquare p 2 (fun h ↦ by omega)).mpr h_sq
 
 /-- For `p ≡ 3 (mod 8)`, `legendreDirichletNat p 2 = -1`. -/
 lemma legendreDirichletNat_two_of_three (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
@@ -640,12 +640,12 @@ lemma legendreDirichletNat_two_of_three (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
     rcases this.mp h with h1 | h7
     · omega
     · omega
-  exact (legendreDirichletNat_eq_neg_one_iff_not_isSquare p 2 (fun h => by omega)).mpr h_not_sq
+  exact (legendreDirichletNat_eq_neg_one_iff_not_isSquare p 2 (fun h ↦ by omega)).mpr h_not_sq
 
 /-- **CN-05 coefficient equality at q = 2**: LHS = RHS for p ≡ 3 mod 4 and q = 2. -/
 theorem CN05CoeffEq_at_prime_pow_two (hp3 : p % 4 = 3) (k : ℕ) :
     ((idealNormMultiplicity (Kminus p) (2 ^ k)) : ℂ) =
-      LSeries.convolution (fun _ : ℕ => (1 : ℂ)) (legendreDirichletNat p) (2 ^ k) := by
+      LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (2 ^ k) := by
   have hp_odd : p ≠ 2 := by omega
   rcases p_mod_eight_cases p hp3 hp_odd with hp3_8 | hp7
   · -- p ≡ 3 mod 8: 2 inert, η(2) = -1.

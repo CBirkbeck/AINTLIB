@@ -100,7 +100,7 @@ theorem caseI_factor_mul_complexConj_idealSpan_descends [IsCMField (CyclotomicFi
   refine ⟨Ideal.span ({x₀} : Set (𝓞 K⁺)), ?_⟩
   rw [Ideal.map_span, Set.image_singleton]
   congr 1
-  exact congrArg (fun y => ({y} : Set _)) hx₀.symm
+  exact congrArg (fun y ↦ ({y} : Set _)) hx₀.symm
 
 section VandiverDescent
 
@@ -414,7 +414,7 @@ theorem class_eq_one_of_p_torsion_mul_and_square
   have h_ord_4 : orderOf x ∣ 4 := orderOf_dvd_of_pow_eq_one hx4
   have h_cop2 : Nat.Coprime p 2 := by
     rw [Nat.coprime_comm, Nat.coprime_primes Nat.prime_two hp_prime]
-    exact fun h => hp_odd h.symm
+    exact fun h ↦ hp_odd h.symm
   have h_cop4 : Nat.Coprime p 4 := by
     simpa [show 4 = 2 ^ 2 by norm_num] using h_cop2.pow_right 2
   have h_ord_one : orderOf x = 1 := by

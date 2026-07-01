@@ -88,6 +88,11 @@ private lemma span_natCast_le_of_absNorm_eq {I : Ideal (𝓞 L)} {k : ℕ}
   rw [Ideal.span_le, Set.singleton_subset_iff]
   exact_mod_cast hI ▸ Ideal.absNorm_mem I
 
+private lemma sup_span_natCast_mul_eq {I : Ideal (𝓞 L)} {m n : ℕ}
+    (hI : Ideal.absNorm I = m * n) : I ⊔ Ideal.span {(m : 𝓞 L) * (n : 𝓞 L)} = I := by
+  rw [← Nat.cast_mul]
+  exact sup_of_le_left (span_natCast_le_of_absNorm_eq L hI)
+
 private lemma absNorm_sup_span_natCast {m n : ℕ} (hcop : Nat.Coprime m n) (hm : 0 < m)
     (hn : 0 < n) (I : Ideal (𝓞 L)) (hI : Ideal.absNorm I = m * n) :
     Ideal.absNorm (I ⊔ Ideal.span {(m : 𝓞 L)}) = m ∧
@@ -96,9 +101,7 @@ private lemma absNorm_sup_span_natCast {m n : ℕ} (hcop : Nat.Coprime m n) (hm 
   set b := Ideal.absNorm (I ⊔ Ideal.span {(n : 𝓞 L)}) with hb_def
   have h_prod : (I ⊔ Ideal.span {(m : 𝓞 L)}) * (I ⊔ Ideal.span {(n : 𝓞 L)}) = I := by
     rw [sup_span_mul_sup_span L hcop I]
-    refine le_antisymm (sup_le le_rfl ?_) le_sup_left
-    rw [Ideal.span_le, Set.singleton_subset_iff]
-    exact_mod_cast hI ▸ Ideal.absNorm_mem I
+    exact sup_span_natCast_mul_eq L hI
   have h_ab : a * b = m * n := by rw [ha_def, hb_def, ← map_mul, h_prod, hI]
   have h_a_dvd_m : a ∣ m :=
     ((hcop.pow_left (Module.finrank ℤ (𝓞 L))).coprime_dvd_left
@@ -144,10 +147,8 @@ lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :
   all_goals rcases Nat.lt_or_ge 1 n with hn1 | hn1
   · classical
     have h_sup_absNorm : ∀ (I : Ideal (𝓞 L)), Ideal.absNorm I = m * n →
-        I ⊔ Ideal.span {(m : 𝓞 L) * (n : 𝓞 L)} = I := fun I hI ↦ by
-      refine le_antisymm (sup_le le_rfl ?_) le_sup_left
-      rw [Ideal.span_le, Set.singleton_subset_iff]
-      exact_mod_cast hI ▸ Ideal.absNorm_mem I
+        I ⊔ Ideal.span {(m : 𝓞 L) * (n : 𝓞 L)} = I := fun I hI ↦
+      sup_span_natCast_mul_eq L hI
     have h_inv_n : ∀ (J L' : Ideal (𝓞 L)), Ideal.absNorm J = m → Ideal.absNorm L' = n →
         J * L' ⊔ Ideal.span {(n : 𝓞 L)} = L' := fun J L' hJ hL ↦
       mul_comm J L' ▸ mul_sup_span_natCast_left L hcop.symm L' J hL hJ

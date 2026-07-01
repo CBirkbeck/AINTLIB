@@ -127,12 +127,9 @@ theorem rationalOpen_subset_intersected_with_piece_via_per_w_local_data
         w.vle f s →
         w.vle (T_D.prod id) D_s ∧ (∀ t' ∈ T_D, w.vle (1 : A) t')) :
     rationalOpen (insert f T_base) s ∩ V ⊆ rationalOpen T_D D_s := by
-  intro v hv_inter
-  obtain ⟨hv_R, hv_V⟩ := hv_inter
-  obtain ⟨hv_spa, hv_per_c, _hv_s_ne⟩ := hv_R
-  have hv_f : v.vle f s :=
-    hv_per_c f (Finset.mem_insert_self f T_base)
-  obtain ⟨h_prod, h_lower⟩ := h_per_w_on_piece v hv_V hv_spa hv_f
+  rintro v ⟨⟨hv_spa, hv_per_c, _⟩, hv_V⟩
+  obtain ⟨h_prod, h_lower⟩ :=
+    h_per_w_on_piece v hv_V hv_spa (hv_per_c f (Finset.mem_insert_self f T_base))
   obtain ⟨h_per_t, h_D_s_ne⟩ :=
     vle_of_dominating_unit_multi_corrected_at v h_prod h_lower
   exact ⟨hv_spa, h_per_t, h_D_s_ne⟩
@@ -180,16 +177,12 @@ theorem per_piece_singleton_subset_via_laurent_membership
   intro w hw_V hw_spa hw_f
   refine ⟨?_, ?_⟩
   · -- Product upper bound: T_D.prod id = σ⁻¹ * τ; needs h_product_at_D_s.
-    rw [show ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A).prod id =
-        ((σ⁻¹ : Aˣ) : A) * τ from Finset.prod_singleton _ _]
-    exact h_product_at_D_s w hw_V hw_spa hw_f
+    simpa using h_product_at_D_s w hw_V hw_spa hw_f
   · -- Per-element lower bound: from T054's per-piece singleton residual.
     intro t' ht'
-    rw [Finset.mem_singleton] at ht'
-    subst ht'
+    obtain rfl := Finset.mem_singleton.mp ht'
     -- w ∈ V_τ unfolds; extract w.vle 1 (σ⁻¹ * τ) from rationalOpen.
-    obtain ⟨_, h_per_one, _⟩ := hw_V
-    exact h_per_one (1 : A) (Finset.mem_singleton.mpr rfl)
+    exact hw_V.2.1 (1 : A) (Finset.mem_singleton.mpr rfl)
 
 /-- **Cover-level assembly residual — Lean statement of the next
 missing API** (T056 structured blocker).

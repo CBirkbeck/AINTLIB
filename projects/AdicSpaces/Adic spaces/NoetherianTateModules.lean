@@ -479,11 +479,10 @@ theorem Wedhorn.isClosed_ideal_of_noetherian
   rw [← closure_subset_iff_isClosed]
   intro x hx_cl
   -- Translate `x ∈ closure(J)` to `x ∈ J.closure` (as an ideal).
-  have hx_cl' : x ∈ J.closure := by rw [← Ideal.coe_closure] at hx_cl; exact hx_cl
+  have hx_cl' : x ∈ J.closure := by rwa [← Ideal.coe_closure] at hx_cl
   -- 5a. Find k : ℕ such that (π : A) ^ k * x ∈ P.A₀.
-  have hπx_tends : Filter.Tendsto (fun k : ℕ => (π : A) ^ k * x) Filter.atTop (nhds 0) := by
-    have := hπ_nilp.mul_const x
-    simpa using this
+  have hπx_tends : Filter.Tendsto (fun k : ℕ ↦ (π : A) ^ k * x) Filter.atTop (nhds 0) := by
+    simpa using hπ_nilp.mul_const x
   have hA₀_nhds : (P.A₀ : Set A) ∈ nhds (0 : A) := P.isOpen.mem_nhds P.A₀.zero_mem
   obtain ⟨k, hk⟩ := (hπx_tends.eventually hA₀_nhds).exists
   set a : A := (π : A) ^ k * x with ha_def

@@ -282,12 +282,12 @@ private theorem finiteLogTermCore_common_num_mem {N n : ℕ} (hn : n ≠ 0)
       ((ℓ : 𝓞 R') ^ m) * num
           = (((ℓ : 𝓞 R') ^ m) * yx) * (dy * c) -
               (((ℓ : 𝓞 R') ^ m) * yy) * (dx * c) := by
-                simp [num]
-                ring
+            simp [num]
+            ring
       _ = (dx * x ^ n) * (dy * c) - (dy * y ^ n) * (dx * c) := by
-                rw [hxspec, hyspec]
+            rw [hxspec, hyspec]
       _ = dx * dy * c * (x ^ n - y ^ n) := by
-                ring
+            ring
   have hpowdiff_big : x ^ n - y ^ n ∈
       F.Q ^ (m * (ℓ - 1) + (N + 1)) := by
     have hpowdiff : x ^ n - y ^ n ∈ F.Q ^ (N + n) :=

@@ -107,24 +107,24 @@ lemma evalEval_ω : (W.ω n).evalEval x y =  polyEval W x y (curve.ω n) := by
 
 open WeierstrassCurve (ψ φ ω)
 
-lemma cusp_ψ₂ : cusp.ψ₂ = 2 * Y := by simp [cusp, ψ₂, Affine.polynomialY, C_ofNat]
-lemma cusp_Ψ₃ : cusp.Ψ₃ = 3 * X ^ 4 := by simp [cusp, Ψ₃, b₂, b₄, b₆, b₈]
-lemma cusp_preΨ₄ : cusp.preΨ₄ = 2 * X ^ 6 := by simp [cusp, preΨ₄, b₂, b₄, b₆, b₈]
+lemma cusp_ψ₂ : (cusp ℤ).ψ₂ = 2 * Y := by simp [cusp, ψ₂, Affine.polynomialY, C_ofNat]
+lemma cusp_Ψ₃ : (cusp ℤ).Ψ₃ = 3 * X ^ 4 := by simp [cusp, Ψ₃, b₂, b₄, b₆, b₈]
+lemma cusp_preΨ₄ : (cusp ℤ).preΨ₄ = 2 * X ^ 6 := by simp [cusp, preΨ₄, b₂, b₄, b₆, b₈]
 
-lemma polyEval_cusp_ψ : polyEval cusp 1 1 (curve.ψ n) = n := by
+lemma polyEval_cusp_ψ : polyEval (cusp ℤ) 1 1 (curve.ψ n) = n := by
   rw [ψ, map_normEDS, ← evalEval_ψ₂, ← evalEval_Ψ₃, ← evalEval_preΨ₄, cusp_ψ₂, cusp_Ψ₃, cusp_preΨ₄]
   simp [evalEval, normEDS_two_three_two]
 
-lemma polyEval_cusp_φ : polyEval cusp 1 1 (curve.φ n) = 1 := by
+lemma polyEval_cusp_φ : polyEval (cusp ℤ) 1 1 (curve.φ n) = 1 := by
   simp_rw [φ, map_sub, map_mul, map_pow, polyEval_cusp_ψ, polyEval]
   simp only [coe_eval₂RingHom, eval₂_C, eval₂_X]; ring
 
-lemma polyEval_cusp_ψc : polyEval cusp 1 1 (curve.ψc n) = 2 := by
+lemma polyEval_cusp_ψc : polyEval (cusp ℤ) 1 1 (curve.ψc n) = 2 := by
   rw [ψc, map_compl₂EDS, ← evalEval_ψ₂, ← evalEval_Ψ₃, ← evalEval_preΨ₄]
   simp [cusp_ψ₂, cusp_Ψ₃, cusp_preΨ₄, evalEval, compl₂EDS_two_three_two]
 
-lemma polyEval_cusp_ω : polyEval cusp 1 1 (curve.ω n) = 1 := by
-  have := congr(polyEval cusp 1 1 $(curve.two_mul_ω n))
+lemma polyEval_cusp_ω : polyEval (cusp ℤ) 1 1 (curve.ω n) = 1 := by
+  have := congr(polyEval (cusp ℤ) 1 1 $(curve.two_mul_ω n))
   simp_rw [map_sub, map_mul, map_ofNat, polyEval_cusp_ψc] at this
   simpa [cusp, polyEval, specialize, curve] using this
 
@@ -186,7 +186,7 @@ lemma smulX_two : smulX 2 = smulX 1 - ψᵤ 3 / (ψᵤ 2) ^ 2 := by
 lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
     smulX m - smulX n = (ψᵤ (n + m) * ψᵤ (n - m)) / (ψᵤ n * ψᵤ m) ^ 2 := by
   rw [smulX_eq hm, smulX_eq hn,
-    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b => by ring,
+    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b ↦ by ring,
     div_sub_div]
   · rw [mul_pow]; congr; convert (isEllSequence_ψᵤ n m 1).symm using 1
     · ring
@@ -196,7 +196,7 @@ lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
 lemma smulX_sub_sub_smulX_add (add_ne : n + m ≠ 0) (sub_ne : n - m ≠ 0) :
     smulX (n - m) - smulX (n + m) = (ψᵤ (2 * n) * ψᵤ (2 * m)) / (ψᵤ (n + m) * ψᵤ (n - m)) ^ 2 := by
   rw [smulX_sub_smulX sub_ne add_ne]
-  simp only [show n + m + (n - m) = 2 * n from by ring, show n + m - (n - m) = 2 * m from by ring]
+  simp only [show n + m + (n - m) = 2 * n by ring, show n + m - (n - m) = 2 * m by ring]
 
 lemma smulX_neg : smulX (-n) = smulX n := by simp_rw [smulX, φ_neg, ψᵤ, ψ_neg, ← map_pow, neg_sq]
 
@@ -370,12 +370,12 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
         ← add_right_cancel_iff (a := _U.a₁ * smulX (n2 + 1 : ℕ) + _U.a₃)]
       convert smulY_add_sub_negY (n := n2) one_ne_zero (by omega) (by omega) (by omega) using 1
       · simp_rw [Affine.negY, Nat.cast_add]; norm_cast
-        simp only [_U, two_nsmul, two_mul]; abel
+        simp only [_U, two_mul]; abel
       convert _U.addY_sub_negY_addY (smulY n2) (smulY 1) ne using 1
       · rw [Affine.negY, ← X_eq]; ring
       · rw [← X_eq]; rfl
     rw [X_eq, Y_eq, n2.cast_add, add_zsmul, eq, eq2]
-    exact ⟨Affine.nonsingular_add ns2 ns (fun h => ne h.1), add_of_X_ne ne⟩
+    exact ⟨Affine.nonsingular_add ns2 ns (fun h ↦ ne h.1), add_of_X_ne ne⟩
   | neg ih n =>
     rw [neg_ne_zero]; intro h0
     obtain ⟨ns, eq⟩ := ih n h0
@@ -439,7 +439,7 @@ lemma dblZ_smulPoly : dblZ curvePoly (smulPoly n) = curve.ψ (2 * n) := by
     WeierstrassCurve.Affine.baseChange WeierstrassCurve.baseChange
   simp_rw [fin3_def_ext, WeierstrassCurve.map]
   rw [← ψc_spec _ n]; congr; convert curve.ω_spec n using 1
-  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 lemma nonsingular_smulField : Nonsingular curveField (smulField n) := by
@@ -457,15 +457,11 @@ private lemma add_point_of_ne_eq_addXYZ {P Q : Point (baseChange curve Universal
   rw [Point.add_point, hv, hw, addMap_eq, add_of_not_equiv]
   intro h; exact hne (Point.ext_iff.mpr (hv ▸ hw ▸ Quotient.eq.mpr h))
 
-set_option maxRecDepth 2048 in
 lemma dblXYZ_smulField : dblXYZ curveField (smulField n) = smulField (2 * n) := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [mul_zero, smulField, smulPoly, comp_fin3]
     simp only [dblXYZ, dblX, dblY, dblZ, dblU_eq, negY, negDblY, curveField, fin3_def_ext]
-    ext i; fin_cases i <;>
-      simp [dblXYZ, dblX, dblY, dblZ, dblU_eq, negY, negDblY,
-        smulField, smulPoly, curveField, fin3_def_ext] <;>
-      norm_num
+    ext i; fin_cases i <;> simp [fin3_def_ext] <;> norm_num
   refine (equiv_iff_eq_of_Z_eq ?_ (ψᵤ_ne_zero <| mul_ne_zero two_ne_zero hn)).mp
     (Quotient.exact ?_)
   · simp only [smulField, smulPoly, fin3_def_ext, Function.comp, ← dblZ_smulPoly, ← map_dblZ]; rfl
@@ -485,7 +481,7 @@ lemma ω_neg_eq_neg_negY : curve.ω (-n) = -negY curvePoly (smulPoly n) := by
   unfold smulPoly WeierstrassCurve.Jacobian.negY curvePoly
     WeierstrassCurve.Affine.baseChange WeierstrassCurve.baseChange
   simp_rw [ω_neg, fin3_def_ext, WeierstrassCurve.map,
-    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 lemma smulPoly_neg : smulPoly (-n) = (-1 : Poly) • neg curvePoly (smulPoly n) := by
@@ -500,7 +496,6 @@ lemma smulField_neg : smulField (-n) = (-1 : Universal.Field) • neg curveField
 lemma smulPoly_zero : smulPoly 0 = ![1, 1, 0] := by simp [smulPoly]
 lemma smulField_zero : smulField 0 = ![1, 1, 0] := by simp [smulField, smulPoly_zero, comp_fin3]
 
-set_option maxHeartbeats 400000 in
 lemma addXYZ_smulField :
     addXYZ curveField (smulField m) (smulField n) =
       polyToField (curve.ψ (n - m)) • smulField (n + m) := by
@@ -510,10 +505,10 @@ lemma addXYZ_smulField :
     simp_rw [zero_mul]
   obtain rfl | ne_neg := eq_or_ne n (-m)
   · have jac_one_smul : ∀ (P : Fin 3 → Universal.Field), (1 : Universal.Field) • P = P :=
-      fun _ => by simp only [smul_fin3, one_pow, one_mul, fin3_def]
+      fun _ ↦ by simp only [smul_fin3, one_pow, one_mul, fin3_def]
     rw [← jac_one_smul (smulField m), smulField_neg, neg_add_cancel,
       addXYZ_smul, one_mul, neg_one_sq (R := Universal.Field), addXYZ_neg nonsingular_smulField.1,
-      jac_one_smul, show (-m - m : ℤ) = -(2 * m) from by ring,
+      jac_one_smul, show (-m - m : ℤ) = -(2 * m) by ring,
       ψ_neg, map_neg, ← dblZ_smulPoly, ← map_dblZ, smulField_zero]
     rfl
   refine (equiv_iff_eq_of_Z_eq ?_ ?_).mp (Quotient.exact ?_)
@@ -535,14 +530,14 @@ lemma addXYZ_smulRing :
 lemma addXYZ_smulField₁ :
     addXYZ curveField (smulField n) (smulField (n + 1)) = smulField (2 * n + 1) := by
   rw [addXYZ_smulField, add_sub_cancel_left, ψ_one, map_one,
-    show (1 : Universal.Field) • smulField (n + 1 + n) = smulField (n + 1 + n) from by
+    show (1 : Universal.Field) • smulField (n + 1 + n) = smulField (n + 1 + n) by
       simp only [smul_fin3, one_pow, one_mul, fin3_def]]
   congr 1; omega
 
 lemma addXYZ_smulRing₁ :
     addXYZ curveRing (smulRing n) (smulRing (n + 1)) = smulRing (2 * n + 1) := by
   rw [addXYZ_smulRing, add_sub_cancel_left, ψ_one, map_one,
-    show (1 : Universal.Ring) • smulRing (n + 1 + n) = smulRing (n + 1 + n) from by
+    show (1 : Universal.Ring) • smulRing (n + 1 + n) = smulRing (n + 1 + n) by
       simp only [smul_fin3, one_pow, one_mul, fin3_def]]
   congr 1; omega
 
@@ -601,7 +596,7 @@ theorem zsmul_eq_smulEval {x y : F} (h : Affine.Nonsingular W x y) (n : ℤ) :
     · rw [Nat.cast_zero, zero_smul, smulEval, comp_fin3]; congrm(⟦?_⟧); simp [evalEval]
     · rw [Nat.cast_one, one_smul, smulEval, comp_fin3]; congrm(⟦?_⟧); simp [evalEval]
     obtain ⟨n, rfl|rfl⟩ := n.even_or_odd'
-    · rw [show (2 * n + 1 + 1 : ℕ) = 2 * (n + 1) from by omega]
+    · rw [show (2 * n + 1 + 1 : ℕ) = 2 * (n + 1) by omega]
       rw [Nat.cast_mul, mul_smul, natCast_zsmul, two_nsmul,
         Point.add_point, ih _ (by omega), addMap_eq, add_self,
         dblXYZ_smulEval h.1]; rfl

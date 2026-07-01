@@ -98,7 +98,7 @@ theorem fermatLastTheoremFor_thirtyseven_of_AK5a_realIdealDescent_exactUnit_noSe
     FermatLastTheoremFor 37 :=
   fermatLastTheoremFor_thirtyseven_of_AK5a_caseIIDescent_noSecondOrder
     caseI_AK5a
-    (fun hV hSO {_m} D =>
+    (fun hV hSO {_m} D ↦
       FLT37.LehmerVandiver.CaseII.caseII_descent_step_under_vandiver37
         (FLT37.LehmerVandiver.CaseII.washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDescent
           Sinnott.flt37_not_dvd_hPlus caseII_realDescent)

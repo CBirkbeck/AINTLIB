@@ -24,8 +24,8 @@ finite-dimensional embedding.
 
 namespace SpherePacking.ModularForms
 
-open scoped Topology Real BigOperators
-open UpperHalfPlane ModularForm SlashInvariantFormClass ModularFormClass Filter
+open scoped Topology Real
+open UpperHalfPlane Filter
 
 noncomputable section
 
@@ -90,7 +90,7 @@ private lemma norm_cuspFunction_div_pow_le_of_ball_bound
       (Nat.succ_le_of_lt hn)
   calc
     ‖cuspFunction h f z / z ^ (n + 1)‖
-        = ‖cuspFunction h f z‖ / ‖z‖ ^ (n + 1) := by simp
+        = ‖cuspFunction h f z‖ / ‖z‖ ^ (n + 1) := by simp only [norm_div, norm_pow]
     _ ≤ (C' * ‖z‖ ^ (n + 1)) / ‖z‖ ^ (n + 1) := by
       gcongr
       exact hcz.trans (by gcongr)
@@ -117,7 +117,9 @@ public lemma qExpansion_coeff_eq_zero_of_cuspFunction_isBigO_pow
     lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1) (le_max_right _ _)
   have hC' : ∀ᶠ q : ℂ in 𝓝 (0 : ℂ), ‖cuspFunction h f q‖ ≤ C' * ‖q‖ ^ N := by
     filter_upwards [hC] with q hq
-    exact (by simpa using hq : ‖cuspFunction h f q‖ ≤ C * ‖q‖ ^ N).trans (by gcongr; exact le_max_left _ _)
+    refine (by simpa using hq : ‖cuspFunction h f q‖ ≤ C * ‖q‖ ^ N).trans ?_
+    gcongr
+    exact le_max_left _ _
   rcases Metric.mem_nhds_iff.1 hC' with ⟨δ, hδ0, hδ⟩
   by_contra hne
   set ε : ℝ := ‖(qExpansion h f).coeff n‖ / 2

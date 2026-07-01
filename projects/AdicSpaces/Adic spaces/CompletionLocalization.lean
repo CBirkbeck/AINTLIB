@@ -84,17 +84,8 @@ variable {R : Type*} [CommRing R] [IsNoetherianRing R] (s : R)
 /-- Monotone sequences of submodules over Noetherian rings stabilize. -/
 private theorem monotone_stabilizes_of_wfGT {α : Type*} [PartialOrder α]
     [WellFoundedGT α] (f : ℕ → α) (hf : Monotone f) :
-    ∃ n, ∀ m, n ≤ m → f n = f m := by
-  by_contra hns; push_neg at hns
-  have : ∀ n, ∃ m, n < m ∧ f n < f m := fun n => by
-    obtain ⟨m, hnm, hne⟩ := hns n
-    exact ⟨m, lt_of_le_of_ne hnm (fun h => hne (h ▸ rfl)),
-           lt_of_le_of_ne (hf hnm) hne⟩
-  exact not_strictMono_of_wellFoundedGT
-    (fun n => (f ∘ fun n => Nat.rec 0 (fun k gk => (this gk).choose) n) n)
-    (by intro a b hab; induction hab with
-        | refl => exact (this _).choose_spec.2
-        | step _ ih => exact lt_trans ih (this _).choose_spec.2)
+    ∃ n, ∀ m, n ≤ m → f n = f m :=
+  WellFoundedGT.monotone_chain_condition ⟨f, hf⟩
 
 /-- The annihilator ideal `{x | s^n * x = 0}`. -/
 private def sAnn (n : ℕ) : Ideal R where
@@ -121,10 +112,8 @@ theorem torsion_bounded :
   refine ⟨N₀, fun x ⟨m, hm⟩ => ?_⟩
   rcases Nat.lt_or_ge m N₀ with hlt | hge
   · exact sAnn_mono s (Nat.le_of_lt hlt) hm
-  · have hmem : x ∈ sAnn s m := hm
-    have heq : sAnn s N₀ = sAnn s m := by
-      ext y; exact ⟨fun hy => (hN₀ m hge).symm ▸ hy, fun hy => (hN₀ m hge) ▸ hy⟩
-    rw [← heq] at hmem; exact hmem
+  · show x ∈ sAnn s N₀
+    exact (hN₀ m hge).symm ▸ hm
 
 end TorsionStabilization
 
@@ -160,11 +149,8 @@ private theorem away_lift_ker_torsion {s₁ t : A}
   have hs₁_unit : IsUnit ((algebraMap A (Localization.Away s₁) s₁) ^ n₀) :=
     IsUnit.pow n₀ (IsLocalization.Away.algebraMap_isUnit (S := Localization.Away s₁) s₁)
   have key : algebraMap A (Localization.Away s₁) (t ^ m) * x *
-      (algebraMap A (Localization.Away s₁) s₁) ^ n₀ = 0 :=
-    calc _ = algebraMap A _ (t ^ m) * (x * (algebraMap A _ s₁) ^ n₀) := by ring
-      _ = algebraMap A _ (t ^ m) * algebraMap A _ a := by rw [hsurj]
-      _ = algebraMap A _ (t ^ m * a) := (map_mul _ _ _).symm
-      _ = 0 := by rw [hm, map_zero]
+      (algebraMap A (Localization.Away s₁) s₁) ^ n₀ = 0 := by
+    rw [mul_assoc, hsurj, ← map_mul, hm, map_zero]
   rwa [hs₁_unit.mul_left_eq_zero] at key
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
@@ -306,7 +292,7 @@ private theorem restrictionMapHom_coe_eq
       ext x
       simp only [RingHom.comp_apply, restrictionMapAlg, algLift, IsLocalization.Away.lift_eq,
         RationalLocData.coeRingHom, RationalLocData.canonicalMap]
-    exact congr_fun (congr_arg DFunLike.coe this) a
+    exact DFunLike.congr_fun this a
   exact (UniformSpace.Completion.extensionHom_coe _ _ a).trans h2
 
 /-- The embedding of `locSubring` into `presheafValue` via `coeRingHom ∘ subtype`. -/
@@ -474,12 +460,11 @@ noncomputable def completionLocSubringEquiv :
   haveI : IsTopologicalRing D₀.completedLocSubring := Subring.instIsTopologicalRing _
   haveI : IsUniformAddGroup D₀.completedLocSubring :=
     IsUniformAddGroup.comap D₀.completedLocSubring.subtype.toAddMonoidHom
-  have hcont : Continuous D₀.locSubringToCompleted := by
-    apply Continuous.subtype_mk (locSubringToPresheafValue_continuous D₀)
-  have hui : IsUniformInducing D₀.locSubringToCompleted := by
-    refine isUniformEmbedding_subtype_val.isUniformInducing.isUniformInducing_comp_iff.mp ?_
-    change IsUniformInducing (Subtype.val ∘ ⇑D₀.locSubringToCompleted)
-    exact locSubringToPresheafValue_isUniformInducing D₀
+  have hcont : Continuous D₀.locSubringToCompleted :=
+    (locSubringToPresheafValue_continuous D₀).subtype_mk _
+  have hui : IsUniformInducing D₀.locSubringToCompleted :=
+    isUniformEmbedding_subtype_val.isUniformInducing.of_comp_iff.mp
+      (locSubringToPresheafValue_isUniformInducing D₀)
   have hdense : DenseRange D₀.locSubringToCompleted := by
     intro ⟨x, hx⟩
     rw [mem_closure_iff_nhds]
@@ -583,8 +568,8 @@ theorem coeRingHom_image_locSubring_isBounded (D : RationalLocData A) :
   obtain ⟨a, ha, b, hb, rfl⟩ := Set.mem_mul.mp hx
   obtain ⟨a', ha', rfl⟩ := ha
   -- a' ∈ locSubring, b ∈ closure(coe '' locNhd k). Show coe(a') * b ∈ W.
-  set f := (D.coeRingHom a' * · : presheafValue D → presheafValue D) with hf_def
-  set S := D.coeRingHom '' (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) with hS_def
+  set f := (D.coeRingHom a' * · : presheafValue D → presheafValue D)
+  set S := D.coeRingHom '' (locNhd D.P D.T D.s k : Set (Localization.Away D.s))
   -- f(b) ∈ f '' closure(S) ⊆ closure(f '' S)
   have hcont : Continuous f := continuous_const.mul continuous_id
   have hfb_in_cl : f b ∈ closure (f '' S) :=
@@ -640,11 +625,10 @@ private theorem ker_algLift_denom_clear
         algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x ∧
       algLift D₀ D h (algebraMap A (Localization.Away D₀.s) a) = 0 := by
   obtain ⟨k, a, hsurj⟩ := IsLocalization.Away.surj (S := Localization.Away D₀.s) D₀.s x
-  refine ⟨k, a, ?_, ?_⟩
-  · rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)
-  · rw [show algebraMap A (Localization.Away D₀.s) a =
-        algebraMap A _ (D₀.s ^ k) * x from by rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)]
-    rw [map_mul, hx, mul_zero]
+  have heq : algebraMap A (Localization.Away D₀.s) a =
+      algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x := by
+    rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)
+  exact ⟨k, a, heq, by rw [heq, map_mul, hx, mul_zero]⟩
 
 -- REMOVED 2026-04-16: `presheafValue_ker_from_locSubring_ker` (sorry'd) and
 -- `restrictionMapHom_eq_condition` (its only caller). Neither had external

@@ -15,8 +15,8 @@ forms, finitely many `q`-coefficients already determine the form.
 
 namespace SpherePacking.ModularForms
 
-open scoped MatrixGroups Topology BigOperators
-open UpperHalfPlane ModularForm SlashInvariantFormClass ModularFormClass Filter
+open scoped MatrixGroups
+open UpperHalfPlane
 
 noncomputable section
 

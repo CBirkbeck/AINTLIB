@@ -136,21 +136,13 @@ theorem per_piece_subset_via_pointwise_clearing
     rationalOpen (insert f T_base) s ∩
         rationalOpen ({(1 : A)} : Finset A) t' ⊆
       rationalOpen ({t'} : Finset A) D_s := by
-  intro v hv_inter
-  obtain ⟨hv_R, hv_V⟩ := hv_inter
-  obtain ⟨hv_spa, hv_per_c, _hv_s_ne⟩ := hv_R
-  obtain ⟨_, hv_per_one, hv_t_ne⟩ := hv_V
-  have hv_f : v.vle f s := hv_per_c f (Finset.mem_insert_self f T_base)
+  intro v ⟨⟨hv_spa, hv_per_c, _⟩, _, hv_per_one, hv_t_ne⟩
   have hv_one_t : v.vle (1 : A) t' :=
     hv_per_one (1 : A) (Finset.mem_singleton.mpr rfl)
   have hv_t_D_s : v.vle t' D_s :=
-    h_clearing v hv_spa hv_f hv_one_t hv_t_ne
-  have hv_one_D_s : v.vle (1 : A) D_s := v.vle_trans hv_one_t hv_t_D_s
-  refine ⟨hv_spa, ?_, not_vle_zero_of_one_vle hv_one_D_s⟩
-  intro t'' ht''
-  rw [Finset.mem_singleton] at ht''
-  subst ht''
-  exact hv_t_D_s
+    h_clearing v hv_spa (hv_per_c f (Finset.mem_insert_self f T_base)) hv_one_t hv_t_ne
+  exact ⟨hv_spa, fun t'' ht'' => Finset.mem_singleton.mp ht'' ▸ hv_t_D_s,
+    not_vle_zero_of_one_vle (v.vle_trans hv_one_t hv_t_D_s)⟩
 
 omit [IsTopologicalRing A] in
 /-- **Per-piece subset supplier — uniform-over-`t' ∈ D.T` form** (T067
@@ -213,8 +205,6 @@ theorem per_piece_subset_via_corrected_multi_clearing_at_v
   refine per_piece_subset_via_pointwise_clearing T_base s D_s f t' ?_
   intro v hv_spa hv_f _hv_one_t _hv_t_ne
   obtain ⟨h_prod, h_lower⟩ := h_per_v v hv_spa hv_f
-  obtain ⟨h_per_t_full, _h_D_s_ne⟩ :=
-    vle_of_dominating_unit_multi_corrected_at v h_prod h_lower
-  exact h_per_t_full t' ht'
+  exact (vle_of_dominating_unit_multi_corrected_at v h_prod h_lower).1 t' ht'
 
 end ValuationSpectrum

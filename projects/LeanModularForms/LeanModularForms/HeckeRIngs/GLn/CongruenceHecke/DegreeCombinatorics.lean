@@ -18,7 +18,7 @@ formulas (`HeckeCoset_deg_Gamma0_one_ppow`, `HeckeCoset_deg_Gamma0_p_ppow`).
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2–3.3
 -/
 
-open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
+open Matrix Matrix.SpecialLinearGroup
 
 open scoped Pointwise MatrixGroups
 
@@ -194,7 +194,7 @@ private lemma diagConj_entry (k : ℕ) (hk : 0 < k) (σ : GL (Fin 2) ℚ) (i j :
     rw [Matrix.coe_units_inv, h_diag_val, Matrix.inv_def, Matrix.adjugate_fin_two,
       Ring.inverse_eq_inv']
     ext i j
-    fin_cases i <;> fin_cases j <;> simp [Matrix.det_fin_two_of] <;> field_simp
+    fin_cases i <;> fin_cases j <;> simp [Matrix.det_fin_two_of]; field_simp
   rw [Units.val_mul, Units.val_mul, h_diag_inv_val, h_diag_val, Matrix.mul_apply,
     Fin.sum_univ_two]
   fin_cases i <;> fin_cases j <;>

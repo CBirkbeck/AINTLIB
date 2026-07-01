@@ -99,7 +99,7 @@ theorem extendToLocalization_le_one_of_locSubring
   -- `(ν s)⁻¹ ≤ (ν s)⁻¹` (will be used as a bound for t/s ≤ 1).
   -- The inverse of a unit `≤ 1` is `≥ 1`, so we need ν(t) · ν(s)⁻¹ ≤ 1 ↔ ν(t) ≤ ν(s).
   set ν_loc := ν.extendToLocalization hS (Localization.Away s) with hν_loc
-  refine Subring.closure_induction (p := fun y _ => ν_loc y ≤ 1) ?_ ?_ ?_ ?_ ?_ ?_ hx
+  refine Subring.closure_induction (p := fun y _ ↦ ν_loc y ≤ 1) ?_ ?_ ?_ ?_ ?_ ?_ hx
   · -- Generators: y ∈ algebraMap '' A₀ ∪ Set.range (fun t : T => divByS t s).
     rintro y (⟨a, ha, rfl⟩ | ⟨⟨t, ht⟩, rfl⟩)
     · -- y = algebraMap a, a ∈ A₀.
@@ -152,12 +152,12 @@ theorem extendToLocalization_mul_pow_lt
       (ν.extendToLocalization hS (Localization.Away s))
         (x * algebraMap A (Localization.Away s) (b : A)) < γ := by
   set ν_loc := ν.extendToLocalization hS (Localization.Away s) with hν_loc
-  have hs_pos : ν s ≠ 0 := fun h0 =>
+  have hs_pos : ν s ≠ 0 := fun h0 ↦
     hS (Submonoid.mem_powers s) ((Valuation.mem_supp_iff ν s).mpr h0)
   have hdiv_le : ∀ t ∈ T, ν_loc (divByS t s) ≤ 1 := by
     intro t ht
     simp only [divByS, hν_loc, Valuation.extendToLocalization_mk']
-    calc ν t * (ν s)⁻¹ ≤ ν s * (ν s)⁻¹ := mul_le_mul_right' (hν_T t ht) _
+    calc ν t * (ν s)⁻¹ ≤ ν s * (ν s)⁻¹ := mul_le_mul_left (hν_T t ht) _
       _ = 1 := mul_inv_cancel₀ hs_pos
   suffices haux : ∀ (U : Finset A), (∀ t ∈ U, ν_loc (divByS t s) ≤ 1) →
       ∀ x ∈ locSubring P U s, ∀ b : ↥P.A₀, b ∈ P.I ^ m →
@@ -203,7 +203,7 @@ theorem extendToLocalization_mul_pow_lt
     rw [Algebra.adjoin_singleton_eq_range_aeval, AlgHom.mem_range] at hx_in_adj
     obtain ⟨p, hp⟩ := hx_in_adj
     rw [← hp, Polynomial.aeval_eq_sum_range, Finset.sum_mul]
-    refine Valuation.map_sum_lt ν_loc hγ (fun i _ => ?_)
+    refine Valuation.map_sum_lt ν_loc hγ (fun i _ ↦ ?_)
     rw [Algebra.smul_def, Algebra.algebraMap_ofSubsemiring_apply,
       show ((p.coeff i : Localization.Away s) * (divByS t s) ^ i) *
             algebraMap A (Localization.Away s) (b : A) =
@@ -212,12 +212,12 @@ theorem extendToLocalization_mul_pow_lt
       map_mul, map_pow]
     have h_coeff : ν_loc ((p.coeff i : Localization.Away s) *
         algebraMap A (Localization.Away s) (b : A)) < γ :=
-      ih (fun t' ht' => hdivU t' (Finset.mem_insert_of_mem ht')) _ (p.coeff i).property b hb
+      ih (fun t' ht' ↦ hdivU t' (Finset.mem_insert_of_mem ht')) _ (p.coeff i).property b hb
     calc ν_loc ((p.coeff i : Localization.Away s)
             * algebraMap A (Localization.Away s) (b : A)) * ν_loc (divByS t s) ^ i
         ≤ ν_loc ((p.coeff i : Localization.Away s)
             * algebraMap A (Localization.Away s) (b : A)) * 1 := by
-          apply mul_le_mul_left'
+          apply mul_le_mul_right
           calc ν_loc (divByS t s) ^ i ≤ (1 : Γ) ^ i :=
                 pow_le_pow_left' (hdivU t (Finset.mem_insert_self t U')) i
             _ = 1 := one_pow i
@@ -279,7 +279,7 @@ theorem extendToLocalization_isContinuous_locTopology_of_bounded
   · subst hγ
     convert isOpen_empty
     ext b
-    simp [not_lt_zero']
+    simp
   -- γ ≠ 0, so γ is a unit. Use ltAddSubgroup characterization.
   set γu : Γˣ := Units.mk0 γ hγ with hγu
   rw [show { b : Localization.Away s | ν_loc b < γ } =
@@ -302,11 +302,11 @@ theorem extendToLocalization_isContinuous_locTopology_of_bounded
   -- smul-stable strengthening `∀ r, ν_loc(↑r · ↑d') < γ` by span-induction (generator case =
   -- `extendToLocalization_mul_pow_lt`, smul case reassociates `r · (c • x) = (r·c) • x`), then
   -- specialise `r = 1`.
-  have hm' : ∀ b : ↥P.A₀, b ∈ P.I ^ m → ν (b : A) < γ := fun b hb => hm ⟨b, hb, rfl⟩
+  have hm' : ∀ b : ↥P.A₀, b ∈ P.I ^ m → ν (b : A) < γ := fun b hb ↦ hm ⟨b, hb, rfl⟩
   have key : ∀ r : ↥(locSubring P T s),
       ν_loc ((r : Localization.Away s)
         * ((d' : locSubring P T s) : Localization.Away s)) < γ := by
-    refine Submodule.span_induction (p := fun x _ => ∀ r : ↥(locSubring P T s),
+    refine Submodule.span_induction (p := fun x _ ↦ ∀ r : ↥(locSubring P T s),
       ν_loc ((r : Localization.Away s)
         * ((x : locSubring P T s) : Localization.Away s)) < γ)
       ?_ ?_ ?_ ?_ hd'_mem

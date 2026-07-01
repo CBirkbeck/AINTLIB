@@ -84,13 +84,13 @@ theorem gaussSum_one_stdAddChar :
       = ∑ a : ZMod p, (1 : DirichletCharacter ℂ p) a * (ZMod.stdAddChar (N := p)) a := rfl
     _ = ∑ a : ZMod p, ((ZMod.stdAddChar (N := p)) a -
           (if a = 0 then (ZMod.stdAddChar (N := p)) a else 0)) := by
-          refine Finset.sum_congr rfl fun a _ => h_term a
+          refine Finset.sum_congr rfl fun a _ ↦ h_term a
     _ = (∑ a : ZMod p, (ZMod.stdAddChar (N := p)) a) -
           ∑ a : ZMod p, (if a = 0 then (ZMod.stdAddChar (N := p)) a else 0) := by
           rw [Finset.sum_sub_distrib]
     _ = 0 - (ZMod.stdAddChar (N := p)) (0 : ZMod p) := by
           rw [h_sum_std, Finset.sum_ite_eq' Finset.univ
-            (0 : ZMod p) (fun a => (ZMod.stdAddChar (N := p)) a)]
+            (0 : ZMod p) (fun a ↦ (ZMod.stdAddChar (N := p)) a)]
           simp
     _ = -1 := by rw [h_zero_std]; ring
 
@@ -117,7 +117,7 @@ theorem gaussSum_mul_gaussSum_inv_stdAddChar
   have h_neg_unit : IsUnit (-1 : ZMod p) := isUnit_one.neg
   have h_sq : χ (-1) * χ (-1) = 1 := by
     rw [← map_mul, show (-1 : ZMod p) * -1 = 1 from by ring, MulChar.map_one]
-  have h_ne : χ (-1) ≠ 0 := fun h => by
+  have h_ne : χ (-1) ≠ 0 := fun h ↦ by
     rw [h, mul_zero] at h_sq; exact zero_ne_one h_sq
   have h_inv_neg_one : χ⁻¹ (-1) = χ (-1) := by
     have h_inv_mul : χ⁻¹ (-1) * χ (-1) = 1 := by
@@ -281,7 +281,7 @@ theorem quadraticCharComplex_card_sqrts (hp₂ : p ≠ 2) (a : ZMod p) :
 function is the quadratic exponential sum obtained by counting fibers of the
 map `x ↦ x^2`. -/
 theorem dft_squareRootCount (k : ZMod p) :
-    ZMod.dft (fun a : ZMod p => (({x : ZMod p | x ^ 2 = a}.toFinset.card : ℂ))) k =
+    ZMod.dft (fun a : ZMod p ↦ (({x : ZMod p | x ^ 2 = a}.toFinset.card : ℂ))) k =
       ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(k * x ^ 2)) := by
   rw [ZMod.dft_apply]
   simp only [smul_eq_mul]
@@ -308,7 +308,7 @@ theorem dft_squareRootCount (k : ZMod p) :
           ZMod.stdAddChar (N := p) (-(y.1 * k)) := by
           rw [Fintype.sum_sigma]
     _ = ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(x ^ 2 * k)) := by
-          refine Fintype.sum_equiv (Equiv.sigmaFiberEquiv (fun x : ZMod p => x ^ 2)) _ _ ?_
+          refine Fintype.sum_equiv (Equiv.sigmaFiberEquiv (fun x : ZMod p ↦ x ^ 2)) _ _ ?_
           intro y
           rcases y with ⟨a, x⟩
           simp [Equiv.sigmaFiberEquiv, x.2]
@@ -319,11 +319,11 @@ theorem dft_squareRootCount (k : ZMod p) :
 terms of `quadraticCharComplex p a + 1`, using the square-counting package
 from `T023d1b`. -/
 theorem dft_quadraticCharComplex_add_one (hp₂ : p ≠ 2) (k : ZMod p) :
-    ZMod.dft (fun a : ZMod p => quadraticCharComplex p a + 1) k =
+    ZMod.dft (fun a : ZMod p ↦ quadraticCharComplex p a + 1) k =
       ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(k * x ^ 2)) := by
   have hfun :
-      (fun a : ZMod p => quadraticCharComplex p a + 1) =
-        (fun a : ZMod p => (({x : ZMod p | x ^ 2 = a}.toFinset.card : ℂ))) := by
+      (fun a : ZMod p ↦ quadraticCharComplex p a + 1) =
+        (fun a : ZMod p ↦ (({x : ZMod p | x ^ 2 = a}.toFinset.card : ℂ))) := by
     funext a
     exact (quadraticCharComplex_card_sqrts (p := p) hp₂ a).symm
   rw [hfun]
@@ -346,7 +346,7 @@ theorem dft_quadraticCharComplex_eq_gaussSum (hp₂ : p ≠ 2) (k : ZMod p) :
 /-- The discrete Fourier transform of the constant-one function on `ZMod p` is
 `p` at `0` and `0` away from `0`. -/
 theorem dft_const_one (k : ZMod p) :
-    ZMod.dft (fun _ : ZMod p => (1 : ℂ)) k = if k = 0 then p else 0 := by
+    ZMod.dft (fun _ : ZMod p ↦ (1 : ℂ)) k = if k = 0 then p else 0 := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   by_cases hk : k = 0
   · subst hk
@@ -357,7 +357,7 @@ theorem dft_const_one (k : ZMod p) :
       intro hshift
       have heval : (ZMod.stdAddChar (N := p)) (-k) = 1 := by
         simpa [AddChar.mulShift_apply] using
-          congrArg (fun ψ : AddChar (ZMod p) ℂ => ψ 1) hshift
+          congrArg (fun ψ : AddChar (ZMod p) ℂ ↦ ψ 1) hshift
       have hzero : (ZMod.stdAddChar (N := p)) (0 : ZMod p) = 1 := AddChar.map_zero_eq_one _
       have hkzero : (-k : ZMod p) = 0 := ZMod.injective_stdAddChar (heval.trans hzero.symm)
       exact hk (by simpa using hkzero)
@@ -369,11 +369,11 @@ theorem dft_const_one (k : ZMod p) :
 `quadraticCharComplex p + 1` is the sum of the quadratic-character Gauss-sum
 term and the transform of the constant function. -/
 theorem dft_quadraticCharComplex_add_one_eq_gaussSum (hp₂ : p ≠ 2) (k : ZMod p) :
-    ZMod.dft (fun a : ZMod p => quadraticCharComplex p a + 1) k =
+    ZMod.dft (fun a : ZMod p ↦ quadraticCharComplex p a + 1) k =
       quadraticCharComplex p (-k) *
           gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) +
         if k = 0 then p else 0 := by
-  change (ZMod.dft ((quadraticCharComplex p : ZMod p → ℂ) + fun _ : ZMod p => (1 : ℂ))) k = _
+  change (ZMod.dft ((quadraticCharComplex p : ZMod p → ℂ) + fun _ : ZMod p ↦ (1 : ℂ))) k = _
   rw [map_add]
   simp [dft_quadraticCharComplex_eq_gaussSum (p := p) hp₂, dft_const_one (p := p) k]
 
@@ -382,7 +382,7 @@ transform of `quadraticCharComplex p + 1` is exactly the quadratic Gauss-sum
 term. -/
 theorem dft_quadraticCharComplex_add_one_of_ne_zero (hp₂ : p ≠ 2)
     {k : ZMod p} (hk : k ≠ 0) :
-    ZMod.dft (fun a : ZMod p => quadraticCharComplex p a + 1) k =
+    ZMod.dft (fun a : ZMod p ↦ quadraticCharComplex p a + 1) k =
       quadraticCharComplex p (-k) *
         gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) := by
   simpa [hk] using dft_quadraticCharComplex_add_one_eq_gaussSum (p := p) hp₂ k
@@ -405,7 +405,7 @@ theorem gaussSum_quadraticCharComplex_eq_squareExponentialSum (hp₂ : p ≠ 2) 
         quadraticCharComplex p (-(-1 : ZMod p)) *
           gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) := by
             simp
-    _ = ZMod.dft (fun a : ZMod p => quadraticCharComplex p a + 1) (-1) := by
+    _ = ZMod.dft (fun a : ZMod p ↦ quadraticCharComplex p a + 1) (-1) := by
           symm
           exact dft_quadraticCharComplex_add_one_of_ne_zero (p := p) hp₂ (k := (-1 : ZMod p)) hneg1
     _ = ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-((-1 : ZMod p) * x ^ 2)) :=
@@ -425,12 +425,12 @@ theorem conj_gaussSum_quadraticCharComplex_eq_eval_neg_one_mul (hp₂ : p ≠ 2)
     conj (∑ x : ZMod p, ZMod.stdAddChar (N := p) (x ^ 2)) := by
           rw [gaussSum_quadraticCharComplex_eq_squareExponentialSum (p := p) hp₂]
     _ = ∑ x : ZMod p, conj (ZMod.stdAddChar (N := p) (x ^ 2)) :=
-          map_sum conj (fun x : ZMod p => ZMod.stdAddChar (N := p) (x ^ 2)) Finset.univ
+          map_sum conj (fun x : ZMod p ↦ ZMod.stdAddChar (N := p) (x ^ 2)) Finset.univ
     _ = ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(x ^ 2)) := by
           refine Finset.sum_congr rfl ?_
           intro x _
           simpa using conj_stdAddChar (p := p) (x ^ 2)
-    _ = ZMod.dft (fun a : ZMod p => quadraticCharComplex p a + 1) (1 : ZMod p) := by
+    _ = ZMod.dft (fun a : ZMod p ↦ quadraticCharComplex p a + 1) (1 : ZMod p) := by
           symm
           simpa using dft_quadraticCharComplex_add_one (p := p) hp₂ (1 : ZMod p)
     _ = quadraticCharComplex p (-1) *
@@ -540,7 +540,7 @@ theorem gaussSum_quadraticCharComplex_eq_or_neg_eq_I_mul_sqrt_of_mod_four_eq_thr
     apply sq_eq_sq_iff_eq_or_eq_neg.1
     rw [hsq_real, Real.sq_sqrt hp_nonneg]
   have hτ : τ = Complex.I * r := by
-    have hmul := congrArg (fun w : ℂ => Complex.I * w) hr
+    have hmul := congrArg (fun w : ℂ ↦ Complex.I * w) hr
     have hIz : Complex.I * z = τ := by
       calc
         Complex.I * z = -(Complex.I * (Complex.I * τ)) := by simp [z]
@@ -605,7 +605,7 @@ Dirichlet character `χ` modulo a prime `p` is an algebraic integer. -/
 theorem isIntegral_gaussSum_stdAddChar (χ : DirichletCharacter ℂ p) :
     IsIntegral ℤ (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ)) := by
   unfold gaussSum
-  refine IsIntegral.sum _ fun a _ => IsIntegral.mul ?_ ?_
+  refine IsIntegral.sum _ fun a _ ↦ IsIntegral.mul ?_ ?_
   · exact DirichletCharacter.isIntegral_apply p χ a
   · exact ZMod.isIntegral_stdAddChar p a
 
@@ -655,7 +655,7 @@ theorem gaussSum_mem_algebraAdjoin_stickelbergerComplexRoot
     push_cast
     field_simp
   unfold gaussSum
-  refine Subalgebra.sum_mem _ fun a _ => Subalgebra.mul_mem _ ?_ ?_
+  refine Subalgebra.sum_mem _ fun a _ ↦ Subalgebra.mul_mem _ ?_ ?_
   · -- `χ a ∈ Algebra.adjoin ℤ {ζ}` via `adjoin ℤ {ζ^p} ⊆ adjoin ℤ {ζ}`.
     have h_pow : χ ^ (p - 1) = 1 := by
       have h := MulChar.pow_card_eq_one χ (M := ZMod p)

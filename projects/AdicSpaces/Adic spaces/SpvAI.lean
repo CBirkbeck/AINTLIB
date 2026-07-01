@@ -60,9 +60,9 @@ def CofinalValue (v : Valuation A Γ₀) (a : A) : Prop :=
 theorem CofinalValue.le_one {v : Valuation A Γ₀} {a : A} (h : CofinalValue v a) :
     v a ≤ 1 := by
   by_contra h_gt
-  push_neg at h_gt
+  push Not at h_gt
   -- v(a) > 1 means v(a)^n ≥ 1 for all n.
-  have h_pow_ge : ∀ n : ℕ, 1 ≤ v a ^ n := fun n => Left.one_le_pow_of_le h_gt.le n
+  have h_pow_ge : ∀ n : ℕ, 1 ≤ v a ^ n := fun n ↦ Left.one_le_pow_of_le h_gt.le n
   -- Take γ = 1. Cofinality gives ∃ n, v(a)^n < 1. Contradicts h_pow_ge.
   obtain ⟨n, hn⟩ := h 1 zero_lt_one
   exact absurd hn (not_lt_of_ge (h_pow_ge n))
@@ -114,10 +114,10 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
     apply h_cofinal c (hS_span ▸ Ideal.subset_span hc) γ hγ
   choose N_c hN_c using h_per_c
   -- N_max := max over S of N_c.
-  let N_max : ℕ := (S.attach.image (fun ⟨c, hc⟩ => N_c c hc)).sup id + 1
+  let N_max : ℕ := (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1
   -- n₀ := (S.card + 1) * N_max.
   let n₀ : ℕ := (S.card + 1) * N_max
-  refine ⟨n₀, fun a ha => ?_⟩
+  refine ⟨n₀, fun a ha ↦ ?_⟩
   -- a ∈ P.I^n₀ = (Ideal.span S)^n₀ = Ideal.span (S^n₀ as Set).
   -- We bound v(a) ≤ max over monomials of v(monomial), and each monomial < γ.
   --
@@ -134,7 +134,7 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
   refine Submodule.span_induction
     (M := P.A₀) (R := P.A₀)
     (s := ((S ^ n₀ : Finset P.A₀) : Set P.A₀))
-    (p := fun x _ => v (P.A₀.subtype x) < γ) ?_ ?_ ?_ ?_ ha'
+    (p := fun x _ ↦ v (P.A₀.subtype x) < γ) ?_ ?_ ?_ ?_ ha'
   · -- Generator case: x ∈ S^n₀ as Finset.
     intro x hx
     -- x ∈ S^n₀ → ∃ f : Fin n₀ → ↥S with (List.ofFn fun i => ↑(f i)).prod = x.
@@ -147,8 +147,8 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
     have hx_eq : (P.A₀.subtype x : A) =
         ∏ i : Fin n₀, (P.A₀.subtype (↑(f i) : P.A₀) : A) := by
       have h_map : (P.A₀.subtype : P.A₀ →+* A)
-          ((List.ofFn fun i => (↑(f i) : P.A₀)).prod) =
-          ((List.ofFn fun i => (↑(f i) : P.A₀)).map P.A₀.subtype).prod :=
+          ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).prod) =
+          ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).map P.A₀.subtype).prod :=
         map_list_prod P.A₀.subtype _
       rw [← hf, h_map, List.map_ofFn, List.prod_ofFn]
       rfl
@@ -169,33 +169,33 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
           ∏ c : ↥S, ∏ i : Fin n₀ with f i = c,
             v (P.A₀.subtype (↑c : P.A₀)) by
         rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
-          (f := fun c : ↥S => v (P.A₀.subtype (↑c : P.A₀)))]]
-      have h_inner : ∀ c : ↥S, (∏ i ∈ Finset.univ.filter (fun i => f i = c),
+          (f := fun c : ↥S ↦ v (P.A₀.subtype (↑c : P.A₀)))]]
+      have h_inner : ∀ c : ↥S, (∏ i ∈ Finset.univ.filter (fun i ↦ f i = c),
           v (P.A₀.subtype (↑c : P.A₀))) =
           v (P.A₀.subtype (↑c : P.A₀)) ^
-          (Finset.univ.filter (fun i : Fin n₀ => f i = c)).card := by
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card := by
         intro c
         rw [Finset.prod_const]
-      rw [Finset.prod_congr rfl fun c _ => h_inner c]
+      rw [Finset.prod_congr rfl fun c _ ↦ h_inner c]
       rw [← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
       -- Bound `others ≤ 1` and `c_star_factor < γ`.
-      have h_v_c_le_one : ∀ c : ↥S, v (P.A₀.subtype (↑c : P.A₀)) ≤ 1 := fun c =>
+      have h_v_c_le_one : ∀ c : ↥S, v (P.A₀.subtype (↑c : P.A₀)) ≤ 1 := fun c ↦
         h_le_one (↑c : P.A₀)
       have h_others_le_one :
           (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
             v (P.A₀.subtype (↑c : P.A₀)) ^
-            (Finset.univ.filter (fun i : Fin n₀ => f i = c)).card) ≤ 1 := by
+            (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) ≤ 1 := by
         refine Finset.prod_le_one' ?_
         intro c _
         exact Left.pow_le_one_of_le (h_v_c_le_one c) _
       have h_c_star_lt : v (P.A₀.subtype (↑c_star : P.A₀)) ^
-          (Finset.univ.filter (fun i : Fin n₀ => f i = c_star)).card < γ := by
-        set count := (Finset.univ.filter (fun i : Fin n₀ => f i = c_star)).card
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card < γ := by
+        set count := (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card
         set N_star := N_c (↑c_star : P.A₀) c_star.2
         have h_N_max_ge : N_max ≥ N_star + 1 := by
-          change (S.attach.image (fun ⟨c, hc⟩ => N_c c hc)).sup id + 1 ≥ N_star + 1
+          change (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1 ≥ N_star + 1
           apply Nat.add_le_add_right
-          have h_mem_image : N_star ∈ S.attach.image (fun ⟨c, hc⟩ => N_c c hc) := by
+          have h_mem_image : N_star ∈ S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc) := by
             rw [Finset.mem_image]
             refine ⟨⟨(↑c_star : P.A₀), c_star.2⟩, Finset.mem_attach _ _, rfl⟩
           exact Finset.le_sup (f := id) h_mem_image
@@ -217,14 +217,14 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
           _ < γ := hN_c (↑c_star : P.A₀) c_star.2
       calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
               v (P.A₀.subtype (↑c : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ => f i = c)).card) *
+              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) *
             v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ => f i = c_star)).card
+              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card
           ≤ 1 * v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ => f i = c_star)).card := by
+              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := by
             exact mul_le_mul_left h_others_le_one _
         _ = v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ => f i = c_star)).card := one_mul _
+              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := one_mul _
         _ < γ := h_c_star_lt
     · -- S empty: f vacuous, contradiction.
       exfalso
@@ -278,7 +278,7 @@ theorem Spv.isContinuous_of_cofinal_disjunct [TopologicalSpace A]
     (ValuativeRel.valuation A).IsContinuous := by
   letI : ValuativeRel A := v.toValuativeRel
   exact Valuation.isContinuous_of_ideal_pow_lt P (ValuativeRel.valuation A)
-    (fun γ hγ => cofinalValue_ideal_pow_lt P h_le_one h_cofinal γ hγ)
+    (fun γ hγ ↦ cofinalValue_ideal_pow_lt P h_le_one h_cofinal γ hγ)
 
 /-- **Wedhorn 7.10 reverse direction (project form).** Full proof using
 both disjuncts of `Spv.IsInSpvAI`.

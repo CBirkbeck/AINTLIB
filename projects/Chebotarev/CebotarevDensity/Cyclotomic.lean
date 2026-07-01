@@ -989,8 +989,7 @@ theorem chebotarev_cyclotomic
   cyclotomic_density_from_two_sided_asymp K L m hm σ
 
 /-- A variant of the cyclotomic-case theorem stated as a lower-density
-inequality. Used in the abelian case to feed into the
-`HasLowerDirichletDensity.mono` chain. -/
+inequality (the `.hasLower` form of `chebotarev_cyclotomic`). -/
 theorem chebotarev_cyclotomic_lowerDensity_ge
     (m : ℕ) [NeZero m] [IsCyclotomicExtension {m} K L] (hm : m % 4 ≠ 2)
     (σ : Gal(L/K)) :

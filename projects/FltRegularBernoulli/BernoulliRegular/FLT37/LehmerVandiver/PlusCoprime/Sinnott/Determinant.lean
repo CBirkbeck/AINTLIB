@@ -1,7 +1,6 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LogEmbedding
 import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 
-
 /-!
 # LV-SIN-B: Vandermonde-style determinant evaluation
 
@@ -198,7 +197,7 @@ theorem dirichletCharacter_sum_mulRight_substitution
       χ ((↑k⁻¹ : ZMod p)) * ∑ a : ZMod p, χ a * g a := by
   -- Substitute a ↦ a · k⁻¹ via Equiv.sum_comp.
   rw [← Equiv.sum_comp (Units.mulRight k⁻¹)
-      (fun a : ZMod p => χ a * g (a * (↑k : ZMod p)))]
+      (fun a : ZMod p ↦ χ a * g (a * (↑k : ZMod p)))]
   -- After rewrite, goal: ∑ a, χ(a · k⁻¹) * g((a · k⁻¹) · k) = ...
   have h_simplify : ∀ a : ZMod p,
       χ ((Units.mulRight k⁻¹) a) * g (((Units.mulRight k⁻¹) a) * (↑k : ZMod p)) =
@@ -210,7 +209,7 @@ theorem dirichletCharacter_sum_mulRight_substitution
       rw [mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, mul_one]
     rw [h_can, map_mul χ]
     ring
-  rw [Finset.sum_congr rfl (fun a _ => h_simplify a), ← Finset.mul_sum]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_simplify a), ← Finset.mul_sum]
 
 /-- **Matrix-eigenvalue identity**: for any Dirichlet character `χ` mod `p`,
 unit `k : (ZMod p)ˣ`, and function `g : ZMod p → ℂ`, the χ-row of the
@@ -232,8 +231,8 @@ theorem dirichletCharacter_sum_matrix_eigenvalue
       (χ (↑(k⁻¹ : (ZMod p)ˣ) : ZMod p) - 1) * ∑ a : ZMod p, χ a * g a := by
   have h_distrib : ∀ a : ZMod p,
       χ a * (g (a * (↑k : ZMod p)) - g a) =
-        χ a * g (a * (↑k : ZMod p)) - χ a * g a := fun a => mul_sub _ _ _
-  rw [Finset.sum_congr rfl (fun a _ => h_distrib a), Finset.sum_sub_distrib,
+        χ a * g (a * (↑k : ZMod p)) - χ a * g a := fun a ↦ mul_sub _ _ _
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_distrib a), Finset.sum_sub_distrib,
     dirichletCharacter_sum_mulRight_substitution χ k g]
   ring
 
@@ -270,7 +269,7 @@ theorem dirichletCharacter_even_log_sin_full_eq_two_half
         ∑ a ∈ Finset.Ico 1 ((p + 1) / 2),
           χ ((a : ℕ) : ZMod p) *
             ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) := by
-    refine Finset.sum_nbij' (fun a => p - a) (fun a => p - a) ?_ ?_ ?_ ?_ ?_
+    refine Finset.sum_nbij' (fun a ↦ p - a) (fun a ↦ p - a) ?_ ?_ ?_ ?_ ?_
     · -- maps Ico ((p+1)/2) p → Ico 1 ((p+1)/2)
       intro a ha
       rw [Finset.mem_Ico] at ha ⊢

@@ -93,6 +93,7 @@ variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type} [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **σ(a + ζb) = a + σ(ζ)·b** in K — utility for fractional ideal calculations.
 
 Used in AK-5b's unit form extraction: the denominator σ(a + ζb) factors as
@@ -102,7 +103,6 @@ theorem complexConj_a_add_zeta_b
     NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) =
       (a : K) + NumberField.IsCMField.complexConj K (algebraMap (𝓞 K) K ζ) * (b : K) := by
-  -- ℤ ⊂ K⁺ ⊂ K: complex conj fixes ℤ.
   have h_int_fixed : ∀ (n : ℤ), NumberField.IsCMField.complexConj K (n : K) = (n : K) := by
     intro n
     have h_n : (n : K) =
@@ -112,12 +112,11 @@ theorem complexConj_a_add_zeta_b
       rfl
     rw [h_n]
     exact (NumberField.IsCMField.complexConj K).commutes _
-  -- Expand the algebraMap of the sum/product first.
   have h_alg_expand : algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K)) =
       (a : K) + algebraMap (𝓞 K) K ζ * (b : K) := by
     rw [map_add, map_mul]
-    have h_a_K : algebraMap (𝓞 K) K ((a : 𝓞 K)) = (a : K) := by rfl
-    have h_b_K : algebraMap (𝓞 K) K ((b : 𝓞 K)) = (b : K) := by rfl
+    have h_a_K : algebraMap (𝓞 K) K ((a : 𝓞 K)) = (a : K) := rfl
+    have h_b_K : algebraMap (𝓞 K) K ((b : 𝓞 K)) = (b : K) := rfl
     rw [h_a_K, h_b_K]
   rw [h_alg_expand, map_add, map_mul, h_int_fixed a, h_int_fixed b]
 
@@ -131,11 +130,10 @@ theorem ringOfIntegersComplexConj_a_add_zeta_b
       (a : 𝓞 K) +
         NumberField.IsCMField.ringOfIntegersComplexConj K ζ * (b : 𝓞 K) := by
   rw [map_add, map_mul]
-  -- σ((a : 𝓞 K)) = (a : 𝓞 K) and σ((b : 𝓞 K)) = (b : 𝓞 K) (σ fixes ℤ).
   have h_a : NumberField.IsCMField.ringOfIntegersComplexConj K (a : 𝓞 K) = (a : 𝓞 K) := by
     apply RingOfIntegers.ext
     rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj]
-    have h_via : ((a : 𝓞 K) : K) = (a : K) := by rfl
+    have h_via : ((a : 𝓞 K) : K) = (a : K) := rfl
     rw [h_via]
     have h_via_Kplus : (a : K) =
         algebraMap (NumberField.maximalRealSubfield K) K
@@ -147,7 +145,7 @@ theorem ringOfIntegersComplexConj_a_add_zeta_b
   have h_b : NumberField.IsCMField.ringOfIntegersComplexConj K (b : 𝓞 K) = (b : 𝓞 K) := by
     apply RingOfIntegers.ext
     rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj]
-    have h_via : ((b : 𝓞 K) : K) = (b : K) := by rfl
+    have h_via : ((b : 𝓞 K) : K) = (b : K) := rfl
     rw [h_via]
     have h_via_Kplus : (b : K) =
         algebraMap (NumberField.maximalRealSubfield K) K
@@ -158,6 +156,7 @@ theorem ringOfIntegersComplexConj_a_add_zeta_b
     exact (NumberField.IsCMField.complexConj K).commutes _
   rw [h_a, h_b]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Ideal-side decomposition for case-I**: from `(a + ζb) = I^p` in `𝓞 K`,
 the σ-image equals `(σI)^p`. Building block for the fractional ideal
 identity `(α₀) = (I · σI⁻¹)^p` needed by AK-5b. -/
@@ -169,17 +168,14 @@ theorem caseI_complexConj_ideal_eq
       ({(a : 𝓞 K) +
         NumberField.IsCMField.ringOfIntegersComplexConj K ζ * (b : 𝓞 K)} : Set (𝓞 K)) =
       (I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ p := by
-  -- Apply ringOfIntegersComplexConj to the case-I ideal identity.
   have h_map_lhs :
       Ideal.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom
         (Ideal.span ({(a : 𝓞 K) + ζ * (b : 𝓞 K)} : Set (𝓞 K))) =
       Ideal.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom
         (I ^ p) := by
     rw [hI_pow]
-  -- LHS: σ-map of span {a + ζb} = span {σ(a + ζb)} = span {a + σ(ζ)·b}.
   rw [Ideal.map_span, Ideal.map_pow] at h_map_lhs
   simp only [Set.image_singleton] at h_map_lhs
-  -- Reduce RingEquiv.toRingHom application to the equiv application.
   have h_apply :
       (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom
         ((a : 𝓞 K) + ζ * (b : 𝓞 K)) =
@@ -191,6 +187,7 @@ theorem caseI_complexConj_ideal_eq
   rw [h_apply] at h_map_lhs
   exact h_map_lhs
 
+omit hp [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 /-- **Unit form extraction from fractional ideal equality**: if
 `spanSingleton α = spanSingleton (γ^p)` in `FractionalIdeal (𝓞 K)⁰ K`, then
 `α = u · γ^p` for some unit `u ∈ (𝓞 K)ˣ`.
@@ -206,12 +203,9 @@ theorem unit_form_of_spanSingleton_pow_eq
   rw [FractionalIdeal.spanSingleton_eq_spanSingleton] at h_eq
   obtain ⟨u, hu⟩ := h_eq
   refine ⟨u⁻¹, ?_⟩
-  -- (u⁻¹ : 𝓞 K) • (γ^p) = α, since u • α = γ^p
   rw [Units.smul_def] at hu
   have h_smul : (algebraMap (𝓞 K) K ((u : 𝓞 K))) * α = γ ^ p := by
-    rw [Algebra.smul_def] at hu
-    exact hu
-  -- Multiply both sides by algebraMap u⁻¹.
+    rwa [Algebra.smul_def] at hu
   have h_unit_ne : (algebraMap (𝓞 K) K (u : 𝓞 K)) ≠ 0 := by
     rw [Ne, FaithfulSMul.algebraMap_eq_zero_iff]
     exact (Units.ne_zero u)
@@ -238,6 +232,7 @@ theorem antiRadical_spanSingleton_div
   unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
   rw [FractionalIdeal.spanSingleton_div_spanSingleton]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **The `(α₀) = (I · σI⁻¹)^p` fractional ideal identity for case-I**.
 
 Combines `antiRadical_spanSingleton_div`, `caseI_complexConj_ideal_eq`, and
@@ -255,39 +250,33 @@ theorem antiRadical_spanSingleton_pow_eq
     ((I : FractionalIdeal (𝓞 K)⁰ K) /
       (I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom :
         FractionalIdeal (𝓞 K)⁰ K)) ^ p := by
-  -- Step 1: rewrite spanSingleton α₀ as quotient of singletons.
   rw [antiRadical_spanSingleton_div (K := K) a b ζ hab]
-  -- Step 2: convert `complexConj K (algebraMap (a+ζb))` to
-  -- `algebraMap (ringOfIntegersComplexConj K (a+ζb))`.
   have h_conj_eq :
       NumberField.IsCMField.complexConj K
         (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) =
       algebraMap (𝓞 K) K
         (NumberField.IsCMField.ringOfIntegersComplexConj K
-          ((a : 𝓞 K) + ζ * (b : 𝓞 K))) := by
-    exact (NumberField.IsCMField.coe_ringOfIntegersComplexConj
+          ((a : 𝓞 K) + ζ * (b : 𝓞 K))) :=
+    (NumberField.IsCMField.coe_ringOfIntegersComplexConj
       (K := K) ((a : 𝓞 K) + ζ * (b : 𝓞 K))).symm
   rw [h_conj_eq]
-  -- Step 3: convert each spanSingleton (algebraMap x) to coeIdeal (Ideal.span {x}).
   rw [← FractionalIdeal.coeIdeal_span_singleton (S := (𝓞 K)⁰) (P := K),
       ← FractionalIdeal.coeIdeal_span_singleton (S := (𝓞 K)⁰) (P := K)]
-  -- Step 4: use hI_pow and its σ-image to rewrite both spans as I^p / (σI)^p.
   rw [hI_pow]
-  -- The σ-image of the span: σ(span{x}) = span{σx}, then apply σ to hI_pow.
   have h_sigma_span :
       Ideal.span
         ({NumberField.IsCMField.ringOfIntegersComplexConj K
           ((a : 𝓞 K) + ζ * (b : 𝓞 K))} : Set (𝓞 K)) =
       (I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ p := by
     have h_map := congrArg
-      (fun J : Ideal (𝓞 K) =>
+      (fun J : Ideal (𝓞 K) ↦
         J.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom) hI_pow
     simp only [Ideal.map_span, Set.image_singleton, Ideal.map_pow] at h_map
     exact h_map
   rw [h_sigma_span]
-  -- Step 5: coeIdeal of pow = pow of coeIdeal, then div_pow.
   rw [FractionalIdeal.coeIdeal_pow, FractionalIdeal.coeIdeal_pow, div_pow]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Consumer of `(I · σI⁻¹)` principality**: given the AK-5a output that
 `(I · σI⁻¹) = (γ)` as fractional ideals, derive
 `spanSingleton α₀ = spanSingleton (γ^p)`. Composes
@@ -309,6 +298,7 @@ theorem antiRadical_spanSingleton_eq_pow_of_principal
   rw [antiRadical_spanSingleton_pow_eq (K := K) (p := p) a b ζ hab I hI_pow,
       hγ_principal, FractionalIdeal.spanSingleton_pow]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Full AK-5a → AK-5b composition**: from case-I `(a + ζb) = I^p` and
 principality of `(I · σI⁻¹)`, extract a unit form `α₀ = u · γ^p`. -/
 theorem antiRadical_unit_form_of_principal
@@ -327,6 +317,7 @@ theorem antiRadical_unit_form_of_principal
     (antiRadical_spanSingleton_eq_pow_of_principal (K := K) (p := p)
       a b ζ hab I hI_pow γ hγ_principal)
 
+omit [IsCMField K] in
 /-- **AK-5d: Apply `KummersLemma.isUnramified` via splitting-field hypothesis**.
 
 Composes the AK-5b output (unit form) with the AK-5c output (strong primarity) and a
@@ -345,8 +336,8 @@ theorem antiKummerLift_isUnramified_of_kummer_data
       (Polynomial.X ^ p - Polynomial.C (u : K))] :
     Algebra.Unramified (𝓞 K)
       (𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
-        (p := p) K α₀ hα₀)) := by
-  exact KummersLemma.isUnramified hp_odd hζ' u hcong hu_no_root _
+        (p := p) K α₀ hα₀)) :=
+  KummersLemma.isUnramified hp_odd hζ' u hcong hu_no_root _
 
 section IsSplittingFieldTransfer
 
@@ -356,6 +347,7 @@ variable {K : Type*} [Field K] [NumberField K]
 
 open Polynomial IntermediateField
 
+omit [NumberField K] [IsCMField K] in
 /-- **K-adjoin equality under K-scalar quotient**: adjoining `β / γ` and `β` give the
 same intermediate field, when `γ ∈ K, γ ≠ 0`. -/
 theorem adjoin_div_K_eq_adjoin
@@ -372,32 +364,29 @@ theorem adjoin_div_K_eq_adjoin
         IntermediateField.adjoin K ({β} : Set L) := by
       rw [show (algebraMap K L γ)⁻¹ = algebraMap K L γ⁻¹ from (map_inv₀ _ _).symm]
       exact IntermediateField.algebraMap_mem _ _
-    have hβ : β ∈ IntermediateField.adjoin K ({β} : Set L) := by
-      apply IntermediateField.subset_adjoin
-      exact Set.mem_singleton _
+    have hβ : β ∈ IntermediateField.adjoin K ({β} : Set L) :=
+      IntermediateField.subset_adjoin _ _ (Set.mem_singleton _)
     rw [div_eq_mul_inv]
     exact mul_mem hβ this
   · rw [IntermediateField.adjoin_le_iff]
     intro x hx
     simp only [Set.mem_singleton_iff] at hx
     rw [hx]
-    -- Goal: β ∈ adjoin K {β / γ_L}
     have h_γ_ne : algebraMap K L γ ≠ 0 := (map_ne_zero_iff _ (algebraMap K L).injective).mpr hγ
     have h_div : β / algebraMap K L γ ∈
-        IntermediateField.adjoin K ({β / algebraMap K L γ} : Set L) := by
-      apply IntermediateField.subset_adjoin
-      exact Set.mem_singleton _
+        IntermediateField.adjoin K ({β / algebraMap K L γ} : Set L) :=
+      IntermediateField.subset_adjoin _ _ (Set.mem_singleton _)
     have h_γ_in :
         algebraMap K L γ ∈
         IntermediateField.adjoin K ({β / algebraMap K L γ} : Set L) :=
       IntermediateField.algebraMap_mem _ _
-    -- β = (β/γ_L) * γ_L, both factors in adjoin.
     have h_prod_mem :
         (β / algebraMap K L γ) * algebraMap K L γ ∈
         IntermediateField.adjoin K ({β / algebraMap K L γ} : Set L) :=
       mul_mem h_div h_γ_in
     rwa [div_mul_cancel₀ β h_γ_ne] at h_prod_mem
 
+omit hp [NumberField K] [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 /-- **The substitution `δ = β/γ_L` gives a root of `X^p - u`** when `β^p = α₀` and
 `α₀ = u · γ^p` (with `γ ≠ 0`). -/
 theorem div_pow_eq_of_unit_form
@@ -408,20 +397,15 @@ theorem div_pow_eq_of_unit_form
     (β / algebraMap K L γ) ^ p = algebraMap K L u := by
   have h_γ_ne : algebraMap K L γ ≠ 0 := (map_ne_zero_iff _ (algebraMap K L).injective).mpr hγ
   have h_γp_ne : algebraMap K L (γ ^ p) ≠ 0 := by
-    rw [map_pow]; exact pow_ne_zero _ h_γ_ne
+    rw [map_pow]
+    exact pow_ne_zero _ h_γ_ne
   rw [div_pow, hβ, hα_form, map_mul, map_pow]
   field_simp
 
+omit hp [NumberField K] [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 /-- **IsSplittingField transfer for `X^p - C u` from `X^p - C α₀`** when `α₀ = u · γ^p`.
 
-Combines:
-- canonical p-th root of α₀ from `rootOfSplitsXPowSubC`
-- `K⟮β⟯ = ⊤` via `Algebra.adjoin_root_eq_top_of_isSplittingField`
-- `K⟮δ⟯ = K⟮β⟯` via `adjoin_div_K_eq_adjoin` (δ = β/γ_L)
-- `δ^p = u` via `div_pow_eq_of_unit_form`
-- `isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top` with α = δ, a = u
-
-This discharges the AK-5d-pre IsSplittingField hypothesis. -/
+Discharges the AK-5d-pre IsSplittingField hypothesis. -/
 theorem isSplittingField_X_pow_sub_C_unit_of_unit_form
     (hp_pos : 0 < p)
     (hK_prim : (primitiveRoots p K).Nonempty)
@@ -435,27 +419,20 @@ theorem isSplittingField_X_pow_sub_C_unit_of_unit_form
   haveI : NeZero p := ⟨Nat.pos_iff_ne_zero.mp hp_pos⟩
   haveI : FiniteDimensional K L := Polynomial.IsSplittingField.finiteDimensional L
     (Polynomial.X ^ p - Polynomial.C α₀)
-  -- The canonical p-th root of α₀ in L.
   let β : L := rootOfSplitsXPowSubC hp_pos α₀ L
   have hβ_pow : β ^ p = algebraMap K L α₀ :=
     rootOfSplitsXPowSubC_pow α₀ L
-  -- K⟮β⟯ = ⊤
   have hβ_top : K⟮β⟯ = ⊤ :=
     IntermediateField.adjoin_root_eq_top_of_isSplittingField hK_prim h_irr hβ_pow
-  -- δ := β / γ_L, δ^p = u
   let δ : L := β / algebraMap K L γ
   have hδ_pow : δ ^ p = algebraMap K L u :=
     div_pow_eq_of_unit_form (K := K) (p := p) β α₀ hβ_pow u γ hγ hα_form
-  -- K⟮δ⟯ = ⊤ via adjoin_div_K_eq_adjoin
   have hδ_top : IntermediateField.adjoin K ({δ} : Set L) = ⊤ := by
     have h_div_eq := adjoin_div_K_eq_adjoin (K := K) β γ hγ (L := L)
-    -- K⟮β⟯ is the same as adjoin K {β} (just notation).
     rw [show (IntermediateField.adjoin K ({β} : Set L)) = K⟮β⟯ from rfl] at h_div_eq
     have : IntermediateField.adjoin K ({δ} : Set L) = K⟮β⟯ := h_div_eq
     rw [this, hβ_top]
-  -- Convert to K⟮δ⟯ form for isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top.
   have hδ_top' : K⟮δ⟯ = ⊤ := hδ_top
-  -- Apply the theorem at finrank K L = p.
   have hK_prim' : (primitiveRoots (Module.finrank K L) K).Nonempty := h_finrank ▸ hK_prim
   have hδ_pow' : δ ^ (Module.finrank K L) = algebraMap K L u := h_finrank ▸ hδ_pow
   have := isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top (K := K) (L := L)
@@ -504,7 +481,6 @@ theorem antiKummerLift_isUnramified_via_AK5
         (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
         hα₀_ne)) := by
-  -- finrank K L = p derived from irreducibility.
   have h_finrank :
       Module.finrank K (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
         (p := p) K
@@ -514,7 +490,6 @@ theorem antiKummerLift_isUnramified_via_AK5
       (K := K) (p := p)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
       hα₀_ne h_irr
-  -- IsCyclic Gal(L/K) derived from irreducibility.
   haveI : IsCyclic
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
@@ -526,7 +501,6 @@ theorem antiKummerLift_isUnramified_via_AK5
       (K := K) (p := p)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
       hα₀_ne h_irr
-  -- Step 1: discharge the IsSplittingField K _ (X^p - C α₀) instance from the antiKummerLift def.
   haveI : Polynomial.IsSplittingField K
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
@@ -535,7 +509,6 @@ theorem antiKummerLift_isUnramified_via_AK5
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)) := by
     unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
     infer_instance
-  -- Step 2: build IsSplittingField K _ (X^p - C u) via the transfer theorem.
   haveI : Polynomial.IsSplittingField K
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
@@ -545,7 +518,6 @@ theorem antiKummerLift_isUnramified_via_AK5
       hp_pos hK_prim
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
       (algebraMap (𝓞 K) K (u : 𝓞 K)) γ hγ_ne h_unit_form.symm h_finrank h_irr
-  -- Step 3: apply KummersLemma.isUnramified via antiKummerLift_isUnramified_of_kummer_data.
   exact antiKummerLift_isUnramified_of_kummer_data (K := K) (p := p)
     hp_odd _ hα₀_ne hζ' u hcong hu_no_root
 
@@ -677,6 +649,7 @@ theorem cross_mul_witness_of_factorIdeal_class_eq_one
     ((ClassGroup.mk0_eq_one_iff
       (mem_nonZeroDivisors_iff_ne_zero.mpr hI_ne)).mp hI_class)
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- AK-5a follows from principality of each actual case-I factor ideal.
 
 This is a reduction lemma, not a source discharge: the input is the concrete
@@ -697,6 +670,7 @@ theorem AK5a_PrincipalMinusIdeals_of_factorIdeal_isPrincipal
   exact principal_ideal_div_conj_isPrincipal (K := K) hI_ne
     (h_principal hgcd hcaseI heq hζ hab hI_ne hI_pow)
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- AK-5a follows from triviality of the class of each actual case-I factor
 ideal.
 
@@ -893,12 +867,14 @@ theorem AK5c_Wieferich_lifting_of_p_dvd (hp_odd : p ≠ 2)
     {ζ : K} (hζ : IsPrimitiveRoot ζ p) :
     (hζ.toInteger - 1 : 𝓞 K) ^ p ∣ (↑u : 𝓞 K) - 1 := by
   obtain ⟨x, hx⟩ := hcong_p
-  -- u - 1 = p * x, so u = 1 + p * x. Convert p * x to p • x.
   have hux : (↑u : 𝓞 K) = 1 + p • x := by
     have : (↑u : 𝓞 K) = 1 + (p : 𝓞 K) * x := by linear_combination hx
-    rw [this]; congr 1; rw [nsmul_eq_mul]
+    rw [this]
+    congr 1
+    rw [nsmul_eq_mul]
   exact AK5c_Wieferich_lifting (K := K) hp_odd hux hζ
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- **AK-5c converse (trivial direction)**: `(ζ-1)^p ∣ u - 1 ⟹ (p : 𝓞 K) ∣ u - 1`.
 Composes `pow_dvd_pow` with `associated_zeta_sub_one_pow_prime`. -/
 theorem p_dvd_of_AK5c_StrongPrimarity {u : (𝓞 K)ˣ}
@@ -920,7 +896,7 @@ theorem AK5c_StrongPrimarity_iff_p_dvd (hp_odd : p ≠ 2)
     (hζ.toInteger - 1 : 𝓞 K) ^ p ∣ ((↑u : 𝓞 K) - 1) ↔
       (p : 𝓞 K) ∣ ((↑u : 𝓞 K) - 1) :=
   ⟨p_dvd_of_AK5c_StrongPrimarity (K := K) hζ,
-    fun h => AK5c_Wieferich_lifting_of_p_dvd (K := K) hp_odd h hζ⟩
+    fun h ↦ AK5c_Wieferich_lifting_of_p_dvd (K := K) hp_odd h hζ⟩
 
 /-- **AK-5c Wieferich lifting from Hensel-style integer congruence on `u`**: if a unit
 `u ∈ (𝓞 K)ˣ` is congruent to *some* integer `n` modulo `p` in `𝓞 K`, then
@@ -965,6 +941,7 @@ variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type} [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
+omit [IsCMField K] in
 /-- **AK-5c discharge of the named Prop**: produces `AK5c_StrongPrimarity ζ' hζ' u`
 from the hypothesis `(p : 𝓞 K) ∣ u - 1`. Direct discharge mechanism for the named Prop. -/
 theorem AK5c_StrongPrimarity_of_p_dvd (hp_odd : p ≠ 2)
@@ -997,7 +974,6 @@ theorem Ideal_map_ringOfIntegersComplexConj_involution
     (I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom).map
       (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom = I := by
   rw [Ideal.map_map]
-  -- Now need: σ.comp σ = id
   have h_comp : (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom.comp
       (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       RingHom.id (𝓞 K) := by
@@ -1024,6 +1000,7 @@ theorem σ_anti_norm_eq_one
     x * NumberField.IsCMField.complexConj K x = 1 := by
   rw [h_anti, mul_inv_cancel₀ hx]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **σ-anti property of `γ^p` implies σ-anti of γ (up to a p-th root of unity)**:
 if `γ^p` is σ-anti and γ ≠ 0, then `γ · σ(γ)` is a p-th root of 1 in K⁺. -/
 theorem σ_pth_anti_norm_pth_root
@@ -1031,10 +1008,8 @@ theorem σ_pth_anti_norm_pth_root
     (h_pth_anti : NumberField.IsCMField.complexConj K (γ ^ p) = (γ ^ p)⁻¹) :
     (γ * NumberField.IsCMField.complexConj K γ) ^ p = 1 := by
   have h_norm := σ_anti_norm_eq_one (K := K) (γ ^ p) (pow_ne_zero _ hγ) h_pth_anti
-  -- γ^p · σ(γ^p) = 1
-  -- σ(γ^p) = σ(γ)^p, so γ^p · σ(γ)^p = (γ · σ(γ))^p = 1.
-  rw [mul_pow]
-  rw [show NumberField.IsCMField.complexConj K γ ^ p =
+  rw [mul_pow,
+    show NumberField.IsCMField.complexConj K γ ^ p =
       NumberField.IsCMField.complexConj K (γ ^ p) from (map_pow _ _ _).symm]
   exact h_norm
 
@@ -1044,6 +1019,7 @@ theorem mul_complexConj_isFixed (γ : K) :
       γ * NumberField.IsCMField.complexConj K γ := by
   rw [map_mul, NumberField.IsCMField.complexConj_apply_apply, mul_comm]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **σ-fixed element with p-th power 1 lies in `K⁺` and corresponds to a p-th root
 of 1 in `K⁺`.** Sets up the Kronecker-style argument for the case-I non-p-th-power
 conclusion. -/
@@ -1052,12 +1028,10 @@ theorem fixed_pow_eq_one_descend
     (hxp : x ^ p = 1) :
     ∃ y : NumberField.maximalRealSubfield K,
       algebraMap (NumberField.maximalRealSubfield K) K y = x ∧ y ^ p = 1 := by
-  -- Use NumberField.IsCMField.complexConj_eq_self_iff to descend to K⁺.
   have h_mem : x ∈ NumberField.maximalRealSubfield K :=
     (NumberField.IsCMField.complexConj_eq_self_iff K x).mp hx_fixed
   refine ⟨⟨x, h_mem⟩, ?_, ?_⟩
   · rfl
-  -- y^p = 1 in K⁺ ↔ algebraMap (y^p) = algebraMap 1 in K.
   · have h_inj : Function.Injective
         (algebraMap (NumberField.maximalRealSubfield K) K) :=
       FaithfulSMul.algebraMap_injective _ _
@@ -1065,41 +1039,29 @@ theorem fixed_pow_eq_one_descend
     rw [map_pow, map_one]
     exact hxp
 
+omit hp in
 /-- **In a totally real number field, p-th roots of unity for p odd are trivial**. -/
 theorem totallyReal_odd_pow_eq_one_eq_one
     {K' : Type*} [Field K'] [NumberField K'] [NumberField.IsTotallyReal K']
     (hp_odd : Odd p) (y : K') (hy : y ^ p = 1) :
     y = 1 := by
-  -- Pick any complex embedding K' → ℂ; it's real since K' is totally real.
   obtain ⟨φ⟩ := (inferInstance : Nonempty (K' →+* ℂ))
   have hφ_real : NumberField.ComplexEmbedding.IsReal φ :=
     NumberField.IsTotallyReal.complexEmbedding_isReal _
-  -- Get a ψ : K' →+* ℝ from the real embedding.
   let ψ : K' →+* ℝ := NumberField.ComplexEmbedding.IsReal.embedding hφ_real
-  -- ψ(y)^p = ψ(y^p) = ψ(1) = 1 in ℝ.
   have hψ_pow : ψ y ^ p = 1 := by
     rw [← map_pow, hy, map_one]
-  -- For p odd in ℝ, ψ y = 1.
   have hψ_y : ψ y = 1 := by
     rcases (pow_eq_one_iff_of_ne_zero hp_odd.pos.ne' (a := ψ y)).mp hψ_pow with h | ⟨h, h_even⟩
     · exact h
     · exact absurd h_even (Nat.not_even_iff_odd.mpr hp_odd)
-  -- ψ injective (ring hom from field), so y = 1.
   have hψ_inj : Function.Injective ψ := RingHom.injective ψ
   apply hψ_inj
   rw [hψ_y, map_one]
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Norm = 1 from σ-anti p-th power**: if `γ^p` is σ-anti in K (i.e.,
-`σ(γ^p) = (γ^p)⁻¹`) and γ ≠ 0 and p is odd, then `γ · σ(γ) = 1` (Norm 1).
-
-This is the composition of:
-- σ_pth_anti_norm_pth_root: (γ·σ(γ))^p = 1
-- mul_complexConj_isFixed: γ·σ(γ) is σ-fixed
-- fixed_pow_eq_one_descend: descends to K⁺
-- totallyReal_odd_pow_eq_one_eq_one: K⁺ totally real, p odd ⇒ trivial.
-
-Foundation for Hilbert 90 application: from σ(γ^p) = (γ^p)⁻¹, derive
-γ = δ/σ(δ) for some δ ∈ K (provided γ^p is σ-anti). -/
+`σ(γ^p) = (γ^p)⁻¹`) and γ ≠ 0 and p is odd, then `γ · σ(γ) = 1` (Norm 1). -/
 theorem σ_pth_anti_norm_eq_one
     (hp_odd : Odd p)
     (γ : K) (hγ : γ ≠ 0)
@@ -1126,7 +1088,6 @@ theorem algebraMap_norm_K_Kplus_eq
       x * NumberField.IsCMField.complexConj K x := by
   classical
   rw [Algebra.norm_eq_prod_automorphisms]
-  -- Reduce ∏ τ : Gal(K/K⁺), τ x to x · σ(x) using Gal = {1, σ}.
   have h_ne : (1 : K ≃ₐ[NumberField.maximalRealSubfield K] K) ≠
       NumberField.IsCMField.complexConj K :=
     (NumberField.IsCMField.complexConj_ne_one K).symm
@@ -1135,7 +1096,6 @@ theorem algebraMap_norm_K_Kplus_eq
     rw [← Nat.card_eq_fintype_card, IsGalois.card_aut_eq_finrank]
     exact Algebra.IsQuadraticExtension.finrank_eq_two
       (NumberField.maximalRealSubfield K) K
-  -- Show univ = {1, σ}.
   have h_univ :
       (Finset.univ : Finset (K ≃ₐ[NumberField.maximalRealSubfield K] K)) =
       {(1 : K ≃ₐ[NumberField.maximalRealSubfield K] K),
@@ -1167,24 +1127,21 @@ theorem exists_div_complexConj_of_mul_complexConj_eq_one
     (γ : K) (hγ : γ * NumberField.IsCMField.complexConj K γ = 1) :
     ∃ δ : Kˣ, (δ : K) / NumberField.IsCMField.complexConj K (δ : K) = γ := by
   haveI : IsCyclic (K ≃ₐ[NumberField.maximalRealSubfield K] K) := by
-    -- Gal(K/K⁺) is cyclic since it has prime order 2.
     rw [isCyclic_iff_exists_zpowers_eq_top]
     exact ⟨NumberField.IsCMField.complexConj K,
       NumberField.IsCMField.zpowers_complexConj_eq_top K⟩
   have h_norm : Algebra.norm (NumberField.maximalRealSubfield K) γ = 1 :=
     norm_Kplus_eq_one_of_mul_complexConj_eq_one (K := K) γ hγ
-  obtain ⟨δ, hδ⟩ := groupCohomology.exists_div_of_norm_eq_one
+  exact groupCohomology.exists_div_of_norm_eq_one
     (g := NumberField.IsCMField.complexConj K)
-    (fun x => by rw [NumberField.IsCMField.zpowers_complexConj_eq_top]; trivial)
+    (fun x ↦ by
+      rw [NumberField.IsCMField.zpowers_complexConj_eq_top]
+      trivial)
     h_norm
-  exact ⟨δ, hδ⟩
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Full σ-anti p-th power Hilbert 90 composition**: if γ ≠ 0 and γ^p is σ-anti
-in K (i.e., σ(γ^p) = (γ^p)⁻¹) with p odd, then ∃ δ ∈ K^×, δ/σ(δ) = γ.
-
-Composes:
-- σ_pth_anti_norm_eq_one (σ-anti γ^p, p odd → γ·σ(γ) = 1)
-- exists_div_complexConj_of_mul_complexConj_eq_one (Hilbert 90). -/
+in K (i.e., σ(γ^p) = (γ^p)⁻¹) with p odd, then ∃ δ ∈ K^×, δ/σ(δ) = γ. -/
 theorem σ_pth_anti_exists_div
     (hp_odd : Odd p)
     (γ : K) (hγ : γ ≠ 0)
@@ -1193,6 +1150,7 @@ theorem σ_pth_anti_exists_div
   exists_div_complexConj_of_mul_complexConj_eq_one (K := K) γ
     (σ_pth_anti_norm_eq_one (K := K) (p := p) hp_odd γ hγ h_pth_anti)
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Ideal-side identity from Hilbert 90 + γ^p = α₀**: if γ^p = α₀ (in K)
 and γ = δ/σ(δ) (from Hilbert 90 applied to γ·σ(γ) = 1), then as fractional
 ideals, `spanSingleton α₀ = (spanSingleton δ / spanSingleton (σ δ))^p`. -/
@@ -1207,6 +1165,7 @@ theorem spanSingleton_pow_eq_div_pow_of_hilbert90
   rw [FractionalIdeal.spanSingleton_div_spanSingleton,
       FractionalIdeal.spanSingleton_pow, h_hilbert, h_pow]
 
+omit [IsCMField K] in
 /-- **FractionalIdeal p-th root uniqueness for Dedekind domains**: if `I^p = J^p`
 for nonzero I, J fractional ideals of 𝓞 K, then I = J. -/
 theorem FractionalIdeal_pow_left_injective_of_ne_zero
@@ -1219,7 +1178,6 @@ theorem FractionalIdeal_pow_left_injective_of_ne_zero
   apply finprod_congr
   intro v
   congr 1
-  -- Need: count v I = count v J.
   have h_count_pow_I : FractionalIdeal.count K v (I ^ p) = p * FractionalIdeal.count K v I :=
     FractionalIdeal.count_pow (K := K) v p I
   have h_count_pow_J : FractionalIdeal.count K v (J ^ p) = p * FractionalIdeal.count K v J :=
@@ -1227,12 +1185,11 @@ theorem FractionalIdeal_pow_left_injective_of_ne_zero
   have h_count_eq : FractionalIdeal.count K v (I ^ p) = FractionalIdeal.count K v (J ^ p) := by
     rw [h_eq]
   rw [h_count_pow_I, h_count_pow_J] at h_count_eq
-  exact (mul_left_cancel₀ (Int.natCast_ne_zero.mpr hp_pos.ne') h_count_eq)
+  exact mul_left_cancel₀ (Int.natCast_ne_zero.mpr hp_pos.ne') h_count_eq
 
+omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Combined ideal-side equality after Hilbert 90 + p-th root uniqueness**.
-
-Reduces to `FractionalIdeal_pow_left_injective_of_ne_zero` after both sides raised
-to p both equal spanSingleton α₀. Non-zero hypotheses provided explicitly. -/
+Non-zero hypotheses provided explicitly. -/
 theorem antiRadical_ideal_div_eq_principal
     (hp_pos : 0 < p)
     (a b : ℤ) (ζ : 𝓞 K) (hab : ¬ (a = 0 ∧ b = 0))
@@ -1293,6 +1250,7 @@ theorem ideal_div_delta_cross_mul
   rw [div_eq_div_iff h_σI_ne h_sσδ_ne] at h_div_eq
   rw [h_div_eq, mul_comm]
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Cross-multiplication witness from a σ-anti p-th root of the case-I radical.**
 
 If the case-I anti-radical is itself a `p`-th power `γ ^ p`, then the
@@ -1398,6 +1356,7 @@ theorem σ_image_eq_of_cross_mul
   rw [h_cross, mul_div_assoc]
   rw [div_self h_sδ_ne, mul_one]
 
+omit [IsCMField K] in
 /-- **Class equality for I and σI via the principal multiplier**: from
 `I·(σδ) = σI·(δ)` with non-zero integer-side witnesses for `δ`, derive
 `[I] = [σI]` in `ClassGroup (𝓞 K)`. -/
@@ -1409,6 +1368,7 @@ theorem classGroup_eq_of_cross_mul_with_integers
   rw [ClassGroup.mk0_eq_mk0_iff]
   exact ⟨x, y, hx, hy, h_eq⟩
 
+omit [IsCMField K] in
 /-- **K-element as ratio of integers**: for δ ∈ K^×, write δ = r/s for r ∈ 𝓞 K
 and s ∈ (𝓞 K)⁰. Concretely: ∃ r ∈ 𝓞 K, s ∈ (𝓞 K)⁰, δ · algebraMap s = algebraMap r.
 
@@ -1421,6 +1381,7 @@ theorem exists_integer_num_denom_of_K_unit
   obtain ⟨⟨r, s⟩, h⟩ := IsLocalization.surj (𝓞 K)⁰ (δ : K)
   exact ⟨r, s, h⟩
 
+omit [IsCMField K] in
 /-- **Principal multiplier from K-element**: a useful K-equation lemma. If
 `z₁ * spanSingleton z₂ = z₃ * spanSingleton z₄` as fractional ideals where all
 `zᵢ` are in K and the equation involves an ideal-times-singleton structure, the
@@ -1433,8 +1394,10 @@ theorem spanSingleton_mul_coeIdeal_translates :
         (J : FractionalIdeal (𝓞 K)⁰ K)) ↔
       Ideal.span ({((IsLocalization.sec (𝓞 K)⁰ z).1 : 𝓞 K)} : Set (𝓞 K)) * I =
         Ideal.span ({((IsLocalization.sec (𝓞 K)⁰ z).2 : 𝓞 K)} : Set (𝓞 K)) * J := by
-  intros; exact FractionalIdeal.spanSingleton_mul_coeIdeal_eq_coeIdeal
+  intros
+  exact FractionalIdeal.spanSingleton_mul_coeIdeal_eq_coeIdeal
 
+omit [IsCMField K] in
 /-- **Singleton-multiplier form** (auxiliary): if for `z ∈ K^×` we have
 `I · sp(c) = J · sp(z)`, then `sp(c · z⁻¹) · I = J`. -/
 theorem singleton_multiplier_form
@@ -1445,7 +1408,6 @@ theorem singleton_multiplier_form
   have hz : (z : K) ≠ 0 := Units.ne_zero z
   have h_sz_ne : FractionalIdeal.spanSingleton (𝓞 K)⁰ (z : K) ≠ 0 :=
     FractionalIdeal.spanSingleton_ne_zero_iff.mpr hz
-  -- From I · sp(c) = J · sp(z), use cancellation on sp(z).
   have h_cancel : FractionalIdeal.spanSingleton (𝓞 K)⁰ ((z : K))⁻¹ *
       (I * FractionalIdeal.spanSingleton (𝓞 K)⁰ c) =
       FractionalIdeal.spanSingleton (𝓞 K)⁰ ((z : K))⁻¹ *
@@ -1540,32 +1502,6 @@ theorem classGroup_mk0_I_eq_σI_of_cross_mul
   rw [← h_σI] at h_int
   exact classGroup_eq_of_cross_mul_with_integers (K := K) I σI _ _ hx_ne hy_ne h_int
 
-/-! ### Chain summary and connection to project infrastructure
-
-The non-pth-power building blocks shipped above establish:
-
-If `γ^p = antiRadical K a b ζ hab` (the non-pth-power negation) and the relevant
-non-zero conditions hold, then `ClassGroup.mk0 I = ClassGroup.mk0 σI` in
-`ClassGroup (𝓞 K)`.
-
-This connects directly to existing project infrastructure in
-`BernoulliRegular/FLT37/PrimaryDescent.lean`:
-- `classGroup_mk0_in_image_classGroupMap_of_sq_in_image`: lifts
-  `[𝔞]² ∈ image classGroupMap` to `[𝔞] ∈ image classGroupMap` (using `[𝔞]^p = 1`).
-- `classGroup_mk0_eq_one_of_in_image_of_VC`: under VC, `[𝔞] = 1` whenever
-  `[𝔞]^p = 1` and `[𝔞] ∈ image classGroupMap`.
-- `isPrincipal_of_class_eq_complexConj_of_VC`: composes the above to conclude
-  `𝔞.IsPrincipal` from `[σ𝔞] = [𝔞]` (which we derive via the chain) + `[𝔞]^p = 1`
-  + descent witness for `[𝔞]² ∈ image`.
-
-**Note:** The chain output `[I] = [σI]` is NOT itself a contradiction with case-I.
-It forces the AK-5a principality conclusion (`[I/σI] = 1`) under the hypothesis.
-
-The standard case-I non-p-th-power proof (Washington §9.4) uses direct residue
-analysis mod `(ζ - 1)` instead. The chain remains useful infrastructure for
-general AK-5 reasoning, particularly for the AK-5a derivation under VC.
--/
-
 /-- **Full non-pth-power chain to isPrincipal under VC + descent witness**.
 
 Final composition: from the assumption `γ^p = antiRadical` (along with the
@@ -1601,32 +1537,14 @@ theorem isPrincipal_of_cross_mul_under_VC
     (h_sq_in_image : ∃ 𝔠₀ : ClassGroup (𝓞 (NumberField.maximalRealSubfield K)),
       classGroupMap K 𝔠₀ = ClassGroup.mk0 I ^ 2) :
     (I : Ideal (𝓞 K)).IsPrincipal := by
-  -- Step 1: derive [I] = [σI] in Cl(𝓞 K) via the non-pth-power chain.
   have h_class_eq : ClassGroup.mk0 I = ClassGroup.mk0 σI :=
     classGroup_mk0_I_eq_σI_of_cross_mul (K := K) I σI h_σI δ h_cross hx_ne hy_ne
-  -- Step 2: apply isPrincipal_of_class_eq_complexConj_of_VC.
-  -- The h_sq_in_image hypothesis as stated uses [I]², which is what we have.
-  -- We use I's underlying ideal as 𝔞.
   have hp_odd_fact : p ≠ 2 := Fact.out
-  -- The PrimaryDescent lemma expects mk0 of (⟨𝔞, ...⟩ : (Ideal (𝓞 K))⁰).
-  -- We have I : (Ideal (𝓞 K))⁰ already; need to match shapes.
   have h_match : (⟨(I : Ideal (𝓞 K)), mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩ :
       (Ideal (𝓞 K))⁰) = I := Subtype.ext rfl
   rw [← h_match] at h_pow_one h_sq_in_image
   exact isPrincipal_of_class_eq_complexConj_of_VC
     (p := p) (hp_odd := hp_odd_fact) (K := K) h_VC h𝔞_nz h_pow_one h_sq_in_image
-
-/-! ### Open content for unconditional AK-5a
-
-The chain so far reduces unconditional AK-5a to the σ-fixed ideal descent:
-given that `I·σI` is σ-fixed as an ideal in `𝓞 K` (literal equality
-`(I·σI).map σ = I·σI`), show it descends to an ideal in `𝓞 K⁺` via the
-algebraMap. I.e., for σ-fixed J, exhibit J' : Ideal (𝓞 K⁺) with
-J = J'.map (algebraMap 𝓞 K⁺ 𝓞 K).
-
-This is the "FLT37b2b2-d-descent" open ticket in `PrimaryDescent.lean`, requiring
-Galois descent at the ideal level via `MulSemiringAction Gal(K/K⁺) (𝓞 K)`
-infrastructure (partially developed in `HMinus/KplusPrimeArithmetic.lean`). -/
 
 /-- **σ-fixed ideal descent Prop**: for every σ-fixed ideal `J` of `𝓞 K`
 (meaning `J.map σ = J` where σ = ringOfIntegersComplexConj), there exists
@@ -1702,7 +1620,6 @@ theorem isPrincipal_end_to_end_chain
       ((IsLocalization.sec (𝓞 K)⁰
         (NumberField.IsCMField.complexConj K (δ : K) * ((δ : K))⁻¹)).2 : 𝓞 K) ≠ 0) :
     I.IsPrincipal := by
-  -- Step 1: derive [σI] = [I] from cross-mul.
   have h_class_eq_swap : ClassGroup.mk0
       (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩ : nonZeroDivisors (Ideal (𝓞 K))) =
       ClassGroup.mk0 σI := by
@@ -1712,7 +1629,6 @@ theorem isPrincipal_end_to_end_chain
     rw [h_match]
     exact classGroup_mk0_I_eq_σI_of_cross_mul (K := K)
       ⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩ σI h_σI δ h_cross hx_ne hy_ne
-  -- Step 2: convert h_class_eq_swap to the form needed by H90 lemma.
   have h_class_eq : ClassGroup.mk0
       (⟨I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
         mem_nonZeroDivisors_iff_ne_zero.mpr
@@ -1726,7 +1642,6 @@ theorem isPrincipal_end_to_end_chain
           ((map_ne_bot_iff_complexConj K I).mpr h𝔞_nz)⟩ : nonZeroDivisors (Ideal (𝓞 K))) =
         σI := Subtype.ext h_σI.symm
     rw [h_σI_eq, ← h_class_eq_swap]
-  -- Step 3: apply isPrincipal_of_pow_principal_of_class_eq_complexConj_of_VC.
   exact isPrincipal_of_pow_principal_of_class_eq_complexConj_of_VC
     (p := p) (hp_odd := Fact.out) (K := K)
     h_VC h_α_ne h𝔞_nz h_pow h_class_eq
@@ -1850,7 +1765,7 @@ theorem AK5a_PrincipalMinusIdeals_of_cross_mul_witness_and_not_dvd_hPlus
     AK5a_PrincipalMinusIdeals (p := p) (K := K) := by
   exact AK5a_PrincipalMinusIdeals_of_cross_mul_data_and_not_dvd_hPlus
     (p := p) (K := K) hp_odd h_not_dvd
-    (fun {a} {b} {c} hgcd hcaseI heq {ζ} hζ hab {I} hI_ne hI_pow => by
+    (fun {a} {b} {c} hgcd hcaseI heq {ζ} hζ hab {I} hI_ne hI_pow ↦ by
       obtain ⟨δ, h_cross⟩ :=
         h_cross_data (a := a) (b := b) (c := c) hgcd hcaseI heq
           (ζ := ζ) hζ hab (I := I) hI_ne hI_pow
@@ -1941,7 +1856,7 @@ theorem AK5a_PrincipalMinusIdeals_of_CaseIAntiKummerLKUnramified_and_not_dvd_hPl
       (p := 37) (K := CyclotomicField 37 ℚ)
       (by decide : (37 : ℕ) ≠ 2) (by decide : (37 : ℕ) ≠ 3)
       h_not_dvd
-      (fun {_a _b _c} heq hcaseI {_ζ} hζ hab =>
+      (fun {_a _b _c} heq hcaseI {_ζ} hζ hab ↦
         h_LK heq hcaseI hζ hab))
       hgcd hcaseI heq hζ hab hI_ne hI_pow
 
@@ -1950,13 +1865,11 @@ section CaseIAntiKummerLKUnramifiedComposition
 open Polynomial
 
 /-- **`CaseIAntiKummerLKUnramified` follows from the universal forms of the AK-5
-substantive outputs.** This is the composition that wires AK-5 (per-case
-hypothesis-based unramified) into the universal CaseI prop. The hypothesis now
-includes `heq : a^37 + b^37 = c^37`, matching the soundness restriction on
-`CaseIAntiKummerLKUnramified`. -/
+substantive outputs.** The hypothesis includes `_heq : a^37 + b^37 = c^37`,
+matching the soundness restriction on `CaseIAntiKummerLKUnramified`. -/
 theorem caseIAntiKummerLKUnramified_of_universal_hypotheses
     (h : ∀ {a b c : ℤ}
-        (heq : a ^ 37 + b ^ 37 = c ^ 37)
+        (_heq : a ^ 37 + b ^ 37 = c ^ 37)
         (hcaseI : ¬ (37 : ℤ) ∣ a * b * c)
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0)),
@@ -1967,7 +1880,7 @@ theorem caseIAntiKummerLKUnramified_of_universal_hypotheses
               (CyclotomicField 37 ℚ) a b ζ hab)
             (caseI_antiRadical_ne_zero (K := CyclotomicField 37 ℚ)
               (by decide : (37 : ℕ) ≠ 2) hcaseI hζ hab)))) :
-    CaseIAntiKummerLKUnramified := fun {_ _ _} heq hcaseI {_} hζ hab =>
+    CaseIAntiKummerLKUnramified := fun {_ _ _} heq hcaseI {_} hζ hab ↦
   h heq hcaseI hζ hab
 
 end CaseIAntiKummerLKUnramifiedComposition

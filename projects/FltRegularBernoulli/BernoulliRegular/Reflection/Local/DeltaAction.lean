@@ -59,7 +59,7 @@ theorem ideal_pow_le_comap_ringEquiv_of_map_eq
 theorem ideal_map_ringEquiv_symm_eq_of_map_eq
     (e : R ≃+* R) (he : I.map (e : R →+* R) = I) :
     I.map (e.symm : R →+* R) = I := by
-  have h := congrArg (fun J : Ideal R => J.map (e.symm : R →+* R)) he
+  have h := congrArg (fun J : Ideal R ↦ J.map (e.symm : R →+* R)) he
   simpa using h.symm
 
 noncomputable def adicCompletionRingHomOfIdealMapEqFamily
@@ -97,7 +97,7 @@ noncomputable def adicCompletionRingHomOfIdealMapEq
     AdicCompletion I R →+* AdicCompletion I R :=
   AdicCompletion.liftRingHom I
     (adicCompletionRingHomOfIdealMapEqFamily (I := I) e he)
-    (fun hmn => adicCompletionRingHomOfIdealMapEqFamily_compatible (I := I) e he hmn)
+    (adicCompletionRingHomOfIdealMapEqFamily_compatible (I := I) e he)
 
 @[simp]
 theorem evalₐ_adicCompletionRingHomOfIdealMapEq
@@ -109,7 +109,7 @@ theorem evalₐ_adicCompletionRingHomOfIdealMapEq
         (AdicCompletion.evalₐ I n x) :=
   AdicCompletion.evalₐ_liftRingHom I
     (adicCompletionRingHomOfIdealMapEqFamily (I := I) e he)
-    (fun hmn => adicCompletionRingHomOfIdealMapEqFamily_compatible (I := I) e he hmn)
+    (adicCompletionRingHomOfIdealMapEqFamily_compatible (I := I) e he)
     n x
 
 theorem quotientMap_ringEquiv_symm_apply_quotientMap_ringEquiv
@@ -353,17 +353,17 @@ theorem localCyclotomicMaximalIdeal_map_localCyclotomicRingEquiv
 
 theorem localCyclotomicMaximalIdeal_pow_map_localCyclotomicRingEquiv
     (a : CyclotomicUnitDelta p) (n : ℕ) :
-    ((localCyclotomicMaximalIdeal p K) ^ n).map
+    (localCyclotomicMaximalIdeal p K ^ n).map
         (localCyclotomicRingEquiv (p := p) K a : localCyclotomicRing p K →+*
           localCyclotomicRing p K) =
-      (localCyclotomicMaximalIdeal p K) ^ n := by
+      localCyclotomicMaximalIdeal p K ^ n := by
   rw [Ideal.map_pow, localCyclotomicMaximalIdeal_map_localCyclotomicRingEquiv]
 
 /-- The cyclotomic action on lambda-local units. -/
 noncomputable def localCyclotomicUnitEquiv
     (a : CyclotomicUnitDelta p) :
     localCyclotomicUnitGroup p K ≃* localCyclotomicUnitGroup p K :=
-  Units.mapEquiv ((localCyclotomicRingEquiv (p := p) K a).toMulEquiv)
+  Units.mapEquiv (localCyclotomicRingEquiv (p := p) K a).toMulEquiv
 
 @[simp]
 theorem localCyclotomicUnitEquiv_coe
@@ -414,8 +414,8 @@ noncomputable def localPrincipalUnitSubgroupEquiv
       ((u : localCyclotomicUnitGroup p K) : localCyclotomicRing p K)
     rw [← RingEquiv.trans_apply, ← localCyclotomicRingEquiv_mul]
     simp [localCyclotomicRingEquiv_one]
-  map_mul' u v := by
-    exact Subtype.ext <| Units.ext <| map_mul (localCyclotomicRingEquiv (p := p) K a)
+  map_mul' u v :=
+    Subtype.ext <| Units.ext <| map_mul (localCyclotomicRingEquiv (p := p) K a)
         ((u : localCyclotomicUnitGroup p K) : localCyclotomicRing p K)
         ((v : localCyclotomicUnitGroup p K) : localCyclotomicRing p K)
 
@@ -433,7 +433,7 @@ theorem evalₐ_completedLocalCyclotomicRingEquiv
     (x : completedLocalCyclotomicRing p K) :
     AdicCompletion.evalₐ (localCyclotomicMaximalIdeal p K) n
         (completedLocalCyclotomicRingEquiv (p := p) K a x) =
-      Ideal.quotientMap ((localCyclotomicMaximalIdeal p K) ^ n)
+      Ideal.quotientMap (localCyclotomicMaximalIdeal p K ^ n)
         (localCyclotomicRingEquiv (p := p) K a : localCyclotomicRing p K →+*
           localCyclotomicRing p K)
         (ideal_pow_le_comap_ringEquiv_of_map_eq (I := localCyclotomicMaximalIdeal p K)
@@ -498,9 +498,6 @@ theorem completedLocalCyclotomicRingEquiv_mul
         (completedLocalCyclotomicRingEquiv (p := p) K b x))
   rw [evalₐ_completedLocalCyclotomicRingEquiv,
     evalₐ_completedLocalCyclotomicRingEquiv]
-  have htrans : M.map (eb.trans ea : localCyclotomicRing p K →+* localCyclotomicRing p K) = M := by
-    rw [← localCyclotomicRingEquiv_mul (p := p) (K := K) a b]
-    exact localCyclotomicMaximalIdeal_map_localCyclotomicRingEquiv (p := p) (K := K) (a * b)
   induction AdicCompletion.evalₐ M n x using Quotient.inductionOn' with
   | h r =>
     change Ideal.Quotient.mk (M ^ n)
@@ -520,7 +517,7 @@ noncomputable def completedLocalCyclotomicRingDeltaAction :
 noncomputable def completedLocalCyclotomicUnitEquiv
     (a : CyclotomicUnitDelta p) :
     completedLocalCyclotomicUnitGroup p K ≃* completedLocalCyclotomicUnitGroup p K :=
-  Units.mapEquiv ((completedLocalCyclotomicRingEquiv (p := p) K a).toMulEquiv)
+  Units.mapEquiv (completedLocalCyclotomicRingEquiv (p := p) K a).toMulEquiv
 
 @[simp]
 theorem completedLocalCyclotomicUnitEquiv_coe
@@ -595,7 +592,7 @@ theorem evalₐ_completedLocalCyclotomicRingEquiv_symm
     (x : completedLocalCyclotomicRing p K) :
     AdicCompletion.evalₐ (localCyclotomicMaximalIdeal p K) n
         ((completedLocalCyclotomicRingEquiv (p := p) K a).symm x) =
-      Ideal.quotientMap ((localCyclotomicMaximalIdeal p K) ^ n)
+      Ideal.quotientMap (localCyclotomicMaximalIdeal p K ^ n)
         ((localCyclotomicRingEquiv (p := p) K a).symm :
           localCyclotomicRing p K →+* localCyclotomicRing p K)
         (ideal_pow_le_comap_ringEquiv_of_map_eq (I := localCyclotomicMaximalIdeal p K)
@@ -668,8 +665,8 @@ noncomputable def completedPrincipalUnitSubgroupEquiv
     Subtype.ext <| (completedLocalCyclotomicUnitEquiv (p := p) K a).left_inv u
   right_inv u :=
     Subtype.ext <| (completedLocalCyclotomicUnitEquiv (p := p) K a).right_inv u
-  map_mul' u v := by
-    exact Subtype.ext <| Units.ext <| map_mul (completedLocalCyclotomicRingEquiv (p := p) K a)
+  map_mul' u v :=
+    Subtype.ext <| Units.ext <| map_mul (completedLocalCyclotomicRingEquiv (p := p) K a)
         ((u : completedLocalCyclotomicUnitGroup p K) : completedLocalCyclotomicRing p K)
         ((v : completedLocalCyclotomicUnitGroup p K) : completedLocalCyclotomicRing p K)
 
@@ -819,3 +816,4 @@ end Reflection
 end BernoulliRegular
 
 end
+

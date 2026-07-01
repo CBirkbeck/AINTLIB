@@ -101,7 +101,7 @@ lemma voronoi_permutation
   have hb_zmod : ((b : ℕ) : ZMod p) = (a : ZMod p)⁻¹ := by
     rw [hb_def, ZMod.natCast_val, ZMod.cast_id]
   -- Forward bijection: i ↦ (i * a) % p. Inverse: j ↦ (j * b) % p.
-  refine Finset.sum_nbij' (fun i => (i * a) % p) (fun j => (j * b) % p) ?_ ?_ ?_ ?_ ?_
+  refine Finset.sum_nbij' (fun i ↦ (i * a) % p) (fun j ↦ (j * b) % p) ?_ ?_ ?_ ?_ ?_
   · intros i _; simp only [Finset.mem_range]; exact Nat.mod_lt _ hp.pos
   · intros j _; simp only [Finset.mem_range]; exact Nat.mod_lt _ hp.pos
   · intros i hi
@@ -150,20 +150,20 @@ lemma voronoi_sum_mod_p_sq
   -- Helper: `(j * a : ℤ_[p]) = p · q_j + r_j` where r_j = (j*a) % p, q_j = (j*a) / p.
   have h_div_mod : ∀ j : ℕ,
       ((j * a : ℕ) : ℤ_[p]) = ((j * a / p : ℕ) : ℤ_[p]) * (p : ℤ_[p]) +
-        ((((j * a) % p : ℕ)) : ℤ_[p]) := fun j => by
+        ((((j * a) % p : ℕ)) : ℤ_[p]) := fun j ↦ by
     rw [show ((j * a : ℕ) : ℤ_[p]) = (((j * a / p) * p + (j * a) % p : ℕ) : ℤ_[p]) from by
       rw [← (Nat.div_add_mod' _ _).symm]]
     push_cast; ring
   -- Per-j witness: apply voronoi_sub_pow_linear_approx to
   -- x = (j*a : ℤ_p), y = (j*a/p : ℤ_p), p = (p : ℤ_p).
-  choose wj hwj using (fun (j : ℕ) (_hj : j ∈ Finset.range p) =>
+  choose wj hwj using (fun (j : ℕ) (_hj : j ∈ Finset.range p) ↦
     voronoi_sub_pow_linear_approx (R := ℤ_[p])
       (p := (p : ℤ_[p])) (k := k) hk_pos ((j * a : ℕ) : ℤ_[p])
       (((j * a / p : ℕ)) : ℤ_[p]))
   -- Now: (r_j : ℤ_p)^k = ((j*a) - p * (j*a/p))^k = (j*a)^k - k*(j*a)^(k-1)*p*(j*a/p) + p²*wj.
   -- For this we need to show (((j*a) % p : ℕ) : ℤ_p) = (j*a : ℤ_p) - p*(j*a/p : ℤ_p).
   have h_rj_eq : ∀ j : ℕ, (((((j * a) % p : ℕ)) : ℤ_[p])) =
-      ((j * a : ℕ) : ℤ_[p]) - (p : ℤ_[p]) * (((j * a / p : ℕ)) : ℤ_[p]) := fun j => by
+      ((j * a : ℕ) : ℤ_[p]) - (p : ℤ_[p]) * (((j * a / p : ℕ)) : ℤ_[p]) := fun j ↦ by
     linear_combination -h_div_mod j
   -- Per-j binomial identity:
   have h_per_j : ∀ (j : ℕ) (hj : j ∈ Finset.range p),
@@ -171,7 +171,7 @@ lemma voronoi_sum_mod_p_sq
         ((j * a : ℕ) : ℤ_[p]) ^ k -
           (k : ℤ_[p]) * ((j * a : ℕ) : ℤ_[p]) ^ (k - 1) * (p : ℤ_[p]) *
             (((j * a / p : ℕ)) : ℤ_[p]) +
-        (p : ℤ_[p]) ^ 2 * wj j hj := fun j hj => by rw [h_rj_eq j]; exact hwj j hj
+        (p : ℤ_[p]) ^ 2 * wj j hj := fun j hj ↦ by rw [h_rj_eq j]; exact hwj j hj
   -- Sum over j ∈ range p.
   -- Let S₁ := ∑ j^k (ℕ form → ℤ_p)
   -- Let S₁' := ∑ ((j*a) % p)^k
@@ -186,11 +186,11 @@ lemma voronoi_sum_mod_p_sq
   -- Step A: cast the permutation from ∑ ((j*a) % p)^k to ∑ j^k as ℤ_p element.
   have h_perm : ((∑ j ∈ Finset.range p, ((j * a) % p) ^ k : ℕ) : ℤ_[p]) =
       ((∑ j ∈ Finset.range p, j ^ k : ℕ) : ℤ_[p]) := by
-    congr 1; exact voronoi_permutation ha_coprime (fun n : ℕ => n ^ k)
+    congr 1; exact voronoi_permutation ha_coprime (fun n : ℕ ↦ n ^ k)
   -- Step B: sum the per-j binomial identity over j ∈ range p in ℤ_p.
   -- Define a total function w : ℕ → ℤ_[p] extending wj.
-  set w : ℕ → ℤ_[p] := fun j => if h : j ∈ Finset.range p then wj j h else 0 with hw_def
-  have hw_eq : ∀ (j : ℕ) (hj : j ∈ Finset.range p), w j = wj j hj := fun j hj => by
+  set w : ℕ → ℤ_[p] := fun j ↦ if h : j ∈ Finset.range p then wj j h else 0 with hw_def
+  have hw_eq : ∀ (j : ℕ) (hj : j ∈ Finset.range p), w j = wj j hj := fun j hj ↦ by
     change (if h : j ∈ Finset.range p then wj j h else 0) = wj j hj; simp [hj]
   -- Final witness: -∑ w j.
   set W_sum : ℤ_[p] := ∑ j ∈ Finset.range p, w j with hW_sum
@@ -202,7 +202,7 @@ lemma voronoi_sum_mod_p_sq
             (((j * a / p : ℕ)) : ℤ_[p]) +
         (p : ℤ_[p]) ^ 2 * w j) := by
     rw [Nat.cast_sum]
-    refine Finset.sum_congr rfl fun j hj => ?_
+    refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [hw_eq j hj, Nat.cast_pow]
     exact h_per_j j hj
   -- Combine Step A and Step B: the sum form using (j*a) ℤ_p terms.
@@ -215,9 +215,9 @@ lemma voronoi_sum_mod_p_sq
     rw [← h_perm, h_sum_binom]
   -- Now factor: (j*a)^k = a^k · j^k, and (j*a)^(k-1) = a^(k-1) · j^(k-1).
   have h_ja_pow : ∀ j : ℕ, ((j * a : ℕ) : ℤ_[p]) ^ k =
-      ((a : ℤ_[p])) ^ k * ((j : ℕ) : ℤ_[p]) ^ k := fun j => by push_cast; ring
+      ((a : ℤ_[p])) ^ k * ((j : ℕ) : ℤ_[p]) ^ k := fun j ↦ by push_cast; ring
   have h_ja_pow_sub1 : ∀ j : ℕ, ((j * a : ℕ) : ℤ_[p]) ^ (k - 1) =
-      ((a : ℤ_[p])) ^ (k - 1) * ((j : ℕ) : ℤ_[p]) ^ (k - 1) := fun j => by push_cast; ring
+      ((a : ℤ_[p])) ^ (k - 1) * ((j : ℕ) : ℤ_[p]) ^ (k - 1) := fun j ↦ by push_cast; ring
   -- Rewrite RHS of h_sum_ℤp term-by-term using h_ja_pow, h_ja_pow_sub1.
   have h_sum_rewrite :
       ∑ j ∈ Finset.range p,
@@ -230,7 +230,7 @@ lemma voronoi_sum_mod_p_sq
           (k : ℤ_[p]) * (a : ℤ_[p]) ^ (k - 1) * (p : ℤ_[p]) *
             (((j : ℕ) : ℤ_[p]) ^ (k - 1) * (((j * a / p : ℕ)) : ℤ_[p])) +
         (p : ℤ_[p]) ^ 2 * w j) := by
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [h_ja_pow j, h_ja_pow_sub1 j]; ring
   rw [h_sum_rewrite] at h_sum_ℤp
   -- Split into three separate sums.
@@ -312,9 +312,9 @@ theorem voronoi_congruence_mod_p
   -- Step 2 (ℚ_p, from sum_range_pow_sub_p_mul_bernoulli_weighted):
   --   (k+1)·(S₁ - p·B_k) = p²·W'
   obtain ⟨W', hW'⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even
-    (fun j hj hj_two hj_even =>
+    (fun j hj hj_two hj_even ↦
       p_mul_bernoulli_mem_padicInt_restricted hp_odd hj_two hj_even
-        (fun j' hj' => h_below_k j' (Nat.le_trans hj' hj.le)))
+        (fun j' hj' ↦ h_below_k j' (Nat.le_trans hj' hj.le)))
   -- Modular inverse of (k+1).
   have hkp1_unit : IsUnit ((k + 1 : ℕ) : ℤ_[p]) := by
     rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
@@ -323,7 +323,7 @@ theorem voronoi_congruence_mod_p
   have hu_mul : ((k + 1 : ℕ) : ℤ_[p]) * u = 1 := by
     change ((hkp1_unit.unit * hkp1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
   have hu_mul_Qp : ((k + 1 : ℕ) : ℚ_[p]) * ((u : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul
   -- Witness: z = W - (a^k - 1) · u · W'.
   refine ⟨W - ((a : ℤ_[p]) ^ k - 1) * u * W', ?_⟩
   -- Introduce abbreviations for the sums (cleaner working in ℚ_[p]).
@@ -334,7 +334,7 @@ theorem voronoi_congruence_mod_p
   have hW_Q : ((a : ℚ_[p]) ^ k - 1) * S1 -
       (k : ℚ_[p]) * (a : ℚ_[p]) ^ (k - 1) * (p : ℚ_[p]) * S2 =
       (p : ℚ_[p]) ^ 2 * ((W : ℤ_[p]) : ℚ_[p]) := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hW
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hW
     simp only [PadicInt.coe_sub, PadicInt.coe_mul, PadicInt.coe_pow,
       PadicInt.coe_natCast, PadicInt.coe_one] at this
     rw [hS1_def, hS2_def]

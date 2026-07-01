@@ -169,7 +169,7 @@ theorem neg {α : 𝓞 K} (hα : IsSemiPrimary p α) : IsSemiPrimary p (-α) := 
 /-- `IsSemiPrimary` is preserved by `Neg.neg` in both directions. -/
 @[simp]
 theorem neg_iff {α : 𝓞 K} : IsSemiPrimary p (-α) ↔ IsSemiPrimary p α :=
-  ⟨fun h => by simpa using h.neg, fun h => h.neg⟩
+  ⟨fun h ↦ by simpa using h.neg, fun h ↦ h.neg⟩
 
 /-- The sum of two semi-primary elements is semi-primary. -/
 theorem add {α β : 𝓞 K} (hα : IsSemiPrimary p α) (hβ : IsSemiPrimary p β) :
@@ -246,7 +246,7 @@ theorem neg {α : 𝓞 K} (hα : IsPrimary p α) : IsPrimary p (-α) := by
 /-- `IsPrimary` is preserved by `Neg.neg` in both directions. -/
 @[simp]
 theorem neg_iff {α : 𝓞 K} : IsPrimary p (-α) ↔ IsPrimary p α :=
-  ⟨fun h => by simpa using h.neg, fun h => h.neg⟩
+  ⟨fun h ↦ by simpa using h.neg, fun h ↦ h.neg⟩
 
 /-- The sum of two primary elements is primary. -/
 theorem add {α β : 𝓞 K} (hα : IsPrimary p α) (hβ : IsPrimary p β) :
@@ -348,7 +348,7 @@ there exist `a : ℤ` and `η : 𝓞 K` with `α = a + (ζ-1)^{2p} · η`. -/
 theorem isPrimary_iff_exists_int_eq_add_zetaSubOne_pow_mul {α : 𝓞 K} :
     IsPrimary p α ↔ ∃ (a : ℤ) (η : 𝓞 K),
       α = (a : 𝓞 K) + zetaSubOne p K ^ (2 * p) * η := by
-  refine ⟨exists_int_eq_add_zetaSubOne_pow_mul, fun ⟨a, η, hα⟩ => ⟨a, η, ?_⟩⟩
+  refine ⟨exists_int_eq_add_zetaSubOne_pow_mul, fun ⟨a, η, hα⟩ ↦ ⟨a, η, ?_⟩⟩
   linear_combination hα
 
 end IsPrimary
@@ -456,10 +456,10 @@ theorem neg {α : 𝓞 K} (hα : IsHyperprimary p α) (hp_odd : Odd p) :
 /-- `IsHyperprimary` is invariant under negation when p is odd. -/
 theorem neg_iff {α : 𝓞 K} (hp_odd : Odd p) :
     IsHyperprimary p (-α) ↔ IsHyperprimary p α :=
-  ⟨fun h => by
+  ⟨fun h ↦ by
     have := IsHyperprimary.neg (p := p) (K := K) h hp_odd
     simpa using this,
-   fun h => IsHyperprimary.neg (p := p) (K := K) h hp_odd⟩
+   fun h ↦ IsHyperprimary.neg (p := p) (K := K) h hp_odd⟩
 
 end IsHyperprimary
 

@@ -137,14 +137,13 @@ theorem _root_.FractionalIdeal.eq_of_count_eq_local
     I = J := by
   rw [← FractionalIdeal.finprod_heightOneSpectrum_factorization' (K := F) hI,
       ← FractionalIdeal.finprod_heightOneSpectrum_factorization' (K := F) hJ]
-  exact finprod_congr (fun v => by rw [h v])
+  exact finprod_congr (fun v ↦ by rw [h v])
 
 /-- The principal fractional ideal `(γ)` is nonzero (as a `FractionalIdeal`),
 since `γ ≠ 0`. -/
 theorem coe_toPrincipalIdeal_genUnit_ne_zero (P : KummerPresentation Ext) :
     (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := by
-  rw [coe_toPrincipalIdeal]
-  rw [P.genUnit_val]
+  rw [coe_toPrincipalIdeal, P.genUnit_val]
   exact spanSingleton_ne_zero_iff.mpr P.gen_ne_zero
 
 /-!
@@ -167,13 +166,12 @@ theorem genValuationDivisibleByP_of_genIsPowOfFractionalIdealClass
   have hJ' : (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) =
       ((J : FractionalIdeal (𝓞 K)⁰ K)) ^ p := by
     have h1 := congrArg
-      (fun I : (FractionalIdeal (𝓞 K)⁰ K)ˣ => (I : FractionalIdeal (𝓞 K)⁰ K))
+      (fun I : (FractionalIdeal (𝓞 K)⁰ K)ˣ ↦ (I : FractionalIdeal (𝓞 K)⁰ K))
       hJ
     simpa [Units.val_pow_eq_pow_val] using h1
   -- `count v (γ) = count v (J^p) = p * count v J`.
   refine ⟨FractionalIdeal.count K v (J : FractionalIdeal (𝓞 K)⁰ K), ?_⟩
-  rw [hJ']
-  rw [FractionalIdeal.count_pow]
+  rw [hJ', FractionalIdeal.count_pow]
 
 /-!
 ### Reverse direction: per-prime divisibility implies `(γ) = J^p`
@@ -212,7 +210,7 @@ theorem count_auxFractionalIdealRoot
         (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ) := by
   unfold auxFractionalIdealRoot
   rw [FractionalIdeal.count_finprod K v
-    (fun w => FractionalIdeal.count K w
+    (fun w ↦ FractionalIdeal.count K w
       (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ))
     (auxExponents_finite_support P)]
 
@@ -222,7 +220,7 @@ theorem auxFractionalIdealRoot_ne_zero (P : KummerPresentation Ext) :
   unfold auxFractionalIdealRoot
   -- The finprod is over `v.asIdeal ^ (e_v)`, all nonzero.
   -- Use `finprod_mem_induction` with `I ≠ 0` as the property.
-  apply finprod_induction (fun I : FractionalIdeal (𝓞 K)⁰ K => I ≠ 0)
+  apply finprod_induction (fun I : FractionalIdeal (𝓞 K)⁰ K ↦ I ≠ 0)
   · exact one_ne_zero
   · intro I I' hI hI'; exact mul_ne_zero hI hI'
   · intro w
@@ -253,8 +251,7 @@ theorem genIsPowOfFractionalIdealClass_of_genValuationDivisibleByP
     rw [FractionalIdeal.count_pow, count_auxFractionalIdealRoot v P]
     -- Goal: count v (γ) = p * (count v γ / p)
     obtain ⟨k, hk⟩ := h v
-    rw [hk]
-    rw [Int.mul_ediv_cancel_left k (Int.natCast_ne_zero.mpr (Fact.out : p.Prime).ne_zero)]
+    rw [hk, Int.mul_ediv_cancel_left k (Int.natCast_ne_zero.mpr (Fact.out : p.Prime).ne_zero)]
   -- Promote `J0` to `J : (FractionalIdeal _)ˣ`.
   let J : (FractionalIdeal (𝓞 K)⁰ K)ˣ := hJ0_isUnit.unit
   refine ⟨J, ?_⟩

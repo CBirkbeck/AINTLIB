@@ -84,24 +84,24 @@ private lemma dslope_integrand_eq {f : ℂ → ℂ} {γ : PiecewiseC1Path x x} {
 
 private lemma winding_integrand_eq_const_mul (f : ℂ → ℂ)
     (γ : PiecewiseC1Path x x) (w : ℂ) :
-    (fun t => f w / (γ t - w) * deriv γ.toPath.extend t) =
-      (fun t => f w * ((γ t - w)⁻¹ * deriv γ.toPath.extend t)) := by
+    (fun t ↦ f w / (γ t - w) * deriv γ.toPath.extend t) =
+      (fun t ↦ f w * ((γ t - w)⁻¹ * deriv γ.toPath.extend t)) := by
   funext t
   field_simp
 
 private lemma contourIntegral_fw_div_eq (f : ℂ → ℂ)
     (γ : PiecewiseC1Path x x) (w : ℂ) :
     ∫ t in (0 : ℝ)..1, f w / (γ t - w) * deriv γ.toPath.extend t =
-      f w * γ.contourIntegral (fun z => (z - w)⁻¹) := by
+      f w * γ.contourIntegral (fun z ↦ (z - w)⁻¹) := by
   simp only [PiecewiseC1Path.contourIntegral, winding_integrand_eq_const_mul]
   exact intervalIntegral.integral_const_mul _ _
 
 private lemma winding_integrand_intervalIntegrable (f : ℂ → ℂ)
     (γ : PiecewiseC1Path x x) (w : ℂ)
     (h_base : IntervalIntegrable
-      (fun t => (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
+      (fun t ↦ (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
     IntervalIntegrable
-      (fun t => f w / (γ t - w) * deriv γ.toPath.extend t) volume 0 1 :=
+      (fun t ↦ f w / (γ t - w) * deriv γ.toPath.extend t) volume 0 1 :=
   winding_integrand_eq_const_mul f γ w ▸ h_base.const_mul _
 
 private theorem avoids_delta_bound (γ : PiecewiseC1Path x x) (w : ℂ)
@@ -112,8 +112,8 @@ private theorem avoids_delta_bound (γ : PiecewiseC1Path x x) (w : ℂ)
   have h_pos : 0 < Metric.infDist w (γ.toPath.extend '' Icc (0 : ℝ) 1) :=
     (h_compact.isClosed.notMem_iff_infDist_pos
       ⟨γ.toPath.extend 0, mem_image_of_mem _ (left_mem_Icc.mpr zero_le_one)⟩).mp
-      (fun ⟨t, ht, heq⟩ => hoff t ht heq)
-  refine ⟨_, h_pos, fun t ht => ?_⟩
+      (fun ⟨t, ht, heq⟩ ↦ hoff t ht heq)
+  refine ⟨_, h_pos, fun t ht ↦ ?_⟩
   calc Metric.infDist w _ ≤ dist w (γ.toPath.extend t) :=
         Metric.infDist_le_dist_of_mem (mem_image_of_mem _ ht)
     _ = ‖γ.toPath.extend t - w‖ := by rw [Complex.dist_eq, norm_sub_rev]
@@ -132,9 +132,9 @@ splits into `f(γ t)/(γ t - w) - f(w)/(γ t - w)`, and identifies the second te
 theorem dixonH1_eq_dixonH2_sub_winding_f {f : ℂ → ℂ} {γ : PiecewiseC1Path x x} (w : ℂ)
     (hoff : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ w)
     (h_cauchy_int : IntervalIntegrable
-      (fun t => f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1)
+      (fun t ↦ f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1)
     (h_base_int : IntervalIntegrable
-      (fun t => (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
+      (fun t ↦ (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
     dixonH1 f γ w =
       dixonH2 f γ w - 2 * ↑Real.pi * I * generalizedWindingNumber γ w * f w := by
   simp only [dixonH1, dixonH2]
