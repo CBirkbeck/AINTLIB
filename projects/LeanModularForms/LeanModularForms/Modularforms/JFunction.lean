@@ -6,6 +6,7 @@ Authors: LeanModularForms contributors
 import Mathlib.NumberTheory.ModularForms.Discriminant
 import Mathlib.NumberTheory.ModularForms.NormTrace
 import LeanModularForms.ForMathlib.ValenceFormulaFinal
+import LeanModularForms.Modularforms.ForMathlib_Cusps
 
 /-!
 # The modular `j`-function
@@ -107,13 +108,6 @@ theorem qj_tendsto_atImInfty : Tendsto qj atImInfty (nhds (1 : ℂ)) := by
     ext τ
     exact congrFun qjIdentity τ
   simpa [hEq] using hqj
-
-theorem zero_at_cusps_of_zero_at_infty {f : ℍ → ℂ} {c : OnePoint ℝ} {k : ℤ}
-    {𝒢 : Subgroup (GL (Fin 2) ℝ)} [𝒢.IsArithmetic]
-    (hc : IsCusp c 𝒢) (hb : ∀ A ∈ 𝒮ℒ, UpperHalfPlane.IsZeroAtImInfty (f ∣[k] A)) :
-    c.IsZeroAt f k := by
-  rw [Subgroup.IsArithmetic.isCusp_iff_isCusp_SL2Z] at hc
-  refine (OnePoint.isZeroAt_iff_forall_SL2Z hc).mpr fun A hA ↦ hb A ⟨A, rfl⟩
 
 def levelOneWeightZeroCuspForm {f : ℍ → ℂ} (hslash : ∀ γ : SL(2, ℤ), f ∣[(0 : ℤ)] γ = f)
     (hmdiff : MDiff f) (hzero : IsZeroAtImInfty f) : CuspForm (Gamma 1) 0 where
