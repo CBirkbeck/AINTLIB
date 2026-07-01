@@ -217,6 +217,12 @@ is the one spine leaf provable now (mathlib Fourier + `auxF`), independent of SP
 **Review note (Q5)**: not trivial in Lean — mind the even extension, the improper `∫_T^∞`,
 the complex parameter `h = s − ½`, and the denominator `h²+γ²` (typing/branch care). Best early
 target above the definitions nonetheless.
+**NORMALISATION WARNING (paper audit 2026-07-01, eq. (2) verbatim)**: the paper's transform is
+`F̂(γ) := ∫_{−∞}^{+∞} F(t)·e^{itγ} dt` — **`e^{+itγ}`, NO `2π`**. Mathlib's `𝓕 f w =
+∫ e^{−2πi·t·w} f(t) dt`. Do NOT state Lemma 2 through mathlib's `𝓕`: define the paper's
+transform as a plain integral (`∫ t, auxF s X t * Complex.exp (I*t*γ)`), or relate via
+`γ = −2πw` with an explicit conversion lemma filed under SP1-N. All explicit-formula terms
+(`∑_ρ F̂(γ_ρ)`) use the paper convention.
 #### Mathlib lemmas
 - `Real.fourierIntegral`, `intervalIntegral.integral_comp`, `integral_cos`, integration-by-parts
   lemmas; `Complex.exp` derivatives.

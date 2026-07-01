@@ -52,7 +52,25 @@ Formalise **Belabas–Friedman, "Computing the residue of the Dedekind zeta func
   (mathlib-standard junk values inside total functions, e.g. `tsum = 0` when not summable, are
   fine — theorems must carry the real summability/integrability hypotheses.)
 - **Faithful to the literature**: proofs mirror the paper / standard references; don't invent
-  decompositions (quote-or-delete discipline from `/develop`).
+  decompositions (quote-or-delete discipline from `/develop`). **Standing instruction
+  (user, 2026-07-01): consult the references REGULARLY** — re-read the source before/after
+  every statement-level definition; audit for drift, wrong statements, junk hypotheses.
+  The paper is NOT on disk (`refs/DedekindResidue/` doesn't exist) — fetch arXiv:1305.0035
+  via the alphaXiv MCP (`answer_pdf_queries` on `https://arxiv.org/pdf/1305.0035`).
+
+**Literature audit 2026-07-01 (full paper text fetched and cross-checked):**
+- `gAux` ✓ = eq. (6); `auxF` ✓ = eqs. (11)–(12); Theorem-1 statement ✓ verbatim constants
+  (2.324, 3.88, 4.26, `(1+2/√log Δ)²`, `X ≥ 69`, `n > 1`, GRH(ζ_K) ∧ RH(ζ_ℚ)).
+- **DRIFT CAUGHT AND FIXED**: the paper's `B_K(X)` is the *relative* sum `∑^{K−ℚ}` ("the sum
+  for k is subtracted from the corresponding sum for K", p. 2) — our `bSum` was the K-sum
+  only. Fixed by adding `bSumRel K X := bSum K X - bSum ℚ X` and redefining `fK` over it.
+- **CONVENTION TRAP RECORDED** (T003 ticket): paper's Fourier transform (eq. 2) is
+  `∫ F(t)e^{+itγ}dt` — no `2π`, opposite sign vs mathlib's `𝓕`. Lemma 2 must be stated in
+  the paper's convention (plain integral), with any 𝓕-bridge filed under SP1-N.
+- AGΘ target cross-checked: `Θ_L(t) = covol(L)⁻¹ t^{−n/2} Θ_{L♯}(1/t)` (standard lattice
+  theta inversion, Neukirch ANT VII §3 shape) is forced by our proven Poisson +
+  mathlib's `fourier_gaussian_innerProductSpace` at `b = πt`; self-consistency: applying it
+  twice returns `Θ_L` via `covolume_dualZLattice_mul` (P.1).
 
 **Confirmed route for the ζ_K functional equation** (expert review, 2026-07-01, reply in
 `expert-review/2026-07-01/`): the classical **Hecke theta stack** —

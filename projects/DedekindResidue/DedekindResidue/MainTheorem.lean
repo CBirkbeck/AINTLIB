@@ -21,11 +21,14 @@ namespace DedekindResidue
 
 open NumberField
 
-/-- `B_K(X) = Σ_{𝔭^m, N𝔭^m < X} (log N𝔭 / N𝔭^{m/2})·(√X·log X / (N𝔭^{m/2}·log N𝔭^m) − 1)`
-— Belabas–Friedman, p. 2. The sum ranges over nonzero prime ideals `𝔭 ⊆ 𝓞_K` and exponents
-`m ≥ 1` with `N𝔭^m < X`; written as a `finsum` (the support is finite, so no separate
-finiteness proof is needed to define it). Here `N𝔭 = Ideal.absNorm 𝔭` and `N𝔭^{m/2}` is the
-real power `Real.rpow`. -/
+/-- The single-field prime-power sum
+`Σ_{𝔭^m, N𝔭^m < X} (log N𝔭 / N𝔭^{m/2})·(√X·log X / (N𝔭^{m/2}·log N𝔭^m) − 1)`
+over nonzero prime ideals `𝔭 ⊆ 𝓞_K` and exponents `m ≥ 1` with `N𝔭^m < X`; written as a
+`finsum` (the support is finite, so no separate finiteness proof is needed to define it).
+Here `N𝔭 = Ideal.absNorm 𝔭` and `N𝔭^{m/2}` is the real power `Real.rpow`.
+
+This is the `K`-part of Belabas–Friedman's `B_K(X)`; the paper's `B_K` itself is the
+**relative** sum `∑^{K−ℚ}` — see `bSumRel`. -/
 noncomputable def bSum (K : Type*) [Field K] [NumberField K] (X : ℝ) : ℝ :=
   ∑ᶠ (p : {p : Ideal (RingOfIntegers K) // p.IsPrime ∧ p ≠ ⊥}) (m : ℕ),
     if 0 < m ∧ (Ideal.absNorm p.1 : ℝ) ^ m < X then
@@ -35,10 +38,19 @@ noncomputable def bSum (K : Type*) [Field K] [NumberField K] (X : ℝ) : ℝ :=
               Real.log ((Ideal.absNorm p.1 : ℝ) ^ m)) - 1)
     else 0
 
-/-- `f_K(X) = 3·(B_K(X) − B_K(X/9)) / (2·√X·log(3X))` — Belabas–Friedman, p. 2: the
-computable approximation to `log κ_K` bounded in Theorem 1. -/
+/-- **`B_K(X)`** of Belabas–Friedman (p. 2, verbatim):
+`B_K(X) := ∑^{K−ℚ}_{𝔭,m : N𝔭^m < X} (log N𝔭/N𝔭^{m/2})·(√X·log X/(N𝔭^{m/2}·log N𝔭^m) − 1)`,
+where "the notation `∑^{K−k}` means that the sum for `k` is subtracted from the corresponding
+sum for `K`" — so the rational-prime sum (`k = ℚ`, prime ideals of `ℤ` with `N(p) = p`) is
+subtracted from the `K`-sum. -/
+noncomputable def bSumRel (K : Type*) [Field K] [NumberField K] (X : ℝ) : ℝ :=
+  bSum K X - bSum ℚ X
+
+/-- `f_K(X) = 3·(B_K(X) − B_K(X/9)) / (2·√X·log(3X))` — Belabas–Friedman, p. 2 (with `B_K`
+the **relative** `∑^{K−ℚ}` sum `bSumRel`): the computable approximation to `log κ_K` bounded
+in Theorem 1. -/
 noncomputable def fK (K : Type*) [Field K] [NumberField K] (X : ℝ) : ℝ :=
-  3 * (bSum K X - bSum K (X / 9)) / (2 * Real.sqrt X * Real.log (3 * X))
+  3 * (bSumRel K X - bSumRel K (X / 9)) / (2 * Real.sqrt X * Real.log (3 * X))
 
 /-- **Theorem 1** (Belabas–Friedman, arXiv:1305.0035, p. 2). Let `K` be a number field of
 degree `n > 1`. Under GRH for `ζ_K` and RH for `ζ_ℚ`, for `X ≥ 69`,
