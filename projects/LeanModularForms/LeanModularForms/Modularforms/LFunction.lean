@@ -28,6 +28,10 @@ For a weight-`k` modular form `f` with `q`-expansion `f(τ) = Σ_{n≥0} aₙ q�
 the **L-function** is the Dirichlet series `L(s, f) = Σ_{n ≥ 1} aₙ · n^{-s}`,
 built on mathlib's `LSeries` / `LSeriesSummable` infrastructure.
 
+All results are stated at full generality for a `ModularFormClass F Γ k` (resp. `CuspFormClass`)
+with `Γ : Subgroup (GL (Fin 2) ℝ)` and `k : ℤ`; the convergence statements additionally assume
+`Γ.IsArithmetic`, which is what mathlib's coefficient-growth bounds require.
+
 ## Main definitions
 
 * `ModularForms.lCoeff f` — the `ℕ → ℂ` coefficient sequence built from the
@@ -38,12 +42,14 @@ built on mathlib's `LSeries` / `LSeriesSummable` infrastructure.
 
 * `ModularForms.abscissaOfAbsConv_lCoeff_le` /
   `ModularForms.abscissaOfAbsConv_lCoeff_le_cuspForm` — Hecke's abscissa bounds
-  `≤ k + 1` (modular forms) and `≤ k/2 + 1` (cusp forms).
+  `≤ k + 1` (modular forms, for `0 ≤ k`) and `≤ k / 2 + 1` (cusp forms), derived from
+  `ModularFormClass.qExpansion_isBigO` and `CuspFormClass.qExpansion_isBigO`.
 * `ModularForms.lSeriesSummable_of_modularForm` /
-  `ModularForms.lSeriesSummable_of_cuspForm` — absolute convergence on the
-  corresponding half-planes.
+  `ModularForms.lSeriesSummable_of_cuspForm` — absolute convergence on the half-planes
+  `Re s > k + 1` (modular forms) and `Re s > k / 2 + 1` (cusp forms).
 * `ModularForms.lSeries_eq_iff_cuspForm` / `ModularForms.lSeries_eq_zero_iff_cuspForm`
-  — LSeries injectivity and non-vanishing for cusp forms.
+  — injectivity (two cusp forms with equal L-functions are equal) and non-vanishing
+  (the L-function vanishes iff the form does) for cusp forms.
 
 ## References
 
@@ -68,6 +74,15 @@ noncomputable def lCoeff [ModularFormClass F Γ k] (f : F) : ℕ → ℂ :=
 lemma lCoeff_apply [ModularFormClass F Γ k] (f : F) (n : ℕ) :
     lCoeff f n = (qExpansion Γ.strictWidthInfty f).coeff n := rfl
 
+/-- The **L-function** `L(s, f) = Σ_{n ≥ 1} aₙ · n^{-s}` of a modular form, as the Dirichlet
+series of its `q`-expansion coefficients `lCoeff f`. -/
+noncomputable def lSeries [ModularFormClass F Γ k] (f : F) (s : ℂ) : ℂ :=
+  LSeries (lCoeff f) s
+
+@[simp]
+lemma lSeries_apply [ModularFormClass F Γ k] (f : F) (s : ℂ) :
+    lSeries f s = LSeries (lCoeff f) s := rfl
+
 open CongruenceSubgroup Matrix.SpecialLinearGroup in
 /-- **Strict width at infinity of the GL₂(ℝ) image of Γ₁(N) is `1`.** -/
 @[simp]
@@ -91,6 +106,131 @@ noncomputable def imAxis [ModularFormClass F Γ k] (f : F) (t : ℝ) : ℂ :=
 lemma imAxis_apply_of_pos [ModularFormClass F Γ k] (f : F) {t : ℝ} (ht : 0 < t) :
     imAxis f t = f ⟨Complex.I * (t : ℂ), imAxis_mem ht⟩ := by
   rw [imAxis, dif_pos ht]
+
+section Convergence
+
+/-! ### Convergence of the L-function
+
+The coefficient bounds of `Mathlib/NumberTheory/ModularForms/Bounds.lean`
+(`ModularFormClass.qExpansion_isBigO` and `CuspFormClass.qExpansion_isBigO`) feed
+mathlib's abscissa-of-absolute-convergence API to give half-planes of absolute
+convergence for `L(s, f)`. -/
+
+open Filter Asymptotics in
+/-- **Hecke's abscissa bound.**  For a weight-`k` modular form on an arithmetic subgroup,
+the L-series of its `q`-expansion coefficients converges absolutely for `Re s > k + 1`;
+equivalently, its abscissa of absolute convergence is at most `k + 1`. -/
+theorem abscissaOfAbsConv_lCoeff_le [Γ.IsArithmetic] [ModularFormClass F Γ k] (f : F)
+    (hk : 0 ≤ k) :
+    LSeries.abscissaOfAbsConv (lCoeff f) ≤ (k : ℝ) + 1 := by
+  refine LSeries.abscissaOfAbsConv_le_of_isBigO_rpow ?_
+  refine (ModularFormClass.qExpansion_isBigO hk f).congr_right fun n ↦ ?_
+  rw [Real.rpow_intCast]
+
+open Filter Asymptotics in
+/-- **Hecke's abscissa bound for cusp forms.**  For a weight-`k` cusp form on an arithmetic
+subgroup, the L-series of its `q`-expansion coefficients converges absolutely for
+`Re s > k / 2 + 1`; equivalently, its abscissa of absolute convergence is at most `k / 2 + 1`. -/
+theorem abscissaOfAbsConv_lCoeff_le_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) :
+    LSeries.abscissaOfAbsConv (lCoeff f) ≤ (((k : ℝ) / 2 : ℝ) : EReal) + 1 :=
+  LSeries.abscissaOfAbsConv_le_of_isBigO_rpow (CuspFormClass.qExpansion_isBigO f)
+
+/-- **Absolute convergence of the L-function of a modular form.**  For a weight-`k` modular form
+on an arithmetic subgroup, the Dirichlet series `lCoeff f` is `LSeriesSummable` at every `s`
+with `k + 1 < Re s`. -/
+theorem lSeriesSummable_of_modularForm [Γ.IsArithmetic] [ModularFormClass F Γ k] (f : F)
+    (hk : 0 ≤ k) {s : ℂ} (hs : (k : ℝ) + 1 < s.re) :
+    LSeriesSummable (lCoeff f) s :=
+  LSeriesSummable_of_abscissaOfAbsConv_lt_re <|
+    (abscissaOfAbsConv_lCoeff_le f hk).trans_lt (by exact_mod_cast hs)
+
+/-- **Absolute convergence of the L-function of a cusp form.**  For a weight-`k` cusp form
+on an arithmetic subgroup, the Dirichlet series `lCoeff f` is `LSeriesSummable` at every `s`
+with `k / 2 + 1 < Re s`. -/
+theorem lSeriesSummable_of_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
+    {s : ℂ} (hs : (k : ℝ) / 2 + 1 < s.re) :
+    LSeriesSummable (lCoeff f) s :=
+  LSeriesSummable_of_abscissaOfAbsConv_lt_re <|
+    (abscissaOfAbsConv_lCoeff_le_cuspForm f).trans_lt (by exact_mod_cast hs)
+
+/-- The L-series of a cusp form converges somewhere, i.e. its abscissa of absolute
+convergence is finite. -/
+theorem abscissaOfAbsConv_lCoeff_lt_top_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) :
+    LSeries.abscissaOfAbsConv (lCoeff f) < ⊤ := by
+  refine (abscissaOfAbsConv_lCoeff_le_cuspForm f).trans_lt ?_
+  rw [show (1 : EReal) = ((1 : ℝ) : EReal) from rfl, ← EReal.coe_add]
+  exact EReal.coe_lt_top _
+
+end Convergence
+
+section Injectivity
+
+/-! ### Injectivity and non-vanishing of cusp-form L-functions
+
+Two cusp forms whose L-functions agree have the same `q`-expansion coefficients (mathlib's
+`LSeries_eq_iff_of_abscissaOfAbsConv_lt_top`, using that a cusp-form L-series converges), and a
+holomorphic function on `ℍ` is recovered from its `q`-expansion
+(`UpperHalfPlane.hasSum_qExpansion`); hence equal L-functions force the forms to be equal. -/
+
+open UpperHalfPlane in
+/-- A modular form is recovered from its `q`-expansion coefficients: for an arithmetic subgroup,
+if two weight-`k` modular forms have the same `lCoeff`, they are equal as functions on `ℍ`. -/
+theorem coe_eq_of_lCoeff_eq [Γ.IsArithmetic] [ModularFormClass F Γ k] {f g : F}
+    (hfg : lCoeff f = lCoeff g) : (f : ℍ → ℂ) = g := by
+  have hh : 0 < Γ.strictWidthInfty := Γ.strictWidthInfty_pos
+  have hΓ : Γ.strictWidthInfty ∈ Γ.strictPeriods := Γ.strictWidthInfty_mem_strictPeriods
+  have : Fact (IsCusp OnePoint.infty Γ) := ⟨Γ.isCusp_of_mem_strictPeriods hh hΓ⟩
+  ext τ
+  have hf := hasSum_qExpansion (f := (f : ℍ → ℂ)) hh
+    (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ) (ModularFormClass.holo f)
+    (ModularFormClass.bdd_at_infty f) τ
+  have hg := hasSum_qExpansion (f := (g : ℍ → ℂ)) hh
+    (SlashInvariantFormClass.periodic_comp_ofComplex g hΓ) (ModularFormClass.holo g)
+    (ModularFormClass.bdd_at_infty g) τ
+  exact hf.unique (by simpa only [← lCoeff_apply, hfg] using hg)
+
+/-- **Injectivity of the cusp-form L-function.**  Two weight-`k` cusp forms on an arithmetic
+subgroup are equal if and only if their L-functions agree. -/
+theorem lSeries_eq_iff_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f g : F) :
+    lSeries f = lSeries g ↔ f = g := by
+  refine ⟨fun h ↦ ?_, fun h ↦ h ▸ rfl⟩
+  have hh : 0 < Γ.strictWidthInfty := Γ.strictWidthInfty_pos
+  have hΓ : Γ.strictWidthInfty ∈ Γ.strictPeriods := Γ.strictWidthInfty_mem_strictPeriods
+  -- equal L-series force equal coefficients at every `n ≠ 0`; the `n = 0` ones both vanish
+  have hcoeff : ∀ n ≠ 0, lCoeff f n = lCoeff g n :=
+    (LSeries_eq_iff_of_abscissaOfAbsConv_lt_top (abscissaOfAbsConv_lCoeff_lt_top_cuspForm f)
+      (abscissaOfAbsConv_lCoeff_lt_top_cuspForm g)).mp h
+  refine DFunLike.coe_injective (coe_eq_of_lCoeff_eq (funext fun n ↦ ?_))
+  rcases eq_or_ne n 0 with rfl | hn
+  · rw [lCoeff_apply, lCoeff_apply, CuspFormClass.qExpansion_coeff_zero f hh hΓ,
+      CuspFormClass.qExpansion_coeff_zero g hh hΓ]
+  · exact hcoeff n hn
+
+open UpperHalfPlane in
+/-- The `q`-expansion coefficient sequence of a cusp form vanishes identically if and only if the
+form does. -/
+theorem lCoeff_eq_zero_iff_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) :
+    lCoeff f = 0 ↔ (f : ℍ → ℂ) = 0 := by
+  have hh : 0 < Γ.strictWidthInfty := Γ.strictWidthInfty_pos
+  have hΓ : Γ.strictWidthInfty ∈ Γ.strictPeriods := Γ.strictWidthInfty_mem_strictPeriods
+  rw [← UpperHalfPlane.qExpansion_eq_zero_iff hh
+    (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ) (ModularFormClass.holo f)
+    (ModularFormClass.bdd_at_infty f)]
+  rw [PowerSeries.ext_iff]
+  simp [funext_iff, lCoeff]
+
+/-- **Non-vanishing of the cusp-form L-function.**  The L-function of a weight-`k` cusp form on
+an arithmetic subgroup is identically zero if and only if the form itself is identically zero. -/
+theorem lSeries_eq_zero_iff_cuspForm [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) :
+    lSeries f = 0 ↔ (f : ℍ → ℂ) = 0 := by
+  have hh : 0 < Γ.strictWidthInfty := Γ.strictWidthInfty_pos
+  have hΓ : Γ.strictWidthInfty ∈ Γ.strictPeriods := Γ.strictWidthInfty_mem_strictPeriods
+  rw [← lCoeff_eq_zero_iff_cuspForm f]
+  rw [show (lSeries f : ℂ → ℂ) = LSeries (lCoeff f) from rfl,
+    LSeries_eq_zero_iff (by simp [CuspFormClass.qExpansion_coeff_zero f hh hΓ])]
+  simp [(abscissaOfAbsConv_lCoeff_lt_top_cuspForm f).ne]
+
+end Injectivity
 
 end ModularForms
 

@@ -1,0 +1,310 @@
+Running linter on specified modules: [LeanModularForms.HeckeRIngs.GL2.Unified.Core]
+-- Found 121 errors in 1042 declarations (plus 2726 automatically generated ones) in LeanModularForms.HeckeRIngs.GL2.Unified.Core with 16 linters
+
+/- The `defsWithUnderscore` linter reports:
+FOUND definitions with an underscore in their name. -/
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Commutativity
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Commutativity.lean:429:1: error: @HeckeRing.instCommRing_of_antiInvolution The definition `HeckeRing.instCommRing_of_antiInvolution` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Degree
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Degree.lean:48:1: error: @HeckeRing.HeckeCoset_deg The definition `HeckeRing.HeckeCoset_deg` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Degree.lean:134:1: error: @HeckeRing.deg_fun The definition `HeckeRing.deg_fun` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Multiplication
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Multiplication.lean:531:1: error: @HeckeRing.T_single The definition `HeckeRing.T_single` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Multiplication.lean:535:1: error: @HeckeRing.HeckeLeftCoset_single The definition `HeckeRing.HeckeLeftCoset_single` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.StabConjugation
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/StabConjugation.lean:81:1: error: @HeckeRing.decompQuot_mul_left_equiv The definition `HeckeRing.decompQuot_mul_left_equiv` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/StabConjugation.lean:122:1: error: @HeckeRing.decompQuot_double_H_equiv The definition `HeckeRing.decompQuot_double_H_equiv` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.AdjointTheory
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/AdjointTheory.lean:119:1: error: @HeckeRing.GL2.heckeT_p_cusp The definition `HeckeRing.GL2.heckeT_p_cusp` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/AdjointTheory.lean:127:1: error: @HeckeRing.GL2.diamondOp_cusp The definition `HeckeRing.GL2.diamondOp_cusp` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/AdjointTheory.lean:242:1: error: @HeckeRing.GL2.heckeT_n_cusp The definition `HeckeRing.GL2.heckeT_n_cusp` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Basic
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Basic.lean:31:1: error: HeckeRing.GL2.T_ad The definition `HeckeRing.GL2.T_ad` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Basic.lean:45:1: error: HeckeRing.GL2.T_pp The definition `HeckeRing.GL2.T_pp` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Basic.lean:64:1: error: HeckeRing.GL2.T_sum The definition `HeckeRing.GL2.T_sum` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.CharSpaceIso
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/CharSpaceIso.lean:149:1: error: HeckeRing.GL2.modFormCharSpace_one_equiv_Gamma0 The definition `HeckeRing.GL2.modFormCharSpace_one_equiv_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/CharacterDecomp.lean:103:1: error: @HeckeRing.GL2.charDecomp_charHomOfEigenvector The definition `HeckeRing.GL2.charDecomp_charHomOfEigenvector` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/CharacterDecomp.lean:297:1: error: @HeckeRing.GL2.fintype_charHom The definition `HeckeRing.GL2.fintype_charHom` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.FourierHecke
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/FourierHecke.lean:738:1: error: @HeckeRing.GL2.IsNormalisedEigenform_one The definition `HeckeRing.GL2.IsNormalisedEigenform_one` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Gamma1Pair.lean:42:1: error: HeckeRing.GL2.Delta1_submonoid The definition `HeckeRing.GL2.Delta1_submonoid` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Gamma1Pair.lean:102:1: error: HeckeRing.GL2.Gamma1_pair The definition `HeckeRing.GL2.Gamma1_pair` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeAction
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeAction.lean:47:1: error: HeckeRing.GL2.instSlashActionIntGeneralLinearGroupFinOfNatNatRatForallUpperHalfPlaneComplex_leanModularForms The definition `HeckeRing.GL2.instSlashActionIntGeneralLinearGroupFinOfNatNatRatForallUpperHalfPlaneComplex_leanModularForms` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeActionGeneral.lean:49:1: error: HeckeRing.GL2.GL_adjugate The definition `HeckeRing.GL2.GL_adjugate` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeActionGeneral.lean:184:1: error: HeckeRing.GL2.tRep_gen The definition `HeckeRing.GL2.tRep_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeActionGeneral.lean:192:1: error: HeckeRing.GL2.heckeSlash_gen The definition `HeckeRing.GL2.heckeSlash_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeActionGeneral.lean:199:1: error: HeckeRing.GL2.heckeSlashExt_gen The definition `HeckeRing.GL2.heckeSlashExt_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:89:1: error: HeckeRing.GL2.heckeSlashInvariant_Gamma0 The definition `HeckeRing.GL2.heckeSlashInvariant_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:104:1: error: HeckeRing.GL2.heckeOperator_Gamma0 The definition `HeckeRing.GL2.heckeOperator_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:113:1: error: HeckeRing.GL2.heckeOperatorLinear_Gamma0 The definition `HeckeRing.GL2.heckeOperatorLinear_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:143:1: error: HeckeRing.GL2.heckeSum_Gamma0 The definition `HeckeRing.GL2.heckeSum_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:289:1: error: HeckeRing.GL2.heckeRingHom_Gamma0 The definition `HeckeRing.GL2.heckeRingHom_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeRingHomCharSpace.lean:42:1: error: @HeckeRing.GL2.heckeT_p_all_charRestrict The definition `HeckeRing.GL2.heckeT_p_all_charRestrict` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeRingHomCharSpace.lean:59:1: error: @HeckeRing.GL2.heckeT_n_charRestrict The definition `HeckeRing.GL2.heckeT_n_charRestrict` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeRingHomCharSpace.lean:76:1: error: @HeckeRing.GL2.heckeT_n_charRestrictAll The definition `HeckeRing.GL2.heckeT_n_charRestrictAll` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace_General
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeRingHomCharSpace_General.lean:84:1: error: @HeckeRing.GL2.heckeT_coprimeRestrict The definition `HeckeRing.GL2.heckeT_coprimeRestrict` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:58:1: error: @HeckeRing.GL2.diamondOp_n The definition `HeckeRing.GL2.diamondOp_n` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:373:1: error: @HeckeRing.GL2.heckeT_p_divN The definition `HeckeRing.GL2.heckeT_p_divN` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:428:1: error: @HeckeRing.GL2.heckeT_p_all The definition `HeckeRing.GL2.heckeT_p_all` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:442:1: error: @HeckeRing.GL2.heckeT_ppow The definition `HeckeRing.GL2.heckeT_ppow` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:489:1: error: @HeckeRing.GL2.heckeT_n_aux The definition `HeckeRing.GL2.heckeT_n_aux` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:504:1: error: @HeckeRing.GL2.heckeT_n The definition `HeckeRing.GL2.heckeT_n` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p.lean:46:1: error: HeckeRing.GL2.T_p_upper The definition `HeckeRing.GL2.T_p_upper` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p.lean:52:1: error: HeckeRing.GL2.T_p_lower The definition `HeckeRing.GL2.T_p_lower` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p.lean:101:1: error: HeckeRing.GL2.heckeT_p_ut The definition `HeckeRing.GL2.heckeT_p_ut` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p.lean:107:1: error: @HeckeRing.GL2.heckeT_p_fun The definition `HeckeRing.GL2.heckeT_p_fun` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p.lean:947:1: error: @HeckeRing.GL2.heckeT_p The definition `HeckeRing.GL2.heckeT_p` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma0
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma0.lean:58:1: error: HeckeRing.GL2.diag_1p_delta_Gamma0 The definition `HeckeRing.GL2.diag_1p_delta_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma0.lean:63:1: error: HeckeRing.GL2.D_p_Gamma0 The definition `HeckeRing.GL2.D_p_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma1.lean:58:1: error: HeckeRing.GL2.sigma_p_specific The definition `HeckeRing.GL2.sigma_p_specific` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma1.lean:97:1: error: HeckeRing.GL2.M_infty The definition `HeckeRing.GL2.M_infty` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/MultiplicationTable.lean:927:1: error: HeckeRing.GL2.T_sum_nat The definition `HeckeRing.GL2.T_sum_nat` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Prop334_HeckeSlash
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Prop334_HeckeSlash.lean:98:1: error: @HeckeRing.GL2.heckeSlash_gen_asModularForm_of_slash_comm The definition `HeckeRing.GL2.heckeSlash_gen_asModularForm_of_slash_comm` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Unified.Gamma0RingDn
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/Gamma0RingDn.lean:607:1: error: @HeckeRing.GL2.Unified.heckeRingD_ppow The definition `HeckeRing.GL2.Unified.heckeRingD_ppow` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/Gamma0RingDn.lean:657:1: error: @HeckeRing.GL2.Unified.heckeRingD_n The definition `HeckeRing.GL2.Unified.heckeRingD_n` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/Gamma0RingDn.lean:689:1: error: @HeckeRing.GL2.Unified.heckeRingS_n The definition `HeckeRing.GL2.Unified.heckeRingS_n` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/NebentypusHeckeRingHom.lean:1127:1: error: @HeckeRing.GL2.Unified.heckeT_ppow_charRestrict The definition `HeckeRing.GL2.Unified.heckeT_ppow_charRestrict` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Unified.RingTransport
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/RingTransport.lean:72:1: error: @HeckeRing.GL2.Unified.heckeT_ppow_charRestrictAll The definition `HeckeRing.GL2.Unified.heckeT_ppow_charRestrictAll` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GL2.Unified.TwistedHeckeRing
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/TwistedHeckeRing.lean:147:1: error: @HeckeRing.GL2.Unified.deltaRep_gen The definition `HeckeRing.GL2.Unified.deltaRep_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/TwistedHeckeRing.lean:162:1: error: @HeckeRing.GL2.Unified.twistedHeckeSlash_gen The definition `HeckeRing.GL2.Unified.twistedHeckeSlash_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/TwistedHeckeRing.lean:238:1: error: @HeckeRing.GL2.Unified.twistedHeckeSlashExt_gen The definition `HeckeRing.GL2.Unified.twistedHeckeSlashExt_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.Basic
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/Basic.lean:40:1: error: HeckeRing.GLn.SLnZ_subgroup The definition `HeckeRing.GLn.SLnZ_subgroup` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/Basic.lean:45:1: error: HeckeRing.GLn.SLnZ_coe The definition `HeckeRing.GLn.SLnZ_coe` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/Basic.lean:95:1: error: HeckeRing.GLn.posDetInt_submonoid The definition `HeckeRing.GLn.posDetInt_submonoid` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/Basic.lean:369:1: error: HeckeRing.GLn.GL_pair The definition `HeckeRing.GLn.GL_pair` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.AtkinLehner
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/AtkinLehner.lean:894:1: error: HeckeRing.GLn.instCommRing_Gamma0 The definition `HeckeRing.GLn.instCommRing_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Foundation
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Foundation.lean:43:1: error: HeckeRing.GLn.Delta0_submonoid The definition `HeckeRing.GLn.Delta0_submonoid` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Foundation.lean:112:1: error: HeckeRing.GLn.Gamma0_pair The definition `HeckeRing.GLn.Gamma0_pair` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Presentation
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Presentation.lean:34:1: error: HeckeRing.GLn.π_hom The definition `HeckeRing.GLn.π_hom` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Presentation.lean:126:1: error: HeckeRing.GLn.ψ_hom The definition `HeckeRing.GLn.ψ_hom` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Props
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Props.lean:27:1: error: HeckeRing.GLn.Delta0_inclusion The definition `HeckeRing.GLn.Delta0_inclusion` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Props.lean:168:1: error: HeckeRing.GLn.T_diag_Gamma0 The definition `HeckeRing.GLn.T_diag_Gamma0` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Props.lean:246:1: error: HeckeRing.GLn.lunip_inject The definition `HeckeRing.GLn.lunip_inject` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/DiagonalCosets.lean:96:1: error: HeckeRing.GLn.diagMat_delta The definition `HeckeRing.GLn.diagMat_delta` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/DiagonalCosets.lean:129:1: error: @HeckeRing.GLn.T_diag The definition `HeckeRing.GLn.T_diag` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/DiagonalCosets.lean:135:1: error: @HeckeRing.GLn.T_elem The definition `HeckeRing.GLn.T_elem` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.PolynomialRing
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/PolynomialRing.lean:48:1: error: HeckeRing.GLn.T_gen_diag The definition `HeckeRing.GLn.T_gen_diag` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/PolynomialRing.lean:82:1: error: HeckeRing.GLn.T_gen The definition `HeckeRing.GLn.T_gen` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/PolynomialRing.lean:983:1: error: HeckeRing.GLn.R_p_isPolynomialRing The definition `HeckeRing.GLn.R_p_isPolynomialRing` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/PrimeDecomposition.lean:138:1: error: HeckeRing.GLn.R_p The definition `HeckeRing.GLn.R_p` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/TransposeAntiInvolution.lean:29:1: error: HeckeRing.GLn.GL_transposeEquiv The definition `HeckeRing.GLn.GL_transposeEquiv` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/TransposeAntiInvolution.lean:71:1: error: HeckeRing.GLn.GL_pair_antiInvolution The definition `HeckeRing.GLn.GL_pair_antiInvolution` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/TransposeAntiInvolution.lean:90:1: error: HeckeRing.GLn.instCommRing_HeckeAlgebra The definition `HeckeRing.GLn.instCommRing_HeckeAlgebra` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.AtImInfty
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/AtImInfty.lean:24:1: error: instFunLikeForallUpperHalfPlaneComplex_leanModularForms The definition `instFunLikeForallUpperHalfPlaneComplex_leanModularForms` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.DimensionFormulas
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/DimensionFormulas.lean:105:1: error: CuspForms_iso_Modforms The definition `CuspForms_iso_Modforms` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.IsCuspForm
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/IsCuspForm.lean:37:1: error: IsCuspForm_to_CuspForm The definition `IsCuspForm_to_CuspForm` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.PSL2Action
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PSL2Action.lean:486:1: error: instMulActionPSL_R The definition `instMulActionPSL_R` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PSL2Action.lean:519:1: error: SL2Z_to_PSL2R The definition `SL2Z_to_PSL2R` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PSL2Action.lean:605:1: error: PSL2Z_to_PSL2R The definition `PSL2Z_to_PSL2R` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PSL2Action.lean:677:1: error: GLPos_to_SLR The definition `GLPos_to_SLR` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PSL2Action.lean:689:1: error: GLPos_to_PSL_R_term The definition `GLPos_to_PSL_R_term` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.PeterssonInnerProduct
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonInnerProduct.lean:64:1: error: instMeasurableSpaceUpperHalfPlane_leanModularForms The definition `instMeasurableSpaceUpperHalfPlane_leanModularForms` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+-- LeanModularForms.Modularforms.PeterssonLevelN
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:51:1: error: @instFintypeQuotientSpecialLinearGroupFinOfNatNatIntSubgroupGamma1_leanModularForms The definition `instFintypeQuotientSpecialLinearGroupFinOfNatNatIntSubgroupGamma1_leanModularForms` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:368:1: error: imageGamma1_PSL The definition `imageGamma1_PSL` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:385:1: error: @instFintype_PSL_quotient_imageGamma1 The definition `instFintype_PSL_quotient_imageGamma1` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:389:1: error: Gamma1_fundDomain_PSL The definition `Gamma1_fundDomain_PSL` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:454:1: error: Gamma1_fundDomain The definition `Gamma1_fundDomain` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:470:1: error: imageGamma1_PSL_R The definition `imageGamma1_PSL_R` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:893:1: error: slToPslQuot_fiberCard The definition `slToPslQuot_fiberCard` contains an underscore. This almost surely violates mathlib's naming convention; use lowerCamelCase or UpperCamelCase instead.
+
+/- The `docBlame` linter reports:
+DEFINITIONS ARE MISSING DOCUMENTATION STRINGS: -/
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Basic
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Basic.lean:58:3: error: @HeckeRing.HeckePair.H definition missing documentation string
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Basic.lean:59:3: error: @HeckeRing.HeckePair.Δ definition missing documentation string
+
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Commutativity
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Commutativity.lean:28:3: error: @HeckeRing.AntiInvolution.toFun definition missing documentation string
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:149:1: error: HeckeRing.GL2.moebiusFin' definition missing documentation string
+
+-- LeanModularForms.HeckeRIngs.GL2.Unified.Core
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Unified/Core.lean:38:3: error: @HeckeRing.GL2.Unified.GoodHeckeFamily.op definition missing documentation string
+
+-- LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Props
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CongruenceHecke/Props.lean:246:1: error: HeckeRing.GLn.lunip_inject definition missing documentation string
+
+-- LeanModularForms.Modularforms.PeterssonInnerProduct
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonInnerProduct.lean:94:1: error: UpperHalfPlane.termμ_hyp definition missing documentation string
+
+/- The `simpNF` linter reports:
+SOME SIMP LEMMAS ARE NOT IN SIMP-NORMAL FORM.
+Please change the lemma to make sure their left-hand sides are in simp normal form.
+To learn about simp normal forms, see
+https://leanprover-community.github.io/extras/simp.html#simp-normal-form
+and https://lean-lang.org/doc/reference/latest/The-Simplifier/Simp-Normal-Forms/. -/
+-- LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Ring.lean:93:1: error: @HeckeRing.T_single_zero simp can prove this:
+  by simp only [*, @Finsupp.single_zero]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Ring.lean:126:1: error: @HeckeRing.T_single_mul_one simp can prove this:
+  by simp only [*, @mul_one]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Ring.lean:130:1: error: @HeckeRing.one_mul_T_single simp can prove this:
+  by simp only [*, @one_mul]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+
+-- LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/Gamma1Pair.lean:117:1: error: HeckeRing.GL2.σ_mapGL_real_toRingHom_eq_id Left-hand side simplifies from
+  ↑(UpperHalfPlane.σ ((Matrix.SpecialLinearGroup.mapGL ℝ) s))
+to
+  ↑(ContinuousAlgEquiv.refl ℝ ℂ)
+using
+  simp only [*, HeckeRing.GL2.σ_mapGL_real_eq_refl]
+Try to change the left-hand side to the simplified term!
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeModularForm
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm.lean:551:1: error: HeckeRing.GL2.heckeRingHom_T_single simp can prove this:
+  by simp only [*, HeckeRing.GL2.heckeRingHom_apply, HeckeRing.GL2.heckeSum_T_single, @zsmul_eq_mul]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeModularForm_Gamma0.lean:302:1: error: HeckeRing.GL2.heckeRingHom_Gamma0_T_single simp can prove this:
+  by simp only [*, HeckeRing.GL2.heckeRingHom_Gamma0_apply, HeckeRing.GL2.heckeSum_Gamma0_T_single, @zsmul_eq_mul]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:66:1: error: @HeckeRing.GL2.diamondOp_n_coprime Left-hand side does not simplify, when using the simp lemma on itself.
+            
+This usually means that it will never apply.
+
+
+-- LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/MultiplicationTable.lean:35:1: error: @HeckeRing.GL2.SLnZ_to_GLnQ_det Left-hand side simplifies from
+  (↑((Matrix.SpecialLinearGroup.mapGL ℚ) S)).det
+to
+  ((↑S).map fun x => ↑x).det
+using
+  simp only [*,
+ @Matrix.SpecialLinearGroup.mapGL_coe_matrix,
+ algebraMap_int_eq,
+ @Matrix.SpecialLinearGroup.map_apply_coe,
+ @RingHom.mapMatrix_apply,
+ @Int.coe_castRingHom]
+Try to change the left-hand side to the simplified term!
+
+-- LeanModularForms.HeckeRIngs.GLn.CoprimeMul
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CoprimeMul.lean:79:1: error: HeckeRing.GLn.diagMat_scalar_eq Left-hand side simplifies from
+  ↑(HeckeRing.GLn.diagMat n fun x => c)
+to
+  Matrix.diagonal fun i => ↑c
+using
+  simp only [*, implies_true, HeckeRing.GLn.diagMat_val]
+Try to change the left-hand side to the simplified term!
+
+-- LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/DiagonalCosets.lean:81:1: error: HeckeRing.GLn.diagMat_det simp can prove this:
+  by simp only [*, implies_true, HeckeRing.GLn.diagMat_val, @Matrix.det_diagonal]
+One of the lemmas above could be a duplicate.
+If that's not the case try reordering lemmas or adding @[priority].
+
+/- The `synTaut` linter reports:
+THE FOLLOWING DECLARATIONS ARE SYNTACTIC TAUTOLOGIES. This usually means that they are of the form `∀ a b ... z, e₁ = e₂` where `e₁` and `e₂` are identical expressions. We call declarations of this form syntactic tautologies. Such lemmas are (mostly) useless and sometimes introduced unintentionally when proving basic facts using `rfl`, when elaboration results in a different term than the user intended. You should check that the declaration really says what you think it does. -/
+-- LeanModularForms.HeckeRIngs.GLn.Basic
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/Basic.lean:50:1: error: HeckeRing.GLn.SLnZ_coe_def LHS equals RHS syntactically
+
+/- The `unusedArguments` linter reports:
+UNUSED ARGUMENTS. -/
+-- LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeActionGeneral.lean:192:1: error: HeckeRing.GL2.heckeSlash_gen argument 2 inst✝ : HeckeRing.GL2.HeckePairAction
+  P
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_n.lean:504:1: error: @HeckeRing.GL2.heckeT_n argument 5 inst✝ : NeZero
+  n
+
+-- LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma1.lean:30:1: error: HeckeRing.GL2.aInvOfCoprime argument 3 inst✝ : NeZero
+  N
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GL2/HeckeT_p_Gamma1.lean:58:1: error: HeckeRing.GL2.sigma_p_specific argument 4 _hp : 0 <
+  p
+
+-- LeanModularForms.HeckeRIngs.GLn.CosetDecomposition
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/CosetDecomposition.lean:43:1: error: HeckeRing.GLn.UpperTriRep argument 3 _hdiv : HeckeRing.GLn.DivChain
+  n a
+
+-- LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/HeckeRIngs/GLn/PrimeDecomposition.lean:138:1: error: HeckeRing.GLn.R_p argument 4 _hp : Nat.Prime
+  p
+
+-- LeanModularForms.Modularforms.PeterssonLevelN
+/Users/mcu22seu/Documents/GitHub/LeanModularForms-hecke/LeanModularForms/Modularforms/PeterssonLevelN.lean:368:1: error: imageGamma1_PSL argument 2 inst✝ : NeZero
+  N

@@ -1,0 +1,50 @@
+# Side-build for the LeanModularForms Verso blueprint.
+#
+# Self-contained Lake package, DECOUPLED from AINTLIB's root lakefile: it lives
+# entirely under projects/LeanModularForms/_blueprint/ and is never referenced by
+# the root workspace. It exists only to compile + render the Verso blueprint on
+# the v4.31.0-rc2 toolchain.
+#
+# It reuses the already-built LeanModularForms oleans by path-requiring the
+# AINTLIB workspace (../../..), then adds the patched VersoBlueprint. mathlib is
+# pinned to d90090f and required LAST so its transitive deps (proofwidgets,
+# batteries, aesop, …) win over VersoBlueprint's older manifest — otherwise
+# `lake exe cache get` computes wrong hashes.
+#
+# The blueprint .lean sources live one directory up, in
+# projects/LeanModularForms/  (root module `LeanModularFormsBlueprint`,
+# renderer `LeanModularFormsBlueprintMain`); srcDir = ".." picks them up.
+name = "LeanModularFormsBlueprintBuild"
+defaultTargets = ["LeanModularFormsBlueprint"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+# Reuse the workspace's built LeanModularForms oleans.
+[[require]]
+name = "AINTLIB"
+path = "../../.."
+
+[[require]]
+name = "VersoBlueprint"
+git = "https://github.com/leanprover/verso-blueprint"
+rev = "v4.30.0"
+
+# mathlib LAST so its transitive pins win the reconciliation (path-require breaks Verso's deps,
+# so keep the git require). NOTE: this re-clones ~7G per side-build — the AINTLIB olean cache is
+# the proper fix to make these side-builds fast + avoid the clone timeout that blocked the render.
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "d90090f647ca"
+
+# The blueprint library + its renderer entry point both live one dir up.
+[[lean_lib]]
+name = "LeanModularFormsBlueprint"
+srcDir = ".."
+globs = ["LeanModularFormsBlueprint"]
+
+[[lean_lib]]
+name = "LeanModularFormsBlueprintMain"
+srcDir = ".."
+globs = ["LeanModularFormsBlueprintMain"]

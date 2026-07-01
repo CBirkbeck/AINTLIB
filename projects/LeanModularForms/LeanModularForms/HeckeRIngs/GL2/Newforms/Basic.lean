@@ -61,6 +61,13 @@ structure Eigenform (N : ℕ) [NeZero N] (k : ℤ)
     heckeRingHomCharSpace (k := k) (χ := χ) (heckeRingDn n.val)
         ⟨toCuspForm.toModularForm', mem_charSpace⟩ =
       ringEigenvalue n • (⟨toCuspForm.toModularForm', mem_charSpace⟩ : modFormCharSpace k χ)
+  /-- At indices **not** coprime to `N` the ring action `heckeRingDn` is not packaged here
+  (the bad-prime element lies in a disjoint double-coset class), so the ring eigenvalue is
+  pinned to the canonical constant `0`.  This removes a latent over-specification: without it,
+  the bad-prime values of `ringEigenvalue` would be free, giving infinitely many `Eigenform`
+  terms over a single underlying `toCuspForm`.  With it, an `Eigenform` is determined by its
+  underlying form together with `χ` (see `Eigenform.ext_of_toCuspForm`). -/
+  ringEigen_bad : ∀ n : ℕ+, ¬ Nat.Coprime n.val N → ringEigenvalue n = 0
 
 /-- The classical Hecke eigenvalue of an eigenform: the ring eigenvalue rescaled by the
 diamond factor `χ(n)`, so that `T_n f = (eigenvalue n) • f` (`Eigenform.isEigen`).  For

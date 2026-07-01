@@ -10,3 +10,4 @@ blueprint/print/
 /.lake/
 *.pdf
 /refs
+*.log

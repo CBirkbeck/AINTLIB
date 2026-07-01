@@ -23,11 +23,12 @@ import LeanModularForms.Modularforms.PeterssonLevelN
 import LeanModularForms.Modularforms.SlashActionAuxil
 
 /-!
-# Newforms: character decomposition, the `Newform` structure, and the Main Lemma
+# Newforms: character decomposition, the `Newform` structure, eigenvalue identity
 
 Character-space decomposition of the old/new subspaces, the `Newform` structure (DS Def 5.8.1),
-primitive forms, the eigenvalue-as-Fourier-coefficient identity, and the Atkin-Lehner Main Lemma
-(DS Thm 5.7.1) with its uniqueness corollary.
+primitive forms, and the eigenvalue-as-Fourier-coefficient identity.  The Atkin–Lehner Main
+Lemma (DS Thm 5.7.1) itself is assembled in `Newforms.MainLemmaProof` (which imports
+`SMOObligations` for the per-character route-B descent, sitting above this file in the DAG).
 -/
 
 noncomputable section
