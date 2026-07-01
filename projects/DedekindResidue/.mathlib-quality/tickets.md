@@ -51,6 +51,20 @@
       (3) `Module.Basis.span hlinind` as the dual ℤ-basis (fold post-`dualZLattice_eq_span` goal with
       `← hc, ← hcstar`); (4) `MᵀM* = 1` from `apply_dualBasis_left` (δ_ij) + `OrthonormalBasis.sum_inner_mul_inner`
       Parseval + `real_inner_comm`, then `Module.Basis.det_apply` + `Matrix.det_transpose` + `Matrix.det_mul`.
+    - **P.2 leaf (e) sub-decomposition** (2026-07-01, per HANDOVER.md §4; footholds sig-verified):
+      (e1) `intEquivSpanBasisFun : (ι→ℤ) ≃ span ℤ (range (Pi.basisFun ℝ ι))` — forward map explicit
+      (coe = integer vector, `Equiv.ofBijective`; surjectivity by `Submodule.span_induction`
+      "integer coordinates"); (e2) Ioc-box `=ᵐ[volume]` Ico-box (symmDiff ⊆ coordinate-hyperplane
+      translates, null via `Measure.addHaar_submodule` + translation invariance); (e3) tiling
+      `Integrable f → ∫ f = ∑'_{n:ι→ℤ} ∫_{IocBox} f(x + n)` via `ZSpan.isAddFundamentalDomain
+      (Pi.basisFun ℝ ι)` + `IsAddFundamentalDomain.integral_eq_tsum'` (+`lintegral_eq_tsum` variant;
+      `VAddInvariantMeasure` via `(inferInstance : … L.toAddSubgroup …)` — Covolume.lean:87 idiom)
+      + (e1)-reindex + (e2); (e4) `Integrable (char(π·) • g(toLp·))` from h_norm (box-lintegrals ≤
+      sup-norms, `volume IocBox = 1` by `volume_pi_pi`); (e5) `integral_tsum` swap on the box (same
+      bounds); (e6) character shift-invariance `mFourier(-m)(π(x+n)) = mFourier(-m)(πx)`;
+      (e) `mFourierCoeff_torusPeriodizationFun = 𝓕g(zpoint m)` assembling e1–e6 +
+      `UnitAddTorus.mFourierCoeff_eq_integral` + `fourierIntegral_zpoint_eq`; (f) Poisson assembly
+      via `hasSum_mFourier_series_apply_of_summable` at `0`.
     - **P.2 STARTED ✓ (2026-07-01, `CompletedZeta/PoissonSummation.lean`, build green)**: file
       created with `zpoint` (ℤ^ι ↪ EuclideanSpace, axiom-clean), `summable_gaussian_zlattice`
       (Gaussian `exp(-a‖x‖²)` summable over any lattice — DONE, axiom-clean: `ZLattice.summable_norm_rpow`

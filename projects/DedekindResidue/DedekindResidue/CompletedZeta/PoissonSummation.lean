@@ -61,6 +61,139 @@ theorem mFourier_neg_coe (m : ι → ℤ) (x : ι → ℝ) :
   push_cast
   ring
 
+/-- The integer points `ℤ^ι` are exactly the `ℤ`-span of the standard basis of `ι → ℝ`: the
+equivalence sending an integer vector to itself, with inverse extracted by
+`Submodule.span_induction` (every element of the span has integer coordinates). The forward
+coercion is definitionally the integer vector (`intEquivSpanBasisFun_coe`). -/
+noncomputable def intEquivSpanBasisFun :
+    (ι → ℤ) ≃ Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι)) :=
+  Equiv.ofBijective
+    (fun n => ⟨fun i => (n i : ℝ), by
+      classical
+      have : (fun i => (n i : ℝ)) = ∑ i, (n i : ℤ) • (Pi.basisFun ℝ ι i) := by
+        ext j
+        simp [Pi.basisFun_apply, Finset.sum_apply, Pi.single_apply, mul_ite]
+      rw [this]
+      exact Submodule.sum_mem _ (fun i _ =>
+        Submodule.smul_mem _ (n i) (Submodule.subset_span ⟨i, rfl⟩))⟩)
+    ⟨fun a b hab => by
+      funext i
+      have h2 : (a i : ℝ) = (b i : ℝ) := congrFun (congrArg Subtype.val hab) i
+      exact_mod_cast h2,
+     fun v => by
+      classical
+      have hcoords : ∀ i, ∃ n : ℤ, (v : ι → ℝ) i = n := by
+        intro i
+        refine Submodule.span_induction ?_ ?_ ?_ ?_ v.2
+        · rintro x ⟨j, rfl⟩
+          by_cases h : i = j
+          · exact ⟨1, by simp [Pi.basisFun_apply, h]⟩
+          · exact ⟨0, by simp [Pi.basisFun_apply, h]⟩
+        · exact ⟨0, by simp⟩
+        · rintro x y _ _ ⟨nx, hx⟩ ⟨ny, hy⟩
+          exact ⟨nx + ny, by simp [hx, hy]⟩
+        · rintro c x _ ⟨nx, hx⟩
+          exact ⟨c * nx, by simp [Pi.smul_apply, hx, zsmul_eq_mul]⟩
+      choose k hk using hcoords
+      exact ⟨k, Subtype.ext (funext (fun i => (hk i).symm))⟩⟩
+
+theorem intEquivSpanBasisFun_coe (n : ι → ℤ) :
+    ((intEquivSpanBasisFun n : Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι))) : ι → ℝ)
+      = fun i => (n i : ℝ) := rfl
+
+/-- A coordinate hyperplane `{x | x i = c}` in `ι → ℝ` is Lebesgue-null: it is a translate of
+the kernel of the `i`-th coordinate projection, a proper subspace. -/
+theorem volume_pi_hyperplane (i : ι) (c : ℝ) :
+    (volume : Measure (ι → ℝ)) {x | x i = c} = 0 := by
+  classical
+  have h0 : (volume : Measure (ι → ℝ)) {x | x i = 0} = 0 := by
+    have hker : {x : ι → ℝ | x i = 0}
+        = (LinearMap.ker (LinearMap.proj (R := ℝ) (φ := fun _ : ι => ℝ) i) : Set (ι → ℝ)) := by
+      ext x; simp [LinearMap.mem_ker]
+    rw [hker]
+    refine Measure.addHaar_submodule _ _ (fun htop => ?_)
+    have h1 : (Pi.single i 1 : ι → ℝ)
+        ∈ LinearMap.ker (LinearMap.proj (R := ℝ) (φ := fun _ : ι => ℝ) i) := by
+      rw [htop]; exact Submodule.mem_top
+    rw [LinearMap.mem_ker] at h1
+    simp [LinearMap.proj_apply] at h1
+  have hshift : {x : ι → ℝ | x i = c}
+      = (fun x : ι → ℝ => x + (Pi.single i (-c) : ι → ℝ)) ⁻¹' {x | x i = 0} := by
+    ext x
+    simp only [Set.mem_setOf_eq, Set.mem_preimage, Pi.add_apply, Pi.single_eq_same]
+    constructor <;> intro h <;> linarith
+  rw [hshift, measure_preimage_add_right]
+  exact h0
+
+/-- The half-open boxes `(0,1]^ι` and `[0,1)^ι` agree up to Lebesgue-null sets: their
+symmetric difference lies in the union of the coordinate hyperplanes `{x i = 0}`, `{x i = 1}`. -/
+theorem iocBox_ae_icoBox :
+    ({x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1} : Set (ι → ℝ))
+      =ᵐ[(volume : Measure (ι → ℝ))] {x : ι → ℝ | ∀ i, x i ∈ Set.Ico (0:ℝ) 1} := by
+  rw [MeasureTheory.ae_eq_set]
+  constructor
+  · refine measure_mono_null (fun x hx => ?_)
+      (measure_iUnion_null (fun i => volume_pi_hyperplane i 1))
+    obtain ⟨hs, ht⟩ := hx
+    simp only [Set.mem_setOf_eq, not_forall] at ht
+    obtain ⟨i, hi⟩ := ht
+    have h1 := hs i
+    rw [Set.mem_Ioc] at h1
+    rw [Set.mem_Ico, not_and_or, not_le, not_lt] at hi
+    refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+    simp only [Set.mem_setOf_eq]
+    rcases hi with h | h
+    · linarith
+    · linarith
+  · refine measure_mono_null (fun x hx => ?_)
+      (measure_iUnion_null (fun i => volume_pi_hyperplane i 0))
+    obtain ⟨hs, ht⟩ := hx
+    simp only [Set.mem_setOf_eq, not_forall] at ht
+    obtain ⟨i, hi⟩ := ht
+    have h1 := hs i
+    rw [Set.mem_Ico] at h1
+    rw [Set.mem_Ioc, not_and_or, not_le, not_lt] at hi
+    refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+    simp only [Set.mem_setOf_eq]
+    rcases hi with h | h
+    · linarith
+    · linarith
+
+/-- The `ZSpan` fundamental domain of the standard basis of `ι → ℝ` is the half-open box
+`[0,1)^ι` (coordinates are the basis representation). -/
+theorem fundamentalDomain_basisFun_eq :
+    ZSpan.fundamentalDomain (Pi.basisFun ℝ ι)
+      = {x : ι → ℝ | ∀ i, x i ∈ Set.Ico (0:ℝ) 1} := by
+  ext x
+  simp [ZSpan.fundamentalDomain, Pi.basisFun_repr]
+
+/-- **Box tiling of `ℝ^ι`.** For an integrable `f`, the integral over `ι → ℝ` is the sum over
+integer translates of the integral over the half-open box `(0,1]^ι` — the fundamental-domain
+decomposition for the standard integer lattice, in the `Ioc` normalisation used by the torus
+Fourier coefficients. -/
+theorem integral_eq_tsum_integral_iocBox (f : (ι → ℝ) → ℂ) (hf : Integrable f) :
+    ∫ x, f x = ∑' n : ι → ℤ, ∫ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+      f (x + fun i => (n i : ℝ)) := by
+  classical
+  haveI : VAddInvariantMeasure
+      (↥(Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι)))) (ι → ℝ) volume :=
+    (inferInstance : VAddInvariantMeasure
+      (Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι))).toAddSubgroup (ι → ℝ) volume)
+  have h1 := (ZSpan.isAddFundamentalDomain (Pi.basisFun ℝ ι)
+    (volume : Measure (ι → ℝ))).integral_eq_tsum' f hf
+  rw [h1, ← ((Equiv.neg (ι → ℤ)).trans intEquivSpanBasisFun).tsum_eq]
+  refine tsum_congr (fun n => ?_)
+  rw [fundamentalDomain_basisFun_eq, setIntegral_congr_set iocBox_ae_icoBox]
+  refine setIntegral_congr_fun ?_ (fun x _ => ?_)
+  · exact measurableSet_setOf.mpr (by measurability)
+  · congr 1
+    show -((intEquivSpanBasisFun (-n) : ι → ℝ)) + x = x + fun i => (n i : ℝ)
+    rw [intEquivSpanBasisFun_coe]
+    funext i
+    simp only [Pi.add_apply, Pi.neg_apply]
+    push_cast
+    ring
+
 /-- **`𝓕` bridge.** The Fourier transform of `g` at the lattice point `m`, an integral over the
 inner-product space `EuclideanSpace ℝ ι`, rewrites as an integral over `ι → ℝ` of the torus
 character `mFourier (-m)` against `g` — via the measure-preserving `WithLp` identification and
