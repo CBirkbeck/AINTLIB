@@ -12,6 +12,17 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
+**UPDATE 2026-07-02 (AGE-4 chain progressing).** AGE-0 ✓ (multivariable theta), AGE-1 ✓
+(`IdealLattice.lean`: `euclideanIdealLattice`, `idealZLattice`, `covolume_idealZLattice`,
+`idealTheta` + `idealTheta_transform`). Remaining chain to GRH non-vacuity is in the SP1-AGE
+ticket (AGE-2/3/4). **AGE-2 WARNING (archimedean-constant trap, review Q5)**: with our PLAIN
+L² metric on `euclidean.mixedSpace`, `⟪σx, σy⟫ = ∑_real x_v y_v + ∑_complex Re(x_w·conj(y_w))`
+which is NOT the trace form `Tr_{K/ℚ}(xy)` at complex places (factor 2 + conjugation) — so
+`dualZLattice (idealZLattice K I)` is a *scaled/conjugated* codifferent lattice, not verbatim
+`(I·𝔡)⁻¹`. Derive the exact dictionary from the pairing computation BEFORE stating AGE-2;
+cross-check against `Different.lean`'s `FractionalIdeal.dual` (trace-form convention) and
+record the conversion in `Normalisation.lean`.
+
 **UPDATE 2026-07-01 (GRH properly stated — user directive executed).** The project now has
 **exactly one `sorry`: `belabas_friedman_thm1` itself** (the target theorem). The sorried
 `completedDedekindZeta` definition is GONE, replaced by the characterisation architecture in
