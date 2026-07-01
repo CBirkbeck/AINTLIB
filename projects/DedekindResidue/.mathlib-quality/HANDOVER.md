@@ -12,7 +12,17 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-**UPDATE 2026-07-01 (final for this session): SP1-AGΘ IS ALSO DONE.** `ThetaLattice.lean`
+**UPDATE 2026-07-01 (later still): SP1-N DONE + AGE STARTED, AGE-0 DONE.** `Normalisation.lean`
+(gammaFactor, paper-Fourier bridge `paperFourierIntegral_eq_fourierIntegral`) and the
+**multivariable theta transformation `weightedThetaLattice_transform`** (AGE-0, the engine for
+nontrivial unit rank) are proven, axiom-clean, pushed. The AGE decomposition (AGE-0..4, with
+mathlib windfalls `FundamentalCone.idealSet`/`idealSetEquivNorm`, `euclidean.mixedSpace`,
+`covolume_idealLattice`, `mellin`) is in the SP1-AGE ticket. Frontier: **AGE-1** — euclidean
+ideal lattices (`ZLattice.comap` of `mixedEmbedding.idealLattice` along `toMixed`, then
+transport along `(euclidean.stdOrthonormalBasis K).repr` to `EuclideanSpace ℝ (index K)`).
+Goal: genuine `completedDedekindZeta` (AGE-4) so GRH is fully stated — the user's priority.
+
+**UPDATE 2026-07-01 (earlier): SP1-AGΘ DONE.** `ThetaLattice.lean`
 (sorry-free, axiom-clean) proves **`thetaLattice_transform`:
 `Θ_L(t) = covol(L)⁻¹·t^{-n/2}·Θ_{L♯}(1/t)`** — the full lattice/Poisson/theta layer
 (reviewer milestone (a)) is complete. Frontier: **SP1-AGE** — Hecke partial theta over ideal

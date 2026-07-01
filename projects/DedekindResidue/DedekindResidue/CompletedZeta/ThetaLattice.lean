@@ -435,6 +435,101 @@ theorem summable_norm_restrict_weightedGaussianCM (L : Submodule ℤ (EuclideanS
       (K : Set (EuclideanSpace ℝ ι))) x)
   exact norm_weightedGaussianCM_le c hca _
 
+/-- `h_sum` for the anisotropic Gaussian: its Fourier transforms are summable over the dual
+lattice (via `fourier_weightedGaussianCM` + isotropic comparison at the inverse upper bound). -/
+theorem summable_fourier_weightedGaussianCM (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {c : ι → ℝ} (hc : ∀ i, 0 < c i)
+    {B : ℝ} (hB : 0 < B) (hcB : ∀ i, c i ≤ B) :
+    Summable fun w : dualZLattice L =>
+      𝓕 (⇑(weightedGaussianCM (ι := ι) c)) (w : EuclideanSpace ℝ ι) := by
+  have hb : ∀ i, B⁻¹ ≤ (c i)⁻¹ := fun i => (inv_le_inv₀ hB (hc i)).mpr (hcB i)
+  have h1 : Summable (fun w : dualZLattice L =>
+      (Real.sqrt (∏ i, c i))⁻¹
+        • weightedGaussianCM (ι := ι) (fun i => (c i)⁻¹) (w : EuclideanSpace ℝ ι)) := by
+    refine Summable.of_norm ?_
+    refine Summable.of_nonneg_of_le (fun w => norm_nonneg _) (fun w => ?_)
+      ((summable_gaussian_zlattice (dualZLattice L)
+        (show (0:ℝ) < π * B⁻¹ by positivity)).mul_left |(Real.sqrt (∏ i, c i))⁻¹|)
+    rw [norm_smul, Real.norm_eq_abs]
+    refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+    have h2 := norm_weightedGaussianCM_le (fun i => (c i)⁻¹) hb
+      ((w : EuclideanSpace ℝ ι))
+    rw [norm_gaussianCM_apply] at h2
+    exact h2
+  exact h1.congr (fun w => (fourier_weightedGaussianCM hc _).symm)
+
+/-- Complexification of the weighted theta sum. -/
+theorem ofReal_weightedTheta (M : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology M] [IsZLattice ℝ M] {d : ι → ℝ} {b : ℝ} (hb : 0 < b)
+    (hdb : ∀ i, b ≤ d i) :
+    ((∑' v : M, Real.exp (-π * ∑ i, d i * ((v : EuclideanSpace ℝ ι) i) ^ 2) : ℝ) : ℂ)
+      = ∑' v : M, weightedGaussianCM (ι := ι) d (v : EuclideanSpace ℝ ι) := by
+  have hsummable : Summable (fun v : M =>
+      Real.exp (-π * ∑ i, d i * ((v : EuclideanSpace ℝ ι) i) ^ 2)) := by
+    refine Summable.of_nonneg_of_le (fun v => (Real.exp_pos _).le) (fun v => ?_)
+      (summable_gaussian_zlattice M (show (0:ℝ) < π * b by positivity))
+    have h2 := norm_weightedGaussianCM_le d hdb ((v : EuclideanSpace ℝ ι))
+    rw [norm_gaussianCM_apply, norm_weightedGaussianCM_apply] at h2
+    exact h2
+  rw [show ((((∑' v : M, Real.exp (-π * ∑ i, d i * ((v : EuclideanSpace ℝ ι) i) ^ 2)) : ℝ)) : ℂ)
+      = Complex.ofRealCLM (∑' v : M,
+          Real.exp (-π * ∑ i, d i * ((v : EuclideanSpace ℝ ι) i) ^ 2)) from rfl]
+  rw [ContinuousLinearMap.map_tsum Complex.ofRealCLM hsummable]
+  refine tsum_congr (fun v => ?_)
+  show ((Real.exp (-π * ∑ i, d i * ((v : EuclideanSpace ℝ ι) i) ^ 2) : ℝ) : ℂ) = _
+  rw [Complex.ofReal_exp]
+  show Complex.exp _ = Complex.exp _
+  congr 1
+  push_cast
+  ring
+
+/-- **The multivariable (anisotropic) lattice theta transformation** (SP1-AGE-0) — the
+analytic engine of Hecke's functional equation for a number field with nontrivial unit rank:
+
+`∑_{v∈L} e^{-π∑ᵢcᵢvᵢ²} = covol(L)⁻¹·(∏ᵢcᵢ)^{-1/2}·∑_{w∈L♯} e^{-π∑ᵢcᵢ⁻¹wᵢ²}`
+
+for any positive weights `c` (no other hypotheses — bounds are derived internally). The
+isotropic `thetaLattice_transform` is the constant-weights case. Hecke integrates this over
+the unit fundamental domain in the weight space (SP1-AGE-3). -/
+theorem weightedThetaLattice_transform (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {c : ι → ℝ} (hc : ∀ i, 0 < c i) :
+    ∑' v : L, Real.exp (-π * ∑ i, c i * ((v : EuclideanSpace ℝ ι) i) ^ 2)
+      = (ZLattice.covolume L volume)⁻¹ * (Real.sqrt (∏ i, c i))⁻¹
+        * ∑' w : dualZLattice L,
+            Real.exp (-π * ∑ i, (c i)⁻¹ * ((w : EuclideanSpace ℝ ι) i) ^ 2) := by
+  obtain ⟨a, ha, hca⟩ : ∃ a : ℝ, 0 < a ∧ ∀ i, a ≤ c i := by
+    rcases isEmpty_or_nonempty ι with h | h
+    · exact ⟨1, one_pos, fun i => (IsEmpty.false i).elim⟩
+    · refine ⟨Finset.univ.inf' Finset.univ_nonempty c, ?_,
+        fun i => Finset.inf'_le _ (Finset.mem_univ i)⟩
+      rw [Finset.lt_inf'_iff]
+      exact fun i _ => hc i
+  obtain ⟨B, hB, hcB⟩ : ∃ B : ℝ, 0 < B ∧ ∀ i, c i ≤ B := by
+    rcases isEmpty_or_nonempty ι with h | h
+    · exact ⟨1, one_pos, fun i => (IsEmpty.false i).elim⟩
+    · refine ⟨Finset.univ.sup' Finset.univ_nonempty c, ?_,
+        fun i => Finset.le_sup' _ (Finset.mem_univ i)⟩
+      obtain ⟨i⟩ := h
+      exact lt_of_lt_of_le (hc i) (Finset.le_sup' _ (Finset.mem_univ i))
+  have hbinv : ∀ i, B⁻¹ ≤ (c i)⁻¹ := fun i => (inv_le_inv₀ hB (hc i)).mpr (hcB i)
+  have hP := tsum_eq_tsum_fourier_zlattice L (g := weightedGaussianCM c)
+    (fun K => summable_norm_restrict_weightedGaussianCM L ha hca K)
+    (summable_fourier_weightedGaussianCM L hc hB hcB)
+  have h3 : (∑' w : dualZLattice L,
+      𝓕 (⇑(weightedGaussianCM (ι := ι) c)) (w : EuclideanSpace ℝ ι))
+      = (Real.sqrt (∏ i, c i))⁻¹
+        • ∑' w : dualZLattice L,
+            weightedGaussianCM (ι := ι) (fun i => (c i)⁻¹) (w : EuclideanSpace ℝ ι) := by
+    rw [← tsum_const_smul'']
+    exact tsum_congr (fun w => fourier_weightedGaussianCM hc _)
+  refine Complex.ofReal_injective ?_
+  rw [ofReal_weightedTheta L ha hca, hP, h3,
+    ← ofReal_weightedTheta (dualZLattice L) (show (0:ℝ) < B⁻¹ by positivity) hbinv]
+  push_cast
+  rw [Complex.real_smul, Complex.real_smul]
+  push_cast
+  ring
+
 end
 
 end DedekindResidue

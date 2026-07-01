@@ -129,7 +129,14 @@
     (Q5)**: the PLAIN L² metric of `euclidean.mixedSpace` (no 2 at complex places) — covolume
     `𝓞_K = 2^{-r₂}√|Δ|` per mathlib; the compensating 2's live in `Γℂ = 2(2π)^{-s}Γ(s)`
     (SP1-N). Leaves, bottom-up:
-    - **(AGE-0) anisotropic theta** [file `ThetaLattice.lean` extension]: for a positive
+    - **(AGE-0) DONE ✓✓ (2026-07-01, `ThetaLattice.lean`, sorry-free, axiom-clean)**:
+      `weightedThetaLattice_transform` — the multivariable theta
+      `∑_{v∈L} e^{-π∑cᵢvᵢ²} = covol(L)⁻¹(∏cᵢ)^{-1/2}∑_{w∈L♯} e^{-π∑cᵢ⁻¹wᵢ²}` for ANY positive
+      weights (junk-free statement, bounds derived internally). Stack: `diagScale`
+      (+adjoint/det/symm/congr), `weightedGaussianCM` (+structural identity `= gaussianCM 1 ∘
+      diagScale √c`), `fourier_weightedGaussianCM` (via P3a), isotropic-comparison convergence
+      layer, `ofReal_weightedTheta`. **Next: AGE-1** (euclidean ideal lattices).
+    - (AGE-0) original plan [file `ThetaLattice.lean` extension]: for a positive
       self-adjoint `P` (diagonal-in-an-ONB suffices): `∑_{v∈L} e^{-π⟨Pv,v⟩} =
       covol(L)⁻¹·det(P)^{-1/2}·∑_{w∈L♯} e^{-π⟨P⁻¹w,w⟩}` — via `tsum_eq_tsum_fourier_zlattice`
       + `fourier_comp_linearEquiv` (P3a!) at `T = P^{1/2}` + `fourier_gaussianCM`. NEEDED
