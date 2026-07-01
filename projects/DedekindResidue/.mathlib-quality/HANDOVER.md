@@ -1,0 +1,192 @@
+# HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
+
+*Written 2026-07-01 so that any Claude account (or human) can take over mid-stream. Read this
+first, then `plan.md` → `tickets.md` → `substrate-api.md` in this directory. Keep this file
+updated at every commit checkpoint.*
+
+## 0. TL;DR for a fresh session
+
+```
+cd /Users/mcu22seu/Documents/GitHub/aintlib-dedekind    # worktree, branch dev/dedekind-residue
+lake exe cache get                                       # only if mathlib oleans missing
+lake build DedekindResidue.CompletedZeta.PoissonSummation
+```
+
+One `sorry` is the live frontier: **`tsum_eq_tsum_fourier_zpoint`** in
+`projects/DedekindResidue/DedekindResidue/CompletedZeta/PoissonSummation.lean` (n-dim Poisson
+summation over `ℤ^ι`). The complete leaf plan with verified mathlib footholds is in §4 below.
+Work it in `/beastmode` style; plan any new gaps in `/develop` style (ticket per leaf, verbatim
+source justification, verified mathlib lemma names).
+
+## 1. What the project is
+
+Formalise **Belabas–Friedman, "Computing the residue of the Dedekind zeta function"
+(arXiv:1305.0035), Theorem 1** in Lean 4 / mathlib, inside the AINTLIB monorepo:
+
+> Under GRH, `|log κ_K − f_K(X)| ≤ B(X, d_K, disc K)` (explicit bound), where
+> `κ_K = Res_{s=1} ζ_K` (mathlib: `NumberField.dedekindZeta_residue K`) and `f_K(X)` is the
+> prime-power sum built from the test function `F_{s,X}` (our `auxF` / `bSum` / `fK`).
+
+**Binding constraints (user-set, non-negotiable):**
+- **GRH is the SOLE hypothesis** — a `Prop` argument threaded through statements, **never an
+  `axiom`**. Everything else genuinely proven.
+- **General number fields** (not abelian-only).
+- **Axiom bar**: every public declaration must have `#print axioms` ⊆
+  `{propext, Classical.choice, Quot.sound}`.
+- **No empty structures / junk witnesses / vacuous instances** — no placeholder constructions
+  that make statements trivially true. Definitions must be the genuine mathematical objects.
+  (mathlib-standard junk values inside total functions, e.g. `tsum = 0` when not summable, are
+  fine — theorems must carry the real summability/integrability hypotheses.)
+- **Faithful to the literature**: proofs mirror the paper / standard references; don't invent
+  decompositions (quote-or-delete discipline from `/develop`).
+
+**Confirmed route for the ζ_K functional equation** (expert review, 2026-07-01, reply in
+`expert-review/2026-07-01/`): the classical **Hecke theta stack** —
+(P) n-dim Poisson (Gaussian class first) → (Θ) lattice Gaussian theta + transformation law →
+(H) Hecke partial theta over ideal classes, unit domain sealed behind a small API →
+(FE) completed `Λ_K` + functional equation, Tate-normalisation discipline for constants.
+**NOT** Tate adelic. Abelian case only as a validation harness, never as substrate.
+mathlib has **no** completed Dedekind zeta / FE (checked 2026-07-01: `NumberTheory/NumberField/
+DedekindZeta.lean` is L-series + residue only) — SP1 is genuinely new.
+
+## 2. Where everything lives
+
+- **Worktree**: `/Users/mcu22seu/Documents/GitHub/aintlib-dedekind`, branch
+  **`dev/dedekind-residue`**, sharing `.git` with the main checkout
+  `/Users/mcu22seu/Documents/GitHub/AINTLIB` (which stays on `main`). Remote:
+  `https://github.com/CBirkbeck/AINTLIB.git`. From another machine: clone + checkout the branch.
+- **Project**: `projects/DedekindResidue/` — library `DedekindResidue`, Lean **module system**
+  (`module` header, `public import`, `@[expose] public section`), no copyright headers by
+  AINTLIB convention.
+- **Pin**: mathlib rev `11b908e5cdd9`, toolchain `v4.32.0-rc1` (moves with the central daily
+  bump on `main`; rebase only at stable points, never mid-proof).
+- **Process artifacts** (this directory, dev-branch only, never merged to `main`):
+  `plan.md` (strategy + sub-epics), `tickets.md` (**the live board** — statuses are kept
+  current), `substrate-api.md` (verified mathlib foothold map, sections A–F),
+  `decomposition.md` (decompose pass), `expert-review/2026-07-01/{brief,reply,state}.md`,
+  `beastmode_active` (session sentinel — **do not commit**).
+- **Paper**: `refs/DedekindResidue/` via the gitignored `refs` symlink (local-only, never
+  committed). `REVIEW_BRIEF.md` in the project root is the self-contained math briefing.
+- **Verify recipe** (no lean MCP on this setup): build the fully-qualified module
+  (`lake build DedekindResidue.CompletedZeta.<Mod>`), then axiom-check via a scratch file:
+  `import DedekindResidue...; #print axioms <FQN>` run with `lake env lean <file>`.
+  Never put `2>/dev/null` next to `lake`/`lean` (repo guardrail blocks it; use `2>&1`).
+
+## 3. State of the code (2026-07-01, all committed on `dev/dedekind-residue`)
+
+| File | Status |
+|---|---|
+| `Basic.lean` | residue/`dedekindZeta` re-exports + conventions. Sorry-free. |
+| `AuxiliaryFunction.lean` | `gAux`, `auxF` + evenness/plateau/measurability API (**T002 done**, axiom-clean). |
+| `MainTheorem.lean` | `bSum` (**T001 done**), `fK` sorry-free; `belabas_friedman_thm1` = the single target `sorry`. |
+| `CompletedZeta/DualLattice.lean` | **P.1 COMPLETE, axiom-clean**: `dualZLattice`, `mem_dualZLattice`, `innerₗ_nondegenerate`, `dualZLattice_eq_span`, `DiscreteTopology`/`IsZLattice` instances, `volumeReal_fundamentalDomain_orthonormal`, **`covolume_dualZLattice_mul`** (`covol L♯ · covol L = 1`). |
+| `CompletedZeta/PoissonSummation.lean` | **P.2 IN PROGRESS**. Done + axiom-clean: `zpoint`, `zpoint_add`, `summable_gaussian_zlattice`, `mFourier_neg_coe`, `periodization` + `periodization_add_zpoint`, `fourierIntegral_zpoint_eq` (the `𝓕` bridge). Remaining: **`tsum_eq_tsum_fourier_zpoint` (`sorry` ~line 155)** — plan in §4. |
+| `CompletedZeta/FunctionalEquation.lean` | `completedDedekindZeta` + FE statements, both `sorry` (SP1-FE — blocked on AGP/AGΘ/AGE). |
+| `CompletedZeta/GRH.lean` | GRH predicates (dual form `GRH_Λ` / `GRH_{>1/2}` per review Q4). Definitions only. |
+
+Ticket board: SP1 sub-epics `N / AGP / AGΘ / AGE / FE / AC / Γ / GRH` (+`T-ADM`, `T-BV`);
+current epic **SP1-AGP** (P.1 ✓, P.2 live, P.3 transport pending). Then AGΘ (theta = P.2/P.3 ⊕
+`fourier_gaussian_innerProductSpace`, which mathlib already has), then AGE (Hecke; reuse the
+codifferent-as-`dualSubmodule` from `RingTheory/DedekindDomain/Different.lean` — see
+`substrate-api.md` §B), then FE/AC/GRH, then SP2 (zeros/Hadamard), SP3 (explicit formula ⇒ Thm 1).
+
+## 4. Live frontier: `tsum_eq_tsum_fourier_zpoint` — verified leaf plan
+
+Goal (statement already in the file, mirrors mathlib's 1-D `Real.tsum_eq_tsum_fourier`):
+for continuous `g : C(EuclideanSpace ℝ ι, ℂ)` with `h_norm` (per-compact summability of
+translate norms) and `h_sum` (summability of `𝓕g` at lattice points),
+`∑'_{n:ι→ℤ} g (zpoint n) = ∑'_m 𝓕 g (zpoint m)`.
+
+Engine: torus Fourier series (`UnitAddTorus`, mathlib `Analysis/Fourier/AddCircleMulti.lean`).
+All footholds below **verified against the pin on 2026-07-01** (exact signatures checked):
+
+- **(c) Periodization as a `C(·,·)`-tsum.** `P := ∑' n : ι → ℤ, g.comp (ContinuousMap.addRight
+  (zpoint n))` in `C(EuclideanSpace ℝ ι, ℂ)`. Summable from `h_norm` via
+  `ContinuousMap.summable_of_locally_summable_norm` (needs `LocallyCompactSpace` domain — OK,
+  finite-dim). Pointwise `P x = periodization g x` via `ContinuousMap.tsum_apply`.
+- **(d) Torus lift.** `π : (ι → ℝ) → UnitAddTorus ι := fun x i => ↑(x i)` is an open quotient
+  map: `IsOpenQuotientMap.piMap (fun _ => QuotientAddGroup.isOpenQuotientMap_mk)`. Define
+  `G : C(UnitAddTorus ι, ℂ)` on points by `q ↦ P (toLp (fun i => (AddCircle.equivIoc 1 0 (q i)
+  : ℝ)))` (genuine Ioc-representatives — NOT a junk section). Descent identity `G (π x) = P
+  (toLp x)` from the **proven** kernel/well-definedness argument (scratch compiled clean
+  2026-07-01, paste-ready):
+
+  ```lean
+  -- q x = q y ⟹ x − y ∈ ℤ^ι, hence periodization agrees (uses periodization_add_zpoint)
+  have hi : ∀ i, ∃ n : ℤ, x i - y i = n := fun i => by
+    have h2 := congrFun h i
+    rw [QuotientAddGroup.eq, AddSubgroup.mem_zmultiples_iff] at h2
+    obtain ⟨n, hn⟩ := h2
+    exact ⟨-n, by simp only [zsmul_eq_mul, mul_one] at hn; push_cast; linarith⟩
+  choose k hk using hi
+  have hxy : x = y + (fun i => (k i : ℝ)) := funext fun i => by
+    have := hk i; simp only [Pi.add_apply]; linarith
+  have hadd : (WithLp.equiv 2 (ι→ℝ)).symm (y + fun i => (k i:ℝ))
+      = (WithLp.equiv 2 (ι→ℝ)).symm y + zpoint k := by
+    ext i
+    simp only [zpoint, PiLp.add_apply, Pi.add_apply, WithLp.equiv_symm_apply, WithLp.ofLp_toLp]
+  rw [hxy, hadd, periodization_add_zpoint]
+  ```
+
+  Continuity of `G`: `G ∘ π = P ∘ toLp` is continuous; conclude via
+  `(IsOpenQuotientMap...).isQuotientMap.continuous_iff`.
+- **(e) THE key lemma — `mFourierCoeff_periodization`**: `mFourierCoeff ⇑G m = 𝓕 ⇑g (zpoint m)`
+  (n-dim analogue of mathlib's `Real.fourierCoeff_tsum_comp_add`; mirror that proof's calc
+  chain — read it at `Mathlib/Analysis/Fourier/PoissonSummation.lean:51`). Steps:
+  1. `UnitAddTorus.mFourierCoeff_eq_integral` (with `a := fun _ => 0`) → integral over the
+     Ioc-box `{x | ∀ i, x i ∈ Ioc 0 1}`.
+  2. Insert descent identity; swap `∑'`/`∫` on the box (`h_norm` at the compact closed box;
+     1-D used `intervalIntegral.tsum_intervalIntegral_eq_of_summable_norm` — n-dim: dominated
+     convergence / `integral_tsum` with the norm bound).
+  3. Character shift-invariance: `mFourier (-m) (π (x + zpoint n)) = mFourier (-m) (π x)`
+     (each coordinate shifts by an integer; via `mFourier_neg_coe` or `AddCircle.coe_add_int`).
+  4. Reassemble `∑'_n ∫_box (translate n) = ∫_{ι→ℝ}` via
+     `ZSpan.isAddFundamentalDomain (Pi.basisFun ℝ ι) volume` +
+     `IsAddFundamentalDomain.integral_eq_tsum'` (verified sig: needs `Integrable f`; yields
+     `∫ f = ∑' g, ∫_s f (-g +ᵥ x)`). **Watch**: ZSpan fundamental domain is the **Ico**-box,
+     torus side is the **Ioc**-box — reconcile a.e. (coordinate hyperplanes are null;
+     `Measure.pi`-null boundary). Integrability of the full integrand from `h_norm` summed
+     (as in 1-D `integrable_of_summable_norm_Icc` — may need an n-dim analogue lemma).
+  5. Finish with `fourierIntegral_zpoint_eq` (already proven in-file).
+- **(f) Assembly.** `UnitAddTorus.hasSum_mFourier_series_apply_of_summable` (needs
+  `Summable (mFourierCoeff ⇑G)` ⟸ (e) + `h_sum`) evaluated at `x = 0`; `mFourier m 0 = 1`
+  (`fourier_eval_zero` productised); LHS `G 0 = P 0 = periodization g 0 = ∑' n, g (zpoint n)`
+  (needs `zpoint`-of-`0` + `zero_add`). Conclude `tsum_eq` from `HasSum`.
+
+After (f): **P.3** (transport `ℤ^ι → general L` by the lattice-basis linear equiv, covolume
+factor via `ZLattice.covolume`; see ticket) — then **AGΘ** (theta transformation:
+`fourier_gaussian_innerProductSpace` is already in mathlib, so Θ = Poisson + that lemma +
+`covolume_dualZLattice_mul`).
+
+## 5. Session-earned gotchas (will bite again)
+
+- **Module system**: bare `Basis` unknown → `Module.Basis` (same for `Module.Basis.addHaar_self`,
+  `.toMatrix_apply`, `.det_apply`).
+- **Inner-product notation**: `open scoped RealInnerProductSpace` exports `⟪x, y⟫` (NO `_ℝ`
+  suffix — `⟪·,·⟫_ℝ` is a mathlib-file-local notation, not importable).
+- **`omit [inst] in` goes BEFORE the docstring**, else "unexpected token 'omit'".
+- `ZLattice.covolume_eq_det_mul_measureReal (L) (μ := autoParam) (b) (b₀)`: `L` explicit, `μ`
+  autoParam. In `rw`, pass named `(μ := volume) (b := …) (b₀ := …)`; after rewriting a carrier
+  equality (e.g. `dualZLattice_eq_span`), re-fold `set`-variables with `rw [← hc, ← hcstar]`
+  before the covolume rewrite pattern can match.
+- **EuclideanSpace coordinates**: `ext i; simp only [zpoint, PiLp.add_apply, Pi.add_apply,
+  WithLp.equiv_symm_apply, WithLp.ofLp_toLp]` is the working idiom.
+- **Torus kernel**: `QuotientAddGroup.eq` + `AddSubgroup.mem_zmultiples_iff` (NOT
+  `AddCircle.coe_eq_coe_iff_of_mem_Ioc`, which demands Ioc membership).
+- `fourier_eq'` is namespaced: **`Real.fourier_eq'`**.
+- After `integral_congr_ae` the integrand is a beta-redex — `dsimp only` before `rw` can match.
+- `ring` cannot rewrite inside `cexp` — `congr 1` down to the exponent first. Sum-order
+  mismatches (`∑ xᵢmᵢ` vs `∑ mᵢxᵢ`): `Finset.sum_congr rfl (fun i _ => mul_comm _ _)`.
+- `Metric.finite_isBounded_inter_isClosed (discrete) (bounded) (closed) : (K ∩ s).Finite` —
+  bounded set FIRST in the intersection.
+- 1-D Poisson template lives at `Mathlib/Analysis/Fourier/PoissonSummation.lean:51` — mirror it.
+
+## 6. Working conventions
+
+- `/develop` to plan (every new leaf gets: statement, sketch, verified mathlib lemma names,
+  source citation), `/beastmode` to execute (sentinel `beastmode_active`; spawn sub-tickets for
+  gaps; never stop on "hard").
+- Commit per green increment on `dev/dedekind-residue`; commit message style is in `git log`.
+  Trailer: `Co-Authored-By: Claude <model> <noreply@anthropic.com>`.
+- Producers don't clean/golf/restyle (fleet does that on `main` post-merge). Leave the
+  ticket-board statuses current — the next session resumes from `tickets.md` + this file.
