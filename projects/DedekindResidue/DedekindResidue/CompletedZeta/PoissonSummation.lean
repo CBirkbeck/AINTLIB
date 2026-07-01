@@ -41,6 +41,40 @@ variable {ι : Type*} [Fintype ι]
 noncomputable def zpoint (n : ι → ℤ) : EuclideanSpace ℝ ι :=
   (WithLp.equiv 2 (ι → ℝ)).symm (fun i => (n i : ℝ))
 
+omit [Fintype ι] in
+/-- `zpoint` is additive: it is the restriction of a linear map to the integer lattice. -/
+theorem zpoint_add (m n : ι → ℤ) : zpoint (m + n) = zpoint m + zpoint n := by
+  ext i
+  simp only [zpoint, PiLp.add_apply, Pi.add_apply, WithLp.equiv_symm_apply, WithLp.ofLp_toLp]
+  push_cast; ring
+
+/-- The torus monomial `mFourier (-m)` is the Fourier character `x ↦ exp(-2πi⟨m,x⟩)` of the
+integer point `m`, written through the coordinatewise quotient `ℝ → AddCircle 1`. -/
+theorem mFourier_neg_coe (m : ι → ℤ) (x : ι → ℝ) :
+    UnitAddTorus.mFourier (-m) (fun i => ((x i : ℝ) : AddCircle (1 : ℝ)))
+      = Complex.exp (-(2 * (Real.pi : ℂ) * Complex.I) * ∑ i, (m i : ℂ) * (x i : ℂ)) := by
+  simp only [UnitAddTorus.mFourier, ContinuousMap.coe_mk, Pi.neg_apply, fourier_coe_apply]
+  rw [← Complex.exp_sum]
+  congr 1
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  push_cast
+  ring
+
+/-- The **torus periodization** of `g`: the `ℤ^ι`-periodic function `x ↦ ∑_{n} g(x + n)`, the
+object whose `m`-th Fourier coefficient is `𝓕g(m)`. -/
+noncomputable def periodization (g : EuclideanSpace ℝ ι → ℂ) (x : EuclideanSpace ℝ ι) : ℂ :=
+  ∑' n : ι → ℤ, g (x + zpoint n)
+
+omit [Fintype ι] in
+/-- The periodization is `ℤ^ι`-periodic: shifting by a lattice point reindexes the sum. -/
+theorem periodization_add_zpoint (g : EuclideanSpace ℝ ι → ℂ) (x : EuclideanSpace ℝ ι)
+    (k : ι → ℤ) : periodization g (x + zpoint k) = periodization g x := by
+  unfold periodization
+  rw [← (Equiv.addLeft k).tsum_eq (fun n => g (x + zpoint n))]
+  refine tsum_congr (fun n => ?_)
+  rw [Equiv.coe_addLeft, zpoint_add, add_assoc]
+
 /-- **Gaussian summability over a lattice.** For `a > 0`, the Gaussian `x ↦ exp(-a‖x‖²)` is
 summable over any `ℤ`-lattice `L ⊂ EuclideanSpace ℝ ι`. Proof: it is eventually dominated (as
 `‖x‖ → ∞`, which happens cofinitely on the lattice since sub-level sets are finite) by
