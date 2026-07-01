@@ -51,6 +51,16 @@
       (3) `Module.Basis.span hlinind` as the dual ℤ-basis (fold post-`dualZLattice_eq_span` goal with
       `← hc, ← hcstar`); (4) `MᵀM* = 1` from `apply_dualBasis_left` (δ_ij) + `OrthonormalBasis.sum_inner_mul_inner`
       Parseval + `real_inner_comm`, then `Module.Basis.det_apply` + `Matrix.det_transpose` + `Matrix.det_mul`.
+    - **P.2 STARTED ✓ (2026-07-01, `CompletedZeta/PoissonSummation.lean`, build green)**: file
+      created with `zpoint` (ℤ^ι ↪ EuclideanSpace, axiom-clean), `summable_gaussian_zlattice`
+      (Gaussian `exp(-a‖x‖²)` summable over any lattice — DONE, axiom-clean: `ZLattice.summable_norm_rpow`
+      dominated via `rexp_neg_quadratic_isLittleO_rpow_atTop` + finite sub-level sets from
+      `Metric.finite_isBounded_inter_isClosed`). **Remaining P.2**: `tsum_eq_tsum_fourier_zpoint`
+      (the Poisson formula, currently `sorry`) via the multivariate torus Fourier series
+      `UnitAddTorus.hasSum_mFourier_series_apply_of_summable` + the key new lemma
+      `mFourierCoeff_periodization` (`mFourierCoeff (periodization g) m = 𝓕g (zpoint m)`, the
+      n-dim analogue of mathlib's `Real.fourierCoeff_tsum_comp_add`). NB torus base is `ι → ℝ`;
+      bridge to `EuclideanSpace`/`𝓕` via `PiLp.volume_preserving_toLp` + character factorisation.
   - **[SP1-AGΘ] lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
     depends on SP1-AGP (Gaussian class) + n-dim Gaussian self-duality (assemble from 1-D
     `Gaussian/FourierTransform`).
