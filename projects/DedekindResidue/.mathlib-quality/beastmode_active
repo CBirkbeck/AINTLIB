@@ -1,1 +1,1 @@
-FOCUS: SP1-AGP P.3 assembly: transport h_norm through T (restrict-norm under homeomorph = image-compact), reindex both tsums, apply P.2 + P3a-d => tsum_eq_tsum_fourier_zlattice
+FOCUS: SP1-AGΘ — Θ3 next: 𝓕(gaussianCM t)(w) = t^{-n/2} cexp(-π‖w‖²/t) via fourier_gaussian_innerProductSpace at b=πt (cpow of positive real juggling); then h_sum discharge; then Θ4 transformation assembly

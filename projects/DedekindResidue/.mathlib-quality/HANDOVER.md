@@ -12,7 +12,16 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-**UPDATE 2026-07-01 (latest): P.3 IS ALSO DONE — SP1-AGP COMPLETE.** `PoissonLattice.lean`
+**UPDATE 2026-07-01 (final for this session): SP1-AGΘ IS ALSO DONE.** `ThetaLattice.lean`
+(sorry-free, axiom-clean) proves **`thetaLattice_transform`:
+`Θ_L(t) = covol(L)⁻¹·t^{-n/2}·Θ_{L♯}(1/t)`** — the full lattice/Poisson/theta layer
+(reviewer milestone (a)) is complete. Frontier: **SP1-AGE** — Hecke partial theta over ideal
+classes (ideal lattices via `mixedEmbedding.idealLattice`/`latticeBasis`, codifferent =
+`dualSubmodule` of the trace form for the dual side, unit fundamental domain sealed behind a
+small API per review Q2). Also do **SP1-N** (normalisation file) early — the paper's Fourier
+convention (`e^{+itγ}`, no 2π) vs mathlib's `𝓕` is recorded in the T003 ticket.
+
+**UPDATE 2026-07-01 (earlier): P.3 DONE — SP1-AGP COMPLETE.** `PoissonLattice.lean`
 (sorry-free, axiom-clean) has `tsum_eq_tsum_fourier_zlattice` (Poisson over an arbitrary
 ℤ-lattice, covolume factor + dual lattice) and `fourier_comp_linearEquiv` (GL change of
 variables for 𝓕). Frontier: **SP1-AGΘ** — Gaussian theta + transformation law; leaf plan in

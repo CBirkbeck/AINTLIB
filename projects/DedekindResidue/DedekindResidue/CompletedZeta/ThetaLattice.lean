@@ -24,7 +24,10 @@ applied to the ideal lattices of a number field it produces the completed `Λ_K`
 
 ## Main definitions / results (this file)
 * `DedekindResidue.thetaLattice L t` — `Θ_L(t) = ∑'_{v ∈ L} exp(-π t ‖v‖²)` (real-valued).
-* (in progress) `thetaLattice_transform` — the inversion law above, for `t > 0`.
+* `thetaLattice_transform` — **the inversion law** `Θ_L(t) = covol(L)⁻¹·t^{-n/2}·Θ_{L♯}(1/t)`
+  for `t > 0`, fully proven from the lattice Poisson formula + mathlib's Gaussian Fourier
+  transform (`fourier_gaussianCM`), with both convergence hypotheses discharged
+  (`summable_norm_restrict_gaussianCM`, `summable_fourier_gaussianCM`).
 -/
 
 namespace DedekindResidue
@@ -177,6 +180,66 @@ theorem fourier_gaussianCM {t : ℝ} (ht : 0 < t) (w : EuclideanSpace ℝ ι) :
       simpa using ht.ne'
     push_cast
     field_simp
+
+/-- The Fourier transforms of the Gaussian are summable over the dual lattice — the `h_sum`
+hypothesis of the lattice Poisson formula at the Gaussian (`Θ3` + `summable_gaussian_zlattice`
+over `L♯`, whose lattice instances come from `DualLattice.lean`). -/
+theorem summable_fourier_gaussianCM (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {t : ℝ} (ht : 0 < t) :
+    Summable fun w : dualZLattice L =>
+      𝓕 (⇑(gaussianCM (ι := ι) t)) (w : EuclideanSpace ℝ ι) := by
+  have h1 : Summable (fun w : dualZLattice L =>
+      ((t ^ (-(Fintype.card ι : ℝ) / 2) : ℝ) : ℂ)
+        * gaussianCM (ι := ι) t⁻¹ (w : EuclideanSpace ℝ ι)) := by
+    refine Summable.of_norm ?_
+    have heq : (fun w : dualZLattice L => ‖((t ^ (-(Fintype.card ι : ℝ) / 2) : ℝ) : ℂ)
+        * gaussianCM (ι := ι) t⁻¹ (w : EuclideanSpace ℝ ι)‖)
+        = fun w : dualZLattice L => |t ^ (-(Fintype.card ι : ℝ) / 2)|
+            * Real.exp (-(π * t⁻¹) * ‖(w : EuclideanSpace ℝ ι)‖ ^ 2) := by
+      funext w
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, norm_gaussianCM_apply]
+    rw [heq]
+    exact (summable_gaussian_zlattice (dualZLattice L) (by positivity)).mul_left _
+  exact h1.congr (fun w => (fourier_gaussianCM ht _).symm)
+
+/-- Complexification of the theta sum: `↑Θ_M(s) = ∑'_{v∈M} gaussianCM s v`. -/
+theorem ofReal_thetaLattice (M : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology M] [IsZLattice ℝ M] {s : ℝ} (hs : 0 < s) :
+    ((thetaLattice M s : ℝ) : ℂ) = ∑' v : M, gaussianCM (ι := ι) s (v : EuclideanSpace ℝ ι) := by
+  rw [thetaLattice]
+  rw [show ((((∑' v : M, Real.exp (-(π * s) * ‖(v : EuclideanSpace ℝ ι)‖ ^ 2)) : ℝ)) : ℂ)
+      = Complex.ofRealCLM (∑' v : M, Real.exp (-(π * s) * ‖(v : EuclideanSpace ℝ ι)‖ ^ 2))
+    from rfl]
+  rw [ContinuousLinearMap.map_tsum Complex.ofRealCLM (summable_thetaLattice M hs)]
+  refine tsum_congr (fun v => ?_)
+  show ((Real.exp (-(π * s) * ‖(v : EuclideanSpace ℝ ι)‖ ^ 2) : ℝ) : ℂ) = _
+  rw [Complex.ofReal_exp]
+  show Complex.exp _ = Complex.exp _
+  congr 1
+  push_cast
+  ring
+
+/-- **The lattice theta transformation law** (SP1-AGΘ; Neukirch VII §3 shape):
+`Θ_L(t) = covol(L)⁻¹ · t^{-n/2} · Θ_{L♯}(1/t)` for `t > 0` — the Gaussian instantiation of
+Poisson summation over `L`. This is the analytic engine of the Hecke functional equation:
+applied to the ideal lattices of a number field it yields the completed `Λ_K` (SP1-AGE). -/
+theorem thetaLattice_transform (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {t : ℝ} (ht : 0 < t) :
+    thetaLattice L t = (ZLattice.covolume L volume)⁻¹ * t ^ (-(Fintype.card ι : ℝ) / 2)
+      * thetaLattice (dualZLattice L) t⁻¹ := by
+  have hP := tsum_eq_tsum_fourier_zlattice L (g := gaussianCM t)
+    (fun K => summable_norm_restrict_gaussianCM L ht K) (summable_fourier_gaussianCM L ht)
+  have h3 : (∑' w : dualZLattice L, 𝓕 (⇑(gaussianCM (ι := ι) t)) (w : EuclideanSpace ℝ ι))
+      = ((t ^ (-(Fintype.card ι : ℝ) / 2) : ℝ) : ℂ)
+        * ∑' w : dualZLattice L, gaussianCM (ι := ι) t⁻¹ (w : EuclideanSpace ℝ ι) := by
+    rw [← tsum_mul_left]
+    exact tsum_congr (fun w => fourier_gaussianCM ht _)
+  refine Complex.ofReal_injective ?_
+  rw [ofReal_thetaLattice L ht, hP, h3, ← ofReal_thetaLattice (dualZLattice L) (inv_pos.mpr ht)]
+  push_cast
+  rw [Complex.real_smul]
+  push_cast
+  ring
 
 end
 

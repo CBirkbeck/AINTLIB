@@ -106,7 +106,17 @@
       `mFourierCoeff_periodization` (`mFourierCoeff (periodization g) m = 𝓕g (zpoint m)`, the
       n-dim analogue of mathlib's `Real.fourierCoeff_tsum_comp_add`). NB torus base is `ι → ℝ`;
       bridge to `EuclideanSpace`/`𝓕` via `PiLp.volume_preserving_toLp` + character factorisation.
-  - **[SP1-AGΘ] lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
+  - **[SP1-AGΘ] — DONE ✓✓ (2026-07-01, `CompletedZeta/ThetaLattice.lean`, sorry-free,
+    axiom-clean)**: `thetaLattice` (`Θ_L(t) = ∑'_{v∈L} e^{-πt‖v‖²}`), `summable_thetaLattice`,
+    `gaussianCM` + `norm_gaussianCM_apply`, `finite_norm_le_zlattice`, Θ1
+    `summable_norm_restrict_gaussianCM` (h_norm discharge), Θ3 `fourier_gaussianCM`
+    (`𝓕 = t^{-n/2}·(t↦1/t)`), `summable_fourier_gaussianCM` (h_sum discharge),
+    `ofReal_thetaLattice`, and **`thetaLattice_transform`:
+    `Θ_L(t) = covol(L)⁻¹·t^{-n/2}·Θ_{L♯}(1/t)`** (`t > 0`) — the reviewer's milestone (a)
+    "reusable lattice/Poisson/theta layer" is COMPLETE (P.1+P.2+P.3+Θ). Next: **SP1-AGE**
+    (Hecke partial theta over ideal classes; reuse mixedEmbedding ideal lattices +
+    codifferent-as-dualSubmodule, substrate-api §B/§F; unit domain sealed per review Q2).
+  - [SP1-AGΘ] original plan: **lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
     depends on SP1-AGP (Gaussian class) + n-dim Gaussian self-duality (assemble from 1-D
     `Gaussian/FourierTransform`).
   - **[SP1-AGE] Hecke construction** — ideal-lattice theta over `FundamentalCone` (unit action) +
