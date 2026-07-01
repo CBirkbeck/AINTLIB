@@ -70,12 +70,22 @@ The paper's own proof bottoms out at three results it treats as known. Under
 decomposition (a focused `/develop --decompose` per sub-project, once its reference is
 in `refs/`):
 
-- **SP1 — general `ζ_K` completed zeta + functional equation + Hadamard product** (Tier
-  1, `CompletedZeta/`). The foundation; the largest. **Route decided (2026-07-01): the
-  general-K Hecke theta stack** — n-dim Poisson summation (AG-P, the self-contained start)
-  → lattice Gaussian theta (AG-Θ) → Hecke construction over the class group (AG-E, needs a
-  Tate/Lang/Neukirch reference) → FE. Not abelian-first. See `decomposition.md` and the
-  restructured `[SP1]` epic in `tickets.md`.
+- **SP1 — general `ζ_K` completed zeta + FE + Hadamard product + analytic control** (Tier
+  1, `CompletedZeta/`). The foundation; the largest. **Route confirmed (expert review
+  2026-07-01): the general-K Hecke theta stack** — n-dim Poisson (AG-P, Gaussian-class
+  first) → lattice Gaussian theta (AG-Θ) → Hecke construction over the class group (AG-E,
+  needs a Tate/Lang/Neukirch reference) → FE assembly. NOT Tate (adelic substrate too
+  large), NOT abelian (validation-only). Implement it as a **Hecke-classical proof with
+  Tate-style normalisation discipline** — every covolume, Fourier transform, discriminant
+  factor and Γ-factor written for comparison against Tate, guarding against a hidden
+  `2^{r₂}`/`π^{r₂}`/`√Δ_K`. **Tier 1 is larger than "FE + Hadamard": the review promotes
+  an explicit analytic-control layer** — finite order of `Λ_K`, vertical-strip growth
+  bounds, zeros as a locally-finite multiset with multiplicity + zero-sum manipulation, the
+  canonical/Hadamard product *and its logarithmic derivative*, contour-shift estimates, the
+  real-branch-of-log convention, and a pinned Γ-factor normalisation (residue constant with
+  the `2^{r₂}` factor) fixed early. See `decomposition.md` and the restructured `[SP1]` epic
+  (sub-epics AG-P/AG-Θ/AG-E/FE + **AC (analytic control)** + **N (normalisation)** + GRH) in
+  `tickets.md`.
 - **SP2 — Weil–Poitou explicit formula** (Tier 2, `ExplicitFormula/`). Source:
   Poitou/Lang/Iwaniec–Kowalski. Depends on SP1.
 - **SP3 — Stark's formula (19) + Landau–Stark bound** (Tier 3, `Stark.lean`). Source:
@@ -90,7 +100,8 @@ decomposed directly from `refs/ANCF/1305.0035.pdf`.
 ```
 DedekindResidue/
   Basic.lean                       -- notation, imports (scaffold ✓)
-  CompletedZeta/  (SP1)  ThetaLattice, GammaFactor, FunctionalEquation, HadamardProduct, GRH
+  CompletedZeta/  (SP1)  DualLattice, ThetaLattice, Normalisation, GammaFactor,
+                         FunctionalEquation, HadamardProduct, AnalyticControl, GRH
   ExplicitFormula/(SP2)  TestFunction, WeilPoitou
   Stark.lean       (SP3)
   AuxiliaryFunction.lean           -- F_{s,X} (11/12) + Fourier transform (Lemma 2)
@@ -102,7 +113,7 @@ DedekindResidue/
 ```
               mathlib θ/Mellin/Poisson/WeakFEPair, mixedEmbedding
                                   │
-                        SP1  CompletedZeta/  (Λ_K, FE, Hadamard, zeros)
+                        SP1  CompletedZeta/  (Λ_K, FE, Hadamard, zeros, analytic control, normalisation)
                         │                     │
               ┌─────────┘                     └───────────┐
         SP2 WeilPoitou (explicit formula)            SP3 Stark (eq 19, Landau–Stark)
@@ -124,17 +135,25 @@ GRH is used only from `Lemma3` upward (the `γ² + h² ≠ 0` continuation step)
 
 ## Generality decisions
 
-- **General number field `K`, `1 < [K:ℚ]`** — the paper's setting. NOT abelian-restricted;
-  abelian-first is only the *internal* development order for SP1's FE, not a narrowing of
-  any final statement.
+- **General number field `K`, `1 < [K:ℚ]`** — the paper's setting; all final statements are
+  general, never abelian-restricted. **Abelian / `K=ℚ` are used only as a *validation
+  harness*** for the upper tiers (explicit-formula API, `F_{s,X}`, Lemma 2, the `T`-vs-`T−a`
+  trick, constant chasing) — **not** as a substrate strategy: the abelian FE closes the wrong
+  gaps (conductor–discriminant, ∏ root numbers, both separate projects). Expert review
+  2026-07-01, Q3.
 - **GRH (and `k=ℚ` RH) as hypotheses, never axioms.** `#print axioms` must stay
   `{propext, Classical.choice, Quot.sound}`.
 - **Residues as `Tendsto (fun s ↦ (s−1) • f s) (𝓝[>] 1) (𝓝 c)`** — mathlib's convention
   (no residue primitive); matches `dedekindZeta_residue`.
 - **Reuse over redefinition** — `κ_K`, invariants, gamma factors, the FE engine, the ζ_K
   Euler product are all consumed from mathlib/Chebotarev.
-- **`GeneralizedRiemannHypothesis K : Prop := ∀ s, completedDedekindZeta K s = 0 → s.re = 1/2`**,
-  mirroring mathlib's `RiemannHypothesis`; pinned once `completedDedekindZeta` (SP1) exists.
+- **GRH provided in two equivalent forms** (expert review, Q4), both `Prop`, both hypotheses:
+  `GRH_Λ K := ∀ s, completedDedekindZeta K s = 0 → s.re = 1/2` (zeros of `Λ_K` on the line —
+  natural for the explicit-formula zero-sum over `ρ = ½+iγ`) and `GRH_{>½} K := ∀ s, ½ < s.re →
+  dedekindZeta K s ≠ 0` (zero-free half-plane — natural for Lemma 3's analyticity of
+  `log(ζ_K/ζ_k)`), plus an **equivalence lemma** (FE + Euler-product nonvanishing on `Re>1` +
+  Γ-factors have no zeros). Mirrors mathlib's `RiemannHypothesis`; pinned once
+  `completedDedekindZeta` (SP1) exists.
 
 ## Sequencing recommendation
 

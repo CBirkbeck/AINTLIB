@@ -1,7 +1,9 @@
 # Expert-review state — 2026-07-01
 
-**Status**: brief delivered; awaiting reviewer reply. Deep build (SP1 theta stack) is on
-hold until the feedback is in.
+**Status**: reply received + integrated (`reply.md`). Conditional green light — Hecke theta
+route confirmed (not Tate, not abelian). Adjustments folded into `plan.md` + `tickets.md`
+(+SP1-AC analytic control, +SP1-N normalisation, +T-ADM, +T-BV; AGP Gaussian-first; AGE
+sealed unit-domain API; GRH dual-form). **Deep build now GREEN-LIT and started.**
 
 ## Scope of this review
 - **Audience**: an external number theorist (no repo access).
