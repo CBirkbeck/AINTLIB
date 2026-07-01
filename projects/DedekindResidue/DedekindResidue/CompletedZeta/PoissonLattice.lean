@@ -74,6 +74,117 @@ theorem fourier_comp_linearEquiv
     rfl
   rw [hadj]
 
+open LinearMap.BilinForm
+open scoped RealInnerProductSpace
+
+/-- Two vectors agreeing against every element of a basis (via the inner product) are equal —
+separation through `innerₗ_nondegenerate`. -/
+theorem eq_of_inner_basis_eq {x y : EuclideanSpace ℝ ι}
+    (c : Module.Basis ι ℝ (EuclideanSpace ℝ ι)) (h : ∀ j, ⟪x, c j⟫ = ⟪y, c j⟫) : x = y := by
+  have hz : x - y = 0 := by
+    refine (innerₗ_nondegenerate (V := EuclideanSpace ℝ ι)).1 _ (fun z => ?_)
+    have hzexp : z = ∑ i, c.repr z i • c i := (c.sum_repr z).symm
+    rw [innerₗ_apply_apply, hzexp, inner_sum]
+    refine Finset.sum_eq_zero (fun i _ => ?_)
+    rw [real_inner_smul_right, inner_sub_left, h i, sub_self, mul_zero]
+  exact sub_eq_zero.mp hz
+
+/-- **P3b.** The lattice-basis change of variables sends the integer point `n` to the lattice
+element of `L` with `b`-coordinates `n`. -/
+theorem latticeEquiv_zpoint (L : Submodule ℤ (EuclideanSpace ℝ ι)) [DiscreteTopology L]
+    [IsZLattice ℝ L] (b : Module.Basis ι ℤ L) (n : ι → ℤ) :
+    ((EuclideanSpace.basisFun ι ℝ).toBasis.equiv (b.ofZLatticeBasis ℝ) (Equiv.refl ι))
+        (zpoint n)
+      = ((b.equivFun.symm n : L) : EuclideanSpace ℝ ι) := by
+  classical
+  set b₀ := (EuclideanSpace.basisFun ι ℝ) with hb₀
+  set c := b.ofZLatticeBasis ℝ with hc
+  set T := (b₀.toBasis.equiv c (Equiv.refl ι)) with hT
+  have hTb : ∀ i, T (b₀.toBasis i) = c i := fun i => by
+    rw [hT, Module.Basis.equiv_apply, Equiv.refl_apply]
+  have hz : zpoint n = ∑ i, (n i : ℝ) • b₀.toBasis i := by
+    ext j
+    simp [zpoint, Finset.sum_apply, WithLp.equiv_symm_apply,
+      hb₀, EuclideanSpace.basisFun_apply, Pi.single_apply, mul_ite,
+      mul_one, mul_zero, Finset.sum_ite_eq]
+  have hRHS : ((b.equivFun.symm n : L) : EuclideanSpace ℝ ι) = ∑ i, (n i : ℝ) • c i := by
+    rw [Module.Basis.equivFun_symm_apply, Submodule.coe_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [AddSubgroupClass.coe_zsmul, Int.cast_smul_eq_zsmul ℝ,
+      ← Module.Basis.ofZLatticeBasis_apply ℝ L b]
+  rw [hz, map_sum, hRHS]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [map_smul, hTb]
+
+/-- **P3c.** The inverse-adjoint of the lattice-basis change of variables sends the integer
+point `m` to the element of the dual lattice with dual-basis coordinates `m`. -/
+theorem adjoint_symm_latticeEquiv_zpoint [DecidableEq ι]
+    (L : Submodule ℤ (EuclideanSpace ℝ ι)) [DiscreteTopology L]
+    [IsZLattice ℝ L] (b : Module.Basis ι ℤ L) (m : ι → ℤ) :
+    LinearMap.adjoint
+        ((((EuclideanSpace.basisFun ι ℝ).toBasis.equiv (b.ofZLatticeBasis ℝ)
+          (Equiv.refl ι)).symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+          EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (zpoint m)
+      = ∑ i, (m i : ℝ) • dualBasis (innerₗ (EuclideanSpace ℝ ι)) innerₗ_nondegenerate
+          (b.ofZLatticeBasis ℝ) i := by
+  classical
+  set b₀ := (EuclideanSpace.basisFun ι ℝ) with hb₀
+  set c := b.ofZLatticeBasis ℝ with hc
+  set T := (b₀.toBasis.equiv c (Equiv.refl ι)) with hT
+  set d := dualBasis (innerₗ (EuclideanSpace ℝ ι)) innerₗ_nondegenerate c with hd
+  have hTb : ∀ i, T (b₀.toBasis i) = c i := fun i => by
+    rw [hT, Module.Basis.equiv_apply, Equiv.refl_apply]
+  have hTsymm : ∀ j, T.symm (c j) = b₀.toBasis j := fun j => by
+    rw [← hTb j, T.symm_apply_apply]
+  refine eq_of_inner_basis_eq c (fun j => ?_)
+  have hLHS : ⟪LinearMap.adjoint ((T.symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (zpoint m), c j⟫ = (m j : ℝ) := by
+    rw [LinearMap.adjoint_inner_left]
+    have : ((T.symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+        EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (c j) = b₀.toBasis j := hTsymm j
+    rw [this]
+    show ⟪zpoint m, b₀.toBasis j⟫ = (m j : ℝ)
+    simp [zpoint, PiLp.inner_apply, WithLp.equiv_symm_apply, hb₀,
+      EuclideanSpace.basisFun_apply]
+  have hRHS : ⟪∑ i, (m i : ℝ) • d i, c j⟫ = (m j : ℝ) := by
+    rw [sum_inner]
+    have : ∀ i, ⟪(m i : ℝ) • d i, c j⟫ = (m i : ℝ) * if j = i then 1 else 0 := fun i => by
+      rw [real_inner_smul_left]
+      congr 1
+      have := apply_dualBasis_left (B := innerₗ (EuclideanSpace ℝ ι))
+        innerₗ_nondegenerate c i j
+      rw [← innerₗ_apply_apply]
+      exact this
+    simp only [this, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  rw [hLHS, hRHS]
+
+/-- **P3d.** The determinant of the lattice-basis change of variables is (up to sign) the
+covolume of the lattice. -/
+theorem abs_det_latticeEquiv (L : Submodule ℤ (EuclideanSpace ℝ ι)) [DiscreteTopology L]
+    [IsZLattice ℝ L] (b : Module.Basis ι ℤ L) :
+    |LinearMap.det (((EuclideanSpace.basisFun ι ℝ).toBasis.equiv
+        (b.ofZLatticeBasis ℝ) (Equiv.refl ι) :
+        EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+        EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|
+      = ZLattice.covolume L volume := by
+  classical
+  set b₀ := (EuclideanSpace.basisFun ι ℝ) with hb₀
+  set c := b.ofZLatticeBasis ℝ with hc
+  set T := (b₀.toBasis.equiv c (Equiv.refl ι)) with hT
+  have hTc : ⇑(T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) ∘ ⇑b₀.toBasis = ⇑c := by
+    funext i
+    show (b₀.toBasis.equiv c (Equiv.refl ι)) (b₀.toBasis i) = c i
+    rw [Module.Basis.equiv_apply, Equiv.refl_apply]
+  have hdet : LinearMap.det (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)
+      = b₀.toBasis.det ⇑c := by
+    have := Module.Basis.det_comp b₀.toBasis
+      (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) ⇑b₀.toBasis
+    rw [hTc, Module.Basis.det_self, mul_one] at this
+    exact this.symm
+  have hcb : (Subtype.val ∘ ⇑b) = ⇑c := by ext i; simp [hc]
+  rw [hdet, ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := b)
+    (b₀ := b₀.toBasis), volumeReal_fundamentalDomain_orthonormal, mul_one, hcb]
+
 end
 
 end DedekindResidue
