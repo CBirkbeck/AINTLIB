@@ -71,8 +71,11 @@ decomposition (a focused `/develop --decompose` per sub-project, once its refere
 in `refs/`):
 
 - **SP1 — general `ζ_K` completed zeta + functional equation + Hadamard product** (Tier
-  1, `CompletedZeta/`). The foundation; the largest. Source: Hecke/Tate/Lang. Develop
-  abelian-case-first internally (reuse mathlib Dirichlet-L FE), final result general `K`.
+  1, `CompletedZeta/`). The foundation; the largest. **Route decided (2026-07-01): the
+  general-K Hecke theta stack** — n-dim Poisson summation (AG-P, the self-contained start)
+  → lattice Gaussian theta (AG-Θ) → Hecke construction over the class group (AG-E, needs a
+  Tate/Lang/Neukirch reference) → FE. Not abelian-first. See `decomposition.md` and the
+  restructured `[SP1]` epic in `tickets.md`.
 - **SP2 — Weil–Poitou explicit formula** (Tier 2, `ExplicitFormula/`). Source:
   Poitou/Lang/Iwaniec–Kowalski. Depends on SP1.
 - **SP3 — Stark's formula (19) + Landau–Stark bound** (Tier 3, `Stark.lean`). Source:

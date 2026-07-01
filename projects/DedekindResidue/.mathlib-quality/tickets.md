@@ -11,16 +11,27 @@
 
 ## Epics (need their own `/develop --decompose` pass before leaf tickets exist)
 
-### [SP1] Completed ζ_K + functional equation + Hadamard product
+### [SP1] Completed ζ_K + functional equation + Hadamard product — the general theta stack
 - **Status**: needs-decomposition · **Files**: `CompletedZeta/{ThetaLattice,GammaFactor,FunctionalEquation,HadamardProduct}.lean`
-- **Type**: epic · **Depends on**: none (foundation) · **Blocks**: SP2, SP3, T010+
-- **Goal**: replace the `completedDedekindZeta` stub with the real definition (via the
-  theta function over the Minkowski ideal lattice + Poisson summation / `WeakFEPair`);
-  prove meromorphic continuation, `completedDedekindZeta_one_sub` (FE), poles at `0,1`
-  tied to `dedekindZeta_residue`, the Hadamard product and the zero set (`γ_ρ ∈ ℝ` under
-  GRH). **Route**: mirror mathlib `AbstractFuncEq`/`RiemannZeta` + FltRegularBernoulli
-  `CompletedDedekindZeta` (cyclotomic), abelian-case-first internally, final result
-  general `K`. **Next action**: `/develop --decompose` scoped to SP1.
+- **Type**: epic (foundation) · **Depends on**: AG-P → AG-Θ → AG-E · **Blocks**: SP2, SP3, T010+
+- **Decision (2026-07-01)**: build the general-K Hecke theta route (not abelian-first). See
+  `decomposition.md` § "Decision: build the general theta stack". Sub-epics, bottom-up:
+
+  - **[SP1-AGP] n-dimensional Poisson summation** over a `ZLattice` — **START HERE** (self-contained
+    real analysis; no external reference). Leaves: (P.1) dual lattice of a `ZLattice`
+    [gap — none in mathlib]; (P.2) Poisson on `ℤⁿ` [from 1-D `Real.tsum_eq_tsum_fourier` by
+    iteration / torus Fourier]; (P.3) transport to a general lattice + covolume factor
+    [`ZLattice.covolume`, `VectorFourier.fourierIntegral`]. **Next action**: `/develop --decompose`
+    scoped to SP1-AGP.
+  - **[SP1-AGΘ] lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
+    depends on SP1-AGP + n-dim Gaussian self-duality (assemble from 1-D
+    `Gaussian/FourierTransform`).
+  - **[SP1-AGE] Hecke construction** — ideal-lattice theta over `FundamentalCone` (unit action) +
+    `ClassGroup 𝓞_K`, Mellin → gamma factors + `completedDedekindZeta` + FE. **Deepest; needs a
+    reference PDF into `refs/` (Tate's thesis / Lang *ANT* XIII–XIV / Neukirch VII §5).**
+  - **[SP1-FE] assembly**: `completedDedekindZeta_one_sub` (clean FE), continuation + poles tied
+    to `dedekindZeta_residue`, Hadamard product / zero set / `γ_ρ ∈ ℝ` — replaces the current stubs.
+  - **[SP1-Γ] `GammaFactor.lean`**: `Γℝ^{r₁}Γℂ^{r₂}` bookkeeping → mathlib Deligne (leaf).
 
 ### [SP2] Weil–Poitou explicit formula
 - **Status**: needs-decomposition · **File**: `ExplicitFormula/WeilPoitou.lean`

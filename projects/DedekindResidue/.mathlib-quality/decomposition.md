@@ -85,3 +85,105 @@ three numerical constants `3/2(1+log9/4) < 2.324`, `6/(1+log9/4) < 3.88`,
   are authored in their focused passes.
 - L2 (`fourier_auxF`) is the one spine leaf dischargeable now from mathlib (Fourier +
   `auxF`); it is the natural first Tier-3 target once SP-independent.
+
+---
+
+# SP1 decomposition — completed ζ_K + functional equation (route study, 2026-07-01)
+
+**Verified facts (mathlib + AINTLIB, this pin):**
+- Riemann model: `completedRiemannZeta_one_sub` rests on `jacobiTheta₂_functional_equation`
+  (`MLB/NumberTheory/ModularForms/JacobiTheta/TwoVariable.lean:469`, via 1-D Poisson) fed
+  through `WeakFEPair`/`StrongFEPair` (`MLB/NumberTheory/LSeries/AbstractFuncEq.lean:81,100`).
+- Dirichlet model: `DirichletCharacter.IsPrimitive.completedLFunction_one_sub`
+  (`DirichletContinuation.lean:284`) + `rootNumber` (`:272`).
+- Cyclotomic precedent (abelian): `completedDedekindZetaCyclotomic = completedRiemannZeta ·
+  ∏_{χ≠1} completedLFunction χ` (FltRegularBernoulli `CompletedDedekindZeta.lean:55`); its FE
+  (`:66`, sorry-free) is a **half-FE** carrying `∏ rootNumber χ`, not the clean `Λ(1−s)=Λ(s)`.
+- Chebotarev `dedekindZeta_eq_prod_artinDirichletSeries` (`ZetaProduct.lean:2769`): abelian
+  factorisation as a **naked Dirichlet series** (Re s>1) — no Gamma factors, no completion, no FE.
+- **NOT FOUND anywhere:** n-dimensional / lattice Poisson summation; multivariate Gaussian
+  theta transformation; Epstein / ideal-lattice theta; Artin L-functions; the
+  conductor–discriminant identity `|d_K| = ∏ cond(χ)`.
+
+## Two routes to the ζ_K functional equation
+
+**Route T (Hecke theta — the only route valid for GENERAL K).** Θ_K(t) over the Minkowski
+ideal lattice → transformation law by n-dim Poisson → Mellin → `completedDedekindZeta` → FE,
+summed over the ideal class group. **Blocked on three missing mathlib foundations, each a
+deep sub-project:**
+- **AG-P** n-dimensional / lattice Poisson summation (only 1-D `Real.tsum_eq_tsum_fourier` exists).
+- **AG-Θ** multivariate Gaussian Fourier self-duality + the ideal-lattice theta transformation.
+- **AG-E** the ideal-lattice theta / Epstein-type zeta and its sum over `ClassGroup 𝓞_K`.
+Depth: each is comparable to a mathlib PR of its own; AG-P underpins AG-Θ underpins AG-E.
+
+**Route A (abelian factorisation — only valid for ABELIAN K).** For abelian `K/ℚ`,
+`ζ_K = ∏_χ L(χ,s)` over the characters `χ` of `Gal(K/ℚ)` (Dirichlet characters via class field
+theory). Define `completedDedekindZeta K := ∏_χ completedLFunction χ`; the FE follows from the
+per-character `completedLFunction_one_sub`. **Reachable now**, but with two real sub-gaps:
+- **AG-W** `∏_χ rootNumber χ = 1` (Artin root number of the regular representation) — needed to
+  turn the half-FE into the clean `Λ_K(1−s) = Λ_K(s)`. Not in mathlib; a theorem in its own right.
+- **AG-CD** conductor–discriminant `|d_K| = ∏_χ cond(χ)` — needed to identify the conductor in
+  `completedDedekindZeta` with `|discr K|`. Not in mathlib.
+
+## Leaf decomposition (Route A, abelian-first — the reachable near-term target)
+
+`CompletedZeta/` (abelian scope; general `K` deferred to Route T):
+- **S1.1** `completedDedekindZeta` (abelian) `:= completedRiemannZeta · ∏_{χ≠1} completedLFunction χ`
+  → mirrors FltRegularBernoulli `:55` (leaf, project-precedent).
+- **S1.2** meromorphic continuation + poles at `0,1`; residue at `1` `= dedekindZeta_residue K`
+  → from `completedLFunction` analyticity + the `ζ_K = ∏ L(χ)` value at `s=1` (Chebotarev
+  `dedekindZeta_eq_prod_artinDirichletSeries`) (internal; needs the abelian dictionary
+  `Gal(K/ℚ)`-char ↔ Dirichlet-char, itself partly in Chebotarev `ZetaProduct`).
+- **S1.3** half-FE `∏_χ completedLFunction_one_sub` → mirrors FltRegularBernoulli `:66` (leaf-ish).
+- **AG-W** `∏_χ rootNumber χ = 1` → **deep gap** (own sub-decomposition).
+- **AG-CD** `|d_K| = ∏_χ cond(χ)` → **deep gap** (own sub-decomposition).
+- **S1.4** clean FE `completedDedekindZeta_one_sub` from S1.3 + AG-W + AG-CD (internal).
+- **S1.5** Hadamard product / zero set / `∑_ρ` convergence → from the product of the
+  `completedLFunction` Hadamard products (internal; per-factor order-1 growth).
+
+`GammaFactor.lean`: `Γℝ`, `Γℂ` and the archimedean-factor bookkeeping → mathlib Deligne (leaf).
+
+## Honest assessment
+
+The **general-K** ζ_K functional equation is blocked on three foundational analytic pieces
+absent from mathlib (n-dim Poisson, multivariate theta, ideal-lattice/Epstein theta) — Route T
+is a multi-foundation effort, each piece a project on its own. The **abelian-K** case (Route A)
+is reachable by reusing mathlib's Dirichlet-L completions, but still requires two genuine new
+theorems (AG-W root-number product, AG-CD conductor–discriminant). There is no shortcut to
+general K: the Artin-L route is equally absent from mathlib. This is the true bottom of the
+project and the point where the general-vs-abelian scope must be reconciled with the effort
+budget.
+
+## Decision (2026-07-01): build the general theta stack (Route T)
+
+The project owner chose the **general-K theta route** over abelian-first. SP1 is therefore
+decomposed as the theta stack, bottom-up. Grounded against mathlib at this pin:
+
+**Exists (reuse):** `ZLattice` + `ZLattice.covolume` + `Zspan.fundamentalDomain`
+(`Algebra/Module/ZLattice/{Basic,Covolume}.lean`); `VectorFourier.fourierIntegral` on a f.d.
+inner-product space (`Analysis/Fourier/FourierTransform.lean`); Gaussian Fourier transform +
+integral (`Analysis/SpecialFunctions/Gaussian/{FourierTransform,GaussianIntegral}.lean`);
+Fourier inversion (`Analysis/Fourier/Inversion.lean`); the Minkowski ideal lattice + fundamental
+cone / unit action (`NumberField/CanonicalEmbedding/{Basic,FundamentalCone,NormLeOne}.lean`,
+with `covolume` tied to `√|discr|`); 1-D `jacobiTheta` as the model to generalise.
+
+**Missing (build, in order):**
+- **AG-P** — *n-dimensional Poisson summation* over a `ZLattice` (dual lattice + covolume
+  factor). mathlib has only 1-D `Real.tsum_eq_tsum_fourier`; **no dual lattice** in `ZLattice/`.
+  Self-contained real analysis — **the concrete starting brick.** Sub-tree: (P.1) dual lattice
+  of a `ZLattice`; (P.2) Poisson on `ℤⁿ` (iterate 1-D / torus Fourier series); (P.3) transport
+  to a general lattice via a linear change of variables + covolume.
+- **AG-Θ** — the *lattice Gaussian theta* `Θ_L(t)=∑_{x∈L} e^{-πt‖x‖²}` and its transformation
+  law `Θ_L(1/t)=t^{n/2}·covol-factor·Θ_{L*}(t)`, from AG-P + n-dim Gaussian self-duality
+  (assemble from the 1-D `Gaussian/FourierTransform`).
+- **AG-E** — the *Hecke construction*: the ideal-lattice theta, integrated over a fundamental
+  domain of the unit action (`FundamentalCone`) and summed over `ClassGroup 𝓞_K`, Mellin → the
+  gamma factors `Γℝ^{r₁}Γℂ^{r₂}` and `completedDedekindZeta`; the FE from AG-Θ. **Deepest node;
+  needs a reference** (Tate's thesis / Lang *ANT* XIII–XIV / Neukirch VII §5 — a PDF into `refs/`).
+
+**Then (from AG-E):** S1.4 clean FE `completedDedekindZeta_one_sub`; S1.2 continuation + poles
+tied to `dedekindZeta_residue`; S1.5 Hadamard product / zero set (`γ_ρ ∈ ℝ` under GRH).
+
+**Immediate next action:** `/develop --decompose` scoped to **AG-P** (n-dim Poisson) — a
+self-contained real-analysis pass, no external reference needed — then build it via `/beastmode`.
+Acquire the AG-E reference in parallel.
