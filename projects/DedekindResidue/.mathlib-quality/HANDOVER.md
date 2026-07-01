@@ -12,7 +12,20 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-**UPDATE 2026-07-01 (later still): SP1-N DONE + AGE STARTED, AGE-0 DONE.** `Normalisation.lean`
+**UPDATE 2026-07-01 (GRH properly stated — user directive executed).** The project now has
+**exactly one `sorry`: `belabas_friedman_thm1` itself** (the target theorem). The sorried
+`completedDedekindZeta` definition is GONE, replaced by the characterisation architecture in
+`FunctionalEquation.lean`: `completedZetaPrefactor` (genuine), `IsCompletedDedekindZeta K Λ`
+(agrees with `prefactor·ζ_K` on `Re s > 1` where the L-series is honest, and `s(s-1)Λ`
+entire) with the PROVEN uniqueness `IsCompletedDedekindZeta.eqOn` (identity theorem; values
+at the poles `0,1` are junk by nature and excluded). `GRH.lean` now states
+`GeneralizedRiemannHypothesis K` in the paper's verbatim form: every such `Λ` is nonvanishing
+on `Re s > 1/2` off the pole `s = 1`. Genuine, junk-free, no placeholders. **Non-vacuity**
+(∃ Λ, IsCompletedDedekindZeta K Λ) is Hecke's theorem = the AGE-4 target: the constructed
+theta-Mellin `Λ` will inhabit the predicate and the FE `Λ(1-s)=Λ(s)` is proven of it.
+Rule going forward (user): NO sorried definitions, no `True`-placeholders, ever.
+
+**UPDATE 2026-07-01 (earlier): SP1-N DONE + AGE STARTED, AGE-0 DONE.** `Normalisation.lean`
 (gammaFactor, paper-Fourier bridge `paperFourierIntegral_eq_fourierIntegral`) and the
 **multivariable theta transformation `weightedThetaLattice_transform`** (AGE-0, the engine for
 nontrivial unit rank) are proven, axiom-clean, pushed. The AGE decomposition (AGE-0..4, with

@@ -142,6 +142,12 @@
       + `fourier_comp_linearEquiv` (P3a!) at `T = P^{1/2}` + `fourier_gaussianCM`. NEEDED
       because Hecke integrates the multivariable theta `Θ(t_w)` over the unit domain in
       `t`-space — the 1-parameter `thetaLattice_transform` suffices only for unit-rank 0.
+    - **(AGE-4') GRH INTERFACE DONE ✓✓ (2026-07-01, sorry-free)**: `FunctionalEquation.lean`
+      rebuilt as the characterisation interface (`completedZetaPrefactor`,
+      `IsCompletedDedekindZeta`, proven uniqueness `.eqOn`); `GRH.lean` states
+      `GeneralizedRiemannHypothesis` in the paper's verbatim `Re > 1/2` form over the
+      characterisation. AGE-4's target is now precisely **non-vacuity**:
+      `∃ Λ, IsCompletedDedekindZeta K Λ` via the theta-Mellin construction (+ FE of it).
     - **(AGE-1) euclidean ideal lattices**: `euclideanIdealLattice I := ZLattice.comap ℝ
       (mixedEmbedding.idealLattice K I) (toMixed K).toLinearMap` (mirror
       `euclidean.integerLattice`) + instances + covolume (via `volumePreserving_toMixed`) +
