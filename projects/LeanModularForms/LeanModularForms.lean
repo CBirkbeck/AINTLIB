@@ -55,3 +55,4 @@ import LeanModularForms.Labels.NewformOrbit
 import LeanModularForms.Labels.Label
 import LeanModularForms.Modularforms.LFunctionEuler
 import LeanModularForms.Modularforms.LFunctionFEqN
+import LeanModularForms.Modularforms.JFunction
