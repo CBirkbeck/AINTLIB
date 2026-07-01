@@ -194,6 +194,130 @@ theorem integral_eq_tsum_integral_iocBox (f : (ι → ℝ) → ℂ) (hf : Integr
     push_cast
     ring
 
+/-- **Box tiling of `ℝ^ι`, `lintegral` form.** No integrability needed: the lower integral over
+`ι → ℝ` is the sum over integer translates of the lower integral over the box `(0,1]^ι`. -/
+theorem lintegral_eq_tsum_lintegral_iocBox (f : (ι → ℝ) → ENNReal) :
+    ∫⁻ x, f x = ∑' n : ι → ℤ, ∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+      f (x + fun i => (n i : ℝ)) := by
+  classical
+  haveI : VAddInvariantMeasure
+      (↥(Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι)))) (ι → ℝ) volume :=
+    (inferInstance : VAddInvariantMeasure
+      (Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι))).toAddSubgroup (ι → ℝ) volume)
+  have h1 := (ZSpan.isAddFundamentalDomain (Pi.basisFun ℝ ι)
+    (volume : Measure (ι → ℝ))).lintegral_eq_tsum' f
+  rw [h1, ← ((Equiv.neg (ι → ℤ)).trans intEquivSpanBasisFun).tsum_eq]
+  refine tsum_congr (fun n => ?_)
+  rw [fundamentalDomain_basisFun_eq, setLIntegral_congr iocBox_ae_icoBox]
+  refine lintegral_congr (fun x => ?_)
+  congr 1
+  show -((intEquivSpanBasisFun (-n) : ι → ℝ)) + x = x + fun i => (n i : ℝ)
+  rw [intEquivSpanBasisFun_coe]
+  funext i
+  simp only [Pi.add_apply, Pi.neg_apply]
+  push_cast
+  ring
+
+/-- The torus monomials have pointwise norm `1` (each factor lies on the circle). -/
+theorem norm_mFourier_apply (n : ι → ℤ) (q : UnitAddTorus ι) :
+    ‖UnitAddTorus.mFourier n q‖ = 1 := by
+  simp only [UnitAddTorus.mFourier, ContinuousMap.coe_mk, norm_prod]
+  refine Finset.prod_eq_one (fun i _ => ?_)
+  simp [fourier_apply]
+
+/-- The half-open box `(0,1]^ι` has volume `1`. -/
+theorem volume_iocBox :
+    (volume : Measure (ι → ℝ)) {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1} = 1 := by
+  have hset : {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1}
+      = Set.pi Set.univ (fun _ => Set.Ioc (0:ℝ) 1) := by
+    ext x; simp [Set.mem_pi]
+  rw [hset, volume_pi_pi]
+  simp [Real.volume_Ioc]
+
+/-- The closed unit box in `EuclideanSpace ℝ ι`, as a compact set: the reference compact for
+all sup-norm estimates on the fundamental box. -/
+noncomputable def unitBoxCompacts : Compacts (EuclideanSpace ℝ ι) :=
+  ⟨WithLp.toLp 2 '' {y : ι → ℝ | ∀ i, y i ∈ Set.Icc (0:ℝ) 1}, by
+    have hbox : IsCompact {y : ι → ℝ | ∀ i, y i ∈ Set.Icc (0:ℝ) 1} := by
+      have : {y : ι → ℝ | ∀ i, y i ∈ Set.Icc (0:ℝ) 1}
+          = Set.pi Set.univ (fun _ => Set.Icc (0:ℝ) 1) := by
+        ext y; simp [Pi.le_def, forall_and]
+      rw [this]
+      exact isCompact_univ_pi (fun _ => isCompact_Icc)
+    exact hbox.image (PiLp.continuous_toLp 2 _)⟩
+
+omit [Fintype ι] in
+/-- `toLp` sends an integer shift in `ι → ℝ` to a `zpoint` shift in `EuclideanSpace ℝ ι`. -/
+theorem toLp_add_intCast (x : ι → ℝ) (n : ι → ℤ) :
+    WithLp.toLp 2 (x + fun i => (n i : ℝ)) = WithLp.toLp 2 x + zpoint n := by
+  ext i
+  simp only [zpoint, PiLp.add_apply, Pi.add_apply, WithLp.equiv_symm_apply]
+
+/-- **Central sup-norm estimate.** On the closed unit box, the `n`-translate of `g` is bounded
+by the sup-norm of its restriction to `unitBoxCompacts` — the quantity `h_norm` sums. -/
+theorem norm_apply_le_restrict_unitBox (g : C(EuclideanSpace ℝ ι, ℂ)) (n : ι → ℤ) {x : ι → ℝ}
+    (hx : ∀ i, x i ∈ Set.Icc (0:ℝ) 1) :
+    ‖g (WithLp.toLp 2 x + zpoint n)‖
+      ≤ ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+          (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ := by
+  have hmem : WithLp.toLp 2 x ∈ (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι)) :=
+    ⟨x, hx, rfl⟩
+  exact ContinuousMap.norm_coe_le_norm
+    ((g.comp (ContinuousMap.addRight (zpoint n))).restrict
+      (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))) ⟨_, hmem⟩
+
+/-- **Integrability of the twisted function.** Under local summability of the lattice
+translates, `y ↦ mFourier (-m) (π y) • g (toLp y)` is integrable on `ι → ℝ`: its `lintegral`
+tiles into box pieces, each bounded by the corresponding translate's sup-norm on the closed
+unit box, and those sup-norms are summable by `h_norm`. -/
+theorem integrable_mFourier_smul_comp_toLp (g : C(EuclideanSpace ℝ ι, ℂ)) (m : ι → ℤ)
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι),
+      Summable fun n : ι → ℤ => ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict K‖) :
+    Integrable (fun y : ι → ℝ =>
+      UnitAddTorus.mFourier (-m) (fun i => ((y i : ℝ) : AddCircle (1 : ℝ)))
+        • g (WithLp.toLp 2 y)) := by
+  have hchar : Continuous (fun y : ι → ℝ =>
+      UnitAddTorus.mFourier (-m) (fun i => ((y i : ℝ) : AddCircle (1 : ℝ)))) :=
+    (map_continuous (UnitAddTorus.mFourier (-m))).comp
+      (continuous_pi (fun i => continuous_quotient_mk'.comp (continuous_apply i)))
+  have hcont : Continuous (fun y : ι → ℝ =>
+      UnitAddTorus.mFourier (-m) (fun i => ((y i : ℝ) : AddCircle (1 : ℝ)))
+        • g (WithLp.toLp 2 y)) :=
+    hchar.smul ((map_continuous g).comp (PiLp.continuous_toLp 2 _))
+  refine ⟨hcont.aestronglyMeasurable, ?_⟩
+  rw [HasFiniteIntegral, lintegral_eq_tsum_lintegral_iocBox]
+  have hbound : ∀ n : ι → ℤ,
+      (∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖UnitAddTorus.mFourier (-m)
+            (fun i => (((x + fun i => (n i : ℝ)) i : ℝ) : AddCircle (1 : ℝ)))
+          • g (WithLp.toLp 2 (x + fun i => (n i : ℝ)))‖ₑ)
+      ≤ ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+          (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ := by
+    intro n
+    have hle : ∀ x ∈ {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖UnitAddTorus.mFourier (-m)
+            (fun i => (((x + fun i => (n i : ℝ)) i : ℝ) : AddCircle (1 : ℝ)))
+          • g (WithLp.toLp 2 (x + fun i => (n i : ℝ)))‖ₑ
+        ≤ ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+            (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ := by
+      intro x hx
+      rw [← ofReal_norm]
+      refine ENNReal.ofReal_le_ofReal ?_
+      rw [norm_smul, norm_mFourier_apply, one_mul, toLp_add_intCast]
+      exact norm_apply_le_restrict_unitBox g n (fun i => ⟨(hx i).1.le, (hx i).2⟩)
+    calc ∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖UnitAddTorus.mFourier (-m)
+            (fun i => (((x + fun i => (n i : ℝ)) i : ℝ) : AddCircle (1 : ℝ)))
+          • g (WithLp.toLp 2 (x + fun i => (n i : ℝ)))‖ₑ
+        ≤ ∫⁻ _x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+          ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+            (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ :=
+        setLIntegral_mono measurable_const hle
+      _ = _ := by rw [setLIntegral_const, volume_iocBox, mul_one]
+  refine lt_of_le_of_lt (ENNReal.tsum_le_tsum hbound) ?_
+  rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => norm_nonneg _) (h_norm _)]
+  exact ENNReal.ofReal_lt_top
+
 /-- **`𝓕` bridge.** The Fourier transform of `g` at the lattice point `m`, an integral over the
 inner-product space `EuclideanSpace ℝ ι`, rewrites as an integral over `ι → ℝ` of the torus
 character `mFourier (-m)` against `g` — via the measure-preserving `WithLp` identification and
