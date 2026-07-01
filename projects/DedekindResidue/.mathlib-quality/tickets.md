@@ -116,6 +116,38 @@
     "reusable lattice/Poisson/theta layer" is COMPLETE (P.1+P.2+P.3+Θ). Next: **SP1-AGE**
     (Hecke partial theta over ideal classes; reuse mixedEmbedding ideal lattices +
     codifferent-as-dualSubmodule, substrate-api §B/§F; unit domain sealed per review Q2).
+  - **[SP1-AGE] decomposition (2026-07-01, recon verified against the pin)** — the GRH-stated
+    path: a genuine `completedDedekindZeta` definition replacing the FunctionalEquation.lean
+    sorry-def. **Mathlib windfalls found**: `FundamentalCone.idealSet K J` +
+    `idealSetEquiv/idealSetEquivNorm` + `card_isPrincipal_norm_eq_mul_torsion` (the sealed
+    unit-domain/ideal-counting API the review asked for — ALREADY in mathlib);
+    `euclidean.mixedSpace K` (`WithLp 2` product, an inner-product space) with
+    `toMixed : ≃L[ℝ] mixedSpace`, `volumePreserving_toMixed(_symm)`, `stdOrthonormalBasis`,
+    `euclidean.integerLattice` (via `ZLattice.comap`); `mixedEmbedding.idealLattice` +
+    `covolume_idealLattice = N(I)·2^{-r₂}√|Δ|`; `NormLeOne.lean` (cone norm-≤-1 volume);
+    mathlib `mellin` machinery (`Analysis/MellinTransform.lean`). **Metric convention pinned
+    (Q5)**: the PLAIN L² metric of `euclidean.mixedSpace` (no 2 at complex places) — covolume
+    `𝓞_K = 2^{-r₂}√|Δ|` per mathlib; the compensating 2's live in `Γℂ = 2(2π)^{-s}Γ(s)`
+    (SP1-N). Leaves, bottom-up:
+    - **(AGE-0) anisotropic theta** [file `ThetaLattice.lean` extension]: for a positive
+      self-adjoint `P` (diagonal-in-an-ONB suffices): `∑_{v∈L} e^{-π⟨Pv,v⟩} =
+      covol(L)⁻¹·det(P)^{-1/2}·∑_{w∈L♯} e^{-π⟨P⁻¹w,w⟩}` — via `tsum_eq_tsum_fourier_zlattice`
+      + `fourier_comp_linearEquiv` (P3a!) at `T = P^{1/2}` + `fourier_gaussianCM`. NEEDED
+      because Hecke integrates the multivariable theta `Θ(t_w)` over the unit domain in
+      `t`-space — the 1-parameter `thetaLattice_transform` suffices only for unit-rank 0.
+    - **(AGE-1) euclidean ideal lattices**: `euclideanIdealLattice I := ZLattice.comap ℝ
+      (mixedEmbedding.idealLattice K I) (toMixed K).toLinearMap` (mirror
+      `euclidean.integerLattice`) + instances + covolume (via `volumePreserving_toMixed`) +
+      transport to `EuclideanSpace ℝ (index K)` along `(stdOrthonormalBasis K).repr`
+      (LinearIsometryEquiv: lattice/dual/covolume/theta all invariant).
+    - **(AGE-2) theta–ideal dictionary**: `‖x‖²` of a lattice point = `∑_w normAtPlace`-form;
+      lattice points of `euclideanIdealLattice I` ↔ elements of `I`; norms via
+      `intNorm`/`idealSetEquivNorm`.
+    - **(AGE-3) partial theta & cone sums**: the ideal-class partial zeta as a cone-point sum
+      (mathlib `idealSetEquivNorm`), Hecke's unit-domain integral representation.
+    - **(AGE-4) Mellin**: `partialCompletedZeta` + **`completedDedekindZeta` as a genuine
+      `mellin`-integral def** — replaces the sorry-def; `GeneralizedRiemannHypothesis` then
+      fully stated (USER PRIORITY). FE from `thetaLattice_transform`/AGE-0 follows as SP1-FE.
   - [SP1-AGΘ] original plan: **lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
     depends on SP1-AGP (Gaussian class) + n-dim Gaussian self-duality (assemble from 1-D
     `Gaussian/FourierTransform`).
