@@ -330,6 +330,65 @@ theorem weightedGaussianCM_eq_comp (c : ι → ℝ) (hc : ∀ i, 0 < c i) (x : E
   push_cast
   ring
 
+omit [Fintype ι] in
+/-- The inverse of a diagonal scaling scales by the inverse weights. -/
+theorem diagScale_symm (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
+    (diagScale c hc).symm = diagScale (fun i => (c i)⁻¹) (fun i => inv_ne_zero (hc i)) := by
+  ext x i
+  rfl
+
+omit [Fintype ι] in
+/-- Diagonal scalings with equal weight functions coincide. -/
+theorem diagScale_congr {c c' : ι → ℝ} (h : c = c') (hc : ∀ i, c i ≠ 0) :
+    diagScale c hc = diagScale c' (h ▸ hc) := by
+  subst h
+  rfl
+
+/-- Product of square roots of positive reals. -/
+theorem prod_sqrt (c : ι → ℝ) (hc : ∀ i, 0 < c i) :
+    (∏ i, Real.sqrt (c i)) = Real.sqrt (∏ i, c i) := by
+  simp_rw [Real.sqrt_eq_rpow]
+  rw [← Real.finsetProd_rpow _ _ (fun i _ => (hc i).le)]
+
+/-- **The Fourier transform of the anisotropic Gaussian** (AGE-0 core):
+`𝓕(e^{-π∑cᵢxᵢ²})(w) = (∏cᵢ)^{-1/2}·e^{-π∑cᵢ⁻¹wᵢ²}` — via the structural identity,
+the GL change-of-variables law (P3a), self-adjointness and determinant of `diagScale`,
+and the self-duality of the standard Gaussian. -/
+theorem fourier_weightedGaussianCM {c : ι → ℝ} (hc : ∀ i, 0 < c i) (w : EuclideanSpace ℝ ι) :
+    𝓕 (⇑(weightedGaussianCM (ι := ι) c)) w
+      = (Real.sqrt (∏ i, c i))⁻¹ • weightedGaussianCM (fun i => (c i)⁻¹) w := by
+  have hsc : ∀ i, Real.sqrt (c i) ≠ 0 := fun i => Real.sqrt_ne_zero'.mpr (hc i)
+  have hcoe : (⇑(weightedGaussianCM (ι := ι) c))
+      = fun v => (⇑(gaussianCM (ι := ι) 1))
+          ((diagScale (fun i => Real.sqrt (c i)) hsc) v) :=
+    funext (fun v => weightedGaussianCM_eq_comp c hc v)
+  rw [hcoe, fourier_comp_linearEquiv (diagScale (fun i => Real.sqrt (c i)) hsc)
+    (⇑(gaussianCM (ι := ι) 1)) w]
+  -- identify the three pieces
+  have hdet : |LinearMap.det ((diagScale (fun i => Real.sqrt (c i)) hsc :
+      EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹ = (Real.sqrt (∏ i, c i))⁻¹ := by
+    rw [det_diagScale, prod_sqrt c hc, abs_of_nonneg (Real.sqrt_nonneg _)]
+  have hadj : LinearMap.adjoint (((diagScale (fun i => Real.sqrt (c i)) hsc).symm :
+      EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) w
+      = (diagScale (fun i => (Real.sqrt (c i))⁻¹) (fun i => inv_ne_zero (hsc i))) w := by
+    rw [diagScale_symm, adjoint_diagScale]
+    rfl
+  rw [hdet, hadj, fourier_gaussianCM one_pos]
+  simp only [inv_one]
+  have h1 : ((1 : ℝ) ^ (-(Fintype.card ι : ℝ) / 2) : ℝ) = 1 := Real.one_rpow _
+  rw [h1]
+  push_cast
+  rw [one_mul]
+  congr 1
+  -- gaussianCM 1 at the inverse-scaled point = weighted Gaussian with inverse weights
+  have hw : (fun i => (Real.sqrt (c i))⁻¹) = fun i => Real.sqrt ((c i)⁻¹) := by
+    funext i
+    rw [Real.sqrt_inv]
+  rw [diagScale_congr hw]
+  exact (weightedGaussianCM_eq_comp (fun i => (c i)⁻¹) (fun i => inv_pos.mpr (hc i)) w).symm
+
 end
 
 end DedekindResidue
