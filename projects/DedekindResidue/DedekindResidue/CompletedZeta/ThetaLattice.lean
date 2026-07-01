@@ -241,6 +241,64 @@ theorem thetaLattice_transform (L : Submodule ℤ (EuclideanSpace ℝ ι))
   push_cast
   ring
 
+open scoped RealInnerProductSpace
+
+/-- Coordinatewise scaling by nonvanishing weights, as a linear equivalence — the diagonal
+positive-definite change of variables for the **anisotropic** (multivariable) theta, which
+Hecke's functional-equation argument integrates over the unit domain (SP1-AGE-0). -/
+noncomputable def diagScale (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
+    EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι where
+  toFun x := WithLp.toLp 2 (fun i => c i * x i)
+  invFun x := WithLp.toLp 2 (fun i => (c i)⁻¹ * x i)
+  map_add' x y := by ext i; simp; ring
+  map_smul' r x := by ext i; simp; ring
+  left_inv x := by
+    ext i
+    field_simp [hc i]
+  right_inv x := by
+    ext i
+    field_simp [hc i]
+
+omit [Fintype ι] in
+theorem diagScale_apply (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) (x : EuclideanSpace ℝ ι) (i : ι) :
+    diagScale c hc x i = c i * x i := rfl
+
+/-- `diagScale` is self-adjoint (its matrix is diagonal). -/
+theorem adjoint_diagScale (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
+    LinearMap.adjoint ((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)
+      = ((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) := by
+  refine ((LinearMap.eq_adjoint_iff _ _).mpr ?_).symm
+  intro x y
+  simp only [PiLp.inner_apply, RCLike.inner_apply, conj_trivial]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  have h1 : (((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) x) i = c i * x i := rfl
+  have h2 : (((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) y) i = c i * y i := rfl
+  rw [h1, h2]
+  ring
+
+/-- The determinant of `diagScale` is the product of the weights. -/
+theorem det_diagScale (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
+    LinearMap.det ((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+      EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) = ∏ i, c i := by
+  classical
+  rw [← LinearMap.det_toMatrix (EuclideanSpace.basisFun ι ℝ).toBasis]
+  have : LinearMap.toMatrix (EuclideanSpace.basisFun ι ℝ).toBasis
+      (EuclideanSpace.basisFun ι ℝ).toBasis
+      ((diagScale c hc : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+        EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) = Matrix.diagonal c := by
+    ext i j
+    rw [LinearMap.toMatrix_apply, Matrix.diagonal_apply]
+    simp only [OrthonormalBasis.coe_toBasis, LinearMap.coe_coe]
+    show diagScale c hc ((EuclideanSpace.basisFun ι ℝ).toBasis j) i = _
+    rw [OrthonormalBasis.coe_toBasis, diagScale_apply]
+    rw [EuclideanSpace.basisFun_apply]
+    simp [PiLp.single_apply, Pi.single_apply, eq_comm]
+  rw [this, Matrix.det_diagonal]
+
 end
 
 end DedekindResidue
