@@ -129,6 +129,55 @@ theorem summable_norm_restrict_gaussianCM (L : Submodule ℤ (EuclideanSpace ℝ
     nlinarith [Real.pi_pos, sq_nonneg (‖(v : EuclideanSpace ℝ ι)‖ - 2 * R'), ht.le,
       mul_pos Real.pi_pos ht]
 
+open scoped FourierTransform
+
+/-- Pointwise norm of the Gaussian: `‖e^{-πt‖x‖²}‖ = e^{-πt‖x‖²}` (the exponent is real). -/
+theorem norm_gaussianCM_apply (t : ℝ) (x : EuclideanSpace ℝ ι) :
+    ‖gaussianCM t x‖ = Real.exp (-(π * t) * ‖x‖ ^ 2) := by
+  simp only [gaussianCM, ContinuousMap.coe_mk]
+  rw [Complex.norm_exp]
+  have : (-(π * t : ℂ) * (‖x‖ : ℂ) ^ 2) = ((-(π * t) * ‖x‖ ^ 2 : ℝ) : ℂ) := by
+    push_cast; ring
+  rw [this, Complex.ofReal_re]
+
+/-- **Θ3: the Fourier transform of the Gaussian** (mathlib's
+`fourier_gaussian_innerProductSpace` at `b = πt`, constants normalised):
+`𝓕(e^{-πt‖·‖²})(w) = t^{-n/2}·e^{-π‖w‖²/t}` — the Gaussian is self-dual up to the scaling
+`t ↦ 1/t` and the factor `t^{-n/2}` (Neukirch VII §3 shape). -/
+theorem fourier_gaussianCM {t : ℝ} (ht : 0 < t) (w : EuclideanSpace ℝ ι) :
+    𝓕 (⇑(gaussianCM (ι := ι) t)) w
+      = ((t ^ (-(Fintype.card ι : ℝ) / 2) : ℝ) : ℂ) * gaussianCM t⁻¹ w := by
+  have hb : (0 : ℝ) < ((π * t : ℂ)).re := by
+    simp only [Complex.mul_re, Complex.ofReal_re]
+    norm_num [Real.pi_pos.le]
+    positivity
+  have h := fourier_gaussian_innerProductSpace (b := (π * t : ℂ)) hb w
+  have hcoe : (⇑(gaussianCM t) : EuclideanSpace ℝ ι → ℂ)
+      = fun v => Complex.exp (-(π * t : ℂ) * (‖v‖ : ℂ) ^ 2) := rfl
+  rw [hcoe]
+  rw [h]
+  congr 1
+  · -- (π/(πt))^(n/2) = ↑(t^(-n/2))
+    have h1 : ((π : ℂ) / (π * t : ℂ)) = ((t⁻¹ : ℝ) : ℂ) := by
+      push_cast
+      rw [div_mul_eq_div_div, div_self (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)]
+      simp [one_div]
+    rw [h1, finrank_euclideanSpace]
+    have h2 : ((Fintype.card ι : ℂ) / 2) = (((Fintype.card ι : ℝ) / 2 : ℝ) : ℂ) := by
+      push_cast
+      ring
+    rw [h2, ← Complex.ofReal_cpow (inv_nonneg.mpr ht.le)]
+    congr 1
+    rw [Real.inv_rpow ht.le, ← Real.rpow_neg ht.le, neg_div]
+  · -- cexp(-π²‖w‖²/(πt)) = gaussianCM t⁻¹ w
+    show _ = Complex.exp (-(π * t⁻¹ : ℂ) * (‖w‖ : ℂ) ^ 2)
+    congr 1
+    have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+    have ht0 : (t : ℂ) ≠ 0 := by
+      simpa using ht.ne'
+    push_cast
+    field_simp
+
 end
 
 end DedekindResidue
