@@ -142,6 +142,76 @@ theorem summable_gaussian_zlattice (L : Submodule ℤ (EuclideanSpace ℝ ι))
     rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
     exact hR _ hlt.le)
 
+/-- Evaluation of the `C(·,·)`-valued periodization: under local summability of the lattice
+translates, the tsum of translates in `C(EuclideanSpace ℝ ι, ℂ)` evaluates pointwise to
+`periodization g`. -/
+theorem coe_tsum_comp_addRight_zpoint (g : C(EuclideanSpace ℝ ι, ℂ))
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι),
+      Summable fun n : ι → ℤ => ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict K‖)
+    (x : EuclideanSpace ℝ ι) :
+    (∑' n : ι → ℤ, g.comp (ContinuousMap.addRight (zpoint n))) x = periodization (⇑g) x := by
+  rw [← ContinuousMap.tsum_apply (ContinuousMap.summable_of_locally_summable_norm h_norm)]
+  exact tsum_congr (fun n => rfl)
+
+omit [Fintype ι] in
+/-- **Descent well-definedness**: the periodization takes equal values at points of `ι → ℝ`
+with the same image on the torus (they differ by an integer vector, and the periodization is
+`ℤ^ι`-periodic). -/
+theorem periodization_toLp_congr (g : EuclideanSpace ℝ ι → ℂ) {x y : ι → ℝ}
+    (h : ∀ i, ((x i : ℝ) : AddCircle (1 : ℝ)) = (y i : ℝ)) :
+    periodization g (WithLp.toLp 2 x) = periodization g (WithLp.toLp 2 y) := by
+  have hi : ∀ i, ∃ n : ℤ, x i - y i = n := by
+    intro i
+    have h2 := h i
+    rw [QuotientAddGroup.eq, AddSubgroup.mem_zmultiples_iff] at h2
+    obtain ⟨n, hn⟩ := h2
+    refine ⟨-n, ?_⟩
+    simp only [zsmul_eq_mul, mul_one] at hn
+    push_cast
+    linarith
+  choose k hk using hi
+  have hxy : x = y + (fun i => (k i : ℝ)) := funext fun i => by
+    have := hk i; simp only [Pi.add_apply]; linarith
+  have hadd : WithLp.toLp 2 (y + fun i => (k i : ℝ)) = WithLp.toLp 2 y + zpoint k := by
+    ext i
+    simp only [zpoint, PiLp.add_apply, Pi.add_apply, WithLp.equiv_symm_apply]
+  rw [hxy, hadd, periodization_add_zpoint]
+
+/-- The **torus periodization** as a function on `UnitAddTorus ι`: the value of
+`periodization g` at the canonical `Ioc (0,1]` representative. By
+`torusPeriodizationFun_coe` this is the genuine descent of `periodization g` along the
+quotient `(ι → ℝ) → UnitAddTorus ι` (independent of the choice of representative). -/
+noncomputable def torusPeriodizationFun (g : EuclideanSpace ℝ ι → ℂ) (q : UnitAddTorus ι) : ℂ :=
+  periodization g (WithLp.toLp 2 (fun i => ((AddCircle.equivIoc 1 0 (q i) : ℝ))))
+
+omit [Fintype ι] in
+/-- The torus periodization descends the periodization: precomposed with the quotient map it
+is `periodization g ∘ toLp`. -/
+theorem torusPeriodizationFun_coe (g : EuclideanSpace ℝ ι → ℂ) (x : ι → ℝ) :
+    torusPeriodizationFun g (fun i => ((x i : ℝ) : AddCircle (1 : ℝ)))
+      = periodization g (WithLp.toLp 2 x) :=
+  periodization_toLp_congr g (fun _ => AddCircle.coe_equivIoc)
+
+/-- Under local summability of the lattice translates, the torus periodization is continuous:
+its composite with the (open quotient) projection `(ι → ℝ) → UnitAddTorus ι` is the continuous
+`C(·,·)`-valued tsum of translates. -/
+theorem continuous_torusPeriodizationFun (g : C(EuclideanSpace ℝ ι, ℂ))
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι),
+      Summable fun n : ι → ℤ => ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict K‖) :
+    Continuous (torusPeriodizationFun ⇑g) := by
+  have hq : IsOpenQuotientMap
+      (fun (x : ι → ℝ) => ((fun i => ((x i : ℝ) : AddCircle (1 : ℝ))) : UnitAddTorus ι)) :=
+    IsOpenQuotientMap.piMap (fun _ => QuotientAddGroup.isOpenQuotientMap_mk)
+  rw [hq.isQuotientMap.continuous_iff]
+  have heq : (torusPeriodizationFun ⇑g)
+      ∘ (fun (x : ι → ℝ) => ((fun i => ((x i : ℝ) : AddCircle (1 : ℝ))) : UnitAddTorus ι))
+      = ⇑(∑' n : ι → ℤ, g.comp (ContinuousMap.addRight (zpoint n))) ∘ (WithLp.toLp 2) := by
+    funext x
+    simp only [Function.comp_apply]
+    rw [coe_tsum_comp_addRight_zpoint g h_norm, torusPeriodizationFun_coe]
+  rw [heq]
+  exact (map_continuous _).comp (PiLp.continuous_toLp 2 _)
+
 /-- **`n`-dimensional Poisson summation over `ℤ^ι`** (SP1-AGP P.2). For a continuous `g` on
 `EuclideanSpace ℝ ι` whose lattice translates are locally summable and whose Fourier transform
 is summable over `ℤ^ι`, `∑_{n} g(n) = ∑_{m} 𝓕g(m)`. Assembled from the multivariate torus
