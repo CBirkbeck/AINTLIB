@@ -25,7 +25,7 @@ namespace DedekindResidue
 
 @[expose] public section
 
-open MeasureTheory Complex
+open MeasureTheory Complex TopologicalSpace
 open scoped FourierTransform
 
 variable {ι : Type*} [Fintype ι]
@@ -184,6 +184,114 @@ theorem abs_det_latticeEquiv (L : Submodule ℤ (EuclideanSpace ℝ ι)) [Discre
   have hcb : (Subtype.val ∘ ⇑b) = ⇑c := by ext i; simp [hc]
   rw [hdet, ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := b)
     (b₀ := b₀.toBasis), volumeReal_fundamentalDomain_orthonormal, mul_one, hcb]
+
+/-- **Sup-norm transport.** Restriction norms of translates conjugate cleanly under an
+invertible linear map: the translate of `g ∘ T` by `T⁻¹v` on `K` has the same sup-norm as the
+translate of `g` by `v` on `T(K)`. -/
+theorem norm_restrict_comp_linearEquiv (g : C(EuclideanSpace ℝ ι, ℂ))
+    (T : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) (hTcont : Continuous ⇑T)
+    (K : Compacts (EuclideanSpace ℝ ι)) (v : EuclideanSpace ℝ ι) :
+    ‖((g.comp ⟨⇑T, hTcont⟩).comp (ContinuousMap.addRight (T.symm v))).restrict (K : Set _)‖
+      = ‖(g.comp (ContinuousMap.addRight v)).restrict
+          ((K.map ⇑T hTcont : Compacts _) : Set _)‖ := by
+  refine le_antisymm ?_ ?_
+  · refine (ContinuousMap.norm_le _ (norm_nonneg _)).mpr (fun x => ?_)
+    have hmem : T x ∈ (K.map ⇑T hTcont : Compacts (EuclideanSpace ℝ ι)) := ⟨x, x.2, rfl⟩
+    have h2 := ContinuousMap.norm_coe_le_norm
+      ((g.comp (ContinuousMap.addRight v)).restrict
+        ((K.map ⇑T hTcont : Compacts (EuclideanSpace ℝ ι)) : Set _)) ⟨T x, hmem⟩
+    have hTx : T (x + T.symm v) = T x + v := by rw [map_add, T.apply_symm_apply]
+    calc ‖g (T (x + T.symm v))‖ = ‖g (T x + v)‖ := by rw [hTx]
+      _ ≤ _ := h2
+  · refine (ContinuousMap.norm_le _ (norm_nonneg _)).mpr (fun y => ?_)
+    obtain ⟨x, hxK, hxy⟩ := y.2
+    have h2 := ContinuousMap.norm_coe_le_norm
+      (((g.comp ⟨⇑T, hTcont⟩).comp (ContinuousMap.addRight (T.symm v))).restrict
+        (K : Set _)) ⟨x, hxK⟩
+    have hTx : T (x + T.symm v) = T x + v := by rw [map_add, T.apply_symm_apply]
+    calc ‖g ((y : EuclideanSpace ℝ ι) + v)‖ = ‖g (T (x + T.symm v))‖ := by rw [hTx, hxy]
+      _ ≤ _ := h2
+
+/-- Transport of the local-summability hypothesis through the lattice change of variables:
+`ℤ^ι`-translates of `g ∘ T` on `K` are the `L`-translates of `g` on `T(K)`. -/
+theorem summable_norm_comp_addRight_zpoint {L : Submodule ℤ (EuclideanSpace ℝ ι)}
+    (T : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) (hTcont : Continuous ⇑T)
+    (eL : (ι → ℤ) ≃ L)
+    (hTz : ∀ n, T (zpoint n) = ((eL n : L) : EuclideanSpace ℝ ι))
+    {g : C(EuclideanSpace ℝ ι, ℂ)}
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι), Summable fun v : L =>
+      ‖(g.comp (ContinuousMap.addRight (v : EuclideanSpace ℝ ι))).restrict (K : Set _)‖)
+    (K : Compacts (EuclideanSpace ℝ ι)) :
+    Summable fun n : ι → ℤ =>
+      ‖((g.comp ⟨⇑T, hTcont⟩).comp (ContinuousMap.addRight (zpoint n))).restrict
+        (K : Set _)‖ := by
+  have hTsz : ∀ n, T.symm ((eL n : L) : EuclideanSpace ℝ ι) = zpoint n :=
+    fun n => by rw [← hTz n, T.symm_apply_apply]
+  have heq : ∀ n : ι → ℤ,
+      ‖((g.comp ⟨⇑T, hTcont⟩).comp (ContinuousMap.addRight (zpoint n))).restrict (K : Set _)‖
+      = ‖(g.comp (ContinuousMap.addRight ((eL n : L) : EuclideanSpace ℝ ι))).restrict
+          ((K.map ⇑T hTcont : Compacts _) : Set _)‖ := fun n => by
+    rw [← hTsz n]
+    exact norm_restrict_comp_linearEquiv g T hTcont K _
+  have hsummable := (h_norm (K.map ⇑T hTcont)).comp_injective eL.injective
+  exact hsummable.congr (fun n => (heq n).symm)
+
+/-- Transport of the Fourier-side summability through the lattice change of variables,
+via `fourier_comp_linearEquiv`. -/
+theorem summable_fourier_zpoint_of_equiv {L : Submodule ℤ (EuclideanSpace ℝ ι)}
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (T : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) (hTcont : Continuous ⇑T)
+    (eD : (ι → ℤ) ≃ dualZLattice L)
+    (hadj : ∀ m : ι → ℤ, LinearMap.adjoint
+        ((T.symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+          EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (zpoint m)
+      = ((eD m : dualZLattice L) : EuclideanSpace ℝ ι))
+    {g : C(EuclideanSpace ℝ ι, ℂ)}
+    (h_sum : Summable fun w : dualZLattice L => 𝓕 (⇑g) (w : EuclideanSpace ℝ ι)) :
+    Summable fun m : ι → ℤ => 𝓕 (⇑(g.comp ⟨⇑T, hTcont⟩)) (zpoint m) := by
+  have h𝓕 : ∀ m : ι → ℤ, 𝓕 (⇑(g.comp ⟨⇑T, hTcont⟩)) (zpoint m)
+      = |LinearMap.det (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹
+        • 𝓕 (⇑g) ((eD m : dualZLattice L) : EuclideanSpace ℝ ι) := by
+    intro m
+    have hcoe : (⇑(g.comp ⟨⇑T, hTcont⟩) : EuclideanSpace ℝ ι → ℂ) = fun v => g (T v) := rfl
+    rw [hcoe, fourier_comp_linearEquiv T (⇑g) (zpoint m), hadj m]
+  have h1 := (h_sum.comp_injective eD.injective).const_smul
+    |LinearMap.det (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹
+  exact h1.congr (fun m => (h𝓕 m).symm)
+
+omit [Fintype ι] in
+theorem tsum_comp_zpoint_of_equiv {L : Submodule ℤ (EuclideanSpace ℝ ι)}
+    (T : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) (hTcont : Continuous ⇑T)
+    (eL : (ι → ℤ) ≃ L)
+    (hTz : ∀ n : ι → ℤ, T (zpoint n) = ((eL n : L) : EuclideanSpace ℝ ι))
+    (g : C(EuclideanSpace ℝ ι, ℂ)) :
+    ∑' n : ι → ℤ, (g.comp ⟨⇑T, hTcont⟩) (zpoint n)
+      = ∑' v : L, g (v : EuclideanSpace ℝ ι) := by
+  rw [← eL.tsum_eq (f := fun v : L => g (v : EuclideanSpace ℝ ι))]
+  exact tsum_congr (fun n => by
+    show g (T (zpoint n)) = _
+    rw [hTz n])
+
+theorem tsum_fourier_zpoint_of_equiv {L : Submodule ℤ (EuclideanSpace ℝ ι)}
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (T : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) (hTcont : Continuous ⇑T)
+    (eD : (ι → ℤ) ≃ dualZLattice L)
+    (hadj : ∀ m : ι → ℤ, LinearMap.adjoint
+        ((T.symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+          EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (zpoint m)
+      = ((eD m : dualZLattice L) : EuclideanSpace ℝ ι))
+    (g : C(EuclideanSpace ℝ ι, ℂ)) :
+    ∑' m : ι → ℤ, 𝓕 (⇑(g.comp ⟨⇑T, hTcont⟩)) (zpoint m)
+      = |LinearMap.det (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹
+        • ∑' w : dualZLattice L, 𝓕 (⇑g) (w : EuclideanSpace ℝ ι) := by
+  have h𝓕 : ∀ m : ι → ℤ, 𝓕 (⇑(g.comp ⟨⇑T, hTcont⟩)) (zpoint m)
+      = |LinearMap.det (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹
+        • 𝓕 (⇑g) ((eD m : dualZLattice L) : EuclideanSpace ℝ ι) := by
+    intro m
+    have hcoe : (⇑(g.comp ⟨⇑T, hTcont⟩) : EuclideanSpace ℝ ι → ℂ) = fun v => g (T v) := rfl
+    rw [hcoe, fourier_comp_linearEquiv T (⇑g) (zpoint m), hadj m]
+  rw [tsum_congr h𝓕, tsum_const_smul'',
+    eD.tsum_eq (f := fun w : dualZLattice L => 𝓕 (⇑g) (w : EuclideanSpace ℝ ι))]
 
 end
 
