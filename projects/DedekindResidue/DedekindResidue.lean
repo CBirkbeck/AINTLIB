@@ -3,6 +3,7 @@ module
 public import DedekindResidue.Basic
 public import DedekindResidue.AuxiliaryFunction
 public import DedekindResidue.CompletedZeta.DualLattice
+public import DedekindResidue.CompletedZeta.Normalisation
 public import DedekindResidue.CompletedZeta.PoissonLattice
 public import DedekindResidue.CompletedZeta.PoissonSummation
 public import DedekindResidue.CompletedZeta.ThetaLattice
