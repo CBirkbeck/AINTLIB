@@ -389,6 +389,52 @@ theorem fourier_weightedGaussianCM {c : ι → ℝ} (hc : ∀ i, 0 < c i) (w : E
   rw [diagScale_congr hw]
   exact (weightedGaussianCM_eq_comp (fun i => (c i)⁻¹) (fun i => inv_pos.mpr (hc i)) w).symm
 
+/-- Pointwise norm of the anisotropic Gaussian. -/
+theorem norm_weightedGaussianCM_apply (c : ι → ℝ) (y : EuclideanSpace ℝ ι) :
+    ‖weightedGaussianCM c y‖ = Real.exp (-π * ∑ i, c i * y i ^ 2) := by
+  simp only [weightedGaussianCM, ContinuousMap.coe_mk]
+  rw [Complex.norm_exp]
+  have : (-(π : ℂ) * ∑ i, (c i : ℂ) * (y i : ℂ) ^ 2)
+      = ((-π * ∑ i, c i * y i ^ 2 : ℝ) : ℂ) := by
+    push_cast
+    ring
+  rw [this, Complex.ofReal_re]
+
+/-- The squared Euclidean norm is the coordinate square sum. -/
+theorem norm_sq_eq_sum (y : EuclideanSpace ℝ ι) : ‖y‖ ^ 2 = ∑ i, y i ^ 2 := by
+  rw [EuclideanSpace.norm_eq, Real.sq_sqrt (by positivity)]
+  exact Finset.sum_congr rfl (fun i _ => by rw [Real.norm_eq_abs, sq_abs])
+
+/-- Weighted-vs-isotropic comparison: with all weights `≥ a`, the anisotropic Gaussian is
+dominated by the isotropic one at parameter `a` (`gaussianCM` at `t = a`). -/
+theorem norm_weightedGaussianCM_le (c : ι → ℝ) {a : ℝ} (hca : ∀ i, a ≤ c i)
+    (y : EuclideanSpace ℝ ι) :
+    ‖weightedGaussianCM c y‖ ≤ ‖gaussianCM a y‖ := by
+  rw [norm_weightedGaussianCM_apply, norm_gaussianCM_apply]
+  refine Real.exp_le_exp.mpr ?_
+  rw [norm_sq_eq_sum]
+  have hle : a * ∑ i, y i ^ 2 ≤ ∑ i, c i * y i ^ 2 := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_le_sum (fun i _ => ?_)
+    have := sq_nonneg (y i)
+    nlinarith [hca i]
+  nlinarith [Real.pi_pos]
+
+/-- `h_norm` for the anisotropic Gaussian, by comparison with the isotropic estimate `Θ1`. -/
+theorem summable_norm_restrict_weightedGaussianCM (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {c : ι → ℝ} {a : ℝ} (ha : 0 < a)
+    (hca : ∀ i, a ≤ c i) (K : Compacts (EuclideanSpace ℝ ι)) :
+    Summable fun v : L =>
+      ‖((weightedGaussianCM c).comp (ContinuousMap.addRight (v : EuclideanSpace ℝ ι))).restrict
+        (K : Set (EuclideanSpace ℝ ι))‖ := by
+  refine Summable.of_nonneg_of_le (fun v => norm_nonneg _) (fun v => ?_)
+    (summable_norm_restrict_gaussianCM L ha K)
+  refine (ContinuousMap.norm_le _ (norm_nonneg _)).mpr (fun x => ?_)
+  refine le_trans ?_ (ContinuousMap.norm_coe_le_norm
+    (((gaussianCM a).comp (ContinuousMap.addRight (v : EuclideanSpace ℝ ι))).restrict
+      (K : Set (EuclideanSpace ℝ ι))) x)
+  exact norm_weightedGaussianCM_le c hca _
+
 end
 
 end DedekindResidue
