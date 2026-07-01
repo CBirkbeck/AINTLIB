@@ -1,1 +1,1 @@
-FOCUS: KILL ALL PLACEHOLDERS — genuine completedDedekindZeta via Hecke integral (AGE-1 euclidean ideal lattices -> ideal theta -> Mellin def), GRH properly stated before Belabas work
+FOCUS: AGE-4 chain, bottom-up: AGE-1 euclideanIdealLattice (ZLattice.comap of idealLattice along toMixed) + instances + covolume + isometry transport to EuclideanSpace ℝ (index K); then AGE-2 dictionary; then unit-box-averaged theta g_J; then WeakFEPair Mellin => ∃ Λ, IsCompletedDedekindZeta

@@ -148,7 +148,28 @@
       `GeneralizedRiemannHypothesis` in the paper's verbatim `Re > 1/2` form over the
       characterisation. AGE-4's target is now precisely **non-vacuity**:
       `∃ Λ, IsCompletedDedekindZeta K Λ` via the theta-Mellin construction (+ FE of it).
-    - **(AGE-1) euclidean ideal lattices**: `euclideanIdealLattice I := ZLattice.comap ℝ
+    - **(AGE-1) DONE ✓✓ (2026-07-01, `CompletedZeta/IdealLattice.lean`, sorry-free, axiom-clean)**:
+      `euclideanIdealLattice` + `idealZLattice ⊂ EuclideanSpace ℝ (index K)` (double
+      `ZLattice.comap` along `euclidean.toMixed` then `(euclidean.stdOrthonormalBasis K).repr.symm`,
+      instances via `inferInstanceAs` + upstream comap instances — NB statements need
+      `open scoped Classical in`, the subtype Fintypes are classical), `covolume_idealZLattice
+      = N(I)·2^{-r₂}·√|Δ_K|` (two `ZLattice.covolume_comap` transports +
+      `covolume_idealLattice`), **`idealTheta`** (`Θ_I(t) = thetaLattice (idealZLattice K I) t`)
+      and **`idealTheta_transform`** (covolume evaluated). REMAINING CHAIN TO AGE-4
+      (non-vacuity of `IsCompletedDedekindZeta`): (AGE-2) identify
+      `dualZLattice (idealZLattice K I)` with the ideal lattice of the codifferent twist
+      (via the trace-form `dualSubmodule` = codifferent, `Different.lean`; gives the clean
+      dual side of `idealTheta_transform`); (AGE-3) the **unit-averaged multivariable theta**:
+      `g_I(t) := ∫_{u ∈ [0,1)^{r+s-1}} Θ-weighted(c(t,u)) du` with weights
+      `c(t,u)_v = t^{1/n}·exp(⟨log-unit-basis combination⟩_v)` (log-unit basis from
+      `NumberField.Units` Dirichlet machinery; box integral — Lebesgue, no surface measure;
+      `weightedThetaLattice_transform` gives `g_I(1/t) = (covol,t)-factors·g_{I♯}(t)` after the
+      `u ↦ -u` + unit-relabeling change of variables — the unit action permutes the lattice);
+      (AGE-4) `Λ := prefactor-normalised ∑_{classes} N(J)^s·mellin(g_J − const)(s/2)` split at 1
+      (mirror mathlib `completedRiemannZeta₀`/`WeakFEPair`), prove agreement on `Re s > 1`
+      (ideal-counting via `FundamentalCone.idealSetEquivNorm` + per-point Mellin) and
+      `s(s-1)Λ` entire ⇒ `∃ Λ, IsCompletedDedekindZeta K Λ` (GRH non-vacuity) + FE.
+    - (AGE-1) original plan: `euclideanIdealLattice I := ZLattice.comap ℝ
       (mixedEmbedding.idealLattice K I) (toMixed K).toLinearMap` (mirror
       `euclidean.integerLattice`) + instances + covolume (via `volumePreserving_toMixed`) +
       transport to `EuclideanSpace ℝ (index K)` along `(stdOrthonormalBasis K).repr`

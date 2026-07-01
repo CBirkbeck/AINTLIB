@@ -81,6 +81,29 @@ theorem covolume_idealZLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
     ZLattice.covolume_comap _ _ _ (euclidean.volumePreserving_toMixed K),
     covolume_idealLattice]
 
+open scoped Real
+
+open scoped Classical in
+/-- The **theta function of a fractional ideal**: the lattice theta of its Euclidean ideal
+lattice, `Θ_I(t) = ∑_{α ∈ I} e^{-πt‖σ(α)‖²}` (with `σ` the mixed embedding in Euclidean
+coordinates). The 1-parameter member of Hecke's family; the unit-averaged multivariable
+version (`weightedGaussianCM` weights over the log-unit box) is SP1-AGE-3. -/
+noncomputable def idealTheta (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : ℝ) : ℝ :=
+  thetaLattice (idealZLattice K I) t
+
+open scoped Classical in
+/-- The transformation law of the ideal theta, with the covolume evaluated by
+`covolume_idealZLattice`: `Θ_I(t) = (N(I)·2^{-r₂}·√|Δ_K|)⁻¹·t^{-n/2}·Θ_{(L_I)♯}(1/t)`.
+Identifying the dual lattice `(L_I)♯` with the ideal lattice of `(I·𝔡_K)⁻¹` (the codifferent
+twist) is SP1-AGE-2. -/
+theorem idealTheta_transform (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (ht : 0 < t) :
+    idealTheta K I t
+      = ((FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K))
+            * (2⁻¹) ^ nrComplexPlaces K * Real.sqrt |discr K|)⁻¹
+          * t ^ (-(Fintype.card (index K) : ℝ) / 2)
+          * thetaLattice (dualZLattice (idealZLattice K I)) t⁻¹ := by
+  rw [idealTheta, thetaLattice_transform (idealZLattice K I) ht, covolume_idealZLattice]
+
 end
 
 end DedekindResidue
