@@ -73,6 +73,18 @@
       `|det|⁻¹` via `ZLattice.covolume_eq_det_mul_measureReal`; dual lattice on the 𝓕 side via
       `dualZLattice` + `covolume_dualZLattice_mul` from P.1), then AGΘ Gaussian instantiation
       (`fourier_gaussian_innerProductSpace` + `summable_gaussian_zlattice` discharge h_norm/h_sum).
+    - **P.3 leaf plan** (2026-07-01, footholds sig-verified): (P3a) `fourier_comp_linearEquiv`:
+      `𝓕(g∘T) w = |det T|⁻¹ • 𝓕 g (adjoint T.symm w)` for `T : EuclideanSpace ≃ₗ[ℝ] EuclideanSpace`
+      — via `T.toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv`, `integral_map_equiv`,
+      `Measure.map_linearMap_addHaar_eq_smul_addHaar` (det ≠ 0 from `LinearEquiv.isUnit_det'`),
+      `integral_smul_measure`, `LinearMap.adjoint_inner_right` (real inner, no conj); (P3b) sum-side
+      reindex `∑' v : L ↔ ∑' n : ι → ℤ` via `b.repr` + `Finsupp.equivFunOnFinite` + `T (zpoint n) =
+      lattice elt with coords n` (`Module.Basis.equiv (basisFun) c (Equiv.refl)`); (P3c) dual-side:
+      `adjoint T.symm (zpoint m)` = dual basis of `c` (⟪adj T⁻¹ eᵢ, c j⟫ = δᵢⱼ) ⇒ ranges over
+      `dualZLattice L` by P.1's `dualZLattice_eq_span`; (P3d) `|det T| = covolume L` via
+      `covolume_eq_det_mul_measureReal` + `volumeReal_fundamentalDomain_orthonormal`; (P3) assemble:
+      `∑'_{v∈L} g(v) = covol(L)⁻¹ ∑'_{w∈L♯} 𝓕g(w)` with honest L-side hypotheses (transport
+      h_norm/h_sum through T by compact-image + equiv-reindex). File: `CompletedZeta/PoissonLattice.lean`.
     - P.2 history (2026-07-01, `CompletedZeta/PoissonSummation.lean`): file
       created with `zpoint` (ℤ^ι ↪ EuclideanSpace, axiom-clean), `summable_gaussian_zlattice`
       (Gaussian `exp(-a‖x‖²)` summable over any lattice — DONE, axiom-clean: `ZLattice.summable_norm_rpow`
