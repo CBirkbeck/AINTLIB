@@ -299,6 +299,37 @@ theorem det_diagScale (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
     simp
   rw [this, Matrix.det_diagonal]
 
+/-- The **anisotropic Gaussian** with diagonal weights `c`:
+`x ↦ e^{-π ∑ᵢ cᵢ xᵢ²}` — the integrand of Hecke's multivariable theta (one weight per
+infinite place). For positive weights it is the standard Gaussian composed with
+`diagScale √c` (`weightedGaussianCM_eq_comp`). -/
+noncomputable def weightedGaussianCM (c : ι → ℝ) : C(EuclideanSpace ℝ ι, ℂ) :=
+  ⟨fun x => Complex.exp (-(π : ℂ) * ∑ i, (c i : ℂ) * (x i : ℂ) ^ 2), by fun_prop⟩
+
+/-- The squared norm of a `diagScale √c`-scaled point is the weighted square sum. -/
+theorem norm_diagScale_sqrt_sq (c : ι → ℝ) (hc : ∀ i, 0 < c i) (x : EuclideanSpace ℝ ι) :
+    ‖diagScale (fun i => Real.sqrt (c i)) (fun i => Real.sqrt_ne_zero'.mpr (hc i)) x‖ ^ 2
+      = ∑ i, c i * x i ^ 2 := by
+  rw [EuclideanSpace.norm_eq, Real.sq_sqrt (by positivity)]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [diagScale_apply, Real.norm_eq_abs, sq_abs, mul_pow, Real.sq_sqrt (hc i).le]
+
+/-- **Structural identity**: the anisotropic Gaussian is the standard Gaussian pulled back
+along the diagonal scaling by `√c`. This feeds `fourier_comp_linearEquiv` (P3a) to compute
+its Fourier transform. -/
+theorem weightedGaussianCM_eq_comp (c : ι → ℝ) (hc : ∀ i, 0 < c i) (x : EuclideanSpace ℝ ι) :
+    weightedGaussianCM c x
+      = gaussianCM 1 ((diagScale (fun i => Real.sqrt (c i))
+          (fun i => Real.sqrt_ne_zero'.mpr (hc i))) x) := by
+  simp only [weightedGaussianCM, gaussianCM, ContinuousMap.coe_mk]
+  congr 1
+  have hn := norm_diagScale_sqrt_sq c hc x
+  rw [show ((‖diagScale (fun i => Real.sqrt (c i))
+      (fun i => Real.sqrt_ne_zero'.mpr (hc i)) x‖ : ℂ) ^ 2)
+      = ((∑ i, c i * x i ^ 2 : ℝ) : ℂ) by rw [← hn]; push_cast; ring]
+  push_cast
+  ring
+
 end
 
 end DedekindResidue
