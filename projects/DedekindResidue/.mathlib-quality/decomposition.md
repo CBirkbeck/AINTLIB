@@ -187,3 +187,45 @@ tied to `dedekindZeta_residue`; S1.5 Hadamard product / zero set (`γ_ρ ∈ ℝ
 **Immediate next action:** `/develop --decompose` scoped to **AG-P** (n-dim Poisson) — a
 self-contained real-analysis pass, no external reference needed — then build it via `/beastmode`.
 Acquire the AG-E reference in parallel.
+
+## AG-P decomposition — n-dimensional Poisson summation (grounded 2026-07-01)
+
+**Source (to generalise):** mathlib's 1-D Poisson `Real.tsum_eq_tsum_fourier`
+(`Analysis/Fourier/PoissonSummation.lean:102`), proved via the periodization's Fourier
+coefficients `Real.fourierCoeff_tsum_comp_add` (`:51`) on `AddCircle 1`. The d-dimensional
+torus analogue of that machinery **already exists**: `Analysis/Fourier/AddCircleMulti.lean`
+— `mFourier`/`mFourierBasis` (`HilbertBasis (d→ℤ) ℂ L²(UnitAddTorus d)`, `:265`),
+`mFourierCoeff` (`:246`), L²/uniform convergence (`hasSum_mFourier_series_L2 :285`), and the
+box↔torus measure equivalence (`measurePreserving_equivPiIoc :168`, `integral_preimage :193`).
+So AG-P mirrors the 1-D proof, swapping `AddCircle` → `UnitAddTorus d` via `AddCircleMulti`.
+
+**Target statement:** for a full `ZLattice L` in a finite-dim real inner-product space `V`
+(dual `L*`, covolume `covol L`) and a Schwartz (or suitably-decaying) `f : V → ℂ`,
+`∑_{x∈L} f x = (covol L)⁻¹ · ∑_{y∈L*} 𝓕f y`.
+
+**Leaves (bottom-up):**
+- **P.1** `ZLattice.dual` — the dual lattice `L* = {y | ∀ x∈L, ⟪x,y⟫ ∈ ℤ}` and its basic API
+  (it is a `ZLattice`; `covol L* = (covol L)⁻¹`; double-dual). **Gap** — nothing in `ZLattice/`
+  (`fundamentalDomain` exists at `Basic.lean:92`, no `dual`). Sub-leaves: dual as a `Submodule`
+  over `ℤ`; `IsZLattice` instance; covolume-inverse (from `ZLattice.covolume` + the dual basis).
+- **P.2** `poissonSummation_zspan` — Poisson for the standard lattice `ℤⁿ ⊂ (ι → ℝ)`:
+  generalise `Real.fourierCoeff_tsum_comp_add` → the periodization `x ↦ ∑_{n∈ℤⁿ} f(x+n)` on
+  `UnitAddTorus ι`, expand in `mFourierBasis`, evaluate the coefficients as `𝓕f` at integer
+  points. Discharged by: `AddCircleMulti` (`mFourierCoeff`, `hasSum_mFourier_series_L2` +
+  the continuous-summable uniform-convergence variant) + `VectorFourier.fourierIntegral`
+  (`FourierTransform.lean`). **Internal** — the analytic heart; sub-decompose against the
+  1-D proof's structure.
+- **P.3** `poissonSummation_zlattice` — transport P.2 to a general `ZLattice L` via the
+  linear equiv `L ≅ ℤⁿ` (a `Basis` of `L`), change of variables in `𝓕`, picking up the
+  `covol L` Jacobian and mapping `ℤⁿ`'s dual to `L*`. Discharged by: `ZLattice.covolume`,
+  `Zspan.basis`, `VectorFourier` change-of-variables. **Internal.**
+
+**Feasibility:** grounded — every analytic ingredient (multivariate torus Fourier series,
+n-dim Fourier transform, lattice covolume) exists; the only genuinely new piece is the dual
+lattice (P.1), which is elementary linear algebra over `ℤ`. No external reference needed.
+AG-P is a clean, self-contained, mathlib-worthy sub-project — the right first brick.
+
+**Note (generality):** AG-P → AG-Θ → AG-E is what makes `completedDedekindZeta` + FE hold for
+**every** number field, hence GRH and Theorem 1 general (not abelian-only). The abelian
+`ζ_K = ∏ L(χ)` route would cap the whole result at abelian extensions; the theta stack is the
+price of the paper's full generality.
