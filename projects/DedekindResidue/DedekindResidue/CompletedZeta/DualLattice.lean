@@ -13,7 +13,7 @@ specialise it to the inner-product bilinear form `innerₗ V` of a finite-dimens
 product space and record the foundational API.
 
 ## Main definitions / results (this file)
-* `DedekindResidue.dualZLattice L` — the dual lattice `L♯ = {y | ∀ x ∈ L, ⟪y, x⟫_ℝ ∈ ℤ}`.
+* `DedekindResidue.dualZLattice L` — the dual lattice `L♯ = {y | ∀ x ∈ L, ⟪y, x⟫ ∈ ℤ}`.
 * `DedekindResidue.mem_dualZLattice` — its membership characterisation.
 * `DedekindResidue.innerₗ_nondegenerate` — the inner-product bilinear form is nondegenerate.
 * `DedekindResidue.dualZLattice_eq_span` — `L♯ = span ℤ (dual basis)`; the structural lever that
@@ -34,7 +34,8 @@ namespace DedekindResidue
 
 @[expose] public section
 
-open LinearMap.BilinForm
+open LinearMap.BilinForm MeasureTheory Matrix
+open scoped RealInnerProductSpace
 
 variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
 
@@ -47,12 +48,12 @@ theorem innerₗ_nondegenerate : Nondegenerate (innerₗ V) :=
    fun x hx => inner_self_eq_zero.mp (by have h := hx x; rwa [innerₗ_apply_apply] at h)⟩
 
 /-- The **dual lattice** `L♯` of `L` in a finite-dimensional real inner product space:
-`L♯ = {y | ∀ x ∈ L, ⟪y, x⟫_ℝ ∈ ℤ}`, built from the inner-product bilinear form. -/
+`L♯ = {y | ∀ x ∈ L, ⟪y, x⟫ ∈ ℤ}`, built from the inner-product bilinear form. -/
 noncomputable def dualZLattice (L : Submodule ℤ V) : Submodule ℤ V :=
   dualSubmodule (innerₗ V) L
 
 omit [FiniteDimensional ℝ V] in
-/-- Membership in the dual lattice: `y ∈ L♯ ↔ ⟪y, x⟫_ℝ` (as `innerₗ V y x`) is an integer for
+/-- Membership in the dual lattice: `y ∈ L♯ ↔ ⟪y, x⟫` (as `innerₗ V y x`) is an integer for
 every `x ∈ L`. -/
 theorem mem_dualZLattice {L : Submodule ℤ V} {y : V} :
     y ∈ dualZLattice L ↔ ∀ x ∈ L, innerₗ V y x ∈ (1 : Submodule ℤ ℝ) :=
@@ -88,6 +89,65 @@ instance instIsZLatticeDualZLattice (L : Submodule ℤ V) [DiscreteTopology L] [
     haveI := ZLattice.module_free ℝ L
     rw [dualZLattice_eq_span L (Module.Free.chooseBasis ℤ L)]
     exact ZSpan.span_top _
+
+/-- The fundamental domain of an orthonormal basis of Euclidean space has volume `1`. -/
+theorem volumeReal_fundamentalDomain_orthonormal {ι : Type*} [Fintype ι]
+    (b : OrthonormalBasis ι ℝ (EuclideanSpace ℝ ι)) :
+    (volume : Measure (EuclideanSpace ℝ ι)).real (ZSpan.fundamentalDomain b.toBasis) = 1 := by
+  rw [measureReal_congr (ZSpan.fundamentalDomain_ae_parallelepiped b.toBasis volume),
+    measureReal_def, ← OrthonormalBasis.addHaar_eq_volume b, Module.Basis.addHaar_self,
+    ENNReal.toReal_one]
+
+/-- **Covolume reciprocal** (SP1-AGP P.1): the dual lattice has reciprocal covolume,
+`covolume L♯ · covolume L = 1`, in Euclidean space with its canonical volume. This is the
+metric heart of the dual lattice and supplies the `√|discr|` in the theta functional equation. -/
+theorem covolume_dualZLattice_mul {ι : Type*} [Fintype ι]
+    (L : Submodule ℤ (EuclideanSpace ℝ ι)) [DiscreteTopology L] [IsZLattice ℝ L] :
+    ZLattice.covolume (dualZLattice L) * ZLattice.covolume L = 1 := by
+  classical
+  haveI := ZLattice.module_finite ℝ L
+  haveI := ZLattice.module_free ℝ L
+  have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
+    rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
+  set b : Module.Basis ι ℤ ↥L :=
+    (Module.Free.chooseBasis ℤ L).reindex (Fintype.equivOfCardEq hcard) with hb
+  set b₀ := EuclideanSpace.basisFun ι ℝ with hb₀
+  set c : Module.Basis ι ℝ (EuclideanSpace ℝ ι) := b.ofZLatticeBasis ℝ with hc
+  set cstar := dualBasis (innerₗ (EuclideanSpace ℝ ι)) innerₗ_nondegenerate c with hcstar
+  have hlinind : LinearIndependent ℤ ⇑cstar :=
+    cstar.linearIndependent.restrict_scalars (by simpa using Int.cast_injective)
+  -- Each covolume is the coordinate determinant in the (orthonormal) standard basis `b₀`.
+  have hcb : (Subtype.val ∘ ⇑b) = ⇑c := by ext i; simp [hc]
+  have hcbs : (Subtype.val ∘ ⇑(Module.Basis.span hlinind)) = ⇑cstar := by ext i; simp
+  have hcovL : ZLattice.covolume L
+      = |b₀.toBasis.det ⇑c| * (volume : Measure (EuclideanSpace ℝ ι)).real
+          (ZSpan.fundamentalDomain b₀.toBasis) := by
+    rw [ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := b) (b₀ := b₀.toBasis), hcb]
+  have hcovLstar : ZLattice.covolume (dualZLattice L)
+      = |b₀.toBasis.det ⇑cstar| * (volume : Measure (EuclideanSpace ℝ ι)).real
+          (ZSpan.fundamentalDomain b₀.toBasis) := by
+    rw [dualZLattice_eq_span L b, ← hc, ← hcstar,
+      ZLattice.covolume_eq_det_mul_measureReal (μ := volume)
+        (b := Module.Basis.span hlinind) (b₀ := b₀.toBasis), hcbs]
+  -- Coordinate-matrix entries are inner products with the (orthonormal) `b₀`.
+  have hP : ∀ (v : Module.Basis ι ℝ (EuclideanSpace ℝ ι)) (m k : ι),
+      b₀.toBasis.toMatrix ⇑v k m = ⟪b₀ k, v m⟫ := fun v m k => by
+    rw [Module.Basis.toMatrix_apply, b₀.coe_toBasis_repr_apply, b₀.repr_apply_apply]
+  -- The mixed Gram matrix `Pᵀ Q` of the primal / dual coordinate matrices is the identity.
+  have hmat : (b₀.toBasis.toMatrix ⇑c)ᵀ * b₀.toBasis.toMatrix ⇑cstar = 1 := by
+    ext i j
+    rw [Matrix.mul_apply, Matrix.one_apply]
+    simp only [Matrix.transpose_apply, hP]
+    have hpar : ∑ k, ⟪b₀ k, c i⟫ * ⟪b₀ k, cstar j⟫ = ⟪c i, cstar j⟫ := by
+      rw [← b₀.sum_inner_mul_inner (c i) (cstar j)]
+      exact Finset.sum_congr rfl fun k _ => by rw [real_inner_comm (c i) (b₀ k)]
+    rw [hpar, hcstar, real_inner_comm, ← innerₗ_apply_apply,
+      apply_dualBasis_left innerₗ_nondegenerate c j i]
+  have hdet : b₀.toBasis.det ⇑c * b₀.toBasis.det ⇑cstar = 1 := by
+    rw [Module.Basis.det_apply, Module.Basis.det_apply,
+      ← Matrix.det_transpose (b₀.toBasis.toMatrix ⇑c), ← Matrix.det_mul, hmat, Matrix.det_one]
+  rw [hcovLstar, hcovL, volumeReal_fundamentalDomain_orthonormal, mul_one, mul_one,
+    ← abs_mul, mul_comm (b₀.toBasis.det ⇑cstar) (b₀.toBasis.det ⇑c), hdet, abs_one]
 
 end
 

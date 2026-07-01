@@ -35,14 +35,22 @@
     [`ZLattice.covolume`, `VectorFourier.fourierIntegral`]. (P.opt) general Schwartz-class
     Poisson — **optional, off the critical path**, only if cheaply reusable. **Next action**:
     `/develop --decompose` scoped to SP1-AGP.
-    - **P.1 STARTED ✓ (2026-07-01, `CompletedZeta/DualLattice.lean`, build green + axiom-clean)**:
-      `dualZLattice` (via `innerₗ` + `LinearMap.BilinForm.dualSubmodule`), `mem_dualZLattice`,
-      `innerₗ_nondegenerate`, and the structural lever `dualZLattice_eq_span` (`L♯ = span ℤ
-      (dual basis)`). **Remaining P.1**: (a) the `IsZLattice ℝ`/`DiscreteTopology` instances for
-      `dualZLattice L` — free from `dualZLattice_eq_span` + `instIsZLatticeRealSpan` (both
-      `Prop`-classes, transport across the carrier equality); (b) the covolume reciprocal
-      `covolume (dualZLattice L) · covolume L = 1` — via `ZLattice.covolume_eq_det` + dual-basis
-      determinant `= (det B)⁻¹`. NB `Basis` is now `Module.Basis` under the module system.
+    - **P.1 DONE ✓✓ (2026-07-01, `CompletedZeta/DualLattice.lean`, build green + axiom-clean
+      `{propext, Classical.choice, Quot.sound}`)**: `dualZLattice` (via `innerₗ` +
+      `LinearMap.BilinForm.dualSubmodule`), `mem_dualZLattice`, `innerₗ_nondegenerate`, the
+      structural lever `dualZLattice_eq_span` (`L♯ = span ℤ (dual basis)`), the
+      `instDiscreteTopologyDualZLattice` + `instIsZLatticeDualZLattice` instances (free from
+      `dualZLattice_eq_span` + `ZSpan.span_top`), the measure fact
+      `volumeReal_fundamentalDomain_orthonormal` (`vol.real(FD b₀)=1`), AND the covolume
+      reciprocal `covolume_dualZLattice_mul` (`covolume L♯ · covolume L = 1`). NB `Basis` is now
+      `Module.Basis`; `⟪x,y⟫` (no `_ℝ` subscript) via `open scoped RealInnerProductSpace`.
+    - **[SP1-AGP-COVOL] covolume reciprocal — DONE ✓✓** (2026-07-01): `covolume_dualZLattice_mul`.
+      Proof exactly as sketched: (1) `ZLattice.covolume_eq_det_mul_measureReal (μ := volume)` with
+      `b₀ := (EuclideanSpace.basisFun ι ℝ).toBasis` (reindex `chooseBasis` to `ι` via
+      `Fintype.equivOfCardEq` + `finrank_euclideanSpace`); (2) `volumeReal_fundamentalDomain_orthonormal`;
+      (3) `Module.Basis.span hlinind` as the dual ℤ-basis (fold post-`dualZLattice_eq_span` goal with
+      `← hc, ← hcstar`); (4) `MᵀM* = 1` from `apply_dualBasis_left` (δ_ij) + `OrthonormalBasis.sum_inner_mul_inner`
+      Parseval + `real_inner_comm`, then `Module.Basis.det_apply` + `Matrix.det_transpose` + `Matrix.det_mul`.
   - **[SP1-AGΘ] lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
     depends on SP1-AGP (Gaussian class) + n-dim Gaussian self-duality (assemble from 1-D
     `Gaussian/FourierTransform`).
