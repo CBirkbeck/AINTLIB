@@ -292,11 +292,11 @@ theorem det_diagScale (c : ι → ℝ) (hc : ∀ i, c i ≠ 0) :
         EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) = Matrix.diagonal c := by
     ext i j
     rw [LinearMap.toMatrix_apply, Matrix.diagonal_apply]
-    simp only [OrthonormalBasis.coe_toBasis, LinearMap.coe_coe]
+    simp only [OrthonormalBasis.coe_toBasis]
     show diagScale c hc ((EuclideanSpace.basisFun ι ℝ).toBasis j) i = _
     rw [OrthonormalBasis.coe_toBasis, diagScale_apply]
     rw [EuclideanSpace.basisFun_apply]
-    simp [PiLp.single_apply, Pi.single_apply, eq_comm]
+    simp
   rw [this, Matrix.det_diagonal]
 
 end

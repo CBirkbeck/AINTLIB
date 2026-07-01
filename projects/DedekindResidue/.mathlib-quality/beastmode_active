@@ -1,1 +1,1 @@
-FOCUS: SP1-AGΘ — Θ3 next: 𝓕(gaussianCM t)(w) = t^{-n/2} cexp(-π‖w‖²/t) via fourier_gaussian_innerProductSpace at b=πt (cpow of positive real juggling); then h_sum discharge; then Θ4 transformation assembly
+FOCUS: SP1-AGE-0 — anisotropic theta: diagonal positive P via ONB, fourier of gaussian∘P^{1/2} from fourier_comp_linearEquiv + fourier_gaussianCM; statement over EuclideanSpace with diagonal weights
