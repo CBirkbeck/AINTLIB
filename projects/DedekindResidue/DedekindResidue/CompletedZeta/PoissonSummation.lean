@@ -61,6 +61,27 @@ theorem mFourier_neg_coe (m : ι → ℤ) (x : ι → ℝ) :
   push_cast
   ring
 
+/-- **`𝓕` bridge.** The Fourier transform of `g` at the lattice point `m`, an integral over the
+inner-product space `EuclideanSpace ℝ ι`, rewrites as an integral over `ι → ℝ` of the torus
+character `mFourier (-m)` against `g` — via the measure-preserving `WithLp` identification and
+`mFourier_neg_coe`. This is the analytic content connecting `𝓕` to the torus Fourier coefficient. -/
+theorem fourierIntegral_zpoint_eq (g : EuclideanSpace ℝ ι → ℂ) (m : ι → ℤ) :
+    𝓕 g (zpoint m) = ∫ x : ι → ℝ,
+      UnitAddTorus.mFourier (-m) (fun i => ((x i : ℝ) : AddCircle (1 : ℝ)))
+        • g ((WithLp.equiv 2 (ι → ℝ)).symm x) := by
+  rw [Real.fourier_eq', ← (PiLp.volume_preserving_toLp (ι := ι)).integral_comp
+    (MeasurableEquiv.toLp 2 (ι → ℝ)).measurableEmbedding]
+  refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  dsimp only
+  rw [mFourier_neg_coe]
+  refine congr_arg₂ (· • ·) ?_ rfl
+  have hinner : (inner ℝ (WithLp.toLp 2 x : EuclideanSpace ℝ ι) (zpoint m)) = ∑ i, x i * (m i : ℝ) := by
+    simp only [zpoint, PiLp.inner_apply, WithLp.equiv_symm_apply, RCLike.inner_apply, conj_trivial]
+    exact Finset.sum_congr rfl (fun i _ => mul_comm _ _)
+  have hs : (∑ i, (x i : ℂ) * (m i : ℂ)) = ∑ i, (m i : ℂ) * (x i : ℂ) :=
+    Finset.sum_congr rfl (fun i _ => mul_comm _ _)
+  rw [hinner]; push_cast; rw [hs]; congr 1; ring
+
 /-- The **torus periodization** of `g`: the `ℤ^ι`-periodic function `x ↦ ∑_{n} g(x + n)`, the
 object whose `m`-th Fourier coefficient is `𝓕g(m)`. -/
 noncomputable def periodization (g : EuclideanSpace ℝ ι → ℂ) (x : EuclideanSpace ℝ ι) : ℂ :=
