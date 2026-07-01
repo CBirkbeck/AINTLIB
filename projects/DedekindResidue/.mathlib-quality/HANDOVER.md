@@ -12,10 +12,18 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-One `sorry` is the live frontier: **`tsum_eq_tsum_fourier_zpoint`** in
-`projects/DedekindResidue/DedekindResidue/CompletedZeta/PoissonSummation.lean` (n-dim Poisson
-summation over `ℤ^ι`). The complete leaf plan with verified mathlib footholds is in §4 below.
-Work it in `/beastmode` style; plan any new gaps in `/develop` style (ticket per leaf, verbatim
+**UPDATE 2026-07-01 (later): P.2 IS DONE.** `tsum_eq_tsum_fourier_zpoint` (n-dim Poisson over
+`ℤ^ι`) is fully proven, sorry-free, axiom-clean — `PoissonSummation.lean` builds with zero
+warnings. The §4 leaf plan below was executed exactly as written (all of e1–e6 + f landed).
+The live frontier is now **P.3 (transport to a general lattice)** then **AGΘ (Gaussian theta +
+transformation law)** — see the SP1-AGP ticket in `tickets.md` for the P.3 sketch: pull the
+`ℤ^ι` formula back along the lattice-basis linear equiv (`Module.Basis.ofZLatticeBasis` +
+`LinearEquiv` change of variables in `𝓕`, covolume factor via
+`ZLattice.covolume_eq_det_mul_measureReal`), dual side via `dualZLattice` +
+`covolume_dualZLattice_mul` (P.1, done); then instantiate at the Gaussian
+(`fourier_gaussian_innerProductSpace` is already in mathlib;
+`summable_gaussian_zlattice` discharges the convergence hypotheses).
+Work in `/beastmode` style; plan any new gaps in `/develop` style (ticket per leaf, verbatim
 source justification, verified mathlib lemma names).
 
 ## 1. What the project is

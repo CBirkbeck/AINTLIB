@@ -11,19 +11,23 @@ but **no** `n`-dimensional / lattice Poisson summation formula. This file builds
 standard lattice `ℤ^ι ⊂ EuclideanSpace ℝ ι`, in the shape needed for the Hecke theta
 transformation: `∑_{n∈ℤ^ι} g(n) = ∑_{m∈ℤ^ι} 𝓕g(m)`.
 
-The engine mirrors the one-dimensional proof in mathlib's `PoissonSummation.lean`: the only
+The engine mirrors the one-dimensional proof in mathlib's `PoissonSummation.lean`: the
 genuinely new lemma is that the `m`-th coefficient of the torus-periodization of `g` is the
-value of the Fourier transform `𝓕g` at the lattice point `m` (`mFourierCoeff_periodization`,
-the analogue of `Real.fourierCoeff_tsum_comp_add`). Poisson then falls out of the multivariate
-torus Fourier series evaluated at `0`.
+value of the Fourier transform `𝓕g` at the lattice point `m`
+(`mFourierCoeff_torusPeriodizationFun`, the analogue of `Real.fourierCoeff_tsum_comp_add`).
+Poisson then falls out of the multivariate torus Fourier series evaluated at `0`.
 
 ## Main results (this file)
+* `DedekindResidue.tsum_eq_tsum_fourier_zpoint` — **`n`-dimensional Poisson summation over
+  `ℤ^ι`**: `∑' n, g (zpoint n) = ∑' m, 𝓕 g (zpoint m)` for continuous `g` with locally
+  summable lattice translates and summable Fourier values.
+* `DedekindResidue.mFourierCoeff_torusPeriodizationFun` — the key coefficient identity.
+* `DedekindResidue.integral_eq_tsum_integral_iocBox` — box tiling of `ℝ^ι` (+ `lintegral` twin).
 * `DedekindResidue.summable_gaussian_zlattice` — the Gaussian `x ↦ exp(-a‖x‖²)` (`a > 0`) is
   summable over any `ℤ`-lattice in `EuclideanSpace ℝ ι` (dominated by a summable power via
-  `ZLattice.summable_norm_rpow`). This drives every convergence hypothesis downstream.
-* `DedekindResidue.zpoint` — the standard embedding `ℤ^ι ↪ EuclideanSpace ℝ ι`.
-* `DedekindResidue.tsum_eq_tsum_fourier_zpoint` — `n`-dimensional Poisson over `ℤ^ι`
-  *(in progress)*.
+  `ZLattice.summable_norm_rpow`). This drives the Gaussian instantiation downstream (AGΘ).
+* `DedekindResidue.zpoint` — the standard embedding `ℤ^ι ↪ EuclideanSpace ℝ ι`;
+  `torusPeriodizationFun` — the genuine descent of the periodization to the torus.
 
 See `.mathlib-quality/substrate-api.md` §C/§E for the torus-Fourier footholds.
 -/
@@ -577,7 +581,38 @@ theorem tsum_eq_tsum_fourier_zpoint {g : C(EuclideanSpace ℝ ι, ℂ)}
           ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict K‖)
     (h_sum : Summable fun m : ι → ℤ => 𝓕 (⇑g) (zpoint m)) :
     ∑' n : ι → ℤ, g (zpoint n) = ∑' m : ι → ℤ, 𝓕 (⇑g) (zpoint m) := by
-  sorry
+  classical
+  set G : C(UnitAddTorus ι, ℂ) :=
+    ⟨torusPeriodizationFun ⇑g, continuous_torusPeriodizationFun g h_norm⟩ with hG
+  have hcoeff : ∀ m : ι → ℤ, UnitAddTorus.mFourierCoeff (⇑G) m = 𝓕 (⇑g) (zpoint m) :=
+    fun m => mFourierCoeff_torusPeriodizationFun g m h_norm
+  have hsummable : Summable (UnitAddTorus.mFourierCoeff (⇑G)) :=
+    h_sum.congr (fun m => (hcoeff m).symm)
+  have hone : ∀ m : ι → ℤ, UnitAddTorus.mFourier m (0 : UnitAddTorus ι) = 1 := by
+    intro m
+    simp only [UnitAddTorus.mFourier, ContinuousMap.coe_mk]
+    refine Finset.prod_eq_one (fun i _ => ?_)
+    show fourier (m i) ((0 : UnitAddTorus ι) i) = 1
+    rw [Pi.zero_apply, fourier_eval_zero]
+  have hG0 : G (0 : UnitAddTorus ι) = ∑' n : ι → ℤ, g (zpoint n) := by
+    have h0 : (0 : UnitAddTorus ι) = (fun i => (((0 : ι → ℝ) i : ℝ) : AddCircle (1:ℝ))) := by
+      funext i
+      simp
+    show torusPeriodizationFun ⇑g (0 : UnitAddTorus ι) = _
+    rw [h0, torusPeriodizationFun_coe]
+    unfold periodization
+    have htl : WithLp.toLp 2 (0 : ι → ℝ) = (0 : EuclideanSpace ℝ ι) := by
+      ext i; simp
+    rw [htl]
+    exact tsum_congr (fun n => by rw [zero_add])
+  have hhs := UnitAddTorus.hasSum_mFourier_series_apply_of_summable hsummable
+    (0 : UnitAddTorus ι)
+  have heq : (fun m : ι → ℤ =>
+      UnitAddTorus.mFourierCoeff (⇑G) m • UnitAddTorus.mFourier m (0 : UnitAddTorus ι))
+      = fun m => 𝓕 (⇑g) (zpoint m) :=
+    funext (fun m => by rw [hcoeff, hone, smul_eq_mul, mul_one])
+  rw [heq, hG0] at hhs
+  exact hhs.tsum_eq.symm
 
 end
 

@@ -65,7 +65,15 @@
       (e) `mFourierCoeff_torusPeriodizationFun = 𝓕g(zpoint m)` assembling e1–e6 +
       `UnitAddTorus.mFourierCoeff_eq_integral` + `fourierIntegral_zpoint_eq`; (f) Poisson assembly
       via `hasSum_mFourier_series_apply_of_summable` at `0`.
-    - **P.2 STARTED ✓ (2026-07-01, `CompletedZeta/PoissonSummation.lean`, build green)**: file
+    - **P.2 DONE ✓✓ (2026-07-01, `CompletedZeta/PoissonSummation.lean`, sorry-free, build green,
+      all public decls axiom-clean)**: `tsum_eq_tsum_fourier_zpoint` — n-dim Poisson over `ℤ^ι` —
+      fully proven via the sub-decomposition above (e1–e6 + f all landed; key lemma
+      `mFourierCoeff_torusPeriodizationFun`). **Next: P.3 transport** to a general lattice
+      `L ⊂ EuclideanSpace ℝ ι` (pull back along the lattice-basis linear equiv; covolume factor
+      `|det|⁻¹` via `ZLattice.covolume_eq_det_mul_measureReal`; dual lattice on the 𝓕 side via
+      `dualZLattice` + `covolume_dualZLattice_mul` from P.1), then AGΘ Gaussian instantiation
+      (`fourier_gaussian_innerProductSpace` + `summable_gaussian_zlattice` discharge h_norm/h_sum).
+    - P.2 history (2026-07-01, `CompletedZeta/PoissonSummation.lean`): file
       created with `zpoint` (ℤ^ι ↪ EuclideanSpace, axiom-clean), `summable_gaussian_zlattice`
       (Gaussian `exp(-a‖x‖²)` summable over any lattice — DONE, axiom-clean: `ZLattice.summable_norm_rpow`
       dominated via `rexp_neg_quadratic_isLittleO_rpow_atTop` + finite sub-level sets from
