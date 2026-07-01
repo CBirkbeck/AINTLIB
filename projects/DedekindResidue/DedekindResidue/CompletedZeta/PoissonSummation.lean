@@ -469,6 +469,104 @@ theorem continuous_torusPeriodizationFun (g : C(EuclideanSpace ℝ ι, ℂ))
   rw [heq]
   exact (map_continuous _).comp (PiLp.continuous_toLp 2 _)
 
+omit [Fintype ι] in
+/-- The coordinatewise quotient to the torus kills integer shifts. -/
+theorem coe_add_intCast_eq (x : ι → ℝ) (n : ι → ℤ) :
+    (fun i => (((x + fun i => (n i : ℝ)) i : ℝ) : AddCircle (1 : ℝ)))
+      = (fun i => ((x i : ℝ) : AddCircle (1 : ℝ))) := by
+  funext i
+  simp only [Pi.add_apply]
+  rw [QuotientAddGroup.eq]
+  refine AddSubgroup.mem_zmultiples_iff.mpr ⟨-(n i), ?_⟩
+  simp [zsmul_eq_mul]
+
+/-- **The key coefficient identity** (n-dim analogue of `Real.fourierCoeff_tsum_comp_add`):
+the `m`-th torus Fourier coefficient of the periodization of `g` is the Fourier transform of
+`g` at the lattice point `m`. Proof: write the coefficient as a box integral, descend the
+periodization, swap sum and integral (dominated by the translate sup-norms), absorb the
+character into each translate by shift-invariance, reassemble the box tiling into `∫_{ℝ^ι}`,
+and identify the result via the `𝓕` bridge. -/
+theorem mFourierCoeff_torusPeriodizationFun (g : C(EuclideanSpace ℝ ι, ℂ)) (m : ι → ℤ)
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι),
+      Summable fun n : ι → ℤ => ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict K‖) :
+    UnitAddTorus.mFourierCoeff (torusPeriodizationFun ⇑g) m = 𝓕 (⇑g) (zpoint m) := by
+  classical
+  have hmeas : MeasurableSet {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1} :=
+    measurableSet_setOf.mpr (by measurability)
+  have hchar : Continuous (fun x : ι → ℝ =>
+      UnitAddTorus.mFourier (-m) (fun i => ((x i : ℝ) : AddCircle (1 : ℝ)))) :=
+    (map_continuous (UnitAddTorus.mFourier (-m))).comp
+      (continuous_pi (fun i => continuous_quotient_mk'.comp (continuous_apply i)))
+  have haesm : ∀ n : ι → ℤ, AEStronglyMeasurable
+      (fun x : ι → ℝ => (UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+        • g (WithLp.toLp 2 x + zpoint n))
+      ((volume : Measure (ι → ℝ)).restrict {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1}) :=
+    fun n => (Continuous.aestronglyMeasurable (hchar.smul
+      (((map_continuous g).comp (continuous_add_const (zpoint n))).comp
+        (PiLp.continuous_toLp 2 _)))).restrict
+  have hlintbound : ∀ n : ι → ℤ,
+      (∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖(UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+          • g (WithLp.toLp 2 x + zpoint n)‖ₑ)
+      ≤ ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+          (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ := by
+    intro n
+    have hle : ∀ x ∈ {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖(UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+          • g (WithLp.toLp 2 x + zpoint n)‖ₑ
+        ≤ ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+            (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ := by
+      intro x hx
+      rw [← ofReal_norm]
+      refine ENNReal.ofReal_le_ofReal ?_
+      rw [norm_smul, norm_mFourier_apply, one_mul]
+      exact norm_apply_le_restrict_unitBox g n (fun i => ⟨(hx i).1.le, (hx i).2⟩)
+    calc (∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+          ‖(UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+            • g (WithLp.toLp 2 x + zpoint n)‖ₑ)
+        ≤ ∫⁻ _x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+            ENNReal.ofReal ‖(g.comp (ContinuousMap.addRight (zpoint n))).restrict
+              (unitBoxCompacts (ι := ι) : Set (EuclideanSpace ℝ ι))‖ :=
+          setLIntegral_mono measurable_const hle
+      _ = _ := by rw [setLIntegral_const, volume_iocBox, mul_one]
+  have hlint : (∑' n : ι → ℤ,
+      ∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        ‖(UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+          • g (WithLp.toLp 2 x + zpoint n)‖ₑ) ≠ ⊤ := by
+    refine ne_top_of_le_ne_top ?_ (ENNReal.tsum_le_tsum hlintbound)
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => norm_nonneg _)
+      (h_norm (unitBoxCompacts (ι := ι)))]
+    exact ENNReal.ofReal_lt_top.ne
+  rw [UnitAddTorus.mFourierCoeff_eq_integral (torusPeriodizationFun ⇑g) m (fun _ => 0)]
+  simp only [zero_add]
+  rw [setIntegral_congr_fun hmeas (g := fun x : ι → ℝ =>
+      ∑' n : ι → ℤ, (UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+        • g (WithLp.toLp 2 x + zpoint n))
+    (fun x _ => by
+      rw [torusPeriodizationFun_coe]
+      show (UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+          • ∑' n : ι → ℤ, g (WithLp.toLp 2 x + zpoint n) = _
+      rw [smul_eq_mul, ← tsum_mul_left]
+      rfl)]
+  rw [MeasureTheory.integral_tsum haesm hlint]
+  have hterm : ∀ n : ι → ℤ,
+      (∫ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+        (UnitAddTorus.mFourier (-m) fun i => ((x i : ℝ) : AddCircle (1:ℝ)))
+          • g (WithLp.toLp 2 x + zpoint n))
+      = ∫ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
+          (fun y : ι → ℝ => (UnitAddTorus.mFourier (-m) fun i => ((y i : ℝ) : AddCircle (1:ℝ)))
+            • g (WithLp.toLp 2 y)) (x + fun i => (n i : ℝ)) := by
+    intro n
+    refine setIntegral_congr_fun hmeas (fun x _ => ?_)
+    show _ = (UnitAddTorus.mFourier (-m) fun i =>
+        (((x + fun i => (n i : ℝ)) i : ℝ) : AddCircle (1:ℝ)))
+      • g (WithLp.toLp 2 (x + fun i => (n i : ℝ)))
+    rw [coe_add_intCast_eq, toLp_add_intCast]
+  rw [tsum_congr hterm,
+    ← integral_eq_tsum_integral_iocBox _ (integrable_mFourier_smul_comp_toLp g m h_norm)]
+  rw [fourierIntegral_zpoint_eq]
+  rfl
+
 /-- **`n`-dimensional Poisson summation over `ℤ^ι`** (SP1-AGP P.2). For a continuous `g` on
 `EuclideanSpace ℝ ι` whose lattice translates are locally summable and whose Fourier transform
 is summable over `ℤ^ι`, `∑_{n} g(n) = ∑_{m} 𝓕g(m)`. Assembled from the multivariate torus
