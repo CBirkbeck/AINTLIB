@@ -3,9 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemma
+import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
 import LeanModularForms.HeckeRIngs.GL2.Newforms.Molteni
-import LeanModularForms.SMOObligations
+import LeanModularForms.StrongMultiplicityOne
 import Mathlib.NumberTheory.LSeries.PrimesInAP
 
 /-!

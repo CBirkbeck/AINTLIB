@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import LeanModularForms.Labels.Encoding
 import LeanModularForms.Labels.HeckeFieldArithmetic
 import LeanModularForms.Labels.HeckeAlgFiniteFinal
-import LeanModularForms.SMOObligations.StrongMultiplicityOneFull
+import LeanModularForms.StrongMultiplicityOne.ConstantMultiple
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 import Mathlib.NumberTheory.NumberField.Basic
 
@@ -42,7 +42,7 @@ which is manifestly orbit-invariant; this is the key we rank by.
 
 The labeling *machinery and its well-definedness reductions* are proved here sorry-free (in
 particular the label is provably **constant on Galois orbits**, and the single-form Strong
-Multiplicity One separation is discharged directly from `strongMultiplicityOne_axiom_clean`).
+Multiplicity One separation is discharged directly from `strongMultiplicityOne`).
 Moreover the finiteness of the space of newforms (`instFiniteNewform`) and the orbit-separation
 underlying label *injectivity* (`Newform.traceSeq_injOn_orbits`) are now **proved** here, both via
 the linear independence of distinct newforms (`linearIndependent_toCuspForm` /
@@ -87,7 +87,7 @@ structure built on it is real and sorry-free.
   (well-definedness, sorry-free).
 * `Newform.coeffSeq_injOn_charSpace` — **Strong Multiplicity One separation** (sorry-free): two
   newforms in the same Nebentypus eigenspace with equal coefficient sequences are equal.  This is
-  the single-form separation discharged directly from `strongMultiplicityOne_axiom_clean`.
+  the single-form separation discharged directly from `strongMultiplicityOne`.
 * `Newform.ext_of_toCuspForm` / `Newform.coeffSeq_injective` — **a newform is determined by its
   underlying form** (resp. its coefficient sequence): `f ↦ f.toCuspForm` and `coeffSeq` are
   injective on `Newform N k` (the character and ring eigenvalues are pinned by the nonzero form).
@@ -134,7 +134,7 @@ lemma coeffSeq_coprime_eq_eigenvalue (f : Newform N k) (n : ℕ+) (hn : Nat.Copr
 /-! ### Strong Multiplicity One: the single-form separation
 
 The genuine multiplicity-one payoff: within a fixed Nebentypus eigenspace, the coefficient
-sequence determines the newform.  Discharged directly from `strongMultiplicityOne_axiom_clean`,
+sequence determines the newform.  Discharged directly from `strongMultiplicityOne`,
 sorry-free, and independent of any finiteness; it is the foundation of the orbit-level separation
 used for label injectivity. -/
 
@@ -143,14 +143,14 @@ used for label injectivity. -/
 normalised Fourier coefficient sequence are equal (as cusp forms).
 
 This is the contrapositive of multiplicity one and is discharged directly from
-`strongMultiplicityOne_axiom_clean` (DS Thm 5.8.2 / Miyake Thm 4.6.8): equal coefficient sequences
+`strongMultiplicityOne` (DS Thm 5.8.2 / Miyake Thm 4.6.8): equal coefficient sequences
 give equal Hecke eigenvalues at every `n` coprime to `N` (with empty exceptional set), forcing
 `f = g`. -/
 lemma coeffSeq_injOn_charSpace {f g : Newform N k} (χ : (ZMod N)ˣ →* ℂˣ)
     (hfχ : f.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
     (hgχ : g.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
     (h : coeffSeq f = coeffSeq g) : f.toCuspForm = g.toCuspForm := by
-  refine strongMultiplicityOne_axiom_clean f g χ hfχ hgχ ∅ ?_
+  refine strongMultiplicityOne f g χ hfχ hgχ ∅ ?_
   intro n hn _
   rw [← coeffSeq_coprime_eq_eigenvalue f n hn χ hfχ,
     ← coeffSeq_coprime_eq_eigenvalue g n hn χ hgχ, h]
@@ -311,7 +311,7 @@ lemma petN_toCuspForm_eq_zero_of_ne {f g : Newform N k} (hfg : f ≠ g) :
     have : ∃ n : ℕ+, Nat.Coprime n.val N ∧ f.eigenvalue n ≠ g.eigenvalue n := by
       by_contra hcon
       push_neg at hcon
-      refine hfg (ext_of_toCuspForm (strongMultiplicityOne_axiom_clean f g g.χ
+      refine hfg (ext_of_toCuspForm (strongMultiplicityOne f g g.χ
         (hχ ▸ f.mem_charSpace) g.mem_charSpace ∅ fun n hn _ => hcon n hn))
     obtain ⟨n, hn, hne⟩ := this
     haveI : NeZero n.val := ⟨n.pos.ne'⟩

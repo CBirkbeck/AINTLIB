@@ -224,11 +224,11 @@ theorem rectangle_stokes_holAntihol {H a : ℂ → ℂ} {h a'der : ℂ → ℂ}
   have hFcont : ContinuousOn F ([[x₀, x₁]] ×ˢ [[y₀, y₁]]) := by
     rw [Set.uIcc_of_le hx, Set.uIcc_of_le hy, hF]
     refine ((hHc.mul hac).const_smul (-Complex.I)).congr (fun p _ => ?_)
-    simp only [Pi.mul_apply, smul_eq_mul]
+    rfl
   have hGcont : ContinuousOn G ([[x₀, x₁]] ×ˢ [[y₀, y₁]]) := by
     rw [Set.uIcc_of_le hx, Set.uIcc_of_le hy, hG]
     refine (hHc.mul hac).neg.congr (fun p _ => ?_)
-    simp only [Pi.mul_apply]
+    rfl
   -- The divergence is integrable: a.e. equal to `-2i·h·conj(a)` (interior is co-null in the box).
   have hIcc_ae : (Set.Icc x₀ x₁ ×ˢ Set.Icc y₀ y₁ : Set (ℝ × ℝ)) =ᵐ[volume]
       Set.Ioo x₀ x₁ ×ˢ Set.Ioo y₀ y₁ :=
@@ -1142,7 +1142,7 @@ theorem continuousOn_gXField_gYField (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : 
   refine ⟨?_, ?_⟩
   · unfold gXField
     exact (((hper.mul hconja).add (hFpc.mul hconjader)).const_smul (-Complex.I)).congr
-      (fun p _ => by simp only [smul_eq_mul, Pi.add_apply, Pi.mul_apply])
+      (fun p _ => rfl)
   · unfold gYField
     exact (((hper.mul continuousOn_const).mul hconja).add
       (hFpc.mul (hconjader.mul continuousOn_const))).neg
