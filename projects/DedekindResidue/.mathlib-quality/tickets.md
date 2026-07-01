@@ -5,7 +5,8 @@
   expands into leaf tickets via its own `/develop --decompose` pass (needs its reference).
 - Concrete near-term (SP-independent, actionable now): T001, T002, T003, T-ADM, T-BV.
 - Tier-3 spine (T010–T014): blocked on the epics.
-- Open near-term: 5 · Epics needing decomposition: 3 (SP1 w/ 8 sub-epics, SP2, SP3) · Blocked (tier-3 spine): 5
+- Done ✓: T001 (bSum), T002 (auxF API + measurability) — build green, axiom-clean.
+- Open near-term: 3 (T003 Lemma 2, T-ADM, T-BV) · Epics needing decomposition: 3 (SP1 w/ 8 sub-epics, SP2, SP3) · Blocked (tier-3 spine): 5
 - Expert-review adjustments folded in (2026-07-01): +SP1-AC, +SP1-N, +T-ADM, +T-BV; AGP
   Gaussian-first; AGE sealed unit-domain API; GRH dual-form. See `expert-review/2026-07-01/`.
 
@@ -86,7 +87,11 @@
 ## Concrete near-term tickets (actionable now — SP-independent)
 
 ### [T001] Define `bSum` (`B_K(X)`) — replace the stub
-- **Status**: open · **File**: `MainTheorem.lean` · **Depends on**: none · **Parallel**: yes · **Type**: def
+- **Status**: DONE ✓ (2026-07-01) · **File**: `MainTheorem.lean` · **Depends on**: none · **Parallel**: yes · **Type**: def
+- **Outcome**: `bSum` defined via nested `∑ᶠ` over `{p : Ideal (𝓞 K) // p.IsPrime ∧ p ≠ ⊥}`
+  and `m : ℕ`, guarded by `0 < m ∧ N𝔭^m < X`; finsum totality ⇒ no finiteness proof needed to
+  define. Build green, axiom-clean `{propext, Classical.choice, Quot.sound}`. (`fK` now
+  sorry-free too.) Finite-support / `Finset` reformulation deferred to when a proof needs it.
 #### Statement
 Replace `noncomputable def bSum (K) (X : ℝ) : ℝ := sorry` with Belabas–Friedman's `B_K(X)`
 (p. 2): the sum over prime ideals `𝔭 ⊆ 𝓞_K` and integers `m ≥ 1` with `N𝔭^m < X` of
@@ -109,7 +114,11 @@ Replace `noncomputable def bSum (K) (X : ℝ) : ℝ := sorry` with Belabas–Fri
 - General number field `K`; `X : ℝ`. Real-valued.
 
 ### [T002] Basic API for `gAux` / `auxF`
-- **Status**: open · **File**: `AuxiliaryFunction.lean` · **Depends on**: none · **Parallel**: yes · **Type**: lemma
+- **Status**: DONE ✓ (2026-07-01) · **File**: `AuxiliaryFunction.lean` · **Depends on**: none · **Parallel**: yes · **Type**: lemma
+- **Outcome**: `gAux_neg`, `auxF_neg` (evenness, `@[simp]`), `auxF_of_le` (plateau = 1),
+  `auxF_zero` (`X ≥ 1 → F(0)=1`), and `measurable_auxF` (`Measurable.ite` + `fun_prop`; the
+  break locus `|t|=log X` is `measurableSet_le`) — the measurability prerequisite T003 needs.
+  All build green + axiom-clean `{propext, Classical.choice, Quot.sound}`.
 #### Statement
 `auxF_of_le` (`|t| ≤ log X → auxF s X t = 1`), `auxF_even` (`auxF s X (-t) = auxF s X t`),
 `gAux_even`, `auxF_apply_zero` (`auxF s X 0 = 1` for `X ≥ 1`), and measurability/continuity

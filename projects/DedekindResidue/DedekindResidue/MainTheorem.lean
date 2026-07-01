@@ -22,10 +22,18 @@ namespace DedekindResidue
 open NumberField
 
 /-- `B_K(X) = Σ_{𝔭^m, N𝔭^m < X} (log N𝔭 / N𝔭^{m/2})·(√X·log X / (N𝔭^{m/2}·log N𝔭^m) − 1)`
-— Belabas–Friedman, p. 2. **Stub**: the prime-ideal-power sum indexing is designed in its
-own ticket. -/
+— Belabas–Friedman, p. 2. The sum ranges over nonzero prime ideals `𝔭 ⊆ 𝓞_K` and exponents
+`m ≥ 1` with `N𝔭^m < X`; written as a `finsum` (the support is finite, so no separate
+finiteness proof is needed to define it). Here `N𝔭 = Ideal.absNorm 𝔭` and `N𝔭^{m/2}` is the
+real power `Real.rpow`. -/
 noncomputable def bSum (K : Type*) [Field K] [NumberField K] (X : ℝ) : ℝ :=
-  sorry
+  ∑ᶠ (p : {p : Ideal (RingOfIntegers K) // p.IsPrime ∧ p ≠ ⊥}) (m : ℕ),
+    if 0 < m ∧ (Ideal.absNorm p.1 : ℝ) ^ m < X then
+      (Real.log (Ideal.absNorm p.1 : ℝ) / (Ideal.absNorm p.1 : ℝ) ^ ((m : ℝ) / 2)) *
+        (Real.sqrt X * Real.log X /
+            ((Ideal.absNorm p.1 : ℝ) ^ ((m : ℝ) / 2) *
+              Real.log ((Ideal.absNorm p.1 : ℝ) ^ m)) - 1)
+    else 0
 
 /-- `f_K(X) = 3·(B_K(X) − B_K(X/9)) / (2·√X·log(3X))` — Belabas–Friedman, p. 2: the
 computable approximation to `log κ_K` bounded in Theorem 1. -/

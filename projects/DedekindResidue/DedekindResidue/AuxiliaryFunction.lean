@@ -33,6 +33,30 @@ noncomputable def auxF (s : ℂ) (X t : ℝ) : ℂ :=
   else Complex.ofReal (Real.log X / |t|) *
     Complex.exp (-(s - 1 / 2) * Complex.ofReal (|t| - Real.log X))
 
+/-- `g_s` is even: `g_s(-t) = g_s(t)` — eq. (6) depends on `t` only through `|t|`. -/
+@[simp] theorem gAux_neg (s : ℂ) (t : ℝ) : gAux s (-t) = gAux s t := by
+  unfold gAux; rw [abs_neg]
+
+/-- `F_{s,X}` is even: `F(-t) = F(t)` — eqs. (11)–(12) depend on `t` only through `|t|`. -/
+@[simp] theorem auxF_neg (s : ℂ) (X t : ℝ) : auxF s X (-t) = auxF s X t := by
+  unfold auxF; rw [abs_neg]
+
+/-- On the plateau `|t| ≤ log X`, `F_{s,X}(t) = 1` — eq. (11). -/
+theorem auxF_of_le (s : ℂ) (X : ℝ) {t : ℝ} (h : |t| ≤ Real.log X) : auxF s X t = 1 := by
+  unfold auxF; exact if_pos h
+
+/-- `F_{s,X}(0) = 1` whenever `X ≥ 1` (so `log X ≥ 0`, putting `0` on the plateau). -/
+theorem auxF_zero (s : ℂ) {X : ℝ} (hX : 1 ≤ X) : auxF s X 0 = 1 :=
+  auxF_of_le s X (by rw [abs_zero]; exact Real.log_nonneg hX)
+
+/-- `F_{s,X}` is measurable (in fact continuous, but measurability is all the Lemma-2
+Fourier integral needs). The break locus `|t| = log X` is a measurable set. -/
+theorem measurable_auxF (s : ℂ) (X : ℝ) : Measurable (auxF s X) := by
+  unfold auxF
+  refine Measurable.ite ?_ measurable_const ?_
+  · exact measurableSet_le (by fun_prop) measurable_const
+  · fun_prop
+
 end
 
 end DedekindResidue
