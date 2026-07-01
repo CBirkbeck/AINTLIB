@@ -70,6 +70,25 @@ theorem dualZLattice_eq_span {ι : Type*} [Fintype ι] [DecidableEq ι]
   conv_lhs => rw [← b.ofZLatticeBasis_span ℝ]
   exact dualSubmodule_span_of_basis (innerₗ V) innerₗ_nondegenerate (b.ofZLatticeBasis ℝ)
 
+/-- The dual of a ℤ-lattice is discrete: it is the span of the dual basis' range. -/
+instance instDiscreteTopologyDualZLattice (L : Submodule ℤ V) [DiscreteTopology L]
+    [IsZLattice ℝ L] : DiscreteTopology (dualZLattice L) := by
+  classical
+  haveI := ZLattice.module_finite ℝ L
+  haveI := ZLattice.module_free ℝ L
+  rw [dualZLattice_eq_span L (Module.Free.chooseBasis ℤ L)]
+  infer_instance
+
+/-- The dual of a ℤ-lattice is again a ℤ-lattice: the dual basis spans `V` over `ℝ`. -/
+instance instIsZLatticeDualZLattice (L : Submodule ℤ V) [DiscreteTopology L] [IsZLattice ℝ L] :
+    IsZLattice ℝ (dualZLattice L) where
+  span_top := by
+    classical
+    haveI := ZLattice.module_finite ℝ L
+    haveI := ZLattice.module_free ℝ L
+    rw [dualZLattice_eq_span L (Module.Free.chooseBasis ℤ L)]
+    exact ZSpan.span_top _
+
 end
 
 end DedekindResidue
