@@ -73,7 +73,18 @@
       `|det|⁻¹` via `ZLattice.covolume_eq_det_mul_measureReal`; dual lattice on the 𝓕 side via
       `dualZLattice` + `covolume_dualZLattice_mul` from P.1), then AGΘ Gaussian instantiation
       (`fourier_gaussian_innerProductSpace` + `summable_gaussian_zlattice` discharge h_norm/h_sum).
-    - **P.3 leaf plan** (2026-07-01, footholds sig-verified): (P3a) `fourier_comp_linearEquiv`:
+    - **P.3 DONE ✓✓ (2026-07-01, `CompletedZeta/PoissonLattice.lean`, sorry-free, axiom-clean)**:
+      `tsum_eq_tsum_fourier_zlattice` — **Poisson over an arbitrary ℤ-lattice**
+      `∑'_{v∈L} g(v) = covol(L)⁻¹ • ∑'_{w∈L♯} 𝓕g(w)` — plus the GL Fourier change-of-variables
+      `fourier_comp_linearEquiv` (genuinely new vs mathlib's isometry-only case), P3b/c/d
+      identification lemmas, and the norm/summability transport helpers. **SP1-AGP is complete.**
+      Next epic: **SP1-AGΘ** (`CompletedZeta/ThetaLattice.lean`): (Θ1) sup-norm Gaussian translate
+      estimate on compacts; (Θ2) discharge h_norm for `g_t = cexp(-πt‖·‖²)` via
+      `summable_gaussian_zlattice`; (Θ3) `𝓕 g_t` via mathlib `fourier_gaussian_innerProductSpace`
+      (b := πt ⇒ `𝓕g_t(w) = t^{-n/2} cexp(-π‖w‖²/t)`); (Θ4) the transformation law
+      `Θ_L(t) = t^{-n/2} covol(L)⁻¹ Θ_{L♯}(1/t)` for `t > 0` (+ `covolume_dualZLattice_mul` to
+      flip L↔L♯).
+    - P.3 leaf plan history (2026-07-01, footholds sig-verified): (P3a) `fourier_comp_linearEquiv`:
       `𝓕(g∘T) w = |det T|⁻¹ • 𝓕 g (adjoint T.symm w)` for `T : EuclideanSpace ≃ₗ[ℝ] EuclideanSpace`
       — via `T.toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv`, `integral_map_equiv`,
       `Measure.map_linearMap_addHaar_eq_smul_addHaar` (det ≠ 0 from `LinearEquiv.isUnit_det'`),

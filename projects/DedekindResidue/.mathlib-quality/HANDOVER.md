@@ -12,7 +12,13 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-**UPDATE 2026-07-01 (later): P.2 IS DONE.** `tsum_eq_tsum_fourier_zpoint` (n-dim Poisson over
+**UPDATE 2026-07-01 (latest): P.3 IS ALSO DONE — SP1-AGP COMPLETE.** `PoissonLattice.lean`
+(sorry-free, axiom-clean) has `tsum_eq_tsum_fourier_zlattice` (Poisson over an arbitrary
+ℤ-lattice, covolume factor + dual lattice) and `fourier_comp_linearEquiv` (GL change of
+variables for 𝓕). Frontier: **SP1-AGΘ** — Gaussian theta + transformation law; leaf plan in
+the SP1-AGP ticket ("Next epic: SP1-AGΘ"). Everything below about P.2 is history.
+
+**UPDATE 2026-07-01 (earlier): P.2 IS DONE.** `tsum_eq_tsum_fourier_zpoint` (n-dim Poisson over
 `ℤ^ι`) is fully proven, sorry-free, axiom-clean — `PoissonSummation.lean` builds with zero
 warnings. The §4 leaf plan below was executed exactly as written (all of e1–e6 + f landed).
 The live frontier is now **P.3 (transport to a general lattice)** then **AGΘ (Gaussian theta +

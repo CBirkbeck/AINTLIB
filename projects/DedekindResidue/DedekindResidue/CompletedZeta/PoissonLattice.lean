@@ -17,7 +17,7 @@ lattice to `L`. The Fourier side transforms by the **`GL` change-of-variables la
 ## Main results (this file)
 * `DedekindResidue.fourier_comp_linearEquiv` —
   `𝓕(g ∘ T) w = |det T|⁻¹ • 𝓕 g ((T⁻¹)^* w)` for `T ∈ GL(EuclideanSpace ℝ ι)`.
-* (in progress) `DedekindResidue.tsum_eq_tsum_fourier_zlattice` — Poisson over `L`:
+* `DedekindResidue.tsum_eq_tsum_fourier_zlattice` — **Poisson summation over a `ℤ`-lattice**:
   `∑'_{v ∈ L} g(v) = covol(L)⁻¹ • ∑'_{w ∈ L♯} 𝓕g(w)`.
 -/
 
@@ -292,6 +292,66 @@ theorem tsum_fourier_zpoint_of_equiv {L : Submodule ℤ (EuclideanSpace ℝ ι)}
     rw [hcoe, fourier_comp_linearEquiv T (⇑g) (zpoint m), hadj m]
   rw [tsum_congr h𝓕, tsum_const_smul'',
     eD.tsum_eq (f := fun w : dualZLattice L => 𝓕 (⇑g) (w : EuclideanSpace ℝ ι))]
+
+open LinearMap.BilinForm in
+/-- **Poisson summation over a `ℤ`-lattice** (SP1-AGP P.3). For a `ℤ`-lattice
+`L ⊂ EuclideanSpace ℝ ι` and continuous `g` whose `L`-translates are locally summable and
+whose Fourier transform is summable over the dual lattice `L♯`,
+
+`∑'_{v ∈ L} g(v) = covol(L)⁻¹ · ∑'_{w ∈ L♯} 𝓕g(w)`.
+
+Proof: conjugate the `ℤ^ι` formula by the lattice-basis change of variables `T`; the sum side
+reindexes by `latticeEquiv_zpoint`, the Fourier side by `fourier_comp_linearEquiv` +
+`adjoint_symm_latticeEquiv_zpoint` (the inverse-adjoint carries `ℤ^ι` onto `L♯`), and
+`|det T| = covol(L)` by `abs_det_latticeEquiv`. -/
+theorem tsum_eq_tsum_fourier_zlattice (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L] {g : C(EuclideanSpace ℝ ι, ℂ)}
+    (h_norm : ∀ K : Compacts (EuclideanSpace ℝ ι),
+        Summable fun v : L =>
+          ‖(g.comp (ContinuousMap.addRight (v : EuclideanSpace ℝ ι))).restrict (K : Set _)‖)
+    (h_sum : Summable fun w : dualZLattice L => 𝓕 (⇑g) (w : EuclideanSpace ℝ ι)) :
+    ∑' v : L, g (v : EuclideanSpace ℝ ι)
+      = (ZLattice.covolume L volume)⁻¹
+        • ∑' w : dualZLattice L, 𝓕 (⇑g) (w : EuclideanSpace ℝ ι) := by
+  classical
+  haveI := ZLattice.module_finite ℝ L
+  haveI := ZLattice.module_free ℝ L
+  have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
+    rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
+  set b : Module.Basis ι ℤ ↥L :=
+    (Module.Free.chooseBasis ℤ L).reindex (Fintype.equivOfCardEq hcard) with hb
+  set c : Module.Basis ι ℝ (EuclideanSpace ℝ ι) := b.ofZLatticeBasis ℝ with hc
+  set d := dualBasis (innerₗ (EuclideanSpace ℝ ι)) innerₗ_nondegenerate c with hd
+  set T := ((EuclideanSpace.basisFun ι ℝ).toBasis.equiv c (Equiv.refl ι)) with hT
+  have hTcont : Continuous ⇑T :=
+    LinearMap.continuous_of_finiteDimensional (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)
+  set eL : (ι → ℤ) ≃ L := b.equivFun.symm.toEquiv with heL
+  have hTz : ∀ n : ι → ℤ, T (zpoint n) = ((eL n : L) : EuclideanSpace ℝ ι) :=
+    fun n => latticeEquiv_zpoint L b n
+  have hlinind : LinearIndependent ℤ ⇑d :=
+    d.linearIndependent.restrict_scalars (by simpa using Int.cast_injective)
+  have hspan : Submodule.span ℤ (Set.range ⇑d) = dualZLattice L :=
+    (dualZLattice_eq_span L b).symm
+  set bs : Module.Basis ι ℤ (Submodule.span ℤ (Set.range ⇑d)) :=
+    Module.Basis.span hlinind with hbs
+  set eD : (ι → ℤ) ≃ dualZLattice L :=
+    (bs.equivFun.symm.toEquiv).trans (LinearEquiv.ofEq _ _ hspan).toEquiv with heD
+  have hadj : ∀ m : ι → ℤ, LinearMap.adjoint
+      ((T.symm : EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
+        EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) (zpoint m)
+      = ((eD m : dualZLattice L) : EuclideanSpace ℝ ι) := by
+    intro m
+    rw [adjoint_symm_latticeEquiv_zpoint L b m]
+    show _ = ((LinearEquiv.ofEq _ _ hspan) (bs.equivFun.symm m) : EuclideanSpace ℝ ι)
+    rw [LinearEquiv.coe_ofEq_apply, Module.Basis.equivFun_symm_apply, Submodule.coe_sum]
+    refine (Finset.sum_congr rfl (fun i _ => ?_)).symm
+    rw [AddSubgroupClass.coe_zsmul, hbs, Module.Basis.span_apply, Int.cast_smul_eq_zsmul ℝ]
+  have h_norm' := fun K => summable_norm_comp_addRight_zpoint T hTcont eL hTz h_norm K
+  have h_sum' := summable_fourier_zpoint_of_equiv T hTcont eD hadj h_sum
+  have hmain := tsum_eq_tsum_fourier_zpoint (g := g.comp ⟨⇑T, hTcont⟩) h_norm' h_sum'
+  rw [tsum_comp_zpoint_of_equiv T hTcont eL hTz g,
+    tsum_fourier_zpoint_of_equiv T hTcont eD hadj g, abs_det_latticeEquiv L b] at hmain
+  exact hmain
 
 end
 
