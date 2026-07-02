@@ -1,5 +1,52 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-02 session (Fable, leg 4): SP1-AC COMPLETE — A0 through A6 all landed
+
+**The entire analytic-control epic is done, axiom-clean, pushed (through the digamma
+commit).** `AnalyticControl.lean` now ends with the two SP2 workhorses:
+
+- **AC-A5 ✅ `exists_logDeriv_partial_fractions`**: for `|T| ≥ A+5`, `s` in the slab ball
+  `closedBall (A+iT) (A+5/4)` (contains `-1 ≤ Re ≤ 2`, `|Im−T| ≤ 1`), `H s ≠ 0`:
+  `‖H'/H(s) − ∑ᶠ_ρ m_ρ/(s−ρ)‖ ≤ C·log(2+|T|)` — zeros = divisor of `H` on
+  `ball (A+iT) (A+2)`. Proof chain (all in AnalyticControl.lean, in order):
+  `exists_H_ball_factorization` (single-ball peel, extract_zeros_poles + codiscrete→EqOn
+  upgrade `eqOn_of_eventuallyEq_codiscreteWithin`), `exists_H_two_radius_factorization`
+  (divisor split `D₂ = D₁ + dA`, `zpow_add'` per-factor, cofactor analytic on the BIG
+  ball), `exists_H_ball_sup_big` (sup at radius A+3; third regime Re < −1 via FE
+  reflection), `exists_ball_zero_count_big` (Jensen at (A+2, A+3), parametric in A),
+  `norm_logDeriv_le_of_norm_le` (GENERIC Landau lemma: holomorphic log on convex ball +
+  recentered borelCaratheodory_zero + Schwarz norm_deriv_le_div_of_mapsTo_ball;
+  `‖h'/h‖ ≤ 32r(log(mS/mL)+1)` on `closedBall c (r−3/4)`), `exists_H_landau_cofactor`
+  (assembly: max principle on the A+5/2 sphere, peel ≥ (1/2)^D, center (A+2)^D,
+  envelope `e^{−n_Kπ|T|/4}` cancels in the ratio), and the logDeriv unwind
+  (`logDeriv_mul`/`logDeriv_prod`/`logDeriv_fun_zpow`; peel product ↦ exactly the
+  partial-fraction finsum).
+- **AC-A6 ✅ `exists_norm_digamma_le`**: `‖digamma(σ+it)‖ ≤ C log(2+|t|)` on
+  `-1 ≤ σ ≤ 2`, `|t| ≥ 2`. Via `digamma = logDeriv Gamma` (rfl) + the SAME generic
+  Landau lemma on unit balls, fed by `exists_norm_Gamma_le_window` (σ ∈ [−2,3] upper;
+  downward recurrence `norm_Gamma_eq_norm_Gamma_add_one_div`) and
+  `exists_le_norm_Gamma_window` (σ ∈ [−1,2] lower, `c·e^{−π|t|/2}/(1+|t|)³`).
+- Also landed en route: `re_le_of_forall_mem_frontier_re_le` (Re max principle).
+
+**Lean-technique notes for this leg**: `MeromorphicOn.AnalyticOnNhd.divisor_nonneg`
+(nested namespace!); `Pi.smul_apply'` for `(f • g) z` with function-valued `f`;
+`hfin.mem_toFinset` beats `rw [Set.Finite.mem_toFinset]` after `set F := hfin.toFinset`;
+`ring` CANNOT prove `a/(1+x)^3 = ((a/(1+x))/(1+x))/(1+x)` (inverse-of-sum) — use
+`rw [show (1+x)^3 = (1+x)*(1+x)*(1+x) by ring, ← div_div, ← div_div]`;
+`Int.toNat_natCast` after rewriting `D u = ((D u).toNat : ℤ)`; positivity can't see
+`0 < ‖w‖` (provide `norm_pos_iff.mpr` + `mul_pos`); `finsum_eq_sum_of_support_subset`
+for statement-level finsums; `Filter.EventuallyEq.eq_of_nhds` + `.deriv_eq` for logDeriv
+congruence; `div_le_div_of_nonneg_left (ha) (hb : 0 < b) (h : b ≤ c) : a/c ≤ a/b`.
+
+**NEXT: SP2 — the explicit formula** (task #17). Plan first (`decomposition-sp2.md`):
+reread paper pp. 3–4 (eq (1)–(3) + hypotheses = `IsAdmissibleTestFn` verbatim) and the
+Poitou scheme; contour of `−Λ'/Λ·F̂`-pairing over expanding rectangles with heights from
+A4 counting, horizontal segments by A5, Γ-side by A6, prime side by
+`Chebotarev.dedekindZeta_eq_tprod_primeIdeal` (projects/Chebotarev/CebotarevDensity/
+NumberFieldEulerProduct.lean:808), F-side by `fourier_auxF` (Lemma 2, landed).
+Zero-sum = `lim_{R→∞} ∑_{|Im ρ|<R}` per paper p.3.
+
+
 ## 2026-07-02 session (Fable): T003 + T-BV + T-ADM COMPLETE — Lemma 2 fully proven
 
 - **Lemma 2 done** (`Lemma2.lean`, sorry-free, axiom-clean): `fourier_auxF` (eq (8) verbatim
