@@ -1131,4 +1131,297 @@ theorem tendsto_integral_dirichlet_plateau {δ : ℝ} (hδ : 0 < δ) :
   push_cast
   ring
 
+/-- **Jordan's Fourier inversion criterion, Dirichlet-kernel form** (SP2-FJ-a/g; Poitou
+p. 6-03): for integrable `H` whose real and imaginary parts have bounded variation, with
+one-sided limits `Hp` (from the right) and `Hm` (from the left) at `0`,
+
+`∫_ℝ H(u) · 2sin(Tu)/u du  →  π(Hp + Hm)`  as `T → ∞`.
+
+The proof splits the line at `±δ`: the far part vanishes by Riemann–Lebesgue, the plateau
+contributes `π·(Hp + Hm)`, and the near-zero remainders are bounded — uniformly in `T` —
+by the Stieltjes window constant times the monotone increments, which vanish as `δ → 0+`. -/
+theorem tendsto_integral_dirichlet_jordan {H : ℝ → ℂ} (hH : Integrable H)
+    (hre : LocallyBoundedVariationOn (fun u => (H u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u => (H u).im) Set.univ)
+    {Hp Hm : ℂ}
+    (hp : Tendsto H (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp))
+    (hm : Tendsto H (nhdsWithin 0 (Set.Iio 0)) (nhds Hm)) :
+    Tendsto (fun T : ℝ => ∫ u : ℝ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      atTop (nhds (((π : ℝ) : ℂ) * (Hp + Hm))) := by
+  classical
+  -- monotone decompositions of the real and imaginary parts
+  obtain ⟨p, q, hpm', hqm', hpq⟩ := hre.exists_monotoneOn_sub_monotoneOn
+  obtain ⟨r, s, hrm', hsm', hrs⟩ := him.exists_monotoneOn_sub_monotoneOn
+  rw [monotoneOn_univ] at hpm' hqm' hrm' hsm'
+  have hre_pt : ∀ u, (H u).re = p u - q u := fun u => by
+    have := congrFun hpq u
+    simpa using this
+  have him_pt : ∀ u, (H u).im = r u - s u := fun u => by
+    have := congrFun hrs u
+    simpa using this
+  -- reflected decompositions for the left side
+  set p' : ℝ → ℝ := fun u => -(q (-u)) with hp'def
+  set q' : ℝ → ℝ := fun u => -(p (-u)) with hq'def
+  set r' : ℝ → ℝ := fun u => -(s (-u)) with hr'def
+  set s' : ℝ → ℝ := fun u => -(r (-u)) with hs'def
+  have hp'm : Monotone p' := fun a b hab => by
+    simp only [hp'def, neg_le_neg_iff]
+    exact hqm' (neg_le_neg hab)
+  have hq'm : Monotone q' := fun a b hab => by
+    simp only [hq'def, neg_le_neg_iff]
+    exact hpm' (neg_le_neg hab)
+  have hr'm : Monotone r' := fun a b hab => by
+    simp only [hr'def, neg_le_neg_iff]
+    exact hsm' (neg_le_neg hab)
+  have hs'm : Monotone s' := fun a b hab => by
+    simp only [hs'def, neg_le_neg_iff]
+    exact hrm' (neg_le_neg hab)
+  have hre'_pt : ∀ u, (H (-u)).re = p' u - q' u := fun u => by
+    rw [hre_pt (-u), hp'def, hq'def]
+    ring
+  have him'_pt : ∀ u, (H (-u)).im = r' u - s' u := fun u => by
+    rw [him_pt (-u), hr'def, hs'def]
+    ring
+  -- one-sided limit identities via right limits of the monotone parts
+  have hHp_re : Hp.re = Function.rightLim p 0 - Function.rightLim q 0 := by
+    have h1 : Tendsto (fun u => (H u).re) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp.re) :=
+      (Complex.continuous_re.tendsto Hp).comp hp
+    have h2 : Tendsto (fun u => p u - q u) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds (Function.rightLim p 0 - Function.rightLim q 0)) :=
+      (hpm'.tendsto_rightLim 0).sub (hqm'.tendsto_rightLim 0)
+    have h3 : (fun u => (H u).re) = fun u => p u - q u := funext hre_pt
+    rw [h3] at h1
+    exact tendsto_nhds_unique h1 h2
+  have hHp_im : Hp.im = Function.rightLim r 0 - Function.rightLim s 0 := by
+    have h1 : Tendsto (fun u => (H u).im) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp.im) :=
+      (Complex.continuous_im.tendsto Hp).comp hp
+    have h2 : Tendsto (fun u => r u - s u) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds (Function.rightLim r 0 - Function.rightLim s 0)) :=
+      (hrm'.tendsto_rightLim 0).sub (hsm'.tendsto_rightLim 0)
+    have h3 : (fun u => (H u).im) = fun u => r u - s u := funext him_pt
+    rw [h3] at h1
+    exact tendsto_nhds_unique h1 h2
+  -- the reflected function tends to Hm from the right
+  have hneg_tendsto : Tendsto (fun u : ℝ => -u)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhdsWithin 0 (Set.Iio 0)) := by
+    refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
+    · have h0 := continuous_neg.tendsto (0:ℝ)
+      simp only [neg_zero] at h0
+      exact h0.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with u hu
+      simpa using hu
+  have hm' : Tendsto (fun u => H (-u)) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hm) :=
+    hm.comp hneg_tendsto
+  have hHm_re : Hm.re = Function.rightLim p' 0 - Function.rightLim q' 0 := by
+    have h1 : Tendsto (fun u => (H (-u)).re) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hm.re) :=
+      (Complex.continuous_re.tendsto Hm).comp hm'
+    have h2 : Tendsto (fun u => p' u - q' u) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds (Function.rightLim p' 0 - Function.rightLim q' 0)) :=
+      (hp'm.tendsto_rightLim 0).sub (hq'm.tendsto_rightLim 0)
+    have h3 : (fun u => (H (-u)).re) = fun u => p' u - q' u := funext hre'_pt
+    rw [h3] at h1
+    exact tendsto_nhds_unique h1 h2
+  have hHm_im : Hm.im = Function.rightLim r' 0 - Function.rightLim s' 0 := by
+    have h1 : Tendsto (fun u => (H (-u)).im) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hm.im) :=
+      (Complex.continuous_im.tendsto Hm).comp hm'
+    have h2 : Tendsto (fun u => r' u - s' u) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds (Function.rightLim r' 0 - Function.rightLim s' 0)) :=
+      (hr'm.tendsto_rightLim 0).sub (hs'm.tendsto_rightLim 0)
+    have h3 : (fun u => (H (-u)).im) = fun u => r' u - s' u := funext him'_pt
+    rw [h3] at h1
+    exact tendsto_nhds_unique h1 h2
+  -- window constant
+  obtain ⟨Cw, hCwpos, hCw⟩ := exists_bound_dirichlet_window
+  -- reflected function integrability
+  have hHneg : Integrable (fun u : ℝ => H (-u)) := by
+    have := (Measure.measurePreserving_neg (volume : Measure ℝ)).integrable_comp_of_integrable hH
+    exact this
+  -- the ε-argument
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  -- choose δ with all eight increments small
+  have hVR : Tendsto (fun δ : ℝ =>
+      Cw * ((Function.rightLim p δ - Function.rightLim p 0)
+          + (Function.rightLim q δ - Function.rightLim q 0))
+        + Cw * ((Function.rightLim r δ - Function.rightLim r 0)
+          + (Function.rightLim s δ - Function.rightLim s 0)))
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h0 := (((tendsto_rightLim_sub_rightLim hpm').add
+      (tendsto_rightLim_sub_rightLim hqm')).const_mul Cw).add
+      (((tendsto_rightLim_sub_rightLim hrm').add
+        (tendsto_rightLim_sub_rightLim hsm')).const_mul Cw)
+    simpa using h0
+  have hVL : Tendsto (fun δ : ℝ =>
+      Cw * ((Function.rightLim p' δ - Function.rightLim p' 0)
+          + (Function.rightLim q' δ - Function.rightLim q' 0))
+        + Cw * ((Function.rightLim r' δ - Function.rightLim r' 0)
+          + (Function.rightLim s' δ - Function.rightLim s' 0)))
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h0 := (((tendsto_rightLim_sub_rightLim hp'm).add
+      (tendsto_rightLim_sub_rightLim hq'm)).const_mul Cw).add
+      (((tendsto_rightLim_sub_rightLim hr'm).add
+        (tendsto_rightLim_sub_rightLim hs'm)).const_mul Cw)
+    simpa using h0
+  have hδex : ∃ δ : ℝ, δ ∈ Set.Ioi (0:ℝ)
+      ∧ (Cw * ((Function.rightLim p δ - Function.rightLim p 0)
+          + (Function.rightLim q δ - Function.rightLim q 0))
+        + Cw * ((Function.rightLim r δ - Function.rightLim r 0)
+          + (Function.rightLim s δ - Function.rightLim s 0)) < ε/4)
+      ∧ (Cw * ((Function.rightLim p' δ - Function.rightLim p' 0)
+          + (Function.rightLim q' δ - Function.rightLim q' 0))
+        + Cw * ((Function.rightLim r' δ - Function.rightLim r' 0)
+          + (Function.rightLim s' δ - Function.rightLim s' 0)) < ε/4) := by
+    have h1 := hVR.eventually (eventually_lt_nhds (show (0:ℝ) < ε/4 by linarith))
+    have h2 := hVL.eventually (eventually_lt_nhds (show (0:ℝ) < ε/4 by linarith))
+    exact (eventually_mem_nhdsWithin.and (h1.and h2)).exists.imp
+      (fun δ h => ⟨h.1, h.2.1, h.2.2⟩)
+  obtain ⟨δ, hδpos, hδR, hδL⟩ := hδex
+  rw [Set.mem_Ioi] at hδpos
+  -- T-eventualities: far part and plateau
+  have hfar := tendsto_integral_dirichlet_far hH hδpos
+  have hplat := tendsto_integral_dirichlet_plateau hδpos
+  have hfar_ev : ∀ᶠ T in atTop, ‖∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+      H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖ < ε/4 := by
+    have h1 := hfar.norm
+    simp only [norm_zero] at h1
+    exact h1.eventually (eventually_lt_nhds (show (0:ℝ) < ε/4 by linarith))
+  have hplat_ev : ∀ᶠ T in atTop,
+      ‖(∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ)) - ((π : ℝ) : ℂ)‖
+        < ε / (4 * (‖Hp + Hm‖ + 1)) := by
+    have h1 := (hplat.sub_const ((π : ℝ) : ℂ)).norm
+    simp only [sub_self, norm_zero] at h1
+    refine h1.eventually (eventually_lt_nhds ?_)
+    have : (0:ℝ) < ‖Hp + Hm‖ + 1 := by positivity
+    positivity
+  obtain ⟨T₀, hT₀⟩ := Filter.eventually_atTop.mp
+    ((hfar_ev.and hplat_ev).and (Filter.eventually_gt_atTop 0))
+  refine ⟨T₀, fun T hT => ?_⟩
+  obtain ⟨⟨hfarT, hplatT⟩, hTpos⟩ := hT₀ T hT
+  -- window bound at this T
+  have hwinT : ∀ v ∈ Set.Icc (0:ℝ) δ, |∫ u in v..δ, 2 * Real.sin (T * u) / u| ≤ Cw :=
+    fun v hv => hCw T v δ hTpos hv.1 hδpos.le
+  -- near-window integrabilities
+  have hHIoc : IntegrableOn H (Set.Ioc 0 δ) := hH.integrableOn
+  have hHnegIoc : IntegrableOn (fun u : ℝ => H (-u)) (Set.Ioc 0 δ) := hHneg.integrableOn
+  have hconstIoc : ∀ c : ℂ, IntegrableOn (fun _ : ℝ => c) (Set.Ioc 0 δ) := fun c =>
+    MeasureTheory.integrableOn_const (by
+      rw [Real.volume_Ioc]
+      exact ENNReal.ofReal_ne_top)
+  -- split off the constants on both near windows
+  have hIright : (∫ u in (0:ℝ)..δ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      = Hp * (∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + ∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+    have h1 : (∫ u in (0:ℝ)..δ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        = (∫ u in (0:ℝ)..δ, Hp * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+          + ∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+      have hsubR : IntegrableOn (fun u : ℝ => H u - Hp) (Set.Ioc 0 δ) :=
+        hHIoc.sub (hconstIoc Hp)
+      rw [← intervalIntegral.integral_add
+        (intervalIntegrable_mul_dirichlet hδpos T (hconstIoc Hp))
+        (intervalIntegrable_mul_dirichlet hδpos T hsubR)]
+      refine intervalIntegral.integral_congr (fun u _ => ?_)
+      ring
+    rw [h1, intervalIntegral.integral_const_mul]
+  have hIleft : (∫ u in (0:ℝ)..δ, H (-u) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      = Hm * (∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + ∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+    have h1 : (∫ u in (0:ℝ)..δ, H (-u) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        = (∫ u in (0:ℝ)..δ, Hm * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+          + ∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+      have hsubL : IntegrableOn (fun u : ℝ => H (-u) - Hm) (Set.Ioc 0 δ) :=
+        hHnegIoc.sub (hconstIoc Hm)
+      rw [← intervalIntegral.integral_add
+        (intervalIntegrable_mul_dirichlet hδpos T (hconstIoc Hm))
+        (intervalIntegrable_mul_dirichlet hδpos T hsubL)]
+      refine intervalIntegral.integral_congr (fun u _ => ?_)
+      ring
+    rw [h1, intervalIntegral.integral_const_mul]
+  -- the two remainder bounds (uniform in T)
+  have hRright : ‖∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+      ≤ Cw * ((Function.rightLim p δ - Function.rightLim p 0)
+            + (Function.rightLim q δ - Function.rightLim q 0))
+        + Cw * ((Function.rightLim r δ - Function.rightLim r 0)
+            + (Function.rightLim s δ - Function.rightLim s 0)) :=
+    norm_integral_sub_rightLim_kernel_le hpm' hqm' hrm' hsm' hre_pt him_pt
+      hHp_re hHp_im hδpos hHIoc hwinT
+  have hRleft : ‖∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+      ≤ Cw * ((Function.rightLim p' δ - Function.rightLim p' 0)
+            + (Function.rightLim q' δ - Function.rightLim q' 0))
+        + Cw * ((Function.rightLim r' δ - Function.rightLim r' 0)
+            + (Function.rightLim s' δ - Function.rightLim s' 0)) :=
+    norm_integral_sub_rightLim_kernel_le hp'm hq'm hr'm hs'm hre'_pt him'_pt
+      hHm_re hHm_im hδpos hHnegIoc hwinT
+  -- the exact decomposition of the difference
+  have hXY : (∫ u : ℝ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        - ((π : ℝ) : ℂ) * (Hp + Hm)
+      = (∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+            H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + (Hp + Hm) * ((∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+            - ((π : ℝ) : ℂ))
+        + (∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + ∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+    rw [integral_dirichlet_split hH hδpos T, hIright, hIleft]
+    ring
+  rw [dist_eq_norm, hXY]
+  -- bound the four pieces
+  have hplat_piece : ‖(Hp + Hm) * ((∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      - ((π : ℝ) : ℂ))‖ < ε/4 := by
+    rw [norm_mul]
+    have h1 : ‖Hp + Hm‖ * ‖(∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        - ((π : ℝ) : ℂ)‖ ≤ ‖Hp + Hm‖ * (ε / (4 * (‖Hp + Hm‖ + 1))) :=
+      mul_le_mul_of_nonneg_left hplatT.le (norm_nonneg _)
+    refine lt_of_le_of_lt h1 ?_
+    have hN1 : (0:ℝ) < ‖Hp + Hm‖ + 1 := by positivity
+    rw [show ‖Hp + Hm‖ * (ε / (4 * (‖Hp + Hm‖ + 1)))
+        = (‖Hp + Hm‖ / (‖Hp + Hm‖ + 1)) * (ε / 4) by
+      field_simp]
+    have h2 : ‖Hp + Hm‖ / (‖Hp + Hm‖ + 1) < 1 := by
+      rw [div_lt_one hN1]
+      linarith
+    exact mul_lt_of_lt_one_left (by linarith) h2
+  have tri : ∀ a b c d : ℂ, ‖a + b + c + d‖ ≤ ‖a‖ + ‖b‖ + ‖c‖ + ‖d‖ := by
+    intro a b c d
+    have h1 : ‖a + b + c + d‖ ≤ ‖a + b + c‖ + ‖d‖ := norm_add_le _ _
+    have h2 : ‖a + b + c‖ ≤ ‖a + b‖ + ‖c‖ := norm_add_le _ _
+    have h3 : ‖a + b‖ ≤ ‖a‖ + ‖b‖ := norm_add_le _ _
+    linarith
+  calc ‖(∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+            H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + (Hp + Hm) * ((∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+            - ((π : ℝ) : ℂ))
+        + (∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + ∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+      ≤ ‖∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+            H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+        + ‖(Hp + Hm) * ((∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+            - ((π : ℝ) : ℂ))‖
+        + ‖∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+        + ‖∫ u in (0:ℝ)..δ, (H (-u) - Hm) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖ :=
+        tri _ _ _ _
+    _ < ε/4 + ε/4 + ε/4 + ε/4 := by
+        refine add_lt_add_of_lt_of_le (add_lt_add_of_lt_of_le
+          (add_lt_add_of_lt_of_lt hfarT hplat_piece) (hRright.trans hδR.le)) (hRleft.trans hδL.le)
+    _ = ε := by ring
+
+/-- **Jordan's Fourier inversion, symmetric-window form** (SP2-FJ-a; Poitou p. 6-03): for
+integrable `H` of bounded variation with one-sided limits `Hp`, `Hm` at `0`,
+
+`∫_{-T}^{T} (∫_ℝ H(u) e^{itu} du) dt  →  π(Hp + Hm)`  as `T → ∞`.
+
+With the jump-mean normalisation `H(0) = (Hp + Hm)/2` the right side is `2π·H(0)` —
+Poitou's form of the réciprocité de Fourier "sous la forme de Jordan". -/
+theorem tendsto_fourier_window_jordan {H : ℝ → ℂ} (hH : Integrable H)
+    (hre : LocallyBoundedVariationOn (fun u => (H u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u => (H u).im) Set.univ)
+    {Hp Hm : ℂ}
+    (hp : Tendsto H (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp))
+    (hm : Tendsto H (nhdsWithin 0 (Set.Iio 0)) (nhds Hm)) :
+    Tendsto (fun T : ℝ => ∫ t : ℝ in (-T)..T,
+        ∫ u : ℝ, H u * Complex.exp ((t : ℂ) * (u : ℂ) * Complex.I))
+      atTop (nhds (((π : ℝ) : ℂ) * (Hp + Hm))) := by
+  have h1 := tendsto_integral_dirichlet_jordan hH hre him hp hm
+  refine h1.congr' ?_
+  filter_upwards [Filter.eventually_gt_atTop 0] with T hT
+  exact (integral_fourier_window_collapse hH hT).symm
+
 end DedekindResidue
