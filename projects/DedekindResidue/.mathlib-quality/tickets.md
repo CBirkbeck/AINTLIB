@@ -243,6 +243,33 @@
          `f₀ = g₀ = h·w⁻¹·vol(unit box)` (the `0 ∈ L` terms). Remaining analytic inputs:
          `hf_int` (LocallyIntegrableOn `Ioi 0`) + `hf_top` (rapid decay of `g_I(t) − g∞`,
          lattice tail estimate from `norm_weightedGaussianCM_le`).
+         **STEPS 1–3 + ALL ANALYTIC INPUTS DONE ✓ (2026-07-02/03, `ThetaEstimates.lean` +
+         `FEPair.lean`, commits 56e2431e/db7e9bef/a50e5f6d)**: shortest vector, real-Gaussian
+         summability, `heckeTheta_eq_one_add` (0-split), `tsum_ite_gaussian_tail`,
+         `heckeWeights_ge_of_bounded`, `exists_heckeTheta_dev_bound`,
+         `continuousAt_heckeTheta_heckeWeights` (joint, `continuousOn_tsum`),
+         `continuousOn_heckeG` (dominated), `unitBoxVol`, `exists_heckeG_dev_bound`,
+         `isBigO_exp_neg_rpow`, class transfers, `heckeFConst = h·w⁻¹·vol`,
+         `heckeF_sub_const_isBigO`, and **`heckeFEPair : WeakFEPair ℂ` ASSEMBLED** —
+         mathlib gives `Λ₀` entire, `Λ` (poles at σ∈{0,1/2}, residues), `hasMellin`
+         (Re σ > 1/2), FE `Λ(1/2−σ) = Λ(σ)`.
+         **CONSTANT DERIVATION (2026-07-03, paper-verified)**: per class,
+         `mellin(Ĝ_C − w⁻¹vol)(s/2) = s_C^{-s/2}·M_I(s/2)`, `s_C = N(I)⁻²β`; unfolding +
+         `(t,u) ↦ y_w = c_w(t,u)(wa)²` factorises `M_I(s/2) = κ·Γ(s/2)^{r₁}π^{-r₁s/2}·
+         Γ(s)^{r₂}π^{-r₂s}·N(I)^{-s}·∑_{𝔞∈[I⁻¹]}N𝔞^{-s}` (κ = Jacobian const, s-free);
+         `s_C^{-s/2} = N(I)^s·β^{-s/2}` kills `N(I)^s`, and `β^{-s/2} = 2^{-r₂s}|Δ|^{s/2}`
+         turns `π^{-s}Γ(s)` into `|Δ|^{s/2}·(Γℂ(s)/2)`: **`mellin(f−f₀)(s/2)
+         = κ·2^{-r₂}·completedZetaPrefactor(s)·ζ_K(s)` — the adjust is s-INDEPENDENT**, so
+         `completedDedekindZeta := (κ·2^{-r₂})⁻¹·P.Λ(s/2)` with `s(s−1)Λ` entire from
+         `Λ = Λ₀ − f₀/σ − g₀/(k−σ)` (pole factors `2(s−1)`, `−2s` entire). Remaining Lean
+         bricks: (α) mellin scaling `mellin (g∘(s_C·)) σ = s_C^{-σ}·mellin g σ`;
+         (β) box-unfolding `w⁻¹∫_box ∑_{L∖0} = ∑_{(I∖0)/units} ∫_{logSpace}` (torsion w
+         cancels; `IsAddFundamentalDomain`-unfolding + orbit structure);
+         (γ) per-point `(t,u)→y` change of variables ⇒ Γ-product × `|Na|^{-2σ}` (pins κ);
+         (δ) counting `∑_{(I∖0)/units}|Na|^{-s} = N(I)^{-s}·∑_{𝔞 integral ∈ [I⁻¹]}N𝔞^{-s}`
+         (mathlib `FundamentalCone.idealSetEquivNorm`); (ε) sum over classes = `ζ_K`,
+         define `completedDedekindZeta`, prove `IsCompletedDedekindZeta` (Re>1 agreement +
+         entirety) ⇒ **`∃ Λ, IsCompletedDedekindZeta K Λ` — GRH non-vacuity**.
       4. `Λ_K(s) := (const-adjust)·P.Λ (s/2)`: `WeakFEPair.Λ₀` entire + explicit poles at
          `σ ∈ {0, 1/2}` ⇒ `s(s−1)Λ_K` entire ✓ second half of `IsCompletedDedekindZeta`.
       5. **Agreement on Re s > 1** (the big remaining brick): `P.hasMellin` +

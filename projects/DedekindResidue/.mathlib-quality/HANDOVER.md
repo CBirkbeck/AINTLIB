@@ -315,3 +315,36 @@ zero-sum via `InfinitePlace.prod_eq_abs_norm`); (1c) `sq_mul_heckeWeights` (mirr
 `ite_mul_heckeWeights`); (1d) `heckeTheta_smul` (generalise `unitMulLatticeEquiv` to
 `mulCoords x`, `x ≠ 0`); then `heckeG_smul`, `Ĝ`, the FE-pair, integrability, decay,
 Mellin agreement.
+
+## 2026-07-03 — heckeFEPair ASSEMBLED (WeakFEPair complete); Mellin agreement is the last gap
+
+**State**: green, single sorry = `belabas_friedman_thm1`, all axiom-clean, pushed through
+`a50e5f6d`. New files: `CompletedZeta/ClassTheta.lean` (normalised class theta Ĝ_C, the
+coefficient-1 symmetry `heckeGClass_inversion`, total theta `heckeF` + `heckeF_inversion`),
+`CompletedZeta/ThetaEstimates.lean` (shortest vector, Gaussian tails, 0-split, weight lower
+bounds, joint continuity, `continuousOn_heckeG`, `unitBoxVol`, `exists_heckeG_dev_bound`),
+`CompletedZeta/FEPair.lean` (**`heckeFEPair : WeakFEPair ℂ`** — f = g = heckeF, k = 1/2,
+ε = 1, f₀ = g₀ = `heckeFConst` = h·w⁻¹·vol; `isBigO_exp_neg_rpow` + transfers).
+
+**What mathlib now gives for free** (`Mathlib.NumberTheory.LSeries.AbstractFuncEq`):
+`(heckeFEPair K).Λ₀` entire, `.Λ` with poles exactly at σ ∈ {0, 1/2} + residues,
+`.hasMellin` on Re σ > 1/2, `.functional_equation : Λ(1/2−σ) = Λ(σ)`.
+
+**Verified constant derivation** (in SP1-AGE ticket, step-by-step): the final agreement is
+`mellin (heckeF − heckeFConst) (s/2) = κ·2^{-r₂}·completedZetaPrefactor K s·ζ_K(s)` with κ
+the (t,u)→y Jacobian constant — **s-independent** (β = 4^{r₂}/|Δ| kills every s-dependent
+mismatch: `s_C^{-s/2} = N(I)^s·2^{-r₂s}|Δ|^{s/2}`, the `N(I)^s` cancels the counting side,
+`2^{-r₂s}` turns `π^{-s}Γ(s)` into `Γℂ(s)/2`, `|Δ|^{s/2}` is the prefactor's power). So
+`completedDedekindZeta := (κ·2^{-r₂})⁻¹·(heckeFEPair K).Λ (s/2)`, and `s(s−1)Λ_K` entire
+falls out of `Λ = Λ₀ − f₀/σ − ε g₀/(k−σ)` (pole terms → entire `−2(s−1)f₀`, `+2s g₀`).
+
+**Remaining Lean bricks to `∃ Λ, IsCompletedDedekindZeta K Λ`** (order): (α) Mellin scaling
+`mellin (g∘(c·)) σ = c^{-σ}·mellin g σ` (mathlib `mellin_comp_mul_left`? verify);
+(β) box-unfolding `w⁻¹∫_box ∑_{L_I∖0} = ∑_{(I∖0)/units}∫_{logSpace}` (torsion-w cancellation;
+`IsAddFundamentalDomain` unfolding + `heckeTheta_unit_mul` orbit structure);
+(γ) per-orbit `(t,u) → y` change of variables ⇒ `κ·Γ(σ)^{r₁}π^{-r₁σ}Γ(2σ)^{r₂}π^{-2r₂σ}·|Na|^{-2σ}`
+(pins κ; the Jacobian is the regulator-style determinant of
+`(τ,u) ↦ τ/n + 2·fullLog(u)_w/mult_w`); (δ) `∑_{(I∖0)/units}|Na|^{-s} = N(I)^{-s}·∑_{𝔞∈[I⁻¹]}N𝔞^{-s}`
+(mathlib `FundamentalCone.idealSetEquivNorm`); (ε) sum over classes, define
+`completedDedekindZeta`, prove both `IsCompletedDedekindZeta` conditions, conclude existence.
+(β)+(γ) are the two big ones — both fully specified above.
