@@ -804,3 +804,43 @@ Euler-γ integral are never needed; ψ(1/2)-values come from mathlib's digamma_o
 then Prop 3 via Lemme 1 (5-way split — REUSES the sinc-tail constants) + Lemme 2 (Plancherel).
 Then Γψ-b (d log G expansion via Normalisation.lean) + Γψ-a (contour shift to Re = 1/2).
 Then SP2-MAIN assembly.
+
+---
+
+## Leg 5 continued (2026-07-03): Prop 3's Lemme 1 + Lemme 2 + Plancherel infrastructure
+
+All in `ExplicitFormula/GammaSide.lean`, all axiom-clean, pushed:
+
+**Lemme 1** (γ' = −iφ): `sincTail` (+ window/deriv/decay lemmas,
+`tendsto_integral_cexp_sub_div_window`), `hasDerivAt_integral_mul_cexp` (dominated
+differentiation engine), `gammaFT` (Poitou's γ with improper sinc-tails),
+`hasDerivAt_gammaFT`.
+
+**Lemme 2 (IBP half)**: `rhoFT` (+ `rhoFT_zero`, `integrable_rhoFT_integrand`,
+`hasDerivAt_rhoFT` — ρ' = −iμ), `norm_cexp_mul_I_sub_one_le` (chord bound), continuity
+layer (`norm_muFT_le`, `continuous_muFT`, `continuous_rhoFT`, `exists_bound_sincTail`,
+`continuous_integral_mul_cexp`, `continuousAt_gammaFT`, `exists_bound_gammaFT`),
+`integral_rhoFT_mul_phi_eq` (IBP off zero), `integral_rhoFT_mul_phi_symm` (fixed-T
+identity via ε → 0), **`tendsto_integral_rhoFT_mul_phi`** (∫_{−T}^T ρφ → −∫_ℝ μγ
+given boundary decay ργ → 0 and μγ ∈ L¹). NOTE the MINUS sign — machine-checked;
+Poitou's displayed "+" absorbs the odd-k reflection that appears in the Plancherel
+step (k(−x) = −k(x) for Prop 3's kernel); final signs to be cross-checked against the
+independently-proven `re_digamma_sub_eq_integral`.
+
+**Plancherel infrastructure**: `muFT_eq_fourierIntegral` (μ(t) = 𝓕k(−t/2π)),
+`integral_fourier_schwartz_smul` (multiplication formula vs Schwartz),
+**`coeFn_fourier_toLp_two`** (L¹∩L²: the L²-𝓕 agrees a.e. with the pointwise 𝓕 —
+via tempered distributions + ae_eq_zero_of_integral_contDiff_smul_eq_zero; mathlib
+has this nowhere), `fourier_conj_neg`, **`integral_fourier_mul_fourier`**
+(∫𝓕k·𝓕h = ∫k(−x)h(x) — the Plancherel pairing).
+
+**REMAINING for Prop 3**: (P-c) `gammaFT F =ᵐ (fun t => 𝓕h(−t/2π))` for
+h := (F0−F)/x ∈ L¹loc-near-0 ∩ L² — truncation h·1_{[−n,n]}, L²-isometry limit,
+pointwise pieces-convergence, ae-subsequence. (P-d) substitution t = −2πs in ∫μγ
+(factor 2π). Then hμγ-discharge (L²×L² Cauchy–Schwarz), the boundary-decay
+hypotheses for the concrete odd kernel k_σ(x) = x e^{−σx}/(1−e^{−x}) (|ρ| = O(log t)
+from the kernel integral; γ-decay o(1/log) is Prop 3's hypothesis on F), and the
+Prop-3 statement assembly. Then Γψ-b (d log G expansion via Normalisation.lean),
+Γψ-a (contour shift to Re = 1/2 using A6 + Φ-decay), I_G assembly
+(digamma_one_half + integral_inv_two_cosh_half + re_digamma_quarter_sub_half),
+Prop 2 (prime side via Jordan + vM series), and the Weil formula (6).
