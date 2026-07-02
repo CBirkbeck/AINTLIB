@@ -12,6 +12,7 @@ public import DedekindResidue.CompletedZeta.HeckeTheta
 public import DedekindResidue.CompletedZeta.IdealLattice
 public import DedekindResidue.CompletedZeta.ThetaEstimates
 public import DedekindResidue.CompletedZeta.ThetaLattice
+public import DedekindResidue.CompletedZeta.Existence
 public import DedekindResidue.CompletedZeta.FEPair
 public import DedekindResidue.CompletedZeta.FunctionalEquation
 public import DedekindResidue.CompletedZeta.GRH
