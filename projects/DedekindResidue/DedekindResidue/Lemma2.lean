@@ -150,6 +150,25 @@ theorem integrable_auxF_kernel (s : ℂ) {X : ℝ} (hX : 1 ≤ X) (hs : 1/2 < s.
   rw [hker, mul_one]
   exact norm_auxF_le s hX (le_of_lt hs) t
 
+/-- Belabas–Friedman eq. (7), first derivative: on `t > 0`,
+`d/dt [e^{-ht}/t] = -(h + 1/t)·e^{-ht}/t`. -/
+theorem hasDerivAt_gAux_core (h : ℂ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun u : ℝ => Complex.exp (-h * u) / u)
+      (-(h + 1/t) * (Complex.exp (-h * t) / t)) t := by
+  have hden_ne : ((t : ℝ) : ℂ) ≠ 0 := by
+    exact_mod_cast ht.ne'
+  have hnum : HasDerivAt (fun w : ℂ => Complex.exp (-h * w))
+      (Complex.exp (-h * (t : ℂ)) * (-h)) (t : ℂ) := by
+    have hlin : HasDerivAt (fun w : ℂ => -h * w) (-h) (t : ℂ) := by
+      simpa using (hasDerivAt_id ((t : ℝ) : ℂ)).const_mul (-h)
+    exact hlin.cexp
+  have hdiv := hnum.div (hasDerivAt_id ((t : ℝ) : ℂ)) hden_ne
+  have hcomp := hdiv.comp_ofReal
+  refine hcomp.congr_deriv ?_
+  simp only [id_eq]
+  field_simp
+  ring
+
 end
 
 end DedekindResidue
