@@ -1693,6 +1693,103 @@ theorem lintegral_mellin_heckeG_dev (J : (Ideal (𝓞 K))⁰) {σ : ℝ} (hσ : 
   rw [tsum_congr hpera, ENNReal.tsum_mul_right]
   ring
 
+open scoped Classical in
+/-- The scaled-argument deviation of the class theta, Mellin-evaluated (e-iii): all the
+`w`, `N(J)` and `s_C` factors cancel, leaving `β^{-σ}` times the Γ-constant times the
+partial zeta sum over the inverse class. -/
+theorem lintegral_mellin_heckeGClass_dev (C : ClassGroup (𝓞 K)) {σ : ℝ} (hσ : 0 < σ) :
+    (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K))
+      = ENNReal.ofReal ((heckeBeta K) ^ (-σ))
+        * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+        * ∑' b : {b : (Ideal (𝓞 K))⁰ //
+            ClassGroup.mk0 b = (ClassGroup.mk0 ((ClassGroup.mk0_surjective C).choose))⁻¹},
+            ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+              ^ (-σ)) := by
+  set J : (Ideal (𝓞 K))⁰ := (ClassGroup.mk0_surjective C).choose with hJ
+  have hNpos := idealNormR_pos K (classRep K C)
+  have hβ := heckeBeta_pos K
+  set s_C : ℝ := (idealNormR K (classRep K C))⁻¹ ^ 2 * heckeBeta K with hsC
+  have hsCpos : 0 < s_C := by positivity
+  -- the class theta is the scaled base theta
+  have hshape : ∀ t : ℝ, heckeGClass K C t = heckeG K (FractionalIdeal.mk0 K J) (s_C * t) :=
+    fun t => rfl
+  have hdev_meas : AEMeasurable (fun t : ℝ =>
+      ENNReal.ofReal (heckeG K (FractionalIdeal.mk0 K J) t
+        - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K))
+      (volume.restrict (Set.Ioi (0:ℝ))) := by
+    refine (ENNReal.continuous_ofReal.comp_continuousOn ?_).aemeasurable measurableSet_Ioi
+    exact (continuousOn_heckeG K _).sub continuousOn_const
+  have hstep : ∀ t ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K)
+      = ENNReal.ofReal (t ^ (σ - 1)) * (fun r => ENNReal.ofReal
+          (heckeG K (FractionalIdeal.mk0 K J) r
+            - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K)) (s_C * t) := by
+    intro t ht
+    rw [hshape]
+  rw [setLIntegral_congr_fun measurableSet_Ioi hstep,
+    lintegral_Ioi_mellin_scale hsCpos σ _ hdev_meas,
+    lintegral_mellin_heckeG_dev K J hσ,
+    tsum_idealSet_norm_rpow K J σ, tsum_principal_dvd_eq K J σ]
+  -- now pure constant algebra in ℝ≥0∞
+  have hNJ : idealNormR K (classRep K C)
+      = ((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) := by
+    rw [idealNormR, classRep]
+    congr 1
+    rw [show ((FractionalIdeal.mk0 K J : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+      FractionalIdeal (𝓞 K)⁰ K) = ((J : Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K) from rfl]
+    rw [FractionalIdeal.coeIdeal_absNorm]
+    norm_cast
+  have hNJpos : (0:ℝ) < ((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) := by
+    rw [← hNJ]
+    exact hNpos
+  -- s_C^{-σ} = (NJ²)^{σ}·β^{-σ}
+  have hsC_rpow : s_C ^ (-σ)
+      = (((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ σ * (heckeBeta K) ^ (-σ) := by
+    rw [hsC, hNJ, Real.mul_rpow (by positivity) hβ.le, ← Real.rpow_natCast
+      ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)))⁻¹) 2, ← Real.rpow_natCast
+      (((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ))) 2,
+      ← Real.rpow_mul (by positivity), ← Real.rpow_mul hNJpos.le,
+      Real.inv_rpow hNJpos.le, ← Real.rpow_neg hNJpos.le]
+    push_cast
+    ring_nf
+  -- w-cancellation
+  have hw_cancel : ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹) * (torsionOrder K : ℝ≥0∞) = 1 := by
+    rw [ENNReal.ofReal_inv_of_pos (by
+      have := torsionOrder_pos K
+      positivity), ENNReal.ofReal_natCast]
+    refine ENNReal.inv_mul_cancel ?_ (ENNReal.natCast_ne_top _)
+    exact_mod_cast (torsionOrder_pos K).ne'
+  -- assemble
+  rw [hsC_rpow, ENNReal.ofReal_mul (by positivity)]
+  have hNJcancel : ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ σ)
+      * ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)) = 1 := by
+    rw [← ENNReal.ofReal_mul (by positivity), ← Real.rpow_add (by positivity)]
+    simp
+  calc ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ σ)
+        * ENNReal.ofReal ((heckeBeta K) ^ (-σ))
+        * (ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹)
+          * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+              π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+          * ((torsionOrder K : ℝ≥0∞)
+            * (ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ))
+              * ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = (ClassGroup.mk0 J)⁻¹},
+                  ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) :
+                    Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)))))
+      = (ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹) * (torsionOrder K : ℝ≥0∞))
+        * (ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ σ)
+          * ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)))
+        * (ENNReal.ofReal ((heckeBeta K) ^ (-σ))
+          * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+              π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+          * ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = (ClassGroup.mk0 J)⁻¹},
+              ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) :
+                Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ))) := by ring
+    _ = _ := by
+        rw [hw_cancel, hNJcancel, one_mul, one_mul]
+
 end
 
 end DedekindResidue
