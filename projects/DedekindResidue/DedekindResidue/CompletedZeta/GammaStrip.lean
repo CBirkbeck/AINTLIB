@@ -424,6 +424,178 @@ theorem norm_Gamma_le_mul_exp {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ ≤ 3/2) (
     _ = Real.sqrt (12 * π) * ‖z‖ * Real.exp (-(π * |t|) / 2) := by
         rw [Real.sqrt_sq (by positivity)]
 
+/-- Decaying Γ-upper on the left strip `-1/2 ≤ σ ≤ 1/2` (one recurrence step from the
+base strip; the pole at `z = 0` is harmless since `|t| ≥ 1`). -/
+theorem norm_Gamma_le_mul_exp_left {σ t : ℝ} (h1 : -(1/2) ≤ σ) (h2 : σ ≤ 1/2)
+    (ht : 1 ≤ |t|) :
+    ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ Real.sqrt (12 * π) * ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2) := by
+  have hzim : (((σ : ℂ) + (t : ℂ) * Complex.I)).im = t := by simp
+  have hzne : ((σ : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+    intro h0
+    have := congrArg Complex.im h0
+    rw [hzim] at this
+    simp at this
+    rw [this] at ht
+    norm_num at ht
+  have hrec : Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)
+      = Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)
+        / ((σ : ℂ) + (t : ℂ) * Complex.I) := by
+    have := Complex.Gamma_add_one ((σ : ℂ) + (t : ℂ) * Complex.I) hzne
+    rw [show ((σ : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I by push_cast; ring] at this
+    rw [this]
+    field_simp
+  have hbase := norm_Gamma_le_mul_exp (σ := σ + 1) (t := t)
+    (by linarith) (by linarith) ht
+  have hzn : (1 : ℝ) ≤ ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
+    calc (1:ℝ) ≤ |t| := ht
+      _ = |(((σ : ℂ) + (t : ℂ) * Complex.I)).im| := by rw [hzim]
+      _ ≤ ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := Complex.abs_im_le_norm _
+  rw [hrec, norm_div]
+  calc ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+        / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+      ≤ ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ / 1 := by
+        gcongr
+    _ = ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by
+        rw [div_one]
+    _ ≤ Real.sqrt (12 * π) * ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2) := hbase
+
+/-- `‖sin(πz)‖ ≤ e^{π|Im z|}`. -/
+theorem norm_sin_pi_mul_le (z : ℂ) :
+    ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.exp (π * |z.im|) := by
+  have hdecomp : (π : ℂ) * z
+      = ((π * z.re : ℝ) : ℂ) + ((π * z.im : ℝ) : ℂ) * Complex.I := by
+    conv_lhs => rw [← Complex.re_add_im z]
+    push_cast
+    ring
+  have hsq := norm_sin_add_mul_I_sq (π * z.re) (π * z.im)
+  rw [← hdecomp] at hsq
+  have hcosh : ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.cosh (π * z.im) := by
+    have h1 : ‖Complex.sin ((π : ℂ) * z)‖^2 ≤ Real.cosh (π * z.im)^2 := by
+      rw [hsq, Real.cosh_sq]
+      nlinarith [Real.sin_sq_add_cos_sq (π * z.re), sq_nonneg (Real.sin (π * z.re))]
+    nlinarith [norm_nonneg (Complex.sin ((π : ℂ) * z)), Real.cosh_pos (π * z.im)]
+  refine hcosh.trans ?_
+  rw [show π * |z.im| = |π * z.im| by rw [abs_mul, abs_of_pos Real.pi_pos]]
+  rw [Real.cosh_eq]
+  have e1 : Real.exp (π * z.im) ≤ Real.exp |π * z.im| :=
+    Real.exp_le_exp.mpr (le_abs_self _)
+  have e2 : Real.exp (-(π * z.im)) ≤ Real.exp |π * z.im| :=
+    Real.exp_le_exp.mpr (neg_le_abs _)
+  linarith
+
+/-- **Matching Γ-lower bound on the base strip** (AC-A1-v): for `1/2 ≤ σ ≤ 3/2`,
+`|t| ≥ 1`, `‖Γ(σ+it)‖ ≥ π·e^{-π|t|/2} / (√(12π)·‖(2-σ)-it‖)`. -/
+theorem le_norm_Gamma_base {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ ≤ 3/2) (ht : 1 ≤ |t|) :
+    π / (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+      * Real.exp (-(π * |t|) / 2)
+      ≤ ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  set z : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hz
+  have hzim : z.im = t := by simp [hz]
+  have htne : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht
+    norm_num at ht
+  have hznotneg : ∀ m : ℕ, z ≠ -m := by
+    intro m h0
+    have := congrArg Complex.im h0
+    rw [hzim] at this
+    simp at this
+    exact htne this
+  have h1znotneg : ∀ m : ℕ, (1 : ℂ) - z ≠ -m := by
+    intro m h0
+    have := congrArg Complex.im h0
+    simp [hz] at this
+    exact htne this
+  have hΓne : Complex.Gamma z ≠ 0 := Complex.Gamma_ne_zero hznotneg
+  have hΓ1ne : Complex.Gamma (1 - z) ≠ 0 := Complex.Gamma_ne_zero h1znotneg
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub z
+  have hsin_ne : Complex.sin ((π : ℂ) * z) ≠ 0 := by
+    intro h0
+    rw [h0] at hrefl
+    rw [div_zero] at hrefl
+    exact mul_ne_zero hΓne hΓ1ne hrefl
+  have hprod : Complex.Gamma z * Complex.Gamma (1 - z) * Complex.sin ((π : ℂ) * z)
+      = (π : ℂ) := by
+    rw [hrefl]
+    field_simp
+  have hnorm : ‖Complex.Gamma z‖ * ‖Complex.Gamma (1 - z)‖
+      * ‖Complex.sin ((π : ℂ) * z)‖ = π := by
+    have := congrArg norm hprod
+    rw [norm_mul, norm_mul] at this
+    rw [this]
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+  -- upper bounds for the two cofactors
+  have h1z : (1 : ℂ) - z = ((1 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I := by
+    rw [hz]
+    push_cast
+    ring
+  have hΓ1up : ‖Complex.Gamma (1 - z)‖
+      ≤ Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2) := by
+    rw [h1z]
+    have := norm_Gamma_le_mul_exp_left (σ := 1 - σ) (t := -t)
+      (by linarith) (by linarith) (by rwa [abs_neg])
+    rw [show (1 - σ + 1 : ℝ) = 2 - σ by ring, abs_neg] at this
+    exact this
+  have hsinup : ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.exp (π * |t|) := by
+    have := norm_sin_pi_mul_le z
+    rwa [hzim] at this
+  -- assemble
+  have hΓpos : 0 < ‖Complex.Gamma z‖ := norm_pos_iff.mpr hΓne
+  have hΓ1pos : 0 < ‖Complex.Gamma (1 - z)‖ := norm_pos_iff.mpr hΓ1ne
+  have hsinpos : 0 < ‖Complex.sin ((π : ℂ) * z)‖ := norm_pos_iff.mpr hsin_ne
+  have hnup : 0 < ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ := by
+    have : ((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I ≠ 0 := by
+      intro h0
+      have := congrArg Complex.im h0
+      simp at this
+      exact htne this
+    exact norm_pos_iff.mpr this
+  have hexp_id : Real.exp (-(π * |t|) / 2) * Real.exp (π * |t|)
+      = Real.exp (π * |t| / 2) := by
+    rw [← Real.exp_add]
+    ring_nf
+  have hbound : ‖Complex.Gamma (1 - z)‖ * ‖Complex.sin ((π : ℂ) * z)‖
+      ≤ Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+        * Real.exp (π * |t| / 2) := by
+    calc ‖Complex.Gamma (1 - z)‖ * ‖Complex.sin ((π : ℂ) * z)‖
+        ≤ (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+            * Real.exp (-(π * |t|) / 2)) * Real.exp (π * |t|) := by
+          exact mul_le_mul hΓ1up hsinup (norm_nonneg _) (by positivity)
+      _ = Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+            * Real.exp (π * |t| / 2) := by
+          rw [mul_assoc, hexp_id]
+  -- from ‖Γz‖·X = π and X ≤ Y: ‖Γz‖ ≥ π/Y
+  have hY : 0 < Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+      * Real.exp (π * |t| / 2) := by positivity
+  have hgz : ‖Complex.Gamma z‖
+      = π / (‖Complex.Gamma (1 - z)‖ * ‖Complex.sin ((π : ℂ) * z)‖) := by
+    rw [eq_div_iff (by positivity)]
+    rw [← mul_assoc]
+    exact hnorm
+  have hexp1 : Real.exp (-(π * |t|) / 2) * Real.exp (π * |t| / 2) = 1 := by
+    rw [← Real.exp_add, show -(π * |t|) / 2 + π * |t| / 2 = 0 by ring, Real.exp_zero]
+  rw [hgz, div_mul_eq_mul_div,
+    div_le_div_iff₀ (by positivity) (by positivity)]
+  calc π * Real.exp (-(π * |t|) / 2)
+      * (‖Complex.Gamma (1 - z)‖ * ‖Complex.sin ((π : ℂ) * z)‖)
+      ≤ π * Real.exp (-(π * |t|) / 2)
+        * (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+          * Real.exp (π * |t| / 2)) := by
+        have hc : (0:ℝ) ≤ π * Real.exp (-(π * |t|) / 2) := by positivity
+        exact mul_le_mul_of_nonneg_left hbound hc
+    _ = π * (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖) := by
+        rw [show π * Real.exp (-(π * |t|) / 2)
+            * (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+              * Real.exp (π * |t| / 2))
+          = π * (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+            * (Real.exp (-(π * |t|) / 2) * Real.exp (π * |t| / 2)) by ring,
+          hexp1, mul_one]
+
 end
 
 end DedekindResidue
