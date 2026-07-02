@@ -104,6 +104,104 @@ theorem idealTheta_transform (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (
           * thetaLattice (dualZLattice (idealZLattice K I)) t⁻¹ := by
   rw [idealTheta, thetaLattice_transform (idealZLattice K I) ht, covolume_idealZLattice]
 
+open scoped Classical in
+/-- The mixed embedding in Euclidean coordinates: `K → EuclideanSpace ℝ (index K)`, the frame
+of `idealZLattice`. Its coordinates are the `stdBasis` coordinates of `mixedEmbedding K x`
+(`embeddingCoords_apply`): the real embedding values at real places and the real/imaginary
+parts at complex places. -/
+noncomputable def embeddingCoords (x : K) : EuclideanSpace ℝ (index K) :=
+  (euclidean.stdOrthonormalBasis K).repr ((euclidean.toMixed K).symm (mixedEmbedding K x))
+
+open scoped Classical in
+theorem embeddingCoords_apply (x : K) (i : index K) :
+    embeddingCoords K x i = (stdBasis K).repr (mixedEmbedding K x) i := by
+  rw [embeddingCoords]
+  have h := euclidean.stdOrthonormalBasis_map_eq K
+  have h2 : (euclidean.stdOrthonormalBasis K).toBasis.repr
+      ((euclidean.toMixed K).symm (mixedEmbedding K x)) i
+      = (stdBasis K).repr (mixedEmbedding K x) i := by
+    rw [← h, Module.Basis.map_repr]
+    simp
+  rw [← h2, OrthonormalBasis.coe_toBasis_repr_apply]
+
+open scoped Classical in
+theorem embeddingCoords_isReal (x : K) (w : {w : InfinitePlace K // IsReal w}) :
+    embeddingCoords K x (Sum.inl w) = embedding_of_isReal w.2 x := by
+  rw [embeddingCoords_apply, stdBasis_apply_isReal, mixedEmbedding_apply_isReal]
+
+open scoped Classical in
+theorem embeddingCoords_isComplex_fst (x : K) (w : {w : InfinitePlace K // IsComplex w}) :
+    embeddingCoords K x (Sum.inr ⟨w, 0⟩) = ((w : InfinitePlace K).embedding x).re := by
+  rw [embeddingCoords_apply, stdBasis_apply_isComplex_fst, mixedEmbedding_apply_isComplex]
+
+open scoped Classical in
+theorem embeddingCoords_isComplex_snd (x : K) (w : {w : InfinitePlace K // IsComplex w}) :
+    embeddingCoords K x (Sum.inr ⟨w, 1⟩) = ((w : InfinitePlace K).embedding x).im := by
+  rw [embeddingCoords_apply, stdBasis_apply_isComplex_snd, mixedEmbedding_apply_isComplex]
+
+/-- The duality weights: `1` at real coordinates, `(2, -2)` at the `(re, im)` coordinates of
+a complex place — the diagonal matrix of `conj ∘ (double)`. -/
+noncomputable def dualityWeights : index K → ℝ :=
+  Sum.elim (fun _ => 1) (fun p => if p.2 = 0 then 2 else -2)
+
+omit [NumberField K] in
+theorem dualityWeights_ne_zero : ∀ i, dualityWeights K i ≠ 0 := by
+  rintro (w | ⟨w, j⟩)
+  · norm_num [dualityWeights]
+  · fin_cases j <;> norm_num [dualityWeights]
+
+open scoped RealInnerProductSpace in
+open scoped Classical in
+/-- **The duality pairing dictionary** (SP1-AGE-2 core): pairing the `dualityWeights`-scaled
+coordinates of `σ(b)` against the coordinates of `σ(a)` computes the rational trace form:
+`⟪D·ζ(b), ζ(a)⟫ = Tr_{K/ℚ}(b·a)`. -/
+theorem inner_diagScale_embeddingCoords (a b : K) :
+    ⟪(diagScale (dualityWeights K) (dualityWeights_ne_zero K)) (embeddingCoords K b),
+      embeddingCoords K a⟫ = ((Algebra.trace ℚ K (b * a) : ℚ) : ℝ) := by
+  have h1 : ((Algebra.trace ℚ K (b * a) : ℚ) : ℂ) = ∑ τ : K →+* ℂ, τ (b * a) := by
+    rw [← eq_ratCast (algebraMap ℚ ℂ), trace_eq_sum_embeddings ℂ,
+      ← Equiv.sum_comp (RingHom.equivRatAlgHom (R := K) (S := ℂ))]
+    rfl
+  have h2 : ((Algebra.trace ℚ K (b * a) : ℚ) : ℝ) = ∑ τ : K →+* ℂ, (τ (b * a)).re := by
+    have h := congrArg Complex.re h1
+    simpa using h
+  rw [h2, ← Equiv.sum_comp (indexEquiv K) (fun τ => (τ (b * a)).re)]
+  rw [PiLp.inner_apply]
+  simp only [RCLike.inner_apply, conj_trivial]
+  rw [Fintype.sum_sum_type, Fintype.sum_sum_type]
+  congr 1
+  · -- real places, termwise
+    refine Finset.sum_congr rfl (fun w _ => ?_)
+    have hD : (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+        (embeddingCoords K b) (Sum.inl w) = embedding_of_isReal w.2 b := by
+      rw [diagScale_apply, embeddingCoords_isReal]
+      simp [dualityWeights]
+    rw [hD, embeddingCoords_isReal, indexEquiv_apply_isReal]
+    have hre : ((w : InfinitePlace K).embedding (b * a)).re
+        = embedding_of_isReal w.2 (b * a) := by
+      rw [← embedding_of_isReal_apply w.2, Complex.ofReal_re]
+    rw [hre, map_mul]
+    ring
+  · -- complex places: group the (re, im) pair per place
+    rw [Fintype.sum_prod_type, Fintype.sum_prod_type]
+    refine Finset.sum_congr rfl (fun w _ => ?_)
+    rw [Fin.sum_univ_two, Fin.sum_univ_two]
+    have hD0 : (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+        (embeddingCoords K b) (Sum.inr (w, 0))
+        = 2 * ((w : InfinitePlace K).embedding b).re := by
+      rw [diagScale_apply, embeddingCoords_isComplex_fst]
+      simp [dualityWeights]
+    have hD1 : (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+        (embeddingCoords K b) (Sum.inr (w, 1))
+        = -2 * ((w : InfinitePlace K).embedding b).im := by
+      rw [diagScale_apply, embeddingCoords_isComplex_snd]
+      simp [dualityWeights]
+    rw [hD0, hD1, embeddingCoords_isComplex_fst, embeddingCoords_isComplex_snd,
+      indexEquiv_apply_isComplex_fst, indexEquiv_apply_isComplex_snd,
+      ComplexEmbedding.conjugate_coe_eq]
+    simp only [map_mul, Complex.mul_re, Complex.conj_re, Complex.conj_im]
+    ring
+
 end
 
 end DedekindResidue
