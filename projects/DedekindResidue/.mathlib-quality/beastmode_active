@@ -1,1 +1,1 @@
-FOCUS: AGE-4 brick alpha — mellin scaling lemma (check mathlib mellin_comp_mul_left), then beta box-unfolding
+FOCUS: AGE-4 brick beta1/beta2 — extract heckeG_sub_eq (g_I(t) - w^-1 vol = w^-1 int_box (Theta-1)) + tail-sum form; then the cone unfolding L\0 = idealSet x unitLattice
