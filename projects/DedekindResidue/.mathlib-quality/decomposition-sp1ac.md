@@ -111,15 +111,23 @@ interpolation:
   `AnalyticOnNhd.sum_divisor_le` with A3's upper bound and the `2+iT`-center lower bound
   (Γ-free since we count zeros of ζ_K, not Λ). Also: zeros of Λ in the strip = zeros of
   ζ_K (Γ has no zeros; prefactor nonvanishing) — bridge lemma to `GRH.lean`'s predicate.
-- **[AC-A5] Landau local partial fractions**: for s in a slab near height T,
-  `ζ_K'/ζ_K(s) = ∑_{ρ : |ρ-(2+iT)| ≤ r} 1/(s-ρ) + O(log Δ_K + log(2+|T|))` —
-  `Complex.borelCaratheodory` applied to `log(f/∏(s-ρ))` on disks, per Tao 246B Notes 1's
-  truncated-formula scheme (his Theorem 9-adjacent) / Titchmarsh §3.9. This is the
-  workhorse SP2's contour needs on horizontal segments.
-- **[AC-A6] digamma vertical bound**: `‖digamma(σ+it)‖ ≤ C·log(2+|t|)` on compact
-  σ-ranges (from `digamma_apply_add_one` + the series/integral rep, or from A1 by
-  Borel–Carathéodory on `log Γ` — choose at implementation time). Needed for the
-  Γ-side of SP2's contour and for eq (18)'s `d_{K,σ}`.
+- **[AC-A5] Landau local partial fractions — ✅ COMPLETE (`exists_logDeriv_partial_fractions`)**:
+  for `|T| ≥ A+5` and `s ∈ closedBall (A+iT) (A+5/4)` (⊇ strip `-1 ≤ Re ≤ 2`, `|Im-T| ≤ 1`)
+  with `H s ≠ 0`: `‖H'/H(s) − ∑ᶠ_ρ m_ρ/(s−ρ)‖ ≤ C·log(2+|T|)`, sum over the divisor of
+  `H` on `ball (A+iT) (A+2)`. Chain: `exists_H_two_radius_factorization` (peel inner zeros,
+  cofactor analytic on the bigger ball via divisor split + `zpow_add'`), maximum principle
+  on the `A+5/2` sphere (peel product ≥ `(1/2)^D`), envelope-matched center lower
+  (`(A+2)^D`), `exists_ball_zero_count_big` (Jensen at radii `(A+2, A+3)`, FE-reflected
+  ball-sup `exists_H_ball_sup_big`), the generic `norm_logDeriv_le_of_norm_le`
+  (holomorphic log + recentered `Complex.borelCaratheodory_zero` + Schwarz
+  `norm_deriv_le_div_of_mapsTo_ball` on quarter-balls), and the `logDeriv_prod`/
+  `logDeriv_fun_zpow` unwind. Envelopes `e^{-n_Kπ|T|/4}` cancel in the log-ratio.
+- **[AC-A6] digamma vertical bound — ✅ COMPLETE (`exists_norm_digamma_le`)**:
+  `‖digamma(σ+it)‖ ≤ C·log(2+|t|)` for `-1 ≤ σ ≤ 2`, `|t| ≥ 2` — the generic Landau
+  lemma applied to `Γ` itself on unit balls (`digamma = logDeriv Gamma` by definition),
+  with σ-uniform window bounds `exists_norm_Gamma_le_window` (`-2 ≤ σ ≤ 3`, downward
+  recurrence `Γ(z)=Γ(z+1)/z` past the left strip) and `exists_le_norm_Gamma_window`
+  (`-1 ≤ σ ≤ 2`, lower `c·e^{-π|t|/2}/(1+|t|)³`). SP1-AC IS NOW FULLY COMPLETE.
 
 Then (separate epics, consuming SP1-AC):
 - **[SP2] explicit formula** (eq (1), K-form; the K−k form (3) by subtraction): contour
