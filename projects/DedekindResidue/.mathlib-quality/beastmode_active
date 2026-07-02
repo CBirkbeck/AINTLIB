@@ -1,1 +1,1 @@
-FOCUS: AGE-3 (iv) integrability of heckeTheta over the FD box + heckeG convergence bounds; then AGE-4 Mellin: agreement on Re>1 via FundamentalCone.idealSetEquivNorm counting
+FOCUS: AGE-4 brick 4 — analytic inputs for WeakFEPair: (a) t->infty limit/constant term of heckeG (0-lattice-point split), (b) rapid decay (f - f0) =O(x^r) all r, (c) LocallyIntegrableOn Ioi 0 (continuity of heckeG in t)
