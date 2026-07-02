@@ -28,6 +28,10 @@ classical Gauss derivation.
   `∫₀^∞ t^{z-1}e^{-t}(e^{-x}-e^{-tx})/x dt = Γ(z)(e^{-x} - (1+x)^{-z})/x`.
 - `digamma_eq_integral_gauss_one` : **Gauss's first form**
   `ψ(z) = ∫₀^∞ (e^{-x} - (1+x)^{-z})/x dx` for `Re z > 0`.
+- `integrableOn_gauss_one_integrand` : integrability of that integrand.
+- `digamma_sub_digamma_eq_integral` : **Poitou's difference form**
+  `ψ(w) - ψ(σ) = ∫₀^∞ (e^{-σu} - e^{-wu})/(1-e^{-u}) du` (`x = e^u - 1`), the form his
+  eq. (5) is used in — both counterterms cancel in the difference.
 -/
 
 @[expose] public section
@@ -502,5 +506,251 @@ theorem digamma_eq_integral_gauss_one {z : ℂ} (hz : 0 < z.re) :
   rw [Complex.digamma_def, logDeriv_apply, hd.deriv, hΓ', hswap',
     MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hinner_eval,
     MeasureTheory.integral_const_mul, mul_comm, mul_div_assoc, div_self hΓne, mul_one]
+
+/-- The Gauss integrand `(e^{-x} - (1+x)^{-z})/x` is integrable on `(0, ∞)` for
+`Re z > 0`: bounded near `0` (the singularities cancel to first order) and dominated by
+`e^{-x}/x₀ + x^{-(1+Re z)}` in the tail. -/
+theorem integrableOn_gauss_one_integrand {z : ℂ} (hz : 0 < z.re) :
+    IntegrableOn
+      (fun x : ℝ => (((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)) / (x:ℂ))
+      (Set.Ioi 0) := by
+  set x₀ : ℝ := min 1 (1/(‖z‖+1)) with hx₀
+  have hx₀pos : 0 < x₀ := lt_min one_pos (by positivity)
+  have hmeas : AEStronglyMeasurable
+      (fun x : ℝ => (((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)) / (x:ℂ))
+      (volume.restrict (Set.Ioi 0)) := by
+    refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    refine ContinuousOn.div ?_ (Complex.continuous_ofReal.continuousOn) ?_
+    · refine ContinuousOn.sub ?_ ?_
+      · exact (Complex.continuous_ofReal.comp (by fun_prop)).continuousOn
+      · refine continuousOn_of_forall_continuousAt (fun x hx => ?_)
+        rw [Set.mem_Ioi] at hx
+        have h0 : ContinuousAt (fun w : ℂ => w ^ (-z)) ((1+x : ℝ):ℂ) :=
+          continuousAt_cpow_const <| Complex.ofReal_mem_slitPlane.2 (by linarith)
+        have hinner : ContinuousAt (fun x : ℝ => ((1+x : ℝ) : ℂ)) x := by fun_prop
+        exact ContinuousAt.comp (x := x) h0 hinner
+    · intro x hx
+      rw [Set.mem_Ioi] at hx
+      exact_mod_cast hx.ne'
+  rw [show Set.Ioi (0:ℝ) = Set.Ioc 0 x₀ ∪ Set.Ioi x₀ by
+    rw [Set.Ioc_union_Ioi_eq_Ioi hx₀pos.le], MeasureTheory.integrableOn_union]
+  constructor
+  · -- near 0: bounded by 1 + 2‖z‖
+    refine MeasureTheory.Integrable.mono'
+      (g := fun _ => 1 + 2*‖z‖)
+      (MeasureTheory.integrableOn_const (by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top))
+      (hmeas.mono_measure (Measure.restrict_mono Set.Ioc_subset_Ioi_self le_rfl)) ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+    refine Filter.Eventually.of_forall (fun x hx => ?_)
+    obtain ⟨hx0, hxle⟩ := hx
+    have hlog_le : Real.log (1+x) ≤ x := by
+      have := Real.log_le_sub_one_of_pos (by linarith : (0:ℝ) < 1+x)
+      linarith
+    have hlog_nonneg : 0 ≤ Real.log (1+x) := Real.log_nonneg (by linarith)
+    have hznorm : ‖-z * (Real.log (1+x) : ℂ)‖ ≤ 1 := by
+      rw [norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg hlog_nonneg]
+      have h1 : Real.log (1+x) ≤ 1/(‖z‖+1) := by
+        calc Real.log (1+x) ≤ x := hlog_le
+          _ ≤ x₀ := hxle
+          _ ≤ 1/(‖z‖+1) := min_le_right _ _
+      calc ‖z‖ * Real.log (1+x) ≤ ‖z‖ * (1/(‖z‖+1)) :=
+            mul_le_mul_of_nonneg_left h1 (norm_nonneg _)
+        _ ≤ 1 := by
+            rw [mul_one_div, div_le_one (by positivity)]
+            linarith
+    have hcpow_exp : ((1+x : ℝ) : ℂ) ^ (-z)
+        = Complex.exp (-z * (Real.log (1+x) : ℂ)) := by
+      rw [Complex.cpow_def_of_ne_zero (by
+        exact_mod_cast (by linarith : (0:ℝ) < 1+x).ne'),
+        ← Complex.ofReal_log (by linarith : (0:ℝ) ≤ 1+x)]
+      ring_nf
+    rw [norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0]
+    rw [div_le_iff₀ hx0]
+    have htri : ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+        ≤ ‖((Real.exp (-x) : ℝ) : ℂ) - 1‖ + ‖(1:ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖ := by
+      calc ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+          = ‖(((Real.exp (-x) : ℝ) : ℂ) - 1) + ((1:ℂ) - ((1+x : ℝ) : ℂ) ^ (-z))‖ := by
+            ring_nf
+        _ ≤ _ := norm_add_le _ _
+    have h1 : ‖((Real.exp (-x) : ℝ) : ℂ) - 1‖ ≤ x := by
+      rw [show ((Real.exp (-x) : ℝ) : ℂ) - 1 = ((Real.exp (-x) - 1 : ℝ) : ℂ) by push_cast; ring,
+        Complex.norm_real, Real.norm_eq_abs, abs_of_nonpos (by
+          have := Real.exp_le_one_iff.mpr (by linarith : -x ≤ 0)
+          linarith)]
+      have := Real.add_one_le_exp (-x)
+      linarith
+    have h2 : ‖(1:ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖ ≤ 2*‖z‖*x := by
+      rw [hcpow_exp, ← norm_neg]
+      have h3 := Complex.norm_exp_sub_one_le hznorm
+      calc ‖-(1 - Complex.exp (-z * (Real.log (1+x) : ℂ)))‖
+          = ‖Complex.exp (-z * (Real.log (1+x) : ℂ)) - 1‖ := by
+            rw [neg_sub]
+        _ ≤ 2 * ‖-z * (Real.log (1+x) : ℂ)‖ := h3
+        _ = 2 * (‖z‖ * Real.log (1+x)) := by
+            rw [norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs,
+              abs_of_nonneg hlog_nonneg]
+        _ ≤ 2*‖z‖*x := by
+            have := mul_le_mul_of_nonneg_left hlog_le (norm_nonneg z)
+            nlinarith [norm_nonneg z]
+    calc ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+        ≤ x + 2*‖z‖*x := by
+          have := htri
+          linarith
+      _ = (1 + 2*‖z‖) * x := by ring
+  · -- tail: dominated by e^{-x}/x₀ + x^{-(1+Re z)}
+    refine MeasureTheory.Integrable.mono'
+      (g := fun x => (1/x₀) * Real.exp (-x) + x ^ (-(1 + z.re)))
+      (MeasureTheory.Integrable.add ?_ ?_)
+      (hmeas.mono_measure (Measure.restrict_mono (Set.Ioi_subset_Ioi hx₀pos.le) le_rfl)) ?_
+    · have h0 := exp_neg_integrableOn_Ioi x₀ (one_pos)
+      have h1 : IntegrableOn (fun x : ℝ => Real.exp (-x)) (Set.Ioi x₀) := by
+        refine h0.congr_fun (fun x _ => ?_) measurableSet_Ioi
+        show Real.exp (-1 * x) = Real.exp (-x)
+        rw [neg_one_mul]
+      exact h1.const_mul _
+    · refine integrableOn_Ioi_rpow_of_lt (by linarith) hx₀pos
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
+      refine Filter.Eventually.of_forall (fun x hx => ?_)
+      rw [Set.mem_Ioi] at hx
+      have hx0 : 0 < x := lt_trans hx₀pos hx
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0]
+      rw [div_le_iff₀ hx0]
+      have hnorm_sub : ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+          ≤ Real.exp (-x) + (1+x) ^ (-z.re) := by
+        calc ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+            ≤ ‖((Real.exp (-x) : ℝ) : ℂ)‖ + ‖((1+x : ℝ) : ℂ) ^ (-z)‖ := norm_sub_le _ _
+          _ = Real.exp (-x) + (1+x) ^ (-z.re) := by
+              rw [Complex.norm_real, Real.norm_eq_abs, Real.abs_exp,
+                Complex.norm_cpow_eq_rpow_re_of_pos (by linarith : (0:ℝ) < 1+x),
+                Complex.neg_re]
+      calc ‖((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-z)‖
+          ≤ Real.exp (-x) + (1+x) ^ (-z.re) := hnorm_sub
+        _ ≤ (1/x₀) * Real.exp (-x) * x + x ^ (-(1 + z.re)) * x := by
+            have hp1 : Real.exp (-x) ≤ (1/x₀) * Real.exp (-x) * x := by
+              have h5 : (1:ℝ) ≤ x/x₀ := (one_le_div hx₀pos).mpr hx.le
+              calc Real.exp (-x) = Real.exp (-x) * 1 := (mul_one _).symm
+                _ ≤ Real.exp (-x) * (x/x₀) :=
+                    mul_le_mul_of_nonneg_left h5 (Real.exp_pos _).le
+                _ = (1/x₀) * Real.exp (-x) * x := by ring
+            have hp2 : (1+x) ^ (-z.re) ≤ x ^ (-(1 + z.re)) * x := by
+              have h4 : (1+x) ^ (-z.re) ≤ x ^ (-z.re) := by
+                refine Real.rpow_le_rpow_of_nonpos hx0 (by linarith) (by linarith)
+              calc (1+x) ^ (-z.re) ≤ x ^ (-z.re) := h4
+                _ = x ^ (-(1 + z.re)) * x := by
+                    rw [show x ^ (-(1 + z.re)) * x
+                        = x ^ (-(1 + z.re)) * x ^ (1:ℝ) by rw [Real.rpow_one],
+                      ← Real.rpow_add hx0]
+                    ring_nf
+            linarith
+        _ = ((1/x₀) * Real.exp (-x) + x ^ (-(1 + z.re))) * x := by ring
+
+/-- **Poitou's difference form of Gauss's formula** (p. 6-03, eq. (5), applied to a
+difference so that both counterterms cancel): for `σ > 0` real and `Re w > 0`,
+
+`ψ(w) - ψ(σ) = ∫₀^∞ (e^{-σu} - e^{-wu})/(1 - e^{-u}) du`.
+
+Change of variables `x = e^u - 1` in the difference of two Gauss first-form integrals. -/
+theorem digamma_sub_digamma_eq_integral {σ : ℝ} (hσ : 0 < σ) {w : ℂ} (hw : 0 < w.re) :
+    Complex.digamma w - Complex.digamma (σ:ℂ)
+      = ∫ u in Set.Ioi (0:ℝ),
+          (Complex.exp (-(σ:ℂ) * (u:ℂ)) - Complex.exp (-w * (u:ℂ)))
+            / (1 - Complex.exp (-(u:ℂ))) := by
+  have hσ' : 0 < ((σ:ℂ)).re := by simpa using hσ
+  rw [digamma_eq_integral_gauss_one hw, digamma_eq_integral_gauss_one hσ',
+    ← MeasureTheory.integral_sub (integrableOn_gauss_one_integrand hw)
+      (integrableOn_gauss_one_integrand hσ')]
+  -- the e^{-x}/x counterterms cancel
+  have hstep1 : (∫ x in Set.Ioi (0:ℝ),
+      ((((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-w)) / (x:ℂ)
+        - (((Real.exp (-x) : ℝ) : ℂ) - ((1+x : ℝ) : ℂ) ^ (-(σ:ℂ))) / (x:ℂ)))
+      = ∫ x in Set.Ioi (0:ℝ),
+          (((1+x : ℝ) : ℂ) ^ (-(σ:ℂ)) - ((1+x : ℝ) : ℂ) ^ (-w)) / (x:ℂ) := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x _ => ?_)
+    ring
+  rw [hstep1]
+  -- change of variables x = e^u - 1
+  set g : ℝ → ℝ := fun u => Real.exp u - 1 with hg
+  have himg : g '' Set.Ioi 0 = Set.Ioi (0:ℝ) := by
+    ext x
+    simp only [Set.mem_image, Set.mem_Ioi]
+    constructor
+    · rintro ⟨u, hu, rfl⟩
+      rw [hg]
+      simp only
+      have := Real.exp_lt_exp.mpr hu
+      rw [Real.exp_zero] at this
+      linarith
+    · intro hx
+      refine ⟨Real.log (1+x), ?_, ?_⟩
+      · refine Real.log_pos ?_
+        linarith
+      · rw [hg]
+        simp only
+        rw [Real.exp_log (by linarith)]
+        ring
+  have hderiv : ∀ u ∈ Set.Ioi (0:ℝ), HasDerivWithinAt g (Real.exp u) (Set.Ioi 0) u := by
+    intro u _
+    exact ((Real.hasDerivAt_exp u).sub_const 1).hasDerivWithinAt
+  have hinj : Set.InjOn g (Set.Ioi 0) := by
+    have hmono : StrictMono g := by
+      intro a b hab
+      rw [hg]
+      simp only
+      have := Real.exp_lt_exp.mpr hab
+      linarith
+    exact (hmono.injective).injOn
+  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi hderiv hinj
+    (fun x : ℝ => (((1+x : ℝ) : ℂ) ^ (-(σ:ℂ)) - ((1+x : ℝ) : ℂ) ^ (-w)) / (x:ℂ))
+  rw [himg] at hcov
+  rw [hcov]
+  -- pointwise identification with the exponential kernel
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
+  rw [Set.mem_Ioi] at hu
+  have hexp1 : (0:ℝ) < Real.exp u - 1 := by
+    have := Real.exp_lt_exp.mpr hu
+    rw [Real.exp_zero] at this
+    linarith
+  have hbase : (1 + (g u) : ℝ) = Real.exp u := by
+    rw [hg]
+    ring
+  -- (e^u)^{-z} = exp(-zu) for both exponents
+  have hcpow : ∀ z : ℂ, ((1 + (g u) : ℝ) : ℂ) ^ (-z) = Complex.exp (-z * (u:ℂ)) := by
+    intro z
+    rw [hbase, Complex.cpow_def_of_ne_zero (by
+      exact_mod_cast (Real.exp_pos u).ne'),
+      ← Complex.ofReal_log (Real.exp_pos u).le, Real.log_exp]
+    ring_nf
+  rw [show |Real.exp u| = Real.exp u from abs_of_pos (Real.exp_pos u)]
+  rw [Complex.real_smul, hcpow, hcpow]
+  have hgu : ((g u : ℝ) : ℂ) = ((Real.exp u - 1 : ℝ) : ℂ) := by
+    rw [hg]
+  rw [hgu]
+  have hne1 : ((Real.exp u - 1 : ℝ) : ℂ) ≠ 0 := by
+    exact_mod_cast hexp1.ne'
+  have hne2 : (1 : ℂ) - Complex.exp (-(u:ℂ)) ≠ 0 := by
+    have h2 : Complex.exp (-(u:ℂ)) = ((Real.exp (-u) : ℝ) : ℂ) := by
+      rw [Complex.ofReal_exp]
+      push_cast
+      ring_nf
+    rw [h2]
+    have h3 : Real.exp (-u) < 1 := by
+      have := Real.exp_lt_exp.mpr (show -u < 0 by linarith)
+      rwa [Real.exp_zero] at this
+    intro h
+    have h4 := sub_eq_zero.mp h
+    have h5 : (1:ℝ) = Real.exp (-u) := by exact_mod_cast h4
+    linarith
+  rw [← mul_div_assoc, div_eq_div_iff hne1 hne2]
+  have hkey : ((Real.exp u : ℝ) : ℂ) * (1 - Complex.exp (-(u:ℂ)))
+      = ((Real.exp u - 1 : ℝ) : ℂ) := by
+    rw [Complex.ofReal_exp]
+    push_cast
+    rw [mul_sub, mul_one, ← Complex.exp_add]
+    simp
+  linear_combination (Complex.exp (-(σ:ℂ) * (u:ℂ)) - Complex.exp (-w * (u:ℂ))) * hkey
 
 end DedekindResidue
