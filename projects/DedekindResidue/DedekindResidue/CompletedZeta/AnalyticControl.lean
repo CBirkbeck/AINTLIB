@@ -2087,6 +2087,287 @@ theorem exists_H_ball_factorization (c : ℂ) {R : ℝ}
   congr 1
   rw [Function.FactorizedRational.finprod_eq_fun hfinsupp]
 
+/-- Sphere-sup bound for the Landau ball: at center `A+iT` with the larger radius
+`A+3`, every point of the closed ball satisfies the decaying envelope bound (in
+terms of `|T|`). Left of the critical strip the functional equation reflects the
+bound from the right half-plane. -/
+theorem exists_H_ball_sup_big (A : ℝ) (hA : 2 ≤ A) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ T : ℝ, A + 5 ≤ |T| →
+      ∀ z ∈ Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (A + 3),
+        ‖completedDedekindZetaEntire K z‖
+          ≤ C * (1 + |T|)^P
+            * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |T|)) / 4) := by
+  obtain ⟨C₁, hC₁, hstrip⟩ := exists_H_strip_decay K
+  obtain ⟨C₂, hC₂, P₂, hright⟩ := exists_H_upper_right K (2*A + 3) (by linarith)
+  set n : ℕ := gammaExponent K with hn
+  refine ⟨(C₁ + C₂) * (4 + A)^(n + 2 + P₂)
+    * Real.exp (((n:ℕ) : ℝ) * (π * (A + 3)) / 4), by positivity,
+    n + 2 + P₂, fun T hT z hz => ?_⟩
+  rw [Metric.mem_closedBall] at hz
+  -- coordinates of z
+  have hre : |z.re - A| ≤ A + 3 := by
+    have h1 : |(z - ((A : ℂ) + (T : ℂ) * Complex.I)).re| ≤ A + 3 := by
+      refine le_trans (Complex.abs_re_le_norm _) ?_
+      rw [Complex.dist_eq] at hz
+      exact hz
+    have h2 : (z - ((A : ℂ) + (T : ℂ) * Complex.I)).re = z.re - A := by simp
+    rwa [h2] at h1
+  have him : |z.im - T| ≤ A + 3 := by
+    have h1 : |(z - ((A : ℂ) + (T : ℂ) * Complex.I)).im| ≤ A + 3 := by
+      refine le_trans (Complex.abs_im_le_norm _) ?_
+      rw [Complex.dist_eq] at hz
+      exact hz
+    have h2 : (z - ((A : ℂ) + (T : ℂ) * Complex.I)).im = z.im - T := by simp
+    rwa [h2] at h1
+  have hzre1 : -3 ≤ z.re := by
+    have := abs_le.mp hre
+    linarith [this.1]
+  have hzre2 : z.re ≤ 2*A + 3 := by
+    have := abs_le.mp hre
+    linarith [this.2]
+  -- |z.im| is comparable to |T|
+  have himlow : |T| - (A + 3) ≤ |z.im| := by
+    have h1 : |T| - |z.im| ≤ |z.im - T| := by
+      calc |T| - |z.im| ≤ |T - z.im| := abs_sub_abs_le_abs_sub T z.im
+        _ = |z.im - T| := abs_sub_comm T z.im
+    linarith
+  have himup : |z.im| ≤ |T| + (A + 3) := by
+    have h1 : |z.im| - |T| ≤ |z.im - T| := abs_sub_abs_le_abs_sub z.im T
+    linarith
+  have him2 : 2 ≤ |z.im| := by linarith
+  have him1t : 1 + |z.im| ≤ (4 + A) * (1 + |T|) := by
+    have h1T : (1:ℝ) ≤ |T| := by linarith
+    nlinarith
+  -- envelope transfer from |z.im| to |T|
+  have henv : Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4)
+      ≤ Real.exp (((n:ℕ) : ℝ) * (π * (A + 3)) / 4)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+    rw [← Real.exp_add, Real.exp_le_exp]
+    have hπ0 : (0:ℝ) ≤ π := Real.pi_pos.le
+    have hn0 : (0:ℝ) ≤ (n:ℕ) := Nat.cast_nonneg n
+    nlinarith [mul_nonneg hn0 hπ0]
+  -- the three regimes
+  have hcase : ‖completedDedekindZetaEntire K z‖
+      ≤ (C₁ + C₂) * (1 + |z.im|)^(n + 2 + P₂)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4) := by
+    have h1z : (1:ℝ) ≤ 1 + |z.im| := by linarith [abs_nonneg z.im]
+    rcases le_or_gt z.re 2 with hzcase | hzcase
+    · rcases le_or_gt (-1) z.re with hzleft | hzleft
+      · -- critical strip: direct decay bound
+        have hb := hstrip z hzleft hzcase (by linarith [him2])
+        refine le_trans hb ?_
+        refine mul_le_mul (mul_le_mul (by linarith) (pow_le_pow_right₀ h1z (by omega))
+          (by positivity) (by linarith)) le_rfl (by positivity) (by positivity)
+      · -- left of the strip: reflect via the functional equation
+        have hfe : completedDedekindZetaEntire K z
+            = completedDedekindZetaEntire K (1 - z) :=
+          (completedDedekindZetaEntire_one_sub K z).symm
+        have hre1z : (1 - z).re = 1 - z.re := by simp
+        have him1z : |(1 - z).im| = |z.im| := by
+          have : (1 - z).im = -z.im := by simp
+          rw [this, abs_neg]
+        have hb := hright (1 - z) (by rw [hre1z]; linarith)
+          (by rw [hre1z]; linarith) (by rw [him1z]; exact him2)
+        rw [hfe]
+        rw [him1z] at hb
+        refine le_trans hb ?_
+        refine mul_le_mul (mul_le_mul (by linarith) (pow_le_pow_right₀ h1z (by omega))
+          (by positivity) (by linarith)) le_rfl (by positivity) (by positivity)
+    · -- right of the strip
+      have hb := hright z (le_of_lt hzcase) (by linarith [hzre2]) him2
+      refine le_trans hb ?_
+      refine mul_le_mul (mul_le_mul (by linarith) (pow_le_pow_right₀ h1z (by omega))
+        (by positivity) (by linarith)) le_rfl (by positivity) (by positivity)
+  refine le_trans hcase ?_
+  calc (C₁ + C₂) * (1 + |z.im|)^(n + 2 + P₂)
+      * Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4)
+      ≤ (C₁ + C₂) * ((4 + A) * (1 + |T|))^(n + 2 + P₂)
+        * (Real.exp (((n:ℕ) : ℝ) * (π * (A + 3)) / 4)
+          * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) := by
+        refine mul_le_mul (mul_le_mul_of_nonneg_left
+          (pow_le_pow_left₀ (by linarith [abs_nonneg z.im]) him1t _) (by positivity))
+          henv (by positivity) (by positivity)
+    _ = (C₁ + C₂) * (4 + A)^(n + 2 + P₂)
+        * Real.exp (((n:ℕ) : ℝ) * (π * (A + 3)) / 4)
+        * (1 + |T|)^(n + 2 + P₂)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+        rw [mul_pow]
+        ring
+
+/-- **Per-height zero counting at the Landau radius.** Given the abscissa `A` with the
+envelope-matched center lower bound, the number of zeros of `H` (with multiplicity) in
+the closed ball of radius `A+2` around `A+iT` is at most `C·log(2+|T|)`. Parametric in
+`A` and the center bound so that downstream users can share one `A`. -/
+theorem exists_ball_zero_count_big (A : ℝ) (hA2 : 2 ≤ A) (cL : ℝ) (hcL : 0 < cL)
+    (hlow : ∀ t : ℝ, 2 ≤ |t| →
+      cL * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+        / (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)
+        ≤ ‖completedDedekindZetaEntire K ((A : ℂ) + (t : ℂ) * Complex.I)‖) :
+    ∃ C : ℝ, 0 < C ∧ ∀ T : ℝ, A + 5 ≤ |T| →
+      ((∑ᶠ u, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2))) u : ℤ)
+        : ℝ) ≤ C * Real.log (2 + |T|) := by
+  obtain ⟨cB, hcB, P, hball⟩ := exists_H_ball_sup_big K A hA2
+  set n : ℕ := gammaExponent K with hn
+  set Pn : ℕ := nrRealPlaces K + nrComplexPlaces K with hPn
+  -- the ratio constant
+  set Cr : ℝ := cB / cL + 1 with hCr
+  have hCr1 : 1 ≤ Cr := by
+    rw [hCr]
+    have : 0 ≤ cB / cL := by positivity
+    linarith
+  -- geometry
+  have hApos : (0:ℝ) < A := by linarith
+  have hrpos : (0:ℝ) < A + 2 := by linarith
+  have hrR : A + 2 < A + 3 := by linarith
+  have hlogRr : 0 < Real.log ((A+3) / (A+2)) := by
+    refine Real.log_pos ?_
+    rw [lt_div_iff₀ hrpos]
+    linarith
+  refine ⟨(Real.log Cr + (P + Pn + 1)) / Real.log ((A+3) / (A+2)),
+    div_pos (by nlinarith [Real.log_nonneg hCr1, Nat.cast_nonneg (α := ℝ) P,
+      Nat.cast_nonneg (α := ℝ) Pn]) hlogRr, fun T hT => ?_⟩
+  set c : ℂ := (A : ℂ) + (T : ℂ) * Complex.I with hc
+  have hT2 : 2 ≤ |T| := by linarith
+  -- center value and its lower bound
+  have hHc := hlow T hT2
+  have hHcpos : 0 < ‖completedDedekindZetaEntire K c‖ := by
+    refine lt_of_lt_of_le ?_ hHc
+    positivity
+  have hHcne : completedDedekindZetaEntire K c ≠ 0 := by
+    intro h0
+    rw [h0] at hHcpos
+    simp at hHcpos
+  -- the normalized function
+  set g : ℂ → ℂ := fun z =>
+    (completedDedekindZetaEntire K c)⁻¹ * completedDedekindZetaEntire K z with hg
+  have hganal : AnalyticOnNhd ℂ g (Metric.closedBall c |A+3|) := by
+    intro z _
+    exact analyticAt_const.mul ((differentiable_completedDedekindZetaEntire K).analyticAt z)
+  have hgc : g c = 1 := by
+    rw [hg]
+    field_simp
+  -- sphere bound for g
+  have hM1 : (1:ℝ) ≤ Cr * (1 + |T|)^(P + Pn) := by
+    have h1T : (1:ℝ) ≤ 1 + |T| := by linarith [abs_nonneg T]
+    calc (1:ℝ) = 1 * 1 := by norm_num
+      _ ≤ Cr * (1 + |T|)^(P + Pn) :=
+          mul_le_mul hCr1 (one_le_pow₀ h1T) (by norm_num) (by linarith)
+  have hgbound : ∀ z ∈ Metric.sphere c |A+3|, ‖g z‖ ≤ Cr * (1 + |T|)^(P + Pn) := by
+    intro z hz
+    have hzball : z ∈ Metric.closedBall c (A+3) := by
+      rw [Metric.mem_closedBall]
+      rw [Metric.mem_sphere] at hz
+      rw [hz, abs_of_pos (by linarith : (0:ℝ) < A + 3)]
+    have hup := hball T hT z hzball
+    rw [hg]
+    rw [norm_mul, norm_inv]
+    have hE : (0:ℝ) < Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := Real.exp_pos _
+    have hinv : ‖completedDedekindZetaEntire K c‖⁻¹
+        ≤ ((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+      rw [inv_le_iff_one_le_mul₀ hHcpos]
+      have hstep : cL * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) / (1 + |T|)^Pn
+          * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) = 1 := by
+        field_simp
+      calc (1:ℝ) = cL * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) / (1 + |T|)^Pn
+          * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) :=
+            hstep.symm
+        _ ≤ ‖completedDedekindZetaEntire K c‖
+            * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) := by
+            refine mul_le_mul_of_nonneg_right hHc (by positivity)
+        _ = (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4))
+            * ‖completedDedekindZetaEntire K c‖ := by ring
+    calc ‖completedDedekindZetaEntire K c‖⁻¹ * ‖completedDedekindZetaEntire K z‖
+        ≤ (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4))
+          * (cB * (1 + |T|)^P * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) :=
+          mul_le_mul hinv hup (norm_nonneg _) (by positivity)
+      _ = cB / cL * (1 + |T|)^(P + Pn) := by
+          rw [show P + Pn = Pn + P by ring, pow_add]
+          field_simp
+          ring
+      _ ≤ Cr * (1 + |T|)^(P + Pn) :=
+          mul_le_mul_of_nonneg_right (by rw [hCr]; linarith) (by positivity)
+  -- Jensen counting for g
+  have habs_r : |A + 2| = A + 2 := abs_of_pos hrpos
+  have habs_R : |A + 3| = A + 3 := abs_of_pos (by linarith : (0:ℝ) < A + 3)
+  have hcount := AnalyticOnNhd.sum_divisor_le
+    (c := c) (r := A + 2) (R := A + 3) (M := Cr * (1 + |T|)^(P + Pn)) (f := g)
+    (by rw [habs_r]; exact hrpos)
+    (by rw [habs_r, habs_R]; exact hrR)
+    hM1 hganal (by rw [hgc]; norm_num) hgbound
+  -- divisor transfer to H
+  have hHmero : MeromorphicOn (completedDedekindZetaEntire K)
+      (Metric.closedBall c |A + 2|) := fun z _ =>
+    ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt
+  have hconstmero : MeromorphicOn (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹)
+      (Metric.closedBall c |A + 2|) := fun z _ =>
+    analyticAt_const.meromorphicAt
+  have hordc : ∀ z ∈ Metric.closedBall c |A + 2|,
+      meromorphicOrderAt (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹) z ≠ ⊤ := by
+    intro z _
+    classical
+    rw [meromorphicOrderAt_const, if_neg (inv_ne_zero hHcne)]
+    exact WithTop.zero_ne_top
+  have hcmem : c ∈ Metric.closedBall c |A + 2| := by
+    rw [habs_r]
+    exact Metric.mem_closedBall_self hrpos.le
+  have hordHc : meromorphicOrderAt (completedDedekindZetaEntire K) c ≠ ⊤ := by
+    rw [((differentiable_completedDedekindZetaEntire K).analyticAt c).meromorphicOrderAt_eq]
+    have h0 : analyticOrderAt (completedDedekindZetaEntire K) c = 0 :=
+      analyticOrderAt_eq_zero.mpr (Or.inr hHcne)
+    rw [h0]
+    simp
+  have hordH : ∀ z ∈ Metric.closedBall c |A + 2|,
+      meromorphicOrderAt (completedDedekindZetaEntire K) z ≠ ⊤ := by
+    intro z hz
+    exact MeromorphicOn.meromorphicOrderAt_ne_top_of_isPreconnected hHmero
+      ((convex_closedBall _ _).isPreconnected) hcmem hz hordHc
+  have hdiv : MeromorphicOn.divisor g (Metric.closedBall c |A + 2|)
+      = MeromorphicOn.divisor (completedDedekindZetaEntire K)
+        (Metric.closedBall c |A + 2|) := by
+    have hgdef : g = fun z => (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹) z
+        * completedDedekindZetaEntire K z := rfl
+    rw [hgdef, MeromorphicOn.divisor_fun_mul hconstmero hHmero hordc hordH,
+      MeromorphicOn.divisor_const]
+    simp
+  rw [hdiv] at hcount
+  rw [habs_r] at hcount
+  refine le_trans hcount ?_
+  -- the log-quotient bound
+  rw [hgc, norm_one, div_one]
+  have h1T : (1:ℝ) ≤ 1 + |T| := by linarith [abs_nonneg T]
+  have hL1 : (1:ℝ) ≤ Real.log (2 + |T|) := by
+    have he9 : Real.exp 1 ≤ 2 + |T| := by
+      have := Real.exp_one_lt_d9
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2 + |T|) := Real.log_le_log (Real.exp_pos 1) he9
+  have hlogM : Real.log (Cr * (1 + |T|)^(P + Pn))
+      ≤ (Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|) := by
+    rw [Real.log_mul (by positivity) (by positivity), Real.log_pow]
+    have hlog1 : Real.log (1 + |T|) ≤ Real.log (2 + |T|) :=
+      Real.log_le_log (by linarith) (by linarith)
+    have hlogCr : (0:ℝ) ≤ Real.log Cr := Real.log_nonneg hCr1
+    have hPP : (0:ℝ) ≤ ((P + Pn : ℕ) : ℝ) := Nat.cast_nonneg _
+    calc Real.log Cr + ((P + Pn : ℕ) : ℝ) * Real.log (1 + |T|)
+        ≤ Real.log Cr * Real.log (2 + |T|)
+          + ((P + Pn : ℕ) : ℝ) * Real.log (2 + |T|) := by
+          have h1 : Real.log Cr ≤ Real.log Cr * Real.log (2 + |T|) := by
+            nlinarith
+          have h2 : ((P + Pn : ℕ) : ℝ) * Real.log (1 + |T|)
+              ≤ ((P + Pn : ℕ) : ℝ) * Real.log (2 + |T|) :=
+            mul_le_mul_of_nonneg_left hlog1 hPP
+          linarith
+      _ ≤ (Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|) := by
+          push_cast
+          nlinarith
+  calc Real.log (Cr * (1 + |T|)^(P + Pn)) / Real.log ((A+3) / (A+2))
+      ≤ ((Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|))
+        / Real.log ((A+3) / (A+2)) := by
+        gcongr
+    _ = (Real.log Cr + (P + Pn + 1)) / Real.log ((A+3) / (A+2))
+        * Real.log (2 + |T|) := by ring
+
 end
 
 end DedekindResidue
