@@ -2336,4 +2336,46 @@ theorem integral_fourier_mul_fourier {k h : ℝ → ℂ}
   rw [hL, hR] at hpair
   exact hpair
 
+/-- **The mixed Plancherel pairing**: for `k ∈ L¹ ∩ L²` and `h ∈ L²` (not necessarily
+integrable), `∫ 𝓕k(ξ)·(𝓕₂h)(ξ) dξ = ∫ k(-x)·h(x) dx`, where `𝓕₂h` is (a representative
+of) the `L²` Fourier transform. -/
+theorem integral_fourier_mul_fourierL2 {k h : ℝ → ℂ}
+    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
+    (hh2 : MemLp h 2 (volume : Measure ℝ)) :
+    (∫ ξ : ℝ, 𝓕 k ξ * ((𝓕 (hh2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) ξ)
+      = ∫ x : ℝ, k (-x) * h x := by
+  classical
+  set kstar : ℝ → ℂ := fun x => conj (k (-x)) with hkstar
+  have hMP : MeasurePreserving (fun x : ℝ => -x) volume volume :=
+    Measure.measurePreserving_neg _
+  have hks1 : Integrable kstar := by
+    have h0 : Integrable (fun x : ℝ => k (-x)) :=
+      hMP.integrable_comp_of_integrable hk1
+    exact memLp_one_iff_integrable.mp ((memLp_one_iff_integrable.mpr h0).star)
+  have hks2 : MemLp kstar 2 (volume : Measure ℝ) := by
+    have h0 : MemLp (fun x : ℝ => k (-x)) 2 (volume : Measure ℝ) :=
+      hk2.comp_measurePreserving hMP
+    exact h0.star
+  have hpair := MeasureTheory.Lp.inner_fourier_eq
+    (hks2.toLp kstar) (hh2.toLp h)
+  rw [MeasureTheory.L2.inner_def, MeasureTheory.L2.inner_def] at hpair
+  have hL : (∫ a : ℝ, ⟪(𝓕 (hks2.toLp kstar) : Lp ℂ 2 (volume : Measure ℝ)) a,
+        (𝓕 (hh2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
+      = ∫ ξ : ℝ, 𝓕 k ξ * ((𝓕 (hh2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) ξ := by
+    refine MeasureTheory.integral_congr_ae ?_
+    filter_upwards [coeFn_fourier_toLp_two hks1 hks2] with ξ h1
+    rw [RCLike.inner_apply, h1, fourier_conj_neg, starRingEnd_self_apply]
+    exact mul_comm _ _
+  have hR : (∫ a : ℝ, ⟪(hks2.toLp kstar : Lp ℂ 2 (volume : Measure ℝ)) a,
+        (hh2.toLp h : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
+      = ∫ x : ℝ, k (-x) * h x := by
+    refine MeasureTheory.integral_congr_ae ?_
+    filter_upwards [hks2.coeFn_toLp, hh2.coeFn_toLp] with x h1 h2
+    rw [RCLike.inner_apply, h1, h2]
+    rw [hkstar]
+    simp only [starRingEnd_self_apply]
+    exact mul_comm _ _
+  rw [hL, hR] at hpair
+  exact hpair
+
 end DedekindResidue
