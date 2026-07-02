@@ -1146,9 +1146,13 @@ theorem rectangle_zero_capture {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 
     rw [Complex.mem_reProdIm, hzre, hwre, hzim, hwim]
     constructor
     · rw [Set.mem_Ioo]
-      constructor <;> simp <;> linarith
+      have h : (((1+a : ℝ) : ℂ)).re = 1 + a := by simp
+      rw [h]
+      constructor <;> linarith
     · rw [Set.mem_Ioo]
-      constructor <;> simp <;> linarith
+      have h : (((1+a : ℝ) : ℂ)).im = 0 := by simp
+      rw [h]
+      constructor <;> linarith
   have hHw₀ : completedDedekindZetaEntire K ((1+a : ℝ) : ℂ) ≠ 0 := by
     refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
     simp
