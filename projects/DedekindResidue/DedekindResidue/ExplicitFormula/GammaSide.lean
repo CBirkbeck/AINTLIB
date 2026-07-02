@@ -1032,4 +1032,150 @@ theorem integral_inv_two_cosh_half :
     nlinarith [h3, Real.exp_pos (u/2)]
   rw [hpt, ← hcov, hval]
 
+/-- The real cosine kernel of `re_digamma_sub_eq_integral` is integrable on `(0, ∞)`. -/
+theorem integrableOn_re_diff_kernel {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
+    IntegrableOn
+      (fun u : ℝ => Real.exp (-(σ*u)) * (1 - Real.cos (t*u)) / (1 - Real.exp (-u)))
+      (Set.Ioi 0) := by
+  have hw : 0 < ((σ:ℂ) + (t:ℂ)*Complex.I).re := by simp [hσ]
+  have h0 := (integrableOn_digamma_diff_kernel hσ hw).re
+  simp only [RCLike.re_to_complex] at h0
+  refine h0.congr ?_
+  refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
+  refine Filter.Eventually.of_forall (fun u hu => ?_)
+  rw [Set.mem_Ioi] at hu
+  have hden_pos : 0 < 1 - Real.exp (-u) := by
+    have := Real.exp_lt_exp.mpr (show -u < 0 by linarith)
+    rw [Real.exp_zero] at this
+    linarith
+  have hden_real : (1:ℂ) - Complex.exp (-(u:ℂ)) = ((1 - Real.exp (-u) : ℝ) : ℂ) := by
+    rw [Complex.ofReal_sub, Complex.ofReal_one, Complex.ofReal_exp]
+    push_cast
+    ring_nf
+  show ((Complex.exp (-(σ:ℂ) * (u:ℂ))
+      - Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)))
+        / (1 - Complex.exp (-(u:ℂ)))).re = _
+  rw [hden_real, div_eq_mul_inv, ← Complex.ofReal_inv, Complex.mul_re,
+    Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
+  have hre1 : (Complex.exp (-(σ:ℂ) * (u:ℂ))).re = Real.exp (-(σ*u)) := by
+    rw [Complex.exp_re]
+    have h1 : (-(σ:ℂ) * (u:ℂ)).re = -(σ*u) := by
+      simp [Complex.mul_re]
+    have h2 : (-(σ:ℂ) * (u:ℂ)).im = 0 := by
+      simp [Complex.mul_im]
+    rw [h1, h2, Real.cos_zero, mul_one]
+  have hre2 : (Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ))).re
+      = Real.exp (-(σ*u)) * Real.cos (t*u) := by
+    rw [Complex.exp_re]
+    have h1 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).re = -(σ*u) := by
+      simp [Complex.mul_re, Complex.add_re, Complex.add_im]
+    have h2 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).im = -(t*u) := by
+      simp [Complex.mul_im, Complex.add_re, Complex.add_im]
+    rw [h1, h2, Real.cos_neg]
+  rw [Complex.sub_re, hre1, hre2]
+  field_simp
+
+/-- **The quarter–half cosh combination** (Poitou p. 6-04, third display): the halved
+`σ = 1/4` kernel minus the `σ = 1/2` kernel is the hyperbolic-cosine kernel:
+
+`[Re ψ(1/4 + it/2) - ψ(1/4)-part] - [Re ψ(1/2 + it) - ψ(1/2)-part]
+   = ∫₀^∞ (1 - cos(tx))/(2 cosh(x/2)) dx`. -/
+theorem re_digamma_quarter_sub_half_eq_integral (t : ℝ) :
+    (Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
+        - Complex.digamma ((1/4 : ℝ):ℂ)).re
+      - (Complex.digamma (((1/2 : ℝ):ℂ) + ((t : ℝ):ℂ)*Complex.I)
+        - Complex.digamma ((1/2 : ℝ):ℂ)).re
+      = ∫ x in Set.Ioi (0:ℝ), (1 - Real.cos (t*x)) / (2 * Real.cosh (x/2)) := by
+  rw [re_digamma_sub_eq_integral (by norm_num : (0:ℝ) < 1/4) (t/2),
+    re_digamma_sub_eq_integral (by norm_num : (0:ℝ) < 1/2) t]
+  -- substitute u = 2x in the σ = 1/4 integral
+  set g : ℝ → ℝ := fun x => 2*x with hg
+  have himg : g '' Set.Ioi 0 = Set.Ioi (0:ℝ) := by
+    ext v
+    simp only [Set.mem_image, Set.mem_Ioi]
+    constructor
+    · rintro ⟨x, hx, rfl⟩
+      rw [hg]
+      simp only
+      linarith
+    · intro hv
+      exact ⟨v/2, by linarith, by rw [hg]; simp only; ring⟩
+  have hderiv : ∀ x ∈ Set.Ioi (0:ℝ), HasDerivWithinAt g 2 (Set.Ioi 0) x := by
+    intro x _
+    have h0 : HasDerivAt (fun x : ℝ => 2*x) 2 x := by
+      simpa using (hasDerivAt_id x).const_mul 2
+    exact h0.hasDerivWithinAt
+  have hinj : Set.InjOn g (Set.Ioi 0) := by
+    have hmono : StrictMono g := fun a b hab => by
+      rw [hg]
+      simp only
+      linarith
+    exact hmono.injective.injOn
+  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi hderiv hinj
+    (fun u : ℝ => Real.exp (-(1/4*u)) * (1 - Real.cos (t/2*u)) / (1 - Real.exp (-u)))
+  rw [himg] at hcov
+  rw [hcov]
+  -- integrable pieces for the subtraction
+  have hint2 := integrableOn_re_diff_kernel (by norm_num : (0:ℝ) < 1/2) t
+  have hint1 : IntegrableOn
+      (fun x : ℝ => |(2:ℝ)| • (Real.exp (-(1/4*(g x))) * (1 - Real.cos (t/2*(g x)))
+        / (1 - Real.exp (-(g x))))) (Set.Ioi 0) := by
+    have h0 := (MeasureTheory.integrableOn_image_iff_integrableOn_abs_deriv_smul
+      measurableSet_Ioi hderiv hinj
+      (fun u : ℝ => Real.exp (-(1/4*u)) * (1 - Real.cos (t/2*u))
+        / (1 - Real.exp (-u)))).mp ?_
+    · exact h0
+    · rw [himg]
+      exact integrableOn_re_diff_kernel (by norm_num : (0:ℝ) < 1/4) (t/2)
+  rw [← MeasureTheory.integral_sub hint1 hint2]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x hx => ?_)
+  rw [Set.mem_Ioi] at hx
+  rw [hg]
+  simp only
+  rw [abs_of_pos (by norm_num : (0:ℝ) < 2), smul_eq_mul]
+  -- kernel identity: 2e^{-x/2}/(1-e^{-2x}) - e^{-x/2}/(1-e^{-x}) = 1/(2cosh(x/2))
+  have hd1 : 0 < 1 - Real.exp (-(2*x)) := by
+    have := Real.exp_lt_exp.mpr (show -(2*x) < 0 by linarith)
+    rw [Real.exp_zero] at this
+    linarith
+  have hd2 : 0 < 1 - Real.exp (-x) := by
+    have := Real.exp_lt_exp.mpr (show -x < 0 by linarith)
+    rw [Real.exp_zero] at this
+    linarith
+  have hfactor : 1 - Real.exp (-(2*x)) = (1 - Real.exp (-x)) * (1 + Real.exp (-x)) := by
+    have h0 : Real.exp (-(2*x)) = Real.exp (-x) * Real.exp (-x) := by
+      rw [← Real.exp_add]
+      ring_nf
+    rw [h0]
+    ring
+  have hcosh : 2 * Real.cosh (x/2) = Real.exp (x/2) + Real.exp (-(x/2)) := by
+    rw [Real.cosh_eq]
+    ring
+  have hcosh_pos : (0:ℝ) < 2 * Real.cosh (x/2) := by
+    rw [hcosh]
+    positivity
+  -- arguments align: 1/4*(2x) = x/2, t/2*(2x) = t*x, 1/2*x = x/2
+  rw [show (1:ℝ)/4*(2*x) = x/2 by ring, show t/2*(2*x) = t*x by ring,
+    show (-(1/2*x) : ℝ) = -(x/2) by ring]
+  have hbr : 2/(1 - Real.exp (-(2*x))) - 1/(1 - Real.exp (-x)) = 1/(1 + Real.exp (-x)) := by
+    rw [hfactor]
+    have h1 : 0 < 1 + Real.exp (-x) := by positivity
+    field_simp
+    ring
+  have hker : Real.exp (-(x/2)) / (1 + Real.exp (-x)) = 1/(2*Real.cosh (x/2)) := by
+    rw [hcosh, div_eq_div_iff (by positivity) (by positivity)]
+    rw [mul_add, ← Real.exp_add, ← Real.exp_add]
+    ring_nf
+    rw [Real.exp_zero]
+  calc 2 * (Real.exp (-(x/2)) * (1 - Real.cos (t*x)) / (1 - Real.exp (-(2*x))))
+        - Real.exp (-(x/2)) * (1 - Real.cos (t*x)) / (1 - Real.exp (-x))
+      = (Real.exp (-(x/2)) * (1 - Real.cos (t*x)))
+          * (2/(1 - Real.exp (-(2*x))) - 1/(1 - Real.exp (-x))) := by ring
+    _ = (Real.exp (-(x/2)) * (1 - Real.cos (t*x))) * (1/(1 + Real.exp (-x))) := by
+        rw [hbr]
+    _ = (1 - Real.cos (t*x)) * (Real.exp (-(x/2)) / (1 + Real.exp (-x))) := by ring
+    _ = (1 - Real.cos (t*x)) * (1/(2*Real.cosh (x/2))) := by rw [hker]
+    _ = (1 - Real.cos (t*x)) / (2 * Real.cosh (x/2)) := by ring
+
 end DedekindResidue
