@@ -1264,4 +1264,300 @@ theorem tendsto_integral_cexp_sub_div_window {t : ℝ} (ht : 0 < t) :
     (Complex.continuous_ofReal.tendsto _).comp h3
   exact h4.const_mul _
 
+/-- **Differentiation of a Fourier-type set integral** (Lemme 1 engine, Poitou p. 6-05):
+if `G` and `x·G(x)` are integrable on `s`, then `t ↦ ∫_s G(x) e^{itx} dx` is
+differentiable with derivative `∫_s i·x·G(x) e^{itx} dx`. -/
+theorem hasDerivAt_integral_mul_cexp {G : ℝ → ℂ} {s : Set ℝ}
+    (hG : IntegrableOn G s) (hxG : IntegrableOn (fun x : ℝ => (x:ℂ) * G x) s) (t : ℝ) :
+    HasDerivAt (fun τ : ℝ => ∫ x in s, G x * Complex.exp ((τ * x : ℝ) * Complex.I))
+      (∫ x in s, Complex.I * (x:ℂ) * G x * Complex.exp ((t * x : ℝ) * Complex.I)) t := by
+  have hexp_meas : ∀ τ : ℝ, AEStronglyMeasurable
+      (fun x : ℝ => Complex.exp ((τ * x : ℝ) * Complex.I)) (volume.restrict s) := by
+    intro τ
+    refine (Continuous.aestronglyMeasurable ?_).restrict
+    fun_prop
+  have hexp_norm : ∀ τ x : ℝ, ‖Complex.exp ((τ * x : ℝ) * Complex.I)‖ = 1 := by
+    intro τ x
+    rw [Complex.norm_exp]
+    simp
+  have h := _root_.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := fun τ : ℝ => fun x : ℝ => G x * Complex.exp ((τ * x : ℝ) * Complex.I))
+    (F' := fun τ : ℝ => fun x : ℝ =>
+      Complex.I * (x:ℂ) * G x * Complex.exp ((τ * x : ℝ) * Complex.I))
+    (bound := fun x => ‖(x:ℂ) * G x‖)
+    (μ := volume.restrict s) (x₀ := t) (s := Metric.ball t 1)
+    (Metric.ball_mem_nhds t one_pos) ?_ ?_ ?_ ?_ ?_ ?_
+  · exact h.2
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    exact (hG.aestronglyMeasurable.mul (hexp_meas τ))
+  · refine hG.mul_bdd (c := 1) (hexp_meas t) ?_
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [hexp_norm t x]
+  · have h5 : AEStronglyMeasurable (fun x : ℝ => Complex.I * (x:ℂ))
+        (volume.restrict s) := (Continuous.aestronglyMeasurable (by fun_prop)).restrict
+    exact (h5.mul hG.aestronglyMeasurable).mul (hexp_meas t)
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    intro τ _
+    rw [norm_mul, hexp_norm τ x, mul_one, norm_mul]
+    rw [show ‖Complex.I * (x:ℂ)‖ = ‖(x:ℂ)‖ by
+      rw [norm_mul, Complex.norm_I, one_mul]]
+    rw [← norm_mul]
+  · exact hxG.norm
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    intro τ _
+    have h0 : HasDerivAt (fun τ : ℝ => τ * x) x τ := by
+      simpa using (hasDerivAt_id τ).mul_const x
+    have h1 : HasDerivAt (fun τ : ℝ => ((τ * x : ℝ) : ℂ)) ((x:ℝ):ℂ) τ :=
+      h0.ofReal_comp
+    have h2 : HasDerivAt (fun τ : ℝ => ((τ * x : ℝ) : ℂ) * Complex.I)
+        ((x:ℂ) * Complex.I) τ := h1.mul_const Complex.I
+    have h3 := h2.cexp
+    have h4 := h3.const_mul (G x)
+    have hval : G x * (Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I) * ((x:ℂ) * Complex.I))
+        = Complex.I * (x:ℂ) * G x * Complex.exp ((τ * x : ℝ) * Complex.I) := by
+      ring
+    rw [hval] at h4
+    exact h4
+
+/-- **Poitou's `γ`** (p. 6-05): the Fourier transform of `(F(0) - F(x))/x`, the
+non-summable `F(0)`-tails taken as improper sinc-tail limits. Defined for all `t`
+(the value at `t = 0` is junk). -/
+noncomputable def gammaFT (F : ℝ → ℂ) (t : ℝ) : ℂ :=
+  (∫ x in Set.Ioc (-1:ℝ) 1, (F 0 - F x)/(x:ℂ) * Complex.exp ((t*x : ℝ) * Complex.I))
+  + F 0 * (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ))
+  - ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, F x/(x:ℂ) * Complex.exp ((t*x : ℝ) * Complex.I)
+
+/-- **Lemme 1** (Poitou p. 6-04/6-05): away from `t = 0`, Poitou's `γ` is differentiable
+with `γ'(t) = -i·φ(t)`, `φ` the Fourier transform of `F`. -/
+theorem hasDerivAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    {t : ℝ} (ht : t ≠ 0) :
+    HasDerivAt (gammaFT F)
+      (-Complex.I * ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)) t := by
+  -- P1: the near-zero piece
+  have hxG₀ : IntegrableOn (fun x : ℝ => (x:ℂ) * ((F 0 - F x)/(x:ℂ)))
+      (Set.Ioc (-1) 1) := by
+    have h0 : IntegrableOn (fun x : ℝ => F 0 - F x) (Set.Ioc (-1:ℝ) 1) := by
+      refine (MeasureTheory.integrableOn_const (by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top)).sub hF.integrableOn
+    refine h0.congr ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+    filter_upwards [MeasureTheory.ae_iff.mpr (by
+      simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+      exact MeasureTheory.measure_singleton (0:ℝ) : volume {x : ℝ | ¬ x ≠ 0} = 0)]
+      with x hx _
+    have hxne : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx
+    exact (mul_div_cancel₀ _ hxne).symm
+  have hP1 := hasDerivAt_integral_mul_cexp hFdiv hxG₀ t
+  -- P3: the tail piece
+  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
+    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
+    · refine ((hF.aestronglyMeasurable.restrict.mul
+        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
+      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
+      refine Filter.Eventually.of_forall (fun x hx => ?_)
+      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+      push Not at hx
+      have hx1 : 1 ≤ |x| := by
+        rcases le_or_gt x (-1) with h | h
+        · rw [abs_of_nonpos (by linarith)]
+          linarith
+        · have := hx h
+          rw [abs_of_pos (by linarith)]
+          linarith
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+      exact div_le_self (norm_nonneg _) hx1
+  have hxGtail : IntegrableOn (fun x : ℝ => (x:ℂ) * (F x/(x:ℂ)))
+      (Set.Ioc (-1:ℝ) 1)ᶜ := by
+    refine hF.integrableOn.congr ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
+    refine Filter.Eventually.of_forall (fun x hx => ?_)
+    rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+    push Not at hx
+    have hxne : x ≠ 0 := by
+      rcases le_or_gt x (-1) with h | h
+      · linarith
+      · have := hx h
+        nlinarith
+    have hxne' : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hxne
+    field_simp
+  have hP3 := hasDerivAt_integral_mul_cexp hGtail hxGtail t
+  -- P2: the sinc-tail piece, locally sign-constant
+  have hP2 : HasDerivAt (fun τ : ℝ =>
+      F 0 * (2 * Complex.I * ((Real.sign τ * sincTail |τ| : ℝ) : ℂ)))
+      (F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ))) t := by
+    rcases lt_or_gt_of_ne ht with hneg | hpos
+    · -- t < 0 : locally sign = -1, |τ| = -τ
+      have hev : (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((Real.sign τ * sincTail |τ| : ℝ) : ℂ)))
+          =ᶠ[nhds t] (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((-(sincTail (-τ)) : ℝ) : ℂ))) := by
+        filter_upwards [eventually_lt_nhds hneg] with τ hτ
+        rw [Real.sign_of_neg hτ, abs_of_neg hτ]
+        norm_num
+      have h0 : HasDerivAt (fun τ : ℝ => sincTail (-τ)) (Real.sin t / t) t := by
+        have h1 := (hasDerivAt_sincTail (show -t ≠ 0 by simpa using ht)).comp t
+          ((hasDerivAt_id t).neg)
+        have h2 : -(Real.sin (-t) / (-t)) * -1 = Real.sin t / t := by
+          rw [Real.sin_neg]
+          field_simp
+        rw [h2] at h1
+        exact h1
+      have h3 : HasDerivAt (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((-(sincTail (-τ)) : ℝ) : ℂ)))
+          (F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ))) t := by
+        have h4 : HasDerivAt (fun τ : ℝ => ((-(sincTail (-τ)) : ℝ) : ℂ))
+            ((-(Real.sin t / t) : ℝ) : ℂ) t := by
+          have h5 : HasDerivAt (fun τ : ℝ => -(sincTail (-τ))) (-(Real.sin t / t)) t :=
+            h0.neg
+          exact h5.ofReal_comp
+        have h6 := h4.const_mul (F 0 * (2 * Complex.I))
+        have h7 : (fun τ : ℝ => F 0 * (2 * Complex.I) * ((-(sincTail (-τ)) : ℝ) : ℂ))
+            = fun τ : ℝ => F 0 * (2 * Complex.I * ((-(sincTail (-τ)) : ℝ) : ℂ)) := by
+          funext τ
+          ring
+        rw [h7] at h6
+        have h8 : F 0 * (2 * Complex.I) * ((-(Real.sin t / t) : ℝ) : ℂ)
+            = F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ)) := by ring
+        rw [h8] at h6
+        exact h6
+      exact h3.congr_of_eventuallyEq hev
+    · -- t > 0 : locally sign = 1, |τ| = τ
+      have hev : (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((Real.sign τ * sincTail |τ| : ℝ) : ℂ)))
+          =ᶠ[nhds t] (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((sincTail τ : ℝ) : ℂ))) := by
+        filter_upwards [eventually_gt_nhds hpos] with τ hτ
+        rw [Real.sign_of_pos hτ, abs_of_pos hτ, one_mul]
+      have h3 : HasDerivAt (fun τ : ℝ => F 0 * (2 * Complex.I
+          * ((sincTail τ : ℝ) : ℂ)))
+          (F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ))) t := by
+        have h4 : HasDerivAt (fun τ : ℝ => ((sincTail τ : ℝ) : ℂ))
+            ((-(Real.sin t / t) : ℝ) : ℂ) t :=
+          (hasDerivAt_sincTail ht).ofReal_comp
+        have h6 := h4.const_mul (F 0 * (2 * Complex.I))
+        have h7 : (fun τ : ℝ => F 0 * (2 * Complex.I) * ((sincTail τ : ℝ) : ℂ))
+            = fun τ : ℝ => F 0 * (2 * Complex.I * ((sincTail τ : ℝ) : ℂ)) := by
+          funext τ
+          ring
+        rw [h7] at h6
+        have h8 : F 0 * (2 * Complex.I) * ((-(Real.sin t / t) : ℝ) : ℂ)
+            = F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ)) := by ring
+        rw [h8] at h6
+        exact h6
+      exact h3.congr_of_eventuallyEq hev
+  -- assemble
+  have hsum := (hP1.add hP2).sub hP3
+  have hfun : (((fun τ : ℝ => ∫ x in Set.Ioc (-1:ℝ) 1, (F 0 - F x)/(x:ℂ)
+          * Complex.exp ((τ*x : ℝ) * Complex.I))
+        + fun τ : ℝ => F 0 * (2 * Complex.I * ((Real.sign τ * sincTail |τ| : ℝ) : ℂ)))
+      - fun τ : ℝ => ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, F x/(x:ℂ)
+          * Complex.exp ((τ*x : ℝ) * Complex.I))
+      = gammaFT F := by
+    funext τ
+    rfl
+  rw [hfun] at hsum
+  -- integrable building blocks on the window
+  have hexp_meas : AEStronglyMeasurable
+      (fun x : ℝ => Complex.exp ((t * x : ℝ) * Complex.I))
+      (volume.restrict (Set.Ioc (-1:ℝ) 1)) := by
+    refine (Continuous.aestronglyMeasurable ?_).restrict
+    fun_prop
+  have hexp_int : IntegrableOn (fun x : ℝ => Complex.exp ((t*x : ℝ) * Complex.I))
+      (Set.Ioc (-1:ℝ) 1) := by
+    refine MeasureTheory.Integrable.mono'
+      (g := fun _ => (1:ℝ))
+      (MeasureTheory.integrableOn_const (by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top)) hexp_meas ?_
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [Complex.norm_exp]
+    simp
+  have hFe_Ioc : IntegrableOn
+      (fun x : ℝ => F x * Complex.exp ((t*x : ℝ) * Complex.I)) (Set.Ioc (-1:ℝ) 1) := by
+    refine hF.integrableOn.mul_bdd (c := 1) hexp_meas ?_
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [Complex.norm_exp]
+    simp
+  have hFe_compl : IntegrableOn
+      (fun x : ℝ => F x * Complex.exp ((t*x : ℝ) * Complex.I)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
+    refine hF.integrableOn.mul_bdd (c := 1) ?_ ?_
+    · refine (Continuous.aestronglyMeasurable ?_).restrict
+      fun_prop
+    · refine Filter.Eventually.of_forall (fun x => ?_)
+      rw [Complex.norm_exp]
+      simp
+  -- V2: the window value
+  have hV2 : (∫ x in Set.Ioc (-1:ℝ) 1, Complex.exp ((t*x : ℝ) * Complex.I))
+      = ((2 * Real.sin t / t : ℝ) : ℂ) := by
+    have h0 := integral_cexp_window ht (1:ℝ)
+    rw [intervalIntegral.integral_of_le (by norm_num : (-1:ℝ) ≤ 1)] at h0
+    rw [one_mul] at h0
+    rw [← h0]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun x _ => ?_)
+    congr 1
+    push_cast
+    ring
+  -- V1: split the near-zero derivative integral
+  have hV1 : (∫ x in Set.Ioc (-1:ℝ) 1, Complex.I * (x:ℂ) * ((F 0 - F x)/(x:ℂ))
+      * Complex.exp ((t*x : ℝ) * Complex.I))
+      = Complex.I * F 0 * ((2 * Real.sin t / t : ℝ) : ℂ)
+        - Complex.I * ∫ x in Set.Ioc (-1:ℝ) 1,
+            F x * Complex.exp ((t*x : ℝ) * Complex.I) := by
+    have h0 : (∫ x in Set.Ioc (-1:ℝ) 1, Complex.I * (x:ℂ) * ((F 0 - F x)/(x:ℂ))
+        * Complex.exp ((t*x : ℝ) * Complex.I))
+        = ∫ x in Set.Ioc (-1:ℝ) 1,
+            (Complex.I * F 0 * Complex.exp ((t*x : ℝ) * Complex.I)
+              - Complex.I * (F x * Complex.exp ((t*x : ℝ) * Complex.I))) := by
+      refine MeasureTheory.integral_congr_ae ?_
+      refine ((MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_)
+      filter_upwards [MeasureTheory.ae_iff.mpr (by
+        simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+        exact MeasureTheory.measure_singleton (0:ℝ) : volume {x : ℝ | ¬ x ≠ 0} = 0)]
+        with x hx _
+      have hxne : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx
+      field_simp
+    rw [h0, MeasureTheory.integral_sub ((hexp_int.const_mul _)) (hFe_Ioc.const_mul _),
+      MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul, hV2]
+  -- V3: the tail derivative integral
+  have hV3 : (∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, Complex.I * (x:ℂ) * (F x/(x:ℂ))
+      * Complex.exp ((t*x : ℝ) * Complex.I))
+      = Complex.I * ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ,
+          F x * Complex.exp ((t*x : ℝ) * Complex.I) := by
+    rw [← MeasureTheory.integral_const_mul]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc.compl (fun x hx => ?_)
+    rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+    push Not at hx
+    have hxne : x ≠ 0 := by
+      rcases le_or_gt x (-1) with h | h
+      · linarith
+      · have := hx h
+        nlinarith
+    have hxne' : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hxne
+    field_simp
+  -- V5: recombine the full line
+  have hV5 : (∫ x in Set.Ioc (-1:ℝ) 1, F x * Complex.exp ((t*x : ℝ) * Complex.I))
+      + ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, F x * Complex.exp ((t*x : ℝ) * Complex.I)
+      = ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I) :=
+    MeasureTheory.integral_add_compl measurableSet_Ioc (by
+      refine hF.mul_bdd (c := 1) ?_ ?_
+      · refine Continuous.aestronglyMeasurable ?_
+        fun_prop
+      · refine Filter.Eventually.of_forall (fun x => ?_)
+        rw [Complex.norm_exp]
+        simp)
+  have hval : ((∫ x in Set.Ioc (-1:ℝ) 1, Complex.I * (x:ℂ) * ((F 0 - F x)/(x:ℂ))
+        * Complex.exp ((t*x : ℝ) * Complex.I))
+      + F 0 * (2 * Complex.I * ((-(Real.sin t / t) : ℝ) : ℂ)))
+      - ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, Complex.I * (x:ℂ) * (F x/(x:ℂ))
+          * Complex.exp ((t*x : ℝ) * Complex.I)
+      = -Complex.I * ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I) := by
+    rw [hV1, hV3, ← hV5]
+    push_cast
+    ring
+  rw [hval] at hsum
+  exact hsum
+
 end DedekindResidue
