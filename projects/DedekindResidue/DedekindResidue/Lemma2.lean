@@ -718,6 +718,191 @@ theorem fourier_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) {γ : �
            + (4*s - 2)*(Real.log X : ℂ)*(γ:ℂ)*Complex.cos ((Real.log X : ℂ)*(γ:ℂ))
            + 4*(γ:ℂ)*Complex.cos ((Real.log X : ℂ)*(γ:ℂ)))) * hEE'
 
+/-- **Belabas–Friedman Lemma 2, the `γ = 0` evaluation**: the paper's eq. (8) at `γ = 0`
+(the `sin(γT)/((h²+γ²)γ)`-term becomes its limit `T/h²`, giving
+`F̂(0) = 2T + 2(h+1/T)/h² - 4/h²·∫_T^∞ F_{s,X}(t)(ht+1)/t² dt`). Lean's total-function
+semantics of `sin(γT)/γ` at `γ = 0` stores junk, so the paper's single display is
+faithfully rendered as this separate companion. -/
+theorem fourier_auxF_zero (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
+    paperFourierIntegral (auxF s X) 0
+      = 2 * (Real.log X : ℂ)
+        + 2 * ((s - 1/2) + 1/(Real.log X : ℂ)) / (s - 1/2)^2
+        - 4 / (s - 1/2)^2 * ∫ t in Set.Ioi (Real.log X),
+            auxF s X t * (((s - 1/2)*t + 1)/t^2) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hTc0 : ((Real.log X : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hT0.ne'
+  have hh : 0 < (s - 1/2 : ℂ).re := by
+    have hre : (s - 1/2 : ℂ).re = s.re - 1/2 := by
+      simp [Complex.sub_re]
+    rw [hre]
+    linarith
+  have hhne : (s - 1/2 : ℂ) ≠ 0 := by
+    intro h0
+    rw [h0] at hh
+    simp at hh
+  have hh2 : ((s - 1/2 : ℂ))^2 ≠ 0 := pow_ne_zero 2 hhne
+  -- the tail branch of auxF is the exponential kernel times a constant
+  have htail_eq : ∀ t ∈ Set.Ioi (Real.log X), auxF s X t
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (Complex.exp (-(s - 1/2) * t) / t) := by
+    intro t ht
+    have htpos : 0 < t := hT0.trans ht
+    have hnot : ¬ |t| ≤ Real.log X := by
+      rw [abs_of_pos htpos]
+      exact not_le.mpr ht
+    have htc : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast htpos.ne'
+    rw [auxF, if_neg hnot, abs_of_pos htpos]
+    push_cast
+    rw [show -(s - 1/2) * ((t:ℂ) - (Real.log X : ℂ))
+        = -(s - 1/2) * (t:ℂ) + (s - 1/2) * (Real.log X : ℂ) by ring, Complex.exp_add]
+    field_simp
+  -- evenness reduction at γ = 0
+  rw [paperFourierIntegral_even (auxF s X) (auxF_neg s X) 0
+    (integrable_auxF_kernel s hX.le hs 0)]
+  -- the cosine factor is 1
+  have hcos0 : ∀ t : ℝ, ((Real.cos (t * 0) : ℝ) : ℂ) = 1 := fun t => by
+    rw [mul_zero, Real.cos_zero, Complex.ofReal_one]
+  -- integrability of auxF on the two pieces
+  have hIocInt : IntegrableOn (fun t : ℝ => auxF s X t * ((Real.cos (t * 0) : ℝ) : ℂ))
+      (Set.Ioc 0 (Real.log X)) := by
+    have hbase : IntegrableOn (fun _ : ℝ => (1 : ℂ)) (Set.Ioc 0 (Real.log X)) :=
+      Continuous.integrableOn_Ioc (by fun_prop)
+    refine hbase.congr_fun (fun t ht => ?_) measurableSet_Ioc
+    rw [auxF_of_le s X (by rw [abs_of_pos ht.1]; exact ht.2), hcos0, one_mul]
+  have hkerInt : IntegrableOn
+      (fun t : ℝ => Complex.exp (-(s - 1/2) * t) / t) (Set.Ioi (Real.log X)) := by
+    have := integrableOn_exp_div_mul_real (h := s - 1/2) hh hT0
+      (ψ := fun _ : ℝ => 1) continuous_const (C := 1) (fun t => by norm_num)
+    refine this.congr_fun (fun t _ => by push_cast; ring) measurableSet_Ioi
+  have hIoiInt : IntegrableOn (fun t : ℝ => auxF s X t * ((Real.cos (t * 0) : ℝ) : ℂ))
+      (Set.Ioi (Real.log X)) := by
+    have hbase : IntegrableOn (fun t : ℝ =>
+        (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (Complex.exp (-(s - 1/2) * t) / t)) (Set.Ioi (Real.log X)) :=
+      hkerInt.const_mul _
+    refine hbase.congr_fun (fun t ht => ?_) measurableSet_Ioi
+    rw [htail_eq t ht, hcos0, mul_one]
+  rw [show Set.Ioi (0:ℝ) = Set.Ioc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
+    (Set.Ioc_union_Ioi_eq_Ioi hT0.le).symm]
+  rw [setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hIocInt hIoiInt]
+  -- plateau piece: ∫ 1 over (0, T] is T
+  have hplat : (∫ t in Set.Ioc (0:ℝ) (Real.log X),
+      auxF s X t * ((Real.cos (t * 0) : ℝ) : ℂ)) = ((Real.log X : ℝ) : ℂ) := by
+    rw [show (∫ t in Set.Ioc (0:ℝ) (Real.log X),
+        auxF s X t * ((Real.cos (t * 0) : ℝ) : ℂ))
+        = ∫ _ in Set.Ioc (0:ℝ) (Real.log X), (1 : ℂ) from
+      setIntegral_congr_fun measurableSet_Ioc (fun t ht => by
+        rw [auxF_of_le s X (by rw [abs_of_pos ht.1]; exact ht.2), hcos0, one_mul])]
+    rw [setIntegral_const, Complex.real_smul, mul_one]
+    norm_num [Measure.real, Real.volume_Ioc, ENNReal.toReal_ofReal hT0.le]
+  -- tail piece: pull out the constant
+  have htint : (∫ t in Set.Ioi (Real.log X),
+      auxF s X t * ((Real.cos (t * 0) : ℝ) : ℂ))
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * ∫ t in Set.Ioi (Real.log X), Complex.exp (-(s - 1/2) * t) / t := by
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    rw [htail_eq t ht, hcos0, mul_one]
+  -- remainder integral: same constant relation
+  have hrint : (∫ t in Set.Ioi (Real.log X),
+      auxF s X t * (((s - 1/2)*t + 1)/t^2))
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * ∫ t in Set.Ioi (Real.log X),
+            (Complex.exp (-(s - 1/2) * t) / t) * (((s - 1/2)*t + 1)/t^2) := by
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    rw [htail_eq t ht]
+    ring
+  -- FTC on (T, ∞): the integrand (h²+(2ht+2)/t²)·g has antiderivative -(h+1/t)·g
+  have hI2 : IntegrableOn (fun t : ℝ =>
+      ((s - 1/2)^2 + (2*(s - 1/2)*t + 2)/t^2) * (Complex.exp (-(s - 1/2) * t) / t))
+      (Set.Ioi (Real.log X)) := by
+    have := integrableOn_gAux_deriv2_mul_real (h := s - 1/2) hh hT0
+      (ψ := fun _ : ℝ => 1) continuous_const (C := 1) (fun t => by norm_num)
+    refine this.congr_fun (fun t _ => by push_cast; ring) measurableSet_Ioi
+  have hFTC : (∫ t in Set.Ioi (Real.log X),
+      ((s - 1/2)^2 + (2*(s - 1/2)*t + 2)/t^2) * (Complex.exp (-(s - 1/2) * t) / t))
+      = ((s - 1/2) + 1/(Real.log X : ℂ))
+        * (Complex.exp (-(s - 1/2) * (Real.log X : ℂ)) / (Real.log X : ℂ)) := by
+    have := integral_Ioi_of_hasDerivAt_of_tendsto'
+      (f := fun t : ℝ => -((s - 1/2) + 1/t) * (Complex.exp (-(s - 1/2) * t) / t))
+      (f' := fun t : ℝ =>
+        ((s - 1/2)^2 + (2*(s - 1/2)*t + 2)/t^2) * (Complex.exp (-(s - 1/2) * t) / t))
+      (a := Real.log X) (m := 0)
+      (fun t ht => hasDerivAt_gAux_deriv (s - 1/2) (lt_of_lt_of_le hT0 ht))
+      hI2 ?_
+    · rw [this, zero_sub]
+      ring
+    · have hmain := tendsto_exp_div_mul_atTop (h := s - 1/2) hh
+        (v := fun t : ℝ => -((s - 1/2) + 1/(t:ℂ)))
+        (C := ‖(s - 1/2 : ℂ)‖ + 1/Real.log X) ?_
+      · exact hmain.congr (fun t => by ring)
+      · filter_upwards [Filter.eventually_ge_atTop (max (Real.log X) 1)] with t ht
+        have htT : Real.log X ≤ t := le_trans (le_max_left _ _) ht
+        have htpos : 0 < t :=
+          lt_of_lt_of_le (lt_of_lt_of_le one_pos (le_max_right _ _)) ht
+        rw [norm_neg]
+        refine le_trans (norm_add_le _ _) ?_
+        have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/Real.log X := by
+          rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
+          gcongr
+        linarith
+  -- split the FTC identity into the plain and remainder kernel integrals
+  have hRk : IntegrableOn (fun t : ℝ =>
+      (Complex.exp (-(s - 1/2) * t) / t) * (((s - 1/2)*t + 1)/t^2))
+      (Set.Ioi (Real.log X)) := by
+    have := integrableOn_bounded_mul_exp_div (h := s - 1/2) hh hT0
+      (φ := fun t : ℝ => ((s - 1/2)*(t:ℂ) + 1)/(t:ℂ)^2)
+      (C := ‖(s - 1/2 : ℂ)‖/Real.log X + 1/(Real.log X)^2) ?_ ?_
+    · exact this.congr_fun (fun t _ => by ring) measurableSet_Ioi
+    · refine ContinuousOn.div (by fun_prop) (by fun_prop) ?_
+      intro t ht
+      have : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans ht).ne'
+      exact pow_ne_zero 2 this
+    · intro t ht
+      have htpos : 0 < t := hT0.trans ht
+      rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
+      have hnum : ‖(s - 1/2)*(t:ℂ) + 1‖ ≤ ‖(s - 1/2 : ℂ)‖*t + 1 := by
+        have hht : ‖(s - 1/2)*(t:ℂ)‖ = ‖(s - 1/2 : ℂ)‖*t := by
+          simp [Complex.norm_real, abs_of_pos htpos]
+        calc ‖(s - 1/2)*(t:ℂ) + 1‖ ≤ ‖(s - 1/2)*(t:ℂ)‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+          _ = ‖(s - 1/2 : ℂ)‖*t + 1 := by rw [hht, norm_one]
+      calc ‖(s - 1/2)*(t:ℂ) + 1‖ / t^2 ≤ (‖(s - 1/2 : ℂ)‖*t + 1) / t^2 := by gcongr
+        _ = ‖(s - 1/2 : ℂ)‖/t + 1/t^2 := by field_simp
+        _ ≤ ‖(s - 1/2 : ℂ)‖/Real.log X + 1/(Real.log X)^2 := by
+            gcongr <;> exact le_of_lt ht
+  have hsplit : (∫ t in Set.Ioi (Real.log X),
+      ((s - 1/2)^2 + (2*(s - 1/2)*t + 2)/t^2) * (Complex.exp (-(s - 1/2) * t) / t))
+      = (s - 1/2)^2 * (∫ t in Set.Ioi (Real.log X), Complex.exp (-(s - 1/2) * t) / t)
+        + 2 * ∫ t in Set.Ioi (Real.log X),
+            (Complex.exp (-(s - 1/2) * t) / t) * (((s - 1/2)*t + 1)/t^2) := by
+    rw [← integral_const_mul, ← integral_const_mul,
+      ← integral_add (hkerInt.const_mul _) (hRk.const_mul _)]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    have htne : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans ht).ne'
+    field_simp
+  -- assemble
+  rw [hplat, htint, hrint]
+  have hIval : (∫ t in Set.Ioi (Real.log X), Complex.exp (-(s - 1/2) * t) / t)
+      = (((s - 1/2) + 1/(Real.log X : ℂ))
+          * (Complex.exp (-(s - 1/2) * (Real.log X : ℂ)) / (Real.log X : ℂ))
+        - 2 * ∫ t in Set.Ioi (Real.log X),
+            (Complex.exp (-(s - 1/2) * t) / t) * (((s - 1/2)*t + 1)/t^2))
+        / (s - 1/2)^2 := by
+    rw [eq_div_iff hh2]
+    linear_combination hFTC - hsplit
+  rw [hIval]
+  field_simp
+  ring_nf
+  have hEE₀ : Complex.exp ((Real.log X : ℂ) * (-1/2) + (Real.log X : ℂ) * s)
+      * Complex.exp ((Real.log X : ℂ) * (1/2) - (Real.log X : ℂ) * s) = 1 := by
+    rw [← Complex.exp_add,
+      show (Real.log X : ℂ) * (-1/2) + (Real.log X : ℂ) * s
+          + ((Real.log X : ℂ) * (1/2) - (Real.log X : ℂ) * s) = 0 by ring]
+    exact Complex.exp_zero
+  linear_combination (((1 : ℂ) - s*4 + s^2*4)⁻¹
+    * (4*(Real.log X : ℂ)*s - 2*(Real.log X : ℂ) + 4)) * hEE₀
+
 end
 
 end DedekindResidue
