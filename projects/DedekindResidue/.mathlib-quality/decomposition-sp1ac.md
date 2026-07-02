@@ -43,6 +43,29 @@ interpolation:
 ## The leaves (bottom-up; each with source + mathlib anchors)
 
 - **[AC-A1] Γ-strip two-sided bounds** (`CompletedZeta/GammaStrip.lean`):
+  **REFINED PLAN (2026-07-02 adversarial audit)**: constant-boundary three-lines is NOT
+  enough (gives bounded, non-decaying upper; quotients then blow up exponentially — the
+  ζ_K convexity bound genuinely needs the `e^{-π|t|/2}`-decaying upper). Route that works,
+  all inputs verified in mathlib:
+  (A1-i) DONE (7001571f): exact `‖Γ(1/2+it)‖² = π/cosh(πt)`, `‖Γ(1+it)‖² = πt/sinh(πt)`;
+    also derive `‖Γ(3/2+it)‖² = ‖1/2+it‖²·π/cosh(πt)` by recurrence when needed.
+  (A1-ii) `‖Γ(z)‖ ≤ Real.Gamma (Re z)` for `0 < Re z` (triangle ineq in
+    `Complex.Gamma_eq_integral`; check for existing mathlib name first).
+  (A1-iii) **PL comparator**: `G(z) := Γ(z)²·sin(πz)/z²` on the strip `Re ∈ [1/2, 3/2]`:
+    `|G| = π/|z|² ≤ 4π` on `Re = 1/2` (exact values + `|sin(π(1/2+it))| = cosh(πt)`),
+    `|G| = π·|1/2+it|²/|3/2+it|² ≤ π` on `Re = 3/2`; interior growth
+    `|G| ≤ Γ(σ)²·e^{π|t|}` is sub-double-exponential, so
+    `PhragmenLindelof.vertical_strip` (mathlib, verified) applies ⇒ `|G| ≤ C₀` on the
+    strip ⇒ `‖Γ(σ+it)‖ ≤ C·(1+|t|)·e^{-π|t|/2}` for `|t| ≥ 1`, `σ ∈ [1/2, 3/2]`
+    (using `|sin(x+iy)|² = sin²x + sinh²y ≥ sinh²y`).
+  (A1-iv) extend the decaying upper to any compact σ-strip by finite recurrence
+    (`Γ(z) = Γ(z+1)/z` leftward, `Γ(z+1) = zΓ(z)` rightward), poly-slack absorbing the
+    `z`-factors; state for `|t| ≥ 1`.
+  (A1-v) matching lower `‖Γ(σ+it)‖ ≥ c·e^{-π|t|/2}·(1+|t|)^{-A}` via
+    `1/Γ(z) = Γ(1-z)·sin(πz)/π` + (A1-iv) + `|sin(π(σ+it))| ≤ cosh(πt) ≤ e^{π|t|}`.
+  Deliverables: `exists_Gamma_strip_upper/lower` (∃ C A, two-sided with matching
+  exponential); then the Γℝ/Γℂ-product versions for `gammaFactor K`.
+  ORIGINAL SKETCH (superseded):
   `Gamma_half_line_norm_sq : ‖Γ(1/2+it)‖^2 = π/cosh(πt)`,
   `Gamma_one_line_norm_sq : ‖Γ(1+it)‖^2 = πt/sinh(πt)` (t ≠ 0),
   `norm_Gamma_le / le_norm_Gamma` on `σ ∈ [σ₀, σ₁]`, shape
