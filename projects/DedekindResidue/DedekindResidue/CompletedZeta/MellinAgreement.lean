@@ -2098,6 +2098,112 @@ theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
         exact hn hI.symm
       exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
 
+theorem sq_rpow_neg {x : ℝ} (hx : 0 ≤ x) (σ : ℝ) :
+    (x ^ 2) ^ (-σ) = x ^ (-(2 * σ)) := by
+  rw [← Real.rpow_natCast x 2, ← Real.rpow_mul hx]
+  norm_num
+
+open scoped Classical in
+/-- The `ℝ≥0∞` ideal sum is `ofReal` of the real one (e-v-b). -/
+theorem tsum_ideal_ofReal_eq {s : ℝ} (hs : 1 < s) :
+    (∑' b : (Ideal (𝓞 K))⁰,
+      ENNReal.ofReal (((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)))
+      = ENNReal.ofReal (∑' b : (Ideal (𝓞 K))⁰,
+          ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) :=
+  (ENNReal.ofReal_tsum_of_nonneg (fun b => Real.rpow_nonneg (Nat.cast_nonneg _) _)
+    (summable_ideal_norm_rpow K hs)).symm
+
+open scoped Classical in
+/-- The Dedekind zeta function at real `s > 1` is the (real) ideal-type norm sum (e-v-a). -/
+theorem dedekindZeta_real_eq {s : ℝ} (hs : 1 < s) :
+    dedekindZeta K (s : ℂ)
+      = ((∑' b : (Ideal (𝓞 K))⁰,
+          ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s) : ℝ) : ℂ) := by
+  rw [dedekindZeta, LSeries]
+  -- terms are ofReal of the real terms
+  have h2 : ∀ n : ℕ, (LSeries.term (fun m =>
+      ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = m} : ℕ) : ℂ)) (s : ℂ) n)
+      = (((if n = 0 then 0 else
+          (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ)
+            * (n : ℝ) ^ (-s) : ℝ)) : ℂ) := by
+    intro n
+    rw [LSeries.term]
+    split_ifs with hn
+    · rw [Complex.ofReal_zero]
+    · rw [show ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℕ) : ℂ)
+        = (((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℕ) : ℝ) : ℂ) by norm_cast]
+      rw [show ((n : ℂ)) ^ (s : ℂ) = ((n : ℝ) : ℂ) ^ ((s : ℝ) : ℂ) by norm_cast,
+        ← Complex.ofReal_cpow (Nat.cast_nonneg n), ← Complex.ofReal_div]
+      congr 1
+      rw [Real.rpow_neg (Nat.cast_nonneg n), div_eq_mul_inv]
+  rw [tsum_congr h2, ← Complex.ofReal_tsum]
+  congr 1
+  -- fiber-glue the real n-sum into the ideal-type sum
+  haveI hfibfin : ∀ n : ℕ, Finite {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := by
+    intro n
+    have hinj : Function.Injective (fun b : {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+        (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+          {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) := by
+      rintro b c hbc
+      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
+        (z : Ideal (𝓞 K))) hbc
+      exact Subtype.ext (Subtype.ext this)
+    haveI : Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = n} :=
+      (Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) n).to_subtype
+    exact Finite.of_injective _ hinj
+  have hsum := summable_ideal_norm_rpow K hs
+  have hsigma : Summable (fun p : (Σ n : ℕ, {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}) =>
+      ((Ideal.absNorm ((p.2 : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) :=
+    (Equiv.summable_iff (Equiv.sigmaFiberEquiv (fun b : (Ideal (𝓞 K))⁰ =>
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))))).mpr hsum
+  rw [show (∑' b : (Ideal (𝓞 K))⁰,
+      ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s))
+    = ∑' p : (Σ n : ℕ, {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}),
+        ((Ideal.absNorm ((p.2 : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s) from
+    (Equiv.tsum_eq (Equiv.sigmaFiberEquiv (fun b : (Ideal (𝓞 K))⁰ =>
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)))) _).symm]
+  rw [hsigma.tsum_sigma' (fun n => Summable.of_finite)]
+  refine tsum_congr (fun n => ?_)
+  -- evaluate the fiber sum (mirror of the summability tail)
+  have hconst : ∀ b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+      ((Ideal.absNorm ((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)
+        = ((n : ℝ)) ^ (-s) := fun b => by rw [b.2]
+  haveI : Fintype {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := Fintype.ofFinite _
+  rw [show (∑' b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+      ((Ideal.absNorm ((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s))
+    = ∑' _b : {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}, ((n : ℝ)) ^ (-s) from
+    tsum_congr hconst]
+  rw [tsum_fintype, Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  by_cases hn : n = 0
+  · subst hn
+    rw [if_pos rfl, Nat.cast_zero, Real.zero_rpow (by linarith), mul_zero]
+  · rw [if_neg hn]
+    congr 2
+    rw [← Nat.card_eq_fintype_card]
+    refine (Nat.card_congr ((Equiv.ofBijective (fun b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+      (⟨((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) ⟨?_, ?_⟩).symm))
+    · rintro b c hbc
+      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
+        (z : Ideal (𝓞 K))) hbc
+      exact Subtype.ext (Subtype.ext this)
+    · rintro ⟨I, hI⟩
+      have hIne : I ≠ 0 := by
+        intro h0
+        rw [h0] at hI
+        rw [show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hI
+        exact hn hI.symm
+      exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
+
 end
 
 end DedekindResidue
