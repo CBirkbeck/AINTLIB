@@ -561,6 +561,88 @@ theorem dualPlaceWeights_heckeWeights_eq {t : ℝ} (ht : 0 < t) (u : logSpace K)
   funext w
   rw [dualPlaceWeights_heckeWeights K ht u w, ite_mul_heckeWeights K (by positivity) (-u) w]
 
+open scoped Classical in
+/-- Integrating a lattice-periodic function over a `ZSpan` fundamental box is invariant
+under the affine involution `u ↦ -u + s`: the preimage of the box is again a fundamental
+domain, and periodic integrals agree on any two fundamental domains. -/
+theorem setIntegral_fundamentalDomain_comp_neg_add {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (b : Module.Basis κ ℝ (ι → ℝ)) (s : ι → ℝ) (f : (ι → ℝ) → ℝ)
+    (hf : ∀ l : Submodule.span ℤ (Set.range ⇑b), ∀ x, f (↑l + x) = f x) :
+    ∫ u in ZSpan.fundamentalDomain b, f (-u + s)
+      = ∫ u in ZSpan.fundamentalDomain b, f u := by
+  set τ : (ι → ℝ) → (ι → ℝ) := fun u => -u + s with hτ
+  have hmp : MeasurePreserving τ volume volume :=
+    (measurePreserving_add_right volume s).comp (Measure.measurePreserving_neg volume)
+  have hemb : MeasurableEmbedding τ :=
+    ((Homeomorph.neg (ι → ℝ)).trans (Homeomorph.addRight s)).measurableEmbedding
+  have hFD := ZSpan.isAddFundamentalDomain b volume
+  have hD' : IsAddFundamentalDomain (Submodule.span ℤ (Set.range ⇑b))
+      (τ ⁻¹' ZSpan.fundamentalDomain b) volume := by
+    refine hFD.preimage_of_equiv hmp.quasiMeasurePreserving
+      (e := fun l => -l) neg_involutive.bijective (fun g x => ?_)
+    show τ ((-g : Submodule.span ℤ (Set.range ⇑b)) +ᵥ x) = g +ᵥ τ x
+    rw [Submodule.vadd_def, Submodule.vadd_def, vadd_eq_add, vadd_eq_add, hτ]
+    push_cast
+    abel
+  have hset : ZSpan.fundamentalDomain b = τ ⁻¹' (τ ⁻¹' ZSpan.fundamentalDomain b) := by
+    ext x
+    have : τ (τ x) = x := by
+      rw [hτ]
+      simp only [neg_add_rev, neg_neg]
+      abel
+    simp [Set.mem_preimage, this]
+  conv_lhs => rw [hset]
+  rw [hmp.setIntegral_preimage_emb hemb]
+  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑b)) (ι → ℝ) volume :=
+    inferInstanceAs
+      (VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑b)).toAddSubgroup (ι → ℝ) volume)
+  refine hD'.setIntegral_eq hFD (f := f) (fun g x => ?_)
+  rw [Submodule.vadd_def, vadd_eq_add]
+  exact hf g x
+
+open scoped Classical in
+/-- **Inversion for the unit-averaged Hecke theta** `g_I`: the Mellin-ready form of the
+theta transformation. The `(1;4)`-duality factor has been absorbed into the norm-ray
+parameter (`4^(2r₂)·t⁻¹`) and a fundamental-domain translation, which the box integral
+does not see. -/
+theorem heckeG_inversion (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (ht : 0 < t) :
+    heckeG K I t
+      = (ZLattice.covolume (idealZLattice K I) volume)⁻¹ * (Real.sqrt t)⁻¹
+        * heckeG K (dualIdealUnit K I) ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹) := by
+  have hpt : ∀ u : logSpace K,
+      heckeTheta K I (heckeWeights K t u)
+        = (ZLattice.covolume (idealZLattice K I) volume)⁻¹ * (Real.sqrt t)⁻¹
+          * heckeTheta K (dualIdealUnit K I)
+              (heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹)
+                (-u + dualShift K)) := by
+    intro u
+    rw [heckeTheta_inversion K I _ (heckeWeights_pos K ht u),
+      prod_placeWeights_heckeWeights K ht u,
+      dualPlaceWeights_heckeWeights_eq K ht u]
+  rw [heckeG, heckeG]
+  simp only [hpt]
+  rw [MeasureTheory.integral_const_mul]
+  have hFDinv : ∫ u in ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+        heckeTheta K (dualIdealUnit K I)
+          (heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹) (-u + dualShift K))
+      = ∫ u in ZSpan.fundamentalDomain
+          ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+          heckeTheta K (dualIdealUnit K I)
+            (heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹) u) := by
+    refine setIntegral_fundamentalDomain_comp_neg_add
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) (dualShift K)
+      (fun u => heckeTheta K (dualIdealUnit K I)
+        (heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹) u))
+      (fun l x => ?_)
+    have hl : (l : logSpace K) ∈ unitLattice K :=
+      (le_of_eq ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis_span ℝ)) l.2
+    obtain ⟨a, -, ha⟩ := Submodule.mem_map.mp hl
+    rw [add_comm, ← ha]
+    exact heckeTheta_heckeWeights_periodic K (dualIdealUnit K I) _ x (Additive.toMul a)
+  rw [hFDinv]
+  ring
+
 end
 
 end DedekindResidue
