@@ -270,6 +270,309 @@ theorem exists_heckeTheta_dev_bound (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
     rw [hexp]
     ring
 
+/-- Monotone comparison for weighted Gaussian terms. -/
+theorem exp_weighted_le_exp_iso {c : ι → ℝ} {a : ℝ} (hca : ∀ i, a ≤ c i)
+    (x : EuclideanSpace ℝ ι) :
+    Real.exp (-π * ∑ i, c i * (x i) ^ 2) ≤ Real.exp (-π * ∑ i, a * (x i) ^ 2) := by
+  refine Real.exp_le_exp.mpr ?_
+  have h : ∑ i, a * (x i) ^ 2 ≤ ∑ i, c i * (x i) ^ 2 :=
+    Finset.sum_le_sum (fun i _ => mul_le_mul_of_nonneg_right (hca i) (sq_nonneg _))
+  nlinarith [Real.pi_pos]
+
+open scoped Classical in
+/-- **Joint continuity of the Hecke theta** in the ray parameter and the log-torus
+variable, at every positive `t`. -/
+theorem continuousAt_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
+    {p : ℝ × logSpace K} (hp : 0 < p.1) :
+    ContinuousAt (fun q : ℝ × logSpace K =>
+      heckeTheta K I (heckeWeights K q.1 q.2)) p := by
+  set a : ℝ := p.1 / 2 with ha_def
+  have ha : 0 < a := by positivity
+  set R : ℝ := ‖p.2‖ + 1 with hR_def
+  have hR : 0 ≤ R := by positivity
+  set m : ℝ := Real.exp (-(2 * (Fintype.card (InfinitePlace K)) * R)) with hm_def
+  have hm : 0 < m := Real.exp_pos _
+  set a' : ℝ := m * a ^ ((1 : ℝ) / (Module.finrank ℚ K)) with ha'_def
+  have ha' : 0 < a' := by
+    have : (0:ℝ) < a ^ ((1 : ℝ) / (Module.finrank ℚ K)) := Real.rpow_pos_of_pos ha _
+    positivity
+  have hsub : ∀ q : ℝ × logSpace K, q ∈ Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R →
+      ∀ i, a' ≤ placeWeights K (heckeWeights K q.1 q.2) i := by
+    rintro q ⟨hq1, hq2⟩ i
+    have hcoord : ∀ j, |q.2 j| ≤ R := by
+      intro j
+      calc |q.2 j| = ‖q.2 j‖ := (Real.norm_eq_abs _).symm
+        _ ≤ ‖q.2‖ := norm_le_pi_norm q.2 j
+        _ ≤ R := by
+            have := Metric.mem_ball.mp hq2
+            rw [dist_zero_right] at this
+            exact this.le
+    have hq1' : (0:ℝ) < q.1 := lt_trans ha hq1
+    have hbase := heckeWeights_ge_of_bounded K hR hcoord hq1'.le
+    have hple : ∀ w : InfinitePlace K, a' ≤ heckeWeights K q.1 q.2 w := by
+      intro w
+      refine le_trans ?_ (hbase w)
+      rw [ha'_def, hm_def]
+      refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
+      exact Real.rpow_le_rpow ha.le (Set.mem_Ioi.mp hq1).le (by positivity)
+    rcases i with (w | ⟨w, j⟩) <;> exact hple _
+  refine ContinuousOn.continuousAt (s := Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R) ?_ ?_
+  · show ContinuousOn (fun q : ℝ × logSpace K => ∑' v : idealZLattice K I,
+      Real.exp (-π * ∑ i : index K, placeWeights K (heckeWeights K q.1 q.2) i
+        * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)) _
+    refine continuousOn_tsum (u := fun v : idealZLattice K I =>
+      Real.exp (-π * ∑ i : index K, a' * ((v : EuclideanSpace ℝ (index K)) i) ^ 2))
+      (fun v => ?_) (summable_real_weightedGaussian _ ha' (fun i => le_refl _))
+      (fun v q hq => ?_)
+    · -- each term continuous on the set
+      refine ContinuousOn.rexp ?_
+      refine ContinuousOn.mul continuousOn_const ?_
+      refine continuousOn_finsetSum _ (fun i _ => ContinuousOn.mul ?_ continuousOn_const)
+      -- placeWeights (heckeWeights q.1 q.2) i continuous in q on the set
+      have hw : ∀ w : InfinitePlace K, ContinuousOn
+          (fun q : ℝ × logSpace K => heckeWeights K q.1 q.2 w)
+          (Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R) := by
+        intro w
+        show ContinuousOn (fun q : ℝ × logSpace K =>
+          q.1 ^ ((1 : ℝ) / (Module.finrank ℚ K))
+            * Real.exp (2 * fullLog K q.2 w / mult w)) _
+        refine ContinuousOn.mul ?_ ?_
+        · refine ContinuousOn.rpow_const (continuous_fst.continuousOn) ?_
+          rintro q ⟨hq1, -⟩
+          exact Or.inl (ne_of_gt (lt_trans ha hq1))
+        · refine Continuous.continuousOn ?_
+          refine Real.continuous_exp.comp ?_
+          refine Continuous.div_const ?_ _
+          refine Continuous.mul continuous_const ?_
+          -- fullLog continuous in u; compose with snd
+          have hfl : Continuous (fun u : logSpace K => fullLog K u w) := by
+            rw [show (fun u : logSpace K => fullLog K u w)
+              = fun u : logSpace K => if h : w = (w₀ : InfinitePlace K) then
+                  -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w'
+                else u ⟨w, h⟩ from rfl]
+            split_ifs with h
+            · exact (continuous_finsetSum Finset.univ (fun i _ => continuous_apply i)).neg
+            · exact continuous_apply _
+          exact hfl.comp continuous_snd
+      rcases i with (w | ⟨w, j⟩) <;>
+        · show ContinuousOn (fun q : ℝ × logSpace K => heckeWeights K q.1 q.2 _) _
+          exact hw _
+    · -- the uniform bound on the set
+      rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+      exact exp_weighted_le_exp_iso (hsub q hq) (v : EuclideanSpace ℝ (index K))
+  · refine IsOpen.mem_nhds (IsOpen.prod isOpen_Ioi Metric.isOpen_ball) ?_
+    refine ⟨?_, ?_⟩
+    · show a < p.1
+      rw [ha_def]
+      linarith
+    · show p.2 ∈ Metric.ball (0 : logSpace K) R
+      rw [Metric.mem_ball, dist_zero_right, hR_def]
+      linarith
+
+open scoped Classical in
+/-- Isotropic comparison for the full theta: weights bounded below give a theta bounded by
+the isotropic lattice Gaussian. -/
+theorem heckeTheta_le_iso (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {c : InfinitePlace K → ℝ}
+    {a : ℝ} (ha : 0 < a) (hca : ∀ w, a ≤ c w) :
+    heckeTheta K I c ≤ ∑' v : idealZLattice K I,
+      Real.exp (-π * ∑ i : index K, a * ((v : EuclideanSpace ℝ (index K)) i) ^ 2) := by
+  have hplaceW : ∀ i, a ≤ placeWeights K c i := by
+    rintro (w | ⟨w, j⟩) <;> exact hca _
+  rw [heckeTheta]
+  refine Summable.tsum_le_tsum (fun v => exp_weighted_le_exp_iso hplaceW _)
+    (summable_real_weightedGaussian _ ha hplaceW)
+    (summable_real_weightedGaussian _ ha (fun i => le_refl a))
+
+open scoped Classical in
+/-- The fundamental box of the unit lattice has coordinate-bounded elements. -/
+theorem exists_box_coord_bound :
+    ∃ R : ℝ, 0 ≤ R ∧ ∀ u ∈ ZSpan.fundamentalDomain
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+      ∀ i, |u i| ≤ R := by
+  obtain ⟨R₀, hR₀⟩ := (Metric.isBounded_iff_subset_closedBall 0).mp
+    (ZSpan.fundamentalDomain_isBounded
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ))
+  refine ⟨max R₀ 0, le_max_right _ _, fun u hu i => ?_⟩
+  have h1 : ‖u‖ ≤ R₀ := by
+    have := hR₀ hu
+    rwa [Metric.mem_closedBall, dist_zero_right] at this
+  calc |u i| = ‖u i‖ := (Real.norm_eq_abs _).symm
+    _ ≤ ‖u‖ := norm_le_pi_norm u i
+    _ ≤ R₀ := h1
+    _ ≤ max R₀ 0 := le_max_left _ _
+
+open scoped Classical in
+/-- **Continuity of the unit-averaged theta** on the positive ray. -/
+theorem continuousOn_heckeG (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    ContinuousOn (heckeG K I) (Set.Ioi (0 : ℝ)) := by
+  intro t₀ ht₀
+  refine ContinuousAt.continuousWithinAt ?_
+  have ht₀' : (0:ℝ) < t₀ := ht₀
+  obtain ⟨R, hR, hbox⟩ := exists_box_coord_bound K
+  set m : ℝ := Real.exp (-(2 * (Fintype.card (InfinitePlace K)) * R)) with hm_def
+  have hm : 0 < m := Real.exp_pos _
+  set a' : ℝ := m * (t₀ / 2) ^ ((1 : ℝ) / (Module.finrank ℚ K)) with ha'_def
+  have ha' : 0 < a' := by
+    have : (0:ℝ) < (t₀ / 2) ^ ((1 : ℝ) / (Module.finrank ℚ K)) :=
+      Real.rpow_pos_of_pos (by positivity) _
+    positivity
+  have hG : heckeG K I = fun t => (torsionOrder K : ℝ)⁻¹ *
+      ∫ u in ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+        heckeTheta K I (heckeWeights K t u) := by
+    funext t
+    rw [heckeG]
+  rw [hG]
+  refine ContinuousAt.mul continuousAt_const ?_
+  refine MeasureTheory.continuousAt_of_dominated (bound := fun _ =>
+    ∑' v : idealZLattice K I,
+      Real.exp (-π * ∑ i : index K, a' * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)) ?_ ?_ ?_ ?_
+  · -- a.e.-strong measurability near t₀
+    refine Filter.eventually_of_mem (Ioi_mem_nhds (show t₀ / 2 < t₀ by linarith)) ?_
+    intro t ht
+    have hcont : Continuous (fun u : logSpace K => heckeTheta K I (heckeWeights K t u)) := by
+      rw [continuous_iff_continuousAt]
+      intro u
+      have hj := continuousAt_heckeTheta_heckeWeights K I
+        (p := ((t : ℝ), u)) (lt_trans (by positivity) ht)
+      have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
+        (continuous_const.prodMk continuous_id).continuousAt
+      have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
+          = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
+            ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
+      rw [hcompeq]
+      exact ContinuousAt.comp (x := u) hj hin
+    exact hcont.aestronglyMeasurable
+  · -- uniform bound near t₀
+    refine Filter.eventually_of_mem (Ioi_mem_nhds (show t₀ / 2 < t₀ by linarith)) ?_
+    intro t ht
+    refine (MeasureTheory.ae_restrict_iff' (ZSpan.fundamentalDomain_measurableSet _)).mpr ?_
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    have hca : ∀ w, a' ≤ heckeWeights K t u w := by
+      intro w
+      refine le_trans ?_ (heckeWeights_ge_of_bounded K hR (hbox u hu)
+        (le_of_lt (lt_trans (by positivity) ht)) w)
+      rw [ha'_def, hm_def]
+      refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
+      exact Real.rpow_le_rpow (by positivity) (le_of_lt ht) (by positivity)
+    rw [Real.norm_eq_abs, abs_of_pos]
+    · exact heckeTheta_le_iso K I ha' hca
+    · -- theta positive: at least the zero term
+      have hsplit := heckeTheta_eq_one_add K I ha' hca
+      have htail : 0 ≤ ∑' v : idealZLattice K I, (if v = 0 then 0
+          else Real.exp (-π * ∑ i : index K,
+            placeWeights K (heckeWeights K t u) i
+              * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)) := by
+        refine tsum_nonneg (fun v => ?_)
+        split_ifs
+        · exact le_refl 0
+        · exact (Real.exp_pos _).le
+      rw [hsplit]
+      linarith
+  · -- the bound is integrable on the (finite-measure) box
+    exact MeasureTheory.integrableOn_const
+      (ne_top_of_lt (ZSpan.fundamentalDomain_isBounded _).measure_lt_top)
+  · -- a.e. continuity in t at t₀
+    refine Filter.Eventually.of_forall (fun u => ?_)
+    have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t₀ : ℝ), u)) ht₀'
+    have hin : ContinuousAt (fun t : ℝ => ((t : ℝ), u)) t₀ :=
+      (continuous_id.prodMk continuous_const).continuousAt
+    have hcompeq : (fun x : ℝ => heckeTheta K I (heckeWeights K x u))
+        = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
+          ∘ (fun t : ℝ => ((t : ℝ), u)) := rfl
+    rw [hcompeq]
+    exact ContinuousAt.comp (x := t₀) hj hin
+
+open scoped Classical in
+/-- The volume of the unit fundamental box — the constant term of the theta integral. -/
+noncomputable def unitBoxVol : ℝ :=
+  (volume (ZSpan.fundamentalDomain
+    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ))).toReal
+
+open scoped Classical in
+theorem unitBoxVol_pos : 0 < unitBoxVol K := by
+  rw [unitBoxVol]
+  exact ENNReal.toReal_pos (ZSpan.measure_fundamentalDomain_ne_zero _)
+    (ne_top_of_lt (ZSpan.fundamentalDomain_isBounded _).measure_lt_top)
+
+open scoped Classical in
+/-- **Exponential approach of `g_I` to its constant term**: for `t ≥ 1`,
+`|g_I(t) − w⁻¹·vol| ≤ C·exp(−c'·t^{1/n})`. -/
+theorem exists_heckeG_dev_bound (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    ∃ C c' : ℝ, 0 < C ∧ 0 < c' ∧ ∀ {t : ℝ}, 1 ≤ t →
+      |heckeG K I t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K|
+        ≤ C * Real.exp (-c' * t ^ ((1 : ℝ) / (Module.finrank ℚ K))) := by
+  obtain ⟨Cθ, c', hCθ, hc', hdev⟩ := exists_heckeTheta_dev_bound K I
+  have hw : (0:ℝ) < (torsionOrder K : ℝ)⁻¹ := by
+    have h1 : 0 < torsionOrder K := torsionOrder_pos K
+    have : (0:ℝ) < (torsionOrder K : ℝ) := by exact_mod_cast h1
+    positivity
+  refine ⟨(torsionOrder K : ℝ)⁻¹ * unitBoxVol K * Cθ, c',
+    by have := unitBoxVol_pos K; positivity, hc', fun {t} ht => ?_⟩
+  have ht0 : (0:ℝ) < t := lt_of_lt_of_le one_pos ht
+  set B := ZSpan.fundamentalDomain
+    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) with hBdef
+  have hBmeas : MeasurableSet B := ZSpan.fundamentalDomain_measurableSet _
+  have hBfin : volume B < ⊤ := (ZSpan.fundamentalDomain_isBounded _).measure_lt_top
+  -- integrability of Θ on the box
+  have hcontu : Continuous (fun u : logSpace K => heckeTheta K I (heckeWeights K t u)) := by
+    rw [continuous_iff_continuousAt]
+    intro u
+    have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t : ℝ), u)) ht0
+    have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
+      (continuous_const.prodMk continuous_id).continuousAt
+    have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
+        = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
+          ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
+    rw [hcompeq]
+    exact ContinuousAt.comp (x := u) hj hin
+  have hint : IntegrableOn (fun u : logSpace K =>
+      heckeTheta K I (heckeWeights K t u)) B := by
+    refine MeasureTheory.Integrable.mono'
+      (MeasureTheory.integrableOn_const (ne_top_of_lt hBfin)
+        (C := 1 + Cθ * Real.exp (-c' * t ^ ((1 : ℝ) / (Module.finrank ℚ K)))))
+      hcontu.aestronglyMeasurable.restrict ?_
+    refine (MeasureTheory.ae_restrict_iff' hBmeas).mpr (Filter.Eventually.of_forall
+      (fun u hu => ?_))
+    obtain ⟨h0, hle⟩ := hdev ht u hu
+    rw [Real.norm_eq_abs, abs_of_pos (by linarith)]
+    linarith
+  -- split off the constant
+  have hsplit : ∫ u in B, heckeTheta K I (heckeWeights K t u)
+      = unitBoxVol K + ∫ u in B, (heckeTheta K I (heckeWeights K t u) - 1) := by
+    rw [MeasureTheory.integral_sub hint (MeasureTheory.integrableOn_const
+      (ne_top_of_lt hBfin))]
+    rw [MeasureTheory.setIntegral_const, smul_eq_mul, mul_one]
+    have hvol : volume.real B = unitBoxVol K := by
+      rw [unitBoxVol, hBdef]
+      rfl
+    rw [hvol]
+    ring
+  have hGdev : heckeG K I t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K
+      = (torsionOrder K : ℝ)⁻¹
+        * ∫ u in B, (heckeTheta K I (heckeWeights K t u) - 1) := by
+    rw [heckeG, ← hBdef, hsplit]
+    ring
+  rw [hGdev, abs_mul, abs_of_pos hw]
+  have hbound : |∫ u in B, (heckeTheta K I (heckeWeights K t u) - 1)|
+      ≤ Cθ * Real.exp (-c' * t ^ ((1 : ℝ) / (Module.finrank ℚ K))) * (volume B).toReal := by
+    rw [← Real.norm_eq_abs]
+    refine MeasureTheory.norm_setIntegral_le_of_norm_le_const hBfin (fun u hu => ?_)
+    obtain ⟨h0, hle⟩ := hdev ht u hu
+    rw [Real.norm_eq_abs, abs_of_nonneg h0]
+    exact hle
+  calc (torsionOrder K : ℝ)⁻¹ * |∫ u in B, (heckeTheta K I (heckeWeights K t u) - 1)|
+      ≤ (torsionOrder K : ℝ)⁻¹
+        * (Cθ * Real.exp (-c' * t ^ ((1 : ℝ) / (Module.finrank ℚ K)))
+            * (volume B).toReal) := by
+        exact mul_le_mul_of_nonneg_left hbound hw.le
+    _ = (torsionOrder K : ℝ)⁻¹ * unitBoxVol K * Cθ
+        * Real.exp (-c' * t ^ ((1 : ℝ) / (Module.finrank ℚ K))) := by
+        have hvol2 : (volume B).toReal = unitBoxVol K := by
+          rw [unitBoxVol, hBdef]
+        rw [hvol2]
+        ring
+
 end
 
 end DedekindResidue
