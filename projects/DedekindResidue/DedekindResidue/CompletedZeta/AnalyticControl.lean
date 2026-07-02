@@ -3321,6 +3321,159 @@ theorem exists_le_norm_Gamma_window :
           / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
           gcongr
 
+/-- **AC-A6: vertical digamma bound.** On the contour window `-1 ≤ σ ≤ 2`, `|t| ≥ 2`,
+the digamma function satisfies `‖ψ(σ+it)‖ ≤ C·log(2+|t|)`. Landau's lemma applied to
+`Γ` on the unit ball around `σ+it`: the window sup and center bounds have matching
+envelopes `e^{-π|t'|/2}`, so the log-ratio is `O(log(2+|t|))`. -/
+theorem exists_norm_digamma_le :
+    ∃ C : ℝ, 0 < C ∧ ∀ σ t : ℝ, -1 ≤ σ → σ ≤ 2 → 2 ≤ |t| →
+      ‖Complex.digamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ ≤ C * Real.log (2 + |t|) := by
+  obtain ⟨Cu, hCu, Pu, hup⟩ := exists_norm_Gamma_le_window
+  obtain ⟨cl, hcl, hlow⟩ := exists_le_norm_Gamma_window
+  refine ⟨32 * (|Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| + (Pu + 3) + 1),
+    by positivity, fun σ t hσl hσr ht => ?_⟩
+  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  -- points of the unit ball: coordinates
+  have hball_re : ∀ z ∈ Metric.ball s 1, -2 ≤ z.re ∧ z.re ≤ 3 := by
+    intro z hz
+    rw [Metric.mem_ball] at hz
+    have h1 : |(z - s).re| ≤ dist z s := by
+      rw [dist_eq_norm]
+      exact Complex.abs_re_le_norm _
+    have h2 : (z - s).re = z.re - σ := by simp [hs]
+    rw [h2] at h1
+    have := abs_le.mp (le_trans h1 hz.le)
+    constructor <;> linarith [this.1, this.2]
+  have hball_im : ∀ z ∈ Metric.ball s 1, 1 ≤ |z.im| ∧ |t| - 1 ≤ |z.im|
+      ∧ |z.im| ≤ |t| + 1 := by
+    intro z hz
+    rw [Metric.mem_ball] at hz
+    have h1 : |(z - s).im| ≤ dist z s := by
+      rw [dist_eq_norm]
+      exact Complex.abs_im_le_norm _
+    have h2 : (z - s).im = z.im - t := by simp [hs]
+    rw [h2] at h1
+    have h3 : |z.im - t| ≤ 1 := le_trans h1 hz.le
+    have h4 : |t| - |z.im| ≤ |z.im - t| := by
+      calc |t| - |z.im| ≤ |t - z.im| := abs_sub_abs_le_abs_sub t z.im
+        _ = |z.im - t| := abs_sub_comm t z.im
+    have h5 : |z.im| - |t| ≤ |z.im - t| := abs_sub_abs_le_abs_sub z.im t
+    refine ⟨by linarith, by linarith, by linarith⟩
+  -- no poles in the ball
+  have hne_neg : ∀ z ∈ Metric.ball s 1, ∀ m : ℕ, z ≠ -(m : ℂ) := by
+    intro z hz m h0
+    have him := (hball_im z hz).1
+    rw [h0] at him
+    simp only [Complex.neg_im, Complex.natCast_im, neg_zero, abs_zero] at him
+    linarith
+  -- Γ is differentiable and zero-free on the ball
+  have hd : DifferentiableOn ℂ Complex.Gamma (Metric.ball s 1) := by
+    intro z hz
+    exact (Complex.differentiableAt_Gamma z (hne_neg z hz)).differentiableWithinAt
+  have h0 : ∀ z ∈ Metric.ball s 1, Complex.Gamma z ≠ 0 := by
+    intro z hz
+    exact Complex.Gamma_ne_zero (hne_neg z hz)
+  -- envelope pieces
+  set E : ℝ := Real.exp (-(π * |t|) / 2) with hE
+  have hEpos : 0 < E := Real.exp_pos _
+  set mS : ℝ := Cu * 2^Pu * Real.exp (π/2) * (1 + |t|)^Pu * E with hmS
+  set mL : ℝ := cl * E / (1 + |t|)^3 with hmL
+  have hmSpos : 0 < mS := by rw [hmS]; positivity
+  have hmLpos : 0 < mL := by rw [hmL]; positivity
+  -- sup bound on the ball
+  have hS : ∀ z ∈ Metric.ball s 1, ‖Complex.Gamma z‖ ≤ mS := by
+    intro z hz
+    obtain ⟨hre1, hre2⟩ := hball_re z hz
+    obtain ⟨him1, him2, him3⟩ := hball_im z hz
+    have hzeq : z = ((z.re : ℝ) : ℂ) + ((z.im : ℝ) : ℂ) * Complex.I := by
+      rw [Complex.re_add_im]
+    have hb := hup z.re z.im hre1 hre2 him1
+    rw [← hzeq] at hb
+    refine le_trans hb ?_
+    rw [hmS]
+    have he1 : Real.exp (-(π * |z.im|) / 2) ≤ Real.exp (π/2) * E := by
+      rw [hE, ← Real.exp_add, Real.exp_le_exp]
+      have hπ := Real.pi_pos
+      nlinarith
+    have hp1 : (1 + |z.im|)^Pu ≤ (2 + |t|)^Pu := by
+      refine pow_le_pow_left₀ (by linarith [abs_nonneg z.im]) (by linarith) _
+    have hp2 : ((2:ℝ) + |t|)^Pu ≤ (2 * (1 + |t|))^Pu := by
+      refine pow_le_pow_left₀ (by linarith) (by linarith) _
+    calc Cu * (1 + |z.im|)^Pu * Real.exp (-(π * |z.im|) / 2)
+        ≤ Cu * ((2 * (1 + |t|))^Pu) * (Real.exp (π/2) * E) := by
+          refine mul_le_mul (mul_le_mul_of_nonneg_left (le_trans hp1 hp2) hCu.le)
+            he1 (by positivity) (by positivity)
+      _ = Cu * 2^Pu * Real.exp (π/2) * (1 + |t|)^Pu * E := by
+          rw [mul_pow]
+          ring
+  -- center lower bound
+  have hcL : mL ≤ ‖Complex.Gamma s‖ := by
+    rw [hmL, hE]
+    exact hlow σ t hσl hσr (by linarith)
+  -- Landau
+  have hland := norm_logDeriv_le_of_norm_le (h := Complex.Gamma) (c := s) (r := 1)
+    (by norm_num) hd h0 hmLpos hcL hS
+  have hs_self : s ∈ Metric.closedBall s (1 - 3/4) := by
+    rw [Metric.mem_closedBall, dist_self]
+    norm_num
+  have hmain := hland s hs_self
+  -- identify digamma with logDeriv Γ
+  rw [show Complex.digamma = logDeriv Complex.Gamma from Complex.digamma_def]
+  refine le_trans hmain ?_
+  -- constant chase
+  set ℓ : ℝ := Real.log (2 + |t|) with hℓ
+  have hℓ1 : (1:ℝ) ≤ ℓ := by
+    rw [hℓ]
+    have he9 : Real.exp 1 ≤ 2 + |t| := by
+      have := Real.exp_one_lt_d9
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2 + |t|) := Real.log_le_log (Real.exp_pos 1) he9
+  have e1 : Real.log mS
+      = Real.log (Cu * 2^Pu) + π/2 + (Pu : ℝ) * Real.log (1 + |t|) + Real.log E := by
+    rw [hmS, Real.log_mul (by positivity) hEpos.ne',
+      Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by positivity) (Real.exp_pos _).ne',
+      Real.log_exp, Real.log_pow]
+  have e2 : Real.log mL
+      = Real.log cl + Real.log E - 3 * Real.log (1 + |t|) := by
+    rw [hmL, Real.log_div (by positivity) (by positivity),
+      Real.log_mul hcl.ne' hEpos.ne', Real.log_pow]
+    push_cast
+    ring
+  have e3 : Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)
+      = Real.log (Cu * 2^Pu) + π/2 - Real.log cl := by
+    rw [Real.log_div (by positivity) hcl.ne',
+      Real.log_mul (by positivity) (Real.exp_pos _).ne', Real.log_exp]
+  have hratio : Real.log (mS/mL)
+      = Real.log (Cu * 2^Pu * Real.exp (π/2) / cl) + (Pu + 3) * Real.log (1 + |t|) := by
+    rw [Real.log_div hmSpos.ne' hmLpos.ne', e1, e2, e3]
+    ring
+  have hlog1T : Real.log (1 + |t|) ≤ ℓ := by
+    rw [hℓ]
+    exact Real.log_le_log (by linarith) (by linarith)
+  have hfinal : Real.log (mS/mL) + 1
+      ≤ (|Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| + (Pu + 3) + 1) * ℓ := by
+    rw [hratio]
+    have b1 : Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)
+        ≤ |Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| * ℓ := by
+      calc Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)
+          ≤ |Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| := le_abs_self _
+        _ = |Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| * 1 := by ring
+        _ ≤ |Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| * ℓ :=
+            mul_le_mul_of_nonneg_left hℓ1 (abs_nonneg _)
+    have b2 : ((Pu + 3 : ℕ) : ℝ) * Real.log (1 + |t|) ≤ ((Pu + 3 : ℕ) : ℝ) * ℓ :=
+      mul_le_mul_of_nonneg_left hlog1T (Nat.cast_nonneg _)
+    have b3 : (1:ℝ) ≤ 1 * ℓ := by linarith
+    push_cast at b2
+    nlinarith [b1, b2, b3]
+  calc 32 * 1 * (Real.log (mS/mL) + 1)
+      ≤ 32 * 1 * ((|Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| + (Pu + 3) + 1) * ℓ) :=
+        mul_le_mul_of_nonneg_left hfinal (by norm_num)
+    _ = 32 * (|Real.log (Cu * 2^Pu * Real.exp (π/2) / cl)| + (Pu + 3) + 1) * ℓ := by
+        ring
+
 end
 
 end DedekindResidue
