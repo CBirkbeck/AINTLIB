@@ -1188,6 +1188,57 @@ theorem tsum_principal_dvd_eq (J : (Ideal (𝓞 K))⁰) (σ : ℝ) :
   rw [Nat.cast_mul, mul_pow, Real.mul_rpow (by positivity) (by positivity),
     ENNReal.ofReal_mul (by positivity), mul_comm (ENNReal.ofReal _)]
 
+/-- **The per-place Gamma integral in exponential coordinates**:
+`∫ e^{aλ − π e^λ} dλ = π^{-a}·Γ(a)`. -/
+theorem lintegral_exp_mul_sub_pi_exp {a : ℝ} (ha : 0 < a) :
+    ∫⁻ l : ℝ, ENNReal.ofReal (Real.exp (a * l - π * Real.exp l))
+      = ENNReal.ofReal (π ^ (-a) * Real.Gamma a) := by
+  have himg := lintegral_image_eq_lintegral_abs_deriv_mul (s := Set.univ)
+    MeasurableSet.univ
+    (f := Real.exp) (f' := Real.exp)
+    (fun x _ => (Real.hasDerivAt_exp x).hasDerivWithinAt)
+    (Real.exp_injective.injOn)
+    (fun z => ENNReal.ofReal (z ^ (a - 1) * Real.exp (-π * z)))
+  rw [Set.image_univ, Real.range_exp, Measure.restrict_univ] at himg
+  have hpt : ∀ l : ℝ, ENNReal.ofReal (|Real.exp l|)
+        * ENNReal.ofReal ((Real.exp l) ^ (a - 1) * Real.exp (-π * Real.exp l))
+      = ENNReal.ofReal (Real.exp (a * l - π * Real.exp l)) := by
+    intro l
+    rw [← ENNReal.ofReal_mul (abs_nonneg _), abs_of_pos (Real.exp_pos l)]
+    congr 1
+    rw [← Real.exp_mul, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  have hLHS : ∫⁻ l : ℝ, ENNReal.ofReal (Real.exp (a * l - π * Real.exp l))
+      = ∫⁻ z in Set.Ioi (0:ℝ), ENNReal.ofReal (z ^ (a - 1) * Real.exp (-π * z)) := by
+    rw [himg]
+    exact (lintegral_congr (fun l => hpt l)).symm
+  rw [hLHS]
+  have hsplit : ∀ z ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (z ^ (a - 1) * Real.exp (-π * z))
+        = ENNReal.ofReal (z ^ (a - 1)) * ENNReal.ofReal (Real.exp (-(π * z))) := by
+    intro z hz
+    rw [← ENNReal.ofReal_mul (Real.rpow_nonneg (le_of_lt hz) _), neg_mul]
+  rw [setLIntegral_congr_fun measurableSet_Ioi hsplit]
+  have hscale := lintegral_Ioi_mellin_scale Real.pi_pos a
+    (fun z => ENNReal.ofReal (Real.exp (-z)))
+    ((ENNReal.continuous_ofReal.comp
+      (Real.continuous_exp.comp continuous_neg)).aemeasurable)
+  rw [hscale]
+  have hGamma : (∫⁻ z in Set.Ioi (0:ℝ), ENNReal.ofReal (z ^ (a - 1))
+        * ENNReal.ofReal (Real.exp (-z)))
+      = ENNReal.ofReal (Real.Gamma a) := by
+    rw [Real.Gamma_eq_integral ha,
+      ofReal_integral_eq_lintegral_ofReal (Real.GammaIntegral_convergent ha)
+        ((MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+          (Filter.Eventually.of_forall (fun x hx =>
+            mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg (le_of_lt hx) _))))]
+    refine (setLIntegral_congr_fun measurableSet_Ioi (fun z hz => ?_)).symm
+    rw [← ENNReal.ofReal_mul (Real.rpow_nonneg (le_of_lt hz) _)]
+    congr 1
+    ring
+  rw [hGamma, ← ENNReal.ofReal_mul (by positivity)]
+
 end
 
 end DedekindResidue
