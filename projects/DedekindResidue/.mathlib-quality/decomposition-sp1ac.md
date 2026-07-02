@@ -105,7 +105,7 @@ interpolation:
   for `-1 ≤ σ ≤ 2` — from A2 (Λ-bound) divided by the Γ-lower bound of A1 (+ prefactor).
   Also the Euler-product lower bound `‖ζ_K(2+it)‖ ≥ ζ_K(4)/ζ_K(2)`-type (mathlib Euler
   product for `dedekindZeta`; exact constant shape free).
-- **[AC-A4] per-height zero counting**:
+- **[AC-A4] per-height zero counting — ✅ COMPLETE (f563ce33, `exists_ball_zero_count`)**:
   `m_K(T) := ∑ᶠ (divisor of ζ_K on closedBall (2+iT) 3/2? — radius covering the critical
   strip slab |γ−T| ≤ 1) ≤ C·(log Δ_K + log(2+|T|))` — direct application of
   `AnalyticOnNhd.sum_divisor_le` with A3's upper bound and the `2+iT`-center lower bound

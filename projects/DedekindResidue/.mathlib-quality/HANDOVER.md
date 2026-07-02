@@ -80,7 +80,18 @@
   **`exists_H_strip_decay`**: ‖H(z)‖ ≤ C(1+|Im|)^{n_K+2}e^{-n_Kπ|Im|/4} on
   [-1,2] × {|Im| ≥ 1} — THE A3 deliverable. All in `CompletedZeta/AnalyticControl.lean`,
   axiom-clean.
-- **NEXT: A4 Jensen assembly**: center c = A+iT (A from A4-i; |T| ≥ 2 covers all slabs
+- **A4 ✅ COMPLETE (f563ce33)**: `exists_ball_zero_count` — per-height zero count of H
+  in slab-covering balls at A+iT is ≤ C_K·log(2+|T|), via sum_divisor_le on the
+  normalized g = H/H(c) (envelope-matched ratio → polynomial), divisor transfer via
+  divisor_fun_mul/divisor_const, order-finiteness by preconnectedness. Full supporting
+  stack in AnalyticControl.lean: exists_H_ball_sup, exists_H_upper_right,
+  exists_norm_gammaFactor_le_range, exists_norm_Gamma_le_range, exists_H_center_lower,
+  exists_gammaFactor_lower, exists_le_norm_Gammaℝ/ℂ, exists_norm_Gamma_le,
+  exists_le_norm_Gamma, exists_base_add_nat, norm_Gamma_le_mul_exp_add_nat.
+- **NEXT: A5 Landau local partial fractions** (Complex.borelCaratheodory + A4's counting
+  → truncated Λ′/Λ = Σ_{nearby ρ} 1/(s-ρ) + O(log)), then A6 digamma bounds, then SP2
+  (the explicit-formula contour; Poitou/IK 5.12 scheme; Chebotarev Euler product for the
+  prime side). (superseded plan below:) A4 Jensen assembly: center c = A+iT (A from A4-i; |T| ≥ 2 covers all slabs
   via T' = ±max(2,|T|)): lower ‖H(c)‖ ≥ |c||c-1|·Δ^{A/2}·γ-lower(A1-propagated,
   matching rate)·(1/2); upper on ball ⊆ strip... CAREFUL: the ball around A+iT sticks
   RIGHT of Re = 2 where exists_H_strip_decay doesn't apply — extend the decaying upper
