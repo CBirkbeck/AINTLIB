@@ -1,5 +1,77 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-02 session (Fable, leg 4, third update): SP2-RECT nearly done — R-a/R-b/R-c/R-d + nonvanishing landed
+
+**All pushed, axiom-clean. Files: `ExplicitFormula/{PhiTransform, RectangleContour, ZeroCapture}.lean`.**
+
+- **SP2-Φ COMPLETE** (PhiTransform.lean): `paperPhi`, `integrable_paperPhi_kernel`
+  (band `-ε ≤ Re s ≤ 1+ε`), `paperPhi_half_add_mul_I` (= F̂), `paperPhi_one_sub`
+  (Φ(1−s) = Φ(s), even F), `hasDerivAt_paperPhi` (holomorphy),
+  `integrable_admissible_majorant`, reflection helpers.
+- **SP2-RECT R-b/R-c COMPLETE** (RectangleContour.lean): `rectangleIntegral` (=
+  mathlib's Goursat combination), `rectangleIntegral_eq_zero`, `log_neg_of_im_pos/neg`,
+  segment FTCs, **`rectangleIntegral_inv_sub`** (∮ dζ/(ζ−ρ) = 2πi),
+  **`rectangleIntegral_cauchy`** (∮ Φ(ζ)(ζ−ρ)⁻¹ = 2πiΦ(ρ), dslope peel), plus
+  boundary plumbing: `rectangleBoundary`, 4 segment-membership lemmas,
+  `rectangleIntegral_congr/const_mul/add/finset_sum`,
+  `logDeriv_eq_sum_add_of_factorization` (generic peeled-logDeriv pointwise).
+- **SP2-RECT R-a COMPLETE** (ZeroCapture.lean): `completedDedekindZetaEntire_ne_zero_of_one_lt`
+  (real ray, Chebotarev Euler-product positivity — FIRST cross-project import:
+  `import CebotarevDensity.NumberFieldEulerProduct`, namespace `Chebotarev`),
+  `convex_reProdIm`, `isBounded_Ioo_reProdIm`, `exists_H_rectangle_factorization`.
+- **SP2-RECT R-d COMPLETE** (ZeroCapture.lean): **`rectangleIntegral_mul_logDeriv_H`**
+  — for H boundary-zero-free + Φ holomorphic on the closed rectangle:
+  `∮ Φ·H'/H = 2πi·∑ᶠ ρ, m_ρ·Φ(ρ)` over the divisor of H on the OPEN rectangle.
+  (Peel on enlarged rectangle, Goursat on cofactor, per-zero Cauchy/Goursat dichotomy
+  via `hsplit_closed` (closed ∖ open = boundary).)
+- **Nonvanishing + strip confinement COMPLETE** (ZeroCapture.lean):
+  `dedekindZeta_ne_zero_of_one_lt_re` (ζ_K(s) ≠ 0, Re > 1 — via mathlib's
+  `tprod_one_add_ne_zero_of_summable` on Chebotarev's Euler product;
+  `Chebotarev.norm_absNorm_cpow_neg_lt_one`, `hasSum_nonzeroIdeal_absNorm_cpow`),
+  `completedDedekindZetaEntire_ne_zero_of_one_lt_re` / `_of_re_lt_zero` (FE),
+  **`re_mem_of_completedDedekindZetaEntire_eq_zero`** (zeros have 0 ≤ Re ≤ 1).
+
+**USER DIRECTIVE (2026-07-02, leg 4)**: check AINTLIB siblings for reusable machinery.
+Audit done → recorded in decomposition-sp2.md §"AINTLIB reuse audit": LeanModularForms/
+ForMathlib/GeneralizedResidueTheory has `generalizedResidueTheorem'` (CPV, simple poles
+on-curve, winding numbers) = FALLBACK if good-heights gets painful; nothing else reusable
+for vM/FJ/Γψ. Keep checking siblings before building new machinery.
+
+**NEXT SP2 leaves (order)**:
+1. **R-e good heights**: finite-set pigeonhole `∃ t ∈ [a,a+1], ∀ s ∈ S, 1/(2(N+1)) ≤ |t−s|`
+   for `S.card ≤ N` (midpoints of N+1 subintervals + injective-map contradiction via
+   `Finset.exists_ne_map_eq_of_card_lt_of_maps_to`), then apply with S := im-parts of
+   the divisor support of H on `ball(A+iT₀+…)`-window (STRIP CONFINEMENT makes the
+   near-T zeros live in `closedBall(A+iT₀, A+2)` — counted by A4
+   `exists_ball_zero_count_big`), N := C·log(2+T₀).
+2. **R-f horizontal edges**: on `Im = T` (good height), `Re ∈ [-1/4, 5/4]`:
+   `‖logDeriv H‖ ≤ C log²(2+T)` via A5 `exists_logDeriv_partial_fractions` + separation
+   (near zeros: |s−ρ| ≥ |T−ρ.im| ≥ c/log; far zeros (|im−T| ≥ 1): |s−ρ| ≥ 1, ∑ ≤ count).
+   Edge integral ≤ (3/2)·CΦ/T·C log² → 0 with the **Φ-decay hypothesis threaded**
+   (hΦdecay : ‖Φ(σ+it)‖ ≤ CΦ/|t| — discharge in SP3 for concrete F, per doc Φ-d).
+3. **R-g Poitou Prop 1**: apply R-d on rectangles [−a, 1+a]×[−T,T] (boundary
+   nonvanishing: vertical edges by the new Re>1 / Re<0 lemmas + FE; horizontal by good
+   heights), split H'/H = 1/s + 1/(s−1) + G'/G + ζ'/ζ on Re = 1+a, fold left edge by
+   `paperPhi_one_sub` + `completedDedekindZetaEntire_one_sub`.
+4. SP2-vM (ζ_K log-deriv series; differentiate Chebotarev's Euler product via
+   `TendstoLocallyUniformlyOn.deriv`, mirror `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`).
+5. SP2-FJ (Fourier–Jordan for BV: Dirichlet integral ∫sinc = π/2 NOT in mathlib —
+   build via Frullani/Fubini; RL lemma ✓ `Real.tendsto_integral_exp_smul_cocompact`;
+   BV monotone-split ✓ `exists_monotoneOn_sub_monotoneOn`; Stieltjes-Fubini for the
+   variation part).
+6. SP2-Γψ (Gauss digamma integral — NOT in mathlib, mathlib HAS digamma_one = −γ,
+   digamma_one_half; series rep must be built from Gamma_seq or recurrence+asymptotic).
+7. SP2-MAIN assembly (Poitou (6) chain of three displays).
+
+**Technique notes (new this leg)**: `Subtype.mk_eq_mk.mp` beats congrArg for nested
+subtype injectivity; linarith can inexplicably fail on 3-step rpow chains — use calc;
+field_simp needs INSTANTIATED ne-hypotheses in context (`have he := hfac_ne 𝔭`);
+`Complex.summable_ofReal`, `Summable.comp_injective`, `Complex.norm_natCast_cpow_of_pos`,
+`inv_le_inv₀` (iff form); rectangle membership plumbing via `Complex.mem_reProdIm` +
+`Set.uIcc_of_le`; mathlib deprecations bite: `integral_finset_sum → integral_finsetSum`,
+`push_neg → push Not`, `continuousOn_finset_sum → continuousOn_finsetSum`.
+
+
 ## 2026-07-02 session (Fable, leg 4 continued): SP2 UNDERWAY — Φ-transform + rectangle Cauchy landed
 
 **SP2 route doc: `.mathlib-quality/decomposition-sp2.md`** (READ FIRST for SP2 work) —
