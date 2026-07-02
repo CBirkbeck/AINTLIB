@@ -1,1 +1,1 @@
-FOCUS: SP1-AGE-3 next — unit-box-averaged multivariable theta g_I(t): log-unit basis recon (NumberField.Units Dirichlet machinery), weights c(t,u), box-integral def, transformation from weightedThetaLattice_transform + dualZLattice_idealZLattice + unit-relabeling
+FOCUS: AGE-3 brick 2 — heckeTheta def + unitMul map (LinearMap.mulLeft ℝ (σε) on mixedSpace) + M_ε(ζa) = ζ(εa) + tsum-reindex equivariance heckeTheta I (c·w(ε)²) = heckeTheta I c

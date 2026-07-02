@@ -185,6 +185,18 @@
       L_{I^∨}` — the dual of an ideal lattice IS the twisted codifferent-dual ideal lattice.
       Θ-side corollary ready: `idealTheta_transform`'s dual side is now identified.
       **Next (AGE-3)**: unit-box-averaged multivariable theta.
+    - **(AGE-3) brick 1+2 DONE ✓ (2026-07-02, `CompletedZeta/HeckeTheta.lean`, sorry-free,
+      axiom-clean)**: `placeWeights`, `sum_placeWeights_embeddingCoords_sq`
+      (`∑ᵢcᵢζ(x)ᵢ² = ∑_w c_w·w(x)²`), **`heckeTheta I c`** (the multivariable theta with
+      per-place weights), `mulCoords` (+`mulCoords_embeddingCoords`: mult-by-`x` in
+      coordinates), `unitMulLatticeEquiv` (unit multiplication permutes the ideal lattice),
+      and **`heckeTheta_unit_mul`** (`Θ(w(ε)²·c) = Θ(c)` — the Hecke unit symmetry).
+      REMAINING AGE-3: log-unit-basis box parametrisation of the weights
+      `c(t,u)_w = t^{1/n}·exp(logunits-combination)` + `g_I(t) := ∫_{[0,1)^{r+s-1}} Θ(c(t,u)) du`
+      + its inversion (from `weightedThetaLattice_transform` — note `heckeTheta I c` = the
+      `weightedGaussianCM (placeWeights c)`-sum over `idealZLattice I` — +
+      `dualZLattice_idealZLattice` + `heckeTheta_unit_mul` for the `u ↦ -u` change of variables).
+      Then AGE-4 Mellin.
     - (AGE-2) original plan — **theta–ideal dictionary**: `‖x‖²` of a lattice point = `∑_w normAtPlace`-form;
       lattice points of `euclideanIdealLattice I` ↔ elements of `I`; norms via
       `intNorm`/`idealSetEquivNorm`.

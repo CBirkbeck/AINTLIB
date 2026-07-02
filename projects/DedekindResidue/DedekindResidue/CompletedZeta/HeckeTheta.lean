@@ -73,6 +73,100 @@ theorem sum_placeWeights_embeddingCoords_sq (c : InfinitePlace K → ℝ) (x : K
     simp only [Sum.elim_inr]
     ring
 
+open scoped Classical in
+/-- The multivariable Hecke theta of a fractional ideal with per-place weights. -/
+noncomputable def heckeTheta (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (c : InfinitePlace K → ℝ) : ℝ :=
+  ∑' v : idealZLattice K I, Real.exp (-π * ∑ i : index K,
+    placeWeights K c i * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)
+
+open scoped Classical in
+/-- Multiplication by (the mixed embedding of) a field element `x`, as a linear map of the
+Euclidean coordinate space (conjugated through the coordinate identifications). -/
+noncomputable def mulCoords (x : K) :
+    EuclideanSpace ℝ (index K) →ₗ[ℝ] EuclideanSpace ℝ (index K) :=
+  ((((euclidean.stdOrthonormalBasis K).repr.toLinearEquiv.toLinearMap).comp
+      ((euclidean.toMixed K).symm.toLinearMap)).comp
+    (LinearMap.mulLeft ℝ (mixedEmbedding K x))).comp
+    (((euclidean.toMixed K).toLinearMap).comp
+      ((euclidean.stdOrthonormalBasis K).repr.symm.toLinearEquiv.toLinearMap))
+
+open scoped Classical in
+theorem mulCoords_embeddingCoords (x a : K) :
+    mulCoords K x (embeddingCoords K a) = embeddingCoords K (x * a) := by
+  rw [mulCoords, embeddingCoords, embeddingCoords]
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearEquiv.coe_coe,
+    LinearIsometryEquiv.coe_toLinearEquiv]
+  rw [LinearIsometryEquiv.symm_apply_apply]
+  show (euclidean.stdOrthonormalBasis K).repr ((euclidean.toMixed K).symm
+    (mixedEmbedding K x * ((euclidean.toMixed K) ((euclidean.toMixed K).symm
+      (mixedEmbedding K a))))) = _
+  rw [ContinuousLinearEquiv.apply_symm_apply, ← map_mul]
+
+open scoped Classical in
+/-- Multiplication by the image of a unit permutes the points of an ideal lattice:
+the induced self-equivalence of `idealZLattice K I`. -/
+noncomputable def unitMulLatticeEquiv (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (ε : (𝓞 K)ˣ) :
+    idealZLattice K I ≃ idealZLattice K I where
+  toFun v := ⟨mulCoords K (algebraMap (𝓞 K) K (ε : 𝓞 K)) v, by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    rw [mem_idealZLattice]
+    refine ⟨algebraMap (𝓞 K) K (ε : 𝓞 K) * a, ?_, by rw [← hva, mulCoords_embeddingCoords]⟩
+    have := Submodule.smul_mem ((I : FractionalIdeal (𝓞 K)⁰ K) :
+      Submodule (𝓞 K) K) (ε : 𝓞 K) ha
+    rwa [Algebra.smul_def] at this⟩
+  invFun v := ⟨mulCoords K (algebraMap (𝓞 K) K ((ε⁻¹ : (𝓞 K)ˣ) : 𝓞 K)) v, by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    rw [mem_idealZLattice]
+    refine ⟨algebraMap (𝓞 K) K ((ε⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * a, ?_,
+      by rw [← hva, mulCoords_embeddingCoords]⟩
+    have := Submodule.smul_mem ((I : FractionalIdeal (𝓞 K)⁰ K) :
+      Submodule (𝓞 K) K) ((ε⁻¹ : (𝓞 K)ˣ) : 𝓞 K) ha
+    rwa [Algebra.smul_def] at this⟩
+  left_inv v := by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    refine Subtype.ext ?_
+    show mulCoords K _ (mulCoords K _ (v : EuclideanSpace ℝ (index K)))
+      = (v : EuclideanSpace ℝ (index K))
+    rw [← hva, mulCoords_embeddingCoords, mulCoords_embeddingCoords, ← mul_assoc,
+      ← map_mul]
+    norm_cast
+    rw [inv_mul_cancel ε]
+    simp
+  right_inv v := by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    refine Subtype.ext ?_
+    show mulCoords K _ (mulCoords K _ (v : EuclideanSpace ℝ (index K)))
+      = (v : EuclideanSpace ℝ (index K))
+    rw [← hva, mulCoords_embeddingCoords, mulCoords_embeddingCoords, ← mul_assoc,
+      ← map_mul]
+    norm_cast
+    rw [mul_inv_cancel ε]
+    simp
+
+open scoped Classical in
+/-- **Unit equivariance of the Hecke theta** (the symmetry making the unit average
+well-defined): scaling the place weights by `w(ε)²` for a unit `ε` leaves the theta of the
+ideal lattice unchanged — multiplication by `ε` permutes the lattice points. -/
+theorem heckeTheta_unit_mul (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (ε : (𝓞 K)ˣ)
+    (c : InfinitePlace K → ℝ) :
+    heckeTheta K I (fun w => (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) ^ 2 * c w)
+      = heckeTheta K I c := by
+  rw [heckeTheta, heckeTheta]
+  conv_rhs => rw [← Equiv.tsum_eq (unitMulLatticeEquiv K I ε)]
+  refine tsum_congr (fun v => ?_)
+  obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+  congr 1
+  have hcoe : ((unitMulLatticeEquiv K I ε v : idealZLattice K I) :
+      EuclideanSpace ℝ (index K))
+      = embeddingCoords K (algebraMap (𝓞 K) K (ε : 𝓞 K) * a) := by
+    show mulCoords K _ (v : EuclideanSpace ℝ (index K)) = _
+    rw [← hva, mulCoords_embeddingCoords]
+  rw [hcoe, ← hva, sum_placeWeights_embeddingCoords_sq, sum_placeWeights_embeddingCoords_sq]
+  refine congrArg (fun r => -π * r) ?_
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  rw [map_mul, mul_pow]
+  ring
+
 end
 
 end DedekindResidue
