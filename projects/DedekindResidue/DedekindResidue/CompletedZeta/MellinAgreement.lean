@@ -1551,6 +1551,148 @@ theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ
       ((MeasureTheory.ae_restrict_iff' hBmeas).mpr
         (Filter.Eventually.of_forall hnn))]
 
+open scoped Classical in
+/-- The box lintegral of a `unitLattice`-periodic function does not depend on the choice
+of ℤ-basis (lintegral version of `setIntegral_box_swap` — hypothesis-free). -/
+theorem setLIntegral_box_swap (f : logSpace K → ℝ≥0∞)
+    (hf : ∀ l ∈ unitLattice K, ∀ x, f (l + x) = f x) :
+    ∫⁻ u in ZSpan.fundamentalDomain
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ), f u
+      = ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ), f u := by
+  have h1 := ZSpan.isAddFundamentalDomain
+    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) volume
+  have h2 := ZSpan.isAddFundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ) volume
+  rw [(Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis_span ℝ] at h1
+  rw [(basisUnitLattice K).ofZLatticeBasis_span ℝ] at h2
+  haveI : VAddInvariantMeasure (unitLattice K) (logSpace K) volume :=
+    inferInstanceAs (VAddInvariantMeasure (unitLattice K).toAddSubgroup (logSpace K) volume)
+  refine h1.setLIntegral_eq h2 (f := f) (fun l x => ?_)
+  rw [Submodule.vadd_def, vadd_eq_add]
+  exact hf (l : logSpace K) l.2 x
+
+open scoped Classical in
+theorem conePreimage_ne_zero (J : (Ideal (𝓞 K))⁰) (a : idealSet K J) :
+    conePreimage K J a ≠ 0 := by
+  intro h0
+  have hc := a.2.1
+  have hval : (a : mixedSpace K) = 0 := by
+    rw [← mixedEmbedding_conePreimage K J a, h0, map_zero]
+  rw [hval] at hc
+  exact hc.2 (map_zero (mixedEmbedding.norm (K := K)))
+
+open scoped Classical in
+/-- **The per-class Mellin chain at unit scale (e-ii)**: the lintegral Mellin transform of
+the deviation of `g` over an integral ideal, fully evaluated. -/
+theorem lintegral_mellin_heckeG_dev (J : (Ideal (𝓞 K))⁰) {σ : ℝ} (hσ : 0 < σ) :
+    (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeG K (FractionalIdeal.mk0 K J) t
+            - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K))
+      = ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹)
+        * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+        * ∑' a : idealSet K J, ENNReal.ofReal
+            (((((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2) ^ (-σ)) := by
+  -- step 1: per-t rewrite to the cone-unfolded form
+  have hstep1 : ∀ t ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeG K (FractionalIdeal.mk0 K J) t
+            - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K)
+      = ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹) * (ENNReal.ofReal (t ^ (σ - 1))
+          * ∑' a : idealSet K J, ∫⁻ u : logSpace K,
+              ENNReal.ofReal (gaussTerm K t u
+                (embeddingCoords K (conePreimage K J a)))) := by
+    intro t ht
+    rw [ofReal_heckeG_sub_const K _ ht]
+    have hswap : (∫⁻ u in ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+        ENNReal.ofReal (heckeTheta K (FractionalIdeal.mk0 K J)
+          (heckeWeights K t u) - 1))
+        = ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+            ENNReal.ofReal (heckeTheta K (FractionalIdeal.mk0 K J)
+              (heckeWeights K t u) - 1) := by
+      refine setLIntegral_box_swap K _ (fun l hl x => ?_)
+      obtain ⟨b, -, hb⟩ := Submodule.mem_map.mp hl
+      rw [add_comm, ← hb]
+      rw [show ((logEmbedding K).toIntLinearMap b : logSpace K)
+        = logEmbedding K (Additive.ofMul (Additive.toMul b)) from rfl]
+      rw [heckeTheta_heckeWeights_periodic K _ t x (Additive.toMul b)]
+    rw [hswap, lintegral_box_theta_tail K J ht]
+    ring
+  rw [setLIntegral_congr_fun measurableSet_Ioi hstep1]
+  rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
+  -- step 2: swap the a-sum out of the t-integral (antitone-measurability route)
+  have hanti : ∀ c : EuclideanSpace ℝ (index K), AntitoneOn
+      (fun t => ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u c))
+      (Set.Ioi (0:ℝ)) := by
+    intro c s hs t ht hst
+    refine lintegral_mono (fun u => ?_)
+    refine ENNReal.ofReal_le_ofReal ?_
+    rw [gaussTerm, gaussTerm]
+    refine Real.exp_le_exp.mpr ?_
+    have hsum : ∑ i : index K, placeWeights K (heckeWeights K s u) i * (c i) ^ 2
+        ≤ ∑ i : index K, placeWeights K (heckeWeights K t u) i * (c i) ^ 2 := by
+      refine Finset.sum_le_sum (fun i _ => ?_)
+      refine mul_le_mul_of_nonneg_right ?_ (sq_nonneg _)
+      have hw : ∀ w : InfinitePlace K, heckeWeights K s u w ≤ heckeWeights K t u w := by
+        intro w
+        rw [heckeWeights, heckeWeights]
+        refine mul_le_mul_of_nonneg_right ?_ (Real.exp_pos _).le
+        refine Real.rpow_le_rpow (le_of_lt hs) hst ?_
+        have := Module.finrank_pos (R := ℚ) (M := K)
+        positivity
+      rcases i with (w | ⟨w, j⟩) <;> exact hw _
+    nlinarith [Real.pi_pos]
+  have hmeasH : ∀ c : EuclideanSpace ℝ (index K), AEMeasurable
+      (fun t => ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u c))
+      (volume.restrict (Set.Ioi (0:ℝ))) :=
+    fun c => aemeasurable_restrict_of_antitoneOn measurableSet_Ioi (hanti c)
+  have hmeas_rpow : AEMeasurable (fun t : ℝ => ENNReal.ofReal (t ^ (σ - 1)))
+      (volume.restrict (Set.Ioi (0:ℝ))) := by
+    have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1)) (Set.Ioi (0:ℝ)) :=
+      fun x hx => (Real.continuousAt_rpow_const x _
+        (Or.inl (ne_of_gt hx))).continuousWithinAt
+    exact (ENNReal.continuous_ofReal.comp_continuousOn hcont).aemeasurable
+      measurableSet_Ioi
+  have hpull : ∀ t ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (t ^ (σ - 1)) * ∑' a : idealSet K J,
+        ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u
+          (embeddingCoords K (conePreimage K J a)))
+      = ∑' a : idealSet K J, ENNReal.ofReal (t ^ (σ - 1))
+          * ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u
+              (embeddingCoords K (conePreimage K J a))) :=
+    fun t _ => (ENNReal.tsum_mul_left).symm
+  rw [setLIntegral_congr_fun measurableSet_Ioi hpull]
+  rw [lintegral_tsum (fun a => hmeas_rpow.mul (hmeasH _))]
+  -- step 3: evaluate each cone-point term
+  have hpera : ∀ a : idealSet K J,
+      (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u
+            (embeddingCoords K (conePreimage K J a))))
+      = ENNReal.ofReal (((((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2) ^ (-σ))
+        * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ))) := by
+    intro a
+    have hyne := conePreimage_ne_zero K J a
+    have hcpos : (0:ℝ) < (((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2 := by
+      have habs : ((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ) ≠ 0 := by
+        rw [Rat.cast_ne_zero, abs_ne_zero]
+        exact Algebra.norm_ne_zero_iff.mpr hyne
+      positivity
+    have hstep : ∀ t ∈ Set.Ioi (0:ℝ),
+        (ENNReal.ofReal (t ^ (σ - 1)) * ∫⁻ u : logSpace K,
+          ENNReal.ofReal (gaussTerm K t u (embeddingCoords K (conePreimage K J a))))
+        = ENNReal.ofReal (t ^ (σ - 1)) * (fun s => ∫⁻ u : logSpace K,
+            ENNReal.ofReal (gaussTerm K s u (embeddingCoords K 1)))
+              ((((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2 * t) := by
+      intro t ht
+      congr 1
+      exact lintegral_gaussTerm_eq_norm_scaled K hyne (le_of_lt ht)
+    rw [setLIntegral_congr_fun measurableSet_Ioi hstep]
+    rw [lintegral_Ioi_mellin_scale hcpos σ _ (hmeasH (embeddingCoords K 1))]
+    rw [lintegral_M0_eq K hσ]
+  rw [tsum_congr hpera, ENNReal.tsum_mul_right]
+  ring
+
 end
 
 end DedekindResidue
