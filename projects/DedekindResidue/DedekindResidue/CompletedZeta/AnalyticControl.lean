@@ -1299,6 +1299,116 @@ theorem exists_le_norm_Gammaℂ (σ : ℝ) (hσ : 1 ≤ σ) :
     _ = 2 * (2*π) ^ (-σ : ℝ)
         * ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by ring
 
+/-- Matching lower bound for the archimedean factor at a fixed abscissa `σ ≥ 1`:
+`‖γ_K(σ+it)‖ ≥ c·e^{-n_Kπ|t|/4}/(1+|t|)^{r₁+r₂}` — the same envelope rate as the
+upper bound `norm_gammaFactor_le`. -/
+theorem exists_gammaFactor_lower (σ : ℝ) (hσ : 1 ≤ σ) :
+    ∃ c : ℝ, 0 < c ∧ ∀ t : ℝ, 2 ≤ |t| →
+      c * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+        / (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)
+        ≤ ‖gammaFactor K ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  obtain ⟨c₁, hc₁, hR⟩ := exists_le_norm_Gammaℝ σ hσ
+  obtain ⟨c₂, hc₂, hC⟩ := exists_le_norm_Gammaℂ σ hσ
+  refine ⟨c₁^(nrRealPlaces K) * c₂^(nrComplexPlaces K), by positivity, fun t ht => ?_⟩
+  rw [gammaFactor, norm_mul, norm_pow, norm_pow]
+  have hp1 : (c₁ * Real.exp (-(π * |t|) / 4) / (1 + |t|))^(nrRealPlaces K)
+      ≤ ‖Complex.Gammaℝ ((σ : ℂ) + (t : ℂ) * Complex.I)‖^(nrRealPlaces K) :=
+    pow_le_pow_left₀ (by positivity) (hR t ht) _
+  have hp2 : (c₂ * Real.exp (-(π * |t|) / 2) / (1 + |t|))^(nrComplexPlaces K)
+      ≤ ‖Complex.Gammaℂ ((σ : ℂ) + (t : ℂ) * Complex.I)‖^(nrComplexPlaces K) :=
+    pow_le_pow_left₀ (by positivity) (hC t ht) _
+  refine le_trans (le_of_eq ?_) (mul_le_mul hp1 hp2 (by positivity) (by positivity))
+  -- collect the exponentials and powers
+  have hE : Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+      = (Real.exp (-(π * |t|) / 4))^(nrRealPlaces K)
+        * (Real.exp (-(π * |t|) / 2))^(nrComplexPlaces K) := by
+    rw [← Real.exp_nat_mul, ← Real.exp_nat_mul, ← Real.exp_add]
+    congr 1
+    rw [gammaExponent]
+    push_cast
+    ring
+  rw [hE]
+  rw [div_pow, div_pow, mul_pow, mul_pow]
+  rw [show (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)
+      = (1 + |t|)^(nrRealPlaces K) * (1 + |t|)^(nrComplexPlaces K) from pow_add _ _ _]
+  field_simp
+
+/-- **A4 center lower bound**: at the abscissa `A` where `‖ζ_K‖ ≥ 1/2`, the entire
+completed zeta obeys the envelope-matched lower
+`‖H(A+it)‖ ≥ c·e^{-n_Kπ|t|/4}/(1+|t|)^{r₁+r₂}` for `|t| ≥ 2`. -/
+theorem exists_H_center_lower :
+    ∃ A : ℝ, 2 ≤ A ∧ ∃ c : ℝ, 0 < c ∧ ∀ t : ℝ, 2 ≤ |t| →
+      c * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+        / (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)
+        ≤ ‖completedDedekindZetaEntire K ((A : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  obtain ⟨A, hA2, hζ⟩ := exists_re_norm_dedekindZeta_ge_half K
+  obtain ⟨cγ, hcγ, hγ⟩ := exists_gammaFactor_lower K A (by linarith)
+  refine ⟨A, hA2, cγ/2, by positivity, fun t ht => ?_⟩
+  set s : ℂ := (A : ℂ) + (t : ℂ) * Complex.I with hs
+  have hsre : s.re = A := by simp [hs]
+  have hsim : s.im = t := by simp [hs]
+  have htne : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht
+    norm_num at ht
+  have hs0 : s ≠ 0 := by
+    intro h0
+    have := congrArg Complex.im h0
+    rw [hsim] at this
+    simp at this
+    exact htne this
+  have hs1 : s ≠ 1 := by
+    intro h0
+    have := congrArg Complex.im h0
+    rw [hsim] at this
+    simp at this
+    exact htne this
+  have hsre1 : (1:ℝ) < s.re := by rw [hsre]; linarith
+  rw [completedDedekindZetaEntire_eq K hs0 hs1,
+    completedDedekindZeta_eq_of_one_lt_re K hsre1, completedZetaPrefactor]
+  rw [norm_mul, norm_mul, norm_mul, norm_mul]
+  -- individual lower bounds
+  have hsn : (1:ℝ) ≤ ‖s‖ := by
+    calc (1:ℝ) ≤ |t| := by linarith
+      _ = |s.im| := by rw [hsim]
+      _ ≤ ‖s‖ := Complex.abs_im_le_norm _
+  have hsn1 : (1:ℝ) ≤ ‖s - 1‖ := by
+    calc (1:ℝ) ≤ |t| := by linarith
+      _ = |(s - 1).im| := by rw [show (s-1).im = s.im by simp, hsim]
+      _ ≤ ‖s - 1‖ := Complex.abs_im_le_norm _
+  have hΔ : (1:ℝ) ≤ ‖((|discr K| : ℝ) : ℂ) ^ (s / 2)‖ := by
+    have hdne : ((discr K : ℤ) : ℝ) ≠ 0 := by
+      exact_mod_cast NumberField.discr_ne_zero K
+    have hd1 : (1:ℝ) ≤ |((discr K : ℤ) : ℝ)| := by
+      have := Int.one_le_abs (NumberField.discr_ne_zero K)
+      calc (1:ℝ) = ((1:ℤ) : ℝ) := by norm_num
+        _ ≤ ((|discr K| : ℤ) : ℝ) := by exact_mod_cast this
+        _ = |((discr K : ℤ) : ℝ)| := by push_cast; rfl
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by linarith)]
+    have hre2 : (s / 2).re = A/2 := by
+      rw [show s / 2 = ((A/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I by
+        rw [hs]; push_cast; ring]
+      simp
+    rw [hre2]
+    calc (1:ℝ) = |((discr K : ℤ) : ℝ)| ^ (0:ℝ) := by rw [Real.rpow_zero]
+      _ ≤ |((discr K : ℤ) : ℝ)| ^ (A/2) :=
+          Real.rpow_le_rpow_of_exponent_le hd1 (by linarith)
+  have hγb := hγ t ht
+  rw [← hs] at hγb
+  have hζb : (1:ℝ)/2 ≤ ‖dedekindZeta K s‖ := hζ s (by rw [hsre])
+  -- assemble
+  calc cγ/2 * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+      / (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)
+      = 1 * 1 * (1 * (cγ * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4)
+        / (1 + |t|)^(nrRealPlaces K + nrComplexPlaces K)) * (1/2)) := by ring
+    _ ≤ ‖s‖ * ‖s - 1‖ * (‖((|discr K| : ℝ) : ℂ) ^ (s / 2)‖
+        * ‖gammaFactor K s‖ * ‖dedekindZeta K s‖) := by
+        refine mul_le_mul (mul_le_mul hsn hsn1 (by norm_num) (by linarith)) ?_
+          (by positivity) (by positivity)
+        refine mul_le_mul (mul_le_mul hΔ hγb (by positivity) (by linarith)) hζb
+          (by norm_num) ?_
+        positivity
+
 end
 
 end DedekindResidue
