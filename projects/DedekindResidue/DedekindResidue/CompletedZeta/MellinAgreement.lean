@@ -26,6 +26,7 @@ namespace DedekindResidue
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace
 open NumberField.mixedEmbedding.fundamentalCone
 open NumberField.Units NumberField.Units.dirichletUnitTheorem MeasureTheory
+open Filter Asymptotics Topology
 open scoped nonZeroDivisors Real ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
@@ -1914,6 +1915,188 @@ theorem lintegral_mellin_heckeF_dev {σ : ℝ} (hσ : 0 < σ) :
     (fun b : (Ideal (𝓞 K))⁰ =>
       ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
         ^ (-σ)))
+
+open scoped Classical in
+/-- The nonzero ideals of norm at most `n` are the disjoint union of the norm-`k` fibers,
+`1 ≤ k ≤ n`. -/
+noncomputable def idealNormLeEquiv (n : ℕ) :
+    {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n}
+      ≃ Σ k : (Finset.Icc 1 n), {I : Ideal (𝓞 K) // Ideal.absNorm I = (k : ℕ)} := by
+  refine Equiv.ofBijective (fun I => ⟨⟨Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)),
+    Finset.mem_Icc.mpr ⟨Nat.one_le_iff_ne_zero.mpr (fun h0 => ?_), I.2⟩⟩,
+    ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), rfl⟩) ⟨?_, ?_⟩
+  · rw [Ideal.absNorm_eq_zero_iff] at h0
+    exact nonZeroDivisors.coe_ne_zero (I : (Ideal (𝓞 K))⁰) (by exact_mod_cast h0)
+  · rintro I J hIJ
+    have hval := congrArg (fun p : Σ k : (Finset.Icc 1 n),
+      {I : Ideal (𝓞 K) // Ideal.absNorm I = (k : ℕ)} => (p.2 : Ideal (𝓞 K))) hIJ
+    simp only at hval
+    exact Subtype.ext (Subtype.ext hval)
+  · rintro ⟨⟨k, hk⟩, I, hIk⟩
+    obtain ⟨hk1, hkn⟩ := Finset.mem_Icc.mp hk
+    have hIne : I ≠ 0 := by
+      intro h0
+      rw [h0] at hIk
+      rw [show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hIk
+      have hk0 : k = 0 := by exact_mod_cast hIk.symm
+      omega
+    refine ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, by
+      show Ideal.absNorm I ≤ n
+      have : Ideal.absNorm I = k := by exact_mod_cast hIk
+      omega⟩, ?_⟩
+    have hNk : Ideal.absNorm I = k := by exact_mod_cast hIk
+    refine Sigma.ext ?_ ?_
+    · exact Subtype.ext (by simpa using hNk)
+    · refine (Subtype.heq_iff_coe_eq (fun J => ?_)).mpr rfl
+      show Ideal.absNorm J = _ ↔ Ideal.absNorm J = _
+      rw [show ((⟨Ideal.absNorm I, by
+        rw [hNk]
+        exact hk⟩ : Finset.Icc 1 n) : ℕ) = Ideal.absNorm I from rfl]
+      rw [hNk]
+
+open scoped Classical in
+/-- Partial sums of the norm-count coefficients are the cumulative ideal counts. -/
+theorem sum_count_eq_card_le (n : ℕ) :
+    ∑ k ∈ Finset.Icc 1 n,
+      (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = k} : ℝ)
+      = (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n} : ℝ) := by
+  haveI : ∀ k : (Finset.Icc 1 n), Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = (k : ℕ)} :=
+    fun k => (Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) (k : ℕ)).to_subtype
+  rw [show (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n})
+    = Nat.card (Σ k : (Finset.Icc 1 n),
+        {I : Ideal (𝓞 K) // Ideal.absNorm I = (k : ℕ)}) from
+    Nat.card_congr (idealNormLeEquiv K n)]
+  rw [Nat.card_sigma]
+  rw [Nat.cast_sum]
+  exact (Finset.sum_attach _ _).symm
+
+open scoped Classical in
+/-- **Summability of the ideal norm sums** for real `s > 1`, from the ideal-counting
+asymptotics. -/
+theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
+    Summable (fun b : (Ideal (𝓞 K))⁰ =>
+      ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) := by
+  -- L-series summability of the counts
+  have hLS : LSeriesSummable (fun n =>
+      ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) (s : ℂ) := by
+    refine LSeriesSummable_of_sum_norm_bigO_and_nonneg (r := 1) ?_
+      (fun n => Nat.cast_nonneg _) zero_le_one (by simpa using hs)
+    have htend : Filter.Tendsto (fun n : ℕ =>
+        (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n} : ℝ)
+          / (n : ℝ)) atTop (𝓝 ((2 ^ nrRealPlaces K * (2 * π) ^ nrComplexPlaces K
+            * regulator K * classNumber K)
+            / (torsionOrder K * Real.sqrt |discr K|))) := by
+      have h1 := (NumberField.Ideal.tendsto_norm_le_div_atTop₀ K).comp
+        tendsto_natCast_atTop_atTop
+      refine h1.congr (fun n => ?_)
+      simp only [Function.comp_apply]
+      congr 2
+      refine Nat.card_congr (Equiv.subtypeEquivRight (fun I => ?_))
+      exact_mod_cast Iff.rfl
+    have hbigO : (fun n : ℕ =>
+        (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n} : ℝ))
+        =O[atTop] (fun n : ℕ => (n : ℝ)) := by
+      have h2 : (fun n : ℕ =>
+          (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ n} : ℝ)
+            / (n : ℝ)) =O[atTop] (fun _ : ℕ => (1:ℝ)) := htend.isBigO_one ℝ
+      have h3 := h2.mul (isBigO_refl (fun n : ℕ => (n : ℝ)) atTop)
+      refine (h3.congr' ?_ (by
+        filter_upwards with n
+        rw [one_mul])).congr_left (fun n => rfl)
+      filter_upwards [Filter.eventually_ne_atTop 0] with n hn
+      rw [div_mul_cancel₀]
+      exact_mod_cast hn
+    refine hbigO.congr' ?_ (by
+      filter_upwards with n
+      rw [Real.rpow_one])
+    filter_upwards with n
+    rw [sum_count_eq_card_le K n]
+  -- transfer to real summability of the count series
+  have hreal : Summable (fun n : ℕ =>
+      (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) * (n : ℝ) ^ (-s)) := by
+    have h1 : Summable (fun n : ℕ => (LSeries.term (fun m =>
+        ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = m} : ℝ) : ℂ)) (s : ℂ) n)) := hLS
+    have h2 : ∀ n : ℕ, (LSeries.term (fun m =>
+        ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = m} : ℝ) : ℂ)) (s : ℂ) n)
+        = (((if n = 0 then 0 else
+            (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ)
+              / (n : ℝ) ^ s : ℝ)) : ℂ) := by
+      intro n
+      rw [LSeries.term]
+      split_ifs with hn
+      · rw [Complex.ofReal_zero]
+      · rw [Complex.ofReal_div]
+        congr 1
+        rw [show ((n : ℂ)) ^ (s : ℂ) = ((n : ℝ) : ℂ) ^ ((s : ℝ) : ℂ) by norm_cast,
+          ← Complex.ofReal_cpow (Nat.cast_nonneg n)]
+    have h3 : Summable (fun n : ℕ => (if n = 0 then 0 else
+        (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) / (n : ℝ) ^ s)) := by
+      rw [← Complex.summable_ofReal]
+      exact h1.congr (fun n => (h2 n))
+    refine h3.congr (fun n => ?_)
+    by_cases hn : n = 0
+    · rw [if_pos hn, hn]
+      rw [Nat.cast_zero, Real.zero_rpow (by linarith), mul_zero]
+    · rw [if_neg hn, Real.rpow_neg (Nat.cast_nonneg n), div_eq_mul_inv]
+  -- transfer to the ideal-indexed sum by fibering over the norm
+  have hnn : ∀ p : (Σ n : ℕ, {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}),
+      0 ≤ ((Ideal.absNorm ((p.2 : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s) :=
+    fun p => Real.rpow_nonneg (Nat.cast_nonneg _) _
+  haveI hfibfin : ∀ n : ℕ, Finite {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := by
+    intro n
+    have hinj : Function.Injective (fun b : {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+        (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+          {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) := by
+      rintro b c hbc
+      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
+        (z : Ideal (𝓞 K))) hbc
+      exact Subtype.ext (Subtype.ext this)
+    haveI : Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = n} :=
+      (Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) n).to_subtype
+    exact Finite.of_injective _ hinj
+  rw [← Equiv.summable_iff (Equiv.sigmaFiberEquiv (fun b : (Ideal (𝓞 K))⁰ =>
+    Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))))]
+  refine (summable_sigma_of_nonneg hnn).mpr ⟨fun n => Summable.of_finite, ?_⟩
+  refine hreal.congr (fun n => ?_)
+  -- evaluate the fiber sum
+  have hconst : ∀ b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+      ((Ideal.absNorm ((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)
+        = ((n : ℝ)) ^ (-s) := by
+    intro b
+    rw [b.2]
+  haveI : Fintype {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := Fintype.ofFinite _
+  rw [show (∑' b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+      ((Ideal.absNorm ((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s))
+    = ∑' _b : {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}, ((n : ℝ)) ^ (-s) from
+    tsum_congr hconst]
+  rw [tsum_fintype, Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  by_cases hn : n = 0
+  · subst hn
+    rw [Nat.cast_zero, Real.zero_rpow (by linarith), mul_zero, mul_zero]
+  · congr 2
+    rw [← Nat.card_eq_fintype_card]
+    refine Nat.card_congr ((Equiv.ofBijective (fun b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+      (⟨((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) ⟨?_, ?_⟩).symm)
+    · rintro b c hbc
+      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
+        (z : Ideal (𝓞 K))) hbc
+      exact Subtype.ext (Subtype.ext this)
+    · rintro ⟨I, hI⟩
+      have hIne : I ≠ 0 := by
+        intro h0
+        rw [h0] at hI
+        rw [show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hI
+        exact hn hI.symm
+      exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
 
 end
 
