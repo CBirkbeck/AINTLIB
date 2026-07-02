@@ -264,6 +264,41 @@ theorem heckeG_eq_basisUnitLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : 
   rw [add_comm, ← ha]
   exact heckeTheta_heckeWeights_periodic K I _ x (Additive.toMul a)
 
+open scoped Classical in
+/-- The composite coordinate identification `EuclideanSpace ≃ mixedSpace` through which
+`idealZLattice` is the comap of `idealLattice`. -/
+noncomputable def euclidMixedEquiv : EuclideanSpace ℝ (index K) ≃ₗ[ℝ] mixedSpace K :=
+  ((euclidean.stdOrthonormalBasis K).repr.symm.toLinearEquiv).trans
+    (euclidean.toMixed K).toLinearEquiv
+
+open scoped Classical in
+theorem mem_idealZLattice_iff_euclidMixed (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
+    (v : EuclideanSpace ℝ (index K)) :
+    v ∈ idealZLattice K I ↔ euclidMixedEquiv K v ∈ mixedEmbedding.idealLattice K I := by
+  rw [idealZLattice, euclideanIdealLattice, ← SetLike.mem_coe, ZLattice.coe_comap,
+    Set.mem_preimage, ZLattice.coe_comap, Set.mem_preimage, SetLike.mem_coe]
+  rfl
+
+open scoped Classical in
+/-- **The Euclidean cone unfolding**: nonzero points of the Euclidean ideal lattice of an
+integral ideal are indexed by cone points × fundamental-unit exponents. -/
+noncomputable def euclidConeEquiv (J : (Ideal (𝓞 K))⁰) :
+    {v : EuclideanSpace ℝ (index K) //
+        v ∈ idealZLattice K (FractionalIdeal.mk0 K J) ∧ v ≠ 0}
+      ≃ (idealSet K J) × (Fin (rank K) → ℤ) := by
+  refine (Equiv.subtypeEquiv (euclidMixedEquiv K).toEquiv (fun v => ?_)).trans
+    (coneUnfoldEquiv K J).symm
+  constructor
+  · rintro ⟨hmem, hne⟩
+    exact ⟨(mem_idealZLattice_iff_euclidMixed K _ v).mp hmem, by
+      simp only [LinearEquiv.coe_toEquiv]
+      rw [Ne, LinearEquiv.map_eq_zero_iff]
+      exact hne⟩
+  · rintro ⟨hmem, hne⟩
+    refine ⟨(mem_idealZLattice_iff_euclidMixed K _ v).mpr ?_, fun h0 => hne (by
+      simp only [LinearEquiv.coe_toEquiv, h0, map_zero])⟩
+    simpa using hmem
+
 end
 
 end DedekindResidue
