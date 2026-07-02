@@ -785,6 +785,173 @@ theorem comparator_bound_left :
           (by positivity) (pow_le_pow_left₀ (norm_nonneg _) hden _)
     _ ≤ M := hM (-t)
 
+/-- **The comparator is bounded on the whole strip** `-1 ≤ Re z ≤ 2`
+(Phragmén–Lindelöf between the two boundary bounds). -/
+theorem comparator_bound_strip :
+    ∃ M : ℝ, 0 < M ∧ ∀ z : ℂ, -1 ≤ z.re → z.re ≤ 2 →
+      ‖completedDedekindZetaEntire K z^4 * Complex.sin (π * z)^(gammaExponent K)
+        / (z - 4)^(4 * gammaExponent K + 8)‖ ≤ M := by
+  obtain ⟨M₁, hM₁0, hM₁⟩ := comparator_bound_left K
+  obtain ⟨M₂, hM₂0, hM₂⟩ := comparator_bound_right K
+  obtain ⟨B, hB0, hB⟩ :=
+    exists_completedDedekindZetaEntire_strip_bound K (-1) 2 (by norm_num)
+  set n : ℕ := gammaExponent K with hn
+  set f : ℂ → ℂ := fun z => completedDedekindZetaEntire K z^4
+    * Complex.sin (π * z)^n / (z - 4)^(4*n+8) with hf
+  refine ⟨M₁ + M₂, by positivity, fun z h1 h2 => ?_⟩
+  -- z - 4 is nonvanishing up to Re ≤ 3
+  have hne4 : ∀ w : ℂ, w.re ≤ 2 → w - 4 ≠ 0 := by
+    intro w hw h0
+    have := congrArg Complex.re h0
+    simp [sub_eq_zero] at this
+    rw [this] at hw
+    norm_num at hw
+  -- differentiability up to the boundary
+  have hfd : DiffContOnCl ℂ f (Complex.re ⁻¹' Set.Ioo (-1 : ℝ) 2) := by
+    have hcl : closure (Complex.re ⁻¹' Set.Ioo (-1 : ℝ) 2)
+        ⊆ Complex.re ⁻¹' Set.Icc (-1 : ℝ) 2 :=
+      closure_minimal (fun w hw => ⟨le_of_lt hw.1, le_of_lt hw.2⟩)
+        (IsClosed.preimage Complex.continuous_re isClosed_Icc)
+    refine DifferentiableOn.diffContOnCl ?_
+    intro w hw
+    have hw2 : w.re ≤ 2 := (hcl hw).2
+    exact (((((differentiable_completedDedekindZetaEntire K) w).pow 4).mul
+      (((Complex.differentiable_sin.comp
+        ((differentiable_const _).mul differentiable_id)).differentiableAt).pow n)).div
+      ((differentiable_id.sub_const (4:ℂ)).differentiableAt.pow _)
+      (pow_ne_zero _ (hne4 w hw2))).differentiableWithinAt
+  -- sub-double-exponential growth
+  have hgrow : ∃ c < π / (2 - (-1) : ℝ), ∃ Bg,
+      f =O[Filter.comap (_root_.abs ∘ Complex.im) Filter.atTop
+          ⊓ Filter.principal (Complex.re ⁻¹' Set.Ioo (-1 : ℝ) 2)]
+        fun z => Real.exp (Bg * Real.exp (c * |z.im|)) := by
+    refine ⟨1, ?_, 8 + (n:ℝ) * π, ?_⟩
+    · rw [show (2 - (-1) : ℝ) = 3 by norm_num, lt_div_iff₀ (by norm_num : (0:ℝ) < 3)]
+      linarith [Real.pi_gt_three]
+    refine Asymptotics.IsBigO.of_bound (B^4 * Real.exp 16) ?_
+    rw [Filter.eventually_inf_principal]
+    refine Filter.Eventually.of_forall (fun w hw => ?_)
+    have hw1 : -1 ≤ w.re := le_of_lt hw.1
+    have hw2 : w.re ≤ 2 := le_of_lt hw.2
+    have hden2 : (2:ℝ) ≤ ‖w - 4‖ := by
+      have habs : (2:ℝ) ≤ |(w - 4).re| := by
+        rw [show (w - 4).re = w.re - 4 by simp, abs_sub_comm,
+          abs_of_pos (by linarith : (0:ℝ) < 4 - w.re)]
+        linarith
+      exact le_trans habs (Complex.abs_re_le_norm _)
+    have hH := hB w hw1 hw2
+    have hwn : ‖w‖ ≤ 2 + |w.im| := by
+      calc ‖w‖ = ‖(w.re : ℂ) + (w.im : ℂ) * Complex.I‖ := by rw [Complex.re_add_im]
+        _ ≤ ‖(w.re : ℂ)‖ + ‖(w.im : ℂ) * Complex.I‖ := norm_add_le _ _
+        _ = |w.re| + |w.im| := by
+            rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+              Real.norm_eq_abs, Real.norm_eq_abs]
+        _ ≤ 2 + |w.im| := by
+            have : |w.re| ≤ 2 := abs_le.mpr ⟨by linarith, hw2⟩
+            linarith
+    have hHb : ‖completedDedekindZetaEntire K w‖ ≤ B * (3 + |w.im|)^2 := by
+      refine le_trans hH ?_
+      have h1w : 1 + ‖w‖ ≤ 3 + |w.im| := by linarith
+      have hsq : (1 + ‖w‖)^2 ≤ (3 + |w.im|)^2 := by
+        have h0 : (0:ℝ) ≤ 1 + ‖w‖ := by positivity
+        nlinarith
+      exact mul_le_mul_of_nonneg_left hsq hB0
+    have hsinw : ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) := norm_sin_pi_mul_le w
+    -- assemble the crude growth estimate
+    have hfw : ‖f w‖ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
+      rw [hf]
+      have hnum : ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
+          ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
+        rw [norm_mul, norm_pow, norm_pow]
+        refine mul_le_mul (pow_le_pow_left₀ (norm_nonneg _) hHb 4) ?_
+          (pow_nonneg (norm_nonneg _) n) (by positivity)
+        calc ‖Complex.sin (π * w)‖^n ≤ (Real.exp (π * |w.im|))^n :=
+              pow_le_pow_left₀ (norm_nonneg _) hsinw n
+          _ = Real.exp ((n:ℝ) * (π * |w.im|)) := by rw [← Real.exp_nat_mul]
+      calc ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n
+            / (w - 4)^(4*n+8)‖
+          = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
+            / ‖w - 4‖^(4*n+8) := by rw [norm_div, norm_pow]
+        _ ≤ ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ / 1 := by
+            gcongr
+            exact one_le_pow₀ (by linarith)
+        _ = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ := div_one _
+        _ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := hnum
+    -- crude ≤ sub-double-exponential
+    have hpoly : (B * (3 + |w.im|)^2)^4 ≤ B^4 * Real.exp (8 * (2 + |w.im|)) := by
+      have h3x : 3 + |w.im| ≤ Real.exp (2 + |w.im|) := by
+        linarith [Real.add_one_le_exp (2 + |w.im|)]
+      have h3x2 : (3 + |w.im|)^2 ≤ Real.exp (2 * (2 + |w.im|)) := by
+        calc (3 + |w.im|)^2 ≤ (Real.exp (2 + |w.im|))^2 :=
+              pow_le_pow_left₀ (by positivity) h3x 2
+          _ = Real.exp (2 * (2 + |w.im|)) := by
+              rw [← Real.exp_nat_mul]
+              norm_num
+      calc (B * (3 + |w.im|)^2)^4 = B^4 * ((3 + |w.im|)^2)^4 := by ring
+        _ ≤ B^4 * (Real.exp (2 * (2 + |w.im|)))^4 := by
+            refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+            have h0 : (0:ℝ) ≤ (3 + |w.im|)^2 := by positivity
+            exact pow_le_pow_left₀ h0 h3x2 4
+        _ = B^4 * Real.exp (8 * (2 + |w.im|)) := by
+            congr 1
+            rw [← Real.exp_nat_mul]
+            congr 1
+            push_cast
+            ring
+    have hfinal : ‖f w‖ ≤ B^4 * Real.exp 16
+        * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
+      refine le_trans hfw ?_
+      calc (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|))
+          ≤ (B^4 * Real.exp (8 * (2 + |w.im|))) * Real.exp ((n:ℝ) * (π * |w.im|)) :=
+            mul_le_mul_of_nonneg_right hpoly (by positivity)
+        _ = B^4 * Real.exp 16 * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
+            rw [mul_assoc, ← Real.exp_add, mul_assoc, ← Real.exp_add]
+            congr 2
+            ring
+    refine le_trans hfinal ?_
+    rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    have hexp_le : Real.exp ((8 + (n:ℝ) * π) * |w.im|)
+        ≤ Real.exp ((8 + (n:ℝ) * π) * Real.exp (1 * |w.im|)) := by
+      rw [Real.exp_le_exp, one_mul]
+      have hc0 : (0:ℝ) ≤ 8 + (n:ℝ) * π := by positivity
+      have himle : |w.im| ≤ Real.exp |w.im| := by
+        linarith [Real.add_one_le_exp |w.im|]
+      nlinarith
+    exact mul_le_mul_of_nonneg_left hexp_le (by positivity)
+  -- boundary bounds in PL form
+  have hle_a : ∀ w : ℂ, w.re = -1 → ‖f w‖ ≤ M₁ + M₂ := by
+    intro w hw
+    have hweq : w = ((-1:ℝ) : ℂ) + (w.im : ℂ) * Complex.I := by
+      apply Complex.ext <;> simp [hw]
+    have := hM₁ w.im
+    rw [← hweq] at this
+    rw [hf]
+    calc ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^(gammaExponent K)
+          / (w - 4)^(4 * gammaExponent K + 8)‖
+        = ‖completedDedekindZetaEntire K w‖^4
+          * ‖Complex.sin (π * w)‖^(gammaExponent K)
+          / ‖w - 4‖^(4 * gammaExponent K + 8) := by
+          rw [norm_div, norm_mul, norm_pow, norm_pow, norm_pow]
+      _ ≤ M₁ := this
+      _ ≤ M₁ + M₂ := by linarith
+  have hle_b : ∀ w : ℂ, w.re = 2 → ‖f w‖ ≤ M₁ + M₂ := by
+    intro w hw
+    have hweq : w = ((2:ℝ) : ℂ) + (w.im : ℂ) * Complex.I := by
+      apply Complex.ext <;> simp [hw]
+    have := hM₂ w.im
+    rw [← hweq] at this
+    rw [hf]
+    calc ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^(gammaExponent K)
+          / (w - 4)^(4 * gammaExponent K + 8)‖
+        = ‖completedDedekindZetaEntire K w‖^4
+          * ‖Complex.sin (π * w)‖^(gammaExponent K)
+          / ‖w - 4‖^(4 * gammaExponent K + 8) := by
+          rw [norm_div, norm_mul, norm_pow, norm_pow, norm_pow]
+      _ ≤ M₂ := this
+      _ ≤ M₁ + M₂ := by linarith
+  show ‖f z‖ ≤ M₁ + M₂
+  exact PhragmenLindelof.vertical_strip hfd hgrow hle_a hle_b h1 h2
+
 end
 
 end DedekindResidue
