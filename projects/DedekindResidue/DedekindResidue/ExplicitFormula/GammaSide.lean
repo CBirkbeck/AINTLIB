@@ -40,6 +40,7 @@ classical Gauss derivation.
 namespace DedekindResidue
 
 open MeasureTheory Complex intervalIntegral Real Filter
+open scoped FourierTransform
 
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
 `∫₀^∞ (e^{-x} - e^{-tx})/x dx = log t`. The kernel is `∫_1^t e^{-sx} ds`; Fubini and
@@ -2151,5 +2152,19 @@ theorem tendsto_integral_rhoFT_mul_phi {k F : ℝ → ℂ}
     MeasureTheory.intervalIntegral_tendsto_integral hμγ hneg Filter.tendsto_id
   have h1 := hboundary.sub hint
   simpa using h1
+
+/-- **Convention bridge** (P-b): the kernel transform `μ(t) = ∫ k(x)e^{itx} dx` is the
+mathlib Fourier integral at `-t/(2π)`. -/
+theorem muFT_eq_fourierIntegral (k : ℝ → ℂ) (t : ℝ) :
+    (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I))
+      = 𝓕 k (-t/(2*π)) := by
+  rw [Real.fourier_real_eq_integral_exp_smul]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  show k x * Complex.exp ((t*x : ℝ) * Complex.I)
+      = Complex.exp (((-2 * π * x * (-t/(2*π)) : ℝ) : ℂ) * Complex.I) • k x
+  rw [smul_eq_mul]
+  rw [show (-2 * π * x * (-t/(2*π)) : ℝ) = t * x by
+    field_simp]
+  ring
 
 end DedekindResidue
