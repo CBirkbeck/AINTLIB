@@ -506,6 +506,19 @@ theorem integral_eq_tsum_box_shift (f : logSpace K → ℝ) (hf : Integrable f) 
     congr 1
     abel
 
+open scoped Classical in
+/-- Cone points of an integral ideal form a countable family (they sit inside the ideal
+lattice, which is a discrete subgroup). -/
+instance instCountableIdealSet (J : (Ideal (𝓞 K))⁰) : Countable (idealSet K J) := by
+  have hinj : Function.Injective (fun a : idealSet K J =>
+      (⟨(a : mixedSpace K), a.2.2⟩ :
+        mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J))) := by
+    intro a b hab
+    have := congrArg (fun z : mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J) =>
+      (z : mixedSpace K)) hab
+    exact Subtype.ext this
+  exact Function.Injective.countable hinj
+
 end
 
 end DedekindResidue
