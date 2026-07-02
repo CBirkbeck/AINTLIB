@@ -19,5 +19,6 @@ public import DedekindResidue.CompletedZeta.Existence
 public import DedekindResidue.CompletedZeta.FEPair
 public import DedekindResidue.CompletedZeta.FunctionalEquation
 public import DedekindResidue.CompletedZeta.GammaStrip
+public import DedekindResidue.CompletedZeta.AnalyticControl
 public import DedekindResidue.CompletedZeta.GRH
 public import DedekindResidue.MainTheorem
