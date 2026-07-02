@@ -1,1 +1,1 @@
-FOCUS: SP1-AGE-2 — derived form: dualZLattice(idealZLattice I) = diagScale c₀-image of idealZLattice(FractionalIdeal.dual I), c₀ = 1 on real coords, (2,-2) on complex (re,im) coords (conj∘double); recon: index K, stdBasis coords, trace_eq_sum_embeddings, FractionalIdeal.mem_dual
+FOCUS: AGE-2 finale — dualIdealUnit (Units.mk0 of FractionalIdeal.dual; probe GroupWithZero), inclusion RHS ≤ dualZLattice via inner_diagScale_embeddingCoords + mem_dual, covolume equality (needs absNorm-of-dual probe), finish by eq_of_le_of_covolume_eq

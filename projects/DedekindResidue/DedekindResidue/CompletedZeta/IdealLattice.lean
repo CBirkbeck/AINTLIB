@@ -226,6 +226,41 @@ theorem mem_idealZLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : Euclidean
     rw [embeddingCoords]
     simp
 
+/-- `absNorm` of the inverse fractional ideal is the inverse norm. -/
+theorem fracAbsNorm_inv (J : FractionalIdeal (𝓞 K)⁰ K) (hJ : J ≠ 0) :
+    FractionalIdeal.absNorm J⁻¹ = (FractionalIdeal.absNorm J)⁻¹ := by
+  have h1 : J * J⁻¹ = 1 := mul_inv_cancel₀ hJ
+  have h2 := congrArg FractionalIdeal.absNorm h1
+  rw [map_mul, FractionalIdeal.absNorm_one] at h2
+  exact eq_inv_of_mul_eq_one_left ((mul_comm _ _).trans h2)
+
+/-- The trace-dual of a (unit) fractional ideal, as a unit fractional ideal —
+`FractionalIdeal.dual ℤ ℚ I`, nonzero by `dual_ne_zero`. -/
+noncomputable def dualIdealUnit (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    (FractionalIdeal (𝓞 K)⁰ K)ˣ :=
+  Units.mk0 (FractionalIdeal.dual ℤ ℚ (I : FractionalIdeal (𝓞 K)⁰ K))
+    (FractionalIdeal.dual_ne_zero ℤ ℚ (Units.ne_zero I))
+
+/-- The norm of the trace-dual ideal: `N(I^∨) = N(I)⁻¹·|Δ_K|⁻¹` (via
+`dual_eq_mul_inv`, `coeIdeal_differentIdeal`, and `absNorm_differentIdeal = |Δ_K|`). -/
+theorem absNorm_dualIdealUnit (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    FractionalIdeal.absNorm ((dualIdealUnit K I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+        FractionalIdeal (𝓞 K)⁰ K)
+      = (FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K))⁻¹
+          * (((discr K).natAbs : ℚ))⁻¹ := by
+  have hcoe : ((dualIdealUnit K I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+      FractionalIdeal (𝓞 K)⁰ K) = FractionalIdeal.dual ℤ ℚ (I : FractionalIdeal (𝓞 K)⁰ K) :=
+    rfl
+  rw [hcoe, FractionalIdeal.dual_eq_mul_inv, map_mul]
+  have hdual1 : FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 K)⁰ K)
+      = ((differentIdeal ℤ (𝓞 K) : Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K)⁻¹ := by
+    rw [coeIdeal_differentIdeal ℤ ℚ K (𝓞 K), inv_inv]
+  have hne : ((differentIdeal ℤ (𝓞 K) : Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := by
+    rw [Ne, FractionalIdeal.coeIdeal_eq_zero]
+    exact differentIdeal_ne_bot
+  rw [hdual1, fracAbsNorm_inv K _ hne, fracAbsNorm_inv K _ (Units.ne_zero I),
+    FractionalIdeal.coeIdeal_absNorm, absNorm_differentIdeal K (𝓞 K), mul_comm]
+
 end
 
 end DedekindResidue
