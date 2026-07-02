@@ -42,16 +42,23 @@ noncomputable def completedZetaPrefactor (K : Type*) [Field K] [NumberField K] (
 /-- **Characterisation of the completed Dedekind zeta function** `Λ_K`:
 1. on the half-plane of absolute convergence `Re s > 1` (where mathlib's `dedekindZeta`
    is the honest convergent `L`-series), `Λ` is `|Δ_K|^{s/2}·γ_K(s)·ζ_K(s)`;
-2. `s(s-1)·Λ(s)` is entire — `Λ` is analytic away from (at most simple) poles at `s = 0, 1`.
+2. `s(s-1)·Λ(s)` extends to an entire function — `Λ` is analytic away from (at most
+   simple) poles at `s = 0, 1`.
 
-These two conditions determine `Λ` uniquely among continuous functions
-(`IsCompletedDedekindZeta.unique`): this predicate **is** "the" completed Dedekind zeta,
+Note the *extends* in 2: a total function `Λ : ℂ → ℂ` carrying genuine poles stores junk
+values at `0` and `1`, so `s(s-1)·Λ(s)` literally vanishes there while its analytic
+continuation does not; the faithful rendering of "`s(s-1)Λ_K(s)` is entire" is the
+existence of an entire `H` agreeing with it away from the two poles.
+
+These two conditions determine `Λ` uniquely away from the poles
+(`IsCompletedDedekindZeta.eqOn`): this predicate **is** "the" completed Dedekind zeta,
 stated without first constructing the meromorphic continuation. Hecke's theorem
-(SP1-AGE/FE: existence of such a `Λ` via the theta-Mellin construction, with the functional
-equation `Λ(1-s) = Λ(s)`) is what makes the predicate inhabited. -/
+(`exists_isCompletedDedekindZeta`: existence of such a `Λ` via the theta-Mellin
+construction) is what makes the predicate inhabited. -/
 def IsCompletedDedekindZeta (K : Type*) [Field K] [NumberField K] (Λ : ℂ → ℂ) : Prop :=
   (∀ s : ℂ, 1 < s.re → Λ s = completedZetaPrefactor K s * dedekindZeta K s)
-    ∧ Differentiable ℂ (fun s => s * (s - 1) * Λ s)
+    ∧ ∃ H : ℂ → ℂ, Differentiable ℂ H
+        ∧ ∀ s : ℂ, s ≠ 0 → s ≠ 1 → H s = s * (s - 1) * Λ s
 
 /-- **Uniqueness.** Any two functions satisfying the completed-zeta characterisation agree
 away from the poles `s = 0, 1`: the entire functions `s(s-1)Λᵢ(s)` agree on the open
@@ -62,22 +69,32 @@ theorem IsCompletedDedekindZeta.eqOn {K : Type*} [Field K] [NumberField K]
     {Λ₁ Λ₂ : ℂ → ℂ} (h₁ : IsCompletedDedekindZeta K Λ₁)
     (h₂ : IsCompletedDedekindZeta K Λ₂) {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) :
     Λ₁ s = Λ₂ s := by
-  have hagree : ∀ s : ℂ, s * (s - 1) * Λ₁ s = s * (s - 1) * Λ₂ s := by
+  obtain ⟨H₁, hH₁, hH₁eq⟩ := h₁.2
+  obtain ⟨H₂, hH₂, hH₂eq⟩ := h₂.2
+  have hagree : ∀ s : ℂ, H₁ s = H₂ s := by
     have hopen : IsOpen {s : ℂ | 1 < s.re} := isOpen_lt continuous_const Complex.continuous_re
-    have hpre : Set.EqOn (fun s => s * (s - 1) * Λ₁ s) (fun s => s * (s - 1) * Λ₂ s)
-        {s : ℂ | 1 < s.re} := by
+    have hpre : Set.EqOn H₁ H₂ {s : ℂ | 1 < s.re} := by
       intro s hs
-      simp only
-      rw [h₁.1 s hs, h₂.1 s hs]
+      have hs0' : s ≠ 0 := by
+        intro h0
+        rw [h0] at hs
+        norm_num [Set.mem_setOf_eq, Complex.zero_re] at hs
+      have hs1' : s ≠ 1 := by
+        intro h1
+        rw [h1] at hs
+        norm_num [Set.mem_setOf_eq, Complex.one_re] at hs
+      rw [hH₁eq s hs0' hs1', hH₂eq s hs0' hs1', h₁.1 s hs, h₂.1 s hs]
     have h2mem : (2 : ℂ) ∈ {s : ℂ | 1 < s.re} := by norm_num [Complex.ofReal_re]
     have := AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
-      (𝕜 := ℂ) (f := fun s => s * (s - 1) * Λ₁ s) (g := fun s => s * (s - 1) * Λ₂ s)
-      (Complex.analyticOnNhd_univ_iff_differentiable.mpr h₁.2)
-      (Complex.analyticOnNhd_univ_iff_differentiable.mpr h₂.2)
+      (𝕜 := ℂ) (f := H₁) (g := H₂)
+      (Complex.analyticOnNhd_univ_iff_differentiable.mpr hH₁)
+      (Complex.analyticOnNhd_univ_iff_differentiable.mpr hH₂)
       isPreconnected_univ (Set.mem_univ (2 : ℂ))
       (hpre.eventuallyEq_of_mem (hopen.mem_nhds h2mem))
     exact fun s => this (Set.mem_univ s)
-  have h := hagree s
+  have h : s * (s - 1) * Λ₁ s = s * (s - 1) * Λ₂ s := by
+    rw [← hH₁eq s hs0 hs1, ← hH₂eq s hs0 hs1]
+    exact hagree s
   have hne : s * (s - 1) ≠ 0 := mul_ne_zero hs0 (sub_ne_zero.mpr hs1)
   exact mul_left_cancel₀ hne h
 
