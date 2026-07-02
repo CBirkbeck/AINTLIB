@@ -1391,6 +1391,88 @@ theorem lintegral_exp_heckeLog (σ : ℝ) (hσ : 0 < σ) :
   have := mult_pos (w := w)
   positivity
 
+open scoped Classical in
+/-- The Hecke weights at ray parameter `e^τ` are the exponentials of the substitution
+coordinates. -/
+theorem heckeWeights_exp (τ : ℝ) (u : logSpace K) (w : InfinitePlace K) :
+    heckeWeights K (Real.exp τ) u w = Real.exp ((heckeLogCLE K (τ, u)) w) := by
+  rw [heckeWeights]
+  have happ : (heckeLogCLE K (τ, u)) w
+      = τ / (Module.finrank ℚ K) + 2 * fullLog K u w / mult w := rfl
+  rw [happ, Real.exp_add]
+  congr 1
+  rw [show τ / (Module.finrank ℚ K : ℝ) = τ * (1 / (Module.finrank ℚ K : ℝ)) by ring,
+    Real.exp_mul]
+
+open scoped Classical in
+/-- The Gaussian term at the unit point in exponential ray coordinates is the master
+integrand's exponential factor. -/
+theorem gaussTerm_exp_eq (τ : ℝ) (u : logSpace K) :
+    gaussTerm K (Real.exp τ) u (embeddingCoords K 1)
+      = Real.exp (-π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K (τ, u)) w)) := by
+  rw [gaussTerm]
+  congr 1
+  rw [sum_placeWeights_embeddingCoords_sq]
+  congr 1
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  rw [map_one, one_pow, mul_one, heckeWeights_exp]
+
+open scoped Classical in
+/-- **The universal Mellin constant M₀, evaluated**: the `(t,u)`-double lintegral of the
+Gaussian at the unit point equals the Jacobian times the Γ-product. -/
+theorem lintegral_M0_eq {σ : ℝ} (hσ : 0 < σ) :
+    (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u (embeddingCoords K 1)))
+      = (heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+          π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)) := by
+  -- t = e^τ substitution on the outer integral
+  have himg := lintegral_image_eq_lintegral_abs_deriv_mul (s := Set.univ)
+    MeasurableSet.univ
+    (f := Real.exp) (f' := Real.exp)
+    (fun x _ => (Real.hasDerivAt_exp x).hasDerivWithinAt)
+    (Real.exp_injective.injOn)
+    (fun t => ENNReal.ofReal (t ^ (σ - 1))
+      * ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u (embeddingCoords K 1)))
+  rw [Set.image_univ, Real.range_exp, Measure.restrict_univ] at himg
+  rw [himg]
+  -- pointwise in τ: collapse the scalar factors and push inside the u-integral
+  have hstep : ∀ τ : ℝ,
+      ENNReal.ofReal (|Real.exp τ|) * (ENNReal.ofReal ((Real.exp τ) ^ (σ - 1))
+        * ∫⁻ u : logSpace K, ENNReal.ofReal
+            (gaussTerm K (Real.exp τ) u (embeddingCoords K 1)))
+        = ∫⁻ u : logSpace K, ENNReal.ofReal (Real.exp (σ * τ
+            - π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K (τ, u)) w))) := by
+    intro τ
+    rw [← mul_assoc, ← ENNReal.ofReal_mul (abs_nonneg _), abs_of_pos (Real.exp_pos _)]
+    have hscal : Real.exp τ * (Real.exp τ) ^ (σ - 1) = Real.exp (σ * τ) := by
+      rw [show (Real.exp τ) ^ (σ - 1) = Real.exp (τ * (σ - 1)) from (Real.exp_mul τ _).symm,
+        ← Real.exp_add]
+      congr 1
+      ring
+    rw [hscal, ← lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
+    refine lintegral_congr (fun u => ?_)
+    rw [gaussTerm_exp_eq, ← ENNReal.ofReal_mul (Real.exp_pos _).le, ← Real.exp_add]
+    congr 2
+    ring
+  rw [lintegral_congr hstep]
+  -- merge the double integral and apply the master factorisation
+  have hjoint : ∫⁻ τ : ℝ, ∫⁻ u : logSpace K, ENNReal.ofReal (Real.exp (σ * τ
+      - π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K (τ, u)) w)))
+      = ∫⁻ p : ℝ × logSpace K, ENNReal.ofReal (Real.exp (σ * p.1
+          - π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K p) w))) := by
+    rw [show (volume : Measure (ℝ × logSpace K))
+      = (volume : Measure ℝ).prod (volume : Measure (logSpace K)) from rfl]
+    rw [lintegral_prod]
+    refine (ENNReal.continuous_ofReal.comp ?_).measurable.aemeasurable
+    refine Real.continuous_exp.comp ?_
+    refine Continuous.sub ?_ ?_
+    · exact continuous_fst.const_mul σ
+    · refine Continuous.mul continuous_const ?_
+      refine continuous_finsetSum _ (fun w _ => ?_)
+      exact Real.continuous_exp.comp
+        ((continuous_apply w).comp (heckeLogCLE K).continuous)
+  rw [hjoint, lintegral_exp_heckeLog K σ hσ]
+
 end
 
 end DedekindResidue
