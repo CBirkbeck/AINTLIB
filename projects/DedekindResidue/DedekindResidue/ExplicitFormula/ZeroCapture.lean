@@ -1326,7 +1326,7 @@ theorem zero_capture_edge_form {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 
       completedDedekindZetaEntire K ((σ:ℂ) + (T:ℂ) * Complex.I) ≠ 0)
     (hbot : ∀ σ : ℝ, -a ≤ σ → σ ≤ 1+a →
       completedDedekindZetaEntire K ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I) ≠ 0)
-    {CΦ Cl : ℝ} (hCΦ0 : 0 ≤ CΦ) (hCl0 : 0 ≤ Cl)
+    {CΦ Cl : ℝ} (hCΦ0 : 0 ≤ CΦ)
     (hΦtop : ∀ x ∈ Set.uIcc (-a) (1+a), ‖Φ ((x:ℂ) + (T:ℂ) * Complex.I)‖ ≤ CΦ)
     (hΦbot : ∀ x ∈ Set.uIcc (-a) (1+a), ‖Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖ ≤ CΦ)
     (hltop : ∀ x ∈ Set.uIcc (-a) (1+a),
