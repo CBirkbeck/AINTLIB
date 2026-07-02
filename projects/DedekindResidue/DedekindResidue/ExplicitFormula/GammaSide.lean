@@ -2767,4 +2767,137 @@ theorem tendsto_eLpNorm_indicator_truncation {g : ℝ → ℂ}
     exact h0
   exact hcont.comp hdom
 
+/-- **Poitou's `γ` is the `L²` Fourier transform** (P-c): for `F` integrable with
+`(F(0)-F(x))/x` locally integrable at `0` and square-integrable, `gammaFT F` agrees a.e.
+with a representative of the `L²` Fourier transform of `(F(0)-F(x))/x`, reflected and
+rescaled to the `e^{itx}` convention. -/
+theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    (fun t : ℝ => gammaFT F t) =ᵐ[volume]
+      (fun t : ℝ => ((𝓕 (hFdiv2.toLp _) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)
+        (-t/(2*π))) := by
+  classical
+  set h : ℝ → ℂ := fun x => (F 0 - F x)/(x:ℂ) with hh
+  set hn : ℕ → ℝ → ℂ := fun n => (Set.Ioc (-(n:ℝ)) (n:ℝ)).indicator h with hhn
+  -- truncations are L¹ ∩ L²
+  have hIntOn : ∀ n : ℕ, IntegrableOn h (Set.Ioc (-(n:ℝ)) (n:ℝ)) := by
+    intro n
+    haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (-(n:ℝ)) (n:ℝ))) := by
+      constructor
+      rw [Measure.restrict_apply_univ, Real.volume_Ioc]
+      exact ENNReal.ofReal_lt_top
+    have h1 : MemLp h 2 (volume.restrict (Set.Ioc (-(n:ℝ)) (n:ℝ))) :=
+      hFdiv2.restrict _
+    have h2 : MemLp (fun _ : ℝ => (1:ℂ)) 2
+        (volume.restrict (Set.Ioc (-(n:ℝ)) (n:ℝ))) := memLp_const _
+    have h3 := MemLp.integrable_mul h1 h2
+    refine h3.congr (Filter.Eventually.of_forall (fun x => ?_))
+    show h x * 1 = h x
+    rw [mul_one]
+  have hn1 : ∀ n : ℕ, Integrable (hn n) := by
+    intro n
+    rw [hhn]
+    exact (integrable_indicator_iff measurableSet_Ioc).mpr (hIntOn n)
+  have hn2 : ∀ n : ℕ, MemLp (hn n) 2 (volume : Measure ℝ) := by
+    intro n
+    rw [hhn]
+    exact hFdiv2.indicator measurableSet_Ioc
+  -- the eLpNorm of the transform difference equals the eLpNorm of the truncation error
+  have hbr : ∀ u : Lp ℂ 2 (volume : Measure ℝ),
+      (𝓕 u : Lp ℂ 2 (volume : Measure ℝ))
+        = MeasureTheory.Lp.fourierTransformₗᵢ ℝ ℂ u := fun _ => rfl
+  have hLp_eLp : ∀ c : Lp ℂ 2 (volume : Measure ℝ),
+      eLpNorm (⇑(𝓕 c : Lp ℂ 2 (volume : Measure ℝ))) 2 volume = eLpNorm (⇑c) 2 volume := by
+    intro c
+    have e1 : eLpNorm (⇑(𝓕 c : Lp ℂ 2 (volume : Measure ℝ))) 2 volume
+        = ENNReal.ofReal ‖(𝓕 c : Lp ℂ 2 (volume : Measure ℝ))‖ := by
+      rw [MeasureTheory.Lp.norm_def,
+        ENNReal.ofReal_toReal (MeasureTheory.Lp.eLpNorm_ne_top _)]
+    have e2 : eLpNorm (⇑c) 2 volume = ENNReal.ofReal ‖c‖ := by
+      rw [MeasureTheory.Lp.norm_def,
+        ENNReal.ofReal_toReal (MeasureTheory.Lp.eLpNorm_ne_top _)]
+    rw [e1, e2, MeasureTheory.Lp.norm_fourier_eq]
+  have hstep : ∀ n : ℕ,
+      eLpNorm ((𝓕 (fun x : ℝ => hn n x))
+        - ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)) 2 volume
+      = eLpNorm (hn n - h) 2 volume := by
+    intro n
+    have h1 : (𝓕 (fun x : ℝ => hn n x))
+        =ᵐ[volume] ((𝓕 ((hn2 n).toLp (hn n)) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) :=
+      (coeFn_fourier_toLp_two (hn1 n) (hn2 n)).symm
+    rw [eLpNorm_congr_ae (Filter.EventuallyEq.sub h1 (Filter.EventuallyEq.refl _ _))]
+    have h2 : (((𝓕 ((hn2 n).toLp (hn n)) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)
+        - ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ))
+        =ᵐ[volume] ((𝓕 ((hn2 n).toLp (hn n)) - 𝓕 (hFdiv2.toLp h)
+          : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) :=
+      (MeasureTheory.Lp.coeFn_sub _ _).symm
+    rw [eLpNorm_congr_ae h2]
+    have h3 : (𝓕 ((hn2 n).toLp (hn n)) - 𝓕 (hFdiv2.toLp h)
+        : Lp ℂ 2 (volume : Measure ℝ))
+        = (𝓕 ((hn2 n).toLp (hn n) - hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) := by
+      rw [hbr, hbr, hbr, ← map_sub]
+    rw [h3, hLp_eLp]
+    refine eLpNorm_congr_ae ?_
+    filter_upwards [MeasureTheory.Lp.coeFn_sub ((hn2 n).toLp (hn n)) (hFdiv2.toLp h),
+      (hn2 n).coeFn_toLp, hFdiv2.coeFn_toLp] with x hx1 hx2 hx3
+    rw [hx1, Pi.sub_apply, hx2, hx3]
+    rfl
+  have heLp : Tendsto (fun n : ℕ =>
+      eLpNorm ((𝓕 (fun x : ℝ => hn n x))
+        - ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)) 2 volume)
+      atTop (nhds 0) := by
+    simp only [hstep]
+    exact tendsto_eLpNorm_indicator_truncation hFdiv2
+  -- convergence in measure and an a.e.-convergent subsequence
+  have hmeas : TendstoInMeasure volume (fun n : ℕ => 𝓕 (fun x : ℝ => hn n x)) atTop
+      ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) := by
+    refine tendstoInMeasure_of_tendsto_eLpNorm (p := 2) (by norm_num) ?_ ?_ heLp
+    · intro n
+      refine Continuous.aestronglyMeasurable ?_
+      exact VectorFourier.fourierIntegral_continuous (by fun_prop) (by fun_prop) (hn1 n)
+    · exact (MeasureTheory.Lp.memLp _).aestronglyMeasurable
+  obtain ⟨ns, hns_mono, hns_ae⟩ := hmeas.exists_seq_tendsto_ae
+  -- pull the a.e. statement back through ξ = -t/(2π)
+  have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+      volume volume := by
+    have h0 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
+      funext t
+      field_simp
+    rw [h0]
+    refine ⟨by fun_prop, ?_⟩
+    have hne0 : ((-(2*π))⁻¹ : ℝ) ≠ 0 := by
+      refine inv_ne_zero ?_
+      refine neg_ne_zero.mpr ?_
+      positivity
+    rw [Real.map_volume_mul_left hne0]
+    exact Measure.smul_absolutelyContinuous
+  have hae_t := hqmp.ae hns_ae
+  -- combine with the pointwise truncated convergence
+  have hne : ∀ᵐ t : ℝ, t ≠ 0 := by
+    rw [MeasureTheory.ae_iff]
+    simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+    exact MeasureTheory.measure_singleton 0
+  filter_upwards [hae_t, hne] with t hlim ht
+  have hpt : Tendsto (fun i : ℕ => 𝓕 (fun x : ℝ => hn (ns i) x) (-t/(2*π)))
+      atTop (nhds (gammaFT F t)) := by
+    have h0 : ∀ n : ℕ, 𝓕 (fun x : ℝ => hn n x) (-t/(2*π))
+        = ∫ x in Set.Ioc (-(n:ℝ)) (n:ℝ), h x * Complex.exp ((t*x : ℝ) * Complex.I) := by
+      intro n
+      rw [← muFT_eq_fourierIntegral (fun x : ℝ => hn n x) t]
+      rw [hhn]
+      rw [← MeasureTheory.integral_indicator measurableSet_Ioc]
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+      show (Set.Ioc (-(n:ℝ)) (n:ℝ)).indicator h x * Complex.exp ((t*x : ℝ) * Complex.I)
+          = (Set.Ioc (-(n:ℝ)) (n:ℝ)).indicator
+              (fun y => h y * Complex.exp ((t*y : ℝ) * Complex.I)) x
+      simp only [Set.indicator_apply]
+      split_ifs with hx
+      · rfl
+      · rw [zero_mul]
+    simp only [h0]
+    exact (tendsto_truncated_fourier_gammaFT hF hFdiv ht).comp
+      (hns_mono.tendsto_atTop)
+  exact tendsto_nhds_unique hpt hlim
+
 end DedekindResidue
