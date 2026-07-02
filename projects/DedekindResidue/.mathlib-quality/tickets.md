@@ -212,7 +212,14 @@
       for `unitLattice`-periodic integrands (`IsAddFundamentalDomain.setIntegral_eq` + translated/
       negated FD is an FD) using `heckeTheta_heckeWeights_periodic` ⇒
       **`heckeG_inversion : g_I(t) = covol(L_I)⁻¹·t^{-1/2}·g_{I^∨}(4^{2r₂}·t⁻¹)`**; (iv)
-      integrability estimates (isotropic comparison per `u` + compactness of the box). Then
+      integrability estimates (isotropic comparison per `u` + compactness of the box).
+      **(i)+(ii)+(iii) ALL DONE ✓ (2026-07-02, commits 3a907b2e/90cb45f2/6de29331)**:
+      `prod_placeWeights` + `prod_placeWeights_heckeWeights` (= t); `fullLog_restrict`
+      (fullLog onto trace-zero), `dualShift`, `fullLog_dualShift`, `heckeWeights_mul_left`/
+      `_add_right`, `ite_mul_heckeWeights`, `dualPlaceWeights_heckeWeights_eq`
+      (`c(t,u)^∨ = c(4^{2r₂}t⁻¹, -u+dualShift)`); `setIntegral_fundamentalDomain_comp_neg_add`
+      (u ↦ -u+s preimage of ZSpan box is an FD via `preimage_of_equiv`; periodic integrals agree)
+      ⇒ **`heckeG_inversion` PROVEN, axiom-clean**. Remaining: (iv), then AGE-4 Mellin. Then
       AGE-4 Mellin (constants self-verifying — every identity proven; the `4^{2r₂}`/`2^{-r₂}`
       factors recombine against `covolume_idealZLattice`'s `(2⁻¹)^{r₂}` and `Γℂ`'s `2`).
       ORIGINAL box plan:
