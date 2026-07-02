@@ -706,6 +706,85 @@ theorem comparator_bound_right :
           + (B * 25)^4 * Real.exp ((n:ℝ) * (π * 2)) / 2^(4*n+8) :=
           le_add_of_nonneg_left (by positivity)
 
+/-- Left boundary bound for the comparator on `Re z = -1`, by reflecting to the right
+boundary through the functional equation. -/
+theorem comparator_bound_left :
+    ∃ M : ℝ, 0 < M ∧ ∀ t : ℝ,
+      ‖completedDedekindZetaEntire K (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)‖^4
+        * ‖Complex.sin (π * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖^(gammaExponent K)
+        / ‖(((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4‖^(4 * gammaExponent K + 8)
+      ≤ M := by
+  obtain ⟨M, hM0, hM⟩ := comparator_bound_right K
+  refine ⟨M, hM0, fun t => ?_⟩
+  set n : ℕ := gammaExponent K with hn
+  -- the functional equation sends -1+it to 2-it
+  have hH : completedDedekindZetaEntire K (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)
+      = completedDedekindZetaEntire K (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) := by
+    have := completedDedekindZetaEntire_one_sub K (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)
+    rw [show (1:ℂ) - (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)
+        = ((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I by push_cast; ring] at this
+    exact this.symm
+  -- the sine moduli agree: both lines have vanishing real sine part
+  have hsin : ‖Complex.sin (π * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖
+      = ‖Complex.sin (π * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖ := by
+    have hd1 : (π : ℂ) * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)
+        = ((π * (-1) : ℝ) : ℂ) + ((π * t : ℝ) : ℂ) * Complex.I := by push_cast; ring
+    have hd2 : (π : ℂ) * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I)
+        = ((π * 2 : ℝ) : ℂ) + ((π * (-t) : ℝ) : ℂ) * Complex.I := by push_cast; ring
+    have hsq1 := norm_sin_add_mul_I_sq (π * (-1)) (π * t)
+    have hsq2 := norm_sin_add_mul_I_sq (π * 2) (π * (-t))
+    rw [← hd1] at hsq1
+    rw [← hd2] at hsq2
+    have hv1 : Real.sin (π * (-1)) = 0 := by
+      rw [show π * (-1) = -π by ring, Real.sin_neg, Real.sin_pi, neg_zero]
+    have hv2 : Real.sin (π * 2) = 0 := by
+      rw [show π * 2 = 2 * π by ring, Real.sin_two_pi]
+    rw [hv1] at hsq1
+    rw [hv2] at hsq2
+    have hs1 : ‖Complex.sin ((π : ℂ) * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖^2
+        = ‖Complex.sin ((π : ℂ) * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖^2 := by
+      rw [hsq1, hsq2]
+      rw [show π * (-t) = -(π * t) by ring, Real.sinh_neg]
+      ring
+    calc ‖Complex.sin ((π : ℂ) * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖
+        = Real.sqrt (‖Complex.sin ((π : ℂ) * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖^2) :=
+          (Real.sqrt_sq (norm_nonneg _)).symm
+      _ = Real.sqrt (‖Complex.sin ((π : ℂ)
+            * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖^2) := by rw [hs1]
+      _ = ‖Complex.sin ((π : ℂ) * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖ :=
+          Real.sqrt_sq (norm_nonneg _)
+  -- the left denominator dominates the right one
+  have hden : ‖(((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) - 4‖
+      ≤ ‖(((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4‖ := by
+    have he1 : (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) - 4
+        = ((-2 : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I := by push_cast; ring
+    have he2 : (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4
+        = ((-5 : ℝ) : ℂ) + ((t : ℝ) : ℂ) * Complex.I := by push_cast; ring
+    rw [he1, he2, Complex.norm_add_mul_I, Complex.norm_add_mul_I]
+    refine Real.sqrt_le_sqrt ?_
+    nlinarith [sq_nonneg t]
+  have hdenpos : (0:ℝ) < ‖(((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) - 4‖ := by
+    have : (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) - 4 ≠ 0 := by
+      intro h0
+      have := congrArg Complex.re h0
+      simp at this
+      norm_num at this
+    exact norm_pos_iff.mpr this
+  calc ‖completedDedekindZetaEntire K (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I)‖^4
+      * ‖Complex.sin (π * (((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖^n
+      / ‖(((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4‖^(4*n+8)
+      = ‖completedDedekindZetaEntire K (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I)‖^4
+        * ‖Complex.sin (π * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖^n
+        / ‖(((-1:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4‖^(4*n+8) := by
+        rw [hH, hsin]
+    _ ≤ ‖completedDedekindZetaEntire K (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I)‖^4
+        * ‖Complex.sin (π * (((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I))‖^n
+        / ‖(((2:ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I) - 4‖^(4*n+8) :=
+        div_le_div_of_nonneg_left
+          (mul_nonneg (pow_nonneg (norm_nonneg _) 4) (pow_nonneg (norm_nonneg _) n))
+          (by positivity) (pow_le_pow_left₀ (norm_nonneg _) hden _)
+    _ ≤ M := hM (-t)
+
 end
 
 end DedekindResidue
