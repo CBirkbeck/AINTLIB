@@ -1701,4 +1701,170 @@ theorem hasDerivAt_rhoFT {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
       rw [hval] at h5
       exact h5
 
+/-- `μ(t) = ∫ k(x)e^{itx} dx` is bounded by `‖k‖₁`. -/
+theorem norm_muFT_le {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
+    ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ ≤ ∫ x : ℝ, ‖k x‖ := by
+  calc ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖
+      ≤ ∫ x : ℝ, ‖k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ :=
+        MeasureTheory.norm_integral_le_integral_norm _
+    _ = ∫ x : ℝ, ‖k x‖ := by
+        refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+        show ‖k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ = ‖k x‖
+        rw [norm_mul, Complex.norm_exp]
+        have h0 : (((t * x : ℝ) : ℂ) * Complex.I).re = 0 := by simp
+        rw [h0, Real.exp_zero, mul_one]
+
+/-- `μ` is continuous (dominated convergence). -/
+theorem continuous_muFT {k : ℝ → ℂ} (hk : Integrable k) :
+    Continuous (fun t : ℝ => ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) := by
+  refine continuous_iff_continuousAt.mpr (fun t => ?_)
+  refine MeasureTheory.continuousAt_of_dominated ?_ ?_ hk.norm ?_
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    refine hk.aestronglyMeasurable.mul ?_
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [norm_mul, Complex.norm_exp]
+    have h0 : (((τ * x : ℝ) : ℂ) * Complex.I).re = 0 := by simp
+    rw [h0, Real.exp_zero, mul_one]
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    refine Continuous.continuousAt ?_
+    have h1 : Continuous (fun τ : ℝ => Complex.exp ((τ * x : ℝ) * Complex.I)) := by
+      fun_prop
+    exact h1.const_mul _
+
+/-- `ρ` is continuous (it is differentiable everywhere). -/
+theorem continuous_rhoFT {k : ℝ → ℂ} (hk : Integrable k) :
+    Continuous (rhoFT k) := by
+  refine continuous_iff_continuousAt.mpr (fun t => ?_)
+  exact (hasDerivAt_rhoFT hk t).continuousAt
+
+/-- The sinc tail is globally bounded. -/
+theorem exists_bound_sincTail : ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, |sincTail t| ≤ C := by
+  obtain ⟨C, hCpos, hC⟩ := exists_bound_primitive_sinc
+  refine ⟨π/2 + C, by positivity, fun t => ?_⟩
+  rw [sincTail]
+  have h0 : |∫ u in (0:ℝ)..t, Real.sin u / u| ≤ C := by
+    rcases le_or_gt 0 t with h | h
+    · exact hC t h
+    · have h2 := intervalIntegral.integral_comp_neg (a := (0:ℝ)) (b := -t)
+        (f := fun u : ℝ => Real.sin u / u)
+      have h3 : (∫ x in (0:ℝ)..(-t), Real.sin (-x) / (-x))
+          = ∫ x in (0:ℝ)..(-t), Real.sin x / x := by
+        refine intervalIntegral.integral_congr (fun x _ => ?_)
+        rw [Real.sin_neg, neg_div_neg_eq]
+      rw [h3] at h2
+      simp only [neg_neg, neg_zero] at h2
+      -- h2 : ∫ x in 0..(-t), sin x/x = ∫ x in t..0, sin x/x
+      have h4 : (∫ u in (0:ℝ)..t, Real.sin u / u)
+          = -∫ x in (0:ℝ)..(-t), Real.sin x / x := by
+        rw [h2, intervalIntegral.integral_symm]
+      rw [h4, abs_neg]
+      exact hC (-t) (by linarith)
+  calc |π/2 - ∫ u in (0:ℝ)..t, Real.sin u / u|
+      ≤ |π/2| + |∫ u in (0:ℝ)..t, Real.sin u / u| := abs_sub _ _
+    _ ≤ π/2 + C := by
+        rw [abs_of_pos (by positivity : (0:ℝ) < π/2)]
+        linarith
+
+/-- Continuity in `t` of Fourier-type set integrals (dominated convergence). -/
+theorem continuous_integral_mul_cexp {G : ℝ → ℂ} {s : Set ℝ} (hG : IntegrableOn G s) :
+    Continuous (fun t : ℝ => ∫ x in s, G x * Complex.exp ((t*x : ℝ) * Complex.I)) := by
+  refine continuous_iff_continuousAt.mpr (fun t => ?_)
+  refine MeasureTheory.continuousAt_of_dominated ?_ ?_ hG.norm ?_
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    refine hG.aestronglyMeasurable.mul ?_
+    refine (Continuous.aestronglyMeasurable ?_).restrict
+    fun_prop
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [norm_mul, Complex.norm_exp]
+    have h0 : (((τ * x : ℝ) : ℂ) * Complex.I).re = 0 := by simp
+    rw [h0, Real.exp_zero, mul_one]
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    refine Continuous.continuousAt ?_
+    have h1 : Continuous (fun τ : ℝ => Complex.exp ((τ * x : ℝ) * Complex.I)) := by
+      fun_prop
+    exact h1.const_mul _
+
+/-- `γ` is continuous away from `0` (it is differentiable there). -/
+theorem continuousAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    {t : ℝ} (ht : t ≠ 0) : ContinuousAt (gammaFT F) t :=
+  (hasDerivAt_gammaFT hF hFdiv ht).continuousAt
+
+/-- `γ` is globally bounded on any compact window: the continuous pieces are bounded on
+compacts and the sinc-tail jump term is globally bounded. -/
+theorem exists_bound_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (a b : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ t ∈ Set.Icc a b, ‖gammaFT F t‖ ≤ C := by
+  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
+    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
+    · refine ((hF.aestronglyMeasurable.restrict.mul
+        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
+      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
+      refine Filter.Eventually.of_forall (fun x hx => ?_)
+      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+      push Not at hx
+      have hx1 : 1 ≤ |x| := by
+        rcases le_or_gt x (-1) with h | h
+        · rw [abs_of_nonpos (by linarith)]
+          linarith
+        · have := hx h
+          rw [abs_of_pos (by linarith)]
+          linarith
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+      exact div_le_self (norm_nonneg _) hx1
+  obtain ⟨Cs, hCspos, hCs⟩ := exists_bound_sincTail
+  obtain ⟨C₀, hC₀⟩ := (isCompact_Icc (a := a) (b := b)).exists_bound_of_continuousOn
+    ((continuous_integral_mul_cexp hFdiv).continuousOn)
+  obtain ⟨C₁, hC₁⟩ := (isCompact_Icc (a := a) (b := b)).exists_bound_of_continuousOn
+    ((continuous_integral_mul_cexp hGtail).continuousOn)
+  refine ⟨(|C₀| + 1) + ‖F 0‖ * (2 * Cs) + (|C₁| + 1), by positivity, fun t htmem => ?_⟩
+  rw [gammaFT]
+  set A : ℂ := ∫ x in Set.Ioc (-1:ℝ) 1, (F 0 - F x)/(x:ℂ)
+      * Complex.exp ((t*x : ℝ) * Complex.I) with hA
+  set B : ℂ := F 0 * (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ)) with hB
+  set D : ℂ := ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, F x/(x:ℂ)
+      * Complex.exp ((t*x : ℝ) * Complex.I) with hD
+  have h1 : ‖A + B - D‖ ≤ ‖A‖ + ‖B‖ + ‖D‖ := by
+    have t1 : ‖A + B - D‖ ≤ ‖A + B‖ + ‖D‖ := norm_sub_le _ _
+    have t2 : ‖A + B‖ ≤ ‖A‖ + ‖B‖ := norm_add_le _ _
+    linarith
+  refine le_trans h1 ?_
+  have h2 : ‖B‖ ≤ ‖F 0‖ * (2 * Cs) := by
+    rw [hB, norm_mul]
+    refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+    rw [norm_mul, norm_mul, Complex.norm_I, mul_one, Complex.norm_real,
+      Real.norm_eq_abs, abs_mul]
+    have hsign : |Real.sign t| ≤ 1 := by
+      rcases lt_trichotomy t 0 with h | h | h
+      · rw [Real.sign_of_neg h]
+        norm_num
+      · rw [h, Real.sign_zero]
+        norm_num
+      · rw [Real.sign_of_pos h]
+        norm_num
+    calc ‖(2:ℂ)‖ * (|Real.sign t| * abs (sincTail |t|))
+        ≤ ‖(2:ℂ)‖ * (1 * Cs) := by
+          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+          refine mul_le_mul hsign (hCs (|t|)) (abs_nonneg _) zero_le_one
+      _ = 2 * Cs := by
+          rw [Complex.norm_ofNat]
+          ring
+  have h3 : ‖A‖ ≤ |C₀| + 1 := by
+    rw [hA]
+    refine le_trans (hC₀ t htmem) ?_
+    calc C₀ ≤ |C₀| := le_abs_self _
+      _ ≤ |C₀| + 1 := by linarith
+  have h4 : ‖D‖ ≤ |C₁| + 1 := by
+    rw [hD]
+    refine le_trans (hC₁ t htmem) ?_
+    calc C₁ ≤ |C₁| := le_abs_self _
+      _ ≤ |C₁| + 1 := by linarith
+  linarith
+
 end DedekindResidue
