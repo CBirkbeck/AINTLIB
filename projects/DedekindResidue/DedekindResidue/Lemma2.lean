@@ -169,6 +169,33 @@ theorem hasDerivAt_gAux_core (h : ℂ) {t : ℝ} (ht : 0 < t) :
   field_simp
   ring
 
+/-- Belabas–Friedman eq. (7), second derivative: on `t > 0`, the derivative of
+`-(h+1/t)·e^{-ht}/t` is `(h² + (2ht+2)/t²)·e^{-ht}/t`. -/
+theorem hasDerivAt_gAux_deriv (h : ℂ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun u : ℝ => -(h + 1/u) * (Complex.exp (-h * u) / u))
+      ((h^2 + (2*h*t + 2)/t^2) * (Complex.exp (-h * t) / t)) t := by
+  have hden_ne : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast ht.ne'
+  -- all-ℂ computation, then compose with ofReal
+  have hfac : HasDerivAt (fun w : ℂ => -(h + 1/w)) (1/(t:ℂ)^2) (t : ℂ) := by
+    have hinv : HasDerivAt (fun w : ℂ => w⁻¹) (-((t:ℂ)^2)⁻¹) (t : ℂ) :=
+      hasDerivAt_inv hden_ne
+    have h2 := (hinv.const_add h).neg
+    rw [show (-fun w : ℂ => h + w⁻¹) = (fun w : ℂ => -(h + 1/w)) from
+      funext (fun w => by simp [one_div])] at h2
+    simpa [neg_neg] using h2
+  have hnum : HasDerivAt (fun w : ℂ => Complex.exp (-h * w))
+      (Complex.exp (-h * (t : ℂ)) * (-h)) (t : ℂ) := by
+    have hlin : HasDerivAt (fun w : ℂ => -h * w) (-h) (t : ℂ) := by
+      simpa using (hasDerivAt_id ((t : ℝ) : ℂ)).const_mul (-h)
+    exact hlin.cexp
+  have hg := hnum.div (hasDerivAt_id ((t : ℝ) : ℂ)) hden_ne
+  have hprod := hfac.mul hg
+  have hcomp := hprod.comp_ofReal
+  refine hcomp.congr_deriv ?_
+  simp only [Pi.div_apply, id_eq]
+  field_simp
+  ring
+
 end
 
 end DedekindResidue
