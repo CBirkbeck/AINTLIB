@@ -1852,7 +1852,7 @@ theorem lintegral_mellin_heckeF_dev {σ : ℝ} (hσ : 0 < σ) :
     rw [hFsum, ENNReal.ofReal_sum_of_nonneg (fun C _ => heckeGClass_dev_nonneg K C ht),
       Finset.mul_sum]
   rw [setLIntegral_congr_fun measurableSet_Ioi hstep]
-  rw [lintegral_finset_sum' _ (fun C _ => ?_)]
+  rw [lintegral_finsetSum' _ (fun C _ => ?_)]
   swap
   · -- measurability per class
     refine AEMeasurable.mul ?_ ?_
