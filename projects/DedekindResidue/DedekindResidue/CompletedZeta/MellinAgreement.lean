@@ -26,7 +26,7 @@ namespace DedekindResidue
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace
 open NumberField.mixedEmbedding.fundamentalCone
 open NumberField.Units NumberField.Units.dirichletUnitTheorem MeasureTheory
-open scoped nonZeroDivisors Real ENNReal
+open scoped nonZeroDivisors Real ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
@@ -1238,6 +1238,40 @@ theorem lintegral_exp_mul_sub_pi_exp {a : ℝ} (ha : 0 < a) :
     congr 1
     ring
   rw [hGamma, ← ENNReal.ofReal_mul (by positivity)]
+
+open scoped Classical in
+/-- The Hecke substitution as a continuous linear equivalence. -/
+noncomputable def heckeLogCLE : (ℝ × logSpace K) ≃L[ℝ] (InfinitePlace K → ℝ) :=
+  (heckeLogEquiv K).toContinuousLinearEquiv
+
+open scoped Classical in
+instance : Measure.IsAddHaarMeasure (volume : Measure (ℝ × logSpace K)) := by
+  rw [show (volume : Measure (ℝ × logSpace K))
+    = (volume : Measure ℝ).prod (volume : Measure (logSpace K)) from rfl]
+  infer_instance
+
+open scoped Classical in
+instance : Measure.IsAddHaarMeasure
+    (Measure.map (heckeLogCLE K) (volume : Measure (ℝ × logSpace K))) :=
+  (heckeLogCLE K).isAddHaarMeasure_map volume
+
+open scoped Classical in
+/-- **The Jacobian constant** of the Hecke substitution: the Haar-comparison factor of the
+pushforward of the product volume. Its value is never needed — only positivity. -/
+noncomputable def heckeJacobian : ℝ≥0 :=
+  Measure.addHaarScalarFactor
+    (Measure.map (heckeLogCLE K) (volume : Measure (ℝ × logSpace K)))
+    (volume : Measure (InfinitePlace K → ℝ))
+
+open scoped Classical in
+theorem map_heckeLogCLE_volume :
+    Measure.map (heckeLogCLE K) (volume : Measure (ℝ × logSpace K))
+      = heckeJacobian K • (volume : Measure (InfinitePlace K → ℝ)) :=
+  Measure.isAddLeftInvariant_eq_smul _ _
+
+open scoped Classical in
+theorem heckeJacobian_pos : 0 < heckeJacobian K :=
+  Measure.addHaarScalarFactor_pos_of_isAddHaarMeasure _ _
 
 end
 
