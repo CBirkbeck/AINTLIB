@@ -385,6 +385,36 @@ theorem dualPlaceWeights_heckeWeights {t : ℝ} (ht : 0 < t) (u : logSpace K)
   simp only [Pi.neg_apply]
   split_ifs <;> ring
 
+open scoped Classical in
+/-- The coordinate product of place weights is the multiplicity-weighted place product:
+real places contribute once, complex places (two coordinates) twice. -/
+theorem prod_placeWeights (c : InfinitePlace K → ℝ) :
+    (∏ i : index K, placeWeights K c i) = ∏ w : InfinitePlace K, c w ^ mult w := by
+  rw [Fintype.prod_sum_type, Fintype.prod_prod_type,
+    ← Fintype.prod_subtype_mul_prod_subtype IsReal (fun w : InfinitePlace K => c w ^ mult w)]
+  congr 1
+  · refine Finset.prod_congr rfl (fun w _ => ?_)
+    simp only [placeWeights, Sum.elim_inl]
+    rw [mult, if_pos w.2, pow_one]
+  · have hre : (∏ i : {w : InfinitePlace K // ¬ IsReal w}, c ↑i ^ mult (i : InfinitePlace K))
+        = ∏ w : {w : InfinitePlace K // IsComplex w}, c ↑w ^ mult (w : InfinitePlace K) :=
+      Fintype.prod_equiv (Equiv.subtypeEquivRight
+        (fun w : InfinitePlace K => not_isReal_iff_isComplex)) _ _ (fun w => rfl)
+    rw [hre]
+    refine Finset.prod_congr rfl (fun w _ => ?_)
+    rw [Fin.prod_univ_two]
+    simp only [placeWeights, Sum.elim_inr]
+    rw [mult, if_neg (by rw [not_isReal_iff_isComplex]; exact w.2)]
+    ring
+
+open scoped Classical in
+/-- The coordinate product of the Hecke weights is the Mellin variable `t` — so the middle
+factor of `heckeTheta_inversion` at the Hecke weights is exactly `(√t)⁻¹`. -/
+theorem prod_placeWeights_heckeWeights {t : ℝ} (ht : 0 < t) (u : logSpace K) :
+    (∏ i : index K, placeWeights K (heckeWeights K t u) i) = t := by
+  rw [prod_placeWeights]
+  exact prod_heckeWeights_pow_mult K ht u
+
 end
 
 end DedekindResidue

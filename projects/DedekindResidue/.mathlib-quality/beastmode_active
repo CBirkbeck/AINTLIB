@@ -1,1 +1,1 @@
-FOCUS: AGE-3 g-inversion — first verify pointwise: dualPlaceWeights (heckeWeights t u) =?= (1 real;4 complex)·heckeWeights t⁻¹ (-u); then box change of variables u↦-u (measure-preserving neg + FD-symmetry via periodicity); then heckeG-inversion; then integrability; then AGE-4 mellin
+FOCUS: AGE-3 (i) prod_placeWeights lemma (index-product = mult-weighted place-product) => t^{-1/2} middle factor — next Lean brick
