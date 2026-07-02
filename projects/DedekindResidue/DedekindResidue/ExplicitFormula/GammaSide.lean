@@ -1560,4 +1560,145 @@ theorem hasDerivAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
   rw [hval] at hsum
   exact hsum
 
+/-- Chord bound: `‖e^{iθ} - 1‖ ≤ |θ|` (via `‖e^{iθ}-1‖ = 2|sin(θ/2)|`). -/
+theorem norm_cexp_mul_I_sub_one_le (θ : ℝ) :
+    ‖Complex.exp ((θ:ℂ) * Complex.I) - 1‖ ≤ |θ| := by
+  have h0 : Complex.exp ((θ:ℂ) * Complex.I) - 1
+      = ⟨Real.cos θ - 1, Real.sin θ⟩ := by
+    rw [Complex.exp_mul_I]
+    apply Complex.ext
+    · simp [Complex.add_re, Complex.mul_re, Complex.cos_ofReal_re, Complex.sin_ofReal_re]
+    · simp [Complex.add_im, Complex.mul_im, Complex.sin_ofReal_re]
+  rw [h0]
+  rw [Complex.norm_def, Complex.normSq_mk]
+  have h1 : (Real.cos θ - 1) * (Real.cos θ - 1) + Real.sin θ * Real.sin θ
+      = 4 * Real.sin (θ/2)^2 := by
+    have h2 : Real.cos θ = 1 - 2 * Real.sin (θ/2)^2 := by
+      have h5 := Real.cos_two_mul (θ/2)
+      have h6 : 2 * (θ/2) = θ := by ring
+      rw [h6] at h5
+      have h7 := Real.sin_sq_add_cos_sq (θ/2)
+      nlinarith
+    have h3 := Real.sin_sq_add_cos_sq θ
+    nlinarith
+  rw [h1]
+  have h4 : Real.sqrt (4 * Real.sin (θ/2)^2) = 2 * |Real.sin (θ/2)| := by
+    rw [show (4 : ℝ) * Real.sin (θ/2)^2 = (2 * |Real.sin (θ/2)|)^2 by
+      rw [mul_pow, sq_abs]
+      ring]
+    exact Real.sqrt_sq (by positivity)
+  rw [h4]
+  calc 2 * |Real.sin (θ/2)| ≤ 2 * |θ/2| := by
+        have := Real.abs_sin_le_abs (x := θ/2)
+        linarith
+    _ = |θ| := by
+        rw [abs_div, abs_two]
+        ring
+
+/-- **Poitou's `ρ`** (Lemme 2, p. 6-05): `ρ(t) = ∫ k(x)(1 - e^{itx})/x dx`. -/
+noncomputable def rhoFT (k : ℝ → ℂ) (t : ℝ) : ℂ :=
+  ∫ x : ℝ, k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ))
+
+@[simp]
+theorem rhoFT_zero (k : ℝ → ℂ) : rhoFT k 0 = 0 := by
+  rw [rhoFT]
+  simp
+
+/-- The `ρ` integrand is integrable for integrable `k` (chord bound `≤ |t|·‖k‖`). -/
+theorem integrable_rhoFT_integrand {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
+    Integrable (fun x : ℝ => k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ))) := by
+  refine MeasureTheory.Integrable.mono' (g := fun x => |t| * ‖k x‖)
+    (hk.norm.const_mul _) ?_ ?_
+  · refine hk.aestronglyMeasurable.mul ?_
+    refine AEStronglyMeasurable.mul ?_ ?_
+    · refine Continuous.aestronglyMeasurable ?_
+      fun_prop
+    · exact ((Complex.measurable_ofReal.inv).aestronglyMeasurable)
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    rcases eq_or_ne x 0 with hx | hx
+    · simp [hx]
+      positivity
+    · rw [norm_mul, mul_comm (|t|) _]
+      refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+      rw [div_le_iff₀ (abs_pos.mpr hx)]
+      have h0 : ‖(1:ℂ) - Complex.exp ((t*x : ℝ) * Complex.I)‖
+          = ‖Complex.exp ((t*x : ℝ) * Complex.I) - 1‖ := by
+        rw [← norm_neg, neg_sub]
+      rw [h0]
+      calc ‖Complex.exp ((t*x : ℝ) * Complex.I) - 1‖ ≤ |t*x| :=
+            norm_cexp_mul_I_sub_one_le (t*x)
+        _ = |t| * |x| := abs_mul t x
+
+/-- **Lemme 2, derivative of `ρ`** (Poitou p. 6-06): `ρ'(t) = -i·μ(t)` with
+`μ(t) = ∫ k(x) e^{itx} dx`. -/
+theorem hasDerivAt_rhoFT {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
+    HasDerivAt (rhoFT k)
+      (-Complex.I * ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) t := by
+  have hexp_meas : ∀ τ : ℝ, AEStronglyMeasurable
+      (fun x : ℝ => Complex.exp ((τ * x : ℝ) * Complex.I)) volume := by
+    intro τ
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  have h := _root_.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := fun τ : ℝ => fun x : ℝ =>
+      k x * ((1 - Complex.exp ((τ * x : ℝ) * Complex.I))/(x:ℂ)))
+    (F' := fun τ : ℝ => fun x : ℝ =>
+      -Complex.I * (k x * Complex.exp ((τ * x : ℝ) * Complex.I)))
+    (bound := fun x => ‖k x‖)
+    (μ := volume) (x₀ := t) (s := Metric.ball t 1)
+    (Metric.ball_mem_nhds t one_pos) ?_ ?_ ?_ ?_ ?_ ?_
+  · have h2 := h.2
+    have h3 : (fun τ : ℝ => ∫ x : ℝ,
+        k x * ((1 - Complex.exp ((τ * x : ℝ) * Complex.I))/(x:ℂ))) = rhoFT k := by
+      funext τ
+      rw [rhoFT]
+    rw [h3] at h2
+    rw [← MeasureTheory.integral_const_mul]
+    exact h2
+  · refine Filter.Eventually.of_forall (fun τ => ?_)
+    exact (integrable_rhoFT_integrand hk τ).aestronglyMeasurable
+  · exact integrable_rhoFT_integrand hk t
+  · refine AEStronglyMeasurable.const_mul ?_ _
+    exact hk.aestronglyMeasurable.mul (hexp_meas t)
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    intro τ _
+    rw [norm_mul, norm_neg, Complex.norm_I, one_mul, norm_mul, Complex.norm_exp]
+    have h0 : (((τ * x : ℝ) : ℂ) * Complex.I).re = 0 := by
+      simp
+    rw [h0, Real.exp_zero, mul_one]
+  · exact hk.norm
+  · filter_upwards [MeasureTheory.ae_iff.mpr (by
+      simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+      exact MeasureTheory.measure_singleton (0:ℝ) : volume {x : ℝ | ¬ x ≠ 0} = 0)]
+      with x hx
+    intro τ _
+    · have h0 : HasDerivAt (fun τ : ℝ => τ * x) x τ := by
+        simpa using (hasDerivAt_id τ).mul_const x
+      have h1 : HasDerivAt (fun τ : ℝ => ((τ * x : ℝ) : ℂ)) ((x:ℝ):ℂ) τ :=
+        h0.ofReal_comp
+      have h2 : HasDerivAt (fun τ : ℝ => ((τ * x : ℝ) : ℂ) * Complex.I)
+          ((x:ℂ) * Complex.I) τ := h1.mul_const Complex.I
+      have h3 := h2.cexp
+      have h4' : HasDerivAt (fun τ : ℝ => (1 : ℂ)
+          - Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I))
+          (0 - Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I) * ((x:ℂ) * Complex.I)) τ :=
+        (hasDerivAt_const τ (1:ℂ)).sub h3
+      have h4 : HasDerivAt (fun τ : ℝ => (1 : ℂ)
+          - Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I))
+          (-(Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I) * ((x:ℂ) * Complex.I))) τ := by
+        have h9 : (0 : ℂ) - Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I) * ((x:ℂ) * Complex.I)
+            = -(Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I) * ((x:ℂ) * Complex.I)) := by
+          ring
+        rw [h9] at h4'
+        exact h4'
+      have h5 := (h4.div_const ((x:ℂ))).const_mul (k x)
+      have hval : k x * (-(Complex.exp (((τ * x : ℝ) : ℂ) * Complex.I)
+          * ((x:ℂ) * Complex.I)) / (x:ℂ))
+          = -Complex.I * (k x * Complex.exp ((τ * x : ℝ) * Complex.I)) := by
+        have hxne : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx
+        field_simp
+      rw [hval] at h5
+      exact h5
+
 end DedekindResidue
