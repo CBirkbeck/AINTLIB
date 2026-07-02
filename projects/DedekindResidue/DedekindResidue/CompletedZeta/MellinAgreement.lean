@@ -1113,6 +1113,81 @@ theorem tsum_idealSet_norm_rpow (J : (Ideal (𝓞 K))⁰) (σ : ℝ) :
   exact (Equiv.tsum_eq hfibeq.symm
     (fun _ => ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))).symm
 
+open scoped Classical in
+/-- The nonzero principal ideals divisible by `J` are exactly `𝔟·J` for `𝔟` in the class
+`[J]⁻¹`. -/
+noncomputable def principalDvdEquiv (J : (Ideal (𝓞 K))⁰) :
+    {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = (ClassGroup.mk0 J)⁻¹}
+      ≃ {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+          ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))} := by
+  refine Equiv.ofBijective (fun b => ⟨b * J, ⟨(b : (Ideal (𝓞 K))⁰) , by
+    rw [Submonoid.coe_mul]
+    exact mul_comm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) (J : Ideal (𝓞 K))⟩, ?_⟩) ⟨?_, ?_⟩
+  · -- principality
+    have h1 : ClassGroup.mk0 (b * J : (Ideal (𝓞 K))⁰) = 1 := by
+      rw [map_mul, b.2, inv_mul_cancel]
+    have h2 := (ClassGroup.mk0_eq_one_iff
+      (SetLike.coe_mem ((b * J : (Ideal (𝓞 K))⁰)))).mp
+    exact h2 h1
+  · -- injective
+    rintro b c hbc
+    have h1 : (b : (Ideal (𝓞 K))⁰) * J = (c : (Ideal (𝓞 K))⁰) * J := by
+      have := congrArg (fun z : {I : (Ideal (𝓞 K))⁰ // _ ∧ _} =>
+        (z : (Ideal (𝓞 K))⁰)) hbc
+      simpa using this
+    exact Subtype.ext (mul_right_cancel h1)
+  · -- surjective
+    rintro ⟨I, ⟨C, hC⟩, hP⟩
+    have hCmem : C ∈ (Ideal (𝓞 K))⁰ := by
+      refine mem_nonZeroDivisors_of_ne_zero (fun hC0 => ?_)
+      have hI0 : (I : Ideal (𝓞 K)) = 0 := by
+        rw [hC, hC0, mul_zero]
+      exact nonZeroDivisors.coe_ne_zero I (by exact_mod_cast hI0)
+    refine ⟨⟨⟨C, hCmem⟩, ?_⟩, ?_⟩
+    · -- class of C is [J]⁻¹
+      rw [eq_inv_iff_mul_eq_one, ← map_mul]
+      have hprod : ((⟨C, hCmem⟩ : (Ideal (𝓞 K))⁰) * J) = I := by
+        refine Subtype.ext ?_
+        rw [show (((⟨C, hCmem⟩ : (Ideal (𝓞 K))⁰) * J : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
+          = C * (J : Ideal (𝓞 K)) from rfl, hC]
+        ring
+      rw [hprod]
+      exact (ClassGroup.mk0_eq_one_iff (SetLike.coe_mem I)).mpr hP
+    · refine Subtype.ext ?_
+      show (⟨C, hCmem⟩ * J : (Ideal (𝓞 K))⁰) = I
+      refine Subtype.ext ?_
+      rw [show ((⟨C, hCmem⟩ * J : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
+        = C * (J : Ideal (𝓞 K)) from rfl, hC]
+      ring
+
+open scoped Classical in
+/-- **The class fiber (δ-2)**: the sum over principal ideals divisible by `J` is the
+`N(J)^{-2σ}`-scaled sum over the ideal class `[J]⁻¹`. -/
+theorem tsum_principal_dvd_eq (J : (Ideal (𝓞 K))⁰) (σ : ℝ) :
+    (∑' I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+        ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))},
+        ENNReal.ofReal ((((Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+      = ENNReal.ofReal ((((Ideal.absNorm (J : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ))
+        * ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = (ClassGroup.mk0 J)⁻¹},
+            ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+              ^ (-σ)) := by
+  rw [← Equiv.tsum_eq (principalDvdEquiv K J) (fun I =>
+    ENNReal.ofReal ((((Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+      ^ (-σ))), ← ENNReal.tsum_mul_left]
+  refine tsum_congr (fun b => ?_)
+  have hval : ((principalDvdEquiv K J b : {I : (Ideal (𝓞 K))⁰ // _ ∧ _}) :
+      (Ideal (𝓞 K))⁰) = (b : (Ideal (𝓞 K))⁰) * J := rfl
+  rw [show ENNReal.ofReal ((((Ideal.absNorm (((principalDvdEquiv K J b :
+      {I : (Ideal (𝓞 K))⁰ // _ ∧ _}) : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ))
+    = ENNReal.ofReal ((((Ideal.absNorm ((((b : (Ideal (𝓞 K))⁰) * J : (Ideal (𝓞 K))⁰)) :
+        Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)) by rw [hval]]
+  rw [show ((((b : (Ideal (𝓞 K))⁰) * J : (Ideal (𝓞 K))⁰)) : Ideal (𝓞 K))
+    = ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) * (J : Ideal (𝓞 K)) from rfl]
+  rw [map_mul]
+  rw [Nat.cast_mul, mul_pow, Real.mul_rpow (by positivity) (by positivity),
+    ENNReal.ofReal_mul (by positivity), mul_comm (ENNReal.ofReal _)]
+
 end
 
 end DedekindResidue
