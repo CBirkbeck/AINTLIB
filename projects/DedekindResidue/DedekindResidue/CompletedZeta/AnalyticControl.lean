@@ -1981,6 +1981,112 @@ theorem exists_differentiableOn_log {U : Set ℂ} (hUo : IsOpen U) (hUc : Convex
   refine DifferentiableAt.congr_of_eventuallyEq ?_ hDzero.symm
   exact (differentiableAt_const _).add ((hfat.div_const _).clog hslit)
 
+/-- **Maximum principle for the real part** (A5-ii-a): if `f` is holomorphic on a
+bounded set (continuously up to the boundary) and `Re f ≤ M` on the frontier, then
+`Re f ≤ M` on the closure — apply the maximum-modulus principle to `exp ∘ f`. -/
+theorem re_le_of_forall_mem_frontier_re_le {f : ℂ → ℂ} {U : Set ℂ}
+    (hU : Bornology.IsBounded U) (hd : DiffContOnCl ℂ f U) {M : ℝ}
+    (hM : ∀ z ∈ frontier U, (f z).re ≤ M) {z : ℂ} (hz : z ∈ closure U) :
+    (f z).re ≤ M := by
+  have hexp : DiffContOnCl ℂ (fun w => Complex.exp (f w)) U :=
+    Complex.differentiable_exp.comp_diffContOnCl hd
+  have h := Complex.norm_le_of_forall_mem_frontier_norm_le hU hexp
+    (C := Real.exp M) (fun w hw => by
+      rw [Complex.norm_exp]
+      exact Real.exp_le_exp.mpr (hM w hw)) hz
+  rw [Complex.norm_exp] at h
+  exact Real.exp_le_exp.mp h
+
+/-- Codiscrete-within agreement of continuous functions on an open set upgrades to
+genuine agreement (ℂ has no isolated points). -/
+theorem eqOn_of_eventuallyEq_codiscreteWithin {f₁ f₂ : ℂ → ℂ} {U : Set ℂ}
+    (hUo : IsOpen U) (h : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
+    (h₁ : ContinuousOn f₁ U) (h₂ : ContinuousOn f₂ U) : Set.EqOn f₁ f₂ U := by
+  intro z hz
+  by_contra hne
+  -- on a neighborhood of z inside U, the two functions differ
+  have hcont : ContinuousAt (fun w => f₁ w - f₂ w) z :=
+    ((h₁.continuousAt (hUo.mem_nhds hz)).sub (h₂.continuousAt (hUo.mem_nhds hz)))
+  have hne' : f₁ z - f₂ z ≠ 0 := sub_ne_zero_of_ne hne
+  have hV : ∀ᶠ w in nhds z, f₁ w - f₂ w ≠ 0 :=
+    hcont.eventually_ne hne'
+  have hVU : ∀ᶠ w in nhds z, w ∈ U ∧ f₁ w ≠ f₂ w := by
+    filter_upwards [hUo.mem_nhds hz, hV] with w hw hw'
+    exact ⟨hw, sub_ne_zero.mp hw'⟩
+  -- hence U \ {agreement set} accumulates at z
+  have hacc : AccPt z (Filter.principal (U \ {x | f₁ x = f₂ x})) := by
+    rw [AccPt]
+    have hmem : U \ {x | f₁ x = f₂ x} ∈ nhdsWithin z {z}ᶜ := by
+      rw [nhdsWithin]
+      refine Filter.mem_inf_of_left ?_
+      filter_upwards [hVU] with w hw
+      exact ⟨hw.1, hw.2⟩
+    have heq : (nhdsWithin z {z}ᶜ ⊓ Filter.principal (U \ {x | f₁ x = f₂ x}))
+        = nhdsWithin z {z}ᶜ := by
+      rw [inf_eq_left]
+      exact Filter.le_principal_iff.mpr hmem
+    rw [heq]
+    infer_instance
+  have hcod := mem_codiscreteWithin_accPt.mp h
+  exact hcod z hz hacc
+
+/-- **Zero-peeling on a ball** (A5-ii-b): on an open ball where `H` is not identically
+zero, `H` factors as the divisor product times a zero-free analytic function. -/
+theorem exists_H_ball_factorization (c : ℂ) {R : ℝ}
+    {w : ℂ} (hw : w ∈ Metric.ball c R)
+    (hHw : completedDedekindZetaEntire K w ≠ 0) :
+    ∃ g : ℂ → ℂ, AnalyticOnNhd ℂ g (Metric.ball c R)
+      ∧ (∀ z ∈ Metric.ball c R, g z ≠ 0)
+      ∧ ∀ z ∈ Metric.ball c R,
+          completedDedekindZetaEntire K z
+            = (∏ᶠ u, (z - u) ^ ((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+                (Metric.ball c R)) u)) * g z := by
+  set U : Set ℂ := Metric.ball c R with hU
+  have hUo : IsOpen U := Metric.isOpen_ball
+  have hHmero : MeromorphicOn (completedDedekindZetaEntire K) U := fun z _ =>
+    ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt
+  have hordw : meromorphicOrderAt (completedDedekindZetaEntire K) w ≠ ⊤ := by
+    rw [((differentiable_completedDedekindZetaEntire K).analyticAt w).meromorphicOrderAt_eq]
+    have h0 : analyticOrderAt (completedDedekindZetaEntire K) w = 0 :=
+      analyticOrderAt_eq_zero.mpr (Or.inr hHw)
+    rw [h0]
+    simp
+  have hord : ∀ u : U, meromorphicOrderAt (completedDedekindZetaEntire K) u ≠ ⊤ := by
+    intro u
+    exact MeromorphicOn.meromorphicOrderAt_ne_top_of_isPreconnected hHmero
+      ((convex_ball _ _).isPreconnected) hw u.2 hordw
+  have hfin : ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U)).support.Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset
+      (fun z _ => ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt)
+      (isCompact_closedBall c R) Metric.ball_subset_closedBall
+  obtain ⟨g, hganal, hgne, heq⟩ :=
+    MeromorphicOn.extract_zeros_poles hHmero hord hfin
+  have hfinsupp : Function.HasFiniteSupport
+      ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U) : ℂ → ℤ) := hfin
+  -- nonnegativity of the divisor (H analytic)
+  have hdivpos : ∀ u : ℂ,
+      0 ≤ (MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u := by
+    intro u
+    exact (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ =>
+      (differentiable_completedDedekindZetaEntire K).analyticAt z)) u
+  -- continuity of the divisor product
+  have hprodanal : ∀ z : ℂ, AnalyticAt ℂ
+      (∏ᶠ u, (· - u) ^ ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u)) z :=
+    fun z => Function.FactorizedRational.analyticAt (hdivpos z)
+  -- upgrade the codiscrete agreement to genuine agreement
+  have heqOn : Set.EqOn (completedDedekindZetaEntire K)
+      ((∏ᶠ u, (· - u) ^ ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u))
+        • g) U := by
+    refine eqOn_of_eventuallyEq_codiscreteWithin hUo heq
+      (differentiable_completedDedekindZetaEntire K).continuous.continuousOn ?_
+    refine ContinuousOn.smul ?_ (hganal.continuousOn)
+    exact fun z _ => (hprodanal z).continuousAt.continuousWithinAt
+  refine ⟨g, hganal, fun z hz => hgne ⟨z, hz⟩, fun z hz => ?_⟩
+  have := heqOn hz
+  rw [this, Pi.smul_apply', smul_eq_mul]
+  congr 1
+  rw [Function.FactorizedRational.finprod_eq_fun hfinsupp]
+
 end
 
 end DedekindResidue
