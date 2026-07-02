@@ -2949,7 +2949,6 @@ theorem exists_H_landau_cofactor :
     have b4 : (1:ℝ) ≤ 1 * ℓ := by linarith
     push_cast at b2
     rw [add_mul, add_mul, add_mul]
-    push_cast
     linarith [b1, b2, b3, b4]
   calc 32 * (A+2) * (Real.log (mS/mL) + 1)
       ≤ 32 * (A+2) * ((|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) * ℓ) :=
