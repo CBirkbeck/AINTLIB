@@ -1735,6 +1735,183 @@ theorem exists_H_ball_sup (A : ℝ) (hA : 2 ≤ A) :
         rw [mul_pow]
         ring
 
+/-- **AC-A4: per-height zero counting.** There are an abscissa `A` and a constant `C`
+such that for all heights `|T| ≥ A+5`, the number of zeros of `H` (with multiplicity)
+in the closed ball of radius `√(A²+1)` around `A+iT` — a ball containing the critical
+slab `0 ≤ Re ≤ 1`, `|Im - T| ≤ 1` — is at most `C·log(2+|T|)`. -/
+theorem exists_ball_zero_count :
+    ∃ A : ℝ, 2 ≤ A ∧ ∃ C : ℝ, 0 < C ∧ ∀ T : ℝ, A + 5 ≤ |T| →
+      ((∑ᶠ u, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (Real.sqrt (A^2+1)))) u : ℤ)
+        : ℝ) ≤ C * Real.log (2 + |T|) := by
+  obtain ⟨A, hA2, cL, hcL, hlow⟩ := exists_H_center_lower K
+  obtain ⟨cB, hcB, P, hball⟩ := exists_H_ball_sup K A hA2
+  set n : ℕ := gammaExponent K with hn
+  set Pn : ℕ := nrRealPlaces K + nrComplexPlaces K with hPn
+  -- the ratio constant
+  set Cr : ℝ := cB / cL + 1 with hCr
+  have hCr1 : 1 ≤ Cr := by
+    rw [hCr]
+    have : 0 ≤ cB / cL := by positivity
+    linarith
+  -- geometry
+  have hApos : (0:ℝ) < A := by linarith
+  have hrpos : (0:ℝ) < Real.sqrt (A^2+1) := by positivity
+  have hrR : Real.sqrt (A^2+1) < A + 1 := by
+    rw [show A + 1 = Real.sqrt ((A+1)^2) by
+      rw [Real.sqrt_sq (by linarith)]]
+    refine Real.sqrt_lt_sqrt (by positivity) ?_
+    nlinarith
+  have hlogRr : 0 < Real.log ((A+1) / Real.sqrt (A^2+1)) := by
+    refine Real.log_pos ?_
+    rw [lt_div_iff₀ hrpos]
+    linarith [hrR]
+  refine ⟨A, hA2, (Real.log Cr + (P + Pn + 1))
+    / Real.log ((A+1) / Real.sqrt (A^2+1)),
+    div_pos (by nlinarith [Real.log_nonneg hCr1, Nat.cast_nonneg (α := ℝ) P,
+      Nat.cast_nonneg (α := ℝ) Pn]) hlogRr, fun T hT => ?_⟩
+  set c : ℂ := (A : ℂ) + (T : ℂ) * Complex.I with hc
+  have hT2 : 2 ≤ |T| := by linarith
+  -- center value and its lower bound
+  have hHc := hlow T hT2
+  have hHcpos : 0 < ‖completedDedekindZetaEntire K c‖ := by
+    refine lt_of_lt_of_le ?_ hHc
+    positivity
+  have hHcne : completedDedekindZetaEntire K c ≠ 0 := by
+    intro h0
+    rw [h0] at hHcpos
+    simp at hHcpos
+  -- the normalized function
+  set g : ℂ → ℂ := fun z =>
+    (completedDedekindZetaEntire K c)⁻¹ * completedDedekindZetaEntire K z with hg
+  have hganal : AnalyticOnNhd ℂ g (Metric.closedBall c |A+1|) := by
+    intro z _
+    exact analyticAt_const.mul ((differentiable_completedDedekindZetaEntire K).analyticAt z)
+  have hgc : g c = 1 := by
+    rw [hg]
+    field_simp
+  -- sphere bound for g
+  have hM1 : (1:ℝ) ≤ Cr * (1 + |T|)^(P + Pn) := by
+    have h1T : (1:ℝ) ≤ 1 + |T| := by linarith [abs_nonneg T]
+    calc (1:ℝ) = 1 * 1 := by norm_num
+      _ ≤ Cr * (1 + |T|)^(P + Pn) :=
+          mul_le_mul hCr1 (one_le_pow₀ h1T) (by norm_num) (by linarith)
+  have hgbound : ∀ z ∈ Metric.sphere c |A+1|, ‖g z‖ ≤ Cr * (1 + |T|)^(P + Pn) := by
+    intro z hz
+    have hzball : z ∈ Metric.closedBall c (A+1) := by
+      rw [Metric.mem_closedBall]
+      rw [Metric.mem_sphere] at hz
+      rw [hz, abs_of_pos (by linarith : (0:ℝ) < A + 1)]
+    have hup := hball T hT z hzball
+    rw [hg]
+    rw [norm_mul, norm_inv]
+    -- ‖H c‖⁻¹·‖H z‖ ≤ [cB(1+T)^P E]/[cL·E/(1+T)^{Pn}] = (cB/cL)(1+T)^{P+Pn}
+    have hE : (0:ℝ) < Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := Real.exp_pos _
+    have hinv : ‖completedDedekindZetaEntire K c‖⁻¹
+        ≤ ((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+      rw [inv_le_iff_one_le_mul₀ hHcpos]
+      have hstep : cL * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) / (1 + |T|)^Pn
+          * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) = 1 := by
+        field_simp
+      calc (1:ℝ) = cL * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) / (1 + |T|)^Pn
+          * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) :=
+            hstep.symm
+        _ ≤ ‖completedDedekindZetaEntire K c‖
+            * (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) := by
+            refine mul_le_mul_of_nonneg_right hHc (by positivity)
+        _ = (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4))
+            * ‖completedDedekindZetaEntire K c‖ := by ring
+    calc ‖completedDedekindZetaEntire K c‖⁻¹ * ‖completedDedekindZetaEntire K z‖
+        ≤ (((1 + |T|)^Pn / cL) / Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4))
+          * (cB * (1 + |T|)^P * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) :=
+          mul_le_mul hinv hup (norm_nonneg _) (by positivity)
+      _ = cB / cL * (1 + |T|)^(P + Pn) := by
+          rw [show P + Pn = Pn + P by ring, pow_add]
+          field_simp
+          ring
+      _ ≤ Cr * (1 + |T|)^(P + Pn) :=
+          mul_le_mul_of_nonneg_right (by rw [hCr]; linarith) (by positivity)
+  -- Jensen counting for g
+  have habs_r : |Real.sqrt (A^2+1)| = Real.sqrt (A^2+1) := abs_of_pos hrpos
+  have habs_R : |A+1| = A+1 := abs_of_pos (by linarith : (0:ℝ) < A + 1)
+  have hcount := AnalyticOnNhd.sum_divisor_le
+    (c := c) (r := Real.sqrt (A^2+1)) (R := A+1) (M := Cr * (1 + |T|)^(P + Pn)) (f := g)
+    (by rw [habs_r]; exact hrpos)
+    (by rw [habs_r, habs_R]; exact hrR)
+    hM1 hganal (by rw [hgc]; norm_num) hgbound
+  -- divisor transfer to H
+  have hHmero : MeromorphicOn (completedDedekindZetaEntire K)
+      (Metric.closedBall c |Real.sqrt (A^2+1)|) := fun z _ =>
+    ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt
+  have hconstmero : MeromorphicOn (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹)
+      (Metric.closedBall c |Real.sqrt (A^2+1)|) := fun z _ =>
+    analyticAt_const.meromorphicAt
+  have hordc : ∀ z ∈ Metric.closedBall c |Real.sqrt (A^2+1)|,
+      meromorphicOrderAt (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹) z ≠ ⊤ := by
+    intro z _
+    classical
+    rw [meromorphicOrderAt_const, if_neg (inv_ne_zero hHcne)]
+    exact WithTop.zero_ne_top
+  have hcmem : c ∈ Metric.closedBall c |Real.sqrt (A^2+1)| := by
+    rw [habs_r]
+    exact Metric.mem_closedBall_self hrpos.le
+  have hordHc : meromorphicOrderAt (completedDedekindZetaEntire K) c ≠ ⊤ := by
+    rw [((differentiable_completedDedekindZetaEntire K).analyticAt c).meromorphicOrderAt_eq]
+    have h0 : analyticOrderAt (completedDedekindZetaEntire K) c = 0 :=
+      analyticOrderAt_eq_zero.mpr (Or.inr hHcne)
+    rw [h0]
+    simp
+  have hordH : ∀ z ∈ Metric.closedBall c |Real.sqrt (A^2+1)|,
+      meromorphicOrderAt (completedDedekindZetaEntire K) z ≠ ⊤ := by
+    intro z hz
+    exact MeromorphicOn.meromorphicOrderAt_ne_top_of_isPreconnected hHmero
+      ((convex_closedBall _ _).isPreconnected) hcmem hz hordHc
+  have hdiv : MeromorphicOn.divisor g (Metric.closedBall c |Real.sqrt (A^2+1)|)
+      = MeromorphicOn.divisor (completedDedekindZetaEntire K)
+        (Metric.closedBall c |Real.sqrt (A^2+1)|) := by
+    have hgdef : g = fun z => (fun _ : ℂ => (completedDedekindZetaEntire K c)⁻¹) z
+        * completedDedekindZetaEntire K z := rfl
+    rw [hgdef, MeromorphicOn.divisor_fun_mul hconstmero hHmero hordc hordH,
+      MeromorphicOn.divisor_const]
+    simp
+  rw [hdiv] at hcount
+  rw [habs_r] at hcount
+  refine le_trans hcount ?_
+  -- the log-quotient bound
+  rw [hgc, norm_one, div_one]
+  have h1T : (1:ℝ) ≤ 1 + |T| := by linarith [abs_nonneg T]
+  have hL1 : (1:ℝ) ≤ Real.log (2 + |T|) := by
+    have he9 : Real.exp 1 ≤ 2 + |T| := by
+      have := Real.exp_one_lt_d9
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2 + |T|) := Real.log_le_log (Real.exp_pos 1) he9
+  have hlogM : Real.log (Cr * (1 + |T|)^(P + Pn))
+      ≤ (Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|) := by
+    rw [Real.log_mul (by positivity) (by positivity), Real.log_pow]
+    have hlog1 : Real.log (1 + |T|) ≤ Real.log (2 + |T|) :=
+      Real.log_le_log (by linarith) (by linarith)
+    have hlogCr : (0:ℝ) ≤ Real.log Cr := Real.log_nonneg hCr1
+    have hPP : (0:ℝ) ≤ ((P + Pn : ℕ) : ℝ) := Nat.cast_nonneg _
+    calc Real.log Cr + ((P + Pn : ℕ) : ℝ) * Real.log (1 + |T|)
+        ≤ Real.log Cr * Real.log (2 + |T|)
+          + ((P + Pn : ℕ) : ℝ) * Real.log (2 + |T|) := by
+          have h1 : Real.log Cr ≤ Real.log Cr * Real.log (2 + |T|) := by
+            nlinarith
+          have h2 : ((P + Pn : ℕ) : ℝ) * Real.log (1 + |T|)
+              ≤ ((P + Pn : ℕ) : ℝ) * Real.log (2 + |T|) :=
+            mul_le_mul_of_nonneg_left hlog1 hPP
+          linarith
+      _ ≤ (Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|) := by
+          push_cast
+          nlinarith
+  calc Real.log (Cr * (1 + |T|)^(P + Pn)) / Real.log ((A+1) / Real.sqrt (A^2+1))
+      ≤ ((Real.log Cr + (P + Pn + 1)) * Real.log (2 + |T|))
+        / Real.log ((A+1) / Real.sqrt (A^2+1)) := by
+        gcongr
+    _ = (Real.log Cr + (P + Pn + 1)) / Real.log ((A+1) / Real.sqrt (A^2+1))
+        * Real.log (2 + |T|) := by ring
+
 end
 
 end DedekindResidue
