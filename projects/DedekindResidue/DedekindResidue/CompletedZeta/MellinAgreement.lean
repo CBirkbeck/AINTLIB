@@ -910,6 +910,91 @@ per-orbit Mellin factorisation. -/
 noncomputable def heckeLogEquiv : (ℝ × logSpace K) ≃ₗ[ℝ] (InfinitePlace K → ℝ) :=
   LinearEquiv.ofBijective (heckeLogMap K) (heckeLogMap_bijective K)
 
+open scoped Classical in
+/-- **The point-dependence of the Gaussian factors through the norm**: the whole-space
+lintegral of a Gaussian term at the point `ζ(y)` is that at `ζ(1)` with the ray parameter
+scaled by `|N(y)|²` — via the proven `x`-absorption (`sq_mul_heckeWeights`) and
+translation invariance. No Jacobian needed. -/
+theorem lintegral_gaussTerm_eq_norm_scaled {y : K} (hy : y ≠ 0) {t : ℝ} (ht : 0 ≤ t) :
+    ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u (embeddingCoords K y))
+      = ∫⁻ u : logSpace K, ENNReal.ofReal
+          (gaussTerm K (((|Algebra.norm ℚ y| : ℚ) : ℝ) ^ 2 * t) u
+            (embeddingCoords K 1)) := by
+  have hpt : ∀ u : logSpace K, gaussTerm K t u (embeddingCoords K y)
+      = gaussTerm K (((|Algebra.norm ℚ y| : ℚ) : ℝ) ^ 2 * t) (u + xShift K y)
+          (embeddingCoords K 1) := by
+    intro u
+    rw [gaussTerm, gaussTerm]
+    refine congrArg (fun r => Real.exp (-π * r)) ?_
+    rw [sum_placeWeights_embeddingCoords_sq, sum_placeWeights_embeddingCoords_sq]
+    refine Finset.sum_congr rfl (fun w _ => ?_)
+    rw [map_one, one_pow, mul_one]
+    rw [← sq_mul_heckeWeights K hy ht u w]
+    ring
+  simp_rw [hpt]
+  exact lintegral_add_right_eq_self
+    (fun u => ENNReal.ofReal (gaussTerm K (((|Algebra.norm ℚ y| : ℚ) : ℝ) ^ 2 * t) u
+      (embeddingCoords K 1))) (xShift K y)
+
+open scoped Classical in
+/-- 1-D Mellin scaling for lower integrals over the positive ray. -/
+theorem lintegral_Ioi_mellin_scale {c : ℝ} (hc : 0 < c) (σ : ℝ) (H : ℝ → ℝ≥0∞)
+    (hH : AEMeasurable H (volume.restrict (Set.Ioi (0:ℝ)))) :
+    ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1)) * H (c * t)
+      = ENNReal.ofReal (c ^ (-σ))
+        * ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1)) * H t := by
+  have hstep1 : ∀ t ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (t ^ (σ - 1)) * H (c * t)
+        = ENNReal.ofReal (c ^ (1 - σ))
+          * (ENNReal.ofReal ((c * t) ^ (σ - 1)) * H (c * t)) := by
+    intro t ht
+    have ht0 : (0:ℝ) < t := ht
+    rw [← mul_assoc, ← ENNReal.ofReal_mul (by positivity)]
+    congr 2
+    rw [Real.mul_rpow hc.le ht0.le, ← mul_assoc, ← Real.rpow_add hc]
+    norm_num
+  rw [setLIntegral_congr_fun measurableSet_Ioi hstep1]
+  rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
+  have hpre : (fun t : ℝ => c * t) ⁻¹' (Set.Ioi (0:ℝ)) = Set.Ioi (0:ℝ) := by
+    ext t
+    simp only [Set.mem_preimage, Set.mem_Ioi]
+    constructor
+    · intro h
+      by_contra hle
+      push Not at hle
+      nlinarith
+    · intro h
+      positivity
+  have hmap : (Measure.map (fun t : ℝ => c * t) (volume.restrict (Set.Ioi (0:ℝ))))
+      = ENNReal.ofReal c⁻¹ • (volume.restrict (Set.Ioi (0:ℝ))) := by
+    conv_lhs => rw [show volume.restrict (Set.Ioi (0:ℝ))
+        = volume.restrict ((fun t : ℝ => c * t) ⁻¹' (Set.Ioi (0:ℝ))) by rw [hpre]]
+    rw [← Measure.restrict_map (measurable_const_mul c) measurableSet_Ioi]
+    rw [show (fun t : ℝ => c * t) = (c * ·) from rfl, Real.map_volume_mul_left hc.ne']
+    rw [Measure.restrict_smul]
+    congr 1
+    rw [abs_of_pos (by positivity : (0:ℝ) < c⁻¹)]
+  have hFmeas : AEMeasurable (fun s : ℝ => ENNReal.ofReal (s ^ (σ - 1)) * H s)
+      (volume.restrict (Set.Ioi (0:ℝ))) := by
+    refine AEMeasurable.mul ?_ hH
+    have hcont : ContinuousOn (fun s : ℝ => s ^ (σ - 1)) (Set.Ioi (0:ℝ)) :=
+      fun x hx => (Real.continuousAt_rpow_const x _
+        (Or.inl (ne_of_gt hx))).continuousWithinAt
+    exact (ENNReal.continuous_ofReal.comp_continuousOn hcont).aemeasurable
+      measurableSet_Ioi
+  have hsub : ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal ((c * t) ^ (σ - 1)) * H (c * t)
+      = ENNReal.ofReal c⁻¹
+        * ∫⁻ s in Set.Ioi (0:ℝ), ENNReal.ofReal (s ^ (σ - 1)) * H s := by
+    have hlm := lintegral_map' (f := fun s : ℝ => ENNReal.ofReal (s ^ (σ - 1)) * H s)
+      (g := fun t : ℝ => c * t)
+      (μ := volume.restrict (Set.Ioi (0:ℝ)))
+      (by rw [hmap]; exact hFmeas.smul_measure _)
+      (measurable_const_mul c).aemeasurable
+    rw [← hlm, hmap, lintegral_smul_measure, smul_eq_mul]
+  rw [hsub, ← mul_assoc, ← ENNReal.ofReal_mul (by positivity),
+    show c⁻¹ = c ^ (-1 : ℝ) by rw [Real.rpow_neg_one], ← Real.rpow_add hc]
+  rw [show (1 : ℝ) - σ + -1 = -σ by ring]
+
 end
 
 end DedekindResidue
