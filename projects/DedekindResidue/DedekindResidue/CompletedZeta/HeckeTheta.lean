@@ -415,6 +415,152 @@ theorem prod_placeWeights_heckeWeights {t : ℝ} (ht : 0 < t) (u : logSpace K) :
   rw [prod_placeWeights]
   exact prod_heckeWeights_pow_mult K ht u
 
+open scoped Classical in
+/-- Every zero-sum place vector is the trace-zero extension of its restriction: `fullLog` is
+onto the trace-zero hyperplane. -/
+theorem fullLog_restrict (y : InfinitePlace K → ℝ) (hy : ∑ w, y w = 0) :
+    fullLog K (fun w : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)} => y w) = y := by
+  funext w
+  rw [fullLog]
+  split_ifs with h
+  · rw [Fintype.sum_eq_add_sum_subtype_ne _ (w₀ : InfinitePlace K)] at hy
+    rw [h]
+    linarith
+  · rfl
+
+open scoped Classical in
+/-- The fixed trace-zero shift in log-coordinates realising the complex-place duality factor
+`4` (the trace-zero part of the log-vector `(0; log 4)`). -/
+noncomputable def dualShift : logSpace K :=
+  fun w => (mult (w : InfinitePlace K) : ℝ) / 2 *
+    ((if IsReal (w : InfinitePlace K) then 0 else Real.log 4)
+      - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)
+
+open scoped Classical in
+theorem fullLog_dualShift (w : InfinitePlace K) :
+    fullLog K (dualShift K) w
+      = (mult w : ℝ) / 2 * ((if IsReal w then 0 else Real.log 4)
+          - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K) := by
+  have h := fullLog_restrict K (fun w => (mult w : ℝ) / 2 *
+    ((if IsReal w then 0 else Real.log 4)
+      - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)) ?_
+  · exact congrFun h w
+  · -- zero-sum computation
+    have hsplit : ∀ w : InfinitePlace K, (mult w : ℝ) / 2 *
+        ((if IsReal w then 0 else Real.log 4)
+          - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)
+        = (mult w : ℝ) / 2 * (if IsReal w then 0 else Real.log 4)
+          - (mult w : ℝ) * (nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K) := by
+      intro w
+      ring
+    rw [Finset.sum_congr rfl (fun w _ => hsplit w), Finset.sum_sub_distrib]
+    have h1 : ∑ w : InfinitePlace K, (mult w : ℝ) / 2 * (if IsReal w then 0 else Real.log 4)
+        = nrComplexPlaces K * Real.log 4 := by
+      rw [← Fintype.sum_subtype_add_sum_subtype IsReal
+        (fun w : InfinitePlace K => (mult w : ℝ) / 2 * (if IsReal w then 0 else Real.log 4))]
+      have hz : (∑ w : {w : InfinitePlace K // IsReal w},
+          (mult (w : InfinitePlace K) : ℝ) / 2 *
+            (if IsReal (w : InfinitePlace K) then 0 else Real.log 4)) = 0 := by
+        refine Finset.sum_eq_zero (fun w _ => ?_)
+        rw [if_pos w.2, mul_zero]
+      have hc : (∑ w : {w : InfinitePlace K // ¬ IsReal w},
+          (mult (w : InfinitePlace K) : ℝ) / 2 *
+            (if IsReal (w : InfinitePlace K) then 0 else Real.log 4))
+          = nrComplexPlaces K * Real.log 4 := by
+        have hterm : ∀ w : {w : InfinitePlace K // ¬ IsReal w},
+            (mult (w : InfinitePlace K) : ℝ) / 2 *
+              (if IsReal (w : InfinitePlace K) then 0 else Real.log 4) = Real.log 4 := by
+          intro w
+          rw [if_neg w.2, mult, if_neg w.2]
+          norm_num
+        rw [Finset.sum_congr rfl (fun w _ => hterm w), Finset.sum_const, nsmul_eq_mul]
+        congr 1
+        norm_cast
+        exact (Fintype.card_congr (Equiv.subtypeEquivRight
+          (fun w : InfinitePlace K => not_isReal_iff_isComplex))).trans rfl
+      rw [hz, hc, zero_add]
+    have h2 : ∑ w : InfinitePlace K,
+        (mult w : ℝ) * (nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)
+        = nrComplexPlaces K * Real.log 4 := by
+      rw [← Finset.sum_mul]
+      have := sum_mult_eq (K := K)
+      rw [show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
+        exact_mod_cast congrArg Nat.cast this]
+      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
+        have := Module.finrank_pos (R := ℚ) (M := K)
+        positivity
+      field_simp
+    rw [h1, h2, sub_self]
+
+theorem heckeWeights_mul_left {a t : ℝ} (ha : 0 ≤ a) (ht : 0 ≤ t) (u : logSpace K)
+    (w : InfinitePlace K) :
+    heckeWeights K (a * t) u w
+      = a ^ ((1 : ℝ) / (Module.finrank ℚ K)) * heckeWeights K t u w := by
+  rw [heckeWeights, heckeWeights, Real.mul_rpow ha ht]
+  ring
+
+open scoped Classical in
+theorem heckeWeights_add_right (t : ℝ) (u v : logSpace K) (w : InfinitePlace K) :
+    heckeWeights K t (u + v) w
+      = Real.exp (2 * fullLog K v w / mult w) * heckeWeights K t u w := by
+  rw [heckeWeights, heckeWeights, fullLog_add, Pi.add_apply]
+  rw [show 2 * (fullLog K u w + fullLog K v w) / (mult w : ℝ)
+      = 2 * fullLog K u w / mult w + 2 * fullLog K v w / mult w by ring]
+  rw [Real.exp_add]
+  ring
+
+open scoped Classical in
+/-- **The `(1;4)`-absorption identity.** Multiplying the Hecke weights by the duality factor
+(`1` at real places, `4` at complex ones) is reabsorbed as a norm-ray scaling by
+`4^(2·r₂)` together with the fixed trace-zero log-shift `dualShift`. -/
+theorem ite_mul_heckeWeights {t : ℝ} (ht : 0 ≤ t) (u : logSpace K) (w : InfinitePlace K) :
+    (if IsReal w then (1 : ℝ) else 4) * heckeWeights K t u w
+      = heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t) (u + dualShift K) w := by
+  rw [heckeWeights_mul_left K (by positivity) ht, heckeWeights_add_right,
+    fullLog_dualShift]
+  have hm : (mult w : ℝ) ≠ 0 := by
+    have := mult_pos (w := w)
+    positivity
+  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  have harg : 2 * ((mult w : ℝ) / 2 * ((if IsReal w then 0 else Real.log 4)
+        - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)) / mult w
+      = (if IsReal w then 0 else Real.log 4)
+        - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K := by
+    field_simp
+  rw [harg]
+  have hscal : ((4 : ℝ) ^ (2 * nrComplexPlaces K)) ^ ((1 : ℝ) / (Module.finrank ℚ K))
+      * Real.exp ((if IsReal w then 0 else Real.log 4)
+          - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)
+      = (if IsReal w then (1 : ℝ) else 4) := by
+    rw [← Real.rpow_natCast (4 : ℝ) (2 * nrComplexPlaces K),
+      ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 4),
+      Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 4), ← Real.exp_add]
+    have hargsum : Real.log 4 * ((2 * nrComplexPlaces K : ℕ) * ((1 : ℝ) / (Module.finrank ℚ K)))
+        + ((if IsReal w then 0 else Real.log 4)
+            - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)
+        = (if IsReal w then 0 else Real.log 4) := by
+      push_cast
+      field_simp
+      ring
+    rw [hargsum]
+    split_ifs with hw
+    · exact Real.exp_zero
+    · exact Real.exp_log (by norm_num)
+  rw [← mul_assoc, hscal]
+
+open scoped Classical in
+/-- **Weights duality, fully absorbed.** The dual of the Hecke weights at `(t, u)` is the
+Hecke weights at `(4^(2r₂)·t⁻¹, -u + dualShift)` — inversion of the norm-ray parameter,
+negation in the log-torus, and a fixed translation. This is the exact bookkeeping needed
+for the inversion of the unit-averaged theta `heckeG`. -/
+theorem dualPlaceWeights_heckeWeights_eq {t : ℝ} (ht : 0 < t) (u : logSpace K) :
+    dualPlaceWeights K (heckeWeights K t u)
+      = heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t⁻¹) (-u + dualShift K) := by
+  funext w
+  rw [dualPlaceWeights_heckeWeights K ht u w, ite_mul_heckeWeights K (by positivity) (-u) w]
+
 end
 
 end DedekindResidue
