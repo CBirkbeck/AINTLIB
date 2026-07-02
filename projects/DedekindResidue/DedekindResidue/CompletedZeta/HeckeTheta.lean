@@ -643,6 +643,230 @@ theorem heckeG_inversion (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (ht :
   rw [hFDinv]
   ring
 
+open scoped Classical in
+/-- Translation-only version of `setIntegral_fundamentalDomain_comp_neg_add`: the box
+integral of a lattice-periodic function is translation invariant. Derived by applying the
+negation lemma twice (with shifts `s` then `0`). -/
+theorem setIntegral_fundamentalDomain_comp_add {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (b : Module.Basis κ ℝ (ι → ℝ)) (s : ι → ℝ) (f : (ι → ℝ) → ℝ)
+    (hf : ∀ l : Submodule.span ℤ (Set.range ⇑b), ∀ x, f (↑l + x) = f x) :
+    ∫ u in ZSpan.fundamentalDomain b, f (u + s)
+      = ∫ u in ZSpan.fundamentalDomain b, f u := by
+  have hneg : ∀ l : Submodule.span ℤ (Set.range ⇑b), ∀ x : ι → ℝ,
+      f (-(↑l + x)) = f (-x) := by
+    intro l x
+    have := hf (-l) (-x)
+    rw [show ((↑(-l) : ι → ℝ) + -x) = -(↑l + x) by push_cast; abel] at this
+    exact this
+  have e1 : ∫ u in ZSpan.fundamentalDomain b, f (u + s)
+      = ∫ u in ZSpan.fundamentalDomain b, (fun v => f (-v)) (-u + (-s)) := by
+    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet b) (fun u _ => ?_)
+    simp only
+    rw [show -(-u + -s) = u + s by abel]
+  rw [e1, setIntegral_fundamentalDomain_comp_neg_add b (-s) (fun v => f (-v)) hneg]
+  have e2 : ∫ u in ZSpan.fundamentalDomain b, (fun v => f (-v)) u
+      = ∫ u in ZSpan.fundamentalDomain b, f (-u + 0) := by
+    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet b) (fun u _ => ?_)
+    simp only [add_zero]
+  rw [e2, setIntegral_fundamentalDomain_comp_neg_add b 0 f hf]
+
+open scoped Classical in
+/-- The trace-zero log-shift by which multiplication by a nonzero `x : K` moves the Hecke
+weights: the restriction of `w ↦ mult w · log (w x) − mult w · log |N(x)| / n`. -/
+noncomputable def xShift (x : K) : logSpace K :=
+  fun w => (mult (w : InfinitePlace K) : ℝ) * Real.log ((w : InfinitePlace K) x)
+    - (mult (w : InfinitePlace K) : ℝ) * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ)
+        / Module.finrank ℚ K
+
+open scoped Classical in
+theorem sum_mult_mul_log (x : K) (hx : x ≠ 0) :
+    ∑ w : InfinitePlace K, (mult w : ℝ) * Real.log (w x)
+      = Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) := by
+  have hterm : ∀ w : InfinitePlace K, (mult w : ℝ) * Real.log (w x)
+      = Real.log (w x ^ mult w) := by
+    intro w
+    rw [Real.log_pow]
+  rw [Finset.sum_congr rfl (fun w _ => hterm w),
+    ← Real.log_prod (fun w _ => pow_ne_zero _ ((pos_iff (w := w)).mpr hx).ne'),
+    prod_eq_abs_norm]
+
+open scoped Classical in
+theorem fullLog_xShift {x : K} (hx : x ≠ 0) (w : InfinitePlace K) :
+    fullLog K (xShift K x) w
+      = (mult w : ℝ) * Real.log (w x)
+        - (mult w : ℝ) * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K := by
+  have h := fullLog_restrict K (fun w => (mult w : ℝ) * Real.log (w x)
+    - (mult w : ℝ) * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K) ?_
+  · exact congrFun h w
+  · rw [Finset.sum_sub_distrib, sum_mult_mul_log K x hx]
+    have hsum : ∑ w : InfinitePlace K,
+        (mult w : ℝ) * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K
+        = Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) := by
+      rw [show (fun w : InfinitePlace K => (mult w : ℝ)
+          * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K)
+        = (fun w : InfinitePlace K => (mult w : ℝ)
+          * (Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K)) by
+          funext w; ring]
+      rw [← Finset.sum_mul]
+      rw [show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
+        exact_mod_cast congrArg Nat.cast (sum_mult_eq (K := K))]
+      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
+        have := Module.finrank_pos (R := ℚ) (M := K)
+        positivity
+      field_simp
+    rw [hsum, sub_self]
+
+open scoped Classical in
+/-- **The `x`-absorption identity.** Multiplying the Hecke weights by `(w x)²` (the effect
+of the lattice `L_I ↦ L_{xI}`) is reabsorbed as a norm-ray scaling by `|N(x)|²` together
+with the trace-zero log-shift `xShift x`. -/
+theorem sq_mul_heckeWeights {x : K} (hx : x ≠ 0) {t : ℝ} (ht : 0 ≤ t) (u : logSpace K)
+    (w : InfinitePlace K) :
+    (w x) ^ 2 * heckeWeights K t u w
+      = heckeWeights K (((|Algebra.norm ℚ x| : ℚ) : ℝ) ^ 2 * t) (u + xShift K x) w := by
+  have hNx : (0 : ℝ) < ((|Algebra.norm ℚ x| : ℚ) : ℝ) := by
+    rw [Rat.cast_pos, abs_pos]
+    exact Algebra.norm_ne_zero_iff.mpr hx
+  have hwx : (0 : ℝ) < w x := pos_iff.mpr hx
+  have hm : (mult w : ℝ) ≠ 0 := by
+    have := mult_pos (w := w)
+    positivity
+  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  rw [heckeWeights_mul_left K (by positivity) ht, heckeWeights_add_right,
+    fullLog_xShift K hx]
+  have harg : 2 * ((mult w : ℝ) * Real.log (w x)
+        - (mult w : ℝ) * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K)
+        / mult w
+      = 2 * Real.log (w x)
+        - 2 * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K := by
+    field_simp
+  rw [harg]
+  have hscal : (((|Algebra.norm ℚ x| : ℚ) : ℝ) ^ 2) ^ ((1 : ℝ) / (Module.finrank ℚ K))
+      * Real.exp (2 * Real.log (w x)
+          - 2 * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K)
+      = (w x) ^ 2 := by
+    rw [← Real.rpow_natCast (((|Algebra.norm ℚ x| : ℚ) : ℝ)) 2,
+      ← Real.rpow_mul hNx.le, Real.rpow_def_of_pos hNx, ← Real.exp_add]
+    have hargsum : Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) * ((2 : ℕ)
+          * ((1 : ℝ) / (Module.finrank ℚ K)))
+        + (2 * Real.log (w x)
+            - 2 * Real.log ((|Algebra.norm ℚ x| : ℚ) : ℝ) / Module.finrank ℚ K)
+        = 2 * Real.log (w x) := by
+      push_cast
+      field_simp
+      ring
+    rw [hargsum, show (2 : ℝ) * Real.log (w x) = (2 : ℕ) * Real.log (w x) by norm_num,
+      Real.exp_nat_mul, Real.exp_log hwx]
+  rw [← mul_assoc, hscal]
+
+open scoped Classical in
+/-- Membership in the lattice of `x·I` (`x ∈ Kˣ` acting through `toPrincipalIdeal`). -/
+theorem mem_idealZLattice_principal_mul (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : Kˣ)
+    (v : EuclideanSpace ℝ (index K)) :
+    v ∈ idealZLattice K (toPrincipalIdeal (𝓞 K) K x * I)
+      ↔ ∃ a ∈ (I : FractionalIdeal (𝓞 K)⁰ K), embeddingCoords K ((x : K) * a) = v := by
+  rw [mem_idealZLattice]
+  constructor
+  · rintro ⟨a, ha, hva⟩
+    rw [Units.val_mul, coe_toPrincipalIdeal, FractionalIdeal.mem_singleton_mul] at ha
+    obtain ⟨b, hb, rfl⟩ := ha
+    exact ⟨b, hb, hva⟩
+  · rintro ⟨a, ha, hva⟩
+    refine ⟨(x : K) * a, ?_, hva⟩
+    rw [Units.val_mul, coe_toPrincipalIdeal, FractionalIdeal.mem_singleton_mul]
+    exact ⟨a, ha, rfl⟩
+
+open scoped Classical in
+/-- Multiplication by `x ∈ Kˣ` as a bijection from the lattice of `I` to that of `x·I`. -/
+noncomputable def smulLatticeEquiv (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : Kˣ) :
+    idealZLattice K I ≃ idealZLattice K (toPrincipalIdeal (𝓞 K) K x * I) where
+  toFun v := ⟨mulCoords K (x : K) v, by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    rw [mem_idealZLattice_principal_mul]
+    exact ⟨a, ha, by rw [← hva, mulCoords_embeddingCoords]⟩⟩
+  invFun v := ⟨mulCoords K ((x⁻¹ : Kˣ) : K) v, by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice_principal_mul K I x _).mp v.2
+    rw [mem_idealZLattice]
+    refine ⟨a, ha, ?_⟩
+    rw [← hva, mulCoords_embeddingCoords, ← mul_assoc]
+    norm_cast
+    rw [inv_mul_cancel x]
+    simp⟩
+  left_inv v := by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+    refine Subtype.ext ?_
+    show mulCoords K _ (mulCoords K _ (v : EuclideanSpace ℝ (index K)))
+      = (v : EuclideanSpace ℝ (index K))
+    rw [← hva, mulCoords_embeddingCoords, mulCoords_embeddingCoords, ← mul_assoc]
+    norm_cast
+    rw [inv_mul_cancel x]
+    simp
+  right_inv v := by
+    obtain ⟨a, ha, hva⟩ := (mem_idealZLattice_principal_mul K I x _).mp v.2
+    refine Subtype.ext ?_
+    show mulCoords K _ (mulCoords K _ (v : EuclideanSpace ℝ (index K)))
+      = (v : EuclideanSpace ℝ (index K))
+    rw [← hva, mulCoords_embeddingCoords, mulCoords_embeddingCoords, ← mul_assoc,
+      ← mul_assoc]
+    norm_cast
+    rw [mul_inv_cancel x]
+    simp
+
+open scoped Classical in
+/-- **Principal rescaling of the Hecke theta**: the theta of `x·I` is the theta of `I`
+with the place weights scaled by `(w x)²`. -/
+theorem heckeTheta_principal_mul (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : Kˣ)
+    (c : InfinitePlace K → ℝ) :
+    heckeTheta K (toPrincipalIdeal (𝓞 K) K x * I) c
+      = heckeTheta K I (fun w => (w (x : K)) ^ 2 * c w) := by
+  rw [heckeTheta, heckeTheta]
+  conv_lhs => rw [← Equiv.tsum_eq (smulLatticeEquiv K I x)]
+  refine tsum_congr (fun v => ?_)
+  obtain ⟨a, ha, hva⟩ := (mem_idealZLattice K I _).mp v.2
+  congr 1
+  have hcoe : ((smulLatticeEquiv K I x v : idealZLattice K
+        (toPrincipalIdeal (𝓞 K) K x * I)) : EuclideanSpace ℝ (index K))
+      = embeddingCoords K ((x : K) * a) := by
+    show mulCoords K _ (v : EuclideanSpace ℝ (index K)) = _
+    rw [← hva, mulCoords_embeddingCoords]
+  rw [hcoe, ← hva, sum_placeWeights_embeddingCoords_sq, sum_placeWeights_embeddingCoords_sq]
+  refine congrArg (fun r => -π * r) ?_
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  rw [map_mul, mul_pow]
+  ring
+
+open scoped Classical in
+/-- **Principal rescaling of the unit-averaged theta**: `g_{x·I}(t) = g_I(|N(x)|²·t)`.
+This is what makes the normalised class theta `Ĝ_C` well-defined on ideal classes. -/
+theorem heckeG_principal_mul (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : Kˣ) {t : ℝ}
+    (ht : 0 ≤ t) :
+    heckeG K (toPrincipalIdeal (𝓞 K) K x * I) t
+      = heckeG K I (((|Algebra.norm ℚ (x : K)| : ℚ) : ℝ) ^ 2 * t) := by
+  rw [heckeG, heckeG]
+  congr 1
+  have hpt : ∀ u : logSpace K,
+      heckeTheta K (toPrincipalIdeal (𝓞 K) K x * I) (heckeWeights K t u)
+        = heckeTheta K I (heckeWeights K (((|Algebra.norm ℚ (x : K)| : ℚ) : ℝ) ^ 2 * t)
+            (u + xShift K (x : K))) := by
+    intro u
+    rw [heckeTheta_principal_mul]
+    congr 1
+    funext w
+    exact sq_mul_heckeWeights K (Units.ne_zero x) ht u w
+  simp only [hpt]
+  refine setIntegral_fundamentalDomain_comp_add
+    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) (xShift K (x : K))
+    (fun u => heckeTheta K I
+      (heckeWeights K (((|Algebra.norm ℚ (x : K)| : ℚ) : ℝ) ^ 2 * t) u))
+    (fun l v => ?_)
+  have hl : (l : logSpace K) ∈ unitLattice K :=
+    (le_of_eq ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis_span ℝ)) l.2
+  obtain ⟨a, -, ha⟩ := Submodule.mem_map.mp hl
+  rw [add_comm, ← ha]
+  exact heckeTheta_heckeWeights_periodic K I _ v (Additive.toMul a)
+
 end
 
 end DedekindResidue
