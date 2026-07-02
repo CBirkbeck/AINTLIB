@@ -1086,6 +1086,65 @@ theorem exists_H_strip_decay :
   exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hC₀4 (by positivity))
     (by positivity)
 
+/-- Rightward propagation of the decaying Γ-upper bound: each recurrence step costs a
+factor `‖z‖ + n`, keeping the bound polynomial-times-decaying. -/
+theorem norm_Gamma_le_mul_exp_add_nat {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ ≤ 3/2)
+    (ht : 1 ≤ |t|) (n : ℕ) :
+    ‖Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ (‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+        * (Real.sqrt (12 * π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+          * Real.exp (-(π * |t|) / 2)) := by
+  induction n with
+  | zero =>
+      have h0 : ((σ + (0:ℕ) : ℝ) : ℂ) = (σ : ℂ) := by push_cast; ring
+      rw [h0]
+      simpa using norm_Gamma_le_mul_exp h1 h2 ht
+  | succ n ih =>
+      have hzim : ((((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)).im = t := by simp
+      have hzne : (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+        intro h0
+        have := congrArg Complex.im h0
+        rw [hzim] at this
+        simp at this
+        rw [this] at ht
+        norm_num at ht
+      have hstep : ((σ + (n+1:ℕ) : ℝ) : ℂ) + (t : ℂ) * Complex.I
+          = ((((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)) + 1 := by
+        push_cast
+        ring
+      rw [hstep, Complex.Gamma_add_one _ hzne, norm_mul]
+      have hfacle : ‖(((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          ≤ ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n := by
+        have hsplit : (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)
+            = ((σ : ℂ) + (t : ℂ) * Complex.I) + (n : ℂ) := by
+          push_cast
+          ring
+        rw [hsplit]
+        refine le_trans (norm_add_le _ _) ?_
+        rw [Complex.norm_natCast]
+      have hbase_nonneg : (0:ℝ) ≤ Real.sqrt (12 * π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+          * Real.exp (-(π * |t|) / 2) := by positivity
+      have hXn : (0:ℝ) ≤ ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n := by positivity
+      calc ‖(((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          * ‖Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          ≤ (‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n)
+            * ((‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+              * (Real.sqrt (12 * π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+                * Real.exp (-(π * |t|) / 2))) :=
+            mul_le_mul hfacle ih (norm_nonneg _) hXn
+        _ = (‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + n)^(n+1)
+            * (Real.sqrt (12 * π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+              * Real.exp (-(π * |t|) / 2)) := by
+            rw [pow_succ]
+            ring
+        _ ≤ (‖(σ : ℂ) + (t : ℂ) * Complex.I‖ + (n+1:ℕ))^(n+1)
+            * (Real.sqrt (12 * π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+              * Real.exp (-(π * |t|) / 2)) := by
+            refine mul_le_mul_of_nonneg_right
+              (pow_le_pow_left₀ hXn ?_ _) hbase_nonneg
+            push_cast
+            linarith
+
 end
 
 end DedekindResidue
