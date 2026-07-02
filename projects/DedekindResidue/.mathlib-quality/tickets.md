@@ -402,7 +402,18 @@ Unfold the `if`; `abs_neg`; standard continuity of `Complex.exp`, `Real.log`, di
 - `s : ℂ`, `X t : ℝ`.
 
 ### [T003] Lemma 2 — Fourier transform of `auxF` (eq 8)
-- **Status**: open · **File**: `AuxiliaryFunction.lean` · **Depends on**: T002 · **Parallel**: no · **Type**: lemma
+- **Status**: in progress (2026-07-03; paper re-audited verbatim: eq (2) e^{+itγ} no 2π ✓,
+  eqs (6)(7)(11)(12) match `gAux`/`auxF` exactly ✓). **γ=0 faithfulness note**: the
+  `sin(γT)/γ` term is 0/0 at γ=0 in Lean-total semantics while `F̂(0) = 2T + …` — state
+  Lemma 2 for `γ ≠ 0` + a separate `γ = 0` companion (`F̂(0) = 2T + 2(h+1/T)/h² −
+  (4/h²)∫_T^∞ f(ht+1)/t²`, the γ→0 limit). **Lean plan**: (L2a) evenness-reduction
+  `∫_ℝ F e^{itγ} = 2∫_0^∞ F cos(γt)` (split Iic/Ioi + comp-neg + cexp-pairing);
+  (L2b) plateau `2∫_0^T cos = 2 sin(γT)/γ` (integral_cos); (L2c) integrability of
+  `g·cos, g'·sin, g''·cos` on `[T,∞)` (exp-decay, Re h > 0, `exp_neg_integrableOn_Ioi`);
+  (L2d) derivative facts on `t ≥ T > 0` (`|t| = t`): `HasDerivAt g (−(h+1/t))g` and for
+  `g'` (eq 7); (L2e) two improper IBPs (`integral_Ioi_deriv_mul_eq_sub`, boundary → 0);
+  (L2f) the tail identity `I(γ²+h²) = −γg(T)sin(γT) + (h+1/T)g(T)cos(γT) − 2∫cos·g(ht+1)/t²`;
+  (L2g) assemble with `f = g/g(T)` + the eq-10 algebra `1/γ − γ/(h²+γ²) = h²/(γ(h²+γ²))`. · **File**: `AuxiliaryFunction.lean` · **Depends on**: T002 · **Parallel**: no · **Type**: lemma
 #### Statement
 `fourier_auxF`: for `Re s > ½`, `X > 1`, `γ ∈ ℝ`, the Fourier transform `F̂_{s,X}(γ)`
 equals the closed form of Lemma 2 (eq 8 / the `\widehat{F_{s,X}}` display, p. 6):
