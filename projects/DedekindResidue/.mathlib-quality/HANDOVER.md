@@ -844,3 +844,27 @@ Prop-3 statement assembly. Then Γψ-b (d log G expansion via Normalisation.lean
 Γψ-a (contour shift to Re = 1/2 using A6 + Φ-decay), I_G assembly
 (digamma_one_half + integral_inv_two_cosh_half + re_digamma_quarter_sub_half),
 Prop 2 (prime side via Jordan + vM series), and the Weil formula (6).
+
+---
+
+## Leg 5 continued (2026-07-03): Prop 3 abstract form COMPLETE
+
+The full Plancherel chain is landed in `ExplicitFormula/GammaSide.lean` (all axiom-clean):
+`tendsto_integral_cexp_sub_div_window'`, `tendsto_truncated_fourier_gammaFT` (P-c step 1),
+`tendsto_eLpNorm_indicator_truncation` (P-c step 2), **`gammaFT_ae_eq_fourierL2`** (P-c:
+γ = the L² Fourier transform a.e., by truncation + isometry + a.e.-subsequence + QMP
+pullback), `integrable_muFT_mul_gammaFT`, **`integral_muFT_mul_gammaFT`** (P-d:
+∫μγ = 2π∫k(−x)(F0−F)/x), **`tendsto_integral_rhoFT_mul_phi_eq_plancherel`**
+(**Prop 3 abstract**: lim ∫_{−T}^T ρφ = −2π∫k(−x)(F0−F)/x under boundary decay ργ → 0).
+
+**NEXT — the concrete kernel** k_σ := odd extension of x e^{−σx}/(1−e^{−x}) (x > 0):
+(1) k_σ ∈ L¹∩L² (→ 1 at 0+, exp decay); (2) for odd k the ρ-fold:
+ρ(t) = 2∫₀^∞ e^{−σx}(1−cos tx)/(1−e^{−x})dx = 2(Re ψ(σ+it) − ψ(σ)) — via
+`re_digamma_sub_eq_integral` (ground truth, already landed); so ρ is REAL and the
+−2π∫k(−x)… = +2π∫₀^∞ 2·e^{−σx}·(F0−F-even-fold)…-signs settle here; (3) boundary decay:
+|ρ| = O(log|t|) elementary kernel estimate + γ = o(1/log) as Prop-3's hypothesis on F
+(Poitou p. 6-06); (4) the final Prop 3 for ζ: (1/2π)-normalised pairing with
+φ real-even for real-even F. Then Γψ-b (d log G via Normalisation.lean), Γψ-a
+(contour shift Re 1+a → 1/2 via A6 + Φ-decay), I_G assembly (digamma_one_half,
+integral_inv_two_cosh_half, re_digamma_quarter_sub_half_eq_integral), Prop 2
+(prime side: Jordan + neg_logDeriv_dedekindZeta_eq_tsum), Weil (6), then SP3.
