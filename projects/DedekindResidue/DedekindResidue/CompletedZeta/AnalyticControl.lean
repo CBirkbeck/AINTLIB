@@ -2629,6 +2629,9 @@ logarithmic derivative is `O(log(2+|T|))` on the slab ball `closedBall (A+iT) (A
 — a ball containing the strip `-1 ≤ Re ≤ 2`, `|Im - T| ≤ 1`. -/
 theorem exists_H_landau_cofactor :
     ∃ A : ℝ, 2 ≤ A ∧ ∃ C : ℝ, 0 < C ∧ ∀ T : ℝ, A + 5 ≤ |T| →
+      ((∑ᶠ u, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2))) u : ℤ) : ℝ)
+        ≤ C * Real.log (2 + |T|) ∧
       ∃ h : ℂ → ℂ,
         AnalyticOnNhd ℂ h (Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 3))
         ∧ (∀ z ∈ Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2), h z ≠ 0)
@@ -2645,7 +2648,7 @@ theorem exists_H_landau_cofactor :
   set Pn : ℕ := nrRealPlaces K + nrComplexPlaces K with hPn
   have hlog2A : 0 < Real.log (2*(A+2)) := Real.log_pos (by linarith)
   refine ⟨A, hA2, 32 * (A+2)
-    * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1),
+    * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) + Cc,
     by positivity, fun T hT => ?_⟩
   set c : ℂ := (A : ℂ) + (T : ℂ) * Complex.I with hcdef
   have hT2 : 2 ≤ |T| := by linarith
@@ -2861,11 +2864,39 @@ theorem exists_H_landau_cofactor :
     calc (Dnat : ℝ) = ((Dnat : ℤ) : ℝ) := by push_cast; ring
       _ ≤ ((∑ᶠ u, Dcl u : ℤ) : ℝ) := hcast
       _ ≤ Cc * Real.log (2 + |T|) := this
+  -- export the open-ball zero count
+  have hcount_open : ((∑ᶠ u, D₁ u : ℤ) : ℝ)
+      ≤ (32 * (A+2)
+        * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) + Cc)
+        * Real.log (2 + |T|) := by
+    have hfs : (∑ᶠ u, D₁ u : ℤ) = (Dnat : ℤ) := by
+      rw [finsum_eq_sum D₁ hfin₁, hDnatdef]
+      push_cast
+      exact (Finset.sum_congr rfl (fun u _ => (Int.toNat_of_nonneg (hD₁nn u)))).symm
+    rw [hfs]
+    have hlog0 : (0:ℝ) ≤ Real.log (2 + |T|) := Real.log_nonneg (by linarith [abs_nonneg T])
+    have hpad : (0:ℝ) ≤ 32 * (A+2)
+        * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) := by positivity
+    have h1 : ((Dnat : ℤ) : ℝ) = (Dnat : ℝ) := by push_cast; ring
+    rw [h1]
+    have hBl : (0:ℝ) ≤ 32 * (A+2)
+        * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1)
+        * Real.log (2 + |T|) := mul_nonneg hpad hlog0
+    have hexp : (32 * (A+2)
+        * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) + Cc)
+        * Real.log (2 + |T|)
+        = 32 * (A+2)
+          * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1)
+          * Real.log (2 + |T|) + Cc * Real.log (2 + |T|) := by ring
+    rw [hexp]
+    linarith [hDle, hBl]
   -- the generic Landau bound
   have hland := norm_logDeriv_le_of_norm_le (h := h) (c := c) (r := A+2)
     (by linarith)
     (hhanal.differentiableOn.mono (Metric.ball_subset_ball (by linarith)))
     hhne hmLpos hhc_lb hhsup
+  constructor
+  · exact hcount_open
   refine ⟨h, hhanal, hhne, fun z hz => by rw [hfac z hz], fun s hs => ?_⟩
   have hs' : s ∈ Metric.closedBall c ((A+2) - 3/4) := by
     rw [Metric.mem_closedBall] at hs ⊢
@@ -2917,12 +2948,19 @@ theorem exists_H_landau_cofactor :
         _ = Cc * Real.log (2*(A+2)) * ℓ := by ring
     have b4 : (1:ℝ) ≤ 1 * ℓ := by linarith
     push_cast at b2
-    nlinarith [b1, b2, b3, b4]
+    rw [add_mul, add_mul, add_mul]
+    push_cast
+    linarith [b1, b2, b3, b4]
   calc 32 * (A+2) * (Real.log (mS/mL) + 1)
       ≤ 32 * (A+2) * ((|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) * ℓ) :=
         mul_le_mul_of_nonneg_left hbound (by positivity)
     _ = 32 * (A+2) * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) * ℓ := by
         ring
+    _ ≤ (32 * (A+2) * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) + Cc)
+        * ℓ := by
+        rw [add_mul]
+        have h1 : (0:ℝ) ≤ Cc * ℓ := mul_nonneg hCc.le (by linarith)
+        linarith
 
 /-- **AC-A5: Landau local partial fractions for the completed Dedekind zeta.**
 There are an abscissa `A` and a constant `C` such that for every height `|T| ≥ A+5`
@@ -2934,6 +2972,9 @@ error of at most `C·log(2+|T|)`. This is the workhorse for the explicit-formula
 contour estimates on horizontal segments. -/
 theorem exists_logDeriv_partial_fractions :
     ∃ A : ℝ, 2 ≤ A ∧ ∃ C : ℝ, 0 < C ∧ ∀ T : ℝ, A + 5 ≤ |T| →
+      ((∑ᶠ u, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2))) u : ℤ) : ℝ)
+        ≤ C * Real.log (2 + |T|) ∧
       ∀ s ∈ Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (A + 5/4),
         completedDedekindZetaEntire K s ≠ 0 →
         ‖logDeriv (completedDedekindZetaEntire K) s
@@ -2941,8 +2982,8 @@ theorem exists_logDeriv_partial_fractions :
                 (Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2))) u : ℂ)) / (s - u)‖
           ≤ C * Real.log (2 + |T|) := by
   obtain ⟨A, hA2, C, hC, hmain⟩ := exists_H_landau_cofactor K
-  refine ⟨A, hA2, C, hC, fun T hT s hs hHs => ?_⟩
-  obtain ⟨h, hhanal, hhne, hfac, hbound⟩ := hmain T hT
+  refine ⟨A, hA2, C, hC, fun T hT => ⟨(hmain T hT).1, fun s hs hHs => ?_⟩⟩
+  obtain ⟨h, hhanal, hhne, hfac, hbound⟩ := (hmain T hT).2
   set c : ℂ := (A : ℂ) + (T : ℂ) * Complex.I with hcdef
   have hs2 : s ∈ Metric.ball c (A+2) := by
     rw [Metric.mem_closedBall] at hs
