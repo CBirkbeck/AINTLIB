@@ -202,6 +202,30 @@ theorem inner_diagScale_embeddingCoords (a b : K) :
     simp only [map_mul, Complex.mul_re, Complex.conj_re, Complex.conj_im]
     ring
 
+open scoped Classical in
+/-- Membership in the Euclidean-coordinates ideal lattice: exactly the coordinate vectors of
+elements of the fractional ideal. -/
+theorem mem_idealZLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (x : EuclideanSpace ℝ (index K)) :
+    x ∈ idealZLattice K I
+      ↔ ∃ a ∈ (I : FractionalIdeal (𝓞 K)⁰ K), embeddingCoords K a = x := by
+  rw [idealZLattice, euclideanIdealLattice]
+  rw [← SetLike.mem_coe, ZLattice.coe_comap, Set.mem_preimage,
+    ZLattice.coe_comap, Set.mem_preimage, SetLike.mem_coe, mem_idealLattice]
+  constructor
+  · rintro ⟨a, ha, hax⟩
+    refine ⟨a, ha, ?_⟩
+    rw [embeddingCoords]
+    have h1 : (euclidean.toMixed K).symm (mixedEmbedding K a)
+        = ((euclidean.stdOrthonormalBasis K).repr.symm.toContinuousLinearEquiv).toLinearMap x := by
+      rw [hax]
+      simp
+    rw [h1]
+    simp
+  · rintro ⟨a, ha, rfl⟩
+    refine ⟨a, ha, ?_⟩
+    rw [embeddingCoords]
+    simp
+
 end
 
 end DedekindResidue

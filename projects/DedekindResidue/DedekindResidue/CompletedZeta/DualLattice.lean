@@ -149,6 +149,51 @@ theorem covolume_dualZLattice_mul {ι : Type*} [Fintype ι]
   rw [hcovLstar, hcovL, volumeReal_fundamentalDomain_orthonormal, mul_one, mul_one,
     ← abs_mul, mul_comm (b₀.toBasis.det ⇑cstar) (b₀.toBasis.det ⇑c), hdet, abs_one]
 
+/-- **Rigidity**: a sub-`ℤ`-lattice of equal covolume is the whole lattice (the relative
+index is `covol L'/covol L = 1`). -/
+theorem eq_of_le_of_covolume_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    (L' L : Submodule ℤ E) [DiscreteTopology L'] [IsZLattice ℝ L']
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (h : L' ≤ L)
+    (hc : ZLattice.covolume L' volume = ZLattice.covolume L volume) : L' = L := by
+  have h1 : ((L'.toAddSubgroup.relIndex L.toAddSubgroup : ℕ) : ℝ) = 1 := by
+    rw [← ZLattice.covolume_div_covolume_eq_relIndex' L' L h, hc,
+      div_self (ZLattice.covolume_ne_zero L volume)]
+  have h2 : L'.toAddSubgroup.relIndex L.toAddSubgroup = 1 := by exact_mod_cast h1
+  have h3 : L.toAddSubgroup ≤ L'.toAddSubgroup := AddSubgroup.relIndex_eq_one.mp h2
+  exact le_antisymm h (fun x hx => h3 hx)
+
+/-- **Covolume under a linear pullback**: `covol(e⁻¹L) = |det e⁻¹|·covol L` — the
+non-measure-preserving complement of `ZLattice.covolume_comap`, via the `ofZLatticeComap`
+basis and `Basis.det_comp`. -/
+theorem covolume_zlattice_comap {ι : Type*} [Fintype ι] (L : Submodule ℤ (EuclideanSpace ℝ ι))
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (e : EuclideanSpace ℝ ι ≃L[ℝ] EuclideanSpace ℝ ι) :
+    ZLattice.covolume (ZLattice.comap ℝ L e.toLinearMap) volume
+      = |LinearMap.det (e.symm : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|
+        * ZLattice.covolume L volume := by
+  classical
+  haveI := ZLattice.module_finite ℝ L
+  haveI := ZLattice.module_free ℝ L
+  have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
+    rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
+  set b : Module.Basis ι ℤ ↥L :=
+    (Module.Free.chooseBasis ℤ L).reindex (Fintype.equivOfCardEq hcard) with hb
+  set bc : Module.Basis ι ℤ (ZLattice.comap ℝ L e.toLinearMap) :=
+    Module.Basis.ofZLatticeComap ℝ L e.toLinearEquiv b with hbc
+  set b₀ := (EuclideanSpace.basisFun ι ℝ) with hb₀
+  have hcoe : (Subtype.val ∘ ⇑bc)
+      = ⇑((e.symm : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)) ∘ (Subtype.val ∘ ⇑b) := by
+    funext i
+    show ((bc i : EuclideanSpace ℝ ι)) = e.symm ((b i : EuclideanSpace ℝ ι))
+    rw [hbc, Module.Basis.ofZLatticeComap_apply]
+    rfl
+  rw [ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := bc) (b₀ := b₀.toBasis),
+    ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := b) (b₀ := b₀.toBasis),
+    volumeReal_fundamentalDomain_orthonormal, mul_one, mul_one, hcoe,
+    Module.Basis.det_comp, abs_mul]
+
 end
 
 end DedekindResidue

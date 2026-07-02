@@ -1,1 +1,1 @@
-FOCUS: AGE-4 chain, bottom-up: AGE-1 euclideanIdealLattice (ZLattice.comap of idealLattice along toMixed) + instances + covolume + isometry transport to EuclideanSpace ℝ (index K); then AGE-2 dictionary; then unit-box-averaged theta g_J; then WeakFEPair Mellin => ∃ Λ, IsCompletedDedekindZeta
+FOCUS: SP1-AGE-2 — derived form: dualZLattice(idealZLattice I) = diagScale c₀-image of idealZLattice(FractionalIdeal.dual I), c₀ = 1 on real coords, (2,-2) on complex (re,im) coords (conj∘double); recon: index K, stdBasis coords, trace_eq_sum_embeddings, FractionalIdeal.mem_dual
