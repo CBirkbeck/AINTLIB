@@ -578,6 +578,134 @@ theorem completedDedekindZetaEntire_one_sub (s : ℂ) :
     completedDedekindZeta_one_sub K z]
   ring
 
+/-- On the strip `-1 ≤ Re z ≤ 2`, the normalizer `z - 4` dominates both the constant 2
+and the height: `1 + |Im z| ≤ 2‖z - 4‖`. -/
+theorem one_add_abs_im_le_two_norm_sub_four {z : ℂ} (h1 : -1 ≤ z.re) (h2 : z.re ≤ 2) :
+    1 + |z.im| ≤ 2 * ‖z - 4‖ := by
+  have hre4 : (z - 4).re = z.re - 4 := by simp
+  have hre : (2:ℝ) ≤ ‖z - 4‖ := by
+    have habs : (2:ℝ) ≤ |(z - 4).re| := by
+      rw [hre4, abs_sub_comm z.re 4, abs_of_pos (by linarith : (0:ℝ) < 4 - z.re)]
+      linarith
+    exact le_trans habs (Complex.abs_re_le_norm _)
+  have him : |z.im| ≤ ‖z - 4‖ := by
+    have h : |(z - 4).im| ≤ ‖z - 4‖ := Complex.abs_im_le_norm _
+    simpa using h
+  linarith
+
+/-- The comparator sine-exponent: `n_K = r₁ + 2r₂`. -/
+noncomputable def gammaExponent : ℕ := nrRealPlaces K + 2 * nrComplexPlaces K
+
+/-- Right boundary bound for the comparator
+`G = H⁴·sin(πz)^{n_K}/(z-4)^{4n_K+8}` on `Re z = 2`. -/
+theorem comparator_bound_right :
+    ∃ M : ℝ, 0 < M ∧ ∀ t : ℝ,
+      ‖completedDedekindZetaEntire K (((2:ℝ) : ℂ) + (t : ℂ) * Complex.I)‖^4
+        * ‖Complex.sin (π * (((2:ℝ) : ℂ) + (t : ℂ) * Complex.I))‖^(gammaExponent K)
+        / ‖(((2:ℝ) : ℂ) + (t : ℂ) * Complex.I) - 4‖^(4 * gammaExponent K + 8)
+      ≤ M := by
+  obtain ⟨C, hC0, hC⟩ := exists_H_two_line_bound K
+  obtain ⟨B, hB0, hB⟩ :=
+    exists_completedDedekindZetaEntire_strip_bound K (-1) 2 (by norm_num)
+  set n : ℕ := gammaExponent K with hn
+  refine ⟨C^4 * 2^(4*n+8) + (B * 25)^4 * Real.exp ((n:ℝ) * (π * 2)) / 2^(4*n+8),
+    by positivity, fun t => ?_⟩
+  set z : ℂ := ((2:ℝ) : ℂ) + (t : ℂ) * Complex.I with hz
+  have hzre : z.re = 2 := by simp [hz]
+  have hzim : z.im = t := by simp [hz]
+  have hnorm4 : (1:ℝ) + |t| ≤ 2 * ‖z - 4‖ := by
+    have := one_add_abs_im_le_two_norm_sub_four (z := z) (by rw [hzre]; norm_num)
+      (by rw [hzre])
+    rwa [hzim] at this
+  have h2z : (2:ℝ) ≤ ‖z - 4‖ := by
+    have habs : (2:ℝ) ≤ |(z - 4).re| := by
+      rw [show (z - 4).re = z.re - 4 by simp, hzre]
+      norm_num
+    exact le_trans habs (Complex.abs_re_le_norm _)
+  have hz4pos : (0:ℝ) < ‖z - 4‖ := by linarith
+  have hsin : ‖Complex.sin (π * z)‖ ≤ Real.exp (π * |t|) := by
+    have := norm_sin_pi_mul_le z
+    rwa [hzim] at this
+  rcases le_or_gt 2 |t| with ht | ht
+  · have hH := hC t ht
+    rw [← hz] at hH
+    have hHn : ‖completedDedekindZetaEntire K z‖^4
+        ≤ C^4 * (1+|t|)^(4*n+8) * Real.exp (-((n:ℝ) * (π * |t|))) := by
+      calc ‖completedDedekindZetaEntire K z‖^4
+          ≤ (C * (1 + |t|)^(n + 2)
+              * Real.exp (-(((n:ℕ) : ℝ) * (π * |t|)) / 4))^4 :=
+            pow_le_pow_left₀ (norm_nonneg _) hH 4
+        _ = C^4 * (1+|t|)^(4*n+8) * Real.exp (-((n:ℝ) * (π * |t|))) := by
+            rw [mul_pow, mul_pow, ← pow_mul, ← Real.exp_nat_mul]
+            rw [show (n + 2) * 4 = 4*n+8 by ring]
+            congr 2
+            push_cast
+            ring
+    have hsinn : ‖Complex.sin (π * z)‖^n ≤ Real.exp ((n:ℝ) * (π * |t|)) := by
+      calc ‖Complex.sin (π * z)‖^n ≤ (Real.exp (π * |t|))^n :=
+            pow_le_pow_left₀ (norm_nonneg _) hsin n
+        _ = Real.exp ((n:ℝ) * (π * |t|)) := by rw [← Real.exp_nat_mul]
+    have hnum : ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+        ≤ C^4 * (1+|t|)^(4*n+8) := by
+      calc ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+          ≤ (C^4 * (1+|t|)^(4*n+8) * Real.exp (-((n:ℝ) * (π * |t|))))
+            * Real.exp ((n:ℝ) * (π * |t|)) :=
+            mul_le_mul hHn hsinn (by positivity) (by positivity)
+        _ = C^4 * (1+|t|)^(4*n+8) * (Real.exp (-((n:ℝ) * (π * |t|)))
+            * Real.exp ((n:ℝ) * (π * |t|))) := by ring
+        _ = C^4 * (1+|t|)^(4*n+8) := by
+            rw [← Real.exp_add]
+            norm_num
+    calc ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+        / ‖z - 4‖^(4*n+8)
+        ≤ C^4 * (1+|t|)^(4*n+8) / ‖z - 4‖^(4*n+8) := by gcongr
+      _ ≤ C^4 * (2 * ‖z - 4‖)^(4*n+8) / ‖z - 4‖^(4*n+8) := by
+          gcongr
+      _ = C^4 * 2^(4*n+8) := by
+          rw [mul_pow, mul_div_assoc, mul_div_assoc,
+            div_self (pow_ne_zero _ hz4pos.ne'), mul_one]
+      _ ≤ C^4 * 2^(4*n+8)
+          + (B * 25)^4 * Real.exp ((n:ℝ) * (π * 2)) / 2^(4*n+8) :=
+          le_add_of_nonneg_right (by positivity)
+  · have hzn : ‖z‖ ≤ 4 := by
+      rw [hz]
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+        Real.norm_eq_abs, Real.norm_eq_abs, show |(2:ℝ)| = 2 by norm_num]
+      linarith
+    have hH := hB z (by rw [hzre]; norm_num) (by rw [hzre])
+    have hH4 : ‖completedDedekindZetaEntire K z‖^4 ≤ (B*25)^4 := by
+      refine pow_le_pow_left₀ (norm_nonneg _) (le_trans hH ?_) 4
+      have h25 : (1+‖z‖)^2 ≤ 25 := by nlinarith [norm_nonneg z, hzn]
+      nlinarith [hB0]
+    have hsinn : ‖Complex.sin (π * z)‖^n ≤ Real.exp ((n:ℝ) * (π * 2)) := by
+      calc ‖Complex.sin (π * z)‖^n ≤ (Real.exp (π * |t|))^n :=
+            pow_le_pow_left₀ (norm_nonneg _) hsin n
+        _ = Real.exp ((n:ℝ) * (π * |t|)) := by rw [← Real.exp_nat_mul]
+        _ ≤ Real.exp ((n:ℝ) * (π * 2)) := by
+            rw [Real.exp_le_exp]
+            have hπ0 : (0:ℝ) ≤ π := Real.pi_pos.le
+            nlinarith [mul_nonneg (mul_nonneg (Nat.cast_nonneg (α := ℝ) n) hπ0)
+              (by linarith [ht.le] : (0:ℝ) ≤ 2 - |t|)]
+    have hden : (2:ℝ)^(4*n+8) ≤ ‖z - 4‖^(4*n+8) :=
+      pow_le_pow_left₀ (by norm_num) h2z _
+    have hnum2 : ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+        ≤ (B*25)^4 * Real.exp ((n:ℝ) * (π * 2)) :=
+      mul_le_mul hH4 hsinn (pow_nonneg (norm_nonneg _) n)
+        (pow_nonneg (by positivity) 4)
+    calc ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+        / ‖z - 4‖^(4*n+8)
+        ≤ (‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n)
+          / 2^(4*n+8) :=
+          div_le_div_of_nonneg_left
+            (mul_nonneg (pow_nonneg (norm_nonneg _) 4) (pow_nonneg (norm_nonneg _) n))
+            (by positivity) hden
+      _ ≤ (B*25)^4 * Real.exp ((n:ℝ) * (π * 2)) / 2^(4*n+8) := by
+          gcongr
+      _ ≤ C^4 * 2^(4*n+8)
+          + (B * 25)^4 * Real.exp ((n:ℝ) * (π * 2)) / 2^(4*n+8) :=
+          le_add_of_nonneg_left (by positivity)
+
 end
 
 end DedekindResidue
