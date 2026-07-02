@@ -1473,6 +1473,84 @@ theorem lintegral_M0_eq {σ : ℝ} (hσ : 0 < σ) :
         ((continuous_apply w).comp (heckeLogCLE K).continuous)
   rw [hjoint, lintegral_exp_heckeLog K σ hσ]
 
+open scoped Classical in
+/-- The `ENNReal` form of the theta deviation: `ofReal(g_I(t) − w⁻¹·vol)` is
+`ofReal(w⁻¹)` times the box lintegral of the tail. -/
+theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (ht : 0 < t) :
+    ENNReal.ofReal (heckeG K I t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K)
+      = ENNReal.ofReal ((torsionOrder K : ℝ)⁻¹)
+        * ∫⁻ u in ZSpan.fundamentalDomain
+            ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+            ENNReal.ofReal (heckeTheta K I (heckeWeights K t u) - 1) := by
+  rw [heckeG_sub_const_eq K I ht]
+  rw [ENNReal.ofReal_mul (by positivity)]
+  congr 1
+  · -- ofReal of the box integral = the box lintegral (nonneg integrand, integrable)
+    obtain ⟨R, hR, hbox⟩ := exists_box_coord_bound K
+    set m : ℝ := Real.exp (-(2 * (Fintype.card (InfinitePlace K)) * R)) with hm_def
+    have hm : 0 < m := Real.exp_pos _
+    set a' : ℝ := m * t ^ ((1 : ℝ) / (Module.finrank ℚ K)) with ha'_def
+    have ha' : 0 < a' := by
+      have := Real.rpow_pos_of_pos ht ((1 : ℝ) / (Module.finrank ℚ K))
+      positivity
+    have hca : ∀ u ∈ ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+        ∀ w, a' ≤ heckeWeights K t u w :=
+      fun u hu w => heckeWeights_ge_of_bounded K hR (hbox u hu) ht.le w
+    have hnn : ∀ u ∈ ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+        0 ≤ heckeTheta K I (heckeWeights K t u) - 1 := by
+      intro u hu
+      have hsplit := heckeTheta_eq_one_add K I ha' (hca u hu)
+      have htail : 0 ≤ ∑' v : idealZLattice K I, (if v = 0 then 0
+          else Real.exp (-π * ∑ i : index K,
+            placeWeights K (heckeWeights K t u) i
+              * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)) := by
+        refine tsum_nonneg (fun v => ?_)
+        split_ifs
+        · exact le_refl 0
+        · exact (Real.exp_pos _).le
+      rw [hsplit]
+      linarith
+    have hcontu : Continuous (fun u : logSpace K =>
+        heckeTheta K I (heckeWeights K t u)) := by
+      rw [continuous_iff_continuousAt]
+      intro u
+      have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t : ℝ), u)) ht
+      have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
+        (continuous_const.prodMk continuous_id).continuousAt
+      have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
+          = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
+            ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
+      rw [hcompeq]
+      exact ContinuousAt.comp (x := u) hj hin
+    have hBmeas : MeasurableSet (ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ)) :=
+      ZSpan.fundamentalDomain_measurableSet _
+    have hBfin : volume (ZSpan.fundamentalDomain
+        ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ)) < ⊤ :=
+      (ZSpan.fundamentalDomain_isBounded _).measure_lt_top
+    have hint : IntegrableOn (fun u : logSpace K =>
+        heckeTheta K I (heckeWeights K t u) - 1)
+        (ZSpan.fundamentalDomain
+          ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ)) := by
+      refine Integrable.sub ?_ (MeasureTheory.integrableOn_const (ne_top_of_lt hBfin))
+      refine MeasureTheory.Integrable.mono'
+        (MeasureTheory.integrableOn_const (ne_top_of_lt hBfin)
+          (C := ∑' v : idealZLattice K I,
+            Real.exp (-π * ∑ i : index K,
+              a' * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)))
+        hcontu.aestronglyMeasurable.restrict ?_
+      refine (MeasureTheory.ae_restrict_iff' hBmeas).mpr (Filter.Eventually.of_forall
+        (fun u hu => ?_))
+      rw [Real.norm_eq_abs, abs_of_pos]
+      · exact heckeTheta_le_iso K I ha' (hca u hu)
+      · have := hnn u hu
+        linarith
+    rw [ofReal_integral_eq_lintegral_ofReal hint
+      ((MeasureTheory.ae_restrict_iff' hBmeas).mpr
+        (Filter.Eventually.of_forall hnn))]
+
 end
 
 end DedekindResidue
