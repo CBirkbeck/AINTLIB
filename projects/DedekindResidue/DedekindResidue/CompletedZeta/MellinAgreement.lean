@@ -2204,6 +2204,137 @@ theorem dedekindZeta_real_eq {s : ℝ} (hs : 1 < s) :
         exact hn hI.symm
       exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
 
+open scoped Classical in
+theorem heckeF_dev_nonneg {t : ℝ} (ht : 0 < t) :
+    0 ≤ heckeF K t - heckeFConst K := by
+  have hFsum : heckeF K t - heckeFConst K
+      = ∑ C : ClassGroup (𝓞 K),
+        (heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K) := by
+    rw [heckeF, heckeFConst, Finset.sum_sub_distrib, Finset.sum_const, nsmul_eq_mul]
+    rfl
+  rw [hFsum]
+  exact Finset.sum_nonneg (fun C _ => heckeGClass_dev_nonneg K C ht)
+
+open scoped Classical in
+/-- **The Λ-value identification (e-vi)**: at real `σ > 1/2` the abstract completed
+function of the Hecke theta pair is the closed Γ–ζ form. -/
+theorem heckeFEPair_Λ_real {σ : ℝ} (hσ : 1/2 < σ) :
+    (heckeFEPair K).Λ (σ : ℂ)
+      = (((heckeBeta K) ^ (-σ)
+          * ((((heckeJacobian K : ℝ≥0)) : ℝ)
+            * ∏ w : InfinitePlace K,
+              π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ))
+          * ∑' b : (Ideal (𝓞 K))⁰,
+              ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ))
+                ^ (-(2 * σ)) : ℝ) : ℂ) := by
+  have hσ' : (heckeFEPair K).k < (σ : ℂ).re := by
+    rw [show (heckeFEPair K).k = 1/2 from rfl]
+    simpa using hσ
+  have hM := (heckeFEPair K).hasMellin hσ'
+  rw [← hM.2]
+  -- unfold the mellin integral into the real one
+  have hfshape : ∀ t : ℝ, (heckeFEPair K).f t - (heckeFEPair K).f₀
+      = (((heckeF K t - heckeFConst K : ℝ)) : ℂ) := by
+    intro t
+    rw [show (heckeFEPair K).f t = ((heckeF K t : ℝ) : ℂ) from rfl,
+      show (heckeFEPair K).f₀ = ((heckeFConst K : ℝ) : ℂ) from rfl]
+    push_cast
+    ring
+  have hptwise : ∀ t ∈ Set.Ioi (0:ℝ),
+      (t : ℂ) ^ ((σ : ℂ) - 1) • ((heckeFEPair K).f t - (heckeFEPair K).f₀)
+      = (((t ^ (σ - 1) * (heckeF K t - heckeFConst K) : ℝ)) : ℂ) := by
+    intro t ht
+    rw [hfshape, smul_eq_mul]
+    rw [show ((σ : ℂ) - 1) = (((σ - 1 : ℝ)) : ℂ) by push_cast; ring]
+    rw [← Complex.ofReal_cpow (le_of_lt ht), ← Complex.ofReal_mul]
+  rw [mellin, setIntegral_congr_fun measurableSet_Ioi hptwise, integral_complex_ofReal]
+  congr 1
+  -- real integrability from the Mellin convergence
+  have hri : IntegrableOn (fun t : ℝ => t ^ (σ - 1) * (heckeF K t - heckeFConst K))
+      (Set.Ioi (0:ℝ)) volume := by
+    have h1 := hM.1.re
+    refine MeasureTheory.IntegrableOn.congr_fun h1 (fun t ht => ?_) measurableSet_Ioi
+    show RCLike.re ((t : ℂ) ^ ((σ : ℂ) - 1) • ((heckeFEPair K).f t - (heckeFEPair K).f₀))
+      = t ^ (σ - 1) * (heckeF K t - heckeFConst K)
+    rw [hptwise t ht]
+    exact Complex.ofReal_re _
+  have hnnae : 0 ≤ᵐ[volume.restrict (Set.Ioi (0:ℝ))]
+      (fun t : ℝ => t ^ (σ - 1) * (heckeF K t - heckeFConst K)) := by
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun t ht => ?_))
+    exact mul_nonneg (Real.rpow_nonneg (le_of_lt ht) _) (heckeF_dev_nonneg K ht)
+  have hσ0 : (0:ℝ) < σ := lt_trans (by norm_num) hσ
+  have h2σ : (1:ℝ) < 2 * σ := by linarith
+  -- pass through ENNReal
+  have hENN : ENNReal.ofReal (∫ t in Set.Ioi (0:ℝ),
+      t ^ (σ - 1) * (heckeF K t - heckeFConst K))
+      = ENNReal.ofReal ((heckeBeta K) ^ (-σ)
+        * ((((heckeJacobian K : ℝ≥0)) : ℝ)
+          * ∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ))
+        * ∑' b : (Ideal (𝓞 K))⁰,
+            ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ))) := by
+    rw [ofReal_integral_eq_lintegral_ofReal hri hnnae]
+    have hsplit : ∀ t ∈ Set.Ioi (0:ℝ),
+        ENNReal.ofReal (t ^ (σ - 1) * (heckeF K t - heckeFConst K))
+        = ENNReal.ofReal (t ^ (σ - 1)) * ENNReal.ofReal (heckeF K t - heckeFConst K) :=
+      fun t ht => ENNReal.ofReal_mul (Real.rpow_nonneg (le_of_lt ht) _)
+    rw [setLIntegral_congr_fun measurableSet_Ioi hsplit,
+      lintegral_mellin_heckeF_dev K hσ0]
+    -- identify the closed ENNReal form with ofReal of the real one
+    have hzsum : (∑' b : (Ideal (𝓞 K))⁰,
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+        = ENNReal.ofReal (∑' b : (Ideal (𝓞 K))⁰,
+            ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ))) := by
+      rw [show (fun b : (Ideal (𝓞 K))⁰ => ENNReal.ofReal
+          ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)))
+        = (fun b : (Ideal (𝓞 K))⁰ => ENNReal.ofReal
+          (((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ)))) from
+        funext (fun b => by rw [sq_rpow_neg (Nat.cast_nonneg _)])]
+      exact tsum_ideal_ofReal_eq K h2σ
+    rw [hzsum]
+    rw [show ((heckeJacobian K : ℝ≥0) : ℝ≥0∞)
+      = ENNReal.ofReal (((heckeJacobian K : ℝ≥0)) : ℝ) from
+      (ENNReal.ofReal_coe_nnreal).symm]
+    have hβ := heckeBeta_pos K
+    have hJnn : (0:ℝ) ≤ ((heckeJacobian K : ℝ≥0) : ℝ) := (heckeJacobian K).2
+    have hΓnn' : (0:ℝ) ≤ ∏ w : InfinitePlace K,
+        π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ) := by
+      refine Finset.prod_nonneg (fun w _ => ?_)
+      have hΓ : 0 < Real.Gamma ((mult w : ℝ) * σ) := by
+        refine Real.Gamma_pos_of_pos ?_
+        have := mult_pos (w := w)
+        positivity
+      positivity
+    rw [← ENNReal.ofReal_mul hJnn, ← ENNReal.ofReal_mul (by positivity),
+      ← ENNReal.ofReal_mul (by positivity)]
+  -- strip ofReal
+  have hlhs_nn : 0 ≤ ∫ t in Set.Ioi (0:ℝ),
+      t ^ (σ - 1) * (heckeF K t - heckeFConst K) :=
+    integral_nonneg_of_ae hnnae
+  have hΓnn : (0:ℝ) ≤ ∏ w : InfinitePlace K,
+      π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ) := by
+    refine Finset.prod_nonneg (fun w _ => ?_)
+    have hΓ : 0 < Real.Gamma ((mult w : ℝ) * σ) := by
+      refine Real.Gamma_pos_of_pos ?_
+      have := mult_pos (w := w)
+      positivity
+    positivity
+  have hrhs_nn : (0:ℝ) ≤ (heckeBeta K) ^ (-σ)
+      * ((((heckeJacobian K : ℝ≥0)) : ℝ)
+        * ∏ w : InfinitePlace K,
+          π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ))
+      * ∑' b : (Ideal (𝓞 K))⁰,
+          ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ)) := by
+    have hβ := heckeBeta_pos K
+    have hz : 0 ≤ ∑' b : (Ideal (𝓞 K))⁰,
+        ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ)) :=
+      tsum_nonneg (fun b => Real.rpow_nonneg (Nat.cast_nonneg _) _)
+    have hJ : (0:ℝ) ≤ (((heckeJacobian K : ℝ≥0)) : ℝ) := (heckeJacobian K).2
+    positivity
+  exact (ENNReal.ofReal_eq_ofReal_iff hlhs_nn hrhs_nn).mp hENN
+
 end
 
 end DedekindResidue
