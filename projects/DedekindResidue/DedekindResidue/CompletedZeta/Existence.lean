@@ -382,6 +382,22 @@ theorem generalizedRiemannHypothesis_iff :
     rw [hΛ.eqOn (isCompletedDedekindZeta_completedDedekindZeta K) hs0 hs1]
     exact hconc s hs hs1
 
+/-- The Hecke pair is self-dual: `f = g`, `f₀ = g₀`, and `ε = 1` is its own inverse. -/
+theorem heckeFEPair_symm : (heckeFEPair K).symm = heckeFEPair K := by
+  unfold WeakFEPair.symm heckeFEPair
+  simp only [inv_one]
+
+/-- **The functional equation** `Λ_K(1-s) = Λ_K(s)` for the completed Dedekind zeta
+function (AC-A0). -/
+theorem completedDedekindZeta_one_sub (s : ℂ) :
+    completedDedekindZeta K (1 - s) = completedDedekindZeta K s := by
+  have hfe := (heckeFEPair K).functional_equation (s/2)
+  rw [heckeFEPair_symm] at hfe
+  have hk : ((heckeFEPair K).k : ℂ) = 1/2 := by norm_num [heckeFEPair]
+  have hε : (heckeFEPair K).ε = 1 := rfl
+  rw [hk, hε, one_smul] at hfe
+  rw [completedDedekindZeta, completedDedekindZeta,
+    show (1 - s)/2 = (1/2 : ℂ) - s/2 by ring, hfe]
 end
 
 end DedekindResidue

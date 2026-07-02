@@ -2115,7 +2115,7 @@ theorem tsum_ideal_ofReal_eq {s : ℝ} (hs : 1 < s) :
       ENNReal.ofReal (((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)))
       = ENNReal.ofReal (∑' b : (Ideal (𝓞 K))⁰,
           ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) :=
-  (ENNReal.ofReal_tsum_of_nonneg (fun b => Real.rpow_nonneg (Nat.cast_nonneg _) _)
+  (ENNReal.ofReal_tsum_of_nonneg (fun _ => Real.rpow_nonneg (Nat.cast_nonneg _) _)
     (summable_ideal_norm_rpow K hs)).symm
 
 open scoped Classical in
