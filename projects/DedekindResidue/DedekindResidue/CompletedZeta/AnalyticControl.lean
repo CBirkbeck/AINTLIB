@@ -548,6 +548,36 @@ theorem exists_H_two_line_bound :
             = 2 + (nrRealPlaces K + 2 * nrComplexPlaces K) by ring, pow_add]
         ring
 
+/-- **The functional equation for the entire completed zeta** (A3-d):
+`H(1-s) = H(s)`, since `s(s-1)` is symmetric under `s ↦ 1-s` and `Λ_K(1-s) = Λ_K(s)`;
+the two exceptional points are absorbed by continuity. -/
+theorem completedDedekindZetaEntire_one_sub (s : ℂ) :
+    completedDedekindZetaEntire K (1 - s) = completedDedekindZetaEntire K s := by
+  have hcont1 : Continuous (fun z : ℂ => completedDedekindZetaEntire K (1 - z)) :=
+    ((differentiable_completedDedekindZetaEntire K).comp
+      ((differentiable_const (1:ℂ)).sub differentiable_id)).continuous
+  have hcont2 : Continuous (completedDedekindZetaEntire K) :=
+    (differentiable_completedDedekindZetaEntire K).continuous
+  have hdense : Dense ({(0:ℂ), 1}ᶜ : Set ℂ) :=
+    Set.Countable.dense_compl ℝ
+      ((Set.toFinite ({(0:ℂ), 1} : Set ℂ)).countable)
+  refine congrFun (Continuous.ext_on hdense hcont1 hcont2 ?_) s
+  intro z hz
+  simp only [Set.mem_compl_iff, Set.mem_insert_iff, Set.mem_singleton_iff, not_or] at hz
+  obtain ⟨hz0, hz1⟩ := hz
+  show completedDedekindZetaEntire K (1 - z) = completedDedekindZetaEntire K z
+  have h1z0 : (1:ℂ) - z ≠ 0 := by
+    intro h0
+    apply hz1
+    linear_combination -h0
+  have h1z1 : (1:ℂ) - z ≠ 1 := by
+    intro h0
+    apply hz0
+    linear_combination -h0
+  rw [completedDedekindZetaEntire_eq K h1z0 h1z1, completedDedekindZetaEntire_eq K hz0 hz1,
+    completedDedekindZeta_one_sub K z]
+  ring
+
 end
 
 end DedekindResidue
