@@ -1409,6 +1409,245 @@ theorem exists_H_center_lower :
           (by norm_num) ?_
         positivity
 
+/-- σ-uniform decaying Γ-upper on `1/2 ≤ σ ≤ σ₁`, `|t| ≥ 1`. -/
+theorem exists_norm_Gamma_le_range (σ₁ : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ σ t : ℝ, 1/2 ≤ σ → σ ≤ σ₁ → 1 ≤ |t| →
+      ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ C * (1 + |t|)^P * Real.exp (-(π * |t|) / 2) := by
+  set N : ℕ := ⌈σ₁⌉₊ with hN
+  refine ⟨(3/2 + N)^N * (Real.sqrt (12 * π) * (3/2)), by positivity, N + 1,
+    fun σ t hσl hσr ht => ?_⟩
+  obtain ⟨σ₀, n, h1, h2, hdec⟩ := exists_base_add_nat hσl
+  have hnN : n ≤ N := by
+    have hnle : (n : ℝ) ≤ σ := by
+      rw [hdec]
+      linarith
+    have : (n : ℝ) ≤ σ₁ := le_trans hnle hσr
+    calc n ≤ ⌈(n : ℝ)⌉₊ := by rw [Nat.ceil_natCast]
+      _ ≤ N := Nat.ceil_le_ceil this
+  have hb := norm_Gamma_le_mul_exp_add_nat (σ := σ₀) (t := t) h1 (le_of_lt h2) ht n
+  rw [← hdec] at hb
+  refine le_trans hb ?_
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ₀)]
+    nlinarith [abs_nonneg t]
+  have hfac : (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+      ≤ ((3/2 + N) * (1 + |t|))^n := by
+    refine pow_le_pow_left₀ (by positivity) ?_ n
+    have hnn : (n:ℝ) ≤ N := by exact_mod_cast hnN
+    nlinarith [Nat.cast_nonneg (α := ℝ) n]
+  calc (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+      * (Real.sqrt (12 * π) * ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2))
+      ≤ ((3/2 + N) * (1 + |t|))^n
+        * (Real.sqrt (12 * π) * ((3/2) * (1 + |t|)) * Real.exp (-(π * |t|) / 2)) := by
+        refine mul_le_mul hfac ?_ (by positivity) (by positivity)
+        refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+        exact mul_le_mul_of_nonneg_left hz₀ (by positivity)
+    _ = ((3/2 + N)^n * (1 + |t|)^(n+1)) * (Real.sqrt (12 * π) * (3/2))
+        * Real.exp (-(π * |t|) / 2) := by
+        rw [mul_pow, pow_succ]
+        ring
+    _ ≤ ((3/2 + N)^N * (1 + |t|)^(N+1)) * (Real.sqrt (12 * π) * (3/2))
+        * Real.exp (-(π * |t|) / 2) := by
+        refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right
+          (mul_le_mul ?_ ?_ (by positivity) (by positivity)) (by positivity))
+          (by positivity)
+        · refine pow_le_pow_right₀ ?_ hnN
+          have : (0:ℝ) ≤ N := Nat.cast_nonneg N
+          linarith
+        · exact pow_le_pow_right₀ h1t (by omega)
+    _ = (3/2 + N)^N * (Real.sqrt (12 * π) * (3/2)) * (1 + |t|)^(N+1)
+        * Real.exp (-(π * |t|) / 2) := by ring
+
+/-- σ-uniform decaying upper for the archimedean factor on `1 ≤ σ ≤ σ₁`, `|t| ≥ 2`. -/
+theorem exists_norm_gammaFactor_le_range (σ₁ : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ σ t : ℝ, 1 ≤ σ → σ ≤ σ₁ → 2 ≤ |t| →
+      ‖gammaFactor K ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ C * (1 + |t|)^P
+          * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4) := by
+  obtain ⟨C₀, hC₀, P₀, hΓ⟩ := exists_norm_Gamma_le_range (σ₁/2)
+  obtain ⟨C₁, hC₁, P₁, hΓ'⟩ := exists_norm_Gamma_le_range σ₁
+  refine ⟨C₀^(nrRealPlaces K) * (2*C₁)^(nrComplexPlaces K), by positivity,
+    P₀ * nrRealPlaces K + P₁ * nrComplexPlaces K, fun σ t hσl hσr ht => ?_⟩
+  rw [gammaFactor, norm_mul, norm_pow, norm_pow]
+  have ht1 : 1 ≤ |t| := by linarith
+  -- Γℝ-factor bound
+  have hGR : ‖Complex.Gammaℝ ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ C₀ * (1 + |t|)^P₀ * Real.exp (-(π * |t|) / 4) := by
+    rw [Complex.Gammaℝ_def, norm_mul]
+    have hπ : ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖ ≤ 1 := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+      have hre : (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2).re = -σ/2 := by
+        rw [show -((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+            = ((-σ/2 : ℝ) : ℂ) + ((-t/2 : ℝ) : ℂ) * Complex.I by push_cast; ring]
+        simp
+      rw [hre]
+      calc π ^ (-σ/2 : ℝ) ≤ π ^ (0 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three])
+              (by linarith)
+        _ = 1 := Real.rpow_zero π
+    have harg : ((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+        = ((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I := by
+      push_cast
+      ring
+    have ht2 : 1 ≤ |t/2| := by
+      rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+      linarith
+    have hb := hΓ (σ/2) (t/2) (by linarith) (by linarith) ht2
+    rw [harg]
+    have hmono : C₀ * (1 + |t/2|)^P₀ * Real.exp (-(π * |t/2|) / 2)
+        ≤ C₀ * (1 + |t|)^P₀ * Real.exp (-(π * |t|) / 4) := by
+      have he : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
+        congr 1
+        rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+        ring
+      rw [he]
+      refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left
+        (pow_le_pow_left₀ (by positivity) ?_ _) hC₀.le) (by positivity)
+      rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+      linarith [abs_nonneg t]
+    calc ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
+        * ‖Complex.Gamma (((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I)‖
+        ≤ 1 * (C₀ * (1 + |t/2|)^P₀ * Real.exp (-(π * |t/2|) / 2)) :=
+          mul_le_mul hπ hb (norm_nonneg _) (by norm_num)
+      _ = C₀ * (1 + |t/2|)^P₀ * Real.exp (-(π * |t/2|) / 2) := by ring
+      _ ≤ C₀ * (1 + |t|)^P₀ * Real.exp (-(π * |t|) / 4) := hmono
+  -- Γℂ-factor bound
+  have hGC : ‖Complex.Gammaℂ ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ 2 * (C₁ * (1 + |t|)^P₁ * Real.exp (-(π * |t|) / 2)) := by
+    rw [Complex.Gammaℂ_def, norm_mul, norm_mul]
+    have h2π : ‖((2:ℂ) * π) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I))‖ ≤ 1 := by
+      rw [show ((2:ℂ) * π) = ((2 * π : ℝ) : ℂ) by push_cast; ring,
+        Complex.norm_cpow_eq_rpow_re_of_pos (by positivity)]
+      have hre : (-((σ : ℂ) + (t : ℂ) * Complex.I)).re = -σ := by simp
+      rw [hre]
+      calc (2*π) ^ (-σ : ℝ) ≤ (2*π) ^ (0 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three])
+              (by linarith)
+        _ = 1 := Real.rpow_zero _
+    have h2n : ‖(2:ℂ)‖ = 2 := by norm_num
+    have hb := hΓ' σ t (by linarith) hσr ht1
+    rw [h2n]
+    calc 2 * ‖((2:ℂ) * π) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I))‖
+        * ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ 2 * 1 * (C₁ * (1 + |t|)^P₁ * Real.exp (-(π * |t|) / 2)) := by
+          refine mul_le_mul (by nlinarith [norm_nonneg (((2:ℂ) * π)
+            ^ (-((σ : ℂ) + (t : ℂ) * Complex.I)))]) hb (norm_nonneg _) (by norm_num)
+      _ = 2 * (C₁ * (1 + |t|)^P₁ * Real.exp (-(π * |t|) / 2)) := by ring
+  -- combine (mirroring norm_gammaFactor_le)
+  have hp1 := pow_le_pow_left₀ (norm_nonneg _) hGR (nrRealPlaces K)
+  have hp2 := pow_le_pow_left₀ (norm_nonneg _) hGC (nrComplexPlaces K)
+  refine le_trans (mul_le_mul hp1 hp2 (by positivity) (by positivity)) (le_of_eq ?_)
+  have hE2 : Real.exp (-(π * |t|) / 2) = (Real.exp (-(π * |t|) / 4))^2 := by
+    rw [show -(π * |t|) / 2 = -(π * |t|) / 4 + -(π * |t|) / 4 by ring, Real.exp_add, sq]
+  rw [hE2]
+  rw [show (C₀ * (1 + |t|)^P₀ * Real.exp (-(π*|t|)/4))^(nrRealPlaces K)
+      * (2 * (C₁ * (1 + |t|)^P₁ * (Real.exp (-(π*|t|)/4))^2))^(nrComplexPlaces K)
+      = C₀^(nrRealPlaces K) * (2*C₁)^(nrComplexPlaces K)
+        * (1+|t|)^(P₀ * nrRealPlaces K + P₁ * nrComplexPlaces K)
+        * (Real.exp (-(π*|t|)/4))^(nrRealPlaces K + 2 * nrComplexPlaces K) by
+    rw [mul_pow, mul_pow, mul_pow, mul_pow, mul_pow, ← pow_mul, ← pow_mul,
+      ← pow_mul, pow_add]
+    ring]
+  congr 1
+  rw [← Real.exp_nat_mul]
+  congr 1
+  rw [gammaExponent]
+  push_cast
+  ring
+
+/-- Decaying H-upper to the right of the critical strip: `2 ≤ Re z ≤ σ₁`, `|Im z| ≥ 2`. -/
+theorem exists_H_upper_right (σ₁ : ℝ) (hσ₁ : 2 ≤ σ₁) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ z : ℂ, 2 ≤ z.re → z.re ≤ σ₁ → 2 ≤ |z.im| →
+      ‖completedDedekindZetaEntire K z‖
+        ≤ C * (1 + |z.im|)^P
+          * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |z.im|)) / 4) := by
+  obtain ⟨Cγ, hCγ, Pγ, hγ⟩ := exists_norm_gammaFactor_le_range K σ₁
+  set T₂ : ℝ := ∑' n : ℕ, ‖LSeries.term
+      (fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)) 2 n‖ with hT₂
+  have hT₂0 : 0 ≤ T₂ := tsum_nonneg (fun n => norm_nonneg _)
+  have hdne : ((discr K : ℤ) : ℝ) ≠ 0 := by
+    exact_mod_cast NumberField.discr_ne_zero K
+  have hd1 : (1:ℝ) ≤ |((discr K : ℤ) : ℝ)| := by
+    have := Int.one_le_abs (NumberField.discr_ne_zero K)
+    calc (1:ℝ) = ((1:ℤ) : ℝ) := by norm_num
+      _ ≤ ((|discr K| : ℤ) : ℝ) := by exact_mod_cast this
+      _ = |((discr K : ℤ) : ℝ)| := by push_cast; rfl
+  refine ⟨(σ₁ + 2)^2 * |((discr K : ℤ) : ℝ)| ^ (σ₁/2) * Cγ * (T₂ + 1),
+    by positivity, Pγ + 2, fun z h2 hσr ht => ?_⟩
+  set σ : ℝ := z.re with hσ
+  set t : ℝ := z.im with htdef
+  have hzeq : z = (σ : ℂ) + (t : ℂ) * Complex.I := by
+    rw [hσ, htdef, Complex.re_add_im]
+  have hs0 : z ≠ 0 := by
+    intro h0
+    have := congrArg Complex.re h0
+    rw [← hσ] at this
+    simp at this
+    rw [this] at h2
+    norm_num at h2
+  have hs1 : z ≠ 1 := by
+    intro h0
+    have := congrArg Complex.re h0
+    rw [← hσ] at this
+    simp at this
+    rw [this] at h2
+    norm_num at h2
+  have hsre1 : (1:ℝ) < z.re := by rw [← hσ]; linarith
+  rw [completedDedekindZetaEntire_eq K hs0 hs1,
+    completedDedekindZeta_eq_of_one_lt_re K hsre1, completedZetaPrefactor]
+  rw [norm_mul, norm_mul, norm_mul, norm_mul]
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have hzn : ‖z‖ ≤ (σ₁ + 2) * (1 + |t|) := by
+    rw [hzeq]
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ)]
+    nlinarith [abs_nonneg t]
+  have hzn1 : ‖z - 1‖ ≤ (σ₁ + 2) * (1 + |t|) := by
+    have hz1eq : z - 1 = ((σ - 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by
+      rw [hzeq]
+      push_cast
+      ring
+    rw [hz1eq]
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ - 1)]
+    nlinarith [abs_nonneg t]
+  have hΔ : ‖((|discr K| : ℝ) : ℂ) ^ (z / 2)‖ ≤ |((discr K : ℤ) : ℝ)| ^ (σ₁/2) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by linarith [abs_pos.mpr hdne])]
+    have hre2 : (z / 2).re = σ/2 := by
+      rw [show z / 2 = ((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I by
+        rw [hzeq]; push_cast; ring]
+      simp
+    rw [hre2]
+    exact Real.rpow_le_rpow_of_exponent_le hd1 (by linarith)
+  have hγb : ‖gammaFactor K z‖ ≤ Cγ * (1 + |t|)^Pγ
+      * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4) := by
+    rw [hzeq]
+    exact hγ σ t (by linarith) hσr ht
+  have hζb : ‖dedekindZeta K z‖ ≤ T₂ + 1 := by
+    refine le_trans (norm_dedekindZeta_le_of_two_le_re K (s := z) (by rw [← hσ]; linarith)) ?_
+    rw [← hT₂]
+    linarith
+  calc ‖z‖ * ‖z - 1‖ * (‖((|discr K| : ℝ) : ℂ) ^ (z / 2)‖ * ‖gammaFactor K z‖
+        * ‖dedekindZeta K z‖)
+      ≤ ((σ₁ + 2) * (1 + |t|)) * ((σ₁ + 2) * (1 + |t|))
+        * ((|((discr K : ℤ) : ℝ)| ^ (σ₁/2))
+          * (Cγ * (1 + |t|)^Pγ
+            * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4))
+          * (T₂ + 1)) := by
+        gcongr
+    _ = (σ₁ + 2)^2 * |((discr K : ℤ) : ℝ)| ^ (σ₁/2) * Cγ * (T₂ + 1)
+        * (1 + |t|)^(Pγ + 2)
+        * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |t|)) / 4) := by
+        rw [pow_add]
+        ring
+
 end
 
 end DedekindResidue
