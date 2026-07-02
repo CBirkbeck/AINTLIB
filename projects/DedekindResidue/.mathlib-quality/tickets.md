@@ -191,6 +191,11 @@
       per-place weights), `mulCoords` (+`mulCoords_embeddingCoords`: mult-by-`x` in
       coordinates), `unitMulLatticeEquiv` (unit multiplication permutes the ideal lattice),
       and **`heckeTheta_unit_mul`** (`Θ(w(ε)²·c) = Θ(c)` — the Hecke unit symmetry).
+      **Brick 3 DONE ✓ (2026-07-02)**: `dualPlaceWeights` (`c⁻¹` real, `4c⁻¹` complex),
+      `placeWeights_dualPlaceWeights`, and **`heckeTheta_inversion`**:
+      `Θ_I(c) = covol(L_I)⁻¹·(∏ᵢc)^{-1/2}·Θ_{I^∨}(c^∨)` — Hecke's multivariable theta
+      functional equation for ideal lattices (weightedThetaLattice_transform +
+      dualZLattice_idealZLattice + comap_equiv reindex, twist absorbed into weights).
       REMAINING AGE-3: log-unit-basis box parametrisation of the weights
       `c(t,u)_w = t^{1/n}·exp(logunits-combination)` + `g_I(t) := ∫_{[0,1)^{r+s-1}} Θ(c(t,u)) du`
       + its inversion (from `weightedThetaLattice_transform` — note `heckeTheta I c` = the

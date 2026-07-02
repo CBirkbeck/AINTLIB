@@ -167,6 +167,57 @@ theorem heckeTheta_unit_mul (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (ε : (𝓞 
   rw [map_mul, mul_pow]
   ring
 
+open scoped Classical in
+/-- The dual place-weights: `c_w⁻¹` at real places and `4·c_w⁻¹` at complex places — the
+factor `4 = 2²` is the square of the duality scaling (`dualityWeights`), the archimedean
+bookkeeping that ultimately feeds `Γℂ`. -/
+noncomputable def dualPlaceWeights (c : InfinitePlace K → ℝ) : InfinitePlace K → ℝ :=
+  fun w => if IsReal w then (c w)⁻¹ else 4 * (c w)⁻¹
+
+open scoped Classical in
+omit [NumberField K] in
+theorem placeWeights_dualPlaceWeights (c : InfinitePlace K → ℝ) (i : index K) :
+    placeWeights K (dualPlaceWeights K c) i
+      = (placeWeights K c i)⁻¹ * (dualityWeights K i) ^ 2 := by
+  rcases i with w | ⟨w, j⟩
+  · simp only [placeWeights, Sum.elim_inl, dualPlaceWeights, dualityWeights, if_pos w.2]
+    norm_num
+  · simp only [placeWeights, Sum.elim_inr, dualPlaceWeights, dualityWeights]
+    rw [if_neg (by rw [not_isReal_iff_isComplex]; exact w.2)]
+    fin_cases j <;> norm_num <;> ring
+
+open scoped Classical in
+/-- **The inversion law of the multivariable Hecke theta** (SP1-AGE-3):
+`Θ_I(c) = covol(L_I)⁻¹ · (∏ᵢ c-coords)^{-1/2} · Θ_{I^∨}(dual weights)` — Poisson summation
+over the ideal lattice, with the dual side identified as the theta of the trace-dual ideal
+via `dualZLattice_idealZLattice` (the duality twist absorbed into the weights). -/
+theorem heckeTheta_inversion (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
+    (c : InfinitePlace K → ℝ) (hc : ∀ w, 0 < c w) :
+    heckeTheta K I c
+      = (ZLattice.covolume (idealZLattice K I) volume)⁻¹
+        * (Real.sqrt (∏ i, placeWeights K c i))⁻¹
+        * heckeTheta K (dualIdealUnit K I) (dualPlaceWeights K c) := by
+  have hpos : ∀ i, 0 < placeWeights K c i := by
+    rintro (w | ⟨w, j⟩) <;> exact hc _
+  rw [heckeTheta, weightedThetaLattice_transform (idealZLattice K I) hpos]
+  congr 1
+  rw [dualZLattice_idealZLattice K I, heckeTheta,
+    ← Equiv.tsum_eq (ZLattice.comap_equiv ℝ (idealZLattice K (dualIdealUnit K I))
+      ((diagScale (dualityWeights K)
+        (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv.toLinearEquiv)).toEquiv]
+  refine tsum_congr (fun v => ?_)
+  congr 1
+  simp only [LinearEquiv.coe_toEquiv, ZLattice.comap_equiv_apply]
+  refine congrArg (fun r => -π * r) ?_
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  have he : (((diagScale (dualityWeights K)
+      (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv.toLinearEquiv).symm)
+        ((v : EuclideanSpace ℝ (index K)))
+      = (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+          ((v : EuclideanSpace ℝ (index K))) := rfl
+  rw [he, placeWeights_dualPlaceWeights, diagScale_apply, mul_pow]
+  ring
+
 end
 
 end DedekindResidue

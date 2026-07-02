@@ -1,1 +1,1 @@
-FOCUS: AGE-3 brick 2 — heckeTheta def + unitMul map (LinearMap.mulLeft ℝ (σε) on mixedSpace) + M_ε(ζa) = ζ(εa) + tsum-reindex equivariance heckeTheta I (c·w(ε)²) = heckeTheta I c
+FOCUS: AGE-3 brick 3 — heckeTheta inversion: weightedThetaLattice_transform at placeWeights c + dualZLattice_idealZLattice + comap-reindex of the dual tsum onto L_{I^dual} with weights (c⁻¹ real; 4c⁻¹ complex)
