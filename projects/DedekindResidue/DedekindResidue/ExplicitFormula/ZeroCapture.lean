@@ -540,6 +540,80 @@ theorem re_mem_of_completedDedekindZetaEntire_eq_zero {ρ : ℂ}
   · by_contra h
     exact completedDedekindZetaEntire_ne_zero_of_one_lt_re K (by linarith) h0
 
+/-- **Separation pigeonhole** (SP2-RECT R-e core): in any unit interval there is a
+point at distance at least `1/(2(N+1))` from every member of a finite set of size at
+most `N` — among the `N+1` midpoints of equal subintervals, at least one is far from
+all of `S`, since distinct midpoints cannot share a close neighbour. -/
+theorem exists_dist_ge_of_card_le {S : Finset ℝ} {N : ℕ} (hcard : S.card ≤ N) (a : ℝ) :
+    ∃ t ∈ Set.Icc a (a + 1), ∀ s ∈ S, 1 / (2 * (N + 1)) ≤ |t - s| := by
+  classical
+  by_contra hcon
+  push Not at hcon
+  have hNpos : (0:ℝ) < 2 * ((N:ℝ) + 1) := by positivity
+  -- each midpoint has a close member of S
+  have hmid : ∀ k : Fin (N + 1), ∃ s ∈ S,
+      |(a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1))) - s| < 1 / (2 * ((N:ℝ) + 1)) := by
+    intro k
+    have hk1 : (0:ℝ) ≤ (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)) := by positivity
+    have hk2 : (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)) ≤ 1 := by
+      rw [div_le_one hNpos]
+      have : (k:ℝ) ≤ N := by
+        have := k.2
+        have h1 : (k:ℕ) ≤ N := by omega
+        exact_mod_cast h1
+      linarith
+    have hmem : a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)) ∈ Set.Icc a (a + 1) := by
+      rw [Set.mem_Icc]
+      constructor <;> linarith
+    obtain ⟨s, hs, hlt⟩ := hcon _ hmem
+    exact ⟨s, hs, by push_cast at hlt ⊢; linarith [hlt]⟩
+  choose f hfS hfclose using hmid
+  -- pigeonhole: N+1 midpoints into ≤ N members
+  have hlt : S.card < (Finset.univ : Finset (Fin (N + 1))).card := by
+    rw [Finset.card_univ, Fintype.card_fin]
+    omega
+  obtain ⟨k, _, k', hk'mem, hne, heq⟩ :=
+    Finset.exists_ne_map_eq_of_card_lt_of_maps_to hlt (fun k _ => hfS k)
+  -- two distinct midpoints within 1/(N+1) of the same point: contradiction
+  have h1 := hfclose k
+  have h2 := hfclose k'
+  rw [heq] at h1
+  have htri : |(a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)))
+      - (a + (2 * (k':ℝ) + 1) / (2 * ((N:ℝ) + 1)))| < 1 / ((N:ℝ) + 1) := by
+    calc |(a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)))
+        - (a + (2 * (k':ℝ) + 1) / (2 * ((N:ℝ) + 1)))|
+        ≤ |(a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1))) - f k'|
+          + |f k' - (a + (2 * (k':ℝ) + 1) / (2 * ((N:ℝ) + 1)))| := abs_sub_le _ _ _
+      _ < 1 / (2 * ((N:ℝ) + 1)) + 1 / (2 * ((N:ℝ) + 1)) := by
+          rw [abs_sub_comm (f k')]
+          exact add_lt_add h1 h2
+      _ = 1 / ((N:ℝ) + 1) := by
+          field_simp
+          ring
+  have hdiff : |(a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)))
+      - (a + (2 * (k':ℝ) + 1) / (2 * ((N:ℝ) + 1)))|
+      = |(k:ℝ) - (k':ℝ)| / ((N:ℝ) + 1) := by
+    rw [show (a + (2 * (k:ℝ) + 1) / (2 * ((N:ℝ) + 1)))
+        - (a + (2 * (k':ℝ) + 1) / (2 * ((N:ℝ) + 1)))
+        = ((k:ℝ) - (k':ℝ)) / ((N:ℝ) + 1) by field_simp; ring]
+    rw [abs_div]
+    congr 1
+    rw [abs_of_pos (by positivity : (0:ℝ) < (N:ℝ) + 1)]
+  have hge : (1:ℝ) ≤ |(k:ℝ) - (k':ℝ)| := by
+    have hkk' : (k:ℕ) ≠ (k':ℕ) := fun h => hne (Fin.ext h)
+    have h1 : ((k:ℕ) : ℤ) ≠ ((k':ℕ) : ℤ) := by exact_mod_cast hkk'
+    have h2 : (1:ℤ) ≤ |((k:ℕ) : ℤ) - ((k':ℕ) : ℤ)| := Int.one_le_abs (sub_ne_zero_of_ne h1)
+    have h3 : ((|((k:ℕ) : ℤ) - ((k':ℕ) : ℤ)| : ℤ) : ℝ) = |(k:ℝ) - (k':ℝ)| := by
+      push_cast
+      ring_nf
+    calc (1:ℝ) = ((1:ℤ) : ℝ) := by norm_num
+      _ ≤ ((|((k:ℕ) : ℤ) - ((k':ℕ) : ℤ)| : ℤ) : ℝ) := by exact_mod_cast h2
+      _ = |(k:ℝ) - (k':ℝ)| := h3
+  rw [hdiff] at htri
+  have : (1:ℝ) / ((N:ℝ) + 1) ≤ |(k:ℝ) - (k':ℝ)| / ((N:ℝ) + 1) := by
+    gcongr
+  linarith
+
 end DedekindResidue
 
 end
