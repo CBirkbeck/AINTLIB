@@ -12,7 +12,25 @@ lake exe cache get                                       # only if mathlib olean
 lake build DedekindResidue.CompletedZeta.PoissonSummation
 ```
 
-**UPDATE 2026-07-02 (AGE-4 chain progressing).** AGE-0 ✓ (multivariable theta), AGE-1 ✓
+**UPDATE 2026-07-02 (later — AGE nearly assembled).** AGE-0 ✓, AGE-1 ✓, **AGE-2 ✓**
+(`dualZLattice_idealZLattice`: the dual of an ideal lattice is the `diagScale dualityWeights`
+(conj∘double) twist of the trace-dual ideal lattice; pairing dictionary
+`inner_diagScale_embeddingCoords` = `Tr_{K/ℚ}(ba)`; rigidity `eq_of_le_of_covolume_eq` +
+`covolume_zlattice_comap` in DualLattice.lean). **AGE-3 nearly done** (`HeckeTheta.lean`):
+`heckeTheta I c` (multivariable, per-place weights), `heckeTheta_unit_mul` (unit symmetry),
+**`heckeTheta_inversion`** (`Θ_I(c) = covol⁻¹(∏c)^{-1/2}Θ_{I^∨}(c^∨)`, `c^∨ = (c⁻¹; 4c⁻¹)`),
+`heckeWeights t u = t^{1/n}exp(2·fullLog(u)/mult)` (equivariance + periodicity + norm-ray
+`∏c_w^{mult}=t`), and **`heckeG I t`** (unit-box-averaged theta). REMAINING: g-inversion
+(pointwise `heckeTheta_inversion` under the box integral + `u ↦ -u` change of variables;
+watch the `4^{r₂}` place-type factor: `dualPlaceWeights (heckeWeights t u) =
+(1 real; 4 complex)·heckeWeights t⁻¹ (-u)` pointwise — verify and absorb into constants),
+integrability estimates for `heckeG`, then **AGE-4**: `Λ := completedZetaPrefactor-normalised
+∑_{classes} N(J)^s-weighted mellin(heckeG_J − const)` split at 1, agreement on `Re s > 1` via
+`FundamentalCone.idealSetEquivNorm` counting + `prod_heckeWeights_pow_mult` (the per-point
+Mellin gives `N(𝔞)^{-s}·Γ-factors`), `s(s-1)Λ` entire ⇒ `∃ Λ, IsCompletedDedekindZeta K Λ`
+(GRH non-vacuity) + FE from the g-inversion.
+
+**UPDATE 2026-07-02 (earlier — AGE-4 chain progressing).** AGE-0 ✓ (multivariable theta), AGE-1 ✓
 (`IdealLattice.lean`: `euclideanIdealLattice`, `idealZLattice`, `covolume_idealZLattice`,
 `idealTheta` + `idealTheta_transform`). Remaining chain to GRH non-vacuity is in the SP1-AGE
 ticket (AGE-2/3/4). **AGE-2 WARNING (archimedean-constant trap, review Q5)**: with our PLAIN
