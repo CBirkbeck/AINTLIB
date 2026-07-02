@@ -1145,6 +1145,91 @@ theorem norm_Gamma_le_mul_exp_add_nat {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ �
             push_cast
             linarith
 
+/-- Every real `σ ≥ 1/2` decomposes as a base-strip point plus a natural number:
+`σ = σ₀ + n` with `σ₀ ∈ [1/2, 3/2)`. -/
+theorem exists_base_add_nat {σ : ℝ} (h : 1/2 ≤ σ) :
+    ∃ σ₀ : ℝ, ∃ n : ℕ, 1/2 ≤ σ₀ ∧ σ₀ < 3/2 ∧ σ = σ₀ + n := by
+  refine ⟨σ - ⌊σ - 1/2⌋₊, ⌊σ - 1/2⌋₊, ?_, ?_, by ring⟩
+  · have hfle : (⌊σ - 1/2⌋₊ : ℝ) ≤ σ - 1/2 := Nat.floor_le (by linarith)
+    linarith
+  · have hflt : σ - 1/2 < ⌊σ - 1/2⌋₊ + 1 := Nat.lt_floor_add_one _
+    linarith
+
+/-- Packaged decaying Γ-upper at an arbitrary abscissa `σ ≥ 1/2`. -/
+theorem exists_norm_Gamma_le (σ : ℝ) (hσ : 1/2 ≤ σ) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ t : ℝ, 1 ≤ |t| →
+      ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ C * (1 + |t|)^P * Real.exp (-(π * |t|) / 2) := by
+  obtain ⟨σ₀, n, h1, h2, hdec⟩ := exists_base_add_nat hσ
+  refine ⟨(3/2 + n)^n * (Real.sqrt (12 * π) * (3/2)), by positivity, n + 1,
+    fun t ht => ?_⟩
+  have hb := norm_Gamma_le_mul_exp_add_nat (σ := σ₀) (t := t) h1 (le_of_lt h2) ht n
+  rw [← hdec] at hb
+  refine le_trans hb ?_
+  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ₀)]
+    nlinarith [abs_nonneg t]
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have hfac : (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+      ≤ ((3/2 + n) * (1 + |t|))^n := by
+    refine pow_le_pow_left₀ (by positivity) ?_ n
+    nlinarith [Nat.cast_nonneg (α := ℝ) n]
+  calc (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
+      * (Real.sqrt (12 * π) * ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2))
+      ≤ ((3/2 + n) * (1 + |t|))^n
+        * (Real.sqrt (12 * π) * ((3/2) * (1 + |t|)) * Real.exp (-(π * |t|) / 2)) := by
+        refine mul_le_mul hfac ?_ (by positivity) (by positivity)
+        refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+        exact mul_le_mul_of_nonneg_left hz₀ (by positivity)
+    _ = ((3/2 + n)^n * (Real.sqrt (12 * π) * (3/2))) * (1 + |t|)^(n + 1)
+        * Real.exp (-(π * |t|) / 2) := by
+        rw [mul_pow, pow_succ]
+        ring
+
+/-- Packaged matching Γ-lower at an arbitrary abscissa `σ ≥ 1/2`. -/
+theorem exists_le_norm_Gamma (σ : ℝ) (hσ : 1/2 ≤ σ) :
+    ∃ c : ℝ, 0 < c ∧ ∀ t : ℝ, 1 ≤ |t| →
+      c * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        ≤ ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  obtain ⟨σ₀, n, h1, h2, hdec⟩ := exists_base_add_nat hσ
+  refine ⟨π / (Real.sqrt (12 * π) * 3), by positivity, fun t ht => ?_⟩
+  have hb := le_norm_Gamma_base_add_nat (σ := σ₀) (t := t) h1 (le_of_lt h2) ht n
+  rw [← hdec] at hb
+  refine le_trans ?_ hb
+  have hz₀ : ‖((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ ≤ 3 * (1 + |t|) := by
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_neg,
+      abs_of_pos (by linarith : (0:ℝ) < 2 - σ₀)]
+    nlinarith [abs_nonneg t]
+  have hz₀pos : (0:ℝ) < ‖((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ := by
+    have hne : ((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I ≠ 0 := by
+      intro h0
+      have := congrArg Complex.im h0
+      simp at this
+      rw [this] at ht
+      norm_num at ht
+    exact norm_pos_iff.mpr hne
+  have hmono : π / (Real.sqrt (12 * π) * 3) / (1 + |t|)
+      ≤ π / (Real.sqrt (12 * π)
+        * ‖((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖) := by
+    rw [div_div]
+    refine div_le_div_of_nonneg_left Real.pi_pos.le (by positivity) ?_
+    calc Real.sqrt (12 * π) * ‖((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+        ≤ Real.sqrt (12 * π) * (3 * (1 + |t|)) :=
+          mul_le_mul_of_nonneg_left hz₀ (by positivity)
+      _ = Real.sqrt (12 * π) * 3 * (1 + |t|) := by ring
+  calc π / (Real.sqrt (12 * π) * 3) * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+      = (π / (Real.sqrt (12 * π) * 3) / (1 + |t|)) * Real.exp (-(π * |t|) / 2) := by
+        ring
+    _ ≤ (π / (Real.sqrt (12 * π)
+        * ‖((2 - σ₀ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖))
+        * Real.exp (-(π * |t|) / 2) :=
+        mul_le_mul_of_nonneg_right hmono (by positivity)
+
 end
 
 end DedekindResidue
