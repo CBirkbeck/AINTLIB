@@ -590,4 +590,243 @@ theorem tendsto_integral_mul_sin_atTop {G : ℝ → ℂ} (hG : Integrable G) :
   rw [Complex.I_sq]
   ring
 
+/-- **FJ-f core, Stieltjes–Fubini kernel bound**: for `g` monotone and a kernel `K`
+whose windows `∫_v^δ K` are uniformly bounded by `C`, the right-continuous modification
+`ḡ = rightLim g` satisfies
+`|∫_0^δ (ḡ(u) - ḡ(0))·K(u) du| ≤ C·(ḡ(δ) - ḡ(0))`.
+
+Proof: `ḡ(u) - ḡ(0) = μ((0,u])` for the Lebesgue–Stieltjes measure `μ` of `g`; Fubini on
+the triangle `{0 < v ≤ u ≤ δ}` turns the left side into `∫_{(0,δ]} (∫_v^δ K) dμ(v)`,
+bounded by `C·μ((0,δ])`. This is the engine of Jordan's near-zero variation estimate
+(Poitou p. 6-03). -/
+theorem abs_integral_stieltjes_kernel_le {g K : ℝ → ℝ} (hg : Monotone g) {δ C : ℝ}
+    (hδ : 0 < δ) (hKmeas : Measurable K)
+    (hK : IntervalIntegrable K volume 0 δ)
+    (hwin : ∀ v ∈ Set.Icc (0:ℝ) δ, |∫ u in v..δ, K u| ≤ C) :
+    |∫ u in (0:ℝ)..δ, (Function.rightLim g u - Function.rightLim g 0) * K u|
+      ≤ C * (Function.rightLim g δ - Function.rightLim g 0) := by
+  classical
+  set F := hg.stieltjesFunction with hF
+  have hFeq : ∀ x, F x = Function.rightLim g x := fun x => hg.stieltjesFunction_eq x
+  set μ := F.measure with hμ
+  set μ' := μ.restrict (Set.Ioc 0 δ) with hμ'
+  -- the window measure is finite, with total mass ḡ(δ) - ḡ(0)
+  have hmass : μ (Set.Ioc 0 δ) = ENNReal.ofReal (Function.rightLim g δ - Function.rightLim g 0) := by
+    rw [hμ, F.measure_Ioc, hFeq, hFeq]
+  have hmono : Function.rightLim g 0 ≤ Function.rightLim g δ := hg.rightLim hδ.le
+  haveI hfin : IsFiniteMeasure μ' := by
+    constructor
+    rw [hμ', Measure.restrict_apply_univ, hmass]
+    exact ENNReal.ofReal_lt_top
+  have hmass' : μ'.real Set.univ = Function.rightLim g δ - Function.rightLim g 0 := by
+    rw [measureReal_def, hμ', Measure.restrict_apply_univ, hmass,
+      ENNReal.toReal_ofReal (by linarith)]
+  -- the mass representation on (0, δ]
+  have hrep : ∀ u ∈ Set.Ioc (0:ℝ) δ,
+      Function.rightLim g u - Function.rightLim g 0 = (μ (Set.Ioc 0 u)).toReal := by
+    intro u hu
+    rw [hμ, F.measure_Ioc, hFeq, hFeq,
+      ENNReal.toReal_ofReal (by
+        have := hg.rightLim hu.1.le
+        linarith)]
+  -- the triangle integrand
+  set ψ : ℝ × ℝ → ℝ := fun p => if p.2 ≤ p.1 then K p.1 else 0 with hψ
+  have hψmeas : Measurable ψ := by
+    refine Measurable.ite ?_ (hKmeas.comp measurable_fst) measurable_const
+    exact measurableSet_le measurable_snd measurable_fst
+  -- inner evaluation in v (u fixed): mass of Ioc 0 u times K u
+  have hinner : ∀ u ∈ Set.Ioc (0:ℝ) δ,
+      (∫ v, ψ (u, v) ∂μ') = (μ (Set.Ioc 0 u)).toReal * K u := by
+    intro u hu
+    have h1 : (fun v => ψ (u, v)) = Set.indicator (Set.Iic u) (fun _ => K u) := by
+      funext v
+      rw [hψ]
+      simp only [Set.indicator_apply, Set.mem_Iic]
+    rw [h1, MeasureTheory.integral_indicator measurableSet_Iic,
+      MeasureTheory.setIntegral_const, smul_eq_mul]
+    have h2 : μ' (Set.Iic u) = μ (Set.Ioc 0 u) := by
+      rw [hμ', Measure.restrict_apply measurableSet_Iic, Set.inter_comm,
+        Set.Ioc_inter_Iic, min_eq_right hu.2]
+    rw [measureReal_def, h2]
+  -- outer evaluation in u (v fixed): the K-window from v to δ
+  have houter : ∀ v ∈ Set.Ioc (0:ℝ) δ,
+      (∫ u in Set.Ioc (0:ℝ) δ, ψ (u, v)) = ∫ u in v..δ, K u := by
+    intro v hv
+    have h1 : (fun u => ψ (u, v)) = Set.indicator (Set.Ici v) K := by
+      funext u
+      rw [hψ]
+      simp only [Set.indicator_apply, Set.mem_Ici]
+    rw [h1, MeasureTheory.integral_indicator measurableSet_Ici,
+      Measure.restrict_restrict measurableSet_Ici]
+    have h2 : Set.Ici v ∩ Set.Ioc (0:ℝ) δ = Set.Icc v δ := by
+      ext x
+      simp only [Set.mem_inter_iff, Set.mem_Ici, Set.mem_Ioc, Set.mem_Icc]
+      constructor
+      · rintro ⟨h1', _, h3'⟩
+        exact ⟨h1', h3'⟩
+      · rintro ⟨h1', h2'⟩
+        exact ⟨h1', lt_of_lt_of_le hv.1 h1', h2'⟩
+    rw [h2, MeasureTheory.integral_Icc_eq_integral_Ioc,
+      ← intervalIntegral.integral_of_le hv.2]
+  -- product integrability for the swap
+  have hKint : IntegrableOn K (Set.Ioc 0 δ) := by
+    have := intervalIntegrable_iff.mp hK
+    rwa [Set.uIoc_of_le hδ.le] at this
+  have hprod : Integrable (Function.uncurry fun u v : ℝ => ψ (u, v))
+      ((volume.restrict (Set.Ioc 0 δ)).prod μ') := by
+    have hmeasp : AEStronglyMeasurable (Function.uncurry fun u v : ℝ => ψ (u, v))
+        ((volume.restrict (Set.Ioc 0 δ)).prod μ') := by
+      have : (Function.uncurry fun u v : ℝ => ψ (u, v)) = ψ := by
+        funext p
+        rw [Function.uncurry]
+      rw [this]
+      exact hψmeas.aestronglyMeasurable
+    refine (MeasureTheory.integrable_prod_iff hmeasp).mpr ⟨?_, ?_⟩
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+      refine Filter.Eventually.of_forall (fun u _ => ?_)
+      simp only [Function.uncurry_apply_pair]
+      have h1 : (fun v => ψ (u, v)) = Set.indicator (Set.Iic u) (fun _ => K u) := by
+        funext v
+        rw [hψ]
+        simp only [Set.indicator_apply, Set.mem_Iic]
+      rw [h1]
+      exact (MeasureTheory.integrable_const (K u)).indicator measurableSet_Iic
+    · -- the norm-outer function is dominated by |K|·mass
+      refine MeasureTheory.Integrable.mono'
+        (g := fun u => |K u| * μ'.real Set.univ)
+        (hKint.norm.mul_const _) ?_ ?_
+      · exact (hmeasp.norm).integral_prod_right'
+      · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+        refine Filter.Eventually.of_forall (fun u _ => ?_)
+        rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+        simp only [Function.uncurry_apply_pair]
+        calc ∫ v, ‖ψ (u, v)‖ ∂μ'
+            ≤ ∫ _, |K u| ∂μ' := by
+              refine MeasureTheory.integral_mono_of_nonneg
+                (Filter.Eventually.of_forall (fun v => norm_nonneg _))
+                (MeasureTheory.integrable_const _)
+                (Filter.Eventually.of_forall (fun v => ?_))
+              show ‖if v ≤ u then K u else 0‖ ≤ |K u|
+              rw [Real.norm_eq_abs]
+              split
+              · exact le_refl _
+              · simp
+          _ = |K u| * μ'.real Set.univ := by
+              rw [MeasureTheory.integral_const, smul_eq_mul, mul_comm]
+  -- Fubini
+  have hswap := MeasureTheory.integral_integral_swap hprod
+  -- assemble: LHS as the double integral
+  rw [intervalIntegral.integral_of_le hδ.le]
+  have hLHS : (∫ u in Set.Ioc (0:ℝ) δ,
+      (Function.rightLim g u - Function.rightLim g 0) * K u)
+      = ∫ u in Set.Ioc (0:ℝ) δ, ∫ v, ψ (u, v) ∂μ' := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun u hu => ?_)
+    rw [hinner u hu, hrep u hu]
+  rw [hLHS, hswap]
+  -- bound the outer Stieltjes integral
+  have hbound : ∀ᵐ v ∂μ', ‖∫ u in Set.Ioc (0:ℝ) δ, ψ (u, v)‖ ≤ C := by
+    rw [hμ']
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+    refine Filter.Eventually.of_forall (fun v hv => ?_)
+    rw [houter v hv, Real.norm_eq_abs]
+    exact hwin v ⟨hv.1.le, hv.2⟩
+  calc |∫ v, (∫ u in Set.Ioc (0:ℝ) δ, ψ (u, v)) ∂μ'|
+      ≤ C * μ'.real Set.univ := by
+        rw [← Real.norm_eq_abs]
+        exact MeasureTheory.norm_integral_le_of_norm_le_const hbound
+    _ = C * (Function.rightLim g δ - Function.rightLim g 0) := by rw [hmass']
+
+/-- Transfer of the Stieltjes kernel bound from the right-continuous modification to `g`
+itself: monotone functions agree with `rightLim g` off a countable (hence null) set. -/
+theorem abs_integral_monotone_kernel_le {g K : ℝ → ℝ} (hg : Monotone g) {δ C : ℝ}
+    (hδ : 0 < δ) (hKmeas : Measurable K)
+    (hK : IntervalIntegrable K volume 0 δ)
+    (hwin : ∀ v ∈ Set.Icc (0:ℝ) δ, |∫ u in v..δ, K u| ≤ C) :
+    |∫ u in (0:ℝ)..δ, (g u - Function.rightLim g 0) * K u|
+      ≤ C * (Function.rightLim g δ - Function.rightLim g 0) := by
+  have hcount : Set.Countable {x : ℝ | g x ≠ Function.rightLim g x} := by
+    refine Set.Countable.mono ?_ hg.countable_not_continuousAt
+    intro x hx
+    simp only [Set.mem_setOf_eq] at hx ⊢
+    intro hcont
+    exact hx (hcont.continuousWithinAt.rightLim_eq).symm
+  have hnull : volume {x : ℝ | g x ≠ Function.rightLim g x} = 0 :=
+    hcount.measure_zero _
+  have hae : ∀ᵐ x : ℝ, g x = Function.rightLim g x := by
+    rw [MeasureTheory.ae_iff]
+    simpa using hnull
+  have heq : (∫ u in (0:ℝ)..δ, (g u - Function.rightLim g 0) * K u)
+      = ∫ u in (0:ℝ)..δ, (Function.rightLim g u - Function.rightLim g 0) * K u := by
+    refine intervalIntegral.integral_congr_ae ?_
+    filter_upwards [hae] with x hx _
+    rw [hx]
+  rw [heq]
+  exact abs_integral_stieltjes_kernel_le hg hδ hKmeas hK hwin
+
+/-- Pointwise bound for a monotone function on a window: `|p u - c| ≤ max |p a - c| |p b - c|`
+for `u ∈ [a, b]`. -/
+theorem abs_monotone_sub_le {p : ℝ → ℝ} (hp : Monotone p) {a b u c : ℝ}
+    (hu : u ∈ Set.Icc a b) : |p u - c| ≤ max (|p a - c|) (|p b - c|) := by
+  rcases le_or_gt c (p u) with h | h
+  · rw [abs_of_nonneg (by linarith)]
+    refine le_max_of_le_right ?_
+    have h2 : p u ≤ p b := hp hu.2
+    calc p u - c ≤ p b - c := by linarith
+      _ ≤ |p b - c| := le_abs_self _
+  · rw [abs_of_neg (by linarith)]
+    refine le_max_of_le_left ?_
+    have h2 : p a ≤ p u := hp hu.1
+    calc -(p u - c) = c - p u := by ring
+      _ ≤ c - p a := by linarith
+      _ ≤ |p a - c| := by
+          rw [abs_sub_comm]
+          exact le_abs_self _
+
+/-- The product of a monotone-difference factor and an interval-integrable kernel is
+interval integrable. -/
+theorem intervalIntegrable_monotone_sub_mul {p K : ℝ → ℝ} (hp : Monotone p) {δ c : ℝ}
+    (hδ : 0 < δ) (hK : IntervalIntegrable K volume 0 δ) :
+    IntervalIntegrable (fun u => (p u - c) * K u) volume 0 δ := by
+  rw [intervalIntegrable_iff, Set.uIoc_of_le hδ.le] at hK ⊢
+  refine MeasureTheory.Integrable.bdd_mul (c := max (|p 0 - c|) (|p δ - c|)) hK ?_ ?_
+  · exact ((hp.measurable.sub measurable_const).aestronglyMeasurable).restrict
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    rw [Real.norm_eq_abs]
+    exact abs_monotone_sub_le hp ⟨hu.1.le, hu.2⟩
+
+/-- **FJ-f, difference-of-monotone form**: the near-zero kernel bound for a function of
+bounded variation presented as a difference `p - q` of monotone functions, right limits
+taken at `0`. The bound is `C` times the sum of the two monotone increments — the
+variation bound of Jordan's argument (Poitou p. 6-03). -/
+theorem abs_integral_monotone_sub_kernel_le {p q K : ℝ → ℝ}
+    (hp : Monotone p) (hq : Monotone q) {δ C : ℝ}
+    (hδ : 0 < δ) (hKmeas : Measurable K)
+    (hK : IntervalIntegrable K volume 0 δ)
+    (hwin : ∀ v ∈ Set.Icc (0:ℝ) δ, |∫ u in v..δ, K u| ≤ C) :
+    |∫ u in (0:ℝ)..δ,
+        ((p u - q u) - (Function.rightLim p 0 - Function.rightLim q 0)) * K u|
+      ≤ C * ((Function.rightLim p δ - Function.rightLim p 0)
+          + (Function.rightLim q δ - Function.rightLim q 0)) := by
+  have hsplit : (∫ u in (0:ℝ)..δ,
+      ((p u - q u) - (Function.rightLim p 0 - Function.rightLim q 0)) * K u)
+      = (∫ u in (0:ℝ)..δ, (p u - Function.rightLim p 0) * K u)
+        - ∫ u in (0:ℝ)..δ, (q u - Function.rightLim q 0) * K u := by
+    rw [← intervalIntegral.integral_sub
+      (intervalIntegrable_monotone_sub_mul hp hδ hK)
+      (intervalIntegrable_monotone_sub_mul hq hδ hK)]
+    refine intervalIntegral.integral_congr (fun u _ => ?_)
+    ring
+  rw [hsplit]
+  calc |(∫ u in (0:ℝ)..δ, (p u - Function.rightLim p 0) * K u)
+        - ∫ u in (0:ℝ)..δ, (q u - Function.rightLim q 0) * K u|
+      ≤ |∫ u in (0:ℝ)..δ, (p u - Function.rightLim p 0) * K u|
+        + |∫ u in (0:ℝ)..δ, (q u - Function.rightLim q 0) * K u| := abs_sub _ _
+    _ ≤ C * (Function.rightLim p δ - Function.rightLim p 0)
+        + C * (Function.rightLim q δ - Function.rightLim q 0) :=
+        add_le_add (abs_integral_monotone_kernel_le hp hδ hKmeas hK hwin)
+          (abs_integral_monotone_kernel_le hq hδ hKmeas hK hwin)
+    _ = C * ((Function.rightLim p δ - Function.rightLim p 0)
+        + (Function.rightLim q δ - Function.rightLim q 0)) := by ring
+
 end DedekindResidue
