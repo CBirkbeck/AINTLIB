@@ -2924,6 +2924,118 @@ theorem exists_H_landau_cofactor :
     _ = 32 * (A+2) * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) * ℓ := by
         ring
 
+/-- **AC-A5: Landau local partial fractions for the completed Dedekind zeta.**
+There are an abscissa `A` and a constant `C` such that for every height `|T| ≥ A+5`
+and every non-zero point `s` of the slab ball `closedBall (A+iT) (A+5/4)` — which
+contains the strip `-1 ≤ Re s ≤ 2`, `|Im s - T| ≤ 1` — the logarithmic derivative
+of `H = completedDedekindZetaEntire` equals the sum of `m_ρ/(s-ρ)` over the zeros
+`ρ` in `ball (A+iT) (A+2)` (with multiplicity, encoded by the divisor), up to an
+error of at most `C·log(2+|T|)`. This is the workhorse for the explicit-formula
+contour estimates on horizontal segments. -/
+theorem exists_logDeriv_partial_fractions :
+    ∃ A : ℝ, 2 ≤ A ∧ ∃ C : ℝ, 0 < C ∧ ∀ T : ℝ, A + 5 ≤ |T| →
+      ∀ s ∈ Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (A + 5/4),
+        completedDedekindZetaEntire K s ≠ 0 →
+        ‖logDeriv (completedDedekindZetaEntire K) s
+            - ∑ᶠ u, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+                (Metric.ball ((A : ℂ) + (T : ℂ) * Complex.I) (A + 2))) u : ℂ)) / (s - u)‖
+          ≤ C * Real.log (2 + |T|) := by
+  obtain ⟨A, hA2, C, hC, hmain⟩ := exists_H_landau_cofactor K
+  refine ⟨A, hA2, C, hC, fun T hT s hs hHs => ?_⟩
+  obtain ⟨h, hhanal, hhne, hfac, hbound⟩ := hmain T hT
+  set c : ℂ := (A : ℂ) + (T : ℂ) * Complex.I with hcdef
+  have hs2 : s ∈ Metric.ball c (A+2) := by
+    rw [Metric.mem_closedBall] at hs
+    rw [Metric.mem_ball]
+    linarith
+  have hs3 : s ∈ Metric.ball c (A+3) := by
+    rw [Metric.mem_ball] at hs2 ⊢
+    linarith
+  -- divisor data
+  have hHanal : ∀ z : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) z := fun z =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt z
+  set D₁ : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+    (Metric.ball c (A+2))) u with hD₁
+  have hD₁nn : ∀ u, 0 ≤ D₁ u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hHanal z)) u
+  have hfin₁ : (Function.support D₁).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset
+      (fun z _ => (hHanal z).meromorphicAt)
+      (isCompact_closedBall c (A+2)) Metric.ball_subset_closedBall
+  set F : Finset ℂ := hfin₁.toFinset with hF
+  have hP₁ : ∀ z : ℂ, (∏ᶠ u, (z - u) ^ D₁ u) = ∏ u ∈ F, (z - u) ^ D₁ u := by
+    intro z
+    refine finprod_eq_prod_of_mulSupport_subset _ ?_
+    intro u hu
+    rw [Function.mem_mulSupport] at hu
+    refine hfin₁.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+    intro h0
+    rw [h0, zpow_zero] at hu
+    exact hu rfl
+  -- nonvanishing of the peel product at s
+  have hfacs := hfac s hs3
+  rw [hP₁ s] at hfacs
+  have hPs_ne : (∏ u ∈ F, (s - u) ^ D₁ u) ≠ 0 := by
+    intro h0
+    rw [h0, zero_mul] at hfacs
+    exact hHs hfacs
+  have hfactor_ne : ∀ u ∈ F, (s - u) ^ D₁ u ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp hPs_ne
+  have hsu_ne : ∀ u ∈ F, s - u ≠ 0 := by
+    intro u hu h0
+    refine hfactor_ne u hu ?_
+    rw [h0]
+    refine zero_zpow _ ?_
+    exact Function.mem_support.mp (hfin₁.mem_toFinset.mp hu)
+  -- logDeriv H = logDeriv (peel) + logDeriv h at s
+  have hHev : completedDedekindZetaEntire K
+      =ᶠ[nhds s] fun z => (∏ u ∈ F, (z - u) ^ D₁ u) * h z := by
+    filter_upwards [Metric.isOpen_ball.mem_nhds hs3] with z hz
+    rw [hfac z hz, hP₁ z]
+  have hpolydiff : DifferentiableAt ℂ (fun z => ∏ u ∈ F, (z - u) ^ D₁ u) s := by
+    refine DifferentiableAt.fun_finsetProd (fun u _ => ?_)
+    exact (differentiableAt_id.sub_const u).zpow (Or.inr (hD₁nn u))
+  have hld : logDeriv (completedDedekindZetaEntire K) s
+      = logDeriv (fun z => (∏ u ∈ F, (z - u) ^ D₁ u) * h z) s := by
+    rw [logDeriv, logDeriv, Pi.div_apply, Pi.div_apply, hHev.deriv_eq, hHev.eq_of_nhds]
+  have hhdiff : DifferentiableAt ℂ h s :=
+    (hhanal s hs3).differentiableAt
+  have hldmul : logDeriv (fun z => (∏ u ∈ F, (z - u) ^ D₁ u) * h z) s
+      = logDeriv (fun z => ∏ u ∈ F, (z - u) ^ D₁ u) s + logDeriv h s :=
+    logDeriv_mul s hPs_ne (hhne s hs2) hpolydiff hhdiff
+  -- the peel product's logarithmic derivative is the partial-fraction sum
+  have hldprod : logDeriv (fun z => ∏ u ∈ F, (z - u) ^ D₁ u) s
+      = ∑ u ∈ F, (D₁ u : ℂ) / (s - u) := by
+    have h1 : logDeriv (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ D₁ u) s
+        = ∑ u ∈ F, logDeriv (fun z => (fun w : ℂ => w - u) z ^ D₁ u) s := by
+      refine logDeriv_prod (fun u hu => hfactor_ne u hu) (fun u hu => ?_)
+      exact (differentiableAt_id.sub_const u).zpow (Or.inr (hD₁nn u))
+    refine Eq.trans h1 ?_
+    refine Finset.sum_congr rfl (fun u hu => ?_)
+    have h2 : logDeriv (fun z : ℂ => (z - u) ^ D₁ u) s
+        = (D₁ u : ℂ) * logDeriv (fun z : ℂ => z - u) s :=
+      logDeriv_fun_zpow (differentiableAt_id.sub_const u) _
+    have h3 : logDeriv (fun z : ℂ => z - u) s = 1 / (s - u) := by
+      rw [logDeriv, Pi.div_apply]
+      simp
+    rw [h2, h3, mul_one_div]
+  -- fold the Finset sum back into the statement's finsum
+  have hfs : (∑ᶠ u, ((D₁ u : ℂ)) / (s - u)) = ∑ u ∈ F, (D₁ u : ℂ) / (s - u) := by
+    refine finsum_eq_sum_of_support_subset _ ?_
+    intro u hu
+    rw [Function.mem_support] at hu
+    refine hfin₁.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+    intro h0
+    rw [h0] at hu
+    simp at hu
+  calc ‖logDeriv (completedDedekindZetaEntire K) s
+        - ∑ᶠ u, ((D₁ u : ℂ)) / (s - u)‖
+      = ‖(∑ u ∈ F, (D₁ u : ℂ) / (s - u) + logDeriv h s)
+        - ∑ u ∈ F, (D₁ u : ℂ) / (s - u)‖ := by
+        rw [hld, hldmul, hldprod, hfs]
+    _ = ‖logDeriv h s‖ := by rw [add_sub_cancel_left]
+    _ ≤ C * Real.log (2 + |T|) := hbound s hs
+
 end
 
 end DedekindResidue
