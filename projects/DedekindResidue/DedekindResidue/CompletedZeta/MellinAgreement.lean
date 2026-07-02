@@ -299,6 +299,49 @@ noncomputable def euclidConeEquiv (J : (Ideal (𝓞 K))⁰) :
       simp only [LinearEquiv.coe_toEquiv, h0, map_zero])⟩
     simpa using hmem
 
+open scoped Classical in
+theorem euclidMixedEquiv_symm_mixedEmbedding (x : K) :
+    (euclidMixedEquiv K).symm (mixedEmbedding K x) = embeddingCoords K x := by
+  rw [euclidMixedEquiv, embeddingCoords]
+  rfl
+
+open scoped Classical in
+/-- The image of `logEmbedding` of a fundamental-system power is the corresponding
+ℤ-combination of the `basisUnitLattice` box basis. -/
+theorem logEmbedding_prod_fundSystem (n : Fin (rank K) → ℤ) :
+    logEmbedding K (Additive.ofMul (∏ i, fundSystem K i ^ (n i)))
+      = ∑ i, n i • (((basisUnitLattice K).ofZLatticeBasis ℝ) i : logSpace K) := by
+  have h1 : Additive.ofMul (∏ i, fundSystem K i ^ (n i))
+      = ∑ i, n i • Additive.ofMul (fundSystem K i) := by
+    induction (Finset.univ : Finset (Fin (rank K))) using Finset.induction with
+    | empty => simp
+    | insert a s ha ih =>
+        rw [Finset.prod_insert ha, Finset.sum_insert ha, ← ih]
+        rfl
+  rw [h1, map_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [map_zsmul, logEmbedding_fundSystem]
+  congr 1
+  rw [Module.Basis.ofZLatticeBasis_apply]
+
+open scoped Classical in
+/-- **Per-point unit shift**: the Gaussian argument of a unit-scaled point at
+log-coordinates `u` is that of the original point at translated coordinates. -/
+theorem sum_placeWeights_unit_smul (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) (y : K) :
+    ∑ i : index K, placeWeights K (heckeWeights K t u) i
+        * (((euclidMixedEquiv K).symm (ε • mixedEmbedding K y)) i) ^ 2
+      = ∑ i : index K, placeWeights K (heckeWeights K t
+          (u + logEmbedding K (Additive.ofMul ε))) i * ((embeddingCoords K y) i) ^ 2 := by
+  have hsmul : (ε • mixedEmbedding K y : mixedSpace K)
+      = mixedEmbedding K (algebraMap (𝓞 K) K (ε : 𝓞 K) * y) := by
+    rw [unitSMul_smul, ← map_mul]
+  rw [hsmul, euclidMixedEquiv_symm_mixedEmbedding,
+    sum_placeWeights_embeddingCoords_sq, sum_placeWeights_embeddingCoords_sq,
+    heckeWeights_add_logEmbedding]
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  rw [map_mul, mul_pow]
+  ring
+
 end
 
 end DedekindResidue
