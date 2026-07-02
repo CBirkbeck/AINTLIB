@@ -1178,4 +1178,90 @@ theorem re_digamma_quarter_sub_half_eq_integral (t : ℝ) :
     _ = (1 - Real.cos (t*x)) * (1/(2*Real.cosh (x/2))) := by rw [hker]
     _ = (1 - Real.cos (t*x)) / (2 * Real.cosh (x/2)) := by ring
 
+/-- The sine-integral tail `∫_t^∞ sin u/u du`, defined through the Dirichlet integral as
+`π/2 - ∫_0^t sin u/u du` (Poitou p. 6-05, the `γ₁ + γ₃` term). -/
+noncomputable def sincTail (t : ℝ) : ℝ := π/2 - ∫ u in (0:ℝ)..t, Real.sin u / u
+
+/-- The truncated tail integrals converge to `sincTail`. -/
+theorem tendsto_integral_sinc_window (t : ℝ) :
+    Tendsto (fun X : ℝ => ∫ u in t..X, Real.sin u / u) atTop (nhds (sincTail t)) := by
+  have h0 : ∀ X : ℝ, (∫ u in t..X, Real.sin u / u)
+      = (∫ u in (0:ℝ)..X, Real.sin u / u) - ∫ u in (0:ℝ)..t, Real.sin u / u := by
+    intro X
+    rw [eq_sub_iff_add_eq]
+    rw [add_comm]
+    exact intervalIntegral.integral_add_adjacent_intervals
+      (intervalIntegrable_sinc 0 t) (intervalIntegrable_sinc t X)
+  simp only [h0]
+  rw [sincTail]
+  exact (tendsto_integral_sinc_atTop).sub_const _
+
+/-- `sincTail` vanishes at infinity. -/
+theorem tendsto_sincTail_atTop : Tendsto sincTail atTop (nhds 0) := by
+  have h0 := tendsto_integral_sinc_atTop.const_sub (π/2)
+  simp only [sub_self] at h0
+  exact h0
+
+/-- `sincTail` is differentiable away from `0`, with derivative `-sin t/t`. -/
+theorem hasDerivAt_sincTail {t : ℝ} (ht : t ≠ 0) :
+    HasDerivAt sincTail (-(Real.sin t / t)) t := by
+  have h0 : HasDerivAt (fun t : ℝ => ∫ u in (0:ℝ)..t, Real.sin u / u)
+      (Real.sin t / t) t := by
+    refine intervalIntegral.integral_hasDerivAt_right
+      (intervalIntegrable_sinc 0 t) ?_ ?_
+    · refine (Measurable.stronglyMeasurable ?_).stronglyMeasurableAtFilter
+      fun_prop
+    · have : ContinuousAt (fun u : ℝ => Real.sin u / u) t := by
+        refine ContinuousAt.div (by fun_prop) (by fun_prop) ht
+      exact this
+  have h1 : HasDerivAt (fun t : ℝ => π/2 - ∫ u in (0:ℝ)..t, Real.sin u / u)
+      (0 - Real.sin t / t) t := (hasDerivAt_const t (π/2)).sub h0
+  have h2 : sincTail = fun t : ℝ => π/2 - ∫ u in (0:ℝ)..t, Real.sin u / u := rfl
+  rw [h2]
+  simpa using h1
+
+/-- The symmetric exponential tails equal the sinc tail: for `t > 0`,
+`∫_1^X (e^{itx} - e^{-itx})/x dx → 2i·sincTail t` (Poitou p. 6-05, `γ₁ + γ₃`). -/
+theorem tendsto_integral_cexp_sub_div_window {t : ℝ} (ht : 0 < t) :
+    Tendsto (fun X : ℝ => ∫ x in (1:ℝ)..X,
+        (Complex.exp ((t*x : ℝ) * Complex.I) - Complex.exp (-((t*x : ℝ)) * Complex.I))
+          / (x:ℂ))
+      atTop (nhds (2 * Complex.I * ((sincTail t : ℝ) : ℂ))) := by
+  -- pointwise: the integrand is 2i·sin(tx)/x
+  have hpt : ∀ x : ℝ,
+      (Complex.exp ((t*x : ℝ) * Complex.I) - Complex.exp (-((t*x : ℝ)) * Complex.I))
+        / (x:ℂ)
+      = 2 * Complex.I * ((Real.sin (t*x) / x : ℝ) : ℂ) := by
+    intro x
+    rcases eq_or_ne x 0 with hx | hx
+    · simp [hx]
+    · rw [Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
+      have hxne : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx
+      push_cast
+      field_simp
+      ring
+  have h0 : ∀ X : ℝ, (∫ x in (1:ℝ)..X,
+      (Complex.exp ((t*x : ℝ) * Complex.I) - Complex.exp (-((t*x : ℝ)) * Complex.I))
+        / (x:ℂ))
+      = 2 * Complex.I * ((∫ x in (1:ℝ)..X, Real.sin (t*x) / x : ℝ) : ℂ) := by
+    intro X
+    rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_const_mul]
+    exact intervalIntegral.integral_congr (fun x _ => hpt x)
+  simp only [h0]
+  -- ∫_1^X sin(tx)/x = ∫_t^{tX} sinc → sincTail t
+  have h1 : ∀ X : ℝ, (∫ x in (1:ℝ)..X, Real.sin (t*x) / x)
+      = ∫ u in t..(t*X), Real.sin u / u := by
+    intro X
+    have := integral_sin_mul_div_eq t 1 X ht
+    rw [mul_one] at this
+    exact this
+  simp only [h1]
+  have h2 : Tendsto (fun X : ℝ => t * X) atTop atTop :=
+    Filter.Tendsto.const_mul_atTop ht Filter.tendsto_id
+  have h3 := (tendsto_integral_sinc_window t).comp h2
+  have h4 : Tendsto (fun X : ℝ => ((∫ u in t..(t*X), Real.sin u / u : ℝ) : ℂ))
+      atTop (nhds ((sincTail t : ℝ) : ℂ)) :=
+    (Complex.continuous_ofReal.tendsto _).comp h3
+  exact h4.const_mul _
+
 end DedekindResidue
