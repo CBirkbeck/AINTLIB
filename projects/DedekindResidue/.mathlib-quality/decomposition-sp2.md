@@ -282,6 +282,32 @@ Source: Poitou 6-03/6-04 (Calcul de la partie archimédienne) + 6-04/6-05/6-06
   inversion (FJ); rectangle Cauchy formula (R-c); Gauss digamma integral (Γψ-c);
   ζ_K log-derivative series (vM-a); Φ vertical decay for BV (Φ-d′).
 
+## AINTLIB reuse audit (2026-07-02, user-prompted)
+
+Swept all sibling projects for contour/residue machinery:
+- **`LeanModularForms/ForMathlib/GeneralizedResidueTheory/`** has a full CPV residue
+  library: `generalizedResidueTheorem'` (Residue/GeneralizedTheoremBase.lean:280) —
+  CPV = `2πi·∑ winding·residue` for piecewise-C¹ closed immersions on convex opens,
+  SIMPLE poles allowed even ON the curve; plus `GeneralizedWindingNumber`,
+  `SimplePoleIntegral.integral_inv_sub_eq_winding`, `NullHomologous`,
+  `ContourIntegral/SegmentFTC`, `HungerbuhlerWasem` crossing theorems.
+  **Decision**: R-d was completed directly (rectangle Goursat + own rectangle Cauchy
+  formula) — it handles arbitrary-multiplicity divisor zeros, whereas the GRT is
+  simple-poles-of-`f` (usable for `Φ·H'/H` only after HasSimplePoleAt bridging +
+  immersion-rectangle + winding computation = more glue than the direct proof).
+  **Fallback recorded**: Poitou's "T through an ordinate with principal value and
+  half-weight" variant is EXACTLY this CPV machinery — if the good-heights route
+  (R-e) ever becomes painful downstream, switch to `generalizedResidueTheorem'`.
+- `FltRegularBernoulli/ZetaFactorisation/Residue.lean`: s = 1 residue consequences of
+  Euler products for CYCLOTOMIC L-products — possible SP3-era cross-check for the
+  class-number-formula side; not needed for SP2.
+- No von Mangoldt/ζ-log-derivative series, no Dirichlet integral/sinc, no
+  Fourier–Jordan/BV inversion anywhere else in AINTLIB — SP2-vM, SP2-FJ, SP2-Γψ must
+  be built as planned.
+- mathlib has `NumberField.dedekindZeta_residue` + `tendsto_sub_one_mul_dedekindZeta_nhdsGT`
+  (NumberTheory/NumberField/DedekindZeta.lean) — the κ_K object Theorem 1 approximates;
+  SP3's statement should be phrased against it.
+
 ## Faithfulness notes
 - Poitou's Prop 1 condition is `‖Φ‖_{a,T} = o(1/log T)`; we use the stronger O(1/T)
   from BV — same conclusion, one fewer epsilon.
