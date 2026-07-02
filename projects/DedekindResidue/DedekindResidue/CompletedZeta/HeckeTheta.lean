@@ -353,6 +353,38 @@ noncomputable def heckeG (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : ℝ) : ℝ
       ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
       heckeTheta K I (heckeWeights K t u)
 
+open scoped Classical in
+/-- `fullLog` is odd. -/
+theorem fullLog_neg (u : logSpace K) : fullLog K (-u) = -fullLog K u := by
+  funext w
+  simp only [fullLog, Pi.neg_apply]
+  split_ifs with h
+  · rw [Finset.sum_neg_distrib]
+  · rfl
+
+open scoped Classical in
+/-- The duality bookkeeping of the Hecke weights: the dual weights of `c(t,u)` are the
+weights `c(1/t, -u)` scaled by `1` at real and `4` at complex places. -/
+theorem dualPlaceWeights_heckeWeights {t : ℝ} (ht : 0 < t) (u : logSpace K)
+    (w : InfinitePlace K) :
+    dualPlaceWeights K (heckeWeights K t u) w
+      = (if IsReal w then 1 else 4) * heckeWeights K t⁻¹ (-u) w := by
+  rw [dualPlaceWeights, heckeWeights, heckeWeights, fullLog_neg]
+  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  have hinv : (t ^ ((1:ℝ) / (Module.finrank ℚ K)))⁻¹
+      = t⁻¹ ^ ((1:ℝ) / (Module.finrank ℚ K)) := by
+    rw [← Real.rpow_neg ht.le, Real.inv_rpow ht.le, ← Real.rpow_neg ht.le]
+  have hexp : (Real.exp (2 * fullLog K u w / mult w))⁻¹
+      = Real.exp (2 * -fullLog K u w / mult w) := by
+    rw [← Real.exp_neg]
+    congr 1
+    ring
+  rw [mul_inv, hinv, hexp]
+  simp only [Pi.neg_apply]
+  split_ifs <;> ring
+
 end
 
 end DedekindResidue
