@@ -647,6 +647,167 @@ theorem tsum_ite_eq_tsum_coneUnfold_ennreal (J : (Ideal (𝓞 K))⁰)
   · rintro ⟨p, hp⟩
     rw [if_neg (hne p)]
 
+open scoped Classical in
+/-- The canonical algebraic preimage of a cone point. -/
+noncomputable def conePreimage (J : (Ideal (𝓞 K))⁰) (a : idealSet K J) : K :=
+  algebraMap (𝓞 K) K ((preimageOfMemIntegerSet (idealSetMap K J a)) : 𝓞 K)
+
+open scoped Classical in
+theorem mixedEmbedding_conePreimage (J : (Ideal (𝓞 K))⁰) (a : idealSet K J) :
+    mixedEmbedding K (conePreimage K J a) = (a : mixedSpace K) := by
+  rw [conePreimage, show (algebraMap (𝓞 K) K
+      ((preimageOfMemIntegerSet (idealSetMap K J a)) : 𝓞 K))
+    = ((preimageOfMemIntegerSet (idealSetMap K J a) : 𝓞 K) : K) from rfl,
+    mixedEmbedding_preimageOfMemIntegerSet, idealSetMap_apply]
+
+open scoped Classical in
+/-- A single Gaussian term of the Hecke theta, as a function of the log-coordinate. -/
+noncomputable def gaussTerm (t : ℝ) (u : logSpace K)
+    (x : EuclideanSpace ℝ (index K)) : ℝ :=
+  Real.exp (-π * ∑ i : index K, placeWeights K (heckeWeights K t u) i * (x i) ^ 2)
+
+open scoped Classical in
+theorem gaussTerm_pos (t : ℝ) (u : logSpace K) (x : EuclideanSpace ℝ (index K)) :
+    0 < gaussTerm K t u x := Real.exp_pos _
+
+open scoped Classical in
+theorem continuous_gaussTerm (t : ℝ) (c : EuclideanSpace ℝ (index K)) :
+    Continuous (fun u : logSpace K => gaussTerm K t u c) := by
+  refine Real.continuous_exp.comp ?_
+  refine Continuous.mul continuous_const ?_
+  refine continuous_finsetSum _ (fun i _ => Continuous.mul ?_ continuous_const)
+  have hw : ∀ w : InfinitePlace K,
+      Continuous (fun u : logSpace K => heckeWeights K t u w) := by
+    intro w
+    show Continuous (fun u : logSpace K =>
+      t ^ ((1 : ℝ) / (Module.finrank ℚ K)) * Real.exp (2 * fullLog K u w / mult w))
+    refine Continuous.mul continuous_const ?_
+    refine Real.continuous_exp.comp ?_
+    refine Continuous.div_const ?_ _
+    refine Continuous.mul continuous_const ?_
+    have hfl : Continuous (fun u : logSpace K => fullLog K u w) := by
+      rw [show (fun u : logSpace K => fullLog K u w)
+        = fun u : logSpace K => if h : w = (w₀ : InfinitePlace K) then
+            -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w'
+          else u ⟨w, h⟩ from rfl]
+      split_ifs with h
+      · exact (continuous_finsetSum Finset.univ (fun i _ => continuous_apply i)).neg
+      · exact continuous_apply _
+    exact hfl
+  rcases i with (w | ⟨w, j⟩) <;>
+    · show Continuous (fun u : logSpace K => heckeWeights K t u _)
+      exact hw _
+
+open scoped Classical in
+/-- The unit shift of a Gaussian term, in `gaussTerm` form. -/
+theorem gaussTerm_unit_smul (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) (y : K) :
+    gaussTerm K t u ((euclidMixedEquiv K).symm (ε • mixedEmbedding K y))
+      = gaussTerm K t (u + logEmbedding K (Additive.ofMul ε)) (embeddingCoords K y) := by
+  rw [gaussTerm, gaussTerm]
+  exact congrArg (fun r => Real.exp (-π * r))
+    (sum_placeWeights_unit_smul K t u ε y)
+
+open scoped Classical in
+/-- **The box lintegral of the theta tail, fully unfolded** along the fundamental cone. -/
+theorem lintegral_box_theta_tail (J : (Ideal (𝓞 K))⁰) {t : ℝ} (ht : 0 < t) :
+    ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+      ENNReal.ofReal
+        (heckeTheta K (FractionalIdeal.mk0 K J) (heckeWeights K t u) - 1)
+      = ∑' a : idealSet K J, ∫⁻ u : logSpace K,
+          ENNReal.ofReal (gaussTerm K t u (embeddingCoords K (conePreimage K J a))) := by
+  have hne : (Finset.univ : Finset (InfinitePlace K)).Nonempty := Finset.univ_nonempty
+  set G : EuclideanSpace ℝ (index K) → ℝ≥0∞ := fun x =>
+    ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+      ENNReal.ofReal (gaussTerm K t u x) with hG
+  -- Step 1: pointwise ENNReal tail expansion
+  have hstep1 : ∀ u : logSpace K,
+      ENNReal.ofReal (heckeTheta K (FractionalIdeal.mk0 K J) (heckeWeights K t u) - 1)
+        = ∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
+            if v = 0 then 0
+            else ENNReal.ofReal (gaussTerm K t u (v : EuclideanSpace ℝ (index K))) := by
+    intro u
+    have ha : 0 < Finset.univ.inf' hne (heckeWeights K t u) :=
+      (Finset.lt_inf'_iff hne).mpr (fun w _ => heckeWeights_pos K ht u w)
+    have hca : ∀ w, Finset.univ.inf' hne (heckeWeights K t u) ≤ heckeWeights K t u w :=
+      fun w => Finset.inf'_le _ (Finset.mem_univ w)
+    have hplaceW : ∀ i, Finset.univ.inf' hne (heckeWeights K t u)
+        ≤ placeWeights K (heckeWeights K t u) i := by
+      rintro (w | ⟨w, j⟩) <;> exact hca _
+    have hsummable : Summable fun v : idealZLattice K (FractionalIdeal.mk0 K J) =>
+        (if v = 0 then 0
+          else gaussTerm K t u (v : EuclideanSpace ℝ (index K))) := by
+      refine (summable_real_weightedGaussian _ ha hplaceW).of_nonneg_of_le
+        (fun v => ?_) (fun v => ?_)
+      · split_ifs
+        · exact le_refl 0
+        · exact (gaussTerm_pos K t u _).le
+      · split_ifs
+        · exact (Real.exp_pos _).le
+        · exact le_refl _
+    rw [heckeTheta_eq_one_add K _ ha hca, add_sub_cancel_left]
+    rw [show (∑' v : idealZLattice K (FractionalIdeal.mk0 K J), (if v = 0 then 0
+        else Real.exp (-π * ∑ i : index K,
+          placeWeights K (heckeWeights K t u) i
+            * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)))
+      = (∑' v : idealZLattice K (FractionalIdeal.mk0 K J), (if v = 0 then 0
+        else gaussTerm K t u (v : EuclideanSpace ℝ (index K)))) from rfl]
+    rw [ENNReal.ofReal_tsum_of_nonneg (fun v => by
+      split_ifs
+      · exact le_refl 0
+      · exact (gaussTerm_pos K t u _).le) hsummable]
+    refine tsum_congr (fun v => ?_)
+    split_ifs
+    · exact ENNReal.ofReal_zero
+    · rfl
+  rw [setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _)
+    (fun u _ => hstep1 u)]
+  -- Step 2: swap lintegral and tsum
+  rw [lintegral_tsum (fun v => ?_)]
+  swap
+  · by_cases hv : v = 0
+    · simp only [if_pos hv]
+      exact aemeasurable_const
+    · simp only [if_neg hv]
+      exact (ENNReal.continuous_ofReal.comp (continuous_gaussTerm K t _)).aemeasurable
+  -- Step 3: the per-v box integral is `ite (v = 0) 0 (G ↑v)`
+  have hstep3 : ∀ v : idealZLattice K (FractionalIdeal.mk0 K J),
+      (∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+        if v = 0 then 0
+        else ENNReal.ofReal (gaussTerm K t u (v : EuclideanSpace ℝ (index K))))
+        = if v = 0 then 0 else G (v : EuclideanSpace ℝ (index K)) := by
+    intro v
+    by_cases hv : v = 0
+    · rw [if_pos hv]
+      rw [setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _)
+        (fun u _ => if_pos hv), lintegral_zero]
+    · rw [if_neg hv, hG]
+      exact setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _)
+        (fun u _ => if_neg hv)
+  rw [tsum_congr hstep3]
+  -- Step 4: cone reindex (on the G-valued family)
+  rw [tsum_ite_eq_tsum_coneUnfold_ennreal K J G]
+  -- Step 5+6: per-point shift, then split the product sum
+  rw [ENNReal.tsum_prod']
+  refine tsum_congr (fun a => ?_)
+  have hstep5 : ∀ n : Fin (rank K) → ℤ,
+      G ((euclidMixedEquiv K).symm
+        ((∏ j, fundSystem K j ^ (n j)) • ((a : mixedSpace K))))
+        = ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+            ENNReal.ofReal (gaussTerm K t (u + logEmbedding K
+              (Additive.ofMul (∏ j, fundSystem K j ^ (n j))))
+              (embeddingCoords K (conePreimage K J a))) := by
+    intro n
+    rw [hG]
+    refine setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _)
+      (fun u _ => ?_)
+    refine congrArg ENNReal.ofReal ?_
+    rw [← mixedEmbedding_conePreimage K J a]
+    exact gaussTerm_unit_smul K t u (∏ j, fundSystem K j ^ (n j)) (conePreimage K J a)
+  rw [tsum_congr hstep5]
+  -- Step 7: re-tile to the whole log-space
+  rw [lintegral_eq_tsum_box_shift K (fun u =>
+    ENNReal.ofReal (gaussTerm K t u (embeddingCoords K (conePreimage K J a))))]
+
 end
 
 end DedekindResidue
