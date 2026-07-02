@@ -261,6 +261,117 @@ theorem absNorm_dualIdealUnit (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
   rw [hdual1, fracAbsNorm_inv K _ hne, fracAbsNorm_inv K _ (Units.ne_zero I),
     FractionalIdeal.coeIdeal_absNorm, absNorm_differentIdeal K (𝓞 K), mul_comm]
 
+open scoped Classical in
+/-- The product of the duality weights is `(-4)^{r₂}` (each complex place contributes
+`2·(-2)`). -/
+theorem prod_dualityWeights :
+    (∏ i : index K, dualityWeights K i) = (-4 : ℝ) ^ nrComplexPlaces K := by
+  classical
+  rw [Fintype.prod_sum_type]
+  have h1 : (∏ w : {w : InfinitePlace K // IsReal w}, dualityWeights K (Sum.inl w)) = 1 := by
+    refine Finset.prod_eq_one (fun w _ => ?_)
+    simp [dualityWeights]
+  rw [h1, one_mul, Fintype.prod_prod_type]
+  have h2 : ∀ w : {w : InfinitePlace K // IsComplex w},
+      (∏ j : Fin 2, dualityWeights K (Sum.inr (w, j))) = -4 := by
+    intro w
+    rw [Fin.prod_univ_two]
+    simp [dualityWeights]
+    norm_num
+  rw [Finset.prod_congr rfl (fun w _ => h2 w), Finset.prod_const, nrComplexPlaces]
+  simp
+
+open scoped RealInnerProductSpace Classical in
+/-- The twisted dual-ideal lattice pairs integrally with the ideal lattice: containment half
+of the duality identification, by the pairing dictionary + `FractionalIdeal.mem_dual`. -/
+theorem comap_le_dualZLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    ZLattice.comap ℝ (idealZLattice K (dualIdealUnit K I))
+        ((diagScale (dualityWeights K)
+          (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv.toLinearMap)
+      ≤ dualZLattice (idealZLattice K I) := by
+  intro x hx
+  rw [← SetLike.mem_coe, ZLattice.coe_comap, Set.mem_preimage, SetLike.mem_coe,
+    mem_idealZLattice] at hx
+  obtain ⟨y, hy, hyx⟩ := hx
+  have hx' : x = (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+      (embeddingCoords K y) := by
+    rw [hyx]
+    show x = (diagScale (dualityWeights K) (dualityWeights_ne_zero K))
+      ((diagScale (dualityWeights K) (dualityWeights_ne_zero K)).symm x)
+    rw [LinearEquiv.apply_symm_apply]
+  rw [mem_dualZLattice]
+  intro v hv
+  rw [mem_idealZLattice] at hv
+  obtain ⟨a, ha, rfl⟩ := hv
+  rw [innerₗ_apply_apply, hx', inner_diagScale_embeddingCoords]
+  have htr : Algebra.trace ℚ K (y * a) ∈ (algebraMap ℤ ℚ).range := by
+    have hmem := (FractionalIdeal.mem_dual (Units.ne_zero I)).mp hy a ha
+    rwa [Algebra.traceForm_apply] at hmem
+  obtain ⟨n, hn⟩ := htr
+  rw [Submodule.mem_one]
+  refine ⟨n, ?_⟩
+  rw [← hn]
+  rfl
+
+open scoped Classical in
+/-- **The dual of an ideal lattice** (SP1-AGE-2): the dual lattice of `idealZLattice K I` is
+the ideal lattice of the trace-dual ideal `I^∨ = (I·𝔡_K)⁻¹`, twisted by the duality scaling
+`diagScale (dualityWeights K)` (the `conj ∘ double` matrix at complex places). Proven by the
+integral-pairing containment plus covolume rigidity
+(`|det| = 4^{r₂}`, `N(I^∨) = N(I)⁻¹|Δ|⁻¹`, and the covolume reciprocal). -/
+theorem dualZLattice_idealZLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
+    dualZLattice (idealZLattice K I)
+      = ZLattice.comap ℝ (idealZLattice K (dualIdealUnit K I))
+          ((diagScale (dualityWeights K)
+            (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv.toLinearMap) := by
+  refine (eq_of_le_of_covolume_eq _ _ (comap_le_dualZLattice K I) ?_).symm
+  rw [covolume_zlattice_comap, covolume_idealZLattice]
+  have hdet : |LinearMap.det ((((diagScale (dualityWeights K)
+      (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv).symm :
+        EuclideanSpace ℝ (index K) →ₗ[ℝ] EuclideanSpace ℝ (index K)))|
+      = 4 ^ nrComplexPlaces K := by
+    have heq : ((((diagScale (dualityWeights K)
+        (dualityWeights_ne_zero K)).symm.toContinuousLinearEquiv).symm :
+          EuclideanSpace ℝ (index K) →ₗ[ℝ] EuclideanSpace ℝ (index K)))
+        = ((diagScale (dualityWeights K) (dualityWeights_ne_zero K) :
+            EuclideanSpace ℝ (index K) ≃ₗ[ℝ] EuclideanSpace ℝ (index K)) :
+          EuclideanSpace ℝ (index K) →ₗ[ℝ] EuclideanSpace ℝ (index K)) := rfl
+    rw [heq, det_diagScale, prod_dualityWeights, abs_pow]
+    norm_num
+  rw [hdet]
+  -- dual covolume via the reciprocal + the ideal covolume
+  have hrec := covolume_dualZLattice_mul (idealZLattice K I)
+  have hLI := covolume_idealZLattice K I
+  have hposq : (0:ℚ) < FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K) := by
+    rw [lt_iff_le_and_ne]
+    refine ⟨FractionalIdeal.absNorm_nonneg _, ?_⟩
+    symm
+    rw [Ne, FractionalIdeal.absNorm_eq_zero_iff]
+    exact Units.ne_zero I
+  have hpos : (0:ℝ) < (FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K) : ℝ) := by
+    exact_mod_cast hposq
+  have hdisc : (0:ℝ) < Real.sqrt |(discr K : ℝ)| := by
+    rw [Real.sqrt_pos]
+    rw [abs_pos]
+    exact_mod_cast discr_ne_zero K
+  have hdual : ZLattice.covolume (dualZLattice (idealZLattice K I)) volume
+      = ((FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K) : ℝ)
+          * (2⁻¹) ^ nrComplexPlaces K * Real.sqrt |(discr K : ℝ)|)⁻¹ := by
+    rw [← hLI]
+    exact eq_inv_of_mul_eq_one_left hrec
+  rw [hdual, absNorm_dualIdealUnit]
+  have hsq : Real.sqrt |(discr K : ℝ)| * Real.sqrt |(discr K : ℝ)| = |(discr K : ℝ)| :=
+    Real.mul_self_sqrt (abs_nonneg _)
+  have hnat : (((discr K).natAbs : ℕ) : ℝ) = |(discr K : ℝ)| := by
+    rw [← Int.cast_natCast, Int.natCast_natAbs, Int.cast_abs]
+  push_cast
+  rw [hnat, ← hsq]
+  field_simp
+  ring_nf
+  rw [Real.sqrt_sq (Real.sqrt_nonneg _), mul_comm (nrComplexPlaces K) 2, pow_mul,
+    mul_assoc, ← mul_pow]
+  norm_num
+
 end
 
 end DedekindResidue

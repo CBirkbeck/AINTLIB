@@ -174,7 +174,18 @@
       `euclidean.integerLattice`) + instances + covolume (via `volumePreserving_toMixed`) +
       transport to `EuclideanSpace ℝ (index K)` along `(stdOrthonormalBasis K).repr`
       (LinearIsometryEquiv: lattice/dual/covolume/theta all invariant).
-    - **(AGE-2) theta–ideal dictionary**: `‖x‖²` of a lattice point = `∑_w normAtPlace`-form;
+    - **(AGE-2) DONE ✓✓ (2026-07-02, `IdealLattice.lean`, sorry-free, axiom-clean)**:
+      `embeddingCoords` (+3 coordinate lemmas), `dualityWeights` `(1; 2,-2)`,
+      **`inner_diagScale_embeddingCoords`** (`⟪D·ζb, ζa⟫ = Tr_{K/ℚ}(ba)` — the derived,
+      proven pairing dictionary), `dualIdealUnit` + `absNorm_dualIdealUnit`
+      (`N(I^∨) = N(I)⁻¹|Δ|⁻¹`), `fracAbsNorm_inv`, `mem_idealZLattice`, supports
+      `eq_of_le_of_covolume_eq` (rigidity) + `covolume_zlattice_comap` (`|det|`-scaling,
+      in DualLattice.lean), `prod_dualityWeights = (-4)^{r₂}`, `comap_le_dualZLattice`, and
+      **`dualZLattice_idealZLattice`**: `(L_I)♯ = (diagScale dualityWeights)-twist of
+      L_{I^∨}` — the dual of an ideal lattice IS the twisted codifferent-dual ideal lattice.
+      Θ-side corollary ready: `idealTheta_transform`'s dual side is now identified.
+      **Next (AGE-3)**: unit-box-averaged multivariable theta.
+    - (AGE-2) original plan — **theta–ideal dictionary**: `‖x‖²` of a lattice point = `∑_w normAtPlace`-form;
       lattice points of `euclideanIdealLattice I` ↔ elements of `I`; norms via
       `intNorm`/`idealSetEquivNorm`.
     - **(AGE-3) partial theta & cone sums**: the ideal-class partial zeta as a cone-point sum
