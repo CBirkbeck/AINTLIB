@@ -378,3 +378,28 @@ agree or need a base-change det-1 argument!); then tsum-reindex + `∑_n ∫_box
 (`idealSetEquivNorm`/`card_isPrincipal_norm_eq_mul_torsion` counting — the ×torsion cancels
 heckeG's w⁻¹), ε (assemble: real s>1 agreement → identity theorem → `completedDedekindZeta`
 def → `IsCompletedDedekindZeta` → existence = GRH non-vacuity).
+
+**β COMPLETE THROUGH THE GEOMETRIC HALF (2026-07-03, commits through 37af7f48)**: in
+`MellinAgreement.lean` now: `heckeG_sub_const_eq`, `coneUnfoldEquiv`, `setIntegral_box_swap`
++ `heckeG_eq_basisUnitLattice`, `euclidMixedEquiv` + `mem_idealZLattice_iff_euclidMixed` +
+`euclidConeEquiv`, `logEmbedding_prod_fundSystem`, `sum_placeWeights_unit_smul`,
+`tsum_ite_eq_tsum_coneUnfold`, **`heckeTheta_tail_cone`** (the tail as
+`∑'_{(a,n)} exp(-π ∑ pW(c(t, u + logEmb(∏fs^n)))·ζ(y_a)²)`, `y_a` the canonical
+`preimageOfMemIntegerSet` preimage), and **`integral_eq_tsum_box_shift`**
+(`∫_{logSpace} f = ∑'_n ∫_box f(· + logEmb(∏fs^n))`, Integrable f). **Remaining β-glue**:
+the Tonelli swap `∫_box ∑'_p (...) = ∑'_p ∫_box (...)` (use `MeasureTheory.integral_tsum`
+with the summability of ∫‖·‖ — all terms nonneg, or lintegral route), then per cone point
+`a` chain: `∑'_n ∫_box gauss(c(t, u+shift_n), ζ(y_a)) = ∫_{logSpace} gauss(c(t,u), ζ(y_a))`
+(box-shift backwards; Integrable per-a to be produced by γ's computation or a dominated
+bound). **Then γ**: for fixed a, compute `∫_0^∞ t^{σ-1} ∫_{logSpace} exp(-π ∑_w
+c_w(t,u)(w y_a)²) du dt = κ·Γ(σ)^{r₁}π^{-r₁σ}·Γ(2σ)^{r₂}π^{-2r₂σ}·|N y_a|^{-2σ}` via the
+per-place substitution `y_w = c_w(t,u)·(w y_a)²` — the Jacobian κ is the determinant of
+`(τ, u) ↦ τ/n + 2·fullLog(u)_w/mult_w` in log-coordinates (regulator-flavoured constant,
+computed once; row-reduce by adding `(mult_w/2)`-weighted rows: ∑ gives `τ/2`).
+**Then δ**: `∑_{a ∈ idealSet, norm = m} 1 = torsionOrder·#{principal ideals ⊆ J of norm m}`
+(`card_isPrincipal_norm_eq_mul_torsion`-style via `idealSetEquivNorm`), so
+`∑'_a |N y_a|^{-2σ} = w·N(J)^{-2σ}·∑_{𝔟 ∈ [J]⁻¹-ish} N𝔟^{-2σ}` — w cancels heckeG's w⁻¹.
+**Then ε**: sum classes → `ζ_K(2σ)`; at `σ = s/2` with the `s_C`-scaling
+(`mellin_comp_mul_left`) → the s-independent-constant agreement; identity theorem to
+Re s > 1; define `completedDedekindZeta := (κ·2^{-r₂})⁻¹·P.Λ(s/2)`; prove
+`IsCompletedDedekindZeta`; conclude `∃ Λ` = GRH non-vacuity.
