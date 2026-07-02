@@ -4,6 +4,7 @@ public import DedekindResidue.Basic
 public import DedekindResidue.AuxiliaryFunction
 public import DedekindResidue.Lemma2
 public import DedekindResidue.ExplicitFormula.TestFunction
+public import DedekindResidue.ExplicitFormula.AuxAdmissible
 public import DedekindResidue.CompletedZeta.ClassTheta
 public import DedekindResidue.CompletedZeta.DualLattice
 public import DedekindResidue.CompletedZeta.MellinAgreement
