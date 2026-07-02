@@ -1648,6 +1648,93 @@ theorem exists_H_upper_right (σ₁ : ℝ) (hσ₁ : 2 ≤ σ₁) :
         rw [pow_add]
         ring
 
+/-- Sphere-sup bound for the Jensen ball: at center `A+iT` with radius `A+1`, every
+point of the closed ball satisfies the decaying envelope bound (in terms of `|T|`). -/
+theorem exists_H_ball_sup (A : ℝ) (hA : 2 ≤ A) :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ T : ℝ, A + 5 ≤ |T| →
+      ∀ z ∈ Metric.closedBall ((A : ℂ) + (T : ℂ) * Complex.I) (A + 1),
+        ‖completedDedekindZetaEntire K z‖
+          ≤ C * (1 + |T|)^P
+            * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |T|)) / 4) := by
+  obtain ⟨C₁, hC₁, hstrip⟩ := exists_H_strip_decay K
+  obtain ⟨C₂, hC₂, P₂, hright⟩ := exists_H_upper_right K (2*A + 2) (by linarith)
+  set n : ℕ := gammaExponent K with hn
+  refine ⟨(C₁ + C₂) * (2 + A)^(n + 2 + P₂)
+    * Real.exp (((n:ℕ) : ℝ) * (π * (A + 1)) / 4), by positivity,
+    n + 2 + P₂, fun T hT z hz => ?_⟩
+  rw [Metric.mem_closedBall] at hz
+  -- coordinates of z
+  have hre : |z.re - A| ≤ A + 1 := by
+    have h1 : |(z - ((A : ℂ) + (T : ℂ) * Complex.I)).re| ≤ A + 1 := by
+      refine le_trans (Complex.abs_re_le_norm _) ?_
+      rw [Complex.dist_eq] at hz
+      exact hz
+    have h2 : (z - ((A : ℂ) + (T : ℂ) * Complex.I)).re = z.re - A := by simp
+    rwa [h2] at h1
+  have him : |z.im - T| ≤ A + 1 := by
+    have h1 : |(z - ((A : ℂ) + (T : ℂ) * Complex.I)).im| ≤ A + 1 := by
+      refine le_trans (Complex.abs_im_le_norm _) ?_
+      rw [Complex.dist_eq] at hz
+      exact hz
+    have h2 : (z - ((A : ℂ) + (T : ℂ) * Complex.I)).im = z.im - T := by simp
+    rwa [h2] at h1
+  have hzre1 : -1 ≤ z.re := by
+    have := abs_le.mp hre
+    linarith [this.1]
+  have hzre2 : z.re ≤ 2*A + 1 := by
+    have := abs_le.mp hre
+    linarith [this.2]
+  -- |z.im| is comparable to |T|
+  have himlow : |T| - (A + 1) ≤ |z.im| := by
+    have h1 : |T| - |z.im| ≤ |z.im - T| := by
+      calc |T| - |z.im| ≤ |T - z.im| := abs_sub_abs_le_abs_sub T z.im
+        _ = |z.im - T| := abs_sub_comm T z.im
+    linarith
+  have himup : |z.im| ≤ |T| + (A + 1) := by
+    have h1 : |z.im| - |T| ≤ |z.im - T| := abs_sub_abs_le_abs_sub z.im T
+    linarith
+  have him2 : 2 ≤ |z.im| := by linarith
+  have him1t : 1 + |z.im| ≤ (2 + A) * (1 + |T|) := by
+    have h1T : (1:ℝ) ≤ |T| := by linarith
+    nlinarith
+  -- envelope transfer from |z.im| to |T|
+  have henv : Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4)
+      ≤ Real.exp (((n:ℕ) : ℝ) * (π * (A + 1)) / 4)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+    rw [← Real.exp_add, Real.exp_le_exp]
+    have hπ0 : (0:ℝ) ≤ π := Real.pi_pos.le
+    have hn0 : (0:ℝ) ≤ (n:ℕ) := Nat.cast_nonneg n
+    nlinarith [mul_nonneg hn0 hπ0]
+  -- the two regimes
+  have hcase : ‖completedDedekindZetaEntire K z‖
+      ≤ (C₁ + C₂) * (1 + |z.im|)^(n + 2 + P₂)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4) := by
+    have h1z : (1:ℝ) ≤ 1 + |z.im| := by linarith [abs_nonneg z.im]
+    rcases le_or_gt z.re 2 with hzcase | hzcase
+    · have hb := hstrip z hzre1 hzcase (by linarith [him2])
+      refine le_trans hb ?_
+      refine mul_le_mul (mul_le_mul (by linarith) (pow_le_pow_right₀ h1z (by omega))
+        (by positivity) (by linarith)) le_rfl (by positivity) (by positivity)
+    · have hb := hright z (le_of_lt hzcase) (by linarith [hzre2]) him2
+      refine le_trans hb ?_
+      refine mul_le_mul (mul_le_mul (by linarith) (pow_le_pow_right₀ h1z (by omega))
+        (by positivity) (by linarith)) le_rfl (by positivity) (by positivity)
+  refine le_trans hcase ?_
+  calc (C₁ + C₂) * (1 + |z.im|)^(n + 2 + P₂)
+      * Real.exp (-(((n:ℕ) : ℝ) * (π * |z.im|)) / 4)
+      ≤ (C₁ + C₂) * ((2 + A) * (1 + |T|))^(n + 2 + P₂)
+        * (Real.exp (((n:ℕ) : ℝ) * (π * (A + 1)) / 4)
+          * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4)) := by
+        refine mul_le_mul (mul_le_mul_of_nonneg_left
+          (pow_le_pow_left₀ (by linarith [abs_nonneg z.im]) him1t _) (by positivity))
+          henv (by positivity) (by positivity)
+    _ = (C₁ + C₂) * (2 + A)^(n + 2 + P₂)
+        * Real.exp (((n:ℕ) : ℝ) * (π * (A + 1)) / 4)
+        * (1 + |T|)^(n + 2 + P₂)
+        * Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) := by
+        rw [mul_pow]
+        ring
+
 end
 
 end DedekindResidue
