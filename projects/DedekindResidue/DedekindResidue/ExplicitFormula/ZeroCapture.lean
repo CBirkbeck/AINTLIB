@@ -1164,6 +1164,152 @@ theorem rectangle_zero_capture {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 
   have hmain := rectangleIntegral_mul_logDeriv_H K hre him hΦ' hbound hw₀mem hHw₀
   rw [hmain, hzre, hwre, hzim, hwim]
 
+/-- The functional equation makes the logarithmic derivative of `H` antisymmetric
+about `s = 1/2`: `H'/H(1-s) = -(H'/H)(s)`. -/
+theorem logDeriv_completedDedekindZetaEntire_one_sub (s : ℂ) :
+    logDeriv (completedDedekindZetaEntire K) (1 - s)
+      = -(logDeriv (completedDedekindZetaEntire K) s) := by
+  have hfun : (fun z : ℂ => completedDedekindZetaEntire K (1 - z))
+      = completedDedekindZetaEntire K :=
+    funext (completedDedekindZetaEntire_one_sub K)
+  have hderiv : deriv (completedDedekindZetaEntire K) (1 - s)
+      = -(deriv (completedDedekindZetaEntire K) s) := by
+    have h1 : deriv (fun z : ℂ => completedDedekindZetaEntire K (1 - z)) s
+        = -(deriv (completedDedekindZetaEntire K) (1 - s)) :=
+      deriv_comp_const_sub (completedDedekindZetaEntire K) 1 s
+    rw [hfun] at h1
+    linear_combination h1
+  rw [logDeriv_apply, logDeriv_apply, hderiv,
+    completedDedekindZetaEntire_one_sub K s]
+  rw [neg_div]
+
+/-- **Vertical-edge folding** (SP2-RECT R-g, step 2): by the functional equation, the
+two vertical edges of the contour integral combine into a single integral over the
+right edge `Re = 1+a` against `Φ(s) + Φ(1-s)` — Poitou's `I(T)` shape (p. 6-02). -/
+theorem rectangleIntegral_fold_vertical {a T : ℝ} (ha : 0 < a) (hT : 0 < T)
+    {Φ : ℂ → ℂ} (hΦc : ContinuousOn Φ (Set.uIcc (-a) (1+a) ×ℂ Set.uIcc (-T) T)) :
+    rectangleIntegral (fun ζ => Φ ζ * logDeriv (completedDedekindZetaEntire K) ζ)
+        (((-a : ℝ):ℂ) + ((-T:ℝ):ℂ) * Complex.I) (((1+a : ℝ):ℂ) + ((T:ℝ):ℂ) * Complex.I)
+      = (∫ x : ℝ in (-a)..(1+a),
+            Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+              * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I))
+        - (∫ x : ℝ in (-a)..(1+a),
+            Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+              * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I))
+        + Complex.I • ∫ y : ℝ in (-T)..T,
+            (Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+              + Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+              * logDeriv (completedDedekindZetaEntire K)
+                  (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := by
+  set z : ℂ := ((-a : ℝ):ℂ) + ((-T:ℝ):ℂ) * Complex.I with hz
+  set w : ℂ := ((1+a : ℝ):ℂ) + ((T:ℝ):ℂ) * Complex.I with hw
+  have hzre : z.re = -a := by rw [hz]; simp
+  have hzim : z.im = -T := by rw [hz]; simp
+  have hwre : w.re = 1+a := by rw [hw]; simp
+  have hwim : w.im = T := by rw [hw]; simp
+  rw [rectangleIntegral, hzre, hzim, hwre, hwim]
+  -- identify the four segment integrals; only the vertical pair needs work
+  -- the left edge, reflected through s ↦ 1-s and y ↦ -y, lands on the right edge
+  have hleft : (∫ y : ℝ in (-T)..T,
+      (fun ζ => Φ ζ * logDeriv (completedDedekindZetaEntire K) ζ)
+        (((-a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      = -∫ y : ℝ in (-T)..T,
+          Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+            * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := by
+    have hcomp := intervalIntegral.integral_comp_neg (a := -T) (b := T)
+      (f := fun y' : ℝ => Φ (((-a:ℝ):ℂ) + ((y':ℝ):ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) (((-a:ℝ):ℂ) + ((y':ℝ):ℂ) * Complex.I))
+    simp only [neg_neg] at hcomp
+    rw [← hcomp]
+    rw [← intervalIntegral.integral_neg]
+    refine intervalIntegral.integral_congr (fun y hy => ?_)
+    have hpt : ((-a:ℝ):ℂ) + ((-y:ℝ):ℂ) * Complex.I
+        = 1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := by
+      push_cast
+      ring
+    rw [hpt, logDeriv_completedDedekindZetaEntire_one_sub K]
+    ring
+  rw [hleft]
+  -- combine the two vertical integrals
+  have hHne : ∀ y : ℝ, completedDedekindZetaEntire K (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) ≠ 0 := by
+    intro y
+    refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
+    simp
+    linarith
+  have hld_cont : ContinuousOn
+      (fun y : ℝ => logDeriv (completedDedekindZetaEntire K)
+        (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)) (Set.uIcc (-T) T) := by
+    have h1 : (fun y : ℝ => logDeriv (completedDedekindZetaEntire K)
+        (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+        = fun y : ℝ => deriv (completedDedekindZetaEntire K)
+            (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+          / completedDedekindZetaEntire K (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := rfl
+    rw [h1]
+    refine ContinuousOn.div ?_ ?_ (fun y _ => hHne y)
+    · refine Continuous.continuousOn ?_
+      have hda : Continuous (deriv (completedDedekindZetaEntire K)) := by
+        refine continuous_iff_continuousAt.mpr (fun ζ => ?_)
+        exact (((differentiable_completedDedekindZetaEntire K).analyticAt ζ).deriv).continuousAt
+      exact hda.comp (by fun_prop)
+    · refine Continuous.continuousOn ?_
+      exact (differentiable_completedDedekindZetaEntire K).continuous.comp (by fun_prop)
+  -- edge continuity of the two Φ-factors
+  have hpath : Continuous (fun y : ℝ => ((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := by fun_prop
+  have hΦ_right : ContinuousOn (fun y : ℝ => Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      (Set.uIcc (-T) T) := by
+    refine hΦc.comp hpath.continuousOn (fun y hy => ?_)
+    rw [Complex.mem_reProdIm]
+    constructor
+    · have : (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I).re = 1+a := by simp
+      rw [this]
+      exact Set.right_mem_uIcc
+    · have : (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I).im = y := by simp
+      rw [this]
+      exact hy
+  have hΦ_left : ContinuousOn (fun y : ℝ => Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+      (Set.uIcc (-T) T) := by
+    have hpath2 : Continuous (fun y : ℝ => 1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)) := by
+      fun_prop
+    refine hΦc.comp hpath2.continuousOn (fun y hy => ?_)
+    rw [Complex.mem_reProdIm]
+    constructor
+    · have : (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)).re = -a := by
+        simp
+      rw [this]
+      exact Set.left_mem_uIcc
+    · have : (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)).im = -y := by simp
+      rw [this]
+      rw [Set.uIcc_of_le (by linarith : -T ≤ T), Set.mem_Icc] at hy ⊢
+      constructor <;> linarith [hy.1, hy.2]
+  -- combine
+  have hint1 : IntervalIntegrable (fun y : ℝ =>
+      Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      volume (-T) T :=
+    (hΦ_right.mul hld_cont).intervalIntegrable
+  have hint2 : IntervalIntegrable (fun y : ℝ =>
+      Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+        * logDeriv (completedDedekindZetaEntire K) (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      volume (-T) T :=
+    (hΦ_left.mul hld_cont).intervalIntegrable
+  have hsum : (∫ y : ℝ in (-T)..T,
+      (Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+        + Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+        * logDeriv (completedDedekindZetaEntire K) (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      = (∫ y : ℝ in (-T)..T,
+          Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+            * logDeriv (completedDedekindZetaEntire K) (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+        + ∫ y : ℝ in (-T)..T,
+            Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+              * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I) := by
+    rw [← intervalIntegral.integral_add hint1 hint2]
+    refine intervalIntegral.integral_congr (fun y hy => ?_)
+    ring
+  rw [hsum, smul_add]
+  ring
+
 end DedekindResidue
 
 end
