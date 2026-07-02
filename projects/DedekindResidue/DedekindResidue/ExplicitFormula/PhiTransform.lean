@@ -32,6 +32,8 @@ Source: Poitou pp. 6-01/6-02 (`refs/DedekindResidue/poitou-petits-discriminants.
 B–F p. 3. Route: `.mathlib-quality/decomposition-sp2.md`, leaf SP2-Φ.
 -/
 
+@[expose] public section
+
 namespace DedekindResidue
 
 open MeasureTheory Complex
@@ -154,3 +156,5 @@ theorem paperPhi_one_sub {F : ℝ → ℂ} (heven : ∀ x : ℝ, F (-x) = F x) (
   ring
 
 end DedekindResidue
+
+end
