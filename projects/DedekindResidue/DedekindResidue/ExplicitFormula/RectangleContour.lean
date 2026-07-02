@@ -390,6 +390,171 @@ theorem rectangleIntegral_cauchy {Φ : ℂ → ℂ} {z w ρ : ℂ}
   rw [smul_eq_mul, smul_eq_mul] at hzero hwind ⊢
   linear_combination hzero + Φ ρ * hwind
 
+/-- The four boundary segments of the rectangle with corners `z`, `w`, as a set. -/
+def rectangleBoundary (z w : ℂ) : Set ℂ :=
+  (Set.uIcc z.re w.re ×ℂ {z.im, w.im}) ∪ ({z.re, w.re} ×ℂ Set.uIcc z.im w.im)
+
+theorem horizontal_mem_rectangleBoundary_bot {z w : ℂ} {x : ℝ}
+    (hx : x ∈ Set.uIcc z.re w.re) :
+    ((x:ℂ) + (z.im:ℂ) * Complex.I) ∈ rectangleBoundary z w := by
+  refine Set.mem_union_left _ ?_
+  rw [Complex.mem_reProdIm]
+  constructor
+  · simpa using hx
+  · simp
+
+theorem horizontal_mem_rectangleBoundary_top {z w : ℂ} {x : ℝ}
+    (hx : x ∈ Set.uIcc z.re w.re) :
+    ((x:ℂ) + (w.im:ℂ) * Complex.I) ∈ rectangleBoundary z w := by
+  refine Set.mem_union_left _ ?_
+  rw [Complex.mem_reProdIm]
+  constructor
+  · simpa using hx
+  · simp
+
+theorem vertical_mem_rectangleBoundary_left {z w : ℂ} {y : ℝ}
+    (hy : y ∈ Set.uIcc z.im w.im) :
+    ((z.re:ℂ) + (y:ℂ) * Complex.I) ∈ rectangleBoundary z w := by
+  refine Set.mem_union_right _ ?_
+  rw [Complex.mem_reProdIm]
+  constructor
+  · simp
+  · simpa using hy
+
+theorem vertical_mem_rectangleBoundary_right {z w : ℂ} {y : ℝ}
+    (hy : y ∈ Set.uIcc z.im w.im) :
+    ((w.re:ℂ) + (y:ℂ) * Complex.I) ∈ rectangleBoundary z w := by
+  refine Set.mem_union_right _ ?_
+  rw [Complex.mem_reProdIm]
+  constructor
+  · simp
+  · simpa using hy
+
+/-- The boundary integral only sees boundary values. -/
+theorem rectangleIntegral_congr {f g : ℂ → ℂ} {z w : ℂ}
+    (h : Set.EqOn f g (rectangleBoundary z w)) :
+    rectangleIntegral f z w = rectangleIntegral g z w := by
+  rw [rectangleIntegral, rectangleIntegral]
+  congr 1
+  · congr 1
+    · congr 1
+      · refine intervalIntegral.integral_congr (fun x hx => ?_)
+        exact h (horizontal_mem_rectangleBoundary_bot hx)
+      · refine intervalIntegral.integral_congr (fun x hx => ?_)
+        exact h (horizontal_mem_rectangleBoundary_top hx)
+    · congr 1
+      refine intervalIntegral.integral_congr (fun y hy => ?_)
+      exact h (vertical_mem_rectangleBoundary_right hy)
+  · congr 1
+    refine intervalIntegral.integral_congr (fun y hy => ?_)
+    exact h (vertical_mem_rectangleBoundary_left hy)
+
+/-- Scalar multiples pass through the boundary integral. -/
+theorem rectangleIntegral_const_mul (c : ℂ) (f : ℂ → ℂ) (z w : ℂ) :
+    rectangleIntegral (fun ζ => c * f ζ) z w = c * rectangleIntegral f z w := by
+  rw [rectangleIntegral, rectangleIntegral]
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
+  rw [smul_eq_mul, smul_eq_mul, smul_eq_mul, smul_eq_mul]
+  ring
+
+/-- Finite sums pass through the boundary integral, given continuity of each summand
+on the boundary. -/
+theorem rectangleIntegral_finset_sum {ι : Type*} (F : Finset ι) (f : ι → ℂ → ℂ)
+    {z w : ℂ} (hf : ∀ i ∈ F, ContinuousOn (f i) (rectangleBoundary z w)) :
+    rectangleIntegral (fun ζ => ∑ i ∈ F, f i ζ) z w
+      = ∑ i ∈ F, rectangleIntegral (f i) z w := by
+  have hpathB : ContinuousOn (fun x : ℝ => (x:ℂ) + (z.im:ℂ) * Complex.I)
+      (Set.uIcc z.re w.re) := by fun_prop
+  have hpathT : ContinuousOn (fun x : ℝ => (x:ℂ) + (w.im:ℂ) * Complex.I)
+      (Set.uIcc z.re w.re) := by fun_prop
+  have hpathR : ContinuousOn (fun y : ℝ => (w.re:ℂ) + (y:ℂ) * Complex.I)
+      (Set.uIcc z.im w.im) := by fun_prop
+  have hpathL : ContinuousOn (fun y : ℝ => (z.re:ℂ) + (y:ℂ) * Complex.I)
+      (Set.uIcc z.im w.im) := by fun_prop
+  have hiB : ∀ i ∈ F, IntervalIntegrable
+      (fun x : ℝ => f i ((x:ℂ) + (z.im:ℂ) * Complex.I)) volume z.re w.re := fun i hi =>
+    (((hf i hi).comp hpathB (fun x hx =>
+      horizontal_mem_rectangleBoundary_bot hx))).intervalIntegrable
+  have hiT : ∀ i ∈ F, IntervalIntegrable
+      (fun x : ℝ => f i ((x:ℂ) + (w.im:ℂ) * Complex.I)) volume z.re w.re := fun i hi =>
+    (((hf i hi).comp hpathT (fun x hx =>
+      horizontal_mem_rectangleBoundary_top hx))).intervalIntegrable
+  have hiR : ∀ i ∈ F, IntervalIntegrable
+      (fun y : ℝ => f i ((w.re:ℂ) + (y:ℂ) * Complex.I)) volume z.im w.im := fun i hi =>
+    (((hf i hi).comp hpathR (fun y hy =>
+      vertical_mem_rectangleBoundary_right hy))).intervalIntegrable
+  have hiL : ∀ i ∈ F, IntervalIntegrable
+      (fun y : ℝ => f i ((z.re:ℂ) + (y:ℂ) * Complex.I)) volume z.im w.im := fun i hi =>
+    (((hf i hi).comp hpathL (fun y hy =>
+      vertical_mem_rectangleBoundary_left hy))).intervalIntegrable
+  rw [rectangleIntegral]
+  rw [intervalIntegral.integral_finsetSum hiB, intervalIntegral.integral_finsetSum hiT,
+    intervalIntegral.integral_finsetSum hiR, intervalIntegral.integral_finsetSum hiL]
+  rw [Finset.smul_sum, Finset.smul_sum]
+  rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [rectangleIntegral]
+
+/-- Sums pass through the boundary integral, given continuity on the boundary. -/
+theorem rectangleIntegral_add {f g : ℂ → ℂ} {z w : ℂ}
+    (hf : ContinuousOn f (rectangleBoundary z w))
+    (hg : ContinuousOn g (rectangleBoundary z w)) :
+    rectangleIntegral (fun ζ => f ζ + g ζ) z w
+      = rectangleIntegral f z w + rectangleIntegral g z w := by
+  have key := rectangleIntegral_finset_sum (F := ({0, 1} : Finset ℕ))
+    (f := fun i => if i = 0 then f else g) (z := z) (w := w) ?_
+  · have h1 : (fun ζ => ∑ i ∈ ({0, 1} : Finset ℕ), (if i = 0 then f else g) ζ)
+        = fun ζ => f ζ + g ζ := by
+      funext ζ
+      simp
+    have h2 : ∑ i ∈ ({0, 1} : Finset ℕ), rectangleIntegral (if i = 0 then f else g) z w
+        = rectangleIntegral f z w + rectangleIntegral g z w := by
+      simp
+    rw [h1, h2] at key
+    exact key
+  · intro i _
+    by_cases hi : i = 0 <;> simp [hi, hf, hg]
+
+/-- The logarithmic derivative of a peeled factorization, pointwise: away from the
+zeros, `H'/H = ∑ dᵤ/(ζ−u) + g'/g`. -/
+theorem logDeriv_eq_sum_add_of_factorization {U : Set ℂ} (hUo : IsOpen U)
+    {H g : ℂ → ℂ} {F : Finset ℂ} {d : ℂ → ℤ}
+    (hfac : ∀ z ∈ U, H z = (∏ u ∈ F, (z - u) ^ d u) * g z)
+    (hd : ∀ u, 0 ≤ d u)
+    (hganal : AnalyticOnNhd ℂ g U)
+    {ζ : ℂ} (hζ : ζ ∈ U) (hgζ : g ζ ≠ 0) (hζne : ∀ u ∈ F, ζ ≠ u) :
+    logDeriv H ζ = ∑ u ∈ F, (d u : ℂ) * (ζ - u)⁻¹ + logDeriv g ζ := by
+  have hPζ : (∏ u ∈ F, (ζ - u) ^ d u) ≠ 0 := by
+    refine Finset.prod_ne_zero_iff.mpr (fun u hu => ?_)
+    exact zpow_ne_zero _ (sub_ne_zero_of_ne (hζne u hu))
+  have hpolydiff : DifferentiableAt ℂ (fun z => ∏ u ∈ F, (z - u) ^ d u) ζ := by
+    refine DifferentiableAt.fun_finsetProd (fun u _ => ?_)
+    exact (differentiableAt_id.sub_const u).zpow (Or.inr (hd u))
+  have hgdiff : DifferentiableAt ℂ g ζ := (hganal ζ hζ).differentiableAt
+  have hHev : H =ᶠ[nhds ζ] fun z => (∏ u ∈ F, (z - u) ^ d u) * g z := by
+    filter_upwards [hUo.mem_nhds hζ] with z hz
+    exact hfac z hz
+  have hld : logDeriv H ζ = logDeriv (fun z => (∏ u ∈ F, (z - u) ^ d u) * g z) ζ := by
+    rw [logDeriv, logDeriv, Pi.div_apply, Pi.div_apply, hHev.deriv_eq, hHev.eq_of_nhds]
+  rw [hld, logDeriv_mul ζ hPζ hgζ hpolydiff hgdiff]
+  congr 1
+  have h1 : logDeriv (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ d u) ζ
+      = ∑ u ∈ F, logDeriv (fun z => (fun w : ℂ => w - u) z ^ d u) ζ := by
+    refine logDeriv_prod (fun u hu => ?_) (fun u hu => ?_)
+    · exact zpow_ne_zero _ (sub_ne_zero_of_ne (hζne u hu))
+    · exact (differentiableAt_id.sub_const u).zpow (Or.inr (hd u))
+  refine Eq.trans h1 ?_
+  refine Finset.sum_congr rfl (fun u hu => ?_)
+  have h2 : logDeriv (fun z : ℂ => (z - u) ^ d u) ζ
+      = (d u : ℂ) * logDeriv (fun z : ℂ => z - u) ζ :=
+    logDeriv_fun_zpow (differentiableAt_id.sub_const u) _
+  have h3 : logDeriv (fun z : ℂ => z - u) ζ = 1 / (ζ - u) := by
+    rw [logDeriv, Pi.div_apply]
+    simp
+  rw [h2, h3]
+  rw [mul_one_div, div_eq_mul_inv]
+
 end DedekindResidue
 
 end
