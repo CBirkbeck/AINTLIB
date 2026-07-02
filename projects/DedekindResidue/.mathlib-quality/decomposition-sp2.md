@@ -109,6 +109,27 @@ bord du rectangle [−a, 1+a]×[−T,T]".
   `∑_{|γ|<T} Φ(ρ) − Φ(0) − Φ(1) = I_ζ(T) + I_G(T) + o(1)` with both `I`'s on the
   single vertical segment `Re = 1+a`, integrand `{Φ(s)+Φ(1−s)}·(−logDeriv …)`.
 
+### SP2-RECT STATUS (2026-07-02, leg 5): ✅ COMPLETE (all in ExplicitFormula/ZeroCapture.lean
+unless noted; RectangleContour.lean holds the generic mechanics)
+- R-a ✅ `exists_H_rectangle_factorization` + witness `completedDedekindZetaEntire_ne_zero_of_one_lt`
+- R-b/R-c ✅ `rectangleIntegral_eq_zero`, `rectangleIntegral_inv_sub`, `rectangleIntegral_cauchy`
+- R-d ✅ `rectangleIntegral_mul_logDeriv_H` (+ boundary plumbing, `logDeriv_eq_sum_add_of_factorization`)
+- R-e ✅ `exists_dist_ge_of_card_le` + **two-sided** `exists_good_height` (both `|T∓Im ρ|`)
+  + bridges `meromorphicOrderAt_…_ne_top` (identity theorem), `…_eq_zero_of_divisor_ne_zero`,
+  `divisor_ne_zero_of_…_eq_zero`
+- R-f ✅ `exists_contour_height` (both edges zero-free + `‖H'/H‖ ≤ C log²(2+T₀)` on
+  `-1/4 ≤ Re ≤ 5/4`; A5's count-conjunct was exported for this)
+- R-g ✅ `rectangle_zero_capture` (∮ΦH'/H = 2πi∑m_ρΦ(ρ) on `[-a,1+a]×[-T,T]`),
+  `logDeriv_completedDedekindZetaEntire_one_sub` (H'/H(1−s) = −H'/H(s)),
+  `rectangleIntegral_fold_vertical` (left edge folds onto right: `(Φ+Φ(1−·))·H'/H`),
+  `zero_capture_edge_form` (**Poitou Prop 1, quantitative**: zero sum − folded edge
+  integral bounded by `2(1+2a)·CΦ·Cl`)
+- REMAINING for the full Prop 1 limit (deferred to SP2-MAIN): instantiate Φ := paperPhi F,
+  CΦ := O(1/T) (Φ-d decay, still hypothesis-packaged), Cl from `exists_contour_height`,
+  T → ∞ through contour heights; then split the right-edge integral H'/H = 1/s + 1/(s−1)
+  + G'/G + ζ'/ζ (subtract `rectangleIntegral_cauchy` at ρ = 0, 1 for the −Φ(0) −Φ(1)
+  terms; the H-divisor itself carries no mass at 0,1).
+
 ### SP2-vM — the prime side series (file `ExplicitFormula/PrimeSide.lean`)
 Source: Poitou 6-02 "− d log ζ_K(s)/ds = ∑_{𝔭,m} (log N𝔭)/(N𝔭)^{ms}".
 - **vM-a** `neg_logDeriv_dedekindZeta_eq_tsum`: for `Re s > 1`:

@@ -1,5 +1,21 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-02 leg 5: SP2-RECT COMPLETE — full contour mechanics for the explicit formula
+
+All pushed, axiom-clean, zero warnings. See decomposition-sp2.md §"SP2-RECT STATUS" for
+the lemma inventory (zero capture, two-sided good heights, contour heights with the
+log² Landau bound, FE folding, and Poitou's Prop 1 in quantitative form
+`zero_capture_edge_form`). Bridge lemmas divisor↔zero + the global
+order-ne-top (identity theorem) now make zero-set reasoning cheap.
+
+**NEXT (per decomposition-sp2.md): SP2-vM** — `neg_logDeriv_dedekindZeta_eq_tsum`:
+`−ζ_K'/ζ_K(s) = ∑_𝔭 ∑_m log(N𝔭)·N𝔭^{−ms}` on `Re s > 1` by differentiating
+Chebotarev's Euler product through `TendstoLocallyUniformlyOn.deriv` (pattern:
+mathlib's `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`, Cotangent.lean sine-product
+logDeriv). Then SP2-FJ (Fourier–Jordan; Dirichlet integral to build), SP2-Γψ (Gauss
+digamma formula to build), SP2-MAIN.
+
+
 ## 2026-07-02 session (Fable, leg 4, third update): SP2-RECT nearly done — R-a/R-b/R-c/R-d + nonvanishing landed
 
 **All pushed, axiom-clean. Files: `ExplicitFormula/{PhiTransform, RectangleContour, ZeroCapture}.lean`.**
