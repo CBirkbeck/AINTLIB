@@ -566,7 +566,7 @@ theorem exists_dist_ge_of_card_le {S : Finset ℝ} {N : ℕ} (hcard : S.card ≤
       rw [Set.mem_Icc]
       constructor <;> linarith
     obtain ⟨s, hs, hlt⟩ := hcon _ hmem
-    exact ⟨s, hs, by push_cast at hlt ⊢; linarith [hlt]⟩
+    exact ⟨s, hs, by linarith [hlt]⟩
   choose f hfS hfclose using hmid
   -- pigeonhole: N+1 midpoints into ≤ N members
   have hlt : S.card < (Finset.univ : Finset (Fin (N + 1))).card := by
