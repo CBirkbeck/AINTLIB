@@ -196,6 +196,141 @@ theorem hasDerivAt_gAux_deriv (h : ℂ) {t : ℝ} (ht : 0 < t) :
   field_simp
   ring
 
+/-- Master decay bound: a continuous multiplier `φ` bounded on `(T, ∞)` times the
+kernel `e^{-ht}/t` (with `Re h > 0`, `T > 0`) is integrable on `(T, ∞)`, by comparison
+with `(C/T)·e^{-Re h · t}`. -/
+theorem integrableOn_bounded_mul_exp_div {h : ℂ} (hh : 0 < h.re) {T : ℝ} (hT : 0 < T)
+    {φ : ℝ → ℂ} (hφc : ContinuousOn φ (Set.Ioi T)) {C : ℝ}
+    (hφb : ∀ t ∈ Set.Ioi T, ‖φ t‖ ≤ C) :
+    IntegrableOn (fun t : ℝ => φ t * (Complex.exp (-h * t) / t)) (Set.Ioi T) := by
+  have hg : ContinuousOn (fun t : ℝ => Complex.exp (-h * t) / (t : ℂ)) (Set.Ioi T) := by
+    refine ContinuousOn.div ?_ Complex.continuous_ofReal.continuousOn ?_
+    · exact (Complex.continuous_exp.comp (by fun_prop)).continuousOn
+    · intro t ht
+      exact_mod_cast (hT.trans ht).ne'
+  refine Integrable.mono' (g := fun t : ℝ => C / T * Real.exp (-h.re * t))
+    ((exp_neg_integrableOn_Ioi T hh).const_mul _)
+    ((hφc.mul hg).aestronglyMeasurable measurableSet_Ioi) ?_
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+  have htpos : 0 < t := hT.trans ht
+  have hnorm : ‖φ t * (Complex.exp (-h * t) / t)‖
+      = ‖φ t‖ * (Real.exp (-h.re * t) / t) := by
+    rw [norm_mul, norm_div, Complex.norm_exp, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos htpos]
+    congr 2
+    simp [Complex.mul_re]
+  rw [hnorm]
+  have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hφb t ht)
+  have hle : Real.exp (-h.re * t) / t ≤ Real.exp (-h.re * t) / T :=
+    div_le_div_of_nonneg_left (Real.exp_pos _).le hT (le_of_lt ht)
+  calc ‖φ t‖ * (Real.exp (-h.re * t) / t)
+      ≤ C * (Real.exp (-h.re * t) / T) :=
+        mul_le_mul (hφb t ht) hle (by positivity) hC0
+    _ = C / T * Real.exp (-h.re * t) := by ring
+
+/-- The kernel `e^{-ht}/t` times an eventually-bounded multiplier tends to `0` at `∞`. -/
+theorem tendsto_exp_div_mul_atTop {h : ℂ} (hh : 0 < h.re) {v : ℝ → ℂ} {C : ℝ}
+    (hv : ∀ᶠ t : ℝ in Filter.atTop, ‖v t‖ ≤ C) :
+    Filter.Tendsto (fun t : ℝ => Complex.exp (-h * t) / t * v t) Filter.atTop (nhds 0) := by
+  have hexp : Filter.Tendsto (fun t : ℝ => C * Real.exp (-(h.re * t))) Filter.atTop
+      (nhds (C * 0)) := by
+    refine Filter.Tendsto.const_mul C (Real.tendsto_exp_atBot.comp ?_)
+    exact Filter.tendsto_neg_atTop_atBot.comp (Filter.Tendsto.const_mul_atTop hh Filter.tendsto_id)
+  rw [mul_zero] at hexp
+  refine squeeze_zero_norm' ?_ hexp
+  filter_upwards [Filter.eventually_ge_atTop (1 : ℝ), hv] with t ht hvt
+  have htpos : 0 < t := lt_of_lt_of_le one_pos ht
+  have hnorm : ‖Complex.exp (-h * t) / t * v t‖
+      = Real.exp (-h.re * t) / t * ‖v t‖ := by
+    rw [norm_mul, norm_div, Complex.norm_exp, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos htpos]
+    congr 2
+    simp [Complex.mul_re]
+  rw [hnorm, neg_mul]
+  have h1 : Real.exp (-(h.re * t)) / t ≤ Real.exp (-(h.re * t)) :=
+    div_le_self (Real.exp_pos _).le ht
+  have hv0 : 0 ≤ ‖v t‖ := norm_nonneg _
+  calc Real.exp (-(h.re * t)) / t * ‖v t‖
+      ≤ Real.exp (-(h.re * t)) * C := by
+        exact mul_le_mul h1 hvt hv0 (Real.exp_pos _).le
+    _ = C * Real.exp (-(h.re * t)) := by ring
+
+/-- First integration by parts for the Fourier tail (Belabas–Friedman, proof of Lemma 2):
+with `g(t) = e^{-ht}/t`, `∫_T^∞ (g′(t)·sin(tγ)/γ + g(t)·cos(tγ)) dt = -g(T)·sin(Tγ)/γ`. -/
+theorem integral_Ioi_gAux_ibp₁ (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 < T) (hγ : γ ≠ 0) :
+    (∫ t in Set.Ioi T,
+        (-(h + 1/t) * (Complex.exp (-h * t) / t) * ((Real.sin (t * γ) / γ : ℝ) : ℂ)
+          + Complex.exp (-h * t) / t * ((Real.cos (t * γ) : ℝ) : ℂ)))
+      = -(Complex.exp (-h * T) / T * ((Real.sin (T * γ) / γ : ℝ) : ℂ)) := by
+  have key := integral_Ioi_deriv_mul_eq_sub
+    (u := fun t : ℝ => Complex.exp (-h * t) / t)
+    (u' := fun t : ℝ => -(h + 1/t) * (Complex.exp (-h * t) / t))
+    (v := fun t : ℝ => ((Real.sin (t * γ) / γ : ℝ) : ℂ))
+    (v' := fun t : ℝ => ((Real.cos (t * γ) : ℝ) : ℂ))
+    (a := T) (a' := Complex.exp (-h * T) / T * ((Real.sin (T * γ) / γ : ℝ) : ℂ)) (b' := 0)
+    (fun t ht => hasDerivAt_gAux_core h (hT.trans ht))
+    (fun t _ => by
+      have hs : HasDerivAt (fun t : ℝ => Real.sin (t * γ) / γ) (Real.cos (t * γ)) t := by
+        have := (((hasDerivAt_id t).mul_const γ).sin).div_const γ
+        simpa [mul_div_assoc, mul_div_cancel_right₀ _ hγ] using this
+      exact hs.ofReal_comp)
+    ?_ ?_ ?_
+  · rw [key, zero_sub]
+  · -- integrability of u'·v + u·v'
+    have h₁ : IntegrableOn
+        (fun t : ℝ => (-(h + 1/t) * ((Real.sin (t * γ) / γ : ℝ) : ℂ))
+          * (Complex.exp (-h * t) / t)) (Set.Ioi T) := by
+      refine integrableOn_bounded_mul_exp_div hh hT ?_
+        (C := (‖h‖ + 1/T) * (1/|γ|)) ?_
+      · refine ContinuousOn.mul (ContinuousOn.neg ?_)
+          (Complex.continuous_ofReal.comp
+            (by fun_prop : Continuous fun t : ℝ => Real.sin (t * γ) / γ)).continuousOn
+        exact continuousOn_const.add (continuousOn_const.div
+          Complex.continuous_ofReal.continuousOn
+          (fun t ht => by exact_mod_cast (hT.trans ht).ne'))
+      · intro t ht
+        rw [norm_mul, norm_neg]
+        refine mul_le_mul ?_ ?_ (norm_nonneg _) (by positivity)
+        · refine le_trans (norm_add_le _ _) ?_
+          have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/T := by
+            rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs,
+              abs_of_pos (hT.trans ht)]
+            gcongr
+            exact le_of_lt ht
+          linarith
+        · rw [Complex.norm_real, Real.norm_eq_abs, abs_div]
+          gcongr
+          exact abs_le.mpr ⟨Real.neg_one_le_sin _, Real.sin_le_one _⟩
+    have h₂ : IntegrableOn
+        (fun t : ℝ => ((Real.cos (t * γ) : ℝ) : ℂ) * (Complex.exp (-h * t) / t))
+        (Set.Ioi T) := by
+      refine integrableOn_bounded_mul_exp_div hh hT
+        (Complex.continuous_ofReal.comp
+          (by fun_prop : Continuous fun t : ℝ => Real.cos (t * γ))).continuousOn
+        (C := 1) ?_
+      intro t _
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_le.mpr ⟨Real.neg_one_le_cos _, Real.cos_le_one _⟩
+    have h₁' : IntegrableOn (fun t : ℝ =>
+        -(h + 1/t) * (Complex.exp (-h * t) / t) * ((Real.sin (t * γ) / γ : ℝ) : ℂ))
+        (Set.Ioi T) := h₁.congr_fun (fun t _ => by ring) measurableSet_Ioi
+    have h₂' : IntegrableOn (fun t : ℝ =>
+        Complex.exp (-h * t) / t * ((Real.cos (t * γ) : ℝ) : ℂ)) (Set.Ioi T) :=
+      h₂.congr_fun (fun t _ => by ring) measurableSet_Ioi
+    exact h₁'.add h₂'
+  · -- boundary at T
+    have hc : ContinuousAt (fun t : ℝ =>
+        Complex.exp (-h * t) / t * ((Real.sin (t * γ) / γ : ℝ) : ℂ)) T := by
+      have hT0 : ((T : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hT.ne'
+      fun_prop (disch := intros; exact hT0)
+    exact hc.tendsto.mono_left nhdsWithin_le_nhds
+  · -- vanishing at ∞
+    refine tendsto_exp_div_mul_atTop hh (C := 1/|γ|) ?_
+    filter_upwards with t
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_div]
+    gcongr
+    exact abs_le.mpr ⟨Real.neg_one_le_sin _, Real.sin_le_one _⟩
+
 end
 
 end DedekindResidue
