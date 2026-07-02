@@ -40,7 +40,7 @@ classical Gauss derivation.
 namespace DedekindResidue
 
 open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
-open scoped FourierTransform ContDiff ComplexConjugate InnerProductSpace
+open scoped FourierTransform ContDiff ComplexConjugate InnerProductSpace ENNReal
 
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
 `∫₀^∞ (e^{-x} - e^{-tx})/x dx = log t`. The kernel is `∫_1^t e^{-sx} ds`; Fubini and
@@ -2699,5 +2699,72 @@ theorem tendsto_truncated_fourier_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
   refine hlim.congr' ?_
   filter_upwards [Filter.eventually_ge_atTop 1] with n hn
   exact (hEq n hn).symm
+
+/-- **L² convergence of truncations**: for `g ∈ L²`,
+`eLpNorm (1_{(-n,n]}·g - g) 2 → 0`. -/
+theorem tendsto_eLpNorm_indicator_truncation {g : ℝ → ℂ}
+    (hg : MemLp g 2 (volume : Measure ℝ)) :
+    Tendsto (fun n : ℕ => eLpNorm
+        ((Set.Ioc (-(n:ℝ)) (n:ℝ)).indicator g - g) 2 (volume : Measure ℝ))
+      atTop (nhds 0) := by
+  have hkey : ∀ n : ℕ, eLpNorm ((Set.Ioc (-(n:ℝ)) (n:ℝ)).indicator g - g) 2 volume
+      = (∫⁻ x, ((Set.Ioc (-(n:ℝ)) (n:ℝ))ᶜ.indicator (fun y => ‖g y‖ₑ ^ (2:ℝ)) x))
+        ^ (1/(2:ℝ)) := by
+    intro n
+    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)]
+    rw [show ((2:ℝ≥0∞).toReal) = (2:ℝ) by norm_num]
+    congr 1
+    refine lintegral_congr (fun x => ?_)
+    rw [Pi.sub_apply]
+    rcases (em (x ∈ Set.Ioc (-(n:ℝ)) (n:ℝ))) with hx | hx
+    · rw [Set.indicator_of_mem hx, Set.indicator_of_notMem (by simpa using hx)]
+      simp
+    · rw [Set.indicator_of_notMem hx, Set.indicator_of_mem (by simpa using hx)]
+      simp [enorm_neg]
+  simp only [hkey]
+  -- dominated convergence for the inner lintegral
+  have hdom : Tendsto (fun n : ℕ => ∫⁻ x,
+      ((Set.Ioc (-(n:ℝ)) (n:ℝ))ᶜ.indicator (fun y => ‖g y‖ₑ ^ (2:ℝ)) x))
+      atTop (nhds 0) := by
+    have h0 : (0 : ℝ≥0∞) = ∫⁻ _ : ℝ, (0 : ℝ≥0∞) ∂(volume : Measure ℝ) := by simp
+    rw [h0]
+    refine MeasureTheory.tendsto_lintegral_of_dominated_convergence'
+      (bound := fun x => ‖g x‖ₑ ^ (2:ℝ)) ?_ ?_ ?_ ?_
+    · intro n
+      refine AEMeasurable.indicator ?_ (measurableSet_Ioc.compl)
+      exact (hg.aestronglyMeasurable.enorm.pow_const _)
+    · intro n
+      refine Filter.Eventually.of_forall (fun x => ?_)
+      rcases (em (x ∈ (Set.Ioc (-(n:ℝ)) (n:ℝ))ᶜ)) with hx | hx
+      · rw [Set.indicator_of_mem hx]
+      · rw [Set.indicator_of_notMem hx]
+        exact zero_le'
+    · have := hg.eLpNorm_lt_top
+      rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num),
+        show ((2:ℝ≥0∞).toReal) = (2:ℝ) by norm_num] at this
+      have h1 : (∫⁻ x, ‖g x‖ₑ ^ (2:ℝ)) < ⊤ := by
+        by_contra hcon
+        push Not at hcon
+        rw [top_le_iff.mp hcon] at this
+        simp at this
+      exact h1.ne
+    · refine Filter.Eventually.of_forall (fun x => ?_)
+      obtain ⟨N, hN⟩ := exists_nat_gt |x|
+      refine tendsto_nhds_of_eventually_eq ?_
+      filter_upwards [Filter.eventually_ge_atTop N] with n hn
+      have hx : x ∈ Set.Ioc (-(n:ℝ)) (n:ℝ) := by
+        rw [Set.mem_Ioc]
+        have h2 : (N:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+        constructor
+        · nlinarith [abs_nonneg x, neg_abs_le x]
+        · nlinarith [le_abs_self x]
+      rw [Set.indicator_of_notMem (by simpa using hx)]
+  -- continuity of `· ^ (1/2)` at 0
+  have hcont : Tendsto (fun z : ℝ≥0∞ => z ^ (1/(2:ℝ))) (nhds 0) (nhds 0) := by
+    have h0 := (ENNReal.continuous_rpow_const (y := 1/(2:ℝ))).tendsto 0
+    rw [show (0:ℝ≥0∞) ^ (1/(2:ℝ)) = 0 by
+      rw [ENNReal.zero_rpow_of_pos (by norm_num)]] at h0
+    exact h0
+  exact hcont.comp hdom
 
 end DedekindResidue
