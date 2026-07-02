@@ -300,6 +300,59 @@ theorem heckeTheta_heckeWeights_periodic (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
   rw [heckeWeights_add_logEmbedding]
   exact heckeTheta_unit_mul K I ε _
 
+
+open scoped Classical in
+theorem sum_fullLog (u : logSpace K) : ∑ w : InfinitePlace K, fullLog K u w = 0 := by
+  rw [Fintype.sum_eq_add_sum_subtype_ne _ (w₀ : InfinitePlace K)]
+  have h1 : fullLog K u (w₀ : InfinitePlace K)
+      = -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w' := by
+    rw [fullLog]
+    exact dif_pos rfl
+  have h2 : ∀ w : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)},
+      fullLog K u (w : InfinitePlace K) = u w := by
+    intro w
+    rw [fullLog, dif_neg w.2]
+  rw [h1, Finset.sum_congr rfl (fun w _ => h2 w)]
+  ring
+
+open scoped Classical in
+/-- **The norm-ray property**: the place-multiplicity-weighted product of the Hecke weights
+is exactly `t` — the Mellin variable. (`∑ mult = n` and the trace-zero sum of `fullLog`.) -/
+theorem prod_heckeWeights_pow_mult {t : ℝ} (ht : 0 < t) (u : logSpace K) :
+    ∏ w : InfinitePlace K, (heckeWeights K t u w) ^ mult w = t := by
+  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  have hexp : ∀ w : InfinitePlace K,
+      (Real.exp (2 * fullLog K u w / mult w)) ^ mult w = Real.exp (2 * fullLog K u w) := by
+    intro w
+    rw [← Real.exp_nat_mul]
+    congr 1
+    have hm : (mult w : ℝ) ≠ 0 := by
+      have := mult_pos (w := w)
+      positivity
+    field_simp
+  simp_rw [heckeWeights, mul_pow, hexp]
+  rw [Finset.prod_mul_distrib, ← Real.exp_sum, Finset.prod_pow_eq_pow_sum,
+    ← Real.rpow_natCast (t ^ ((1:ℝ) / (Module.finrank ℚ K))), ← Real.rpow_mul ht.le,
+    sum_mult_eq]
+  rw [show (∑ x : InfinitePlace K, 2 * fullLog K u x) = 0 by
+    rw [← Finset.mul_sum, sum_fullLog, mul_zero]]
+  rw [Real.exp_zero, mul_one, one_div, inv_mul_cancel₀ (by positivity), Real.rpow_one]
+
+open scoped Classical in
+/-- **Hecke's unit-averaged theta** `g_I(t)`: the multivariable theta at the Hecke weights,
+averaged over the fundamental box of the unit lattice in log-coordinates and divided by the
+number of roots of unity. Genuine Lebesgue integral over `logSpace K`; the integrand is
+periodic modulo `unitLattice K` (`heckeTheta_heckeWeights_periodic`), so the box choice is
+immaterial. The Mellin transform of `g_I` produces the completed partial zeta of the class
+of `I` (SP1-AGE-4). -/
+noncomputable def heckeG (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : ℝ) : ℝ :=
+  (torsionOrder K : ℝ)⁻¹ *
+    ∫ u in ZSpan.fundamentalDomain
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
+      heckeTheta K I (heckeWeights K t u)
+
 end
 
 end DedekindResidue

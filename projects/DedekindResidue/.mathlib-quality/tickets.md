@@ -196,7 +196,16 @@
       `Θ_I(c) = covol(L_I)⁻¹·(∏ᵢc)^{-1/2}·Θ_{I^∨}(c^∨)` — Hecke's multivariable theta
       functional equation for ideal lattices (weightedThetaLattice_transform +
       dualZLattice_idealZLattice + comap_equiv reindex, twist absorbed into weights).
-      REMAINING AGE-3: log-unit-basis box parametrisation of the weights
+      **L1/L2/L3 DONE ✓ (2026-07-02)**: `fullLog` (trace-zero extension, `fullLog_logEmbedding`,
+      `fullLog_add`, `sum_fullLog = 0`), **`heckeWeights t u`** (`t^{1/n}·exp(2·fullLog/mult)`,
+      positive; equivariance `heckeWeights_add_logEmbedding` ⇒
+      `heckeTheta_heckeWeights_periodic` — integrand periodic mod `unitLattice`),
+      `prod_heckeWeights_pow_mult` (`∏_w c_w^{mult w} = t`, the norm ray), and **`heckeG I t`**
+      (the unit-box-averaged theta, `torsionOrder⁻¹·∫_{FD(unit basis)} Θ_I(c(t,u)) du`).
+      REMAINING AGE-3 (then AGE-4): the `g`-inversion (heckeTheta_inversion pointwise under the
+      integral + `u ↦ -u` box change of variables + dualPlaceWeights-vs-heckeWeights(1/t,-u)
+      bookkeeping with the 4^{r₂}/2-power constants), and integrability estimates; then the
+      Mellin definition of `Λ` + `IsCompletedDedekindZeta` existence. ORIGINAL box plan:
       `c(t,u)_w = t^{1/n}·exp(logunits-combination)` + `g_I(t) := ∫_{[0,1)^{r+s-1}} Θ(c(t,u)) du`
       + its inversion (from `weightedThetaLattice_transform` — note `heckeTheta I c` = the
       `weightedGaussianCM (placeWeights c)`-sum over `idealZLattice I` — +
