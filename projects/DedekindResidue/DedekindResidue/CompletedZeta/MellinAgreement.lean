@@ -342,6 +342,87 @@ theorem sum_placeWeights_unit_smul (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) 
   rw [map_mul, mul_pow]
   ring
 
+open scoped Classical in
+/-- **Reindex a zero-removed lattice sum along the Euclidean cone unfolding**: the sum
+over nonzero points of the ideal lattice becomes a sum over cone points × unit exponents. -/
+theorem tsum_ite_eq_tsum_coneUnfold (J : (Ideal (𝓞 K))⁰)
+    (g : EuclideanSpace ℝ (index K) → ℝ) :
+    (∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
+        if v = 0 then 0 else g (v : EuclideanSpace ℝ (index K)))
+      = ∑' p : (idealSet K J) × (Fin (rank K) → ℤ),
+          g ((euclidMixedEquiv K).symm
+            ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))) := by
+  have hmem : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))
+        ∈ idealZLattice K (FractionalIdeal.mk0 K J) := by
+    intro p
+    rw [mem_idealZLattice_iff_euclidMixed, LinearEquiv.apply_symm_apply]
+    exact unit_smul_mem_idealLattice K J _ (p.1.2.2)
+  have hne : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (⟨(euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))),
+        hmem p⟩ : idealZLattice K (FractionalIdeal.mk0 K J)) ≠ 0 := by
+    intro p h0
+    have h1 : (euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))) = 0 := by
+      have := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
+        (z : EuclideanSpace ℝ (index K))) h0
+      simpa using this
+    rw [LinearEquiv.map_eq_zero_iff] at h1
+    have hp1ne : ((p.1 : mixedSpace K)) ≠ 0 := by
+      intro hz
+      have hc := p.1.2.1
+      rw [hz] at hc
+      exact hc.2 (map_zero (mixedEmbedding.norm (K := K)))
+    exact (unit_smul_ne_zero K _ hp1ne) h1
+  refine tsum_eq_tsum_of_ne_zero_bij
+    (i := fun p => ⟨(euclidMixedEquiv K).symm
+      ((∏ i, fundSystem K i ^ ((p : (idealSet K J) × (Fin (rank K) → ℤ)).2 i))
+        • (((p : (idealSet K J) × (Fin (rank K) → ℤ)).1 : mixedSpace K))), hmem p⟩)
+    ?_ ?_ ?_
+  · -- injectivity
+    rintro p q hpq
+    have hval := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
+      (z : EuclideanSpace ℝ (index K))) hpq
+    simp only at hval
+    have hmix := (euclidMixedEquiv K).symm.injective hval
+    have hcu : coneUnfoldEquiv K J (p : (idealSet K J) × (Fin (rank K) → ℤ))
+        = coneUnfoldEquiv K J (q : (idealSet K J) × (Fin (rank K) → ℤ)) :=
+      Subtype.ext hmix
+    exact Subtype.ext ((coneUnfoldEquiv K J).injective hcu)
+  · -- support inclusion
+    rintro v hv
+    rw [Function.mem_support] at hv
+    have hvne : v ≠ 0 := by
+      rintro rfl
+      simp at hv
+    have hvne' : (v : EuclideanSpace ℝ (index K)) ≠ 0 := by
+      intro h0
+      exact hvne (Subtype.ext h0)
+    set w : {x : EuclideanSpace ℝ (index K) //
+        x ∈ idealZLattice K (FractionalIdeal.mk0 K J) ∧ x ≠ 0} :=
+      ⟨(v : EuclideanSpace ℝ (index K)), v.2, hvne'⟩ with hw
+    set pr := euclidConeEquiv K J w with hpr
+    have hback : (euclidConeEquiv K J).symm pr = w := Equiv.symm_apply_apply _ _
+    -- compute the value of the inverse
+    have hvalsymm : ((euclidConeEquiv K J).symm pr : EuclideanSpace ℝ (index K))
+        = (euclidMixedEquiv K).symm
+            ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K))) := by
+      rw [euclidConeEquiv]
+      rfl
+    have hvw : (euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))
+        = (v : EuclideanSpace ℝ (index K)) := by
+      rw [← hvalsymm, hback]
+    have hgpr : g ((euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))) ≠ 0 := by
+      rw [hvw]
+      rwa [if_neg hvne] at hv
+    refine ⟨⟨pr, hgpr⟩, ?_⟩
+    exact Subtype.ext hvw
+  · -- pointwise agreement
+    rintro ⟨p, hp⟩
+    rw [if_neg (hne p)]
+
 end
 
 end DedekindResidue
