@@ -230,6 +230,40 @@ noncomputable def coneUnfoldEquiv (J : (Ideal (𝓞 K))⁰) :
       rw [zpow_neg]
     rw [hprodinv, inv_smul_smul]
 
+open scoped Classical in
+/-- The box integral of a `unitLattice`-periodic function does not depend on the choice of
+ℤ-basis of the unit lattice: any two `ZSpan` boxes are fundamental domains of the same
+lattice. -/
+theorem setIntegral_box_swap (f : logSpace K → ℝ)
+    (hf : ∀ l ∈ unitLattice K, ∀ x, f (l + x) = f x) :
+    ∫ u in ZSpan.fundamentalDomain
+      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ), f u
+      = ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ), f u := by
+  have h1 := ZSpan.isAddFundamentalDomain
+    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) volume
+  have h2 := ZSpan.isAddFundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ) volume
+  rw [(Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis_span ℝ] at h1
+  rw [(basisUnitLattice K).ofZLatticeBasis_span ℝ] at h2
+  haveI : VAddInvariantMeasure (unitLattice K) (logSpace K) volume :=
+    inferInstanceAs (VAddInvariantMeasure (unitLattice K).toAddSubgroup (logSpace K) volume)
+  refine h1.setIntegral_eq h2 (f := f) (fun l x => ?_)
+  rw [Submodule.vadd_def, vadd_eq_add]
+  exact hf (l : logSpace K) l.2 x
+
+open scoped Classical in
+/-- `heckeG` computed over the canonical `basisUnitLattice` box — the box whose translates
+are indexed by `logEmbedding_fundSystem`. -/
+theorem heckeG_eq_basisUnitLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : ℝ) :
+    heckeG K I t = (torsionOrder K : ℝ)⁻¹ *
+      ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+        heckeTheta K I (heckeWeights K t u) := by
+  rw [heckeG]
+  congr 1
+  refine setIntegral_box_swap K _ (fun l hl x => ?_)
+  obtain ⟨a, -, ha⟩ := Submodule.mem_map.mp hl
+  rw [add_comm, ← ha]
+  exact heckeTheta_heckeWeights_periodic K I _ x (Additive.toMul a)
+
 end
 
 end DedekindResidue
