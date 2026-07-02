@@ -1,1 +1,1 @@
-FOCUS: AGE-3 (i) prod_placeWeights lemma (index-product = mult-weighted place-product) => t^{-1/2} middle factor — next Lean brick
+FOCUS: AGE-3 (iv) integrability of heckeTheta over the FD box + heckeG convergence bounds; then AGE-4 Mellin: agreement on Re>1 via FundamentalCone.idealSetEquivNorm counting
