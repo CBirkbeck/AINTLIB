@@ -270,6 +270,13 @@
          (mathlib `FundamentalCone.idealSetEquivNorm`); (ε) sum over classes = `ζ_K`,
          define `completedDedekindZeta`, prove `IsCompletedDedekindZeta` (Re>1 agreement +
          entirety) ⇒ **`∃ Λ, IsCompletedDedekindZeta K Λ` — GRH non-vacuity**.
+         **NAMED TARGET (user-confirmed 2026-07-03): `exists_isCompletedDedekindZeta :
+         ∃ Λ : ℂ → ℂ, IsCompletedDedekindZeta K Λ`** — the inhabitation theorem making
+         `GeneralizedRiemannHypothesis K` non-vacuous. All hard analytic bricks DONE as of
+         045cd9a2 (β unfolding, δ+δ2 counting, γ `lintegral_M0_eq`); remaining is the (ε)
+         assembly: ENNReal chain-glue per class → real-σ agreement → toReal/mellin
+         identification (`heckeFEPair.hasMellin`) → identity theorem (Re s > 1) → the
+         definition + both `IsCompletedDedekindZeta` conditions.
       4. `Λ_K(s) := (const-adjust)·P.Λ (s/2)`: `WeakFEPair.Λ₀` entire + explicit poles at
          `σ ∈ {0, 1/2}` ⇒ `s(s−1)Λ_K` entire ✓ second half of `IsCompletedDedekindZeta`.
       5. **Agreement on Re s > 1** (the big remaining brick): `P.hasMellin` +
