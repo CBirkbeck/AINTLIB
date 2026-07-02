@@ -91,6 +91,72 @@ theorem exists_heckeΛ₀_strip_bound (a b : ℝ) :
           + ∫ x in Set.Ioi (0:ℝ), x ^ (b - 1) * ‖(heckeFEPair K).f_modif x‖ :=
         integral_add (integrable_heckeΛ₀_norm K a) (integrable_heckeΛ₀_norm K b)
 
+/-- **AC-A2-ii: polynomial strip bound for the entire completed zeta**
+`H(s) = s(s-1)Λ_K(s)`: on every vertical strip, `‖H(s)‖ ≤ B·(1+‖s‖)²` uniformly in
+the imaginary direction. This is the growth input for Jensen counting and the
+contour estimates. -/
+theorem exists_completedDedekindZetaEntire_strip_bound (a b : ℝ) (hab : a ≤ b) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ s : ℂ, a ≤ s.re → s.re ≤ b →
+      ‖completedDedekindZetaEntire K s‖ ≤ B * (1 + ‖s‖)^2 := by
+  obtain ⟨B₀, hB₀⟩ := exists_heckeΛ₀_strip_bound K (a/2) (b/2)
+  have hB₀0 : 0 ≤ B₀ := by
+    refine le_trans (norm_nonneg ((heckeFEPair K).Λ₀ ((a/2 : ℝ) : ℂ))) (hB₀ _ ?_ ?_)
+    · simp
+    · simp
+      linarith
+  refine ⟨‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
+    * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖),
+    by positivity, fun s ha hb => ?_⟩
+  have hs2 : (s / 2).re = s.re / 2 := by
+    rw [show s / 2 = ((1/2 : ℝ) : ℂ) * s by push_cast; ring, Complex.re_ofReal_mul]
+    ring
+  have hΛ : ‖(heckeFEPair K).Λ₀ (s / 2)‖ ≤ B₀ :=
+    hB₀ (s/2) (by rw [hs2]; linarith) (by rw [hs2]; linarith)
+  have h1s : ‖s‖ ≤ 1 + ‖s‖ := by linarith [norm_nonneg s]
+  have h1s1 : ‖s - 1‖ ≤ 1 + ‖s‖ := by
+    calc ‖s - 1‖ ≤ ‖s‖ + ‖(1:ℂ)‖ := norm_sub_le _ _
+      _ = 1 + ‖s‖ := by rw [norm_one]; ring
+  have hone : (1:ℝ) ≤ 1 + ‖s‖ := by linarith [norm_nonneg s]
+  have hmain : ‖s * (s - 1) * (heckeFEPair K).Λ₀ (s / 2)
+      - 2 * (s - 1) * (heckeFEPair K).f₀ + 2 * s * (heckeFEPair K).g₀‖
+      ≤ (1 + ‖s‖)^2 * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖) := by
+    refine le_trans (norm_add_le _ _) ?_
+    refine le_trans (add_le_add_left (norm_sub_le _ _) _) ?_
+    rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul]
+    simp only [Complex.norm_ofNat]
+    have hsq : 1 + ‖s‖ ≤ (1 + ‖s‖)^2 := by nlinarith [norm_nonneg s]
+    have e1 : ‖s‖ * ‖s - 1‖ * ‖(heckeFEPair K).Λ₀ (s / 2)‖ ≤ (1 + ‖s‖)^2 * B₀ := by
+      have hss : ‖s‖ * ‖s - 1‖ ≤ (1 + ‖s‖)^2 := by
+        nlinarith [norm_nonneg s, norm_nonneg (s - 1)]
+      exact mul_le_mul hss hΛ (norm_nonneg _) (by positivity)
+    have e2 : 2 * ‖s - 1‖ * ‖(heckeFEPair K).f₀‖
+        ≤ (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).f₀‖) := by
+      calc 2 * ‖s - 1‖ * ‖(heckeFEPair K).f₀‖
+          = ‖s - 1‖ * (2 * ‖(heckeFEPair K).f₀‖) := by ring
+        _ ≤ (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).f₀‖) :=
+            mul_le_mul_of_nonneg_right (h1s1.trans hsq) (by positivity)
+    have e3 : 2 * ‖s‖ * ‖(heckeFEPair K).g₀‖
+        ≤ (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).g₀‖) := by
+      calc 2 * ‖s‖ * ‖(heckeFEPair K).g₀‖
+          = ‖s‖ * (2 * ‖(heckeFEPair K).g₀‖) := by ring
+        _ ≤ (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).g₀‖) :=
+            mul_le_mul_of_nonneg_right (h1s.trans hsq) (by positivity)
+    have hdist : (1 + ‖s‖)^2 * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖)
+        = (1 + ‖s‖)^2 * B₀ + (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).f₀‖)
+          + (1 + ‖s‖)^2 * (2 * ‖(heckeFEPair K).g₀‖) := by ring
+    rw [hdist]
+    linarith
+  rw [completedDedekindZetaEntire, norm_mul]
+  calc ‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
+      * ‖s * (s - 1) * (heckeFEPair K).Λ₀ (s / 2)
+          - 2 * (s - 1) * (heckeFEPair K).f₀ + 2 * s * (heckeFEPair K).g₀‖
+      ≤ ‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
+        * ((1 + ‖s‖)^2 * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖)) :=
+        mul_le_mul_of_nonneg_left hmain (norm_nonneg _)
+    _ = ‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
+        * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖) * (1 + ‖s‖)^2 := by
+        ring
+
 end
 
 end DedekindResidue
