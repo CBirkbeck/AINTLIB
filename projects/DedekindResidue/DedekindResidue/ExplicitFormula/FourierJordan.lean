@@ -1,6 +1,7 @@
 module
 
 public import DedekindResidue.ExplicitFormula.PrimeSide
+public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 
 /-!
 # Fourier–Jordan inversion: the Dirichlet integral (SP2-FJ-c)
@@ -492,5 +493,101 @@ theorem integral_fourier_window_collapse {H : ℝ → ℂ} (hH : Integrable H) {
   congr 1
   rw [← intervalIntegral.integral_of_le (by linarith : -T ≤ T)]
   exact integral_cexp_window hu T
+
+/-- Riemann–Lebesgue for the kernel `e^{-iuT}`: for (any) `G`,
+`∫ G(u) e^{-iuT} du → 0` as `T → ∞`. -/
+theorem tendsto_integral_mul_cexp_neg_atTop (G : ℝ → ℂ) :
+    Tendsto (fun T : ℝ => ∫ u : ℝ, G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I))
+      atTop (nhds 0) := by
+  have hRL := Real.tendsto_integral_exp_smul_cocompact G
+  have hmap : Tendsto (fun T : ℝ => T / (2*π)) atTop (Filter.cocompact ℝ) := by
+    rw [cocompact_eq_atBot_atTop]
+    refine Filter.Tendsto.mono_right ?_ le_sup_right
+    exact Filter.tendsto_id.atTop_div_const (by positivity)
+  have hcomp := hRL.comp hmap
+  refine hcomp.congr (fun T => ?_)
+  simp only [Function.comp_apply]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+  show Real.fourierChar (-(u * (T / (2*π)))) • G u = G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)
+  rw [Circle.smul_def, Real.fourierChar_apply]
+  have hreal : 2 * π * -(u * (T / (2 * π))) = -(u * T) := by
+    have hpi : (2:ℝ) * π ≠ 0 := by positivity
+    field_simp
+  rw [hreal]
+  push_cast
+  exact mul_comm _ _
+
+/-- Riemann–Lebesgue for the kernel `e^{+iuT}`. -/
+theorem tendsto_integral_mul_cexp_pos_atTop (G : ℝ → ℂ) :
+    Tendsto (fun T : ℝ => ∫ u : ℝ, G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I))
+      atTop (nhds 0) := by
+  have hRL := Real.tendsto_integral_exp_smul_cocompact G
+  have hmap : Tendsto (fun T : ℝ => -T / (2*π)) atTop (Filter.cocompact ℝ) := by
+    rw [cocompact_eq_atBot_atTop]
+    refine Filter.Tendsto.mono_right ?_ le_sup_left
+    have h1 : Tendsto (fun T : ℝ => T / (2*π)) atTop atTop :=
+      Filter.tendsto_id.atTop_div_const (by positivity)
+    have h2 := Filter.tendsto_neg_atBot_iff.mpr h1
+    refine h2.congr (fun T => ?_)
+    ring
+  have hcomp := hRL.comp hmap
+  refine hcomp.congr (fun T => ?_)
+  simp only [Function.comp_apply]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+  show Real.fourierChar (-(u * (-T / (2*π)))) • G u = G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I)
+  rw [Circle.smul_def, Real.fourierChar_apply]
+  have hreal : 2 * π * -(u * (-T / (2 * π))) = u * T := by
+    have hpi : (2:ℝ) * π ≠ 0 := by positivity
+    field_simp
+  rw [hreal]
+  push_cast
+  exact mul_comm _ _
+
+/-- **FJ-d, Riemann–Lebesgue with the sine kernel**: for integrable `G`,
+`∫ G(u)·sin(Tu) du → 0` as `T → ∞`. Applied away from `u = 0` (to `G = H(u)/u` on
+`|u| ≥ δ`) in the Fourier–Jordan argument. -/
+theorem tendsto_integral_mul_sin_atTop {G : ℝ → ℂ} (hG : Integrable G) :
+    Tendsto (fun T : ℝ => ∫ u : ℝ, G u * ((Real.sin (T * u) : ℝ) : ℂ))
+      atTop (nhds 0) := by
+  have hplus := tendsto_integral_mul_cexp_pos_atTop G
+  have hminus := tendsto_integral_mul_cexp_neg_atTop G
+  have hdiff := (hplus.sub hminus).div_const (2 * Complex.I)
+  rw [sub_zero, zero_div] at hdiff
+  refine hdiff.congr (fun T => ?_)
+  have hexp_p : AEStronglyMeasurable
+      (fun u : ℝ => Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I)) volume := by
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  have hexp_m : AEStronglyMeasurable
+      (fun u : ℝ => Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)) volume := by
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  have hint_p : Integrable (fun u : ℝ => G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I)) := by
+    have h1 := hG.bdd_mul (c := 1) hexp_p (Filter.Eventually.of_forall (fun u => by
+      simp [Complex.norm_exp]))
+    refine h1.congr (Filter.Eventually.of_forall (fun u => ?_))
+    exact mul_comm _ _
+  have hint_m : Integrable
+      (fun u : ℝ => G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)) := by
+    have h1 := hG.bdd_mul (c := 1) hexp_m (Filter.Eventually.of_forall (fun u => by
+      simp [Complex.norm_exp]))
+    refine h1.congr (Filter.Eventually.of_forall (fun u => ?_))
+    exact mul_comm _ _
+  rw [← MeasureTheory.integral_sub hint_p hint_m, ← MeasureTheory.integral_div]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+  show (G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I)
+        - G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)) / (2 * Complex.I)
+      = G u * ((Real.sin (T * u) : ℝ) : ℂ)
+  rw [show ((Real.sin (T * u) : ℝ) : ℂ) = Complex.sin ((u:ℂ) * (T:ℂ)) by
+    push_cast
+    rw [mul_comm]]
+  rw [show Complex.sin ((u:ℂ) * (T:ℂ))
+      = ((Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)
+          - Complex.exp (((u:ℂ) * (T:ℂ)) * Complex.I)) * Complex.I) / 2 from rfl]
+  have hIne : (2 : ℂ) * Complex.I ≠ 0 := by
+    simp [Complex.I_ne_zero]
+  field_simp
+  rw [Complex.I_sq]
+  ring
 
 end DedekindResidue
