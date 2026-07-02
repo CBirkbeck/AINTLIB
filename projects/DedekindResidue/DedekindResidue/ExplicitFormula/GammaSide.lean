@@ -3031,4 +3031,198 @@ theorem tendsto_integral_rhoFT_mul_phi_eq_plancherel {k F : ℝ → ℂ}
   rw [integral_muFT_mul_gammaFT hk1 hk2 hF hFdiv hFdiv2] at h0
   exact h0
 
+/-- **Poitou's odd kernel** (p. 6-06): the odd extension of
+`x ↦ x e^{-σx}/(1-e^{-x})` from `x > 0`. -/
+noncomputable def poitouKernel (σ : ℝ) (x : ℝ) : ℝ :=
+  Real.sign x * (|x| * Real.exp (-(σ*|x|)) / (1 - Real.exp (-|x|)))
+
+theorem poitouKernel_neg (σ x : ℝ) : poitouKernel σ (-x) = -poitouKernel σ x := by
+  rw [poitouKernel, poitouKernel, Real.sign_neg, abs_neg]
+  ring
+
+theorem poitouKernel_of_pos {σ x : ℝ} (hx : 0 < x) :
+    poitouKernel σ x = x * Real.exp (-(σ*x)) / (1 - Real.exp (-x)) := by
+  rw [poitouKernel, Real.sign_of_pos hx, abs_of_pos hx, one_mul]
+
+/-- The kernel profile bound: `|poitouKernel σ x| ≤ (1+|x|)e^{-σ|x|}` (from
+`y/(1-e^{-y}) ≤ 1+y`, i.e. `(1+y)e^{-y} ≤ 1`). -/
+theorem abs_poitouKernel_le (σ : ℝ) (x : ℝ) :
+    |poitouKernel σ x| ≤ (1 + |x|) * Real.exp (-(σ*|x|)) := by
+  rcases lt_trichotomy x 0 with hx | hx | hx
+  · rw [poitouKernel, Real.sign_of_neg hx, abs_mul, abs_neg, abs_one, one_mul]
+    have hax : 0 < |x| := abs_pos.mpr hx.ne
+    have hden : 0 < 1 - Real.exp (-|x|) := by
+      have := Real.exp_lt_exp.mpr (show -|x| < 0 by linarith)
+      rw [Real.exp_zero] at this
+      linarith
+    rw [abs_div, abs_mul, abs_abs, Real.abs_exp, abs_of_pos hden,
+      div_le_iff₀ hden]
+    have hkey : (1 + |x|) * Real.exp (-|x|) ≤ 1 := by
+      have h0 := Real.add_one_le_exp |x|
+      rw [Real.exp_neg]
+      rw [mul_inv_le_iff₀ (Real.exp_pos _)]
+      linarith
+    nlinarith [Real.exp_pos (-(σ*|x|)), Real.exp_pos (-|x|), abs_nonneg x,
+      mul_pos (Real.exp_pos (-(σ*|x|))) hden]
+  · rw [hx]
+    simp [poitouKernel]
+  · rw [poitouKernel, Real.sign_of_pos hx, one_mul]
+    have hax : 0 < |x| := abs_pos.mpr hx.ne'
+    have hden : 0 < 1 - Real.exp (-|x|) := by
+      have := Real.exp_lt_exp.mpr (show -|x| < 0 by linarith)
+      rw [Real.exp_zero] at this
+      linarith
+    rw [abs_div, abs_mul, abs_abs, Real.abs_exp, abs_of_pos hden,
+      div_le_iff₀ hden]
+    have hkey : (1 + |x|) * Real.exp (-|x|) ≤ 1 := by
+      have h0 := Real.add_one_le_exp |x|
+      rw [Real.exp_neg]
+      rw [mul_inv_le_iff₀ (Real.exp_pos _)]
+      linarith
+    nlinarith [Real.exp_pos (-(σ*|x|)), Real.exp_pos (-|x|), abs_nonneg x,
+      mul_pos (Real.exp_pos (-(σ*|x|))) hden]
+
+/-- The two-sided exponential `e^{-a|x|}` is integrable. -/
+theorem integrable_exp_neg_mul_abs {a : ℝ} (ha : 0 < a) :
+    Integrable (fun x : ℝ => Real.exp (-(a*|x|))) := by
+  have A : MeasurableEmbedding fun x : ℝ => -x :=
+    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+  have hmap : (volume : Measure ℝ).restrict (Set.Iio (0:ℝ))
+      = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ioi (0:ℝ))) := by
+    rw [show Set.Ioi (0:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iio 0) by ext x; simp,
+      ← Measure.restrict_map A.measurable measurableSet_Iio,
+      Measure.map_neg_eq_self (volume : Measure ℝ)]
+  have hIoi : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) (Set.Ioi 0) := by
+    refine (exp_neg_integrableOn_Ioi (0:ℝ) ha).congr_fun (fun x hx => ?_) measurableSet_Ioi
+    rw [Set.mem_Ioi] at hx
+    rw [abs_of_pos hx]
+    ring_nf
+  have hIio : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) (Set.Iio 0) := by
+    rw [IntegrableOn, hmap, A.integrable_map_iff]
+    refine hIoi.congr ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
+    refine Filter.Eventually.of_forall (fun x hx => ?_)
+    show Real.exp (-(a*|x|)) = Real.exp (-(a*|(-x)|))
+    rw [abs_neg]
+  rw [← MeasureTheory.integrableOn_univ,
+    show (Set.univ : Set ℝ) = Set.Iio 0 ∪ Set.Ici 0 by rw [Set.Iio_union_Ici],
+    MeasureTheory.integrableOn_union]
+  constructor
+  · exact hIio
+  · have h8 : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) {(0:ℝ)} := by
+      rw [IntegrableOn, Measure.restrict_eq_zero.mpr (measure_singleton 0)]
+      exact integrable_zero_measure
+    have h9 : Set.Ici (0:ℝ) = {(0:ℝ)} ∪ Set.Ioi 0 := by
+      ext x
+      simp only [Set.mem_Ici, Set.mem_union, Set.mem_singleton_iff, Set.mem_Ioi]
+      constructor
+      · intro h'
+        rcases eq_or_lt_of_le h' with h'' | h''
+        · exact Or.inl h''.symm
+        · exact Or.inr h''
+      · rintro (h' | h')
+        · exact h'.ge
+        · exact h'.le
+    rw [h9]
+    exact MeasureTheory.IntegrableOn.union h8 hIoi
+
+/-- The exponential-polynomial majorant bound: `(1+|x|)e^{-a|x|} ≤ (1+2/a)e^{-a|x|/2}`. -/
+theorem one_add_abs_mul_exp_le {a : ℝ} (ha : 0 < a) (x : ℝ) :
+    (1 + |x|) * Real.exp (-(a*|x|)) ≤ (1 + 2/a) * Real.exp (-(a*|x|/2)) := by
+  have h1 : |x| * Real.exp (-(a*|x|)) ≤ (2/a) * Real.exp (-(a*|x|/2)) := by
+    have h2 : a*|x|/2 + 1 ≤ Real.exp (a*|x|/2) := Real.add_one_le_exp _
+    have h3 : |x| ≤ (2/a) * Real.exp (a*|x|/2) := by
+      rw [div_mul_eq_mul_div, le_div_iff₀ ha]
+      nlinarith [abs_nonneg x]
+    calc |x| * Real.exp (-(a*|x|))
+        ≤ ((2/a) * Real.exp (a*|x|/2)) * Real.exp (-(a*|x|)) := by
+          refine mul_le_mul_of_nonneg_right h3 (Real.exp_pos _).le
+      _ = (2/a) * Real.exp (-(a*|x|/2)) := by
+          rw [mul_assoc, ← Real.exp_add]
+          ring_nf
+  have h4 : Real.exp (-(a*|x|)) ≤ Real.exp (-(a*|x|/2)) := by
+    refine Real.exp_le_exp.mpr ?_
+    nlinarith [abs_nonneg x]
+  nlinarith [Real.exp_pos (-(a*|x|/2))]
+
+/-- The exponential-polynomial majorant is integrable on the whole line. -/
+theorem integrable_one_add_abs_mul_exp {a : ℝ} (ha : 0 < a) :
+    Integrable (fun x : ℝ => (1 + |x|) * Real.exp (-(a*|x|))) := by
+  have hmeas : AEStronglyMeasurable (fun x : ℝ => (1 + |x|) * Real.exp (-(a*|x|)))
+      (volume : Measure ℝ) := by
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  refine MeasureTheory.Integrable.mono'
+    (g := fun x => (1 + 2/a) * Real.exp (-(a*|x|/2)))
+    (((integrable_exp_neg_mul_abs (show (0:ℝ) < a/2 by positivity)).congr
+      (Filter.Eventually.of_forall (fun x => by
+        show Real.exp (-(a/2*|x|)) = Real.exp (-(a*|x|/2))
+        ring_nf))).const_mul _) hmeas ?_
+  exact Filter.Eventually.of_forall (fun x => by
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    exact one_add_abs_mul_exp_le ha x)
+
+/-- Total form of the Poitou kernel: `sign x·|x| = x` collapses the piecewise
+definition. -/
+theorem poitouKernel_eq (σ x : ℝ) :
+    poitouKernel σ x = x * Real.exp (-(σ*|x|)) / (1 - Real.exp (-|x|)) := by
+  have hs : Real.sign x * |x| = x := by
+    rcases lt_trichotomy x 0 with h | h | h
+    · rw [Real.sign_of_neg h, abs_of_neg h]
+      ring
+    · rw [h, Real.sign_zero, abs_zero, mul_zero]
+    · rw [Real.sign_of_pos h, abs_of_pos h, one_mul]
+  rw [poitouKernel, show Real.sign x * (|x| * Real.exp (-(σ*|x|)) / (1 - Real.exp (-|x|)))
+      = (Real.sign x * |x|) * Real.exp (-(σ*|x|)) / (1 - Real.exp (-|x|)) from by ring,
+    hs]
+
+/-- The Poitou kernel is measurable. -/
+theorem measurable_poitouKernel (σ : ℝ) : Measurable (poitouKernel σ) := by
+  have h0 : poitouKernel σ = fun x => x * Real.exp (-(σ*|x|)) / (1 - Real.exp (-|x|)) :=
+    funext (poitouKernel_eq σ)
+  rw [h0]
+  fun_prop
+
+/-- The (complexified) Poitou kernel is integrable (K3). -/
+theorem integrable_poitouKernel {σ : ℝ} (hσ : 0 < σ) :
+    Integrable (fun x : ℝ => ((poitouKernel σ x : ℝ) : ℂ)) := by
+  refine MeasureTheory.Integrable.mono' (integrable_one_add_abs_mul_exp hσ) ?_ ?_
+  · exact (Complex.measurable_ofReal.comp (measurable_poitouKernel σ)).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [Complex.norm_real, Real.norm_eq_abs]
+    exact abs_poitouKernel_le σ x
+
+/-- The (complexified) Poitou kernel is square-integrable (K4). -/
+theorem memLp_two_poitouKernel {σ : ℝ} (hσ : 0 < σ) :
+    MemLp (fun x : ℝ => ((poitouKernel σ x : ℝ) : ℂ)) 2 (volume : Measure ℝ) := by
+  have hmaj : MemLp (fun x : ℝ => (1 + |x|) * Real.exp (-(σ*|x|))) 2
+      (volume : Measure ℝ) := by
+    rw [memLp_two_iff_integrable_sq (by
+      refine Continuous.aestronglyMeasurable ?_
+      fun_prop)]
+    have h0 : ∀ x : ℝ, ((1 + |x|) * Real.exp (-(σ*|x|)))^2
+        ≤ (1 + 2/σ)^2 * Real.exp (-(σ*|x|)) := by
+      intro x
+      have h1 := one_add_abs_mul_exp_le hσ x
+      have h2 : ((1 + |x|) * Real.exp (-(σ*|x|)))^2
+          ≤ ((1 + 2/σ) * Real.exp (-(σ*|x|/2)))^2 := by
+        refine pow_le_pow_left₀ (by positivity) h1 2
+      refine le_trans h2 (le_of_eq ?_)
+      rw [mul_pow]
+      congr 1
+      rw [sq, ← Real.exp_add]
+      ring_nf
+    refine MeasureTheory.Integrable.mono'
+      (((integrable_exp_neg_mul_abs hσ).const_mul ((1 + 2/σ)^2))) ?_ ?_
+    · refine Continuous.aestronglyMeasurable ?_
+      fun_prop
+    · refine Filter.Eventually.of_forall (fun x => ?_)
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      exact h0 x
+  refine MemLp.of_le hmaj ?_ ?_
+  · exact (Complex.measurable_ofReal.comp (measurable_poitouKernel σ)).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs]
+    refine le_trans (abs_poitouKernel_le σ x) (le_abs_self _)
+
 end DedekindResidue
