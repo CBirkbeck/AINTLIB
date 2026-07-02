@@ -385,4 +385,112 @@ theorem exists_bound_integral_sinc :
     _ ≤ C₀ + C₀ := add_le_add (hC₀ B hB) (hC₀ A hA)
     _ = 2 * C₀ := by ring
 
+/-- **Sinc scaling**: `∫_v^δ sin(Tu)/u du = ∫_{Tv}^{Tδ} sin x/x dx` for `T > 0`. -/
+theorem integral_sin_mul_div_eq (T v δ : ℝ) (hT : 0 < T) :
+    ∫ u in v..δ, Real.sin (T * u) / u = ∫ x in (T*v)..(T*δ), Real.sin x / x := by
+  have h1 : (fun u : ℝ => Real.sin (T * u) / u)
+      = fun u : ℝ => T • ((fun x : ℝ => Real.sin x / x) (T * u)) := by
+    funext u
+    rcases eq_or_ne u 0 with hu | hu
+    · simp [hu]
+    · rw [smul_eq_mul]
+      show Real.sin (T * u) / u = T * (Real.sin (T * u) / (T * u))
+      field_simp
+  rw [h1, intervalIntegral.integral_smul]
+  have h2 := intervalIntegral.integral_comp_mul_left (a := v) (b := δ) (c := T)
+    (fun x => Real.sin x / x) hT.ne'
+  rw [h2, smul_smul, mul_inv_cancel₀ hT.ne', one_smul]
+
+/-- The scaled sinc window is uniformly bounded: with `C_sinc` from
+`exists_bound_integral_sinc`, `|∫_v^δ sin(Tu)/u du| ≤ C` for all `0 ≤ v, δ` and `T > 0`. -/
+theorem exists_bound_integral_sin_mul_div :
+    ∃ C : ℝ, 0 < C ∧ ∀ T v δ : ℝ, 0 < T → 0 ≤ v → 0 ≤ δ →
+      |∫ u in v..δ, Real.sin (T * u) / u| ≤ C := by
+  obtain ⟨C, hCpos, hC⟩ := exists_bound_integral_sinc
+  refine ⟨C, hCpos, fun T v δ hT hv hδ => ?_⟩
+  rw [integral_sin_mul_div_eq T v δ hT]
+  exact hC (T*v) (T*δ) (by positivity) (by positivity)
+
+/-- **FJ-e, plateau limit**: `∫_0^δ sin(Tu)/u du → π/2` as `T → ∞`, for fixed `δ > 0`. -/
+theorem tendsto_integral_sin_mul_div_atTop {δ : ℝ} (hδ : 0 < δ) :
+    Tendsto (fun T : ℝ => ∫ u in (0:ℝ)..δ, Real.sin (T * u) / u)
+      atTop (nhds (π/2)) := by
+  have hev : (fun T : ℝ => ∫ u in (0:ℝ)..δ, Real.sin (T * u) / u)
+      =ᶠ[atTop] fun T : ℝ => ∫ x in (0:ℝ)..(T*δ), Real.sin x / x := by
+    filter_upwards [Filter.eventually_gt_atTop 0] with T hT
+    rw [integral_sin_mul_div_eq T 0 δ hT, mul_zero]
+  rw [Filter.tendsto_congr' hev]
+  have hcomp : Tendsto (fun T : ℝ => T * δ) atTop atTop :=
+    Filter.Tendsto.atTop_mul_const hδ Filter.tendsto_id
+  exact tendsto_integral_sinc_atTop.comp hcomp
+
+/-- The symmetric complex-exponential window integral: for `u ≠ 0`,
+`∫_{-T}^{T} e^{itu} dt = 2 sin(Tu)/u`. -/
+theorem integral_cexp_window {u : ℝ} (hu : u ≠ 0) (T : ℝ) :
+    ∫ t : ℝ in (-T)..T, Complex.exp ((t : ℂ) * (u : ℂ) * Complex.I)
+      = ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+  have hu' : (u : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hu
+  have hc : ((u : ℂ) * Complex.I) ≠ 0 := by
+    exact mul_ne_zero hu' Complex.I_ne_zero
+  have h1 : (fun t : ℝ => Complex.exp ((t : ℂ) * (u : ℂ) * Complex.I))
+      = fun t : ℝ => Complex.exp (((u : ℂ) * Complex.I) * (t : ℝ)) := by
+    funext t
+    ring_nf
+  rw [h1, integral_exp_mul_complex hc]
+  rw [div_eq_iff hc]
+  have hz : (u:ℂ) * Complex.I * (T:ℂ) = ((T:ℂ) * (u:ℂ)) * Complex.I := by ring
+  have hz' : (u:ℂ) * Complex.I * ((-T : ℝ):ℂ) = (-((T:ℂ) * (u:ℂ))) * Complex.I := by
+    push_cast
+    ring
+  rw [hz, hz', Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
+  push_cast
+  field_simp
+  ring
+
+/-- **FJ-b, kernel collapse** (Poitou p. 6-03): for integrable `H`, Fubini collapses the
+symmetric Fourier window onto the Dirichlet kernel:
+`∫_{-T}^{T} (∫ H(u) e^{itu} du) dt = ∫ H(u) · 2sin(Tu)/u du`. -/
+theorem integral_fourier_window_collapse {H : ℝ → ℂ} (hH : Integrable H) {T : ℝ}
+    (hT : 0 < T) :
+    (∫ t : ℝ in (-T)..T, ∫ u : ℝ, H u * Complex.exp ((t : ℂ) * (u : ℂ) * Complex.I))
+      = ∫ u : ℝ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+  rw [intervalIntegral.integral_of_le (by linarith : -T ≤ T)]
+  -- joint integrability on Ioc(-T,T) × ℝ
+  have hHsnd : Integrable (fun p : ℝ × ℝ => H p.2)
+      ((volume.restrict (Set.Ioc (-T) T)).prod volume) := by
+    have h1 : Integrable (fun _ : ℝ => (1:ℂ)) (volume.restrict (Set.Ioc (-T) T)) :=
+      MeasureTheory.integrableOn_const (by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top)
+    have := h1.mul_prod hH
+    simpa using this
+  have hexp_meas : AEStronglyMeasurable
+      (fun p : ℝ × ℝ => Complex.exp ((p.1 : ℂ) * (p.2 : ℂ) * Complex.I))
+      ((volume.restrict (Set.Ioc (-T) T)).prod volume) := by
+    refine Continuous.aestronglyMeasurable ?_
+    fun_prop
+  have hprod : Integrable
+      (Function.uncurry fun t u : ℝ => H u * Complex.exp ((t : ℂ) * (u : ℂ) * Complex.I))
+      ((volume.restrict (Set.Ioc (-T) T)).prod volume) := by
+    have := hHsnd.bdd_mul (c := 1) hexp_meas ?_
+    · refine this.congr (Filter.Eventually.of_forall (fun p => ?_))
+      simp only [Function.uncurry]
+      exact mul_comm _ _
+    · refine Filter.Eventually.of_forall (fun p => ?_)
+      rw [Complex.norm_exp]
+      simp
+  have hswap := MeasureTheory.integral_integral_swap hprod
+  rw [hswap]
+  -- inner integral: pull out H u, evaluate the window
+  refine MeasureTheory.integral_congr_ae ?_
+  have h0 : ∀ᵐ (u : ℝ), u ≠ 0 := by
+    rw [MeasureTheory.ae_iff]
+    simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+    exact MeasureTheory.measure_singleton 0
+  filter_upwards [h0] with u hu
+  rw [MeasureTheory.integral_const_mul]
+  congr 1
+  rw [← intervalIntegral.integral_of_le (by linarith : -T ≤ T)]
+  exact integral_cexp_window hu T
+
 end DedekindResidue
