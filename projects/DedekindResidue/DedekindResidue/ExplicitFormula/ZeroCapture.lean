@@ -1078,6 +1078,88 @@ theorem exists_contour_height :
       _ = |(-T) - ρ.im| := by
           rw [show (-T) - ρ.im = -(T + ρ.im) by ring, abs_neg]
 
+/-- **Zero capture on the explicit-formula rectangle** (SP2-RECT R-g, step 1): for a
+half-width `0 < a ≤ 1/4`, a positive height `T` at which both horizontal edges are
+zero-free (as produced by `exists_contour_height`), and `Φ` holomorphic on the closed
+rectangle `[-a, 1+a] × [-T, T]`,
+
+`∮_{∂R} Φ·H'/H = 2πi·∑_ρ m_ρ·Φ(ρ)`,
+
+the sum over the divisor of `H` on the open rectangle. The vertical edges are
+zero-free automatically (`Re = -a < 0` and `Re = 1+a > 1`). -/
+theorem rectangle_zero_capture {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 0 < T)
+    {Φ : ℂ → ℂ}
+    (hΦ : ∀ ζ ∈ Set.uIcc (-a) (1+a) ×ℂ Set.uIcc (-T) T, DifferentiableAt ℂ Φ ζ)
+    (htop : ∀ σ : ℝ, -a ≤ σ → σ ≤ 1+a →
+      completedDedekindZetaEntire K ((σ:ℂ) + (T:ℂ) * Complex.I) ≠ 0)
+    (hbot : ∀ σ : ℝ, -a ≤ σ → σ ≤ 1+a →
+      completedDedekindZetaEntire K ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I) ≠ 0) :
+    rectangleIntegral (fun ζ => Φ ζ * logDeriv (completedDedekindZetaEntire K) ζ)
+        (((-a : ℝ):ℂ) + ((-T:ℝ):ℂ) * Complex.I) (((1+a : ℝ):ℂ) + ((T:ℝ):ℂ) * Complex.I)
+      = 2 * Real.pi * Complex.I
+        * ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+            (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-T) T)) ρ : ℂ)) * Φ ρ := by
+  set z : ℂ := ((-a : ℝ):ℂ) + ((-T:ℝ):ℂ) * Complex.I with hz
+  set w : ℂ := ((1+a : ℝ):ℂ) + ((T:ℝ):ℂ) * Complex.I with hw
+  have hzre : z.re = -a := by rw [hz]; simp
+  have hzim : z.im = -T := by rw [hz]; simp
+  have hwre : w.re = 1+a := by rw [hw]; simp
+  have hwim : w.im = T := by rw [hw]; simp
+  have hre : z.re < w.re := by rw [hzre, hwre]; linarith
+  have him : z.im < w.im := by rw [hzim, hwim]; linarith
+  -- the boundary is zero-free
+  have hbound : ∀ ζ ∈ rectangleBoundary z w, completedDedekindZetaEntire K ζ ≠ 0 := by
+    intro ζ hζ
+    rw [rectangleBoundary] at hζ
+    rcases hζ with hζ | hζ <;> rw [Complex.mem_reProdIm] at hζ
+    · -- horizontal edges
+      obtain ⟨hζre, hζim⟩ := hζ
+      rw [hzre, hwre, Set.uIcc_of_le (by linarith : -a ≤ 1+a), Set.mem_Icc] at hζre
+      have hζeq : ζ = ((ζ.re : ℝ):ℂ) + ((ζ.im : ℝ):ℂ) * Complex.I := by
+        rw [Complex.re_add_im]
+      rcases hζim with h | h
+      · -- bottom: im = -T
+        rw [hzim] at h
+        have := hbot ζ.re hζre.1 hζre.2
+        rw [← h] at this
+        rw [hζeq]
+        exact this
+      · -- top: im = T
+        rw [hwim] at h
+        have := htop ζ.re hζre.1 hζre.2
+        rw [← h] at this
+        rw [hζeq]
+        exact this
+    · -- vertical edges
+      obtain ⟨hζre, _⟩ := hζ
+      rcases hζre with h | h
+      · rw [hzre] at h
+        refine completedDedekindZetaEntire_ne_zero_of_re_lt_zero K ?_
+        rw [h]
+        linarith
+      · rw [hwre] at h
+        refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
+        rw [h]
+        linarith
+  -- witness in the enlarged rectangle
+  have hw₀mem : ((1+a : ℝ) : ℂ) ∈ Set.Ioo (z.re - 1) (w.re + 1) ×ℂ Set.Ioo (z.im - 1) (w.im + 1) := by
+    rw [Complex.mem_reProdIm, hzre, hwre, hzim, hwim]
+    constructor
+    · rw [Set.mem_Ioo]
+      constructor <;> simp <;> linarith
+    · rw [Set.mem_Ioo]
+      constructor <;> simp <;> linarith
+  have hHw₀ : completedDedekindZetaEntire K ((1+a : ℝ) : ℂ) ≠ 0 := by
+    refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
+    simp
+    linarith
+  have hΦ' : ∀ ζ ∈ Set.uIcc z.re w.re ×ℂ Set.uIcc z.im w.im, DifferentiableAt ℂ Φ ζ := by
+    intro ζ hζ
+    rw [hzre, hwre, hzim, hwim] at hζ
+    exact hΦ ζ hζ
+  have hmain := rectangleIntegral_mul_logDeriv_H K hre him hΦ' hbound hw₀mem hHw₀
+  rw [hmain, hzre, hwre, hzim, hwim]
+
 end DedekindResidue
 
 end
