@@ -40,7 +40,7 @@ classical Gauss derivation.
 namespace DedekindResidue
 
 open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
-open scoped FourierTransform ContDiff
+open scoped FourierTransform ContDiff ComplexConjugate InnerProductSpace
 
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
 `∫₀^∞ (e^{-x} - e^{-tx})/x dx = log t`. The kernel is `∫_1^t e^{-sx} ds`; Fubini and
@@ -2268,5 +2268,72 @@ theorem coeFn_fourier_toLp_two {f : ℝ → ℂ} (hf1 : Integrable f)
       _ = 0 := by rw [hchain, sub_self]
   filter_upwards [h0] with x hx
   exact sub_eq_zero.mp hx
+
+/-- The Fourier transform of the conjugate reflection is the conjugate transform:
+`𝓕(conj ∘ k ∘ neg) = conj ∘ 𝓕k`. -/
+theorem fourier_conj_neg (k : ℝ → ℂ) (ξ : ℝ) :
+    𝓕 (fun x : ℝ => conj (k (-x))) ξ = conj (𝓕 k ξ) := by
+  rw [Real.fourier_real_eq_integral_exp_smul, Real.fourier_real_eq_integral_exp_smul]
+  rw [← integral_conj]
+  have h0 : (fun v : ℝ => conj (Complex.exp ((-2 * π * v * ξ : ℝ) * Complex.I) • k v))
+      = fun v : ℝ => Complex.exp ((-2 * π * (-v) * ξ : ℝ) * Complex.I) • conj (k v) := by
+    funext v
+    rw [smul_eq_mul, smul_eq_mul, map_mul, ← Complex.exp_conj]
+    congr 2
+    rw [map_mul, Complex.conj_I, Complex.conj_ofReal]
+    push_cast
+    ring
+  rw [h0]
+  have h1 := integral_comp_neg_real
+    (fun v : ℝ => Complex.exp ((-2 * π * (-v) * ξ : ℝ) * Complex.I) • conj (k v))
+  rw [← h1]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun v => ?_))
+  show Complex.exp ((-2 * π * v * ξ : ℝ) * Complex.I) • conj (k (-v))
+      = Complex.exp ((-2 * π * (-(-v)) * ξ : ℝ) * Complex.I) • conj (k (-v))
+  rw [neg_neg]
+
+/-- **The Plancherel pairing** (Poitou p. 6-06): for `k, h ∈ L¹ ∩ L²`,
+`∫ 𝓕k(ξ)·𝓕h(ξ) dξ = ∫ k(-x)·h(x) dx`. -/
+theorem integral_fourier_mul_fourier {k h : ℝ → ℂ}
+    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
+    (hh1 : Integrable h) (hh2 : MemLp h 2 (volume : Measure ℝ)) :
+    ∫ ξ : ℝ, 𝓕 k ξ * 𝓕 h ξ = ∫ x : ℝ, k (-x) * h x := by
+  classical
+  set kstar : ℝ → ℂ := fun x => conj (k (-x)) with hkstar
+  have hMP : MeasurePreserving (fun x : ℝ => -x) volume volume :=
+    Measure.measurePreserving_neg _
+  have hks1 : Integrable kstar := by
+    have h0 : Integrable (fun x : ℝ => k (-x)) :=
+      hMP.integrable_comp_of_integrable hk1
+    exact memLp_one_iff_integrable.mp ((memLp_one_iff_integrable.mpr h0).star)
+  have hks2 : MemLp kstar 2 (volume : Measure ℝ) := by
+    have h0 : MemLp (fun x : ℝ => k (-x)) 2 (volume : Measure ℝ) :=
+      hk2.comp_measurePreserving hMP
+    exact h0.star
+  -- the L² pairing
+  have hpair := MeasureTheory.Lp.inner_fourier_eq
+    (hks2.toLp kstar) (hh2.toLp h)
+  rw [MeasureTheory.L2.inner_def, MeasureTheory.L2.inner_def] at hpair
+  -- identify the left side with ∫ 𝓕k·𝓕h
+  have hL : (∫ a : ℝ, ⟪(𝓕 (hks2.toLp kstar) : Lp ℂ 2 (volume : Measure ℝ)) a,
+        (𝓕 (hh2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
+      = ∫ ξ : ℝ, 𝓕 k ξ * 𝓕 h ξ := by
+    refine MeasureTheory.integral_congr_ae ?_
+    filter_upwards [coeFn_fourier_toLp_two hks1 hks2, coeFn_fourier_toLp_two hh1 hh2]
+      with ξ h1 h2
+    rw [RCLike.inner_apply, h1, h2, fourier_conj_neg, starRingEnd_self_apply]
+    exact mul_comm _ _
+  -- identify the right side with ∫ k(-x)·h(x)
+  have hR : (∫ a : ℝ, ⟪(hks2.toLp kstar : Lp ℂ 2 (volume : Measure ℝ)) a,
+        (hh2.toLp h : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
+      = ∫ x : ℝ, k (-x) * h x := by
+    refine MeasureTheory.integral_congr_ae ?_
+    filter_upwards [hks2.coeFn_toLp, hh2.coeFn_toLp] with x h1 h2
+    rw [RCLike.inner_apply, h1, h2]
+    rw [hkstar]
+    simp only [starRingEnd_self_apply]
+    exact mul_comm _ _
+  rw [hL, hR] at hpair
+  exact hpair
 
 end DedekindResidue
