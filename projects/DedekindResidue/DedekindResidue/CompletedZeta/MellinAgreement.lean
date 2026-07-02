@@ -423,6 +423,36 @@ theorem tsum_ite_eq_tsum_coneUnfold (J : (Ideal (𝓞 K))⁰)
     rintro ⟨p, hp⟩
     rw [if_neg (hne p)]
 
+open scoped Classical in
+/-- **The theta tail as a cone sum with shifted log-coordinates**: reindex + per-point
+unit shift combined. Each cone point contributes through its canonical algebraic
+preimage, and the fundamental-unit exponents move into a translation of `u`. -/
+theorem heckeTheta_tail_cone (J : (Ideal (𝓞 K))⁰) (t : ℝ) (u : logSpace K) :
+    (∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
+        if v = 0 then 0 else Real.exp (-π * ∑ i : index K,
+          placeWeights K (heckeWeights K t u) i
+            * ((v : EuclideanSpace ℝ (index K)) i) ^ 2))
+      = ∑' p : (idealSet K J) × (Fin (rank K) → ℤ),
+          Real.exp (-π * ∑ i : index K, placeWeights K (heckeWeights K t
+            (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (p.2 j))))) i
+              * ((embeddingCoords K (algebraMap (𝓞 K) K
+                  ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K))) i) ^ 2) := by
+  rw [tsum_ite_eq_tsum_coneUnfold K J (g := fun x => Real.exp (-π * ∑ i : index K,
+    placeWeights K (heckeWeights K t u) i * (x i) ^ 2))]
+  refine tsum_congr (fun p => ?_)
+  congr 1
+  have hcoe : ((p.1 : mixedSpace K))
+      = mixedEmbedding K (algebraMap (𝓞 K) K
+          ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K)) := by
+    rw [show (algebraMap (𝓞 K) K
+        ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K))
+      = ((preimageOfMemIntegerSet (idealSetMap K J p.1) : 𝓞 K) : K) from rfl]
+    rw [mixedEmbedding_preimageOfMemIntegerSet]
+    rw [idealSetMap_apply]
+  rw [hcoe]
+  exact congrArg (fun r => -π * r)
+    (sum_placeWeights_unit_smul K t u (∏ j, fundSystem K j ^ (p.2 j)) _)
+
 end
 
 end DedekindResidue
