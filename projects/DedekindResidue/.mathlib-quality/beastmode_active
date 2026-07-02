@@ -1,1 +1,1 @@
-FOCUS: SP2-RECT R-e good heights (pigeonhole from exists_ball_zero_count: in any [T0,T0+1] there is T with dist(T, zero ordinates) >= c/log T) then R-d rectangle argument principle for H (peel + Goursat on g-part + rectangleIntegral_cauchy per zero) in ZeroCapture.lean.
+FOCUS: SP2-RECT R-e good heights (pigeonhole from exists_ball_zero_count over [T,T+1]: exists T-prime with dist to zero ordinates >= c/log T) in ZeroCapture.lean; then R-f horizontal edge bound (A5 + Phi-decay hypothesis) and R-g FE-fold + G/zeta split (Poitou Prop 1 assembly).

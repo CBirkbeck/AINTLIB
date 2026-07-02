@@ -399,6 +399,147 @@ theorem rectangleIntegral_mul_logDeriv_H {z w : ℂ} (hre : z.re < w.re) (him : 
       Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hin]
     simp
 
+/-- **Euler-product nonvanishing**: `ζ_K(s) ≠ 0` for `Re s > 1`. Each Euler factor is
+`1 + f_𝔭` with `f_𝔭 = (1 − N𝔭^{-s})⁻¹ − 1` absolutely summable, so the product is a
+nonzero limit (`tprod_one_add_ne_zero_of_summable`, the Dedekind-eta pattern). -/
+theorem dedekindZeta_ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    NumberField.dedekindZeta K s ≠ 0 := by
+  rw [Chebotarev.dedekindZeta_eq_tprod_primeIdeal K hs]
+  set x : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} → ℂ :=
+    fun 𝔭 => (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s) with hx
+  -- factor norms are at most 1/2
+  have hnormeq : ∀ 𝔭, ‖x 𝔭‖ = (Ideal.absNorm 𝔭.1 : ℝ) ^ (-s.re) := by
+    intro 𝔭
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    rw [hx]
+    simp only
+    rw [Complex.norm_natCast_cpow_of_pos (by omega), Complex.neg_re]
+  have hhalf : ∀ 𝔭, ‖x 𝔭‖ ≤ 1/2 := by
+    intro 𝔭
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have h2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
+      have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
+      exact_mod_cast this
+    rw [hnormeq 𝔭]
+    have hstep1 : (Ideal.absNorm 𝔭.1 : ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-s.re) := by
+      rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
+      refine (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
+        (Real.rpow_pos_of_pos (by norm_num) _)).mpr ?_
+      exact Real.rpow_le_rpow (by norm_num) h2 (by linarith)
+    have hstep2 : (2:ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-(1:ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have hstep3 : (2:ℝ) ^ (-(1:ℝ)) = 1/2 := by
+      rw [Real.rpow_neg_one]
+      norm_num
+    calc (Ideal.absNorm 𝔭.1 : ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-s.re) := hstep1
+      _ ≤ (2:ℝ) ^ (-(1:ℝ)) := hstep2
+      _ = 1/2 := hstep3
+  have hfac_ne : ∀ 𝔭, (1 : ℂ) - x 𝔭 ≠ 0 := by
+    intro 𝔭 h0
+    have h1 : x 𝔭 = 1 := by linear_combination -h0
+    have := hhalf 𝔭
+    rw [h1] at this
+    norm_num at this
+  -- summability of the factor norms
+  have hσsum : Summable (fun I : Chebotarev.NonzeroIdeal K =>
+      (Ideal.absNorm I.1 : ℝ) ^ (-s.re)) := by
+    have h1 := (Chebotarev.hasSum_nonzeroIdeal_absNorm_cpow K
+      (s := ((s.re : ℝ) : ℂ)) (by simpa using hs)).summable
+    have h1' : Summable (fun I : Chebotarev.NonzeroIdeal K =>
+        (((Ideal.absNorm I.1 : ℝ) ^ (-s.re) : ℝ) : ℂ)) := by
+      refine h1.congr (fun I => ?_)
+      rw [show ((Ideal.absNorm I.1 : ℕ) : ℂ) = (((Ideal.absNorm I.1 : ℝ)) : ℂ) by
+          push_cast; ring,
+        show -(((s.re : ℝ)) : ℂ) = (((-s.re : ℝ)) : ℂ) by push_cast; ring,
+        ← Complex.ofReal_cpow (Nat.cast_nonneg _)]
+    exact Complex.summable_ofReal.mp h1'
+  have hprime_sum : Summable (fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} =>
+      ‖x 𝔭‖) := by
+    have hinj : Function.Injective
+        (fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} =>
+          (⟨𝔭.1, 𝔭.2.2⟩ : Chebotarev.NonzeroIdeal K)) := by
+      intro 𝔭 𝔮 h
+      have h' : (⟨𝔭.1, 𝔭.2.2⟩ : Chebotarev.NonzeroIdeal K) = ⟨𝔮.1, 𝔮.2.2⟩ := h
+      exact Subtype.ext (Subtype.mk_eq_mk.mp h')
+    have hcomp := hσsum.comp_injective hinj
+    exact hcomp.congr (fun 𝔭 => (hnormeq 𝔭).symm)
+  -- the correction terms and their bound
+  have hfbound : ∀ 𝔭, ‖(1 - x 𝔭)⁻¹ - 1‖ ≤ 2 * ‖x 𝔭‖ := by
+    intro 𝔭
+    have hid : (1 - x 𝔭)⁻¹ - 1 = x 𝔭 * (1 - x 𝔭)⁻¹ := by
+      have he := hfac_ne 𝔭
+      field_simp
+      ring
+    rw [hid, norm_mul]
+    have hlow : (1:ℝ)/2 ≤ ‖1 - x 𝔭‖ := by
+      have h1 : ‖(1:ℂ)‖ - ‖x 𝔭‖ ≤ ‖1 - x 𝔭‖ := norm_sub_norm_le _ _
+      rw [norm_one] at h1
+      linarith [hhalf 𝔭]
+    have hinv : ‖(1 - x 𝔭)⁻¹‖ ≤ 2 := by
+      rw [norm_inv]
+      rw [show (2:ℝ) = (1/2)⁻¹ by norm_num]
+      refine (inv_le_inv₀ ?_ (by norm_num)).mpr hlow
+      have := hhalf 𝔭
+      have h1 : (0:ℝ) < 1/2 := by norm_num
+      linarith
+    calc ‖x 𝔭‖ * ‖(1 - x 𝔭)⁻¹‖ ≤ ‖x 𝔭‖ * 2 :=
+          mul_le_mul_of_nonneg_left hinv (norm_nonneg _)
+      _ = 2 * ‖x 𝔭‖ := by ring
+  have hfsum : Summable (fun 𝔭 => ‖(1 - x 𝔭)⁻¹ - 1‖) :=
+    Summable.of_nonneg_of_le (fun 𝔭 => norm_nonneg _) hfbound (hprime_sum.mul_left 2)
+  -- assemble
+  have hcongr : (∏' 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}, (1 - x 𝔭)⁻¹)
+      = ∏' 𝔭, (1 + ((1 - x 𝔭)⁻¹ - 1)) :=
+    tprod_congr (fun 𝔭 => by ring)
+  rw [hcongr]
+  refine tprod_one_add_ne_zero_of_summable (fun 𝔭 => ?_) hfsum
+  rw [show (1:ℂ) + ((1 - x 𝔭)⁻¹ - 1) = (1 - x 𝔭)⁻¹ by ring]
+  exact inv_ne_zero (hfac_ne 𝔭)
+
+/-- `H = completedDedekindZetaEntire` does not vanish on `Re s > 1`. -/
+theorem completedDedekindZetaEntire_ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    completedDedekindZetaEntire K s ≠ 0 := by
+  have hs0 : s ≠ 0 := by
+    intro h0
+    rw [h0] at hs
+    simp at hs
+    linarith
+  have hs1 : s ≠ 1 := by
+    intro h0
+    rw [h0] at hs
+    simp at hs
+  rw [completedDedekindZetaEntire_eq K hs0 hs1,
+    completedDedekindZeta_eq_of_one_lt_re K hs, completedZetaPrefactor]
+  refine mul_ne_zero (mul_ne_zero hs0 ?_) (mul_ne_zero (mul_ne_zero ?_ ?_) ?_)
+  · intro h0
+    have := congrArg Complex.re h0
+    simp at this
+    linarith
+  · intro h0
+    have hbase : ((|discr K| : ℝ) : ℂ) ≠ 0 := by
+      have h2 : |discr K| ≠ 0 := abs_ne_zero.mpr (NumberField.discr_ne_zero K)
+      exact_mod_cast h2
+    exact hbase ((Complex.cpow_eq_zero_iff _ _).mp h0).1
+  · exact gammaFactor_ne_zero_of_re_pos K (by linarith)
+  · exact dedekindZeta_ne_zero_of_one_lt_re K hs
+/-- `H` does not vanish on `Re s < 0` (functional-equation reflection). -/
+theorem completedDedekindZetaEntire_ne_zero_of_re_lt_zero {s : ℂ} (hs : s.re < 0) :
+    completedDedekindZetaEntire K s ≠ 0 := by
+  rw [← completedDedekindZetaEntire_one_sub K s]
+  refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
+  rw [Complex.sub_re, Complex.one_re]
+  linarith
+
+/-- **Strip confinement**: every zero of `H` has real part in `[0, 1]`. -/
+theorem re_mem_of_completedDedekindZetaEntire_eq_zero {ρ : ℂ}
+    (h0 : completedDedekindZetaEntire K ρ = 0) : 0 ≤ ρ.re ∧ ρ.re ≤ 1 := by
+  constructor
+  · by_contra h
+    exact completedDedekindZetaEntire_ne_zero_of_re_lt_zero K (by linarith) h0
+  · by_contra h
+    exact completedDedekindZetaEntire_ne_zero_of_one_lt_re K (by linarith) h0
+
 end DedekindResidue
 
 end
