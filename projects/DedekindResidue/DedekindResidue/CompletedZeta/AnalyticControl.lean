@@ -1230,6 +1230,75 @@ theorem exists_le_norm_Gamma (σ : ℝ) (hσ : 1/2 ≤ σ) :
         * Real.exp (-(π * |t|) / 2) :=
         mul_le_mul_of_nonneg_right hmono (by positivity)
 
+/-- Matching lower bound for `Γℝ` at a fixed abscissa `σ ≥ 1`: rate `e^{-π|t|/4}`. -/
+theorem exists_le_norm_Gammaℝ (σ : ℝ) (hσ : 1 ≤ σ) :
+    ∃ c : ℝ, 0 < c ∧ ∀ t : ℝ, 2 ≤ |t| →
+      c * Real.exp (-(π * |t|) / 4) / (1 + |t|)
+        ≤ ‖Complex.Gammaℝ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  obtain ⟨c₀, hc₀, hlow⟩ := exists_le_norm_Gamma (σ/2) (by linarith)
+  refine ⟨Real.pi ^ (-σ/2 : ℝ) * c₀, by positivity, fun t ht => ?_⟩
+  rw [Complex.Gammaℝ_def, norm_mul]
+  have hπnorm : ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
+      = Real.pi ^ (-σ/2 : ℝ) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    congr 1
+    rw [show -((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+        = ((-σ/2 : ℝ) : ℂ) + ((-t/2 : ℝ) : ℂ) * Complex.I by push_cast; ring]
+    simp
+  have harg : ((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+      = ((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I := by
+    push_cast
+    ring
+  have ht2 : 1 ≤ |t/2| := by
+    rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+    linarith
+  have hΓ := hlow (t/2) ht2
+  rw [hπnorm, harg]
+  have hexp : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
+    congr 1
+    rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+    ring
+  rw [hexp] at hΓ
+  have hmono : c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t|)
+      ≤ c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t/2|) := by
+    refine div_le_div_of_nonneg_left (by positivity) ?_ ?_
+    · have : (0:ℝ) ≤ |t/2| := abs_nonneg _
+      linarith
+    · rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+      linarith [abs_nonneg t]
+  calc Real.pi ^ (-σ/2 : ℝ) * c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t|)
+      = Real.pi ^ (-σ/2 : ℝ) * (c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t|)) := by ring
+    _ ≤ Real.pi ^ (-σ/2 : ℝ) * (c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t/2|)) :=
+        mul_le_mul_of_nonneg_left hmono (by positivity)
+    _ ≤ Real.pi ^ (-σ/2 : ℝ)
+        * ‖Complex.Gamma (((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I)‖ :=
+        mul_le_mul_of_nonneg_left hΓ (by positivity)
+
+/-- Matching lower bound for `Γℂ` at a fixed abscissa `σ ≥ 1`: rate `e^{-π|t|/2}`. -/
+theorem exists_le_norm_Gammaℂ (σ : ℝ) (hσ : 1 ≤ σ) :
+    ∃ c : ℝ, 0 < c ∧ ∀ t : ℝ, 2 ≤ |t| →
+      c * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        ≤ ‖Complex.Gammaℂ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  obtain ⟨c₀, hc₀, hlow⟩ := exists_le_norm_Gamma σ (by linarith)
+  refine ⟨2 * (2*π) ^ (-σ : ℝ) * c₀, by positivity, fun t ht => ?_⟩
+  rw [Complex.Gammaℂ_def, norm_mul, norm_mul]
+  have h2π : ‖((2:ℂ) * π) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I))‖
+      = (2*π) ^ (-σ : ℝ) := by
+    rw [show ((2:ℂ) * π) = ((2 * π : ℝ) : ℂ) by push_cast; ring,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by positivity)]
+    congr 1
+    simp
+  have h2n : ‖(2:ℂ)‖ = 2 := by norm_num
+  have hΓ := hlow t (by linarith)
+  rw [h2π, h2n]
+  calc 2 * (2*π) ^ (-σ : ℝ) * c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+      = 2 * (2*π) ^ (-σ : ℝ) * (c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)) := by ring
+    _ ≤ 2 * (2*π) ^ (-σ : ℝ)
+        * ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ :=
+        mul_le_mul_of_nonneg_left hΓ (by positivity)
+    _ = 2 * (2*π) ^ (-σ : ℝ)
+        * ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by ring
+
 end
 
 end DedekindResidue
