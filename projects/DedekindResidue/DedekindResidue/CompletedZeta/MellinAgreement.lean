@@ -24,6 +24,7 @@ namespace DedekindResidue
 @[expose] public section
 
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace
+open NumberField.mixedEmbedding.fundamentalCone
 open NumberField.Units NumberField.Units.dirichletUnitTheorem MeasureTheory
 open scoped nonZeroDivisors Real
 
@@ -97,6 +98,137 @@ theorem heckeG_sub_const_eq (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (h
     ring
   rw [heckeG, ← hBdef, hsplit]
   ring
+
+open scoped Classical in
+/-- Unit-scaling preserves membership in the ideal lattice of an integral ideal. -/
+theorem unit_smul_mem_idealLattice (J : (Ideal (𝓞 K))⁰) (u : (𝓞 K)ˣ) {x : mixedSpace K}
+    (hx : x ∈ mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J)) :
+    u • x ∈ mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J) := by
+  rw [mem_idealLattice] at hx ⊢
+  obtain ⟨y, hy, rfl⟩ := hx
+  refine ⟨algebraMap (𝓞 K) K (u : 𝓞 K) * y, ?_, ?_⟩
+  · rw [SetLike.mem_coe, FractionalIdeal.coe_mk0, FractionalIdeal.mem_coeIdeal] at hy ⊢
+    obtain ⟨b, hb, rfl⟩ := hy
+    exact ⟨(u : 𝓞 K) * b, Ideal.mul_mem_left _ _ hb, by rw [map_mul]⟩
+  · rw [map_mul]
+    rfl
+
+omit [NumberField K] in
+open scoped Classical in
+theorem unit_smul_ne_zero (u : (𝓞 K)ˣ) {x : mixedSpace K} (hx : x ≠ 0) : u • x ≠ 0 := by
+  intro h0
+  apply hx
+  have h2 : u⁻¹ • (u • x) = u⁻¹ • (0 : mixedSpace K) := congrArg _ h0
+  rw [inv_smul_smul] at h2
+  rw [h2]
+  show mixedEmbedding K ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * 0 = 0
+  exact mul_zero _
+
+open scoped Classical in
+/-- **The cone unfolding**: every nonzero point of the ideal lattice of an integral ideal
+`J` is uniquely a fundamental-system power times a fundamental-cone point of `J`. -/
+noncomputable def coneUnfoldEquiv (J : (Ideal (𝓞 K))⁰) :
+    (idealSet K J) × (Fin (rank K) → ℤ)
+      ≃ {x : mixedSpace K // x ∈ mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J)
+          ∧ x ≠ 0} := by
+  have hlat : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (∏ i, fundSystem K i ^ (p.2 i : ℤ)) • (p.1 : mixedSpace K)
+        ∈ mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J) :=
+    fun p => unit_smul_mem_idealLattice K J _ p.1.2.2
+  have hcone_mem : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      ((p.1 : mixedSpace K) ∈ fundamentalCone K) := fun p => p.1.2.1
+  have hne : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (∏ i, fundSystem K i ^ (p.2 i : ℤ)) • (p.1 : mixedSpace K) ≠ 0 := by
+    intro p
+    refine unit_smul_ne_zero K _ ?_
+    intro h0
+    have hmem := hcone_mem p
+    rw [h0] at hmem
+    exact hmem.2 (map_zero (mixedEmbedding.norm (K := K)))
+  refine Equiv.ofBijective (fun p =>
+    ⟨(∏ i, fundSystem K i ^ (p.2 i : ℤ)) • (p.1 : mixedSpace K), hlat p, hne p⟩) ⟨?_, ?_⟩
+  · rintro ⟨⟨a, ha⟩, n⟩ ⟨⟨b, hb⟩, m⟩ hab
+    simp only [Subtype.mk_eq_mk] at hab
+    -- (u_m⁻¹ * u_n) • a = b
+    have hmove : ((∏ i, fundSystem K i ^ (m i : ℤ))⁻¹
+        * ∏ i, fundSystem K i ^ (n i : ℤ)) • a = b := by
+      rw [mul_smul]
+      rw [hab, inv_smul_smul]
+    have hμtor : ((∏ i, fundSystem K i ^ (m i : ℤ))⁻¹
+        * ∏ i, fundSystem K i ^ (n i : ℤ)) ∈ torsion K := by
+      rw [← unit_smul_mem_iff_mem_torsion ha.1]
+      rw [hmove]
+      exact hb.1
+    -- rewrite μ as a pure fundSystem power with exponents n - m
+    have hμpow : ((∏ i, fundSystem K i ^ (m i : ℤ))⁻¹
+        * ∏ i, fundSystem K i ^ (n i : ℤ))
+        = ∏ i, fundSystem K i ^ ((n - m) i : ℤ) := by
+      rw [← Finset.prod_inv_distrib, ← Finset.prod_mul_distrib]
+      refine Finset.prod_congr rfl (fun i _ => ?_)
+      rw [← zpow_neg, ← zpow_add]
+      congr 1
+      simp [sub_eq_add_neg, add_comm]
+    have huniq := exist_unique_eq_mul_prod K (∏ i, fundSystem K i ^ ((n - m) i : ℤ))
+    obtain ⟨ζe, hζe, huni⟩ := huniq
+    have h1 : ((1 : torsion K), (n - m)) = ζe := by
+      refine huni _ ?_
+      show (∏ i, fundSystem K i ^ ((n - m) i : ℤ))
+        = ((1 : torsion K) : (𝓞 K)ˣ) * ∏ i, fundSystem K i ^ ((n - m) i : ℤ)
+      rw [OneMemClass.coe_one, one_mul]
+    have h2 : ((⟨_, hμtor⟩ : torsion K), (0 : Fin (rank K) → ℤ)) = ζe := by
+      refine huni _ ?_
+      show (∏ i, fundSystem K i ^ ((n - m) i : ℤ))
+        = ((∏ i, fundSystem K i ^ (m i : ℤ))⁻¹ * ∏ i, fundSystem K i ^ (n i : ℤ))
+          * ∏ i, fundSystem K i ^ ((0 : Fin (rank K) → ℤ) i)
+      rw [hμpow]
+      simp
+    rw [← h2] at h1
+    have hnm : n - m = 0 := by
+      have := congrArg Prod.snd h1
+      simpa using this
+    have hμ1 : ((∏ i, fundSystem K i ^ (m i : ℤ))⁻¹
+        * ∏ i, fundSystem K i ^ (n i : ℤ)) = 1 := by
+      rw [hμpow, show n - m = 0 from hnm]
+      simp
+    have hn : n = m := by
+      have := sub_eq_zero.mp hnm
+      exact this
+    have hab' : a = b := by
+      rw [hμ1, one_smul] at hmove
+      exact hmove
+    simp [hn, hab']
+  · rintro ⟨v, hvlat, hvne⟩
+    have hvnorm : mixedEmbedding.norm v ≠ 0 := by
+      rw [mem_idealLattice] at hvlat
+      obtain ⟨y, hy, rfl⟩ := hvlat
+      rw [norm_eq_norm]
+      have hy0 : y ≠ 0 := fun h => hvne (by rw [h, map_zero])
+      have hN : Algebra.norm ℚ y ≠ 0 := by exact Algebra.norm_ne_zero_iff.mpr hy0
+      simpa using hN
+    obtain ⟨u, hu⟩ := exists_unit_smul_mem hvnorm
+    obtain ⟨⟨ζtor, nexp⟩, hdecomp, -⟩ := exist_unique_eq_mul_prod K u
+    have hζinv : ((ζtor : (𝓞 K)ˣ))⁻¹ ∈ torsion K := inv_mem ζtor.2
+    have hwv_cone : (∏ i, fundSystem K i ^ (nexp i)) • v ∈ fundamentalCone K := by
+      have h1 : ((ζtor : (𝓞 K)ˣ))⁻¹ • (u • v) ∈ fundamentalCone K :=
+        torsion_smul_mem_of_mem hu hζinv
+      rw [smul_smul] at h1
+      have heq : ((ζtor : (𝓞 K)ˣ))⁻¹ * u = ∏ i, fundSystem K i ^ (nexp i) := by
+        rw [hdecomp, ← mul_assoc, inv_mul_cancel, one_mul]
+      rwa [heq] at h1
+    have hwv_lat : (∏ i, fundSystem K i ^ (nexp i)) • v
+        ∈ mixedEmbedding.idealLattice K (FractionalIdeal.mk0 K J) :=
+      unit_smul_mem_idealLattice K J _ hvlat
+    refine ⟨⟨⟨(∏ i, fundSystem K i ^ (nexp i)) • v,
+      Set.mem_inter hwv_cone (SetLike.mem_coe.mpr hwv_lat)⟩, fun i => -(nexp i)⟩, ?_⟩
+    rw [Subtype.ext_iff]
+    show (∏ i, fundSystem K i ^ ((fun i => -(nexp i)) i))
+        • ((∏ i, fundSystem K i ^ (nexp i)) • v) = v
+    have hprodinv : (∏ i, fundSystem K i ^ ((fun i => -(nexp i)) i))
+        = (∏ i, fundSystem K i ^ (nexp i))⁻¹ := by
+      rw [← Finset.prod_inv_distrib]
+      refine Finset.prod_congr rfl (fun i _ => ?_)
+      rw [zpow_neg]
+    rw [hprodinv, inv_smul_smul]
 
 end
 
