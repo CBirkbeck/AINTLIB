@@ -3036,6 +3036,291 @@ theorem exists_logDeriv_partial_fractions :
     _ = ‖logDeriv h s‖ := by rw [add_sub_cancel_left]
     _ ≤ C * Real.log (2 + |T|) := hbound s hs
 
+/-- One-step downward recurrence in norm: `‖Γ(z)‖ = ‖Γ(z+1)‖/‖z‖` off the poles. -/
+theorem norm_Gamma_eq_norm_Gamma_add_one_div {z : ℂ} (hz : z ≠ 0) :
+    ‖Complex.Gamma z‖ = ‖Complex.Gamma (z + 1)‖ / ‖z‖ := by
+  rw [Complex.Gamma_add_one z hz, norm_mul]
+  field_simp [norm_ne_zero_iff.mpr hz]
+
+/-- σ-uniform decaying Γ-upper on the window `-2 ≤ σ ≤ 3`, `|t| ≥ 1` (the wide window
+needed for unit balls around the explicit-formula contour). Left of `Re = -1/2` the
+recurrence `Γ(z) = Γ(z+1)/z` steps back into the reflected strip, and `‖z‖ ≥ |t| ≥ 1`
+only shrinks the bound. -/
+theorem exists_norm_Gamma_le_window :
+    ∃ C : ℝ, 0 < C ∧ ∃ P : ℕ, ∀ σ t : ℝ, -2 ≤ σ → σ ≤ 3 → 1 ≤ |t| →
+      ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ C * (1 + |t|)^P * Real.exp (-(π * |t|) / 2) := by
+  obtain ⟨Cr, hCr, Pr, hright⟩ := exists_norm_Gamma_le_range 3
+  refine ⟨Cr + 3/2 * Real.sqrt (12 * π), by positivity, Pr + 1, fun σ t hσl hσr ht => ?_⟩
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have htne : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht
+    norm_num at ht
+  -- generic nonvanishing of horizontal translates
+  have hzne : ∀ a : ℝ, ((a : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+    intro a h0
+    have := congrArg Complex.im h0
+    simp at this
+    exact htne this
+  have hznorm : ∀ a : ℝ, (1:ℝ) ≤ ‖(a : ℂ) + (t : ℂ) * Complex.I‖ := by
+    intro a
+    calc (1:ℝ) ≤ |t| := ht
+      _ = |((a : ℂ) + (t : ℂ) * Complex.I).im| := by simp
+      _ ≤ ‖(a : ℂ) + (t : ℂ) * Complex.I‖ := Complex.abs_im_le_norm _
+  -- the left-strip bound, packaged
+  have hleft : ∀ a : ℝ, -(1/2) ≤ a → a ≤ 1/2 →
+      ‖Complex.Gamma ((a : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ 3/2 * Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2) := by
+    intro a ha1 ha2
+    refine le_trans (norm_Gamma_le_mul_exp_left ha1 ha2 ht) ?_
+    have hb : ‖((a + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+        Real.norm_eq_abs, Real.norm_eq_abs]
+      have : |a + 1| ≤ 3/2 := by
+        rw [abs_le]
+        constructor <;> linarith
+      nlinarith [abs_nonneg t]
+    calc Real.sqrt (12 * π) * ‖((a + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖
+        * Real.exp (-(π * |t|) / 2)
+        ≤ Real.sqrt (12 * π) * ((3/2) * (1 + |t|)) * Real.exp (-(π * |t|) / 2) := by
+          refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+          exact mul_le_mul_of_nonneg_left hb (by positivity)
+      _ = 3/2 * Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2) := by ring
+  -- common final comparison
+  have hpad : ∀ X : ℝ,
+      (X ≤ Cr * (1 + |t|)^Pr * Real.exp (-(π * |t|) / 2)
+        ∨ X ≤ 3/2 * Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2)) →
+      X ≤ (Cr + 3/2 * Real.sqrt (12 * π)) * (1 + |t|)^(Pr + 1)
+        * Real.exp (-(π * |t|) / 2) := by
+    intro X hcase
+    have hp1 : (1 + |t|)^Pr ≤ (1 + |t|)^(Pr + 1) := pow_le_pow_right₀ h1t (by omega)
+    have hp2 : (1 + |t|)^1 ≤ (1 + |t|)^(Pr + 1) := pow_le_pow_right₀ h1t (by omega)
+    rcases hcase with hc | hc
+    · refine le_trans hc ?_
+      refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+      refine mul_le_mul (le_add_of_nonneg_right (by positivity)) hp1
+        (by positivity) (by positivity)
+    · refine le_trans hc ?_
+      refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+      calc (3/2 : ℝ) * Real.sqrt (12 * π) * (1 + |t|)
+          = (3/2 * Real.sqrt (12 * π)) * (1 + |t|)^1 := by ring
+        _ ≤ (Cr + 3/2 * Real.sqrt (12 * π)) * (1 + |t|)^(Pr + 1) :=
+            mul_le_mul (le_add_of_nonneg_left hCr.le) hp2
+              (by positivity) (by positivity)
+  refine hpad _ ?_
+  -- case split on σ
+  rcases le_or_gt (1/2 : ℝ) σ with hc1 | hc1
+  · exact Or.inl (hright σ t hc1 hσr ht)
+  rcases le_or_gt (-(1/2) : ℝ) σ with hc2 | hc2
+  · exact Or.inr (hleft σ hc2 hc1.le)
+  rcases le_or_gt (-(3/2) : ℝ) σ with hc3 | hc3
+  · -- one step down
+    refine Or.inr ?_
+    rw [norm_Gamma_eq_norm_Gamma_add_one_div (hzne σ)]
+    have hcast : ((σ : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast]
+    have hb := hleft (σ + 1) (by linarith) (by linarith)
+    calc ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+        ≤ ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ / 1 :=
+          div_le_div_of_nonneg_left (norm_nonneg _) (by norm_num) (hznorm σ)
+      _ = ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by ring
+      _ ≤ 3/2 * Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2) := hb
+  · -- two steps down
+    refine Or.inr ?_
+    rw [norm_Gamma_eq_norm_Gamma_add_one_div (hzne σ)]
+    have hcast : ((σ : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast, norm_Gamma_eq_norm_Gamma_add_one_div (hzne (σ + 1))]
+    have hcast2 : (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast2]
+    have hb := hleft (σ + 2) (by linarith) (by linarith)
+    calc ‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖
+        ≤ ‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ / 1 :=
+          div_le_div_of_nonneg_left (by positivity) (by norm_num) (hznorm σ)
+      _ = ‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ := by ring
+      _ ≤ ‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ / 1 :=
+          div_le_div_of_nonneg_left (norm_nonneg _) (by norm_num) (hznorm (σ + 1))
+      _ = ‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by ring
+      _ ≤ 3/2 * Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2) := hb
+
+/-- σ-uniform Γ-lower on the window `-1 ≤ σ ≤ 2`, `|t| ≥ 1`, with the matching
+envelope: `‖Γ(σ+it)‖ ≥ c·e^{-π|t|/2}/(1+|t|)³`. Downward steps divide by at most
+`(1+|t|)` each; the base strip and one upward recurrence cover `σ ∈ [1/2, 2]`. -/
+theorem exists_le_norm_Gamma_window :
+    ∃ c : ℝ, 0 < c ∧ ∀ σ t : ℝ, -1 ≤ σ → σ ≤ 2 → 1 ≤ |t| →
+      c * Real.exp (-(π * |t|) / 2) / (1 + |t|)^3
+        ≤ ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  set c₀ : ℝ := π / (Real.sqrt (12 * π) * (3/2)) with hc₀
+  have hc₀pos : 0 < c₀ := by rw [hc₀]; positivity
+  refine ⟨c₀, hc₀pos, fun σ t hσl hσr ht => ?_⟩
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have h1tpos : (0:ℝ) < 1 + |t| := by linarith
+  have hEpos : (0:ℝ) < Real.exp (-(π * |t|) / 2) := Real.exp_pos _
+  have htne : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht
+    norm_num at ht
+  have hzne : ∀ a : ℝ, ((a : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+    intro a h0
+    have := congrArg Complex.im h0
+    simp at this
+    exact htne this
+  -- the packaged base lower bound: uniform denominator (3/2)(1+|t|) for 1/2 ≤ a ≤ 3/2
+  have hbase : ∀ a : ℝ, 1/2 ≤ a → a ≤ 3/2 →
+      c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        ≤ ‖Complex.Gamma ((a : ℂ) + (t : ℂ) * Complex.I)‖ := by
+    intro a ha1 ha2
+    refine le_trans ?_ (le_norm_Gamma_base ha1 ha2 ht)
+    have hden : ‖((2 - a : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+        Real.norm_eq_abs, Real.norm_eq_abs, abs_neg]
+      have : |2 - a| ≤ 3/2 := by
+        rw [abs_le]
+        constructor <;> linarith
+      nlinarith [abs_nonneg t]
+    have hdenpos : (0:ℝ) < ‖((2 - a : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ := by
+      refine norm_pos_iff.mpr ?_
+      intro h0
+      have := congrArg Complex.im h0
+      simp at this
+      exact htne this
+    have hkey : c₀ / (1 + |t|)
+        ≤ π / (Real.sqrt (12 * π) * ‖((2 - a : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖) := by
+      rw [hc₀, div_div]
+      refine div_le_div_of_nonneg_left Real.pi_pos.le
+        (mul_pos (by positivity) hdenpos) ?_
+      calc Real.sqrt (12 * π) * ‖((2 - a : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+          ≤ Real.sqrt (12 * π) * ((3/2) * (1 + |t|)) :=
+            mul_le_mul_of_nonneg_left hden (by positivity)
+        _ = Real.sqrt (12 * π) * (3/2) * (1 + |t|) := by ring
+    calc c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        = c₀ / (1 + |t|) * Real.exp (-(π * |t|) / 2) := by ring
+      _ ≤ π / (Real.sqrt (12 * π) * ‖((2 - a : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+          * Real.exp (-(π * |t|) / 2) :=
+          mul_le_mul_of_nonneg_right hkey hEpos.le
+  -- the packaged base+1 lower bound for 3/2 < a ≤ 2
+  have hbase1 : ∀ a : ℝ, 3/2 < a → a ≤ 2 →
+      c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        ≤ ‖Complex.Gamma ((a : ℂ) + (t : ℂ) * Complex.I)‖ := by
+    intro a ha1 ha2
+    have hb := le_norm_Gamma_base_add_nat (σ := a - 1) (t := t)
+      (by linarith) (by linarith) ht 1
+    have hcast : ((a - 1 + (1:ℕ) : ℝ) : ℂ) = (a : ℂ) := by push_cast; ring
+    rw [hcast] at hb
+    refine le_trans ?_ hb
+    have hden : ‖((2 - (a-1) : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+        ≤ (3/2) * (1 + |t|) := by
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+        Real.norm_eq_abs, Real.norm_eq_abs, abs_neg]
+      have : |2 - (a-1)| ≤ 3/2 := by
+        rw [abs_le]
+        constructor <;> linarith
+      nlinarith [abs_nonneg t]
+    have hdenpos : (0:ℝ) < ‖((2 - (a-1) : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖ := by
+      refine norm_pos_iff.mpr ?_
+      intro h0
+      have := congrArg Complex.im h0
+      simp at this
+      exact htne this
+    have hkey : c₀ / (1 + |t|)
+        ≤ π / (Real.sqrt (12 * π)
+          * ‖((2 - (a-1) : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖) := by
+      rw [hc₀, div_div]
+      refine div_le_div_of_nonneg_left Real.pi_pos.le
+        (mul_pos (by positivity) hdenpos) ?_
+      calc Real.sqrt (12 * π) * ‖((2 - (a-1) : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖
+          ≤ Real.sqrt (12 * π) * ((3/2) * (1 + |t|)) :=
+            mul_le_mul_of_nonneg_left hden (by positivity)
+        _ = Real.sqrt (12 * π) * (3/2) * (1 + |t|) := by ring
+    calc c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)
+        = c₀ / (1 + |t|) * Real.exp (-(π * |t|) / 2) := by ring
+      _ ≤ π / (Real.sqrt (12 * π)
+          * ‖((2 - (a-1) : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+          * Real.exp (-(π * |t|) / 2) :=
+          mul_le_mul_of_nonneg_right hkey hEpos.le
+  -- norms of the translates from above
+  have hupnorm : ∀ a : ℝ, |a| ≤ 1 → ‖(a : ℂ) + (t : ℂ) * Complex.I‖ ≤ 1 + |t| := by
+    intro a ha
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs]
+    linarith
+  -- the drop-one-power comparison
+  have hdrop : c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)^3
+      ≤ c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|) := by
+    refine div_le_div_of_nonneg_left (by positivity) h1tpos ?_
+    calc (1 + |t|) = (1 + |t|)^1 := by ring
+      _ ≤ (1 + |t|)^3 := pow_le_pow_right₀ h1t (by omega)
+  rcases le_or_gt (1/2 : ℝ) σ with hc1 | hc1
+  · rcases le_or_gt σ (3/2 : ℝ) with hc1' | hc1'
+    · exact le_trans hdrop (hbase σ hc1 hc1')
+    · exact le_trans hdrop (hbase1 σ hc1' hσr)
+  rcases le_or_gt (-(1/2) : ℝ) σ with hc2 | hc2
+  · -- one step down: ‖Γ(z)‖ = ‖Γ(z+1)‖/‖z‖ ≥ base(σ+1)/(1+|t|)
+    rw [norm_Gamma_eq_norm_Gamma_add_one_div (hzne σ)]
+    have hcast : ((σ : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast]
+    have hb := hbase (σ + 1) (by linarith) (by linarith)
+    have hzn : ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ ≤ 1 + |t| :=
+      hupnorm σ (by rw [abs_le]; constructor <;> linarith)
+    have hznpos : (0:ℝ) < ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ :=
+      norm_pos_iff.mpr (hzne σ)
+    calc c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)^3
+        = (c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)) / (1 + |t|)^2 := by
+          rw [show ((1:ℝ) + |t|)^3 = (1 + |t|) * (1 + |t|)^2 by ring, ← div_div]
+      _ ≤ (c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)) / (1 + |t|) := by
+          refine div_le_div_of_nonneg_left (by positivity) h1tpos ?_
+          calc (1 + |t|) = (1 + |t|)^1 := by ring
+            _ ≤ (1 + |t|)^2 := pow_le_pow_right₀ h1t (by omega)
+      _ ≤ ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ / (1 + |t|) := by
+          gcongr
+      _ ≤ ‖Complex.Gamma (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
+          gcongr
+  · -- two steps down
+    rw [norm_Gamma_eq_norm_Gamma_add_one_div (hzne σ)]
+    have hcast : ((σ : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast, norm_Gamma_eq_norm_Gamma_add_one_div (hzne (σ + 1))]
+    have hcast2 : (((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I) + 1
+        = ((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by push_cast; ring
+    rw [hcast2]
+    have hb := hbase (σ + 2) (by linarith) (by linarith)
+    have hzn : ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ ≤ 1 + |t| :=
+      hupnorm σ (by rw [abs_le]; constructor <;> linarith)
+    have hzn1 : ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ ≤ 1 + |t| :=
+      hupnorm (σ + 1) (by rw [abs_le]; constructor <;> linarith)
+    have hznpos : (0:ℝ) < ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ :=
+      norm_pos_iff.mpr (hzne σ)
+    have hzn1pos : (0:ℝ) < ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ :=
+      norm_pos_iff.mpr (hzne (σ + 1))
+    calc c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)^3
+        = ((c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)) / (1 + |t|)) / (1 + |t|) := by
+          rw [show ((1:ℝ) + |t|)^3 = (1 + |t|) * (1 + |t|) * (1 + |t|) by ring,
+            ← div_div, ← div_div]
+      _ ≤ ((c₀ * Real.exp (-(π * |t|) / 2) / (1 + |t|)) / (1 + |t|))
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
+          gcongr
+      _ ≤ (‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ / (1 + |t|))
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
+          gcongr
+      _ ≤ (‖Complex.Gamma (((σ + 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          / ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖)
+          / ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ := by
+          gcongr
+
 end
 
 end DedekindResidue
