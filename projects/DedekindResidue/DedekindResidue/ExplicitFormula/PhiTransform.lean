@@ -104,7 +104,7 @@ theorem integrable_paperPhi_kernel {F : ℝ → ℂ} (hF : IsAdmissibleTestFn F)
       rw [hF.even x]
       congr 1
       push_cast
-      ring
+      ring_nf
     have h1 : IntegrableOn (fun x : ℝ => F x * Complex.exp ((1/2 - s) * x))
         (Set.Ici 0) := by
       refine integrableOn_Ici_mul_cexp hint ?_
@@ -153,7 +153,7 @@ theorem paperPhi_one_sub {F : ℝ → ℂ} (heven : ∀ x : ℝ, F (-x) = F x) (
   rw [heven x]
   congr 1
   push_cast
-  ring
+  ring_nf
 
 
 /-- The two-sided majorant `‖F x‖·(e^{(1/2+ε)x} + e^{-(1/2+ε)x})` is integrable for an
