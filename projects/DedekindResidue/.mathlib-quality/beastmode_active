@@ -1,1 +1,1 @@
-FOCUS: AGE-4 brick 4 — analytic inputs for WeakFEPair: (a) t->infty limit/constant term of heckeG (0-lattice-point split), (b) rapid decay (f - f0) =O(x^r) all r, (c) LocallyIntegrableOn Ioi 0 (continuity of heckeG in t)
+FOCUS: AGE-4 brick 4c — transfer to heckeF: continuity/integrability + deviation from h*w^-1*vol; exp(-c x^{1/n}) =O(x^r) all r via isLittleO_rpow_exp_pos_mul_atTop; then assemble the WeakFEPair
