@@ -81,7 +81,7 @@ interpolation:
   `‖H(s)‖ ≤ exp(C·|s|·log(2+|s|))`-type global bound via FE-reflection (Re s ≥ 1/2 by the
   integral bound, Re s < 1/2 by `Λ(s) = Λ(1-s)`). Order-(≤1+ε) statement, constants may
   depend on K.
-- **[AC-A3] REVISED (2026-07-02, envelope-matched Jensen scheme)** — the deliverable is a
+- **[AC-A3] REVISED (2026-07-02, envelope-matched Jensen scheme) — ✅ COMPLETE (252361b6, `exists_H_strip_decay`)** — the deliverable is a
   **decaying upper for `H = completedDedekindZetaEntire` on the strip `-1 ≤ Re ≤ 2`**:
   `‖H(σ+it)‖ ≤ C_K·(1+|t|)^P·e^{-(n_K π/4)|t|}` — matching the center-lower's envelope
   exactly (Γℝ-factor decays at rate π|t|/4, Γℂ at π|t|/2; total `(r₁+2r₂)π/4 = n_K π/4`),

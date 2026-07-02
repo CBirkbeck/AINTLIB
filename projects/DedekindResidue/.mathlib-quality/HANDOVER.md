@@ -63,6 +63,34 @@
 - Everything through 40a69cd1 pushed; zero sorries outside MainTheorem.lean's
   belabas_friedman_thm1; #print axioms clean on all new decls.
 
+### Second /beastmode leg (same day): A3 COMPLETE + A4 center pieces — through 252361b6
+- **A4-i** `exists_re_norm_dedekindZeta_ge_half` (∃ A ≥ 2 with ‖ζ_K‖ ≥ 1/2 right of A;
+  Dirichlet-tail route, `card_absNorm_eq_one`), **A4-ii** `le_norm_Gamma_base_add_nat`
+  (rightward Γ-lower propagation). tprod-free: the Chebotarev Euler product
+  (`Chebotarev.dedekindZeta_eq_tprod_primeIdeal` in
+  `projects/Chebotarev/CebotarevDensity/NumberFieldEulerProduct.lean`, verified) is
+  reserved for SP2's prime side.
+- **A3 COMPLETE** (route: decomposition doc §A3 REVISED — H-language, envelope-matched):
+  `norm_Gammaℝ_le`, `norm_Gammaℂ_le`, `norm_gammaFactor_le` (decaying γ-uppers, rate
+  n_Kπ/4); `norm_dedekindZeta_le_of_two_le_re`; `exists_H_two_line_bound` (Re = 2);
+  `completedDedekindZetaEntire_one_sub` (H(1-s) = H(s)); `gammaExponent` (opaque def —
+  abbrev caused whnf blowups); `one_add_abs_im_le_two_norm_sub_four`;
+  `comparator_bound_right/left` (left rides on right via FE; both lines have
+  |sin(π·)| = |sinh(πt)|); `comparator_bound_strip` (PL, width-3 strip admits e^{|t|});
+  **`exists_H_strip_decay`**: ‖H(z)‖ ≤ C(1+|Im|)^{n_K+2}e^{-n_Kπ|Im|/4} on
+  [-1,2] × {|Im| ≥ 1} — THE A3 deliverable. All in `CompletedZeta/AnalyticControl.lean`,
+  axiom-clean.
+- **NEXT: A4 Jensen assembly**: center c = A+iT (A from A4-i; |T| ≥ 2 covers all slabs
+  via T' = ±max(2,|T|)): lower ‖H(c)‖ ≥ |c||c-1|·Δ^{A/2}·γ-lower(A1-propagated,
+  matching rate)·(1/2); upper on ball ⊆ strip... CAREFUL: the ball around A+iT sticks
+  RIGHT of Re = 2 where exists_H_strip_decay doesn't apply — extend the decaying upper
+  to [-1, A+R] (right of 2: H = s(s-1)prefactor·γ·ζ directly, γ-upper by rightward
+  recurrence-propagation of norm_Gamma_le_mul_exp (UPPER analogue of
+  le_norm_Gamma_base_add_nat — factors ‖z+k‖ ≤ (‖z‖+k), poly-loss), ζ ≤ T₂-const,
+  |Δ^{s/2}| ≤ Δ^{(A+R)/2}) — then AnalyticOnNhd.sum_divisor_le + slab-in-ball geometry
+  gives m_K(T) = O_K(log(2+|T|)). Then A5 (Landau local fractions via
+  Complex.borelCaratheodory), A6 (digamma bounds), then SP2.
+
 
 *Written 2026-07-01 so that any Claude account (or human) can take over mid-stream. Read this
 first, then `plan.md` → `tickets.md` → `substrate-api.md` in this directory. Keep this file
