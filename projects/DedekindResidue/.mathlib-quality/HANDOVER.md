@@ -27,6 +27,42 @@
   (Tao 246A supplement) for the factorization chain.
 - Commits this session: bfeb0694 → a7eb90bc (all pushed).
 
+### Later same session: SP1-AC underway (Hadamard-free route) — through 40a69cd1
+- **Route documents**: `.mathlib-quality/decomposition-sp1ac.md` (READ FIRST — the full leaf
+  plan A0–A6 with mathlib anchors + the refined A1 PL-comparator plan).
+- **AC-A0 DONE** (`Existence.lean`): `heckeFEPair_symm` (self-dual pair),
+  `completedDedekindZeta_one_sub` — the clean FE `Λ_K(1-s) = Λ_K(s)`.
+- **AC-A1 DONE** (`CompletedZeta/GammaStrip.lean`, all axiom-clean, Stirling-free):
+  exact `norm_Gamma_half_add_mul_I_sq` (= π/cosh(πt)), `norm_Gamma_one_add_mul_I_sq`
+  (= πt/sinh(πt)); `norm_Gamma_le_Gamma_re` (integral triangle);
+  `norm_sin_add_mul_I_sq` (= sin²x+sinh²y); `Gamma_le_max_of_mem_Icc` (convexity);
+  `norm_Gamma_sq_mul_sin_div_le` — the **Phragmén–Lindelöf comparator**
+  `‖Γ(z)²sin(πz)/z²‖ ≤ 4π` on `1/2 ≤ Re ≤ 3/2` (PhragmenLindelof.vertical_strip,
+  boundary values exact); payoffs `norm_Gamma_le_mul_exp` (decaying upper
+  `≤ √(12π)‖z‖e^{-π|t|/2}`, base strip, |t| ≥ 1), `norm_Gamma_le_mul_exp_left`
+  (left strip via recurrence), `norm_sin_pi_mul_le`, and the **matching lower**
+  `le_norm_Gamma_base` (`≥ π e^{-π|t|/2}/(√(12π)‖(2-σ)-it‖)`) via reflection.
+- **AC-A2 DONE** (`CompletedZeta/AnalyticControl.lean`): `norm_heckeΛ₀_le`,
+  `integrable_heckeΛ₀_norm`, `exists_heckeΛ₀_strip_bound` (uniform-in-t strip bound via
+  the endpoint-exponent trick), `exists_completedDedekindZetaEntire_strip_bound`
+  (`‖H(s)‖ ≤ B(1+‖s‖)²` on strips).
+- **NEXT: AC-A3** — ζ_K polynomial bounds on `-1 ≤ σ ≤ 2`: express
+  `dedekindZeta = completedDedekindZetaEntire/(s(s-1)·prefactor·Γ-product)` and divide the
+  H-strip bound by `le_norm_Gamma_base`-type lower bounds (mind: prefactor
+  `|Δ|^{s/2}γ(s)` where `gammaFactor K s = Γℝ(s)^{r₁}Γℂ(s)^{r₂}`; Γℝ(s) = π^{-s/2}Γ(s/2),
+  arguments s/2 ∈ [-1/2,1] need base+left strip lowers — may need a right-extension of
+  `le_norm_Gamma_base` to σ ∈ [-1/2, 1/2] via reflection+recurrence, or restrict the
+  convexity strip to what Jensen at center 2+iT with radius 5/2 needs: σ ∈ [-1/2, 9/2]).
+  Then **AC-A4** Jensen counting via `AnalyticOnNhd.sum_divisor_le` (needs ζ_K entire
+  ON THE BALL — ζ_K has a pole at s=1! For the ball centered 2+iT with |T| ≥ 3 the pole
+  is outside ✓; small-T balls handled separately or count zeros of H instead — DECIDE
+  when implementing; counting zeros of H = s(s-1)Λ avoids the pole and Γ has no zeros so
+  strip-zeros(H) = strip-zeros(ζ_K) ∪ {0,1}-adjust — HdivisorBound may be cleaner:
+  H entire ✓ sum_divisor_le applies directly with the A2-ii bound + lower |H(2+iT)| via
+  Euler product + Γ-lower + prefactor: all in hand).
+- Everything through 40a69cd1 pushed; zero sorries outside MainTheorem.lean's
+  belabas_friedman_thm1; #print axioms clean on all new decls.
+
 
 *Written 2026-07-01 so that any Claude account (or human) can take over mid-stream. Read this
 first, then `plan.md` → `tickets.md` → `substrate-api.md` in this directory. Keep this file
