@@ -1973,11 +1973,8 @@ theorem sum_count_eq_card_le (n : ℕ) :
 open scoped Classical in
 /-- **Summability of the ideal norm sums** for real `s > 1`, from the ideal-counting
 asymptotics. -/
-theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
-    Summable (fun b : (Ideal (𝓞 K))⁰ =>
-      ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) := by
-  -- L-series summability of the counts
-  have hLS : LSeriesSummable (fun n =>
+theorem count_LSeriesSummable {s : ℝ} (hs : 1 < s) :
+    LSeriesSummable (fun n =>
       ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) (s : ℂ) := by
     refine LSeriesSummable_of_sum_norm_bigO_and_nonneg (r := 1) ?_
       (fun n => Nat.cast_nonneg _) zero_le_one (by simpa using hs)
@@ -2011,6 +2008,14 @@ theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
       rw [Real.rpow_one])
     filter_upwards with n
     rw [sum_count_eq_card_le K n]
+
+open scoped Classical in
+/-- **Summability of the ideal norm sums** for real `s > 1`, from the ideal-counting
+asymptotics. -/
+theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
+    Summable (fun b : (Ideal (𝓞 K))⁰ =>
+      ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s)) := by
+  have hLS := count_LSeriesSummable K hs
   -- transfer to real summability of the count series
   have hreal : Summable (fun n : ℕ =>
       (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) * (n : ℝ) ^ (-s)) := by
