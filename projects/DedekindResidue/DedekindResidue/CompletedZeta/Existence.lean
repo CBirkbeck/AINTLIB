@@ -3,6 +3,7 @@ module
 public import Mathlib
 public import DedekindResidue.CompletedZeta.MellinAgreement
 public import DedekindResidue.CompletedZeta.FunctionalEquation
+public import DedekindResidue.CompletedZeta.GRH
 
 /-!
 # Existence of the completed Dedekind zeta function  (SP1-AGE-4, ε)
@@ -351,6 +352,35 @@ theorem exists_isCompletedDedekindZeta :
     fun _s hs => completedDedekindZeta_eq_of_one_lt_re K hs,
     completedDedekindZetaEntire K, differentiable_completedDedekindZetaEntire K,
     fun _s hs0 hs1 => completedDedekindZetaEntire_eq K hs0 hs1⟩
+
+open scoped Classical in
+/-- The constructed function satisfies the characterisation (the existence witness,
+named). -/
+theorem isCompletedDedekindZeta_completedDedekindZeta :
+    IsCompletedDedekindZeta K (completedDedekindZeta K) :=
+  ⟨fun _s hs => completedDedekindZeta_eq_of_one_lt_re K hs,
+    completedDedekindZetaEntire K, differentiable_completedDedekindZetaEntire K,
+    fun _s hs0 hs1 => completedDedekindZetaEntire_eq K hs0 hs1⟩
+
+open scoped Classical in
+/-- **GRH through the constructed completed zeta**: now that the characterisation is
+inhabited (`exists_isCompletedDedekindZeta`) and unique off the poles
+(`IsCompletedDedekindZeta.eqOn`), the abstract GRH quantification is equivalent to
+nonvanishing of the concrete function `completedDedekindZeta`. -/
+theorem generalizedRiemannHypothesis_iff :
+    GeneralizedRiemannHypothesis K
+      ↔ ∀ s : ℂ, 1/2 < s.re → s ≠ 1 → completedDedekindZeta K s ≠ 0 := by
+  constructor
+  · intro hGRH s hs hs1
+    exact hGRH (completedDedekindZeta K)
+      (isCompletedDedekindZeta_completedDedekindZeta K) s hs hs1
+  · intro hconc Λ hΛ s hs hs1
+    have hs0 : s ≠ 0 := by
+      intro h0
+      rw [h0] at hs
+      norm_num [Complex.zero_re] at hs
+    rw [hΛ.eqOn (isCompletedDedekindZeta_completedDedekindZeta K) hs0 hs1]
+    exact hconc s hs hs1
 
 end
 
