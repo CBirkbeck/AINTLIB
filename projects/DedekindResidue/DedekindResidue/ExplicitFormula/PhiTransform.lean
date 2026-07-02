@@ -155,6 +155,174 @@ theorem paperPhi_one_sub {F : ℝ → ℂ} (heven : ∀ x : ℝ, F (-x) = F x) (
   push_cast
   ring
 
+
+/-- The two-sided majorant `‖F x‖·(e^{(1/2+ε)x} + e^{-(1/2+ε)x})` is integrable for an
+admissible test function: it is the sum of the kernel norms at the band endpoints. -/
+theorem integrable_admissible_majorant {F : ℝ → ℂ} (hF : IsAdmissibleTestFn F)
+    {ε : ℝ} (hε : 0 < ε)
+    (hint : IntegrableOn (fun x : ℝ => F x * ((Real.exp ((1/2 + ε) * x) : ℝ) : ℂ))
+        (Set.Ici 0)) :
+    Integrable (fun x : ℝ =>
+      ‖F x‖ * (Real.exp ((1/2 + ε) * x) + Real.exp (-((1/2 + ε) * x)))) := by
+  have hR : Integrable (fun x : ℝ =>
+      F x * Complex.exp ((((1 + ε : ℝ) : ℂ) - 1/2) * x)) := by
+    refine integrable_paperPhi_kernel hF hint ?_ ?_
+    · simp only [Complex.ofReal_re]
+      linarith
+    · simp only [Complex.ofReal_re]
+      exact le_refl _
+  have hL : Integrable (fun x : ℝ =>
+      F x * Complex.exp ((((-ε : ℝ) : ℂ) - 1/2) * x)) := by
+    refine integrable_paperPhi_kernel hF hint ?_ ?_
+    · simp only [Complex.ofReal_re]
+      exact le_refl _
+    · simp only [Complex.ofReal_re]
+      linarith
+  have hsum := hR.norm.add hL.norm
+  refine hsum.congr (Filter.Eventually.of_forall (fun x => ?_))
+  simp only [Pi.add_apply, norm_mul, Complex.norm_exp]
+  have e1 : ((((1 + ε : ℝ) : ℂ) - 1/2) * x).re = (1/2 + ε) * x := by
+    rw [show (((1 + ε : ℝ) : ℂ) - 1/2) * x = (((1/2 + ε : ℝ)) : ℂ) * x by push_cast; ring,
+      ← Complex.ofReal_mul, Complex.ofReal_re]
+  have e2 : ((((-ε : ℝ) : ℂ) - 1/2) * x).re = -((1/2 + ε) * x) := by
+    rw [show (((-ε : ℝ) : ℂ) - 1/2) * x = ((-(1/2 + ε) * x : ℝ) : ℂ) by push_cast; ring,
+      Complex.ofReal_re]
+    ring
+  rw [e1, e2]
+  ring
+
+/-- **Φ holomorphy** (SP2-Φ-c): in the open band `-ε < Re s < 1+ε`, `Φ` is
+complex-differentiable with derivative `∫ x·F(x)·e^{(s-1/2)x} dx`. -/
+theorem hasDerivAt_paperPhi {F : ℝ → ℂ} (hF : IsAdmissibleTestFn F)
+    {ε : ℝ} (hε : 0 < ε)
+    (hint : IntegrableOn (fun x : ℝ => F x * ((Real.exp ((1/2 + ε) * x) : ℝ) : ℂ))
+        (Set.Ici 0))
+    {s₀ : ℂ} (hs1 : -ε < s₀.re) (hs2 : s₀.re < 1 + ε) :
+    HasDerivAt (paperPhi F)
+      (∫ x : ℝ, (x : ℂ) * (F x * Complex.exp ((s₀ - 1/2) * x))) s₀ := by
+  classical
+  set gap : ℝ := min (s₀.re + ε) (1 + ε - s₀.re) with hgap
+  have hgappos : 0 < gap := by
+    rw [hgap]
+    rw [lt_min_iff]
+    constructor <;> linarith
+  set δ : ℝ := gap / 2 with hδ
+  have hδpos : 0 < δ := by
+    rw [hδ]
+    exact half_pos hgappos
+  -- inside the ball, the real part keeps a margin gap/2 from the band edges
+  have hband : ∀ s ∈ Metric.ball s₀ δ, |s.re - 1/2| ≤ 1/2 + ε - gap/2 := by
+    intro s hs
+    rw [Metric.mem_ball, Complex.dist_eq] at hs
+    have hre : |s.re - s₀.re| ≤ ‖s - s₀‖ := by
+      rw [show s.re - s₀.re = (s - s₀).re by simp [Complex.sub_re]]
+      exact Complex.abs_re_le_norm _
+    have habs := abs_le.mp (le_of_lt (lt_of_le_of_lt hre hs))
+    have hg1 : gap ≤ s₀.re + ε := by rw [hgap]; exact min_le_left _ _
+    have hg2 : gap ≤ 1 + ε - s₀.re := by rw [hgap]; exact min_le_right _ _
+    have hδeq : δ = gap / 2 := hδ
+    rw [abs_le]
+    constructor
+    · linarith [habs.1]
+    · linarith [habs.2]
+  -- the dominating function
+  have habsorb : ∀ x : ℝ, |x| * Real.exp (-((gap/2) * |x|)) ≤ 2/gap := by
+    intro x
+    have hgt : (0:ℝ) ≤ |x| := abs_nonneg x
+    have h1 : (gap/2) * |x| ≤ Real.exp ((gap/2) * |x|) := by
+      have := Real.add_one_le_exp ((gap/2) * |x|)
+      linarith
+    rw [Real.exp_neg, ← div_eq_mul_inv, div_le_iff₀ (Real.exp_pos _)]
+    calc |x| = (2/gap) * ((gap/2) * |x|) := by field_simp
+      _ ≤ (2/gap) * Real.exp ((gap/2) * |x|) := by
+          refine mul_le_mul_of_nonneg_left h1 (by positivity)
+      _ = 2/gap * Real.exp ((gap/2) * |x|) := by ring
+  set bound : ℝ → ℝ := fun x =>
+    (2/gap) * (‖F x‖ * (Real.exp ((1/2 + ε) * x) + Real.exp (-((1/2 + ε) * x)))) with hbd
+  have hboundint : Integrable bound :=
+    (integrable_admissible_majorant hF hε hint).const_mul _
+  -- pointwise derivative and its ball-uniform norm bound
+  have hker_deriv : ∀ (x : ℝ) (s : ℂ), HasDerivAt (fun z => F x * Complex.exp ((z - 1/2) * x))
+      ((x : ℂ) * (F x * Complex.exp ((s - 1/2) * x))) s := by
+    intro x s
+    have h1 : HasDerivAt (fun z : ℂ => (z - 1/2) * x) (x : ℂ) s := by
+      simpa using ((hasDerivAt_id s).sub_const (1/2 : ℂ)).mul_const (x : ℂ)
+    have h2 := (h1.cexp).const_mul (F x)
+    have hval : F x * (Complex.exp ((s - 1/2) * x) * (x:ℂ))
+        = (x : ℂ) * (F x * Complex.exp ((s - 1/2) * x)) := by ring
+    rw [hval] at h2
+    exact h2
+  have hker_deriv_bound : ∀ x : ℝ, ∀ s ∈ Metric.ball s₀ δ,
+      ‖(x : ℂ) * (F x * Complex.exp ((s - 1/2) * x))‖ ≤ bound x := by
+    intro x s hs
+    rw [norm_mul, norm_mul, Complex.norm_exp, Complex.norm_real, Real.norm_eq_abs]
+    have hre : ((s - 1/2) * (x:ℂ)).re = (s.re - 1/2) * x := by
+      simp [Complex.sub_re, Complex.mul_re]
+    rw [hre]
+    have h1 : (s.re - 1/2) * x ≤ (1/2 + ε - gap/2) * |x| := by
+      calc (s.re - 1/2) * x ≤ |(s.re - 1/2) * x| := le_abs_self _
+        _ = |s.re - 1/2| * |x| := abs_mul _ _
+        _ ≤ (1/2 + ε - gap/2) * |x| :=
+            mul_le_mul_of_nonneg_right (hband s hs) (abs_nonneg x)
+    have h2 : Real.exp ((s.re - 1/2) * x) ≤ Real.exp ((1/2 + ε - gap/2) * |x|) :=
+      Real.exp_le_exp.mpr h1
+    have h3 : |x| * Real.exp ((1/2 + ε - gap/2) * |x|)
+        ≤ (2/gap) * Real.exp ((1/2 + ε) * |x|) := by
+      have hkey := habsorb x
+      have hexp : (1/2 + ε - gap/2) * |x| = (-((gap/2) * |x|)) + (1/2 + ε) * |x| := by
+        ring
+      calc |x| * Real.exp ((1/2 + ε - gap/2) * |x|)
+          = (|x| * Real.exp (-((gap/2) * |x|))) * Real.exp ((1/2 + ε) * |x|) := by
+            rw [hexp, Real.exp_add, ← mul_assoc]
+        _ ≤ (2/gap) * Real.exp ((1/2 + ε) * |x|) :=
+            mul_le_mul_of_nonneg_right hkey (Real.exp_pos _).le
+    have h4 : Real.exp ((1/2 + ε) * |x|)
+        ≤ Real.exp ((1/2 + ε) * x) + Real.exp (-((1/2 + ε) * x)) := by
+      rcases le_or_gt 0 x with hx | hx
+      · rw [abs_of_nonneg hx]
+        linarith [Real.exp_pos (-((1/2 + ε) * x))]
+      · rw [abs_of_neg hx]
+        rw [show (1/2 + ε) * -x = -((1/2 + ε) * x) by ring]
+        linarith [Real.exp_pos ((1/2 + ε) * x)]
+    calc |x| * (‖F x‖ * Real.exp ((s.re - 1/2) * x))
+        ≤ |x| * (‖F x‖ * Real.exp ((1/2 + ε - gap/2) * |x|)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg x)
+          exact mul_le_mul_of_nonneg_left h2 (norm_nonneg _)
+      _ = ‖F x‖ * (|x| * Real.exp ((1/2 + ε - gap/2) * |x|)) := by ring
+      _ ≤ ‖F x‖ * ((2/gap) * Real.exp ((1/2 + ε) * |x|)) :=
+          mul_le_mul_of_nonneg_left h3 (norm_nonneg _)
+      _ ≤ ‖F x‖ * ((2/gap) * (Real.exp ((1/2 + ε) * x) + Real.exp (-((1/2 + ε) * x)))) := by
+          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+          refine mul_le_mul_of_nonneg_left h4 (by positivity)
+      _ = bound x := by rw [hbd]; ring
+  -- the dominated-differentiation theorem
+  have hballmem : Metric.ball s₀ δ ∈ nhds s₀ := Metric.ball_mem_nhds s₀ hδpos
+  have hmeas : ∀ᶠ s in nhds s₀, AEStronglyMeasurable
+      (fun x : ℝ => F x * Complex.exp ((s - 1/2) * x)) volume := by
+    filter_upwards [hballmem] with s hs
+    have := hband s hs
+    have habs := abs_le.mp this
+    exact (integrable_paperPhi_kernel hF hint (by linarith [habs.1])
+      (by linarith [habs.2])).aestronglyMeasurable
+  have hint₀ : Integrable (fun x : ℝ => F x * Complex.exp ((s₀ - 1/2) * x)) :=
+    integrable_paperPhi_kernel hF hint (le_of_lt hs1) (le_of_lt hs2)
+  have hF'meas : AEStronglyMeasurable
+      (fun x : ℝ => (x : ℂ) * (F x * Complex.exp ((s₀ - 1/2) * x))) volume := by
+    refine AEStronglyMeasurable.mul ?_ hint₀.aestronglyMeasurable
+    exact Continuous.aestronglyMeasurable (by fun_prop)
+  have hlip : ∀ᵐ x : ℝ ∂volume, LipschitzOnWith (Real.nnabs (bound x))
+      (fun s => F x * Complex.exp ((s - 1/2) * x)) (Metric.ball s₀ δ) := by
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    have hconv : Convex ℝ (Metric.ball s₀ δ) := convex_ball s₀ δ
+    refine hconv.lipschitzOnWith_of_nnnorm_hasDerivWithin_le
+      (f' := fun s => (x : ℂ) * (F x * Complex.exp ((s - 1/2) * x)))
+      (fun s hs => ((hker_deriv x s).hasDerivWithinAt)) (fun s hs => ?_)
+    rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_nnabs]
+    refine le_trans (hker_deriv_bound x s hs) (le_abs_self _)
+  have := hasDerivAt_integral_of_dominated_loc_of_lip hballmem hmeas hint₀ hF'meas
+    hlip hboundint (Filter.Eventually.of_forall (fun x => hker_deriv x s₀))
+  exact this.2
+
 end DedekindResidue
 
 end
