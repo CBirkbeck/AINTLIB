@@ -868,3 +868,28 @@ pullback), `integrable_muFT_mul_gammaFT`, **`integral_muFT_mul_gammaFT`** (P-d:
 (contour shift Re 1+a → 1/2 via A6 + Φ-decay), I_G assembly (digamma_one_half,
 integral_inv_two_cosh_half, re_digamma_quarter_sub_half_eq_integral), Prop 2
 (prime side: Jordan + neg_logDeriv_dedekindZeta_eq_tsum), Weil (6), then SP3.
+
+---
+
+## Leg 5 continued (2026-07-03): PROPOSITION 3 COMPLETE
+
+`ExplicitFormula/GammaSide.lean` now contains the full Prop-3 chain, ending in
+**`prop3_poitou`**: for σ > 0 and even admissible F (integrable; (F0−F)/x locally
+integrable at 0 and in L²) with boundary decay ργ → 0 at ±∞,
+`lim ∫_{−T}^T 2(Reψ(σ+it) − ψ(σ))·φ(t)dt = 4π∫₀^∞ e^{−σy}(F0−F)/(1−e^{−y})dy` —
+Poitou's display with all signs machine-verified. Supporting concrete-kernel layer:
+`poitouKernel` (+ neg/of_pos/eq/abs-bound/measurable/L¹/L² = `integrable_poitouKernel`,
+`memLp_two_poitouKernel`), `integrable_exp_neg_mul_abs`, `one_add_abs_mul_exp_le`,
+`integrable_one_add_abs_mul_exp`, **`rhoFT_poitouKernel`** (ρ = 2(Reψ-diff): the
+digamma bridge), `integral_poitouKernel_neg_mul` (even-F fold).
+
+**REMAINING for the Γ-side**: discharge the boundary-decay hypotheses for SP3's F
+(needs |ρ| = O(log|t|) elementary estimate + γ = o(1/log) for the concrete F — Poitou's
+Remarque: BV of (F0−F)/x suffices); Γψ-b (d log G expansion: G'/G = ½log|d| +
+r₁(−½logπ + ½ψ(s/2)) + r₂(−log2π + ψ(s)) from Normalisation.lean's gammaFactor);
+Γψ-a (contour shift Re = 1+a → 1/2 via A6 exists_norm_digamma_le + Φ-decay);
+I_G assembly (uses digamma_one_half for ψ(½) = −γ−2log2, integral_inv_two_cosh_half,
+re_digamma_quarter_sub_half_eq_integral + prop3_poitou at σ = 1/2 and the
+(1/4, t/2)-variant). Then Prop 2 (prime side: tendsto_fourier_window_jordan +
+neg_logDeriv_dedekindZeta_eq_tsum + Prop 1's zero_capture_edge_form), and the
+Weil formula (6) assembly. Then SP3 (Theorem 1).
