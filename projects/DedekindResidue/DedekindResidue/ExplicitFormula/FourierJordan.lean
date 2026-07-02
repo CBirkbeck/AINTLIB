@@ -2,6 +2,7 @@ module
 
 public import DedekindResidue.ExplicitFormula.PrimeSide
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
+public import DedekindResidue.ExplicitFormula.PhiTransform
 
 /-!
 # Fourier–Jordan inversion: the Dirichlet integral (SP2-FJ-c)
@@ -828,5 +829,306 @@ theorem abs_integral_monotone_sub_kernel_le {p q K : ℝ → ℝ}
           (abs_integral_monotone_kernel_le hq hδ hKmeas hK hwin)
     _ = C * ((Function.rightLim p δ - Function.rightLim p 0)
         + (Function.rightLim q δ - Function.rightLim q 0)) := by ring
+
+/-- **FJ-g3**: the right increment of the right-continuous modification of a monotone
+function vanishes as the window shrinks: `rightLim g δ - rightLim g 0 → 0` as `δ → 0+`. -/
+theorem tendsto_rightLim_sub_rightLim {g : ℝ → ℝ} (hg : Monotone g) :
+    Tendsto (fun δ : ℝ => Function.rightLim g δ - Function.rightLim g 0)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+  have hcont : ContinuousWithinAt hg.stieltjesFunction (Set.Ici 0) 0 :=
+    hg.stieltjesFunction.right_continuous 0
+  have h1 : Tendsto (fun δ : ℝ => Function.rightLim g δ)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds (Function.rightLim g 0)) := by
+    have h2 := hcont.tendsto
+    have h3 : Tendsto (fun δ : ℝ => hg.stieltjesFunction δ)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds (hg.stieltjesFunction 0)) :=
+      h2.mono_left (nhdsWithin_mono 0 Set.Ioi_subset_Ici_self)
+    have h4 : (fun δ : ℝ => hg.stieltjesFunction δ)
+        = fun δ : ℝ => Function.rightLim g δ := by
+      funext δ
+      exact hg.stieltjesFunction_eq δ
+    rw [h4, hg.stieltjesFunction_eq] at h3
+    exact h3
+  have := h1.sub_const (Function.rightLim g 0)
+  simpa using this
+
+/-- The scaled Dirichlet kernel `u ↦ 2·sin(Tu)/u` is measurable. -/
+theorem measurable_dirichlet_kernel (T : ℝ) :
+    Measurable (fun u : ℝ => 2 * Real.sin (T * u) / u) := by
+  fun_prop
+
+/-- The scaled Dirichlet kernel is bounded by `2|T|` (since `|sin x| ≤ |x|`). -/
+theorem abs_dirichlet_kernel_le (T u : ℝ) :
+    |2 * Real.sin (T * u) / u| ≤ 2 * |T| := by
+  rcases eq_or_ne u 0 with hu | hu
+  · simp [hu]
+  · rw [abs_div, abs_mul, abs_two]
+    rw [div_le_iff₀ (abs_pos.mpr hu)]
+    have h1 : |Real.sin (T * u)| ≤ |T * u| := Real.abs_sin_le_abs
+    calc 2 * |Real.sin (T * u)| ≤ 2 * |T * u| := by linarith
+      _ = 2 * |T| * |u| := by rw [abs_mul]; ring
+
+/-- The scaled Dirichlet kernel is interval integrable on `[0, δ]`. -/
+theorem intervalIntegrable_dirichlet_kernel (T δ : ℝ) :
+    IntervalIntegrable (fun u : ℝ => 2 * Real.sin (T * u) / u) volume 0 δ := by
+  refine intervalIntegrable_iff.mpr ?_
+  refine MeasureTheory.Integrable.mono'
+    (g := fun _ => 2 * |T|)
+    (MeasureTheory.integrableOn_const (C := 2 * |T|) (by
+      rw [Real.volume_uIoc]
+      exact ENNReal.ofReal_ne_top))
+    ((measurable_dirichlet_kernel T).aestronglyMeasurable) ?_
+  refine Filter.Eventually.of_forall (fun u => ?_)
+  rw [Real.norm_eq_abs]
+  exact abs_dirichlet_kernel_le T u
+
+/-- Windows of the scaled Dirichlet kernel are uniformly bounded (twice the sinc-window
+constant), independently of `T > 0` and of the window `[v, δ] ⊆ [0, ∞)`. -/
+theorem exists_bound_dirichlet_window :
+    ∃ C : ℝ, 0 < C ∧ ∀ T v δ : ℝ, 0 < T → 0 ≤ v → 0 ≤ δ →
+      |∫ u in v..δ, 2 * Real.sin (T * u) / u| ≤ C := by
+  obtain ⟨C, hCpos, hC⟩ := exists_bound_integral_sin_mul_div
+  refine ⟨2 * C, by positivity, fun T v δ hT hv hδ => ?_⟩
+  have h1 : (∫ u in v..δ, 2 * Real.sin (T * u) / u)
+      = 2 * ∫ u in v..δ, Real.sin (T * u) / u := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun u _ => ?_)
+    ring
+  rw [h1, abs_mul, abs_two]
+  have := hC T v δ hT hv hδ
+  linarith
+
+/-- **FJ-g2, near-zero remainder bound**: for `H` with monotone-decomposed real and
+imaginary parts and `Hp` the right-limit value at `0`, the remainder integral against the
+Dirichlet kernel is bounded by the window constant times the four monotone increments —
+uniformly in `T`. -/
+theorem norm_integral_sub_rightLim_kernel_le
+    {p q r s : ℝ → ℝ} (hp : Monotone p) (hq : Monotone q)
+    (hr : Monotone r) (hs : Monotone s) {H : ℝ → ℂ}
+    (hre : ∀ u, (H u).re = p u - q u) (him : ∀ u, (H u).im = r u - s u)
+    {Hp : ℂ} (hHpre : Hp.re = Function.rightLim p 0 - Function.rightLim q 0)
+    (hHpim : Hp.im = Function.rightLim r 0 - Function.rightLim s 0)
+    {C T δ : ℝ} (hδ : 0 < δ)
+    (hHint : IntegrableOn H (Set.Ioc 0 δ))
+    (hwin : ∀ v ∈ Set.Icc (0:ℝ) δ, |∫ u in v..δ, 2 * Real.sin (T * u) / u| ≤ C) :
+    ‖∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+      ≤ C * ((Function.rightLim p δ - Function.rightLim p 0)
+            + (Function.rightLim q δ - Function.rightLim q 0))
+        + C * ((Function.rightLim r δ - Function.rightLim r 0)
+            + (Function.rightLim s δ - Function.rightLim s 0)) := by
+  -- integrability of the full integrand on the window
+  have hint : IntegrableOn (fun u => (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      (Set.Ioc 0 δ) := by
+    refine MeasureTheory.Integrable.mul_bdd (c := 2 * |T|)
+      (hHint.sub (MeasureTheory.integrableOn_const (by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top))) ?_ ?_
+    · exact ((Complex.measurable_ofReal.comp
+        (measurable_dirichlet_kernel T)).aestronglyMeasurable).restrict
+    · refine Filter.Eventually.of_forall (fun u => ?_)
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_dirichlet_kernel_le T u
+  have h0 := integral_re hint
+  have h0' := integral_im hint
+  simp only [RCLike.re_to_complex] at h0
+  simp only [RCLike.im_to_complex] at h0'
+  -- the real part is the (p, q) monotone-difference integral
+  have hre_val : (∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).re
+      = ∫ u in (0:ℝ)..δ, ((p u - q u) - (Function.rightLim p 0 - Function.rightLim q 0))
+          * (2 * Real.sin (T * u) / u) := by
+    rw [intervalIntegral.integral_of_le hδ.le, intervalIntegral.integral_of_le hδ.le,
+      ← h0]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun u _ => ?_)
+    show ((H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).re = _
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero,
+      Complex.sub_re, hre u, hHpre]
+  -- the imaginary part is the (r, s) monotone-difference integral
+  have him_val : (∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).im
+      = ∫ u in (0:ℝ)..δ, ((r u - s u) - (Function.rightLim r 0 - Function.rightLim s 0))
+          * (2 * Real.sin (T * u) / u) := by
+    rw [intervalIntegral.integral_of_le hδ.le, intervalIntegral.integral_of_le hδ.le,
+      ← h0']
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun u _ => ?_)
+    show ((H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).im = _
+    rw [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, mul_zero, zero_add,
+      Complex.sub_im, him u, hHpim]
+  -- combine via ‖z‖ ≤ |re z| + |im z|
+  calc ‖∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)‖
+      ≤ |(∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).re|
+        + |(∫ u in (0:ℝ)..δ, (H u - Hp) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)).im| :=
+        Complex.norm_le_abs_re_add_abs_im _
+    _ ≤ C * ((Function.rightLim p δ - Function.rightLim p 0)
+            + (Function.rightLim q δ - Function.rightLim q 0))
+        + C * ((Function.rightLim r δ - Function.rightLim r 0)
+            + (Function.rightLim s δ - Function.rightLim s 0)) := by
+        rw [hre_val, him_val]
+        exact add_le_add
+          (abs_integral_monotone_sub_kernel_le hp hq hδ
+            (measurable_dirichlet_kernel T) (intervalIntegrable_dirichlet_kernel T δ) hwin)
+          (abs_integral_monotone_sub_kernel_le hr hs hδ
+            (measurable_dirichlet_kernel T) (intervalIntegrable_dirichlet_kernel T δ) hwin)
+
+/-- The Dirichlet kernel is even. -/
+theorem dirichlet_kernel_neg (T u : ℝ) :
+    2 * Real.sin (T * -u) / -u = 2 * Real.sin (T * u) / u := by
+  rw [mul_neg, Real.sin_neg]
+  rcases eq_or_ne u 0 with hu | hu
+  · simp [hu]
+  · rw [mul_neg, neg_div_neg_eq]
+
+/-- Multiplying an integrable function by the Dirichlet kernel keeps it interval
+integrable on the window. -/
+theorem intervalIntegrable_mul_dirichlet {H : ℝ → ℂ} {δ : ℝ} (hδ : 0 < δ) (T : ℝ)
+    (hHint : IntegrableOn H (Set.Ioc 0 δ)) :
+    IntervalIntegrable (fun u => H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      volume 0 δ := by
+  rw [intervalIntegrable_iff, Set.uIoc_of_le hδ.le]
+  refine MeasureTheory.Integrable.mul_bdd (c := 2 * |T|) hHint ?_ ?_
+  · exact ((Complex.measurable_ofReal.comp
+      (measurable_dirichlet_kernel T)).aestronglyMeasurable).restrict
+  · refine Filter.Eventually.of_forall (fun u => ?_)
+    rw [Complex.norm_real, Real.norm_eq_abs]
+    exact abs_dirichlet_kernel_le T u
+
+/-- **FJ-g1, window split**: the full-line Dirichlet-kernel integral decomposes into a
+far part (`|u| > δ`, plus the null point `0`) and two reflected near windows. -/
+theorem integral_dirichlet_split {H : ℝ → ℂ} (hH : Integrable H) {δ : ℝ}
+    (hδ : 0 < δ) (T : ℝ) :
+    ∫ u : ℝ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)
+      = (∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+            H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + (∫ u in (0:ℝ)..δ, H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+        + ∫ u in (0:ℝ)..δ, H (-u) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+  set f : ℝ → ℂ := fun u => H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) with hf
+  have hfint : Integrable f := by
+    refine MeasureTheory.Integrable.mul_bdd (c := 2 * |T|) hH ?_ ?_
+    · exact (Complex.measurable_ofReal.comp
+        (measurable_dirichlet_kernel T)).aestronglyMeasurable
+    · refine Filter.Eventually.of_forall (fun u => ?_)
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_dirichlet_kernel_le T u
+  have hmeas_union : MeasurableSet (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0) :=
+    measurableSet_Ioc.union measurableSet_Ico
+  have hsplit1 : (∫ u in Set.Ioc 0 δ ∪ Set.Ico (-δ) 0, f u)
+      + ∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ, f u = ∫ u : ℝ, f u :=
+    MeasureTheory.integral_add_compl hmeas_union hfint
+  have hdisj : Disjoint (Set.Ioc 0 δ) (Set.Ico (-δ) 0) := by
+    refine Set.disjoint_left.mpr (fun u hu hu' => ?_)
+    exact absurd hu.1 (not_lt.mpr hu'.2.le)
+  have hsplit2 : (∫ u in Set.Ioc 0 δ ∪ Set.Ico (-δ) 0, f u)
+      = (∫ u in Set.Ioc 0 δ, f u) + ∫ u in Set.Ico (-δ) 0, f u :=
+    MeasureTheory.setIntegral_union hdisj measurableSet_Ico
+      (hfint.integrableOn) (hfint.integrableOn)
+  -- reflect the negative window
+  have hreflect : (∫ u in Set.Ico (-δ) 0, f u) = ∫ u in Set.Ioc 0 δ, f (-u) := by
+    have h1 : (∫ u in Set.Ico (-δ) 0, f u)
+        = ∫ u : ℝ, (Set.Ico (-δ) 0).indicator f u := by
+      rw [MeasureTheory.integral_indicator measurableSet_Ico]
+    have h2 : (∫ u : ℝ, (Set.Ico (-δ) 0).indicator f u)
+        = ∫ u : ℝ, (Set.Ico (-δ) 0).indicator f (-u) :=
+      (integral_comp_neg_real ((Set.Ico (-δ) 0).indicator f)).symm
+    have h3 : (fun u : ℝ => (Set.Ico (-δ) 0).indicator f (-u))
+        = (Set.Ioc 0 δ).indicator (fun u => f (-u)) := by
+      funext u
+      simp only [Set.indicator_apply, Set.mem_Ico, Set.mem_Ioc]
+      by_cases hu : -δ ≤ -u ∧ -u < 0
+      · rw [if_pos hu, if_pos ⟨by linarith [hu.2], by linarith [hu.1]⟩]
+      · rw [if_neg hu, if_neg (fun h => hu ⟨by linarith [h.2], by linarith [h.1]⟩)]
+    rw [h1, h2, h3, MeasureTheory.integral_indicator measurableSet_Ioc]
+  have hK_even : ∀ u : ℝ, f (-u) = H (-u) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+    intro u
+    rw [hf]
+    simp only
+    rw [dirichlet_kernel_neg]
+  have h4 : (∫ u in Set.Ioc (0:ℝ) δ, f (-u))
+      = ∫ u in Set.Ioc (0:ℝ) δ, H (-u) * ((2 * Real.sin (T * u) / u : ℝ) : ℂ) := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun u _ => hK_even u)
+  rw [← hsplit1, hsplit2, hreflect]
+  rw [intervalIntegral.integral_of_le hδ.le, intervalIntegral.integral_of_le hδ.le]
+  rw [h4]
+  abel
+
+/-- **FJ-g far limit**: for fixed `δ > 0` the far part of the Dirichlet-kernel integral
+vanishes as `T → ∞` (Riemann–Lebesgue applied to `H(u)·2/u` off `(-δ, δ)`). -/
+theorem tendsto_integral_dirichlet_far {H : ℝ → ℂ} (hH : Integrable H) {δ : ℝ}
+    (hδ : 0 < δ) :
+    Tendsto (fun T : ℝ => ∫ u in (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ,
+        H u * ((2 * Real.sin (T * u) / u : ℝ) : ℂ)) atTop (nhds 0) := by
+  set far := (Set.Ioc 0 δ ∪ Set.Ico (-δ) 0)ᶜ with hfar
+  have hfarmeas : MeasurableSet far :=
+    (measurableSet_Ioc.union measurableSet_Ico).compl
+  set G : ℝ → ℂ := far.indicator (fun u => H u * ((2 / u : ℝ) : ℂ)) with hG
+  -- |2/u| ≤ 2/δ on the far set
+  have hfar_bound : ∀ u ∈ far, |2 / u| ≤ 2 / δ := by
+    intro u hu
+    rw [hfar, Set.mem_compl_iff, Set.mem_union, Set.mem_Ioc, Set.mem_Ico] at hu
+    push Not at hu
+    rcases lt_trichotomy u 0 with h | h | h
+    · have h1 : u < -δ := by
+        by_contra h2
+        push Not at h2
+        exact absurd h (not_lt.mpr (hu.2 h2))
+      rw [abs_div, abs_two, abs_of_neg h]
+      rw [div_le_div_iff₀ (by linarith) hδ]
+      linarith
+    · simp [h]
+      positivity
+    · have h1 : δ < u := by
+        by_contra h2
+        push Not at h2
+        exact absurd (hu.1 h) (not_lt.mpr h2)
+      rw [abs_div, abs_two, abs_of_pos h]
+      rw [div_le_div_iff₀ (by linarith) hδ]
+      linarith
+  have hGint : Integrable G := by
+    refine MeasureTheory.Integrable.mono' (g := fun u => (2/δ) * ‖H u‖)
+      (hH.norm.const_mul _) ?_ ?_
+    · refine AEStronglyMeasurable.indicator ?_ hfarmeas
+      refine hH.aestronglyMeasurable.mul ?_
+      exact (Complex.measurable_ofReal.comp (by fun_prop)).aestronglyMeasurable
+    · refine Filter.Eventually.of_forall (fun u => ?_)
+      rw [hG]
+      rcases Set.indicator_eq_zero_or_self far (fun u => H u * ((2 / u : ℝ) : ℂ)) u
+        with h | h
+      · rw [h]
+        simp only [norm_zero]
+        positivity
+      · rcases (em (u ∈ far)) with hmem | hmem
+        · rw [h, norm_mul, Complex.norm_real, Real.norm_eq_abs, mul_comm]
+          refine mul_le_mul (hfar_bound u hmem) (le_refl _) (norm_nonneg _)
+            (by positivity)
+        · rw [Set.indicator_of_notMem hmem]
+          simp only [norm_zero]
+          positivity
+  have hRL := tendsto_integral_mul_sin_atTop hGint
+  refine hRL.congr (fun T => ?_)
+  rw [← MeasureTheory.integral_indicator hfarmeas]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+  show G u * ((Real.sin (T * u) : ℝ) : ℂ)
+      = far.indicator (fun w => H w * ((2 * Real.sin (T * w) / w : ℝ) : ℂ)) u
+  rw [hG]
+  rcases (em (u ∈ far)) with hmem | hmem
+  · rw [Set.indicator_of_mem hmem, Set.indicator_of_mem hmem]
+    push_cast
+    ring
+  · rw [Set.indicator_of_notMem hmem, Set.indicator_of_notMem hmem, zero_mul]
+
+/-- **FJ-g plateau limit**: `∫_0^δ 2·sin(Tu)/u du → π` as `T → ∞`. -/
+theorem tendsto_integral_dirichlet_plateau {δ : ℝ} (hδ : 0 < δ) :
+    Tendsto (fun T : ℝ => ∫ u in (0:ℝ)..δ, ((2 * Real.sin (T * u) / u : ℝ) : ℂ))
+      atTop (nhds ((π : ℝ) : ℂ)) := by
+  have h1 := tendsto_integral_sin_mul_div_atTop hδ
+  have h2 := h1.const_mul (2:ℝ)
+  have h3 : Tendsto (fun T : ℝ =>
+      ((2 * ∫ u in (0:ℝ)..δ, Real.sin (T*u)/u : ℝ) : ℂ)) atTop (nhds ((π : ℝ) : ℂ)) := by
+    have h4 := (Complex.continuous_ofReal.tendsto (2 * (π/2))).comp h2
+    have h5 : (2 : ℝ) * (π/2) = π := by ring
+    rw [h5] at h4
+    exact h4
+  refine h3.congr (fun T => ?_)
+  rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_ofReal]
+  refine intervalIntegral.integral_congr (fun u _ => ?_)
+  push_cast
+  ring
 
 end DedekindResidue
