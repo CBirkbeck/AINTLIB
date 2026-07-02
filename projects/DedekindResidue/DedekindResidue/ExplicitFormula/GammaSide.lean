@@ -40,7 +40,7 @@ classical Gauss derivation.
 namespace DedekindResidue
 
 open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
-open scoped FourierTransform
+open scoped FourierTransform ContDiff
 
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
 `∫₀^∞ (e^{-x} - e^{-tx})/x dx = log t`. The kernel is `∫_1^t e^{-sx} ds`; Fubini and
@@ -2184,5 +2184,89 @@ theorem integral_fourier_schwartz_smul {f : ℝ → ℂ} (hf : Integrable f)
     exact real_inner_comm a b
   rw [hflip] at h0
   exact h0
+
+/-- **The `L¹ ∩ L²` compatibility of the Fourier transform** (Pa-2): for `f` both
+integrable and square-integrable, the abstract `L²` Fourier transform (extended from
+Schwartz functions) agrees a.e. with the pointwise Fourier integral. Both sides define
+the same tempered distribution, and locally integrable functions are a.e.-determined by
+their distributional action. -/
+theorem coeFn_fourier_toLp_two {f : ℝ → ℂ} (hf1 : Integrable f)
+    (hf2 : MemLp f 2 (volume : Measure ℝ)) :
+    ((𝓕 (hf2.toLp f) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) =ᵐ[volume] 𝓕 f := by
+  set A : ℝ → ℂ := ((𝓕 (hf2.toLp f) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) with hA
+  have hB_cont : Continuous (𝓕 f) :=
+    VectorFourier.fourierIntegral_continuous (by fun_prop) (by fun_prop) hf1
+  have hsub_li : LocallyIntegrable (fun x => A x - 𝓕 f x) volume := by
+    refine LocallyIntegrable.sub ?_ ?_
+    · exact (Lp.memLp _).locallyIntegrable (by norm_num)
+    · exact hB_cont.locallyIntegrable
+  have h0 : ∀ᵐ x ∂(volume : Measure ℝ), A x - 𝓕 f x = 0 := by
+    refine ae_eq_zero_of_integral_contDiff_smul_eq_zero hsub_li ?_
+    intro g g_smooth g_cpt
+    have hg₁ : HasCompactSupport (Complex.ofRealCLM ∘ g) := g_cpt.comp_left rfl
+    have hg₂ : ContDiff ℝ ∞ (Complex.ofRealCLM ∘ g) := by fun_prop
+    set Φg := hg₁.toSchwartzMap hg₂ with hΦg
+    have hΦg_coe : ∀ x : ℝ, Φg x = ((g x : ℝ) : ℂ) := fun x => rfl
+    have hΦg_cont : Continuous (fun x : ℝ => Φg x) := Φg.continuous
+    have hΦg_supp : HasCompactSupport (fun x : ℝ => Φg x) := hg₁
+    have hΦg2 : MemLp (fun x : ℝ => Φg x) 2 (volume : Measure ℝ) :=
+      hΦg_cont.memLp_of_hasCompactSupport (p := 2) hΦg_supp
+    -- integrability of the two test pairings
+    have hgA : Integrable (fun x => g x • A x) volume := by
+      have h1 : Integrable ((fun x : ℝ => Φg x) * A) volume :=
+        MemLp.integrable_mul hΦg2 (Lp.memLp _)
+      refine h1.congr (Filter.Eventually.of_forall (fun x => ?_))
+      show Φg x * A x = g x • A x
+      rw [hΦg_coe x]
+      exact Complex.real_smul.symm
+    have hgB : Integrable (fun x => g x • 𝓕 f x) volume := by
+      have h1 : Integrable (fun x : ℝ => Φg x * 𝓕 f x) volume := by
+        refine Integrable.mul_bdd (c := ∫ y : ℝ, ‖f y‖)
+          (hΦg_cont.integrable_of_hasCompactSupport hΦg_supp) ?_ ?_
+        · exact hB_cont.aestronglyMeasurable
+        · refine Filter.Eventually.of_forall (fun ξ => ?_)
+          exact VectorFourier.norm_fourierIntegral_le_integral_norm _ _ _ _ _
+      refine h1.congr (Filter.Eventually.of_forall (fun x => ?_))
+      show Φg x * 𝓕 f x = g x • 𝓕 f x
+      rw [hΦg_coe x]
+      exact Complex.real_smul.symm
+    -- the distributional chain
+    have hchain : (∫ x, g x • A x) = ∫ x, g x • 𝓕 f x := by
+      have c1 : (∫ x, g x • A x) = Lp.toTemperedDistribution (𝓕 (hf2.toLp f)) Φg := by
+        rw [Lp.toTemperedDistribution_apply]
+        refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+        show g x • A x = Φg x • A x
+        rw [hΦg_coe x, Complex.real_smul, smul_eq_mul]
+      have c2 : Lp.toTemperedDistribution (𝓕 (hf2.toLp f)) Φg
+          = 𝓕 (Lp.toTemperedDistribution (hf2.toLp f)) Φg := by
+        rw [Lp.fourier_toTemperedDistribution_eq]
+      have c3 : 𝓕 (Lp.toTemperedDistribution (hf2.toLp f)) Φg
+          = Lp.toTemperedDistribution (hf2.toLp f) (𝓕 Φg) := rfl
+      have c4 : Lp.toTemperedDistribution (hf2.toLp f) (𝓕 Φg)
+          = ∫ x, (𝓕 Φg) x • ((hf2.toLp f : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) x :=
+        Lp.toTemperedDistribution_apply _ _
+      have c5 : (∫ x, (𝓕 Φg) x • ((hf2.toLp f : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) x)
+          = ∫ x, (𝓕 (fun y : ℝ => Φg y)) x • f x := by
+        refine MeasureTheory.integral_congr_ae ?_
+        filter_upwards [hf2.coeFn_toLp] with x hx
+        rw [hx]
+        congr 1
+      have c6 : (∫ x, (𝓕 (fun y : ℝ => Φg y)) x • f x)
+          = ∫ ξ, (fun y : ℝ => Φg y) ξ • 𝓕 f ξ :=
+        integral_fourier_schwartz_smul hf1 Φg
+      have c7 : (∫ ξ, (fun y : ℝ => Φg y) ξ • 𝓕 f ξ) = ∫ ξ, g ξ • 𝓕 f ξ := by
+        refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun ξ => ?_))
+        show Φg ξ • 𝓕 f ξ = g ξ • 𝓕 f ξ
+        rw [hΦg_coe ξ, Complex.real_smul, smul_eq_mul]
+      rw [c1, c2, c3, c4, c5, c6, c7]
+    calc (∫ x, g x • (A x - 𝓕 f x))
+        = (∫ x, g x • A x) - ∫ x, g x • 𝓕 f x := by
+          rw [← MeasureTheory.integral_sub hgA hgB]
+          refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+          show g x • (A x - 𝓕 f x) = g x • A x - g x • 𝓕 f x
+          exact smul_sub _ _ _
+      _ = 0 := by rw [hchain, sub_self]
+  filter_upwards [h0] with x hx
+  exact sub_eq_zero.mp hx
 
 end DedekindResidue
