@@ -1912,6 +1912,75 @@ theorem exists_ball_zero_count :
     _ = (Real.log Cr + (P + Pn + 1)) / Real.log ((A+1) / Real.sqrt (A^2+1))
         * Real.log (2 + |T|) := by ring
 
+/-- **Holomorphic logarithm on a convex open set** (A5-i): a zero-free holomorphic
+function on a nonempty convex open set has a holomorphic logarithm. The continuous
+branch comes from mathlib's simply-connected lifting; differentiability is local, via
+the principal branch of the quotient. -/
+theorem exists_differentiableOn_log {U : Set ℂ} (hUo : IsOpen U) (hUc : Convex ℝ U)
+    (hne : U.Nonempty) {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U)
+    (h0 : ∀ z ∈ U, f z ≠ 0) :
+    ∃ L : ℂ → ℂ, DifferentiableOn ℂ L U ∧ Set.EqOn (Complex.exp ∘ L) f U := by
+  have hcontr : ContractibleSpace U := hUc.contractibleSpace hne
+  have hSC : IsSimplyConnected U := (inferInstance : SimplyConnectedSpace U)
+  obtain ⟨L, hLc, hLeq⟩ := Complex.exists_continuousOn_eqOn_exp_comp hSC hUo
+    hf.continuousOn (by
+      rintro ⟨z, hz, hz0⟩
+      exact h0 z hz hz0)
+  refine ⟨L, fun z₀ hz₀ => ?_, hLeq⟩
+  have hUmem : U ∈ nhds z₀ := hUo.mem_nhds hz₀
+  suffices h : DifferentiableAt ℂ L z₀ from h.differentiableWithinAt
+  have hf0 : f z₀ ≠ 0 := h0 z₀ hz₀
+  have hfat : DifferentiableAt ℂ f z₀ := hf.differentiableAt hUmem
+  have hquot : ContinuousAt (fun z => f z / f z₀) z₀ :=
+    (hf.continuousOn.continuousAt hUmem).div_const _
+  have hone : f z₀ / f z₀ = 1 := by field_simp
+  have hslit : f z₀ / f z₀ ∈ Complex.slitPlane := by
+    rw [hone]
+    simp [Complex.slitPlane]
+  have hDcont : ContinuousAt
+      (fun z => L z - (L z₀ + Complex.log (f z / f z₀))) z₀ :=
+    (hLc.continuousAt hUmem).sub (continuousAt_const.add (hquot.clog hslit))
+  have hD0 : L z₀ - (L z₀ + Complex.log (f z₀ / f z₀)) = 0 := by
+    rw [hone, Complex.log_one]
+    ring
+  -- values of D lie in 2πiℤ
+  have hDint : ∀ z ∈ U, ∃ n : ℤ,
+      L z - (L z₀ + Complex.log (f z / f z₀)) = n * (2 * π * Complex.I) := by
+    intro z hz
+    have hexpD : Complex.exp (L z - (L z₀ + Complex.log (f z / f z₀))) = 1 := by
+      rw [Complex.exp_sub, Complex.exp_add,
+        Complex.exp_log (div_ne_zero (h0 z hz) hf0)]
+      have h1 : Complex.exp (L z) = f z := hLeq hz
+      have h2 : Complex.exp (L z₀) = f z₀ := hLeq hz₀
+      rw [h1, h2]
+      field_simp [h0 z hz, hf0]
+    rwa [Complex.exp_eq_one_iff] at hexpD
+  -- D is eventually small, hence eventually zero
+  have hDsmall : ∀ᶠ z in nhds z₀,
+      ‖L z - (L z₀ + Complex.log (f z / f z₀))‖ < 2*π := by
+    have htend := hDcont.tendsto
+    rw [hD0] at htend
+    have := Metric.tendsto_nhds.mp htend (2*π) (by positivity)
+    filter_upwards [this] with z hz
+    rwa [dist_zero_right] at hz
+  have hDzero : (fun z => L z₀ + Complex.log (f z / f z₀)) =ᶠ[nhds z₀] L := by
+    filter_upwards [hDsmall, hUmem] with z hznorm hzU
+    obtain ⟨n, hn⟩ := hDint z hzU
+    have hnz : (n : ℂ) = 0 := by
+      by_contra hne'
+      have hn1 : (1:ℝ) ≤ |(n:ℝ)| := by
+        have : n ≠ 0 := by exact_mod_cast hne'
+        exact_mod_cast Int.one_le_abs this
+      rw [hn] at hznorm
+      rw [norm_mul, norm_mul, norm_mul, Complex.norm_I, mul_one,
+        Complex.norm_intCast, Complex.norm_ofNat, Complex.norm_real,
+        Real.norm_eq_abs, abs_of_pos Real.pi_pos] at hznorm
+      nlinarith [Real.pi_pos]
+    rw [hnz, zero_mul] at hn
+    linear_combination -hn
+  refine DifferentiableAt.congr_of_eventuallyEq ?_ hDzero.symm
+  exact (differentiableAt_const _).add ((hfat.div_const _).clog hslit)
+
 end
 
 end DedekindResidue
