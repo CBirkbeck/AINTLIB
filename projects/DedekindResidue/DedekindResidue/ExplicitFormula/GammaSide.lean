@@ -2900,4 +2900,113 @@ theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
       (hns_mono.tendsto_atTop)
   exact tendsto_nhds_unique hpt hlim
 
+/-- **`μγ` is integrable** (P-d prerequisite): the product of the two transforms is
+integrable, being a.e. a product of two `L²` representatives after rescaling. -/
+theorem integrable_muFT_mul_gammaFT {k F : ℝ → ℂ}
+    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
+    (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    Integrable (fun t : ℝ =>
+      (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t) := by
+  set repk : ℝ → ℂ := ((𝓕 (hk2.toLp k) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) with hrepk
+  set reph : ℝ → ℂ := ((𝓕 (hFdiv2.toLp _) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)
+    with hreph
+  -- integrable product of the scaled reps
+  have hprod : Integrable (fun t : ℝ => repk (-t/(2*π)) * reph (-t/(2*π))) := by
+    have h0 : Integrable (fun s : ℝ => repk s * reph s) :=
+      MemLp.integrable_mul (MeasureTheory.Lp.memLp _) (MeasureTheory.Lp.memLp _)
+    have h1 : Integrable (fun t : ℝ => (fun s : ℝ => repk s * reph s) ((-(2*π))⁻¹ * t)) := by
+      rw [MeasureTheory.integrable_comp_mul_left_iff
+        (fun s : ℝ => repk s * reph s)
+        (inv_ne_zero (neg_ne_zero.mpr (by positivity : (2*π : ℝ) ≠ 0)))]
+      exact h0
+    refine h1.congr (Filter.Eventually.of_forall (fun t => ?_))
+    congr 2 <;> · field_simp
+  -- transfer along a.e. equality
+  have hμeq : ∀ t : ℝ, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I))
+      = 𝓕 k (-t/(2*π)) := fun t => muFT_eq_fourierIntegral k t
+  have hkae : (fun t : ℝ => 𝓕 k (-t/(2*π))) =ᵐ[volume]
+      (fun t : ℝ => repk (-t/(2*π))) := by
+    have h0 : (𝓕 k) =ᵐ[volume] repk := (coeFn_fourier_toLp_two hk1 hk2).symm
+    have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+        (volume : Measure ℝ) (volume : Measure ℝ) := by
+      have h1 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
+        funext t
+        field_simp
+      rw [h1]
+      refine ⟨by fun_prop, ?_⟩
+      rw [Real.map_volume_mul_left (inv_ne_zero (neg_ne_zero.mpr
+        (by positivity : (2*π : ℝ) ≠ 0)))]
+      exact Measure.smul_absolutelyContinuous
+    exact hqmp.ae h0
+  have hγae : (fun t : ℝ => gammaFT F t) =ᵐ[volume]
+      (fun t : ℝ => reph (-t/(2*π))) := gammaFT_ae_eq_fourierL2 hF hFdiv hFdiv2
+  refine hprod.congr ?_
+  filter_upwards [hkae, hγae] with t h1 h2
+  rw [hμeq t, h1, h2]
+
+/-- **The Plancherel evaluation of `∫μγ`** (P-d, Poitou p. 6-06): for `k ∈ L¹∩L²` and
+admissible `F`,
+`∫ μ(t)γ(t) dt = 2π ∫ k(-x)·(F(0)-F(x))/x dx`. -/
+theorem integral_muFT_mul_gammaFT {k F : ℝ → ℂ}
+    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
+    (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    (∫ t : ℝ, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)
+      = ((2*π : ℝ) : ℂ) * ∫ x : ℝ, k (-x) * ((F 0 - F x)/(x:ℂ)) := by
+  set repk : ℝ → ℂ := ((𝓕 (hk2.toLp k) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) with hrepk
+  set reph : ℝ → ℂ := ((𝓕 (hFdiv2.toLp _) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ)
+    with hreph
+  have hμeq : ∀ t : ℝ, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I))
+      = 𝓕 k (-t/(2*π)) := fun t => muFT_eq_fourierIntegral k t
+  have hkae : (fun t : ℝ => 𝓕 k (-t/(2*π))) =ᵐ[volume]
+      (fun t : ℝ => repk (-t/(2*π))) := by
+    have h0 : (𝓕 k) =ᵐ[volume] repk := (coeFn_fourier_toLp_two hk1 hk2).symm
+    have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+        (volume : Measure ℝ) (volume : Measure ℝ) := by
+      have h1 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
+        funext t
+        field_simp
+      rw [h1]
+      refine ⟨by fun_prop, ?_⟩
+      rw [Real.map_volume_mul_left (inv_ne_zero (neg_ne_zero.mpr
+        (by positivity : (2*π : ℝ) ≠ 0)))]
+      exact Measure.smul_absolutelyContinuous
+    exact hqmp.ae h0
+  have hγae : (fun t : ℝ => gammaFT F t) =ᵐ[volume]
+      (fun t : ℝ => reph (-t/(2*π))) := gammaFT_ae_eq_fourierL2 hF hFdiv hFdiv2
+  -- replace by the scaled representatives
+  have h1 : (∫ t : ℝ, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)
+      = ∫ t : ℝ, repk (-t/(2*π)) * reph (-t/(2*π)) := by
+    refine MeasureTheory.integral_congr_ae ?_
+    filter_upwards [hkae, hγae] with t hk' hγ'
+    rw [hμeq t, hk', hγ']
+  rw [h1]
+  -- rescale
+  have h2 : (∫ t : ℝ, repk (-t/(2*π)) * reph (-t/(2*π)))
+      = |((-(2*π))⁻¹)⁻¹| • ∫ s : ℝ, repk s * reph s := by
+    rw [← MeasureTheory.Measure.integral_comp_mul_left
+      (fun s : ℝ => repk s * reph s) ((-(2*π))⁻¹)]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun t => ?_))
+    congr 2 <;> · field_simp
+  rw [h2]
+  have h3 : |((-(2*π))⁻¹)⁻¹| = (2*π : ℝ) := by
+    rw [inv_inv, abs_neg, abs_of_pos (by positivity)]
+  rw [h3]
+  -- evaluate via the mixed Plancherel pairing
+  have h4 : (∫ s : ℝ, repk s * reph s)
+      = ∫ x : ℝ, k (-x) * ((F 0 - F x)/(x:ℂ)) := by
+    have h5 : (∫ s : ℝ, repk s * reph s) = ∫ s : ℝ, 𝓕 k s * reph s := by
+      refine MeasureTheory.integral_congr_ae ?_
+      filter_upwards [(coeFn_fourier_toLp_two hk1 hk2)] with s hs
+      rw [hrepk]
+      show ((𝓕 (hk2.toLp k) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) s * reph s
+          = 𝓕 k s * reph s
+      rw [hs]
+    rw [h5, hreph]
+    exact integral_fourier_mul_fourierL2 hk1 hk2 hFdiv2
+  rw [h4, Complex.real_smul]
+
 end DedekindResidue
