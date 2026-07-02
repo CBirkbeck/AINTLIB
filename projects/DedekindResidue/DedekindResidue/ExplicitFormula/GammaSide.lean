@@ -3345,4 +3345,139 @@ theorem rhoFT_poitouKernel {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
   congr 1
   rw [MeasureTheory.integral_const_mul, re_digamma_sub_eq_integral hσ t]
 
+/-- The even-`F` fold of the kernel pairing: for even `F`,
+`∫_ℝ k_σ(-x)·(F(0)-F(x))/x dx = -2∫₀^∞ e^{-σy}(F(0)-F(y))/(1-e^{-y}) dy`. -/
+theorem integral_poitouKernel_neg_mul {σ : ℝ} (hσ : 0 < σ) {F : ℝ → ℂ}
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    (∫ x : ℝ, ((poitouKernel σ (-x) : ℝ) : ℂ) * ((F 0 - F x)/(x:ℂ)))
+      = -(2 * ∫ y in Set.Ioi (0:ℝ),
+          ((Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y)) := by
+  classical
+  set h : ℝ → ℂ := fun x => (F 0 - F x)/(x:ℂ) with hh
+  set k : ℝ → ℂ := fun x => ((poitouKernel σ x : ℝ) : ℂ) with hk
+  -- integrability of the pairing
+  have hpair_int : Integrable (fun x : ℝ => k (-x) * h x) := by
+    have h0 : Integrable (fun x : ℝ => k (-x)) :=
+      (Measure.measurePreserving_neg (volume : Measure ℝ)).integrable_comp_of_integrable
+        (integrable_poitouKernel hσ)
+    have h1 : MemLp (fun x : ℝ => k (-x)) 2 (volume : Measure ℝ) :=
+      (memLp_two_poitouKernel hσ).comp_measurePreserving
+        (Measure.measurePreserving_neg _)
+    have h2 := MemLp.integrable_mul h1 hFdiv2
+    exact h2
+  -- k(-x) = -k(x)
+  have hodd : ∀ x : ℝ, k (-x) = -k x := by
+    intro x
+    rw [hk]
+    simp only
+    rw [poitouKernel_neg]
+    push_cast
+    ring
+  -- fold to the positive half-line: h is odd for even F
+  have hhodd : ∀ x : ℝ, x ≠ 0 → h (-x) = -h x := by
+    intro x hx
+    rw [hh]
+    simp only
+    rw [hFeven x]
+    push_cast
+    have hxne : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx
+    field_simp
+  -- split and reflect
+  have hsplit := MeasureTheory.integral_add_compl (measurableSet_Iio (a := (0:ℝ)))
+    hpair_int
+  rw [← hsplit]
+  have hcomplIio : (Set.Iio (0:ℝ))ᶜ = Set.Ici (0:ℝ) := by
+    ext x
+    simp
+  rw [hcomplIio]
+  have hIci : (∫ x in Set.Ici (0:ℝ), k (-x) * h x)
+      = ∫ x in Set.Ioi (0:ℝ), k (-x) * h x :=
+    (MeasureTheory.setIntegral_congr_set (Ioi_ae_eq_Ici (a := (0:ℝ)))).symm
+  rw [hIci]
+  have A : MeasurableEmbedding fun x : ℝ => -x :=
+    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+  have hmap : (volume : Measure ℝ).restrict (Set.Iio (0:ℝ))
+      = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ioi (0:ℝ))) := by
+    rw [show Set.Ioi (0:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iio 0) by ext x; simp,
+      ← Measure.restrict_map A.measurable measurableSet_Iio,
+      Measure.map_neg_eq_self (volume : Measure ℝ)]
+  have hIio : (∫ x in Set.Iio (0:ℝ), k (-x) * h x)
+      = ∫ y in Set.Ioi (0:ℝ), k (-y) * h y := by
+    rw [show (∫ x in Set.Iio (0:ℝ), k (-x) * h x)
+        = ∫ x, k (-x) * h x ∂((volume : Measure ℝ).restrict (Set.Iio 0)) from rfl,
+      hmap, A.integral_map]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+    rw [Set.mem_Ioi] at hy
+    show k (-(-y)) * h (-y) = k (-y) * h y
+    rw [neg_neg, hodd y, hhodd y hy.ne']
+    ring
+  rw [hIio]
+  -- both halves agree; evaluate on the positive side
+  have hval : (∫ y in Set.Ioi (0:ℝ), k (-y) * h y)
+      = -∫ y in Set.Ioi (0:ℝ),
+          ((Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y) := by
+    rw [← MeasureTheory.integral_neg]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+    rw [Set.mem_Ioi] at hy
+    rw [hodd y]
+    have hkpos : k y = ((y * Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) := by
+      rw [hk]
+      simp only
+      rw [poitouKernel_of_pos hy]
+    rw [hkpos, hh]
+    simp only
+    have hyne : (y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy.ne'
+    push_cast
+    field_simp
+  rw [hval]
+  ring
+
+/-- **Poitou's Proposition 3** (p. 6-04, for the Dedekind kernel): for `σ > 0` and an
+even admissible `F` with the boundary decay `ργ → 0`,
+
+`lim_{T→∞} ∫_{-T}^T 2(Re ψ(σ+it) - ψ(σ))·φ(t) dt
+   = 4π ∫₀^∞ e^{-σy}(F(0)-F(y))/(1-e^{-y}) dy`,
+
+equivalently `(1/2π)∫(Re ψ(σ+it) - ψ(σ))φ(t)dt = ∫₀^∞ e^{-σx}(F(0)-F(x))/(1-e^{-x})dx`
+— exactly Poitou's display. -/
+theorem prop3_poitou {σ : ℝ} (hσ : 0 < σ) {F : ℝ → ℂ} (hF : Integrable F)
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t * gammaFT F t) atTop (nhds 0))
+    (hbot : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t * gammaFT F t) atBot (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (((2 * ((Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)
+            - Complex.digamma (σ:ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      atTop (nhds (((4*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y))) := by
+  have h0 := tendsto_integral_rhoFT_mul_phi_eq_plancherel
+    (integrable_poitouKernel hσ) (memLp_two_poitouKernel hσ) hF hFdiv hFdiv2 htop hbot
+  -- rewrite the integrand via the ρ-fold identity
+  have hfun : (fun T : ℝ => ∫ t in (-T)..T,
+      rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+        * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      = fun T : ℝ => ∫ t in (-T)..T,
+        (((2 * ((Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)
+            - Complex.digamma (σ:ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)) := by
+    funext T
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    rw [rhoFT_poitouKernel hσ t]
+  rw [hfun] at h0
+  -- rewrite the limit via the even fold
+  have hval : -(((2*π : ℝ) : ℂ)
+      * ∫ x : ℝ, ((poitouKernel σ (-x) : ℝ) : ℂ) * ((F 0 - F x)/(x:ℂ)))
+      = ((4*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y) := by
+    rw [integral_poitouKernel_neg_mul hσ hFeven hFdiv2]
+    push_cast
+    ring
+  rw [hval] at h0
+  exact h0
+
 end DedekindResidue
