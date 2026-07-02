@@ -995,6 +995,124 @@ theorem lintegral_Ioi_mellin_scale {c : ℝ} (hc : 0 < c) (σ : ℝ) (H : ℝ �
     show c⁻¹ = c ^ (-1 : ℝ) by rw [Real.rpow_neg_one], ← Real.rpow_add hc]
   rw [show (1 : ℝ) - σ + -1 = -σ by ring]
 
+open scoped Classical in
+/-- The norm of the canonical preimage of a cone point is its integer norm. -/
+theorem abs_norm_conePreimage (J : (Ideal (𝓞 K))⁰) (a : idealSet K J) :
+    ((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)
+      = (intNorm (idealSetMap K J a) : ℝ) := by
+  rw [intNorm_coe, ← norm_eq_norm, mixedEmbedding_conePreimage]
+  rw [show ((idealSetMap K J a : integerSet K) : mixedSpace K) = (a : mixedSpace K)
+    from idealSetMap_apply K J a]
+
+open scoped Classical in
+/-- **The counting step (δ)**: the cone-point norm sum is `torsionOrder` times the sum
+over nonzero principal ideals divisible by `J`. -/
+theorem tsum_idealSet_norm_rpow (J : (Ideal (𝓞 K))⁰) (σ : ℝ) :
+    ∑' a : idealSet K J,
+      ENNReal.ofReal (((((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2) ^ (-σ))
+      = (torsionOrder K)
+        * ∑' I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+            ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))},
+            ENNReal.ofReal ((((Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+              ^ (-σ)) := by
+  have hsummand : ∀ a : idealSet K J,
+      ENNReal.ofReal (((((|Algebra.norm ℚ (conePreimage K J a)| : ℚ) : ℝ)) ^ 2) ^ (-σ))
+        = ENNReal.ofReal ((((intNorm (idealSetMap K J a) : ℝ)) ^ 2) ^ (-σ)) := by
+    intro a
+    rw [abs_norm_conePreimage]
+  rw [tsum_congr hsummand]
+  -- fiber the cone side over the integer norm
+  rw [← Equiv.tsum_eq (Equiv.sigmaFiberEquiv (fun a : idealSet K J =>
+    intNorm (idealSetMap K J a))) (fun a =>
+      ENNReal.ofReal ((((intNorm (idealSetMap K J a) : ℝ)) ^ 2) ^ (-σ))),
+    ENNReal.tsum_sigma']
+  -- fiber the ideal side over the norm
+  have hidealfiber : (∑' I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+        ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))},
+        ENNReal.ofReal ((((Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+      = ∑' n : ℕ, ∑' _I : {I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+          ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))} //
+            Ideal.absNorm ((I.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+          ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) := by
+    rw [← Equiv.tsum_eq (Equiv.sigmaFiberEquiv
+      (fun I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+        ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))} =>
+          Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))))
+      (fun I => ENNReal.ofReal ((((Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) :
+        Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)))]
+    rw [ENNReal.tsum_sigma']
+    refine tsum_congr (fun n => tsum_congr (fun I => ?_))
+    show ENNReal.ofReal ((((Ideal.absNorm ((I.val : (Ideal (𝓞 K))⁰) :
+      Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)) = _
+    rw [I.2]
+  rw [hidealfiber]
+  rw [← ENNReal.tsum_mul_left]
+  refine tsum_congr (fun n => ?_)
+  -- reduce the cone fiber to a constant sum
+  have hconst : (∑' b : {a : idealSet K J // intNorm (idealSetMap K J a) = n},
+      ENNReal.ofReal ((((intNorm (idealSetMap K J ((Equiv.sigmaFiberEquiv
+        (fun a : idealSet K J => intNorm (idealSetMap K J a))) ⟨n, b⟩)) : ℝ)) ^ 2) ^ (-σ)))
+      = ∑' _b : {a : idealSet K J // intNorm (idealSetMap K J a) = n},
+          ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) := by
+    refine tsum_congr (fun b => ?_)
+    show ENNReal.ofReal ((((intNorm (idealSetMap K J b.val) : ℝ)) ^ 2) ^ (-σ)) = _
+    rw [b.2]
+  rw [hconst]
+  -- reindex the cone fiber to the mathlib norm-fiber, then to ideals × torsion
+  have hfib1 : {a : idealSet K J // intNorm (idealSetMap K J a) = n}
+      ≃ {a : idealSet K J // mixedEmbedding.norm (a : mixedSpace K) = (n : ℝ)} := by
+    refine Equiv.subtypeEquivRight (fun a => ?_)
+    constructor
+    · intro h
+      rw [← h, intNorm_coe,
+        show ((idealSetMap K J a : integerSet K) : mixedSpace K) = (a : mixedSpace K)
+          from idealSetMap_apply K J a]
+    · intro h
+      have h2 : (intNorm (idealSetMap K J a) : ℝ) = (n : ℝ) := by
+        rw [intNorm_coe, show ((idealSetMap K J a : integerSet K) : mixedSpace K)
+          = (a : mixedSpace K) from idealSetMap_apply K J a]
+        exact h
+      exact_mod_cast h2
+  rw [show (∑' _b : {a : idealSet K J // intNorm (idealSetMap K J a) = n},
+      ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))
+    = ∑' _b : {a : idealSet K J // mixedEmbedding.norm (a : mixedSpace K) = (n : ℝ)},
+        ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) from
+    (Equiv.tsum_eq hfib1.symm (fun _ => ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))).symm]
+  rw [show (∑' _b : {a : idealSet K J // mixedEmbedding.norm (a : mixedSpace K) = (n : ℝ)},
+      ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))
+    = ∑' _p : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+        ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
+        ∧ Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} × (torsion K),
+        ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) from
+    (Equiv.tsum_eq (idealSetEquivNorm K J n).symm
+      (fun _ => ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))).symm]
+  rw [ENNReal.tsum_prod']
+  have hinner : ∀ I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+      ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
+      ∧ Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n},
+      (∑' _ζ : torsion K, ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))
+        = (torsionOrder K) * ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) := by
+    intro I
+    rw [tsum_fintype, Finset.sum_const, nsmul_eq_mul]
+    norm_cast
+  rw [tsum_congr hinner, ENNReal.tsum_mul_left]
+  congr 1
+  have hfibeq : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+      ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
+      ∧ Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}
+      ≃ {I : {I : (Ideal (𝓞 K))⁰ // (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+          ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))} //
+            Ideal.absNorm ((I.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := by
+    refine (Equiv.subtypeEquivRight (fun I => ?_)).trans
+      (Equiv.subtypeSubtypeEquivSubtypeInter
+        (fun I : (Ideal (𝓞 K))⁰ => (J : Ideal (𝓞 K)) ∣ (I : Ideal (𝓞 K))
+          ∧ Submodule.IsPrincipal ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)))
+        (fun I => Ideal.absNorm ((I : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n)).symm
+    rw [and_assoc]
+  exact (Equiv.tsum_eq hfibeq.symm
+    (fun _ => ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))).symm
+
 end
 
 end DedekindResidue
