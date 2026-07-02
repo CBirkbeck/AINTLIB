@@ -614,6 +614,234 @@ theorem exists_dist_ge_of_card_le {S : Finset ℝ} {N : ℕ} (hcard : S.card ≤
     gcongr
   linarith
 
+/-- **Good heights** (SP2-RECT R-e): there are an abscissa `A` and a constant `c` such
+that every unit window `[T₀, T₀+1]` at height `T₀ ≥ A+5` contains a height `T` whose
+distance to every zero ordinate of `H` is at least `c/log(2+T₀)`. Zeros far from the
+window are automatically separated; zeros in the window live in the critical strip and
+are counted by the Jensen bound, so the separation pigeonhole applies. -/
+theorem exists_good_height :
+    ∃ A : ℝ, 2 ≤ A ∧ ∃ c : ℝ, 0 < c ∧ c ≤ 1 ∧ ∀ T₀ : ℝ, A + 5 ≤ T₀ →
+      ∃ T ∈ Set.Icc T₀ (T₀ + 1), ∀ ρ : ℂ, completedDedekindZetaEntire K ρ = 0 →
+        c / Real.log (2 + T₀) ≤ |T - ρ.im| := by
+  classical
+  obtain ⟨A, hA2, cL, hcL, hlow⟩ := exists_H_center_lower K
+  obtain ⟨Cc, hCc, hcount⟩ := exists_ball_zero_count_big K A hA2 cL hcL hlow
+  refine ⟨A, hA2, min 1 (1 / (2 * (2 * Cc + 2))), by positivity,
+    min_le_left _ _, fun T₀ hT₀ => ?_⟩
+  set c₀ : ℂ := (A : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I with hc₀
+  have hT₀pos : (7:ℝ) ≤ T₀ := by linarith
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := by
+    have he : Real.exp 1 ≤ 2 + T₀ := by
+      have := Real.exp_one_lt_d9
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2 + T₀) := Real.log_le_log (Real.exp_pos 1) he
+  -- the window of relevant zeros
+  set V : Set ℂ := Set.Ioo (-1 : ℝ) 2 ×ℂ Set.Ioo (T₀ - 1) (T₀ + 2) with hV
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  set D : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K) V) u
+    with hD
+  have hDnn : ∀ u, 0 ≤ D u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ => hHanal ζ)) u
+  obtain ⟨R₀, hR₀⟩ := ((Metric.isBounded_Ioo (-1:ℝ) 2).reProdIm
+    (Metric.isBounded_Ioo (T₀-1) (T₀+2))).subset_closedBall (0 : ℂ)
+  have hfin : (Function.support D).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset
+      (fun ζ _ => (hHanal ζ).meromorphicAt) (isCompact_closedBall (0:ℂ) R₀) hR₀
+  set S : Finset ℝ := hfin.toFinset.image Complex.im with hS
+  -- V sits inside the counting ball
+  have hVball : V ⊆ Metric.closedBall c₀ (A + 2) := by
+    intro ζ hζ
+    rw [hV, Complex.mem_reProdIm, Set.mem_Ioo, Set.mem_Ioo] at hζ
+    rw [Metric.mem_closedBall, dist_eq_norm]
+    have hre : ((ζ - c₀).re) = ζ.re - A := by
+      rw [hc₀]
+      simp
+    have him : ((ζ - c₀).im) = ζ.im - (T₀ + 1/2) := by
+      rw [hc₀]
+      simp
+    have hsq : ‖ζ - c₀‖^2 = (ζ.re - A)^2 + (ζ.im - (T₀ + 1/2))^2 := by
+      rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, hre, him]
+      ring
+    have h1 : (ζ.re - A)^2 ≤ (A+1)^2 := by
+      have := hζ.1
+      nlinarith [this.1, this.2]
+    have h2 : (ζ.im - (T₀ + 1/2))^2 ≤ (3/2)^2 := by
+      have := hζ.2
+      nlinarith [this.1, this.2]
+    nlinarith [norm_nonneg (ζ - c₀), hsq]
+  -- the count bounds the number of window ordinates
+  have hcast : ((S.card : ℕ) : ℝ) ≤ 2 * Cc * Real.log (2 + T₀) := by
+    -- card S ≤ card supp ≤ ∑ multiplicities ≤ Jensen count
+    have h1 : S.card ≤ hfin.toFinset.card := Finset.card_image_le
+    have h2 : hfin.toFinset.card ≤ ∑ u ∈ hfin.toFinset, (D u).toNat := by
+      rw [Finset.card_eq_sum_ones]
+      refine Finset.sum_le_sum ?_
+      intro u hu
+      have hne : D u ≠ 0 := Function.mem_support.mp (hfin.mem_toFinset.mp hu)
+      have := hDnn u
+      omega
+    -- the ℤ-sum is bounded by the closed-ball count
+    set Dcl : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+      (Metric.closedBall c₀ (A+2))) u with hDcl
+    have hmcl : MeromorphicOn (completedDedekindZetaEntire K)
+        (Metric.closedBall c₀ (A+2)) := fun ζ _ => (hHanal ζ).meromorphicAt
+    have hmV : MeromorphicOn (completedDedekindZetaEntire K) V := fun ζ _ =>
+      (hHanal ζ).meromorphicAt
+    have hfincl : (Function.support Dcl).Finite :=
+      MeromorphicOn.divisor_support_finite_of_subset hmcl
+        (isCompact_closedBall c₀ (A+2)) subset_rfl
+    have hDclnn : ∀ u, 0 ≤ Dcl u := fun u =>
+      (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ => hHanal ζ)) u
+    have hpt : ∀ u, D u ≤ Dcl u := by
+      intro u
+      by_cases hu : u ∈ V
+      · rw [hD, hDcl]
+        simp only
+        rw [MeromorphicOn.divisor_apply hmV hu,
+          MeromorphicOn.divisor_apply hmcl (hVball hu)]
+      · rw [hD]
+        simp only
+        rw [Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hu]
+        exact hDclnn u
+    have hFsub : hfin.toFinset ⊆ hfincl.toFinset := by
+      intro u hu
+      have hu' := Function.mem_support.mp (hfin.mem_toFinset.mp hu)
+      refine hfincl.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+      intro h0
+      refine hu' (le_antisymm ?_ (hDnn u))
+      rw [← h0]
+      exact hpt u
+    have e1 : ((∑ u ∈ hfin.toFinset, (D u).toNat : ℕ) : ℤ)
+        = ∑ u ∈ hfin.toFinset, D u := by
+      push_cast
+      refine Finset.sum_congr rfl (fun u _ => Int.toNat_of_nonneg (hDnn u))
+    have e2 : ∑ u ∈ hfin.toFinset, D u ≤ ∑ u ∈ hfincl.toFinset, Dcl u := by
+      calc ∑ u ∈ hfin.toFinset, D u = ∑ u ∈ hfincl.toFinset, D u := by
+            refine Finset.sum_subset hFsub (fun u _ hu => ?_)
+            by_contra h0
+            exact hu (hfin.mem_toFinset.mpr (Function.mem_support.mpr h0))
+        _ ≤ ∑ u ∈ hfincl.toFinset, Dcl u := Finset.sum_le_sum (fun u _ => hpt u)
+    have e3 : ∑ u ∈ hfincl.toFinset, Dcl u = ∑ᶠ u, Dcl u :=
+      (finsum_eq_sum Dcl hfincl).symm
+    have hcnt := hcount (T₀ + 1/2) (by
+      rw [abs_of_pos (by linarith)]
+      linarith)
+    have hlogle : Real.log (2 + |T₀ + 1/2|) ≤ 2 * Real.log (2 + T₀) := by
+      rw [abs_of_pos (by linarith)]
+      have hstep : (2 + (T₀ + 1/2)) ≤ (2 + T₀) * 2 := by linarith
+      calc Real.log (2 + (T₀ + 1/2)) ≤ Real.log ((2 + T₀) * 2) :=
+            Real.log_le_log (by linarith) hstep
+        _ = Real.log (2 + T₀) + Real.log 2 := by
+            rw [Real.log_mul (by linarith) (by norm_num)]
+        _ ≤ 2 * Real.log (2 + T₀) := by
+            have h2 : Real.log 2 ≤ 1 := by
+              have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
+              linarith
+            linarith
+    calc ((S.card : ℕ) : ℝ)
+        ≤ ((∑ u ∈ hfin.toFinset, (D u).toNat : ℕ) : ℝ) := by
+          exact_mod_cast le_trans h1 h2
+      _ ≤ ((∑ᶠ u, Dcl u : ℤ) : ℝ) := by
+          have hint : ((∑ u ∈ hfin.toFinset, (D u).toNat : ℕ) : ℤ) ≤ ∑ᶠ u, Dcl u := by
+            rw [e1, ← e3]
+            exact e2
+          exact_mod_cast hint
+      _ ≤ Cc * Real.log (2 + |T₀ + 1/2|) := hcnt
+      _ ≤ Cc * (2 * Real.log (2 + T₀)) :=
+          mul_le_mul_of_nonneg_left hlogle hCc.le
+      _ = 2 * Cc * Real.log (2 + T₀) := by ring
+  -- pigeonhole over the window ordinates
+  obtain ⟨T, hTmem, hTsep⟩ := exists_dist_ge_of_card_le (le_refl S.card) T₀
+  refine ⟨T, hTmem, fun ρ hρ => ?_⟩
+  have hstrip := re_mem_of_completedDedekindZetaEntire_eq_zero K hρ
+  have hcpos : (0:ℝ) < min 1 (1 / (2 * (2 * Cc + 2))) := by positivity
+  have hlogpos : (0:ℝ) < Real.log (2 + T₀) := by linarith
+  by_cases hwin : ρ.im ∈ Set.Ioo (T₀ - 1) (T₀ + 2)
+  · -- windowed zero: its ordinate is a member of S
+    have hρV : ρ ∈ V := by
+      rw [hV, Complex.mem_reProdIm]
+      refine ⟨Set.mem_Ioo.mpr ⟨by linarith [hstrip.1], by linarith [hstrip.2]⟩, hwin⟩
+    have hmV : MeromorphicOn (completedDedekindZetaEntire K) V := fun ζ _ =>
+      (hHanal ζ).meromorphicAt
+    have hVconv : Convex ℝ V := convex_reProdIm (convex_Ioo _ _) (convex_Ioo _ _)
+    -- witness point with H ≠ 0 in the window
+    have hwit_re : (((3/2 : ℝ) : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I).re = 3/2 := by
+      simp
+    have hwit_im : (((3/2 : ℝ) : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I).im = T₀ + 1/2 := by
+      simp
+    have hwitmem : ((3/2 : ℝ) : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I ∈ V := by
+      rw [hV, Complex.mem_reProdIm, hwit_re, hwit_im]
+      constructor
+      · rw [Set.mem_Ioo]
+        constructor <;> norm_num
+      · rw [Set.mem_Ioo]
+        constructor <;> linarith
+    have hwitne : completedDedekindZetaEntire K
+        (((3/2 : ℝ) : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I) ≠ 0 := by
+      refine completedDedekindZetaEntire_ne_zero_of_one_lt_re K ?_
+      rw [hwit_re]
+      norm_num
+    have hordwit : meromorphicOrderAt (completedDedekindZetaEntire K)
+        (((3/2 : ℝ) : ℂ) + ((T₀ + 1/2 : ℝ) : ℂ) * Complex.I) ≠ ⊤ := by
+      rw [(hHanal _).meromorphicOrderAt_eq]
+      rw [analyticOrderAt_eq_zero.mpr (Or.inr hwitne)]
+      simp
+    have hordρ : meromorphicOrderAt (completedDedekindZetaEntire K) ρ ≠ ⊤ :=
+      MeromorphicOn.meromorphicOrderAt_ne_top_of_isPreconnected hmV
+        hVconv.isPreconnected hwitmem hρV hordwit
+    have hDρ : D ρ ≠ 0 := by
+      rw [hD]
+      simp only
+      rw [MeromorphicOn.divisor_apply hmV hρV]
+      intro hcon
+      rcases WithTop.untop₀_eq_zero.mp hcon with h | h
+      · -- order zero would give a nonzero limit, contradicting H ρ = 0
+        obtain ⟨c, hc0, hc⟩ :=
+          tendsto_ne_zero_of_meromorphicOrderAt_eq_zero ((hHanal ρ).meromorphicAt) h
+        have hcont : Filter.Tendsto (completedDedekindZetaEntire K)
+            (nhdsWithin ρ {ρ}ᶜ) (nhds (completedDedekindZetaEntire K ρ)) :=
+          ((hHanal ρ).continuousAt.tendsto).mono_left nhdsWithin_le_nhds
+        have huniq := tendsto_nhds_unique hc hcont
+        rw [hρ] at huniq
+        exact hc0 huniq
+      · exact hordρ h
+    have hmemS : ρ.im ∈ S := by
+      rw [hS]
+      exact Finset.mem_image.mpr ⟨ρ, hfin.mem_toFinset.mpr
+        (Function.mem_support.mpr hDρ), rfl⟩
+    have hsep := hTsep ρ.im hmemS
+    -- turn the pigeonhole separation into the log form
+    refine le_trans ?_ hsep
+    rw [div_le_div_iff₀ hlogpos (by positivity), one_mul]
+    have hc2 : min 1 (1 / (2 * (2 * Cc + 2))) ≤ 1 / (2 * (2 * Cc + 2)) :=
+      min_le_right _ _
+    have hkey : (2 : ℝ) * ((S.card : ℝ) + 1) ≤ (2 * (2 * Cc + 2)) * Real.log (2 + T₀) := by
+      nlinarith [hcast, hlog1, hCc.le]
+    have hden : (2 * (2 * Cc + 2)) ≠ 0 := by positivity
+    calc min 1 (1 / (2 * (2 * Cc + 2))) * (2 * ((S.card : ℝ) + 1))
+        ≤ (1 / (2 * (2 * Cc + 2))) * ((2 * (2 * Cc + 2)) * Real.log (2 + T₀)) := by
+          refine mul_le_mul hc2 hkey (by positivity) (by positivity)
+      _ = Real.log (2 + T₀) := by
+          field_simp
+  · -- distant zero: automatic unit separation
+    rw [Set.mem_Ioo] at hwin
+    push Not at hwin
+    have hone : (1:ℝ) ≤ |T - ρ.im| := by
+      rw [Set.mem_Icc] at hTmem
+      rcases le_or_gt ρ.im (T₀ - 1) with h | h
+      · rw [abs_of_pos (by linarith)]
+        linarith
+      · have h2 := hwin h
+        rw [abs_of_neg (by linarith)]
+        linarith
+    calc min 1 (1 / (2 * (2 * Cc + 2))) / Real.log (2 + T₀)
+        ≤ 1 / 1 := by
+          refine div_le_div₀ (by norm_num) (min_le_left _ _) (by norm_num) hlog1
+      _ = 1 := by norm_num
+      _ ≤ |T - ρ.im| := hone
+
 end DedekindResidue
 
 end
