@@ -219,7 +219,41 @@
       `_add_right`, `ite_mul_heckeWeights`, `dualPlaceWeights_heckeWeights_eq`
       (`c(t,u)^∨ = c(4^{2r₂}t⁻¹, -u+dualShift)`); `setIntegral_fundamentalDomain_comp_neg_add`
       (u ↦ -u+s preimage of ZSpan box is an FD via `preimage_of_equiv`; periodic integrals agree)
-      ⇒ **`heckeG_inversion` PROVEN, axiom-clean**. Remaining: (iv), then AGE-4 Mellin. Then
+      ⇒ **`heckeG_inversion` PROVEN, axiom-clean**. Remaining: (iv), then AGE-4 Mellin.
+      **AGE-4 ROUTE (derived 2026-07-02, constants VERIFIED to cancel — target
+      `∃ Λ, IsCompletedDedekindZeta K Λ` via mathlib `WeakFEPair`
+      (`Mathlib.NumberTheory.LSeries.AbstractFuncEq`), the completedRiemannZeta machinery):**
+      1. **`heckeG_smul`**: for `x ∈ K*`, `heckeG (x•I) t = heckeG I (|N(x)|²·t)`. Pieces:
+         (a) translation-only FD invariance — derive from `setIntegral_fundamentalDomain_comp_neg_add`
+         applied TWICE (`h := f∘neg` is periodic; shift `-s` then `0`), no new measure theory;
+         (b) `xShift x : logSpace K` := restriction of `w ↦ mult_w·log(w x) − mult_w·log|Nx|/n`
+         (zero-sum via `InfinitePlace.prod_eq_abs_norm` + `Real.log_prod`), `fullLog_xShift`
+         mirror of `fullLog_dualShift`; (c) `(w x)² · heckeWeights t u w
+         = heckeWeights (|Nx|²·t) (u + xShift x) w` mirror of `ite_mul_heckeWeights`
+         (the `(1;4)` case IS the special case `y_w = mult_w·log(1;2)`);
+         (d) `heckeTheta (x•I) c = heckeTheta I ((w·x)²·c)` — generalise `unitMulLatticeEquiv`
+         to `mulCoords x` for `x ≠ 0`.
+      2. **Normalised class theta** `Ĝ_C(x) := heckeG I (N(I)⁻²·β·x)` for any rep `I` of `C`,
+         `β := 4^(r₂)/|Δ|` — class-invariant by 1. **Clean Hecke symmetry falls out**:
+         `Ĝ_C(1/x) = √x · Ĝ_{C^∨}(x)` — coefficient is EXACTLY 1
+         (covol_I⁻¹·N(I)·β^{-1/2} = 2^{r₂}|Δ|^{-1/2}·2^{-r₂}|Δ|^{1/2} = 1, using
+         `covolume_idealZLattice = N(I)·2^{-r₂}√|Δ|` and `N(I^∨) = N(I)⁻¹·natAbs(Δ)⁻¹`).
+      3. **`f := ∑_{C ∈ ClassGroup} Ĝ_C`** (finite sum; `C ↦ C^∨` a bijection) ⇒
+         `f(1/x) = √x·f(x)`: a `WeakFEPair f f (k := 1/2) (ε := 1)` with
+         `f₀ = g₀ = h·w⁻¹·vol(unit box)` (the `0 ∈ L` terms). Remaining analytic inputs:
+         `hf_int` (LocallyIntegrableOn `Ioi 0`) + `hf_top` (rapid decay of `g_I(t) − g∞`,
+         lattice tail estimate from `norm_weightedGaussianCM_le`).
+      4. `Λ_K(s) := (const-adjust)·P.Λ (s/2)`: `WeakFEPair.Λ₀` entire + explicit poles at
+         `σ ∈ {0, 1/2}` ⇒ `s(s−1)Λ_K` entire ✓ second half of `IsCompletedDedekindZeta`.
+      5. **Agreement on Re s > 1** (the big remaining brick): `P.hasMellin` +
+         box-unfolding (`IsAddFundamentalDomain.integral_eq_tsum`: ∫_{FD}∑_{lattice} =
+         ∑_{orbit reps}∫_{logSpace}; torsion `w` cancels `torsionOrder⁻¹` since `w(ζa)=w(a)`)
+         + Fubini + per-point change of variables `(t,u) ↦ y_w = c_w(t,u)·(wa)²` +
+         per-place 1-D Gamma integrals (`Γℝ` at real, `Γ(s)π^{-s}` at complex — the
+         `2^{s-1}`-vs-`Γℂ` and `β^{s/2}` constants absorbed into the s-dependent
+         const-adjust in 4) + ideal counting `∑_{a ∈ I∖0 mod units} |N a|^{-s} =
+         N(I)^s·∑_{𝔞 integral, [𝔞]=[I⁻¹]} N𝔞^{-s}` (mathlib
+         `FundamentalCone.idealSetEquivNorm`-style) summed over classes = `ζ_K`. Then
       AGE-4 Mellin (constants self-verifying — every identity proven; the `4^{2r₂}`/`2^{-r₂}`
       factors recombine against `covolume_idealZLattice`'s `(2⁻¹)^{r₂}` and `Γℂ`'s `2`).
       ORIGINAL box plan:

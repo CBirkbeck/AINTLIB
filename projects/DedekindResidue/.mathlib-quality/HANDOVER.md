@@ -283,3 +283,35 @@ factor via `ZLattice.covolume`; see ticket) — then **AGΘ** (theta transformat
   Trailer: `Co-Authored-By: Claude <model> <noreply@anthropic.com>`.
 - Producers don't clean/golf/restyle (fleet does that on `main` post-merge). Leave the
   ticket-board statuses current — the next session resumes from `tickets.md` + this file.
+
+## 2026-07-02 — AGE-3 COMPLETE (`heckeG_inversion` proven); AGE-4 route derived, constants verified
+
+**State**: whole project builds green; single `sorry` = `belabas_friedman_thm1`; all else
+axiom-clean. Branch pushed through the `heckeG_inversion` + ticket commits.
+
+**Landed today** (all in `CompletedZeta/HeckeTheta.lean`):
+- `prod_placeWeights` / `prod_placeWeights_heckeWeights` (coordinate product = t).
+- `fullLog_restrict` (fullLog onto the trace-zero hyperplane), `dualShift`,
+  `fullLog_dualShift`, `heckeWeights_mul_left`/`_add_right`, `ite_mul_heckeWeights`,
+  `dualPlaceWeights_heckeWeights_eq` — `c(t,u)^∨ = c(4^{2r₂}t⁻¹, -u+dualShift)`.
+- `setIntegral_fundamentalDomain_comp_neg_add` — ∫ over a ZSpan box of a lattice-periodic
+  f is invariant under `u ↦ -u+s` (preimage FD via `IsAddFundamentalDomain.preimage_of_equiv`,
+  then `setIntegral_eq`; needed `VAddInvariantMeasure` transported from `.toAddSubgroup`
+  via `inferInstanceAs`, and `Submodule.vadd_def`).
+- **`heckeG_inversion : g_I(t) = covol(L_I)⁻¹·(√t)⁻¹·g_{I^∨}(4^{2r₂}·t⁻¹)`** — the
+  Mellin-ready inversion.
+
+**AGE-4 route (fully derived, see SP1-AGE ticket for detail)**: normalise
+`Ĝ_C(x) := heckeG I (N(I)⁻²·β·x)`, `β := 4^{r₂}/|Δ|` — class-invariant via the new target
+`heckeG_smul : heckeG (x•I) t = heckeG I (|Nx|²t)`; then `Ĝ_C(1/x) = √x·Ĝ_{C^∨}(x)` with
+coefficient EXACTLY 1 (verified: covol_I⁻¹·N(I)·β^{-1/2} = 1). Sum over the class group ⇒
+`f(1/x) = √x f(x)` ⇒ mathlib `WeakFEPair f f (1/2) 1` (AbstractFuncEq, the
+completedRiemannZeta machinery) gives Λ₀ entire + poles ⇒ `s(s−1)Λ` entire. Agreement on
+Re>1 via `P.hasMellin` + box-unfolding + per-place Gamma integrals + `idealSetEquivNorm`
+counting; s-dependent constants absorbed by a `C₁·C₂^s` adjust (harmless for both
+`IsCompletedDedekindZeta` conditions). **Next bricks in order**: (1a) translation-only FD
+invariance (apply the neg lemma twice); (1b) `xShift`+`fullLog_xShift` (mirror dualShift,
+zero-sum via `InfinitePlace.prod_eq_abs_norm`); (1c) `sq_mul_heckeWeights` (mirror
+`ite_mul_heckeWeights`); (1d) `heckeTheta_smul` (generalise `unitMulLatticeEquiv` to
+`mulCoords x`, `x ≠ 0`); then `heckeG_smul`, `Ĝ`, the FE-pair, integrability, decay,
+Mellin agreement.
