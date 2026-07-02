@@ -438,3 +438,34 @@ via Haar-uniqueness — no determinant needed), γ-N1/N2 reductions, g5 Gamma in
 e-viii exactly as in the beastmode sentinel (full breakdown there): the LSeries/dedekindZeta
 bridge at real s > 1, the toReal/hasMellin identification, the identity theorem, the
 definition and the existence theorem.
+
+## 2026-07-03 — ★★★ SP1-AGE COMPLETE: `exists_isCompletedDedekindZeta` PROVEN ★★★
+
+**Hecke's theorem is formalized** (commit 35352d14, all pushed): for every number field K,
+
+    theorem exists_isCompletedDedekindZeta : ∃ Λ : ℂ → ℂ, IsCompletedDedekindZeta K Λ
+
+axiom-clean ({propext, Classical.choice, Quot.sound}), sorry-free, general K. The GRH
+predicate now quantifies over a genuinely inhabited characterisation. The witness is
+`completedDedekindZeta := heckeAdjust⁻¹ · (heckeFEPair K).Λ (s/2)` with the entire
+extension `completedDedekindZetaEntire` built from `Λ₀` + explicit pole terms.
+
+**CRITICAL predicate fix en route** (commit c7a3cd76): the old entirety condition
+`Differentiable ℂ (fun s => s(s-1)Λ s)` was UNSATISFIABLE for total functions with
+genuine poles (the product literally vanishes at 0,1 while the continuation carries the
+residues). Faithful form now: `∃ H entire, ∀ s ≠ 0, s ≠ 1, H s = s(s-1)Λ s`. Uniqueness
+(.eqOn) adapted; GRH statement unchanged.
+
+**The ε-chain that closed it** (all in `MellinAgreement.lean` + `Existence.lean`):
+e-i ENNReal deviation, e-ii per-class Mellin chain (antitone-measurability trick),
+e-iii ALL constant cancellations machine-verified (w, N(J), s_C), e-iv the total Mellin
+identity, e-v ζ-convergence from ideal-count asymptotics (`count_LSeriesSummable` extracted)
++ `dedekindZeta_real_eq`, e-vi `heckeFEPair_Λ_real` (the Λ-value = Γ–ζ closed form),
+e-vii `prod_place_gamma` + `Gammaℝ/Gammaℂ_ofReal` + `heckeAdjust := heckeJacobian·2^{-r₂}` +
+`Λ_half_eq_prefactor_mul_zeta`, e-viii the identity theorem (frequently-agreement along
+2 + 1/(n+1); analyticity of both sides) + the definitions + the existence theorem.
+
+**The user's directive "get the GRH done properly before we do belabas" is DISCHARGED.**
+Next per ticket board: the Belabas-paper spine — T003 (Lemma 2: paperFourierIntegral of
+auxF), T-ADM, T-BV, then the explicit formula and Theorem 1 (`belabas_friedman_thm1`,
+still the project's single sorry).
