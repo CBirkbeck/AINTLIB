@@ -361,3 +361,20 @@ cone-points of norm n ≃ {principal ideals ∣-divisible by J, norm n} × torsi
 `𝔞 = (a) ⊆ J ↦ 𝔟 := 𝔞·J⁻¹ ∈ [J]⁻¹` gives the partial zeta. Agreement needs only REAL s > 1
 (both sides analytic on Re>1, identity theorem — mirror `IsCompletedDedekindZeta.eqOn`),
 so all swaps are Tonelli-on-nonneg. Mellin scaling = mathlib `mellin_comp_mul_left` ✓.
+
+**β1+β3 LANDED (2026-07-03, `MellinAgreement.lean`, commits 44099204/a3ba23f3)**:
+`heckeG_sub_const_eq` (the all-t>0 deviation identity) and **`coneUnfoldEquiv`**
+(`idealSet K J × (Fin (rank K) → ℤ) ≃ {x ∈ idealLattice (mk0 K J) | x ≠ 0}`, via
+`exist_unique_eq_mul_prod` + `unit_smul_mem_iff_mem_torsion` + `exists_unit_smul_mem`).
+**Next (β4)**: transport `coneUnfoldEquiv` through `embeddingCoords`/the euclidean comaps to
+reindex `∑'_{v ∈ idealZLattice (classRep C), v≠0}` (note `classRep K C = FractionalIdeal.mk0
+K J_C`, `J_C := (ClassGroup.mk0_surjective C).choose`, so the mixedSpace lattice matches);
+per-point unit shift = `heckeWeights_add_logEmbedding` + `logEmbedding_fundSystem`
+(`logEmb(∏fs^n) = ∑ nᵢ·basisUnitLattice i`, ℤ-combination of the box basis — mind
+`basisUnitLattice` vs `(chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ`: check whether they
+agree or need a base-change det-1 argument!); then tsum-reindex + `∑_n ∫_box (·+n·basis) =
+∫_{logSpace}` (IsAddFundamentalDomain.integral_eq_tsum'-reverse, P.2-era machinery). Then γ
+(per-orbit (t,u)→y Jacobian ⇒ Γℝ/Γ-integrals × |Na|^{-2σ}, pins κ), δ
+(`idealSetEquivNorm`/`card_isPrincipal_norm_eq_mul_torsion` counting — the ×torsion cancels
+heckeG's w⁻¹), ε (assemble: real s>1 agreement → identity theorem → `completedDedekindZeta`
+def → `IsCompletedDedekindZeta` → existence = GRH non-vacuity).

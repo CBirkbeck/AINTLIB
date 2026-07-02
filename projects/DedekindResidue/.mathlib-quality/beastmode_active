@@ -1,1 +1,1 @@
-FOCUS: AGE-4 brick beta1/beta2 — extract heckeG_sub_eq (g_I(t) - w^-1 vol = w^-1 int_box (Theta-1)) + tail-sum form; then the cone unfolding L\0 = idealSet x unitLattice
+FOCUS: AGE-4 brick beta4 — transport coneUnfoldEquiv through embeddingCoords to the EuclideanSpace lattice (idealZLattice (classRep C))\0, then the tsum reindex of the zero-removed theta + per-point unit shift (heckeWeights_add_logEmbedding with logEmbedding_fundSystem) + FD integral unfolding
