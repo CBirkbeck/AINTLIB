@@ -596,6 +596,44 @@ theorem le_norm_Gamma_base {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ ≤ 3/2) (ht 
             * (Real.exp (-(π * |t|) / 2) * Real.exp (π * |t| / 2)) by ring,
           hexp1, mul_one]
 
+/-- Rightward propagation of the Γ-lower bound: each recurrence step multiplies by a
+factor of modulus `≥ |t| ≥ 1`, so the base-strip lower bound survives arbitrarily far
+to the right. -/
+theorem le_norm_Gamma_base_add_nat {σ t : ℝ} (h1 : 1/2 ≤ σ) (h2 : σ ≤ 3/2)
+    (ht : 1 ≤ |t|) (n : ℕ) :
+    π / (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+      * Real.exp (-(π * |t|) / 2)
+      ≤ ‖Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  induction n with
+  | zero =>
+      have h0 : ((σ + (0:ℕ) : ℝ) : ℂ) = (σ : ℂ) := by push_cast; ring
+      rw [h0]
+      exact le_norm_Gamma_base h1 h2 ht
+  | succ n ih =>
+      have hzim : ((((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)).im = t := by simp
+      have hzne : (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+        intro h0
+        have := congrArg Complex.im h0
+        rw [hzim] at this
+        simp at this
+        rw [this] at ht
+        norm_num at ht
+      have hstep : ((σ + (n+1:ℕ) : ℝ) : ℂ) + (t : ℂ) * Complex.I
+          = ((((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)) + 1 := by
+        push_cast
+        ring
+      rw [hstep, Complex.Gamma_add_one _ hzne, norm_mul]
+      have hfac : (1:ℝ) ≤ ‖(((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by
+        calc (1:ℝ) ≤ |t| := ht
+          _ = |((((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)).im| := by rw [hzim]
+          _ ≤ ‖(((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := Complex.abs_im_le_norm _
+      calc π / (Real.sqrt (12 * π) * ‖((2 - σ : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * Complex.I‖)
+            * Real.exp (-(π * |t|) / 2)
+          ≤ ‖Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := ih
+        _ ≤ ‖(((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+              * ‖Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖ := by
+            nlinarith [norm_nonneg (Complex.Gamma (((σ + n : ℝ) : ℂ) + (t : ℂ) * Complex.I))]
+
 end
 
 end DedekindResidue

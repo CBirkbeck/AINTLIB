@@ -81,7 +81,27 @@ interpolation:
   `‖H(s)‖ ≤ exp(C·|s|·log(2+|s|))`-type global bound via FE-reflection (Re s ≥ 1/2 by the
   integral bound, Re s < 1/2 by `Λ(s) = Λ(1-s)`). Order-(≤1+ε) statement, constants may
   depend on K.
-- **[AC-A3] ζ_K polynomial bounds on strips**: `‖dedekindZeta K (σ+it)‖ ≤ C_K·(2+|t|)^{c}`
+- **[AC-A3] REVISED (2026-07-02, envelope-matched Jensen scheme)** — the deliverable is a
+  **decaying upper for `H = completedDedekindZetaEntire` on the strip `-1 ≤ Re ≤ 2`**:
+  `‖H(σ+it)‖ ≤ C_K·(1+|t|)^P·e^{-(n_K π/4)|t|}` — matching the center-lower's envelope
+  exactly (Γℝ-factor decays at rate π|t|/4, Γℂ at π|t|/2; total `(r₁+2r₂)π/4 = n_K π/4`),
+  so the Jensen ratio at center `A+iT` is polynomial and per-height counting is
+  `O(log Δ_K + log(2+|T|))` as classically required (paper p. 8 "all sums in (13) are
+  absolutely convergent" needs per-height O(log), NOT O(T)). Sub-leaves:
+  (a) rightward UPPER propagation `‖Γ(z+n)‖ ≤ poly·upper` (mirror of the landed
+      `le_norm_Gamma_base_add_nat`); decaying upper for `gammaFactor K (σ+it)`, σ ∈ [1,2];
+  (b) `‖ζ_K(σ+it)‖ ≤ T₂` for σ ≥ 2 (norm-sum at 2 — same machinery as A4-i);
+  (c) decaying upper for H on the line Re = 2 (combine via
+      completedDedekindZetaEntire_eq + completedDedekindZeta_eq_of_one_lt_re);
+  (d) `completedDedekindZetaEntire_one_sub : H(1-s) = H(s)` (s(s-1) is 1-s-symmetric;
+      off {0,1} from A0's FE, everywhere by continuity + density);
+  (e) PL comparator `G := H⁴·sin(πz)^{n_K}` (exponent-matched: 4·(n_Kπ/4) = n_K·π) on
+      [-1, 2] with the A1-iii scheme → decaying upper inside the strip.
+  Then **A4** = `AnalyticOnNhd.sum_divisor_le` at center `A+iT` (A from
+  `exists_re_norm_dedekindZeta_ge_half`, LANDED) with (e)'s sup-bound and the
+  center-lower from `le_norm_Gamma_base_add_nat` (LANDED) + ζ ≥ 1/2 + prefactor const.
+  ORIGINAL SKETCH (superseded — dedekindZeta is LSeries-junk off Re > 1, so ζ_K-strip
+  bounds are the wrong object; H-language throughout): `‖dedekindZeta K (σ+it)‖ ≤ C_K·(2+|t|)^{c}`
   for `-1 ≤ σ ≤ 2` — from A2 (Λ-bound) divided by the Γ-lower bound of A1 (+ prefactor).
   Also the Euler-product lower bound `‖ζ_K(2+it)‖ ≥ ζ_K(4)/ζ_K(2)`-type (mathlib Euler
   product for `dedekindZeta`; exact constant shape free).
