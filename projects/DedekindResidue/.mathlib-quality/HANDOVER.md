@@ -403,3 +403,21 @@ computed once; row-reduce by adding `(mult_w/2)`-weighted rows: ∑ gives `τ/2`
 (`mellin_comp_mul_left`) → the s-independent-constant agreement; identity theorem to
 Re s > 1; define `completedDedekindZeta := (κ·2^{-r₂})⁻¹·P.Λ(s/2)`; prove
 `IsCompletedDedekindZeta`; conclude `∃ Λ` = GRH non-vacuity.
+
+**γ-REDUCTION LANDED (2026-07-03, commits b2968dfd/ada27c38)**: `heckeLogEquiv` (the
+(τ,u)↦λ linear equivalence, bijective via the weighted-row-sum kernel trick),
+`lintegral_gaussTerm_eq_norm_scaled` (per-point y-dependence = |N(y)|²-scaling of the ray
+parameter, via the PROVEN sq_mul_heckeWeights — NO Jacobian for y!), and
+`lintegral_Ioi_mellin_scale` (1-D ENNReal Mellin scaling). **Consequence — the universal
+constant**: define `M₀(σ) := ∫⁻_{t∈Ioi 0} ofReal(t^{σ-1})·∫⁻_u ofReal(gaussTerm t u ζ(1))`;
+then per cone point `∫⁻ₜ t^{σ-1}·∫⁻_u gauss(ζ(y_a)) = ofReal(|N y_a|^{-2σ})·M₀(σ)`. The
+whole agreement is now: Mellin-lintegral of (heckeF − h·w⁻¹·vol) at σ =
+β^{-σ}·M₀(σ)·∑_{all integral 𝔟≠0} N𝔟^{-2σ}, with w and N(J_C) cancelling (torsion via
+idealSetEquivNorm, N(J_C)^{2σ} from the s_C-scaling against the counting). Remaining:
+(δ) the counting: ∑'_{a : idealSet K J} ofReal(|N y_a|)^{-2σ} = w·N(J)^{-2σ}·∑_{𝔟∈[J]⁻¹}
+N𝔟^{-2σ} in ENNReal (fiber the tsum over the norm; `idealSetEquivNorm` per fiber;
+{principal ⊆ J} ↔ {𝔟 ∈ [J]⁻¹} via 𝔟 = 𝔞J⁻¹); summed over classRep's: ζ_K(2σ).
+(γ-main) M₀(σ) explicit: t = e^τ then `heckeLogEquiv` change of variables
+(`Measure.map_linearMap_addHaar_eq_smul_addHaar`), τ = ∑_w mult_w·λ_w on the image,
+product-split the Pi-lintegral, per-place ∫⁻_ℝ ofReal(e^{mσλ − πe^λ})dλ = ofReal(π^{-mσ}Γ(mσ)).
+(ε) toReal + mellin-identification + identity theorem + definitions.
