@@ -453,6 +453,59 @@ theorem heckeTheta_tail_cone (J : (Ideal (𝓞 K))⁰) (t : ℝ) (u : logSpace K
   exact congrArg (fun r => -π * r)
     (sum_placeWeights_unit_smul K t u (∏ j, fundSystem K j ^ (p.2 j)) _)
 
+open scoped Classical in
+/-- **Tiling the log-space by unit-box translates**: the integral of an integrable
+function over `logSpace` is the sum over fundamental-unit exponents of box integrals at
+translated arguments. -/
+theorem integral_eq_tsum_box_shift (f : logSpace K → ℝ) (hf : Integrable f) :
+    ∫ u, f u = ∑' n : Fin (rank K) → ℤ,
+      ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+        f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))) := by
+  classical
+  set B := (basisUnitLattice K).ofZLatticeBasis ℝ with hB
+  have hFD := ZSpan.isAddFundamentalDomain B volume
+  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)) (logSpace K) volume :=
+    inferInstanceAs
+      (VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)).toAddSubgroup
+        (logSpace K) volume)
+  rw [hFD.integral_eq_tsum' f hf]
+  have hpre : ∀ g : Submodule.span ℤ (Set.range ⇑B),
+      ∫ x in ZSpan.fundamentalDomain B, f (-g +ᵥ x)
+        = ∫ x in ZSpan.fundamentalDomain B, f (-(g : logSpace K) + x) := by
+    intro g
+    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _) (fun x _ => ?_)
+    rw [Submodule.vadd_def, vadd_eq_add]
+    norm_cast
+  rw [tsum_congr hpre]
+  -- reindex the span by exponent vectors
+  set eB := ((Module.Basis.restrictScalars ℤ B).equivFun).toEquiv with heB
+  rw [← Equiv.tsum_eq eB.symm (fun g => ∫ u in ZSpan.fundamentalDomain B,
+    f (-(g : logSpace K) + u))]
+  · -- now both sides are sums over exponent vectors; match term-by-term after n ↦ -n
+    rw [← Equiv.tsum_eq (Equiv.neg (Fin (rank K) → ℤ)) (fun n =>
+      ∫ u in ZSpan.fundamentalDomain B,
+        f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))))]
+    refine tsum_congr (fun n => ?_)
+    have hval : ((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K)
+        = ∑ i, n i • (B i) := by
+      rw [heB]
+      show (((Module.Basis.restrictScalars ℤ B).equivFun.symm n :
+        Submodule.span ℤ (Set.range ⇑B)) : logSpace K) = _
+      rw [(Module.Basis.restrictScalars ℤ B).equivFun_symm_apply]
+      push_cast
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Module.Basis.restrictScalars_apply]
+    have hshift : logEmbedding K (Additive.ofMul (∏ j, fundSystem K j
+          ^ ((Equiv.neg (Fin (rank K) → ℤ)) n j)))
+        = -((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K) := by
+      rw [logEmbedding_prod_fundSystem, hval, ← Finset.sum_neg_distrib]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Equiv.neg_apply, Pi.neg_apply, neg_smul, ← hB]
+    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _) (fun u _ => ?_)
+    rw [hshift]
+    congr 1
+    abel
+
 end
 
 end DedekindResidue
