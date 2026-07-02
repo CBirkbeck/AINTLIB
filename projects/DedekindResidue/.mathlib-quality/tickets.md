@@ -202,10 +202,20 @@
       `heckeTheta_heckeWeights_periodic` — integrand periodic mod `unitLattice`),
       `prod_heckeWeights_pow_mult` (`∏_w c_w^{mult w} = t`, the norm ray), and **`heckeG I t`**
       (the unit-box-averaged theta, `torsionOrder⁻¹·∫_{FD(unit basis)} Θ_I(c(t,u)) du`).
-      REMAINING AGE-3 (then AGE-4): the `g`-inversion (heckeTheta_inversion pointwise under the
-      integral + `u ↦ -u` box change of variables + dualPlaceWeights-vs-heckeWeights(1/t,-u)
-      bookkeeping with the 4^{r₂}/2-power constants), and integrability estimates; then the
-      Mellin definition of `Λ` + `IsCompletedDedekindZeta` existence. ORIGINAL box plan:
+      **Duality bookkeeping DONE ✓ (2026-07-02)**: `fullLog_neg` + `dualPlaceWeights_heckeWeights`
+      (`c^∨(t,u) = (1;4)·c(1/t,-u)` pointwise). **g-INVERSION ROUTE (derived 2026-07-02)**:
+      (i) `prod_placeWeights` lemma (`∏_i placeWeights c i = ∏_w c_w^{mult w}`) ⇒ the middle
+      factor of `heckeTheta_inversion` at `c(t,u)` is `t^{-1/2}` (norm-ray); (ii) decompose the
+      `(1;4)`-factor: log-vector `(0; log 4)` = uniform `(2r₂·log4)/n·𝟙` + trace-zero `v₀`, so
+      `(1;4)·c(1/t,-u) = c(4^{2r₂}/t, -u + u₀)` with `u₀ := (v₀-restriction)/2`-shift ⇒
+      pointwise-in-`u` integrand inversion; (iii) box absorbs `-u+u₀`: FD-translation invariance
+      for `unitLattice`-periodic integrands (`IsAddFundamentalDomain.setIntegral_eq` + translated/
+      negated FD is an FD) using `heckeTheta_heckeWeights_periodic` ⇒
+      **`heckeG_inversion : g_I(t) = covol(L_I)⁻¹·t^{-1/2}·g_{I^∨}(4^{2r₂}·t⁻¹)`**; (iv)
+      integrability estimates (isotropic comparison per `u` + compactness of the box). Then
+      AGE-4 Mellin (constants self-verifying — every identity proven; the `4^{2r₂}`/`2^{-r₂}`
+      factors recombine against `covolume_idealZLattice`'s `(2⁻¹)^{r₂}` and `Γℂ`'s `2`).
+      ORIGINAL box plan:
       `c(t,u)_w = t^{1/n}·exp(logunits-combination)` + `g_I(t) := ∫_{[0,1)^{r+s-1}} Θ(c(t,u)) du`
       + its inversion (from `weightedThetaLattice_transform` — note `heckeTheta I c` = the
       `weightedGaussianCM (placeWeights c)`-sum over `idealZLattice I` — +
