@@ -25,7 +25,8 @@ namespace DedekindResidue
 
 @[expose] public section
 
-open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace MeasureTheory
+open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace
+open NumberField.Units NumberField.Units.dirichletUnitTheorem MeasureTheory
 open scoped nonZeroDivisors Real
 
 variable (K : Type*) [Field K] [NumberField K]
@@ -217,6 +218,87 @@ theorem heckeTheta_inversion (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
           ((v : EuclideanSpace ℝ (index K))) := rfl
   rw [he, placeWeights_dualPlaceWeights, diagScale_apply, mul_pow]
   ring
+
+
+
+open scoped Classical in
+/-- Extend hyperplane coordinates `u : logSpace K` (indexed by `w ≠ w₀`) to all infinite
+places by the trace-zero condition: the `w₀`-component is `-∑_{w ≠ w₀} u_w`. On the image of
+`logEmbedding` this recovers the full unit log-vector (`fullLog_logEmbedding`). -/
+noncomputable def fullLog (u : logSpace K) : InfinitePlace K → ℝ := fun w =>
+  if h : w = (w₀ : InfinitePlace K) then
+    -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w'
+  else u ⟨w, h⟩
+
+open scoped Classical in
+theorem fullLog_logEmbedding (ε : (𝓞 K)ˣ) (w : InfinitePlace K) :
+    fullLog K (logEmbedding K (Additive.ofMul ε)) w
+      = mult w * Real.log (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) := by
+  rw [fullLog]
+  split_ifs with h
+  · rw [sum_logEmbedding_component, h]
+    ring
+  · rw [logEmbedding_component]
+
+open scoped Classical in
+theorem fullLog_add (u v : logSpace K) :
+    fullLog K (u + v) = fullLog K u + fullLog K v := by
+  funext w
+  simp only [fullLog, Pi.add_apply]
+  split_ifs with h
+  · rw [Finset.sum_add_distrib]
+    ring
+  · rfl
+
+open scoped Classical in
+/-- **The Hecke weight family**: `c(t,u)_w = t^{1/n}·exp(2·(trace-zero extension of u)_w / mult w)`.
+Pinned by two requirements: `∏_w c_w^{mult w} = t` (the norm ray, giving `N(𝔞)^{-s}` under the
+Mellin transform) and equivariance under `u ↦ u + logEmbedding ε` matching
+`heckeTheta_unit_mul` (making the theta integrand periodic modulo the unit lattice). -/
+noncomputable def heckeWeights (t : ℝ) (u : logSpace K) : InfinitePlace K → ℝ := fun w =>
+  t ^ ((1 : ℝ) / (Module.finrank ℚ K)) * Real.exp (2 * fullLog K u w / mult w)
+
+theorem heckeWeights_pos {t : ℝ} (ht : 0 < t) (u : logSpace K) (w : InfinitePlace K) :
+    0 < heckeWeights K t u w := by
+  rw [heckeWeights]
+  positivity
+
+open scoped Classical in
+/-- **Equivariance of the Hecke weights**: translating `u` by the log of a unit scales the
+weights by `w(ε)²` — exactly the scaling `heckeTheta_unit_mul` absorbs. -/
+theorem heckeWeights_add_logEmbedding (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) :
+    heckeWeights K t (u + logEmbedding K (Additive.ofMul ε))
+      = fun w => (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) ^ 2 * heckeWeights K t u w := by
+  funext w
+  rw [heckeWeights, heckeWeights, fullLog_add, Pi.add_apply, fullLog_logEmbedding]
+  have hmult : (mult w : ℝ) ≠ 0 := by
+    have := mult_pos (w := w)
+    positivity
+  have hpos : 0 < w (algebraMap (𝓞 K) K (ε : 𝓞 K)) := by
+    rw [pos_iff]
+    simp only [ne_eq, RingOfIntegers.coe_eq_zero_iff]
+    exact Units.ne_zero ε
+  rw [mul_add, add_div, Real.exp_add]
+  have h2 : 2 * ((mult w : ℝ) * Real.log (w (algebraMap (𝓞 K) K (ε : 𝓞 K)))) / (mult w : ℝ)
+      = 2 * Real.log (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) := by
+    field_simp
+  have h3 : Real.exp (2 * Real.log (w (algebraMap (𝓞 K) K (ε : 𝓞 K))))
+      = (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) ^ 2 := by
+    rw [two_mul, Real.exp_add, Real.exp_log hpos]
+    ring
+  rw [h2, h3]
+  ring
+
+open scoped Classical in
+/-- **Periodicity of the theta integrand modulo the unit lattice**: the Hecke-weighted theta
+is invariant under `u ↦ u + logEmbedding ε` — the equivariance of the weights matches the
+unit symmetry of the theta exactly. This makes the unit-box average well-defined. -/
+theorem heckeTheta_heckeWeights_periodic (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
+    (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) :
+    heckeTheta K I (heckeWeights K t (u + logEmbedding K (Additive.ofMul ε)))
+      = heckeTheta K I (heckeWeights K t u) := by
+  rw [heckeWeights_add_logEmbedding]
+  exact heckeTheta_unit_mul K I ε _
 
 end
 

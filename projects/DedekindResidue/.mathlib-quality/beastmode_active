@@ -1,1 +1,1 @@
-FOCUS: AGE-3 brick 3 — heckeTheta inversion: weightedThetaLattice_transform at placeWeights c + dualZLattice_idealZLattice + comap-reindex of the dual tsum onto L_{I^dual} with weights (c⁻¹ real; 4c⁻¹ complex)
+FOCUS: AGE-3 L1/L2 — fullLog (trace-zero extension of logSpace coords) + heckeWeights t u = t^{1/n}exp(2·fullLog/mult) + positivity + equivariance under u += logEmbedding ε
