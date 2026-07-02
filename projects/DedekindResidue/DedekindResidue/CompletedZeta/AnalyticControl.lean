@@ -24,7 +24,7 @@ namespace DedekindResidue
 
 @[expose] public section
 
-open MeasureTheory NumberField
+open Complex MeasureTheory NumberField NumberField.InfinitePlace
 open scoped Real
 
 variable (K : Type*) [Field K] [NumberField K]
@@ -264,6 +264,173 @@ theorem exists_re_norm_dedekindZeta_ge_half :
       _ ≤ ‖(1:ℂ) + R‖ + ‖-R‖ := norm_add_le _ _
       _ = ‖(1:ℂ) + R‖ + ‖R‖ := by rw [norm_neg]
   linarith [le_trans hRbound hm]
+
+/-- Decaying upper bound for `Γℝ` on `1 ≤ σ ≤ 2`, `|t| ≥ 2`:
+`‖Γℝ(σ+it)‖ ≤ √(12π)·(1+|t|)·e^{-π|t|/4}`. -/
+theorem norm_Gammaℝ_le {σ t : ℝ} (h1 : 1 ≤ σ) (h2 : σ ≤ 2) (ht : 2 ≤ |t|) :
+    ‖Complex.Gammaℝ ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 4) := by
+  rw [Complex.Gammaℝ_def, norm_mul]
+  have hπ : ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖ ≤ 1 := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    have hre : (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2).re = -σ/2 := by
+      rw [show -((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+          = ((-σ/2 : ℝ) : ℂ) + ((-t/2 : ℝ) : ℂ) * Complex.I by push_cast; ring]
+      simp
+    rw [hre]
+    calc π ^ (-σ/2 : ℝ) ≤ π ^ (0 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) (by linarith)
+      _ = 1 := Real.rpow_zero π
+  have harg : ((σ : ℂ) + (t : ℂ) * Complex.I) / 2
+      = ((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I := by
+    push_cast
+    ring
+  have ht2 : 1 ≤ |t/2| := by
+    rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+    linarith
+  have hΓ : ‖Complex.Gamma (((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
+      ≤ Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 4) := by
+    rw [harg]
+    refine le_trans (norm_Gamma_le_mul_exp (σ := σ/2) (t := t/2)
+      (by linarith) (by linarith) ht2) ?_
+    have hnorm : ‖((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I‖ ≤ 1 + |t| := by
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+        Real.norm_eq_abs, Real.norm_eq_abs]
+      have hs2 : |σ/2| ≤ 1 := by
+        rw [abs_div, show |(2:ℝ)| = 2 by norm_num,
+          abs_of_pos (by linarith : (0:ℝ) < σ)]
+        linarith
+      have ht2' : |t/2| ≤ |t| := by
+        rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+        linarith [abs_nonneg t]
+      linarith
+    have hexp : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
+      congr 1
+      rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+      ring
+    rw [hexp]
+    gcongr
+  calc ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
+      * ‖Complex.Gamma (((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
+      ≤ 1 * (Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 4)) :=
+        mul_le_mul hπ hΓ (norm_nonneg _) (by norm_num)
+    _ = Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 4) := by ring
+
+/-- Decaying upper bound for `Γℂ` on `1 ≤ σ ≤ 2`, `|t| ≥ 2`:
+`‖Γℂ(σ+it)‖ ≤ 8√(12π)·(1+|t|)²·e^{-π|t|/2}`. -/
+theorem norm_Gammaℂ_le {σ t : ℝ} (h1 : 1 ≤ σ) (h2 : σ ≤ 2) (ht : 2 ≤ |t|) :
+    ‖Complex.Gammaℂ ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ 8 * Real.sqrt (12 * π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2) := by
+  rw [Complex.Gammaℂ_def, norm_mul, norm_mul]
+  have ht1 : 1 ≤ |t| := by linarith
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have hsq : (0:ℝ) ≤ Real.sqrt (12*π) := Real.sqrt_nonneg _
+  have he : (0:ℝ) < Real.exp (-(π * |t|)/2) := Real.exp_pos _
+  have h2π : ‖((2:ℂ) * π) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I))‖ ≤ 1 := by
+    rw [show ((2:ℂ) * π) = ((2 * π : ℝ) : ℂ) by push_cast; ring,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by positivity)]
+    have hre : (-((σ : ℂ) + (t : ℂ) * Complex.I)).re = -σ := by simp
+    rw [hre]
+    calc (2*π) ^ (-σ : ℝ) ≤ (2*π) ^ (0 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) (by linarith)
+      _ = 1 := Real.rpow_zero _
+  have h2n : ‖(2:ℂ)‖ = 2 := by norm_num
+  have hznorm : ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ ≤ 2 * (1 + |t|) := by
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ)]
+    nlinarith [abs_nonneg t]
+  have hΓ : ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ 4 * Real.sqrt (12 * π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2) := by
+    rcases le_or_gt σ (3/2) with hσ | hσ
+    · refine le_trans (norm_Gamma_le_mul_exp (σ := σ) (t := t) (by linarith) hσ ht1) ?_
+      have hstep : ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ ≤ 4 * (1 + |t|)^2 := by
+        refine le_trans hznorm ?_
+        nlinarith
+      calc Real.sqrt (12*π) * ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ * Real.exp (-(π * |t|)/2)
+          ≤ Real.sqrt (12*π) * (4 * (1 + |t|)^2) * Real.exp (-(π * |t|)/2) := by
+            gcongr
+        _ = 4 * Real.sqrt (12*π) * (1 + |t|)^2 * Real.exp (-(π * |t|)/2) := by ring
+    · have hne : ((σ : ℂ) + (t : ℂ) * Complex.I) - 1 ≠ 0 := by
+        intro h0
+        have := congrArg Complex.im h0
+        simp at this
+        rw [this] at ht1
+        norm_num at ht1
+      have hrec : Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)
+          = (((σ : ℂ) + (t : ℂ) * Complex.I) - 1)
+            * Complex.Gamma (((σ - 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I) := by
+        have h := Complex.Gamma_add_one (((σ : ℂ) + (t : ℂ) * Complex.I) - 1) hne
+        rw [sub_add_cancel] at h
+        rw [h]
+        congr 2
+        push_cast
+        ring
+      rw [hrec, norm_mul]
+      have hfac : ‖((σ : ℂ) + (t : ℂ) * Complex.I) - 1‖ ≤ 3 * (1 + |t|) := by
+        refine le_trans (norm_sub_le _ _) ?_
+        rw [norm_one]
+        linarith [hznorm]
+      have hbase := norm_Gamma_le_mul_exp (σ := σ - 1) (t := t)
+        (by linarith) (by linarith) ht1
+      have hn1 : ‖((σ - 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ ≤ 1 + |t| := by
+        refine le_trans (norm_add_le _ _) ?_
+        rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+          Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ - 1)]
+        linarith
+      calc ‖((σ : ℂ) + (t : ℂ) * Complex.I) - 1‖
+          * ‖Complex.Gamma (((σ - 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+          ≤ (3 * (1 + |t|))
+            * (Real.sqrt (12 * π) * (1 + |t|) * Real.exp (-(π * |t|) / 2)) := by
+            refine mul_le_mul hfac (le_trans hbase ?_) (norm_nonneg _) (by positivity)
+            gcongr
+        _ ≤ 4 * Real.sqrt (12 * π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2) := by
+            nlinarith [mul_nonneg (mul_nonneg hsq (by nlinarith : (0:ℝ) ≤ (1+|t|)^2)) he.le]
+  calc ‖(2:ℂ)‖ * ‖((2:ℂ) * π) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I))‖
+      * ‖Complex.Gamma ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ 2 * 1 * (4 * Real.sqrt (12 * π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2)) := by
+        rw [h2n]
+        refine mul_le_mul (by nlinarith [norm_nonneg (((2:ℂ) * π)
+          ^ (-((σ : ℂ) + (t : ℂ) * Complex.I)))]) hΓ (norm_nonneg _) (by norm_num)
+    _ = 8 * Real.sqrt (12 * π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2) := by ring
+
+/-- **Decaying upper for the archimedean factor** on `1 ≤ σ ≤ 2`, `|t| ≥ 2`:
+`‖γ_K(σ+it)‖ ≤ C_K·(1+|t|)^{n}·e^{-nπ|t|/4}` with `n = r₁ + 2r₂` — the envelope rate
+matched by the lower bounds (`Γℝ` decays at `π|t|/4` per factor, `Γℂ` at `π|t|/2`). -/
+theorem norm_gammaFactor_le {σ t : ℝ} (h1 : 1 ≤ σ) (h2 : σ ≤ 2) (ht : 2 ≤ |t|) :
+    ‖gammaFactor K ((σ : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ (Real.sqrt (12*π))^(nrRealPlaces K) * (8 * Real.sqrt (12*π))^(nrComplexPlaces K)
+        * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K)
+        * Real.exp (-(((nrRealPlaces K + 2 * nrComplexPlaces K : ℕ) : ℝ) * (π * |t|)) / 4)
+      := by
+  rw [gammaFactor, norm_mul, norm_pow, norm_pow]
+  have hE2 : Real.exp (-(π * |t|) / 2) = (Real.exp (-(π * |t|) / 4))^2 := by
+    rw [show -(π * |t|) / 2 = -(π * |t|) / 4 + -(π * |t|) / 4 by ring, Real.exp_add, sq]
+  have hb1 := norm_Gammaℝ_le (h1 := h1) (h2 := h2) (ht := ht)
+  have hb2 := norm_Gammaℂ_le (h1 := h1) (h2 := h2) (ht := ht)
+  have hp1 : ‖Complex.Gammaℝ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ ^ nrRealPlaces K
+      ≤ (Real.sqrt (12*π) * (1 + |t|) * Real.exp (-(π * |t|) / 4)) ^ nrRealPlaces K :=
+    pow_le_pow_left₀ (norm_nonneg _) hb1 _
+  have hp2 : ‖Complex.Gammaℂ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ ^ nrComplexPlaces K
+      ≤ (8 * Real.sqrt (12*π) * (1 + |t|)^2 * Real.exp (-(π * |t|) / 2))
+        ^ nrComplexPlaces K :=
+    pow_le_pow_left₀ (norm_nonneg _) hb2 _
+  refine le_trans (mul_le_mul hp1 hp2 (by positivity) (by positivity)) (le_of_eq ?_)
+  rw [hE2]
+  rw [show (Real.sqrt (12*π) * (1 + |t|) * Real.exp (-(π * |t|) / 4)) ^ nrRealPlaces K
+      * (8 * Real.sqrt (12*π) * (1 + |t|)^2 * (Real.exp (-(π * |t|) / 4))^2)
+        ^ nrComplexPlaces K
+      = (Real.sqrt (12*π))^(nrRealPlaces K) * (8 * Real.sqrt (12*π))^(nrComplexPlaces K)
+        * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K)
+        * (Real.exp (-(π * |t|) / 4))^(nrRealPlaces K + 2 * nrComplexPlaces K) by
+    rw [mul_pow, mul_pow, mul_pow, mul_pow, pow_add, ← pow_mul, pow_add, ← pow_mul]
+    ring]
+  congr 1
+  rw [← Real.exp_nat_mul]
+  congr 1
+  push_cast
+  ring
 
 end
 
