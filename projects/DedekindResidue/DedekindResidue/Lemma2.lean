@@ -575,6 +575,149 @@ theorem tail_integral_identity (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 < 
   field_simp at h2 ⊢
   linear_combination (-1 : ℂ) * h2
 
+/-- **Belabas–Friedman Lemma 2, eq. (8)** (the `γ ≠ 0` case): the paper-convention
+Fourier transform of the auxiliary function `F_{s,X}` in closed form. With `h = s - 1/2`
+and `T = log X`,
+`F̂(γ) = 2h²·sin(Tγ)/((h²+γ²)γ) + 2(h+1/T)·cos(Tγ)/(h²+γ²)
+        - 4/(h²+γ²)·∫_T^∞ cos(tγ)·F_{s,X}(t)·(ht+1)/t² dt`. -/
+theorem fourier_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) {γ : ℝ}
+    (hγ : γ ≠ 0) :
+    paperFourierIntegral (auxF s X) γ
+      = 2 * (s - 1/2)^2 / (((s - 1/2)^2 + (γ:ℂ)^2) * γ)
+          * ((Real.sin (Real.log X * γ) : ℝ) : ℂ)
+        + 2 * ((s - 1/2) + 1/(Real.log X : ℂ)) / ((s - 1/2)^2 + (γ:ℂ)^2)
+          * ((Real.cos (Real.log X * γ) : ℝ) : ℂ)
+        - 4 / ((s - 1/2)^2 + (γ:ℂ)^2) * ∫ t in Set.Ioi (Real.log X),
+            ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * (((s - 1/2)*t + 1)/t^2) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hTc0 : ((Real.log X : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hT0.ne'
+  have hγc : ((γ : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hγ
+  have hh : 0 < (s - 1/2 : ℂ).re := by
+    have hre : (s - 1/2 : ℂ).re = s.re - 1/2 := by
+      simp [Complex.sub_re]
+    rw [hre]
+    linarith
+  -- the denominator h² + γ² is nonzero when Re h > 0 and γ ≠ 0
+  have hne : (s - 1/2)^2 + ((γ:ℝ):ℂ)^2 ≠ 0 := by
+    intro h0
+    have h1 := congrArg Complex.re h0
+    have h2 := congrArg Complex.im h0
+    simp only [pow_two, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.zero_re, Complex.zero_im] at h1 h2
+    have hb : (s - 1/2 : ℂ).im = 0 := by nlinarith [hh]
+    rw [hb] at h1
+    nlinarith [hh, abs_pos.mpr hγ, sq_abs γ]
+  -- the tail branch of auxF is the exponential kernel times a constant
+  have htail_eq : ∀ t ∈ Set.Ioi (Real.log X), auxF s X t
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (Complex.exp (-(s - 1/2) * t) / t) := by
+    intro t ht
+    have htpos : 0 < t := hT0.trans ht
+    have hnot : ¬ |t| ≤ Real.log X := by
+      rw [abs_of_pos htpos]
+      exact not_le.mpr ht
+    have htc : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast htpos.ne'
+    rw [auxF, if_neg hnot, abs_of_pos htpos]
+    push_cast
+    rw [show -(s - 1/2) * ((t:ℂ) - (Real.log X : ℂ))
+        = -(s - 1/2) * (t:ℂ) + (s - 1/2) * (Real.log X : ℂ) by ring, Complex.exp_add]
+    field_simp
+  -- evenness reduction: F̂ = 2·∫_{(0,∞)} F·cos
+  rw [paperFourierIntegral_even (auxF s X) (auxF_neg s X) γ
+    (integrable_auxF_kernel s hX.le hs γ)]
+  -- split (0,∞) = (0,T] ∪ (T,∞)
+  have hIocInt : IntegrableOn
+      (fun t : ℝ => auxF s X t * ((Real.cos (t * γ) : ℝ) : ℂ))
+      (Set.Ioc 0 (Real.log X)) := by
+    have hbase : IntegrableOn (fun t : ℝ => ((Real.cos (t * γ) : ℝ) : ℂ))
+        (Set.Ioc 0 (Real.log X)) := Continuous.integrableOn_Ioc (by fun_prop)
+    refine hbase.congr_fun (fun t ht => ?_) measurableSet_Ioc
+    rw [auxF_of_le s X (by rw [abs_of_pos ht.1]; exact ht.2), one_mul]
+  have hIoiInt : IntegrableOn
+      (fun t : ℝ => auxF s X t * ((Real.cos (t * γ) : ℝ) : ℂ))
+      (Set.Ioi (Real.log X)) := by
+    have hbase : IntegrableOn (fun t : ℝ =>
+        (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (Complex.exp (-(s - 1/2) * t) / t * ((Real.cos (t * γ) : ℝ) : ℂ)))
+        (Set.Ioi (Real.log X)) :=
+      (integrableOn_exp_div_mul_real (h := s - 1/2) hh hT0
+        (ψ := fun t : ℝ => Real.cos (t * γ)) (by fun_prop)
+        (fun t => abs_le.mpr ⟨Real.neg_one_le_cos _, Real.cos_le_one _⟩)).const_mul _
+    refine hbase.congr_fun (fun t ht => ?_) measurableSet_Ioi
+    rw [htail_eq t ht]
+    ring
+  rw [show Set.Ioi (0:ℝ) = Set.Ioc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
+    (Set.Ioc_union_Ioi_eq_Ioi hT0.le).symm]
+  rw [setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hIocInt hIoiInt]
+  -- plateau piece
+  have hplat : (∫ t in Set.Ioc (0:ℝ) (Real.log X),
+      auxF s X t * ((Real.cos (t * γ) : ℝ) : ℂ))
+      = ((Real.sin (Real.log X * γ) / γ : ℝ) : ℂ) := by
+    rw [← integral_plateau_cos hT0.le hγ]
+    refine setIntegral_congr_fun measurableSet_Ioc (fun t ht => ?_)
+    rw [auxF_of_le s X (by rw [abs_of_pos ht.1]; exact ht.2), one_mul]
+  -- tail piece: pull out the constant
+  have htint : (∫ t in Set.Ioi (Real.log X),
+      auxF s X t * ((Real.cos (t * γ) : ℝ) : ℂ))
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * ∫ t in Set.Ioi (Real.log X),
+            Complex.exp (-(s - 1/2) * t) / t * ((Real.cos (t * γ) : ℝ) : ℂ) := by
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    rw [htail_eq t ht]
+    ring
+  -- remainder integral: same constant relation
+  have hrint : (∫ t in Set.Ioi (Real.log X),
+      ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * (((s - 1/2)*t + 1)/t^2))
+      = (Real.log X : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * ∫ t in Set.Ioi (Real.log X),
+            ((Real.cos (t * γ) : ℝ) : ℂ) * (Complex.exp (-(s - 1/2) * t) / t)
+              * (((s - 1/2)*t + 1)/t^2) := by
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    rw [htail_eq t ht]
+    ring
+  have hEE : Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+      * Complex.exp (-(s - 1/2) * (Real.log X : ℂ)) = 1 := by
+    rw [← Complex.exp_add,
+      show (s - 1/2) * (Real.log X : ℂ) + -(s - 1/2) * (Real.log X : ℂ) = 0 by ring]
+    exact Complex.exp_zero
+  have hkey := tail_integral_identity (s - 1/2) hh hT0 hγ
+  have hI : (∫ t in Set.Ioi (Real.log X),
+      Complex.exp (-(s - 1/2) * t) / t * ((Real.cos (t * γ) : ℝ) : ℂ))
+      = (-γ * (Complex.exp (-(s - 1/2) * (Real.log X : ℂ)) / (Real.log X : ℂ))
+            * ((Real.sin (Real.log X * γ) : ℝ) : ℂ)
+          + (s - 1/2 + 1/(Real.log X : ℂ))
+            * (Complex.exp (-(s - 1/2) * (Real.log X : ℂ)) / (Real.log X : ℂ))
+            * ((Real.cos (Real.log X * γ) : ℝ) : ℂ)
+          - 2 * ∫ t in Set.Ioi (Real.log X),
+              ((Real.cos (t * γ) : ℝ) : ℂ) * (Complex.exp (-(s - 1/2) * t) / t)
+                * (((s - 1/2)*t + 1)/t^2))
+        / ((s - 1/2)^2 + (γ:ℂ)^2) := by
+    rw [eq_div_iff hne]
+    linear_combination hkey
+  rw [hplat, htint, hrint, hI]
+  push_cast
+  field_simp
+  have hw0 : ((1:ℂ) + (γ:ℂ)^2*4 - s*4 + s^2*4) ≠ 0 := by
+    intro h0
+    apply hne
+    linear_combination (1/4 : ℂ) * h0
+  have hW : ((1:ℂ) + (γ:ℂ)^2*4 - s*4 + s^2*4)
+      * ((1:ℂ) + (γ:ℂ)^2*4 - s*4 + s^2*4)⁻¹ = 1 := mul_inv_cancel₀ hw0
+  have hEE' : Complex.exp ((Real.log X : ℂ) * (2 * s - 1) / 2)
+      * Complex.exp (-((Real.log X : ℂ) * (2 * s - 1) / 2)) = 1 := by
+    rw [← Complex.exp_add,
+      show (Real.log X : ℂ) * (2 * s - 1) / 2 + -((Real.log X : ℂ) * (2 * s - 1) / 2)
+        = 0 by ring]
+    exact Complex.exp_zero
+  linear_combination
+    (-((Real.log X : ℂ)) * Complex.sin ((Real.log X : ℂ) * (γ : ℂ))) * hW
+    + (((1:ℂ) + (γ:ℂ)^2*4 - s*4 + s^2*4)⁻¹
+        * (-(4:ℂ)*(γ:ℂ)^2*(Real.log X : ℂ)*Complex.sin ((Real.log X : ℂ)*(γ:ℂ))
+           + (4*s - 2)*(Real.log X : ℂ)*(γ:ℂ)*Complex.cos ((Real.log X : ℂ)*(γ:ℂ))
+           + 4*(γ:ℂ)*Complex.cos ((Real.log X : ℂ)*(γ:ℂ)))) * hEE'
+
 end
 
 end DedekindResidue
