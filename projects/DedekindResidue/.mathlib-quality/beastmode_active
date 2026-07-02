@@ -1,1 +1,1 @@
-FOCUS: SP2-Phi holomorphy brick (hasDerivAt_paperPhi via hasDerivAt_integral_of_dominated_loc_of_lip; majorant |x| ||F x|| (e^{(1/2+eps)x}+e^{-(1/2+eps)x}) with |x|e^{-delta|x|} absorption). Then SP2-RECT R-c rectangle 1/(z-rho) integral.
+FOCUS: SP2-RECT R-c — the rectangle Cauchy formula (1/2pi i) oint dz/(z-rho) = 1 for rho inside an axis-parallel rectangle: parametrize the four sides, arctan/log computation, plus the dslope-Goursat reduction oint Phi(z)/(z-rho) = 2pi i Phi(rho). New file ExplicitFormula/RectangleContour.lean. Main new mechanism of SP2 — do it now.
