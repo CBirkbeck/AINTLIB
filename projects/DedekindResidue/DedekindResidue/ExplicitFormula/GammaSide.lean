@@ -3009,4 +3009,26 @@ theorem integral_muFT_mul_gammaFT {k F : ℝ → ℂ}
     exact integral_fourier_mul_fourierL2 hk1 hk2 hFdiv2
   rw [h4, Complex.real_smul]
 
+/-- **Proposition 3, abstract form** (Poitou p. 6-04/6-06): for `k ∈ L¹∩L²` and
+admissible `F` with the boundary decay `ρ(t)γ(t) → 0`, the symmetric truncations of
+`∫ρφ` converge:
+
+`lim_{T→∞} ∫_{-T}^T ρ(t)·φ(t) dt = -2π ∫ k(-x)·(F(0)-F(x))/x dx`.
+
+For odd `k` the right side is `+2π ∫ k(x)·(F(0)-F(x))/x dx`. -/
+theorem tendsto_integral_rhoFT_mul_phi_eq_plancherel {k F : ℝ → ℂ}
+    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
+    (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop : Tendsto (fun t : ℝ => rhoFT k t * gammaFT F t) atTop (nhds 0))
+    (hbot : Tendsto (fun t : ℝ => rhoFT k t * gammaFT F t) atBot (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      atTop (nhds (-(((2*π : ℝ) : ℂ) * ∫ x : ℝ, k (-x) * ((F 0 - F x)/(x:ℂ))))) := by
+  have h0 := tendsto_integral_rhoFT_mul_phi hk1 hF hFdiv
+    (integrable_muFT_mul_gammaFT hk1 hk2 hF hFdiv hFdiv2) htop hbot
+  rw [integral_muFT_mul_gammaFT hk1 hk2 hF hFdiv hFdiv2] at h0
+  exact h0
+
 end DedekindResidue
