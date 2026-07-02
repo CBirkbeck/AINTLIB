@@ -432,6 +432,122 @@ theorem norm_gammaFactor_le {σ t : ℝ} (h1 : 1 ≤ σ) (h2 : σ ≤ 2) (ht : 2
   push_cast
   ring
 
+/-- On `Re s ≥ 2` the Dedekind zeta function is bounded by its norm-sum at `2`. -/
+theorem norm_dedekindZeta_le_of_two_le_re {s : ℂ} (hs : 2 ≤ s.re) :
+    ‖dedekindZeta K s‖
+      ≤ ∑' n : ℕ, ‖LSeries.term
+          (fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)) 2 n‖ := by
+  set f : ℕ → ℂ := fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)
+    with hf
+  have hsum2 : LSeriesSummable f 2 := by
+    have h := count_LSeriesSummable K (by norm_num : (1:ℝ) < 2)
+    have hfe : (fun n : ℕ =>
+        ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) = f := by
+      funext n
+      rw [hf]
+      push_cast
+      rfl
+    rw [hfe] at h
+    exact_mod_cast h
+  have hsummS : LSeriesSummable f s := hsum2.of_re_le_re (by simpa using hs)
+  have hterm : ∀ n : ℕ, ‖LSeries.term f s n‖ ≤ ‖LSeries.term f 2 n‖ := by
+    intro n
+    rcases eq_or_ne n 0 with rfl | hn0
+    · simp
+    rw [LSeries.norm_term_eq, LSeries.norm_term_eq, if_neg hn0, if_neg hn0,
+      show ((2:ℂ)).re = (2:ℝ) by norm_num]
+    have hn1 : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr hn0
+    gcongr
+  calc ‖dedekindZeta K s‖ = ‖∑' n : ℕ, LSeries.term f s n‖ := by rw [dedekindZeta]; rfl
+    _ ≤ ∑' n : ℕ, ‖LSeries.term f s n‖ := norm_tsum_le_tsum_norm hsummS.norm
+    _ ≤ ∑' n : ℕ, ‖LSeries.term f 2 n‖ :=
+        (hsummS.norm).tsum_le_tsum hterm (hsum2.norm)
+
+/-- **Decaying upper for `H` on the line `Re = 2`** (A3-c): the polynomial factors and
+the prefactor are tame, the gamma factor supplies the `e^{-n_K π|t|/4}` envelope, and
+the zeta factor is bounded. -/
+theorem exists_H_two_line_bound :
+    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 2 ≤ |t| →
+      ‖completedDedekindZetaEntire K (((2:ℝ) : ℂ) + (t : ℂ) * Complex.I)‖
+        ≤ C * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K + 2)
+          * Real.exp (-(((nrRealPlaces K + 2 * nrComplexPlaces K : ℕ) : ℝ) * (π * |t|))
+            / 4) := by
+  set T₂ : ℝ := ∑' n : ℕ, ‖LSeries.term
+      (fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)) 2 n‖ with hT₂
+  have hT₂0 : 0 ≤ T₂ := tsum_nonneg (fun n => norm_nonneg _)
+  refine ⟨6 * (|((discr K : ℤ) : ℝ)| + 2)
+    * ((Real.sqrt (12*π))^(nrRealPlaces K) * (8 * Real.sqrt (12*π))^(nrComplexPlaces K))
+    * (T₂ + 1), by positivity, fun t ht => ?_⟩
+  set s : ℂ := ((2:ℝ) : ℂ) + (t : ℂ) * Complex.I with hs
+  have hsre : s.re = 2 := by simp [hs]
+  have hs0 : s ≠ 0 := by
+    intro h0
+    have := congrArg Complex.re h0
+    rw [hsre] at this
+    norm_num at this
+  have hs1 : s ≠ 1 := by
+    intro h0
+    have := congrArg Complex.re h0
+    rw [hsre] at this
+    norm_num at this
+  have hs2 : (1:ℝ) < s.re := by rw [hsre]; norm_num
+  rw [completedDedekindZetaEntire_eq K hs0 hs1,
+    completedDedekindZeta_eq_of_one_lt_re K hs2, completedZetaPrefactor]
+  rw [norm_mul, norm_mul, norm_mul, norm_mul]
+  have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
+  have hsn : ‖s‖ ≤ 2 * (1 + |t|) := by
+    rw [hs]
+    refine le_trans (norm_add_le _ _) ?_
+    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, show |(2:ℝ)| = 2 by norm_num]
+    linarith [abs_nonneg t]
+  have hsn1 : ‖s - 1‖ ≤ 3 * (1 + |t|) := by
+    refine le_trans (norm_sub_le _ _) ?_
+    rw [norm_one]
+    linarith [hsn]
+  have hdne : ((discr K : ℤ) : ℝ) ≠ 0 := by
+    exact_mod_cast NumberField.discr_ne_zero K
+  have hdpos : (0:ℝ) < |((discr K : ℤ) : ℝ)| := abs_pos.mpr hdne
+  have hΔ : ‖((|discr K| : ℝ) : ℂ) ^ (s / 2)‖ ≤ |((discr K : ℤ) : ℝ)| + 2 := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hdpos]
+    have hre2 : (s / 2).re = 1 := by
+      rw [show s / 2 = ((1:ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I by
+        rw [hs]; push_cast; ring]
+      simp
+    rw [hre2, Real.rpow_one]
+    linarith
+  have hγ := norm_gammaFactor_le K (σ := 2) (t := t) (by norm_num) (by norm_num) ht
+  rw [show (((2:ℝ) : ℂ) + (t : ℂ) * Complex.I) = s from rfl] at hγ
+  have hζ : ‖dedekindZeta K s‖ ≤ T₂ + 1 := by
+    refine le_trans (norm_dedekindZeta_le_of_two_le_re K (s := s) (by rw [hsre])) ?_
+    rw [← hT₂]
+    linarith
+  calc ‖s‖ * ‖s - 1‖ * (‖((|discr K| : ℝ) : ℂ) ^ (s / 2)‖ * ‖gammaFactor K s‖
+        * ‖dedekindZeta K s‖)
+      ≤ (2 * (1 + |t|)) * (3 * (1 + |t|)) * ((|((discr K : ℤ) : ℝ)| + 2)
+          * ((Real.sqrt (12*π))^(nrRealPlaces K)
+              * (8 * Real.sqrt (12*π))^(nrComplexPlaces K)
+            * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K)
+            * Real.exp (-(((nrRealPlaces K + 2 * nrComplexPlaces K : ℕ) : ℝ)
+              * (π * |t|)) / 4))
+          * (T₂ + 1)) := by
+        gcongr
+    _ = 6 * (|((discr K : ℤ) : ℝ)| + 2)
+        * ((Real.sqrt (12*π))^(nrRealPlaces K) * (8 * Real.sqrt (12*π))^(nrComplexPlaces K))
+        * (T₂ + 1)
+        * ((1 + |t|)^2 * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K))
+        * Real.exp (-(((nrRealPlaces K + 2 * nrComplexPlaces K : ℕ) : ℝ) * (π * |t|))
+          / 4) := by ring
+    _ = 6 * (|((discr K : ℤ) : ℝ)| + 2)
+        * ((Real.sqrt (12*π))^(nrRealPlaces K) * (8 * Real.sqrt (12*π))^(nrComplexPlaces K))
+        * (T₂ + 1)
+        * (1 + |t|)^(nrRealPlaces K + 2 * nrComplexPlaces K + 2)
+        * Real.exp (-(((nrRealPlaces K + 2 * nrComplexPlaces K : ℕ) : ℝ) * (π * |t|))
+          / 4) := by
+        rw [show nrRealPlaces K + 2 * nrComplexPlaces K + 2
+            = 2 + (nrRealPlaces K + 2 * nrComplexPlaces K) by ring, pow_add]
+        ring
+
 end
 
 end DedekindResidue
