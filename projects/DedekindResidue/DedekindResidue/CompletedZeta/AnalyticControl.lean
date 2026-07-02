@@ -952,6 +952,140 @@ theorem comparator_bound_strip :
   show ‖f z‖ ≤ M₁ + M₂
   exact PhragmenLindelof.vertical_strip hfd hgrow hle_a hle_b h1 h2
 
+/-- **AC-A3 deliverable: the envelope-matched decaying upper bound for `H` on the
+critical strip.** For `-1 ≤ Re z ≤ 2` and `|Im z| ≥ 1`,
+`‖H(z)‖ ≤ C·(1+|Im z|)^{n_K+2}·e^{-n_K·π|Im z|/4}` — the same exponential rate as the
+center lower bounds, so Jensen ratios are polynomial. -/
+theorem exists_H_strip_decay :
+    ∃ C : ℝ, 0 < C ∧ ∀ z : ℂ, -1 ≤ z.re → z.re ≤ 2 → 1 ≤ |z.im| →
+      ‖completedDedekindZetaEntire K z‖
+        ≤ C * (1 + |z.im|)^(gammaExponent K + 2)
+          * Real.exp (-(((gammaExponent K : ℕ) : ℝ) * (π * |z.im|)) / 4) := by
+  obtain ⟨M, hM0, hM⟩ := comparator_bound_strip K
+  set n : ℕ := gammaExponent K with hn
+  refine ⟨(M * 5^(4*n+8) * 3^n) ^ ((1:ℝ)/4) + 1, by positivity, fun z h1 h2 ht => ?_⟩
+  set t : ℝ := z.im with hts
+  set C₀ : ℝ := (M * 5^(4*n+8) * 3^n) ^ ((1:ℝ)/4) + 1 with hC₀
+  have hC₀0 : 0 < C₀ := by positivity
+  -- the comparator bound, cleared of the normalizer
+  have hcomp := hM z h1 h2
+  rw [norm_div, norm_mul, norm_pow, norm_pow, norm_pow] at hcomp
+  -- sine lower bound
+  have hsinlow : Real.exp (π * |t|) / 3 ≤ ‖Complex.sin (π * z)‖ := by
+    have hdecomp : (π : ℂ) * z
+        = ((π * z.re : ℝ) : ℂ) + ((π * t : ℝ) : ℂ) * Complex.I := by
+      conv_lhs => rw [← Complex.re_add_im z]
+      push_cast
+      ring
+    have hsq := norm_sin_add_mul_I_sq (π * z.re) (π * t)
+    rw [← hdecomp] at hsq
+    have hsinh_abs : Real.sinh (π * |t|) = |Real.sinh (π * t)| := by
+      rw [show π * |t| = |π * t| by rw [abs_mul, abs_of_pos Real.pi_pos], ← Real.abs_sinh]
+    have hlow : Real.sinh (π * |t|) ≤ ‖Complex.sin (π * z)‖ := by
+      rw [hsinh_abs]
+      have hsq' : |Real.sinh (π * t)|^2 ≤ ‖Complex.sin (π * z)‖^2 := by
+        rw [hsq, sq_abs]
+        nlinarith [sq_nonneg (Real.sin (π * z.re))]
+      nlinarith [abs_nonneg (Real.sinh (π * t)), norm_nonneg (Complex.sin (π * z))]
+    refine le_trans ?_ hlow
+    rw [Real.sinh_eq]
+    have hx : (3 : ℝ) ≤ Real.exp (π * |t|) := by
+      have h4 : (4 : ℝ) ≤ 1 + π * |t| := by nlinarith [Real.pi_gt_three]
+      linarith [Real.add_one_le_exp (π * |t|)]
+    have hinv : Real.exp (-(π * |t|)) ≤ 1 := by
+      rw [Real.exp_le_one_iff]
+      have : (0:ℝ) ≤ π * |t| := by positivity
+      linarith
+    nlinarith [Real.exp_pos (π * |t|)]
+  -- normalizer upper bound
+  have hz4up : ‖z - 4‖ ≤ 5 * (1 + |t|) := by
+    calc ‖z - 4‖ = ‖((z.re - 4 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖ := by
+          congr 1
+          conv_lhs => rw [← Complex.re_add_im z]
+          push_cast
+          ring
+      _ ≤ ‖((z.re - 4 : ℝ) : ℂ)‖ + ‖(t : ℂ) * Complex.I‖ := norm_add_le _ _
+      _ = |z.re - 4| + |t| := by
+          rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+            Real.norm_eq_abs, Real.norm_eq_abs]
+      _ ≤ 5 * (1 + |t|) := by
+          have habs : |z.re - 4| ≤ 5 := by
+            rw [abs_sub_comm, abs_of_pos (by linarith : (0:ℝ) < 4 - z.re)]
+            linarith
+          nlinarith [abs_nonneg t]
+  -- solve the comparator inequality for ‖H‖⁴
+  have hsinpos : (0:ℝ) < ‖Complex.sin (π * z)‖ := by
+    have h3 : (0:ℝ) < Real.exp (π * |t|) / 3 := by positivity
+    linarith
+  have hH4 : ‖completedDedekindZetaEntire K z‖^4
+      ≤ M * (5 * (1 + |t|))^(4*n+8) * (3 * Real.exp (-(π * |t|))) ^ n := by
+    have hpos : (0:ℝ) < ‖z - 4‖^(4*n+8) := by
+      have h2z : (0:ℝ) < ‖z - 4‖ := by
+        have habs : (2:ℝ) ≤ |(z - 4).re| := by
+          rw [show (z - 4).re = z.re - 4 by simp, abs_sub_comm,
+            abs_of_pos (by linarith : (0:ℝ) < 4 - z.re)]
+          linarith
+        linarith [le_trans habs (Complex.abs_re_le_norm (z - 4))]
+      positivity
+    have hstep : ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n
+        ≤ M * ‖z - 4‖^(4*n+8) := by
+      rw [div_le_iff₀ hpos] at hcomp
+      exact hcomp
+    have hsinn : (Real.exp (π * |t|) / 3)^n ≤ ‖Complex.sin (π * z)‖^n :=
+      pow_le_pow_left₀ (by positivity) hsinlow n
+    have hkey : ‖completedDedekindZetaEntire K z‖^4 * (Real.exp (π * |t|) / 3)^n
+        ≤ M * (5 * (1 + |t|))^(4*n+8) := by
+      calc ‖completedDedekindZetaEntire K z‖^4 * (Real.exp (π * |t|) / 3)^n
+          ≤ ‖completedDedekindZetaEntire K z‖^4 * ‖Complex.sin (π * z)‖^n :=
+            mul_le_mul_of_nonneg_left hsinn (by positivity)
+        _ ≤ M * ‖z - 4‖^(4*n+8) := hstep
+        _ ≤ M * (5 * (1 + |t|))^(4*n+8) := by
+            refine mul_le_mul_of_nonneg_left ?_ hM0.le
+            exact pow_le_pow_left₀ (norm_nonneg _) hz4up _
+    have hEinv : ((Real.exp (π * |t|) / 3)^n)⁻¹ = (3 * Real.exp (-(π * |t|)))^n := by
+      rw [← inv_pow]
+      congr 1
+      rw [Real.exp_neg]
+      field_simp
+    calc ‖completedDedekindZetaEntire K z‖^4
+        = ‖completedDedekindZetaEntire K z‖^4 * (Real.exp (π * |t|) / 3)^n
+          * ((Real.exp (π * |t|) / 3)^n)⁻¹ := by
+          rw [mul_assoc, mul_inv_cancel₀ (by positivity), mul_one]
+      _ ≤ M * (5 * (1 + |t|))^(4*n+8) * ((Real.exp (π * |t|) / 3)^n)⁻¹ :=
+          mul_le_mul_of_nonneg_right hkey (by positivity)
+      _ = M * (5 * (1 + |t|))^(4*n+8) * (3 * Real.exp (-(π * |t|))) ^ n := by
+          rw [hEinv]
+  have hC₀4 : M * 5^(4*n+8) * 3^n ≤ C₀^4 := by
+    have hpow : ((M * 5^(4*n+8) * 3^n) ^ ((1:ℝ)/4))^(4:ℕ) = M * 5^(4*n+8) * 3^n := by
+      rw [← Real.rpow_natCast ((M * 5^(4*n+8) * 3^n) ^ ((1:ℝ)/4)) 4,
+        ← Real.rpow_mul (by positivity)]
+      norm_num
+    calc M * 5^(4*n+8) * 3^n = ((M * 5^(4*n+8) * 3^n) ^ ((1:ℝ)/4))^(4:ℕ) := hpow.symm
+      _ ≤ C₀^4 := by
+          refine pow_le_pow_left₀ (by positivity) ?_ 4
+          rw [hC₀]
+          linarith
+  refine le_of_pow_le_pow_left₀ (by norm_num : (4:ℕ) ≠ 0) (by positivity) ?_
+  have hRHS : (C₀ * (1 + |t|)^(n+2)
+      * Real.exp (-(((n:ℕ) : ℝ) * (π * |t|)) / 4))^4
+      = C₀^4 * (1 + |t|)^(4*n+8) * Real.exp (-((n:ℝ) * (π * |t|))) := by
+    rw [mul_pow, mul_pow, ← pow_mul, ← Real.exp_nat_mul]
+    rw [show (n+2)*4 = 4*n+8 by ring]
+    congr 2
+    push_cast
+    ring
+  rw [hRHS]
+  refine le_trans hH4 ?_
+  have hLHS : M * (5 * (1 + |t|))^(4*n+8) * (3 * Real.exp (-(π * |t|))) ^ n
+      = (M * 5^(4*n+8) * 3^n) * (1 + |t|)^(4*n+8)
+        * Real.exp (-((n:ℝ) * (π * |t|))) := by
+    rw [mul_pow, mul_pow, ← Real.exp_nat_mul]
+    rw [show ((n:ℝ)) * -(π * |t|) = -((n:ℝ) * (π * |t|)) by ring]
+    ring
+  rw [hLHS]
+  exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hC₀4 (by positivity))
+    (by positivity)
+
 end
 
 end DedekindResidue
