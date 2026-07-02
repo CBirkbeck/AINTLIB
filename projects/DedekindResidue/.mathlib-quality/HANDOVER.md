@@ -757,3 +757,50 @@ e-vii `prod_place_gamma` + `Gammaℝ/Gammaℂ_ofReal` + `heckeAdjust := heckeJac
 Next per ticket board: the Belabas-paper spine — T003 (Lemma 2: paperFourierIntegral of
 auxF), T-ADM, T-BV, then the explicit formula and Theorem 1 (`belabas_friedman_thm1`,
 still the project's single sorry).
+
+---
+
+## Leg 5 continued (2026-07-02): SP2-vM, SP2-FJ COMPLETE; SP2-Γψ Gauss layer landed
+
+**SP2-vM COMPLETE** (`ExplicitFormula/PrimeSide.lean`): `neg_logDeriv_dedekindZeta_eq_tsum`
+(−ζ_K'/ζ_K(s) = ∑_𝔭 log N𝔭·N𝔭^{−s}/(1−N𝔭^{−s}) for Re s > 1) via mathlib's
+`logDeriv_tprod_eq_tsum` + the Euler product imported from the Chebotarev project.
+
+**SP2-FJ COMPLETE** (`ExplicitFormula/FourierJordan.lean`, ~900 lines, all axiom-clean):
+- FJ-c: the Dirichlet integral. `tendsto_integral_sinc_atTop` (∫₀^b sinc → π/2, Frullani/
+  Fubini + dominated convergence), `exists_bound_primitive_sinc`/`exists_bound_integral_sinc`
+  (the C_sinc uniform window constant).
+- Scaling layer: `integral_sin_mul_div_eq`, `exists_bound_integral_sin_mul_div`,
+  `tendsto_integral_sin_mul_div_atTop` (plateau → π/2).
+- FJ-b: `integral_cexp_window` (∫_{−T}^T e^{itu}dt = 2sin(Tu)/u),
+  `integral_fourier_window_collapse` (Fubini, symmetric window ↦ Dirichlet kernel).
+- FJ-d: `tendsto_integral_mul_cexp_neg/pos_atTop`, `tendsto_integral_mul_sin_atTop`
+  (Riemann–Lebesgue, reparametrised from mathlib's cocompact form).
+- FJ-f: `abs_integral_stieltjes_kernel_le` (THE Stieltjes–Fubini engine: monotone g,
+  C-bounded windows ⟹ |∫₀^δ(ḡ−ḡ(0+))K| ≤ C(ḡ(δ)−ḡ(0+)), Fubini on the triangle against
+  the Lebesgue–Stieltjes measure), `abs_integral_monotone_kernel_le` (transfer to g),
+  `abs_integral_monotone_sub_kernel_le` (difference-of-monotone).
+- FJ-g: `tendsto_rightLim_sub_rightLim`, dirichlet-kernel facts,
+  `norm_integral_sub_rightLim_kernel_le` (re/im split remainder bound),
+  `integral_dirichlet_split` (far + right + reflected-left decomposition),
+  `tendsto_integral_dirichlet_far` (RL), `tendsto_integral_dirichlet_plateau` (→ π),
+  **`tendsto_integral_dirichlet_jordan`** (∫H·2sin(Tu)/u → π(Hp+Hm) for integrable BV H
+  with one-sided limits: ε/4-assembly) and **`tendsto_fourier_window_jordan`**
+  (the symmetric-window Jordan inversion — Poitou p. 6-03's "réciprocité de Fourier
+  sous la forme de Jordan").
+
+**SP2-Γψ underway** (`ExplicitFormula/GammaSide.lean`, all axiom-clean): mathlib has NO
+digamma integral representation (explicit TODO in Gamma/Digamma.lean) — built from scratch:
+`integral_frullani_log` (∫(e^{−x}−e^{−tx})/x = log t), `integrableOn_rpow_mul_exp_neg_mul_abs_log`,
+`abs_frullani_kernel_le`, `integral_gauss_inner`, **`digamma_eq_integral_gauss_one`**
+(Gauss's first form ψ(z) = ∫₀^∞(e^{−x}−(1+x)^{−z})/x dx via Γ'-integral + Frullani + Fubini),
+`integrableOn_gauss_one_integrand`, **`digamma_sub_digamma_eq_integral`**
+(ψ(w)−ψ(σ) = ∫₀^∞(e^{−σu}−e^{−wu})/(1−e^{−u})du — Poitou's (5) in the only form used;
+KEY simplification: the counterterms cancel in differences, so Gauss's second form and the
+Euler-γ integral are never needed; ψ(1/2)-values come from mathlib's digamma_one_half).
+
+**Next (Γψ continuation)**: p. 6-04 Re-kernel identities (Re ψ(σ+it)−ψ(σ) with cos-kernels;
+σ=1/2 sh-kernel; the (1/4, t/2)−(1/2, t) ch-combination; ∫dx/(2ch(x/2)) = π/2 elementary),
+then Prop 3 via Lemme 1 (5-way split — REUSES the sinc-tail constants) + Lemme 2 (Plancherel).
+Then Γψ-b (d log G expansion via Normalisation.lean) + Γψ-a (contour shift to Re = 1/2).
+Then SP2-MAIN assembly.
