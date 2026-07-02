@@ -402,7 +402,13 @@ Unfold the `if`; `abs_neg`; standard continuity of `Complex.exp`, `Real.log`, di
 - `s : ℂ`, `X t : ℝ`.
 
 ### [T003] Lemma 2 — Fourier transform of `auxF` (eq 8)
-- **Status**: in progress (2026-07-03; paper re-audited verbatim: eq (2) e^{+itγ} no 2π ✓,
+- **Status**: **DONE** (2026-07-02, commits bfeb0694…5878b2cc). `fourier_auxF` (γ≠0, eq 8
+  verbatim) + `fourier_auxF_zero` (γ=0 companion, single-FTC route) in `Lemma2.lean`;
+  all L2a–L2g bricks landed sorry-free + axiom-clean; supporting API:
+  `integrableOn_bounded_mul_exp_div`, `tendsto_exp_div_mul_atTop`,
+  `integrableOn_{exp_div,gAux_deriv,gAux_deriv2}_mul_real`, `hasDerivAt_gAux_core/deriv`
+  (eq 7), `integral_Ioi_gAux_ibp₁/₂`, `tail_integral_identity`.
+  (was: in progress 2026-07-03; paper re-audited verbatim: eq (2) e^{+itγ} no 2π ✓,
   eqs (6)(7)(11)(12) match `gAux`/`auxF` exactly ✓). **γ=0 faithfulness note**: the
   `sin(γT)/γ` term is 0/0 at γ=0 in Lean-total semantics while `F̂(0) = 2T + …` — state
   Lemma 2 for `γ ≠ 0` + a separate `γ = 0` companion (`F̂(0) = 2T + 2(h+1/T)/h² −
