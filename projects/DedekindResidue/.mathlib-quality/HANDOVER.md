@@ -1,5 +1,55 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-02 session (Fable, leg 4 continued): SP2 UNDERWAY — Φ-transform + rectangle Cauchy landed
+
+**SP2 route doc: `.mathlib-quality/decomposition-sp2.md`** (READ FIRST for SP2 work) —
+full Poitou-faithful leaf tree with verified mathlib anchors. **Poitou's paper is now
+LOCAL: `refs/DedekindResidue/poitou-petits-discriminants.pdf`** (pp. 6-01–6-08 read;
+his Théorème (A. Weil) p. 6-06/07 = B–F eq (1) verbatim; Props 1–3 + Lemmes 1–2 are
+the proof to transcribe).
+
+**Landed this leg (all axiom-clean, pushed):**
+- `ExplicitFormula/PhiTransform.lean` (SP2-Φ COMPLETE): `paperPhi F s = ∫ F(x)e^{(s−1/2)x}dx`;
+  `integrableOn_Ici_mul_cexp` (half-line domination workhorse); `integrable_paperPhi_kernel`
+  (band `-ε ≤ Re s ≤ 1+ε`); `paperPhi_half_add_mul_I` (= F̂(γ), B–F (2));
+  `paperPhi_one_sub` (Φ(1−s) = Φ(s) for even F — folds Poitou's left edge; his
+  {Φ(s)+Φ(1−s)} = 2Φ(s)); `integral_comp_neg_real`, `integrableOn_Iio_comp_neg_iff`;
+  `integrable_admissible_majorant`; `hasDerivAt_paperPhi` (holomorphy in the open band,
+  dominated-deriv with |x|-absorption via the gap/2 margin).
+- `ExplicitFormula/RectangleContour.lean` (SP2-RECT R-b/R-c COMPLETE — the main NEW
+  mechanism): `rectangleIntegral` (bottom − top + I•right − I•left, matches mathlib's
+  Goursat combination), `rectangleIntegral_eq_zero` (off-countable Goursat wrapper),
+  `log_neg_of_im_pos/neg` (log(−u) = log u ∓ πi), `integral_horizontal_inv_sub` +
+  `smul_integral_vertical_inv_sub` (segment FTC via `HasDerivAt.clog_real`; LEFT side
+  through the reflected branch log(−(ζ−ρ))), **`rectangleIntegral_inv_sub`**
+  (∮ dζ/(ζ−ρ) = 2πi, telescoping + jump identities), `integral_horizontal_split`/
+  `integral_vertical_split` (dslope + Φρ·inv decomposition per segment),
+  **`rectangleIntegral_cauchy`** (∮ Φ(ζ)(ζ−ρ)⁻¹dζ = 2πi·Φ(ρ); dslope peel:
+  `continuousOn_dslope` needs the CONJUNCTION ⟨ContinuousOn, DifferentiableAt at ρ⟩).
+- NOTE: project files use the MODULE SYSTEM — new files need `module`, `public import`,
+  and `@[expose] public section` (forgot the section once: build green but declarations
+  invisible to importers).
+
+**SP1-AC is COMPLETE** (earlier this leg): A5 `exists_logDeriv_partial_fractions` +
+A6 `exists_norm_digamma_le` + the generic Landau lemma `norm_logDeriv_le_of_norm_le`
+(reusable!), two-radius peel `exists_H_two_radius_factorization`, window Γ-bounds.
+All in `CompletedZeta/AnalyticControl.lean` (~3500 lines now).
+
+**NEXT SP2 leaves (in order, per decomposition-sp2.md):**
+1. **R-a** rectangle zero-peel: `exists_H_ball_factorization`-mirror with `U := open
+   rectangle` (convex ✓ same extract_zeros_poles chain); nonvanishing witness leaf
+   `H_ne_zero_of_one_lt_real` (H(x) ≠ 0 for real x > 1: Euler product positivity via
+   `Chebotarev.dedekindZeta_re_pos_of_one_lt` (:817) + prefactor/Γ nonvanishing).
+2. **R-e** good heights from A4 counting (pigeonhole in [T,T+1]: ∃T' with
+   dist(T', ordinates) ≥ c/log T).
+3. **R-f** horizontal-edge bound (A5 + good heights + Φ = O(1/T) — Φ-decay still a
+   HYPOTHESIS to thread; discharge for concrete F in SP3 per the doc's Φ-d decision).
+4. **R-d/R-g** argument-principle assembly + FE folding + G/ζ split (Poitou Prop 1).
+5. Then SP2-vM (ζ_K log-deriv series), SP2-FJ (Fourier–Jordan, incl. Dirichlet
+   integral ∫sinc = π/2 — NOT in mathlib), SP2-Γψ (Gauss digamma formula — NOT in
+   mathlib; digamma_one/digamma_one_half ARE), SP2-MAIN.
+
+
 ## 2026-07-02 session (Fable, leg 4): SP1-AC COMPLETE — A0 through A6 all landed
 
 **The entire analytic-control epic is done, axiom-clean, pushed (through the digamma
