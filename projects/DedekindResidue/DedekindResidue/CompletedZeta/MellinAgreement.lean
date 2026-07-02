@@ -26,7 +26,7 @@ namespace DedekindResidue
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace
 open NumberField.mixedEmbedding.fundamentalCone
 open NumberField.Units NumberField.Units.dirichletUnitTheorem MeasureTheory
-open scoped nonZeroDivisors Real
+open scoped nonZeroDivisors Real ENNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
@@ -518,6 +518,134 @@ instance instCountableIdealSet (J : (Ideal (𝓞 K))⁰) : Countable (idealSet K
       (z : mixedSpace K)) hab
     exact Subtype.ext this
   exact Function.Injective.countable hinj
+
+open scoped Classical in
+/-- **Tiling the log-space by unit-box translates, `lintegral` version** — no
+integrability hypothesis needed. -/
+theorem lintegral_eq_tsum_box_shift (f : logSpace K → ℝ≥0∞) :
+    ∫⁻ u, f u = ∑' n : Fin (rank K) → ℤ,
+      ∫⁻ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
+        f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))) := by
+  classical
+  set B := (basisUnitLattice K).ofZLatticeBasis ℝ with hB
+  have hFD := ZSpan.isAddFundamentalDomain B volume
+  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)) (logSpace K) volume :=
+    inferInstanceAs
+      (VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)).toAddSubgroup
+        (logSpace K) volume)
+  rw [hFD.lintegral_eq_tsum' f]
+  have hpre : ∀ g : Submodule.span ℤ (Set.range ⇑B),
+      ∫⁻ x in ZSpan.fundamentalDomain B, f (-g +ᵥ x)
+        = ∫⁻ x in ZSpan.fundamentalDomain B, f (-(g : logSpace K) + x) := by
+    intro g
+    refine setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _)
+      (fun x _ => ?_)
+    rw [Submodule.vadd_def, vadd_eq_add]
+    norm_cast
+  rw [tsum_congr hpre]
+  set eB := ((Module.Basis.restrictScalars ℤ B).equivFun).toEquiv with heB
+  rw [← Equiv.tsum_eq eB.symm (fun g => ∫⁻ u in ZSpan.fundamentalDomain B,
+    f (-(g : logSpace K) + u))]
+  rw [← Equiv.tsum_eq (Equiv.neg (Fin (rank K) → ℤ)) (fun n =>
+    ∫⁻ u in ZSpan.fundamentalDomain B,
+      f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))))]
+  refine tsum_congr (fun n => ?_)
+  have hval : ((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K)
+      = ∑ i, n i • (B i) := by
+    rw [heB]
+    show (((Module.Basis.restrictScalars ℤ B).equivFun.symm n :
+      Submodule.span ℤ (Set.range ⇑B)) : logSpace K) = _
+    rw [(Module.Basis.restrictScalars ℤ B).equivFun_symm_apply]
+    push_cast
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Module.Basis.restrictScalars_apply]
+  have hshift : logEmbedding K (Additive.ofMul (∏ j, fundSystem K j
+        ^ ((Equiv.neg (Fin (rank K) → ℤ)) n j)))
+      = -((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K) := by
+    rw [logEmbedding_prod_fundSystem, hval, ← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Equiv.neg_apply, Pi.neg_apply, neg_smul, ← hB]
+  refine setLIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _) (fun u _ => ?_)
+  rw [hshift]
+  congr 1
+  abel
+
+open scoped Classical in
+/-- `ℝ≥0∞`-valued version of `tsum_ite_eq_tsum_coneUnfold` (same unfolding, for
+lintegral-valued families). -/
+theorem tsum_ite_eq_tsum_coneUnfold_ennreal (J : (Ideal (𝓞 K))⁰)
+    (g : EuclideanSpace ℝ (index K) → ℝ≥0∞) :
+    (∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
+        if v = 0 then 0 else g (v : EuclideanSpace ℝ (index K)))
+      = ∑' p : (idealSet K J) × (Fin (rank K) → ℤ),
+          g ((euclidMixedEquiv K).symm
+            ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))) := by
+  have hmem : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))
+        ∈ idealZLattice K (FractionalIdeal.mk0 K J) := by
+    intro p
+    rw [mem_idealZLattice_iff_euclidMixed, LinearEquiv.apply_symm_apply]
+    exact unit_smul_mem_idealLattice K J _ (p.1.2.2)
+  have hne : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
+      (⟨(euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))),
+        hmem p⟩ : idealZLattice K (FractionalIdeal.mk0 K J)) ≠ 0 := by
+    intro p h0
+    have h1 : (euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))) = 0 := by
+      have := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
+        (z : EuclideanSpace ℝ (index K))) h0
+      simpa using this
+    rw [LinearEquiv.map_eq_zero_iff] at h1
+    have hp1ne : ((p.1 : mixedSpace K)) ≠ 0 := by
+      intro hz
+      have hc := p.1.2.1
+      rw [hz] at hc
+      exact hc.2 (map_zero (mixedEmbedding.norm (K := K)))
+    exact (unit_smul_ne_zero K _ hp1ne) h1
+  refine tsum_eq_tsum_of_ne_zero_bij
+    (i := fun p => ⟨(euclidMixedEquiv K).symm
+      ((∏ i, fundSystem K i ^ ((p : (idealSet K J) × (Fin (rank K) → ℤ)).2 i))
+        • (((p : (idealSet K J) × (Fin (rank K) → ℤ)).1 : mixedSpace K))), hmem p⟩)
+    ?_ ?_ ?_
+  · rintro p q hpq
+    have hval := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
+      (z : EuclideanSpace ℝ (index K))) hpq
+    simp only at hval
+    have hmix := (euclidMixedEquiv K).symm.injective hval
+    have hcu : coneUnfoldEquiv K J (p : (idealSet K J) × (Fin (rank K) → ℤ))
+        = coneUnfoldEquiv K J (q : (idealSet K J) × (Fin (rank K) → ℤ)) :=
+      Subtype.ext hmix
+    exact Subtype.ext ((coneUnfoldEquiv K J).injective hcu)
+  · rintro v hv
+    rw [Function.mem_support] at hv
+    have hvne : v ≠ 0 := by
+      rintro rfl
+      simp at hv
+    have hvne' : (v : EuclideanSpace ℝ (index K)) ≠ 0 := by
+      intro h0
+      exact hvne (Subtype.ext h0)
+    set w : {x : EuclideanSpace ℝ (index K) //
+        x ∈ idealZLattice K (FractionalIdeal.mk0 K J) ∧ x ≠ 0} :=
+      ⟨(v : EuclideanSpace ℝ (index K)), v.2, hvne'⟩ with hw
+    set pr := euclidConeEquiv K J w with hpr
+    have hback : (euclidConeEquiv K J).symm pr = w := Equiv.symm_apply_apply _ _
+    have hvalsymm : ((euclidConeEquiv K J).symm pr : EuclideanSpace ℝ (index K))
+        = (euclidMixedEquiv K).symm
+            ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K))) := by
+      rw [euclidConeEquiv]
+      rfl
+    have hvw : (euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))
+        = (v : EuclideanSpace ℝ (index K)) := by
+      rw [← hvalsymm, hback]
+    have hgpr : g ((euclidMixedEquiv K).symm
+        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))) ≠ 0 := by
+      rw [hvw]
+      rwa [if_neg hvne] at hv
+    refine ⟨⟨pr, hgpr⟩, ?_⟩
+    exact Subtype.ext hvw
+  · rintro ⟨p, hp⟩
+    rw [if_neg (hne p)]
 
 end
 
