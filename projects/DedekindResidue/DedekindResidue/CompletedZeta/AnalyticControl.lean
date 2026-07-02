@@ -24,7 +24,7 @@ namespace DedekindResidue
 
 @[expose] public section
 
-open MeasureTheory
+open MeasureTheory NumberField
 open scoped Real
 
 variable (K : Type*) [Field K] [NumberField K]
@@ -156,6 +156,114 @@ theorem exists_completedDedekindZetaEntire_strip_bound (a b : ℝ) (hab : a ≤ 
     _ = ‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
         * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖) * (1 + ‖s‖)^2 := by
         ring
+
+/-- There is exactly one ideal of norm 1. -/
+theorem card_absNorm_eq_one :
+    Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = 1} = 1 := by
+  have he : {I : Ideal (𝓞 K) // Ideal.absNorm I = 1} ≃ {I : Ideal (𝓞 K) // I = ⊤} :=
+    Equiv.subtypeEquivRight (fun I => Ideal.absNorm_eq_one_iff)
+  rw [Nat.card_congr he]
+  simp
+
+/-- **AC-A4 center lower bound**: far enough right, the Dedekind zeta function is at
+least `1/2` in modulus — the Dirichlet tail `∑_{n≥2} a_n n^{-σ}` decays like `2^{-σ}`
+once it converges, so it is eventually below `1/2`. -/
+theorem exists_re_norm_dedekindZeta_ge_half :
+    ∃ A : ℝ, 2 ≤ A ∧ ∀ s : ℂ, A ≤ s.re → 1/2 ≤ ‖dedekindZeta K s‖ := by
+  set f : ℕ → ℂ := fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)
+    with hf
+  have hsum2 : LSeriesSummable f 2 := by
+    have h := count_LSeriesSummable K (by norm_num : (1:ℝ) < 2)
+    have hfe : (fun n : ℕ =>
+        ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) = f := by
+      funext n
+      rw [hf]
+      push_cast
+      rfl
+    rw [hfe] at h
+    exact_mod_cast h
+  set T : ℝ := ∑' n : ℕ, ‖LSeries.term f 2 n‖ with hT
+  have hT0 : 0 ≤ T := tsum_nonneg (fun n => norm_nonneg _)
+  obtain ⟨m, hm⟩ : ∃ m : ℕ, T * (1/2)^m ≤ 1/2 := by
+    rcases eq_or_lt_of_le hT0 with h0 | hpos
+    · exact ⟨0, by rw [← h0]; norm_num⟩
+    · obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one
+        (show (0:ℝ) < 1/(2*T) by positivity) (by norm_num : (1:ℝ)/2 < 1)
+      refine ⟨m, ?_⟩
+      have := mul_le_mul_of_nonneg_left hm.le hT0
+      calc T * (1/2)^m ≤ T * (1/(2*T)) := this
+        _ = 1/2 := by field_simp
+  refine ⟨2 + m, by linarith [Nat.cast_nonneg (α := ℝ) m], fun s hs => ?_⟩
+  have hσ2 : (2:ℝ) ≤ s.re := by
+    have : (0:ℝ) ≤ m := Nat.cast_nonneg m
+    linarith
+  have hsummS : LSeriesSummable f s := hsum2.of_re_le_re (by simpa using hσ2)
+  have hterm1 : LSeries.term f s 1 = 1 := by
+    rw [LSeries.term_def]
+    simp [hf]
+  have hζ : dedekindZeta K s
+      = 1 + ∑' n : ℕ, ite (n = 1) 0 (LSeries.term f s n) := by
+    rw [dedekindZeta, LSeries]
+    rw [show (fun n ↦ (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℂ)) = f
+      from rfl]
+    rw [hsummS.tsum_eq_add_tsum_ite 1, hterm1]
+  -- pointwise tail comparison against the exponent-2 terms
+  have hpoint : ∀ n : ℕ, ‖ite (n = 1) 0 (LSeries.term f s n)‖
+      ≤ (1/2)^m * ‖LSeries.term f 2 n‖ := by
+    intro n
+    rcases eq_or_ne n 1 with rfl | hn1
+    · simp
+    rcases eq_or_ne n 0 with rfl | hn0
+    · simp
+    rw [if_neg hn1, LSeries.norm_term_eq, LSeries.norm_term_eq, if_neg hn0, if_neg hn0,
+      show ((2:ℂ)).re = (2:ℝ) by norm_num]
+    have hn2 : (2:ℝ) ≤ (n:ℝ) := by exact_mod_cast (by omega : 2 ≤ n)
+    have hnpos : (0:ℝ) < n := by linarith
+    have hkey : (n:ℝ)^(2:ℝ) * (2:ℝ)^(m:ℝ) ≤ (n:ℝ)^(s.re) := by
+      have h1 : (2:ℝ)^(m:ℝ) ≤ (n:ℝ)^(s.re - 2) := by
+        calc (2:ℝ)^(m:ℝ) ≤ (2:ℝ)^(s.re - 2) :=
+              Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+          _ ≤ (n:ℝ)^(s.re - 2) := Real.rpow_le_rpow (by norm_num) hn2 (by linarith)
+      calc (n:ℝ)^(2:ℝ) * (2:ℝ)^(m:ℝ)
+          ≤ (n:ℝ)^(2:ℝ) * (n:ℝ)^(s.re - 2) :=
+            mul_le_mul_of_nonneg_left h1 (by positivity)
+        _ = (n:ℝ)^(s.re) := by
+            rw [← Real.rpow_add hnpos]
+            ring_nf
+    have hhalf : ((1:ℝ)/2)^m * ((2:ℝ)^(m:ℝ)) = 1 := by
+      rw [← Real.rpow_natCast ((1:ℝ)/2) m,
+        ← Real.mul_rpow (by norm_num) (by norm_num)]
+      norm_num
+    calc ‖f n‖ / (n:ℝ)^(s.re)
+        ≤ ‖f n‖ / ((n:ℝ)^(2:ℝ) * (2:ℝ)^(m:ℝ)) := by
+          gcongr
+      _ = (1/2)^m * (‖f n‖ / (n:ℝ)^(2:ℝ)) := by
+          rw [← div_div, div_eq_mul_inv (‖f n‖ / (n:ℝ)^(2:ℝ)), mul_comm]
+          congr 1
+          exact (eq_inv_of_mul_eq_one_left hhalf).symm
+  -- summability of the pieces
+  have hnormS : Summable (fun n : ℕ => ‖ite (n = 1) 0 (LSeries.term f s n)‖) := by
+    refine Summable.of_nonneg_of_le (fun n => norm_nonneg _) (fun n => ?_) hsummS.norm
+    rcases eq_or_ne n 1 with rfl | hn1
+    · simp
+    · rw [if_neg hn1]
+  have hcompar : Summable (fun n : ℕ => (1/2:ℝ)^m * ‖LSeries.term f 2 n‖) :=
+    (hsum2.norm).mul_left _
+  have hRbound : ‖∑' n : ℕ, ite (n = 1) 0 (LSeries.term f s n)‖ ≤ T * (1/2)^m := by
+    refine le_trans (norm_tsum_le_tsum_norm hnormS) ?_
+    calc (∑' n : ℕ, ‖ite (n = 1) 0 (LSeries.term f s n)‖)
+        ≤ ∑' n : ℕ, (1/2:ℝ)^m * ‖LSeries.term f 2 n‖ :=
+          hnormS.tsum_le_tsum hpoint hcompar
+      _ = (1/2)^m * T := by rw [tsum_mul_left]
+      _ = T * (1/2)^m := by ring
+  rw [hζ]
+  set R : ℂ := ∑' n : ℕ, ite (n = 1) 0 (LSeries.term f s n) with hR
+  have h1R : (1:ℝ) ≤ ‖(1:ℂ) + R‖ + ‖R‖ := by
+    calc (1:ℝ) = ‖(1:ℂ)‖ := by norm_num
+      _ = ‖((1:ℂ) + R) + (-R)‖ := by ring_nf
+      _ ≤ ‖(1:ℂ) + R‖ + ‖-R‖ := norm_add_le _ _
+      _ = ‖(1:ℂ) + R‖ + ‖R‖ := by rw [norm_neg]
+  linarith [le_trans hRbound hm]
 
 end
 
