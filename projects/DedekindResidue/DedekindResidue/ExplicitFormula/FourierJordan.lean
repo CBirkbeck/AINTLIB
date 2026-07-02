@@ -312,4 +312,77 @@ theorem tendsto_integral_sinc_atTop :
       (Filter.Tendsto.const_sub 1 h0).div_const _
     simpa using h1
 
+/-- The sinc function is interval integrable on every interval (it is measurable and
+bounded by `1`). -/
+theorem intervalIntegrable_sinc (a b : ℝ) :
+    IntervalIntegrable (fun x : ℝ => Real.sin x / x) volume a b := by
+  refine intervalIntegrable_iff.mpr ?_
+  have hmeas : AEStronglyMeasurable (fun x : ℝ => Real.sin x / x)
+      (volume.restrict (Set.uIoc a b)) :=
+    (Real.measurable_sin.div measurable_id).aestronglyMeasurable
+  refine MeasureTheory.Integrable.mono'
+    (g := fun _ => (1:ℝ))
+    (MeasureTheory.integrableOn_const (C := (1:ℝ)) (by
+      rw [Real.volume_uIoc]
+      exact ENNReal.ofReal_ne_top))
+    hmeas ?_
+  refine Filter.Eventually.of_forall (fun x => ?_)
+  rw [Real.norm_eq_abs]
+  rcases eq_or_ne x 0 with hx | hx
+  · simp [hx]
+  · rw [abs_div]
+    exact div_le_one_of_le₀ Real.abs_sin_le_abs (abs_nonneg _)
+
+/-- The sinc primitive is uniformly bounded on `[0, ∞)`: continuity on compacts plus
+the limit `π/2` at infinity. This is the constant `C_sinc` of Poitou's Fourier–Jordan
+argument (p. 6-03). -/
+theorem exists_bound_primitive_sinc :
+    ∃ C : ℝ, 0 < C ∧ ∀ b : ℝ, 0 ≤ b → |∫ x in (0:ℝ)..b, Real.sin x / x| ≤ C := by
+  set g : ℝ → ℝ := fun b => ∫ x in (0:ℝ)..b, Real.sin x / x with hg
+  have hgc : Continuous g :=
+    intervalIntegral.continuous_primitive (fun a b => intervalIntegrable_sinc a b) 0
+  -- eventually within 1 of π/2
+  have htail := tendsto_integral_sinc_atTop.eventually
+    (Metric.closedBall_mem_nhds (π/2) one_pos)
+  rw [Filter.eventually_atTop] at htail
+  obtain ⟨b₀, hb₀⟩ := htail
+  -- bound on the compact initial segment [0, max b₀ 0]
+  obtain ⟨C₀, hC₀⟩ := (isCompact_Icc (a := (0:ℝ)) (b := max b₀ 0)).exists_bound_of_continuousOn
+    hgc.continuousOn
+  refine ⟨max C₀ (|π/2| + 1) + 1, by positivity, fun b hb => ?_⟩
+  rcases le_or_gt b (max b₀ 0) with hble | hbgt
+  · have := hC₀ b ⟨hb, hble⟩
+    rw [Real.norm_eq_abs] at this
+    calc |g b| ≤ C₀ := this
+      _ ≤ max C₀ (|π/2| + 1) := le_max_left _ _
+      _ ≤ max C₀ (|π/2| + 1) + 1 := le_add_of_nonneg_right zero_le_one
+  · have hb' : b₀ ≤ b := le_trans (le_max_left _ _) hbgt.le
+    have := hb₀ b hb'
+    rw [Real.dist_eq] at this
+    calc |g b| = |(g b - π/2) + π/2| := by ring_nf
+      _ ≤ |g b - π/2| + |π/2| := abs_add_le _ _
+      _ ≤ 1 + |π/2| := by gcongr
+      _ = |π/2| + 1 := add_comm _ _
+      _ ≤ max C₀ (|π/2| + 1) := le_max_right _ _
+      _ ≤ max C₀ (|π/2| + 1) + 1 := le_add_of_nonneg_right zero_le_one
+
+/-- **Uniform sinc-window bound `C_sinc`** (FJ-c tail corollary): a single constant
+bounds `|∫_A^B sin x/x dx|` over all nonnegative windows. Used to control the
+variation part of the Fourier–Jordan near-zero estimate. -/
+theorem exists_bound_integral_sinc :
+    ∃ C : ℝ, 0 < C ∧ ∀ A B : ℝ, 0 ≤ A → 0 ≤ B →
+      |∫ x in A..B, Real.sin x / x| ≤ C := by
+  obtain ⟨C₀, hC₀pos, hC₀⟩ := exists_bound_primitive_sinc
+  refine ⟨2 * C₀, by positivity, fun A B hA hB => ?_⟩
+  have hsub : (∫ x in (0:ℝ)..B, Real.sin x / x) - ∫ x in (0:ℝ)..A, Real.sin x / x
+      = ∫ x in A..B, Real.sin x / x :=
+    intervalIntegral.integral_interval_sub_left
+      (intervalIntegrable_sinc 0 B) (intervalIntegrable_sinc 0 A)
+  rw [← hsub]
+  calc |(∫ x in (0:ℝ)..B, Real.sin x / x) - ∫ x in (0:ℝ)..A, Real.sin x / x|
+      ≤ |∫ x in (0:ℝ)..B, Real.sin x / x| + |∫ x in (0:ℝ)..A, Real.sin x / x| :=
+        abs_sub _ _
+    _ ≤ C₀ + C₀ := add_le_add (hC₀ B hB) (hC₀ A hA)
+    _ = 2 * C₀ := by ring
+
 end DedekindResidue
