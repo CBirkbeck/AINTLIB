@@ -580,7 +580,7 @@ theorem completedDedekindZetaEntire_one_sub (s : ℂ) :
 
 /-- On the strip `-1 ≤ Re z ≤ 2`, the normalizer `z - 4` dominates both the constant 2
 and the height: `1 + |Im z| ≤ 2‖z - 4‖`. -/
-theorem one_add_abs_im_le_two_norm_sub_four {z : ℂ} (h1 : -1 ≤ z.re) (h2 : z.re ≤ 2) :
+theorem one_add_abs_im_le_two_norm_sub_four {z : ℂ} (_h1 : -1 ≤ z.re) (h2 : z.re ≤ 2) :
     1 + |z.im| ≤ 2 * ‖z - 4‖ := by
   have hre4 : (z - 4).re = z.re - 4 := by simp
   have hre : (2:ℝ) ≤ ‖z - 4‖ := by
