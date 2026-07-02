@@ -348,3 +348,16 @@ falls out of `Λ = Λ₀ − f₀/σ − ε g₀/(k−σ)` (pole terms → entir
 (mathlib `FundamentalCone.idealSetEquivNorm`); (ε) sum over classes, define
 `completedDedekindZeta`, prove both `IsCompletedDedekindZeta` conditions, conclude existence.
 (β)+(γ) are the two big ones — both fully specified above.
+
+**Interface alignment for (β)/(δ) (2026-07-03)**: `classRep K C = FractionalIdeal.mk0 K J_C`
+with `J_C := (ClassGroup.mk0_surjective C).choose : (Ideal (𝓞 K))⁰` — INTEGRAL ideal reps,
+exactly matching mathlib's cone machinery: use `fundamentalCone.idealSet K J_C` (cone ∩ the
+same `idealLattice`) as the orbit-rep set. Unfolding: `L_{J_C}∖0 ≃ idealSet × (free units)`
+(cone is fundamental mod torsion: `exists_unit_smul_mem` + `torsion_unit_smul_mem_of_mem`;
+idealSet carries each free orbit torsionOrder-times, so `∑_{v∈L∖0} h = ∑_{a∈idealSet}∑_{l∈unitLattice} h(ε_l·a)`
+with NO stray factor, and heckeG's `w⁻¹` cancels against `idealSetEquivNorm`'s `× torsion`
+in (δ): `card_isPrincipal_norm_eq_mul_torsion`). For (δ) use `idealSetEquivNorm K J n`:
+cone-points of norm n ≃ {principal ideals ∣-divisible by J, norm n} × torsion; then
+`𝔞 = (a) ⊆ J ↦ 𝔟 := 𝔞·J⁻¹ ∈ [J]⁻¹` gives the partial zeta. Agreement needs only REAL s > 1
+(both sides analytic on Re>1, identity theorem — mirror `IsCompletedDedekindZeta.eqOn`),
+so all swaps are Tonelli-on-nonneg. Mellin scaling = mathlib `mellin_comp_mul_left` ✓.
