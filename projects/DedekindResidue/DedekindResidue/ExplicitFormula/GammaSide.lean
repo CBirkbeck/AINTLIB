@@ -39,7 +39,7 @@ classical Gauss derivation.
 
 namespace DedekindResidue
 
-open MeasureTheory Complex intervalIntegral Real Filter
+open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
 open scoped FourierTransform
 
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
@@ -2166,5 +2166,23 @@ theorem muFT_eq_fourierIntegral (k : ℝ → ℂ) (t : ℝ) :
   rw [show (-2 * π * x * (-t/(2*π)) : ℝ) = t * x by
     field_simp]
   ring
+
+/-- **Multiplication formula against Schwartz functions** (Pa-1): for integrable `f`,
+`∫ 𝓕Φ(x) • f(x) dx = ∫ Φ(ξ) • 𝓕f(ξ) dξ`. -/
+theorem integral_fourier_schwartz_smul {f : ℝ → ℂ} (hf : Integrable f)
+    (Φ : SchwartzMap ℝ ℂ) :
+    ∫ x : ℝ, (𝓕 (Φ : ℝ → ℂ)) x • f x = ∫ ξ : ℝ, (Φ : ℝ → ℂ) ξ • (𝓕 f) ξ := by
+  have h0 := VectorFourier.integral_fourierIntegral_smul_eq_flip
+    (e := Real.fourierChar) (μ := (volume : Measure ℝ)) (ν := (volume : Measure ℝ))
+    (L := innerₗ ℝ) (f := (Φ : ℝ → ℂ)) (g := f)
+    (by fun_prop) (by fun_prop) (Φ.integrable) hf
+  have hflip : (innerₗ ℝ).flip = innerₗ ℝ := by
+    apply LinearMap.ext
+    intro a
+    apply LinearMap.ext
+    intro b
+    exact real_inner_comm a b
+  rw [hflip] at h0
+  exact h0
 
 end DedekindResidue
