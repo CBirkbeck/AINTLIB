@@ -2378,4 +2378,326 @@ theorem integral_fourier_mul_fourierL2 {k h : ℝ → ℂ}
   rw [hL, hR] at hpair
   exact hpair
 
+/-- Two-sided version of the symmetric-tail limit: for `t ≠ 0`,
+`∫_1^X (e^{itx} - e^{-itx})/x dx → 2i·sign(t)·sincTail|t|`. -/
+theorem tendsto_integral_cexp_sub_div_window' {t : ℝ} (ht : t ≠ 0) :
+    Tendsto (fun X : ℝ => ∫ x in (1:ℝ)..X,
+        (Complex.exp ((t*x : ℝ) * Complex.I) - Complex.exp (-((t*x : ℝ)) * Complex.I))
+          / (x:ℂ))
+      atTop (nhds (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ))) := by
+  rcases lt_or_gt_of_ne ht with hneg | hpos
+  · -- t < 0: flip signs and use the positive case at |t| = -t
+    have h0 := tendsto_integral_cexp_sub_div_window (t := -t) (by linarith)
+    have h1 : (fun X : ℝ => ∫ x in (1:ℝ)..X,
+        (Complex.exp ((t*x : ℝ) * Complex.I) - Complex.exp (-((t*x : ℝ)) * Complex.I))
+          / (x:ℂ))
+        = fun X : ℝ => -∫ x in (1:ℝ)..X,
+          (Complex.exp ((-t*x : ℝ) * Complex.I) - Complex.exp (-((-t*x : ℝ)) * Complex.I))
+            / (x:ℂ) := by
+      funext X
+      rw [← intervalIntegral.integral_neg]
+      refine intervalIntegral.integral_congr (fun x _ => ?_)
+      rw [show ((-t*x : ℝ) : ℂ) = -((t*x : ℝ) : ℂ) by push_cast; ring]
+      rw [show (-(-((t*x : ℝ) : ℂ))) = ((t*x : ℝ) : ℂ) by ring]
+      ring
+    rw [h1]
+    have h2 := h0.neg
+    have h3 : -(2 * Complex.I * ((sincTail (-t) : ℝ) : ℂ))
+        = 2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ) := by
+      rw [Real.sign_of_neg hneg, abs_of_neg hneg]
+      push_cast
+      ring
+    rw [h3] at h2
+    exact h2
+  · have h0 := tendsto_integral_cexp_sub_div_window hpos
+    have h3 : 2 * Complex.I * ((sincTail t : ℝ) : ℂ)
+        = 2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ) := by
+      rw [Real.sign_of_pos hpos, abs_of_pos hpos, one_mul]
+    rw [h3] at h0
+    exact h0
+
+/-- **Pointwise convergence of truncated Fourier integrals to Poitou's `γ`** (P-c, step 1):
+for `t ≠ 0`, `∫_{-n}^{n} (F(0)-F(x))/x · e^{itx} dx → gammaFT F t`. -/
+theorem tendsto_truncated_fourier_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    {t : ℝ} (ht : t ≠ 0) :
+    Tendsto (fun n : ℕ => ∫ x in Set.Ioc (-(n:ℝ)) (n:ℝ),
+        ((F 0 - F x)/(x:ℂ)) * Complex.exp ((t*x : ℝ) * Complex.I))
+      atTop (nhds (gammaFT F t)) := by
+  set h : ℝ → ℂ := fun x => (F 0 - F x)/(x:ℂ) with hh
+  set e : ℝ → ℂ := fun x => Complex.exp ((t*x : ℝ) * Complex.I) with he
+  have he_bd : ∀ x : ℝ, ‖e x‖ = 1 := by
+    intro x
+    rw [he]
+    simp only
+    rw [Complex.norm_exp]
+    simp
+  have he_meas : AEStronglyMeasurable e volume := by
+    refine Continuous.aestronglyMeasurable ?_
+    rw [he]
+    fun_prop
+  -- integrabilities
+  have hFe_int : Integrable (fun x : ℝ => (F x/(x:ℂ)) * e x) volume → True := fun _ => trivial
+  have hFx_tail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
+    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
+    · refine ((hF.aestronglyMeasurable.restrict.mul
+        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
+      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
+      refine Filter.Eventually.of_forall (fun x hx => ?_)
+      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+      push Not at hx
+      have hx1 : 1 ≤ |x| := by
+        rcases le_or_gt x (-1) with h' | h'
+        · rw [abs_of_nonpos (by linarith)]
+          linarith
+        · have := hx h'
+          rw [abs_of_pos (by linarith)]
+          linarith
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+      exact div_le_self (norm_nonneg _) hx1
+  -- eventually-n decomposition
+  have hEq : ∀ n : ℕ, 1 ≤ n →
+      (∫ x in Set.Ioc (-(n:ℝ)) (n:ℝ), h x * e x)
+      = (∫ x in Set.Ioc (-1:ℝ) 1, h x * e x)
+        + (F 0 * ∫ x in (1:ℝ)..(n:ℝ),
+            (Complex.exp ((t*x : ℝ) * Complex.I)
+              - Complex.exp (-((t*x : ℝ)) * Complex.I)) / (x:ℂ))
+        - ∫ x in (Set.Ioc (-(n:ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) (n:ℝ)), (F x/(x:ℂ)) * e x := by
+    intro n hn
+    have hn' : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+    have hsplit : Set.Ioc (-(n:ℝ)) (n:ℝ)
+        = Set.Ioc (-(n:ℝ)) (-1:ℝ) ∪ Set.Ioc (-1:ℝ) 1 ∪ Set.Ioc (1:ℝ) (n:ℝ) := by
+      rw [Set.Ioc_union_Ioc_eq_Ioc (by linarith) (by linarith),
+        Set.Ioc_union_Ioc_eq_Ioc (by linarith) (by linarith)]
+    -- integrability of h·e on the three pieces
+    have hmid : IntegrableOn (fun x => h x * e x) (Set.Ioc (-1:ℝ) 1) := by
+      refine hFdiv.mul_bdd (c := 1) (he_meas.restrict) ?_
+      exact Filter.Eventually.of_forall (fun x => by rw [he_bd x])
+    have hF0_int : ∀ a b : ℝ, Set.Ioc a b ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ →
+        IntegrableOn (fun x : ℝ => F 0/(x:ℂ) * e x) (Set.Ioc a b) := by
+      intro a b hsub
+      refine MeasureTheory.Integrable.mono'
+        (g := fun _ => ‖F 0‖)
+        (MeasureTheory.integrableOn_const (by
+          rw [Real.volume_Ioc]
+          exact ENNReal.ofReal_ne_top)) ?_ ?_
+      · refine AEStronglyMeasurable.mul ?_ (he_meas.restrict)
+        exact ((Complex.measurable_ofReal.inv).aestronglyMeasurable.const_mul
+          (F 0)).congr (Filter.Eventually.of_forall (fun x =>
+            (div_eq_mul_inv (F 0) ((x:ℝ):ℂ)).symm)) |>.restrict
+      · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+        refine Filter.Eventually.of_forall (fun x hx => ?_)
+        have hx1 : 1 ≤ |x| := by
+          have := hsub hx
+          rw [Set.mem_compl_iff, Set.mem_Ioc] at this
+          push Not at this
+          rcases le_or_gt x (-1) with h' | h'
+          · rw [abs_of_nonpos (by linarith)]
+            linarith
+          · have := this h'
+            rw [abs_of_pos (by linarith)]
+            linarith
+        rw [norm_mul, he_bd x, mul_one, norm_div, Complex.norm_real,
+          Real.norm_eq_abs]
+        exact div_le_self (norm_nonneg _) hx1
+    have hFx_int : ∀ a b : ℝ, Set.Ioc a b ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ →
+        IntegrableOn (fun x => (F x/(x:ℂ)) * e x) (Set.Ioc a b) := by
+      intro a b hsub
+      refine ((hFx_tail.mono_set hsub).mul_bdd (c := 1) (he_meas.restrict) ?_)
+      exact Filter.Eventually.of_forall (fun x => by rw [he_bd x])
+    have htail_int : ∀ a b : ℝ, Set.Ioc a b ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ →
+        IntegrableOn (fun x => h x * e x) (Set.Ioc a b) := by
+      intro a b hsub
+      refine ((hF0_int a b hsub).sub (hFx_int a b hsub)).congr ?_
+      refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr ?_
+      refine Filter.Eventually.of_forall (fun x _ => ?_)
+      show F 0/(x:ℂ) * e x - (F x/(x:ℂ)) * e x = h x * e x
+      rw [hh]
+      simp only
+      ring
+    have hneg_sub : Set.Ioc (-(n:ℝ)) (-1:ℝ) ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ := by
+      intro x hx
+      rw [Set.mem_Ioc] at hx
+      rw [Set.mem_compl_iff, Set.mem_Ioc]
+      push Not
+      intro h'
+      linarith [hx.2]
+    have hpos_sub : Set.Ioc (1:ℝ) (n:ℝ) ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ := by
+      intro x hx
+      rw [Set.mem_Ioc] at hx
+      rw [Set.mem_compl_iff, Set.mem_Ioc]
+      push Not
+      intro h'
+      linarith [hx.1]
+    -- split the integral
+    have hdisj1 : Disjoint (Set.Ioc (-(n:ℝ)) (-1:ℝ)) (Set.Ioc (-1:ℝ) 1) := by
+      refine Set.disjoint_left.mpr (fun x hx hx' => ?_)
+      rw [Set.mem_Ioc] at hx hx'
+      linarith [hx.2, hx'.1]
+    have hdisj2 : Disjoint (Set.Ioc (-(n:ℝ)) (-1:ℝ) ∪ Set.Ioc (-1:ℝ) 1)
+        (Set.Ioc (1:ℝ) (n:ℝ)) := by
+      refine Set.disjoint_left.mpr (fun x hx hx' => ?_)
+      rw [Set.mem_Ioc] at hx'
+      rcases hx with hx | hx <;> rw [Set.mem_Ioc] at hx
+      · linarith [hx.2, hx'.1]
+      · linarith [hx.2, hx'.1]
+    rw [hsplit, MeasureTheory.setIntegral_union hdisj2 measurableSet_Ioc
+      (MeasureTheory.IntegrableOn.union (htail_int _ _ hneg_sub) hmid)
+      (htail_int _ _ hpos_sub),
+      MeasureTheory.setIntegral_union hdisj1 measurableSet_Ioc
+      (htail_int _ _ hneg_sub) hmid]
+    -- tail algebra
+    have htail_eq : ∀ a b : ℝ, Set.Ioc a b ⊆ (Set.Ioc (-1:ℝ) 1)ᶜ →
+        (∫ x in Set.Ioc a b, h x * e x)
+        = (∫ x : ℝ in Set.Ioc a b, F 0/(x:ℂ) * e x)
+          - ∫ x in Set.Ioc a b, (F x/(x:ℂ)) * e x := by
+      intro a b hsub
+      rw [← MeasureTheory.integral_sub (hF0_int a b hsub) (hFx_int a b hsub)]
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun x _ => ?_)
+      show h x * e x = F 0/(x:ℂ) * e x - (F x/(x:ℂ)) * e x
+      rw [hh]
+      simp only
+      ring
+    rw [htail_eq _ _ hneg_sub, htail_eq _ _ hpos_sub]
+    -- pull out F 0 and reflect the negative window
+    have hF0pull : ∀ a b : ℝ, (∫ x : ℝ in Set.Ioc a b, F 0/(x:ℂ) * e x)
+        = F 0 * ∫ x in Set.Ioc a b, e x / (x:ℂ) := by
+      intro a b
+      rw [← MeasureTheory.integral_const_mul]
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun x _ => ?_)
+      ring
+    rw [hF0pull, hF0pull]
+    have hIoc_int : ∀ a b : ℝ, IntervalIntegrable (fun x : ℝ => e x / (x:ℂ)) volume a b
+        → True := fun _ _ _ => trivial
+    have hnegint : (∫ x in Set.Ioc (-(n:ℝ)) (-1:ℝ), e x / (x:ℂ))
+        = -∫ x in (1:ℝ)..(n:ℝ), Complex.exp (-((t*x : ℝ)) * Complex.I) / (x:ℂ) := by
+      rw [← intervalIntegral.integral_of_le (by linarith : -(n:ℝ) ≤ -1)]
+      have h0 := intervalIntegral.integral_comp_neg (a := (1:ℝ)) (b := (n:ℝ))
+        (f := fun y : ℝ => e y / (y:ℂ))
+      -- h0 : ∫ x in 1..n, e(-x)/(-x) = ∫ x in -n..-1, e x/x
+      rw [← h0, ← intervalIntegral.integral_neg]
+      refine intervalIntegral.integral_congr (fun x _ => ?_)
+      show e (-x) / ((-x : ℝ):ℂ) = -(Complex.exp (-((t*x : ℝ)) * Complex.I) / (x:ℂ))
+      rw [he]
+      simp only
+      rw [show ((t*(-x) : ℝ) : ℂ) = -((t*x : ℝ) : ℂ) by push_cast; ring]
+      push_cast
+      rw [div_neg]
+    have hposint : (∫ x in Set.Ioc (1:ℝ) (n:ℝ), e x / (x:ℂ))
+        = ∫ x in (1:ℝ)..(n:ℝ), Complex.exp ((t*x : ℝ) * Complex.I) / (x:ℂ) := by
+      rw [← intervalIntegral.integral_of_le hn']
+    rw [hnegint, hposint]
+    -- recombine the interval integrals
+    have hcont1 : IntervalIntegrable
+        (fun x : ℝ => Complex.exp ((t*x : ℝ) * Complex.I) / (x:ℂ)) volume 1 (n:ℝ) := by
+      refine ContinuousOn.intervalIntegrable ?_
+      refine ContinuousOn.div (by fun_prop) (by fun_prop) ?_
+      intro x hx
+      rw [Set.uIcc_of_le hn', Set.mem_Icc] at hx
+      exact_mod_cast (by linarith : x ≠ 0)
+    have hcont2 : IntervalIntegrable
+        (fun x : ℝ => Complex.exp (-((t*x : ℝ)) * Complex.I) / (x:ℂ)) volume 1 (n:ℝ) := by
+      refine ContinuousOn.intervalIntegrable ?_
+      refine ContinuousOn.div (by fun_prop) (by fun_prop) ?_
+      intro x hx
+      rw [Set.uIcc_of_le hn', Set.mem_Icc] at hx
+      exact_mod_cast (by linarith : x ≠ 0)
+    have hwindow : (F 0 * ∫ x in (1:ℝ)..(n:ℝ),
+          Complex.exp ((t*x : ℝ) * Complex.I) / (x:ℂ))
+        + F 0 * -∫ x in (1:ℝ)..(n:ℝ), Complex.exp (-((t*x : ℝ)) * Complex.I) / (x:ℂ)
+        = F 0 * ∫ x in (1:ℝ)..(n:ℝ),
+            (Complex.exp ((t*x : ℝ) * Complex.I)
+              - Complex.exp (-((t*x : ℝ)) * Complex.I)) / (x:ℂ) := by
+      have hcont2' : IntervalIntegrable
+          (fun x : ℝ => -(Complex.exp (-((t*x : ℝ)) * Complex.I) / (x:ℂ)))
+          volume 1 (n:ℝ) := hcont2.neg
+      rw [← mul_add, ← intervalIntegral.integral_neg,
+        ← intervalIntegral.integral_add hcont1 hcont2']
+      congr 1
+      refine intervalIntegral.integral_congr (fun x _ => ?_)
+      ring
+    -- recombine the F-tail set integrals
+    have hFtails : (∫ x in Set.Ioc (-(n:ℝ)) (-1:ℝ), (F x/(x:ℂ)) * e x)
+        + ∫ x in Set.Ioc (1:ℝ) (n:ℝ), (F x/(x:ℂ)) * e x
+        = ∫ x in (Set.Ioc (-(n:ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) (n:ℝ)), (F x/(x:ℂ)) * e x := by
+      rw [MeasureTheory.setIntegral_union ?_ measurableSet_Ioc
+        (hFx_int _ _ hneg_sub) (hFx_int _ _ hpos_sub)]
+      refine Set.disjoint_left.mpr (fun x hx hx' => ?_)
+      rw [Set.mem_Ioc] at hx hx'
+      linarith [hx.2, hx'.1]
+    linear_combination hwindow - hFtails
+  -- assemble the limit
+  have hlim : Tendsto (fun n : ℕ =>
+      (∫ x in Set.Ioc (-1:ℝ) 1, h x * e x)
+        + (F 0 * ∫ x in (1:ℝ)..((n:ℕ):ℝ),
+            (Complex.exp ((t*x : ℝ) * Complex.I)
+              - Complex.exp (-((t*x : ℝ)) * Complex.I)) / (x:ℂ))
+        - ∫ x in (Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ)),
+            (F x/(x:ℂ)) * e x)
+      atTop (nhds (gammaFT F t)) := by
+    -- window limit
+    have hT2 : Tendsto (fun n : ℕ => F 0 * ∫ x in (1:ℝ)..((n:ℕ):ℝ),
+        (Complex.exp ((t*x : ℝ) * Complex.I)
+          - Complex.exp (-((t*x : ℝ)) * Complex.I)) / (x:ℂ))
+        atTop (nhds (F 0 * (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ)))) := by
+      refine Filter.Tendsto.const_mul _ ?_
+      exact (tendsto_integral_cexp_sub_div_window' ht).comp
+        tendsto_natCast_atTop_atTop
+    -- tail limit: the union is exactly the complement
+    have hUnion : (⋃ n : ℕ, (Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ)))
+        = (Set.Ioc (-1:ℝ) 1)ᶜ := by
+      ext x
+      simp only [Set.mem_iUnion, Set.mem_union, Set.mem_Ioc, Set.mem_compl_iff]
+      constructor
+      · rintro ⟨n, ⟨h1, h2⟩ | ⟨h1, h2⟩⟩
+        · push Not
+          intro h'
+          linarith
+        · push Not
+          intro h'
+          linarith
+      · intro hx
+        push Not at hx
+        rcases le_or_gt x (-1) with h' | h'
+        · obtain ⟨n, hn⟩ := exists_nat_gt (-x)
+          exact ⟨n, Or.inl ⟨by linarith, h'⟩⟩
+        · have h'' := hx h'
+          obtain ⟨n, hn⟩ := exists_nat_gt x
+          exact ⟨n, Or.inr ⟨h'', hn.le⟩⟩
+    have hmono : Monotone (fun n : ℕ =>
+        Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ)) := by
+      intro m n hmn
+      have hmn' : ((m:ℕ):ℝ) ≤ ((n:ℕ):ℝ) := by exact_mod_cast hmn
+      refine Set.union_subset_union ?_ ?_
+      · exact Set.Ioc_subset_Ioc_left (by linarith)
+      · exact Set.Ioc_subset_Ioc_right hmn'
+    have hint_union : IntegrableOn (fun x => (F x/(x:ℂ)) * e x)
+        (⋃ n : ℕ, (Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ))) := by
+      rw [hUnion]
+      refine hFx_tail.mul_bdd (c := 1) (he_meas.restrict) ?_
+      exact Filter.Eventually.of_forall (fun x => by rw [he_bd x])
+    have hT3 : Tendsto (fun n : ℕ =>
+        ∫ x in (Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ)),
+          (F x/(x:ℂ)) * e x)
+        atTop (nhds (∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, (F x/(x:ℂ)) * e x)) := by
+      have h0 := MeasureTheory.tendsto_setIntegral_of_monotone₀
+        (s := fun n : ℕ => Set.Ioc (-((n:ℕ):ℝ)) (-1:ℝ) ∪ Set.Ioc (1:ℝ) ((n:ℕ):ℝ))
+        (fun n => (measurableSet_Ioc.union measurableSet_Ioc).nullMeasurableSet)
+        hmono hint_union
+      rw [hUnion] at h0
+      exact h0
+    have hT1 : Tendsto (fun _ : ℕ => ∫ x in Set.Ioc (-1:ℝ) 1, h x * e x)
+        atTop (nhds (∫ x in Set.Ioc (-1:ℝ) 1, h x * e x)) := tendsto_const_nhds
+    have hfinal := (hT1.add hT2).sub hT3
+    have hval : (∫ x in Set.Ioc (-1:ℝ) 1, h x * e x)
+        + F 0 * (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ))
+        - ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, (F x/(x:ℂ)) * e x = gammaFT F t := by
+      rw [gammaFT]
+    rw [hval] at hfinal
+    exact hfinal
+  refine hlim.congr' ?_
+  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+  exact (hEq n hn).symm
+
 end DedekindResidue
