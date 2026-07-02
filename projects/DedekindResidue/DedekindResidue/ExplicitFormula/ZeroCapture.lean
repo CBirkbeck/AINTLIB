@@ -1310,6 +1310,107 @@ theorem rectangleIntegral_fold_vertical {a T : ℝ} (ha : 0 < a) (hT : 0 < T)
   rw [hsum, smul_add]
   ring
 
+/-- **Poitou's Proposition 1, quantitative form** (SP2-RECT R-g, step 3): on the
+contour rectangle `[-a, 1+a] × [-T, T]` with zero-free horizontal edges, the captured
+zero sum differs from the folded right-edge integral by at most the horizontal-edge
+contribution `2(1+2a)·C_Φ·C_l`:
+
+`‖2πi·∑_ρ m_ρ Φ(ρ) − i∫_{-T}^{T} (Φ+Φ(1-·))·H'/H((1+a)+iy) dy‖ ≤ 2(1+2a)·C_Φ·C_l`.
+
+As `T → ∞` through contour heights, `C_Φ = O(1/T)` (transform decay) and
+`C_l = O(log² T)` make the right side vanish — Poitou's `≡` modulo `o(1)`. -/
+theorem zero_capture_edge_form {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 0 < T)
+    {Φ : ℂ → ℂ}
+    (hΦ : ∀ ζ ∈ Set.uIcc (-a) (1+a) ×ℂ Set.uIcc (-T) T, DifferentiableAt ℂ Φ ζ)
+    (htop : ∀ σ : ℝ, -a ≤ σ → σ ≤ 1+a →
+      completedDedekindZetaEntire K ((σ:ℂ) + (T:ℂ) * Complex.I) ≠ 0)
+    (hbot : ∀ σ : ℝ, -a ≤ σ → σ ≤ 1+a →
+      completedDedekindZetaEntire K ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I) ≠ 0)
+    {CΦ Cl : ℝ} (hCΦ0 : 0 ≤ CΦ) (hCl0 : 0 ≤ Cl)
+    (hΦtop : ∀ x ∈ Set.uIcc (-a) (1+a), ‖Φ ((x:ℂ) + (T:ℂ) * Complex.I)‖ ≤ CΦ)
+    (hΦbot : ∀ x ∈ Set.uIcc (-a) (1+a), ‖Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖ ≤ CΦ)
+    (hltop : ∀ x ∈ Set.uIcc (-a) (1+a),
+      ‖logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + (T:ℂ) * Complex.I)‖ ≤ Cl)
+    (hlbot : ∀ x ∈ Set.uIcc (-a) (1+a),
+      ‖logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖ ≤ Cl) :
+    ‖2 * Real.pi * Complex.I
+        * ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+            (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-T) T)) ρ : ℂ)) * Φ ρ
+      - Complex.I • ∫ y : ℝ in (-T)..T,
+          (Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+            + Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+            * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)‖
+      ≤ 2 * (1 + 2*a) * (CΦ * Cl) := by
+  have hΦc : ContinuousOn Φ (Set.uIcc (-a) (1+a) ×ℂ Set.uIcc (-T) T) :=
+    fun ζ hζ => (hΦ ζ hζ).continuousAt.continuousWithinAt
+  have hcap := rectangle_zero_capture K ha ha' hT hΦ htop hbot
+  have hfold := rectangleIntegral_fold_vertical K ha hT hΦc
+  -- the difference is exactly bottom − top
+  have hdiff : 2 * Real.pi * Complex.I
+        * ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+            (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-T) T)) ρ : ℂ)) * Φ ρ
+      - Complex.I • (∫ y : ℝ in (-T)..T,
+          (Φ (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+            + Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+            * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I))
+      = (∫ x : ℝ in (-a)..(1+a),
+            Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+              * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I))
+        - (∫ x : ℝ in (-a)..(1+a),
+            Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+              * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)) := by
+    rw [← hcap, hfold]
+    ring
+  rw [hdiff]
+  -- bound the two horizontal edges
+  have hbotb : ‖∫ x : ℝ in (-a)..(1+a),
+      Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖
+      ≤ CΦ * Cl * (1 + 2*a) := by
+    have := intervalIntegral.norm_integral_le_of_norm_le_const
+      (C := CΦ * Cl) (a := (-a : ℝ)) (b := (1+a : ℝ))
+      (f := fun x : ℝ => Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I))
+      (fun x hx => by
+        have hx' : x ∈ Set.uIcc (-a) (1+a) := Set.uIoc_subset_uIcc hx
+        rw [norm_mul]
+        exact mul_le_mul (hΦbot x hx') (hlbot x hx') (norm_nonneg _) hCΦ0)
+    refine le_trans this (le_of_eq ?_)
+    rw [abs_of_pos (by linarith : (0:ℝ) < 1+a - -a)]
+    ring
+  have htopb : ‖∫ x : ℝ in (-a)..(1+a),
+      Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)‖
+      ≤ CΦ * Cl * (1 + 2*a) := by
+    have := intervalIntegral.norm_integral_le_of_norm_le_const
+      (C := CΦ * Cl) (a := (-a : ℝ)) (b := (1+a : ℝ))
+      (f := fun x : ℝ => Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+        * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I))
+      (fun x hx => by
+        have hx' : x ∈ Set.uIcc (-a) (1+a) := Set.uIoc_subset_uIcc hx
+        rw [norm_mul]
+        exact mul_le_mul (hΦtop x hx') (hltop x hx') (norm_nonneg _) hCΦ0)
+    refine le_trans this (le_of_eq ?_)
+    rw [abs_of_pos (by linarith : (0:ℝ) < 1+a - -a)]
+    ring
+  calc ‖(∫ x : ℝ in (-a)..(1+a),
+        Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+          * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I))
+      - ∫ x : ℝ in (-a)..(1+a),
+          Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+            * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)‖
+      ≤ ‖∫ x : ℝ in (-a)..(1+a),
+          Φ ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)
+            * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖
+        + ‖∫ x : ℝ in (-a)..(1+a),
+            Φ ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)
+              * logDeriv (completedDedekindZetaEntire K) ((x:ℂ) + ((T:ℝ):ℂ) * Complex.I)‖ :=
+        norm_sub_le _ _
+    _ ≤ CΦ * Cl * (1 + 2*a) + CΦ * Cl * (1 + 2*a) := add_le_add hbotb htopb
+    _ = 2 * (1 + 2*a) * (CΦ * Cl) := by ring
+
 end DedekindResidue
 
 end
