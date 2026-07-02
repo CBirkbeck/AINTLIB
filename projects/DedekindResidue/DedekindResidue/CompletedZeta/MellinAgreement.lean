@@ -1790,6 +1790,131 @@ theorem lintegral_mellin_heckeGClass_dev (C : ClassGroup (𝓞 K)) {σ : ℝ} (h
     _ = _ := by
         rw [hw_cancel, hNJcancel, one_mul, one_mul]
 
+open scoped Classical in
+/-- The theta deviation is nonnegative at every positive ray parameter. -/
+theorem heckeG_dev_nonneg (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (ht : 0 < t) :
+    0 ≤ heckeG K I t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K := by
+  rw [heckeG_sub_const_eq K I ht]
+  have hne : (Finset.univ : Finset (InfinitePlace K)).Nonempty := Finset.univ_nonempty
+  refine mul_nonneg (by positivity) ?_
+  refine setIntegral_nonneg (ZSpan.fundamentalDomain_measurableSet _) (fun u _ => ?_)
+  have ha : 0 < Finset.univ.inf' hne (heckeWeights K t u) :=
+    (Finset.lt_inf'_iff hne).mpr (fun w _ => heckeWeights_pos K ht u w)
+  have hca : ∀ w, Finset.univ.inf' hne (heckeWeights K t u) ≤ heckeWeights K t u w :=
+    fun w => Finset.inf'_le _ (Finset.mem_univ w)
+  have hsplit := heckeTheta_eq_one_add K I ha hca
+  have htail : 0 ≤ ∑' v : idealZLattice K I, (if v = 0 then 0
+      else Real.exp (-π * ∑ i : index K,
+        placeWeights K (heckeWeights K t u) i
+          * ((v : EuclideanSpace ℝ (index K)) i) ^ 2)) := by
+    refine tsum_nonneg (fun v => ?_)
+    split_ifs
+    · exact le_refl 0
+    · exact (Real.exp_pos _).le
+  rw [hsplit]
+  linarith
+
+open scoped Classical in
+theorem heckeGClass_dev_nonneg (C : ClassGroup (𝓞 K)) {t : ℝ} (ht : 0 < t) :
+    0 ≤ heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K := by
+  have hNpos := idealNormR_pos K (classRep K C)
+  have hβ := heckeBeta_pos K
+  show 0 ≤ heckeG K (classRep K C)
+    ((idealNormR K (classRep K C))⁻¹ ^ 2 * heckeBeta K * t)
+    - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K
+  exact heckeG_dev_nonneg K _ (by positivity)
+
+open scoped Classical in
+/-- **The total Mellin identity (e-iv)**: the lintegral Mellin transform of the total
+theta deviation equals `β^{-σ}` times the Γ-constant times the full ideal sum. -/
+theorem lintegral_mellin_heckeF_dev {σ : ℝ} (hσ : 0 < σ) :
+    (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeF K t - heckeFConst K))
+      = ENNReal.ofReal ((heckeBeta K) ^ (-σ))
+        * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+        * ∑' b : (Ideal (𝓞 K))⁰,
+            ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+              ^ (-σ)) := by
+  -- pointwise: split the deviation into class deviations
+  have hstep : ∀ t ∈ Set.Ioi (0:ℝ),
+      ENNReal.ofReal (t ^ (σ - 1)) * ENNReal.ofReal (heckeF K t - heckeFConst K)
+      = ∑ C : ClassGroup (𝓞 K), ENNReal.ofReal (t ^ (σ - 1))
+          * ENNReal.ofReal (heckeGClass K C t
+              - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K) := by
+    intro t ht
+    have hFsum : heckeF K t - heckeFConst K
+        = ∑ C : ClassGroup (𝓞 K),
+          (heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K) := by
+      rw [heckeF, heckeFConst, Finset.sum_sub_distrib, Finset.sum_const, nsmul_eq_mul]
+      rfl
+    rw [hFsum, ENNReal.ofReal_sum_of_nonneg (fun C _ => heckeGClass_dev_nonneg K C ht),
+      Finset.mul_sum]
+  rw [setLIntegral_congr_fun measurableSet_Ioi hstep]
+  rw [lintegral_finset_sum' _ (fun C _ => ?_)]
+  swap
+  · -- measurability per class
+    refine AEMeasurable.mul ?_ ?_
+    · have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1)) (Set.Ioi (0:ℝ)) :=
+        fun x hx => (Real.continuousAt_rpow_const x _
+          (Or.inl (ne_of_gt hx))).continuousWithinAt
+      exact (ENNReal.continuous_ofReal.comp_continuousOn hcont).aemeasurable
+        measurableSet_Ioi
+    · refine (ENNReal.continuous_ofReal.comp_continuousOn ?_).aemeasurable
+        measurableSet_Ioi
+      exact (continuousOn_heckeGClass K C).sub continuousOn_const
+  -- per class: e-iii + the fiber predicate through choose_spec
+  have hperC : ∀ C : ClassGroup (𝓞 K),
+      (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeGClass K C t - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K))
+      = ENNReal.ofReal ((heckeBeta K) ^ (-σ))
+        * ((heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+            π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)))
+        * ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C⁻¹},
+            ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+              ^ (-σ)) := by
+    intro C
+    rw [lintegral_mellin_heckeGClass_dev K C hσ]
+    congr 1
+    have hpred : ∀ b : (Ideal (𝓞 K))⁰,
+        (ClassGroup.mk0 b = (ClassGroup.mk0 ((ClassGroup.mk0_surjective C).choose))⁻¹)
+          ↔ (ClassGroup.mk0 b = C⁻¹) := by
+      intro b
+      rw [(ClassGroup.mk0_surjective C).choose_spec]
+    exact Equiv.tsum_eq (Equiv.subtypeEquivRight hpred)
+      (fun b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C⁻¹} =>
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+  rw [Finset.sum_congr rfl (fun C _ => hperC C), ← Finset.mul_sum]
+  congr 1
+  -- reindex C ↦ C⁻¹ then glue the fibers into the full ideal sum
+  rw [show (∑ C : ClassGroup (𝓞 K),
+      ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C⁻¹},
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+    = ∑ C : ClassGroup (𝓞 K),
+      ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C},
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)) from Fintype.sum_equiv (Equiv.inv (ClassGroup (𝓞 K))) _ _
+      (fun C => rfl)]
+  rw [show (∑ C : ClassGroup (𝓞 K),
+      ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C},
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)))
+    = ∑' C : ClassGroup (𝓞 K),
+      ∑' b : {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C},
+        ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+          ^ (-σ)) from (tsum_fintype _).symm]
+  rw [← ENNReal.tsum_sigma' (f := fun p : (Σ C : ClassGroup (𝓞 K),
+    {b : (Ideal (𝓞 K))⁰ // ClassGroup.mk0 b = C}) =>
+      ENNReal.ofReal ((((Ideal.absNorm ((p.2 : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+        ^ (-σ)))]
+  exact Equiv.tsum_eq (Equiv.sigmaFiberEquiv (fun b : (Ideal (𝓞 K))⁰ =>
+    ClassGroup.mk0 b))
+    (fun b : (Ideal (𝓞 K))⁰ =>
+      ENNReal.ofReal ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2)
+        ^ (-σ)))
+
 end
 
 end DedekindResidue
