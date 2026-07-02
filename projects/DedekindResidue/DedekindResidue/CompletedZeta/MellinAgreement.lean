@@ -1273,6 +1273,124 @@ open scoped Classical in
 theorem heckeJacobian_pos : 0 < heckeJacobian K :=
   Measure.addHaarScalarFactor_pos_of_isAddHaarMeasure _ _
 
+/-- Integrability of the exponential-coordinates Gamma integrand. -/
+theorem integrable_exp_mul_sub_pi_exp {a : ℝ} (ha : 0 < a) :
+    Integrable (fun l : ℝ => Real.exp (a * l - π * Real.exp l)) := by
+  constructor
+  · exact (Real.continuous_exp.comp (by fun_prop)).aestronglyMeasurable
+  · rw [hasFiniteIntegral_iff_ofReal (Filter.Eventually.of_forall
+      (fun l => (Real.exp_pos _).le))]
+    rw [lintegral_exp_mul_sub_pi_exp ha]
+    exact ENNReal.ofReal_lt_top
+
+/-- The Bochner form of the per-place Gamma integral. -/
+theorem integral_exp_mul_sub_pi_exp {a : ℝ} (ha : 0 < a) :
+    ∫ l : ℝ, Real.exp (a * l - π * Real.exp l) = π ^ (-a) * Real.Gamma a := by
+  have h1 : ENNReal.ofReal (∫ l : ℝ, Real.exp (a * l - π * Real.exp l))
+      = ENNReal.ofReal (π ^ (-a) * Real.Gamma a) := by
+    rw [ofReal_integral_eq_lintegral_ofReal (integrable_exp_mul_sub_pi_exp ha)
+      (Filter.Eventually.of_forall (fun l => (Real.exp_pos _).le)),
+      lintegral_exp_mul_sub_pi_exp ha]
+  have h2 : (0:ℝ) ≤ ∫ l : ℝ, Real.exp (a * l - π * Real.exp l) :=
+    integral_nonneg (fun l => (Real.exp_pos _).le)
+  have h3 : (0:ℝ) ≤ π ^ (-a) * Real.Gamma a := by
+    have := Real.Gamma_pos_of_pos ha
+    positivity
+  exact (ENNReal.ofReal_eq_ofReal_iff h2 h3).mp h1
+
+open scoped Classical in
+/-- The weighted row-sum of the Hecke substitution recovers the ray coordinate. -/
+theorem sum_mult_heckeLogCLE (p : ℝ × logSpace K) :
+    ∑ w : InfinitePlace K, (mult w : ℝ) * (heckeLogCLE K p) w = p.1 := by
+  have happ : ∀ w : InfinitePlace K, (heckeLogCLE K p) w
+      = p.1 / (Module.finrank ℚ K) + 2 * fullLog K p.2 w / mult w := fun w => rfl
+  rw [Finset.sum_congr rfl (fun w _ => by rw [happ w])]
+  have hterm : ∀ w : InfinitePlace K,
+      (mult w : ℝ) * (p.1 / (Module.finrank ℚ K) + 2 * fullLog K p.2 w / mult w)
+      = (mult w : ℝ) * p.1 / (Module.finrank ℚ K) + 2 * fullLog K p.2 w := by
+    intro w
+    have hm : (mult w : ℝ) ≠ 0 := by
+      have := mult_pos (w := w)
+      positivity
+    field_simp
+  rw [Finset.sum_congr rfl (fun w _ => hterm w), Finset.sum_add_distrib]
+  have h2 : ∑ w : InfinitePlace K, 2 * fullLog K p.2 w = 0 := by
+    rw [← Finset.mul_sum, sum_fullLog, mul_zero]
+  rw [h2, add_zero]
+  have hsum : ∑ w : InfinitePlace K, (mult w : ℝ) * p.1 / (Module.finrank ℚ K)
+      = (∑ w : InfinitePlace K, (mult w : ℝ)) * p.1 / (Module.finrank ℚ K) := by
+    rw [Finset.sum_mul, Finset.sum_div]
+  rw [hsum, show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
+    exact_mod_cast congrArg Nat.cast (sum_mult_eq (K := K))]
+  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  field_simp
+
+open scoped Classical in
+/-- **The universal Mellin constant in closed form**: the change of variables along the
+Hecke substitution factorises the master integral into per-place Gamma integrals. -/
+theorem lintegral_exp_heckeLog (σ : ℝ) (hσ : 0 < σ) :
+    ∫⁻ p : ℝ × logSpace K, ENNReal.ofReal (Real.exp (σ * p.1
+        - π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K p) w)))
+      = (heckeJacobian K : ℝ≥0∞) * ENNReal.ofReal (∏ w : InfinitePlace K,
+          π ^ (-((mult w : ℝ) * σ)) * Real.Gamma ((mult w : ℝ) * σ)) := by
+  set G : (InfinitePlace K → ℝ) → ℝ≥0∞ := fun l =>
+    ENNReal.ofReal (∏ w : InfinitePlace K,
+      Real.exp ((mult w : ℝ) * σ * l w - π * Real.exp (l w))) with hG
+  have hpt : ∀ p : ℝ × logSpace K,
+      ENNReal.ofReal (Real.exp (σ * p.1
+        - π * ∑ w : InfinitePlace K, Real.exp ((heckeLogCLE K p) w)))
+        = G (heckeLogCLE K p) := by
+    intro p
+    rw [hG]
+    congr 1
+    rw [← Real.exp_sum]
+    congr 1
+    rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← sum_mult_heckeLogCLE K p,
+      Finset.mul_sum]
+    congr 1
+    refine Finset.sum_congr rfl (fun w _ => ?_)
+    ring
+  simp_rw [hpt]
+  have hGmeas : Measurable G := by
+    rw [hG]
+    refine ENNReal.measurable_ofReal.comp ?_
+    refine Finset.measurable_prod _ (fun w _ => ?_)
+    refine Real.measurable_exp.comp ?_
+    refine Measurable.sub ?_ ?_
+    · exact (measurable_pi_apply w).const_mul _
+    · exact (Real.measurable_exp.comp (measurable_pi_apply w)).const_mul _
+  have hmap : ∫⁻ p : ℝ × logSpace K, G (heckeLogCLE K p)
+      = (heckeJacobian K : ℝ≥0∞) * ∫⁻ l, G l := by
+    rw [← lintegral_map hGmeas (heckeLogCLE K).continuous.measurable,
+      map_heckeLogCLE_volume, lintegral_smul_measure]
+    rfl
+  rw [hmap]
+  congr 1
+  -- evaluate the product integral
+  have hint : ∀ w : InfinitePlace K,
+      Integrable (fun l : ℝ => Real.exp ((mult w : ℝ) * σ * l - π * Real.exp l)) := by
+    intro w
+    refine integrable_exp_mul_sub_pi_exp ?_
+    have := mult_pos (w := w)
+    positivity
+  have hprod_int : Integrable (fun l : InfinitePlace K → ℝ =>
+      ∏ w : InfinitePlace K, Real.exp ((mult w : ℝ) * σ * l w - π * Real.exp (l w))) := by
+    exact MeasureTheory.Integrable.fintype_prod (f := fun w x =>
+      Real.exp ((mult w : ℝ) * σ * x - π * Real.exp x)) hint
+  rw [hG]
+  rw [← ofReal_integral_eq_lintegral_ofReal hprod_int
+    (Filter.Eventually.of_forall (fun l => Finset.prod_nonneg
+      (fun w _ => (Real.exp_pos _).le)))]
+  congr 1
+  rw [MeasureTheory.integral_fintype_prod_volume_eq_prod (f := fun w x =>
+    Real.exp ((mult w : ℝ) * σ * x - π * Real.exp x))]
+  refine Finset.prod_congr rfl (fun w _ => ?_)
+  refine integral_exp_mul_sub_pi_exp ?_
+  have := mult_pos (w := w)
+  positivity
+
 end
 
 end DedekindResidue
