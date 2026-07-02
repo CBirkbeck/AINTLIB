@@ -447,7 +447,14 @@ transform as a plain integral (`∫ t, auxF s X t * Complex.exp (I*t*γ)`), or r
 - `s : ℂ` with `½ < Re s`; `X : ℝ`, `1 < X`.
 
 ### [T-ADM] Admissibility structure for explicit-formula test functions
-- **Status**: open · **File**: `ExplicitFormula/TestFunction.lean` · **Depends on**: T-BV · **Parallel**: yes · **Type**: def/structure
+- **Status**: **DONE** (2026-07-02, commits d8e32d87 + a7eb90bc). `IsAdmissibleTestFn` in
+  `ExplicitFormula/TestFunction.lean` — the paper's p.3 hypotheses verbatim (even; ∃ε>0 with
+  F·e^{(1/2+ε)x} BV+integrable on [0,∞); (F(0)−F(x))/x BV; jump-average). Discharged for
+  `F_{s,X}`: `isAdmissibleTestFn_auxF` in `ExplicitFormula/AuxAdmissible.lean` for
+  **Re s > 1** (paper-faithful: Lemma 3 applies the formula at Re s > 1 first, then
+  continues analytically), witness ε = (Re s−1)/2; `continuous_auxF` via kink-free
+  max-form `auxF_eq_max`. Axiom-clean.
+  (was: open · **File**: `ExplicitFormula/TestFunction.lean` · **Depends on**: T-BV · **Parallel**: yes · **Type**: def/structure
 #### Statement
 A named `structure` (not loose hypotheses) capturing Weil–Poitou admissibility (review Q4):
 evenness; bounded variation + integrability of `x ↦ F(x)·e^{(1/2+ε)x}`; bounded variation of
@@ -463,7 +470,14 @@ Provide a constructor from `[T-BV]` (piecewise-C¹) so `F_{s,X}` discharges it c
 - `F : ℝ → ℂ`; `ε > 0`. Reused verbatim across SP2 + Tier-3.
 
 ### [T-BV] Piecewise-C¹-with-integrable-derivative ⇒ bounded variation
-- **Status**: open · **File**: `ExplicitFormula/TestFunction.lean` (or `Common/`) · **Depends on**: none · **Parallel**: yes · **Type**: lemma
+- **Status**: **DONE** (2026-07-02, commit d8e32d87). In `ExplicitFormula/TestFunction.lean`:
+  `eVariationOn_le_integral_norm_deriv` (variation ≤ ∫‖f′‖ on ord-connected sets, via
+  FTC-right + `sum_integral_adjacent_intervals` + `setIntegral_mono_set`),
+  `boundedVariationOn_of_deriv_integrable`, `boundedVariationOn_Ici_of_piecewise_deriv`
+  (single-kink glue via `eVariationOn.union`). Mathlib has NO variation-vs-∫‖f′‖ lemma
+  (only AC ⇒ BV on compact uIcc via `AbsolutelyContinuousOnInterval`) — this is new, and a
+  mathlibable candidate. Axiom-clean.
+  (was: open · **File**: `ExplicitFormula/TestFunction.lean` (or `Common/`) · **Depends on**: none · **Parallel**: yes · **Type**: lemma
 #### Statement
 A reusable lemma: a continuous function that is piecewise `C¹` with integrable derivative on
 `ℝ` (finitely many break-points) is of bounded variation on every interval, with the expected

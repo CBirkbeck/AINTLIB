@@ -1,5 +1,33 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-02 session (Fable): T003 + T-BV + T-ADM COMPLETE — Lemma 2 fully proven
+
+- **Lemma 2 done** (`Lemma2.lean`, sorry-free, axiom-clean): `fourier_auxF` (eq (8) verbatim
+  vs p.6 display, γ ≠ 0) + `fourier_auxF_zero` (γ = 0 companion via one FTC application —
+  the integrand `(h²+(2ht+2)/t²)g` has antiderivative `-(h+1/t)g`). Chain: evenness
+  reduction → plateau `sin(Tγ)/γ` → eq (7) derivatives (`hasDerivAt_gAux_core/deriv`) →
+  two improper IBPs (`integral_Ioi_gAux_ibp₁/₂` via `integral_Ioi_deriv_mul_eq_sub`) →
+  `tail_integral_identity` → assembly (endgame trick: field_simp then linear_combination
+  against explicit `E·E⁻¹=1` (`exp_add`) and `w·w⁻¹=1` companion equations whose atom
+  shapes match the field_simp normal form).
+- **T-BV done** (`ExplicitFormula/TestFunction.lean`): `eVariationOn_le_integral_norm_deriv`
+  (≤ ∫‖f′‖; partition increments via FTC-right + adjacent-interval chaining — NOT in
+  mathlib, mathlibable), `boundedVariationOn_Ici_of_piecewise_deriv` (kink glue).
+- **T-ADM done**: `IsAdmissibleTestFn` = the paper's p.3 explicit-formula hypotheses
+  verbatim (even / ∃ε>0 BV+integrable weighted / diff-quotient BV / jump-average), and
+  `isAdmissibleTestFn_auxF` (`ExplicitFormula/AuxAdmissible.lean`) for **Re s > 1**
+  (paper-faithful regime — Lemma 3 continues analytically afterwards), ε = (Re s−1)/2.
+- Paper PDF fetched fresh (arXiv 1305.0035) — pp. 3–7 re-read: explicit formula (1) and
+  its test-function hypotheses verbatim, Lemma 3 = eq (13), Lemma 2 display confirmed.
+- **Next: SP1-AC** (blocks SP2+SP3): mathlib has NO Hadamard factorization / finite-order
+  theory (checked: only three-lines + `ZetaZeros.lean` discreteness). Chain to decompose
+  (per plan, from sources): finite order of Λ_K → Jensen → zero counting → Hadamard
+  order ≤ 1 → Λ′/Λ partial fractions → contour bounds. Sources to fetch into
+  `refs/DedekindResidue/`: Poitou (Numdam, free) for SP2; public Hadamard notes
+  (Tao 246A supplement) for the factorization chain.
+- Commits this session: bfeb0694 → a7eb90bc (all pushed).
+
+
 *Written 2026-07-01 so that any Claude account (or human) can take over mid-stream. Read this
 first, then `plan.md` → `tickets.md` → `substrate-api.md` in this directory. Keep this file
 updated at every commit checkpoint.*
