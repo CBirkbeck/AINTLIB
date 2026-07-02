@@ -896,6 +896,188 @@ theorem exists_good_height :
       exact le_trans hbeats (hTsep (-ρ.im) hmem)
     · exact le_trans hsmall (hfar (-ρ.im) hwin)
 
+/-- **Contour heights** (SP2-RECT R-f): heights `T ∈ [T₀, T₀+1]` at which both
+horizontal edges `Im = ±T` of the explicit-formula rectangle are zero-free for `H`
+and carry the Landau bound `‖H'/H‖ ≤ C·log²(2+T₀)` across the strip `-1/4 ≤ Re ≤ 5/4`.
+Combines the two-sided good-height separation with the exported zero count and the
+partial-fraction decomposition of AC-A5. -/
+theorem exists_contour_height :
+    ∃ A : ℝ, 2 ≤ A ∧ ∃ c C : ℝ, 0 < c ∧ c ≤ 1 ∧ 0 < C ∧ ∀ T₀ : ℝ, A + 5 ≤ T₀ →
+      ∃ T ∈ Set.Icc T₀ (T₀ + 1),
+        (∀ ρ : ℂ, completedDedekindZetaEntire K ρ = 0 →
+          c / Real.log (2 + T₀) ≤ |T - ρ.im| ∧ c / Real.log (2 + T₀) ≤ |T + ρ.im|)
+        ∧ (∀ σ : ℝ, -(1/4) ≤ σ → σ ≤ 5/4 →
+            completedDedekindZetaEntire K ((σ:ℂ) + (T:ℂ) * Complex.I) ≠ 0
+            ∧ ‖logDeriv (completedDedekindZetaEntire K) ((σ:ℂ) + (T:ℂ) * Complex.I)‖
+              ≤ C * (Real.log (2 + T₀))^2)
+        ∧ ∀ σ : ℝ, -(1/4) ≤ σ → σ ≤ 5/4 →
+            completedDedekindZetaEntire K ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I) ≠ 0
+            ∧ ‖logDeriv (completedDedekindZetaEntire K) ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖
+              ≤ C * (Real.log (2 + T₀))^2 := by
+  classical
+  obtain ⟨A₁, hA₁2, C₁, hC₁, hmain⟩ := exists_logDeriv_partial_fractions K
+  obtain ⟨A₂, hA₂2, c₂, hc₂, hc₂1, hgood⟩ := exists_good_height K
+  refine ⟨max A₁ A₂, le_trans hA₁2 (le_max_left _ _),
+    c₂, 2*C₁/c₂ + 2*C₁, hc₂, hc₂1, by positivity, fun T₀ hT₀ => ?_⟩
+  have hT₀A₁ : A₁ + 5 ≤ T₀ := by
+    have := le_max_left A₁ A₂
+    linarith
+  have hT₀A₂ : A₂ + 5 ≤ T₀ := by
+    have := le_max_right A₁ A₂
+    linarith
+  have hT₀7 : (7:ℝ) ≤ T₀ := by linarith
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := by
+    have he : Real.exp 1 ≤ 2 + T₀ := by
+      have := Real.exp_one_lt_d9
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2 + T₀) := Real.log_le_log (Real.exp_pos 1) he
+  have hlogpos : (0:ℝ) < Real.log (2 + T₀) := by linarith
+  obtain ⟨T, hTmem, hTsep⟩ := hgood T₀ hT₀A₂
+  rw [Set.mem_Icc] at hTmem
+  have hTpos : (0:ℝ) < T := by linarith
+  -- log comparison for heights in the window
+  have hlogT : Real.log (2 + T) ≤ 2 * Real.log (2 + T₀) := by
+    have hstep : (2 + T) ≤ (2 + T₀) * 2 := by linarith
+    calc Real.log (2 + T) ≤ Real.log ((2 + T₀) * 2) :=
+          Real.log_le_log (by linarith) hstep
+      _ = Real.log (2 + T₀) + Real.log 2 := by
+          rw [Real.log_mul (by linarith) (by norm_num)]
+      _ ≤ 2 * Real.log (2 + T₀) := by
+          have h2 : Real.log 2 ≤ 1 := by
+            have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
+            linarith
+          linarith
+  -- the shared per-edge argument
+  have hedge : ∀ T' : ℝ, |T'| = T →
+      (∀ ρ : ℂ, completedDedekindZetaEntire K ρ = 0 →
+        c₂ / Real.log (2 + T₀) ≤ |T' - ρ.im|) →
+      ∀ σ : ℝ, -(1/4) ≤ σ → σ ≤ 5/4 →
+        completedDedekindZetaEntire K ((σ:ℂ) + (T':ℂ) * Complex.I) ≠ 0
+        ∧ ‖logDeriv (completedDedekindZetaEntire K) ((σ:ℂ) + (T':ℂ) * Complex.I)‖
+          ≤ (2*C₁/c₂ + 2*C₁) * (Real.log (2 + T₀))^2 := by
+    intro T' hT'abs hsep σ hσ1 hσ2
+    have hT'A₁ : A₁ + 5 ≤ |T'| := by
+      rw [hT'abs]
+      linarith
+    obtain ⟨hcnt, hpf⟩ := hmain T' hT'A₁
+    set s : ℂ := (σ:ℂ) + (T':ℂ) * Complex.I with hs
+    have hsim : s.im = T' := by
+      rw [hs]
+      simp
+    have hsre : s.re = σ := by
+      rw [hs]
+      simp
+    -- s is not a zero
+    have hHs : completedDedekindZetaEntire K s ≠ 0 := by
+      intro h0
+      have := hsep s h0
+      rw [hsim, sub_self, abs_zero] at this
+      have : (0:ℝ) < c₂ / Real.log (2 + T₀) := by positivity
+      linarith
+    refine ⟨hHs, ?_⟩
+    -- s is in the A5 slab ball
+    have hsball : s ∈ Metric.closedBall ((A₁ : ℂ) + (T' : ℂ) * Complex.I) (A₁ + 5/4) := by
+      rw [Metric.mem_closedBall, dist_eq_norm]
+      have hdiff : s - ((A₁ : ℂ) + (T' : ℂ) * Complex.I) = ((σ - A₁ : ℝ) : ℂ) := by
+        rw [hs]
+        push_cast
+        ring
+      rw [hdiff, Complex.norm_real, Real.norm_eq_abs, abs_le]
+      constructor <;> linarith
+    have hbound := hpf s hsball hHs
+    -- the divisor data
+    set D : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+      (Metric.ball ((A₁ : ℂ) + (T' : ℂ) * Complex.I) (A₁ + 2))) u with hD
+    have hDnn : ∀ u, 0 ≤ D u := fun u =>
+      (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ =>
+        (differentiable_completedDedekindZetaEntire K).analyticAt ζ)) u
+    obtain ⟨R₀, hR₀⟩ := (Metric.isBounded_ball (x := (A₁ : ℂ) + (T' : ℂ) * Complex.I)
+      (r := A₁ + 2)).subset_closedBall (0 : ℂ)
+    have hfin : (Function.support D).Finite :=
+      MeromorphicOn.divisor_support_finite_of_subset
+        (fun ζ _ => ((differentiable_completedDedekindZetaEntire K).analyticAt ζ).meromorphicAt)
+        (isCompact_closedBall (0:ℂ) R₀) hR₀
+    -- separation for every support point
+    have hsep' : ∀ u ∈ hfin.toFinset, c₂ / Real.log (2 + T₀) ≤ ‖s - u‖ := by
+      intro u hu
+      have hHu : completedDedekindZetaEntire K u = 0 :=
+        completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero K
+          (Function.mem_support.mp (hfin.mem_toFinset.mp hu))
+      calc c₂ / Real.log (2 + T₀) ≤ |T' - u.im| := hsep u hHu
+        _ = |(s - u).im| := by rw [show (s - u).im = T' - u.im by rw [Complex.sub_im, hsim]]
+        _ ≤ ‖s - u‖ := Complex.abs_im_le_norm _
+      -- the sum bound
+    have hsum : ‖∑ᶠ u, ((D u : ℂ)) / (s - u)‖
+        ≤ C₁ * Real.log (2 + |T'|) * (Real.log (2 + T₀) / c₂) := by
+      have hsub : (Function.support (fun u => ((D u : ℂ)) / (s - u))) ⊆ hfin.toFinset := by
+        intro u hu
+        rw [Function.mem_support] at hu
+        refine hfin.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+        intro h0
+        rw [h0] at hu
+        simp at hu
+      rw [finsum_eq_sum_of_support_subset _ hsub]
+      calc ‖∑ u ∈ hfin.toFinset, ((D u : ℂ)) / (s - u)‖
+          ≤ ∑ u ∈ hfin.toFinset, ‖((D u : ℂ)) / (s - u)‖ := norm_sum_le _ _
+        _ ≤ ∑ u ∈ hfin.toFinset, (D u : ℝ) * (Real.log (2 + T₀) / c₂) := by
+            refine Finset.sum_le_sum (fun u hu => ?_)
+            rw [norm_div]
+            have hDu : ‖((D u : ℂ))‖ = (D u : ℝ) := by
+              rw [show ((D u : ℂ)) = (((D u : ℝ)) : ℂ) by push_cast; ring,
+                Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by exact_mod_cast hDnn u)]
+            rw [hDu]
+            have hpos : (0:ℝ) < c₂ / Real.log (2 + T₀) := by positivity
+            have hlow := hsep' u hu
+            have hnorm_pos : (0:ℝ) < ‖s - u‖ := lt_of_lt_of_le hpos hlow
+            rw [div_eq_mul_inv]
+            refine mul_le_mul_of_nonneg_left ?_ (by exact_mod_cast hDnn u)
+            refine le_trans ((inv_le_inv₀ hnorm_pos hpos).mpr hlow) (le_of_eq ?_)
+            rw [inv_div]
+        _ = ((∑ u ∈ hfin.toFinset, D u : ℤ) : ℝ) * (Real.log (2 + T₀) / c₂) := by
+            rw [← Finset.sum_mul]
+            push_cast
+            ring
+        _ ≤ C₁ * Real.log (2 + |T'|) * (Real.log (2 + T₀) / c₂) := by
+            refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+            have hfs : ((∑ u ∈ hfin.toFinset, D u : ℤ) : ℝ) = ((∑ᶠ u, D u : ℤ) : ℝ) := by
+              rw [finsum_eq_sum D hfin]
+            rw [hfs]
+            exact hcnt
+    -- assemble the edge bound
+    have hTT : Real.log (2 + |T'|) ≤ 2 * Real.log (2 + T₀) := by
+      rw [hT'abs]
+      exact hlogT
+    have htri : ‖logDeriv (completedDedekindZetaEntire K) s‖
+        ≤ ‖logDeriv (completedDedekindZetaEntire K) s
+            - ∑ᶠ u, ((D u : ℂ)) / (s - u)‖ + ‖∑ᶠ u, ((D u : ℂ)) / (s - u)‖ :=
+      norm_le_norm_sub_add _ _
+    have hfac1 : (0:ℝ) ≤ 1 + Real.log (2 + T₀) / c₂ := by positivity
+    calc ‖logDeriv (completedDedekindZetaEntire K) s‖
+        ≤ ‖logDeriv (completedDedekindZetaEntire K) s
+            - ∑ᶠ u, ((D u : ℂ)) / (s - u)‖ + ‖∑ᶠ u, ((D u : ℂ)) / (s - u)‖ := htri
+      _ ≤ C₁ * Real.log (2 + |T'|)
+          + C₁ * Real.log (2 + |T'|) * (Real.log (2 + T₀) / c₂) :=
+          add_le_add hbound hsum
+      _ = C₁ * Real.log (2 + |T'|) * (1 + Real.log (2 + T₀) / c₂) := by ring
+      _ ≤ C₁ * (2 * Real.log (2 + T₀)) * (1 + Real.log (2 + T₀) / c₂) := by
+          refine mul_le_mul_of_nonneg_right ?_ hfac1
+          exact mul_le_mul_of_nonneg_left hTT hC₁.le
+      _ ≤ (2*C₁/c₂ + 2*C₁) * (Real.log (2 + T₀))^2 := by
+          rw [show (2*C₁/c₂ + 2*C₁) * (Real.log (2 + T₀))^2
+              = C₁ * (2 * Real.log (2 + T₀))
+                * (Real.log (2 + T₀)/c₂ + Real.log (2 + T₀)) by ring]
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          linarith
+  -- both edges
+  refine ⟨T, Set.mem_Icc.mpr hTmem, hTsep, ?_, ?_⟩
+  · exact hedge T (abs_of_pos hTpos) (fun ρ hρ => (hTsep ρ hρ).1)
+  · refine hedge (-T) (by rw [abs_neg]; exact abs_of_pos hTpos) (fun ρ hρ => ?_)
+    have h2 := (hTsep ρ hρ).2
+    calc c₂ / Real.log (2 + T₀) ≤ |T + ρ.im| := h2
+      _ = |(-T) - ρ.im| := by
+          rw [show (-T) - ρ.im = -(T + ρ.im) by ring, abs_neg]
+
 end DedekindResidue
 
 end
