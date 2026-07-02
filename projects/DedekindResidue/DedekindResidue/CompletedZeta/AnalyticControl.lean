@@ -2490,6 +2490,137 @@ theorem exists_H_two_radius_factorization (c : ℂ) {r₁ r₂ : ℝ} (h12 : r�
     rw [hfac z hz, hsplit z]
     ring
 
+/-- **Landau's logarithmic-derivative bound** (A5-ii-c, generic form): if `h` is
+holomorphic and zero-free on `ball c r` with `‖h‖ ≤ mS` there and `mL ≤ ‖h c‖` at the
+center, then `‖h'/h‖ ≤ 32·r·(log(mS/mL) + 1)` on the concentric closed ball of radius
+`r - 3/4`. Chain: holomorphic logarithm on the convex ball, Borel–Carathéodory from the
+`Re`-bound `log(mS/mL)`, then the Schwarz derivative estimate on quarter-balls. -/
+theorem norm_logDeriv_le_of_norm_le {h : ℂ → ℂ} {c : ℂ} {r : ℝ} (hr : 3/4 < r)
+    (hd : DifferentiableOn ℂ h (Metric.ball c r))
+    (h0 : ∀ z ∈ Metric.ball c r, h z ≠ 0)
+    {mS mL : ℝ} (hmL : 0 < mL) (hcL : mL ≤ ‖h c‖)
+    (hS : ∀ z ∈ Metric.ball c r, ‖h z‖ ≤ mS) :
+    ∀ s ∈ Metric.closedBall c (r - 3/4),
+      ‖logDeriv h s‖ ≤ 32 * r * (Real.log (mS/mL) + 1) := by
+  have hr0 : (0:ℝ) < r := by linarith
+  have hcmem : c ∈ Metric.ball c r := Metric.mem_ball_self hr0
+  -- the holomorphic logarithm
+  obtain ⟨L, hLd, hLeq⟩ := exists_differentiableOn_log Metric.isOpen_ball
+    (convex_ball c r) ⟨c, hcmem⟩ hd h0
+  -- the ratio constant
+  set M : ℝ := Real.log (mS/mL) + 1 with hM
+  have hmS : 0 < mS := lt_of_lt_of_le hmL (le_trans hcL (hS c hcmem))
+  have hratio1 : (1:ℝ) ≤ mS/mL := (one_le_div hmL).mpr (le_trans hcL (hS c hcmem))
+  have hM1 : (1:ℝ) ≤ M := by
+    rw [hM]
+    linarith [Real.log_nonneg hratio1]
+  have hM0 : (0:ℝ) < M := by linarith
+  -- Re (L z - L c) = log ‖h z‖ - log ‖h c‖ ≤ log (mS/mL) ≤ M on the ball
+  have hreL : ∀ z ∈ Metric.ball c r, (L z).re = Real.log ‖h z‖ := by
+    intro z hz
+    have hexp : Complex.exp (L z) = h z := hLeq hz
+    have : ‖h z‖ = Real.exp ((L z).re) := by
+      rw [← hexp, Complex.norm_exp]
+    rw [this, Real.log_exp]
+  have hreG : ∀ z ∈ Metric.ball c r, (L z - L c).re ≤ M := by
+    intro z hz
+    rw [Complex.sub_re, hreL z hz, hreL c hcmem]
+    have h1 : Real.log ‖h z‖ ≤ Real.log mS :=
+      Real.log_le_log (norm_pos_iff.mpr (h0 z hz)) (hS z hz)
+    have h2 : Real.log mL ≤ Real.log ‖h c‖ := Real.log_le_log hmL hcL
+    have h3 : Real.log (mS/mL) = Real.log mS - Real.log mL :=
+      Real.log_div hmS.ne' hmL.ne'
+    rw [hM]
+    linarith
+  -- Borel–Carathéodory, recentered at the origin
+  have hGd : DifferentiableOn ℂ (fun w => L (c + w) - L c) (Metric.ball 0 r) := by
+    refine DifferentiableOn.sub_const ?_ _
+    refine hLd.comp (differentiable_id.const_add c).differentiableOn ?_
+    intro w hw
+    simpa [Metric.mem_ball, dist_eq_norm] using hw
+  have hBC : ∀ w ∈ Metric.ball (0:ℂ) r,
+      ‖L (c + w) - L c‖ ≤ 2 * M * ‖w‖ / (r - ‖w‖) := by
+    intro w hw
+    refine Complex.borelCaratheodory_zero hM0 hGd ?_ hr0 hw ?_
+    · intro x hx
+      simp only [Set.mem_setOf_eq]
+      refine hreG (c + x) ?_
+      rw [Metric.mem_ball] at hx ⊢
+      simpa [dist_eq_norm] using hx
+    · simp
+  -- uniform bound on the sub-ball of radius r - 1/2
+  have hGbound : ∀ z ∈ Metric.ball c (r - 1/2), ‖L z - L c‖ ≤ 4 * M * r := by
+    intro z hz
+    have hzc : ‖z - c‖ < r - 1/2 := by
+      rw [Metric.mem_ball, dist_eq_norm] at hz
+      exact hz
+    have hw : z - c ∈ Metric.ball (0:ℂ) r := by
+      rw [Metric.mem_ball, dist_zero_right]
+      linarith
+    have h1 := hBC (z - c) hw
+    rw [add_sub_cancel] at h1
+    refine le_trans h1 ?_
+    have hden : (1:ℝ)/2 < r - ‖z - c‖ := by linarith
+    calc 2 * M * ‖z - c‖ / (r - ‖z - c‖)
+        ≤ 2 * M * r / (r - ‖z - c‖) := by
+          gcongr
+          linarith
+      _ ≤ 2 * M * r / (1/2) := by
+          exact div_le_div_of_nonneg_left (by positivity) (by norm_num) hden.le
+      _ = 4 * M * r := by ring
+  -- Schwarz derivative estimate on quarter-balls
+  intro s hs
+  have hsball : s ∈ Metric.ball c r := by
+    rw [Metric.mem_closedBall] at hs
+    rw [Metric.mem_ball]
+    linarith
+  have hsub : Metric.ball s (1/4) ⊆ Metric.ball c (r - 1/2) := by
+    intro z hz
+    rw [Metric.mem_ball] at hz ⊢
+    rw [Metric.mem_closedBall] at hs
+    calc dist z c ≤ dist z s + dist s c := dist_triangle z s c
+      _ < 1/4 + (r - 3/4) := by linarith
+      _ = r - 1/2 := by ring
+  have hsub2 : Metric.ball s (1/4) ⊆ Metric.ball c r := by
+    intro z hz
+    have := hsub hz
+    rw [Metric.mem_ball] at this ⊢
+    linarith
+  set G : ℂ → ℂ := fun z => L z - L c with hG
+  have hGdiff : DifferentiableOn ℂ G (Metric.ball s (1/4)) :=
+    (hLd.mono hsub2).sub_const _
+  have hmaps : Set.MapsTo G (Metric.ball s (1/4))
+      (Metric.closedBall (G s) (8 * M * r)) := by
+    intro z hz
+    rw [Metric.mem_closedBall, dist_eq_norm]
+    have h1 : ‖G z‖ ≤ 4 * M * r := hGbound z (hsub hz)
+    have h2 : ‖G s‖ ≤ 4 * M * r := by
+      refine hGbound s ?_
+      rw [Metric.mem_ball]
+      rw [Metric.mem_closedBall] at hs
+      linarith
+    calc ‖G z - G s‖ ≤ ‖G z‖ + ‖G s‖ := norm_sub_le _ _
+      _ ≤ 8 * M * r := by linarith
+  have hderiv := Complex.norm_deriv_le_div_of_mapsTo_ball hGdiff hmaps (by norm_num)
+  -- identify deriv G with logDeriv h
+  have hLds : DifferentiableAt ℂ L s :=
+    hLd.differentiableAt (Metric.isOpen_ball.mem_nhds hsball)
+  have hderivG : deriv G s = deriv L s := by
+    rw [hG]
+    simp
+  have hlogDeriv : logDeriv h s = deriv L s := by
+    have hhs : h s ≠ 0 := h0 s hsball
+    have hexps : Complex.exp (L s) = h s := hLeq hsball
+    have hev : h =ᶠ[nhds s] fun z => Complex.exp (L z) := by
+      filter_upwards [Metric.isOpen_ball.mem_nhds hsball] with z hz
+      exact (hLeq hz).symm
+    rw [logDeriv, Pi.div_apply, hev.deriv_eq]
+    rw [deriv_cexp hLds, hexps]
+    field_simp
+  rw [hlogDeriv, ← hderivG]
+  refine le_trans hderiv ?_
+  rw [show (8 : ℝ) * M * r / (1/4) = 32 * r * M by ring]
+
 end
 
 end DedekindResidue
