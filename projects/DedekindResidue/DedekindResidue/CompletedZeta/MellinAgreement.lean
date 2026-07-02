@@ -808,6 +808,108 @@ theorem lintegral_box_theta_tail (J : (Ideal (𝓞 K))⁰) {t : ℝ} (ht : 0 < t
   rw [lintegral_eq_tsum_box_shift K (fun u =>
     ENNReal.ofReal (gaussTerm K t u (embeddingCoords K (conePreimage K J a))))]
 
+open scoped Classical in
+/-- The log-coordinates map of the Hecke substitution: `(τ, u) ↦ (τ/n + 2·fullLog(u)_w/m_w)_w`.
+Its bijectivity is the change of variables underlying the per-orbit Γ-factorisation. -/
+noncomputable def heckeLogMap : (ℝ × logSpace K) →ₗ[ℝ] (InfinitePlace K → ℝ) where
+  toFun p := fun w => p.1 / (Module.finrank ℚ K) + 2 * fullLog K p.2 w / mult w
+  map_add' p q := by
+    funext w
+    simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply]
+    rw [fullLog_add, Pi.add_apply]
+    ring
+  map_smul' c p := by
+    funext w
+    simp only [Prod.smul_fst, Prod.smul_snd, Pi.smul_apply, smul_eq_mul,
+      RingHom.id_apply]
+    have hsmul : fullLog K (c • p.2) w = c * fullLog K p.2 w := by
+      rw [show c • p.2 = fun w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)} =>
+        c * p.2 w' from rfl]
+      rw [fullLog, fullLog]
+      split_ifs with h
+      · rw [← Finset.mul_sum]
+        ring
+      · rfl
+    rw [hsmul]
+    ring
+
+open scoped Classical in
+theorem heckeLogMap_injective : Function.Injective (heckeLogMap K) := by
+  rw [← LinearMap.ker_eq_bot, Submodule.eq_bot_iff]
+  rintro ⟨τ, u⟩ hp
+  rw [LinearMap.mem_ker] at hp
+  have hw : ∀ w : InfinitePlace K,
+      τ / (Module.finrank ℚ K) + 2 * fullLog K u w / mult w = 0 :=
+    fun w => congrFun hp w
+  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := by
+    have := Module.finrank_pos (R := ℚ) (M := K)
+    positivity
+  -- weighted row sum: multiply by mult w / 2 and sum
+  have hsum : ∑ w : InfinitePlace K,
+      (mult w : ℝ) / 2 * (τ / (Module.finrank ℚ K) + 2 * fullLog K u w / mult w)
+      = τ / 2 := by
+    have hterm : ∀ w : InfinitePlace K,
+        (mult w : ℝ) / 2 * (τ / (Module.finrank ℚ K) + 2 * fullLog K u w / mult w)
+        = (mult w : ℝ) * τ / (2 * Module.finrank ℚ K) + fullLog K u w := by
+      intro w
+      have hm : (mult w : ℝ) ≠ 0 := by
+        have := mult_pos (w := w)
+        positivity
+      field_simp
+    rw [Finset.sum_congr rfl (fun w _ => hterm w), Finset.sum_add_distrib,
+      sum_fullLog, add_zero, ← Finset.sum_div, ← Finset.sum_mul,
+      show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
+        exact_mod_cast congrArg Nat.cast (sum_mult_eq (K := K))]
+    field_simp
+  have hτ : τ = 0 := by
+    have h0 : ∑ w : InfinitePlace K,
+        (mult w : ℝ) / 2 * (τ / (Module.finrank ℚ K) + 2 * fullLog K u w / mult w)
+        = 0 := by
+      refine Finset.sum_eq_zero (fun w _ => ?_)
+      rw [hw w, mul_zero]
+    rw [hsum] at h0
+    linarith
+  have hu : u = 0 := by
+    funext w'
+    have := hw w'
+    rw [hτ, zero_div, zero_add] at this
+    have hm : (mult (w' : InfinitePlace K) : ℝ) ≠ 0 := by
+      have := mult_pos (w := (w' : InfinitePlace K))
+      positivity
+    have hfl : fullLog K u (w' : InfinitePlace K) = 0 := by
+      field_simp at this
+      linarith
+    rw [fullLog] at hfl
+    rw [dif_neg w'.2] at hfl
+    simpa using hfl
+  rw [hτ, hu]
+  rfl
+
+open scoped Classical in
+theorem heckeLogMap_bijective : Function.Bijective (heckeLogMap K) := by
+  have hdim : Module.finrank ℝ (ℝ × logSpace K)
+      = Module.finrank ℝ (InfinitePlace K → ℝ) := by
+    rw [Module.finrank_prod, Module.finrank_self, Module.finrank_pi, Module.finrank_pi]
+    have hcard : Fintype.card {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}
+        = Fintype.card (InfinitePlace K) - 1 := by
+      rw [Fintype.card_subtype_compl (p := fun w : InfinitePlace K =>
+        w = (w₀ : InfinitePlace K))]
+      congr 1
+    rw [hcard]
+    have hpos : 1 ≤ Fintype.card (InfinitePlace K) :=
+      Fintype.card_pos_iff.mpr inferInstance
+    omega
+
+  exact ⟨heckeLogMap_injective K,
+    (LinearMap.injective_iff_surjective_of_finrank_eq_finrank hdim).mp
+      (heckeLogMap_injective K)⟩
+
+open scoped Classical in
+/-- The Hecke substitution as a linear equivalence — the change of variables of the
+per-orbit Mellin factorisation. -/
+noncomputable def heckeLogEquiv : (ℝ × logSpace K) ≃ₗ[ℝ] (InfinitePlace K → ℝ) :=
+  LinearEquiv.ofBijective (heckeLogMap K) (heckeLogMap_bijective K)
+
 end
 
 end DedekindResidue
