@@ -1,1 +1,1 @@
-FOCUS: AGE-2 finale — dualIdealUnit (Units.mk0 of FractionalIdeal.dual; probe GroupWithZero), inclusion RHS ≤ dualZLattice via inner_diagScale_embeddingCoords + mem_dual, covolume equality (needs absNorm-of-dual probe), finish by eq_of_le_of_covolume_eq
+FOCUS: SP1-AGE-3 next — unit-box-averaged multivariable theta g_I(t): log-unit basis recon (NumberField.Units Dirichlet machinery), weights c(t,u), box-integral def, transformation from weightedThetaLattice_transform + dualZLattice_idealZLattice + unit-relabeling
