@@ -3225,4 +3225,124 @@ theorem memLp_two_poitouKernel {σ : ℝ} (hσ : 0 < σ) :
     rw [Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs]
     refine le_trans (abs_poitouKernel_le σ x) (le_abs_self _)
 
+/-- **The ρ-fold identity** (K5, Poitou p. 6-06): for the odd Poitou kernel,
+`ρ(t) = 2(Re ψ(σ+it) - ψ(σ))` — in particular `ρ` is real-valued. This is the bridge
+between the abstract Proposition 3 and the digamma kernel identities. -/
+theorem rhoFT_poitouKernel {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
+    rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      = (((2 * ((Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)
+          - Complex.digamma (σ:ℂ)).re) : ℝ)) : ℂ) := by
+  set k : ℝ → ℂ := fun x => ((poitouKernel σ x : ℝ) : ℂ) with hk
+  have hint := integrable_rhoFT_integrand (integrable_poitouKernel hσ) t
+  rw [rhoFT]
+  -- split at 0
+  have hsplit := MeasureTheory.integral_add_compl (measurableSet_Iio (a := (0:ℝ)))
+    hint
+  rw [← hsplit]
+  have hcomplIio : (Set.Iio (0:ℝ))ᶜ = Set.Ici (0:ℝ) := by
+    ext x
+    simp
+  rw [hcomplIio]
+  -- Ici → Ioi (null point)
+  have hIci : (∫ x in Set.Ici (0:ℝ), k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ)))
+      = ∫ x in Set.Ioi (0:ℝ), k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ)) :=
+    (MeasureTheory.setIntegral_congr_set (Ioi_ae_eq_Ici (a := (0:ℝ)))).symm
+  rw [hIci]
+  -- reflect the negative half-line
+  have A : MeasurableEmbedding fun x : ℝ => -x :=
+    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+  have hmap : (volume : Measure ℝ).restrict (Set.Iio (0:ℝ))
+      = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ioi (0:ℝ))) := by
+    rw [show Set.Ioi (0:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iio 0) by ext x; simp,
+      ← Measure.restrict_map A.measurable measurableSet_Iio,
+      Measure.map_neg_eq_self (volume : Measure ℝ)]
+  have hIio : (∫ x in Set.Iio (0:ℝ), k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ)))
+      = ∫ y in Set.Ioi (0:ℝ),
+          k y * ((1 - Complex.exp (-((t*y : ℝ)) * Complex.I))/(y:ℂ)) := by
+    rw [show (∫ x in Set.Iio (0:ℝ),
+        k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ)))
+        = ∫ x, k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ))
+            ∂((volume : Measure ℝ).restrict (Set.Iio 0)) from rfl,
+      hmap, A.integral_map]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+    rw [Set.mem_Ioi] at hy
+    show k (-y) * ((1 - Complex.exp ((t*(-y) : ℝ) * Complex.I))/((-y : ℝ):ℂ))
+        = k y * ((1 - Complex.exp (-((t*y : ℝ)) * Complex.I))/(y:ℂ))
+    have hkneg : k (-y) = -k y := by
+      rw [hk]
+      simp only
+      rw [poitouKernel_neg]
+      push_cast
+      ring
+    rw [hkneg, show ((t*(-y) : ℝ) : ℂ) = -((t*y : ℝ) : ℂ) by push_cast; ring]
+    push_cast
+    have hyne : (y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy.ne'
+    field_simp
+  rw [hIio]
+  -- combine the two half-line integrals
+  have hcomb : (∫ y in Set.Ioi (0:ℝ),
+        k y * ((1 - Complex.exp (-((t*y : ℝ)) * Complex.I))/(y:ℂ)))
+      + (∫ y in Set.Ioi (0:ℝ),
+          k y * ((1 - Complex.exp ((t*y : ℝ) * Complex.I))/(y:ℂ)))
+      = ∫ y in Set.Ioi (0:ℝ),
+          ((2 * (Real.exp (-(σ*y)) * (1 - Real.cos (t*y)) / (1 - Real.exp (-y))) : ℝ) : ℂ) := by
+    rw [← MeasureTheory.integral_add ?_ ?_]
+    · refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+      rw [Set.mem_Ioi] at hy
+      have hyne : (y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy.ne'
+      have hkpos : k y = ((y * Real.exp (-(σ*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) := by
+        rw [hk]
+        simp only
+        rw [poitouKernel_of_pos hy]
+      have hcos : Complex.exp (-((t*y : ℝ)) * Complex.I)
+          + Complex.exp ((t*y : ℝ) * Complex.I) = ((2 * Real.cos (t*y) : ℝ) : ℂ) := by
+        rw [Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
+        push_cast
+        ring
+      have hden : (0:ℝ) < 1 - Real.exp (-y) := by
+        have := Real.exp_lt_exp.mpr (show -y < 0 by linarith)
+        rw [Real.exp_zero] at this
+        linarith
+      have he1 : Complex.exp ((t*y : ℝ) * Complex.I)
+          = ((Real.cos (t*y) : ℝ) : ℂ) + ((Real.sin (t*y) : ℝ) : ℂ) * Complex.I := by
+        rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
+      have he2 : Complex.exp (-((t*y : ℝ)) * Complex.I)
+          = ((Real.cos (t*y) : ℝ) : ℂ) - ((Real.sin (t*y) : ℝ) : ℂ) * Complex.I := by
+        rw [show (-((t*y : ℝ)) : ℂ) * Complex.I = (((-(t*y)) : ℝ) : ℂ) * Complex.I by
+          push_cast; ring, Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
+        push_cast
+        rw [Complex.cos_neg, Complex.sin_neg]
+        ring
+      rw [hkpos, he1, he2]
+      have hdneC : ((1 - Real.exp (-y) : ℝ) : ℂ) ≠ 0 := by
+        exact_mod_cast hden.ne'
+      push_cast at hdneC ⊢
+      field_simp
+      ring
+    · have h0 : Integrable (fun x => k x * ((1 - Complex.exp ((t*x : ℝ) * Complex.I))/(x:ℂ)))
+          ((volume : Measure ℝ).restrict (Set.Iio 0)) := hint.integrableOn
+      rw [hmap, A.integrable_map_iff] at h0
+      refine h0.congr ?_
+      refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
+      refine Filter.Eventually.of_forall (fun y hy => ?_)
+      rw [Set.mem_Ioi] at hy
+      show k (-y) * ((1 - Complex.exp ((t*(-y) : ℝ) * Complex.I))/((-y : ℝ):ℂ))
+          = k y * ((1 - Complex.exp (-((t*y : ℝ)) * Complex.I))/(y:ℂ))
+      have hkneg : k (-y) = -k y := by
+        rw [hk]
+        simp only
+        rw [poitouKernel_neg]
+        push_cast
+        ring
+      rw [hkneg, show ((t*(-y) : ℝ) : ℂ) = -((t*y : ℝ) : ℂ) by push_cast; ring]
+      push_cast
+      have hyne : (y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy.ne'
+      field_simp
+    · exact hint.integrableOn
+  rw [hcomb]
+  -- evaluate against the digamma kernel identity
+  rw [integral_complex_ofReal]
+  congr 1
+  rw [MeasureTheory.integral_const_mul, re_digamma_sub_eq_integral hσ t]
+
 end DedekindResidue
