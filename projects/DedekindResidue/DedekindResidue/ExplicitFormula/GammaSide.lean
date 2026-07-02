@@ -1867,4 +1867,289 @@ theorem exists_bound_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
       _ ≤ |C₁| + 1 := by linarith
   linarith
 
+/-- **Integration by parts off zero** (Lemme 2, p. 6-06): on an interval avoiding `0`,
+`∫_c^d ρφ = i(ρ(d)γ(d) - ρ(c)γ(c)) - ∫_c^d μγ`. -/
+theorem integral_rhoFT_mul_phi_eq {k F : ℝ → ℂ} (hk : Integrable k) (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    {c d : ℝ} (h0 : (0:ℝ) ∉ Set.uIcc c d) :
+    (∫ t in c..d, rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      = Complex.I * (rhoFT k d * gammaFT F d - rhoFT k c * gammaFT F c)
+        - ∫ t in c..d, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t := by
+  have hu : ∀ t ∈ Set.uIcc c d, HasDerivAt (rhoFT k)
+      (-Complex.I * ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) t :=
+    fun t _ => hasDerivAt_rhoFT hk t
+  have hv : ∀ t ∈ Set.uIcc c d, HasDerivAt (gammaFT F)
+      (-Complex.I * ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)) t := by
+    intro t ht
+    refine hasDerivAt_gammaFT hF hFdiv ?_
+    intro heq
+    rw [heq] at ht
+    exact h0 ht
+  have hu' : IntervalIntegrable (fun t : ℝ =>
+      -Complex.I * ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) volume c d := by
+    refine Continuous.intervalIntegrable ?_ c d
+    exact (continuous_muFT hk).const_mul _
+  have hv' : IntervalIntegrable (fun t : ℝ =>
+      -Complex.I * ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)) volume c d := by
+    refine Continuous.intervalIntegrable ?_ c d
+    exact (continuous_muFT hF).const_mul _
+  have hibp := intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hv hu' hv'
+  -- hibp : ∫ ρ·(-iφ) = ρ d γ d - ρ c γ c - ∫ (-iμ)·γ
+  have h1 : (∫ t in c..d, rhoFT k t
+      * (-Complex.I * ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      = -Complex.I * ∫ t in c..d,
+          rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)) := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    ring
+  have h2 : (∫ t in c..d,
+      (-Complex.I * ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)
+      = -Complex.I * ∫ t in c..d,
+          (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    ring
+  rw [h1, h2] at hibp
+  -- solve for ∫ρφ
+  have hA : ∀ A : ℂ, Complex.I * (-Complex.I * A) = A := fun A => by
+    rw [← mul_assoc, mul_neg, Complex.I_mul_I, neg_neg, one_mul]
+  have h3 := congrArg (fun z => Complex.I * z) hibp
+  rw [hA] at h3
+  rw [mul_sub, hA] at h3
+  exact h3
+
+/-- **The fixed-`T` boundary identity** (Lemme 2, p. 6-06): letting `ε → 0` in the
+integration by parts on `[-T, -ε]` and `[ε, T]`, the `ρ(±ε)γ(±ε)` boundary terms vanish
+(`ρ(0) = 0`, `γ` bounded near `0`), leaving
+`∫_{-T}^T ρφ = i(ρ(T)γ(T) - ρ(-T)γ(-T)) - ∫_{-T}^T μγ`. -/
+theorem integral_rhoFT_mul_phi_symm {k F : ℝ → ℂ} (hk : Integrable k) (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hμγ : Integrable (fun t : ℝ =>
+      (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t))
+    {T : ℝ} (hT : 0 < T) :
+    (∫ t in (-T)..T, rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      = Complex.I * (rhoFT k T * gammaFT F T - rhoFT k (-T) * gammaFT F (-T))
+        - ∫ t in (-T)..T,
+            (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t := by
+  set ρ := rhoFT k with hρ
+  set γ := gammaFT F with hγ
+  set μ : ℝ → ℂ := fun t => ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I) with hμ
+  set φ : ℝ → ℂ := fun t => ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I) with hφ
+  have hρφ_cont : Continuous (fun t => ρ t * φ t) :=
+    (continuous_rhoFT hk).mul (continuous_muFT hF)
+  have hμγ_ii : ∀ a b : ℝ, IntervalIntegrable (fun t => μ t * γ t) volume a b :=
+    fun a b => hμγ.intervalIntegrable
+  obtain ⟨Cγ, hCγpos, hCγ⟩ := exists_bound_gammaFT hF hFdiv (-1) 1
+  obtain ⟨M, hM⟩ := (isCompact_Icc (a := (-1:ℝ)) (b := 1)).exists_bound_of_continuousOn
+    (hρφ_cont.continuousOn)
+  -- the ε-parameterized decomposition
+  have hEq : ∀ ε : ℝ, 0 < ε → ε < T →
+      (∫ t in (-T)..T, ρ t * φ t)
+      = (Complex.I * (ρ (-ε) * γ (-ε) - ρ (-T) * γ (-T)) - ∫ t in (-T)..(-ε), μ t * γ t)
+        + (∫ t in (-ε)..ε, ρ t * φ t)
+        + (Complex.I * (ρ T * γ T - ρ ε * γ ε) - ∫ t in ε..T, μ t * γ t) := by
+    intro ε hε hεT
+    have hsplit : (∫ t in (-T)..T, ρ t * φ t)
+        = (∫ t in (-T)..(-ε), ρ t * φ t) + (∫ t in (-ε)..ε, ρ t * φ t)
+          + ∫ t in ε..T, ρ t * φ t := by
+      rw [intervalIntegral.integral_add_adjacent_intervals
+        (hρφ_cont.intervalIntegrable _ _) (hρφ_cont.intervalIntegrable _ _),
+        intervalIntegral.integral_add_adjacent_intervals
+        (hρφ_cont.intervalIntegrable _ _) (hρφ_cont.intervalIntegrable _ _)]
+    rw [hsplit]
+    rw [integral_rhoFT_mul_phi_eq hk hF hFdiv (c := -T) (d := -ε) (by
+      rw [Set.uIcc_of_le (by linarith), Set.mem_Icc]
+      push Not
+      intro h
+      linarith)]
+    rw [integral_rhoFT_mul_phi_eq hk hF hFdiv (c := ε) (d := T) (by
+      rw [Set.uIcc_of_le (by linarith), Set.mem_Icc]
+      push Not
+      intro h
+      linarith)]
+  -- limits of each ε-piece along 𝓝[>] 0
+  have hρ0 : Tendsto (fun ε : ℝ => ρ ε) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h0 := (continuous_rhoFT hk).tendsto 0
+    rw [show rhoFT k 0 = 0 from rhoFT_zero k] at h0
+    exact h0.mono_left nhdsWithin_le_nhds
+  have hρ0' : Tendsto (fun ε : ℝ => ρ (-ε)) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h0 := (continuous_rhoFT hk).tendsto 0
+    rw [show rhoFT k 0 = 0 from rhoFT_zero k] at h0
+    have h1 : Tendsto (fun ε : ℝ => -ε) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have := (continuous_neg.tendsto (0:ℝ)).mono_left
+        (nhdsWithin_le_nhds (s := Set.Ioi (0:ℝ)))
+      simpa using this
+    exact h0.comp h1
+  have hbd1 : Tendsto (fun ε : ℝ => ρ ε * γ ε) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have hb : Tendsto (fun ε : ℝ => Cγ * ‖ρ ε‖) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      simpa using (hρ0.norm.const_mul Cγ)
+    refine squeeze_zero_norm' ?_ hb
+    filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < 1 by norm_num)] with ε hε
+    rw [norm_mul]
+    calc ‖ρ ε‖ * ‖γ ε‖ ≤ ‖ρ ε‖ * Cγ := by
+          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+          exact hCγ ε ⟨by linarith [hε.1], hε.2.le⟩
+      _ = Cγ * ‖ρ ε‖ := mul_comm _ _
+  have hbd2 : Tendsto (fun ε : ℝ => ρ (-ε) * γ (-ε)) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have hb : Tendsto (fun ε : ℝ => Cγ * ‖ρ (-ε)‖) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      simpa using (hρ0'.norm.const_mul Cγ)
+    refine squeeze_zero_norm' ?_ hb
+    filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < 1 by norm_num)] with ε hε
+    rw [norm_mul]
+    calc ‖ρ (-ε)‖ * ‖γ (-ε)‖ ≤ ‖ρ (-ε)‖ * Cγ := by
+          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+          refine hCγ (-ε) ⟨by linarith [hε.2], by linarith [hε.1]⟩
+      _ = Cγ * ‖ρ (-ε)‖ := mul_comm _ _
+  have hmid : Tendsto (fun ε : ℝ => ∫ t in (-ε)..ε, ρ t * φ t)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have hb : Tendsto (fun ε : ℝ => (2 * (|M| + 1)) * ε)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have h0 : Tendsto (fun ε : ℝ => (2 * (|M| + 1)) * ε) (nhds 0) (nhds 0) := by
+        have h1 : Tendsto (fun ε : ℝ => ε) (nhds (0:ℝ)) (nhds 0) := tendsto_id
+        simpa using h1.const_mul (2 * (|M| + 1))
+      exact h0.mono_left nhdsWithin_le_nhds
+    refine squeeze_zero_norm' ?_ hb
+    · filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < 1 by norm_num)] with ε hε
+      have h0 := intervalIntegral.norm_integral_le_of_norm_le_const
+        (C := |M| + 1) (a := -ε) (b := ε) (f := fun t => ρ t * φ t) (fun t htmem => by
+          rw [Set.uIoc_of_le (by linarith [hε.1] : -ε ≤ ε), Set.mem_Ioc] at htmem
+          calc ‖ρ t * φ t‖ ≤ M := hM t ⟨by linarith [htmem.1, hε.2], by
+                linarith [htmem.2, hε.2]⟩
+            _ ≤ |M| + 1 := by
+                have := le_abs_self M
+                linarith)
+      calc ‖∫ t in (-ε)..ε, ρ t * φ t‖ ≤ (|M| + 1) * |ε - (-ε)| := h0
+        _ = (2 * (|M| + 1)) * ε := by
+            rw [abs_of_pos (by linarith [hε.1] : (0:ℝ) < ε - (-ε))]
+            ring
+  have htail_pos : Tendsto (fun ε : ℝ => ∫ t in ε..T, μ t * γ t)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds (∫ t in (0:ℝ)..T, μ t * γ t)) := by
+    have h0 : ∀ ε : ℝ, (∫ t in ε..T, μ t * γ t)
+        = (∫ t in (0:ℝ)..T, μ t * γ t) - ∫ t in (0:ℝ)..ε, μ t * γ t := by
+      intro ε
+      rw [eq_sub_iff_add_eq, add_comm]
+      exact intervalIntegral.integral_add_adjacent_intervals
+        (hμγ_ii 0 ε) (hμγ_ii ε T)
+    refine Tendsto.congr (fun ε => (h0 ε).symm) ?_
+    have h1 : Tendsto (fun ε : ℝ => ∫ t in (0:ℝ)..ε, μ t * γ t)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have h2 : Tendsto (fun ε : ℝ => ∫ t in Set.Ioc (0:ℝ) ε, μ t * γ t)
+          (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+        refine hμγ.tendsto_setIntegral_nhds_zero ?_
+        have h3 : Tendsto (fun ε : ℝ => ENNReal.ofReal ε)
+            (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+          rw [show (0 : ENNReal) = ENNReal.ofReal 0 by simp]
+          exact (ENNReal.continuous_ofReal.tendsto 0).mono_left nhdsWithin_le_nhds
+        refine h3.congr' ?_
+        filter_upwards [self_mem_nhdsWithin] with ε hε
+        rw [Function.comp_apply, Real.volume_Ioc, sub_zero]
+      refine h2.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with ε hε
+      rw [Set.mem_Ioi] at hε
+      rw [intervalIntegral.integral_of_le hε.le]
+    have h4 : Tendsto (fun ε : ℝ => (∫ t in (0:ℝ)..T, μ t * γ t)
+        - ∫ t in (0:ℝ)..ε, μ t * γ t) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds ((∫ t in (0:ℝ)..T, μ t * γ t) - 0)) := tendsto_const_nhds.sub h1
+    simpa using h4
+  have htail_neg : Tendsto (fun ε : ℝ => ∫ t in (-T)..(-ε), μ t * γ t)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds (∫ t in (-T)..(0:ℝ), μ t * γ t)) := by
+    have h0 : ∀ ε : ℝ, (∫ t in (-T)..(-ε), μ t * γ t)
+        = (∫ t in (-T)..(0:ℝ), μ t * γ t) - ∫ t in (-ε)..(0:ℝ), μ t * γ t := by
+      intro ε
+      rw [eq_sub_iff_add_eq]
+      exact intervalIntegral.integral_add_adjacent_intervals
+        (hμγ_ii (-T) (-ε)) (hμγ_ii (-ε) 0)
+    refine Tendsto.congr (fun ε => (h0 ε).symm) ?_
+    have h1 : Tendsto (fun ε : ℝ => ∫ t in (-ε)..(0:ℝ), μ t * γ t)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have h2 : Tendsto (fun ε : ℝ => ∫ t in Set.Ioc (-ε) (0:ℝ), μ t * γ t)
+          (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+        refine hμγ.tendsto_setIntegral_nhds_zero ?_
+        have h3 : Tendsto (fun ε : ℝ => ENNReal.ofReal ε)
+            (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+          rw [show (0 : ENNReal) = ENNReal.ofReal 0 by simp]
+          exact (ENNReal.continuous_ofReal.tendsto 0).mono_left nhdsWithin_le_nhds
+        refine h3.congr' ?_
+        filter_upwards [self_mem_nhdsWithin] with ε hε
+        rw [Function.comp_apply, Real.volume_Ioc, sub_neg_eq_add, zero_add]
+      refine h2.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with ε hε
+      rw [Set.mem_Ioi] at hε
+      rw [intervalIntegral.integral_of_le (by linarith : -ε ≤ 0)]
+    have h4 : Tendsto (fun ε : ℝ => (∫ t in (-T)..(0:ℝ), μ t * γ t)
+        - ∫ t in (-ε)..(0:ℝ), μ t * γ t) (nhdsWithin 0 (Set.Ioi 0))
+        (nhds ((∫ t in (-T)..(0:ℝ), μ t * γ t) - 0)) := tendsto_const_nhds.sub h1
+    simpa using h4
+  -- assemble the ε-limit of the right-hand side
+  have hRHS : Tendsto (fun ε : ℝ =>
+      (Complex.I * (ρ (-ε) * γ (-ε) - ρ (-T) * γ (-T)) - ∫ t in (-T)..(-ε), μ t * γ t)
+        + (∫ t in (-ε)..ε, ρ t * φ t)
+        + (Complex.I * (ρ T * γ T - ρ ε * γ ε) - ∫ t in ε..T, μ t * γ t))
+      (nhdsWithin 0 (Set.Ioi 0))
+      (nhds ((Complex.I * ((0:ℂ) - ρ (-T) * γ (-T)) - ∫ t in (-T)..(0:ℝ), μ t * γ t)
+        + (0:ℂ)
+        + (Complex.I * (ρ T * γ T - 0) - ∫ t in (0:ℝ)..T, μ t * γ t))) := by
+    refine Filter.Tendsto.add (Filter.Tendsto.add ?_ hmid) ?_
+    · refine Filter.Tendsto.sub ?_ htail_neg
+      refine Filter.Tendsto.const_mul _ ?_
+      exact (hbd2.sub_const _)
+    · refine Filter.Tendsto.sub ?_ htail_pos
+      refine Filter.Tendsto.const_mul _ ?_
+      exact (tendsto_const_nhds.sub hbd1)
+  -- the left side is constant; conclude by uniqueness of limits
+  have hLHS : Tendsto (fun _ : ℝ => ∫ t in (-T)..T, ρ t * φ t)
+      (nhdsWithin 0 (Set.Ioi 0))
+      (nhds ((Complex.I * ((0:ℂ) - ρ (-T) * γ (-T)) - ∫ t in (-T)..(0:ℝ), μ t * γ t)
+        + (0:ℂ)
+        + (Complex.I * (ρ T * γ T - 0) - ∫ t in (0:ℝ)..T, μ t * γ t))) := by
+    refine hRHS.congr' ?_
+    filter_upwards [Ioo_mem_nhdsGT hT] with ε hε
+    exact (hEq ε hε.1 hε.2).symm
+  have huniq := tendsto_nhds_unique tendsto_const_nhds hLHS
+  have hadj : (∫ t in (-T)..(0:ℝ), μ t * γ t) + ∫ t in (0:ℝ)..T, μ t * γ t
+      = ∫ t in (-T)..T, μ t * γ t :=
+    intervalIntegral.integral_add_adjacent_intervals (hμγ_ii (-T) 0) (hμγ_ii 0 T)
+  linear_combination huniq - hadj
+
+/-- **Lemme 2** (Poitou p. 6-06): with the boundary decay `ργ → 0` at `±∞` and `μγ`
+integrable, the symmetric truncations `∫_{-T}^{T} ρ(t)φ(t) dt` converge as `T → ∞`,
+with value `-∫_ℝ μ(t)γ(t) dt`. -/
+theorem tendsto_integral_rhoFT_mul_phi {k F : ℝ → ℂ}
+    (hk : Integrable k) (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hμγ : Integrable (fun t : ℝ =>
+      (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t))
+    (htop : Tendsto (fun t : ℝ => rhoFT k t * gammaFT F t) atTop (nhds 0))
+    (hbot : Tendsto (fun t : ℝ => rhoFT k t * gammaFT F t) atBot (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      atTop (nhds (-∫ t : ℝ,
+        (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)) := by
+  have hev : (fun T : ℝ => ∫ t in (-T)..T,
+      rhoFT k t * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      =ᶠ[atTop] (fun T : ℝ =>
+        Complex.I * (rhoFT k T * gammaFT F T - rhoFT k (-T) * gammaFT F (-T))
+        - ∫ t in (-T)..T,
+            (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t) := by
+    filter_upwards [Filter.eventually_gt_atTop 0] with T hT
+    exact integral_rhoFT_mul_phi_symm hk hF hFdiv hμγ hT
+  rw [Filter.tendsto_congr' hev]
+  have hneg : Tendsto (fun T : ℝ => -T) atTop atBot :=
+    Filter.tendsto_neg_atBot_iff.mpr Filter.tendsto_id
+  have hb1 : Tendsto (fun T : ℝ => rhoFT k T * gammaFT F T) atTop (nhds 0) := htop
+  have hb2 : Tendsto (fun T : ℝ => rhoFT k (-T) * gammaFT F (-T)) atTop (nhds 0) :=
+    hbot.comp hneg
+  have hboundary : Tendsto (fun T : ℝ =>
+      Complex.I * (rhoFT k T * gammaFT F T - rhoFT k (-T) * gammaFT F (-T)))
+      atTop (nhds 0) := by
+    have h0 := (hb1.sub hb2).const_mul Complex.I
+    simpa using h0
+  have hint : Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+      (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)
+      atTop (nhds (∫ t : ℝ,
+        (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) * gammaFT F t)) :=
+    MeasureTheory.intervalIntegral_tendsto_integral hμγ hneg Filter.tendsto_id
+  have h1 := hboundary.sub hint
+  simpa using h1
+
 end DedekindResidue
