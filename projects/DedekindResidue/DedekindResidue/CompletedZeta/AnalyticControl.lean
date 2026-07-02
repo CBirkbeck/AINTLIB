@@ -2368,6 +2368,128 @@ theorem exists_ball_zero_count_big (A : ℝ) (hA2 : 2 ≤ A) (cL : ℝ) (hcL : 0
     _ = (Real.log Cr + (P + Pn + 1)) / Real.log ((A+3) / (A+2))
         * Real.log (2 + |T|) := by ring
 
+/-- **Two-radius zero-peeling** (A5-ii-b′): peel only the zeros of `H` inside the small
+ball `ball c r₁`; the cofactor `h` is analytic on the *large* ball `ball c r₂` and
+zero-free on the small ball. This is the shape the Landau/Titchmarsh maximum-principle
+argument needs: on spheres of intermediate radius the peeled product is bounded below by
+the separation, while `h` is still analytic there. -/
+theorem exists_H_two_radius_factorization (c : ℂ) {r₁ r₂ : ℝ} (h12 : r₁ ≤ r₂)
+    {w : ℂ} (hw : w ∈ Metric.ball c r₁)
+    (hHw : completedDedekindZetaEntire K w ≠ 0) :
+    ∃ h : ℂ → ℂ, AnalyticOnNhd ℂ h (Metric.ball c r₂)
+      ∧ (∀ z ∈ Metric.ball c r₁, h z ≠ 0)
+      ∧ ∀ z ∈ Metric.ball c r₂,
+          completedDedekindZetaEntire K z
+            = (∏ᶠ u, (z - u) ^ ((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+                (Metric.ball c r₁)) u)) * h z := by
+  have hsub : Metric.ball c r₁ ⊆ Metric.ball c r₂ := Metric.ball_subset_ball h12
+  obtain ⟨g, hganal, hgne, hfac⟩ := exists_H_ball_factorization K c (hsub hw) hHw
+  have hHanal : AnalyticOnNhd ℂ (completedDedekindZetaEntire K) Set.univ := fun z _ =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt z
+  have hm₁ : MeromorphicOn (completedDedekindZetaEntire K) (Metric.ball c r₁) :=
+    fun z _ => (hHanal z trivial).meromorphicAt
+  have hm₂ : MeromorphicOn (completedDedekindZetaEntire K) (Metric.ball c r₂) :=
+    fun z _ => (hHanal z trivial).meromorphicAt
+  set D₁ : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+    (Metric.ball c r₁)) u with hD₁
+  set D₂ : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+    (Metric.ball c r₂)) u with hD₂
+  -- pointwise comparison of the two divisors
+  have hD₁_mem : ∀ u ∈ Metric.ball c r₁, D₁ u = D₂ u := by
+    intro u hu
+    rw [hD₁, hD₂]
+    simp only
+    rw [MeromorphicOn.divisor_apply hm₁ hu, MeromorphicOn.divisor_apply hm₂ (hsub hu)]
+  have hD₁_zero : ∀ u, u ∉ Metric.ball c r₁ → D₁ u = 0 := by
+    intro u hu
+    rw [hD₁]
+    simp only
+    exact Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hu
+  have hD₁nn : ∀ u, 0 ≤ D₁ u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hHanal z trivial)) u
+  have hD₂nn : ∀ u, 0 ≤ D₂ u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hHanal z trivial)) u
+  -- the annulus exponents
+  set dA : ℂ → ℤ := fun u => D₂ u - D₁ u with hdA
+  have hdAnn : ∀ u, 0 ≤ dA u := by
+    intro u
+    rw [hdA]
+    by_cases hu : u ∈ Metric.ball c r₁
+    · simp [hD₁_mem u hu]
+    · simp [hD₁_zero u hu, hD₂nn u]
+  have hdA_zero : ∀ u ∈ Metric.ball c r₁, dA u = 0 := by
+    intro u hu
+    rw [hdA]
+    simp [hD₁_mem u hu]
+  -- finite supports
+  have hfin₁ : (Function.support D₁).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset
+      (fun z _ => (hHanal z trivial).meromorphicAt)
+      (isCompact_closedBall c r₁) Metric.ball_subset_closedBall
+  have hfin₂ : (Function.support D₂).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset
+      (fun z _ => (hHanal z trivial).meromorphicAt)
+      (isCompact_closedBall c r₂) Metric.ball_subset_closedBall
+  have hfinA : (Function.support dA).Finite := by
+    refine (hfin₂.union hfin₁).subset ?_
+    intro u hu
+    rw [Function.mem_support, hdA] at hu
+    by_contra hcon
+    simp only [Set.mem_union, Function.mem_support, not_or, not_not] at hcon
+    simp [hcon.1, hcon.2] at hu
+  -- mulSupport finiteness for the three factor families, at every point
+  have hms : ∀ (d : ℂ → ℤ), (Function.support d).Finite → ∀ z : ℂ,
+      (Function.mulSupport fun u => (z - u) ^ d u).Finite := by
+    intro d hd z
+    refine hd.subset ?_
+    intro u hu
+    rw [Function.mem_mulSupport] at hu
+    rw [Function.mem_support]
+    intro h0
+    rw [h0, zpow_zero] at hu
+    exact hu rfl
+  -- pointwise product split
+  have hsplit : ∀ z : ℂ, (∏ᶠ u, (z - u) ^ D₂ u)
+      = (∏ᶠ u, (z - u) ^ D₁ u) * (∏ᶠ u, (z - u) ^ dA u) := by
+    intro z
+    calc (∏ᶠ u, (z - u) ^ D₂ u)
+        = ∏ᶠ u, ((z - u) ^ D₁ u * (z - u) ^ dA u) := by
+          refine finprod_congr (fun u => ?_)
+          have hexp : D₂ u = D₁ u + dA u := by rw [hdA]; ring
+          rw [hexp, zpow_add' (Or.inr (by
+            have h1 := hD₁nn u
+            have h2 := hdAnn u
+            omega))]
+      _ = (∏ᶠ u, (z - u) ^ D₁ u) * (∏ᶠ u, (z - u) ^ dA u) :=
+          finprod_mul_distrib (hms D₁ hfin₁ z) (hms dA hfinA z)
+  -- the cofactor
+  refine ⟨fun z => (∏ᶠ u, (z - u) ^ dA u) * g z, ?_, ?_, ?_⟩
+  · -- analytic on the large ball
+    have heqfun : (fun z => (∏ᶠ u, (z - u) ^ dA u) * g z)
+        = fun z => (∏ᶠ u, (· - u) ^ dA u) z * g z := by
+      funext z
+      rw [Function.FactorizedRational.finprod_eq_fun hfinA]
+    rw [heqfun]
+    intro z hz
+    exact (Function.FactorizedRational.analyticAt (hdAnn z)).mul (hganal z hz)
+  · -- zero-free on the small ball
+    intro z hz
+    refine mul_ne_zero ?_ (hgne z (hsub hz))
+    rw [finprod_eq_prod _ (hms dA hfinA z)]
+    refine Finset.prod_ne_zero_iff.mpr (fun u hu => ?_)
+    rw [Set.Finite.mem_toFinset, Function.mem_mulSupport] at hu
+    have hdu : dA u ≠ 0 := by
+      intro h0
+      rw [h0, zpow_zero] at hu
+      exact hu rfl
+    have huout : u ∉ Metric.ball c r₁ := fun hin => hdu (hdA_zero u hin)
+    have hzu : z - u ≠ 0 := sub_ne_zero_of_ne (fun h => huout (h ▸ hz))
+    exact zpow_ne_zero _ hzu
+  · -- the factorization
+    intro z hz
+    rw [hfac z hz, hsplit z]
+    ring
+
 end
 
 end DedekindResidue
