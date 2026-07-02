@@ -1703,7 +1703,7 @@ theorem hasDerivAt_rhoFT {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
       exact h5
 
 /-- `μ(t) = ∫ k(x)e^{itx} dx` is bounded by `‖k‖₁`. -/
-theorem norm_muFT_le {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
+theorem norm_muFT_le (k : ℝ → ℂ) (t : ℝ) :
     ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ ≤ ∫ x : ℝ, ‖k x‖ := by
   calc ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖
       ≤ ∫ x : ℝ, ‖k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ :=
@@ -2738,7 +2738,7 @@ theorem tendsto_eLpNorm_indicator_truncation {g : ℝ → ℂ}
       rcases (em (x ∈ (Set.Ioc (-(n:ℝ)) (n:ℝ))ᶜ)) with hx | hx
       · rw [Set.indicator_of_mem hx]
       · rw [Set.indicator_of_notMem hx]
-        exact zero_le'
+        exact bot_le
     · have := hg.eLpNorm_lt_top
       rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num),
         show ((2:ℝ≥0∞).toReal) = (2:ℝ) by norm_num] at this
