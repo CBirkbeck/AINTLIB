@@ -421,3 +421,20 @@ N𝔟^{-2σ} in ENNReal (fiber the tsum over the norm; `idealSetEquivNorm` per f
 (`Measure.map_linearMap_addHaar_eq_smul_addHaar`), τ = ∑_w mult_w·λ_w on the image,
 product-split the Pi-lintegral, per-place ∫⁻_ℝ ofReal(e^{mσλ − πe^λ})dλ = ofReal(π^{-mσ}Γ(mσ)).
 (ε) toReal + mellin-identification + identity theorem + definitions.
+
+## 2026-07-03 (late) — ε-assembly: e-i through e-iv DONE; e-v (LSeries bridge) in progress
+
+**Landed** (`MellinAgreement.lean`, pushed through ab0feab0): `ofReal_heckeG_sub_const` (e-i),
+`setLIntegral_box_swap` + `conePreimage_ne_zero` + **`lintegral_mellin_heckeG_dev`** (e-ii — the
+per-class chain, antitone-measurability route via `aemeasurable_restrict_of_antitoneOn`),
+**`lintegral_mellin_heckeGClass_dev`** (e-iii — ALL cancellations w/N(J)/s_C machine-verified),
+`heckeG_dev_nonneg`/`heckeGClass_dev_nonneg` + **`lintegral_mellin_heckeF_dev`** (e-iv):
+
+  ∫⁻ Mellin of (heckeF − heckeFConst) at σ = β^{-σ}·(heckeJacobian·Γ-prod)·∑'_{𝔟:(Ideal 𝓞K)⁰}(N𝔟²)^{-σ}
+
+Also earlier today: γ complete (`lintegral_M0_eq`, `lintegral_exp_heckeLog`, `heckeJacobian`
+via Haar-uniqueness — no determinant needed), γ-N1/N2 reductions, g5 Gamma integrals.
+**USER CONFIRMED the named target: `exists_isCompletedDedekindZeta`.** Remaining: e-v →
+e-viii exactly as in the beastmode sentinel (full breakdown there): the LSeries/dedekindZeta
+bridge at real s > 1, the toReal/hasMellin identification, the identity theorem, the
+definition and the existence theorem.
