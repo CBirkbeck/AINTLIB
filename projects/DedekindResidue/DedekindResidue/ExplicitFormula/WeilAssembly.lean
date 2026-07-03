@@ -2305,4 +2305,368 @@ theorem differentiableAt_paperPhi_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) {a : ℝ
   exact (hasDerivAt_paperPhi (isAdmissibleTestFn_auxF s hX (by linarith)) hε0 hint
     (by linarith) (by linarith)).differentiableAt
 
+/-- Even fold of the Poitou transform onto the positive half line:
+`Φ(z) = ∫₀^∞ F(x)(e^{wx} + e^{-wx}) dx`, `w = z - 1/2`. -/
+theorem paperPhi_eq_half_line_fold {F : ℝ → ℂ} (heven : ∀ x : ℝ, F (-x) = F x) (z : ℂ)
+    (hint : Integrable (fun x : ℝ => F x * Complex.exp ((z - 1/2) * x)))
+    (hint2 : Integrable (fun x : ℝ => F x * Complex.exp (-(z - 1/2) * x))) :
+    paperPhi F z = ∫ x in Set.Ioi (0:ℝ),
+      F x * (Complex.exp ((z - 1/2) * x) + Complex.exp (-(z - 1/2) * x)) := by
+  rw [paperPhi, ← intervalIntegral.integral_Iic_add_Ioi (b := (0:ℝ))
+    hint.integrableOn hint.integrableOn]
+  have h1 : (∫ x in Set.Iic (0:ℝ), F x * Complex.exp ((z - 1/2) * x))
+      = ∫ x in Set.Ioi (0:ℝ), F x * Complex.exp (-(z - 1/2) * x) := by
+    rw [show Set.Iic (0:ℝ) = Set.Iic (-(0:ℝ)) by rw [neg_zero],
+      ← integral_comp_neg_Ioi]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun x _ => ?_)
+    rw [heven x]
+    congr 1
+    exact congrArg Complex.exp (by push_cast; ring)
+  have h2 : ∫ x in Set.Ioi (0:ℝ),
+      F x * (Complex.exp ((z - 1/2) * x) + Complex.exp (-(z - 1/2) * x))
+      = (∫ x in Set.Ioi (0:ℝ), F x * Complex.exp (-(z - 1/2) * x))
+        + ∫ x in Set.Ioi (0:ℝ), F x * Complex.exp ((z - 1/2) * x) := by
+    rw [← MeasureTheory.integral_add hint2.integrableOn hint.integrableOn]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show F x * (Complex.exp ((z - 1/2) * x) + Complex.exp (-(z - 1/2) * x))
+        = F x * Complex.exp (-(z - 1/2) * x) + F x * Complex.exp ((z - 1/2) * x)
+    ring
+  rw [h1, h2]
+
+/-- Complex-kernel integrability of the auxiliary function, `|Re w| < Re s - 1/2`. -/
+theorem integrable_auxF_mul_cexp (s : ℂ) {X : ℝ} (hX : 1 < X) {w : ℂ}
+    (hw : |w.re| < s.re - 1/2) :
+    Integrable (fun x : ℝ => auxF s X x * Complex.exp (w * x)) := by
+  have hs : 1/2 ≤ s.re := by
+    have h0 := abs_nonneg w.re
+    linarith
+  refine Integrable.mono'
+    (g := fun t : ℝ => Real.exp ((s.re - 1/2) * Real.log X)
+      * Real.exp (-(s.re - 1/2 - |w.re|) * |t|)) ?_ ?_ ?_
+  · exact (integrable_exp_neg_mul_abs (by linarith)).const_mul _
+  · refine Continuous.aestronglyMeasurable ?_
+    exact (continuous_auxF s hX).mul
+      (Complex.continuous_exp.comp (continuous_const.mul Complex.continuous_ofReal))
+  · refine Filter.Eventually.of_forall (fun t => ?_)
+    rw [norm_mul, Complex.norm_exp]
+    rw [show (w * (t:ℂ)).re = w.re * t by simp [Complex.mul_re]]
+    have h1 := norm_auxF_le s hX.le hs t
+    have h2 : Real.exp (w.re * t) ≤ Real.exp (|w.re| * |t|) := by
+      refine Real.exp_le_exp.mpr ?_
+      calc w.re * t ≤ |w.re * t| := le_abs_self _
+        _ = |w.re| * |t| := abs_mul _ _
+    calc ‖auxF s X t‖ * Real.exp (w.re * t)
+        ≤ (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * |t|))
+          * Real.exp (|w.re| * |t|) := by
+          refine mul_le_mul h1 h2 (Real.exp_pos _).le ?_
+          positivity
+      _ = Real.exp ((s.re - 1/2) * Real.log X)
+          * Real.exp (-(s.re - 1/2 - |w.re|) * |t|) := by
+          rw [mul_assoc, ← Real.exp_add]
+          congr 2
+          ring
+
+/-- On the open tail, `F_{s,X}` is the explicit kernel `C₀·e^{-hx}/x`,
+`C₀ = T e^{hT}`, `h = s - 1/2`. -/
+theorem auxF_tail_form (s : ℂ) {X : ℝ} (hX : 1 < X) :
+    ∀ y ∈ Set.Ioi (Real.log X),
+      auxF s X y = ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * (Complex.exp (-(s - 1/2) * y) / y) := by
+  intro y hy
+  have h0 := auxF_mul_exp_tail_eq' s hX 0 y hy
+  rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one] at h0
+  rw [show -(-((((0:ℝ)):ℂ) - (s - 1/2))) = -(s - 1/2) by push_cast; ring] at h0
+  exact h0
+
+/-- Pointwise bound on the tail-derivative kernel times the antisymmetric kernel:
+`‖F'(x)·(e^{wx}-e^{-wx})‖ ≤ 2e^{h_r T}(‖h‖+1/T)·e^{-(h_r-|Re w|)x}` for `x > T`. -/
+theorem norm_auxF_tail_deriv_mul_le (s : ℂ) {X : ℝ} (hX : 1 < X) (w : ℂ)
+    {x : ℝ} (hx : Real.log X < x) :
+    ‖(((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x)))
+      * (Complex.exp ((w : ℂ) * x) - Complex.exp (-(w : ℂ) * x))‖
+      ≤ 2 * Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+        * Real.exp (-((s.re - 1/2) - |w.re|) * x) := by
+  have hb0 : 0 < Real.log X := Real.log_pos hX
+  have hxpos : 0 < x := hb0.trans hx
+  have hhre : (s - (1/2:ℂ)).re = s.re - 1/2 := by
+    rw [Complex.sub_re]
+    norm_num
+  -- the S-factor
+  have hSb : ‖Complex.exp ((w : ℂ) * x) - Complex.exp (-(w : ℂ) * x)‖
+      ≤ 2 * Real.exp (|w.re| * x) := by
+    refine le_trans (norm_sub_le _ _) ?_
+    rw [Complex.norm_exp, Complex.norm_exp,
+      show ((w:ℂ) * (x:ℂ)).re = w.re * x by simp [Complex.mul_re],
+      show (-(w:ℂ) * (x:ℂ)).re = -w.re * x by simp [Complex.mul_re]]
+    have e1 : Real.exp (w.re * x) ≤ Real.exp (|w.re| * x) :=
+      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (le_abs_self _) hxpos.le)
+    have e2 : Real.exp (-w.re * x) ≤ Real.exp (|w.re| * x) := by
+      refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right ?_ hxpos.le)
+      rw [← abs_neg w.re]
+      exact le_abs_self _
+    linarith
+  -- the D-factor
+  have hDb : ‖((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+      * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x))‖
+      ≤ Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+        * Real.exp (-(s.re - 1/2) * x) := by
+    rw [norm_mul, norm_mul, norm_mul, norm_neg, norm_div,
+      Complex.norm_exp, Complex.norm_exp, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hb0,
+      show ((s - 1/2) * ((Real.log X : ℝ) : ℂ)).re = (s.re - 1/2) * Real.log X by
+        rw [Complex.mul_re, hhre]
+        simp,
+      show (-(s - 1/2) * ((x : ℝ) : ℂ)).re = -(s.re - 1/2) * x by
+        rw [Complex.mul_re, Complex.neg_re, Complex.neg_im, hhre]
+        simp]
+    have h1x : ‖((x : ℝ) : ℂ)‖ = x := by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hxpos]
+    have hnum : ‖(s - 1/2) + 1/((x : ℝ) : ℂ)‖ ≤ ‖s - (1/2 : ℂ)‖ + 1/Real.log X := by
+      refine le_trans (norm_add_le _ _) ?_
+      have h2 : ‖1/((x : ℝ) : ℂ)‖ = 1/x := by
+        rw [norm_div, norm_one, h1x]
+      rw [h2]
+      have h3 : 1/x ≤ 1/Real.log X := by
+        refine one_div_le_one_div_of_le hb0 hx.le
+      linarith
+    rw [h1x]
+    -- assemble: T·e^{h_r T}·(‖h+1/x‖·e^{-h_r x}/x) ≤ e^{h_r T}(‖h‖+1/T)e^{-h_r x}
+    have hxinv : Real.log X / x ≤ 1 := by
+      rw [div_le_one hxpos]
+      exact hx.le
+    calc Real.log X * Real.exp ((s.re - 1/2) * Real.log X)
+          * (‖s - 1/2 + 1/((x : ℝ) : ℂ)‖ * (Real.exp (-(s.re - 1/2) * x) / x))
+        ≤ Real.log X * Real.exp ((s.re - 1/2) * Real.log X)
+          * ((‖s - (1/2 : ℂ)‖ + 1/Real.log X) * (Real.exp (-(s.re - 1/2) * x) / x)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          refine mul_le_mul_of_nonneg_right hnum (by positivity)
+      _ = (Real.log X / x) * (Real.exp ((s.re - 1/2) * Real.log X)
+          * ((‖s - (1/2 : ℂ)‖ + 1/Real.log X) * Real.exp (-(s.re - 1/2) * x))) := by
+          ring
+      _ ≤ 1 * (Real.exp ((s.re - 1/2) * Real.log X)
+          * ((‖s - (1/2 : ℂ)‖ + 1/Real.log X) * Real.exp (-(s.re - 1/2) * x))) := by
+          refine mul_le_mul_of_nonneg_right hxinv ?_
+          positivity
+      _ = Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+          * Real.exp (-(s.re - 1/2) * x) := by
+          ring
+  rw [norm_mul]
+  calc ‖((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x))‖
+      * ‖Complex.exp ((w : ℂ) * x) - Complex.exp (-(w : ℂ) * x)‖
+      ≤ (Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+          * Real.exp (-(s.re - 1/2) * x)) * (2 * Real.exp (|w.re| * x)) := by
+        refine mul_le_mul hDb hSb (norm_nonneg _) ?_
+        positivity
+    _ = 2 * Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+        * Real.exp (-((s.re - 1/2) - |w.re|) * x) := by
+        rw [show -((s.re - 1/2) - |w.re|) * x = -(s.re - 1/2) * x + |w.re| * x by ring,
+          Real.exp_add]
+        ring
+
+/-- **The integrated-by-parts Poitou transform of the auxiliary function**: for
+`w = z - 1/2` inside the convergence strip `|Re w| < Re s - 1/2`,
+
+`w·Φ_{F_{s,X}}(z) = -∫_{log X}^∞ F'(x)·(e^{wx} - e^{-wx}) dx`,
+
+with `F'` the explicit tail derivative. The antisymmetric kernel vanishes at the
+origin (killing that boundary term) and the plateau boundary term at `log X`
+cancels against the tail's. -/
+theorem mul_paperPhi_auxF_eq (s : ℂ) {X : ℝ} (hX : 1 < X) {z : ℂ}
+    (hzl : |(z - 1/2).re| < s.re - 1/2) :
+    (z - 1/2) * paperPhi (auxF s X) z
+      = -∫ x in Set.Ioi (Real.log X),
+          (((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+              * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x)))
+            * (Complex.exp ((z - 1/2) * x) - Complex.exp (-(z - 1/2) * x)) := by
+  have hb0 : 0 < Real.log X := Real.log_pos hX
+  set b : ℝ := Real.log X with hb
+  set w : ℂ := z - 1/2 with hwdef
+  set h : ℂ := s - 1/2 with hhdef
+  set S : ℝ → ℂ := fun x => Complex.exp (w * x) - Complex.exp (-w * x) with hS
+  set Kk : ℝ → ℂ := fun x => Complex.exp (w * x) + Complex.exp (-w * x) with hKk
+  set D : ℝ → ℂ := fun x : ℝ =>
+    ((b : ℝ) : ℂ) * Complex.exp (h * (b : ℂ))
+      * (-(h + 1/x) * (Complex.exp (-h * x) / x)) with hD
+  have hwneg : |(-w).re| < s.re - 1/2 := by
+    rw [Complex.neg_re, abs_neg]
+    exact hzl
+  have hint : Integrable (fun x : ℝ => auxF s X x * Complex.exp (w * x)) :=
+    integrable_auxF_mul_cexp s hX hzl
+  have hint2 : Integrable (fun x : ℝ => auxF s X x * Complex.exp (-w * x)) :=
+    integrable_auxF_mul_cexp s hX hwneg
+  -- the S-derivative
+  have hKcont : Continuous Kk := by
+    refine Continuous.add ?_ ?_ <;>
+      exact Complex.continuous_exp.comp (continuous_const.mul Complex.continuous_ofReal)
+  have hScont : Continuous S := by
+    refine Continuous.sub ?_ ?_ <;>
+      exact Complex.continuous_exp.comp (continuous_const.mul Complex.continuous_ofReal)
+  have hSderiv : ∀ x : ℝ, HasDerivAt S (w * Kk x) x := by
+    intro x
+    have e1 : HasDerivAt (fun y : ℝ => Complex.exp (w * y))
+        (Complex.exp (w * x) * (w * 1)) x :=
+      (((hasDerivAt_id ((x:ℝ):ℂ)).const_mul w).cexp).comp_ofReal
+    have e2 : HasDerivAt (fun y : ℝ => Complex.exp (-w * y))
+        (Complex.exp (-w * x) * (-w * 1)) x :=
+      (((hasDerivAt_id ((x:ℝ):ℂ)).const_mul (-w)).cexp).comp_ofReal
+    refine (e1.sub e2).congr_deriv ?_
+    rw [hKk]
+    ring
+  have hS0 : S 0 = 0 := by
+    rw [hS]
+    show Complex.exp (w * ((0:ℝ):ℂ)) - Complex.exp (-w * ((0:ℝ):ℂ)) = 0
+    rw [Complex.ofReal_zero, mul_zero, mul_zero, sub_self]
+  -- the fold, multiplied through by w
+  have hstep0 : w * paperPhi (auxF s X) z
+      = ∫ x in Set.Ioi (0:ℝ), auxF s X x * (w * Kk x) := by
+    rw [paperPhi_eq_half_line_fold (auxF_neg s X) z hint hint2,
+      ← MeasureTheory.integral_const_mul]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show w * (auxF s X x * (Complex.exp (w * x) + Complex.exp (-w * x)))
+        = auxF s X x * (w * Kk x)
+    rw [hKk]
+    ring
+  have hintwK : Integrable (fun x : ℝ => auxF s X x * (w * Kk x)) := by
+    refine ((hint.const_mul w).add (hint2.const_mul w)).congr ?_
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    show w * (auxF s X x * Complex.exp (w * x)) + w * (auxF s X x * Complex.exp (-w * x))
+        = auxF s X x * (w * Kk x)
+    rw [hKk]
+    ring
+  -- split at b
+  have hdisj : Disjoint (Set.Ioc (0:ℝ) b) (Set.Ioi b) := by
+    refine Set.disjoint_left.mpr (fun x hx1 hx2 => ?_)
+    rw [Set.mem_Ioc] at hx1
+    rw [Set.mem_Ioi] at hx2
+    linarith [hx1.2]
+  have hsplit : (∫ x in Set.Ioi (0:ℝ), auxF s X x * (w * Kk x))
+      = (∫ x in Set.Ioc (0:ℝ) b, auxF s X x * (w * Kk x))
+        + ∫ x in Set.Ioi b, auxF s X x * (w * Kk x) := by
+    rw [← MeasureTheory.setIntegral_union hdisj measurableSet_Ioi
+      hintwK.integrableOn hintwK.integrableOn, Set.Ioc_union_Ioi_eq_Ioi hb0.le]
+  -- plateau piece = S b
+  have hplateau : (∫ x in Set.Ioc (0:ℝ) b, auxF s X x * (w * Kk x)) = S b := by
+    have hcongr : (∫ x in Set.Ioc (0:ℝ) b, auxF s X x * (w * Kk x))
+        = ∫ x in Set.Ioc (0:ℝ) b, w * Kk x := by
+      refine setIntegral_congr_fun measurableSet_Ioc (fun x hx => ?_)
+      rw [Set.mem_Ioc] at hx
+      rw [auxF_of_le s X (by rw [abs_of_pos hx.1]; exact hx.2), one_mul]
+    rw [hcongr, ← intervalIntegral.integral_of_le hb0.le,
+      intervalIntegral.integral_eq_sub_of_hasDerivAt
+        (fun x _ => hSderiv x)
+        ((continuous_const.mul hKcont).intervalIntegrable 0 b),
+      hS0, sub_zero]
+  -- tail derivative of auxF·S
+  have hDS : ∀ x ∈ Set.Ioi b, HasDerivAt (fun y : ℝ => auxF s X y * S y)
+      (D x * S x + auxF s X x * (w * Kk x)) x := by
+    intro x hx
+    have hxpos : 0 < x := hb0.trans hx
+    have hev : (fun y : ℝ => auxF s X y * S y)
+        =ᶠ[nhds x] fun y : ℝ =>
+          ((b : ℝ) : ℂ) * Complex.exp (h * (b : ℂ))
+            * (Complex.exp (-h * y) / y) * S y := by
+      filter_upwards [eventually_gt_nhds hx] with y hy
+      rw [auxF_tail_form s hX y hy]
+    have hcore : HasDerivAt (fun y : ℝ => Complex.exp (-h * y) / y)
+        (-(h + 1/x) * (Complex.exp (-h * x) / x)) x := hasDerivAt_gAux_core h hxpos
+    have hmul := (hcore.const_mul
+      (((b : ℝ) : ℂ) * Complex.exp (h * (b : ℂ)))).mul (hSderiv x)
+    refine (hmul.congr_of_eventuallyEq hev).congr_deriv ?_
+    rw [hD, auxF_tail_form s hX x hx]
+  -- decay of auxF·S at infinity
+  have htend : Tendsto (fun y : ℝ => auxF s X y * S y) atTop (nhds 0) := by
+    have hmaj : ∀ y : ℝ, 0 ≤ y → ‖auxF s X y * S y‖
+        ≤ 2 * Real.exp ((s.re - 1/2) * b) * Real.exp (-((s.re - 1/2) - |w.re|) * y) := by
+      intro y hy
+      rw [norm_mul]
+      have h1 := norm_auxF_le s hX.le (by linarith [abs_nonneg w.re]) y
+      rw [abs_of_nonneg hy] at h1
+      have h2 : ‖S y‖ ≤ 2 * Real.exp (|w.re| * y) := by
+        rw [hS]
+        refine le_trans (norm_sub_le _ _) ?_
+        rw [Complex.norm_exp, Complex.norm_exp,
+          show (w * (y:ℂ)).re = w.re * y by simp [Complex.mul_re],
+          show (-w * (y:ℂ)).re = -w.re * y by simp [Complex.mul_re]]
+        have e1 : Real.exp (w.re * y) ≤ Real.exp (|w.re| * y) :=
+          Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (le_abs_self _) hy)
+        have e2 : Real.exp (-w.re * y) ≤ Real.exp (|w.re| * y) := by
+          refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right ?_ hy)
+          rw [← abs_neg w.re]
+          exact le_abs_self _
+        linarith
+      calc ‖auxF s X y‖ * ‖S y‖
+          ≤ (Real.exp ((s.re - 1/2) * b) * Real.exp (-(s.re - 1/2) * y))
+            * (2 * Real.exp (|w.re| * y)) := by
+            refine mul_le_mul h1 h2 (norm_nonneg _) ?_
+            positivity
+        _ = 2 * Real.exp ((s.re - 1/2) * b)
+            * Real.exp (-((s.re - 1/2) - |w.re|) * y) := by
+            rw [show -((s.re - 1/2) - |w.re|) * y = -(s.re - 1/2) * y + |w.re| * y by
+              ring, Real.exp_add]
+            ring
+    have hexp : Tendsto (fun y : ℝ =>
+        2 * Real.exp ((s.re - 1/2) * b) * Real.exp (-((s.re - 1/2) - |w.re|) * y))
+        atTop (nhds 0) := by
+      rw [show (0:ℝ) = 2 * Real.exp ((s.re - 1/2) * b) * 0 by ring]
+      refine Tendsto.const_mul _ ?_
+      refine Real.tendsto_exp_atBot.comp ?_
+      have hδ : 0 < (s.re - 1/2) - |w.re| := by linarith
+      have h1 : Tendsto (fun y : ℝ => ((s.re - 1/2) - |w.re|) * y) atTop atTop :=
+        Tendsto.const_mul_atTop hδ tendsto_id
+      refine (tendsto_neg_atTop_atBot.comp h1).congr (fun y => ?_)
+      show -(((s.re - 1/2) - |w.re|) * y) = -((s.re - 1/2) - |w.re|) * y
+      ring
+    refine squeeze_zero_norm' ?_ hexp
+    filter_upwards [Filter.eventually_ge_atTop (0:ℝ)] with y hy
+    exact hmaj y hy
+  -- integrability of D·S on the tail
+  have hDSint : IntegrableOn (fun x : ℝ => D x * S x) (Set.Ioi b) := by
+    refine Integrable.mono'
+      (g := fun x : ℝ => 2 * Real.exp ((s.re - 1/2) * b)
+        * (‖s - (1/2 : ℂ)‖ + 1/b) * Real.exp (-((s.re - 1/2) - |w.re|) * x)) ?_ ?_ ?_
+    · refine Integrable.const_mul ?_ _
+      have hδ : 0 < (s.re - 1/2) - |w.re| := by linarith
+      exact (exp_neg_integrableOn_Ioi b hδ)
+    · refine (ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi)
+      have hne : ∀ x ∈ Set.Ioi b, ((x : ℝ) : ℂ) ≠ 0 := by
+        intro x hx
+        exact_mod_cast (hb0.trans hx).ne'
+      refine ContinuousOn.mul ?_ hScont.continuousOn
+      refine ContinuousOn.mul continuousOn_const ?_
+      refine ContinuousOn.mul ?_ ?_
+      · refine ContinuousOn.neg ?_
+        exact continuousOn_const.add
+          (continuousOn_const.div Complex.continuous_ofReal.continuousOn hne)
+      · refine ContinuousOn.div ?_ Complex.continuous_ofReal.continuousOn hne
+        exact (Complex.continuous_exp.comp
+          (continuous_const.mul Complex.continuous_ofReal)).continuousOn
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun x hx => ?_))
+      rw [Set.mem_Ioi] at hx
+      exact norm_auxF_tail_deriv_mul_le s hX w hx
+  -- FTC on the tail
+  have hab : auxF s X b = 1 := auxF_of_le s X (by rw [abs_of_pos hb0])
+  have htail : (∫ x in Set.Ioi b, (D x * S x + auxF s X x * (w * Kk x)))
+      = 0 - auxF s X b * S b := by
+    refine MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto
+      ((continuous_auxF s hX).mul hScont).continuousWithinAt hDS
+      (hDSint.add hintwK.integrableOn) htend
+  have hsum := MeasureTheory.integral_add hDSint hintwK.integrableOn
+  rw [htail, hab, one_mul, zero_sub] at hsum
+  -- assemble
+  rw [hstep0, hsplit, hplateau]
+  have hfin : (∫ x in Set.Ioi b, auxF s X x * (w * Kk x))
+      = -S b - ∫ x in Set.Ioi b, D x * S x := by
+    linear_combination -hsum
+  rw [hfin]
+  have hDSeq : (∫ x in Set.Ioi b, D x * S x)
+      = ∫ x in Set.Ioi (Real.log X),
+          (((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+              * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x)))
+            * (Complex.exp ((z - 1/2) * x) - Complex.exp (-(z - 1/2) * x)) := rfl
+  rw [hDSeq]
+  ring
+
 end DedekindResidue
