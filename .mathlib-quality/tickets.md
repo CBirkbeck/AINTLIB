@@ -185,6 +185,21 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
   are scoped out of WCA (`attribute [-instance]`) with the faithful package supplied at
   every B-level context; `relativePiece_equiv_restrict_square` (RPK) carries the faithful
   shadow + `[IsRingOfIntegralElements (A⁺)]`.
+- **C4 FRONTIER ANALYSIS (2026-07-03 read)**: the keystone's true content is
+  `isClosed_image_spa_ιSpv_bool_noHArch` (SpaCompactNoHArch:310, private): the image of
+  `Spa A A⁺` in the DISCRETE Boolean cube `A×A → Bool` is closed. The relation/A⁺-bound
+  constraints are per-tuple clopen ✓; the hard part is encoding CONTINUITY as a closed
+  condition — cofinality-style constraints (`∃ n, …`) are countable unions (OPEN), so the
+  naive encoding fails; Wedhorn's route is the Spv(A,I)-retraction spectrality (Thm 7.10's
+  proof + 7.5/7.12/7.30 microbial dichotomy) — Huber's spectrality theorem. The T-SPVAI
+  landings (retraction `restrictIdealSingle`, cΓ machinery, corrected
+  `cont_to_ideal_le_supp_of_mem_defIdeal`) are the toolkit. The OTHER SpaCompactNoHArch
+  sorry (`isClosed_range_ιSpv_inter_vleCylinder`:220) is a B2-flagged DEAD ROUTE
+  (Sierpinski — documented false-approach); check whether the `isClosed_setOf_vle` chain
+  (:247-291) that consumes it is even on the keystone path before touching it.
+  Carrier #6 (Cor 7.32-aux) is the compactness CONSUMER (cover+finite-subcover; its own
+  docstring notes the current signature lacks `[IsTateRing A]` — another statement fix at
+  discharge time).
 - **NEXT = C4 (T-L5)**: its own decompose pass per the standing plan — the keystone
   `isClosed_image_spa_ιSpv_bool_noHArch` decomposes per the 2026-06-05 finding as
   (range ✓ proven) ∩ (A⁺-cylinders) ∩ (no-hArch Cont-closedness = the microbial/Spv(A,I)

@@ -1,1 +1,1 @@
-FOCUS: CARRIERS = 2 (C4 only: Cor732-aux + SpaQC keystone)! Committing the campaign, board update, then C4 decompose (T-L5).
+FOCUS: C4 decompose (T-L5) — PHASE 1: read Wedhorn Thm 7.10 proof (wedhorn.txt ~§7.2) + SpvAITopology current state; target = isClosed_image_spa_ιSpv_bool_noHArch (SpaCompactNoHArch:310). Everything else PROVEN (carriers=2).
