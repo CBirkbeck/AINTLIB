@@ -1165,3 +1165,14 @@ toReal transfer with finiteness from C2b+C3); (C3) outer bound ≤
 (T−T')(h+1/T')e^{T'/2}L(T') via the antitone kernel + monotone (h+1/U); c4-final
 assembly with |r_K−1| ≤ n_K−1 (paper 497–501 at k=ℚ). Then L4-b/d, L5, T012 — the full
 map with paper line refs is in the beastmode sentinel and decomposition-t011.md.
+
+### Leg 8 final: T011 ESTIMATE SUITE COMPLETE (through 73ac378d)
+
+c4 landed in full: `weight_mul_cutKernel_le`, `archWeight` API,
+`integrableOn_archWeight_mul_cutKernel`, `integral_archWeight_mul_cutKernel_Ioi_zero`,
+`inner_arch_bound'`, and **`arch_sum_diff_le`** (Δ(q+q̃) ≤ (T−T')(h+1/T')e^{T'/2}L(T'),
+the paper's β-bound, via C1 cutoff-FTC + ofReal/lintegral Tonelli + antitone kernel).
+All four Lemma-4 estimates are now machine-verified at real σ, axiom-clean.
+NEXT: L4-a relative display (K−ℚ; Φ-terms cancel), L4-b T-difference, L4-c
+realification + bounds assembly, L4-d σ→1⁺ → Explicit2 at k=ℚ. Full continuation
+map in the beastmode sentinel.
