@@ -1,1 +1,1 @@
-FOCUS: T012-b N3 done (dSigma_rat_two_eq + dSigma_ge green); verifying axioms then N4 (ratPrimeIdeal + W lower bound + master numeric)
+FOCUS: T012-b N4 — building vonMangoldtSum_rat_two_ge + zeroSumSigma_rat_le

@@ -711,6 +711,137 @@ theorem dSigma_ge (hn : 1 < Module.finrank ℚ K) {σ : ℝ} (hσ : 1 < σ) (hσ
     mul_nonneg hr1nn (by linarith : (0:ℝ) ≤ π/2 - IC), hW, hIs_le,
     (by ring : (2:ℝ)/σ = 2*(1/σ))]
 
+/-! ### The ℚ-side von Mangoldt certificate (T12-b N4) -/
+
+/-- The natural number `p` is a prime element of `𝓞 ℚ` when it is a prime
+(transport along `𝓞 ℚ ≃+* ℤ`). -/
+theorem prime_natCast_ringOfIntegers_rat {p : ℕ} (hp : p.Prime) :
+    Prime ((p : 𝓞 ℚ)) := by
+  have h : Prime (Rat.ringOfIntegersEquiv ((p : 𝓞 ℚ))) := by
+    rw [map_natCast]
+    exact Nat.prime_iff_prime_int.mp hp
+  exact (MulEquiv.prime_iff Rat.ringOfIntegersEquiv).mp h
+
+/-- The rational prime `p` as a nonzero prime ideal of `𝓞 ℚ`. -/
+noncomputable def ratPrimeIdeal (p : ℕ) (hp : p.Prime) :
+    {𝔭 : Ideal (𝓞 ℚ) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} :=
+  ⟨Ideal.span {(p : 𝓞 ℚ)},
+    (Ideal.span_singleton_prime (prime_natCast_ringOfIntegers_rat hp).ne_zero).mpr
+      (prime_natCast_ringOfIntegers_rat hp),
+    fun hbot => (prime_natCast_ringOfIntegers_rat hp).ne_zero
+      (Ideal.span_singleton_eq_bot.mp hbot)⟩
+
+/-- The ideal `ratPrimeIdeal p` has absolute norm `p` (the norm of `p : 𝓞 ℚ`
+is `p^1` since `𝓞 ℚ` has `ℤ`-rank one). -/
+theorem absNorm_ratPrimeIdeal (p : ℕ) (hp : p.Prime) :
+    Ideal.absNorm (ratPrimeIdeal p hp).1 = p := by
+  show Ideal.absNorm (Ideal.span {(p : 𝓞 ℚ)}) = p
+  rw [Ideal.absNorm_span_singleton,
+    show ((p : 𝓞 ℚ)) = algebraMap ℤ (𝓞 ℚ) (p : ℤ) from (map_natCast _ p).symm,
+    Algebra.norm_algebraMap, NumberField.RingOfIntegers.rank, Module.finrank_self,
+    pow_one, Int.natAbs_natCast]
+
+/-- The von Mangoldt term at `(ratPrimeIdeal p, m)` and `σ = 2` is
+`log p / p^(2(m+1))`. -/
+theorem vonMangoldt_term_ratPrimeIdeal (p : ℕ) (hp : p.Prime) (m : ℕ) :
+    Real.log (Ideal.absNorm (ratPrimeIdeal p hp).1)
+      * (Ideal.absNorm (ratPrimeIdeal p hp).1 : ℝ) ^ (-(((m+1 : ℕ)) : ℝ) * 2)
+    = Real.log p * ((p:ℝ) ^ (2*(m+1)))⁻¹ := by
+  rw [absNorm_ratPrimeIdeal,
+    show (-(((m+1 : ℕ)) : ℝ) * 2) = -((2*(m+1) : ℕ) : ℝ) by push_cast; ring,
+    Real.rpow_neg (Nat.cast_nonneg p), Real.rpow_natCast]
+
+/-- The nine sample indices `(2,1),(2,2),(2,3),(3,1),(3,2),(5,1),(7,1),(11,1),(13,1)`
+(prime, exponent) for the `σ = 2` von Mangoldt certificate. -/
+noncomputable def vmIndex : Fin 9 → {𝔭 : Ideal (𝓞 ℚ) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ :=
+  ![(ratPrimeIdeal 2 (by norm_num), 0), (ratPrimeIdeal 2 (by norm_num), 1),
+    (ratPrimeIdeal 2 (by norm_num), 2), (ratPrimeIdeal 3 (by norm_num), 0),
+    (ratPrimeIdeal 3 (by norm_num), 1), (ratPrimeIdeal 5 (by norm_num), 0),
+    (ratPrimeIdeal 7 (by norm_num), 0), (ratPrimeIdeal 11 (by norm_num), 0),
+    (ratPrimeIdeal 13 (by norm_num), 0)]
+
+/-- The nine sample indices are pairwise distinct (separated by the invariant
+`(absNorm, exponent)`). -/
+theorem vmIndex_injective : Function.Injective vmIndex := by
+  have hkey : ∀ i, (Ideal.absNorm (vmIndex i).1.1, (vmIndex i).2)
+      = ![(2,0),(2,1),(2,2),(3,0),(3,1),(5,0),(7,0),(11,0),(13,0)] i := by
+    intro i
+    fin_cases i <;>
+      simp [vmIndex, absNorm_ratPrimeIdeal]
+  have htable : Function.Injective
+      (![(2,0),(2,1),(2,2),(3,0),(3,1),(5,0),(7,0),(11,0),(13,0)] : Fin 9 → ℕ × ℕ) := by
+    decide
+  intro i j hij
+  refine htable ?_
+  rw [← hkey i, ← hkey j, hij]
+
+/-- **The nine-term von Mangoldt certificate at `σ = 2`** (T12-b N4):
+`W = Σ_{𝔭,m} log N𝔭·N𝔭^{−2m} ≥ (21/64)·log 2 + (10/81)·log 3 + log 5/25 + log 7/49
++ log 11/121 + log 13/169` (the terms `2^1,2^2,2^3,3^1,3^2,5,7,11,13`). -/
+theorem vonMangoldtSum_rat_two_ge :
+    Real.log 2 * (21/64) + Real.log 3 * (10/81) + Real.log 5 * (1/25)
+      + Real.log 7 * (1/49) + Real.log 11 * (1/121) + Real.log 13 * (1/169)
+      ≤ vonMangoldtSum ℚ 2 := by
+  classical
+  have hsum := summable_primeIdeal_pow_log_rpow (K := ℚ) (by norm_num : (1:ℝ) < 2)
+  have hle := Summable.sum_le_tsum (f := fun pk :
+        {𝔭 : Ideal (𝓞 ℚ) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * 2))
+    (Finset.univ.map ⟨vmIndex, vmIndex_injective⟩)
+    (fun _ _ => mul_nonneg (Real.log_natCast_nonneg _)
+      (Real.rpow_nonneg (Nat.cast_nonneg _) _)) hsum
+  rw [Finset.sum_map] at hle
+  refine le_trans (le_of_eq ?_) hle
+  simp only [Function.Embedding.coeFn_mk, Fin.sum_univ_succ, Fin.sum_univ_zero,
+    Matrix.cons_val_zero, Matrix.cons_val_succ, vmIndex]
+  simp only [vonMangoldt_term_ratPrimeIdeal]
+  push_cast
+  norm_num
+  ring
+
+/-- **The ℚ-zero-sum master certificate** (T12-b N4, replacing B–F's `0.023095`):
+under RH, `Σ_ρ m_ρ/(¼+γ_ρ²) ≤ 2γ_E + 2 log 2π − 3` — the ℚ-zero sum is at most the
+`d_{K,σ}` lower bound. Via `landau_stark_estimate` at `ℚ`, `σ = 2` (`log Δ_ℚ = 0`),
+`d_{ℚ,2} = 2W + γ_E + log π − 1`, and the nine-term `W`-certificate, the inequality
+reduces to `12 ≤ 6W + 5γ_E + 5 log π + 2 log 2`, which holds with margin `0.38`. -/
+theorem zeroSumSigma_rat_le (hRH : RiemannHypothesis) :
+    zeroSumSigma ℚ 1 ≤ 2 * Real.eulerMascheroniConstant + 2 * Real.log (2*π) - 3 := by
+  have h1 := landau_stark_estimate ℚ (generalizedRiemannHypothesis_rat hRH)
+    (σ := 2) (by norm_num)
+  rw [Rat.numberField_discr] at h1
+  norm_num [Real.log_one] at h1
+  rw [dSigma_rat_two_eq] at h1
+  have hγ := Real.one_half_lt_eulerMascheroniConstant
+  have hl2 := Real.log_two_gt_d9
+  have hl3 := Real.log_three_gt_d9
+  have hl5 := Real.log_five_gt_d9
+  have hlπ : Real.log 3 ≤ Real.log π :=
+    Real.log_le_log (by norm_num) Real.pi_gt_three.le
+  have hl7 : 14 * Real.log 2 ≤ 5 * Real.log 7 := by
+    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^14)
+      (by norm_num : ((2:ℝ))^14 ≤ 7^5)
+    rw [Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hl11 : 10 * Real.log 2 ≤ 3 * Real.log 11 := by
+    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^10)
+      (by norm_num : ((2:ℝ))^10 ≤ 11^3)
+    rw [Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hl13 : 11 * Real.log 2 ≤ 3 * Real.log 13 := by
+    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^11)
+      (by norm_num : ((2:ℝ))^11 ≤ 13^3)
+    rw [Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hW := vonMangoldtSum_rat_two_ge
+  have hlog2π : Real.log (2*π) = Real.log 2 + Real.log π :=
+    Real.log_mul two_ne_zero Real.pi_ne_zero
+  rw [hlog2π]
+  linarith
+
 end DedekindResidue
 
 end
