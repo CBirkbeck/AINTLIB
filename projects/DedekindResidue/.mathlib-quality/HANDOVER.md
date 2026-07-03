@@ -893,3 +893,40 @@ re_digamma_quarter_sub_half_eq_integral + prop3_poitou at σ = 1/2 and the
 (1/4, t/2)-variant). Then Prop 2 (prime side: tendsto_fourier_window_jordan +
 neg_logDeriv_dedekindZeta_eq_tsum + Prop 1's zero_capture_edge_form), and the
 Weil formula (6) assembly. Then SP3 (Theorem 1).
+
+## 2026-07-03 — Γψ COMPLETE: I_G (Poitou's Γ-side) fully landed
+
+The entire ψ/Γ-side of Poitou's explicit formula is now machine-verified in
+`ExplicitFormula/GammaSide.lean` (all axiom-clean, zero warnings):
+
+- **Γψ-a strip bound** `exists_norm_logDeriv_gammaFactor_le`: ‖logDeriv γ_K(σ+it)‖ ≤
+  C·log(2+|t|) on 1/4 ≤ σ ≤ 5/4, |t| ≥ 4 (from the d log γ_K expansion + A6 at s, s/2).
+- **Γψ-d ψ-constants**: `digamma_three_quarter_sub_quarter` (ψ(3/4)−ψ(1/4) = π, via
+  K4 + Gauss-difference + u=2x — NO reflection formula), `digamma_quarter_add_three_quarter`
+  (logDeriv of Legendre duplication at 1/4), `digamma_half_sub_quarter`
+  (ψ(1/2)−ψ(1/4) = π/2 + log 2 — the source of Poitou's r₁π/2).
+- **Γψ-e rescaled Prop 3** `prop3_poitou_quarter`: lim ∫2(Reψ(1/4+it/2)−ψ(1/4))φ =
+  8π∫e^{−x/2}(F0−F)/(1−e^{−2x}), via prop3_poitou at the half-scaled test function
+  F(x/2)/2 (transfers: `integrable_halfScale`, `integrableOn_halfScale_div`,
+  `memLp_two_halfScale_div`, `map_volume_half_mul`).
+- **Γψ-f kernels**: `integrableOn_sinh_kernel_mul` (L²×L² Poitou pairing),
+  `integrableOn_cosh_kernel_mul` (domination), `integral_gauss_half_eq_sinh`,
+  `integral_gauss_quarter_eq_sinh_add_cosh` (quarter kernel = avg of sinh+cosh kernels).
+- **Γψ-g I_G** `tendsto_IG_gammaFactor`:
+  lim_{T→∞} ∫_{−T}^T 2Re(γ_K'/γ_K)(1/2+it)·φ(t) dt
+    = 2π{ −(n(γ_E+log 8π) + r₁π/2)·F(0) + n∫₀^∞(F0−F)/(2sinh(x/2)) + r₁∫₀^∞(F0−F)/(2cosh(x/2)) }
+  — Poitou p. 6-04's display exactly (n = r₁+2r₂ stated as such; convert via
+  `NumberField.InfinitePlace.card_add_two_mul_card_eq_rank` when assembling Weil).
+  Hypotheses: F integrable, BV (re/im), right-continuous at 0, even, (F0−F)/x ∈ L¹(Ioc(−1,1)) ∩ L²(ℝ),
+  plus 4 boundary-decay hypotheses ργ→0 (at σ=1/2 with F; at σ=1/4 with F(x/2)/2) —
+  discharged later at SP3's concrete F. `two_re_logDeriv_gammaFactor_half` is the
+  pointwise integrand split (re-extraction pattern: normalise casts to ofReal, then
+  simp [add_re, re_ofReal_mul, ofReal_re, neg_re, sub_re], then linear_combination
+  with log_mul/log_pow facts).
+
+REMAINING Γ-side: Γψ-c contour shift (Re=1+a→1/2, rectangle Cauchy + strip bound ×
+Φ-decay). Then Prop 2 (prime side), Weil (6) assembly, SP3.
+
+Gotcha of the day: `∫ y in s, A + c * ∫ y in s, B` — the first ∫ swallows everything
+after the comma (nested-∫ in the ring-atom diff was the tell). Parenthesise every
+integral that is followed by `+`.
