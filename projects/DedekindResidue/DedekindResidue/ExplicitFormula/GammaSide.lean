@@ -4008,4 +4008,234 @@ theorem digamma_half_sub_quarter :
   push_cast at h1 h2 ⊢
   linear_combination h1/2 - h2/2
 
+/-- Pushforward of Lebesgue measure under `x ↦ x/2` is `2 • volume`. -/
+theorem map_volume_half_mul :
+    Measure.map (fun x : ℝ => (2:ℝ)⁻¹ * x) (volume : Measure ℝ)
+      = (2 : ℝ≥0∞) • (volume : Measure ℝ) := by
+  rw [Real.map_volume_mul_left (by norm_num : ((2:ℝ)⁻¹) ≠ 0)]
+  rw [show |((2:ℝ)⁻¹)⁻¹| = (2:ℝ) by norm_num]
+  rw [show ((2:ℝ) : ℝ) = ((2:ℕ) : ℝ) by norm_num, ENNReal.ofReal_natCast]
+  norm_num
+
+/-- Integrability of the half-scaled test function `x ↦ F(x/2)/2`. -/
+theorem integrable_halfScale {F : ℝ → ℂ} (hF : Integrable F) :
+    Integrable (fun x : ℝ => F (x/2) / 2) := by
+  have h0 : Integrable (fun x : ℝ => F ((2:ℝ)⁻¹ * x)) :=
+    (MeasureTheory.integrable_comp_mul_left_iff F (by norm_num : ((2:ℝ)⁻¹) ≠ 0)).mpr hF
+  refine (h0.div_const 2).congr (Filter.Eventually.of_forall (fun x => ?_))
+  show F ((2:ℝ)⁻¹ * x) / 2 = F (x/2) / 2
+  rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+
+/-- The near-zero local integrability hypothesis transfers to the half-scaled
+test function. -/
+theorem integrableOn_halfScale_div {F : ℝ → ℂ}
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1)) :
+    IntegrableOn (fun x : ℝ => (F 0/2 - F (x/2)/2)/(x:ℂ)) (Set.Ioc (-1) 1) := by
+  set q : ℝ → ℂ := fun w => (F 0 - F w)/(w:ℂ) with hq
+  have h1 : IntegrableOn q (Set.Ioc (-(1/2)) (1/2)) :=
+    hFdiv.mono_set (fun x hx => ⟨by linarith [hx.1], by linarith [hx.2]⟩)
+  have he : MeasurableEmbedding (fun x : ℝ => (2:ℝ)⁻¹ * x) :=
+    (Homeomorph.mulLeft₀ ((2:ℝ)⁻¹) (by norm_num)).isClosedEmbedding.measurableEmbedding
+  have hpre : (fun x : ℝ => (2:ℝ)⁻¹ * x) ⁻¹' (Set.Ioc (-(1/2)) (1/2)) = Set.Ioc (-1) 1 := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_Ioc]
+    constructor
+    · rintro ⟨ha, hb⟩
+      constructor <;> linarith
+    · rintro ⟨ha, hb⟩
+      constructor <;> linarith
+  have hrestr : Measure.map (fun x : ℝ => (2:ℝ)⁻¹ * x)
+        ((volume : Measure ℝ).restrict (Set.Ioc (-1) 1))
+      = ((2 : ℝ≥0∞) • (volume : Measure ℝ)).restrict (Set.Ioc (-(1/2)) (1/2)) := by
+    rw [← hpre, ← Measure.restrict_map he.measurable measurableSet_Ioc, map_volume_half_mul]
+  have h2 : Integrable (fun x : ℝ => q ((2:ℝ)⁻¹ * x))
+      ((volume : Measure ℝ).restrict (Set.Ioc (-1) 1)) := by
+    have h3 : Integrable q (Measure.map (fun x : ℝ => (2:ℝ)⁻¹ * x)
+        ((volume : Measure ℝ).restrict (Set.Ioc (-1) 1))) := by
+      rw [hrestr, Measure.restrict_smul]
+      exact (integrable_smul_measure (by norm_num) (by norm_num)).mpr h1
+    exact he.integrable_map_iff.mp h3
+  refine (h2.const_mul ((1/4 : ℂ))).congr (Filter.Eventually.of_forall (fun x => ?_))
+  show (1/4 : ℂ) * q ((2:ℝ)⁻¹ * x) = (F 0/2 - F (x/2)/2)/(x:ℂ)
+  rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+  show (1/4 : ℂ) * ((F 0 - F (x/2))/((x/2 : ℝ):ℂ)) = (F 0/2 - F (x/2)/2)/(x:ℂ)
+  rw [show ((x/2 : ℝ) : ℂ) = (x:ℂ)/2 by push_cast; ring]
+  rw [div_div_eq_mul_div]
+  rw [show (F 0/2 - F (x/2)/2) = (F 0 - F (x/2))/2 by ring]
+  rw [mul_div_assoc']
+  congr 1
+  ring
+
+/-- The global square-integrability hypothesis transfers to the half-scaled
+test function. -/
+theorem memLp_two_halfScale_div {F : ℝ → ℂ}
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    MemLp (fun x : ℝ => (F 0/2 - F (x/2)/2)/(x:ℂ)) 2 (volume : Measure ℝ) := by
+  set q : ℝ → ℂ := fun w => (F 0 - F w)/(w:ℂ) with hq
+  have he : Measurable (fun x : ℝ => (2:ℝ)⁻¹ * x) := measurable_id.const_mul _
+  have hq2 : MemLp q 2 ((2 : ℝ≥0∞) • (volume : Measure ℝ)) :=
+    hFdiv2.smul_measure (by norm_num)
+  rw [← map_volume_half_mul] at hq2
+  have h3 : MemLp (q ∘ (fun x : ℝ => (2:ℝ)⁻¹ * x)) 2 (volume : Measure ℝ) :=
+    (memLp_map_measure_iff hq2.aestronglyMeasurable he.aemeasurable).mp hq2
+  refine (memLp_congr_ae (Filter.Eventually.of_forall (fun x => ?_))).mp
+    (h3.const_mul ((1/4 : ℂ)))
+  show (1/4 : ℂ) * q ((2:ℝ)⁻¹ * x) = (F 0/2 - F (x/2)/2)/(x:ℂ)
+  rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+  show (1/4 : ℂ) * ((F 0 - F (x/2))/((x/2 : ℝ):ℂ)) = (F 0/2 - F (x/2)/2)/(x:ℂ)
+  rw [show ((x/2 : ℝ) : ℂ) = (x:ℂ)/2 by push_cast; ring]
+  rw [div_div_eq_mul_div]
+  rw [show (F 0/2 - F (x/2)/2) = (F 0 - F (x/2))/2 by ring]
+  rw [mul_div_assoc']
+  congr 1
+  ring
+
+/-- **Proposition 3 at the quarter point with half-scaled frequency** (the
+`Re ψ(1/4 + it/2)` term of Poitou p. 6-03/6-04): for `F` integrable, even, with
+the local and global divided-difference hypotheses and the boundary decay for the
+half-scaled data,
+
+`lim_{T→∞} ∫_{-T}^T 2(Re ψ(1/4 + it/2) - ψ(1/4))·φ(t) dt
+   = 8π ∫₀^∞ e^{-x/2}(F(0) - F(x))/(1 - e^{-2x}) dx`. -/
+theorem prop3_poitou_quarter {F : ℝ → ℂ} (hF : Integrable F)
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atTop (nhds 0))
+    (hbot : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
+            - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      atTop (nhds (((8*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(y/2)) / (1 - Real.exp (-(2*y))) : ℝ) : ℂ) * (F 0 - F y))) := by
+  set Fh : ℝ → ℂ := fun x => F (x/2) / 2 with hFh_def
+  have hFh0 : Fh 0 = F 0 / 2 := by
+    show F (0/2) / 2 = F 0 / 2
+    norm_num
+  -- transferred hypotheses
+  have hFh : Integrable Fh := integrable_halfScale hF
+  have hFh_even : ∀ x : ℝ, Fh (-x) = Fh x := by
+    intro x
+    show F ((-x)/2) / 2 = F (x/2) / 2
+    rw [show (-x)/2 = -(x/2) by ring, hFeven]
+  have hFhx : ∀ x : ℝ, Fh x = F (x/2) / 2 := fun _ => rfl
+  have hFhdiv : IntegrableOn (fun x : ℝ => (Fh 0 - Fh x)/(x:ℂ)) (Set.Ioc (-1) 1) := by
+    refine (integrableOn_halfScale_div hFdiv).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    show (F 0/2 - F (x/2)/2)/(x:ℂ) = (Fh 0 - Fh x)/(x:ℂ)
+    rw [hFh0, hFhx]
+  have hFhdiv2 : MemLp (fun x : ℝ => (Fh 0 - Fh x)/(x:ℂ)) 2 (volume : Measure ℝ) := by
+    refine (memLp_congr_ae (Filter.Eventually.of_forall (fun x => ?_))).mp
+      (memLp_two_halfScale_div hFdiv2)
+    show (F 0/2 - F (x/2)/2)/(x:ℂ) = (Fh 0 - Fh x)/(x:ℂ)
+    rw [hFh0, hFhx]
+  have h0 := prop3_poitou (show (0:ℝ) < 1/4 by norm_num) hFh hFh_even hFhdiv hFhdiv2
+    htop hbot
+  -- the Fourier transform of the half-scaled function is φ(2u)
+  have hFour : ∀ u : ℝ, (∫ x : ℝ, Fh x * Complex.exp ((u*x : ℝ) * Complex.I))
+      = ∫ x : ℝ, F x * Complex.exp (((2*u)*x : ℝ) * Complex.I) := by
+    intro u
+    set g : ℝ → ℂ := fun w => F w * Complex.exp (((2*u)*w : ℝ) * Complex.I) with hg
+    have h1 : (∫ x : ℝ, g ((2:ℝ)⁻¹ * x)) = |(((2:ℝ)⁻¹))⁻¹| • ∫ x : ℝ, g x :=
+      MeasureTheory.Measure.integral_comp_mul_left g ((2:ℝ)⁻¹)
+    have h2 : (fun x : ℝ => Fh x * Complex.exp ((u*x : ℝ) * Complex.I))
+        = fun x : ℝ => (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x) := by
+      funext x
+      show F (x/2) / 2 * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x)
+      rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+      show F (x/2) / 2 * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * (F (x/2) * Complex.exp (((2*u)*(x/2) : ℝ) * Complex.I))
+      rw [show ((2*u)*(x/2) : ℝ) = (u*x : ℝ) by ring]
+      ring
+    rw [h2, MeasureTheory.integral_const_mul, h1,
+      show |(((2:ℝ)⁻¹))⁻¹| = (2:ℝ) by norm_num, Complex.real_smul]
+    push_cast
+    ring
+  -- fixed-T change of variables t = 2u
+  have hint : ∀ T : ℝ, (∫ t in (-T)..T,
+      (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
+          - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+        * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      = 2 * ∫ u in (-(T/2))..(T/2),
+          (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + (u:ℂ)*Complex.I)
+              - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+            * (∫ x : ℝ, Fh x * Complex.exp ((u*x : ℝ) * Complex.I)) := by
+    intro T
+    have h1 := intervalIntegral.integral_comp_mul_left
+      (f := fun t : ℝ =>
+        (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
+            - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      (a := -(T/2)) (b := T/2) (show (2:ℝ) ≠ 0 by norm_num)
+    rw [show (2:ℝ) * -(T/2) = -T by ring, show (2:ℝ) * (T/2) = T by ring] at h1
+    have h2 : (∫ t in (-T)..T,
+        (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
+            - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+        = (2:ℝ) • ∫ u in (-(T/2))..(T/2),
+            (((2 * ((Complex.digamma (((1/4 : ℝ):ℂ) + (((2*u)/2 : ℝ):ℂ)*Complex.I)
+                - Complex.digamma ((1/4 : ℝ):ℂ)).re) : ℝ)) : ℂ)
+              * (∫ x : ℝ, F x * Complex.exp (((2*u)*x : ℝ) * Complex.I)) := by
+      rw [h1, smul_smul]
+      norm_num
+    rw [h2, Complex.real_smul, Complex.ofReal_ofNat]
+    congr 1
+    refine intervalIntegral.integral_congr (fun u _ => ?_)
+    rw [show (((2*u)/2 : ℝ) : ℂ) = (u:ℂ) from Complex.ofReal_inj.mpr (by ring)]
+    rw [hFour u]
+  -- the limit value under the y = 2x substitution
+  have hlim : (2:ℂ) * ((((4*π : ℝ)) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+      ((Real.exp (-(1/4*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (Fh 0 - Fh y))
+      = ((8*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(y/2)) / (1 - Real.exp (-(2*y))) : ℝ) : ℂ) * (F 0 - F y) := by
+    set m : ℝ → ℂ := fun y =>
+      ((Real.exp (-(1/4*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (Fh 0 - Fh y) with hm
+    have h1 := MeasureTheory.integral_comp_mul_left_Ioi m 0
+      (show (0:ℝ) < 2 by norm_num)
+    rw [mul_zero] at h1
+    have h2 : ∀ x ∈ Set.Ioi (0:ℝ), m (2*x)
+        = ((Real.exp (-(x/2)) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ)
+            * ((F 0 - F x)/2) := by
+      intro x _
+      show ((Real.exp (-(1/4*(2*x))) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ)
+          * (Fh 0 - Fh (2*x))
+        = ((Real.exp (-(x/2)) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ) * ((F 0 - F x)/2)
+      rw [hFh0, show Fh (2*x) = F x / 2 from by
+        show F ((2*x)/2) / 2 = F x / 2
+        rw [show (2*x)/2 = x by ring]]
+      rw [show -(1/4*(2*x)) = -(x/2) by ring]
+      push_cast
+      ring
+    rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi h2] at h1
+    -- h1 : ∫ (kernel'·(F0−Fx)/2) = 2⁻¹ • ∫ m
+    have h3 : (∫ y in Set.Ioi (0:ℝ), m y)
+        = 2 * ∫ x in Set.Ioi (0:ℝ),
+            ((Real.exp (-(x/2)) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ)
+              * ((F 0 - F x)/2) := by
+      rw [h1, Complex.real_smul]
+      push_cast
+      ring
+    rw [h3]
+    rw [show (∫ x in Set.Ioi (0:ℝ),
+        ((Real.exp (-(x/2)) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ) * ((F 0 - F x)/2))
+        = (1/2 : ℂ) * ∫ x in Set.Ioi (0:ℝ),
+          ((Real.exp (-(x/2)) / (1 - Real.exp (-(2*x))) : ℝ) : ℂ) * (F 0 - F x) from by
+      rw [← MeasureTheory.integral_const_mul]
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x _ => ?_)
+      ring]
+    push_cast
+    ring
+  -- assemble
+  refine Tendsto.congr (fun T => (hint T).symm) ?_
+  have hhalf : Tendsto (fun T : ℝ => T/2) atTop atTop :=
+    tendsto_atTop_atTop.mpr (fun b => ⟨2*b, fun a ha => by linarith⟩)
+  have h9 := (h0.comp hhalf).const_mul (2:ℂ)
+  rw [hlim] at h9
+  exact h9
 end DedekindResidue
