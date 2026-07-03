@@ -136,6 +136,290 @@ theorem tsum_zetaZeros_paperPhi_auxF_eq (hGRH : GeneralizedRiemannHypothesis K)
       (summable_zetaZeros_paperPhi_auxF K hGRH s hX hs) ha hTtop)
     hTlim
 
+/-! ### The three pieces of the Fourier closed form (Lemma 2, eq. (8))
+
+`F̂_{s,X}(γ)` splits into a sine piece, a cosine piece and a tail-integral piece; the
+sine piece carries the removable singularity at `γ = 0` (plateau value `2·log X`),
+matching the `γ = 0` companion `fourier_auxF_zero`. These are the three zero-sums of
+Belabas–Friedman's Lemma 3 display (eq. (13)). -/
+
+/-- The sine piece `2h²·sin(Tγ)/((h²+γ²)γ)` of eq. (8), with its plateau value `2T`
+at `γ = 0` (`h := s − 1/2`, `T := log X`). -/
+noncomputable def zeroSinTerm (s : ℂ) (X : ℝ) (γ : ℝ) : ℂ :=
+  if γ = 0 then 2 * (Real.log X : ℂ)
+  else 2 * (s - 1/2)^2 / (((s - 1/2)^2 + (γ:ℂ)^2) * γ)
+    * ((Real.sin (Real.log X * γ) : ℝ) : ℂ)
+
+/-- The cosine piece `2(h + 1/T)·cos(Tγ)/(h²+γ²)` of eq. (8). -/
+noncomputable def zeroCosTerm (s : ℂ) (X : ℝ) (γ : ℝ) : ℂ :=
+  2 * ((s - 1/2) + 1/(Real.log X : ℂ)) / ((s - 1/2)^2 + (γ:ℂ)^2)
+    * ((Real.cos (Real.log X * γ) : ℝ) : ℂ)
+
+/-- The tail-integral piece `4/(h²+γ²)·∫_T^∞ cos(tγ)·F_{s,X}(t)·(ht+1)/t² dt` of
+eq. (8). -/
+noncomputable def zeroIntTerm (s : ℂ) (X : ℝ) (γ : ℝ) : ℂ :=
+  4 / ((s - 1/2)^2 + (γ:ℂ)^2)
+    * ∫ t in Set.Ioi (Real.log X),
+        ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * (((s - 1/2)*t + 1)/t^2)
+
+/-- **The three-piece split of the Fourier transform of the auxiliary function**:
+Lemma 2's closed form (eq. (8)) and its `γ = 0` companion, packaged as one total
+identity `F̂_{s,X}(γ) = sin-piece + cos-piece − integral-piece`. -/
+theorem paperFourierIntegral_auxF_split (s : ℂ) {X : ℝ} (hX : 1 < X)
+    (hs : 1/2 < s.re) (γ : ℝ) :
+    paperFourierIntegral (auxF s X) γ
+      = zeroSinTerm s X γ + zeroCosTerm s X γ - zeroIntTerm s X γ := by
+  by_cases hγ : γ = 0
+  · subst hγ
+    rw [fourier_auxF_zero s hX hs, zeroSinTerm, zeroCosTerm, zeroIntTerm, if_pos rfl]
+    have h2 : ((Real.cos (Real.log X * 0) : ℝ) : ℂ) = 1 := by
+      rw [mul_zero, Real.cos_zero, Complex.ofReal_one]
+    have h3 : (∫ t in Set.Ioi (Real.log X),
+        ((Real.cos (t * 0) : ℝ) : ℂ) * auxF s X t * (((s - 1/2)*t + 1)/t^2))
+        = ∫ t in Set.Ioi (Real.log X), auxF s X t * (((s - 1/2)*t + 1)/t^2) := by
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun t => ?_))
+      dsimp only
+      rw [mul_zero, Real.cos_zero, Complex.ofReal_one, one_mul]
+    rw [h2, h3]
+    push_cast
+    ring
+  · rw [fourier_auxF s hX hs hγ, zeroSinTerm, if_neg hγ, zeroCosTerm, zeroIntTerm]
+
+/-- The eq-(8) tail integrand is integrable on `(T, ∞)`: on the tail `F_{s,X}` is the
+exponential kernel `T·e^{hT}·e^{−ht}/t`, and the cofactor `cos(tγ)·(ht+1)/t²` is
+continuous and bounded there. -/
+theorem integrableOn_auxF_tail_kernel (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re)
+    (γ : ℝ) :
+    MeasureTheory.IntegrableOn (fun t : ℝ =>
+        ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * (((s - 1/2)*t + 1)/t^2))
+      (Set.Ioi (Real.log X)) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hh : 0 < (s - 1/2 : ℂ).re := by
+    have h1 : (s - 1/2 : ℂ).re = s.re - 1/2 := by
+      simp [Complex.sub_re]
+    rw [h1]
+    linarith
+  set T : ℝ := Real.log X with hT_def
+  set cT : ℂ := (T : ℂ) * Complex.exp ((s - 1/2) * (T:ℂ)) with hcT_def
+  have hbdd : ∀ t ∈ Set.Ioi T, ‖((Real.cos (t * γ) : ℝ) : ℂ) * cT
+      * (((s - 1/2)*t + 1)/(t:ℂ)^2)‖ ≤ ‖cT‖ * (‖(s - 1/2 : ℂ)‖/T + 1/T^2) := by
+    intro t ht
+    have htpos : 0 < t := hT0.trans ht
+    have hTt : T ≤ t := le_of_lt ht
+    rw [norm_mul, norm_mul]
+    have hc : ‖((Real.cos (t*γ) : ℝ) : ℂ)‖ ≤ 1 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_cos_le_one _
+    have hq : ‖(((s - 1/2)*t + 1)/(t:ℂ)^2 : ℂ)‖ ≤ ‖(s - 1/2 : ℂ)‖/T + 1/T^2 := by
+      rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
+      have hnum : ‖((s - 1/2)*(t:ℂ) + 1 : ℂ)‖ ≤ ‖(s - 1/2 : ℂ)‖ * t + 1 := by
+        refine (norm_add_le _ _).trans ?_
+        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos, norm_one]
+      refine (div_le_div_of_nonneg_right hnum (by positivity)).trans ?_
+      rw [div_le_iff₀ (by positivity : (0:ℝ) < t^2), add_mul]
+      have hhn : (0:ℝ) ≤ ‖(s - 1/2 : ℂ)‖ := norm_nonneg _
+      have e1 : ‖(s - 1/2 : ℂ)‖ * t ≤ ‖(s - 1/2 : ℂ)‖/T * t^2 := by
+        rw [div_mul_eq_mul_div, le_div_iff₀ hT0]
+        have := mul_le_mul_of_nonneg_left hTt (mul_nonneg hhn htpos.le)
+        nlinarith
+      have e2 : (1:ℝ) ≤ 1/T^2 * t^2 := by
+        rw [div_mul_eq_mul_div, le_div_iff₀ (by positivity : (0:ℝ) < T^2)]
+        nlinarith
+      linarith
+    calc ‖((Real.cos (t*γ) : ℝ) : ℂ)‖ * ‖cT‖ * ‖(((s - 1/2)*t + 1)/(t:ℂ)^2 : ℂ)‖
+        ≤ 1 * ‖cT‖ * (‖(s - 1/2 : ℂ)‖/T + 1/T^2) := by
+          refine mul_le_mul (mul_le_mul_of_nonneg_right hc (norm_nonneg _)) hq
+            (norm_nonneg _) (by positivity)
+      _ = ‖cT‖ * (‖(s - 1/2 : ℂ)‖/T + 1/T^2) := by ring
+  refine ((integrableOn_bounded_mul_exp_div hh hT0
+      (φ := fun t : ℝ => ((Real.cos (t * γ) : ℝ) : ℂ) * cT * (((s - 1/2)*t + 1)/(t:ℂ)^2))
+      ?_ hbdd)).congr_fun (fun t ht => ?_) measurableSet_Ioi
+  · refine ContinuousOn.mul (ContinuousOn.mul ?_ continuousOn_const) ?_
+    · exact (Complex.continuous_ofReal.comp
+        (Real.continuous_cos.comp (continuous_id.mul continuous_const))).continuousOn
+    · refine ContinuousOn.div (by fun_prop) (by fun_prop) ?_
+      intro t ht
+      have htpos : (0:ℝ) < t := hT0.trans ht
+      exact_mod_cast pow_ne_zero 2 (by exact_mod_cast htpos.ne' : (t:ℂ) ≠ 0)
+  · rw [auxF_tail_form s hX t ht]
+    ring
+
+/-! ### Norm bounds at real `σ` and summability of the three zero-series -/
+
+/-- Generic summability wrapper: any test function with a `c/(h²+γ²)` bound
+(`h := σ − 1/2 > 0`) is divisor-summable over the zero index (Landau). -/
+theorem summable_zetaZeros_mul_of_norm_le {σ : ℝ} (hσ : 1/2 < σ) {f : ℝ → ℂ} {c : ℝ}
+    (hf : ∀ γ : ℝ, ‖f γ‖ ≤ c / ((σ - 1/2)^2 + γ^2)) :
+    Summable (fun ρ : ZetaZeros K => (zetaZeroDivisor K ρ.1 : ℂ) * f ρ.1.im) := by
+  have hh : (0:ℝ) < σ - 1/2 := by linarith
+  refine Summable.of_norm_bounded
+    ((summable_zetaZeros_inv_sq K (σ - 1/2) hh).mul_left c) (fun ρ => ?_)
+  rw [norm_mul]
+  have hdnn : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+    exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+  have hnormd : ‖((zetaZeroDivisor K ρ.1 : ℤ) : ℂ)‖ = (zetaZeroDivisor K ρ.1 : ℝ) := by
+    rw [Complex.norm_intCast, abs_of_nonneg]
+    exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+  rw [hnormd]
+  calc (zetaZeroDivisor K ρ.1 : ℝ) * ‖f ρ.1.im‖
+      ≤ (zetaZeroDivisor K ρ.1 : ℝ) * (c / ((σ - 1/2)^2 + ρ.1.im^2)) :=
+        mul_le_mul_of_nonneg_left (hf _) hdnn
+    _ = c * ((zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)) := by ring
+
+/-- **Sine-piece bound**: `‖zeroSinTerm‖ ≤ 2h²T/(h²+γ²)` — `|sin(Tγ)| ≤ T|γ|` kills
+the `1/γ`, uniformly through the plateau at `γ = 0`. -/
+theorem norm_zeroSinTerm_le {σ : ℝ} (hσ : 1/2 < σ) {X : ℝ} (hX : 1 < X) (γ : ℝ) :
+    ‖zeroSinTerm (σ:ℂ) X γ‖
+      ≤ 2*(σ - 1/2)^2 * Real.log X / ((σ - 1/2)^2 + γ^2) := by
+  have hh : (0:ℝ) < σ - 1/2 := by linarith
+  have hh2 : (0:ℝ) < (σ - 1/2)^2 := pow_pos hh 2
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  by_cases hγ : γ = 0
+  · subst hγ
+    rw [zeroSinTerm, if_pos rfl]
+    have h1 : (2 * (Real.log X : ℂ)) = ((2*Real.log X : ℝ) : ℂ) := by push_cast; ring
+    rw [h1, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by positivity)]
+    have h2 : 2*(σ - 1/2)^2 * Real.log X / ((σ - 1/2)^2 + 0^2) = 2*Real.log X := by
+      rw [show (0:ℝ)^2 = 0 by norm_num, add_zero,
+        show 2*(σ - 1/2)^2*Real.log X = 2*Real.log X * (σ - 1/2)^2 by ring,
+        mul_div_assoc, div_self hh2.ne', mul_one]
+    rw [h2]
+  · have h1 : zeroSinTerm (σ:ℂ) X γ
+        = ((2*(σ - 1/2)^2 / (((σ - 1/2)^2 + γ^2)*γ)
+            * Real.sin (Real.log X * γ) : ℝ) : ℂ) := by
+      rw [zeroSinTerm, if_neg hγ]
+      push_cast
+      ring
+    rw [h1, Complex.norm_real, Real.norm_eq_abs]
+    have hD : (0:ℝ) < (σ - 1/2)^2 + γ^2 := by positivity
+    have habs : |2*(σ - 1/2)^2 / (((σ - 1/2)^2 + γ^2)*γ) * Real.sin (Real.log X * γ)|
+        = 2*(σ - 1/2)^2 * |Real.sin (Real.log X * γ)|
+          / (((σ - 1/2)^2 + γ^2) * |γ|) := by
+      rw [abs_mul, abs_div, abs_mul, abs_mul, abs_two, abs_of_pos hh2, abs_of_pos hD]
+      ring
+    have hsin : |Real.sin (Real.log X * γ)| ≤ Real.log X * |γ| := by
+      have h2 := Real.abs_sin_le_abs (x := Real.log X * γ)
+      rwa [abs_mul, abs_of_pos hT0] at h2
+    have hγ' : |γ| ≠ 0 := abs_ne_zero.mpr hγ
+    have hγpos : (0:ℝ) < |γ| := abs_pos.mpr hγ
+    rw [habs]
+    calc 2*(σ - 1/2)^2 * |Real.sin (Real.log X * γ)| / (((σ - 1/2)^2 + γ^2) * |γ|)
+        ≤ 2*(σ - 1/2)^2 * (Real.log X * |γ|) / (((σ - 1/2)^2 + γ^2) * |γ|) := by
+          gcongr
+      _ = 2*(σ - 1/2)^2 * Real.log X / ((σ - 1/2)^2 + γ^2) := by
+          rw [show 2*(σ - 1/2)^2 * (Real.log X * |γ|)
+              = 2*(σ - 1/2)^2 * Real.log X * |γ| by ring,
+            mul_div_mul_right _ _ hγ']
+
+/-- **Cosine-piece bound**: `‖zeroCosTerm‖ ≤ 2(h + 1/T)/(h²+γ²)`. -/
+theorem norm_zeroCosTerm_le {σ : ℝ} (hσ : 1/2 < σ) {X : ℝ} (hX : 1 < X) (γ : ℝ) :
+    ‖zeroCosTerm (σ:ℂ) X γ‖
+      ≤ 2*((σ - 1/2) + 1/Real.log X) / ((σ - 1/2)^2 + γ^2) := by
+  have hh : (0:ℝ) < σ - 1/2 := by linarith
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hD : (0:ℝ) < (σ - 1/2)^2 + γ^2 := by positivity
+  have h1 : zeroCosTerm (σ:ℂ) X γ
+      = ((2*((σ - 1/2) + 1/Real.log X) / ((σ - 1/2)^2 + γ^2)
+          * Real.cos (Real.log X * γ) : ℝ) : ℂ) := by
+    rw [zeroCosTerm]
+    push_cast
+    ring
+  rw [h1, Complex.norm_real, Real.norm_eq_abs, abs_mul, abs_div,
+    abs_of_pos (by positivity : (0:ℝ) < 2*((σ - 1/2) + 1/Real.log X)),
+    abs_of_pos hD]
+  calc 2*((σ - 1/2) + 1/Real.log X) / ((σ - 1/2)^2 + γ^2) * |Real.cos (Real.log X * γ)|
+      ≤ 2*((σ - 1/2) + 1/Real.log X) / ((σ - 1/2)^2 + γ^2) * 1 := by
+        gcongr
+        exact abs_cos_le_one _
+    _ = 2*((σ - 1/2) + 1/Real.log X) / ((σ - 1/2)^2 + γ^2) := mul_one _
+
+/-- The uniform (γ-free) majorant of the tail integral: the integrated norm of the
+`γ = 0` integrand. -/
+noncomputable def auxFTailNormBound (σ X : ℝ) : ℝ :=
+  ∫ t in Set.Ioi (Real.log X), ‖auxF (σ:ℂ) X t * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+
+/-- **Integral-piece bound**: `‖zeroIntTerm‖ ≤ 4·M₀/(h²+γ²)` with the γ-free tail
+constant `M₀ = ∫‖F_{s,X}·(ht+1)/t²‖`. -/
+theorem norm_zeroIntTerm_le {σ : ℝ} (hσ : 1/2 < σ) {X : ℝ} (hX : 1 < X) (γ : ℝ) :
+    ‖zeroIntTerm (σ:ℂ) X γ‖
+      ≤ 4 * auxFTailNormBound σ X / ((σ - 1/2)^2 + γ^2) := by
+  have hh : (0:ℝ) < σ - 1/2 := by linarith
+  have hs2 : 1/2 < ((σ:ℂ)).re := by rw [Complex.ofReal_re]; linarith
+  have hD : (0:ℝ) < (σ - 1/2)^2 + γ^2 := by positivity
+  have hDc : ((σ:ℂ) - 1/2)^2 + (γ:ℂ)^2 = (((σ - 1/2)^2 + γ^2 : ℝ) : ℂ) := by
+    push_cast
+    ring
+  -- integrability of the γ = 0 majorant
+  have hint0 : MeasureTheory.IntegrableOn (fun t : ℝ =>
+      auxF (σ:ℂ) X t * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)) (Set.Ioi (Real.log X)) := by
+    refine (integrableOn_auxF_tail_kernel (σ:ℂ) hX hs2 0).congr_fun (fun t ht => ?_)
+      measurableSet_Ioi
+    dsimp only
+    rw [mul_zero, Real.cos_zero, Complex.ofReal_one, one_mul]
+  rw [zeroIntTerm, norm_mul, norm_div, hDc, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos hD]
+  have h4 : ‖(4:ℂ)‖ = 4 := by norm_num
+  rw [h4]
+  have hIle : ‖∫ t in Set.Ioi (Real.log X),
+      ((Real.cos (t * γ) : ℝ) : ℂ) * auxF (σ:ℂ) X t * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+      ≤ auxFTailNormBound σ X := by
+    rw [auxFTailNormBound]
+    refine MeasureTheory.norm_integral_le_of_norm_le hint0.norm ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t _
+    rw [norm_mul, norm_mul, norm_mul]
+    have hc : ‖((Real.cos (t*γ) : ℝ) : ℂ)‖ ≤ 1 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_cos_le_one _
+    calc ‖((Real.cos (t*γ) : ℝ) : ℂ)‖ * ‖auxF (σ:ℂ) X t‖ * ‖(((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2‖
+        ≤ 1 * ‖auxF (σ:ℂ) X t‖ * ‖(((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2‖ := by
+          gcongr
+      _ = ‖auxF (σ:ℂ) X t‖ * ‖(((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2‖ := by ring
+  calc 4 / ((σ - 1/2)^2 + γ^2) * ‖∫ t in Set.Ioi (Real.log X),
+        ((Real.cos (t * γ) : ℝ) : ℂ) * auxF (σ:ℂ) X t * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+      ≤ 4 / ((σ - 1/2)^2 + γ^2) * auxFTailNormBound σ X := by
+        gcongr
+    _ = 4 * auxFTailNormBound σ X / ((σ - 1/2)^2 + γ^2) := by ring
+
+/-- **The three-series split of the zero side** (the Lemma 3 display's zero sums):
+under GRH at real `σ > 1`, the absolutely convergent zero sum of the explicit formula
+splits into the sine, cosine and tail-integral series, each absolutely convergent. -/
+theorem tsum_zetaZeros_paperPhi_auxF_split (hGRH : GeneralizedRiemannHypothesis K)
+    {σ X : ℝ} (hσ : 1 < σ) (hX : 1 < X) :
+    ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * paperPhi (auxF (σ:ℂ) X) ρ.1
+      = (∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+        + (∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+        - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im := by
+  have hσ2 : (1:ℝ)/2 < σ := by linarith
+  have hs2 : 1/2 < ((σ:ℂ)).re := by rw [Complex.ofReal_re]; linarith
+  have hsin : Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im) :=
+    summable_zetaZeros_mul_of_norm_le K hσ2 (fun γ => norm_zeroSinTerm_le hσ2 hX γ)
+  have hcos : Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im) :=
+    summable_zetaZeros_mul_of_norm_le K hσ2 (fun γ => norm_zeroCosTerm_le hσ2 hX γ)
+  have hint : Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im) :=
+    summable_zetaZeros_mul_of_norm_le K hσ2 (fun γ => norm_zeroIntTerm_le hσ2 hX γ)
+  have hpoint : ∀ ρ : ZetaZeros K,
+      (zetaZeroDivisor K ρ.1 : ℂ) * paperPhi (auxF (σ:ℂ) X) ρ.1
+        = ((zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im
+            + (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+          - (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im := by
+    intro ρ
+    have hre := ZetaZeros_re_eq_half K hGRH ρ
+    have hρ_eq : ρ.1 = ((1/2 : ℝ) : ℂ) + (ρ.1.im : ℂ) * Complex.I := by
+      apply Complex.ext
+      · simpa using hre
+      · simp
+    have h12 : ((1/2 : ℝ) : ℂ) = (1/2 : ℂ) := by norm_num
+    rw [show paperPhi (auxF (σ:ℂ) X) ρ.1 = paperFourierIntegral (auxF (σ:ℂ) X) ρ.1.im by
+      conv_lhs => rw [hρ_eq, h12]
+      rw [paperPhi_half_add_mul_I],
+      paperFourierIntegral_auxF_split (σ:ℂ) hX hs2 ρ.1.im]
+    ring
+  rw [tsum_congr hpoint, Summable.tsum_sub (hsin.add hcos) hint,
+    Summable.tsum_add hsin hcos]
+
 end DedekindResidue
 
 end
