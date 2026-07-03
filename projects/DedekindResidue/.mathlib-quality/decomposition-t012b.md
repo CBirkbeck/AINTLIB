@@ -101,3 +101,49 @@ CAREFUL: 2.324 in the paper is their rounding — CHECK: (3/2)(1+(log9)/4) = 1.5
 1.5+0.75·1.098612 = 2.32396 < 2.324 ✓ (need log3 < 1.09867: certified). 6/1.549653 = 3.8718 < 3.88 ✓; 
 3·2.197224/1.549653 = 4.2538 < 4.26 ✓.]
 Final: belabas_friedman_thm1 in MainTheorem.lean (replace sorry; MainTheorem imports Theorem1 ✓).
+
+## BREAKTHROUGH REVISION (supersedes Brick Γ/D digamma plans): NO DIGAMMA NEEDED
+Let Is(σ) := ∫_{Ioi 0} 1/(2sinh(y/2))(1−e^{−(σ−1/2)y}), Ic(σ) := cosh version.
+- **Recurrence** Is(σ+1) = Is(σ) + 1/σ: difference integrand = e^{−σy}(e^{y/2}−e^{−y/2})/(2sinh(y/2))
+  = e^{−σy}; ∫_{Ioi 0} e^{−σy} = 1/σ. [integral_sub + exp integral; PURE ALGEBRA]
+- **Is(1) = 2log2** by FTC: integrand = e^{−y/2}/(1+e^{−y/2}); antider −2log(1+e^{−y/2}),
+  F(0) = −2log2, F(∞) = 0. [integral_Ioi_of_hasDerivAt_of_tendsto — known pattern]
+- ⟹ Is(2) = 1+2log2, Is(3) = 3/2+2log2 free.
+- **Is mono in σ** (setIntegral_mono, integrand mono) ⟹ for 1 < σ ≤ 2:
+  Is(σ) + 1/σ = Is(σ+1) ≤ Is(3) = 3/2+2log2.
+- **Ic ∈ [0, π/2]**: 0 ≤ integrand ≤ 1/(2cosh(y/2)) and GammaSide has
+  `∫ 1/(2cosh(u/2)) = π/2` (integral_Ioi_inv_two_cosh, line ~972).
+- **Ic(2) = π/2 − (1−log2)**: Ic(2) = π/2 − J, J := ∫e^{−3y/2}/(2cosh(y/2))
+  = ∫e^{−2y}/(1+e^{−y}) = 1−log2 by FTC: antider log(1+e^{−y}) − e^{−y}, F(0) = log2−1, F(∞) = 0.
+- **dSigma K σ ≥ 2γ + 2log2π − 3** for 1 < σ ≤ 2 (n≥2, W≥0, Ic ≤ π/2, r₁(π/2−Ic) ≥ 0 needs
+  r₁ coefficient handling: dSigma has −r₁·Ic ≥ −r₁·π/2 so r₁π/2 − r₁Ic ≥ 0 ✓ drop;
+  n(γ+log8π−Is(σ)) ≥ 2(γ+log8π−Is(σ)) needs γ+log8π−Is(σ) ≥ 0: Is(σ) ≤ Is(3) = 3/2+2log2 <
+  γ+log8π ✓ numeric-free? log8π = 3log2+logπ: need 3/2+2log2 ≤ γ+3log2+logπ ⟺ 3/2 ≤ γ+log2+logπ
+  ≈ 0.577+0.693+1.145 = 2.415 ✓ needs certified γ,log2,logπ lower bounds — OR keep n-coeff as
+  n(...) ≥ 2(...) only when (...) ≥ 0 — same certificates);
+  then d ≥ 2(γ+log8π) − 2Is(σ) − 2/σ = 2(γ+log8π) − 2(Is(σ)+1/σ) ≥ 2(γ+log8π) − 2(3/2+2log2)
+  = 2γ + 2logπ + 2log2 − 3 = 2γ + 2log2π − 3 =: dLow ≈ 1.830.
+- **dSigma ℚ 2 = 2W + γ + logπ − 1** exactly (n=r₁=1 values above; the 8π/2cosh constants
+  collapse: (γ+log8π) + π/2 − (1+2log2) − (π/2−1+log2) − 1 = γ+logπ−1).
+- **Σℚ ≤ 3(2−dℚ2) = 3(3 − 2W − γ − logπ)**; W ≥ Σ_{p∈{2,3,5,7,11,13,17,19,23}} logp/p²
+  (m=1 terms only) ≥ 0.4584.
+- **FINAL numeric target**: 3(3−2W−γ−logπ) ≤ 2γ+2log2π−3 ⟺ 12 ≤ 6W+5γ+5logπ+2log2+2·...
+  recompute: 9−6W−3γ−3logπ ≤ 2γ+2log2+2logπ−3 ⟺ 12 ≤ 6W+5γ+5logπ+2log2:
+  6(0.4584)+5(0.5772)+5(1.1447)+2(0.6931) = 2.7504+2.886+5.7235+1.3862 = 12.746 ✓ margin 0.7.
+  Certificates needed: log2 > 0.6931 (mathlib log_two_gt_d9 ✓), logπ > 1.1447 
+  (π > 3.141592 ✓ + log(3.141592) > 1.1447 ⟸ e^{1.1447} < 3.141592: e·e^{0.1447}:
+  bound e^{0.1447} via series/1/(1−x)... or logπ > log3 = 1.0986 (log3 bounds derivable from
+  log2 + log(3/2)?? mathlib: Real.log_three bounds? hmm) — with logπ ≥ log3 ≥ 1.0986:
+  sum = 2.7504+2.886+5.493+1.3862 = 12.5156 ✓ STILL ≥ 12 with margin 0.5 — log3 route suffices
+  IF mathlib has log3 bounds; else logπ ≥ log2 = 0.6931·... no: π ≥ 2·e^{0.4}?? KISS: 
+  π > 3 → logπ > log3; log3 = log2 + log(3/2); log(3/2) > 0.405: e^{0.405} < 1.5 ⟸ 
+  e^{0.405} ≤ 1/(1−0.405)?? = 1.68 too crude; series: e^{0.405} ≤ 1+0.405+0.082+0.011+0.0011+...
+  ≈ 1.4993 < 1.5 ✓ via Real.exp_bound (mathlib exp series remainder) — or check mathlib for 
+  ready log-bounds beyond log2 (Analysis.SpecialFunctions.Log.Basic / Mathlib.Analysis.SpecialFunctions.Log.Deriv 
+  has abs_log_sub_add_sum_range_le for series-based certificates).
+  γ > 0.5772: CHECK Mathlib/NumberTheory/Harmonic/EulerMascheroni.lean for numeric bounds 
+  (eulerMascheroniSeq 6 < γ < eulerMascheroniSeq' 6-style). If only weaker bounds exist, 
+  margins allow γ > 0.5 IF W strengthened: with γ = 0.5: need 6W ≥ 12 − 2.5 − 5.493 − 1.3862 
+  = 2.6208: W ≥ 0.4368 ✓ (already have 0.4584 with 9 primes!) — so even γ > 1/2 works ✓✓ 
+  (EulerMascheroni surely has 1/2 < γ). SO: certificates = log2 > 0.693, log3 > 1.098 (or 
+  logπ ≥ log3 with log3 = log2+log1.5, log1.5 ≥ 0.405), γ > 1/2, W ≥ 9-prime sum, π > 3.
