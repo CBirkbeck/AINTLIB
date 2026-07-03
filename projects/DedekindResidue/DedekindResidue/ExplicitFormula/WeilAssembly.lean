@@ -11,6 +11,7 @@ module
 public import Mathlib
 public import DedekindResidue.ExplicitFormula.ZeroCapture
 public import DedekindResidue.ExplicitFormula.GammaSide
+public import DedekindResidue.ExplicitFormula.AuxAdmissible
 
 @[expose] public section
 
@@ -1947,5 +1948,72 @@ theorem norm_gammaFT_le_of_fourier_decay {F : ℝ → ℂ} (hF : Integrable F)
     · refine ((continuous_const.mul ?_).aestronglyMeasurable).restrict
       exact hφc.comp continuous_neg
     · exact (tendsto_gammaFT_atBot F).comp tendsto_neg_atTop_atBot
+
+/-- The auxiliary function is integrable on the line (exponential decay). -/
+theorem integrable_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
+    Integrable (auxF s X) := by
+  refine Integrable.mono'
+    (g := fun t : ℝ => Real.exp ((s.re - 1/2) * Real.log X)
+      * Real.exp (-(s.re - 1/2) * |t|)) ?_ ?_ ?_
+  · refine Integrable.const_mul ?_ _
+    have h0 := integrable_exp_neg_mul_abs (b := s.re - 1/2) (by linarith)
+    exact h0
+  · exact (continuous_auxF s hX).aestronglyMeasurable
+  · exact Filter.Eventually.of_forall (fun t => norm_auxF_le s hX.le hs.le t)
+
+/-- The divided difference `(F(0) - F(x))/x` of the auxiliary function is integrable
+on the unit window: it vanishes on the plateau `|x| ≤ min 1 (log X)` and is bounded
+by a constant on the remainder. -/
+theorem integrableOn_auxF_diffQuot_window (s : ℂ) {X : ℝ} (hX : 1 < X)
+    (hs : 1/2 < s.re) :
+    IntegrableOn (fun x : ℝ => (auxF s X 0 - auxF s X x)/(x:ℂ)) (Set.Ioc (-1) 1) := by
+  set δ : ℝ := min 1 (Real.log X) with hδ_def
+  have hδ0 : 0 < δ := lt_min one_pos (Real.log_pos hX)
+  set B : ℝ := (1 + Real.exp ((s.re - 1/2) * Real.log X)) / δ with hB_def
+  have hbound : ∀ x : ℝ, ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖ ≤ B := by
+    intro x
+    rcases le_or_gt |x| δ with hx | hx
+    · -- plateau: the numerator vanishes
+      have h1 : auxF s X x = 1 := by
+        rw [auxF, if_pos]
+        exact le_trans hx (min_le_right _ _)
+      rw [auxF_zero s hX.le, h1, sub_self, zero_div, norm_zero, hB_def]
+      positivity
+    · have hx0 : x ≠ 0 := by
+        intro h0
+        rw [h0, abs_zero] at hx
+        linarith
+      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+      have hnum : ‖auxF s X 0 - auxF s X x‖
+          ≤ 1 + Real.exp ((s.re - 1/2) * Real.log X) := by
+        refine le_trans (norm_sub_le _ _) ?_
+        rw [auxF_zero s hX.le, norm_one]
+        have h2 := norm_auxF_le s hX.le hs.le x
+        have h3 : Real.exp (-(s.re - 1/2) * |x|) ≤ 1 := by
+          refine Real.exp_le_one_iff.mpr ?_
+          have := abs_nonneg x
+          nlinarith
+        nlinarith [Real.exp_pos ((s.re - 1/2) * Real.log X),
+          norm_nonneg (auxF s X x), Real.exp_pos (-(s.re - 1/2) * |x|)]
+      rw [hB_def]
+      calc ‖auxF s X 0 - auxF s X x‖ / |x|
+          ≤ (1 + Real.exp ((s.re - 1/2) * Real.log X)) / |x| := by
+            rw [div_le_div_iff_of_pos_right (by positivity)]
+            exact hnum
+        _ ≤ (1 + Real.exp ((s.re - 1/2) * Real.log X)) / δ := by
+            refine div_le_div_of_nonneg_left ?_ hδ0 hx.le
+            positivity
+  refine Integrable.mono' (g := fun _ : ℝ => B)
+    (MeasureTheory.integrableOn_const (by exact (measure_Ioc_lt_top).ne)) ?_
+    (Filter.Eventually.of_forall (fun x => hbound x))
+  refine AEStronglyMeasurable.congr
+    (f := fun x : ℝ => (auxF s X 0 - auxF s X x) * ((x:ℂ))⁻¹) ?_ ?_
+  · refine AEStronglyMeasurable.mul ?_ ?_
+    · exact ((aestronglyMeasurable_const.sub
+        (continuous_auxF s hX).aestronglyMeasurable)).restrict
+    · exact ((Complex.measurable_ofReal.inv).aestronglyMeasurable).restrict
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    show (auxF s X 0 - auxF s X x) * ((x:ℂ))⁻¹ = (auxF s X 0 - auxF s X x)/(x:ℂ)
+    rw [div_eq_mul_inv]
 
 end DedekindResidue
