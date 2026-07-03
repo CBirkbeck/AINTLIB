@@ -2926,4 +2926,204 @@ theorem locallyBoundedVariationOn_poleWindow_auxF_im (s : ℂ) {X : ℝ} (hX : 1
   exact lipschitzWith_complex_im.comp_locallyBoundedVariationOn
     (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
 
+/-- **Variation of a pointwise-convergent series is at most the sum of the
+variations** (the countable subadditivity of total variation). -/
+theorem eVariationOn_tsum_le {ι : Type*} (f : ι → ℝ → ℂ) (s : Set ℝ)
+    (hsum : ∀ x ∈ s, Summable (fun i => f i x)) :
+    eVariationOn (fun x => ∑' i, f i x) s ≤ ∑' i, eVariationOn (f i) s := by
+  rw [eVariationOn]
+  refine iSup_le ?_
+  rintro ⟨n, u, hu, us⟩
+  have hpt : ∀ j : ℕ,
+      edist (∑' i, f i (u (j+1))) (∑' i, f i (u j))
+        ≤ ∑' i, edist (f i (u (j+1))) (f i (u j)) := by
+    intro j
+    rw [edist_eq_enorm_sub, ← Summable.tsum_sub (hsum _ (us (j+1))) (hsum _ (us j))]
+    refine le_trans enorm_tsum_le_tsum_enorm ?_
+    refine ENNReal.tsum_le_tsum (fun i => ?_)
+    rw [edist_eq_enorm_sub]
+  calc (∑ j ∈ Finset.range n, edist ((fun x => ∑' i, f i x) (u (j+1)))
+        ((fun x => ∑' i, f i x) (u j)))
+      ≤ ∑ j ∈ Finset.range n, ∑' i, edist (f i (u (j+1))) (f i (u j)) :=
+        Finset.sum_le_sum (fun j _ => hpt j)
+    _ = ∑' i, ∑ j ∈ Finset.range n, edist (f i (u (j+1))) (f i (u j)) :=
+        (Summable.tsum_finsetSum (fun j _ => ENNReal.summable)).symm
+    _ ≤ ∑' i, eVariationOn (f i) s :=
+        ENNReal.tsum_le_tsum (fun i => eVariationOn.sum_le hu us)
+
+/-- Variation of a scaled translate: `Var(w·g(·+β)) ≤ ‖w‖·Var(g)` on the line. -/
+theorem eVariationOn_smul_translate_le (g : ℝ → ℂ) (w : ℂ) (β : ℝ) :
+    eVariationOn (fun u : ℝ => w * g (u + β)) Set.univ
+      ≤ (‖w‖₊ : ℝ≥0∞) * eVariationOn g Set.univ := by
+  have hlip : LipschitzWith ‖w‖₊ (fun z : ℂ => w * z) := by
+    refine LipschitzWith.of_dist_le_mul (fun z z' => ?_)
+    rw [dist_eq_norm, dist_eq_norm, ← mul_sub, norm_mul, coe_nnnorm]
+  have h1 : eVariationOn ((fun z : ℂ => w * z) ∘ (fun u : ℝ => g (u + β))) Set.univ
+      ≤ (‖w‖₊ : ℝ≥0∞) * eVariationOn (fun u : ℝ => g (u + β)) Set.univ :=
+    (hlip.lipschitzOnWith).comp_eVariationOn_le (Set.mapsTo_univ _ _)
+  refine le_trans h1 (mul_le_mul_right ?_ _)
+  exact eVariationOn.comp_le_of_monotoneOn g (fun u : ℝ => u + β)
+    (fun x _ y _ hxy => by simpa using hxy) (Set.mapsTo_univ _ _)
+
+/-- The uniform bound on the weighted auxiliary symbol `G = F_{s,X}·e^{(1/2+a)x}`. -/
+theorem norm_auxF_mul_exp_le (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) (x : ℝ) :
+    ‖auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖
+      ≤ Real.exp ((s.re - 1/2) * Real.log X) := by
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, Real.abs_exp]
+  have h1 := norm_auxF_le s hX.le (by linarith) x
+  have h2 : Real.exp ((1/2+a) * x) ≤ Real.exp ((1/2+a) * |x|) := by
+    refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (le_abs_self x) (by linarith))
+  calc ‖auxF s X x‖ * Real.exp ((1/2+a) * x)
+      ≤ (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * |x|))
+        * Real.exp ((1/2+a) * |x|) := by
+        refine mul_le_mul h1 h2 (Real.exp_pos _).le ?_
+        positivity
+    _ = Real.exp ((s.re - 1/2) * Real.log X)
+        * Real.exp (-((s.re - 1/2) - (1/2+a)) * |x|) := by
+        rw [mul_assoc, ← Real.exp_add]
+        congr 2
+        ring
+    _ ≤ Real.exp ((s.re - 1/2) * Real.log X) * 1 := by
+        refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
+        refine Real.exp_le_one_iff.mpr ?_
+        have h3 : 0 ≤ (s.re - 1/2) - (1/2+a) := by linarith
+        have h4 := abs_nonneg x
+        nlinarith
+    _ = Real.exp ((s.re - 1/2) * Real.log X) := mul_one _
+
+/-- The prime-side weights are nonnegative and summable at exponent `1+a`. -/
+theorem primeSideH_weight_nonneg
+    (pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ) :
+    0 ≤ Real.log (Ideal.absNorm pk.1.1)
+      * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := by
+  refine mul_nonneg (Real.log_natCast_nonneg _) ?_
+  positivity
+
+/-- Pointwise summability of the prime-side series at the auxiliary function. -/
+theorem summable_primeSideH_term_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) (u : ℝ) :
+    Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      ((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (auxF s X (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ)
+                  * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))) := by
+  refine Summable.of_norm_bounded
+    (g := fun pk => (Real.log (Ideal.absNorm pk.1.1)
+      * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
+        * Real.exp ((s.re - 1/2) * Real.log X))
+    ((summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)).mul_right _)
+    (fun pk => ?_)
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+  refine mul_le_mul_of_nonneg_left ?_ (primeSideH_weight_nonneg K pk)
+  exact norm_auxF_mul_exp_le s hX ha has _
+
+/-- **`hH`-BV, complex level**: the prime side of the explicit formula has bounded
+variation on the whole line at the auxiliary function: the variation of the series
+is at most the (convergent) weighted sum of the variations of the translates. -/
+theorem boundedVariationOn_primeSideH_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) :
+    BoundedVariationOn (primeSideH K a (auxF s X)) Set.univ := by
+  set G : ℝ → ℂ := fun x => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) with hG
+  have hGbv : BoundedVariationOn G Set.univ :=
+    boundedVariationOn_auxF_mul_exp s hX (by linarith) (by linarith)
+  -- the series form
+  have h0 : primeSideH K a (auxF s X)
+      = fun u : ℝ => ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          ((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+            * G (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)) := by
+    funext u
+    rw [primeSideH]
+  -- weight summability in ℝ≥0
+  have hwsum : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))) :=
+    summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)
+  have hwsum' : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)‖₊) := by
+    rw [← NNReal.summable_coe]
+    refine hwsum.congr (fun pk => ?_)
+    rw [coe_nnnorm, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+  have hwtop : (∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      (‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)‖₊
+        : ℝ≥0∞)) ≠ ⊤ :=
+    ENNReal.tsum_coe_ne_top_iff_summable.mpr hwsum'
+  -- assemble
+  unfold BoundedVariationOn
+  rw [h0]
+  refine ne_top_of_le_ne_top ?_ (eVariationOn_tsum_le _ _ (fun x _ => by
+    have := summable_primeSideH_term_auxF K s hX ha has x
+    rw [hG]
+    exact this))
+  refine ne_top_of_le_ne_top ?_ (ENNReal.tsum_le_tsum (fun pk =>
+    eVariationOn_smul_translate_le G _ _))
+  rw [ENNReal.tsum_mul_right]
+  exact ENNReal.mul_ne_top hwtop hGbv
+
+/-- **`hHre` at the auxiliary function**. -/
+theorem locallyBoundedVariationOn_primeSideH_auxF_re (s : ℂ) {X : ℝ} (hX : 1 < X)
+    (ha : 0 < a) (has : a < s.re - 1) :
+    LocallyBoundedVariationOn
+      (fun u : ℝ => (primeSideH K a (auxF s X) u).re) Set.univ :=
+  (lipschitzWith_complex_re.comp_boundedVariationOn
+    (boundedVariationOn_primeSideH_auxF K s hX ha has)).locallyBoundedVariationOn
+
+/-- **`hHim` at the auxiliary function**. -/
+theorem locallyBoundedVariationOn_primeSideH_auxF_im (s : ℂ) {X : ℝ} (hX : 1 < X)
+    (ha : 0 < a) (has : a < s.re - 1) :
+    LocallyBoundedVariationOn
+      (fun u : ℝ => (primeSideH K a (auxF s X) u).im) Set.univ :=
+  (lipschitzWith_complex_im.comp_boundedVariationOn
+    (boundedVariationOn_primeSideH_auxF K s hX ha has)).locallyBoundedVariationOn
+
+/-- The prime side is continuous at the auxiliary function (Weierstrass M-test). -/
+theorem continuous_primeSideH_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) :
+    Continuous (primeSideH K a (auxF s X)) := by
+  have h0 : primeSideH K a (auxF s X)
+      = fun u : ℝ => ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          ((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+            * (auxF s X (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                * ((Real.exp ((1/2+a)
+                    * (u + (((pk.2+1 : ℕ)) : ℝ)
+                      * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)) := by
+    funext u
+    rw [primeSideH]
+  rw [h0]
+  refine continuous_tsum (fun pk => ?_)
+    ((summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)).mul_right
+      (Real.exp ((s.re - 1/2) * Real.log X))) (fun pk u => ?_)
+  · refine continuous_const.mul ?_
+    refine Continuous.mul ?_ ?_
+    · exact (continuous_auxF s hX).comp (continuous_id.add continuous_const)
+    · exact Complex.continuous_ofReal.comp (by fun_prop)
+  · rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+    refine mul_le_mul_of_nonneg_left ?_ (primeSideH_weight_nonneg K pk)
+    exact norm_auxF_mul_exp_le s hX ha has _
+
+/-- **`hHp` at the auxiliary function**: the right limit at `0` is the value. -/
+theorem tendsto_primeSideH_auxF_right (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) :
+    Tendsto (primeSideH K a (auxF s X)) (nhdsWithin 0 (Set.Ioi 0))
+      (nhds (primeSideH K a (auxF s X) 0)) :=
+  ((continuous_primeSideH_auxF K s hX ha has).continuousAt).tendsto.mono_left
+    nhdsWithin_le_nhds
+
+/-- **`hHm` at the auxiliary function**: the left limit at `0` is the value. -/
+theorem tendsto_primeSideH_auxF_left (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < a)
+    (has : a < s.re - 1) :
+    Tendsto (primeSideH K a (auxF s X)) (nhdsWithin 0 (Set.Iio 0))
+      (nhds (primeSideH K a (auxF s X) 0)) :=
+  ((continuous_primeSideH_auxF K s hX ha has).continuousAt).tendsto.mono_left
+    nhdsWithin_le_nhds
+
 end DedekindResidue
