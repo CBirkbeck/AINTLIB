@@ -29,6 +29,22 @@ open scoped Real
 
 variable (K : Type*) [Field K] [NumberField K]
 
+/-- Elementary norm bound `‖σ + t·I‖ ≤ σ + |t|` for a nonnegative real abscissa `σ`;
+the peeling step behind the vertical-strip Γ-bounds. -/
+theorem norm_ofReal_add_mul_I_le (σ t : ℝ) (hσ : 0 ≤ σ) :
+    ‖(σ : ℂ) + (t : ℂ) * Complex.I‖ ≤ σ + |t| := by
+  refine le_trans (norm_add_le _ _) (le_of_eq ?_)
+  rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+    Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hσ]
+
+/-- Half-angle exponential rewrite `e^{-π|t/2|/2} = e^{-π|t|/4}`, converting the
+`Γ(·/2)` decay rate into the `Γℝ`/`Γℂ` envelope rate. -/
+theorem exp_neg_pi_abs_half_div_two (t : ℝ) :
+    Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
+  congr 1
+  rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
+  ring
+
 /-- Pointwise Mellin triangle inequality for the entire completed theta transform:
 `‖Λ₀(s)‖` is at most the norm-integral at the real part. -/
 theorem norm_heckeΛ₀_le (s : ℂ) :
@@ -156,14 +172,6 @@ theorem exists_completedDedekindZetaEntire_strip_bound (a b : ℝ) (hab : a ≤ 
     _ = ‖(((heckeAdjust K : ℝ) : ℂ))⁻¹‖
         * (B₀ + 2 * ‖(heckeFEPair K).f₀‖ + 2 * ‖(heckeFEPair K).g₀‖) * (1 + ‖s‖)^2 := by
         ring
-
-/-- There is exactly one ideal of norm 1. -/
-theorem card_absNorm_eq_one :
-    Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = 1} = 1 := by
-  have he : {I : Ideal (𝓞 K) // Ideal.absNorm I = 1} ≃ {I : Ideal (𝓞 K) // I = ⊤} :=
-    Equiv.subtypeEquivRight (fun I => Ideal.absNorm_eq_one_iff)
-  rw [Nat.card_congr he]
-  simp
 
 /-- **AC-A4 center lower bound**: far enough right, the Dedekind zeta function is at
 least `1/2` in modulus — the Dirichlet tail `∑_{n≥2} a_n n^{-σ}` decays like `2^{-σ}`
@@ -305,11 +313,7 @@ theorem norm_Gammaℝ_le {σ t : ℝ} (h1 : 1 ≤ σ) (h2 : σ ≤ 2) (ht : 2 �
         rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
         linarith [abs_nonneg t]
       linarith
-    have hexp : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
-      congr 1
-      rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
-      ring
-    rw [hexp]
+    rw [exp_neg_pi_abs_half_div_two t]
     gcongr
   calc ‖(π : ℂ) ^ (-((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
       * ‖Complex.Gamma (((σ : ℂ) + (t : ℂ) * Complex.I) / 2)‖
@@ -1166,11 +1170,8 @@ theorem exists_norm_Gamma_le (σ : ℝ) (hσ : 1/2 ≤ σ) :
   have hb := norm_Gamma_le_mul_exp_add_nat (σ := σ₀) (t := t) h1 (le_of_lt h2) ht n
   rw [← hdec] at hb
   refine le_trans hb ?_
-  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
-      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ₀)]
-    nlinarith [abs_nonneg t]
+  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) :=
+    (norm_ofReal_add_mul_I_le σ₀ t (by linarith)).trans (by nlinarith [abs_nonneg t])
   have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
   have hfac : (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
       ≤ ((3/2 + n) * (1 + |t|))^n := by
@@ -1254,11 +1255,7 @@ theorem exists_le_norm_Gammaℝ (σ : ℝ) (hσ : 1 ≤ σ) :
     linarith
   have hΓ := hlow (t/2) ht2
   rw [hπnorm, harg]
-  have hexp : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
-    congr 1
-    rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
-    ring
-  rw [hexp] at hΓ
+  rw [exp_neg_pi_abs_half_div_two t] at hΓ
   have hmono : c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t|)
       ≤ c₀ * Real.exp (-(π * |t|) / 4) / (1 + |t/2|) := by
     refine div_le_div_of_nonneg_left (by positivity) ?_ ?_
@@ -1429,11 +1426,8 @@ theorem exists_norm_Gamma_le_range (σ₁ : ℝ) :
   rw [← hdec] at hb
   refine le_trans hb ?_
   have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
-  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) := by
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
-      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ₀)]
-    nlinarith [abs_nonneg t]
+  have hz₀ : ‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ ≤ (3/2) * (1 + |t|) :=
+    (norm_ofReal_add_mul_I_le σ₀ t (by linarith)).trans (by nlinarith [abs_nonneg t])
   have hfac : (‖(σ₀ : ℂ) + (t : ℂ) * Complex.I‖ + n)^n
       ≤ ((3/2 + N) * (1 + |t|))^n := by
     refine pow_le_pow_left₀ (by positivity) ?_ n
@@ -1501,11 +1495,7 @@ theorem exists_norm_gammaFactor_le_range (σ₁ : ℝ) :
     rw [harg]
     have hmono : C₀ * (1 + |t/2|)^P₀ * Real.exp (-(π * |t/2|) / 2)
         ≤ C₀ * (1 + |t|)^P₀ * Real.exp (-(π * |t|) / 4) := by
-      have he : Real.exp (-(π * |t/2|) / 2) = Real.exp (-(π * |t|) / 4) := by
-        congr 1
-        rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
-        ring
-      rw [he]
+      rw [exp_neg_pi_abs_half_div_two t]
       refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left
         (pow_le_pow_left₀ (by positivity) ?_ _) hC₀.le) (by positivity)
       rw [abs_div, show |(2:ℝ)| = 2 by norm_num]
@@ -1604,20 +1594,14 @@ theorem exists_H_upper_right (σ₁ : ℝ) (hσ₁ : 2 ≤ σ₁) :
   have h1t : (1:ℝ) ≤ 1 + |t| := by linarith [abs_nonneg t]
   have hzn : ‖z‖ ≤ (σ₁ + 2) * (1 + |t|) := by
     rw [hzeq]
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
-      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ)]
-    nlinarith [abs_nonneg t]
+    exact (norm_ofReal_add_mul_I_le σ t (by linarith)).trans (by nlinarith [abs_nonneg t])
   have hzn1 : ‖z - 1‖ ≤ (σ₁ + 2) * (1 + |t|) := by
     have hz1eq : z - 1 = ((σ - 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I := by
       rw [hzeq]
       push_cast
       ring
     rw [hz1eq]
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
-      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (by linarith : (0:ℝ) < σ - 1)]
-    nlinarith [abs_nonneg t]
+    exact (norm_ofReal_add_mul_I_le (σ - 1) t (by linarith)).trans (by nlinarith [abs_nonneg t])
   have hΔ : ‖((|discr K| : ℝ) : ℂ) ^ (z / 2)‖ ≤ |((discr K : ℤ) : ℝ)| ^ (σ₁/2) := by
     rw [Complex.norm_cpow_eq_rpow_re_of_pos (by linarith [abs_pos.mpr hdne])]
     have hre2 : (z / 2).re = σ/2 := by
@@ -1980,22 +1964,6 @@ theorem exists_differentiableOn_log {U : Set ℂ} (hUo : IsOpen U) (hUc : Convex
     linear_combination -hn
   refine DifferentiableAt.congr_of_eventuallyEq ?_ hDzero.symm
   exact (differentiableAt_const _).add ((hfat.div_const _).clog hslit)
-
-/-- **Maximum principle for the real part** (A5-ii-a): if `f` is holomorphic on a
-bounded set (continuously up to the boundary) and `Re f ≤ M` on the frontier, then
-`Re f ≤ M` on the closure — apply the maximum-modulus principle to `exp ∘ f`. -/
-theorem re_le_of_forall_mem_frontier_re_le {f : ℂ → ℂ} {U : Set ℂ}
-    (hU : Bornology.IsBounded U) (hd : DiffContOnCl ℂ f U) {M : ℝ}
-    (hM : ∀ z ∈ frontier U, (f z).re ≤ M) {z : ℂ} (hz : z ∈ closure U) :
-    (f z).re ≤ M := by
-  have hexp : DiffContOnCl ℂ (fun w => Complex.exp (f w)) U :=
-    Complex.differentiable_exp.comp_diffContOnCl hd
-  have h := Complex.norm_le_of_forall_mem_frontier_norm_le hU hexp
-    (C := Real.exp M) (fun w hw => by
-      rw [Complex.norm_exp]
-      exact Real.exp_le_exp.mpr (hM w hw)) hz
-  rw [Complex.norm_exp] at h
-  exact Real.exp_le_exp.mp h
 
 /-- Codiscrete-within agreement of continuous functions on an open set upgrades to
 genuine agreement (ℂ has no isolated points). -/
