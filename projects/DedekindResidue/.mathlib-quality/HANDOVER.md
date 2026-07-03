@@ -1007,3 +1007,39 @@ Hypotheses still to discharge at SP3 (concrete B–F test function; all standard
   B with B·log² → 0 (compact support ⟹ Φ decays like 1/t²-ish via IBP).
 Then: H(0)-value = Σ log N𝔭 N𝔭^{−m/2}F(m log N𝔭) (locally finite evaluation),
 Lemma 3 / (19) / Lemma 5 / Lemma 4 / belabas_friedman_thm1.
+
+## 2026-07-03 (SP3 leg) — γ-decay chain COMPLETE; 4 Weil boundary hypotheses discharged
+
+- `abs_sincTail_le` (|sincTail t| ≤ 2/t, IBP), `exists_norm_fourier_auxF_le`
+  (φ_auxF = O(1/γ²) read off the fourier_auxF closed form — NO BV-Stieltjes needed),
+  `tendsto_gammaFT_atTop/atBot` (unconditional: set-restricted RL wrappers +
+  sincTail → 0), `norm_gammaFT_le_of_fourier_decay` (γ = O(1/t) via Lemme 1 +
+  improper FTC; negative ray by reflection), `integrable_auxF`,
+  `integrableOn_auxF_diffQuot_window` (plateau-vanishing + bounded remainder),
+  `paperFourierIntegral_eq_muFT`, `tendsto_log_two_add_abs_div_abs`,
+  `tendsto_rhoFT_mul_gammaFT_of_decay` (O(log)·O(1/t) squeeze),
+  **`tendsto_boundary_auxF` + `tendsto_boundary_auxF_half`** — instantiating at
+  σ = 1/2, 1/4 and l = atTop/atBot (with habs = tendsto_abs_atTop_atTop resp. the
+  neg-composition) discharges htop2/hbot2/htop4/hbot4 of weil_explicit_formula
+  at F = auxF s X. All axiom-clean.
+
+REMAINING SP3 hypotheses of weil_explicit_formula at auxF:
+(1) BV re/im of F (from isAdmissibleTestFn_auxF's pieces? its bv is on Ici 0 with
+    the e^{(1/2+ε)x}-weight — need plain LocallyBoundedVariationOn on univ: auxF is
+    C⁰ + piecewise-C¹ ⟹ eVariationOn_le_integral_norm_deriv per piece + evenness
+    reflection), hF0 (continuity ✓ continuous_auxF), evenness ✓ (auxF_even exists?),
+    hFdiv ✓ landed, hFdiv2 (MemLp 2 of the diffQuot: same plateau+bounded argument
+    with the L²-window + exponential tail — mirror integrableOn_auxF_diffQuot_window
+    globally: (1−F)/x bounded on |x| ≤ max(1,δ), ≤ (1+e^{hT}e^{−h|x|})/|x| beyond —
+    L² ✓).
+(2) hΦd : Differentiable ℂ (paperPhi (auxF s X)) — from hasDerivAt_paperPhi +
+    admissibility (check its hypotheses).
+(3) The band bound B with B·log² → 0: ‖paperPhi F(σ+it)‖ ≤ B|t| on σ ∈ [−a,1+a] —
+    needs a σ-uniform version of the closed-form decay (fourier_auxF is at σ = 1/2
+    only!). Options: generalize Lemma-2's IBP to the shifted weight (paperPhi F(σ+it)
+    = paperFourierIntegral of F·e^{(σ−1/2)x} at t), or a direct two-fold IBP bound.
+    THIS IS THE MAIN REMAINING ANALYTIC PIECE.
+(4) BV re/im + limits of poleWindow-sum E, primeSideH H at auxF (locally-finite/
+    C¹-piece arguments), Hp/Hm values.
+(5) H(0)-value = Σ log N𝔭·N𝔭^{−m/2}·auxF(m log N𝔭), then Lemma 3, (19), Lemma 5,
+    Lemma 4, belabas_friedman_thm1.
