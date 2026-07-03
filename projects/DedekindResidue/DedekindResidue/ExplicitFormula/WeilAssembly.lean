@@ -1263,4 +1263,272 @@ theorem tendsto_edge_integral (ha : 0 < a) (ha' : a ≤ 1/4)
   convert hfinal using 2
   ring
 
+/-- **Weil's explicit formula** (Poitou's (6), Théorème p. 6-06/6-07): there is a
+sequence of contour heights `T n → ∞` along which the zero-capture sums of
+`Φ` over the zeros of `Λ_K` in `(-a, 1+a) × (-T n, T n)` converge, with limit
+
+`Φ(0) + Φ(1) + log|d|·F(0) + I_G-terms − (H(0+) + H(0-))`,
+
+the right side of formula (6) before the prime-side unfolding of `H(0±)`. -/
+theorem weil_explicit_formula (ha : 0 < a) (ha' : a ≤ 1/4)
+    (hF : Integrable F)
+    (hre : LocallyBoundedVariationOn (fun u : ℝ => (F u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u : ℝ => (F u).im) Set.univ)
+    (hF0 : Tendsto F (nhdsWithin 0 (Set.Ioi 0)) (nhds (F 0)))
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atTop (nhds 0))
+    (hbot2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atBot (nhds 0))
+    (htop4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atTop (nhds 0))
+    (hbot4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
+    (hΦd : Differentiable ℂ (paperPhi F))
+    {B : ℝ → ℝ}
+    (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
+      ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
+    (hBlog2 : Tendsto (fun T : ℝ => B T * (Real.log (2+T))^2) atTop (nhds 0))
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (hGre : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).re) Set.univ)
+    (hGim : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).im) Set.univ)
+    (hEre : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
+      Set.univ)
+    (hEim : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
+      Set.univ)
+    (hHre : LocallyBoundedVariationOn (fun u : ℝ => (primeSideH K a F u).re) Set.univ)
+    (hHim : LocallyBoundedVariationOn (fun u : ℝ => (primeSideH K a F u).im) Set.univ)
+    {Hp Hm : ℂ}
+    (hHp : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp))
+    (hHm : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Iio 0)) (nhds Hm)) :
+    ∃ T : ℕ → ℝ, Tendsto T atTop atTop ∧
+      Tendsto (fun n : ℕ => ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ)) * paperPhi F ρ)
+        atTop (nhds
+          ((paperPhi F 0 + paperPhi F 1)
+            + ((Real.log |NumberField.discr K| : ℝ) : ℂ) * F 0
+            + (((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+                + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                  * (Real.eulerMascheroniConstant + Real.log (8*π))
+                + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+            + (((NumberField.InfinitePlace.nrRealPlaces K
+                + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+            + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+            - (Hp + Hm))) := by
+  -- weaker single-log decay for the Γ-shift
+  have hBnn : ∀ᶠ T in atTop, 0 ≤ B T := by
+    filter_upwards [Filter.eventually_ge_atTop (0:ℝ)] with T hT
+    have h0 := hB (1/2) T (by linarith) (by linarith)
+    rw [abs_of_nonneg hT] at h0
+    exact le_trans (norm_nonneg _) h0
+  have hlog1 : ∀ᶠ T in atTop, (1:ℝ) ≤ Real.log (2+T) := by
+    filter_upwards [Filter.eventually_ge_atTop (Real.exp 1)] with T hT
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (2+T) := Real.log_le_log (Real.exp_pos 1) (by linarith)
+  have hBlog : Tendsto (fun T : ℝ => B T * Real.log (2+T)) atTop (nhds 0) := by
+    refine squeeze_zero' ?_ ?_ hBlog2
+    · filter_upwards [hBnn, hlog1] with T h1 h2
+      exact mul_nonneg h1 (by linarith)
+    · filter_upwards [hBnn, hlog1] with T h1 h2
+      have h3 : Real.log (2+T) ≤ (Real.log (2+T))^2 := by nlinarith
+      exact mul_le_mul_of_nonneg_left h3 h1
+  have hedge := tendsto_edge_integral K ha ha' hF hre him hF0 hFeven hFdiv hFdiv2
+    htop2 hbot2 htop4 hbot4 hΦd hB hBlog hFa hGre hGim hEre hEim hHre hHim hHp hHm
+  -- good heights
+  obtain ⟨A, hA2, c, C, hc, hc1, hC, hgood⟩ := exists_contour_height K
+  have hchoice : ∀ n : ℕ, ∃ T ∈ Set.Icc (A + 5 + n) (A + 5 + n + 1),
+      (∀ ρ : ℂ, completedDedekindZetaEntire K ρ = 0 →
+        c / Real.log (2 + (A + 5 + n)) ≤ |T - ρ.im|
+          ∧ c / Real.log (2 + (A + 5 + n)) ≤ |T + ρ.im|)
+      ∧ (∀ σ : ℝ, -(1/4) ≤ σ → σ ≤ 5/4 →
+          completedDedekindZetaEntire K ((σ:ℂ) + (T:ℂ) * Complex.I) ≠ 0
+          ∧ ‖logDeriv (completedDedekindZetaEntire K) ((σ:ℂ) + (T:ℂ) * Complex.I)‖
+            ≤ C * (Real.log (2 + (A + 5 + n)))^2)
+      ∧ ∀ σ : ℝ, -(1/4) ≤ σ → σ ≤ 5/4 →
+          completedDedekindZetaEntire K ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I) ≠ 0
+          ∧ ‖logDeriv (completedDedekindZetaEntire K) ((σ:ℂ) + ((-T:ℝ):ℂ) * Complex.I)‖
+            ≤ C * (Real.log (2 + (A + 5 + n)))^2 := by
+    intro n
+    have h0 : A + 5 ≤ A + 5 + n := by
+      have : (0:ℝ) ≤ n := Nat.cast_nonneg n
+      linarith
+    exact hgood (A + 5 + n) h0
+  choose T hTmem hTsep hTtop hTbot using hchoice
+  have hTge : ∀ n : ℕ, A + 5 + n ≤ T n := fun n => (hTmem n).1
+  have hTtend : Tendsto T atTop atTop := by
+    refine tendsto_atTop_atTop.mpr (fun b => ?_)
+    obtain ⟨n₀, hn₀⟩ := exists_nat_ge (b - A - 5)
+    refine ⟨n₀, fun n hn => ?_⟩
+    have h1 := hTge n
+    have h2 : (n₀ : ℝ) ≤ n := Nat.cast_le.mpr hn
+    linarith
+  have hTpos : ∀ n : ℕ, 0 < T n := by
+    intro n
+    have h0 := hTge n
+    have h1 : (0:ℝ) ≤ n := Nat.cast_nonneg n
+    linarith
+  refine ⟨T, hTtend, ?_⟩
+  -- the zero-capture bound at each good height
+  have hcap : ∀ n : ℕ, ‖2 * Real.pi * Complex.I
+      * (∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ)) * paperPhi F ρ)
+      - Complex.I • ∫ y : ℝ in (-(T n))..(T n),
+          (paperPhi F (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+            + paperPhi F (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+            * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)‖
+      ≤ 2 * (1 + 2*a) * (B (T n) * (C * (Real.log (2 + (A + 5 + n)))^2)) := by
+    intro n
+    refine zero_capture_edge_form K ha ha' (hTpos n)
+      (fun ζ _ => hΦd.differentiableAt) ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    · intro σ h1 h2
+      exact (hTtop n σ (by linarith) (by linarith)).1
+    · intro σ h1 h2
+      exact (hTbot n σ (by linarith) (by linarith)).1
+    · -- 0 ≤ CΦ
+      have h0 := hB (1/2) (T n) (by linarith) (by linarith)
+      rw [abs_of_pos (hTpos n)] at h0
+      exact le_trans (norm_nonneg _) h0
+    · intro x hx
+      rw [Set.uIcc_of_le (by linarith : -a ≤ 1+a), Set.mem_Icc] at hx
+      have h0 := hB x (T n) hx.1 hx.2
+      rw [abs_of_pos (hTpos n)] at h0
+      exact h0
+    · intro x hx
+      rw [Set.uIcc_of_le (by linarith : -a ≤ 1+a), Set.mem_Icc] at hx
+      have h0 := hB x (-(T n)) hx.1 hx.2
+      rw [abs_neg, abs_of_pos (hTpos n)] at h0
+      exact h0
+    · intro x hx
+      rw [Set.uIcc_of_le (by linarith : -a ≤ 1+a), Set.mem_Icc] at hx
+      exact (hTtop n x (by linarith [hx.1]) (by linarith [hx.2])).2
+    · intro x hx
+      rw [Set.uIcc_of_le (by linarith : -a ≤ 1+a), Set.mem_Icc] at hx
+      exact (hTbot n x (by linarith [hx.1]) (by linarith [hx.2])).2
+  -- the error tends to zero
+  have herr : Tendsto (fun n : ℕ =>
+      2 * (1 + 2*a) * (B (T n) * (C * (Real.log (2 + (A + 5 + n)))^2))) atTop (nhds 0) := by
+    have h0 : Tendsto (fun n : ℕ => B (T n) * (Real.log (2 + T n))^2) atTop (nhds 0) :=
+      hBlog2.comp hTtend
+    have h1 : Tendsto (fun n : ℕ =>
+        2 * (1 + 2*a) * C * (B (T n) * (Real.log (2 + T n))^2)) atTop (nhds 0) := by
+      have h2 := h0.const_mul (2 * (1 + 2*a) * C)
+      rw [mul_zero] at h2
+      exact h2
+    refine squeeze_zero_norm' ?_ h1
+    filter_upwards [] with n
+    have hBnn' : 0 ≤ B (T n) := by
+      have h0' := hB (1/2) (T n) (by linarith) (by linarith)
+      rw [abs_of_pos (hTpos n)] at h0'
+      exact le_trans (norm_nonneg _) h0'
+    have hAn : (0:ℝ) ≤ A + 5 + n := by
+      have h9 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith
+    have hlogle : Real.log (2 + (A + 5 + n)) ≤ Real.log (2 + T n) :=
+      Real.log_le_log (by linarith) (by linarith [hTge n])
+    have hlognn : 0 ≤ Real.log (2 + (A + 5 + n)) :=
+      Real.log_nonneg (by linarith)
+    have hsq : (Real.log (2 + (A + 5 + n)))^2 ≤ (Real.log (2 + T n))^2 := by nlinarith
+    have h4 : B (T n) * (Real.log (2 + (A + 5 + n)))^2
+        ≤ B (T n) * (Real.log (2 + T n))^2 := mul_le_mul_of_nonneg_left hsq hBnn'
+    have hval_nn : 0 ≤ 2 * (1 + 2*a) * (B (T n) * (C * (Real.log (2 + (A + 5 + n)))^2)) :=
+      mul_le_mul_of_nonneg_left (mul_nonneg hBnn' (mul_nonneg hC.le (sq_nonneg _)))
+        (by linarith) |>.trans_eq' (by ring)
+    rw [Real.norm_eq_abs, abs_of_nonneg hval_nn]
+    calc 2 * (1 + 2*a) * (B (T n) * (C * (Real.log (2 + (A + 5 + n)))^2))
+        = 2 * (1 + 2*a) * (C * (B (T n) * (Real.log (2 + (A + 5 + n)))^2)) := by ring
+      _ ≤ 2 * (1 + 2*a) * (C * (B (T n) * (Real.log (2 + T n))^2)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by linarith)
+          exact mul_le_mul_of_nonneg_left h4 hC.le
+      _ = 2 * (1 + 2*a) * C * (B (T n) * (Real.log (2 + T n))^2) := by ring
+  -- 2πi S_n − i E_n → 0
+  have hdiff : Tendsto (fun n : ℕ => 2 * Real.pi * Complex.I
+      * (∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ)) * paperPhi F ρ)
+      - Complex.I • ∫ y : ℝ in (-(T n))..(T n),
+          (paperPhi F (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)
+            + paperPhi F (1 - (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)))
+            * logDeriv (completedDedekindZetaEntire K)
+                (((1+a:ℝ):ℂ) + (y:ℂ) * Complex.I)) atTop (nhds 0) := by
+    refine squeeze_zero_norm' ?_ herr
+    filter_upwards [] with n
+    exact hcap n
+  -- hence 2πi S_n → i · L
+  have hSn : Tendsto (fun n : ℕ => 2 * Real.pi * Complex.I
+      * (∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ)) * paperPhi F ρ))
+      atTop (nhds (0 + Complex.I • (((2*π : ℝ):ℂ) * (paperPhi F 0 + paperPhi F 1)
+        + ((2*π : ℝ):ℂ) * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ) * (F 0 + F 0)
+        + ((2*π : ℝ) : ℂ) *
+          ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+              + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                * (Real.eulerMascheroniConstant + Real.log (8*π))
+              + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+          + (((NumberField.InfinitePlace.nrRealPlaces K
+              + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+              * (∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+              * ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+        - 2 * ((π : ℝ) : ℂ) * (Hp + Hm)))) := by
+    have h0 := hdiff.add ((hedge.comp hTtend).const_smul Complex.I)
+    refine h0.congr (fun n => ?_)
+    exact sub_add_cancel _ _
+  -- divide by 2πi
+  have h2πi : (2 * Real.pi * Complex.I : ℂ) ≠ 0 := by
+    refine mul_ne_zero (mul_ne_zero two_ne_zero ?_) Complex.I_ne_zero
+    exact_mod_cast Real.pi_ne_zero
+  have hfin := hSn.const_mul ((2 * Real.pi * Complex.I : ℂ))⁻¹
+  have hlim_eq : ((2 * Real.pi * Complex.I : ℂ))⁻¹ * (0 + Complex.I • (((2*π : ℝ):ℂ)
+        * (paperPhi F 0 + paperPhi F 1)
+      + ((2*π : ℝ):ℂ) * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ) * (F 0 + F 0)
+      + ((2*π : ℝ) : ℂ) *
+        ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+        + (((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+        + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+            * ∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+      - 2 * ((π : ℝ) : ℂ) * (Hp + Hm)))
+      = ((paperPhi F 0 + paperPhi F 1)
+        + ((Real.log |NumberField.discr K| : ℝ) : ℂ) * F 0
+        + (((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+        + (((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+        + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+        - (Hp + Hm)) := by
+    rw [zero_add, smul_eq_mul, inv_mul_eq_iff_eq_mul₀ h2πi]
+    push_cast
+    ring
+  rw [hlim_eq] at hfin
+  refine hfin.congr (fun n => ?_)
+  rw [← mul_assoc, inv_mul_cancel₀ h2πi, one_mul]
+
 end DedekindResidue

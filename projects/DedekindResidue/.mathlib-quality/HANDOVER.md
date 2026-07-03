@@ -983,3 +983,27 @@ divisor sums → (1/2π)·[edge limit]. Then boundary/BV discharges at SP3's con
 
 Process rule (twice burned): NEVER pipe `lake build` or sequence `; git push` —
 build bare, check exit, THEN commit/push in a separate command.
+
+## 2026-07-03 — **WEIL'S EXPLICIT FORMULA LANDED** (weil_explicit_formula, axiom-clean)
+
+SP2's capstone is machine-verified: `weil_explicit_formula` in WeilAssembly.lean —
+there is a sequence of good contour heights T n → ∞ along which
+  Σᶠ ρ, divisor(Λ_ent, (−a,1+a)×(−Tn,Tn))(ρ)·Φ(ρ)
+converges to
+  Φ(0) + Φ(1) + log|d|·F(0) − (n(γ_E+log 8π) + r₁π/2)·F(0)
+    + n∫₀^∞(F0−F)/(2sh(x/2)) + r₁∫₀^∞(F0−F)/(2ch(x/2)) − (H(0+)+H(0−)),
+Poitou's (6) with the prime side folded into H(0±) (its unfolding to
+−2Σ log N𝔭/N𝔭^{m/2} F(m log N𝔭) is the H-value computation at SP3's concrete F).
+Route: tendsto_edge_integral (all four edge pieces jointly) + exists_contour_height
+(choice sequence T n ∈ [A+5+n, A+6+n], Λ≠0 + logDeriv ≤ C log² on horizontals) +
+zero_capture_edge_form (per-height bound 2(1+2a)·B(Tn)·C·log²(2+T₀n) → 0 given
+B = o(1/log²)) + division by 2πi.
+
+Hypotheses still to discharge at SP3 (concrete B–F test function; all standard):
+- BV re/im of: F, F_a, poleWindow-sum E, primeSideH H (locally finite sums for
+  compact support), one-sided limits Hp/Hm (continuity), htop/hbot ργ-decay at
+  σ = 1/2, 1/4 (|ρ| = O(log) from A6 + rhoFT_poitouKernel; γ = o(1/log) from BV
+  of (F0−F)/x per Poitou's Remarque), Φ entire (hasDerivAt_paperPhi), band bound
+  B with B·log² → 0 (compact support ⟹ Φ decays like 1/t²-ish via IBP).
+Then: H(0)-value = Σ log N𝔭 N𝔭^{−m/2}F(m log N𝔭) (locally finite evaluation),
+Lemma 3 / (19) / Lemma 5 / Lemma 4 / belabas_friedman_thm1.
