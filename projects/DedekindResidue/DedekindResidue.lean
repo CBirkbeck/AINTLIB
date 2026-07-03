@@ -28,4 +28,5 @@ public import DedekindResidue.ExplicitFormula.PrimeSide
 public import DedekindResidue.ExplicitFormula.FourierJordan
 public import DedekindResidue.ExplicitFormula.GammaSide
 public import DedekindResidue.ExplicitFormula.WeilAssembly
+public import DedekindResidue.ExplicitFormula.GRHZeros
 public import DedekindResidue.MainTheorem
