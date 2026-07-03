@@ -134,6 +134,111 @@ theorem norm_tsum_zeroSinTerm_sub_le {σ : ℝ} (hσ : 1/2 < σ) {X X' : ℝ} (h
   · exact hmaj.of_nonneg_of_le (fun ρ => norm_nonneg _) hpt
   · exact (hsum.sub hsum').norm
 
+/-! ### The cosine and tail-integral estimates (paper lines 457–467)
+
+The cosine terms are bounded trivially (`|cos| ≤ 1`) at each cutoff; the tail
+integral is evaluated exactly by the kernel antiderivative
+`d/dt(−e^{−ht}/t) = (h + 1/t)e^{−ht}/t`, giving the clean `1/T` bound with no
+constants lost. -/
+
+/-- Generic norm bound: a `c/(h²+γ²)`-bounded test function has divisor-weighted
+series bounded by `c·Σ_ρ m_ρ/(h²+γ_ρ²)`. -/
+theorem norm_tsum_zetaZeros_mul_le {σ : ℝ} (hσ : 1/2 < σ) {f : ℝ → ℂ} {c : ℝ}
+    (hf : ∀ γ : ℝ, ‖f γ‖ ≤ c / ((σ - 1/2)^2 + γ^2)) :
+    ‖∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * f ρ.1.im‖
+      ≤ c * ∑' ρ : ZetaZeros K,
+          (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2) := by
+  have hmaj : Summable (fun ρ : ZetaZeros K =>
+      c * ((zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2))) :=
+    (summable_zetaZeros_inv_sq K (σ - 1/2) (by linarith)).mul_left c
+  have hpt : ∀ ρ : ZetaZeros K,
+      ‖(zetaZeroDivisor K ρ.1 : ℂ) * f ρ.1.im‖
+        ≤ c * ((zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)) := by
+    intro ρ
+    have hdnn : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+      exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+    rw [norm_mul, Complex.norm_intCast, abs_of_nonneg hdnn]
+    calc (zetaZeroDivisor K ρ.1 : ℝ) * ‖f ρ.1.im‖
+        ≤ (zetaZeroDivisor K ρ.1 : ℝ) * (c / ((σ - 1/2)^2 + ρ.1.im^2)) :=
+          mul_le_mul_of_nonneg_left (hf _) hdnn
+      _ = c * ((zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)) := by ring
+  rw [← tsum_mul_left]
+  refine (norm_tsum_le_tsum_norm ?_).trans
+    (Summable.tsum_le_tsum (fun ρ => hpt ρ) ?_ hmaj)
+  · exact hmaj.of_nonneg_of_le (fun ρ => norm_nonneg _) hpt
+  · exact (summable_zetaZeros_mul_of_norm_le K hσ hf).norm
+
+/-- **The cosine-terms estimate**: the two-cutoff difference of the cosine series is
+bounded by `(2(h+1/T) + 2(h+1/T'))·Σ_ρ m_ρ/(h²+γ_ρ²)` (triangle inequality, `|cos|≤1`
+at each cutoff). -/
+theorem norm_tsum_zeroCosTerm_sub_le {σ : ℝ} (hσ : 1/2 < σ) {X X' : ℝ} (hX' : 1 < X')
+    (hXX : X' ≤ X) :
+    ‖(∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+      - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X' ρ.1.im‖
+      ≤ (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+          * ∑' ρ : ZetaZeros K,
+              (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2) := by
+  have hX : 1 < X := lt_of_lt_of_le hX' hXX
+  refine (norm_sub_le _ _).trans ?_
+  rw [add_mul]
+  gcongr
+  · exact norm_tsum_zetaZeros_mul_le K hσ (fun γ => norm_zeroCosTerm_le hσ hX γ)
+  · exact norm_tsum_zetaZeros_mul_le K hσ (fun γ => norm_zeroCosTerm_le hσ hX' γ)
+
+/-- **The exact kernel integral** (paper eq:diffeq consequence, lines 460–467):
+`∫_T^∞ (h + 1/t)·e^{−ht}/t · dt = e^{−hT}/T` — the antiderivative is `−e^{−ht}/t`. -/
+theorem integral_Ioi_kernel_eval {h T : ℝ} (hh : 0 < h) (hT : 0 < T) :
+    ∫ t in Set.Ioi T, (h + 1/t) * Real.exp (-h*t) / t = Real.exp (-h*T) / T := by
+  have hderiv : ∀ t ∈ Set.Ioi T, HasDerivAt (fun u : ℝ => -(Real.exp (-h*u) / u))
+      ((h + 1/t) * Real.exp (-h*t) / t) t := by
+    intro t ht
+    have ht0 : (0:ℝ) < t := hT.trans ht
+    have h1 : HasDerivAt (fun u : ℝ => Real.exp (-h*u))
+        (Real.exp (-h*t) * (-h * 1)) t :=
+      ((hasDerivAt_id t).const_mul (-h)).exp
+    have h2 := (h1.div (hasDerivAt_id t) ht0.ne').neg
+    have h3 : (h + 1/t) * Real.exp (-h*t) / t
+        = -((Real.exp (-h*t) * (-h*1) * t - Real.exp (-h*t) * 1) / t^2) := by
+      field_simp
+      ring
+    exact h3 ▸ h2
+  have hint : MeasureTheory.IntegrableOn
+      (fun t : ℝ => (h + 1/t) * Real.exp (-h*t) / t) (Set.Ioi T) := by
+    refine MeasureTheory.Integrable.mono'
+      (g := fun t : ℝ => (h + 1/T) / T * Real.exp (-h*t))
+      ((exp_neg_integrableOn_Ioi T hh).const_mul _) ?_ ?_
+    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+      refine ContinuousOn.div ?_ continuousOn_id (fun t ht => (hT.trans ht).ne')
+      refine ContinuousOn.mul ?_
+        (Real.continuous_exp.comp (continuous_const.mul continuous_id)).continuousOn
+      exact continuousOn_const.add (continuousOn_const.div continuousOn_id
+        (fun t ht => (hT.trans ht).ne'))
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      have ht0 : (0:ℝ) < t := hT.trans ht
+      have hTt : T ≤ t := le_of_lt ht
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      calc (h + 1/t) * Real.exp (-h*t) / t
+          ≤ (h + 1/T) * Real.exp (-h*t) / T := by
+            gcongr
+        _ = (h + 1/T) / T * Real.exp (-h*t) := by ring
+  have hlim : Tendsto (fun t : ℝ => -(Real.exp (-h*t) / t)) atTop (nhds 0) := by
+    rw [show (0:ℝ) = -0 by norm_num]
+    exact Tendsto.neg (Tendsto.div_atTop
+      (Real.tendsto_exp_atBot.comp
+        (Tendsto.const_mul_atTop_of_neg (by linarith : (-h:ℝ) < 0) tendsto_id))
+      tendsto_id)
+  have hkey := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto
+    (f := fun u : ℝ => -(Real.exp (-h*u) / u))
+    (f' := fun t : ℝ => (h + 1/t) * Real.exp (-h*t) / t)
+    (by
+      refine ContinuousWithinAt.neg ?_
+      refine ContinuousWithinAt.div ?_ continuousWithinAt_id hT.ne'
+      exact (Real.continuous_exp.comp
+        (continuous_const.mul continuous_id)).continuousWithinAt)
+    hderiv hint hlim
+  rw [hkey]
+  ring
+
 end DedekindResidue
 
 end
