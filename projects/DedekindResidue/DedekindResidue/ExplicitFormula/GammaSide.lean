@@ -4631,7 +4631,7 @@ and `g` analytic on the right half-plane with `‖g‖ ≤ C|t|` on the sub-band
 difference of the two symmetric vertical integrals of `(Φ(s) + Φ(1-s))·g(s)`
 vanishes as `T → ∞` provided `B·C → 0`. -/
 theorem tendsto_shift_vertical_sub {a : ℝ} (ha : 0 < a) {Φ g : ℂ → ℂ}
-    (hΦ : Differentiable ℂ Φ)
+    (hΦ : ∀ ζ : ℂ, -a ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ Φ ζ)
     (hg : ∀ s : ℂ, 0 < s.re → DifferentiableAt ℂ g s)
     {B C : ℝ → ℝ}
     (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a → ‖Φ ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
@@ -4646,13 +4646,18 @@ theorem tendsto_shift_vertical_sub {a : ℝ} (ha : 0 < a) {Φ g : ℂ → ℂ}
           + Φ (1 - (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)))
           * g (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)) atTop (nhds 0) := by
   set f : ℂ → ℂ := fun s => (Φ s + Φ (1 - s)) * g s with hf
-  have hfdiff : ∀ ζ : ℂ, 0 < ζ.re → DifferentiableAt ℂ f ζ := by
-    intro ζ hζ
-    refine DifferentiableAt.mul ?_ (hg ζ hζ)
-    refine (hΦ ζ).add ?_
+  have hfdiff : ∀ ζ : ℂ, 1/2 ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ f ζ := by
+    intro ζ hζ1 hζ2
+    refine DifferentiableAt.mul ?_ (hg ζ (by linarith))
+    refine (hΦ ζ (by linarith) hζ2).add ?_
     have h0 : (fun s : ℂ => Φ (1 - s)) = Φ ∘ (fun s : ℂ => 1 - s) := rfl
     rw [h0]
-    exact (hΦ _).comp ζ ((differentiableAt_const 1).sub differentiableAt_id)
+    refine DifferentiableAt.comp ζ (hΦ (1 - ζ) ?_ ?_)
+      ((differentiableAt_const 1).sub differentiableAt_id)
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
   -- the fixed-T horizontal bound
   have hkey : ∀ T : ℝ, 4 ≤ T →
       ‖(∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
@@ -4682,15 +4687,16 @@ theorem tendsto_shift_vertical_sub {a : ℝ} (ha : 0 < a) {Φ g : ℂ → ℂ}
       · intro ζ hζ
         rw [Complex.mem_reProdIm, hzre, hwre, hzim, hwim,
           Set.uIcc_of_le hrele, Set.uIcc_of_le himle] at hζ
-        refine ((hfdiff ζ ?_).continuousAt).continuousWithinAt
-        have h1 := hζ.1.1
-        linarith
+        exact ((hfdiff ζ hζ.1.1 hζ.1.2).continuousAt).continuousWithinAt
       · intro ζ hζ
         rw [Set.mem_sdiff, Complex.mem_reProdIm, hzre, hwre, hzim, hwim] at hζ
-        refine hfdiff ζ ?_
-        have h1 := hζ.1.1.1
-        rw [min_eq_left hrele] at h1
-        linarith
+        refine hfdiff ζ ?_ ?_
+        · have h1 := hζ.1.1.1
+          rw [min_eq_left hrele] at h1
+          linarith
+        · have h2 := hζ.1.1.2
+          rw [max_eq_right hrele] at h2
+          linarith
     rw [rectangleIntegral, hzre, hzim, hwre, hwim] at h0
     -- solve for the vertical difference
     have h1 : Complex.I * ((∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))

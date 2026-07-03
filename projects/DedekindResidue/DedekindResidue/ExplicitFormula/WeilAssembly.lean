@@ -920,7 +920,7 @@ theorem tendsto_gamma_edge (ha : 0 < a) (ha' : a ≤ 1/4)
     (hbot4 : Tendsto (fun t : ℝ =>
       rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
         * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
-    (hΦd : Differentiable ℂ (paperPhi F))
+    (hΦd : ∀ ζ : ℂ, -a ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ (paperPhi F) ζ)
     {B : ℝ → ℝ}
     (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
       ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
@@ -1038,7 +1038,7 @@ theorem tendsto_edge_integral (ha : 0 < a) (ha' : a ≤ 1/4)
     (hbot4 : Tendsto (fun t : ℝ =>
       rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
         * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
-    (hΦd : Differentiable ℂ (paperPhi F))
+    (hΦd : ∀ ζ : ℂ, -a ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ (paperPhi F) ζ)
     {B : ℝ → ℝ}
     (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
       ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
@@ -1289,7 +1289,7 @@ theorem weil_explicit_formula (ha : 0 < a) (ha' : a ≤ 1/4)
     (hbot4 : Tendsto (fun t : ℝ =>
       rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
         * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
-    (hΦd : Differentiable ℂ (paperPhi F))
+    (hΦd : ∀ ζ : ℂ, -a ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ (paperPhi F) ζ)
     {B : ℝ → ℝ}
     (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
       ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
@@ -1395,7 +1395,9 @@ theorem weil_explicit_formula (ha : 0 < a) (ha' : a ≤ 1/4)
       ≤ 2 * (1 + 2*a) * (B (T n) * (C * (Real.log (2 + (A + 5 + n)))^2)) := by
     intro n
     refine zero_capture_edge_form K ha ha' (hTpos n)
-      (fun ζ _ => hΦd.differentiableAt) ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      (fun ζ hζ => by
+        rw [Complex.mem_reProdIm, Set.uIcc_of_le (by linarith : (-a:ℝ) ≤ 1+a)] at hζ
+        exact hΦd ζ hζ.1.1 hζ.1.2) ?_ ?_ ?_ ?_ ?_ ?_ ?_
     · intro σ h1 h2
       exact (hTtop n σ (by linarith) (by linarith)).1
     · intro σ h1 h2
@@ -2278,5 +2280,29 @@ theorem memLp_two_auxF_diffQuot (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.r
     exact hrayneg.union (hplateau_int.union hraypos)
   rw [← MeasureTheory.integrableOn_univ]
   exact h9
+
+/-- **`hΦd` at the auxiliary function**: `Φ_{F_{s,X}}` is complex-differentiable at
+every point of the closed band `-a ≤ Re ζ ≤ 1+a`, for `0 < a < Re s - 1` (the band
+then sits strictly inside the convergence band `1 - Re s < Re ζ < Re s`). -/
+theorem differentiableAt_paperPhi_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) {a : ℝ}
+    (ha : 0 < a) (has : a < s.re - 1) :
+    ∀ ζ : ℂ, -a ≤ ζ.re → ζ.re ≤ 1+a → DifferentiableAt ℂ (paperPhi (auxF s X)) ζ := by
+  intro ζ h1 h2
+  set ε : ℝ := (a + (s.re - 1))/2 with hε
+  have hεa : a < ε := by
+    rw [hε]
+    linarith
+  have hεs : ε < s.re - 1 := by
+    rw [hε]
+    linarith
+  have hε0 : 0 < ε := lt_trans ha hεa
+  have hint : IntegrableOn
+      (fun x : ℝ => auxF s X x * ((Real.exp ((1/2 + ε) * x) : ℝ) : ℂ))
+      (Set.Ici 0) := by
+    refine (integrable_auxF_mul_exp s hX (c := 1/2 + ε) ?_).integrableOn
+    rw [abs_of_pos (by linarith)]
+    linarith
+  exact (hasDerivAt_paperPhi (isAdmissibleTestFn_auxF s hX (by linarith)) hε0 hint
+    (by linarith) (by linarith)).differentiableAt
 
 end DedekindResidue
