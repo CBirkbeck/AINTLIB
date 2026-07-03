@@ -17,6 +17,7 @@ module
 
 public import Mathlib
 public import DedekindResidue.Lemma3
+public import DedekindResidue.QSide
 
 @[expose] public section
 
@@ -1119,6 +1120,70 @@ theorem arch_sum_diff_le {σ : ℝ} (hσ1 : 1 ≤ σ) {T' T : ℝ} (hT' : 0 < T'
   rw [MeasureTheory.setLIntegral_const, Real.volume_Ioc,
     ← ENNReal.ofReal_mul hc₀nn]
   exact ENNReal.ofReal_le_ofReal (le_of_eq (mul_comm _ _))
+
+
+/-! ### The relative display (L4-a): `K` minus `ℚ`
+
+Subtracting the `ℚ`-instance of the Lemma-3 display kills the field-independent
+`Φ(0) + Φ(1)` (the test function is the same), `log Δ_ℚ = 0`, and shifts the
+archimedean coefficients by one (`n_ℚ = r_ℚ = 1`). -/
+
+theorem lemma4_relative_display (hGRH : GeneralizedRiemannHypothesis K)
+    (hRH : RiemannHypothesis)
+    {σ X : ℝ} (hσ : 1 < σ) (hX : 1 < X) {a : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4)
+    (has : a < σ - 1) :
+    2 * ((Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+        * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+          - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)) : ℝ) : ℂ)
+      = ((Real.log |NumberField.discr K| : ℝ) : ℂ)
+        + (((-((((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ)) - 1)
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1) * (π/2)) : ℝ)) : ℂ)
+        + ((((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ) - 1)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+        + (((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ) - 1)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+        - 2 * ((∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+            (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+              then Real.log (Ideal.absNorm pk.1.1)
+                * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+                * (1 - Real.log X
+                    / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                    * Real.exp (-(σ - 1/2)
+                        * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                          - Real.log X)))
+              else 0) : ℝ) : ℂ)
+        + 2 * ((∑' pk : {𝔭 : Ideal (𝓞 ℚ) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+            (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+              then Real.log (Ideal.absNorm pk.1.1)
+                * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+                * (1 - Real.log X
+                    / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                    * Real.exp (-(σ - 1/2)
+                        * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                          - Real.log X)))
+              else 0) : ℝ) : ℂ)
+        - ((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+          - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+        - ((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+          - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+        + ((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+          - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im) := by
+  have hK := lemma3_display K hGRH hσ hX ha ha' has
+  have hQ := lemma3_display ℚ (generalizedRiemannHypothesis_rat hRH) hσ hX ha ha' has
+  rw [Rat.numberField_discr,
+    NumberField.InfinitePlace.nrRealPlaces_eq_one_of_finrank_eq_one
+      (Module.finrank_self ℚ),
+    NumberField.InfinitePlace.nrComplexPlaces_eq_zero_of_finrank_eq_one
+      (Module.finrank_self ℚ)] at hQ
+  simp only [abs_one, Int.cast_one, Real.log_one, Nat.cast_one, Nat.cast_zero,
+    mul_zero, add_zero, one_mul, Complex.ofReal_zero] at hQ
+  push_cast at hK hQ ⊢
+  linear_combination hK - hQ
 
 
 end DedekindResidue
