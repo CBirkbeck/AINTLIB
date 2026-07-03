@@ -167,6 +167,211 @@ theorem ZetaZeros_re_eq_half (hGRH : GeneralizedRiemannHypothesis K)
   re_eq_half_of_completedDedekindZetaEntire_eq_zero K hGRH
     ((zetaZeroDivisor_ne_zero_iff K).mp ρ.2)
 
+/-- The window divisors agree with the global divisor on their windows. -/
+theorem divisor_apply_eq_zetaZeroDivisor {U : Set ℂ} {u : ℂ} (hu : u ∈ U) :
+    (MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u
+      = zetaZeroDivisor K u := by
+  have hm : ∀ (V : Set ℂ), MeromorphicOn (completedDedekindZetaEntire K) V :=
+    fun V ζ _ => ((differentiable_completedDedekindZetaEntire K).analyticAt ζ).meromorphicAt
+  rw [MeromorphicOn.divisor_apply (hm U) hu, zetaZeroDivisor,
+    MeromorphicOn.divisor_apply (hm Set.univ) (Set.mem_univ u)]
+
+/-- The global divisor is nonnegative (the completion is entire). -/
+theorem zetaZeroDivisor_nonneg (u : ℂ) : 0 ≤ zetaZeroDivisor K u := by
+  rw [zetaZeroDivisor]
+  exact (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt ζ)) u
+
+/-- A finite family of indexed zeros inside a closed ball contributes at most the
+ball's divisor finsum. -/
+theorem sum_zetaZeroDivisor_le_ball_finsum (c₀ : ℂ) (r : ℝ)
+    (u : Finset (ZetaZeros K)) (hu : ∀ ρ ∈ u, (ρ : ZetaZeros K).1 ∈ Metric.closedBall c₀ r) :
+    (∑ ρ ∈ u, zetaZeroDivisor K ρ.1)
+      ≤ ∑ᶠ z, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Metric.closedBall c₀ r)) z := by
+  classical
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  set Dcl : ℂ → ℤ := fun z => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+    (Metric.closedBall c₀ r)) z with hDcl
+  have hmcl : MeromorphicOn (completedDedekindZetaEntire K) (Metric.closedBall c₀ r) :=
+    fun ζ _ => (hHanal ζ).meromorphicAt
+  have hfin : (Function.support Dcl).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset hmcl
+      (isCompact_closedBall c₀ r) subset_rfl
+  have hDclnn : ∀ z, 0 ≤ Dcl z := fun z =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ => hHanal ζ)) z
+  have hagree : ∀ ρ ∈ u, Dcl (ρ : ZetaZeros K).1 = zetaZeroDivisor K (ρ : ZetaZeros K).1 := by
+    intro ρ hρ
+    exact divisor_apply_eq_zetaZeroDivisor K (hu ρ hρ)
+  -- pass to the image in ℂ
+  have hinj : Set.InjOn (fun ρ : ZetaZeros K => ρ.1) u := by
+    intro ρ _ ρ' _ h
+    exact Subtype.ext h
+  have himg : (∑ ρ ∈ u, zetaZeroDivisor K ρ.1)
+      = ∑ z ∈ u.image (fun ρ : ZetaZeros K => ρ.1), zetaZeroDivisor K z :=
+    (Finset.sum_image (fun ρ hρ ρ' hρ' h => hinj hρ hρ' h)).symm
+  have hsub : u.image (fun ρ : ZetaZeros K => ρ.1) ⊆ hfin.toFinset := by
+    intro z hz
+    obtain ⟨ρ, hρu, rfl⟩ := Finset.mem_image.mp hz
+    refine hfin.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+    rw [hagree ρ hρu]
+    exact ρ.2
+  calc (∑ ρ ∈ u, zetaZeroDivisor K ρ.1)
+      = ∑ z ∈ u.image (fun ρ : ZetaZeros K => ρ.1), zetaZeroDivisor K z := himg
+    _ = ∑ z ∈ u.image (fun ρ : ZetaZeros K => ρ.1), Dcl z := by
+        refine Finset.sum_congr rfl (fun z hz => ?_)
+        obtain ⟨ρ, hρu, rfl⟩ := Finset.mem_image.mp hz
+        exact (hagree ρ hρu).symm
+    _ ≤ ∑ z ∈ hfin.toFinset, Dcl z :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsub (fun z _ _ => hDclnn z)
+    _ = ∑ᶠ z, Dcl z := (finsum_eq_sum Dcl hfin).symm
+
+/-- **The unit-slab zero count** (Jensen counting made summation-ready): there is a
+constant `C` with: for every `n`, any finite family of indexed zeros with ordinates
+in `[n, n+1]` (either sign) has divisor-weighted count at most `C·log(3+n)`. -/
+theorem exists_slab_zetaZeroDivisor_sum_le :
+    ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ, ∀ u : Finset (ZetaZeros K),
+      (∀ ρ ∈ u, (n:ℝ) ≤ |((ρ : ZetaZeros K).1).im| ∧ |((ρ : ZetaZeros K).1).im| ≤ n+1) →
+      (∑ ρ ∈ u, (zetaZeroDivisor K ρ.1 : ℝ)) ≤ C * Real.log (3+n) := by
+  classical
+  obtain ⟨A, hA2, cL, hcL, hlow⟩ := exists_H_center_lower K
+  obtain ⟨Cc, hCc, hcount⟩ := exists_ball_zero_count_big K A hA2 cL hcL hlow
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
+    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  -- the fixed-zone constant
+  set C₀ : ℤ := ∑ᶠ z, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+    (Metric.closedBall (0:ℂ) (A+8))) z with hC₀
+  have hC₀nn : (0:ℤ) ≤ C₀ := by
+    rw [hC₀]
+    have hm : MeromorphicOn (completedDedekindZetaEntire K)
+        (Metric.closedBall (0:ℂ) (A+8)) := fun ζ _ => (hHanal ζ).meromorphicAt
+    have hfin : (Function.support (fun z => (MeromorphicOn.divisor
+        (completedDedekindZetaEntire K) (Metric.closedBall (0:ℂ) (A+8))) z)).Finite :=
+      MeromorphicOn.divisor_support_finite_of_subset hm
+        (isCompact_closedBall (0:ℂ) (A+8)) subset_rfl
+    rw [finsum_eq_sum _ hfin]
+    refine Finset.sum_nonneg (fun z _ => ?_)
+    exact (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ => hHanal ζ)) z
+  refine ⟨2*Cc + (C₀ : ℝ) + 1, by positivity, fun n u hu => ?_⟩
+  -- basic facts about the zeros in `u`
+  have hz : ∀ ρ ∈ u, completedDedekindZetaEntire K ((ρ : ZetaZeros K).1) = 0 :=
+    fun ρ _ => (zetaZeroDivisor_ne_zero_iff K).mp ρ.2
+  have hre : ∀ ρ ∈ u, 0 ≤ ((ρ : ZetaZeros K).1).re ∧ ((ρ : ZetaZeros K).1).re ≤ 1 :=
+    fun ρ hρ => re_mem_of_completedDedekindZetaEntire_eq_zero K (hz ρ hρ)
+  have hlog3 : (1:ℝ) ≤ Real.log (3+n) := by
+    have he : Real.exp 1 ≤ 3 + (n:ℝ) := by
+      have := Real.exp_one_lt_d9
+      have hn0 : (0:ℝ) ≤ n := Nat.cast_nonneg n
+      linarith
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (3+n) := Real.log_le_log (Real.exp_pos 1) he
+  rcases le_or_gt (A + 5) (n:ℝ) with hbig | hsmall
+  · -- large slab: two balls at heights ±(n + 1/2)
+    set upos := u.filter (fun ρ : ZetaZeros K => 0 ≤ (ρ.1).im) with hupos
+    set uneg := u.filter (fun ρ : ZetaZeros K => ¬ 0 ≤ (ρ.1).im) with huneg
+    have hsplit : (∑ ρ ∈ u, (zetaZeroDivisor K ρ.1 : ℝ))
+        = (∑ ρ ∈ upos, (zetaZeroDivisor K ρ.1 : ℝ))
+          + ∑ ρ ∈ uneg, (zetaZeroDivisor K ρ.1 : ℝ) := by
+      rw [hupos, huneg]
+      exact (Finset.sum_filter_add_sum_filter_not u _ _).symm
+    have hball : ∀ (Tc : ℝ), |Tc| = (n:ℝ) + 1/2 →
+        ∀ (v : Finset (ZetaZeros K)), v ⊆ u →
+        (∀ ρ ∈ v, |((ρ : ZetaZeros K).1).im - Tc| ≤ 1/2) →
+        (∑ ρ ∈ v, (zetaZeroDivisor K ρ.1 : ℝ)) ≤ Cc * Real.log (3+n) := by
+      intro Tc hTc v hvu hvim
+      have hmem : ∀ ρ ∈ v, (ρ : ZetaZeros K).1
+          ∈ Metric.closedBall ((A:ℂ) + (Tc:ℂ)*Complex.I) (A+2) := by
+        intro ρ hρ
+        exact Metric.mem_closedBall.mpr (by
+          have hreρ := hre ρ (hvu hρ)
+          have himρ := hvim ρ hρ
+          rw [dist_eq_norm]
+          have hsq : ‖(ρ : ZetaZeros K).1 - ((A:ℂ) + (Tc:ℂ)*Complex.I)‖^2
+              = ((ρ.1).re - A)^2 + ((ρ.1).im - Tc)^2 := by
+            rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+            simp [Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
+              Complex.mul_re, Complex.mul_im]
+            ring
+          have h2 : ((ρ.1).re - A)^2 ≤ A^2 := by nlinarith [hreρ.1, hreρ.2]
+          have h3 : ((ρ.1).im - Tc)^2 ≤ (1/2)^2 := by
+            have := abs_le.mp himρ
+            nlinarith [this.1, this.2]
+          nlinarith [norm_nonneg ((ρ : ZetaZeros K).1 - ((A:ℂ) + (Tc:ℂ)*Complex.I)),
+            hsq])
+      have hint := sum_zetaZeroDivisor_le_ball_finsum K
+        ((A:ℂ) + (Tc:ℂ)*Complex.I) (A+2) v hmem
+      have hcnt := hcount Tc (by rw [hTc]; linarith)
+      have hlogle : Real.log (2 + |Tc|) ≤ Real.log (3+n) := by
+        refine Real.log_le_log (by rw [hTc]; linarith) ?_
+        rw [hTc]
+        linarith
+      calc (∑ ρ ∈ v, (zetaZeroDivisor K ρ.1 : ℝ))
+          = ((∑ ρ ∈ v, zetaZeroDivisor K ρ.1 : ℤ) : ℝ) := by push_cast; rfl
+        _ ≤ ((∑ᶠ z, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+              (Metric.closedBall ((A:ℂ) + (Tc:ℂ)*Complex.I) (A+2))) z : ℤ) : ℝ) := by
+            exact_mod_cast hint
+        _ ≤ Cc * Real.log (2 + |Tc|) := hcnt
+        _ ≤ Cc * Real.log (3+n) := mul_le_mul_of_nonneg_left hlogle hCc.le
+    have hpos : (∑ ρ ∈ upos, (zetaZeroDivisor K ρ.1 : ℝ)) ≤ Cc * Real.log (3+n) := by
+      refine hball ((n:ℝ) + 1/2) (abs_of_pos (by positivity)) upos
+        (Finset.filter_subset _ _) (fun ρ hρ => ?_)
+      have h1 := hu ρ (Finset.filter_subset _ _ hρ)
+      have h2 : 0 ≤ (ρ.1).im := (Finset.mem_filter.mp hρ).2
+      rw [abs_of_nonneg h2] at h1
+      rw [abs_le]
+      constructor <;> linarith [h1.1, h1.2]
+    have hneg : (∑ ρ ∈ uneg, (zetaZeroDivisor K ρ.1 : ℝ)) ≤ Cc * Real.log (3+n) := by
+      refine hball (-((n:ℝ) + 1/2)) (by rw [abs_neg]; exact abs_of_pos (by positivity))
+        uneg (Finset.filter_subset _ _) (fun ρ hρ => ?_)
+      have h1 := hu ρ (Finset.filter_subset _ _ hρ)
+      have h2 : ¬ 0 ≤ (ρ.1).im := (Finset.mem_filter.mp hρ).2
+      push Not at h2
+      rw [abs_of_neg h2] at h1
+      rw [abs_le]
+      constructor <;> linarith [h1.1, h1.2]
+    have hCnn : 0 ≤ Cc * Real.log (3+n) := by
+      refine mul_nonneg hCc.le (by linarith)
+    calc (∑ ρ ∈ u, (zetaZeroDivisor K ρ.1 : ℝ))
+        ≤ Cc * Real.log (3+n) + Cc * Real.log (3+n) := by
+          rw [hsplit]
+          exact add_le_add hpos hneg
+      _ = 2*Cc * Real.log (3+n) := by ring
+      _ ≤ (2*Cc + (C₀ : ℝ) + 1) * Real.log (3+n) := by
+          refine mul_le_mul_of_nonneg_right ?_ (by linarith)
+          have : (0:ℝ) ≤ (C₀:ℝ) := by exact_mod_cast hC₀nn
+          linarith
+  · -- small slab: one fixed ball
+    have hmem : ∀ ρ ∈ u, (ρ : ZetaZeros K).1 ∈ Metric.closedBall (0:ℂ) (A+8) := by
+      intro ρ hρ
+      have hreρ := hre ρ hρ
+      have himρ := hu ρ hρ
+      refine Metric.mem_closedBall.mpr ?_
+      rw [dist_zero_right]
+      have hsq : ‖(ρ : ZetaZeros K).1‖^2 = (ρ.1).re^2 + (ρ.1).im^2 := by
+        rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+        ring
+      have h2 : (ρ.1).re^2 ≤ 1 := by nlinarith [hreρ.1, hreρ.2]
+      have h3 : (ρ.1).im^2 ≤ ((n:ℝ)+1)^2 := by
+        have h4 := himρ.2
+        have h5 := abs_nonneg ((ρ.1).im)
+        nlinarith [neg_abs_le ((ρ.1).im), le_abs_self ((ρ.1).im)]
+      have h6 : ((n:ℝ)+1)^2 ≤ (A+6)^2 := by nlinarith
+      nlinarith [norm_nonneg ((ρ : ZetaZeros K).1), hsq]
+    have hint := sum_zetaZeroDivisor_le_ball_finsum K (0:ℂ) (A+8) u hmem
+    calc (∑ ρ ∈ u, (zetaZeroDivisor K ρ.1 : ℝ))
+        = ((∑ ρ ∈ u, zetaZeroDivisor K ρ.1 : ℤ) : ℝ) := by push_cast; rfl
+      _ ≤ ((C₀ : ℤ) : ℝ) := by
+          rw [hC₀]
+          exact_mod_cast hint
+      _ ≤ (2*Cc + (C₀ : ℝ) + 1) * 1 := by
+          have h7 : (0:ℝ) < Cc := hCc
+          nlinarith
+      _ ≤ (2*Cc + (C₀ : ℝ) + 1) * Real.log (3+n) := by
+          refine mul_le_mul_of_nonneg_left hlog3 ?_
+          have : (0:ℝ) ≤ (C₀:ℝ) := by exact_mod_cast hC₀nn
+          linarith
+
 end DedekindResidue
 
 end
