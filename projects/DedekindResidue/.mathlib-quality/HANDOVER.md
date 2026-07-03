@@ -1239,3 +1239,47 @@ Dsinh+Dcosh = ∫archWeight(F_T−F_T') (integral_add) ≤ `arch_sum_diff_le`;
 - **T12-c**: Q4 κ_ℚ = 1 (dedekindZeta_residue ℚ = regulator ℚ · h/w-form:
   2^1·reg·1/(2·1) = reg; regulator ℚ = 1 rank-0) → log κ_ℚ = 0; assemble
   `belabas_friedman_thm1` (hn : 1 < finrank, X ≥ 69, constants 2.324/3.88/4.26).
+
+### Leg 8 final state (this session): T011 + L5 + T012-a + T012-b(N1,N2) COMPLETE
+
+Proven this session (all green, pushed, no new sorries; the single intentional
+sorry remains `belabas_friedman_thm1`):
+- **Lemma4.lean**: full B–F Lemma 4 — `lemma4_sigma_estimate`, `lemma4_explicit2`.
+- **QSide.lean**: `generalizedRiemannHypothesis_rat`, **`dedekindZeta_residue_rat_eq_one`**
+  (κ_ℚ = 1: regulator ℚ = 1, torsion 2, class number 1).
+- **Lemma5.lean**: full B–F Lemma 5 — expTest discharge suite,
+  `weil_explicit_formula_expTest`, **`stark_identity`** (eq:Stark),
+  `dSigma`, **`landau_stark_estimate`**.
+- **Theorem1.lean**: `bSum` (redesigned index, its design ticket), bridges
+  **`bSum_eq_neg_plateauSum`**, `cutoff_weight_diff` (eq:Diff), **`step1`**;
+  numerics N1 (`sinh_int_rec` I(σ+1)=I(σ)+1/σ, `sinh_int_mono`,
+  `sinh_int_one` I(1)=2log2, `cosh_int_nonneg/le`) and N2 (`cosh_int_two`
+  I_cosh(2) = π/2−(1−log2)). **No digamma anywhere.**
+
+**REMAINING (map + margins in `.mathlib-quality/decomposition-t012b.md`, sentinel
+has the live focus):**
+- **N3**: `dSigma_rat_two_eq : dSigma ℚ 2 = 2·vonMangoldtSum ℚ 2 + γ_E + log π − 1`
+  (unfold dSigma at ℚ, n=r₁=1, I_s(2) = 1+2log2 by rec+base, I_c(2) by N2,
+  log8π = 3log2+logπ) and `dSigma_ge : 1 < σ ≤ 2 → 2γ+2log2π−3 ≤ dSigma K σ`
+  (vonMangoldt ≥ 0; n ≥ 2 with bracket ≥ 0; cosh bracket ≥ 0 via cosh_int_le;
+  I_s(σ)+1/σ = I_s(σ+1) ≤ I_s(3) = 3/2+2log2 via rec+mono).
+- **N4**: `vonMangoldtSum ℚ 2 ≥ log2/4 + log3/9 + log5/25 + log7/49 + log2/16`
+  (≥ 0.4778): five explicit indices (span p ideals of 𝓞 ℚ via
+  Rat.ringOfIntegersEquiv transport, absNorm p; p=2 twice: m=1,2);
+  Summable.sum_le_tsum. Then the master numeric:
+  `zeroSumSigma ℚ 1 ≤ 2γ + 2log2π − 3` via landau_stark_estimate ℚ σ=2 +
+  N3 + certificates (γ > 1/2: one_half_lt_eulerMascheroniSeq_six +
+  eulerMascheroniSeq_lt_eulerMascheroniConstant; log2 > 0.6931:
+  Real.log_two_gt_d9; logπ ≥ log3 = log2 + log(3/2), log(3/2) > 0.405;
+  margin analysis says 15 ≤ 6W+5γ+5logπ+5log2 needs the N2 refinement — 
+  RE-CHECK the final inequality shape in decomposition-t012b.md before coding).
+- **N5**: β-bound (1/2+1/t)e^t·L(t) ≤ 2 for t ≥ log(23/3): quintic
+  log(1+u) ≤ u−u²/2+u³/3−u⁴/4+u⁵/5 (derivative 0 ≤ u⁵, integrate via
+  monotoneOn_of_hasDerivWithinAt_nonneg), u := 2/(e^t−1), monotone reduction,
+  exp certificates (e² < 7.39, e^{0.03} < 1.031). archKernelL(T') = L form.
+- **N6**: assemble `belabas_friedman_thm1` in MainTheorem.lean (replace the
+  sorry; imports already flow): step1 + landau_stark_estimate at K
+  (σ := 1+1/√logΔ, needs |Δ_K| ≥ 3 for n ≥ 2 — find mathlib's
+  abs_discr bound name), (2σ−1)(logΔ+2/(σ−1)) = (√logΔ+2)², the ℚ-sum
+  absorption (N4 master), β-absorption (N5), constants
+  (3/2)(1+log9/4) < 2.324 etc. via log3 certificates. `#print axioms` check.
