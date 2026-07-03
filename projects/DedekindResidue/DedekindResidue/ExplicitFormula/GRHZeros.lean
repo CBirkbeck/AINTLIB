@@ -372,6 +372,155 @@ theorem exists_slab_zetaZeroDivisor_sum_le :
           have : (0:ℝ) ≤ (C₀:ℝ) := by exact_mod_cast hC₀nn
           linarith
 
+/-- The slab-count majorant series `∑ log(3+n)/(h²+n²)` converges
+(`log(3+n) ≤ 2√(n+1+ ...)` elementary, no asymptotics). -/
+theorem summable_log_div_sq (h : ℝ) (hh : 0 < h) :
+    Summable (fun n : ℕ => Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) := by
+  set c₁ : ℝ := min (h^2) (1/4) with hc₁
+  have hc₁0 : 0 < c₁ := by
+    rw [hc₁]
+    exact lt_min (by positivity) (by norm_num)
+  have hbase : Summable (fun n : ℕ => (((n:ℝ)+1)) ^ (-(3/2 : ℝ))) := by
+    have h0 : Summable (fun n : ℕ => ((n:ℝ)) ^ (-(3/2 : ℝ))) :=
+      Real.summable_nat_rpow.mpr (by norm_num)
+    have h1 := (summable_nat_add_iff 1).mpr h0
+    refine h1.congr (fun n => ?_)
+    push_cast
+    ring_nf
+  refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_)
+    ((hbase.mul_left (4/c₁)))
+  · have hlog : 0 ≤ Real.log (3+(n:ℝ)) := by
+      refine Real.log_nonneg ?_
+      have := Nat.cast_nonneg (α := ℝ) n
+      linarith
+    positivity
+  · have hn0 : (0:ℝ) ≤ n := Nat.cast_nonneg n
+    -- log(3+n) ≤ 2√(3+n) ≤ 4√(n+1)
+    have hlog2 : Real.log (3+(n:ℝ)) ≤ 2 * Real.sqrt (3+(n:ℝ)) := by
+      have hs : Real.sqrt (3+(n:ℝ)) ^ 2 = 3+(n:ℝ) := Real.sq_sqrt (by linarith)
+      have hspos : 0 < Real.sqrt (3+(n:ℝ)) := Real.sqrt_pos.mpr (by linarith)
+      calc Real.log (3+(n:ℝ)) = Real.log ((Real.sqrt (3+(n:ℝ)))^2) := by rw [hs]
+        _ = 2 * Real.log (Real.sqrt (3+(n:ℝ))) := by
+            rw [Real.log_pow]
+            push_cast
+            ring
+        _ ≤ 2 * (Real.sqrt (3+(n:ℝ)) - 1) := by
+            have := Real.log_le_sub_one_of_pos hspos
+            linarith
+        _ ≤ 2 * Real.sqrt (3+(n:ℝ)) := by linarith
+    have hsqrt : Real.sqrt (3+(n:ℝ)) ≤ 2 * Real.sqrt ((n:ℝ)+1) := by
+      have h44 : Real.sqrt 4 = 2 := by
+        rw [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 2)]
+      rw [show (2:ℝ) * Real.sqrt ((n:ℝ)+1) = Real.sqrt (4*((n:ℝ)+1)) by
+        rw [Real.sqrt_mul (by norm_num : (0:ℝ) ≤ 4), h44]]
+      exact Real.sqrt_le_sqrt (by linarith)
+    have hden : c₁ * ((n:ℝ)+1)^2 ≤ h^2 + (n:ℝ)^2 := by
+      rcases Nat.eq_zero_or_pos n with h0 | h0
+      · subst h0
+        simp only [Nat.cast_zero]
+        have : c₁ ≤ h^2 := min_le_left _ _
+        nlinarith
+      · have hn1 : (1:ℝ) ≤ n := by exact_mod_cast h0
+        have h4 : c₁ ≤ 1/4 := min_le_right _ _
+        nlinarith
+    have hpos : 0 < h^2 + (n:ℝ)^2 := by positivity
+    have hpos2 : 0 < c₁ * ((n:ℝ)+1)^2 := by positivity
+    calc Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)
+        ≤ (4 * Real.sqrt ((n:ℝ)+1)) / (c₁ * ((n:ℝ)+1)^2) := by
+          refine div_le_div₀ ?_ ?_ hpos2 hden
+          · positivity
+          · calc Real.log (3+(n:ℝ)) ≤ 2 * Real.sqrt (3+(n:ℝ)) := hlog2
+              _ ≤ 2 * (2 * Real.sqrt ((n:ℝ)+1)) := by
+                  refine mul_le_mul_of_nonneg_left hsqrt (by norm_num)
+              _ = 4 * Real.sqrt ((n:ℝ)+1) := by ring
+      _ = (4/c₁) * (Real.sqrt ((n:ℝ)+1) / ((n:ℝ)+1)^2) := by
+          field_simp
+      _ = (4/c₁) * (((n:ℝ)+1)) ^ (-(3/2 : ℝ)) := by
+          congr 1
+          rw [Real.rpow_neg (by positivity : (0:ℝ) ≤ (n:ℝ)+1),
+            show (3/2:ℝ) = 1/2 + 1 by norm_num,
+            Real.rpow_add (by positivity : (0:ℝ) < (n:ℝ)+1),
+            Real.rpow_one, ← Real.sqrt_eq_rpow]
+          have hs2 : Real.sqrt ((n:ℝ)+1) * Real.sqrt ((n:ℝ)+1) = (n:ℝ)+1 :=
+            Real.mul_self_sqrt (by positivity)
+          have hsne : Real.sqrt ((n:ℝ)+1) ≠ 0 := by positivity
+          have hne : ((n:ℝ)+1) ≠ 0 := by positivity
+          field_simp
+          linear_combination hs2
+
+/-- **Landau-type absolute convergence over the zero index**: for every `h > 0`,
+`∑_ρ div(ρ)/(h² + γ_ρ²)` converges. -/
+theorem summable_zetaZeros_inv_sq (h : ℝ) (hh : 0 < h) :
+    Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2)) := by
+  classical
+  obtain ⟨C, hC, hslab⟩ := exists_slab_zetaZeroDivisor_sum_le K
+  have hnn : ∀ ρ : ZetaZeros K,
+      0 ≤ (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2) := by
+    intro ρ
+    have h1 : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+      exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+    positivity
+  have hmaj : Summable (fun n : ℕ => C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2))) :=
+    (summable_log_div_sq h hh).mul_left C
+  set ctot : ℝ := ∑' n : ℕ, C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) with hctot
+  refine summable_of_sum_le (c := ctot) (fun ρ => hnn ρ) (fun v => ?_)
+  -- partition the finite family by ⌊|γ|⌋
+  set g : ZetaZeros K → ℕ := fun ρ => ⌊|((ρ : ZetaZeros K).1).im|⌋₊ with hg
+  have hmaps : ∀ ρ ∈ v, g ρ ∈ v.image g := fun ρ hρ => Finset.mem_image_of_mem g hρ
+  rw [← Finset.sum_fiberwise_of_maps_to hmaps]
+  have hfiber : ∀ n ∈ v.image g,
+      (∑ ρ ∈ v.filter (fun ρ => g ρ = n),
+        (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2))
+      ≤ C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) := by
+    intro n _
+    have hbound : ∀ ρ ∈ v.filter (fun ρ => g ρ = n),
+        (n:ℝ) ≤ |((ρ : ZetaZeros K).1).im| ∧ |((ρ : ZetaZeros K).1).im| ≤ n+1 := by
+      intro ρ hρ
+      have hgn : g ρ = n := (Finset.mem_filter.mp hρ).2
+      rw [hg] at hgn
+      constructor
+      · rw [← hgn]
+        exact Nat.floor_le (abs_nonneg _)
+      · rw [← hgn]
+        exact le_of_lt (Nat.lt_floor_add_one _)
+    have hstep : ∀ ρ ∈ v.filter (fun ρ => g ρ = n),
+        (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2)
+        ≤ (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + (n:ℝ)^2) := by
+      intro ρ hρ
+      have h1 := (hbound ρ hρ).1
+      have h2 : (n:ℝ)^2 ≤ ((ρ : ZetaZeros K).1).im^2 := by
+        have h3 := abs_nonneg ((ρ : ZetaZeros K).1).im
+        have h4 : (n:ℝ)^2 ≤ |((ρ : ZetaZeros K).1).im|^2 := by nlinarith
+        rwa [sq_abs] at h4
+      have h5 : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+        exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+      refine div_le_div_of_nonneg_left h5 (by positivity) ?_
+      linarith
+    calc (∑ ρ ∈ v.filter (fun ρ => g ρ = n),
+          (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2))
+        ≤ ∑ ρ ∈ v.filter (fun ρ => g ρ = n),
+          (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + (n:ℝ)^2) :=
+          Finset.sum_le_sum hstep
+      _ = (∑ ρ ∈ v.filter (fun ρ => g ρ = n), (zetaZeroDivisor K ρ.1 : ℝ))
+            / (h^2 + (n:ℝ)^2) := by
+          rw [Finset.sum_div]
+      _ ≤ (C * Real.log (3+(n:ℝ))) / (h^2 + (n:ℝ)^2) := by
+          refine div_le_div_of_nonneg_right ?_ (by positivity)
+          exact hslab n _ hbound
+      _ = C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) := by ring
+  calc (∑ n ∈ v.image g, ∑ ρ ∈ v.filter (fun ρ => g ρ = n),
+        (zetaZeroDivisor K ρ.1 : ℝ) / (h^2 + ((ρ : ZetaZeros K).1).im^2))
+      ≤ ∑ n ∈ v.image g, C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) :=
+        Finset.sum_le_sum hfiber
+    _ ≤ ∑' n : ℕ, C * (Real.log (3+(n:ℝ)) / (h^2 + (n:ℝ)^2)) := by
+        refine sum_le_hasSum _ (fun n _ => ?_) hmaj.hasSum
+        have hlog : 0 ≤ Real.log (3+(n:ℝ)) := by
+          refine Real.log_nonneg ?_
+          have := Nat.cast_nonneg (α := ℝ) n
+          linarith
+        positivity
+
 end DedekindResidue
 
 end
