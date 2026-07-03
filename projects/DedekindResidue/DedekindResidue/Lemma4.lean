@@ -817,6 +817,57 @@ theorem two_cosh_half_eq {y : ℝ} : 2 * Real.cosh (y/2)
   rw [Real.cosh_eq, mul_add, mul_one, h1]
   ring
 
+/-- Pointwise: `(w₁+w₂)(y)·cutKernel σ y U ≤ (h+1/U)e^{U/2}·(1/(e^y−1)+1/(e^y+1))`
+for `1 ≤ σ` and `0 < U < y`. -/
+theorem weight_mul_cutKernel_le {σ : ℝ} (hσ1 : 1 ≤ σ) {U y : ℝ} (hU : 0 < U)
+    (hyU : U < y) :
+    (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+      ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+  have hh : (1:ℝ)/2 ≤ σ - 1/2 := by linarith
+  have hy0 : 0 < y := hU.trans hyU
+  have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+  have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+  have hey : 1 < Real.exp y := by
+    calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+      _ < Real.exp y := Real.exp_lt_exp.mpr hy0
+  have hkernel : cutKernel σ y U
+      ≤ (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by
+    rw [cutKernel, if_pos hyU]
+    have h1 : (1 + (σ - 1/2)*U)/y ≤ (1 + (σ - 1/2)*U)/U := by
+      gcongr
+    have h2 : (1 + (σ - 1/2)*U)/U = σ - 1/2 + 1/U := by
+      field_simp
+      ring
+    calc (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))
+        ≤ (1 + (σ - 1/2)*U)/U * Real.exp (-(σ - 1/2)*(y - U)) :=
+          mul_le_mul_of_nonneg_right h1 (Real.exp_pos _).le
+      _ = (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by rw [h2]
+  have hwsum : 1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))
+      = Real.exp (y/2) * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+    rw [two_sinh_half_eq, two_cosh_half_eq, one_div, one_div, mul_inv, mul_inv,
+      Real.exp_neg, inv_inv, mul_add, one_div, one_div]
+  have hwpos : 0 ≤ 1/(Real.exp y - 1) + 1/(Real.exp y + 1) := by positivity
+  have hexp_collapse : Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U))
+      ≤ Real.exp (U/2) := by
+    rw [← Real.exp_add]
+    refine Real.exp_le_exp.mpr ?_
+    have h7 : (1/2)*(y - U) ≤ (σ - 1/2)*(y - U) :=
+      mul_le_mul_of_nonneg_right hh (by linarith)
+    linarith
+  calc (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+      ≤ (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2)))
+          * ((σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U))) :=
+        mul_le_mul_of_nonneg_left hkernel (by positivity)
+    _ = (σ - 1/2 + 1/U) * (Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U)))
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+        rw [hwsum]
+        ring
+    _ ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+        refine mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hexp_collapse (by positivity)) hwpos
+
 /-- **(C2b) The inner bound**: for `1 ≤ σ` and `U > 0`,
 `∫_{y>U} (1/(2sinh(y/2)) + 1/(2cosh(y/2)))·cutKernel σ y U dy
   ≤ (h + 1/U)·e^{U/2}·L(U)`. -/
@@ -857,51 +908,8 @@ theorem inner_arch_bound {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ} (hU : 0 < U) :
   have hptbound : ∀ y ∈ Set.Ioi U,
       (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
       ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
-          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
-    intro y hy
-    have hyU : U < y := hy
-    have hy0 : 0 < y := hU.trans hyU
-    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
-    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
-    have hey : 1 < Real.exp y := by
-      calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
-        _ < Real.exp y := Real.exp_lt_exp.mpr hy0
-    have hkernel : cutKernel σ y U
-        ≤ (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by
-      rw [cutKernel, if_pos hyU]
-      have h1 : (1 + (σ - 1/2)*U)/y ≤ (1 + (σ - 1/2)*U)/U := by
-        gcongr
-      have h2 : (1 + (σ - 1/2)*U)/U = σ - 1/2 + 1/U := by
-        field_simp
-        ring
-      calc (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))
-          ≤ (1 + (σ - 1/2)*U)/U * Real.exp (-(σ - 1/2)*(y - U)) :=
-            mul_le_mul_of_nonneg_right h1 (Real.exp_pos _).le
-        _ = (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by rw [h2]
-    have hwsum : 1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))
-        = Real.exp (y/2) * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
-      rw [two_sinh_half_eq, two_cosh_half_eq, one_div, one_div, mul_inv, mul_inv,
-        Real.exp_neg, inv_inv, mul_add, one_div, one_div]
-    have hwpos : 0 ≤ 1/(Real.exp y - 1) + 1/(Real.exp y + 1) := by positivity
-    have hexp_collapse : Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U))
-        ≤ Real.exp (U/2) := by
-      rw [← Real.exp_add]
-      refine Real.exp_le_exp.mpr ?_
-      have h7 : (1/2)*(y - U) ≤ (σ - 1/2)*(y - U) :=
-        mul_le_mul_of_nonneg_right hh (by linarith)
-      linarith
-    calc (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
-        ≤ (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2)))
-            * ((σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U))) :=
-          mul_le_mul_of_nonneg_left hkernel (by positivity)
-      _ = (σ - 1/2 + 1/U) * (Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U)))
-            * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
-          rw [hwsum]
-          ring
-      _ ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
-            * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
-          refine mul_le_mul_of_nonneg_right
-            (mul_le_mul_of_nonneg_left hexp_collapse (by positivity)) hwpos
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) :=
+    fun y hy => weight_mul_cutKernel_le hσ1 hU hy
   have hint : MeasureTheory.IntegrableOn (fun y : ℝ =>
       (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U)
       (Set.Ioi U) := by
@@ -924,6 +932,66 @@ theorem inner_arch_bound {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ} (hU : 0 < U) :
           archKernelL]
         ring
 
+/-! ### The Tonelli swap and the final archimedean estimate (c4-C2c/C3) -/
+
+/-- The combined weight, as a global (junk-at-0) function. -/
+noncomputable def archWeight (y : ℝ) : ℝ :=
+  1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))
+
+theorem measurable_archWeight : Measurable archWeight := by
+  unfold archWeight
+  fun_prop
+
+theorem archWeight_nonneg {y : ℝ} (hy : 0 < y) : 0 ≤ archWeight y := by
+  have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+  have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+  unfold archWeight
+  positivity
+
+/-- Joint measurability of the swap integrand. -/
+theorem measurable_archWeight_mul_cutKernel (σ : ℝ) :
+    Measurable (fun p : ℝ × ℝ => archWeight p.2 * cutKernel σ p.2 p.1) := by
+  refine (measurable_archWeight.comp measurable_snd).mul ?_
+  unfold cutKernel
+  refine Measurable.ite ?_ ?_ measurable_const
+  · exact measurableSet_lt measurable_fst measurable_snd
+  · fun_prop
+
+/-- The weighted cut kernel is integrable on `(0, ∞)` in `y` (it vanishes on
+`(0, U]` and is dominated beyond). -/
+theorem integrableOn_archWeight_mul_cutKernel {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ}
+    (hU : 0 < U) :
+    MeasureTheory.IntegrableOn (fun y : ℝ => archWeight y * cutKernel σ y U)
+      (Set.Ioi 0) := by
+  have hh0 : (0:ℝ) < σ - 1/2 := by linarith
+  have hσ2 : (1:ℝ)/2 < σ := by linarith
+  -- on `(0, U]` the integrand vanishes; on `(U, ∞)` use the C2b majorant
+  have hsplit : Set.Ioi (0:ℝ) = Set.Ioc 0 U ∪ Set.Ioi U := by
+    rw [Set.Ioc_union_Ioi_eq_Ioi hU.le]
+  rw [hsplit]
+  refine MeasureTheory.IntegrableOn.union ?_ ?_
+  · refine MeasureTheory.integrableOn_zero.congr_fun (fun y hy => ?_) measurableSet_Ioc
+    rw [cutKernel, if_neg (not_lt.mpr hy.2), mul_zero]
+  · have hmajint : MeasureTheory.IntegrableOn (fun y : ℝ =>
+        (σ - 1/2 + 1/U) * Real.exp (U/2)
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1))) (Set.Ioi U) :=
+      (((integrableOn_inv_exp_sub_one hU).add
+        (integrableOn_inv_exp_add_one hU)).const_mul _)
+    refine MeasureTheory.Integrable.mono' hmajint
+      ((measurable_archWeight.mul (by
+        unfold cutKernel
+        refine Measurable.ite (measurableSet_lt measurable_const measurable_id) ?_
+          measurable_const
+        fun_prop)).aestronglyMeasurable) ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+    have hy0 : 0 < y := hU.trans hy
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+    rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (archWeight_nonneg hy0) (cutKernel_nonneg hσ2 hy0 hU.le))]
+    exact weight_mul_cutKernel_le hσ1 hU hy
+
 end DedekindResidue
 
 end
+
