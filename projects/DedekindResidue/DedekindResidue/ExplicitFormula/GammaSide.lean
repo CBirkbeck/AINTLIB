@@ -4812,4 +4812,114 @@ theorem tendsto_shift_vertical_sub {a : ℝ} (ha : 0 < a) {Φ g : ℂ → ℂ}
   filter_upwards [Filter.eventually_ge_atTop (4:ℝ)] with T hT
   exact hkey T hT
 
+/-- Continuity of `y ↦ γ_K'/γ_K(1/2 + iy)`. -/
+theorem continuous_logDeriv_gammaFactor_half (K : Type*) [Field K] [NumberField K] :
+    Continuous (fun y : ℝ =>
+      logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)) := by
+  refine continuous_iff_continuousAt.mpr (fun y => ?_)
+  refine ContinuousAt.comp ?_ ?_
+  · refine (differentiableAt_logDeriv_gammaFactor K ?_).continuousAt
+    simp
+  · exact (continuous_const.add (Complex.continuous_ofReal.mul continuous_const)).continuousAt
+
+/-- **The critical-line fold** (Poitou p. 6-03, the passage from
+`{Φ(s) + Φ(1-s)} d log G` to `φ(t)·2 Re(G'/G)`): for an even integrable `F` whose
+`Φ` restricts on the critical line to the Fourier integral `φ`, the shifted vertical
+integral coincides with the `I_G` integrand at every height `T`. The reflection
+`t ↦ -t` together with Schwarz reflection for `γ_K` produces the real part; no
+reality assumption on `F` is needed. -/
+theorem integral_half_line_fold (K : Type*) [Field K] [NumberField K]
+    {F : ℝ → ℂ} (hF : Integrable F) (hFeven : ∀ x : ℝ, F (-x) = F x)
+    {Φ : ℂ → ℂ}
+    (hΦval : ∀ y : ℝ, Φ (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+      = ∫ x : ℝ, F x * Complex.exp ((y*x : ℝ) * Complex.I))
+    (T : ℝ) :
+    (∫ y in (-T)..T, (Φ (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+        + Φ (1 - (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)))
+        * logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I))
+      = ∫ y in (-T)..T,
+          ((2 * (logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)).re : ℝ) : ℂ)
+            * (∫ x : ℝ, F x * Complex.exp ((y*x : ℝ) * Complex.I)) := by
+  set φ : ℝ → ℂ := fun y => ∫ x : ℝ, F x * Complex.exp ((y*x : ℝ) * Complex.I) with hφ
+  set L : ℝ → ℂ := fun y =>
+    logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I) with hL
+  -- φ is even
+  have hφeven : ∀ y : ℝ, φ (-y) = φ y := by
+    intro y
+    rw [hφ]
+    simp only
+    rw [← integral_comp_neg_real (fun x => F x * Complex.exp ((y*x : ℝ) * Complex.I))]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show F x * Complex.exp (((-y)*x : ℝ) * Complex.I)
+        = F (-x) * Complex.exp ((y*(-x) : ℝ) * Complex.I)
+    rw [hFeven x, show (y*(-x) : ℝ) = ((-y)*x : ℝ) by ring]
+  -- L reflects by conjugation
+  have hLconj : ∀ y : ℝ, L (-y) = (starRingEnd ℂ) (L y) := by
+    intro y
+    rw [hL]
+    simp only
+    rw [show (((1/2:ℝ):ℂ) + ((-y : ℝ):ℂ)*Complex.I)
+        = (starRingEnd ℂ) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I) by
+      rw [map_add, Complex.conj_ofReal, map_mul, Complex.conj_ofReal, Complex.conj_I]
+      push_cast
+      ring]
+    exact logDeriv_gammaFactor_conj K (by simp)
+  -- the left-hand integrand is 2·φ·L
+  have hpt : ∀ y : ℝ, (Φ (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+      + Φ (1 - (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)))
+      * logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+      = 2 * φ y * L y := by
+    intro y
+    have h1 : (1:ℂ) - (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+        = ((1/2:ℝ):ℂ) + ((-y : ℝ):ℂ)*Complex.I := by
+      push_cast
+      ring
+    rw [h1, hΦval y, hΦval (-y)]
+    have h2 : (∫ x : ℝ, F x * Complex.exp (((-y)*x : ℝ) * Complex.I)) = φ (-y) := rfl
+    rw [h2, hφeven y]
+    show (φ y + φ y) * L y = 2 * φ y * L y
+    ring
+  rw [intervalIntegral.integral_congr (fun y _ => hpt y)]
+  -- continuity for integrability
+  have hφc : Continuous φ := continuous_muFT hF
+  have hLc : Continuous L := continuous_logDeriv_gammaFactor_half K
+  have hLcc : Continuous (fun y : ℝ => (starRingEnd ℂ) (L y)) :=
+    Complex.continuous_conj.comp hLc
+  -- reflect: ∫ 2φL = ∫ 2φ·conj L
+  have hrefl : (∫ y in (-T)..T, 2 * φ y * L y)
+      = ∫ y in (-T)..T, 2 * φ y * (starRingEnd ℂ) (L y) := by
+    have h0 := intervalIntegral.integral_comp_neg (a := -T) (b := T)
+      (fun y => 2 * φ y * L y)
+    rw [neg_neg] at h0
+    rw [← h0]
+    refine intervalIntegral.integral_congr (fun y _ => ?_)
+    rw [hφeven y, hLconj y]
+  -- average and take the real part of L
+  have hii1 : IntervalIntegrable (fun y => 2 * φ y * L y) MeasureTheory.volume (-T) T :=
+    ((continuous_const.mul hφc).mul hLc).intervalIntegrable _ _
+  have hii2 : IntervalIntegrable (fun y => 2 * φ y * (starRingEnd ℂ) (L y))
+      MeasureTheory.volume (-T) T :=
+    ((continuous_const.mul hφc).mul hLcc).intervalIntegrable _ _
+  have havg : (∫ y in (-T)..T, 2 * φ y * L y)
+      = ∫ y in (-T)..T, φ y * (L y + (starRingEnd ℂ) (L y)) := by
+    have h1 : (∫ y in (-T)..T, 2 * φ y * L y)
+        = ((∫ y in (-T)..T, 2 * φ y * L y)
+          + ∫ y in (-T)..T, 2 * φ y * (starRingEnd ℂ) (L y)) / 2 := by
+      rw [← hrefl]
+      ring
+    rw [h1, ← intervalIntegral.integral_add hii1 hii2]
+    rw [show ((∫ y in (-T)..T, (2 * φ y * L y + 2 * φ y * (starRingEnd ℂ) (L y))) / 2)
+        = (1/2 : ℂ) * ∫ y in (-T)..T, (2 * φ y * L y + 2 * φ y * (starRingEnd ℂ) (L y))
+        from by ring]
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun y _ => ?_)
+    ring
+  rw [havg]
+  refine intervalIntegral.integral_congr (fun y _ => ?_)
+  rw [Complex.add_conj]
+  rw [hφ, hL]
+  simp only
+  push_cast
+  ring
+
 end DedekindResidue
