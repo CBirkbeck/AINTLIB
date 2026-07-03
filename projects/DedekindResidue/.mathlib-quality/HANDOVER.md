@@ -1,5 +1,52 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-03 leg 7: SP3 HYPOTHESIS DISCHARGE COMPLETE — weil_explicit_formula_auxF landed
+
+All pushed, axiom-clean, zero warnings. **Every hypothesis of `weil_explicit_formula`
+is now discharged at `F = F_{s,X}`** (`1 < X`, `0 < a ≤ 1/4`, `a < Re s − 1`), and the
+instantiated milestone **`weil_explicit_formula_auxF`** (WeilAssembly.lean, end) gives
+the zero-capture limit = Poitou's (6) RHS at the auxiliary function with
+`Hp = Hm = H(0)`.
+
+The bricks of this leg (all in `WeilAssembly.lean` / `AuxAdmissible.lean`):
+- **SP3-c1** `memLp_two_auxF_diffQuot` (hFdiv2).
+- **SP3-c2** (AuxAdmissible) parametrised weight `auxF_mul_exp_bv_Ici` (any real
+  `c < Re s − 1/2`), `boundedVariationOn_auxF_mul_exp` on `univ` (`|c| < Re s − 1/2`,
+  evenness reflection flips the weight sign), `lipschitzWith_complex_re/im`,
+  `locallyBoundedVariationOn_auxF_re/im` (hre/him, `c = 0`),
+  `locallyBoundedVariationOn_auxF_mul_exp_re/im` (hGre/hGim, `c = 1/2+a`),
+  `integrable_auxF_mul_exp` (hFa, full line).
+- **SP3-c3** hΦd was over-strong (global `Differentiable ℂ (paperPhi F)` is FALSE at
+  auxF — Φ-integral only converges on `1−Re s < Re < Re s`): **weakened to band-local**
+  `∀ ζ, −a ≤ Re ζ ≤ 1+a → DifferentiableAt` through `tendsto_shift_vertical_sub`
+  (GammaSide), `tendsto_edge_integral`, `weil_explicit_formula`; discharged by
+  `differentiableAt_paperPhi_auxF` (witness ε = (a + (Re s −1))/2).
+- **SP3-c4a** the IBP identity `mul_paperPhi_auxF_eq`:
+  `w·Φ(z) = −∫_{log X}^∞ F'(x)(e^{wx} − e^{−wx}) dx` (`w = z−1/2`, `|Re w| < Re s−1/2`)
+  via even fold `paperPhi_eq_half_line_fold`, plateau FTC (antisymmetric kernel
+  vanishes at 0), tail improper-FTC at the kink; + `integrable_auxF_mul_cexp`,
+  `auxF_tail_form`, `norm_auxF_tail_deriv_mul_le`.
+- **SP3-c4b THE MAIN PIECE** `exists_band_bound_paperPhi_auxF`:
+  `‖Φ(σ+it)‖ ≤ M/max(|t|,1)` uniformly on `σ ∈ [−a,1+a]` (small `|t|`: L¹ majorant;
+  large: IBP + `‖w‖ ≥ |t|`); `tendsto_div_max_mul_log_sq` gives `B·log² → 0`.
+  So hB/hBlog2 hold with `B T = M/max(T,1)`.
+- **SP3-c5** `hasDerivAt_poleWindow` (`E_c' = c·E_c − 2G`) →
+  `locallyBoundedVariationOn_poleWindow_add` → `..._poleWindow_auxF_re/im` (hEre/hEim).
+- **SP3-c6** `eVariationOn_tsum_le` (countable subadditivity of variation —
+  mathlib-worthy) + `eVariationOn_smul_translate_le`; primeSideH = weighted sum of
+  translates of `G = auxF·e^{(1/2+a)x}` ⟹ `boundedVariationOn_primeSideH_auxF`
+  (hHre/hHim) and `continuous_primeSideH_auxF` (M-test) ⟹ hHp/hHm at `H(0)`.
+
+**NEXT (B–F Theorem 1 chain; consult refs REGULARLY — Poitou PDF local,
+B–F 1305.0035 via alphaXiv):**
+1. `primeSideH_auxF_zero_eq`: `H(0) = ∑_{𝔭,m} log N·N^{−m/2}·F_{s,X}(m log N)` — the
+   weights collapse: `N^{−m(1+a)}·e^{(1/2+a)m log N} = N^{−m/2}`.
+2. B–F Lemma 3 (apply the formula at `F_{s,X}`, Re s > 1 first), eq (19), Lemma 5,
+   Lemma 4, `belabas_friedman_thm1` + mathlib `dedekindZeta_residue`
+   (MainTheorem.lean's single intentional sorry).
+
+---
+
 ## 2026-07-02 leg 5: SP2-RECT COMPLETE — full contour mechanics for the explicit formula
 
 All pushed, axiom-clean, zero warnings. See decomposition-sp2.md §"SP2-RECT STATUS" for
