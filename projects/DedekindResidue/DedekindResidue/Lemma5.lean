@@ -19,7 +19,8 @@ public import DedekindResidue.Lemma4
 
 namespace DedekindResidue
 
-open Complex NumberField Filter MeasureTheory
+open Complex NumberField Filter MeasureTheory Real
+open scoped ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
@@ -632,6 +633,324 @@ theorem differentiableAt_paperPhi_expTest {h : ℝ} {a : ℝ}
   refine hrat.congr_of_eventuallyEq ?_
   filter_upwards [hUopen.mem_nhds hζU] with z hz
   exact paperPhi_expTest hz
+
+/-! ### Boundary decay, the prime side, and the pole windows at `F_h` -/
+
+/-- **`htop2`/`hbot2` at the Landau–Stark function**: `ρ_σ·γ_{F_h} → 0` along any
+`|t| → ∞` filter. -/
+theorem tendsto_boundary_expTest {h : ℝ} (hh : 0 < h)
+    {σ : ℝ} (hσ : 0 < σ) (hσl : -1 ≤ σ) (hσr : σ ≤ 2) (l : Filter ℝ)
+    (habs : Filter.Tendsto (fun t : ℝ => |t|) l atTop) :
+    Filter.Tendsto (fun t : ℝ => rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      * gammaFT (expTest h) t) l (nhds 0) := by
+  obtain ⟨C, γ₀, hC, hγ₀, hφ⟩ := exists_norm_fourier_expTest_le hh
+  refine tendsto_rhoFT_mul_gammaFT_of_decay (C := C) (γ₀ := γ₀) hσ hσl hσr ?_ l habs
+  refine norm_gammaFT_le_of_fourier_decay (integrable_expTest hh)
+    (integrableOn_expTest_diffQuot_window hh) hγ₀ ?_
+  intro γ hγ
+  rw [← paperFourierIntegral_eq_muFT]
+  exact hφ γ hγ
+
+/-- **`htop4`/`hbot4` at the Landau–Stark function**: the half-scaled boundary
+decay. -/
+theorem tendsto_boundary_expTest_half {h : ℝ} (hh : 0 < h)
+    {σ : ℝ} (hσ : 0 < σ) (hσl : -1 ≤ σ) (hσr : σ ≤ 2) (l : Filter ℝ)
+    (habs : Filter.Tendsto (fun t : ℝ => |t|) l atTop) :
+    Filter.Tendsto (fun t : ℝ => rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      * gammaFT (fun x : ℝ => expTest h (x/2) / 2) t) l (nhds 0) := by
+  obtain ⟨C, γ₀, hC, hγ₀, hφ⟩ := exists_norm_fourier_expTest_le hh
+  refine tendsto_rhoFT_mul_gammaFT_of_decay (C := C) (γ₀ := γ₀) hσ hσl hσr ?_ l habs
+  have hFh : Integrable (fun x : ℝ => expTest h (x/2) / 2) :=
+    integrable_halfScale (integrable_expTest hh)
+  have hFhdiv : MeasureTheory.IntegrableOn (fun x : ℝ =>
+      ((fun x : ℝ => expTest h (x/2) / 2) 0 - (fun x : ℝ => expTest h (x/2) / 2) x)/(x:ℂ))
+      (Set.Ioc (-1) 1) := by
+    refine (integrableOn_halfScale_div (integrableOn_expTest_diffQuot_window hh)).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    show (expTest h 0/2 - expTest h (x/2)/2)/(x:ℂ)
+        = (expTest h (0/2) / 2 - expTest h (x/2) / 2)/(x:ℂ)
+    norm_num
+  refine norm_gammaFT_le_of_fourier_decay hFh hFhdiv hγ₀ ?_
+  intro u hu
+  have hFour : (∫ x : ℝ, (expTest h (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I))
+      = ∫ x : ℝ, expTest h x * Complex.exp (((2*u)*x : ℝ) * Complex.I) := by
+    set g : ℝ → ℂ := fun w => expTest h w * Complex.exp (((2*u)*w : ℝ) * Complex.I)
+      with hg
+    have h1 : (∫ x : ℝ, g ((2:ℝ)⁻¹ * x)) = |(((2:ℝ)⁻¹))⁻¹| • ∫ x : ℝ, g x :=
+      MeasureTheory.Measure.integral_comp_mul_left g ((2:ℝ)⁻¹)
+    have h2 : (fun x : ℝ => (expTest h (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I))
+        = fun x : ℝ => (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x) := by
+      funext x
+      show (expTest h (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x)
+      rw [hg]
+      show (expTest h (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * (expTest h ((2:ℝ)⁻¹ * x)
+            * Complex.exp (((2*u)*((2:ℝ)⁻¹ * x) : ℝ) * Complex.I))
+      rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+      rw [show ((2*u)*(x/2) : ℝ) = (u*x : ℝ) by ring]
+      ring
+    rw [h2, MeasureTheory.integral_const_mul, h1,
+      show |(((2:ℝ)⁻¹))⁻¹| = (2:ℝ) by norm_num, Complex.real_smul,
+      Complex.ofReal_ofNat]
+    ring
+  show ‖∫ x : ℝ, (expTest h (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)‖ ≤ C/u^2
+  rw [hFour, ← paperFourierIntegral_eq_muFT]
+  have h2u : γ₀ ≤ |2*u| := by
+    rw [abs_mul, abs_two]
+    have h0 := abs_nonneg u
+    linarith
+  refine le_trans (hφ (2*u) h2u) ?_
+  have hu0 : (0:ℝ) < u^2 := by
+    have h0 : u ≠ 0 := by
+      intro h0
+      rw [h0, abs_zero] at hu
+      linarith
+    positivity
+  rw [mul_pow]
+  rw [show (2:ℝ)^2 * u^2 = 4 * u^2 by ring]
+  refine div_le_div_of_nonneg_left hC.le hu0 ?_
+  linarith
+
+/-- The uniform bound on the weighted Landau–Stark symbol
+`G = F_h·e^{(1/2+a)x}`. -/
+theorem norm_expTest_mul_exp_le {h : ℝ} {a : ℝ} (ha : 0 < a) (hah : 1/2 + a < h)
+    (x : ℝ) :
+    ‖expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖ ≤ 1 := by
+  rw [norm_mul, norm_expTest, Complex.norm_real, Real.norm_eq_abs, Real.abs_exp,
+    ← Real.exp_add]
+  refine Real.exp_le_one_iff.mpr ?_
+  have h1 : (1/2+a) * x ≤ (1/2+a) * |x| :=
+    mul_le_mul_of_nonneg_left (le_abs_self x) (by linarith)
+  nlinarith [abs_nonneg x]
+
+/-- Pointwise summability of the prime-side series at the Landau–Stark function. -/
+theorem summable_primeSideH_term_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
+    (hah : 1/2 + a < h) (u : ℝ) :
+    Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      ((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ)
+                  * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))) := by
+  refine Summable.of_norm_bounded
+    (g := fun pk => Real.log (Ideal.absNorm pk.1.1)
+      * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
+    (summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a))
+    (fun pk => ?_)
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+  calc Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
+        * ‖expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ)
+                  * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)‖
+      ≤ Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) * 1 :=
+        mul_le_mul_of_nonneg_left (norm_expTest_mul_exp_le ha hah _)
+          (primeSideH_weight_nonneg K pk)
+    _ = Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := mul_one _
+
+/-- **`hH`-BV at the Landau–Stark function** (complex level). -/
+theorem boundedVariationOn_primeSideH_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
+    (hah : 1/2 + a < h) :
+    BoundedVariationOn (primeSideH K a (expTest h)) Set.univ := by
+  set G : ℝ → ℂ := fun x => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) with hG
+  have hGbv : BoundedVariationOn G Set.univ :=
+    boundedVariationOn_expTest_mul_exp (by linarith) hah
+  have h0 : primeSideH K a (expTest h)
+      = fun u : ℝ => ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          ((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+            * G (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)) := by
+    funext u
+    rw [primeSideH]
+  have hwsum : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))) :=
+    summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)
+  have hwsum' : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)‖₊) := by
+    rw [← NNReal.summable_coe]
+    refine hwsum.congr (fun pk => ?_)
+    rw [coe_nnnorm, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+  have hwtop : (∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      (‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)‖₊
+        : ℝ≥0∞)) ≠ ⊤ :=
+    ENNReal.tsum_coe_ne_top_iff_summable.mpr hwsum'
+  unfold BoundedVariationOn
+  rw [h0]
+  refine ne_top_of_le_ne_top ?_ (eVariationOn_tsum_le _ _ (fun x _ => by
+    have h1 := summable_primeSideH_term_expTest K ha hah x
+    rw [hG]
+    exact h1))
+  refine ne_top_of_le_ne_top ?_ (ENNReal.tsum_le_tsum (fun pk =>
+    eVariationOn_smul_translate_le G _ _))
+  rw [ENNReal.tsum_mul_right]
+  exact ENNReal.mul_ne_top hwtop hGbv
+
+/-- **`hHre` at the Landau–Stark function.** -/
+theorem locallyBoundedVariationOn_primeSideH_expTest_re {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (hah : 1/2 + a < h) :
+    LocallyBoundedVariationOn
+      (fun u : ℝ => (primeSideH K a (expTest h) u).re) Set.univ :=
+  (lipschitzWith_complex_re.comp_boundedVariationOn
+    (boundedVariationOn_primeSideH_expTest K ha hah)).locallyBoundedVariationOn
+
+/-- **`hHim` at the Landau–Stark function.** -/
+theorem locallyBoundedVariationOn_primeSideH_expTest_im {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (hah : 1/2 + a < h) :
+    LocallyBoundedVariationOn
+      (fun u : ℝ => (primeSideH K a (expTest h) u).im) Set.univ :=
+  (lipschitzWith_complex_im.comp_boundedVariationOn
+    (boundedVariationOn_primeSideH_expTest K ha hah)).locallyBoundedVariationOn
+
+/-- The prime side is continuous at the Landau–Stark function (Weierstrass
+M-test). -/
+theorem continuous_primeSideH_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
+    (hah : 1/2 + a < h) :
+    Continuous (primeSideH K a (expTest h)) := by
+  have h0 : primeSideH K a (expTest h)
+      = fun u : ℝ => ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          ((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+            * (expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                * ((Real.exp ((1/2+a)
+                    * (u + (((pk.2+1 : ℕ)) : ℝ)
+                      * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)) := by
+    funext u
+    rw [primeSideH]
+  rw [h0]
+  refine continuous_tsum (fun pk => ?_)
+    (summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)) (fun pk u => ?_)
+  · refine continuous_const.mul ?_
+    refine Continuous.mul ?_ ?_
+    · exact (continuous_expTest h).comp (continuous_id.add continuous_const)
+    · exact Complex.continuous_ofReal.comp (by fun_prop)
+  · rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (primeSideH_weight_nonneg K pk)]
+    calc Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
+          * ‖expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * ((Real.exp ((1/2+a)
+                  * (u + (((pk.2+1 : ℕ)) : ℝ)
+                    * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)‖
+        ≤ Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) * 1 :=
+          mul_le_mul_of_nonneg_left (norm_expTest_mul_exp_le ha hah _)
+            (primeSideH_weight_nonneg K pk)
+      _ = Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := mul_one _
+
+/-- **`hHp` at the Landau–Stark function.** -/
+theorem tendsto_primeSideH_expTest_right {h : ℝ} {a : ℝ} (ha : 0 < a)
+    (hah : 1/2 + a < h) :
+    Filter.Tendsto (primeSideH K a (expTest h)) (nhdsWithin 0 (Set.Ioi 0))
+      (nhds (primeSideH K a (expTest h) 0)) :=
+  ((continuous_primeSideH_expTest K ha hah).continuousAt).tendsto.mono_left
+    nhdsWithin_le_nhds
+
+/-- **`hHm` at the Landau–Stark function.** -/
+theorem tendsto_primeSideH_expTest_left {h : ℝ} {a : ℝ} (ha : 0 < a)
+    (hah : 1/2 + a < h) :
+    Filter.Tendsto (primeSideH K a (expTest h)) (nhdsWithin 0 (Set.Iio 0))
+      (nhds (primeSideH K a (expTest h) 0)) :=
+  ((continuous_primeSideH_expTest K ha hah).continuousAt).tendsto.mono_left
+    nhdsWithin_le_nhds
+
+/-- **`hEre` at the Landau–Stark function.** -/
+theorem locallyBoundedVariationOn_poleWindow_expTest_re {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (hah : 1/2 + a < h) :
+    LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a)
+            (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
+      Set.univ := by
+  have hG : Integrable (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith)
+  have hGc : Continuous (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    (continuous_expTest h).mul (Complex.continuous_ofReal.comp (by fun_prop))
+  exact lipschitzWith_complex_re.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+
+/-- **`hEim` at the Landau–Stark function.** -/
+theorem locallyBoundedVariationOn_poleWindow_expTest_im {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (hah : 1/2 + a < h) :
+    LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a)
+            (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
+      Set.univ := by
+  have hG : Integrable (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith)
+  have hGc : Continuous (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    (continuous_expTest h).mul (Complex.continuous_ofReal.comp (by fun_prop))
+  exact lipschitzWith_complex_im.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+
+/-- **The Weil–Poitou explicit formula at the Landau–Stark function**: every
+hypothesis of `weil_explicit_formula` holds for `F_h(x) = e^{−h|x|}` when
+`0 < a ≤ 1/4` and `1/2 + a < h`. -/
+theorem weil_explicit_formula_expTest {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (ha' : a ≤ 1/4) (hah : 1/2 + a < h) :
+    ∃ T : ℕ → ℝ, Filter.Tendsto T atTop atTop ∧
+      Filter.Tendsto (fun n : ℕ =>
+          ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ))
+            * paperPhi (expTest h) ρ)
+        atTop (nhds
+          ((paperPhi (expTest h) 0 + paperPhi (expTest h) 1)
+            + ((Real.log |NumberField.discr K| : ℝ) : ℂ) * expTest h 0
+            + (((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+                + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                  * (Real.eulerMascheroniConstant + Real.log (8*π))
+                + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ)
+                * expTest h 0
+            + (((NumberField.InfinitePlace.nrRealPlaces K
+                + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (expTest h 0 - expTest h y))
+            + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (expTest h 0 - expTest h y))
+            - (primeSideH K a (expTest h) 0 + primeSideH K a (expTest h) 0))) := by
+  have hh0 : (0:ℝ) < h := by linarith
+  obtain ⟨M, hM0, hMb⟩ := exists_band_bound_paperPhi_expTest hh0 ha hah
+  exact weil_explicit_formula K ha ha'
+    (integrable_expTest hh0)
+    (locallyBoundedVariationOn_expTest_re hh0)
+    (locallyBoundedVariationOn_expTest_im hh0)
+    (((continuous_expTest h).continuousAt).tendsto.mono_left nhdsWithin_le_nhds)
+    (expTest_neg h)
+    (integrableOn_expTest_diffQuot_window hh0)
+    (memLp_two_expTest_diffQuot hh0)
+    (tendsto_boundary_expTest hh0 (by norm_num) (by norm_num) (by norm_num)
+      atTop tendsto_abs_atTop_atTop)
+    (tendsto_boundary_expTest hh0 (by norm_num) (by norm_num) (by norm_num)
+      atBot tendsto_abs_atBot_atTop)
+    (tendsto_boundary_expTest_half hh0 (by norm_num) (by norm_num) (by norm_num)
+      atTop tendsto_abs_atTop_atTop)
+    (tendsto_boundary_expTest_half hh0 (by norm_num) (by norm_num) (by norm_num)
+      atBot tendsto_abs_atBot_atTop)
+    (differentiableAt_paperPhi_expTest ha hah)
+    (B := fun T : ℝ => M / max T 1)
+    (fun σ t h1 h2 => hMb σ t h1 h2)
+    (tendsto_div_max_mul_log_sq M)
+    (integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith))
+    (locallyBoundedVariationOn_expTest_mul_exp_re ha hah)
+    (locallyBoundedVariationOn_expTest_mul_exp_im ha hah)
+    (locallyBoundedVariationOn_poleWindow_expTest_re ha hah)
+    (locallyBoundedVariationOn_poleWindow_expTest_im ha hah)
+    (locallyBoundedVariationOn_primeSideH_expTest_re K ha hah)
+    (locallyBoundedVariationOn_primeSideH_expTest_im K ha hah)
+    (tendsto_primeSideH_expTest_right K ha hah)
+    (tendsto_primeSideH_expTest_left K ha hah)
 
 end DedekindResidue
 
