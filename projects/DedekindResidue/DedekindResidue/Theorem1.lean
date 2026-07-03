@@ -206,6 +206,278 @@ theorem step1 (hGRH : GeneralizedRiemannHypothesis K) (hRH : RiemannHypothesis)
   rw [habs_eq, abs_mul, abs_of_nonneg hfacnn] at hkey
   exact hkey
 
+
+/-- The exponential weight is at most one for nonnegative arguments. -/
+theorem exp_weight_le_one {σ y : ℝ} (hσ : 1/2 < σ) (hy : 0 ≤ y) :
+    Real.exp (-(σ - 1/2) * y) ≤ 1 := by
+  refine Real.exp_le_one_iff.mpr ?_
+  have h1 := mul_nonneg (show (0:ℝ) ≤ σ - 1/2 by linarith) hy
+  nlinarith
+
+/-! ### The archimedean integrals, elementarily (T12-b, no digamma) -/
+
+/-- The sinh-weighted exponential integrand is integrable: bounded by `σ−1/2` on
+`(0,1]` (since `sinh x ≥ x`), exponentially small beyond. -/
+theorem integrableOn_sinh_weight_exp {σ : ℝ} (hσ : 1/2 < σ) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+      (Set.Ioi 0) := by
+  have hmeas : AEStronglyMeasurable
+      (fun y : ℝ => 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+      ((volume : Measure ℝ).restrict (Set.Ioi 0)) := by
+    refine AEStronglyMeasurable.mul ?_ (by fun_prop)
+    exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+  have hsplit : Set.Ioi (0:ℝ) = Set.Ioc 0 1 ∪ Set.Ioi 1 :=
+    (Set.Ioc_union_Ioi_eq_Ioi zero_le_one).symm
+  rw [hsplit]
+  refine MeasureTheory.IntegrableOn.union ?_ ?_
+  · refine Integrable.mono' (g := fun _ : ℝ => σ - 1/2)
+      (integrableOn_const (by rw [Real.volume_Ioc]; exact ENNReal.ofReal_lt_top.ne))
+      (hmeas.mono_set (by rw [hsplit]; exact Set.subset_union_left)) ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr
+      (Filter.Eventually.of_forall (fun y hy => ?_))
+    have hy0 : 0 < y := hy.1
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hsy : y/2 ≤ Real.sinh (y/2) := Real.self_le_sinh_iff.mpr (by linarith)
+    have hexp : 1 - Real.exp (-(σ - 1/2) * y) ≤ (σ - 1/2) * y := by
+      have h1 := Real.add_one_le_exp (-((σ - 1/2) * y))
+      have h2 : -(σ - 1/2) * y = -((σ - 1/2) * y) := by ring
+      rw [h2]
+      linarith
+    have hexp0 : 0 ≤ 1 - Real.exp (-(σ - 1/2) * y) := by
+      linarith [exp_weight_le_one hσ hy0.le]
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (by positivity) hexp0)]
+    calc 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))
+        ≤ 1/(2 * (y/2)) * ((σ - 1/2) * y) := by
+          refine mul_le_mul ?_ hexp hexp0 (by positivity)
+          exact one_div_le_one_div_of_le (by linarith) (by linarith)
+      _ = σ - 1/2 := by
+          rw [show 2 * (y/2) = y by ring]
+          field_simp
+  · refine Integrable.mono' (g := fun y : ℝ =>
+      (1 - Real.exp (-1))⁻¹ * Real.exp (-(1/2) * y))
+      ((exp_neg_integrableOn_Ioi 1 (by norm_num : (0:ℝ) < 1/2)).const_mul _)
+      (hmeas.mono_set (by rw [hsplit]; exact Set.subset_union_right)) ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun y hy => ?_))
+    have hy1 : (1:ℝ) < y := hy
+    have hy0 : (0:ℝ) < y := by linarith
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hexp0 : 0 ≤ 1 - Real.exp (-(σ - 1/2) * y) := by
+      linarith [exp_weight_le_one hσ hy0.le]
+    have hexp1 : 1 - Real.exp (-(σ - 1/2) * y) ≤ 1 := by
+      have := Real.exp_pos (-(σ - 1/2) * y)
+      linarith
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (by positivity) hexp0)]
+    have hpos1 : (0:ℝ) < 1 - Real.exp (-1) := by
+      have := Real.exp_lt_one_iff.mpr (show (-1:ℝ) < 0 by norm_num)
+      linarith
+    have hfrac : 1/(2 * Real.sinh (y/2))
+        ≤ (1 - Real.exp (-1))⁻¹ * Real.exp (-(1/2) * y) := by
+      have hsinh : (1 - Real.exp (-1)) * Real.exp (y/2) ≤ 2 * Real.sinh (y/2) := by
+        rw [two_sinh_half_eq']
+        have h1 : Real.exp (-y) ≤ Real.exp (-1) := Real.exp_le_exp.mpr (by linarith)
+        have h2 := Real.exp_pos (y/2)
+        nlinarith
+      have h2s : (0:ℝ) < 2 * Real.sinh (y/2) := by positivity
+      rw [div_le_iff₀ h2s]
+      have h3 : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
+        rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
+      calc (1:ℝ) = ((1 - Real.exp (-1))⁻¹ * (1 - Real.exp (-1)))
+            * (Real.exp (-(1/2) * y) * Real.exp (y/2)) := by
+            rw [inv_mul_cancel₀ hpos1.ne', h3, mul_one]
+        _ = (1 - Real.exp (-1))⁻¹ * Real.exp (-(1/2) * y)
+            * ((1 - Real.exp (-1)) * Real.exp (y/2)) := by ring
+        _ ≤ (1 - Real.exp (-1))⁻¹ * Real.exp (-(1/2) * y) * (2 * Real.sinh (y/2)) :=
+            mul_le_mul_of_nonneg_left hsinh (by positivity)
+    calc 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))
+        ≤ 1/(2 * Real.sinh (y/2)) * 1 := mul_le_mul_of_nonneg_left hexp1 (by positivity)
+      _ = 1/(2 * Real.sinh (y/2)) := mul_one _
+      _ ≤ (1 - Real.exp (-1))⁻¹ * Real.exp (-(1/2) * y) := hfrac
+
+/-- **The sinh-integral recurrence** `I(σ+1) = I(σ) + 1/σ`: the difference
+integrand collapses to `e^{−σy}` (the `sinh` cancels). -/
+theorem sinh_int_rec {σ : ℝ} (hσ : 1/2 < σ) :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((σ+1) - 1/2) * y)))
+      = (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) + 1/σ := by
+  have hσ0 : (0:ℝ) < σ := by linarith
+  have hdiff : (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((σ+1) - 1/2) * y)))
+      - (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) = 1/σ := by
+    rw [← MeasureTheory.integral_sub (integrableOn_sinh_weight_exp (by linarith))
+      (integrableOn_sinh_weight_exp hσ)]
+    have hcongr : ∀ y ∈ Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((σ+1) - 1/2) * y))
+          - 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))
+        = Real.exp (-(σ * y)) := by
+      intro y hy
+      have hy0 : (0:ℝ) < y := hy
+      have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+      have h2s : (0:ℝ) < 2 * Real.sinh (y/2) := by positivity
+      have hkey : Real.exp (-(σ - 1/2) * y) - Real.exp (-((σ+1) - 1/2) * y)
+          = Real.exp (-(σ * y)) * (2 * Real.sinh (y/2)) := by
+        rw [Real.sinh_eq,
+          show -(σ - 1/2) * y = -(σ * y) + y/2 by ring,
+          show -((σ+1) - 1/2) * y = -(σ * y) + -(y/2) by ring,
+          Real.exp_add, Real.exp_add]
+        ring
+      have hgoal : 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((σ+1) - 1/2) * y))
+          - 1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))
+          = (Real.exp (-(σ - 1/2) * y) - Real.exp (-((σ+1) - 1/2) * y))
+            / (2 * Real.sinh (y/2)) := by
+        ring
+      rw [hgoal, hkey, mul_div_assoc, div_self h2s.ne', mul_one]
+    rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hcongr,
+      integral_exp_neg_mul_Ioi hσ0]
+  linarith
+
+/-- **Monotonicity of the sinh integral in `σ`.** -/
+theorem sinh_int_mono {σ σ' : ℝ} (hσ : 1/2 < σ) (hσσ' : σ ≤ σ') :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+      ≤ ∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ' - 1/2) * y)) := by
+  refine MeasureTheory.setIntegral_mono_on (integrableOn_sinh_weight_exp hσ)
+    (integrableOn_sinh_weight_exp (by linarith)) measurableSet_Ioi
+    (fun y hy => ?_)
+  have hy0 : (0:ℝ) < y := hy
+  have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+  refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+  have h1 : Real.exp (-(σ' - 1/2) * y) ≤ Real.exp (-(σ - 1/2) * y) :=
+    Real.exp_le_exp.mpr (by nlinarith)
+  linarith
+
+/-- **`I(1) = 2 log 2`** by the fundamental theorem of calculus: the integrand is
+`e^{−y/2}/(1+e^{−y/2})`, the derivative of `−2·log(1+e^{−y/2})`. -/
+theorem sinh_int_one :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((1:ℝ) - 1/2) * y)))
+      = 2 * Real.log 2 := by
+  have hderiv : ∀ y ∈ Set.Ioi (0:ℝ),
+      HasDerivAt (fun y : ℝ => -2 * Real.log (1 + Real.exp (-(y/2))))
+        (1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((1:ℝ) - 1/2) * y))) y := by
+    intro y hy
+    have hy0 : (0:ℝ) < y := hy
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hpos : (0:ℝ) < 1 + Real.exp (-(y/2)) := by positivity
+    have h1 : HasDerivAt (fun y : ℝ => -(y/2)) (-(1/2)) y := by
+      have h1a := (hasDerivAt_id y).const_mul (-(1/2) : ℝ)
+      simp only [id_eq, mul_one] at h1a
+      exact h1a.congr_of_eventuallyEq
+        (Filter.Eventually.of_forall (fun x => by ring))
+    have h2 := ((h1.exp).const_add 1).log hpos.ne'
+    have h3 := h2.const_mul (-2)
+    refine h3.congr_deriv ?_
+    have hem : Real.exp (-(y/2)) * Real.exp (-(y/2)) = Real.exp (-y) := by
+      rw [← Real.exp_add]
+      congr 1
+      ring
+    have hform : Real.exp (-((1:ℝ) - 1/2) * y) = Real.exp (-(y/2)) := by
+      congr 1
+      ring
+    rw [hform, two_sinh_half_eq']
+    have hene : (0:ℝ) < 1 - Real.exp (-y) := by
+      have h4 : Real.exp (-y) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
+      linarith
+    have hey : Real.exp (-(y/2)) * Real.exp (y/2) = 1 := by
+      rw [← Real.exp_add]
+      norm_num
+    field_simp
+    nlinarith [hem, hey, Real.exp_pos (y/2), Real.exp_pos (-(y/2))]
+  have hlim : Filter.Tendsto (fun y : ℝ => -2 * Real.log (1 + Real.exp (-(y/2))))
+      atTop (nhds 0) := by
+    have h2 : Filter.Tendsto (fun y : ℝ => Real.exp (-(y/2))) atTop (nhds 0) := by
+      refine Real.tendsto_exp_atBot.comp ?_
+      have h1 := Tendsto.const_mul_atTop_of_neg
+        (show (-(1/2) : ℝ) < 0 by norm_num) (tendsto_id (α := ℝ))
+      refine h1.congr (fun y => ?_)
+      simp only [id_eq]
+      ring
+    have h3 : Filter.Tendsto (fun y : ℝ => 1 + Real.exp (-(y/2))) atTop (nhds 1) := by
+      have h4 := (tendsto_const_nhds (x := (1:ℝ)) (f := atTop)).add h2
+      rw [add_zero] at h4
+      exact h4
+    have h5 := ((Real.continuousAt_log one_ne_zero).tendsto).comp h3
+    rw [Real.log_one] at h5
+    have h6 := h5.const_mul (-2)
+    simpa using h6
+  have hcont : ContinuousWithinAt (fun y : ℝ => -2 * Real.log (1 + Real.exp (-(y/2))))
+      (Set.Ici 0) 0 := by
+    refine Continuous.continuousWithinAt ?_
+    refine continuous_const.mul (Continuous.log (by fun_prop) (fun y => ?_))
+    positivity
+  have hkey := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv
+    (integrableOn_sinh_weight_exp (by norm_num)) hlim
+  rw [hkey]
+  norm_num
+
+/-- The cosh-weighted exponential integral is trapped in `[0, π/2]`. -/
+theorem cosh_int_nonneg {σ : ℝ} (hσ : 1/2 < σ) :
+    0 ≤ ∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)) := by
+  refine MeasureTheory.setIntegral_nonneg measurableSet_Ioi (fun y hy => ?_)
+  have hy0 : (0:ℝ) < y := hy
+  have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+  have h1 : Real.exp (-(σ - 1/2) * y) ≤ 1 := by
+    refine Real.exp_le_one_iff.mpr ?_
+    nlinarith
+  have h2 : (0:ℝ) ≤ 1 - Real.exp (-(σ - 1/2) * y) := by linarith
+  positivity
+
+/-- The cosh integrand is integrable (dominated by the pure cosh kernel). -/
+theorem integrableOn_cosh_weight_exp {σ : ℝ} (hσ : 1/2 < σ) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+      (Set.Ioi 0) := by
+  refine (integrableOn_sinh_weight_exp hσ).mono' ?_ ?_
+  · refine AEStronglyMeasurable.mul ?_ (by fun_prop)
+    exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun y hy => ?_))
+    have hy0 : (0:ℝ) < y := hy
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+    have hsc : Real.sinh (y/2) < Real.cosh (y/2) := Real.sinh_lt_cosh _
+    have h1 : Real.exp (-(σ - 1/2) * y) ≤ 1 := by
+      refine Real.exp_le_one_iff.mpr ?_
+      nlinarith
+    have h2 : (0:ℝ) ≤ 1 - Real.exp (-(σ - 1/2) * y) := by linarith
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    refine mul_le_mul_of_nonneg_right ?_ h2
+    exact one_div_le_one_div_of_le (by positivity) (by linarith)
+
+/-- **The cosh integral is at most `π/2`.** -/
+theorem cosh_int_le {σ : ℝ} (hσ : 1/2 < σ) :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) ≤ π/2 := by
+  rw [← integral_inv_two_cosh_half]
+  have hcoshint : MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.cosh (y/2))) (Set.Ioi 0) := by
+    refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(1/2) * y))
+      (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
+    · exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun y _ => ?_))
+      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      have hch : Real.exp (y/2) ≤ 2 * Real.cosh (y/2) := by
+        rw [Real.cosh_eq]
+        have := Real.exp_pos (-(y/2))
+        linarith
+      have hde : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
+        rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
+      rw [div_le_iff₀ (by positivity)]
+      nlinarith [Real.exp_pos (-(1/2) * y), Real.exp_pos (y/2)]
+  refine MeasureTheory.setIntegral_mono_on (integrableOn_cosh_weight_exp hσ)
+    hcoshint measurableSet_Ioi (fun y hy => ?_)
+  have hy0 : (0:ℝ) < y := hy
+  have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+  have h1 : (0:ℝ) < Real.exp (-(σ - 1/2) * y) := Real.exp_pos _
+  nlinarith [mul_pos (show (0:ℝ) < 1/(2 * Real.cosh (y/2)) by positivity) h1]
+
 end DedekindResidue
 
 end
