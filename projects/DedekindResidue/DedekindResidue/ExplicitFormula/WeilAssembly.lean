@@ -1531,4 +1531,205 @@ theorem weil_explicit_formula (ha : 0 < a) (ha' : a ≤ 1/4)
   refine hfin.congr (fun n => ?_)
   rw [← mul_assoc, inv_mul_cancel₀ h2πi, one_mul]
 
+/-- **Quadratic Fourier decay of the auxiliary function** (readable from the
+Belabas–Friedman closed form, Lemma 2 eq. (8)): `‖F̂_{s,X}(γ)‖ = O(1/γ²)`. -/
+theorem exists_norm_fourier_auxF_le (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
+    ∃ C γ₀ : ℝ, 0 < C ∧ 1 ≤ γ₀ ∧ ∀ γ : ℝ, γ₀ ≤ |γ| →
+      ‖paperFourierIntegral (auxF s X) γ‖ ≤ C / γ^2 := by
+  set h : ℂ := s - 1/2 with hh_def
+  have hhre : 0 < h.re := by
+    rw [hh_def, show (s - 1/2 : ℂ).re = s.re - 1/2 by simp [Complex.sub_re]]
+    linarith
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  -- the tail-integral constant
+  set K₀ : ℝ := ‖h‖/Real.log X + 1/(Real.log X)^2 with hK₀_def
+  set M : ℝ := ∫ t in Set.Ioi (Real.log X),
+    K₀ * (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * t)) with hM_def
+  have hmaj_int : IntegrableOn (fun t : ℝ =>
+      K₀ * (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * t)))
+      (Set.Ioi (Real.log X)) := by
+    refine Integrable.const_mul (Integrable.const_mul ?_ _) _
+    exact exp_neg_integrableOn_Ioi _ (by linarith)
+  have hMnn : 0 ≤ M := by
+    rw [hM_def]
+    refine MeasureTheory.integral_nonneg (fun t => ?_)
+    have hK₀nn : 0 ≤ K₀ := by
+      rw [hK₀_def]
+      positivity
+    positivity
+  -- the tail integral in the closed form is bounded by M, for every γ
+  have htail_bound : ∀ γ : ℝ, ‖∫ t in Set.Ioi (Real.log X),
+      ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2)‖ ≤ M := by
+    intro γ
+    refine le_trans (norm_integral_le_integral_norm _) ?_
+    rw [hM_def]
+    refine MeasureTheory.integral_mono_of_nonneg
+      (Filter.Eventually.of_forall (fun t => norm_nonneg _)) hmaj_int ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun t ht => ?_))
+    rw [Set.mem_Ioi] at ht
+    have ht0 : 0 < t := lt_trans hT0 ht
+    show ‖((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2)‖
+        ≤ K₀ * (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * t))
+    rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs]
+    have hb1 : |Real.cos (t * γ)| ≤ 1 := Real.abs_cos_le_one _
+    have hb2 : ‖auxF s X t‖ ≤ Real.exp ((s.re - 1/2) * Real.log X)
+        * Real.exp (-(s.re - 1/2) * t) := by
+      have h0 := norm_auxF_le s hX.le hs.le t
+      rw [abs_of_pos ht0] at h0
+      exact h0
+    have hb3 : ‖(h*(t:ℂ) + 1)/(t:ℂ)^2‖ ≤ K₀ := by
+      rw [norm_div]
+      have hden : ‖((t:ℂ))^2‖ = t^2 := by
+        rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]
+      rw [hden, div_le_iff₀ (by positivity)]
+      have hnum : ‖h*(t:ℂ) + 1‖ ≤ ‖h‖*t + 1 := by
+        refine le_trans (norm_add_le _ _) ?_
+        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0, norm_one]
+      refine le_trans hnum ?_
+      rw [hK₀_def]
+      have e2 : t ≤ t^2/Real.log X := by
+        rw [le_div_iff₀ hT0]
+        nlinarith
+      have e3 : (1:ℝ) ≤ t^2/(Real.log X)^2 := by
+        rw [le_div_iff₀ (by positivity)]
+        nlinarith
+      have e4 : ‖h‖ * t ≤ ‖h‖ * (t^2/Real.log X) :=
+        mul_le_mul_of_nonneg_left e2 (norm_nonneg h)
+      have e5 : (‖h‖/Real.log X + 1/(Real.log X)^2) * t^2
+          = ‖h‖ * (t^2/Real.log X) + t^2/(Real.log X)^2 := by
+        ring
+      rw [e5]
+      have e6 : (1:ℝ) * 1 ≤ t^2/(Real.log X)^2 := by
+        rw [one_mul]
+        exact e3
+      linarith
+    calc |Real.cos (t * γ)| * ‖auxF s X t‖ * ‖(h*(t:ℂ) + 1)/(t:ℂ)^2‖
+        ≤ 1 * (Real.exp ((s.re - 1/2) * Real.log X)
+            * Real.exp (-(s.re - 1/2) * t)) * K₀ := by
+          have hK₀nn : 0 ≤ K₀ := by
+            rw [hK₀_def]
+            positivity
+          refine mul_le_mul (mul_le_mul hb1 hb2 (norm_nonneg _) (by norm_num)) hb3
+            (norm_nonneg _) (by positivity)
+      _ = K₀ * (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * t)) := by
+          ring
+  -- the denominator lower bound
+  set γ₀ : ℝ := 1 + Real.sqrt 2 * ‖h‖ with hγ₀_def
+  have hγ₀1 : 1 ≤ γ₀ := by
+    rw [hγ₀_def]
+    have h1 : 0 ≤ Real.sqrt 2 * ‖h‖ := by positivity
+    linarith
+  refine ⟨4*‖h‖^2 + 4*‖h + 1/((Real.log X : ℝ):ℂ)‖ + 8*M + 1, γ₀, ?_, hγ₀1,
+    fun γ hγ => ?_⟩
+  · have hn1 := sq_nonneg ‖h‖
+    have hn2 := norm_nonneg (h + 1/((Real.log X : ℝ):ℂ))
+    linarith
+  have hγ1 : 1 ≤ |γ| := le_trans hγ₀1 hγ
+  have hγne : γ ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at hγ1
+    linarith
+  have hγ2 : (0:ℝ) < γ^2 := by positivity
+  have hd : γ^2/2 ≤ ‖h^2 + ((γ:ℝ):ℂ)^2‖ := by
+    have h1 : Real.sqrt 2 * ‖h‖ ≤ |γ| := by
+      rw [hγ₀_def] at hγ
+      linarith
+    have h2 : 2 * ‖h‖^2 ≤ γ^2 := by
+      have h3 : (Real.sqrt 2 * ‖h‖)^2 ≤ |γ|^2 :=
+        pow_le_pow_left₀ (by positivity) h1 2
+      rw [mul_pow, Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2)] at h3
+      rw [← sq_abs γ]
+      linarith
+    have h4 : (h^2 + ((γ:ℝ):ℂ)^2).re ≤ ‖h^2 + ((γ:ℝ):ℂ)^2‖ := Complex.re_le_norm _
+    have h5 : (h^2 + ((γ:ℝ):ℂ)^2).re = (h^2).re + γ^2 := by
+      rw [Complex.add_re, show (((γ:ℝ):ℂ))^2 = (((γ^2 : ℝ)):ℂ) by push_cast; ring,
+        Complex.ofReal_re]
+    have h6 : -(‖h‖^2) ≤ (h^2).re := by
+      have h7 := Complex.abs_re_le_norm (h^2)
+      rw [norm_pow] at h7
+      have h10 := abs_le.mp h7
+      linarith [h10.1]
+    linarith
+  -- the generic division bound
+  have hkey : ∀ z : ℂ, ‖z / (h^2 + ((γ:ℝ):ℂ)^2)‖ ≤ ‖z‖ * (2/γ^2) := by
+    intro z
+    rw [norm_div]
+    have hdpos : 0 < ‖h^2 + ((γ:ℝ):ℂ)^2‖ := lt_of_lt_of_le (by positivity) hd
+    rw [div_le_iff₀ hdpos]
+    have h1 : 1 ≤ (2/γ^2) * ‖h^2 + ((γ:ℝ):ℂ)^2‖ := by
+      rw [div_mul_eq_mul_div, le_div_iff₀ hγ2]
+      linarith
+    nlinarith [norm_nonneg z]
+  rw [fourier_auxF s hX hs hγne]
+  -- rewrite the three terms as single divisions
+  have e1 : 2 * h^2 / ((h^2 + ((γ:ℝ):ℂ)^2) * γ)
+        * ((Real.sin (Real.log X * γ) : ℝ) : ℂ)
+      = (2 * h^2 * ((Real.sin (Real.log X * γ) : ℝ) : ℂ) / γ)
+          / (h^2 + ((γ:ℝ):ℂ)^2) := by
+    rw [div_mul_eq_mul_div, div_mul_eq_div_div_swap]
+  have e2 : 2 * (h + 1/((Real.log X : ℝ):ℂ)) / (h^2 + ((γ:ℝ):ℂ)^2)
+        * ((Real.cos (Real.log X * γ) : ℝ) : ℂ)
+      = (2 * (h + 1/((Real.log X : ℝ):ℂ)) * ((Real.cos (Real.log X * γ) : ℝ) : ℂ))
+          / (h^2 + ((γ:ℝ):ℂ)^2) := by
+    rw [div_mul_eq_mul_div]
+  have e3 : 4 / (h^2 + ((γ:ℝ):ℂ)^2) * (∫ t in Set.Ioi (Real.log X),
+        ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2))
+      = (4 * ∫ t in Set.Ioi (Real.log X),
+          ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2))
+          / (h^2 + ((γ:ℝ):ℂ)^2) := by
+    rw [div_mul_eq_mul_div]
+  rw [e1, e2, e3]
+  -- numerator bounds
+  have n1 : ‖2 * h^2 * ((Real.sin (Real.log X * γ) : ℝ) : ℂ) / γ‖ ≤ 2*‖h‖^2 := by
+    rw [norm_div, norm_mul, norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs,
+      Complex.norm_real, Real.norm_eq_abs, show ‖(2:ℂ)‖ = 2 by norm_num]
+    rw [div_le_iff₀ (by positivity : (0:ℝ) < |γ|)]
+    have hs1 : |Real.sin (Real.log X * γ)| ≤ 1 := Real.abs_sin_le_one _
+    nlinarith [norm_nonneg h, sq_nonneg ‖h‖, abs_nonneg (Real.sin (Real.log X * γ))]
+  have n2 : ‖2 * (h + 1/((Real.log X : ℝ):ℂ)) * ((Real.cos (Real.log X * γ) : ℝ) : ℂ)‖
+      ≤ 2*‖h + 1/((Real.log X : ℝ):ℂ)‖ := by
+    rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs,
+      show ‖(2:ℂ)‖ = 2 by norm_num]
+    have hc1 : |Real.cos (Real.log X * γ)| ≤ 1 := Real.abs_cos_le_one _
+    nlinarith [norm_nonneg (h + 1/((Real.log X : ℝ):ℂ))]
+  have n3 : ‖4 * ∫ t in Set.Ioi (Real.log X),
+      ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2)‖ ≤ 4*M := by
+    rw [norm_mul, show ‖(4:ℂ)‖ = 4 by norm_num]
+    have := htail_bound γ
+    linarith
+  -- assemble
+  calc ‖(2 * h^2 * ((Real.sin (Real.log X * γ) : ℝ) : ℂ) / γ) / (h^2 + ((γ:ℝ):ℂ)^2)
+        + (2 * (h + 1/((Real.log X : ℝ):ℂ)) * ((Real.cos (Real.log X * γ) : ℝ) : ℂ))
+            / (h^2 + ((γ:ℝ):ℂ)^2)
+        - (4 * ∫ t in Set.Ioi (Real.log X),
+            ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2))
+            / (h^2 + ((γ:ℝ):ℂ)^2)‖
+      ≤ ‖(2 * h^2 * ((Real.sin (Real.log X * γ) : ℝ) : ℂ) / γ) / (h^2 + ((γ:ℝ):ℂ)^2)‖
+        + ‖(2 * (h + 1/((Real.log X : ℝ):ℂ)) * ((Real.cos (Real.log X * γ) : ℝ) : ℂ))
+            / (h^2 + ((γ:ℝ):ℂ)^2)‖
+        + ‖(4 * ∫ t in Set.Ioi (Real.log X),
+            ((Real.cos (t * γ) : ℝ) : ℂ) * auxF s X t * ((h*t + 1)/(t:ℂ)^2))
+            / (h^2 + ((γ:ℝ):ℂ)^2)‖ := by
+        refine le_trans (norm_sub_le _ _) ?_
+        have := norm_add_le
+          ((2 * h^2 * ((Real.sin (Real.log X * γ) : ℝ) : ℂ) / γ) / (h^2 + ((γ:ℝ):ℂ)^2))
+          ((2 * (h + 1/((Real.log X : ℝ):ℂ)) * ((Real.cos (Real.log X * γ) : ℝ) : ℂ))
+            / (h^2 + ((γ:ℝ):ℂ)^2))
+        linarith
+    _ ≤ (2*‖h‖^2) * (2/γ^2) + (2*‖h + 1/((Real.log X : ℝ):ℂ)‖) * (2/γ^2)
+        + (4*M) * (2/γ^2) := by
+        refine add_le_add (add_le_add ?_ ?_) ?_
+        · exact le_trans (hkey _) (mul_le_mul_of_nonneg_right n1 (by positivity))
+        · exact le_trans (hkey _) (mul_le_mul_of_nonneg_right n2 (by positivity))
+        · exact le_trans (hkey _) (mul_le_mul_of_nonneg_right n3 (by positivity))
+    _ ≤ (4*‖h‖^2 + 4*‖h + 1/((Real.log X : ℝ):ℂ)‖ + 8*M + 1) / γ^2 := by
+        have hfin : (2*‖h‖^2)*(2/γ^2) + (2*‖h + 1/((Real.log X : ℝ):ℂ)‖)*(2/γ^2)
+            + (4*M)*(2/γ^2)
+            = (4*‖h‖^2 + 4*‖h + 1/((Real.log X : ℝ):ℂ)‖ + 8*M)/γ^2 := by
+          field_simp
+          ring
+        rw [hfin, div_le_div_iff_of_pos_right hγ2]
+        linarith
+
 end DedekindResidue
