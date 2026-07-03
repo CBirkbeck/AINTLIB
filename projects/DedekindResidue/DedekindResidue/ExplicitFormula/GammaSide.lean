@@ -4238,4 +4238,121 @@ theorem prop3_poitou_quarter {F : ℝ → ℂ} (hF : Integrable F)
   have h9 := (h0.comp hhalf).const_mul (2:ℂ)
   rw [hlim] at h9
   exact h9
+/-- The sinh limit kernel `(F(0) - F(x))/(2 sinh(x/2))` is integrable on `(0,∞)`:
+it is the product of the square-integrable Poitou kernel at `σ = 1/2` and the
+square-integrable divided difference. -/
+theorem integrableOn_sinh_kernel_mul {F : ℝ → ℂ}
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    IntegrableOn (fun y : ℝ => ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+      (Set.Ioi (0:ℝ)) := by
+  have h1 : MemLp (fun y : ℝ => ((poitouKernel (1/2) y : ℝ) : ℂ)) 2
+      ((volume : Measure ℝ).restrict (Set.Ioi 0)) :=
+    (memLp_two_poitouKernel (by norm_num : (0:ℝ) < 1/2)).restrict _
+  have h2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2
+      ((volume : Measure ℝ).restrict (Set.Ioi 0)) := hFdiv2.restrict _
+  have h3 := MemLp.integrable_mul h1 h2
+  refine h3.congr ?_
+  refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+    (Filter.Eventually.of_forall (fun y hy => ?_))
+  rw [Set.mem_Ioi] at hy
+  show ((poitouKernel (1/2) y : ℝ) : ℂ) * ((F 0 - F y)/(y:ℂ))
+      = ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y)
+  rw [poitouKernel_of_pos hy, ← exp_half_div_one_sub_exp_neg hy]
+  have hyne : (y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy.ne'
+  have hden : (0:ℝ) < 1 - Real.exp (-y) := by
+    have h := Real.exp_lt_exp.mpr (show -y < 0 by linarith)
+    rw [Real.exp_zero] at h
+    linarith
+  have hdenC : ((1 - Real.exp (-y) : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hden.ne'
+  rw [show -((1/2:ℝ)*y) = -(y/2) by ring]
+  push_cast at hdenC ⊢
+  field_simp
+
+/-- The cosh limit kernel `(F(0) - F(x))/(2 cosh(x/2))` is integrable on `(0,∞)`:
+dominated by the sinh kernel. -/
+theorem integrableOn_cosh_kernel_mul {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    IntegrableOn (fun y : ℝ => ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+      (Set.Ioi (0:ℝ)) := by
+  refine Integrable.mono' (integrableOn_sinh_kernel_mul hFdiv2).norm ?_ ?_
+  · refine AEStronglyMeasurable.mul ?_ ((aestronglyMeasurable_const.sub
+      hF.aestronglyMeasurable).restrict)
+    refine Continuous.aestronglyMeasurable ?_
+    exact Complex.continuous_ofReal.comp
+      (continuous_const.div ((continuous_const.mul
+        ((Real.continuous_cosh).comp (continuous_id.div_const 2))))
+        (fun y => by positivity))
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun y hy => ?_))
+    rw [Set.mem_Ioi] at hy
+    show ‖((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)‖
+        ≤ ‖((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y)‖
+    rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real]
+    have hsh : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hch : Real.sinh (y/2) ≤ Real.cosh (y/2) := by
+      have h0 : Real.cosh (y/2) - Real.sinh (y/2) = Real.exp (-(y/2)) := by
+        rw [Real.cosh_eq, Real.sinh_eq]
+        ring
+      have h1 := Real.exp_pos (-(y/2))
+      linarith
+    have h1 : |(1/(2 * Real.cosh (y/2)) : ℝ)| ≤ |(1/(2 * Real.sinh (y/2)) : ℝ)| := by
+      rw [abs_of_pos (by positivity), abs_of_pos (by positivity)]
+      gcongr
+    exact mul_le_mul_of_nonneg_right h1 (norm_nonneg _)
+
+
+/-- Kernel conversion for the `σ = 1/2` Proposition-3 limit: the Gauss kernel is
+the sinh kernel. -/
+theorem integral_gauss_half_eq_sinh {F : ℝ → ℂ} :
+    (∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(1/2*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y))
+      = ∫ y in Set.Ioi (0:ℝ),
+          ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y) := by
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+  rw [Set.mem_Ioi] at hy
+  rw [show -(1/2*y) = -(y/2) by ring,
+    exp_half_div_one_sub_exp_neg hy]
+
+/-- Kernel conversion for the quarter-point limit: the `e^{-y/2}/(1-e^{-2y})`
+kernel is the average of the sinh and cosh kernels, so its integral splits. -/
+theorem integral_gauss_quarter_eq_sinh_add_cosh {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ)) :
+    (∫ y in Set.Ioi (0:ℝ),
+        ((Real.exp (-(y/2)) / (1 - Real.exp (-(2*y))) : ℝ) : ℂ) * (F 0 - F y))
+      = (1/2 : ℂ) * ((∫ y in Set.Ioi (0:ℝ),
+            ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ∫ y in Set.Ioi (0:ℝ),
+            ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)) := by
+  rw [← MeasureTheory.integral_add (integrableOn_sinh_kernel_mul hFdiv2)
+    (integrableOn_cosh_kernel_mul hF hFdiv2)]
+  rw [← MeasureTheory.integral_const_mul]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+  rw [Set.mem_Ioi] at hy
+  -- pointwise: e^{-y/2}/(1-e^{-2y}) = (1/2)(1/(2sh(y/2)) + 1/(2ch(y/2)))
+  have hexp : 0 < Real.exp (-y) := Real.exp_pos _
+  have hlt : Real.exp (-y) < 1 := by
+    rw [show (1:ℝ) = Real.exp 0 by rw [Real.exp_zero]]
+    exact Real.exp_lt_exp.mpr (by linarith)
+  have hsh : Real.exp (-(y/2)) / (1 - Real.exp (-y)) = 1/(2 * Real.sinh (y/2)) :=
+    exp_half_div_one_sub_exp_neg hy
+  have hch : Real.exp (-(y/2)) / (1 + Real.exp (-y)) = 1/(2 * Real.cosh (y/2)) := by
+    have hcosh : 2 * Real.cosh (y/2) = Real.exp (y/2) + Real.exp (-(y/2)) := by
+      rw [Real.cosh_eq]
+      ring
+    rw [hcosh, div_eq_div_iff (by positivity) (by positivity), one_mul, mul_add,
+      ← Real.exp_add, ← Real.exp_add]
+    ring_nf
+    rw [Real.exp_zero]
+  have hker : Real.exp (-(y/2)) / (1 - Real.exp (-(2*y)))
+      = (1/2) * (1/(2 * Real.sinh (y/2)) + 1/(2 * Real.cosh (y/2))) := by
+    rw [← hsh, ← hch, show -(2*y) = (-y) + (-y) by ring, Real.exp_add]
+    have h1 : (1:ℝ) - Real.exp (-y) ≠ 0 := by linarith
+    have h2 : (1:ℝ) + Real.exp (-y) ≠ 0 := by positivity
+    have h3 : (1:ℝ) - Real.exp (-y)^2 ≠ 0 := by nlinarith
+    field_simp
+    ring
+  rw [hker]
+  push_cast
+  ring
+
 end DedekindResidue
