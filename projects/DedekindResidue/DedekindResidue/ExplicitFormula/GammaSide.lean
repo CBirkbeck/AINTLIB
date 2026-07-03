@@ -1,6 +1,7 @@
 module
 
 public import DedekindResidue.ExplicitFormula.FourierJordan
+public import DedekindResidue.ExplicitFormula.RectangleContour
 
 /-!
 # The archimedean side: digamma integrals (SP2-Γψ)
@@ -4639,5 +4640,176 @@ theorem logDeriv_gammaFactor_conj (K : Type*) [Field K] [NumberField K]
       ← Complex.ofReal_log (by positivity)]]
   simp only [map_add, map_mul, map_neg, map_natCast, map_div₀, map_one, map_ofNat,
     Complex.conj_ofReal]
+
+/-- `γ_K'/γ_K` is differentiable on the right half-plane (the derivative of an
+analytic nonvanishing function divided by it). -/
+theorem differentiableAt_logDeriv_gammaFactor (K : Type*) [Field K] [NumberField K]
+    {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ (logDeriv (gammaFactor K)) s := by
+  have hU : IsOpen {w : ℂ | 0 < w.re} := isOpen_lt continuous_const Complex.continuous_re
+  have hdiff : DifferentiableOn ℂ (gammaFactor K) {w : ℂ | 0 < w.re} := by
+    intro w hw
+    rw [Set.mem_setOf_eq] at hw
+    exact (((differentiableAt_Gammaℝ_of_re_pos hw).pow _).mul
+      ((differentiableAt_Gammaℂ_of_re_pos hw).pow _)).differentiableWithinAt
+  have han : AnalyticOnNhd ℂ (gammaFactor K) {w : ℂ | 0 < w.re} :=
+    hdiff.analyticOnNhd hU
+  have hd : DifferentiableAt ℂ (deriv (gammaFactor K)) s :=
+    ((han s hs).deriv).differentiableAt
+  have hval : DifferentiableAt ℂ (gammaFactor K) s := (han s hs).differentiableAt
+  have hne : gammaFactor K s ≠ 0 := gammaFactor_ne_zero_of_re_pos K hs
+  exact hd.div hval hne
+
+/-- **The generic contour shift `Re = 1+a → Re = 1/2`** (Poitou p. 6-03: "on peut
+remplacer `I_G^a(T)` par `I_G(T)`"): for entire `Φ` bounded on the band by `B|t|`,
+and `g` analytic on the right half-plane with `‖g‖ ≤ C|t|` on the sub-band, the
+difference of the two symmetric vertical integrals of `(Φ(s) + Φ(1-s))·g(s)`
+vanishes as `T → ∞` provided `B·C → 0`. -/
+theorem tendsto_shift_vertical_sub {a : ℝ} (ha : 0 < a) {Φ g : ℂ → ℂ}
+    (hΦ : Differentiable ℂ Φ)
+    (hg : ∀ s : ℂ, 0 < s.re → DifferentiableAt ℂ g s)
+    {B C : ℝ → ℝ}
+    (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a → ‖Φ ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
+    (hgb : ∀ σ t : ℝ, 1/2 ≤ σ → σ ≤ 1+a → 4 ≤ |t| →
+      ‖g ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ C |t|)
+    (hlim : Tendsto (fun T : ℝ => B T * C T) atTop (nhds 0)) :
+    Tendsto (fun T : ℝ =>
+      (∫ y in (-T)..T, (Φ (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I)
+          + Φ (1 - (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I)))
+          * g (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
+      - ∫ y in (-T)..T, (Φ (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+          + Φ (1 - (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)))
+          * g (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)) atTop (nhds 0) := by
+  set f : ℂ → ℂ := fun s => (Φ s + Φ (1 - s)) * g s with hf
+  have hfdiff : ∀ ζ : ℂ, 0 < ζ.re → DifferentiableAt ℂ f ζ := by
+    intro ζ hζ
+    refine DifferentiableAt.mul ?_ (hg ζ hζ)
+    refine (hΦ ζ).add ?_
+    have h0 : (fun s : ℂ => Φ (1 - s)) = Φ ∘ (fun s : ℂ => 1 - s) := rfl
+    rw [h0]
+    exact (hΦ _).comp ζ ((differentiableAt_const 1).sub differentiableAt_id)
+  -- the fixed-T horizontal bound
+  have hkey : ∀ T : ℝ, 4 ≤ T →
+      ‖(∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
+        - ∫ y in (-T)..T, f (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)‖
+      ≤ (2 + 4*a) * (B T * C T) := by
+    intro T hT
+    have hT0 : 0 < T := by linarith
+    set z : ℂ := ((1/2:ℝ):ℂ) + ((-T:ℝ):ℂ)*Complex.I with hz
+    set w : ℂ := ((1+a:ℝ):ℂ) + ((T:ℝ):ℂ)*Complex.I with hw
+    have hzre : z.re = 1/2 := by
+      rw [hz]
+      simp
+    have hzim : z.im = -T := by
+      rw [hz]
+      simp
+    have hwre : w.re = 1+a := by
+      rw [hw]
+      simp
+    have hwim : w.im = T := by
+      rw [hw]
+      simp
+    have hrele : (1/2 : ℝ) ≤ 1+a := by linarith
+    have himle : (-T : ℝ) ≤ T := by linarith
+    -- Goursat on the rectangle
+    have h0 : rectangleIntegral f z w = 0 := by
+      refine rectangleIntegral_eq_zero (s := ∅) Set.countable_empty ?_ ?_
+      · intro ζ hζ
+        rw [Complex.mem_reProdIm, hzre, hwre, hzim, hwim,
+          Set.uIcc_of_le hrele, Set.uIcc_of_le himle] at hζ
+        refine ((hfdiff ζ ?_).continuousAt).continuousWithinAt
+        have h1 := hζ.1.1
+        linarith
+      · intro ζ hζ
+        rw [Set.mem_sdiff, Complex.mem_reProdIm, hzre, hwre, hzim, hwim] at hζ
+        refine hfdiff ζ ?_
+        have h1 := hζ.1.1.1
+        rw [min_eq_left hrele] at h1
+        linarith
+    rw [rectangleIntegral, hzre, hzim, hwre, hwim] at h0
+    -- solve for the vertical difference
+    have h1 : Complex.I * ((∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
+        - ∫ y in (-T)..T, f (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I))
+        = (∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I))
+          - ∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I) := by
+      have h2 := h0
+      rw [smul_eq_mul, smul_eq_mul] at h2
+      linear_combination h2
+    have h2 : (∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
+        - ∫ y in (-T)..T, f (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)
+        = -Complex.I * ((∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I))
+          - ∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I)) := by
+      have h3 : -Complex.I * (Complex.I * ((∫ y in (-T)..T, f (((1+a:ℝ):ℂ) + (y:ℂ)*Complex.I))
+          - ∫ y in (-T)..T, f (((1/2:ℝ):ℂ) + (y:ℂ)*Complex.I)))
+          = -Complex.I * ((∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I))
+            - ∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I)) := by
+        rw [h1]
+      rw [← mul_assoc, neg_mul, Complex.I_mul_I, neg_neg, one_mul] at h3
+      exact h3
+    rw [h2, norm_mul, norm_neg, Complex.norm_I, one_mul]
+    -- bound the two horizontal integrals
+    have hBnn : 0 ≤ B T := by
+      have h4 := hB (1/2) T (by linarith) (by linarith)
+      rw [abs_of_pos hT0] at h4
+      exact le_trans (norm_nonneg _) h4
+    have hCnn : 0 ≤ C T := by
+      have h4 := hgb (1/2) T (le_refl _) (by linarith) (by rw [abs_of_pos hT0]; exact hT)
+      rw [abs_of_pos hT0] at h4
+      exact le_trans (norm_nonneg _) h4
+    have hbound : ∀ t : ℝ, |t| = T → ∀ x ∈ Set.uIoc (1/2 : ℝ) (1+a),
+        ‖f ((x:ℂ) + (t:ℝ)*Complex.I)‖ ≤ 2*B T*C T := by
+      intro t ht x hx
+      rw [Set.uIoc_of_le hrele, Set.mem_Ioc] at hx
+      rw [hf]
+      show ‖(Φ ((x:ℂ) + (t:ℂ)*Complex.I) + Φ (1 - ((x:ℂ) + (t:ℂ)*Complex.I)))
+        * g ((x:ℂ) + (t:ℂ)*Complex.I)‖ ≤ 2*B T*C T
+      rw [norm_mul]
+      have hb1 : ‖Φ ((x:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B T := by
+        have h5 := hB x t (by linarith [hx.1]) hx.2
+        rw [ht] at h5
+        exact h5
+      have hb2 : ‖Φ (1 - ((x:ℂ) + (t:ℂ)*Complex.I))‖ ≤ B T := by
+        have h6 : (1 : ℂ) - ((x:ℂ) + (t:ℂ)*Complex.I)
+            = (((1-x : ℝ)):ℂ) + ((-t : ℝ):ℂ)*Complex.I := by
+          push_cast
+          ring
+        rw [h6]
+        have h5 := hB (1-x) (-t) (by linarith [hx.2]) (by linarith [hx.1])
+        rw [abs_neg, ht] at h5
+        exact h5
+      have hb3 : ‖g ((x:ℂ) + (t:ℂ)*Complex.I)‖ ≤ C T := by
+        have h5 := hgb x t (le_of_lt hx.1) hx.2 (by rw [ht]; exact hT)
+        rw [ht] at h5
+        exact h5
+      calc ‖Φ ((x:ℂ) + (t:ℂ)*Complex.I) + Φ (1 - ((x:ℂ) + (t:ℂ)*Complex.I))‖
+            * ‖g ((x:ℂ) + (t:ℂ)*Complex.I)‖
+          ≤ (B T + B T) * C T := by
+            refine mul_le_mul (le_trans (norm_add_le _ _) (add_le_add hb1 hb2)) hb3
+              (norm_nonneg _) (by linarith)
+        _ = 2*B T*C T := by ring
+    have htop : ‖∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I)‖
+        ≤ 2*B T*C T * |1+a - 1/2| :=
+      intervalIntegral.norm_integral_le_of_norm_le_const
+        (hbound T (abs_of_pos hT0) )
+    have hbot : ‖∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I)‖
+        ≤ 2*B T*C T * |1+a - 1/2| :=
+      intervalIntegral.norm_integral_le_of_norm_le_const
+        (hbound (-T) (by rw [abs_neg, abs_of_pos hT0]))
+    have habs : |1+a - (1/2 : ℝ)| = 1/2 + a := by
+      rw [abs_of_pos (by linarith)]
+      ring
+    rw [habs] at htop hbot
+    calc ‖(∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I))
+          - ∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I)‖
+        ≤ ‖∫ x in (1/2)..(1+a), f ((x:ℂ) + ((T:ℝ):ℂ)*Complex.I)‖
+          + ‖∫ x in (1/2)..(1+a), f ((x:ℂ) + ((-T:ℝ):ℂ)*Complex.I)‖ := norm_sub_le _ _
+      _ ≤ 2*B T*C T * (1/2 + a) + 2*B T*C T * (1/2 + a) := add_le_add htop hbot
+      _ = (2 + 4*a) * (B T * C T) := by ring
+  -- squeeze
+  have h9 := hlim.const_mul (2 + 4*a)
+  rw [mul_zero] at h9
+  refine squeeze_zero_norm' ?_ h9
+  filter_upwards [Filter.eventually_ge_atTop (4:ℝ)] with T hT
+  exact hkey T hT
 
 end DedekindResidue
