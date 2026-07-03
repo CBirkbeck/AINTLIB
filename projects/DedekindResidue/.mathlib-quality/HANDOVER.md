@@ -954,3 +954,32 @@ integral that is followed by `+`.
 
 NEXT: Weil (6) assembly (edge split + Prop 1 + Prop 2 + shift + fold + I_G, T→∞
 via exists_contour_height), then boundary-decay discharges, then SP3.
+
+## 2026-07-03 (later still) — Weil assembly: W-a/W-b/W-c1 landed
+
+WeilAssembly.lean now contains (all axiom-clean):
+- **W-a** `logDeriv_completedDedekindZetaEntire_split`: on Re>1,
+  Λ_ent'/Λ_ent = 1/s + 1/(s−1) + ½log|d| + γ_K'/γ_K + ζ_K'/ζ_K (ζ-differentiability
+  via the entire completion, no LSeries plumbing).
+- **W-b** the pole piece: `integral_cexp_neg_mul_Ioi`, `integral_cexp_mul_Iio`,
+  `restrict_Iio_eq_map_sub`, `integrableOn_exp_mul_Iio`, `integral_exp_mul_Iio`,
+  `poleWindow` (tail form 2e^{cu}∫_u^∞Ge^{−cw}), kernel-L¹, `tail_integral_eq`,
+  `continuous_poleWindow`, `poleWindow_zero`, `integrable_poleWindow_pair`
+  (half-plane-indicator Fubini), `integral_poleWindow_cexp`
+  (∫E_c e^{itu} = 2(∫Ge^{itx})/(c+it)), `integrable_poleWindow`, `paperPhi_edge`,
+  `integrable_F_mul_exp_half`, `poleWindow_zero_add_eq` (E_a(0)+E_{1+a}(0) = Φ(0)+Φ(1)),
+  `tendsto_pole_piece` (→ 2π(Φ(0)+Φ(1))).
+- **W-c1** `tendsto_const_piece`: ∫(Φ+Φ(1−·))·κ → 2πκ(F(0+)+F(0−)) — the ½log|d| piece.
+
+REMAINING for Weil (6): W-c2 `tendsto_edge_integral` (pointwise edge-split + 4-way
+interval split (all pieces continuous in t; ζ-piece = full − others) + limits:
+pole (tendsto_pole_piece), disc (tendsto_const_piece at κ=½log|d|), Γ (shift-instance
+of tendsto_shift_vertical_sub at g=logDeriv γ_K with C=C₀log(2+·) from
+exists_norm_logDeriv_gammaFactor_le, + integral_half_line_fold via
+paperPhi_half_add_mul_I, + tendsto_IG_gammaFactor), ζ (tendsto_prime_side, sign −).
+Then W-c3 `weil_explicit_formula`: zero_capture_edge_form at exists_contour_height
+heights, horizontal error CΦ·C(logT₀)² → 0 given Φ = o(1/log²) band decay ⟹
+divisor sums → (1/2π)·[edge limit]. Then boundary/BV discharges at SP3's concrete F.
+
+Process rule (twice burned): NEVER pipe `lake build` or sequence `; git push` —
+build bare, check exit, THEN commit/push in a separate command.
