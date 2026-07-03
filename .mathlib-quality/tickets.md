@@ -200,6 +200,20 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
   Carrier #6 (Cor 7.32-aux) is the compactness CONSUMER (cover+finite-subcover; its own
   docstring notes the current signature lacks `[IsTateRing A]` — another statement fix at
   discharge time).
+- **C4 SOURCE MAP (Wedhorn 7.10/7.12 read, wedhorn.txt:2908-2941)**: Cor 7.12's proof is
+  three lines: `Cont(A) = Spv(A,I) ∖ ⋃_{f∈I} Spv(A,I)(1/f)` — CLOSED in Spv(A,I). In the
+  Boolean cube the keystone decomposes as: [range ιSpv_bool — PROVEN closed] ∩
+  [`A⁺`-cylinders `{r | r(f,1)}` — clopen ✓] ∩ [`∀ a ∈ I·A`-image: `{r | ¬ r(1,a)}`
+  — clopen ✓ (v(a) < 1 ⟺ ¬ vle 1 a, complement of basicOpen 1 a)] ∩
+  [**Spv(A,I)-membership** — THE residual piece]. Route for the residual: Spv(A,I) =
+  fixed-point set of the Wedhorn-7.1.2 retraction (in-repo: `restrictIdeal`/SpvAI,
+  retraction_surjective + retraction_eq_self per 05-18 session 13); fixed-point sets of
+  continuous self-maps are closed in Hausdorff spaces, and the Bool-cube IS Hausdorff —
+  so the leaf becomes **continuity of the retraction in the cube topology** (its
+  coordinates (r v)(g,h) as functions of finitely many v-coordinates — Wedhorn 7.2's
+  case-formula; the cΓ-membership quantifier is the subtlety) OR Wedhorn 7.5's direct
+  spectrality encoding. /develop --decompose THIS against wedhorn.txt:2860-2940
+  (7.1-7.5 block) + SpvAITopology's current decl inventory before writing any code.
 - **NEXT = C4 (T-L5)**: its own decompose pass per the standing plan — the keystone
   `isClosed_image_spa_ιSpv_bool_noHArch` decomposes per the 2026-06-05 finding as
   (range ✓ proven) ∩ (A⁺-cylinders) ∩ (no-hArch Cont-closedness = the microbial/Spv(A,I)
