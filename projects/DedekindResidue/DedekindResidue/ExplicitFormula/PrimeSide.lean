@@ -569,6 +569,164 @@ theorem neg_logDeriv_dedekindZeta_eq_tsum_prod {s : ℂ} (hs : 1 < s.re) :
         refine tsum_congr (fun k => ?_)
         rw [hcpow k]
 
+/-- The ideals of the ring of integers form a countable type: each ideal has finite
+absolute norm and there are finitely many ideals of each norm. -/
+instance countable_ideal_ringOfIntegers (K : Type*) [Field K] [NumberField K] :
+    Countable (Ideal (𝓞 K)) := by
+  have h0 : (Set.univ : Set (Ideal (𝓞 K))) = ⋃ n : ℕ, {I | Ideal.absNorm I = n} := by
+    ext I
+    simp only [Set.mem_univ, Set.mem_iUnion, Set.mem_setOf_eq, true_iff]
+    exact ⟨Ideal.absNorm I, rfl⟩
+  have h1 : (Set.univ : Set (Ideal (𝓞 K))).Countable := by
+    rw [h0]
+    exact Set.countable_iUnion (fun n => (Ideal.finite_setOf_absNorm_eq n).countable)
+  exact Set.countable_univ_iff.mp h1
+
+/-- A pointwise `tsum` of integrable functions with summable `L¹` norms is
+integrable (companion to `MeasureTheory.integral_tsum_of_summable_integral_norm`,
+which computes its integral). -/
+theorem integrable_tsum_of_summable_integral_norm {ι : Type*} [Countable ι]
+    {F : ι → ℝ → ℂ} (hF_int : ∀ i, Integrable (F i) (volume : Measure ℝ))
+    (hF_sum : Summable fun i => ∫ a : ℝ, ‖F i a‖) :
+    Integrable (fun a : ℝ => ∑' i, F i a) (volume : Measure ℝ) := by
+  refine ⟨AEStronglyMeasurable.tsum (fun i => (hF_int i).1), ?_⟩
+  show ∫⁻ a, ‖∑' i, F i a‖ₑ ∂(volume : Measure ℝ) < ⊤
+  have h0 : ∀ i : ι, ∫⁻ a, ‖F i a‖ₑ ∂(volume : Measure ℝ) = ‖∫ a : ℝ, ‖F i a‖‖ₑ := by
+    intro i
+    rw [← MeasureTheory.ofReal_integral_norm_eq_lintegral_enorm (hF_int i),
+      Real.enorm_eq_ofReal (integral_nonneg (fun a => norm_nonneg (F i a)))]
+  calc ∫⁻ a, ‖∑' i, F i a‖ₑ ∂(volume : Measure ℝ)
+      ≤ ∫⁻ a, ∑' i, ‖F i a‖ₑ ∂(volume : Measure ℝ) :=
+        lintegral_mono (fun a => enorm_tsum_le_tsum_enorm)
+    _ = ∑' i, ∫⁻ a, ‖F i a‖ₑ ∂(volume : Measure ℝ) :=
+        lintegral_tsum (fun i => (hF_int i).1.enorm)
+    _ = ∑' i, ‖∫ a : ℝ, ‖F i a‖‖ₑ := tsum_congr h0
+    _ < ⊤ := by
+        have h1 : ∀ i : ι, ‖∫ a : ℝ, ‖F i a‖‖ₑ = ((‖∫ a : ℝ, ‖F i a‖‖₊ : ℝ≥0) : ℝ≥0∞) := by
+          intro i
+          rfl
+        rw [tsum_congr h1]
+        exact Ne.lt_top (ENNReal.tsum_coe_ne_top_iff_summable.2
+          (NNReal.summable_coe.1 hF_sum.abs))
+
+/-- **Translation identity**: multiplying a Fourier-type integral by `e^{-itβ}`
+translates the integrand by `β`. -/
+theorem integral_translate_cexp (G : ℝ → ℂ) (β t : ℝ) :
+    (∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I))
+        * Complex.exp (((-(t*β)) : ℝ) * Complex.I)
+      = ∫ u : ℝ, G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I) := by
+  have h2 := (measurePreserving_add_right (volume : Measure ℝ) β).integral_comp
+    (Homeomorph.addRight β).isClosedEmbedding.measurableEmbedding
+    (fun v : ℝ => G v * Complex.exp ((t*(v - β) : ℝ) * Complex.I))
+  have h3 : (∫ u : ℝ, G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I))
+      = ∫ v : ℝ, G v * Complex.exp ((t*(v - β) : ℝ) * Complex.I) := by
+    rw [← h2]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+    show G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I)
+        = G (u + β) * Complex.exp ((t*((u + β) - β) : ℝ) * Complex.I)
+    rw [show (t*((u + β) - β) : ℝ) = (t*u : ℝ) by ring]
+  rw [h3, ← MeasureTheory.integral_mul_const]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun v => ?_))
+  show G v * Complex.exp ((t*v : ℝ) * Complex.I) * Complex.exp (((-(t*β)) : ℝ) * Complex.I)
+      = G v * Complex.exp ((t*(v - β) : ℝ) * Complex.I)
+  rw [mul_assoc, ← Complex.exp_add]
+  congr 2
+  push_cast
+  ring
+
+variable (K : Type*) [Field K] [NumberField K]
+
+/-- **Poitou's prime-side function `H`** (p. 6-02):
+`H(u) = ∑_{𝔭,m≥1} log(N𝔭)·N𝔭^{-m(1+a)}·F_a(u + m·log N𝔭)`, where
+`F_a(x) = F(x)·e^{(1/2+a)x}`. Its one-sided means at `0` are the limit of the
+prime-side edge integral. -/
+noncomputable def primeSideH (a : ℝ) (F : ℝ → ℂ) (u : ℝ) : ℂ :=
+  ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+    ((Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+      * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+          * ((Real.exp ((1/2+a)
+              * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))
+
+/-- Each prime-power term of `primeSideH` is integrable. -/
+theorem integrable_primeSideH_term {a : ℝ} {F : ℝ → ℂ}
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ) :
+    Integrable (fun u : ℝ =>
+      ((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+      (volume : Measure ℝ) := by
+  refine Integrable.const_mul ?_ _
+  exact hFa.comp_add_right _
+
+/-- The `L¹` norms of the `primeSideH` terms are summable, with the geometric
+values `log(N𝔭)·N𝔭^{-m(1+a)}·‖F_a‖₁`. -/
+theorem summable_integral_norm_primeSideH {a : ℝ} (ha : 0 < a) (F : ℝ → ℂ) :
+    Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      ∫ u : ℝ, ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖) := by
+  have hval : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      (∫ u : ℝ, ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖)
+      = (Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
+        * ∫ x : ℝ, ‖F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖ := by
+    intro pk
+    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hN1 : (1:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr hne0
+    have hwnn : 0 ≤ Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := by
+      have := Real.log_nonneg hN1
+      positivity
+    rw [show (∫ u : ℝ, ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖)
+        = ∫ u : ℝ, (Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
+          * ‖(fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))
+              (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))‖ from by
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+      show ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖
+        = (Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
+          * ‖F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * ((Real.exp ((1/2+a)
+                  * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)‖
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hwnn]]
+    rw [MeasureTheory.integral_const_mul]
+    congr 1
+    exact (measurePreserving_add_right (volume : Measure ℝ)
+        ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))).integral_comp
+      (Homeomorph.addRight _).isClosedEmbedding.measurableEmbedding
+      (fun x : ℝ => ‖F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖)
+  refine Summable.congr ?_ (fun pk => (hval pk).symm)
+  exact (summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a)).mul_right _
+
+/-- `primeSideH` is integrable. -/
+theorem integrable_primeSideH {a : ℝ} (ha : 0 < a) {F : ℝ → ℂ}
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))) :
+    Integrable (primeSideH K a F) (volume : Measure ℝ) :=
+  integrable_tsum_of_summable_integral_norm
+    (fun pk => integrable_primeSideH_term K hFa pk)
+    (summable_integral_norm_primeSideH K ha F)
+
 end DedekindResidue
 
 end
