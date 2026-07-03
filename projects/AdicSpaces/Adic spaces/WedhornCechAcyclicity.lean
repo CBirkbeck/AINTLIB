@@ -12217,25 +12217,13 @@ theorem spa_compactSpace_tate_noHArch
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A] :
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] :
     CompactSpace ↥(Spa A A⁺) := by
-  classical
-  constructor
-  -- the whole space is the preimage of the trivial rational open R({1}/1),
-  -- which is compact by the no-hArch Wedhorn 7.35(2)
-  -- (`isCompact_preimage_rationalOpen_noHArch`, SpaCompactNoHArch.lean; its
-  -- residual analytic content is parked there as L1.3.a).
-  obtain ⟨P⟩ := ‹IsHuberRing A›.exists_pairOfDefinition
-  have h := isCompact_preimage_rationalOpen_noHArch (A := A) (globalLocData P)
-  have huniv : (Subtype.val ⁻¹' rationalOpen (globalLocData P).T
-      (globalLocData P).s : Set ↥(Spa A A⁺)) = Set.univ := by
-    rw [Set.eq_univ_iff_forall]
-    intro v
-    show v.1 ∈ rationalOpen (globalLocData P).T (globalLocData P).s
-    exact ⟨v.2, fun x hx => by
-      rw [Finset.mem_singleton.mp hx]
-      exact (v.1.vle_total 1 1).elim id id, v.1.not_vle_one_zero⟩
-  rwa [huniv] at h
+  obtain ⟨P, π, hA₀le, hπ, hunit⟩ :=
+    IsTateRing.exists_principal_pairOfDefinition_le_subring (A := A)
+      (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A)))
+  exact compactSpace_spa_noHArch P hπ (fun x => hA₀le x.2) (Ideal.span {((π : A))}) rfl
 
 /-- **Step 1 (Wedhorn 7.54 / Huber [Hu3] 2.6 — analytic normalisation):** any
 rational cover `𝒱` of the whole space `Spa A` refines to a finite *normalised*
@@ -12260,7 +12248,9 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
     (𝒱 : Finset (RationalLocData A))
+    (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
     (hcov : ∀ v ∈ Spa A A⁺, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :
     ∃ LP : List (Finset A × A),
       (∀ p ∈ LP, p.2 ∈ p.1) ∧
@@ -12292,7 +12282,8 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
           (q D hD x).2 := by
     intro D hD
     have hcpt : IsCompact (Subtype.val ⁻¹' rationalOpen D.T D.s :
-        Set ↥(Spa A A⁺)) := isCompact_preimage_rationalOpen_noHArch D
+        Set ↥(Spa A A⁺)) := isCompact_preimage_rationalOpen_noHArch
+      (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A))) D (h𝒱 D hD)
     obtain ⟨ι, hι⟩ := hcpt.elim_finite_subcover
       (fun x : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} =>
         Subtype.val ⁻¹' rationalOpen (q D hD x).1 (q D hD x).2)
@@ -12382,12 +12373,13 @@ theorem exists_form_a_refinement_coversSpa [DecidableEq A]
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
     (𝒱 : Finset (RationalLocData A))
+    (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
     (hcov : ∀ v ∈ Spa A A⁺, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :
     ∃ S : Finset A, Ideal.span (S : Set A) = ⊤ ∧
       (∀ v ∈ Spa A A⁺, ∃ f ∈ S, v ∈ rationalOpen S f) ∧
       (∀ f ∈ S, ∃ D ∈ 𝒱, rationalOpen S f ⊆ rationalOpen D.T D.s) := by
   obtain ⟨LP, hts, h1, hcovLP, hrelLP, hrefLP⟩ :=
-    exists_finite_normalized_rational_refinement 𝒱 hcov
+    exists_finite_normalized_rational_refinement 𝒱 h𝒱 hcov
   refine ⟨distinguishedProducts LP, ?_, ?_, ?_⟩
   letI P_amb : PairOfDefinition A := (IsTateRing.principalPair A).toPairOfDefinition
   haveI : IsAdicComplete P_amb.I P_amb.A₀ :=
@@ -12447,7 +12439,7 @@ theorem exists_form_a_refinement [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A)
+    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     ∃ (S : Finset A) (piece : A → RationalLocData A),
       Ideal.span (S : Set A) = ⊤ ∧
@@ -12469,7 +12461,7 @@ theorem exists_form_a_refinement [DecidableEq A]
   have hcov𝒱 : ∀ v ∈ Spa A A⁺, ∃ D ∈ C.covers, v ∈ rationalOpen D.T D.s :=
     fun v hv => C.hcover v (hbase v hv)
   obtain ⟨LP, hts, h1, hcovLP, hrelLP, hrefLP⟩ :=
-    exists_finite_normalized_rational_refinement C.covers hcov𝒱
+    exists_finite_normalized_rational_refinement C.covers hC_cov hcov𝒱
   letI P_amb : PairOfDefinition A := (IsTateRing.principalPair A).toPairOfDefinition
   haveI : IsAdicComplete P_amb.I P_amb.A₀ :=
     principalPair_isAdicComplete_of_stronglyNoetherianTate
@@ -12515,7 +12507,7 @@ theorem exists_ideal_gen_refinement [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A)
+    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     ∃ (T : Finset A) (C' : RationalCovering A),
       C'.IsGeneratedBy T ∧
@@ -12528,7 +12520,7 @@ theorem exists_ideal_gen_refinement [DecidableEq A]
           rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) := by
   -- Step 1: form-(a) Nullstellensatz refinement (Wedhorn 7.54).
   obtain ⟨S, piece, hS_span, h_piece_T, h_piece_s, h_piece_P, h_piece_sub,
-    h_cover_rel, h_contain⟩ := exists_form_a_refinement C hbase
+    h_cover_rel, h_contain⟩ := exists_form_a_refinement C hC_cov hbase
   -- Step 2: package the form-(a) pieces into a generated `RationalCovering`.
   obtain ⟨C', h_C'_gen, h_C'_base, h_C'_P, h_C'_refines, h_C'_covers_each⟩ :=
     rationalCovering_from_idealGenSet C S hS_span piece h_piece_T h_piece_s
@@ -12562,7 +12554,7 @@ theorem exists_ideal_gen_refinement_covers_each_D [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A)
+    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     ∃ (T : Finset A) (C' : RationalCovering A),
       C'.IsGeneratedBy T ∧
@@ -12576,7 +12568,7 @@ theorem exists_ideal_gen_refinement_covers_each_D [DecidableEq A]
   -- Pass-through: the D-relative covers-each is part of the 7.54-package
   -- (Huber's per-point normalisation lives inside the containing piece).
   obtain ⟨T, C', h_C'_gen, h_C'_base, h_C'_P, h_C'_refines, h_C'_each⟩ :=
-    exists_ideal_gen_refinement C hbase
+    exists_ideal_gen_refinement C hC_cov hbase
   exact ⟨T, C', h_C'_gen, h_C'_base, h_C'_P, h_C'_refines, h_C'_each⟩
 
 /-! ##### Sub-lemmas for `IsOXAcyclic_of_refining_acyclic_cover` (Prop A.3(2) project bridge) -/
@@ -12753,6 +12745,7 @@ theorem every_rational_cover_is_OXAcyclic_whole_space [DecidableEq A]
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
     (C : RationalCovering A) (hbase_rat : C.base.IsRational)
+    (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     C.IsOXAcyclic := by
   -- Wedhorn p. 83 proof composition (verbatim):
@@ -12764,7 +12757,7 @@ theorem every_rational_cover_is_OXAcyclic_whole_space [DecidableEq A]
   -- the covering-each-D direction (strengthened in
   -- `exists_ideal_gen_refinement_covers_each_D`).
   obtain ⟨T, C', h_C'_gen, h_C'_base, h_C'_P, h_refines, h_C'_covers_each_D⟩ :=
-    exists_ideal_gen_refinement_covers_each_D C hbase
+    exists_ideal_gen_refinement_covers_each_D C hC_cov hbase
   -- Step 2: Lemma 8.34 — C' is O_X-acyclic.
   have h_C'_acyclic : C'.IsOXAcyclic := wedhorn_lemma_834 C' T h_C'_gen
     (by rw [h_C'_base]; exact hbase_rat) h_C'_P
@@ -12846,7 +12839,11 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
   -- `IsRingOfIntegralElements ((presheafValue C.base)⁺)` via `presheafValuePlus_isRingOfIntegralElements`)
   -- all resolve from the preamble + the global instance — NO false `B⁺ ⊆ B₀`.
   refine every_rational_cover_is_OXAcyclic_whole_space (imageCover C hC)
-    (globalLocData_isRational _) ?_
+    (globalLocData_isRational _) (fun E hE => ?_) ?_
+  case _ =>
+    rw [imageCover, Finset.mem_image] at hE
+    obtain ⟨⟨D, hD⟩, -, rfl⟩ := hE
+    exact imagePieceDatum_isRational C.base D.T D.s ((hC.piece hD).span_eq_top)
   intro w hw
   exact ⟨hw, fun x hx => by
     rw [Finset.mem_singleton.mp hx]

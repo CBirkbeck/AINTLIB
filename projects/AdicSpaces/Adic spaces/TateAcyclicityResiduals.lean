@@ -252,7 +252,9 @@ Tracked as an atomic sub-lemma; closing this discharges C2. -/
 theorem exists_per_D_finite_cover_of_localBasisHyp
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
-    (C : RationalCovering A) (h_basis : LocalBasisHyp C) :
+    (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (C : RationalCovering A) (hC_rat : ∀ D ∈ C.covers, D.IsRational)
+    (h_basis : LocalBasisHyp C) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
         rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
@@ -280,7 +282,7 @@ theorem exists_per_D_finite_cover_of_localBasisHyp
     exact hv_plus
   -- Quasi-compactness of `R(D.T, D.s)` extracts a finite subfamily.
   choose mk_S_D h_subset hW_fin _h_cover_fin using fun D (hD : D ∈ C.covers) =>
-    (isCompact_preimage_rationalOpen_noHArch D).elim_finite_subcover_image
+    (isCompact_preimage_rationalOpen_noHArch hplus_open D (hC_rat D hD)).elim_finite_subcover_image
       (b := W D)
       (c := fun f => Subtype.val ⁻¹' rationalOpen (insert f C.base.T) C.base.s)
       (fun f _ => rationalOpen_isOpen _ _)
@@ -530,7 +532,7 @@ theorem exists_standard_cover_refining
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A) :
+    (C : RationalCovering A) (hC_rat : ∀ D ∈ C.covers, D.IsRational) :
     ∃ S : Finset A,
       refines_cover C S ∧
       refines_contain C S ∧
@@ -539,7 +541,7 @@ theorem exists_standard_cover_refining
   have h_basis : LocalBasisHyp C := localBasisHyp_of_strongly_noetherian C
   -- Lane C C2: per-D finite families from quasi-compactness
   obtain ⟨mk_S_D, h_in_D, h_cover_D⟩ :=
-    exists_per_D_finite_cover_of_localBasisHyp C h_basis
+    exists_per_D_finite_cover_of_localBasisHyp CompatiblePlusSubring.isOpen' C hC_rat h_basis
   -- Lane C C3: span-top on the combined family via Cor 7.32
   have h_span : Ideal.span ((C.covers.biUnion mk_S_D : Finset A) : Set A) = ⊤ :=
     span_top_of_per_D_finite_cover C mk_S_D h_in_D h_cover_D
@@ -1010,7 +1012,8 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    (L : RationalLocData A) (x y a : A)
+    (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (L : RationalLocData A) (hL_rat : L.IsRational) (x y a : A)
     (ha_nonzero : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
       ¬ v.vle a 0) :
     ∃ (N : ℕ) (B : Finset L.P.A₀),
@@ -1042,7 +1045,7 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
   let K_Spa : Set ↥(Spa A A⁺) :=
     Subtype.val ⁻¹' (rationalOpen L.T L.s ∩ {v | v.vle x y})
   have hK_compact : IsCompact K_Spa :=
-    isCompact_rationalOpen_inter_vle_noHArch L x y
+    isCompact_rationalOpen_inter_vle_noHArch hplus_open L hL_rat x y
   have hK_ne_zero : ∀ w ∈ K_Spa, ¬ (w.1 : Spv A).vle a 0 := fun w hw =>
     ha_nonzero w.1 hw
   -- Step 3: per-c uniform N over K.
@@ -1226,7 +1229,8 @@ private theorem exists_absolute_ratio_rationalLocData_aux
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (L : RationalLocData A) (hA₀_le : L.P.A₀ ≤ A⁺)
+    (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (L : RationalLocData A) (hL_rat : L.IsRational) (hA₀_le : L.P.A₀ ≤ A⁺)
     (C : RationalCovering A) (g h : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
@@ -1274,7 +1278,7 @@ private theorem exists_absolute_ratio_rationalLocData_aux
     exact ValuativeRel.zero_vlt_mul hvLs hvh
   -- Step 4: half-space domination lemma supplies B⁺.
   obtain ⟨Nplus, Bplus, hBplus_span, hBplus_dom⟩ :=
-    exists_ideal_pow_generators_dominated_for_half_space L g h (L.s * h) hsplus_ne
+    exists_ideal_pow_generators_dominated_for_half_space hplus_open L hL_rat g h (L.s * h) hsplus_ne
   -- Step 5: symmetric for minus (s_minus = L.s * g, half-space {v.vle h g}).
   have hsminus_ne : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle h g},
       ¬ v.vle (L.s * g) 0 := by
@@ -1285,7 +1289,7 @@ private theorem exists_absolute_ratio_rationalLocData_aux
     letI : ValuativeRel A := v.toValuativeRel
     exact ValuativeRel.zero_vlt_mul hvLs hvg
   obtain ⟨Nminus, Bminus, hBminus_span, hBminus_dom⟩ :=
-    exists_ideal_pow_generators_dominated_for_half_space L h g (L.s * g) hsminus_ne
+    exists_ideal_pow_generators_dominated_for_half_space hplus_open L hL_rat h g (L.s * g) hsminus_ne
   -- Step 7: assemble plus and minus.
   let Tplus : Finset A :=
     L.T.image (· * h) ∪ {L.s * g, L.s * h} ∪ Bplus.image L.P.A₀.subtype
@@ -1574,7 +1578,8 @@ theorem relative_ratio_split_transports_to_RatioNodeData
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (L : RationalLocData A) (hA₀_le : L.P.A₀ ≤ A⁺)
+    (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (L : RationalLocData A) (hL_rat : L.IsRational) (hA₀_le : L.P.A₀ ≤ A⁺)
     (C : RationalCovering A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
@@ -1586,7 +1591,7 @@ theorem relative_ratio_split_transports_to_RatioNodeData
   -- Step 1: Use the P3-specific absolute representation theorem to get
   -- `plus, minus : RationalLocData A` with explicit rationalOpen equalities.
   obtain ⟨plus, minus, hplus_open, hminus_open⟩ :=
-    exists_absolute_ratio_rationalLocData_aux L hA₀_le C g h h_unit_base h_unit_ug h_unit_uh
+    exists_absolute_ratio_rationalLocData_aux hplus_open L hL_rat hA₀_le C g h h_unit_base h_unit_ug h_unit_uh
   -- Step 2: Package these into a RatioNodeData L g h.
   refine ⟨{
     plus := plus,
@@ -2435,13 +2440,13 @@ theorem exists_wedhorn_laurent_refinement_tree
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
     ∃ t : LaurentTree A,
       t.Refines C.base C ∧
       t.allSplitsInducing C.base := by
   classical
   -- Step 1: get standard cover S refining C.
-  obtain ⟨S, hS_cover, hS_contain, hS_span⟩ := exists_standard_cover_refining C
+  obtain ⟨S, hS_cover, hS_contain, hS_span⟩ := exists_standard_cover_refining C hC_cov
   -- Step 2: get first-stage Laurent tree t_outer + per-leaf restricted-
   -- cover-by-units (W2). The outer tree is the balanced Laurent tree
   -- on the unit-rescaled S.
@@ -2499,12 +2504,12 @@ theorem exists_wedhorn_ratio_laurent_refinement_tree_realized
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
     ∃ (t : RatioLaurentTree A) (ρ : RatioTreeRealization t C.base),
       ρ.Refines C ∧ ρ.allSplitsInducing := by
   -- Promote the legacy `LaurentTree`-valued I.1 via the structural transfer
   -- lemmas `refines_ofLaurentTree` and `allSplitsInducing_ofLaurentTree`.
-  obtain ⟨t, hRefines, hSplits⟩ := exists_wedhorn_laurent_refinement_tree P C
+  obtain ⟨t, hRefines, hSplits⟩ := exists_wedhorn_laurent_refinement_tree P C hC_cov
   refine ⟨RatioLaurentTree.ofLaurentTree t,
     RatioTreeRealization.ofLaurentTree t C.base, ?_, ?_⟩
   · exact RatioTreeRealization.refines_ofLaurentTree t C.base C hRefines
@@ -2917,13 +2922,14 @@ theorem isSheafyComplete
       Continuous C.base.canonicalMap ∧
       (∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p → ¬IsOpen (p : Set A) →
         (Ideal.map C.base.canonicalMap p :
-          Ideal (presheafValue C.base)) ≠ ⊤)) :
+          Ideal (presheafValue C.base)) ≠ ⊤) ∧
+      (∀ D ∈ C.covers, D.IsRational)) :
     IsSheafy A := by
   refine isSheafy_ofStronglyNoetherianTate_flat_of_wedhorn_tree_existence
     P ?_ ?_
   · -- Spa-point existence via IV.1.
     intro C p hp hs
-    obtain ⟨hA₀, hLoc, hAplus, hcont, hlifted⟩ := hSpa_inputs C
+    obtain ⟨hA₀, hLoc, hAplus, hcont, hlifted, -⟩ := hSpa_inputs C
     haveI : IsNoetherianRing C.base.P.A₀ := hA₀
     haveI : IsNoetherianRing (locSubring C.base.P C.base.T C.base.s) := hLoc
     exact exists_spa_point_dominating_prime C.base hAplus hcont hlifted p hp hs
@@ -2936,7 +2942,7 @@ theorem isSheafyComplete
     -- that bundle. The bridge sorry that previously stood here for the
     -- `T-EMBEDDINGTOPO-WEDHORN-FAITHFUL` ticket is now discharged.
     intro C
-    exact exists_wedhorn_laurent_refinement_tree P C
+    exact exists_wedhorn_laurent_refinement_tree P C (hSpa_inputs C).2.2.2.2.2
 
 /-! ### Dependency-graph summary
 

@@ -1,1 +1,1 @@
-FOCUS: C4 DONE (7.35 QC axiom-clean). R5: rewire spa_compactSpace_tate_noHArch + isCompact_preimage_rationalOpen_noHArch consumers onto R-tree
+FOCUS: R5 rewiring GREEN; verify keystone off trace, then carrier #6 (Cor732 finset aux)

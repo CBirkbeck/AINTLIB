@@ -185,6 +185,23 @@ noncomputable def imagePieceDatum
       (T.image D₀.canonicalMap) (D₀.canonicalMap t)
       (by rw [Finset.coe_image]; exact span_image_canonicalMap_eq_top D₀ T hspan) }
 
+/-- The image piece is rational (Wedhorn 7.29): its tray is the `canonicalMap`-image of
+a `⊤`-spanning family, which spans `⊤` (`span_image_canonicalMap_eq_top`). -/
+theorem imagePieceDatum_isRational
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (t : A)
+    (hspan : Ideal.span (T : Set A) = ⊤) :
+    (imagePieceDatum D₀ T t hspan).IsRational := by
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  refine RationalLocData.isRational_of_span_eq_top ?_
+  show Ideal.span (((T.image D₀.canonicalMap) : Finset (presheafValue D₀)) :
+    Set (presheafValue D₀)) = ⊤
+  rw [Finset.coe_image]
+  exact span_image_canonicalMap_eq_top D₀ T hspan
+
 set_option linter.unusedSectionVars false in
 /-- **General relative piece, forward base unit (G1-1)**: `s_inter = D₀.s·t` maps to a
 unit of `Localization.Away (canMap t)` over `B`. -/
@@ -1435,7 +1452,12 @@ theorem remark755_dominating_unit_over_presheafValue
   haveI hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
   haveI : IsHuberRing (presheafValue D) := hTate.toIsHuberRing
   set W := imagePieceDatum D E.T E.s hspanE with hW
-  have hY := isCompact_preimage_rationalOpen_noHArch (A := presheafValue D) W
+  have hW_rat : W.IsRational := by
+    rw [hW]
+    exact imagePieceDatum_isRational D E.T E.s hspanE
+  have hY := isCompact_preimage_rationalOpen_noHArch (A := presheafValue D)
+    (IsRingOfIntegralElements.isOpen
+      (B := ((presheafValue D)⁺ : Subring (presheafValue D)))) W hW_rat
   obtain ⟨u, hu⟩ := exists_dominating_unit_noHArch (A := presheafValue D) hY W.s
     (fun y hy => (Set.mem_preimage.mp hy).2.2)
   exact ⟨u, fun y hy => hu y (Set.mem_preimage.mpr hy)⟩
