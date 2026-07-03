@@ -720,4 +720,104 @@ theorem poleWindow_zero_add_eq (ha : 0 < a) (hF : Integrable F)
   rw [show -(-(1/2)) = (1/2 : ℝ) by ring]
   ring
 
+/-- **The pole-piece limit** (Poitou p. 6-01/6-07): the `1/s + 1/(s-1)` part of the
+edge integral converges to `2π(Φ(0) + Φ(1))`. -/
+theorem tendsto_pole_piece (ha : 0 < a) (hF : Integrable F)
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (hEre : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
+      Set.univ)
+    (hEim : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
+      Set.univ) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)))
+      atTop (nhds (((2*π : ℝ):ℂ) * (paperPhi F 0 + paperPhi F 1))) := by
+  set G : ℝ → ℂ := fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) with hG_def
+  set E : ℝ → ℂ := fun u => poleWindow a G u + poleWindow (1+a) G u with hE_def
+  have h1a : (0:ℝ) < 1+a := by linarith
+  have hEint : Integrable E :=
+    (integrable_poleWindow ha hFa).add (integrable_poleWindow h1a hFa)
+  have hEcont : Continuous E :=
+    (continuous_poleWindow ha hFa).add (continuous_poleWindow h1a hFa)
+  have hEp : Tendsto E (nhdsWithin 0 (Set.Ioi 0)) (nhds (E 0)) :=
+    (hEcont.tendsto 0).mono_left nhdsWithin_le_nhds
+  have hEm : Tendsto E (nhdsWithin 0 (Set.Iio 0)) (nhds (E 0)) :=
+    (hEcont.tendsto 0).mono_left nhdsWithin_le_nhds
+  have hW := tendsto_fourier_window_jordan hEint hEre hEim hEp hEm
+  -- fixed-T function identity
+  have hfun : ∀ T : ℝ, (∫ t in (-T)..T,
+      (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+        * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)))
+      = ∫ t in (-T)..T, ∫ u : ℝ, E u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I) := by
+    intro T
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    rw [paperPhi_one_sub hFeven]
+    -- the E-integral splits into the two pole windows
+    have hpc : ∀ c : ℝ, 0 < c → Integrable (fun u : ℝ =>
+        poleWindow c G u * Complex.exp ((t*u : ℝ) * Complex.I)) := by
+      intro c hc
+      refine (integrable_poleWindow hc hFa).mul_bdd (c := 1) ?_ ?_
+      · refine Continuous.aestronglyMeasurable ?_
+        exact Complex.continuous_exp.comp
+          ((Complex.continuous_ofReal.comp (continuous_const.mul continuous_id)).mul
+            continuous_const)
+      · refine Filter.Eventually.of_forall (fun u => ?_)
+        rw [Complex.norm_exp_ofReal_mul_I]
+    have hsplit : (∫ u : ℝ, E u * Complex.exp ((t*u : ℝ) * Complex.I))
+        = (∫ u : ℝ, poleWindow a G u * Complex.exp ((t*u : ℝ) * Complex.I))
+          + ∫ u : ℝ, poleWindow (1+a) G u * Complex.exp ((t*u : ℝ) * Complex.I) := by
+      rw [← MeasureTheory.integral_add (hpc a ha) (hpc (1+a) h1a)]
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+      show E u * Complex.exp ((t*u : ℝ) * Complex.I) = _
+      rw [hE_def]
+      ring
+    have hcast1 : ((a:ℝ):ℂ) + (t:ℂ)*Complex.I
+        = (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1 := by
+      push_cast
+      ring
+    have hcast2 : (((1+a:ℝ)):ℂ) + (t:ℂ)*Complex.I
+        = ((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I := rfl
+    have hkey : (2 * paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+        * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1))
+        = ∫ u : ℝ, E u * Complex.exp ((t*u : ℝ) * Complex.I) := by
+      have hφG : paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          = ∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I) := paperPhi_edge a F t
+      rw [hsplit, integral_poleWindow_cexp ha hFa t, integral_poleWindow_cexp h1a hFa t,
+        hφG, hcast1, one_div, one_div]
+      ring
+    calc (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+          * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1))
+        = (2 * paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+          * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)) := by ring
+      _ = ∫ u : ℝ, E u * Complex.exp ((t*u : ℝ) * Complex.I) := hkey
+      _ = ∫ u : ℝ, E u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I) := by
+          refine MeasureTheory.integral_congr_ae
+            (Filter.Eventually.of_forall (fun u => ?_))
+          show E u * Complex.exp (((t*u : ℝ):ℂ) * Complex.I)
+              = E u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I)
+          rw [Complex.ofReal_mul]
+  refine Tendsto.congr (fun T => (hfun T).symm) ?_
+  have hlim : ((π : ℝ):ℂ) * (E 0 + E 0) = ((2*π : ℝ):ℂ) * (paperPhi F 0 + paperPhi F 1) := by
+    have h0 : E 0 = paperPhi F 0 + paperPhi F 1 := by
+      rw [hE_def]
+      exact poleWindow_zero_add_eq ha hF hFeven hFa
+    rw [h0]
+    push_cast
+    ring
+  rw [← hlim]
+  exact hW
+
 end DedekindResidue
