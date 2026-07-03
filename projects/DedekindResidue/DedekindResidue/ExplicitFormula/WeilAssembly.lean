@@ -2822,4 +2822,108 @@ theorem tendsto_div_max_mul_log_sq (M : ℝ) :
   rw [max_eq_left hT, pow_two]
   field_simp
 
+/-- The pole window of a continuous integrable symbol is `C¹` with derivative
+`c·E_c(u) - 2G(u)`. -/
+theorem hasDerivAt_poleWindow (hc : 0 < c) (hG : Integrable G) (hGc : Continuous G)
+    (u : ℝ) :
+    HasDerivAt (poleWindow c G) ((c : ℂ) * poleWindow c G u - 2 * G u) u := by
+  set Kf : ℝ → ℂ := fun w => G w * ((Real.exp (-(c*w)) : ℝ) : ℂ) with hKf
+  have hKfc : Continuous Kf := by
+    refine hGc.mul ?_
+    exact Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+      ((continuous_const.mul continuous_id).neg))
+  have hK_ii : IntervalIntegrable Kf volume 0 u := by
+    rw [intervalIntegrable_iff]
+    exact (integrableOn_poleWindow_kernel hc hG (min 0 u)).mono_set (fun w hw => hw.1)
+  -- the primitive derivative
+  have hprim : HasDerivAt (fun v : ℝ => ∫ x in (0:ℝ)..v, Kf x) (Kf u) u :=
+    intervalIntegral.integral_hasDerivAt_right hK_ii
+      (hKfc.stronglyMeasurableAtFilter _ _) hKfc.continuousAt
+  -- the tail derivative
+  have hτ : HasDerivAt (fun v : ℝ => ∫ w in Set.Ioi v, Kf w) (-Kf u) u := by
+    have h0 : (fun v : ℝ => ∫ w in Set.Ioi v, Kf w)
+        = fun v : ℝ => (∫ w in Set.Ioi (0:ℝ), Kf w) - ∫ x in (0:ℝ)..v, Kf x :=
+      funext (fun v => tail_integral_eq hc hG v)
+    rw [h0]
+    have h1 := (hasDerivAt_const u (∫ w in Set.Ioi (0:ℝ), Kf w)).sub hprim
+    rw [zero_sub] at h1
+    exact h1
+  -- the exponential factor
+  have hexp : HasDerivAt (fun v : ℝ => ((2 : ℂ)) * ((Real.exp (c*v) : ℝ) : ℂ))
+      (2 * ((c * Real.exp (c*u) : ℝ) : ℂ)) u := by
+    have hbase : HasDerivAt (fun v : ℝ => ((Real.exp (c*v) : ℝ) : ℂ))
+        ((c * Real.exp (c*u) : ℝ) : ℂ) u := by
+      have := (((hasDerivAt_id u).const_mul c).exp).ofReal_comp
+      refine this.congr_deriv ?_
+      simp only [id_eq]
+      push_cast
+      ring
+    exact hbase.const_mul 2
+  -- the product
+  have hprod := hexp.mul hτ
+  have heq : ((Real.exp (c*u) : ℝ) : ℂ) * ((Real.exp (-(c*u)) : ℝ) : ℂ) = 1 := by
+    rw [← Complex.ofReal_mul, ← Real.exp_add]
+    norm_num
+  refine (hprod.congr_of_eventuallyEq ?_).congr_deriv ?_
+  · exact Filter.Eventually.of_forall (fun v => rfl)
+  · simp only [poleWindow, hKf, Complex.ofReal_mul]
+    linear_combination (-2 : ℂ) * G u * heq
+
+/-- **`hE`-BV, complex level**: the sum of two pole windows of a continuous
+integrable symbol has locally bounded variation on the line. -/
+theorem locallyBoundedVariationOn_poleWindow_add {c₁ c₂ : ℝ} (hc₁ : 0 < c₁)
+    (hc₂ : 0 < c₂) (hG : Integrable G) (hGc : Continuous G) :
+    LocallyBoundedVariationOn
+      (fun u : ℝ => poleWindow c₁ G u + poleWindow c₂ G u) Set.univ := by
+  intro p q _ _
+  rw [Set.univ_inter]
+  refine boundedVariationOn_of_deriv_integrable (f' := fun u : ℝ =>
+      ((c₁ : ℂ) * poleWindow c₁ G u - 2 * G u)
+        + ((c₂ : ℂ) * poleWindow c₂ G u - 2 * G u))
+    Set.ordConnected_Icc
+    (Continuous.continuousOn
+      ((continuous_poleWindow hc₁ hG).add (continuous_poleWindow hc₂ hG)))
+    (fun x _ => (hasDerivAt_poleWindow hc₁ hG hGc x).add
+      (hasDerivAt_poleWindow hc₂ hG hGc x)) ?_
+  refine Continuous.integrableOn_Icc ?_
+  refine Continuous.add ?_ ?_
+  · exact (continuous_const.mul (continuous_poleWindow hc₁ hG)).sub
+      (continuous_const.mul hGc)
+  · exact (continuous_const.mul (continuous_poleWindow hc₂ hG)).sub
+      (continuous_const.mul hGc)
+
+/-- **`hEre` at the auxiliary function**. -/
+theorem locallyBoundedVariationOn_poleWindow_auxF_re (s : ℂ) {X : ℝ} (hX : 1 < X)
+    {a : ℝ} (ha : 0 < a) (has : a < s.re - 1) :
+    LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a)
+            (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
+      Set.univ := by
+  have hG : Integrable (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) := by
+    refine integrable_auxF_mul_exp s hX ?_
+    rw [abs_of_pos (by linarith)]
+    linarith
+  have hGc : Continuous (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    (continuous_auxF s hX).mul (Complex.continuous_ofReal.comp (by fun_prop))
+  exact lipschitzWith_complex_re.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+
+/-- **`hEim` at the auxiliary function**. -/
+theorem locallyBoundedVariationOn_poleWindow_auxF_im (s : ℂ) {X : ℝ} (hX : 1 < X)
+    {a : ℝ} (ha : 0 < a) (has : a < s.re - 1) :
+    LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a)
+            (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
+      Set.univ := by
+  have hG : Integrable (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) := by
+    refine integrable_auxF_mul_exp s hX ?_
+    rw [abs_of_pos (by linarith)]
+    linarith
+  have hGc : Continuous (fun x : ℝ => auxF s X x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    (continuous_auxF s hX).mul (Complex.continuous_ofReal.comp (by fun_prop))
+  exact lipschitzWith_complex_im.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+
 end DedekindResidue
