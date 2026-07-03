@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».SpvAITopology
 import «Adic spaces».AdicSpectrum
+import «Adic spaces».SpaCompact
 
 /-!
 # Quasi-compactness of `Spa A A⁺` via `Spv(A, I)` (Wedhorn 7.5 / 7.12 / 7.35)
@@ -475,7 +476,90 @@ theorem image_ιSpvR_spa_eq [IsTopologicalRing A] (P : PairOfDefinition A) {π :
     (hπ : P.I = Ideal.span {π}) (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
     (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
     ιSpvR I '' (Spa A A⁺) = profileCarrier A I ∩ spaProfileConditions I (π : A) := by
-  sorry
+  have hπ_tn : IsTopologicallyNilpotent ((π : A)) :=
+    P.isTopologicallyNilpotent_of_mem (hπ ▸ Ideal.mem_span_singleton_self π)
+  apply Set.Subset.antisymm
+  · rintro y ⟨v, hv, rfl⟩
+    refine ⟨⟨ιSpv_bool v, ⟨v, rfl⟩, rfl⟩, ?_, ?_⟩
+    · -- `v(π) < 1` for continuous `v` (forward 7.10, via topological nilpotence).
+      rw [Bool.eq_false_iff]
+      intro htrue
+      rw [ιSpvR_eq_true_iff] at htrue
+      have h1 : v.vle 1 ((π : A)) := htrue.1 1 (by simp [RCoord.oneOver])
+      exact not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hπ_tn h1
+    · intro f hf
+      rw [ιSpvR_eq_true_iff]
+      refine ⟨fun t ht => ?_, v.not_vle_one_zero⟩
+      simp only [RCoord.leOne, Finset.mem_insert, Finset.mem_singleton] at ht
+      rcases ht with rfl | rfl
+      · exact hv.2 _ hf
+      · exact (v.vle_total 1 1).elim id id
+  · rintro y ⟨⟨x, ⟨v, rfl⟩, rfl⟩, hone, hplus⟩
+    set w := restrictIdealSingleSpv v ((π : A)) with hw_def
+    have hprofile : ιSpvR I w = ιSpvR I v :=
+      funext fun p => ιSpvR_retractionSingle_eq ((π : A)) I hIeq v p
+    have hw_mem : w ∈ SpvAI A I := by
+      rw [hIeq]
+      exact restrictIdealSingleSpv_mem_SpvAI v _
+    have hone_w : ιSpvR I w (RCoord.oneOver I ((π : A))) = false := by
+      rw [hprofile]; exact hone
+    have hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true := by
+      intro f hf
+      rw [hprofile]; exact hplus f hf
+    letI : ValuativeRel A := w.toValuativeRel
+    set wv := ValuativeRel.valuation A with hwv_def
+    have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
+      intro a
+      have hcoord := hplus_w (a : A) (hA₀le a)
+      rw [ιSpvR_eq_true_iff] at hcoord
+      have hle : w.vle ((a : A)) 1 :=
+        hcoord.1 (a : A) (by simp [RCoord.leOne])
+      have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
+      simpa using h2
+    have h_lt_pi : wv ((π : A)) < 1 := by
+      by_contra hge
+      push_neg at hge
+      have hge' : wv 1 ≤ wv ((π : A)) := by
+        rw [map_one]
+        exact hge
+      have hne : wv ((π : A)) ≠ 0 := by
+        intro h0
+        rw [map_one, h0] at hge'
+        simp at hge'
+      have htrue : ιSpvR I w (RCoord.oneOver I ((π : A))) = true := by
+        rw [ιSpvR_eq_true_iff]
+        refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
+        simp only [RCoord.oneOver, Finset.mem_singleton] at ht
+        subst ht
+        exact (vle_iff_canonical w 1 ((π : A))).mpr hge'
+      rw [hone_w] at htrue
+      exact Bool.false_ne_true htrue
+    have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
+      intro a ha
+      rw [hπ] at ha
+      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
+      have hmul : wv ((P.A₀.subtype (c * π))) = wv ((c : A)) * wv ((π : A)) := by
+        rw [show (P.A₀.subtype (c * π) : A) = (c : A) * ((π : A)) from rfl, map_mul]
+      rw [hmul]
+      calc wv ((c : A)) * wv ((π : A)) ≤ 1 * wv ((π : A)) := by
+            gcongr
+            exact h_le_one c
+        _ = wv ((π : A)) := one_mul _
+        _ < 1 := h_lt_pi
+    have hmap : Ideal.map P.A₀.subtype P.I = I := by
+      rw [hπ, Ideal.map_span, Set.image_singleton, hIeq]
+      rfl
+    have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
+      rw [hmap]
+      exact hw_mem
+    have hcont : w.IsContinuous :=
+      Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+    have hbdd : ∀ f ∈ (A⁺ : Subring A), w.vle f 1 := by
+      intro f hf
+      have hcoord := hplus_w f hf
+      rw [ιSpvR_eq_true_iff] at hcoord
+      exact hcoord.1 f (by simp [RCoord.leOne])
+    exact ⟨w, ⟨hcont, hbdd⟩, hprofile⟩
 
 /-- The `Spa`-profile image is compact. -/
 theorem isCompact_image_ιSpvR_spa [IsTopologicalRing A] (P : PairOfDefinition A)
