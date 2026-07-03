@@ -2016,4 +2016,73 @@ theorem integrableOn_auxF_diffQuot_window (s : ℂ) {X : ℝ} (hX : 1 < X)
     show (auxF s X 0 - auxF s X x) * ((x:ℂ))⁻¹ = (auxF s X 0 - auxF s X x)/(x:ℂ)
     rw [div_eq_mul_inv]
 
+/-- Convention bridge: the paper Fourier integral in window normal form. -/
+theorem paperFourierIntegral_eq_muFT (F : ℝ → ℂ) (γ : ℝ) :
+    paperFourierIntegral F γ = ∫ x : ℝ, F x * Complex.exp ((γ*x : ℝ) * Complex.I) := by
+  rw [paperFourierIntegral]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  push_cast
+  ring_nf
+
+/-- `log(2+|t|)/|t| → 0` along any filter where `|t| → ∞`. -/
+theorem tendsto_log_two_add_abs_div_abs (l : Filter ℝ)
+    (habs : Tendsto (fun t : ℝ => |t|) l atTop) :
+    Tendsto (fun t : ℝ => Real.log (2 + |t|) / |t|) l (nhds 0) := by
+  have h0 : Tendsto (fun x : ℝ => Real.log x / x) atTop (nhds 0) := by
+    have := Real.isLittleO_log_id_atTop.tendsto_div_nhds_zero
+    refine this.congr (fun x => ?_)
+    rfl
+  have h1 : Tendsto (fun r : ℝ => Real.log (2 + r) / (2 + r)) atTop (nhds 0) := by
+    have h2 : Tendsto (fun r : ℝ => 2 + r) atTop atTop :=
+      tendsto_atTop_add_const_left _ _ tendsto_id
+    exact h0.comp h2
+  have h3 : Tendsto (fun r : ℝ => (2 + r) / r) atTop (nhds 1) := by
+    have h4 : Tendsto (fun r : ℝ => 2/r + 1) atTop (nhds (0 + 1)) := by
+      refine Tendsto.add ?_ tendsto_const_nhds
+      exact tendsto_const_nhds.div_atTop tendsto_id
+    rw [zero_add] at h4
+    refine h4.congr' ?_
+    filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with r hr
+    field_simp
+  have h5 : Tendsto (fun r : ℝ => Real.log (2 + r) / r) atTop (nhds 0) := by
+    have h6 := h1.mul h3
+    rw [zero_mul] at h6
+    refine h6.congr' ?_
+    filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with r hr
+    have h7 : (2 + r) ≠ 0 := by linarith
+    field_simp
+  exact h5.comp habs
+
+/-- **The boundary decay `ρ·γ → 0`** from the `O(log)`-kernel and an `O(1/t)`
+bound on `γ`. -/
+theorem tendsto_rhoFT_mul_gammaFT_of_decay {F : ℝ → ℂ} {σ : ℝ}
+    (hσ : 0 < σ) (hσl : -1 ≤ σ) (hσr : σ ≤ 2)
+    {C γ₀ : ℝ}
+    (hγb : ∀ t : ℝ, γ₀ ≤ |t| → ‖gammaFT F t‖ ≤ C/|t|)
+    (l : Filter ℝ) (habs : Tendsto (fun t : ℝ => |t|) l atTop) :
+    Tendsto (fun t : ℝ => rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      * gammaFT F t) l (nhds 0) := by
+  obtain ⟨Cρ, hCρ, hρb⟩ := exists_norm_rhoFT_poitouKernel_le hσ hσl hσr
+  have hlog := tendsto_log_two_add_abs_div_abs l habs
+  have hlim : Tendsto (fun t : ℝ => Cρ * C * (Real.log (2 + |t|) / |t|)) l (nhds 0) := by
+    have h0 := hlog.const_mul (Cρ * C)
+    rw [mul_zero] at h0
+    exact h0
+  refine squeeze_zero_norm' ?_ hlim
+  have hev : ∀ᶠ t : ℝ in l, max 2 γ₀ ≤ |t| :=
+    habs.eventually (Filter.eventually_ge_atTop (max 2 γ₀))
+  filter_upwards [hev] with t ht
+  have ht2 : 2 ≤ |t| := le_trans (le_max_left _ _) ht
+  have htγ : γ₀ ≤ |t| := le_trans (le_max_right _ _) ht
+  have ht0 : 0 < |t| := lt_of_lt_of_le two_pos ht2
+  rw [norm_mul]
+  calc ‖rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t‖ * ‖gammaFT F t‖
+      ≤ (Cρ * Real.log (2 + |t|)) * (C/|t|) := by
+        refine mul_le_mul (hρb t ht2) (hγb t htγ) (norm_nonneg _) ?_
+        have hlognn : 0 ≤ Real.log (2 + |t|) :=
+          Real.log_nonneg (by linarith [abs_nonneg t])
+        positivity
+    _ = Cρ * C * (Real.log (2 + |t|) / |t|) := by
+        field_simp
+
 end DedekindResidue
