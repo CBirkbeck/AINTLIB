@@ -112,6 +112,26 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
      ValuationCoarsening for the in-repo form) and preserves supp (vertical). The
      microbe lemma pair (ValuationPrimeConvex §MicrobeHeightOne, PROVEN) serves the
      `ofPrime` variant if the Spv-level assembly hits a wall.
+  1b. **T-C3-ASSEMBLE-5 (READY — all pieces verified on the shelf 2026-07-03)**: carrier #5
+     assembly, ~100–150 LOC: (1) dominate `A₀/𝔭₀` — `exists_valuationSubring_of_prime`
+     (ValuationContinuity:152, proven); (2) `w := P.pulledBackValuation V₀`: `le_one` on the
+     `A₀`-image (`pulledBackValuation_le_one`), `I`-images `< 1`
+     (`pulledBackValuation_lt_one`), `w.supp = 𝔭` EXACT (`pulledBackValuation_supp`, used
+     at VC:972); (3) coarsen by `H := maxAvoid` (OrderedGroupConvex §7.1) of the class of
+     the generator-sup `g < 1, g ≠ 0` (the `hg1`/`hg0` computation is VERBATIM in
+     `pulledBackValuation_isContinuous`'s body, VC:333-353 — crib it); quotient
+     MulArchimedean via the §7.1 archimedean-iff (OrderedGroupConvex; verify exact name);
+     (4) continuity of `w.coarsen H`: `Valuation.isContinuous_of_le_one_and_pow_cofinal`
+     (VC:354 usage) + `coarsen_le_one_of_le_one` + `coarsen_pow_cofinal`
+     (ValuationCoarsening:155/185, proven); (5) supp preserved: `coarsen_supp`
+     (ValuationCoarsening:141, proven) ⟹ supp = `𝔭`, non-open = `h𝔭`; (6) the leaf's
+     `MulArchimedean (ValueGroupWithZero A)` from quotient-MulArch via `MulArchimedean.comap`
+     (in-repo precedent, STATUS session 4). ⚠ IMPORT CHECK FIRST: the carrier sits in
+     Presheaf.lean, which does NOT directly import ValuationContinuity/ValuationCoarsening —
+     check transitivity via WedhornLocalizationContinuity; if absent, either add the import
+     (upstream-safe: ValuationContinuity imports nothing from Presheaf — VERIFY no cycle) or
+     relocate the leaf + its in-file consumer `exists_cont_supp_ge_powerBounded_of_nonOpen_prime`
+     downstream together.
   2. **T-C3-Q**: (ofPrime variant, fallback) instantiate `Q` := minimal prime over one
      retracted `φ(I)`-image (`Ideal.exists_minimalPrimes_le`), `hht1` := microbe (a),
      `hJ_le_Q` := microbe (b); feed `via_heightOne_ofPrime` → **carrier #3** (exact-supp
