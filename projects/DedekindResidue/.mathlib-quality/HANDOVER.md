@@ -1,5 +1,57 @@
 # HANDOVER — DedekindResidue (Belabas–Friedman residue formalisation)
 
+## 2026-07-03 leg 9: ★★★ PROJECT TARGET PROVEN — `belabas_friedman_thm1` ★★★
+
+**The project's single intentional sorry is discharged** (commit d5ea59a3, pushed).
+`belabas_friedman_thm1` (MainTheorem.lean) is proven for every number field `K` with
+`n > 1`, under `GeneralizedRiemannHypothesis K` + mathlib's `RiemannHypothesis`, for
+`X ≥ 69` — the paper's Theorem 1 verbatim, constants 2.324 / 3.88 / 4.26. Axioms:
+`{propext, Classical.choice, Quot.sound}`. **Whole library builds green, zero
+warnings, zero sorries.**
+
+This leg (T012-b N3–N6, all in `Theorem1.lean` + `MainTheorem.lean`):
+- **N3** `nrRealPlaces_rat`/`nrComplexPlaces_rat`, `sinh_int_two` (= 1+2log2),
+  `vonMangoldtSum_nonneg`, **`dSigma_rat_two_eq`** (d_{ℚ,2} = 2W+γ+logπ−1),
+  **`dSigma_ge`** (2γ+2log2π−3 =: dLow ≤ d_{K,σ}, 1 < σ ≤ 2, n ≥ 2; brackets
+  nonneg via I_s(σ)+1/σ = I_s(σ+1) ≤ I_s(3) = 3/2+2log2; generalize-to-atoms +
+  a `2/σ = 2·(1/σ)` bridge unstuck nlinarith — linarith does NOT connect `c/x`
+  with `1/x` atoms on its own).
+- **N4** `ratPrimeIdeal p` (span of `(p : 𝓞 ℚ)`; primality transported along
+  `Rat.ringOfIntegersEquiv` via `MulEquiv.prime_iff`; `absNorm = p` via
+  `Ideal.absNorm_span_singleton` + `Algebra.norm_algebraMap` + rank-1),
+  `vmIndex : Fin 9 → …` (`![...]`-matrix; injectivity by the `(absNorm, m)`
+  invariant table + `decide`), **`vonMangoldtSum_rat_two_ge`** (9-term W ≥
+  (21/64)log2 + (10/81)log3 + log5/25 + log7/49 + log11/121 + log13/169 ≈ 0.5012),
+  **`zeroSumSigma_rat_le`** (Σℚ ≤ dLow): reduces to 12 ≤ 6W+5γ+5logπ+2log2
+  (margin 0.39) with mathlib's `log_two/three/five_gt_d9`, power certificates
+  `2^14 ≤ 7^5`, `2^10 ≤ 11^3`, `2^11 ≤ 13^3`, `one_half_lt_eulerMascheroniConstant`,
+  `pi_gt_three`.
+- **N5** `log_one_add_le_quintic` (Mercator ≤ degree-5; deficit deriv u⁵/(1+u)),
+  `archKernelL_eq_log_one_add` (L(t) = log(1+u), u = 2/(eᵗ−1)),
+  `exp_le_one_div_one_sub`, `log_twentyThree_thirds_ge` (log(23/3) ≥ 2.0246 via
+  e² ≤ 2.7182818286²), **`beta_bound_core`** ((1/2+1/t)·eᵗ·L(t) ≤ 2 for
+  t ≥ log(23/3): eᵗ·quintic(u) = 2+u²(1−u)/6+(3/20)u⁴+u⁵/5 ≤ 2.012201 at
+  u ≤ 3/10, then (1/2+1/2.0246)·2.012201 ≤ 2), **`beta_bound_half`** (the
+  e^{t/2}-form ≤ 2e^{−t/2} used by step1).
+- **N6** the assembly (MainTheorem.lean): step1 + arch-term ≤ 6log9/√X
+  (β-bound at T′ = log(X/9), e^{−T′/2} = 3/√X) + COEFF ≤ 2+log3+12/T′ ≤
+  (4/3)·2.324·(1+3.88/T′) (**`log_three_lt_d9` closes the paper-tight
+  (3/2)(1+log9/4) < 2.324, margin 5.4e-5**) + zero sums ≤ (√logΔ+2)² via
+  `landau_stark_estimate` at σ = 1+1/√logΔ (σ ≤ 2 ⟸ logΔ ≥ 1 ⟸ |Δ| ≥ 3 =
+  `abs_discr_gt_two`; `dSigma_ge` + `zeroSumSigma_rat_le`;
+  (2σ−1)(logΔ+2/(σ−1)) = (√logΔ+2)² by `← hs2`-substitution + field_simp) +
+  6log9 ≤ (4/3)·2.324·4.26; cancel (4/3)√X·log3X by `le_of_mul_le_mul_left`.
+  Lean gotchas: identifiers may not contain `Σ`; `set L := Real.log (|discr K| : ℝ)`
+  must match the goal's elaborated coercion form (ℝ-abs of cast, NOT cast-of-ℤ-abs).
+
+**Board state**: T001–T003, T-ADM, T-BV, SP1, SP2, SP3, T010, T011, **T012** all
+done. CLEANUP-1 superseded (fleet cleans on `main` post-merge). Remaining stubs
+(need `/develop` before they are workable): **T013** (paper Thm 7 / Cor 8
+refinements), **T014** (bridge `log κ_K` to `log(h_K R_K)` via mathlib's
+`dedekindZeta_residue` class-number formula). Natural next steps beyond those:
+PR `dev/dedekind-residue` → `main` (hands the sorry-free library to the cleanup
+fleet), and the parked verso-blueprint render (Linux-only, `_blueprint/`).
+
 ## 2026-07-03 leg 7: SP3 HYPOTHESIS DISCHARGE COMPLETE — weil_explicit_formula_auxF landed
 
 All pushed, axiom-clean, zero warnings. **Every hypothesis of `weil_explicit_formula`

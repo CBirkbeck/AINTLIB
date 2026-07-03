@@ -15,7 +15,7 @@
 ## Epics (need their own `/develop --decompose` pass before leaf tickets exist)
 
 ### [SP1] Completed ζ_K + FE + Hadamard + analytic control — the general theta stack
-- **Status**: needs-decomposition · **Files**: `CompletedZeta/{DualLattice,ThetaLattice,Normalisation,GammaFactor,FunctionalEquation,HadamardProduct,AnalyticControl,GRH}.lean`
+- **Status**: **DONE** (2026-07-03: `exists_isCompletedDedekindZeta` + FE + A0–A6 analytic control; see decomposition-sp1ac.md + HANDOVER) · **Files**: `CompletedZeta/*.lean`
 - **Type**: epic (foundation) · **Depends on**: N → AG-P → AG-Θ → AG-E → FE → AC · **Blocks**: SP2, SP3, T010+
 - **Route confirmed (expert review 2026-07-01)**: general-K **Hecke theta route**, NOT Tate
   (adelic substrate too large) and NOT abelian (validation-only). Implement as a
@@ -329,7 +329,7 @@
     explicit-formula zero-sum. Replaces the current single-form stub (review Q4).
 
 ### [SP2] Weil–Poitou explicit formula
-- **Status**: needs-decomposition · **File**: `ExplicitFormula/WeilPoitou.lean`
+- **Status**: **DONE** (2026-07-03: `weil_explicit_formula` in `ExplicitFormula/WeilAssembly.lean`; see decomposition-sp2.md)
 - **Type**: epic · **Depends on**: SP1 · **Blocks**: T004 (Lemma 3)
 - **Goal**: the explicit formula (eqs 1, 3): `Σ_ρ F̂(γ_ρ) = −2 Σ_{𝔭,m} (log N𝔭/N𝔭^{m/2})
   F(m log N𝔭) + 4∫F(x)cosh(x/2)dx + F(0)(log Δ_K − n_K C − n_K log 8π − r_K π/2) +
@@ -342,7 +342,7 @@
   post-Lemma-3 estimates) — keep that visible in the Lean statement.
 
 ### [SP3] Stark's formula + Landau–Stark bound
-- **Status**: needs-decomposition · **File**: `Stark.lean`
+- **Status**: **DONE** (2026-07-03: hypothesis-discharge suite at `F_{s,X}` (`weil_explicit_formula_auxF`) + `expTest` (`weil_explicit_formula_expTest`, `stark_identity`, `landau_stark_estimate` in `Lemma5.lean`))
 - **Type**: epic · **Depends on**: SP1 · **Blocks**: T005 (Lemma 4), T012 (Thm 1)
 - **Goal**: eq (19) `Σ_ρ 1/(σ−ρ) = ½log Δ_K + 1/(σ−1) + 1/σ − ½ d_{K,σ}` and Lemma 5
   `Σ_ρ (¼+γ_ρ²)^{−1} = O(log Δ_K)`. **Route**: Stark 1974 eq (9); Landau §180; mathlib
@@ -494,18 +494,26 @@ Split at the break-points; on each `C¹` piece bound the variation by `∫|F'|` 
 - `F : ℝ → ℂ` (or `ℝ → ℝ`) piecewise `C¹`. General.
 
 ### [CLEANUP-1] `/cleanup` on `AuxiliaryFunction.lean`
-- **Status**: open · **Depends on**: T003 · **Type**: cleanup (after 3 tickets touch the file: T002, T003 + the def).
+- **Status**: superseded (2026-07-03) · **Depends on**: T003 · **Type**: cleanup.
+  Cleanup is now the AINTLIB fleet's job **on `main` post-merge** (repo CLAUDE.md:
+  producers never clean/golf on dev branches) — do not execute here.
 
 ---
 
-## Tier-3 spine (blocked on the epics)
+## Tier-3 spine — ★ ALL DONE (2026-07-03) ★
 
-- **[T010]** `lemma3` (eq 13) — `File`: `Lemma3.lean` — **Depends on**: SP1, SP2, T003 — statement + proof.
-- **[T011]** `lemma4` (eq 14) — `File`: `Lemma4.lean` — **Depends on**: T010, SP3. ⚠ **Review Q5
-  hotspot**: the `T`-vs-`T−a` trick (MVT + monotonicity to avoid a lost `log X`) — the hard part
-  is proving the named real functions monotone on the *exact* numerical domains (`X ≥ 69`,
-  `a = log 9`, `T = log X`); the constants `2.324/3.88/4.26` live here.
-- **[T012] (milestone)** `belabas_friedman_thm1` — `File`: `MainTheorem.lean` — **Depends on**: T011, SP3, T001.
+- **[T010]** `lemma3` (eq 13) — **DONE** (2026-07-03, `lemma3_display` in `Lemma3.lean`).
+- **[T011]** `lemma4` (eq 14) — **DONE** (2026-07-03, `lemma4_sigma_estimate` +
+  `lemma4_explicit2` in `Lemma4.lean`; the T-vs-T′ trick landed via `arch_sum_diff_le`).
+- **[T012] (milestone)** `belabas_friedman_thm1` — **DONE ★ (2026-07-03, commit d5ea59a3)**:
+  `MainTheorem.lean`, sorry-free, axioms = {propext, Classical.choice, Quot.sound}.
+  Endgame numerics in `Theorem1.lean` (T012-b N1–N5): `sinh_int_rec/one/two/mono`,
+  `cosh_int_nonneg/le/two`, `dSigma_rat_two_eq`, `dSigma_ge` (dLow = 2γ+2log2π−3),
+  `ratPrimeIdeal`/`vonMangoldtSum_rat_two_ge` (9-term W-certificate),
+  `zeroSumSigma_rat_le` (the ℚ-master numeric), `log_one_add_le_quintic`,
+  `beta_bound_core/half`; assembly at `σ = 1+1/√logΔ` with
+  `(2σ−1)(logΔ+2/(σ−1)) = (√logΔ+2)²` and `log_three_lt_d9` closing
+  `(3/2)(1+log9/4) < 2.324` (margin 5.4e-5), `6log9 < (4/3)·2.324·4.26`.
 - **[T013]** `Refinements` (Thm 7, Cor 8) — **Depends on**: T012. *(Later /develop pass.)*
 - **[T014]** `Residue` — bridge `|log κ_K − f_K(X)| ≤ …` to `log(h_K R_K)` via
   `dedekindZeta_residue` — **Depends on**: T012.
