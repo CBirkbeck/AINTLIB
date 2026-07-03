@@ -4887,4 +4887,39 @@ theorem integral_half_line_fold (K : Type*) [Field K] [NumberField K]
   push_cast
   ring
 
+/-- **The `ρ`-kernel is `O(log|t|)`** (Poitou p. 6-06: "ce qu'on sait être de
+l'ordre de log t pour t grand"): the boundary-decay input for Lemme 2, discharged
+from the digamma window bound A6. -/
+theorem exists_norm_rhoFT_poitouKernel_le {σ : ℝ} (hσ : 0 < σ) (hσl : -1 ≤ σ)
+    (hσr : σ ≤ 2) :
+    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 2 ≤ |t| →
+      ‖rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t‖ ≤ C * Real.log (2 + |t|) := by
+  obtain ⟨C₆, hC₆pos, hC₆⟩ := exists_norm_digamma_le
+  refine ⟨2 * (C₆ + ‖Complex.digamma (σ:ℂ)‖) + 1, by positivity, fun t ht => ?_⟩
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + |t|) := by
+    rw [show (1:ℝ) = Real.log (Real.exp 1) by rw [Real.log_exp]]
+    refine Real.log_le_log (Real.exp_pos 1) ?_
+    have := Real.exp_one_lt_d9
+    linarith
+  rw [rhoFT_poitouKernel hσ t, Complex.norm_real, Real.norm_eq_abs]
+  have h1 : |2 * ((Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)
+      - Complex.digamma (σ:ℂ)).re)|
+      ≤ 2 * (‖Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)‖ + ‖Complex.digamma (σ:ℂ)‖) := by
+    rw [abs_mul, abs_two]
+    refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+    calc |(Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I) - Complex.digamma (σ:ℂ)).re|
+        ≤ ‖Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I) - Complex.digamma (σ:ℂ)‖ :=
+          Complex.abs_re_le_norm _
+      _ ≤ ‖Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)‖ + ‖Complex.digamma (σ:ℂ)‖ :=
+          norm_sub_le _ _
+  refine le_trans h1 ?_
+  have h2 := hC₆ σ t hσl hσr ht
+  have h3 : ‖Complex.digamma (σ:ℂ)‖ ≤ ‖Complex.digamma (σ:ℂ)‖ * Real.log (2 + |t|) := by
+    nlinarith [norm_nonneg (Complex.digamma (σ:ℂ))]
+  calc 2 * (‖Complex.digamma ((σ:ℂ) + (t:ℂ)*Complex.I)‖ + ‖Complex.digamma (σ:ℂ)‖)
+      ≤ 2 * (C₆ * Real.log (2 + |t|) + ‖Complex.digamma (σ:ℂ)‖ * Real.log (2 + |t|)) := by
+        nlinarith
+    _ ≤ (2 * (C₆ + ‖Complex.digamma (σ:ℂ)‖) + 1) * Real.log (2 + |t|) := by
+        nlinarith [norm_nonneg (Complex.digamma (σ:ℂ))]
+
 end DedekindResidue
