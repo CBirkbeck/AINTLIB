@@ -1827,4 +1827,125 @@ theorem tendsto_gammaFT_atBot (F : ℝ → ℂ) :
     simp only [Function.comp_apply]
     rw [abs_neg]
 
+/-- **The `γ = O(1/t)` bound from quadratic Fourier decay** (Poitou's Lemme 1 made
+quantitative): if the Fourier transform of `F` is `O(1/γ²)` beyond `γ₀`, then
+`‖γ_F(t)‖ ≤ C/|t|` there, via `γ' = -iφ` and the fundamental theorem of calculus
+against the vanishing at infinity. -/
+theorem norm_gammaFT_le_of_fourier_decay {F : ℝ → ℂ} (hF : Integrable F)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    {C γ₀ : ℝ} (hγ₀ : 1 ≤ γ₀)
+    (hφ : ∀ γ : ℝ, γ₀ ≤ |γ| →
+      ‖∫ x : ℝ, F x * Complex.exp ((γ*x : ℝ) * Complex.I)‖ ≤ C/γ^2) :
+    ∀ t : ℝ, γ₀ ≤ |t| → ‖gammaFT F t‖ ≤ C/|t| := by
+  have hrpow : ∀ τ : ℝ, 0 < τ → ∀ u : ℝ, τ < u → u^(-2 : ℝ) = 1/u^2 := by
+    intro τ hτ u hu
+    have hu0 : 0 < u := lt_trans hτ hu
+    rw [Real.rpow_neg hu0.le, show ((2:ℝ)) = ((2:ℕ):ℝ) by norm_num,
+      Real.rpow_natCast, one_div]
+  have hval : ∀ τ : ℝ, 0 < τ → (∫ u in Set.Ioi τ, C * u^(-2 : ℝ)) = C/τ := by
+    intro τ hτ
+    rw [MeasureTheory.integral_const_mul, integral_Ioi_rpow_of_lt (by norm_num) hτ,
+      show (-2 : ℝ) + 1 = -1 by norm_num, Real.rpow_neg_one]
+    field_simp
+  -- the one-sided tail bound, stated for the positive ray after reflection bookkeeping
+  have hmain : ∀ (g : ℝ → ℂ) (ψ : ℝ → ℂ) (τ : ℝ), γ₀ ≤ τ →
+      (∀ u ∈ Set.Ici τ, HasDerivAt g (ψ u) u) →
+      (∀ u : ℝ, τ < u → ‖ψ u‖ ≤ C/u^2) →
+      AEStronglyMeasurable ψ ((volume : Measure ℝ).restrict (Set.Ioi τ)) →
+      Tendsto g atTop (nhds 0) →
+      ‖g τ‖ ≤ C/τ := by
+    intro g ψ τ hτ hderiv hψb hψm htend
+    have hτ0 : 0 < τ := lt_of_lt_of_le one_pos (le_trans hγ₀ hτ)
+    have hint : IntegrableOn ψ (Set.Ioi τ) := by
+      refine Integrable.mono' (g := fun u : ℝ => C * u^(-2 : ℝ))
+        ((integrableOn_Ioi_rpow_of_lt (by norm_num) hτ0).const_mul C) hψm ?_
+      refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun u hu => ?_))
+      rw [Set.mem_Ioi] at hu
+      show ‖ψ u‖ ≤ C * u^(-2 : ℝ)
+      rw [hrpow τ hτ0 u hu]
+      refine le_trans (hψb u hu) (le_of_eq ?_)
+      rw [one_div, div_eq_mul_inv]
+    have hkey := integral_Ioi_of_hasDerivAt_of_tendsto' hderiv hint htend
+    rw [zero_sub] at hkey
+    have hg : g τ = -∫ u in Set.Ioi τ, ψ u := by
+      rw [hkey, neg_neg]
+    rw [hg, norm_neg]
+    refine le_trans (norm_integral_le_integral_norm _) ?_
+    rw [← hval τ hτ0]
+    refine MeasureTheory.integral_mono_of_nonneg
+      (Filter.Eventually.of_forall (fun u => norm_nonneg _))
+      ((integrableOn_Ioi_rpow_of_lt (by norm_num) hτ0).const_mul C) ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun u hu => ?_))
+    rw [Set.mem_Ioi] at hu
+    show ‖ψ u‖ ≤ C * u^(-2 : ℝ)
+    rw [hrpow τ hτ0 u hu]
+    refine le_trans (hψb u hu) (le_of_eq ?_)
+    rw [one_div, div_eq_mul_inv]
+  have hφc : Continuous (fun γ : ℝ => ∫ x : ℝ, F x * Complex.exp ((γ*x : ℝ) * Complex.I)) :=
+    continuous_muFT hF
+  intro t ht
+  rcases le_or_gt γ₀ t with htpos | htneg
+  · -- positive side
+    have habs : |t| = t := abs_of_pos (lt_of_lt_of_le one_pos (le_trans hγ₀ htpos))
+    rw [habs]
+    refine hmain (gammaFT F) (fun u => -Complex.I
+      * ∫ x : ℝ, F x * Complex.exp ((u*x : ℝ) * Complex.I)) t htpos ?_ ?_ ?_
+      (tendsto_gammaFT_atTop F)
+    · intro u hu
+      rw [Set.mem_Ici] at hu
+      refine hasDerivAt_gammaFT hF hFdiv ?_
+      have : (0:ℝ) < u := lt_of_lt_of_le one_pos (le_trans hγ₀ (le_trans htpos hu))
+      linarith
+    · intro u hu
+      have hu0 : γ₀ ≤ |u| := by
+        rw [abs_of_pos (lt_trans (lt_of_lt_of_le one_pos (le_trans hγ₀ htpos)) hu)]
+        linarith
+      rw [norm_mul, norm_neg, Complex.norm_I, one_mul]
+      exact hφ u hu0
+    · exact ((continuous_const.mul hφc).aestronglyMeasurable).restrict
+  · -- negative side: reflect
+    have htneg' : t ≤ -γ₀ := by
+      rcases abs_cases t with ⟨h1, _⟩ | ⟨h1, h2⟩
+      · rw [h1] at ht
+        linarith
+      · rw [h1] at ht
+        linarith
+    have hτ : γ₀ ≤ -t := by linarith
+    have habs : |t| = -t := abs_of_neg (by linarith)
+    rw [habs]
+    have hgval : gammaFT F t = (fun u : ℝ => gammaFT F (-u)) (-t) := by
+      simp only [neg_neg]
+    rw [show ‖gammaFT F t‖ = ‖(fun u : ℝ => gammaFT F (-u)) (-t)‖ by rw [← hgval]]
+    refine hmain (fun u : ℝ => gammaFT F (-u))
+      (fun u => Complex.I * ∫ x : ℝ, F x * Complex.exp (((-u)*x : ℝ) * Complex.I))
+      (-t) hτ ?_ ?_ ?_ ?_
+    · intro u hu
+      rw [Set.mem_Ici] at hu
+      have hu0 : 0 < u := lt_of_lt_of_le one_pos (le_trans hγ₀ (le_trans hτ hu))
+      have hd := hasDerivAt_gammaFT hF hFdiv (t := -u) (by linarith : (-u : ℝ) ≠ 0)
+      have hneg : HasDerivAt (fun v : ℝ => -v) (-(1:ℝ)) u := (hasDerivAt_id u).neg
+      have hcomp := hd.scomp u hneg
+      have hval2 : ((-1 : ℝ)) • (-Complex.I
+          * ∫ x : ℝ, F x * Complex.exp (((-u)*x : ℝ) * Complex.I))
+          = Complex.I * ∫ x : ℝ, F x * Complex.exp (((-u)*x : ℝ) * Complex.I) := by
+        rw [Complex.real_smul]
+        push_cast
+        ring
+      rw [hval2] at hcomp
+      exact hcomp
+    · intro u hu
+      have hu0 : 0 < u := lt_trans (lt_of_lt_of_le one_pos (le_trans hγ₀ hτ)) hu
+      have habs2 : γ₀ ≤ |(-u : ℝ)| := by
+        rw [abs_neg, abs_of_pos hu0]
+        linarith
+      rw [norm_mul, Complex.norm_I, one_mul]
+      refine le_trans (hφ (-u) habs2) (le_of_eq ?_)
+      rw [neg_pow]
+      norm_num
+    · refine ((continuous_const.mul ?_).aestronglyMeasurable).restrict
+      exact hφc.comp continuous_neg
+    · exact (tendsto_gammaFT_atBot F).comp tendsto_neg_atTop_atBot
+
 end DedekindResidue
