@@ -414,19 +414,6 @@ theorem sinh_int_one :
   rw [hkey]
   norm_num
 
-/-- The cosh-weighted exponential integral is trapped in `[0, π/2]`. -/
-theorem cosh_int_nonneg {σ : ℝ} (hσ : 1/2 < σ) :
-    0 ≤ ∫ y in Set.Ioi (0:ℝ),
-        1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)) := by
-  refine MeasureTheory.setIntegral_nonneg measurableSet_Ioi (fun y hy => ?_)
-  have hy0 : (0:ℝ) < y := hy
-  have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
-  have h1 : Real.exp (-(σ - 1/2) * y) ≤ 1 := by
-    refine Real.exp_le_one_iff.mpr ?_
-    nlinarith
-  have h2 : (0:ℝ) ≤ 1 - Real.exp (-(σ - 1/2) * y) := by linarith
-  positivity
-
 /-- The cosh integrand is integrable (dominated by the pure cosh kernel). -/
 theorem integrableOn_cosh_weight_exp {σ : ℝ} (hσ : 1/2 < σ) :
     MeasureTheory.IntegrableOn
@@ -449,28 +436,33 @@ theorem integrableOn_cosh_weight_exp {σ : ℝ} (hσ : 1/2 < σ) :
     refine mul_le_mul_of_nonneg_right ?_ h2
     exact one_div_le_one_div_of_le (by positivity) (by linarith)
 
+/-- The pure `1/(2 * cosh (y/2))` kernel is integrable on `Set.Ioi 0`, dominated by
+`e^(-y/2)`. Shared by `cosh_int_le` and `cosh_int_two`. -/
+theorem integrableOn_inv_two_cosh_half :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.cosh (y/2))) (Set.Ioi 0) := by
+  refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(1/2) * y))
+    (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
+  · exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun y _ => ?_))
+    have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    have hch : Real.exp (y/2) ≤ 2 * Real.cosh (y/2) := by
+      rw [Real.cosh_eq]
+      have := Real.exp_pos (-(y/2))
+      linarith
+    have hde : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
+      rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
+    rw [div_le_iff₀ (by positivity)]
+    nlinarith [Real.exp_pos (-(1/2) * y), Real.exp_pos (y/2)]
+
 /-- **The cosh integral is at most `π/2`.** -/
 theorem cosh_int_le {σ : ℝ} (hσ : 1/2 < σ) :
     (∫ y in Set.Ioi (0:ℝ),
         1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) ≤ π/2 := by
   rw [← integral_inv_two_cosh_half]
-  have hcoshint : MeasureTheory.IntegrableOn
-      (fun y : ℝ => 1/(2 * Real.cosh (y/2))) (Set.Ioi 0) := by
-    refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(1/2) * y))
-      (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
-    · exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
-        (Filter.Eventually.of_forall (fun y _ => ?_))
-      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
-      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-      have hch : Real.exp (y/2) ≤ 2 * Real.cosh (y/2) := by
-        rw [Real.cosh_eq]
-        have := Real.exp_pos (-(y/2))
-        linarith
-      have hde : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
-        rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
-      rw [div_le_iff₀ (by positivity)]
-      nlinarith [Real.exp_pos (-(1/2) * y), Real.exp_pos (y/2)]
+  have hcoshint := integrableOn_inv_two_cosh_half
   refine MeasureTheory.setIntegral_mono_on (integrableOn_cosh_weight_exp hσ)
     hcoshint measurableSet_Ioi (fun y hy => ?_)
   have hy0 : (0:ℝ) < y := hy
@@ -506,23 +498,7 @@ theorem cosh_int_two :
         rw [div_le_one (by positivity)]
         linarith
       nlinarith [Real.exp_pos (-(3/2) * y)]
-  have hcoshint : MeasureTheory.IntegrableOn
-      (fun y : ℝ => 1/(2 * Real.cosh (y/2))) (Set.Ioi 0) := by
-    refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(1/2) * y))
-      (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
-    · exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
-        (Filter.Eventually.of_forall (fun y _ => ?_))
-      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
-      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-      have hch : Real.exp (y/2) ≤ 2 * Real.cosh (y/2) := by
-        rw [Real.cosh_eq]
-        have := Real.exp_pos (-(y/2))
-        linarith
-      have hde : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
-        rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
-      rw [div_le_iff₀ (by positivity)]
-      nlinarith [Real.exp_pos (-(1/2) * y), Real.exp_pos (y/2)]
+  have hcoshint := integrableOn_inv_two_cosh_half
   have hsplit : (∫ y in Set.Ioi (0:ℝ),
       1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-((2:ℝ) - 1/2) * y)))
       = (∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.cosh (y/2)))
@@ -613,6 +589,14 @@ theorem vonMangoldtSum_nonneg (σ : ℝ) : 0 ≤ vonMangoldtSum K σ :=
   tsum_nonneg fun _ => mul_nonneg (Real.log_natCast_nonneg _)
     (Real.rpow_nonneg (Nat.cast_nonneg _) _)
 
+/-- `log (8 * π) = 3 * log 2 + log π`, the Γ-constant that appears in the `dSigma`
+numerics (`dSigma_rat_two_eq`, `dSigma_ge`). -/
+theorem log_eight_mul_pi_eq : Real.log (8 * π) = 3 * Real.log 2 + Real.log π := by
+  rw [Real.log_mul (by norm_num) Real.pi_ne_zero,
+    show (8:ℝ) = 2^3 by norm_num, Real.log_pow]
+  push_cast
+  ring
+
 /-- **`d_{ℚ,2} = 2W + γ + log π − 1`**, `W = vonMangoldtSum ℚ 2` (B–F lines 603–612 at
 `k = ℚ`, `σ = 2`): with `n = r₁ = 1`, `I_sinh(2) = 1 + 2 log 2`,
 `I_cosh(2) = π/2 − (1 − log 2)` and `log 8π = 3 log 2 + log π`, the Γ-constant and the
@@ -620,11 +604,7 @@ archimedean integrals collapse elementarily. -/
 theorem dSigma_rat_two_eq :
     dSigma ℚ 2 = 2 * vonMangoldtSum ℚ 2
       + Real.eulerMascheroniConstant + Real.log π - 1 := by
-  have hlog8π : Real.log (8*π) = 3 * Real.log 2 + Real.log π := by
-    rw [Real.log_mul (by norm_num) Real.pi_ne_zero,
-      show (8:ℝ) = 2^3 by norm_num, Real.log_pow]
-    push_cast
-    ring
+  have hlog8π := log_eight_mul_pi_eq
   rw [dSigma, nrRealPlaces_rat, nrComplexPlaces_rat, sinh_int_two, cosh_int_two, hlog8π]
   push_cast
   ring
@@ -661,11 +641,7 @@ theorem dSigma_ge (hn : 1 < Module.finrank ℚ K) {σ : ℝ} (hσ : 1 < σ) (hσ
   have hl3 : (1.0986122885 : ℝ) < Real.log 3 := Real.log_three_gt_d9
   have hlπ : Real.log 3 ≤ Real.log π :=
     Real.log_le_log (by norm_num) Real.pi_gt_three.le
-  have hlog8π : Real.log (8*π) = 3 * Real.log 2 + Real.log π := by
-    rw [Real.log_mul (by norm_num) Real.pi_ne_zero,
-      show (8:ℝ) = 2^3 by norm_num, Real.log_pow]
-    push_cast
-    ring
+  have hlog8π := log_eight_mul_pi_eq
   have hlog2π : Real.log (2*π) = Real.log 2 + Real.log π :=
     Real.log_mul (by norm_num) Real.pi_ne_zero
   have hσ0 : (0:ℝ) < σ := by linarith
@@ -800,6 +776,15 @@ theorem vonMangoldtSum_rat_two_ge :
   norm_num
   ring
 
+/-- From `2 ^ a ≤ p ^ b` in `ℕ` (with `2 ≤ p`), deduce `a * log 2 ≤ b * log p` by
+taking logs of the cast inequality. The `hl7`/`hl11`/`hl13` power comparisons in
+`zeroSumSigma_rat_le` are instances. -/
+theorem mul_log_two_le_mul_log_of_pow_le {a b p : ℕ} (_hp : 2 ≤ p) (h : 2 ^ a ≤ p ^ b) :
+    (a : ℝ) * Real.log 2 ≤ (b : ℝ) * Real.log p := by
+  have hlog := Real.log_le_log (by positivity : (0:ℝ) < 2 ^ a)
+    (by exact_mod_cast h : ((2:ℝ)) ^ a ≤ (p:ℝ) ^ b)
+  rwa [Real.log_pow, Real.log_pow] at hlog
+
 /-- **The ℚ-zero-sum master certificate** (T12-b N4, replacing B–F's `0.023095`):
 under RH, `Σ_ρ m_ρ/(¼+γ_ρ²) ≤ 2γ_E + 2 log 2π − 3` — the ℚ-zero sum is at most the
 `d_{K,σ}` lower bound. Via `landau_stark_estimate` at `ℚ`, `σ = 2` (`log Δ_ℚ = 0`),
@@ -819,23 +804,14 @@ theorem zeroSumSigma_rat_le (hRH : RiemannHypothesis) :
   have hlπ : Real.log 3 ≤ Real.log π :=
     Real.log_le_log (by norm_num) Real.pi_gt_three.le
   have hl7 : 14 * Real.log 2 ≤ 5 * Real.log 7 := by
-    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^14)
-      (by norm_num : ((2:ℝ))^14 ≤ 7^5)
-    rw [Real.log_pow, Real.log_pow] at h
-    push_cast at h
-    linarith
+    exact_mod_cast mul_log_two_le_mul_log_of_pow_le (a := 14) (b := 5) (p := 7)
+      (by norm_num) (by norm_num)
   have hl11 : 10 * Real.log 2 ≤ 3 * Real.log 11 := by
-    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^10)
-      (by norm_num : ((2:ℝ))^10 ≤ 11^3)
-    rw [Real.log_pow, Real.log_pow] at h
-    push_cast at h
-    linarith
+    exact_mod_cast mul_log_two_le_mul_log_of_pow_le (a := 10) (b := 3) (p := 11)
+      (by norm_num) (by norm_num)
   have hl13 : 11 * Real.log 2 ≤ 3 * Real.log 13 := by
-    have h := Real.log_le_log (by positivity : (0:ℝ) < 2^11)
-      (by norm_num : ((2:ℝ))^11 ≤ 13^3)
-    rw [Real.log_pow, Real.log_pow] at h
-    push_cast at h
-    linarith
+    exact_mod_cast mul_log_two_le_mul_log_of_pow_le (a := 11) (b := 3) (p := 13)
+      (by norm_num) (by norm_num)
   have hW := vonMangoldtSum_rat_two_ge
   have hlog2π : Real.log (2*π) = Real.log 2 + Real.log π :=
     Real.log_mul two_ne_zero Real.pi_ne_zero
