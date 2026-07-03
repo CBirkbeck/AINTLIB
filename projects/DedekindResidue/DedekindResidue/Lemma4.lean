@@ -1380,6 +1380,344 @@ theorem integrableOn_cosh_weight_one_sub {σ T : ℝ} (hσ : 1/2 < σ) (hT : 0 <
     exact mul_le_mul_of_nonneg_right hw12 hmem.1
 
 
+/-! ### The archimedean difference, realified and bounded (L4-c-ii) -/
+
+/-- `arch_display_integral_eq` at the sinh weight. -/
+theorem arch_display_sinh_eq (σ X : ℝ) :
+    (∫ y in Set.Ioi (0:ℝ), ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+      = ((∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ (Real.log X) y) : ℝ) : ℂ) :=
+  arch_display_integral_eq σ X _
+
+/-- `arch_display_integral_eq` at the cosh weight. -/
+theorem arch_display_cosh_eq (σ X : ℝ) :
+    (∫ y in Set.Ioi (0:ℝ), ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+      = ((∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ (Real.log X) y) : ℝ) : ℂ) :=
+  arch_display_integral_eq σ X _
+
+/-- Raising the cutoff raises the test function: `F_{σ,e^{T'}} ≤ F_{σ,e^T}` pointwise. -/
+theorem auxFCut_sub_nonneg {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' : 0 < T')
+    (hTT : T' ≤ T) (hy : 0 < y) :
+    0 ≤ auxFCut σ T y - auxFCut σ T' y := by
+  rw [auxFCut_sub_eq_integral hσ hT' hTT hy, intervalIntegral.integral_of_le hTT]
+  exact MeasureTheory.setIntegral_nonneg measurableSet_Ioc
+    (fun U hU => cutKernel_nonneg hσ hy (hT'.trans hU.1).le)
+
+/-- The sinh-weighted cutoff difference is integrable on `(0, ∞)`. -/
+theorem integrableOn_sinh_weight_sub {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ} (hT' : 0 < T')
+    (hT : 0 < T) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2*Real.sinh (y/2)) * (auxFCut σ T y - auxFCut σ T' y))
+      (Set.Ioi 0) :=
+  ((integrableOn_sinh_weight_one_sub hσ hT').sub
+    (integrableOn_sinh_weight_one_sub hσ hT)).congr_fun
+    (fun y _ => by simp only [Pi.sub_apply]; ring) measurableSet_Ioi
+
+/-- The cosh-weighted cutoff difference is integrable on `(0, ∞)`. -/
+theorem integrableOn_cosh_weight_sub {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ} (hT' : 0 < T')
+    (hT : 0 < T) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2*Real.cosh (y/2)) * (auxFCut σ T y - auxFCut σ T' y))
+      (Set.Ioi 0) :=
+  ((integrableOn_cosh_weight_one_sub hσ hT').sub
+    (integrableOn_cosh_weight_one_sub hσ hT)).congr_fun
+    (fun y _ => by simp only [Pi.sub_apply]; ring) measurableSet_Ioi
+
+/-- The difference of sinh-weighted `(1−F)`-integrals is minus the cutoff-difference
+integral. -/
+theorem sinh_integral_diff_eq {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ} (hT' : 0 < T')
+    (hT : 0 < T) :
+    (∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ T y))
+      - ∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ T' y)
+      = - ∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (auxFCut σ T y - auxFCut σ T' y) := by
+  rw [← MeasureTheory.integral_sub (integrableOn_sinh_weight_one_sub hσ hT)
+    (integrableOn_sinh_weight_one_sub hσ hT'), ← MeasureTheory.integral_neg]
+  exact MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y _ => by ring)
+
+/-- The difference of cosh-weighted `(1−F)`-integrals is minus the cutoff-difference
+integral. -/
+theorem cosh_integral_diff_eq {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ} (hT' : 0 < T')
+    (hT : 0 < T) :
+    (∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ T y))
+      - ∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ T' y)
+      = - ∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.cosh (y/2)) * (auxFCut σ T y - auxFCut σ T' y) := by
+  rw [← MeasureTheory.integral_sub (integrableOn_cosh_weight_one_sub hσ hT)
+    (integrableOn_cosh_weight_one_sub hσ hT'), ← MeasureTheory.integral_neg]
+  exact MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y _ => by ring)
+
+/-- The sinh cutoff-difference integral is nonnegative. -/
+theorem integral_sinh_weight_sub_nonneg {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ}
+    (hT' : 0 < T') (hTT : T' ≤ T) :
+    0 ≤ ∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (auxFCut σ T y - auxFCut σ T' y) := by
+  refine MeasureTheory.setIntegral_nonneg measurableSet_Ioi (fun y hy => ?_)
+  have hy0 : 0 < y := hy
+  have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+  exact mul_nonneg (by positivity) (auxFCut_sub_nonneg hσ hT' hTT hy0)
+
+/-- The cosh cutoff-difference integral is nonnegative. -/
+theorem integral_cosh_weight_sub_nonneg {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ}
+    (hT' : 0 < T') (hTT : T' ≤ T) :
+    0 ≤ ∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.cosh (y/2)) * (auxFCut σ T y - auxFCut σ T' y) := by
+  refine MeasureTheory.setIntegral_nonneg measurableSet_Ioi (fun y hy => ?_)
+  have hy0 : 0 < y := hy
+  have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+  exact mul_nonneg (by positivity) (auxFCut_sub_nonneg hσ hT' hTT hy0)
+
+/-- The combined-weight cutoff-difference integral splits into its sinh and cosh
+parts. -/
+theorem integral_archWeight_sub_split {σ : ℝ} (hσ : 1/2 < σ) {T' T : ℝ}
+    (hT' : 0 < T') (hT : 0 < T) :
+    ∫ y in Set.Ioi (0:ℝ), archWeight y * (auxFCut σ T y - auxFCut σ T' y)
+      = (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (auxFCut σ T y - auxFCut σ T' y))
+        + ∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.cosh (y/2)) * (auxFCut σ T y - auxFCut σ T' y) := by
+  rw [← MeasureTheory.integral_add (integrableOn_sinh_weight_sub hσ hT' hT)
+    (integrableOn_cosh_weight_sub hσ hT' hT)]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y _ => ?_)
+  unfold archWeight
+  ring
+
+/-- **The place-count combination bound**: for `n = r₁ + 2r₂ ≥ 2` and `D₁, D₂ ≥ 0`,
+`|(n−1)·D₁ + (r₁−1)·D₂| ≤ (n−1)·(D₁+D₂)` — the paper's `|r_K − r_k| ≤ n_K − n_k`
+step (B–F lines 497–501) at `k = ℚ`. -/
+theorem abs_place_combination_le (hn : 1 < Module.finrank ℚ K) {D₁ D₂ : ℝ}
+    (hD₁ : 0 ≤ D₁) (hD₂ : 0 ≤ D₂) :
+    |((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1) * D₁
+      + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1) * D₂|
+      ≤ ((Module.finrank ℚ K : ℝ) - 1) * (D₁ + D₂) := by
+  have hcard := NumberField.InfinitePlace.card_add_two_mul_card_eq_rank K
+  have hcardR : (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+      + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ)
+      = (Module.finrank ℚ K : ℝ) := by
+    rw [← hcard]
+    push_cast
+    ring
+  have hnR : (1:ℝ) < (Module.finrank ℚ K : ℝ) := by exact_mod_cast hn
+  have hn2R : (2:ℝ) ≤ (Module.finrank ℚ K : ℝ) := by
+    have : (2:ℕ) ≤ Module.finrank ℚ K := hn
+    exact_mod_cast this
+  have hr2nn : (0:ℝ) ≤ (NumberField.InfinitePlace.nrComplexPlaces K : ℝ) :=
+    Nat.cast_nonneg _
+  have hr1nn : (0:ℝ) ≤ (NumberField.InfinitePlace.nrRealPlaces K : ℝ) :=
+    Nat.cast_nonneg _
+  have habs1 : |(NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+      + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1|
+      = (Module.finrank ℚ K : ℝ) - 1 := by
+    rw [abs_of_nonneg (by linarith), hcardR]
+  have habs2 : |(NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1|
+      ≤ (Module.finrank ℚ K : ℝ) - 1 := by
+    rw [abs_le]
+    constructor <;> linarith
+  calc |((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1) * D₁
+      + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1) * D₂|
+      ≤ |((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+          + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1) * D₁|
+        + |((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1) * D₂| := abs_add_le _ _
+    _ = |(NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+          + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1| * D₁
+        + |(NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1| * D₂ := by
+        rw [abs_mul, abs_mul, abs_of_nonneg hD₁, abs_of_nonneg hD₂]
+    _ ≤ ((Module.finrank ℚ K : ℝ) - 1) * D₁
+        + ((Module.finrank ℚ K : ℝ) - 1) * D₂ := by
+        rw [habs1]
+        exact add_le_add le_rfl (mul_le_mul_of_nonneg_right habs2 hD₂)
+    _ = ((Module.finrank ℚ K : ℝ) - 1) * (D₁ + D₂) := by ring
+
+/-- Triangle inequality for the display's arch + zero-side combination. -/
+theorem norm_arch_zero_comb_le {A SK SQ CK CQ IK IQ : ℂ} {b sk sq ck cq ik iq : ℝ}
+    (hA : ‖A‖ ≤ b) (hSK : ‖SK‖ ≤ sk) (hSQ : ‖SQ‖ ≤ sq) (hCK : ‖CK‖ ≤ ck)
+    (hCQ : ‖CQ‖ ≤ cq) (hIK : ‖IK‖ ≤ ik) (hIQ : ‖IQ‖ ≤ iq) :
+    ‖A - (SK - SQ) - (CK - CQ) + (IK - IQ)‖
+      ≤ b + (sk + sq) + (ck + cq) + (ik + iq) := by
+  calc ‖A - (SK - SQ) - (CK - CQ) + (IK - IQ)‖
+      ≤ ‖A - (SK - SQ) - (CK - CQ)‖ + ‖IK - IQ‖ := norm_add_le _ _
+    _ ≤ (‖A - (SK - SQ)‖ + ‖CK - CQ‖) + ‖IK - IQ‖ :=
+        add_le_add (norm_sub_le _ _) le_rfl
+    _ ≤ ((‖A‖ + ‖SK - SQ‖) + ‖CK - CQ‖) + ‖IK - IQ‖ :=
+        add_le_add (add_le_add (norm_sub_le _ _) le_rfl) le_rfl
+    _ ≤ ((b + (‖SK‖ + ‖SQ‖)) + (‖CK‖ + ‖CQ‖)) + (‖IK‖ + ‖IQ‖) :=
+        add_le_add (add_le_add (add_le_add hA (norm_sub_le _ _)) (norm_sub_le _ _))
+          (norm_sub_le _ _)
+    _ ≤ ((b + (sk + sq)) + (ck + cq)) + (ik + iq) :=
+        add_le_add (add_le_add (add_le_add le_rfl (add_le_add hSK hSQ))
+          (add_le_add hCK hCQ)) (add_le_add hIK hIQ)
+    _ = b + (sk + sq) + (ck + cq) + (ik + iq) := by ring
+
+/-- The per-`σ` zero sum `Σ_ρ m_ρ/(h² + γ_ρ²)` (`h = σ − 1/2`) appearing in every
+zero-side estimate; under GRH and `σ → 1⁺` it converges to the paper's
+`Σ_ρ 1/(¼ + γ_ρ²)`. -/
+noncomputable def zeroSumSigma (K : Type*) [Field K] [NumberField K] (σ : ℝ) : ℝ :=
+  ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)
+
+/-- **The σ-tracked Explicit2 estimate (L4-c)** — the quantitative core of B–F
+Lemma 4 (`Mostways`, eq. Explicit2) at real `σ > 1`, `k = ℚ`, cutoffs
+`X' ≤ X`: moving the plateau sums to the left, the two-cutoff difference of the
+relative display is bounded by the archimedean term
+`(n−1)(T−T')(h+1/T')e^{T'/2}L(T')` plus the coefficient
+`2h²(T−T') + 2(h+1/T) + 2(h+1/T') + 4/T + 4/T'` times the two fields' zero sums
+(`T = log X`, `T' = log X'`, `h = σ−1/2`). `σ → 1⁺` (L4-d) turns this into the
+paper's `Explicit2` with `c_{a,T}`. -/
+theorem lemma4_sigma_estimate (hGRH : GeneralizedRiemannHypothesis K)
+    (hRH : RiemannHypothesis) (hn : 1 < Module.finrank ℚ K)
+    {σ : ℝ} (hσ : 1 < σ) {X' X : ℝ} (hX' : 1 < X') (hXX : X' ≤ X)
+    {a : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (has : a < σ - 1) :
+    |2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+      - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+      + 2 * (plateauSum K σ X - plateauSum K σ X')
+      - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X')|
+      ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+            + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K σ + zeroSumSigma ℚ σ) := by
+  have hX : 1 < X := lt_of_lt_of_le hX' hXX
+  have hT : 0 < Real.log X := Real.log_pos hX
+  have hT' : 0 < Real.log X' := Real.log_pos hX'
+  have hTT : Real.log X' ≤ Real.log X := Real.log_le_log (by linarith) hXX
+  have hσ2 : (1:ℝ)/2 < σ := by linarith
+  -- the difference display with realified archimedean integrals
+  have hd := lemma4_diff_display K hGRH hRH hσ hX' hXX ha ha' has
+  rw [arch_display_sinh_eq σ X, arch_display_sinh_eq σ X',
+    arch_display_cosh_eq σ X, arch_display_cosh_eq σ X'] at hd
+  push_cast at hd
+  -- the key identity: the real left side is the real arch part plus the zero sums
+  have key : ((2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        + 2 * (plateauSum K σ X - plateauSum K σ X')
+        - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X') : ℝ) : ℂ)
+      = ((((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1)
+            * ((∫ y in Set.Ioi (0:ℝ),
+                1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ (Real.log X) y))
+              - ∫ y in Set.Ioi (0:ℝ),
+                1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ (Real.log X') y))
+          + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1)
+            * ((∫ y in Set.Ioi (0:ℝ),
+                1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ (Real.log X) y))
+              - ∫ y in Set.Ioi (0:ℝ),
+                1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ (Real.log X') y)) : ℝ) : ℂ)
+        - (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X' ρ.1.im))
+        - (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X' ρ.1.im))
+        + (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X' ρ.1.im)) := by
+    push_cast
+    linear_combination hd
+  -- the archimedean bound
+  have hDs := integral_sinh_weight_sub_nonneg hσ2 hT' hTT
+  have hDc := integral_cosh_weight_sub_nonneg hσ2 hT' hTT
+  have hsd := sinh_integral_diff_eq hσ2 hT' hT
+  have hcd := cosh_integral_diff_eq hσ2 hT' hT
+  have habsneg : ∀ c d e f : ℝ, |c * -d + e * -f| = |c * d + e * f| := fun c d e f => by
+    rw [show c * -d + e * -f = -(c * d + e * f) by ring, abs_neg]
+  have hnR : (1:ℝ) < (Module.finrank ℚ K : ℝ) := by exact_mod_cast hn
+  have harch : ‖((((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) - 1)
+        * ((∫ y in Set.Ioi (0:ℝ),
+            1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ (Real.log X) y))
+          - ∫ y in Set.Ioi (0:ℝ),
+            1/(2 * Real.sinh (y/2)) * (1 - auxFCut σ (Real.log X') y))
+      + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ) - 1)
+        * ((∫ y in Set.Ioi (0:ℝ),
+            1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ (Real.log X) y))
+          - ∫ y in Set.Ioi (0:ℝ),
+            1/(2 * Real.cosh (y/2)) * (1 - auxFCut σ (Real.log X') y)) : ℝ) : ℂ)‖
+      ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X'))) := by
+    rw [Complex.norm_real, Real.norm_eq_abs, hsd, hcd, habsneg]
+    refine (abs_place_combination_le K hn hDs hDc).trans ?_
+    refine mul_le_mul_of_nonneg_left ?_ (by linarith)
+    rw [← integral_archWeight_sub_split hσ2 hT' hT]
+    exact arch_sum_diff_le hσ.le hT' hTT
+  -- the zero-sum bounds (c1–c3) at `K` and at `ℚ`
+  have hc1K := norm_tsum_zeroSinTerm_sub_le K hσ2 hX' hXX
+  have hc1Q := norm_tsum_zeroSinTerm_sub_le ℚ hσ2 hX' hXX
+  have hc2K := norm_tsum_zeroCosTerm_sub_le K hσ2 hX' hXX
+  have hc2Q := norm_tsum_zeroCosTerm_sub_le ℚ hσ2 hX' hXX
+  have hc3K := norm_tsum_zeroIntTerm_sub_le K hσ2 hX' hXX
+  have hc3Q := norm_tsum_zeroIntTerm_sub_le ℚ hσ2 hX' hXX
+  -- assemble
+  calc |2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+      - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+      + 2 * (plateauSum K σ X - plateauSum K σ X')
+      - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X')|
+      = ‖((2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        + 2 * (plateauSum K σ X - plateauSum K σ X')
+        - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X') : ℝ) : ℂ)‖ := by
+        rw [Complex.norm_real, Real.norm_eq_abs]
+    _ ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+              * ∑' ρ : ZetaZeros K,
+                  (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)
+            + 2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+              * ∑' ρ : ZetaZeros ℚ,
+                  (zetaZeroDivisor ℚ ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2))
+        + ((2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+              * ∑' ρ : ZetaZeros K,
+                  (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)
+            + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+              * ∑' ρ : ZetaZeros ℚ,
+                  (zetaZeroDivisor ℚ ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2))
+        + ((4 / Real.log X + 4 / Real.log X')
+              * ∑' ρ : ZetaZeros K,
+                  (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)
+            + (4 / Real.log X + 4 / Real.log X')
+              * ∑' ρ : ZetaZeros ℚ,
+                  (zetaZeroDivisor ℚ ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)) := by
+        rw [key]
+        exact norm_arch_zero_comb_le harch hc1K hc1Q hc2K hc2Q hc3K hc3Q
+    _ = ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+            + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K σ + zeroSumSigma ℚ σ) := by
+        unfold zeroSumSigma
+        ring
+
+
 end DedekindResidue
 
 end
