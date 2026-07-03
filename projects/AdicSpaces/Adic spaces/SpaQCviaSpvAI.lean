@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».SpvAITopology
 import «Adic spaces».AdicSpectrum
 import «Adic spaces».SpaCompact
+import «Adic spaces».RationalSubsets
 
 /-!
 # Quasi-compactness of `Spa A A⁺` via `Spv(A, I)` (Wedhorn 7.5 / 7.12 / 7.35)
@@ -589,15 +590,222 @@ theorem exists_rational_between_of_mem_basicOpen [IsTopologicalRing A]
     {v : Spv A} (hv : v ∈ Spa A A⁺) {g h : A} (hgh : v ∈ basicOpen g h) :
     ∃ (T : Finset A) (_ : I ≤ (Ideal.span (T : Set A)).radical),
       v ∈ rationalOpen T h ∧ rationalOpen T h ⊆ basicOpen g h := by
-  sorry
+  classical
+  obtain ⟨hvle, hne⟩ := hgh
+  letI : ValuativeRel A := v.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  have hwh_ne : wv h ≠ 0 := fun h0 => hne ((vle_zero_iff_canonical v h).mpr h0)
+  have hcont : v.IsContinuous := hv.1
+  have h_open : IsOpen {x : A | wv x < wv h} := hcont (wv h)
+  have h0mem : (0 : A) ∈ {x : A | wv x < wv h} := by
+    simp only [Set.mem_setOf_eq, map_zero]
+    exact zero_lt_iff.mpr hwh_ne
+  obtain ⟨n, -, hsub⟩ := P.hasBasis_nhds_zero.mem_iff.mp (h_open.mem_nhds h0mem)
+  obtain ⟨Gn, hGn⟩ := Ideal.FG.pow (n := n) P.fg
+  refine ⟨insert g (Gn.image (fun b : P.A₀ => (b : A))), ?_, ⟨hv, fun t ht => ?_, hne⟩, ?_⟩
+  · -- side condition: `I ≤ √(span T)` — every generator image has its `n`-th power in
+    -- `span (image Gn) ⊆ span T`.
+    rw [hIeq, Ideal.span_le]
+    rintro x ⟨b, hbI, rfl⟩
+    refine ⟨n, ?_⟩
+    have hbn : b ^ n ∈ P.I ^ n := Ideal.pow_mem_pow hbI n
+    rw [← hGn] at hbn
+    have hcoe : (P.A₀.subtype b) ^ n = P.A₀.subtype (b ^ n) := by
+      rw [map_pow]
+    rw [hcoe]
+    have hmem := Ideal.mem_map_of_mem (P.A₀.subtype) hbn
+    rw [Ideal.map_span] at hmem
+    refine Ideal.span_mono ?_ hmem
+    rw [Finset.coe_insert, Finset.coe_image]
+    intro y hy
+    obtain ⟨c, hcG, rfl⟩ := hy
+    exact Set.mem_insert_of_mem _ ⟨c, hcG, rfl⟩
+  · -- membership: `v(t) ≤ v(h)` for each `t ∈ T` (for `g` by hypothesis, for the
+    -- `Gn`-images because they lie in the continuity neighborhood).
+    rcases Finset.mem_insert.mp ht with rfl | htG
+    · exact hvle
+    · obtain ⟨b, hbG, rfl⟩ := Finset.mem_image.mp htG
+      have hb_pow : b ∈ ((P.I ^ n : Ideal P.A₀) : Set P.A₀) := by
+        rw [← hGn]
+        exact Ideal.subset_span hbG
+      have hb_nbhd : ((b : A)) ∈ {x : A | wv x < wv h} :=
+        hsub ⟨b, hb_pow, rfl⟩
+      exact (vle_iff_canonical v _ h).mpr (le_of_lt hb_nbhd)
+  · rintro u ⟨-, huT, hus⟩
+    exact ⟨huT g (Finset.mem_insert_self g _), hus⟩
 
-/-- **`Spa A A⁺` is quasi-compact in `Spv A`** (Wedhorn 7.35(1)). -/
+/-- The Sierpinski `R`-profile: coordinate `p` tests membership in the side-condition
+rational subset `R(p)`. Factors as `(· = true) ∘ ιSpvR I`, so its `Spa`-image is a
+continuous image of the (compact) Bool profile image. -/
+noncomputable def ιSpvPropR (I : Ideal A) (v : Spv A) : RCoord A I → Prop :=
+  fun p => ιSpvR I v p = true
+
+/-- The Bool-to-Sierpinski comparison map on the `R`-cube is continuous. -/
+theorem continuous_toProp_rcoord (I : Ideal A) :
+    Continuous (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) :=
+  continuous_pi fun p =>
+    (continuous_of_discreteTopology (f := fun b : Bool => b = true)).comp
+      (continuous_apply p)
+
+/-- **The `R`-profile is inducing on `Spa A A⁺`** (Wedhorn 7.35(2): side-condition
+rational subsets form a basis of the subspace topology; one direction is
+`rationalOpen_isOpen`, the other is the basis lemma above). -/
+theorem isInducing_ιSpvPropR_spa [IsTopologicalRing A] (P : PairOfDefinition A)
+    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
+    Topology.IsInducing (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) := by
+  classical
+  refine ⟨?_⟩
+  have hstep1 : TopologicalSpace.induced
+      (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) Pi.topologicalSpace =
+      TopologicalSpace.generateFrom
+        {U | ∃ p : RCoord A I, U = Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
+    rw [show (Pi.topologicalSpace : TopologicalSpace (RCoord A I → Prop)) =
+        ⨅ p, TopologicalSpace.induced (fun r : RCoord A I → Prop => r p) sierpinskiSpace
+        from rfl]
+    rw [induced_iInf]
+    have hcoord : ∀ p : RCoord A I,
+        TopologicalSpace.induced ((fun r : RCoord A I → Prop => r p) ∘
+          (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A))) sierpinskiSpace =
+          TopologicalSpace.generateFrom {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
+      intro p
+      rw [show sierpinskiSpace = TopologicalSpace.generateFrom {{True}} from rfl,
+          induced_generateFrom_eq]
+      congr 1
+      ext U
+      simp only [Set.image_singleton, Set.mem_singleton_iff]
+      constructor
+      · rintro rfl
+        ext v
+        simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
+          eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
+        constructor
+        · rintro ⟨h1, h2⟩
+          exact ⟨v.2, h1, h2⟩
+        · rintro ⟨-, h1, h2⟩
+          exact ⟨h1, h2⟩
+      · rintro rfl
+        ext v
+        simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
+          eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
+        constructor
+        · rintro ⟨-, h1, h2⟩
+          exact ⟨h1, h2⟩
+        · rintro ⟨h1, h2⟩
+          exact ⟨v.2, h1, h2⟩
+    simp_rw [induced_compose, hcoord]
+    rw [show (⨅ p : RCoord A I, TopologicalSpace.generateFrom
+          {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) =
+        TopologicalSpace.generateFrom
+          (⋃ p : RCoord A I, {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) from
+        generateFrom_iUnion.symm]
+    congr 1
+    ext U
+    simp only [Set.mem_iUnion, Set.mem_singleton_iff, Set.mem_setOf_eq]
+  have hstep2 : (instTopologicalSpaceSubtype : TopologicalSpace ↥(Spa A A⁺)) =
+      TopologicalSpace.generateFrom
+        ((Set.preimage (Subtype.val : ↥(Spa A A⁺) → Spv A)) ''
+          {U | ∃ f s : A, U = basicOpen f s}) := by
+    rw [show (instTopologicalSpaceSubtype : TopologicalSpace ↥(Spa A A⁺)) =
+        TopologicalSpace.induced (Subtype.val : ↥(Spa A A⁺) → Spv A)
+          ValuationSpectrum.instTopologicalSpace from rfl]
+    rw [show (ValuationSpectrum.instTopologicalSpace : TopologicalSpace (Spv A)) =
+        TopologicalSpace.generateFrom {U | ∃ f s : A, U = basicOpen f s} from rfl]
+    exact induced_generateFrom_eq
+  rw [hstep1, hstep2]
+  apply le_antisymm
+  · -- side-condition rational traces are open in the subspace topology
+    refine le_generateFrom fun U hU => ?_
+    obtain ⟨p, rfl⟩ := hU
+    rw [← hstep2]
+    exact rationalOpen_isOpen _ _
+  · -- basic-open traces are open in the rational-trace topology (basis lemma)
+    refine le_generateFrom fun U hU => ?_
+    obtain ⟨V, ⟨f, t, rfl⟩, rfl⟩ := hU
+    have hcover : (Subtype.val ⁻¹' basicOpen f t : Set ↥(Spa A A⁺)) =
+        ⋃₀ {W | (∃ p : RCoord A I, W = Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2) ∧
+          W ⊆ Subtype.val ⁻¹' basicOpen f t} := by
+      ext v
+      constructor
+      · intro hv
+        obtain ⟨T, hside, hmem, hsub⟩ :=
+          exists_rational_between_of_mem_basicOpen P I hIeq v.2 hv
+        exact ⟨Subtype.val ⁻¹' rationalOpen T t,
+          ⟨⟨⟨(T, t), hside⟩, rfl⟩, Set.preimage_mono hsub⟩, hmem⟩
+      · rintro ⟨W, ⟨-, hWsub⟩, hvW⟩
+        exact hWsub hvW
+    rw [hcover]
+    exact TopologicalSpace.GenerateOpen.sUnion _ fun W hW =>
+      TopologicalSpace.GenerateOpen.basic _ hW.1
+
+/-- **The `R`-profile is injective on `Spa A A⁺`** (side-condition rational subsets
+separate points, via the basis lemma + injectivity of the full Huber embedding). -/
+theorem injective_ιSpvPropR_spa [IsTopologicalRing A] (P : PairOfDefinition A)
+    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
+    Function.Injective (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) := by
+  intro v₁ v₂ hEq
+  have key : ∀ f t : A, (v₁ : Spv A) ∈ basicOpen f t ↔ (v₂ : Spv A) ∈ basicOpen f t := by
+    have main : ∀ (w₁ w₂ : ↥(Spa A A⁺)),
+        ιSpvPropR I (w₁ : Spv A) = ιSpvPropR I (w₂ : Spv A) →
+        ∀ f t : A, (w₁ : Spv A) ∈ basicOpen f t → (w₂ : Spv A) ∈ basicOpen f t := by
+      intro w₁ w₂ hE f t hmem
+      obtain ⟨T, hside, hm, hsub⟩ :=
+        exists_rational_between_of_mem_basicOpen P I hIeq w₁.2 hmem
+      obtain ⟨-, hm1, hm2⟩ := hm
+      have hco : ιSpvR I (w₁ : Spv A) ⟨(T, t), hside⟩ = true :=
+        (ιSpvR_eq_true_iff I _ _).mpr ⟨hm1, hm2⟩
+      have hco2 : ιSpvR I (w₂ : Spv A) ⟨(T, t), hside⟩ = true := by
+        have := congrFun hE ⟨(T, t), hside⟩
+        simp only [ιSpvPropR, eq_iff_iff] at this
+        exact this.mp hco
+      obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hco2
+      exact hsub ⟨w₂.2, h1, h2⟩
+    intro f t
+    exact ⟨main v₁ v₂ hEq f t, main v₂ v₁ hEq.symm f t⟩
+  have hιSpv : ιSpv (v₁ : Spv A) = ιSpv (v₂ : Spv A) := by
+    funext q
+    exact propext ((ιSpv_iff_mem_basicOpen _ q.1 q.2).trans
+      ((key q.1 q.2).trans (ιSpv_iff_mem_basicOpen _ q.1 q.2).symm))
+  exact Subtype.ext (ιSpv_injective hιSpv)
+
+/-- **`Spa A A⁺` is quasi-compact in `Spv A`** (Wedhorn 7.35(1), no `hArch`): the
+`R`-profile embeds `Spa` into the Sierpinski `R`-cube, and its image is the continuous
+image of the compact Bool-profile image (R3). -/
 theorem isCompact_spa_noHArch [IsTopologicalRing A] (P : PairOfDefinition A)
     {π : P.A₀} (hπ : P.I = Ideal.span {π})
     (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
     (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
     IsCompact ((Spa A A⁺) : Set (Spv A)) := by
-  sorry
+  have hIeq' : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) := by
+    rw [show Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) =
+        Ideal.map P.A₀.subtype P.I from rfl, hπ, Ideal.map_span, Set.image_singleton, hIeq]
+    rfl
+  have hEmb : Topology.IsEmbedding (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) :=
+    ⟨isInducing_ιSpvPropR_spa P I hIeq', injective_ιSpvPropR_spa P I hIeq'⟩
+  have himg : IsCompact ((fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
+      Set.univ) := by
+    have h1 : ((fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) '' Set.univ) =
+        (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
+          (ιSpvR I '' (Spa A A⁺)) := by
+      rw [Set.image_univ]
+      ext r
+      constructor
+      · rintro ⟨v, rfl⟩
+        exact ⟨ιSpvR I (v : Spv A), ⟨(v : Spv A), v.2, rfl⟩, rfl⟩
+      · rintro ⟨y, ⟨v, hv, rfl⟩, rfl⟩
+        exact ⟨⟨v, hv⟩, rfl⟩
+    rw [h1]
+    exact (isCompact_image_ιSpvR_spa P hπ hA₀le I hIeq).image (continuous_toProp_rcoord I)
+  have huniv : IsCompact (Set.univ : Set ↥(Spa A A⁺)) :=
+    (hEmb.isCompact_iff (s := Set.univ)).mpr himg
+  exact isCompact_iff_compactSpace.mpr (isCompact_univ_iff.mp huniv)
+
+/-- **`Spa A A⁺` is a compact topological space** (instance form). -/
+theorem compactSpace_spa_noHArch [IsTopologicalRing A] (P : PairOfDefinition A)
+    {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
+    CompactSpace ↥(Spa A A⁺) :=
+  isCompact_iff_compactSpace.mp (isCompact_spa_noHArch P hπ hA₀le I hIeq)
 
 /-- **Rational subsets are quasi-compact** (Wedhorn 7.35(2)): the trace of
 `rationalOpen T s` on `Spa A A⁺` is compact whenever the datum satisfies the openness
@@ -609,6 +817,34 @@ theorem isCompact_subtype_rationalOpen [IsTopologicalRing A] (P : PairOfDefiniti
     (T : Finset A) (s : A)
     (hTI : I ≤ (Ideal.span (T : Set A)).radical) :
     IsCompact (Subtype.val ⁻¹' (rationalOpen T s) : Set ↥(Spa A A⁺)) := by
-  sorry
+  have hIeq' : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) := by
+    rw [show Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) =
+        Ideal.map P.A₀.subtype P.I from rfl, hπ, Ideal.map_span, Set.image_singleton, hIeq]
+    rfl
+  have hEmb : Topology.IsEmbedding (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) :=
+    ⟨isInducing_ιSpvPropR_spa P I hIeq', injective_ιSpvPropR_spa P I hIeq'⟩
+  refine (hEmb.isCompact_iff (s := Subtype.val ⁻¹' rationalOpen T s)).mpr ?_
+  have h1 : (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
+      (Subtype.val ⁻¹' rationalOpen T s) =
+      (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
+        ((ιSpvR I '' (Spa A A⁺)) ∩
+          {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true}) := by
+    ext r
+    constructor
+    · rintro ⟨v, hv, rfl⟩
+      rw [Set.mem_preimage] at hv
+      obtain ⟨hvSpa, h1, h2⟩ := hv
+      exact ⟨ιSpvR I (v : Spv A), ⟨⟨(v : Spv A), v.2, rfl⟩,
+        (ιSpvR_eq_true_iff I _ _).mpr ⟨h1, h2⟩⟩, rfl⟩
+    · rintro ⟨y, ⟨⟨v, hvSpa, rfl⟩, hq⟩, rfl⟩
+      obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hq
+      exact ⟨⟨v, hvSpa⟩, Set.mem_preimage.mpr ⟨hvSpa, h1, h2⟩, rfl⟩
+  rw [h1]
+  refine IsCompact.image ?_ (continuous_toProp_rcoord I)
+  refine (isCompact_image_ιSpvR_spa P hπ hA₀le I hIeq).inter_right ?_
+  have hcl : {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true} =
+      (fun y : RCoord A I → Bool => y ⟨(T, s), hTI⟩) ⁻¹' {true} := rfl
+  rw [hcl]
+  exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
 
 end ValuationSpectrum
