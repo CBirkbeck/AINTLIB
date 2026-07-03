@@ -1636,8 +1636,11 @@ theorem exists_spa_point_supp_ge_in_presheafValue
   haveI : IsHuberRing (presheafValue C.base) := hTate.toIsHuberRing
   haveI : T2Space (presheafValue C.base) := inferInstance
   haveI : NonarchimedeanRing (presheafValue C.base) := inferInstance
+  letI P_B : PairOfDefinition (presheafValue C.base) := presheafValue_concretePair C.base
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete C.base
   obtain ⟨v, hcont, hsupp, hbd⟩ :=
-    exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := presheafValue C.base) h𝔭_notOpen
+    exists_cont_supp_ge_powerBounded_of_nonOpen_prime
+      (A := presheafValue C.base) P_B h𝔭_notOpen
   exact ⟨v, ⟨hcont, fun f hf => hbd f
     (IsRingOfIntegralElements.subset_powerBounded (B := (presheafValue C.base)⁺) hf)⟩, hsupp⟩
 

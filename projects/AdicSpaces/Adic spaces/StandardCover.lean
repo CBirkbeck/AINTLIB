@@ -788,6 +788,7 @@ rational open. -/
 theorem exists_spa_point_with_supp_ge_of_prime
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     {p : Ideal A} [p.IsPrime] :
     ∃ v ∈ Spa A A⁺, p ≤ v.supp := by
   by_cases hp_open : IsOpen (p : Set A)
@@ -804,7 +805,7 @@ theorem exists_spa_point_with_supp_ge_of_prime
     -- `IsRingOfIntegralElements.subset_powerBounded`): the non-open prime has a continuous
     -- analytic Spa-point bounded on all of `A°`, which lies in `Spa(A, A⁺)` since `A⁺ ⊆ A°`.
     obtain ⟨v, hv_cont, hv_supp, hv_bd⟩ :=
-      exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := A) hp_open
+      exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := A) P hp_open
     exact ⟨v, ⟨hv_cont, fun f hf => hv_bd f
       (IsRingOfIntegralElements.subset_powerBounded (B := (A⁺ : Subring A)) hf)⟩, hv_supp⟩
 
@@ -841,6 +842,7 @@ This equivalence is what converts between the ideal-theoretic formulation
 theorem spanTop_iff_noCommonZero_spa
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (T : Finset A) :
     Ideal.span (T : Set A) = ⊤ ↔
       ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0 := by
@@ -868,7 +870,7 @@ theorem spanTop_iff_noCommonZero_spa
     by_contra h_ne
     obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ h_ne
     haveI : q.IsPrime := hq_max.isPrime
-    obtain ⟨v, hv_spa, hv_supp⟩ := exists_spa_point_with_supp_ge_of_prime (A := A)
+    obtain ⟨v, hv_spa, hv_supp⟩ := exists_spa_point_with_supp_ge_of_prime (A := A) P
       (p := q)
     obtain ⟨t, htT, htne⟩ := h_spa v hv_spa
     apply htne
@@ -961,7 +963,7 @@ theorem zavyalov_candidate_family_h_span_from_no_common_zero
     (h_no_common_zero : ∀ v ∈ Spa A A⁺,
       ∃ f ∈ C.covers.biUnion mk_S_D, ¬ v.vle f 0) :
     Ideal.span ((C.covers.biUnion mk_S_D : Finset A) : Set A) = ⊤ :=
-  (spanTop_iff_noCommonZero_spa _).mpr h_no_common_zero
+  (spanTop_iff_noCommonZero_spa P _).mpr h_no_common_zero
 
 /-- **Zavyalov §2.3 — per-D existential from a candidate-family
 construction** (the user's target signature, in conditional form).

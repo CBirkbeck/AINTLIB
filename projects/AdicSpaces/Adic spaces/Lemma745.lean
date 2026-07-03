@@ -694,6 +694,21 @@ theorem exists_mem_spa_supp_ge_of_nonOpen_prime (P : PairOfDefinition A)
     ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp :=
   P.exists_spa_point_via_restrictToConvex h𝔭 hAplus_le_A₀
 
+/-- **Wedhorn Lemma 7.45, `Cont`-level form** (no `A⁺` data): for a non-open prime `𝔭` of a
+complete Huber ring there is a continuous *analytic* valuation `x` with `𝔭 ≤ supp x` and
+`supp x ⊉ I`. Obtained from `exists_spa_point_via_restrictToConvex` by instantiating the
+plus subring at the ring of definition itself (`A⁺ := A₀`, where `hAplus_le_A₀` is
+`subset_rfl`); the `A⁺`-bound clause of `Spa`-membership is discarded.
+Source: Wedhorn Lemma 7.45 (wedhorn.txt:3336). -/
+theorem exists_cont_analytic_supp_ge_of_nonOpen_prime (P : PairOfDefinition A)
+    [IsAdicComplete P.I P.A₀] {𝔭 : Ideal A} [𝔭.IsPrime]
+    (h𝔭 : ¬IsOpen (𝔭 : Set A)) :
+    ∃ x : Spv A, x ∈ Cont A ∧ 𝔭 ≤ x.supp ∧ ¬P.idealOfDefinition ≤ x.supp := by
+  letI : PlusSubring A := ⟨P.A₀⟩
+  obtain ⟨v, hv_spa, hsupp, hanalytic⟩ :=
+    P.exists_spa_point_via_restrictToConvex h𝔭 (le_refl (P.A₀ : Set A))
+  exact ⟨v, hv_spa.1, hsupp, hanalytic⟩
+
 /-- **Containment form of complete-affinoid Spa-point existence (Wedhorn 7.45 + 7.51).**
 For a maximal ideal `𝔪` of a complete affinoid ring `(A, A⁺)` with pair of definition `P`,
 there is `v ∈ Spa(A, A⁺)` with `𝔪 ≤ supp(v)`.
@@ -742,3 +757,216 @@ theorem isUnit_iff_forall_not_vle_zero_of_complete
   exact h v hv ((v.mem_supp_iff f).mp (hsupp (hf𝔪 (Ideal.mem_span_singleton_self f))))
 
 end PairOfDefinition
+
+/-! ### Wedhorn Lemma 7.45, height-one form (assembly)
+
+The `Cont`-level analytic point of `exists_cont_analytic_supp_ge_of_nonOpen_prime`,
+vertically generized to height one by
+`Valuation.coarsen_maxAvoid_isContinuous_mulArchimedean` (ValuationContinuity). The
+value-group bookkeeping: transport the canonical valuation along `Γ₀ →*₀ WithZero Γ₀ˣ`,
+coarsen, and pull `MulArchimedean` back to the canonical value group of the resulting
+`Spv`-point along the strictly monotone `embed`/`embedding` chain. -/
+
+section HeightOneAssembly
+
+open ValuationSpectrum
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+
+/-- The canonical splitting `Γ₀ →*₀ WithZero Γ₀ˣ` of a linearly ordered commutative
+group-with-zero. -/
+noncomputable def withZeroUnitsSplit (Γ₀ : Type*) [LinearOrderedCommGroupWithZero Γ₀] :
+    Γ₀ →*₀ WithZero Γ₀ˣ where
+  toFun γ := if h : γ = 0 then 0 else ↑(Units.mk0 γ h)
+  map_zero' := by simp
+  map_one' := by
+    rw [dif_neg one_ne_zero]
+    norm_cast
+    exact Units.ext (by simp)
+  map_mul' x y := by
+    rcases eq_or_ne x 0 with rfl | hx
+    · simp
+    rcases eq_or_ne y 0 with rfl | hy
+    · simp
+    rw [dif_neg hx, dif_neg hy, dif_neg (mul_ne_zero hx hy), ← WithZero.coe_mul]
+    exact congrArg _ (Units.ext (by simp))
+
+theorem withZeroUnitsSplit_eq_zero_iff {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {γ : Γ₀} : withZeroUnitsSplit Γ₀ γ = 0 ↔ γ = 0 := by
+  unfold withZeroUnitsSplit
+  simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk]
+  split_ifs with h
+  · simp [h]
+  · simp [h]
+
+theorem withZeroUnitsSplit_apply_ne {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {γ : Γ₀} (h : γ ≠ 0) : withZeroUnitsSplit Γ₀ γ = ↑(Units.mk0 γ h) := by
+  unfold withZeroUnitsSplit
+  simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, dif_neg h]
+
+theorem withZeroUnitsSplit_monotone (Γ₀ : Type*) [LinearOrderedCommGroupWithZero Γ₀] :
+    Monotone (withZeroUnitsSplit Γ₀) := by
+  intro a b hab
+  rcases eq_or_ne a 0 with rfl | ha
+  · simp
+  have hb : b ≠ 0 := fun h ↦ ha (le_antisymm (h ▸ hab) (zero_le' (a := a)))
+  rw [withZeroUnitsSplit_apply_ne ha, withZeroUnitsSplit_apply_ne hb, WithZero.coe_le_coe,
+    ← Units.val_le_val]
+  simpa using hab
+
+theorem withZeroUnitsSplit_lt_coe_iff {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {γ : Γ₀} {u : Γ₀ˣ} : withZeroUnitsSplit Γ₀ γ < ↑u ↔ γ < (u : Γ₀) := by
+  rcases eq_or_ne γ 0 with rfl | h
+  · simp [WithZero.zero_lt_coe, Units.zero_lt]
+  · rw [withZeroUnitsSplit_apply_ne h, WithZero.coe_lt_coe, ← Units.val_lt_val]
+    simp
+
+namespace PairOfDefinition
+
+/-- An open prime ideal contains the ideal of definition (`I`-image powers land in it,
+then primality). -/
+theorem idealOfDefinition_le_of_isOpen_of_isPrime (P : PairOfDefinition A)
+    {J : Ideal A} [J.IsPrime] (hJ : IsOpen (J : Set A)) :
+    P.idealOfDefinition ≤ J := by
+  obtain ⟨N, -, hN⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hJ.mem_nhds J.zero_mem)
+  rw [idealOfDefinition, Ideal.map_le_iff_le_comap]
+  intro b hb
+  have hmem : (P.A₀.subtype (b ^ N) : A) ∈ J :=
+    hN ⟨b ^ N, Ideal.pow_mem_pow hb N, rfl⟩
+  rw [map_pow] at hmem
+  exact ‹J.IsPrime›.mem_of_pow_mem N hmem
+
+end PairOfDefinition
+
+/-- `MulArchimedean` descends to the canonical value group of `ofValuation w` from the
+codomain of `w`, along the strictly monotone `embed`/`embedding` chain. -/
+theorem mulArchimedean_valueGroupWithZero_ofValuation {Γ₀' : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀'] [MulArchimedean Γ₀']
+    (w : Valuation A Γ₀') :
+    (letI : ValuativeRel A := ValuativeRel.ofValuation w
+     MulArchimedean (ValuativeRel.ValueGroupWithZero A)) := by
+  letI : ValuativeRel A := ValuativeRel.ofValuation w
+  haveI := Valuation.Compatible.ofValuation w
+  have h1 := ValuativeRel.ValueGroupWithZero.embed_strictMono w
+  have h2 := MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+    (f := MonoidWithZeroHom.ofClass w)
+  exact MulArchimedean.comap
+    ((MonoidWithZeroHom.ValueGroup₀.embedding.comp
+      (ValuativeRel.ValueGroupWithZero.embed w)).toMonoidHom) (h2.comp h1)
+
+namespace PairOfDefinition
+
+/-- **Wedhorn Lemma 7.45, height-one analytic form (assembled).** For a non-open prime
+`𝔭` of a complete Huber ring there is a continuous valuation `x` with `𝔭 ≤ supp x`,
+non-open support, and `MulArchimedean` canonical value group (Wedhorn's height-one
+vertical generization, Remarks 7.38/7.40(5)/4.12).
+Source: Wedhorn Lemma 7.45 (wedhorn.txt:3336) + Remark 7.40(5). -/
+theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime'
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
+    {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬IsOpen (𝔭 : Set A)) :
+    ∃ x : Spv A, x ∈ Cont A ∧ 𝔭 ≤ x.supp ∧ ¬IsOpen (x.supp : Set A) ∧
+      (letI : ValuativeRel A := x.toValuativeRel
+       MulArchimedean (ValuativeRel.ValueGroupWithZero A)) := by
+  classical
+  obtain ⟨x₀, hx₀_cont, hx₀_supp, hx₀_an⟩ :=
+    P.exists_cont_analytic_supp_ge_of_nonOpen_prime h𝔭
+  letI : ValuativeRel A := x₀.toValuativeRel
+  set v := ValuativeRel.valuation A with hv_def
+  have hv_cont : v.IsContinuous := hx₀_cont
+  have hsupp_eq : x₀.supp = v.supp :=
+    @ValuativeRel.supp_eq_valuation_supp A _ x₀.toValuativeRel
+  -- A generator of the ideal of definition outside the support.
+  have hex : ∃ b ∈ P.I, (P.A₀.subtype b : A) ∉ x₀.supp := by
+    by_contra hcon
+    push_neg at hcon
+    exact hx₀_an (Ideal.map_le_iff_le_comap.mpr fun b hb ↦ hcon b hb)
+  obtain ⟨b, hb_I, hb_supp⟩ := hex
+  set i : A := P.A₀.subtype b with hi_def
+  have hi_nil : IsTopologicallyNilpotent i := P.isTopologicallyNilpotent_of_mem hb_I
+  have hvi_ne : v i ≠ 0 := by
+    intro h0
+    exact hb_supp (hsupp_eq ▸ (Valuation.mem_supp_iff v i).mpr h0)
+  -- `v i < 1` from continuity and topological nilpotence.
+  have hvi_lt : v i < 1 := by
+    have hopen : IsOpen {a : A | v a < 1} := hv_cont 1
+    have h0mem : (0 : A) ∈ {a : A | v a < 1} := by simp
+    obtain ⟨n, hn⟩ := (hi_nil.eventually (hopen.mem_nhds h0mem)).exists
+    by_contra hge
+    rw [not_lt] at hge
+    refine absurd hn (not_lt.mpr ?_)
+    calc (1 : ValuativeRel.ValueGroupWithZero A) = 1 ^ n := (one_pow n).symm
+      _ ≤ (v i) ^ n := pow_le_pow_left' hge n
+      _ = v (i ^ n) := (map_pow v i n).symm
+  -- Transport along `Γ₀ →*₀ WithZero Γ₀ˣ`.
+  set φ := withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A) with hφ_def
+  set v' : Valuation A (WithZero (ValuativeRel.ValueGroupWithZero A)ˣ) :=
+    v.map φ (withZeroUnitsSplit_monotone _) with hv'_def
+  have hv'_apply : ∀ a : A, v' a = φ (v a) := fun a ↦ Valuation.map_apply _ _ _ _
+  have hv'_cont : v'.IsContinuous := by
+    intro δ
+    rcases eq_or_ne δ 0 with rfl | hδ
+    · simp only [not_lt_zero]
+      exact isOpen_empty
+    obtain ⟨u, rfl⟩ := WithZero.ne_zero_iff_exists.mp hδ
+    have : {a : A | v' a < ↑u} = {a : A | v a < (u : ValuativeRel.ValueGroupWithZero A)} := by
+      ext a
+      rw [Set.mem_setOf_eq, Set.mem_setOf_eq, hv'_apply, withZeroUnitsSplit_lt_coe_iff]
+    rw [this]
+    exact hv_cont _
+  have hv'_supp : v'.supp = v.supp := by
+    ext a
+    rw [Valuation.mem_supp_iff, Valuation.mem_supp_iff, hv'_apply,
+      withZeroUnitsSplit_eq_zero_iff]
+  -- The cofinal unit `g₀ := v i`.
+  set g₀ : (ValuativeRel.ValueGroupWithZero A)ˣ := Units.mk0 (v i) hvi_ne with hg₀_def
+  have hg₀_lt : g₀ < 1 := by
+    rw [← Units.val_lt_val, hg₀_def]
+    simpa using hvi_lt
+  have hcof : ∀ γ : (ValuativeRel.ValueGroupWithZero A)ˣ, ∃ n : ℕ, g₀ ^ n ≤ γ := by
+    intro γ
+    obtain ⟨a, s, hval⟩ := ValuativeRel.exists_valuation_div_valuation_eq
+      (γ : ValuativeRel.ValueGroupWithZero A)
+    have hvs_ne : v (s : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero s
+    have hva_ne : v a ≠ 0 := by
+      intro h0
+      apply γ.ne_zero
+      rw [← hval, h0, zero_div]
+    -- continuity at `v a`: the sequence `i ^ n * s` enters `{v < v a}`.
+    have hopen : IsOpen {c : A | v c < v a} := hv_cont _
+    have h0mem : (0 : A) ∈ {c : A | v c < v a} := by
+      simp [zero_lt_iff.mpr hva_ne]
+    have htend : Filter.Tendsto (fun n : ℕ ↦ i ^ n * (s : A)) Filter.atTop (nhds 0) := by
+      simpa using hi_nil.mul_const (s : A)
+    obtain ⟨n, hn⟩ := (htend.eventually (hopen.mem_nhds h0mem)).exists
+    refine ⟨n, ?_⟩
+    rw [← Units.val_le_val]
+    have hval_le : (v i) ^ n * v (s : A) ≤ v a := by
+      have hlt : v (i ^ n * (s : A)) < v a := hn
+      rw [map_mul, map_pow] at hlt
+      exact le_of_lt hlt
+    calc ((g₀ ^ n : (ValuativeRel.ValueGroupWithZero A)ˣ) : ValuativeRel.ValueGroupWithZero A)
+        = (v i) ^ n := by simp [hg₀_def]
+      _ ≤ v a / v (s : A) := (le_div_iff₀ (zero_lt_iff.mpr hvs_ne)).mpr hval_le
+      _ = (γ : ValuativeRel.ValueGroupWithZero A) := hval
+  -- Coarsen and package.
+  obtain ⟨hw_cont, hw_arch⟩ :=
+    v'.coarsen_maxAvoid_isContinuous_mulArchimedean hv'_cont hg₀_lt hcof
+  set w := v'.coarsen (ConvexSubgroup.maxAvoid hg₀_lt.ne) with hw_def
+  have hw_supp : w.supp = x₀.supp := by
+    rw [hw_def, Valuation.coarsen_supp, hv'_supp, hsupp_eq]
+  haveI : MulArchimedean
+      (WithZero ((ValuativeRel.ValueGroupWithZero A)ˣ ⧸
+        (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup)) := by
+    haveI := hw_arch
+    infer_instance
+  refine ⟨ofValuation w, isContinuous_ofValuation_of w hw_cont, ?_, ?_, ?_⟩
+  · rw [supp_ofValuation, hw_supp]
+    exact hx₀_supp
+  · rw [supp_ofValuation, hw_supp]
+    intro hopen
+    exact hx₀_an (P.idealOfDefinition_le_of_isOpen_of_isPrime hopen)
+  · exact mulArchimedean_valueGroupWithZero_ofValuation w
+
+end PairOfDefinition
+
+end HeightOneAssembly

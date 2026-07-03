@@ -112,6 +112,37 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
      ValuationCoarsening for the in-repo form) and preserves supp (vertical). The
      microbe lemma pair (ValuationPrimeConvex §MicrobeHeightOne, PROVEN) serves the
      `ofPrime` variant if the Spv-level assembly hits a wall.
+  1a. **T-C3-ASSEMBLE-5 EXECUTION PLAN (finalized 2026-07-03, supersedes 1b's recipe)** —
+     three steps, no 250-line duplication:
+     **(a) Cont-only 7.45 for free** (Lemma745.lean, ~12 LOC): new
+     `exists_cont_analytic_supp_ge_of_nonOpen_prime (P) [IsAdicComplete P.I P.A₀] (h𝔭) :
+     ∃ x : Spv A, x ∈ Cont A ∧ 𝔭 ≤ x.supp ∧ ¬ P.idealOfDefinition ≤ x.supp` — proof:
+     `letI : PlusSubring A := ⟨P.A₀⟩` then apply the PROVEN
+     `exists_spa_point_via_restrictToConvex h𝔭 subset_rfl` and project Spa→Cont (the A⁺
+     clause washes out; `hAplus_le_A₀ := subset_rfl` at A⁺ := A₀).
+     **(b) MulArch coarsening of a continuous point at a top-nilpotent non-support element**
+     (ValuationContinuity.lean, ~100 LOC, the real new math): from
+     `(hx : x ∈ Cont A) (hi_nil : IsTopologicallyNilpotent i) (hi_ne : ¬ x.vle i 0)`
+     produce `y ∈ Cont A, y.supp = x.supp`, MulArch value group. Proof skeleton:
+     v := x's valuation; continuity ⟹ γ₀ := v i has γ₀ ≠ 0, γ₀ < 1 (take γ := γ₀ in the
+     sublevel-openness + i^n → 0), and γ₀-powers cofinal below every γ ≠ 0;
+     H := `ConvexSubgroup.maxAvoid` (γ₀-units-part; bridge Γ₀ ≅ WithZero Γ₀ˣ);
+     w := `Valuation.coarsen v H`; MulArch(Γ/H) via `mulArchimedean_iff_convex_trivial` +
+     maxAvoid-maximality + cofinality-sandwich (nontrivial convex K̄ pulls back above H ⟹
+     contains γ̄₀ ⟹ cofinal ⟹ K̄ = ⊤); continuity of w: for δ ≠ 0 pick n with γ̄₀ⁿ < δ
+     (cofinal image), then `{w < δ}` is open via the additive-translate argument
+     `a + {v < γ₀^m} ⊆ {w < δ}` (max(w a, γ̄₀^m) < δ), `{v < γ₀^m}` open by hx;
+     supp preserved (π kills no coe: `coarsen_supp`); package y := ofValuation w;
+     ValueGroupWithZero-MulArch via `MulArchimedean.comap` (session-4 precedent).
+     **(c) carrier surgery** (Presheaf.lean): carrier #5 gains
+     `(P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]` (B2-log: Wedhorn 7.45 assumes
+     complete — wedhorn.txt:3336ff; statement was under-hypothesized); proof = (a) + pick
+     `i` from ¬I≤supp + (b) + (¬I≤supp ⟹ ¬IsOpen supp, elementary open-ideal-absorbs);
+     consumer `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` gains the same
+     hypotheses; ITS consumer `exists_spa_point_supp_ge_in_presheafValue` (Cor832)
+     supplies the concrete complete pair at `presheafValue D`
+     (`presheafValue_pairOfDefinition_concrete` + `presheafValue_isAdicComplete` — verify
+     names at edit).
   1b. **T-C3-ASSEMBLE-5 (READY — all pieces verified on the shelf 2026-07-03)**: carrier #5
      assembly, ~100–150 LOC: (1) dominate `A₀/𝔭₀` — `exists_valuationSubring_of_prime`
      (ValuationContinuity:152, proven); (2) `w := P.pulledBackValuation V₀`: `le_one` on the

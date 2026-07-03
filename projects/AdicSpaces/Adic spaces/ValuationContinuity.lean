@@ -1351,3 +1351,119 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
       (P.rationalQuotient_mem_rationalEnlargedSubring 𝔭 T s ht))
 
 end PairOfDefinition
+
+/-! ### Height-one vertical generization (Wedhorn Remarks 7.38 / 7.40(5) / 4.12)
+
+Coarsening a continuous valuation by the maximal convex subgroup avoiding a
+divisibility-cofinal element `g₀ < 1` of its value group produces a continuous valuation
+with `MulArchimedean` quotient value group; the support is unchanged
+(`Valuation.coarsen_supp`). This is the vertical-generization step of Wedhorn Lemma 7.45:
+combined with the `Cont`-level analytic point of
+`exists_cont_analytic_supp_ge_of_nonOpen_prime` (Lemma745), it produces the height-one
+analytic point above a non-open prime. -/
+
+section HeightOneGenerization
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+
+/-- **Wedhorn Rem 7.38/7.40(5)+4.12 (generization core).** If `v` is continuous and
+`g₀ < 1` is cofinal in the value group (`∀ γ, ∃ n, g₀ ^ n ≤ γ`), then the coarsening of
+`v` by `maxAvoid g₀` is continuous and its value group `Γ ⧸ maxAvoid g₀` is
+`MulArchimedean`. -/
+theorem Valuation.coarsen_maxAvoid_isContinuous_mulArchimedean
+    {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+    (v : Valuation A (WithZero Γ)) (hv : v.IsContinuous)
+    {g₀ : Γ} (hg₀_lt : g₀ < 1)
+    (hcof : ∀ γ : Γ, ∃ n : ℕ, g₀ ^ n ≤ γ) :
+    (v.coarsen (ConvexSubgroup.maxAvoid hg₀_lt.ne)).IsContinuous ∧
+      MulArchimedean (Γ ⧸ (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup) := by
+  set H := ConvexSubgroup.maxAvoid hg₀_lt.ne with hH_def
+  set π := QuotientGroup.mk' H.toSubgroup with hπ_def
+  -- The class of `g₀` is `< 1` in the quotient.
+  have hg₀_bar_ne : π g₀ ≠ 1 := fun h1 ↦
+    ConvexSubgroup.not_mem_maxAvoid hg₀_lt.ne ((QuotientGroup.eq_one_iff g₀).mp h1)
+  have hg₀_bar_lt : π g₀ < 1 :=
+    lt_of_le_of_ne (H.quotientMk_le_one hg₀_lt.le) hg₀_bar_ne
+  -- Cofinality descends to the quotient.
+  have hcof_bar : ∀ d : Γ ⧸ H.toSubgroup, ∃ n : ℕ, π g₀ ^ n ≤ d := by
+    intro d
+    obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
+    obtain ⟨n, hn⟩ := hcof x
+    exact ⟨n, by rw [← map_pow]; exact H.quotientMk_monotone hn⟩
+  -- `MulArchimedean` of the quotient: every convex subgroup is trivial.
+  have hArch : MulArchimedean (Γ ⧸ H.toSubgroup) := by
+    rw [ConvexSubgroup.mulArchimedean_iff_convex_trivial]
+    intro K
+    by_cases hK : K = ⊥
+    · exact Or.inl hK
+    refine Or.inr ?_
+    have hπ_mono : Monotone π := H.quotientMk_monotone
+    -- The pullback of `K` strictly contains `H`, hence contains `g₀` by maximality.
+    have hg₀K : π g₀ ∈ K := by
+      by_contra hg₀_not
+      have hK'_le : K.comap (π : Γ →* _) hπ_mono ≤ H :=
+        ConvexSubgroup.le_maxAvoid_of_not_mem
+          (fun hmem ↦ hg₀_not (ConvexSubgroup.mem_comap.mp hmem))
+      apply hK
+      ext d
+      simp only [ConvexSubgroup.mem_bot]
+      constructor
+      · intro hd
+        obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
+        have hx_K' : x ∈ K.comap (π : Γ →* _) hπ_mono := ConvexSubgroup.mem_comap.mpr hd
+        exact (QuotientGroup.eq_one_iff x).mpr (SetLike.le_def.mp hK'_le hx_K')
+      · rintro rfl
+        exact K.one_mem
+    -- Sandwich: every element of the quotient lies between powers of `π g₀`.
+    ext d
+    simp only [ConvexSubgroup.mem_top, iff_true]
+    obtain ⟨n, hn⟩ := hcof_bar d
+    obtain ⟨m, hm⟩ := hcof_bar d⁻¹
+    have hd_le : d ≤ (π g₀ ^ m)⁻¹ := by
+      rw [← inv_inv d]
+      exact inv_le_inv' hm
+    exact K.convex (K.pow_mem hg₀K n) (K.inv_mem (K.pow_mem hg₀K m)) hn hd_le
+  refine ⟨?_, hArch⟩
+  -- Continuity of the coarsening: additive translates of `v`-sublevels.
+  intro δ
+  rcases eq_or_ne δ 0 with rfl | hδ
+  · simp only [not_lt_zero]
+    exact isOpen_empty
+  obtain ⟨d, rfl⟩ := WithZero.ne_zero_iff_exists.mp hδ
+  rw [isOpen_iff_mem_nhds]
+  intro a₀ ha₀
+  obtain ⟨n, hn⟩ := hcof_bar d
+  -- `v`-sublevel at `g₀ ^ (n + 1)`; its class is strictly below `π g₀ ^ n ≤ d`.
+  have hsub : ∀ b : A, v b < ↑(g₀ ^ (n + 1)) →
+      v.coarsen H b < ↑d := by
+    intro b hb
+    rcases eq_or_ne (v b) 0 with hb0 | hb0
+    · have : v.coarsen H b = 0 := by
+        simp [Valuation.coarsen_apply, hb0]
+      simp [this]
+    obtain ⟨gb, hgb⟩ := WithZero.ne_zero_iff_exists.mp hb0
+    have hgb_lt : gb < g₀ ^ (n + 1) := by
+      rw [← hgb] at hb
+      exact_mod_cast hb
+    have hπgb : π gb ≤ π g₀ ^ (n + 1) := by
+      rw [← map_pow]
+      exact H.quotientMk_monotone hgb_lt.le
+    have hstep : π g₀ ^ (n + 1) < π g₀ ^ n := by
+      rw [pow_succ]
+      exact mul_lt_of_lt_one_right' _ hg₀_bar_lt
+    have : v.coarsen H b = ↑(π gb) := by
+      simp only [Valuation.coarsen_apply, ← hgb, WithZero.mapMonoidWithZeroHom_apply_coe]
+      rfl
+    rw [this]
+    exact_mod_cast lt_of_le_of_lt hπgb (lt_of_lt_of_le hstep hn)
+  have hopen : IsOpen {b : A | v b < ↑(g₀ ^ (n + 1))} := hv _
+  have hmem : a₀ + 0 ∈ (a₀ + ·) '' {b : A | v b < ↑(g₀ ^ (n + 1))} :=
+    Set.mem_image_of_mem _ (by simp)
+  refine Filter.mem_of_superset
+    (((Homeomorph.addLeft a₀).isOpenMap _ hopen).mem_nhds (by simpa using hmem)) ?_
+  rintro _ ⟨b, hb, rfl⟩
+  calc v.coarsen H (a₀ + b) ≤ max (v.coarsen H a₀) (v.coarsen H b) :=
+        Valuation.map_add _ _ _
+    _ < ↑d := max_lt ha₀ (hsub b hb)
+
+end HeightOneGenerization

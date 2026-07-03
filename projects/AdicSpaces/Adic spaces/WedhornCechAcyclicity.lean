@@ -8286,11 +8286,13 @@ and `A⁺ ⊆ P.A₀` are threaded explicitly (matching `spanTop_iff_noCommonZer
 interface); the whole-space assembly supplies them from `globalLocData.P` +
 `[CompatiblePlusSubring A]` + the bundle's completeness. -/
 theorem span_top_of_distinguished_products [DecidableEq A] [IsHuberRing A] [T2Space A]
-    [NonarchimedeanRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] (LP : List (Finset A × A))
+    [NonarchimedeanRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
+    (LP : List (Finset A × A))
     (hts : ∀ p ∈ LP, p.2 ∈ p.1) (h1 : ∀ p ∈ LP, (1 : A) ∈ p.1)
     (hcovSpa : ∀ v ∈ Spa A A⁺, ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2) :
     Ideal.span (distinguishedProducts LP : Set A) = ⊤ := by
-  refine (spanTop_iff_noCommonZero_spa (distinguishedProducts LP)).mpr ?_
+  refine (spanTop_iff_noCommonZero_spa P (distinguishedProducts LP)).mpr ?_
   intro v hv
   obtain ⟨s, hsS, _, _, hvs0⟩ := distinguishedProducts_cover LP hts h1 hv (hcovSpa v hv)
   exact ⟨s, hsS, hvs0⟩
@@ -12025,7 +12027,10 @@ theorem exists_form_a_refinement_coversSpa [DecidableEq A]
   obtain ⟨LP, hts, h1, hcovLP, hrelLP, hrefLP⟩ :=
     exists_finite_normalized_rational_refinement 𝒱 hcov
   refine ⟨distinguishedProducts LP, ?_, ?_, ?_⟩
-  · exact span_top_of_distinguished_products LP hts h1 hcovLP
+  letI P_amb : PairOfDefinition A := (IsTateRing.principalPair A).toPairOfDefinition
+  haveI : IsAdicComplete P_amb.I P_amb.A₀ :=
+    principalPair_isAdicComplete_of_stronglyNoetherianTate
+  · exact span_top_of_distinguished_products P_amb LP hts h1 hcovLP
   · intro v hv
     obtain ⟨s, hsS, hmem⟩ := distinguishedProducts_cover LP hts h1 hv (hcovLP v hv)
     exact ⟨s, hsS, by rw [← rationalOpen_distinguished_eq LP hts h1 hcovLP]; exact hmem⟩
@@ -12103,8 +12108,11 @@ theorem exists_form_a_refinement [DecidableEq A]
     fun v hv => C.hcover v (hbase v hv)
   obtain ⟨LP, hts, h1, hcovLP, hrelLP, hrefLP⟩ :=
     exists_finite_normalized_rational_refinement C.covers hcov𝒱
+  letI P_amb : PairOfDefinition A := (IsTateRing.principalPair A).toPairOfDefinition
+  haveI : IsAdicComplete P_amb.I P_amb.A₀ :=
+    principalPair_isAdicComplete_of_stronglyNoetherianTate
   have hspanS : Ideal.span ((distinguishedProducts LP : Finset A) : Set A) = ⊤ :=
-    span_top_of_distinguished_products LP hts h1 hcovLP
+    span_top_of_distinguished_products P_amb LP hts h1 hcovLP
   -- the form-(a) pieces: R(S/f) at the base pair (genPieceDatum)
   refine ⟨distinguishedProducts LP,
     fun f => genPieceDatum C.base.P (distinguishedProducts LP) f hspanS,

@@ -2702,7 +2702,7 @@ theorem RationalCovering.noCommonZero_plusHalf_of_refines_span_top
     (C.rationalOpen_plusDatum_eq_insert f₀).symm ▸ hv
   have hv_spa : v ∈ Spa A A⁺ :=
     rationalOpen_subset_spa (laurentPlus_subset C.base f₀ hv_plusDatum)
-  exact ((spanTop_iff_noCommonZero_spa S).mp hspan) v hv_spa
+  exact ((spanTop_iff_noCommonZero_spa P S).mp hspan) v hv_spa
 
 /-- **Minus-half no-common-zero from `refines_span_top`**. Mirror of
 the plus-half version via `laurentMinus_subset`. -/
@@ -2718,7 +2718,7 @@ theorem RationalCovering.noCommonZero_minusHalf_of_refines_span_top
   intro v hv
   have hv_spa : v ∈ Spa A A⁺ :=
     rationalOpen_subset_spa (laurentMinus_subset C.base f₀ hv)
-  exact ((spanTop_iff_noCommonZero_spa S).mp hspan) v hv_spa
+  exact ((spanTop_iff_noCommonZero_spa P S).mp hspan) v hv_spa
 
 /-- **`f₀` has non-zero valuation on the minus half**. On the Laurent-
 minus half at `f₀`, the valuation of `f₀` dominates `C.base.s` (which
@@ -2761,7 +2761,7 @@ theorem RationalCovering.noCommonZero_erase_of_f₀_zero
     ∀ v ∈ Spa A A⁺, v.vle f₀ 0 → ∃ g ∈ S.erase f₀, ¬ v.vle g 0 := by
   intro v hv_spa hv_f₀
   obtain ⟨f, hf_mem, hvf⟩ :=
-    (spanTop_iff_noCommonZero_spa S).mp hspan v hv_spa
+    (spanTop_iff_noCommonZero_spa P S).mp hspan v hv_spa
   refine ⟨f, Finset.mem_erase.mpr ⟨?_, hf_mem⟩, hvf⟩
   intro h_eq
   exact hvf (h_eq ▸ hv_f₀)
@@ -2799,7 +2799,7 @@ theorem RationalCovering.refines_span_top_erase_of_noCommonZero_nonzero_f₀
     (h_cover_nonzero_f₀ :
       ∀ v ∈ Spa A A⁺, ¬ v.vle f₀ 0 → ∃ g ∈ S.erase f₀, ¬ v.vle g 0) :
     Ideal.span ((S.erase f₀ : Finset A) : Set A) = ⊤ := by
-  rw [spanTop_iff_noCommonZero_spa]
+  rw [spanTop_iff_noCommonZero_spa P]
   intro v hv_spa
   by_cases h_f₀_zero : v.vle f₀ 0
   · exact RationalCovering.noCommonZero_erase_of_f₀_zero P hAplus_le_A₀

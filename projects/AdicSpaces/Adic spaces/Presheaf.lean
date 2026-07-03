@@ -12,6 +12,8 @@ import «Adic spaces».LocalizationTopology
 import «Adic spaces».OrderedGroupConvex
 import «Adic spaces».Prop752
 import «Adic spaces».RationalSubsets
+import «Adic spaces».Lemma745
+import «Adic spaces».ValuationContinuity
 import «Adic spaces».WedhornLocalizationContinuity
 
 /-!
@@ -3935,23 +3937,24 @@ theorem heightOne_le_one_on_powerBounded
 For a non-open prime `𝔭` there is a continuous **analytic** valuation `x` of **height one**
 (encoded as `MulArchimedean (ValueGroupWithZero A)`, Prop 1.14) with `𝔭 ≤ supp x`.
 
-FAITHFUL LEAF (`sorry`): Wedhorn builds an analytic continuous `v` with `𝔭 ≤ supp v` (the repo's
-`PairOfDefinition.exists_spa_point_via_restrictToConvex` supplies this), then passes to its
-height-one **vertical generalisation** `x` (Remark 4.12, valid since `v` is microbial). The repo's
-height-one machinery is the `ofPrime` coarsening (`ValuationSubring.mulArchimedean_ofPrime_of_height_one`,
-`exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime`), which still needs the height-one
-prime `Q` of the valuation ring — the documented "minimal prime above `φ(I)` is height-one" gap
-(valuation-ring dimension theory). Isolated as one named leaf per CLAUDE.md; consumed by
-`exists_cont_supp_ge_powerBounded_of_nonOpen_prime` below via Prop 7.41
-(`heightOne_le_one_on_powerBounded`), which discharges the `A°` bound. -/
+**PROVEN 2026-07-03** (was the C3 deep leaf): delegates to
+`PairOfDefinition.exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime'` (Lemma745) —
+the `Cont`-level analytic point of `exists_spa_point_via_restrictToConvex` (7.45 Steps 3–7,
+at the plus subring `A⁺ := A₀`), vertically generized to height one by
+`Valuation.coarsen_maxAvoid_isContinuous_mulArchimedean` (ValuationContinuity, Wedhorn
+Rem 7.38/7.40(5)/4.12). ⚠ Statement surgery (b2_log 2026-07-03): gained
+`(P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]` — Wedhorn 7.45 assumes a COMPLETE
+Huber ring (wedhorn.txt:3336, "Prop 5.38, completeness"); the previous pair-free statement
+was under-hypothesized and unprovable as stated. -/
 theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
     ∃ x : Spv A, x ∈ Cont A ∧ 𝔭 ≤ x.supp ∧ ¬ IsOpen (x.supp : Set A) ∧
       (letI : ValuativeRel A := x.toValuativeRel
        MulArchimedean (ValuativeRel.ValueGroupWithZero A)) :=
-  sorry
+  P.exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime' h𝔭
 
 /-- **Wedhorn 7.45 + 7.41 (height-one bound form)** — the source-justified leaf underlying the
 faithful non-open-prime Spa-point existence. For a non-open prime `𝔭` there is a continuous
@@ -3966,11 +3969,12 @@ PROVEN). Once `v` is bounded on `A°`, ANY ring of integral elements `A⁺ ⊆ A
 theorem exists_cont_supp_ge_powerBounded_of_nonOpen_prime
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
     ∃ v : Spv A, v ∈ Cont A ∧ 𝔭 ≤ v.supp ∧
       ∀ a ∈ (TopologicalRing.powerBoundedSubring A : Set A), v.vle a 1 := by
   obtain ⟨x, hx_cont, hx_supp, hx_an, hArch⟩ :=
-    exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime (A := A) h𝔭
+    exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime (A := A) P h𝔭
   exact ⟨x, hx_cont, hx_supp,
     fun a ha => heightOne_le_one_on_powerBounded x hx_cont hx_an hArch a ha⟩
 

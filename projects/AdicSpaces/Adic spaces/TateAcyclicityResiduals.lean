@@ -509,7 +509,7 @@ theorem span_top_of_per_D_finite_cover
     outside_rescue_of_per_D_cover C mk_S_D h_in_D h_cover_D
   -- Reduce to no-common-zero on Spa via Prop 7.14 and case-split on
   -- membership in the base rational open.
-  refine (spanTop_iff_noCommonZero_spa _).mpr ?_
+  refine (spanTop_iff_noCommonZero_spa P _).mpr ?_
   intro v hv_spa
   by_cases hv_base : v ∈ rationalOpen C.base.T C.base.s
   · obtain ⟨D, hD_mem, hv_D⟩ := C.hcover v hv_base
