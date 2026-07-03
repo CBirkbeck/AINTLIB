@@ -3126,4 +3126,64 @@ theorem tendsto_primeSideH_auxF_left (s : ℂ) {X : ℝ} (hX : 1 < X) (ha : 0 < 
   ((continuous_primeSideH_auxF K s hX ha has).continuousAt).tendsto.mono_left
     nhdsWithin_le_nhds
 
+/-- **The Weil–Poitou explicit formula at the auxiliary test function** (SP3
+milestone): every hypothesis of `weil_explicit_formula` holds for `F = F_{s,X}`
+when `1 < X` and `0 < a ≤ 1/4` with `a < Re s - 1`. The zero-capture sums over
+the zeros of `Λ_K` in the band `-a < Re ρ < 1+a` along good heights converge to
+Poitou's right-hand side, with both one-sided prime-side limits equal to
+`H(0)`. -/
+theorem weil_explicit_formula_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) {a : ℝ}
+    (ha : 0 < a) (ha' : a ≤ 1/4) (has : a < s.re - 1) :
+    ∃ T : ℕ → ℝ, Tendsto T atTop atTop ∧
+      Tendsto (fun n : ℕ => ∑ᶠ ρ, (((MeromorphicOn.divisor (completedDedekindZetaEntire K)
+          (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) ρ : ℂ))
+            * paperPhi (auxF s X) ρ)
+        atTop (nhds
+          ((paperPhi (auxF s X) 0 + paperPhi (auxF s X) 1)
+            + ((Real.log |NumberField.discr K| : ℝ) : ℂ) * auxF s X 0
+            + (((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+                + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                  * (Real.eulerMascheroniConstant + Real.log (8*π))
+                + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ)
+                * auxF s X 0
+            + (((NumberField.InfinitePlace.nrRealPlaces K
+                + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (auxF s X 0 - auxF s X y))
+            + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (auxF s X 0 - auxF s X y))
+            - (primeSideH K a (auxF s X) 0 + primeSideH K a (auxF s X) 0))) := by
+  have hs : 1/2 < s.re := by linarith
+  obtain ⟨M, hM0, hMb⟩ := exists_band_bound_paperPhi_auxF s hX ha has
+  refine weil_explicit_formula K ha ha'
+    (integrable_auxF s hX hs)
+    (locallyBoundedVariationOn_auxF_re s hX hs)
+    (locallyBoundedVariationOn_auxF_im s hX hs)
+    (((continuous_auxF s hX).continuousAt).tendsto.mono_left nhdsWithin_le_nhds)
+    (auxF_neg s X)
+    (integrableOn_auxF_diffQuot_window s hX hs)
+    (memLp_two_auxF_diffQuot s hX hs)
+    (tendsto_boundary_auxF s hX hs (by norm_num) (by norm_num) (by norm_num)
+      atTop tendsto_abs_atTop_atTop)
+    (tendsto_boundary_auxF s hX hs (by norm_num) (by norm_num) (by norm_num)
+      atBot tendsto_abs_atBot_atTop)
+    (tendsto_boundary_auxF_half s hX hs (by norm_num) (by norm_num) (by norm_num)
+      atTop tendsto_abs_atTop_atTop)
+    (tendsto_boundary_auxF_half s hX hs (by norm_num) (by norm_num) (by norm_num)
+      atBot tendsto_abs_atBot_atTop)
+    (differentiableAt_paperPhi_auxF s hX ha has)
+    (B := fun T : ℝ => M / max T 1)
+    (fun σ t h1 h2 => hMb σ t h1 h2)
+    (tendsto_div_max_mul_log_sq M)
+    (integrable_auxF_mul_exp s hX (by rw [abs_of_pos (by linarith)]; linarith))
+    (locallyBoundedVariationOn_auxF_mul_exp_re s hX ha has)
+    (locallyBoundedVariationOn_auxF_mul_exp_im s hX ha has)
+    (locallyBoundedVariationOn_poleWindow_auxF_re s hX ha has)
+    (locallyBoundedVariationOn_poleWindow_auxF_im s hX ha has)
+    (locallyBoundedVariationOn_primeSideH_auxF_re K s hX ha has)
+    (locallyBoundedVariationOn_primeSideH_auxF_im K s hX ha has)
+    (tendsto_primeSideH_auxF_right K s hX ha has)
+    (tendsto_primeSideH_auxF_left K s hX ha has)
+
 end DedekindResidue
