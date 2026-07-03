@@ -214,6 +214,30 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
   case-formula; the cΓ-membership quantifier is the subtlety) OR Wedhorn 7.5's direct
   spectrality encoding. /develop --decompose THIS against wedhorn.txt:2860-2940
   (7.1-7.5 block) + SpvAITopology's current decl inventory before writing any code.
+- **C4 DECOMPOSE SKELETON (K-tree, from the 7.5-proof read wedhorn.txt:2860-2884)** —
+  next /develop pass turns these into `:= by sorry` decls + tickets:
+  - **K1** (Wedhorn 7.5(iii), verbatim "We claim that W = r⁻¹(U)" wedhorn.txt:2862-2872):
+    `r⁻¹(Spv(A,I)-basic (T/s)) = Spv-basic (T/s)` for `I ⊆ √(T·A)` — the retraction pulls
+    basics to basics; in-repo partials: session-7 `retraction_ideal_ne_zero` (7.5(3)) +
+    T-SPVAI transfers. This IS the finite-coordinate determination of `r`.
+  - **K2**: cube-continuity of `ιSpv_bool ∘ r` — each Boolean coordinate `(r v).vle g h`
+    is a finite Boolean formula in `v`-coordinates (Wedhorn 7.2's case-definition of the
+    restricted valuation; K1 is the geometric shadow).
+  - **K3**: `image(Spv(A,I))` closed in the cube = fixed-point set of the continuous
+    self-map `r̂` (cube is Hausdorff: product of discrete) ∩ `range ιSpv_bool` (PROVEN
+    closed). Fixed-point sets of continuous maps into Hausdorff are closed — mathlib
+    `isClosed_eq` on `r̂` vs `id` restricted to the (closed) range.
+  - **K4** (Thm 7.10, wedhorn.txt:2908-2926, proof read + quoted on board): 
+    `image(Cont) = image(Spv(A,I)) ∩ ⋂_{a ∈ I-image} {r | ¬ r(1,a)}` — the `⊆`-half is
+    the PROVEN `cont_to_ideal_le_supp_of_mem_defIdeal`-style elementary argument; the
+    `⊇`-half is 7.10's converse (cofinality from the Tate/bounded trick, "Choose n such
+    that t·aⁿ ∈ I").
+  - **K5**: `image(Spa) = image(Cont) ∩ ⋂_{f∈A⁺} {r | r(f,1)}` — from the PROVEN
+    `Spa = Cont ∩ ⋂ …` (AdicSpectrum:137).
+  - **K6** = keystone: intersection of K3/K4/K5-closed pieces. Then carrier #6 via cube
+    compactness (product of finite discrete, mathlib) + the existing
+    `isCompact_preimage_rationalOpen_noHArch` packaging + cover-finite-subcover
+    (Cor 7.32, statement gains `[IsTateRing A]` per its own docstring note).
 - **NEXT = C4 (T-L5)**: its own decompose pass per the standing plan — the keystone
   `isClosed_image_spa_ιSpv_bool_noHArch` decomposes per the 2026-06-05 finding as
   (range ✓ proven) ∩ (A⁺-cylinders) ∩ (no-hArch Cont-closedness = the microbial/Spv(A,I)

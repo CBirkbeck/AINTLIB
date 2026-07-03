@@ -1,1 +1,1 @@
-FOCUS: C4 decompose (T-L5) — PHASE 1: read Wedhorn Thm 7.10 proof (wedhorn.txt ~§7.2) + SpvAITopology current state; target = isClosed_image_spa_ιSpv_bool_noHArch (SpaCompactNoHArch:310). Everything else PROVEN (carriers=2).
+FOCUS: C4 /develop --decompose next — target isClosed_image_spa_ιSpv_bool_noHArch via [range ✓ + clopen cylinders ✓ + Spv(A,I)-closedness]; read wedhorn.txt:2860-2940 (7.1-7.5) + SpvAITopology inventory; retraction-fixed-point route primary. Carriers=2, build green, 11 commits today.
