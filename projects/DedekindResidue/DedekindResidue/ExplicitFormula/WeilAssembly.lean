@@ -592,6 +592,8 @@ theorem integrable_poleWindow (hc : 0 < c) (hG : Integrable G) :
         ring
     _ = poleWindow c G u := h1
 
+variable {a : ℝ} {F : ℝ → ℂ}
+
 /-- `Φ` on the edge `Re s = 1+a` is the Fourier integral of the weighted function. -/
 theorem paperPhi_edge (a : ℝ) (F : ℝ → ℂ) (t : ℝ) :
     paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
