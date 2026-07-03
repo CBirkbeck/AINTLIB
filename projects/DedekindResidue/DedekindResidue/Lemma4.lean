@@ -1250,6 +1250,136 @@ theorem lemma4_diff_display (hGRH : GeneralizedRiemannHypothesis K)
   linear_combination h1 - h2
 
 
+/-! ### Realifying the archimedean display integrals (L4-c-i) -/
+
+/-- The display's archimedean integrals are coercions of their real avatars. -/
+theorem arch_display_integral_eq (σ X : ℝ) (w : ℝ → ℝ) :
+    (∫ y in Set.Ioi (0:ℝ), ((w y : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+      = ((∫ y in Set.Ioi (0:ℝ), w y * (1 - auxFCut σ (Real.log X) y) : ℝ) : ℂ) := by
+  rw [← integral_complex_ofReal]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+  rw [auxF_eq_auxFCut σ X hy]
+  push_cast
+  ring
+
+theorem measurable_one_sub_auxFCut (σ T : ℝ) :
+    Measurable (fun y : ℝ => 1 - auxFCut σ T y) := by
+  refine measurable_const.sub ?_
+  unfold auxFCut
+  refine Measurable.ite (measurableSet_le measurable_id measurable_const)
+    measurable_const ?_
+  fun_prop
+
+/-- `0 ≤ 1 − F_{σ,e^T}(y) ≤ 1` for `y, T > 0`, `σ > 1/2`. -/
+theorem one_sub_auxFCut_mem {σ T y : ℝ} (hσ : 1/2 < σ) (hT : 0 < T) (hy : 0 < y) :
+    0 ≤ 1 - auxFCut σ T y ∧ 1 - auxFCut σ T y ≤ 1 := by
+  rw [auxFCut]
+  by_cases hcase : y ≤ T
+  · rw [if_pos hcase]
+    norm_num
+  · rw [if_neg hcase]
+    rw [not_le] at hcase
+    constructor
+    · have h1 : T/y ≤ 1 := by
+        rw [div_le_one hy]
+        linarith
+      have h2 : Real.exp (-(σ - 1/2)*(y - T)) ≤ 1 := by
+        have h2a : (0:ℝ) ≤ σ - 1/2 := by linarith
+        have h2b : (0:ℝ) ≤ y - T := by linarith
+        have h2c : (0:ℝ) ≤ (σ - 1/2)*(y - T) := mul_nonneg h2a h2b
+        calc Real.exp (-(σ - 1/2)*(y - T)) ≤ Real.exp 0 :=
+              Real.exp_le_exp.mpr (by nlinarith)
+          _ = 1 := Real.exp_zero
+      have h3 : T/y * Real.exp (-(σ - 1/2)*(y - T)) ≤ 1 := by
+        calc T/y * Real.exp (-(σ - 1/2)*(y - T)) ≤ 1 * 1 :=
+              mul_le_mul h1 h2 (Real.exp_pos _).le one_pos.le
+          _ = 1 := by norm_num
+      linarith
+    · have h4 : 0 ≤ T/y * Real.exp (-(σ - 1/2)*(y - T)) := by positivity
+      linarith
+
+/-- `2 sinh(y/2) = e^{y/2}(1 − e^{−y})`. -/
+theorem two_sinh_half_eq' {y : ℝ} : 2 * Real.sinh (y/2)
+    = Real.exp (y/2) * (1 - Real.exp (-y)) := by
+  have h1 : Real.exp (y/2) * Real.exp (-y) = Real.exp (-(y/2)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [Real.sinh_eq, mul_sub, mul_one, h1]
+  ring
+
+/-- The sinh-weighted `(1 − F)`-integrand is integrable on `(0, ∞)`. -/
+theorem integrableOn_sinh_weight_one_sub {σ T : ℝ} (hσ : 1/2 < σ) (hT : 0 < T) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2*Real.sinh (y/2)) * (1 - auxFCut σ T y)) (Set.Ioi 0) := by
+  have hsplit : Set.Ioi (0:ℝ) = Set.Ioc 0 T ∪ Set.Ioi T := by
+    rw [Set.Ioc_union_Ioi_eq_Ioi hT.le]
+  rw [hsplit]
+  refine MeasureTheory.IntegrableOn.union ?_ ?_
+  · refine MeasureTheory.integrableOn_zero.congr_fun (fun y hy => ?_) measurableSet_Ioc
+    rw [auxFCut, if_pos hy.2]
+    norm_num
+  · have hmaj : MeasureTheory.IntegrableOn (fun y : ℝ =>
+        (1 - Real.exp (-T))⁻¹ * Real.exp (-(1/2) * y)) (Set.Ioi T) :=
+      (exp_neg_integrableOn_Ioi T (by norm_num : (0:ℝ) < 1/2)).const_mul _
+    refine MeasureTheory.Integrable.mono' hmaj ?_ ?_
+    · refine MeasureTheory.AEStronglyMeasurable.mul ?_
+        (measurable_one_sub_auxFCut σ T).aestronglyMeasurable
+      refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+      refine continuousOn_const.div (by fun_prop) (fun y hy => ?_)
+      have hs : 0 < Real.sinh (y/2) :=
+        Real.sinh_pos_iff.mpr (by linarith [hT.trans hy])
+      positivity
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+      have hyT : T < y := hy
+      have hy0 : 0 < y := hT.trans hyT
+      have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+      have hmem := one_sub_auxFCut_mem hσ hT hy0
+      rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (by positivity) hmem.1)]
+      have hpos1 : (0:ℝ) < 1 - Real.exp (-T) := by
+        linarith [exp_neg_lt_one hT]
+      have hwval : 1/(2*Real.sinh (y/2))
+          ≤ (1 - Real.exp (-T))⁻¹ * Real.exp (-(1/2)*y) := by
+        have hTy : 1 - Real.exp (-T) ≤ 1 - Real.exp (-y) := by
+          have h5 : Real.exp (-y) ≤ Real.exp (-T) :=
+            Real.exp_le_exp.mpr (by linarith)
+          linarith
+        have hexphalf : Real.exp (-(1/2)*y) = (Real.exp (y/2))⁻¹ := by
+          rw [← Real.exp_neg]
+          congr 1
+          ring
+        rw [two_sinh_half_eq', one_div, mul_inv, hexphalf,
+          mul_comm ((1 - Real.exp (-T))⁻¹)]
+        gcongr
+      calc 1/(2*Real.sinh (y/2)) * (1 - auxFCut σ T y)
+          ≤ 1/(2*Real.sinh (y/2)) * 1 :=
+            mul_le_mul_of_nonneg_left hmem.2 (by positivity)
+        _ = 1/(2*Real.sinh (y/2)) := mul_one _
+        _ ≤ (1 - Real.exp (-T))⁻¹ * Real.exp (-(1/2)*y) := hwval
+
+/-- The cosh-weighted `(1 − F)`-integrand is integrable on `(0, ∞)`. -/
+theorem integrableOn_cosh_weight_one_sub {σ T : ℝ} (hσ : 1/2 < σ) (hT : 0 < T) :
+    MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2*Real.cosh (y/2)) * (1 - auxFCut σ T y)) (Set.Ioi 0) := by
+  refine (integrableOn_sinh_weight_one_sub hσ hT).mono' ?_ ?_
+  · refine MeasureTheory.AEStronglyMeasurable.mul ?_
+      (measurable_one_sub_auxFCut σ T).aestronglyMeasurable
+    refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    refine continuousOn_const.div (by fun_prop) (fun y _ => ?_)
+    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+    positivity
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+    have hy0 : 0 < y := hy
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+    have hmem := one_sub_auxFCut_mem hσ hT hy0
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (by positivity) hmem.1)]
+    have hsc : Real.sinh (y/2) < Real.cosh (y/2) := Real.sinh_lt_cosh _
+    have hw12 : 1/(2*Real.cosh (y/2)) ≤ 1/(2*Real.sinh (y/2)) :=
+      one_div_le_one_div_of_le (by positivity) (by linarith)
+    exact mul_le_mul_of_nonneg_right hw12 hmem.1
+
+
 end DedekindResidue
 
 end
