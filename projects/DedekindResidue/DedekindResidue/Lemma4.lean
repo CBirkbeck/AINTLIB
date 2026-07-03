@@ -1186,6 +1186,70 @@ theorem lemma4_relative_display (hGRH : GeneralizedRiemannHypothesis K)
   linear_combination hK - hQ
 
 
+/-! ### The two-cutoff difference (L4-b)
+
+Subtracting the relative display at cutoffs `X` and `X'` kills the remaining
+cutoff-free terms (`log Δ_K` and the Γ-constant), leaving only differences that the
+four estimates (c1–c4) control — with no `log X` loss. -/
+
+/-- The plateau (prime-side defect) sum, abbreviated. -/
+noncomputable def plateauSum (K : Type*) [Field K] [NumberField K] (σ X : ℝ) : ℝ :=
+  ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+    (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+      then Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+        * (1 - Real.log X
+            / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * Real.exp (-(σ - 1/2)
+                * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                  - Real.log X)))
+      else 0)
+
+/-- **The two-cutoff difference of the relative display** (L4-b): all cutoff-free
+terms cancel. -/
+theorem lemma4_diff_display (hGRH : GeneralizedRiemannHypothesis K)
+    (hRH : RiemannHypothesis)
+    {σ : ℝ} (hσ : 1 < σ) {X' X : ℝ} (hX' : 1 < X') (hXX : X' ≤ X)
+    {a : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (has : a < σ - 1) :
+    2 * ((Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+        * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+          - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)) : ℝ) : ℂ)
+      - 2 * ((Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+        * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+          - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)) : ℝ) : ℂ)
+      = ((((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ) - 1)
+            * ((∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+              - ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X' y))
+        + (((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ) - 1)
+            * ((∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+              - ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X' y))
+        - 2 * (((plateauSum K σ X : ℝ) : ℂ) - ((plateauSum K σ X' : ℝ) : ℂ))
+        + 2 * (((plateauSum ℚ σ X : ℝ) : ℂ) - ((plateauSum ℚ σ X' : ℝ) : ℂ))
+        - (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X' ρ.1.im))
+        - (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X' ρ.1.im))
+        + (((∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X' ρ.1.im)
+          - ((∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+            - ∑' ρ : ZetaZeros ℚ, (zetaZeroDivisor ℚ ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X' ρ.1.im)) := by
+  have hX : 1 < X := lt_of_lt_of_le hX' hXX
+  have h1 := lemma4_relative_display K hGRH hRH hσ hX ha ha' has
+  have h2 := lemma4_relative_display K hGRH hRH hσ hX' ha ha' has
+  unfold plateauSum
+  push_cast at h1 h2 ⊢
+  linear_combination h1 - h2
+
+
 end DedekindResidue
 
 end
