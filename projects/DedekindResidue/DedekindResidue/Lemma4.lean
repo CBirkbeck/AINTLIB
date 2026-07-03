@@ -654,6 +654,144 @@ theorem auxFCut_sub_eq_integral {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' 
       rw [cutKernel, if_pos hUlt]
 
 
+/-! ### The closed-form archimedean tail integrals (c4-C2)
+
+`∫_U^∞ dy/(e^y−1) = −log(1−e^{−U})` and `∫_U^∞ dy/(e^y+1) = log(1+e^{−U})` — the two
+halves of the `archKernelL` closed form. -/
+
+theorem integrableOn_inv_exp_sub_one {U : ℝ} (hU : 0 < U) :
+    MeasureTheory.IntegrableOn (fun y : ℝ => 1/(Real.exp y - 1)) (Set.Ioi U) := by
+  have hbound : ∀ y ∈ Set.Ioi U, ‖1/(Real.exp y - 1)‖
+      ≤ (1 - Real.exp (-U))⁻¹ * Real.exp (-y) := by
+    intro y hy
+    have hyU : U < y := hy
+    have he1 : Real.exp (-U) < 1 := exp_neg_lt_one hU
+    have hey : 0 < Real.exp y := Real.exp_pos _
+    have hgt : 1 < Real.exp y := by
+      calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+        _ < Real.exp y := Real.exp_lt_exp.mpr (by linarith)
+    rw [Real.norm_eq_abs, abs_of_pos (by positivity : (0:ℝ) < 1/(Real.exp y - 1))]
+    rw [div_le_iff₀ (by linarith : (0:ℝ) < Real.exp y - 1)]
+    have hkey : Real.exp (-y) * (Real.exp y - 1) = 1 - Real.exp (-y) := by
+      rw [mul_sub, ← Real.exp_add, mul_one]
+      norm_num
+    calc (1:ℝ) = (1 - Real.exp (-U))⁻¹ * (1 - Real.exp (-U)) := by
+          rw [inv_mul_cancel₀ (by linarith : (1:ℝ) - Real.exp (-U) ≠ 0)]
+      _ ≤ (1 - Real.exp (-U))⁻¹ * (1 - Real.exp (-y)) := by
+          gcongr
+      _ = (1 - Real.exp (-U))⁻¹ * Real.exp (-y) * (Real.exp y - 1) := by
+          rw [mul_assoc, hkey]
+  refine MeasureTheory.Integrable.mono'
+    ((exp_neg_integrableOn_Ioi U one_pos).const_mul ((1 - Real.exp (-U))⁻¹)) ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    refine ContinuousOn.div continuousOn_const
+      (Real.continuous_exp.continuousOn.sub continuousOn_const) ?_
+    intro y hy
+    have hgt : 1 < Real.exp y := by
+      calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+        _ < Real.exp y := Real.exp_lt_exp.mpr (by linarith [hU.trans hy])
+    linarith
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+    have h1 := hbound y hy
+    calc ‖1/(Real.exp y - 1)‖ ≤ (1 - Real.exp (-U))⁻¹ * Real.exp (-y) := h1
+      _ = (1 - Real.exp (-U))⁻¹ * Real.exp (-1*y) := by norm_num
+
+theorem integral_Ioi_inv_exp_sub_one {U : ℝ} (hU : 0 < U) :
+    ∫ y in Set.Ioi U, 1/(Real.exp y - 1) = -Real.log (1 - Real.exp (-U)) := by
+  have hderiv : ∀ y ∈ Set.Ioi U, HasDerivAt (fun y : ℝ => Real.log (1 - Real.exp (-y)))
+      (1/(Real.exp y - 1)) y := by
+    intro y hy
+    have hyU : U < y := hy
+    have hy0 : 0 < y := hU.trans hyU
+    have he1 : Real.exp (-y) < 1 := exp_neg_lt_one hy0
+    have hexpneg : HasDerivAt (fun y : ℝ => Real.exp (-y)) (-Real.exp (-y)) y := by
+      have h0 := ((hasDerivAt_id y).neg).exp
+      simpa using h0
+    have h1 := ((hasDerivAt_const y (1:ℝ)).sub hexpneg).log
+      (by linarith : (1:ℝ) - Real.exp (-y) ≠ 0)
+    have hval : (0 - -Real.exp (-y))/(1 - Real.exp (-y)) = 1/(Real.exp y - 1) := by
+      rw [zero_sub, neg_neg]
+      rw [div_eq_div_iff (by linarith : (1:ℝ) - Real.exp (-y) ≠ 0)
+        (by
+          have hgt : 1 < Real.exp y := by
+            calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+              _ < Real.exp y := Real.exp_lt_exp.mpr (by linarith)
+          linarith : (Real.exp y - 1) ≠ 0)]
+      rw [mul_sub, ← Real.exp_add, mul_one, neg_add_cancel, Real.exp_zero, one_mul]
+    exact hval ▸ h1
+  have hlim : Tendsto (fun y : ℝ => Real.log (1 - Real.exp (-y))) atTop (nhds 0) := by
+    rw [show (0:ℝ) = Real.log (1 - 0) by norm_num]
+    refine Tendsto.log ?_ (by norm_num)
+    exact tendsto_const_nhds.sub
+      (Real.tendsto_exp_atBot.comp (Tendsto.const_mul_atTop_of_neg
+        (by norm_num : (-1:ℝ) < 0) tendsto_id) |>.congr (fun y => by norm_num))
+  have hkey := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto
+    (f := fun y : ℝ => Real.log (1 - Real.exp (-y)))
+    (f' := fun y : ℝ => 1/(Real.exp y - 1))
+    (by
+      have he1 : Real.exp (-U) < 1 := exp_neg_lt_one hU
+      refine ContinuousWithinAt.log ?_ (by linarith)
+      exact (continuous_const.sub (Real.continuous_exp.comp
+        continuous_neg)).continuousWithinAt)
+    hderiv (integrableOn_inv_exp_sub_one hU) hlim
+  rw [hkey]
+  ring
+
+theorem integrableOn_inv_exp_add_one {U : ℝ} (hU : 0 < U) :
+    MeasureTheory.IntegrableOn (fun y : ℝ => 1/(Real.exp y + 1)) (Set.Ioi U) := by
+  refine (integrableOn_inv_exp_sub_one hU).mono' ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    refine ContinuousOn.div continuousOn_const
+      (Real.continuous_exp.continuousOn.add continuousOn_const) ?_
+    intro y _
+    positivity
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+    have hgt : 1 < Real.exp y := by
+      calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+        _ < Real.exp y := Real.exp_lt_exp.mpr (by linarith [hU.trans hy])
+    rw [Real.norm_eq_abs, abs_of_pos (by positivity : (0:ℝ) < 1/(Real.exp y + 1))]
+    have h1 : (0:ℝ) < Real.exp y - 1 := by linarith
+    have h2 : Real.exp y - 1 ≤ Real.exp y + 1 := by linarith
+    exact one_div_le_one_div_of_le h1 h2
+
+theorem integral_Ioi_inv_exp_add_one {U : ℝ} (hU : 0 < U) :
+    ∫ y in Set.Ioi U, 1/(Real.exp y + 1) = Real.log (1 + Real.exp (-U)) := by
+  have hderiv : ∀ y ∈ Set.Ioi U, HasDerivAt (fun y : ℝ => -Real.log (1 + Real.exp (-y)))
+      (1/(Real.exp y + 1)) y := by
+    intro y hy
+    have hy0 : 0 < y := hU.trans hy
+    have he0 : 0 < Real.exp (-y) := Real.exp_pos _
+    have hexpneg : HasDerivAt (fun y : ℝ => Real.exp (-y)) (-Real.exp (-y)) y := by
+      have h0 := ((hasDerivAt_id y).neg).exp
+      simpa using h0
+    have h1 := (((hasDerivAt_const y (1:ℝ)).add hexpneg).log
+      (by linarith : (1:ℝ) + Real.exp (-y) ≠ 0)).neg
+    have hval : -((0 + -Real.exp (-y))/(1 + Real.exp (-y))) = 1/(Real.exp y + 1) := by
+      rw [zero_add]
+      rw [neg_div, neg_neg]
+      rw [div_eq_div_iff (by linarith : (1:ℝ) + Real.exp (-y) ≠ 0)
+        (by positivity : (Real.exp y + 1) ≠ 0)]
+      rw [mul_add, ← Real.exp_add, mul_one, neg_add_cancel, Real.exp_zero, one_mul]
+    exact hval ▸ h1
+  have hlim : Tendsto (fun y : ℝ => -Real.log (1 + Real.exp (-y))) atTop (nhds 0) := by
+    rw [show (0:ℝ) = -Real.log (1 + 0) by norm_num]
+    refine Tendsto.neg (Tendsto.log ?_ (by norm_num))
+    exact tendsto_const_nhds.add
+      (Real.tendsto_exp_atBot.comp (Tendsto.const_mul_atTop_of_neg
+        (by norm_num : (-1:ℝ) < 0) tendsto_id) |>.congr (fun y => by norm_num))
+  have hkey := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto
+    (f := fun y : ℝ => -Real.log (1 + Real.exp (-y)))
+    (f' := fun y : ℝ => 1/(Real.exp y + 1))
+    (by
+      refine ContinuousWithinAt.neg ?_
+      refine ContinuousWithinAt.log ?_ (by positivity)
+      exact (continuous_const.add (Real.continuous_exp.comp
+        continuous_neg)).continuousWithinAt)
+    hderiv (integrableOn_inv_exp_add_one hU) hlim
+  rw [hkey]
+  ring
+
+
 end DedekindResidue
 
 end
