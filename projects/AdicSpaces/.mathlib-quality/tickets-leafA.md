@@ -1,5 +1,16 @@
 # Ticket board — Separation spine (Leaf A), Wedhorn Thm 8.28(b)
 
+> **★ RE-SYNC 2026-07-03 (/develop --continue):** this board is partially STALE — see the
+> authoritative section at the top of the ROOT `.mathlib-quality/tickets.md`.
+> - **T-LA1 is CLOSED** (commit `3a5e295f` closed `prop_8_30_imagePiece_wholeSpace_flat`;
+>   follow-ups `2c24ea85`/`27b16d73` landed the chain). Not open work.
+> - **T-LA3a/T-LA3b are SUPERSEDED** by the integral-closure-in-completion design
+>   (isIntegrallyClosed free, openness landed `a3808076`) + the **T-PB power-bounded
+>   reroute** (root board, 2026-07-03): the sole IRIE residual is
+>   `completedPlusSubringBase_isBounded` → replaced by `_le_powerBounded` (T-PB15/16/17).
+>   [Hu1] 2.4.3 is NOT needed on this route.
+> - **T-LA4a/T-LA4b remain live** (= carriers #5 and #3 of the root-board trace; C3 lane).
+
 Created 2026-06-23 by /develop. Source-grounded against `references/wedhorn.txt`
 (pdftotext of the Wedhorn PDF) + `references/huber1.txt`. Full decomposition in
 `.mathlib-quality/decomposition-leafA.md`. **Start order (user):** L-A1 first.
@@ -23,7 +34,10 @@ T-LA1 is independent and on the flatness path; T-LA3*/T-LA4* discharge the
 ---
 
 ## [T-LA1] Remark-7.55 geometric chain  — START HERE
-- **Status**: open
+- **Status**: ✅ DONE (2026-06-23/24, commits 8f2fcbef → 46641d47 → 2c24ea85 → 3a5e295f →
+  27b16d73: `prop_8_30_imagePiece_wholeSpace_flat` closed via the faithful chain relocated
+  into RelativePieceKeystone; verified 2026-07-03 — not a sorry carrier on the headline trace)
+- **Status (was)**: open
 - **File**: RelativePieceKeystone.lean
 - **Depends on**: none (per-step + fold already proven)
 - **Type**: theorem (geometric construction, ~300 LOC)

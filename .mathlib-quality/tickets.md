@@ -1,6 +1,97 @@
 # Ticket Board — Thm 8.28(b) sheafiness, revised 4-leaf plan (post /expert-review 2026-06-19)
 
-## ★ UPDATE 2026-06-22 (/develop --continue — T-L4/HU-e SpvAI leaf: B2 + faithful fix)
+## ★★ AUTHORITATIVE RE-SYNC 2026-07-03 (/develop --continue — traced 7-leaf ground truth + T-PB cluster)
+
+**Ground truth, verified today by a CollectAxioms-closure walk (35 454 constants), NOT from
+board memory:** the headline `isSheafy_of_stronglyNoetherian_828b` (WedhornCechAcyclicity:12944)
+builds green (3190 jobs), axioms `[propext, sorryAx, Classical.choice, Quot.sound]`, and its
+transitive closure contains **EXACTLY 7 direct sorry carriers**:
+
+| # | Carrier | File | Wedhorn | Cluster |
+|---|---------|------|---------|---------|
+| 1 | `RationalLocData.completedPlusSubringBase_isBounded` | Presheaf (≈:536 post-skeleton) | 7.19/7.20 | **C1 IRIE-boundedness (B2 over-strong; T-PB reroute below)** |
+| 2 | `locLift_divByS_isPowerBounded_completion_of_tate` | Presheaf (≈:4010) | 7.41 / valuative criterion | C2 LL-bdd |
+| 3 | `exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete` | Presheaf (≈:2820) | 7.51/7.49 | C3 Nullstellensatz |
+| 4 | `spa_point_nonOpen_of_rational_subset` | Presheaf | 7.52 | C3 Nullstellensatz |
+| 5 | `exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime` | Presheaf | 7.45 + 7.41 | C3 Nullstellensatz (deep) |
+| 6 | `exists_dominating_unit_noHArch_finset_aux` | Cor732 | Cor 7.32 | C4 Spa-QC side |
+| 7 | `isClosed_image_spa_ιSpv_bool_noHArch` | SpaCompactNoHArch | 7.35 | C4 Spa-QC keystone (deepest) |
+
+**Stale-entry corrections (board hygiene):**
+- `tickets-leafA.md` **T-LA1 is CLOSED** (commit 3a5e295f closed `prop_8_30_imagePiece_wholeSpace_flat`;
+  the Remark-7.55 chain is built). The leafA board's "Status: open" is stale.
+- This board's T-L1 ✅ (unchanged), **T-L2's residual is exactly carrier #1** (openness landed
+  a3808076; integrally-closed free; boundedness = the B2), T-L3 = carriers #3/#4/#5 lane,
+  T-L4 = carrier #2's criterion lane (criterion itself now BUILT, bottoms at carrier #1),
+  T-L5 = carriers #6/#7.
+- **Restored from the lost 2026-06-24 session task tracker** (expert-review/2026-06-24/integration.md):
+  reviewer-approved OPTIONAL re-route "rebuild Remark-7.55 chain on
+  `presheafValue_flat_of_unitDatum_faithful` (arbitrary-f, LL-free)" — recorded below as
+  **[T-755-UNITDATUM-REROUTE]** (deferred: LL is discharged via C1→C2 anyway; the re-route only
+  decouples the flatness chain's axiom trail, it does not remove leaves from the closure since
+  `hasLocLiftPowerBounded_faithful` sits in the headline statement).
+
+**Keystone finding:** the valuative criterion `isPowerBounded_of_forall_vle_one_spa_of_complete`
+(FaithfulLocLift:548) is already sorry-free-modulo-carrier-#1 (it is NOT a carrier itself). So
+**closing C1 (T-PB cluster) unblocks C2 immediately** — leaf #2's own docstring route (Wedhorn 7.41
+via Spa-pullback) becomes available. Priority order: **T-PB1…17 (C1) → T-LLBDD-WIRE (C2) →
+C3 lane (existing T-L3/T-LA4 tickets) → C4 (T-L5, own decompose pass first)**.
+
+### T-PB cluster — kill carrier #1 by the power-bounded reroute (Wedhorn 7.19/7.20 + 5.30)
+
+Skeleton landed 2026-07-03 (all `:= by sorry`, build green): 6 lemmas in Bounded.lean,
+3 in LocalizationTopology.lean, 6 in Presheaf.lean. Decomposition with verbatim source
+quotes + adversarial pass: `.mathlib-quality/decomposition.md` §"T-PB". Foundation already
+axiom-clean: `PairOfDefinition.isPowerBounded_of_monic_powerBounded_eval` +
+`PairOfDefinition.isBounded_adjoin` (HuberRings, commit 534d0f97),
+`IsBounded.isPowerBounded_of_isIntegral` (Bounded:386).
+
+| Ticket | Decl (all stated, `:= by sorry`) | File | Sketch anchor | Est. |
+|---|---|---|---|---|
+| T-PB1 | `isBounded_bot` | Bounded | open subgroup absorbs `ℤ`-multiples (`zsmul_eq_mul`, `AddSubgroup.zsmul_mem`, `Subring.mem_bot`) | ~10 |
+| T-PB2 | `isBounded_closure_finset_of_isPowerBounded` | Bounded | Wedhorn 5.30(2): replicate `isBounded_adjoin` induction (HuberRings:639) with T-PB1 base; needs public copy of private `isBounded_addSubgroup_closure` (HuberRings:621) at `[NonarchimedeanAddGroup]` | ~90 |
+| T-PB3 | `isPowerBounded_of_monic_eval_zero` | Bounded | Wedhorn 5.30(4): crib `isPowerBounded_of_monic_powerBounded_eval` body (HuberRings:826), swap `isBounded_adjoin`→T-PB2, finish by `IsBounded.isPowerBounded_of_isIntegral` | ~40 |
+| T-PB4 | `isPowerBounded_of_isIntegral_of_subset_powerBounded` | Bounded | extract monic `p` from `IsIntegral ↥B x`, `p.map B.subtype`, `Monic.map`, `eval_map`/`eval₂_eq_eval_map`, coeffs land in `B ⊆ A°`, apply T-PB3 | ~15 |
+| T-PB5 | `IsBounded.isPowerBounded_of_mem` | Bounded | `Set.range (x ^ ·) ⊆ B` by `pow_mem`, then `IsBounded.subset` | ~5 |
+| T-PB6 | `IsBounded.closure` | Bounded | absorb into closed-open subgroup: `G ⊆ U` nonarch, `S*V ⊆ G`, fixed `v`: `closure S · v ⊆ closure (S·v) ⊆ Ḡ = G` (`image_closure_subset_closure_image`; `G` closed: open subgroups are closed) | ~15 |
+| T-PB7 | `locSubring_isBounded_of_pair` (D-bundled PROVEN copy exists: PresheafIdentification:1097 — crib it) | LocTop | `V := locNhd n`; `locSubring · locNhd n ⊆ locNhd n` (elements `↑c·↑y = ↑(c·y)`, `Ideal.mul_mem_left`); basis via `(locBasis …).hasBasis_nhds_zero` | ~25 |
+| T-PB8 | `isBounded_image_algebraMap_of_isBounded` | LocTop | A-side: `hS` at `P`-basis nbhd gives `I^m`-image·S ⊆ `I^n`-image; A_s-side: `locIdeal^m = Ideal.map … (P.I^m)` (`Ideal.map_pow`), `Submodule.span_induction` as in `locNhd_invS_mem` (LocTop:148): generators `algebraMapD b · f x = f(b·x) ∈` image of `I^n` ⊆ `locNhd n` | ~60 |
+| T-PB9 | `isPowerBounded_algebraMap_of_isPowerBounded` | LocTop | `Set.range ((f a) ^ ·) = f '' Set.range (a ^ ·)` (`map_pow`), then T-PB8 | ~10 |
+| T-PB10 | `locPlusSubring_le_powerBounded` | Presheaf | `Subring.closure_le` into `powerBoundedSubring.toSubring` (haveI `hag_loc` pattern Presheaf:1489); generators: `A⁺`-image by `IsRingOfIntegralElements.subset_powerBounded`+T-PB9; `divByS` by `divByS_mem_locSubring`+T-PB7+T-PB5 | ~30 |
+| T-PB11 | `integralClosure_locPlusSubring_le_powerBounded` | Presheaf | T-PB4 @ `D.topology` with `hB := T-PB10` | ~15 |
+| T-PB12 | `isPowerBounded_coeRingHom` | Presheaf | set-form bounded transfer along coe: `hasBasis_of_isDenseInducing` (as :649-652 openness proof) + `closure(f''locNhd m)·f''S ⊆ closure(f''(locNhd m·S))`; crib CL:527's documented pattern INTO Presheaf (CompletionLocalization imports Presheaf — cannot import it) | ~50 |
+| T-PB13 | `nonarchimedeanAddGroup_presheafValue` | Presheaf | crib Presheaf:1489-1497 (`hag_loc` + `instNonarchimedeanAddGroupCompletion`); D-bundled PROVEN copy exists downstream (`presheafValueNonarchimedeanAddGroup`, PresheafIdentification:1081) — crib | ~10 |
+| T-PB14 | `isClosed_powerBoundedSubring` | Presheaf | `completedLocSubring` open (locNhd-1 absorption as :649) + bounded (T-PB12-set-form on T-PB7, then T-PB6) ⟹ elementwise pb (T-PB5) ⟹ `A° ⊇` open subring ⟹ `A°` open subgroup (needs T-PB13 for `toSubring`) ⟹ closed (`AddSubgroup.isClosed_of_isOpen`) | ~50 |
+| T-PB15 | `completedPlusSubringBase_le_powerBounded` | Presheaf | `closure_minimal` (image ⊆ `B°` by T-PB11∘T-PB12) (T-PB14) | ~15 |
+| T-PB16 | RETARGET `subset_powerBounded` field of `presheafValuePlus_isRingOfIntegralElements` | Presheaf | replace `completedPlusSubringBase_isBounded.isPowerBounded_of_isIntegral` with T-PB4 @ `presheafValue D` (haveI T-PB13) + `hB := T-PB15` + the existing `hx_int` | ~10 |
+| T-PB17 | DELETE `completedPlusSubringBase_isBounded` + its ROUTE-DIVERGENCE docstring | Presheaf | grep-verify zero consumers post-T-PB16; append b2_log entry (over-strong uniform boundedness, replaced by `_le_powerBounded`) | — |
+| CLEANUP-PB | /cleanup on Bounded.lean, LocalizationTopology.lean tail, Presheaf.lean §CompletedPair | — | cadence: 6+3+6 proof tickets | — |
+
+Dependencies: PB2←PB1; PB3←PB2; PB4←PB3; PB7,PB8 independent; PB9←PB8; PB10←{PB5,PB7,PB9};
+PB11←{PB4,PB10}; PB12←PB7-pattern (independent of PB10); PB13 independent; PB14←{PB5,PB6,PB12,PB13};
+PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: {PB1-6} ∥ {PB7-9} ∥ {PB13}.
+
+### [T-LLBDD-WIRE] Close carrier #2 via the (now-unblocked) valuative criterion — C2
+- **Status**: open (blocked by T-PB16)
+- **File**: Presheaf.lean (`locLift_divByS_isPowerBounded_completion_of_tate`, ≈:4010)
+- **Sketch** (the decl's own docstring route, Wedhorn 7.41/7.52(1)): every
+  `v ∈ Spa (presheafValue D')` pulls back to `R(D'.T/D'.s) ⊆ R(D.T/D.s)` (C3-bijection
+  machinery: `exists_spa_presheafValue_of_rationalOpen` / `Spa_presheafValueEquivalence`);
+  there `v(t) ≤ v(s) ≠ 0`, and `lift(t/s)·c(s) = c(t)` gives `v(lift(t/s)) ≤ 1`; conclude by
+  `isPowerBounded_of_forall_vle_one_spa_of_complete` (FaithfulLocLift:548 — axiom-clean once
+  T-PB lands). Alternative if the faithful chain already covers the consumer: re-wire the
+  remaining headline consumer of carrier #2 onto `locLift_divByS_isPowerBounded_faithful` and
+  quarantine the `_of_tate` variant.
+- **Sources**: Wedhorn 7.41 (wedhorn.txt:3281), 7.52(1) (wedhorn.txt:3472); huber2.txt 3.3(i).
+
+### [T-755-UNITDATUM-REROUTE] (optional, deferred) LL-free Remark-7.55 flatness chain
+- **Status**: open-deferred (reviewer-approved 2026-06-24; cosmetic for the axiom trail)
+- Rebuild `flat_imagePieceDatum_domUnit`'s chain on `presheafValue_flat_of_unitDatum_faithful`
+  (arbitrary-`f`, no `h_pb`, no LL) so Leaf-A flatness stops threading `h_pb`/LL. Open question
+  recorded: is the two-element `imagePieceDatum` step re-encodable with one-element `unitDatum`
+  steps only? See expert-review/2026-06-24/integration.md.
+
+
 - **The HU-e continuity bottom `ofValuation_restrictIdeal_isInSpvAI` was FALSE** (B2,
   `b2_log.jsonl`): general `cGammaIdeal ≠` Wedhorn Def 7.3. User-approved fix = **principal-case**
   faithful replacement `ofValuation_restrictIdealSingle_isInSpvAI` (the only case HU-e needs).

@@ -7,6 +7,146 @@ Source mapping verified against Wedhorn's bibliography (`wedhorn.txt:5725-5745`)
 **[Hu3]** = A generalization (1994). Build is green (3190 jobs); these are the only
 critical-path sorries.
 
+## ★★★★ T-PB cluster (2026-07-03, /develop --continue): carrier #1 power-bounded reroute
+
+**Target**: kill `RationalLocData.completedPlusSubringBase_isBounded` (Presheaf, the B2
+over-strong uniform-boundedness sorry — the ONLY sorry carrier of the IRIE
+`subset_powerBounded` field, and the bottleneck of the LL valuative criterion
+`isPowerBounded_of_forall_vle_one_spa_of_complete`). Skeleton landed (15 `:= by sorry`
+decls, build green); ticket board section "T-PB cluster" in `tickets.md`.
+
+### Plain-English proof (Wedhorn's own, transcribed)
+
+`𝒪_X(D)⁺` is by construction the integral closure (in the completion `B = 𝒪_X(D)`) of
+`Ĉ₀ = closure(image of C)`, `C = (A⁺[T/s])^int ⊆ Aₛ`. To see `𝒪_X(D)⁺ ⊆ B°` (Wedhorn Def
+7.14's third axiom, via Prop 7.19), it suffices — since `B°` is integrally closed in `B`
+(Prop 5.30(4)) — to show `Ĉ₀ ⊆ B°`. The generators of `A⁺[T/s]` are power-bounded in `Aₛ`
+(`A⁺ ⊆ A°` maps to power-bounded elements; `t/s` lies in the ring of definition
+`A₀[T/s]`, which is bounded), so `A⁺[T/s] ⊆ (Aₛ)°` (Lemma 7.20's content); its integral
+closure `C` stays in `(Aₛ)°` by Prop 5.30(4) at `Aₛ`; the completion coercion carries
+power-bounded to power-bounded (7.47(1) direction); and `B°` is closed (it contains the
+open subring `closure(image A₀[T/s])`, hence is an open, therefore closed, subgroup), so
+the closure `Ĉ₀` of the image of `C` stays in `B°`. Finally an element of `𝒪_X(D)⁺` is
+integral over `Ĉ₀ ⊆ B°`, hence power-bounded by Prop 5.30(4) at `B`.
+
+### Verbatim source quotes
+
+- **Prop 7.19** (wedhorn.txt:3015–3029, p. 61): "Let A = (A, A⁺) be an affinoid ring and
+  let (Tᵢ) be a finite family of subsets of A such that Tᵢ·A is open for all i. Then
+  (A⟨X⟩_T, (A⁺⟨X⟩)^int) is an affinoid ring […] **Proof.** As A⁺ is open in A, then A⁺⟨X⟩
+  is open in A⟨X⟩_T. Hence (A⁺⟨X⟩)^int is open. It remains to show that (A⁺⟨X⟩)^int is
+  contained in A⟨X⟩°_T. As A⟨X⟩°_T is integrally closed in A⟨X⟩_T, it suffices to show
+  that A⁺⟨X⟩ is contained in A⟨X⟩°_T. This follows from the following lemma."
+- **Lemma 7.20** (wedhorn.txt:3031–3040, p. 61): "Let A be a f-adic ring and let (Tᵢ) be a
+  family of subsets of A such that Tᵢ·A is open in A for all i. Then (A°)⟨X⟩ ⊆ (A⟨X⟩_T)°.
+  […] **Proof.** Let a ∈ (A°)⟨X⟩ and write a = b + c, where b ∈ (A°)[X] and c ∈ J⟨X⟩,
+  where J is an ideal of definition of A. Then b and c are both power-bounded. Therefore
+  a is power-bounded."
+- **Prop 5.30** (wedhorn.txt:1786–1804, p. 37): "Let A be a non-archimedean topological
+  ring. […] (2) A subset T of A is power-bounded if and only if the subring of A generated
+  by T is bounded. (3) The union of all bounded subrings is A°, and this is a subring of A.
+  (4) A° is integrally closed in A […] **Proof.** […] It remains to show (4). Let a ∈ A be
+  integral over A°. By (3), a is integral over a bounded subring B of A. Therefore there
+  exists an integer N such that B[a] = B + Ba + ··· + Ba^{N−1}. Thus B[a] is bounded and
+  hence a is power-bounded."
+
+### Lean ↔ source match
+
+The project models `A⟨T/s⟩` as `presheafValue D` = completion of `Aₛ` with the
+localization topology; Wedhorn's `A⁺⟨X⟩` (closure of the image of `A⁺[X]` under
+`X ↦ t/s`) corresponds to `closure(coeRingHom '' locPlusSubring)`; his `(·)^int` is taken
+in the completion (project Def: `completedPlusSubring = IntCl_B(Ĉ₀)`, making
+integral-closedness free — Wedhorn instead cites [Hu1] 2.4.3 to move `^int` across the
+completion; the two agree, and our form needs only the CONTAINMENT direction proven here).
+Wedhorn's proof-by-decomposition `a = b + c` (polynomial part + `J⟨X⟩` tail, "both
+power-bounded") is packaged in the skeleton as: image-of-`C` power-bounded (the `b` part,
+T-PB10/11/12) + closedness of `B°` absorbing the completion tail (the `c` part, T-PB6/14) —
+the same content, organized around `closure_minimal` instead of an explicit series split.
+Prop 5.30 is stated by Wedhorn for **plain nonarchimedean topological rings**; the
+skeleton's Bounded.lean layer (T-PB1–6) keeps exactly that generality (pair-free), unlike
+the earlier pair-carrying `PairOfDefinition.isPowerBounded_of_monic_powerBounded_eval`
+(which stays; the pair-free form is needed at `B` where no pair exists upstream of
+Presheaf.lean).
+
+### Leaves (all stated `:= by sorry`, file:line in tickets.md table)
+
+Each leaf's discharge, per Step 4: T-PB1/2/3/4/5/6 — mathlib + existing project engines
+(`IsBounded.isPowerBounded_of_isIntegral` Bounded:386 ✓ exists, `isBounded_adjoin`
+induction HuberRings:639 ✓ exists to crib, `image_closure_subset_closure_image`,
+`AddSubgroup.isClosed_of_isOpen` — mathlib names to re-verify at execution);
+T-PB7/8/9 — existing locNhd machinery (`locNhd_invS_mem`'s `Submodule.span_induction`
+pattern LocTop:148 ✓, `Ideal.map_pow`, `Ideal.mul_mem_left`); T-PB10–15 — compositions of
+the above with in-file patterns (Presheaf:1489 `hag_loc`, Presheaf:649 `hasBasis` openness
+proof ✓ all exist); T-PB16/17 — rewiring + deletion, no new math.
+
+### Attacks attempted (adversarial pass, per leaf group)
+
+- **T-PB1 (⊥ bounded).** [1] Counterexample: `ℝ_std` — `ℤ·1` unbounded; hypothesis
+  `[NonarchimedeanAddGroup]` is necessary and present ✓ (matches Wedhorn 5.30's standing
+  nonarch hypothesis). [2] Edge: char p — `⊥` finite, trivially bounded; char 0 — infinite
+  but `n·v ∈ G` for `v ∈ G` open subgroup ✓. [3] Hypothesis-strength: cannot drop nonarch
+  (attack 1); cannot weaken to `T1`/`T2` — irrelevant axes. SURVIVED.
+- **T-PB2 (5.30(2) finite).** [1] Source-drift: Wedhorn's (2) is for a *power-bounded
+  subset* T (uniformly), not elementwise — for INFINITE elementwise-pb T the statement is
+  FALSE (e.g. unbounded scalings); skeleton restricts to `Finset` where elementwise ⟹
+  set-pb via `IsBounded.mul` — scope is correct ✓. [2] Discharge: the `isBounded_adjoin`
+  induction body (HuberRings:639–706) uses only `[NonarchimedeanRing]`-field
+  `is_nonarchimedean` — same field in `NonarchimedeanAddGroup` ✓ replicable upstream.
+  [3] Edge: `T = ∅` → `Subring.closure ∅ = ⊥` → T-PB1 ✓. SURVIVED.
+- **T-PB3/4 (5.30(4)).** [1] Counterexample search: b2_log has NO entry against 5.30(4)
+  (checked 2026-07-03; entries 6/7 concern MvPolynomial-vs-TateAlgebra and pb-transfer
+  along arbitrary homs — different statements). [2] Edge: `p = X` (degree 1, coeff 0) →
+  `x = 0` pb ✓; `natDegree 0` degenerate → `1 = 0`, everything pb ✓ (the landed HuberRings
+  analog handles this case explicitly, :401–406). [3] Discharge: engine
+  `IsBounded.isPowerBounded_of_isIntegral` exists sorry-free (Bounded:386, verified today).
+  [4] Hypothesis: `[IsTopologicalRing]` needed by the engine; nonarch needed by T-PB2.
+  SURVIVED.
+- **T-PB6 (closure of bounded).** [1] Attack "closure of elementwise-pb is pb" — that
+  STRONGER claim is dubious; the skeleton only claims closure of BOUNDED is bounded, which
+  the closed-open-subgroup absorption proves ✓ (`Ḡ = G` for open subgroups). [2] Order of
+  multiplication: `IsBounded` is `S * V ⊆ U` (S left); fixed-`v` continuity argument works
+  on the left factor ✓. [3] Nonarch necessary: in `ℝ`, closure of a bounded set is bounded
+  too — but our proof needs closed absorbing nbhds; nonarch supplies them; keeping the
+  hypothesis is harmless (all consumers are nonarch). SURVIVED.
+- **T-PB7/8/9 (localization transfer).** [1] The prior-B2 attack (b2_log entry 7:
+  `IsPowerBounded.map` FALSE for arbitrary continuous homs — counterexample
+  `id : ℝ_disc → ℝ_std`): our statements are NOT the generic transfer — they are specific
+  to `algebraMap` with the `locTopology` built from the SAME pair `P`, where `locNhd`
+  absorption is available; the counterexample does not embed (its target topology is not a
+  locTopology of the source's pair). Addressed ✓. [2] Composition attack on T-PB8's chain
+  `(I^m-image)·S ⊆ I^n-image` uses A-boundedness of S against the P-adic basis — P's basis
+  IS A's nbhd basis (PairOfDefinition contract) ✓. [3] Edge: `S = ∅`/`{0}` trivial ✓;
+  `s` nilpotent → `Localization.Away s` trivial ring, everything bounded ✓. SURVIVED.
+- **T-PB10–15 (assembly).** [1] Composition: could all pieces hold and
+  `completedPlusSubringBase ⊆ B°` fail? `base = closure(image(IntCl))`;
+  `closure_minimal` needs image ⊆ `B°` (T-PB11∘T-PB12 pointwise ✓) and `B°` CLOSED
+  (T-PB14) — no gap. [2] T-PB14's "A° contains an open subring ⟹ open": needs A° to be a
+  SUBRING (add-closed) — supplied by `powerBoundedSubring.toSubring` which needs
+  `[NonarchimedeanAddGroup B]` = T-PB13 ✓ (dependency recorded). [3] Vacuity: is
+  `completedLocSubring` actually open? Its openness proof is the same locNhd-1 absorption
+  as `completedPlusSubringBase_isOpen` (landed a3808076) with the TRIVIAL containment
+  `locNhd 1 ⊆ locSubring` (subtype image of an ideal of the subring) — strictly easier ✓.
+  [4] Instance-diamond attack on `@powerBoundedSubring _ _ D.topology` vs the completion's
+  global instances: A_s-level statements use explicit `@`-form with `D.topology` (the
+  file's established idiom, cf. :4010), completion-level use the global `presheafValue`
+  instances — no mixing in any single statement ✓. SURVIVED.
+- **T-PB16 (retarget).** [1] Could the field's OLD proof shape not match: the existing
+  body derives `hx_int : IsIntegral ↥base x` then applies the bounded engine — the new
+  route consumes the SAME `hx_int` via T-PB4 with `hB := T-PB15` — signature-compatible ✓.
+  [2] Hidden-hypothesis attack: T-PB16 adds NO new binders to the instance (T-PB13 is
+  `haveI`-internal) — headline signature unchanged ✓ (the §8.4 leak test).
+- **Prior-B2 log consultation** (Step 4.6): entries checked 2026-07-03. Entry 7
+  (`IsPowerBounded.map`) — addressed at T-PB7/8/9 attack [1] above (specialized true
+  forms). The 2026-06-24 route-divergence B2 (uniform IsBounded over-strong) is the very
+  statement this cluster REPLACES (T-PB17 logs its resolution). No other name/shape match.
+
+### Confidence gate
+
+All leaves: mathlib/project-discharged or composition-of-skeleton (no API gaps); skeleton
+compiles (build green, sorries only — verified 2026-07-03); every leaf has the quotes above
+(Prop 5.30 / 7.19 / 7.20 with line refs into wedhorn.txt); adversarial pass recorded; no
+REVIEW-PENDING. GATE PASSES for the T-PB subtree.
+
 ## ★★★ ADVERSARIAL DECOMPOSE round 3 (2026-06-20) — the T-L1c inducing assembly (read FIRST)
 
 Target: the in-WCA `productRestrictionSub_isInducing_via_equalizer` route (reviewer #2's

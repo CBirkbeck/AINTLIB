@@ -633,4 +633,45 @@ instance locSubring_isNoetherianRing_instance (P : PairOfDefinition A)
     IsNoetherianRing (locSubring P T s) :=
   locSubring_isNoetherianRing P T s
 
+/-! ### Boundedness in the localization topology (Wedhorn Lemma 7.20 substrate)
+
+`locSubring` is a ring of definition of the localization topology, hence bounded; the
+canonical map `A → Aₛ` carries bounded (resp. power-bounded) subsets to bounded
+(resp. power-bounded) ones. These feed Wedhorn Prop 7.19 / Lemma 7.20 for the plus
+subring of `𝒪_X(R(T/s))` (`Presheaf.lean`). -/
+
+/-- `locSubring` is bounded in the localization topology: it is a ring of definition
+(ideal absorption `locSubring · locNhd n ⊆ locNhd n`).
+Source: Wedhorn §6.1 (6.1.2) / Lemma 7.20 context. Pair-level (unbundled) form of
+`locSubring_isBounded` (PresheafIdentification.lean, `RationalLocData`-bundled, proven) —
+this one is available upstream, in `Presheaf.lean`; the two are dedup targets for cleanup. -/
+theorem locSubring_isBounded_of_pair [IsTopologicalRing A] (P : PairOfDefinition A)
+    (T : Finset A) (s : A)
+    (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s) :
+    letI := locTopology P T s hopen
+    TopologicalRing.IsBounded (locSubring P T s : Set (Localization.Away s)) := by
+  sorry
+
+/-- The canonical map `A → Aₛ` carries bounded subsets to bounded subsets of the
+localization topology: `locNhd`-neighbourhoods absorb images of `A`-bounded sets.
+Source: Wedhorn Lemma 7.20 (p. 61) context (the polynomial part `b` and tail `c` of
+`a = b + c` are power-bounded because `A`-bounded data stays bounded in `A⟨X⟩_T`). -/
+theorem isBounded_image_algebraMap_of_isBounded [IsTopologicalRing A]
+    (P : PairOfDefinition A) (T : Finset A) (s : A)
+    (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s)
+    {S : Set A} (hS : TopologicalRing.IsBounded S) :
+    letI := locTopology P T s hopen
+    TopologicalRing.IsBounded (algebraMap A (Localization.Away s) '' S) := by
+  sorry
+
+/-- Power-bounded elements of `A` map to power-bounded elements of the localization
+topology. Source: Wedhorn Lemma 7.20 (p. 61, "`b` … power-bounded"). -/
+theorem isPowerBounded_algebraMap_of_isPowerBounded [IsTopologicalRing A]
+    (P : PairOfDefinition A) (T : Finset A) (s : A)
+    (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s)
+    {a : A} (ha : TopologicalRing.IsPowerBounded a) :
+    letI := locTopology P T s hopen
+    TopologicalRing.IsPowerBounded (algebraMap A (Localization.Away s) a) := by
+  sorry
+
 end ValuationSpectrum

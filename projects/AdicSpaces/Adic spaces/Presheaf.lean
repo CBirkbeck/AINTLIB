@@ -445,6 +445,70 @@ theorem RationalLocData.completedPlusSubringBase_le_completedPlusSubring
   rw [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring]
   exact (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebraMap_mem ⟨x, hx⟩
 
+/-! ### Power-bounded route for `completedPlusSubringBase` (Wedhorn Prop 7.19 + Lemma 7.20)
+
+The faithful `subset_powerBounded` chain, replacing the over-strong uniform-boundedness
+route flagged below: `locPlusSubring ⊆ (Aₛ)°` (Lemma 7.20 — the generators, `A⁺`-images and
+`t/s`, are power-bounded), its integral closure stays power-bounded (Prop 5.30(4)), the
+completion coercion preserves power-boundedness, and `(𝒪_X(D))°` is closed (it contains
+the open subring `completedLocSubring`), so the topological closure
+`completedPlusSubringBase` consists of power-bounded elements. -/
+
+/-- **Wedhorn Lemma 7.20** at the localization: `locPlusSubring ⊆ (Aₛ)°`. The generators
+are power-bounded: `A⁺`-images by `A⁺ ⊆ A°` (`IsRingOfIntegralElements.subset_powerBounded`)
+plus transfer along `A → Aₛ`; the `t/s` by membership in the ring of definition
+`locSubring`. -/
+theorem RationalLocData.locPlusSubring_le_powerBounded (D : RationalLocData A)
+    [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
+    (D.locPlusSubring : Set (Localization.Away D.s)) ⊆
+      @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
+  sorry
+
+/-- **Wedhorn Prop 7.19 step** (p. 61): the integral closure `C = (A⁺[T/s])^int` of
+`locPlusSubring` in `Aₛ` is power-bounded (integral over power-bounded ⟹ power-bounded,
+Prop 5.30(4)). -/
+theorem RationalLocData.integralClosure_locPlusSubring_le_powerBounded
+    (D : RationalLocData A) [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
+    ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring :
+        Set (Localization.Away D.s)) ⊆
+      @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
+  sorry
+
+/-- The completion coercion preserves power-boundedness: `(Aₛ)° → (𝒪_X(D))°`
+(Wedhorn Lemma 7.47(1) direction used by Prop 7.19 at the completion; the completion's
+`0`-neighbourhood basis `closure (coe '' locNhd n)` absorbs images of bounded sets). -/
+theorem RationalLocData.isPowerBounded_coeRingHom (D : RationalLocData A)
+    {x : Localization.Away D.s}
+    (hx : @TopologicalRing.IsPowerBounded (Localization.Away D.s) _ D.topology x) :
+    TopologicalRing.IsPowerBounded (D.coeRingHom x) := by
+  sorry
+
+/-- `NonarchimedeanAddGroup` for the completion `𝒪_X(D)` (the localization topology has an
+open-subgroups basis; completions preserve nonarchimedean additive groups via
+`instNonarchimedeanAddGroupCompletion`). -/
+theorem RationalLocData.nonarchimedeanAddGroup_presheafValue (D : RationalLocData A) :
+    NonarchimedeanAddGroup (presheafValue D) := by
+  sorry
+
+/-- `(𝒪_X(D))°` is closed: it contains the open subring `completedLocSubring` (a bounded
+open subring — Wedhorn 6.1.2 at the completion), hence is an open, and therefore closed,
+additive subgroup. -/
+theorem RationalLocData.isClosed_powerBoundedSubring (D : RationalLocData A) :
+    IsClosed (TopologicalRing.powerBoundedSubring (presheafValue D)) := by
+  sorry
+
+/-- **Wedhorn Prop 7.19 / Lemma 7.20 (power-bounded form)**: `Ĉ₀ ⊆ (𝒪_X(D))°`. The image
+of `C = (A⁺[T/s])^int` is power-bounded and `(𝒪_X(D))°` is closed, so the topological
+closure `completedPlusSubringBase = Ĉ₀` consists of power-bounded elements. This is the
+faithful replacement for the uniform-boundedness statement below; it feeds the
+`subset_powerBounded` field of `presheafValuePlus_isRingOfIntegralElements` via
+Prop 5.30(4) (`A°` integrally closed) at `𝒪_X(D)`. -/
+theorem RationalLocData.completedPlusSubringBase_le_powerBounded (D : RationalLocData A)
+    [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
+    (D.completedPlusSubringBase : Set (presheafValue D)) ⊆
+      TopologicalRing.powerBoundedSubring (presheafValue D) := by
+  sorry
+
 /-- **`completedPlusSubringBase` is bounded.** ⚠️ ROUTE-DIVERGENCE FLAG (2026-06-24): this UNIFORM
 (von Neumann) boundedness statement is STRONGER than Wedhorn's actual Prop 7.19 / Lemma 7.20
 argument, which proves only that `A(T/s)⁺` is POWER-bounded (`⊆ A(T/s)°`): `A⁺⟨X⟩ ⊆ A°⟨X⟩ ⊆
