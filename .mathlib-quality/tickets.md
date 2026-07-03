@@ -238,6 +238,34 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
     compactness (product of finite discrete, mathlib) + the existing
     `isCompact_preimage_rationalOpen_noHArch` packaging + cover-finite-subcover
     (Cor 7.32, statement gains `[IsTateRing A]` per its own docstring note).
+- **⚠ C4 ROUTE RE-BASE (2026-07-03, from the full 7.35-proof read, wedhorn.txt:3186-3207)**:
+  Wedhorn's assembly lives ENTIRELY in the `Spv(A,I)`-world: (7.12) `Cont` closed in
+  `Spv(A,I)` (three lines: complement of `⋃_{f∈I} basics`); (7.35) `Spa = Cont ∩
+  ⋂_{a∈A⁺} Spv(A,I)(a/1)` is PRO-CONSTRUCTIBLE in the spectral `Spv(A,I)` ⟹ spectral ⟹
+  qc, and rational subsets = `Spa ∩ Spv(A,I)-basics` are a qc basis. The keystone's
+  `(A×A)`-cube-closedness instead encodes "`Spa` pro-constructible in `Spv A`" — STRICTLY
+  STRONGER (Rem 7.6: the inclusion `Spv(A,I) ↪ Spv A` is not spectral; `Spv(A,I)` itself
+  is suspect-non-pro-constructible in `Spv A` since `IsInSpvAI`'s cofinality branch is
+  cons-OPEN). **B2-candidate**: keystone possibly unprovable/false as stated; no
+  counterexample yet (Cont(ℚ_p) = {v_p} is a cons-point, fine) — do NOT force it.
+  **Faithful K-tree v2 (R-world)**:
+  - **R1** (7.5(i)-(iv) mirror): `Spv(A,I)`-quasicompactness via the ρ-graph trick:
+    ρ : range ιSpv_bool → C_R := (Finset A × A → Bool), ρ(x)(T,s) := the FINITE Boolean
+    `W(T/s)`-formula in x-coordinates (this is 7.5(iii): r⁻¹(U(T/s)) = W(T/s), verbatim
+    quote on board); ρ continuous (finite formulas), range ιSpv_bool closed (PROVEN) ⟹
+    j-image of `Spv(A,I)` = ρ-image compact in C_R. Principal case (Tate π) uses the
+    FAITHFUL `restrictIdealSingle`/`IsInSpvAI`-single machinery (T-SPVAI, proven);
+    general-I cGammaIdeal is the known-unfaithful B2 — stay principal.
+  - **R2** (7.12): `Cont`-image = j-image ∩ ⋂_{a∈I-gens}(¬ R-coordinate ({1,a},a))ᶜ-side —
+    clopen conditions in C_R ⟹ closed ⟹ compact.
+  - **R3** (7.35): `Spa`-image = R2 ∩ ⋂_{f∈A⁺} R-coordinate({f,1},1) — clopen ⟹ compact;
+    rational subsets `R(T/s)` = Spa-image ∩ R-coordinate(T∪{s},s) — clopen-in-compact ⟹
+    **qc of rational subsets** (the consumers' real need).
+  - **R4**: re-point `isCompact_preimage_rationalOpen_noHArch` (+ the
+    `exists_finite_normalized_rational_refinement` chain) at R3's qc-conclusion; keystone
+    + its `_aux`/packaging quarantined (B2-log if R4 lands without them).
+  - **R5**: carrier #6 (Cor 7.32-aux) from R3-compactness via cover+finite-subcover
+    (+ `[IsTateRing A]` statement fix per its docstring).
 - **NEXT = C4 (T-L5)**: its own decompose pass per the standing plan — the keystone
   `isClosed_image_spa_ιSpv_bool_noHArch` decomposes per the 2026-06-05 finding as
   (range ✓ proven) ∩ (A⁺-cylinders) ∩ (no-hArch Cont-closedness = the microbial/Spv(A,I)
