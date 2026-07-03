@@ -983,4 +983,284 @@ theorem tendsto_gamma_edge (ha : 0 < a) (ha' : a ≤ 1/4)
   refine hcomb.congr (fun T => ?_)
   ring
 
+/-- Continuity in `t` of `Λ_ent'/Λ_ent(1+a+it)`. -/
+theorem continuous_logDeriv_completedDedekindZetaEntire_edge (ha : 0 < a) :
+    Continuous (fun t : ℝ =>
+      logDeriv (completedDedekindZetaEntire K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)) := by
+  have han : AnalyticOnNhd ℂ (completedDedekindZetaEntire K) Set.univ :=
+    (differentiable_completedDedekindZetaEntire K).differentiableOn.analyticOnNhd
+      isOpen_univ
+  refine continuous_iff_continuousAt.mpr (fun t => ?_)
+  have hs : 1 < ((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)).re := by
+    rw [show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp]
+    linarith
+  refine ContinuousAt.comp ?_
+    ((continuous_const.add (Complex.continuous_ofReal.mul continuous_const)).continuousAt)
+  have hd : ContinuousAt (deriv (completedDedekindZetaEntire K))
+      (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) :=
+    ((han _ (Set.mem_univ _)).deriv).differentiableAt.continuousAt
+  have hv : ContinuousAt (completedDedekindZetaEntire K)
+      (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) :=
+    (differentiable_completedDedekindZetaEntire K).continuous.continuousAt
+  have hne : completedDedekindZetaEntire K (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) ≠ 0 :=
+    completedDedekindZetaEntire_ne_zero_of_one_lt_re K hs
+  exact ContinuousAt.div hd hv hne
+
+/-- Continuity in `t` of `γ_K'/γ_K(1+a+it)`. -/
+theorem continuous_logDeriv_gammaFactor_edge (ha : 0 < a) :
+    Continuous (fun t : ℝ =>
+      logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)) := by
+  refine continuous_iff_continuousAt.mpr (fun t => ?_)
+  refine ContinuousAt.comp ?_
+    ((continuous_const.add (Complex.continuous_ofReal.mul continuous_const)).continuousAt)
+  refine (differentiableAt_logDeriv_gammaFactor K ?_).continuousAt
+  rw [show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp]
+  linarith
+
+/-- **The full edge-integral limit** — all four pieces of
+`∫ (Φ(s)+Φ(1-s))·Λ_ent'/Λ_ent(s)` on `Re s = 1+a` converge (Poitou (1) → (6)). -/
+theorem tendsto_edge_integral (ha : 0 < a) (ha' : a ≤ 1/4)
+    (hF : Integrable F)
+    (hre : LocallyBoundedVariationOn (fun u : ℝ => (F u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u : ℝ => (F u).im) Set.univ)
+    (hF0 : Tendsto F (nhdsWithin 0 (Set.Ioi 0)) (nhds (F 0)))
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atTop (nhds 0))
+    (hbot2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atBot (nhds 0))
+    (htop4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atTop (nhds 0))
+    (hbot4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
+    (hΦd : Differentiable ℂ (paperPhi F))
+    {B : ℝ → ℝ}
+    (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
+      ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
+    (hBlog : Tendsto (fun T : ℝ => B T * Real.log (2+T)) atTop (nhds 0))
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (hGre : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).re) Set.univ)
+    (hGim : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).im) Set.univ)
+    (hEre : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
+      Set.univ)
+    (hEim : LocallyBoundedVariationOn (fun u : ℝ =>
+      ((poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
+      Set.univ)
+    (hHre : LocallyBoundedVariationOn (fun u : ℝ => (primeSideH K a F u).re) Set.univ)
+    (hHim : LocallyBoundedVariationOn (fun u : ℝ => (primeSideH K a F u).im) Set.univ)
+    {Hp Hm : ℂ}
+    (hHp : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp))
+    (hHm : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Iio 0)) (nhds Hm)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * logDeriv (completedDedekindZetaEntire K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+      atTop (nhds
+        (((2*π : ℝ):ℂ) * (paperPhi F 0 + paperPhi F 1)
+          + ((2*π : ℝ):ℂ) * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ) * (F 0 + F 0)
+          + ((2*π : ℝ) : ℂ) *
+            ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+                + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                  * (Real.eulerMascheroniConstant + Real.log (8*π))
+                + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+            + (((NumberField.InfinitePlace.nrRealPlaces K
+                + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+                * (∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+            + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+                * ∫ y in Set.Ioi (0:ℝ),
+                  ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          - 2 * ((π : ℝ) : ℂ) * (Hp + Hm))) := by
+  -- the left one-sided limit of F from evenness
+  have hmneg : Tendsto (fun x : ℝ => -x) (nhdsWithin 0 (Set.Iio 0))
+      (nhdsWithin 0 (Set.Ioi 0)) := by
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+    · have h2 := (continuous_neg.tendsto (0:ℝ)).mono_left
+        (nhdsWithin_le_nhds (s := Set.Iio 0))
+      rw [neg_zero] at h2
+      exact h2
+    · filter_upwards [self_mem_nhdsWithin] with x hx
+      rw [Set.mem_Iio] at hx
+      exact Set.mem_Ioi.mpr (by linarith)
+  have hFm : Tendsto F (nhdsWithin 0 (Set.Iio 0)) (nhds (F 0)) :=
+    (hF0.comp hmneg).congr (fun x => hFeven x)
+  -- the four piece limits
+  have hpole := tendsto_pole_piece ha hF hFeven hFa hEre hEim
+  have hdisc := tendsto_const_piece hFeven hFa hGre hGim hF0 hFm
+    (Real.log |NumberField.discr K| / 2)
+  have hγ := tendsto_gamma_edge K ha ha' hF hre him hF0 hFeven hFdiv hFdiv2
+    htop2 hbot2 htop4 hbot4 hΦd hB hBlog
+  have hζ := (tendsto_prime_side K ha hFeven hFa hHre hHim hHp hHm).neg
+  -- continuity facts for the fixed-T splitting
+  have hΦc : Continuous (fun t : ℝ => paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)) := by
+    refine (continuous_muFT hFa).congr (fun t => ?_)
+    exact (paperPhi_edge a F t).symm
+  have hΦpairc : Continuous (fun t : ℝ =>
+      paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))) := by
+    refine (hΦc.add hΦc).congr (fun t => ?_)
+    show paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+      = paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+    rw [paperPhi_one_sub hFeven]
+  have hs_ne : ∀ t : ℝ, (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) ≠ 0 := by
+    intro t h0
+    have h1 := congrArg Complex.re h0
+    rw [show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp,
+      Complex.zero_re] at h1
+    linarith
+  have hs1_ne : ∀ t : ℝ, (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1 ≠ 0 := by
+    intro t h0
+    have h1 := congrArg Complex.re h0
+    rw [Complex.sub_re, Complex.one_re,
+      show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp,
+      Complex.zero_re] at h1
+    linarith
+  have hsc : Continuous (fun t : ℝ => (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)) :=
+    continuous_const.add (Complex.continuous_ofReal.mul continuous_const)
+  have hpolec : Continuous (fun t : ℝ =>
+      1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)) :=
+    (continuous_const.div hsc hs_ne).add
+      (continuous_const.div (hsc.sub continuous_const) hs1_ne)
+  have hγc := continuous_logDeriv_gammaFactor_edge K ha
+  have hΛc := continuous_logDeriv_completedDedekindZetaEntire_edge K ha
+  -- fixed-T splitting into the four pieces
+  have hfun : ∀ T : ℝ, (∫ t in (-T)..T,
+      (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+        * logDeriv (completedDedekindZetaEntire K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+      = (∫ t in (-T)..T,
+          (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+            * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)))
+        + ((∫ t in (-T)..T,
+            (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+              * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ))
+          + ((∫ y in (-T)..T,
+              (paperPhi F (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I)
+                + paperPhi F (1 - (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I)))
+                * logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I))
+            + -(∫ t in (-T)..T,
+              (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+                * (-(logDeriv (NumberField.dedekindZeta K)
+                    (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))))) := by
+    intro T
+    have ii1 : IntervalIntegrable (fun t : ℝ =>
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)))
+        MeasureTheory.volume (-T) T := (hΦpairc.mul hpolec).intervalIntegrable _ _
+    have ii2 : IntervalIntegrable (fun t : ℝ =>
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ))
+        MeasureTheory.volume (-T) T := (hΦpairc.mul continuous_const).intervalIntegrable _ _
+    have ii3 : IntervalIntegrable (fun t : ℝ =>
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+        MeasureTheory.volume (-T) T := (hΦpairc.mul hγc).intervalIntegrable _ _
+    have ii4 : IntervalIntegrable (fun t : ℝ =>
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+        MeasureTheory.volume (-T) T := by
+      have hfull : IntervalIntegrable (fun t : ℝ =>
+          (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+            * logDeriv (completedDedekindZetaEntire K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+          MeasureTheory.volume (-T) T := (hΦpairc.mul hΛc).intervalIntegrable _ _
+      have hζeq : (fun t : ℝ =>
+          (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+            * logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+          = fun t : ℝ =>
+            ((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+              * logDeriv (completedDedekindZetaEntire K)
+                  (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+            - (((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+              * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1)))
+              + (((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+                * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ))
+                + ((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                  + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+                  * logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))) := by
+        funext t
+        have hsre : 1 < ((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)).re := by
+          rw [show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp]
+          linarith
+        have hsplit := logDeriv_completedDedekindZetaEntire_split K hsre
+        rw [hsplit]
+        rw [show (((Real.log |NumberField.discr K| : ℝ) : ℂ))/2
+            = ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ) by push_cast; ring]
+        ring
+      rw [hζeq]
+      exact (hfull.sub (ii1.add (ii2.add ii3)))
+    -- pointwise split of the full integrand
+    have hpt : ∀ t : ℝ,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * logDeriv (completedDedekindZetaEntire K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        = (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+            * (1/(((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + 1/((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1))
+          + ((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+              * ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ)
+            + ((paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+                * logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+              + (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+                + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+                * logDeriv (NumberField.dedekindZeta K)
+                    (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))) := by
+      intro t
+      have hsre : 1 < ((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)).re := by
+        rw [show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp]
+        linarith
+      rw [logDeriv_completedDedekindZetaEntire_split K hsre]
+      rw [show (((Real.log |NumberField.discr K| : ℝ) : ℂ))/2
+          = ((Real.log |NumberField.discr K| / 2 : ℝ) : ℂ) by push_cast; ring]
+      ring
+    have h4 : (∫ t in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+        = -(∫ t in (-T)..T,
+          (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+            + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+            * (-(logDeriv (NumberField.dedekindZeta K)
+                (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))) := by
+      rw [← intervalIntegral.integral_neg]
+      refine intervalIntegral.integral_congr (fun t _ => ?_)
+      ring
+    rw [intervalIntegral.integral_congr (fun t _ => hpt t),
+      intervalIntegral.integral_add ii1 (ii2.add (ii3.add ii4)),
+      intervalIntegral.integral_add ii2 (ii3.add ii4),
+      intervalIntegral.integral_add ii3 ii4, h4]
+  refine Tendsto.congr (fun T => (hfun T).symm) ?_
+  have hfinal := hpole.add (hdisc.add (hγ.add hζ))
+  convert hfinal using 2
+  ring
+
 end DedekindResidue
