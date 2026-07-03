@@ -5,13 +5,17 @@
 Maths: `plan-coefficient-field-arithmetic.md`. New work lands in
 `LeanModularForms/Labels/HeckeFieldArithmetic.lean` (new file).*
 
-## Summary
-- **Tranche 1 (executable now)**: 5 proof/def + 1 cleanup. Closes both `NewformOrbit` sorries
-  **modulo the single isolated input FIH (T002)**. Net: 2 vague sorries → 1 precise foundational one.
-- **Tranche 2 (IHR, research roadmap)**: 5 blocked tickets — a multi-month modular-symbol /
-  Eichler–Shimura build that discharges T002. NOT session-executable; documented, not for immediate
-  `/beastmode`.
-- Open: 4 (T001, T003, T004, T005) | Blocked: 1 (T002) + 5 (IHR) | Parallel: T001 then {T003}; T004,T005 after T002+T003.
+## Summary  (updated 2026-07-03 — **BOARD DISCHARGED**)
+- **Tranche 1**: ALL DONE (T001–T007). Both `NewformOrbit` headlines proven: `coeffSeq_isIntegral`
+  (A) + `instNumberFieldCoeffField` (B); LMFDB label map + canonicity axiom-clean.
+- **Tranche 2 (IHR)**: COMPLETE as-needed. Substrate (ES tracker) + Hecke equivariance + the
+  Eichler-route injectivity (EICH-1..5) all axiom-clean; `heckeAlgℤ_finite` k≥2 sorry-free.
+  The Stokes boundary identity (`interior_edges_cancel_sum`) is SUPERSEDED — do not formalise.
+- **Sole remaining input (by explicit reviewer+user decision, round 2 Q3)**:
+  `exists_HeckeStableLattice_one` — weight-1 full-rank Hecke-stable lattice, **cited**
+  (Deligne–Serre 1974 Prop 2.7, pre-Galois-rep; bad-prime `U_p` caveat in the docstring).
+  `k ≤ 0` is PROVEN (T007); `k ≥ 2` never consumes it.
+- Open: 0 dispatchable | Deferred: CLEANUP-1, CLEANUP-EICH-1/2 (central-main policy) | Cited: 1 (weight-1 input).
 
 ## Dependency order (Tranche 1)
 ```
@@ -69,6 +73,8 @@ Keep `N, k` general; the subalgebra over the base ring `ℤ` (we need the *integ
 
 ### [T002] FIH input — the integral Hecke algebra is module-finite over ℤ
 - **Status**: ENDGAME DONE / DEEP INPUT RE-ISOLATED (2026-06-22, via [T002-L1]) — `heckeAlgℤ_finite` is now **PROVEN** (the `End_ℤ(Λ)` endgame) from the single deep input **`exists_HeckeStableLattice`** (`Nonempty (HeckeStableLattice N k)`, the source-faithful full-rank Hecke-stable ℤ-lattice = Shimura (3.5.20)/Thm 3.52). That `sorry` is the sole remaining deep input; it is what **Tranche-2 / IHR-asm** now discharges. · **File**: Labels/HeckeFieldArithmetic.lean · **Depends on**: T001 (done), IHR-asm (discharges `exists_HeckeStableLattice`) · **Type**: instance (endgame proven; input isolated)
+- **UPDATE (2026-06-30, EICH-5)**: the `k ≥ 2` case is **PROVEN sorry-free** via the Eichler period route (`heckeAlgℤ_finite_of_two_le`, `Labels/HeckeAlgFiniteFinal.lean`); the lattice input is consumed only for `k < 2`.
+- **UPDATE (2026-07-03, T007)**: `k ≤ 0` **PROVEN** (`exists_HeckeStableLattice_of_nonpos`: `S_k = 0`, trivial lattice). The sole remaining deep input is **`exists_HeckeStableLattice_one` (weight 1, Deligne–Serre Prop 2.7, cited)** — per reviewer round-2 Q3 this stays a cited classical input (option (b)); no formalisation ticket is planned for it (full DS weight-1 machinery is research-scale, B3-grade).
 - **Source-faithfulness note (2026-06-21)**: DS's algebraic-integer theorem (Thm 6.5.1, `ds.txt:18066`) is **weight-2-only**, via the homology lattice `H₁(X₁N,ℤ)` + integer Hecke matrix + Cayley–Hamilton; module-finiteness is then `End_ℤ(free)≅M_r(ℤ)` (Ex 6.5.1). **The q-expansion-lattice route was REJECTED** — DS has no q-expansion principle / Sturm bound, and the rational-coeff basis (Cor 6.5.6) is *downstream* of the homology (Galois descent), so that route only relocates the deep input. The weight-`k` generalization needs the `Sym^{k-2}` integral modular-symbol module (IHR-a) — beyond DS; cite Shimura/Hida. The genuine irreducible content is the **existence of the Hecke-stable full-rank free ℤ-lattice Λ**; `IHR-asm` (Λ ⟹ `Module.Finite`) is itself BOUNDED.
 
 #### Statement
@@ -130,6 +136,46 @@ Shimura, *Intro. Arith. Theory*, **(3.5.20)+ρ₀ p.84** (faithful integral repr
 
 #### Generality decision
 Per `N, k`. Lattice in `S_k(Γ₁N)` itself (matches Shimura/Miyake; cleaner than the homology dual). `spanning` (full-rank) is the honest hard field; **faithfulness is derived, never stubbed** (the audit's anti-empty-structure requirement). After this, the Tranche-2 IHR roadmap discharges `exists_HeckeStableLattice` (not `heckeAlgℤ_finite` directly).
+
+---
+
+### [T007] Weight-case narrowing — prove the `k ≤ 0` lattice case, isolate `k = 1` as the named Deligne–Serre input
+- **Status**: ✅ **DONE (2026-07-03)** — `CuspForm.eq_zero_of_weight_nonpos` + `CuspForm.subsingleton_of_weight_nonpos` + `exists_HeckeStableLattice_of_nonpos` PROVEN, axiom-clean (`{propext, Classical.choice, Quot.sound}`); the deep input renamed/narrowed to **`exists_HeckeStableLattice_one` (weight 1 ONLY, DS Prop 2.7 docstring + bad-prime `U_p` caveat per reviewer round-2 Q3)**; `exists_HeckeStableLattice` restated with `(hk : k < 2)` and PROVEN by case-split; `heckeAlgℤ_finite_of_lattice` gains `(hk : k < 2)`; consumer `HeckeAlgFiniteFinal.heckeAlgℤ_finite` updated (statement unchanged). Verified: Labels tree green (4072 jobs); `#print axioms heckeAlgℤ_finite` sorryAx traces solely to `exists_HeckeStableLattice_one`; `heckeAlgℤ_finite_of_two_le` + `coeffField_numberField_of_two_le` stay axiom-clean. Integration.md change #3 (k=1 citation fix) discharged. PHASE-6.5 cleanup deferred (AINTLIB producer rule). · **File**: Labels/HeckeFieldArithmetic.lean (+ 1-line consumer fix in Labels/HeckeAlgFiniteFinal.lean) · **Depends on**: T002-L1 (done), EICH-5 (done) · **Parent**: T002 · **Type**: theorem + restructure of the isolated input
+- **Why (on-target check)**: the ES-tracker "WIRING ARCHITECTURE / WEIGHT CASES" block prescribes exactly this: k≥2 = period route (DONE via EICH); **k≤0 = `S_k = 0` ⟹ trivial lattice — "find/prove"**; **k=1 = genuine Deligne–Serre gap — reviewer round 2 (Q3) decided option (b): isolate as a named cited input, DS *Prop 2.7* + bad-prime `U_p` caveat**. Also discharges integration.md "Changes to apply" #3 (the `exists_HeckeStableLattice` k=1 citation fix). After this the project's sole remaining Group-A sorry is `exists_HeckeStableLattice_one` (weight 1).
+
+#### Statement
+```lean
+/-- A cusp form of nonpositive weight on an arithmetic subgroup vanishes. -/
+theorem CuspForm.eq_zero_of_weight_nonpos {𝒢 : Subgroup (GL (Fin 2) ℝ)} [𝒢.IsArithmetic]
+    {k : ℤ} (hk : k ≤ 0) (f : CuspForm 𝒢 k) : f = 0
+
+theorem exists_HeckeStableLattice_of_nonpos (N : ℕ) [NeZero N] {k : ℤ} (hk : k ≤ 0) :
+    Nonempty (HeckeStableLattice N k)   -- PROVEN: ⊥ is free/finite/stable, spanning since S_k = 0
+
+/-- (The named weight-1 deep input) Deligne–Serre Prop 2.7 (pre-Galois-rep: finite free
+Hecke+diamond-stable lattice); CAVEAT: Prop 2.7's T_p-stability is p∤N — bad-prime U_p added
+separately. -/
+theorem exists_HeckeStableLattice_one (N : ℕ) [NeZero N] :
+    Nonempty (HeckeStableLattice N 1) := sorry
+
+theorem exists_HeckeStableLattice (N : ℕ) [NeZero N] {k : ℤ} (hk : k < 2) :
+    Nonempty (HeckeStableLattice N k)   -- case split: k ≤ 0 proven, k = 1 the named input
+
+theorem heckeAlgℤ_finite_of_lattice (N : ℕ) [NeZero N] {k : ℤ} (hk : k < 2) :
+    Module.Finite ℤ (heckeAlgℤ N k)     -- gains the (hk : k < 2) hypothesis; body unchanged
+```
+#### Proof sketch
+1. `CuspForm.eq_zero_of_weight_nonpos`: `k < 0` → coerce to `ModularForm 𝒢 k`, `ModularForm.isZero_of_neg_weight`; `k = 0` → `ModularForm.eq_const_of_weight_zero` gives `⇑f = const c`, `CuspFormClass.zero_at_infty` (via the `Fact (IsCusp ∞ 𝒢)` instance for arithmetic 𝒢) gives `⇑f → 0` at `i∞`, `tendsto_nhds_unique tendsto_const_nhds` forces `c = 0`; conclude by `CuspForm.ext` (mirror of EichlerInjective.lean:2144–2158, the EICH-4 k=2 case).
+2. `exists_HeckeStableLattice_of_nonpos`: lattice `⊥` — `free`/`finite` instances for the trivial submodule; `spanning`: `S_k` is subsingleton (step 1) so `Submodule ℂ S_k` is subsingleton, `Subsingleton.elim _ ⊤`; `stable`: `x ∈ ⊥ ⟹ x = 0 ⟹ T 0 = 0 ∈ ⊥`.
+3. `exists_HeckeStableLattice_one`: the isolated sorry with the reviewer-mandated docstring (DS Prop 2.7 + bad-prime U_p caveat, ranked fallback note).
+4. `exists_HeckeStableLattice (hk : k < 2)`: `rcases lt_or_eq` on `k ≤ 0` vs `k = 1` (omega interval), dispatch to 2/3.
+5. Consumer fix: `HeckeAlgFiniteFinal.heckeAlgℤ_finite` k<2 branch passes `hk`.
+#### Mathlib lemmas needed
+`ModularForm.isZero_of_neg_weight` (NormTrace.lean:141), `ModularForm.eq_const_of_weight_zero` (:164), `CuspFormClass.zero_at_infty` (Basic.lean:738), `Fact (IsCusp ∞ Γ)` instance (Basic.lean:730), `tendsto_nhds_unique`, `Submodule` ⊥ API. All verified present (grep 2026-07-03).
+#### Sources
+Deligne–Serre 1974, *Formes modulaires de poids 1*, **Prop 2.7** (reviewer reply 2026-06-24 Q3); trivial-weight vanishing = standard (weight-0 holomorphic form on compact curve is constant, cusp vanishing kills it).
+#### Generality decision
+`CuspForm.eq_zero_of_weight_nonpos` stated for arbitrary arithmetic `𝒢` (mathlib-shaped, reusable); the lattice statements per `N, k` as before.
 
 ---
 
@@ -579,18 +625,27 @@ Both ES-2 and ES-3 need only `𝕄` (done); ES-4 needs ES-3; ES-asm needs ES-1�
 - **The move (import-cycle fix):** the sorry'd `heckeAlgℤ_finite` instance + `exists_HeckeStableLattice` are UPSTREAM (HeckeFieldArithmetic) but the real proof (`heckeAlgℤ_finite_of_period`) is DOWNSTREAM (after substrate, which imports HeckeFieldArithmetic). Fix: remove the sorry instance + `exists_HeckeStableLattice` from HeckeFieldArithmetic; create `ModularSymbols/HeckeFiniteFinal.lean` (downstream of all substrate files) proving the REAL `instance heckeAlgℤ_finite`; move `newformEigenHom_range_finite` (T004b, currently in HeckeFieldArithmetic, uses the instance) there too; have `NewformOrbit` import it. Bounded ripple (only T004b moves; T004/T005 stay in NewformOrbit + 1 import line).
 - **WEIGHT CASES** (instance is stated `∀ k : ℤ`): **k≥2** = the substrate (`heckeAlgℤ_finite_of_period`). **k≤0** = `S_k=0` ⟹ `End ℂ S_k` subsingleton ⟹ `heckeAlgℤ` finite (need the `CuspForm ... k = 0` vanishing lemma for k≤0; `ModularForm.isZero_of_neg_weight`-style — find/prove). **★ k=1 = GENUINE GAP:** weight-1 Hecke-algebra finiteness is **Deligne–Serre** (Galois/Artin, NOT modular symbols — `cuspValue_symRep_gamma` is *false* at k=1, Sym^{k-2}=Sym^{-1} degenerate). No elementary/modular-symbol route exists. Options at wiring: (a) restrict downstream T004/T005 to `2≤k` (loses weight-1 newforms), or (b) isolate k=1 as a named deep input (Deligne–Serre). Decide + flag to user.
 
-### [IHR-a] Integral modular-symbol module + Manin presentation  — blocked, research
+### [IHR-a] Integral modular-symbol module + Manin presentation  — **✅ DONE as-needed (2026-06-22/23, ES tracker)**
 `𝕄_k(Γ₁N,ℤ)` = `Γ₁N`-coinvariants of `Div⁰(ℙ¹ℚ) ⊗ Sym^{k-2}ℤ²`; finite free over ℤ via Manin symbols
 (generators over `Γ₁N\SL₂ℤ × V_{k-2}`, 2-term `x+x|S` and 3-term `x+x|U+x|U²` relations + parabolic).
 Combinatorial. *(mathlib: `groupCohomology`, `Representation`, symmetric powers; modular symbols
 absent.)*
+**Resolution note (2026-07-03 bookkeeping):** built as `CoefficientSystem.lean` (ES-0) + `ModuleM.lean`
+(ES-1a) + finiteness via `CoinvariantsFinite.lean` (ES-1d) — see the ES build tracker above, all
+axiom-clean. The full Manin *presentation* (freeness, explicit relations) was NOT needed: the refined
+finiteness plan uses `End_ℤ(𝕄)`/dual and tolerates torsion. No open work remains.
 
-### [IHR-b] Integral Hecke (Heilbronn) action on `𝕄_k(Γ₁N,ℤ)`  — blocked, research
+### [IHR-b] Integral Hecke (Heilbronn) action on `𝕄_k(Γ₁N,ℤ)`  — **✅ DONE (2026-06-23, ES tracker `hT`/`hD`)**
 `T_n, U_p, ⟨d⟩` act by finite sums of integer (Heilbronn) matrices. Combinatorial. Depends: IHR-a.
+**Resolution note:** `periodMap'_heckeEnd` + `periodMap'_diamond` axiom-clean (ES tracker ★★ hT/hD entries).
 
-### [IHR-c] Period pairing well-defined / Γ-invariant / Hecke-equivariant  — blocked, research (analytic)
+### [IHR-c] Period pairing well-defined / Γ-invariant / Hecke-equivariant  — **SUPERSEDED as an input; pairing itself DONE**
 `⟨f,{α,β}⊗P⟩ = ∫_α^β f(z)P(z,1)dz`: converges (cusp decay), descends to `𝕄_k(Γ₁N)`, Hecke-equivariant.
 The genuine analytic input. Uses codebase cusp decay + mathlib contour integration. Depends: IHR-a.
+**Resolution note (2026-07-03 bookkeeping):** the pairing + invariance + equivariance are proven
+(`rawPairing`, `isPeriodInvariant_all`, PeriodHecke); the *boundary-identity* residual
+(`interior_edges_cancel_sum`, Shimura 8.2.22) is **SUPERSEDED — do not formalise** (reviewer round 2):
+injectivity now comes from the Eichler route, and nothing consumes that sorry. Proven pieces kept dormant.
 
 ### [IHR-d] Injectivity of the period map `ι : S_k ↪ 𝕄_k(Γ₁N,ℤ)^∨ ⊗ ℂ`  — **✅ DONE (2026-06-30) via the Eichler route (EICH-1..5)**
 A cusp form with all periods zero is zero (the "easy half" of Eichler–Shimura). Depends: IHR-c.
@@ -602,11 +657,15 @@ compiling skeleton `ModularSymbols/EichlerInjective.lean`). Discharged by the ex
 **EICH-1 → {EICH-2, EICH-3} → EICH-4 → EICH-5** below. On completion, `periodMap'_injective` (hence
 `heckeAlgℤ_finite` for k≥2) no longer consumes `interior_edges_cancel_sum`.
 
-### [IHR-asm] Assemble FIH from IHR — discharges T002  — blocked, research
+### [IHR-asm] Assemble FIH from IHR — discharges T002  — **✅ DONE (2026-06-30, with EICH-5)**
 `𝕋ℤ ↪ End_ℤ(𝕄_k^∨_tf)` via Hecke-equivariance + injectivity (IHR-d); sub-ℤ-module of finite free is
 finite ⟹ `Module.Finite ℤ (heckeAlgℤ N k)` (T002). Depends: IHR-a/b/c/d.
 **Status note:** the assembly itself (`heckeAlgℤ_finite_of_period`) is PROVEN + INSTALLED
 (`Labels/HeckeAlgFiniteFinal.lean`); only IHR-d (injectivity) remains — see the EICH cluster.
+**Resolution note (2026-07-03 bookkeeping):** IHR-d closed via EICH-1..5 ⟹ the whole `k ≥ 2` chain
+(`heckeAlgℤ_finite_of_two_le`) is axiom-clean. With T007 (`k ≤ 0` proven) the FIH for ALL weights
+rests on exactly one cited input: `exists_HeckeStableLattice_one` (weight 1, Deligne–Serre Prop 2.7).
+Tranche 2 is COMPLETE as-needed; nothing here is dispatchable.
 
 ---
 
@@ -820,7 +879,7 @@ reply.md §1.3 (8) (verbatim): *"After slashing by σ, the LHS becomes the Eichl
 `k : ℤ`, `2 ≤ k`. Holds for every `γ ∈ SL(2,ℤ)` (hence every cusp). NOTE: `hf` likely unused (boundedness is automatic from `b₀ = 0` for the cusp form `f|_k γ`, just like `eichler_cusp_holo`); kept for signature uniformity. Does NOT need `eichlerIntegralAt` if route (a) is taken, but the general-`γ` slash-on-`q`-series formula is required either way.
 
 ### [EICH-3a-i] G3b finite-cusp residual — boundedness of `(E_f∘↑)∣[2-k]γ` for `γ•∞ ≠ ∞` (`γ₁₀ ≠ 0`)  [SPAWNED 2026-06-30 from EICH-3a]
-- **Status**: **OPEN — the SOLE remaining residual of the whole Eichler route** (2026-06-30). After EICH-3a's `eichler_bdd_at_cusp` was split into the `γ₁₀ = 0` case (PROVEN, axiom-clean: cusp-`∞` bound transfer) and the `γ₁₀ ≠ 0` finite-cusp case, only the latter remains. `#print axioms periodMap'_injective_eichler` traces `sorryAx` solely to this lemma and **NOT `interior_edges_cancel_sum`**. So closing EICH-3a-i makes the entire `k≥2` injectivity / `heckeAlgℤ_finite` (k≥2) chain axiom-clean. · **File**: ModularSymbols/EichlerInjective.lean (`eichler_slashSL_bdd_finite`, ~line 627) · **Depends on**: EICH-1, EICH-2 · **Type**: theorem (1 isolated `private` sorry, in-tree) · **Parent**: EICH-3a · **Blocks**: nothing (`eichler_bdd_at_cusp` packaged around it)
+- **Status**: ✅ **DONE (2026-06-30; stale-OPEN entry corrected 2026-07-03)** — `eichler_slashSL_bdd_finite` was closed later the same day (see IHR-d and CLEANUP-EICH-2 axiom re-check); `EichlerInjective.lean` is **sorry-free** and `#print axioms periodMap'_injective_eichler` = `{propext, Classical.choice, Quot.sound}` (re-verified 2026-07-03, fresh `lake env lean`). The whole Eichler route is closed; the `k≥2` injectivity / `heckeAlgℤ_finite` (k≥2) chain is axiom-clean. *(Original OPEN analysis kept below for the record.)* · **File**: ModularSymbols/EichlerInjective.lean (`eichler_slashSL_bdd_finite`, ~line 627) · **Depends on**: EICH-1, EICH-2 · **Type**: theorem (1 isolated `private` sorry, in-tree) · **Parent**: EICH-3a · **Blocks**: nothing (`eichler_bdd_at_cusp` packaged around it)
 #### Statement
 ```lean
 private theorem eichler_slashSL_bdd_finite (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)

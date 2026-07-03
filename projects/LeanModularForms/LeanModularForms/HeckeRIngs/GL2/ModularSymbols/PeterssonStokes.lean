@@ -2690,8 +2690,14 @@ It is faithfully stated: the left-hand side is the genuine symmetrised standard-
 (equal, by `tile_area_eq_slashed_stdfdo` + `symmArea_eq_symm_stdTile_sum`, to the nonzero symmetrised
 area integral — its `g = iⁿ f` twisted diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), and the right-hand side
 pairs against the *genuine nonzero* Manin boundary symbol `(1 − g₀)·∂e₀` of `maninPairedBoundary N`,
-so a `c = 0` / `boundaryDivisor = 0` witness is *not* available.  This is the single remaining `k ≥ 2`
-gap; the whole substrate's `sorryAx` traces solely to it.
+so a `c = 0` / `boundaryDivisor = 0` witness is *not* available.
+
+**SUPERSEDED (2026-06-30, expert review round 2 + EICH-1..5): this lemma is OFF the critical path
+and is not to be formalised.**  Period-map injectivity for `k ≥ 2` is proven sorry-free by the
+Eichler-integral route (`EichlerInjective.periodMap'_injective_eichler`, axiom-clean), which the
+live `heckeAlgℤ_finite` instance consumes; nothing downstream consumes this `sorry` anymore.  The
+proven pieces surrounding it (`tile_stokes_fd`, the binomial bridge, the paired-boundary collapse)
+are kept dormant/reusable per the reviewer's instruction.
 
 The lift family `σ` is constrained to be a genuine `SL₂(ℤ)`-lift of the coset representatives
 (`hσ : ∀ q, (σ q : PSL(2, ℤ)) = q.out`).  This hypothesis is **essential for faithfulness**: it makes

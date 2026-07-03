@@ -245,7 +245,13 @@ namespace PairedBoundary
 variable (B : PairedBoundary N)
 
 /-- The total boundary divisor `∑_i ∂(edge i) ∈ Div0 ℤ` of a paired boundary — the integral
-1-cycle the period functional is evaluated on. -/
+1-cycle the period functional is evaluated on.
+
+**Typing note (expert review 2026-06-24, §7).**  This element lives in the *raw* divisor module
+`Div0 ℤ`, **not** in the coinvariants `𝕄` — no descent is performed here.  Correspondingly
+`rawPairing` is the pre-descent pairing and `div0Rep` acts on the divisor factor only; any
+nonzeroness statement about `boundaryDivisor` (e.g. the `(1 − g₀)·∂e₀` Manin symbol) is a claim at
+the raw level and does **not** assert nonvanishing of its image in the coinvariant quotient. -/
 noncomputable def boundaryDivisor : Div0 ℤ := ∑ i, (B.edge i).edgeDivisor
 
 /-- **The pairwise side-pairing identity** (the local heart of the collapse).  The two divisor

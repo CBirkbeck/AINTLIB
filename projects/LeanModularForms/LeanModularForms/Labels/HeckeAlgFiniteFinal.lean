@@ -64,15 +64,16 @@ theorem heckeAlgℤ_finite_of_two_le (hk : 2 ≤ k) : Module.Finite ℤ (heckeAl
 
 The proof splits on the weight:
 * `2 ≤ k`: `heckeAlgℤ_finite_of_two_le` (the integral Eichler–Shimura period route, axiom-clean —
-  **not** the Stokes-route `interior_edges_cancel_sum` nor `exists_HeckeStableLattice`);
-* `k < 2`: via the full-rank Hecke-stable lattice route `heckeAlgℤ_finite_of_lattice`
-  (`k = 1` = Deligne–Serre, `k ≤ 0` trivial), the only branch still resting on
-  `exists_HeckeStableLattice`. -/
+  **not** the Stokes-route `interior_edges_cancel_sum` nor any lattice input);
+* `k < 2`: via the full-rank Hecke-stable lattice route `heckeAlgℤ_finite_of_lattice` —
+  **proven** for `k ≤ 0` (`S_k = 0`, `exists_HeckeStableLattice_of_nonpos`), and resting on the
+  cited Deligne–Serre Prop 2.7 input `exists_HeckeStableLattice_one` for `k = 1` (the sole
+  remaining Group-A `sorry`). -/
 instance heckeAlgℤ_finite (N : ℕ) [NeZero N] (k : ℤ) :
     Module.Finite ℤ (heckeAlgℤ N k) := by
   rcases le_or_gt 2 k with hk | hk
   · exact heckeAlgℤ_finite_of_two_le hk
-  · exact heckeAlgℤ_finite_of_lattice N k
+  · exact heckeAlgℤ_finite_of_lattice N k hk
 
 /-- **[T004b]** The eigenvalue ring `O_f := (newformEigenHom f).range ⊆ ℂ` is module-finite over
 `ℤ` — the surjective image of the finite `ℤ`-module `heckeAlgℤ N k`. -/
