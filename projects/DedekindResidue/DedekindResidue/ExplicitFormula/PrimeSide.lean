@@ -35,6 +35,49 @@ open scoped ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
+/-- The absolute norm of a nonzero prime ideal is nonzero (`absNorm I = 0 ↔ I = ⊥`, and the
+ideal is nonzero). -/
+theorem absNorm_ne_zero_of_prime {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}} :
+    Ideal.absNorm 𝔭.1 ≠ 0 :=
+  fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+
+/-- The absolute norm of a nonzero prime ideal is not `1` (`absNorm I = 1 ↔ I = ⊤`, and a
+prime ideal is proper). -/
+theorem absNorm_ne_one_of_prime {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}} :
+    Ideal.absNorm 𝔭.1 ≠ 1 :=
+  fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+
+/-- A nonzero prime ideal has absolute norm at least `2` (it is neither `0` nor `1`). This is
+the arithmetic fact underlying every prime-power Dirichlet estimate in this file. -/
+theorem two_le_absNorm_of_prime {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}} :
+    2 ≤ Ideal.absNorm 𝔭.1 := by
+  have h0 : Ideal.absNorm 𝔭.1 ≠ 0 := absNorm_ne_zero_of_prime K
+  have h1 : Ideal.absNorm 𝔭.1 ≠ 1 := absNorm_ne_one_of_prime K
+  omega
+
+/-- Real-cast form of `two_le_absNorm_of_prime`: `(2 : ℝ) ≤ N𝔭`. -/
+theorem two_le_absNorm_of_prime_real {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}} :
+    (2 : ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
+  exact_mod_cast two_le_absNorm_of_prime (K := K) (𝔭 := 𝔭)
+
+/-- For a nonzero prime ideal and real exponent `σ > 1`, `2·N𝔭^{-σ} < 1`: the Euler-factor
+smallness estimate that forces non-vanishing and the uniform inverse bound. -/
+theorem two_mul_rpow_neg_lt_one {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}} {σ : ℝ}
+    (hσ : 1 < σ) : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) < 1 := by
+  have hN2 : (2 : ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := two_le_absNorm_of_prime_real K
+  have hmono : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) ≤ 2 * (2 : ℝ) ^ (-σ) := by
+    refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+    rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
+    exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
+      (Real.rpow_pos_of_pos (by norm_num) _)).mpr (Real.rpow_le_rpow (by norm_num) hN2 (by linarith))
+  have h2s : (2 : ℝ) * (2 : ℝ) ^ (-σ) < 1 := by
+    have hs2 : (2 : ℝ) ^ (-σ) < (2 : ℝ) ^ (-(1 : ℝ)) :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) (by linarith)
+    rw [Real.rpow_neg_one] at hs2
+    norm_num at hs2
+    linarith
+  linarith
+
 /-- Prime-ideal norm sums converge for real exponent `σ > 1` (comparison with the full
 ideal Dirichlet series). -/
 theorem summable_primeIdeal_rpow {σ : ℝ} (hσ : 1 < σ) :
@@ -71,15 +114,11 @@ theorem summable_primeIdeal_log_rpow {σ : ℝ} (hσ : 1 < σ) :
   refine Summable.of_nonneg_of_le (fun 𝔭 => ?_) (fun 𝔭 => ?_)
     ((summable_primeIdeal_rpow K hexp).mul_left (1/δ))
   · have hN : (1:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-      have h0 : Ideal.absNorm 𝔭.1 ≠ 0 :=
-        fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-      exact_mod_cast Nat.one_le_iff_ne_zero.mpr h0
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr (absNorm_ne_zero_of_prime K)
     have := Real.log_nonneg hN
     positivity
   · have hN : (1:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-      have h0 : Ideal.absNorm 𝔭.1 ≠ 0 :=
-        fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-      exact_mod_cast Nat.one_le_iff_ne_zero.mpr h0
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr (absNorm_ne_zero_of_prime K)
     have hNpos : (0:ℝ) < (Ideal.absNorm 𝔭.1 : ℝ) := by linarith
     -- log N ≤ N^δ/δ
     have hlog : Real.log (Ideal.absNorm 𝔭.1) ≤ (Ideal.absNorm 𝔭.1 : ℝ)^δ / δ := by
@@ -138,11 +177,8 @@ theorem euler_g_bound (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 �
     (h1 : 1 < σ₀) (h2 : σ₀ ≤ x.re) :
     ‖(1 - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-x))⁻¹ - 1‖
       ≤ 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ₀) := by
-  have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-  have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-  have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-    have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-    exact_mod_cast this
+  have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := absNorm_ne_zero_of_prime K
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := two_le_absNorm_of_prime_real K
   have hnorm : ‖(Ideal.absNorm 𝔭.1 : ℂ) ^ (-x)‖ = (Ideal.absNorm 𝔭.1 : ℝ) ^ (-x.re) := by
     rw [Complex.norm_natCast_cpow_of_pos (by omega), Complex.neg_re]
   have hle : ‖(Ideal.absNorm 𝔭.1 : ℂ) ^ (-x)‖ ≤ (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ₀) := by
@@ -213,25 +249,7 @@ theorem multipliableLocallyUniformlyOn_eulerFactors :
     have hb := euler_g_bound K 𝔭 hσ₀ (hσ₀min x hx)
     rw [h0] at hb
     simp only [inv_zero, zero_sub, norm_neg, norm_one] at hb
-    have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-      have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-      have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 :=
-        fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-      have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-      exact_mod_cast this
-    have hsmall : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ₀) ≤ 2 * (2:ℝ)^(-σ₀) := by
-      refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
-      rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
-      refine (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
-        (Real.rpow_pos_of_pos (by norm_num) _)).mpr ?_
-      exact Real.rpow_le_rpow (by norm_num) hN2 (by linarith)
-    have h2s : (2:ℝ) * (2:ℝ)^(-σ₀) < 1 := by
-      have hs2 : (2:ℝ)^(-σ₀) < (2:ℝ)^(-(1:ℝ)) :=
-        Real.rpow_lt_rpow_of_exponent_lt (by norm_num) (by linarith)
-      rw [Real.rpow_neg_one] at hs2
-      norm_num at hs2
-      linarith
-    linarith
+    linarith [two_mul_rpow_neg_lt_one K (𝔭 := 𝔭) hσ₀]
   have hsum_u : Summable (fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} =>
       2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ₀)) :=
     (summable_primeIdeal_rpow K hσ₀).mul_left 2
@@ -246,7 +264,7 @@ theorem multipliableLocallyUniformlyOn_eulerFactors :
     refine Continuous.const_cpow continuous_neg ?_
     left
     intro h0
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := absNorm_ne_zero_of_prime K
     rw [show ((Ideal.absNorm 𝔭.1 : ℕ) : ℂ) = 0 ↔ Ideal.absNorm 𝔭.1 = 0 from
       Nat.cast_eq_zero] at h0
     exact hne0 h0
@@ -259,49 +277,15 @@ theorem euler_factor_ne_zero (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 
   have hb := euler_g_bound K 𝔭 hx (le_refl x.re)
   rw [h0] at hb
   simp only [inv_zero, zero_sub, norm_neg, norm_one] at hb
-  have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-  have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-  have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-    have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-    exact_mod_cast this
-  have hsmall : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-x.re) ≤ 2 * (2:ℝ)^(-x.re) := by
-    refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
-    rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
-    refine (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
-      (Real.rpow_pos_of_pos (by norm_num) _)).mpr ?_
-    exact Real.rpow_le_rpow (by norm_num) hN2 (by linarith)
-  have h2s : (2:ℝ) * (2:ℝ)^(-x.re) < 1 := by
-    have hs2 : (2:ℝ)^(-x.re) < (2:ℝ)^(-(1:ℝ)) :=
-      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) (by linarith)
-    rw [Real.rpow_neg_one] at hs2
-    norm_num at hs2
-    linarith
-  linarith
+  linarith [two_mul_rpow_neg_lt_one K (𝔭 := 𝔭) hx]
 
 /-- The inverse Euler factor has norm at most `2` on `Re > 1`. -/
 theorem euler_inv_norm_le_two (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}) {x : ℂ}
     (hx : 1 < x.re) :
     ‖((1 : ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-x))⁻¹‖ ≤ 2 := by
   have hb := euler_g_bound K 𝔭 hx (le_refl x.re)
-  have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-  have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-  have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-    have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-    exact_mod_cast this
-  have hsmall : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-x.re) ≤ 1 := by
-    have h1 : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-x.re) ≤ 2 * (2:ℝ)^(-x.re) := by
-      refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
-      rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
-      refine (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
-        (Real.rpow_pos_of_pos (by norm_num) _)).mpr ?_
-      exact Real.rpow_le_rpow (by norm_num) hN2 (by linarith)
-    have h2 : (2:ℝ) * (2:ℝ)^(-x.re) ≤ 1 := by
-      have hs2 : (2:ℝ)^(-x.re) ≤ (2:ℝ)^(-(1:ℝ)) :=
-        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
-      rw [Real.rpow_neg_one] at hs2
-      norm_num at hs2
-      linarith
-    linarith
+  have hsmall : 2 * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-x.re) ≤ 1 :=
+    (two_mul_rpow_neg_lt_one K (𝔭 := 𝔭) hx).le
   calc ‖((1 : ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-x))⁻¹‖
       ≤ ‖((1 : ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-x))⁻¹ - 1‖ + ‖(1:ℂ)‖ :=
         norm_le_norm_sub_add _ _
@@ -323,7 +307,7 @@ theorem neg_logDeriv_dedekindZeta_eq_tsum {s : ℂ} (hs : 1 < s.re) :
   have hNcast : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
       ((Ideal.absNorm 𝔭.1 : ℕ) : ℂ) ≠ 0 := by
     intro 𝔭 h0
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := absNorm_ne_zero_of_prime K
     exact hne0 (Nat.cast_eq_zero.mp h0)
   have hf_ne : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
       ((1 : ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s))⁻¹ ≠ 0 :=
@@ -342,7 +326,7 @@ theorem neg_logDeriv_dedekindZeta_eq_tsum {s : ℂ} (hs : 1 < s.re) :
         / (1 - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)))‖
       ≤ 2 * (Real.log (Ideal.absNorm 𝔭.1) * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-s.re)) := by
     intro 𝔭
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := absNorm_ne_zero_of_prime K
     have hN1 : (1:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr hne0
     have hlogeq : ‖Complex.log (Ideal.absNorm 𝔭.1 : ℂ)‖ = Real.log (Ideal.absNorm 𝔭.1) := by
@@ -409,12 +393,7 @@ theorem summable_primeIdeal_pow_log_rpow {σ : ℝ} (hσ : 1 < σ) :
       Real.log (Ideal.absNorm pk.1.1)
         * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)) := by
   have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
-      (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-    intro 𝔭
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-    exact_mod_cast this
+      (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := fun 𝔭 => two_le_absNorm_of_prime_real K
   have hr : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
       (0:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) ∧ (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) < 1 := by
     intro 𝔭
@@ -501,11 +480,7 @@ theorem neg_logDeriv_dedekindZeta_eq_tsum_prod {s : ℂ} (hs : 1 < s.re) :
           Complex.log (Ideal.absNorm pk.1.1 : ℂ)
             * (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s) := by
   have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
-      2 ≤ Ideal.absNorm 𝔭.1 := by
-    intro 𝔭
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    omega
+      2 ≤ Ideal.absNorm 𝔭.1 := fun 𝔭 => two_le_absNorm_of_prime K
   -- norm identities
   have hnorm : ∀ (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}) (k : ℕ),
       ‖Complex.log (Ideal.absNorm 𝔭.1 : ℂ)
@@ -682,8 +657,7 @@ theorem summable_integral_norm_primeSideH {a : ℝ} (ha : 0 < a) (F : ℝ → �
           * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
         * ∫ x : ℝ, ‖F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖ := by
     intro pk
-    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 := absNorm_ne_zero_of_prime K
     have hN1 : (1:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr hne0
     have hwnn : 0 ≤ Real.log (Ideal.absNorm pk.1.1)
@@ -761,11 +735,7 @@ theorem paperPhi_mul_neg_logDeriv_eq (K : Type*) [Field K] [NumberField K]
     ring
   -- per-term data
   have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
-      2 ≤ Ideal.absNorm 𝔭.1 := by
-    intro 𝔭
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    omega
+      2 ≤ Ideal.absNorm 𝔭.1 := fun 𝔭 => two_le_absNorm_of_prime K
   -- Step 4 (per-term): Φ(s)·log(N𝔭)·N𝔭^{-(k+1)s} = ∫ H_pk(u)·e^{itu} du
   have hterm : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
       paperPhi F s * (Complex.log (Ideal.absNorm pk.1.1 : ℂ)
@@ -917,13 +887,7 @@ theorem summable_primeIdeal_pow_div {σ : ℝ} (hσ : 1 < σ) :
   refine Summable.of_nonneg_of_le (fun pk => ?_) (fun pk => ?_)
     (((summable_primeIdeal_pow_log_rpow K hσ).mul_left (1/Real.log 2)))
   · positivity
-  · have hfacts : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
-      have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-        fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-      have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
-        fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-      have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
-      exact_mod_cast h2
+  · have hfacts : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := two_le_absNorm_of_prime_real K
     have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
     have hlogN : Real.log 2 ≤ Real.log (Ideal.absNorm pk.1.1) :=
       Real.log_le_log (by norm_num) hfacts
@@ -953,10 +917,7 @@ theorem dedekindZeta_eq_exp_tsum {s : ℂ} (hs : 1 < s.re) :
       (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)) := by
     refine Summable.of_norm ?_
     refine (summable_primeIdeal_rpow K hs).congr (fun 𝔭 => ?_)
-    have hpos : 0 < Ideal.absNorm 𝔭.1 := by
-      rcases Nat.eq_zero_or_pos (Ideal.absNorm 𝔭.1) with h0 | h0
-      · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) 𝔭.2.2
-      · exact h0
+    have hpos : 0 < Ideal.absNorm 𝔭.1 := Nat.pos_of_ne_zero (absNorm_ne_zero_of_prime K)
     rw [Complex.norm_natCast_cpow_of_pos hpos, Complex.neg_re]
   have hne : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
       (1:ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s) ≠ 0 :=
@@ -981,10 +942,7 @@ theorem dedekindZeta_eq_exp_tsum_prod {s : ℂ} (hs : 1 < s.re) :
       = (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * s.re)
           / ((pk.2+1 : ℕ) : ℝ) := by
     intro pk
-    have hpos : 0 < Ideal.absNorm pk.1.1 := by
-      rcases Nat.eq_zero_or_pos (Ideal.absNorm pk.1.1) with h0 | h0
-      · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) pk.1.2.2
-      · exact h0
+    have hpos : 0 < Ideal.absNorm pk.1.1 := Nat.pos_of_ne_zero (absNorm_ne_zero_of_prime K)
     rw [norm_div, Complex.norm_natCast_cpow_of_pos hpos, Complex.norm_natCast]
     congr 2
     rw [show (-(((pk.2+1 : ℕ)) : ℂ) * s) = -((((pk.2+1 : ℕ)) : ℝ) : ℂ) * s by
@@ -1007,17 +965,8 @@ theorem dedekindZeta_eq_exp_tsum_prod {s : ℂ} (hs : 1 < s.re) :
   rw [hsummable.tsum_prod' hslice]
   refine tsum_congr (fun 𝔭 => ?_)
   -- per-prime Taylor expansion of -log(1 - N^{-s})
-  have hpos : 0 < Ideal.absNorm 𝔭.1 := by
-    rcases Nat.eq_zero_or_pos (Ideal.absNorm 𝔭.1) with h0 | h0
-    · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) 𝔭.2.2
-    · exact h0
-  have hfacts : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
-    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 :=
-      fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 :=
-      fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    have h2 : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
-    exact_mod_cast h2
+  have hpos : 0 < Ideal.absNorm 𝔭.1 := Nat.pos_of_ne_zero (absNorm_ne_zero_of_prime K)
+  have hfacts : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := two_le_absNorm_of_prime_real K
   have hz : ‖(Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)‖ < 1 := by
     rw [Complex.norm_natCast_cpow_of_pos hpos, Complex.neg_re]
     refine Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith)
@@ -1057,11 +1006,6 @@ theorem dedekindZeta_ofReal_re_pos {σ : ℝ} (hσ : 1 < σ) :
     0 < (NumberField.dedekindZeta K (σ : ℂ)).re := by
   rw [dedekindZeta_ofReal_eq K hσ, Complex.ofReal_re]
   exact Real.exp_pos _
-
-/-- `ζ_K(σ)` is real on the real ray. -/
-theorem dedekindZeta_ofReal_im_eq_zero {σ : ℝ} (hσ : 1 < σ) :
-    (NumberField.dedekindZeta K (σ : ℂ)).im = 0 := by
-  rw [dedekindZeta_ofReal_eq K hσ, Complex.ofReal_im]
 
 /-- **The logarithmic Euler product on the real ray** (B–F eq. (4)):
 `log ζ_K(σ) = ∑_{𝔭,m} N𝔭^{-(m+1)σ}/(m+1)` for `σ > 1`. -/
