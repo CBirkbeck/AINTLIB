@@ -3810,4 +3810,202 @@ theorem exists_norm_logDeriv_gammaFactor_le :
         + Real.log (2 + |t|) by ring]
   linarith
 
+/-- `ψ(3/4) - ψ(1/4) = π`, derived from the Gauss-difference integral and the
+`∫ 1/(2 cosh(x/2)) = π/2` evaluation (Poitou p. 6-04; no reflection formula needed). -/
+theorem digamma_three_quarter_sub_quarter :
+    Complex.digamma ((3/4 : ℝ) : ℂ) - Complex.digamma ((1/4 : ℝ) : ℂ) = ((π : ℝ) : ℂ) := by
+  have hw : (0:ℝ) < (((3/4 : ℝ) : ℂ)).re := by
+    rw [Complex.ofReal_re]
+    norm_num
+  rw [digamma_sub_digamma_eq_integral (show (0:ℝ) < 1/4 by norm_num) hw]
+  -- the integrand is a real cast
+  have hcast : ∀ u ∈ Set.Ioi (0:ℝ),
+      (Complex.exp (-((1/4 : ℝ):ℂ) * (u:ℂ)) - Complex.exp (-((3/4 : ℝ):ℂ) * (u:ℂ)))
+          / (1 - Complex.exp (-(u:ℂ)))
+        = (((Real.exp (-(u/4)) - Real.exp (-(3*u/4))) / (1 - Real.exp (-u)) : ℝ) : ℂ) := by
+    intro u _
+    rw [show (-((1/4 : ℝ):ℂ) * (u:ℂ)) = ((-(u/4) : ℝ) : ℂ) by push_cast; ring,
+      show (-((3/4 : ℝ):ℂ) * (u:ℂ)) = ((-(3*u/4) : ℝ) : ℂ) by push_cast; ring,
+      show (-(u:ℂ)) = ((-u : ℝ) : ℂ) by push_cast; ring,
+      ← Complex.ofReal_exp, ← Complex.ofReal_exp, ← Complex.ofReal_exp]
+    push_cast
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hcast, integral_complex_ofReal]
+  congr 1
+  -- substitute u = 2x and identify the cosh kernel
+  set g : ℝ → ℝ := fun u => (Real.exp (-(u/4)) - Real.exp (-(3*u/4))) / (1 - Real.exp (-u))
+    with hg
+  have hsub := MeasureTheory.integral_comp_mul_left_Ioi g 0 (show (0:ℝ) < 2 by norm_num)
+  rw [mul_zero] at hsub
+  have hker : ∀ x ∈ Set.Ioi (0:ℝ), g (2*x) = 1/(2 * Real.cosh (x/2)) := by
+    intro x hx
+    rw [Set.mem_Ioi] at hx
+    rw [hg]
+    simp only
+    set y : ℝ := Real.exp (-(x/2)) with hy
+    have hy0 : 0 < y := Real.exp_pos _
+    have hy1 : y < 1 := by
+      rw [hy, show (1:ℝ) = Real.exp 0 by rw [Real.exp_zero]]
+      exact Real.exp_lt_exp.mpr (by linarith)
+    have he1 : Real.exp (-(2*x/4)) = y := by
+      rw [hy]
+      congr 1
+      ring
+    have he3 : Real.exp (-(3*(2*x)/4)) = y^3 := by
+      rw [hy, show -(3*(2*x)/4) = (-(x/2)) + ((-(x/2)) + (-(x/2))) by ring,
+        Real.exp_add, Real.exp_add]
+      ring
+    have he4 : Real.exp (-(2*x)) = y^4 := by
+      rw [hy, show -(2*x) = (-(x/2)) + ((-(x/2)) + ((-(x/2)) + (-(x/2)))) by ring,
+        Real.exp_add, Real.exp_add, Real.exp_add]
+      ring
+    have hcosh : Real.cosh (x/2) = (y⁻¹ + y)/2 := by
+      rw [Real.cosh_eq, hy, ← Real.exp_neg, neg_neg]
+    rw [show Real.exp (-(2*x/4)) = y from he1, he3, he4, hcosh]
+    have hy4lt : y^4 < 1 := pow_lt_one₀ hy0.le hy1 (by norm_num)
+    have hy4 : (1:ℝ) - y^4 ≠ 0 := (by linarith : (0:ℝ) < 1 - y^4).ne'
+    have hyne : y ≠ 0 := hy0.ne'
+    field_simp
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hker,
+    integral_inv_two_cosh_half] at hsub
+  have h2 : ∫ u in Set.Ioi (0:ℝ), g u = 2 * (π/2) := by
+    have h3 := hsub.symm
+    rw [smul_eq_mul] at h3
+    linarith
+  rw [h2]
+  ring
+
+/-- Log-derivative of the Legendre duplication formula at `s = 1/4`:
+`ψ(1/4) + ψ(3/4) = 2 ψ(1/2) - 2 log 2`. -/
+theorem digamma_quarter_add_three_quarter :
+    Complex.digamma ((1/4 : ℝ) : ℂ) + Complex.digamma ((3/4 : ℝ) : ℂ)
+      = 2 * Complex.digamma ((1/2 : ℝ) : ℂ) - 2 * Complex.log 2 := by
+  have hdiff : ∀ z : ℂ, 0 < z.re → DifferentiableAt ℂ Complex.Gamma z := by
+    intro z hz
+    refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+    intro heq
+    have h0 := congrArg Complex.re heq
+    simp only [Complex.neg_re, Complex.natCast_re] at h0
+    rw [h0] at hz
+    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+    linarith
+  set s₀ : ℂ := ((1/4 : ℝ) : ℂ) with hs₀
+  have hre₀ : s₀.re = 1/4 := Complex.ofReal_re _
+  have hshift : s₀ + 1/2 = ((3/4 : ℝ) : ℂ) := by
+    rw [hs₀]
+    push_cast
+    norm_num
+  have hdouble : 2 * s₀ = ((1/2 : ℝ) : ℂ) := by
+    rw [hs₀]
+    push_cast
+    norm_num
+  -- logDeriv of both sides of the duplication identity
+  have hfg : logDeriv (fun s : ℂ => Complex.Gamma s * Complex.Gamma (s + 1/2)) s₀
+      = logDeriv (fun s : ℂ =>
+          Complex.Gamma (2*s) * (2:ℂ) ^ (1 - 2*s) * (Real.sqrt π : ℂ)) s₀ := by
+    congr 1
+    funext s
+    exact Complex.Gamma_mul_Gamma_add_half s
+  -- LHS = ψ(1/4) + ψ(3/4)
+  have hΓq : Complex.Gamma s₀ ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos (by rw [hre₀]; norm_num)
+  have hΓ3q : Complex.Gamma (s₀ + 1/2) ≠ 0 := by
+    rw [hshift]
+    exact Complex.Gamma_ne_zero_of_re_pos (by rw [Complex.ofReal_re]; norm_num)
+  have hd3q : DifferentiableAt ℂ (fun s : ℂ => Complex.Gamma (s + 1/2)) s₀ := by
+    have h0 : (fun s : ℂ => Complex.Gamma (s + 1/2))
+        = Complex.Gamma ∘ (fun s : ℂ => s + 1/2) := rfl
+    rw [h0]
+    refine DifferentiableAt.comp s₀ ?_ (differentiableAt_id.add_const _)
+    rw [hshift]
+    exact hdiff _ (by rw [Complex.ofReal_re]; norm_num)
+  have hLHS : logDeriv (fun s : ℂ => Complex.Gamma s * Complex.Gamma (s + 1/2)) s₀
+      = Complex.digamma ((1/4 : ℝ) : ℂ) + Complex.digamma ((3/4 : ℝ) : ℂ) := by
+    rw [logDeriv_mul s₀ hΓq hΓ3q (hdiff s₀ (by rw [hre₀]; norm_num)) hd3q]
+    congr 1
+    have h0 : (fun s : ℂ => Complex.Gamma (s + 1/2))
+        = Complex.Gamma ∘ (fun s : ℂ => s + 1/2) := rfl
+    rw [h0, logDeriv_comp ?_ ?_]
+    · rw [show deriv (fun s : ℂ => s + 1/2) s₀ = 1 from by
+        rw [deriv_add_const, deriv_id'']]
+      rw [hshift, Complex.digamma_def]
+      ring
+    · rw [hshift]
+      exact hdiff _ (by rw [Complex.ofReal_re]; norm_num)
+    · exact differentiableAt_id.add_const _
+  -- RHS = 2 ψ(1/2) - 2 log 2
+  have hΓh : Complex.Gamma (2 * s₀) ≠ 0 := by
+    rw [hdouble]
+    exact Complex.Gamma_ne_zero_of_re_pos (by rw [Complex.ofReal_re]; norm_num)
+  have hpow_ne : (2:ℂ) ^ (1 - 2*s₀) ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff, not_and_or]
+    exact Or.inl two_ne_zero
+  have hderiv_lin : HasDerivAt (fun s : ℂ => 1 - 2*s) (-2) s₀ := by
+    have h1 := ((hasDerivAt_id s₀).const_mul (2:ℂ)).const_sub (1:ℂ)
+    have h2 : -((2:ℂ) * 1) = -2 := by ring
+    rw [h2] at h1
+    exact h1
+  have hdpow : HasDerivAt (fun s : ℂ => (2:ℂ) ^ (1 - 2*s))
+      ((2:ℂ) ^ (1 - 2*s₀) * Complex.log 2 * (-2)) s₀ :=
+    hderiv_lin.const_cpow (Or.inl two_ne_zero)
+  have hdΓ2 : DifferentiableAt ℂ (fun s : ℂ => Complex.Gamma (2*s)) s₀ := by
+    have h0 : (fun s : ℂ => Complex.Gamma (2*s))
+        = Complex.Gamma ∘ (fun s : ℂ => 2*s) := rfl
+    rw [h0]
+    refine DifferentiableAt.comp s₀ ?_ (differentiableAt_id.const_mul _)
+    rw [hdouble]
+    exact hdiff _ (by rw [Complex.ofReal_re]; norm_num)
+  have hRHS : logDeriv (fun s : ℂ =>
+        Complex.Gamma (2*s) * (2:ℂ) ^ (1 - 2*s) * (Real.sqrt π : ℂ)) s₀
+      = 2 * Complex.digamma ((1/2 : ℝ) : ℂ) - 2 * Complex.log 2 := by
+    have hprod_ne : Complex.Gamma (2*s₀) * (2:ℂ) ^ (1 - 2*s₀) ≠ 0 :=
+      mul_ne_zero hΓh hpow_ne
+    have hsqrt_ne : ((Real.sqrt π : ℝ) : ℂ) ≠ 0 := by
+      rw [Ne, Complex.ofReal_eq_zero]
+      exact (Real.sqrt_pos.mpr Real.pi_pos).ne'
+    rw [logDeriv_mul (f := fun s : ℂ => Complex.Gamma (2*s) * (2:ℂ) ^ (1 - 2*s))
+        (g := fun _ : ℂ => ((Real.sqrt π : ℝ) : ℂ)) s₀ hprod_ne hsqrt_ne
+        (hdΓ2.mul hdpow.differentiableAt) (differentiableAt_const _),
+      logDeriv_mul (f := fun s : ℂ => Complex.Gamma (2*s))
+        (g := fun s : ℂ => (2:ℂ) ^ (1 - 2*s)) s₀ hΓh hpow_ne hdΓ2
+        hdpow.differentiableAt]
+    have hconst : logDeriv (fun _ : ℂ => ((Real.sqrt π : ℝ) : ℂ)) s₀ = 0 :=
+      congrFun (logDeriv_const _) s₀
+    have hgamma2 : logDeriv (fun s : ℂ => Complex.Gamma (2*s)) s₀
+        = 2 * Complex.digamma ((1/2 : ℝ) : ℂ) := by
+      have h0 : (fun s : ℂ => Complex.Gamma (2*s))
+          = Complex.Gamma ∘ (fun s : ℂ => 2*s) := rfl
+      rw [h0, logDeriv_comp ?_ ?_]
+      · rw [show deriv (fun s : ℂ => 2*s) s₀ = 2 from by
+          rw [deriv_const_mul_field, deriv_id'']
+          ring]
+        rw [hdouble, Complex.digamma_def]
+        ring
+      · rw [hdouble]
+        exact hdiff _ (by rw [Complex.ofReal_re]; norm_num)
+      · exact differentiableAt_id.const_mul _
+    have hcpow : logDeriv (fun s : ℂ => (2:ℂ) ^ (1 - 2*s)) s₀
+        = Complex.log 2 * (-2) := by
+      rw [logDeriv_apply, hdpow.deriv]
+      field_simp
+    rw [hconst, hgamma2, hcpow]
+    ring
+  rw [hLHS, hRHS] at hfg
+  exact hfg
+
+/-- **`ψ(1/2) - ψ(1/4) = π/2 + log 2`** (Poitou p. 6-04, the value
+`∫₀^∞ dx/(2 ch(x/2)) = -ψ(1/4) + ψ(1/2) - log 2 = π/2` rearranged). -/
+theorem digamma_half_sub_quarter :
+    Complex.digamma ((1/2 : ℝ) : ℂ) - Complex.digamma ((1/4 : ℝ) : ℂ)
+      = ((π/2 + Real.log 2 : ℝ) : ℂ) := by
+  have h1 := digamma_three_quarter_sub_quarter
+  have h2 := digamma_quarter_add_three_quarter
+  have hlog : Complex.log 2 = ((Real.log 2 : ℝ) : ℂ) := by
+    rw [Complex.ofReal_log (by norm_num : (0:ℝ) ≤ 2)]
+    norm_num
+  rw [hlog] at h2
+  push_cast at h1 h2 ⊢
+  linear_combination h1/2 - h2/2
+
 end DedekindResidue
