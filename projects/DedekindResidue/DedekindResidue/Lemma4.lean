@@ -342,6 +342,145 @@ theorem norm_tsum_zeroIntTerm_sub_le {σ : ℝ} (hσ : 1/2 < σ) {X X' : ℝ} (h
     rwa [show (4:ℝ) / (Real.log X' * ((σ - 1/2)^2 + γ^2))
       = 4 / Real.log X' / ((σ - 1/2)^2 + γ^2) by rw [div_div]] at h1
 
+/-! ### The archimedean estimate: the `β`-kernel (paper lines 476–518)
+
+The combined `sinh + cosh` archimedean kernel is
+`L(U) = log((1+e^{−U})/(1−e^{−U})) = 2 artanh(e^{−U})`; the paper's `β`-bound rests
+on `e^{U/2}·L(U)` being decreasing, which follows from `L(U) ≤ 1/sinh U`
+(via `log(1+x) ≤ x` and `−log(1−x) ≤ x/(1−x)`). -/
+
+/-- The combined archimedean log-kernel `L(U) = log(1+e^{−U}) − log(1−e^{−U})`. -/
+noncomputable def archKernelL (U : ℝ) : ℝ :=
+  Real.log (1 + Real.exp (-U)) - Real.log (1 - Real.exp (-U))
+
+theorem exp_neg_lt_one {U : ℝ} (hU : 0 < U) : Real.exp (-U) < 1 := by
+  have h1 : Real.exp (-U) < Real.exp 0 := Real.exp_lt_exp.mpr (by linarith)
+  simpa using h1
+
+theorem archKernelL_pos {U : ℝ} (hU : 0 < U) : 0 < archKernelL U := by
+  have he1 : Real.exp (-U) < 1 := exp_neg_lt_one hU
+  have he0 : 0 < Real.exp (-U) := Real.exp_pos _
+  have h1 : Real.log (1 - Real.exp (-U)) < 0 :=
+    Real.log_neg (by linarith) (by linarith)
+  have h2 : 0 < Real.log (1 + Real.exp (-U)) :=
+    Real.log_pos (by linarith)
+  rw [archKernelL]
+  linarith
+
+/-- `sinh U = (1 − x²)/(2x)` for `x = e^{−U}`. -/
+theorem sinh_eq_exp_neg {U : ℝ} :
+    Real.sinh U = (1 - Real.exp (-U)^2) / (2*Real.exp (-U)) := by
+  have hxU : Real.exp U = (Real.exp (-U))⁻¹ := by
+    rw [← Real.exp_neg, neg_neg]
+  rw [Real.sinh_eq, hxU]
+  have hne : Real.exp (-U) ≠ 0 := (Real.exp_pos _).ne'
+  field_simp
+
+/-- **(A)** `L(U) ≤ 2/sinh U` (crude log bounds suffice for the factor 2). -/
+theorem archKernelL_le_two_inv_sinh {U : ℝ} (hU : 0 < U) :
+    archKernelL U ≤ 2 / Real.sinh U := by
+  set x : ℝ := Real.exp (-U) with hx_def
+  have hx0 : 0 < x := Real.exp_pos _
+  have hx1 : x < 1 := exp_neg_lt_one hU
+  have hx2 : (0:ℝ) < 1 - x^2 := by nlinarith
+  rw [sinh_eq_exp_neg, ← hx_def, div_div_eq_mul_div]
+  have hlog1 : Real.log (1 + x) ≤ x := by
+    have h1 := Real.log_le_sub_one_of_pos (by linarith : (0:ℝ) < 1 + x)
+    linarith
+  have hlog2 : -Real.log (1 - x) ≤ x / (1 - x) := by
+    have h1 : Real.log (1 - x) = -Real.log (1/(1-x)) := by
+      rw [Real.log_div one_ne_zero (by linarith : (1:ℝ) - x ≠ 0), Real.log_one]
+      ring
+    rw [h1, neg_neg]
+    have h2 := Real.log_le_sub_one_of_pos
+      (by positivity : (0:ℝ) < 1/(1-x))
+    have h3 : 1/(1-x) - 1 = x/(1-x) := by
+      rw [eq_div_iff (by linarith : (1:ℝ) - x ≠ 0), sub_mul, one_mul,
+        div_mul_cancel₀ _ (by linarith : (1:ℝ) - x ≠ 0)]
+      ring
+    linarith
+  rw [archKernelL, ← hx_def]
+  have hL : x + x/(1-x) = x*(2-x)/(1-x) := by
+    have hne : (1:ℝ) - x ≠ 0 := by linarith
+    rw [eq_div_iff hne, add_mul, div_mul_cancel₀ _ hne]
+    ring
+  have hxx : x + x/(1-x) ≤ 2*(2*x)/(1-x^2) := by
+    rw [hL, div_le_div_iff₀ (by linarith) hx2]
+    nlinarith [mul_pos hx0 (by linarith : (0:ℝ) < 1 - x), sq_nonneg x,
+      mul_pos (mul_pos hx0 hx0) (by linarith : (0:ℝ) < 1 - x)]
+  linarith
+
+/-- The derivative of the weighted kernel:
+`d/dU (e^{U/2}·L(U)) = e^{U/2}·(L(U)/2 − 1/sinh U)`. -/
+theorem hasDerivAt_exp_half_mul_archKernelL {U : ℝ} (hU : 0 < U) :
+    HasDerivAt (fun U : ℝ => Real.exp (U/2) * archKernelL U)
+      (Real.exp (U/2) * (archKernelL U / 2 - 1 / Real.sinh U)) U := by
+  have he0 : 0 < Real.exp (-U) := Real.exp_pos _
+  have he1 : Real.exp (-U) < 1 := exp_neg_lt_one hU
+  have h1 : HasDerivAt (fun U : ℝ => Real.exp (U/2)) (Real.exp (U/2) * (1/2)) U := by
+    have h0 := ((hasDerivAt_id U).div_const (2:ℝ)).exp
+    simpa using h0
+  have hexpneg : HasDerivAt (fun U : ℝ => Real.exp (-U)) (-Real.exp (-U)) U := by
+    have h0 := ((hasDerivAt_id U).neg).exp
+    simpa using h0
+  have h2a : HasDerivAt (fun U : ℝ => Real.log (1 + Real.exp (-U)))
+      (-Real.exp (-U)/(1 + Real.exp (-U))) U := by
+    have h0 := ((hasDerivAt_const U (1:ℝ)).add hexpneg).log
+      (by linarith : (1:ℝ) + Real.exp (-U) ≠ 0)
+    simpa using h0
+  have h2b : HasDerivAt (fun U : ℝ => Real.log (1 - Real.exp (-U)))
+      (Real.exp (-U)/(1 - Real.exp (-U))) U := by
+    have h0 := ((hasDerivAt_const U (1:ℝ)).sub hexpneg).log
+      (by linarith : (1:ℝ) - Real.exp (-U) ≠ 0)
+    rw [show Real.exp (-U)/(1 - Real.exp (-U))
+      = (0 - -Real.exp (-U))/(1 - Real.exp (-U)) by ring]
+    exact h0
+  have h2 : HasDerivAt (fun U : ℝ =>
+      Real.log (1 + Real.exp (-U)) - Real.log (1 - Real.exp (-U)))
+      (-Real.exp (-U)/(1 + Real.exp (-U)) - Real.exp (-U)/(1 - Real.exp (-U))) U :=
+    h2a.sub h2b
+  have h3 := h1.mul h2
+  have hLder : -Real.exp (-U)/(1 + Real.exp (-U)) - Real.exp (-U)/(1 - Real.exp (-U))
+      = -(1 / Real.sinh U) := by
+    rw [sinh_eq_exp_neg]
+    have hx2 : (0:ℝ) < 1 - Real.exp (-U)^2 := by nlinarith
+    have hne1 : (1:ℝ) + Real.exp (-U) ≠ 0 := by linarith
+    have hne2 : (1:ℝ) - Real.exp (-U) ≠ 0 := by linarith
+    have hne3 : (1:ℝ) - Real.exp (-U)^2 ≠ 0 := hx2.ne'
+    field_simp
+    ring
+  have hval : Real.exp (U/2) * (archKernelL U / 2 - 1 / Real.sinh U)
+      = Real.exp (U/2) * (1/2)
+        * (Real.log (1 + Real.exp (-U)) - Real.log (1 - Real.exp (-U)))
+        + Real.exp (U/2)
+          * (-Real.exp (-U)/(1 + Real.exp (-U)) - Real.exp (-U)/(1 - Real.exp (-U))) := by
+    rw [hLder]
+    unfold archKernelL
+    ring
+  exact hval ▸ h3
+
+/-- **(B)** `e^{U/2}·L(U)` is antitone on `(0, ∞)`. -/
+theorem antitoneOn_exp_half_mul_archKernelL :
+    AntitoneOn (fun U : ℝ => Real.exp (U/2) * archKernelL U) (Set.Ioi 0) := by
+  refine antitoneOn_of_deriv_nonpos (convex_Ioi 0) ?_ ?_ ?_
+  · intro U hU
+    exact ((hasDerivAt_exp_half_mul_archKernelL hU).continuousAt).continuousWithinAt
+  · rw [interior_Ioi]
+    intro U hU
+    exact ((hasDerivAt_exp_half_mul_archKernelL hU).differentiableAt).differentiableWithinAt
+  · rw [interior_Ioi]
+    intro U hU
+    rw [(hasDerivAt_exp_half_mul_archKernelL hU).deriv]
+    have hL := archKernelL_le_two_inv_sinh hU
+    have hs : 0 < Real.sinh U := Real.sinh_pos_iff.mpr hU
+    have h1 : archKernelL U / 2 - 1 / Real.sinh U ≤ 0 := by
+      have h2 : (0:ℝ) < 1 / Real.sinh U := by positivity
+      have h3 : archKernelL U ≤ 2 * (1 / Real.sinh U) := by
+        rw [show (2:ℝ) * (1 / Real.sinh U) = 2 / Real.sinh U by ring]
+        exact hL
+      linarith
+    exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le h1
+
 end DedekindResidue
 
 end
