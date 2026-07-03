@@ -175,6 +175,23 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
      (CompleteSpace holds by construction — the criterion's completeness is on the target
      ring, not on `A`) + Spa-pullback of the rational containment.
 
+**Progress (2026-07-03 beastmode, FINAL for this session-day — carriers 7 → 2)**:
+- **CARRIERS = 2** (verified trace, commit e0e1cf91): ONLY the C4 Spa-quasicompactness pair
+  remains on `isSheafy_of_stronglyNoetherian_828b`:
+  `Cor732.exists_dominating_unit_noHArch_finset_aux` (Cor 7.32) and
+  `SpaCompactNoHArch.isClosed_image_spa_ιSpv_bool_noHArch` (7.35 keystone). The LL package
+  (7.41/7.51/7.52), the Nullstellensatz trio (7.45/7.49/7.52), and the IRIE interface
+  (7.14/7.19/7.20) are PROVEN on the headline path. The unfaithful `HasLocLift` instances
+  are scoped out of WCA (`attribute [-instance]`) with the faithful package supplied at
+  every B-level context; `relativePiece_equiv_restrict_square` (RPK) carries the faithful
+  shadow + `[IsRingOfIntegralElements (A⁺)]`.
+- **NEXT = C4 (T-L5)**: its own decompose pass per the standing plan — the keystone
+  `isClosed_image_spa_ιSpv_bool_noHArch` decomposes per the 2026-06-05 finding as
+  (range ✓ proven) ∩ (A⁺-cylinders) ∩ (no-hArch Cont-closedness = the microbial/Spv(A,I)
+  cluster, SpvAITopology, where T-SPVAI-1..3 landed 06-22); Cor 7.32-aux consumes it via
+  Spa-QC. Also flush the (now off-path) legacy: unprimed 7.51/7.52 chain + `_of_tate`
+  LL lemmas are quarantine/cleanup candidates.
+
 **Progress (2026-07-03 beastmode, continued — carriers 7 → 4)**:
 - Carriers #1/#3/#5 ELIMINATED (commits 1dc14351, c5cb82d9, a22f268b). Remaining: #2 (LL-bdd
   leaf), #4 (7.52-nonopen leaf) — both enter ONLY via residual references to the unfaithful
