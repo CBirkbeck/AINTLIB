@@ -478,6 +478,114 @@ theorem cosh_int_le {σ : ℝ} (hσ : 1/2 < σ) :
   have h1 : (0:ℝ) < Real.exp (-(σ - 1/2) * y) := Real.exp_pos _
   nlinarith [mul_pos (show (0:ℝ) < 1/(2 * Real.cosh (y/2)) by positivity) h1]
 
+/-- **`I_cosh(2) = π/2 − (1 − log 2)`** by FTC: the tail integrand
+`e^{−3y/2}/(2cosh(y/2)) = e^{−2y}/(1+e^{−y})` is the derivative of
+`log(1+e^{−y}) − e^{−y}`. -/
+theorem cosh_int_two :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-((2:ℝ) - 1/2) * y)))
+      = π/2 - (1 - Real.log 2) := by
+  have hJint : MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.cosh (y/2)) * Real.exp (-((2:ℝ) - 1/2) * y))
+      (Set.Ioi 0) := by
+    refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(3/2) * y))
+      (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
+    · refine AEStronglyMeasurable.mul ?_ (by fun_prop)
+      exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun y _ => ?_))
+      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+      have hc1 : (1:ℝ) ≤ Real.cosh (y/2) := Real.one_le_cosh _
+      have he := Real.exp_pos (-((2:ℝ) - 1/2) * y)
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      have hform : Real.exp (-((2:ℝ) - 1/2) * y) = Real.exp (-(3/2) * y) := by
+        congr 1
+        ring
+      rw [hform]
+      have h1 : 1/(2 * Real.cosh (y/2)) ≤ 1 := by
+        rw [div_le_one (by positivity)]
+        linarith
+      nlinarith [Real.exp_pos (-(3/2) * y)]
+  have hcoshint : MeasureTheory.IntegrableOn
+      (fun y : ℝ => 1/(2 * Real.cosh (y/2))) (Set.Ioi 0) := by
+    refine Integrable.mono' (g := fun y : ℝ => Real.exp (-(1/2) * y))
+      (exp_neg_integrableOn_Ioi 0 (by norm_num)) ?_ ?_
+    · exact ((measurable_const.div (by fun_prop)).aestronglyMeasurable)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun y _ => ?_))
+      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      have hch : Real.exp (y/2) ≤ 2 * Real.cosh (y/2) := by
+        rw [Real.cosh_eq]
+        have := Real.exp_pos (-(y/2))
+        linarith
+      have hde : Real.exp (-(1/2) * y) * Real.exp (y/2) = 1 := by
+        rw [← Real.exp_add, show -(1/2) * y + y/2 = 0 by ring, Real.exp_zero]
+      rw [div_le_iff₀ (by positivity)]
+      nlinarith [Real.exp_pos (-(1/2) * y), Real.exp_pos (y/2)]
+  have hsplit : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-((2:ℝ) - 1/2) * y)))
+      = (∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.cosh (y/2)))
+        - ∫ y in Set.Ioi (0:ℝ), 1/(2 * Real.cosh (y/2))
+            * Real.exp (-((2:ℝ) - 1/2) * y) := by
+    rw [← MeasureTheory.integral_sub hcoshint hJint]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y _ => ?_)
+    ring
+  have hJ : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.cosh (y/2)) * Real.exp (-((2:ℝ) - 1/2) * y)) = 1 - Real.log 2 := by
+    have hderiv : ∀ y ∈ Set.Ioi (0:ℝ),
+        HasDerivAt (fun y : ℝ => Real.log (1 + Real.exp (-y)) - Real.exp (-y))
+          (1/(2 * Real.cosh (y/2)) * Real.exp (-((2:ℝ) - 1/2) * y)) y := by
+      intro y _
+      have hpos : (0:ℝ) < 1 + Real.exp (-y) := by positivity
+      have h1 : HasDerivAt (fun y : ℝ => -y) (-1) y := by
+        have h1a := (hasDerivAt_id y).const_mul (-1 : ℝ)
+        simp only [id_eq, mul_one] at h1a
+        exact h1a.congr_of_eventuallyEq
+          (Filter.Eventually.of_forall (fun x => by ring))
+      have h2 := ((h1.exp).const_add 1).log hpos.ne'
+      have h3 := h2.sub h1.exp
+      refine h3.congr_deriv ?_
+      have hc : (0:ℝ) < Real.cosh (y/2) := Real.cosh_pos _
+      have hch : 2 * Real.cosh (y/2) = Real.exp (y/2) * (1 + Real.exp (-y)) := by
+        rw [Real.cosh_eq, mul_add, mul_one, ← Real.exp_add,
+          show y/2 + -y = -(y/2) by ring]
+        ring
+      have hform : Real.exp (-((2:ℝ) - 1/2) * y)
+          = Real.exp (-y) * Real.exp (-y) * Real.exp (y/2) := by
+        rw [← Real.exp_add, ← Real.exp_add]
+        congr 1
+        ring
+      rw [hform, hch]
+      have he := Real.exp_pos (-y)
+      have hey := Real.exp_pos (y/2)
+      field_simp
+      ring
+    have hlim : Filter.Tendsto
+        (fun y : ℝ => Real.log (1 + Real.exp (-y)) - Real.exp (-y)) atTop (nhds 0) := by
+      have h2 : Filter.Tendsto (fun y : ℝ => Real.exp (-y)) atTop (nhds 0) := by
+        refine Real.tendsto_exp_atBot.comp ?_
+        exact tendsto_neg_atTop_atBot
+      have h3 : Filter.Tendsto (fun y : ℝ => 1 + Real.exp (-y)) atTop (nhds 1) := by
+        have h4 := (tendsto_const_nhds (x := (1:ℝ)) (f := atTop)).add h2
+        rw [add_zero] at h4
+        exact h4
+      have h5 := ((Real.continuousAt_log one_ne_zero).tendsto).comp h3
+      rw [Real.log_one] at h5
+      have h6 := h5.sub h2
+      rw [sub_zero] at h6
+      exact h6
+    have hcont : ContinuousWithinAt
+        (fun y : ℝ => Real.log (1 + Real.exp (-y)) - Real.exp (-y)) (Set.Ici 0) 0 := by
+      refine Continuous.continuousWithinAt ?_
+      refine Continuous.sub (Continuous.log (by fun_prop) (fun y => ?_)) (by fun_prop)
+      positivity
+    have hkey := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv
+      hJint hlim
+    rw [hkey]
+    norm_num
+  rw [hsplit, integral_inv_two_cosh_half, hJ]
+
 end DedekindResidue
 
 end
