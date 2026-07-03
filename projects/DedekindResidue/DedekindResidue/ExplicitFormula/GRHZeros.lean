@@ -106,6 +106,67 @@ theorem re_eq_half_of_completedDedekindZetaEntire_eq_zero
       · exact h7
     exact hiff ρ hgt hρ1 h3
 
+/-- **The global zero divisor** of the entire completion (order at each point, as a
+`ℤ`-valued function on `ℂ`). Since the divisor's value at an interior point is the
+local order, this agrees with every window divisor on the window. -/
+noncomputable def zetaZeroDivisor : ℂ → ℤ :=
+  MeromorphicOn.divisor (completedDedekindZetaEntire K) Set.univ
+
+/-- The global divisor's support is locally finite. -/
+theorem locallyFiniteSupport_zetaZeroDivisor :
+    LocallyFiniteSupport (zetaZeroDivisor K) := by
+  intro z
+  obtain ⟨t, ht, hfin⟩ :=
+    (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+      Set.univ).supportLocallyFiniteWithinDomain z (Set.mem_univ z)
+  exact ⟨t, ht, hfin⟩
+
+/-- **The zero set is countable**: the support of the global divisor is a countable
+subset of `ℂ` (locally finite ⟹ finite on each closed ball ⟹ countable union). -/
+theorem countable_support_zetaZeroDivisor :
+    (Function.support (zetaZeroDivisor K)).Countable := by
+  have hfin : ∀ n : ℕ,
+      (Metric.closedBall (0:ℂ) n ∩ Function.support (zetaZeroDivisor K)).Finite :=
+    fun n => (locallyFiniteSupport_zetaZeroDivisor K).finite_inter_support_of_isCompact
+      (isCompact_closedBall 0 n)
+  have hcover : Function.support (zetaZeroDivisor K)
+      = ⋃ n : ℕ, (Metric.closedBall (0:ℂ) n ∩ Function.support (zetaZeroDivisor K)) := by
+    ext z
+    simp only [Set.mem_iUnion, Set.mem_inter_iff, Metric.mem_closedBall]
+    constructor
+    · intro hz
+      obtain ⟨n, hn⟩ := exists_nat_ge (dist z 0)
+      exact ⟨n, hn, hz⟩
+    · rintro ⟨n, _, hz⟩
+      exact hz
+  rw [hcover]
+  exact Set.countable_iUnion (fun n => (hfin n).countable)
+
+/-- **The zero index**: the subtype of points where the global divisor is nonzero
+(equivalently, the zeros of the entire completion, carrying their multiplicities
+through the divisor value). -/
+def ZetaZeros : Type _ := {ρ : ℂ // zetaZeroDivisor K ρ ≠ 0}
+
+instance : Countable (ZetaZeros K) := by
+  have h := (countable_support_zetaZeroDivisor K).to_subtype
+  exact h
+
+/-- Membership in the zero index is equivalent to being a zero of the entire
+completion. -/
+theorem zetaZeroDivisor_ne_zero_iff {ρ : ℂ} :
+    zetaZeroDivisor K ρ ≠ 0 ↔ completedDedekindZetaEntire K ρ = 0 := by
+  constructor
+  · intro h
+    exact completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero K (U := Set.univ) h
+  · intro h
+    exact divisor_ne_zero_of_completedDedekindZetaEntire_eq_zero K (Set.mem_univ ρ) h
+
+/-- **Under GRH every indexed zero sits on the critical line.** -/
+theorem ZetaZeros_re_eq_half (hGRH : GeneralizedRiemannHypothesis K)
+    (ρ : ZetaZeros K) : (ρ.1).re = 1/2 :=
+  re_eq_half_of_completedDedekindZetaEntire_eq_zero K hGRH
+    ((zetaZeroDivisor_ne_zero_iff K).mp ρ.2)
+
 end DedekindResidue
 
 end
