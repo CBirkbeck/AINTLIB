@@ -1143,3 +1143,25 @@ machine-verified** and the Lemma-4 estimate suite is 3/4 done.
 4. **T012**: eq:Diff ((1/g(T)−1/g(T−a)) = (2/3)√X log 3X), A↔bSum bridge, numerics
    (β(log(X/9))<1 for X≥69; d_{K,σ}>1.163 via Ψ(4)=11/6−γ_E; ζℚ-sum ≤ 1.163 via
    L5-at-ℚ σ=2 certified numerics), constants 2.324/3.88/4.26.
+
+### Leg 8 continued: T011 estimate suite — 3.9 of 4 done (through de61a4d0)
+
+Lemma4.lean now carries, all axiom-clean/zero-warnings/pushed:
+- c1 `norm_zeroSinTerm_sub_le` + `norm_tsum_zeroSinTerm_sub_le` (MVT sine difference).
+- c2 `norm_tsum_zetaZeros_mul_le` (generic) + `norm_tsum_zeroCosTerm_sub_le`.
+- c3 `integrableOn_kernel` + `integral_Ioi_kernel_eval` (∫_T^∞(h+1/t)e^{−ht}/t = e^{−hT}/T)
+  + `norm_zeroIntTerm_le_refined` (≤ 4/(T(h²+γ²))) + `norm_tsum_zeroIntTerm_sub_le`.
+- c4(A) `archKernelL` + `archKernelL_le_two_inv_sinh`; (B) `hasDerivAt_exp_half_mul_archKernelL`
+  + `antitoneOn_exp_half_mul_archKernelL` (e^{U/2}L(U) decreasing — the β-monotonicity,
+  NO e^{a/2} loss); (C1) `auxFCut` + bridge + `cutKernel` API + `auxFCut_sub_eq_integral`
+  (FTC in the log-cutoff, kink split); (C2a) `integral_Ioi_inv_exp_sub_one/_add_one`
+  closed forms; (C2b) `inner_arch_bound`
+  (∫_{y>U}(w₁+w₂)cutKernel ≤ (h+1/U)e^{U/2}L(U), h-exponentials collapse exactly).
+
+**REMAINING for c4**: (C2c) the Tonelli swap Δ(q+q̃) = ∫_{Ioc T' T}(inner) (lintegral
+route; joint measurability of uncurried (U,y) ↦ w(y)·cutKernel σ y U via Measurable.ite
+(measurableSet_lt measurable_fst measurable_snd); ofReal / lintegral_lintegral_swap /
+toReal transfer with finiteness from C2b+C3); (C3) outer bound ≤
+(T−T')(h+1/T')e^{T'/2}L(T') via the antitone kernel + monotone (h+1/U); c4-final
+assembly with |r_K−1| ≤ n_K−1 (paper 497–501 at k=ℚ). Then L4-b/d, L5, T012 — the full
+map with paper line refs is in the beastmode sentinel and decomposition-t011.md.
