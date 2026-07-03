@@ -2162,4 +2162,121 @@ theorem tendsto_boundary_auxF_half (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < 
   refine div_le_div_of_nonneg_left hC.le hu0 ?_
   linarith
 
+/-- The divided difference of the auxiliary function is square-integrable on the
+line: zero on the plateau, `O(1/|x|)` beyond it. -/
+theorem memLp_two_auxF_diffQuot (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
+    MemLp (fun x : ℝ => (auxF s X 0 - auxF s X x)/(x:ℂ)) 2 (volume : Measure ℝ) := by
+  set δ : ℝ := min 1 (Real.log X) with hδ_def
+  have hδ0 : 0 < δ := lt_min one_pos (Real.log_pos hX)
+  set E : ℝ := Real.exp ((s.re - 1/2) * Real.log X) with hE_def
+  have hEpos : 0 < E := Real.exp_pos _
+  -- pointwise structure
+  have hplateau : ∀ x : ℝ, |x| ≤ δ → (auxF s X 0 - auxF s X x)/(x:ℂ) = 0 := by
+    intro x hx
+    rw [auxF_zero s hX.le, auxF_of_le s X (le_trans hx (min_le_right _ _)),
+      sub_self, zero_div]
+  have hfar : ∀ x : ℝ, δ < |x| → ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖ ≤ (1 + E)/|x| := by
+    intro x hx
+    rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+    rw [div_le_div_iff_of_pos_right (lt_trans hδ0 hx)]
+    refine le_trans (norm_sub_le _ _) ?_
+    rw [auxF_zero s hX.le, norm_one, hE_def]
+    have h2 := norm_auxF_le s hX.le hs.le x
+    have h3 : Real.exp (-(s.re - 1/2) * |x|) ≤ 1 := by
+      refine Real.exp_le_one_iff.mpr ?_
+      have := abs_nonneg x
+      nlinarith
+    nlinarith [Real.exp_pos ((s.re - 1/2) * Real.log X),
+      norm_nonneg (auxF s X x), Real.exp_pos (-(s.re - 1/2) * |x|)]
+  -- measurability
+  have hmeas : AEStronglyMeasurable (fun x : ℝ => (auxF s X 0 - auxF s X x)/(x:ℂ))
+      (volume : Measure ℝ) := by
+    refine AEStronglyMeasurable.congr
+      (f := fun x : ℝ => (auxF s X 0 - auxF s X x) * ((x:ℂ))⁻¹) ?_ ?_
+    · exact (aestronglyMeasurable_const.sub
+        (continuous_auxF s hX).aestronglyMeasurable).mul
+        ((Complex.measurable_ofReal.inv).aestronglyMeasurable)
+    · refine Filter.Eventually.of_forall (fun x => ?_)
+      show (auxF s X 0 - auxF s X x) * ((x:ℂ))⁻¹ = (auxF s X 0 - auxF s X x)/(x:ℂ)
+      rw [div_eq_mul_inv]
+  -- L² via integrability of the square
+  rw [memLp_two_iff_integrable_sq_norm hmeas]
+  -- the square is dominated ray by ray
+  have hraypos : IntegrableOn
+      (fun x : ℝ => ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2) (Set.Ioi δ) := by
+    refine Integrable.mono' (g := fun x : ℝ => (1+E)^2 * x^(-2 : ℝ))
+      ((integrableOn_Ioi_rpow_of_lt (by norm_num) hδ0).const_mul _) ?_ ?_
+    · exact ((hmeas.norm.pow 2).restrict)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun x hx => ?_))
+      rw [Set.mem_Ioi] at hx
+      have hx0 : 0 < x := lt_trans hδ0 hx
+      have habs : δ < |x| := by
+        rw [abs_of_pos hx0]
+        exact hx
+      have h1 := hfar x habs
+      rw [abs_of_pos hx0] at h1
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), Real.rpow_neg hx0.le,
+        show ((2:ℝ)) = ((2:ℕ):ℝ) by norm_num, Real.rpow_natCast]
+      have h2 : (0:ℝ) ≤ (1+E)/x := by positivity
+      calc ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2 ≤ ((1+E)/x)^2 := by
+            exact pow_le_pow_left₀ (norm_nonneg _) h1 2
+        _ = (1+E)^2 * (x^2)⁻¹ := by
+            rw [div_pow]
+            ring
+    -- (end hraypos)
+  have hplateau_int : IntegrableOn
+      (fun x : ℝ => ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2) (Set.Ioc (-δ) δ) := by
+    refine (integrable_zero _ _ _).congr ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr
+      (Filter.Eventually.of_forall (fun x hx => ?_))
+    rw [Set.mem_Ioc] at hx
+    have h0 : |x| ≤ δ := abs_le.mpr ⟨hx.1.le, hx.2⟩
+    show (0 : ℝ → ℝ) x = ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2
+    rw [hplateau x h0, norm_zero]
+    norm_num
+  have hrayneg : IntegrableOn
+      (fun x : ℝ => ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2) (Set.Iic (-δ)) := by
+    have A : MeasurableEmbedding fun x : ℝ => -x :=
+      (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+    have hmap : (volume : Measure ℝ).restrict (Set.Iic (-δ))
+        = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ici δ)) := by
+      rw [show Set.Ici δ = (fun x : ℝ => -x) ⁻¹' (Set.Iic (-δ)) by
+          ext x
+          simp only [Set.mem_preimage, Set.mem_Iic, Set.mem_Ici]
+          constructor <;> intro h <;> linarith,
+        ← Measure.restrict_map A.measurable measurableSet_Iic,
+        Measure.map_neg_eq_self (volume : Measure ℝ)]
+    rw [IntegrableOn, hmap, A.integrable_map_iff]
+    have hIci : IntegrableOn
+        (fun x : ℝ => ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2) (Set.Ici δ) := by
+      refine hraypos.congr_set_ae (Ioi_ae_eq_Ici (a := δ)).symm
+    refine hIci.congr (Filter.Eventually.of_forall (fun x => ?_))
+    show ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2
+        = ‖(auxF s X 0 - auxF s X (-x))/((-x : ℝ):ℂ)‖^2
+    rw [auxF_neg]
+    have hnorm : ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖
+        = ‖(auxF s X 0 - auxF s X x)/((-x : ℝ):ℂ)‖ := by
+      rw [norm_div, norm_div]
+      congr 1
+      rw [Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
+        abs_neg]
+    rw [hnorm]
+  -- assemble over the covering ℝ = Iic(-δ) ∪ Ioc(-δ)δ ∪ Ioi δ
+  have hcover : (Set.univ : Set ℝ) = Set.Iic (-δ) ∪ (Set.Ioc (-δ) δ ∪ Set.Ioi δ) := by
+    ext x
+    simp only [Set.mem_univ, Set.mem_union, Set.mem_Iic, Set.mem_Ioc, Set.mem_Ioi,
+      true_iff]
+    rcases le_or_gt x (-δ) with h | h
+    · exact Or.inl h
+    · rcases le_or_gt x δ with h2 | h2
+      · exact Or.inr (Or.inl ⟨h, h2⟩)
+      · exact Or.inr (Or.inr h2)
+  have h9 : IntegrableOn (fun x : ℝ => ‖(auxF s X 0 - auxF s X x)/(x:ℂ)‖^2)
+      (Set.univ : Set ℝ) := by
+    rw [hcover]
+    exact hrayneg.union (hplateau_int.union hraypos)
+  rw [← MeasureTheory.integrableOn_univ]
+  exact h9
+
 end DedekindResidue
