@@ -51,6 +51,48 @@ theorem card_int_ideal_absNorm_eq (n : ℕ) :
     rw [e₁, e₂, h₁, h₂, hn₁, hn₂]
   · exact ⟨⟨Ideal.span {(n : ℤ)}, absNorm_span_natCast n⟩⟩
 
+/-- The absolute ideal norm is invariant under a ring isomorphism (the quotients are
+isomorphic). -/
+theorem absNorm_map_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
+    [IsDedekindDomain R] [IsDedekindDomain S]
+    [Module.Free ℤ R] [Module.Finite ℤ R]
+    [Module.Free ℤ S] [Module.Finite ℤ S] (e : R ≃+* S) (I : Ideal R) :
+    Ideal.absNorm (I.map (e : R →+* S)) = Ideal.absNorm I := by
+  rw [Ideal.absNorm_apply, Ideal.absNorm_apply, Submodule.cardQuot_apply,
+    Submodule.cardQuot_apply]
+  exact (Nat.card_congr (Ideal.quotientEquiv I (I.map (e : R →+* S)) e rfl).toEquiv).symm
+
+/-- **There is exactly one ideal of `𝓞 ℚ` of each norm** (transport along
+`𝓞 ℚ ≃+* ℤ`). -/
+theorem card_rat_ideal_absNorm_eq (n : ℕ) :
+    Nat.card {I : Ideal (𝓞 ℚ) // Ideal.absNorm I = n} = 1 := by
+  have e := Rat.ringOfIntegersEquiv
+  have hEquiv : {I : Ideal (𝓞 ℚ) // Ideal.absNorm I = n}
+      ≃ {J : Ideal ℤ // Ideal.absNorm J = n} :=
+    { toFun := fun I => ⟨I.1.map (e : 𝓞 ℚ →+* ℤ), by
+        rw [absNorm_map_ringEquiv]
+        exact I.2⟩
+      invFun := fun J => ⟨J.1.map (e.symm : ℤ →+* 𝓞 ℚ), by
+        rw [absNorm_map_ringEquiv]
+        exact J.2⟩
+      left_inv := fun I => Subtype.ext (Ideal.map_of_equiv e)
+      right_inv := fun J => by
+        refine Subtype.ext ?_
+        have h1 := Ideal.map_of_equiv (I := J.1) e.symm
+        rw [RingEquiv.symm_symm] at h1
+        exact h1 }
+  rw [Nat.card_congr hEquiv]
+  exact card_int_ideal_absNorm_eq n
+
+/-- **`ζ_ℚ` is the Riemann zeta function** on `Re s > 1`. -/
+theorem dedekindZeta_rat_eq_riemannZeta {s : ℂ} (hs : 1 < s.re) :
+    NumberField.dedekindZeta ℚ s = riemannZeta s := by
+  rw [NumberField.dedekindZeta, ← LSeries_one_eq_riemannZeta hs]
+  refine LSeries_congr (fun {n} _hn => ?_) s
+  rw [card_rat_ideal_absNorm_eq n]
+  simp
+
+
 end DedekindResidue
 
 end
