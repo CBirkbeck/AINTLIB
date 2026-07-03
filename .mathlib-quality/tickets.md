@@ -71,6 +71,18 @@ Dependencies: PB2←PB1; PB3←PB2; PB4←PB3; PB7,PB8 independent; PB9←PB8; P
 PB11←{PB4,PB10}; PB12←PB7-pattern (independent of PB10); PB13 independent; PB14←{PB5,PB6,PB12,PB13};
 PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: {PB1-6} ∥ {PB7-9} ∥ {PB13}.
 
+**Progress**:
+- 2026-07-03 (beastmode): **T-PB1..17 ALL DONE.** PB1–6 proven (Bounded.lean clean; + new public
+  helper `isBounded_addSubgroupClosure`, pair-free 5.30(1); new import
+  `Mathlib.RingTheory.Polynomial.Subring` for `Polynomial.toSubring`). PB7–9 proven
+  (LocalizationTopology.lean clean; PB8 by `Submodule.span_induction` on
+  `locIdeal^m = Ideal.map (P.I^m)` per sketch). PB10–15 proven (Presheaf.lean clean; shared
+  helper `RationalLocData.isBounded_image_coeRingHom` feeds PB12+PB14; one elaboration fix
+  `show _`→`Set.mem_preimage`). PB16 field retargeted onto
+  `isPowerBounded_of_isIntegral_of_subset_powerBounded` + `completedPlusSubringBase_le_powerBounded`.
+  PB17: false `completedPlusSubringBase_isBounded` DELETED, b2_log entry appended.
+  **Carrier #1 eliminated.** Full-build gate + carrier re-trace in flight.
+
 ### [T-LLBDD-WIRE] Close carrier #2 via the (now-unblocked) valuative criterion — C2
 - **Status**: open (blocked by T-PB16)
 - **File**: Presheaf.lean (`locLift_divByS_isPowerBounded_completion_of_tate`, ≈:4010)

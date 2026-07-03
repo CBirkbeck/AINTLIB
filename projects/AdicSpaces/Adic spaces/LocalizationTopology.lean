@@ -650,7 +650,16 @@ theorem locSubring_isBounded_of_pair [IsTopologicalRing A] (P : PairOfDefinition
     (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s) :
     letI := locTopology P T s hopen
     TopologicalRing.IsBounded (locSubring P T s : Set (Localization.Away s)) := by
-  sorry
+  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
+  have hbasis := (locBasis P T s hopen).hasBasis_nhds_zero
+  intro U hU
+  obtain ⟨k, -, hkU⟩ := hbasis.mem_iff.mp hU
+  refine ⟨locNhd P T s k, hbasis.mem_of_mem trivial, ?_⟩
+  intro z hz
+  obtain ⟨d, hd, v, hv, rfl⟩ := Set.mem_mul.mp hz
+  apply hkU
+  obtain ⟨jv, hjv, rfl⟩ := hv
+  exact ⟨⟨d, hd⟩ * jv, Ideal.mul_mem_left _ _ hjv, MulMemClass.coe_mul ..⟩
 
 /-- The canonical map `A → Aₛ` carries bounded subsets to bounded subsets of the
 localization topology: `locNhd`-neighbourhoods absorb images of `A`-bounded sets.
@@ -662,7 +671,42 @@ theorem isBounded_image_algebraMap_of_isBounded [IsTopologicalRing A]
     {S : Set A} (hS : TopologicalRing.IsBounded S) :
     letI := locTopology P T s hopen
     TopologicalRing.IsBounded (algebraMap A (Localization.Away s) '' S) := by
-  sorry
+  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
+  have hbasis := (locBasis P T s hopen).hasBasis_nhds_zero
+  intro U hU
+  obtain ⟨n, -, hnU⟩ := hbasis.mem_iff.mp hU
+  -- `A`-side absorption: `S * (image of I^m) ⊆ image of I^n`.
+  obtain ⟨W, hW, hSW⟩ := hS (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀))
+    ((P.pow_image_isOpen n).mem_nhds ⟨0, (P.I ^ n).zero_mem, rfl⟩)
+  obtain ⟨m, -, hmW⟩ := P.hasBasis_nhds_zero.mem_iff.mp hW
+  refine ⟨locNhd P T s m, hbasis.mem_of_mem trivial, ?_⟩
+  intro z hz
+  obtain ⟨y, ⟨x, hxS, rfl⟩, v, hv, rfl⟩ := Set.mem_mul.mp hz
+  obtain ⟨d, hd, rfl⟩ := hv
+  apply hnU
+  -- `∀ d ∈ locIdeal^m`, `(algebraMap x) * ↑d ∈ locNhd n`, by span induction.
+  rw [locIdeal, ← Ideal.map_pow, ← Ideal.span_eq (P.I ^ m), Ideal.map_span] at hd
+  refine Submodule.span_induction
+    (p := fun d _ ↦ algebraMap A (Localization.Away s) x * ↑d ∈ locNhd P T s n)
+    ?_ ?_ ?_ ?_ hd
+  · rintro d ⟨b, hb, rfl⟩
+    change algebraMap A (Localization.Away s) x * algebraMap A _ ↑b ∈ _
+    rw [← map_mul]
+    obtain ⟨b', hb'n, heq⟩ := hSW (Set.mul_mem_mul hxS (hmW ⟨b, hb, rfl⟩))
+    rw [← heq]
+    exact ⟨algebraMapD P T s b',
+      by rw [locIdeal, ← Ideal.map_pow]; exact Ideal.mem_map_of_mem _ hb'n, rfl⟩
+  · simp only [ZeroMemClass.coe_zero, mul_zero]
+    exact zero_mem_locNhd P T s n
+  · intro d1 d2 _ _ h1 h2
+    simp only [AddMemClass.coe_add, mul_add]
+    exact (locNhd P T s n).add_mem h1 h2
+  · intro r d1 _ h1
+    rw [show (↑(r • d1) : Localization.Away s) = ↑r * ↑d1 from MulMemClass.coe_mul ..,
+      mul_left_comm]
+    obtain ⟨d'', hd'', heq⟩ := h1
+    rw [← heq]
+    exact ⟨r * d'', Ideal.mul_mem_left _ _ hd'', MulMemClass.coe_mul ..⟩
 
 /-- Power-bounded elements of `A` map to power-bounded elements of the localization
 topology. Source: Wedhorn Lemma 7.20 (p. 61, "`b` … power-bounded"). -/
@@ -672,6 +716,18 @@ theorem isPowerBounded_algebraMap_of_isPowerBounded [IsTopologicalRing A]
     {a : A} (ha : TopologicalRing.IsPowerBounded a) :
     letI := locTopology P T s hopen
     TopologicalRing.IsPowerBounded (algebraMap A (Localization.Away s) a) := by
-  sorry
+  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
+  have h : Set.range ((algebraMap A (Localization.Away s) a) ^ · : ℕ → Localization.Away s) =
+      algebraMap A (Localization.Away s) '' Set.range (a ^ · : ℕ → A) := by
+    ext y
+    constructor
+    · rintro ⟨n, rfl⟩
+      exact ⟨a ^ n, ⟨n, rfl⟩, map_pow _ a n⟩
+    · rintro ⟨_, ⟨n, rfl⟩, rfl⟩
+      exact ⟨n, (map_pow _ a n).symm⟩
+  show TopologicalRing.IsBounded
+    (Set.range ((algebraMap A (Localization.Away s) a) ^ · : ℕ → Localization.Away s))
+  rw [h]
+  exact isBounded_image_algebraMap_of_isBounded P T s hopen ha
 
 end ValuationSpectrum

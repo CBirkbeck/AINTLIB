@@ -462,7 +462,24 @@ theorem RationalLocData.locPlusSubring_le_powerBounded (D : RationalLocData A)
     [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
     (D.locPlusSubring : Set (Localization.Away D.s)) ⊆
       @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
-  sorry
+  letI := D.topology
+  haveI hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have hbasis := locBasis D.P D.T D.s D.hopen
+  haveI hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
+    @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
+      intro U hU
+      obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
+        hbasis.toRingFilterBasis.toAddGroupFilterBasis.nhds_zero_hasBasis.mem_iff.mp hU
+      exact ⟨hbasis.openAddSubgroup n, hVU⟩)
+  have h : D.locPlusSubring ≤ TopologicalRing.powerBoundedSubring.toSubring
+      (Localization.Away D.s) := by
+    rw [RationalLocData.locPlusSubring, Subring.closure_le]
+    rintro x (⟨a, ha, rfl⟩ | ⟨t, rfl⟩)
+    · exact isPowerBounded_algebraMap_of_isPowerBounded D.P D.T D.s D.hopen
+        (IsRingOfIntegralElements.subset_powerBounded ha)
+    · exact (locSubring_isBounded_of_pair D.P D.T D.s D.hopen).isPowerBounded_of_mem
+        (divByS_mem_locSubring D.P D.T D.s t.2)
+  exact fun x hx ↦ h hx
 
 /-- **Wedhorn Prop 7.19 step** (p. 61): the integral closure `C = (A⁺[T/s])^int` of
 `locPlusSubring` in `Aₛ` is power-bounded (integral over power-bounded ⟹ power-bounded,
@@ -472,7 +489,58 @@ theorem RationalLocData.integralClosure_locPlusSubring_le_powerBounded
     ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring :
         Set (Localization.Away D.s)) ⊆
       @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
-  sorry
+  letI := D.topology
+  haveI hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have hbasis := locBasis D.P D.T D.s D.hopen
+  haveI hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
+    @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
+      intro U hU
+      obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
+        hbasis.toRingFilterBasis.toAddGroupFilterBasis.nhds_zero_hasBasis.mem_iff.mp hU
+      exact ⟨hbasis.openAddSubgroup n, hVU⟩)
+  intro x hx
+  have hx_int : IsIntegral ↥(D.locPlusSubring) x := by
+    rwa [SetLike.mem_coe, Subalgebra.mem_toSubring, mem_integralClosure_iff] at hx
+  exact TopologicalRing.isPowerBounded_of_isIntegral_of_subset_powerBounded
+    D.locPlusSubring_le_powerBounded hx_int
+
+/-- The completion coercion carries bounded subsets of the localization topology to
+bounded subsets of `𝒪_X(D)`: the completion's `0`-neighbourhood basis is the family of
+closures of images of `locNhd`, which absorbs images of bounded sets. -/
+theorem RationalLocData.isBounded_image_coeRingHom (D : RationalLocData A)
+    {S : Set (Localization.Away D.s)}
+    (hS : letI := D.topology; TopologicalRing.IsBounded S) :
+    TopologicalRing.IsBounded (⇑D.coeRingHom '' S) := by
+  letI := D.uniformSpace
+  letI := D.isUniformAddGroup
+  letI := D.isTopologicalRing
+  have hbasis := (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero
+  have hbasis_compl : (nhds (0 : presheafValue D)).HasBasis (fun _ : ℕ ↦ True)
+      (fun n ↦ closure
+        (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
+    (map_zero D.coeRingHom : D.coeRingHom 0 = 0) ▸
+      hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
+  intro U hU
+  obtain ⟨n, -, hnU⟩ := hbasis_compl.mem_iff.mp hU
+  obtain ⟨V, hV, hSV⟩ := hS (locNhd D.P D.T D.s n : Set (Localization.Away D.s))
+    (hbasis.mem_of_mem trivial)
+  obtain ⟨m, -, hmV⟩ := hbasis.mem_iff.mp hV
+  refine ⟨closure (⇑D.coeRingHom '' (locNhd D.P D.T D.s m : Set (Localization.Away D.s))),
+    hbasis_compl.mem_of_mem trivial, ?_⟩
+  intro z hz
+  obtain ⟨y, ⟨w, hwS, rfl⟩, v, hv, rfl⟩ := Set.mem_mul.mp hz
+  refine hnU ?_
+  have hsub : ⇑D.coeRingHom '' (locNhd D.P D.T D.s m : Set (Localization.Away D.s)) ⊆
+      (fun t ↦ D.coeRingHom w * t) ⁻¹'
+        closure (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s))) := by
+    rintro _ ⟨u, hu, rfl⟩
+    simp only [Set.mem_preimage]
+    rw [← map_mul]
+    exact subset_closure ⟨w * u, hSV (Set.mul_mem_mul hwS (hmV hu)), rfl⟩
+  have hclosed : IsClosed ((fun t ↦ D.coeRingHom w * t) ⁻¹'
+      closure (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
+    isClosed_closure.preimage (continuous_const.mul continuous_id)
+  exact closure_minimal hsub hclosed hv
 
 /-- The completion coercion preserves power-boundedness: `(Aₛ)° → (𝒪_X(D))°`
 (Wedhorn Lemma 7.47(1) direction used by Prop 7.19 at the completion; the completion's
@@ -481,21 +549,84 @@ theorem RationalLocData.isPowerBounded_coeRingHom (D : RationalLocData A)
     {x : Localization.Away D.s}
     (hx : @TopologicalRing.IsPowerBounded (Localization.Away D.s) _ D.topology x) :
     TopologicalRing.IsPowerBounded (D.coeRingHom x) := by
-  sorry
+  have hrange : Set.range ((D.coeRingHom x) ^ · : ℕ → presheafValue D) =
+      ⇑D.coeRingHom '' Set.range (x ^ · : ℕ → Localization.Away D.s) := by
+    ext y
+    constructor
+    · rintro ⟨n, rfl⟩
+      exact ⟨x ^ n, ⟨n, rfl⟩, map_pow _ x n⟩
+    · rintro ⟨_, ⟨n, rfl⟩, rfl⟩
+      exact ⟨n, (map_pow _ x n).symm⟩
+  show TopologicalRing.IsBounded (Set.range ((D.coeRingHom x) ^ · : ℕ → presheafValue D))
+  rw [hrange]
+  exact D.isBounded_image_coeRingHom hx
 
 /-- `NonarchimedeanAddGroup` for the completion `𝒪_X(D)` (the localization topology has an
 open-subgroups basis; completions preserve nonarchimedean additive groups via
 `instNonarchimedeanAddGroupCompletion`). -/
 theorem RationalLocData.nonarchimedeanAddGroup_presheafValue (D : RationalLocData A) :
     NonarchimedeanAddGroup (presheafValue D) := by
-  sorry
+  have hbasis := locBasis D.P D.T D.s D.hopen
+  haveI hag_loc : @NonarchimedeanAddGroup (Localization.Away D.s) _ D.topology :=
+    @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
+      intro U hU
+      obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
+        hbasis.toRingFilterBasis.toAddGroupFilterBasis.nhds_zero_hasBasis.mem_iff.mp hU
+      exact ⟨hbasis.openAddSubgroup n, hVU⟩)
+  exact @instNonarchimedeanAddGroupCompletion _ _ D.uniformSpace D.isUniformAddGroup hag_loc
 
 /-- `(𝒪_X(D))°` is closed: it contains the open subring `completedLocSubring` (a bounded
 open subring — Wedhorn 6.1.2 at the completion), hence is an open, and therefore closed,
 additive subgroup. -/
 theorem RationalLocData.isClosed_powerBoundedSubring (D : RationalLocData A) :
     IsClosed (TopologicalRing.powerBoundedSubring (presheafValue D)) := by
-  sorry
+  haveI hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
+  -- (i) `completedLocSubring` is open: it contains `closure (coe '' locNhd 1)`, a
+  -- `0`-neighbourhood of the completion.
+  have hopen : IsOpen (D.completedLocSubring : Set (presheafValue D)) := by
+    letI := D.uniformSpace
+    letI := D.isUniformAddGroup
+    letI := D.isTopologicalRing
+    have hbasis := (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero
+    have hbasis_compl : (nhds (0 : presheafValue D)).HasBasis (fun _ : ℕ ↦ True)
+        (fun n ↦ closure
+          (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
+      (map_zero D.coeRingHom : D.coeRingHom 0 = 0) ▸
+        hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
+    have himage_sub : ⇑D.coeRingHom '' (locNhd D.P D.T D.s 1 : Set (Localization.Away D.s)) ⊆
+        (D.completedLocSubring : Set (presheafValue D)) := by
+      rintro _ ⟨y, hy, rfl⟩
+      obtain ⟨d, _, rfl⟩ := hy
+      exact Subring.le_topologicalClosure _ ⟨d.1, d.2, rfl⟩
+    have hClosed : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
+      Subring.isClosed_topologicalClosure _
+    change IsOpen ((D.completedLocSubring).toAddSubgroup : Set (presheafValue D))
+    exact AddSubgroup.isOpen_of_mem_nhds _
+      (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 1) trivial)
+        (closure_minimal himage_sub hClosed))
+  -- (ii) `completedLocSubring` is bounded: the closure of the bounded image of `locSubring`.
+  have hbounded : TopologicalRing.IsBounded (D.completedLocSubring : Set (presheafValue D)) := by
+    have himg := D.isBounded_image_coeRingHom
+      (S := (locSubring D.P D.T D.s : Set (Localization.Away D.s)))
+      (locSubring_isBounded_of_pair D.P D.T D.s D.hopen)
+    refine himg.closure.subset ?_
+    intro x hx
+    have hx' : x ∈ closure ((((locSubring D.P D.T D.s).map D.coeRingHom) :
+        Subring (presheafValue D)) : Set (presheafValue D)) := hx
+    rwa [Subring.coe_map] at hx'
+  -- (iii) `(𝒪_X(D))° ⊇ completedLocSubring` elementwise, so `A°` is an open subgroup.
+  have hsub : (D.completedLocSubring : Set (presheafValue D)) ⊆
+      ((TopologicalRing.powerBoundedSubring.toSubring (presheafValue D)).toAddSubgroup :
+        Set (presheafValue D)) :=
+    fun _ hx ↦ hbounded.isPowerBounded_of_mem hx
+  have hopen_pb : IsOpen ((TopologicalRing.powerBoundedSubring.toSubring
+      (presheafValue D)).toAddSubgroup : Set (presheafValue D)) :=
+    AddSubgroup.isOpen_of_mem_nhds _
+      (Filter.mem_of_superset (hopen.mem_nhds D.completedLocSubring.zero_mem) hsub)
+  -- (iv) an open additive subgroup is closed.
+  change IsClosed ((TopologicalRing.powerBoundedSubring.toSubring
+      (presheafValue D)).toAddSubgroup : Set (presheafValue D))
+  exact AddSubgroup.isClosed_of_isOpen _ hopen_pb
 
 /-- **Wedhorn Prop 7.19 / Lemma 7.20 (power-bounded form)**: `Ĉ₀ ⊆ (𝒪_X(D))°`. The image
 of `C = (A⁺[T/s])^int` is power-bounded and `(𝒪_X(D))°` is closed, so the topological
@@ -507,30 +638,28 @@ theorem RationalLocData.completedPlusSubringBase_le_powerBounded (D : RationalLo
     [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
     (D.completedPlusSubringBase : Set (presheafValue D)) ⊆
       TopologicalRing.powerBoundedSubring (presheafValue D) := by
-  sorry
+  have himg : ⇑D.coeRingHom ''
+      ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring :
+        Set (Localization.Away D.s)) ⊆
+      TopologicalRing.powerBoundedSubring (presheafValue D) := by
+    rintro _ ⟨y, hy, rfl⟩
+    exact D.isPowerBounded_coeRingHom (D.integralClosure_locPlusSubring_le_powerBounded hy)
+  intro x hx
+  have hx' : x ∈ closure (⇑D.coeRingHom ''
+      ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring :
+        Set (Localization.Away D.s))) := by
+    have hmem : x ∈ closure ((((integralClosure ↥(D.locPlusSubring)
+        (Localization.Away D.s)).toSubring.map D.coeRingHom) :
+        Subring (presheafValue D)) : Set (presheafValue D)) := hx
+    rwa [Subring.coe_map] at hmem
+  exact closure_minimal himg D.isClosed_powerBoundedSubring hx'
 
-/-- **`completedPlusSubringBase` is bounded.** ⚠️ ROUTE-DIVERGENCE FLAG (2026-06-24): this UNIFORM
-(von Neumann) boundedness statement is STRONGER than Wedhorn's actual Prop 7.19 / Lemma 7.20
-argument, which proves only that `A(T/s)⁺` is POWER-bounded (`⊆ A(T/s)°`): `A⁺⟨X⟩ ⊆ A°⟨X⟩ ⊆
-A(T/s)°` then integral-closure preserves `⊆ A°` (since `A°` is integrally closed). A ring of
-integral elements (Def 7.14) is NOT required uniformly bounded — only `⊆ A°` — so uniform
-boundedness need not hold (a non-uniform Tate ring has unbounded `A°`). The A₀-analogue
-`coeRingHom_image_locSubring_isBounded` IS uniformly bounded only because `locSubring` is a ring of
-DEFINITION (bounded); `IC = (locPlusSubring)ⁱⁿᵗ ⊄ locSubring`, so its ideal-absorption route does
-NOT transfer.
-
-**FAITHFUL FIX** (the consuming IRIE `subset_powerBounded` field, Presheaf ~673): reroute to the
-power-bounded containment `completedPlusSubringBase ⊆ powerBoundedSubring (presheafValue D)` (Wedhorn
-Lemma 7.20) and conclude via `A°` integrally closed, REPLACING `IsBounded.isPowerBounded_of_isIntegral`.
-Missing infrastructure for that route: (i) `locPlusSubring ⊆ (Aₛ)°` (generators: `algebraMap A⁺ ⊆
-(Aₛ)°` via `IsPowerBounded.map` + `A⁺ ⊆ A°`; `divByS` power-bounded in `Aₛ`), (ii) `(Aₛ)°`/`(𝒪_X(D))°`
-integrally closed (standard, not yet in repo), (iii) closure of power-bounded ⊆ power-bounded. Sole
-remaining IRIE residual; the openness residual `completedPlusSubringBase_isOpen` is DONE (sorry-free,
-Wedhorn 7.19/7.20 absorption). -/
-theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData A) [PlusSubring A]
-    [IsRingOfIntegralElements (A⁺)] :
-    TopologicalRing.IsBounded (D.completedPlusSubringBase : Set (presheafValue D)) :=
-  sorry
+-- The former `completedPlusSubringBase_isBounded` (UNIFORM von-Neumann boundedness of `Ĉ₀`,
+-- sorry'd) was DELETED 2026-07-03: B2 over-strong vs Wedhorn 7.19/7.20 (a ring of integral
+-- elements need not be uniformly bounded — only `⊆ A°`; in a non-uniform Tate ring `A°` is
+-- unbounded). Replaced by the faithful power-bounded route above
+-- (`completedPlusSubringBase_le_powerBounded` + Prop 5.30(4)), consumed by the IRIE
+-- `subset_powerBounded` field. See `.mathlib-quality/b2_log.jsonl`.
 
 -- `completedPlusSubringBase_isOpen` is proven below, after the `locIdeal ⊆ locPlusSubring`
 -- absorption helpers it depends on (Wedhorn Prop 7.19 / Lemma 7.20).
@@ -748,7 +877,9 @@ instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
       have hx' : x ∈ D.completedPlusSubring := hx
       rwa [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring,
         mem_integralClosure_iff] at hx'
-    exact D.completedPlusSubringBase_isBounded.isPowerBounded_of_isIntegral hx_int
+    haveI := D.nonarchimedeanAddGroup_presheafValue
+    exact TopologicalRing.isPowerBounded_of_isIntegral_of_subset_powerBounded
+      D.completedPlusSubringBase_le_powerBounded hx_int
 
 /-- The canonical map `A →+* presheafValue D` sends `A⁺` into `B⁺`. -/
 theorem RationalLocData.canonicalMap_integral (D : RationalLocData A)
