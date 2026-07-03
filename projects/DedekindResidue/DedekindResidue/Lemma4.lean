@@ -991,6 +991,136 @@ theorem integrableOn_archWeight_mul_cutKernel {σ : ℝ} (hσ1 : 1 ≤ σ) {U : 
       (mul_nonneg (archWeight_nonneg hy0) (cutKernel_nonneg hσ2 hy0 hU.le))]
     exact weight_mul_cutKernel_le hσ1 hU hy
 
+/-- Extending the inner integral to `(0, ∞)` costs nothing: the cut kernel vanishes
+below the cutoff. -/
+theorem integral_archWeight_mul_cutKernel_Ioi_zero {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ}
+    (hU : 0 < U) :
+    ∫ y in Set.Ioi 0, archWeight y * cutKernel σ y U
+      = ∫ y in Set.Ioi U, archWeight y * cutKernel σ y U := by
+  have hsplit : Set.Ioi (0:ℝ) = Set.Ioc 0 U ∪ Set.Ioi U := by
+    rw [Set.Ioc_union_Ioi_eq_Ioi hU.le]
+  have hzero : ∀ y ∈ Set.Ioc (0:ℝ) U, archWeight y * cutKernel σ y U = 0 := by
+    intro y hy
+    rw [cutKernel, if_neg (not_lt.mpr hy.2), mul_zero]
+  rw [hsplit, MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl)
+    measurableSet_Ioi
+    (MeasureTheory.integrableOn_zero.congr_fun (fun y hy => (hzero y hy).symm)
+      measurableSet_Ioc)
+    ((integrableOn_archWeight_mul_cutKernel hσ1 hU).mono_set
+      (Set.Ioi_subset_Ioi hU.le)),
+    MeasureTheory.setIntegral_eq_zero_of_forall_eq_zero hzero, zero_add]
+
+/-- The inner bound with the packaged weight. -/
+theorem inner_arch_bound' {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ} (hU : 0 < U) :
+    ∫ y in Set.Ioi 0, archWeight y * cutKernel σ y U
+      ≤ (σ - 1/2 + 1/U) * Real.exp (U/2) * archKernelL U := by
+  rw [integral_archWeight_mul_cutKernel_Ioi_zero hσ1 hU]
+  have h1 := inner_arch_bound hσ1 hU
+  simpa [archWeight] using h1
+
+/-- **(c4) The archimedean difference estimate**: for `1 ≤ σ`, `0 < T' ≤ T`,
+`∫_{y>0} (w₁+w₂)(y)·(F_{σ,e^T}(y) − F_{σ,e^{T'}}(y)) dy
+  ≤ (T−T')·(h+1/T')·e^{T'/2}·L(T')` — the paper's `β`-bound with no constant
+loss. -/
+theorem arch_sum_diff_le {σ : ℝ} (hσ1 : 1 ≤ σ) {T' T : ℝ} (hT' : 0 < T')
+    (hTT : T' ≤ T) :
+    ∫ y in Set.Ioi 0, archWeight y * (auxFCut σ T y - auxFCut σ T' y)
+      ≤ (T - T') * ((σ - 1/2 + 1/T') * Real.exp (T'/2) * archKernelL T') := by
+  have hσ2 : (1:ℝ)/2 < σ := by linarith
+  have hc₀nn : 0 ≤ (σ - 1/2 + 1/T') * Real.exp (T'/2) * archKernelL T' := by
+    have hL := archKernelL_pos hT'
+    have h1 : (0:ℝ) < 1/T' := by positivity
+    positivity
+  have hbound_nonneg : 0 ≤ (T - T')
+      * ((σ - 1/2 + 1/T') * Real.exp (T'/2) * archKernelL T') :=
+    mul_nonneg (by linarith) hc₀nn
+  have hFmeas : Measurable (fun y : ℝ =>
+      archWeight y * (auxFCut σ T y - auxFCut σ T' y)) := by
+    refine measurable_archWeight.mul (Measurable.sub ?_ ?_) <;>
+    · unfold auxFCut
+      refine Measurable.ite (measurableSet_le measurable_id measurable_const)
+        measurable_const ?_
+      fun_prop
+  have hFnn : ∀ y ∈ Set.Ioi (0:ℝ),
+      0 ≤ archWeight y * (auxFCut σ T y - auxFCut σ T' y) := by
+    intro y hy
+    refine mul_nonneg (archWeight_nonneg hy) ?_
+    rw [auxFCut_sub_eq_integral hσ2 hT' hTT hy, intervalIntegral.integral_of_le hTT]
+    refine MeasureTheory.setIntegral_nonneg measurableSet_Ioc (fun U hU => ?_)
+    exact cutKernel_nonneg hσ2 hy (le_of_lt (lt_of_lt_of_le hT' hU.1.le))
+  rw [MeasureTheory.integral_eq_lintegral_of_nonneg_ae
+    ((MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall hFnn))
+    hFmeas.aestronglyMeasurable.restrict]
+  refine ENNReal.toReal_le_of_le_ofReal hbound_nonneg ?_
+  have hstep1 : ∫⁻ y in Set.Ioi 0,
+      ENNReal.ofReal (archWeight y * (auxFCut σ T y - auxFCut σ T' y))
+      = ∫⁻ y in Set.Ioi 0, ∫⁻ U in Set.Ioc T' T,
+          ENNReal.ofReal (archWeight y * cutKernel σ y U) := by
+    refine MeasureTheory.setLIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+    rw [auxFCut_sub_eq_integral hσ2 hT' hTT hy, intervalIntegral.integral_of_le hTT,
+      ← MeasureTheory.integral_const_mul,
+      MeasureTheory.ofReal_integral_eq_lintegral_ofReal]
+    · exact (((intervalIntegrable_cutKernel hσ2 hy hT' hTT).1).const_mul _)
+    · rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff' measurableSet_Ioc]
+      refine Filter.Eventually.of_forall (fun U hU => ?_)
+      exact mul_nonneg (archWeight_nonneg hy)
+        (cutKernel_nonneg hσ2 hy (le_of_lt (lt_of_lt_of_le hT' hU.1.le)))
+  rw [hstep1]
+  have huncurry : AEMeasurable
+      (Function.uncurry fun y U => ENNReal.ofReal (archWeight y * cutKernel σ y U))
+      ((MeasureTheory.volume.restrict (Set.Ioi 0)).prod
+        (MeasureTheory.volume.restrict (Set.Ioc T' T))) := by
+    refine Measurable.aemeasurable ?_
+    have h1 : (Function.uncurry fun y U =>
+        ENNReal.ofReal (archWeight y * cutKernel σ y U))
+        = fun p : ℝ × ℝ => ENNReal.ofReal (archWeight p.1 * cutKernel σ p.1 p.2) :=
+      rfl
+    rw [h1]
+    refine ENNReal.measurable_ofReal.comp ?_
+    refine (measurable_archWeight.comp measurable_fst).mul ?_
+    unfold cutKernel
+    refine Measurable.ite (measurableSet_lt measurable_snd measurable_fst) ?_
+      measurable_const
+    fun_prop
+  rw [MeasureTheory.lintegral_lintegral_swap huncurry]
+  have hinner : ∀ U ∈ Set.Ioc T' T,
+      (∫⁻ y in Set.Ioi 0, ENNReal.ofReal (archWeight y * cutKernel σ y U))
+      ≤ ENNReal.ofReal ((σ - 1/2 + 1/T') * Real.exp (T'/2) * archKernelL T') := by
+    intro U hU
+    have hU0 : 0 < U := lt_of_lt_of_le hT' hU.1.le
+    rw [← MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+      (integrableOn_archWeight_mul_cutKernel hσ1 hU0)
+      (by
+        rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff' measurableSet_Ioi]
+        refine Filter.Eventually.of_forall (fun y hy => ?_)
+        exact mul_nonneg (archWeight_nonneg hy)
+          (cutKernel_nonneg hσ2 hy hU0.le))]
+    refine ENNReal.ofReal_le_ofReal ?_
+    refine (inner_arch_bound' hσ1 hU0).trans ?_
+    have hmono := antitoneOn_exp_half_mul_archKernelL
+      (Set.mem_Ioi.mpr hT') (Set.mem_Ioi.mpr hU0) hU.1.le
+    have hfac : σ - 1/2 + 1/U ≤ σ - 1/2 + 1/T' := by
+      have h1 : 1/U ≤ 1/T' := one_div_le_one_div_of_le hT' hU.1.le
+      linarith
+    have hULnn : 0 ≤ Real.exp (U/2) * archKernelL U :=
+      mul_nonneg (Real.exp_pos _).le (archKernelL_pos hU0).le
+    have hfacnn : (0:ℝ) ≤ σ - 1/2 + 1/T' := by
+      have : (0:ℝ) < 1/T' := by positivity
+      linarith
+    calc (σ - 1/2 + 1/U) * Real.exp (U/2) * archKernelL U
+        = (σ - 1/2 + 1/U) * (Real.exp (U/2) * archKernelL U) := by ring
+      _ ≤ (σ - 1/2 + 1/T') * (Real.exp (T'/2) * archKernelL T') :=
+          mul_le_mul hfac hmono hULnn hfacnn
+      _ = (σ - 1/2 + 1/T') * Real.exp (T'/2) * archKernelL T' := by ring
+  refine le_trans (MeasureTheory.lintegral_mono_ae
+    ((MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr
+      (Filter.Eventually.of_forall hinner))) ?_
+  rw [MeasureTheory.setLIntegral_const, Real.volume_Ioc,
+    ← ENNReal.ofReal_mul hc₀nn]
+  exact ENNReal.ofReal_le_ofReal (le_of_eq (mul_comm _ _))
+
+
 end DedekindResidue
 
 end
