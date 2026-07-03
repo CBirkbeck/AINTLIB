@@ -243,4 +243,136 @@ theorem integral_cexp_mul_Iio {z : ℂ} (hz : 0 < z.re) (w : ℝ) :
   rw [h2, MeasureTheory.integral_const_mul, integral_cexp_neg_mul_Ioi hz,
     div_eq_mul_inv]
 
+/-- Left rays as reflected right rays. -/
+theorem restrict_Iio_eq_map_sub (w : ℝ) :
+    (volume : Measure ℝ).restrict (Set.Iio w)
+      = Measure.map (fun v : ℝ => w - v) ((volume : Measure ℝ).restrict (Set.Ioi 0)) := by
+  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
+    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
+  rw [show Set.Ioi (0:ℝ) = (fun v : ℝ => w - v) ⁻¹' (Set.Iio w) by
+      ext v
+      simp only [Set.mem_preimage, Set.mem_Iio, Set.mem_Ioi]
+      constructor <;> intro h <;> linarith,
+    ← Measure.restrict_map A.measurable measurableSet_Iio]
+  congr 1
+  have h1 : (fun v : ℝ => w - v) = (fun v : ℝ => w + v) ∘ (fun v : ℝ => -v) := by
+    funext v
+    simp [sub_eq_add_neg]
+  rw [h1, ← Measure.map_map (measurable_const_add w) measurable_neg,
+    Measure.map_neg_eq_self, map_add_left_eq_self]
+
+/-- `e^{cu}` is integrable on left rays for `c > 0`. -/
+theorem integrableOn_exp_mul_Iio {c : ℝ} (hc : 0 < c) (w : ℝ) :
+    IntegrableOn (fun u : ℝ => Real.exp (c*u)) (Set.Iio w) := by
+  rw [IntegrableOn, restrict_Iio_eq_map_sub w]
+  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
+    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
+  rw [A.integrable_map_iff]
+  have h0 : IntegrableOn (fun v : ℝ => Real.exp (c*w) * Real.exp (-(c*v)))
+      (Set.Ioi 0) := by
+    refine Integrable.const_mul ?_ _
+    have := exp_neg_integrableOn_Ioi (0:ℝ) hc
+    refine this.congr_fun (fun v _ => ?_) measurableSet_Ioi
+    show Real.exp (-c * v) = Real.exp (-(c * v))
+    rw [show -c * v = -(c*v) by ring]
+  refine h0.congr (Filter.Eventually.of_forall (fun v => ?_))
+  show Real.exp (c*w) * Real.exp (-(c*v)) = Real.exp (c*(w - v))
+  rw [← Real.exp_add]
+  congr 1
+  ring
+
+/-- `∫_{-∞}^w e^{cu} du = e^{cw}/c` for `c > 0`. -/
+theorem integral_exp_mul_Iio {c : ℝ} (hc : 0 < c) (w : ℝ) :
+    ∫ u in Set.Iio w, Real.exp (c*u) = Real.exp (c*w)/c := by
+  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
+    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
+  rw [show (∫ u in Set.Iio w, Real.exp (c*u))
+      = ∫ u, Real.exp (c*u) ∂((volume : Measure ℝ).restrict (Set.Iio w)) from rfl,
+    restrict_Iio_eq_map_sub w, A.integral_map]
+  have h2 : (∫ v in Set.Ioi (0:ℝ), Real.exp (c * (w - v)))
+      = ∫ v in Set.Ioi (0:ℝ), Real.exp (c*w) * Real.exp (-(c*v)) := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun v _ => ?_)
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [h2, MeasureTheory.integral_const_mul, integral_exp_neg_mul_Ioi hc]
+  ring
+
+variable {c : ℝ} {G : ℝ → ℂ}
+
+/-- **The pole-piece window function** (Poitou's residue terms as a Fourier window):
+`E_c(u) = 2 e^{cu} ∫_u^∞ G(w) e^{-cw} dw`. Paired against `e^{itu}` it produces
+`2·(∫G e^{itx})/(c+it)`, the `1/s`- and `1/(s-1)`-terms of the edge integrand. -/
+noncomputable def poleWindow (c : ℝ) (G : ℝ → ℂ) (u : ℝ) : ℂ :=
+  2 * ((Real.exp (c*u) : ℝ) : ℂ)
+    * ∫ w in Set.Ioi u, G w * ((Real.exp (-(c*w)) : ℝ) : ℂ)
+
+/-- The tail kernel is integrable on each right ray. -/
+theorem integrableOn_poleWindow_kernel (hc : 0 < c) (hG : Integrable G) (u : ℝ) :
+    IntegrableOn (fun w : ℝ => G w * ((Real.exp (-(c*w)) : ℝ) : ℂ)) (Set.Ioi u) := by
+  refine (hG.restrict).mul_bdd (c := Real.exp (-(c*u))) ?_ ?_
+  · refine (Continuous.aestronglyMeasurable ?_).restrict
+    exact Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+      ((continuous_const.mul continuous_id).neg))
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+      (Filter.Eventually.of_forall (fun w hw => ?_))
+    rw [Set.mem_Ioi] at hw
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    exact Real.exp_le_exp.mpr (by nlinarith)
+
+/-- The global tail formula: `∫_{Ioi u} = ∫_{Ioi 0} - ∫_0^u`. -/
+theorem tail_integral_eq (hc : 0 < c) (hG : Integrable G) (u : ℝ) :
+    (∫ w in Set.Ioi u, G w * ((Real.exp (-(c*w)) : ℝ) : ℂ))
+      = (∫ w in Set.Ioi (0:ℝ), G w * ((Real.exp (-(c*w)) : ℝ) : ℂ))
+        - ∫ x in (0:ℝ)..u, G x * ((Real.exp (-(c*x)) : ℝ) : ℂ) := by
+  set Kf : ℝ → ℂ := fun w => G w * ((Real.exp (-(c*w)) : ℝ) : ℂ) with hKf
+  rcases le_or_gt 0 u with hu | hu
+  · -- u ≥ 0 : Ioi 0 = Ioc 0 u ∪ Ioi u
+    have hsplit : (∫ w in Set.Ioi (0:ℝ), Kf w)
+        = (∫ w in Set.Ioc 0 u, Kf w) + ∫ w in Set.Ioi u, Kf w := by
+      rw [← MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl)
+        measurableSet_Ioi ((integrableOn_poleWindow_kernel hc hG 0).mono_set
+          (fun w hw => hw.1)) (integrableOn_poleWindow_kernel hc hG u),
+        Set.Ioc_union_Ioi_eq_Ioi hu]
+    rw [intervalIntegral.integral_of_le hu]
+    rw [hsplit]
+    ring
+  · -- u < 0 : Ioi u = Ioc u 0 ∪ Ioi 0
+    have hsplit : (∫ w in Set.Ioi u, Kf w)
+        = (∫ w in Set.Ioc u 0, Kf w) + ∫ w in Set.Ioi (0:ℝ), Kf w := by
+      rw [← MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl)
+        measurableSet_Ioi ((integrableOn_poleWindow_kernel hc hG u).mono_set
+          (fun w hw => hw.1)) (integrableOn_poleWindow_kernel hc hG 0),
+        Set.Ioc_union_Ioi_eq_Ioi hu.le]
+    rw [intervalIntegral.integral_symm, intervalIntegral.integral_of_le hu.le]
+    rw [hsplit]
+    ring
+
+/-- `poleWindow` is continuous. -/
+theorem continuous_poleWindow (hc : 0 < c) (hG : Integrable G) :
+    Continuous (poleWindow c G) := by
+  have hK_ii : ∀ a b : ℝ, IntervalIntegrable
+      (fun w : ℝ => G w * ((Real.exp (-(c*w)) : ℝ) : ℂ)) volume a b := by
+    intro a b
+    rw [intervalIntegrable_iff]
+    exact (integrableOn_poleWindow_kernel hc hG (min a b)).mono_set
+      (fun w hw => hw.1)
+  have hτ : Continuous (fun u : ℝ =>
+      ∫ w in Set.Ioi u, G w * ((Real.exp (-(c*w)) : ℝ) : ℂ)) := by
+    have h0 : (fun u : ℝ => ∫ w in Set.Ioi u, G w * ((Real.exp (-(c*w)) : ℝ) : ℂ))
+        = fun u : ℝ => (∫ w in Set.Ioi (0:ℝ), G w * ((Real.exp (-(c*w)) : ℝ) : ℂ))
+          - ∫ x in (0:ℝ)..u, G x * ((Real.exp (-(c*x)) : ℝ) : ℂ) :=
+      funext (fun u => tail_integral_eq hc hG u)
+    rw [h0]
+    exact continuous_const.sub (continuous_primitive hK_ii 0)
+  refine Continuous.mul ?_ hτ
+  exact continuous_const.mul (Complex.continuous_ofReal.comp
+    (Real.continuous_exp.comp (continuous_const.mul continuous_id)))
+
+/-- Value at the origin. -/
+theorem poleWindow_zero :
+    poleWindow c G 0 = 2 * ∫ w in Set.Ioi (0:ℝ), G w * ((Real.exp (-(c*w)) : ℝ) : ℂ) := by
+  rw [poleWindow, mul_zero, Real.exp_zero]
+  norm_num
+
 end DedekindResidue
