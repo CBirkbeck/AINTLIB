@@ -842,6 +842,164 @@ theorem zeroSumSigma_rat_le (hRH : RiemannHypothesis) :
   rw [hlog2π]
   linarith
 
+/-! ### The β-bound (T12-b N5) -/
+
+/-- The quintic Mercator upper bound `log(1+u) ≤ u − u²/2 + u³/3 − u⁴/4 + u⁵/5` for
+`u ≥ 0`: the deficit has derivative `u⁵/(1+u) ≥ 0` and vanishes at `0`. -/
+theorem log_one_add_le_quintic {u : ℝ} (hu : 0 ≤ u) :
+    Real.log (1 + u) ≤ u - u^2/2 + u^3/3 - u^4/4 + u^5/5 := by
+  have hderiv : ∀ x ∈ Set.Ici (0:ℝ),
+      HasDerivAt (fun v : ℝ => v - v^2/2 + v^3/3 - v^4/4 + v^5/5 - Real.log (1 + v))
+        (1 - x + x^2 - x^3 + x^4 - 1/(1+x)) x := by
+    intro x hx
+    have hx0 : (0:ℝ) ≤ x := hx
+    have h1x : (0:ℝ) < 1 + x := by linarith
+    have hp : HasDerivAt (fun v : ℝ => v - v^2/2 + v^3/3 - v^4/4 + v^5/5)
+        (1 - x + x^2 - x^3 + x^4) x := by
+      have h1 : HasDerivAt (fun v : ℝ => v) 1 x := hasDerivAt_id' x
+      have h2 := (hasDerivAt_pow 2 x).div_const 2
+      have h3 := (hasDerivAt_pow 3 x).div_const 3
+      have h4 := (hasDerivAt_pow 4 x).div_const 4
+      have h5 := (hasDerivAt_pow 5 x).div_const 5
+      have h := (((h1.sub h2).add h3).sub h4).add h5
+      refine h.congr_deriv ?_
+      norm_num
+    have hl : HasDerivAt (fun v : ℝ => Real.log (1 + v)) (1/(1+x)) x := by
+      have h := ((hasDerivAt_id x).const_add (1:ℝ)).log h1x.ne'
+      simpa using h
+    exact hp.sub hl
+  have hmono : MonotoneOn
+      (fun v : ℝ => v - v^2/2 + v^3/3 - v^4/4 + v^5/5 - Real.log (1 + v))
+      (Set.Ici 0) := by
+    refine monotoneOn_of_deriv_nonneg (convex_Ici 0) ?_ ?_ ?_
+    · intro x hx
+      exact ((hderiv x hx).continuousAt).continuousWithinAt
+    · rw [interior_Ici]
+      intro x hx
+      exact ((hderiv x (Set.mem_Ici.mpr (Set.mem_Ioi.mp hx).le)).differentiableAt).differentiableWithinAt
+    · rw [interior_Ici]
+      intro x hx
+      rw [(hderiv x (Set.mem_Ici.mpr (Set.mem_Ioi.mp hx).le)).deriv]
+      have hx0 : (0:ℝ) < x := hx
+      have h1x : (0:ℝ) < 1 + x := by linarith
+      rw [sub_nonneg, div_le_iff₀ h1x]
+      nlinarith [pow_nonneg hx0.le 5]
+  have h0 := hmono Set.self_mem_Ici (a := (0:ℝ)) (Set.mem_Ici.mpr hu) hu
+  norm_num at h0
+  linarith
+
+/-- `L(t) = log(1 + 2/(e^t − 1))` for `t > 0`: the two log-halves of the archimedean
+kernel combine over the common denominator `e^t − 1`. -/
+theorem archKernelL_eq_log_one_add {t : ℝ} (ht : 0 < t) :
+    archKernelL t = Real.log (1 + 2/(Real.exp t - 1)) := by
+  have hE1 : (1:ℝ) < Real.exp t := by
+    rw [← Real.exp_zero]
+    exact Real.exp_lt_exp.mpr ht
+  have hE0 : (0:ℝ) < Real.exp t := Real.exp_pos t
+  have he1 : Real.exp (-t) < 1 := exp_neg_lt_one ht
+  have he0 : (0:ℝ) < Real.exp (-t) := Real.exp_pos _
+  rw [archKernelL, ← Real.log_div (by linarith) (by linarith)]
+  congr 1
+  rw [Real.exp_neg]
+  have hE1' : Real.exp t - 1 ≠ 0 := by linarith
+  have hEne : Real.exp t ≠ 0 := hE0.ne'
+  field_simp
+  ring
+
+/-- Small-argument exponential upper bound `e^x ≤ 1/(1−x)` for `x < 1`. -/
+theorem exp_le_one_div_one_sub {x : ℝ} (hx : x < 1) :
+    Real.exp x ≤ 1/(1-x) := by
+  have h1 : (0:ℝ) < 1 - x := by linarith
+  have h2 : 1 - x ≤ Real.exp (-x) := by
+    have := Real.add_one_le_exp (-x)
+    linarith
+  have h3 : Real.exp x * (1 - x) ≤ Real.exp x * Real.exp (-x) :=
+    mul_le_mul_of_nonneg_left h2 (Real.exp_pos x).le
+  rw [← Real.exp_add] at h3
+  norm_num at h3
+  rw [le_div_iff₀ h1]
+  linarith
+
+/-- The threshold certificate `log(23/3) ≥ 2.0246` (via `e² < 7.3890561` and
+`e^{0.0246} ≤ 1/(1 − 0.0246)`). -/
+theorem log_twentyThree_thirds_ge : (2.0246:ℝ) ≤ Real.log (23/3) := by
+  rw [Real.le_log_iff_exp_le (by norm_num : (0:ℝ) < 23/3)]
+  have he2 : Real.exp 2 ≤ 2.7182818286^2 := by
+    rw [show (2:ℝ) = 1 + 1 by norm_num, Real.exp_add]
+    have h := Real.exp_one_lt_d9.le
+    nlinarith [Real.exp_pos 1]
+  have he00 : Real.exp 0.0246 ≤ 1/(1 - 0.0246) :=
+    exp_le_one_div_one_sub (by norm_num)
+  calc Real.exp 2.0246 = Real.exp 2 * Real.exp 0.0246 := by
+        rw [← Real.exp_add]
+        norm_num
+    _ ≤ 2.7182818286^2 * (1/(1 - 0.0246)) :=
+        mul_le_mul he2 he00 (Real.exp_pos _).le (by positivity)
+    _ ≤ 23/3 := by norm_num
+
+/-- **The β-bound** (T12-b N5, B–F line 594): `(1/2 + 1/t)·e^t·L(t) ≤ 2` for
+`t ≥ log(23/3)` (i.e. `t = log(X/9)`, `X ≥ 69`). Via the quintic Mercator bound at
+`u = 2/(e^t−1) ≤ 3/10`: `e^t·L ≤ (2+u)(1−u/2+u²/3−u³/4+u⁴/5)
+= 2 + u²(1−u)/6 + (3/20)u⁴ + u⁵/5 ≤ 2.012201`, and `(1/2+1/t) ≤ 1/2+1/2.0246`. -/
+theorem beta_bound_core {t : ℝ} (ht : Real.log (23/3) ≤ t) :
+    (1/2 + 1/t) * (Real.exp t * archKernelL t) ≤ 2 := by
+  have ht' : (2.0246:ℝ) ≤ t := le_trans log_twentyThree_thirds_ge ht
+  have ht0 : (0:ℝ) < t := by linarith
+  have hE : (23/3 : ℝ) ≤ Real.exp t := by
+    calc (23/3 : ℝ) = Real.exp (Real.log (23/3)) := (Real.exp_log (by norm_num)).symm
+      _ ≤ Real.exp t := Real.exp_le_exp.mpr ht
+  have hE1 : (0:ℝ) < Real.exp t - 1 := by linarith
+  set u : ℝ := 2/(Real.exp t - 1) with hu_def
+  have hu0 : 0 < u := by positivity
+  have hu3 : u ≤ 3/10 := by
+    rw [hu_def, div_le_iff₀ hE1]
+    linarith
+  have hL : archKernelL t = Real.log (1 + u) := archKernelL_eq_log_one_add ht0
+  have hEu : Real.exp t * u = 2 + u := by
+    rw [hu_def]
+    field_simp
+    ring
+  have hEL : Real.exp t * archKernelL t
+      ≤ 2 + u^2*(1-u)/6 + (3/20)*u^4 + u^5/5 := by
+    rw [hL]
+    calc Real.exp t * Real.log (1 + u)
+        ≤ Real.exp t * (u - u^2/2 + u^3/3 - u^4/4 + u^5/5) :=
+          mul_le_mul_of_nonneg_left (log_one_add_le_quintic hu0.le) (Real.exp_pos t).le
+      _ = 2 + u^2*(1-u)/6 + (3/20)*u^4 + u^5/5 := by
+          linear_combination (1 - u/2 + u^2/3 - u^3/4 + u^4/5) * hEu
+  have hP : 2 + u^2*(1-u)/6 + (3/20)*u^4 + u^5/5 ≤ 2012201/1000000 := by
+    have hfac : (0:ℝ) ≤ 21/100 + (7/10)*u - u^2 := by
+      nlinarith [mul_le_mul_of_nonneg_left hu3 hu0.le]
+    have hcube : u^2*(1-u) ≤ 63/1000 := by
+      nlinarith [mul_nonneg (sub_nonneg.mpr hu3) hfac]
+    have h4 : u^4 ≤ (3/10:ℝ)^4 := pow_le_pow_left₀ hu0.le hu3 4
+    have h5 : u^5 ≤ (3/10:ℝ)^5 := pow_le_pow_left₀ hu0.le hu3 5
+    nlinarith
+  have hfrac : 1/2 + 1/t ≤ 1/2 + 1/2.0246 := by
+    have h := one_div_le_one_div_of_le (by norm_num : (0:ℝ) < 2.0246) ht'
+    linarith
+  have hELpos : 0 ≤ Real.exp t * archKernelL t :=
+    mul_nonneg (Real.exp_pos t).le (archKernelL_pos ht0).le
+  calc (1/2 + 1/t) * (Real.exp t * archKernelL t)
+      ≤ (1/2 + 1/2.0246) * (2012201/1000000) :=
+        mul_le_mul hfrac (le_trans hEL hP) hELpos (by norm_num)
+    _ ≤ 2 := by norm_num
+
+/-- The β-bound in the halved-exponential form used by `step1`'s archimedean term:
+`(1/2 + 1/t)·e^{t/2}·L(t) ≤ 2·e^{−t/2}`. -/
+theorem beta_bound_half {t : ℝ} (ht : Real.log (23/3) ≤ t) :
+    (1/2 + 1/t) * Real.exp (t/2) * archKernelL t ≤ 2 * Real.exp (-(t/2)) := by
+  have hcore := beta_bound_core ht
+  have hkey : (1/2 + 1/t) * Real.exp (t/2) * archKernelL t
+      = ((1/2 + 1/t) * (Real.exp t * archKernelL t)) * Real.exp (-(t/2)) := by
+    rw [show Real.exp t = Real.exp (t/2) * Real.exp (t/2) by
+      rw [← Real.exp_add]; congr 1; ring]
+    have hne : Real.exp (t/2) ≠ 0 := (Real.exp_pos _).ne'
+    rw [Real.exp_neg]
+    field_simp
+  rw [hkey]
+  exact mul_le_mul_of_nonneg_right hcore (Real.exp_pos _).le
+
 end DedekindResidue
 
 end
