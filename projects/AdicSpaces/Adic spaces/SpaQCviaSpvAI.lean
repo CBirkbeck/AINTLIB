@@ -428,30 +428,29 @@ noncomputable def RCoord.leOne (I : Ideal A) (f : A) : RCoord A I :=
     rw [h, Ideal.radical_top]
     exact le_top⟩
 
-/-- The `Spa`-profile conditions inside the profile cube: for EVERY element `a` of the
-ideal of definition (image in `A`) the coordinate `({1}, a)` is `false` (encoding
-`v(a) < 1`: `W({1}/a) = {v(a) ≥ 1}`), and for `f ∈ A⁺` the coordinate `({f}, 1)` is
-`true` (encoding `v(f) ≤ 1`, as `v(1) ≠ 0` always). Quantifying over the whole ideal —
-not just a generating set — matches Theorem 7.10's hypothesis (`v(a) < 1 for all a ∈ I`)
-and is what the reverse direction's coefficient-absorption needs. -/
-def spaProfileConditions (I : Ideal A) : Set (RCoord A I → Bool) :=
-  { y | (∀ a ∈ I, y (RCoord.oneOver I a) = false) ∧
+/-- The `Spa`-profile conditions inside the profile cube, for a PRINCIPAL generator `g`
+(the image in `A` of the principal Tate pair's `π`): the coordinate `({1}, g)` is `false`
+(encoding `v(g) < 1`, as `W({1}/g) = {v(g) ≥ 1}`), and for `f ∈ A⁺` the coordinate
+`({f,1}, 1)` is `true` (encoding `v(f) ≤ 1`). Theorem 7.10's hypothesis `v(a) < 1` on
+all of `P.I = (π)` follows from the single `g`-condition by coefficient absorption:
+`a = c·π` with `c ∈ A₀` and `v(c) ≤ 1`. -/
+def spaProfileConditions (I : Ideal A) (g : A) : Set (RCoord A I → Bool) :=
+  { y | y (RCoord.oneOver I g) = false ∧
         ∀ f ∈ (A⁺ : Subring A), y (RCoord.leOne I f) = true }
 
-/-- The conditions cut out a closed subset (an intersection of coordinate cylinders in a
-product of discrete spaces). -/
-theorem isClosed_spaProfileConditions (I : Ideal A) :
-    IsClosed (spaProfileConditions (A := A) I) := by
-  have hrw : spaProfileConditions (A := A) I =
-      (⋂ a ∈ I, {y : RCoord A I → Bool | y (RCoord.oneOver I a) = false}) ∩
+/-- The conditions cut out a closed subset (coordinate cylinders in a product of
+discrete spaces). -/
+theorem isClosed_spaProfileConditions (I : Ideal A) (g : A) :
+    IsClosed (spaProfileConditions (A := A) I g) := by
+  have hrw : spaProfileConditions (A := A) I g =
+      {y : RCoord A I → Bool | y (RCoord.oneOver I g) = false} ∩
       ⋂ f ∈ (A⁺ : Subring A), {y : RCoord A I → Bool | y (RCoord.leOne I f) = true} := by
     ext y
     simp [spaProfileConditions]
   rw [hrw]
   refine IsClosed.inter ?_ ?_
-  · refine isClosed_biInter fun a _ => ?_
-    have h : {y : RCoord A I → Bool | y (RCoord.oneOver I a) = false} =
-        (fun y : RCoord A I → Bool => y (RCoord.oneOver I a)) ⁻¹' {false} := rfl
+  · have h : {y : RCoord A I → Bool | y (RCoord.oneOver I g) = false} =
+        (fun y : RCoord A I → Bool => y (RCoord.oneOver I g)) ⁻¹' {false} := rfl
     rw [h]
     exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
   · refine isClosed_biInter fun f _ => ?_
@@ -460,61 +459,69 @@ theorem isClosed_spaProfileConditions (I : Ideal A) :
     rw [h]
     exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
 
-/-- **Wedhorn 7.10 + 7.35, profile form.** Let `I = span S` be a (principal-generated,
-Tate-faithful) ideal of definition. The `Spa`-profile image equals the compact carrier
-intersected with the clopen conditions:
-`ιSpvR '' (Spa A A⁺) = profileCarrier A ∩ spaProfileConditions S`.
+/-- **Wedhorn 7.10 + 7.35, profile form (principal Tate pair).** Let `P` be a pair of
+definition with `P.I = (π)` principal, `P.A₀ ≤ A⁺`, and `I = (↑π)` the generated ideal
+of `A`. The `Spa`-profile image equals the compact carrier intersected with the clopen
+conditions.
 
-`⊆`: `Spa ⊆ Spv` gives carrier membership; a continuous `v` has `v(a) < 1` for `a ∈ S`
-(topological nilpotence) and `v(f) ≤ 1` for `f ∈ A⁺` by `Spa`-membership.
-`⊇`: given `y = rhoR (ιSpv_bool v)`, Wedhorn 7.5(iii) rewrites `y = ιSpvR w` for the
-retraction `w := r v ∈ Spv(A, I)`; the conditions transported to `w` say `w(a) < 1` on
-`S` and `w(f) ≤ 1` on `A⁺`; Theorem 7.10 (converse direction, *"Choose `n ∈ ℕ` such that
-`t·aⁿ ∈ I` (this exists because `{t}` is bounded)"*, `wedhorn.txt:2919-2922`) then yields
-`w ∈ Cont A`, hence `w ∈ Spa A A⁺` and `y ∈ ιSpvR '' Spa`. -/
-theorem image_ιSpvR_spa_eq (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
-    ιSpvR I '' (Spa A A⁺) = profileCarrier A I ∩ spaProfileConditions I := by
+`⊆`: `Spa ⊆ Spv` gives carrier membership; a continuous `v` has `v(↑π) < 1`
+(`not_vle_one_of_mem_spa_of_topologicallyNilpotent`) and `v(f) ≤ 1` for `f ∈ A⁺`.
+`⊇`: given `y = ιSpvR I v`, Wedhorn 7.5(iii) (`ιSpvR_retractionSingle_eq`) rewrites
+`y = ιSpvR I w` for the principal retraction `w ∈ Spv(A, I)`; the conditions transported
+to `w` say `w(↑π) < 1` and `w ≤ 1` on `A⁺ ⊇ A₀`; Theorem 7.10's converse
+(`Spv.isContinuous_of_isInSpvAI_of_lt_one`, with `w(a) < 1` on `P.I` by coefficient
+absorption `a = c·π`) yields `w ∈ Cont A`, hence `w ∈ Spa A A⁺` and `y ∈ ιSpvR '' Spa`. -/
+theorem image_ιSpvR_spa_eq [IsTopologicalRing A] (P : PairOfDefinition A) {π : P.A₀}
+    (hπ : P.I = Ideal.span {π}) (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
+    ιSpvR I '' (Spa A A⁺) = profileCarrier A I ∩ spaProfileConditions I (π : A) := by
   sorry
 
 /-- The `Spa`-profile image is compact. -/
-theorem isCompact_image_ιSpvR_spa (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
+theorem isCompact_image_ιSpvR_spa [IsTopologicalRing A] (P : PairOfDefinition A)
+    {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
     IsCompact (ιSpvR I '' (Spa A A⁺)) := by
-  rw [image_ιSpvR_spa_eq P I hIeq]
-  exact (isCompact_profileCarrier I).inter_right (isClosed_spaProfileConditions I)
+  rw [image_ιSpvR_spa_eq P hπ hA₀le I hIeq]
+  exact (isCompact_profileCarrier I).inter_right (isClosed_spaProfileConditions I (π : A))
 
-/-! ### R4 — the profile map is inducing and injective on `Spa`; quasi-compactness -/
+/-! ### R4 — transfer back along the Sierpinski embedding
 
-/-- **Wedhorn 7.35(2) substrate (via 7.5(ii), `wedhorn.txt:2836-2858`)**: on `Spa A A⁺`
-the subspace topology from `Spv A` is generated by the rational subsets, i.e. by the
-`W(T/s)`-profile coordinates with the side condition. Hence `ιSpvR` restricted to
-`Spa A A⁺` is inducing. -/
-theorem isInducing_ιSpvR_spa (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
-    Topology.IsInducing (fun v : ↥(Spa A A⁺) => ιSpvR I (v : Spv A)) := by
+`ιSpv_isEmbedding` (proven) reduces compactness of a subset of `Spv A` to compactness
+of its `ιSpv`-image in the Sierpinski cube. On `Spa` the subspace topology is generated
+by the side-condition rational subsets (Wedhorn 7.5(ii)/7.35(2) basis argument), so the
+`RCoord`-indexed Sierpinski profile is itself an embedding of `Spa`, and compactness of
+the Bool-profile image (R3) transfers. -/
+
+/-- **Wedhorn 7.35(2) basis substrate**: for `v ∈ Spa A A⁺` and a basic open
+`basicOpen g h ∋ v`, there is a side-condition datum `(T, s)` with
+`v ∈ rationalOpen T s ⊆ basicOpen g h`. Take `s := h`, `T := {g} ∪ Tₙ` where `Tₙ`
+finitely generates (the image of) `P.I ^ n` and `n` is chosen by continuity of `v` so
+that `v < v(h)` on `P.I ^ n`. -/
+theorem exists_rational_between_of_mem_basicOpen [IsTopologicalRing A]
+    (P : PairOfDefinition A) (I : Ideal A)
+    (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)))
+    {v : Spv A} (hv : v ∈ Spa A A⁺) {g h : A} (hgh : v ∈ basicOpen g h) :
+    ∃ (T : Finset A) (_ : I ≤ (Ideal.span (T : Set A)).radical),
+      v ∈ rationalOpen T h ∧ rationalOpen T h ⊆ basicOpen g h := by
   sorry
 
-/-- `ιSpvR` is injective on `Spa A A⁺` (rational subsets separate points of `Spa`;
-`Spv A` is T0 on `basicOpen`s and the 7.5(ii) refinement keeps separation on the
-side-condition coordinates). -/
-theorem injOn_ιSpvR_spa (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
-    Set.InjOn (ιSpvR I) (Spa A A⁺) := by
-  sorry
-
-/-- **`Spa A A⁺` is a compact topological space** (Wedhorn 7.35(1): spectral, in
-particular quasi-compact). -/
-theorem compactSpace_spa (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
-    CompactSpace ↥(Spa A A⁺) := by
+/-- **`Spa A A⁺` is quasi-compact in `Spv A`** (Wedhorn 7.35(1)). -/
+theorem isCompact_spa_noHArch [IsTopologicalRing A] (P : PairOfDefinition A)
+    {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))}) :
+    IsCompact ((Spa A A⁺) : Set (Spv A)) := by
   sorry
 
 /-- **Rational subsets are quasi-compact** (Wedhorn 7.35(2)): the trace of
 `rationalOpen T s` on `Spa A A⁺` is compact whenever the datum satisfies the openness
 side condition. -/
-theorem isCompact_subtype_rationalOpen (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)))
+theorem isCompact_subtype_rationalOpen [IsTopologicalRing A] (P : PairOfDefinition A)
+    {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))})
     (T : Finset A) (s : A)
     (hTI : I ≤ (Ideal.span (T : Set A)).radical) :
     IsCompact (Subtype.val ⁻¹' (rationalOpen T s) : Set ↥(Spa A A⁺)) := by
