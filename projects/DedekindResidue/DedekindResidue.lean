@@ -33,4 +33,5 @@ public import DedekindResidue.Lemma3
 public import DedekindResidue.Lemma4
 public import DedekindResidue.QSide
 public import DedekindResidue.Lemma5
+public import DedekindResidue.Theorem1
 public import DedekindResidue.MainTheorem
