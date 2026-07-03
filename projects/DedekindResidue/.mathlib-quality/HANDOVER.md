@@ -1200,3 +1200,42 @@ Dsinh+Dcosh = ∫archWeight(F_T−F_T') (integral_add) ≤ `arch_sum_diff_le`;
 (triangle over the K/ℚ split). Assemble |LHS − plateau-moved| ≤
 (n−1)·arch-bound + C(σ,T,T')·(Σ_K + Σ_ℚ). **THEN L4-d** σ→1⁺ (map in sentinel).
 **THEN L5** (weil at e^{−h|x|} → eq:Stark → Estimate), **THEN T012**.
+
+### Leg 8 (cont.): T011 COMPLETE, L5 COMPLETE
+
+- **T011 (B–F Lemma 4) COMPLETE** in Lemma4.lean: `lemma4_sigma_estimate`
+  (σ-tracked Explicit2, phantom-`a` instantiable) and **`lemma4_explicit2`**
+  (σ→1⁺ limit): |2(T√X−T'√X')·log(κ_K/κ_ℚ) + 2ΔP_K − 2ΔP_ℚ| ≤
+  (n−1)(T−T')(1/2+1/T')e^{T'/2}L(T') + [(T−T')/2 + 2(1/2+1/T) + 2(1/2+1/T')
+  + 4/T+4/T']·(zeroSumSigma K 1 + zeroSumSigma ℚ 1). Limit machinery:
+  tendsto_sub_one_mul_dedekindZeta_re, tendsto_log_dedekindZeta_ratio,
+  tendsto_plateauSum (finite support), zeroSumSigma_anti.
+- **L5 (Landau–Stark) COMPLETE** in Lemma5.lean: `expTest h = e^{−h|x|}`, full
+  weil-hypothesis discharge suite (closed-form transform
+  `paperPhi_expTest : Φ = 1/(h−w)+1/(h+w)` on |Re w| < h; Fourier decay 2h/γ²;
+  band bound from the rational; BV via deriv-integrable + reflection;
+  primeSideH M-test), packaged `weil_explicit_formula_expTest`, and:
+  - **`stark_identity`** (eq:Stark ×2): 2(σ−1/2)·zeroSumSigma K σ = 2/σ +
+    2/(σ−1) + logΔ − Γconst + n·I_sinh(σ) + r₁·I_cosh(σ) − 2·vonMangoldtSum K σ.
+  - **`dSigma`** (B–F d_{K,σ}, arch side in integral form) and
+    **`landau_stark_estimate`**: zeroSumSigma K 1 ≤ (2σ−1)(logΔ + 2/(σ−1) − dSigma).
+
+**NEXT: T012** (endgame; paper lines 564–631):
+- **T12-a**: (i) plateauSum↔bSum bridge: `bSum K X = −plateauSum K 1 X`
+  (at σ=1 the plateau term is exactly minus the bSum term; boundary N^m = X
+  both vanish; finsum-pair vs tsum-product bookkeeping). (ii) eq:Diff:
+  √X·logX − √(X/9)·log(X/9) = ... note OUR lemma4_explicit2 LHS factor is
+  2(logX·√X − logX'·√X'), X' := X/9: = (2/3)√X·(3logX − logX + log9)·... =
+  (2/3)√X·log(9X²)/... CHECK against paper (2/3)√X log 3X ✓ (√(X/9) = √X/3,
+  log(X/9) = logX − log9: logX√X − (√X/3)(logX−log9) = (√X/3)(2logX+log9) =
+  (2√X/3)·log(3X) ✓ since 2logX+log9 = 2log3X). (iii) Step1: combine with
+  landau_stark_estimate at K and ℚ (logΔ_ℚ = 0), coeff ≥ 0.
+- **T12-b numerics**: dSigma's integrals → digamma via GammaSide's proven
+  `digamma_sub_digamma_eq_integral` (check exact form); d_{K,σ} > 2log2π − 2Ψ(4)
+  = 1.163 (n ≥ 2, vonMangoldt ≥ 0, Ψ mono); ζℚ-sum ≤ 1.163 via
+  landau_stark_estimate at ℚ, σ = 2 + certified numerics (vonMangoldtSum ℚ 2 =
+  Σ log p·p^{−2m} bounds, γ_E, Ψ(4) = 11/6 − γ_E); β-monotonicity + β(log(X/9))<1
+  for X ≥ 69; σ := 1+1/√logΔ with |Δ| ≥ 3 (n ≥ 2 Minkowski).
+- **T12-c**: Q4 κ_ℚ = 1 (dedekindZeta_residue ℚ = regulator ℚ · h/w-form:
+  2^1·reg·1/(2·1) = reg; regulator ℚ = 1 rank-0) → log κ_ℚ = 0; assemble
+  `belabas_friedman_thm1` (hn : 1 < finrank, X ≥ 69, constants 2.324/3.88/4.26).
