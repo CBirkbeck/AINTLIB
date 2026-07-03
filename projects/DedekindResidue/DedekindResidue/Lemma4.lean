@@ -481,6 +481,179 @@ theorem antitoneOn_exp_half_mul_archKernelL :
       linarith
     exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le h1
 
+/-! ### The cutoff-derivative representation (c4-C1)
+
+For fixed `y > 0` the map `U ↦ F_{σ,e^U}(y)` is the plateau `1` for `U ≥ y` and the
+smooth tail `(U/y)e^{−h(y−U)}` for `U ≤ y` (both branches agree at `U = y`), so the
+two-cutoff difference is the interval integral of the `U`-derivative
+`((1+hU)/y)e^{−h(y−U)}` cut off at `U = y`. -/
+
+/-- The real auxiliary-function family in the log-cutoff `U`: `F_{σ,e^U}(y)` for
+`y > 0`. -/
+noncomputable def auxFCut (σ U y : ℝ) : ℝ :=
+  if y ≤ U then 1 else U/y * Real.exp (-(σ - 1/2)*(y - U))
+
+/-- On the real ray, `auxF` at cutoff `X` is the coercion of `auxFCut σ (log X)`. -/
+theorem auxF_eq_auxFCut (σ : ℝ) (X : ℝ) {y : ℝ} (hy : 0 < y) :
+    auxF (σ:ℂ) X y = ((auxFCut σ (Real.log X) y : ℝ) : ℂ) := by
+  rw [auxF_ofReal, auxFCut, abs_of_pos hy]
+
+/-- The tail branch extends continuously through the kink: for `U ≤ y`,
+`auxFCut σ U y = (U/y)e^{−h(y−U)}`. -/
+theorem auxFCut_eq_tail {σ U y : ℝ} (hy : 0 < y) (hU : U ≤ y) :
+    auxFCut σ U y = U/y * Real.exp (-(σ - 1/2)*(y - U)) := by
+  rw [auxFCut]
+  by_cases hcase : y ≤ U
+  · have hUy : U = y := le_antisymm hU hcase
+    subst hUy
+    rw [if_pos le_rfl, sub_self, mul_zero, Real.exp_zero,
+      div_self hy.ne', one_mul]
+  · rw [if_neg hcase]
+
+/-- The `U`-derivative of the tail branch. -/
+theorem hasDerivAt_auxFCut_tail {σ y : ℝ} (U : ℝ) :
+    HasDerivAt (fun U : ℝ => U/y * Real.exp (-(σ - 1/2)*(y - U)))
+      ((1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))) U := by
+  have h1 : HasDerivAt (fun U : ℝ => U/y) (1/y) U := (hasDerivAt_id U).div_const y
+  have h2 : HasDerivAt (fun U : ℝ => Real.exp (-(σ - 1/2)*(y - U)))
+      (Real.exp (-(σ - 1/2)*(y - U)) * (σ - 1/2)) U := by
+    have h3 : HasDerivAt (fun U : ℝ => -(σ - 1/2)*(y - U)) (σ - 1/2) U := by
+      have h4 := ((hasDerivAt_id U).const_sub y).const_mul (-(σ - 1/2))
+      simpa using h4
+    simpa using h3.exp
+  have h5 := h1.mul h2
+  have hval : (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))
+      = 1/y * Real.exp (-(σ - 1/2)*(y - U))
+        + U/y * (Real.exp (-(σ - 1/2)*(y - U)) * (σ - 1/2)) := by
+    rw [div_mul_eq_mul_div, div_mul_eq_mul_div, one_mul, div_mul_eq_mul_div,
+      ← add_div]
+    congr 1
+    ring
+  exact hval ▸ h5
+
+/-- The cutoff-difference integrand: the `U`-derivative, cut off at `U = y`. -/
+noncomputable def cutKernel (σ y U : ℝ) : ℝ :=
+  if U < y then (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U)) else 0
+
+theorem cutKernel_nonneg {σ y U : ℝ} (hσ : 1/2 < σ) (hy : 0 < y) (hU : 0 ≤ U) :
+    0 ≤ cutKernel σ y U := by
+  rw [cutKernel]
+  by_cases hcase : U < y
+  · rw [if_pos hcase]
+    have h1 : (0:ℝ) ≤ 1 + (σ - 1/2)*U := by nlinarith
+    positivity
+  · rw [if_neg hcase]
+
+theorem measurable_cutKernel (σ y : ℝ) : Measurable (cutKernel σ y) := by
+  refine Measurable.ite (measurableSet_lt measurable_id measurable_const) ?_
+    measurable_const
+  fun_prop
+
+theorem intervalIntegrable_cutKernel {σ y : ℝ} (hσ : 1/2 < σ) (hy : 0 < y)
+    {T' T : ℝ} (hT' : 0 < T') (hTT : T' ≤ T) :
+    IntervalIntegrable (cutKernel σ y) MeasureTheory.volume T' T := by
+  refine IntervalIntegrable.mono_fun'
+    (g := fun _ : ℝ => (1 + (σ - 1/2)*T)/y)
+    (intervalIntegrable_const) ?_ ?_
+  · exact (measurable_cutKernel σ y).aestronglyMeasurable
+  · rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff' measurableSet_uIoc]
+    refine Filter.Eventually.of_forall (fun U hU => ?_)
+    rw [Set.uIoc_of_le hTT] at hU
+    have hU0 : 0 < U := hT'.trans hU.1
+    rw [Real.norm_eq_abs, abs_of_nonneg (cutKernel_nonneg hσ hy hU0.le), cutKernel]
+    by_cases hcase : U < y
+    · rw [if_pos hcase]
+      have he : Real.exp (-(σ - 1/2)*(y - U)) ≤ 1 := by
+        have h0 : (0:ℝ) ≤ (σ - 1/2)*(y - U) :=
+          mul_nonneg (by linarith) (by linarith)
+        calc Real.exp (-(σ - 1/2)*(y - U)) ≤ Real.exp 0 :=
+              Real.exp_le_exp.mpr (by nlinarith [h0])
+          _ = 1 := Real.exp_zero
+      have h1 : (0:ℝ) ≤ 1 + (σ - 1/2)*U := by nlinarith
+      calc (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))
+          ≤ (1 + (σ - 1/2)*U)/y * 1 :=
+            mul_le_mul_of_nonneg_left he (by positivity)
+        _ ≤ (1 + (σ - 1/2)*T)/y := by
+            rw [mul_one]
+            have h2 : (σ - 1/2)*U ≤ (σ - 1/2)*T :=
+              mul_le_mul_of_nonneg_left hU.2 (by linarith)
+            gcongr
+    · rw [if_neg hcase]
+      have h1 : (0:ℝ) ≤ 1 + (σ - 1/2)*T := by nlinarith
+      positivity
+
+/-- Almost every `U` differs from `y`. -/
+theorem ae_ne_singleton (y : ℝ) : ∀ᵐ U : ℝ, U ≠ y := by
+  refine MeasureTheory.ae_iff.mpr ?_
+  simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+  exact MeasureTheory.measure_singleton y
+
+/-- **(C1) The cutoff-difference representation**: for `0 < T' ≤ T` and `y > 0`,
+`F_{σ,e^T}(y) − F_{σ,e^{T'}}(y) = ∫_{T'}^T cutKernel σ y U dU`. -/
+theorem auxFCut_sub_eq_integral {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' : 0 < T')
+    (hTT : T' ≤ T) (hy : 0 < y) :
+    auxFCut σ T y - auxFCut σ T' y = ∫ U in T'..T, cutKernel σ y U := by
+  have hcont : Continuous (fun U : ℝ =>
+      (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))) := by fun_prop
+  by_cases hyT' : y ≤ T'
+  · -- plateau at both cutoffs; the kernel vanishes on `[T', T]`
+    have h1 : auxFCut σ T y = 1 := by rw [auxFCut, if_pos (le_trans hyT' hTT)]
+    have h2 : auxFCut σ T' y = 1 := by rw [auxFCut, if_pos hyT']
+    rw [h1, h2, sub_self,
+      intervalIntegral.integral_congr (g := fun _ => (0:ℝ)) (fun U hU => ?_),
+      intervalIntegral.integral_zero]
+    rw [Set.uIcc_of_le hTT] at hU
+    rw [cutKernel, if_neg (not_lt.mpr (le_trans hyT' hU.1))]
+  · rw [not_le] at hyT'
+    by_cases hyT : T ≤ y
+    · -- tail at both cutoffs: pure FTC on `[T', T] ⊆ (0, y]`
+      have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt
+        (f := fun U : ℝ => U/y * Real.exp (-(σ - 1/2)*(y - U)))
+        (f' := fun U : ℝ => (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U)))
+        (fun U _ => hasDerivAt_auxFCut_tail U)
+        (hcont.intervalIntegrable T' T)
+      rw [auxFCut_eq_tail hy hyT, auxFCut_eq_tail hy (le_trans hTT hyT), ← hftc]
+      refine intervalIntegral.integral_congr_ae ?_
+      filter_upwards [ae_ne_singleton y] with U hUy hUIoc
+      rw [Set.uIoc_of_le hTT] at hUIoc
+      have hUlt : U < y := lt_of_le_of_ne (le_trans hUIoc.2 hyT) hUy
+      rw [cutKernel, if_pos hUlt]
+    · -- straddling case `T' < y < T`: split at `y`
+      rw [not_le] at hyT
+      have hint1 := intervalIntegrable_cutKernel (T' := T') (T := y) hσ hy hT'
+        (le_of_lt hyT')
+      have hint2 := intervalIntegrable_cutKernel (T' := y) (T := T) hσ hy hy
+        (le_of_lt hyT)
+      rw [← intervalIntegral.integral_add_adjacent_intervals hint1 hint2]
+      -- the `[y, T]` piece vanishes pointwise
+      have hzero : (∫ U in y..T, cutKernel σ y U) = 0 := by
+        rw [intervalIntegral.integral_congr (g := fun _ => (0:ℝ)) (fun U hU => ?_),
+          intervalIntegral.integral_zero]
+        rw [Set.uIcc_of_le (le_of_lt hyT)] at hU
+        rw [cutKernel, if_neg (not_lt.mpr hU.1)]
+      rw [hzero, add_zero]
+      -- the `[T', y]` piece: FTC ending exactly at the kink
+      have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt
+        (f := fun U : ℝ => U/y * Real.exp (-(σ - 1/2)*(y - U)))
+        (f' := fun U : ℝ => (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U)))
+        (fun U _ => hasDerivAt_auxFCut_tail U)
+        (hcont.intervalIntegrable T' y)
+      have hplateau : auxFCut σ T y = 1 := by
+        rw [auxFCut, if_pos (le_of_lt hyT)]
+      have htailT' : auxFCut σ T' y
+          = T'/y * Real.exp (-(σ - 1/2)*(y - T')) :=
+        auxFCut_eq_tail hy (le_of_lt hyT')
+      rw [hplateau, htailT']
+      rw [show (∫ U in T'..y, cutKernel σ y U)
+          = ∫ U in T'..y, (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U)) from ?_,
+        hftc, sub_self, mul_zero, Real.exp_zero, mul_one, div_self hy.ne']
+      refine intervalIntegral.integral_congr_ae ?_
+      filter_upwards [ae_ne_singleton y] with U hUy hUIoc
+      rw [Set.uIoc_of_le (le_of_lt hyT')] at hUIoc
+      have hUlt : U < y := lt_of_le_of_ne hUIoc.2 hUy
+      rw [cutKernel, if_pos hUlt]
+
+
 end DedekindResidue
 
 end
