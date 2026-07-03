@@ -4596,4 +4596,48 @@ theorem tendsto_IG_gammaFactor (K : Type*) [Field K] [NumberField K]
   rw [← hlim]
   exact hsum
 
+/-- **Schwarz reflection for the digamma function** on the right half-plane:
+`ψ(z̄) = conj ψ(z)`, from the Gauss integral representation. (Not yet in mathlib.) -/
+theorem digamma_conj {z : ℂ} (hz : 0 < z.re) :
+    Complex.digamma (starRingEnd ℂ z) = starRingEnd ℂ (Complex.digamma z) := by
+  have hzc : 0 < ((starRingEnd ℂ) z).re := by
+    rw [Complex.conj_re]
+    exact hz
+  rw [digamma_eq_integral_gauss_one hzc, digamma_eq_integral_gauss_one hz,
+    ← integral_conj]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x hx => ?_)
+  rw [Set.mem_Ioi] at hx
+  rw [map_div₀, map_sub, Complex.conj_ofReal, Complex.conj_ofReal]
+  congr 1
+  congr 1
+  -- conj((1+x)^(-z)) = (1+x)^(-z̄)
+  rw [show (-(starRingEnd ℂ) z) = (starRingEnd ℂ) (-z) by rw [map_neg],
+    Complex.cpow_conj _ _ (by
+      rw [Complex.arg_ofReal_of_nonneg (by linarith : (0:ℝ) ≤ 1+x)]
+      exact Real.pi_ne_zero.symm),
+    Complex.conj_ofReal]
+
+/-- **Schwarz reflection for `γ_K'/γ_K`** on the right half-plane. -/
+theorem logDeriv_gammaFactor_conj (K : Type*) [Field K] [NumberField K]
+    {s : ℂ} (hs : 0 < s.re) :
+    logDeriv (gammaFactor K) (starRingEnd ℂ s)
+      = starRingEnd ℂ (logDeriv (gammaFactor K) s) := by
+  have hsc : 0 < ((starRingEnd ℂ) s).re := by
+    rw [Complex.conj_re]
+    exact hs
+  have hs2 : 0 < (s/2).re := by
+    rw [show (s/2).re = s.re/2 by simp]
+    linarith
+  rw [logDeriv_gammaFactor K hsc, logDeriv_gammaFactor K hs]
+  rw [show (starRingEnd ℂ) s / 2 = (starRingEnd ℂ) (s/2) by
+    rw [map_div₀, map_ofNat]]
+  rw [digamma_conj hs2, digamma_conj hs]
+  rw [show Complex.log (π:ℂ) = ((Real.log π : ℝ):ℂ) from
+    (Complex.ofReal_log Real.pi_pos.le).symm]
+  rw [show Complex.log (2*(π:ℂ)) = ((Real.log (2*π) : ℝ):ℂ) from by
+    rw [show (2*(π:ℂ)) = ((2*π : ℝ):ℂ) by push_cast; ring,
+      ← Complex.ofReal_log (by positivity)]]
+  simp only [map_add, map_mul, map_neg, map_natCast, map_div₀, map_one, map_ofNat,
+    Complex.conj_ofReal]
+
 end DedekindResidue
