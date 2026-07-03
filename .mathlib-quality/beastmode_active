@@ -1,1 +1,1 @@
-FOCUS: R-skeleton written (SpaQCviaSpvAI.lean, 9 sorries) — typechecking; then prove R0-layer (continuous_rhoR, ιSpvR_eq_true_iff, isClosed_spaProfileConditions) same-session
+FOCUS: R1 PROVEN (7.5(iii) + order-transfer + bridges + profile-agree) — commit, then R3 image_ιSpvR_spa_eq (7.10-encoding; cofinalValue_ideal_pow_lt exists as the reverse-direction heart)
