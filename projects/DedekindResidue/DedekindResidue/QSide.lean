@@ -156,6 +156,35 @@ theorem generalizedRiemannHypothesis_rat (hRH : RiemannHypothesis) :
   linarith [this ▸ hs]
 
 
+/-! ### `κ_ℚ = 1` (Q4) -/
+
+/-- The unit group of `ℤ` has rank `0`, so the regulator of `ℚ` is the empty
+determinant. -/
+theorem regulator_rat_eq_one : NumberField.Units.regulator ℚ = 1 := by
+  classical
+  haveI : IsEmpty {w : NumberField.InfinitePlace ℚ //
+      w ≠ NumberField.Units.dirichletUnitTheorem.w₀} :=
+    ⟨fun w => w.2 (Subsingleton.elim _ _)⟩
+  rw [NumberField.Units.regulator_eq_det']
+  simp
+
+/-- The torsion of `ℚ` is `{±1}`. -/
+theorem torsionOrder_rat_eq_two : NumberField.Units.torsionOrder ℚ = 2 :=
+  NumberField.Units.torsionOrder_eq_two_of_odd_finrank
+    (by rw [Module.finrank_self]; exact odd_one)
+
+/-- **`κ_ℚ = 1`**: the residue of the Riemann zeta at `1` through the class number
+formula: `(2¹·(2π)⁰·1·1)/(2·√1) = 1`. -/
+theorem dedekindZeta_residue_rat_eq_one : NumberField.dedekindZeta_residue ℚ = 1 := by
+  rw [NumberField.dedekindZeta_residue_def,
+    NumberField.InfinitePlace.nrRealPlaces_eq_one_of_finrank_eq_one
+      (Module.finrank_self ℚ),
+    NumberField.InfinitePlace.nrComplexPlaces_eq_zero_of_finrank_eq_one
+      (Module.finrank_self ℚ),
+    Rat.classNumber_eq, regulator_rat_eq_one, torsionOrder_rat_eq_two,
+    Rat.numberField_discr]
+  norm_num
+
 end DedekindResidue
 
 end

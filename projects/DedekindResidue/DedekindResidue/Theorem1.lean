@@ -137,6 +137,75 @@ theorem bSumRel_eq_neg_plateau_diff {X : ℝ} (hX : 1 < X) :
   rw [bSumRel, bSum_eq_neg_plateauSum K hX, bSum_eq_neg_plateauSum ℚ hX]
   ring
 
+/-! ### eq:Diff and Step1 (T12-a-ii/iii) -/
+
+/-- **eq:Diff** (B–F line 568): the cutoff-weight difference at `a = log 9`:
+`√X·log X − √(X/9)·log(X/9) = (2/3)·√X·log(3X)`. -/
+theorem cutoff_weight_diff {X : ℝ} (hX9 : 9 < X) :
+    Real.log X * Real.sqrt X - Real.log (X/9) * Real.sqrt (X/9)
+      = (2/3) * Real.sqrt X * Real.log (3*X) := by
+  have hX0 : (0:ℝ) < X := by linarith
+  have hsqrt9 : Real.sqrt (X/9) = Real.sqrt X / 3 := by
+    rw [show (9:ℝ) = 3^2 by norm_num, Real.sqrt_div' X (by norm_num),
+      Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 3)]
+  have hlogdiv : Real.log (X/9) = Real.log X - Real.log 9 :=
+    Real.log_div hX0.ne' (by norm_num)
+  have hlog9 : Real.log 9 = 2 * Real.log 3 := by
+    rw [show (9:ℝ) = 3^2 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  have hlog3X : Real.log (3*X) = Real.log 3 + Real.log X :=
+    Real.log_mul (by norm_num) hX0.ne'
+  rw [hsqrt9, hlogdiv, hlog9, hlog3X]
+  ring
+
+/-- **Step1** (B–F line 575, ×2 normalisation): under GRH + RH, `n ≥ 2`, `X > 9`,
+`(4/3)·√X·log(3X)·|log κ_K − f_K(X)|` is at most the archimedean bound plus the
+`c`-coefficient times the two zero sums, at cutoffs `X` and `X/9`. -/
+theorem step1 (hGRH : GeneralizedRiemannHypothesis K) (hRH : RiemannHypothesis)
+    (hn : 1 < Module.finrank ℚ K) {X : ℝ} (hX9 : 9 < X) :
+    (4/3) * Real.sqrt X * Real.log (3*X)
+        * |Real.log (NumberField.dedekindZeta_residue K) - fK K X|
+      ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log (X/9))
+            * ((1/2 + 1/Real.log (X/9)) * Real.exp (Real.log (X/9)/2)
+              * archKernelL (Real.log (X/9))))
+        + (2*(1/2:ℝ)^2 * (Real.log X - Real.log (X/9))
+            + (2*((1/2:ℝ) + 1/Real.log X) + 2*((1/2:ℝ) + 1/Real.log (X/9)))
+            + (4 / Real.log X + 4 / Real.log (X/9)))
+          * (zeroSumSigma K 1 + zeroSumSigma ℚ 1) := by
+  have hX' : 1 < X/9 := by linarith
+  have hXX : X/9 ≤ X := by linarith
+  have hX1 : 1 < X := by linarith
+  have hkey := lemma4_explicit2 K hGRH hRH hn hX' hXX
+  rw [dedekindZeta_residue_rat_eq_one, Real.log_one] at hkey
+  have hfacnn : (0:ℝ) ≤ (4/3) * Real.sqrt X * Real.log (3*X) :=
+    mul_nonneg (mul_nonneg (by norm_num) (Real.sqrt_nonneg X))
+      (Real.log_nonneg (by linarith))
+  have hfacpos : (0:ℝ) < 2 * Real.sqrt X * Real.log (3*X) := by
+    have h1 : 0 < Real.sqrt X := Real.sqrt_pos.mpr (by linarith)
+    have h2 : 0 < Real.log (3*X) := Real.log_pos (by linarith)
+    positivity
+  have hD : bSumRel K X - bSumRel K (X/9)
+      = fK K X * (2 * Real.sqrt X * Real.log (3*X)) / 3 := by
+    rw [fK, div_mul_cancel₀ _ hfacpos.ne',
+      mul_div_cancel_left₀ _ (by norm_num : (3:ℝ) ≠ 0)]
+  have hP := bSumRel_eq_neg_plateau_diff K hX1
+  have hP' := bSumRel_eq_neg_plateau_diff K hX'
+  have hdiff := cutoff_weight_diff hX9
+  have habs_eq : 2 * (Real.log X * Real.sqrt X
+        * (Real.log (NumberField.dedekindZeta_residue K) - 0))
+      - 2 * (Real.log (X/9) * Real.sqrt (X/9)
+        * (Real.log (NumberField.dedekindZeta_residue K) - 0))
+      + 2 * (plateauSum K 1 X - plateauSum K 1 (X/9))
+      - 2 * (plateauSum ℚ 1 X - plateauSum ℚ 1 (X/9))
+      = (4/3) * Real.sqrt X * Real.log (3*X)
+          * (Real.log (NumberField.dedekindZeta_residue K) - fK K X) := by
+    linear_combination 2 * (Real.log (NumberField.dedekindZeta_residue K)) * hdiff
+      + 2 * hP - 2 * hP' - 2 * hD
+  rw [habs_eq, abs_mul, abs_of_nonneg hfacnn] at hkey
+  exact hkey
+
 end DedekindResidue
 
 end
