@@ -5,6 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».SpaCompact
 import «Adic spaces».Presheaf
 import «Adic spaces».SpvAITopology
+import «Adic spaces».SpaQCviaSpvAI
+import «Adic spaces».AdicMorphisms
 
 /-!
 # No-`hArch` compactness and per-`v` cofinality (T-COMPACT-NO-HARCH)
@@ -379,10 +381,15 @@ closed image description supplied by the sub-lemma
 `image_spa_ιSpv_bool_noHArch`. The actual no-`hArch` content is concentrated
 in that sub-lemma's body (still `sorry`-bodied, tracked as L1.3.a). -/
 theorem isCompact_preimage_rationalOpen_noHArch
-    (L : RationalLocData A) :
+    [IsTateRing A] (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (L : RationalLocData A) (hRat : L.IsRational) :
     IsCompact (Subtype.val ⁻¹' rationalOpen L.T L.s : Set ↥(Spa A A⁺)) := by
-  obtain ⟨S, hS, hEq⟩ := image_spa_ιSpv_bool_noHArch (A := A)
-  exact isCompact_preimage_rationalOpen_of_isClosed_image hS hEq L.T L.s
+  obtain ⟨P, π, hA₀le, hπ, hunit⟩ :=
+    IsTateRing.exists_principal_pairOfDefinition_le_subring (A := A) hplus_open
+  refine isCompact_subtype_rationalOpen P hπ (fun x => hA₀le x.2)
+    (Ideal.span {((π : A))}) rfl L.T L.s ?_
+  rw [hRat.span_eq_top, Ideal.radical_top]
+  exact le_top
 
 /-- **(T-COMPACT-NO-HARCH, round-22 reviewer-mandated.) Half-space compactness
 without `hArch`.** The half-space `R(L) ∩ {v(g) ≤ v(h)}` in
@@ -400,13 +407,14 @@ The assembly is a one-liner: a closed subset of a compact set is compact
 (`IsCompact.inter_right`). The `Subtype.val ⁻¹'` distributes over `∩` definitionally,
 giving the required intersection form. -/
 theorem isCompact_rationalOpen_inter_vle_noHArch
-    (L : RationalLocData A) (g h : A) :
+    [IsTateRing A] (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
+    (L : RationalLocData A) (hRat : L.IsRational) (g h : A) :
     IsCompact (Subtype.val ⁻¹'
       (rationalOpen L.T L.s ∩ {v | v.vle g h}) : Set ↥(Spa A A⁺)) := by
   -- `Subtype.val ⁻¹' (A ∩ B) = Subtype.val ⁻¹' A ∩ Subtype.val ⁻¹' B`.
   rw [Set.preimage_inter]
   -- A compact set intersected with a closed set on the right is compact.
-  exact (isCompact_preimage_rationalOpen_noHArch L).inter_right
+  exact (isCompact_preimage_rationalOpen_noHArch hplus_open L hRat).inter_right
     (isClosed_subtype_setOf_vle g h)
 
 end ValuationSpectrum

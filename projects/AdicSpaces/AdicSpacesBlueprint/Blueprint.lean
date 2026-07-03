@@ -3,14 +3,7 @@ import VersoManual
 import VersoBlueprint
 import VersoBlueprint.Commands.Graph
 import VersoBlueprint.Commands.Summary
-import «Adic spaces».HuberRings
-import «Adic spaces».ValuationSpectrum
-import «Adic spaces».ContinuousValuations
-import «Adic spaces».AffinoidRings
-import «Adic spaces».AdicSpectrum
-import «Adic spaces».RationalSubsets
-import «Adic spaces».AnalyticPoints
-import «Adic spaces».TateAlgebra
+import «Adic spaces»
 
 open Verso.Genre
 open Verso.Genre.Manual
@@ -21,15 +14,16 @@ open Informal
 This is the blueprint for the [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces)
 formalisation (Birkbeck) of _Huber's theory of adic spaces_ — the point-set
 foundations of $`p`-adic geometry and perfectoid spaces, following Wedhorn's
-_Adic Spaces_ notes. It develops Huber rings and Tate rings, the valuation spectrum
-$`\mathrm{Spv}`, continuous valuations, rings of integral elements, the adic spectrum
-$`\mathrm{Spa}`, its rational subsets and analytic locus, Tate algebras, and (in
-progress) the structure sheaf.
+_Adic Spaces_ notes. It develops Huber rings and Tate rings, power-bounded and
+topologically nilpotent elements, the valuation spectrum $`\mathrm{Spv}`, convex
+subgroups and coarsenings, continuous valuations, rings of integral elements, the
+adic spectrum $`\mathrm{Spa}`, its quasi-compactness and rational subsets, the
+analytic locus, Tate algebras, and (in progress) the structure sheaf.
 
 Each node carries a `(lean := …)` reference to the actual declaration in the
-`«Adic spaces»` library, so Verso reads its completion status directly from Lean.
-The dependency graph at the foot of the page records how the constructions build on
-one another.
+`«Adic spaces»` library, so Verso reads its completion status directly from Lean,
+and its prose cites the corresponding numbered result in Wedhorn. The dependency
+graph at the foot of the page records how the constructions build on one another.
 
 # Huber rings and Tate rings
 
@@ -39,7 +33,7 @@ _pair of definition_: an open subring $`A_0 \subseteq A` together with a finitel
 generated ideal $`I \subseteq A_0` such that the powers $`I^n` form a neighbourhood
 basis of $`0` in $`A_0`. In `Adic-Spaces` the pair is the structure
 $`\texttt{PairOfDefinition}` and the predicate is the class $`\texttt{IsHuberRing}`.
-Following Wedhorn §6.
+Following Wedhorn Definition 6.1.
 :::
 
 :::definition "tate-ring" (lean := "IsTateRing")
@@ -50,6 +44,119 @@ non-archimedean geometry. In `Adic-Spaces` this is the class $`\texttt{IsTateRin
 Following Wedhorn Definition 6.10.
 :::
 
+:::definition "pseudo-uniformizer" (lean := "IsPseudoUniformizer, PseudoUniformizer")
+A _pseudo-uniformiser_ of a topological ring $`A` is a unit $`w \in A^\times` that is
+topologically nilpotent, $`w^n \to 0`. In `Adic-Spaces`: the predicate
+$`\texttt{IsPseudoUniformizer}` and the bundled type $`\texttt{PseudoUniformizer}\,A`.
+A Tate ring is precisely a Huber ring possessing one ({uses "tate-ring"}[]).
+Following Wedhorn Definition 6.10.
+:::
+
+:::definition "huber-pow-open" (lean := "PairOfDefinition.pow_isOpen, PairOfDefinition.isBounded_A₀")
+For a pair of definition $`(A_0, I)` ({uses "huber-ring"}[]), each ideal power
+$`I^n` is open in $`A_0` ($`\texttt{pow\_isOpen}`) and the ring of definition $`A_0`
+is bounded in $`A` ($`\texttt{isBounded\_A}_0`). These two facts say that $`A_0` is an
+open bounded subring whose $`I`-adic filtration realises the topology — the defining
+data of a Huber ring. Following Wedhorn §6.
+:::
+
+:::theorem "tate-open-nilradical" (lean := "IsTateRing.isOpen_topologicalNilradical")
+In a Tate ring $`A` ({uses "tate-ring"}[], {uses "pseudo-uniformizer"}[]) the set
+$`A^{\circ\circ}` of topologically nilpotent elements is _open_.
+:::
+
+:::proof "tate-open-nilradical"
+Let $`\varpi` be a pseudo-uniformiser. Since $`\varpi^n \to 0`, the sets
+$`\varpi^n A_0` (images of a ring of definition) shrink to $`0`, so for large $`n` the
+neighbourhood $`\varpi^n A_0` of $`0` consists of topologically nilpotent elements; as
+$`\varpi` is a unit this neighbourhood translates to show $`A^{\circ\circ}` contains an
+open set around each of its points. Hence $`A^{\circ\circ}` is open. Following Wedhorn §6.
+:::
+
+# Bounded sets, power-bounded elements and open ideals
+
+:::definition "power-bounded" (lean := "TopologicalRing.powerBoundedSubring, TopologicalRing.topologicallyNilpotentElements")
+A subset $`S` of a topological ring is _bounded_ if it is absorbed by every
+neighbourhood of $`0`; an element $`a` is _power-bounded_ when $`\{a^n\}` is bounded,
+and _topologically nilpotent_ when $`a^n \to 0`. The power-bounded elements form the
+subset $`A^{\circ}` ($`\texttt{powerBoundedSubring}`) and the topologically nilpotent
+ones the subset $`A^{\circ\circ}` ($`\texttt{topologicallyNilpotentElements}`).
+Following Wedhorn Definition 5.27.
+:::
+
+:::theorem "power-bounded-add" (lean := "TopologicalRing.isPowerBounded_add")
+In a non-archimedean ring the sum of two power-bounded elements is again power-bounded;
+consequently $`A^{\circ}` is a subring ({uses "power-bounded"}[]). Following Wedhorn
+Proposition 5.30(3).
+:::
+
+:::proof "power-bounded-add"
+Non-archimedeanness gives a neighbourhood basis of $`0` by open subgroups, so for an
+open subgroup $`U` the binomial expansion of $`(a+b)^n` has every term of the form
+$`a^i b^{n-i}`, each lying in the bounded set generated by the powers of $`a` and $`b`.
+Choosing $`U` absorbing both $`\{a^n\}` and $`\{b^n\}` and using subadditivity over the
+subgroup shows $`\{(a+b)^n\}` is absorbed by $`U`. Closure under negation and product is
+similar, so $`A^{\circ}` is a subring. Following Wedhorn Proposition 5.30(3).
+:::
+
+:::theorem "power-bounded-integrally-closed" (lean := "TopologicalRing.IsBounded.isPowerBounded_of_isIntegral")
+The power-bounded subring $`A^{\circ}` is _integrally closed_ in $`A`: any element
+integral over a bounded subring is power-bounded ({uses "power-bounded"}[]). Following
+Wedhorn Proposition 5.30(4).
+:::
+
+:::proof "power-bounded-integrally-closed"
+If $`a` satisfies a monic relation $`a^k = \sum_{i<k} b_i a^i` with the $`b_i` in a
+bounded subring $`B`, then every power $`a^n` is a $`B`-linear combination of
+$`1, a, \dots, a^{k-1}`. Boundedness of $`B` and of the finite set
+$`\{1, \dots, a^{k-1}\}` makes the set of all such combinations bounded, so $`\{a^n\}`
+is bounded and $`a \in A^{\circ}`. Following Wedhorn Proposition 5.30(4).
+:::
+
+:::theorem "open-ideal-criterion" (lean := "ideal_isOpen_iff_topologicalNilradical_le_radical")
+An ideal $`\mathfrak{a}` of a Huber ring is open _iff_ the topological nilradical is
+contained in its radical, $`A^{\circ\circ} \subseteq \sqrt{\mathfrak{a}}`. Following
+Wedhorn Lemma 6.6.
+:::
+
+:::proof "open-ideal-criterion"
+($`\Rightarrow`) If $`\mathfrak a` is open then it contains a neighbourhood of $`0`,
+hence a power $`I^n` of a defining ideal, so each topologically nilpotent element has a
+power in $`\mathfrak a`, giving $`A^{\circ\circ} \subseteq \sqrt{\mathfrak a}`.
+($`\Leftarrow`) If the defining ideal $`I` (whose elements are topologically nilpotent)
+lies in $`\sqrt{\mathfrak a}`, finite generation of $`I` yields a single $`N` with
+$`I^N \subseteq \mathfrak a`; since $`I^N` is open, so is $`\mathfrak a`. Following
+Wedhorn Lemma 6.6.
+:::
+
+# Convex subgroups and coarsening of valuations
+
+:::definition "convex-subgroup" (lean := "ConvexSubgroup, ConvexSubgroup.minContain")
+A subgroup $`H` of a linearly ordered commutative group $`\Gamma` is _convex_ if
+$`a, b \in H` and $`a \le x \le b` force $`x \in H`. In `Adic-Spaces` this is the
+structure $`\texttt{ConvexSubgroup}`, and $`\texttt{minContain}\,S` is the smallest
+convex subgroup containing a set $`S`. Convex subgroups of the value group control the
+coarsenings of a valuation. Following Wedhorn §7.1.
+:::
+
+:::definition "valuation-coarsening" (lean := "Valuation.coarsen")
+The _coarsening_ of a valuation $`v : R \to \Gamma_0` by a convex subgroup $`H`
+({uses "convex-subgroup"}[]) is the composite $`R \xrightarrow{v} \Gamma_0
+\xrightarrow{\pi} (\Gamma/H)_0` with the quotient projection. Coarser valuations have
+the same support but a smaller value group; passing to a maximal proper convex subgroup
+gives a height-one (rank-one) coarsening. In `Adic-Spaces`: $`\texttt{Valuation.coarsen}`.
+Following Wedhorn §7.1.
+:::
+
+:::definition "characteristic-subgroup" (lean := "Valuation.cGammaIdeal, Valuation.imageGeOne")
+For a valuation $`v` and an ideal $`I` Wedhorn singles out the convex subgroup
+$`c\Gamma_v` generated by the values $`\ge 1` attained by $`v` ($`\texttt{imageGeOne}`),
+relative to $`I` packaged as $`\texttt{cGammaIdeal}`. This _characteristic subgroup_
+records the "microbial" part of the value group and is the technical device behind the
+$`\mathrm{Spv}(A,I)` description of continuity ({uses "convex-subgroup"}[]). Following
+Wedhorn Definition 4.13.
+:::
+
 # The valuation spectrum and continuous valuations
 
 :::definition "valuation-spectrum" (lean := "ValuationSpectrum, ValuationSpectrum.basicOpen, ValuationSpectrum.supp")
@@ -57,9 +164,48 @@ The _valuation spectrum_ $`\mathrm{Spv}(A)` of a commutative ring $`A` is the se
 equivalence classes of valuations on $`A`, presented as valuative relations. Its
 topology is generated by the _basic open sets_
 $$`\mathrm{Spv}(A)\!\left(\tfrac{f}{s}\right) = \{\, v : v(f) \le v(s) \ne 0 \,\},`
-and the _support_ $`v \mapsto \{a : v(a) = 0\}` is a continuous map to
-$`\mathrm{Spec}(A)`. In `Adic-Spaces`: $`\texttt{ValuationSpectrum}`,
-$`\texttt{basicOpen}`, $`\texttt{supp}`. Following Wedhorn Definition 4.1.
+and the _support_ $`v \mapsto \{a : v(a) = 0\}` is a prime ideal. In `Adic-Spaces`:
+$`\texttt{ValuationSpectrum}`, $`\texttt{basicOpen}`, $`\texttt{supp}`. Following
+Wedhorn Definition 4.1.
+:::
+
+:::definition "spv-comap" (lean := "ValuationSpectrum.comap")
+A ring homomorphism $`\varphi : A \to B` induces a continuous map
+$`\mathrm{Spv}(\varphi) : \mathrm{Spv}(B) \to \mathrm{Spv}(A)` by pulling back
+valuations ({uses "valuation-spectrum"}[]). In `Adic-Spaces`:
+$`\texttt{ValuationSpectrum.comap}`. Following Wedhorn Remark 4.3.
+:::
+
+:::theorem "supp-continuous" (lean := "ValuationSpectrum.suppFun, ValuationSpectrum.suppFun_continuous")
+The support map $`\mathrm{supp} : \mathrm{Spv}(A) \to \mathrm{Spec}(A)`,
+$`v \mapsto \{a : v(a)=0\}`, is continuous ({uses "valuation-spectrum"}[]). In
+`Adic-Spaces`: $`\texttt{suppFun}`, $`\texttt{suppFun\_continuous}`. Following Wedhorn
+Definition 4.1ff.
+:::
+
+:::proof "supp-continuous"
+The preimage of a basic open $`D(f) \subseteq \mathrm{Spec}(A)` under $`\mathrm{supp}`
+is $`\{v : v(f) \ne 0\}`, which equals the basic open
+$`\mathrm{Spv}(A)(f/f) = \{v : v(f) \le v(f) \ne 0\}` of the valuation spectrum. A map
+whose preimages of subbasic opens are open is continuous. Following Wedhorn
+Definition 4.1ff.
+:::
+
+:::theorem "spv-compact" (lean := "ValuationSpectrum.ιSpv_isEmbedding, ValuationSpectrum.compactSpace_of_subbasic_subcover")
+The valuation spectrum $`\mathrm{Spv}(A)` is _quasi-compact_
+({uses "valuation-spectrum"}[]): it embeds into the product space
+$`\prod_{(f,s)} \{0,1\}` of "characteristic functions" of the basic relations
+$`v(f) \le v(s) \ne 0` as a closed subset, and a closed subset of a compact product is
+compact. Following Wedhorn Theorem 4.9.
+:::
+
+:::proof "spv-compact"
+Map each $`v` to the predicate $`(f,s) \mapsto (v(f) \le v(s) \wedge v(s) \ne 0)` in
+$`(A \times A \to \mathrm{Prop})`. This is injective and a topological embedding
+($`\texttt{ιSpv\_isEmbedding}`), and its image is cut out by the closed valuation-axiom
+conditions, hence closed in the compact Tychonoff product. Compactness then reduces to a
+subbasic subcover statement ($`\texttt{compactSpace\_of\_subbasic\_subcover}`), giving
+quasi-compactness of $`\mathrm{Spv}(A)`. Following Wedhorn Theorem 4.9.
 :::
 
 :::definition "continuous-valuation" (lean := "Valuation.IsContinuous, ValuationSpectrum.Cont")
@@ -70,16 +216,94 @@ $`\mathrm{Cont}(A) \subseteq \mathrm{Spv}(A)` ($`\texttt{Cont}`). Following Wedh
 Definition 7.7.
 :::
 
-# The adic spectrum
+:::theorem "continuity-via-restriction" (lean := "Valuation.restrictToConvex, PairOfDefinition.isContinuous_of_restriction_isContinuous")
+Continuity of a valuation $`v` on a Huber ring can be detected after restricting its
+value group to a convex subgroup ({uses "convex-valuation-link"}[]): if the
+restriction $`\texttt{restrictToConvex}` of $`v` is continuous, then so is $`v`
+({uses "continuous-valuation"}[], {uses "huber-ring"}[]). In `Adic-Spaces`:
+$`\texttt{isContinuous\_of\_restriction\_isContinuous}`. Following Wedhorn Lemma 7.44.
+:::
+
+:::proof "continuity-via-restriction"
+Continuity is the requirement that each $`\{a : v(a) < \gamma\}` be open. Restricting to
+the convex subgroup generated by the relevant threshold collapses values outside it
+while preserving the comparison $`v(a) < \gamma` for $`\gamma` in the subgroup, so the
+restricted valuation's continuity sets are precisely the original ones (cofinally). A
+pair of definition $`(A_0, I)` provides the open sets $`I^n` witnessing these, and
+transporting continuity of the restriction along this filtration recovers continuity of
+$`v`. Following Wedhorn Lemma 7.44.
+:::
+
+:::definition "convex-valuation-link" (lean := "Valuation.restrictToConvex")
+The _restriction to a convex subgroup_ of a valuation $`v`, $`\texttt{restrictToConvex}`,
+sends $`v` to the valuation with value group cut down to a chosen convex subgroup $`H`
+of $`\Gamma_v` ({uses "convex-subgroup"}[]). It is the pointwise device underlying both
+the coarsening construction and the continuity criterion of Lemma 7.44. Following
+Wedhorn §7.1.
+:::
+
+:::theorem "continuous-injectivity" (lean := "Valuation.isEquiv_of_isContinuous_of_denseRange, ValuationSpectrum.eq_of_isContinuous_of_comap_eq_of_denseRange")
+If $`\varphi : R \to S` has dense image and $`v, w` are two _continuous_ valuations on
+$`S` whose pullbacks to $`R` agree, then $`v` and $`w` are equivalent
+({uses "continuous-valuation"}[], {uses "spv-comap"}[]): a continuous valuation is
+determined by its restriction along a dense subring. In `Adic-Spaces`:
+$`\texttt{isEquiv\_of\_isContinuous\_of\_denseRange}` and
+$`\texttt{eq\_of\_isContinuous\_of\_comap\_eq\_of\_denseRange}`. Following Wedhorn
+Proposition 7.48.
+:::
+
+:::proof "continuous-injectivity"
+For $`s \in S` choose $`r_i \to s` from the dense image. Continuity of $`v` and $`w`
+means $`v(s), w(s)` are governed by the values on the approximating $`r_i`, where
+$`v` and $`w` already agree by hypothesis. The comparison $`v(s) \le v(s')` is then
+forced to match $`w(s) \le w(s')` by passing to the limit using openness of the
+sublevel sets, so $`v` and $`w` induce the same valuative relation, i.e. are equivalent.
+Following Wedhorn Proposition 7.48.
+:::
+
+:::definition "spv-ai" (lean := "ValuationSpectrum.Spv.IsInSpvAI, Valuation.CofinalValue")
+For an ideal $`I`, the subspace $`\mathrm{Spv}(A, I) \subseteq \mathrm{Spv}(A)` is
+characterised disjunctively ($`\texttt{IsInSpvAI}`): either every $`a \in I` has
+$`v(a)` _cofinal_ (every positive $`\gamma` exceeds some power $`v(a)^n`,
+$`\texttt{CofinalValue}`) or the value group is microbial. This is Wedhorn's combinatorial
+handle on continuity used in the Tate-ring compactness route
+({uses "continuous-valuation"}[]). Following Wedhorn Lemma 7.4.
+:::
+
+# Integral elements and affinoid rings
 
 :::definition "affinoid-ring" (lean := "ValuationSpectrum.IsRingOfIntegralElements, ValuationSpectrum.IsAffinoidRing")
 For a topological ring $`A`, a subring $`A^{+} \subseteq A` is a _ring of integral
 elements_ ($`\texttt{IsRingOfIntegralElements}`) if it is open, integrally closed in
-$`A`, and contained in the power-bounded subring $`A^{\circ}` ({uses "huber-ring"}[]).
-The pair $`(A, A^{+})` is then an _affinoid ring_ (Huber pair),
-$`\texttt{IsAffinoidRing}`. Every ring of integral elements automatically contains all
-topologically nilpotent elements. Following Wedhorn Definition 7.14.
+$`A`, and contained in the power-bounded subring $`A^{\circ}`
+({uses "huber-ring"}[], {uses "power-bounded"}[]). The pair $`(A, A^{+})` is then an
+_affinoid ring_ (Huber pair), $`\texttt{IsAffinoidRing}`. Following Wedhorn
+Definition 7.14.
 :::
+
+:::theorem "integral-le-powerbounded" (lean := "ValuationSpectrum.IsRingOfIntegralElements.le_powerBoundedSubring, ValuationSpectrum.IsRingOfIntegralElements.topologicallyNilpotentElements_subset")
+Every ring of integral elements $`A^{+}` is contained in $`A^{\circ}` and contains all
+topologically nilpotent elements: $`A^{\circ\circ} \subseteq A^{+} \subseteq A^{\circ}`
+({uses "affinoid-ring"}[], {uses "power-bounded"}[]). Following Wedhorn Remark 7.15.
+:::
+
+:::proof "integral-le-powerbounded"
+By definition $`A^{+} \subseteq A^{\circ}`. Conversely a topologically nilpotent element
+$`t` satisfies $`t^n \to 0`, so $`1 - t` is a unit and $`t` is integral over $`A^{+}`
+after clearing by an open neighbourhood; openness and integral-closedness of $`A^{+}`
+then force $`t \in A^{+}`. Hence $`A^{\circ\circ} \subseteq A^{+}`. Following Wedhorn
+Remark 7.15.
+:::
+
+:::definition "uniform-pair" (lean := "TopologicalRing.IsUniform, TopologicalRing.IsStablyUniform")
+A Huber ring $`A` is _uniform_ if $`A^{\circ}` is bounded ($`\texttt{IsUniform}`); an
+affinoid ring $`(A, A^{+})` is _stably uniform_ if every rational localisation stays
+uniform ($`\texttt{IsStablyUniform}`) ({uses "affinoid-ring"}[],
+{uses "power-bounded"}[]). Stable uniformity is the standard hypothesis guaranteeing the
+structure presheaf is a sheaf. Following Wedhorn Definitions 7.36 and 7.37.
+:::
+
+# The adic spectrum
 
 :::definition "adic-spectrum" (lean := "ValuationSpectrum.Spa, ValuationSpectrum.PlusSubring")
 Let $`(A, A^{+})` be an affinoid ring ({uses "affinoid-ring"}[]). The _adic spectrum_
@@ -90,6 +314,111 @@ integral subring packaged by the class $`\texttt{PlusSubring}`). This is the
 fundamental functor of Huber's theory. Following Wedhorn Definition 7.23.
 :::
 
+:::theorem "spa-functorial" (lean := "ValuationSpectrum.spaComap, ValuationSpectrum.comap_mem_spa")
+A continuous homomorphism $`\varphi : A \to B` of affinoid rings with
+$`A^{+} \subseteq \varphi^{-1}(B^{+})` induces a continuous map
+$`\mathrm{Spa}(B, B^{+}) \to \mathrm{Spa}(A, A^{+})` ($`\texttt{spaComap}`), making
+$`\mathrm{Spa}` a functor ({uses "adic-spectrum"}[], {uses "spv-comap"}[]). Following
+Wedhorn Definition 7.23ff.
+:::
+
+:::proof "spa-functorial"
+The valuation-spectrum comap $`\mathrm{Spv}(\varphi)` is already continuous. If
+$`v \in \mathrm{Spa}(B,B^{+})` then $`v` is continuous, so its pullback is continuous
+($`\varphi` being continuous); and for $`f \in A^{+}` we have
+$`\varphi(f) \in B^{+}`, whence $`(\varphi^*v)(f) = v(\varphi f) \le 1`. Thus
+$`\varphi^* v \in \mathrm{Spa}(A,A^{+})`, and restricting $`\mathrm{Spv}(\varphi)`
+gives the required continuous map. Following Wedhorn Definition 7.23ff.
+:::
+
+:::theorem "spa-compact" (lean := "ValuationSpectrum.isCompact_spa_of_tate_pseudouniformizer, ValuationSpectrum.instCompactSpace_spa")
+The adic spectrum $`\mathrm{Spa}(A, A^{+})` is _quasi-compact_
+({uses "adic-spectrum"}[], {uses "spv-compact"}[]). In `Adic-Spaces` this is proved for
+Tate rings with an explicit pseudo-uniformiser
+($`\texttt{isCompact\_spa\_of\_tate\_pseudouniformizer}`, {uses "tate-ring"}[]) and for
+the discrete case ($`\texttt{instCompactSpace\_spa}`). Following Wedhorn Theorem 7.30.
+:::
+
+:::proof "spa-compact"
+$`\mathrm{Spa}(A,A^{+})` sits inside the quasi-compact $`\mathrm{Spv}(A)`
+({uses "spv-compact"}[]) as the locus of continuous valuations with $`v(f) \le 1` for
+$`f \in A^{+}`. Each such condition is closed in the characteristic-function embedding,
+and a pseudo-uniformiser controls the value groups uniformly so the continuity locus is
+also closed. A closed subset of the compact product is compact, giving
+quasi-compactness of $`\mathrm{Spa}`. Following Wedhorn Theorem 7.30.
+:::
+
+:::theorem "maximal-open-implies-closed" (lean := "IsTopologicallyNilpotent.mem_of_isMaximal, isOpen_of_isMaximal_of_isOpen_topologicallyNilpotent")
+When $`A^{\circ\circ}` is open, every maximal ideal of $`A` is open
+({uses "open-ideal-criterion"}[], {uses "power-bounded"}[]): topologically nilpotent
+elements lie in every maximal ideal ($`\texttt{mem\_of\_isMaximal}`), and the open-ideal
+criterion then makes the maximal ideal open
+($`\texttt{isOpen\_of\_isMaximal\_of\_isOpen\_topologicallyNilpotent}`). Following Wedhorn
+Proposition 7.51.
+:::
+
+:::proof "maximal-open-implies-closed"
+A topologically nilpotent $`t` has $`1 - t` invertible, so $`t` lies in the Jacobson
+radical, hence in every maximal ideal $`\mathfrak m`; thus
+$`A^{\circ\circ} \subseteq \mathfrak m \subseteq \sqrt{\mathfrak m}`. By the open-ideal
+criterion ({uses "open-ideal-criterion"}[]) the containment
+$`A^{\circ\circ} \subseteq \sqrt{\mathfrak m}` makes $`\mathfrak m` open. Following
+Wedhorn Proposition 7.51.
+:::
+
+:::theorem "spa-supp-maximal" (lean := "ValuationSpectrum.exists_mem_spa_supp_eq, ValuationSpectrum.exists_mem_spa_supp_eq_of_isOpen_topologicallyNilpotent")
+Every _open_ maximal ideal $`\mathfrak m` is the support of a point of
+$`\mathrm{Spa}(A, A^{+})` ({uses "adic-spectrum"}[]): the trivial valuation on the
+residue field $`A/\mathfrak m` pulls back to a continuous, $`A^{+}`-bounded valuation
+with support exactly $`\mathfrak m`. Following Wedhorn Proposition 7.51.
+:::
+
+:::proof "spa-supp-maximal"
+Since $`\mathfrak m` is maximal, $`A/\mathfrak m` is a field; take the trivial valuation
+$`\mathbf 1` on it and set $`v = \mathbf 1 \circ \pi` for $`\pi : A \to A/\mathfrak m`.
+Then $`\mathrm{supp}(v) = \mathfrak m`. For continuity, $`\{a : v(a) < \gamma\}` is
+either $`\varnothing`, all of $`A`, or $`\mathfrak m` (open by hypothesis), so all
+sublevel sets are open. As $`v` takes values in $`\{0,1\}` it is bounded by $`1` on all
+of $`A`, in particular on $`A^{+}`, so $`v \in \mathrm{Spa}(A,A^{+})`. Following Wedhorn
+Proposition 7.51.
+:::
+
+:::theorem "lemma-745-nonopen-support" (lean := "PairOfDefinition.exists_mem_spa_supp_ge_of_nonOpen_prime")
+For a non-open prime $`\mathfrak p` there is a point of $`\mathrm{Spa}(A, A^{+})` whose
+support contains $`\mathfrak p` ({uses "adic-spectrum"}[], {uses "huber-ring"}[]),
+constructed by extending a valuation along a convex coarsening
+({uses "convex-valuation-link"}[]). In `Adic-Spaces`:
+$`\texttt{exists\_mem\_spa\_supp\_ge\_of\_nonOpen\_prime}`. Following Wedhorn Lemma 7.45.
+:::
+
+:::proof "lemma-745-nonopen-support"
+Because $`\mathfrak p` is not open, the defining ideal $`I` is not contained in
+$`\sqrt{\mathfrak p}`, so some $`u \in I` escapes $`\mathfrak p`. Building a valuation on
+$`A/\mathfrak p` with $`u` cofinal and restricting to the convex subgroup generated by
+its values ($`\texttt{restrictToConvex}`) yields a continuous valuation, bounded by $`1`
+on $`A^{+}`, whose support dominates $`\mathfrak p`. This is a point of
+$`\mathrm{Spa}(A,A^{+})` with the desired support. Following Wedhorn Lemma 7.45.
+:::
+
+:::theorem "cor-732-dominating-unit" (lean := "ValuationSpectrum.exists_dominating_unit")
+_(Corollary 7.32.)_ Over a Tate ring, given finitely many $`f_i` and a pseudo-uniformiser
+context, there is a unit (a power of the uniformiser) that _dominates_ all the $`f_i` on
+the quasi-compact $`\mathrm{Spa}` ({uses "spa-compact"}[], {uses "tate-ring"}[]). In
+`Adic-Spaces`: $`\texttt{exists\_dominating\_unit}`. This denominator-clearing step is
+the engine of the rational-cover refinements. Following Wedhorn Corollary 7.32.
+:::
+
+:::proof "cor-732-dominating-unit"
+Each point $`v \in \mathrm{Spa}` admits a power $`\varpi^{n_v}` of the pseudo-uniformiser
+with $`v(\varpi^{n_v}) \le v(f_i)` for all $`i` on a neighbourhood, because $`\varpi` is
+topologically nilpotent and the $`f_i` are finitely many. The sets where a fixed power
+works are open and cover $`\mathrm{Spa}`; quasi-compactness
+({uses "spa-compact"}[]) extracts a finite subcover, and taking the maximal exponent
+produces a single dominating unit. Following Wedhorn Corollary 7.32.
+:::
+
+# Rational subsets
+
 :::definition "rational-subsets" (lean := "ValuationSpectrum.rationalOpen, ValuationSpectrum.IsRationalSubset")
 For $`f_1, \dots, f_n, s \in A` generating an open ideal, the _rational subset_
 $$`R\!\left(\tfrac{f_1, \dots, f_n}{s}\right) = \{\, v \in \mathrm{Spa}(A, A^{+}) : v(f_i) \le v(s) \ne 0 \,\}`
@@ -98,10 +427,11 @@ is the basic open of $`\mathrm{Spa}` cut out by $`\texttt{rationalOpen}`
 arise this way. Following Wedhorn Definition 7.29.
 :::
 
-:::theorem "rational-subsets-inter" (lean := "ValuationSpectrum.IsRationalSubset.inter")
+:::theorem "rational-subsets-inter" (lean := "ValuationSpectrum.IsRationalSubset.inter, ValuationSpectrum.rationalOpen_inter")
 The intersection of two rational subsets is again rational
 ({uses "rational-subsets"}[]): rational subsets form a basis of the topology of
-$`\mathrm{Spa}(A, A^{+})` closed under finite intersection.
+$`\mathrm{Spa}(A, A^{+})` closed under finite intersection. Following Wedhorn
+Remark 7.30(5).
 :::
 
 :::proof "rational-subsets-inter"
@@ -109,38 +439,187 @@ Given $`R(f_i/s)` and $`R(g_j/t)`, their intersection is $`R(f_i g_j / st)`: a p
 $`v` lies in both iff $`v(f_i) \le v(s)` and $`v(g_j) \le v(t)` with $`v(s), v(t) \ne 0`,
 which by multiplicativity of $`v` is exactly $`v(f_i g_j) \le v(st) \ne 0`. The
 numerator family of the product still generates an open ideal, so the intersection is
-again a rational subset.
+again a rational subset. Following Wedhorn Remark 7.30(5).
 :::
 
-:::definition "analytic-points" (lean := "ValuationSpectrum.IsAnalytic, ValuationSpectrum.IsTateRing.isAnalytic")
-A point $`v \in \mathrm{Spa}(A, A^{+})` is _analytic_ if its support $`\ker v` is not
-open — equivalently, some topologically nilpotent element is sent to a nonzero value
-({uses "adic-spectrum"}[]). In `Adic-Spaces`, $`\texttt{IsAnalytic}`; when $`A` is a
-Tate ring ({uses "tate-ring"}[]) _every_ point is analytic
-($`\texttt{IsTateRing.isAnalytic}`), because the pseudo-uniformiser $`\varpi` is a unit
-and so cannot lie in any support.
+:::theorem "rational-subsets-open" (lean := "ValuationSpectrum.IsRationalSubset.isOpen, ValuationSpectrum.rationalOpen_isOpen")
+Every rational subset is open in $`\mathrm{Spa}(A, A^{+})`
+({uses "rational-subsets"}[]): it is a finite intersection of basic opens
+$`\{v(f_i) \le v(s) \ne 0\}`. Following Wedhorn Theorem 7.35(2).
 :::
 
-# Tate algebras and the structure sheaf
+:::proof "rational-subsets-open"
+A rational subset $`R(T/s)` is the finite intersection
+$`\bigcap_i \{v : v(f_i) \le v(s) \ne 0\}` of the subbasic opens of $`\mathrm{Spa}`. Each
+factor is open by definition of the topology on the valuation spectrum, and a finite
+intersection of opens is open. Following Wedhorn Theorem 7.35(2).
+:::
 
-:::definition "tate-algebra" (lean := "TateAlgebra")
+# Analytic points
+
+:::definition "analytic-points" (lean := "ValuationSpectrum.IsAnalytic, ValuationSpectrum.IsTrivialValuation, ValuationSpectrum.SpaIsAnalytic")
+A point $`v \in \mathrm{Spv}(A)` is _analytic_ if its support $`\ker v` is not an open
+ideal ($`\texttt{IsAnalytic}`) ({uses "adic-spectrum"}[]); a point is _trivial_ if all
+elements outside the support are $`v`-equivalent ($`\texttt{IsTrivialValuation}`), and
+$`\mathrm{Spa}(A, A^{+})` is _analytic_ when it has no trivial points
+($`\texttt{SpaIsAnalytic}`). Following Wedhorn Definition 8.35.
+:::
+
+:::theorem "tate-all-analytic" (lean := "ValuationSpectrum.IsTateRing.isAnalytic")
+If $`A` is a Tate ring then _every_ point of $`\mathrm{Spv}(A)` is analytic
+({uses "analytic-points"}[], {uses "tate-ring"}[], {uses "pseudo-uniformizer"}[]). In
+`Adic-Spaces`: $`\texttt{IsTateRing.isAnalytic}`. Following Wedhorn Proposition 8.36.
+:::
+
+:::proof "tate-all-analytic"
+Let $`\varpi` be a pseudo-uniformiser ({uses "pseudo-uniformizer"}[]); it is a unit, so
+$`\varpi \notin \mathrm{supp}(v)` for any $`v`. If $`\mathrm{supp}(v)` were open it would
+contain a power $`\varpi^n` of the topologically nilpotent $`\varpi` (since powers of
+$`\varpi` shrink to $`0`), forcing $`\varpi^n \in \mathrm{supp}(v)`, hence
+$`\varpi \in \mathrm{supp}(v)` — contradicting that $`\varpi` is a unit. So
+$`\mathrm{supp}(v)` is never open and $`v` is analytic. Following Wedhorn
+Proposition 8.36.
+:::
+
+:::theorem "analytic-adic-complete" (lean := "PairOfDefinition.I_le_maximal_of_isAdicComplete, PairOfDefinition.not_isMaximal_of_I_not_le")
+In an $`I`-adically complete ring of definition, the defining ideal $`I` lies in every
+maximal ideal of $`A_0` ($`\texttt{I\_le\_maximal\_of\_isAdicComplete}`); equivalently a
+prime not containing $`I` is not maximal ({uses "huber-ring"}[],
+{uses "analytic-points"}[]). This is the completeness input controlling which supports
+can occur. Following Wedhorn §8.4 (Remark 8.4).
+:::
+
+:::proof "analytic-adic-complete"
+If $`\mathfrak m` is maximal but $`I \not\subseteq \mathfrak m`, pick $`u \in I`
+outside $`\mathfrak m`; then $`u` is a unit modulo $`\mathfrak m`. But $`u \in I` is
+topologically nilpotent, so $`1 - u` is a unit by $`I`-adic completeness, and standard
+Jacobson-radical reasoning forces $`u \in \mathfrak m`, a contradiction. Hence
+$`I \subseteq \mathfrak m`. Following Wedhorn §8.4.
+:::
+
+# Tate algebras and restricted power series
+
+:::definition "restricted-power-series" (lean := "MvPowerSeries.IsRestricted, restrictedMvPowerSeriesSubring, IsStronglyNoetherian")
+A power series $`\sum a_\nu T^\nu` is _restricted_ if its coefficients tend to $`0`
+along the cofinite filter ($`\texttt{IsRestricted}`); these form the subring
+$`A\langle T_1, \dots, T_k\rangle` ($`\texttt{restrictedMvPowerSeriesSubring}`). A
+topological ring is _strongly noetherian_ if every such ring is noetherian
+($`\texttt{IsStronglyNoetherian}`) ({uses "huber-ring"}[]). Following Wedhorn
+Definition 6.9.
+:::
+
+:::definition "tate-algebra" (lean := "TateAlgebra, LaurentTateAlgebra")
 The _Tate algebra_ $`A\langle X \rangle` over a Tate ring $`A`
-({uses "tate-ring"}[]) is the ring of _restricted power series_ — those
-$`\sum_n a_n X^n` whose coefficients are eventually small ($`a_n \to 0`). It is the
-ring of functions on the closed unit disc and the building block of the structure
-sheaf on rational subsets ({uses "rational-subsets"}[]). In `Adic-Spaces`:
-$`\texttt{TateAlgebra}`. Following Wedhorn Definition 7.29.
+({uses "tate-ring"}[], {uses "restricted-power-series"}[]) is the ring of restricted
+power series in one variable — the building block of functions on the closed unit disc.
+Its Laurent variant $`A\langle \zeta, \zeta^{-1}\rangle`
+($`\texttt{LaurentTateAlgebra}`, the quotient $`A\langle X, Y\rangle/(XY-1)`) inverts the
+coordinate and gives the annular pieces of rational covers
+({uses "rational-subsets"}[]). In `Adic-Spaces`: $`\texttt{TateAlgebra}`. Following
+Wedhorn Definition 7.29 (§6.9).
+:::
+
+:::theorem "tate-algebra-eval" (lean := "TateAlgebra.evalZeroHom, TateAlgebra.evalZeroHom_surjective")
+Evaluation at $`0` is a surjective ring homomorphism $`A\langle X\rangle \to A`
+({uses "tate-algebra"}[]): the constant term $`a_0` of a restricted power series. In
+`Adic-Spaces`: $`\texttt{evalZeroHom}`, $`\texttt{evalZeroHom\_surjective}`. Following
+Wedhorn §6.9.
+:::
+
+:::proof "tate-algebra-eval"
+Sending $`\sum a_n X^n \mapsto a_0` respects sums and products of restricted power
+series (the product's constant term is $`a_0 b_0`), so it is a ring hom. It is
+surjective because every $`a \in A` is the image of the constant series $`a`. Following
+Wedhorn §6.9.
+:::
+
+:::theorem "laurent-zeta-unit" (lean := "LaurentTateAlgebra.zeta_mul_zetaInv, LaurentTateAlgebra.zetaInv_mul_zeta")
+In the Laurent Tate algebra the coordinate $`\zeta` is a unit, with explicit inverse
+$`\zeta^{-1}` satisfying $`\zeta \cdot \zeta^{-1} = 1`
+({uses "tate-algebra"}[]). In `Adic-Spaces`: $`\texttt{zeta\_mul\_zetaInv}`,
+$`\texttt{zetaInv\_mul\_zeta}`. This invertibility is what makes
+$`A\langle \zeta, \zeta^{-1}\rangle` the ring of functions on an annulus. Following
+Wedhorn §8.29.
+:::
+
+:::proof "laurent-zeta-unit"
+By construction $`A\langle\zeta,\zeta^{-1}\rangle = A\langle X,Y\rangle/(XY-1)` with
+$`\zeta, \zeta^{-1}` the images of $`X, Y`. The defining relation $`XY - 1 = 0`
+becomes $`\zeta \cdot \zeta^{-1} = 1` in the quotient, and commutativity gives the
+reverse product too. Following Wedhorn §8.29.
+:::
+
+# Module topology, noetherian rings and the structure sheaf
+
+:::theorem "module-open-mapping" (lean := "IsModuleTopology.isOpenMap_of_surjective_of_finite, IsModuleTopology.strictExact")
+For finitely generated modules carrying the canonical module topology over a complete
+Tate ring, every surjective $`A`-linear map is _open_
+($`\texttt{isOpenMap\_of\_surjective\_of\_finite}`), and short exact sequences are
+_strict_ ($`\texttt{strictExact}`) ({uses "tate-ring"}[]). This is the open-mapping
+theorem for module topologies. Following Wedhorn Proposition 6.18.
+:::
+
+:::proof "module-open-mapping"
+A finitely generated module is an open quotient of some $`A^n` with the product
+topology; a surjection $`M \twoheadrightarrow N` lifts to a surjection
+$`A^n \twoheadrightarrow N`, and completeness plus finite generation make this quotient
+map open (a Banach-style open mapping argument). Openness of the surjection and
+continuity of the injection in a short exact sequence is exactly strictness. Following
+Wedhorn Proposition 6.18.
+:::
+
+:::theorem "closed-ideal-noetherian" (lean := "Wedhorn.isClosed_ideal_of_noetherian")
+In a complete Tate ring that is noetherian, every ideal is _closed_
+({uses "tate-ring"}[], {uses "module-open-mapping"}[]). In `Adic-Spaces`:
+$`\texttt{Wedhorn.isClosed\_ideal\_of\_noetherian}`. Following Wedhorn Proposition 6.17.
+:::
+
+:::proof "closed-ideal-noetherian"
+An ideal $`J` is a finitely generated submodule, hence (by the open-mapping theorem for
+the module topology, {uses "module-open-mapping"}[]) carries the subspace topology as an
+open quotient of $`A^n`. The quotient $`A/J` with the module topology is complete and
+Hausdorff, which forces $`J = \ker(A \to A/J)` to be closed. Following Wedhorn
+Proposition 6.17.
+:::
+
+:::definition "spa-topcat" (lean := "ValuationSpectrum.SpaTop, ValuationSpectrum.suppSpa")
+The adic spectrum packaged as a topological space (object of $`\mathrm{TopCat}`),
+$`\texttt{SpaTop}`, together with its continuous support map to $`\mathrm{Spec}(A)`
+($`\texttt{suppSpa}`) ({uses "adic-spectrum"}[], {uses "supp-continuous"}[]). This is the
+underlying space on which the structure (pre)sheaf lives. Following Wedhorn §8.1.
+:::
+
+:::theorem "structure-presheaf-typelevel-sheaf" (lean := "ValuationSpectrum.structurePresheaf_typeLevel_isSheaf")
+The _type-level_ part of the structure-sheaf condition holds unconditionally: the
+underlying $`\texttt{subpresheafToTypes}` of the "locally-a-fraction" predicate on
+$`\mathrm{Spa}(A, A^{+})` is a sheaf of types
+({uses "spa-topcat"}[], {uses "rational-subsets"}[]). In `Adic-Spaces`:
+$`\texttt{structurePresheaf\_typeLevel\_isSheaf}` — this is the sorry-free core extracted
+from the (still in-progress) topological-ring sheaf statement. Following Wedhorn §8.1
+(Theorem 8.28(c)).
+:::
+
+:::proof "structure-presheaf-typelevel-sheaf"
+Sections of the structure presheaf are by definition functions to stalks that are
+_locally_ given by a fraction; this is a local predicate, and the subpresheaf of all
+functions satisfying a local predicate is automatically a sheaf of types (gluing is
+pointwise on stalks and the local condition is checked on the cover). The remaining,
+genuinely in-progress, content is upgrading this from $`\mathrm{Type}` to topological
+rings (Tate acyclicity), which still carries $`\texttt{sorry}`s. Following Wedhorn §8.1.
 :::
 
 :::theorem "structure-sheaf"
-_(Tate's acyclicity theorem / the structure sheaf.)_ For a strongly noetherian Tate
-ring, the structure presheaf $`\mathcal{O}_X` on the rational subsets
-({uses "rational-subsets"}[], {uses "tate-algebra"}[]) of $`X = \mathrm{Spa}(A, A^{+})`
-is a _sheaf_: the Čech complex of a rational cover is exact (Tate acyclicity), so
-sections glue. This makes $`(\mathrm{Spa}(A, A^{+}), \mathcal{O}_X)` an _adic space_.
-In `Adic-Spaces`: $`\texttt{structurePresheaf\_isSheaf}` (`Adic spaces/StructureSheaf.lean`)
-— _in progress_ (the Laurent-cover acyclicity and the gluing refinement carry the
-remaining `sorry`s).
+_(Tate's acyclicity theorem / the structure sheaf — in progress.)_ For a strongly
+noetherian (stably uniform) Tate ring, the structure presheaf $`\mathcal{O}_X` on the
+rational subsets ({uses "rational-subsets"}[], {uses "tate-algebra"}[],
+{uses "uniform-pair"}[]) of $`X = \mathrm{Spa}(A, A^{+})` is conjecturally a _sheaf_ of
+topological rings: the Čech complex of a rational (Laurent) cover should be exact (Tate
+acyclicity), so sections glue, making $`(\mathrm{Spa}(A, A^{+}), \mathcal{O}_X)` an
+_adic space_. The type-level sheaf condition is already established
+({uses "structure-presheaf-typelevel-sheaf"}[]); in `Adic-Spaces` the ring-valued
+$`\texttt{structurePresheaf\_isSheaf}` (`Adic spaces/StructureSheaf.lean`) and the
+Laurent-cover acyclicity carry the remaining $`\texttt{sorry}`s. Following Wedhorn
+Theorem 8.28(b,c).
 :::
 
 # Dependency graph

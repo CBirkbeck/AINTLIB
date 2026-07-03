@@ -224,8 +224,11 @@ private theorem isAdic_topology_finer (PA : PairOfDefinition A) {m : ℕ} (hm_po
   exact ⟨ι x, hmj_le hιx, rfl⟩
 
 omit [IsHuberRing A] in
-private theorem exists_pairOfDefinition_le_subring (PA : PairOfDefinition A) {U : Subring A}
-    (hU : IsOpen (U : Set A)) (_hU_le : U ≤ PA.A₀) :
+/-- **Every open subring contains a ring of definition** (Wedhorn Rem 6.2-style): given
+any pair of definition and an open subring `U`, some pair of definition has `A₀ ≤ U`
+(take the subring closure of the image of a high power `I^m ⊆ U`). -/
+theorem exists_pairOfDefinition_le_subring (PA : PairOfDefinition A) {U : Subring A}
+    (hU : IsOpen (U : Set A)) :
     ∃ (PA' : PairOfDefinition A), PA'.A₀ ≤ U := by
   obtain ⟨m, -, hm⟩ := PA.hasBasis_nhds_zero.mem_iff.mp (hU.mem_nhds (U.zero_mem))
   rcases Nat.eq_zero_or_pos m with rfl | hm_pos
@@ -408,6 +411,23 @@ private theorem exists_pairOfDefinition_le_subring (PA : PairOfDefinition A) {U 
         hI'_le_comap s hs⟩
   exact ⟨⟨A₀', I', hA₀'_open, ⟨F', rfl⟩, hI'_isAdic⟩, hA₀'_le_U⟩
 
+
+omit [IsTopologicalRing A] [IsHuberRing A] in
+/-- **Principal pair inside an open subring** (Tate case): combine
+`exists_pairOfDefinition_le_subring` with `PairOfDefinition.exists_principal_same_A₀`.
+Discharges the `A₀ ≤ A⁺` hypothesis of the Spa quasi-compactness route whenever `A⁺`
+is open (e.g. a ring of integral elements / `CompatiblePlusSubring`). -/
+theorem IsTateRing.exists_principal_pairOfDefinition_le_subring
+    [IsTateRing A] {U : Subring A} (hU : IsOpen (U : Set A)) :
+    ∃ (P : PairOfDefinition A) (π : P.A₀),
+      P.A₀ ≤ U ∧ P.I = Ideal.span {π} ∧ IsUnit ((π : A)) := by
+  obtain ⟨P₀⟩ := (‹IsTateRing A›.toIsHuberRing).exists_pairOfDefinition
+  obtain ⟨P₁, hP₁le⟩ := exists_pairOfDefinition_le_subring P₀ hU
+  obtain ⟨P, π, hA₀eq, hπ, hunit⟩ := P₁.exists_principal_same_A₀
+  refine ⟨P, π, ?_, hπ, hunit⟩
+  rw [hA₀eq]
+  exact hP₁le
+
 omit [IsTopologicalRing B] [IsHuberRing B] in
 private theorem exists_compatible_pair
     {φ : A →+* B} (hφ : Continuous φ) (PB : PairOfDefinition B) :
@@ -417,7 +437,7 @@ private theorem exists_compatible_pair
   set U : Subring A := PA'.A₀ ⊓ (PB.A₀.comap φ) with U_def
   have hU_open : IsOpen (U : Set A) := PA'.isOpen.inter hpreimg_open
   have hU_le : U ≤ PA'.A₀ := inf_le_left
-  obtain ⟨PA, hPA_le⟩ := exists_pairOfDefinition_le_subring PA' hU_open hU_le
+  obtain ⟨PA, hPA_le⟩ := exists_pairOfDefinition_le_subring PA' hU_open
   exact ⟨PA, fun a ha ↦ (hPA_le ha).2⟩
 
 omit [IsTopologicalRing A] [IsTopologicalRing B]

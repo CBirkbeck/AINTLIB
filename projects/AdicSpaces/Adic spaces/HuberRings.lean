@@ -517,21 +517,16 @@ structure PrincipalPairOfDefinition (A : Type*) [CommRing A] [TopologicalSpace A
   /-- `π` is a unit in `A`. -/
   π_isUnit : IsUnit ((π : A))
 
-/-- **Wedhorn Lemma 6.14 (our version):** a Tate ring admits a pair of definition
-whose ideal of definition is principal and whose generator (viewed in `A`) is a
-topologically nilpotent unit.
-
-The generator is constructed from the topologically nilpotent unit `u ∈ Aˣ`: some
-positive power `u^k` of `u` lies in any given `A₀` (since `A₀` is open), and then
-by Wedhorn 6.4 some further power `(u^k)^N ∈ P.I`. Taking `π := (u^k)^N` and
-refining `P` to `P.withPrincipal` gives the principal pair, and `π` is a unit in
-`A` since it is a positive power of a unit. -/
-theorem IsTateRing.exists_principal_pairOfDefinition
-    (A : Type*) [CommRing A] [TopologicalSpace A] [IsTateRing A] :
-    ∃ (P : PairOfDefinition A) (π : P.A₀),
-      P.I = Ideal.span {π} ∧ IsUnit ((π : A)) := by
+/-- **Wedhorn Lemma 6.14, pinned ring of definition:** in a Tate ring, ANY pair of
+definition refines to a principal pair with the SAME ring of definition
+(`withPrincipal` keeps `A₀`; the generator is a power of the topologically nilpotent
+unit, landed in `A₀` by openness). -/
+theorem PairOfDefinition.exists_principal_same_A₀
+    {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A] [IsTateRing A]
+    (P : PairOfDefinition A) :
+    ∃ (P' : PairOfDefinition A) (π : P'.A₀),
+      P'.A₀ = P.A₀ ∧ P'.I = Ideal.span {π} ∧ IsUnit ((π : A)) := by
   obtain ⟨u, hu_nilp⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
-  obtain ⟨P⟩ := (‹IsTateRing A›.toIsHuberRing).exists_pairOfDefinition
   -- Step 1: Some power `u^k` of `u` lies in `P.A₀`, since `P.A₀` is open and
   -- `u` is topologically nilpotent.
   have h_nhds : (P.A₀ : Set A) ∈ nhds (0 : A) := P.isOpen.mem_nhds P.A₀.zero_mem
@@ -571,7 +566,7 @@ theorem IsTateRing.exists_principal_pairOfDefinition
     exact Subtype.ext (Units.val_pow_eq_pow_val u k)
   rw [hgen_eq] at hm_le
   -- Now construct `withPrincipal`.
-  refine ⟨P.withPrincipal hπ_mem_I hm_le, π, rfl, ?_⟩
+  refine ⟨P.withPrincipal hπ_mem_I hm_le, π, rfl, rfl, ?_⟩
   -- Step 5: `(π : A)` is a unit. Since `π = u_k^N` and `(u_k : A) = (u : A)^k`,
   -- we have `(π : A) = (u : A) ^ (k * N)`, which is the value of a unit.
   have : (π : A) = ((u ^ (k * N) : Aˣ) : A) := by
@@ -580,6 +575,17 @@ theorem IsTateRing.exists_principal_pairOfDefinition
     rw [SubmonoidClass.coe_pow, hu_k_val, ← pow_mul, Units.val_pow_eq_pow_val]
   rw [this]
   exact Units.isUnit _
+
+/-- **Wedhorn Lemma 6.14 (our version):** a Tate ring admits a pair of definition
+whose ideal of definition is principal and whose generator (viewed in `A`) is a
+topologically nilpotent unit. Corollary of `PairOfDefinition.exists_principal_same_A₀`. -/
+theorem IsTateRing.exists_principal_pairOfDefinition
+    (A : Type*) [CommRing A] [TopologicalSpace A] [IsTateRing A] :
+    ∃ (P : PairOfDefinition A) (π : P.A₀),
+      P.I = Ideal.span {π} ∧ IsUnit ((π : A)) := by
+  obtain ⟨P⟩ := (‹IsTateRing A›.toIsHuberRing).exists_pairOfDefinition
+  obtain ⟨P', π, -, h1, h2⟩ := P.exists_principal_same_A₀
+  exact ⟨P', π, h1, h2⟩
 
 /-- A canonical principal pair of definition for a Tate ring, obtained via
 `IsTateRing.exists_principal_pairOfDefinition` and `Classical.choice`. -/
