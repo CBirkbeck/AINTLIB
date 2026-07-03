@@ -148,4 +148,99 @@ theorem logDeriv_completedDedekindZetaEntire_split {s : ℂ} (hs : 1 < s.re) :
   rw [h1, h2, h3]
   ring
 
+/-- The complex exponential tail integral: for `Re z > 0`,
+`∫₀^∞ e^{-zv} dv = 1/z`. -/
+theorem integral_cexp_neg_mul_Ioi {z : ℂ} (hz : 0 < z.re) :
+    ∫ v in Set.Ioi (0:ℝ), Complex.exp (-(z * (v:ℂ))) = z⁻¹ := by
+  have hzne : z ≠ 0 := by
+    intro h0
+    rw [h0, Complex.zero_re] at hz
+    exact lt_irrefl _ hz
+  have hderiv : ∀ v ∈ Set.Ici (0:ℝ),
+      HasDerivAt (fun v : ℝ => -Complex.exp (-(z * (v:ℂ))) / z)
+        (Complex.exp (-(z * (v:ℂ)))) v := by
+    intro v _
+    have h0 : HasDerivAt (fun v : ℝ => ((v:ℝ):ℂ)) 1 v := by
+      simpa using (hasDerivAt_id v).ofReal_comp
+    have h1 : HasDerivAt (fun v : ℝ => -(z * (v:ℂ))) (-z) v := by
+      have h2 := (h0.const_mul z).neg
+      have h3 : -(z * (1:ℂ)) = -z := by ring
+      rw [h3] at h2
+      exact h2
+    have h3 := (h1.cexp.neg).div_const z
+    have hval : -(Complex.exp (-(z * (v:ℂ))) * -z) / z = Complex.exp (-(z * (v:ℂ))) := by
+      rw [div_eq_iff hzne]
+      ring
+    rw [hval] at h3
+    exact h3
+  have hint : IntegrableOn (fun v : ℝ => Complex.exp (-(z * (v:ℂ)))) (Set.Ioi 0) := by
+    refine Integrable.mono' (g := fun v : ℝ => Real.exp (-(z.re * v))) ?_ ?_ ?_
+    · have := exp_neg_integrableOn_Ioi (0:ℝ) hz
+      refine this.congr_fun (fun v _ => ?_) measurableSet_Ioi
+      show Real.exp (-z.re * v) = Real.exp (-(z.re * v))
+      rw [show -z.re * v = -(z.re * v) by ring]
+    · refine (Continuous.aestronglyMeasurable ?_).restrict
+      exact Complex.continuous_exp.comp
+        ((continuous_const.mul Complex.continuous_ofReal).neg)
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun v _ => ?_))
+      rw [Complex.norm_exp]
+      rw [show (-(z * (v:ℂ))).re = -(z.re * v) from by
+        rw [Complex.neg_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+        ring]
+  have htend : Tendsto (fun v : ℝ => -Complex.exp (-(z * (v:ℂ))) / z) atTop (nhds 0) := by
+    rw [show (0:ℂ) = -0/z by ring]
+    refine Tendsto.div_const (Tendsto.neg ?_) z
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    have h1 : (fun v : ℝ => ‖Complex.exp (-(z * (v:ℂ)))‖)
+        = fun v : ℝ => Real.exp (-(z.re * v)) := by
+      funext v
+      rw [Complex.norm_exp]
+      congr 1
+      rw [Complex.neg_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [h1]
+    have h2 : Tendsto (fun v : ℝ => -(z.re * v)) atTop atBot := by
+      refine Filter.tendsto_neg_atBot_iff.mpr ?_
+      exact Tendsto.const_mul_atTop hz tendsto_id
+    exact Real.tendsto_exp_atBot.comp h2
+  have h0 := integral_Ioi_of_hasDerivAt_of_tendsto' hderiv hint htend
+  rw [h0]
+  rw [show ((0:ℝ):ℂ) = (0:ℂ) from rfl, mul_zero, neg_zero, Complex.exp_zero]
+  rw [zero_sub, neg_div, neg_neg, one_div]
+
+/-- The complex exponential head integral: for `Re z > 0`,
+`∫_{-∞}^{w} e^{zu} du = e^{zw}/z`. -/
+theorem integral_cexp_mul_Iio {z : ℂ} (hz : 0 < z.re) (w : ℝ) :
+    ∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)) = Complex.exp (z * (w:ℂ)) / z := by
+  -- reflect to the tail integral via u = w - v
+  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
+    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
+  have hmap : (volume : Measure ℝ).restrict (Set.Iio w)
+      = Measure.map (fun v : ℝ => w - v) ((volume : Measure ℝ).restrict (Set.Ioi 0)) := by
+    rw [show Set.Ioi (0:ℝ) = (fun v : ℝ => w - v) ⁻¹' (Set.Iio w) by
+        ext v
+        simp only [Set.mem_preimage, Set.mem_Iio, Set.mem_Ioi]
+        constructor <;> intro h <;> linarith,
+      ← Measure.restrict_map A.measurable measurableSet_Iio]
+    congr 1
+    -- map (w - ·) volume = volume
+    have h1 : (fun v : ℝ => w - v) = (fun v : ℝ => w + v) ∘ (fun v : ℝ => -v) := by
+      funext v
+      simp [sub_eq_add_neg]
+    rw [h1, ← Measure.map_map (measurable_const_add w) measurable_neg,
+      Measure.map_neg_eq_self, map_add_left_eq_self]
+  rw [show (∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)))
+      = ∫ u, Complex.exp (z * (u:ℂ)) ∂((volume : Measure ℝ).restrict (Set.Iio w)) from rfl,
+    hmap, A.integral_map]
+  have h2 : (∫ v in Set.Ioi (0:ℝ), Complex.exp (z * ((w - v : ℝ):ℂ)))
+      = ∫ v in Set.Ioi (0:ℝ), Complex.exp (z * (w:ℂ)) * Complex.exp (-(z * (v:ℂ))) := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun v _ => ?_)
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  rw [h2, MeasureTheory.integral_const_mul, integral_cexp_neg_mul_Ioi hz,
+    div_eq_mul_inv]
+
 end DedekindResidue
