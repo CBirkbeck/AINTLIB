@@ -420,6 +420,131 @@ theorem tsum_zetaZeros_paperPhi_auxF_split (hGRH : GeneralizedRiemannHypothesis 
   rw [tsum_congr hpoint, Summable.tsum_sub (hsin.add hcos) hint,
     Summable.tsum_add hsin hcos]
 
+/-! ### The prime side at the origin: plateau defect + `T·e^{hT}·log ζ_K(σ)`
+
+Belabas–Friedman's Lemma 3 bookkeeping (proof of eq. (13)): since
+`f_{σ,X}(t) = g_σ(t)/g_σ(T)` with `g_σ(t) = e^{−ht}/t`, the pure-kernel prime sum
+collapses to `(1/g_σ(T))·log ζ_K(σ) = T·e^{hT}·log ζ_K(σ)` by the logarithmic Euler
+product, and `H(0)` differs from it by the finitely-supported plateau defect
+`∑_{N𝔭^m ≤ X} (log N𝔭/N𝔭^{m/2})·(1 − f_{σ,X}(m log N𝔭))`. -/
+
+/-- On the real ray the auxiliary function is the coercion of its real avatar. -/
+theorem auxF_ofReal (σ X t : ℝ) :
+    auxF (σ:ℂ) X t
+      = ((if |t| ≤ Real.log X then 1
+          else Real.log X/|t| * Real.exp (-(σ - 1/2)*(|t| - Real.log X)) : ℝ) : ℂ) := by
+  rw [auxF]
+  by_cases ht : |t| ≤ Real.log X
+  · rw [if_pos ht, if_pos ht, Complex.ofReal_one]
+  · rw [if_neg ht, if_neg ht, Complex.ofReal_mul, Complex.ofReal_exp]
+    congr 1
+    push_cast
+    ring
+
+/-- **The pure-kernel prime sum is the logarithm** (B–F eq. (4) folded into the
+`f_{σ,X}` weights): `∑_{𝔭,m} (log N𝔭/N𝔭^{m/2})·f_{σ,X}(m log N𝔭)
+= T·e^{hT}·log ζ_K(σ)` for real `σ > 1`. -/
+theorem tsum_kernel_eq_log_zeta {σ : ℝ} (hσ : 1 < σ) (X : ℝ) :
+    ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+        * (Real.log X / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * Real.exp (-(σ - 1/2)
+                * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1) - Real.log X)))
+      = Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re) := by
+  rw [real_log_dedekindZeta K hσ, ← tsum_mul_left]
+  refine tsum_congr (fun pk => ?_)
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
+      fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
+    exact_mod_cast h2
+  have hN0 : (0:ℝ) < (Ideal.absNorm pk.1.1 : ℝ) := by linarith
+  have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
+    Real.log_pos (by linarith)
+  have hm0 : (0:ℝ) < ((pk.2+1 : ℕ) : ℝ) := by positivity
+  -- collapse the exponentials: `N^{-m/2}·e^{-h(mL-T)} = e^{hT}·N^{-mσ}`
+  have hexp : (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+      * Real.exp (-(σ - 1/2)
+          * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1) - Real.log X))
+      = Real.exp ((σ - 1/2) * Real.log X)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) := by
+    rw [Real.rpow_def_of_pos hN0, Real.rpow_def_of_pos hN0, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  calc Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+        * (Real.log X / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * Real.exp (-(σ - 1/2)
+                * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1) - Real.log X)))
+      = (Real.log X / ((pk.2+1 : ℕ) : ℝ))
+          * ((Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+            * Real.exp (-(σ - 1/2)
+                * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1) - Real.log X))) := by
+        field_simp
+    _ = (Real.log X / ((pk.2+1 : ℕ) : ℝ))
+          * (Real.exp ((σ - 1/2) * Real.log X)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)) := by rw [hexp]
+    _ = Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * ((Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)
+            / ((pk.2+1 : ℕ) : ℝ)) := by ring
+
+/-- **Finiteness of the plateau**: only finitely many prime powers satisfy
+`m·log N𝔭 ≤ log X`. -/
+theorem finite_plateau_support {X : ℝ} (hX : 1 < X) :
+    {pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ |
+      (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X}.Finite := by
+  have hX0 : (0:ℝ) < X := by linarith
+  refine Set.Finite.of_finite_image (f := fun pk => (pk.1.1, pk.2)) ?_ ?_
+  · refine Set.Finite.subset
+      ((Ideal.finite_setOf_absNorm_le (S := 𝓞 K) ⌊X⌋₊).prod
+        (Set.finite_Iic ⌊Real.log X / Real.log 2⌋₊)) ?_
+    rintro ⟨I, m⟩ ⟨pk, hpk, hIm⟩
+    simp only [Prod.mk.injEq] at hIm
+    obtain ⟨rfl, rfl⟩ : pk.1.1 = I ∧ pk.2 = m := ⟨hIm.1, hIm.2⟩
+    have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+      have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+        fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+      have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
+        fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+      have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
+      exact_mod_cast h2
+    have hL2 : Real.log 2 ≤ Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
+      Real.log_le_log (by norm_num) hN2
+    have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
+      Real.log_pos (by linarith)
+    have hm1 : (1:ℝ) ≤ ((pk.2+1 : ℕ) : ℝ) := by
+      have h1 : (1:ℕ) ≤ pk.2+1 := by omega
+      exact_mod_cast h1
+    constructor
+    · -- `absNorm ≤ ⌊X⌋₊`: `log N ≤ m·log N ≤ log X`
+      have h1 : Real.log (Ideal.absNorm pk.1.1 : ℝ) ≤ Real.log X := by
+        calc Real.log (Ideal.absNorm pk.1.1 : ℝ)
+            ≤ (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) := by
+              nlinarith
+          _ ≤ Real.log X := hpk
+      have h2 : (Ideal.absNorm pk.1.1 : ℝ) ≤ X :=
+        (Real.log_le_log_iff (by linarith) hX0).mp h1
+      exact Nat.le_floor h2
+    · -- `m ≤ ⌊log X/log 2⌋₊`: `(m+1)·log 2 ≤ (m+1)·log N ≤ log X`
+      have h1 : (((pk.2+1 : ℕ)) : ℝ) * Real.log 2 ≤ Real.log X := by
+        calc (((pk.2+1 : ℕ)) : ℝ) * Real.log 2
+            ≤ (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) := by
+              nlinarith
+          _ ≤ Real.log X := hpk
+      have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+      have h2 : ((pk.2 : ℕ) : ℝ) ≤ Real.log X / Real.log 2 := by
+        rw [le_div_iff₀ hlog2]
+        have h3 : ((pk.2 : ℕ) : ℝ) ≤ (((pk.2+1 : ℕ)) : ℝ) := by push_cast; linarith
+        nlinarith
+      exact Set.mem_Iic.mpr (Nat.le_floor h2)
+  · intro pk _ pk' _ h
+    simp only [Prod.mk.injEq] at h
+    exact Prod.ext (Subtype.ext h.1) h.2
+
 end DedekindResidue
 
 end
