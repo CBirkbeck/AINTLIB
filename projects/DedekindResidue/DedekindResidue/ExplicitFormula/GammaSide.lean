@@ -4922,4 +4922,114 @@ theorem exists_norm_rhoFT_poitouKernel_le {σ : ℝ} (hσ : 0 < σ) (hσl : -1 �
     _ ≤ (2 * (C₆ + ‖Complex.digamma (σ:ℂ)‖) + 1) * Real.log (2 + |t|) := by
         nlinarith [norm_nonneg (Complex.digamma (σ:ℂ))]
 
+/-- **Quantitative sinc-tail decay**: `|sincTail t| ≤ 2/t` for `t > 0`,
+by one integration by parts against the bounded primitive of `sin`. -/
+theorem abs_sincTail_le {t : ℝ} (ht : 0 < t) : |sincTail t| ≤ 2/t := by
+  have hrpow : ∀ u : ℝ, t < u → u^(-2 : ℝ) = 1/u^2 := by
+    intro u hu
+    have hu0 : 0 < u := lt_trans ht hu
+    rw [Real.rpow_neg hu0.le, show ((2:ℝ)) = ((2:ℕ):ℝ) by norm_num,
+      Real.rpow_natCast, one_div]
+  have hint : IntegrableOn (fun u : ℝ => Real.cos u / u^2) (Set.Ioi t) := by
+    refine Integrable.mono' (g := fun u : ℝ => u^(-2 : ℝ))
+      (integrableOn_Ioi_rpow_of_lt (by norm_num) ht) ?_ ?_
+    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+      exact ContinuousOn.div Real.continuous_cos.continuousOn
+        (continuous_pow 2).continuousOn
+        (fun u hu => pow_ne_zero 2 (ne_of_gt (lt_trans ht hu)))
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun u hu => ?_))
+      rw [Set.mem_Ioi] at hu
+      have hu0 : 0 < u := lt_trans ht hu
+      rw [Real.norm_eq_abs, abs_div, abs_of_pos (by positivity : (0:ℝ) < u^2),
+        hrpow u hu]
+      rw [div_le_div_iff_of_pos_right (by positivity)]
+      exact Real.abs_cos_le_one u
+  have hval2 : (∫ u in Set.Ioi t, u^(-2 : ℝ)) = 1/t := by
+    rw [integral_Ioi_rpow_of_lt (by norm_num) ht]
+    rw [show (-2 : ℝ) + 1 = -1 by norm_num, Real.rpow_neg_one]
+    field_simp
+  -- integration by parts on finite windows
+  have hIBP : ∀ X : ℝ, t ≤ X → (∫ u in t..X, Real.sin u / u)
+      = (Real.cos t/t - Real.cos X/X) - ∫ u in t..X, Real.cos u / u^2 := by
+    intro X hX
+    have hcont2 : ContinuousOn (fun u : ℝ => Real.cos u / u^2) (Set.uIcc t X) := by
+      refine ContinuousOn.div Real.continuous_cos.continuousOn
+        (continuous_pow 2).continuousOn (fun u hu => ?_)
+      rw [Set.uIcc_of_le hX, Set.mem_Icc] at hu
+      exact pow_ne_zero 2 (ne_of_gt (lt_of_lt_of_le ht hu.1))
+    have hderiv : ∀ u ∈ Set.uIcc t X, HasDerivAt (fun y : ℝ => -Real.cos y/y)
+        (Real.sin u / u + Real.cos u / u^2) u := by
+      intro u hu
+      rw [Set.uIcc_of_le hX, Set.mem_Icc] at hu
+      have hu0 : 0 < u := lt_of_lt_of_le ht hu.1
+      have h1 : HasDerivAt (fun y : ℝ => -Real.cos y) (Real.sin u) u := by
+        have h1' := (Real.hasDerivAt_cos u).neg
+        rw [neg_neg] at h1'
+        exact h1'
+      have h2 : HasDerivAt (fun y : ℝ => -Real.cos y/y)
+          ((Real.sin u * u - -Real.cos u * 1) / u ^ 2) u :=
+        h1.div (hasDerivAt_id u) hu0.ne'
+      have h3 : (Real.sin u * u - -Real.cos u * 1) / u ^ 2
+          = Real.sin u / u + Real.cos u / u^2 := by
+        field_simp
+        ring
+      rw [h3] at h2
+      exact h2
+    have hii2 : IntervalIntegrable (fun u : ℝ => Real.cos u / u^2)
+        MeasureTheory.volume t X := hcont2.intervalIntegrable
+    have hiisum : IntervalIntegrable (fun u : ℝ => Real.sin u / u + Real.cos u / u^2)
+        MeasureTheory.volume t X := (intervalIntegrable_sinc t X).add hii2
+    have h4 := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hiisum
+    have h5 : (∫ u in t..X, (Real.sin u / u + Real.cos u / u^2))
+        = (∫ u in t..X, Real.sin u / u) + ∫ u in t..X, Real.cos u / u^2 :=
+      intervalIntegral.integral_add (intervalIntegrable_sinc t X) hii2
+    rw [h5] at h4
+    have h6 : -Real.cos X/X - (-Real.cos t/t) = Real.cos t/t - Real.cos X/X := by
+      ring
+    rw [h6] at h4
+    linarith [h4]
+  -- pass to the limit X → ∞
+  have hlim1 : Tendsto (fun X : ℝ => Real.cos t/t - Real.cos X/X) atTop
+      (nhds (Real.cos t/t)) := by
+    have h0 : Tendsto (fun X : ℝ => Real.cos X/X) atTop (nhds 0) := by
+      refine squeeze_zero_norm' ?_ tendsto_inv_atTop_zero
+      filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with X hX
+      rw [Real.norm_eq_abs, abs_div, abs_of_pos hX]
+      rw [show X⁻¹ = 1/X by rw [one_div]]
+      rw [div_le_div_iff_of_pos_right hX]
+      exact Real.abs_cos_le_one X
+    have h1 := (tendsto_const_nhds (x := Real.cos t/t) (f := atTop)).sub h0
+    rw [sub_zero] at h1
+    exact h1
+  have hlim2 : Tendsto (fun X : ℝ => ∫ u in t..X, Real.cos u / u^2) atTop
+      (nhds (∫ u in Set.Ioi t, Real.cos u / u^2)) :=
+    MeasureTheory.intervalIntegral_tendsto_integral_Ioi t hint tendsto_id
+  have hrep : sincTail t = Real.cos t/t - ∫ u in Set.Ioi t, Real.cos u / u^2 := by
+    refine tendsto_nhds_unique (tendsto_integral_sinc_window t) ?_
+    have h0 := hlim1.sub hlim2
+    refine h0.congr' ?_
+    filter_upwards [Filter.eventually_ge_atTop t] with X hX
+    exact (hIBP X hX).symm
+  rw [hrep]
+  have h7 : |∫ u in Set.Ioi t, Real.cos u / u^2| ≤ 1/t := by
+    rw [← hval2]
+    refine le_trans (abs_integral_le_integral_abs) ?_
+    refine MeasureTheory.setIntegral_mono_on hint.abs
+      (integrableOn_Ioi_rpow_of_lt (by norm_num) ht) measurableSet_Ioi
+      (fun u hu => ?_)
+    rw [Set.mem_Ioi] at hu
+    have hu0 : 0 < u := lt_trans ht hu
+    rw [abs_div, abs_of_pos (by positivity : (0:ℝ) < u^2), hrpow u hu]
+    rw [div_le_div_iff_of_pos_right (by positivity)]
+    exact Real.abs_cos_le_one u
+  calc |Real.cos t/t - ∫ u in Set.Ioi t, Real.cos u / u^2|
+      ≤ |Real.cos t/t| + |∫ u in Set.Ioi t, Real.cos u / u^2| := abs_sub _ _
+    _ ≤ 1/t + 1/t := by
+        refine add_le_add ?_ h7
+        rw [abs_div, abs_of_pos ht]
+        rw [div_le_div_iff_of_pos_right ht]
+        exact Real.abs_cos_le_one t
+    _ = 2/t := by ring
+
 end DedekindResidue
