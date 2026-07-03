@@ -728,6 +728,187 @@ theorem integrable_primeSideH {a : ℝ} (ha : 0 < a) {F : ℝ → ℂ}
     (fun pk => integrable_primeSideH_term K hFa pk)
     (summable_integral_norm_primeSideH K ha F)
 
+/-- **The fixed-`t` prime-side identity** (Poitou pp. 6-02/6-03, the "Calcul de la
+partie ultramétrique"): on the edge `s = 1+a+it`,
+
+`Φ(s)·(−ζ_K'/ζ_K(s)) = ∫ H(u)·e^{itu} du`,
+
+expanding the Dirichlet series, translating each prime-power term, and summing
+back under the integral. -/
+theorem paperPhi_mul_neg_logDeriv_eq (K : Type*) [Field K] [NumberField K]
+    {a : ℝ} (ha : 0 < a) {F : ℝ → ℂ}
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (t : ℝ) :
+    paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        * (-(logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+      = ∫ u : ℝ, primeSideH K a F u * Complex.exp ((t*u : ℝ) * Complex.I) := by
+  set s : ℂ := ((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I with hs_def
+  have hs : 1 < s.re := by
+    rw [hs_def, show ((((1+a : ℝ)):ℂ) + (t:ℂ)*Complex.I).re = 1+a from by simp]
+    linarith
+  set G : ℝ → ℂ := fun x => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) with hG_def
+  -- Step 1: the Φ-value on the edge
+  have hφ : paperPhi F s = ∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I) := by
+    rw [paperPhi]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show F x * Complex.exp ((s - 1/2) * x)
+        = F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) * Complex.exp ((t*x : ℝ) * Complex.I)
+    rw [show ((s - 1/2) * x) = (((1/2+a) * x : ℝ) : ℂ) + ((t*x : ℝ) : ℂ) * Complex.I from by
+      rw [hs_def]
+      push_cast
+      ring]
+    rw [Complex.exp_add, Complex.ofReal_exp]
+    ring
+  -- per-term data
+  have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      2 ≤ Ideal.absNorm 𝔭.1 := by
+    intro 𝔭
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    omega
+  -- Step 4 (per-term): Φ(s)·log(N𝔭)·N𝔭^{-(k+1)s} = ∫ H_pk(u)·e^{itu} du
+  have hterm : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      paperPhi F s * (Complex.log (Ideal.absNorm pk.1.1 : ℂ)
+          * (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s))
+      = ∫ u : ℝ, (((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+          * Complex.exp ((t*u : ℝ) * Complex.I) := by
+    intro pk
+    have h2 := hfacts pk.1
+    have hN0 : (0:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by positivity
+    have hN1 : (1:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+      exact_mod_cast (by omega : 1 ≤ Ideal.absNorm pk.1.1)
+    have hNne : ((Ideal.absNorm pk.1.1 : ℕ) : ℂ) ≠ 0 := by
+      rw [Ne, Nat.cast_eq_zero]
+      omega
+    set β : ℝ := (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) with hβ
+    -- split the prime power along s = (1+a) + it
+    have hsplit : (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s)
+        = (((Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+          * Complex.exp (((-(t*β)) : ℝ) * Complex.I) := by
+      have h3 : (-(((pk.2+1 : ℕ)) : ℂ) * s)
+          = ((-(((pk.2+1 : ℕ)) : ℝ) * (1+a) : ℝ) : ℂ)
+            + ((-((((pk.2+1 : ℕ)) : ℝ) * t) : ℝ) : ℂ) * Complex.I := by
+        rw [hs_def]
+        push_cast
+        ring
+      rw [h3, Complex.cpow_add _ _ hNne]
+      congr 1
+      · rw [show ((Ideal.absNorm pk.1.1 : ℕ) : ℂ) = (((Ideal.absNorm pk.1.1 : ℝ)) : ℂ) by
+            push_cast; ring,
+          ← Complex.ofReal_cpow hN0]
+      · rw [Complex.cpow_def_of_ne_zero hNne]
+        congr 1
+        rw [show ((Ideal.absNorm pk.1.1 : ℕ) : ℂ) = (((Ideal.absNorm pk.1.1 : ℝ)) : ℂ) by
+            push_cast; ring,
+          ← Complex.ofReal_log hN0, hβ]
+        push_cast
+        ring
+    -- the complex log is the real log
+    have hlog : Complex.log (Ideal.absNorm pk.1.1 : ℂ)
+        = ((Real.log (Ideal.absNorm pk.1.1) : ℝ) : ℂ) := by
+      rw [show ((Ideal.absNorm pk.1.1 : ℕ) : ℂ) = (((Ideal.absNorm pk.1.1 : ℝ)) : ℂ) by
+          push_cast; ring,
+        ← Complex.ofReal_log hN0]
+    rw [hsplit, hlog, hφ]
+    -- translate
+    have htrans := integral_translate_cexp G β t
+    calc (∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I))
+          * (((Real.log (Ideal.absNorm pk.1.1) : ℝ) : ℂ)
+            * ((((Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+              * Complex.exp (((-(t*β)) : ℝ) * Complex.I)))
+        = (((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ))
+          * ((∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I))
+            * Complex.exp (((-(t*β)) : ℝ) * Complex.I)) := by
+          push_cast
+          ring
+      _ = (((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ))
+          * ∫ u : ℝ, G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I) := by
+          rw [htrans]
+      _ = ∫ u : ℝ, (((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ))
+          * (G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I)) := by
+          rw [MeasureTheory.integral_const_mul]
+      _ = ∫ u : ℝ, (((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+            * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * ((Real.exp ((1/2+a)
+                  * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+            * Complex.exp ((t*u : ℝ) * Complex.I) := by
+          refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+          show (((Real.log (Ideal.absNorm pk.1.1)
+              * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ))
+            * (G (u + β) * Complex.exp ((t*u : ℝ) * Complex.I)) = _
+          rw [hG_def, hβ]
+          ring
+  -- Step 2+3: expand the series and multiply in
+  rw [neg_logDeriv_dedekindZeta_eq_tsum_prod K hs, ← tsum_mul_left]
+  -- Step 5: sum the per-term identities and swap with the integral
+  rw [tsum_congr hterm]
+  -- integral_tsum in the ∑'∫ → ∫∑' direction
+  have hint_pk : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      Integrable (fun u : ℝ =>
+        (((Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+          * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * ((Real.exp ((1/2+a)
+                  * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+            * Complex.exp ((t*u : ℝ) * Complex.I)) (volume : Measure ℝ) := by
+    intro pk
+    refine (integrable_primeSideH_term K hFa pk).mul_bdd (c := 1) ?_ ?_
+    · refine Continuous.aestronglyMeasurable ?_
+      refine Complex.continuous_exp.comp ?_
+      exact (Complex.continuous_ofReal.comp (continuous_const.mul continuous_id)).mul
+        continuous_const
+    · filter_upwards [] with u
+      rw [Complex.norm_exp_ofReal_mul_I]
+  have hnorm_eq : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      (∫ u : ℝ, ‖(((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+          * Complex.exp ((t*u : ℝ) * Complex.I)‖)
+      = ∫ u : ℝ, ‖((Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖ := by
+    intro pk
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+    show ‖(((Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+      * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+          * ((Real.exp ((1/2+a)
+              * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)))
+        * Complex.exp ((t*u : ℝ) * Complex.I)‖
+      = ‖((Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+      * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+          * ((Real.exp ((1/2+a)
+              * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))‖
+    rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+  rw [MeasureTheory.integral_tsum_of_summable_integral_norm hint_pk
+    (by
+      refine Summable.congr (summable_integral_norm_primeSideH K ha F) (fun pk => ?_)
+      exact (hnorm_eq pk).symm)]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+  beta_reduce
+  rw [show primeSideH K a F u
+      = ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+        ((Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+          * (F (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * ((Real.exp ((1/2+a)
+                  * (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))
+      from rfl]
+  exact tsum_mul_right
+
 end DedekindResidue
 
 end
