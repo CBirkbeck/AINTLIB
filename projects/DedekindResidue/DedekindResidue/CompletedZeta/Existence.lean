@@ -137,7 +137,7 @@ theorem Λ_half_eq_prefactor_mul_zeta {s : ℝ} (hs : 1 < s) :
       congr 1
       push_cast
       ring
-    · ring
+    · ring_nf
   rw [hβsplit, heckeAdjust]
   have h2π : ((2 * π) ^ (-s)) = (2:ℝ) ^ (-s) * π ^ (-s) :=
     Real.mul_rpow (by norm_num) Real.pi_pos.le

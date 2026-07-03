@@ -1424,4 +1424,58 @@ theorem tendsto_fourier_window_jordan {H : ℝ → ℂ} (hH : Integrable H)
   filter_upwards [Filter.eventually_gt_atTop 0] with T hT
   exact (integral_fourier_window_collapse hH hT).symm
 
+/-- **Proposition 2 — the prime side** (Poitou p. 6-03, display (4)): for even `F`
+with the weighted integrability making `F_a ∈ L¹` and with Jordan-type hypotheses
+on Poitou's `H`, the prime-side edge integral converges:
+
+`lim_{T→∞} ∫_{-T}^T {Φ(1+a+it) + Φ(-a-it)}·(−ζ_K'/ζ_K(1+a+it)) dt = 2π(H(0+) + H(0-))`.
+
+(For the concrete admissible test functions `H` is continuous at `0` with
+`H(0) = ∑ log(N𝔭)/N𝔭^{m/2}·F(m log N𝔭)`, recovering Poitou's `−2∑…` after the
+sign bookkeeping of the surrounding contour.) -/
+theorem tendsto_prime_side (K : Type*) [Field K] [NumberField K]
+    {a : ℝ} (ha : 0 < a) {F : ℝ → ℂ}
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (hHre : LocallyBoundedVariationOn (fun u => (primeSideH K a F u).re) Set.univ)
+    (hHim : LocallyBoundedVariationOn (fun u => (primeSideH K a F u).im) Set.univ)
+    {Hp Hm : ℂ}
+    (hHp : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Ioi 0)) (nhds Hp))
+    (hHm : Tendsto (primeSideH K a F) (nhdsWithin 0 (Set.Iio 0)) (nhds Hm)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+          * (-(logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))))
+      atTop (nhds (2 * ((π : ℝ) : ℂ) * (Hp + Hm))) := by
+  have hW := tendsto_fourier_window_jordan (integrable_primeSideH K ha hFa)
+    hHre hHim hHp hHm
+  have hW2 := hW.const_mul (2:ℂ)
+  have hfun : ∀ T : ℝ, (∫ t in (-T)..T,
+      (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+        * (-(logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))))
+      = 2 * ∫ t in (-T)..T,
+          ∫ u : ℝ, primeSideH K a F u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I) := by
+    intro T
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    rw [paperPhi_one_sub hFeven]
+    have h1 : (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))
+        * (-(logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))
+        = 2 * (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          * (-(logDeriv (NumberField.dedekindZeta K) (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)))) := by
+      ring
+    rw [h1, paperPhi_mul_neg_logDeriv_eq K ha hFa t]
+    congr 1
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+    show primeSideH K a F u * Complex.exp ((t*u : ℝ) * Complex.I)
+        = primeSideH K a F u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I)
+    rw [Complex.ofReal_mul]
+  refine Tendsto.congr (fun T => (hfun T).symm) ?_
+  have hlim : (2:ℂ) * (((π : ℝ) : ℂ) * (Hp + Hm)) = 2 * ((π : ℝ) : ℂ) * (Hp + Hm) := by
+    ring
+  rw [← hlim]
+  exact hW2
+
 end DedekindResidue
