@@ -4355,4 +4355,245 @@ theorem integral_gauss_quarter_eq_sinh_add_cosh {F : ℝ → ℂ} (hF : Integrab
   push_cast
   ring
 
+/-- **The pointwise split of `2 Re (γ_K'/γ_K)(1/2 + it)`** (Poitou p. 6-03, the
+`I_G(T)` integrand): constants plus the two digamma difference kernels. -/
+theorem two_re_logDeriv_gammaFactor_half (K : Type*) [Field K] [NumberField K] (t : ℝ) :
+    2 * (logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)).re
+      = -((((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+          + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)))
+        + ((NumberField.InfinitePlace.nrRealPlaces K : ℝ)/2)
+            * (2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+                - Complex.digamma ((1/4:ℝ):ℂ)).re))
+        + (NumberField.InfinitePlace.nrComplexPlaces K : ℝ)
+            * (2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+                - Complex.digamma ((1/2:ℝ):ℂ)).re)) := by
+  set r₁ := NumberField.InfinitePlace.nrRealPlaces K
+  set r₂ := NumberField.InfinitePlace.nrComplexPlaces K
+  have hs : 0 < ((((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)).re := by
+    simp
+  rw [logDeriv_gammaFactor K hs]
+  rw [show (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)/2
+      = ((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I by push_cast; ring]
+  -- normalise the coefficients and logs to real casts
+  rw [show Complex.log (π:ℂ) = ((Real.log π : ℝ):ℂ) from
+    (Complex.ofReal_log Real.pi_pos.le).symm]
+  rw [show Complex.log (2*(π:ℂ)) = ((Real.log (2*π) : ℝ):ℂ) from by
+    rw [show (2*(π:ℂ)) = ((2*π : ℝ):ℂ) by push_cast; ring,
+      ← Complex.ofReal_log (by positivity)]]
+  rw [show ((r₁:ℕ):ℂ) = ((r₁:ℝ):ℂ) by norm_cast, show ((r₂:ℕ):ℂ) = ((r₂:ℝ):ℂ) by norm_cast]
+  rw [show (-(1/2) : ℂ) = ((-(1/2) : ℝ):ℂ) by norm_num,
+    show ((1/2) : ℂ) = (((1/2) : ℝ):ℂ) by norm_num]
+  simp only [Complex.add_re, Complex.re_ofReal_mul, Complex.ofReal_re, Complex.neg_re,
+    Complex.sub_re]
+  -- digamma values
+  have hψhalf : (Complex.digamma ((1/2:ℝ):ℂ)).re
+      = -2*Real.log 2 - Real.eulerMascheroniConstant := by
+    rw [show ((1/2:ℝ):ℂ) = (1/2:ℂ) by norm_num, Complex.digamma_one_half,
+      Complex.sub_re, Complex.ofReal_re,
+      show (-2 * Complex.log 2 : ℂ) = ((-2:ℝ):ℂ) * Complex.log ((2:ℝ):ℂ) by norm_num,
+      Complex.re_ofReal_mul, Complex.log_ofReal_re]
+  have hψdiff : (Complex.digamma ((1/2:ℝ):ℂ)).re - (Complex.digamma ((1/4:ℝ):ℂ)).re
+      = π/2 + Real.log 2 := by
+    have h := congrArg Complex.re digamma_half_sub_quarter
+    rw [Complex.sub_re, Complex.ofReal_re] at h
+    exact h
+  have hψquarter : (Complex.digamma ((1/4:ℝ):ℂ)).re
+      = -Real.eulerMascheroniConstant - 3*Real.log 2 - π/2 := by
+    rw [hψhalf] at hψdiff
+    linarith
+  have hlogA : Real.log (8*π) = Real.log π + 3*Real.log 2 := by
+    rw [show (8*π : ℝ) = 2^3*π by ring, Real.log_mul (by norm_num) Real.pi_pos.ne',
+      Real.log_pow]
+    push_cast
+    ring
+  have hlogB : Real.log (2*π) = Real.log 2 + Real.log π :=
+    Real.log_mul (by norm_num) Real.pi_pos.ne'
+  rw [hψhalf, hψquarter]
+  linear_combination ((r₁:ℝ) + 2*(r₂:ℝ)) * hlogA - 2*(r₂:ℝ) * hlogB
+
+/-- **The Γ-side of the explicit formula on the critical line** (Poitou pp. 6-03/6-04,
+`I_G(T)` for the pure Γ-factor): for an even admissible test function `F` with the
+boundary decay hypotheses at both digamma points,
+
+`lim_{T→∞} ∫_{-T}^T 2 Re(γ_K'/γ_K)(1/2+it)·φ(t) dt
+   = 2π·{ -(n(γ_E + log 8π) + r₁ π/2)·F(0)
+          + n ∫₀^∞ (F(0)-F(x))/(2 sinh(x/2)) dx
+          + r₁ ∫₀^∞ (F(0)-F(x))/(2 cosh(x/2)) dx }`,
+
+where `n = [K:ℚ]`, `r₁` is the number of real places and `γ_E` Euler's constant. -/
+theorem tendsto_IG_gammaFactor (K : Type*) [Field K] [NumberField K]
+    {F : ℝ → ℂ} (hF : Integrable F)
+    (hre : LocallyBoundedVariationOn (fun u : ℝ => (F u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u : ℝ => (F u).im) Set.univ)
+    (hF0 : Tendsto F (nhdsWithin 0 (Set.Ioi 0)) (nhds (F 0)))
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atTop (nhds 0))
+    (hbot2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atBot (nhds 0))
+    (htop4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atTop (nhds 0))
+    (hbot4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        ((2 * (logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)).re : ℝ) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ) * Complex.I)))
+      atTop (nhds (((2*π : ℝ) : ℂ) *
+        ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+              + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                * (Real.eulerMascheroniConstant + Real.log (8*π))
+              + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+          + (((NumberField.InfinitePlace.nrRealPlaces K
+              + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+              * (∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+              * ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)))) := by
+  set r₁ := NumberField.InfinitePlace.nrRealPlaces K
+  set r₂ := NumberField.InfinitePlace.nrComplexPlaces K
+  -- the left one-sided limit at 0 from evenness
+  have hmneg : Tendsto (fun x : ℝ => -x) (nhdsWithin 0 (Set.Iio 0))
+      (nhdsWithin 0 (Set.Ioi 0)) := by
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+    · have h2 := (continuous_neg.tendsto (0:ℝ)).mono_left
+        (nhdsWithin_le_nhds (s := Set.Iio 0))
+      rw [neg_zero] at h2
+      exact h2
+    · filter_upwards [self_mem_nhdsWithin] with x hx
+      rw [Set.mem_Iio] at hx
+      exact Set.mem_Ioi.mpr (by linarith)
+  have hFm : Tendsto F (nhdsWithin 0 (Set.Iio 0)) (nhds (F 0)) := by
+    have h2 := hF0.comp hmneg
+    exact h2.congr (fun x => hFeven x)
+  -- the Fourier window at 0
+  have hW := tendsto_fourier_window_jordan hF hre him hF0 hFm
+  have hWfun : (fun T : ℝ => ∫ t in (-T)..T,
+      ∫ u : ℝ, F u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I))
+      = fun T : ℝ => ∫ t in (-T)..T,
+          ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I) := by
+    funext T
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+    show F u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I)
+        = F u * Complex.exp (((t*u : ℝ):ℂ)*Complex.I)
+    rw [Complex.ofReal_mul]
+  rw [hWfun] at hW
+  -- the two Proposition-3 inputs
+  have hQ := prop3_poitou (show (0:ℝ) < 1/2 by norm_num) hF hFeven hFdiv hFdiv2
+    htop2 hbot2
+  have hP := prop3_poitou_quarter hF hFeven hFdiv hFdiv2 htop4 hbot4
+  -- continuity for interval integrability
+  have hφc : Continuous (fun t : ℝ => ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)) :=
+    continuous_muFT hF
+  have hk2eq : (fun t : ℝ => (((2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+      - Complex.digamma ((1/2:ℝ):ℂ)).re) : ℝ)) : ℂ))
+      = rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) :=
+    funext (fun t => (rhoFT_poitouKernel (by norm_num : (0:ℝ) < 1/2) t).symm)
+  have hk2c : Continuous (fun t : ℝ =>
+      (((2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+        - Complex.digamma ((1/2:ℝ):ℂ)).re) : ℝ)) : ℂ)) := by
+    rw [hk2eq]
+    exact continuous_rhoFT (integrable_poitouKernel (by norm_num))
+  have hk4eq : (fun t : ℝ => (((2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+      - Complex.digamma ((1/4:ℝ):ℂ)).re) : ℝ)) : ℂ))
+      = (rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ))) ∘ (fun t : ℝ => t/2) :=
+    funext (fun t => (rhoFT_poitouKernel (by norm_num : (0:ℝ) < 1/4) (t/2)).symm)
+  have hk4c : Continuous (fun t : ℝ =>
+      (((2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+        - Complex.digamma ((1/4:ℝ):ℂ)).re) : ℝ)) : ℂ)) := by
+    rw [hk4eq]
+    exact (continuous_rhoFT (integrable_poitouKernel (by norm_num))).comp
+      (continuous_id.div_const 2)
+  -- the pointwise split, cast to ℂ
+  have hpt : ∀ t : ℝ,
+      ((2 * (logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)).re : ℝ) : ℂ)
+        * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I))
+      = ((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (r₁:ℝ) * (π/2)) : ℝ) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I))
+        + (((r₁:ℕ):ℂ)/2 * ((((2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+              - Complex.digamma ((1/4:ℝ):ℂ)).re) : ℝ)) : ℂ)
+            * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))
+          + ((r₂:ℕ):ℂ) * ((((2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+              - Complex.digamma ((1/2:ℝ):ℂ)).re) : ℝ)) : ℂ)
+            * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))) := by
+    intro t
+    rw [two_re_logDeriv_gammaFactor_half K t]
+    push_cast
+    ring
+  -- fixed-T splitting of the interval integral
+  have hfun : ∀ T : ℝ, (∫ t in (-T)..T,
+      ((2 * (logDeriv (gammaFactor K) (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)).re : ℝ) : ℂ)
+        * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))
+      = ((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (r₁:ℝ) * (π/2)) : ℝ) : ℂ)
+          * (∫ t in (-T)..T, ∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I))
+        + (((r₁:ℕ):ℂ)/2 * (∫ t in (-T)..T,
+            (((2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+              - Complex.digamma ((1/4:ℝ):ℂ)).re) : ℝ)) : ℂ)
+              * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))
+          + ((r₂:ℕ):ℂ) * (∫ t in (-T)..T,
+            (((2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+              - Complex.digamma ((1/2:ℝ):ℂ)).re) : ℝ)) : ℂ)
+              * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))) := by
+    intro T
+    have ii1 : IntervalIntegrable (fun t : ℝ =>
+        ((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (r₁:ℝ) * (π/2)) : ℝ) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I)))
+        MeasureTheory.volume (-T) T :=
+      (continuous_const.mul hφc).intervalIntegrable _ _
+    have ii2 : IntervalIntegrable (fun t : ℝ =>
+        ((r₁:ℕ):ℂ)/2 * ((((2 * ((Complex.digamma (((1/4:ℝ):ℂ) + ((t/2:ℝ):ℂ)*Complex.I)
+            - Complex.digamma ((1/4:ℝ):ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I))))
+        MeasureTheory.volume (-T) T :=
+      (continuous_const.mul (hk4c.mul hφc)).intervalIntegrable _ _
+    have ii3 : IntervalIntegrable (fun t : ℝ =>
+        ((r₂:ℕ):ℂ) * ((((2 * ((Complex.digamma (((1/2:ℝ):ℂ) + (t:ℂ)*Complex.I)
+            - Complex.digamma ((1/2:ℝ):ℂ)).re) : ℝ)) : ℂ)
+          * (∫ x : ℝ, F x * Complex.exp ((t*x : ℝ)*Complex.I))))
+        MeasureTheory.volume (-T) T :=
+      (continuous_const.mul (hk2c.mul hφc)).intervalIntegrable _ _
+    rw [intervalIntegral.integral_congr (fun t _ => hpt t),
+      intervalIntegral.integral_add ii1 (ii2.add ii3),
+      intervalIntegral.integral_add ii2 ii3,
+      intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_const_mul]
+  refine Tendsto.congr (fun T => (hfun T).symm) ?_
+  -- assemble the three limits
+  have hsum := (hW.const_mul
+      ((((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+        + (r₁:ℝ) * (π/2)) : ℝ)) : ℂ))).add
+    ((hP.const_mul (((r₁:ℕ):ℂ)/2)).add (hQ.const_mul ((r₂:ℕ):ℂ)))
+  -- identify the limit value
+  have hlim : ((((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+        + (r₁:ℝ) * (π/2)) : ℝ)) : ℂ)) * (((π : ℝ) : ℂ) * (F 0 + F 0))
+      + ((((r₁:ℕ):ℂ)/2) * (((8*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+          ((Real.exp (-(y/2)) / (1 - Real.exp (-(2*y))) : ℝ) : ℂ) * (F 0 - F y))
+        + ((r₂:ℕ):ℂ) * (((4*π : ℝ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+          ((Real.exp (-(1/2*y)) / (1 - Real.exp (-y)) : ℝ) : ℂ) * (F 0 - F y)))
+      = ((2*π : ℝ) : ℂ) *
+        ((((-(((r₁:ℝ) + 2*(r₂:ℝ)) * (Real.eulerMascheroniConstant + Real.log (8*π))
+              + (r₁:ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+          + (((r₁ + 2*r₂ : ℕ)) : ℂ) * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ((r₁ : ℕ) : ℂ) * ∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)) := by
+    rw [integral_gauss_quarter_eq_sinh_add_cosh hF hFdiv2, integral_gauss_half_eq_sinh,
+      show ((8*π : ℝ) : ℂ) = 4*((2*π : ℝ) : ℂ) by push_cast; ring,
+      show ((4*π : ℝ) : ℂ) = 2*((2*π : ℝ) : ℂ) by push_cast; ring,
+      show ((π : ℝ) : ℂ) * (F 0 + F 0) = ((2*π : ℝ) : ℂ) * F 0 by push_cast; ring,
+      show (((r₁ + 2*r₂ : ℕ)) : ℂ) = ((r₁:ℕ):ℂ) + 2*((r₂:ℕ):ℂ) by push_cast; ring]
+    ring
+  rw [← hlim]
+  exact hsum
+
 end DedekindResidue
