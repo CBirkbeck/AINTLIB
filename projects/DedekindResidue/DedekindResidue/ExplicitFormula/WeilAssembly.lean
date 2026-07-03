@@ -210,40 +210,6 @@ theorem integral_cexp_neg_mul_Ioi {z : ℂ} (hz : 0 < z.re) :
   rw [show ((0:ℝ):ℂ) = (0:ℂ) from rfl, mul_zero, neg_zero, Complex.exp_zero]
   rw [zero_sub, neg_div, neg_neg, one_div]
 
-/-- The complex exponential head integral: for `Re z > 0`,
-`∫_{-∞}^{w} e^{zu} du = e^{zw}/z`. -/
-theorem integral_cexp_mul_Iio {z : ℂ} (hz : 0 < z.re) (w : ℝ) :
-    ∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)) = Complex.exp (z * (w:ℂ)) / z := by
-  -- reflect to the tail integral via u = w - v
-  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
-    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
-  have hmap : (volume : Measure ℝ).restrict (Set.Iio w)
-      = Measure.map (fun v : ℝ => w - v) ((volume : Measure ℝ).restrict (Set.Ioi 0)) := by
-    rw [show Set.Ioi (0:ℝ) = (fun v : ℝ => w - v) ⁻¹' (Set.Iio w) by
-        ext v
-        simp only [Set.mem_preimage, Set.mem_Iio, Set.mem_Ioi]
-        constructor <;> intro h <;> linarith,
-      ← Measure.restrict_map A.measurable measurableSet_Iio]
-    congr 1
-    -- map (w - ·) volume = volume
-    have h1 : (fun v : ℝ => w - v) = (fun v : ℝ => w + v) ∘ (fun v : ℝ => -v) := by
-      funext v
-      simp [sub_eq_add_neg]
-    rw [h1, ← Measure.map_map (measurable_const_add w) measurable_neg,
-      Measure.map_neg_eq_self, map_add_left_eq_self]
-  rw [show (∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)))
-      = ∫ u, Complex.exp (z * (u:ℂ)) ∂((volume : Measure ℝ).restrict (Set.Iio w)) from rfl,
-    hmap, A.integral_map]
-  have h2 : (∫ v in Set.Ioi (0:ℝ), Complex.exp (z * ((w - v : ℝ):ℂ)))
-      = ∫ v in Set.Ioi (0:ℝ), Complex.exp (z * (w:ℂ)) * Complex.exp (-(z * (v:ℂ))) := by
-    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun v _ => ?_)
-    rw [← Complex.exp_add]
-    congr 1
-    push_cast
-    ring
-  rw [h2, MeasureTheory.integral_const_mul, integral_cexp_neg_mul_Ioi hz,
-    div_eq_mul_inv]
-
 /-- Left rays as reflected right rays. -/
 theorem restrict_Iio_eq_map_sub (w : ℝ) :
     (volume : Measure ℝ).restrict (Set.Iio w)
@@ -261,6 +227,25 @@ theorem restrict_Iio_eq_map_sub (w : ℝ) :
     simp [sub_eq_add_neg]
   rw [h1, ← Measure.map_map (measurable_const_add w) measurable_neg,
     Measure.map_neg_eq_self, map_add_left_eq_self]
+
+/-- The complex exponential head integral: for `Re z > 0`,
+`∫_{-∞}^{w} e^{zu} du = e^{zw}/z`. -/
+theorem integral_cexp_mul_Iio {z : ℂ} (hz : 0 < z.re) (w : ℝ) :
+    ∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)) = Complex.exp (z * (w:ℂ)) / z := by
+  have A : MeasurableEmbedding (fun v : ℝ => w - v) :=
+    (Homeomorph.subLeft w).isClosedEmbedding.measurableEmbedding
+  rw [show (∫ u in Set.Iio w, Complex.exp (z * (u:ℂ)))
+      = ∫ u, Complex.exp (z * (u:ℂ)) ∂((volume : Measure ℝ).restrict (Set.Iio w)) from rfl,
+    restrict_Iio_eq_map_sub w, A.integral_map]
+  have h2 : (∫ v in Set.Ioi (0:ℝ), Complex.exp (z * ((w - v : ℝ):ℂ)))
+      = ∫ v in Set.Ioi (0:ℝ), Complex.exp (z * (w:ℂ)) * Complex.exp (-(z * (v:ℂ))) := by
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun v _ => ?_)
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  rw [h2, MeasureTheory.integral_const_mul, integral_cexp_neg_mul_Ioi hz,
+    div_eq_mul_inv]
 
 /-- `e^{cu}` is integrable on left rays for `c > 0`. -/
 theorem integrableOn_exp_mul_Iio {c : ℝ} (hc : 0 < c) (w : ℝ) :
@@ -1801,34 +1786,36 @@ theorem tendsto_gammaFT_plateau (F : ℝ → ℂ) (l : Filter ℝ)
     nlinarith
   nlinarith [mul_le_mul_of_nonneg_left hstep (norm_nonneg (F 0)), norm_nonneg (F 0)]
 
-/-- **Poitou's `γ` vanishes at `+∞`** — unconditionally: Riemann–Lebesgue on both
-integral pieces, `sincTail → 0` on the plateau piece. -/
-theorem tendsto_gammaFT_atTop (F : ℝ → ℂ) :
-    Tendsto (gammaFT F) atTop (nhds 0) := by
-  have hW := tendsto_setIntegral_mul_cexp_atTop (fun x : ℝ => (F 0 - F x)/(x:ℂ))
-    (Set.Ioc (-1) 1) measurableSet_Ioc
-  have hT := tendsto_setIntegral_mul_cexp_atTop (fun x : ℝ => F x/(x:ℂ))
-    ((Set.Ioc (-1) 1)ᶜ) measurableSet_Ioc.compl
-  have hS := tendsto_gammaFT_plateau F atTop (tendsto_abs_atTop_atTop)
+/-- **Poitou's `γ` vanishes along any filter on which `|t| → ∞`** — Riemann–Lebesgue on
+both integral pieces (supplied as `hRL`, so this is filter-generic), `sincTail → 0` on the
+plateau piece. The `atTop`/`atBot` cases below are the two specialisations. -/
+theorem tendsto_gammaFT_of_setIntegral (F : ℝ → ℂ) (l : Filter ℝ)
+    (habs : Tendsto (fun t : ℝ => |t|) l atTop)
+    (hRL : ∀ (q : ℝ → ℂ) (u : Set ℝ), MeasurableSet u →
+      Tendsto (fun t : ℝ => ∫ x in u, q x * Complex.exp ((t*x : ℝ) * Complex.I)) l (nhds 0)) :
+    Tendsto (gammaFT F) l (nhds 0) := by
+  have hW := hRL (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1) measurableSet_Ioc
+  have hT := hRL (fun x : ℝ => F x/(x:ℂ)) ((Set.Ioc (-1) 1)ᶜ) measurableSet_Ioc.compl
+  have hS := tendsto_gammaFT_plateau F l habs
   have h0 := (hW.add hS).sub hT
   rw [show ((0:ℂ) + 0 - 0 : ℂ) = 0 by ring] at h0
   exact h0
 
+/-- **Poitou's `γ` vanishes at `+∞`** — unconditionally: Riemann–Lebesgue on both
+integral pieces, `sincTail → 0` on the plateau piece. -/
+theorem tendsto_gammaFT_atTop (F : ℝ → ℂ) :
+    Tendsto (gammaFT F) atTop (nhds 0) :=
+  tendsto_gammaFT_of_setIntegral F atTop tendsto_abs_atTop_atTop
+    tendsto_setIntegral_mul_cexp_atTop
+
 /-- **Poitou's `γ` vanishes at `-∞`** — unconditionally. -/
 theorem tendsto_gammaFT_atBot (F : ℝ → ℂ) :
     Tendsto (gammaFT F) atBot (nhds 0) := by
-  have hW := tendsto_setIntegral_mul_cexp_atBot (fun x : ℝ => (F 0 - F x)/(x:ℂ))
-    (Set.Ioc (-1) 1) measurableSet_Ioc
-  have hT := tendsto_setIntegral_mul_cexp_atBot (fun x : ℝ => F x/(x:ℂ))
-    ((Set.Ioc (-1) 1)ᶜ) measurableSet_Ioc.compl
-  have hS := tendsto_gammaFT_plateau F atBot ?_
-  · have h0 := (hW.add hS).sub hT
-    rw [show ((0:ℂ) + 0 - 0 : ℂ) = 0 by ring] at h0
-    exact h0
-  · have h1 : Tendsto (fun t : ℝ => -t) atBot atTop := tendsto_neg_atBot_atTop
-    refine (tendsto_abs_atTop_atTop.comp h1).congr (fun t => ?_)
-    simp only [Function.comp_apply]
-    rw [abs_neg]
+  refine tendsto_gammaFT_of_setIntegral F atBot ?_ tendsto_setIntegral_mul_cexp_atBot
+  have h1 : Tendsto (fun t : ℝ => -t) atBot atTop := tendsto_neg_atBot_atTop
+  refine (tendsto_abs_atTop_atTop.comp h1).congr (fun t => ?_)
+  simp only [Function.comp_apply]
+  rw [abs_neg]
 
 /-- **The `γ = O(1/t)` bound from quadratic Fourier decay** (Poitou's Lemme 1 made
 quantitative): if the Fourier transform of `F` is `O(1/γ²)` beyond `γ₀`, then
@@ -2378,6 +2365,22 @@ theorem auxF_tail_form (s : ℂ) {X : ℝ} (hX : 1 < X) :
   rw [show -(-((((0:ℝ)):ℂ) - (s - 1/2))) = -(s - 1/2) by push_cast; ring] at h0
   exact h0
 
+/-- The antisymmetric exponential kernel `e^{wx} - e^{-wx}` is bounded in norm by
+`2 e^{|Re w| x}` for `x ≥ 0`: each summand's real part is at most `|Re w| x`. -/
+theorem norm_cexp_sub_cexp_neg_le (w : ℂ) {x : ℝ} (hx : 0 ≤ x) :
+    ‖Complex.exp (w * x) - Complex.exp (-w * x)‖ ≤ 2 * Real.exp (|w.re| * x) := by
+  refine le_trans (norm_sub_le _ _) ?_
+  rw [Complex.norm_exp, Complex.norm_exp,
+    show (w * (x:ℂ)).re = w.re * x by simp [Complex.mul_re],
+    show (-w * (x:ℂ)).re = -w.re * x by simp [Complex.mul_re]]
+  have e1 : Real.exp (w.re * x) ≤ Real.exp (|w.re| * x) :=
+    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (le_abs_self _) hx)
+  have e2 : Real.exp (-w.re * x) ≤ Real.exp (|w.re| * x) := by
+    refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right ?_ hx)
+    rw [← abs_neg w.re]
+    exact le_abs_self _
+  linarith
+
 /-- Pointwise bound on the tail-derivative kernel times the antisymmetric kernel:
 `‖F'(x)·(e^{wx}-e^{-wx})‖ ≤ 2e^{h_r T}(‖h‖+1/T)·e^{-(h_r-|Re w|)x}` for `x > T`. -/
 theorem norm_auxF_tail_deriv_mul_le (s : ℂ) {X : ℝ} (hX : 1 < X) (w : ℂ)
@@ -2394,18 +2397,7 @@ theorem norm_auxF_tail_deriv_mul_le (s : ℂ) {X : ℝ} (hX : 1 < X) (w : ℂ)
     norm_num
   -- the S-factor
   have hSb : ‖Complex.exp ((w : ℂ) * x) - Complex.exp (-(w : ℂ) * x)‖
-      ≤ 2 * Real.exp (|w.re| * x) := by
-    refine le_trans (norm_sub_le _ _) ?_
-    rw [Complex.norm_exp, Complex.norm_exp,
-      show ((w:ℂ) * (x:ℂ)).re = w.re * x by simp [Complex.mul_re],
-      show (-(w:ℂ) * (x:ℂ)).re = -w.re * x by simp [Complex.mul_re]]
-    have e1 : Real.exp (w.re * x) ≤ Real.exp (|w.re| * x) :=
-      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (le_abs_self _) hxpos.le)
-    have e2 : Real.exp (-w.re * x) ≤ Real.exp (|w.re| * x) := by
-      refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right ?_ hxpos.le)
-      rw [← abs_neg w.re]
-      exact le_abs_self _
-    linarith
+      ≤ 2 * Real.exp (|w.re| * x) := norm_cexp_sub_cexp_neg_le w hxpos.le
   -- the D-factor
   have hDb : ‖((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
       * (-((s - 1/2) + 1/x) * (Complex.exp (-(s - 1/2) * x) / x))‖
@@ -2585,17 +2577,7 @@ theorem mul_paperPhi_auxF_eq (s : ℂ) {X : ℝ} (hX : 1 < X) {z : ℂ}
       rw [abs_of_nonneg hy] at h1
       have h2 : ‖S y‖ ≤ 2 * Real.exp (|w.re| * y) := by
         rw [hS]
-        refine le_trans (norm_sub_le _ _) ?_
-        rw [Complex.norm_exp, Complex.norm_exp,
-          show (w * (y:ℂ)).re = w.re * y by simp [Complex.mul_re],
-          show (-w * (y:ℂ)).re = -w.re * y by simp [Complex.mul_re]]
-        have e1 : Real.exp (w.re * y) ≤ Real.exp (|w.re| * y) :=
-          Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (le_abs_self _) hy)
-        have e2 : Real.exp (-w.re * y) ≤ Real.exp (|w.re| * y) := by
-          refine Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right ?_ hy)
-          rw [← abs_neg w.re]
-          exact le_abs_self _
-        linarith
+        exact norm_cexp_sub_cexp_neg_le w hy
       calc ‖auxF s X y‖ * ‖S y‖
           ≤ (Real.exp ((s.re - 1/2) * b) * Real.exp (-(s.re - 1/2) * y))
             * (2 * Real.exp (|w.re| * y)) := by
