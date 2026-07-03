@@ -1090,3 +1090,56 @@ REMAINING SP3 hypotheses of weil_explicit_formula at auxF:
     C¹-piece arguments), Hp/Hm values.
 (5) H(0)-value = Σ log N𝔭·N𝔭^{−m/2}·auxF(m log N𝔭), then Lemma 3, (19), Lemma 5,
     Lemma 4, belabas_friedman_thm1.
+
+## 2026-07-03 leg 8: T010 COMPLETE (Lemma 3 landed) + T011 underway + blueprint bootstrapped
+
+All pushed, axiom-clean, zero warnings. **Belabas–Friedman Lemma 3 is fully
+machine-verified** and the Lemma-4 estimate suite is 3/4 done.
+
+- **T010-b5** (GRHZeros.lean): `finite_zetaZeros_mem_of_isBounded`,
+  `finsum_divisor_mul_eq_sum_zetaZeros` (window bridge, Finset.map embedding),
+  `tendsto_finsum_window_zetaZeros` (window sums → tsum under GRH; Finset-exhaustion
+  against HasSum, GRH pins Re = 1/2 in the band).
+- **T010-b6** (NEW Lemma3.lean): `summable_zetaZeros_paperPhi_auxF` (quadratic Fourier
+  decay glued to the band bound vs Landau), `tsum_zetaZeros_paperPhi_auxF_eq` (the
+  explicit formula as an honest Σ' — tendsto_nhds_unique vs weil_explicit_formula_auxF);
+  the three-piece split `zeroSin/Cos/IntTerm` + `paperFourierIntegral_auxF_split` +
+  bounds + `tsum_zetaZeros_paperPhi_auxF_split` (the three B–F (13) zero-series).
+- **T010-b7**: `auxF_ofReal`, `tsum_kernel_eq_log_zeta` (kernel prime sum =
+  T·e^{hT}·log ζ_K(σ) via `real_log_dedekindZeta`), `finite_plateau_support`,
+  `summable_kernel`, `primeSideH_auxF_zero_split` (H(0) = plateau defect + T e^{hT} log ζ).
+- **T010 capstone**: **`lemma3_display`** — the canonical rearrangement of B–F (13)
+  at real σ > 1 under GRH (2Te^{hT}·log ζ_K(σ) = Φ(0)+Φ(1)+logΔ+c_Γ+arch-integrals
+  −2·plateau −S_sin −S_cos +S_int), by linear_combination of the three splits.
+- **PAPER SOURCE NOW LOCAL**: `refs/DedekindResidue/bf-src/paper.tex` (arXiv e-print,
+  986 lines). §3 read verbatim; T011/T012 route in
+  `.mathlib-quality/decomposition-t011.md` (Lemma 4 = `Mostways` lines 409–519, applied
+  at s=1; WE avoid analytic continuation by σ-tracking + σ→1⁺ limits; Lemma 5 =
+  `Estimate` lines 523–562 via **eq:Stark, provable with the explicit formula at
+  F(x)=e^{−(σ−1/2)|x|}** per the paper's own footnote — reuses our weil machinery +
+  digamma bridges; Theorem-1 endgame lines 564–631 with the exact constant extraction).
+- **T011 (Lemma4.lean, NEW)**: c1 `norm_tsum_zeroSinTerm_sub_le` (MVT via
+  LipschitzWith 1 sin, no log X loss); c2 `norm_tsum_zetaZeros_mul_le` (generic) +
+  `norm_tsum_zeroCosTerm_sub_le`; c3 `integrableOn_kernel` + `integral_Ioi_kernel_eval`
+  (∫_T^∞(h+1/t)e^{−ht}/t = e^{−hT}/T, FTC on −e^{−ht}/t) +
+  `norm_zeroIntTerm_le_refined` (‖zeroIntTerm‖ ≤ 4/(T(h²+γ²))) +
+  `norm_tsum_zeroIntTerm_sub_le`.
+- **Blueprint bootstrapped** (user-requested; then parked "later" — Lean priority):
+  `DedekindResidueBlueprint/Blueprint.lean` (52 chunks, 63 (lean := …) refs
+  machine-verified), side package `_blueprint/` (verso v4.32.0). **RENDER IS
+  LINUX-ONLY**: Lean clamps RLIMIT_NOFILE to OPEN_MAX (10240) on macOS; classic-mode
+  Verso importing module-system mathlib needs ~15k fds. `_blueprint/scripts/ci-pages.sh`.
+
+**NEXT (per decomposition-t011.md + sentinel):**
+1. **c4** arch integrals: σ-tracked q/q̃ difference bound (paper eq:deriv lines
+   476–518) → the β(T−a) term. The display's integrals are ∫_{Ioi 0}(1−F_{σ,X})/2sinh(y/2)
+   (integrand vanishes on the plateau y ≤ T).
+2. **L4-b/d**: difference of `lemma3_display` at X, X/9-style cutoffs (log Δ + c_Γ +
+   Φ(0)+Φ(1) cancel), relative K−ℚ (Δ_ℚ=1 via `Rat.numberField_discr`, n_ℚ=r_ℚ=1),
+   then σ→1⁺: LHS via `NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT` (+ κ_ℚ=1),
+   zero-sums by dominated convergence (majorant (9/4)m/(¼+γ²)) → **Explicit2 at k=ℚ**.
+3. **L5**: weil at F_h(x)=e^{−h|x|} (new, EASIER discharge suite) → eq:Stark(σ) →
+   `Estimate`.
+4. **T012**: eq:Diff ((1/g(T)−1/g(T−a)) = (2/3)√X log 3X), A↔bSum bridge, numerics
+   (β(log(X/9))<1 for X≥69; d_{K,σ}>1.163 via Ψ(4)=11/6−γ_E; ζℚ-sum ≤ 1.163 via
+   L5-at-ℚ σ=2 certified numerics), constants 2.324/3.88/4.26.

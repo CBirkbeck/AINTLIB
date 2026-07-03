@@ -185,6 +185,28 @@ theorem norm_tsum_zeroCosTerm_sub_le {σ : ℝ} (hσ : 1/2 < σ) {X X' : ℝ} (h
   · exact norm_tsum_zetaZeros_mul_le K hσ (fun γ => norm_zeroCosTerm_le hσ hX γ)
   · exact norm_tsum_zetaZeros_mul_le K hσ (fun γ => norm_zeroCosTerm_le hσ hX' γ)
 
+/-- The kernel `(h + 1/t)e^{−ht}/t` is integrable on `(T, ∞)`. -/
+theorem integrableOn_kernel {h T : ℝ} (hh : 0 < h) (hT : 0 < T) :
+    MeasureTheory.IntegrableOn
+      (fun t : ℝ => (h + 1/t) * Real.exp (-h*t) / t) (Set.Ioi T) := by
+  refine MeasureTheory.Integrable.mono'
+    (g := fun t : ℝ => (h + 1/T) / T * Real.exp (-h*t))
+    ((exp_neg_integrableOn_Ioi T hh).const_mul _) ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    refine ContinuousOn.div ?_ continuousOn_id (fun t ht => (hT.trans ht).ne')
+    refine ContinuousOn.mul ?_
+      (Real.continuous_exp.comp (continuous_const.mul continuous_id)).continuousOn
+    exact continuousOn_const.add (continuousOn_const.div continuousOn_id
+      (fun t ht => (hT.trans ht).ne'))
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+    have ht0 : (0:ℝ) < t := hT.trans ht
+    have hTt : T ≤ t := le_of_lt ht
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    calc (h + 1/t) * Real.exp (-h*t) / t
+        ≤ (h + 1/T) * Real.exp (-h*t) / T := by
+          gcongr
+      _ = (h + 1/T) / T * Real.exp (-h*t) := by ring
+
 /-- **The exact kernel integral** (paper eq:diffeq consequence, lines 460–467):
 `∫_T^∞ (h + 1/t)·e^{−ht}/t · dt = e^{−hT}/T` — the antiderivative is `−e^{−ht}/t`. -/
 theorem integral_Ioi_kernel_eval {h T : ℝ} (hh : 0 < h) (hT : 0 < T) :
@@ -202,25 +224,7 @@ theorem integral_Ioi_kernel_eval {h T : ℝ} (hh : 0 < h) (hT : 0 < T) :
       field_simp
       ring
     exact h3 ▸ h2
-  have hint : MeasureTheory.IntegrableOn
-      (fun t : ℝ => (h + 1/t) * Real.exp (-h*t) / t) (Set.Ioi T) := by
-    refine MeasureTheory.Integrable.mono'
-      (g := fun t : ℝ => (h + 1/T) / T * Real.exp (-h*t))
-      ((exp_neg_integrableOn_Ioi T hh).const_mul _) ?_ ?_
-    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
-      refine ContinuousOn.div ?_ continuousOn_id (fun t ht => (hT.trans ht).ne')
-      refine ContinuousOn.mul ?_
-        (Real.continuous_exp.comp (continuous_const.mul continuous_id)).continuousOn
-      exact continuousOn_const.add (continuousOn_const.div continuousOn_id
-        (fun t ht => (hT.trans ht).ne'))
-    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
-      have ht0 : (0:ℝ) < t := hT.trans ht
-      have hTt : T ≤ t := le_of_lt ht
-      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-      calc (h + 1/t) * Real.exp (-h*t) / t
-          ≤ (h + 1/T) * Real.exp (-h*t) / T := by
-            gcongr
-        _ = (h + 1/T) / T * Real.exp (-h*t) := by ring
+  have hint := integrableOn_kernel hh hT
   have hlim : Tendsto (fun t : ℝ => -(Real.exp (-h*t) / t)) atTop (nhds 0) := by
     rw [show (0:ℝ) = -0 by norm_num]
     exact Tendsto.neg (Tendsto.div_atTop
@@ -238,6 +242,105 @@ theorem integral_Ioi_kernel_eval {h T : ℝ} (hh : 0 < h) (hT : 0 < T) :
     hderiv hint hlim
   rw [hkey]
   ring
+
+/-- **The refined integral-piece bound**: `‖zeroIntTerm‖ ≤ 4/(T·(h²+γ²))` — the
+tail integral is at most `1/T` by the exact kernel antiderivative (no opaque
+constant). -/
+theorem norm_zeroIntTerm_le_refined {σ : ℝ} (hσ : 1/2 < σ) {X : ℝ} (hX : 1 < X)
+    (γ : ℝ) :
+    ‖zeroIntTerm (σ:ℂ) X γ‖
+      ≤ 4 / (Real.log X * ((σ - 1/2)^2 + γ^2)) := by
+  have hh : (0:ℝ) < σ - 1/2 := by linarith
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hD : (0:ℝ) < (σ - 1/2)^2 + γ^2 := by positivity
+  have hDc : ((σ:ℂ) - 1/2)^2 + (γ:ℂ)^2 = (((σ - 1/2)^2 + γ^2 : ℝ) : ℂ) := by
+    push_cast
+    ring
+  set T : ℝ := Real.log X with hT_def
+  -- the tail integral is bounded by `1/T`
+  have hIle : ‖∫ t in Set.Ioi T,
+      ((Real.cos (t * γ) : ℝ) : ℂ) * auxF (σ:ℂ) X t * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+      ≤ 1 / T := by
+    have hmajint : MeasureTheory.IntegrableOn (fun t : ℝ =>
+        Real.exp ((σ - 1/2)*T) * ((σ - 1/2 + 1/t) * Real.exp (-(σ - 1/2)*t) / t))
+        (Set.Ioi T) := (integrableOn_kernel hh hT0).const_mul _
+    have hbound : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioi T)),
+        ‖((Real.cos (t * γ) : ℝ) : ℂ) * auxF (σ:ℂ) X t
+          * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+        ≤ Real.exp ((σ - 1/2)*T) * ((σ - 1/2 + 1/t) * Real.exp (-(σ - 1/2)*t) / t) := by
+      filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      have ht0 : (0:ℝ) < t := hT0.trans ht
+      have hTt : T ≤ t := le_of_lt ht
+      have habs : |t| = t := abs_of_pos ht0
+      have hauxval : auxF (σ:ℂ) X t
+          = ((T/t * Real.exp (-(σ - 1/2)*(t - T)) : ℝ) : ℂ) := by
+        rw [auxF_ofReal, habs,
+          if_neg (by simp only [← hT_def]; exact not_le.mpr ht), ← hT_def]
+      have hqval : ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)
+          = ((((σ - 1/2)*t + 1)/t^2 : ℝ) : ℂ) := by
+        push_cast
+        ring
+      rw [hauxval, hqval, norm_mul, norm_mul, Complex.norm_real, Complex.norm_real,
+        Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs]
+      have h2 : |T/t * Real.exp (-(σ - 1/2)*(t - T))|
+          = T/t * Real.exp (-(σ - 1/2)*(t - T)) := abs_of_nonneg (by positivity)
+      have h3 : |((σ - 1/2)*t + 1)/t^2| = ((σ - 1/2)*t + 1)/t^2 :=
+        abs_of_nonneg (by positivity)
+      rw [h2, h3]
+      calc |Real.cos (t*γ)| * (T/t * Real.exp (-(σ - 1/2)*(t - T)))
+            * (((σ - 1/2)*t + 1)/t^2)
+          ≤ 1 * (T/t * Real.exp (-(σ - 1/2)*(t - T))) * (((σ - 1/2)*t + 1)/t^2) := by
+            gcongr
+            · exact abs_cos_le_one _
+        _ = Real.exp ((σ - 1/2)*T)
+              * (Real.exp (-(σ - 1/2)*t) * (((σ - 1/2)*t + 1) * (T/t^3))) := by
+            rw [show -(σ - 1/2)*(t - T) = -(σ - 1/2)*t + (σ - 1/2)*T by ring,
+              Real.exp_add]
+            field_simp
+        _ ≤ Real.exp ((σ - 1/2)*T)
+              * (Real.exp (-(σ - 1/2)*t) * (((σ - 1/2)*t + 1) * (1/t^2))) := by
+            have h4 : T/t^3 ≤ 1/t^2 := by
+              rw [div_le_div_iff₀ (by positivity) (by positivity)]
+              nlinarith
+            gcongr
+        _ = Real.exp ((σ - 1/2)*T) * ((σ - 1/2 + 1/t) * Real.exp (-(σ - 1/2)*t) / t) := by
+            field_simp
+    refine (MeasureTheory.norm_integral_le_of_norm_le hmajint hbound).trans ?_
+    rw [MeasureTheory.integral_const_mul, integral_Ioi_kernel_eval hh hT0,
+      ← mul_div_assoc, ← Real.exp_add,
+      show (σ - 1/2)*T + -(σ - 1/2)*T = 0 by ring, Real.exp_zero]
+  -- assemble
+  rw [zeroIntTerm, norm_mul, norm_div, hDc, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos hD, show ‖(4:ℂ)‖ = 4 by norm_num]
+  calc 4 / ((σ - 1/2)^2 + γ^2) * ‖∫ t in Set.Ioi (Real.log X),
+        ((Real.cos (t * γ) : ℝ) : ℂ) * auxF (σ:ℂ) X t
+          * ((((σ:ℂ) - 1/2)*t + 1)/(t:ℂ)^2)‖
+      ≤ 4 / ((σ - 1/2)^2 + γ^2) * (1 / Real.log X) := by
+        gcongr
+    _ = 4 / (Real.log X * ((σ - 1/2)^2 + γ^2)) := by
+        field_simp
+
+/-- **The integral-terms estimate**: the two-cutoff difference of the tail-integral
+series is bounded by `(4/T + 4/T')·Σ_ρ m_ρ/(h²+γ_ρ²)`. -/
+theorem norm_tsum_zeroIntTerm_sub_le {σ : ℝ} (hσ : 1/2 < σ) {X X' : ℝ} (hX' : 1 < X')
+    (hXX : X' ≤ X) :
+    ‖(∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im)
+      - ∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X' ρ.1.im‖
+      ≤ (4 / Real.log X + 4 / Real.log X')
+          * ∑' ρ : ZetaZeros K,
+              (zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2) := by
+  have hX : 1 < X := lt_of_lt_of_le hX' hXX
+  refine (norm_sub_le _ _).trans ?_
+  rw [add_mul]
+  gcongr
+  · refine norm_tsum_zetaZeros_mul_le K hσ (fun γ => ?_)
+    have h1 := norm_zeroIntTerm_le_refined hσ hX γ
+    rwa [show (4:ℝ) / (Real.log X * ((σ - 1/2)^2 + γ^2))
+      = 4 / Real.log X / ((σ - 1/2)^2 + γ^2) by rw [div_div]] at h1
+  · refine norm_tsum_zetaZeros_mul_le K hσ (fun γ => ?_)
+    have h1 := norm_zeroIntTerm_le_refined hσ hX' γ
+    rwa [show (4:ℝ) / (Real.log X' * ((σ - 1/2)^2 + γ^2))
+      = 4 / Real.log X' / ((σ - 1/2)^2 + γ^2) by rw [div_div]] at h1
 
 end DedekindResidue
 
