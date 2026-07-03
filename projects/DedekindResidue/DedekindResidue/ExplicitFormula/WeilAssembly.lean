@@ -820,4 +820,71 @@ theorem tendsto_pole_piece (ha : 0 < a) (hF : Integrable F)
   rw [← hlim]
   exact hW
 
+/-- **The discriminant piece**: the constant `(1/2)log|d|` against the paired window
+converges to `2π F(0)·log|d|` (after the two edges double it). Stated for a general
+real constant `κ`: `lim ∫ (Φ(s)+Φ(1-s))·κ dt = 4π κ F(0)`. -/
+theorem tendsto_const_piece (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    (hGre : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).re) Set.univ)
+    (hGim : LocallyBoundedVariationOn (fun x : ℝ =>
+      ((F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))).im) Set.univ)
+    {Fp Fm : ℂ}
+    (hFp : Tendsto F (nhdsWithin 0 (Set.Ioi 0)) (nhds Fp))
+    (hFm : Tendsto F (nhdsWithin 0 (Set.Iio 0)) (nhds Fm))
+    (κ : ℝ) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))) * ((κ : ℝ) : ℂ))
+      atTop (nhds (((2*π : ℝ):ℂ) * ((κ : ℝ) : ℂ) * (Fp + Fm))) := by
+  set G : ℝ → ℂ := fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) with hG_def
+  -- one-sided limits of G at 0 are those of F
+  have hGlim : ∀ (l : Filter ℝ) (L : ℂ), l ≤ nhds 0 → Tendsto F l (nhds L) →
+      Tendsto G l (nhds L) := by
+    intro l L hl hFl
+    have hexp : Tendsto (fun x : ℝ => ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) l (nhds 1) := by
+      have h0 : Continuous (fun x : ℝ => ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+        Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+          (continuous_const.mul continuous_id))
+      have h1 := (h0.tendsto 0).mono_left hl
+      rw [show ((Real.exp ((1/2+a) * 0) : ℝ) : ℂ) = 1 by norm_num] at h1
+      exact h1
+    have h2 := hFl.mul hexp
+    rw [mul_one] at h2
+    exact h2
+  have hGp : Tendsto G (nhdsWithin 0 (Set.Ioi 0)) (nhds Fp) :=
+    hGlim _ _ nhdsWithin_le_nhds hFp
+  have hGm : Tendsto G (nhdsWithin 0 (Set.Iio 0)) (nhds Fm) :=
+    hGlim _ _ nhdsWithin_le_nhds hFm
+  have hW := tendsto_fourier_window_jordan hFa hGre hGim hGp hGm
+  -- fixed-T identity
+  have hfun : ∀ T : ℝ, (∫ t in (-T)..T,
+      (paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I))) * ((κ : ℝ) : ℂ))
+      = 2 * ((κ : ℝ) : ℂ) * ∫ t in (-T)..T,
+          ∫ u : ℝ, G u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I) := by
+    intro T
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    rw [paperPhi_one_sub hFeven]
+    have hφG : paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+        = ∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I) := paperPhi_edge a F t
+    rw [hφG]
+    have hcongr : (∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I))
+        = ∫ u : ℝ, G u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I) := by
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
+      show G u * Complex.exp (((t*u : ℝ):ℂ) * Complex.I)
+          = G u * Complex.exp ((t:ℂ)*(u:ℂ)*Complex.I)
+      rw [Complex.ofReal_mul]
+    rw [hcongr]
+    ring
+  refine Tendsto.congr (fun T => (hfun T).symm) ?_
+  have h9 := hW.const_mul (2 * ((κ : ℝ) : ℂ))
+  have hlim : 2 * ((κ : ℝ) : ℂ) * (((π : ℝ) : ℂ) * (Fp + Fm))
+      = ((2*π : ℝ):ℂ) * ((κ : ℝ) : ℂ) * (Fp + Fm) := by
+    push_cast
+    ring
+  rw [hlim] at h9
+  exact h9
+
 end DedekindResidue
