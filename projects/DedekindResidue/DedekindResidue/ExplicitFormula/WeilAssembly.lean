@@ -2085,4 +2085,81 @@ theorem tendsto_rhoFT_mul_gammaFT_of_decay {F : ℝ → ℂ} {σ : ℝ}
     _ = Cρ * C * (Real.log (2 + |t|) / |t|) := by
         field_simp
 
+/-- **Boundary discharge at the auxiliary function**: `ρ_σ·γ_{F_{s,X}} → 0` along
+any `|t| → ∞` filter — the `htop2`/`hbot2` hypotheses of the Weil assembly. -/
+theorem tendsto_boundary_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re)
+    {σ : ℝ} (hσ : 0 < σ) (hσl : -1 ≤ σ) (hσr : σ ≤ 2) (l : Filter ℝ)
+    (habs : Tendsto (fun t : ℝ => |t|) l atTop) :
+    Tendsto (fun t : ℝ => rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      * gammaFT (auxF s X) t) l (nhds 0) := by
+  obtain ⟨C, γ₀, hC, hγ₀, hφ⟩ := exists_norm_fourier_auxF_le s hX hs
+  refine tendsto_rhoFT_mul_gammaFT_of_decay (C := C) (γ₀ := γ₀) hσ hσl hσr ?_ l habs
+  refine norm_gammaFT_le_of_fourier_decay (integrable_auxF s hX hs)
+    (integrableOn_auxF_diffQuot_window s hX hs) hγ₀ ?_
+  intro γ hγ
+  rw [← paperFourierIntegral_eq_muFT]
+  exact hφ γ hγ
+
+/-- **Boundary discharge at the half-scaled auxiliary function**: the
+`htop4`/`hbot4` hypotheses of the Weil assembly. -/
+theorem tendsto_boundary_auxF_half (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re)
+    {σ : ℝ} (hσ : 0 < σ) (hσl : -1 ≤ σ) (hσr : σ ≤ 2) (l : Filter ℝ)
+    (habs : Tendsto (fun t : ℝ => |t|) l atTop) :
+    Tendsto (fun t : ℝ => rhoFT (fun x => ((poitouKernel σ x : ℝ) : ℂ)) t
+      * gammaFT (fun x : ℝ => auxF s X (x/2) / 2) t) l (nhds 0) := by
+  obtain ⟨C, γ₀, hC, hγ₀, hφ⟩ := exists_norm_fourier_auxF_le s hX hs
+  refine tendsto_rhoFT_mul_gammaFT_of_decay (C := C) (γ₀ := γ₀) hσ hσl hσr ?_ l habs
+  have hFh : Integrable (fun x : ℝ => auxF s X (x/2) / 2) :=
+    integrable_halfScale (integrable_auxF s hX hs)
+  have hFhdiv : IntegrableOn (fun x : ℝ =>
+      ((fun x : ℝ => auxF s X (x/2) / 2) 0 - (fun x : ℝ => auxF s X (x/2) / 2) x)/(x:ℂ))
+      (Set.Ioc (-1) 1) := by
+    refine (integrableOn_halfScale_div (integrableOn_auxF_diffQuot_window s hX hs)).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    show (auxF s X 0/2 - auxF s X (x/2)/2)/(x:ℂ)
+        = (auxF s X (0/2) / 2 - auxF s X (x/2) / 2)/(x:ℂ)
+    norm_num
+  refine norm_gammaFT_le_of_fourier_decay hFh hFhdiv hγ₀ ?_
+  intro u hu
+  -- the Fourier transform of the half-scale is the transform at 2u
+  have hFour : (∫ x : ℝ, (auxF s X (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I))
+      = ∫ x : ℝ, auxF s X x * Complex.exp (((2*u)*x : ℝ) * Complex.I) := by
+    set g : ℝ → ℂ := fun w => auxF s X w * Complex.exp (((2*u)*w : ℝ) * Complex.I)
+      with hg
+    have h1 : (∫ x : ℝ, g ((2:ℝ)⁻¹ * x)) = |(((2:ℝ)⁻¹))⁻¹| • ∫ x : ℝ, g x :=
+      MeasureTheory.Measure.integral_comp_mul_left g ((2:ℝ)⁻¹)
+    have h2 : (fun x : ℝ => (auxF s X (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I))
+        = fun x : ℝ => (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x) := by
+      funext x
+      show (auxF s X (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * g ((2:ℝ)⁻¹ * x)
+      rw [hg]
+      show (auxF s X (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)
+          = (1/2 : ℂ) * (auxF s X ((2:ℝ)⁻¹ * x)
+            * Complex.exp (((2*u)*((2:ℝ)⁻¹ * x) : ℝ) * Complex.I))
+      rw [show (2:ℝ)⁻¹ * x = x/2 by ring]
+      rw [show ((2*u)*(x/2) : ℝ) = (u*x : ℝ) by ring]
+      ring
+    rw [h2, MeasureTheory.integral_const_mul, h1,
+      show |(((2:ℝ)⁻¹))⁻¹| = (2:ℝ) by norm_num, Complex.real_smul,
+      Complex.ofReal_ofNat]
+    ring
+  show ‖∫ x : ℝ, (auxF s X (x/2) / 2) * Complex.exp ((u*x : ℝ) * Complex.I)‖ ≤ C/u^2
+  rw [hFour, ← paperFourierIntegral_eq_muFT]
+  have h2u : γ₀ ≤ |2*u| := by
+    rw [abs_mul, abs_two]
+    have h0 := abs_nonneg u
+    linarith
+  refine le_trans (hφ (2*u) h2u) ?_
+  have hu0 : (0:ℝ) < u^2 := by
+    have h0 : u ≠ 0 := by
+      intro h0
+      rw [h0, abs_zero] at hu
+      linarith
+    positivity
+  rw [mul_pow]
+  rw [show (2:ℝ)^2 * u^2 = 4 * u^2 by ring]
+  refine div_le_div_of_nonneg_left hC.le hu0 ?_
+  linarith
+
 end DedekindResidue
