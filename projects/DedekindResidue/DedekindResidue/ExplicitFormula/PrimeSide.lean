@@ -31,6 +31,7 @@ Route: `.mathlib-quality/decomposition-sp2.md`, leaf SP2-vM.
 namespace DedekindResidue
 
 open MeasureTheory Complex NumberField
+open scoped ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
