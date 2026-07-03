@@ -887,4 +887,100 @@ theorem tendsto_const_piece (hFeven : ∀ x : ℝ, F (-x) = F x)
   rw [hlim] at h9
   exact h9
 
+/-- `Φ` on the critical line is the Fourier integral, in the window normal form. -/
+theorem paperPhi_half_line (F : ℝ → ℂ) (y : ℝ) :
+    paperPhi F (((1/2 : ℝ):ℂ) + (y:ℂ)*Complex.I)
+      = ∫ x : ℝ, F x * Complex.exp ((y*x : ℝ) * Complex.I) := by
+  have h0 : (((1/2 : ℝ):ℂ) + (y:ℂ)*Complex.I) = 1/2 + (y:ℂ)*Complex.I := by
+    push_cast
+    ring
+  rw [h0, paperPhi_half_add_mul_I, paperFourierIntegral]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  push_cast
+  ring_nf
+
+/-- **The Γ-edge limit** (Poitou p. 6-03, "Calcul de la partie archimédienne"):
+shift to the critical line, fold to the real part, and evaluate by `I_G`. -/
+theorem tendsto_gamma_edge (ha : 0 < a) (ha' : a ≤ 1/4)
+    (hF : Integrable F)
+    (hre : LocallyBoundedVariationOn (fun u : ℝ => (F u).re) Set.univ)
+    (him : LocallyBoundedVariationOn (fun u : ℝ => (F u).im) Set.univ)
+    (hF0 : Tendsto F (nhdsWithin 0 (Set.Ioi 0)) (nhds (F 0)))
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
+    (hFdiv2 : MemLp (fun x : ℝ => (F 0 - F x)/(x:ℂ)) 2 (volume : Measure ℝ))
+    (htop2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atTop (nhds 0))
+    (hbot2 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/2) x : ℝ) : ℂ)) t * gammaFT F t) atBot (nhds 0))
+    (htop4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atTop (nhds 0))
+    (hbot4 : Tendsto (fun t : ℝ =>
+      rhoFT (fun x => ((poitouKernel (1/4) x : ℝ) : ℂ)) t
+        * gammaFT (fun x : ℝ => F (x/2) / 2) t) atBot (nhds 0))
+    (hΦd : Differentiable ℂ (paperPhi F))
+    {B : ℝ → ℝ}
+    (hB : ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
+      ‖paperPhi F ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ B |t|)
+    (hBlog : Tendsto (fun T : ℝ => B T * Real.log (2+T)) atTop (nhds 0)) :
+    Tendsto (fun T : ℝ => ∫ y in (-T)..T,
+        (paperPhi F (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I)
+          + paperPhi F (1 - (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I)))
+          * logDeriv (gammaFactor K) (((1+a : ℝ):ℂ) + (y:ℂ)*Complex.I))
+      atTop (nhds (((2*π : ℝ) : ℂ) *
+        ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+              + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                * (Real.eulerMascheroniConstant + Real.log (8*π))
+              + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+          + (((NumberField.InfinitePlace.nrRealPlaces K
+              + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+              * (∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+              * ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)))) := by
+  -- the vertical integrals over ±T can be shifted to the critical line
+  obtain ⟨C₀, hC₀pos, hC₀⟩ := exists_norm_logDeriv_gammaFactor_le K
+  have hgb : ∀ σ t : ℝ, 1/2 ≤ σ → σ ≤ 1+a → 4 ≤ |t| →
+      ‖logDeriv (gammaFactor K) ((σ:ℂ) + (t:ℂ)*Complex.I)‖
+        ≤ (fun r : ℝ => C₀ * Real.log (2+r)) |t| := by
+    intro σ t h1 h2 h3
+    exact hC₀ σ t (by linarith) (by linarith) h3
+  have hlim' : Tendsto (fun T : ℝ => B T * ((fun r : ℝ => C₀ * Real.log (2+r)) T))
+      atTop (nhds 0) := by
+    have h0 := hBlog.const_mul C₀
+    rw [mul_zero] at h0
+    refine h0.congr (fun T => ?_)
+    show C₀ * (B T * Real.log (2+T)) = B T * (C₀ * Real.log (2+T))
+    ring
+  have hshift := tendsto_shift_vertical_sub ha hΦd
+    (fun s hs => differentiableAt_logDeriv_gammaFactor K hs) hB hgb hlim'
+  -- the critical-line integral is the I_G integrand
+  have hIG := tendsto_IG_gammaFactor K hF hre him hF0 hFeven hFdiv hFdiv2
+    htop2 hbot2 htop4 hbot4
+  have hhalf : Tendsto (fun T : ℝ => ∫ y in (-T)..T,
+      (paperPhi F (((1/2 : ℝ):ℂ) + (y:ℂ)*Complex.I)
+        + paperPhi F (1 - (((1/2 : ℝ):ℂ) + (y:ℂ)*Complex.I)))
+        * logDeriv (gammaFactor K) (((1/2 : ℝ):ℂ) + (y:ℂ)*Complex.I))
+      atTop (nhds (((2*π : ℝ) : ℂ) *
+        ((((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+              + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+                * (Real.eulerMascheroniConstant + Real.log (8*π))
+              + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ) * F 0
+          + (((NumberField.InfinitePlace.nrRealPlaces K
+              + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+              * (∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (F 0 - F y))
+          + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+              * ∫ y in Set.Ioi (0:ℝ),
+                ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (F 0 - F y)))) := by
+    refine hIG.congr (fun T => ?_)
+    rw [← integral_half_line_fold K hF hFeven (fun y => paperPhi_half_line F y) T]
+  -- assemble: edge = (edge - half) + half
+  have hcomb := hshift.add hhalf
+  rw [zero_add] at hcomb
+  refine hcomb.congr (fun T => ?_)
+  ring
+
 end DedekindResidue
