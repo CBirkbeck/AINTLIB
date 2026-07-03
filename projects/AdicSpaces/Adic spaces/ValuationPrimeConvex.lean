@@ -676,3 +676,47 @@ theorem le_convexSubgroupOfPrime_height_one (A : ValuationSubring K)
     (convexSubgroupOfPrime_antitone A h_key)
 
 end ValuationSubring
+
+/-! ### Height-one minimal primes over a divisibility-cofinal element ("microbe")
+
+The narrow lemma pair closing the "minimal prime above `φ(I)` is height-one" gap of
+`exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime` (ValuationContinuity):
+if `x ≠ 0` has *divisibility-cofinal powers* (every nonzero `p` divides some `x ^ n` —
+the ring-theoretic shadow of `v(x)`-powers being cofinal in the value group, which holds
+for images of an ideal of definition under a continuous valuation, Wedhorn Remark
+7.38/7.40(5)), then any prime strictly below a minimal prime over `(x)` is `⊥`, and every
+divisibility-cofinal element lies in that minimal prime. Both are general
+commutative-ring statements — no valuation-ring hypothesis needed. -/
+
+section MicrobeHeightOne
+
+variable {V : Type*} [CommRing V]
+
+/-- **Height-one**: if every nonzero `p` divides a power of `x`, a minimal prime `Q` over
+`(x)` has no prime strictly below it except `⊥`. (Wedhorn Rem 7.38/7.40(5) context: the
+support of the height-one vertical generization.) -/
+theorem Ideal.eq_bot_of_lt_of_mem_minimalPrimes_of_forall_dvd_pow
+    {x : V} (hcof : ∀ p : V, p ≠ 0 → ∃ n : ℕ, p ∣ x ^ n)
+    {Q : Ideal V} (hQ : Q ∈ (Ideal.span {x}).minimalPrimes)
+    (P' : Ideal V) [hP' : P'.IsPrime] (hlt : P' < Q) : P' = ⊥ := by
+  have hx_not_mem : x ∉ P' := by
+    intro hx_mem
+    exact absurd (hQ.2 ⟨hP', (Ideal.span_singleton_le_iff_mem P').mpr hx_mem⟩ hlt.le)
+      (not_le_of_gt hlt)
+  rw [Submodule.eq_bot_iff]
+  intro p hp
+  by_contra hp0
+  obtain ⟨n, c, hc⟩ := hcof p hp0
+  exact hx_not_mem (hP'.mem_of_pow_mem n (hc ▸ P'.mul_mem_right c hp))
+
+/-- Every divisibility-cofinal element lies in a minimal prime over `(x)` (`x ≠ 0`):
+`x` divides a power of `y` by `y`'s cofinality, which forces `y ∈ Q` by primality. -/
+theorem Ideal.mem_of_mem_minimalPrimes_of_forall_dvd_pow
+    {x : V} (hx0 : x ≠ 0)
+    {Q : Ideal V} (hQ : Q ∈ (Ideal.span {x}).minimalPrimes)
+    {y : V} (hycof : ∀ p : V, p ≠ 0 → ∃ n : ℕ, p ∣ y ^ n) : y ∈ Q := by
+  obtain ⟨n, c, hc⟩ := hycof x hx0
+  exact hQ.1.1.mem_of_pow_mem n
+    (hc ▸ Q.mul_mem_right c (hQ.1.2 (Ideal.mem_span_singleton_self x)))
+
+end MicrobeHeightOne

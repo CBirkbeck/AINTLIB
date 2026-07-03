@@ -12865,7 +12865,7 @@ the Tate unit) makes the corestriction open, hence a homeomorphism onto its rang
 topological embedding (here: inducing). -/
 theorem productRestrictionSub_isInducing_via_equalizer
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (C : RationalCovering A) (hC : C.IsRational) :
     Topology.IsInducing (productRestrictionSub A C) := by

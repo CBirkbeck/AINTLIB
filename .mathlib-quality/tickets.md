@@ -71,6 +71,46 @@ Dependencies: PB2←PB1; PB3←PB2; PB4←PB3; PB7,PB8 independent; PB9←PB8; P
 PB11←{PB4,PB10}; PB12←PB7-pattern (independent of PB10); PB13 independent; PB14←{PB5,PB6,PB12,PB13};
 PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: {PB1-6} ∥ {PB7-9} ∥ {PB13}.
 
+### C3 pipeline state (2026-07-03 beastmode, post-T-PB)
+
+- **Binder re-wire round 1**: `productRestrictionSub_isInducing_via_equalizer` now takes
+  `[HasLocLiftPowerBounded A]` (WCA:12868) — its path to carriers #2/#4 closed. Re-trace shows
+  the unfaithful instance now enters ONE decl deeper: `every_rational_cover_is_OXAcyclic`'s own
+  term synthesizes `hasLocLiftPowerBounded_of_stronglyNoetherianTate` (StructureSheaf:1725 →
+  primed Presheaf instance → carriers #2/#4). **Options**: (i) continue threading
+  `[HasLocLiftPowerBounded A]` binders down the WCA gluing chain (each round ≈ one WCA
+  recompile; chain is finite: every_rational_cover_is_OXAcyclic → imageCover → whole_space →
+  8.34 parts…); or (ii) just discharge the C3 leaves — #2/#4 are TRUE (7.41/7.52) and their
+  discharge kills the taint wherever it enters. **(ii) is primary; (i) is faithfulness polish.**
+- **NEW (proven, first try): microbe height-one lemma pair** (ValuationPrimeConvex.lean,
+  §MicrobeHeightOne, fully general commutative-ring statements):
+  `Ideal.eq_bot_of_lt_of_mem_minimalPrimes_of_forall_dvd_pow` (a minimal prime over a
+  divisibility-cofinal `x` is height-one) + `Ideal.mem_of_mem_minimalPrimes_of_forall_dvd_pow`
+  (every divisibility-cofinal element lies in it). These close the "minimal prime above `φ(I)`
+  in the valuation ring is height-1" gap named by
+  `exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime` (ValuationContinuity:999,
+  PROVEN modulo caller-supplied `Q`/`hht1`/`hJ_le_Q`). Also proven-status finding:
+  `exists_spa_point_via_restrictToConvex` (Lemma745:418) is SORRY-FREE.
+- **Remaining C3 glue (next tickets, in order)**:
+  1. **T-C3-COF**: the cofinality supplier — for the dominating `V₀` (or its
+     restrictIdealSingle-retracted refinement, T-SPVAI machinery), every `φ(I)`-image is
+     divisibility-cofinal (`∀ p ≠ 0, ∃ n, p ∣ x^n` in `V₀`). Source: continuity of
+     `pulledBackValuation` (`pulledBackValuation_isContinuous`, proven) + I-adic
+     top-nilpotence; Wedhorn Rem 7.38/7.40(5). ⚠ adversarial note: cofinality vs ALL of
+     `V₀` may need the retraction first (raw Chevalley `V₀` can have too-big value group —
+     exactly why Wedhorn retracts via 7.1.2 before generizing).
+  2. **T-C3-Q**: instantiate `Q` := minimal prime over one `φ(I)`-image `x ≠ 0`
+     (`Ideal.exists_minimalPrimes_le`), `hht1` := microbe lemma (a), `hJ_le_Q` := microbe
+     lemma (b) per image; feed `via_heightOne_ofPrime` → **carrier #3**
+     (exact-supp maximal case) and the `≥`-form → **carrier #5**.
+  3. **T-C3-52**: carrier #4 (`spa_point_nonOpen_of_rational_subset`) via
+     `exists_mem_rationalOpen_supp_ge_of_nonOpen_prime_mulArchimedean`
+     (ValuationContinuity:940, proven) + the same coarsening + the enlarged-domination
+     `hrat_compat` supplier (ValuationContinuity:1038+).
+  4. **T-LLBDD-WIRE** (carrier #2): valuative criterion at the COMPLETE `presheafValue D'`
+     (CompleteSpace holds by construction — the criterion's completeness is on the target
+     ring, not on `A`) + Spa-pullback of the rational containment.
+
 **Progress**:
 - 2026-07-03 (beastmode): **T-PB1..17 ALL DONE.** PB1–6 proven (Bounded.lean clean; + new public
   helper `isBounded_addSubgroupClosure`, pair-free 5.30(1); new import
