@@ -1,5 +1,6 @@
 module
 
+public import DedekindResidue.Lemma2
 public import DedekindResidue.ExplicitFormula.FourierJordan
 public import DedekindResidue.ExplicitFormula.RectangleContour
 
@@ -2923,7 +2924,7 @@ theorem integrable_muFT_mul_gammaFT {k F : ℝ → ℂ}
         (inv_ne_zero (neg_ne_zero.mpr (by positivity : (2*π : ℝ) ≠ 0)))]
       exact h0
     refine h1.congr (Filter.Eventually.of_forall (fun t => ?_))
-    congr 2 <;> · field_simp
+    field_simp
   -- transfer along a.e. equality
   have hμeq : ∀ t : ℝ, (∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I))
       = 𝓕 k (-t/(2*π)) := fun t => muFT_eq_fourierIntegral k t
@@ -2991,7 +2992,7 @@ theorem integral_muFT_mul_gammaFT {k F : ℝ → ℂ}
     rw [← MeasureTheory.Measure.integral_comp_mul_left
       (fun s : ℝ => repk s * reph s) ((-(2*π))⁻¹)]
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun t => ?_))
-    congr 2 <;> · field_simp
+    field_simp
   rw [h2]
   have h3 : |((-(2*π))⁻¹)⁻¹| = (2*π : ℝ) := by
     rw [inv_inv, abs_neg, abs_of_pos (by positivity)]
@@ -3084,48 +3085,12 @@ theorem abs_poitouKernel_le (σ : ℝ) (x : ℝ) :
       mul_pos (Real.exp_pos (-(σ*|x|))) hden]
 
 /-- The two-sided exponential `e^{-a|x|}` is integrable. -/
-theorem integrable_exp_neg_mul_abs {a : ℝ} (ha : 0 < a) :
-    Integrable (fun x : ℝ => Real.exp (-(a*|x|))) := by
-  have A : MeasurableEmbedding fun x : ℝ => -x :=
-    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
-  have hmap : (volume : Measure ℝ).restrict (Set.Iio (0:ℝ))
-      = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ioi (0:ℝ))) := by
-    rw [show Set.Ioi (0:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iio 0) by ext x; simp,
-      ← Measure.restrict_map A.measurable measurableSet_Iio,
-      Measure.map_neg_eq_self (volume : Measure ℝ)]
-  have hIoi : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) (Set.Ioi 0) := by
-    refine (exp_neg_integrableOn_Ioi (0:ℝ) ha).congr_fun (fun x hx => ?_) measurableSet_Ioi
-    rw [Set.mem_Ioi] at hx
-    rw [abs_of_pos hx]
-    ring_nf
-  have hIio : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) (Set.Iio 0) := by
-    rw [IntegrableOn, hmap, A.integrable_map_iff]
-    refine hIoi.congr ?_
-    refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
-    refine Filter.Eventually.of_forall (fun x hx => ?_)
-    show Real.exp (-(a*|x|)) = Real.exp (-(a*|(-x)|))
-    rw [abs_neg]
-  rw [← MeasureTheory.integrableOn_univ,
-    show (Set.univ : Set ℝ) = Set.Iio 0 ∪ Set.Ici 0 by rw [Set.Iio_union_Ici],
-    MeasureTheory.integrableOn_union]
-  constructor
-  · exact hIio
-  · have h8 : IntegrableOn (fun x : ℝ => Real.exp (-(a*|x|))) {(0:ℝ)} := by
-      rw [IntegrableOn, Measure.restrict_eq_zero.mpr (measure_singleton 0)]
-      exact integrable_zero_measure
-    have h9 : Set.Ici (0:ℝ) = {(0:ℝ)} ∪ Set.Ioi 0 := by
-      ext x
-      simp only [Set.mem_Ici, Set.mem_union, Set.mem_singleton_iff, Set.mem_Ioi]
-      constructor
-      · intro h'
-        rcases eq_or_lt_of_le h' with h'' | h''
-        · exact Or.inl h''.symm
-        · exact Or.inr h''
-      · rintro (h' | h')
-        · exact h'.ge
-        · exact h'.le
-    rw [h9]
-    exact MeasureTheory.IntegrableOn.union h8 hIoi
+theorem integrable_exp_neg_mul_abs' {a : ℝ} (ha : 0 < a) :
+    Integrable (fun x : ℝ => Real.exp (-(a*|x|))) :=
+  (integrable_exp_neg_mul_abs ha).congr
+    (Filter.Eventually.of_forall (fun x => by
+      show Real.exp (-a * |x|) = Real.exp (-(a * |x|))
+      rw [neg_mul]))
 
 /-- The exponential-polynomial majorant bound: `(1+|x|)e^{-a|x|} ≤ (1+2/a)e^{-a|x|/2}`. -/
 theorem one_add_abs_mul_exp_le {a : ℝ} (ha : 0 < a) (x : ℝ) :
@@ -3155,7 +3120,7 @@ theorem integrable_one_add_abs_mul_exp {a : ℝ} (ha : 0 < a) :
     fun_prop
   refine MeasureTheory.Integrable.mono'
     (g := fun x => (1 + 2/a) * Real.exp (-(a*|x|/2)))
-    (((integrable_exp_neg_mul_abs (show (0:ℝ) < a/2 by positivity)).congr
+    (((integrable_exp_neg_mul_abs' (show (0:ℝ) < a/2 by positivity)).congr
       (Filter.Eventually.of_forall (fun x => by
         show Real.exp (-(a/2*|x|)) = Real.exp (-(a*|x|/2))
         ring_nf))).const_mul _) hmeas ?_
@@ -3214,7 +3179,7 @@ theorem memLp_two_poitouKernel {σ : ℝ} (hσ : 0 < σ) :
       rw [sq, ← Real.exp_add]
       ring_nf
     refine MeasureTheory.Integrable.mono'
-      (((integrable_exp_neg_mul_abs hσ).const_mul ((1 + 2/σ)^2))) ?_ ?_
+      (((integrable_exp_neg_mul_abs' hσ).const_mul ((1 + 2/σ)^2))) ?_ ?_
     · refine Continuous.aestronglyMeasurable ?_
       fun_prop
     · refine Filter.Eventually.of_forall (fun x => ?_)

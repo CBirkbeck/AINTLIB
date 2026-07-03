@@ -21,4 +21,11 @@ public import DedekindResidue.CompletedZeta.FunctionalEquation
 public import DedekindResidue.CompletedZeta.GammaStrip
 public import DedekindResidue.CompletedZeta.AnalyticControl
 public import DedekindResidue.CompletedZeta.GRH
+public import DedekindResidue.ExplicitFormula.PhiTransform
+public import DedekindResidue.ExplicitFormula.RectangleContour
+public import DedekindResidue.ExplicitFormula.ZeroCapture
+public import DedekindResidue.ExplicitFormula.PrimeSide
+public import DedekindResidue.ExplicitFormula.FourierJordan
+public import DedekindResidue.ExplicitFormula.GammaSide
+public import DedekindResidue.ExplicitFormula.WeilAssembly
 public import DedekindResidue.MainTheorem
