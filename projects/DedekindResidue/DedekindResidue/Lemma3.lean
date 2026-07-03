@@ -702,6 +702,61 @@ theorem primeSideH_auxF_zero_split (a : ℝ) {σ X : ℝ} (hσ : 1 < σ) (hX : 1
             tsum_kernel_eq_log_zeta (K := K) hσ X],
           Complex.ofReal_add]
 
+/-! ### Lemma 3: the assembled display
+
+Combining the tsum form of the explicit formula, the three-series split of the zero
+side, and the plateau/log split of the prime side, and clearing `F_{σ,X}(0) = 1`,
+gives Belabas–Friedman's Lemma 3 in the canonical rearrangement: the logarithm term
+`2·T·e^{hT}·log ζ_K(σ)` equals the archimedean side minus the plateau defect minus
+the three zero-series. (The paper's eq. (13) is this identity divided by
+`2/g_σ(T) = 2·T·e^{hT}`.) -/
+
+/-- **Belabas–Friedman Lemma 3** (canonical rearrangement, real `σ > 1`): under GRH,
+$$ 2\,T e^{hT} \log ζ_K(σ) = Φ(0) + Φ(1) + \log Δ_K + c_Γ
+  + n_K ∫\frac{1-F}{2\sinh(y/2)} + r_1 ∫\frac{1-F}{2\cosh(y/2)}
+  - 2\!\!\sum_{mL ≤ T}\frac{\log N}{N^{m/2}}(1 - f_{σ,X}(mL))
+  - S_{\sin} - S_{\cos} + S_{\mathrm{int}}, $$
+where `S_sin`, `S_cos`, `S_int` are the three absolutely convergent zero-series of
+eq. (13) and `c_Γ = -(n_K(γ_E + \log 8π) + r_1 π/2)`. -/
+theorem lemma3_display (hGRH : GeneralizedRiemannHypothesis K)
+    {σ X : ℝ} (hσ : 1 < σ) (hX : 1 < X) {a : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4)
+    (has : a < σ - 1) :
+    2 * ((Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+        * Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re) : ℝ) : ℂ)
+      = (paperPhi (auxF (σ:ℂ) X) 0 + paperPhi (auxF (σ:ℂ) X) 1)
+        + ((Real.log |NumberField.discr K| : ℝ) : ℂ)
+        + (((-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)) : ℝ)) : ℂ)
+        + (((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ)) : ℂ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.sinh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+        + ((NumberField.InfinitePlace.nrRealPlaces K : ℕ) : ℂ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              ((1/(2 * Real.cosh (y/2)) : ℝ) : ℂ) * (1 - auxF (σ:ℂ) X y))
+        - 2 * ((∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+            (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+              then Real.log (Ideal.absNorm pk.1.1)
+                * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+                * (1 - Real.log X
+                    / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                    * Real.exp (-(σ - 1/2)
+                        * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                          - Real.log X)))
+              else 0) : ℝ) : ℂ)
+        - (∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroSinTerm (σ:ℂ) X ρ.1.im)
+        - (∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * zeroCosTerm (σ:ℂ) X ρ.1.im)
+        + ∑' ρ : ZetaZeros K,
+            (zetaZeroDivisor K ρ.1 : ℂ) * zeroIntTerm (σ:ℂ) X ρ.1.im := by
+  have hsre : a < ((σ:ℂ)).re - 1 := by rw [Complex.ofReal_re]; linarith
+  have hmain := tsum_zetaZeros_paperPhi_auxF_eq K hGRH (σ:ℂ) hX ha ha' hsre
+  rw [tsum_zetaZeros_paperPhi_auxF_split K hGRH hσ hX,
+    primeSideH_auxF_zero_split K a hσ hX, auxF_zero (σ:ℂ) hX.le] at hmain
+  simp only [mul_one] at hmain
+  linear_combination hmain
+
 end DedekindResidue
 
 end
