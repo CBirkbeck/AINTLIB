@@ -1019,7 +1019,7 @@ noncomputable def vonMangoldtSum (K : Type*) [Field K] [NumberField K] (σ : ℝ
 
 /-- **The prime side at the Landau–Stark function is the von Mangoldt sum**:
 `H(0) = Σ log N𝔭 · N𝔭^{−m/2}·e^{−h·m·log N𝔭} = Σ log N𝔭 · N𝔭^{−mσ}`, `σ = h+1/2`. -/
-theorem primeSideH_expTest_zero_eq (a : ℝ) {h : ℝ} (hh : 0 < h) :
+theorem primeSideH_expTest_zero_eq (a : ℝ) {h : ℝ} (_ : 0 < h) :
     primeSideH K a (expTest h) 0 = ((vonMangoldtSum K (h + 1/2) : ℝ) : ℂ) := by
   rw [primeSideH_auxF_zero_eq, vonMangoldtSum, Complex.ofReal_tsum]
   refine tsum_congr (fun pk => ?_)

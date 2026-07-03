@@ -586,6 +586,131 @@ theorem cosh_int_two :
     norm_num
   rw [hsplit, integral_inv_two_cosh_half, hJ]
 
+/-! ### The `d_{K,σ}` numerics (T12-b N3) -/
+
+/-- `ℚ` has exactly one real place. -/
+theorem nrRealPlaces_rat : NumberField.InfinitePlace.nrRealPlaces ℚ = 1 :=
+  NumberField.InfinitePlace.nrRealPlaces_eq_one_of_finrank_eq_one (Module.finrank_self ℚ)
+
+/-- `ℚ` has no complex places. -/
+theorem nrComplexPlaces_rat : NumberField.InfinitePlace.nrComplexPlaces ℚ = 0 := by
+  have h := NumberField.InfinitePlace.card_add_two_mul_card_eq_rank ℚ
+  rw [nrRealPlaces_rat, Module.finrank_self] at h
+  omega
+
+/-- **`I_sinh(2) = 1 + 2 log 2`** from the recurrence and `I_sinh(1) = 2 log 2`. -/
+theorem sinh_int_two :
+    (∫ y in Set.Ioi (0:ℝ),
+        1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((2:ℝ) - 1/2) * y)))
+      = 1 + 2 * Real.log 2 := by
+  have h := sinh_int_rec (σ := 1) (by norm_num)
+  rw [sinh_int_one] at h
+  rw [show ((2:ℝ) - 1/2) = ((1:ℝ)+1) - 1/2 by norm_num, h]
+  ring
+
+/-- The von Mangoldt Dirichlet sum is nonnegative. -/
+theorem vonMangoldtSum_nonneg (σ : ℝ) : 0 ≤ vonMangoldtSum K σ :=
+  tsum_nonneg fun _ => mul_nonneg (Real.log_natCast_nonneg _)
+    (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+
+/-- **`d_{ℚ,2} = 2W + γ + log π − 1`**, `W = vonMangoldtSum ℚ 2` (B–F lines 603–612 at
+`k = ℚ`, `σ = 2`): with `n = r₁ = 1`, `I_sinh(2) = 1 + 2 log 2`,
+`I_cosh(2) = π/2 − (1 − log 2)` and `log 8π = 3 log 2 + log π`, the Γ-constant and the
+archimedean integrals collapse elementarily. -/
+theorem dSigma_rat_two_eq :
+    dSigma ℚ 2 = 2 * vonMangoldtSum ℚ 2
+      + Real.eulerMascheroniConstant + Real.log π - 1 := by
+  have hlog8π : Real.log (8*π) = 3 * Real.log 2 + Real.log π := by
+    rw [Real.log_mul (by norm_num) Real.pi_ne_zero,
+      show (8:ℝ) = 2^3 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  rw [dSigma, nrRealPlaces_rat, nrComplexPlaces_rat, sinh_int_two, cosh_int_two, hlog8π]
+  push_cast
+  ring
+
+/-- **The lower bound `d_{K,σ} ≥ 2γ + 2 log 2π − 3`** for `1 < σ ≤ 2`, `n ≥ 2`
+(B–F lines 603–612): drop `W ≥ 0` and `r₁·(π/2 − I_cosh) ≥ 0`, bound
+`n·(γ + log 8π − I_sinh(σ)) ≥ 2·(…)` (the bracket is nonnegative since
+`I_sinh(σ) ≤ I_sinh(2) = 1 + 2log2 < γ + log 8π`), and use
+`I_sinh(σ) + 1/σ = I_sinh(σ+1) ≤ I_sinh(3) = 3/2 + 2 log 2`. -/
+theorem dSigma_ge (hn : 1 < Module.finrank ℚ K) {σ : ℝ} (hσ : 1 < σ) (hσ2 : σ ≤ 2) :
+    2 * Real.eulerMascheroniConstant + 2 * Real.log (2*π) - 3 ≤ dSigma K σ := by
+  have hσh : (1:ℝ)/2 < σ := by linarith
+  -- the sinh integral at σ, bounded via the recurrence and monotonicity
+  have hrec := sinh_int_rec hσh
+  have hmono := sinh_int_mono (σ := σ + 1) (σ' := 3) (by linarith) (by linarith)
+  have h3 : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-((3:ℝ) - 1/2) * y)))
+      = 3/2 + 2 * Real.log 2 := by
+    have h := sinh_int_rec (σ := 2) (by norm_num)
+    rw [sinh_int_two] at h
+    rw [show ((3:ℝ) - 1/2) = ((2:ℝ)+1) - 1/2 by norm_num, h]
+    ring
+  have hIs_le : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+      ≤ 3/2 + 2 * Real.log 2 - 1/σ := by
+    rw [h3] at hmono
+    linarith
+  -- the cosh integral is at most π/2
+  have hIc_le := cosh_int_le hσh
+  -- numeric certificates for the bracket
+  have hγ : (1:ℝ)/2 < Real.eulerMascheroniConstant :=
+    Real.one_half_lt_eulerMascheroniConstant
+  have hl2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have hl3 : (1.0986122885 : ℝ) < Real.log 3 := Real.log_three_gt_d9
+  have hlπ : Real.log 3 ≤ Real.log π :=
+    Real.log_le_log (by norm_num) Real.pi_gt_three.le
+  have hlog8π : Real.log (8*π) = 3 * Real.log 2 + Real.log π := by
+    rw [Real.log_mul (by norm_num) Real.pi_ne_zero,
+      show (8:ℝ) = 2^3 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  have hlog2π : Real.log (2*π) = Real.log 2 + Real.log π :=
+    Real.log_mul (by norm_num) Real.pi_ne_zero
+  have hσ0 : (0:ℝ) < σ := by linarith
+  have hinvσ : (1:ℝ)/2 ≤ 1/σ := by
+    rw [div_le_div_iff₀ (by norm_num) hσ0]
+    linarith
+  -- the bracket `γ + log 8π − I_sinh(σ) ≥ 0` (in `3log2 + logπ` form)
+  have hbr : 0 ≤ Real.eulerMascheroniConstant + (3 * Real.log 2 + Real.log π)
+      - (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) := by
+    linarith
+  -- place counts
+  have hW := vonMangoldtSum_nonneg K σ
+  have hcard := NumberField.InfinitePlace.card_add_two_mul_card_eq_rank K
+  have hcardR : (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+      + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ)
+      = (Module.finrank ℚ K : ℝ) := by
+    rw [← hcard]
+    push_cast
+    ring
+  have hsumcast : ((NumberField.InfinitePlace.nrRealPlaces K
+      + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ) : ℝ)
+      = (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) := by
+    push_cast
+    ring
+  have hn2R : (2:ℝ) ≤ (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+      + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ) := by
+    rw [hcardR]
+    have : (2:ℕ) ≤ Module.finrank ℚ K := hn
+    exact_mod_cast this
+  have hr1nn : (0:ℝ) ≤ (NumberField.InfinitePlace.nrRealPlaces K : ℝ) :=
+    Nat.cast_nonneg _
+  -- assemble, over opaque atoms
+  rw [dSigma, hsumcast, hlog8π, hlog2π]
+  generalize hISg : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) = IS at hIs_le hbr ⊢
+  generalize hICg : (∫ y in Set.Ioi (0:ℝ),
+      1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y))) = IC at hIc_le ⊢
+  generalize hR1g : (NumberField.InfinitePlace.nrRealPlaces K : ℝ) = R1 at hn2R hr1nn ⊢
+  generalize hR2g : (NumberField.InfinitePlace.nrComplexPlaces K : ℝ) = R2 at hn2R ⊢
+  nlinarith [mul_nonneg (by linarith : (0:ℝ) ≤ R1 + 2*R2 - 2) hbr,
+    mul_nonneg hr1nn (by linarith : (0:ℝ) ≤ π/2 - IC), hW, hIs_le,
+    (by ring : (2:ℝ)/σ = 2*(1/σ))]
+
 end DedekindResidue
 
 end
