@@ -3480,4 +3480,229 @@ theorem prop3_poitou {σ : ℝ} (hσ : 0 < σ) {F : ℝ → ℂ} (hF : Integrabl
   rw [hval] at h0
   exact h0
 
+/-- `logDeriv` of a natural power. -/
+theorem logDeriv_pow' {f : ℂ → ℂ} {x : ℂ} (n : ℕ) (hf : f x ≠ 0)
+    (hd : DifferentiableAt ℂ f x) :
+    logDeriv (fun y => f y ^ n) x = n * logDeriv f x := by
+  induction n with
+  | zero =>
+    simp only [pow_zero, Nat.cast_zero, zero_mul]
+    exact congrFun (logDeriv_const 1) x
+  | succ n ih =>
+    have h0 : (fun y => f y ^ (n+1)) = fun y => (f y ^ n) * f y := by
+      funext y
+      rw [pow_succ]
+    rw [h0, logDeriv_mul (f := fun y => f y ^ n) (g := f) x (pow_ne_zero n hf) hf
+      (hd.pow n) hd, ih]
+    push_cast
+    ring
+
+/-- **`d log Γℝ`** (Γψ-b, Poitou p. 6-03): `(Γℝ'/Γℝ)(s) = -½ log π + ½ ψ(s/2)`. -/
+theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
+    logDeriv Complex.Gammaℝ s
+      = -(1/2) * Complex.log π + (1/2) * Complex.digamma (s/2) := by
+  have hs2 : 0 < (s/2).re := by
+    have h0 : (s/2 : ℂ).re = s.re / 2 := by
+      simp
+    rw [h0]
+    linarith
+  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hfun : Complex.Gammaℝ = fun s : ℂ => (π:ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) :=
+    funext Complex.Gammaℝ_def
+  rw [hfun]
+  -- split the product
+  have hpow_ne : (π:ℂ) ^ (-s / 2) ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff, not_and_or]
+    exact Or.inl hπ
+  have hΓ_ne : Complex.Gamma (s / 2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hs2
+  have hd1 : DifferentiableAt ℂ (fun w : ℂ => (π:ℂ) ^ (-w / 2)) s := by
+    have h0 : HasDerivAt (fun w : ℂ => -w / 2) (-(1/2)) s := by
+      have h1 : HasDerivAt (fun w : ℂ => w) 1 s := hasDerivAt_id s
+      have h2 := (h1.neg).div_const 2
+      have h3 : -(1:ℂ)/2 = -(1/2) := by ring
+      rw [h3] at h2
+      exact h2
+    exact ((h0.const_cpow (Or.inl hπ)).differentiableAt)
+  have hd2 : DifferentiableAt ℂ (fun w : ℂ => Complex.Gamma (w / 2)) s := by
+    have h0 : DifferentiableAt ℂ Complex.Gamma (s / 2) := by
+      refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+      intro heq
+      have := congrArg Complex.re heq
+      simp only [Complex.neg_re, Complex.natCast_re] at this
+      rw [this] at hs2
+      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+      linarith
+    exact h0.comp s (differentiableAt_id.div_const 2)
+  rw [logDeriv_mul s hpow_ne hΓ_ne hd1 hd2]
+  -- the power part
+  have hlog1 : logDeriv (fun w : ℂ => (π:ℂ) ^ (-w / 2)) s = -(1/2) * Complex.log π := by
+    rw [logDeriv_apply]
+    have h0 : HasDerivAt (fun w : ℂ => -w / 2) (-(1/2)) s := by
+      have h1 := (hasDerivAt_id s).neg.div_const (2:ℂ)
+      have h3 : -(1:ℂ)/2 = -(1/2) := by ring
+      rw [h3] at h1
+      exact h1
+    have h1 := h0.const_cpow (c := (π:ℂ)) (Or.inl hπ)
+    rw [h1.deriv]
+    field_simp
+  -- the Gamma part via the chain rule
+  have hlog2 : logDeriv (fun w : ℂ => Complex.Gamma (w / 2)) s
+      = (1/2) * Complex.digamma (s/2) := by
+    have h0 : (fun w : ℂ => Complex.Gamma (w / 2))
+        = Complex.Gamma ∘ (fun w : ℂ => w / 2) := rfl
+    rw [h0, logDeriv_comp ?_ ?_]
+    · rw [show deriv (fun w : ℂ => w / 2) s = 1/2 from by
+        rw [deriv_div_const, deriv_id'']
+      ]
+      rw [Complex.digamma_def]
+      ring
+    · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+      intro heq
+      have := congrArg Complex.re heq
+      simp only [Complex.neg_re, Complex.natCast_re] at this
+      rw [this] at hs2
+      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+      linarith
+    · exact differentiableAt_id.div_const 2
+  rw [hlog1, hlog2]
+
+/-- Differentiability of `Γℝ` on the right half-plane. -/
+theorem differentiableAt_Gammaℝ_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ Complex.Gammaℝ s := by
+  have hs2 : 0 < (s/2).re := by
+    have h0 : (s/2 : ℂ).re = s.re / 2 := by simp
+    rw [h0]
+    linarith
+  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hfun : Complex.Gammaℝ = fun s : ℂ => (π:ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) :=
+    funext Complex.Gammaℝ_def
+  rw [hfun]
+  refine DifferentiableAt.mul ?_ ?_
+  · have h0 : HasDerivAt (fun w : ℂ => -w / 2) (-(1/2)) s := by
+      have h1 := (hasDerivAt_id s).neg.div_const (2:ℂ)
+      have h3 : -(1:ℂ)/2 = -(1/2) := by ring
+      rw [h3] at h1
+      exact h1
+    exact (h0.const_cpow (Or.inl hπ)).differentiableAt
+  · have h0 : DifferentiableAt ℂ Complex.Gamma (s / 2) := by
+      refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+      intro heq
+      have := congrArg Complex.re heq
+      simp only [Complex.neg_re, Complex.natCast_re] at this
+      rw [this] at hs2
+      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+      linarith
+    exact h0.comp s (differentiableAt_id.div_const 2)
+
+/-- `Γℂ` is nonvanishing on the right half-plane. -/
+theorem Gammaℂ_ne_zero_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    Complex.Gammaℂ s ≠ 0 := by
+  have hbase : (2 * (π : ℂ)) ≠ 0 :=
+    mul_ne_zero two_ne_zero (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)
+  rw [Complex.Gammaℂ_def]
+  refine mul_ne_zero (mul_ne_zero two_ne_zero ?_) (Complex.Gamma_ne_zero_of_re_pos hs)
+  rw [Ne, Complex.cpow_eq_zero_iff, not_and_or]
+  exact Or.inl hbase
+
+/-- Differentiability of `Γℂ` on the right half-plane. -/
+theorem differentiableAt_Gammaℂ_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ Complex.Gammaℂ s := by
+  have hbase : (2 * (π : ℂ)) ≠ 0 :=
+    mul_ne_zero two_ne_zero (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)
+  have hfun : Complex.Gammaℂ
+      = fun s : ℂ => 2 * (2 * (π:ℂ)) ^ (-s) * Complex.Gamma s :=
+    funext Complex.Gammaℂ_def
+  rw [hfun]
+  refine DifferentiableAt.mul (DifferentiableAt.const_mul ?_ 2) ?_
+  · exact ((hasDerivAt_id s).neg.const_cpow (Or.inl hbase)).differentiableAt
+  · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+    intro heq
+    have := congrArg Complex.re heq
+    simp only [Complex.neg_re, Complex.natCast_re] at this
+    rw [this] at hs
+    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+    linarith
+
+/-- **`d log Γℂ`** (Γψ-b): `(Γℂ'/Γℂ)(s) = -log(2π) + ψ(s)` on the right half-plane. -/
+theorem logDeriv_Gammaℂ {s : ℂ} (hs : 0 < s.re) :
+    logDeriv Complex.Gammaℂ s
+      = -Complex.log (2*π) + Complex.digamma s := by
+  have hbase : (2 * (π : ℂ)) ≠ 0 :=
+    mul_ne_zero two_ne_zero (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)
+  have hfun : Complex.Gammaℂ
+      = fun s : ℂ => 2 * (2 * (π:ℂ)) ^ (-s) * Complex.Gamma s :=
+    funext Complex.Gammaℂ_def
+  rw [hfun]
+  have hpow_ne : (2 * (π:ℂ)) ^ (-s) ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff, not_and_or]
+    exact Or.inl hbase
+  have hΓ_ne : Complex.Gamma s ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hs
+  have hd1 : DifferentiableAt ℂ (fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) s :=
+    DifferentiableAt.const_mul
+      (((hasDerivAt_id s).neg.const_cpow (Or.inl hbase)).differentiableAt) 2
+  have hdΓ : DifferentiableAt ℂ Complex.Gamma s := by
+    refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+    intro heq
+    have := congrArg Complex.re heq
+    simp only [Complex.neg_re, Complex.natCast_re] at this
+    rw [this] at hs
+    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+    linarith
+  rw [logDeriv_mul (f := fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) (g := Complex.Gamma) s
+    (mul_ne_zero two_ne_zero hpow_ne) hΓ_ne hd1 hdΓ]
+  have h1 : logDeriv (fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) s = -Complex.log (2*π) := by
+    rw [logDeriv_const_mul s 2 two_ne_zero]
+    rw [logDeriv_apply]
+    have h0 : HasDerivAt (fun w : ℂ => -w) (-1) s := (hasDerivAt_id s).neg
+    have h1 := h0.const_cpow (c := 2 * (π:ℂ)) (Or.inl hbase)
+    rw [h1.deriv]
+    field_simp
+  rw [h1, Complex.digamma_def]
+
+/-- **`d log γ_K`** (Γψ-b, Poitou p. 6-03): on the right half-plane,
+`(γ_K'/γ_K)(s) = r₁(-½ log π + ½ ψ(s/2)) + r₂(-log 2π + ψ(s))`. -/
+theorem logDeriv_gammaFactor (K : Type*) [Field K] [NumberField K] {s : ℂ}
+    (hs : 0 < s.re) :
+    logDeriv (gammaFactor K) s
+      = (NumberField.InfinitePlace.nrRealPlaces K)
+          * (-(1/2) * Complex.log π + (1/2) * Complex.digamma (s/2))
+        + (NumberField.InfinitePlace.nrComplexPlaces K)
+          * (-Complex.log (2*π) + Complex.digamma s) := by
+  have hfun : gammaFactor K = fun s : ℂ =>
+      (Complex.Gammaℝ s) ^ NumberField.InfinitePlace.nrRealPlaces K
+        * (Complex.Gammaℂ s) ^ NumberField.InfinitePlace.nrComplexPlaces K := rfl
+  rw [hfun]
+  rw [logDeriv_mul
+    (f := fun s : ℂ => (Complex.Gammaℝ s) ^ NumberField.InfinitePlace.nrRealPlaces K)
+    (g := fun s : ℂ => (Complex.Gammaℂ s) ^ NumberField.InfinitePlace.nrComplexPlaces K)
+    s (pow_ne_zero _ (Complex.Gammaℝ_ne_zero_of_re_pos hs))
+    (pow_ne_zero _ (Gammaℂ_ne_zero_of_re_pos hs))
+    ((differentiableAt_Gammaℝ_of_re_pos hs).pow _)
+    ((differentiableAt_Gammaℂ_of_re_pos hs).pow _)]
+  rw [logDeriv_pow' _ (Complex.Gammaℝ_ne_zero_of_re_pos hs)
+    (differentiableAt_Gammaℝ_of_re_pos hs)]
+  rw [logDeriv_pow' _ (Gammaℂ_ne_zero_of_re_pos hs)
+    (differentiableAt_Gammaℂ_of_re_pos hs)]
+  rw [logDeriv_Gammaℝ hs, logDeriv_Gammaℂ hs]
+
+/-- `logDeriv` of a `c^{s/2}`-prefactor: `(c^{s/2}·f)'/(c^{s/2}·f) = ½ log c + f'/f`. -/
+theorem logDeriv_cpow_half_mul {c : ℂ} (hc : c ≠ 0) {f : ℂ → ℂ} {s : ℂ}
+    (hf : f s ≠ 0) (hd : DifferentiableAt ℂ f s) :
+    logDeriv (fun w : ℂ => c ^ (w/2) * f w) s
+      = (1/2) * Complex.log c + logDeriv f s := by
+  have hpow_ne : c ^ (s/2) ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff, not_and_or]
+    exact Or.inl hc
+  have h0 : HasDerivAt (fun w : ℂ => w / 2) (1/2) s := by
+    have h1 := (hasDerivAt_id s).div_const (2:ℂ)
+    have h3 : (1:ℂ)/2 = 1/2 := by norm_num
+    rw [h3] at h1
+    exact h1
+  have hd1 : DifferentiableAt ℂ (fun w : ℂ => c ^ (w/2)) s :=
+    (h0.const_cpow (Or.inl hc)).differentiableAt
+  rw [logDeriv_mul (f := fun w : ℂ => c ^ (w/2)) (g := f) s hpow_ne hf hd1 hd]
+  congr 1
+  rw [logDeriv_apply, (h0.const_cpow (Or.inl hc)).deriv]
+  field_simp
+
 end DedekindResidue
