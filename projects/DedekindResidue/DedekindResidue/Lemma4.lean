@@ -792,6 +792,138 @@ theorem integral_Ioi_inv_exp_add_one {U : ℝ} (hU : 0 < U) :
   ring
 
 
+/-! ### The inner archimedean bound (c4-C2b)
+
+For `y > U` the cut kernel is at most `(h+1/U)e^{−h(y−U)}`, the combined weights are
+`1/(2sinh(y/2)) + 1/(2cosh(y/2)) = e^{y/2}(1/(e^y−1) + 1/(e^y+1))`, and for
+`h ≥ 1/2` the exponentials collapse to the `h`-free `e^{U/2}`, leaving exactly the
+closed-form tails of `archKernelL U`. -/
+
+theorem two_sinh_half_eq {y : ℝ} : 2 * Real.sinh (y/2)
+    = Real.exp (-(y/2)) * (Real.exp y - 1) := by
+  have h1 : Real.exp (-(y/2)) * Real.exp y = Real.exp (y/2) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [Real.sinh_eq, mul_sub, mul_one, h1]
+  ring
+
+theorem two_cosh_half_eq {y : ℝ} : 2 * Real.cosh (y/2)
+    = Real.exp (-(y/2)) * (Real.exp y + 1) := by
+  have h1 : Real.exp (-(y/2)) * Real.exp y = Real.exp (y/2) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [Real.cosh_eq, mul_add, mul_one, h1]
+  ring
+
+/-- **(C2b) The inner bound**: for `1 ≤ σ` and `U > 0`,
+`∫_{y>U} (1/(2sinh(y/2)) + 1/(2cosh(y/2)))·cutKernel σ y U dy
+  ≤ (h + 1/U)·e^{U/2}·L(U)`. -/
+theorem inner_arch_bound {σ : ℝ} (hσ1 : 1 ≤ σ) {U : ℝ} (hU : 0 < U) :
+    ∫ y in Set.Ioi U,
+      (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+      ≤ (σ - 1/2 + 1/U) * Real.exp (U/2) * archKernelL U := by
+  have hh : (1:ℝ)/2 ≤ σ - 1/2 := by linarith
+  have hh0 : (0:ℝ) < σ - 1/2 := by linarith
+  have hσ2 : (1:ℝ)/2 < σ := by linarith
+  have hmajint : MeasureTheory.IntegrableOn (fun y : ℝ =>
+      (σ - 1/2 + 1/U) * Real.exp (U/2) * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)))
+      (Set.Ioi U) :=
+    (((integrableOn_inv_exp_sub_one hU).add
+      (integrableOn_inv_exp_add_one hU)).const_mul _)
+  have hwcont : ContinuousOn (fun y : ℝ =>
+      1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) (Set.Ioi U) := by
+    refine ContinuousOn.add ?_ ?_
+    · refine continuousOn_const.div (by fun_prop) (fun y hy => ?_)
+      have hs : 0 < Real.sinh (y/2) :=
+        Real.sinh_pos_iff.mpr (by linarith [hU.trans hy])
+      positivity
+    · refine continuousOn_const.div (by fun_prop) (fun y _ => ?_)
+      have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+      positivity
+  have hmeasK : Measurable (fun y : ℝ => cutKernel σ y U) := by
+    unfold cutKernel
+    refine Measurable.ite (measurableSet_lt measurable_const measurable_id) ?_
+      measurable_const
+    fun_prop
+  have hptnn : ∀ y ∈ Set.Ioi U,
+      0 ≤ (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U := by
+    intro y hy
+    have hy0 : 0 < y := hU.trans hy
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+    exact mul_nonneg (by positivity) (cutKernel_nonneg hσ2 hy0 hU.le)
+  have hptbound : ∀ y ∈ Set.Ioi U,
+      (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+      ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+    intro y hy
+    have hyU : U < y := hy
+    have hy0 : 0 < y := hU.trans hyU
+    have hs : 0 < Real.sinh (y/2) := Real.sinh_pos_iff.mpr (by linarith)
+    have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
+    have hey : 1 < Real.exp y := by
+      calc (1:ℝ) = Real.exp 0 := Real.exp_zero.symm
+        _ < Real.exp y := Real.exp_lt_exp.mpr hy0
+    have hkernel : cutKernel σ y U
+        ≤ (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by
+      rw [cutKernel, if_pos hyU]
+      have h1 : (1 + (σ - 1/2)*U)/y ≤ (1 + (σ - 1/2)*U)/U := by
+        gcongr
+      have h2 : (1 + (σ - 1/2)*U)/U = σ - 1/2 + 1/U := by
+        field_simp
+        ring
+      calc (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U))
+          ≤ (1 + (σ - 1/2)*U)/U * Real.exp (-(σ - 1/2)*(y - U)) :=
+            mul_le_mul_of_nonneg_right h1 (Real.exp_pos _).le
+        _ = (σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U)) := by rw [h2]
+    have hwsum : 1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))
+        = Real.exp (y/2) * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+      rw [two_sinh_half_eq, two_cosh_half_eq, one_div, one_div, mul_inv, mul_inv,
+        Real.exp_neg, inv_inv, mul_add, one_div, one_div]
+    have hwpos : 0 ≤ 1/(Real.exp y - 1) + 1/(Real.exp y + 1) := by positivity
+    have hexp_collapse : Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U))
+        ≤ Real.exp (U/2) := by
+      rw [← Real.exp_add]
+      refine Real.exp_le_exp.mpr ?_
+      have h7 : (1/2)*(y - U) ≤ (σ - 1/2)*(y - U) :=
+        mul_le_mul_of_nonneg_right hh (by linarith)
+      linarith
+    calc (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+        ≤ (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2)))
+            * ((σ - 1/2 + 1/U) * Real.exp (-(σ - 1/2)*(y - U))) :=
+          mul_le_mul_of_nonneg_left hkernel (by positivity)
+      _ = (σ - 1/2 + 1/U) * (Real.exp (y/2) * Real.exp (-(σ - 1/2)*(y - U)))
+            * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+          rw [hwsum]
+          ring
+      _ ≤ (σ - 1/2 + 1/U) * Real.exp (U/2)
+            * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) := by
+          refine mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left hexp_collapse (by positivity)) hwpos
+  have hint : MeasureTheory.IntegrableOn (fun y : ℝ =>
+      (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U)
+      (Set.Ioi U) := by
+    refine MeasureTheory.Integrable.mono' hmajint
+      ((hwcont.aestronglyMeasurable measurableSet_Ioi).mul
+        hmeasK.aestronglyMeasurable) ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with y hy
+    rw [Real.norm_eq_abs, abs_of_nonneg (hptnn y hy)]
+    exact hptbound y hy
+  calc ∫ y in Set.Ioi U,
+        (1/(2*Real.sinh (y/2)) + 1/(2*Real.cosh (y/2))) * cutKernel σ y U
+      ≤ ∫ y in Set.Ioi U, (σ - 1/2 + 1/U) * Real.exp (U/2)
+          * (1/(Real.exp y - 1) + 1/(Real.exp y + 1)) :=
+        MeasureTheory.setIntegral_mono_on hint hmajint measurableSet_Ioi hptbound
+    _ = (σ - 1/2 + 1/U) * Real.exp (U/2) * archKernelL U := by
+        rw [MeasureTheory.integral_const_mul,
+          MeasureTheory.integral_add (integrableOn_inv_exp_sub_one hU)
+            (integrableOn_inv_exp_add_one hU),
+          integral_Ioi_inv_exp_sub_one hU, integral_Ioi_inv_exp_add_one hU,
+          archKernelL]
+        ring
+
 end DedekindResidue
 
 end
