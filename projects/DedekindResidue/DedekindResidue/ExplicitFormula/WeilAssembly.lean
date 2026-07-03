@@ -2669,4 +2669,157 @@ theorem mul_paperPhi_auxF_eq (s : ℂ) {X : ℝ} (hX : 1 < X) {z : ℂ}
   rw [hDSeq]
   ring
 
+/-- **`hB` at the auxiliary function**: the σ-uniform band bound
+`‖Φ_{F_{s,X}}(σ+it)‖ ≤ M/max(|t|,1)` on `-a ≤ σ ≤ 1+a`, for `0 < a < Re s - 1`.
+Small `|t|` by the trivial `L¹` bound, large `|t|` by the integrated-by-parts
+identity and `‖w‖ ≥ |t|`. -/
+theorem exists_band_bound_paperPhi_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) {a : ℝ}
+    (ha : 0 < a) (has : a < s.re - 1) :
+    ∃ M : ℝ, 0 ≤ M ∧ ∀ σ t : ℝ, -a ≤ σ → σ ≤ 1+a →
+      ‖paperPhi (auxF s X) ((σ:ℂ) + (t:ℂ)*Complex.I)‖ ≤ M / max |t| 1 := by
+  have hb0 : 0 < Real.log X := Real.log_pos hX
+  have hδ : 0 < (s.re - 1/2) - (1/2 + a) := by linarith
+  -- the trivial full-line majorant constant
+  set M₀ : ℝ := ∫ x : ℝ, Real.exp ((s.re - 1/2) * Real.log X)
+    * Real.exp (-((s.re - 1/2) - (1/2 + a)) * |x|) with hM₀
+  have hM₀int : Integrable (fun x : ℝ => Real.exp ((s.re - 1/2) * Real.log X)
+      * Real.exp (-((s.re - 1/2) - (1/2 + a)) * |x|)) :=
+    (integrable_exp_neg_mul_abs hδ).const_mul _
+  have hM₀nn : 0 ≤ M₀ := by
+    rw [hM₀]
+    refine MeasureTheory.integral_nonneg (fun x => ?_)
+    positivity
+  -- the tail-integral majorant constant
+  set V₀ : ℝ := ∫ x in Set.Ioi (Real.log X),
+    2 * Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+      * Real.exp (-((s.re - 1/2) - (1/2 + a)) * x) with hV₀
+  have hV₀int : IntegrableOn (fun x : ℝ =>
+      2 * Real.exp ((s.re - 1/2) * Real.log X) * (‖s - (1/2 : ℂ)‖ + 1/Real.log X)
+        * Real.exp (-((s.re - 1/2) - (1/2 + a)) * x)) (Set.Ioi (Real.log X)) :=
+    (exp_neg_integrableOn_Ioi (Real.log X) hδ).const_mul _
+  have hV₀nn : 0 ≤ V₀ := by
+    rw [hV₀]
+    refine MeasureTheory.integral_nonneg (fun x => ?_)
+    positivity
+  refine ⟨max M₀ V₀, le_trans hM₀nn (le_max_left _ _), fun σ t h1 h2 => ?_⟩
+  set z : ℂ := (σ:ℂ) + (t:ℂ)*Complex.I with hz
+  have hwre : (z - 1/2).re = σ - 1/2 := by
+    rw [hz]
+    simp [Complex.add_re, Complex.sub_re, Complex.mul_re]
+  have hwim : (z - 1/2).im = t := by
+    rw [hz]
+    simp [Complex.add_im, Complex.sub_im, Complex.mul_im]
+  have hwabs : |(z - 1/2).re| ≤ 1/2 + a := by
+    rw [hwre, abs_le]
+    constructor <;> linarith
+  have hwlt : |(z - 1/2).re| < s.re - 1/2 := lt_of_le_of_lt hwabs (by linarith)
+  -- the two kernel-decay comparisons, shared by both cases
+  have hptw : ∀ x : ℝ, ‖auxF s X x * Complex.exp ((z - 1/2) * x)‖
+      ≤ Real.exp ((s.re - 1/2) * Real.log X)
+        * Real.exp (-((s.re - 1/2) - (1/2 + a)) * |x|) := by
+    intro x
+    rw [norm_mul, Complex.norm_exp,
+      show ((z - 1/2) * (x:ℂ)).re = (z - 1/2).re * x by simp [Complex.mul_re]]
+    have h3 := norm_auxF_le s hX.le (by linarith) x
+    have h4 : Real.exp ((z - 1/2).re * x) ≤ Real.exp ((1/2 + a) * |x|) := by
+      refine Real.exp_le_exp.mpr ?_
+      calc (z - 1/2).re * x ≤ |(z - 1/2).re * x| := le_abs_self _
+        _ = |(z - 1/2).re| * |x| := abs_mul _ _
+        _ ≤ (1/2 + a) * |x| := mul_le_mul_of_nonneg_right hwabs (abs_nonneg x)
+    calc ‖auxF s X x‖ * Real.exp ((z - 1/2).re * x)
+        ≤ (Real.exp ((s.re - 1/2) * Real.log X) * Real.exp (-(s.re - 1/2) * |x|))
+          * Real.exp ((1/2 + a) * |x|) := by
+          refine mul_le_mul h3 h4 (Real.exp_pos _).le ?_
+          positivity
+      _ = Real.exp ((s.re - 1/2) * Real.log X)
+          * Real.exp (-((s.re - 1/2) - (1/2 + a)) * |x|) := by
+          rw [mul_assoc, ← Real.exp_add]
+          congr 2
+          ring
+  rcases le_or_gt |t| 1 with hcase | hcase
+  · -- small |t|: the trivial bound
+    rw [max_eq_right hcase]
+    have h5 : ‖paperPhi (auxF s X) z‖ ≤ M₀ := by
+      rw [paperPhi, hM₀]
+      refine MeasureTheory.norm_integral_le_of_norm_le hM₀int ?_
+      exact Filter.Eventually.of_forall hptw
+    calc ‖paperPhi (auxF s X) z‖ ≤ M₀ := h5
+      _ ≤ max M₀ V₀ := le_max_left _ _
+      _ = max M₀ V₀ / 1 := (div_one _).symm
+  · -- large |t|: the integrated-by-parts bound
+    rw [max_eq_left hcase.le]
+    have ht0 : 0 < |t| := lt_trans one_pos hcase
+    have hibp := mul_paperPhi_auxF_eq s hX (z := z) hwlt
+    have hnorm : ‖(z - 1/2) * paperPhi (auxF s X) z‖ ≤ V₀ := by
+      rw [hibp, norm_neg, hV₀]
+      refine MeasureTheory.norm_integral_le_of_norm_le hV₀int ?_
+      refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+        (Filter.Eventually.of_forall (fun x hx => ?_))
+      rw [Set.mem_Ioi] at hx
+      refine le_trans (norm_auxF_tail_deriv_mul_le s hX (z - 1/2) hx) ?_
+      refine mul_le_mul_of_nonneg_left ?_ ?_
+      · refine Real.exp_le_exp.mpr ?_
+        refine mul_le_mul_of_nonneg_right ?_ (le_trans hb0.le hx.le)
+        have := abs_nonneg (z - 1/2).re
+        linarith [hwabs]
+      · positivity
+    have hwge : |t| ≤ ‖z - 1/2‖ := by
+      rw [← hwim]
+      exact Complex.abs_im_le_norm _
+    have h6 : |t| * ‖paperPhi (auxF s X) z‖ ≤ V₀ := by
+      calc |t| * ‖paperPhi (auxF s X) z‖
+          ≤ ‖z - 1/2‖ * ‖paperPhi (auxF s X) z‖ :=
+            mul_le_mul_of_nonneg_right hwge (norm_nonneg _)
+        _ = ‖(z - 1/2) * paperPhi (auxF s X) z‖ := (norm_mul _ _).symm
+        _ ≤ V₀ := hnorm
+    rw [le_div_iff₀ ht0]
+    calc ‖paperPhi (auxF s X) z‖ * |t| = |t| * ‖paperPhi (auxF s X) z‖ := mul_comm _ _
+      _ ≤ V₀ := h6
+      _ ≤ max M₀ V₀ := le_max_right _ _
+
+/-- **`hBlog2` at the auxiliary function**: `(M/max(T,1))·log²(2+T) → 0`. -/
+theorem tendsto_div_max_mul_log_sq (M : ℝ) :
+    Tendsto (fun T : ℝ => M / max T 1 * (Real.log (2+T))^2) atTop (nhds 0) := by
+  -- log²(u)/u → 0
+  have h0 : Tendsto (fun u : ℝ => Real.log u * Real.log u / u) atTop (nhds 0) := by
+    have h1 : (fun u : ℝ => Real.log u * Real.log u)
+        =o[atTop] fun u : ℝ => u ^ ((1:ℝ)/2) * u ^ ((1:ℝ)/2) :=
+      (isLittleO_log_rpow_atTop (by norm_num)).mul
+        (isLittleO_log_rpow_atTop (by norm_num))
+    have h2 : (fun u : ℝ => Real.log u * Real.log u) =o[atTop] (fun u : ℝ => u) := by
+      refine h1.trans_eventuallyEq ?_
+      filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with u hu
+      rw [← Real.rpow_add hu]
+      norm_num
+    exact h2.tendsto_div_nhds_zero
+  -- log²(2+r)/(2+r) → 0
+  have h3 : Tendsto (fun r : ℝ => Real.log (2+r) * Real.log (2+r) / (2+r))
+      atTop (nhds 0) :=
+    h0.comp (tendsto_atTop_add_const_left _ _ tendsto_id)
+  -- (2+r)/r → 1
+  have h4 : Tendsto (fun r : ℝ => (2 + r) / r) atTop (nhds 1) := by
+    have h5 : Tendsto (fun r : ℝ => 2/r + 1) atTop (nhds (0 + 1)) := by
+      refine Tendsto.add ?_ tendsto_const_nhds
+      exact tendsto_const_nhds.div_atTop tendsto_id
+    rw [zero_add] at h5
+    refine h5.congr' ?_
+    filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with r hr
+    field_simp
+  -- log²(2+r)/r → 0
+  have h6 : Tendsto (fun r : ℝ => Real.log (2+r) * Real.log (2+r) / r)
+      atTop (nhds 0) := by
+    have h7 := h3.mul h4
+    rw [zero_mul] at h7
+    refine h7.congr' ?_
+    filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with r hr
+    have h8 : (2 + r) ≠ 0 := by linarith
+    field_simp
+  -- assemble
+  have h9 := h6.const_mul M
+  rw [mul_zero] at h9
+  refine h9.congr' ?_
+  filter_upwards [Filter.eventually_ge_atTop (1:ℝ)] with T hT
+  rw [max_eq_left hT, pow_two]
+  field_simp
+
 end DedekindResidue
