@@ -1732,4 +1732,99 @@ theorem exists_norm_fourier_auxF_le (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 <
         rw [hfin, div_le_div_iff_of_pos_right hγ2]
         linarith
 
+/-- Set-restricted Riemann–Lebesgue, `e^{+ixt}` kernel, `t → +∞`. -/
+theorem tendsto_setIntegral_mul_cexp_atTop (q : ℝ → ℂ) (s : Set ℝ)
+    (hs : MeasurableSet s) :
+    Tendsto (fun t : ℝ => ∫ x in s, q x * Complex.exp ((t*x : ℝ) * Complex.I))
+      atTop (nhds 0) := by
+  have h0 := tendsto_integral_mul_cexp_pos_atTop (s.indicator q)
+  refine h0.congr (fun t => ?_)
+  rw [← MeasureTheory.integral_indicator hs]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  show s.indicator q x * Complex.exp ((x:ℂ) * (t:ℂ) * Complex.I)
+      = s.indicator (fun x => q x * Complex.exp ((t*x : ℝ) * Complex.I)) x
+  by_cases hx : x ∈ s
+  · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]
+    congr 1
+    push_cast
+    ring_nf
+  · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, zero_mul]
+
+/-- Set-restricted Riemann–Lebesgue, `e^{+ixt}` kernel, `t → -∞`. -/
+theorem tendsto_setIntegral_mul_cexp_atBot (q : ℝ → ℂ) (s : Set ℝ)
+    (hs : MeasurableSet s) :
+    Tendsto (fun t : ℝ => ∫ x in s, q x * Complex.exp ((t*x : ℝ) * Complex.I))
+      atBot (nhds 0) := by
+  have h0 := tendsto_integral_mul_cexp_neg_atTop (s.indicator q)
+  have h2 := h0.comp tendsto_neg_atBot_atTop
+  refine h2.congr (fun t => ?_)
+  simp only [Function.comp_apply]
+  rw [← MeasureTheory.integral_indicator hs]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  show s.indicator q x * Complex.exp (-((x:ℂ) * ((-t:ℝ):ℂ)) * Complex.I)
+      = s.indicator (fun x => q x * Complex.exp ((t*x : ℝ) * Complex.I)) x
+  by_cases hx : x ∈ s
+  · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]
+    congr 1
+    push_cast
+    ring_nf
+  · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, zero_mul]
+
+/-- The plateau piece of `gammaFT` vanishes at `±∞`. -/
+theorem tendsto_gammaFT_plateau (F : ℝ → ℂ) (l : Filter ℝ)
+    (habs : Tendsto (fun t : ℝ => |t|) l atTop) :
+    Tendsto (fun t : ℝ =>
+      F 0 * (2 * Complex.I * ((Real.sign t * sincTail (|t|) : ℝ) : ℂ))) l (nhds 0) := by
+  have h1 : Tendsto (fun t : ℝ => sincTail (|t|)) l (nhds 0) :=
+    tendsto_sincTail_atTop.comp habs
+  have h2 : Tendsto (fun t : ℝ => 2 * ‖F 0‖ * |sincTail (|t|)|) l (nhds 0) := by
+    have h3 := (h1.abs).const_mul (2 * ‖F 0‖)
+    rw [abs_zero, mul_zero] at h3
+    exact h3
+  refine squeeze_zero_norm' ?_ h2
+  filter_upwards [] with t
+  rw [norm_mul, norm_mul, norm_mul, Complex.norm_I, mul_one, Complex.norm_real,
+    Real.norm_eq_abs, abs_mul, show ‖(2:ℂ)‖ = 2 by norm_num]
+  have hsign : |Real.sign t| ≤ 1 := by
+    rcases lt_trichotomy t 0 with h | h | h
+    · rw [Real.sign_of_neg h]
+      norm_num
+    · rw [h, Real.sign_zero]
+      norm_num
+    · rw [Real.sign_of_pos h]
+      norm_num
+  have hnn := abs_nonneg (sincTail (|t|))
+  have hstep : |Real.sign t| * |sincTail (|t|)| ≤ |sincTail (|t|)| := by
+    nlinarith
+  nlinarith [mul_le_mul_of_nonneg_left hstep (norm_nonneg (F 0)), norm_nonneg (F 0)]
+
+/-- **Poitou's `γ` vanishes at `+∞`** — unconditionally: Riemann–Lebesgue on both
+integral pieces, `sincTail → 0` on the plateau piece. -/
+theorem tendsto_gammaFT_atTop (F : ℝ → ℂ) :
+    Tendsto (gammaFT F) atTop (nhds 0) := by
+  have hW := tendsto_setIntegral_mul_cexp_atTop (fun x : ℝ => (F 0 - F x)/(x:ℂ))
+    (Set.Ioc (-1) 1) measurableSet_Ioc
+  have hT := tendsto_setIntegral_mul_cexp_atTop (fun x : ℝ => F x/(x:ℂ))
+    ((Set.Ioc (-1) 1)ᶜ) measurableSet_Ioc.compl
+  have hS := tendsto_gammaFT_plateau F atTop (tendsto_abs_atTop_atTop)
+  have h0 := (hW.add hS).sub hT
+  rw [show ((0:ℂ) + 0 - 0 : ℂ) = 0 by ring] at h0
+  exact h0
+
+/-- **Poitou's `γ` vanishes at `-∞`** — unconditionally. -/
+theorem tendsto_gammaFT_atBot (F : ℝ → ℂ) :
+    Tendsto (gammaFT F) atBot (nhds 0) := by
+  have hW := tendsto_setIntegral_mul_cexp_atBot (fun x : ℝ => (F 0 - F x)/(x:ℂ))
+    (Set.Ioc (-1) 1) measurableSet_Ioc
+  have hT := tendsto_setIntegral_mul_cexp_atBot (fun x : ℝ => F x/(x:ℂ))
+    ((Set.Ioc (-1) 1)ᶜ) measurableSet_Ioc.compl
+  have hS := tendsto_gammaFT_plateau F atBot ?_
+  · have h0 := (hW.add hS).sub hT
+    rw [show ((0:ℂ) + 0 - 0 : ℂ) = 0 by ring] at h0
+    exact h0
+  · have h1 : Tendsto (fun t : ℝ => -t) atBot atTop := tendsto_neg_atBot_atTop
+    refine (tendsto_abs_atTop_atTop.comp h1).congr (fun t => ?_)
+    simp only [Function.comp_apply]
+    rw [abs_neg]
+
 end DedekindResidue
