@@ -31,4 +31,5 @@ public import DedekindResidue.ExplicitFormula.WeilAssembly
 public import DedekindResidue.ExplicitFormula.GRHZeros
 public import DedekindResidue.Lemma3
 public import DedekindResidue.Lemma4
+public import DedekindResidue.QSide
 public import DedekindResidue.MainTheorem
