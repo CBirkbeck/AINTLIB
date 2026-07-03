@@ -93,6 +93,69 @@ theorem dedekindZeta_rat_eq_riemannZeta {s : ℂ} (hs : 1 < s.re) :
   simp
 
 
+/-- The completed-zeta prefactor of `ℚ` is `Γ_ℝ` (discriminant `1`, one real place). -/
+theorem completedZetaPrefactor_rat (s : ℂ) :
+    completedZetaPrefactor ℚ s = Complex.Gammaℝ s := by
+  rw [completedZetaPrefactor, gammaFactor,
+    NumberField.InfinitePlace.nrRealPlaces_eq_one_of_finrank_eq_one
+      (Module.finrank_self ℚ),
+    NumberField.InfinitePlace.nrComplexPlaces_eq_zero_of_finrank_eq_one
+      (Module.finrank_self ℚ),
+    Rat.numberField_discr]
+  norm_num
+
+/-- **`completedRiemannZeta` is a completed Dedekind zeta function for `ℚ`.** -/
+theorem isCompletedDedekindZeta_rat :
+    IsCompletedDedekindZeta ℚ completedRiemannZeta := by
+  constructor
+  · intro s hs
+    have hs0 : s ≠ 0 := by
+      intro h
+      rw [h] at hs
+      norm_num at hs
+    rw [completedZetaPrefactor_rat, dedekindZeta_rat_eq_riemannZeta hs,
+      riemannZeta_def_of_ne_zero hs0,
+      mul_div_cancel₀ _ (Complex.Gammaℝ_ne_zero_of_re_pos (by linarith))]
+  · refine ⟨fun s => s * (s - 1) * completedRiemannZeta₀ s + 1, ?_, ?_⟩
+    · exact (((differentiable_id.mul (differentiable_id.sub_const 1)).mul
+        differentiable_completedZeta₀).add_const 1)
+    · intro s hs0 hs1
+      rw [completedRiemannZeta_eq]
+      have h1 : (1:ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
+      field_simp
+      ring
+
+
+/-- **The Riemann Hypothesis transfers to `GeneralizedRiemannHypothesis ℚ`**: any
+completed Dedekind zeta function for `ℚ` agrees with `completedRiemannZeta` away
+from the poles, whose zeros off the critical line RH excludes. -/
+theorem generalizedRiemannHypothesis_rat (hRH : RiemannHypothesis) :
+    GeneralizedRiemannHypothesis ℚ := by
+  intro Λ hΛ s hs hs1 hzero
+  have hs0 : s ≠ 0 := by
+    intro h
+    rw [h] at hs
+    norm_num at hs
+  have hΛs : Λ s = completedRiemannZeta s :=
+    hΛ.eqOn isCompletedDedekindZeta_rat hs0 hs1
+  have hcz : completedRiemannZeta s = 0 := by
+    rw [← hΛs]
+    exact hzero
+  have hGne : Complex.Gammaℝ s ≠ 0 :=
+    Complex.Gammaℝ_ne_zero_of_re_pos (by linarith)
+  have hζ : riemannZeta s = 0 := by
+    rw [riemannZeta_def_of_ne_zero hs0, hcz, zero_div]
+  have hnottriv : ¬∃ n : ℕ, s = -2 * (n + 1) := by
+    rintro ⟨n, rfl⟩
+    have h1 : ((-2 * ((n:ℂ) + 1)).re) = -2 * ((n:ℝ) + 1) := by
+      simp
+    rw [h1] at hs
+    have h2 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+    nlinarith
+  have := hRH s hζ hnottriv hs1
+  linarith [this ▸ hs]
+
+
 end DedekindResidue
 
 end
