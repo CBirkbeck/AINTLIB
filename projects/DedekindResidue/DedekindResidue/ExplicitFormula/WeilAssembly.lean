@@ -592,4 +592,130 @@ theorem integrable_poleWindow (hc : 0 < c) (hG : Integrable G) :
         ring
     _ = poleWindow c G u := h1
 
+/-- `Φ` on the edge `Re s = 1+a` is the Fourier integral of the weighted function. -/
+theorem paperPhi_edge (a : ℝ) (F : ℝ → ℂ) (t : ℝ) :
+    paperPhi F (((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I)
+      = ∫ x : ℝ, (F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))
+          * Complex.exp ((t*x : ℝ) * Complex.I) := by
+  rw [paperPhi]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  show F x * Complex.exp (((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1/2) * x)
+      = F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ) * Complex.exp ((t*x : ℝ) * Complex.I)
+  rw [show ((((1+a : ℝ):ℂ) + (t:ℂ)*Complex.I) - 1/2) * x
+      = (((1/2+a) * x : ℝ) : ℂ) + ((t*x : ℝ) : ℂ) * Complex.I from by push_cast; ring]
+  rw [Complex.exp_add, Complex.ofReal_exp]
+  ring
+
+/-- The weighted function `F(x)e^{bx}`, `|b| ≤ 1/2`, is integrable for even `F`
+with `F·e^{(1/2+a)x} ∈ L¹`. -/
+theorem integrable_F_mul_exp_half (ha : 0 < a) (hF : Integrable F)
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)))
+    {b : ℝ} (hb : |b| ≤ 1/2) :
+    Integrable (fun x : ℝ => F x * ((Real.exp (b * x) : ℝ) : ℂ)) := by
+  have hGneg : Integrable (fun x : ℝ =>
+      ‖F (-x) * ((Real.exp ((1/2+a) * (-x)) : ℝ) : ℂ)‖) :=
+    (Measure.measurePreserving_neg (volume : Measure ℝ)).integrable_comp_of_integrable
+      hFa.norm
+  refine Integrable.mono'
+    (g := fun x => ‖F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)‖
+      + ‖F (-x) * ((Real.exp ((1/2+a) * (-x)) : ℝ) : ℂ)‖)
+    (hFa.norm.add hGneg) ?_ ?_
+  · refine hF.1.mul ?_
+    exact (Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+      (continuous_const.mul continuous_id))).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [norm_mul, norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs, Real.abs_exp,
+      Complex.norm_real, Real.norm_eq_abs, Real.abs_exp,
+      Complex.norm_real, Real.norm_eq_abs, Real.abs_exp, hFeven x]
+    rcases le_or_gt 0 x with hx | hx
+    · have h1 : Real.exp (b*x) ≤ Real.exp ((1/2+a)*x) := by
+        refine Real.exp_le_exp.mpr ?_
+        have hble : b ≤ 1/2 := le_trans (le_abs_self b) hb
+        nlinarith
+      nlinarith [norm_nonneg (F x), Real.exp_pos ((1/2+a)*(-x)),
+        mul_nonneg (norm_nonneg (F x)) (Real.exp_pos ((1/2+a)*(-x))).le]
+    · have h1 : Real.exp (b*x) ≤ Real.exp ((1/2+a)*(-x)) := by
+        refine Real.exp_le_exp.mpr ?_
+        have hble : -b ≤ 1/2 := le_trans (neg_le_abs b) hb
+        nlinarith
+      nlinarith [norm_nonneg (F x), Real.exp_pos ((1/2+a)*x),
+        mul_nonneg (norm_nonneg (F x)) (Real.exp_pos ((1/2+a)*x)).le]
+
+/-- **The value identification** (Poitou p. 6-07, Remarque): for even `F`,
+`E_a(0) + E_{1+a}(0) = Φ(0) + Φ(1)`. -/
+theorem poleWindow_zero_add_eq (ha : 0 < a) (hF : Integrable F)
+    (hFeven : ∀ x : ℝ, F (-x) = F x)
+    (hFa : Integrable (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ))) :
+    poleWindow a (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) 0
+        + poleWindow (1+a) (fun x : ℝ => F x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) 0
+      = paperPhi F 0 + paperPhi F 1 := by
+  -- the two tail kernels collapse
+  have hker1 : ∀ w : ℝ, (F w * ((Real.exp ((1/2+a) * w) : ℝ) : ℂ))
+      * ((Real.exp (-(a*w)) : ℝ) : ℂ) = F w * ((Real.exp ((1/2) * w) : ℝ) : ℂ) := by
+    intro w
+    rw [mul_assoc, ← Complex.ofReal_mul, ← Real.exp_add]
+    congr 3
+    ring
+  have hker2 : ∀ w : ℝ, (F w * ((Real.exp ((1/2+a) * w) : ℝ) : ℂ))
+      * ((Real.exp (-((1+a)*w)) : ℝ) : ℂ) = F w * ((Real.exp (-(1/2) * w) : ℝ) : ℂ) := by
+    intro w
+    rw [mul_assoc, ← Complex.ofReal_mul, ← Real.exp_add]
+    congr 3
+    ring
+  -- Φ-values as weighted integrals
+  have hΦ1 : paperPhi F 1 = ∫ x : ℝ, F x * ((Real.exp ((1/2) * x) : ℝ) : ℂ) := by
+    rw [paperPhi]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show F x * Complex.exp (((1:ℂ) - 1/2) * x) = F x * ((Real.exp ((1/2) * x) : ℝ) : ℂ)
+    rw [show ((1:ℂ) - 1/2) * x = (((1/2) * x : ℝ) : ℂ) by push_cast; ring,
+      ← Complex.ofReal_exp]
+  have hΦ0 : paperPhi F 0 = ∫ x : ℝ, F x * ((Real.exp (-(1/2) * x) : ℝ) : ℂ) := by
+    rw [paperPhi]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    show F x * Complex.exp (((0:ℂ) - 1/2) * x) = F x * ((Real.exp (-(1/2) * x) : ℝ) : ℂ)
+    rw [show ((0:ℂ) - 1/2) * x = ((-(1/2) * x : ℝ) : ℂ) by push_cast; ring,
+      ← Complex.ofReal_exp]
+  -- fold the full-line integrals onto the half line
+  have hfold : ∀ b : ℝ, |b| ≤ 1/2 →
+      (∫ x : ℝ, F x * ((Real.exp (b * x) : ℝ) : ℂ))
+        = (∫ w in Set.Ioi (0:ℝ), F w * ((Real.exp (b * w) : ℝ) : ℂ))
+          + ∫ w in Set.Ioi (0:ℝ), F w * ((Real.exp (-b * w) : ℝ) : ℂ) := by
+    intro b hb
+    have hint := integrable_F_mul_exp_half ha hF hFeven hFa hb
+    have hsplit := (MeasureTheory.integral_add_compl (measurableSet_Iio (a := (0:ℝ)))
+      hint).symm
+    have hcomplIio : (Set.Iio (0:ℝ))ᶜ = Set.Ici (0:ℝ) := by
+      ext x
+      simp
+    rw [hcomplIio] at hsplit
+    have hIci : (∫ x in Set.Ici (0:ℝ), F x * ((Real.exp (b * x) : ℝ) : ℂ))
+        = ∫ x in Set.Ioi (0:ℝ), F x * ((Real.exp (b * x) : ℝ) : ℂ) :=
+      (MeasureTheory.setIntegral_congr_set (Ioi_ae_eq_Ici (a := (0:ℝ)))).symm
+    have A : MeasurableEmbedding fun x : ℝ => -x :=
+      (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+    have hmap : (volume : Measure ℝ).restrict (Set.Iio (0:ℝ))
+        = Measure.map (fun x : ℝ => -x) ((volume : Measure ℝ).restrict (Set.Ioi (0:ℝ))) := by
+      rw [show Set.Ioi (0:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iio 0) by ext x; simp,
+        ← Measure.restrict_map A.measurable measurableSet_Iio,
+        Measure.map_neg_eq_self (volume : Measure ℝ)]
+    have hIio : (∫ x in Set.Iio (0:ℝ), F x * ((Real.exp (b * x) : ℝ) : ℂ))
+        = ∫ w in Set.Ioi (0:ℝ), F w * ((Real.exp (-b * w) : ℝ) : ℂ) := by
+      rw [show (∫ x in Set.Iio (0:ℝ), F x * ((Real.exp (b * x) : ℝ) : ℂ))
+          = ∫ x, F x * ((Real.exp (b * x) : ℝ) : ℂ)
+              ∂((volume : Measure ℝ).restrict (Set.Iio 0)) from rfl,
+        hmap, A.integral_map]
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun w _ => ?_)
+      show F (-w) * ((Real.exp (b * -w) : ℝ) : ℂ) = F w * ((Real.exp (-b * w) : ℝ) : ℂ)
+      rw [hFeven w, show b * -w = -b * w by ring]
+    rw [hsplit, hIci, hIio]
+    ring
+  rw [poleWindow_zero, poleWindow_zero,
+    MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun w _ => hker1 w),
+    MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun w _ => hker2 w),
+    hΦ0, hΦ1, hfold (1/2) (by rw [abs_of_pos]; norm_num),
+    hfold (-(1/2)) (by rw [abs_neg, abs_of_pos]; norm_num)]
+  rw [show -(-(1/2)) = (1/2 : ℝ) by ring]
+  ring
+
 end DedekindResidue
