@@ -13,6 +13,13 @@ import «Adic spaces».Wedhorn828
 import «Adic spaces».RelativePieceKeystone
 import «Adic spaces».WedhornBanachTheorem
 
+-- Faithfulness scoping (2026-07-03): within THIS file — the 8.28(b) assembly — the
+-- sorry-carrying `HasLocLiftPowerBounded` instances must not be synthesized; every
+-- B-level context supplies the PROVEN `hasLocLiftPowerBounded_faithful` (directly or
+-- via the priority instance). Other files are unaffected.
+attribute [-instance] ValuationSpectrum.hasLocLiftPowerBounded_of_stronglyNoetherianTate
+attribute [-instance] ValuationSpectrum.hasLocLiftPowerBounded_of_stronglyNoetherianTate'
+
 /-!
 # Wedhorn-Čech acyclicity: bridge to `IsSheafy`
 
@@ -2715,7 +2722,7 @@ evaluation, with every engine input discharged from the landed package
 `unitCoUnit_inter_T_cases`). -/
 private noncomputable def unitCover_overlapQuotEquiv
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
@@ -2728,6 +2735,11 @@ private noncomputable def unitCover_overlapQuotEquiv
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -2751,6 +2763,15 @@ private noncomputable def unitCover_overlapQuotEquiv
   have hYeta : (TateAlgebra₂.Y : ↥(TateAlgebra₂ (presheafValue D₀))) =
       (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
         ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
+  haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB'.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   refine tate_quotPresentation (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
@@ -2812,7 +2833,7 @@ set_option linter.unusedSectionVars false in
 unification against the definition). -/
 private theorem unitCover_overlapQuotEquiv_canonicalMap
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) (x : presheafValue D₀) :
@@ -2827,6 +2848,11 @@ private theorem unitCover_overlapQuotEquiv_canonicalMap
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5458,6 +5484,11 @@ private noncomputable def unitCover_example638Plus
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5482,6 +5513,11 @@ private theorem unitCover_example638Plus_canonicalMap
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5772,6 +5808,11 @@ private theorem unitCover_example638Plus_symm_mk
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -5788,6 +5829,11 @@ private theorem unitCover_example638Plus_symm_mk
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5811,6 +5857,11 @@ private theorem unitCover_example638Plus_symm_continuous
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -5823,6 +5874,11 @@ private theorem unitCover_example638Plus_symm_continuous
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5902,6 +5958,11 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -5916,6 +5977,11 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5939,6 +6005,15 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
   have hYeta : (TateAlgebra₂.Y : ↥(TateAlgebra₂ (presheafValue D₀))) =
       (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
         ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
+  haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB'.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   exact tate_quotPresentation_symm_mk (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
@@ -6009,6 +6084,11 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -6021,6 +6101,11 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6055,6 +6140,11 @@ private theorem unitCover_sq_plus_dense
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -6077,6 +6167,11 @@ private theorem unitCover_sq_plus_dense
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6290,6 +6385,11 @@ private theorem unitCover_posLift_bridgePlus
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6338,6 +6438,11 @@ private theorem unitCover_sq_minus_dense
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -6360,6 +6465,11 @@ private theorem unitCover_sq_minus_dense
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6614,6 +6724,11 @@ private theorem unitCover_negLift_bridgeMinus
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -8415,6 +8530,11 @@ noncomputable def imageGenCover
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair D₀)
@@ -8453,6 +8573,11 @@ theorem imageGenCover_isRational
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   constructor
@@ -8484,6 +8609,11 @@ theorem imageGenCover_isGeneratedBy
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   constructor
@@ -8688,6 +8818,11 @@ private theorem imagePieceDatum_eq_genPieceDatum
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : DecidableEq (presheafValue D₀) := Classical.decEq _
     haveI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
     imagePieceDatum D₀ T t hspan =
@@ -8713,6 +8848,11 @@ theorem genRestrictedCover_separation
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     ∀ (_hBsep : ∀ (y : presheafValue (imageGenCover D₀ T hspan).base),
       (∀ (E : RationalLocData (presheafValue D₀))
         (hE : E ∈ (imageGenCover D₀ T hspan).covers),
@@ -8730,6 +8870,11 @@ theorem genRestrictedCover_separation
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -8788,6 +8933,11 @@ private theorem genPiece_relOverlap_baseHom_isUnit
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     IsUnit (((algebraMap (presheafValue D₀) (Localization.Away
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)).comp D₀.canonicalMap)
@@ -8799,6 +8949,11 @@ private theorem genPiece_relOverlap_baseHom_isUnit
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   have hs : ((((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s : A)) = (D₀.s * t₁) * t₂ := rfl
   rw [RingHom.comp_apply, hs, map_mul, map_mul, map_mul, map_mul]
@@ -8891,6 +9046,11 @@ private theorem genPiece_relOverlap_forward_witness
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     ∃ y : Localization.Away (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s),
       y ∈ locSubring ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -8910,6 +9070,11 @@ private theorem genPiece_relOverlap_forward_witness
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -9060,6 +9225,11 @@ private theorem genPiece_relOverlap_forwardCompletion_continuous
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     @Continuous _ _ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).topology _
       ((((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9071,6 +9241,11 @@ private theorem genPiece_relOverlap_forwardCompletion_continuous
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -9115,6 +9290,11 @@ private noncomputable def genPiece_relOverlap_forward
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9145,6 +9325,11 @@ private theorem genPiece_relOverlap_forward_coe
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂ (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9155,6 +9340,11 @@ private theorem genPiece_relOverlap_forward_coe
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9185,6 +9375,11 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     IsUnit ((restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
         ((RationalLocData.interSamePair_subset_left _ _ _).trans
@@ -9197,6 +9392,11 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   have hu : IsUnit (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) := isUnit_s_in_presheafValue _
@@ -9268,6 +9468,11 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     @Continuous _ _ ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).topology _
       (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) := by
@@ -9277,6 +9482,11 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -9412,6 +9622,11 @@ private noncomputable def genPiece_relOverlap_backward
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
@@ -9441,6 +9656,11 @@ private theorem genPiece_relOverlap_backward_coe
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_backward D₀ T hspan t₁ t₂ (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom y) =
       genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂ y := by
@@ -9450,6 +9670,11 @@ private theorem genPiece_relOverlap_backward_coe
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
@@ -9479,6 +9704,11 @@ private theorem genPiece_relOverlap_locRoundtrip1
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂).comp
         (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂) =
       ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
@@ -9489,6 +9719,11 @@ private theorem genPiece_relOverlap_locRoundtrip1
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   refine IsLocalization.ringHom_ext (Submonoid.powers (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) ?_
   ext a
@@ -9515,6 +9750,11 @@ private theorem genPiece_relOverlap_backward_forward
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_backward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_forward D₀ T hspan t₁ t₂ x) = x := by
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
@@ -9523,6 +9763,11 @@ private theorem genPiece_relOverlap_backward_forward
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9576,6 +9821,11 @@ private theorem genPiece_relOverlap_forward_restriction
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂
         (restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
@@ -9589,6 +9839,11 @@ private theorem genPiece_relOverlap_forward_restriction
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
@@ -9700,6 +9955,11 @@ private theorem genPiece_relOverlap_forward_backward
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_backward D₀ T hspan t₁ t₂ y) = y := by
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
@@ -9708,6 +9968,11 @@ private theorem genPiece_relOverlap_forward_backward
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   have hloc : (genPiece_relOverlap_forward D₀ T hspan t₁ t₂).comp
       (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9770,6 +10035,11 @@ private noncomputable def genPiece_relative_overlap_equiv
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
         (genPieceDatum D₀.P T t₂ hspan) rfl) ≃+*
       presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9797,6 +10067,11 @@ private theorem genPiece_relative_overlap_square₁
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
         (restrictionMap (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
           ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
@@ -9813,6 +10088,11 @@ private theorem genPiece_relative_overlap_square₁
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away
       (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) :=
     (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).uniformSpace
@@ -9858,6 +10138,15 @@ private theorem genPiece_relative_overlap_square₁
         (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
     ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
+  haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB'.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   revert g
   suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
       (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
@@ -9983,6 +10272,11 @@ private theorem genPiece_relative_overlap_square₂
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
         (restrictionMap (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
           ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
@@ -10004,6 +10298,11 @@ private theorem genPiece_relative_overlap_square₂
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away
       (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
     (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -10049,6 +10348,15 @@ private theorem genPiece_relative_overlap_square₂
         (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
     ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
+  haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB'.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   revert g
   suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
       (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
@@ -10197,6 +10505,11 @@ private theorem genPiece_family_pair_compat
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     restrictionMap (imagePieceDatum D₀ T t₁ hspan)
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
           (imagePieceDatum D₀ T t₂ hspan) rfl)
@@ -10213,6 +10526,11 @@ private theorem genPiece_family_pair_compat
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   rw [← genPiece_relative_overlap_square₁ D₀ T hspan t₁ t₂ g₁,
     ← genPiece_relative_overlap_square₂ D₀ T hspan t₁ t₂ g₂]
   congr 1
@@ -10260,6 +10578,11 @@ theorem genRestrictedCover_gluing
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     ∀ (_hBglue : ∀ (g : ∀ (E : ↥(imageGenCover D₀ T hspan).covers),
         presheafValue E.1),
       (∀ (E₁ E₂ : ↥(imageGenCover D₀ T hspan).covers)
@@ -10290,6 +10613,11 @@ theorem genRestrictedCover_gluing
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -10513,6 +10841,11 @@ theorem genRestrictedCover_isOXAcyclic_of_B
       haveI : IsStronglyNoetherian (presheafValue D₀) :=
         presheafValue_isStronglyNoetherian_faithful D₀
       haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+      haveI : @CompleteSpace (presheafValue D₀)
+          (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+        presheafValue_completeSpace_rightUniformSpace D₀
+      haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+        hasLocLiftPowerBounded_faithful
       (imageGenCover D₀ T hspan).IsOXAcyclic) :
     (genRestrictedCover D₀ T hspan).IsOXAcyclic := by
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
@@ -10521,6 +10854,11 @@ theorem genRestrictedCover_isOXAcyclic_of_B
   haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   constructor
   · intro x hx
     refine genRestrictedCover_separation D₀ T hspan hB.separation x ?_
@@ -10876,6 +11214,11 @@ noncomputable def imageCover [DecidableEq A]
   haveI : IsNoetherianRing (presheafValue C.base) :=
     presheafValue_isNoetherianRing_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue C.base)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+    presheafValue_completeSpace_rightUniformSpace C.base
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair C.base)
@@ -11033,6 +11376,11 @@ theorem imageGenCover_isOXAcyclic_of_units
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     (imageGenCover D₀ T hspan).IsOXAcyclic := by
   haveI hTateB : IsTateRing (presheafValue D₀) :=
     presheafValue_isTateRing_faithful D₀
@@ -11041,6 +11389,11 @@ theorem imageGenCover_isOXAcyclic_of_units
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
   haveI : T2Space (presheafValue D₀) := inferInstance
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
@@ -11181,6 +11534,11 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     haveI : IsStronglyNoetherian (presheafValue D₀) :=
       presheafValue_isStronglyNoetherian_faithful D₀
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+      hasLocLiftPowerBounded_faithful
     haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
     haveI : T2Space (presheafValue D₀) := inferInstance
     letI : DecidableEq (presheafValue D₀) := Classical.decEq _
@@ -12353,6 +12711,11 @@ theorem genRestrictedCover_isOXAcyclic_of_spanTop [DecidableEq A]
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
+    hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
   haveI : T2Space (presheafValue D₀) := inferInstance
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
@@ -12452,6 +12815,11 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
     haveI : IsStronglyNoetherian (presheafValue C.base) :=
       presheafValue_isStronglyNoetherian_faithful C.base
     haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue C.base)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+      presheafValue_completeSpace_rightUniformSpace C.base
+    haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+      hasLocLiftPowerBounded_faithful
     (imageCover C hC).IsOXAcyclic := by
   haveI hTateB : IsTateRing (presheafValue C.base) :=
     presheafValue_isTateRing_faithful C.base
@@ -12460,6 +12828,11 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
   haveI : IsStronglyNoetherian (presheafValue C.base) :=
     presheafValue_isStronglyNoetherian_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue C.base)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+    presheafValue_completeSpace_rightUniformSpace C.base
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+    hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue C.base) := inferInstance
   haveI : T2Space (presheafValue C.base) := inferInstance
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
@@ -12517,6 +12890,11 @@ private theorem imageCover_keystone_compat [DecidableEq A]
     haveI : IsNoetherianRing (presheafValue C.base) :=
       presheafValue_isNoetherianRing_faithful C.base
     haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue C.base)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+      presheafValue_completeSpace_rightUniformSpace C.base
+    haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+      hasLocLiftPowerBounded_faithful
     ∀ (D₁ D₂ : ↥C.covers) (G : RationalLocData (presheafValue C.base))
       (h₁ : rationalOpen G.T G.s ⊆
         rationalOpen (imagePieceDatum C.base D₁.1.T D₁.1.s
@@ -12539,6 +12917,11 @@ private theorem imageCover_keystone_compat [DecidableEq A]
   haveI : IsNoetherianRing (presheafValue C.base) :=
     presheafValue_isNoetherianRing_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue C.base)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+    presheafValue_completeSpace_rightUniformSpace C.base
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   intro D₁ D₂ G h₁ h₂
   -- the normalised A-side intersection D₁₂ at the base pair (Wedhorn 7.31(2)):
@@ -12636,6 +13019,11 @@ theorem imageCover_gluing_transport [DecidableEq A]
       haveI : IsStronglyNoetherian (presheafValue C.base) :=
         presheafValue_isStronglyNoetherian_faithful C.base
       haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+      haveI : @CompleteSpace (presheafValue C.base)
+          (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+        presheafValue_completeSpace_rightUniformSpace C.base
+      haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+        hasLocLiftPowerBounded_faithful
       (imageCover C hC).IsOXAcyclic) :
     ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
@@ -12647,6 +13035,11 @@ theorem imageCover_gluing_transport [DecidableEq A]
   haveI : IsStronglyNoetherian (presheafValue C.base) :=
     presheafValue_isStronglyNoetherian_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue C.base)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+    presheafValue_completeSpace_rightUniformSpace C.base
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   haveI : @CompleteSpace (presheafValue C.base)
@@ -12759,6 +13152,11 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
   haveI : IsStronglyNoetherian (presheafValue C.base) :=
     presheafValue_isStronglyNoetherian_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue C.base)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
+    presheafValue_completeSpace_rightUniformSpace C.base
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
+    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   haveI : @CompleteSpace (presheafValue C.base)

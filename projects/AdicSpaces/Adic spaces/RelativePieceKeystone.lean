@@ -1072,7 +1072,7 @@ inverted `E.s`), hence everywhere by continuity + `T2`. Same 8-step stack as
 `genPiece_relative_equiv`'s G3b overlap squares. -/
 theorem relativePiece_equiv_restrict_square
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ E E' : RationalLocData A)
@@ -1085,6 +1085,10 @@ theorem relativePiece_equiv_restrict_square
     haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
     haveI : IsNoetherianRing (presheafValue D₀) :=
       presheafValue_isNoetherianRing_faithful D₀
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE'
         (restrictionMap E E' hE'_sub y) =
       restrictionMap (imagePieceDatum D₀ E.T E.s hspanE)
@@ -1094,6 +1098,11 @@ theorem relativePiece_equiv_restrict_square
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
   haveI : IsNoetherianRing (presheafValue D₀) :=
     presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   haveI : IsStronglyNoetherian (presheafValue D₀) :=
     presheafValue_isStronglyNoetherian_faithful D₀
   haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing

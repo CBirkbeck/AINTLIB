@@ -175,7 +175,26 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
      (CompleteSpace holds by construction — the criterion's completeness is on the target
      ring, not on `A`) + Spa-pullback of the rational containment.
 
-**Progress**:
+**Progress (2026-07-03 beastmode, continued — carriers 7 → 4)**:
+- Carriers #1/#3/#5 ELIMINATED (commits 1dc14351, c5cb82d9, a22f268b). Remaining: #2 (LL-bdd
+  leaf), #4 (7.52-nonopen leaf) — both enter ONLY via residual references to the unfaithful
+  `hasLocLiftPowerBounded_of_stronglyNoetherianTate('`)` instances; #6/#7 (C4 Spa-QC).
+- Full-env reference scan of the unfaithful instance (20 decls): every_rational_cover_is_OXAcyclic
+  (persists even under a body-shadow haveI — reference point not yet identified; value? = none
+  under async elab made expr-probing unreliable), imageCover_isOXAcyclic, imageCover_gluing_transport,
+  relativePiece_equiv_restrict_square, genPiece_family_pair_compat, genPiece_relative_overlap_square₁/₂,
+  unitCover_overlapQuotEquiv._proof_9, genRestrictedCover_{separation,gluing,isOXAcyclic_of_B},
+  imageGenCover_isOXAcyclic_of_units, isSheafy_separation_empty_cover_*, + legacy _proof wrappers
+  (cor_8_32_clean_proof, prop_8_30_flat_clean_proof, tateAcyclicity_*_proof,
+  exists_hSpa_points_global_*_proof, isSheafy_ofStronglyNoetherianTate(_proof)).
+- **DEPRIORITIZATION CAMPAIGN (in flight)**: demote both unfaithful instances to plain defs
+  (names/types/bodies preserved — named references keep compiling; only typeclass SYNTHESIS
+  stops). Error-driven repair: on-path B-level sites get `haveI := hasLocLiftPowerBounded_faithful`
+  (+ `presheafValue_completeSpace_rightUniformSpace` bridge where missing, RPK:1557 pattern);
+  legacy A-level sites get an explicit `haveI := hasLocLiftPowerBounded_of_stronglyNoetherianTate' A`
+  (behavior identical, taint contained). Terminates by construction; then re-trace expects
+  carriers = {#6, #7} only, i.e. C4.
+
 - 2026-07-03 (beastmode): **T-PB1..17 ALL DONE.** PB1–6 proven (Bounded.lean clean; + new public
   helper `isBounded_addSubgroupClosure`, pair-free 5.30(1); new import
   `Mathlib.RingTheory.Polynomial.Subring` for `Polynomial.toSubring`). PB7–9 proven
