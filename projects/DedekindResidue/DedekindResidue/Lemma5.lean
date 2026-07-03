@@ -952,6 +952,273 @@ theorem weil_explicit_formula_expTest {h : ℝ} {a : ℝ}
     (tendsto_primeSideH_expTest_right K ha hah)
     (tendsto_primeSideH_expTest_left K ha hah)
 
+/-! ### Evaluating the three sides: eq:Stark (L5-b) -/
+
+/-- The conjugate-pair combination collapses to the real rational
+`2h/(h²+γ²)`. -/
+theorem one_div_sub_add_one_div_add_I {h γ : ℝ} (hh : 0 < h) :
+    1/((h:ℂ) - (γ:ℂ)*Complex.I) + 1/((h:ℂ) + (γ:ℂ)*Complex.I)
+      = ((2*h/(h^2 + γ^2) : ℝ) : ℂ) := by
+  have hd1 : ((h:ℂ) - (γ:ℂ)*Complex.I) ≠ 0 := by
+    intro h0
+    have h1 := congrArg Complex.re h0
+    simp at h1
+    linarith
+  have hd2 : ((h:ℂ) + (γ:ℂ)*Complex.I) ≠ 0 := by
+    intro h0
+    have h1 := congrArg Complex.re h0
+    simp at h1
+    linarith
+  have hprod : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
+      = (((h^2 + γ^2 : ℝ)) : ℂ) := by
+    have h2 : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
+        = (h:ℂ)^2 - ((γ:ℂ)*Complex.I)^2 := by ring
+    rw [h2, mul_pow, Complex.I_sq]
+    push_cast
+    ring
+  rw [div_add_div _ _ hd1 hd2, hprod, Complex.ofReal_div]
+  congr 1
+  push_cast
+  ring
+
+/-- **The transform value at a critical-line zero**: `Φ_{F_h}(1/2+iγ) = 2h/(h²+γ²)`. -/
+theorem paperPhi_expTest_at_zero {h : ℝ} (hh : 0 < h) {ρ : ℂ} (hre : ρ.re = 1/2) :
+    paperPhi (expTest h) ρ = ((2*h/(h^2 + ρ.im^2) : ℝ) : ℂ) := by
+  have hz : |ρ.re - 1/2| < h := by
+    rw [hre, sub_self, abs_zero]
+    exact hh
+  rw [paperPhi_expTest hz]
+  have hρ_eq : ρ - 1/2 = (ρ.im : ℂ) * Complex.I := by
+    apply Complex.ext
+    · simp [hre]
+    · simp
+  rw [hρ_eq]
+  exact one_div_sub_add_one_div_add_I hh
+
+/-- **Absolute convergence of the zero side at the Landau–Stark function.** -/
+theorem summable_zetaZeros_paperPhi_expTest (hGRH : GeneralizedRiemannHypothesis K)
+    {h : ℝ} (hh : 1/2 < h) :
+    Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℂ) * paperPhi (expTest h) ρ.1) := by
+  have hs : Summable (fun ρ : ZetaZeros K =>
+      (zetaZeroDivisor K ρ.1 : ℂ) * ((2*h/(h^2 + ρ.1.im^2) : ℝ) : ℂ)) := by
+    refine summable_zetaZeros_mul_of_norm_le K (σ := h + 1/2) (by linarith)
+      (f := fun γ => ((2*h/(h^2 + γ^2) : ℝ) : ℂ)) (c := 2*h) (fun γ => ?_)
+    rw [Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (div_nonneg (by linarith) (by positivity)),
+      show (h + 1/2 - 1/2) = h by ring]
+  refine hs.congr (fun ρ => ?_)
+  rw [paperPhi_expTest_at_zero (by linarith) (ZetaZeros_re_eq_half K hGRH ρ)]
+
+/-- **The von Mangoldt Dirichlet sum** `Σ_{𝔭,m} log N𝔭 · N𝔭^{−mσ}`
+(= `−ζ'_K/ζ_K(σ)` for `σ > 1`; B–F's `−2ζ'_K/ζ_K(σ)` term is twice this). -/
+noncomputable def vonMangoldtSum (K : Type*) [Field K] [NumberField K] (σ : ℝ) : ℝ :=
+  ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+    Real.log (Ideal.absNorm pk.1.1)
+      * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)
+
+/-- **The prime side at the Landau–Stark function is the von Mangoldt sum**:
+`H(0) = Σ log N𝔭 · N𝔭^{−m/2}·e^{−h·m·log N𝔭} = Σ log N𝔭 · N𝔭^{−mσ}`, `σ = h+1/2`. -/
+theorem primeSideH_expTest_zero_eq (a : ℝ) {h : ℝ} (hh : 0 < h) :
+    primeSideH K a (expTest h) 0 = ((vonMangoldtSum K (h + 1/2) : ℝ) : ℂ) := by
+  rw [primeSideH_auxF_zero_eq, vonMangoldtSum, Complex.ofReal_tsum]
+  refine tsum_congr (fun pk => ?_)
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+      fun h0 => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h0)
+    have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
+      fun h0 => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h0)
+    have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
+    exact_mod_cast h2
+  have hN0 : (0:ℝ) < (Ideal.absNorm pk.1.1 : ℝ) := by linarith
+  have hlogNn : (0:ℝ) ≤ Real.log (Ideal.absNorm pk.1.1) :=
+    Real.log_nonneg (by linarith)
+  have hmlogNn : (0:ℝ) ≤ (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) :=
+    mul_nonneg (Nat.cast_nonneg _) hlogNn
+  unfold expTest
+  rw [abs_of_nonneg hmlogNn, ← Complex.ofReal_mul]
+  congr 1
+  have hkey : (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+      * Real.exp (-h * ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)))
+      = (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (h + 1/2)) := by
+    rw [Real.rpow_def_of_pos hN0, Real.rpow_def_of_pos hN0, ← Real.exp_add]
+    congr 1
+    ring
+  rw [mul_assoc, hkey]
+
+/-- **The pole terms at the Landau–Stark function**:
+`Φ(0) + Φ(1) = 2/(h+1/2) + 2/(h−1/2) = 2/σ + 2/(σ−1)`. -/
+theorem paperPhi_expTest_zero_add_one {h : ℝ} (hh : 1/2 < h) :
+    paperPhi (expTest h) 0 + paperPhi (expTest h) 1
+      = ((2/(h + 1/2) + 2/(h - 1/2) : ℝ) : ℂ) := by
+  have hz0 : |(0:ℂ).re - 1/2| < h := by
+    simp only [Complex.zero_re, zero_sub, abs_neg]
+    rw [abs_of_pos (by norm_num : (0:ℝ) < 1/2)]
+    linarith [hh]
+  have hz1 : |(1:ℂ).re - 1/2| < h := by
+    simp only [Complex.one_re]
+    rw [show (1:ℝ) - 1/2 = 1/2 by norm_num, abs_of_pos (by norm_num : (0:ℝ) < 1/2)]
+    linarith
+  rw [paperPhi_expTest hz0, paperPhi_expTest hz1]
+  have h0eq : ((h:ℂ) - ((0:ℂ) - 1/2)) = ((h + 1/2 : ℝ) : ℂ) := by push_cast; ring
+  have h0eq' : ((h:ℂ) + ((0:ℂ) - 1/2)) = ((h - 1/2 : ℝ) : ℂ) := by push_cast; ring
+  have h1eq : ((h:ℂ) - ((1:ℂ) - 1/2)) = ((h - 1/2 : ℝ) : ℂ) := by push_cast; ring
+  have h1eq' : ((h:ℂ) + ((1:ℂ) - 1/2)) = ((h + 1/2 : ℝ) : ℂ) := by push_cast; ring
+  rw [h0eq, h0eq', h1eq, h1eq']
+  have hne1' : (h + 1/2 : ℝ) ≠ 0 := by linarith
+  have hne2' : (h - 1/2 : ℝ) ≠ 0 := by linarith
+  push_cast
+  field_simp
+  ring
+
+/-- Realifying the archimedean integrals at the Landau–Stark function. -/
+theorem arch_expTest_integral_eq (h : ℝ) (w : ℝ → ℝ) :
+    (∫ y in Set.Ioi (0:ℝ), ((w y : ℝ) : ℂ) * (expTest h 0 - expTest h y))
+      = ((∫ y in Set.Ioi (0:ℝ), w y * (1 - Real.exp (-h * y)) : ℝ) : ℂ) := by
+  rw [← integral_complex_ofReal]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun y hy => ?_)
+  rw [expTest_zero]
+  unfold expTest
+  rw [abs_of_nonneg (le_of_lt hy)]
+  push_cast
+  ring
+
+/-- **eq:Stark** (B–F lines 554–557, ×2): for `σ > 1`, under GRH,
+`2(σ−1/2)·Σ_ρ m_ρ/((σ−1/2)²+γ_ρ²)
+  = 2/σ + 2/(σ−1) + log Δ_K − [Γ-constant] + n·I_sinh(σ) + r₁·I_cosh(σ)
+    − 2·Σ_{𝔭,m} log N𝔭·N𝔭^{−mσ}`,
+the explicit formula evaluated at the Landau–Stark function `F_{σ−1/2}`. -/
+theorem stark_identity (hGRH : GeneralizedRiemannHypothesis K) {σ : ℝ} (hσ : 1 < σ) :
+    2*(σ - 1/2) * zeroSumSigma K σ
+      = 2/σ + 2/(σ - 1) + Real.log |NumberField.discr K|
+        + (-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)))
+        + ((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ) : ℝ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+        + (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+        - 2 * vonMangoldtSum K σ := by
+  have hh : 1/2 < σ - 1/2 := by linarith
+  have hh0 : (0:ℝ) < σ - 1/2 := by linarith
+  set a : ℝ := min (1/4) ((σ - 1)/2) with ha_def
+  have ha : 0 < a := lt_min (by norm_num) (by linarith)
+  have ha' : a ≤ 1/4 := min_le_left _ _
+  have hah : 1/2 + a < σ - 1/2 := by
+    have h1 : a ≤ (σ - 1)/2 := min_le_right _ _
+    linarith
+  obtain ⟨T, hT, hlim⟩ := weil_explicit_formula_expTest K ha ha' hah
+  have hsum := summable_zetaZeros_paperPhi_expTest K hGRH hh
+  have hbridge := tendsto_finsum_window_zetaZeros K hGRH hsum ha hT
+  have hkey := tendsto_nhds_unique hbridge hlim
+  -- evaluate the zero side
+  have hzeros : (∑' ρ : ZetaZeros K,
+      (zetaZeroDivisor K ρ.1 : ℂ) * paperPhi (expTest (σ - 1/2)) ρ.1)
+      = ((2*(σ - 1/2) * zeroSumSigma K σ : ℝ) : ℂ) := by
+    have h1 : ∀ ρ : ZetaZeros K,
+        (zetaZeroDivisor K ρ.1 : ℂ) * paperPhi (expTest (σ - 1/2)) ρ.1
+        = (((zetaZeroDivisor K ρ.1 : ℝ)
+            * (2*(σ - 1/2)/((σ - 1/2)^2 + ρ.1.im^2)) : ℝ) : ℂ) := by
+      intro ρ
+      rw [paperPhi_expTest_at_zero hh0 (ZetaZeros_re_eq_half K hGRH ρ)]
+      push_cast
+      ring
+    rw [tsum_congr h1, ← Complex.ofReal_tsum]
+    congr 1
+    rw [zeroSumSigma, ← tsum_mul_left]
+    refine tsum_congr (fun ρ => ?_)
+    ring
+  -- evaluate the prime side
+  have hprime := primeSideH_expTest_zero_eq K a hh0
+  rw [show (σ - 1/2) + 1/2 = σ by ring] at hprime
+  -- evaluate the pole terms
+  have hpoles := paperPhi_expTest_zero_add_one hh
+  rw [show (σ - 1/2) + 1/2 = σ by ring, show (σ - 1/2) - 1/2 = σ - 1 by ring] at hpoles
+  -- realify the archimedean integrals
+  have harch1 := arch_expTest_integral_eq (σ - 1/2) (fun y => 1/(2 * Real.sinh (y/2)))
+  have harch2 := arch_expTest_integral_eq (σ - 1/2) (fun y => 1/(2 * Real.cosh (y/2)))
+  rw [hzeros, hpoles, hprime, harch1, harch2, expTest_zero] at hkey
+  have hkey2 : ((2*(σ - 1/2) * zeroSumSigma K σ : ℝ) : ℂ)
+      = ((2/σ + 2/(σ - 1) + Real.log |NumberField.discr K|
+        + (-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+              * (Real.eulerMascheroniConstant + Real.log (8*π))
+            + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)))
+        + ((NumberField.InfinitePlace.nrRealPlaces K
+            + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ) : ℝ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+        + (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+            * (∫ y in Set.Ioi (0:ℝ),
+              1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+        - 2 * vonMangoldtSum K σ : ℝ) : ℂ) := by
+    rw [hkey]
+    push_cast
+    ring
+  exact_mod_cast hkey2
+
+/-! ### The Landau–Stark estimate (L5-c) -/
+
+/-- **B–F's `d_{K,σ}`** (line 528), with the archimedean side kept in its integral
+form (the digamma evaluation is a numeric-phase concern):
+`d_{K,σ} = 2Σ log N𝔭·N𝔭^{−mσ} + [Γ-constant] − n·I_sinh(σ) − r₁·I_cosh(σ) − 2/σ`. -/
+noncomputable def dSigma (K : Type*) [Field K] [NumberField K] (σ : ℝ) : ℝ :=
+  2 * vonMangoldtSum K σ
+    - (-(((NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        + 2*(NumberField.InfinitePlace.nrComplexPlaces K : ℝ))
+          * (Real.eulerMascheroniConstant + Real.log (8*π))
+        + (NumberField.InfinitePlace.nrRealPlaces K : ℝ) * (π/2)))
+    - ((NumberField.InfinitePlace.nrRealPlaces K
+        + 2*NumberField.InfinitePlace.nrComplexPlaces K : ℕ) : ℝ)
+        * (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.sinh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+    - (NumberField.InfinitePlace.nrRealPlaces K : ℝ)
+        * (∫ y in Set.Ioi (0:ℝ),
+          1/(2 * Real.cosh (y/2)) * (1 - Real.exp (-(σ - 1/2) * y)))
+    - 2/σ
+
+/-- eq:Stark in `d_{K,σ}`-form: `2(σ−1/2)·Σ_σ = log Δ_K + 2/(σ−1) − d_{K,σ}`. -/
+theorem stark_identity' (hGRH : GeneralizedRiemannHypothesis K) {σ : ℝ} (hσ : 1 < σ) :
+    2*(σ - 1/2) * zeroSumSigma K σ
+      = Real.log |NumberField.discr K| + 2/(σ - 1) - dSigma K σ := by
+  rw [stark_identity K hGRH hσ, dSigma]
+  ring
+
+/-- **B–F Lemma 5 (`Estimate`, line 523)**: under GRH, for `σ > 1`,
+`Σ_ρ m_ρ/(¼+γ_ρ²) ≤ (2σ−1)·(log Δ_K + 2/(σ−1) − d_{K,σ})`. -/
+theorem landau_stark_estimate (hGRH : GeneralizedRiemannHypothesis K) {σ : ℝ}
+    (hσ : 1 < σ) :
+    zeroSumSigma K 1
+      ≤ (2*σ - 1) * (Real.log |NumberField.discr K| + 2/(σ - 1) - dSigma K σ) := by
+  have hZ : zeroSumSigma K 1 ≤ (2*σ - 1)^2 * zeroSumSigma K σ := by
+    have hZ2 : (2*σ - 1)^2 * zeroSumSigma K σ
+        = ∑' ρ : ZetaZeros K, (2*σ - 1)^2
+            * ((zetaZeroDivisor K ρ.1 : ℝ) / ((σ - 1/2)^2 + ρ.1.im^2)) := by
+      rw [zeroSumSigma, tsum_mul_left]
+    rw [zeroSumSigma, hZ2]
+    refine Summable.tsum_le_tsum (fun ρ => ?_)
+      (summable_zetaZeros_inv_sq K ((1:ℝ) - 1/2) (by norm_num))
+      (((summable_zetaZeros_inv_sq K (σ - 1/2) (by linarith)).mul_left _))
+    have hm : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+      exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+    have hB : (0:ℝ) < ((1:ℝ) - 1/2)^2 + ρ.1.im^2 :=
+      add_pos_of_pos_of_nonneg (by norm_num) (sq_nonneg _)
+    have hA : (0:ℝ) < (σ - 1/2)^2 + ρ.1.im^2 :=
+      add_pos_of_pos_of_nonneg (pow_pos (by linarith) 2) (sq_nonneg _)
+    rw [mul_div_assoc', div_le_div_iff₀ hB hA]
+    have h41 : (1:ℝ) ≤ (2*σ - 1)^2 := by nlinarith
+    nlinarith [mul_nonneg hm (sq_nonneg ρ.1.im), sq_nonneg ρ.1.im,
+      mul_nonneg (mul_nonneg hm (sq_nonneg ρ.1.im))
+        (by nlinarith : (0:ℝ) ≤ (2*σ - 1)^2 - 1)]
+  calc zeroSumSigma K 1 ≤ (2*σ - 1)^2 * zeroSumSigma K σ := hZ
+    _ = (2*σ - 1) * (2*(σ - 1/2) * zeroSumSigma K σ) := by ring
+    _ = (2*σ - 1) * (Real.log |NumberField.discr K| + 2/(σ - 1) - dSigma K σ) := by
+        rw [stark_identity' K hGRH hσ]
+
 end DedekindResidue
 
 end
