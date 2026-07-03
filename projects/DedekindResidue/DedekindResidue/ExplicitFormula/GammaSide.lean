@@ -3705,4 +3705,109 @@ theorem logDeriv_cpow_half_mul {c : ℂ} (hc : c ≠ 0) {f : ℂ → ℂ} {s : �
   rw [logDeriv_apply, (h0.const_cpow (Or.inl hc)).deriv]
   field_simp
 
+variable (K : Type*) [Field K] [NumberField K]
+
+/-- **The Γ-side logarithmic derivative is `O(log|t|)` in the critical band**
+(Γψ-a prerequisite; Poitou p. 6-03 "\|G'/G(s)\| est O(log|t|) dans une bande
+verticale"): from the `d log γ_K` expansion and the digamma window bound A6. -/
+theorem exists_norm_logDeriv_gammaFactor_le :
+    ∃ C : ℝ, 0 < C ∧ ∀ σ t : ℝ, 1/4 ≤ σ → σ ≤ 5/4 → 4 ≤ |t| →
+      ‖logDeriv (gammaFactor K) ((σ:ℂ) + (t:ℂ) * Complex.I)‖
+        ≤ C * Real.log (2 + |t|) := by
+  obtain ⟨C₆, hC₆pos, hC₆⟩ := exists_norm_digamma_le
+  set r₁ := NumberField.InfinitePlace.nrRealPlaces K
+  set r₂ := NumberField.InfinitePlace.nrComplexPlaces K
+  refine ⟨(r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆)
+      + (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + C₆) + 1, by positivity,
+    fun σ t hσl hσr ht => ?_⟩
+  set s : ℂ := (σ:ℂ) + (t:ℂ) * Complex.I with hs
+  have hsre : s.re = σ := by
+    rw [hs]
+    simp
+  have hsim : s.im = t := by
+    rw [hs]
+    simp
+  have hspos : 0 < s.re := by
+    rw [hsre]
+    linarith
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + |t|) := by
+    rw [show (1:ℝ) = Real.log (Real.exp 1) by rw [Real.log_exp]]
+    refine Real.log_le_log (Real.exp_pos 1) ?_
+    have := Real.exp_one_lt_d9
+    linarith
+  rw [logDeriv_gammaFactor K hspos]
+  -- half-point coordinates
+  have hs2 : s/2 = ((σ/2 : ℝ) : ℂ) + ((t/2 : ℝ) : ℂ) * Complex.I := by
+    rw [hs]
+    push_cast
+    ring
+  have hψ2 : ‖Complex.digamma (s/2)‖ ≤ C₆ * Real.log (2 + |t|) := by
+    rw [hs2]
+    have h0 := hC₆ (σ/2) (t/2) (by linarith) (by linarith) (by
+      rw [abs_div, abs_two]
+      rw [le_div_iff₀ (by norm_num : (0:ℝ) < 2)]
+      linarith)
+    refine le_trans h0 ?_
+    refine mul_le_mul_of_nonneg_left ?_ hC₆pos.le
+    refine Real.log_le_log (by positivity) ?_
+    rw [abs_div, abs_two]
+    nlinarith [abs_nonneg t]
+  have hψ1 : ‖Complex.digamma s‖ ≤ C₆ * Real.log (2 + |t|) := by
+    have h0 := hC₆ σ t (by linarith) (by linarith) (by linarith)
+    rw [← hs] at h0
+    exact h0
+  -- assemble
+  have htri : ‖(r₁ : ℂ) * (-(1/2) * Complex.log π + (1/2) * Complex.digamma (s/2))
+      + (r₂ : ℂ) * (-Complex.log (2*π) + Complex.digamma s)‖
+      ≤ (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * ‖Complex.digamma (s/2)‖)
+        + (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + ‖Complex.digamma s‖) := by
+    refine le_trans (norm_add_le _ _) ?_
+    refine add_le_add ?_ ?_
+    · rw [norm_mul, Complex.norm_natCast]
+      refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_mul, norm_mul, norm_neg]
+      refine add_le_add (le_of_eq ?_) (le_of_eq ?_)
+      · norm_num
+      · norm_num
+    · rw [norm_mul, Complex.norm_natCast]
+      refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+      refine le_trans (norm_add_le _ _) ?_
+      rw [norm_neg]
+  refine le_trans htri ?_
+  have h1 : (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * ‖Complex.digamma (s/2)‖)
+      ≤ (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆) * Real.log (2 + |t|) := by
+    have h2 : (1/2 : ℝ) * ‖Complex.log (π:ℂ)‖ + (1/2) * ‖Complex.digamma (s/2)‖
+        ≤ ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆) * Real.log (2 + |t|) := by
+      rw [add_mul]
+      refine add_le_add ?_ ?_
+      · nlinarith [norm_nonneg (Complex.log (π:ℂ))]
+      · rw [mul_assoc]
+        refine mul_le_mul_of_nonneg_left hψ2 (by norm_num)
+    calc (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * ‖Complex.digamma (s/2)‖)
+        ≤ (r₁ : ℝ) * (((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆) * Real.log (2 + |t|)) :=
+          mul_le_mul_of_nonneg_left h2 (Nat.cast_nonneg _)
+      _ = (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆) * Real.log (2 + |t|) := by
+          ring
+  have h2 : (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + ‖Complex.digamma s‖)
+      ≤ (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + C₆) * Real.log (2 + |t|) := by
+    have h3 : ‖Complex.log (2*(π:ℂ))‖ + ‖Complex.digamma s‖
+        ≤ (‖Complex.log (2*(π:ℂ))‖ + C₆) * Real.log (2 + |t|) := by
+      rw [add_mul]
+      refine add_le_add ?_ ?_
+      · nlinarith [norm_nonneg (Complex.log (2*(π:ℂ)))]
+      · exact hψ1
+    calc (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + ‖Complex.digamma s‖)
+        ≤ (r₂ : ℝ) * ((‖Complex.log (2*(π:ℂ))‖ + C₆) * Real.log (2 + |t|)) :=
+          mul_le_mul_of_nonneg_left h3 (Nat.cast_nonneg _)
+      _ = (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + C₆) * Real.log (2 + |t|) := by ring
+  have hfin := add_le_add h1 h2
+  refine le_trans hfin ?_
+  rw [show ((r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆)
+      + (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + C₆) + 1) * Real.log (2 + |t|)
+      = (r₁ : ℝ) * ((1/2) * ‖Complex.log (π:ℂ)‖ + (1/2) * C₆) * Real.log (2 + |t|)
+        + (r₂ : ℝ) * (‖Complex.log (2*(π:ℂ))‖ + C₆) * Real.log (2 + |t|)
+        + Real.log (2 + |t|) by ring]
+  linarith
+
 end DedekindResidue
