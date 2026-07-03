@@ -402,6 +402,173 @@ theorem neg_logDeriv_dedekindZeta_eq_tsum {s : ℂ} (hs : 1 < s.re) :
         refine tsum_congr (fun 𝔭 => ?_)
         rw [hld_eq 𝔭, neg_neg]
 
+/-- Summability of the prime-power family `log(N𝔭)·N𝔭^{-(k+1)σ}` for `σ > 1`. -/
+theorem summable_primeIdeal_pow_log_rpow {σ : ℝ} (hσ : 1 < σ) :
+    Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)) := by
+  have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
+    intro 𝔭
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
+    exact_mod_cast this
+  have hr : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      (0:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) ∧ (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) < 1 := by
+    intro 𝔭
+    constructor
+    · positivity
+    · rw [Real.rpow_neg (by linarith [hfacts 𝔭]), inv_lt_one_iff₀]
+      right
+      exact Real.one_lt_rpow_iff_of_pos (by linarith [hfacts 𝔭]) |>.mpr
+        (Or.inl ⟨by linarith [hfacts 𝔭], by linarith⟩)
+  have hnn : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      0 ≤ Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) := by
+    intro pk
+    have h1 : (1:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by linarith [hfacts pk.1]
+    have := Real.log_nonneg h1
+    positivity
+  -- the exponent identity N^{-(k+1)σ} = (N^{-σ})^{k+1}
+  have hexp : ∀ (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}) (k : ℕ),
+      (Ideal.absNorm 𝔭.1 : ℝ) ^ (-(((k+1 : ℕ)) : ℝ) * σ)
+        = ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)) ^ (k+1) := by
+    intro 𝔭 k
+    rw [← Real.rpow_natCast ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)) (k+1),
+      ← Real.rpow_mul (by linarith [hfacts 𝔭])]
+    congr 1
+    push_cast
+    ring
+  refine (summable_prod_of_nonneg hnn).mpr ⟨?_, ?_⟩
+  · intro 𝔭
+    exact (((summable_geometric_of_lt_one (hr 𝔭).1 (hr 𝔭).2).mul_left
+        ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ))).mul_left (Real.log (Ideal.absNorm 𝔭.1))).congr
+      (fun k => by rw [hexp 𝔭 k, pow_succ'])
+  · -- the 𝔭-sums are dominated by a constant multiple of log(N𝔭)·N𝔭^{-σ}
+    have hval : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+        (∑' k : ℕ, Real.log (Ideal.absNorm 𝔭.1)
+          * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-(((k+1 : ℕ)) : ℝ) * σ))
+        ≤ (1 - (2:ℝ) ^ (-σ))⁻¹ * (Real.log (Ideal.absNorm 𝔭.1)
+            * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)) := by
+      intro 𝔭
+      have h2σ : (2:ℝ) ^ (-σ) < 1 := by
+        rw [Real.rpow_neg (by norm_num), inv_lt_one_iff₀]
+        right
+        exact Real.one_lt_rpow_iff_of_pos (by norm_num) |>.mpr
+          (Or.inl ⟨by norm_num, by linarith⟩)
+      have hmono : (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ) ≤ (2:ℝ) ^ (-σ) := by
+        rw [Real.rpow_neg (by linarith [hfacts 𝔭]), Real.rpow_neg (by norm_num)]
+        refine (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith [hfacts 𝔭]) _)
+          (Real.rpow_pos_of_pos (by norm_num) _)).mpr ?_
+        exact Real.rpow_le_rpow (by norm_num) (hfacts 𝔭) (by linarith)
+      have hsum : (∑' k : ℕ, Real.log (Ideal.absNorm 𝔭.1)
+          * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-(((k+1 : ℕ)) : ℝ) * σ))
+          = Real.log (Ideal.absNorm 𝔭.1) * ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)
+            * (1 - (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ))⁻¹) := by
+        rw [show (fun k : ℕ => Real.log (Ideal.absNorm 𝔭.1)
+            * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-(((k+1 : ℕ)) : ℝ) * σ))
+            = fun k : ℕ => Real.log (Ideal.absNorm 𝔭.1)
+              * ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)
+                * ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)) ^ k) from
+          funext (fun k => by rw [hexp 𝔭 k, pow_succ'])]
+        rw [tsum_mul_left, tsum_mul_left, tsum_geometric_of_lt_one (hr 𝔭).1 (hr 𝔭).2]
+      rw [hsum]
+      have hlognn : 0 ≤ Real.log (Ideal.absNorm 𝔭.1) :=
+        Real.log_nonneg (by linarith [hfacts 𝔭])
+      have hinv : (1 - (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ))⁻¹ ≤ (1 - (2:ℝ) ^ (-σ))⁻¹ := by
+        refine (inv_le_inv₀ (by linarith [(hr 𝔭).2]) (by linarith [h2σ, hmono])).mpr ?_
+        linarith
+      calc Real.log (Ideal.absNorm 𝔭.1) * ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)
+            * (1 - (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ))⁻¹)
+          ≤ Real.log (Ideal.absNorm 𝔭.1) * ((Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)
+            * (1 - (2:ℝ) ^ (-σ))⁻¹) := by
+            refine mul_le_mul_of_nonneg_left ?_ hlognn
+            refine mul_le_mul_of_nonneg_left hinv (by positivity)
+        _ = (1 - (2:ℝ) ^ (-σ))⁻¹ * (Real.log (Ideal.absNorm 𝔭.1)
+            * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-σ)) := by ring
+    refine Summable.of_nonneg_of_le (fun 𝔭 => ?_) hval
+      ((summable_primeIdeal_log_rpow K hσ).mul_left _)
+    exact tsum_nonneg (fun k => hnn (𝔭, k))
+
+/-- **The prime-power expansion of `−ζ_K'/ζ_K`** (Poitou p. 6-02): for `Re s > 1`,
+`−ζ_K'/ζ_K(s) = ∑_{𝔭,m≥1} log(N𝔭)·N𝔭^{-ms}`, expanding each Euler factor
+geometrically. -/
+theorem neg_logDeriv_dedekindZeta_eq_tsum_prod {s : ℂ} (hs : 1 < s.re) :
+    -(logDeriv (NumberField.dedekindZeta K) s)
+      = ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          Complex.log (Ideal.absNorm pk.1.1 : ℂ)
+            * (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s) := by
+  have hfacts : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      2 ≤ Ideal.absNorm 𝔭.1 := by
+    intro 𝔭
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 := fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 := fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    omega
+  -- norm identities
+  have hnorm : ∀ (𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}) (k : ℕ),
+      ‖Complex.log (Ideal.absNorm 𝔭.1 : ℂ)
+        * (Ideal.absNorm 𝔭.1 : ℂ) ^ (-(((k+1 : ℕ)) : ℂ) * s)‖
+      = Real.log (Ideal.absNorm 𝔭.1)
+        * (Ideal.absNorm 𝔭.1 : ℝ) ^ (-(((k+1 : ℕ)) : ℝ) * s.re) := by
+    intro 𝔭 k
+    have h2 := hfacts 𝔭
+    have hN1 : (1:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
+      exact_mod_cast (by omega : 1 ≤ Ideal.absNorm 𝔭.1)
+    have hlogeq : ‖Complex.log (Ideal.absNorm 𝔭.1 : ℂ)‖ = Real.log (Ideal.absNorm 𝔭.1) := by
+      rw [show ((Ideal.absNorm 𝔭.1 : ℕ) : ℂ) = (((Ideal.absNorm 𝔭.1 : ℝ)) : ℂ) by
+          push_cast; ring,
+        ← Complex.ofReal_log (by linarith), Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (Real.log_nonneg hN1)]
+    rw [norm_mul, hlogeq, Complex.norm_natCast_cpow_of_pos (by omega)]
+    congr 2
+    rw [show (-(((k+1 : ℕ)) : ℂ) * s) = -((((k+1 : ℕ)) : ℝ) : ℂ) * s by push_cast; ring]
+    rw [neg_mul, Complex.neg_re, Complex.re_ofReal_mul]
+    ring
+  -- summability of the double family
+  have hsummable : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      Complex.log (Ideal.absNorm pk.1.1 : ℂ)
+        * (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s)) := by
+    refine Summable.of_norm ?_
+    refine (summable_primeIdeal_pow_log_rpow K hs).congr (fun pk => ?_)
+    exact (hnorm pk.1 pk.2).symm
+  have hslice : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      Summable (fun k : ℕ => Complex.log (Ideal.absNorm 𝔭.1 : ℂ)
+        * (Ideal.absNorm 𝔭.1 : ℂ) ^ (-(((k+1 : ℕ)) : ℂ) * s)) := by
+    intro 𝔭
+    refine Summable.of_norm ?_
+    refine (((summable_primeIdeal_pow_log_rpow K hs).prod_factor 𝔭).congr (fun k => ?_))
+    exact (hnorm 𝔭 k).symm
+  rw [neg_logDeriv_dedekindZeta_eq_tsum K hs, hsummable.tsum_prod' hslice]
+  refine tsum_congr (fun 𝔭 => ?_)
+  -- per-prime geometric expansion
+  set w : ℂ := (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s) with hw
+  have hwlt : ‖w‖ < 1 := by
+    rw [hw, Complex.norm_natCast_cpow_of_pos (by have := hfacts 𝔭; omega), Complex.neg_re]
+    have hN2 : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by exact_mod_cast hfacts 𝔭
+    rw [Real.rpow_neg (by linarith), inv_lt_one_iff₀]
+    right
+    exact Real.one_lt_rpow_iff_of_pos (by linarith) |>.mpr
+      (Or.inl ⟨by linarith, by linarith⟩)
+  have hgeom : (∑' k : ℕ, w ^ (k+1)) = w / (1 - w) := by
+    rw [show (fun k : ℕ => w ^ (k+1)) = fun k : ℕ => w * w ^ k from
+      funext (fun k => pow_succ' w k), tsum_mul_left,
+      tsum_geometric_of_norm_lt_one hwlt, div_eq_mul_inv]
+  have hcpow : ∀ k : ℕ, (Ideal.absNorm 𝔭.1 : ℂ) ^ (-(((k+1 : ℕ)) : ℂ) * s) = w ^ (k+1) := by
+    intro k
+    rw [hw, show (-(((k+1 : ℕ)) : ℂ) * s) = (((k+1 : ℕ)) : ℂ) * (-s) by ring,
+      Complex.cpow_nat_mul]
+  calc Complex.log (Ideal.absNorm 𝔭.1 : ℂ) * (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)
+        / (1 - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s))
+      = Complex.log (Ideal.absNorm 𝔭.1 : ℂ) * (w / (1 - w)) := by
+        rw [hw, mul_div_assoc]
+    _ = Complex.log (Ideal.absNorm 𝔭.1 : ℂ) * ∑' k : ℕ, w ^ (k+1) := by rw [hgeom]
+    _ = ∑' k : ℕ, Complex.log (Ideal.absNorm 𝔭.1 : ℂ) * w ^ (k+1) := tsum_mul_left.symm
+    _ = ∑' k : ℕ, Complex.log (Ideal.absNorm 𝔭.1 : ℂ)
+          * (Ideal.absNorm 𝔭.1 : ℂ) ^ (-(((k+1 : ℕ)) : ℂ) * s) := by
+        refine tsum_congr (fun k => ?_)
+        rw [hcpow k]
+
 end DedekindResidue
 
 end
