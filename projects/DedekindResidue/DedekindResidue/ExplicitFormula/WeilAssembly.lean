@@ -375,4 +375,221 @@ theorem poleWindow_zero :
   rw [poleWindow, mul_zero, Real.exp_zero]
   norm_num
 
+/-- The half-plane indicator product function behind `poleWindow` is integrable. -/
+theorem integrable_poleWindow_pair (hc : 0 < c) (hG : Integrable G) (t : ℝ) :
+    Integrable (fun p : ℝ × ℝ => ({q : ℝ × ℝ | q.1 < q.2}).indicator
+      (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ) * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+        * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) p)
+      ((volume : Measure ℝ).prod (volume : Measure ℝ)) := by
+  have hKm : AEStronglyMeasurable (fun w : ℝ => G w * ((Real.exp (-(c*w)) : ℝ):ℂ))
+      (volume : Measure ℝ) := by
+    refine hG.1.mul ?_
+    refine Continuous.aestronglyMeasurable ?_
+    exact Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+      ((continuous_const.mul continuous_id).neg))
+  have hcoeffc : Continuous (fun u : ℝ =>
+      2 * ((Real.exp (c*u) : ℝ):ℂ) * Complex.exp ((t*u : ℝ) * Complex.I)) := by
+    refine Continuous.mul ?_ ?_
+    · exact continuous_const.mul (Complex.continuous_ofReal.comp
+        (Real.continuous_exp.comp (continuous_const.mul continuous_id)))
+    · exact Complex.continuous_exp.comp
+        ((Complex.continuous_ofReal.comp (continuous_const.mul continuous_id)).mul
+          continuous_const)
+  have hPmeas : AEStronglyMeasurable (fun p : ℝ × ℝ =>
+      ({q : ℝ × ℝ | q.1 < q.2}).indicator
+        (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+            * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+          * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) p)
+      ((volume : Measure ℝ).prod (volume : Measure ℝ)) := by
+    refine AEStronglyMeasurable.indicator ?_
+      (measurableSet_lt measurable_fst measurable_snd)
+    refine AEStronglyMeasurable.mul ?_ ?_
+    · exact (hcoeffc.comp continuous_fst).aestronglyMeasurable
+    · exact hKm.comp_quasiMeasurePreserving Measure.quasiMeasurePreserving_snd
+  refine (MeasureTheory.integrable_prod_iff' hPmeas).mpr ⟨?_, ?_⟩
+  · -- u-slices for a.e. w
+    refine Filter.Eventually.of_forall (fun w => ?_)
+    have hsec : (fun u : ℝ => ({q : ℝ × ℝ | q.1 < q.2}).indicator
+        (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+            * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+          * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) (u, w))
+        = (Set.Iio w).indicator (fun u =>
+            (2 * ((Real.exp (c*u) : ℝ):ℂ) * Complex.exp ((t*u : ℝ) * Complex.I))
+              * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))) := by
+      funext u
+      by_cases h : u < w
+      · rw [Set.indicator_of_mem (by exact h : (u, w) ∈ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_mem (Set.mem_Iio.mpr h)]
+      · rw [Set.indicator_of_notMem (by exact h : (u, w) ∉ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_notMem (fun hm => h (Set.mem_Iio.mp hm))]
+    rw [hsec]
+    rw [integrable_indicator_iff measurableSet_Iio]
+    refine Integrable.mul_const ?_ _
+    refine Integrable.mono' (g := fun u : ℝ => 2 * Real.exp (c*u))
+      (((integrableOn_exp_mul_Iio hc w).const_mul 2)) ?_ ?_
+    · exact (hcoeffc.aestronglyMeasurable).restrict
+    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Iio).mpr
+        (Filter.Eventually.of_forall (fun u _ => ?_))
+      rw [norm_mul, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one,
+        Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+      rw [show ‖(2:ℂ)‖ = 2 by norm_num]
+  · -- the norm marginals
+    have hval : ∀ w : ℝ, (∫ u : ℝ, ‖({q : ℝ × ℝ | q.1 < q.2}).indicator
+        (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+            * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+          * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) (u, w)‖)
+        = (2/c) * ‖G w‖ := by
+      intro w
+      have hsec : ∀ u : ℝ, ‖({q : ℝ × ℝ | q.1 < q.2}).indicator
+          (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+              * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+            * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) (u, w)‖
+          = (Set.Iio w).indicator
+              (fun u => 2 * Real.exp (c*u) * (‖G w‖ * Real.exp (-(c*w)))) u := by
+        intro u
+        by_cases h : u < w
+        · rw [Set.indicator_of_mem (by exact h : (u, w) ∈ {q : ℝ × ℝ | q.1 < q.2}),
+            Set.indicator_of_mem (Set.mem_Iio.mpr h)]
+          simp only [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one,
+            Complex.norm_real, Real.norm_eq_abs, Real.abs_exp, Complex.norm_ofNat]
+        · rw [Set.indicator_of_notMem (by exact h : (u, w) ∉ {q : ℝ × ℝ | q.1 < q.2}),
+            Set.indicator_of_notMem (fun hm => h (Set.mem_Iio.mp hm)), norm_zero]
+      rw [MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hsec)]
+      rw [MeasureTheory.integral_indicator measurableSet_Iio]
+      rw [show (fun u : ℝ => 2 * Real.exp (c*u) * (‖G w‖ * Real.exp (-(c*w))))
+          = fun u : ℝ => (2 * (‖G w‖ * Real.exp (-(c*w)))) * Real.exp (c*u) from by
+        funext u
+        ring]
+      rw [MeasureTheory.integral_const_mul, integral_exp_mul_Iio hc w]
+      have hee : Real.exp (-(c*w)) * Real.exp (c*w) = 1 := by
+        rw [← Real.exp_add, show -(c*w) + c*w = 0 by ring, Real.exp_zero]
+      calc 2 * (‖G w‖ * Real.exp (-(c*w))) * (Real.exp (c*w)/c)
+          = (2/c) * ‖G w‖ * (Real.exp (-(c*w)) * Real.exp (c*w)) := by ring
+        _ = 2/c * ‖G w‖ := by rw [hee, mul_one]
+    refine Integrable.congr ((hG.norm.const_mul (2/c))) ?_
+    exact Filter.Eventually.of_forall (fun w => (hval w).symm)
+
+/-- **The fixed-`t` pole-piece identity**: `∫ E_c(u) e^{itu} du = 2·(∫ G e^{itx})/(c+it)`. -/
+theorem integral_poleWindow_cexp (hc : 0 < c) (hG : Integrable G) (t : ℝ) :
+    ∫ u : ℝ, poleWindow c G u * Complex.exp ((t*u : ℝ) * Complex.I)
+      = 2 * (∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I))
+          * ((c:ℂ) + (t:ℂ)*Complex.I)⁻¹ := by
+  set z : ℂ := (c:ℂ) + (t:ℂ)*Complex.I with hz_def
+  have hzre : z.re = c := by
+    rw [hz_def]
+    simp
+  have hzpos : 0 < z.re := by
+    rw [hzre]
+    exact hc
+  set P : ℝ × ℝ → ℂ := fun p => ({q : ℝ × ℝ | q.1 < q.2}).indicator
+    (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ) * Complex.exp ((t*q.1 : ℝ) * Complex.I))
+      * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) p with hP_def
+  have hprod : Integrable P ((volume : Measure ℝ).prod (volume : Measure ℝ)) :=
+    integrable_poleWindow_pair hc hG t
+  -- identify the u-marginal with the left-hand integrand
+  have hIdent1 : ∀ u : ℝ, poleWindow c G u * Complex.exp ((t*u : ℝ) * Complex.I)
+      = ∫ w : ℝ, P (u, w) := by
+    intro u
+    have hsec : (fun w : ℝ => P (u, w))
+        = (Set.Ioi u).indicator (fun w =>
+            (2 * ((Real.exp (c*u) : ℝ):ℂ) * Complex.exp ((t*u : ℝ) * Complex.I))
+              * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))) := by
+      funext w
+      rw [hP_def]
+      beta_reduce
+      by_cases h : u < w
+      · rw [Set.indicator_of_mem (by exact h : (u, w) ∈ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_mem (Set.mem_Ioi.mpr h)]
+      · rw [Set.indicator_of_notMem (by exact h : (u, w) ∉ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_notMem (fun hm => h (Set.mem_Ioi.mp hm))]
+    rw [hsec, MeasureTheory.integral_indicator measurableSet_Ioi,
+      MeasureTheory.integral_const_mul, poleWindow]
+    ring
+  -- identify the w-marginal
+  have hIdent2 : ∀ w : ℝ, (∫ u : ℝ, P (u, w))
+      = (G w * Complex.exp ((t*w : ℝ) * Complex.I)) * (2 * z⁻¹) := by
+    intro w
+    have hsec : (fun u : ℝ => P (u, w))
+        = (Set.Iio w).indicator (fun u =>
+            (2 * ((Real.exp (c*u) : ℝ):ℂ) * Complex.exp ((t*u : ℝ) * Complex.I))
+              * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))) := by
+      funext u
+      rw [hP_def]
+      beta_reduce
+      by_cases h : u < w
+      · rw [Set.indicator_of_mem (by exact h : (u, w) ∈ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_mem (Set.mem_Iio.mpr h)]
+      · rw [Set.indicator_of_notMem (by exact h : (u, w) ∉ {q : ℝ × ℝ | q.1 < q.2}),
+          Set.indicator_of_notMem (fun hm => h (Set.mem_Iio.mp hm))]
+    rw [hsec, MeasureTheory.integral_indicator measurableSet_Iio]
+    have hpt : ∀ u : ℝ, (2 * ((Real.exp (c*u) : ℝ):ℂ)
+        * Complex.exp ((t*u : ℝ) * Complex.I))
+          * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))
+        = (2 * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))) * Complex.exp (z * (u:ℂ)) := by
+      intro u
+      have hexp : Complex.exp (z * (u:ℂ))
+          = ((Real.exp (c*u) : ℝ):ℂ) * Complex.exp ((t*u : ℝ) * Complex.I) := by
+        rw [Complex.ofReal_exp, ← Complex.exp_add]
+        congr 1
+        rw [hz_def]
+        push_cast
+        ring
+      rw [hexp]
+      ring
+    rw [MeasureTheory.setIntegral_congr_fun measurableSet_Iio (fun u _ => hpt u),
+      MeasureTheory.integral_const_mul, integral_cexp_mul_Iio hzpos w]
+    have hcollapse : ((Real.exp (-(c*w)) : ℝ):ℂ) * Complex.exp (z * (w:ℂ))
+        = Complex.exp ((t*w : ℝ) * Complex.I) := by
+      rw [Complex.ofReal_exp, ← Complex.exp_add]
+      congr 1
+      rw [hz_def]
+      push_cast
+      ring
+    linear_combination (2 * G w / z) * hcollapse
+  -- swap and conclude
+  have hswap := MeasureTheory.integral_integral_swap
+    (f := fun u w : ℝ => P (u, w)) (by exact hprod)
+  calc ∫ u : ℝ, poleWindow c G u * Complex.exp ((t*u : ℝ) * Complex.I)
+      = ∫ u : ℝ, ∫ w : ℝ, P (u, w) :=
+        MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hIdent1)
+    _ = ∫ w : ℝ, ∫ u : ℝ, P (u, w) := hswap
+    _ = ∫ w : ℝ, (G w * Complex.exp ((t*w : ℝ) * Complex.I)) * (2 * z⁻¹) :=
+        MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hIdent2)
+    _ = (∫ w : ℝ, G w * Complex.exp ((t*w : ℝ) * Complex.I)) * (2 * z⁻¹) :=
+        MeasureTheory.integral_mul_const _ _
+    _ = 2 * (∫ x : ℝ, G x * Complex.exp ((t*x : ℝ) * Complex.I)) * z⁻¹ := by
+        ring
+
+/-- `poleWindow` is integrable. -/
+theorem integrable_poleWindow (hc : 0 < c) (hG : Integrable G) :
+    Integrable (poleWindow c G) (volume : Measure ℝ) := by
+  have h0 := (integrable_poleWindow_pair hc hG 0).integral_prod_left
+  refine h0.congr (Filter.Eventually.of_forall (fun u => ?_))
+  have h1 : poleWindow c G u * Complex.exp ((0*u : ℝ) * Complex.I) = poleWindow c G u := by
+    rw [show ((0*u : ℝ) : ℂ) = 0 by push_cast; ring, zero_mul, Complex.exp_zero, mul_one]
+  calc (∫ w : ℝ, ({q : ℝ × ℝ | q.1 < q.2}).indicator
+        (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+            * Complex.exp ((0*q.1 : ℝ) * Complex.I))
+          * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) (u, w))
+      = poleWindow c G u * Complex.exp ((0*u : ℝ) * Complex.I) := by
+        have h2 : ∀ w : ℝ, ({q : ℝ × ℝ | q.1 < q.2}).indicator
+            (fun q => (2 * ((Real.exp (c*q.1) : ℝ):ℂ)
+                * Complex.exp ((0*q.1 : ℝ) * Complex.I))
+              * (G q.2 * ((Real.exp (-(c*q.2)) : ℝ):ℂ))) (u, w)
+            = (Set.Ioi u).indicator (fun w =>
+                (2 * ((Real.exp (c*u) : ℝ):ℂ)
+                  * Complex.exp ((0*u : ℝ) * Complex.I))
+                  * (G w * ((Real.exp (-(c*w)) : ℝ):ℂ))) w := by
+          intro w
+          by_cases h : u < w
+          · rw [Set.indicator_of_mem (by exact h : (u, w) ∈ {q : ℝ × ℝ | q.1 < q.2}),
+              Set.indicator_of_mem (Set.mem_Ioi.mpr h)]
+          · rw [Set.indicator_of_notMem (by exact h : (u, w) ∉ {q : ℝ × ℝ | q.1 < q.2}),
+              Set.indicator_of_notMem (fun hm => h (Set.mem_Ioi.mp hm))]
+        rw [MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall h2),
+          MeasureTheory.integral_indicator measurableSet_Ioi,
+          MeasureTheory.integral_const_mul, poleWindow]
+        ring
+    _ = poleWindow c G u := h1
+
 end DedekindResidue
