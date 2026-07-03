@@ -1718,6 +1718,282 @@ theorem lemma4_sigma_estimate (hGRH : GeneralizedRiemannHypothesis K)
         ring
 
 
+/-! ### The `σ → 1⁺` limit (L4-d): Explicit2 at the residue
+
+Every quantity in `lemma4_sigma_estimate` is continuous in `σ` at `1` — except the
+log-ratio, whose limit is `log κ_K − log κ_ℚ` (the divergences of `log ζ_K` and
+`log ζ_ℚ` cancel), and the zero sums, which we bound by their `σ = 1` values
+(termwise antitone in `σ`). Taking `σ → 1⁺` in the inequality yields the paper's
+`Explicit2` (in our ×2 normalisation) with `h = 1/2` pinned. -/
+
+theorem zeroSumSigma_nonneg (σ : ℝ) : 0 ≤ zeroSumSigma K σ :=
+  tsum_nonneg fun ρ => div_nonneg
+    (by exact_mod_cast zetaZeroDivisor_nonneg K ρ.1) (by positivity)
+
+/-- The zero sum is antitone in `σ` past the critical line: each term
+`m_ρ/((σ−1/2)² + γ²)` decreases as `σ` grows. -/
+theorem zeroSumSigma_anti {σ' σ : ℝ} (hσ' : 1/2 < σ') (hσσ : σ' ≤ σ) :
+    zeroSumSigma K σ ≤ zeroSumSigma K σ' := by
+  refine Summable.tsum_le_tsum (fun ρ => ?_)
+    (summable_zetaZeros_inv_sq K (σ - 1/2) (by linarith))
+    (summable_zetaZeros_inv_sq K (σ' - 1/2) (by linarith))
+  have hm : (0:ℝ) ≤ (zetaZeroDivisor K ρ.1 : ℝ) := by
+    exact_mod_cast zetaZeroDivisor_nonneg K ρ.1
+  have hB : (0:ℝ) < (σ' - 1/2)^2 + ρ.1.im^2 :=
+    add_pos_of_pos_of_nonneg (pow_pos (by linarith) 2) (sq_nonneg _)
+  have hA : (0:ℝ) < (σ - 1/2)^2 + ρ.1.im^2 :=
+    add_pos_of_pos_of_nonneg (pow_pos (by linarith) 2) (sq_nonneg _)
+  rw [div_le_div_iff₀ hA hB]
+  have hsq : (σ' - 1/2)^2 ≤ (σ - 1/2)^2 := by nlinarith
+  nlinarith
+
+/-- The plateau sum is the finite sum over the plateau support. -/
+theorem plateauSum_eq_sum {X : ℝ} (hX : 1 < X) (σ : ℝ) :
+    plateauSum K σ X = ∑ pk ∈ (finite_plateau_support K hX).toFinset,
+      (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+        then Real.log (Ideal.absNorm pk.1.1)
+          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+          * (1 - Real.log X
+              / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+              * Real.exp (-(σ - 1/2)
+                  * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                    - Real.log X)))
+        else 0) := by
+  unfold plateauSum
+  refine tsum_eq_sum (fun pk hpk => ?_)
+  rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at hpk
+  exact if_neg hpk
+
+set_option maxHeartbeats 800000 in
+/-- The plateau sum is continuous in `σ` (its support is finite and
+`σ`-independent, and each term is an exponential in `σ`). -/
+theorem tendsto_plateauSum {X : ℝ} (hX : 1 < X) :
+    Filter.Tendsto (fun σ : ℝ => plateauSum K σ X) (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (plateauSum K 1 X)) := by
+  have hs : Filter.Tendsto (fun σ : ℝ =>
+      ∑ pk ∈ (finite_plateau_support K hX).toFinset,
+        (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+          then Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+            * (1 - Real.log X
+                / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                * Real.exp (-(σ - 1/2)
+                    * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                      - Real.log X)))
+          else 0)) (nhds 1)
+      (nhds (∑ pk ∈ (finite_plateau_support K hX).toFinset,
+        (if (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+          then Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2)
+            * (1 - Real.log X
+                / (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+                * Real.exp (-((1:ℝ) - 1/2)
+                    * (((pk.2+1 : ℕ) : ℝ) * Real.log (Ideal.absNorm pk.1.1)
+                      - Real.log X)))
+          else 0))) := by
+    refine tendsto_finsetSum _ (fun pk _ => ?_)
+    by_cases hc : (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1) ≤ Real.log X
+    · simp only [if_pos hc]
+      exact Continuous.tendsto (by fun_prop) 1
+    · simp only [if_neg hc]
+      exact tendsto_const_nhds
+  refine Filter.Tendsto.congr (fun σ => (plateauSum_eq_sum K hX σ).symm) ?_
+  rw [plateauSum_eq_sum K hX 1]
+  exact hs.mono_left (nhdsWithin_le_nhds (s := Set.Ioi 1))
+
+/-- The real-part class number formula: `(σ−1)·ζ_K(σ).re → κ_K` as `σ → 1⁺`. -/
+theorem tendsto_sub_one_mul_dedekindZeta_re :
+    Filter.Tendsto (fun σ : ℝ => (σ - 1) * (NumberField.dedekindZeta K (σ:ℂ)).re)
+      (nhdsWithin 1 (Set.Ioi 1)) (nhds (NumberField.dedekindZeta_residue K)) := by
+  have h1 := NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT K
+  have h2 := (Complex.continuous_re.tendsto _).comp h1
+  have h3 : Filter.Tendsto
+      (Complex.re ∘ fun s : ℝ => ((s : ℂ) - 1) * NumberField.dedekindZeta K (s:ℂ))
+      (nhdsWithin 1 (Set.Ioi 1)) (nhds (NumberField.dedekindZeta_residue K)) := by
+    simpa using h2
+  refine h3.congr (fun σ => ?_)
+  simp only [Function.comp_apply]
+  rw [show ((σ:ℂ) - 1) = ((σ - 1 : ℝ) : ℂ) by push_cast; ring,
+    Complex.re_ofReal_mul]
+
+/-- `log((σ−1)·ζ_K(σ).re) → log κ_K` as `σ → 1⁺`. -/
+theorem tendsto_log_sub_one_mul_dedekindZeta :
+    Filter.Tendsto (fun σ : ℝ =>
+        Real.log ((σ - 1) * (NumberField.dedekindZeta K (σ:ℂ)).re))
+      (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (Real.log (NumberField.dedekindZeta_residue K))) :=
+  ((Real.continuousAt_log
+    (NumberField.dedekindZeta_residue_pos K).ne').tendsto).comp
+    (tendsto_sub_one_mul_dedekindZeta_re K)
+
+/-- **The relative log-residue limit**: as `σ → 1⁺`,
+`log ζ_K(σ) − log ζ_ℚ(σ) → log κ_K − log κ_ℚ` — the individual divergences cancel
+against the shared `log(σ−1)`. -/
+theorem tendsto_log_dedekindZeta_ratio :
+    Filter.Tendsto (fun σ : ℝ => Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+        - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re))
+      (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (Real.log (NumberField.dedekindZeta_residue K)
+        - Real.log (NumberField.dedekindZeta_residue ℚ))) := by
+  refine ((tendsto_log_sub_one_mul_dedekindZeta K).sub
+    (tendsto_log_sub_one_mul_dedekindZeta ℚ)).congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with σ hσ
+  have h1 : (1:ℝ) < σ := hσ
+  rw [Real.log_mul (by linarith) (dedekindZeta_ofReal_re_pos K h1).ne',
+    Real.log_mul (by linarith) (dedekindZeta_ofReal_re_pos ℚ h1).ne']
+  ring
+
+/-- The cutoff weight `T·e^{(σ−1/2)T}` tends to `T·√X` (`T = log X`). -/
+theorem tendsto_cutoff_weight {X : ℝ} (hX : 1 < X) :
+    Filter.Tendsto (fun σ : ℝ => Real.log X * Real.exp ((σ - 1/2) * Real.log X))
+      (nhdsWithin 1 (Set.Ioi 1)) (nhds (Real.log X * Real.sqrt X)) := by
+  have hc : Continuous fun σ : ℝ => Real.log X * Real.exp ((σ - 1/2) * Real.log X) := by
+    fun_prop
+  have h1 : Filter.Tendsto (fun σ : ℝ => Real.log X * Real.exp ((σ - 1/2) * Real.log X))
+      (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (Real.log X * Real.exp (((1:ℝ) - 1/2) * Real.log X))) :=
+    (hc.tendsto 1).mono_left nhdsWithin_le_nhds
+  convert h1 using 2
+  rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by linarith : (0:ℝ) < X)]
+  congr 1
+  ring
+
+/-- **The Explicit2 inequality at the residue (L4-d)** — B–F Lemma 4 (`Mostways`,
+eq. Explicit2) at `k = ℚ` in our ×2 normalisation, `h = 1/2` pinned by `σ → 1⁺`:
+for cutoffs `1 < X' ≤ X` (`T = log X`, `T' = log X'`),
+`|2(T√X − T'√X')·log(κ_K/κ_ℚ) + 2ΔP_K − 2ΔP_ℚ|` is at most
+`(n−1)(T−T')(1/2+1/T')e^{T'/2}L(T') + [2·(1/2)²(T−T') + 2(1/2+1/T) + 2(1/2+1/T')
++ 4/T + 4/T']·(Σ_K + Σ_ℚ)` with `Σ = Σ_ρ m_ρ/(1/4+γ_ρ²)`. Dividing by 2 recovers
+the paper's `a/4 + 1 + 3/T + 3/T' ≤ c_{a,T}` and `a·e^{−T'/2}β(T')`. -/
+theorem lemma4_explicit2 (hGRH : GeneralizedRiemannHypothesis K)
+    (hRH : RiemannHypothesis) (hn : 1 < Module.finrank ℚ K)
+    {X' X : ℝ} (hX' : 1 < X') (hXX : X' ≤ X) :
+    |2 * (Real.log X * Real.sqrt X
+          * (Real.log (NumberField.dedekindZeta_residue K)
+            - Real.log (NumberField.dedekindZeta_residue ℚ)))
+      - 2 * (Real.log X' * Real.sqrt X'
+          * (Real.log (NumberField.dedekindZeta_residue K)
+            - Real.log (NumberField.dedekindZeta_residue ℚ)))
+      + 2 * (plateauSum K 1 X - plateauSum K 1 X')
+      - 2 * (plateauSum ℚ 1 X - plateauSum ℚ 1 X')|
+      ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(1/2:ℝ)^2 * (Real.log X - Real.log X')
+            + (2*((1/2:ℝ) + 1/Real.log X) + 2*((1/2:ℝ) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K 1 + zeroSumSigma ℚ 1) := by
+  have hX : 1 < X := lt_of_lt_of_le hX' hXX
+  have hT : 0 < Real.log X := Real.log_pos hX
+  have hT' : 0 < Real.log X' := Real.log_pos hX'
+  have hTT : Real.log X' ≤ Real.log X := Real.log_le_log (by linarith) hXX
+  -- the left side converges
+  have hL := tendsto_log_dedekindZeta_ratio K
+  have hwX := tendsto_cutoff_weight hX
+  have hwX' := tendsto_cutoff_weight hX'
+  have hPKX := tendsto_plateauSum K hX
+  have hPKX' := tendsto_plateauSum K hX'
+  have hPQX := tendsto_plateauSum ℚ hX
+  have hPQX' := tendsto_plateauSum ℚ hX'
+  have hf : Filter.Tendsto (fun σ : ℝ =>
+      |2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        + 2 * (plateauSum K σ X - plateauSum K σ X')
+        - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X')|)
+      (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (|2 * (Real.log X * Real.sqrt X
+          * (Real.log (NumberField.dedekindZeta_residue K)
+            - Real.log (NumberField.dedekindZeta_residue ℚ)))
+        - 2 * (Real.log X' * Real.sqrt X'
+          * (Real.log (NumberField.dedekindZeta_residue K)
+            - Real.log (NumberField.dedekindZeta_residue ℚ)))
+        + 2 * (plateauSum K 1 X - plateauSum K 1 X')
+        - 2 * (plateauSum ℚ 1 X - plateauSum ℚ 1 X')|)) := by
+    refine Filter.Tendsto.abs ?_
+    exact ((((tendsto_const_nhds.mul (hwX.mul hL)).sub
+      (tendsto_const_nhds.mul (hwX'.mul hL))).add
+      (tendsto_const_nhds.mul (hPKX.sub hPKX'))).sub
+      (tendsto_const_nhds.mul (hPQX.sub hPQX')))
+  -- the right side converges
+  have hg : Filter.Tendsto (fun σ : ℝ =>
+      ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+            + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K 1 + zeroSumSigma ℚ 1))
+      (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(1/2:ℝ)^2 * (Real.log X - Real.log X')
+            + (2*((1/2:ℝ) + 1/Real.log X) + 2*((1/2:ℝ) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K 1 + zeroSumSigma ℚ 1))) := by
+    have hc : Continuous (fun σ : ℝ =>
+        ((Module.finrank ℚ K : ℝ) - 1)
+            * ((Real.log X - Real.log X')
+              * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+                * archKernelL (Real.log X')))
+          + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+              + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+              + (4 / Real.log X + 4 / Real.log X'))
+            * (zeroSumSigma K 1 + zeroSumSigma ℚ 1)) := by fun_prop
+    have h1 := (hc.tendsto 1).mono_left (nhdsWithin_le_nhds (s := Set.Ioi 1))
+    convert h1 using 2
+    norm_num
+  -- the σ-estimate, relaxed to the σ = 1 zero sums, holds on `(1, ∞)`
+  have hle : ∀ᶠ σ in nhdsWithin 1 (Set.Ioi 1),
+      |2 * (Real.log X * Real.exp ((σ - 1/2) * Real.log X)
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        - 2 * (Real.log X' * Real.exp ((σ - 1/2) * Real.log X')
+          * (Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re)
+            - Real.log ((NumberField.dedekindZeta ℚ (σ:ℂ)).re)))
+        + 2 * (plateauSum K σ X - plateauSum K σ X')
+        - 2 * (plateauSum ℚ σ X - plateauSum ℚ σ X')|
+      ≤ ((Module.finrank ℚ K : ℝ) - 1)
+          * ((Real.log X - Real.log X')
+            * ((σ - 1/2 + 1/Real.log X') * Real.exp (Real.log X'/2)
+              * archKernelL (Real.log X')))
+        + (2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+            + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+            + (4 / Real.log X + 4 / Real.log X'))
+          * (zeroSumSigma K 1 + zeroSumSigma ℚ 1) := by
+    filter_upwards [self_mem_nhdsWithin] with σ hσ
+    have hσ1 : (1:ℝ) < σ := hσ
+    -- instantiate the phantom `a`
+    have hest := lemma4_sigma_estimate K hGRH hRH hn hσ1 hX' hXX
+      (a := min (1/4) ((σ - 1)/2))
+      (lt_min (by norm_num) (by linarith))
+      (min_le_left _ _)
+      (lt_of_le_of_lt (min_le_right _ _) (by linarith))
+    refine hest.trans (add_le_add le_rfl ?_)
+    -- relax the zero sums to σ = 1
+    have hcoeff : (0:ℝ) ≤ 2*(σ - 1/2)^2 * (Real.log X - Real.log X')
+        + (2*((σ - 1/2) + 1/Real.log X) + 2*((σ - 1/2) + 1/Real.log X'))
+        + (4 / Real.log X + 4 / Real.log X') := by
+      have h1 : (0:ℝ) ≤ 2*(σ - 1/2)^2 * (Real.log X - Real.log X') :=
+        mul_nonneg (by positivity) (by linarith)
+      have h2 : (0:ℝ) < 1/Real.log X := by positivity
+      have h3 : (0:ℝ) < 1/Real.log X' := by positivity
+      have h4 : (0:ℝ) < 4/Real.log X := by positivity
+      have h5 : (0:ℝ) < 4/Real.log X' := by positivity
+      linarith
+    refine mul_le_mul_of_nonneg_left ?_ hcoeff
+    exact add_le_add (zeroSumSigma_anti K (by norm_num) hσ1.le)
+      (zeroSumSigma_anti ℚ (by norm_num) hσ1.le)
+  exact le_of_tendsto_of_tendsto hf hg hle
+
+
 end DedekindResidue
 
 end
