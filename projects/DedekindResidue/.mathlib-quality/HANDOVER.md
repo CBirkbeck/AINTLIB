@@ -930,3 +930,27 @@ REMAINING Γ-side: Γψ-c contour shift (Re=1+a→1/2, rectangle Cauchy + strip 
 Gotcha of the day: `∫ y in s, A + c * ∫ y in s, B` — the first ∫ swallows everything
 after the comma (nested-∫ in the ring-atom diff was the tell). Parenthesise every
 integral that is followed by `+`.
+
+## 2026-07-03 (later) — Prop 2 (prime side) COMPLETE + contour shift + fold
+
+- **Γψ-c complete**: `digamma_conj` + `logDeriv_gammaFactor_conj` (Schwarz reflection,
+  via the Gauss integral — digamma_conj is mathlib-worthy), `differentiableAt_logDeriv_gammaFactor`,
+  `tendsto_shift_vertical_sub` (generic Re=1+a→1/2 rectangle shift with B·C→0 decay),
+  `continuous_logDeriv_gammaFactor_half`, `integral_half_line_fold` (critical-line fold
+  into the 2Re-form; evenness suffices, no reality assumption).
+- **Prop 2 (prime side) complete** in PrimeSide.lean + FourierJordan.lean:
+  `summable_primeIdeal_pow_log_rpow`, `neg_logDeriv_dedekindZeta_eq_tsum_prod`
+  (geometric m-expansion), `countable_ideal_ringOfIntegers` (instance),
+  `integrable_tsum_of_summable_integral_norm` (mathlib-worthy companion),
+  `integral_translate_cexp`, `primeSideH` (Poitou's H) + term-integrability +
+  L¹-norm summability + `integrable_primeSideH`, `paperPhi_mul_neg_logDeriv_eq`
+  (fixed-t identity: Φ·(−ζ'/ζ) = ∫He^{itu}), `tendsto_prime_side`
+  (lim ∫{Φ(s)+Φ(1−s)}(−ζ'/ζ) = 2π(H(0+)+H(0−))).
+- H's Jordan hypotheses (BV re/im + one-sided limits at 0) are taken as hypotheses,
+  as is the ργ boundary decay on the Γ-side — all discharged at SP3's concrete F
+  (compact support ⟹ locally finite sums).
+- Process guardrail learned: never `lake build | tail -1 && git commit…` — the pipe
+  masks build failure (tail exits 0). Build bare with exit check FIRST, then commit.
+
+NEXT: Weil (6) assembly (edge split + Prop 1 + Prop 2 + shift + fold + I_G, T→∞
+via exists_contour_height), then boundary-decay discharges, then SP3.
