@@ -909,6 +909,169 @@ theorem paperPhi_mul_neg_logDeriv_eq (K : Type*) [Field K] [NumberField K]
       from rfl]
   exact tsum_mul_right
 
+/-- Summability of the prime-power logarithmic series `∑ N𝔭^{-(m+1)σ}/(m+1)`
+(dominated by the von Mangoldt series via `log N𝔭 ≥ log 2`). -/
+theorem summable_primeIdeal_pow_div {σ : ℝ} (hσ : 1 < σ) :
+    Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) / ((pk.2+1 : ℕ) : ℝ)) := by
+  refine Summable.of_nonneg_of_le (fun pk => ?_) (fun pk => ?_)
+    (((summable_primeIdeal_pow_log_rpow K hσ).mul_left (1/Real.log 2)))
+  · positivity
+  · have hfacts : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+      have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+        fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+      have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
+        fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+      have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
+      exact_mod_cast h2
+    have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+    have hlogN : Real.log 2 ≤ Real.log (Ideal.absNorm pk.1.1) :=
+      Real.log_le_log (by norm_num) hfacts
+    have hm1 : (1:ℝ) ≤ ((pk.2+1 : ℕ) : ℝ) := by
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.succ_ne_zero _)
+    have hrpow : (0:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) := by
+      positivity
+    calc (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) / ((pk.2+1 : ℕ) : ℝ)
+        ≤ (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ) := by
+          rw [div_le_iff₀ (by linarith)]
+          nlinarith
+      _ = (1/Real.log 2) * (Real.log 2
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)) := by
+          field_simp
+      _ ≤ (1/Real.log 2) * (Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          exact mul_le_mul_of_nonneg_right hlogN hrpow
+
+/-- **The Dedekind zeta function as an exponential** (log-Euler product, prime-ideal
+form): `ζ_K(s) = exp(∑_𝔭 -log(1 - N𝔭^{-s}))` on `Re s > 1`. -/
+theorem dedekindZeta_eq_exp_tsum {s : ℂ} (hs : 1 < s.re) :
+    NumberField.dedekindZeta K s
+      = Complex.exp (∑' 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+          -Complex.log (1 - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s))) := by
+  have hsum : Summable (fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} =>
+      (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)) := by
+    refine Summable.of_norm ?_
+    refine (summable_primeIdeal_rpow K hs).congr (fun 𝔭 => ?_)
+    have hpos : 0 < Ideal.absNorm 𝔭.1 := by
+      rcases Nat.eq_zero_or_pos (Ideal.absNorm 𝔭.1) with h0 | h0
+      · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) 𝔭.2.2
+      · exact h0
+    rw [Complex.norm_natCast_cpow_of_pos hpos, Complex.neg_re]
+  have hne : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      (1:ℂ) - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s) ≠ 0 :=
+    fun 𝔭 => euler_factor_ne_zero K 𝔭 hs
+  have H := (hsum.clog_one_sub.neg).hasSum.cexp.tprod_eq
+  simp only [Function.comp_apply, Complex.exp_neg, Complex.exp_log (hne _)] at H
+  rw [Chebotarev.dedekindZeta_eq_tprod_primeIdeal K hs]
+  exact H
+
+/-- **The Dedekind zeta function as an exponential of the prime-power series**:
+`ζ_K(s) = exp(∑_{𝔭,m} N𝔭^{-(m+1)s}/(m+1))` on `Re s > 1`. -/
+theorem dedekindZeta_eq_exp_tsum_prod {s : ℂ} (hs : 1 < s.re) :
+    NumberField.dedekindZeta K s
+      = Complex.exp (∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s)
+            / ((pk.2+1 : ℕ) : ℂ)) := by
+  rw [dedekindZeta_eq_exp_tsum K hs]
+  congr 1
+  -- norms of the double-series terms
+  have hnorm : ∀ pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+      ‖(Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s) / ((pk.2+1 : ℕ) : ℂ)‖
+      = (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * s.re)
+          / ((pk.2+1 : ℕ) : ℝ) := by
+    intro pk
+    have hpos : 0 < Ideal.absNorm pk.1.1 := by
+      rcases Nat.eq_zero_or_pos (Ideal.absNorm pk.1.1) with h0 | h0
+      · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) pk.1.2.2
+      · exact h0
+    rw [norm_div, Complex.norm_natCast_cpow_of_pos hpos, Complex.norm_natCast]
+    congr 2
+    rw [show (-(((pk.2+1 : ℕ)) : ℂ) * s) = -((((pk.2+1 : ℕ)) : ℝ) : ℂ) * s by
+        push_cast; ring]
+    rw [neg_mul, Complex.neg_re, Complex.re_ofReal_mul]
+    ring
+  have hsummable : Summable (fun pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ =>
+      (Ideal.absNorm pk.1.1 : ℂ) ^ (-(((pk.2+1 : ℕ)) : ℂ) * s)
+        / ((pk.2+1 : ℕ) : ℂ)) := by
+    refine Summable.of_norm ?_
+    refine (summable_primeIdeal_pow_div K hs).congr (fun pk => ?_)
+    exact (hnorm pk).symm
+  have hslice : ∀ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},
+      Summable (fun k : ℕ => (Ideal.absNorm 𝔭.1 : ℂ) ^ (-(((k+1 : ℕ)) : ℂ) * s)
+        / ((k+1 : ℕ) : ℂ)) := by
+    intro 𝔭
+    refine Summable.of_norm ?_
+    refine ((summable_primeIdeal_pow_div K hs).prod_factor 𝔭).congr (fun k => ?_)
+    exact (hnorm (𝔭, k)).symm
+  rw [hsummable.tsum_prod' hslice]
+  refine tsum_congr (fun 𝔭 => ?_)
+  -- per-prime Taylor expansion of -log(1 - N^{-s})
+  have hpos : 0 < Ideal.absNorm 𝔭.1 := by
+    rcases Nat.eq_zero_or_pos (Ideal.absNorm 𝔭.1) with h0 | h0
+    · exact absurd (Ideal.absNorm_eq_zero_iff.mp h0) 𝔭.2.2
+    · exact h0
+  have hfacts : (2:ℝ) ≤ (Ideal.absNorm 𝔭.1 : ℝ) := by
+    have hne0 : Ideal.absNorm 𝔭.1 ≠ 0 :=
+      fun h => 𝔭.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm 𝔭.1 ≠ 1 :=
+      fun h => 𝔭.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have h2 : 2 ≤ Ideal.absNorm 𝔭.1 := by omega
+    exact_mod_cast h2
+  have hz : ‖(Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)‖ < 1 := by
+    rw [Complex.norm_natCast_cpow_of_pos hpos, Complex.neg_re]
+    refine Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith)
+  have h1 := Complex.hasSum_taylorSeries_neg_log hz
+  have h2 : HasSum (fun m : ℕ =>
+      ((Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)) ^ (m+1) / ((m+1 : ℕ) : ℂ))
+      (-Complex.log (1 - (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s))) := by
+    refine (hasSum_nat_add_iff (f := fun n : ℕ =>
+      ((Ideal.absNorm 𝔭.1 : ℂ) ^ (-s)) ^ n / (n : ℂ)) 1).mpr ?_
+    simpa using h1
+  rw [← h2.tsum_eq]
+  refine tsum_congr (fun m => ?_)
+  rw [show (-(((m+1 : ℕ)) : ℂ) * s) = (((m+1 : ℕ)) : ℂ) * (-s) by push_cast; ring,
+    Complex.cpow_nat_mul]
+
+/-- On the real ray `σ > 1`, `ζ_K(σ)` is the coercion of the positive real number
+`exp(∑_{𝔭,m} N𝔭^{-(m+1)σ}/(m+1))`. -/
+theorem dedekindZeta_ofReal_eq {σ : ℝ} (hσ : 1 < σ) :
+    NumberField.dedekindZeta K (σ : ℂ)
+      = ((Real.exp (∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)
+            / ((pk.2+1 : ℕ) : ℝ)) : ℝ) : ℂ) := by
+  have hσ' : 1 < (σ : ℂ).re := by
+    rw [Complex.ofReal_re]
+    exact hσ
+  rw [dedekindZeta_eq_exp_tsum_prod K hσ', Complex.ofReal_exp]
+  congr 1
+  rw [Complex.ofReal_tsum]
+  refine tsum_congr (fun pk => ?_)
+  have hpos : 0 ≤ (Ideal.absNorm pk.1.1 : ℝ) := Nat.cast_nonneg _
+  rw [Complex.ofReal_div, Complex.ofReal_cpow hpos]
+  push_cast
+  ring_nf
+
+/-- `ζ_K(σ) > 0` on the real ray, read on the real part. -/
+theorem dedekindZeta_ofReal_re_pos {σ : ℝ} (hσ : 1 < σ) :
+    0 < (NumberField.dedekindZeta K (σ : ℂ)).re := by
+  rw [dedekindZeta_ofReal_eq K hσ, Complex.ofReal_re]
+  exact Real.exp_pos _
+
+/-- `ζ_K(σ)` is real on the real ray. -/
+theorem dedekindZeta_ofReal_im_eq_zero {σ : ℝ} (hσ : 1 < σ) :
+    (NumberField.dedekindZeta K (σ : ℂ)).im = 0 := by
+  rw [dedekindZeta_ofReal_eq K hσ, Complex.ofReal_im]
+
+/-- **The logarithmic Euler product on the real ray** (B–F eq. (4)):
+`log ζ_K(σ) = ∑_{𝔭,m} N𝔭^{-(m+1)σ}/(m+1)` for `σ > 1`. -/
+theorem real_log_dedekindZeta {σ : ℝ} (hσ : 1 < σ) :
+    Real.log ((NumberField.dedekindZeta K (σ : ℂ)).re)
+      = ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+          (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * σ)
+            / ((pk.2+1 : ℕ) : ℝ) := by
+  rw [dedekindZeta_ofReal_eq K hσ, Complex.ofReal_re, Real.log_exp]
+
 end DedekindResidue
 
 end
