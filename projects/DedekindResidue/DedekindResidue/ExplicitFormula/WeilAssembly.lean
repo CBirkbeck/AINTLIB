@@ -3186,4 +3186,45 @@ theorem weil_explicit_formula_auxF (s : ℂ) {X : ℝ} (hX : 1 < X) {a : ℝ}
     (tendsto_primeSideH_auxF_right K s hX ha has)
     (tendsto_primeSideH_auxF_left K s hX ha has)
 
+/-- **The prime-side value at the origin** (Poitou's `H(0⁺) + H(0⁻)` term made
+explicit, B–F p. 5): the band parameter `a` collapses out, leaving
+`H(0) = ∑_{𝔭,m} log N𝔭 · N𝔭^{-m/2} · F(m log N𝔭)`. -/
+theorem primeSideH_auxF_zero_eq (a : ℝ) (F : ℝ → ℂ) :
+    primeSideH K a F 0
+      = ∑' pk : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} × ℕ,
+        ((Real.log (Ideal.absNorm pk.1.1)
+            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2) : ℝ) : ℂ)
+          * F ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)) := by
+  rw [primeSideH]
+  refine tsum_congr (fun pk => ?_)
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
+    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
+      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
+    have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
+      fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
+    exact_mod_cast h2
+  have hN0 : (0:ℝ) < (Ideal.absNorm pk.1.1 : ℝ) := by linarith
+  have key : (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
+      * Real.exp ((1/2+a)
+          * ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)))
+      = (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) / 2) := by
+    rw [Real.rpow_def_of_pos hN0, Real.rpow_def_of_pos hN0, ← Real.exp_add]
+    congr 1
+    ring
+  rw [zero_add]
+  rw [show ((Real.log (Ideal.absNorm pk.1.1)
+        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) : ℝ) : ℂ)
+        * (F ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
+            * ((Real.exp ((1/2+a)
+                * ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ))
+      = ((Real.log (Ideal.absNorm pk.1.1)
+          * ((Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
+            * Real.exp ((1/2+a)
+              * ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)))) : ℝ) : ℂ)
+          * F ((((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1)) by
+    push_cast
+    ring]
+  rw [key]
+
 end DedekindResidue
