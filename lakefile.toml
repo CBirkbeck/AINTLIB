@@ -86,3 +86,14 @@ globs = ["CebotarevDensity"]
 autoImplicit = false
 relaxedAutoImplicit = false
 maxSynthPendingDepth = 3
+
+# ───────── Belabas–Friedman: effective residue of the Dedekind zeta function ─────────
+# Imports mathlib (and CebotarevDensity for the ζ_K Euler product); built on demand.
+[[lean_lib]]
+name = "DedekindResidue"
+srcDir = "projects/DedekindResidue"
+globs = ["DedekindResidue"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
