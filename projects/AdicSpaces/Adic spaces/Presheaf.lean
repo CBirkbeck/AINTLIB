@@ -4055,6 +4055,61 @@ theorem wedhorn_7_52_2_isUnit_iff_forall_not_vle_zero
     exact h v hv ((v.mem_supp_iff f).mp
       (hvsupp ▸ hf𝔪 (Ideal.mem_span_singleton_self f)))
 
+/-! ### Wedhorn Prop 7.51(2)/7.52(2), P-complete PROVEN forms
+
+The `'`-primed chain below discharges Prop 7.51(2) (Spa point with exact support at a
+non-open maximal ideal) from the PROVEN height-one 7.45
+(`exists_cont_supp_ge_powerBounded_of_nonOpen_prime`): the analytic point has `𝔪 ≤ supp`,
+and maximality + primality of the support force equality. The `(P) [IsAdicComplete]`
+hypotheses are Wedhorn's own completeness assumption (b2_log 2026-07-03); consumers at
+completions supply `presheafValue_concretePair` + `presheafValue_isAdicComplete`. The
+unprimed sorried chain above (`exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete` &
+its consumers) is superseded on the headline path by these. -/
+
+/-- **Wedhorn Prop 7.51(2), non-open case — PROVEN** (P-complete form). -/
+theorem exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete'
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
+    (𝔪 : Ideal A) [𝔪.IsMaximal] (h𝔪 : ¬ IsOpen (𝔪 : Set A)) :
+    ∃ v ∈ Spa A A⁺, v.supp = 𝔪 := by
+  haveI : 𝔪.IsPrime := ‹𝔪.IsMaximal›.isPrime
+  obtain ⟨v, hv_cont, hv_supp, hv_bd⟩ :=
+    exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := A) P h𝔪
+  refine ⟨v, ⟨hv_cont, fun f hf => hv_bd f
+    (IsRingOfIntegralElements.subset_powerBounded (B := (A⁺ : Subring A)) hf)⟩, ?_⟩
+  exact (‹𝔪.IsMaximal›.eq_of_le (instIsPrimeSupp v).ne_top hv_supp).symm
+
+/-- **Wedhorn Prop 7.51(2) — PROVEN** (P-complete form, both cases). -/
+theorem exists_spa_point_supp_eq_maxIdeal_of_complete'
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
+    (𝔪 : Ideal A) [𝔪.IsMaximal] :
+    ∃ v ∈ Spa A A⁺, v.supp = 𝔪 := by
+  by_cases h : IsOpen (𝔪 : Set A)
+  · exact exists_mem_spa_supp_eq 𝔪 h
+  · exact exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete' P 𝔪 h
+
+/-- **Wedhorn 7.52(2) — PROVEN** (P-complete Nullstellensatz unit criterion): `f` is a
+unit iff `v(f) ≠ 0` on all of `Spa(A, A⁺)`. -/
+theorem isUnit_iff_forall_not_vle_zero_of_completePair
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
+    (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
+    (f : A) :
+    IsUnit f ↔ ∀ v ∈ Spa A A⁺, ¬ v.vle f 0 := by
+  refine ⟨fun hu v _ => not_vle_zero_of_isUnit hu v, fun h => ?_⟩
+  by_contra hf
+  obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
+    Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
+  haveI := h𝔪
+  obtain ⟨v, hv, hsupp⟩ := exists_spa_point_supp_eq_maxIdeal_of_complete' P 𝔪
+  exact h v hv ((v.mem_supp_iff f).mp (hsupp.ge (hf𝔪 (Ideal.mem_span_singleton_self f))))
+
 /-- **(Pass-4 audit, PB transfer along continuous ring hom — STATEMENT BUG)**
 
 ⚠ **B2 (b2_log entry 7, 2026-05-18):** false in general for arbitrary

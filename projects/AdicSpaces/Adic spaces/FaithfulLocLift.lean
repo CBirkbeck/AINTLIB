@@ -66,7 +66,9 @@ theorem isUnit_canonicalMap_s_faithful
   haveI : IsHuberRing (presheafValue D') := hTate.toIsHuberRing
   haveI : T2Space (presheafValue D') := inferInstance
   haveI : NonarchimedeanRing (presheafValue D') := inferInstance
-  rw [isUnit_iff_forall_not_vle_zero_of_complete_pairFree (D'.canonicalMap D.s)]
+  letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B (D'.canonicalMap D.s)]
   intro w hw hvle
   have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw
   exact (h hmem).2.2 (by simpa only [comap_vle, map_zero] using hvle)
@@ -633,5 +635,19 @@ theorem hasLocLiftPowerBounded_faithful
   isUnit_canonicalMap_s := fun D D' h => isUnit_canonicalMap_s_faithful D D' h
   locLift_divByS_isPowerBounded := fun D D' h t ht =>
     locLift_divByS_isPowerBounded_faithful D D' h t ht
+
+/-- **Instance form of the faithful LL package** (2026-07-03, post carrier-#3/#5 discharge:
+the faithful chain is axiom-clean). Priority above the sorry-carrying
+`hasLocLiftPowerBounded_of_stronglyNoetherianTate` delegation chain
+(StructureSheaf → Presheaf primed instance), so contexts that carry the
+right-uniformity `CompleteSpace` binder — the whole Wedhorn-8.28(b) bundle — synthesize
+the PROVEN package instead of the sorried one. The `CompleteSpace`-w.r.t.-`letI` binder
+is exactly the shape those bundles carry, so synthesis fires there and nowhere else. -/
+instance (priority := 1100) hasLocLiftPowerBounded_faithful_instance
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] :
+    HasLocLiftPowerBounded A :=
+  hasLocLiftPowerBounded_faithful
 
 end ValuationSpectrum

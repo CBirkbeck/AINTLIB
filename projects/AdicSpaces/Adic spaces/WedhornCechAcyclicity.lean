@@ -7266,7 +7266,9 @@ theorem canonical_unit_of_pointwise_lower_bound
   haveI : IsHuberRing (presheafValue Vj) := hTate.toIsHuberRing
   haveI : T2Space (presheafValue Vj) := inferInstance
   haveI : NonarchimedeanRing (presheafValue Vj) := inferInstance
-  rw [isUnit_iff_forall_not_vle_zero_of_complete_pairFree (Vj.canonicalMap t)]
+  letI P_B : PairOfDefinition (presheafValue Vj) := presheafValue_concretePair Vj
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete Vj
+  rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B (Vj.canonicalMap t)]
   intro w hw hvle
   -- the `A`-shadow of `w` lies in the rational open, so the lower bound applies
   have hv_ro : comap Vj.canonicalMap w ∈ rationalOpen Vj.T Vj.s :=
@@ -10933,8 +10935,10 @@ theorem presheafValue_subsingleton_of_rationalOpen_empty
     have h := comap_canonicalMap_mem_rationalOpen E (canonicalMap_continuous E) hw
     rw [hempty] at h
     exact h
+  letI P_B : PairOfDefinition (presheafValue E) := presheafValue_concretePair E
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete E
   have h0 : IsUnit (0 : presheafValue E) := by
-    rw [isUnit_iff_forall_not_vle_zero_of_complete_pairFree (0 : presheafValue E)]
+    rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B (0 : presheafValue E)]
     exact fun w hw _ => hspa w hw
   exact subsingleton_of_zero_eq_one (isUnit_zero_iff.mp h0)
 
@@ -12760,6 +12764,8 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
   haveI : @CompleteSpace (presheafValue C.base)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
     presheafValue_completeSpace_rightUniformSpace C.base
+  -- Faithful LL shadow (RPK pattern): everything below synthesizes the PROVEN package.
+  haveI : HasLocLiftPowerBounded (presheafValue C.base) := hasLocLiftPowerBounded_faithful
   have hplusA : (A⁺ : Set A) ⊆ C.base.P.A₀ := CompatiblePlusSubring.aplus_le_A₀ C.base
   have hCB := imageCover_isOXAcyclic C hC hplusA
   constructor
