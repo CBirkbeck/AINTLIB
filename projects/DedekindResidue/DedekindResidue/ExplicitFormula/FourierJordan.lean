@@ -56,8 +56,7 @@ theorem hasDerivAt_exp_sin_primitive (y x : ℝ) :
       = Real.exp (-(y*x)) * Real.sin x := by
     rw [div_eq_iff hy2]
     ring
-  rw [hval] at hfull
-  exact hfull
+  rwa [hval] at hfull
 
 /-- Closed form of the damped sine integral. -/
 theorem integral_exp_neg_mul_sin (y b : ℝ) :
@@ -88,8 +87,7 @@ theorem integral_exp_neg_mul_Ioi {x : ℝ} (hx : 0 < x) :
     have hval : -(Real.exp (-(x*t)) * -x) / x = Real.exp (-(x*t)) := by
       rw [div_eq_iff hx.ne']
       ring
-    rw [hval] at h2
-    exact h2
+    rwa [hval] at h2
   have hint : IntegrableOn (fun y : ℝ => Real.exp (-(x*y))) (Set.Ioi 0) := by
     have := exp_neg_integrableOn_Ioi (0:ℝ) hx
     refine this.congr_fun (fun y _ => ?_) measurableSet_Ioi
@@ -518,31 +516,18 @@ theorem tendsto_integral_mul_cexp_neg_atTop (G : ℝ → ℂ) :
   push_cast
   exact mul_comm _ _
 
-/-- Riemann–Lebesgue for the kernel `e^{+iuT}`. -/
+/-- Riemann–Lebesgue for the kernel `e^{+iuT}`: the sign-reflected companion of
+`tendsto_integral_mul_cexp_neg_atTop`, via the change of variables `u ↦ -u`. -/
 theorem tendsto_integral_mul_cexp_pos_atTop (G : ℝ → ℂ) :
     Tendsto (fun T : ℝ => ∫ u : ℝ, G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I))
       atTop (nhds 0) := by
-  have hRL := Real.tendsto_integral_exp_smul_cocompact G
-  have hmap : Tendsto (fun T : ℝ => -T / (2*π)) atTop (Filter.cocompact ℝ) := by
-    rw [cocompact_eq_atBot_atTop]
-    refine Filter.Tendsto.mono_right ?_ le_sup_left
-    have h1 : Tendsto (fun T : ℝ => T / (2*π)) atTop atTop :=
-      Filter.tendsto_id.atTop_div_const (by positivity)
-    have h2 := Filter.tendsto_neg_atBot_iff.mpr h1
-    refine h2.congr (fun T => ?_)
-    ring
-  have hcomp := hRL.comp hmap
-  refine hcomp.congr (fun T => ?_)
-  simp only [Function.comp_apply]
+  refine (tendsto_integral_mul_cexp_neg_atTop (fun u => G (-u))).congr (fun T => ?_)
+  rw [← integral_comp_neg_real (fun u => G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I))]
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
-  show Real.fourierChar (-(u * (-T / (2*π)))) • G u = G u * Complex.exp ((u:ℂ) * (T:ℂ) * Complex.I)
-  rw [Circle.smul_def, Real.fourierChar_apply]
-  have hreal : 2 * π * -(u * (-T / (2 * π))) = u * T := by
-    have hpi : (2:ℝ) * π ≠ 0 := by positivity
-    field_simp
-  rw [hreal]
-  push_cast
-  exact mul_comm _ _
+  show G (-u) * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)
+      = G (-u) * Complex.exp (((-u : ℝ) : ℂ) * (T:ℂ) * Complex.I)
+  rw [show (((-u : ℝ) : ℂ) * (T:ℂ) * Complex.I) = -((u:ℂ) * (T:ℂ)) * Complex.I by
+    push_cast; ring]
 
 /-- **FJ-d, Riemann–Lebesgue with the sine kernel**: for integrable `G`,
 `∫ G(u)·sin(Tu) du → 0` as `T → ∞`. Applied away from `u = 0` (to `G = H(u)/u` on
@@ -615,7 +600,7 @@ theorem abs_integral_stieltjes_kernel_le {g K : ℝ → ℝ} (hg : Monotone g) {
   have hmass : μ (Set.Ioc 0 δ) = ENNReal.ofReal (Function.rightLim g δ - Function.rightLim g 0) := by
     rw [hμ, F.measure_Ioc, hFeq, hFeq]
   have hmono : Function.rightLim g 0 ≤ Function.rightLim g δ := hg.rightLim hδ.le
-  haveI hfin : IsFiniteMeasure μ' := by
+  have : IsFiniteMeasure μ' := by
     constructor
     rw [hμ', Measure.restrict_apply_univ, hmass]
     exact ENNReal.ofReal_lt_top
@@ -847,8 +832,7 @@ theorem tendsto_rightLim_sub_rightLim {g : ℝ → ℝ} (hg : Monotone g) :
         = fun δ : ℝ => Function.rightLim g δ := by
       funext δ
       exact hg.stieltjesFunction_eq δ
-    rw [h4, hg.stieltjesFunction_eq] at h3
-    exact h3
+    rwa [h4, hg.stieltjesFunction_eq] at h3
   have := h1.sub_const (Function.rightLim g 0)
   simpa using this
 
