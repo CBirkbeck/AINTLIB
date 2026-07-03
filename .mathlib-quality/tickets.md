@@ -92,17 +92,30 @@ PB15←{PB11,PB12,PB14}; PB16←{PB4,PB13,PB15}; PB17←PB16. Parallel-capable: 
   PROVEN modulo caller-supplied `Q`/`hht1`/`hJ_le_Q`). Also proven-status finding:
   `exists_spa_point_via_restrictToConvex` (Lemma745:418) is SORRY-FREE.
 - **Remaining C3 glue (next tickets, in order)**:
-  1. **T-C3-COF**: the cofinality supplier — for the dominating `V₀` (or its
-     restrictIdealSingle-retracted refinement, T-SPVAI machinery), every `φ(I)`-image is
-     divisibility-cofinal (`∀ p ≠ 0, ∃ n, p ∣ x^n` in `V₀`). Source: continuity of
-     `pulledBackValuation` (`pulledBackValuation_isContinuous`, proven) + I-adic
-     top-nilpotence; Wedhorn Rem 7.38/7.40(5). ⚠ adversarial note: cofinality vs ALL of
-     `V₀` may need the retraction first (raw Chevalley `V₀` can have too-big value group —
-     exactly why Wedhorn retracts via 7.1.2 before generizing).
-  2. **T-C3-Q**: instantiate `Q` := minimal prime over one `φ(I)`-image `x ≠ 0`
-     (`Ideal.exists_minimalPrimes_le`), `hht1` := microbe lemma (a), `hJ_le_Q` := microbe
-     lemma (b) per image; feed `via_heightOne_ofPrime` → **carrier #3**
-     (exact-supp maximal case) and the `≥`-form → **carrier #5**.
+  1. **T-C3-COF — ⚠ ROUTE CORRECTED (2026-07-03 adversarial pass)**: divisibility-cofinality
+     of `φ(I)`-images in the RAW Chevalley `V₀` is **circular** — the natural proof
+     (`p ∣ x^n ⟺ v(x)^n ≤ v(p)` + `exists_pow_lt₀`) needs `[MulArchimedean V₀.ValueGroup]`,
+     which is the CONCLUSION the height-one coarsening is meant to produce (and if `V₀` were
+     already MulArch, `exists_mem_spa_supp_eq_of_nonOpen_prime_mulArchimedean` applies
+     directly with no `Q` needed). For raw `V₀` of possibly infinite rank the cofinality can
+     FAIL (fraction-field elements outside the `A`-image reach). **Wedhorn's order is forced:
+     retract FIRST (7.1.2), then generize.** Correct route for carrier #5 — all at the
+     `Spv`/coarsening level, pieces verified in-repo:
+     `w := ofValuation (restrictIdealSingle (pulledBackValuation V₀) g)` (`g` an `I`-image
+     with `w g ≠ 0`) → microbial ✓ (`restrictIdealSingle_isMicrobial_of_mem`, SpvAI:693,
+     proven 06-22) → continuous ✓ (`ofValuation_restrictIdealSingle_isInSpvAI` SpvAI:800 +
+     `Spv.isContinuous_of_isInSpvAI_of_lt_one`, axiom-clean per 06-21 board) → `𝔭 ≤ supp` ✓
+     (retraction preserves the value at `A`-elements / supp-side; SpvAI apply lemmas
+     :809-833) → height-one vertical generization: coarsen by `maxAvoid` (OrderedGroupConvex,
+     §7.1, exists) of the cΓ-generator; MulArchimedean of the quotient via the §7.1
+     archimedean-iff; coarsening preserves continuity (Wedhorn Rem 7.11(2) — CHECK
+     ValuationCoarsening for the in-repo form) and preserves supp (vertical). The
+     microbe lemma pair (ValuationPrimeConvex §MicrobeHeightOne, PROVEN) serves the
+     `ofPrime` variant if the Spv-level assembly hits a wall.
+  2. **T-C3-Q**: (ofPrime variant, fallback) instantiate `Q` := minimal prime over one
+     retracted `φ(I)`-image (`Ideal.exists_minimalPrimes_le`), `hht1` := microbe (a),
+     `hJ_le_Q` := microbe (b); feed `via_heightOne_ofPrime` → **carrier #3** (exact-supp
+     maximal case) and the `≥`-form → **carrier #5**.
   3. **T-C3-52**: carrier #4 (`spa_point_nonOpen_of_rational_subset`) via
      `exists_mem_rationalOpen_supp_ge_of_nonOpen_prime_mulArchimedean`
      (ValuationContinuity:940, proven) + the same coarsening + the enlarged-domination

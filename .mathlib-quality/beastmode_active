@@ -1,1 +1,1 @@
-FOCUS: L1 — reroute IRIE subset_powerBounded to power-bounded (B⁺⊆B°). Need: (A) completedPlusSubringBase⊆A°, (B) A° integrally closed [via integral-over-finite-pb-coeffs ⟹ bounded subring ⟹ pb], divByS pb, closure-of-pb. Then L2 construction-level LL-bdd.
+FOCUS: T-C3-COF route corrected on board (retract-first, Spv-level assembly) — next: inventory ValuationCoarsening for coarsening-preserves-continuity (Rem 7.11(2)), then assemble carrier #5
