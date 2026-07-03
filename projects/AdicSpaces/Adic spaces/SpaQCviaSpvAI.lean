@@ -165,15 +165,6 @@ theorem restrictToConvexBounded_le_reflect
 
 variable [TopologicalSpace A]
 
-/-- `vle`-bridge for the Spv-level retraction. -/
-theorem restrictIdeal_vle_iff (v : Spv A) (I : Ideal A) (g h : A) :
-    (restrictIdeal v I).vle g h ↔
-      (letI : ValuativeRel A := v.toValuativeRel
-       (ValuativeRel.valuation A).restrictIdeal I g ≤
-         (ValuativeRel.valuation A).restrictIdeal I h) := by
-  letI : ValuativeRel A := v.toValuativeRel
-  exact Iff.rfl
-
 /-- `vle`-bridge for `v` via its canonical valuation. -/
 theorem vle_iff_canonical (v : Spv A) (g h : A) :
     v.vle g h ↔
@@ -182,35 +173,20 @@ theorem vle_iff_canonical (v : Spv A) (g h : A) :
   letI : ValuativeRel A := v.toValuativeRel
   exact Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) g h
 
+/-- `v(a) = 0` in canonical-valuation form. -/
+theorem vle_zero_iff_canonical (v : Spv A) (a : A) :
+    v.vle a 0 ↔
+      (letI : ValuativeRel A := v.toValuativeRel
+       ValuativeRel.valuation A a = 0) := by
+  letI : ValuativeRel A := v.toValuativeRel
+  rw [vle_iff_canonical]
+  simp
+
 /-- Transitivity of `vle` (through the canonical valuation). -/
 theorem vle_trans' {v : Spv A} {a b c : A} (h1 : v.vle a b) (h2 : v.vle b c) :
     v.vle a c := by
   rw [vle_iff_canonical] at h1 h2 ⊢
   exact le_trans h1 h2
-
-/-- **Wedhorn 7.5(iii), preservation half**: `v.vle g h → (restrictIdeal v I).vle g h`. -/
-theorem restrictIdeal_vle_of_vle {v : Spv A} {I : Ideal A} {g h : A}
-    (hle : v.vle g h) : (restrictIdeal v I).vle g h := by
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [restrictIdeal_vle_iff]
-  rw [vle_iff_canonical] at hle
-  exact restrictToConvexBounded_le_of_le _ _ _ hle
-
-/-- **Wedhorn 7.5(iii), reflection half**. -/
-theorem vle_of_restrictIdeal_vle {v : Spv A} {I : Ideal A} {g h : A}
-    (hle : (restrictIdeal v I).vle g h) (hne : ¬ (restrictIdeal v I).vle h 0) :
-    v.vle g h ∧ ¬ v.vle h 0 := by
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [restrictIdeal_vle_iff] at hle
-  have hne' : (ValuativeRel.valuation A).restrictIdeal I h ≠ 0 := by
-    intro h0
-    apply hne
-    rw [restrictIdeal_vle_iff, h0]
-    simp
-  obtain ⟨h1, h2⟩ := restrictToConvexBounded_le_reflect _ _ _ hle hne'
-  refine ⟨(vle_iff_canonical v g h).mpr h1, fun hcon => h2 ?_⟩
-  have h3 := (vle_iff_canonical v h 0).mp hcon
-  simpa using h3
 
 /-- `v(I) = 0` puts `v` in `Spv(A, I)` (the cofinality disjunct holds vacuously on zero
 values). -/
@@ -224,58 +200,196 @@ theorem isInSpvAI_of_forall_vle_zero {v : Spv A} {I : Ideal A}
   intro γ hγ
   exact ⟨1, by simpa [h0] using hγ⟩
 
-/-- **Wedhorn 7.5(iii)** (`wedhorn.txt:2862-2872`, verbatim: *"Set `U := Spv(A, I)(T/s)`
-and `W := Spv(A)(T/s)`. We claim that `W = r⁻¹(U)`."*), profile form: for `T` finite with
-`I ⊆ √(T·A)` and every `v : Spv A`, the `(T, s)`-profile coordinate of `v` agrees with
-that of the retraction. The pair-of-definition data threads `retraction_eq_self`'s
-hypotheses for the `v(I) = 0` branch. -/
-theorem ιSpvR_retraction_eq (I : Ideal A) (P : PairOfDefinition A)
-    (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)))
+/-! ### R1' — the faithful PRINCIPAL retraction (Wedhorn 7.1.2 for `I = (g)`)
+
+The general `restrictIdeal`-retraction's `SpvAI`-membership rests on the unfaithful
+`cGammaIdeal` (B2, 2026-06-22). The principal case — the only one the Tate-ring
+application needs (`IsTateRing.exists_principal_pairOfDefinition`) — is faithful:
+`ofValuation_restrictIdealSingle_isInSpvAI` is proven. We build the `Spv`-level
+retraction on `restrictIdealSingle` and prove Wedhorn 7.5(iii) for it. -/
+
+/-- **Wedhorn 7.4(iii), principal case.** For `v ∈ Spv(A, (g))` (with `v(g) ≠ 0`) the
+window `cΓ_v((g))` contains every nonzero value-unit — i.e. it is all of `Γ_v`.
+
+* Cofinal disjunct: `v(g)` is cofinal, so any `v(a) < 1` is sandwiched
+  `v(g)^n < v(a) < 1` with both ends in the window (`v(g)⁻¹` is a generator).
+* Microbial disjunct: the microbial witness `b` puts `v(a)` directly in the
+  characteristic generators `cGammaUnits`. -/
+theorem cGammaSingle_univ_of_isInSpvAI {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {w : Valuation A Γ₀} {g : A} (hg : w g ≠ 0)
+    (h : (∀ a ∈ Ideal.span {g}, Valuation.CofinalValue w a) ∨ Valuation.IsMicrobial w) :
+    ∀ (a : A) (ha : w a ≠ 0), Units.mk0 (w a) ha ∈ Valuation.cGammaSingle w g hg := by
+  intro a ha
+  by_cases h_ge : 1 ≤ w a
+  · exact Valuation.vUnit_mem_cGammaSingle hg h_ge ha
+  · push_neg at h_ge
+    rcases h with h_cof | h_micr
+    · -- cofinality of `v(g)` sandwiches `v(a)` between `(mk0 v(g))^n` and `1`.
+      obtain ⟨n, hn⟩ :=
+        h_cof g (Ideal.mem_span_singleton_self g) (w a) (zero_lt_iff.mpr ha)
+      have hg_mem : Units.mk0 (w g) hg ∈ Valuation.cGammaSingle w g hg := by
+        have := Valuation.invGen_mem_cGammaSingle w g hg
+        simpa using inv_mem this
+      have hpow_mem : (Units.mk0 (w g) hg) ^ n ∈ Valuation.cGammaSingle w g hg :=
+        pow_mem hg_mem n
+      refine (Valuation.cGammaSingle w g hg).convex hpow_mem
+        (one_mem (Valuation.cGammaSingle w g hg)) ?_ ?_
+      · exact Units.val_le_val.mp (by simpa using hn.le)
+      · exact Units.val_le_val.mp (by simpa using h_ge.le)
+    · obtain ⟨b, hb_ge_one, hb_inv_le, hb_ge⟩ := h_micr (w a) (zero_lt_iff.mpr ha)
+      have hvb_ne : w b ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hb_ge_one)
+      refine ConvexSubgroup.subset_minContain _ (Set.mem_insert_of_mem _ ?_)
+      refine ⟨b, hb_ge_one, hvb_ne, ?_, ?_⟩
+      · rw [← Units.val_le_val]; exact hb_inv_le
+      · rw [← Units.val_le_val]; exact hb_ge
+
+/-- **Full-window restriction is a value-equivalence** (generic form of
+`restrictIdeal_isEquiv_of_cGammaIdeal_univ` for an arbitrary convex window). -/
+theorem restrictToConvexBounded_isEquiv_of_univ {R : Type*} [CommRing R] {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀] (w : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
+    (hH_ge : ∀ a : R, ∀ ha : w a ≠ 0, 1 ≤ w a → Units.mk0 (w a) ha ∈ H)
+    (huniv : ∀ (a : R) (ha : w a ≠ 0), Units.mk0 (w a) ha ∈ H) :
+    (w.restrictToConvexBounded H hH_ge).IsEquiv w := by
+  intro r s
+  by_cases hr : w r = 0
+  · rw [Valuation.restrictToConvexBounded_apply_zero w H hH_ge hr, hr]
+    simp only [zero_le']
+  · rw [Valuation.restrictToConvexBounded_apply_mem w H hH_ge hr (huniv r hr)]
+    by_cases hs : w s = 0
+    · rw [Valuation.restrictToConvexBounded_apply_zero w H hH_ge hs, hs]
+      constructor
+      · intro h
+        exact absurd (le_zero_iff.mp h) WithZero.coe_ne_zero
+      · intro h
+        rw [le_zero_iff] at h
+        exact absurd h hr
+    · rw [Valuation.restrictToConvexBounded_apply_mem w H hH_ge hs (huniv s hs)]
+      rw [show ((⟨Units.mk0 (w r) hr, huniv r hr⟩ : H.toSubgroup) :
+          WithZero H.toSubgroup) ≤ _ ↔ _ from WithZero.coe_le_coe]
+      exact Units.val_le_val.symm
+
+open Classical in
+/-- **The faithful principal `Spv`-level retraction**: restrict to the window
+`cΓ_v((g))` when `v(g) ≠ 0`; fix `v` when `v(g) = 0` (there `v ∈ Spv(A, (g))` holds
+vacuously through the cofinality disjunct). -/
+noncomputable def restrictIdealSingleSpv (v : Spv A) (g : A) : Spv A :=
+  letI : ValuativeRel A := v.toValuativeRel
+  if hg : (ValuativeRel.valuation A) g = 0 then v
+  else ofValuation ((ValuativeRel.valuation A).restrictIdealSingle g hg)
+
+theorem restrictIdealSingleSpv_of_zero {v : Spv A} {g : A} (hg : v.vle g 0) :
+    restrictIdealSingleSpv v g = v := by
+  letI : ValuativeRel A := v.toValuativeRel
+  have h0 : (ValuativeRel.valuation A) g = 0 := (vle_zero_iff_canonical v g).mp hg
+  simp only [restrictIdealSingleSpv, dif_pos h0]
+
+theorem restrictIdealSingleSpv_of_ne {v : Spv A} {g : A} (hg : ¬ v.vle g 0) :
+    restrictIdealSingleSpv v g =
+      (letI : ValuativeRel A := v.toValuativeRel
+       ofValuation ((ValuativeRel.valuation A).restrictIdealSingle g
+         (fun h0 => hg ((vle_zero_iff_canonical v g).mpr h0)))) := by
+  letI : ValuativeRel A := v.toValuativeRel
+  have h0 : (ValuativeRel.valuation A) g ≠ 0 :=
+    fun h => hg ((vle_zero_iff_canonical v g).mpr h)
+  simp only [restrictIdealSingleSpv, dif_neg h0]
+
+/-- The principal retraction lands in `Spv(A, (g))` — faithfully
+(`ofValuation_restrictIdealSingle_isInSpvAI`), no `cGammaIdeal` sorry. -/
+theorem restrictIdealSingleSpv_mem_SpvAI (v : Spv A) (g : A) :
+    restrictIdealSingleSpv v g ∈ SpvAI A (Ideal.span {g}) := by
+  by_cases hg : v.vle g 0
+  · rw [restrictIdealSingleSpv_of_zero hg]
+    refine isInSpvAI_of_forall_vle_zero fun a ha => ?_
+    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
+    rw [vle_zero_iff_canonical] at hg ⊢
+    letI : ValuativeRel A := v.toValuativeRel
+    rw [map_mul, hg, mul_zero]
+  · rw [restrictIdealSingleSpv_of_ne hg]
+    letI : ValuativeRel A := v.toValuativeRel
+    exact ofValuation_restrictIdealSingle_isInSpvAI (ValuativeRel.valuation A) g _
+
+/-- **Wedhorn 7.5(2), principal case (fixed points).** `r(v) = v` for
+`v ∈ Spv(A, (g))`. -/
+theorem restrictIdealSingleSpv_eq_self_of_mem {v : Spv A} {g : A}
+    (hv : v ∈ SpvAI A (Ideal.span {g})) : restrictIdealSingleSpv v g = v := by
+  by_cases hg : v.vle g 0
+  · exact restrictIdealSingleSpv_of_zero hg
+  · rw [restrictIdealSingleSpv_of_ne hg]
+    letI : ValuativeRel A := v.toValuativeRel
+    exact (ofValuation_eq_of_isEquiv
+      (restrictToConvexBounded_isEquiv_of_univ _ _ _
+        (cGammaSingle_univ_of_isInSpvAI _ hv))).trans (ofValuation_valuation v)
+
+/-- **Wedhorn 7.5(iii), principal profile form** (`wedhorn.txt:2862-2872`): for every
+side-condition coordinate `p` and every `v : Spv A`, the `p`-profile coordinate of `v`
+agrees with that of the principal retraction. -/
+theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hIg : I = Ideal.span {g})
     (v : Spv A) (p : RCoord A I) :
-    ιSpvR I ((SpvAI.retraction I v : Spv A)) p = ιSpvR I v p := by
-  obtain ⟨⟨T, s⟩, hTI⟩ := p
-  by_cases hI0 : ∃ a ∈ I, ¬ v.vle a 0
-  · rw [Bool.eq_iff_iff, ιSpvR_eq_true_iff, ιSpvR_eq_true_iff]
+    ιSpvR I (restrictIdealSingleSpv v g) p = ιSpvR I v p := by
+  by_cases hg0 : v.vle g 0
+  · rw [restrictIdealSingleSpv_of_zero hg0]
+  · obtain ⟨⟨T, s⟩, hTI⟩ := p
+    rw [restrictIdealSingleSpv_of_ne hg0]
+    letI : ValuativeRel A := v.toValuativeRel
+    set w := ValuativeRel.valuation A with hw_def
+    have hg : w g ≠ 0 := fun h0 => hg0 ((vle_zero_iff_canonical v g).mpr h0)
+    set w' := w.restrictIdealSingle g
+      (fun h0 => hg0 ((vle_zero_iff_canonical v g).mpr h0)) with hw'_def
+    -- vle on the retraction IS ≤ of `w'` (ofValuation's rel is definitionally ≤).
+    have hbr : ∀ a b : A, (ofValuation w').vle a b ↔ w' a ≤ w' b := fun a b => Iff.rfl
+    -- `w'(g) ≠ 0`: the generator's value-unit lies in its own window.
+    have hg'_ne : w' g ≠ 0 := by
+      have hg_mem : Units.mk0 (w g) hg ∈ Valuation.cGammaSingle w g hg := by
+        have := Valuation.invGen_mem_cGammaSingle w g hg
+        simpa using inv_mem this
+      rw [hw'_def, Valuation.restrictIdealSingle,
+        Valuation.restrictToConvexBounded_apply_mem w _ _ hg hg_mem]
+      exact WithZero.coe_ne_zero
+    rw [Bool.eq_iff_iff, ιSpvR_eq_true_iff, ιSpvR_eq_true_iff]
     constructor
     · rintro ⟨hT, hs⟩
-      have hss : (restrictIdeal v I).vle s s :=
-        ((restrictIdeal v I).vle_total s s).elim id id
-      have hs_side := vle_of_restrictIdeal_vle hss hs
-      exact ⟨fun t ht => (vle_of_restrictIdeal_vle (hT t ht) hs).1, hs_side.2⟩
+      have hs_ne : w' s ≠ 0 := by
+        intro h0
+        exact hs ((hbr s 0).mpr (by rw [h0, map_zero]))
+      constructor
+      · intro t ht
+        have hle := (hbr t s).mp (hT t ht)
+        rw [hw'_def, Valuation.restrictIdealSingle] at hle hs_ne
+        rw [vle_iff_canonical]
+        exact (restrictToConvexBounded_le_reflect w _ _ hle hs_ne).1
+      · intro hcon
+        have h0 : w s = 0 := (vle_zero_iff_canonical v s).mp hcon
+        refine hs_ne ?_
+        rw [hw'_def, Valuation.restrictIdealSingle]
+        exact Valuation.restrictToConvexBounded_apply_zero w _ _ h0
     · rintro ⟨hT, hs0⟩
-      have hTr : ∀ t ∈ T, (restrictIdeal v I).vle t s :=
-        fun t ht => restrictIdeal_vle_of_vle (hT t ht)
-      refine ⟨hTr, ?_⟩
-      intro hs_zero
-      obtain ⟨a, haI, ha_ne⟩ := SpvAI.retraction_ideal_ne_zero (I := I) (v := v) hI0
-      apply ha_ne
-      have hsupp : ∀ t ∈ T, t ∈ (restrictIdeal v I).supp := by
-        intro t ht
-        rw [mem_supp_iff]
-        exact vle_trans' (hTr t ht) hs_zero
-      have hspan : Ideal.span (T : Set A) ≤ (restrictIdeal v I).supp :=
-        Ideal.span_le.mpr fun t ht => hsupp t ht
-      have hrad : a ∈ (restrictIdeal v I).supp := by
-        obtain ⟨n, hn⟩ := hTI haI
-        exact (instIsPrimeSupp (restrictIdeal v I)).mem_of_pow_mem n (hspan hn)
-      exact (mem_supp_iff _ a).mp hrad
-  · push_neg at hI0
-    have hv_mem : v ∈ SpvAI A I := isInSpvAI_of_forall_vle_zero hI0
-    have hfix : (SpvAI.retraction I v : Spv A) = v :=
-      congrArg Subtype.val (SpvAI.retraction_eq_self I P hIeq ⟨v, hv_mem⟩)
-    rw [hfix]
-
-/-- **Wedhorn 7.5(iii)+(iv), image form**: the `W`-profile image of all of `Spv A`
-coincides with the profile image of `Spv(A, I)` — on the coordinates satisfying the
-side condition `I ⊆ √(T·A)` (the profile values elsewhere are not constrained; the
-downstream lemmas only read side-condition coordinates). Stated as: for every
-`v : Spv A` there is `w ∈ SpvAI A I` whose profile agrees with `v`'s on all
-side-condition coordinates, and conversely. -/
-theorem exists_SpvAI_profile_agree (I : Ideal A) (P : PairOfDefinition A)
-    (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) (v : Spv A) :
-    ∃ w ∈ SpvAI A I, ιSpvR I w = ιSpvR I v :=
-  ⟨(SpvAI.retraction I v : Spv A), (SpvAI.retraction I v).2,
-    funext fun p => ιSpvR_retraction_eq I P hIeq v p⟩
+      -- Nonvanishing of `w'(s)`: else all of `T` dies, so `span T ≤ supp w'`; the side
+      -- condition then kills `g` in `w'`, contradicting `w'(g) ≠ 0`.
+      have hs'_ne : w' s ≠ 0 := by
+        intro h0
+        have hTz : ∀ t ∈ (T : Finset A), t ∈ w'.supp := by
+          intro t ht
+          have hle : w t ≤ w s := (vle_iff_canonical v t s).mp (hT t ht)
+          have hle' : w' t ≤ w' s := by
+            rw [hw'_def, Valuation.restrictIdealSingle]
+            exact restrictToConvexBounded_le_of_le w _ _ hle
+          rw [h0, le_zero_iff] at hle'
+          exact (Valuation.mem_supp_iff w' t).mpr hle'
+        have hspan : Ideal.span (T : Set A) ≤ w'.supp :=
+          Ideal.span_le.mpr fun t ht => hTz t ht
+        have hg_rad : g ∈ (Ideal.span (T : Set A)).radical :=
+          hTI (hIg ▸ Ideal.mem_span_singleton_self g)
+        obtain ⟨n, hn⟩ := hg_rad
+        have hprime : (w'.supp).IsPrime := inferInstance
+        have hg_supp : g ∈ w'.supp := hprime.mem_of_pow_mem n (hspan hn)
+        exact hg'_ne ((Valuation.mem_supp_iff w' g).mp hg_supp)
+      refine ⟨fun t ht => ?_, fun hcon => ?_⟩
+      · rw [hbr, hw'_def, Valuation.restrictIdealSingle]
+        exact restrictToConvexBounded_le_of_le w _ _
+          ((vle_iff_canonical v t s).mp (hT t ht))
+      · have h0 := (hbr s 0).mp hcon
+        rw [map_zero, le_zero_iff] at h0
+        exact hs'_ne h0
 
 /-! ### R2 — the compact profile set
 
