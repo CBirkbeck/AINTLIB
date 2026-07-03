@@ -1176,3 +1176,27 @@ All four Lemma-4 estimates are now machine-verified at real σ, axiom-clean.
 NEXT: L4-a relative display (K−ℚ; Φ-terms cancel), L4-b T-difference, L4-c
 realification + bounds assembly, L4-d σ→1⁺ → Explicit2 at k=ℚ. Full continuation
 map in the beastmode sentinel.
+
+### Leg 8 (cont.): L4 assembly underway (through L4-c-i)
+
+- **L4-Q COMPLETE** (QSide.lean): `card_int/rat_ideal_absNorm_eq`,
+  `dedekindZeta_rat_eq_riemannZeta` (Re>1), `completedZetaPrefactor_rat` (= Γℝ),
+  `isCompletedDedekindZeta_rat` (completedRiemannZeta is Λ_ℚ; entire ext
+  H = s(s−1)Λ₀+1), **`generalizedRiemannHypothesis_rat`** (mathlib RH ⟹ our GRH(ℚ)).
+  Q4 (κ_ℚ = 1) deferred to T012.
+- **L4-a** `lemma4_relative_display` (K−ℚ display; Φ-terms cancel, logΔ_ℚ = 0,
+  arch coefficients shift by 1).
+- **L4-b** `plateauSum` + `lemma4_diff_display` (two-cutoff difference; logΔ_K and
+  the Γ-constant cancel).
+- **L4-c(i)** `arch_display_integral_eq` (realification via integral_complex_ofReal),
+  `one_sub_auxFCut_mem`, `integrableOn_{sinh,cosh}_weight_one_sub`.
+
+**NEXT: L4-c(ii/iii)** — the Explicit2-σ estimate: (ii) arch-difference bound:
+realify both display arch-diffs, ∫w(1−F_T)−∫w(1−F_T') = −∫w(F_T−F_T') (integral_sub),
+Dsinh, Dcosh ≥ 0 (setIntegral_nonneg via auxFCut_sub_eq_integral-nonneg),
+Dsinh+Dcosh = ∫archWeight(F_T−F_T') (integral_add) ≤ `arch_sum_diff_le`;
+|(n−1)Dsinh+(r₁−1)Dcosh| ≤ (n−1)(Dsinh+Dcosh) needs hn : 1 < finrank and r₁ ≤ n.
+(iii) zero-sum diffs via norm_tsum_zero{Sin,Cos,Int}Term_sub_le at K and ℚ
+(triangle over the K/ℚ split). Assemble |LHS − plateau-moved| ≤
+(n−1)·arch-bound + C(σ,T,T')·(Σ_K + Σ_ℚ). **THEN L4-d** σ→1⁺ (map in sentinel).
+**THEN L5** (weil at e^{−h|x|} → eq:Stark → Estimate), **THEN T012**.
