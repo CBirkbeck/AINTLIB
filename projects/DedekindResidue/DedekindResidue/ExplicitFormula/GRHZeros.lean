@@ -521,6 +521,94 @@ theorem summable_zetaZeros_inv_sq (h : ℝ) (hh : 0 < h) :
           linarith
         positivity
 
+/-- **Finitely many indexed zeros in a bounded set**: the zeros of the entire
+completion lying in any bounded subset of `ℂ` form a finite subfamily of the zero
+index. -/
+theorem finite_zetaZeros_mem_of_isBounded {W : Set ℂ} (hW : Bornology.IsBounded W) :
+    {ρ : ZetaZeros K | ρ.1 ∈ W}.Finite := by
+  obtain ⟨R, hR⟩ := hW.subset_closedBall (0 : ℂ)
+  have hfin : (Metric.closedBall (0:ℂ) R ∩ Function.support (zetaZeroDivisor K)).Finite :=
+    (locallyFiniteSupport_zetaZeroDivisor K).finite_inter_support_of_isCompact
+      (isCompact_closedBall 0 R)
+  refine Set.Finite.of_finite_image (f := fun ρ : ZetaZeros K => ρ.1)
+    (hfin.subset ?_) (Subtype.val_injective.injOn)
+  rintro z ⟨ρ, hρ, rfl⟩
+  exact ⟨hR hρ, ρ.2⟩
+
+/-- **The window bridge (b5-i)**: on a bounded window `W`, the divisor-weighted
+finsum against any test function collapses to the finite sum over the indexed
+zeros lying in `W`, each weighted by the global divisor. -/
+theorem finsum_divisor_mul_eq_sum_zetaZeros (φ : ℂ → ℂ) {W : Set ℂ}
+    (hW : Bornology.IsBounded W) :
+    ∑ᶠ z, ((MeromorphicOn.divisor (completedDedekindZetaEntire K) W) z : ℂ) * φ z
+      = ∑ ρ ∈ (finite_zetaZeros_mem_of_isBounded K hW).toFinset,
+          (zetaZeroDivisor K ρ.1 : ℂ) * φ ρ.1 := by
+  classical
+  set S : Finset (ZetaZeros K) := (finite_zetaZeros_mem_of_isBounded K hW).toFinset with hS
+  have hmem : ∀ ρ : ZetaZeros K, ρ ∈ S ↔ ρ.1 ∈ W := fun ρ => by
+    rw [hS, Set.Finite.mem_toFinset, Set.mem_setOf_eq]
+  set e : ZetaZeros K ↪ ℂ := ⟨fun ρ => ρ.1, Subtype.val_injective⟩ with he
+  have hsupp : Function.support (fun z =>
+      ((MeromorphicOn.divisor (completedDedekindZetaEntire K) W) z : ℂ) * φ z)
+      ⊆ ↑(S.map e) := by
+    intro z hz
+    rw [Function.mem_support] at hz
+    have hDne : (MeromorphicOn.divisor (completedDedekindZetaEntire K) W) z ≠ 0 := by
+      intro h0
+      exact hz (by rw [h0, Int.cast_zero, zero_mul])
+    have hzW : z ∈ W :=
+      (MeromorphicOn.divisor (completedDedekindZetaEntire K) W).supportWithinDomain
+        (Function.mem_support.mpr hDne)
+    have hzd : zetaZeroDivisor K z ≠ 0 := by
+      rw [← divisor_apply_eq_zetaZeroDivisor K hzW]
+      exact hDne
+    simp only [Finset.coe_map, Set.mem_image, Finset.mem_coe]
+    exact ⟨⟨z, hzd⟩, (hmem _).mpr hzW, rfl⟩
+  rw [finsum_eq_finsetSum_of_support_subset _ hsupp, Finset.sum_map]
+  refine Finset.sum_congr rfl (fun ρ hρ => ?_)
+  rw [divisor_apply_eq_zetaZeroDivisor K (u := e ρ) ((hmem ρ).mp hρ)]
+  rfl
+
+/-- **The zero-capture limit (b5-ii)**: under GRH, along any height sequence
+`T n → ∞` the divisor-weighted window finsums of the explicit formula converge to
+the absolutely-summable series over the full zero index. This upgrades the
+`weil_explicit_formula` limit from a statement about window sums to a statement
+about `∑'_ρ` — the form Belabas–Friedman's Lemma 3 sums take. -/
+theorem tendsto_finsum_window_zetaZeros (hGRH : GeneralizedRiemannHypothesis K)
+    {φ : ℂ → ℂ}
+    (hsum : Summable (fun ρ : ZetaZeros K => (zetaZeroDivisor K ρ.1 : ℂ) * φ ρ.1))
+    {a : ℝ} (ha : 0 < a) {T : ℕ → ℝ} (hT : Filter.Tendsto T Filter.atTop Filter.atTop) :
+    Filter.Tendsto (fun n : ℕ => ∑ᶠ z, ((MeromorphicOn.divisor
+        (completedDedekindZetaEntire K)
+        (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n))) z : ℂ) * φ z)
+      Filter.atTop
+      (nhds (∑' ρ : ZetaZeros K, (zetaZeroDivisor K ρ.1 : ℂ) * φ ρ.1)) := by
+  classical
+  have hWb : ∀ n : ℕ, Bornology.IsBounded (Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n)) :=
+    fun n => isBounded_Ioo_reProdIm (-a) (1+a) (-(T n)) (T n)
+  set S : ℕ → Finset (ZetaZeros K) :=
+    fun n => (finite_zetaZeros_mem_of_isBounded K (hWb n)).toFinset with hSdef
+  have hSmem : ∀ (n : ℕ) (ρ : ZetaZeros K),
+      ρ ∈ S n ↔ ρ.1 ∈ Set.Ioo (-a) (1+a) ×ℂ Set.Ioo (-(T n)) (T n) := fun n ρ => by
+    rw [hSdef, Set.Finite.mem_toFinset, Set.mem_setOf_eq]
+  have hStop : Filter.Tendsto S Filter.atTop Filter.atTop := by
+    rw [Filter.tendsto_atTop]
+    intro b
+    obtain ⟨B, hB⟩ := (b.finite_toSet.image (fun ρ : ZetaZeros K => |ρ.1.im|)).bddAbove
+    filter_upwards [hT.eventually_ge_atTop (B+1)] with n hn
+    rw [Finset.le_iff_subset]
+    intro ρ hρb
+    rw [hSmem]
+    refine Complex.mem_reProdIm.mpr ⟨?_, ?_⟩
+    · rw [ZetaZeros_re_eq_half K hGRH ρ]
+      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+    · have him : |ρ.1.im| ≤ B :=
+        hB (Set.mem_image_of_mem _ (Finset.mem_coe.mpr hρb))
+      obtain ⟨h1, h2⟩ := abs_le.mp him
+      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+  refine (hsum.hasSum.comp hStop).congr (fun n => ?_)
+  exact (finsum_divisor_mul_eq_sum_zetaZeros K φ (hWb n)).symm
+
 end DedekindResidue
 
 end
