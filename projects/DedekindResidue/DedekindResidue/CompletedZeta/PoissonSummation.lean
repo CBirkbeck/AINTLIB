@@ -171,6 +171,14 @@ theorem fundamentalDomain_basisFun_eq :
   ext x
   simp [ZSpan.fundamentalDomain, Pi.basisFun_repr]
 
+private theorem neg_intEquivSpanBasisFun_add (n : ι → ℤ) (x : ι → ℝ) :
+    -((intEquivSpanBasisFun (-n) : ι → ℝ)) + x = x + fun i => (n i : ℝ) := by
+  rw [intEquivSpanBasisFun_coe]
+  funext i
+  simp only [Pi.add_apply, Pi.neg_apply]
+  push_cast
+  ring
+
 /-- **Box tiling of `ℝ^ι`.** For an integrable `f`, the integral over `ι → ℝ` is the sum over
 integer translates of the integral over the half-open box `(0,1]^ι` — the fundamental-domain
 decomposition for the standard integer lattice, in the `Ioc` normalisation used by the torus
@@ -179,7 +187,7 @@ theorem integral_eq_tsum_integral_iocBox (f : (ι → ℝ) → ℂ) (hf : Integr
     ∫ x, f x = ∑' n : ι → ℤ, ∫ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
       f (x + fun i => (n i : ℝ)) := by
   classical
-  haveI : VAddInvariantMeasure
+  have : VAddInvariantMeasure
       (↥(Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι)))) (ι → ℝ) volume :=
     (inferInstance : VAddInvariantMeasure
       (Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι))).toAddSubgroup (ι → ℝ) volume)
@@ -191,12 +199,7 @@ theorem integral_eq_tsum_integral_iocBox (f : (ι → ℝ) → ℂ) (hf : Integr
   refine setIntegral_congr_fun ?_ (fun x _ => ?_)
   · exact measurableSet_setOf.mpr (by measurability)
   · congr 1
-    show -((intEquivSpanBasisFun (-n) : ι → ℝ)) + x = x + fun i => (n i : ℝ)
-    rw [intEquivSpanBasisFun_coe]
-    funext i
-    simp only [Pi.add_apply, Pi.neg_apply]
-    push_cast
-    ring
+    exact neg_intEquivSpanBasisFun_add n x
 
 /-- **Box tiling of `ℝ^ι`, `lintegral` form.** No integrability needed: the lower integral over
 `ι → ℝ` is the sum over integer translates of the lower integral over the box `(0,1]^ι`. -/
@@ -204,7 +207,7 @@ theorem lintegral_eq_tsum_lintegral_iocBox (f : (ι → ℝ) → ENNReal) :
     ∫⁻ x, f x = ∑' n : ι → ℤ, ∫⁻ x in {x : ι → ℝ | ∀ i, x i ∈ Set.Ioc (0:ℝ) 1},
       f (x + fun i => (n i : ℝ)) := by
   classical
-  haveI : VAddInvariantMeasure
+  have : VAddInvariantMeasure
       (↥(Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι)))) (ι → ℝ) volume :=
     (inferInstance : VAddInvariantMeasure
       (Submodule.span ℤ (Set.range (Pi.basisFun ℝ ι))).toAddSubgroup (ι → ℝ) volume)
@@ -215,12 +218,7 @@ theorem lintegral_eq_tsum_lintegral_iocBox (f : (ι → ℝ) → ENNReal) :
   rw [fundamentalDomain_basisFun_eq, setLIntegral_congr iocBox_ae_icoBox]
   refine lintegral_congr (fun x => ?_)
   congr 1
-  show -((intEquivSpanBasisFun (-n) : ι → ℝ)) + x = x + fun i => (n i : ℝ)
-  rw [intEquivSpanBasisFun_coe]
-  funext i
-  simp only [Pi.add_apply, Pi.neg_apply]
-  push_cast
-  ring
+  exact neg_intEquivSpanBasisFun_add n x
 
 /-- The torus monomials have pointwise norm `1` (each factor lies on the circle). -/
 theorem norm_mFourier_apply (n : ι → ℤ) (q : UnitAddTorus ι) :
