@@ -540,9 +540,94 @@ together with compactness of `Spa A A⁺` to upgrade `exists_dominating_unit_noH
 cover-and-finite-subcover argument; in the current signature both are absent,
 so the proper closure of this sub-lemma is part of T-FOUND-D / future tickets. -/
 private theorem exists_dominating_unit_noHArch_finset_aux
+    [IsTateRing A] [CompactSpace ↥(Spa A A⁺)]
     (T : Finset A) (hT : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0) :
     ∃ s : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
-      v.vle (s : A) t ∧ ¬ v.vle t (s : A) := by sorry
+      v.vle (s : A) t ∧ ¬ v.vle t (s : A) := by
+  classical
+  obtain ⟨u, hu_tn⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := A)
+  -- The increasing open exhaustion `U n := ⋃ t ∈ T, {v : v(uⁿ) ≤ v(t) ≠ 0}`.
+  set U : ℕ → Set ↥(Spa A A⁺) := fun n =>
+    ⋃ t ∈ T, Subtype.val ⁻¹' basicOpen ((u : A) ^ n) t with hU_def
+  have hU_open : ∀ n, IsOpen (U n) := fun n =>
+    isOpen_biUnion fun t _ =>
+      (isOpen_basicOpen _ t).preimage continuous_subtype_val
+  -- Pointwise: continuity of `v` + topological nilpotence of `u` put `v` in some `U n`.
+  have hU_cover : (Set.univ : Set ↥(Spa A A⁺)) ⊆ ⋃ n, U n := by
+    rintro ⟨v, hvSpa⟩ -
+    obtain ⟨t, htT, ht0⟩ := hT v hvSpa
+    letI : ValuativeRel A := v.toValuativeRel
+    set w := ValuativeRel.valuation A with hw_def
+    have hwt_ne : w t ≠ 0 := by
+      intro h0
+      refine ht0 ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
+      rw [h0, map_zero]
+    have hcont : v.IsContinuous := hvSpa.1
+    have h_open : IsOpen {a : A | w a < w t} := hcont (w t)
+    have h0_mem : (0 : A) ∈ {a : A | w a < w t} := by
+      simp only [Set.mem_setOf_eq, map_zero]
+      exact zero_lt_iff.mpr hwt_ne
+    obtain ⟨n, hn⟩ := (hu_tn.eventually (h_open.mem_nhds h0_mem)).exists
+    refine Set.mem_iUnion.mpr ⟨n, Set.mem_biUnion htT ?_⟩
+    exact ⟨(Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hn.le, ht0⟩
+  -- The exhaustion is monotone (`v(u) ≤ 1` on `Spa`).
+  have hmono : ∀ (m n : ℕ), m ≤ n → U m ⊆ U n := by
+    intro m n hmn x hx
+    simp only [hU_def, Set.mem_iUnion, Set.mem_preimage] at hx ⊢
+    obtain ⟨t, htT, hx1, hx0⟩ := hx
+    refine ⟨t, htT, ?_, hx0⟩
+    refine x.1.vle_trans ?_ hx1
+    letI : ValuativeRel A := x.1.toValuativeRel
+    set w := ValuativeRel.valuation A with hw_def
+    have hu_le_one : w ((u : A)) ≤ 1 := valuation_pi_le_one_on_spa x.2 hu_tn
+    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
+    rw [map_pow, map_pow]
+    exact pow_le_pow_right_of_le_one' hu_le_one hmn
+  -- Compactness extracts a single level `N`.
+  obtain ⟨F, hF⟩ := isCompact_univ.elim_finite_subcover U hU_open hU_cover
+  set N : ℕ := F.sup id with hN_def
+  have hUN : ∀ x : ↥(Spa A A⁺), x ∈ U N := by
+    intro x
+    have hx := hF (Set.mem_univ x)
+    simp only [Set.mem_iUnion] at hx
+    obtain ⟨n, hnF, hxn⟩ := hx
+    exact hmono n N (Finset.le_sup (f := id) hnF) hxn
+  -- Conclude with `s := u^(N+1)`.
+  refine ⟨u ^ (N + 1), fun v hvSpa => ?_⟩
+  have hvU := hUN ⟨v, hvSpa⟩
+  simp only [hU_def, Set.mem_iUnion, Set.mem_preimage] at hvU
+  obtain ⟨t, htT, hvle, hvt0⟩ := hvU
+  letI : ValuativeRel A := v.toValuativeRel
+  set w := ValuativeRel.valuation A with hw_def
+  have h_t : w ((u : A) ^ N) ≤ w t :=
+    (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvle
+  have hu_lt_one : w ((u : A)) < 1 := by
+    have hu_not : ¬ v.vle 1 ((u : A)) :=
+      not_vle_one_of_mem_spa_of_topologicallyNilpotent hvSpa hu_tn
+    have hne : ¬ (w 1 ≤ w ((u : A))) := fun h ↦ hu_not
+      ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
+    rw [map_one] at hne
+    exact lt_of_not_ge hne
+  have hwuN_ne : w ((u : A) ^ N) ≠ 0 := by
+    intro h
+    refine not_vle_zero_of_isUnit ((u.isUnit).pow N) v
+      ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
+    rw [map_zero]
+    exact le_of_eq h
+  have h_strict : w ((u : A) ^ (N + 1)) < w ((u : A) ^ N) := by
+    rw [pow_succ, map_mul]
+    have h1 : w ((u : A) ^ N) * w ((u : A)) < w ((u : A) ^ N) * 1 :=
+      mul_lt_mul_of_pos_left hu_lt_one (zero_lt_iff.mpr hwuN_ne)
+    simpa using h1
+  have h_lt_t : w ((u : A) ^ (N + 1)) < w t := lt_of_lt_of_le h_strict h_t
+  refine ⟨t, htT, ?_, ?_⟩
+  · refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
+    rw [Units.val_pow_eq_pow_val]
+    exact le_of_lt h_lt_t
+  · intro hvle'
+    have h_le := (Valuation.Compatible.vle_iff_le (v := w) t _).mp hvle'
+    rw [Units.val_pow_eq_pow_val] at h_le
+    exact absurd h_le (not_le.mpr h_lt_t)
 
 /-- **Wedhorn Cor 7.32 (no hArch), Finset form.** For a finite family `T` with
 no common zero on `Spa A A⁺`, there exists a unit `s ∈ Aˣ` such that for every
@@ -555,6 +640,7 @@ mathematical content (cover + finite-subcover argument from Wedhorn Cor 7.32);
 the wrapper exposes the public-facing name without altering the original
 signature. -/
 theorem exists_dominating_unit_noHArch_finset
+    [IsTateRing A] [CompactSpace ↥(Spa A A⁺)]
     (T : Finset A) (hT : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0) :
     ∃ s : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
       v.vle (s : A) t ∧ ¬ v.vle t (s : A) :=
