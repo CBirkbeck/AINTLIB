@@ -1,9 +1,9 @@
 module
 
 public import Mathlib
-public import DedekindResidue.CompletedZeta.MellinAgreement
 public import DedekindResidue.CompletedZeta.FunctionalEquation
 public import DedekindResidue.CompletedZeta.GRH
+public import DedekindResidue.CompletedZeta.MellinAgreement
 
 /-!
 # Existence of the completed Dedekind zeta function  (SP1-AGE-4, ε)
@@ -142,10 +142,6 @@ theorem Λ_half_eq_prefactor_mul_zeta {s : ℝ} (hs : 1 < s) :
   have h2π : ((2 * π) ^ (-s)) = (2:ℝ) ^ (-s) * π ^ (-s) :=
     Real.mul_rpow (by norm_num) Real.pi_pos.le
   rw [h2π]
-  have h2r : (0:ℝ) < (2:ℝ) ^ (nrComplexPlaces K) := by positivity
-  have h2rs : ∀ x : ℝ, ((2:ℝ) ^ (-s) * x) ^ (nrComplexPlaces K)
-      = ((2:ℝ) ^ (-s)) ^ (nrComplexPlaces K) * x ^ (nrComplexPlaces K) :=
-    fun x => mul_pow _ _ _
   rw [show (2 * ((2:ℝ) ^ (-s) * π ^ (-s)) * Real.Gamma s)
     = (2 * (π ^ (-s) * Real.Gamma s)) * (2:ℝ) ^ (-s) by ring_nf]
   rw [mul_pow (2 * (π ^ (-s) * Real.Gamma s)) ((2:ℝ) ^ (-s)) (nrComplexPlaces K)]

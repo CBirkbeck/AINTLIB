@@ -116,11 +116,10 @@ open scoped Classical in
 theorem embeddingCoords_apply (x : K) (i : index K) :
     embeddingCoords K x i = (stdBasis K).repr (mixedEmbedding K x) i := by
   rw [embeddingCoords]
-  have h := euclidean.stdOrthonormalBasis_map_eq K
   have h2 : (euclidean.stdOrthonormalBasis K).toBasis.repr
       ((euclidean.toMixed K).symm (mixedEmbedding K x)) i
       = (stdBasis K).repr (mixedEmbedding K x) i := by
-    rw [← h, Module.Basis.map_repr]
+    rw [← euclidean.stdOrthonormalBasis_map_eq K, Module.Basis.map_repr]
     simp
   rw [← h2, OrthonormalBasis.coe_toBasis_repr_apply]
 
@@ -266,7 +265,6 @@ open scoped Classical in
 `2·(-2)`). -/
 theorem prod_dualityWeights :
     (∏ i : index K, dualityWeights K i) = (-4 : ℝ) ^ nrComplexPlaces K := by
-  classical
   rw [Fintype.prod_sum_type]
   have h1 : (∏ w : {w : InfinitePlace K // IsReal w}, dualityWeights K (Sum.inl w)) = 1 := by
     refine Finset.prod_eq_one (fun w _ => ?_)
