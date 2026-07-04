@@ -61,10 +61,10 @@ Source stack: WilliamCoram/PhD (github, Apache 2.0) + Bingyu Xia's MvPowerSeries
 
 | # | Ticket | Content | Source | Est |
 |---|--------|---------|--------|-----|
-| V1 | vendor Xia Fubini | `MvPowerSeries.sumToIter/iterToSum/finSuccEquiv` (full power series) | Bryce/{Basic,Equiv} (774 ln) | adapt |
-| V2 | vendor Mv-restricted | normed `MvPowerSeries.IsRestricted c` + `Restricted c` subring | PR'd/{Antidiag,MvRestricted} (140) | adapt |
-| V3 | vendor Gauss extras | `gaussNorm_add_le_max/mul_le/eq_zero_iff` gaps over merged mathlib | ToPR/MvGaussNorm + Restricted-diff | adapt |
-| V4 | vendor norm+iso | `Restricted` NormedRing + `MvRestricted.finSuccEquiv` + `isCompleteSpace` | ToPR/{MvRestricted,RestrictedIso} (505) | adapt |
+| V1 ✅ | vendor Xia Fubini | `MvPowerSeries.sumToIter/iterToSum/finSuccEquiv` (full power series) | Bryce/{Basic,Equiv} (774 ln) | adapt |
+| V2 ✅ | vendor Mv-restricted | normed `MvPowerSeries.IsRestricted c` + `Restricted c` subring | PR'd/{Antidiag,MvRestricted} (140) | adapt |
+| V3 ✅ | vendor Gauss extras | `gaussNorm_add_le_max/mul_le/eq_zero_iff` gaps over merged mathlib | ToPR/MvGaussNorm + Restricted-diff | adapt |
+| V4 ⏳ | vendor norm+iso (MvRestrictedNorm + RestrictedNorm drafted on disk, ~7 drift sites each: instance-arg lints, abbrev-unfold simpa strictness, IsNonarchimedean instance→theorem, 2 grind regressions; RestrictedIso not started) | `Restricted` NormedRing + `MvRestricted.finSuccEquiv` + `isCompleteSpace` | ToPR/{MvRestricted,RestrictedIso} (505) | adapt |
 | B1 | norm↔topological bridge | over `K = F⸨X⸩` with `Valued.toNormedField`: Coram-`Restricted K 1` ≃ our `restrictedMvPowerSeriesSubring k K` (same carrier condition) | new | ~150 |
 | D1 | disc instances | `D := Restricted K (1 : Fin 1 → ℝ)`: Tate pod from norm balls, IRIE (unit ball; Gauss power-mult), PlusSubring, T2/Complete (V4) | new | ~300 |
 | D2 | strongly noetherian D | our-restrictedMv-over-D → (V4 Fubini) → (k+1)-var over K → (B1) → my LaurentSeries transpose instance | new | ~200 |

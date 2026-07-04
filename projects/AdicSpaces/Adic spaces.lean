@@ -81,6 +81,7 @@ import «Adic spaces».ExampleLaurentSeries
 import «Adic spaces».Vendored.XiaMvPowerSeriesEquiv
 import «Adic spaces».Vendored.CoramMvRestricted
 import «Adic spaces».Vendored.CoramMvGaussNorm
+
 import «Adic spaces».SpvAI
 import «Adic spaces».SpvAITopology
 import «Adic spaces».SpvCompletionExtension
