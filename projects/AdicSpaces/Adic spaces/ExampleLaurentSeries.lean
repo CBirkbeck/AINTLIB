@@ -228,6 +228,57 @@ instance : @CompleteSpace K (IsTopologicalAddGroup.rightUniformSpace K) := by
 
 /-! ### Strongly noetherian (the layer transpose) -/
 
+section StronglyNoetherianProof
+
+variable (k : ℕ)
+
+/-- The transpose, as a raw function. -/
+def tauFun (g : PowerSeries (MvPolynomial (Fin k) F)) :
+    MvPowerSeries (Fin k) F⟦X⟧ :=
+  fun s => PowerSeries.mk fun m => MvPolynomial.coeff s (PowerSeries.coeff m g)
+
+theorem coeff_tauFun (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ ℕ) (m : ℕ) :
+    PowerSeries.coeff m (MvPowerSeries.coeff s (tauFun F k g)) =
+      MvPolynomial.coeff s (PowerSeries.coeff m g) := by
+  rw [show tauFun F k g = fun s => PowerSeries.mk fun m =>
+    MvPolynomial.coeff s (PowerSeries.coeff m g) from rfl,
+    MvPowerSeries.coeff_apply, PowerSeries.coeff_mk]
+
+/-- The **transpose** ring homomorphism: a power series in `X` whose coefficients are
+`k`-variable polynomials becomes a `k`-variable power series whose coefficients are
+power series in `X` (swap the two gradings). -/
+def tau : PowerSeries (MvPolynomial (Fin k) F) →+* MvPowerSeries (Fin k) F⟦X⟧ where
+  toFun := tauFun F k
+  map_zero' := by
+    refine MvPowerSeries.ext fun s => ?_
+    refine PowerSeries.ext fun m => ?_
+    rw [coeff_tauFun]
+    simp
+  map_one' := by
+    refine MvPowerSeries.ext fun s => ?_
+    refine PowerSeries.ext fun m => ?_
+    rw [coeff_tauFun, PowerSeries.coeff_one, MvPowerSeries.coeff_one]
+    by_cases hm : m = 0 <;> by_cases hs : s = 0 <;>
+      simp [hm, hs, MvPolynomial.coeff_one, PowerSeries.coeff_one, eq_comm]
+  map_add' g h := by
+    refine MvPowerSeries.ext fun s => ?_
+    refine PowerSeries.ext fun m => ?_
+    simp [coeff_tauFun]
+  map_mul' g h := by
+    refine MvPowerSeries.ext fun s => ?_
+    refine PowerSeries.ext fun m => ?_
+    rw [coeff_tauFun, PowerSeries.coeff_mul, MvPolynomial.coeff_sum,
+      MvPowerSeries.coeff_mul, map_sum]
+    simp only [MvPolynomial.coeff_mul, PowerSeries.coeff_mul, coeff_tauFun]
+    rw [Finset.sum_comm]
+
+theorem coeff_tau (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ ℕ) (m : ℕ) :
+    PowerSeries.coeff m (MvPowerSeries.coeff s (tau F k g)) =
+      MvPolynomial.coeff s (PowerSeries.coeff m g) :=
+  coeff_tauFun F k g s m
+
+end StronglyNoetherianProof
+
 instance : IsStronglyNoetherian K := by
   sorry
 
