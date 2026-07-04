@@ -1,5 +1,40 @@
 # Ticket Board — Thm 8.28(b) sheafiness, revised 4-leaf plan (post /expert-review 2026-06-19)
 
+## ✅✅ CAMPAIGN COMPLETE 2026-07-04 — HEADLINE THEOREM PROVEN ✅✅
+
+**`isSheafy_of_stronglyNoetherian_828b` is sorry-free.** Verified 2026-07-04 by CollectAxioms
+closure walk (35 969 constants, **0 sorry carriers**) and `#print axioms` =
+`[propext, Classical.choice, Quot.sound]`. Full library build green (3191 jobs).
+Final commit: `583d8ad3`. Session arc (7 → 0 carriers):
+
+- **C1 (carrier #1)**: T-PB1–17 all landed — IRIE boundedness rerouted through the faithful
+  Wedhorn 7.19/7.20 power-bounded chain; the false `completedPlusSubringBase_isBounded` deleted (B2-logged).
+- **C2 (carrier #2)** + **LL leaves**: faithful `hasLocLiftPowerBounded_faithful` instance +
+  WCA-scoped removal of the unfaithful LL instances; primed criterion delegation.
+- **C3 (carriers #3/#4/#5)**: 7.51/7.52 primed Nullstellensatz chain + 7.45 height-one
+  analytic-point lemma proven end-to-end (Lemma745.lean, ValuationContinuity.lean).
+- **C4 (carriers #6/#7)**: the B2-suspect full-cube closedness keystone
+  (`isClosed_image_spa_ιSpv_bool_noHArch`) **abandoned and routed around** via the new
+  `SpaQCviaSpvAI.lean` R-tree: side-condition-indexed profile cube (`RCoord`), faithful
+  PRINCIPAL retraction on `cGammaSingle` (Wedhorn 7.1.2/7.4(iii)/7.5(iii)), Wedhorn 7.10+7.35
+  profile image identity, 7.35(2) basis lemma, Sierpinski-embedding transfer ⟹
+  `compactSpace_spa_noHArch` + `isCompact_subtype_rationalOpen` (both axiom-clean).
+  Carrier #6 (Cor 7.32 finset) proven by the V_n exhaustion + CompactSpace supply.
+- **R5 rewiring**: `isCompact_preimage_rationalOpen_noHArch` restated with the faithful
+  `IsRational` side condition (Wedhorn Def 7.29) + `[IsTateRing]`; hypothesis threaded through
+  the 7.54 chain (WCA), the C2-lane (TAR) and the legacy ratio/tree chain (TAR); new suppliers
+  `PairOfDefinition.exists_principal_same_A₀` (HuberRings) and
+  `IsTateRing.exists_principal_pairOfDefinition_le_subring` (AdicMorphisms).
+
+**Left for the cleanup fleet (all OFF the headline trace — dead code, no math debt on 8.28(b)):**
+- Quarantined legacy sorries: `isClosed_image_spa_ιSpv_bool_noHArch` + Sierpinski-closedness
+  family (SpvAITopology 1434–1470), `cGammaIdeal_mem_of_cofinal_lt_one` /
+  `ofValuation_restrictIdeal_isInSpvAI` (general-cGammaIdeal B2 pair), old unprimed 7.51/7.52
+  chain, `_of_tate` LL lemmas, TAR ratio/tree sub-sorries.
+- Golf: `SpaQCviaSpvAI.lean` deprecation warnings (`push_neg`, `zero_le'`), unusedSectionVars.
+
+---
+
 ## ★★ AUTHORITATIVE RE-SYNC 2026-07-03 (/develop --continue — traced 7-leaf ground truth + T-PB cluster)
 
 **Ground truth, verified today by a CollectAxioms-closure walk (35 454 constants), NOT from
