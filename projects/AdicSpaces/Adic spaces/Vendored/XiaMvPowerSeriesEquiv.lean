@@ -127,6 +127,8 @@ is patterned after `Mathlib/Algebra/MvPolynomial/Equiv.lean`.
 -/
 
 
+end MvPowerSeries
+
 noncomputable section
 
 namespace MvPowerSeries
