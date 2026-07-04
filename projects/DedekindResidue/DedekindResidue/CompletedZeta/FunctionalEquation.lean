@@ -76,12 +76,10 @@ theorem IsCompletedDedekindZeta.eqOn {K : Type*} [Field K] [NumberField K]
     have hpre : Set.EqOn H₁ H₂ {s : ℂ | 1 < s.re} := by
       intro s hs
       have hs0' : s ≠ 0 := by
-        intro h0
-        rw [h0] at hs
+        rintro rfl
         norm_num [Set.mem_setOf_eq, Complex.zero_re] at hs
       have hs1' : s ≠ 1 := by
-        intro h1
-        rw [h1] at hs
+        rintro rfl
         norm_num [Set.mem_setOf_eq, Complex.one_re] at hs
       rw [hH₁eq s hs0' hs1', hH₂eq s hs0' hs1', h₁.1 s hs, h₂.1 s hs]
     have h2mem : (2 : ℂ) ∈ {s : ℂ | 1 < s.re} := by norm_num [Complex.ofReal_re]
