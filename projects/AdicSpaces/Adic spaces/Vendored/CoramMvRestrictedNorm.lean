@@ -99,8 +99,8 @@ lemma gaussNorm_achieved [NormedRing R] [IsUltrametricDist R] (hc : 0 ≤ c)
   · have hpos : 0 < gaussNorm R c f :=
       (MvPowerSeries.gaussNorm_nonneg norm c f.1 norm_nonneg).lt_of_ne' hG
     have hfin : {t | gaussNorm R c f / 2 ≤ ‖MvPowerSeries.coeff t f.1‖ * t.prod (c · ^ ·)}.Finite := by
-      have : MvPowerSeries.IsRestricted c f.1 := f.2
-      simp_rw [MvPowerSeries.IsRestricted, NormedAddGroup.tendsto_nhds_zero] at this
+      have : MvPowerSeries.IsRestrictedGauss c f.1 := f.2
+      simp_rw [MvPowerSeries.IsRestrictedGauss, NormedAddGroup.tendsto_nhds_zero] at this
       have := this (gaussNorm R c f / 2) (by aesop)
       simp only [norm_mul, Real.norm_eq_abs, Filter.eventually_cofinite, not_lt, abs_norm] at this
       convert this with t
@@ -132,8 +132,8 @@ lemma achievingPoints_finite [NormedRing R] [IsUltrametricDist R] (hc : 0 ≤ c)
   have hpos : 0 < gaussNorm R c f :=
       (MvPowerSeries.gaussNorm_nonneg norm c f.1 norm_nonneg).lt_of_ne' h
   have hfin : {t | gaussNorm R c f / 2 ≤ ‖MvPowerSeries.coeff t f.1‖ * t.prod (c · ^ ·)}.Finite := by
-      have : MvPowerSeries.IsRestricted c f.1 := f.2
-      simp_rw [MvPowerSeries.IsRestricted, NormedAddGroup.tendsto_nhds_zero] at this
+      have : MvPowerSeries.IsRestrictedGauss c f.1 := f.2
+      simp_rw [MvPowerSeries.IsRestrictedGauss, NormedAddGroup.tendsto_nhds_zero] at this
       have := this (gaussNorm R c f / 2) (by aesop)
       simp only [norm_mul, Real.norm_eq_abs, Filter.eventually_cofinite, not_lt, abs_norm] at this
       convert this with t
@@ -197,8 +197,8 @@ end MvRestricted
 
 section MvPolynomial
 
-lemma MvPolynomial.IsRestricted [NormedCommRing R] [IsUltrametricDist R] (f : MvPolynomial σ R) :
-    MvPowerSeries.IsRestricted c f.toMvPowerSeries := by
+lemma MvPolynomial.IsRestrictedGauss [NormedCommRing R] [IsUltrametricDist R] (f : MvPolynomial σ R) :
+    MvPowerSeries.IsRestrictedGauss c f.toMvPowerSeries := by
   suffices {t | ¬ (‖(MvPowerSeries.coeff t) f.toMvPowerSeries‖ * t.prod (c · ^ ·) = 0)}.Finite by
     exact tendsto_nhds_of_eventually_eq this
   simp only [coeff_coe, mul_eq_zero, norm_eq_zero, not_or, ← mem_support_iff]
@@ -206,6 +206,6 @@ lemma MvPolynomial.IsRestricted [NormedCommRing R] [IsUltrametricDist R] (f : Mv
 
 def MvPolynomial.toMvRestricted [NormedCommRing R] [IsUltrametricDist R] [StrongPos c]
     (f : MvPolynomial σ R) : MvPowerSeries.Restricted R c :=
-  ⟨f.toMvPowerSeries, MvPolynomial.IsRestricted c f⟩
+  ⟨f.toMvPowerSeries, MvPolynomial.IsRestrictedGauss c f⟩
 
 end MvPolynomial

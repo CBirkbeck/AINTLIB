@@ -33,7 +33,7 @@ Authors: William Coram
 /-!
 # Multivariate restricted power series
 
-`IsRestricted` : We say a multivariate power series over a normed ring `R` is restricted for a
+`IsRestrictedGauss` : We say a multivariate power series over a normed ring `R` is restricted for a
 tuple `c` if `‖coeff t f‖ * ∏ i ∈ t.support, c i ^ t i → 0` under the cofinite filter.
 
 -/
@@ -49,41 +49,41 @@ variable {R : Type*} [NormedRing R] {σ : Type*}
 
 /-- A multivariate powe0r series over a normed ring `R` is restricted for aExpand commentComment on line R31Resolved
   tuple `c` if `‖coeff t f‖ * ∏ i ∈ t.support, c i ^ t i → 0` under the cofinite filter. -/
-def IsRestricted (c : σ → ℝ) (f : MvPowerSeries σ R) :=
+def IsRestrictedGauss (c : σ → ℝ) (f : MvPowerSeries σ R) :=
   Tendsto (fun (t : σ →₀ ℕ) ↦ ‖coeff t f‖ * t.prod (c · ^ ·)) cofinite (𝓝 0)
 
 @[simp]
-lemma isRestricted_abs_iff (c : σ → ℝ) (f : MvPowerSeries σ R) :
-    IsRestricted |c| f ↔ IsRestricted c f := by
-  simp [IsRestricted, NormedAddGroup.tendsto_nhds_zero, Finsupp.prod]
+lemma isRestrictedGauss_abs_iff (c : σ → ℝ) (f : MvPowerSeries σ R) :
+    IsRestrictedGauss |c| f ↔ IsRestrictedGauss c f := by
+  simp [IsRestrictedGauss, NormedAddGroup.tendsto_nhds_zero, Finsupp.prod]
 
-lemma isRestricted_zero (c : σ → ℝ) : IsRestricted c (0 : MvPowerSeries σ R) := by
-  simpa [IsRestricted] using tendsto_const_nhds
+lemma isRestrictedGauss_zero (c : σ → ℝ) : IsRestrictedGauss c (0 : MvPowerSeries σ R) := by
+  simpa [IsRestrictedGauss] using tendsto_const_nhds
 
-lemma isRestricted_monomial (c : σ → ℝ) (n : σ →₀ ℕ) (a : R) :
-    IsRestricted c (monomial n a) := by
+lemma isRestrictedGauss_monomial (c : σ → ℝ) (n : σ →₀ ℕ) (a : R) :
+    IsRestrictedGauss c (monomial n a) := by
   classical
   refine tendsto_nhds_of_eventually_eq (Set.Subsingleton.finite ?_)
   aesop (add simp [Set.Subsingleton, coeff_monomial])
 
-lemma isRestricted_one (c : σ → ℝ) : IsRestricted c (1 : MvPowerSeries σ R) :=
-  isRestricted_monomial c 0 1
+lemma isRestrictedGauss_one (c : σ → ℝ) : IsRestrictedGauss c (1 : MvPowerSeries σ R) :=
+  isRestrictedGauss_monomial c 0 1
 
-lemma isRestricted_C (c : σ → ℝ) (a : R) : IsRestricted c (C a) := by
-  simpa [monomial_zero_eq_C_apply] using isRestricted_monomial c 0 a
+lemma isRestrictedGauss_C (c : σ → ℝ) (a : R) : IsRestrictedGauss c (C a) := by
+  simpa [monomial_zero_eq_C_apply] using isRestrictedGauss_monomial c 0 a
 
-lemma isRestricted.add (c : σ → ℝ) {f g : MvPowerSeries σ R} (hf : IsRestricted c f)
-    (hg : IsRestricted c g) : IsRestricted c (f + g) := by
-  rw [← isRestricted_abs_iff, IsRestricted] at *
+lemma isRestrictedGauss.add (c : σ → ℝ) {f g : MvPowerSeries σ R} (hf : IsRestrictedGauss c f)
+    (hg : IsRestrictedGauss c g) : IsRestrictedGauss c (f + g) := by
+  rw [← isRestrictedGauss_abs_iff, IsRestrictedGauss] at *
   refine tendsto_const_nhds.squeeze (add_zero (0 : ℝ) ▸ hf.add hg) (fun n ↦ ?_) fun n ↦ ?_
   · dsimp [Finsupp.prod]; positivity -- TODO: add positivity extension for Finsupp.prod
   rw [← add_mul]
   exact mul_le_mul_of_nonneg_right (norm_add_le ..) (by dsimp [Finsupp.prod]; positivity)
 
-lemma isRestricted.neg (c : σ → ℝ) {f : MvPowerSeries σ R} (hf : IsRestricted c f) :
-    IsRestricted c (-f) := by
-  rw [← isRestricted_abs_iff, IsRestricted] at *
-  simpa [IsRestricted] using hf
+lemma isRestrictedGauss.neg (c : σ → ℝ) {f : MvPowerSeries σ R} (hf : IsRestrictedGauss c f) :
+    IsRestrictedGauss c (-f) := by
+  rw [← isRestrictedGauss_abs_iff, IsRestrictedGauss] at *
+  simpa [IsRestrictedGauss] using hf
 
 open IsUltrametricDist
 
@@ -118,26 +118,26 @@ lemma tendsto_antidiagonal {M S : Type*} [AddMonoid M] [Finset.HasAntidiagonal M
   refine Finset.sup'_mono_fun fun x hx ↦ ?_
   grw [mul_mul_mul_comm, ← hC, Finset.mem_antidiagonal.mp hx, ← norm_mul_le]
 
-lemma isRestricted.mul [IsUltrametricDist R] (c : σ → ℝ) {f g : MvPowerSeries σ R}
-    (hf : IsRestricted c f) (hg : IsRestricted c g) : IsRestricted c (f * g) := by
+lemma isRestrictedGauss.mul [IsUltrametricDist R] (c : σ → ℝ) {f g : MvPowerSeries σ R}
+    (hf : IsRestrictedGauss c f) (hg : IsRestrictedGauss c g) : IsRestrictedGauss c (f * g) := by
   classical
-  rw [← isRestricted_abs_iff, IsRestricted] at *
+  rw [← isRestrictedGauss_abs_iff, IsRestrictedGauss] at *
   exact tendsto_antidiagonal (by simp [Finsupp.prod_add_index', pow_add]) hf hg
 
 /-- Additive subgroup structure on `MvPowerSeries σ R`. -/
 def isAddSubgroup (c : σ → ℝ) : AddSubgroup (MvPowerSeries σ R) where
-  carrier := IsRestricted c
-  zero_mem' := isRestricted_zero c
-  add_mem' := isRestricted.add c
-  neg_mem' := isRestricted.neg c
+  carrier := IsRestrictedGauss c
+  zero_mem' := isRestrictedGauss_zero c
+  add_mem' := isRestrictedGauss.add c
+  neg_mem' := isRestrictedGauss.neg c
 
 variable [IsUltrametricDist R]
 
 /-- Ring structure on `MvPowerSeries σ R`. -/
 def isSubring (c : σ → ℝ) :  Subring (MvPowerSeries σ R) where
   __ := isAddSubgroup c
-  one_mem' := isRestricted_one c
-  mul_mem' := isRestricted.mul c
+  one_mem' := isRestrictedGauss_one c
+  mul_mem' := isRestrictedGauss.mul c
 
 variable (R) in
 /-- The type of restricted `MvPowerSeries σ R`. -/
