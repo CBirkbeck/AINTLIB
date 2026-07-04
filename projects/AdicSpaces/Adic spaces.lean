@@ -82,6 +82,7 @@ import «Adic spaces».Vendored.XiaMvPowerSeriesEquiv
 import «Adic spaces».Vendored.CoramMvRestricted
 import «Adic spaces».Vendored.CoramMvGaussNorm
 import «Adic spaces».Vendored.CoramMvRestrictedNorm
+import «Adic spaces».Vendored.CoramRestrictedNorm
 
 import «Adic spaces».SpvAI
 import «Adic spaces».SpvAITopology
