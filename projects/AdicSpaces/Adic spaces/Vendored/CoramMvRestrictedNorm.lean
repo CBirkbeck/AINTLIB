@@ -8,6 +8,7 @@ pending its mathlib PR. Import paths redirected to this workspace's vendored cop
 -/
 import Mathlib.Analysis.Normed.Unbundled.RingSeminorm
 import Mathlib.Order.Lex
+import Mathlib.Data.Finsupp.Lex
 import «Adic spaces».Vendored.CoramMvGaussNorm
 
 /-! # Norm instances on multivariate restricted power series (vendored) -/
@@ -19,11 +20,12 @@ variable {R : Type*} {σ : Type*} (c : σ → ℝ)
 
 class StrongPos (c : σ → ℝ) : Prop where pos : ∀ i, 0 < c i
 
-lemma StrongPos_pos [StrongPos c] : ∀ i, 0 < c i := by expose_names; exact inst.pos
+lemma StrongPos_pos [StrongPos c] : ∀ i, 0 < c i := fun i => StrongPos.pos i
 
-instance (hc : ∀ i, 0 < c i) : StrongPos c := {pos := hc}
+theorem strongPos_of_forall_pos (hc : ∀ i, 0 < c i) : StrongPos c := {pos := hc}
 
-instance (c : ℝ) (hc : 0 < c) : StrongPos (fun _ : Unit ↦ c) := {pos := by grind}
+theorem strongPos_const_of_pos (c : ℝ) (hc : 0 < c) : StrongPos (fun _ : Unit ↦ c) :=
+  {pos := fun _ => hc}
 
 lemma StrongPos_unit_iff (c : ℝ) : StrongPos (fun _ : Unit ↦ c) ↔ 0 < c := by
   constructor
@@ -40,7 +42,7 @@ lemma hasGaussNorm [NormedRing R] [IsUltrametricDist R] (f : MvPowerSeries.Restr
   MvPowerSeries.HasGaussNorm norm c f.1 := Filter.Tendsto.bddAbove_range_of_cofinite f.2
 
 noncomputable
-instance isRingNorm [NormedRing R] [IsUltrametricDist R] [StrongPos c] :
+def isRingNorm [NormedRing R] [IsUltrametricDist R] [StrongPos c] :
     RingNorm (MvPowerSeries.Restricted R c) where
   toFun f := gaussNorm R c f
   map_zero' := MvPowerSeries.gaussNorm_zero norm c norm_zero
@@ -56,9 +58,10 @@ instance isRingNorm [NormedRing R] [IsUltrametricDist R] [StrongPos c] :
   mul_le' f g := MvPowerSeries.gaussNorm_mul_le norm c f.1 g.1 (StrongLT.le (StrongPos_pos c))
     norm_nonneg norm_mul_le IsUltrametricDist.norm_add_le_max norm_zero (hasGaussNorm c f)
     (hasGaussNorm c g)
-  eq_zero_of_map_eq_zero' f := by
-    simpa using (MvPowerSeries.gaussNorm_eq_zero_iff norm c f.1 norm_zero norm_nonneg (by aesop)
-      (StrongPos_pos c) (hasGaussNorm c f)).mp
+  eq_zero_of_map_eq_zero' f hf := by
+    refine Subtype.ext ?_
+    exact (MvPowerSeries.gaussNorm_eq_zero_iff norm c f.1 norm_zero norm_nonneg (by aesop)
+      (StrongPos_pos c) (hasGaussNorm c f)).mp hf
 
 variable (R) in
 noncomputable
@@ -70,7 +73,7 @@ lemma norm_eq [NormedRing R] [IsUltrametricDist R] [StrongPos c] (f : MvPowerSer
 
 variable (R) in
 noncomputable
-instance isNonarchimedean [NormedRing R] [IsUltrametricDist R] [StrongPos c] :
+def isNonarchimedean [NormedRing R] [IsUltrametricDist R] [StrongPos c] :
     IsNonarchimedean (R := ℝ) (α := MvPowerSeries.Restricted R c) norm :=
   fun f g => MvPowerSeries.gaussNorm_add_le_max norm c f.1 g.1 (StrongLT.le (StrongPos_pos c))
     norm_nonneg IsUltrametricDist.norm_add_le_max (hasGaussNorm c f) (hasGaussNorm c g)
@@ -103,8 +106,10 @@ lemma gaussNorm_achieved [NormedRing R] [IsUltrametricDist R] (hc : 0 ≤ c)
       simp_rw [MvPowerSeries.IsRestrictedGauss, NormedAddGroup.tendsto_nhds_zero] at this
       have := this (gaussNorm R c f / 2) (by aesop)
       simp only [norm_mul, Real.norm_eq_abs, Filter.eventually_cofinite, not_lt, abs_norm] at this
-      convert this with t
-      grind [foo c hc t]
+      have habs : ∀ t : σ →₀ ℕ, |t.prod (c · ^ ·)| = t.prod (c · ^ ·) :=
+        fun t => abs_of_nonneg (foo c hc t)
+      simp only [habs] at this
+      exact this
     have hne : {t | gaussNorm R c f / 2 ≤ ‖MvPowerSeries.coeff t f.1‖ * t.prod (c · ^ ·)}.Nonempty := by
       by_contra hemp
       rw [Set.not_nonempty_iff_eq_empty] at hemp
@@ -136,8 +141,10 @@ lemma achievingPoints_finite [NormedRing R] [IsUltrametricDist R] (hc : 0 ≤ c)
       simp_rw [MvPowerSeries.IsRestrictedGauss, NormedAddGroup.tendsto_nhds_zero] at this
       have := this (gaussNorm R c f / 2) (by aesop)
       simp only [norm_mul, Real.norm_eq_abs, Filter.eventually_cofinite, not_lt, abs_norm] at this
-      convert this with t
-      grind [foo c hc t]
+      have habs : ∀ t : σ →₀ ℕ, |t.prod (c · ^ ·)| = t.prod (c · ^ ·) :=
+        fun t => abs_of_nonneg (foo c hc t)
+      simp only [habs] at this
+      exact this
   refine Set.Finite.subset hfin ?_
   grind
 
@@ -145,6 +152,20 @@ lemma test (hc : ∀ (i : σ), 0 < c i) : 0 ≤ c := by
   intro i
   exact Std.le_of_lt (hc i)
 
+private lemma exists_lex_max_achieving [NormedRing R] [IsUltrametricDist R] [LinearOrder σ]
+    (hc : 0 ≤ c) (f : MvPowerSeries.Restricted R c) (hf : gaussNorm R c f ≠ 0) :
+    ∃ i, MvPowerSeries.AchievesGaussNorm norm c f.1 i ∧
+      ∀ a, MvPowerSeries.AchievesGaussNorm norm c f.1 a → toLex a ≤ toLex i := by
+  classical
+  have hfin := achievingPoints_finite c hc f hf
+  obtain ⟨a₀, ha₀⟩ := gaussNorm_achieved c hc f
+  obtain ⟨i, hiF, hiMax⟩ := hfin.toFinset.exists_max_image (fun a => toLex a)
+    ⟨a₀, hfin.mem_toFinset.mpr ha₀⟩
+  exact ⟨i, hfin.mem_toFinset.mp hiF, fun a ha => hiMax a (hfin.mem_toFinset.mpr ha)⟩
+
+/-- **Gauss dominance** (the strict-drop input to `gaussNorm_mul_eq_mul`): the
+lexicographically largest achieving indices of `f` and `g` strictly dominate every other
+point of their antidiagonal. Needs only submultiplicativity of the coefficient norm. -/
 lemma bar [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] (hc : ∀ i, 0 < c i)
     (f g : MvPowerSeries.Restricted R c) (hf : gaussNorm R c f ≠ 0) (hg : gaussNorm R c g ≠ 0) :
     ∃ i j, MvPowerSeries.AchievesGaussNorm norm c f.1 i ∧
@@ -152,11 +173,102 @@ lemma bar [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] (hc : ∀ i, 0 <
       ∀ p ∈ Finset.antidiagonal (i + j), p ≠ (i, j) →
       norm (MvPowerSeries.coeff p.1 f.1 * MvPowerSeries.coeff p.2 g.1) <
       norm (MvPowerSeries.coeff i f.1) * norm (MvPowerSeries.coeff j g.1) := by
-  -- need to work out how to convert and clean the proof from before
-  sorry
+  classical
+  have hc' : (0 : σ → ℝ) ≤ c := fun i => (hc i).le
+  have hfpos : 0 < gaussNorm R c f :=
+    (MvPowerSeries.gaussNorm_nonneg norm c f.1 norm_nonneg).lt_of_ne' hf
+  have hgpos : 0 < gaussNorm R c g :=
+    (MvPowerSeries.gaussNorm_nonneg norm c g.1 norm_nonneg).lt_of_ne' hg
+  have hw : ∀ t : σ →₀ ℕ, (0 : ℝ) < t.prod (c · ^ ·) :=
+    fun t => Finset.prod_pos fun k _ => pow_pos (hc k) _
+  obtain ⟨i, hiA, hiMax⟩ := exists_lex_max_achieving c hc' f hf
+  obtain ⟨j, hjA, hjMax⟩ := exists_lex_max_achieving c hc' g hg
+  refine ⟨i, j, hiA, hjA, fun p hp hne => ?_⟩
+  rw [Finset.mem_antidiagonal] at hp
+  -- one component is lexicographically strictly above its maximum achiever
+  have hcase : toLex i < toLex p.1 ∨ toLex j < toLex p.2 := by
+    by_contra hcon
+    push_neg at hcon
+    obtain ⟨h1, h2⟩ := hcon
+    rcases lt_or_eq_of_le h1 with h1' | h1'
+    · have hstrict : toLex (p.1 + p.2) < toLex (i + j) := by
+        have := add_lt_add_of_lt_of_le h1' h2
+        exact this
+      rw [hp] at hstrict
+      exact lt_irrefl _ hstrict
+    · have hp1 : p.1 = i := by
+        have := h1'
+        exact toLex.injective this
+      have hp2 : p.2 = j := by
+        rw [hp1] at hp
+        exact add_left_cancel hp
+      exact hne (Prod.ext hp1 hp2)
+  -- weight bookkeeping: the antidiagonal preserves the total weight
+  have hww : (p.1).prod (c · ^ ·) * (p.2).prod (c · ^ ·) =
+      i.prod (c · ^ ·) * j.prod (c · ^ ·) := by
+    rw [← Finsupp.prod_add_index' (fun a => pow_zero (c a)) (fun a m n => pow_add (c a) m n),
+      ← Finsupp.prod_add_index' (fun a => pow_zero (c a)) (fun a m n => pow_add (c a) m n), hp]
+  -- the strict product bound at the weighted level
+  have hweighted :
+      (norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·)) *
+        (norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·)) <
+      gaussNorm R c f * gaussNorm R c g := by
+    rcases hcase with hgt | hgt
+    · have hp1_not : ¬ MvPowerSeries.AchievesGaussNorm norm c f.1 p.1 :=
+        fun hach => absurd (hiMax p.1 hach) (not_le.mpr hgt)
+      have hf_lt : norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·) <
+          gaussNorm R c f :=
+        lt_of_le_of_ne (MvPowerSeries.le_gaussNorm norm c f.1 (hasGaussNorm c f) p.1) hp1_not
+      have hg_le : norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·) ≤
+          gaussNorm R c g :=
+        MvPowerSeries.le_gaussNorm norm c g.1 (hasGaussNorm c g) p.2
+      rcases eq_or_lt_of_le (mul_nonneg (norm_nonneg (MvPowerSeries.coeff p.2 g.1))
+          (hw p.2).le) with h0 | hpos
+      · rw [← h0, mul_zero]
+        exact mul_pos hfpos hgpos
+      · exact mul_lt_mul hf_lt hg_le hpos hfpos.le
+    · have hp2_not : ¬ MvPowerSeries.AchievesGaussNorm norm c g.1 p.2 :=
+        fun hach => absurd (hjMax p.2 hach) (not_le.mpr hgt)
+      have hg_lt : norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·) <
+          gaussNorm R c g :=
+        lt_of_le_of_ne (MvPowerSeries.le_gaussNorm norm c g.1 (hasGaussNorm c g) p.2) hp2_not
+      have hf_le : norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·) ≤
+          gaussNorm R c f :=
+        MvPowerSeries.le_gaussNorm norm c f.1 (hasGaussNorm c f) p.1
+      rcases eq_or_lt_of_le (mul_nonneg (norm_nonneg (MvPowerSeries.coeff p.1 f.1))
+          (hw p.1).le) with h0 | hpos
+      · rw [← h0, zero_mul]
+        exact mul_pos hfpos hgpos
+      · calc (norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·)) *
+              (norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·))
+            = (norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·)) *
+              (norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·)) := by ring
+          _ < gaussNorm R c g * gaussNorm R c f :=
+              mul_lt_mul hg_lt hf_le hpos hgpos.le
+          _ = gaussNorm R c f * gaussNorm R c g := by ring
+  -- cancel the (equal, positive) weights and conclude via submultiplicativity
+  have hGf : gaussNorm R c f = norm (MvPowerSeries.coeff i f.1) * i.prod (c · ^ ·) := hiA.symm
+  have hGg : gaussNorm R c g = norm (MvPowerSeries.coeff j g.1) * j.prod (c · ^ ·) := hjA.symm
+  rw [hGf, hGg] at hweighted
+  have hkey : norm (MvPowerSeries.coeff p.1 f.1) * norm (MvPowerSeries.coeff p.2 g.1) <
+      norm (MvPowerSeries.coeff i f.1) * norm (MvPowerSeries.coeff j g.1) := by
+    have hwpos : (0 : ℝ) < i.prod (c · ^ ·) * j.prod (c · ^ ·) :=
+      mul_pos (hw i) (hw j)
+    refine lt_of_mul_lt_mul_right ?_ hwpos.le
+    calc norm (MvPowerSeries.coeff p.1 f.1) * norm (MvPowerSeries.coeff p.2 g.1) *
+          (i.prod (c · ^ ·) * j.prod (c · ^ ·))
+        = norm (MvPowerSeries.coeff p.1 f.1) * norm (MvPowerSeries.coeff p.2 g.1) *
+          ((p.1).prod (c · ^ ·) * (p.2).prod (c · ^ ·)) := by rw [hww]
+      _ = (norm (MvPowerSeries.coeff p.1 f.1) * (p.1).prod (c · ^ ·)) *
+          (norm (MvPowerSeries.coeff p.2 g.1) * (p.2).prod (c · ^ ·)) := by ring
+      _ < (norm (MvPowerSeries.coeff i f.1) * i.prod (c · ^ ·)) *
+          (norm (MvPowerSeries.coeff j g.1) * j.prod (c · ^ ·)) := hweighted
+      _ = norm (MvPowerSeries.coeff i f.1) * norm (MvPowerSeries.coeff j g.1) *
+          (i.prod (c · ^ ·) * j.prod (c · ^ ·)) := by ring
+  exact lt_of_le_of_lt (norm_mul_le _ _) hkey
 
 noncomputable
-instance isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [StrongPos c]
+def isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [StrongPos c]
     (hnorm : ∀ a b : R, norm (a * b) = norm a * norm b) : IsAbsoluteValue (gaussNorm R c) where
   abv_nonneg' g := MvPowerSeries.gaussNorm_nonneg norm c g.1 norm_nonneg
   abv_eq_zero' := by
@@ -172,18 +284,24 @@ instance isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [
     by_cases h1 : gaussNorm R c f = 0
     · simp [h1]
       suffices f * g = 0 by
-        simpa [this] using MvPowerSeries.gaussNorm_zero norm c norm_zero
+        rw [this]
+        show MvPowerSeries.gaussNorm norm c ((0 : MvPowerSeries.Restricted R c)).1 = 0
+        rw [show ((0 : MvPowerSeries.Restricted R c)).1 = (0 : MvPowerSeries σ R) from rfl]
+        exact MvPowerSeries.gaussNorm_zero norm c norm_zero
       suffices f = 0 by
-        grind
+        rw [this, zero_mul]
       convert (MvPowerSeries.gaussNorm_eq_zero_iff norm c f.1 norm_zero norm_nonneg (by aesop)
         (StrongPos_pos c) (hasGaussNorm c f)).mp h1
       aesop
     by_cases h2 : gaussNorm R c g = 0
     · simp [h2]
       suffices f * g = 0 by
-        simpa [this] using MvPowerSeries.gaussNorm_zero norm c norm_zero
+        rw [this]
+        show MvPowerSeries.gaussNorm norm c ((0 : MvPowerSeries.Restricted R c)).1 = 0
+        rw [show ((0 : MvPowerSeries.Restricted R c)).1 = (0 : MvPowerSeries σ R) from rfl]
+        exact MvPowerSeries.gaussNorm_zero norm c norm_zero
       suffices g = 0 by
-        grind
+        rw [this, mul_zero]
       convert (MvPowerSeries.gaussNorm_eq_zero_iff norm c g.1 norm_zero norm_nonneg (by aesop)
         (StrongPos_pos c) (hasGaussNorm c g)).mp h2
       aesop
