@@ -77,7 +77,7 @@ theorem heckeG_sub_const_eq (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (h
       (fun u hu => ?_))
     have hca : ∀ w, a' ≤ heckeWeights K t u w := by
       intro w
-      exact heckeWeights_ge_of_bounded K hR (hbox u hu) ht.le w
+      exact le_heckeWeights_of_bounded K hR (hbox u hu) ht.le w
     rw [Real.norm_eq_abs, abs_of_pos]
     · exact heckeTheta_le_iso K I ha' hca
     · have hsplit := heckeTheta_eq_one_add K I ha' hca
@@ -1303,7 +1303,7 @@ theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ
     have hca : ∀ u ∈ ZSpan.fundamentalDomain
         ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
         ∀ w, a' ≤ heckeWeights K t u w :=
-      fun u hu w => heckeWeights_ge_of_bounded K hR (hbox u hu) ht.le w
+      fun u hu w => le_heckeWeights_of_bounded K hR (hbox u hu) ht.le w
     have hnn : ∀ u ∈ ZSpan.fundamentalDomain
         ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
         0 ≤ heckeTheta K I (heckeWeights K t u) - 1 := by
