@@ -455,13 +455,7 @@ theorem tsum_kernel_eq_log_zeta {σ : ℝ} (hσ : 1 < σ) (X : ℝ) :
           * Real.log ((NumberField.dedekindZeta K (σ:ℂ)).re) := by
   rw [real_log_dedekindZeta K hσ, ← tsum_mul_left]
   refine tsum_congr (fun pk => ?_)
-  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
-    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
-      fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
-    exact_mod_cast h2
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := two_le_absNorm_of_prime_real K
   have hN0 : (0:ℝ) < (Ideal.absNorm pk.1.1 : ℝ) := by linarith
   have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
     Real.log_pos (by linarith)
@@ -505,19 +499,13 @@ theorem finite_plateau_support {X : ℝ} (hX : 1 < X) :
     rintro ⟨I, m⟩ ⟨pk, hpk, hIm⟩
     simp only [Prod.mk.injEq] at hIm
     obtain ⟨rfl, rfl⟩ : pk.1.1 = I ∧ pk.2 = m := ⟨hIm.1, hIm.2⟩
-    have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
-      have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-        fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-      have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
-        fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-      have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
-      exact_mod_cast h2
+    have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := two_le_absNorm_of_prime_real K
     have hL2 : Real.log 2 ≤ Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
       Real.log_le_log (by norm_num) hN2
     have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
       Real.log_pos (by linarith)
     have hm1 : (1:ℝ) ≤ ((pk.2+1 : ℕ) : ℝ) := by
-      have h1 : (1:ℕ) ≤ pk.2+1 := by omega
+      have h1 : (1:ℕ) ≤ pk.2+1 := by lia
       exact_mod_cast h1
     constructor
     · -- `absNorm ≤ ⌊X⌋₊`: `log N ≤ m·log N ≤ log X`
@@ -557,13 +545,7 @@ theorem summable_kernel {σ : ℝ} (hσ : 1 < σ) (X : ℝ) :
   have hsum := (summable_primeIdeal_pow_div K hσ).mul_left
     (Real.log X * Real.exp ((σ - 1/2) * Real.log X))
   refine hsum.congr (fun pk => ?_)
-  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
-    have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-      fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-    have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
-      fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
-    exact_mod_cast h2
+  have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := two_le_absNorm_of_prime_real K
   have hN0 : (0:ℝ) < (Ideal.absNorm pk.1.1 : ℝ) := by linarith
   have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
     Real.log_pos (by linarith)
@@ -652,13 +634,7 @@ theorem primeSideH_auxF_zero_split (a : ℝ) {σ X : ℝ} (hσ : 1 < σ) (hX : 1
                         - Real.log X)))) : ℝ) : ℂ) := by
         congr 1
         refine tsum_congr (fun pk => ?_)
-        have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := by
-          have hne0 : Ideal.absNorm pk.1.1 ≠ 0 :=
-            fun h => pk.1.2.2 (Ideal.absNorm_eq_zero_iff.mp h)
-          have hne1 : Ideal.absNorm pk.1.1 ≠ 1 :=
-            fun h => pk.1.2.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-          have h2 : 2 ≤ Ideal.absNorm pk.1.1 := by omega
-          exact_mod_cast h2
+        have hN2 : (2:ℝ) ≤ (Ideal.absNorm pk.1.1 : ℝ) := two_le_absNorm_of_prime_real K
         have hL0 : 0 < Real.log (Ideal.absNorm pk.1.1 : ℝ) :=
           Real.log_pos (by linarith)
         have hm0 : (0:ℝ) < ((pk.2+1 : ℕ) : ℝ) := by positivity

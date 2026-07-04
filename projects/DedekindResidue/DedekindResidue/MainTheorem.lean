@@ -60,7 +60,7 @@ theorem belabas_friedman_thm1 {K : Type*} [Field K] [NumberField K]
     Real.log_le_log (by norm_num) Real.pi_gt_three.le
   -- ### discriminant-side facts
   have hd2 : (2:ℤ) < |discr K| := NumberField.abs_discr_gt_two hn
-  have hd3' : (3:ℤ) ≤ |discr K| := by omega
+  have hd3' : (3:ℤ) ≤ |discr K| := by lia
   have hd3 : (3:ℝ) ≤ (|discr K| : ℝ) := by exact_mod_cast hd3'
   have hd0 : (0:ℝ) < (|discr K| : ℝ) := by linarith
   have hlogd1 : (1:ℝ) ≤ Real.log (|discr K| : ℝ) := by

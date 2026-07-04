@@ -354,9 +354,8 @@ on `e^{U/2}·L(U)` being decreasing, which follows from `L(U) ≤ 1/sinh U`
 noncomputable def archKernelL (U : ℝ) : ℝ :=
   Real.log (1 + Real.exp (-U)) - Real.log (1 - Real.exp (-U))
 
-theorem exp_neg_lt_one {U : ℝ} (hU : 0 < U) : Real.exp (-U) < 1 := by
-  have h1 : Real.exp (-U) < Real.exp 0 := Real.exp_lt_exp.mpr (by linarith)
-  simpa using h1
+theorem exp_neg_lt_one {U : ℝ} (hU : 0 < U) : Real.exp (-U) < 1 :=
+  Real.exp_lt_one_iff.mpr (by linarith)
 
 theorem archKernelL_pos {U : ℝ} (hU : 0 < U) : 0 < archKernelL U := by
   have he1 : Real.exp (-U) < 1 := exp_neg_lt_one hU
@@ -583,12 +582,6 @@ theorem intervalIntegrable_cutKernel {σ y : ℝ} (hσ : 1/2 < σ) (hy : 0 < y)
       have h1 : (0:ℝ) ≤ 1 + (σ - 1/2)*T := by nlinarith
       positivity
 
-/-- Almost every `U` differs from `y`. -/
-theorem ae_ne_singleton (y : ℝ) : ∀ᵐ U : ℝ, U ≠ y := by
-  refine MeasureTheory.ae_iff.mpr ?_
-  simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
-  exact MeasureTheory.measure_singleton y
-
 /-- **(C1) The cutoff-difference representation**: for `0 < T' ≤ T` and `y > 0`,
 `F_{σ,e^T}(y) − F_{σ,e^{T'}}(y) = ∫_{T'}^T cutKernel σ y U dU`. -/
 theorem auxFCut_sub_eq_integral {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' : 0 < T')
@@ -615,7 +608,7 @@ theorem auxFCut_sub_eq_integral {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' 
         (hcont.intervalIntegrable T' T)
       rw [auxFCut_eq_tail hy hyT, auxFCut_eq_tail hy (le_trans hTT hyT), ← hftc]
       refine intervalIntegral.integral_congr_ae ?_
-      filter_upwards [ae_ne_singleton y] with U hUy hUIoc
+      filter_upwards [MeasureTheory.Measure.ae_ne MeasureTheory.volume y] with U hUy hUIoc
       rw [Set.uIoc_of_le hTT] at hUIoc
       have hUlt : U < y := lt_of_le_of_ne (le_trans hUIoc.2 hyT) hUy
       rw [cutKernel, if_pos hUlt]
@@ -649,7 +642,7 @@ theorem auxFCut_sub_eq_integral {σ : ℝ} (hσ : 1/2 < σ) {T' T y : ℝ} (hT' 
           = ∫ U in T'..y, (1 + (σ - 1/2)*U)/y * Real.exp (-(σ - 1/2)*(y - U)) from ?_,
         hftc, sub_self, mul_zero, Real.exp_zero, mul_one, div_self hy.ne']
       refine intervalIntegral.integral_congr_ae ?_
-      filter_upwards [ae_ne_singleton y] with U hUy hUIoc
+      filter_upwards [MeasureTheory.Measure.ae_ne MeasureTheory.volume y] with U hUy hUIoc
       rw [Set.uIoc_of_le (le_of_lt hyT')] at hUIoc
       have hUlt : U < y := lt_of_le_of_ne hUIoc.2 hUy
       rw [cutKernel, if_pos hUlt]
@@ -948,15 +941,6 @@ theorem archWeight_nonneg {y : ℝ} (hy : 0 < y) : 0 ≤ archWeight y := by
   have hc : 0 < Real.cosh (y/2) := Real.cosh_pos _
   unfold archWeight
   positivity
-
-/-- Joint measurability of the swap integrand. -/
-theorem measurable_archWeight_mul_cutKernel (σ : ℝ) :
-    Measurable (fun p : ℝ × ℝ => archWeight p.2 * cutKernel σ p.2 p.1) := by
-  refine (measurable_archWeight.comp measurable_snd).mul ?_
-  unfold cutKernel
-  refine Measurable.ite ?_ ?_ measurable_const
-  · exact measurableSet_lt measurable_fst measurable_snd
-  · fun_prop
 
 /-- The weighted cut kernel is integrable on `(0, ∞)` in `y` (it vanishes on
 `(0, U]` and is dominated beyond). -/

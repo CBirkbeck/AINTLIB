@@ -26,42 +26,12 @@ open MeasureTheory Complex NumberField
 
 variable (K : Type*) [Field K] [NumberField K]
 
-/-- `H` does not vanish on the real ray `x > 1`: all factors of
-`H = s(s−1)·|Δ|^{s/2}·γ(s)·ζ_K(s)` are nonzero there (the Euler product keeps
-`Re ζ_K(x) > 0`). This is the witness for rectangle zero-peeling. -/
-theorem completedDedekindZetaEntire_ne_zero_of_one_lt {x : ℝ} (hx : 1 < x) :
-    completedDedekindZetaEntire K (x : ℂ) ≠ 0 := by
-  have hx0 : (x : ℂ) ≠ 0 := by
-    intro h0
-    have := congrArg Complex.re h0
-    simp at this
-    linarith
-  have hx1 : (x : ℂ) ≠ 1 := by
-    intro h0
-    have := congrArg Complex.re h0
-    simp at this
-    linarith
-  have hxre : 1 < ((x : ℂ)).re := by simpa using hx
-  rw [completedDedekindZetaEntire_eq K hx0 hx1,
-    completedDedekindZeta_eq_of_one_lt_re K hxre, completedZetaPrefactor]
-  refine mul_ne_zero (mul_ne_zero hx0 ?_) (mul_ne_zero (mul_ne_zero ?_ ?_) ?_)
-  · intro h0
-    have := congrArg Complex.re h0
-    simp at this
-    linarith
-  · -- |Δ|^{x/2} ≠ 0: nonzero base
-    intro h0
-    have hbase : ((|discr K| : ℝ) : ℂ) ≠ 0 := by
-      have h1 := NumberField.discr_ne_zero K
-      have h2 : |discr K| ≠ 0 := abs_ne_zero.mpr h1
-      exact_mod_cast h2
-    exact hbase ((Complex.cpow_eq_zero_iff _ _).mp h0).1
-  · exact gammaFactor_ne_zero_of_re_pos K (by simpa using (by linarith : (0:ℝ) < x))
-  · -- ζ_K(x) ≠ 0 from positive real part
-    intro h0
-    have := Chebotarev.dedekindZeta_re_pos_of_one_lt (L := K) x hx
-    rw [h0] at this
-    simp at this
+/-- `H = completedDedekindZetaEntire K` is analytic at every point (it is entire).
+The single reusable analyticity fact behind the divisor, zero-order and
+meromorphicity arguments for `H` throughout this file. -/
+theorem analyticAt_completedDedekindZetaEntire (ζ : ℂ) :
+    AnalyticAt ℂ (completedDedekindZetaEntire K) ζ :=
+  (differentiable_completedDedekindZetaEntire K).analyticAt ζ
 
 /-- Open rectangles are convex: they are intersections of linear preimages of
 intervals under `re` and `im`. -/
@@ -90,9 +60,9 @@ theorem exists_H_rectangle_factorization {a b c d : ℝ}
   have hUo : IsOpen U := (isOpen_Ioo).reProdIm (isOpen_Ioo)
   have hUc : Convex ℝ U := convex_reProdIm (convex_Ioo a b) (convex_Ioo c d)
   have hHmero : MeromorphicOn (completedDedekindZetaEntire K) U := fun z _ =>
-    ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt
+    (analyticAt_completedDedekindZetaEntire K z).meromorphicAt
   have hordw : meromorphicOrderAt (completedDedekindZetaEntire K) w ≠ ⊤ := by
-    rw [((differentiable_completedDedekindZetaEntire K).analyticAt w).meromorphicOrderAt_eq]
+    rw [(analyticAt_completedDedekindZetaEntire K w).meromorphicOrderAt_eq]
     have h0 : analyticOrderAt (completedDedekindZetaEntire K) w = 0 :=
       analyticOrderAt_eq_zero.mpr (Or.inr hHw)
     rw [h0]
@@ -105,7 +75,7 @@ theorem exists_H_rectangle_factorization {a b c d : ℝ}
   obtain ⟨R₀, hR₀⟩ := (isBounded_Ioo_reProdIm a b c d).subset_closedBall (0 : ℂ)
   have hfin : ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U)).support.Finite :=
     MeromorphicOn.divisor_support_finite_of_subset
-      (fun z _ => ((differentiable_completedDedekindZetaEntire K).analyticAt z).meromorphicAt)
+      (fun z _ => (analyticAt_completedDedekindZetaEntire K z).meromorphicAt)
       (isCompact_closedBall (0:ℂ) R₀) hR₀
   obtain ⟨g, hganal, hgne, heq⟩ :=
     MeromorphicOn.extract_zeros_poles hHmero hord hfin
@@ -115,7 +85,7 @@ theorem exists_H_rectangle_factorization {a b c d : ℝ}
       0 ≤ (MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u := by
     intro u
     exact (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ =>
-      (differentiable_completedDedekindZetaEntire K).analyticAt z)) u
+      analyticAt_completedDedekindZetaEntire K z)) u
   have hprodanal : ∀ z : ℂ, AnalyticAt ℂ
       (∏ᶠ u, (· - u) ^ ((MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u)) z :=
     fun z => Function.FactorizedRational.analyticAt (hdivpos z)
@@ -216,8 +186,8 @@ theorem rectangleIntegral_mul_logDeriv_H {z w : ℂ} (hre : z.re < w.re) (him : 
   obtain ⟨g, hganal, hgne, hfac⟩ := exists_H_rectangle_factorization K hw₀ hHw₀
   set D : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K) U') u
     with hD
-  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ :=
+    analyticAt_completedDedekindZetaEntire K
   have hDnn : ∀ u, 0 ≤ D u := fun u =>
     (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ => hHanal ζ)) u
   obtain ⟨R₀, hR₀⟩ := (isBounded_Ioo_reProdIm (z.re - 1) (w.re + 1) (z.im - 1)
@@ -618,8 +588,8 @@ theorem exists_dist_ge_of_card_le {S : Finset ℝ} {N : ℕ} (hcard : S.card ≤
 `H(2) ≠ 0`), so its meromorphic order is everywhere finite. -/
 theorem meromorphicOrderAt_completedDedekindZetaEntire_ne_top (u : ℂ) :
     meromorphicOrderAt (completedDedekindZetaEntire K) u ≠ ⊤ := by
-  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ :=
+    analyticAt_completedDedekindZetaEntire K
   intro htop
   rw [(hHanal u).meromorphicOrderAt_eq] at htop
   have hordtop : analyticOrderAt (completedDedekindZetaEntire K) u = ⊤ :=
@@ -643,7 +613,7 @@ theorem completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero {U : Set ℂ} {u 
   rw [MeromorphicOn.divisor_def]
   by_cases hcond : MeromorphicOn (completedDedekindZetaEntire K) U ∧ u ∈ U
   · rw [if_pos hcond]
-    rw [((differentiable_completedDedekindZetaEntire K).analyticAt u).meromorphicOrderAt_eq,
+    rw [(analyticAt_completedDedekindZetaEntire K u).meromorphicOrderAt_eq,
       analyticOrderAt_eq_zero.mpr (Or.inr hne)]
     simp
   · rw [if_neg hcond]
@@ -652,8 +622,8 @@ theorem completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero {U : Set ℂ} {u 
 theorem divisor_ne_zero_of_completedDedekindZetaEntire_eq_zero {U : Set ℂ} {u : ℂ}
     (huU : u ∈ U) (h0 : completedDedekindZetaEntire K u = 0) :
     (MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u ≠ 0 := by
-  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ :=
+    analyticAt_completedDedekindZetaEntire K
   have hm : MeromorphicOn (completedDedekindZetaEntire K) U := fun ζ _ =>
     (hHanal ζ).meromorphicAt
   rw [MeromorphicOn.divisor_apply hm huU]
@@ -669,6 +639,29 @@ theorem divisor_ne_zero_of_completedDedekindZetaEntire_eq_zero {U : Set ℂ} {u 
     exact hc0 huniq
   · exact meromorphicOrderAt_completedDedekindZetaEntire_ne_top K u h
 
+/-- For `1 ≤ T`, one has `1 ≤ log (2 + T)` (since `2 + T ≥ e`). Base estimate for the
+`log`-height bounds along the explicit-formula contour. -/
+theorem one_le_log_two_add {T : ℝ} (hT : 1 ≤ T) : (1:ℝ) ≤ Real.log (2 + T) := by
+  have he : Real.exp 1 ≤ 2 + T := by
+    have := Real.exp_one_lt_d9
+    linarith
+  calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+    _ ≤ Real.log (2 + T) := Real.log_le_log (Real.exp_pos 1) he
+
+/-- `log`-doubling: if `1 ≤ B`, `0 < s` and `s ≤ 2(2 + B)` then
+`log s ≤ 2 · log (2 + B)`. Compares a height in the window `[T₀, T₀+1]` to the base
+height `T₀` at the cost of a factor `2` (from `log 2 ≤ 1`). -/
+theorem log_le_two_mul_log_two_add {s B : ℝ} (hB : 1 ≤ B) (hs0 : 0 < s) (hs : s ≤ (2 + B) * 2) :
+    Real.log s ≤ 2 * Real.log (2 + B) := by
+  calc Real.log s ≤ Real.log ((2 + B) * 2) := Real.log_le_log hs0 hs
+    _ = Real.log (2 + B) + Real.log 2 := by rw [Real.log_mul (by linarith) (by norm_num)]
+    _ ≤ 2 * Real.log (2 + B) := by
+        have h2 : Real.log 2 ≤ 1 := by
+          have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
+          linarith
+        have := one_le_log_two_add hB
+        linarith
+
 /-- **Two-sided good heights** (SP2-RECT R-e, both edges): every unit window
 `[T₀, T₀+1]` at height `T₀ ≥ A+5` contains a height `T` separated from every zero
 ordinate in BOTH directions: `|T − Im ρ| ≥ c/log(2+T₀)` and `|T + Im ρ| ≥ c/log(2+T₀)`
@@ -683,29 +676,15 @@ theorem exists_good_height :
   refine ⟨A, hA2, min 1 (1 / (2 * (4 * Cc + 2))), by positivity,
     min_le_left _ _, fun T₀ hT₀ => ?_⟩
   have hT₀pos : (7:ℝ) ≤ T₀ := by linarith
-  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := by
-    have he : Real.exp 1 ≤ 2 + T₀ := by
-      have := Real.exp_one_lt_d9
-      linarith
-    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
-      _ ≤ Real.log (2 + T₀) := Real.log_le_log (Real.exp_pos 1) he
-  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := one_le_log_two_add (by linarith)
+  have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ :=
+    analyticAt_completedDedekindZetaEntire K
   -- the two windows: ordinates near +T₀ and near −T₀
   have hlogle : ∀ Tc : ℝ, |Tc| = T₀ + 1/2 →
       Real.log (2 + |Tc|) ≤ 2 * Real.log (2 + T₀) := by
     intro Tc hTc
     rw [hTc]
-    have hstep : (2 + (T₀ + 1/2)) ≤ (2 + T₀) * 2 := by linarith
-    calc Real.log (2 + (T₀ + 1/2)) ≤ Real.log ((2 + T₀) * 2) :=
-          Real.log_le_log (by linarith) hstep
-      _ = Real.log (2 + T₀) + Real.log 2 := by
-          rw [Real.log_mul (by linarith) (by norm_num)]
-      _ ≤ 2 * Real.log (2 + T₀) := by
-          have h2 : Real.log 2 ≤ 1 := by
-            have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
-            linarith
-          linarith
+    exact log_le_two_mul_log_two_add (by linarith) (by linarith) (by linarith)
   -- a generic window package: for a center height Tc, the ordinate image of the
   -- divisor support of the window is a finset of size ≤ 2·Cc·log(2+T₀)
   have hwindow : ∀ Tc : ℝ, |Tc| = T₀ + 1/2 →
@@ -926,28 +905,14 @@ theorem exists_contour_height :
     have := le_max_right A₁ A₂
     linarith
   have hT₀7 : (7:ℝ) ≤ T₀ := by linarith
-  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := by
-    have he : Real.exp 1 ≤ 2 + T₀ := by
-      have := Real.exp_one_lt_d9
-      linarith
-    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
-      _ ≤ Real.log (2 + T₀) := Real.log_le_log (Real.exp_pos 1) he
+  have hlog1 : (1:ℝ) ≤ Real.log (2 + T₀) := one_le_log_two_add (by linarith)
   have hlogpos : (0:ℝ) < Real.log (2 + T₀) := by linarith
   obtain ⟨T, hTmem, hTsep⟩ := hgood T₀ hT₀A₂
   rw [Set.mem_Icc] at hTmem
   have hTpos : (0:ℝ) < T := by linarith
   -- log comparison for heights in the window
-  have hlogT : Real.log (2 + T) ≤ 2 * Real.log (2 + T₀) := by
-    have hstep : (2 + T) ≤ (2 + T₀) * 2 := by linarith
-    calc Real.log (2 + T) ≤ Real.log ((2 + T₀) * 2) :=
-          Real.log_le_log (by linarith) hstep
-      _ = Real.log (2 + T₀) + Real.log 2 := by
-          rw [Real.log_mul (by linarith) (by norm_num)]
-      _ ≤ 2 * Real.log (2 + T₀) := by
-          have h2 : Real.log 2 ≤ 1 := by
-            have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
-            linarith
-          linarith
+  have hlogT : Real.log (2 + T) ≤ 2 * Real.log (2 + T₀) :=
+    log_le_two_mul_log_two_add (by linarith) (by linarith) (by linarith)
   -- the shared per-edge argument
   have hedge : ∀ T' : ℝ, |T'| = T →
       (∀ ρ : ℂ, completedDedekindZetaEntire K ρ = 0 →
@@ -991,12 +956,12 @@ theorem exists_contour_height :
       (Metric.ball ((A₁ : ℂ) + (T' : ℂ) * Complex.I) (A₁ + 2))) u with hD
     have hDnn : ∀ u, 0 ≤ D u := fun u =>
       (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ =>
-        (differentiable_completedDedekindZetaEntire K).analyticAt ζ)) u
+        analyticAt_completedDedekindZetaEntire K ζ)) u
     obtain ⟨R₀, hR₀⟩ := (Metric.isBounded_ball (x := (A₁ : ℂ) + (T' : ℂ) * Complex.I)
       (r := A₁ + 2)).subset_closedBall (0 : ℂ)
     have hfin : (Function.support D).Finite :=
       MeromorphicOn.divisor_support_finite_of_subset
-        (fun ζ _ => ((differentiable_completedDedekindZetaEntire K).analyticAt ζ).meromorphicAt)
+        (fun ζ _ => (analyticAt_completedDedekindZetaEntire K ζ).meromorphicAt)
         (isCompact_closedBall (0:ℂ) R₀) hR₀
     -- separation for every support point
     have hsep' : ∀ u ∈ hfin.toFinset, c₂ / Real.log (2 + T₀) ≤ ‖s - u‖ := by
@@ -1250,7 +1215,7 @@ theorem rectangleIntegral_fold_vertical {a T : ℝ} (ha : 0 < a) (hT : 0 < T)
     · refine Continuous.continuousOn ?_
       have hda : Continuous (deriv (completedDedekindZetaEntire K)) := by
         refine continuous_iff_continuousAt.mpr (fun ζ => ?_)
-        exact (((differentiable_completedDedekindZetaEntire K).analyticAt ζ).deriv).continuousAt
+        exact ((analyticAt_completedDedekindZetaEntire K ζ).deriv).continuousAt
       exact hda.comp (by fun_prop)
     · refine Continuous.continuousOn ?_
       exact (differentiable_completedDedekindZetaEntire K).continuous.comp (by fun_prop)

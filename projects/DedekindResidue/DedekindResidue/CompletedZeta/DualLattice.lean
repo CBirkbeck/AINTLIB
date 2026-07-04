@@ -75,8 +75,8 @@ theorem dualZLattice_eq_span {ι : Type*} [Fintype ι] [DecidableEq ι]
 instance instDiscreteTopologyDualZLattice (L : Submodule ℤ V) [DiscreteTopology L]
     [IsZLattice ℝ L] : DiscreteTopology (dualZLattice L) := by
   classical
-  haveI := ZLattice.module_finite ℝ L
-  haveI := ZLattice.module_free ℝ L
+  have := ZLattice.module_finite ℝ L
+  have := ZLattice.module_free ℝ L
   rw [dualZLattice_eq_span L (Module.Free.chooseBasis ℤ L)]
   infer_instance
 
@@ -85,8 +85,8 @@ instance instIsZLatticeDualZLattice (L : Submodule ℤ V) [DiscreteTopology L] [
     IsZLattice ℝ (dualZLattice L) where
   span_top := by
     classical
-    haveI := ZLattice.module_finite ℝ L
-    haveI := ZLattice.module_free ℝ L
+    have := ZLattice.module_finite ℝ L
+    have := ZLattice.module_free ℝ L
     rw [dualZLattice_eq_span L (Module.Free.chooseBasis ℤ L)]
     exact ZSpan.span_top _
 
@@ -105,8 +105,8 @@ theorem covolume_dualZLattice_mul {ι : Type*} [Fintype ι]
     (L : Submodule ℤ (EuclideanSpace ℝ ι)) [DiscreteTopology L] [IsZLattice ℝ L] :
     ZLattice.covolume (dualZLattice L) * ZLattice.covolume L = 1 := by
   classical
-  haveI := ZLattice.module_finite ℝ L
-  haveI := ZLattice.module_free ℝ L
+  have := ZLattice.module_finite ℝ L
+  have := ZLattice.module_free ℝ L
   have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
     rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
   set b : Module.Basis ι ℤ ↥L :=
@@ -174,8 +174,8 @@ theorem covolume_zlattice_comap {ι : Type*} [Fintype ι] (L : Submodule ℤ (Eu
       = |LinearMap.det (e.symm : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|
         * ZLattice.covolume L volume := by
   classical
-  haveI := ZLattice.module_finite ℝ L
-  haveI := ZLattice.module_free ℝ L
+  have := ZLattice.module_finite ℝ L
+  have := ZLattice.module_free ℝ L
   have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
     rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
   set b : Module.Basis ι ℤ ↥L :=
@@ -186,7 +186,7 @@ theorem covolume_zlattice_comap {ι : Type*} [Fintype ι] (L : Submodule ℤ (Eu
   have hcoe : (Subtype.val ∘ ⇑bc)
       = ⇑((e.symm : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)) ∘ (Subtype.val ∘ ⇑b) := by
     funext i
-    show ((bc i : EuclideanSpace ℝ ι)) = e.symm ((b i : EuclideanSpace ℝ ι))
+    change ((bc i : EuclideanSpace ℝ ι)) = e.symm ((b i : EuclideanSpace ℝ ι))
     rw [hbc, Module.Basis.ofZLatticeComap_apply]
     rfl
   rw [ZLattice.covolume_eq_det_mul_measureReal (μ := volume) (b := bc) (b₀ := b₀.toBasis),

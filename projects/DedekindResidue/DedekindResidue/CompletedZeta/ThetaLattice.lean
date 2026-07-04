@@ -58,6 +58,15 @@ mathlib's `fourier_gaussian_innerProductSpace` (`b = πt`). -/
 noncomputable def gaussianCM (t : ℝ) : C(EuclideanSpace ℝ ι, ℂ) :=
   ⟨fun x => Complex.exp (-(π * t : ℂ) * (‖x‖ : ℂ) ^ 2), by fun_prop⟩
 
+/-- Pointwise norm of the Gaussian: `‖e^{-πt‖x‖²}‖ = e^{-πt‖x‖²}` (the exponent is real). -/
+theorem norm_gaussianCM_apply (t : ℝ) (x : EuclideanSpace ℝ ι) :
+    ‖gaussianCM t x‖ = Real.exp (-(π * t) * ‖x‖ ^ 2) := by
+  simp only [gaussianCM, ContinuousMap.coe_mk]
+  rw [Complex.norm_exp]
+  have : (-(π * t : ℂ) * (‖x‖ : ℂ) ^ 2) = ((-(π * t) * ‖x‖ ^ 2 : ℝ) : ℂ) := by
+    push_cast; ring
+  rw [this, Complex.ofReal_re]
+
 /-- Sub-level sets of a lattice are finite (lattice ∩ closed ball in a proper space). -/
 theorem finite_norm_le_zlattice (L : Submodule ℤ (EuclideanSpace ℝ ι))
     [DiscreteTopology L] (R : ℝ) :
@@ -87,14 +96,6 @@ theorem summable_norm_restrict_gaussianCM (L : Submodule ℤ (EuclideanSpace ℝ
   have hKR : (K : Set (EuclideanSpace ℝ ι)) ⊆ Metric.closedBall 0 R' :=
     hR.trans (Metric.closedBall_subset_closedBall (le_max_left _ _))
   have hR0 : (0 : ℝ) ≤ R' := le_max_right _ _
-  have hgnorm : ∀ y : EuclideanSpace ℝ ι,
-      ‖gaussianCM t y‖ = Real.exp (-(π * t) * ‖y‖ ^ 2) := by
-    intro y
-    simp only [gaussianCM, ContinuousMap.coe_mk]
-    rw [Complex.norm_exp]
-    have : (-(π * t : ℂ) * (‖y‖ : ℂ) ^ 2) = ((-(π * t) * ‖y‖ ^ 2 : ℝ) : ℂ) := by
-      push_cast; ring
-    rw [this, Complex.ofReal_re]
   refine Summable.of_norm_bounded_eventually
     (g := fun v : L => Real.exp (π * t * R' ^ 2)
       * Real.exp (-(π * t / 2) * ‖(v : EuclideanSpace ℝ ι)‖ ^ 2)) ?_ ?_
@@ -109,7 +110,7 @@ theorem summable_norm_restrict_gaussianCM (L : Submodule ℤ (EuclideanSpace ℝ
     rw [← Real.exp_add]
     refine (ContinuousMap.norm_le _ (Real.exp_nonneg _)).mpr (fun x => ?_)
     show ‖gaussianCM t ((x : EuclideanSpace ℝ ι) + (v : EuclideanSpace ℝ ι))‖ ≤ _
-    rw [hgnorm]
+    rw [norm_gaussianCM_apply]
     refine Real.exp_le_exp.mpr ?_
     have hx : ‖(x : EuclideanSpace ℝ ι)‖ ≤ R' := by
       have := hKR x.2
@@ -133,15 +134,6 @@ theorem summable_norm_restrict_gaussianCM (L : Submodule ℤ (EuclideanSpace ℝ
       mul_pos Real.pi_pos ht]
 
 open scoped FourierTransform
-
-/-- Pointwise norm of the Gaussian: `‖e^{-πt‖x‖²}‖ = e^{-πt‖x‖²}` (the exponent is real). -/
-theorem norm_gaussianCM_apply (t : ℝ) (x : EuclideanSpace ℝ ι) :
-    ‖gaussianCM t x‖ = Real.exp (-(π * t) * ‖x‖ ^ 2) := by
-  simp only [gaussianCM, ContinuousMap.coe_mk]
-  rw [Complex.norm_exp]
-  have : (-(π * t : ℂ) * (‖x‖ : ℂ) ^ 2) = ((-(π * t) * ‖x‖ ^ 2 : ℝ) : ℂ) := by
-    push_cast; ring
-  rw [this, Complex.ofReal_re]
 
 /-- **Θ3: the Fourier transform of the Gaussian** (mathlib's
 `fourier_gaussian_innerProductSpace` at `b = πt`, constants normalised):
@@ -344,12 +336,6 @@ theorem diagScale_congr {c c' : ι → ℝ} (h : c = c') (hc : ∀ i, c i ≠ 0)
   subst h
   rfl
 
-/-- Product of square roots of positive reals. -/
-theorem prod_sqrt (c : ι → ℝ) (hc : ∀ i, 0 < c i) :
-    (∏ i, Real.sqrt (c i)) = Real.sqrt (∏ i, c i) := by
-  simp_rw [Real.sqrt_eq_rpow]
-  rw [← Real.finsetProd_rpow _ _ (fun i _ => (hc i).le)]
-
 /-- **The Fourier transform of the anisotropic Gaussian** (AGE-0 core):
 `𝓕(e^{-π∑cᵢxᵢ²})(w) = (∏cᵢ)^{-1/2}·e^{-π∑cᵢ⁻¹wᵢ²}` — via the structural identity,
 the GL change-of-variables law (P3a), self-adjointness and determinant of `diagScale`,
@@ -368,7 +354,8 @@ theorem fourier_weightedGaussianCM {c : ι → ℝ} (hc : ∀ i, 0 < c i) (w : E
   have hdet : |LinearMap.det ((diagScale (fun i => Real.sqrt (c i)) hsc :
       EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
       EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι)|⁻¹ = (Real.sqrt (∏ i, c i))⁻¹ := by
-    rw [det_diagScale, prod_sqrt c hc, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [det_diagScale, ← Real.sqrt_prod Finset.univ (fun i _ => (hc i).le),
+      abs_of_nonneg (Real.sqrt_nonneg _)]
   have hadj : LinearMap.adjoint (((diagScale (fun i => Real.sqrt (c i)) hsc).symm :
       EuclideanSpace ℝ ι ≃ₗ[ℝ] EuclideanSpace ℝ ι) :
       EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ ι) w

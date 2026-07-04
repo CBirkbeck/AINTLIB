@@ -30,8 +30,6 @@ namespace DedekindResidue
 open MeasureTheory
 open scoped Real
 
-
-
 /-- Kink-free closed form for `auxF` (valid for `X > 1`): on both branches,
 `F_{s,X}(t) = (T/max(|t|,T))·e^{-h(max(|t|,T)-T)}` with `T = log X`. -/
 theorem auxF_eq_max (s : ℂ) {X : ℝ} (hX : 1 < X) (t : ℝ) :
@@ -79,14 +77,14 @@ section AdmAux
 
 variable (s : ℂ) {X : ℝ}
 
-/-- On the tail, the exponentially weighted auxiliary function is a constant times the
-kernel `e^{mt}/t`, `m = (1/2+ε) - h`. Stated with the `-(-m)` spelling that the kernel
-lemmas (`hasDerivAt_gAux_core` etc. at `h := -m`) produce. -/
-theorem auxF_mul_exp_tail_eq (hX : 1 < X) :
+/-- Tail identity for a general real weight `c`: beyond the plateau,
+`F_{s,X}(t)e^{ct} = T e^{(s-1/2)T}·e^{mt}/t` with `m = c - (s - 1/2)`, in the `-(-m)`
+spelling the kernel lemmas produce. -/
+theorem auxF_mul_exp_tail_eq' (hX : 1 < X) (c : ℝ) :
     ∀ t ∈ Set.Ioi (Real.log X),
-      auxF s X t * ((Real.exp ((1/2 + (s.re - 1)/2) * t) : ℝ) : ℂ)
+      auxF s X t * ((Real.exp (c * t) : ℝ) : ℂ)
         = ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-          * (Complex.exp (-(-(((1/2 + (s.re - 1)/2 : ℝ) : ℂ) - (s - 1/2))) * t) / t) := by
+          * (Complex.exp (-(-(((c : ℝ) : ℂ) - (s - 1/2))) * t) / t) := by
   intro t ht
   have hT0 : 0 < Real.log X := Real.log_pos hX
   have htpos : 0 < t := hT0.trans ht
@@ -98,10 +96,19 @@ theorem auxF_mul_exp_tail_eq (hX : 1 < X) :
   push_cast
   rw [show -(s - 1/2) * ((t:ℂ) - (Real.log X : ℂ))
       = (s - 1/2) * (Real.log X : ℂ) + -(s - 1/2) * (t:ℂ) by ring, Complex.exp_add]
-  rw [show ((1:ℂ)/2 + ((s.re : ℂ) - 1)/2 - (s - 1/2)) * (t:ℂ)
-      = -(s - 1/2) * (t:ℂ) + ((1:ℂ)/2 + ((s.re : ℂ) - 1)/2) * (t:ℂ) by ring,
-    Complex.exp_add]
+  rw [show ((c : ℂ) - (s - 1/2)) * (t:ℂ)
+      = -(s - 1/2) * (t:ℂ) + (c : ℂ) * (t:ℂ) by ring, Complex.exp_add]
   field_simp
+
+/-- On the tail, the exponentially weighted auxiliary function is a constant times the
+kernel `e^{mt}/t`, `m = (1/2+ε) - h`. Stated with the `-(-m)` spelling that the kernel
+lemmas (`hasDerivAt_gAux_core` etc. at `h := -m`) produce. -/
+theorem auxF_mul_exp_tail_eq (hX : 1 < X) :
+    ∀ t ∈ Set.Ioi (Real.log X),
+      auxF s X t * ((Real.exp ((1/2 + (s.re - 1)/2) * t) : ℝ) : ℂ)
+        = ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (Complex.exp (-(-(((1/2 + (s.re - 1)/2 : ℝ) : ℂ) - (s - 1/2))) * t) / t) :=
+  auxF_mul_exp_tail_eq' s hX (1/2 + (s.re - 1)/2)
 
 /-- The real part of the tail-kernel exponent parameter is `(Re s - 1)/2 > 0`. -/
 theorem tailExponent_re_pos (hs : 1 < s.re) :
@@ -112,88 +119,6 @@ theorem tailExponent_re_pos (hs : 1 < s.re) :
     ring
   rw [this]
   linarith
-
-/-- **Bounded variation of the weighted test function** (with `ε = (Re s - 1)/2`,
-requiring `Re s > 1` exactly as in the paper's proof of Lemma 3, where the explicit
-formula is first applied for `Re s > 1`). -/
-theorem auxF_mul_exp_bv (hX : 1 < X) (hs : 1 < s.re) :
-    BoundedVariationOn
-      (fun x : ℝ => auxF s X x * ((Real.exp ((1/2 + (s.re - 1)/2) * x) : ℝ) : ℂ))
-      (Set.Ici 0) := by
-  have hT0 : 0 < Real.log X := Real.log_pos hX
-  set m : ℂ := (((1/2 + (s.re - 1)/2 : ℝ)) : ℂ) - (s - 1/2) with hm
-  have hmre : 0 < (-m).re := tailExponent_re_pos s hs
-  refine boundedVariationOn_Ici_of_piecewise_deriv (b := Real.log X) hT0.le
-    (Continuous.continuousOn (by
-      exact (continuous_auxF s hX).mul
-        (Complex.continuous_ofReal.comp (by fun_prop))))
-    (f' := fun x : ℝ => if x < Real.log X
-      then (((1/2 + (s.re - 1)/2) * Real.exp ((1/2 + (s.re - 1)/2) * x) : ℝ) : ℂ)
-      else ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-        * (-(-m + 1/x) * (Complex.exp (-(-m) * x) / x)))
-    ?_ ?_ ?_
-  · -- plateau derivative
-    intro x hx
-    rw [if_pos hx.2]
-    have hev : (fun y : ℝ => auxF s X y * ((Real.exp ((1/2 + (s.re - 1)/2) * y) : ℝ) : ℂ))
-        =ᶠ[nhds x] fun y : ℝ => ((Real.exp ((1/2 + (s.re - 1)/2) * y) : ℝ) : ℂ) := by
-      filter_upwards [eventually_abs_sub_lt x
-        (by rw [abs_of_pos hx.1]; linarith [hx.2] : 0 < Real.log X - |x|)] with y hy
-      have hyle : |y| ≤ Real.log X := by
-        have := abs_sub_abs_le_abs_sub y x
-        linarith [abs_sub_comm y x ▸ hy]
-      rw [auxF_of_le s X hyle, one_mul]
-    have hbase : HasDerivAt
-        (fun y : ℝ => ((Real.exp ((1/2 + (s.re - 1)/2) * y) : ℝ) : ℂ))
-        (((1/2 + (s.re - 1)/2) * Real.exp ((1/2 + (s.re - 1)/2) * x) : ℝ) : ℂ) x := by
-      have := (((hasDerivAt_id x).const_mul ((1:ℝ)/2 + (s.re - 1)/2)).exp).ofReal_comp
-      refine this.congr_deriv ?_
-      simp only [id_eq]
-      push_cast
-      ring
-    exact hbase.congr_of_eventuallyEq hev
-  · -- tail derivative
-    intro x hx
-    rw [if_neg (not_lt.mpr (le_of_lt hx))]
-    have hev : (fun y : ℝ => auxF s X y * ((Real.exp ((1/2 + (s.re - 1)/2) * y) : ℝ) : ℂ))
-        =ᶠ[nhds x] fun y : ℝ =>
-          ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-            * (Complex.exp (-(-m) * y) / y) := by
-      filter_upwards [eventually_gt_nhds hx] with y hy
-      exact auxF_mul_exp_tail_eq s hX y hy
-    exact (((hasDerivAt_gAux_core (-m) (hT0.trans hx)).const_mul
-      (((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ)))).congr_of_eventuallyEq
-      hev)
-  · -- integrability of the derivative
-    rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
-      (Set.Icc_union_Ioi_eq_Ici hT0.le).symm]
-    refine MeasureTheory.IntegrableOn.union ?_ ?_
-    · -- plateau piece, a.e.-equal to the continuous formula
-      have hbase : IntegrableOn
-          (fun x : ℝ =>
-            (((1/2 + (s.re - 1)/2) * Real.exp ((1/2 + (s.re - 1)/2) * x) : ℝ) : ℂ))
-          (Set.Icc 0 (Real.log X)) :=
-        Continuous.integrableOn_Icc (by fun_prop)
-      refine hbase.congr ?_
-      have hae : ∀ᵐ x : ℝ ∂(volume.restrict (Set.Icc 0 (Real.log X))), x ≠ Real.log X := by
-        refine ae_restrict_of_ae ?_
-        rw [MeasureTheory.ae_iff]
-        simp only [not_not, Set.setOf_eq_eq_singleton]
-        exact measure_singleton _
-      filter_upwards [ae_restrict_mem measurableSet_Icc, hae] with x hx hxne
-      rw [if_pos (lt_of_le_of_ne hx.2 hxne)]
-    · -- tail piece: the exponential kernel lemma
-      have hbase : IntegrableOn (fun x : ℝ =>
-          ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-            * (-(-m + 1/x) * (Complex.exp (-(-m) * x) / x) * ((1 : ℝ) : ℂ)))
-          (Set.Ioi (Real.log X)) :=
-        (integrableOn_gAux_deriv_mul_real (h := -m) hmre hT0
-          (ψ := fun _ : ℝ => 1) continuous_const (C := 1)
-          (fun t => by norm_num)).const_mul _
-      refine hbase.congr_fun (fun x hx => ?_) measurableSet_Ioi
-      rw [if_neg (not_lt.mpr (le_of_lt hx))]
-      push_cast
-      ring
 
 /-- **Integrability of the weighted test function** on `[0,∞)` (same `ε`). -/
 theorem auxF_mul_exp_integrable (hX : 1 < X) (hs : 1 < s.re) :
@@ -219,29 +144,6 @@ theorem auxF_mul_exp_integrable (hX : 1 < X) (hs : 1 < s.re) :
     rw [auxF_mul_exp_tail_eq s hX x hx, hm]
     push_cast
     ring
-
-/-- Tail identity for a general real weight `c`: beyond the plateau,
-`F_{s,X}(t)e^{ct} = T e^{(s-1/2)T}·e^{mt}/t` with `m = c - (s - 1/2)`, in the `-(-m)`
-spelling the kernel lemmas produce. -/
-theorem auxF_mul_exp_tail_eq' (hX : 1 < X) (c : ℝ) :
-    ∀ t ∈ Set.Ioi (Real.log X),
-      auxF s X t * ((Real.exp (c * t) : ℝ) : ℂ)
-        = ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-          * (Complex.exp (-(-(((c : ℝ) : ℂ) - (s - 1/2))) * t) / t) := by
-  intro t ht
-  have hT0 : 0 < Real.log X := Real.log_pos hX
-  have htpos : 0 < t := hT0.trans ht
-  have htc : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast htpos.ne'
-  have hnot : ¬ |t| ≤ Real.log X := by
-    rw [abs_of_pos htpos]
-    exact not_le.mpr ht
-  rw [auxF, if_neg hnot, abs_of_pos htpos, neg_neg]
-  push_cast
-  rw [show -(s - 1/2) * ((t:ℂ) - (Real.log X : ℂ))
-      = (s - 1/2) * (Real.log X : ℂ) + -(s - 1/2) * (t:ℂ) by ring, Complex.exp_add]
-  rw [show ((c : ℂ) - (s - 1/2)) * (t:ℂ)
-      = -(s - 1/2) * (t:ℂ) + (c : ℂ) * (t:ℂ) by ring, Complex.exp_add]
-  field_simp
 
 /-- **Bounded variation of the `c`-weighted auxiliary function on the half line**, for
 any real weight `c < Re s - 1/2` (the tail exponent then still decays). -/
@@ -326,6 +228,15 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
       push_cast
       ring
 
+/-- **Bounded variation of the weighted test function** (with `ε = (Re s - 1)/2`,
+requiring `Re s > 1` exactly as in the paper's proof of Lemma 3, where the explicit
+formula is first applied for `Re s > 1`). -/
+theorem auxF_mul_exp_bv (hX : 1 < X) (hs : 1 < s.re) :
+    BoundedVariationOn
+      (fun x : ℝ => auxF s X x * ((Real.exp ((1/2 + (s.re - 1)/2) * x) : ℝ) : ℂ))
+      (Set.Ici 0) :=
+  auxF_mul_exp_bv_Ici s hX (c := 1/2 + (s.re - 1)/2) (by linarith)
+
 /-- **Bounded variation of the `c`-weighted auxiliary function on the whole line**, for
 `|c| < Re s - 1/2`: the positive ray directly, the negative ray by the evenness
 reflection (which flips the weight's sign). -/
@@ -367,47 +278,47 @@ theorem lipschitzWith_complex_im : LipschitzWith 1 Complex.im := by
   rw [NNReal.coe_one, one_mul, Real.dist_eq, Complex.dist_eq, ← Complex.sub_im]
   exact Complex.abs_im_le_norm _
 
+/-- **Bounded variation of `F_{s,X}` on the whole line** (for `Re s > 1/2`): the `c = 0`
+case of `boundedVariationOn_auxF_mul_exp`, with the trivial `e^{0·x} = 1` weight removed. -/
+theorem boundedVariationOn_auxF (hX : 1 < X) (hs : 1/2 < s.re) :
+    BoundedVariationOn (auxF s X) Set.univ := by
+  have h1 := boundedVariationOn_auxF_mul_exp s hX (c := 0) (by linarith) (by linarith)
+  have h2 : (fun x : ℝ => auxF s X x * ((Real.exp (0 * x) : ℝ) : ℂ)) = auxF s X := by
+    funext x
+    rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one]
+  rwa [h2] at h1
+
 /-- **`hre` at the auxiliary function**: the real part of `F_{s,X}` has locally bounded
 variation on the line. -/
 theorem locallyBoundedVariationOn_auxF_re (hX : 1 < X) (hs : 1/2 < s.re) :
-    LocallyBoundedVariationOn (fun u : ℝ => (auxF s X u).re) Set.univ := by
-  have h1 := boundedVariationOn_auxF_mul_exp s hX (c := 0) (by linarith) (by linarith)
-  have h2 : (fun x : ℝ => auxF s X x * ((Real.exp (0 * x) : ℝ) : ℂ)) = auxF s X := by
-    funext x
-    rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one]
-  rw [h2] at h1
-  exact (lipschitzWith_complex_re.comp_boundedVariationOn h1).locallyBoundedVariationOn
+    LocallyBoundedVariationOn (fun u : ℝ => (auxF s X u).re) Set.univ :=
+  (lipschitzWith_complex_re.comp_boundedVariationOn
+    (boundedVariationOn_auxF s hX hs)).locallyBoundedVariationOn
 
 /-- **`him` at the auxiliary function**. -/
 theorem locallyBoundedVariationOn_auxF_im (hX : 1 < X) (hs : 1/2 < s.re) :
-    LocallyBoundedVariationOn (fun u : ℝ => (auxF s X u).im) Set.univ := by
-  have h1 := boundedVariationOn_auxF_mul_exp s hX (c := 0) (by linarith) (by linarith)
-  have h2 : (fun x : ℝ => auxF s X x * ((Real.exp (0 * x) : ℝ) : ℂ)) = auxF s X := by
-    funext x
-    rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one]
-  rw [h2] at h1
-  exact (lipschitzWith_complex_im.comp_boundedVariationOn h1).locallyBoundedVariationOn
+    LocallyBoundedVariationOn (fun u : ℝ => (auxF s X u).im) Set.univ :=
+  (lipschitzWith_complex_im.comp_boundedVariationOn
+    (boundedVariationOn_auxF s hX hs)).locallyBoundedVariationOn
 
 /-- **`hGre` at the auxiliary function**: the real part of `F_{s,X}(x)e^{(1/2+a)x}` has
 locally bounded variation on the line, for `0 < a < Re s - 1`. -/
 theorem locallyBoundedVariationOn_auxF_mul_exp_re (hX : 1 < X) {a : ℝ}
     (ha : 0 < a) (has : a < s.re - 1) :
     LocallyBoundedVariationOn (fun x : ℝ =>
-      ((auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ))).re) Set.univ := by
-  have h1 : BoundedVariationOn
-      (fun x : ℝ => auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ)) Set.univ :=
-    boundedVariationOn_auxF_mul_exp s hX (by linarith) (by linarith)
-  exact (lipschitzWith_complex_re.comp_boundedVariationOn h1).locallyBoundedVariationOn
+      ((auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ))).re) Set.univ :=
+  (lipschitzWith_complex_re.comp_boundedVariationOn
+    (boundedVariationOn_auxF_mul_exp s hX (c := 1/2 + a)
+      (by linarith) (by linarith))).locallyBoundedVariationOn
 
 /-- **`hGim` at the auxiliary function**. -/
 theorem locallyBoundedVariationOn_auxF_mul_exp_im (hX : 1 < X) {a : ℝ}
     (ha : 0 < a) (has : a < s.re - 1) :
     LocallyBoundedVariationOn (fun x : ℝ =>
-      ((auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ))).im) Set.univ := by
-  have h1 : BoundedVariationOn
-      (fun x : ℝ => auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ)) Set.univ :=
-    boundedVariationOn_auxF_mul_exp s hX (by linarith) (by linarith)
-  exact (lipschitzWith_complex_im.comp_boundedVariationOn h1).locallyBoundedVariationOn
+      ((auxF s X x * ((Real.exp ((1/2 + a) * x) : ℝ) : ℂ))).im) Set.univ :=
+  (lipschitzWith_complex_im.comp_boundedVariationOn
+    (boundedVariationOn_auxF_mul_exp s hX (c := 1/2 + a)
+      (by linarith) (by linarith))).locallyBoundedVariationOn
 
 /-- **`hFa` at the auxiliary function**: the `c`-weighted auxiliary function is
 integrable on the whole line for `|c| < Re s - 1/2`. -/
@@ -439,7 +350,6 @@ theorem integrable_auxF_mul_exp (hX : 1 < X) {c : ℝ} (hc : |c| < s.re - 1/2) :
           rw [mul_assoc, ← Real.exp_add]
           congr 2
           ring
-
 
 /-- On the tail, the difference quotient is `1/x - c·e^{-hx}/x²` with `c = T·e^{hT}`. -/
 theorem auxF_diffQuot_tail_eq (hX : 1 < X) :

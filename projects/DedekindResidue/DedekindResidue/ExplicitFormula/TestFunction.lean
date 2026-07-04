@@ -95,8 +95,8 @@ theorem eVariationOn_le_integral_norm_deriv {f f' : ℝ → ℂ} {s : Set ℝ}
       rw [hseg i]
       exact intervalIntegral.norm_integral_le_integral_norm (hu (Nat.le_succ i))
     refine le_trans (Finset.sum_le_sum hstep) ?_
-    rw [intervalIntegral.sum_integral_adjacent_intervals (fun k _ => hiin k)]
-    rw [intervalIntegral.integral_of_le (hu (Nat.zero_le n))]
+    rw [intervalIntegral.sum_integral_adjacent_intervals (fun k _ => hiin k),
+      intervalIntegral.integral_of_le (hu (Nat.zero_le n))]
     refine setIntegral_mono_set hint.norm
       (Filter.Eventually.of_forall (fun x => norm_nonneg _)) ?_
     exact ((Set.Ioc_subset_Icc_self).trans (hs.out (us 0) (us n))).eventuallyLE
@@ -131,12 +131,12 @@ theorem boundedVariationOn_Ici_of_piecewise_deriv {f f' : ℝ → ℂ} {a b : �
   have h1 : BoundedVariationOn f (Set.Icc a b) :=
     boundedVariationOn_of_deriv_integrable Set.ordConnected_Icc
       (hcont.mono Set.Icc_subset_Ici_self)
-      (by rw [interior_Icc]; exact hd1)
+      (by rwa [interior_Icc])
       (hint.mono_set Set.Icc_subset_Ici_self)
   have h2 : BoundedVariationOn f (Set.Ici b) :=
     boundedVariationOn_of_deriv_integrable Set.ordConnected_Ici
       (hcont.mono (Set.Ici_subset_Ici.mpr hab))
-      (by rw [interior_Ici]; exact hd2)
+      (by rwa [interior_Ici])
       (hint.mono_set (Set.Ici_subset_Ici.mpr hab))
   have hunion : Set.Ici a = Set.Icc a b ∪ Set.Ici b :=
     (Set.Icc_union_Ici_eq_Ici hab).symm

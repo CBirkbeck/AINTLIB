@@ -122,6 +122,30 @@ theorem norm_sin_add_mul_I_sq (x y : ℝ) :
   have h2 := Real.cosh_sq y
   nlinarith [Real.sinh_sq y]
 
+/-- `‖sin(πz)‖ ≤ e^{π|Im z|}`. -/
+theorem norm_sin_pi_mul_le (z : ℂ) :
+    ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.exp (π * |z.im|) := by
+  have hdecomp : (π : ℂ) * z
+      = ((π * z.re : ℝ) : ℂ) + ((π * z.im : ℝ) : ℂ) * Complex.I := by
+    conv_lhs => rw [← Complex.re_add_im z]
+    push_cast
+    ring
+  have hsq := norm_sin_add_mul_I_sq (π * z.re) (π * z.im)
+  rw [← hdecomp] at hsq
+  have hcosh : ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.cosh (π * z.im) := by
+    have h1 : ‖Complex.sin ((π : ℂ) * z)‖^2 ≤ Real.cosh (π * z.im)^2 := by
+      rw [hsq, Real.cosh_sq]
+      nlinarith [Real.sin_sq_add_cos_sq (π * z.re), sq_nonneg (Real.sin (π * z.re))]
+    nlinarith [norm_nonneg (Complex.sin ((π : ℂ) * z)), Real.cosh_pos (π * z.im)]
+  refine hcosh.trans ?_
+  rw [show π * |z.im| = |π * z.im| by rw [abs_mul, abs_of_pos Real.pi_pos]]
+  rw [Real.cosh_eq]
+  have e1 : Real.exp (π * z.im) ≤ Real.exp |π * z.im| :=
+    Real.exp_le_exp.mpr (le_abs_self _)
+  have e2 : Real.exp (-(π * z.im)) ≤ Real.exp |π * z.im| :=
+    Real.exp_le_exp.mpr (neg_le_abs _)
+  linarith
+
 /-- On `[1/2, 3/2]`, `Γ` is at most `max Γ(1/2) Γ(3/2)` (convexity). -/
 theorem Gamma_le_max_of_mem_Icc {σ : ℝ} (hσ : σ ∈ Set.Icc (1/2 : ℝ) (3/2)) :
     Real.Gamma σ ≤ max (Real.Gamma (1/2)) (Real.Gamma (3/2)) := by
@@ -159,27 +183,8 @@ theorem norm_Gamma_sq_mul_sin_div_le {z : ℂ} (h1 : 1/2 ≤ z.re) (h2 : z.re �
     fun w hw1 hw2 => le_trans (norm_Gamma_le_Gamma_re (by linarith))
       (Gamma_le_max_of_mem_Icc ⟨hw1, hw2⟩)
   -- |sin(πw)| ≤ cosh(π·Im w) ≤ exp(π·|Im w|)
-  have hsin_le : ∀ w : ℂ, ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) := by
-    intro w
-    have hdecomp : (π : ℂ) * w = ((π * w.re : ℝ) : ℂ) + ((π * w.im : ℝ) : ℂ) * Complex.I := by
-      conv_lhs => rw [← Complex.re_add_im w]
-      push_cast
-      ring
-    have hsq := norm_sin_add_mul_I_sq (π * w.re) (π * w.im)
-    rw [← hdecomp] at hsq
-    have hcosh : ‖Complex.sin (π * w)‖^2 ≤ Real.cosh (π * w.im) ^ 2 := by
-      rw [hsq, Real.cosh_sq]
-      nlinarith [Real.sin_sq_add_cos_sq (π * w.re), sq_nonneg (Real.sin (π * w.re))]
-    have h1 : ‖Complex.sin (π * w)‖ ≤ Real.cosh (π * w.im) := by
-      nlinarith [norm_nonneg (Complex.sin (π * w)), Real.cosh_pos (π * w.im)]
-    refine h1.trans ?_
-    rw [show π * |w.im| = |π * w.im| by rw [abs_mul, abs_of_pos Real.pi_pos]]
-    rw [Real.cosh_eq]
-    have e1 : Real.exp (π * w.im) ≤ Real.exp |π * w.im| :=
-      Real.exp_le_exp.mpr (le_abs_self _)
-    have e2 : Real.exp (-(π * w.im)) ≤ Real.exp |π * w.im| :=
-      Real.exp_le_exp.mpr (neg_le_abs _)
-    linarith
+  have hsin_le : ∀ w : ℂ, ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) :=
+    norm_sin_pi_mul_le
   -- norm of sin on the two boundary lines is exactly cosh(π·Im)
   have hsin_line : ∀ w : ℂ, Real.sin (π * w.re) ^ 2 = 1 →
       ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
@@ -462,30 +467,6 @@ theorem norm_Gamma_le_mul_exp_left {σ t : ℝ} (h1 : -(1/2) ≤ σ) (h2 : σ �
         rw [div_one]
     _ ≤ Real.sqrt (12 * π) * ‖((σ + 1 : ℝ) : ℂ) + (t : ℂ) * Complex.I‖
         * Real.exp (-(π * |t|) / 2) := hbase
-
-/-- `‖sin(πz)‖ ≤ e^{π|Im z|}`. -/
-theorem norm_sin_pi_mul_le (z : ℂ) :
-    ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.exp (π * |z.im|) := by
-  have hdecomp : (π : ℂ) * z
-      = ((π * z.re : ℝ) : ℂ) + ((π * z.im : ℝ) : ℂ) * Complex.I := by
-    conv_lhs => rw [← Complex.re_add_im z]
-    push_cast
-    ring
-  have hsq := norm_sin_add_mul_I_sq (π * z.re) (π * z.im)
-  rw [← hdecomp] at hsq
-  have hcosh : ‖Complex.sin ((π : ℂ) * z)‖ ≤ Real.cosh (π * z.im) := by
-    have h1 : ‖Complex.sin ((π : ℂ) * z)‖^2 ≤ Real.cosh (π * z.im)^2 := by
-      rw [hsq, Real.cosh_sq]
-      nlinarith [Real.sin_sq_add_cos_sq (π * z.re), sq_nonneg (Real.sin (π * z.re))]
-    nlinarith [norm_nonneg (Complex.sin ((π : ℂ) * z)), Real.cosh_pos (π * z.im)]
-  refine hcosh.trans ?_
-  rw [show π * |z.im| = |π * z.im| by rw [abs_mul, abs_of_pos Real.pi_pos]]
-  rw [Real.cosh_eq]
-  have e1 : Real.exp (π * z.im) ≤ Real.exp |π * z.im| :=
-    Real.exp_le_exp.mpr (le_abs_self _)
-  have e2 : Real.exp (-(π * z.im)) ≤ Real.exp |π * z.im| :=
-    Real.exp_le_exp.mpr (neg_le_abs _)
-  linarith
 
 /-- **Matching Γ-lower bound on the base strip** (AC-A1-v): for `1/2 ≤ σ ≤ 3/2`,
 `|t| ≥ 1`, `‖Γ(σ+it)‖ ≥ π·e^{-π|t|/2} / (√(12π)·‖(2-σ)-it‖)`. -/

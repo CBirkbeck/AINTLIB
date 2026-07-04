@@ -42,10 +42,6 @@ noncomputable def rectangleIntegral (f : ℂ → ℂ) (z w : ℂ) : ℂ :=
 /-- `log(-u) = log u - πi` in the upper half-plane. -/
 theorem log_neg_of_im_pos {u : ℂ} (hu : 0 < u.im) :
     Complex.log (-u) = Complex.log u - Real.pi * Complex.I := by
-  have hne : u ≠ 0 := by
-    intro h0
-    rw [h0] at hu
-    simp at hu
   rw [Complex.log, Complex.log, norm_neg, arg_neg_eq_arg_sub_pi_of_im_pos hu]
   push_cast
   ring
@@ -53,13 +49,9 @@ theorem log_neg_of_im_pos {u : ℂ} (hu : 0 < u.im) :
 /-- `log(-u) = log u + πi` in the lower half-plane. -/
 theorem log_neg_of_im_neg {u : ℂ} (hu : u.im < 0) :
     Complex.log (-u) = Complex.log u + Real.pi * Complex.I := by
-  have hne : u ≠ 0 := by
-    intro h0
-    rw [h0] at hu
-    simp at hu
-  rw [Complex.log, Complex.log, norm_neg, arg_neg_eq_arg_add_pi_of_im_neg hu]
-  push_cast
-  ring
+  have h := log_neg_of_im_pos (u := -u) (by simp only [Complex.neg_im]; linarith)
+  rw [neg_neg] at h
+  linear_combination -h
 
 /-- FTC on a horizontal segment staying in the slit plane:
 `∫_{a}^{b} (x + ci − ρ)⁻¹ dx = log(b + ci − ρ) − log(a + ci − ρ)`. -/
@@ -212,8 +204,7 @@ theorem rectangleIntegral_inv_sub {z w ρ : ℂ}
       Complex.ofReal_re, Complex.I_im, Complex.I_re]
     simp
     linarith
-  rw [hB, hT, hR, hL]
-  rw [log_neg_of_im_pos hu₄im, log_neg_of_im_neg hu₁im]
+  rw [hB, hT, hR, hL, log_neg_of_im_pos hu₄im, log_neg_of_im_neg hu₁im]
   ring
 
 

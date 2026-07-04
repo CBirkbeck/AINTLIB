@@ -66,12 +66,8 @@ has real part `1/2`. -/
 theorem re_eq_half_of_completedDedekindZetaEntire_eq_zero
     (hGRH : GeneralizedRiemannHypothesis K) {ρ : ℂ}
     (hρ : completedDedekindZetaEntire K ρ = 0) : ρ.re = 1/2 := by
-  have hρ0 : ρ ≠ 0 := by
-    intro h
-    exact completedDedekindZetaEntire_zero_ne_zero K (h ▸ hρ)
-  have hρ1 : ρ ≠ 1 := by
-    intro h
-    exact completedDedekindZetaEntire_one_ne_zero K (h ▸ hρ)
+  have hρ0 : ρ ≠ 0 := fun h => completedDedekindZetaEntire_zero_ne_zero K (h ▸ hρ)
+  have hρ1 : ρ ≠ 1 := fun h => completedDedekindZetaEntire_one_ne_zero K (h ▸ hρ)
   have hiff := (generalizedRiemannHypothesis_iff K).mp hGRH
   by_contra hne
   rcases lt_or_gt_of_ne hne with hlt | hgt
@@ -147,19 +143,15 @@ theorem countable_support_zetaZeroDivisor :
 through the divisor value). -/
 def ZetaZeros : Type _ := {ρ : ℂ // zetaZeroDivisor K ρ ≠ 0}
 
-instance : Countable (ZetaZeros K) := by
-  have h := (countable_support_zetaZeroDivisor K).to_subtype
-  exact h
+instance : Countable (ZetaZeros K) :=
+  (countable_support_zetaZeroDivisor K).to_subtype
 
 /-- Membership in the zero index is equivalent to being a zero of the entire
 completion. -/
 theorem zetaZeroDivisor_ne_zero_iff {ρ : ℂ} :
-    zetaZeroDivisor K ρ ≠ 0 ↔ completedDedekindZetaEntire K ρ = 0 := by
-  constructor
-  · intro h
-    exact completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero K (U := Set.univ) h
-  · intro h
-    exact divisor_ne_zero_of_completedDedekindZetaEntire_eq_zero K (Set.mem_univ ρ) h
+    zetaZeroDivisor K ρ ≠ 0 ↔ completedDedekindZetaEntire K ρ = 0 :=
+  ⟨fun h => completedDedekindZetaEntire_eq_zero_of_divisor_ne_zero K (U := Set.univ) h,
+    fun h => divisor_ne_zero_of_completedDedekindZetaEntire_eq_zero K (Set.mem_univ ρ) h⟩
 
 /-- **Under GRH every indexed zero sits on the critical line.** -/
 theorem ZetaZeros_re_eq_half (hGRH : GeneralizedRiemannHypothesis K)
@@ -172,15 +164,16 @@ theorem divisor_apply_eq_zetaZeroDivisor {U : Set ℂ} {u : ℂ} (hu : u ∈ U) 
     (MeromorphicOn.divisor (completedDedekindZetaEntire K) U) u
       = zetaZeroDivisor K u := by
   have hm : ∀ (V : Set ℂ), MeromorphicOn (completedDedekindZetaEntire K) V :=
-    fun V ζ _ => ((differentiable_completedDedekindZetaEntire K).analyticAt ζ).meromorphicAt
+    fun V ζ _ => (analyticAt_completedDedekindZetaEntire K ζ).meromorphicAt
   rw [MeromorphicOn.divisor_apply (hm U) hu, zetaZeroDivisor,
     MeromorphicOn.divisor_apply (hm Set.univ) (Set.mem_univ u)]
 
 /-- The global divisor is nonnegative (the completion is entire). -/
+@[simp]
 theorem zetaZeroDivisor_nonneg (u : ℂ) : 0 ≤ zetaZeroDivisor K u := by
   rw [zetaZeroDivisor]
   exact (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun ζ _ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ)) u
+    analyticAt_completedDedekindZetaEntire K ζ)) u
 
 /-- A finite family of indexed zeros inside a closed ball contributes at most the
 ball's divisor finsum. -/
@@ -191,7 +184,7 @@ theorem sum_zetaZeroDivisor_le_ball_finsum (c₀ : ℂ) (r : ℝ)
           (Metric.closedBall c₀ r)) z := by
   classical
   have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+    analyticAt_completedDedekindZetaEntire K ζ
   set Dcl : ℂ → ℤ := fun z => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
     (Metric.closedBall c₀ r)) z with hDcl
   have hmcl : MeromorphicOn (completedDedekindZetaEntire K) (Metric.closedBall c₀ r) :=
@@ -238,7 +231,7 @@ theorem exists_slab_zetaZeroDivisor_sum_le :
   obtain ⟨A, hA2, cL, hcL, hlow⟩ := exists_H_center_lower K
   obtain ⟨Cc, hCc, hcount⟩ := exists_ball_zero_count_big K A hA2 cL hcL hlow
   have hHanal : ∀ ζ : ℂ, AnalyticAt ℂ (completedDedekindZetaEntire K) ζ := fun ζ =>
-    (differentiable_completedDedekindZetaEntire K).analyticAt ζ
+    analyticAt_completedDedekindZetaEntire K ζ
   -- the fixed-zone constant
   set C₀ : ℤ := ∑ᶠ z, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
     (Metric.closedBall (0:ℂ) (A+8))) z with hC₀
@@ -574,8 +567,7 @@ theorem finsum_divisor_mul_eq_sum_zetaZeros (φ : ℂ → ℂ) {W : Set ℂ}
 the absolutely-summable series over the full zero index. This upgrades the
 `weil_explicit_formula` limit from a statement about window sums to a statement
 about `∑'_ρ` — the form Belabas–Friedman's Lemma 3 sums take. -/
-theorem tendsto_finsum_window_zetaZeros (hGRH : GeneralizedRiemannHypothesis K)
-    {φ : ℂ → ℂ}
+theorem tendsto_finsum_window_zetaZeros (hGRH : GeneralizedRiemannHypothesis K) {φ : ℂ → ℂ}
     (hsum : Summable (fun ρ : ZetaZeros K => (zetaZeroDivisor K ρ.1 : ℂ) * φ ρ.1))
     {a : ℝ} (ha : 0 < a) {T : ℕ → ℝ} (hT : Filter.Tendsto T Filter.atTop Filter.atTop) :
     Filter.Tendsto (fun n : ℕ => ∑ᶠ z, ((MeromorphicOn.divisor

@@ -31,6 +31,18 @@ open scoped nonZeroDivisors Real
 
 variable (K : Type*) [Field K] [NumberField K]
 
+/-- The `ℝ`-cast field degree `[K : ℚ]` is positive — the packaged `Module.finrank_pos` used
+for the degree denominators throughout the Hecke-weight normalisation. -/
+theorem finrank_pos_real : (0 : ℝ) < (Module.finrank ℚ K : ℝ) := by
+  have := Module.finrank_pos (R := ℚ) (M := K)
+  positivity
+
+omit [NumberField K] in
+/-- The `ℝ`-cast local multiplicity `mult w` is nonzero (`1` at real, `2` at complex places) —
+the recurring side goal for the `field_simp`s that divide by `mult w`. -/
+theorem mult_ne_zero_real (w : InfinitePlace K) : (mult w : ℝ) ≠ 0 := by
+  have := mult_pos (w := w)
+  positivity
 
 /-- Expand per-place weights to per-coordinate weights (equal on the `(re, im)` pair of a
 complex place). -/
@@ -271,9 +283,7 @@ theorem heckeWeights_add_logEmbedding (t : ℝ) (u : logSpace K) (ε : (𝓞 K)�
       = fun w => (w (algebraMap (𝓞 K) K (ε : 𝓞 K))) ^ 2 * heckeWeights K t u w := by
   funext w
   rw [heckeWeights, heckeWeights, fullLog_add, Pi.add_apply, fullLog_logEmbedding]
-  have hmult : (mult w : ℝ) ≠ 0 := by
-    have := mult_pos (w := w)
-    positivity
+  have hmult : (mult w : ℝ) ≠ 0 := mult_ne_zero_real K w
   have hpos : 0 < w (algebraMap (𝓞 K) K (ε : 𝓞 K)) := by
     rw [pos_iff]
     simp only [ne_eq, RingOfIntegers.coe_eq_zero_iff]
@@ -320,17 +330,13 @@ open scoped Classical in
 is exactly `t` — the Mellin variable. (`∑ mult = n` and the trace-zero sum of `fullLog`.) -/
 theorem prod_heckeWeights_pow_mult {t : ℝ} (ht : 0 < t) (u : logSpace K) :
     ∏ w : InfinitePlace K, (heckeWeights K t u w) ^ mult w = t := by
-  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := finrank_pos_real K
   have hexp : ∀ w : InfinitePlace K,
       (Real.exp (2 * fullLog K u w / mult w)) ^ mult w = Real.exp (2 * fullLog K u w) := by
     intro w
     rw [← Real.exp_nat_mul]
     congr 1
-    have hm : (mult w : ℝ) ≠ 0 := by
-      have := mult_pos (w := w)
-      positivity
+    have hm : (mult w : ℝ) ≠ 0 := mult_ne_zero_real K w
     field_simp
   simp_rw [heckeWeights, mul_pow, hexp]
   rw [Finset.prod_mul_distrib, ← Real.exp_sum, Finset.prod_pow_eq_pow_sum,
@@ -370,9 +376,7 @@ theorem dualPlaceWeights_heckeWeights {t : ℝ} (ht : 0 < t) (u : logSpace K)
     dualPlaceWeights K (heckeWeights K t u) w
       = (if IsReal w then 1 else 4) * heckeWeights K t⁻¹ (-u) w := by
   rw [dualPlaceWeights, heckeWeights, heckeWeights, fullLog_neg]
-  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hn : (0:ℝ) < (Module.finrank ℚ K : ℝ) := finrank_pos_real K
   have hinv : (t ^ ((1:ℝ) / (Module.finrank ℚ K)))⁻¹
       = t⁻¹ ^ ((1:ℝ) / (Module.finrank ℚ K)) := by
     rw [← Real.rpow_neg ht.le, Real.inv_rpow ht.le, ← Real.rpow_neg ht.le]
@@ -486,9 +490,7 @@ theorem fullLog_dualShift (w : InfinitePlace K) :
       have := sum_mult_eq (K := K)
       rw [show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
         exact_mod_cast congrArg Nat.cast this]
-      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
-        have := Module.finrank_pos (R := ℚ) (M := K)
-        positivity
+      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := (finrank_pos_real K).ne'
       field_simp
     rw [h1, h2, sub_self]
 
@@ -518,12 +520,8 @@ theorem ite_mul_heckeWeights {t : ℝ} (ht : 0 ≤ t) (u : logSpace K) (w : Infi
       = heckeWeights K ((4 : ℝ) ^ (2 * nrComplexPlaces K) * t) (u + dualShift K) w := by
   rw [heckeWeights_mul_left K (by positivity) ht, heckeWeights_add_right,
     fullLog_dualShift]
-  have hm : (mult w : ℝ) ≠ 0 := by
-    have := mult_pos (w := w)
-    positivity
-  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hm : (mult w : ℝ) ≠ 0 := mult_ne_zero_real K w
+  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := (finrank_pos_real K).ne'
   have harg : 2 * ((mult w : ℝ) / 2 * ((if IsReal w then 0 else Real.log 4)
         - 2 * nrComplexPlaces K * Real.log 4 / Module.finrank ℚ K)) / mult w
       = (if IsReal w then 0 else Real.log 4)
@@ -593,7 +591,7 @@ theorem setIntegral_fundamentalDomain_comp_neg_add {ι κ : Type*} [Fintype ι] 
     simp [Set.mem_preimage, this]
   conv_lhs => rw [hset]
   rw [hmp.setIntegral_preimage_emb hemb]
-  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑b)) (ι → ℝ) volume :=
+  have : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑b)) (ι → ℝ) volume :=
     inferInstanceAs
       (VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑b)).toAddSubgroup (ι → ℝ) volume)
   refine hD'.setIntegral_eq hFD (f := f) (fun g x => ?_)
@@ -710,9 +708,7 @@ theorem fullLog_xShift {x : K} (hx : x ≠ 0) (w : InfinitePlace K) :
       rw [← Finset.sum_mul]
       rw [show (∑ w : InfinitePlace K, (mult w : ℝ)) = (Module.finrank ℚ K : ℝ) by
         exact_mod_cast congrArg Nat.cast (sum_mult_eq (K := K))]
-      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
-        have := Module.finrank_pos (R := ℚ) (M := K)
-        positivity
+      have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := (finrank_pos_real K).ne'
       field_simp
     rw [hsum, sub_self]
 
@@ -728,12 +724,8 @@ theorem sq_mul_heckeWeights {x : K} (hx : x ≠ 0) {t : ℝ} (ht : 0 ≤ t) (u :
     rw [Rat.cast_pos, abs_pos]
     exact Algebra.norm_ne_zero_iff.mpr hx
   have hwx : (0 : ℝ) < w x := pos_iff.mpr hx
-  have hm : (mult w : ℝ) ≠ 0 := by
-    have := mult_pos (w := w)
-    positivity
-  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hm : (mult w : ℝ) ≠ 0 := mult_ne_zero_real K w
+  have hn : (Module.finrank ℚ K : ℝ) ≠ 0 := (finrank_pos_real K).ne'
   rw [heckeWeights_mul_left K (by positivity) ht, heckeWeights_add_right,
     fullLog_xShift K hx]
   have harg : 2 * ((mult w : ℝ) * Real.log (w x)

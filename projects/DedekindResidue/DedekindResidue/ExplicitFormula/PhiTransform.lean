@@ -1,8 +1,8 @@
 module
 
 public import Mathlib
-public import DedekindResidue.ExplicitFormula.TestFunction
 public import DedekindResidue.CompletedZeta.Normalisation
+public import DedekindResidue.ExplicitFormula.TestFunction
 
 /-!
 # The two-sided transform Φ of the explicit formula  (SP2-Φ)
@@ -154,7 +154,6 @@ theorem paperPhi_one_sub {F : ℝ → ℂ} (heven : ∀ x : ℝ, F (-x) = F x) (
   congr 1
   push_cast
   ring_nf
-
 
 /-- The two-sided majorant `‖F x‖·(e^{(1/2+ε)x} + e^{-(1/2+ε)x})` is integrable for an
 admissible test function: it is the sum of the kernel norms at the band endpoints. -/

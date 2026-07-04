@@ -44,36 +44,40 @@ namespace DedekindResidue
 open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
 open scoped FourierTransform ContDiff ComplexConjugate InnerProductSpace ENNReal
 
+/-- The Frullani kernel is a parameter integral of the exponential: for `x > 0`,
+`(e^{-x} - e^{-tx})/x = ∫_1^t e^{-sx} ds` (the primitive is `s ↦ -e^{-sx}/x`). -/
+theorem frullani_kernel_eq_intervalIntegral (t : ℝ) {x : ℝ} (hx : 0 < x) :
+    (Real.exp (-x) - Real.exp (-(t*x))) / x = ∫ s in (1:ℝ)..t, Real.exp (-(s*x)) := by
+  have hprim : ∀ s : ℝ, HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)) / x)
+      (Real.exp (-(s*x))) s := by
+    intro s
+    have h0 : HasDerivAt (fun s' : ℝ => s' * x) x s := by
+      simpa using (hasDerivAt_id s).mul_const x
+    have h1 : HasDerivAt (fun s' : ℝ => -(s' * x)) (-x) s := h0.neg
+    have h2 := h1.exp
+    have h3 : HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)))
+        (-(Real.exp (-(s*x)) * -x)) s := h2.neg
+    have h4 := h3.div_const x
+    have hval : -(Real.exp (-(s*x)) * -x) / x = Real.exp (-(s*x)) := by
+      rw [div_eq_iff hx.ne']
+      ring
+    rw [hval] at h4
+    exact h4
+  have hint : IntervalIntegrable (fun s : ℝ => Real.exp (-(s*x))) volume 1 t := by
+    refine ContinuousOn.intervalIntegrable ?_
+    fun_prop
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => hprim s) hint]
+  field_simp
+  ring
+
 /-- **Frullani integral for the logarithm** (Γψ-c1): for `t > 0`,
 `∫₀^∞ (e^{-x} - e^{-tx})/x dx = log t`. The kernel is `∫_1^t e^{-sx} ds`; Fubini and
 `∫₀^∞ e^{-sx} dx = 1/s` reduce it to `∫_1^t ds/s`. -/
 theorem integral_frullani_log {t : ℝ} (ht : 0 < t) :
     ∫ x in Set.Ioi (0:ℝ), (Real.exp (-x) - Real.exp (-(t*x))) / x = Real.log t := by
-  -- the kernel identity: for x > 0
   have hker : ∀ x : ℝ, 0 < x →
-      (Real.exp (-x) - Real.exp (-(t*x))) / x = ∫ s in (1:ℝ)..t, Real.exp (-(s*x)) := by
-    intro x hx
-    have hprim : ∀ s : ℝ, HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)) / x)
-        (Real.exp (-(s*x))) s := by
-      intro s
-      have h0 : HasDerivAt (fun s' : ℝ => s' * x) x s := by
-        simpa using (hasDerivAt_id s).mul_const x
-      have h1 : HasDerivAt (fun s' : ℝ => -(s' * x)) (-x) s := h0.neg
-      have h2 := h1.exp
-      have h3 : HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)))
-          (-(Real.exp (-(s*x)) * -x)) s := h2.neg
-      have h4 := h3.div_const x
-      have hval : -(Real.exp (-(s*x)) * -x) / x = Real.exp (-(s*x)) := by
-        rw [div_eq_iff hx.ne']
-        ring
-      rw [hval] at h4
-      exact h4
-    have hint : IntervalIntegrable (fun s : ℝ => Real.exp (-(s*x))) volume 1 t := by
-      refine ContinuousOn.intervalIntegrable ?_
-      fun_prop
-    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => hprim s) hint]
-    field_simp
-    ring
+      (Real.exp (-x) - Real.exp (-(t*x))) / x = ∫ s in (1:ℝ)..t, Real.exp (-(s*x)) :=
+    fun x hx => frullani_kernel_eq_intervalIntegral t hx
   -- Fubini on a positive window: ∫_x ∫_{s ∈ Ioc a b} e^{-sx} = ∫_{Ioc a b} 1/s
   have haux : ∀ a b : ℝ, 0 < a → a ≤ b →
       (∫ x in Set.Ioi (0:ℝ), ∫ s in Set.Ioc a b, Real.exp (-(s*x)))
@@ -213,29 +217,7 @@ theorem integrableOn_rpow_mul_exp_neg_mul_abs_log {a : ℝ} (ha : 0 < a) :
 with `m = min 1 t`, hence integrable on `(0, ∞)` for each `t > 0` (Γψ-c2 slice bound). -/
 theorem abs_frullani_kernel_le (t : ℝ) {x : ℝ} (hx : 0 < x) :
     |(Real.exp (-x) - Real.exp (-(t*x))) / x| ≤ |t - 1| * Real.exp (-(min 1 t * x)) := by
-  have hker : (Real.exp (-x) - Real.exp (-(t*x))) / x = ∫ s in (1:ℝ)..t, Real.exp (-(s*x)) := by
-    have hprim : ∀ s : ℝ, HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)) / x)
-        (Real.exp (-(s*x))) s := by
-      intro s
-      have h0 : HasDerivAt (fun s' : ℝ => s' * x) x s := by
-        simpa using (hasDerivAt_id s).mul_const x
-      have h1 : HasDerivAt (fun s' : ℝ => -(s' * x)) (-x) s := h0.neg
-      have h2 := h1.exp
-      have h3 : HasDerivAt (fun s' : ℝ => -Real.exp (-(s'*x)))
-          (-(Real.exp (-(s*x)) * -x)) s := h2.neg
-      have h4 := h3.div_const x
-      have hval : -(Real.exp (-(s*x)) * -x) / x = Real.exp (-(s*x)) := by
-        rw [div_eq_iff hx.ne']
-        ring
-      rw [hval] at h4
-      exact h4
-    have hint : IntervalIntegrable (fun s : ℝ => Real.exp (-(s*x))) volume 1 t := by
-      refine ContinuousOn.intervalIntegrable ?_
-      fun_prop
-    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => hprim s) hint]
-    field_simp
-    ring
-  rw [hker]
+  rw [frullani_kernel_eq_intervalIntegral t hx]
   have hbound := intervalIntegral.norm_integral_le_of_norm_le_const
     (C := Real.exp (-(min 1 t * x))) (a := (1:ℝ)) (b := t)
     (f := fun s : ℝ => Real.exp (-(s*x)))
@@ -905,6 +887,38 @@ theorem integrableOn_digamma_diff_kernel {σ : ℝ} (hσ : 0 < σ) {w : ℂ} (hw
             have := hden_pos u₀ hu₀pos
             positivity
 
+/-- Pointwise real part of Poitou's difference kernel: for `u > 0`,
+`Re((e^{-σu} - e^{-(σ+it)u})/(1-e^{-u})) = e^{-σu}(1 - cos(tu))/(1-e^{-u})`. -/
+theorem re_digamma_diff_kernel_apply {σ : ℝ} (t : ℝ) {u : ℝ} (hu : 0 < u) :
+    ((Complex.exp (-(σ:ℂ) * (u:ℂ)) - Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)))
+        / (1 - Complex.exp (-(u:ℂ)))).re
+      = Real.exp (-(σ*u)) * (1 - Real.cos (t*u)) / (1 - Real.exp (-u)) := by
+  have hden_pos : 0 < 1 - Real.exp (-u) := by
+    have := Real.exp_lt_exp.mpr (show -u < 0 by linarith)
+    rw [Real.exp_zero] at this
+    linarith
+  have hden_real : (1:ℂ) - Complex.exp (-(u:ℂ)) = ((1 - Real.exp (-u) : ℝ) : ℂ) := by
+    rw [Complex.ofReal_sub, Complex.ofReal_one, Complex.ofReal_exp]
+    push_cast
+    ring_nf
+  rw [hden_real, div_eq_mul_inv, ← Complex.ofReal_inv, Complex.mul_re,
+    Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
+  have hre1 : (Complex.exp (-(σ:ℂ) * (u:ℂ))).re = Real.exp (-(σ*u)) := by
+    rw [Complex.exp_re]
+    have h1 : (-(σ:ℂ) * (u:ℂ)).re = -(σ*u) := by simp [Complex.mul_re]
+    have h2 : (-(σ:ℂ) * (u:ℂ)).im = 0 := by simp [Complex.mul_im]
+    rw [h1, h2, Real.cos_zero, mul_one]
+  have hre2 : (Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ))).re
+      = Real.exp (-(σ*u)) * Real.cos (t*u) := by
+    rw [Complex.exp_re]
+    have h1 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).re = -(σ*u) := by
+      simp [Complex.mul_re, Complex.add_re, Complex.add_im]
+    have h2 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).im = -(t*u) := by
+      simp [Complex.mul_im, Complex.add_re, Complex.add_im]
+    rw [h1, h2, Real.cos_neg]
+  rw [Complex.sub_re, hre1, hre2]
+  field_simp
+
 /-- **Poitou's cosine-kernel identity** (p. 6-04): for `σ > 0`,
 `Re(ψ(σ+it) - ψ(σ)) = ∫₀^∞ e^{-σu}(1 - cos(tu))/(1-e^{-u}) du`. -/
 theorem re_digamma_sub_eq_integral {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
@@ -919,36 +933,7 @@ theorem re_digamma_sub_eq_integral {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
   rw [← h0]
   refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
   rw [Set.mem_Ioi] at hu
-  have hden_pos : 0 < 1 - Real.exp (-u) := by
-    have := Real.exp_lt_exp.mpr (show -u < 0 by linarith)
-    rw [Real.exp_zero] at this
-    linarith
-  have hden_real : (1:ℂ) - Complex.exp (-(u:ℂ)) = ((1 - Real.exp (-u) : ℝ) : ℂ) := by
-    rw [Complex.ofReal_sub, Complex.ofReal_one, Complex.ofReal_exp]
-    push_cast
-    ring_nf
-  show ((Complex.exp (-(σ:ℂ) * (u:ℂ))
-      - Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)))
-        / (1 - Complex.exp (-(u:ℂ)))).re = _
-  rw [hden_real, div_eq_mul_inv, ← Complex.ofReal_inv, Complex.mul_re,
-    Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
-  have hre1 : (Complex.exp (-(σ:ℂ) * (u:ℂ))).re = Real.exp (-(σ*u)) := by
-    rw [Complex.exp_re]
-    have h1 : (-(σ:ℂ) * (u:ℂ)).re = -(σ*u) := by
-      simp [Complex.mul_re]
-    have h2 : (-(σ:ℂ) * (u:ℂ)).im = 0 := by
-      simp [Complex.mul_im]
-    rw [h1, h2, Real.cos_zero, mul_one]
-  have hre2 : (Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ))).re
-      = Real.exp (-(σ*u)) * Real.cos (t*u) := by
-    rw [Complex.exp_re]
-    have h1 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).re = -(σ*u) := by
-      simp [Complex.mul_re, Complex.add_re, Complex.add_im]
-    have h2 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).im = -(t*u) := by
-      simp [Complex.mul_im, Complex.add_re, Complex.add_im]
-    rw [h1, h2, Real.cos_neg]
-  rw [Complex.sub_re, hre1, hre2]
-  field_simp
+  exact re_digamma_diff_kernel_apply t hu
 
 /-- The `σ = 1/2` kernel is the hyperbolic-sine kernel (Poitou p. 6-04, first display):
 `e^{-u/2}/(1 - e^{-u}) = 1/(2 sinh(u/2))`. -/
@@ -1047,139 +1032,7 @@ theorem integrableOn_re_diff_kernel {σ : ℝ} (hσ : 0 < σ) (t : ℝ) :
   refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr ?_
   refine Filter.Eventually.of_forall (fun u hu => ?_)
   rw [Set.mem_Ioi] at hu
-  have hden_pos : 0 < 1 - Real.exp (-u) := by
-    have := Real.exp_lt_exp.mpr (show -u < 0 by linarith)
-    rw [Real.exp_zero] at this
-    linarith
-  have hden_real : (1:ℂ) - Complex.exp (-(u:ℂ)) = ((1 - Real.exp (-u) : ℝ) : ℂ) := by
-    rw [Complex.ofReal_sub, Complex.ofReal_one, Complex.ofReal_exp]
-    push_cast
-    ring_nf
-  show ((Complex.exp (-(σ:ℂ) * (u:ℂ))
-      - Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)))
-        / (1 - Complex.exp (-(u:ℂ)))).re = _
-  rw [hden_real, div_eq_mul_inv, ← Complex.ofReal_inv, Complex.mul_re,
-    Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
-  have hre1 : (Complex.exp (-(σ:ℂ) * (u:ℂ))).re = Real.exp (-(σ*u)) := by
-    rw [Complex.exp_re]
-    have h1 : (-(σ:ℂ) * (u:ℂ)).re = -(σ*u) := by
-      simp [Complex.mul_re]
-    have h2 : (-(σ:ℂ) * (u:ℂ)).im = 0 := by
-      simp [Complex.mul_im]
-    rw [h1, h2, Real.cos_zero, mul_one]
-  have hre2 : (Complex.exp (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ))).re
-      = Real.exp (-(σ*u)) * Real.cos (t*u) := by
-    rw [Complex.exp_re]
-    have h1 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).re = -(σ*u) := by
-      simp [Complex.mul_re, Complex.add_re, Complex.add_im]
-    have h2 : (-((σ:ℂ) + (t:ℂ)*Complex.I) * (u:ℂ)).im = -(t*u) := by
-      simp [Complex.mul_im, Complex.add_re, Complex.add_im]
-    rw [h1, h2, Real.cos_neg]
-  rw [Complex.sub_re, hre1, hre2]
-  field_simp
-
-/-- **The quarter–half cosh combination** (Poitou p. 6-04, third display): the halved
-`σ = 1/4` kernel minus the `σ = 1/2` kernel is the hyperbolic-cosine kernel:
-
-`[Re ψ(1/4 + it/2) - ψ(1/4)-part] - [Re ψ(1/2 + it) - ψ(1/2)-part]
-   = ∫₀^∞ (1 - cos(tx))/(2 cosh(x/2)) dx`. -/
-theorem re_digamma_quarter_sub_half_eq_integral (t : ℝ) :
-    (Complex.digamma (((1/4 : ℝ):ℂ) + ((t/2 : ℝ):ℂ)*Complex.I)
-        - Complex.digamma ((1/4 : ℝ):ℂ)).re
-      - (Complex.digamma (((1/2 : ℝ):ℂ) + ((t : ℝ):ℂ)*Complex.I)
-        - Complex.digamma ((1/2 : ℝ):ℂ)).re
-      = ∫ x in Set.Ioi (0:ℝ), (1 - Real.cos (t*x)) / (2 * Real.cosh (x/2)) := by
-  rw [re_digamma_sub_eq_integral (by norm_num : (0:ℝ) < 1/4) (t/2),
-    re_digamma_sub_eq_integral (by norm_num : (0:ℝ) < 1/2) t]
-  -- substitute u = 2x in the σ = 1/4 integral
-  set g : ℝ → ℝ := fun x => 2*x with hg
-  have himg : g '' Set.Ioi 0 = Set.Ioi (0:ℝ) := by
-    ext v
-    simp only [Set.mem_image, Set.mem_Ioi]
-    constructor
-    · rintro ⟨x, hx, rfl⟩
-      rw [hg]
-      simp only
-      linarith
-    · intro hv
-      exact ⟨v/2, by linarith, by rw [hg]; simp only; ring⟩
-  have hderiv : ∀ x ∈ Set.Ioi (0:ℝ), HasDerivWithinAt g 2 (Set.Ioi 0) x := by
-    intro x _
-    have h0 : HasDerivAt (fun x : ℝ => 2*x) 2 x := by
-      simpa using (hasDerivAt_id x).const_mul 2
-    exact h0.hasDerivWithinAt
-  have hinj : Set.InjOn g (Set.Ioi 0) := by
-    have hmono : StrictMono g := fun a b hab => by
-      rw [hg]
-      simp only
-      linarith
-    exact hmono.injective.injOn
-  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
-    measurableSet_Ioi hderiv hinj
-    (fun u : ℝ => Real.exp (-(1/4*u)) * (1 - Real.cos (t/2*u)) / (1 - Real.exp (-u)))
-  rw [himg] at hcov
-  rw [hcov]
-  -- integrable pieces for the subtraction
-  have hint2 := integrableOn_re_diff_kernel (by norm_num : (0:ℝ) < 1/2) t
-  have hint1 : IntegrableOn
-      (fun x : ℝ => |(2:ℝ)| • (Real.exp (-(1/4*(g x))) * (1 - Real.cos (t/2*(g x)))
-        / (1 - Real.exp (-(g x))))) (Set.Ioi 0) := by
-    have h0 := (MeasureTheory.integrableOn_image_iff_integrableOn_abs_deriv_smul
-      measurableSet_Ioi hderiv hinj
-      (fun u : ℝ => Real.exp (-(1/4*u)) * (1 - Real.cos (t/2*u))
-        / (1 - Real.exp (-u)))).mp ?_
-    · exact h0
-    · rw [himg]
-      exact integrableOn_re_diff_kernel (by norm_num : (0:ℝ) < 1/4) (t/2)
-  rw [← MeasureTheory.integral_sub hint1 hint2]
-  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x hx => ?_)
-  rw [Set.mem_Ioi] at hx
-  rw [hg]
-  simp only
-  rw [abs_of_pos (by norm_num : (0:ℝ) < 2), smul_eq_mul]
-  -- kernel identity: 2e^{-x/2}/(1-e^{-2x}) - e^{-x/2}/(1-e^{-x}) = 1/(2cosh(x/2))
-  have hd1 : 0 < 1 - Real.exp (-(2*x)) := by
-    have := Real.exp_lt_exp.mpr (show -(2*x) < 0 by linarith)
-    rw [Real.exp_zero] at this
-    linarith
-  have hd2 : 0 < 1 - Real.exp (-x) := by
-    have := Real.exp_lt_exp.mpr (show -x < 0 by linarith)
-    rw [Real.exp_zero] at this
-    linarith
-  have hfactor : 1 - Real.exp (-(2*x)) = (1 - Real.exp (-x)) * (1 + Real.exp (-x)) := by
-    have h0 : Real.exp (-(2*x)) = Real.exp (-x) * Real.exp (-x) := by
-      rw [← Real.exp_add]
-      ring_nf
-    rw [h0]
-    ring
-  have hcosh : 2 * Real.cosh (x/2) = Real.exp (x/2) + Real.exp (-(x/2)) := by
-    rw [Real.cosh_eq]
-    ring
-  have hcosh_pos : (0:ℝ) < 2 * Real.cosh (x/2) := by
-    rw [hcosh]
-    positivity
-  -- arguments align: 1/4*(2x) = x/2, t/2*(2x) = t*x, 1/2*x = x/2
-  rw [show (1:ℝ)/4*(2*x) = x/2 by ring, show t/2*(2*x) = t*x by ring,
-    show (-(1/2*x) : ℝ) = -(x/2) by ring]
-  have hbr : 2/(1 - Real.exp (-(2*x))) - 1/(1 - Real.exp (-x)) = 1/(1 + Real.exp (-x)) := by
-    rw [hfactor]
-    have h1 : 0 < 1 + Real.exp (-x) := by positivity
-    field_simp
-    ring
-  have hker : Real.exp (-(x/2)) / (1 + Real.exp (-x)) = 1/(2*Real.cosh (x/2)) := by
-    rw [hcosh, div_eq_div_iff (by positivity) (by positivity)]
-    rw [mul_add, ← Real.exp_add, ← Real.exp_add]
-    ring_nf
-    rw [Real.exp_zero]
-  calc 2 * (Real.exp (-(x/2)) * (1 - Real.cos (t*x)) / (1 - Real.exp (-(2*x))))
-        - Real.exp (-(x/2)) * (1 - Real.cos (t*x)) / (1 - Real.exp (-x))
-      = (Real.exp (-(x/2)) * (1 - Real.cos (t*x)))
-          * (2/(1 - Real.exp (-(2*x))) - 1/(1 - Real.exp (-x))) := by ring
-    _ = (Real.exp (-(x/2)) * (1 - Real.cos (t*x))) * (1/(1 + Real.exp (-x))) := by
-        rw [hbr]
-    _ = (1 - Real.cos (t*x)) * (Real.exp (-(x/2)) / (1 + Real.exp (-x))) := by ring
-    _ = (1 - Real.cos (t*x)) * (1/(2*Real.cosh (x/2))) := by rw [hker]
-    _ = (1 - Real.cos (t*x)) / (2 * Real.cosh (x/2)) := by ring
+  exact re_digamma_diff_kernel_apply t hu
 
 /-- The sine-integral tail `∫_t^∞ sin u/u du`, defined through the Dirichlet integral as
 `π/2 - ∫_0^t sin u/u du` (Poitou p. 6-05, the `γ₁ + γ₃` term). -/
@@ -1330,6 +1183,28 @@ noncomputable def gammaFT (F : ℝ → ℂ) (t : ℝ) : ℂ :=
   + F 0 * (2 * Complex.I * ((Real.sign t * sincTail |t| : ℝ) : ℂ))
   - ∫ x in (Set.Ioc (-1:ℝ) 1)ᶜ, F x/(x:ℂ) * Complex.exp ((t*x : ℝ) * Complex.I)
 
+/-- Dividing an integrable `F` by `x` stays integrable on the complement of the unit
+window `{x | |x| ≥ 1}`, since `‖F x / x‖ ≤ ‖F x‖` there. -/
+theorem integrableOn_div_ofReal_compl_Ioc {F : ℝ → ℂ} (hF : Integrable F) :
+    IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
+  refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
+  · refine ((hF.aestronglyMeasurable.restrict.mul
+      ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
+    exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
+  · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
+    refine Filter.Eventually.of_forall (fun x hx => ?_)
+    rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
+    push Not at hx
+    have hx1 : 1 ≤ |x| := by
+      rcases le_or_gt x (-1) with h | h
+      · rw [abs_of_nonpos (by linarith)]
+        linarith
+      · have := hx h
+        rw [abs_of_pos (by linarith)]
+        linarith
+    rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+    exact div_le_self (norm_nonneg _) hx1
+
 /-- **Lemme 1** (Poitou p. 6-04/6-05): away from `t = 0`, Poitou's `γ` is differentiable
 with `γ'(t) = -i·φ(t)`, `φ` the Fourier transform of `F`. -/
 theorem hasDerivAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
@@ -1354,24 +1229,8 @@ theorem hasDerivAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
     exact (mul_div_cancel₀ _ hxne).symm
   have hP1 := hasDerivAt_integral_mul_cexp hFdiv hxG₀ t
   -- P3: the tail piece
-  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
-    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
-    · refine ((hF.aestronglyMeasurable.restrict.mul
-        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
-      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
-      refine Filter.Eventually.of_forall (fun x hx => ?_)
-      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
-      push Not at hx
-      have hx1 : 1 ≤ |x| := by
-        rcases le_or_gt x (-1) with h | h
-        · rw [abs_of_nonpos (by linarith)]
-          linarith
-        · have := hx h
-          rw [abs_of_pos (by linarith)]
-          linarith
-      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
-      exact div_le_self (norm_nonneg _) hx1
+  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ :=
+    integrableOn_div_ofReal_compl_Ioc hF
   have hxGtail : IntegrableOn (fun x : ℝ => (x:ℂ) * (F x/(x:ℂ)))
       (Set.Ioc (-1:ℝ) 1)ᶜ := by
     refine hF.integrableOn.congr ?_
@@ -1704,19 +1563,6 @@ theorem hasDerivAt_rhoFT {k : ℝ → ℂ} (hk : Integrable k) (t : ℝ) :
       rw [hval] at h5
       exact h5
 
-/-- `μ(t) = ∫ k(x)e^{itx} dx` is bounded by `‖k‖₁`. -/
-theorem norm_muFT_le (k : ℝ → ℂ) (t : ℝ) :
-    ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ ≤ ∫ x : ℝ, ‖k x‖ := by
-  calc ‖∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)‖
-      ≤ ∫ x : ℝ, ‖k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ :=
-        MeasureTheory.norm_integral_le_integral_norm _
-    _ = ∫ x : ℝ, ‖k x‖ := by
-        refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-        show ‖k x * Complex.exp ((t*x : ℝ) * Complex.I)‖ = ‖k x‖
-        rw [norm_mul, Complex.norm_exp]
-        have h0 : (((t * x : ℝ) : ℂ) * Complex.I).re = 0 := by simp
-        rw [h0, Real.exp_zero, mul_one]
-
 /-- `μ` is continuous (dominated convergence). -/
 theorem continuous_muFT {k : ℝ → ℂ} (hk : Integrable k) :
     Continuous (fun t : ℝ => ∫ x : ℝ, k x * Complex.exp ((t*x : ℝ) * Complex.I)) := by
@@ -1791,36 +1637,14 @@ theorem continuous_integral_mul_cexp {G : ℝ → ℂ} {s : Set ℝ} (hG : Integ
       fun_prop
     exact h1.const_mul _
 
-/-- `γ` is continuous away from `0` (it is differentiable there). -/
-theorem continuousAt_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
-    (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
-    {t : ℝ} (ht : t ≠ 0) : ContinuousAt (gammaFT F) t :=
-  (hasDerivAt_gammaFT hF hFdiv ht).continuousAt
-
 /-- `γ` is globally bounded on any compact window: the continuous pieces are bounded on
 compacts and the sinc-tail jump term is globally bounded. -/
 theorem exists_bound_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
     (hFdiv : IntegrableOn (fun x : ℝ => (F 0 - F x)/(x:ℂ)) (Set.Ioc (-1) 1))
     (a b : ℝ) :
     ∃ C : ℝ, 0 < C ∧ ∀ t ∈ Set.Icc a b, ‖gammaFT F t‖ ≤ C := by
-  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
-    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
-    · refine ((hF.aestronglyMeasurable.restrict.mul
-        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
-      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
-      refine Filter.Eventually.of_forall (fun x hx => ?_)
-      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
-      push Not at hx
-      have hx1 : 1 ≤ |x| := by
-        rcases le_or_gt x (-1) with h | h
-        · rw [abs_of_nonpos (by linarith)]
-          linarith
-        · have := hx h
-          rw [abs_of_pos (by linarith)]
-          linarith
-      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
-      exact div_le_self (norm_nonneg _) hx1
+  have hGtail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ :=
+    integrableOn_div_ofReal_compl_Ioc hF
   obtain ⟨Cs, hCspos, hCs⟩ := exists_bound_sincTail
   obtain ⟨C₀, hC₀⟩ := (isCompact_Icc (a := a) (b := b)).exists_bound_of_continuousOn
     ((continuous_integral_mul_cexp hFdiv).continuousOn)
@@ -2294,50 +2118,6 @@ theorem fourier_conj_neg (k : ℝ → ℂ) (ξ : ℝ) :
       = Complex.exp ((-2 * π * (-(-v)) * ξ : ℝ) * Complex.I) • conj (k (-v))
   rw [neg_neg]
 
-/-- **The Plancherel pairing** (Poitou p. 6-06): for `k, h ∈ L¹ ∩ L²`,
-`∫ 𝓕k(ξ)·𝓕h(ξ) dξ = ∫ k(-x)·h(x) dx`. -/
-theorem integral_fourier_mul_fourier {k h : ℝ → ℂ}
-    (hk1 : Integrable k) (hk2 : MemLp k 2 (volume : Measure ℝ))
-    (hh1 : Integrable h) (hh2 : MemLp h 2 (volume : Measure ℝ)) :
-    ∫ ξ : ℝ, 𝓕 k ξ * 𝓕 h ξ = ∫ x : ℝ, k (-x) * h x := by
-  classical
-  set kstar : ℝ → ℂ := fun x => conj (k (-x)) with hkstar
-  have hMP : MeasurePreserving (fun x : ℝ => -x) volume volume :=
-    Measure.measurePreserving_neg _
-  have hks1 : Integrable kstar := by
-    have h0 : Integrable (fun x : ℝ => k (-x)) :=
-      hMP.integrable_comp_of_integrable hk1
-    exact memLp_one_iff_integrable.mp ((memLp_one_iff_integrable.mpr h0).star)
-  have hks2 : MemLp kstar 2 (volume : Measure ℝ) := by
-    have h0 : MemLp (fun x : ℝ => k (-x)) 2 (volume : Measure ℝ) :=
-      hk2.comp_measurePreserving hMP
-    exact h0.star
-  -- the L² pairing
-  have hpair := MeasureTheory.Lp.inner_fourier_eq
-    (hks2.toLp kstar) (hh2.toLp h)
-  rw [MeasureTheory.L2.inner_def, MeasureTheory.L2.inner_def] at hpair
-  -- identify the left side with ∫ 𝓕k·𝓕h
-  have hL : (∫ a : ℝ, ⟪(𝓕 (hks2.toLp kstar) : Lp ℂ 2 (volume : Measure ℝ)) a,
-        (𝓕 (hh2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
-      = ∫ ξ : ℝ, 𝓕 k ξ * 𝓕 h ξ := by
-    refine MeasureTheory.integral_congr_ae ?_
-    filter_upwards [coeFn_fourier_toLp_two hks1 hks2, coeFn_fourier_toLp_two hh1 hh2]
-      with ξ h1 h2
-    rw [RCLike.inner_apply, h1, h2, fourier_conj_neg, starRingEnd_self_apply]
-    exact mul_comm _ _
-  -- identify the right side with ∫ k(-x)·h(x)
-  have hR : (∫ a : ℝ, ⟪(hks2.toLp kstar : Lp ℂ 2 (volume : Measure ℝ)) a,
-        (hh2.toLp h : Lp ℂ 2 (volume : Measure ℝ)) a⟫_ℂ)
-      = ∫ x : ℝ, k (-x) * h x := by
-    refine MeasureTheory.integral_congr_ae ?_
-    filter_upwards [hks2.coeFn_toLp, hh2.coeFn_toLp] with x h1 h2
-    rw [RCLike.inner_apply, h1, h2]
-    rw [hkstar]
-    simp only [starRingEnd_self_apply]
-    exact mul_comm _ _
-  rw [hL, hR] at hpair
-  exact hpair
-
 /-- **The mixed Plancherel pairing**: for `k ∈ L¹ ∩ L²` and `h ∈ L²` (not necessarily
 integrable), `∫ 𝓕k(ξ)·(𝓕₂h)(ξ) dξ = ∫ k(-x)·h(x) dx`, where `𝓕₂h` is (a representative
 of) the `L²` Fourier transform. -/
@@ -2440,24 +2220,8 @@ theorem tendsto_truncated_fourier_gammaFT {F : ℝ → ℂ} (hF : Integrable F)
     fun_prop
   -- integrabilities
   have hFe_int : Integrable (fun x : ℝ => (F x/(x:ℂ)) * e x) volume → True := fun _ => trivial
-  have hFx_tail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ := by
-    refine MeasureTheory.Integrable.mono' (hF.integrableOn.norm) ?_ ?_
-    · refine ((hF.aestronglyMeasurable.restrict.mul
-        ((Complex.measurable_ofReal.inv).aestronglyMeasurable.restrict)).congr ?_)
-      exact Filter.Eventually.of_forall (fun x => (div_eq_mul_inv (F x) _).symm)
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioc.compl).mpr ?_
-      refine Filter.Eventually.of_forall (fun x hx => ?_)
-      rw [Set.mem_compl_iff, Set.mem_Ioc] at hx
-      push Not at hx
-      have hx1 : 1 ≤ |x| := by
-        rcases le_or_gt x (-1) with h' | h'
-        · rw [abs_of_nonpos (by linarith)]
-          linarith
-        · have := hx h'
-          rw [abs_of_pos (by linarith)]
-          linarith
-      rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
-      exact div_le_self (norm_nonneg _) hx1
+  have hFx_tail : IntegrableOn (fun x : ℝ => F x/(x:ℂ)) (Set.Ioc (-1:ℝ) 1)ᶜ :=
+    integrableOn_div_ofReal_compl_Ioc hF
   -- eventually-n decomposition
   have hEq : ∀ n : ℕ, 1 ≤ n →
       (∫ x in Set.Ioc (-(n:ℝ)) (n:ℝ), h x * e x)
@@ -2785,7 +2549,7 @@ theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
   -- truncations are L¹ ∩ L²
   have hIntOn : ∀ n : ℕ, IntegrableOn h (Set.Ioc (-(n:ℝ)) (n:ℝ)) := by
     intro n
-    haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (-(n:ℝ)) (n:ℝ))) := by
+    have : IsFiniteMeasure (volume.restrict (Set.Ioc (-(n:ℝ)) (n:ℝ))) := by
       constructor
       rw [Measure.restrict_apply_univ, Real.volume_Ioc]
       exact ENNReal.ofReal_lt_top
@@ -3463,6 +3227,19 @@ theorem logDeriv_pow' {f : ℂ → ℂ} {x : ℂ} (n : ℕ) (hf : f x ≠ 0)
     push_cast
     ring
 
+/-- `Complex.Gamma` is differentiable at every `s` in the right half-plane: on `0 < s.re`
+the nonvanishing side-condition `∀ m, s ≠ -m` of `Complex.differentiableAt_Gamma` is
+automatic. -/
+theorem differentiableAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ Complex.Gamma s := by
+  refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+  intro heq
+  have := congrArg Complex.re heq
+  simp only [Complex.neg_re, Complex.natCast_re] at this
+  rw [this] at hs
+  have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
+  linarith
+
 /-- **`d log Γℝ`** (Γψ-b, Poitou p. 6-03): `(Γℝ'/Γℝ)(s) = -½ log π + ½ ψ(s/2)`. -/
 theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
     logDeriv Complex.Gammaℝ s
@@ -3489,16 +3266,8 @@ theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
       rw [h3] at h2
       exact h2
     exact ((h0.const_cpow (Or.inl hπ)).differentiableAt)
-  have hd2 : DifferentiableAt ℂ (fun w : ℂ => Complex.Gamma (w / 2)) s := by
-    have h0 : DifferentiableAt ℂ Complex.Gamma (s / 2) := by
-      refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-      intro heq
-      have := congrArg Complex.re heq
-      simp only [Complex.neg_re, Complex.natCast_re] at this
-      rw [this] at hs2
-      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-      linarith
-    exact h0.comp s (differentiableAt_id.div_const 2)
+  have hd2 : DifferentiableAt ℂ (fun w : ℂ => Complex.Gamma (w / 2)) s :=
+    (differentiableAt_Gamma_of_re_pos hs2).comp s (differentiableAt_id.div_const 2)
   rw [logDeriv_mul s hpow_ne hΓ_ne hd1 hd2]
   -- the power part
   have hlog1 : logDeriv (fun w : ℂ => (π:ℂ) ^ (-w / 2)) s = -(1/2) * Complex.log π := by
@@ -3522,13 +3291,7 @@ theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
       ]
       rw [Complex.digamma_def]
       ring
-    · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-      intro heq
-      have := congrArg Complex.re heq
-      simp only [Complex.neg_re, Complex.natCast_re] at this
-      rw [this] at hs2
-      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-      linarith
+    · exact differentiableAt_Gamma_of_re_pos hs2
     · exact differentiableAt_id.div_const 2
   rw [hlog1, hlog2]
 
@@ -3550,15 +3313,7 @@ theorem differentiableAt_Gammaℝ_of_re_pos {s : ℂ} (hs : 0 < s.re) :
       rw [h3] at h1
       exact h1
     exact (h0.const_cpow (Or.inl hπ)).differentiableAt
-  · have h0 : DifferentiableAt ℂ Complex.Gamma (s / 2) := by
-      refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-      intro heq
-      have := congrArg Complex.re heq
-      simp only [Complex.neg_re, Complex.natCast_re] at this
-      rw [this] at hs2
-      have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-      linarith
-    exact h0.comp s (differentiableAt_id.div_const 2)
+  · exact (differentiableAt_Gamma_of_re_pos hs2).comp s (differentiableAt_id.div_const 2)
 
 /-- `Γℂ` is nonvanishing on the right half-plane. -/
 theorem Gammaℂ_ne_zero_of_re_pos {s : ℂ} (hs : 0 < s.re) :
@@ -3581,13 +3336,7 @@ theorem differentiableAt_Gammaℂ_of_re_pos {s : ℂ} (hs : 0 < s.re) :
   rw [hfun]
   refine DifferentiableAt.mul (DifferentiableAt.const_mul ?_ 2) ?_
   · exact ((hasDerivAt_id s).neg.const_cpow (Or.inl hbase)).differentiableAt
-  · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-    intro heq
-    have := congrArg Complex.re heq
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    rw [this] at hs
-    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-    linarith
+  · exact differentiableAt_Gamma_of_re_pos hs
 
 /-- **`d log Γℂ`** (Γψ-b): `(Γℂ'/Γℂ)(s) = -log(2π) + ψ(s)` on the right half-plane. -/
 theorem logDeriv_Gammaℂ {s : ℂ} (hs : 0 < s.re) :
@@ -3606,14 +3355,7 @@ theorem logDeriv_Gammaℂ {s : ℂ} (hs : 0 < s.re) :
   have hd1 : DifferentiableAt ℂ (fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) s :=
     DifferentiableAt.const_mul
       (((hasDerivAt_id s).neg.const_cpow (Or.inl hbase)).differentiableAt) 2
-  have hdΓ : DifferentiableAt ℂ Complex.Gamma s := by
-    refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-    intro heq
-    have := congrArg Complex.re heq
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    rw [this] at hs
-    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-    linarith
+  have hdΓ : DifferentiableAt ℂ Complex.Gamma s := differentiableAt_Gamma_of_re_pos hs
   rw [logDeriv_mul (f := fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) (g := Complex.Gamma) s
     (mul_ne_zero two_ne_zero hpow_ne) hΓ_ne hd1 hdΓ]
   have h1 : logDeriv (fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) s = -Complex.log (2*π) := by
@@ -3847,15 +3589,8 @@ theorem digamma_three_quarter_sub_quarter :
 theorem digamma_quarter_add_three_quarter :
     Complex.digamma ((1/4 : ℝ) : ℂ) + Complex.digamma ((3/4 : ℝ) : ℂ)
       = 2 * Complex.digamma ((1/2 : ℝ) : ℂ) - 2 * Complex.log 2 := by
-  have hdiff : ∀ z : ℂ, 0 < z.re → DifferentiableAt ℂ Complex.Gamma z := by
-    intro z hz
-    refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-    intro heq
-    have h0 := congrArg Complex.re heq
-    simp only [Complex.neg_re, Complex.natCast_re] at h0
-    rw [h0] at hz
-    have h2 : (0:ℝ) ≤ m := Nat.cast_nonneg m
-    linarith
+  have hdiff : ∀ z : ℂ, 0 < z.re → DifferentiableAt ℂ Complex.Gamma z :=
+    fun z hz => differentiableAt_Gamma_of_re_pos hz
   set s₀ : ℂ := ((1/4 : ℝ) : ℂ) with hs₀
   have hre₀ : s₀.re = 1/4 := Complex.ofReal_re _
   have hshift : s₀ + 1/2 = ((3/4 : ℝ) : ℂ) := by
@@ -4927,115 +4662,5 @@ theorem exists_norm_rhoFT_poitouKernel_le {σ : ℝ} (hσ : 0 < σ) (hσl : -1 �
         nlinarith
     _ ≤ (2 * (C₆ + ‖Complex.digamma (σ:ℂ)‖) + 1) * Real.log (2 + |t|) := by
         nlinarith [norm_nonneg (Complex.digamma (σ:ℂ))]
-
-/-- **Quantitative sinc-tail decay**: `|sincTail t| ≤ 2/t` for `t > 0`,
-by one integration by parts against the bounded primitive of `sin`. -/
-theorem abs_sincTail_le {t : ℝ} (ht : 0 < t) : |sincTail t| ≤ 2/t := by
-  have hrpow : ∀ u : ℝ, t < u → u^(-2 : ℝ) = 1/u^2 := by
-    intro u hu
-    have hu0 : 0 < u := lt_trans ht hu
-    rw [Real.rpow_neg hu0.le, show ((2:ℝ)) = ((2:ℕ):ℝ) by norm_num,
-      Real.rpow_natCast, one_div]
-  have hint : IntegrableOn (fun u : ℝ => Real.cos u / u^2) (Set.Ioi t) := by
-    refine Integrable.mono' (g := fun u : ℝ => u^(-2 : ℝ))
-      (integrableOn_Ioi_rpow_of_lt (by norm_num) ht) ?_ ?_
-    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
-      exact ContinuousOn.div Real.continuous_cos.continuousOn
-        (continuous_pow 2).continuousOn
-        (fun u hu => pow_ne_zero 2 (ne_of_gt (lt_trans ht hu)))
-    · refine (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
-        (Filter.Eventually.of_forall (fun u hu => ?_))
-      rw [Set.mem_Ioi] at hu
-      have hu0 : 0 < u := lt_trans ht hu
-      rw [Real.norm_eq_abs, abs_div, abs_of_pos (by positivity : (0:ℝ) < u^2),
-        hrpow u hu]
-      rw [div_le_div_iff_of_pos_right (by positivity)]
-      exact Real.abs_cos_le_one u
-  have hval2 : (∫ u in Set.Ioi t, u^(-2 : ℝ)) = 1/t := by
-    rw [integral_Ioi_rpow_of_lt (by norm_num) ht]
-    rw [show (-2 : ℝ) + 1 = -1 by norm_num, Real.rpow_neg_one]
-    field_simp
-  -- integration by parts on finite windows
-  have hIBP : ∀ X : ℝ, t ≤ X → (∫ u in t..X, Real.sin u / u)
-      = (Real.cos t/t - Real.cos X/X) - ∫ u in t..X, Real.cos u / u^2 := by
-    intro X hX
-    have hcont2 : ContinuousOn (fun u : ℝ => Real.cos u / u^2) (Set.uIcc t X) := by
-      refine ContinuousOn.div Real.continuous_cos.continuousOn
-        (continuous_pow 2).continuousOn (fun u hu => ?_)
-      rw [Set.uIcc_of_le hX, Set.mem_Icc] at hu
-      exact pow_ne_zero 2 (ne_of_gt (lt_of_lt_of_le ht hu.1))
-    have hderiv : ∀ u ∈ Set.uIcc t X, HasDerivAt (fun y : ℝ => -Real.cos y/y)
-        (Real.sin u / u + Real.cos u / u^2) u := by
-      intro u hu
-      rw [Set.uIcc_of_le hX, Set.mem_Icc] at hu
-      have hu0 : 0 < u := lt_of_lt_of_le ht hu.1
-      have h1 : HasDerivAt (fun y : ℝ => -Real.cos y) (Real.sin u) u := by
-        have h1' := (Real.hasDerivAt_cos u).neg
-        rw [neg_neg] at h1'
-        exact h1'
-      have h2 : HasDerivAt (fun y : ℝ => -Real.cos y/y)
-          ((Real.sin u * u - -Real.cos u * 1) / u ^ 2) u :=
-        h1.div (hasDerivAt_id u) hu0.ne'
-      have h3 : (Real.sin u * u - -Real.cos u * 1) / u ^ 2
-          = Real.sin u / u + Real.cos u / u^2 := by
-        field_simp
-        ring
-      rw [h3] at h2
-      exact h2
-    have hii2 : IntervalIntegrable (fun u : ℝ => Real.cos u / u^2)
-        MeasureTheory.volume t X := hcont2.intervalIntegrable
-    have hiisum : IntervalIntegrable (fun u : ℝ => Real.sin u / u + Real.cos u / u^2)
-        MeasureTheory.volume t X := (intervalIntegrable_sinc t X).add hii2
-    have h4 := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hiisum
-    have h5 : (∫ u in t..X, (Real.sin u / u + Real.cos u / u^2))
-        = (∫ u in t..X, Real.sin u / u) + ∫ u in t..X, Real.cos u / u^2 :=
-      intervalIntegral.integral_add (intervalIntegrable_sinc t X) hii2
-    rw [h5] at h4
-    have h6 : -Real.cos X/X - (-Real.cos t/t) = Real.cos t/t - Real.cos X/X := by
-      ring
-    rw [h6] at h4
-    linarith [h4]
-  -- pass to the limit X → ∞
-  have hlim1 : Tendsto (fun X : ℝ => Real.cos t/t - Real.cos X/X) atTop
-      (nhds (Real.cos t/t)) := by
-    have h0 : Tendsto (fun X : ℝ => Real.cos X/X) atTop (nhds 0) := by
-      refine squeeze_zero_norm' ?_ tendsto_inv_atTop_zero
-      filter_upwards [Filter.eventually_gt_atTop (0:ℝ)] with X hX
-      rw [Real.norm_eq_abs, abs_div, abs_of_pos hX]
-      rw [show X⁻¹ = 1/X by rw [one_div]]
-      rw [div_le_div_iff_of_pos_right hX]
-      exact Real.abs_cos_le_one X
-    have h1 := (tendsto_const_nhds (x := Real.cos t/t) (f := atTop)).sub h0
-    rw [sub_zero] at h1
-    exact h1
-  have hlim2 : Tendsto (fun X : ℝ => ∫ u in t..X, Real.cos u / u^2) atTop
-      (nhds (∫ u in Set.Ioi t, Real.cos u / u^2)) :=
-    MeasureTheory.intervalIntegral_tendsto_integral_Ioi t hint tendsto_id
-  have hrep : sincTail t = Real.cos t/t - ∫ u in Set.Ioi t, Real.cos u / u^2 := by
-    refine tendsto_nhds_unique (tendsto_integral_sinc_window t) ?_
-    have h0 := hlim1.sub hlim2
-    refine h0.congr' ?_
-    filter_upwards [Filter.eventually_ge_atTop t] with X hX
-    exact (hIBP X hX).symm
-  rw [hrep]
-  have h7 : |∫ u in Set.Ioi t, Real.cos u / u^2| ≤ 1/t := by
-    rw [← hval2]
-    refine le_trans (abs_integral_le_integral_abs) ?_
-    refine MeasureTheory.setIntegral_mono_on hint.abs
-      (integrableOn_Ioi_rpow_of_lt (by norm_num) ht) measurableSet_Ioi
-      (fun u hu => ?_)
-    rw [Set.mem_Ioi] at hu
-    have hu0 : 0 < u := lt_trans ht hu
-    rw [abs_div, abs_of_pos (by positivity : (0:ℝ) < u^2), hrpow u hu]
-    rw [div_le_div_iff_of_pos_right (by positivity)]
-    exact Real.abs_cos_le_one u
-  calc |Real.cos t/t - ∫ u in Set.Ioi t, Real.cos u / u^2|
-      ≤ |Real.cos t/t| + |∫ u in Set.Ioi t, Real.cos u / u^2| := abs_sub _ _
-    _ ≤ 1/t + 1/t := by
-        refine add_le_add ?_ h7
-        rw [abs_div, abs_of_pos ht]
-        rw [div_le_div_iff_of_pos_right ht]
-        exact Real.abs_cos_le_one t
-    _ = 2/t := by ring
 
 end DedekindResidue

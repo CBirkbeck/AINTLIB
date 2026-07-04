@@ -46,12 +46,6 @@ theorem norm_expTest (h x : ℝ) : ‖expTest h x‖ = Real.exp (-h * |x|) := by
   unfold expTest
   rw [Complex.norm_real, Real.norm_eq_abs, Real.abs_exp]
 
-theorem norm_expTest_le_one {h : ℝ} (hh : 0 ≤ h) (x : ℝ) : ‖expTest h x‖ ≤ 1 := by
-  rw [norm_expTest]
-  refine Real.exp_le_one_iff.mpr ?_
-  have h0 := abs_nonneg x
-  nlinarith [hh, h0]
-
 /-- **`hF` at the Landau–Stark function.** -/
 theorem integrable_expTest {h : ℝ} (hh : 0 < h) : Integrable (expTest h) := by
   have h1 : Integrable (fun x : ℝ => Real.exp (-h * |x|)) :=
@@ -143,25 +137,26 @@ theorem boundedVariationOn_expTest_mul_exp {h : ℝ} {c : ℝ}
       ⟨Set.self_mem_Ici, fun x hx => hx⟩]
   exact ENNReal.add_ne_top.mpr ⟨hIic, hpos⟩
 
-/-- **`hre` at the Landau–Stark function.** -/
-theorem locallyBoundedVariationOn_expTest_re {h : ℝ} (hh : 0 < h) :
-    LocallyBoundedVariationOn (fun u : ℝ => (expTest h u).re) Set.univ := by
+/-- **BV of the Landau–Stark function on the line.** -/
+theorem boundedVariationOn_expTest {h : ℝ} (hh : 0 < h) :
+    BoundedVariationOn (expTest h) Set.univ := by
   have h1 := boundedVariationOn_expTest_mul_exp (h := h) (c := 0) (by linarith) hh
   have h2 : (fun x : ℝ => expTest h x * ((Real.exp (0 * x) : ℝ) : ℂ)) = expTest h := by
     funext x
     rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one]
-  rw [h2] at h1
-  exact (lipschitzWith_complex_re.comp_boundedVariationOn h1).locallyBoundedVariationOn
+  rwa [h2] at h1
+
+/-- **`hre` at the Landau–Stark function.** -/
+theorem locallyBoundedVariationOn_expTest_re {h : ℝ} (hh : 0 < h) :
+    LocallyBoundedVariationOn (fun u : ℝ => (expTest h u).re) Set.univ :=
+  (lipschitzWith_complex_re.comp_boundedVariationOn
+    (boundedVariationOn_expTest hh)).locallyBoundedVariationOn
 
 /-- **`him` at the Landau–Stark function.** -/
 theorem locallyBoundedVariationOn_expTest_im {h : ℝ} (hh : 0 < h) :
-    LocallyBoundedVariationOn (fun u : ℝ => (expTest h u).im) Set.univ := by
-  have h1 := boundedVariationOn_expTest_mul_exp (h := h) (c := 0) (by linarith) hh
-  have h2 : (fun x : ℝ => expTest h x * ((Real.exp (0 * x) : ℝ) : ℂ)) = expTest h := by
-    funext x
-    rw [zero_mul, Real.exp_zero, Complex.ofReal_one, mul_one]
-  rw [h2] at h1
-  exact (lipschitzWith_complex_im.comp_boundedVariationOn h1).locallyBoundedVariationOn
+    LocallyBoundedVariationOn (fun u : ℝ => (expTest h u).im) Set.univ :=
+  (lipschitzWith_complex_im.comp_boundedVariationOn
+    (boundedVariationOn_expTest hh)).locallyBoundedVariationOn
 
 /-- **`hGre` at the Landau–Stark function** (`c = 1/2+a < h`). -/
 theorem locallyBoundedVariationOn_expTest_mul_exp_re {h : ℝ} {a : ℝ}
@@ -204,21 +199,25 @@ theorem norm_expTest_diffQuot_le {h : ℝ} (hh : 0 < h) (x : ℝ) :
     rw [h3]
     linarith
 
+/-- The divided difference `(F_h(0) − F_h(x))/x` is a.e.-strongly measurable. -/
+theorem aestronglyMeasurable_expTest_diffQuot (h : ℝ) :
+    AEStronglyMeasurable (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ))
+      (volume : Measure ℝ) := by
+  refine AEStronglyMeasurable.congr
+    (f := fun x : ℝ => (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹) ?_ ?_
+  · exact (aestronglyMeasurable_const.sub
+      (continuous_expTest h).aestronglyMeasurable).mul
+      ((Complex.measurable_ofReal.inv).aestronglyMeasurable)
+  · refine Filter.Eventually.of_forall (fun x => ?_)
+    show (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹ = (expTest h 0 - expTest h x)/(x:ℂ)
+    rw [div_eq_mul_inv]
+
 /-- **`hFdiv` at the Landau–Stark function**: the divided difference is integrable
 on the window. -/
 theorem integrableOn_expTest_diffQuot_window {h : ℝ} (hh : 0 < h) :
     IntegrableOn (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ))
       (Set.Ioc (-1) 1) := by
-  have hmeas : AEStronglyMeasurable (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ))
-      (volume : Measure ℝ) := by
-    refine AEStronglyMeasurable.congr
-      (f := fun x : ℝ => (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹) ?_ ?_
-    · exact (aestronglyMeasurable_const.sub
-        (continuous_expTest h).aestronglyMeasurable).mul
-        ((Complex.measurable_ofReal.inv).aestronglyMeasurable)
-    · refine Filter.Eventually.of_forall (fun x => ?_)
-      show (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹ = (expTest h 0 - expTest h x)/(x:ℂ)
-      rw [div_eq_mul_inv]
+  have hmeas := aestronglyMeasurable_expTest_diffQuot h
   refine Integrable.mono' (g := fun _ : ℝ => h) ?_ hmeas.restrict ?_
   · exact integrableOn_const (by
       rw [Real.volume_Ioc]
@@ -229,16 +228,7 @@ theorem integrableOn_expTest_diffQuot_window {h : ℝ} (hh : 0 < h) :
 square-integrable on the line (`≤ h` near `0`, `O(1/|x|)` beyond). -/
 theorem memLp_two_expTest_diffQuot {h : ℝ} (hh : 0 < h) :
     MemLp (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ)) 2 (volume : Measure ℝ) := by
-  have hmeas : AEStronglyMeasurable (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ))
-      (volume : Measure ℝ) := by
-    refine AEStronglyMeasurable.congr
-      (f := fun x : ℝ => (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹) ?_ ?_
-    · exact (aestronglyMeasurable_const.sub
-        (continuous_expTest h).aestronglyMeasurable).mul
-        ((Complex.measurable_ofReal.inv).aestronglyMeasurable)
-    · refine Filter.Eventually.of_forall (fun x => ?_)
-      show (expTest h 0 - expTest h x) * ((x:ℂ))⁻¹ = (expTest h 0 - expTest h x)/(x:ℂ)
-      rw [div_eq_mul_inv]
+  have hmeas := aestronglyMeasurable_expTest_diffQuot h
   have hfar : ∀ x : ℝ, x ≠ 0 → ‖(expTest h 0 - expTest h x)/(x:ℂ)‖ ≤ 1/|x| := by
     intro x hx
     rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
@@ -468,6 +458,33 @@ theorem paperPhi_expTest {h : ℝ} {z : ℂ} (hz : |z.re - 1/2| < h) :
       measurableSet_Ici hIio_int hIci_int, hIci_val, hIio_val]
   ring
 
+/-- The conjugate-pair combination collapses to the real rational
+`2h/(h²+γ²)`. -/
+theorem one_div_sub_add_one_div_add_I {h γ : ℝ} (hh : 0 < h) :
+    1/((h:ℂ) - (γ:ℂ)*Complex.I) + 1/((h:ℂ) + (γ:ℂ)*Complex.I)
+      = ((2*h/(h^2 + γ^2) : ℝ) : ℂ) := by
+  have hd1 : ((h:ℂ) - (γ:ℂ)*Complex.I) ≠ 0 := by
+    intro h0
+    have h1 := congrArg Complex.re h0
+    simp at h1
+    linarith
+  have hd2 : ((h:ℂ) + (γ:ℂ)*Complex.I) ≠ 0 := by
+    intro h0
+    have h1 := congrArg Complex.re h0
+    simp at h1
+    linarith
+  have hprod : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
+      = (((h^2 + γ^2 : ℝ)) : ℂ) := by
+    have h2 : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
+        = (h:ℂ)^2 - ((γ:ℂ)*Complex.I)^2 := by ring
+    rw [h2, mul_pow, Complex.I_sq]
+    push_cast
+    ring
+  rw [div_add_div _ _ hd1 hd2, hprod, Complex.ofReal_div]
+  congr 1
+  push_cast
+  ring
+
 /-- **The Fourier decay of `F̂_h`**: the transform is the rational
 `2h/(h²+γ²) ≤ 2h/γ²`. -/
 theorem exists_norm_fourier_expTest_le {h : ℝ} (hh : 0 < h) :
@@ -488,34 +505,10 @@ theorem exists_norm_fourier_expTest_le {h : ℝ} (hh : 0 < h) :
       = (h:ℂ) - (γ:ℂ)*Complex.I := by ring
   have hzero2 : ((h:ℂ) + ((1/2 + (γ:ℂ)*Complex.I) - 1/2))
       = (h:ℂ) + (γ:ℂ)*Complex.I := by ring
-  have hd3 : (((h^2 + γ^2 : ℝ)) : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (by positivity)
-  have hd1 : ((h:ℂ) - (γ:ℂ)*Complex.I) ≠ 0 := by
-    intro h0
-    have h1' := congrArg Complex.re h0
-    simp at h1'
-    linarith
-  have hd2 : ((h:ℂ) + (γ:ℂ)*Complex.I) ≠ 0 := by
-    intro h0
-    have h1' := congrArg Complex.re h0
-    simp at h1'
-    linarith
-  have hprod : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
-      = (((h^2 + γ^2 : ℝ)) : ℂ) := by
-    have h2 : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
-        = (h:ℂ)^2 - ((γ:ℂ)*Complex.I)^2 := by ring
-    rw [h2, mul_pow, Complex.I_sq]
-    push_cast
-    ring
-  have hcomb : 1/((h:ℂ) - (γ:ℂ)*Complex.I) + 1/((h:ℂ) + (γ:ℂ)*Complex.I)
-      = ((2*h : ℝ) : ℂ) / (((h^2 + γ^2 : ℝ)) : ℂ) := by
-    rw [div_add_div _ _ hd1 hd2, hprod]
-    congr 1
-    push_cast
-    ring
-  rw [h1, h2, hzero1, hzero2, hcomb]
-  rw [norm_div, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
-    Real.norm_eq_abs, abs_of_pos (by linarith), abs_of_pos (by positivity)]
+  rw [h1, h2, hzero1, hzero2, one_div_sub_add_one_div_add_I hh, Complex.norm_real,
+    Real.norm_eq_abs,
+    abs_of_nonneg (show (0:ℝ) ≤ 2 * h / (h ^ 2 + γ ^ 2) from
+      div_nonneg (by linarith) (by positivity))]
   rw [div_le_div_iff₀ (by positivity) (by positivity)]
   nlinarith [sq_nonneg γ, sq_nonneg h]
 
@@ -724,6 +717,13 @@ theorem norm_expTest_mul_exp_le {h : ℝ} {a : ℝ} (ha : 0 < a) (hah : 1/2 + a 
     mul_le_mul_of_nonneg_left (le_abs_self x) (by linarith)
   nlinarith [abs_nonneg x]
 
+/-- `‖(w : ℂ) * z‖ ≤ w` when `0 ≤ w` and `‖z‖ ≤ 1` — the Weierstrass-`M` step for
+the prime-side series. -/
+theorem norm_ofReal_mul_le_of_norm_le_one {w : ℝ} (hw : 0 ≤ w) {z : ℂ}
+    (hz : ‖z‖ ≤ 1) : ‖(w : ℂ) * z‖ ≤ w := by
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hw]
+  exact mul_le_of_le_one_right hw hz
+
 /-- Pointwise summability of the prime-side series at the Landau–Stark function. -/
 theorem summable_primeSideH_term_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
     (hah : 1/2 + a < h) (u : ℝ) :
@@ -739,20 +739,8 @@ theorem summable_primeSideH_term_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
       * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)))
     (summable_primeIdeal_pow_log_rpow K (by linarith : (1:ℝ) < 1+a))
     (fun pk => ?_)
-  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
-    abs_of_nonneg (primeSideH_weight_nonneg K pk)]
-  calc Real.log (Ideal.absNorm pk.1.1)
-        * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
-        * ‖expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
-            * ((Real.exp ((1/2+a)
-                * (u + (((pk.2+1 : ℕ)) : ℝ)
-                  * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)‖
-      ≤ Real.log (Ideal.absNorm pk.1.1)
-          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) * 1 :=
-        mul_le_mul_of_nonneg_left (norm_expTest_mul_exp_le ha hah _)
-          (primeSideH_weight_nonneg K pk)
-    _ = Real.log (Ideal.absNorm pk.1.1)
-          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := mul_one _
+  exact norm_ofReal_mul_le_of_norm_le_one (primeSideH_weight_nonneg K pk)
+    (norm_expTest_mul_exp_le ha hah _)
 
 /-- **`hH`-BV at the Landau–Stark function** (complex level). -/
 theorem boundedVariationOn_primeSideH_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
@@ -833,20 +821,8 @@ theorem continuous_primeSideH_expTest {h : ℝ} {a : ℝ} (ha : 0 < a)
     refine Continuous.mul ?_ ?_
     · exact (continuous_expTest h).comp (continuous_id.add continuous_const)
     · exact Complex.continuous_ofReal.comp (by fun_prop)
-  · rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_nonneg (primeSideH_weight_nonneg K pk)]
-    calc Real.log (Ideal.absNorm pk.1.1)
-          * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a))
-          * ‖expTest h (u + (((pk.2+1 : ℕ)) : ℝ) * Real.log (Ideal.absNorm pk.1.1))
-              * ((Real.exp ((1/2+a)
-                  * (u + (((pk.2+1 : ℕ)) : ℝ)
-                    * Real.log (Ideal.absNorm pk.1.1))) : ℝ) : ℂ)‖
-        ≤ Real.log (Ideal.absNorm pk.1.1)
-            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) * 1 :=
-          mul_le_mul_of_nonneg_left (norm_expTest_mul_exp_le ha hah _)
-            (primeSideH_weight_nonneg K pk)
-      _ = Real.log (Ideal.absNorm pk.1.1)
-            * (Ideal.absNorm pk.1.1 : ℝ) ^ (-(((pk.2+1 : ℕ)) : ℝ) * (1+a)) := mul_one _
+  · exact norm_ofReal_mul_le_of_norm_le_one (primeSideH_weight_nonneg K pk)
+      (norm_expTest_mul_exp_le ha hah _)
 
 /-- **`hHp` at the Landau–Stark function.** -/
 theorem tendsto_primeSideH_expTest_right {h : ℝ} {a : ℝ} (ha : 0 < a)
@@ -864,6 +840,20 @@ theorem tendsto_primeSideH_expTest_left {h : ℝ} {a : ℝ} (ha : 0 < a)
   ((continuous_primeSideH_expTest K ha hah).continuousAt).tendsto.mono_left
     nhdsWithin_le_nhds
 
+/-- **BV of the pole-window sum** at the Landau–Stark symbol `G = F_h·e^{(1/2+a)x}`. -/
+theorem locallyBoundedVariationOn_poleWindow_sum_expTest {h : ℝ} {a : ℝ}
+    (ha : 0 < a) (hah : 1/2 + a < h) :
+    LocallyBoundedVariationOn (fun u : ℝ =>
+      poleWindow a (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
+        + poleWindow (1+a)
+            (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)
+      Set.univ := by
+  have hG : Integrable (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith)
+  have hGc : Continuous (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
+    (continuous_expTest h).mul (Complex.continuous_ofReal.comp (by fun_prop))
+  exact locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc
+
 /-- **`hEre` at the Landau–Stark function.** -/
 theorem locallyBoundedVariationOn_poleWindow_expTest_re {h : ℝ} {a : ℝ}
     (ha : 0 < a) (hah : 1/2 + a < h) :
@@ -871,13 +861,9 @@ theorem locallyBoundedVariationOn_poleWindow_expTest_re {h : ℝ} {a : ℝ}
       ((poleWindow a (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
         + poleWindow (1+a)
             (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).re)
-      Set.univ := by
-  have hG : Integrable (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
-    integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith)
-  have hGc : Continuous (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
-    (continuous_expTest h).mul (Complex.continuous_ofReal.comp (by fun_prop))
-  exact lipschitzWith_complex_re.comp_locallyBoundedVariationOn
-    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+      Set.univ :=
+  lipschitzWith_complex_re.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_sum_expTest ha hah)
 
 /-- **`hEim` at the Landau–Stark function.** -/
 theorem locallyBoundedVariationOn_poleWindow_expTest_im {h : ℝ} {a : ℝ}
@@ -886,13 +872,9 @@ theorem locallyBoundedVariationOn_poleWindow_expTest_im {h : ℝ} {a : ℝ}
       ((poleWindow a (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u
         + poleWindow (1+a)
             (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) u)).im)
-      Set.univ := by
-  have hG : Integrable (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
-    integrable_expTest_mul_exp (by rw [abs_of_pos (by linarith)]; linarith)
-  have hGc : Continuous (fun x : ℝ => expTest h x * ((Real.exp ((1/2+a) * x) : ℝ) : ℂ)) :=
-    (continuous_expTest h).mul (Complex.continuous_ofReal.comp (by fun_prop))
-  exact lipschitzWith_complex_im.comp_locallyBoundedVariationOn
-    (locallyBoundedVariationOn_poleWindow_add ha (by linarith) hG hGc)
+      Set.univ :=
+  lipschitzWith_complex_im.comp_locallyBoundedVariationOn
+    (locallyBoundedVariationOn_poleWindow_sum_expTest ha hah)
 
 /-- **The Weil–Poitou explicit formula at the Landau–Stark function**: every
 hypothesis of `weil_explicit_formula` holds for `F_h(x) = e^{−h|x|}` when
@@ -953,33 +935,6 @@ theorem weil_explicit_formula_expTest {h : ℝ} {a : ℝ}
     (tendsto_primeSideH_expTest_left K ha hah)
 
 /-! ### Evaluating the three sides: eq:Stark (L5-b) -/
-
-/-- The conjugate-pair combination collapses to the real rational
-`2h/(h²+γ²)`. -/
-theorem one_div_sub_add_one_div_add_I {h γ : ℝ} (hh : 0 < h) :
-    1/((h:ℂ) - (γ:ℂ)*Complex.I) + 1/((h:ℂ) + (γ:ℂ)*Complex.I)
-      = ((2*h/(h^2 + γ^2) : ℝ) : ℂ) := by
-  have hd1 : ((h:ℂ) - (γ:ℂ)*Complex.I) ≠ 0 := by
-    intro h0
-    have h1 := congrArg Complex.re h0
-    simp at h1
-    linarith
-  have hd2 : ((h:ℂ) + (γ:ℂ)*Complex.I) ≠ 0 := by
-    intro h0
-    have h1 := congrArg Complex.re h0
-    simp at h1
-    linarith
-  have hprod : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
-      = (((h^2 + γ^2 : ℝ)) : ℂ) := by
-    have h2 : ((h:ℂ) - (γ:ℂ)*Complex.I) * ((h:ℂ) + (γ:ℂ)*Complex.I)
-        = (h:ℂ)^2 - ((γ:ℂ)*Complex.I)^2 := by ring
-    rw [h2, mul_pow, Complex.I_sq]
-    push_cast
-    ring
-  rw [div_add_div _ _ hd1 hd2, hprod, Complex.ofReal_div]
-  congr 1
-  push_cast
-  ring
 
 /-- **The transform value at a critical-line zero**: `Φ_{F_h}(1/2+iγ) = 2h/(h²+γ²)`. -/
 theorem paperPhi_expTest_at_zero {h : ℝ} (hh : 0 < h) {ρ : ℂ} (hre : ρ.re = 1/2) :

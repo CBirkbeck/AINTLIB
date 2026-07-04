@@ -31,6 +31,20 @@ open scoped nonZeroDivisors Real ENNReal NNReal
 
 variable (K : Type*) [Field K] [NumberField K]
 
+/-- Continuity of the box integrand `u ↦ heckeTheta I (heckeWeights t u)`, for `t > 0`. -/
+theorem continuous_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ}
+    (ht : 0 < t) :
+    Continuous (fun u : logSpace K => heckeTheta K I (heckeWeights K t u)) := by
+  rw [continuous_iff_continuousAt]
+  intro u
+  have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t : ℝ), u)) ht
+  have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
+    (continuous_const.prodMk continuous_id).continuousAt
+  have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
+      = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
+        ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
+  rw [hcompeq]
+  exact ContinuousAt.comp (x := u) hj hin
 
 open scoped Classical in
 /-- The deviation of `g_I` from its constant term is the box integral of the zero-removed
@@ -51,17 +65,7 @@ theorem heckeG_sub_const_eq (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (h
   have ha' : 0 < a' := by
     have := Real.rpow_pos_of_pos ht ((1 : ℝ) / (Module.finrank ℚ K))
     positivity
-  have hcontu : Continuous (fun u : logSpace K => heckeTheta K I (heckeWeights K t u)) := by
-    rw [continuous_iff_continuousAt]
-    intro u
-    have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t : ℝ), u)) ht
-    have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
-      (continuous_const.prodMk continuous_id).continuousAt
-    have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
-        = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
-          ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
-    rw [hcompeq]
-    exact ContinuousAt.comp (x := u) hj hin
+  have hcontu := continuous_heckeTheta_heckeWeights K I ht
   have hint : IntegrableOn (fun u : logSpace K =>
       heckeTheta K I (heckeWeights K t u)) B := by
     refine MeasureTheory.Integrable.mono'
@@ -73,7 +77,7 @@ theorem heckeG_sub_const_eq (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ} (h
       (fun u hu => ?_))
     have hca : ∀ w, a' ≤ heckeWeights K t u w := by
       intro w
-      exact heckeWeights_ge_of_bounded K hR (hbox u hu) ht.le w
+      exact le_heckeWeights_of_bounded K hR (hbox u hu) ht.le w
     rw [Real.norm_eq_abs, abs_of_pos]
     · exact heckeTheta_le_iso K I ha' hca
     · have hsplit := heckeTheta_eq_one_add K I ha' hca
@@ -204,7 +208,7 @@ noncomputable def coneUnfoldEquiv (J : (Ideal (𝓞 K))⁰) :
       obtain ⟨y, hy, rfl⟩ := hvlat
       rw [norm_eq_norm]
       have hy0 : y ≠ 0 := fun h => hvne (by rw [h, map_zero])
-      have hN : Algebra.norm ℚ y ≠ 0 := by exact Algebra.norm_ne_zero_iff.mpr hy0
+      have hN : Algebra.norm ℚ y ≠ 0 := Algebra.norm_ne_zero_iff.mpr hy0
       simpa using hN
     obtain ⟨u, hu⟩ := exists_unit_smul_mem hvnorm
     obtain ⟨⟨ζtor, nexp⟩, hdecomp, -⟩ := exist_unique_eq_mul_prod K u
@@ -230,40 +234,6 @@ noncomputable def coneUnfoldEquiv (J : (Ideal (𝓞 K))⁰) :
       refine Finset.prod_congr rfl (fun i _ => ?_)
       rw [zpow_neg]
     rw [hprodinv, inv_smul_smul]
-
-open scoped Classical in
-/-- The box integral of a `unitLattice`-periodic function does not depend on the choice of
-ℤ-basis of the unit lattice: any two `ZSpan` boxes are fundamental domains of the same
-lattice. -/
-theorem setIntegral_box_swap (f : logSpace K → ℝ)
-    (hf : ∀ l ∈ unitLattice K, ∀ x, f (l + x) = f x) :
-    ∫ u in ZSpan.fundamentalDomain
-      ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ), f u
-      = ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ), f u := by
-  have h1 := ZSpan.isAddFundamentalDomain
-    ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ) volume
-  have h2 := ZSpan.isAddFundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ) volume
-  rw [(Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis_span ℝ] at h1
-  rw [(basisUnitLattice K).ofZLatticeBasis_span ℝ] at h2
-  haveI : VAddInvariantMeasure (unitLattice K) (logSpace K) volume :=
-    inferInstanceAs (VAddInvariantMeasure (unitLattice K).toAddSubgroup (logSpace K) volume)
-  refine h1.setIntegral_eq h2 (f := f) (fun l x => ?_)
-  rw [Submodule.vadd_def, vadd_eq_add]
-  exact hf (l : logSpace K) l.2 x
-
-open scoped Classical in
-/-- `heckeG` computed over the canonical `basisUnitLattice` box — the box whose translates
-are indexed by `logEmbedding_fundSystem`. -/
-theorem heckeG_eq_basisUnitLattice (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (t : ℝ) :
-    heckeG K I t = (torsionOrder K : ℝ)⁻¹ *
-      ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
-        heckeTheta K I (heckeWeights K t u) := by
-  rw [heckeG]
-  congr 1
-  refine setIntegral_box_swap K _ (fun l hl x => ?_)
-  obtain ⟨a, -, ha⟩ := Submodule.mem_map.mp hl
-  rw [add_comm, ← ha]
-  exact heckeTheta_heckeWeights_periodic K I _ x (Additive.toMul a)
 
 open scoped Classical in
 /-- The composite coordinate identification `EuclideanSpace ≃ mixedSpace` through which
@@ -344,170 +314,6 @@ theorem sum_placeWeights_unit_smul (t : ℝ) (u : logSpace K) (ε : (𝓞 K)ˣ) 
   ring
 
 open scoped Classical in
-/-- **Reindex a zero-removed lattice sum along the Euclidean cone unfolding**: the sum
-over nonzero points of the ideal lattice becomes a sum over cone points × unit exponents. -/
-theorem tsum_ite_eq_tsum_coneUnfold (J : (Ideal (𝓞 K))⁰)
-    (g : EuclideanSpace ℝ (index K) → ℝ) :
-    (∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
-        if v = 0 then 0 else g (v : EuclideanSpace ℝ (index K)))
-      = ∑' p : (idealSet K J) × (Fin (rank K) → ℤ),
-          g ((euclidMixedEquiv K).symm
-            ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))) := by
-  have hmem : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
-      (euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K)))
-        ∈ idealZLattice K (FractionalIdeal.mk0 K J) := by
-    intro p
-    rw [mem_idealZLattice_iff_euclidMixed, LinearEquiv.apply_symm_apply]
-    exact unit_smul_mem_idealLattice K J _ (p.1.2.2)
-  have hne : ∀ p : (idealSet K J) × (Fin (rank K) → ℤ),
-      (⟨(euclidMixedEquiv K).symm ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))),
-        hmem p⟩ : idealZLattice K (FractionalIdeal.mk0 K J)) ≠ 0 := by
-    intro p h0
-    have h1 : (euclidMixedEquiv K).symm
-        ((∏ i, fundSystem K i ^ (p.2 i)) • ((p.1 : mixedSpace K))) = 0 := by
-      have := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
-        (z : EuclideanSpace ℝ (index K))) h0
-      simpa using this
-    rw [LinearEquiv.map_eq_zero_iff] at h1
-    have hp1ne : ((p.1 : mixedSpace K)) ≠ 0 := by
-      intro hz
-      have hc := p.1.2.1
-      rw [hz] at hc
-      exact hc.2 (map_zero (mixedEmbedding.norm (K := K)))
-    exact (unit_smul_ne_zero K _ hp1ne) h1
-  refine tsum_eq_tsum_of_ne_zero_bij
-    (i := fun p => ⟨(euclidMixedEquiv K).symm
-      ((∏ i, fundSystem K i ^ ((p : (idealSet K J) × (Fin (rank K) → ℤ)).2 i))
-        • (((p : (idealSet K J) × (Fin (rank K) → ℤ)).1 : mixedSpace K))), hmem p⟩)
-    ?_ ?_ ?_
-  · -- injectivity
-    rintro p q hpq
-    have hval := congrArg (fun z : idealZLattice K (FractionalIdeal.mk0 K J) =>
-      (z : EuclideanSpace ℝ (index K))) hpq
-    simp only at hval
-    have hmix := (euclidMixedEquiv K).symm.injective hval
-    have hcu : coneUnfoldEquiv K J (p : (idealSet K J) × (Fin (rank K) → ℤ))
-        = coneUnfoldEquiv K J (q : (idealSet K J) × (Fin (rank K) → ℤ)) :=
-      Subtype.ext hmix
-    exact Subtype.ext ((coneUnfoldEquiv K J).injective hcu)
-  · -- support inclusion
-    rintro v hv
-    rw [Function.mem_support] at hv
-    have hvne : v ≠ 0 := by
-      rintro rfl
-      simp at hv
-    have hvne' : (v : EuclideanSpace ℝ (index K)) ≠ 0 := by
-      intro h0
-      exact hvne (Subtype.ext h0)
-    set w : {x : EuclideanSpace ℝ (index K) //
-        x ∈ idealZLattice K (FractionalIdeal.mk0 K J) ∧ x ≠ 0} :=
-      ⟨(v : EuclideanSpace ℝ (index K)), v.2, hvne'⟩ with hw
-    set pr := euclidConeEquiv K J w with hpr
-    have hback : (euclidConeEquiv K J).symm pr = w := Equiv.symm_apply_apply _ _
-    -- compute the value of the inverse
-    have hvalsymm : ((euclidConeEquiv K J).symm pr : EuclideanSpace ℝ (index K))
-        = (euclidMixedEquiv K).symm
-            ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K))) := by
-      rw [euclidConeEquiv]
-      rfl
-    have hvw : (euclidMixedEquiv K).symm
-        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))
-        = (v : EuclideanSpace ℝ (index K)) := by
-      rw [← hvalsymm, hback]
-    have hgpr : g ((euclidMixedEquiv K).symm
-        ((∏ i, fundSystem K i ^ (pr.2 i)) • ((pr.1 : mixedSpace K)))) ≠ 0 := by
-      rw [hvw]
-      rwa [if_neg hvne] at hv
-    refine ⟨⟨pr, hgpr⟩, ?_⟩
-    exact Subtype.ext hvw
-  · -- pointwise agreement
-    rintro ⟨p, hp⟩
-    rw [if_neg (hne p)]
-
-open scoped Classical in
-/-- **The theta tail as a cone sum with shifted log-coordinates**: reindex + per-point
-unit shift combined. Each cone point contributes through its canonical algebraic
-preimage, and the fundamental-unit exponents move into a translation of `u`. -/
-theorem heckeTheta_tail_cone (J : (Ideal (𝓞 K))⁰) (t : ℝ) (u : logSpace K) :
-    (∑' v : idealZLattice K (FractionalIdeal.mk0 K J),
-        if v = 0 then 0 else Real.exp (-π * ∑ i : index K,
-          placeWeights K (heckeWeights K t u) i
-            * ((v : EuclideanSpace ℝ (index K)) i) ^ 2))
-      = ∑' p : (idealSet K J) × (Fin (rank K) → ℤ),
-          Real.exp (-π * ∑ i : index K, placeWeights K (heckeWeights K t
-            (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (p.2 j))))) i
-              * ((embeddingCoords K (algebraMap (𝓞 K) K
-                  ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K))) i) ^ 2) := by
-  rw [tsum_ite_eq_tsum_coneUnfold K J (g := fun x => Real.exp (-π * ∑ i : index K,
-    placeWeights K (heckeWeights K t u) i * (x i) ^ 2))]
-  refine tsum_congr (fun p => ?_)
-  congr 1
-  have hcoe : ((p.1 : mixedSpace K))
-      = mixedEmbedding K (algebraMap (𝓞 K) K
-          ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K)) := by
-    rw [show (algebraMap (𝓞 K) K
-        ((preimageOfMemIntegerSet (idealSetMap K J p.1)) : 𝓞 K))
-      = ((preimageOfMemIntegerSet (idealSetMap K J p.1) : 𝓞 K) : K) from rfl]
-    rw [mixedEmbedding_preimageOfMemIntegerSet]
-    rw [idealSetMap_apply]
-  rw [hcoe]
-  exact congrArg (fun r => -π * r)
-    (sum_placeWeights_unit_smul K t u (∏ j, fundSystem K j ^ (p.2 j)) _)
-
-open scoped Classical in
-/-- **Tiling the log-space by unit-box translates**: the integral of an integrable
-function over `logSpace` is the sum over fundamental-unit exponents of box integrals at
-translated arguments. -/
-theorem integral_eq_tsum_box_shift (f : logSpace K → ℝ) (hf : Integrable f) :
-    ∫ u, f u = ∑' n : Fin (rank K) → ℤ,
-      ∫ u in ZSpan.fundamentalDomain ((basisUnitLattice K).ofZLatticeBasis ℝ),
-        f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))) := by
-  classical
-  set B := (basisUnitLattice K).ofZLatticeBasis ℝ with hB
-  have hFD := ZSpan.isAddFundamentalDomain B volume
-  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)) (logSpace K) volume :=
-    inferInstanceAs
-      (VAddInvariantMeasure (Submodule.span ℤ (Set.range ⇑B)).toAddSubgroup
-        (logSpace K) volume)
-  rw [hFD.integral_eq_tsum' f hf]
-  have hpre : ∀ g : Submodule.span ℤ (Set.range ⇑B),
-      ∫ x in ZSpan.fundamentalDomain B, f (-g +ᵥ x)
-        = ∫ x in ZSpan.fundamentalDomain B, f (-(g : logSpace K) + x) := by
-    intro g
-    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _) (fun x _ => ?_)
-    rw [Submodule.vadd_def, vadd_eq_add]
-    norm_cast
-  rw [tsum_congr hpre]
-  -- reindex the span by exponent vectors
-  set eB := ((Module.Basis.restrictScalars ℤ B).equivFun).toEquiv with heB
-  rw [← Equiv.tsum_eq eB.symm (fun g => ∫ u in ZSpan.fundamentalDomain B,
-    f (-(g : logSpace K) + u))]
-  · -- now both sides are sums over exponent vectors; match term-by-term after n ↦ -n
-    rw [← Equiv.tsum_eq (Equiv.neg (Fin (rank K) → ℤ)) (fun n =>
-      ∫ u in ZSpan.fundamentalDomain B,
-        f (u + logEmbedding K (Additive.ofMul (∏ j, fundSystem K j ^ (n j)))))]
-    refine tsum_congr (fun n => ?_)
-    have hval : ((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K)
-        = ∑ i, n i • (B i) := by
-      rw [heB]
-      show (((Module.Basis.restrictScalars ℤ B).equivFun.symm n :
-        Submodule.span ℤ (Set.range ⇑B)) : logSpace K) = _
-      rw [(Module.Basis.restrictScalars ℤ B).equivFun_symm_apply]
-      push_cast
-      refine Finset.sum_congr rfl (fun i _ => ?_)
-      rw [Module.Basis.restrictScalars_apply]
-    have hshift : logEmbedding K (Additive.ofMul (∏ j, fundSystem K j
-          ^ ((Equiv.neg (Fin (rank K) → ℤ)) n j)))
-        = -((eB.symm n : Submodule.span ℤ (Set.range ⇑B)) : logSpace K) := by
-      rw [logEmbedding_prod_fundSystem, hval, ← Finset.sum_neg_distrib]
-      refine Finset.sum_congr rfl (fun i _ => ?_)
-      rw [Equiv.neg_apply, Pi.neg_apply, neg_smul, ← hB]
-    refine setIntegral_congr_fun (ZSpan.fundamentalDomain_measurableSet _) (fun u _ => ?_)
-    rw [hshift]
-    congr 1
-    abel
-
-open scoped Classical in
 /-- Cone points of an integral ideal form a countable family (they sit inside the ideal
 lattice, which is a discrete subgroup). -/
 instance instCountableIdealSet (J : (Ideal (𝓞 K))⁰) : Countable (idealSet K J) := by
@@ -572,7 +378,7 @@ theorem lintegral_eq_tsum_box_shift (f : logSpace K → ℝ≥0∞) :
   abel
 
 open scoped Classical in
-/-- `ℝ≥0∞`-valued version of `tsum_ite_eq_tsum_coneUnfold` (same unfolding, for
+/-- `ℝ≥0∞`-valued cone-unfolding of a zero-removed lattice sum (same unfolding, for
 lintegral-valued families). -/
 theorem tsum_ite_eq_tsum_coneUnfold_ennreal (J : (Ideal (𝓞 K))⁰)
     (g : EuclideanSpace ℝ (index K) → ℝ≥0∞) :
@@ -1497,7 +1303,7 @@ theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ
     have hca : ∀ u ∈ ZSpan.fundamentalDomain
         ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
         ∀ w, a' ≤ heckeWeights K t u w :=
-      fun u hu w => heckeWeights_ge_of_bounded K hR (hbox u hu) ht.le w
+      fun u hu w => le_heckeWeights_of_bounded K hR (hbox u hu) ht.le w
     have hnn : ∀ u ∈ ZSpan.fundamentalDomain
         ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ),
         0 ≤ heckeTheta K I (heckeWeights K t u) - 1 := by
@@ -1513,18 +1319,7 @@ theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ
         · exact (Real.exp_pos _).le
       rw [hsplit]
       linarith
-    have hcontu : Continuous (fun u : logSpace K =>
-        heckeTheta K I (heckeWeights K t u)) := by
-      rw [continuous_iff_continuousAt]
-      intro u
-      have hj := continuousAt_heckeTheta_heckeWeights K I (p := ((t : ℝ), u)) ht
-      have hin : ContinuousAt (fun u' : logSpace K => ((t : ℝ), u')) u :=
-        (continuous_const.prodMk continuous_id).continuousAt
-      have hcompeq : (fun u' : logSpace K => heckeTheta K I (heckeWeights K t u'))
-          = (fun q : ℝ × logSpace K => heckeTheta K I (heckeWeights K q.1 q.2))
-            ∘ (fun u' : logSpace K => ((t : ℝ), u')) := rfl
-      rw [hcompeq]
-      exact ContinuousAt.comp (x := u) hj hin
+    have hcontu := continuous_heckeTheta_heckeWeights K I ht
     have hBmeas : MeasurableSet (ZSpan.fundamentalDomain
         ((Module.Free.chooseBasis ℤ (unitLattice K)).ofZLatticeBasis ℝ)) :=
       ZSpan.fundamentalDomain_measurableSet _
@@ -1554,7 +1349,7 @@ theorem ofReal_heckeG_sub_const (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {t : ℝ
 
 open scoped Classical in
 /-- The box lintegral of a `unitLattice`-periodic function does not depend on the choice
-of ℤ-basis (lintegral version of `setIntegral_box_swap` — hypothesis-free). -/
+of ℤ-basis (the lintegral version, hypothesis-free). -/
 theorem setLIntegral_box_swap (f : logSpace K → ℝ≥0∞)
     (hf : ∀ l ∈ unitLattice K, ∀ x, f (l + x) = f x) :
     ∫⁻ u in ZSpan.fundamentalDomain
@@ -2009,6 +1804,37 @@ theorem count_LSeriesSummable {s : ℝ} (hs : 1 < s) :
     filter_upwards with n
     rw [sum_count_eq_card_le K n]
 
+/-- Forgetting the nonzero-divisor witness embeds the nonzero-divisor ideals of `𝓞 K` of
+norm `n` into all ideals of norm `n`; the resulting map is injective. -/
+theorem normFiber_forget_injective (n : ℕ) :
+    Function.Injective (fun b : {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+      (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) := by
+  rintro b c hbc
+  have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
+    (z : Ideal (𝓞 K))) hbc
+  exact Subtype.ext (Subtype.ext this)
+
+/-- For `n ≠ 0`, forgetting the nonzero-divisor witness is a bijection between the
+nonzero-divisor ideals of `𝓞 K` of norm `n` and all ideals of norm `n` (surjective because
+a nonzero norm forces the ideal to be a nonzero divisor). Used to evaluate the norm fibers
+of the ideal-type zeta sum. -/
+noncomputable def normFiberEquiv (n : ℕ) (hn : n ≠ 0) :
+    {b : (Ideal (𝓞 K))⁰ //
+        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}
+      ≃ {I : Ideal (𝓞 K) // Ideal.absNorm I = n} := by
+  refine Equiv.ofBijective (fun b : {b : (Ideal (𝓞 K))⁰ //
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
+      (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
+        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) ⟨normFiber_forget_injective K n, ?_⟩
+  rintro ⟨I, hI⟩
+  have hIne : I ≠ 0 := by
+    intro h0
+    rw [h0, show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hI
+    exact hn hI.symm
+  exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
+
 open scoped Classical in
 /-- **Summability of the ideal norm sums** for real `s > 1`, from the ideal-counting
 asymptotics. -/
@@ -2049,19 +1875,10 @@ theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
       0 ≤ ((Ideal.absNorm ((p.2 : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-s) :=
     fun p => Real.rpow_nonneg (Nat.cast_nonneg _) _
   haveI hfibfin : ∀ n : ℕ, Finite {b : (Ideal (𝓞 K))⁰ //
-      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := by
-    intro n
-    have hinj : Function.Injective (fun b : {b : (Ideal (𝓞 K))⁰ //
-        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
-        (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
-          {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) := by
-      rintro b c hbc
-      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
-        (z : Ideal (𝓞 K))) hbc
-      exact Subtype.ext (Subtype.ext this)
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := fun n => by
     haveI : Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = n} :=
       (Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) n).to_subtype
-    exact Finite.of_injective _ hinj
+    exact Finite.of_injective _ (normFiber_forget_injective K n)
   rw [← Equiv.summable_iff (Equiv.sigmaFiberEquiv (fun b : (Ideal (𝓞 K))⁰ =>
     Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))))]
   refine (summable_sigma_of_nonneg hnn).mpr ⟨fun n => Summable.of_finite, ?_⟩
@@ -2087,26 +1904,7 @@ theorem summable_ideal_norm_rpow {s : ℝ} (hs : 1 < s) :
     rw [Nat.cast_zero, Real.zero_rpow (by linarith), mul_zero, mul_zero]
   · congr 2
     rw [← Nat.card_eq_fintype_card]
-    refine Nat.card_congr ((Equiv.ofBijective (fun b : {b : (Ideal (𝓞 K))⁰ //
-      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
-      (⟨((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
-        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) ⟨?_, ?_⟩).symm)
-    · rintro b c hbc
-      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
-        (z : Ideal (𝓞 K))) hbc
-      exact Subtype.ext (Subtype.ext this)
-    · rintro ⟨I, hI⟩
-      have hIne : I ≠ 0 := by
-        intro h0
-        rw [h0] at hI
-        rw [show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hI
-        exact hn hI.symm
-      exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
-
-theorem sq_rpow_neg {x : ℝ} (hx : 0 ≤ x) (σ : ℝ) :
-    (x ^ 2) ^ (-σ) = x ^ (-(2 * σ)) := by
-  rw [← Real.rpow_natCast x 2, ← Real.rpow_mul hx]
-  norm_num
+    exact Nat.card_congr (normFiberEquiv K n hn).symm
 
 open scoped Classical in
 /-- The `ℝ≥0∞` ideal sum is `ofReal` of the real one (e-v-b). -/
@@ -2145,19 +1943,10 @@ theorem dedekindZeta_real_eq {s : ℝ} (hs : 1 < s) :
   congr 1
   -- fiber-glue the real n-sum into the ideal-type sum
   haveI hfibfin : ∀ n : ℕ, Finite {b : (Ideal (𝓞 K))⁰ //
-      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := by
-    intro n
-    have hinj : Function.Injective (fun b : {b : (Ideal (𝓞 K))⁰ //
-        Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
-        (⟨((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
-          {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) := by
-      rintro b c hbc
-      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
-        (z : Ideal (𝓞 K))) hbc
-      exact Subtype.ext (Subtype.ext this)
+      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} := fun n => by
     haveI : Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = n} :=
       (Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) n).to_subtype
-    exact Finite.of_injective _ hinj
+    exact Finite.of_injective _ (normFiber_forget_injective K n)
   have hsum := summable_ideal_norm_rpow K hs
   have hsigma : Summable (fun p : (Σ n : ℕ, {b : (Ideal (𝓞 K))⁰ //
       Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n}) =>
@@ -2193,21 +1982,7 @@ theorem dedekindZeta_real_eq {s : ℝ} (hs : 1 < s) :
   · rw [if_neg hn]
     congr 2
     rw [← Nat.card_eq_fintype_card]
-    refine (Nat.card_congr ((Equiv.ofBijective (fun b : {b : (Ideal (𝓞 K))⁰ //
-      Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) = n} =>
-      (⟨((b.val : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)), b.2⟩ :
-        {I : Ideal (𝓞 K) // Ideal.absNorm I = n})) ⟨?_, ?_⟩).symm))
-    · rintro b c hbc
-      have := congrArg (fun z : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} =>
-        (z : Ideal (𝓞 K))) hbc
-      exact Subtype.ext (Subtype.ext this)
-    · rintro ⟨I, hI⟩
-      have hIne : I ≠ 0 := by
-        intro h0
-        rw [h0] at hI
-        rw [show Ideal.absNorm (0 : Ideal (𝓞 K)) = 0 by simp] at hI
-        exact hn hI.symm
-      exact ⟨⟨⟨I, mem_nonZeroDivisors_of_ne_zero hIne⟩, hI⟩, rfl⟩
+    exact Nat.card_congr (normFiberEquiv K n hn).symm
 
 open scoped Classical in
 theorem heckeF_dev_nonneg {t : ℝ} (ht : 0 < t) :
@@ -2296,7 +2071,12 @@ theorem heckeFEPair_Λ_real {σ : ℝ} (hσ : 1/2 < σ) :
           ((((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)))
         = (fun b : (Ideal (𝓞 K))⁰ => ENNReal.ofReal
           (((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ)))) from
-        funext (fun b => by rw [sq_rpow_neg (Nat.cast_nonneg _)])]
+        funext (fun b => by
+          have hb : (((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ 2) ^ (-σ)
+              = ((Ideal.absNorm ((b : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)) : ℝ)) ^ (-(2 * σ)) := by
+            rw [← Real.rpow_natCast _ 2, ← Real.rpow_mul (Nat.cast_nonneg _)]
+            norm_num
+          rw [hb])]
       exact tsum_ideal_ofReal_eq K h2σ
     rw [hzsum]
     rw [show ((heckeJacobian K : ℝ≥0) : ℝ≥0∞)

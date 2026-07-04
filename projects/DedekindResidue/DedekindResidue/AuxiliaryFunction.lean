@@ -33,10 +33,6 @@ noncomputable def auxF (s : ℂ) (X t : ℝ) : ℂ :=
   else Complex.ofReal (Real.log X / |t|) *
     Complex.exp (-(s - 1 / 2) * Complex.ofReal (|t| - Real.log X))
 
-/-- `g_s` is even: `g_s(-t) = g_s(t)` — eq. (6) depends on `t` only through `|t|`. -/
-@[simp] theorem gAux_neg (s : ℂ) (t : ℝ) : gAux s (-t) = gAux s t := by
-  unfold gAux; rw [abs_neg]
-
 /-- `F_{s,X}` is even: `F(-t) = F(t)` — eqs. (11)–(12) depend on `t` only through `|t|`. -/
 @[simp] theorem auxF_neg (s : ℂ) (X t : ℝ) : auxF s X (-t) = auxF s X t := by
   unfold auxF; rw [abs_neg]

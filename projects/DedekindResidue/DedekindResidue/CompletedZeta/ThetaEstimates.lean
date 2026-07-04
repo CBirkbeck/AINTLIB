@@ -15,7 +15,7 @@ The analytic inputs feeding the `WeakFEPair` construction of `Λ_K`:
 * `tsum_ite_gaussian_tail` — the zero-removed Gaussian lattice sum decays like
   `exp(-π(a-a₀)δ²)`;
 * `heckeTheta_eq_one_add` — splitting `Θ_I(c) = 1 + Θ*_I(c)` at the zero lattice point;
-* `abs_fullLog_le` / `heckeWeights_ge_of_bounded` — uniform weight lower bound
+* `abs_fullLog_le` / `le_heckeWeights_of_bounded` — uniform weight lower bound
   `c(t,u)_w ≥ m·t^{1/n}` over any coordinate-bounded set of the log-torus;
 * `exists_heckeTheta_dev_bound` — the packaged estimate: uniformly over the unit box and
   `t ≥ 1`, `0 ≤ Θ_I(c(t,u)) − 1 ≤ C·exp(−c'·t^{1/n})`.
@@ -174,7 +174,7 @@ theorem abs_fullLog_le {u : logSpace K} {R : ℝ} (hR : 0 ≤ R)
 open scoped Classical in
 /-- **Uniform lower bound for the Hecke weights over any bounded set** of the log-torus:
 `c(t,u)_w ≥ m·t^{1/n}` with `m > 0` depending only on the bound. -/
-theorem heckeWeights_ge_of_bounded {R : ℝ} (hR : 0 ≤ R) {u : logSpace K}
+theorem le_heckeWeights_of_bounded {R : ℝ} (hR : 0 ≤ R) {u : logSpace K}
     (hu : ∀ i, |u i| ≤ R) {t : ℝ} (ht : 0 ≤ t) (w : InfinitePlace K) :
     Real.exp (-(2 * (Fintype.card (InfinitePlace K)) * R))
         * t ^ ((1 : ℝ) / (Module.finrank ℚ K))
@@ -243,10 +243,10 @@ theorem exists_heckeTheta_dev_bound (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
   have ht0 : (0:ℝ) < t := lt_of_lt_of_le one_pos ht
   have htpow : (1:ℝ) ≤ t ^ ((1 : ℝ) / (Module.finrank ℚ K)) := by
     refine Real.one_le_rpow ht ?_
-    have := Module.finrank_pos (R := ℚ) (M := K)
+    have := finrank_pos_real K
     positivity
   have hca : ∀ w, m * t ^ ((1 : ℝ) / (Module.finrank ℚ K)) ≤ heckeWeights K t u w :=
-    fun w => heckeWeights_ge_of_bounded K hR (hcoord u hu) ht0.le w
+    fun w => le_heckeWeights_of_bounded K hR (hcoord u hu) ht0.le w
   have ha : (0:ℝ) < m * t ^ ((1 : ℝ) / (Module.finrank ℚ K)) := by positivity
   rw [heckeTheta_eq_one_add K I ha hca, add_sub_cancel_left]
   constructor
@@ -308,7 +308,7 @@ theorem continuousAt_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K
             rw [dist_zero_right] at this
             exact this.le
     have hq1' : (0:ℝ) < q.1 := lt_trans ha hq1
-    have hbase := heckeWeights_ge_of_bounded K hR hcoord hq1'.le
+    have hbase := le_heckeWeights_of_bounded K hR hcoord hq1'.le
     have hple : ∀ w : InfinitePlace K, a' ≤ heckeWeights K q.1 q.2 w := by
       intro w
       refine le_trans ?_ (hbase w)
@@ -450,7 +450,7 @@ theorem continuousOn_heckeG (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
     refine Filter.Eventually.of_forall (fun u hu => ?_)
     have hca : ∀ w, a' ≤ heckeWeights K t u w := by
       intro w
-      refine le_trans ?_ (heckeWeights_ge_of_bounded K hR (hbox u hu)
+      refine le_trans ?_ (le_heckeWeights_of_bounded K hR (hbox u hu)
         (le_of_lt (lt_trans (by positivity) ht)) w)
       rw [ha'_def, hm_def]
       refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le

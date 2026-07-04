@@ -255,6 +255,31 @@ theorem tendsto_exp_div_mul_atTop {h : ℂ} (hh : 0 < h.re) {v : ℝ → ℂ} {C
         exact mul_le_mul h1 hvt hv0 (Real.exp_pos _).le
     _ = C * Real.exp (-(h.re * t)) := by ring
 
+/-- The affine-plus-inverse norm bound `‖h + 1/t‖ ≤ ‖h‖ + 1/T` for `T > 0` and `t ≥ T`,
+used throughout the exponential-tail integrations by parts. -/
+theorem norm_affine_inv_le (h : ℂ) {t T : ℝ} (hT : 0 < T) (ht : T ≤ t) :
+    ‖h + 1 / (t : ℂ)‖ ≤ ‖h‖ + 1 / T := by
+  refine le_trans (norm_add_le _ _) ?_
+  have : ‖(1 : ℂ) / (t : ℂ)‖ ≤ 1 / T := by
+    rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (lt_of_lt_of_le hT ht)]
+    gcongr
+  linarith
+
+/-- The bound `‖(h·t + 1)/t²‖ ≤ ‖h‖/T + 1/T²` for `T > 0` and `t ≥ T`, the second-order
+counterpart of `norm_affine_inv_le` for the remainder integrand. -/
+theorem norm_affine_div_sq_le (h : ℂ) {t T : ℝ} (hT : 0 < T) (ht : T ≤ t) :
+    ‖(h * (t : ℂ) + 1) / (t : ℂ) ^ 2‖ ≤ ‖h‖ / T + 1 / T ^ 2 := by
+  have htpos : 0 < t := lt_of_lt_of_le hT ht
+  rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
+  have hnum : ‖h * (t : ℂ) + 1‖ ≤ ‖h‖ * t + 1 := by
+    have hht : ‖h * (t : ℂ)‖ = ‖h‖ * t := by simp [Complex.norm_real, abs_of_pos htpos]
+    calc ‖h * (t : ℂ) + 1‖ ≤ ‖h * (t : ℂ)‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+      _ = ‖h‖ * t + 1 := by rw [hht, norm_one]
+  calc ‖h * (t : ℂ) + 1‖ / t ^ 2 ≤ (‖h‖ * t + 1) / t ^ 2 := by gcongr
+    _ = ‖h‖ / t + 1 / t ^ 2 := by field_simp
+    _ ≤ ‖h‖ / T + 1 / T ^ 2 := by gcongr
+
 /-- First integration by parts for the Fourier tail (Belabas–Friedman, proof of Lemma 2):
 with `g(t) = e^{-ht}/t`, `∫_T^∞ (g′(t)·sin(tγ)/γ + g(t)·cos(tγ)) dt = -g(T)·sin(Tγ)/γ`. -/
 theorem integral_Ioi_gAux_ibp₁ (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 < T) (hγ : γ ≠ 0) :
@@ -291,13 +316,7 @@ theorem integral_Ioi_gAux_ibp₁ (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 
       · intro t ht
         rw [norm_mul, norm_neg]
         refine mul_le_mul ?_ ?_ (norm_nonneg _) (by positivity)
-        · refine le_trans (norm_add_le _ _) ?_
-          have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/T := by
-            rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs,
-              abs_of_pos (hT.trans ht)]
-            gcongr
-            exact le_of_lt ht
-          linarith
+        · exact norm_affine_inv_le h hT (le_of_lt ht)
         · rw [Complex.norm_real, Real.norm_eq_abs, abs_div]
           gcongr
           exact abs_le.mpr ⟨Real.neg_one_le_sin _, Real.sin_le_one _⟩
@@ -361,13 +380,7 @@ theorem integrableOn_gAux_deriv_mul_real {h : ℂ} (hh : 0 < h.re) {T : ℝ} (hT
     rw [norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs]
     have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (hψb t)
     refine mul_le_mul ?_ (hψb t) (abs_nonneg _) (by positivity)
-    refine le_trans (norm_add_le _ _) ?_
-    have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/T := by
-      rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs,
-        abs_of_pos (hT.trans ht)]
-      gcongr
-      exact le_of_lt ht
-    linarith
+    exact norm_affine_inv_le h hT (le_of_lt ht)
 
 /-- Integrability of the second-derivative term `(h²+(2ht+2)/t²)·e^{-ht}/t` against a
 bounded continuous real multiplier. -/
@@ -463,14 +476,8 @@ theorem integral_Ioi_gAux_ibp₂ (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 
     · exact hmain.congr (fun t => by simp only [Pi.mul_apply]; ring)
     · filter_upwards [Filter.eventually_ge_atTop (max T 1)] with t ht
       have htT : T ≤ t := le_trans (le_max_left _ _) ht
-      have htpos : 0 < t := lt_of_lt_of_le (lt_of_lt_of_le one_pos (le_max_right _ _)) ht
       rw [norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs]
-      have hb1 : ‖h + 1/(t:ℂ)‖ ≤ ‖h‖ + 1/T := by
-        refine le_trans (norm_add_le _ _) ?_
-        have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/T := by
-          rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
-          gcongr
-        linarith
+      have hb1 : ‖h + 1/(t:ℂ)‖ ≤ ‖h‖ + 1/T := norm_affine_inv_le h hT htT
       have hb2 : |(-Real.cos (t * γ) / γ^2 : ℝ)| ≤ 1/γ^2 := by
         rw [abs_div, abs_neg, abs_pow, sq_abs]
         gcongr
@@ -541,18 +548,9 @@ theorem tail_integral_identity (h : ℂ) (hh : 0 < h.re) {T γ : ℝ} (hT : 0 < 
       have : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT.trans ht).ne'
       exact pow_ne_zero 2 this
     · intro t ht
-      have htpos : 0 < t := hT.trans ht
       rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
-      refine mul_le_mul (hcos1 t) ?_ (norm_nonneg _) (by norm_num)
-      rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
-      have hnum : ‖h*(t:ℂ) + 1‖ ≤ ‖h‖*t + 1 := by
-        have hht : ‖h*(t:ℂ)‖ = ‖h‖*t := by
-          simp [Complex.norm_real, abs_of_pos htpos]
-        calc ‖h*(t:ℂ) + 1‖ ≤ ‖h*(t:ℂ)‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
-          _ = ‖h‖*t + 1 := by rw [hht, norm_one]
-      calc ‖h*(t:ℂ) + 1‖ / t^2 ≤ (‖h‖*t + 1) / t^2 := by gcongr
-        _ = ‖h‖/t + 1/t^2 := by field_simp
-        _ ≤ ‖h‖/T + 1/T^2 := by gcongr <;> exact le_of_lt ht
+      exact mul_le_mul (hcos1 t) (norm_affine_div_sq_le h hT (le_of_lt ht))
+        (norm_nonneg _) (by norm_num)
   have hDcos : (∫ t in Set.Ioi T,
       (h^2 + (2*h*t + 2)/t^2) * (Complex.exp (-h * t) / t)
         * ((Real.cos (t * γ) : ℝ) : ℂ))
@@ -839,14 +837,8 @@ theorem fourier_auxF_zero (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
       · exact hmain.congr (fun t => by ring)
       · filter_upwards [Filter.eventually_ge_atTop (max (Real.log X) 1)] with t ht
         have htT : Real.log X ≤ t := le_trans (le_max_left _ _) ht
-        have htpos : 0 < t :=
-          lt_of_lt_of_le (lt_of_lt_of_le one_pos (le_max_right _ _)) ht
         rw [norm_neg]
-        refine le_trans (norm_add_le _ _) ?_
-        have : ‖(1 : ℂ)/(t : ℂ)‖ ≤ 1/Real.log X := by
-          rw [norm_div, norm_one, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
-          gcongr
-        linarith
+        exact norm_affine_inv_le (s - 1/2) hT0 htT
   -- split the FTC identity into the plain and remainder kernel integrals
   have hRk : IntegrableOn (fun t : ℝ =>
       (Complex.exp (-(s - 1/2) * t) / t) * (((s - 1/2)*t + 1)/t^2))
@@ -860,17 +852,7 @@ theorem fourier_auxF_zero (s : ℂ) {X : ℝ} (hX : 1 < X) (hs : 1/2 < s.re) :
       have : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans ht).ne'
       exact pow_ne_zero 2 this
     · intro t ht
-      have htpos : 0 < t := hT0.trans ht
-      rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos htpos]
-      have hnum : ‖(s - 1/2)*(t:ℂ) + 1‖ ≤ ‖(s - 1/2 : ℂ)‖*t + 1 := by
-        have hht : ‖(s - 1/2)*(t:ℂ)‖ = ‖(s - 1/2 : ℂ)‖*t := by
-          simp [Complex.norm_real, abs_of_pos htpos]
-        calc ‖(s - 1/2)*(t:ℂ) + 1‖ ≤ ‖(s - 1/2)*(t:ℂ)‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
-          _ = ‖(s - 1/2 : ℂ)‖*t + 1 := by rw [hht, norm_one]
-      calc ‖(s - 1/2)*(t:ℂ) + 1‖ / t^2 ≤ (‖(s - 1/2 : ℂ)‖*t + 1) / t^2 := by gcongr
-        _ = ‖(s - 1/2 : ℂ)‖/t + 1/t^2 := by field_simp
-        _ ≤ ‖(s - 1/2 : ℂ)‖/Real.log X + 1/(Real.log X)^2 := by
-            gcongr <;> exact le_of_lt ht
+      exact norm_affine_div_sq_le (s - 1/2) hT0 (le_of_lt ht)
   have hsplit : (∫ t in Set.Ioi (Real.log X),
       ((s - 1/2)^2 + (2*(s - 1/2)*t + 2)/t^2) * (Complex.exp (-(s - 1/2) * t) / t))
       = (s - 1/2)^2 * (∫ t in Set.Ioi (Real.log X), Complex.exp (-(s - 1/2) * t) / t)
