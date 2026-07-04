@@ -243,7 +243,7 @@ theorem exists_heckeTheta_dev_bound (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
   have ht0 : (0:ℝ) < t := lt_of_lt_of_le one_pos ht
   have htpow : (1:ℝ) ≤ t ^ ((1 : ℝ) / (Module.finrank ℚ K)) := by
     refine Real.one_le_rpow ht ?_
-    have := Module.finrank_pos (R := ℚ) (M := K)
+    have := finrank_pos_real K
     positivity
   have hca : ∀ w, m * t ^ ((1 : ℝ) / (Module.finrank ℚ K)) ≤ heckeWeights K t u w :=
     fun w => heckeWeights_ge_of_bounded K hR (hcoord u hu) ht0.le w
