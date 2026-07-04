@@ -78,6 +78,7 @@ import «Adic spaces».SpaCompact
 import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».SpaQCviaSpvAI
 import «Adic spaces».ExampleLaurentSeries
+import «Adic spaces».ExampleUnitDisc
 import «Adic spaces».Vendored.XiaMvPowerSeriesEquiv
 import «Adic spaces».Vendored.CoramMvRestricted
 import «Adic spaces».Vendored.CoramMvGaussNorm

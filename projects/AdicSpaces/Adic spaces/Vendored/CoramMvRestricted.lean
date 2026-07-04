@@ -47,7 +47,7 @@ open scoped Topology Pointwise
 
 variable {R : Type*} [NormedRing R] {σ : Type*}
 
-/-- A multivariate powe0r series over a normed ring `R` is restricted for aExpand commentComment on line R31Resolved
+/-- A multivariate power series over a normed ring `R` is restricted for a
   tuple `c` if `‖coeff t f‖ * ∏ i ∈ t.support, c i ^ t i → 0` under the cofinite filter. -/
 def IsRestrictedGauss (c : σ → ℝ) (f : MvPowerSeries σ R) :=
   Tendsto (fun (t : σ →₀ ℕ) ↦ ‖coeff t f‖ * t.prod (c · ^ ·)) cofinite (𝓝 0)
