@@ -11374,8 +11374,7 @@ theorem imageGenCover_isOXAcyclic_of_units
       CompleteSpace A] [DecidableEq A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (hne : T.Nonempty)
-    (h_units : ∀ t ∈ T, IsUnit (D₀.canonicalMap t))
-    (_hplusA : (A⁺ : Set A) ⊆ D₀.P.A₀) :
+    (h_units : ∀ t ∈ T, IsUnit (D₀.canonicalMap t)) :
     haveI hTateB : IsTateRing (presheafValue D₀) :=
       presheafValue_isTateRing_faithful D₀
     haveI : IsNoetherianRing (presheafValue D₀) :=
@@ -11462,7 +11461,7 @@ the dead A-level part-(iii) route (the `ratio_laurent_cover_of_units` trio,
 B2-logged: canonical-image units have no ring inverses in `A`). -/
 theorem genRestrictedCover_isOXAcyclic_of_units
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] [DecidableEq A]
     (D₀ : RationalLocData A) (T : Finset A)
@@ -11470,8 +11469,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units
     (h_units : ∀ t ∈ T, IsUnit (D₀.canonicalMap t)) :
     (genRestrictedCover D₀ T hspan).IsOXAcyclic :=
   genRestrictedCover_isOXAcyclic_of_B D₀ T hspan
-    (imageGenCover_isOXAcyclic_of_units D₀ T hspan hne h_units
-      (CompatiblePlusSubring.aplus_le_A₀ D₀))
+    (imageGenCover_isOXAcyclic_of_units D₀ T hspan hne h_units)
 
 set_option linter.unusedSectionVars false in
 /-- **The σ₊-dichotomy engine** (Wedhorn p. 84 part (ii), wedhorn.txt:4236-4242,
@@ -12807,8 +12805,7 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational)
-    (hplusA : (A⁺ : Set A) ⊆ C.base.P.A₀) :
+    (C : RationalCovering A) (hC : C.IsRational) :
     haveI hTateB : IsTateRing (presheafValue C.base) :=
       presheafValue_isTateRing_faithful C.base
     haveI : IsNoetherianRing (presheafValue C.base) :=
@@ -13009,7 +13006,6 @@ theorem imageCover_gluing_transport [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (C : RationalCovering A) (hC : C.IsRational)
-    (hplusA : (A⁺ : Set A) ⊆ C.base.P.A₀)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers)
       (D₃ : RationalLocData A)
@@ -13144,7 +13140,7 @@ trackings; gluing via the keystone restriction squares
 `relativePiece_equiv_restrict_square`). -/
 theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (C : RationalCovering A) (hC : C.IsRational) :
@@ -13169,8 +13165,7 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     presheafValue_completeSpace_rightUniformSpace C.base
   -- Faithful LL shadow (RPK pattern): everything below synthesizes the PROVEN package.
   haveI : HasLocLiftPowerBounded (presheafValue C.base) := hasLocLiftPowerBounded_faithful
-  have hplusA : (A⁺ : Set A) ⊆ C.base.P.A₀ := CompatiblePlusSubring.aplus_le_A₀ C.base
-  have hCB := imageCover_isOXAcyclic C hC hplusA
+  have hCB := imageCover_isOXAcyclic C hC
   constructor
   · -- SEPARATION: transport through `globalSections_equiv` at `B` + the
     -- keystone canonical-map tracking.
@@ -13196,7 +13191,7 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     exact hback.symm
   · -- GLUING: transport through the keystone + its restriction squares.
     intro f hcompat
-    exact imageCover_gluing_transport C hC hplusA f hcompat (imageCover_isOXAcyclic C hC hplusA)
+    exact imageCover_gluing_transport C hC f hcompat (imageCover_isOXAcyclic C hC)
 
 /-- **Wedhorn Theorem 8.28(b)** (p. 81, Wedhorn-clean form). *Let
 `A = (A, A⁺)` be an affinoid ring with `A` a strongly noetherian Tate
@@ -13208,7 +13203,7 @@ complete topological rings" (embedding + gluing fields, see
 `StructureSheaf.lean:332`). -/
 theorem isSheafy_ofStronglyNoetherianTate_clean
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] :
     IsSheafy A := by
@@ -13259,7 +13254,7 @@ acyclicity `every_rational_cover_is_OXAcyclic` (Wedhorn 7.54 + 8.34(i)–(iv) +
 Prop A.3 + the R2-transport via Prop 8.16). -/
 theorem lemma_8_34_gluing
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (C : RationalCovering A) (hC : C.IsRational)
@@ -13282,7 +13277,7 @@ the Tate unit) makes the corestriction open, hence a homeomorphism onto its rang
 topological embedding (here: inducing). -/
 theorem productRestrictionSub_isInducing_via_equalizer
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (C : RationalCovering A) (hC : C.IsRational) :
     Topology.IsInducing (productRestrictionSub A C) := by
@@ -13352,23 +13347,41 @@ theorem productRestrictionSub_isInducing_via_equalizer
 -- hypothesis — the `IsSheafy` statement's hypotheses remain exactly the Wedhorn 8.28(b) data.
 end IRIEThreaded
 
-set_option linter.unusedSectionVars false in
+end ValuationSpectrum
+
+namespace ValuationSpectrum
+
 /-- **Theorem 8.28(b)** (Wedhorn p. 81, wedhorn.txt:4143; assembled from Cor 8.32
-(separation/embedding) and Lemma 8.34 (gluing)): *if `A` is a complete strongly
-noetherian Tate ring then `𝒪_X` is a sheaf of complete topological rings on
-`X = Spa A`.* By Prop A.4 the sheaf property is the pair `(embedding, gluing)`
-per Def-7.29 rational cover. -/
+(separation/embedding) and Lemma 8.34 (gluing)): *let `(A, A⁺)` be a complete affinoid
+ring with `A` a strongly noetherian Tate ring; then `𝒪_X` is a sheaf of complete
+topological rings on `X = Spa A`.* By Prop A.4 the sheaf property is the pair
+`(embedding, gluing)` per Def-7.29 rational cover.
+
+Hypotheses are exactly Wedhorn's (audit 2026-07-04, b2_log AUDIT-828B-HYP fixed):
+* `IsTateRing A` + `IsStronglyNoetherian A` — "strongly noetherian Tate";
+* `T2Space A` + `CompleteSpace A` (right uniformity) — "complete" (= separated-complete);
+* `IsRingOfIntegralElements (A⁺)` — "(A, A⁺) affinoid" (Wedhorn Def 7.14(1)-(2)).
+
+Derived, NOT assumed: `IsNoetherianRing A` (the `k = 0` case of strongly noetherian),
+`NonarchimedeanRing A` / `IsHuberRing A` / `IsTopologicalRing A` (from Tate), and
+`HasLocLiftPowerBounded A` (Wedhorn *proves* the restriction maps are well-defined:
+`s` a unit (7.52(2)/7.51) + `t/s` power-bounded (7.41) — supplied by
+`hasLocLiftPowerBounded_faithful`, so its source-justified leaves are exposed on the
+headline rather than hidden behind a binder). The formerly-assumed
+`CompatiblePlusSubring A` (whose `aplus_le_pod` field is unsatisfiable for nondiscrete
+Tate rings) is GONE — its only on-trace uses were vestigial arguments. -/
 theorem isSheafy_of_stronglyNoetherian_828b
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [CompatiblePlusSubring A]
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTateRing A] [IsStronglyNoetherian A] [T2Space A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] :
-    -- `HasLocLiftPowerBounded A` is NOT assumed: Wedhorn *proves* the restriction maps are
-    -- well-defined (s a unit (7.52(2)/7.51) + t/s power-bounded (7.41)). We DERIVE it here from
-    -- the same hypotheses via `hasLocLiftPowerBounded_faithful`, so its two source-justified leaves
-    -- (Prop 7.51(2) + [Hu2] 3.3) are exposed on the headline rather than hidden behind a binder.
-    letI := hasLocLiftPowerBounded_faithful (A := A); IsSheafy A := by
+    letI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
+    letI := hasLocLiftPowerBounded_faithful (A := A)
+    IsSheafy A := by
+  letI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
   letI := hasLocLiftPowerBounded_faithful (A := A)
+  classical
   exact
     -- Embedding via the equalizer + σ-compact-free OMT route (expert-review 2026-06-20, Q1):
     -- inducing from the closed `sectionEqualizer` range, NOT the Prop-6.18 module-topology leaf.

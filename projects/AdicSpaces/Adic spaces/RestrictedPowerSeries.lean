@@ -240,3 +240,22 @@ class IsStronglyNoetherian (A : Type*) [CommRing A] [TopologicalSpace A]
   /-- The restricted power series ring in `k` variables is noetherian for all `k`. -/
   isNoetherianRing_restricted : ∀ k : ℕ,
     IsNoetherianRing (restrictedMvPowerSeriesSubring k A)
+
+/-- **Strongly noetherian implies noetherian** — the `k = 0` case: the index set
+`Fin 0 →₀ ℕ` is a singleton, so its cofinite filter is `⊥` and every power series in
+zero variables is restricted; `constantCoeff` is then a ring surjection
+`A⟨⟩ = A⦃⦄ → A`. -/
+theorem IsStronglyNoetherian.isNoetherianRing (A : Type*) [CommRing A]
+    [TopologicalSpace A] [NonarchimedeanRing A] [IsStronglyNoetherian A] :
+    IsNoetherianRing A := by
+  haveI h0 : IsNoetherianRing (restrictedMvPowerSeriesSubring 0 A) :=
+    IsStronglyNoetherian.isNoetherianRing_restricted 0
+  refine isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring 0 A) A
+    ((MvPowerSeries.constantCoeff (σ := Fin 0) (R := A)).comp
+      (restrictedMvPowerSeriesSubring 0 A).subtype) ?_
+  intro a
+  refine ⟨⟨MvPowerSeries.C (σ := Fin 0) (R := A) a, ?_⟩, ?_⟩
+  · show Filter.Tendsto _ _ _
+    rw [Filter.cofinite_eq_bot]
+    exact Filter.tendsto_bot
+  · simp [MvPowerSeries.constantCoeff_C]
