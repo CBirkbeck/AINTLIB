@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.RingTheory.LaurentSeries
 import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Polynomial.Basic
 import Mathlib.Topology.Algebra.Valued.WithZeroMulInt
 import «Adic spaces».RestrictedPowerSeries
 import «Adic spaces».HuberRings
@@ -277,10 +279,231 @@ theorem coeff_tau (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ �
       MvPolynomial.coeff s (PowerSeries.coeff m g) :=
   coeff_tauFun F k g s m
 
-end StronglyNoetherianProof
+/-- The transpose landed in `K`-coefficients. -/
+def Psi : PowerSeries (MvPolynomial (Fin k) F) →+* MvPowerSeries (Fin k) K :=
+  (MvPowerSeries.map (HahnSeries.ofPowerSeries ℤ F : F⟦X⟧ →+* K)).comp (tau F k)
 
+theorem coeff_Psi (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ ℕ) :
+    MvPowerSeries.coeff s (Psi F k g) =
+      ((MvPowerSeries.coeff s (tau F k g) : F⟦X⟧) : K) := by
+  rw [Psi, RingHom.comp_apply, MvPowerSeries.coeff_map]
+
+/-- Valuation bound from vanishing low layers. -/
+theorem psi_coeff_v_le (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ ℕ) (n : ℕ)
+    (h : ∀ m < n, MvPolynomial.coeff s (PowerSeries.coeff m g) = 0) :
+    Valued.v (MvPowerSeries.coeff s (Psi F k g)) ≤ exp (-(n : ℤ)) := by
+  rw [coeff_Psi, LaurentSeries.intValuation_le_iff_coeff_lt_eq_zero]
+  intro m hm
+  rw [coeff_tau]
+  exact h m hm
+
+/-- The transpose image is a restricted power series (its `X`-layers are polynomials). -/
+theorem psi_mem_restricted (g : PowerSeries (MvPolynomial (Fin k) F)) :
+    Psi F k g ∈ restrictedMvPowerSeriesSubring k K := by
+  show MvPowerSeries.IsRestricted _
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  obtain ⟨n, hn⟩ := (mem_nhds_iff_ball F).mp hU
+  rw [Filter.mem_cofinite]
+  refine Set.Finite.subset
+    (((Finset.range (n + 1)).biUnion fun m =>
+      (PowerSeries.coeff m g).support).finite_toSet) ?_
+  intro s hs
+  rw [Set.mem_compl_iff, Set.mem_preimage] at hs
+  by_contra hs0
+  refine hs (hn ?_)
+  rw [Set.mem_setOf_eq, sub_zero]
+  refine lt_of_le_of_lt (psi_coeff_v_le F k g s (n + 1) fun m hm => ?_) ?_
+  · by_contra hc
+    exact hs0 (Finset.mem_coe.mpr (Finset.mem_biUnion.mpr
+      ⟨m, Finset.mem_range.mpr hm, MvPolynomial.mem_support_iff.mpr hc⟩))
+  · rw [exp_lt_exp]
+    omega
+
+/-- **Surjectivity onto the integral part**: every restricted power series over `K` with
+integral coefficients is a transpose image. -/
+theorem exists_psi_eq (f : MvPowerSeries (Fin k) K)
+    (hres : MvPowerSeries.IsRestricted f)
+    (hint : ∀ s, Valued.v (MvPowerSeries.coeff s f) ≤ 1) :
+    ∃ g, Psi F k g = f := by
+  classical
+  have hPs : ∀ s, ∃ P : F⟦X⟧, ((P : F⟦X⟧) : K) = MvPowerSeries.coeff s f := fun s => by
+    obtain ⟨Q, hQ⟩ :=
+      (LaurentSeries.val_le_one_iff_eq_coe F (MvPowerSeries.coeff s f)).mp (hint s)
+    exact ⟨Q, hQ⟩
+  choose P hP using hPs
+  -- each `X`-layer has finite support (restrictedness below radius `exp (-(m+1))`)
+  have hlayer : ∀ m : ℕ, {s : Fin k →₀ ℕ | PowerSeries.coeff m (P s) ≠ 0}.Finite := by
+    intro m
+    have hball := Filter.tendsto_def.mp hres _
+      (ball_mem_nhds F (0 : K) (m + 1))
+    rw [Filter.mem_cofinite] at hball
+    refine hball.subset fun s hs => ?_
+    rw [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq, sub_zero]
+    intro hlt
+    refine hs (LaurentSeries.coeff_zero_of_lt_intValuation F (n := m) (d := m + 1)
+      ?_ (by omega))
+    rw [hP s]
+    exact le_of_lt hlt
+  set g : PowerSeries (MvPolynomial (Fin k) F) := PowerSeries.mk fun m =>
+    ∑ s ∈ (hlayer m).toFinset,
+      MvPolynomial.monomial s (PowerSeries.coeff m (P s)) with hg_def
+  refine ⟨g, ?_⟩
+  refine MvPowerSeries.ext fun s => ?_
+  rw [coeff_Psi, ← hP s]
+  congr 1
+  refine PowerSeries.ext fun m => ?_
+  rw [coeff_tau, hg_def, PowerSeries.coeff_mk, MvPolynomial.coeff_sum]
+  by_cases hs : s ∈ (hlayer m).toFinset
+  · rw [Finset.sum_eq_single s (fun b _ hb => by
+      rw [MvPolynomial.coeff_monomial, if_neg hb]) (fun h => absurd hs h)]
+    rw [MvPolynomial.coeff_monomial, if_pos rfl]
+  · rw [Finset.sum_eq_zero fun b hb => ?_, eq_comm]
+    · rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq, not_not] at hs
+      exact hs
+    · rw [MvPolynomial.coeff_monomial, if_neg]
+      intro hbs
+      exact hs (hbs ▸ hb)
+
+/-- The constant `t` inside the restricted subring, as a unit. -/
+theorem c_t_mem_restricted (a : K) :
+    MvPowerSeries.C (σ := Fin k) a ∈ restrictedMvPowerSeriesSubring k K := by
+  classical
+  show MvPowerSeries.IsRestricted _
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  rw [Filter.mem_cofinite]
+  refine Set.Finite.subset (Set.finite_singleton (0 : Fin k →₀ ℕ)) ?_
+  intro s hs
+  rw [Set.mem_compl_iff, Set.mem_preimage] at hs
+  rw [Set.mem_singleton_iff]
+  by_contra hs0
+  refine hs ?_
+  rw [MvPowerSeries.coeff_C, if_neg hs0]
+  exact mem_of_mem_nhds hU
+
+/-- Uniform integralization: some `tⁿ` multiple of a restricted series has all
+coefficients integral. -/
+theorem exists_t_pow_mul_integral (f : MvPowerSeries (Fin k) K)
+    (hres : MvPowerSeries.IsRestricted f) :
+    ∃ n : ℕ, ∀ s, Valued.v ((t F) ^ n * MvPowerSeries.coeff s f) ≤ 1 := by
+  classical
+  have hball := Filter.tendsto_def.mp hres _ (ball_mem_nhds F (0 : K) 0)
+  rw [Filter.mem_cofinite] at hball
+  set S₀ := hball.toFinset with hS₀
+  refine ⟨S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat, fun s => ?_⟩
+  rw [Valuation.map_mul, valuation_t_pow]
+  by_cases hs : s ∈ S₀
+  · -- exceptional coefficient: absorb its size into the sup
+    have hle : Valued.v (MvPowerSeries.coeff s f) ≤
+        exp ((S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat : ℕ) : ℤ) := by
+      refine le_trans le_exp_log ?_
+      rw [exp_le_exp]
+      have := Finset.le_sup (f := fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat) hs
+      omega
+    calc exp (-((S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat : ℕ) : ℤ)) *
+          Valued.v (MvPowerSeries.coeff s f)
+        ≤ exp (-((S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat : ℕ) : ℤ)) *
+          exp ((S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat : ℕ) : ℤ) := by
+          gcongr
+      _ = exp 0 := by rw [← exp_add]; ring_nf
+      _ = 1 := exp_zero
+  · -- generic coefficient: already strictly inside the unit ball
+    have hlt : Valued.v (MvPowerSeries.coeff s f) < 1 := by
+      have := fun h => hs (Set.Finite.mem_toFinset _ |>.mpr h)
+      by_contra hge
+      push_neg at hge
+      refine this ?_
+      rw [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq, sub_zero]
+      intro hlt1
+      have h1 : (exp (-(0 : ℕ) : ℤ) : ℤᵐ⁰) = 1 := by
+        rw [show (-(0:ℕ) : ℤ) = 0 by omega, exp_zero]
+      rw [h1] at hlt1
+      exact absurd hge (not_le.mpr hlt1)
+    calc exp (-((S₀.sup fun s => (log (Valued.v (MvPowerSeries.coeff s f))).toNat : ℕ) : ℤ)) *
+          Valued.v (MvPowerSeries.coeff s f)
+        ≤ 1 * Valued.v (MvPowerSeries.coeff s f) := by
+          gcongr
+          rw [← exp_zero, exp_le_exp]
+          omega
+      _ = Valued.v (MvPowerSeries.coeff s f) := one_mul _
+      _ ≤ 1 := le_of_lt hlt
+
+/-- The transpose corestricted to the restricted subring. -/
+def psiR : PowerSeries (MvPolynomial (Fin k) F) →+*
+    ↥(restrictedMvPowerSeriesSubring k K) :=
+  RingHom.codRestrict (Psi F k) _ (psi_mem_restricted F k)
+
+theorem psiR_val (g : PowerSeries (MvPolynomial (Fin k) F)) :
+    ((psiR F k g : ↥(restrictedMvPowerSeriesSubring k K)) :
+      MvPowerSeries (Fin k) K) = Psi F k g := rfl
+
+/-- The constant `t` in the restricted subring. -/
+def tC : ↥(restrictedMvPowerSeriesSubring k K) :=
+  ⟨MvPowerSeries.C (t F), c_t_mem_restricted F k (t F)⟩
+
+/-- The constant `t⁻¹` in the restricted subring. -/
+def tCinv : ↥(restrictedMvPowerSeriesSubring k K) :=
+  ⟨MvPowerSeries.C ((t F)⁻¹), c_t_mem_restricted F k ((t F)⁻¹)⟩
+
+theorem tCinv_mul_tC : tCinv F k * tC F k = 1 := by
+  refine Subtype.ext ?_
+  show MvPowerSeries.C ((t F)⁻¹) * MvPowerSeries.C (t F) = 1
+  rw [← map_mul, inv_mul_cancel₀ (t_ne_zero F), map_one]
+
+theorem tC_pow_mul_val (n : ℕ) (x : ↥(restrictedMvPowerSeriesSubring k K)) :
+    (((tC F k) ^ n * x : ↥(restrictedMvPowerSeriesSubring k K)) :
+      MvPowerSeries (Fin k) K) =
+      MvPowerSeries.C ((t F) ^ n) * (x : MvPowerSeries (Fin k) K) := by
+  push_cast
+  rw [show ((tC F k : ↥(restrictedMvPowerSeriesSubring k K)) :
+    MvPowerSeries (Fin k) K) = MvPowerSeries.C (t F) from rfl, ← map_pow]
+
+/-- **`F⸨X⸩` is strongly noetherian.** Every ideal of the restricted power series ring
+pulls back to a finitely generated ideal of the noetherian
+`(MvPolynomial (Fin k) F)⟦X⟧` along the transpose, and the generators recover the ideal
+after clearing denominators by the unit `t`. -/
 instance : IsStronglyNoetherian K := by
-  sorry
+  constructor
+  intro k
+  classical
+  rw [isNoetherianRing_iff_ideal_fg]
+  intro J
+  obtain ⟨G, hG⟩ := (isNoetherianRing_iff_ideal_fg
+    (PowerSeries (MvPolynomial (Fin k) F))).mp inferInstance (J.comap (psiR F k))
+  refine ⟨G.image (psiR F k), le_antisymm ?_ ?_⟩
+  · rw [Ideal.span_le]
+    rintro y hy
+    rw [Finset.coe_image] at hy
+    obtain ⟨g, hgG, rfl⟩ := hy
+    have hg' : g ∈ J.comap (psiR F k) := by
+      rw [← hG]
+      exact Ideal.subset_span hgG
+    exact Ideal.mem_comap.mp hg'
+  · intro x hx
+    obtain ⟨n, hn⟩ := exists_t_pow_mul_integral F k (x : MvPowerSeries (Fin k) K) x.2
+    have hcoeff : ∀ s, Valued.v (MvPowerSeries.coeff s
+        ((((tC F k) ^ n * x : ↥(restrictedMvPowerSeriesSubring k K))) :
+          MvPowerSeries (Fin k) K)) ≤ 1 := by
+      intro s
+      rw [tC_pow_mul_val, MvPowerSeries.coeff_C_mul]
+      exact hn s
+    obtain ⟨g, hg⟩ := exists_psi_eq F k
+      (((tC F k) ^ n * x : ↥(restrictedMvPowerSeriesSubring k K)) :
+        MvPowerSeries (Fin k) K)
+      ((tC F k) ^ n * x : ↥(restrictedMvPowerSeriesSubring k K)).2 hcoeff
+    have hψg : psiR F k g = (tC F k) ^ n * x := Subtype.ext (by rw [psiR_val]; exact hg)
+    have hgJ : g ∈ J.comap (psiR F k) := by
+      rw [Ideal.mem_comap, hψg]
+      exact Ideal.mul_mem_left _ _ hx
+    have hmem : psiR F k g ∈ Ideal.span ((G.image (psiR F k) :
+        Finset ↥(restrictedMvPowerSeriesSubring k K)) : Set _) := by
+      rw [Finset.coe_image, ← Ideal.map_span, hG]
+      exact Ideal.mem_map_of_mem (psiR F k) hgJ
+    have hxeq : x = (tCinv F k) ^ n * psiR F k g := by
+      rw [hψg, ← mul_assoc, ← mul_pow, tCinv_mul_tC, one_pow, one_mul]
+    rw [hxeq]
+    exact Ideal.mul_mem_left _ _ hmem
+
+end StronglyNoetherianProof
 
 /-! ### The payoff -/
 

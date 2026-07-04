@@ -77,6 +77,7 @@ import «Adic spaces».CharacteristicSubgroup
 import «Adic spaces».SpaCompact
 import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».SpaQCviaSpvAI
+import «Adic spaces».ExampleLaurentSeries
 import «Adic spaces».SpvAI
 import «Adic spaces».SpvAITopology
 import «Adic spaces».SpvCompletionExtension
