@@ -72,7 +72,7 @@ theorem continuousOn_heckeGClass (C : ClassGroup (𝓞 K)) :
     ContinuousOn (heckeGClass K C) (Set.Ioi (0:ℝ)) := by
   have hN := idealNormR_pos K (classRep K C)
   have hβ := heckeBeta_pos K
-  show ContinuousOn (fun x => heckeG K (classRep K C)
+  change ContinuousOn (fun x => heckeG K (classRep K C)
     ((idealNormR K (classRep K C))⁻¹ ^ 2 * heckeBeta K * x)) _
   refine ContinuousOn.comp (g := heckeG K (classRep K C))
     (f := fun x : ℝ => (idealNormR K (classRep K C))⁻¹ ^ 2 * heckeBeta K * x)
@@ -84,7 +84,7 @@ theorem continuousOn_heckeGClass (C : ClassGroup (𝓞 K)) :
 
 open scoped Classical in
 theorem continuousOn_heckeF : ContinuousOn (heckeF K) (Set.Ioi (0:ℝ)) := by
-  show ContinuousOn (fun x => ∑ C : ClassGroup (𝓞 K), heckeGClass K C x) _
+  change ContinuousOn (fun x => ∑ C : ClassGroup (𝓞 K), heckeGClass K C x) _
   exact continuousOn_finsetSum _ (fun C _ => continuousOn_heckeGClass K C)
 
 open scoped Classical in
@@ -97,9 +97,7 @@ theorem exists_heckeGClass_dev_bound (C : ClassGroup (𝓞 K)) :
   have hβ := heckeBeta_pos K
   set s : ℝ := (idealNormR K (classRep K C))⁻¹ ^ 2 * heckeBeta K with hs_def
   have hs : 0 < s := by positivity
-  have hn : (0:ℝ) < (1 : ℝ) / (Module.finrank ℚ K) := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hn : (0:ℝ) < (1 : ℝ) / (Module.finrank ℚ K) := div_pos one_pos (finrank_pos_real K)
   refine ⟨C₀, c₀ * s ^ ((1 : ℝ) / (Module.finrank ℚ K)), max 1 s⁻¹, hC₀,
     by have := Real.rpow_pos_of_pos hs ((1 : ℝ) / (Module.finrank ℚ K)); positivity,
     le_max_left _ _, fun {x} hx => ?_⟩
@@ -173,9 +171,7 @@ open scoped Classical in
 theorem heckeF_sub_const_isBigO (r : ℝ) :
     (fun x : ℝ => heckeF K x - heckeFConst K) =O[atTop] fun x : ℝ => x ^ r := by
   obtain ⟨Cb, c', x₀, hCb, hc', hx₀, hdev⟩ := exists_heckeF_dev_bound K
-  have hn : (0:ℝ) < (1 : ℝ) / (Module.finrank ℚ K) := by
-    have := Module.finrank_pos (R := ℚ) (M := K)
-    positivity
+  have hn : (0:ℝ) < (1 : ℝ) / (Module.finrank ℚ K) := div_pos one_pos (finrank_pos_real K)
   refine IsBigO.trans ?_ (isBigO_exp_neg_rpow hc' hn r)
   rw [isBigO_iff]
   refine ⟨Cb, ?_⟩
@@ -204,7 +200,7 @@ noncomputable def heckeFEPair : WeakFEPair ℂ where
   h_feq := fun x hx => by
     have h := heckeF_inversion K (Set.mem_Ioi.mp hx)
     rw [Real.sqrt_eq_rpow] at h
-    show ((heckeF K (1 / x) : ℝ) : ℂ) = _
+    change ((heckeF K (1 / x) : ℝ) : ℂ) = _
     rw [h, one_mul, smul_eq_mul]
     push_cast
     ring

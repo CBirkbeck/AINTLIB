@@ -52,14 +52,14 @@ theorem classGroup_mk_eq_mk_iff {I J : (FractionalIdeal (𝓞 K)⁰ K)ˣ} :
       have : ((J * I⁻¹ : (FractionalIdeal (𝓞 K)⁰ K)ˣ) : FractionalIdeal (𝓞 K)⁰ K)
           = (0 : FractionalIdeal (𝓞 K)⁰ K) := by
         apply FractionalIdeal.coeToSubmodule_injective
-        show ((↑(J * I⁻¹) : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
+        change ((↑(J * I⁻¹) : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
           = ((0 : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
         rw [FractionalIdeal.coe_zero, hx, Submodule.span_zero_singleton]
       exact Units.ne_zero _ this
     have hspan : toPrincipalIdeal (𝓞 K) K (Units.mk0 x hxne) = J * I⁻¹ := by
       rw [← Units.val_inj, coe_toPrincipalIdeal]
       apply FractionalIdeal.coeToSubmodule_injective
-      show ((spanSingleton (𝓞 K)⁰ x : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
+      change ((spanSingleton (𝓞 K)⁰ x : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
         = ((↑(J * I⁻¹) : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K)
       rw [FractionalIdeal.coe_spanSingleton, hx]
     exact ⟨Units.mk0 x hxne, by rw [hspan, inv_mul_cancel_right]⟩
@@ -154,7 +154,7 @@ theorem heckeGClass_eq {C : ClassGroup (𝓞 K)} (I : (FractionalIdeal (𝓞 K)�
 theorem dualIdealUnit_eq_mul_inv (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
     dualIdealUnit K I = dualIdealUnit K 1 * I⁻¹ := by
   rw [← Units.val_inj, Units.val_mul]
-  show FractionalIdeal.dual ℤ ℚ (I : FractionalIdeal (𝓞 K)⁰ K)
+  change FractionalIdeal.dual ℤ ℚ (I : FractionalIdeal (𝓞 K)⁰ K)
     = FractionalIdeal.dual ℤ ℚ ((1 : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
         FractionalIdeal (𝓞 K)⁰ K) * ((I⁻¹ : (FractionalIdeal (𝓞 K)⁰ K)ˣ) :
         FractionalIdeal (𝓞 K)⁰ K)
