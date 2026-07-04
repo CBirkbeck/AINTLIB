@@ -26,6 +26,16 @@ Final commit: `583d8ad3`. Session arc (7 → 0 carriers):
   `PairOfDefinition.exists_principal_same_A₀` (HuberRings) and
   `IsTateRing.exists_principal_pairOfDefinition_le_subring` (AdicMorphisms).
 
+**⚠ POST-COMPLETION AUDIT FINDING (2026-07-04, b2_log AUDIT-828B-HYP):** the headline's
+`[CompatiblePlusSubring A]` hypothesis is over-strong: its `aplus_le_pod` field demands
+`A⁺ ⊆ P.A₀` for EVERY pair of definition (via `globalLocData`), which no open `A⁺` satisfies
+for a nondiscrete Tate ring (`⋂ₙ (Z_p + pⁿZ_p⟨x⟩) = Z_p` not open in `Q_p⟨x⟩`). The theorem is
+TRUE as stated but applies vacuously to the motivating examples. Follow-up dev ticket: weaken
+`aplus_le_pod` to the pinned/chosen pairs the construction actually uses (on-trace consumer:
+`StructureSheaf._aux_nonOpen_hSpa_Aplus_le_principalPair_A₀`, C3 lane). Cosmetic siblings:
+drop the auto-included `[DecidableEq (RationalLocData A)]`, and derive `[IsNoetherianRing A]`
+from `IsStronglyNoetherian` (k = 0: `A⟨⟩ ≅ A` — transfer not yet formalized).
+
 **Left for the cleanup fleet (all OFF the headline trace — dead code, no math debt on 8.28(b)):**
 - Quarantined legacy sorries: `isClosed_image_spa_ιSpv_bool_noHArch` + Sierpinski-closedness
   family (SpvAITopology 1434–1470), `cGammaIdeal_mem_of_cofinal_lt_one` /
