@@ -314,8 +314,8 @@ theorem tsum_eq_tsum_fourier_zlattice (L : Submodule ℤ (EuclideanSpace ℝ ι)
       = (ZLattice.covolume L volume)⁻¹
         • ∑' w : dualZLattice L, 𝓕 (⇑g) (w : EuclideanSpace ℝ ι) := by
   classical
-  haveI := ZLattice.module_finite ℝ L
-  haveI := ZLattice.module_free ℝ L
+  have := ZLattice.module_finite ℝ L
+  have := ZLattice.module_free ℝ L
   have hcard : Fintype.card (Module.Free.ChooseBasisIndex ℤ ↥L) = Fintype.card ι := by
     rw [← Module.finrank_eq_card_chooseBasisIndex, ZLattice.rank ℝ L, finrank_euclideanSpace]
   set b : Module.Basis ι ℤ ↥L :=
