@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.RingTheory.LaurentSeries
+import Mathlib.RingTheory.Valuation.Integral
 import Mathlib.Topology.Algebra.Valued.WithZeroMulInt
 import «Adic spaces».RestrictedPowerSeries
 import «Adic spaces».HuberRings
@@ -183,16 +184,34 @@ instance : IsTateRing K :=
 
 /-! ### `(K, 𝒪)` is an affinoid ring (Wedhorn Def 7.14) -/
 
-/-- `𝒪` is integrally closed in `K`: an element integral over the closed unit ball has
-valuation at most `1` (else the leading term strictly dominates every other term of the
-monic relation). -/
-theorem O_isIntegrallyClosed (a : K) (ha : IsIntegral (O F) a) : a ∈ O F := by
-  sorry
+/-- `𝒪` is integrally closed in `K` (`Valuation.Integers.mem_of_integral`). -/
+theorem O_isIntegrallyClosed (a : K) (ha : IsIntegral (O F) a) : a ∈ O F :=
+  Valuation.Integers.mem_of_integral (Valuation.integer.integers _) ha
 
-/-- The power-bounded subring of `K` is exactly `𝒪` (rank-one valuation). -/
+/-- The closed unit ball is a bounded subset of `K` (`v(s·y) ≤ v(y)` for `s ∈ 𝒪`). -/
+theorem isBounded_O : TopologicalRing.IsBounded ((O F : Subring K) : Set K) := by
+  intro U hU
+  obtain ⟨n, hn⟩ := (mem_nhds_iff_ball F).mp hU
+  refine ⟨{y : K | Valued.v (y - 0) < exp (-(n : ℤ))},
+    by simpa using ball_mem_nhds F 0 n, ?_⟩
+  rintro z ⟨s, hs, y, hy, rfl⟩
+  refine hn ?_
+  rw [Set.mem_setOf_eq, sub_zero] at hy ⊢
+  rw [Valuation.map_mul]
+  calc Valued.v s * Valued.v y ≤ 1 * Valued.v y := by
+        gcongr
+        exact hs
+    _ = Valued.v y := one_mul _
+    _ < exp (-(n : ℤ)) := hy
+
+/-- The power-bounded subring of `K` contains `𝒪` (in fact equals it). -/
 theorem O_subset_powerBounded :
     ((O F : Subring K) : Set K) ⊆ TopologicalRing.powerBoundedSubring K := by
-  sorry
+  intro x hx
+  refine (isBounded_O F).subset ?_
+  rintro - ⟨k, rfl⟩
+  rw [SetLike.mem_coe, mem_O_iff, map_pow]
+  exact pow_le_one₀ zero_le' hx
 
 instance : ValuationSpectrum.PlusSubring K := ⟨O F⟩
 
