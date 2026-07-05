@@ -547,3 +547,64 @@ Work: 49 (v2) + 12 (H) + 3 (M) + 5 (scoping) = **69**; cleanups: 17 (v2) +
 
 ### Start-now set (v3)
 T-E1, T-E2, T-A2, T-B2, T-D3, T-D13, T-Q3, T-F0, **T-H7, T-FLAT1** — 10 workers.
+
+
+---
+
+## Amendments v4 (2026-07-05): worker-grade proof plans + ecosystem integration
+
+**The two decomposition companions are now BINDING for their tickets:**
+`decomposition-km1.md` (KM Ch. 1 complete, all proofs read) governs streams D0/D/H's
+engine tickets; `decomposition-gme2.md` (GME Ch. 2 chains, proofs read) governs the
+A6 (Abel), A7 (Weierstrass embedding), E12–E15 (M₁/rigidity/Legendre/ℰ₃), B8–B9
+(dual isogeny/Hasse/Aut), C (Weil pairing), Y (Thm 2.6.8) chains. A worker on any of
+these tickets MUST follow the transcribed proof steps; deviations are B2 reports.
+
+**Gate change:** T-C1 (Weil pairing construction) is **no longer KM-gated** — the
+construction of record is GME 2.6.4 pp. 152–153 (read, transcribed in
+decomposition-gme2 §C), duality-compatible per (PR2), Silverman-convention anchored
+via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only.
+
+**New hard-bit tickets (from the read proofs; statements per the decompositions):**
+- [T-NOETH0] scoping: mathlib `SpreadingOut`/`AffineTransitionLimit` coverage vs
+  EGA IV 8.9.1 uses (HB-NOETH); policy: try direct proofs first.
+- [T-D22] section-of-smooth-rel-curve ⟹ locally principal nzd ideal (HB-REGIMM;
+  étale-local 𝔸¹ model route). [T-D23] closed pt of smooth curve /field has DVR
+  local ring. [T-D24] finrank additivity in SES of finite free modules (local + glue).
+  [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
+  empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
+  pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
+  charpoly-as-norm (`LinearMap.charpoly f = Algebra.norm R[T] (T•1 − f)`).
+  [T-D30] char-poly form of full-sections + equivalence (KM 1.8.2). [T-D31]
+  reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
+  geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
+  lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
+- [T-NORM0] norm/det of pushforward along finite locally free morphisms
+  (`∧^r g_*`; engine for Cor 2.2.2, pairing C.2, charpoly bridge). HB-NORM.
+- [T-RED0] reduced-universal-base transfer principle (identities of morphisms of
+  f.l.f. schemes over reduced base ⟺ geometric fibres; + pullback-from-universal).
+  Used by B8, T-C2a–c, PR1–3.
+- [T-PIC0] Pic(X) for a scheme via invertible O_X-modules (mathlib `SheafOfModules`
+  + LocallyFree ✓ merged); fibre-degree of an invertible sheaf. COH-adjacent;
+  UNCLAIMED per survey — coordinate on Zulip before starting.
+- [T-A6.α–δ], [T-A7.a–e], [T-E12..T-E15], [T-B8/T-B9], [T-C.1–.5], [T-Y.1–.7]:
+  the chain tickets exactly as decomposed in decomposition-gme2.md (statements to be
+  added to the skeleton as their prerequisite APIs land; the chain files list every
+  step + its source page).
+
+**Ecosystem coordination (BINDING; see ecosystem-survey-2026-07-05.md):**
+T-E1/T-E2 ⟷ mathlib PR #25218 (Tate normal form) — check before starting;
+T-B2/AG-CD ⟷ #40500 + YaelDillies/toric Diag/Character; universal curves ⟷ #41300;
+group-law alt route ⟷ #35151; COH-3 ⟷ #36345/#36218 (Riou/Nugent lane — do not build);
+Weil divisors = Raph-DG lane (we do effective Cartier only); FLAT = ours (unclaimed);
+Tate curve/p-divisible/eff-Cartier/R^if_*/torsors = confirmed vacuums (ours).
+OWNER ACTIONS: Zulip modular-curves post; XYin licence ping; FLT stub-fill offer.
+
+**COH stream targets pinned** (decomposition-gme2 header): COH-1 = GME Lemma 1.10.4;
+COH-2 = GME Cor 1.9.12; COH-3 = mathlib R^i f_* lane. **BB-RR pinned** := GME
+2.1.2/2.1.3/2.1.6 exactly; nothing else enters the box.
+
+**Start-now set (v4, re-verified against dependencies + ecosystem):**
+T-A2/T-A3 (per A7.e Proj route), T-B2 (against #40500/toric), T-D3b, T-D13, T-D22,
+T-D24, T-D25, T-D29, T-NORM0, T-Q3, T-F0, T-H7 — 12 parallel-safe;
+plus T-E1/T-E2 the moment the #25218 coordination check is done.

@@ -86,7 +86,7 @@ and the base-change group structure are real (sorry-free) definitions.*
 
 | ID | Statement | Source | Where stated / used |
 |----|-----------|--------|---------------------|
-| BB-RR | Riemann–Roch consequences: pointed genus-1 curve over a field = Weierstrass cubic; `π_*Ω¹` invertible; local Weierstrass form over the base | Silverman III.3.1; Loeffler 3.3.2; KM 2.2.5–2.2.6 | fibre condition (Basic.lean); T-A4/T-A7 |
+| BB-RR | **:= GME 2.1.2 (Grothendieck–Serre duality for relative curves) + 2.1.3 (RR) + 2.1.6 (relative RR) — exactly these, nothing else enters the box** | GME §2.1 (full text in refs); Silverman III.3.1 fibrewise | A6.α, A7.b (fibre vanishing + rank counts); T-A4 |
 
 **De-black-boxed (owner, 2026-07-05: "the only black box should be Riemann–Roch;
 the others we should plan to do, in parallel if possible")** — each former box is now
@@ -97,7 +97,7 @@ for existing work before the detailed tickets are cut; scoping tickets exist now
 
 | Stream | Was | Target statement(s) | First tickets | Feeds |
 |--------|-----|--------------------|---------------|-------|
-| **COH** | BB-COHBC | `π_*O_E ≅ O_S` compatibly with arbitrary base change; `R¹π_*O_E` a line bundle (the reviewer's `coherent-base-change`, `relative-duality-genus-one` boxes) | T-COH0 scoping (integrate survey: mathlib cohomology PRs); then Čech-on-affine-covers route | Abel canonicity (T-A6); relative-Picard chain |
+| **COH** | BB-COHBC | COH-1 = GME Lemma 1.10.4 (cohomology & base change); COH-2 = GME Cor 1.9.12 (`Γ(E,O)=Γ(S,O)`); COH-3 = `R^i f_*` + affine vanishing + LES (mathlib lane #36345/#36218 — coordinate, don't build); + T-PIC0 (Pic of a scheme, unclaimed) | T-COH0 scoping done via survey; sources pinned in decomposition-gme2.md | Abel canonicity (A6 chain); A7 ranks; relative Picard |
 | **FLAT** | BB-FLAT | Fibrewise flatness criterion (EGA IV 11.3.10): `X → Y` over `S`, `X` `S`-flat + fibrewise flat ⇒ flat; and the local criterion of flatness | T-FLAT0 scoping (mathlib `RingTheory.Flat` state + survey); T-FLAT1 Lean statement (needs fibre-morphism helper) | T-B4 (`E[N]` rank `N²`) |
 | **OT** | BB-DELIGNE | A finite locally free commutative group scheme of rank `N` is killed by `N` (Deligne's norm argument) | T-OT0 scoping after T-SG1 (needs the flf-group-scheme vocabulary); norm machinery: `Algebra.norm` + FltRegular's norm lemmas (rescan running) | T-D5 (exact order ⟹ killed) |
 | **DESC** | BB-DESC | fppf descent of elliptic curves (`ellipticCurve_fppf_descent` — statement already in `Moduli/Stack.lean`) | T-DESC0 scoping: mathlib `Morphisms/Descent`, `FlatDescent` coverage (survey); route: descend via relatively ample `ω`/ideal-at-zero embedding ⟶ module descent (in mathlib) + Proj | T-E10/T-E8; T-E9 route |
@@ -278,3 +278,22 @@ everywhere; naive fibrewise level definitions) are exactly the two that would ha
 forced redo. Deferred-not-redone: coarse moduli (KM 8), char `p ∣ N` theory (KM 5–7),
 compactification; formal DM-stack *packaging* tracks mathlib's stack API (T-E8) but
 no definition changes when it lands.
+
+
+## Worker-grade proof plans + ecosystem (2026-07-05, v4)
+
+Sources now READ IN FULL with proofs: KM Ch. 1 §§1.1–1.9 (all of it) and GME
+2.2.1–2.2.6, 2.6.1–2.6.4. Binding worker decompositions:
+- `decomposition-km1.md` — divisors, degrees, incidence loci, subgroup locus, 1.4.4,
+  A-structures/A-generators, factorization, full sections; standing hard bits
+  HB-NOETH / HB-FLF / HB-FIBCRIT; sub-tickets T-D22–T-D32.
+- `decomposition-gme2.md` — chains A6 (Abel; COH pins), A7 (Weierstrass embedding —
+  T-A2 now via Proj + Hida's 8-conditions chart analysis), E12–E15 (M₁, rigidity,
+  Legendre, ℰ₃ — the KM-4.7 bootstrap objects, fully explicit), B8–B9 (dual
+  isogeny/Hasse/Aut-computation), **C (Weil pairing construction — T-C1 un-gated)**,
+  Y (Thm 2.6.8 = Y(N) over ℤ[1/p]/ℤ, incl. the G-torsor descent engine 2.6.7 and the
+  reduced-universal-base transfer principle T-RED0).
+- `ecosystem-survey-2026-07-05.md` — reuse/coordinate/watch table (mathlib PRs
+  #25218/#41300/#35151/#40500/#36345/#36218/#24434/#38472-lane; toric; XYin;
+  Loeffler's OpenModularCurve; FLT stubs; AINTLIB incremental reuse for OT/DESC/COH/
+  FLAT/IRR) + the binding coordinate-don't-duplicate policy + owner actions.
