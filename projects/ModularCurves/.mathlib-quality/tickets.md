@@ -608,3 +608,14 @@ COH-2 = GME Cor 1.9.12; COH-3 = mathlib R^i f_* lane. **BB-RR pinned** := GME
 T-A2/T-A3 (per A7.e Proj route), T-B2 (against #40500/toric), T-D3b, T-D13, T-D22,
 T-D24, T-D25, T-D29, T-NORM0, T-Q3, T-F0, T-H7 — 12 parallel-safe;
 plus T-E1/T-E2 the moment the #25218 coordination check is done.
+
+
+### Reuse-policy note (v4.1, 2026-07-05)
+The ecosystem policy is now three-tier "copy by default" (see
+`ecosystem-survey-2026-07-05.md` §BINDING reuse policy v2): Tier-1 sources are
+copied into `ModularCurves/ForMathlib/` under the VENDOR register
+(provenance header + delete-when-upstream-lands; enforced by every CLEANUP ticket
+and the daily bump). T-E1/T-E2's #25218 check becomes: fetch the PR branch, vendor
+or align, then work. T-B2 may vendor toric's `Diag` layer. Tier-2 (unlicensed:
+XYin, Loeffler, WenrongZou) = read + re-prove until a licence lands (owner pings).
+Tier-3 = track/steer the COH, Weil-divisor, descent-effectivity mathlib lanes.

@@ -43,13 +43,40 @@ BINDING coordination policy at the end.*
    `DimGenCongLevels/NormTransfer.lean` + cusp machinery. Algebraic route source =
    GME 2.5.2–2.5.3 + 2.9.3 (in hand).
 
-## BINDING coordination policy (added to the board's standing rules)
+## BINDING reuse policy (v2 — "copy by default, with discipline")
 
-- Before starting T-E1, T-E2, T-B2, any D0 ticket, or any COH ticket: check the
-  named PR/lane above; if live, align statements with it and record the
-  decision in the ticket's log. Duplicating a live mathlib PR is a B2-grade offence
-  (AINTLIB's cardinal sin, extended to the ecosystem).
-- OWNER ACTIONS (Chris): (a) post the KM-programme plan summary to the Zulip
-  "Modular curves" thread; (b) licence/coordination ping to SmwYin (XYin) — note
-  their `dual` branch already sits in our remotes; (c) optional: offer FLT the
-  FiniteFlat/TateCurve stub fills.
+Three tiers, by licence:
+
+**Tier 1 — COPY NOW (Apache-2.0 / mathlib code, incl. open PR branches):**
+mathlib PRs #25218 (Tate normal form), #41300 (universal curve), #35151 (Weierstrass
+group law), #40500 (Hopf ≌ affine group schemes); YaelDillies/toric
+(Diag/μ_n/Character); FLT infrastructure. Mechanics (the **VENDOR register**):
+- vendored code goes under `ModularCurves/ForMathlib/`, one file per source, with a
+  provenance header: source repo/PR#, commit, licence, and the rule
+  `DELETE WHEN UPSTREAM LANDS`;
+- every vendored file is listed in the VENDOR table below; the daily-bump worker and
+  every `[CLEANUP-*]` ticket check the table: if the upstream PR merged, delete the
+  vendored file and switch imports to mathlib (this is the ONLY reason copying an
+  in-flight PR needs care: AINTLIB bumps mathlib daily, so PRs are future upstream);
+- adapt-don't-fork: keep names as close to the source as possible so the
+  delete-and-switch is mechanical.
+
+| Vendored file | Source | Delete when |
+|---|---|---|
+| (none yet — first candidates: #25218 → T-E1/T-E2; toric `Diag` → T-B2) | | |
+
+**Tier 2 — READ + RE-PROVE (no licence: XYin, loefflerd/ModularFormDimensions,
+WenrongZou/FormalGroupLaws, erdOne/QuasiCoherent):** verbatim copying is not legal
+until the author adds a licence or consents (one-line ask; both XYin's author —
+who already has the `SmwYin/dual` branch in OUR repo — and Loeffler are in the
+owner's orbit). Statement-mining and independent re-formalisation are always fine.
+
+**Tier 3 — COORDINATE-THE-DESIGN (active mathlib lanes owned by others):** COH
+`R^i f_*` lane (Riou/Nugent), Weil divisors (Raph-DG), descent effectivity (#24434).
+Here the point is not permission but that mathlib's eventual API wins by default in a
+daily-bumped monorepo — steer it (Zulip) or track it; do not silently diverge. Posting
+the KM plan to the Zulip modular-curves thread is an optimisation of this, not a gate.
+
+Owner-level items reduced to: (a) licence pings to SmwYin + Loeffler (Tier 2 unlock);
+(b) optional Zulip post (Tier 3 steering). Everything in Tier 1 is workable now by
+any agent following the VENDOR register discipline.
