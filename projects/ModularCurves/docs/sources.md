@@ -1,87 +1,63 @@
-# Sources — Modular Curves
+# Sources — Modular Curves (Katz–Mazur arithmetic-moduli programme)
 
-A living bibliography for planning the modular-curves formalisation. Add, reorder, and
-annotate freely — the entries below are **suggested starting points**, not a fixed list.
+Reference library for the project. **All books/PDFs live in `refs/ModularCurves/`**
+(gitignored, local-only, reachable via the `refs → ../AINTLIB/refs` symlink) — never in
+the repo. This file records what we have, what each source is *for*, and what is missing.
 
-**How to use this file**
-- Group a source under the heading it fits; note *what we want from it* (which chapters map
-  to which formalisation targets), and a rough priority `[P0]…[P2]`.
-- **Local PDFs are never committed.** Drop them in `refs/ModularCurves/` (gitignored) and
-  reference them here by title. See `docs/README.md`.
-- Prefer sources that give *constructions we can follow line by line* over surveys.
+Priorities: `[P0]` = spine of the current plan · `[P1]` = active secondary · `[P2]` = later phase.
 
----
+## Acquired (in `refs/ModularCurves/`)
 
-## 1. Core theory — analytic & algebraic (start here)
+| File | Source | Role | Pri |
+|------|--------|------|-----|
+| `preview-9781400881710_A26691730.pdf` | **Katz–Mazur**, *Arithmetic Moduli of Elliptic Curves* (AM-108, 1985) — **PREVIEW ONLY: frontmatter + Introduction + Ch. 1 §§1.1–1.9 (book pp. i–39)** | THE primary reference. Ch. 1 (relative Cartier divisors, full sets of sections, **exact order N**, §1.4 with proofs) fully usable for verbatim-quote decomposition. **Ch. 2 (group law, [N], pairings), Ch. 3–4 (moduli problems, representability) NOT INCLUDED — full text needed** | P0 |
+| `modcurvesnotes.pdf` | **D. Loeffler**, *Modular Curves* lecture notes (21 pp.) | The concise spine actually driving Phase 1–2: §3.3 EC over base schemes + Tate normal form + explicit `Y₁(N)`; §3.4 smoothness; §3.6 quotients & `Y₀(N)`; §3.7 Ell/R + KM representability theorem; §3.8 general level structures `P_H`; §4 Katz forms + Tate curve. Verbatim-quotable throughout | P0 |
+| `buzzard-tcc-20260326.pdf` | **K. Buzzard**, *Formalizing Fermat* Lecture 8 slides (TCC course, 2026-03-26) | The endgame spec: p. 33 defines `Y(ρ̄_N)` requirements (functor on ℚ-schemes, representations-with-pairing, smooth geometrically irreducible); pp. 34–39 Moret–Bailly application (black-boxed) | P0 |
+| `Haruzo Hida - Geometric Modular Forms and Elliptic Curves (2001…).pdf` | **Hida**, *GME* (371 pp., full text) | Full-text secondary for the KM-missing chapters until full KM lands: EC over schemes, moduli & level structures, geometric modular forms. Use for cross-referenced quotes where the KM preview runs out | P1 |
+| `padicpropMFMS.pdf` | **Katz**, *p-adic properties of modular schemes and modular forms* (Antwerp III, 1972; 122 pp., full) | Moduli schemes M_n & the q-expansion principle (Ch. 1); later: p-adic modular forms, canonical subgroup (Phase 3+) | P1 |
+| `[…] Faltings, Chai - Degeneration of abelian varieties (1990).djvu` | **Faltings–Chai** | Compactification/degeneration theory — Phase 4 (X(N) over ℤ, cusps). ⚠ **DJVU: unreadable by the session tooling — replace with PDF if/when Phase 4 starts** | P2 |
+| `[…] Hida - p-Adic Automorphic Forms on Shimura Varieties (2004).pdf` | **Hida**, *PAF* | Shimura-variety generalisations — far horizon; the FLT Shimura-surface material is black-boxed anyway | P2 |
 
-- **Diamond & Shurman, _A First Course in Modular Forms_ (GTM 228).** `[P0]`
-  The canonical modern reference. Ch. 2 builds `X(Γ)` as a compact Riemann surface; Ch. 3
-  gives the moduli interpretation and the curves `X₀(N)`, `X₁(N)`, `X(N)`. This is the main
-  spine for the analytic construction.
-- **Milne, _Modular Functions and Modular Forms_ (online notes, free).** `[P0]`
-  Careful, self-contained construction of the curves as Riemann surfaces *and* as algebraic
-  curves. Excellent for the compactification + cusps and for the analytic→algebraic bridge.
-- **Shimura, _Introduction to the Arithmetic Theory of Automorphic Functions_.** `[P1]`
-  Canonical models, Hecke correspondences, the arithmetic of the curves.
-- **Serre, _A Course in Arithmetic_, Ch. VII.** `[P1]`
-  `SL₂(ℤ)`, the fundamental domain, modular forms — background/warm-up, mostly in mathlib.
+## Wanted (please drop into `refs/ModularCurves/`)
 
-## 2. Moduli & arithmetic-geometric foundations (the scheme-theoretic direction)
+1. **Katz–Mazur, FULL TEXT** — blocking verbatim-quote fidelity for Ch. 2 (§2.1 group
+   structure, §2.3 structure of [N], §2.8 pairings), Ch. 3 (Γ-structures), Ch. 4
+   (formalism + 4.7). The plan's WS-C and parts of WS-A/E are PENDING-SOURCE until then.
+2. *(Phase 4, optional now)* Deligne–Rapoport, *Les schémas de modules de courbes
+   elliptiques* (LNM 349) — generalized elliptic curves, cusps.
+3. *(nice-to-have)* Conrad, *Arithmetic moduli of generalized elliptic curves* — modern
+   DR/KM exposition.
 
-- **Katz & Mazur, _Arithmetic Moduli of Elliptic Curves_ (Ann. of Math. Studies 108).** `[P1]`
-  Modular curves as moduli of elliptic curves with level structure; integral models.
-- **Deligne & Rapoport, _Les schémas de modules de courbes elliptiques_ (LNM 349).** `[P2]`
-  Foundational integral models, cusps, generalized elliptic curves, the Tate curve.
-- **B. Conrad, notes on _Arithmetic moduli of generalized elliptic curves_.** `[P2]`
-  Modern exposition of DR/KM; useful when we reach the moduli-stack formulation.
-- **The Stacks Project (online).** `[P2]`
-  Algebraic-geometry / moduli foundations to cite as needed.
+## Existing Lean infrastructure — reuse first (survey 2026-07-05)
 
-## 3. Level structure, cusps, dimension formulas
+**mathlib** (pin `11b908e5cdd9`): Weierstrass curves over rings + division polynomials +
+`VariableChange` + `IsElliptic`; group law over fields; morphism classes
+(smooth/étale/proper/flat/finite + `finrank`); ZMT; fibres; `GrpObj` in `Over S`;
+fppf/fpqc precoverages; fibered categories + `Pseudofunctor.IsStack`;
+`CyclotomicCharacter`; `Field.absoluteGaloisGroup`. **Absent**: everything
+scheme-theoretic about elliptic curves (see `.mathlib-quality/plan.md` inventory).
 
-- **Diamond & Shurman, Ch. 1–3** (widths of cusps, genus, dimension formulas).
-- **Stein, _Modular Forms: A Computational Approach_ (free).** `[P1]`
-  Concrete formulas for cusps, indices, and dimensions — good for cross-checking statements.
+**AINTLIB**: HasseWeil (field-level Weil pairing, `E[N] ≅ (ℤ/N)²` alg. closed, Tate
+modules, dual isogenies, formal groups — fibre anchors); NagellLutz (`Universal.lean`
+universal Weierstrass curve over `ℤ[A₁..A₆]`; division polynomials are a mathlib fork —
+use mathlib's); LeanModularForms (congruence subgroups, Hecke, analytic side; no
+geometric `Γ\ℍ` object exists anywhere in the repo).
 
-## 4. Surveys / orientation (free, good for scoping)
+## Bibliography (cite keys used in Lean docstrings & tickets)
 
-- **Bruinier–van der Geer–Harder–Zagier, _The 1-2-3 of Modular Forms_.**
-- Course notes: Milne (above), Darmon, Snowden — for filling specific gaps.
-
-## 5. Existing Lean / mathlib infrastructure — **reuse first, do not re-prove**
-
-Per AINTLIB's cardinal rule, search these before proving anything. `grep -r`, `exact?`,
-`apply?`, and `import` from any project in the workspace.
-
-**mathlib**
-- `Mathlib.Analysis.Complex.UpperHalfPlane.*` — `ℍ`, the `GL₂⁺(ℝ)` / `SL₂(ℝ)` Möbius action,
-  topology, metric, manifold structure (`Basic`, `Topology`, `Metric`, `Manifold`, `MoebiusAction`).
-- `Mathlib.NumberTheory.Modular` — the `SL(2, ℤ)` action and its standard fundamental domain.
-- `Mathlib.NumberTheory.ModularForms.CongruenceSubgroups` — `Γ(N)`, `Γ₀(N)`, `Γ₁(N)`.
-- `Mathlib.NumberTheory.ModularForms.*` — `SlashActions`, `SlashInvariantForms`, `Basic`
-  (`ModularForm` / `CuspForm`), `Cusps`, `EisensteinSeries`, `QExpansion`, `Petersson`,
-  `DimensionFormulas`, `LevelOne`.
-- Algebraic-curve / moduli direction (later): `Mathlib.AlgebraicGeometry.*`,
-  `Mathlib.Geometry.RingedSpace.*`, `Mathlib.Geometry.Manifold.*` (Riemann-surface structure).
-
-**In-repo (AINTLIB) — `import` directly, this is the whole point of the monorepo**
-- `projects/LeanModularForms/` — modular & cusp forms, slash actions, PSL₂ action, cusps,
-  valence formula, dimension formulas, Petersson inner product. Closest existing project.
-- `projects/HasseWeil/` — elliptic curves, `Pic⁰`, isogenies, torsion — for the
-  moduli-of-elliptic-curves side.
-
-## 6. Related AINTLIB dev branches — cross-link, don't duplicate
-
-- `dev/leanmodularforms` → `projects/LeanModularForms/`
-- `dev/hasse-weil` → `projects/HasseWeil/`
-- `dev/modular-commensurable` — commensurability of subgroups; check before touching
-  Hecke / correspondence material.
-
----
-
-## 7. To add (your sources)
-
-<!-- Chris: drop titles/links here; move them up into the sections above as they firm up. -->
--
--
--
+- **[KM]** N. Katz, B. Mazur. *Arithmetic Moduli of Elliptic Curves.* Ann. of Math.
+  Studies 108, Princeton, 1985.
+- **[Loe]** D. Loeffler. *Modular Curves.* Lecture notes (TCC-style course), 21 pp.
+- **[Buz-L8]** K. Buzzard. *Formalizing Fermat*, Lecture 8 slides, 2026-03-26 (in
+  `ImperialCollegeLondon/FLT`, `2026_EPSRC_TCC_course/20260326.pdf`).
+- **[Hida-GME]** H. Hida. *Geometric Modular Forms and Elliptic Curves.* World
+  Scientific, 2001.
+- **[Katz-Antwerp]** N. Katz. *p-adic properties of modular schemes and modular forms.*
+  In: Modular Functions of One Variable III, LNM 350, Springer, 1973.
+- **[Sil]** J. Silverman. *The Arithmetic of Elliptic Curves.* GTM 106 (for the
+  field-level dictionary: III.3, III.6, III.8; used fibrewise only).
+- **[FC]** G. Faltings, C.-L. Chai. *Degeneration of Abelian Varieties.* Ergebnisse 22,
+  Springer, 1990.
+- **[Hida-PAF]** H. Hida. *p-Adic Automorphic Forms on Shimura Varieties.* Springer, 2004.
+- **[DR]** P. Deligne, M. Rapoport. *Les schémas de modules de courbes elliptiques.*
+  LNM 349, 1973. *(not yet in refs/)*
