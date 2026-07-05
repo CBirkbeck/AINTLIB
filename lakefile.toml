@@ -97,3 +97,14 @@ globs = ["DedekindResidue"]
 autoImplicit = false
 relaxedAutoImplicit = false
 maxSynthPendingDepth = 3
+
+# ───────── Modular curves: X(Γ) = Γ\ℍ for congruence Γ — new project (dev/modular-curves) ─────────
+# Analytic Riemann-surface theory first, later the algebraic/moduli models. Imports mathlib (and, as
+# it grows, LeanModularForms / HasseWeil). Built on demand while it is a stub — not yet a default target.
+[[lean_lib]]
+name = "ModularCurves"
+srcDir = "projects/ModularCurves"
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
