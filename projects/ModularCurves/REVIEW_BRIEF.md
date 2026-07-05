@@ -1,7 +1,8 @@
 # Review brief — Arithmetic moduli of elliptic curves and modular curves, formalisation programme
 
 *Prepared 2026-07-05 for a senior arithmetic geometer. Self-contained: no repository
-access required. **DRAFT** — question list pending final sign-off by the project owner.*
+access required. Sent 2026-07-05; reviewer reply received the same day and integrated —
+see `.mathlib-quality/expert-review/2026-07-05/{reply,integration}.md`.*
 
 ## 1. Goal
 

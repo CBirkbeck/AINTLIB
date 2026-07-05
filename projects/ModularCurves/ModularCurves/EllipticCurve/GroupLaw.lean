@@ -4,22 +4,30 @@ import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 import Mathlib.AlgebraicGeometry.Group.Smooth
 
 /-!
-# The group law on an elliptic curve over a base
+# The working record: elliptic curves with their group structure
 
-An elliptic curve `E/S` (pure geometry: `EllipticCurve.Basic`) carries a unique structure
-of commutative group scheme over `S` with identity the zero section. This is a **theorem**
-(Abel; KM 2.1.2: the map `E(T) → Pic⁰(E_T/T)`, `P ↦ I(P)⁻¹ ⊗ I(0)`, is an isomorphism of
-functors), not part of the definition — all our sources define elliptic curves without
-group data.
+Per the expert-review integration (2026-07-05, Q1/Q3): the group law is **part of the
+working record**, not a registered sorried construction and not a prerequisite chain.
+`EllipticCurve S` extends the geometric record `EllipticCurveGeom S` by
 
-We register the group structure as construction `DS2` (data-`sorry`): a `GrpObj` structure
-on `E` viewed in `Over S` (mathlib's group objects, with the cartesian monoidal structure
-on `Over S` via pullbacks). Everything downstream (`[N]`, torsion, level structures)
-consumes it through this single registered instance and the specification theorems below
-(`grpObj_one_eq_zero`, `grpObj_unique`, `grpObj_comm`), so the bundled data is pinned down
-by theorems and cannot drift from the mathematics. Discharge route (ticket chain `T-A6*`):
-KM 2.1 — rigidified degree-0 line bundles; the cohomology-and-base-change inputs are
-black-box register items (BB-COHBC).
+* a group-object structure on `E` in `Over S` (mathlib `GrpObj`, cartesian monoidal
+  structure via pullbacks),
+* commutativity, and
+* the normalisation that the unit is the zero section.
+
+This is exactly the object KM Ch. 1 consumes: "a smooth commutative S-group-scheme of
+relative dimension one" (KM 1.4.1). Mathematically the extra data is redundant:
+
+**The deferred canonicity ("purity/comparison") project** — `abelEnrichment_exists` /
+`abelEnrichment_unique` below — proves every `EllipticCurveGeom` admits a unique such
+enrichment, via Abel's theorem `E(T) ≅ Pic⁰(E_T/T)` (KM 2.1.2). Its named black boxes,
+fixed once and not allowed to grow (reviewer's list, Q3):
+`coherent-base-change` (`π_*O_E ≅ O_S` compatibly with base change);
+`relative-duality-genus-one` (`R¹π_*O_E` a line bundle, base-change compatible);
+`relative-Picard` (representability of `Pic_{E/S}`, `Pic⁰_{E/S}`, rigidified variants);
+`Poincare` (Poincaré bundle); `Abel-isomorphism` (`E ≅ Pic⁰_{E/S}` carrying zero to
+`O_E`, base-change compatible); `group-law-from-Abel` (induced structure; uniqueness).
+⧗KM-gate: KM 2.1–2.3 are on the do-not-formalize-from-memory list.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
@@ -32,44 +40,47 @@ universe u
 
 namespace ModularCurves
 
+variable {S : Scheme.{u}}
+
+/-- The **working record**: an elliptic curve over `S` together with its commutative
+group-scheme structure, normalised so the unit is the zero section.
+Source: KM 1.4.1 ("smooth commutative S-group-scheme of relative dimension one");
+design per expert review (2026-07-05). The data is canonically unique —
+`abelEnrichment_unique`. -/
+structure EllipticCurve (S : Scheme.{u}) extends EllipticCurveGeom S where
+  /-- The group-object structure on `E` in `Over S`. -/
+  grp : GrpObj (Over.mk π)
+  /-- The group law is commutative. -/
+  comm : letI := grp; IsCommMonObj (Over.mk π)
+  /-- The unit of the group structure is the zero section. -/
+  one_eq_zero :
+    letI := grp
+    (η[Over.mk π] : _ ⟶ Over.mk π).left = (𝟙_ (Over S)).hom ≫ zero
+
 namespace EllipticCurve
 
-variable {S : Scheme.{u}} (E : EllipticCurve S)
+variable (E : EllipticCurve S)
 
 /-- `E/S` as an object of `Over S`. -/
 noncomputable abbrev asOver : Over S := Over.mk E.π
 
-/-- **(DS2, ticket chain T-A6)** The group-scheme structure on an elliptic curve `E/S`:
-a group-object structure on `E` in `Over S`.
+noncomputable instance grpObj : GrpObj E.asOver := E.grp
 
-DATA-SORRY (register entry DS2). Mathematical content (KM 2.1.2, Abel): `E(T)` is in
-natural bijection with `Pic⁰(E_T/T)` via `P ↦ I(P)⁻¹ ⊗ I(0)`, transporting the group
-structure of the Picard group; the required representability and base-change facts are
-the black boxes BB-COHBC of the register (plan.md). -/
-noncomputable instance grpObj : GrpObj E.asOver := sorry
+instance isCommMonObj : IsCommMonObj E.asOver := E.comm
 
-/-- **(T-A6a)** Normalisation: the unit of the registered group structure is the zero
-section (as morphisms from the underlying scheme of the monoidal unit of `Over S`).
-This is part of the *specification* of DS2. -/
-theorem grpObj_one_eq_zero :
-    (η[E.asOver]).left = (𝟙_ (Over S)).hom ≫ E.zero := by sorry
+/-- **(T-A6b, canonicity — Abel/KM 2.1.2; deferred purity project)** Every geometric
+elliptic curve admits an enrichment to the working record. -/
+theorem abelEnrichment_exists (G : EllipticCurveGeom S) :
+    ∃ E : EllipticCurve S, E.toEllipticCurveGeom = G := by sorry
 
-/-- **(T-A6b, uniqueness — KM 2.1.2 + rigidity)** Any two group-object structures on
-`E/S` whose units are the zero section coincide. Consequently DS2 is canonical data.
-Source: KM 2.1.2 (uniqueness of the Abel isomorphism); rigidity. -/
-theorem grpObj_unique (g₁ g₂ : GrpObj E.asOver)
-    (h₁ : (letI := g₁; (η[E.asOver] : _ ⟶ E.asOver)).left = (𝟙_ (Over S)).hom ≫ E.zero)
-    (h₂ : (letI := g₂; (η[E.asOver] : _ ⟶ E.asOver)).left = (𝟙_ (Over S)).hom ≫ E.zero) :
-    g₁ = g₂ := by sorry
+/-- **(T-A6c, uniqueness — KM 2.1.2 + rigidity; deferred purity project)** The
+enrichment is unique: two working records with the same geometry are equal. -/
+theorem abelEnrichment_unique (E E' : EllipticCurve S)
+    (h : E.toEllipticCurveGeom = E'.toEllipticCurveGeom) : E = E' := by sorry
 
-/-- **(T-A6c)** The group law is commutative.
-Source: KM 2.1.2 (`Pic⁰` is abelian); alternatively fibrewise rigidity via mathlib's
-`AlgebraicGeometry.Group.Abelian`. -/
-theorem grpObj_comm : IsCommMonObj E.asOver := by sorry
-
-/-- Multiplication by `n` on `E/S`, as an endomorphism over `S`: the `n`-th power of the
-identity in the group `Hom_{Over S}(E, E)` induced by the group-object structure
-(mathlib's `MonObj.Hom.group`). Source: KM 2.3 ("the structure of `[N]`"). -/
+/-- Multiplication by `n` on `E/S`, as an endomorphism over `S`: the `n`-th power of
+the identity in the group `Hom_{Over S}(E, E)` induced by the group structure.
+Source: KM 2.3 ("the structure of `[N]`" — ⧗KM for its theorems). -/
 noncomputable def mulBy (n : ℤ) : E.asOver ⟶ E.asOver :=
   letI : Group (E.asOver ⟶ E.asOver) := Hom.group
   (𝟙 E.asOver) ^ n
@@ -81,19 +92,65 @@ noncomputable abbrev mulByHom (n : ℤ) : E.E ⟶ E.E := (E.mulBy n).left
 theorem mulByHom_π (n : ℤ) : E.mulByHom n ≫ E.π = E.π :=
   Over.w (E.mulBy n)
 
-/-- The additive commutative group structure on `T`-points `E.Point g`, induced by DS2:
-`E.Point g` is definitionally the hom-set `Over.mk g ⟶ E.asOver` (as a subtype), which
-carries the group structure of morphisms into a group object; commutativity by
-`grpObj_comm`. Registered with DS2 (its compatibility specification
-`point_smul_eq_comp_mulBy` is T-A6d). -/
+/-- The `T`-points of `E/S` along `g : T ⟶ S`: morphisms `T ⟶ E` lifting `g`.
+Source: Loeffler §3.3. -/
+abbrev Point {T : Scheme.{u}} (g : T ⟶ S) : Type u :=
+  { h : T ⟶ E.E // h ≫ E.π = g }
+
+/-- The zero `T`-point. -/
+def zeroPoint {T : Scheme.{u}} (g : T ⟶ S) : E.Point g :=
+  ⟨g ≫ E.zero, by rw [Category.assoc, E.zero_π, Category.comp_id]⟩
+
+/-- Points of `E` over `g` are the `Over S`-morphisms `Over.mk g ⟶ E.asOver`. -/
+noncomputable def pointEquivOverHom {T : Scheme.{u}} (g : T ⟶ S) :
+    E.Point g ≃ (Over.mk g ⟶ E.asOver) where
+  toFun P := Over.homMk P.1 P.2
+  invFun f := ⟨f.left, Over.w f⟩
+  left_inv P := rfl
+  right_inv f := by ext; rfl
+
+/-- The additive commutative group structure on `T`-points, transported from the
+hom-group into the group object `E` (mathlib `Hom.commGroup`), commutativity from the
+`comm` field. Specification tying it to `mulBy`: `point_smul_eq_comp_mulBy`. -/
 noncomputable instance pointAddCommGroup {T : Scheme.{u}} (g : T ⟶ S) :
-    AddCommGroup (E.Point g) := sorry
+    AddCommGroup (E.Point g) :=
+  letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+  ((E.pointEquivOverHom g).trans Additive.ofMul).addCommGroup
 
 /-- **(T-A6d, specification)** Scalar multiplication on points is composition with
-`mulBy`: `(n • P) = P ≫ [n]`. This ties the point-level group structure (DS2 via
-`pointAddCommGroup`) to the morphism `mulBy`, so the two can never diverge. -/
+`mulBy`: `(n • P) = P ≫ [n]`. Provable from `pointEquivOverHom` +
+`GrpObj.comp_zpow`; keeps the point-level and morphism-level `[n]` from diverging. -/
 theorem point_smul_eq_comp_mulBy {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     ((n • P : E.Point g) : T ⟶ E.E) = (P : T ⟶ E.E) ≫ E.mulByHom n := by sorry
+
+/-- Restriction of a point along `k : T' ⟶ T` (functoriality of the points functor). -/
+def Point.restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point g) :
+    E.Point (k ≫ g) :=
+  ⟨k ≫ P.1, by rw [Category.assoc, P.2]⟩
+
+/-- **(T-A5)** Base change of the working record along `g : T ⟶ S`: total space
+`E ×_S T`; the group structure is mathlib's group-object structure on the pullback
+(`Over.grpObjMkPullbackSnd`). Geometry Props are base-change stability (mathlib
+instances + fibre transitivity); ticket `T-A5`. -/
+noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T where
+  E := pullback E.π g
+  π := pullback.snd E.π g
+  zero := pullback.lift (g ≫ E.zero) (𝟙 T)
+    (by rw [Category.assoc, E.zero_π, Category.comp_id, Category.id_comp])
+  zero_π := pullback.lift_snd _ _ _
+  smooth := by sorry
+  proper := by sorry
+  fibres := by sorry
+  grp := Over.grpObjMkPullbackSnd
+  comm := by sorry
+  one_eq_zero := by sorry
+
+/-- A point of `E` over `g : T ⟶ S`, viewed as a section of the base-changed curve
+`E ×_S T / T`. -/
+noncomputable def Point.asSection {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
+    (E.baseChange g).Point (𝟙 T) :=
+  ⟨pullback.lift P.1 (𝟙 T) (by rw [P.2, Category.id_comp]),
+    pullback.lift_snd _ _ _⟩
 
 end EllipticCurve
 

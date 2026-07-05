@@ -163,6 +163,21 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
     PairingCompatAt D sT torsionIso t ht x y hx hy
 
+/-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
+representability of the ρ-level problem: for every elliptic curve `E` over a
+`ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on E ×_T T'}` is representable
+by a finite étale `T`-scheme — the symplectic isomorphism scheme
+`Isom^symp(E[N], V_ρ̄)`. `Y(ρ̄)` is then the Isom-scheme over a rigidified level base,
+which *carries its moduli interpretation by construction*; the identification with the
+Galois twist of `Y(N)_ℚ` is a separate later theorem (route note, plan §Y(ρ̄)). -/
+theorem rhoLevel_relativelyRepresentable {N : ℕ} [NeZero N] (hN : 3 ≤ N)
+    (D : GaloisRepData N) {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
+    (E : EllipticCurve T) :
+    ∃ (I : Scheme.{0}) (f : I ⟶ T), IsFinite f ∧ Etale f ∧
+      ∀ {T' : Scheme.{0}} (k : T' ⟶ T),
+        Nonempty ({ h : T' ⟶ I // h ≫ f = k } ≃
+          RhoLevelStructure D (k ≫ sT) (E.baseChange k)) := by sorry
+
 /-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists:
 there is a scheme `Y = Y(ρ̄_N)` over `ℚ`, smooth of relative dimension 1 and affine, such
 that for every `ℚ`-scheme `T` the `T`-points of `Y` over `ℚ` biject with isomorphism

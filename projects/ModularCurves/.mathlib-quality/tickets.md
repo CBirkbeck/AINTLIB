@@ -1,7 +1,10 @@
 # Ticket Board — ModularCurves (Phase 1–2)
 
-*/develop 1g, 2026-07-05. Statements are canonical in the Lean skeleton (commit
-`b758179b`): every proof ticket is "discharge the `sorry` at the named declaration" —
+*/develop 1g, 2026-07-05; **v2 after expert-review integration** (see `§Amendments v2`
+at the end — new incidence/quotient/subgroup-scheme/groupoid streams, dependency
+changes from the two-record design, route changes for the pairing and Y(ρ̄)).
+Statements are canonical in the Lean skeleton (commit
+`b758179b`, amended by the integration commit): every proof ticket is "discharge the `sorry` at the named declaration" —
 the signature in the file is the contract (develop.md §2.5). No ticket may alter a
 statement; a worker convinced a statement is wrong hard-stops with a B2 report
 (`b2_log.jsonl`) and the board is replanned.*
@@ -120,20 +123,20 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] §3.7 (Ell is fibered); [KM] 2.1 ⧗ (reconciliation only).
 - **Generality**: arbitrary `g : T ⟶ S`.
 
-### [T-A6a–d] ⧗KM Abel: the group law (DS2 discharge chain)
-- **Status**: open (statements final) · **File**: EllipticCurve/GroupLaw.lean ·
-  `grpObj` + `grpObj_one_eq_zero` + `grpObj_unique` + `grpObj_comm` +
-  `pointAddCommGroup` + `point_smul_eq_comp_mulBy`
-- **Depends on**: T-A2 (models), AG-LB *or* D-lane divisors (route choice = review Q3)
-- **Parallel**: no (single chain; sub-tickets may split after route fixed)
-- **Type**: def(data) + theorems
-- **Sketch** (KM 2.1.2 route): (i) `I(P)` ideal sheaves of sections; (ii) rigidified
-  `Pic⁰(E_T/T)` presheaf; (iii) Abel bijection `E(T) ≅ Pic⁰` (BB-COHBC stated black
-  boxes: cohomology-and-base-change for `π_*O`, `R¹π_*O` line bundle); (iv) transport
-  group structure; unit = zero section; (v) uniqueness/commutativity from Pic. This is
-  the project's hardest chain — expect sub-ticketing via `/beastmode` Parent tickets.
-- **Sources**: [KM] 2.1 ⧗ · Mumford AV p. 53 (per [Loe] 3.3.2's citation) ·
+### [T-A6] ⧗KM Abel canonicity — the deferred "purity/comparison" project (v2)
+- **Status**: open, **phase 3+ — no longer blocks anything** (v2: group law is a field
+  of the working record, D5) · **File**: EllipticCurve/GroupLaw.lean ·
+  `abelEnrichment_exists`, `abelEnrichment_unique`, `point_smul_eq_comp_mulBy`
+- **Depends on**: T-A2, AG-LB or divisor route · **Parallel**: self-contained project
+- **Type**: theorems (no data)
+- **Sketch** (KM 2.1.2): the seven named boxes fixed by the reviewer (Q3), stated once
+  and never grown: coherent-base-change; relative-duality-genus-one; relative-Picard;
+  Poincare; Abel-isomorphism; group-law-from-Abel; torsion. Then transport + uniqueness.
+- **Sources**: [KM] 2.1 ⧗ (do-not-formalize-from-memory) · Mumford AV p. 53 ·
   [Hida-GME] §2.1. **Generality**: any base scheme.
+- Note: `pointEquivOverHom`, `pointAddCommGroup`, base-change group data are **done**
+  (real definitions, integration commit). `point_smul_eq_comp_mulBy` is provable-now
+  (via `GrpObj.comp_zpow`) — small starter ticket.
 
 ### [T-B2] μ_N and (ℤ/N) wiring (DS3 discharge)
 - **Status**: open · **File**: GroupScheme/MuN.lean · `muNGrpObj`, `constZModGrpObj`,
@@ -150,8 +153,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 ### [T-B3] E[N] ↪ E closed immersion + `torsionIdeal`
 - **Status**: open · **Files**: Torsion.lean (`torsionι_isClosedImmersion`),
   LevelStructure/Basic.lean (`torsionIdeal` un-sorried via it)
-- **Depends on**: T-A6 (uses only `mulBy` existence — statement-level OK now; proof
-  uses separatedness of `π`) · **Parallel**: with T-B4/B5 · **Type**: theorem + def
+- **Depends on**: none (v2: group data is in the record) · **Parallel**: with T-B4/B5 · **Type**: theorem + def
 - **Sketch**: zero section is a closed immersion (`π` separated; mathlib
   `isClosedImmersion_of_comp_eq_id` pattern seen in `Group/Abelian.lean`); closed
   immersions stable under pullback; convert via `IsClosedImmersion` ↔ ideal-sheaf
@@ -170,8 +172,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 
 ### [T-B5] [N] étale when N invertible (+ E[N] finite étale)
 - **Status**: open · **File**: Torsion.lean · `mulBy_etale`, `torsionπ_etale`
-- **Depends on**: T-A6 (invariant differential input) · **Parallel**: with T-B4 ·
-  **Type**: theorems
+- **Depends on**: invariant-differential input only (v2: not the Abel chain) · **Parallel**: with T-B4 · **Type**: theorems
 - **Sketch**: [Loe] 3.4.2(2) verbatim route: `[N]` multiplies the invariant
   differential by `N` ⟹ iso on (co)tangent ⟹ formally étale; + lfp. Needs the
   invariant-differential API (sub-ticket if mathlib's `Ω¹` for schemes is insufficient
@@ -187,13 +188,21 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   alg. closed, `N` invertible) — do NOT re-prove. Cross-project import isolated here.
 - **Sources**: [Sil] III.6.4(b); in-repo HasseWeil (sorry-free — verified).
 
-### [T-C1] ⧗KM Weil pairing construction (DS4 discharge, KM 2.8)
-- **Status**: open (BLOCKED on full KM text for the construction of record)
+### [T-C0] Char-0 étale-descent Weil pairing (v2 — first milestone, review Q5)
+- **Status**: open · **File**: WeilPairing/ (new construction file) ·
+  **Depends on**: T-B6 (fibre comparison), T-F1-adjacent Galois machinery ·
+  **Type**: def(data, discharges DS4 over ℚ-schemes) + specs
+- **Sketch**: over bases where `N` is invertible, `E[N]` is finite étale; construct
+  `e_N` by étale descent of the classical field-level pairing (HasseWeil), verifying
+  the T-C2a/b/c specs. Same API as the eventual scheme-level construction (D7).
+
+### [T-C1] ⧗KM Weil pairing, scheme-level construction of record (v2 route = duality)
+- **Status**: open (gated: KM 2.8 on the do-not-formalize-from-memory list)
 - **File**: WeilPairing/Basic.lean · `weilPairing`, `weilPairing_over` ·
-  **Depends on**: T-B3, T-B2, T-D3 (divisor language) · **Type**: def(data) + theorem
-- **Sketch**: KM 2.8 norm/divisor construction (⧗); candidate alternates to be
-  reconciled at cut time: Oda/Deligne commutator on theta groups; Cartier autoduality.
-  **Route choice is review question Q5.**
+  **Depends on**: T-B3, T-B2, T-D3, AG-CD scoping · **Type**: def(data) + theorem
+- **Sketch** (v2, review Q5): final API via **Cartier duality/autoduality**; the KM 2.8
+  norm/divisor construction is the comparison backend (and the KM-faithful proof), not
+  the API. `N ∣ M` compatibilities structural via duality.
 - **Sources**: [KM] 2.8 ⧗ · [Hida-GME] · [Sil] III.8 (fibre anchor).
 
 ### [T-C2] Pairing bilinear + alternating (specs)
@@ -344,10 +353,18 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   upgrade `coords_additive`/`pairing_compat` to morphism-level once T-F1c lands ·
   **Depends on**: T-F1, T-C4 · **Type**: def + theorems.
 
+### [T-F6] Symplectic Isom-scheme: ρ-level relative representability (v2, review Q9)
+- **Status**: open · **File**: YRho.lean · `rhoLevel_relativelyRepresentable` ·
+  **Depends on**: T-F1, T-C0 (pairing over char 0), T-B5 · **Type**: theorem ·
+  **Sketch**: `Isom^symp(E[N], V_ρ̄)` as an open-closed piece of the finite étale
+  `Isom(E[N], V_ρ̄)`-scheme (pairing condition cuts by det); finite étale over `T`.
+
 ### [T-F4] ⧗ Y(ρ̄_N) representable (phase-3 headline) · MILESTONE
 - **Status**: open (phase 3) · **File**: YRho.lean · `yRho_representable` ·
-  **Depends on**: T-E9, T-F1, T-F3, AG-QUOT (twisting) · **Type**: theorem ·
-  **Sources**: [Buz-L8] p. 33 (verbatim in decomposition); twist route in plan.
+  **Depends on**: T-E9, T-F1, T-F3, **T-F6 (route of record, v2)** · **Type**: theorem ·
+  **Sources**: [Buz-L8] p. 33 (verbatim in decomposition). v2 route: Isom-scheme over a
+  rigidified full-level base carries the moduli interpretation by construction; the
+  Galois-twist identification is a separate later comparison theorem (D8).
 
 ### [T-F5] Geometric irreducibility (BB-IRR)
 - **Status**: open (phase 3; black box acceptable indefinitely per owner) ·
@@ -379,3 +396,95 @@ maxHeartbeats` anywhere; DS-register unchanged; `#print axioms` audit)
 ## Board totals check
 24 work + 11 cleanup = 35; ⌈24/3⌉ = 8 ≤ 8 per-file/interval cleanups + 2 pre-milestone
 + 1 final ✓ cadence satisfied.
+
+
+---
+
+## Amendments v2 (expert-review integration, 2026-07-05)
+
+### New stream D0 — Cartier incidence (KM 1.3; quote-complete from the preview)
+All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
+- **[T-D11]** `ecd-official-definition` — official ECD (invertible ideal /
+  affine-local nzd form) + equivalence with the working (finite locally free) form in
+  smooth curves, both directions (reviewer: sections give ECDs; finite flat f.p.
+  closed subschemes are ECDs; proper ECDs are finite flat). File: CartierDivisor.lean
+  (extends T-D1; AG-LB only for the (L,s)-interface half, T-D19). Sources: KM 1.1–1.2
+  (in hand).
+- **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
+  functoriality. Depends: none. Parallel: yes.
+- **[T-D13]** `sectionVanishingIdeal_spec` (zero locus in a finite locally free
+  module). Depends: none. Parallel: yes. PROVABLE-NOW candidate.
+- **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
+  T-D12, T-D13.
+- **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
+- **[T-D16]** `exists_subgroupLocus` (KM 1.3.7, verbatim + proof in hand;
+  `1 + deg + deg²` equations via `[e] ≤ D`, `D = inv*D`, `[m(P₁,P₂)] ≤ D_W`).
+  Depends: T-D14, T-D15, T-D3.
+- **[T-D17]** `exists_exactOrderLocus` (A-generators, `A = ℤ/N`; KM 1.6 instance).
+  Depends: T-D16. Feeds T-E7.
+- **[T-D18]** `exists_fullLevelLocus` (`A = (ℤ/N)²`). Depends: T-D16. Feeds T-E9.
+- **[T-D19]** `ecd-pair-section-interface` — `D ↔ (L, s)`, sum = tensor. BLOCKED on
+  AG-LB. Sources: KM 1.2 (in hand).
+- **[T-D20]** flat pullback along `Y → X` + composition laws. Depends: T-D12.
+- **[T-D21]** general-`A` A-structures/A-generators representability (KM 1.5–1.6,
+  in hand): closed subscheme of `Hom(A, E)`. Depends: T-D16; structure theorem for
+  finite abelian `A` (mathlib). The two instances T-D17/T-D18 do not wait for this.
+
+### New stream SG — finite locally free closed subgroups (review requirement)
+- **[T-SG1]** finite locally free closed subgroup schemes of `E/S`: definition +
+  basic API (kernel-style constructors; `E[N]` as the leading example).
+- **[T-SG2]** fppf-local cyclicity (KM 1.4.1 verbatim, in hand) as the **definition of
+  record** for Γ₀(N); discharges/replaces the geometric-fibre surrogate in
+  `IsGammaZero` (upgrade `T-D10`). **GATE: no Γ₀ representability theorem may be
+  stated against the surrogate.**
+- **[T-SG3]** cyclicity is a closed condition (KM 6.4 ⧗; statement-level now, proof
+  gated on full KM).
+
+### New stream Q — finite quotients (reviewer split of AG-QUOT)
+- **[T-Q1]** finite group actions on schemes (vocabulary; mathlib group-action reuse).
+- **[T-Q2]** free actions vs stabilizers (statements).
+- **[T-Q3]** affine quotients: `Spec(A^G)` universal property (Loeffler 3.6.1 proof
+  route, quote in hand). PROVABLE with today's mathlib invariant-theory fragments —
+  early target.
+- **[T-Q4]** base change of invariants (KM Ch. 7 appendix ⧗ "base change for rings of
+  invariants").
+- **[T-Q5]** gluing affine quotients (quasi-projective case; Loeffler 3.6.1).
+- **[T-Q6]** quotients of rigidified moduli problems (feeds KM 4.7 ⇐, T-E5).
+- **[T-Q7]** coarse quotient statements for non-fine levels (`Y₀(N)`, `Y(1)`) — via
+  the groupoid layer (D6), phase M of the spine.
+
+### New stream G — groupoid layer (review Q7)
+- **[T-G1]** `isIso_homOver`: pointed `S`-morphisms of elliptic curves are isos.
+- **[T-G2]** pointed morphisms are group homomorphisms (rigidity; KM 2.4-adjacent ⧗).
+- **[T-G3]** `aut_trivial_of_fullLevel` (rigidification bridge; Loeffler 3.8.3
+  content). Blocks: passing any small-level statement to iso-classes.
+
+### Modified in v2
+- T-A6 → canonicity project (above); **T-B3, T-B5, T-C2, T-D5–T-D9 no longer depend
+  on it** (group data is a record field).
+- `pointEquivOverHom`, `pointAddCommGroup`, `baseChange` group data: **done** in the
+  integration commit (real definitions).
+- T-C0 added; T-C1 re-routed (duality API); T-C2a/b/c spec tickets added
+  (naturality, `N∣M`, symplectic pin — statements in skeleton).
+- T-F6 added; T-F4 re-routed through it.
+- Phase-2 named blocks added (review Q8): **N-Isog** moduli problem, degeneracy-map
+  finite flatness, `Γ₀(p)`-regularity with auxiliary level — statements to be cut
+  when full KM lands (all on the do-not-formalize-from-memory list).
+
+### Do-not-formalize-from-memory gate (v2, binding)
+KM 2.3, 2.8, 4.7, 5–7, 8–10, 12–13: tickets touching these may *state* from
+[Loe]/[Hida] quotes but may not close, nor may proofs be reconstructed "from
+standard knowledge", until the full KM text is in `refs/ModularCurves/` and the
+decomposition quote-gate passes.
+
+### Cleanup cadence (v2 recount)
+Work tickets: 24 (v1) − 1 (pointAddCommGroup absorbed) + 11 (D0) + 3 (SG) + 7 (Q)
++ 3 (G) + 2 (C0, F6) = **49**. ⌈49/3⌉ = 17 ≥ cleanups: v1's 11 + **[CLEANUP-9]**
+Incidence.lean after T-D13+T-D14+T-D15 · **[CLEANUP-10]** Incidence.lean final (after
+T-D16–T-D18) · **[CLEANUP-11]** Groupoid.lean final (after T-G1–G3) · **[CLEANUP-12]**
+quotient stream after T-Q3+T-Q4+T-Q5 · **[CLEANUP-13]** WeilPairing after T-C0+T-C2a–c
+· **[CLEANUP-ALL-3]** before T-F6. All cleanups: no `set_option maxHeartbeats`;
+DS-register unchanged; `#print axioms` audit.
+
+### Start-now set (v2)
+**T-E1, T-E2, T-A2, T-B2, T-D3, T-D13, T-Q3, T-F0** — 8 independent workers.

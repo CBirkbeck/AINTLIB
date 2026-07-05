@@ -7,8 +7,10 @@ import ModularCurves.GroupScheme.MuN
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Basic
+import ModularCurves.LevelStructure.Incidence
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.Moduli.Groupoid
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Stack
 import ModularCurves.ModularCurve.YRho

@@ -90,6 +90,46 @@ theorem weilPairingEval_nondegenerate {N : ℕ} [NeZero N]
       (E.weilPairingEval x y hx hy : Γ(Spec (.of k), ⊤)) = 1) :
     x = E.zeroPoint t := by sorry
 
+/-- **(T-C2a, base-change naturality — required pinning spec per expert review Q4:
+"compatible with arbitrary base change", since fibrewise agreement does not pin
+morphisms over non-reduced bases)** Restriction along `k : T' ⟶ T` commutes with the
+pairing: `e_N(x|_{T'}, y|_{T'}) = (e_N(x,y))|_{T'}` in `Γ(T', O)`. -/
+theorem weilPairingEval_restrict {N : ℕ} [NeZero N] {T T' : Scheme.{u}} {g : T ⟶ S}
+    (k : T' ⟶ T) (x y : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hx' : (Point.restrict E k x).1 ≫ E.mulByHom N = (k ≫ g) ≫ E.zero)
+    (hy' : (Point.restrict E k y).1 ≫ E.mulByHom N = (k ≫ g) ≫ E.zero) :
+    (E.weilPairingEval (Point.restrict E k x) (Point.restrict E k y) hx' hy' : Γ(T', ⊤))
+      = (Scheme.Γ.map k.op).hom (E.weilPairingEval x y hx hy : Γ(T, ⊤)) := by sorry
+
+/-- **(T-C2b, divisibility — expert review Q5: "compatibility with N ∣ M")** For
+points killed by `N`, the `N·M`-pairing is the `M`-th power of the `N`-pairing:
+`e_{NM}(x, y) = e_N(x, y)^M`. (Lattice check: for `x = a/N`, `y = b/N`,
+`e_N = exp(2πi(ad−bc)/N)` and as `NM`-torsion points `e_{NM} = e_N^M`.)
+Source: Silverman III.8.4-type compatibility; ⧗KM 2.8 for the KM form. -/
+theorem weilPairingEval_mul {N M : ℕ} [NeZero N] [NeZero M] {T : Scheme.{u}}
+    {g : T ⟶ S} (x y : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hx' : x.1 ≫ E.mulByHom (N * M) = g ≫ E.zero)
+    (hy' : y.1 ≫ E.mulByHom (N * M) = g ≫ E.zero) :
+    (haveI : NeZero (N * M) := ⟨Nat.mul_ne_zero (NeZero.ne _) (NeZero.ne _)⟩;
+      (E.weilPairingEval (N := N * M) x y hx' hy' : Γ(T, ⊤))) =
+      (E.weilPairingEval (N := N) x y hx hy : Γ(T, ⊤)) ^ M := by sorry
+
+/-- **(T-C2c, the symplectic-formula pin — expert review Q6, Silverman convention)**
+On a pair of torsion points, `e_N(aP + bQ, cP + dQ) = e_N(P,Q)^{ad − bc}` (exponent
+taken mod `N`). Together with Galois equivariance over fields (recorded in ticket
+`T-C4`) and `det ∘ ρ_E = χ_N`, this fixes the project's normalisation once and for
+all. -/
+theorem weilPairingEval_symplectic {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (P Q : E.Point g) (a b c d : ℤ)
+    (hP : P.1 ≫ E.mulByHom N = g ≫ E.zero) (hQ : Q.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (h₁ : (a • P + b • Q).1 ≫ E.mulByHom N = g ≫ E.zero)
+    (h₂ : (c • P + d • Q).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval (a • P + b • Q) (c • P + d • Q) h₁ h₂ : Γ(T, ⊤)) =
+      (E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^ (((a * d - b * c) % (N : ℤ)).toNat) :=
+  by sorry
+
 end EllipticCurve
 
 end ModularCurves

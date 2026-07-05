@@ -297,3 +297,28 @@ trace-discriminant; the `ℤ/N → C` closed-immersion reformulation).
 
 **Owner actions requested**: (1) full KM PDF into `refs/ModularCurves/` (unblocks the
 PENDING-SOURCE(KM) quote-gates); (2) Faltings–Chai as PDF only if/when Phase 4 starts.
+
+
+---
+
+## Amendment (2026-07-05, expert-review integration)
+
+- DS2 deleted (group law now a field of the working record `EllipticCurve`;
+  `EllipticCurveGeom` carries the geometry). Leaves A6.* re-scoped to the deferred
+  canonicity project (`abelEnrichment_exists/unique`) with the reviewer's seven named
+  black boxes; **nothing in streams B/C/D/E depends on it anymore**.
+- New result block **R-D0 (Cartier incidence, KM 1.3)** — leaves T-D11–T-D21 with
+  verbatim KM 1.3.5/1.3.7 quotes (recorded in `Incidence.lean`'s module docstring;
+  both passages in hand with proofs). `exists_subgroupLocus` supersedes the direct
+  route to exact-order representability; D2 (`HasExactOrder`) is unchanged as the
+  definition.
+- Fibre condition (leaf A1) restated as pointed scheme isomorphism with `projModel`
+  (reviewer Q2); the functor-of-points interface remains only inside
+  `IsWeierstrassModel` (T-A2's spec).
+- Pairing leaves gain the three pinning specs (naturality/divisibility/symplectic,
+  Silverman convention — reviewer Q4/Q5/Q6); construction re-routed (duality API,
+  KM 2.8 as backend; char-0 étale-descent construction T-C0 as first milestone).
+- New leaves: groupoid layer (T-G1–T-G3, reviewer Q7); quotient stream (T-Q1–T-Q7);
+  fppf-cyclicity gate (T-SG2) — **no Γ₀ representability statement may use the
+  geometric-fibre surrogate**.
+- Source gate hardened: KM 2.3/2.8/4.7/5–7/8–10/12–13 are do-not-formalize-from-memory.

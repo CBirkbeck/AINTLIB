@@ -5,9 +5,9 @@
 - Goal of brief: soundness check on the *definitions* + strategic guidance on the six
   decision points, before execution starts
 - Scope: whole project (phase 1–3 plan)
-- Status: **DRAFT — awaiting owner sign-off of the question list (Phase 7)**
-- Reply received: false
-- Reply integrated: false
+- Status: sent; reply received and integrated
+- Reply received: true (2026-07-05)
+- Reply integrated: true (2026-07-05; see integration.md)
 
 ## Questions in the brief (verbatim §8 headers)
 
