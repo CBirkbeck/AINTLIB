@@ -488,3 +488,62 @@ DS-register unchanged; `#print axioms` audit.
 
 ### Start-now set (v2)
 **T-E1, T-E2, T-A2, T-B2, T-D3, T-D13, T-Q3, T-F0** — 8 independent workers.
+
+
+---
+
+## Amendments v3 (2026-07-05): levels layer + RR-only black-box directive
+
+### Stream H — general levels & full level over ℤ (`Moduli/GammaH.lean`, statements in skeleton)
+- **[T-H1]** `gammaHNaive_bot`: `P_⊥ ≅` naive full level. Depends: T-E4. Golf-sized.
+- **[T-H2]** `glSmul` membership + **[T-H2a]** action law (needs killed-by-N; uses
+  `point_smul_eq_comp_mulBy`). Depends: T-A6d spec only.
+- **[T-H3]** `gammaHNaiveProblem` functor laws + orbit-compat of pullback.
+- **[T-H4]** `gammaHNaive_relativelyRepresentable` (Loeffler 3.8.2; Weil-pairing open
+  locus for H = 1, quotient for general H). Depends: T-C0/T-C1, stream Q, T-D18.
+- **[T-H5]** `gammaHNaive_rigid_iff` (Loeffler 3.8.3, torsion-free preimage in SL₂(ℤ)).
+  Depends: T-H3; mathlib `CongruenceSubgroup` API.
+- **[T-H6]** `gammaHNaive_representable_of_rigid` — every fine modular curve of every
+  level. Depends: T-E5, T-H4.
+- **[T-H7]** `gammaFullNaive_not_rigid_of_le_two` — the honest "only a stack for
+  N ≤ 2" statement ([-1] fixes E[2] pointwise). Depends: T-E4.
+- **[T-H8]** `gammaFullDrinfeld_representable` (N ≥ 3, arbitrary ring — **full level N
+  over ℤ**; KM 4.7.2/5.1 ⧗KM gate) + **[T-H8a]** Drinfeld problems' functor laws.
+- **[T-H9]** `gammaOneDrinfeld_representable` (N ≥ 4 over ℤ; ⧗KM).
+- **[T-H10]** `fullLevelGroupoid` category laws + equivalence-to-discrete for N ≥ 3
+  (via T-G3).
+
+### Stream M — coarse moduli (`Moduli/Coarse.lean`, statements in skeleton)
+- **[T-M1]** `jLine_coarse_points` + **[T-M1a]** j-compatibility (KM 8.2 ⧗; Silverman
+  III.1.4(b) fibrewise — HasseWeil/mathlib `IsomOfJ` reuse). Universal-property half
+  = T-Q7.
+- **[T-M2]** `exists_coarse_gammaH` (Loeffler §3.6 + §3.8 Rem. 1, quotes in hand;
+  covers Y₀(N) and small-N full level). Depends: stream Q, T-H6 (auxiliary rigid
+  level), T-G1.
+
+### De-black-boxing streams (owner directive: only RR stays; parallel)
+- **[T-COH0]** scoping: integrate mathlib-PR survey; decide Čech-on-affines route;
+  cut T-COH1.. with statements (`π_*O ≅ O_S` + base change; `R¹π_*O` line bundle).
+- **[T-FLAT0]** scoping (mathlib RingTheory.Flat + survey) · **[T-FLAT1]** Lean
+  statement of the fibrewise criterion + fibre-morphism helper; then proof tickets.
+- **[T-OT0]** scoping after T-SG1; statement "flf comm. group scheme of rank N killed
+  by N"; Deligne norm-argument decomposition (FltRegular norm lemmas per rescan).
+- **[T-DESC0]** scoping: exact coverage of mathlib Morphisms/Descent + FlatDescent
+  (survey); route via relatively-ample embedding + module descent; target
+  `ellipticCurve_fppf_descent` (statement exists).
+- **[T-IRR0]** scoping: algebraic (KM Ch. 10 ⧗, Tate-curve degeneration) vs analytic
+  (uniformisation ↔ LeanModularForms) route; target `yRho_geometricallyIrreducible`
+  (statement exists). Late-phase; parallel.
+
+Former BB-usage edges become dependencies: T-B4 ← FLAT; T-D5 ← OT; T-E10/T-E8 ← DESC;
+T-A6 ← COH; T-F5 ← IRR. **BB-RR remains the only standing assumption.**
+
+### Cadence (v3 recount)
+Work: 49 (v2) + 12 (H) + 3 (M) + 5 (scoping) = **69**; cleanups: 17 (v2) +
+**[CLEANUP-14]** GammaH.lean after T-H2+T-H3+T-H5 · **[CLEANUP-15]** GammaH final ·
+**[CLEANUP-16]** Coarse.lean final · **[CLEANUP-ALL-4]** before T-H8 = **21**.
+⌈69/3⌉ = 23 ≈ satisfied with per-file finals counted; re-audit at next /develop
+--continue (R3).
+
+### Start-now set (v3)
+T-E1, T-E2, T-A2, T-B2, T-D3, T-D13, T-Q3, T-F0, **T-H7, T-FLAT1** — 10 workers.

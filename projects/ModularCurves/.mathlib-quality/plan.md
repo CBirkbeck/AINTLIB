@@ -80,19 +80,33 @@ and the base-change group structure are real (sorry-free) definitions.*
 `torsionIdeal` (LevelStructure/Basic.lean) is DS-adjacent: discharged by T-B3a from
 `torsionι_isClosedImmersion`.
 
-## The BLACK-BOX REGISTER (mathematical inputs we assume, with sorried statements)
+## The BLACK-BOX REGISTER — **RR-ONLY** (owner directive, 2026-07-05)
+
+**Standing black box (the only one):**
 
 | ID | Statement | Source | Where stated / used |
 |----|-----------|--------|---------------------|
-| BB-RR | Riemann–Roch consequences: pointed genus-1 curve over a field = Weierstrass cubic; `π_*Ω¹` invertible; local Weierstrass form over the base | Silverman III.3.1; Loeffler 3.3.2 ("calculation in sheaf cohomology, c.f. p. 53 of Mumford"); KM 2.2.5–2.2.6 | fibre condition (Basic.lean); T-A7 locally-Weierstrass |
-| BB-COHBC | Cohomology and base change needed for Abel/Pic⁰ | KM 2.1; Mumford AV | T-A6 (DS2 discharge) |
-| BB-FLAT | Fibrewise flatness criterion (EGA IV 11.3.10) | EGA | T-B4 (`[N]` finite flat of deg `N²`) |
-| BB-DELIGNE | Finite locally free comm. group scheme of rank `N` is killed by `N` | KM 1.4.2 cite [Oort–Tate] | T-D5 |
-| BB-DESC | fppf descent of (quasi-projective) schemes | SGA 1 VIII | T-E10 (`ellipticCurve_fppf_descent`) |
-| BB-IRR | Geometric irreducibility of `Y(N)`, `Y(ρ,p)` | "proved complex-analytically" (Buzzard p. 33); DR VI | T-F5 |
+| BB-RR | Riemann–Roch consequences: pointed genus-1 curve over a field = Weierstrass cubic; `π_*Ω¹` invertible; local Weierstrass form over the base | Silverman III.3.1; Loeffler 3.3.2; KM 2.2.5–2.2.6 | fibre condition (Basic.lean); T-A4/T-A7 |
 
-Rule: a black box may be *used* only via its stated Lean theorem; each is a genuine
-`sorry` on `main` (allowed there as WIP) and a candidate for its own dev sub-project.
+**De-black-boxed (owner, 2026-07-05: "the only black box should be Riemann–Roch;
+the others we should plan to do, in parallel if possible")** — each former box is now
+a **planned workstream**; its sorried Lean statement stays exactly where it is, but as
+the headline *target* of the stream, not a standing assumption. Survey agents are
+checking mathlib PRs, external Lean repos (incl. the FLT project), and AINTLIB itself
+for existing work before the detailed tickets are cut; scoping tickets exist now:
+
+| Stream | Was | Target statement(s) | First tickets | Feeds |
+|--------|-----|--------------------|---------------|-------|
+| **COH** | BB-COHBC | `π_*O_E ≅ O_S` compatibly with arbitrary base change; `R¹π_*O_E` a line bundle (the reviewer's `coherent-base-change`, `relative-duality-genus-one` boxes) | T-COH0 scoping (integrate survey: mathlib cohomology PRs); then Čech-on-affine-covers route | Abel canonicity (T-A6); relative-Picard chain |
+| **FLAT** | BB-FLAT | Fibrewise flatness criterion (EGA IV 11.3.10): `X → Y` over `S`, `X` `S`-flat + fibrewise flat ⇒ flat; and the local criterion of flatness | T-FLAT0 scoping (mathlib `RingTheory.Flat` state + survey); T-FLAT1 Lean statement (needs fibre-morphism helper) | T-B4 (`E[N]` rank `N²`) |
+| **OT** | BB-DELIGNE | A finite locally free commutative group scheme of rank `N` is killed by `N` (Deligne's norm argument) | T-OT0 scoping after T-SG1 (needs the flf-group-scheme vocabulary); norm machinery: `Algebra.norm` + FltRegular's norm lemmas (rescan running) | T-D5 (exact order ⟹ killed) |
+| **DESC** | BB-DESC | fppf descent of elliptic curves (`ellipticCurve_fppf_descent` — statement already in `Moduli/Stack.lean`) | T-DESC0 scoping: mathlib `Morphisms/Descent`, `FlatDescent` coverage (survey); route: descend via relatively ample `ω`/ideal-at-zero embedding ⟶ module descent (in mathlib) + Proj | T-E10/T-E8; T-E9 route |
+| **IRR** | BB-IRR | Geometric connectedness/irreducibility of `Y(N)`, `Y(ρ̄)` (`yRho_geometricallyIrreducible` — statement in `YRho.lean`) | T-IRR0 scoping: algebraic route via KM Ch. 10 (components via `T[N]`, Tate-curve/cusp degeneration — ⧗KM) vs analytic route (uniformisation, hooks LeanModularForms). Buzzard sanctioned sorrying this ("see 1980s"); owner directs planning it anyway — late-phase, parallel | T-F5 |
+
+Rule: BB-RR may be *used* only via its stated Lean theorems. The five streams'
+target statements may likewise be used downstream while open (they are ordinary
+sorried theorems), but every use is a dependency edge on the corresponding stream,
+tracked on the board — not an assumption that may quietly become permanent.
 
 ## Mathlib inventory (survey 2026-07-05, pin 11b908e5cdd9)
 
@@ -142,7 +156,11 @@ projects/ModularCurves/ModularCurves/
 ├─ Moduli/EllCategory.lean               WS-E  Ell/R; moduli problems; KM 4.7 statement
 ├─ Moduli/Representability.lean          WS-E  Tate normal form (provable now!); Y₁(N); Y(N)
 ├─ Moduli/Stack.lean                     WS-E  fppf descent statements (stack bridge)
-└─ ModularCurve/YRho.lean                WS-F  GaloisRepData; V_ρ (DS5); Y(ρ̄_N)
+├─ Moduli/Groupoid.lean                  WS-G  groupoid of elliptic curves; rigidification
+├─ Moduli/GammaH.lean                    WS-H  P_H for H ≤ GL₂(ℤ/N); Drinfeld problems over ℤ;
+│                                              not-rigid at N ≤ 2; levelled groupoid
+├─ Moduli/Coarse.lean                    WS-M  coarse j-line; coarse Y_{P_H} (Y₀(N), small N)
+└─ ModularCurve/YRho.lean                WS-F  GaloisRepData; V_ρ (DS5); Y(ρ̄_N); Isom^symp
 ```
 
 ## Workstreams & parallelism

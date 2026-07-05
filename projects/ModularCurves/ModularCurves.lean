@@ -11,6 +11,8 @@ import ModularCurves.LevelStructure.Incidence
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.Moduli.Groupoid
+import ModularCurves.Moduli.GammaH
+import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Stack
 import ModularCurves.ModularCurve.YRho
