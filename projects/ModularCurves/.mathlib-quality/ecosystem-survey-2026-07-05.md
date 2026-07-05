@@ -65,11 +65,27 @@ group law), #40500 (Hopf ≌ affine group schemes); YaelDillies/toric
 |---|---|---|
 | (none yet — first candidates: #25218 → T-E1/T-E2; toric `Diag` → T-B2) | | |
 
-**Tier 2 — READ + RE-PROVE (no licence: XYin, loefflerd/ModularFormDimensions,
-WenrongZou/FormalGroupLaws, erdOne/QuasiCoherent):** verbatim copying is not legal
-until the author adds a licence or consents (one-line ask; both XYin's author —
-who already has the `SmwYin/dual` branch in OUR repo — and Loeffler are in the
-owner's orbit). Statement-mining and independent re-formalisation are always fine.
+**Tier 2 — RESOLVED by author permission (owner, 2026-07-05):** XYin (owner's
+student) and loefflerd/ModularFormDimensions — copying permitted; treat as Tier 1
+(vendor with provenance headers crediting the author; best practice: get the OK in
+writing / a LICENSE file added before anything ships in a public release, since
+AINTLIB redistributes). erdOne/QuasiCoherent stays read-only (mathlib staging; will
+land upstream anyway).
+
+**Needs-assessment (2026-07-05, so nobody vendors for the sake of it):**
+- *Loeffler/ModularFormDimensions*: unique delta vs AINTLIB = the quotient object
+  `Y(𝒢) = 𝒢\ℍ` with divisors/orders on the quotient. Consumed only in **phase 3**
+  (analytic comparison `Y(N)(ℂ) ≅ Γ(N)\ℍ`, stream IRR analytic route). Vendor then,
+  not now.
+- *WenrongZou/FormalGroupLaws*: **nothing needed** — HasseWeil's FormalGroup/ already
+  covers the programme's formal-group uses (height, [n], char-p `[p](T)=g(Tᵖ)`),
+  sorry-free; Wenrong's extras (Lazard universal FGL, Lubin–Tate) are out of scope.
+  Only relevance: his defs are becoming mathlib's `FormalGroup` API — future
+  AINTLIB-wide dedup item (HasseWeil ↔ mathlib) at some daily bump; track, don't copy.
+- *XYin*: the genuinely useful pieces are the Φ_m modular-polynomial/function-field
+  model of X₀(N), the Kronecker congruence, and integral q-expansions of Δ, j —
+  phase 2–3 (Γ₀/N-Isog cross-checks, cusps/q-expansions) and phase 4 (KM Ch. 12/
+  Igusa-adjacent). Vendor per-need with provenance.
 
 **Tier 3 — COORDINATE-THE-DESIGN (active mathlib lanes owned by others):** COH
 `R^i f_*` lane (Riou/Nugent), Weil divisors (Raph-DG), descent effectivity (#24434).
