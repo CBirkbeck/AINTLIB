@@ -3,6 +3,8 @@ import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+import Mathlib.AlgebraicGeometry.Morphisms.Separated
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.RingTheory.Norm.Defs
 import Mathlib.RingTheory.TensorProduct.Basic
 
@@ -67,15 +69,41 @@ noncomputable def degree (D : RelEffCartierDiv π) (s : S) : ℕ :=
 
 /-- **(DS4a, ticket T-D3)** The divisor `Σᵢ [Pᵢ]` attached to a finite family of sections
 of `π` — the closed subscheme whose ideal is the *product* of the ideal sheaves of the
-(closed-immersion) sections. DATA-SORRY (register entry DS4a). Specifications: degree `= n`
-(`sectionsDivisor_degree`), and formation commutes with arbitrary base change (KM 1.1). -/
+(closed-immersion) sections. DATA-SORRY (register entry DS4a).
+
+SCOPE (adversarial pass 2026-07-06): the construction and its specifications are pinned
+under KM 1.2.1's standing hypotheses — `π` separated (sections are closed immersions)
+and smooth of relative dimension 1 (ideal products have the right length); the data
+slot is total, but nothing is promised outside that scope. Specifications: degree `= n`
+(`sectionsDivisor_degree`, hypothesised accordingly), and formation commutes with
+arbitrary base change (KM 1.1). -/
 noncomputable def sectionsDivisor (π : C ⟶ S) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) : RelEffCartierDiv π := sorry
 
-/-- **(T-D3a, specification of DS4a)** `Σᵢ [Pᵢ]` has degree `n`. Source: KM 1.2.2. -/
-theorem sectionsDivisor_degree (π : C ⟶ S) {n : ℕ}
+/-- **(T-D3a, specification of DS4a)** `Σᵢ [Pᵢ]` has degree `n`, under KM 1.2.1's
+standing hypotheses.
+
+ADVERSARIAL FIX (2026-07-06): the hypotheses are REQUIRED — for `π = 𝟙 (Spec k)`,
+`n = 2`, no degree-2 divisor in `Spec k` exists at all (statement was unsatisfiable
+by any data filling); on the nodal `Spec k[x,y]/(xy)` the squared node-section ideal
+has length `3 ≠ 2`. Source: KM 1.2.2, proved under the standing assumptions of
+KM 1.2.1. -/
+theorem sectionsDivisor_degree (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
     (sectionsDivisor π P).degree s = n := by sorry
+
+/-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
+sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
+pulled-back closed immersion), as a divisor in the base-changed curve (structure
+morphism `pullback.snd π t`). Finiteness/flatness/finite presentation are base-change
+stability, ticket `T-D12`; formation is functorial (KM 1.1). -/
+noncomputable def baseChange (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
+    RelEffCartierDiv (pullback.snd π t) where
+  ideal := (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker
+  finite := by sorry
+  flat := by sorry
+  lfp := by sorry
 
 end RelEffCartierDiv
 
@@ -100,8 +128,18 @@ every `R`-algebra `A` and every `f ∈ A ⊗_R B`:
 
 Verbatim source (proof of KM 1.9.1): "The points `P₁,…,P_N` form a full set of sections of
 `Spec(B)/R` if and only if this universal `f` satisfies `Norm(f) = ∏ f(Pᵢ)` in
-`R[T₁,…,T_N]`" — quantifying over all `A` is equivalent by base change (KM 1.8.4). -/
-def IsFullSetOfSectionsAlg {n : ℕ} (P : Fin n → (B →ₐ[R] R)) : Prop :=
+`R[T₁,…,T_N]`" — quantifying over all `A` is equivalent by base change (KM 1.8.4).
+
+ADVERSARIAL FIX (2026-07-06): `[Module.Free R B] [Module.Finite R B]` are REQUIRED —
+mathlib's `Algebra.norm` is junk (constantly `1`) on modules with no finite basis, so
+without freeness the definition is falsely strong on the locally-free-non-free stratum
+(e.g. `B` of rank `N` with nontrivial determinant line: the legitimate full set
+`P₁ = ⋯ = P_N = 0` fails the equation at `f = 0`, `1 ≠ 0`). For `B` free, `A ⊗[R] B`
+is free over every `A`, so the norm is honest throughout the quantifier. KM's
+projective case must be reached via a trivialising cover (T-D4), never by applying
+this definition on arbitrary affines. -/
+def IsFullSetOfSectionsAlg [Module.Free R B] [Module.Finite R B] {n : ℕ}
+    (P : Fin n → (B →ₐ[R] R)) : Prop :=
   ∀ (A : Type u) [CommRing A] [Algebra R A],
     ∀ f : A ⊗[R] B,
       Algebra.norm A f = ∏ i, AlgHom.sectionBaseChange R B A (P i) f

@@ -19,10 +19,12 @@ is a unit (KM 2.2; Loeffler, *Modular curves*, §3.3, Def 3.3.3; Silverman III.3
 
 **Construction status.** The model is *declared* here (`projModel`, a registered data-`sorry`,
 see the DATA-SORRY REGISTER in `.mathlib-quality/plan.md`) and *characterised* by
-`IsWeierstrassModel`; ticket `T-A2` constructs it by gluing the two standard affine charts
-(`z = 1` and `y = 1`) along their common localisation, and discharges the characterisation.
-No downstream file may use `projModel` except through `IsWeierstrassModel` and the theorems
-stated here.
+`IsWeierstrassModel`; ticket `T-A2` constructs it by Hida's route of record
+(decomposition-gme2 A7.e): `Proj (R[X,Y,Z]/(Weierstrass cubic))`, smoothness by the
+chartwise Jacobian analysis (GME pp. 114–115), and discharges the characterisation.
+No downstream file may use `projModel` except through `IsWeierstrassModel`, the theorems
+stated here, and the fibrewise bridge `FibrewiseElliptic` (sanctioned raw-iso consumer,
+expert review Q2).
 
 ## References
 
@@ -46,30 +48,38 @@ def SpecPoints (X : Scheme.{u}) (f : X ⟶ Spec (.of R)) (K : Type u) [CommRing 
     Type u :=
   { g : Spec (.of K) ⟶ X // g ≫ f = Spec.map (CommRingCat.ofHom (algebraMap R K)) }
 
-/-- `IsWeierstrassModel W X f x₀` says that the pointed `R`-scheme `(X, f, x₀)` is *a* plane
-projective model of the Weierstrass curve `W`: it is proper, of finite presentation, and for
-every `R`-algebra field `K` its `K`-points biject with the mathlib affine-chart points
-`(W.baseChange K).toAffine.Point` (which include the point at infinity `0`), naturally in `K`
-and sending `x₀` to `0`.
+/-- `IsWeierstrassModel W X f x₀` says that the pointed `R`-scheme `(X, f, x₀)` is *a*
+plane projective model of the Weierstrass curve `W`: proper, of finite presentation,
+with a section, and — **when `W` is elliptic** — its `K`-points over every `R`-algebra
+field `K` biject with the Weierstrass points `(W.baseChange K).toAffine.Point`,
+POINTEDLY (`x₀ ↦ 0`).
 
-This is the *interface* by which the rest of the library consumes the projective model; the
-model itself is constructed in ticket `T-A2`. The point-level bijection plus properness and
-smoothness pins the model down uniquely (`isWeierstrassModel_unique`, via KM 2.2.5 —
-Riemann–Roch black box). -/
+ADVERSARIAL FIX (2026-07-05, DEF-7): the points clause is (i) guarded by
+`W.IsElliptic` — mathlib's `Affine.Point` contains only NONSINGULAR points, so for
+singular `W` the honest projective cubic has strictly more `K`-points (cuspidal
+`y² = x³` over `𝔽₅`: 6 vs 5) and the unguarded clause was false of the registered
+model; and (ii) pointed — the bare `Nonempty (≃)` form did not tie `x₀` to `0` and
+pinned nothing. Field-points cannot detect nilpotents, so this interface alone can
+NEVER pin the model up to isomorphism (thickening counterexample `V(F)` vs `V(F²)`);
+uniqueness additionally requires smoothness — see `isWeierstrassModel_unique`. -/
 structure IsWeierstrassModel (W : WeierstrassCurve R) (X : Scheme.{u})
     (f : X ⟶ Spec (.of R)) (x₀ : Spec (.of R) ⟶ X) : Prop where
   isProper : IsProper f
   locallyOfFinitePresentation : LocallyOfFinitePresentation f
   section_comp : x₀ ≫ f = 𝟙 _
-  /-- The `K`-points of `X` over `R` biject with the Weierstrass points over `K`. -/
-  points (K : Type u) [Field K] [Algebra R K] :
-    Nonempty (SpecPoints X f K ≃ (W.baseChange K).toAffine.Point)
+  /-- Pointed `K`-points comparison, for elliptic `W`. -/
+  points : ∀ (_ : W.IsElliptic) (K : Type u) [Field K] [Algebra R K],
+    ∃ e : SpecPoints X f K ≃ (W.baseChange K).toAffine.Point,
+      e ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ x₀, by
+        rw [Category.assoc, section_comp, Category.comp_id]⟩ = 0
 
 /-- **(T-A2)** The plane projective model of a Weierstrass curve, as a scheme over `Spec R`:
 the closed subscheme of `ℙ²_R` defined by the homogeneous Weierstrass cubic.
 
-DATA-SORRY (register entry DS1): to be constructed by gluing the affine charts
-`Spec R[x,y]/(W)` (chart `z = 1`) and `Spec R[t,s]/(W_∞)` (chart `y = 1`), following KM 2.2.
+DATA-SORRY (register entry DS1). Route of record (decomposition-gme2 A7.e, adopted
+2026-07-05, superseding the two-chart gluing sketch): Hida's construction —
+`Proj (R[X,Y,Z]/(Weierstrass cubic))` with `0 = (0,1,0)`, smoothness via the
+eight-equivalent-conditions chartwise Jacobian analysis (GME pp. 114–115).
 Consumers must use only `IsWeierstrassModel` facts about it. -/
 noncomputable def projModel (W : WeierstrassCurve R) : Scheme.{u} := sorry
 
@@ -91,12 +101,23 @@ KM 2.2.4; Silverman III.1.4(a). -/
 theorem projModel_smooth (W : WeierstrassCurve R) [W.IsElliptic] :
     SmoothOfRelativeDimension 1 (projModelπ W) := by sorry
 
-/-- **(T-A4, uniqueness of the model)** Any two pointed `R`-schemes satisfying
-`IsWeierstrassModel W` are isomorphic over `Spec R`, compatibly with the base points.
-Source: KM 2.2.5 (uniqueness of Weierstrass models; Riemann–Roch black box). -/
-theorem isWeierstrassModel_unique (W : WeierstrassCurve R) {X X' : Scheme.{u}}
+/-- **(T-A4, uniqueness of the model — KM 2.2.5 scope)** For **elliptic** `W`, any two
+pointed **smooth** models satisfying `IsWeierstrassModel W` are isomorphic over
+`Spec R`, compatibly with the base points.
+
+ADVERSARIAL FIX (2026-07-05, DEF-7): ellipticity and smoothness hypotheses are
+REQUIRED — without them `V(F)` and its first-order thickening `V(F²)` both satisfy
+the field-points interface (reduced `Spec K` cannot see nilpotents) yet are not
+isomorphic; KM 2.2.5's uniqueness is among smooth pointed models of an elliptic
+curve, and the previous unconditional statement was strictly stronger than the
+source and false. Source: KM 2.2.5 ⧗ (Riemann–Roch black box; Hida GME §2.2.6
+"Moduli of Weierstrass Type" as interim proof-bearing source). -/
+theorem isWeierstrassModel_unique (W : WeierstrassCurve R) [W.IsElliptic]
+    {X X' : Scheme.{u}}
     {f : X ⟶ Spec (.of R)} {x₀ : Spec (.of R) ⟶ X} {f' : X' ⟶ Spec (.of R)}
-    {x₀' : Spec (.of R) ⟶ X'} (h : IsWeierstrassModel W X f x₀)
+    {x₀' : Spec (.of R) ⟶ X'}
+    (hs : SmoothOfRelativeDimension 1 f) (hs' : SmoothOfRelativeDimension 1 f')
+    (h : IsWeierstrassModel W X f x₀)
     (h' : IsWeierstrassModel W X' f' x₀') :
     ∃ e : X ≅ X', e.hom ≫ f' = f ∧ x₀ ≫ e.hom = x₀' := by sorry
 

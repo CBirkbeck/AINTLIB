@@ -74,21 +74,26 @@ finite locally free commutative group scheme of rank `N` is killed by `N` (KM ci
 theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
     (h : P.HasExactOrder E N) : (N : ℤ) • P = 0 := by sorry
 
-/-- **(T-D6 = KM 1.4.4, (1) ⇔ (3), verbatim source in hand with proof)** For `N`
-invertible on `S`: `P` has exact order `N` iff on every geometric point the induced point
-has exact order `N` "in the usual sense that `N` is the least positive integer which kills
-`P_k`". -/
+/-- **(T-D6 = KM 1.4.4, (1) ⇔ (3), verbatim source in hand with proof)** For a point
+`P` **killed by `N`** (KM's standing hypothesis "Let `P ∈ C(S)` be a point killed by
+`N`" — REQUIRED: over `S = Spec ℚ̄[ε]` a lift `P̃` of an exact-order-`N` point with
+`N•P̃ ≠ 0` in the tangent kernel satisfies the geometric right-hand side but not the
+left; adversarial pass 2026-07-06) and `N` invertible on `S`: `P` has exact order `N`
+iff on every geometric point the induced point has exact order `N` "in the usual sense
+that `N` is the least positive integer which kills `P_k`". -/
 theorem Section.hasExactOrder_iff_geometric {P : E.Section} {N : ℕ} [NeZero N]
-    (hN : NIsInvertible S N) :
+    (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
     P.HasExactOrder E N ↔
       ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
         (N : ℤ) • Point.pull E t P = 0 ∧
         ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0 := by sorry
 
-/-- **(T-D7 = KM 1.4.4, (1) ⇔ (4))** For `N` invertible on `S`: `P` has exact order `N`
-iff the divisor `Σₐ [aP]` is finite étale over `S`. -/
+/-- **(T-D7 = KM 1.4.4, (1) ⇔ (4))** For a point `P` killed by `N` (KM's standing
+hypothesis — required: the same `ℚ̄[ε]` lift makes `[P̃] + [2P̃]` a disjoint union
+`S ⊔ S`, finite étale, without `P̃` having exact order 2) and `N` invertible on `S`:
+`P` has exact order `N` iff the divisor `Σₐ [aP]` is finite étale over `S`. -/
 theorem Section.hasExactOrder_iff_etale {P : E.Section} {N : ℕ} [NeZero N]
-    (hN : NIsInvertible S N) :
+    (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
     P.HasExactOrder E N ↔
       Etale ((P.orderDivisor E N).ideal.subschemeι ≫ E.π) := by sorry
 

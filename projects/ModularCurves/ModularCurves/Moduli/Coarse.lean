@@ -48,16 +48,27 @@ open EllipticCurve in
 /-- Isomorphism classes of elliptic curves with an `H`-orbit of full level-`N`
 structures, over a base — the point-set that a coarse `Y_{P_H}` must have at
 algebraically closed points: the quotient by the join of the `H`-action and pointed
-isomorphism (`(E, L) ∼ (E', L')` iff some pointed `S`-morphism carries `g • L` to
-`L'` for some `g ∈ H`; on the quotient this is an equivalence since the morphisms
-are isomorphisms, T-G1). -/
+**isomorphism** (`(E, L) ∼ (E', L')` iff some pointed `S`-isomorphism carries `g • L`
+to `L'` for some `g ∈ H`; `Quot` takes the generated equivalence).
+
+ADVERSARIAL FIX (2026-07-06): `IsIso f.hom` is REQUIRED — general `HomOver`s include
+non-isomorphisms, and without the clause a 3-isogeny (an isomorphism on `E[2]`)
+collapsed non-isomorphic curves in `GammaHClasses S 2 H`, while at `N = 1` the zero
+morphism collapsed everything to a point. (The former justification via `T-G1` was
+void — that claim was false and is deleted.) -/
 def GammaHClasses (S : Scheme.{u}) (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) : Type (u + 1) :=
   Quot (fun (a b : Σ E : EllipticCurve S, E.FullLevelPt N) =>
     ∃ (f : a.1.HomOver b.1) (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)),
-      g ∈ H ∧
+      IsIso f.hom ∧ g ∈ H ∧
       f.mapPoint (a.1.glSmul g a.2).1.1 = b.2.1.1 ∧
       f.mapPoint (a.1.glSmul g a.2).1.2 = b.2.1.2)
+
+/-- The class of a levelled curve in `GammaHClasses`. -/
+def GammaHClasses.mk {S : Scheme.{u}} {N : ℕ} [NeZero N]
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (E : EllipticCurve S) (L : E.FullLevelPt N) : GammaHClasses S N H :=
+  Quot.mk _ ⟨E, L⟩
 
 /-- **(T-M1 = KM 8.2 ⧗ "The j-line as a coarse moduli scheme"; Silverman III.1.4(b))**
 The j-line `Spec R[j]` is a coarse moduli scheme for elliptic curves (level 1): over
@@ -78,17 +89,35 @@ theorem jLine_coarse_points_j (k : Type u) [Field k] [IsAlgClosed k] :
 
 /-- **(T-M2 = Loeffler §3.6 / §3.8 Remark (1); KM Ch. 8 ⧗)** Coarse `Y_{P_H}` exists:
 for every `H ≤ GL₂(ℤ/N)` (in particular the Borel — `Y₀(N)` — and `N ≤ 2` full level)
-there is a scheme over `Spec R` whose points over every algebraically closed field
-biject with the classes `GammaHClasses` ("the maps `P̃_H(S) → Y_{P_H}(S)` … are
-bijective if `S` is algebraically closed"). Construction route: quotient of the fine
-`Y(N')` (auxiliary rigid level) by the finite group action — stream Q. -/
+there is a scheme over `Spec R`, affine over the `j`-line, whose points over every
+algebraically closed field biject with the classes `GammaHClasses` ("the maps
+`P̃_H(S) → Y_{P_H}(S)` … are bijective if `S` is algebraically closed"),
+**compatibly with `j`**. Construction route: quotient of the fine `Y(N')` (auxiliary
+rigid level) by the finite group action — stream Q.
+
+ADVERSARIAL FIX (2026-07-06): the previous conclusion — an unconstrained `∃ Y` with a
+bare `Nonempty (≃)` per point — was a pure cardinality claim (satisfied by `𝔸¹_R`
+outright) and asserted nothing about moduli. The bijection is now pinned by the
+`j`-line factorisation: sending a class to its point of `Y` and then down `jY`
+computes the `j`-invariant of (any Weierstrass model of) the curve, mirroring
+`jLine_coarse_points_j`. Loeffler's full pin (the natural transformation
+`P̃_H(S) → Y(S)` for all `S`) is stream-Q vocabulary, ticket `T-Q7`. -/
 theorem exists_coarse_gammaH (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) :
-    ∃ (Y : Scheme.{u}) (σ : Y ⟶ Spec R),
-      ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ Spec R),
-        Nonempty (GammaHClasses (Spec (.of k)) N H ≃
-          { h : Spec (.of k) ⟶ Y // h ≫ σ = t }) := by sorry
+    ∃ (Y : Scheme.{u}) (σ : Y ⟶ Spec R) (jY : Y ⟶ Spec (.of (Polynomial R))),
+      jY ≫ Spec.map (CommRingCat.ofHom (algebraMap R (Polynomial R))) = σ ∧
+      IsAffineHom jY ∧
+      ∀ (k : Type u) [Field k] [IsAlgClosed k] [Algebra R k],
+        ∃ e : GammaHClasses (Spec (.of k)) N H ≃
+            { h : Spec (.of k) ⟶ Y //
+              h ≫ σ = Spec.map (CommRingCat.ofHom (algebraMap R k)) },
+          ∀ (E : EllipticCurve (Spec (.of k))) (L : E.FullLevelPt N)
+            (W : WeierstrassCurve k) (_ : W.IsElliptic)
+            (i : E.E ≅ projModel W), i.hom ≫ projModelπ W = E.π →
+            (e (GammaHClasses.mk H E L)).1 ≫ jY =
+              Spec.map (CommRingCat.ofHom
+                (Polynomial.eval₂RingHom (algebraMap R k) W.j)) := by sorry
 
 end Coarse
 

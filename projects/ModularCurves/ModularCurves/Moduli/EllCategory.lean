@@ -45,7 +45,16 @@ structure EllObj (R : CommRingCat.{u}) where
 
 variable {R : CommRingCat.{u}}
 
-/-- A morphism of `Ell/R`: a cartesian square over a morphism of `R`-schemes.
+/-- A morphism of `Ell/R`: a cartesian square over a morphism of `R`-schemes,
+compatible with the zero sections.
+
+On `zero_w` (adversarial adjudication, 2026-07-06): the zero clause is NOT in
+Loeffler's display (the ellipsis in the quoted Def 3.7.1 is only the square diagram)
+and is NOT automatic — a translation `τ_P` over `𝟙` is a cartesian non-pointed square.
+It is nonetheless the sources' intended category: "elliptic curve" is the pair
+`(E, 0)`, without it the level-structure functors are not functors (translations
+destroy torsion data), and Loeffler's own Thm 3.7.4 would be false (Aut would contain
+all translations). Verbatim KM 4.1 reconciliation: PENDING-SOURCE(KM Ch. 4).
 Source: Loeffler Def 3.7.1 ("morphisms are squares … where `E ≅ E' ×_T S`"); KM 4.1. -/
 structure EllHom (X Y : EllObj R) where
   baseHom : X.base ⟶ Y.base
@@ -102,10 +111,11 @@ noncomputable def _root_.ModularCurves.EllObj.pullbackAlongMap (X : EllObj R)
   isPullback := by sorry
   zero_w := by sorry
 
-/-- `P` is **representable** if it is a representable presheaf on `Ell/R`.
-Source: Loeffler Def 3.7.1(3); KM 4.3. -/
-def Representable (P : ModuliProblem R) : Prop :=
-  ∃ X : EllObj R, Nonempty (P.RepresentableBy X)
+/-- `P` is **representable** if it is a representable presheaf on `Ell/R` — mathlib's
+`Functor.IsRepresentable`, under the project's name (kept as an `abbrev` so the two
+never diverge). Source: Loeffler Def 3.7.1(3); KM 4.3. -/
+abbrev Representable (P : ModuliProblem R) : Prop :=
+  P.IsRepresentable
 
 /-- `P` is **relatively representable**: for every `E/S` in `Ell/R`, the functor
 `Sch/S → Set`, `T ↦ P(E ×_S T / T)` is representable — stated with its naturality

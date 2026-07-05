@@ -1,5 +1,6 @@
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.Representability
+import ModularCurves.Moduli.Coarse
 import Mathlib.FieldTheory.AbsoluteGaloisGroup
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
 import Mathlib.RingTheory.RootsOfUnity.Basic
@@ -104,14 +105,15 @@ noncomputable def vRhoPointsEquiv {N : ℕ} [NeZero N] (D : GaloisRepData N) :
 noncomputable def coord {N : ℕ} [NeZero N] (D : GaloisRepData N) {T : Scheme.{0}}
     (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
     (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
     (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
     (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
     (x : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) : Fin 2 → ZMod N :=
   vRhoPointsEquiv D
     ⟨E.pointToTorsion x hx ≫ torsionIso.hom ≫ pullback.fst _ _, by
-      rw [Category.assoc, Category.assoc, pullback.condition, ← Category.assoc,
-        ← Category.assoc]
-      sorry⟩
+      rw [Category.assoc, Category.assoc, pullback.condition,
+        ← Category.assoc torsionIso.hom, hOver, ← Category.assoc,
+        E.pointToTorsion_torsionπ, ht]⟩
 
 /-- The pairing-compatibility relation at a geometric point: `e_N(x,y) = p(a₁b₂ − a₂b₁)`
 where `(a₁,a₂), (b₁,b₂)` are the coordinates of `x, y`. The two sides live in
@@ -121,6 +123,7 @@ where `(a₁,a₂), (b₁,b₂)` are the coordinates of `x, y`. The two sides li
 def PairingCompatAt {N : ℕ} [NeZero N] (D : GaloisRepData N) {T : Scheme.{0}}
     (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
     (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
     (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
     (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
     (x y : E.Point t)
@@ -150,8 +153,8 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
     (x y : E.Point t)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero)
     (hxy : (x + y).1 ≫ E.mulByHom N = t ≫ E.zero),
-    coord D sT torsionIso t ht (x + y) hxy =
-      coord D sT torsionIso t ht x hx + coord D sT torsionIso t ht y hy
+    coord D sT torsionIso over_T t ht (x + y) hxy =
+      coord D sT torsionIso over_T t ht x hx + coord D sT torsionIso over_T t ht y hy
   /-- Pairing compatibility: the Weil pairing of two `ℚ̄`-valued torsion points equals
   `p` of the standard symplectic pairing `a₁b₂ − a₂b₁` of their coordinates.
   (`Γ(Spec ℚ̄, ⊤)`-valued roots of unity are compared with `μ_N(ℚ̄)` through the
@@ -161,7 +164,7 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
     (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
     (x y : E.Point t)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
-    PairingCompatAt D sT torsionIso t ht x y hx hy
+    PairingCompatAt D sT torsionIso over_T t ht x y hx hy
 
 /-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
 representability of the ρ-level problem: for every elliptic curve `E` over a
@@ -178,29 +181,47 @@ theorem rhoLevel_relativelyRepresentable {N : ℕ} [NeZero N] (hN : 3 ≤ N)
         Nonempty ({ h : T' ⟶ I // h ≫ f = k } ≃
           RhoLevelStructure D (k ≫ sT) (E.baseChange k)) := by sorry
 
+/-- The representing property for the twisted modular curve: `(Y, sY)` is a smooth
+affine `ℚ`-curve whose `T`-points over `ℚ` are naturally the isomorphism classes of
+pairs `(E, α)` — the quotient by pointed over-`T` isomorphisms carrying coordinates to
+coordinates (DEF-4). Extracted as a predicate so that geometric irreducibility (T-F5)
+can be asserted OF THE REPRESENTING CURVE, not of arbitrary smooth curves (DEF-6). -/
+def RepresentsYRho {N : ℕ} [NeZero N] (D : GaloisRepData N) (Y : Scheme.{0})
+    (sY : Y ⟶ Spec (.of ℚ)) : Prop :=
+  SmoothOfRelativeDimension 1 sY ∧ IsAffineHom sY ∧
+    ∀ (T : Scheme.{0}) (sT : T ⟶ Spec (.of ℚ)),
+      Nonempty ({ h : T ⟶ Y // h ≫ sY = sT } ≃
+        Quot (fun (a b : Σ E : EllipticCurve T, RhoLevelStructure D sT E) =>
+          ∃ f : a.1 ≅ b.1,
+            ∀ (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+              (ht : t ≫ sT =
+                Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+              (x : a.1.Point t)
+              (hx : x.1 ≫ a.1.mulByHom N = t ≫ a.1.zero)
+              (hx' : (f.hom.mapPoint x).1 ≫ b.1.mulByHom N = t ≫ b.1.zero),
+              coord D sT b.2.torsionIso b.2.over_T t ht (f.hom.mapPoint x) hx' =
+                coord D sT a.2.torsionIso a.2.over_T t ht x hx))
+
 /-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists:
-there is a scheme `Y = Y(ρ̄_N)` over `ℚ`, smooth of relative dimension 1 and affine, such
-that for every `ℚ`-scheme `T` the `T`-points of `Y` over `ℚ` biject with isomorphism
-classes of pairs `(E/T, α : ρ-level structure)`, naturally in `T`. Requires `N ≥ 3` (the
-underlying `[Γ(N)]` must be rigid — Loeffler Prop 3.8.3).
-
-Geometric irreducibility of `Y` is stated separately (`yRho_geometricallyIrreducible`,
-black box BB-IRR: "proved complex-analytically by uniformising the ℂ-points … by the
-upper half plane" — sorry-able 1980s input). -/
+some `(Y, sY)` represents the ρ-level moduli problem in the sense of
+`RepresentsYRho`. Requires `N ≥ 3` (rigidity — Loeffler Prop 3.8.3).
+Route of record: the symplectic Isom-scheme over a rigidified base (T-F6, review Q9);
+the Galois-twist identification is a separate later theorem (D8). -/
 theorem yRho_representable {N : ℕ} [NeZero N] (hN : 3 ≤ N) (D : GaloisRepData N) :
-    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ)),
-      SmoothOfRelativeDimension 1 sY ∧ IsAffineHom sY ∧
-      ∀ (T : Scheme.{0}) (sT : T ⟶ Spec (.of ℚ)),
-        Nonempty ({ h : T ⟶ Y // h ≫ sY = sT } ≃
-          Quot (fun (a b : Σ E : EllipticCurve T, RhoLevelStructure D sT E) =>
-            Nonempty (a.1.E ≅ b.1.E))) := by sorry
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ)), RepresentsYRho D Y sY := by sorry
 
-/-- **(T-F5, BB-IRR)** `Y(ρ̄_N)` is geometrically irreducible over `ℚ`. Black box:
-complex-analytic uniformisation of the ℂ-points by the upper half-plane (Buzzard p. 33;
-"Proof: See 1980s"). Stated as: the base change to `ℚ̄` is irreducible. -/
+/-- **(T-F5, stream IRR)** Any curve representing the ρ-level problem is
+geometrically irreducible over `ℚ`: its base change to `ℚ̄` is irreducible.
+ADVERSARIAL FIX (2026-07-05, DEF-6): the previous statement quantified over ALL smooth
+relative curves (with `D` unused) and was false (`ℙ¹ ⊔ ℙ¹` counterexample); geometric
+irreducibility is a property of the REPRESENTING curve, so the representability
+predicate is now the hypothesis. Source: Buzzard p. 33 ("NB irreducibility is proved
+complex-analytically by uniformising the ℂ-points of the curve by the upper half
+plane"; p. 34 "Proof: See 1980s") — routes in stream IRR (GME 2.9.3 / 2.5.3 algebraic
+route, analytic uniformisation alternative). -/
 theorem yRho_geometricallyIrreducible {N : ℕ} [NeZero N] (hN : 3 ≤ N)
     (D : GaloisRepData N) (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ))
-    (hY : SmoothOfRelativeDimension 1 sY) :
+    (hY : RepresentsYRho D Y sY) :
     IrreducibleSpace ↥(pullback sY
       (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) := by sorry
 

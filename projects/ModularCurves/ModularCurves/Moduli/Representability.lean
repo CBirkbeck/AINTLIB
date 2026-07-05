@@ -47,7 +47,9 @@ def _root_.WeierstrassCurve.IsTateNormal (W : WeierstrassCurve R) : Prop :=
 /-- The point `(x, y)` on `W` is *nowhere of order 1, 2 or 3*: the product
 `ψ₂(x,y) · ψ₃(x,y)` of division-polynomial values is a unit of `R` (equivalently: in no
 residue field does `P` become `0`, 2-torsion, or 3-torsion; the affine point is nowhere
-`0` automatically). Source: Loeffler Prop 3.3.4 hypothesis "`P, 2P, 3P ≠ 0` in any
+`0` automatically). The order-3 direction of the dictionary uses nonsingularity —
+supplied by `[W.IsElliptic]` at every use site, not by this definition.
+Source: Loeffler Prop 3.3.4 hypothesis "`P, 2P, 3P ≠ 0` in any
 fibre"; division-polynomial dictionary: Silverman III Ex. 3.7 / mathlib
 `WeierstrassCurve.Ψ`. -/
 def NowhereOrderLEThree (W : WeierstrassCurve R) (x y : R) : Prop :=
@@ -74,6 +76,9 @@ noncomputable def tateCurve : WeierstrassCurve (MvPolynomial (Fin 2) ℤ) :=
     a₄ := 0
     a₆ := 0 }
 
+/-- The universal Tate curve is in Tate normal form (sanity pin). -/
+theorem tateCurve_isTateNormal : tateCurve.IsTateNormal := ⟨rfl, rfl, rfl⟩
+
 /-- The coordinate ring `ℤ[A, B][Δ(A,B)⁻¹]` of the universal Tate curve — the affine ring
 of (the coarse ring-level avatar of) the universal elliptic curve with a point of nowhere
 order ≤ 3. Source: Loeffler Cor 3.3.5. -/
@@ -85,12 +90,22 @@ ring homomorphisms `tateRing →+* A` correspond exactly to pairs `(α, β) ∈ 
 `Δ(α, β)` a unit — i.e. to Tate-normal elliptic curves over `A` marked at `(0, 0)`.
 (Universal property of polynomial ring + localization; with `T-E1` this is Loeffler's
 "`(Spec ℤ[A,B,Δ(A,B)⁻¹], (E(A,B),(0:0:1)))` represents the functor `S ↦ {eq. classes of
-pairs (E,P) … P ∈ E(S) not of order 1,2,3 in any fibre}`".) -/
+pairs (E,P) … P ∈ E(S) not of order 1,2,3 in any fibre}`".)
+
+ADVERSARIAL FIX (2026-07-06): the bare `Nonempty (≃)` form was a cardinality-only
+claim (dischargeable for e.g. `A = ℂ` by counting); the equivalence is now PINNED to
+the canonical evaluation map `φ ↦ (φ A, φ B)` — naturality in `A` follows from the
+pin. -/
 theorem tateRing_homEquiv (A : Type u) [CommRing A] :
-    Nonempty ((tateRing →+* A) ≃
-      { c : A × A //
-        IsUnit ((tateCurve.map (MvPolynomial.eval₂Hom (Int.castRingHom A)
-          (fun i => if i = 0 then c.1 else c.2))).Δ) }) := by sorry
+    ∃ e : (tateRing →+* A) ≃
+        { c : A × A //
+          IsUnit ((tateCurve.map (MvPolynomial.eval₂Hom (Int.castRingHom A)
+            (fun i => if i = 0 then c.1 else c.2))).Δ) },
+      ∀ φ : tateRing →+* A,
+        ((e φ).1 : A × A) =
+          (φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 0)),
+           φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 1))) := by
+  sorry
 
 end TateNormalForm
 
@@ -106,6 +121,19 @@ noncomputable def EllHom.pullSection {X Y : EllObj R} (f : X ⟶ Y)
   ⟨f.isPullback.lift (f.baseHom ≫ P.1) (𝟙 X.base)
       (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp]),
     f.isPullback.lift_snd _ _ _⟩
+
+/-- **(T-E4a, additivity of section-pullback — surfaced by the adversarial pass
+2026-07-06)** `pullSection` is a group homomorphism. NOT free: `EllHom` carries no
+group-compatibility field and the two curves' `grp` data are independent, so this
+consumes uniqueness of the group law with given unit (`abelEnrichment_unique`,
+GME Cor 2.2.5 — a pointed isomorphism onto the pullback is automatically a group
+isomorphism). Every moduli-functor `map` below (Γ₁/Γ(N)/P_H, naive and Drinfeld)
+consumes this lemma; it restores the dependency edge from the level functors to the
+canonicity chain A6.δ that the earlier "nothing depends on it" amendment dropped. -/
+theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
+    (P Q : Y.curve.Section) :
+    EllHom.pullSection R f (P + Q) =
+      EllHom.pullSection R f P + EllHom.pullSection R f Q := by sorry
 
 /-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
 order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor laws are
@@ -130,7 +158,14 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
 /-- **(T-E7 = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
 `N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
 representing base scheme is smooth and affine over `Spec R`.
-Loeffler (verbatim, Thm 3.4.4): "`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`." -/
+Loeffler (verbatim, Thm 3.4.4): "`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."
+
+Notes (adversarial pass 2026-07-06): TRUE only after `IsNaiveGammaOne` gained its
+global killing clause (without it a `ℚ̄[ε]`-family gave pro-representation
+`ℚ̄[[t,s]]`, contradicting smooth + quasi-finite-over-j). General `R` follows from
+`ℤ[1/N]` by base change (`Smooth`, `IsAffineHom` stable). Affineness for general `N`
+is QUOTE-PARTIAL: Loeffler's `Spec` display is verbatim only for `N = 5`; attach the
+KM affine-over-the-j-line locator when the full text lands. -/
 theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R)) :
     (gammaOneNaiveProblem R N).Representable ∧
@@ -140,11 +175,16 @@ theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
 /-- **(T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1)** For `N ≥ 3` and `N` invertible
 in `R`, the naive full-level problem `[Γ(N)]` is rigid and representable; the representing
 scheme `Y(N)` is smooth and affine over `Spec R`.
-(Rigidity per Loeffler Prop 3.8.3: the preimage of `H = {1}` in `SL₂(ℤ)` has no elliptic
-points and does not contain `−1` for `N ≥ 3`.) -/
+(Rigidity: Loeffler Prop 3.8.3 covers `Ell/R[1/6]` only; for residue characteristics
+2 and 3 the source of record is the GME 2.6.4 Aut-computation ("`ε ∈ Aut(E,φ)`,
+`n ≥ 3` invertible ⟹ `ε = 1`", chain B9 in decomposition-gme2 — valid in all
+characteristics with `N` invertible); KM locator pending. Smooth+affine conjunct
+restored 2026-07-06 — it was in this docstring but missing from the statement.) -/
 theorem gammaFullNaive_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N)
     (hinv : IsUnit (N : R)) :
-    (gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable := by
+    ((gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable) ∧
+      ∀ X : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) →
+        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by
   sorry
 
 end LevelModuli

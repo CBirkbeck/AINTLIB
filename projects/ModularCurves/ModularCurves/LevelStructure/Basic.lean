@@ -46,10 +46,19 @@ def IsNaiveFullLevel (N : ℕ) [NeZero N] (P Q : E.Section) : Prop :=
       ∀ x : E.Point t, (N : ℤ) • x = 0 →
         x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q}
 
-/-- **Naive Γ₁(N)-structure**: a point of fibrewise exact order `N` (the right-hand side
-of KM 1.4.4). For `N` invertible this coincides with the Drinfeld notion
-(`Section.hasExactOrder_iff_geometric`). -/
+/-- **Naive Γ₁(N)-structure**: a point killed by `N`, of fibrewise exact order `N`
+(the right-hand side of KM 1.4.4, *with its standing hypothesis*). For `N` invertible
+this coincides with the Drinfeld notion (`Section.hasExactOrder_iff_geometric`).
+
+ADVERSARIAL FIX (2026-07-06, converged on by three independent passes): the global
+killing clause `(N : ℤ) • P = 0` is REQUIRED (mirroring `IsNaiveFullLevel`) — without
+it, over `Spec ℚ̄[ε]` any tangent-direction lift of an exact-order-`N` point satisfies
+the fibrewise clauses while `N•P ≠ 0`; the moduli functor built on the unkilled form
+strictly contains `h_{Y₁(N)}` (pro-representation `ℚ̄[[t,s]]`, tangent dimension 2)
+and `gammaOneNaive_representable` was FALSE for it. Loeffler's own construction cuts
+`Y₁(N)` out by exactly the closed condition `N·(0:0:1) = (0:1:0)`. -/
 def IsNaiveGammaOne (N : ℕ) [NeZero N] (P : E.Section) : Prop :=
+  ((N : ℤ) • P = 0) ∧
   ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
     (N : ℤ) • Point.pull E t P = 0 ∧
     ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0
@@ -59,10 +68,21 @@ KM 1.4.1. This is the definition of record over an arbitrary base. -/
 def IsGammaOne (N : ℕ) [NeZero N] (P : E.Section) : Prop :=
   P.HasExactOrder E N
 
-/-- The ideal sheaf of `E[N]` as a closed subscheme of `E` — placeholder interface used by
-`IsFullLevel`; provided with `torsionι_isClosedImmersion` (T-B3) via mathlib's
-`IsClosedImmersion`-to-`IdealSheafData` dictionary. Ticket `T-B3a`. -/
-noncomputable def torsionIdeal (N : ℕ) : Scheme.IdealSheafData E.E := sorry
+/-- The ideal sheaf of `E[N]` as a closed subscheme of `E`: the kernel ideal of the
+inclusion `E[N] ⟶ E` (mathlib `Scheme.Hom.ker`).
+
+REAL definition (adversarial pass 2026-07-06 — previously an *unregistered* data-sorry;
+`Scheme.Hom.ker` makes it definable outright, and the pin is `torsionIdeal_subscheme`
+below). -/
+noncomputable def torsionIdeal (N : ℕ) : Scheme.IdealSheafData E.E :=
+  (E.torsionι N).ker
+
+/-- **(T-B3a, pinning spec)** The closed subscheme cut out by `torsionIdeal N` is `E[N]`
+itself, compatibly with the inclusions. Discharge: `torsionι_isClosedImmersion` (T-B3)
++ mathlib's `ker_subschemeι` dictionary. -/
+theorem torsionIdeal_subscheme (N : ℕ) :
+    ∃ e : (E.torsionIdeal N).subscheme ≅ E.torsion N,
+      e.hom ≫ E.torsionι N = (E.torsionIdeal N).subschemeι := by sorry
 
 /-- **Drinfeld Γ(N)-structure** (KM 3.1): a pair `P, Q` of points killed by `N` such that
 the divisor `Σ_{(a,b) ∈ (ℤ/N)²} [aP + bQ]` equals `E[N]` as a closed subscheme — i.e. the
@@ -88,22 +108,25 @@ theorem isGammaOne_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N) (P : 
 
 /-- **Γ₀(N)-structure** (KM 3.4): a relative effective Cartier divisor `G ⊆ E` of degree
 `N` which is a subgroup (KM 1.3.6) and is *cyclic* (KM 1.4.1: fppf-locally on `S` admits a
-generator of exact order `N`). The fppf-local generator condition is stated here through
-its geometric-fibre form (equivalent for our purposes over geometric points, where fppf
-covers of a field split); the literal fppf-local Drinfeld form is ticket `T-D10`. -/
+generator of exact order `N`). The generator condition is stated here in its
+geometric-fibre **Drinfeld** form: over every geometric point, some section generates
+`G` in the divisor sense, `Σ_{a=1}^{N} [a·P₀] = G` as closed subschemes.
+
+ADVERSARIAL FIX (2026-07-06): the previous surrogate demanded a point of *naive* exact
+order `N` on fibres — wrong in char `p ∣ N`: `G = Ker F ⊂ E` supersingular over `F̄_p`
+(`N = p`) is KM-cyclic with Drinfeld generator `P₀ = 0` (`Σ_a [a·0] = p[0] = Ker F`,
+KM 1.4.3), but `E[p](k̄) = 0` has no naive generator, so the old form excluded a
+legitimate KM Γ₀(p)-structure. The divisor form below is honest over geometric points
+in all characteristics; the literal fppf-local form of record is ticket `T-D10`. -/
 structure IsGammaZero (N : ℕ) [NeZero N] (G : RelEffCartierDiv E.π) : Prop where
   isSubgroup : G.IsSubgroup E
   degree_eq : ∀ s : S, G.degree s = N
-  /-- Geometric cyclicity: over every geometric point `t` there is a point `P₀` of naive
-  exact order `N` such that every `t`-point of `E` factoring through `G` is an integer
-  multiple of `P₀`. -/
+  /-- Geometric Drinfeld cyclicity: over every geometric point `t` there is a section
+  `P₀` of the base-changed curve with `Σ_{a=1}^{N} [a·P₀] = G_t` as divisors. -/
   geometricallyCyclic :
     ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
-      ∃ P₀ : E.Point t,
-        ((N : ℤ) • P₀ = 0 ∧ ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P₀ ≠ 0) ∧
-        ∀ x : E.Point t,
-          (∃ h : Spec (.of k) ⟶ G.ideal.subscheme, h ≫ G.ideal.subschemeι = x.1) →
-          ∃ a : ℤ, x = a • P₀
+      ∃ P₀ : (E.baseChange t).Section,
+        (P₀.orderDivisor (E.baseChange t) N).ideal = (G.baseChange t).ideal
 
 end EllipticCurve
 

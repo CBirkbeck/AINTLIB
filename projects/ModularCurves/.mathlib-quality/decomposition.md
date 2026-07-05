@@ -322,3 +322,101 @@ PENDING-SOURCE(KM) quote-gates); (2) Faltings–Chai as PDF only if/when Phase 4
   fppf-cyclicity gate (T-SG2) — **no Γ₀ representability statement may use the
   geometric-fibre surrogate**.
 - Source gate hardened: KM 2.3/2.8/4.7/5–7/8–10/12–13 are do-not-formalize-from-memory.
+
+---
+
+## Adversarial pass (`/develop --decompose`), 2026-07-05/06 — adjudication record (v2)
+
+**Method.** Five independent red-team agents, one per file cluster, each attacking every
+public declaration in ≥3 of five categories — [FALSITY] truth/counterexample,
+[HYP] hypothesis strength & degenerate bases, [SRC] fidelity to quoted sources,
+[TYPE] types/universes/mathlib conventions (verified against the pinned mathlib
+*source*, not memory), [DEP] dischargeability of sorries & hidden dependencies.
+Coverage: all 18 skeleton files, ~105 public declarations. **Full per-leaf attack
+logs** (the mode's "Attacks attempted" blocks): `decompose-attacks-2026-07-06/`
+`{foundations,level-structures,moduli-core,levels-stack,pairing-yrho}.md`.
+Every fix below is applied in the skeleton; `lake build` green after each round
+(final: 3297 jobs, 117 sorries, 0 axioms, 0 maxHeartbeats).
+
+### Defect register (all REJECTED/NEEDS-FIX findings, adjudicated + fixed)
+
+| # | Where | Defect (counterexample) | Fix applied |
+|---|---|---|---|
+| DEF-1 | `gammaFullNaive_not_rigid_of_le_two` | vacuous over 𝔽₂-algebras / empty objects | + `hinv`, + nonempty-base `hR` (re-verified adequate by agent 4) |
+| DEF-2 | Stack descent | cocycle-free fppf effectivity FALSE (sextic twist, H¹(G,μ₆)≠0) | replaced by GME 2.6.7 torsor form `levelledCurve_descent_of_torsor` (re-verified: θ(g)-orientation correct; `G : Type u`) |
+| DEF-3 | incidence loci | sections not closed immersions without separatedness | `[IsSeparated π]` on T-D14/T-D15 |
+| DEF-4 | `yRho_representable` | quotient compared bare schemes — relation far too coarse | pointed-over-T iso + coord-transport relation (`RepresentsYRho`) |
+| DEF-5 | `coord` (YRho) | missing `over_T`; inner obligation unprovable | + `hOver`; obligation now a REAL proof (rw-chain) |
+| DEF-6 | `yRho_geometricallyIrreducible` | false as universally quantified (ℙ¹⊔ℙ¹) | conditional on `RepresentsYRho` |
+| DEF-7 | `IsWeierstrassModel` + T-A2/T-A4 | `points` was unpointed per-field `Nonempty(≃)` vs *nonsingular-only* `Affine.Point`: T-A2 spec FALSE for singular W (cusp /𝔽₅: 6≠5); T-A4 FALSE outright (V(F) vs V(F²) thickening) | points clause IsElliptic-guarded + pointed (x₀ ↦ 0); T-A4 gains `[W.IsElliptic]` + smoothness of both models (KM 2.2.5's actual scope) |
+| DEF-8 | `glSmul_mul` | left-action law for a right action ⇒ asserts `(g*h)•L=(h*g)•L`; refuted on a basis of E[N](ℂ) via `Matrix.mul_apply` | law flipped to `(g*h)•L = h•(g•L)` |
+| DEF-9 | `isIso_homOver` (T-G1) | FALSE — `[2]` is a pointed S-endo of degree 4; no source can exist | DELETED; groupoid semantics = core, documented |
+| DEF-10 | `aut_trivial_of_fullLevel` (T-G3) | endo form FALSE — `[1+N]` fixes all level points | endo → iso (`e : E ≅ E`), matching GME p. 151's `deg ε = 1` |
+| DEF-11 | T-H8/T-H9 (Drinfeld representability) | FALSE over arbitrary R: supersingular `(0,0)` in char p∣N is a Drinfeld structure (`Norm(f)=f(0)^{N²}` on `k[t]/(t^{N²})` — independently re-verified) fixed by `[-1]`; T-H9 refuted by in-hand KM Caution 1.4.3 | + `IsUnit (N : R)` (GME 2.6.8 scope); over-ℤ forms ⧗KM with GME's coprime-`m,n≥3` caveat recorded |
+| DEF-12 | `GammaHClasses` | non-iso `HomOver`s collapse odd-isogenous curves; zero morphism collapses everything at N=1 | + `IsIso f.hom` in the relation; + real `GammaHClasses.mk` |
+| DEF-13 | `exists_coarse_gammaH` (T-M2) | junk: unconstrained `∃Y` + `Nonempty(≃)` = cardinality claim satisfied by 𝔸¹ | pinned: jY to the j-line, `jY ≫ Spec C = σ`, `IsAffineHom jY`, equiv j-compatible on every class (mirrors T-M1a); full natural-transformation pin stays T-Q7 |
+| DEF-14 | T-D6/T-D7 iffs + `sectionsDivisor_degree` | KM standing hypotheses dropped in transcription: "killed by N" (ℚ̄[ε]-lift counterexamples, both directions) and KM 1.2.1's separated+smooth (𝟙-Spec k n=2 unsatisfiable; nodal length 3≠2) | + `hkill : (N:ℤ)•P = 0`; + `[IsSeparated π]` + `SmoothOfRelativeDimension 1 π`; DS4a pin scoped to KM 1.2.1 |
+| DEF-15 | `IsFullSetOfSectionsAlg` | mathlib `Algebra.norm` ≡ 1 without a finite basis ⇒ definition falsely strong on the flf-non-free stratum | + `[Module.Free R B] [Module.Finite R B]`; projective case via trivialising cover only (T-D4) |
+| DEF-16 | `IsNaiveGammaOne` (3 agents converged) | missing global `(N:ℤ)•P = 0` (KM 1.4.4 standing hyp; Loeffler's closed condition `N·(0:0:1)=(0:1:0)`) ⇒ `gammaOneNaive_representable` FALSE (ℚ̄[[t,s]] pro-representation vs smooth∧quasi-finite-over-j), `isGammaOne_iff_naive` FALSE | global kill clause added; repairs T-E7, T-D9 and the Γ₁ functor simultaneously |
+| DEF-17 | `sectionVanishingIdeal_spec` (T-D13) | hypothesis-free tautology (`Ideal.span_le` unfolds to itself) — dischargeable without the load-bearing content | restated as `sectionVanishingIdeal_eq_span_coord` (`Module.Basis`, the deg-D′-equations engine) |
+| DEF-18 | `tateRing_homEquiv` (T-E2) | `Nonempty(≃)` = cardinality-only (dischargeable for A=ℂ by counting) | pinned existential: the equiv IS `φ ↦ (φ A, φ B)` |
+| DEF-19 | `IsGammaZero.geometricallyCyclic` | naive-order surrogate wrong in char p∣N: excludes `Ker F` (KM-cyclic via Drinfeld generator 0, KM 1.4.3) | field upgraded to geometric *Drinfeld* form: `Σ_{a≤N}[a·P₀] = G_t` as divisors (uses `orderDivisor` + `baseChange`, moved to `CartierDivisor.lean`); fppf-local record stays T-D10 |
+| DEF-20 | `torsionIdeal` | **unregistered** data-sorry (register rule (iii) violation), leaving `IsFullLevel` unconstrained | constructive kill: `:= (E.torsionι N).ker` (REAL, mathlib `Scheme.Hom.ker`); pin `torsionIdeal_subscheme` stated |
+| DEF-21 | under-statements vs own docstrings | T-H4 étale half, T-H6 & `gammaFullNaive_representable` smooth∧affine, missing `[Nontrivial R]` on T-H5 (zero-ring), `Representable` duplicating mathlib `Functor.IsRepresentable` | statements strengthened to match docstrings; `Nontrivial R` added; `Representable := P.IsRepresentable` (abbrev) |
+| DEF-22 | hidden dependency (agents 3+4) | `pullSection`-additivity silently consumes group-law uniqueness (A6.δ) — contradicting the "nothing depends on canonicity" amendment | surfaced as sorried spec `EllHom.pullSection_add` with the dependency edge documented; the amendment is hereby CORRECTED: streams E/H functor-laws depend on A6.δ through this single lemma |
+
+Bonus verifications that SURVIVED hard attack (see archives for the full ~80): the
+convention spine (`ad−bc` symplectic pin ↔ `det_cyclo` ↔ `p_equivariant`, same χ, no
+hidden inverse; `e_{NM}=e_N^M` exponent recomputed); `mulBy = (𝟙)^n` is the pointwise
+Hom-group power (mathlib source: `Hom.monoid` convolution, `GrpObj.comp_zpow`);
+`grpObjMkPullbackSnd` orientation; `IsFullLevel`'s `Fin (N²)` enumeration (exhaustively
+`decide`-checked, includes `(0,0)`); `glSmul` index convention (= `φ∘g`, mathlib
+column-vector `mulVec`); `NowhereOrderLEThree` (`Ψ 2` is the y-involving ψ₂; `evalEval`
+order pinned by mathlib's own `evalEval_polynomialY`); DEF-1/DEF-2 fixes re-verified
+adequate by an independent agent.
+
+### Consolidated QUOTE-MISSING list (per the do-not-formalize-from-memory gate)
+
+Statement-level quote-gaps, all flagged in-file; none blocks stating, all block *closing*:
+
+- **KM 2.2.5** (T-A4 uniqueness), **KM 2.1.2 / GME 2.2.5 statement** (abelEnrichment_*) —
+  proofs transcribed in gme2, verbatim statements pending.
+- **KM 2.3.1** (T-B3/B4 finite-flat-rank family: `torsionι_isClosedImmersion`,
+  `torsionπ_isFinite/flat`, `torsion_rank`, `torsionπ_etale`), **KM 1.12**
+  (`muNπ_isFinite/flat/finrank/etale_iff`).
+- **KM 3.1/3.2/3.4/3.7** (Drinfeld level definitions of record + naive-iff),
+  **KM 1.10.x** (full-sets ⟺ divisor-equality bridge asserted as "i.e." in
+  `IsFullLevel`), **KM 1.6.2/1.6.3/1.6.5, 1.3.4 statements** (incidence corollaries),
+  **KM 1.2.2/1.2.5 statements**.
+- **KM Ch. 4** (4.1 morphism convention incl. `zero_w` reconciliation; 4.2–4.4; 4.7
+  for `representable_iff`), **KM 4.7.2/5.1** (over-ℤ representability — now correctly
+  NOT stated), **KM Ch. 8** (coarse), **KM 2.8** (pairing specs
+  `weilPairingEval_add_left/self/mul` — C-stream gate as planned).
+- Rigidity of Γ(N) in residue chars 2,3: GME B9 quote in hand covers "`N ≥ 3`
+  invertible"; KM verbatim pending. Affineness of Y₁(N) for general N: QUOTE-PARTIAL
+  (Loeffler `Spec`-display verbatim only for N = 5). `moduliProblem_fppf_separated`:
+  formal lemma, PENDING-SOURCE marker added in-file.
+
+**The cure for ~70% of this list is one owner action: the full KM PDF into
+`refs/ModularCurves/`** (standing request).
+
+### Confidence gate (honest, per subtree)
+
+Binding conditions: (i) every leaf survived ≥3 recorded attacks; (ii) accepted leaves
+carry verbatim quotes or an explicit PENDING-SOURCE gate; (iii) mathlib discharge
+claims verified against the pinned source.
+
+| Subtree | (i) | (ii) | (iii) | Verdict |
+|---|---|---|---|---|
+| A (curves/models) | ✓ | partial (KM 2.2.5 pending; Loe/Sil/GME quotes in hand) | ✓ (GlueData/Proj, smooth-base-change, ZMT, finrank all source-checked) | **PASS with quote-gate** |
+| B (torsion, μ_N) | ✓ | partial (KM 2.3.1/1.12 pending; Loe 3.4.2 verbatim [sic]) | ✓ | **PASS with quote-gate** |
+| D0/D (divisors, exact order, levels) | ✓ | strong (KM Ch. 1 §§1.1–1.9 in hand with proofs) — Ch. 3 defs pending | ✓ (`Scheme.Hom.ker`, `IdealSheafData`, norm API at source) | **PASS**; strongest subtree |
+| C (pairing) | ✓ | C-stream gated on KM 2.8 as designed; GME 2.6.4 chain in hand | ✓ | **PASS within the declared gate** |
+| E (Ell/R, representability) | ✓ | Loeffler 3.7.x verbatim re-extracted from the PDF; KM Ch. 4 pending | ✓ (`IsPullback` conventions, `Ψ`/`evalEval`, `VariableChange` action at source) | **PASS with quote-gate** |
+| H (P_H, Drinfeld) | ✓ | Loe 3.8.1–3.8.3 verbatim; KM 3/5/7 pending; over-ℤ forms correctly withheld | ✓ | **PASS after DEF-8/11 repairs** |
+| G/M (groupoid, coarse) | ✓ | Loe §3.6/3.8 Rem 1 verbatim; KM 8 ⧗ | ✓ | **PASS after DEF-9/10/12/13** |
+| F (Y(ρ̄,p)) | ✓ | Buzzard L8 in hand | ✓ (`modularCyclotomicCharacter` hn-shape at source) | **PASS after DEF-4/5/6** |
+
+No subtree FAILS. The pass found no defect it could not repair at statement level, and
+every repair traces to a source hypothesis the transcription had dropped or a junk
+pattern the project's own kill-list names.

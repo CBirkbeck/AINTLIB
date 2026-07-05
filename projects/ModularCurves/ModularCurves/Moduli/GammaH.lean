@@ -27,9 +27,14 @@ concretely (owner question, 2026-07-05; Loeffler §3.8; KM Ch. 3–5, 7).
 * **Fine modular curves of arbitrary level**: rigid ⟹ representable, smooth over
   `ℤ[1/N]` (Loeffler §3.8: "there is a scheme `Y = Y_{P_H}` … One can check that
   `Y_{P_H}` is smooth over `ℤ[1/N]`").
-* **Full level N over an arbitrary base (Drinfeld form)** and its representability for
-  `N ≥ 3` over any ring — KM 4.7.2/5.1 territory (⧗KM: do-not-formalize-from-memory;
-  statement here, closure gated on the full text). This is "full level N over ℤ".
+* **Full level N over an arbitrary base (Drinfeld form)**: the problem is defined
+  with no invertibility hypothesis (that is the point of the Drinfeld register), and
+  its representability is stated for `N ≥ 3` **with `N` invertible** (GME Thm 2.6.8
+  scope). The over-ℤ refinement is KM 4.7.2/5.1 territory (⧗KM) — NOT stated here:
+  the bare over-ℤ form is false (supersingular `(0,0)` in char `p ∣ N` is a Drinfeld
+  structure fixed by `[-1]`), and GME's in-hand over-ℤ Aut-triviality needs coprime
+  `m, n ≥ 3` dividing `N`. Cut the over-ℤ statements verbatim when the full KM text
+  lands.
 * **The honest stack content at small N**: for `N ≤ 2` the set-valued problem is NOT
   rigid (`[-1]` acts trivially on `E[2]`), so there is no fine scheme — the object of
   record is the levelled groupoid (`FullLevelGroupoid`), per design D6. Coarse spaces:
@@ -69,17 +74,35 @@ noncomputable def glSmul {N : ℕ} [NeZero N]
      ((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)),
     by sorry⟩
 
-/-- **(T-H2a)** The action law `(g * h) • L = g • (h • L)` (uses that level points are
-killed by `N`, so the `ZMod.val` lifts compose correctly mod `N`). -/
+/-- **(T-H2a)** The action law. `glSmul` is *precomposition* of the trivialisation
+`(ℤ/N)² ≅ E[N]` with `g`, hence a **right** action: `(φ∘g)∘h = φ∘(g*h)` reads
+`(g*h) • L = h • (g • L)`. (Uses that level points are killed by `N`, so the
+`ZMod.val` lifts compose correctly mod `N`.)
+
+ADVERSARIAL FIX (2026-07-06): the previous left-action law `(g*h) • L = g • (h • L)`
+was FALSE — by `Matrix.mul_apply` it asserts `(g*h) • L = (h*g) • L` for all `g, h`,
+refuted on any honest basis of `E[N](ℂ)` by `g = (1 1; 0 1)`, `h = (1 0; 1 1)`.
+H-orbits are unaffected (right orbits = left orbits as partitions). -/
 theorem glSmul_mul {N : ℕ} [NeZero N]
     (g h : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) :
-    E.glSmul (g * h) L = E.glSmul g (E.glSmul h L) := by sorry
+    E.glSmul (g * h) L = E.glSmul h (E.glSmul g L) := by sorry
 
 /-- The `H`-orbit equivalence on full level structures, for `H ≤ GL₂(ℤ/N)`. -/
 noncomputable def hOrbitSetoid {N : ℕ} [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) :
     Setoid (E.FullLevelPt N) :=
   ⟨fun L L' => ∃ g ∈ H, E.glSmul g L = L', by sorry⟩
+
+/-- Pull a full level point back along a base morphism `σ : T' ⟶ T`: the level of the
+base-changed curve. (Membership Prop is `T-H2b`.) -/
+noncomputable def FullLevelPt.pullAlong {T T' : Scheme.{u}} {E : EllipticCurve T}
+    {N : ℕ} [NeZero N] (σ : T' ⟶ T) (L : E.FullLevelPt N) :
+    (E.baseChange σ).FullLevelPt N :=
+  ⟨(EllipticCurve.Point.asSection E σ
+      ⟨σ ≫ L.1.1.1, by rw [Category.assoc, L.1.1.2, Category.comp_id]⟩,
+    EllipticCurve.Point.asSection E σ
+      ⟨σ ≫ L.1.2.1, by rw [Category.assoc, L.1.2.2, Category.comp_id]⟩),
+    by sorry⟩
 
 end EllipticCurve
 
@@ -108,21 +131,29 @@ singletons, recovering `gammaFullNaiveProblem`. -/
 theorem gammaHNaive_bot (N : ℕ) [NeZero N] :
     Nonempty ((gammaHNaiveProblem R N ⊥) ≅ gammaFullNaiveProblem R N) := by sorry
 
-/-- **(T-H4 = Loeffler Prop 3.8.2)** `P_H` is relatively representable and étale over
-`Ell/R` when `N` is invertible: for every `E/S`, the functor `T ↦ P_H(E ×_S T)` is
-representable by a scheme finite étale over `S`. (Proof route for `H = {1}`: the open
+/-- **(T-H4 = Loeffler Prop 3.8.2, BOTH halves)** `P_H` is relatively representable
+**and the representing objects are finite étale** over the base when `N` is invertible
+(verbatim: "relatively representable and étale … finite étale") — the étale conjunct
+was missing from the statement until 2026-07-06. (Proof route for `H = {1}`: the open
 subscheme of `E[N] ×_S E[N]` cut by non-vanishing of Weil pairings — consumes
-workstream C; for general `H`: the quotient by `H` — consumes stream Q.) -/
+workstream C; for general `H`: the quotient by `H` — consumes stream Q. The two
+conjuncts share one representing object; identifying them across the two ∃'s is part
+of the ticket.) -/
 theorem gammaHNaive_relativelyRepresentable (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) :
-    (gammaHNaiveProblem R N H).RelativelyRepresentable := by sorry
+    (gammaHNaiveProblem R N H).RelativelyRepresentable ∧
+      ∀ X : EllObj R, ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
+        ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
+          ({ h : T ⟶ Z // h ≫ f = g } ≃
+            (gammaHNaiveProblem R N H).obj (Opposite.op (X.pullbackAlong g))) := by
+  sorry
 
 /-- **(T-H5 = Loeffler Prop 3.8.3, the rigidity criterion for arbitrary level)** Over
 `R` with `6N` invertible: `P_H` is rigid iff the preimage of `H` in `SL₂(ℤ)` is
 torsion-free ("contains no elements of finite order — i.e. has no elliptic points and
 does not contain `−1`"). -/
-theorem gammaHNaive_rigid_iff (N : ℕ) [NeZero N]
+theorem gammaHNaive_rigid_iff (N : ℕ) [NeZero N] [Nontrivial R]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit ((6 * N : ℕ) : R)) :
     (gammaHNaiveProblem R N H).Rigid ↔
@@ -139,15 +170,24 @@ Source: Loeffler §3.8 (after 3.8.3); via `representable_iff` (T-E5) + T-H4. -/
 theorem gammaHNaive_representable_of_rigid (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) (hrig : (gammaHNaiveProblem R N H).Rigid) :
-    (gammaHNaiveProblem R N H).Representable := by sorry
+    (gammaHNaiveProblem R N H).Representable ∧
+      ∀ X : EllObj R, Nonempty ((gammaHNaiveProblem R N H).RepresentableBy X) →
+        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by sorry
 
 /-- **(T-H7, the honest stack statement at small `N`)** For `N ≤ 2` the full-level
 problem is NOT rigid — `[-1]` is a nontrivial automorphism acting trivially on all
 level data (on `E[2]`, `−P = P`) — so no fine scheme exists and the object of record
 is the levelled groupoid (design D6). This is the precise sense in which "for full
-level `N ≤ 2` we only get a stack". -/
+level `N ≤ 2` we only get a stack".
+
+Hypotheses per the adversarial pass (2026-07-05, DEF-1): `N` invertible (over an
+`𝔽₂`-algebra naive full level-2 structures do not exist — `E[2]` is infinitesimal —
+so the problem is vacuously rigid), and an object with nonempty base (empty-base
+objects witness nothing). Proof route: pass to the full-level trivialisation scheme
+of any `X` (finite étale surjective, so nonempty base persists), where the
+tautological level point is fixed by `[-1] ≠ 𝟙`. -/
 theorem gammaFullNaive_not_rigid_of_le_two (N : ℕ) [NeZero N] (hN : N ≤ 2)
-    (hR : Nonempty (EllObj R)) :
+    (hinv : IsUnit ((N : ℕ) : R)) (hR : ∃ X : EllObj R, Nonempty X.base) :
     ¬ (gammaFullNaiveProblem R N).Rigid := by sorry
 
 end GammaH
@@ -178,18 +218,35 @@ noncomputable def gammaOneDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem R
   map_id := by sorry
   map_comp := by sorry
 
-/-- **(T-H8 = KM 4.7.2/5.1 — "full level N over ℤ" — ⧗KM, closure gated on the full
-text)** For `N ≥ 3`, the Drinfeld full-level problem is rigid and representable over
-an **arbitrary** ring — no invertibility of `N`. (KM: `Y(N)` is an affine scheme,
-flat and finite over the `j`-line over `ℤ`, regular; those refinements are phase-2
-statements to be cut verbatim when the full text lands.) -/
-theorem gammaFullDrinfeld_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N) :
+/-- **(T-H8 = GME Thm 2.6.8 scope; over-ℤ refinements = KM 4.7.2/5.1, ⧗KM)** For
+`N ≥ 3` with `N` **invertible**, the Drinfeld full-level problem is rigid and
+representable.
+
+ADVERSARIAL FIX (2026-07-06): the previous arbitrary-ring form was FALSE — in char
+`p ∣ N` with `N = p^k` (e.g. `N = 3`, supersingular `E/F̄₃`), the pair `(0, 0)` IS a
+Drinfeld Γ(N)-structure (`Σ_{a,b} [a·0 + b·0] = N²[0] = E[N]` as divisors, and
+`Norm(f) = f(0)^{N²} = ∏ f(0)` on the local ring `k[t]/(t^{N²})` — independently
+verified), and `[-1] ≠ 𝟙` fixes it, so the problem is not rigid, hence (Yoneda +
+cartesian-square rigidity) not representable. The over-ℤ statement has genuine fine
+print — GME's in-hand over-ℤ Aut-triviality needs coprime `m, n ≥ 3` dividing `N`
+(decomposition-gme2 B9/Y.6) — and is ⧗KM: cut it verbatim from the full text, never
+from memory. (KM refinements for phase 2: `Y(N)` affine, flat finite over the
+`j`-line, regular.) -/
+theorem gammaFullDrinfeld_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N)
+    (hinv : IsUnit (N : R)) :
     (gammaFullDrinfeldProblem R N).Rigid ∧
       (gammaFullDrinfeldProblem R N).Representable := by sorry
 
-/-- **(T-H9 = KM 5.x for `Γ₁` — ⧗KM)** For `N ≥ 4`, the Drinfeld `Γ₁(N)` problem is
-rigid and representable over an arbitrary ring ("`Y₁(N)` over `ℤ`"). -/
-theorem gammaOneDrinfeld_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N) :
+/-- **(T-H9, `Γ₁` analogue — over-ℤ refinement is KM 5.x, ⧗KM)** For `N ≥ 4` with `N`
+**invertible**, the Drinfeld `Γ₁(N)` problem is rigid and representable.
+
+ADVERSARIAL FIX (2026-07-06): over an arbitrary ring this was FALSE, refuted by a
+source already in hand — KM Caution 1.4.3: over `F̄_p` the zero section has exact
+order `pⁿ` for every `n` (it generates `Ker Fⁿ`), so for `N = p^k ≥ 4` in char `p`
+the zero section is a Drinfeld Γ₁(N)-structure fixed by `[-1] ≠ 𝟙`: not rigid, not
+representable. "`Y₁(N)` over `ℤ`" awaits the verbatim KM statement. -/
+theorem gammaOneDrinfeld_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
     (gammaOneDrinfeldProblem R N).Rigid ∧
       (gammaOneDrinfeldProblem R N).Representable := by sorry
 
@@ -197,19 +254,22 @@ end DrinfeldOverZ
 
 namespace EllipticCurve
 
-/-- The **levelled groupoid**: elliptic curves over `S` with (naive) full level-`N`
-structure; morphisms are pointed `S`-isomorphisms carrying one level structure to the
-other. For `N ≥ 3` this groupoid is discrete on isomorphism classes
-(`aut_trivial_of_fullLevel`); for `N ≤ 2` it is the object of record — the value at
-`S` of the moduli **stack** of full level-`N` structures
-(`gammaFullNaive_not_rigid_of_le_two`). -/
+/-- The **levelled category**: elliptic curves over `S` with (naive) full level-`N`
+structure; morphisms are pointed `S`-morphisms carrying one level structure to the
+other. Its **core** is the levelled groupoid — the value at `S` of the moduli
+**stack** of full level-`N` structures; as with `HomOver`, non-invertible levelled
+endomorphisms exist (`[1+N]`), so the category itself is not a groupoid (adversarial
+pass 2026-07-06). For `N ≥ 3` (invertible) the *automorphisms* are trivial
+(`aut_trivial_of_fullLevel`); for `N ≤ 2` the levelled groupoid is the object of
+record (`gammaFullNaive_not_rigid_of_le_two`). -/
+@[ext]
 structure LevelledHom {N : ℕ} [NeZero N]
     (X Y : Σ E : EllipticCurve S, E.FullLevelPt N) where
   hom : X.1 ⟶ Y.1
   level_w₁ : X.2.1.1.1 ≫ hom.hom = Y.2.1.1.1
   level_w₂ : X.2.1.2.1 ≫ hom.hom = Y.2.1.2.1
 
-noncomputable instance fullLevelGroupoid (N : ℕ) [NeZero N] :
+noncomputable instance levelledCategory (N : ℕ) [NeZero N] :
     Category (Σ E : EllipticCurve S, E.FullLevelPt N) where
   Hom := LevelledHom
   id X := ⟨𝟙 X.1, by sorry, by sorry⟩

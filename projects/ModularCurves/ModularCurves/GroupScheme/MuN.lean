@@ -1,5 +1,7 @@
 import Mathlib.AlgebraicGeometry.Limits
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 
@@ -81,8 +83,25 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
 on `S`. (Two statements; étale case.) Source: KM 1.12; standard. -/
 theorem muNπ_isFinite (S : Scheme.{u}) (N : ℕ) [NeZero N] : IsFinite (muNπ S N) := by sorry
 
-theorem muNπ_etale_of_invertible (S : Scheme.{u}) (N : ℕ) [NeZero N]
-    (h : IsUnit (N : Γ(S, ⊤))) : Etale (muNπ S N) := by sorry
+/-- **(T-B7)** `μ_{N,S} ⟶ S` is flat, of constant rank `N`. -/
+theorem muNπ_flat (S : Scheme.{u}) (N : ℕ) [NeZero N] : Flat (muNπ S N) := by sorry
+
+theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
+    (muNπ S N).finrank s = N := by sorry
+
+/-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
+iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
+for `S = ∅`). -/
+theorem muNπ_etale_iff (S : Scheme.{u}) (N : ℕ) [NeZero N] :
+    Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) := by sorry
+
+/-- **(T-B2, DS3 naturality spec — register rule (iii))** The points description of
+`μ_N` is natural: restriction along `k : T' ⟶ T` corresponds to applying `Γ`-map. -/
+theorem muNPointsEquiv_natural (S : Scheme.{u}) (N : ℕ) [NeZero N]
+    {T T' : Scheme.{u}} (g : T ⟶ S) (k : T' ⟶ T)
+    (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
+    (muNPointsEquiv S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
+      (Scheme.Γ.map k.op).hom (muNPointsEquiv S N g h : Γ(T, ⊤)) := by sorry
 
 end ModularCurves
 

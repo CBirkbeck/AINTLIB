@@ -14,7 +14,7 @@ from KM 2.3 and both black-box targets of workstream B:
 * **KM 2.3.1**: `E[N] → S` is finite locally free of rank `N²` (proof: `[N]` is finite
   locally free of degree `N²`, via Hasse's `deg [N] = N²` on fibres + fibrewise flatness
   criterion — see the black-box register).
-* **Loeffler Lemma 3.4.2(2)** (verbatim: *"If `E/S` is an elliptic curve and `N ≥` is
+* **Loeffler Lemma 3.4.2(2)** (verbatim: *"If `E/S` is an elliptic curve and `N ≥` is [sic]
   invertible on `S`, then `[N] : E → E` is smooth. ... The morphism `[N]` multiplies a
   global differential by `N`, so it induces an isomorphism of tangent space. In other
   words, it is an étale morphism"*): when `N` is invertible on `S`, `[N]` is étale, hence
@@ -71,9 +71,15 @@ theorem pointToTorsion_torsionπ {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} (x : E
     E.pointToTorsion x hx ≫ E.torsionπ N = g :=
   pullback.lift_snd _ _ _
 
+@[simp]
+theorem pointToTorsion_torsionι {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    E.pointToTorsion x hx ≫ E.torsionι N = x.1 :=
+  pullback.lift_fst _ _ _
+
 /-- **(T-B3)** `E[N] ⟶ E` is a closed immersion (kernels of group-scheme morphisms against
 proper separated bases; the zero section of a separated morphism is a closed immersion). -/
-theorem torsionι_isClosedImmersion (N : ℕ) [NeZero N] :
+theorem torsionι_isClosedImmersion (N : ℕ) :
     IsClosedImmersion (E.torsionι N) := by sorry
 
 /-- **(T-B4 = KM 2.3.1)** `E[N] ⟶ S` is finite and flat (finite locally free) — of rank
@@ -82,22 +88,22 @@ fibrewise `deg [N] = N²`, Silverman III.6.2(d), + the fibrewise flatness criter
 EGA IV 11.3.10 — register item BB-FLAT). -/
 theorem torsionπ_isFinite (N : ℕ) [NeZero N] : IsFinite (E.torsionπ N) := by sorry
 
-theorem torsionπ_flat (N : ℕ) [NeZero N] : Flat (E.torsionπ N) := by sorry
+/-- **(T-B4, flatness half of KM 2.3.1; BB-FLAT/stream FLAT consumer)** `E[N] ⟶ S` is
+flat. -/
+theorem torsionπ_flat (N : ℕ) : Flat (E.torsionπ N) := by sorry
 
 /-- **(T-B4, rank part of KM 2.3.1)** `E[N]/S` has constant rank `N²`. -/
 theorem torsion_rank (N : ℕ) [NeZero N] (s : S) :
-    haveI := E.torsionπ_isFinite N
-    haveI := E.torsionπ_flat N
     (E.torsionπ N).finrank s = N ^ 2 := by sorry
 
 /-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
 (it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
-theorem mulBy_etale (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.mulByHom N) := by sorry
 
 /-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
 Source: Loeffler §3.4; KM 2.3.5. -/
-theorem torsionπ_etale (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.torsionπ N) := by sorry
 
 end EllipticCurve
