@@ -1700,8 +1700,24 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
   CommAlgCat k with (co)limits transported along `commAlgCatEquivUnder` +
   Under CommRingCat; subcategory closure via
   `ObjectProperty.IsClosedUnderLimitsOfShape` + `Algebra.Etale.of_equiv`):
-  - AG-GG-1.0 ambient instances: HasFiniteProducts/HasPushouts/HasInitial (+
-    SingleObj-G limits) for CommAlgCat k, via the Under-equivalence.
+  - AG-GG-1.0 DONE (2026-07-06): HasFiniteLimits/HasFiniteColimits +
+    HasColimitsOfShape (SingleObj G) for CommAlgCat k via commAlgCatEquivUnder;
+    gotchas: SingleObj G : Type 0 ALWAYS (universe-shrink via
+    hasColimitsOfSizeShrink needed for u > 0); Under-side SingleObj colimits via
+    Under.forget creating CONNECTED colimits (IsConnected (SingleObj G) ✓ mathlib).
+  - AG-GG-1.1 DONE: finite products (pointwise Pi-algebras; Fan.IsLimit.mk;
+    subcategory homs are ObjectProperty.homMk-wrapped — hom_ext takes P explicitly,
+    use the ext TACTIC which chains all three @[ext] lemmas).
+  - AG-GG-1.3a DONE: k initial (hasInitial_of_unique; hom-subsingleton from
+    AlgHom.commutes).
+  - AG-GG-1.2 DONE: pushouts = tensor B ⊗[A] C; étale vertex via mathlib's
+    OWN 2-of-3 `Algebra.Etale.of_restrictScalars k A C` (no new lemma needed!) +
+    Etale.baseChange + Etale.comp; Module.Finite via of_restrictScalars_finite +
+    base_change + trans; IsColimit cribbed from CommRingCat.pushoutCoconeIsColimit
+    (productMap f' g' over the span-algebraized base, restrictScalars k;
+    A-AlgHoms from k-AlgHoms with letI toAlgebra-of-composite; term-glue map_mul
+    in the induction — rw across the wrapper seam fails); HasPushouts via
+    diagramIsoSpan (NOT .symm — hasColimit_of_iso eats G ≅ F).
   - AG-GG-1.1 closure under finite products (Etale-Pi instance ✓ in mathlib;
     concrete product cones in CommAlgCat).
   - AG-GG-1.2 closure under pushouts B ⊗[A] C (needs the 2-out-of-3
