@@ -1,2 +1,1 @@
-FOCUS: T-B6d card_sections_eq_finrank — Part 1 algebra (natCard_algHom_eq_finrank) in ForMathlib/EtaleSectionsCount.lean
-FOCUS-D: (beastmode-D2) T-D14: a/a-prime/b DONE+committed (isSubdivisor_iff_le, exists_factor_subschemeι_iff, baseChange_ideal). ONLY T-D14c LEFT: construct Z : S.IdealSheafData with (Z ≤ t.ker ⟺ D.ideal.comap (fst π t) ≤ D-prime.ideal.comap (fst π t)) — affine-local generator-coordinates via T-D13/T-D27 + gluing + base-change bridge. Full route + mathlib comap-dictionary map in T-D14 board progress note. A on T-D6 (ExactOrder.lean) — stay out.
+FOCUS: T-B6e torsionBy_addEquiv_of_card — pure group theory leaf

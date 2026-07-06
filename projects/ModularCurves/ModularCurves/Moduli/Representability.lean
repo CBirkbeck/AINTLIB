@@ -151,6 +151,48 @@ noncomputable def EllHom.pullSection {X Y : EllObj R} (f : X ⟶ Y)
       (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp]),
     f.isPullback.lift_snd _ _ _⟩
 
+/-- Pulling a section back along the identity gives the section back. -/
+theorem EllHom.pullSection_id {X : EllObj R} (P : X.curve.Section) :
+    EllHom.pullSection R (𝟙 X) P = P := by
+  refine Subtype.ext ?_
+  refine (𝟙 X : X ⟶ X).isPullback.hom_ext ?_ ?_
+  · have h1 : (EllHom.pullSection R (𝟙 X) P).1 ≫ (𝟙 X : X ⟶ X).top =
+        (𝟙 X : X ⟶ X).baseHom ≫ P.1 :=
+      (𝟙 X : X ⟶ X).isPullback.lift_fst _ _ _
+    rw [h1]
+    show 𝟙 X.base ≫ P.1 = P.1 ≫ 𝟙 X.curve.E
+    rw [Category.id_comp, Category.comp_id]
+  · rw [(EllHom.pullSection R (𝟙 X) P).2, P.2]
+
+/-- Pulling sections back is compatible with composition. -/
+theorem EllHom.pullSection_comp {X Y Z : EllObj R} (f : X ⟶ Y) (g : Y ⟶ Z)
+    (P : Z.curve.Section) :
+    EllHom.pullSection R (f ≫ g) P =
+      EllHom.pullSection R f (EllHom.pullSection R g P) := by
+  refine Subtype.ext ?_
+  refine (f ≫ g : X ⟶ Z).isPullback.hom_ext ?_ ?_
+  · have h0 : (EllHom.pullSection R (f ≫ g) P).1 ≫ (f ≫ g : X ⟶ Z).top =
+        (f ≫ g : X ⟶ Z).baseHom ≫ P.1 :=
+      (f ≫ g : X ⟶ Z).isPullback.lift_fst _ _ _
+    rw [h0]
+    have h1 : (EllHom.pullSection R f (EllHom.pullSection R g P)).1 ≫ f.top =
+        f.baseHom ≫ (EllHom.pullSection R g P).1 := f.isPullback.lift_fst _ _ _
+    have h2 : (EllHom.pullSection R g P).1 ≫ g.top = g.baseHom ≫ P.1 :=
+      g.isPullback.lift_fst _ _ _
+    show (f.baseHom ≫ g.baseHom) ≫ P.1 =
+      (EllHom.pullSection R f (EllHom.pullSection R g P)).1 ≫ f.top ≫ g.top
+    calc (f.baseHom ≫ g.baseHom) ≫ P.1
+        = f.baseHom ≫ g.baseHom ≫ P.1 := Category.assoc _ _ _
+      _ = f.baseHom ≫ (EllHom.pullSection R g P).1 ≫ g.top := by rw [h2]
+      _ = (f.baseHom ≫ (EllHom.pullSection R g P).1) ≫ g.top :=
+          (Category.assoc _ _ _).symm
+      _ = ((EllHom.pullSection R f (EllHom.pullSection R g P)).1 ≫ f.top) ≫ g.top := by
+          rw [h1]
+      _ = (EllHom.pullSection R f (EllHom.pullSection R g P)).1 ≫ f.top ≫ g.top :=
+          Category.assoc _ _ _
+  · rw [(EllHom.pullSection R (f ≫ g) P).2,
+      (EllHom.pullSection R f (EllHom.pullSection R g P)).2]
+
 /-- **(T-E4a, additivity of section-pullback — surfaced by the adversarial pass
 2026-07-06)** `pullSection` is a group homomorphism. NOT free: `EllHom` carries no
 group-compatibility field and the two curves' `grp` data are independent, so this
@@ -170,8 +212,12 @@ order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor l
 noncomputable def gammaOneNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R where
   obj X := { P : X.unop.curve.Section // X.unop.curve.IsNaiveGammaOne N P }
   map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1, by sorry⟩
-  map_id := by sorry
-  map_comp := by sorry
+  map_id X := by
+    ext P
+    exact congrArg Subtype.val (EllHom.pullSection_id R P.1)
+  map_comp f g := by
+    ext P
+    exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop P.1)
 
 /-- The naive full-level-`N` (`Γ(N)`) moduli problem over `R`:
 `E/S ↦ {(P, Q) generating E[N] in every fibre}`. Source: Loeffler Fact 3.8.1 (verbatim:
@@ -181,8 +227,14 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
     X.unop.curve.IsNaiveFullLevel N PQ.1 PQ.2 }
   map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
     EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
-  map_id := by sorry
-  map_comp := by sorry
+  map_id X := by
+    ext PQ
+    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
+    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.2)
+  map_comp f g := by
+    ext PQ
+    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.1)
+    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.2)
 
 /-- **(T-E7 = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
 `N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
