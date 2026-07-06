@@ -3934,3 +3934,14 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     recorded as follow-up — needs the étale-trivialisation tower, T-H4-adjacent).
     Scope note: field-base first per review Q5's own milestone framing; YRho consumer
     (AlgebraicClosure ℚ) is covered.
+  - 2026-07-07T00:35Z: T-C0a delegated (torsionAlgebra construction — route: IsFinite
+    ⟹ IsAffineHom ⟹ IsAffine, Γ-transport, HasAffineProperty/HasRingHomProperty
+    extraction of Finite/Etale to the algebra side, FiniteEtale.of packaging).
+    **T-C0c recon done**: HasseWeil's pairing = transport-constant of τ_S g_T / g_T
+    (Pairing.lean:217, Classical.choose of pairing_const_of_transport);
+    DivisorGalois.lean has the full RingEquiv-transport toolkit (map_XYIdeal,
+    valuation_map_ringEquiv, count_map_ringEquiv) and FrobeniusConjugation.lean the
+    coordinate-ring generator-extensionality pattern — T-C0c (general σ-equivariance)
+    = generalise their Frobenius chain to arbitrary σ : k̄ ≃ₐ[k] k̄; patterned,
+    substantial; statement to be cut in HasseWeil-vocabulary inside EtaleDescent.lean
+    (cross-project import already legal — one workspace).
