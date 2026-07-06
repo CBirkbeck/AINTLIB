@@ -555,6 +555,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   rank-N étale subgroup over field has N distinct points; (3)⟹(1) via (4). Attack
   obligation from decomposition D5 (killed-by-N hypothesis placement) must be resolved
   first — if the skeleton form is inequivalent, B2-report (do NOT silently edit).
+  **RESOLVED 2026-07-06 (v5)**: the adversarial pass added the standing hypothesis
+  `hkill : (N : ℤ) • P = 0` to the skeleton (ExactOrder.lean:85, docstring records the
+  `ℚ̄[ε]` counterexample); same for T-D7 (line 96). Both are workable as stated.
 - **Sources**: [KM] 1.4.4 with proof (IN HAND).
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
