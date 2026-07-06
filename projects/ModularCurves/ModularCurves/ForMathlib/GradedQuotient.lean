@@ -215,4 +215,29 @@ lemma quotientGradingHom_irrelevant_le :
 
 end Irrelevant
 
+section Map
+
+variable {τ B S : Type*} [CommRing S] [CommRing B] [Algebra S B]
+  {ℬ : ι → Submodule S B} [GradedAlgebra ℬ]
+
+/-- Functoriality of the quotient grading: a graded ring homomorphism mapping `I`
+into `J` descends to a graded homomorphism of the quotient gradings. -/
+def quotientGradingMap (φ : GradedRingHom 𝒜 ℬ) (I : HomogeneousIdeal 𝒜)
+    (J : HomogeneousIdeal ℬ) (h : I.toIdeal ≤ J.toIdeal.comap φ.toRingHom) :
+    GradedRingHom (quotientGrading I) (quotientGrading J) where
+  toRingHom := Ideal.quotientMap J.toIdeal φ.toRingHom h
+  map_mem {i x} hx := by
+    obtain ⟨a, ha, rfl⟩ := hx
+    refine ⟨φ a, φ.map_mem ha, ?_⟩
+    exact Ideal.quotientMap_mk.symm
+
+@[simp]
+lemma quotientGradingMap_mk (φ : GradedRingHom 𝒜 ℬ) (I : HomogeneousIdeal 𝒜)
+    (J : HomogeneousIdeal ℬ) (h : I.toIdeal ≤ J.toIdeal.comap φ.toRingHom) (a : A) :
+    quotientGradingMap φ I J h (Ideal.Quotient.mk I.toIdeal a) =
+      Ideal.Quotient.mk J.toIdeal (φ a) :=
+  Ideal.quotientMap_mk (H := h)
+
+end Map
+
 end HomogeneousIdeal
