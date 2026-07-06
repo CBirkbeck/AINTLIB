@@ -1087,8 +1087,6 @@ private lemma eq_infPoint_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Fiel
   · -- the Z-chart: contradicts the hypothesis
     exact absurd ⟨Spec.map (CommRingCat.ofHom φ.1), rfl⟩ hg
 
-end Points
-
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
 biject with `(W.baseChange K).toAffine.Point`, sending `[0:1:0]` to `0`.
 Route: every `Spec K`-point factors through one of the three affine charts (`K` is
@@ -1100,7 +1098,34 @@ theorem projModel_points (W : WeierstrassCurve R) (hell : W.IsElliptic)
     ∃ e : SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point,
       e ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
         rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ = 0 := by
-  sorry
+  classical
+  let EZ : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 } ≃
+      { p : K × K // (W.baseChange K).toAffine.Equation p.1 p.2 } :=
+    (chartHomEquiv W 2 K).trans ((chartSolutionsEquiv W 2 K).trans
+      (zSolutionsToAffine W K))
+  let EB : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ¬ ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 } ≃ PUnit.{u + 1} :=
+    { toFun := fun _ => PUnit.unit
+      invFun := fun _ => ⟨infPoint W K, infPoint_not_inZ W K⟩
+      left_inv := fun g => Subtype.ext (eq_infPoint_of_not_inZ W K g.1 g.2).symm
+      right_inv := fun _ => rfl }
+  let e0 : SpecPoints (projModel W) (projModelπ W) K ≃
+      (W.baseChange K).toAffine.Point :=
+    (Equiv.sumCompl _).symm.trans ((EZ.sumCongr EB).trans
+      (affinePointSplit W hell K).symm)
+  refine ⟨e0.trans (Equiv.swap (e0 ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫
+    projModelZero W, by
+      rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩) 0), ?_⟩
+  rw [Equiv.trans_apply, Equiv.swap_apply_left]
+
+end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
 Source: KM 2.2; Loeffler §3.3 Def 3.3.3. -/
