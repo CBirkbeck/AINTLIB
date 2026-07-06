@@ -1,1 +1,1 @@
-FOCUS: T-B2 mu_N wiring (worker beastmode-B, stream B) — claimed; committing claim, then baseline build of ModularCurves.GroupScheme.MuN
+FOCUS: T-B2 (beastmode-B) — writing muN points-functor block (muNRingGen/specHomEquiv/GrpFunctor/RepresentableBy) into MuN.lean, then build

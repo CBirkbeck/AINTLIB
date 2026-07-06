@@ -58,10 +58,163 @@ def constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
 def constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A ⟶ S :=
   Sigma.desc fun _ ↦ 𝟙 S
 
+section PointsFunctor
+
+/-! ### The points functor of `μ_{N,S}` (ticket T-B2)
+
+`μ_N`-points over `g : T ⟶ S` are the `N`-th roots of unity of `Γ(T, ⊤)`. Following
+the pattern of `Mathlib.AlgebraicGeometry.AffineSpace` (`toSpecMvPolyIntEquiv`), the
+equivalence is assembled from the universal property of `Spec ℤ[T]/(Tᴺ − 1)` and of
+the defining pullback. The group-object structure (DS3a) is then *induced* from the
+presheaf of groups it represents (`GrpObj.ofRepresentableBy`), which makes the points
+description `muNPointsEquiv` — together with its naturality and multiplicativity —
+the definitional pin of the group law, as required by the DATA-SORRY register. On
+points the induced multiplication is multiplication of roots of unity, i.e. the
+comultiplication `T ↦ T ⊗ T` of KM 1.12. -/
+
+open Ideal.Quotient in
+/-- The universal `N`-th root of unity: the class of `T` in `ℤ[T]/(Tᴺ − 1)`. -/
+private def muNRingGen (N : ℕ) : muNRing N :=
+  ULift.ringEquiv.symm (mk _ (X : Polynomial ℤ))
+
+private lemma muNRingGen_pow (N : ℕ) : muNRingGen N ^ N = 1 := by
+  rw [muNRingGen, ← map_pow, ← map_pow, ← map_one ULift.ringEquiv.symm,
+    ← map_one (Ideal.Quotient.mk _)]
+  exact congrArg _ <| Ideal.Quotient.eq.mpr <| Ideal.mem_span_singleton_self _
+
+/-- Two ring homomorphisms out of `ℤ[T]/(Tᴺ − 1)` agreeing on the class of `T` agree. -/
+private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N ⟶ R}
+    (h : f (muNRingGen N) = g (muNRingGen N)) : f = g := by
+  have key : (f.hom.comp (ULift.ringEquiv.symm : _ ≃+* muNRing N).toRingHom).comp
+        (Ideal.Quotient.mk _) =
+      (g.hom.comp (ULift.ringEquiv.symm : _ ≃+* muNRing N).toRingHom).comp
+        (Ideal.Quotient.mk _) := by
+    refine Polynomial.ringHom_ext (fun a ↦ ?_) h
+    exact DFunLike.congr_fun
+      (RingHom.ext_int (_root_.RingHom.comp _ (Polynomial.C : ℤ →+* Polynomial ℤ))
+        (_root_.RingHom.comp _ (Polynomial.C : ℤ →+* Polynomial ℤ))) a
+  ext x
+  obtain ⟨x⟩ := x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  exact DFunLike.congr_fun key p
+
+/-- The ring homomorphism `ℤ[T]/(Tᴺ − 1) ⟶ R` classifying an `N`-th root of unity. -/
+private def muNRingLift {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
+    muNRing N ⟶ R :=
+  CommRingCat.ofHom <|
+    (Ideal.Quotient.lift _ (Polynomial.eval₂RingHom (Int.castRingHom R) a) <| by
+      intro p hp
+      obtain ⟨q, rfl⟩ := Ideal.mem_span_singleton.mp hp
+      simp [ha, sub_self]).comp (ULift.ringEquiv : muNRing N ≃+* _).toRingHom
+
+private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
+    muNRingLift a ha (muNRingGen N) = a := by
+  simp [muNRingLift, muNRingGen]
+
+/-- Morphisms into the absolute `μ_N` are `N`-th roots of unity of `Γ(X, ⊤)`
+(universal property of `Spec ℤ[T]/(Tᴺ − 1)`). -/
+private def muNAbsHomEquiv {N : ℕ} {X : Scheme.{u}} :
+    (X ⟶ muNAbs N) ≃ { a : Γ(X, ⊤) // a ^ N = 1 } where
+  toFun f := ⟨f.appTop ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)), by
+    rw [← map_pow, ← map_pow, muNRingGen_pow, map_one, map_one]⟩
+  invFun a := X.toSpecΓ ≫ Spec.map (muNRingLift a.1 a.2)
+  left_inv f := by
+    apply (ΓSpec.adjunction.homEquiv _ _).symm.injective
+    apply Quiver.Hom.unop_inj
+    rw [Adjunction.homEquiv_symm_apply, Adjunction.homEquiv_symm_apply]
+    dsimp
+    simp only [Scheme.toSpecΓ_appTop, Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+    exact muNRing_hom_ext (by simp [muNRingLift_gen])
+  right_inv a := by
+    ext
+    simp only [Scheme.comp_appTop, CommRingCat.comp_apply]
+    rw [← Scheme.ΓSpecIso_inv_naturality_apply, Scheme.toSpecΓ_appTop]
+    simp [muNRingLift_gen]
+
+/-- `S`-morphisms into `μ_{N,S}` over `g` are morphisms into the absolute `μ_N`
+(universal property of the defining pullback). -/
+private def muNHomEquivAbsHom (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
+    { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ (T ⟶ muNAbs N) where
+  toFun h := h.1 ≫ pullback.snd _ _
+  invFun k := ⟨pullback.lift g k (by simp), pullback.lift_fst _ _ _⟩
+  left_inv h := Subtype.ext <| by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]; exact h.2.symm
+    · rw [pullback.lift_snd]
+  right_inv k := pullback.lift_snd _ _ _
+
+/-- The core points description (engine for `muNGrpObj` and `muNPointsEquiv`). -/
+private def muNPointsEquivAux (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
+    { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
+  (muNHomEquivAbsHom S N g).trans muNAbsHomEquiv
+
+private lemma muNPointsEquivAux_natural (S : Scheme.{u}) (N : ℕ) {T T' : Scheme.{u}}
+    (g : T ⟶ S) (k : T' ⟶ T) (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
+    (muNPointsEquivAux S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
+      k.appTop ((muNPointsEquivAux S N g h : Γ(T, ⊤))) := by
+  simp only [muNPointsEquivAux, muNAbsHomEquiv, muNHomEquivAbsHom, Equiv.trans_apply,
+    Equiv.coe_fn_mk, Category.assoc, Scheme.comp_appTop, CommRingCat.comp_apply]
+
+/-- The group of `N`-th roots of unity of a commutative monoid, as a group structure
+on the subtype `{a // a ^ N = 1}` (upstream candidate). -/
+private def nthRootsCommGroup (R : Type*) [CommMonoid R] (N : ℕ) [NeZero N] :
+    CommGroup { a : R // a ^ N = 1 } where
+  mul a b := ⟨a.1 * b.1, by rw [mul_pow, a.2, b.2, one_mul]⟩
+  one := ⟨1, one_pow N⟩
+  inv a := ⟨a.1 ^ (N - 1), by rw [← pow_mul, mul_comm, pow_mul, a.2, one_pow]⟩
+  mul_assoc a b c := Subtype.ext (mul_assoc _ _ _)
+  one_mul a := Subtype.ext (one_mul _)
+  mul_one a := Subtype.ext (mul_one _)
+  mul_comm a b := Subtype.ext (mul_comm _ _)
+  inv_mul_cancel a := Subtype.ext <| by
+    show a.1 ^ (N - 1) * a.1 = 1
+    rw [← pow_succ, Nat.succ_pred_eq_of_pos (NeZero.pos N), a.2]
+
+attribute [local instance] nthRootsCommGroup
+
+/-- Roots of unity are functorial along monoid homomorphisms. -/
+private def nthRootsMap {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N : ℕ} [NeZero N]
+    (f : R →* R') : { a : R // a ^ N = 1 } →* { a : R' // a ^ N = 1 } where
+  toFun a := ⟨f a.1, by rw [← map_pow, a.2, map_one]⟩
+  map_one' := Subtype.ext (map_one f)
+  map_mul' a b := Subtype.ext (map_mul f _ _)
+
+/-- The presheaf of groups on `Over S` represented by `μ_{N,S}`: `N`-th roots of unity
+of the global sections, with pointwise multiplication. -/
+private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
+  obj Y := GrpCat.of { a : Γ(Y.unop.left, ⊤) // a ^ N = 1 }
+  map k := GrpCat.ofHom (nthRootsMap k.unop.left.appTop.hom.toMonoidHom)
+  map_id Y := by
+    ext a
+    exact Subtype.ext (by simp [nthRootsMap])
+  map_comp f g := by
+    ext a
+    exact Subtype.ext (by simp [nthRootsMap])
+
+/-- `μ_{N,S}` represents its points presheaf. -/
+private def muNRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
+    (muNGrpFunctor S N ⋙ forget _).RepresentableBy (Over.mk (muNπ S N)) where
+  homEquiv {Y} :=
+    (⟨fun f ↦ ⟨f.left, Over.w f⟩, fun h ↦ Over.homMk h.1 h.2, fun _ ↦ rfl,
+        fun _ ↦ Over.OverMorphism.ext rfl⟩ :
+      (Y ⟶ Over.mk (muNπ S N)) ≃ { h : Y.left ⟶ muN S N // h ≫ muNπ S N = Y.hom }).trans
+    (muNPointsEquivAux S N Y.hom)
+  homEquiv_comp {Y Y'} f h := Subtype.ext <| by
+    have := muNPointsEquivAux_natural S N Y'.hom f.left ⟨h.left, Over.w h⟩
+    simp only [Over.w f, Over.comp_left] at this ⊢
+    exact this
+
 /-- **(DS3a, ticket T-B2)** The group structure on `μ_{N,S}` in `Over S`, with
-comultiplication `Spec` of `T ↦ T ⊗ T`. DATA-SORRY (register entry DS3). -/
-instance muNGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
-    GrpObj (Over.mk (muNπ S N)) := sorry
+comultiplication `Spec` of `T ↦ T ⊗ T`. Constructed by representability
+(`GrpObj.ofRepresentableBy`) from the presheaf of `N`-th roots of unity, so that the
+registered points description `muNPointsEquiv` (with `muNPointsEquiv_natural`,
+`muNPointsEquiv_one`, `muNPointsEquiv_mul`) pins the group law: on `T`-points it is
+multiplication of `N`-th roots of unity, i.e. `Spec` of `T ↦ T ⊗ T` (KM 1.12). -/
+noncomputable instance muNGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
+    GrpObj (Over.mk (muNπ S N)) :=
+  .ofRepresentableBy _ (muNGrpFunctor S N) (muNRepresentableBy S N)
+
+end PointsFunctor
 
 /-- **(DS3b, ticket T-B2)** The group structure on the constant group scheme `(ℤ/N)_S`.
 DATA-SORRY (register entry DS3). -/
@@ -77,7 +230,8 @@ Source: KM 1.12; Loeffler's representability example (`ℤ[T]/(Tⁿ−1)` repres
 roots of unity in `R`"). -/
 noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Scheme.{u}}
     (g : T ⟶ S) :
-    { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } := sorry
+    { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
+  muNPointsEquivAux S N g
 
 /-- **(T-B7)** `μ_{N,S} ⟶ S` is finite locally free of rank `N`, étale iff `N` is invertible
 on `S`. (Two statements; étale case.) Source: KM 1.12; standard. -/
@@ -101,7 +255,8 @@ theorem muNPointsEquiv_natural (S : Scheme.{u}) (N : ℕ) [NeZero N]
     {T T' : Scheme.{u}} (g : T ⟶ S) (k : T' ⟶ T)
     (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
     (muNPointsEquiv S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
-      (Scheme.Γ.map k.op).hom (muNPointsEquiv S N g h : Γ(T, ⊤)) := by sorry
+      (Scheme.Γ.map k.op).hom (muNPointsEquiv S N g h : Γ(T, ⊤)) :=
+  muNPointsEquivAux_natural S N g k h
 
 end ModularCurves
 
