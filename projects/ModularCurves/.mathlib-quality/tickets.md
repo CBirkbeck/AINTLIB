@@ -1417,14 +1417,25 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 1.4.1 cyclic (IN HAND) + 3.4 ⧗ + 6.1 ⧗.
 
 ### [T-E3] Ell/R category plumbing (Prop sorries)
-- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
-  2026-07-08T14:00Z · **File**: Moduli/EllCategory.lean · category instance fields,
+- **Status**: done (beastmode-A 2026-07-08T14:00Z → 2026-07-08T15:30Z — ALL fields
+  sorry-free: id-square `IsPullback.of_horiz_isIso ⟨by simp⟩`; comp-square
+  `f.isPullback.paste_horiz g.isPullback`; category laws `intros; ext <;> simp`;
+  `pullbackAlongMap.isPullback` via `IsPullback.of_right` after rewriting the big
+  square's fst-composite (`rw [← hfst] at hbig` — rewriting INSIDE an IsPullback
+  index works fine at hypotheses); `zero_w` needs the FULL raw `show`-recast of the
+  goal (both zero-fields respelled as pullback.lifts — proof args arbitrary) because
+  the record-projection typing poisons every kabstract. LEAN GOTCHA BANKED:
+  `pullback.map ≫ pullback.fst/snd` NEVER simp-reduces (abbrev-unfold does not
+  happen in simp matching) and `pullback.lift ≫ fst` can ALSO fail under simp in
+  Scheme-category goals — collapse with explicit `pullback.lift_fst/snd` show-terms
+  and finish with `lift_fst_assoc` + `Category.comp_id`-terms.) · **File**: Moduli/EllCategory.lean · category instance fields,
   `pullbackAlongMap.isPullback/zero_w` · **Depends on**: none · **Parallel**: yes ·
   **Type**: lemmas · **Sketch**: `IsPullback.of_id_fst`-style + `IsPullback.paste_horiz`
   (find exact names); EllHom ext-lemma discipline.
 
 ### [T-E4] Moduli-problem functor laws (Prop sorries)
-- **Status**: open · **File**: Moduli/Representability.lean · `gammaOneNaiveProblem`
+- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
+  2026-07-08T15:30Z · **File**: Moduli/Representability.lean · `gammaOneNaiveProblem`
   and `gammaFullNaiveProblem` `map_id/map_comp/map`-membership sorries ·
   **Depends on**: T-E3 · **Type**: lemmas.
 
