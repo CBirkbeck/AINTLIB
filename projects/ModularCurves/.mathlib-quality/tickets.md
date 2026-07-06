@@ -3951,6 +3951,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   potentially retiring the T-A6 gate on the level-functor `map` fields (`pullSection_add`).
   **Lane**: A · **Depends**: T-A8, T-W4 · **Type**: def + descent/invariance lemmas ·
   **Sources**: reviewer v8 Q3; Silverman III.2–3; mathlib `EllipticCurve.Weierstrass` group.
+  **Progress** (beastmode-A 2026-07-07): FOUNDATION landed — `ForMathlib/AffinePointVariableChange.lean`,
+  axiom-clean, general-`C` (any `CommRing`, mathlib only had the special origin-translation
+  `equation_iff_variableChange`). `VariableChange.vcX`/`vcY` (coordinate maps `u⁻²(x−r)`,
+  `u⁻³(y−s(x−r)−t)`); `equation_smul` (equation preserved — polynomial scales by `u⁻⁶`, one
+  `linear_combination`); `nonsingular_smul` (smoothness preserved — Jacobian `∂/∂Y↦u⁻³∂/∂Y`,
+  `∂/∂X↦u⁻⁴(∂/∂X+s·∂/∂Y)` invertible, so gradient-nonvanishing transports); `pointMap :
+  W.Point → (C•W).Point` + `pointMap_zero`/`pointMap_some`. NEXT: `pointMap_add` (group-hom;
+  needs `[Field]` — mathlib's affine `Point.add` is field-only — + `addX`/`addY`/`slope`
+  transport) → `AddEquiv (via C⁻¹)` → descent of the scheme group law across charts.
 
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
