@@ -422,6 +422,36 @@ theorem fp_algebraMap_gradeZero_away (W : WeierstrassCurve R) (i : Fin 3) :
   rw [hfinal]
   exact RingHom.FinitePresentation.comp hfg hsymm
 
+set_option backward.isDefEq.respectTransparency false in
+instance (W : WeierstrassCurve R) :
+    LocallyOfFinitePresentation (Proj.toSpecZero (quotientGrading (projIdeal W))) := by
+  rw [IsZariskiLocalAtSource.iff_of_iSup_eq_top (P := @LocallyOfFinitePresentation) _
+    (Proj.iSup_basicOpen_eq_top (quotientGrading (projIdeal W))
+      (fun i : Fin 3 => Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+      (quotient_irrelevant_le_span_mk_X W))]
+  intro i
+  rw [← MorphismProperty.cancel_left_of_respectsIso (P := @LocallyOfFinitePresentation)
+    (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W))
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+      (mk_X_mem_quotientGrading_one W i) one_pos).inv, ← Category.assoc,
+    ← Proj.awayι, Proj.awayι_toSpecZero,
+    HasRingHomProperty.Spec_iff (P := @LocallyOfFinitePresentation)]
+  exact fp_algebraMap_gradeZero_away W i
+
+/-- **(T-A2d, PROVED)** The projective Weierstrass model is locally of finite
+presentation over the base. -/
+theorem projModelπ_lfp (W : WeierstrassCurve R) :
+    LocallyOfFinitePresentation (projModelπ W) := by
+  unfold projModelπ
+  haveI h1 : LocallyOfFinitePresentation
+      (Proj.toSpecZero (quotientGrading (projIdeal W))) := inferInstance
+  haveI h2 : LocallyOfFinitePresentation
+      (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) := by
+    haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
+      inferInstance
+    infer_instance
+  exact MorphismProperty.IsStableUnderComposition.comp_mem _ _ h1 h2
+
 end Lfp
 
 end ProjModel
@@ -431,8 +461,7 @@ Source: KM 2.2; Loeffler §3.3 Def 3.3.3. -/
 theorem projModel_isWeierstrassModel (W : WeierstrassCurve R) :
     IsWeierstrassModel W (projModel W) (projModelπ W) (projModelZero W) := by
   refine ⟨inferInstance, ?_, projModelZero_projModelπ W, ?_⟩
-  · -- lfp (T-A2d): via the three affine charts `(Away (mk Xᵢ))₀ ≅ R[u,v]/(F̃ᵢ)`
-    sorry
+  · exact projModelπ_lfp W
   · -- pointed K-points for elliptic W (T-A2e): via the chart description +
     -- mathlib's `Projective.Point.toAffineAddEquiv`
     sorry

@@ -149,7 +149,14 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   use).
 
 ### [T-A2d] lfp of the model via the ℙ² embedding (sub-ticket of T-A2)
-- **Status**: in_progress (beastmode, spawned 2026-07-06T04:45Z) · **Files**:
+- **Status**: done (beastmode, 2026-07-06T04:45Z → 2026-07-06T08:30Z — ALL five steps
+  sorry-free: quotientGradingHom + irrelevant_le; Proj(A/I) ↪ Proj A closed immersion;
+  chartRingEquiv (the ℙⁿ charts, incl. the monomial-clearing identity);
+  ker_away_map_quotientGradingHom (chartwise-principal); finitePresentation_-
+  awayQuotient + fp_algebraMap_gradeZero_away + the IsZariskiLocalAtSource mirror ⟹
+  **projModelπ_lfp PROVED and plugged into projModel_isWeierstrassModel**, which now
+  has isProper/lfp/section_comp REAL — only the T-A2e points clause remains sorried.
+  /cleanup deferred to parent T-A2 Phase 6.5) · **Files**:
   ForMathlib/GradedQuotient.lean (graded mk-hom), ForMathlib/ProjClosedImmersion.lean
   (new), WeierstrassModel.lean · **Parent**: T-A2
 - **Depends on**: T-A2a (done) · **Type**: def + theorems
