@@ -632,6 +632,29 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     (isUnit-iff-basicOpen-⊤), field case via unramified ⟹ T^N−1 separable ⟹
     N ≠ 0 in κ(s). Check RingTheory/{Etale,Unramified} for
     AdjoinRoot-separable dictionaries before hand-rolling.
+  - 2026-07-06T11:00: etale_iff SPLIT into `etale_muNπ_of_isUnit` /
+    `isUnit_of_etale_muNπ` (committed, both sorried — the ONLY sorries left in
+    MuN.lean). ENGINE MAP (all verified present): `RingHom.Etale` ↔ Flat ∧
+    FormallyUnramified ∧ FinitePresentation (RingHom/Etale.lean:84);
+    `Etale` scheme-class has `HasRingHomProperty @Etale RingHom.Etale` ⟹
+    `HasRingHomProperty.Spec_iff`; `isPullback_SpecMap_of_isPushout`
+    (Pullbacks.lean:787) + `pullbackSpecIso R S T` (affine pullback = Spec of
+    tensor); `StandardEtalePair` + instance `Algebra.Etale R P.Ring`
+    (Etale/StandardEtale.lean:191); `Polynomial.separable_X_pow_sub_C`;
+    Morphisms/FormallyUnramified.lean exists. ROUTE DECISION (⟸): build the
+    ℤ[1/N]-model `Spec (ULift (Away (N:ℤ)[X]⧸(X^N−1)))`, ONE pushout square
+    (Algebra.IsPushout at ULift level — localization-tensor collapse), étale-ness
+    of the model by StandardEtalePair-or-direct (T is a unit in the quotient since
+    T·T^{N−1}=1, so derivative N·T^{N−1} is a unit when N is), S factors through
+    Spec ℤ[1/N] via toSpecΓ ≫ Spec.map (IsLocalization.Away.lift at h), paste with
+    isPullback_muN, finish by MorphismProperty.of_isPullback. (⟹): base-change to
+    Spec κ(s) at a point where N is not a unit in the stalk (isUnit-in-Γ ↔
+    basicOpen = ⊤ ↔ unit in every stalk), affine-identify the fibre as
+    Spec (κ[T]/(T^N−1)) via pullbackSpecIso-transport, RingHom.Etale ⟹
+    FormallyUnramified ⟹ (Unramified/Field) reduced — contradict
+    (T^{N/p}−1)^p = T^N−1 nilpotent for p = char κ ∣ N. ULift-transports via
+    RingHom-property-of-bijective composition lemmas (pattern proven in
+    muNRingMap_finite/flat/finrank).
   `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
   foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
 - **Depends on**: none · **Parallel**: yes · **Type**: theorems
