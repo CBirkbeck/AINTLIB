@@ -3937,6 +3937,27 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     q-lane.md: fails for S = ∅ — Hom-sets G vs 1 — and for disconnected S —
     componentwise translations; the general comparison lives at stackification
     level), and the (descent-gated) essential-image statement.
+  - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
+    (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
+    (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
+    IsZariskiLocalAtSource via RingHomProperties.lean:379; Flat.lean:105 is the
+    template) — **USED, trivialTorsorπ_etale LANDED**. (2) Surjective via
+    `Surjective.sigmaDesc_of_union_range_eq_univ` (UnderlyingMap.lean:116) —
+    **USED, trivialTorsorπ_surjective LANDED**. (3) IsFinite/IsAffineHom/
+    IsIntegralHom of Sigma.desc: NOT in mathlib — only BINARY
+    `coprod.desc` instances (Finite.lean:147, Affine.lean:218, Integral.lean:98;
+    engine `HasAffineProperty.coprodDesc_affineAnd` AffineAnd.lean:283) ⟹
+    T-W3b-i sub-lemma: `IsFinite (Sigma.desc f)` for [Finite ι] by induction
+    (Fin-n normal form or `Finite.induction_empty_option`; iterate the binary
+    instance) — ForMathlib-grade, upstream candidate. (4) pullback-∐
+    distributivity: `IsUniversalColimit.isPullback_of_isColimit_left`
+    (VanKampen.lean:796) + `FinitaryPreExtensive.isUniversal_finiteCoproducts`
+    (Extensive.lean:449) + `instance FinitaryExtensive Scheme`
+    (AG/Limits.lean:455); WORKED TEMPLATE at
+    AG/Geometrically/Reduced.lean:97-101 — the ∐-comparison-iso field of the
+    trivial TorsorPair goes through this. (5) NO torsor-of-constant-group
+    notion anywhere in mathlib AlgebraicGeometry — our TorsorPair is new
+    (upstream candidate with SchemeQuotient).
 
 - **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
   `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
