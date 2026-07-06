@@ -1,6 +1,7 @@
 import ModularCurves.EllipticCurve.Basic
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import ModularCurves.ForMathlib.FunctorMapZpow
 import Mathlib.AlgebraicGeometry.Group.Smooth
 
 /-!
@@ -187,6 +188,21 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
         (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
         (pullback.lift_snd _ _ _)) ?_
       exact hε2.trans (pullback.lift_snd _ _ _).symm
+
+/-- **(T-D6a-ii)** Multiplication by `n` commutes with base change: on the base-changed
+curve `E ×_S T`, the endomorphism `[n]` is the image of `E`'s `[n]` under the monoidal
+functor `Over.pullback g`. Both are the `n`-th power of the identity in the respective
+hom-groups, and `Over.pullback g` preserves those powers.
+
+Proof: `Functor.map_zpow'` (ForMathlib, the `zpow` companion of mathlib's
+`Functor.map_inv'`) + `Functor.map_id`; the `open scoped CategoryTheory.Obj`
+inside `map_zpow'` resolves the `GrpObj (F.obj G)` instance that otherwise diamonds
+with `Hom.group`. -/
+theorem mulBy_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
+    (E.baseChange g).mulBy n =
+      (Over.pullback g).map (E.mulBy n) := by
+  simp only [EllipticCurve.mulBy, Functor.map_zpow', CategoryTheory.Functor.map_id]
+  rfl
 
 /-- A point of `E` over `g : T ⟶ S`, viewed as a section of the base-changed curve
 `E ×_S T / T`. -/
