@@ -87,7 +87,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     decompose flags).
 
 ### [T-E2] Universal Tate curve represents (ring level) — PROVABLE NOW · MILESTONE
-- **Status**: open · **File**: Moduli/Representability.lean · `tateRing_homEquiv`
+- **Status**: done (beastmode, 2026-07-06T01:30Z → 2026-07-06T02:20Z) · **File**: Moduli/Representability.lean · `tateRing_homEquiv`
 - **Depends on**: none (statement); the *display* with T-E1 · **Parallel**: yes ·
   **Type**: theorem
 - **Statement**: in skeleton (`(tateRing →+* A) ≃ {c : A × A // IsUnit Δ(c)}`).
@@ -98,6 +98,18 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `IsLocalization.Away.AwayMap.lift_comp` (verify exact names).
 - **Sources**: [Loe] Cor 3.3.5.
 - **Generality**: all `CommRing A`, universe-polymorphic target.
+- **Progress**:
+  - 2026-07-06T02:00: proven — pinned-equiv form (decompose-pass DEF-18 statement):
+    toFun = evaluation at generator images; invFun = `IsLocalization.Away.lift`;
+    left_inv via `IsLocalization.ringHom_ext` + `Away.lift_comp` + the agreement
+    helper `tateRing_eval₂Hom_comp` (MvPolynomial.ringHom_ext' + RingHom.ext_int);
+    right_inv by simp. Pin `fun φ ↦ rfl`. Axioms: standard three.
+  - 2026-07-06T02:20: DONE — /cleanup ran (helper 13→6 lines via ringHom_ext'
+    one-liner; theorem body 23→9 via hΔ-inline (▸), show-removal, terminal-simp
+    collapse, `Away.algebraMap_isUnit` API upgrade). All gates pass, statement
+    byte-identical. MILESTONE: first representability result of the project —
+    the ring-level universal Tate curve. Post-proof cleanup: ✓ ran (gates pass,
+    no flags).
 
 ### [T-A2] Construct the projective Weierstrass model (DS1)
 - **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean · `projModel`,

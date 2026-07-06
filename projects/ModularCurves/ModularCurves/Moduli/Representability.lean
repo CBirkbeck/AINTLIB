@@ -99,6 +99,13 @@ order ≤ 3. Source: Loeffler Cor 3.3.5. -/
 noncomputable abbrev tateRing : Type :=
   Localization.Away tateCurve.Δ
 
+private lemma tateRing_eval₂Hom_comp (A : Type u) [CommRing A] (φ : tateRing →+* A) :
+    MvPolynomial.eval₂Hom (Int.castRingHom A) (fun i : Fin 2 ↦ if i = 0 then
+        φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 0))
+        else φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 1))) =
+      φ.comp (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing) :=
+  MvPolynomial.ringHom_ext' (RingHom.ext_int _ _) fun i ↦ by fin_cases i <;> simp
+
 /-- **(T-E2 = Loeffler Cor 3.3.5, ring level — PROVABLE-NOW target)** For every ring `A`,
 ring homomorphisms `tateRing →+* A` correspond exactly to pairs `(α, β) ∈ A²` with
 `Δ(α, β)` a unit — i.e. to Tate-normal elliptic curves over `A` marked at `(0, 0)`.
@@ -119,7 +126,15 @@ theorem tateRing_homEquiv (A : Type u) [CommRing A] :
         ((e φ).1 : A × A) =
           (φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 0)),
            φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 1))) := by
-  sorry
+  refine ⟨⟨fun φ ↦ ⟨(φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 0)),
+      φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 1))), ?_⟩,
+    fun c ↦ IsLocalization.Away.lift tateCurve.Δ
+      (WeierstrassCurve.map_Δ (A := A) tateCurve _ ▸ c.2), fun φ ↦ ?_, fun c ↦ ?_⟩, fun φ ↦ rfl⟩
+  · rw [WeierstrassCurve.map_Δ, tateRing_eval₂Hom_comp A φ]
+    exact (IsLocalization.Away.algebraMap_isUnit tateCurve.Δ).map φ
+  · exact IsLocalization.ringHom_ext (Submonoid.powers tateCurve.Δ)
+      ((IsLocalization.Away.lift_comp _ _).trans (tateRing_eval₂Hom_comp A φ))
+  · simp
 
 end TateNormalForm
 
