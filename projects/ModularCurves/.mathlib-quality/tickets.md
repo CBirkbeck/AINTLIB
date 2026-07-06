@@ -1928,6 +1928,38 @@ transported along the equivalence (GrpObj/ofRepresentableBy — T-B2 experience
 directly applicable). All leaves unclaimed.
 
 ### [T-F1] ⧗(AG-GG) V_ρ construction (DS5 discharge)
+- **PROGRESS** (beastmode-B, 2026-07-06): **DS5 DATA-SORRY DISCHARGED** — `vRho`/`vRhoπ`
+  are now REAL DEFINITIONS in YRho.lean via the completed AG-GG correspondence:
+  `vRhoAlgebra D := ((finiteEtaleEquivContAction ℚ).inverse.obj (rhoContAction D)).unop`,
+  `vRho D := Spec (.of (vRhoAlgebra D))`. Pieces landed: `sepClosureQAlgEquiv`
+  (char-0: separableClosure = ⊤ via eq_top_iff + isSeparable_of_perfectField —
+  needs `haveI := AlgebraicClosure.isAlgebraic ℚ` first, it does NOT synthesize
+  bare), `galSepMulEquivGalQ := AlgEquiv.autCongr` + Krull-continuity
+  (`continuous_of_continuousAt_one` on the toMonoidHom + `krullTopology_mem_nhds_one_iff`
+  both sides, transporting fixing subgroups along `E.map e.symm.toAlgHom`),
+  `galSepContinuousMulEquivGalQ` (compact-to-T2: `Continuous.homeoOfEquivCompactToT2`
+  INLINE — a `have hh :=` loses defeq and the invFun-coercion mismatches;
+  `haveI : T2Space GalQ := krullTopology_t2` needs the IsAlgebraic haveI),
+  `rhoAction` (End-fields need `FintypeCat.homMk` + `FintypeCat.hom_ext _ _ fun v =>`;
+  bare `ext` finds no @[ext] lemma for `End (FintypeCat.of _)`), `rhoAction_ker_open`
+  (preimage of D.ker_open), `rhoAction_isContinuous` (discrete-rng + union of left
+  cosets of the open kernel; `DiscreteTopology` haveI := ⟨rfl⟩ on the forget₂-TopCat
+  carrier), `rhoContAction`, and **T-F1a PROVED** (2 lines: `IsFinite.SpecMap_iff` +
+  `RingHom.finite_algebraMap`; `HasRingHomProperty.Spec_iff (P := @Etale)` +
+  `RingHom.etale_algebraMap` — object-property instances fire). Also landed
+  `pointsEquivOfContAction` (ForMathlib/FiniteEtaleFundamentalGroup, GREEN): the
+  correspondence counit as an Equiv of finite sets — the T-F1b core.
+  **BUILD PENDING**: sibling beastmode-A's T-A8a WIP in EllipticCurve/Basic.lean is
+  transiently red (uncommitted working-tree edits); YRho imports it. Background
+  watcher armed; on green: one `lake build ModularCurves.ModularCurve.YRho` iteration,
+  then commit + axiom-check probe (remember the two concrete-ℚ instance registrations
+  are IN the file already).
+  **T-F1b REMAINING** (chain designed): {h // triangle} ≃ (A →ₐ[ℚ] ℚ̄) via
+  Spec.preimage-bijection (EtaleSectionsCount pattern), ≃ (A →ₐ[ℚ] SepCl) via
+  `AlgEquiv.arrowCongr` along `sepClosureQAlgEquiv.symm`, then DEFEQ to the fiber of
+  `inverse.obj (rhoContAction D)` (op-unop eta), then `pointsEquivOfContAction`, then
+  carrier-defeq to `Fin 2 → ZMod N`. Equivariance spec (vRhoPointsEquiv_equivariant)
+  after. v8 review checked: T-F* stays on the spine, COH non-blocking, no impact.
 - **Status**: open (scoping first: AG-GG sub-development) · **File**: YRho.lean ·
   `vRho`, `vRhoπ`, `vRhoPointsEquiv` + specs T-F1a/b (+ group structure T-F1c) ·
   **Type**: def(data) + theorems ·
