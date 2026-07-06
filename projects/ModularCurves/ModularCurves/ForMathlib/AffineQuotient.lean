@@ -778,7 +778,138 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
     refine ⟨v, j.isOpenEmbedding.injective ?_⟩
     rw [← Scheme.Hom.comp_apply, IsOpenImmersion.lift_fac]
     exact hv
-  sorry
+  -- notation for the cover pieces and the B-side witnesses
+  set ℓ : ∀ p : Q', Spec (CommRingCat.of (Localization.Away (a p))) ⟶ Q' :=
+    fun p => IsOpenImmersion.lift j (chartA R (a p)) (hliftA p) with hℓdef
+  have hℓj : ∀ p, ℓ p ≫ j = chartA R (a p) :=
+    fun p => IsOpenImmersion.lift_fac _ _ _
+  haveI hℓimm : ∀ p, IsOpenImmersion (ℓ p) := by
+    intro p
+    have : IsOpenImmersion (ℓ p ≫ j) := (hℓj p) ▸ inferInstance
+    exact IsOpenImmersion.of_comp _ j
+  have hrangeκB : ∀ p : Q', Set.range ⇑(chartB R (a p)) ⊆
+      Set.range ⇑(pullback.fst (invariantsπ G B R) j) := by
+    intro p t ht
+    rw [IsOpenImmersion.range_pullbackFst]
+    show invariantsπ G B R t ∈ j.opensRange
+    obtain ⟨v, rfl⟩ := ht
+    have h20 : invariantsπ G B R (chartB R (a p) v) =
+        chartA R (a p) (chartπ R (a p) v) := by
+      rw [← Scheme.Hom.comp_apply, chart_square G B R (a p), Scheme.Hom.comp_apply]
+    rw [h20]
+    exact hrange p (by
+      have h21 : chartA R (a p) (chartπ R (a p) v) ∈
+          (chartA R (a p)).opensRange := ⟨_, rfl⟩
+      rwa [chartA_opensRange] at h21)
+  set κB' : ∀ p : Q', Spec (CommRingCat.of (Localization.Away ((a p : B)))) ⟶
+      pullback (invariantsπ G B R) j :=
+    fun p => IsOpenImmersion.lift (pullback.fst (invariantsπ G B R) j)
+      (chartB R (a p)) (hrangeκB p) with hκB'def
+  have hκB'fst : ∀ p, κB' p ≫ pullback.fst (invariantsπ G B R) j =
+      chartB R (a p) := fun p => IsOpenImmersion.lift_fac _ _ _
+  have hκB'snd : ∀ p, κB' p ≫ pullback.snd (invariantsπ G B R) j =
+      chartπ R (a p) ≫ ℓ p := by
+    intro p
+    rw [← cancel_mono j, Category.assoc, Category.assoc, hℓj p, ← pullback.condition,
+      ← Category.assoc, hκB'fst, chart_square G B R (a p)]
+  -- gluing compatibility on overlaps, via the relative uniqueness
+  have hcompat : ∀ p r : Q', pullback.fst (ℓ p) (ℓ r) ≫ qa p =
+      pullback.snd (ℓ p) (ℓ r) ≫ qa r := by
+    intro p r
+    obtain ⟨j'', hj''⟩ : ∃ j'', pullback.fst (ℓ p) (ℓ r) ≫ ℓ p ≫ j = j'' := ⟨_, rfl⟩
+    haveI : IsOpenImmersion j'' := hj'' ▸ inferInstance
+    refine invariantsπ_hom_ext_of_isOpenImmersion G B R j'' _ _ ?_
+    have hside : ∀ (rr : Q')
+        (pr : pullback (ℓ p) (ℓ r) ⟶
+          Spec (CommRingCat.of (Localization.Away (a rr))))
+        (hpr : pr ≫ ℓ rr ≫ j = j''),
+        ∃ m : pullback (invariantsπ G B R) j'' ⟶ pullback (invariantsπ G B R) j,
+          m ≫ pullback.fst (invariantsπ G B R) j =
+            pullback.fst (invariantsπ G B R) j'' ∧
+          pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa rr) = m ≫ f := by
+      intro rr pr hpr
+      have hcone : (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ chartA R (a rr) =
+          pullback.fst (invariantsπ G B R) j'' ≫ invariantsπ G B R := by
+        rw [Category.assoc, ← hℓj rr, hpr]
+        exact pullback.condition.symm
+      have hu₁ := (isPullback_chart G B R (a rr)).lift_fst
+        (pullback.snd (invariantsπ G B R) j'' ≫ pr)
+        (pullback.fst (invariantsπ G B R) j'') hcone
+      have hu₂ := (isPullback_chart G B R (a rr)).lift_snd
+        (pullback.snd (invariantsπ G B R) j'' ≫ pr)
+        (pullback.fst (invariantsπ G B R) j'') hcone
+      refine ⟨(isPullback_chart G B R (a rr)).lift _ _ hcone ≫ κB' rr, ?_, ?_⟩
+      · rw [Category.assoc, hκB'fst, hu₂]
+      · have h40 : ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫
+            chartπ R (a rr)) ≫ qa rr =
+            (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa rr := by
+          rw [hu₁]
+        calc pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa rr)
+            = (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa rr := by
+              rw [Category.assoc]
+          _ = ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫ chartπ R (a rr)) ≫
+              qa rr := h40.symm
+          _ = (isPullback_chart G B R (a rr)).lift _ _ hcone ≫
+              (chartπ R (a rr) ≫ qa rr) := by rw [Category.assoc]
+          _ = (isPullback_chart G B R (a rr)).lift _ _ hcone ≫ (κB' rr ≫ f) := by
+              rw [hqa rr (κB' rr) (hκB'fst rr)]
+          _ = ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫ κB' rr) ≫ f := by
+              rw [Category.assoc]
+    obtain ⟨m₁, hm₁f, hm₁⟩ := hside p (pullback.fst (ℓ p) (ℓ r)) hj''
+    obtain ⟨m₂, hm₂f, hm₂⟩ := hside r (pullback.snd (ℓ p) (ℓ r)) (by
+      rw [← Category.assoc, ← pullback.condition, Category.assoc, hj''])
+    have hmm : m₁ = m₂ := by
+      rw [← cancel_mono (pullback.fst (invariantsπ G B R) j), hm₁f, hm₂f]
+    rw [← Category.assoc, Category.assoc, hm₁, ← Category.assoc, Category.assoc,
+      hm₂, hmm]
+  -- glue and verify the factorization on the lifted `B`-side cover
+  set 𝒰Q : Q'.OpenCover := Scheme.Cover.mkOfCovers (J := ↥Q')
+    (fun p => Spec (CommRingCat.of (Localization.Away (a p))))
+    (fun p => ℓ p)
+    (fun x => ⟨x, hcoverQ' x⟩)
+    (fun p => hℓimm p) with h𝒰Q
+  refine ⟨𝒰Q.glueMorphisms (fun p => qa p) hcompat, ?_⟩
+  haveI hκB'imm : ∀ p, IsOpenImmersion (κB' p) := by
+    intro p
+    have : IsOpenImmersion (κB' p ≫ pullback.fst (invariantsπ G B R) j) :=
+      (hκB'fst p) ▸ inferInstance
+    exact IsOpenImmersion.of_comp _ (pullback.fst (invariantsπ G B R) j)
+  have hcoverPB : ∀ w : ↥(pullback (invariantsπ G B R) j),
+      ∃ v, κB' (pullback.snd (invariantsπ G B R) j w) v = w := by
+    intro w
+    have h31 : invariantsπ G B R (pullback.fst (invariantsπ G B R) j w) =
+        j (pullback.snd (invariantsπ G B R) j w) := by
+      rw [← Scheme.Hom.comp_apply, pullback.condition, Scheme.Hom.comp_apply]
+    have h30 : pullback.fst (invariantsπ G B R) j w ∈
+        (chartB R (a (pullback.snd (invariantsπ G B R) j w))).opensRange := by
+      rw [chartB_opensRange]
+      show invariantsπ G B R (pullback.fst (invariantsπ G B R) j w) ∈
+        PrimeSpectrum.basicOpen (a (pullback.snd (invariantsπ G B R) j w))
+      rw [h31]
+      exact hmem _
+    obtain ⟨v, hv⟩ := h30
+    exact ⟨v, (pullback.fst (invariantsπ G B R) j).isOpenEmbedding.injective (by
+      rw [← Scheme.Hom.comp_apply, hκB'fst, hv])⟩
+  refine Scheme.Cover.hom_ext
+    ((Scheme.Cover.mkOfCovers
+      (J := ↥((pullback (invariantsπ G B R) j : Scheme.{u})))
+      (fun w =>
+        Spec (CommRingCat.of (Localization.Away
+          ((a (pullback.snd (invariantsπ G B R) j w) : B)))))
+      (fun w => κB' (pullback.snd (invariantsπ G B R) j w))
+      (fun w => ⟨w, hcoverPB w⟩)
+      (fun w => hκB'imm _) : (pullback (invariantsπ G B R) j).OpenCover))
+    _ _ (fun w => ?_)
+  have hfinal : ∀ p' : Q', κB' p' ≫ pullback.snd (invariantsπ G B R) j ≫
+      𝒰Q.glueMorphisms (fun p => qa p) hcompat = κB' p' ≫ f := by
+    intro p'
+    rw [← Category.assoc, hκB'snd, Category.assoc]
+    have h50 : ℓ p' ≫ 𝒰Q.glueMorphisms (fun p => qa p) hcompat = qa p' :=
+      𝒰Q.ι_glueMorphisms (fun p => qa p) hcompat p'
+    rw [h50]
+    exact hqa _ (κB' _) (hκB'fst _)
+  exact hfinal (pullback.snd (invariantsπ G B R) j
+    (show ↥(pullback (invariantsπ G B R) j) from w))
 
 end UniversalProperty
 
