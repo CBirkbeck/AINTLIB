@@ -209,11 +209,9 @@ noncomputable def spanPushoutCoconeIsColimit : IsColimit (spanPushoutCocone f g)
       | tmul y z =>
         have h1 : (y ⊗ₜ z : ↑Y.obj ⊗[↑X.obj] ↑Z.obj) = (y ⊗ₜ 1) * ((1 : Y.obj) ⊗ₜ z) := by
           rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-        have h2 : m.hom.hom (y ⊗ₜ z) = s.inl.hom.hom y * s.inr.hom.hom z := by
-          have h := congrArg m.hom.hom h1
-          rw [map_mul] at h
-          rw [hml y, hmr z] at h
-          exact h
+        have h2 : m.hom.hom (y ⊗ₜ z) = s.inl.hom.hom y * s.inr.hom.hom z :=
+          (congrArg m.hom.hom h1).trans ((map_mul m.hom.hom _ _).trans
+            (congrArg₂ (· * ·) (hml y) (hmr z)))
         have h3 : ((Algebra.TensorProduct.productMap f' g').restrictScalars k) (y ⊗ₜ z) =
             s.inl.hom.hom y * s.inr.hom.hom z := by
           show Algebra.TensorProduct.productMap f' g' (y ⊗ₜ z) = _
@@ -224,9 +222,12 @@ noncomputable def spanPushoutCoconeIsColimit : IsColimit (spanPushoutCocone f g)
         exact (map_add _ _ _).trans
           (((congrArg₂ (· + ·) ih₁ ih₂).trans (map_add _ _ _).symm))
 
-instance hasPushouts : HasPushouts (CommAlgCat.FiniteEtale.{u} k) :=
-  hasPushouts_of_hasColimit_span fun f g =>
-    HasColimit.mk ⟨_, spanPushoutCoconeIsColimit f g⟩
+instance hasPushouts : HasPushouts (CommAlgCat.FiniteEtale.{u} k) where
+  has_colimit F := by
+    haveI : HasColimit (span (F.map WalkingSpan.Hom.fst) (F.map WalkingSpan.Hom.snd)) :=
+      HasColimit.mk ⟨_, spanPushoutCoconeIsColimit
+        (F.map WalkingSpan.Hom.fst) (F.map WalkingSpan.Hom.snd)⟩
+    exact hasColimit_of_iso (diagramIsoSpan F)
 
 end PushoutCat
 
