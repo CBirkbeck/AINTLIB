@@ -2486,6 +2486,38 @@ lemma projModelZeroChart_comp_χ (W : WeierstrassCurve R) :
   rw [← awayι_projModelπ W 1, ← Category.assoc, projModelZeroChart_fac]
   exact projModelZero_projModelπ W
 
+/-- Evaluation of the `Y`-chart at the point at infinity `[0:1:0]`. -/
+noncomputable def zeroChartHom (W : WeierstrassCurve R) :
+    Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) →+* R :=
+  (Localization.awayLift (projModelZeroEval W)
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (isUnit_iff_exists_inv.mpr ⟨1, by
+      rw [show (projModelZeroEval W) ((quotientGradingHom (projIdeal W))
+          (MvPolynomial.X 1)) = 1 from by
+        show (projModelZeroEval W) (Ideal.Quotient.mk _ (MvPolynomial.X 1)) = 1
+        rw [projModelZeroEval_mk]
+        simp]
+      rw [one_mul]⟩)).comp
+    (HomogeneousLocalization.valRingHom _)
+
+lemma zeroChartHom_mk (W : WeierstrassCurve R) {i : ℕ}
+    (hs : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) ∈
+      quotientGrading (projIdeal W) i) (n : ℕ) (a : projCoordRing W)
+    (ha : a ∈ quotientGrading (projIdeal W) (n • i)) :
+    zeroChartHom W (HomogeneousLocalization.Away.mk _ hs n a ha) =
+      projModelZeroEval W a := by
+  rw [zeroChartHom, RingHom.comp_apply,
+    HomogeneousLocalization.valRingHom_apply, Away.val_mk]
+  rw [Localization.awayLift_mk (hv := by
+    rw [show (projModelZeroEval W) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 1)) = 1 from by
+      show (projModelZeroEval W) (Ideal.Quotient.mk _ (MvPolynomial.X 1)) = 1
+      rw [projModelZeroEval_mk]
+      simp]
+    rw [one_mul])]
+  simp
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
