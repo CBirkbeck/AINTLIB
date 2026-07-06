@@ -32,6 +32,19 @@ universe u
 
 namespace ModularCurves
 
+/-- **(T-B6c)** On the spectrum of a field, `N` is invertible iff `N ≠ 0` in the field. -/
+theorem nIsInvertible_spec_iff (k : Type u) [Field k] (N : ℕ) :
+    NIsInvertible (Spec (CommRingCat.of k)) N ↔ (N : k) ≠ 0 := by
+  rw [NIsInvertible]
+  constructor
+  · intro h
+    have h2 := h.map (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom
+    rw [map_natCast (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom N] at h2
+    exact isUnit_iff_ne_zero.mp h2
+  · intro h
+    have h2 := (isUnit_iff_ne_zero.mpr h).map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
+    rwa [map_natCast (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom N] at h2
+
 namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
