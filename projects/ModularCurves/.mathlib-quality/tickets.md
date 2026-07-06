@@ -2496,7 +2496,8 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     tracked for the cleanup lane, same as T-D31/T-D32).
 
 ### [T-Q3a] Localized action ring homs at an invariant element
-- **Status**: open · **File**: ModularCurves/ForMathlib/InvariantLocalization.lean
+- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:45Z
+- **File**: ModularCurves/ForMathlib/InvariantLocalization.lean
   (NEW) · **Parent**: T-Q3 · **Type**: def + lemmas · **Depends on**: none
   (pure algebra; parallel with T-Q1)
 - **Statement**: for `h : B` with `hfix : ∀ g : G, g • h = h`, package the induced
