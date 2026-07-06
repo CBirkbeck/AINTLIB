@@ -1605,6 +1605,24 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   T-D12, T-D13.
   - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
     2026-07-06T14:45Z (deps both met: T-D13 mine, T-D12 core by A).
+  - **Progress**: 2026-07-06T15:05Z — T-D14a DONE (`isSubdivisor_iff_le`,
+    commit 87a2f88a: factorization ⟺ ideal-≤ via `Scheme.Hom.le_ker_comp` +
+    `ker_subschemeι` / mathlib `inclusion` + `inclusion_subschemeι`). T-D14a′ +
+    T-D14b DONE (next commit: `exists_factor_subschemeι_iff` — ∃-factorization
+    ⟺ `Z ≤ t.ker`, via `t.toImage ≫ inclusion`; `baseChange_ideal` :
+    `(D.baseChange t).ideal = D.ideal.comap (pullback.fst π t)` via
+    `pullbackSymmetry_hom_comp_fst` + `ker_comp_of_isIso` + mathlib
+    `ker_fst_of_isClosedImmersion`). Axioms standard ×3. MATHLIB DISCOVERY OF
+    RECORD: IdealSheaf/Functorial.lean has the COMPLETE comap/map dictionary
+    (`comap I f := (pullback.fst f I.subschemeι).ker`, comap_comp/id/mono,
+    GaloisConnection `map_gc`, `le_map_iff_comap_le`,
+    `ker_fst_of_isClosedImmersion`, `isPullback_of_isClosedImmersion`) and
+    Subscheme.lean has `kerAdjunction`. UNIVERSALITY NOW READS: ∃h ⟺ Z ≤ t.ker
+    (T-D14a′); RHS ⟺ `D.ideal.comap (fst π t) ≤ D'.ideal.comap (fst π t)`
+    (T-D14a + T-D14b). REMAINING = T-D14c ONLY: construct `Z : S.IdealSheafData`
+    with `Z ≤ t.ker ⟺ comap(I_D) ≤ comap(I_D')` for all t — affine-local
+    equations (generators of I(D) pushed to B′ := O_{D′} flf, coordinates via
+    T-D13/T-D27, glue over S, base-change bridge for the ⟺).
   - **ROUTE OF RECORD (analysis banked 2026-07-06T14:45Z, COUNT-FREE)**: the
     statement never mentions the `deg D′` equation count (docstring-only per the
     attack log), so NO local principality of `I(D)` is needed — the T-D11/AG-LB/
