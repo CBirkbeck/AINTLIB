@@ -2052,6 +2052,48 @@ lemma baseChangeGradedHom_mk_X (W : WeierstrassCurve R) (j : Fin 3) :
   rw [MvPolynomial.map_X]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The chart square of the base-change morphism of models is cartesian:
+`D₊`-preimages under `Proj.map` are the base-changed charts. -/
+lemma isPullback_projModelBaseChange_chart (W : WeierstrassCurve R) (j : Fin 3) :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.Away.map
+        (baseChangeGradedHom (algebraMap R R') W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))))
+      (Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))
+        ((baseChangeGradedHom (algebraMap R R') W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+        ((baseChangeGradedHom (algebraMap R R') W).2
+          (mk_X_mem_quotientGrading_one W j)) one_pos)
+      (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+        (mk_X_mem_quotientGrading_one W j) one_pos)
+      (projModelBaseChange (algebraMap R R') W) := by
+  refine IsOpenImmersion.isPullback _ _ _ _ ?_ ?_
+  · exact Proj.awayι_comp_map (baseChangeGradedHom (algebraMap R R') W)
+      (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) one_pos _
+      (mk_X_mem_quotientGrading_one W j)
+  · rw [show projModelBaseChange (algebraMap R R') W =
+      Proj.map (baseChangeGradedHom (algebraMap R R') W)
+        (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) from rfl]
+    rw [Proj.opensRange_awayι, Proj.opensRange_awayι, Proj.map_preimage_basicOpen]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The lift restricts over each cover piece to the base-changed chart. -/
+lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom
+          ((chartCoordEquiv (W.map (algebraMap R R')) j).symm.toRingHom)) ≫
+        Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))
+          ((quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
+            (MvPolynomial.X j))
+          (mk_X_mem_quotientGrading_one (W.map (algebraMap R R')) j) one_pos)
+      ((isPullback_piece (R' := R') W j).isoPullback.hom)
+      (projModelBaseChangeLift (algebraMap R R') W)
+      ((Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+        (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j) := by
+  sorry
+
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
   show (MorphismProperty.isomorphisms Scheme)
