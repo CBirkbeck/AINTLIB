@@ -90,18 +90,34 @@ lemma map_eval_eq_piRight_apply {ι : Type} [Fintype ι] [DecidableEq ι]
   | tmul ω f => simp [Algebra.TensorProduct.piRight_tmul]
   | add a b ha hb => simp [map_add, ha, hb]
 
-/-- The base change of the product fan is a limit fan. -/
+/-- Two maps into a base-changed product agreeing on all coordinate projections are
+equal. -/
+lemma baseChangePi_hom_ext {ι : Type} [Fintype ι] [DecidableEq ι]
+    (A : ι → CommAlgCat.FiniteEtale.{u} k) {W : CommAlgCat.FiniteEtale.{u} Ω}
+    {u v : W ⟶ (baseChangeU k Ω).obj (CommAlgCat.FiniteEtale.of k (Π j, A j))}
+    (h : ∀ i, u ≫ (baseChangeU k Ω).map ((productFan A).π.app ⟨i⟩) =
+      v ≫ (baseChangeU k Ω).map ((productFan A).π.app ⟨i⟩)) : u = v := by
+  ext x
+  apply (Algebra.TensorProduct.piRight k Ω Ω (fun j => (A j : Type u))).injective
+  refine funext fun i => ?_
+  rw [← map_eval_eq_piRight_apply A i, ← map_eval_eq_piRight_apply A i]
+  exact congrArg (fun q => q.hom.hom x) (h i)
+
+/-- The base change of the product fan is a limit fan: `Ω ⊗[k] ∏ᵢ Aᵢ` is the product
+of the `Ω ⊗[k] Aᵢ`, via `piRight`. -/
 noncomputable def isLimitMapConeProductFan {ι : Type} [Finite ι]
     (A : ι → CommAlgCat.FiniteEtale.{u} k) :
     IsLimit ((baseChangeU k Ω).mapCone (productFan A)) := by
   haveI := Fintype.ofFinite ι
   haveI := Classical.decEq ι
-  refine IsLimit.mk
-    (fun s => ObjectProperty.homMk (CommAlgCat.ofHom
-      ((Algebra.TensorProduct.piRight k Ω Ω
-          (fun j => (A j : Type u))).symm.toAlgHom.comp
-        (AlgHom.pi (fun i => (s.π.app ⟨i⟩).hom.hom))))) ?_ ?_
-  · rintro s ⟨i⟩
+  have hfac : ∀ (s : Cone (Discrete.functor A ⋙ baseChangeU k Ω)) (i : ι),
+      (ObjectProperty.homMk (CommAlgCat.ofHom
+        ((Algebra.TensorProduct.piRight k Ω Ω
+            (fun j => (A j : Type u))).symm.toAlgHom.comp
+          (AlgHom.pi (fun i => (s.π.app ⟨i⟩).hom.hom)))) :
+          s.pt ⟶ (baseChangeU k Ω).obj (CommAlgCat.FiniteEtale.of k (Π j, A j))) ≫
+        ((baseChangeU k Ω).mapCone (productFan A)).π.app ⟨i⟩ = s.π.app ⟨i⟩ := by
+    intro s i
     ext x
     show Algebra.TensorProduct.map (AlgHom.id Ω Ω)
         (Pi.evalAlgHom k (fun j => (A j : Type u)) i)
@@ -109,13 +125,13 @@ noncomputable def isLimitMapConeProductFan {ι : Type} [Finite ι]
           (fun j => (s.π.app ⟨j⟩).hom.hom x)) =
       (s.π.app ⟨i⟩).hom.hom x
     rw [map_eval_eq_piRight_apply, AlgEquiv.apply_symm_apply]
-  · intro s m hm
-    ext x
-    apply (Algebra.TensorProduct.piRight k Ω Ω (fun j => (A j : Type u))).injective
-    rw [AlgEquiv.apply_symm_apply]
-    refine funext fun i => ?_
-    rw [← map_eval_eq_piRight_apply A i]
-    exact congrArg (fun q => q.hom.hom x) (hm ⟨i⟩)
+  refine IsLimit.mk
+    (fun s => ObjectProperty.homMk (CommAlgCat.ofHom
+      ((Algebra.TensorProduct.piRight k Ω Ω
+          (fun j => (A j : Type u))).symm.toAlgHom.comp
+        (AlgHom.pi (fun i => (s.π.app ⟨i⟩).hom.hom)))))
+    (fun s => by rintro ⟨i⟩; exact hfac s i)
+    (fun s m hm => baseChangePi_hom_ext A fun i => (hm ⟨i⟩).trans (hfac s i).symm)
 
 lemma preservesLimitsOfShapeDiscrete_baseChange (ι : Type) [Finite ι] :
     PreservesLimitsOfShape (Discrete ι) (baseChangeU k Ω) where
