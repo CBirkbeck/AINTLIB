@@ -4043,3 +4043,18 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     Spec k gives W/k ✓ exists today) PLUS group-law comparison across the pointed
     fibre iso — that is A6.δ/T-W7-gate-adjacent; T-C0c/d will surface the exact
     edge. Next: T-C0c skeleton (WeilPairing/GaloisEquivariance.lean).
+  - 2026-07-07T01:50Z: T-C0c delegated (new file WeilPairing/GaloisEquivariance.lean;
+    σ-general mirror of the HasseWeil Frobenius chain, statement-first). **T-C0d
+    designed + RE-CUT against mathlib's CategoryTheory/Galois/Equivalence.lean**
+    (functorToContAction : C ⥤ ContAction FintypeCat (Aut F), Full+Faithful+EssSurj —
+    with B-lane's GaloisCategory instance for (FiniteEtale k)ᵒᵖ this is the whole
+    transport): **T-C0d-i** (gate-free) — any Aut-equivariant continuous pairing map
+    between the fibre values of torsionAlgebra ⊗ torsionAlgebra and the μ_N algebra
+    lifts to a FiniteEtale-morphism, via functorToContAction.Full; **T-C0d-ii**
+    (GATED) — the concrete pairing map on fibre values via the Weierstrass fibre
+    model: needs the pointed fibre iso (FibrewiseElliptic at the point of Spec k) to
+    be a GROUP iso, which is the A6.δ/abelEnrichment content = **the T-W7 edge**
+    (v8: T-W7 retires that gate). Board edge recorded: T-C0d-ii, T-C0e-re-cut ←
+    T-W7 (A-lane, spine-sequenced; W4/W5 just landed). H-lane keeps the gate-free
+    side moving (T-C0c chain + T-C0d-i statement) and hands the concrete-map edge
+    to the spine like the level-functor memberships.
