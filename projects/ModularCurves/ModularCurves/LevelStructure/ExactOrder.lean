@@ -59,6 +59,26 @@ theorem Point.pull_zsmul {T : Scheme.{u}} (t : T ⟶ S) (a : ℤ) (P : E.Section
   rw [point_smul_eq_comp_mulBy, point_smul_eq_comp_mulBy, ← Category.assoc]
   rfl
 
+/-- Pulling points back along `t` is additive: `pull` is a group homomorphism (it is
+precomposition on the same curve, so distributes over the point group — no canonicity
+needed, unlike `EllHom.pullSection` between different curves). -/
+theorem Point.pull_add {T : Scheme.{u}} (t : T ⟶ S) (P Q : E.Section) :
+    Point.pull E t (P + Q) = Point.pull E t P + Point.pull E t Q := by
+  letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (Over.mk (𝟙 S) ⟶ E.asOver) := Hom.commGroup
+  refine (E.pointEquivOverHom t).injective ?_
+  have hw : t ≫ (Over.mk (𝟙 S)).hom = (Over.mk t).hom := by
+    simp
+  have corr : ∀ R : E.Section, (E.pointEquivOverHom t) (Point.pull E t R) =
+      (Over.homMk t hw : Over.mk t ⟶ Over.mk (𝟙 S)) ≫
+        (E.pointEquivOverHom (𝟙 S) R) := by
+    intro R
+    apply Over.OverMorphism.ext
+    rw [Over.comp_left]
+    rfl
+  rw [pointEquivOverHom_add, corr, corr, corr, pointEquivOverHom_add,
+    MonObj.comp_mul]
+
 /-- Pulling back the zero point gives zero. -/
 theorem Point.pull_zero {T : Scheme.{u}} (t : T ⟶ S) :
     Point.pull E t (0 : E.Section) = 0 := by
