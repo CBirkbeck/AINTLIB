@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q4 (KM A7 appendix).
 -/
-import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.Algebra.Algebra.Subalgebra.Operations
+import Mathlib.RingTheory.Flat.Basic
+import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
 # Base change for rings of invariants (Katz–Mazur, Appendix A7)
@@ -43,7 +45,7 @@ open TensorProduct
 variable {G : Type*} [Group G]
 variable {R : Type u} {A : Type u} {R' : Type u}
 variable [CommRing R] [CommRing A] [Algebra R A]
-variable [MulSemiringAction G A] [SMulCommClass G R A]
+variable [MulSemiringAction G A] [SMulCommClass G R A] [SMulCommClass R G A]
 variable [CommRing R'] [Algebra R R']
 
 namespace MulSemiringAction
@@ -100,12 +102,13 @@ noncomputable def fixedPointsBaseChange :
       | tmul a r =>
         intro g
         rw [Algebra.TensorProduct.map_tmul, MulSemiringAction.smul_tmul_baseChange]
-        exact congrArg (· ⊗ₜ[R] _) (congrArg _ (a.2 g)))
+        exact congrArg (fun y => y ⊗ₜ[R] ((AlgHom.id R R') r)) (a.2 g))
 
 @[simp]
 theorem fixedPointsBaseChange_tmul (a : FixedPoints.subalgebra R A G) (r : R') :
     (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') (a ⊗ₜ[R] r) : A ⊗[R] R') =
-      (a : A) ⊗ₜ[R] r := rfl
+      (a : A) ⊗ₜ[R] r := by
+  simp [fixedPointsBaseChange]
 
 /-- **∗(A, G, R, R') holds for flat R'** (KM A7.1.3 (1)): the comparison map is
 bijective when `R'` is flat over `R`. -/
