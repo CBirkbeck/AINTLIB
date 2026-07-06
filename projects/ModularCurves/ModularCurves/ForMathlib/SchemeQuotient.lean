@@ -778,6 +778,7 @@ private theorem glueT'_cocycle (i j k : X) :
 
 /-- **The quotient glue data** (T-Q5 c4): the local quotients of a stable affine
 atlas, glued along the saturated overlaps. -/
+@[reducible]
 private noncomputable def quotientGlueData : Scheme.GlueData where
   J := X
   U := fun i => σ.localQuotient (hVs i)
@@ -792,6 +793,67 @@ private noncomputable def quotientGlueData : Scheme.GlueData where
   t_fac := fun i j k => glueT'_fac σ V hVs hVa i j k
   cocycle := fun i j k => glueT'_cocycle σ V hVs hVa i j k
   f_open := fun i j => inferInstance
+
+/-- **The quotient of a scheme by a finite group action** (T-Q5d): the local
+quotients of a stable affine atlas, glued. -/
+noncomputable def quotient : Scheme.{u} := (quotientGlueData σ V hVs hVa).glued
+
+/-- The chart composites into the quotient agree on overlaps. -/
+private theorem chartCompat (i j : X) :
+    X.homOfLE (inf_le_left : V i ⊓ V j ≤ V i) ≫ σ.localQuotientπ (hVs i) (hVa i) ≫
+      (quotientGlueData σ V hVs hVa).ι i =
+    X.homOfLE (inf_le_right : V i ⊓ V j ≤ V j) ≫ σ.localQuotientπ (hVs j) (hVa j) ≫
+      (quotientGlueData σ V hVs hVa).ι j := by
+  rw [← Category.assoc, ← localQuotientπ_localQuotientMap σ ((hVs i).inf (hVs j))
+      ((hVa i).inf (hVa j)) (hVs i) (hVa i) inf_le_left,
+    ← Category.assoc, ← localQuotientπ_localQuotientMap σ ((hVs i).inf (hVs j))
+      ((hVa i).inf (hVa j)) (hVs j) (hVa j) inf_le_right,
+    Category.assoc, Category.assoc]
+  congr 1
+  have h90 := (quotientGlueData σ V hVs hVa).glue_condition i j
+  show σ.localQuotientMap _ _ _ _ _ ≫ (quotientGlueData σ V hVs hVa).ι i =
+    σ.localQuotientMap _ _ _ _ _ ≫ (quotientGlueData σ V hVs hVa).ι j
+  rw [← h90, ← Category.assoc]
+  congr 1
+  exact localQuotientMap_trans σ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+    ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (hVs j) (hVa j)
+    (le_inf inf_le_right inf_le_left) inf_le_left
+
+variable (hVmem : ∀ x : X, x ∈ V x)
+
+/-- The quotient projection `X ⟶ X/G`, glued from the local quotient
+projections. -/
+noncomputable def quotientπ : X ⟶ σ.quotient V hVs hVa := by
+  refine ((Scheme.Cover.mkOfCovers (J := ↥X)
+      (fun x => (V x : Scheme.{u}))
+      (fun x => (V x).ι)
+      (fun x => by
+        have h : x ∈ Set.range ⇑(V x).ι := by
+          rw [Scheme.Opens.range_ι]
+          exact hVmem x
+        obtain ⟨v, hv⟩ := h
+        exact ⟨x, v, hv⟩)
+      (fun x => inferInstance) : X.OpenCover)).glueMorphisms
+    (fun x => σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x)
+    ?_
+  intro x y
+  show pullback.fst ((V x).ι) ((V y).ι) ≫
+      (σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x) =
+    pullback.snd ((V x).ι) ((V y).ι) ≫
+      (σ.localQuotientπ (hVs y) (hVa y) ≫ (quotientGlueData σ V hVs hVa).ι y)
+  have htop : (V y).ι ⁻¹ᵁ (V y) = ⊤ := by
+    refine TopologicalSpace.Opens.ext (Set.eq_univ_of_forall fun v => ?_)
+    show (V y).ι v ∈ (V y : Set X)
+    rw [← Scheme.Opens.range_ι]
+    exact ⟨v, rfl⟩
+  have H := IsOpenImmersion.isPullback (X.homOfLE (inf_le_left : V x ⊓ V y ≤ V x))
+    (X.homOfLE (inf_le_right : V x ⊓ V y ≤ V y)) (V x).ι (V y).ι
+    (by simp)
+    (by rw [Scheme.Opens.opensRange_ι, Scheme.opensRange_homOfLE,
+      Scheme.Hom.preimage_inf, htop, inf_top_eq])
+  rw [← cancel_epi H.isoPullback.hom, H.isoPullback_hom_fst_assoc,
+    H.isoPullback_hom_snd_assoc]
+  exact chartCompat σ V hVs hVa x y
 
 end Glue
 
