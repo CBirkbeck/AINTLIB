@@ -72,7 +72,15 @@ noncomputable def glSmul {N : ℕ} [NeZero N]
   let m : Matrix (Fin 2) (Fin 2) (ZMod N) := g
   ⟨((((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2,
      ((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)),
-    by sorry⟩
+    by
+      have hP : (N : ℤ) • L.1.1 = 0 := L.2.1.1
+      have hQ : (N : ℤ) • L.1.2 = 0 := L.2.1.2
+      refine ⟨⟨?_, ?_⟩, ?_⟩
+      · rw [smul_add, smul_comm (N : ℤ) ((m 0 0).val : ℤ),
+          smul_comm (N : ℤ) ((m 1 0).val : ℤ), hP, hQ, smul_zero, smul_zero, add_zero]
+      · rw [smul_add, smul_comm (N : ℤ) ((m 0 1).val : ℤ),
+          smul_comm (N : ℤ) ((m 1 1).val : ℤ), hP, hQ, smul_zero, smul_zero, add_zero]
+      · sorry⟩
 
 /-- If `N • P = 0` then `m • P = 0` whenever `N ∣ m` — so `m • P` depends only on
 `m mod N`. Used to lift `ZMod N` matrix entries via `ZMod.val`. -/
