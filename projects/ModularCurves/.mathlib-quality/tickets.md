@@ -1857,8 +1857,36 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     walkingCospanOpEquiv, singleObjOpEquiv (AG-GG-1), Finite Gᵐᵒᵖ via
     Finite.of_equiv G MulOpposite.opEquiv; epis: op-side hand-lemma via
     unop_mono_of_epi + preservesMonomorphisms + op_epi_of_mono.
-- **[AG-GG-3]** `IsFundamentalGroup GalQ F` (Krull topology, continuity +
-  transitivity axioms — classical infinite Galois theory, mathlib-supported).
+- **[AG-GG-3]** `IsFundamentalGroup Gal(k̄/k) (fiber k k̄)` — SCOPED 2026-07-06
+  (beastmode-B), file ForMathlib/FiniteEtaleFundamentalGroup.lean. Mathlib gives the
+  topology side FREE: `separableClosure.isGalois` [Normal on AlgebraicClosure] ⇒
+  IsGalois k (SeparableClosure k) ⇒ `CompactSpace Gal(K/k)` (Galois/Profinite:329) +
+  IsTopologicalGroup (KrullTopology). Fiber topology: `scoped instance : TopologicalSpace
+  (F.obj X) := ⊥` in CategoryTheory.PreGaloisCategory scope (Galois/Topology:57) —
+  open scoped it. The class (IsFundamentalgroup.lean:231): extends IsNaturalSMul +
+  transitive_of_isGalois + continuous_smul + non_trivial'. Leaves:
+  - 3a MulAction σ • x := σ.toAlgHom.comp x + IsNaturalSMul (comp-assoc, rfl-ish).
+  - 3d connected ⇒ field: A ≠ 0 (else X initial-op via terminal = empty-product
+    vertex, subsingleton carrier); m₀ maximal; mkₐ surjective ⇒ epi (ConcreteCategory
+    epi_of_surjective + faithful-ι reflects) ⇒ op-mono into X; A⧸m₀ étale
+    (etale_quotient) nonzero-field ⇒ non-initial ⇒ IsConnected.noTrivialComponent ⇒
+    iso ⇒ IsField A transported along the CRT-free RingEquiv.
+  - 3e transitive on Galois X: [IsGalois X ⇒ IsConnected X] ⇒ A field (3d, letI
+    h.toField); x y : A →ₐ Ω; χ := ofInjectiveField-y ∘ (ofInjectiveField-x).symm on
+    fieldRanges; σ := χ.liftNormal Ω (Normal k Ω from IsGalois); liftNormal_commutes
+    gives σ ∘ x = y.
+  - 3c ContinuousSMul on discrete fibers: stabilizer {σ | σ∘x = x} = fixingSubgroup
+    of x.range-promoted-to-IntermediateField (range is a FIELD: f.d. domain in Ω —
+    part-(i)-W trick isField_of_isIntegral_of_isField'; inverse-closure from
+    IsField-inverses via Subalgebra.toIntermediateField); f.d. ⇒
+    IntermediateField.fixingSubgroup_isOpen (KrullTopology:173); {σ | σ•x = y} =
+    preimage of stabilizer under continuous left-mul by σ₀⁻¹ (nonempty case);
+    Continuous into ⊥-topology finite target via per-point preimages open.
+  - 3f non_trivial: σ fixing all fibers: at X := op (of k ↥(adjoin k {ω}))
+    (étale: intermediate of separable is separable + of_isSeparable; f.d.: ω
+    integral) with point (adjoin).val: σ ω = ω for all ω ⇒ σ = 1.
+  Then `instance : IsFundamentalGroup (fiber k (SeparableClosure k)) Gal` and via
+  mathlib toAutMulEquiv/toAutHomeo the identification with Aut F = π₁.
 - **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
   dictionary (finite ⇒ affine ⇒ Spec of the algebra IS the finite étale ℚ-scheme).
 Then T-F1: `V_ρ := Spec` of the algebra attached to the `ContAction` `(ℤ/N)²`-via-ρ;
