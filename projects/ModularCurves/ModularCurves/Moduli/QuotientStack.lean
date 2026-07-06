@@ -7,6 +7,8 @@ Ticket T-W3 (quotient-stack core; reviewer v8).
 -/
 import ModularCurves.ForMathlib.SchemeQuotient
 import Mathlib.CategoryTheory.Category.Cat
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
 
 /-!
 # The quotient prestack `[X/G]` of a scheme by a finite group action (T-W3)
@@ -162,5 +164,88 @@ noncomputable def ActionGroupoid.toQuotient (S : Scheme.{u}) :
   map_comp _ _ := Subsingleton.elim _ _
 
 end Coarse
+
+section TorsorPair
+
+open AlgebraicGeometry
+
+variable [Finite G]
+
+/-- **A `G`-torsor pair over `S`** (T-W3b vocabulary): a finite étale `G`-torsor
+`p : P ⟶ S` (in the `∐`-comparison sense of record — `TorsorData`/Stack.lean
+shape) together with a `G`-equivariant map to `X`. These are the objects of the
+honest (stacky) value groupoid of `[X/G]` at `S`; the prestack `ActionGroupoid`
+embeds as the trivial-torsor pairs (T-W3b). -/
+structure TorsorPair (σ : SchemeAction G X) (S : Scheme.{u}) where
+  /-- The total space of the torsor. -/
+  P : Scheme.{u}
+  /-- The torsor projection. -/
+  p : P ⟶ S
+  /-- The `G`-action on the total space. -/
+  τ : SchemeAction G P
+  /-- The action lies over `S`. -/
+  over_base : ∀ g : G, τ.hom g ≫ p = p
+  /-- The projection is finite. -/
+  finite : IsFinite p
+  /-- The projection is étale. -/
+  etale : AlgebraicGeometry.Etale p
+  /-- The projection is surjective. -/
+  surjective : Surjective p
+  /-- The torsor condition: `(g, x) ↦ (g·x, x)` identifies `∐_G P` with
+  `P ×_S P`. -/
+  torsor : IsIso ((Limits.Sigma.desc fun g : G =>
+    Limits.pullback.lift (τ.hom g) (𝟙 P)
+      (by rw [Category.id_comp]; exact over_base g)) :
+    (∐ fun _ : G => P) ⟶ Limits.pullback p p)
+  /-- The equivariant map to `X`. -/
+  u : P ⟶ X
+  /-- Equivariance of `u`. -/
+  equivariant : ∀ g : G, τ.hom g ≫ u = u ≫ σ.hom g
+
+namespace TorsorPair
+
+variable {σ} {S : Scheme.{u}}
+
+/-- Morphisms of `G`-torsor pairs: equivariant maps over `S` compatible with the
+maps to `X`. (Any such map is automatically an isomorphism — torsor pairs form a
+groupoid — but that is a theorem, not part of the data.) -/
+@[ext]
+structure Hom (A B : TorsorPair σ S) where
+  /-- The underlying map of total spaces. -/
+  hom : A.P ⟶ B.P
+  over : hom ≫ B.p = A.p
+  equiv : ∀ g : G, A.τ.hom g ≫ hom = hom ≫ B.τ.hom g
+  compat : hom ≫ B.u = A.u
+
+instance : Category (TorsorPair σ S) where
+  Hom A B := Hom A B
+  id A :=
+    { hom := 𝟙 A.P
+      over := Category.id_comp _
+      equiv := fun g => by rw [Category.comp_id, Category.id_comp]
+      compat := Category.id_comp _ }
+  comp {A B C} f g :=
+    { hom := f.hom ≫ g.hom
+      over := by rw [Category.assoc, g.over, f.over]
+      equiv := fun γ => by
+        rw [← Category.assoc, f.equiv γ, Category.assoc, g.equiv γ,
+          Category.assoc]
+      compat := by rw [Category.assoc, g.compat, f.compat] }
+  id_comp f := by ext1; exact Category.id_comp _
+  comp_id f := by ext1; exact Category.comp_id _
+  assoc f g h := by ext1; exact Category.assoc _ _ _
+
+omit [Finite G] in
+@[simp]
+theorem comp_hom {A B C : TorsorPair σ S} (f : A ⟶ B) (g : B ⟶ C) :
+    (f ≫ g).hom = f.hom ≫ g.hom := rfl
+
+omit [Finite G] in
+@[simp]
+theorem id_hom (A : TorsorPair σ S) : (𝟙 A : A ⟶ A).hom = 𝟙 A.P := rfl
+
+end TorsorPair
+
+end TorsorPair
 
 end ModularCurves
