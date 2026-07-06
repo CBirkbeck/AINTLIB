@@ -3329,7 +3329,19 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     (β1) DONE: `IsStableOpen.inf`, `localQuotientMap_self`,
     `localQuotientMap_trans` (glue backbone; NOTE the ≤-proof-irrelevance makes
     eqToHom-free t-maps possible). All sorry-free, axiom-clean, committed.
-    REMAINING (β2, route locked): β2a range_localQuotientMap = imageOpens
+    (β2) COMPLETE (2026-07-06T22:04Z): range_localQuotientMap, imageOpens_inf
+    (saturation arithmetic), tripleIso + hom_fst/hom_snd + fst/snd-shuffles,
+    isIso-of-eq-maps, glueF/glueT/glueT' (@[reducible] — REQUIRED for the
+    rw-pattern matching through the defs), t_fac, cocycle, and
+    **quotientGlueData : Scheme.GlueData** — ALL FIELDS PROVEN; X/G exists as
+    `.glued`. GOTCHA: `isOpenImmersion_localQuotientMap` must be an INSTANCE
+    (haveI-chains in statements caused whnf timeouts); ≤-proof-irrelevance of
+    localQuotientMap makes every lattice-branch defeq (t_id/f_id/cocycle all
+    close by _self/_trans + rfl). REMAINING (β3): quotientπ via glueMorphisms
+    over the V-opens cover (compat = glue_condition + localQuotientπ_
+    localQuotientMap, plan in transcript), invariance, then the contract
+    (hom_ext / exists / ∃!) via per-chart affine machinery over 𝒟.openCover.
+    OLD route notes below superseded where they conflict: β2a range_localQuotientMap = imageOpens
     (extract from (α)'s m₀-iso); β2b imageOpens-intersection arithmetic
     (π(A)∩π(B) = π(A∩B) for saturated A B — KEY: a stable set containing one
     orbit point contains the orbit); β2c tripleIso : pullback (f i j) (f i k) ≅
