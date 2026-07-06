@@ -3957,3 +3957,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     = generalise their Frobenius chain to arbitrary σ : k̄ ≃ₐ[k] k̄; patterned,
     substantial; statement to be cut in HasseWeil-vocabulary inside EtaleDescent.lean
     (cross-project import already legal — one workspace).
+  - 2026-07-07T00:55Z: **T-C0a DONE** (delegated, first-try) — torsionAlgebra via
+    IsFinite⟹IsAffineHom⟹isAffine_of_isAffineHom, k-algebra by
+    (ΓSpecIso).inv ≫ appTop toAlgebra, Module.Finite from IsFinite.finite_app +
+    finite_respectsIso.cancel_left_isIso, Algebra.Etale from
+    HasRingHomProperty.iff_of_isAffine + Etale.respectsIso; packaged with
+    CommAlgCat.FiniteEtale.of. Axioms: boxes only. **T-C0b route pinned**: AlgHom
+    side ≃ {h : Spec k̄ ⟶ E.torsion N // h ≫ torsionπ = t} (affine Γ-adjunction /
+    isoSpec + Spec.preimage glue) ∘ torsionPointsEquiv (TorsionFibre:304) — delegating.
