@@ -242,12 +242,16 @@ noncomputable def vanishingLocus : S.IdealSheafData where
     haveI : IsLocalizedModule (Submonoid.powers f)
         (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
           Γ(W, p ⁻¹ᵁ S.basicOpen f)).toLinearMap := by
-      haveI : IsLocalization (Algebra.algebraMapSubmonoid Γ(W, p ⁻¹ᵁ U.1)
-          (Submonoid.powers f)) Γ(W, p ⁻¹ᵁ S.basicOpen f) := by
-        rw [Algebra.algebraMapSubmonoid, Submonoid.map_powers]
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U.1))
+          Γ(W, p ⁻¹ᵁ U.1) (Submonoid.powers f)) Γ(W, p ⁻¹ᵁ S.basicOpen f) := by
+        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U.1)) Γ(W, p ⁻¹ᵁ U.1)
+            (Submonoid.powers f) = Submonoid.powers
+              (algebraMap Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) f) from
+          Submonoid.map_powers _ f]
         exact hWloc
       infer_instance
-    have hglue := submoduleVanishingIdeal_localized (Submonoid.powers f)
+    have hglue := submoduleVanishingIdeal_localized (Rₛ := Γ(S, S.basicOpen f))
+      (Submonoid.powers f)
       (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
         Γ(W, p ⁻¹ᵁ S.basicOpen f)).toLinearMap
       ((E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars Γ(S, U.1))
