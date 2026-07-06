@@ -105,6 +105,104 @@ theorem toPullbackAlong_pullbackAlongπ {Y X : EllObj R} (u : Y ⟶ X) :
   · show u.isPullback.isoPullback.hom ≫ pullback.fst X.curve.π u.baseHom = u.top
     exact u.isPullback.isoPullback_hom_fst
 
+/-- The morphism `Y ⟶ X.pullbackAlong g` assembled from `u : Y ⟶ X` and a base
+factorization `h : Y.base ⟶ T` with `h ≫ g = u.baseHom` (the universal property
+of the tautological cartesian square, map-in direction). -/
+noncomputable def homToPullbackAlong {Y X : EllObj R} {T : Scheme.{u}}
+    {g : T ⟶ X.base} (u : Y ⟶ X) (h : Y.base ⟶ T) (hh : h ≫ g = u.baseHom) :
+    Y ⟶ X.pullbackAlong g where
+  baseHom := h
+  base_w := by
+    show h ≫ g ≫ X.structMap = Y.structMap
+    rw [← Category.assoc, hh, u.base_w]
+  top := pullback.lift u.top (Y.curve.π ≫ h)
+    (by rw [Category.assoc, hh]; exact u.isPullback.w)
+  isPullback := by
+    have hbig : IsPullback
+        (pullback.lift u.top (Y.curve.π ≫ h)
+          (by rw [Category.assoc, hh]; exact u.isPullback.w) ≫
+            pullback.fst X.curve.π g)
+        Y.curve.π X.curve.π (h ≫ g) := by
+      rw [pullback.lift_fst, hh]
+      exact u.isPullback
+    exact IsPullback.of_right hbig (pullback.lift_snd _ _ _)
+      (IsPullback.of_hasPullback X.curve.π g)
+  zero_w := by
+    apply pullback.hom_ext
+    · show Y.curve.zero ≫ pullback.lift u.top (Y.curve.π ≫ h) _ ≫
+          pullback.fst X.curve.π g =
+        (h ≫ pullback.lift (g ≫ X.curve.zero) (𝟙 T) _) ≫ pullback.fst X.curve.π g
+      rw [pullback.lift_fst, Category.assoc, pullback.lift_fst, u.zero_w,
+        ← Category.assoc, hh]
+    · show Y.curve.zero ≫ pullback.lift u.top (Y.curve.π ≫ h) _ ≫
+          pullback.snd X.curve.π g =
+        (h ≫ pullback.lift (g ≫ X.curve.zero) (𝟙 T) _) ≫ pullback.snd X.curve.π g
+      rw [pullback.lift_snd, Category.assoc, pullback.lift_snd, Category.comp_id,
+        ← Category.assoc, Y.curve.zero_π, Category.id_comp]
+
+@[simp]
+theorem homToPullbackAlong_baseHom {Y X : EllObj R} {T : Scheme.{u}}
+    {g : T ⟶ X.base} (u : Y ⟶ X) (h : Y.base ⟶ T) (hh : h ≫ g = u.baseHom) :
+    (homToPullbackAlong u h hh).baseHom = h := rfl
+
+/-- Projecting the assembled morphism back to `X` recovers `u`. -/
+@[reassoc (attr := simp)]
+theorem homToPullbackAlong_pullbackAlongπ {Y X : EllObj R} {T : Scheme.{u}}
+    {g : T ⟶ X.base} (u : Y ⟶ X) (h : Y.base ⟶ T) (hh : h ≫ g = u.baseHom) :
+    homToPullbackAlong u h hh ≫ X.pullbackAlongπ g = u := by
+  refine EllHom.ext ?_ ?_
+  · show h ≫ g = u.baseHom
+    exact hh
+  · show pullback.lift u.top (Y.curve.π ≫ h) _ ≫ pullback.fst X.curve.π g = u.top
+    exact pullback.lift_fst _ _ _
+
+/-- **The universal property of the tautological cartesian square**: morphisms
+`Y ⟶ X ×_{X.base} T` correspond to pairs `(u : Y ⟶ X, h : Y.base ⟶ T)` with
+`h ≫ g = u.baseHom`. -/
+noncomputable def homPullbackAlongEquiv (X : EllObj R) {T : Scheme.{u}}
+    (g : T ⟶ X.base) (Y : EllObj R) :
+    (Y ⟶ X.pullbackAlong g) ≃
+      {p : (Y ⟶ X) × (Y.base ⟶ T) // p.2 ≫ g = p.1.baseHom} where
+  toFun v := ⟨(v ≫ X.pullbackAlongπ g, v.baseHom), rfl⟩
+  invFun p := homToPullbackAlong p.1.1 p.1.2 p.2
+  left_inv v := by
+    refine EllHom.ext ?_ ?_
+    · rfl
+    · exact pullback.hom_ext (pullback.lift_fst _ _ _)
+        ((pullback.lift_snd _ _ _).trans v.isPullback.w.symm)
+  right_inv p := by
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · exact homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
+    · rfl
+
+/-- Decomposing a morphism into the tautological square over a composite base
+map: `v : Y ⟶ X ×_{X.base} T` factors as the comparison of `v ≫ π` followed by
+the base-change functoriality map. -/
+theorem toPullbackAlong_pullbackAlongMap {Y X : EllObj R} {T : Scheme.{u}}
+    {g : T ⟶ X.base} (v : Y ⟶ X.pullbackAlong g) :
+    toPullbackAlong (v ≫ X.pullbackAlongπ g) ≫
+      X.pullbackAlongMap g v.baseHom = v := by
+  refine EllHom.ext ?_ ?_
+  · show 𝟙 Y.base ≫ v.baseHom = v.baseHom
+    rw [Category.id_comp]
+  · apply pullback.hom_ext
+    · show ((v ≫ X.pullbackAlongπ g).isPullback.isoPullback.hom ≫
+          Limits.pullback.map X.curve.π (v.baseHom ≫ g) X.curve.π g
+            (𝟙 X.curve.E) v.baseHom (𝟙 X.base) rfl rfl) ≫
+            pullback.fst X.curve.π g = v.top ≫ pullback.fst X.curve.π g
+      rw [Category.assoc]
+      erw [pullback.lift_fst]
+      rw [Category.comp_id]
+      exact (v ≫ X.pullbackAlongπ g).isPullback.isoPullback_hom_fst
+    · show ((v ≫ X.pullbackAlongπ g).isPullback.isoPullback.hom ≫
+          Limits.pullback.map X.curve.π (v.baseHom ≫ g) X.curve.π g
+            (𝟙 X.curve.E) v.baseHom (𝟙 X.base) rfl rfl) ≫
+            pullback.snd X.curve.π g = v.top ≫ pullback.snd X.curve.π g
+      rw [Category.assoc]
+      erw [pullback.lift_snd]
+      erw [(v ≫ X.pullbackAlongπ g).isPullback.isoPullback_hom_snd_assoc]
+      exact v.isPullback.w.symm
+
 /-- **Every `Ell/R`-morphism is cartesian**: the comparison isomorphism
 `Y ≅ X.pullbackAlong u.baseHom` induced by `u : Y ⟶ X`. Loeffler Def 3.7.1's
 "morphisms are squares where `E ≅ E' ×_T S`", packaged as an iso onto the chosen
@@ -183,6 +281,127 @@ theorem simul_obj (P Q : ModuliProblem R) (X : (EllObj R)ᵒᵖ) :
 theorem simul_map (P Q : ModuliProblem R) {X Y : (EllObj R)ᵒᵖ} (f : X ⟶ Y)
     (a : (P.simul Q).obj X) :
     (P.simul Q).map f a = (P.map f a.1, Q.map f a.2) := rfl
+
+section SimulRepresentable
+
+open EllObj
+
+variable (P : ModuliProblem R) {Xδ : EllObj R} {Z : Scheme.{u}} {f : Z ⟶ Xδ.base}
+
+/-- Transport of relative `P`-values along the cartesian-comparison isos: the value
+of the universal element `eqv f ⟨𝟙 Z, _⟩` pulled back along `v` agrees with the
+`eqv`-value of `v`'s base map, transported along `isoPullbackAlong`. -/
+private theorem map_val_eq
+    (eqv : ∀ {T : Scheme.{u}} (g : T ⟶ Xδ.base),
+      { h : T ⟶ Z // h ≫ f = g } ≃ P.obj (Opposite.op (Xδ.pullbackAlong g)))
+    (hnat : ∀ {T T' : Scheme.{u}} (g : T ⟶ Xδ.base) (k : T' ⟶ T)
+      (h : { h : T ⟶ Z // h ≫ f = g }),
+      eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+        P.map (Xδ.pullbackAlongMap g k).op (eqv g h))
+    {Y : EllObj R} (v : Y ⟶ Xδ.pullbackAlong f) (u : Y ⟶ Xδ)
+    (hu : v ≫ Xδ.pullbackAlongπ f = u) :
+    P.map v.op (eqv f ⟨𝟙 Z, Category.id_comp f⟩) =
+      P.map (isoPullbackAlong u).hom.op
+        (eqv u.baseHom ⟨v.baseHom, by rw [← hu]; rfl⟩) := by
+  subst hu
+  rw [show (⟨v.baseHom, by rfl⟩ :
+        { h : Y.base ⟶ Z // h ≫ f = (v ≫ Xδ.pullbackAlongπ f).baseHom }) =
+      ⟨v.baseHom ≫ 𝟙 Z, by
+        show (v.baseHom ≫ 𝟙 Z) ≫ f = v.baseHom ≫ f
+        exact (Category.assoc _ _ _).trans
+          (congrArg (fun t => v.baseHom ≫ t) (Category.id_comp f))⟩ from
+    Subtype.ext (Category.comp_id _).symm]
+  erw [hnat f v.baseHom ⟨𝟙 Z, Category.id_comp f⟩]
+  conv_lhs => rw [← toPullbackAlong_pullbackAlongMap v]
+  erw [op_comp, Functor.map_comp_apply]
+  exact rfl
+
+/-- **KM 4.7, step (i)** (KM p. 112: "Because `δ` is representable, and `𝒫` is
+relatively representable, the simultaneous problem `(𝒫,δ)` is representable, by
+`𝕸(𝒫,δ) = 𝒫_{E/𝕸(δ)}`"): the explicit `RepresentableBy` structure on the relative
+representing object over the universal curve. -/
+noncomputable def simulRepresentableBy (Q : ModuliProblem R)
+    (rδ : Q.RepresentableBy Xδ)
+    (eqv : ∀ {T : Scheme.{u}} (g : T ⟶ Xδ.base),
+      { h : T ⟶ Z // h ≫ f = g } ≃ P.obj (Opposite.op (Xδ.pullbackAlong g)))
+    (hnat : ∀ {T T' : Scheme.{u}} (g : T ⟶ Xδ.base) (k : T' ⟶ T)
+      (h : { h : T ⟶ Z // h ≫ f = g }),
+      eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+        P.map (Xδ.pullbackAlongMap g k).op (eqv g h)) :
+    (P.simul Q).RepresentableBy (Xδ.pullbackAlong f) where
+  homEquiv {Y} :=
+    { toFun := fun v => (P.map v.op (eqv f ⟨𝟙 Z, Category.id_comp f⟩),
+        Q.map v.op (rδ.homEquiv (Xδ.pullbackAlongπ f)))
+      invFun := fun a =>
+        homToPullbackAlong (rδ.homEquiv.symm a.2)
+          ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+            (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).1
+          ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+            (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).2
+      left_inv := fun v => by
+        dsimp only
+        have hu₀ : rδ.homEquiv.symm
+            (Q.map v.op (rδ.homEquiv (Xδ.pullbackAlongπ f))) =
+            v ≫ Xδ.pullbackAlongπ f := by
+          rw [← rδ.homEquiv_comp, Equiv.symm_apply_apply]
+        have hh : (eqv (rδ.homEquiv.symm
+              (Q.map v.op (rδ.homEquiv (Xδ.pullbackAlongπ f)))).baseHom).symm
+            (P.map (isoPullbackAlong (rδ.homEquiv.symm
+              (Q.map v.op (rδ.homEquiv (Xδ.pullbackAlongπ f))))).inv.op
+              (P.map v.op (eqv f ⟨𝟙 Z, Category.id_comp f⟩))) =
+            ⟨v.baseHom, by rw [← hu₀.symm]; rfl⟩ := by
+          rw [map_val_eq P eqv hnat v _ hu₀.symm, ← Functor.map_comp_apply,
+            ← op_comp, Iso.inv_hom_id, op_id, Functor.map_id_apply,
+            Equiv.symm_apply_apply]
+        rw [hh]
+        refine EllHom.ext ?_ ?_
+        · exact rfl
+        · exact pullback.hom_ext
+            ((pullback.lift_fst _ _ _).trans (congrArg EllHom.top hu₀))
+            ((pullback.lift_snd _ _ _).trans v.isPullback.w.symm)
+      right_inv := fun a => by
+        dsimp only
+        have hproj := homToPullbackAlong_pullbackAlongπ (rδ.homEquiv.symm a.2)
+          ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+            (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).1
+          ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+            (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).2
+        refine Prod.ext ?_ ?_
+        · rw [map_val_eq P eqv hnat _ _ hproj]
+          rw [show (⟨(homToPullbackAlong (rδ.homEquiv.symm a.2)
+                ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+                  (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).1
+                ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+                  (P.map (isoPullbackAlong
+                    (rδ.homEquiv.symm a.2)).inv.op a.1)).2).baseHom,
+              ((eqv (rδ.homEquiv.symm a.2).baseHom).symm
+                (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1)).2⟩ :
+              { h : Y.base ⟶ Z // h ≫ f = (rδ.homEquiv.symm a.2).baseHom }) =
+              (eqv (rδ.homEquiv.symm a.2).baseHom).symm
+                (P.map (isoPullbackAlong (rδ.homEquiv.symm a.2)).inv.op a.1) from
+            Subtype.ext rfl]
+          rw [Equiv.apply_symm_apply, ← Functor.map_comp_apply, ← op_comp,
+            Iso.hom_inv_id, op_id, Functor.map_id_apply]
+        · show Q.map _ (rδ.homEquiv (Xδ.pullbackAlongπ f)) = a.2
+          rw [← rδ.homEquiv_comp, hproj, Equiv.apply_symm_apply] }
+  homEquiv_comp {Y Y'} k v := by
+    refine Prod.ext ?_ ?_
+    · show P.map (k ≫ v).op _ = P.map k.op (P.map v.op _)
+      rw [op_comp, Functor.map_comp_apply]
+    · show Q.map (k ≫ v).op _ = Q.map k.op (Q.map v.op _)
+      rw [op_comp, Functor.map_comp_apply]
+
+/-- **KM 4.7, step (i), existence form**: if `δ` is representable and `𝒫` is
+relatively representable, the simultaneous problem `(𝒫,δ)` is representable. -/
+theorem simul_representable (P Q : ModuliProblem R)
+    (hQ : Q.Representable) (hP : P.RelativelyRepresentable) :
+    (P.simul Q).Representable := by
+  obtain ⟨Xδ, ⟨rδ⟩⟩ := hQ.has_representation
+  obtain ⟨Z, f, eqv, hnat⟩ := hP Xδ
+  exact ⟨⟨Xδ.pullbackAlong f,
+    ⟨simulRepresentableBy P Q rδ @eqv @hnat⟩⟩⟩
+
+end SimulRepresentable
 
 end ModuliProblem
 
