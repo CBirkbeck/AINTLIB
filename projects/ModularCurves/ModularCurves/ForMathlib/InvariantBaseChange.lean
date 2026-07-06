@@ -8,6 +8,7 @@ ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q4 (KM A7 appendix
 import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.Algebra.Algebra.Subalgebra.Operations
 import Mathlib.RingTheory.Flat.Basic
+import Mathlib.LinearAlgebra.TensorProduct.Pi
 import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
@@ -70,6 +71,7 @@ instance : MulSemiringAction G (A ⊗[R] R') where
         rw [Algebra.TensorProduct.tmul_mul_tmul, smul_tmul', smul_tmul', smul_tmul',
           Algebra.TensorProduct.tmul_mul_tmul, smul_mul']
 
+omit [SMulCommClass G R A] in
 theorem smul_tmul_baseChange (g : G) (a : A) (r : R') :
     g • (a ⊗ₜ[R] r) = (g • a) ⊗ₜ[R] r :=
   smul_tmul' g a r
@@ -110,12 +112,103 @@ theorem fixedPointsBaseChange_tmul (a : FixedPoints.subalgebra R A G) (r : R') :
       (a : A) ⊗ₜ[R] r := by
   simp [fixedPointsBaseChange]
 
+/-- The "difference" map whose kernel is the ring of invariants: KM A7.1.3 (1),
+"A^G is a kernel: 0 → A^G → A → ⊕_g A via ⊕(1−g)". -/
+private noncomputable def invariantsDelta (G : Type*) [Group G] (R A : Type u)
+    [CommRing R] [CommRing A] [Algebra R A] [MulSemiringAction G A]
+    [SMulCommClass G R A] [SMulCommClass R G A] : A →ₗ[R] (G → A) :=
+  LinearMap.pi fun g => DistribSMul.toLinearMap R A g - LinearMap.id
+
+private theorem invariantsDelta_apply (g : G) (x : A) :
+    invariantsDelta G R A x g = g • x - x := rfl
+
+private theorem exact_subtype_invariantsDelta :
+    Function.Exact (FixedPoints.subalgebra R A G).toSubmodule.subtype
+      (invariantsDelta G R A) := by
+  intro y
+  constructor
+  · intro hy
+    refine ⟨⟨y, fun g => ?_⟩, rfl⟩
+    have h1 := congrFun hy g
+    rw [invariantsDelta_apply] at h1
+    exact sub_eq_zero.mp h1
+  · rintro ⟨⟨x, hx⟩, rfl⟩
+    funext g
+    rw [invariantsDelta_apply]
+    exact sub_eq_zero.mpr (hx g)
+
 /-- **∗(A, G, R, R') holds for flat R'** (KM A7.1.3 (1)): the comparison map is
 bijective when `R'` is flat over `R`. -/
 theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
     Function.Bijective
       (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
-  sorry
+  classical
+  cases nonempty_fintype G
+  -- the underlying map agrees with the flat-tensored inclusion
+  have hagree : ∀ x : (FixedPoints.subalgebra R A G) ⊗[R] R',
+      (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+        (AlgHom.id R R')) x =
+      LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype x := by
+    intro x
+    induction x with
+    | zero => simp
+    | add x₁ x₂ h₁ h₂ => simp [h₁, h₂]
+    | tmul a r => rfl
+  have hval : Function.Injective
+      ⇑(LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) :=
+    Module.Flat.rTensor_preserves_injective_linearMap _ Subtype.val_injective
+  constructor
+  · -- injectivity
+    intro x₁ x₂ h12
+    have h13 := congrArg Subtype.val h12
+    rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₁ : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₁ from rfl,
+      show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₂ : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₂ from rfl, hagree, hagree] at h13
+    exact hval h13
+  · -- surjectivity
+    rintro ⟨z, hz⟩
+    -- the tensored difference map kills `z`
+    have hεz : LinearMap.rTensor R' (invariantsDelta G R A) z = 0 := by
+      have hpi : ∀ (x : A ⊗[R] R') (g : G),
+          TensorProduct.piLeft (R := R) (M := fun _ : G => A) (N := R')
+            (LinearMap.rTensor R' (invariantsDelta G R A) x) g =
+            g • x - x := by
+        intro x
+        induction x with
+        | zero => intro g; simp
+        | add x₁ x₂ h₁ h₂ =>
+          intro g
+          rw [map_add, map_add]
+          simp only [Pi.add_apply]
+          rw [h₁ g, h₂ g, smul_add]
+          abel
+        | tmul a r =>
+          intro g
+          rw [LinearMap.rTensor_tmul]
+          simp only [TensorProduct.piLeft, LinearEquiv.trans_apply,
+            TensorProduct.comm_tmul, TensorProduct.piRight_apply,
+            TensorProduct.piRightHom_tmul, LinearEquiv.piCongrRight_apply]
+          rw [invariantsDelta_apply, TensorProduct.sub_tmul,
+            MulSemiringAction.smul_tmul_baseChange]
+      have h0 : TensorProduct.piLeft (R := R) (M := fun _ : G => A) (N := R')
+          (LinearMap.rTensor R' (invariantsDelta G R A) z) = 0 := by
+        funext g
+        rw [hpi z g]
+        show g • z - z = 0
+        rw [sub_eq_zero]
+        exact hz g
+      have h0' := congrArg (TensorProduct.piLeft (R := R) (M := fun _ : G => A) (N := R')).symm h0
+      rwa [LinearEquiv.symm_apply_apply, map_zero] at h0'
+    obtain ⟨w, hw⟩ := ((Module.Flat.rTensor_exact R'
+      (exact_subtype_invariantsDelta (G := G) (R := R) (A := A))) z).mp hεz
+    refine ⟨w, Subtype.ext ?_⟩
+    rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') w : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) w from rfl, hagree]
+    exact hw
 
 /-- **∗(A, G, R, R') holds when `#G` is invertible in `R`** (KM A7.1.3 (4)): the
 comparison map is bijective — via the divided trace `T = (1/#G)·Σ_g g`, which
