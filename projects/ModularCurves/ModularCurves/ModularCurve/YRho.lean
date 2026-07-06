@@ -3,6 +3,7 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Coarse
 import Mathlib.FieldTheory.AbsoluteGaloisGroup
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
 import Mathlib.RingTheory.RootsOfUnity.Basic
 
 /-!
@@ -49,7 +50,14 @@ abbrev GalQ : Type := AlgebraicClosure ℚ ≃ₐ[ℚ] AlgebraicClosure ℚ
 /-- **(T-F0)** `ℚ̄` contains exactly `N` `N`-th roots of unity (char. 0, algebraically
 closed). Input hypothesis for mathlib's `modularCyclotomicCharacter`. -/
 theorem card_rootsOfUnity_algClosureQ (N : ℕ) [NeZero N] :
-    Fintype.card { x // x ∈ rootsOfUnity N (AlgebraicClosure ℚ) } = N := by sorry
+    Fintype.card { x // x ∈ rootsOfUnity N (AlgebraicClosure ℚ) } = N := by
+  haveI : NeZero ((N : AlgebraicClosure ℚ)) := ⟨Nat.cast_ne_zero.mpr (NeZero.ne N)⟩
+  have hdeg : (Polynomial.cyclotomic N (AlgebraicClosure ℚ)).degree ≠ 0 := by
+    rw [Polynomial.degree_cyclotomic]
+    exact_mod_cast (Nat.totient_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne N))).ne'
+  obtain ⟨ζ, hζ⟩ := IsAlgClosed.exists_root _ hdeg
+  have hprim : IsPrimitiveRoot ζ N := Polynomial.isRoot_cyclotomic_iff.mp hζ
+  exact hprim.card_rootsOfUnity
 
 /-- A mod-`N` Galois representation datum for the twisted modular curve: a continuous
 action of `Gal(ℚ̄/ℚ)` on `(ℤ/N)²` with cyclotomic determinant, together with the pairing
