@@ -121,7 +121,15 @@ noncomputable instance pointAddCommGroup {T : Scheme.{u}} (g : T ⟶ S) :
 `mulBy`: `(n • P) = P ≫ [n]`. Provable from `pointEquivOverHom` +
 `GrpObj.comp_zpow`; keeps the point-level and morphism-level `[n]` from diverging. -/
 theorem point_smul_eq_comp_mulBy {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
-    ((n • P : E.Point g) : T ⟶ E.E) = (P : T ⟶ E.E) ≫ E.mulByHom n := by sorry
+    ((n • P : E.Point g) : T ⟶ E.E) = (P : T ⟶ E.E) ≫ E.mulByHom n := by
+  letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+  have h1 : ((E.pointEquivOverHom g) (n • P)) = ((E.pointEquivOverHom g) P) ^ n := rfl
+  have h2 : ((E.pointEquivOverHom g) P) ^ n =
+      (E.pointEquivOverHom g) P ≫ (𝟙 E.asOver) ^ n := by
+    rw [GrpObj.comp_zpow, Category.comp_id]
+  have h3 := congrArg CommaMorphism.left (h1.trans h2)
+  simp only [Over.comp_left] at h3
+  exact h3
 
 /-- Restriction of a point along `k : T' ⟶ T` (functoriality of the points functor). -/
 def Point.restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point g) :
@@ -141,7 +149,7 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
   smooth := by
     haveI : MorphismProperty.IsStableUnderBaseChange
         (@SmoothOfRelativeDimension 1) :=
-      AlgebraicGeometry.isSmoothOfRelativeDimension_isStableUnderBaseChange 1
+      AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
     exact MorphismProperty.pullback_snd _ _ E.smooth
   proper := MorphismProperty.pullback_snd _ _ E.proper
   fibres := by sorry
