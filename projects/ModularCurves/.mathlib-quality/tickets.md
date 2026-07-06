@@ -1513,9 +1513,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 1.4.4 (IN HAND; discriminant argument quoted in proof).
 
 ### [T-D8] ⧗KM Γ(N): Drinfeld ⟺ naive (N invertible)
-- **Status**: open · **File**: LevelStructure/Basic.lean · `isFullLevel_iff_naive` ·
-  **Depends on**: T-D6, T-B4, T-B6 · **Type**: theorem ·
-  **Sources**: [KM] 3.1 + 3.7 ⧗; [Loe] Fact 3.8.1 (naive side, in hand).
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-09T05:30Z —
+  `isFullLevel_iff_naive` DERIVED sorry-free from the single register box
+  `fullLevel_divisor_iff_naive_gen` (T-D8-bridge, verbatim KM 3.7 / 1.4.4-for-Γ(N)
+  content: divisor Σ_{(a,b)}[aP+bQ] = E[N] ⟺ fibrewise P,Q generate the N-torsion).
+  Box discharge route recorded in-docstring: T-D2's `isFullSetOfSectionsAlg_iff_fields`
+  (PROVED reduced-base criterion) glued to T-B6's fibre comparison E[N]_{k̄}≅(ℤ/N)²
+  (stream-B). The killing clauses are shared structurally, so the iff-plumbing is
+  free.) · **File**: LevelStructure/Basic.lean · `isFullLevel_iff_naive` ·
+  **Depends on**: T-D6 (done-mod-box), T-B4 (done-mod-box), T-B6 (stream-B) ·
+  **Type**: theorem · **Sources**: [KM] 3.1 + 3.7 ⧗; [Loe] Fact 3.8.1 (naive side, in hand).
 
 ### [T-D9] Γ₁(N): Drinfeld ⟺ naive (restatement of T-D6)
 - **Status**: done (beastmode-A 2026-07-09T05:00Z — PROVED first-try, sorry-free in
