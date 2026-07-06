@@ -313,6 +313,66 @@ theorem trivialTorsorMap_equivariant (S : Scheme.{u}) (t : S ⟶ X) (g : G) :
   rw [← Category.assoc, ι_trivialTorsorAction_hom, ι_trivialTorsorMap,
     ← Category.assoc, ι_trivialTorsorMap, Category.assoc, ← σ.hom_mul]
 
+variable (G) in
+/-- Left translation on the trivial torsor: the `h`-summand maps identically to
+the `g * h`-summand. Left translations are the torsor-pair endomorphisms of the
+trivial torsor (they commute with the right-translation action). -/
+noncomputable def trivialTorsorLeft (S : Scheme.{u}) (g : G) :
+    (∐ fun _ : G => S) ⟶ (∐ fun _ : G => S) :=
+  Limits.Sigma.desc fun h => Limits.Sigma.ι (fun _ : G => S) (g * h)
+
+omit [Finite G] in
+@[reassoc (attr := simp)]
+theorem ι_trivialTorsorLeft (S : Scheme.{u}) (g h : G) :
+    Limits.Sigma.ι (fun _ : G => S) h ≫ trivialTorsorLeft G S g =
+      Limits.Sigma.ι (fun _ : G => S) (g * h) :=
+  Limits.Sigma.ι_desc _ _
+
+omit [Finite G] in
+/-- Left translations commute with the (right-translation) torsor action. -/
+theorem trivialTorsorLeft_equivariant (S : Scheme.{u}) (g γ : G) :
+    (trivialTorsorAction G S).hom γ ≫ trivialTorsorLeft G S g =
+      trivialTorsorLeft G S g ≫ (trivialTorsorAction G S).hom γ := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [← Category.assoc, ι_trivialTorsorAction_hom, ι_trivialTorsorLeft,
+    ← Category.assoc, ι_trivialTorsorLeft, ι_trivialTorsorAction_hom,
+    mul_assoc]
+
+omit [Finite G] in
+/-- Left translations lie over the base. -/
+theorem trivialTorsorLeft_over_base (S : Scheme.{u}) (g : G) :
+    trivialTorsorLeft G S g ≫ trivialTorsorπ S = trivialTorsorπ S := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [← Category.assoc, ι_trivialTorsorLeft, ι_trivialTorsorπ, ι_trivialTorsorπ]
+
+omit [Finite G] in
+/-- The compatibility of left translation with the equivariant maps: if
+`t ≫ σ.hom g = t'`, left translation by `g⁻¹` carries the trivial pair of `t'`
+to that of `t`. -/
+theorem trivialTorsorLeft_map (S : Scheme.{u}) {t t' : S ⟶ X} {g : G}
+    (hg : t ≫ σ.hom g = t') :
+    trivialTorsorLeft G S g⁻¹ ≫ trivialTorsorMap σ S t' =
+      trivialTorsorMap σ S t := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [← Category.assoc, ι_trivialTorsorLeft, ι_trivialTorsorMap,
+    ι_trivialTorsorMap, ← hg, Category.assoc, ← σ.hom_mul,
+    mul_inv_cancel_left]
+
+omit [Finite G] in
+@[simp]
+theorem trivialTorsorLeft_one (S : Scheme.{u}) :
+    trivialTorsorLeft G S (1 : G) = 𝟙 _ := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [ι_trivialTorsorLeft, one_mul, Category.comp_id]
+
+omit [Finite G] in
+theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
+    trivialTorsorLeft G S (g * g') =
+      trivialTorsorLeft G S g' ≫ trivialTorsorLeft G S g := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [ι_trivialTorsorLeft, ← Category.assoc, ι_trivialTorsorLeft,
+    ι_trivialTorsorLeft, mul_assoc]
+
 end TorsorPair
 
 end ModularCurves
