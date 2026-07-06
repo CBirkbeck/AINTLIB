@@ -86,4 +86,19 @@ def pointMap : W.toAffine.Point → (C • W).toAffine.Point
 @[simp] lemma pointMap_some {x y : R} (h : W.toAffine.Nonsingular x y) :
     C.pointMap W (.some x y h) = .some (C.vcX x) (C.vcY x y) (nonsingular_smul C W h) := rfl
 
+/-- The coordinate change commutes with the `y`-negation `negY`: transforming then negating equals
+negating then transforming. This is the coordinate identity behind `pointMap_neg`. -/
+lemma negY_smul (x y : R) :
+    (C • W).toAffine.negY (C.vcX x) (C.vcY x y) = C.vcY x (W.toAffine.negY x y) := by
+  simp only [Affine.negY, variableChange_a₁, variableChange_a₃, vcX, vcY]
+  ring
+
+/-- The induced point map is a group anti/homomorphism for negation: `pointMap (-P) = -pointMap P`.
+Valid over any `CommRing` (mathlib's `Point.neg` needs no field). -/
+lemma pointMap_neg (P : W.toAffine.Point) : C.pointMap W (-P) = -(C.pointMap W P) := by
+  cases P with
+  | zero => rfl
+  | some x y h => rw [Affine.Point.neg_some, pointMap_some, pointMap_some,
+      Affine.Point.neg_some]; simp only [negY_smul]
+
 end WeierstrassCurve.VariableChange
