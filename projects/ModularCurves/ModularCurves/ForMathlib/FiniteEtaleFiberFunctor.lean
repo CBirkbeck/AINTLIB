@@ -623,6 +623,85 @@ lemma preservesLimitsOfShapeSingleObj_baseChange (H : Type u) [Monoid H] [Finite
 
 end FixedPointsBaseChange
 
+/-! Assembly (leaf AG-GG-2g): the fiber functor of `FiniteEtale k` at the separable
+closure satisfies the axioms (G4)–(G6) of a Galois fiber functor.  Everything is
+transported along `fiberIsoBaseChangeFiber` — the equivalence part (`fiber Ω Ω` for
+`Ω` separably closed) preserves and reflects everything, so each axiom reduces to the
+corresponding exactness statement for `baseChangeU k Ω` proved above. -/
+
+section Assembly
+
+/-- The factorisation of the fiber functor through base change to the separable
+closure, with universes pinned. -/
+noncomputable def fiberFactorization :
+    (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}) ≅
+    (baseChangeU k (SeparableClosure k)).op ⋙
+      CommAlgCat.FiniteEtale.fiber (SeparableClosure k) (SeparableClosure k) :=
+  CommAlgCat.FiniteEtale.fiberIsoBaseChangeFiber k (SeparableClosure k) (SeparableClosure k)
+
+/-- The fiber functor at the separable closure is a Galois fiber functor. -/
+noncomputable instance : PreGaloisCategory.FiberFunctor
+    (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}) where
+  preservesTerminalObjects := by
+    haveI := preservesColimitsOfShapePEmpty_baseChange k (SeparableClosure k)
+    haveI : PreservesColimitsOfShape (Discrete PEmpty.{1})ᵒᵖ
+        (baseChangeU k (SeparableClosure k)) :=
+      preservesColimitsOfShape_of_equiv (Discrete.opposite PEmpty.{1}).symm _
+    haveI : PreservesLimitsOfShape (Discrete PEmpty.{1})
+        (baseChangeU k (SeparableClosure k)).op :=
+      preservesLimitsOfShape_op _ _
+    exact preservesLimitsOfShape_of_natIso (fiberFactorization k).symm
+  preservesPullbacks := by
+    haveI := preservesColimitsOfShapeWalkingSpan_baseChange (k := k)
+      (Ω := SeparableClosure k)
+    haveI : PreservesColimitsOfShape WalkingCospanᵒᵖ
+        (baseChangeU k (SeparableClosure k)) :=
+      preservesColimitsOfShape_of_equiv walkingCospanOpEquiv.symm _
+    haveI : PreservesLimitsOfShape WalkingCospan
+        (baseChangeU k (SeparableClosure k)).op :=
+      preservesLimitsOfShape_op _ _
+    exact preservesLimitsOfShape_of_natIso (fiberFactorization k).symm
+  preservesFiniteCoproducts := by
+    constructor
+    intro n
+    haveI := preservesLimitsOfShapeDiscrete_baseChange (k := k)
+      (Ω := SeparableClosure k) (Fin n)
+    haveI : PreservesLimitsOfShape (Discrete (Fin n))ᵒᵖ
+        (baseChangeU k (SeparableClosure k)) :=
+      preservesLimitsOfShape_of_equiv (Discrete.opposite (Fin n)).symm _
+    haveI : PreservesColimitsOfShape (Discrete (Fin n))
+        (baseChangeU k (SeparableClosure k)).op :=
+      preservesColimitsOfShape_op _ _
+    exact preservesColimitsOfShape_of_natIso (fiberFactorization k).symm
+  preservesEpis := by
+    haveI hbc : (baseChangeU k (SeparableClosure k)).op.PreservesEpimorphisms := by
+      constructor
+      intro X Y f hf
+      haveI : (baseChangeU k (SeparableClosure k)).PreservesMonomorphisms :=
+        preservesMonomorphisms_baseChange
+      haveI : Mono f.unop := inferInstance
+      haveI : Mono ((baseChangeU k (SeparableClosure k)).map f.unop) :=
+        Functor.PreservesMonomorphisms.preserves _
+      exact inferInstanceAs
+        (Epi ((baseChangeU k (SeparableClosure k)).map f.unop).op)
+    exact Functor.preservesEpimorphisms.of_iso (fiberFactorization k).symm
+  preservesQuotientsByFiniteGroups G _ _ := by
+    haveI : Finite Gᵐᵒᵖ := Finite.of_equiv G MulOpposite.opEquiv
+    haveI := preservesLimitsOfShapeSingleObj_baseChange (k := k)
+      (Ω := SeparableClosure k) Gᵐᵒᵖ
+    haveI : PreservesLimitsOfShape (SingleObj G)ᵒᵖ
+        (baseChangeU k (SeparableClosure k)) :=
+      preservesLimitsOfShape_of_equiv (singleObjOpEquiv G) _
+    haveI : PreservesColimitsOfShape (SingleObj G)
+        (baseChangeU k (SeparableClosure k)).op :=
+      preservesColimitsOfShape_op _ _
+    exact preservesColimitsOfShape_of_natIso (fiberFactorization k).symm
+  reflectsIsos := reflectsIsomorphisms_fiber k
+
+end Assembly
+
 end FiniteEtaleGalois
 
 end ModularCurves
