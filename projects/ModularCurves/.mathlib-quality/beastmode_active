@@ -1,2 +1,1 @@
-FOCUS: T-Q5 — existsUnique_quotientπ_lift assembly + verify + board
-FOCUS-H: (beastmode-H) T-H1 gammaHNaive_bot — writing the ⊥-orbit NatIso
+FOCUS: T-Q6 — board expansion (leaves a-d + quotes), then attack blocks, then T-Q6a simul def

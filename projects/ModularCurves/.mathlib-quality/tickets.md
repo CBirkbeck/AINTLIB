@@ -3396,8 +3396,71 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     Files: ForMathlib/SchemeQuotient.lean (NEW). NOTE: T-Q6/T-Q7 consume the
     STATEMENT of T-Q5d only — they unblock at skeleton time.
 - **[T-Q6]** quotients of rigidified moduli problems (KM 4.7 ⇐ engine; T-E5).
+  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T22:50Z ·
+    **File**: Moduli/QuotientProblem.lean (NEW)
+  - **QUOTE-GATE SATISFIED** (2026-07-06T22:45Z; KM 4.7 read from
+    `katz-mazur-arithmetic-moduli-FULL.pdf` pdf pp. 122–128 = book pp. 111–117;
+    KM 7.1 read pdf pp. 197–199 = book pp. 186–188; Ch.4 Appendix (A.4) read pdf
+    p. 136 = book p. 125; Loeffler §3.6–3.8 re-read from `modcurvesnotes.pdf`
+    pp. 16–19). Verbatim of record:
+    - SCHOLIE (4.7.0): "Let 𝒫 be relatively representable and affine over (Ell);
+      then a necessary and sufficient condition that 𝒫 be representable is that
+      𝒫 be rigid."
+    - The axiomatized engine (KM p. 112): "Let N ≥ 1 be an integer, G a finite
+      group, and δ a relatively representable and affine moduli problem on (Ell)
+      which satisfies the following axioms: 1) δ is representable, by an affine
+      ℤ[1/N]-scheme. 2) G operates upon δ, in such a way that for every elliptic
+      curve E/S with S a ℤ[1/N]-scheme, the S-scheme δ_{E/S} is a finite etale
+      G-torsor. We claim that over ℤ[1/N], 𝒫 is represented by the affine
+      ℤ[1/N]-scheme 𝕸(𝒫,δ)/G." Applied with (N=2, δ=Legendre,
+      G=GL(2,ℤ/2ℤ)×{±1}) and (N=3, δ=naive level 3, G=GL(2,𝔽₃)).
+    - Proof skeleton (KM pp. 112–116): (i) "Because δ is representable, and 𝒫
+      is relatively representable, the simultaneous problem (𝒫,δ) is
+      representable, by 𝕸(𝒫,δ) = 𝒫_{E/𝕸(δ)}"; affine. (ii) G acts on 𝕸(𝒫,δ)
+      through δ; θ(g) unique by rigidity ⟹ one-cocycle. (iii) "By axiom 2) and
+      the rigidity of 𝒫, G operates freely on 𝕸(𝒫,δ)"; quotient exists (affine),
+      π_univ is a finite étale G-torsor [SGA III Exp V, 4.1]. (iv) θ = descent
+      data; E projective ⟹ descends via I⁻¹(0); α_univ descends since 𝒫
+      relatively affine (SGA I Exp VIII, 7.8, 1.2, 1.7). (v) (E₀,α₀) represents
+      𝒫: for (E/S,α) use the torsor δ_{E/S} → S, classify (E×δ_{E/S}, α, β_univ)
+      → f : δ_{E/S} → 𝕸(𝒫,δ) G-equivariant, quotient f₀; cartesian since
+      vertical arrows are G-torsors; rigidity + étale-surjective π gives
+      f₀*(E₀,α₀) ≅ (E,α); uniqueness: a G-map of G-torsors is an iso.
+    - KM 7.1.1 (G operates on 𝒫) = pointwise action + pullback-compat diagram
+      (7.1.1.1) = `G →* Aut 𝒫` in the functor category. KM 7.1.2/7.1.3 (the
+      problem-level quotient 𝒫/G, rel-repr affine, étale-torsor iff free, etc.)
+      is the T-Q7-adjacent formalism — locator banked (book pp. 186–201), NOT
+      in T-Q6 scope.
+    - Appendix (A.4.1.2): 𝒫 representable ⟺ 𝒫̃ representable AND 𝒫 rigid (a
+      tautology); Gabber counterexample shows 𝒫̃-representable ⇏ rigid. NOTE
+      FOR T-E5: KM 4.7.0 carries an "affine over (Ell)" hypothesis that
+      Loeffler 3.7.4 DROPS; the project's `representable_iff` statement follows
+      Loeffler. At T-E5 pickup either add the affineness hypothesis (KM-honest)
+      or route the general case through KM (A.4.2) (étale-sheaf condition,
+      auto for rel-repr) — statement risk flagged, decision belongs to T-E5.
+  - **Leaves (Tier A5 split, single-conclusion each)**:
+    T-Q6a `simul` — the simultaneous problem (𝒫,δ) as a pointwise-product
+    presheaf + API; REAL def (no data sorries).
+    T-Q6b Ell-iso infrastructure: every `EllHom` is cartesian — the comparison
+    iso `Y ≅ X.pullbackAlong u.baseHom` in `Ell/R` from `u : Y ⟶ X` (uses
+    EllHom.isPullback + IsPullback.isoPullback + zero_w); feeds Q6c's
+    value-transport.
+    T-Q6c `simul_representable` : δ.Representable → 𝒫.RelativelyRepresentable →
+    (𝒫.simul δ).Representable — KM step (i), fully formal, NO black box.
+    T-Q6d engine statement (the axiomatized claim, quote above) + assembly:
+    vocabulary `G →* Aut δ` (mathlib-native, no new structure), induced action
+    on `simul`, freeness-from-rigidity, quotient via T-Q3/T-Q5 machinery
+    (`𝕸(𝒫,δ)` is AFFINE — invariantsπ suffices, no gluing), étale-torsor step =
+    T-Q2's sorried SGA III V 4.1 interface, descent step = stream-DESC's
+    `levelledCurve_descent_of_torsor`-shape black box (T-E10 v2 precedent).
+    Q6d statements may sorry against those two black boxes per the T-H/T-Q2
+    precedent; Q6a–c must close.
 - **[T-Q7]** coarse quotient statements (`Y₀(N)`, `Y(1)`) — via groupoid layer (D6),
-  phase M; consumes T-Q5 + T-M1/T-M2 vocabulary.
+  phase M; consumes T-Q5 + T-M1/T-M2 vocabulary. NOTE (2026-07-06): KM Ch. 7
+  (QUOTIENTS BY FINITE GROUPS, book pp. 186–214) read at T-Q6 quote-gate; 7.1.3
+  (existence + properties of 𝒫/G for rel-repr affine 𝒫) and 7.3 (quotients of
+  product problems) are the sources of record for the Γ₀-style problem-level
+  quotients here.
 - **[CLEANUP-12]** (already on the board, v2 cadence): quotient stream after
   T-Q3+T-Q4+T-Q5 — covers the three new ForMathlib files.
 
