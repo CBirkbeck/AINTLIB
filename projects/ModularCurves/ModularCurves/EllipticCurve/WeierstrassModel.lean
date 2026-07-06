@@ -1950,6 +1950,23 @@ lemma isPushout_sChart_commRingCat (W : WeierstrassCurve R) (i : Fin 3) :
   haveI := isPushout_sChart (R' := R') W i
   exact CommRingCat.isPushout_of_isPushout R R' _ _
 
+/-- The `Spec` of the chart square is a pullback: the chart of the base-changed model
+is the base change of the chart. -/
+lemma isPullback_sChart_spec (W : WeierstrassCurve R) (i : Fin 3) :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom (algebraMap R'
+        (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial}))))
+      (Spec.map (CommRingCat.ofHom ((sChartBaseChange (R' := R') W i).toRingHom)))
+      (Spec.map (CommRingCat.ofHom (algebraMap R R')))
+      (Spec.map (CommRingCat.ofHom (algebraMap R
+        (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R i
+            W.toProjective.polynomial})))) :=
+  AlgebraicGeometry.isPullback_SpecMap_of_isPushout _ _ _ _
+    (isPushout_sChart_commRingCat (R' := R') W i)
+
 end TensorComparison
 
 end BaseChangeGraded
