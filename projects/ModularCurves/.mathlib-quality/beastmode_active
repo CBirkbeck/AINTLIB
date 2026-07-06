@@ -1,1 +1,2 @@
 FOCUS: T-B7 (beastmode-B) — LAST sorry: isUnit_of_etale_muNπ. Plan+engines in T-B7 board note (11:50 entry). Step 1: generalize muNModel pushout to arbitrary A : CommRingCat; step 2: isPullback_muN_baseChange; step 3-4: residue-field reduction + isReduced_of_field contradiction.
+FOCUS-D: (beastmode-D2) next: T-D29 charpoly-as-norm (Wave 0 #3) — five-method mathlib search FIRST (T-D3b lesson: pin keeps landing tools), then attack block + ForMathlib skeleton + prove. T-D13 parked at A-chain gate (retry lake build ModularCurves.LevelStructure.Incidence when A commits).

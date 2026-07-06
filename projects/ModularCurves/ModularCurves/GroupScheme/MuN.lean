@@ -750,6 +750,43 @@ private lemma etale_muNπ_of_isUnit (S : Scheme.{u}) (N : ℕ) [NeZero N]
   exact MorphismProperty.of_isPullback LEFT
     (HasRingHomProperty.Spec_iff.mpr (muNModelStruct_etale N))
 
+/-- Base change of `μ_{N}` along `g : T ⟶ S`. -/
+private lemma isPullback_muN_baseChange (S T : Scheme.{u}) (N : ℕ) (g : T ⟶ S) :
+    ∃ θ : muN T N ⟶ muN S N, IsPullback θ (muNπ T N) (muNπ S N) g := by
+  have t := (isPullback_muN S N).flip
+  have big := (isPullback_muN T N).flip
+  have hterm : terminal.from T ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom
+      = g ≫ (terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom) :=
+    specULiftZIsTerminal.hom_ext _ _
+  rw [hterm] at big
+  let θ := t.lift (pullback.snd (terminal.from T) (terminal.from (muNAbs N)))
+    (muNπ T N ≫ g) (by rw [← Category.assoc]; exact big.w)
+  have hθ1 : θ ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))
+      = pullback.snd _ _ := t.lift_fst _ _ _
+  have hθ2 : θ ≫ muNπ S N = muNπ T N ≫ g := t.lift_snd _ _ _
+  rw [← hθ1] at big
+  exact ⟨θ, IsPullback.of_right big hθ2 t⟩
+
+/-- Field case of the converse: if `μ_N` is étale over a field, `N` is nonzero in it. -/
+private lemma etale_field_nezero (K : Type u) [Field K] (N : ℕ) [NeZero N]
+    (h : Etale (muNπ (Spec (CommRingCat.of K)) N)) : (N : K) ≠ 0 := by
+  intro hNK
+  -- transfer étale to the model over K (LEFT square with identity factor)
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
+  have big := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  have hfactor : (𝟙 (Spec (CommRingCat.of K))) ≫ Spec.map (muNBaseMap K)
+      = terminal.from _ ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom :=
+    specULiftZIsTerminal.hom_ext _ _
+  rw [← hfactor] at big
+  let mid := t.lift (pullback.snd _ _) (muNπ _ N ≫ 𝟙 _)
+    (by rw [← Category.assoc]; exact big.w)
+  have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ := t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N ≫ 𝟙 _ := t.lift_snd _ _ _
+  rw [← hmid1] at big
+  have LEFT := IsPullback.of_right big hmid2 t
+  have triv : IsPullback (𝟙 (muNModelRing K N).1?? placeholder) (𝟙 _) (𝟙 _) (𝟙 _) := sorry
+  sorry
+
 private lemma isUnit_of_etale_muNπ (S : Scheme.{u}) (N : ℕ) [NeZero N]
     (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by sorry
 

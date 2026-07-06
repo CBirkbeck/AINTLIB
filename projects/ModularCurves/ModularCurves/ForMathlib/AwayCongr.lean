@@ -52,4 +52,23 @@ lemma awayCongr_map {s t : A} (h : s = t) (g : GradedRingHom 𝒜 ℬ) (x : Away
   subst h
   rfl
 
+lemma awayCongr_trans {s t u : A} (h₁ : s = t) (h₂ : t = u) (x : Away 𝒜 s) :
+    awayCongr (𝒜 := 𝒜) h₂ (awayCongr (𝒜 := 𝒜) h₁ x) =
+      awayCongr (𝒜 := 𝒜) (h₁.trans h₂) x := by
+  subst h₁; subst h₂; rfl
+
+lemma awayCongr_self {s : A} (h : s = s) (x : Away 𝒜 s) :
+    awayCongr (𝒜 := 𝒜) h x = x := by
+  rw [Subsingleton.elim h rfl]
+  rfl
+
+/-- `Away.map` only depends on the graded hom up to propositional equality, through
+the transport. -/
+lemma awayMap_congr {g₁ g₂ : GradedRingHom 𝒜 ℬ} (h : g₁ = g₂) (s : A) (x : Away 𝒜 s) :
+    HomogeneousLocalization.Away.map g₂ s x =
+      awayCongr (𝒜 := ℬ) (congrArg (fun g : GradedRingHom 𝒜 ℬ => g s) h)
+        (HomogeneousLocalization.Away.map g₁ s x) := by
+  subst h
+  exact (awayCongr_self _ _).symm
+
 end ModularCurves
