@@ -282,6 +282,73 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.2 (⧗KM for the quote); [Loe] Def 3.3.3; [Sil] III.3.
 - **Generality**: any `CommRing R`; no ellipticity needed for the model itself.
 
+### [T-A3a] Weierstrass Jacobian comaximality, certificate-free (sub-ticket of T-A3)
+- **Status**: open · **File**: WeierstrassModel.lean (section Points or new Smooth section)
+- **Parent**: T-A3 · **Depends on**: T-A2 (done) · **Type**: theorem
+- **Statement**: for `W : WeierstrassCurve R` `[W.IsElliptic]`, in `MvPolynomial (Fin 2) R`
+  (or the two-variable polynomial ring of the Z-chart),
+  `Ideal.span {F̃, ∂F̃/∂u, ∂F̃/∂v} = ⊤` where `F̃` is the dehomogenised (affine) Weierstrass
+  cubic. Same statement per chart for the Y-chart form (for the ∞-point assembly, where
+  the ∂-with-respect-to-Z partial is `1 + O(u,z)`).
+- **Proof sketch (CERTIFICATE-FREE — no explicit Bezout coefficients)**: suppose the span
+  is proper; `Ideal.exists_le_maximal` gives a maximal `m` above it; `L := R[u,v]/m` is a
+  field, `(x, y) :=` images of `(u, v)`. Push `W` to `L` along the composite
+  `R → R[u,v] → L`: the point satisfies `Equation x y` (image of `F̃` is `0`) and both
+  partial-evaluations vanish (images of `∂F̃`), i.e. `¬ Nonsingular x y` via
+  `Affine.nonsingular_iff` + `evalEval_polynomialX/Y` (match our `∂`-forms against
+  mathlib's `polynomialX/Y` by `ring`-normalisation). But `Δ` maps to a unit
+  (`IsUnit.map`), so `(W.map …).IsElliptic` + `Nontrivial L` give
+  `equation_iff_nonsingular.mp`: CONTRADICTION. This is the fibrewise-criterion
+  reduction of KM 2.2.4 with mathlib's pointwise theorem as the field-level engine.
+- **Sources**: KM 2.2.4 (smoothness over Δ-inverted base); GME §2.2.5 pp. 114–115
+  (chartwise Jacobian display, incl. the ∞-chart computation); Loeffler §3.4;
+  mathlib `equation_iff_nonsingular_of_Δ_ne_zero` (Affine/Basic.lean:243) as the
+  pointwise input. MvPolynomial partials: `MvPolynomial.pderiv`.
+- **Generality**: any CommRing R, `[W.IsElliptic]`. Upstream candidate.
+
+### [T-A3b] Standard-smooth presentations of localized hypersurfaces (sub-ticket of T-A3)
+- **Status**: open · **File**: ForMathlib (new StandardSmoothHypersurface.lean)
+- **Parent**: T-A3 · **Depends on**: none (pure commutative algebra) · **Type**: def+thm
+- **Statement**: for `f : MvPolynomial (Fin 2) R` and a variable `i : Fin 2`, the
+  localization `(MvPolynomial (Fin 2) R ⧸ Ideal.span {f})_{∂f/∂xᵢ}` is
+  `Algebra.IsStandardSmoothOfRelativeDimension 1` over `R`.
+- **Proof sketch**: exhibit an `Algebra.SubmersivePresentation`: three generators
+  `u, v, w`, two relations `(f, w·∂f/∂xᵢ − 1)`; the section selects `(xᵢ, w)`; the
+  Jacobian determinant is `(∂f/∂xᵢ)²`, a unit in the localization. Survey mathlib's
+  `RingTheory/Smooth/StandardSmooth.lean` + `RingTheory/Presentation.lean` +
+  `RingTheory/Extension/Presentation/*` for existing constructors
+  (`Presentation.localizationAway`, quotient presentations, `SubmersivePresentation`
+  builders) before hand-rolling; the composition/localization transfer lemmas
+  (`isStandardSmoothOfRelativeDimension_stableUnderCompositionWithLocalizationAway`,
+  `_localizationPreserves`) are already in mathlib (used by the scheme-level
+  `HasRingHomProperty` instance).
+- **Sources**: standard (Stacks 00T7 standard-smooth examples); no KM gate.
+- **Generality**: arbitrary base `R`, arbitrary finite variable count σ with a chosen
+  variable — state for `Fin 2` in v1 if the general form fights the presentation API.
+  Upstream candidate.
+
+### [T-A3c] Chartwise assembly of projModel smoothness (sub-ticket of T-A3)
+- **Status**: open · **File**: WeierstrassModel.lean
+- **Parent**: T-A3 · **Depends on**: T-A3a, T-A3b · **Type**: theorem (discharges T-A3)
+- **Statement**: `projModel_smooth : SmoothOfRelativeDimension 1 (projModelπ W)` for
+  `[W.IsElliptic]`.
+- **Proof sketch**: mirror `projModelπ_lfp` EXACTLY: mathlib instance
+  `HasRingHomProperty (@SmoothOfRelativeDimension n) (Locally
+  (IsStandardSmoothOfRelativeDimension n))` (Morphisms/Smooth.lean:154);
+  `IsZariskiLocalAtSource.iff_of_iSup_eq_top` over the three `D₊(mk Xᵢ)`;
+  `cancel_left_of_respectsIso (basicOpenIsoSpec …).inv` + `Proj.awayι_toSpecZero` +
+  `HasRingHomProperty.Spec_iff` reduce to: `Locally (IsStandardSmoothOfRelativeDimension
+  1)` for `R → (chart ring)`. Transfer along `chartCoordEquiv` (T-A2e machinery;
+  `algebraMap_gradeZero_comp_eq` aligns the two R-structurings; `Locally` respects
+  isos). Then `RingHom.Locally`-intro with the two-element cover `{∂F̃/∂u, ∂F̃/∂v}`
+  (comaximal in the chart by T-A3a; check `RingHom.Locally`'s exact membership form —
+  span-⊤ of the chosen units-set) and T-A3b on each piece. The `Spec.map
+  gradeZeroRingEquiv`-iso part contributes `SmoothOfRelativeDimension 0`
+  ([IsOpenImmersion] priority-900 instance); compose with the `n + m`-instance and
+  close with `show SmoothOfRelativeDimension (1 + 0) _` or comp_mem, as in the
+  IsProper composite (transparency gotcha noted in T-A2 progress).
+- **Sources**: GME pp. 114–115; KM 2.2.4; assembly = this project's lfp proof of record.
+
 ### [T-A3] Model smooth ⟺ Δ unit
 - **Status**: open (statement final; proof after T-A2) · **File**: WeierstrassModel.lean
   · `projModel_smooth` · **Depends on**: T-A2 · **Parallel**: with T-A4 · **Type**: thm
