@@ -154,8 +154,39 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
   proper := MorphismProperty.pullback_snd _ _ E.proper
   fibres := E.fibres.baseChange g
   grp := Over.grpObjMkPullbackSnd
-  comm := by sorry
-  one_eq_zero := by sorry
+  comm := by exact Over.isCommMonObj_mk_pullbackSnd
+  one_eq_zero := by
+    apply pullback.hom_ext
+    all_goals dsimp [Over.grpObjMkPullbackSnd_one]
+    all_goals simp only [Over.grpObjMkPullbackSnd_one, Over.pullback, Over.comp_left,
+      Over.homMk_left, Category.id_comp, E.one_eq_zero, Over.mk_left]
+    all_goals
+      have hε2 : (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
+          pullback.snd (𝟙 S) g = 𝟙 T := Over.w _
+    · have hε1 : (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
+          pullback.fst (𝟙 S) g = g := by
+        have hc : pullback.fst (𝟙 S) g = pullback.snd (𝟙 S) g ≫ g := by
+          simpa using pullback.condition (f := 𝟙 S) (g := g)
+        calc (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ pullback.fst (𝟙 S) g
+            = (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
+              pullback.snd (𝟙 S) g ≫ g := congrArg
+                (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q) hc
+          _ = ((Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
+              pullback.snd (𝟙 S) g) ≫ g := (Category.assoc _ _ _).symm
+          _ = 𝟙 T ≫ g := congrArg (· ≫ g) hε2
+          _ = g := Category.id_comp g
+      refine (Category.assoc _ _ _).trans ?_
+      refine Eq.trans (congrArg
+        (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
+        (pullback.lift_fst _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg (· ≫ E.zero) hε1) ?_
+      exact (pullback.lift_fst _ _ _).symm
+    · refine (Category.assoc _ _ _).trans ?_
+      refine Eq.trans (congrArg
+        (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
+        (pullback.lift_snd _ _ _)) ?_
+      exact hε2.trans (pullback.lift_snd _ _ _).symm
 
 /-- A point of `E` over `g : T ⟶ S`, viewed as a section of the base-changed curve
 `E ×_S T / T`. -/

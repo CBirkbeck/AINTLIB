@@ -84,9 +84,8 @@ private def muNRingGen (N : ℕ) : muNRing N :=
 
 private lemma muNRingGen_pow (N : ℕ) : muNRingGen N ^ N = 1 :=
   ULift.down_injective <| by
-    show (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) X) ^ N = 1
-    rw [← map_pow, ← map_one (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}))]
-    exact Ideal.Quotient.eq.mpr (Ideal.mem_span_singleton_self _)
+    change (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) X) ^ N = 1
+    simp [← map_pow, Ideal.Quotient.mk_eq_one_iff_sub_mem]
 
 /-- Two ring homomorphisms out of `ℤ[T]/(Tᴺ − 1)` agreeing on the class of `T` agree. -/
 private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N ⟶ R}
