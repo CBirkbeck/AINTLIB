@@ -102,6 +102,19 @@ def IsSubdivisor (D' D : RelEffCartierDiv π) : Prop :=
   ∃ j : D'.ideal.subscheme ⟶ D.ideal.subscheme,
     j ≫ D.ideal.subschemeι = D'.ideal.subschemeι
 
+/-- **(T-D14a)** The subscheme-factorization form of `D' ≤ D` is ideal-sheaf
+containment (KM 1.3.1's `I(D) ⊆ I(D')` dictionary — the effective divisor `D'` is
+larger exactly when its ideal is smaller). -/
+theorem isSubdivisor_iff_le (D' D : RelEffCartierDiv π) :
+    IsSubdivisor D' D ↔ D.ideal ≤ D'.ideal := by
+  constructor
+  · rintro ⟨j, hj⟩
+    have h := j.le_ker_comp D.ideal.subschemeι
+    rwa [hj, Scheme.IdealSheafData.ker_subschemeι,
+      Scheme.IdealSheafData.ker_subschemeι] at h
+  · intro h
+    exact ⟨Scheme.IdealSheafData.inclusion h, Scheme.IdealSheafData.inclusion_subschemeι h⟩
+
 /-- **(T-D14 = KM 1.3.4, incidence `≤`)** For a smooth relative curve and effective
 divisors `D, D'` with `D'` proper (= finite) over `S`, there is a closed subscheme
 `Z ⊆ S` universal for `D' ≤ D`, cut out locally by `deg D'` equations, compatible with
