@@ -1265,12 +1265,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (2a) DONE 2026-07-08T08:00Z: `sectionDivisor` + `sectionDivisor_degree` sorry-free
   in CartierDivisor.lean (ker + toImage-transport; degree via
   finrank_eq_one_of_isIso; NB IsIso.eq_inv_comp for the `= inv _ ≫ _`-orientation).
-  NEXT ACTION: (2b) the n-fold product: mine KM 1.1.10-1.2.2 quotes from the full PDF
-  (printed pp. ~7-20); then state the product-divisor lemma family (one conclusion
-  each): product of two RelEffCartierDivs is a RelEffCartierDiv (finite/flat/lfp of
-  the product-ideal subscheme — CRT off the common support + filtration 0 → I/IJ →
-  R/IJ → R/I → 0 with I/IJ ≅ J-module-locally-free-transport) + degree-additivity;
-  then `sectionsDivisor := ∏ sectionDivisor` via the classical-split for totality. · **File**: CartierDivisor.lean · `sectionsDivisor`,
+  (2b) QUOTES MINED (2026-07-08T08:30Z, printed pp. 7-9): KM 1.2.2 "any section
+  s ∈ C(S) defines an effective Cartier divisor [s]" (proof: EGA IV 8.9.1 noetherian
+  reduction + 1.1.5.2 geometric-fibre flatness); KM 1.2.3 "D closed, finite flat and
+  of finite presentation over S ⟺ effective Cartier divisor proper over S" (THE
+  working-def equivalence = T-D1's content); KM 1.2.5 degree = locally free rank of
+  the affine ring; KM 1.2.6 deg(D₁+D₂) = deg D₁ + deg D₂ (proof via the SES
+  0 → I₁/I₁I₂ → O/I₁I₂ → O/I₁ → 0 and invertibility of I₁ — NEEDS the AG-LB
+  invertible-ideal input, same as T-D1). DECISION: products of section-divisors
+  being divisors (finite/flat/lfp of ∏ᵢ ker) and degree-additivity both genuinely
+  consume 1.2.3/AG-LB; state them as TWO hypothesis-guarded register boxes
+  ([IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π) — true statements, KM-cited,
+  discharge = T-D1 once AG-LB lands), then `sectionsDivisor` total via classical
+  dite: real branch ⟨∏ᵢ (P i).1.ker, boxes⟩; junk branch ⟨⊤, empty-subscheme props⟩
+  (⊤-support is ⊥ ⟹ subscheme empty ⟹ IsClosedImmersion-of-IsEmpty instance chain;
+  check an open-immersion-of-empty instance for flat/lfp, else small vacuous lemmas).
+  `sectionsDivisor_degree` follows from box-2 + sectionDivisor_degree + Fin-sum. · **File**: CartierDivisor.lean · `sectionsDivisor`,
   `sectionsDivisor_degree` · **Depends on**: none · **Parallel**: yes ·
   **Type**: def(data) + theorem
 - **Sketch**: section ⟹ closed immersion (π separated) ⟹ ideal sheaf via

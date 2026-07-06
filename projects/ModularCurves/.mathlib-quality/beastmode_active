@@ -1,1 +1,1 @@
-FOCUS: T-B6 — verify torsionPointsEquiv (now green), axiom-check, then attack headline via fibre-dictionary sub-ticket
+FOCUS: T-B6c nIsInvertible_spec_iff — quick leaf, then T-B6a mulByHom_baseChange main attack
