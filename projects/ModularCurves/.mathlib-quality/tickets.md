@@ -3261,7 +3261,7 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 - **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
-  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
+  - **Status**: done (2026-07-06T22:28Z) · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
   - **T-Q5a DONE** (2026-07-06T17:10Z): ForMathlib/SchemeQuotient.lean —
     `SchemeAction` (two-law σ-family + derived `isIso_hom`), `SchemeAction.spec`
     (the specSMul instance), `IsStableOpen`, and the Γ-bridge
@@ -3341,6 +3341,24 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     over the V-opens cover (compat = glue_condition + localQuotientπ_
     localQuotientMap, plan in transcript), invariance, then the contract
     (hom_ext / exists / ∃!) via per-chart affine machinery over 𝒟.openCover.
+    (β3-β4) DONE — **T-Q5 COMPLETE** (2026-07-06T22:28Z, commit "T-Q5 COMPLETE"):
+    the full T-Q5d contract is proven, sorry-free, zero warnings, standard
+    axioms, in ForMathlib/SchemeQuotient.lean: `quotient` (:= glueData.glued,
+    @[reducible]), `quotientπ` (glued from `localQuotientπ ≫ opensι` over
+    `atlasCover` via `chartCompat`/`quotientπCompat`), `opensι_quotientπ`,
+    `hom_quotientπ` (invariance; the contract's `quotientπ_comp_hom` under a
+    mathlib-idiomatic name), `quotientπ_hom_ext` (uniqueness via per-chart
+    invariantsπ_hom_ext + hπ'-idiom), `exists_quotientπ_lift` (existence:
+    per-chart `exists_chart_lift` from the ABSOLUTE exists_invariantsπ_lift +
+    specSMul_isoSpec_inv, overlap agreement `hover` via invariantsπ_hom_ext +
+    localQuotientMap_trans_assoc + hleg both sides, then vPullbackCone
+    transport by `PullbackCone.IsLimit.lift'` — NO conePointUniqueUpToIso
+    needed, a bare lift + 2 leg-equations suffices; GOTCHA of record:
+    repackage ℓ through a cleanly-TYPED ∃ (the mk-pt cone-point type pollutes
+    rw-motives) and discharge the legs by PURE-DEFEQ `exact` — simp-
+    normalizing them breaks the match; the @[reducible] chain makes plain
+    exact work), `existsUnique_quotientπ_lift` (formal assembly).
+    T-Q6/T-Q7/T-W3 consumers are UNBLOCKED with the full proven contract.
     OLD route notes below superseded where they conflict: β2a range_localQuotientMap = imageOpens
     (extract from (α)'s m₀-iso); β2b imageOpens-intersection arithmetic
     (π(A)∩π(B) = π(A∩B) for saturated A B — KEY: a stable set containing one

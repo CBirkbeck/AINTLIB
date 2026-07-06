@@ -1,3 +1,2 @@
-FOCUS: T-F1 — waiting on sibling Basic.lean green (watcher armed); then build YRho, fix fallout, axiom-probe; then T-F1b points chain
-FOCUS-H: (beastmode-H) T-H7 DONE — Phase 6.5 cleanup on headline, then G6 re-scan -> T-H1
-FOCUS-Q: (beastmode-Q) quotientGlueData DONE (X/G exists!). NOW β3: (1) hVmem-variable + quotientπ glue over V-opens cover (compat via glue_condition + pi-map-squares), (2) invariance via resLE_comp_ι + resLE_localQuotientπ, (3) hom_ext via D.openCover + per-chart invariantsπ_hom_ext, (4) existence via per-chart keystone + glue, ∃!.
+FOCUS: T-Q5 — existsUnique_quotientπ_lift assembly + verify + board
+FOCUS-H: (beastmode-H) T-H1 gammaHNaive_bot — writing the ⊥-orbit NatIso

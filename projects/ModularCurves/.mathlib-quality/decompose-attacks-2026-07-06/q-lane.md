@@ -311,3 +311,21 @@ Proof = T-Q3's existence VERBATIM with the per-point charts chosen INSIDE
 Mirror of the already-proven `invariantsπ_hom_ext_of_isOpenImmersion` — the two
 j-relative statements together say `π` is an effective epi stable under open
 restriction, which IS the descent content of Loeffler 3.6.1.
+
+## T-Q5 (α) IsOpenImmersion (localQuotientMap) — attack block (2026-07-07 pickup)
+
+- **A1 (window well-formed)** `windowHom := X.homOfLE hWV ≫ hVa.isoSpec.hom` is an
+  open immersion (homOfLE-instance ≫ iso); its range is the "W-window" in
+  Spec Γ(V). Stability under the Γ(V)-specSMul: pointwise from the two proven
+  squares (resLE_homOfLE + resLE_isoSpec_hom). No new math. SURVIVES.
+- **A2 (saturation)** range fst_{π,j₀} = π⁻¹(imageOpens) = π⁻¹(π(window-range)) =
+  window-range needs stability (A1) + fibres-are-orbits — exactly the hsat idiom
+  of isOpen_image_invariantsπ_of_stable. SURVIVES.
+- **A3 (inverse construction honest?)** q from the KEYSTONE at j₀; the two
+  inverse laws are pure UP-uniqueness (Q_W-side absolute hom_ext; Q'-side
+  j₀-relative hom_ext) given the three composition facts π^W ≫ m₀ = iso.hom ≫ snd,
+  snd ≫ q = f₀, f₀ = iso.inv ≫ π^W. Any failure here is a wiring bug, not a
+  math gap. SURVIVES.
+- **A4 (degenerate W = ⊥)** Q_⊥ = Spec of invariants of the zero ring = empty
+  scheme; imageOpens = ∅; everything holds vacuously; no nontriviality used.
+  SURVIVES.
