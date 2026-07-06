@@ -4014,3 +4014,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (FrobeniusFunctionFieldEquiv/DivisorGalois/Conjugation, pattern theorem
     frobeniusFunctionFieldEquiv_weilFunction_eq_smul :492) need σ-mirroring.
     Statement design after T-C0b returns (its equiv form feeds T-C0d's shape).
+  - 2026-07-07T01:30Z: **T-C0b DONE** (delegated, first-probe compile) — the affine
+    Γ⊣Spec glue went through with isoSpec_inv_naturality/toSpecΓ_appTop/
+    ΓSpecIso_naturality; no gap lemmas. **DEFECT FLAGGED (self-report)**: the T-C0e
+    skeleton statement `exists_weilPairingSpecField` is TOO WEAK as stated — the
+    over-S condition alone is satisfiable by the trivial section through μ_N's unit,
+    so it does not pin the pairing. RE-CUT PLAN: after T-C0c/d land the
+    identification vocabulary (fibre-functor points of the product ↔ pairs of
+    torsion points; HasseWeil comparison), restate T-C0e with the fibrewise
+    HasseWeil-comparison spec (T-C4's content at field bases) as the defining
+    clause. ALSO SURFACED: the k̄-points bridge from scheme-E to a Weierstrass
+    model's point group needs the fibre model (FibrewiseElliptic at the point of
+    Spec k gives W/k ✓ exists today) PLUS group-law comparison across the pointed
+    fibre iso — that is A6.δ/T-W7-gate-adjacent; T-C0c/d will surface the exact
+    edge. Next: T-C0c skeleton (WeilPairing/GaloisEquivariance.lean).
