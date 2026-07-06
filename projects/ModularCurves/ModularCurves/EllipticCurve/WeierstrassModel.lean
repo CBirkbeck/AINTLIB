@@ -2556,6 +2556,22 @@ lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
   rw [← cancel_epi (((Spec (.of R)).basicOpen
       (((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).ι)]
+  show (Proj.openCoverOfMapIrrelevantEqTop (quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)).f
+      ⟨1, (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1),
+        one_pos, mk_X_mem_quotientGrading_one W 1⟩ ≫
+      Spec.map (CommRingCat.ofHom (zeroChartHom W)) ≫
+      Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos =
+    (Proj.openCoverOfMapIrrelevantEqTop (quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)).f
+      ⟨1, (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1),
+        one_pos, mk_X_mem_quotientGrading_one W 1⟩ ≫ projModelZero W
+  conv_rhs => rw [projModelZero, Proj.fromOfGlobalSections]
+  rw [Scheme.Cover.ι_glueMorphisms]
   sorry
 
 end Points
