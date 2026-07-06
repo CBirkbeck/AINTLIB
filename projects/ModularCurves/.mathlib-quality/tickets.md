@@ -1928,6 +1928,15 @@ transported along the equivalence (GrpObj/ofRepresentableBy — T-B2 experience
 directly applicable). All leaves unclaimed.
 
 ### [T-F1] ⧗(AG-GG) V_ρ construction (DS5 discharge)
+- ✓✓ **LANDED GREEN + AXIOM-CLEAN** (2026-07-06, beastmode-B): YRho.lean builds;
+  `#print axioms` on vRho / rhoContAction / vRhoπ_finite_etale =
+  propext/choice/Quot.sound ONLY — the whole AG-GG tower under V_ρ is sorry-free.
+  T-F1a (finite étale) PROVED. Remaining in T-F1: T-F1b vRhoPointsEquiv (chain below;
+  step-1 `specPointsEquivAlgHom` GREEN in ForMathlib/EtaleSectionsCount) +
+  equivariance spec; T-F1c group structure. Final seam notes in commit eab704fb
+  (Filter.mem_map; intermediateFieldMap-f.d.-transport; open-scoped-Pointwise ABOVE
+  docstring; **rhoAction must be abbrev** — structure projections don't reduce at
+  instance-search transparency; coset endgame at Action-smul via ρτ = 𝟙 + map_id).
 - **PROGRESS** (beastmode-B, 2026-07-06): **DS5 DATA-SORRY DISCHARGED** — `vRho`/`vRhoπ`
   are now REAL DEFINITIONS in YRho.lean via the completed AG-GG correspondence:
   `vRhoAlgebra D := ((finiteEtaleEquivContAction ℚ).inverse.obj (rhoContAction D)).unop`,
