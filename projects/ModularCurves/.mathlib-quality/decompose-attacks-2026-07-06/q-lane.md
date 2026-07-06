@@ -420,3 +420,18 @@ restriction, which IS the descent content of Loeffler 3.6.1.
   ring-points form but what SGA III V 4.1 needs; provable since a fixed
   T-point restricts to fixed geometric points. Statement stays; proof is the
   θ(g)-rigidity argument (KM p. 113) — sorried this session with route banked.
+
+### T-W3b full-faithfulness ATTACK FINDING (2026-07-07T03:50Z)
+The naive claim "trivialization `ActionGroupoid σ S ⥤ TorsorPair σ S` is fully
+faithful" is FALSE:
+- **S = ∅**: `Hom_{[X/G]}(t, t') = {g // t ≫ σ g = t'} = G` (all conditions
+  vacuous), but `Hom(triv t, triv t')` = maps `∅ ⟶ ∅` = singleton. Not faithful
+  for `|G| > 1`.
+- **S disconnected**: a torsor-pair endomorphism of `∐_G S` may left-translate
+  different connected components by different group elements; only single
+  elements come from the functor. Not full.
+Verdict: state full-faithfulness only for connected nonempty `S` (or state the
+honest general comparison at stackification level — the prestack [X/G] is not
+even fppf-separated, which is exactly WHY stackification appears). Board text
+corrected. The trivialization FUNCTOR itself is still total (no hypotheses);
+only the equivalence claims carry connectivity hypotheses.

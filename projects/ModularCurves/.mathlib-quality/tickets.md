@@ -3932,9 +3932,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (IsFinite/Etale/Surjective of `trivialTorsorπ` + the `∐`-comparison iso —
     mathlib sigma-facts survey dispatched), then the trivialization functor
     `ActionGroupoid σ S ⥤ TorsorPair σ S` (morphism-level: `f : t ⟶ t'` maps to
-    the summand-translation `trivialTorsorAction.hom f.1`-conjugate; check
-    left/right convention against `equivariant` at write time), full
-    faithfulness, and the (descent-gated) essential-image statement.
+    the LEFT translation by `f.1⁻¹` — `trivialTorsorLeft_map`, landed), full
+    faithfulness **for connected nonempty S only** (ATTACK FINDING 2026-07-07,
+    q-lane.md: fails for S = ∅ — Hom-sets G vs 1 — and for disconnected S —
+    componentwise translations; the general comparison lives at stackification
+    level), and the (descent-gated) essential-image statement.
 
 - **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
   `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
