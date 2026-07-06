@@ -319,4 +319,13 @@ noncomputable def chartRingEquiv (i : σ) :
   RingEquiv.ofRingHom (dehomogenizeAt R i) (homogenizeAt R i)
     (dehomogenizeAt_comp_homogenizeAt R i) (homogenizeAt_comp_dehomogenizeAt R i)
 
+/-- Homogenising the dehomogenisation of a degree-`n` homogeneous polynomial gives
+`p / X_iⁿ`. -/
+lemma homogenizeAt_dehomogenizeAux (i : σ) {p : MvPolynomial σ R} {n : ℕ}
+    (hmem : p ∈ homogeneousSubmodule σ R (n • 1)) :
+    homogenizeAt R i (dehomogenizeAux R i p) =
+      HomogeneousLocalization.Away.mk _ (X_mem_homogeneousSubmodule_one R i) n p hmem := by
+  conv_lhs => rw [← dehomogenizeAt_mk R i hmem]
+  exact RingHom.congr_fun (homogenizeAt_comp_dehomogenizeAt R i) _
+
 end MvPolynomial

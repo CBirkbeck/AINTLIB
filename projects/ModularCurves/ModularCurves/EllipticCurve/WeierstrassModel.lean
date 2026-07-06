@@ -509,6 +509,50 @@ lemma specPoint_factors_through_chart (W : WeierstrassCurve R)
     exact hi
   exact this
 
+/-- The chart of the model as a quotient of the chart of `ℙ²`. -/
+noncomputable def chartQuotientEquiv (W : WeierstrassCurve R) (i : Fin 3) :
+    (Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i) ⧸
+      Ideal.span {HomogeneousLocalization.Away.mk
+        (MvPolynomial.homogeneousSubmodule (Fin 3) R)
+        (MvPolynomial.X_mem_homogeneousSubmodule_one R i) 3 W.toProjective.polynomial
+        (by simp [projective_polynomial_isHomogeneous W])}) ≃+*
+    Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) :=
+  (Ideal.quotEquivOfEq (show Ideal.span _ =
+      RingHom.ker (HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+        (MvPolynomial.X i)) from
+    (ker_away_map_quotientGradingHom (projIdeal W)
+      (projective_polynomial_isHomogeneous W) (projIdeal_toIdeal W)
+      (MvPolynomial.X_mem_homogeneousSubmodule_one R i)).symm)).trans
+    (RingHom.quotientKerEquivOfSurjective
+      (away_map_quotientGradingHom_surjective (projIdeal W)
+        (MvPolynomial.X_mem_homogeneousSubmodule_one R i)))
+
+/-- The chart of the model as the plane coordinate ring modulo the dehomogenised
+cubic. -/
+noncomputable def chartCoordEquiv (W : WeierstrassCurve R) (i : Fin 3) :
+    (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) ≃+*
+    Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) :=
+  (Ideal.quotientEquiv _ _
+    ((MvPolynomial.chartRingEquiv R i).symm :
+      MvPolynomial {j : Fin 3 // j ≠ i} R ≃+*
+        Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i))
+    (by
+      rw [Ideal.map_span, Set.image_singleton]
+      congr 1
+      rw [Set.singleton_eq_singleton_iff]
+      symm
+      show MvPolynomial.homogenizeAt R i
+          (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) = _
+      rw [MvPolynomial.homogenizeAt_dehomogenizeAux R i (n := 3)
+        (by
+          rw [smul_eq_mul, mul_one]
+          exact (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+            (projective_polynomial_isHomogeneous W))])).trans
+    (chartQuotientEquiv W i)
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
