@@ -1607,6 +1607,62 @@ theorem projModel_smooth (W : WeierstrassCurve R) [W.IsElliptic] :
     inferInstance
   exact h3
 
+section BaseChangeGraded
+
+variable {R' : Type u} [CommRing R'] (f : R →+* R')
+
+/-- `MvPolynomial.map` as a graded ring homomorphism for the standard grading. -/
+noncomputable def mvMapGraded : GradedRingHom
+    (MvPolynomial.homogeneousSubmodule (Fin 3) R)
+    (MvPolynomial.homogeneousSubmodule (Fin 3) R') where
+  toRingHom := MvPolynomial.map f
+  map_mem {i x} hx := (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+    (((MvPolynomial.mem_homogeneousSubmodule _ _).mp hx).map f)
+
+lemma projIdeal_le_comap (W : WeierstrassCurve R) :
+    (projIdeal W).toIdeal ≤
+      (projIdeal (W.map f)).toIdeal.comap (MvPolynomial.map f) := by
+  rw [projIdeal_toIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+    Ideal.mem_comap, ← WeierstrassCurve.Projective.map_polynomial]
+  exact Ideal.subset_span rfl
+
+/-- The graded base-change homomorphism between the homogeneous coordinate rings of
+the Weierstrass models of `W` and `W.map f`. -/
+noncomputable def baseChangeGradedHom (W : WeierstrassCurve R) :
+    GradedRingHom (quotientGrading (projIdeal W))
+      (quotientGrading (projIdeal (W.map f))) :=
+  quotientGradingMap (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
+    (projIdeal_le_comap f W)
+
+lemma baseChangeGradedHom_irrelevant_le (W : WeierstrassCurve R) :
+    (HomogeneousIdeal.irrelevant (quotientGrading (projIdeal (W.map f)))).toIdeal ≤
+      Ideal.map (baseChangeGradedHom f W).toRingHom
+        (HomogeneousIdeal.irrelevant (quotientGrading (projIdeal W))).toIdeal := by
+  refine le_trans (quotient_irrelevant_le_span_mk_X (W.map f)) ?_
+  rw [Ideal.span_le]
+  rintro _ ⟨i, rfl⟩
+  beta_reduce
+  have h1 : (Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal
+      (MvPolynomial.X i) : projCoordRing (W.map f)) =
+      (baseChangeGradedHom f W).toRingHom
+        (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i)) := by
+    show _ = quotientGradingMap (mvMapGraded f) _ _ _ (Ideal.Quotient.mk _ _)
+    rw [quotientGradingMap_mk]
+    show _ = Ideal.Quotient.mk _ (MvPolynomial.map f (MvPolynomial.X i))
+    rw [MvPolynomial.map_X]
+  rw [h1]
+  refine Ideal.mem_map_of_mem _ ?_
+  show GradedRing.proj (quotientGrading (projIdeal W)) 0
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i)) = 0
+  rw [GradedRing.proj_apply,
+    decompose_quotientGrading_mk (projIdeal W)
+      ((MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+        (MvPolynomial.isHomogeneous_X _ _)),
+    DirectSum.coe_of_apply]
+  simp
+
+end BaseChangeGraded
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.

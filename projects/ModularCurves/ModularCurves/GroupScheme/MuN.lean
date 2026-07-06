@@ -121,6 +121,16 @@ private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ 
   rw [Ideal.Quotient.lift_mk]
   simp [Polynomial.coe_eval₂RingHom]
 
+/-- Morphisms into an affine scheme are determined by their action on global sections. -/
+private lemma specHom_ext {R : CommRingCat.{u}} {X : Scheme.{u}} {f₁ f₂ : X ⟶ Spec R}
+    (h : f₁.appTop = f₂.appTop) : f₁ = f₂ := by
+  apply (ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm.injective
+  apply Quiver.Hom.unop_inj
+  have e1 := ΓSpec_adjunction_homEquiv_eq ((ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm f₁).unop
+  have e2 := ΓSpec_adjunction_homEquiv_eq ((ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm f₂).unop
+  simp only [Quiver.Hom.op_unop, Opposite.unop_op, Equiv.apply_symm_apply] at e1 e2
+  exact (cancel_epi (Scheme.ΓSpecIso R).hom).mp (e1.symm.trans (h.trans e2))
+
 /-- Morphisms into `Spec ℤ[T]/(Tᴺ − 1)` are `N`-th roots of unity of `Γ(X, ⊤)`. -/
 private def muNSpecHomEquiv {N : ℕ} {X : Scheme.{u}} :
     (X ⟶ Spec (muNRing N)) ≃ { a : Γ(X, ⊤) // a ^ N = 1 } where
@@ -128,12 +138,9 @@ private def muNSpecHomEquiv {N : ℕ} {X : Scheme.{u}} :
     rw [← map_pow, ← map_pow, muNRingGen_pow, map_one, map_one]⟩
   invFun a := X.toSpecΓ ≫ Spec.map (muNRingLift a.1 a.2)
   left_inv f := by
-    apply (ΓSpec.adjunction.homEquiv _ _).symm.injective
-    apply Quiver.Hom.unop_inj
-    rw [Adjunction.homEquiv_symm_apply, Adjunction.homEquiv_symm_apply]
-    dsimp
+    apply specHom_ext
+    refine (cancel_epi (Scheme.ΓSpecIso (muNRing N)).inv).mp ?_
     refine muNRing_hom_ext ?_
-    simp only [Quiver.Hom.unop_op, Functor.rightOp_map, Scheme.Γ_map]
     rw [CommRingCat.comp_apply, CommRingCat.comp_apply, Scheme.Hom.comp_appTop,
       CommRingCat.comp_apply,
       ← CommRingCat.comp_apply ((Scheme.ΓSpecIso (muNRing N)).inv)
