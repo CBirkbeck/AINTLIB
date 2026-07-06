@@ -1018,6 +1018,14 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
     2026-07-06T11:05Z · target `sectionVanishingIdeal_eq_span_coord`
     (Incidence.lean:69) per §Amendments v5 Wave 0.
+  - **Progress**: 2026-07-06T11:20Z — proof WRITTEN + verified green standalone
+    against mathlib (le_antisymm; ≤: expand φσ along `b.linearCombination_repr` +
+    `map_sum`, termwise `Ideal.mul_mem_right` of coord-generators; ≥: `b.coord i`
+    is a functional; gotcha: rintro-rfl leaves beta-unreduced membership — `show φ σ ∈ _`).
+    Module gate + #print axioms PENDING: Incidence's import chain passes through
+    stream-A's in-flight WIP (ProjectiveSpaceChart.lean heartbeat-timeout mid-edit,
+    working tree only — NOT the committed baseline). Close-out on next A-green;
+    meanwhile continuing Wave 0 with T-D3b (chain-independent ForMathlib).
 - **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
   T-D12, T-D13.
 - **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
