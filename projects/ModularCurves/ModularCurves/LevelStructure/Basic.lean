@@ -82,7 +82,15 @@ itself, compatibly with the inclusions. Discharge: `torsionι_isClosedImmersion`
 + mathlib's `ker_subschemeι` dictionary. -/
 theorem torsionIdeal_subscheme (N : ℕ) :
     ∃ e : (E.torsionIdeal N).subscheme ≅ E.torsion N,
-      e.hom ≫ E.torsionι N = (E.torsionIdeal N).subschemeι := by sorry
+      e.hom ≫ E.torsionι N = (E.torsionIdeal N).subschemeι := by
+  have _ := E.torsionι_isClosedImmersion N
+  have hker : (E.torsionι N).ker = ((E.torsionIdeal N).subschemeι).ker :=
+    (Scheme.IdealSheafData.ker_subschemeι _).symm
+  have _ := IsClosedImmersion.isIso_lift (E.torsionι N)
+    ((E.torsionIdeal N).subschemeι) hker
+  exact ⟨asIso (IsClosedImmersion.lift (E.torsionι N)
+      ((E.torsionIdeal N).subschemeι) hker.le),
+    IsClosedImmersion.lift_fac _ _ _⟩
 
 /-- **Drinfeld Γ(N)-structure** (KM 3.1): a pair `P, Q` of points killed by `N` such that
 the divisor `Σ_{(a,b) ∈ (ℤ/N)²} [aP + bQ]` equals `E[N]` as a closed subscheme — i.e. the

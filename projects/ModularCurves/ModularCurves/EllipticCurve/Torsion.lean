@@ -80,7 +80,12 @@ theorem pointToTorsion_torsionι {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} (x : E
 /-- **(T-B3)** `E[N] ⟶ E` is a closed immersion (kernels of group-scheme morphisms against
 proper separated bases; the zero section of a separated morphism is a closed immersion). -/
 theorem torsionι_isClosedImmersion (N : ℕ) :
-    IsClosedImmersion (E.torsionι N) := by sorry
+    IsClosedImmersion (E.torsionι N) := by
+  have h1 : IsClosedImmersion (E.zero ≫ E.π) := by
+    rw [E.zero_π]
+    infer_instance
+  have h2 : IsClosedImmersion E.zero := IsClosedImmersion.of_comp (f := E.zero) (g := E.π)
+  exact MorphismProperty.pullback_fst _ _ h2
 
 /-- **(T-B4 = KM 2.3.1)** `E[N] ⟶ S` is finite and flat (finite locally free) — of rank
 `N²` by `torsion_rank`. Black-box inputs: `[N]` finite flat of degree `N²` (KM 2.3.1; via
