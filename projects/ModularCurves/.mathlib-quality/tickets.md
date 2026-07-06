@@ -22,6 +22,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 4. PENDING-SOURCE(KM) tickets (marked ⧗KM) may be *worked for statements and
    non-KM-sourced lemmas* but not closed until the full KM text lands and the verbatim
    quote-gate in `decomposition.md` is satisfied.
+5. **Claim protocol (multi-worker, added 2026-07-06)** — several workers share this
+   worktree/branch; the board is the lock. To claim a ticket: add a
+   `- **Claimed**: <worker-handle>, <ISO-UTC>` line, set `Status: in_progress`, and
+   **commit `tickets.md` alone, immediately** (`board(ModularCurves): claim <ID>
+   (<worker>)`) *before* touching any `.lean` file. A ticket carrying another worker's
+   live claim — and the declarations/files its work owns — is off-limits until its
+   Status turns `done`/`blocked` (a finished claim line stays as the record; set
+   `Status: done (<worker>, <start> → <end>)` in the same commit as the final proof).
+   Shared-worktree hygiene: `git add` only your own files (never `-A`); commit before
+   long builds; if `tickets.md` conflicts, re-apply your lines on top — never drop
+   another worker's claim.
 
 ## Summary
 - Work tickets: 24 · Cleanup tickets: 11 · Milestones: T-E2, T-E7, T-E9, T-F4
@@ -393,8 +404,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (via `GrpObj.comp_zpow`) — small starter ticket.
 
 ### [T-B2] μ_N and (ℤ/N) wiring (DS3 discharge)
-- **Status**: open · **File**: GroupScheme/MuN.lean · `muNGrpObj`, `constZModGrpObj`,
-  `muNPointsEquiv` (+ its naturality, to be added as `muNPointsEquiv_natural`)
+- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker), 2026-07-06T08:57Z ·
+  **File**: GroupScheme/MuN.lean · `muNGrpObj`, `constZModGrpObj`,
+  `muNPointsEquiv` (+ its naturality — `muNPointsEquiv_natural` now stated in skeleton)
 - **Depends on**: none · **Parallel**: yes · **Type**: def(data) + theorems
 - **Sketch**: comult `Spec.map (T ↦ T ⊗ T)` on `ℤ[T]/(Tᴺ−1)`; pullback to `S`; GrpObj
   fields via `Over`-cartesian-monoidal API (pattern: mathlib
