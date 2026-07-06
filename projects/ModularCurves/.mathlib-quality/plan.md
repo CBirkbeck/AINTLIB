@@ -176,8 +176,10 @@ marked `Parallel: yes` are independent.
   finite flat rank N² (BB-FLAT), étale when invertible; fibre comparison to HasseWeil.
 - **WS-C** Weil pairing: KM 2.8 construction (needs full KM text); specs; fibre
   comparison + normalisation pin (T-C4).
-- **WS-D** Drinfeld structures: divisor sums (T-D3); full-sections globalisation (T-D2/4);
+- **WS-D** ★ Drinfeld structures: divisor sums (T-D3); full-sections globalisation (T-D2/4);
   KM 1.4.4 equivalences (T-D6/7); naive ⟺ Drinfeld for Γ(N), Γ₁(N) (T-D8/9).
+  **★ CLAIMED: beastmode-D, 2026-07-06T09:25Z** — work order on the ticket board
+  (§Amendments v5); binding proof plans in `decomposition-km1.md`.
 - **WS-E** moduli: Ell/R plumbing sorries; **T-E1/T-E2 (Tate normal form — provable
   now, start here)**; KM 4.7 (needs AG-QUOT); Y₁(N), Y(N); fppf statements; T-E8 stack
   packaging.

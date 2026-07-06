@@ -44,7 +44,11 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (statements are frozen; other lanes may start on their non-DS2-dependent parts).
 - **B** torsion & μ_N (Torsion, MuN) — B2/B3 independent of A-proofs.
 - **C** Weil pairing (WeilPairing/*) — construction ⧗KM; comparison ticket ready.
-- **D** Drinfeld structures (LevelStructure/*) — KM Ch. 1 fully sourced.
+- **D** ★ Drinfeld structures (LevelStructure/*) — KM Ch. 1 fully sourced.
+  **★ STREAM CLAIMED: beastmode-D (stream-D worker), 2026-07-06T09:25Z** — D-lane
+  execution order in §Amendments v5 (end of file); individual tickets are still
+  claimed one at a time per rule 5 at pickup (the stream star reserves the lane and
+  records the plan, it does not lock every ticket).
 - **E** moduli + representability (Moduli/*) — E1/E2 ring-level, independent of ALL
   scheme-level lanes.
 - **F** Y(ρ,p) (ModularCurve/YRho) — F0 now; F1 after AG-GG scoping; F4 phase 3.
