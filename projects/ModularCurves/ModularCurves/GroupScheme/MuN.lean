@@ -470,12 +470,64 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
     { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
   muNPointsEquivAux S N g
 
+section RankAndEtale
+
+/-! ### `μ_N` is finite locally free of rank `N` (ticket T-B7)
+
+`ℤ[T]/(Tᴺ − 1)` is free of rank `N` over `ℤ` (monic quotient basis `1, …, T^{N−1}`),
+so the absolute `μ_N ⟶ Spec ℤ` is finite flat of rank `N`; the relative statements
+follow by base change along the defining pullback square, transported from the
+abstract terminal scheme to `Spec (ULift ℤ)`. -/
+
+private lemma muN_poly_monic (N : ℕ) [NeZero N] : ((X : Polynomial ℤ) ^ N - 1).Monic := by
+  simpa using Polynomial.monic_X_pow_sub_C (1 : ℤ) (NeZero.ne N)
+
+/-- The structure ring map of the absolute `μ_N`, out of the coordinate ring of the
+terminal scheme. -/
+private def muNRingMap (N : ℕ) : CommRingCat.of (ULift.{u} ℤ) ⟶ muNRing N :=
+  CommRingCat.ofHom ((ULift.ringEquiv.symm.toRingHom.comp
+    (algebraMap ℤ (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}))).comp
+    ULift.ringEquiv.toRingHom)
+
+private lemma muNRingMap_finite (N : ℕ) [NeZero N] : (muNRingMap N).hom.Finite := by
+  refine RingHom.Finite.comp ?_ ?_
+  · refine RingHom.Finite.comp ?_ ?_
+    · exact RingHom.Finite.of_surjective _ ULift.ringEquiv.symm.surjective
+    · exact RingHom.finite_algebraMap.mpr (muN_poly_monic N).finite_quotient
+  · exact RingHom.Finite.of_surjective _ ULift.ringEquiv.surjective
+
+private lemma muNRingMap_flat (N : ℕ) [NeZero N] : (muNRingMap N).hom.Flat := by
+  haveI := (muN_poly_monic N).free_quotient
+  exact RingHom.Flat.comp (RingHom.Flat.of_bijective ULift.ringEquiv.bijective)
+    (RingHom.Flat.comp (RingHom.flat_algebraMap_iff.mpr inferInstance)
+      (RingHom.Flat.of_bijective ULift.ringEquiv.symm.bijective))
+
+/-- The defining square of `μ_{N,S}`, with the cospan corner moved from the abstract
+terminal scheme to `Spec (ULift ℤ)`. -/
+private lemma isPullback_muN (S : Scheme.{u}) (N : ℕ) :
+    IsPullback (muNπ S N) (pullback.snd (terminal.from S) (terminal.from (muNAbs N)))
+      (terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom)
+      (Spec.map (muNRingMap N)) := by
+  have h2 : terminal.from (muNAbs N) ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom
+      = Spec.map (muNRingMap N) := specULiftZIsTerminal.hom_ext _ _
+  have t : IsPullback (terminal.from (muNAbs N)) (𝟙 (muNAbs N))
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom (Spec.map (muNRingMap N)) :=
+    IsPullback.of_vert_isIso ⟨by rw [Category.id_comp, h2]⟩
+  have main := (IsPullback.of_hasPullback (terminal.from S)
+    (terminal.from (muNAbs N))).paste_vert t
+  rw [Category.comp_id] at main
+  exact main
+
 /-- **(T-B7)** `μ_{N,S} ⟶ S` is finite locally free of rank `N`, étale iff `N` is invertible
 on `S`. (Two statements; étale case.) Source: KM 1.12; standard. -/
-theorem muNπ_isFinite (S : Scheme.{u}) (N : ℕ) [NeZero N] : IsFinite (muNπ S N) := by sorry
+theorem muNπ_isFinite (S : Scheme.{u}) (N : ℕ) [NeZero N] : IsFinite (muNπ S N) :=
+  MorphismProperty.of_isPullback (isPullback_muN S N).flip
+    ((IsFinite.SpecMap_iff _).mpr (muNRingMap_finite N))
 
 /-- **(T-B7)** `μ_{N,S} ⟶ S` is flat, of constant rank `N`. -/
-theorem muNπ_flat (S : Scheme.{u}) (N : ℕ) [NeZero N] : Flat (muNπ S N) := by sorry
+theorem muNπ_flat (S : Scheme.{u}) (N : ℕ) [NeZero N] : Flat (muNπ S N) :=
+  MorphismProperty.of_isPullback (isPullback_muN S N).flip
+    (Flat.SpecMap_iff.mpr (muNRingMap_flat N))
 
 theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
     (muNπ S N).finrank s = N := by sorry
@@ -485,6 +537,8 @@ iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides 
 for `S = ∅`). -/
 theorem muNπ_etale_iff (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) := by sorry
+
+end RankAndEtale
 
 /-- **(T-B2, DS3 naturality spec — register rule (iii))** The points description of
 `μ_N` is natural: restriction along `k : T' ⟶ T` corresponds to applying `Γ`-map. -/
