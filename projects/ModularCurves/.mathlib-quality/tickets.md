@@ -2328,8 +2328,32 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
 - **[T-D16]** `exists_subgroupLocus` (KM 1.3.7, verbatim + proof in hand;
   `1 + deg + deg²` equations via `[e] ≤ D`, `D = inv*D`, `[m(P₁,P₂)] ≤ D_W`).
   Depends: T-D14, T-D15, T-D3.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T22:30Z (deps met: T-D14/T-D15 mine just now, T-D3 by A).
+  - **Status**: done (beastmode-D2, 2026-07-06T22:30Z → 2026-07-06T23:50Z) —
+    **`exists_subgroupLocus` (KM 1.3.7) PROVED sorry-free, standard axioms**
+    (delegated; 615 lines of subgroupLocusAux_* privates). CONSTRUCTION:
+    Z := Z₁ ⊔ Z₂ ⊔ Z₃ — Z₁ = T-D14 at [e] := sectionDivisor E.zero;
+    Z₂ = T-D14 at inv*D (NEW private invD := comap along mulByHom (-1);
+    SIMPLIFICATION vs banked plan: ONE incidence-LE locus suffices — the single
+    containment powers neg_mem both ways by comap calculus, no EQ-locus);
+    Z₃ = vanishingLocus q (T-D14-over-W at the tautological-pair-sum section),
+    W := D ×ₛ D — vanishingLocus IS the (deg D)²-descent. Conditions
+    normalized t-level: comap-⊥/comap-≤ forms. DICTIONARY (the new content):
+    ⟸ AddSubgroup with carrier {P | (D.bc t).ideal.comap P.1 = ⊥}; ⟹
+    instantiations at 𝟙, the universal D_T-point, the tautological pair over
+    T ×ₛ W. KEY DEFEQ WINS: point-addition val is `rfl`-transparent
+    (`(P+Q).1 = pullback.lift P.1 Q.1 _ ≫ μ` — Equiv.addCommGroup transport +
+    Hom.mul_def + Over.lift_left all defeq); μ-projection via
+    `Over.μ_pullback_left_fst_fst'` mathlib lemmas. GOTCHAS OF RECORD:
+    (1) the asSection/baseChange defeq-straddling trap is PERVASIVE — raw-typed
+    aliases + obtain-rebinding at raw types + Iff.of_eq (congrArg (· = ⊥) h)
+    instead of rw at mixed junctions; (2) pin pullback.lift's (f :=) at bc-
+    spellings; (3) AddSubgroup anonymous-constructor field ORDER is add/zero/neg
+    (declaration order); (4) Hom.mul_def lives at CategoryTheory.Hom.*; (5)
+    DEDUP for /cleanup post-merge: subgroupLocusAux_{zero_val,mulBy_comp,
+    mulByHom_neg_one_involutive} duplicate point_zero_val (TorsionFibre:254) +
+    GammaH.lean:409-441 lemmas (outside Incidence's import closure — flagged,
+    not fixed, imports were frozen). Incidence.lean remaining sorries: ONLY
+    T-D17 + T-D18. v8 note: T-W8 consumes these loci over the atlas U.
     Route banked in the T-D15 done-note: three loci sup + vanishingLocus-as-
     coordinate-descent for condition (3) + the IsSubgroup ⟺ three-conditions
     dictionary (functor-of-points AddSubgroup form per ExactOrder.lean:91).
