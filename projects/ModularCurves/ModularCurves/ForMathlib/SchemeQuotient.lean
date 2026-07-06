@@ -796,6 +796,7 @@ private noncomputable def quotientGlueData : Scheme.GlueData where
 
 /-- **The quotient of a scheme by a finite group action** (T-Q5d): the local
 quotients of a stable affine atlas, glued. -/
+@[reducible]
 noncomputable def quotient : Scheme.{u} := (quotientGlueData σ V hVs hVa).glued
 
 /-- The chart composites into the quotient agree on overlaps. -/
@@ -821,26 +822,25 @@ private theorem chartCompat (i j : X) :
 
 variable (hVmem : ∀ x : X, x ∈ V x)
 
-/-- The quotient projection `X ⟶ X/G`, glued from the local quotient
-projections. -/
-noncomputable def quotientπ : X ⟶ σ.quotient V hVs hVa := by
-  refine ((Scheme.Cover.mkOfCovers (J := ↥X)
-      (fun x => (V x : Scheme.{u}))
-      (fun x => (V x).ι)
-      (fun x => by
-        have h : x ∈ Set.range ⇑(V x).ι := by
-          rw [Scheme.Opens.range_ι]
-          exact hVmem x
-        obtain ⟨v, hv⟩ := h
-        exact ⟨x, v, hv⟩)
-      (fun x => inferInstance) : X.OpenCover)).glueMorphisms
-    (fun x => σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x)
-    ?_
-  intro x y
-  show pullback.fst ((V x).ι) ((V y).ι) ≫
+/-- The atlas cover of `X` by the stable affine opens. -/
+@[reducible]
+private noncomputable def atlasCover : X.OpenCover :=
+  Scheme.Cover.mkOfCovers (J := ↥X)
+    (fun x => (V x : Scheme.{u}))
+    (fun x => (V x).ι)
+    (fun x => by
+      have h : x ∈ Set.range ⇑(V x).ι := by
+        rw [Scheme.Opens.range_ι]
+        exact hVmem x
+      obtain ⟨v, hv⟩ := h
+      exact ⟨x, v, hv⟩)
+    (fun x => inferInstance)
+
+private theorem quotientπCompat (x y : X) :
+    pullback.fst ((V x).ι) ((V y).ι) ≫
       (σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x) =
     pullback.snd ((V x).ι) ((V y).ι) ≫
-      (σ.localQuotientπ (hVs y) (hVa y) ≫ (quotientGlueData σ V hVs hVa).ι y)
+      (σ.localQuotientπ (hVs y) (hVa y) ≫ (quotientGlueData σ V hVs hVa).ι y) := by
   have htop : (V y).ι ⁻¹ᵁ (V y) = ⊤ := by
     refine TopologicalSpace.Opens.ext (Set.eq_univ_of_forall fun v => ?_)
     show (V y).ι v ∈ (V y : Set X)
@@ -854,6 +854,36 @@ noncomputable def quotientπ : X ⟶ σ.quotient V hVs hVa := by
   rw [← cancel_epi H.isoPullback.hom, H.isoPullback_hom_fst_assoc,
     H.isoPullback_hom_snd_assoc]
   exact chartCompat σ V hVs hVa x y
+
+/-- The quotient projection `X ⟶ X/G`, glued from the local quotient
+projections. -/
+noncomputable def quotientπ : X ⟶ σ.quotient V hVs hVa :=
+  (atlasCover V hVmem).glueMorphisms
+    (fun x => σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x)
+    (fun x y => quotientπCompat σ V hVs hVa x y)
+
+/-- Defining property of the quotient projection on each chart. -/
+theorem opensι_quotientπ (x : X) :
+    (V x).ι ≫ σ.quotientπ V hVs hVa hVmem =
+      σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x :=
+  (atlasCover V hVmem).ι_glueMorphisms
+    (fun x => σ.localQuotientπ (hVs x) (hVa x) ≫ (quotientGlueData σ V hVs hVa).ι x)
+    (fun x y => quotientπCompat σ V hVs hVa x y) x
+
+/-- **Invariance of the quotient projection** (T-Q5d contract, part 1):
+`σ.hom g ≫ quotientπ = quotientπ`. -/
+theorem hom_quotientπ (g : G) :
+    σ.hom g ≫ σ.quotientπ V hVs hVa hVmem = σ.quotientπ V hVs hVa hVmem := by
+  have key : ∀ x' : X, (V x').ι ≫ σ.hom g ≫ σ.quotientπ V hVs hVa hVmem =
+      (V x').ι ≫ σ.quotientπ V hVs hVa hVmem := by
+    intro x'
+    have hres : (V x').ι ≫ σ.hom g =
+        (σ.hom g).resLE (V x') (V x') ((hVs x').le_preimage g) ≫ (V x').ι :=
+      (Scheme.Hom.resLE_comp_ι _ _).symm
+    rw [← Category.assoc, hres, Category.assoc,
+      opensι_quotientπ σ V hVs hVa hVmem x',
+      resLE_localQuotientπ_assoc σ (hVs x') (hVa x') g]
+  exact (atlasCover V hVmem).hom_ext _ _ fun x => key x
 
 end Glue
 
