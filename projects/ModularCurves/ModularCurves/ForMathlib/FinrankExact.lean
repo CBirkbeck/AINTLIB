@@ -29,8 +29,11 @@ This is the degree-additivity engine for sums of relative effective Cartier divi
 (KM 1.2.3: the ideal-product SES `0 → A/gA → A/fgA → A/fA → 0`).
 
 Upstream candidates: mathlib has `Exact.splitSurjectiveEquiv` (splitting from a given
-section), `Module.finrank_prod` and `Module.rankAtStalk_prod`, and an
-Euler-characteristic lemma over division rings, but none of the three statements above.
+section), `Module.finrank_prod` and `Module.rankAtStalk_prod`, an Euler-characteristic
+lemma over division rings, and the bundled single-universe analogue
+`ModuleCat.free_shortExact_finrank_add` (`ShortComplex (ModuleCat R)`, one universe,
+`Ring R`) — but none of the three statements above in unbundled, multi-universe,
+Semiring/CommRing form.
 -/
 
 open Module
@@ -52,12 +55,10 @@ theorem Function.Exact.nonempty_linearEquiv_prod_of_projective [Module.Projectiv
 
 /-- Rank additivity in a short exact sequence `0 → M → N → P → 0` of modules with
 `M` and `P` finite free. -/
-theorem Module.finrank_eq_add_of_exact [StrongRankCondition R]
-    [Module.Free R M] [Module.Finite R M] [Module.Free R P] [Module.Finite R P]
-    (h : Function.Exact f g) (hf : Function.Injective f) (hg : Function.Surjective g) :
-    finrank R N = finrank R M + finrank R P := by
-  obtain ⟨e⟩ := h.nonempty_linearEquiv_prod_of_projective hf hg
-  rw [e.finrank_eq, Module.finrank_prod]
+theorem Module.finrank_eq_add_of_exact [StrongRankCondition R] [Module.Free R M] [Module.Finite R M]
+    [Module.Free R P] [Module.Finite R P] (h : Function.Exact f g) (hf : Function.Injective f)
+    (hg : Function.Surjective g) : finrank R N = finrank R M + finrank R P :=
+  (h.nonempty_linearEquiv_prod_of_projective hf hg).elim fun e ↦ e.finrank_eq.trans finrank_prod
 
 end Split
 

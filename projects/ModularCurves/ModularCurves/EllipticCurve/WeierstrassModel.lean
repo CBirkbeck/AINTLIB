@@ -2396,6 +2396,17 @@ theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
   exact inferInstanceAs (IsIso (h.isoPullback.symm ≪≫
     (isPullback_piece (R' := R') W i).isoPullback).hom)
 
+/-- **(T-A5a, headline)** The projective model of `W.map f` is the base change of the
+projective model of `W` along `Spec f`. -/
+theorem isPullback_projModelBaseChange (W : WeierstrassCurve R) :
+    IsPullback (projModelBaseChange (algebraMap R R') W)
+      (projModelπ (W.map (algebraMap R R'))) (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap R R'))) := by
+  haveI := projModelBaseChangeLift_isIso (R' := R') W
+  exact IsPullback.of_iso_pullback ⟨projModelBaseChange_π (algebraMap R R') W⟩
+    (asIso (projModelBaseChangeLift (algebraMap R R') W))
+    (Limits.pullback.lift_fst _ _ _) (Limits.pullback.lift_snd _ _ _)
+
 end TensorComparison
 
 end BaseChangeGraded

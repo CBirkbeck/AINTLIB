@@ -61,6 +61,71 @@ def FibrewiseElliptic {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z �
       e.hom ≫ projModelπ W = π.fiberToSpecResidueField s ∧
       sectionFiberPoint π z hz s ≫ e.hom = projModelZero W
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-A5b)** Fibrewise ellipticity is stable under base change: the fibre of the
+pulled-back family at `t` is the fibre at `g t` extended to `κ(t)`, and the projective
+Weierstrass model base-changes accordingly (`isPullback_projModelBaseChange`). -/
+lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
+    {hz : z ≫ π = 𝟙 S} (h : FibrewiseElliptic π z hz) (g : T ⟶ S) :
+    FibrewiseElliptic (pullback.snd π g)
+      (pullback.lift (g ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]))
+      (pullback.lift_snd _ _ _) := by
+  intro t
+  obtain ⟨W, hell, e_s, heπ, hez⟩ := h (g t)
+  letI : Algebra (S.residueField (g t)) (T.residueField t) :=
+    (g.residueFieldMap t).hom.toAlgebra
+  haveI := hell
+  have hA : IsPullback
+      (((pullback.map (pullback.snd π g) (T.fromSpecResidueField t) π
+          (S.fromSpecResidueField (g t)) (pullback.fst π g)
+          (Spec.map (g.residueFieldMap t)) g
+          (IsPullback.of_hasPullback π g).w.symm (by simp)) :
+        (pullback.snd π g).fiber t ⟶ π.fiber (g t)) ≫ e_s.hom)
+      ((pullback.snd π g).fiberToSpecResidueField t)
+      (projModelπ W) (Spec.map (g.residueFieldMap t)) := by
+    refine (isPullback_fiberToSpecResidueField_of_isPullback
+      (IsPullback.of_hasPullback π g) t).of_iso (Iso.refl _) e_s (Iso.refl _) (Iso.refl _)
+      (by simp) (by simp)
+      (by rw [Iso.refl_hom, Category.comp_id]; exact heπ.symm) (by simp)
+  have hB : IsPullback
+      (projModelBaseChange (algebraMap (S.residueField (g t)) (T.residueField t)) W)
+      (projModelπ (W.map (algebraMap (S.residueField (g t)) (T.residueField t))))
+      (projModelπ W) (Spec.map (g.residueFieldMap t)) := by
+    have hbc := isPullback_projModelBaseChange (R' := T.residueField t) W
+    rwa [show CommRingCat.ofHom
+      (algebraMap (S.residueField (g t)) (T.residueField t)) =
+      g.residueFieldMap t from rfl] at hbc
+  refine ⟨W.map (algebraMap (S.residueField (g t)) (T.residueField t)), inferInstance,
+    hA.isoPullback ≪≫ hB.isoPullback.symm, ?_, ?_⟩
+  · simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+    rw [(Iso.inv_comp_eq _).mpr hB.isoPullback_hom_snd.symm, hA.isoPullback_hom_snd]
+  · rw [← cancel_mono hB.isoPullback.hom]
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id,
+      Category.comp_id]
+    have hnat : sectionFiberPoint (pullback.snd π g) (pullback.lift (g ≫ z) (𝟙 T)
+          (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]))
+          (pullback.lift_snd _ _ _) t ≫
+        ((pullback.map (pullback.snd π g) (T.fromSpecResidueField t) π
+          (S.fromSpecResidueField (g t)) (pullback.fst π g)
+          (Spec.map (g.residueFieldMap t)) g
+          (IsPullback.of_hasPullback π g).w.symm (by simp)) :
+          (pullback.snd π g).fiber t ⟶ π.fiber (g t)) =
+        Spec.map (g.residueFieldMap t) ≫ sectionFiberPoint π z hz (g t) := by
+      apply pullback.hom_ext
+      · simp [sectionFiberPoint, Category.assoc]
+      · simp [sectionFiberPoint, Category.assoc]
+        exact Category.id_comp _
+    apply pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [hA.isoPullback_hom_fst, hB.isoPullback_hom_fst, projModelZero_baseChange,
+        show Spec.map (CommRingCat.ofHom (algebraMap (S.residueField (g t))
+          (T.residueField t))) = Spec.map (g.residueFieldMap t) from rfl,
+        ← hez, reassoc_of% hnat]
+    · simp only [Category.assoc]
+      rw [hA.isoPullback_hom_snd, hB.isoPullback_hom_snd, projModelZero_projModelπ]
+      exact pullback.lift_snd _ _ _
+
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
 expressed via `FibrewiseElliptic`.
