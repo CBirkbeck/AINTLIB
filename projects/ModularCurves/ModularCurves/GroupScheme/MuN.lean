@@ -585,28 +585,32 @@ pair once `N` is invertible. Any `S` with `N` invertible factors through
 
 private abbrev muNAwayRing (N : ℕ) : Type u := ULift.{u} (Localization.Away (N : ℤ))
 
-private abbrev muNModelPoly (N : ℕ) : Polynomial (muNAwayRing N) :=
+private abbrev muNModelPoly (A : Type u) [CommRing A] (N : ℕ) : Polynomial A :=
   X ^ N - 1
 
-private def muNModelRing (N : ℕ) : CommRingCat.{u} := .of (AdjoinRoot (muNModelPoly N))
+private def muNModelRing (A : Type u) [CommRing A] (N : ℕ) : CommRingCat.{u} :=
+  .of (AdjoinRoot (muNModelPoly A N))
 
-/-- `ℤ → ℤ[1/N]`, universe-lifted. -/
-private def muNAwayMap (N : ℕ) : CommRingCat.of (ULift.{u} ℤ) ⟶ .of (muNAwayRing N) :=
-  CommRingCat.ofHom ((Int.castRingHom _).comp ULift.ringEquiv.toRingHom)
+/-- The unique map `ℤ → A`, universe-lifted. -/
+private def muNBaseMap (A : Type u) [CommRing A] :
+    CommRingCat.of (ULift.{u} ℤ) ⟶ .of A :=
+  CommRingCat.ofHom ((Int.castRingHom A).comp ULift.ringEquiv.toRingHom)
 
-/-- The structure map of the model. -/
-private def muNModelStruct (N : ℕ) : CommRingCat.of (muNAwayRing N) ⟶ muNModelRing N :=
-  CommRingCat.ofHom (AdjoinRoot.of (muNModelPoly N))
+/-- The structure map of the model over `A`. -/
+private def muNModelStruct (A : Type u) [CommRing A] (N : ℕ) :
+    CommRingCat.of A ⟶ muNModelRing A N :=
+  CommRingCat.ofHom (AdjoinRoot.of (muNModelPoly A N))
 
-private lemma muNModel_root_pow (N : ℕ) :
-    (AdjoinRoot.root (muNModelPoly N)) ^ N = 1 := by
-  have h := AdjoinRoot.mk_self (f := muNModelPoly N)
+private lemma muNModel_root_pow (A : Type u) [CommRing A] (N : ℕ) :
+    (AdjoinRoot.root (muNModelPoly A N)) ^ N = 1 := by
+  have h := AdjoinRoot.mk_self (f := muNModelPoly A N)
   rw [muNModelPoly, map_sub, map_pow, map_one, AdjoinRoot.mk_X, sub_eq_zero] at h
   exact h
 
-/-- The comparison `ℤ[T]/(Tᴺ−1) → ℤ[1/N][T]/(Tᴺ−1)`, classifying the root. -/
-private def muNModelCompare (N : ℕ) : muNRing N ⟶ muNModelRing N :=
-  muNRingLift (AdjoinRoot.root (muNModelPoly N)) (muNModel_root_pow N)
+/-- The comparison `ℤ[T]/(Tᴺ−1) → A[T]/(Tᴺ−1)`, classifying the root. -/
+private def muNModelCompare (A : Type u) [CommRing A] (N : ℕ) :
+    muNRing N ⟶ muNModelRing A N :=
+  muNRingLift (AdjoinRoot.root (muNModelPoly A N)) (muNModel_root_pow A N)
 
 /-- Ring homomorphisms out of `ULift ℤ` agree. -/
 private lemma uliftZ_hom_ext {R : CommRingCat.{u}} {f g : CommRingCat.of (ULift.{u} ℤ) ⟶ R} :
@@ -617,53 +621,54 @@ private lemma uliftZ_hom_ext {R : CommRingCat.{u}} {f g : CommRingCat.of (ULift.
   obtain ⟨x⟩ := x
   exact DFunLike.congr_fun key x
 
-private lemma muNModel_eval₂_vanish (N : ℕ) {Rc : CommRingCat.{u}}
-    (i : muNAwayRing N →+* Rc) (x : Rc) (hx : x ^ N = 1) :
-    (muNModelPoly N).eval₂ i x = 0 := by
+private lemma muNModel_eval₂_vanish (A : Type u) [CommRing A] (N : ℕ)
+    {Rc : CommRingCat.{u}} (i : A →+* Rc) (x : Rc) (hx : x ^ N = 1) :
+    (muNModelPoly A N).eval₂ i x = 0 := by
   simp [muNModelPoly, hx]
 
-private lemma pushout_inr_gen_pow (N : ℕ) (s : PushoutCocone (muNAwayMap N) (muNRingMap N)) :
+private lemma pushout_inr_gen_pow (A : Type u) [CommRing A] (N : ℕ)
+    (s : PushoutCocone (muNBaseMap A) (muNRingMap N)) :
     (s.inr (muNRingGen N)) ^ N = 1 := by
   rw [← map_pow, muNRingGen_pow, map_one]
 
-/-- The model is the pushout (base change) of `μ_N`'s coordinate ring to `ℤ[1/N]`. -/
-private lemma muNModel_isPushout (N : ℕ) :
-    IsPushout (muNAwayMap N) (muNRingMap N) (muNModelStruct N) (muNModelCompare N) := by
-  have test : ∀ (s : PushoutCocone (muNAwayMap N) (muNRingMap N)),
-      (muNModelPoly N).eval₂ (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N)) = 0 :=
-    fun s ↦ muNModel_eval₂_vanish N (s.inl.hom : muNAwayRing N →+* s.pt)
-      (s.inr (muNRingGen N)) (pushout_inr_gen_pow N s)
+/-- The model over `A` is the pushout (base change) of `μ_N`'s coordinate ring. -/
+private lemma muNModel_isPushout (A : Type u) [CommRing A] (N : ℕ) :
+    IsPushout (muNBaseMap A) (muNRingMap N) (muNModelStruct A N) (muNModelCompare A N) := by
+  have test : ∀ (s : PushoutCocone (muNBaseMap A) (muNRingMap N)),
+      (muNModelPoly A N).eval₂ (s.inl.hom : A →+* s.pt) (s.inr (muNRingGen N)) = 0 :=
+    fun s ↦ muNModel_eval₂_vanish A N (s.inl.hom : A →+* s.pt)
+      (s.inr (muNRingGen N)) (pushout_inr_gen_pow A N s)
   refine IsPushout.of_isColimit' ⟨uliftZ_hom_ext⟩ (PushoutCocone.IsColimit.mk _
-    (fun s ↦ CommRingCat.ofHom (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt)
+    (fun s ↦ CommRingCat.ofHom (AdjoinRoot.lift (s.inl.hom : A →+* s.pt)
       (s.inr (muNRingGen N)) (test s)))
     (fun s ↦ CommRingCat.hom_ext (AdjoinRoot.lift_comp_of (test s)))
     (fun s ↦ muNRing_hom_ext (by
       rw [CommRingCat.comp_apply,
-        show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
+        show (muNModelCompare A N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly A N) from
           muNRingLift_gen _ _]
-      show AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N)) (test s)
-        (AdjoinRoot.root (muNModelPoly N)) = s.inr (muNRingGen N)
+      show AdjoinRoot.lift (s.inl.hom : A →+* s.pt) (s.inr (muNRingGen N)) (test s)
+        (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N)
       exact AdjoinRoot.lift_root (test s)))
     (fun s m' hleft hright ↦ ?_))
-  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) = s.inl.hom := by
+  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) = s.inl.hom := by
     have h3 := congrArg CommRingCat.Hom.hom hleft
     exact h3
-  have hX : m'.hom (AdjoinRoot.root (muNModelPoly N)) = s.inr (muNRingGen N) := by
+  have hX : m'.hom (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N) := by
     have h2 := congrArg (fun (t : muNRing N ⟶ s.pt) ↦ t (muNRingGen N)) hright
     simpa [CommRingCat.comp_apply,
-      show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
+      show (muNModelCompare A N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly A N) from
         muNRingLift_gen _ _] using h2
-  have key : m'.hom.comp (AdjoinRoot.mk (muNModelPoly N)) =
-      (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N))
-        (test s)).comp (AdjoinRoot.mk (muNModelPoly N)) := by
+  have key : m'.hom.comp (AdjoinRoot.mk (muNModelPoly A N)) =
+      (AdjoinRoot.lift (s.inl.hom : A →+* s.pt) (s.inr (muNRingGen N))
+        (test s)).comp (AdjoinRoot.mk (muNModelPoly A N)) := by
     refine Polynomial.ringHom_ext' ?_ ?_
-    · rw [show (m'.hom.comp (AdjoinRoot.mk (muNModelPoly N))).comp Polynomial.C =
-          m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) from rfl, hC]
+    · rw [show (m'.hom.comp (AdjoinRoot.mk (muNModelPoly A N))).comp Polynomial.C =
+          m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) from rfl, hC]
       exact (AdjoinRoot.lift_comp_of (test s)).symm
-    · have hmkX : (AdjoinRoot.mk (muNModelPoly N)) X = AdjoinRoot.root (muNModelPoly N) :=
+    · have hmkX : (AdjoinRoot.mk (muNModelPoly A N)) X = AdjoinRoot.root (muNModelPoly A N) :=
         AdjoinRoot.mk_X
       exact ((congrArg (fun t ↦ m'.hom t) hmkX).trans hX).trans
-        (((congrArg (fun t ↦ (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt)
+        (((congrArg (fun t ↦ (AdjoinRoot.lift (s.inl.hom : A →+* s.pt)
           (s.inr (muNRingGen N)) (test s)) t) hmkX).trans
             (AdjoinRoot.lift_root (test s))).symm)
   refine CommRingCat.hom_ext (RingHom.ext fun x ↦ ?_)
@@ -680,38 +685,40 @@ private lemma muNAway_natCast_isUnit (N : ℕ) [NeZero N] : IsUnit (N : muNAwayR
 
 /-- `(Xᴺ − 1, C N)` is a standard étale pair: `f'·X − N·f = N`. -/
 private def muNStdPair (N : ℕ) [NeZero N] : StandardEtalePair (muNAwayRing N) where
-  f := muNModelPoly N
+  f := muNModelPoly (muNAwayRing N) N
   monic_f := by simpa using Polynomial.monic_X_pow_sub_C (1 : muNAwayRing N) (NeZero.ne N)
   g := Polynomial.C (N : muNAwayRing N)
   cond := by
     refine ⟨X, -Polynomial.C (N : muNAwayRing N), 1, ?_⟩
     have h1 : (X : (muNAwayRing N)[X]) ^ (N - 1) * X = X ^ N := by
       rw [← pow_succ, Nat.sub_add_cancel NeZero.one_le]
-    have hder : derivative (muNModelPoly N)
+    have hder : derivative (muNModelPoly (muNAwayRing N) N)
         = Polynomial.C (N : muNAwayRing N) * X ^ (N - 1) := by
       simp [muNModelPoly, Polynomial.derivative_X_pow]
     rw [hder, mul_assoc, h1]
     ring
 
 private lemma muNModel_algebra_etale (N : ℕ) [NeZero N] :
-    Algebra.Etale (muNAwayRing N) (AdjoinRoot (muNModelPoly N)) := by
+    Algebra.Etale (muNAwayRing N) (AdjoinRoot (muNModelPoly (muNAwayRing N) N)) := by
   have hg : IsUnit (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g) := by
-    show IsUnit (AdjoinRoot.mk (muNModelPoly N) (Polynomial.C (N : muNAwayRing N)))
+    show IsUnit (AdjoinRoot.mk (muNModelPoly (muNAwayRing N) N)
+      (Polynomial.C (N : muNAwayRing N)))
     rw [AdjoinRoot.mk_C]
-    exact (muNAway_natCast_isUnit N).map (AdjoinRoot.of (muNModelPoly N))
+    exact (muNAway_natCast_isUnit N).map (AdjoinRoot.of (muNModelPoly (muNAwayRing N) N))
   have e2 := IsLocalization.atUnits (AdjoinRoot (muNStdPair N).f)
     (Submonoid.powers (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g))
     (S := Localization.Away (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g))
     (Submonoid.powers_le.mpr ((IsUnit.mem_submonoid_iff _).mpr hg))
-  have e3 : (muNStdPair N).Ring ≃ₐ[muNAwayRing N] AdjoinRoot (muNModelPoly N) :=
+  have e3 : (muNStdPair N).Ring ≃ₐ[muNAwayRing N]
+      AdjoinRoot (muNModelPoly (muNAwayRing N) N) :=
     (muNStdPair N).equivAwayAdjoinRoot.trans
       (AlgEquiv.restrictScalars (muNAwayRing N) e2).symm
   exact Algebra.Etale.of_equiv e3
 
 private lemma muNModelStruct_etale (N : ℕ) [NeZero N] :
-    RingHom.Etale (muNModelStruct N).hom := by
+    RingHom.Etale (muNModelStruct (muNAwayRing N) N).hom := by
   have h5 := (RingHom.etale_algebraMap (R := muNAwayRing N)
-    (S := AdjoinRoot (muNModelPoly N))).mpr (muNModel_algebra_etale N)
+    (S := AdjoinRoot (muNModelPoly (muNAwayRing N) N))).mpr (muNModel_algebra_etale N)
   rw [AdjoinRoot.algebraMap_eq] at h5
   exact h5
 
@@ -719,7 +726,29 @@ private lemma muNModelStruct_etale (N : ℕ) [NeZero N] :
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
 for `S = ∅`). -/
 private lemma etale_muNπ_of_isUnit (S : Scheme.{u}) (N : ℕ) [NeZero N]
-    (h : IsUnit (N : Γ(S, ⊤))) : Etale (muNπ S N) := by sorry
+    (h : IsUnit (N : Γ(S, ⊤))) : Etale (muNπ S N) := by
+  have hZ : IsUnit ((Int.castRingHom Γ(S, ⊤)) (N : ℤ)) := by simpa using h
+  let ψ : muNAwayRing N →+* Γ(S, ⊤) :=
+    (IsLocalization.Away.lift (N : ℤ) hZ).comp ULift.ringEquiv.toRingHom
+  let factor : S ⟶ Spec (.of (muNAwayRing N)) :=
+    S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom ψ)
+  have hfactor : factor ≫ Spec.map (muNBaseMap (muNAwayRing N))
+      = terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom :=
+    specULiftZIsTerminal.hom_ext _ _
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _
+    (muNModel_isPushout (muNAwayRing N) N)).flip
+  have big := (isPullback_muN S N).flip
+  rw [← hfactor] at big
+  let mid := t.lift (pullback.snd (terminal.from S) (terminal.from (muNAbs N)))
+    (muNπ S N ≫ factor) (by rw [← Category.assoc]; exact big.w)
+  have hmid1 : mid ≫ Spec.map (muNModelCompare (muNAwayRing N) N) = pullback.snd _ _ :=
+    t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct (muNAwayRing N) N) = muNπ S N ≫ factor :=
+    t.lift_snd _ _ _
+  rw [← hmid1] at big
+  have LEFT := IsPullback.of_right big hmid2 t
+  exact MorphismProperty.of_isPullback LEFT
+    (HasRingHomProperty.Spec_iff.mpr (muNModelStruct_etale N))
 
 private lemma isUnit_of_etale_muNπ (S : Scheme.{u}) (N : ℕ) [NeZero N]
     (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by sorry

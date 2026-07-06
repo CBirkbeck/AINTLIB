@@ -5,6 +5,7 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2d (step 4).
 -/
+import ModularCurves.ForMathlib.AwayCongr
 import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -152,6 +153,55 @@ noncomputable def homogenizeAt (i : σ) :
     MvPolynomial {j : σ // j ≠ i} R →+*
       Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R) :=
   eval₂Hom (awayConstHom R i) (awayVar R i)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Homogenisation commutes with coefficient maps, through the graded `Away.map`
+and the transport along `map g (X i) = X i`. -/
+lemma homogenizeAt_map {S : Type*} [CommRing S] (g : R →+* S) (i : σ)
+    (p : MvPolynomial {j : σ // j ≠ i} R) :
+    homogenizeAt S i (MvPolynomial.map g p) =
+      ModularCurves.awayCongr (𝒜 := homogeneousSubmodule σ S)
+        (MvPolynomial.map_X g i)
+        ((HomogeneousLocalization.Away.map
+          (⟨MvPolynomial.map g, fun {n x} hx =>
+            (mem_homogeneousSubmodule _ _).mpr
+              (((mem_homogeneousSubmodule _ _).mp hx).map g)⟩ :
+            GradedRingHom (homogeneousSubmodule σ R) (homogeneousSubmodule σ S))
+          (X i)) (homogenizeAt R i p)) := by
+  induction p using MvPolynomial.induction_on with
+  | C r =>
+    rw [MvPolynomial.map_C]
+    have hS : homogenizeAt S i (C (g r)) = awayConst S i (g r) := eval₂Hom_C _ _ _
+    have hR : homogenizeAt R i (C r) = awayConst R i r := eval₂Hom_C _ _ _
+    rw [hS, hR]
+    rw [awayConst, awayConst, HomogeneousLocalization.Away.map_mk,
+      ModularCurves.awayCongr_mk]
+    apply val_injective
+    rw [Away.val_mk, Away.val_mk]
+    rw [show ((⟨MvPolynomial.map g, fun {n x} hx =>
+        (mem_homogeneousSubmodule _ _).mpr
+          (((mem_homogeneousSubmodule _ _).mp hx).map g)⟩ :
+        GradedRingHom (homogeneousSubmodule σ R) (homogeneousSubmodule σ S))
+        (C r) : MvPolynomial σ S) = MvPolynomial.map g (C r) from rfl,
+      MvPolynomial.map_C]
+  | add p q hp hq =>
+    simp only [map_add, hp, hq]
+  | mul_X p k hp =>
+    rw [map_mul, map_mul, hp, MvPolynomial.map_X g k]
+    have hS : homogenizeAt S i (X k) = awayVar S i k := eval₂Hom_X' _ _ _
+    have hR : homogenizeAt R i (X k) = awayVar R i k := eval₂Hom_X' _ _ _
+    rw [hS, map_mul, map_mul, map_mul, hR]
+    congr 1
+    rw [awayVar, awayVar, HomogeneousLocalization.Away.map_mk,
+      ModularCurves.awayCongr_mk]
+    apply val_injective
+    rw [Away.val_mk, Away.val_mk]
+    rw [show ((⟨MvPolynomial.map g, fun {n x} hx =>
+        (mem_homogeneousSubmodule _ _).mpr
+          (((mem_homogeneousSubmodule _ _).mp hx).map g)⟩ :
+        GradedRingHom (homogeneousSubmodule σ R) (homogeneousSubmodule σ S))
+        (X k.1) : MvPolynomial σ S) = MvPolynomial.map g (X k.1) from rfl,
+      MvPolynomial.map_X]
 
 private lemma dehomog_lift_mk_one (i : σ) (a : MvPolynomial σ R) :
     Localization.awayLift (dehomogenizeAux R i) (X i)
