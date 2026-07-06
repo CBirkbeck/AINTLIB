@@ -79,7 +79,6 @@ abbrev constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A �
 
 section PointsFunctor
 
-/-- The universal `N`-th root of unity: the class of `T` in `ℤ[T]/(Tᴺ − 1)`. -/
 private def muNRingGen (N : ℕ) : muNRing N :=
   ULift.up (Ideal.Quotient.mk _ (X : Polynomial ℤ))
 
