@@ -2223,6 +2223,52 @@ private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
   exact (bc_chart_value (R' := R') W j p).symm
 
 set_option backward.isDefEq.respectTransparency false in
+/-- `Proj.awayι` absorbs the transport along an element equality. -/
+private lemma awayι_awayCongr (W' : WeierstrassCurve R') {s t : projCoordRing W'}
+    (h : s = t) (hs : s ∈ quotientGrading (projIdeal W') 1) :
+    Spec.map ((awayCongr (𝒜 := quotientGrading (projIdeal W'))
+        h).toCommRingCatIso.hom) ≫
+      Proj.awayι (quotientGrading (projIdeal W')) s hs one_pos =
+    Proj.awayι (quotientGrading (projIdeal W')) t (h ▸ hs) one_pos := by
+  subst h
+  rw [show ((awayCongr (𝒜 := quotientGrading (projIdeal W'))
+      (rfl : s = s)).toCommRingCatIso.hom) = 𝟙 _ from rfl]
+  rw [Spec.map_id, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The chart of the base-changed model over its own structure map, θ-form. -/
+private lemma theta_awayι_π (W : WeierstrassCurve R) (j : Fin 3) :
+    (thetaIso (R' := R') W j).hom ≫
+      Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))
+        ((baseChangeGradedHom (algebraMap R R') W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+        ((baseChangeGradedHom (algebraMap R R') W).2
+          (mk_X_mem_quotientGrading_one W j)) one_pos ≫
+      projModelπ (W.map (algebraMap R R')) =
+    Spec.map (CommRingCat.ofHom (algebraMap R'
+      (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' j
+          (W.map (algebraMap R R')).toProjective.polynomial}))) := by
+  simp only [thetaIso, Iso.trans_hom, asIso_hom, Category.assoc]
+  rw [reassoc_of% (awayι_awayCongr (W.map (algebraMap R R'))
+    (baseChangeGradedHom_mk_X (R' := R') W j)
+    ((baseChangeGradedHom (algebraMap R R') W).2
+      (mk_X_mem_quotientGrading_one W j)))]
+  rw [show (baseChangeGradedHom_mk_X (R' := R') W j) ▸
+      ((baseChangeGradedHom (algebraMap R R') W).2
+        (mk_X_mem_quotientGrading_one W j)) =
+      mk_X_mem_quotientGrading_one (W.map (algebraMap R R')) j from rfl]
+  rw [awayι_projModelπ (W.map (algebraMap R R')) j]
+  rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  congr 1
+  rw [algebraMap_chart_eq (W.map (algebraMap R R')) j]
+  refine congrArg CommRingCat.ofHom ?_
+  refine RingHom.ext fun r => ?_
+  show (chartCoordEquiv (W.map (algebraMap R R')) j).symm
+    ((chartCoordEquiv (W.map (algebraMap R R')) j) ((algebraMap R' _) r)) = _
+  rw [RingEquiv.symm_apply_apply]
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The lift restricts over each cover piece to the base-changed chart. -/
 lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
     IsPullback
