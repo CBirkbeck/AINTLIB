@@ -398,6 +398,404 @@ theorem le_ker_iff_forall {X Y : Scheme.{u}} (I : Y.IdealSheafData) (f : X ⟶ Y
     I ≤ f.ker ↔ ∀ U : Y.affineOpens, I.ideal U ≤ RingHom.ker (f.app U.1).hom :=
   Scheme.IdealSheafData.le_ofIdeals_iff
 
+/-- A section of a scheme vanishes as soon as it vanishes near every point: the
+sheaf-injectivity workhorse behind the gluing steps of `vanishingLocus_le_ker_iff`. -/
+private theorem vanishingLocusAux_section_eq_zero {X : Scheme.{u}} {U₀ : X.Opens}
+    (x : Γ(X, U₀))
+    (h : ∀ q ∈ U₀, ∃ (V : X.Opens) (hle : V ≤ U₀), q ∈ V ∧
+      (X.presheaf.map (homOfLE hle).op).hom x = 0) : x = 0 := by
+  choose V hle hmem hzero using fun q : ↥U₀ => h q q.2
+  refine X.sheaf.eq_of_locally_eq' V U₀ (fun q => homOfLE (hle q))
+    (fun q hq => ?_) x 0 (fun q => ?_)
+  · exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨q, hq⟩, hmem ⟨q, hq⟩⟩
+  · show (X.presheaf.map (homOfLE (hle q)).op).hom x =
+      (X.presheaf.map (homOfLE (hle q)).op).hom 0
+    rw [map_zero]
+    exact hzero q
+
+open scoped TensorProduct in
+/-- The purely algebraic core of the vanishing-locus universal property, over a free
+piece: the vanishing ideal of `a` dies under `R → C` iff `a` dies in the base change
+`C ⊗[R] A` — the `PUnit`-instance of the bridge
+`forall_one_tmul_eq_zero_iff_span_coord_le_ker`. -/
+private theorem vanishingLocusAux_svi_le_ker_iff {R A C : Type u} [CommRing R]
+    [CommRing A] [CommRing C] [Algebra R A] [Algebra R C] [Module.Free R A] (a : A) :
+    sectionVanishingIdeal R A a ≤ RingHom.ker (algebraMap R C) ↔
+      (1 : C) ⊗ₜ[R] a = 0 := by
+  have key := forall_one_tmul_eq_zero_iff_span_coord_le_ker (R := R) (A := C) (B := A)
+    (Module.Free.chooseBasis R A) (fun _ : PUnit.{u + 1} => a)
+  rw [sectionVanishingIdeal_eq_span_coord R A (Module.Free.chooseBasis R A)]
+  constructor
+  · intro h
+    refine (key.mpr (le_trans (Ideal.span_le.mpr ?_) h)) PUnit.unit
+    rintro _ ⟨q, rfl⟩
+    exact Ideal.subset_span ⟨q.2, rfl⟩
+  · intro h
+    refine le_trans (Ideal.span_le.mpr ?_) (key.mp fun _ => h)
+    rintro _ ⟨i, rfl⟩
+    exact Ideal.subset_span ⟨(PUnit.unit, i), rfl⟩
+
+/-- The basic-open refinement of `exists_affineOpen_mem_free`: inside any affine open
+`U` and around any of its points there is a *basic* open of `U` over which the
+pushforward trivialises. (Same proof, but keeping the ambient affine `U` fixed, which
+is what the arbitrary-affine reduction of `vanishingLocus_le_ker_iff` needs.) -/
+private theorem vanishingLocusAux_exists_basicOpen_free (U : S.affineOpens) {s : S}
+    (hs : s ∈ U.1) :
+    ∃ r : Γ(S, U.1), s ∈ S.basicOpen r ∧
+      (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+       Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r)) := by
+  obtain ⟨U₀, hU₀⟩ := U
+  replace hs : s ∈ U₀ := hs
+  -- the sections over `U₀` are a finite flat finitely presented module
+  letI := ((p.app U₀).hom).toAlgebra
+  haveI hfin : Module.Finite Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := p.finite_app U₀ hU₀
+  haveI hfp : RingHom.FinitePresentation (p.appLE U₀ (p ⁻¹ᵁ U₀) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation p ‹_› ⟨U₀, hU₀⟩
+      ⟨p ⁻¹ᵁ U₀, hU₀.preimage p⟩ le_rfl
+  haveI hflat : RingHom.Flat (p.appLE U₀ (p ⁻¹ᵁ U₀) le_rfl).hom :=
+    HasRingHomProperty.appLE @Flat p ‹_› ⟨U₀, hU₀⟩ ⟨p ⁻¹ᵁ U₀, hU₀.preimage p⟩ le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfp hflat
+  haveI : Algebra.FinitePresentation Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := hfp
+  haveI : Module.FinitePresentation Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) :=
+    Module.FinitePresentation.of_finite_of_finitePresentation _ _
+  haveI : Module.Flat Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := hflat
+  -- finite + flat over the local ring at `s` gives freeness there; descend to some `D(r) ∋ s`
+  haveI : Module.Free (Localization.AtPrime (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal)
+      (LocalizedModule (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl Γ(W, p ⁻¹ᵁ U₀)) :=
+    Module.free_of_flat_of_isLocalRing
+  obtain ⟨r, hr, hfree, -⟩ := Module.FinitePresentation.exists_free_localizedModule_powers
+    (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl
+    (LocalizedModule.mkLinearMap (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl
+      Γ(W, p ⁻¹ᵁ U₀))
+    (Localization.AtPrime (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal)
+  refine ⟨r, ?_, ?_⟩
+  · -- membership: `r ∉ 𝔭ₛ` says exactly `s ∈ D(r)`
+    show s ∈ S.basicOpen r
+    have h1 : hU₀.primeIdealOf ⟨s, hs⟩ ∈ hU₀.fromSpec ⁻¹ᵁ S.basicOpen r := by
+      rw [hU₀.fromSpec_preimage_basicOpen]
+      exact hr
+    have h2 : hU₀.fromSpec (hU₀.primeIdealOf ⟨s, hs⟩) ∈ S.basicOpen r := h1
+    rwa [hU₀.fromSpec_primeIdealOf ⟨s, hs⟩] at h2
+  · -- freeness: transport `hfree` along the canonical identifications of the localizations
+    show (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+      Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r))
+    letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le r).op).hom).toAlgebra
+    letI := ((W.presheaf.map (homOfLE
+      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx)).op).hom).toAlgebra
+    letI := ((p.appLE U₀ (p ⁻¹ᵁ S.basicOpen r)
+      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx)).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U₀) Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI : IsScalarTower Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI hSloc : IsLocalization.Away r Γ(S, S.basicOpen r) :=
+      hU₀.isLocalization_basicOpen r
+    haveI hWloc := (hU₀.preimage p).isLocalization_of_eq_basicOpen
+      (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r)
+      (homOfLE (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx))
+      (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
+    haveI : IsLocalizedModule (Submonoid.powers r)
+        (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+          Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap := by
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U₀))
+          Γ(W, p ⁻¹ᵁ U₀) (Submonoid.powers r)) Γ(W, p ⁻¹ᵁ S.basicOpen r) := by
+        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U₀)) Γ(W, p ⁻¹ᵁ U₀)
+            (Submonoid.powers r) = Submonoid.powers
+              (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r) from
+          Submonoid.map_powers _ r]
+        exact hWloc
+      infer_instance
+    set e := (IsLocalization.algEquiv (Submonoid.powers r)
+      (Localization (Submonoid.powers r)) Γ(S, S.basicOpen r)).toRingEquiv
+    haveI := RingHomInvPair.of_ringEquiv e
+    haveI := RingHomInvPair.of_ringEquiv_symm e
+    refine (Module.Free.iff_of_equiv (σ := (e : Localization (Submonoid.powers r) →+*
+      Γ(S, S.basicOpen r))) ?_).mp hfree
+    have iso0 := IsLocalizedModule.iso (Submonoid.powers r)
+      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap
+    refine { __ := iso0, map_smul' := ?_ }
+    intro c x
+    obtain ⟨c, t, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers r) c
+    apply ((Module.End.isUnit_iff _).mp (IsLocalizedModule.map_units
+      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap t)).1
+    simp [e, ← map_smul, ← smul_assoc]
+
+/-- `appLE ⊤ ⊤` is `appTop` (the inclusion `⊤ ≤ f ⁻¹ᵁ ⊤` is the identity). -/
+private theorem vanishingLocusAux_appLE_top {X Y : Scheme.{u}} (f : X ⟶ Y)
+    (e : ⊤ ≤ f ⁻¹ᵁ ⊤) : f.appLE ⊤ ⊤ e = f.appTop := by
+  have h : f.appLE ⊤ (f ⁻¹ᵁ ⊤) le_rfl = f.appLE ⊤ ⊤ e := rfl
+  rw [← h, Scheme.Hom.appLE_eq_app]
+
+open scoped TensorProduct in
+omit [IsFinite p] [Flat p] [LocallyOfFinitePresentation p] in
+/-- The "algebra ⇒ geometry" half of the affine-local tensor dictionary: if a section
+`a` over `D ≤ p⁻¹U` dies in the base change `Γ(T,V) ⊗ Γ(W,D)`, then its pullback to
+the piece `fst⁻¹V ⊓ snd⁻¹D` of `T ×ₛ W` vanishes. Pure naturality: the coordinate
+rings of the piece receive a map *from* the tensor product (`productMap` of the two
+`appLE`s), no pullback-square computation needed. -/
+private theorem vanishingLocusAux_appLE_snd_eq_zero {T : Scheme.{u}} (t : T ⟶ S)
+    (U : S.affineOpens) (V : T.affineOpens) (D : W.Opens)
+    (eV : V.1 ≤ t ⁻¹ᵁ U.1) (eD : D ≤ p ⁻¹ᵁ U.1) (a : Γ(W, D))
+    (h : letI := ((t.appLE U.1 V.1 eV).hom).toAlgebra
+         letI := ((p.appLE U.1 D eD).hom).toAlgebra
+         (1 : Γ(T, V.1)) ⊗ₜ[Γ(S, U.1)] a = 0) :
+    ((pullback.snd t p).appLE D
+      (pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) inf_le_right).hom a = 0 := by
+  letI := ((t.appLE U.1 V.1 eV).hom).toAlgebra
+  letI := ((p.appLE U.1 D eD).hom).toAlgebra
+  letI := (((pullback.fst t p).appLE V.1
+    (pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) inf_le_left).hom).toAlgebra
+  letI := (((pullback.snd t p).appLE D
+    (pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) inf_le_right).hom).toAlgebra
+  letI := ((t.appLE U.1 V.1 eV ≫ (pullback.fst t p).appLE V.1
+    (pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) inf_le_left).hom).toAlgebra
+  haveI : IsScalarTower ↑Γ(S, U.1) ↑Γ(T, V.1)
+      ↑Γ(pullback t p, pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+        RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp])
+  haveI : IsScalarTower ↑Γ(S, U.1) ↑Γ(W, D)
+      ↑Γ(pullback t p, pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+        RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp,
+        Scheme.Hom.appLE_comp_appLE, Scheme.Hom.appLE_comp_appLE]
+      simp only [pullback.condition])
+  have hkey := congrArg (Algebra.TensorProduct.productMap
+    (IsScalarTower.toAlgHom Γ(S, U.1) Γ(T, V.1)
+      Γ(pullback t p, pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D))
+    (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, D)
+      Γ(pullback t p, pullback.fst t p ⁻¹ᵁ V.1 ⊓ pullback.snd t p ⁻¹ᵁ D))) h
+  rw [map_zero, Algebra.TensorProduct.productMap_apply_tmul, map_one, one_mul] at hkey
+  exact hkey
+
+open scoped TensorProduct in
+omit [Flat p] [LocallyOfFinitePresentation p] in
+/-- The "geometry ⇒ algebra" half of the affine-local tensor dictionary: if the
+pullback of `a : Γ(W, p⁻¹U)` to the piece `fst⁻¹V` of `T ×ₛ W` vanishes, then `a`
+dies in the base change `Γ(T,V) ⊗ Γ(W,p⁻¹U)`. This is where the pullback square is
+genuinely used: `Spec` of the tensor product maps to `T ×ₛ W` via `pullback.lift` of
+the two `fromSpec`-legs, and global sections of that map recover the tensor. -/
+private theorem vanishingLocusAux_one_tmul_eq_zero {T : Scheme.{u}} (t : T ⟶ S)
+    (U : S.affineOpens) (V : T.affineOpens) (eV : V.1 ≤ t ⁻¹ᵁ U.1)
+    (e' : pullback.fst t p ⁻¹ᵁ V.1 ≤ pullback.snd t p ⁻¹ᵁ (p ⁻¹ᵁ U.1))
+    (a : Γ(W, p ⁻¹ᵁ U.1))
+    (h : ((pullback.snd t p).appLE (p ⁻¹ᵁ U.1) (pullback.fst t p ⁻¹ᵁ V.1) e').hom a = 0) :
+    letI := ((t.appLE U.1 V.1 eV).hom).toAlgebra
+    letI := ((p.app U.1).hom).toAlgebra
+    (1 : Γ(T, V.1)) ⊗ₜ[Γ(S, U.1)] a = 0 := by
+  letI := ((t.appLE U.1 V.1 eV).hom).toAlgebra
+  letI := ((p.app U.1).hom).toAlgebra
+  have hA : IsAffineOpen (p ⁻¹ᵁ U.1) := U.2.preimage p
+  let N : CommRingCat.{u} := CommRingCat.of (↑Γ(T, V.1) ⊗[↑Γ(S, U.1)] ↑Γ(W, p ⁻¹ᵁ U.1))
+  let inclC : Γ(T, V.1) ⟶ N :=
+    CommRingCat.ofHom Algebra.TensorProduct.includeLeftRingHom
+  let inclA : Γ(W, p ⁻¹ᵁ U.1) ⟶ N :=
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := Γ(S, U.1))
+      (A := Γ(T, V.1))).toRingHom
+  have hring : t.appLE U.1 V.1 eV ≫ inclC = p.app U.1 ≫ inclA := by
+    ext x
+    exact RingHom.congr_fun Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap x
+  have hcomm : (Spec.map inclC ≫ V.2.fromSpec) ≫ t =
+      (Spec.map inclA ≫ hA.fromSpec) ≫ p := by
+    rw [Category.assoc, Category.assoc, ← IsAffineOpen.SpecMap_appLE_fromSpec t U.2 V.2 eV,
+      ← IsAffineOpen.SpecMap_appLE_fromSpec p U.2 hA le_rfl, ← Spec.map_comp_assoc,
+      ← Spec.map_comp_assoc, Scheme.Hom.appLE_eq_app, hring]
+  let θ : Spec N ⟶ pullback t p := pullback.lift _ _ hcomm
+  have hθfst : θ ≫ pullback.fst t p = Spec.map inclC ≫ V.2.fromSpec := pullback.lift_fst _ _ _
+  have hθsnd : θ ≫ pullback.snd t p = Spec.map inclA ≫ hA.fromSpec := pullback.lift_snd _ _ _
+  have hpre : (⊤ : (Spec N).Opens) ≤ θ ⁻¹ᵁ (pullback.fst t p ⁻¹ᵁ V.1) := by
+    rw [← Scheme.Hom.comp_preimage, hθfst, Scheme.Hom.comp_preimage,
+      V.2.fromSpec_preimage_self, Scheme.Hom.preimage_top]
+  have key : (pullback.snd t p).appLE (p ⁻¹ᵁ U.1) (pullback.fst t p ⁻¹ᵁ V.1) e' ≫
+      θ.appLE (pullback.fst t p ⁻¹ᵁ V.1) ⊤ hpre ≫ (Scheme.ΓSpecIso N).hom = inclA := by
+    rw [Scheme.Hom.appLE_comp_appLE_assoc]
+    simp only [hθsnd]
+    rw [Scheme.Hom.comp_appLE, hA.fromSpec_app_self, Category.assoc, Category.assoc,
+      Scheme.Hom.map_appLE_assoc, vanishingLocusAux_appLE_top,
+      Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+  have keya := congrArg (fun (α : Γ(W, p ⁻¹ᵁ U.1) ⟶ N) => α.hom a) key
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at keya
+  rw [h, map_zero, map_zero] at keya
+  show (1 : Γ(T, V.1)) ⊗ₜ[↑Γ(S, U.1)] a = 0
+  exact keya.symm
+
+omit [Flat p] in
+/-- Direction "⇐" of the universal property over a *free* affine chart: if `E` dies
+on the base change, then the vanishing ideal over `U` is killed by `t` — glue the
+tensor bridge `vanishingLocusAux_one_tmul_eq_zero` over affine charts of `t⁻¹U`. -/
+private theorem vanishingLocusAux_ideal_le_ker {T : Scheme.{u}} (t : T ⟶ S)
+    (hE : E ≤ (pullback.snd t p).ker) (U : S.affineOpens)
+    (hfree : letI := ((p.app U.1).hom).toAlgebra
+      Module.Free Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)) :
+    (vanishingLocus p E).ideal U ≤ RingHom.ker (t.app U.1).hom := by
+  letI := ((p.app U.1).hom).toAlgebra
+  haveI : Module.Free ↑Γ(S, U.1) ↑Γ(W, p ⁻¹ᵁ U.1) := hfree
+  show submoduleVanishingIdeal Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
+    ((E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars Γ(S, U.1)) ≤
+    RingHom.ker (t.app U.1).hom
+  refine iSup_le fun g => ?_
+  intro x hx
+  rw [RingHom.mem_ker]
+  refine vanishingLocusAux_section_eq_zero _ fun q hq => ?_
+  obtain ⟨V, hVaff, hqV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+    T.isBasis_affineOpens hq
+  replace hVaff : IsAffineOpen V := hVaff
+  refine ⟨V, hVle, hqV, ?_⟩
+  have e' : pullback.fst t p ⁻¹ᵁ V ≤ pullback.snd t p ⁻¹ᵁ (p ⁻¹ᵁ U.1) := by
+    rw [← Scheme.Hom.comp_preimage, ← pullback.condition, Scheme.Hom.comp_preimage]
+    exact (pullback.fst t p).preimage_mono hVle
+  have h1 : ((pullback.snd t p).app (p ⁻¹ᵁ U.1)).hom g.1 = 0 :=
+    RingHom.mem_ker.mp ((le_ker_iff_forall E (pullback.snd t p)).mp hE
+      ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩ g.2)
+  have h2 : ((pullback.snd t p).appLE (p ⁻¹ᵁ U.1) (pullback.fst t p ⁻¹ᵁ V) e').hom
+      g.1 = 0 := by
+    show ((pullback t p).presheaf.map (homOfLE e').op).hom
+      (((pullback.snd t p).app (p ⁻¹ᵁ U.1)).hom g.1) = 0
+    rw [h1, map_zero]
+  have h3 := vanishingLocusAux_one_tmul_eq_zero p t U ⟨V, hVaff⟩ hVle e' g.1 h2
+  letI : Algebra ↑Γ(S, U.1) ↑Γ(T, V) := ((t.appLE U.1 V hVle).hom).toAlgebra
+  have h4 := (vanishingLocusAux_svi_le_ker_iff (C := ↑Γ(T, V)) (g.1 : Γ(W, p ⁻¹ᵁ U.1))).mpr h3
+  exact RingHom.mem_ker.mp (h4 hx)
+
+/-- Direction "⇐" of the universal property: if `E` dies on the base change `T ×ₛ W`,
+then `t` kills the whole vanishing locus. Reduces an arbitrary affine `U` to the free
+basic-open refinement via quasi-coherence (`map_ideal`) and sheaf-injectivity. -/
+private theorem vanishingLocusAux_le_tker {T : Scheme.{u}} (t : T ⟶ S)
+    (hE : E ≤ (pullback.snd t p).ker) : vanishingLocus p E ≤ t.ker := by
+  rw [le_ker_iff_forall]
+  intro U x hx
+  rw [RingHom.mem_ker]
+  refine vanishingLocusAux_section_eq_zero _ fun q hq => ?_
+  obtain ⟨r, hqr, hfree⟩ := vanishingLocusAux_exists_basicOpen_free p U
+    (show t.base q ∈ U.1 from hq)
+  obtain ⟨V, hVaff, hqV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+    T.isBasis_affineOpens (show q ∈ t ⁻¹ᵁ S.basicOpen r from hqr)
+  have hVU : V ≤ t ⁻¹ᵁ U.1 := fun z hz => S.basicOpen_le r (hVle hz)
+  refine ⟨V, hVU, hqV, ?_⟩
+  have hxr : (S.presheaf.map (homOfLE (S.basicOpen_le r)).op).hom x ∈
+      (vanishingLocus p E).ideal (S.affineBasicOpen r) := by
+    rw [← (vanishingLocus p E).map_ideal (U := S.affineBasicOpen r) (V := U)
+      (S.basicOpen_le r)]
+    exact Ideal.mem_map_of_mem _ hx
+  have h0 := RingHom.mem_ker.mp
+    (vanishingLocusAux_ideal_le_ker p E t hE (S.affineBasicOpen r) hfree hxr)
+  have key := congrArg (fun (α : Γ(S, U.1) ⟶ Γ(T, V)) => α.hom x)
+    (Scheme.Hom.map_appLE t hVle ((homOfLE (S.basicOpen_le r)).op))
+  refine key.symm.trans ?_
+  show (T.presheaf.map (homOfLE hVle).op).hom
+    ((t.app (S.affineBasicOpen r).1).hom
+      ((S.presheaf.map (homOfLE (S.basicOpen_le r)).op).hom x)) = 0
+  rw [h0]
+  exact map_zero _
+
+open scoped TensorProduct in
+/-- Direction "⇒" of the universal property: if `t` kills the vanishing locus, then
+`E` dies on the base change `T ×ₛ W`. An arbitrary affine of `W` is refined by basic
+opens of the free charts `p⁻¹U`; on each piece `fst⁻¹V ⊓ snd⁻¹D(f)` the section is a
+combination of restrictions of sections over `p⁻¹U`, each of which dies in the tensor
+product by the coordinate bridge. -/
+private theorem vanishingLocusAux_le_ker_snd {T : Scheme.{u}} (t : T ⟶ S)
+    (hZ : vanishingLocus p E ≤ t.ker) : E ≤ (pullback.snd t p).ker := by
+  rw [le_ker_iff_forall]
+  intro Vw g hg
+  rw [RingHom.mem_ker]
+  refine vanishingLocusAux_section_eq_zero _ fun q hq => ?_
+  -- the free affine chart on the base, around `p (snd q)`
+  obtain ⟨U, hsU, hfree⟩ := exists_affineOpen_mem_free p
+    (p.base ((pullback.snd t p).base q))
+  letI := ((p.app U.1).hom).toAlgebra
+  haveI : Module.Free ↑Γ(S, U.1) ↑Γ(W, p ⁻¹ᵁ U.1) := hfree
+  have hwp : (pullback.snd t p).base q ∈ p ⁻¹ᵁ U.1 := hsU
+  have hwV : (pullback.snd t p).base q ∈ Vw.1 := hq
+  -- a basic open of `p⁻¹U` around `snd q` inside `Vw ⊓ p⁻¹U`
+  obtain ⟨f, hfle, hwf⟩ := (U.2.preimage p).exists_basicOpen_le
+    (V := Vw.1 ⊓ p ⁻¹ᵁ U.1) ⟨(pullback.snd t p).base q, hwV, hwp⟩ hwp
+  have hDV : W.basicOpen f ≤ Vw.1 := hfle.trans inf_le_left
+  have hDp : W.basicOpen f ≤ p ⁻¹ᵁ U.1 := hfle.trans inf_le_right
+  have hDaff : IsAffineOpen (W.basicOpen f) := (U.2.preimage p).basicOpen f
+  -- an affine chart on `T` around `fst q` inside `t⁻¹U`
+  have hxT : q ∈ pullback.fst t p ⁻¹ᵁ (t ⁻¹ᵁ U.1) := by
+    rw [← Scheme.Hom.comp_preimage, pullback.condition, Scheme.Hom.comp_preimage]
+    exact hwp
+  obtain ⟨V, hVaff, hqV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+    T.isBasis_affineOpens (show (pullback.fst t p).base q ∈ t ⁻¹ᵁ U.1 from hxT)
+  replace hVaff : IsAffineOpen V := hVaff
+  refine ⟨pullback.fst t p ⁻¹ᵁ V ⊓ pullback.snd t p ⁻¹ᵁ W.basicOpen f,
+    le_trans inf_le_right ((pullback.snd t p).preimage_mono hDV), ⟨hqV, hwf⟩, ?_⟩
+  -- algebra structures for the tensor bridge
+  letI : Algebra ↑Γ(S, U.1) ↑Γ(T, V) := ((t.appLE U.1 V hVle).hom).toAlgebra
+  letI : Algebra ↑Γ(S, U.1) ↑Γ(W, W.basicOpen f) :=
+    ((p.appLE U.1 (W.basicOpen f) hDp).hom).toAlgebra
+  letI : Algebra ↑Γ(W, p ⁻¹ᵁ U.1) ↑Γ(W, W.basicOpen f) :=
+    ((W.presheaf.map (homOfLE hDp).op).hom).toAlgebra
+  haveI : IsScalarTower ↑Γ(S, U.1) ↑Γ(W, p ⁻¹ᵁ U.1) ↑Γ(W, W.basicOpen f) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+        RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+      rfl)
+  -- every element of `E.ideal (p⁻¹U)` dies in `Γ(T,V) ⊗ Γ(W, D(f))`
+  have hgen : ∀ b ∈ E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩,
+      (1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)] ((W.presheaf.map (homOfLE hDp).op).hom b) =
+        (0 : ↑Γ(T, V) ⊗[↑Γ(S, U.1)] ↑Γ(W, W.basicOpen f)) := by
+    intro b hb
+    have hsvi : sectionVanishingIdeal ↑Γ(S, U.1) ↑Γ(W, p ⁻¹ᵁ U.1) b ≤
+        RingHom.ker (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) := by
+      refine le_trans (sectionVanishingIdeal_le_submoduleVanishingIdeal
+        (J := (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars ↑Γ(S, U.1)) hb) ?_
+      refine le_trans ((le_ker_iff_forall _ t).mp hZ U) ?_
+      intro y hy
+      rw [RingHom.mem_ker] at hy ⊢
+      show (T.presheaf.map (homOfLE hVle).op).hom ((t.app U.1).hom y) = 0
+      rw [hy]
+      exact map_zero _
+    have h1b := (vanishingLocusAux_svi_le_ker_iff (C := ↑Γ(T, V)) b).mp hsvi
+    have hmap := congrArg (Algebra.TensorProduct.map (AlgHom.id ↑Γ(S, U.1) ↑Γ(T, V))
+      (IsScalarTower.toAlgHom ↑Γ(S, U.1) ↑Γ(W, p ⁻¹ᵁ U.1) ↑Γ(W, W.basicOpen f))) h1b
+    rw [map_zero, Algebra.TensorProduct.map_tmul, map_one] at hmap
+    exact hmap
+  -- the restriction of `g` to `D(f)` is a combination of restrictions from `p⁻¹U`
+  have hg0 : (W.presheaf.map (homOfLE hDV).op).hom g ∈
+      E.ideal ⟨W.basicOpen f, hDaff⟩ := by
+    rw [← E.map_ideal (U := ⟨W.basicOpen f, hDaff⟩) (V := Vw) hDV]
+    exact Ideal.mem_map_of_mem _ hg
+  rw [← E.map_ideal (U := ⟨W.basicOpen f, hDaff⟩)
+    (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) hDp] at hg0
+  have hzero : (1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)]
+      ((W.presheaf.map (homOfLE hDV).op).hom g) = 0 := by
+    refine Submodule.span_induction
+      (p := fun y _ => (1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)] y = 0) ?_ ?_ ?_ ?_ hg0
+    · rintro y ⟨b, hb, rfl⟩
+      exact hgen b hb
+    · exact TensorProduct.tmul_zero _ _
+    · intro y z _ _ hy hz
+      rw [TensorProduct.tmul_add, hy, hz, add_zero]
+    · intro c y _ hy
+      rw [smul_eq_mul, show (1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)] (c * y) =
+          ((1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)] c) * ((1 : Γ(T, V)) ⊗ₜ[↑Γ(S, U.1)] y) from
+          by rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul], hy, mul_zero]
+  -- push through the tensor bridge and glue
+  have hfinal := vanishingLocusAux_appLE_snd_eq_zero p t U ⟨V, hVaff⟩ (W.basicOpen f)
+    hVle hDp _ hzero
+  have hstep := congrArg
+    (fun (α : Γ(W, Vw.1) ⟶
+        Γ(pullback t p, pullback.fst t p ⁻¹ᵁ V ⊓ pullback.snd t p ⁻¹ᵁ W.basicOpen f)) =>
+      α.hom g)
+    (Scheme.Hom.map_appLE (pullback.snd t p) inf_le_right ((homOfLE hDV).op))
+  exact hstep.symm.trans hfinal
+
 /-- **(T-D14c-2, universal property of the vanishing locus)** `T → S` kills the
 vanishing locus of `E` iff `E` pulls back to the zero ideal sheaf on the base change
 of `W`. Combined with `exists_factor_subschemeι_iff`, `isSubdivisor_iff_le`,
@@ -407,7 +805,8 @@ theorem vanishingLocus_le_ker_iff {T : Scheme.{u}} (t : T ⟶ S) :
     vanishingLocus p E ≤ t.ker ↔ E.comap (pullback.snd t p) = ⊥ := by
   rw [(Scheme.IdealSheafData.map_gc (pullback.snd t p)).l_eq_bot,
     Scheme.IdealSheafData.map_bot]
-  sorry
+  exact ⟨fun h => vanishingLocusAux_le_ker_snd p E t h,
+    fun h => vanishingLocusAux_le_tker p E t h⟩
 
 end VanishingLocus
 
