@@ -493,6 +493,7 @@ theorem localQuotientMap_self {W : X.Opens} (hW : σ.IsStableOpen W)
     Category.id_comp]
 
 /-- The local quotient maps compose along inclusions. -/
+@[reassoc]
 theorem localQuotientMap_trans {W V U : X.Opens} (hW : σ.IsStableOpen W)
     (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
     (hU : σ.IsStableOpen U) (hUa : IsAffineOpen U) (hWV : W ≤ V) (hVU : V ≤ U) :
@@ -689,6 +690,93 @@ private theorem snd_eq_tripleIso_inv {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V)
         σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hW₂ hW₂a inf_le_right := by
   rw [Iso.eq_inv_comp]
   exact tripleIso_hom_snd σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a
+
+omit [Finite G] in
+private theorem triple_le {A B C : X.Opens} :
+    (A ⊓ B) ⊓ (A ⊓ C) ≤ (B ⊓ C) ⊓ (B ⊓ A) :=
+  le_inf (le_inf (inf_le_left.trans inf_le_right)
+      (inf_le_right.trans inf_le_right))
+    (le_inf (inf_le_left.trans inf_le_right) (inf_le_left.trans inf_le_left))
+
+section Glue
+
+variable [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+variable (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x))
+  (hVa : ∀ x, IsAffineOpen (V x))
+
+/-- The pairwise piece of the quotient glue data. -/
+@[reducible]
+private noncomputable def glueF (i j : X) :
+    σ.localQuotient ((hVs i).inf (hVs j)) ⟶ σ.localQuotient (hVs i) :=
+  σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) (hVs i) (hVa i)
+    inf_le_left
+
+/-- The transition map of the quotient glue data. -/
+@[reducible]
+private noncomputable def glueT (i j : X) :
+    σ.localQuotient ((hVs i).inf (hVs j)) ⟶
+      σ.localQuotient ((hVs j).inf (hVs i)) :=
+  σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+    ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (le_inf inf_le_right inf_le_left)
+
+/-- The triple transition of the quotient glue data. -/
+@[reducible]
+private noncomputable def glueT' (i j k : X) :
+    pullback (glueF σ V hVs hVa i j) (glueF σ V hVs hVa i k) ⟶
+      pullback (glueF σ V hVs hVa j k) (glueF σ V hVs hVa j i) :=
+  (σ.tripleIso inf_le_left inf_le_left (hVa i) ((hVs i).inf (hVs j))
+      ((hVa i).inf (hVa j)) ((hVs i).inf (hVs k)) ((hVa i).inf (hVa k)) (hVs i)
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k)))).inv ≫
+    σ.localQuotientMap (((hVs i).inf (hVs j)).inf ((hVs i).inf (hVs k)))
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k)))
+      (((hVs j).inf (hVs k)).inf ((hVs j).inf (hVs i)))
+      (((hVa j).inf (hVa k)).inf ((hVa j).inf (hVa i))) triple_le ≫
+    (σ.tripleIso inf_le_left inf_le_left (hVa j) ((hVs j).inf (hVs k))
+      ((hVa j).inf (hVa k)) ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (hVs j)
+      (((hVa j).inf (hVa k)).inf ((hVa j).inf (hVa i)))).hom
+
+private theorem glueT'_fac (i j k : X) :
+    glueT' σ V hVs hVa i j k ≫ pullback.snd _ _ =
+      pullback.fst _ _ ≫ glueT σ V hVs hVa i j := by
+  rw [glueT', Category.assoc, Category.assoc,
+    snd_eq_tripleIso_inv σ inf_le_left inf_le_left (hVa j) ((hVs j).inf (hVs k))
+      ((hVa j).inf (hVa k)) ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (hVs j)
+      (((hVa j).inf (hVa k)).inf ((hVa j).inf (hVa i))),
+    Iso.hom_inv_id_assoc,
+    localQuotientMap_trans σ _ (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))) _
+      (((hVa j).inf (hVa k)).inf ((hVa j).inf (hVa i))) _ ((hVa j).inf (hVa i))
+      triple_le inf_le_right,
+    fst_eq_tripleIso_inv σ inf_le_left inf_le_left (hVa i) ((hVs i).inf (hVs j))
+      ((hVa i).inf (hVa j)) ((hVs i).inf (hVs k)) ((hVa i).inf (hVa k)) (hVs i)
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))),
+    Category.assoc, glueT,
+    localQuotientMap_trans σ _ (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))) _
+      ((hVa i).inf (hVa j)) _ ((hVa j).inf (hVa i)) inf_le_left
+      (le_inf inf_le_right inf_le_left)]
+
+private theorem glueT'_cocycle (i j k : X) :
+    glueT' σ V hVs hVa i j k ≫ glueT' σ V hVs hVa j k i ≫
+      glueT' σ V hVs hVa k i j = 𝟙 _ := by
+  show ((σ.tripleIso _ _ _ _ _ _ _ _ _).inv ≫ _ ≫ (σ.tripleIso _ _ _ _ _ _ _ _ _).hom) ≫
+    ((σ.tripleIso _ _ _ _ _ _ _ _ _).inv ≫ _ ≫ (σ.tripleIso _ _ _ _ _ _ _ _ _).hom) ≫
+    ((σ.tripleIso _ _ _ _ _ _ _ _ _).inv ≫ _ ≫ (σ.tripleIso _ _ _ _ _ _ _ _ _).hom) = 𝟙 _
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  rw [localQuotientMap_trans_assoc σ _
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))) _
+      (((hVa j).inf (hVa k)).inf ((hVa j).inf (hVa i))) _
+      (((hVa k).inf (hVa i)).inf ((hVa k).inf (hVa j))) triple_le triple_le,
+    localQuotientMap_trans_assoc σ _
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))) _
+      (((hVa k).inf (hVa i)).inf ((hVa k).inf (hVa j))) _
+      (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k)))
+      (triple_le.trans triple_le) triple_le,
+    show σ.localQuotientMap _ (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k))) _
+        (((hVa i).inf (hVa j)).inf ((hVa i).inf (hVa k)))
+        ((triple_le.trans triple_le).trans triple_le) = 𝟙 _ from
+      σ.localQuotientMap_self _ _,
+    Category.id_comp, Iso.inv_hom_id]
+
+end Glue
 
 end OpenImmersion
 
