@@ -668,7 +668,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     etale_iff) remain open sorries as planned.
 
 ### [T-B7] μ_N finite locally free of rank N, étale iff N invertible (spawned by beastmode-B, 2026-07-06)
-- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
+- **Status**: done (beastmode-B, 2026-07-06T10:18Z → 2026-07-06T11:26Z) ·
+  **Claimed**: beastmode-B (stream-B worker),
   2026-07-06T10:18Z · **File**: GroupScheme/MuN.lean · `muNπ_isFinite`, `muNπ_flat`,
 - **Progress**:
   - 2026-07-06T10:45: THREE OF FOUR proved+committed (muNπ_isFinite, muNπ_flat,
@@ -737,6 +738,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     contradiction: y := mk(X^{N/q}−1), y^q = 0 by `sub_pow_char` (q := ringChar κ,
     prime since (N:κ)=0, q ∣ N via CharP.cast_eq_zero_iff), y ≠ 0 by
     degree-lt-dvd.
+  - 2026-07-06T11:26: DONE — `muNπ_etale_iff` proved; **MuN.lean sorry-free**; all
+    four T-B7 theorems axiom-clean (standard three). Converse per plan: pushout
+    block generalized to arbitrary (A : Type u) [CommRing A];
+    `isPullback_muN_baseChange`; residue criterion
+    (`RingedSpace.isUnit_of_isUnit_germ` + `residue_ne_zero_iff_isUnit` +
+    map_natCast glue); field case: étale moved to `Spec.map (muNModelStruct K N)`
+    via `isoIsPullback` vs the `of_horiz_isIso` trivial square +
+    `cancel_left_of_respectsIso`, then `RingHom.etale_algebraMap` →
+    `FormallyUnramified.isReduced_of_field` vs nilpotent `mk (X^{N/q} − 1)`
+    (`sub_pow_char`, hand-rolled `CharP (K[X]) q`; nonzero by
+    `natDegree_le_of_dvd` + `Nat.div_lt_self`). NEW GOTCHAS of record: never
+    `rw … at` an already-rewritten IsPullback hypothesis (leaves rfl-uncloseable
+    `X = X`; rebuild squares with fresh-goal rewrites); `simpa using
+    <simp-tagged lemma>` self-destructs to `True`. Upstream candidates:
+    `specHom_ext`, `nthRootsCommGroup`, `CharP (K[X])` instance, monic-quotient
+    étale-iff bundle. [CLEANUP-4] deps now fully satisfied (covers T-B7 additions).
   `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
   foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
 - **Depends on**: none · **Parallel**: yes · **Type**: theorems
