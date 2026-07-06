@@ -173,18 +173,24 @@ lemma mk_Y_mem_irrelevant (W : WeierstrassCurve R) :
     DirectSum.coe_of_apply]
   simp
 
+/-- The evaluation at `[0:1:0]` maps the irrelevant ideal onto the unit ideal. -/
+lemma projModelZeroEval_irrelevant_map_top (W : WeierstrassCurve R) :
+    (HomogeneousIdeal.irrelevant (quotientGrading (projIdeal W))).toIdeal.map
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)) = ⊤ := by
+  rw [Ideal.eq_top_iff_one]
+  have h1 : ((Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom.comp (projModelZeroEval W))
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X 1)) = 1 := by
+    rw [RingHom.comp_apply, projModelZeroEval_mk]
+    simp
+  rw [← h1]
+  exact Ideal.mem_map_of_mem _ (mk_Y_mem_irrelevant W)
+
 /-- **(T-A2)** The section at infinity `[0:1:0]` of the projective Weierstrass model,
 via `Proj.fromOfGlobalSections` at the evaluation `X ↦ 0, Y ↦ 1, Z ↦ 0`. -/
 noncomputable def projModelZero (W : WeierstrassCurve R) : Spec (.of R) ⟶ projModel W :=
   Proj.fromOfGlobalSections _
-    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)) (by
-      rw [Ideal.eq_top_iff_one]
-      have h1 : ((Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom.comp (projModelZeroEval W))
-          (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X 1)) = 1 := by
-        rw [RingHom.comp_apply, projModelZeroEval_mk]
-        simp
-      rw [← h1]
-      exact Ideal.mem_map_of_mem _ (mk_Y_mem_irrelevant W))
+    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+    (projModelZeroEval_irrelevant_map_top W)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-A2, PROVED)** The section at infinity is a section of the structure morphism:
