@@ -170,4 +170,148 @@ lemma dehomogenizeAt_comp_homogenizeAt (i : σ) :
       (isUnit_iff_exists_inv.mpr ⟨1, by simp⟩) (awayVar R i j).val = X j
     exact happ
 
+/-- `dehomogenizeAt` on the normal form `p / X_iⁿ`. -/
+lemma dehomogenizeAt_mk (i : σ) {n : ℕ} {p : MvPolynomial σ R}
+    (hp : p ∈ homogeneousSubmodule σ R (n • 1)) :
+    dehomogenizeAt R i
+        (Away.mk _ (X_mem_homogeneousSubmodule_one R i) n p hp) =
+      dehomogenizeAux R i p := by
+  have h1 : (Away.mk _ (X_mem_homogeneousSubmodule_one R i) n p hp).val *
+      Localization.mk ((X i : MvPolynomial σ R) ^ n) 1 = Localization.mk p 1 := by
+    rw [Away.val_mk, Localization.mk_mul, mul_one]
+    rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+    exact ⟨1, by simp [mul_comm]⟩
+  have happ := congrArg (Localization.awayLift (dehomogenizeAux R i) (X i)
+    (isUnit_iff_exists_inv.mpr ⟨1, by simp⟩)) h1
+  rw [map_mul, dehomog_lift_mk_one, dehomog_lift_mk_one] at happ
+  simp only [map_pow, dehomogenizeAux_X_self, one_pow, mul_one] at happ
+  exact happ
+
+/-- The `mk`-image of `X_i` powers is invertible in the localization. -/
+private lemma isUnit_mk_X_pow (i : σ) (n : ℕ) :
+    IsUnit (Localization.mk ((X i : MvPolynomial σ R) ^ n)
+      (1 : Submonoid.powers (X i : MvPolynomial σ R))) := by
+  rw [Localization.mk_one_eq_algebraMap]
+  exact IsLocalization.map_units _
+    (⟨(X i) ^ n, n, rfl⟩ : Submonoid.powers (X i : MvPolynomial σ R))
+
+/-- The composite `R[X] → (R[X]_{X i})₀ →(val) Localization`, through dehomogenisation
+and homogenisation — the working ring hom for the clearing computation. -/
+private noncomputable def clearingHom (i : σ) :
+    MvPolynomial σ R →+* Localization (Submonoid.powers (X i : MvPolynomial σ R)) :=
+  (valRingHom _).comp ((homogenizeAt R i).comp (dehomogenizeAux R i))
+
+private lemma clearingHom_C (i : σ) (r : R) :
+    clearingHom R i (C r) = Localization.mk (C r) 1 := by
+  simp only [clearingHom, RingHom.comp_apply, dehomogenizeAux_C]
+  show (homogenizeAt R i (C r)).val = _
+  rw [homogenizeAt, eval₂Hom_C]
+  exact val_awayConst R i r
+
+private lemma clearingHom_X_self (i : σ) : clearingHom R i (X i) = 1 := by
+  simp only [clearingHom, RingHom.comp_apply, dehomogenizeAux_X_self, map_one]
+
+private lemma clearingHom_X_ne (i : σ) {j : σ} (h : j ≠ i) :
+    clearingHom R i (X j) =
+      Localization.mk (X j) (⟨(X i : MvPolynomial σ R) ^ 1, 1, rfl⟩ :
+        Submonoid.powers (X i : MvPolynomial σ R)) := by
+  simp only [clearingHom, RingHom.comp_apply, dehomogenizeAux_X_ne R i h]
+  show (homogenizeAt R i (X ⟨j, h⟩)).val = _
+  rw [homogenizeAt, eval₂Hom_X']
+  exact val_awayVar' R i ⟨j, h⟩
+
+/-- Uniform clearing identity for variables: `Φ(X_j) · ψ(X_i) = ψ(X_j)` for every `j`
+(including `j = i`), where `ψ` is the localization map. -/
+private lemma clearingHom_X_mul (i j : σ) :
+    clearingHom R i (X j) * algebraMap (MvPolynomial σ R) _ (X i) =
+      algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R))) (X j) := by
+  by_cases h : j = i
+  · subst h
+    rw [clearingHom_X_self, one_mul]
+  · rw [clearingHom_X_ne R i h, ← Localization.mk_one_eq_algebraMap,
+      ← Localization.mk_one_eq_algebraMap, Localization.mk_mul, mul_one]
+    rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+    exact ⟨1, by simp [pow_one, mul_comm]⟩
+
+/-- Monomial clearing: homogenising the dehomogenisation of a degree-`n` homogeneous
+polynomial recovers `p / X_iⁿ`, expressed at the level of the ambient localization. -/
+private lemma clearingHom_mul_pow (i : σ) {p : MvPolynomial σ R} {n : ℕ}
+    (hp : p.IsHomogeneous n) :
+    clearingHom R i p * algebraMap (MvPolynomial σ R) _ ((X i) ^ n) =
+      algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R))) p := by
+  classical
+  conv_lhs => rw [p.as_sum]
+  conv_rhs => rw [p.as_sum]
+  rw [map_sum, map_sum, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun d hd => ?_
+  have hdeg : (d.sum fun _ e => e) = n := by
+    simpa [Finsupp.weight_apply, smul_eq_mul, mul_one, Finsupp.sum]
+      using hp (mem_support_iff.mp hd)
+  rw [monomial_eq, map_mul, map_mul, ← hdeg]
+  have hC : clearingHom R i (C (coeff d p)) =
+      algebraMap (MvPolynomial σ R) _ (C (coeff d p)) := by
+    rw [clearingHom_C, Localization.mk_one_eq_algebraMap]
+  rw [hC, mul_assoc]
+  congr 1
+  -- Π Φ(X_j)^{d_j} · ψ(X_i)^{Σ d_j} = Π ψ(X_j)^{d_j}
+  unfold Finsupp.prod Finsupp.sum
+  beta_reduce
+  have hΦ : clearingHom R i (∏ j ∈ d.support, X j ^ d j) =
+      ∏ j ∈ d.support, clearingHom R i (X j) ^ d j := by
+    rw [map_prod]
+    exact Finset.prod_congr rfl fun j _ => map_pow _ _ _
+  have hψp : algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R)))
+        (∏ j ∈ d.support, X j ^ d j) =
+      ∏ j ∈ d.support, (algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R))) (X j)) ^ d j := by
+    rw [map_prod]
+    exact Finset.prod_congr rfl fun j _ => map_pow _ _ _
+  have hψX : algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R)))
+        ((X i) ^ (∑ j ∈ d.support, d j)) =
+      ∏ j ∈ d.support, (algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R))) (X i)) ^ d j := by
+    rw [map_pow]
+    exact (Finset.prod_pow_eq_pow_sum _ _ _).symm
+  rw [hΦ, hψX, hψp, ← Finset.prod_mul_distrib]
+  exact Finset.prod_congr rfl fun j _ => by rw [← mul_pow, clearingHom_X_mul]
+
+/-- Homogenising after dehomogenising is the identity on the chart ring. -/
+lemma homogenizeAt_comp_dehomogenizeAt (i : σ) :
+    (homogenizeAt R i).comp (dehomogenizeAt R i) = RingHom.id _ := by
+  refine RingHom.ext fun z => ?_
+  obtain ⟨n, p, hp, rfl⟩ :=
+    HomogeneousLocalization.Away.mk_surjective _ (X_mem_homogeneousSubmodule_one R i) z
+  rw [RingHom.comp_apply, dehomogenizeAt_mk, RingHom.id_apply]
+  apply val_injective
+  have hphom : p.IsHomogeneous n := by
+    have := (mem_homogeneousSubmodule _ _).mp hp
+    simpa using this
+  have h1 := clearingHom_mul_pow R i hphom
+  have h2 : (Away.mk _ (X_mem_homogeneousSubmodule_one R i) n p hp).val *
+      algebraMap (MvPolynomial σ R) _ ((X i) ^ n) =
+      algebraMap (MvPolynomial σ R)
+        (Localization (Submonoid.powers (X i : MvPolynomial σ R))) p := by
+    rw [Away.val_mk, ← Localization.mk_one_eq_algebraMap, ← Localization.mk_one_eq_algebraMap,
+      Localization.mk_mul, mul_one]
+    rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+    exact ⟨1, by simp [mul_comm]⟩
+  have hunit : IsUnit (algebraMap (MvPolynomial σ R)
+      (Localization (Submonoid.powers (X i : MvPolynomial σ R))) ((X i) ^ n)) :=
+    IsLocalization.map_units _
+      (⟨(X i) ^ n, n, rfl⟩ : Submonoid.powers (X i : MvPolynomial σ R))
+  show clearingHom R i p = _
+  exact hunit.mul_right_cancel (h1.trans h2.symm)
+
+/-- **The chart of projective space at `X i`**: the degree-zero homogeneous
+localization away from `X i` is a polynomial ring on the remaining variables. -/
+noncomputable def chartRingEquiv (i : σ) :
+    Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R) ≃+*
+      MvPolynomial {j : σ // j ≠ i} R :=
+  RingEquiv.ofHomInv (dehomogenizeAt R i) (homogenizeAt R i)
+    (dehomogenizeAt_comp_homogenizeAt R i) (homogenizeAt_comp_dehomogenizeAt R i)
+
 end MvPolynomial
