@@ -1047,7 +1047,9 @@ maxHeartbeats` anywhere; DS-register unchanged; `#print axioms` audit)
   final GroupLaw cleanup folds in after T-A6 chain) (deps: T-A5, T-A6)
 - **[CLEANUP-3]** after T-B3+T-B4+T-B5 → Torsion.lean (deps: those)
 - **[CLEANUP-4]** final per-file MuN.lean (deps: T-B2) — includes `ULift` review in
-  `muNRing`
+  `muNRing` · **Claimed**: beastmode-B, 2026-07-06T11:55Z (in_progress; deps T-B2 ✓
+  T-B7 ✓ both done, file sorry-free; running while the A-lane WIP blocks the
+  Torsion import chain)
 - **[CLEANUP-5]** after T-D2+T-D3 → CartierDivisor.lean (deps: those) — includes
   upstreaming review of `IdealSheafData.mul`
 - **[CLEANUP-6]** after T-D5+T-D6+T-D7 → ExactOrder.lean (deps: those)
