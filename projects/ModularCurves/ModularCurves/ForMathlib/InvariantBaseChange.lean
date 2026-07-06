@@ -137,6 +137,7 @@ private theorem exact_subtype_invariantsDelta :
     rw [invariantsDelta_apply]
     exact sub_eq_zero.mpr (hx g)
 
+omit [SMulCommClass R G A] in
 /-- The underlying map of the comparison hom is the tensored inclusion. -/
 private theorem map_val_id_eq_rTensor
     (x : (FixedPoints.subalgebra R A G) ⊗[R] R') :
@@ -218,4 +219,94 @@ theorem fixedPointsBaseChange_bijective_of_isUnit [Finite G]
     (h : IsUnit ((Nat.card G : ℕ) : R)) :
     Function.Bijective
       (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
-  sorry
+  classical
+  cases nonempty_fintype G
+  obtain ⟨u, hu⟩ := h
+  have hcard : ((Fintype.card G : ℕ) : R) = (u : R) := by
+    rw [hu, Nat.card_eq_fintype_card]
+  -- the divided trace
+  set Tfull : A →ₗ[R] A :=
+    ((u⁻¹ : Rˣ) : R) • ∑ g : G, DistribSMul.toLinearMap R A g with hTfull
+  have hTapp : ∀ x : A, Tfull x = ((u⁻¹ : Rˣ) : R) • ∑ g : G, g • x := by
+    intro x
+    rw [hTfull]
+    simp [DistribSMul.toLinearMap]
+  have hTmem : ∀ x : A, Tfull x ∈ FixedPoints.subalgebra R A G := by
+    intro x g₀
+    show g₀ • Tfull x = Tfull x
+    rw [hTapp, smul_comm g₀, Finset.smul_sum]
+    congr 1
+    exact Fintype.sum_equiv (Equiv.mulLeft g₀) _ _ (fun g => by
+      simp [mul_smul])
+  have hTr : ∀ s : FixedPoints.subalgebra R A G, Tfull (s : A) = (s : A) := by
+    intro s
+    rw [hTapp, Finset.sum_congr rfl (fun g _ => s.2 g), Finset.sum_const,
+      Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hcard]
+    simp
+  -- the tensored trace averages the tensor action
+  have htensor : ∀ x : A ⊗[R] R',
+      LinearMap.rTensor R' Tfull x = ((u⁻¹ : Rˣ) : R) • ∑ g : G, g • x := by
+    intro x
+    induction x with
+    | zero => simp
+    | add x₁ x₂ h₁ h₂ =>
+      rw [map_add, h₁, h₂, ← smul_add, ← Finset.sum_add_distrib]
+      congr 1
+      exact Finset.sum_congr rfl fun g _ => (smul_add g x₁ x₂).symm
+    | tmul a r =>
+      rw [LinearMap.rTensor_tmul, hTapp, ← TensorProduct.smul_tmul',
+        TensorProduct.sum_tmul]
+      congr 1
+  have hproj : ∀ z : A ⊗[R] R', (∀ g : G, g • z = z) →
+      LinearMap.rTensor R' Tfull z = z := by
+    intro z hz
+    rw [htensor, Finset.sum_congr rfl (fun g _ => hz g), Finset.sum_const,
+      Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hcard]
+    simp
+  -- the corestricted trace is a retraction of the inclusion
+  set T : A →ₗ[R] (FixedPoints.subalgebra R A G).toSubmodule :=
+    LinearMap.codRestrict (FixedPoints.subalgebra R A G).toSubmodule Tfull hTmem
+    with hT
+  have hcompleft : (FixedPoints.subalgebra R A G).toSubmodule.subtype ∘ₗ T
+      = Tfull := by
+    ext x
+    rfl
+  have hTsub : T ∘ₗ (FixedPoints.subalgebra R A G).toSubmodule.subtype
+      = LinearMap.id := by
+    ext s
+    show Tfull (s : A) = (s : A)
+    exact hTr s
+  have hval : Function.Injective
+      ⇑(LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) := by
+    have hLI : (LinearMap.rTensor R' T).comp
+        (LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) =
+        LinearMap.id := by
+      rw [← LinearMap.rTensor_comp, hTsub, LinearMap.rTensor_id]
+    intro x y hxy
+    have h2 := congrArg (LinearMap.rTensor R' T) hxy
+    rwa [← LinearMap.comp_apply, ← LinearMap.comp_apply, hLI, LinearMap.id_apply,
+      LinearMap.id_apply] at h2
+  constructor
+  · -- injectivity
+    intro x₁ x₂ h12
+    have h13 := congrArg Subtype.val h12
+    rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₁ :
+          A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₁ from rfl,
+      show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₂ :
+          A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₂ from rfl,
+      map_val_id_eq_rTensor, map_val_id_eq_rTensor] at h13
+    exact hval h13
+  · -- surjectivity: the tensored trace provides a preimage of any fixed element
+    rintro ⟨z, hz⟩
+    refine ⟨LinearMap.rTensor R' T z, Subtype.ext ?_⟩
+    rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')
+          (LinearMap.rTensor R' T z) : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) (LinearMap.rTensor R' T z) from rfl,
+      map_val_id_eq_rTensor, ← LinearMap.comp_apply, ← LinearMap.rTensor_comp,
+      hcompleft]
+    exact hproj z (fun g => hz g)

@@ -2929,8 +2929,34 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   of invariants") — **full KM text NOW IN refs/** (`katz-mazur-arithmetic-moduli-
   FULL.pdf`); read the appendix at pickup (quote-gate), decide the flat/finite-free
   hypotheses honestly. Feeds T-Q6 and the Y(ρ̄) twist route.
-  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:25Z
-    (quote-gate read first; full ticket body + statements to follow)
+  - **Status**: done (beastmode-Q, 2026-07-06T16:25Z → 2026-07-06T17:20Z; core
+    Q4a–Q4d — the phase-2 remainder is [T-Q4e], open, below)
+  - **Delivered** (ForMathlib/InvariantBaseChange.lean, sorry-free, ZERO warnings,
+    axioms: standard on all four): Q4a `MulSemiringAction G (A ⊗[R] R')` instance
+    built on `{ TensorProduct.leftDistribMulAction with … }` (NO diamond — the smul
+    is mathlib's `leftHasSMul`) + `smul_tmul_baseChange` + `SMulCommClass G R`
+    instance; Q4b `fixedPointsBaseChange : Aᴳ ⊗[R] R' →ₐ[R] (A ⊗[R] R')ᴳ` (KM's
+    ∗-map, `AlgHom.codRestrict` of `Algebra.TensorProduct.map val id`); Q4c
+    `fixedPointsBaseChange_bijective_of_flat` (KM A7.1.3(1) — kernel-exactness
+    `0 → Aᴳ → A → (G → A)` + `Module.Flat.rTensor_exact` +
+    `rTensor_preserves_injective_linearMap`, with `TensorProduct.piLeft` for the
+    finite-product commutation); Q4d `fixedPointsBaseChange_bijective_of_isUnit`
+    (KM A7.1.3(4) — divided trace `u⁻¹ • Σ_g g` corestricted to a retraction,
+    tensored; `IsUnit (Nat.card G : R)` hypothesis).
+  - GOTCHAS OF RECORD: `DistribMulAction.toLinearMap` is DEPRECATED →
+    `DistribSMul.toLinearMap`; tensor-side needs BOTH `[SMulCommClass G R A]` and
+    `[SMulCommClass R G A]` (mathlib's left-tensor instances want the R-G order;
+    taking both avoids loop-prone symm-instances); `TensorProduct.piLeft` needs
+    `[Fintype ι]` (cases nonempty_fintype) and has NO application lemmas — unfold
+    via `simp only [piLeft, LinearEquiv.trans_apply, comm_tmul, piRight_apply,
+    piRightHom_tmul, piCongrRight_apply]`; `g • (a ⊗ₜ r)` is DEFEQ
+    `(g • a) ⊗ₜ r` so rw-rfl often closes sum-congruences for free; `omit [..] in`
+    goes BEFORE the docstring.
+  - Post-proof cleanup: DEFERRED (owner pause; CLEANUP-12 scope grows to four
+    Q-files).
+- **[T-Q4e]** (open; phase 2 of T-Q4) KM A7.1.3(0) transitivity + (2) faithfully
+  flat descent of ∗ + A7.1.4 DVR criterion; statements per the banked verbatim
+  quotes. Cut when a consumer (T-Q6 / Y(ρ̄) twist) demands them.
   - **QUOTE-GATE SATISFIED** (2026-07-06T16:35Z; KM pp. 215–218 read from
     `katz-mazur-arithmetic-moduli-FULL.pdf`, pdf pp. 226–229 — the PDF is a pure
     scan, read visually; page offset = book + 11). Verbatim of record:
