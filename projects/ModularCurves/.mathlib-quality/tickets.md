@@ -3965,3 +3965,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     CommAlgCat.FiniteEtale.of. Axioms: boxes only. **T-C0b route pinned**: AlgHom
     side ≃ {h : Spec k̄ ⟶ E.torsion N // h ≫ torsionπ = t} (affine Γ-adjunction /
     isoSpec + Spec.preimage glue) ∘ torsionPointsEquiv (TorsionFibre:304) — delegating.
+  - 2026-07-07T01:10Z: T-C0b delegated (affine Γ-adjunction glue ∘ torsionPointsEquiv).
+    **T-C0c placement decided**: HasseWeil files are READ-ONLY on this branch
+    (cross-branch drift risk — their dev branch owns them); the σ-equivariance
+    generalisation lives in ModularCurves as a NEW file
+    WeilPairing/GaloisEquivariance.lean importing HasseWeil — their DivisorGalois
+    toolkit is already σ-general (map_XYIdeal/valuation_map_ringEquiv take arbitrary
+    RingEquiv); only the Frobenius-specific instantiation files
+    (FrobeniusFunctionFieldEquiv/DivisorGalois/Conjugation, pattern theorem
+    frobeniusFunctionFieldEquiv_weilFunction_eq_smul :492) need σ-mirroring.
+    Statement design after T-C0b returns (its equiv form feeds T-C0d's shape).
