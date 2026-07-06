@@ -43,10 +43,10 @@ theorem point_zero_val {T : Scheme.{u}} (g : T ⟶ S) :
       (Additive.toMul (0 : Additive (Over.mk g ⟶ E.asOver))) := rfl
   rw [h0, toMul_zero]
   show ((1 : Over.mk g ⟶ E.asOver)).left = g ≫ E.zero
-  rw [Hom.one_def, Over.comp_left, E.one_eq_zero, ← Category.assoc]
+  rw [Hom.one_def, Over.comp_left, E.one_eq_zero]
   have hw : (toUnit (Over.mk g)).left ≫ (𝟙_ (Over S)).hom = g :=
     Over.w (toUnit (Over.mk g))
-  rw [hw]
+  exact (Category.assoc _ _ _).symm.trans (congrArg (fun m ↦ m ≫ E.zero) hw)
 
 /-- Membership in the `N`-torsion of the point group, morphism-level form. -/
 theorem smul_eq_zero_iff_comp_mulByHom {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
@@ -55,7 +55,8 @@ theorem smul_eq_zero_iff_comp_mulByHom {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
   constructor
   · intro h
     have hval := congrArg (fun Q : E.Point g ↦ (Q : T ⟶ E.E)) h
-    simpa [E.point_smul_eq_comp_mulBy, E.point_zero_val] using hval
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
+    exact hval
   · intro h
     apply Subtype.ext
     rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
@@ -68,24 +69,32 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
     { h : T ⟶ E.torsion N // h ≫ E.torsionπ N = t } ≃
       Submodule.torsionBy ℤ (E.Point t) (N : ℤ) where
   toFun h := ⟨⟨h.1 ≫ E.torsionι N, by
-      have hcond : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
+      have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
         pullback.condition
       have hπ : E.torsionι N ≫ E.π = E.torsionπ N := by
         have h2 := congrArg (fun m ↦ m ≫ E.π) hcond
         simpa [E.mulByHom_π, E.zero_π] using h2
       rw [Category.assoc, hπ, h.2]⟩, by
-    rw [Submodule.mem_torsionBy_iff]
-    rw [E.smul_eq_zero_iff_comp_mulByHom]
+    have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
+      pullback.condition
+    rw [Submodule.mem_torsionBy_iff, E.smul_eq_zero_iff_comp_mulByHom]
     show (h.1 ≫ E.torsionι N) ≫ E.mulByHom (N : ℤ) = t ≫ E.zero
-    rw [Category.assoc,
-      show E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero from by
-        simpa using (pullback.condition (f := E.mulByHom N) (g := E.zero)),
-      ← Category.assoc, h.2]⟩
-  invFun P := ⟨E.pointToTorsion P.1.1
+    rw [Category.assoc, hcond, ← Category.assoc, h.2]⟩
+  invFun P := ⟨E.pointToTorsion P.1
       ((E.smul_eq_zero_iff_comp_mulByHom t N P.1).mp
-        ((Submodule.mem_torsionBy_iff _ _ _).mp P.2)).symm ▸ sorry, sorry⟩
-  left_inv h := sorry
-  right_inv P := sorry
+        ((Submodule.mem_torsionBy_iff _ _).mp P.2)),
+    E.pointToTorsion_torsionπ _ _⟩
+  left_inv h := Subtype.ext <| by
+    apply pullback.hom_ext
+    · show E.pointToTorsion _ _ ≫ E.torsionι N = h.1 ≫ E.torsionι N
+      rw [E.pointToTorsion_torsionι]
+    · show E.pointToTorsion _ _ ≫ E.torsionπ N = h.1 ≫ E.torsionπ N
+      rw [E.pointToTorsion_torsionπ, h.2]
+  right_inv P := by
+    apply Subtype.ext
+    apply Subtype.ext
+    show (E.pointToTorsion _ _ ≫ E.torsionι N : T ⟶ E.E) = ((P : E.Point t) : T ⟶ E.E)
+    rw [E.pointToTorsion_torsionι]
 
 /-- **(T-B6 headline)** Over an algebraically closed field in which `N` is invertible,
 the `N`-torsion of the geometric point group is `(ℤ/N)²`.
