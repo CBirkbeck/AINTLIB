@@ -248,6 +248,204 @@ theorem invariantsπ_hom_ext [Finite G] {Y : Scheme.{u}}
   rw [Category.comp_id] at hc
   rw [← hc, Category.assoc, Category.assoc, H]
 
+/-- The basic-open chart of `Spec Bᴳ` at an invariant `a`. -/
+private noncomputable def chartA (a : FixedPoints.subalgebra R B G) :
+    Spec (CommRingCat.of (Localization.Away a)) ⟶
+      Spec (CommRingCat.of (FixedPoints.subalgebra R B G)) :=
+  Spec.map (CommRingCat.ofHom
+    (algebraMap (FixedPoints.subalgebra R B G) (Localization.Away a)))
+
+/-- The basic-open chart of `Spec B` at (the image of) an invariant `a`. -/
+private noncomputable def chartB (a : FixedPoints.subalgebra R B G) :
+    Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶ Spec (CommRingCat.of B) :=
+  Spec.map (CommRingCat.ofHom (algebraMap B (Localization.Away ((a : B)))))
+
+/-- The localized invariants morphism over the chart at `a`. -/
+private noncomputable def chartπ (a : FixedPoints.subalgebra R B G) :
+    Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶
+      Spec (CommRingCat.of (Localization.Away a)) :=
+  Spec.map (CommRingCat.ofHom (IsLocalization.map
+    (Localization.Away ((a : B)))
+    (algebraMap (FixedPoints.subalgebra R B G) B)
+    (Submonoid.powers_le_comap_algebraMap R a)))
+
+private theorem chartπ_def (a : FixedPoints.subalgebra R B G) :
+    chartπ R a = Spec.map (CommRingCat.ofHom (IsLocalization.map
+      (Localization.Away ((a : B)))
+      (algebraMap (FixedPoints.subalgebra R B G) B)
+      (Submonoid.powers_le_comap_algebraMap R a))) := rfl
+
+private theorem chartA_def (a : FixedPoints.subalgebra R B G) :
+    chartA R a = Spec.map (CommRingCat.ofHom
+      (algebraMap (FixedPoints.subalgebra R B G) (Localization.Away a))) := rfl
+
+private theorem chartB_def (a : FixedPoints.subalgebra R B G) :
+    chartB R a = Spec.map (CommRingCat.ofHom
+      (algebraMap B (Localization.Away ((a : B))))) := rfl
+
+private instance (a : FixedPoints.subalgebra R B G) : IsOpenImmersion (chartA R a) :=
+  inferInstanceAs (IsOpenImmersion (Spec.map _))
+
+private instance (a : FixedPoints.subalgebra R B G) : IsOpenImmersion (chartB R a) :=
+  inferInstanceAs (IsOpenImmersion (Spec.map _))
+
+private theorem chartA_opensRange (a : FixedPoints.subalgebra R B G) :
+    (chartA R a).opensRange = PrimeSpectrum.basicOpen a :=
+  Scheme.Hom.opensRange_localizationAway
+    (R := CommRingCat.of (FixedPoints.subalgebra R B G)) a
+
+private theorem chartB_opensRange (a : FixedPoints.subalgebra R B G) :
+    (chartB R a).opensRange = PrimeSpectrum.basicOpen ((a : B)) :=
+  Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of B) ((a : B))
+
+variable (G B) in
+private theorem chart_square (a : FixedPoints.subalgebra R B G) :
+    chartB R a ≫ invariantsπ G B R = chartπ R a ≫ chartA R a := by
+  rw [chartB_def, chartπ_def, chartA_def, invariantsπ, ← Spec.map_comp, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  exact (IsLocalization.map_comp _).symm
+
+variable (G B) in
+/-- The chart square is cartesian: `D(a) ×_{Spec Bᴳ} Spec B = D((a : B))`. -/
+private theorem isPullback_chart (a : FixedPoints.subalgebra R B G) :
+    IsPullback (chartπ R a) (chartB R a) (chartA R a) (invariantsπ G B R) := by
+  refine IsOpenImmersion.isPullback (chartπ R a) (chartB R a) (chartA R a)
+    (invariantsπ G B R) (chart_square G B R a) ?_
+  rw [chartA_opensRange, chartB_opensRange]
+  exact TopologicalSpace.Opens.ext rfl
+
+variable (G B) in
+/-- One leg of the gluing compatibility: over any morphism `j'` into `Spec Bᴳ` that
+factors through the chart at an invariant `r`, a local descent `qr` of `f` pulls back
+to `pullback.fst π j' ≫ f`. -/
+private theorem chart_descent_side [Finite G] {Y : Scheme.{u}}
+    (f : Spec (CommRingCat.of B) ⟶ Y)
+    {P : Scheme.{u}} (j' : P ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (r : FixedPoints.subalgebra R B G)
+    (qr : Spec (CommRingCat.of (Localization.Away r)) ⟶ Y)
+    (hqr : chartπ R r ≫ qr = chartB R r ≫ f)
+    (pr : P ⟶ Spec (CommRingCat.of (Localization.Away r)))
+    (hpr : pr ≫ chartA R r = j') :
+    pullback.snd (invariantsπ G B R) j' ≫ (pr ≫ qr) =
+      pullback.fst (invariantsπ G B R) j' ≫ f := by
+  have hcone : (pullback.snd (invariantsπ G B R) j' ≫ pr) ≫ chartA R r =
+      pullback.fst (invariantsπ G B R) j' ≫ invariantsπ G B R := by
+    rw [Category.assoc, hpr]
+    exact pullback.condition.symm
+  have hu₁ := (isPullback_chart G B R r).lift_fst
+    (pullback.snd (invariantsπ G B R) j' ≫ pr)
+    (pullback.fst (invariantsπ G B R) j') hcone
+  have hu₂ := (isPullback_chart G B R r).lift_snd
+    (pullback.snd (invariantsπ G B R) j' ≫ pr)
+    (pullback.fst (invariantsπ G B R) j') hcone
+  rw [← Category.assoc, ← hu₁, Category.assoc, hqr, ← Category.assoc, hu₂]
+
+variable (G B) in
+/-- Around every point of `Spec Bᴳ` there is an invariant basic open over which a
+`G`-invariant morphism out of `Spec B` descends. -/
+private theorem exists_chart_descent [Finite G] {Y : Scheme.{u}}
+    (f : Spec (CommRingCat.of B) ⟶ Y) (hf : ∀ g : G, specSMul g ≫ f = f)
+    (p : Spec (CommRingCat.of (FixedPoints.subalgebra R B G))) :
+    ∃ a : FixedPoints.subalgebra R B G,
+      p ∈ PrimeSpectrum.basicOpen a ∧
+      ∃ qa : Spec (CommRingCat.of (Localization.Away a)) ⟶ Y,
+        chartπ R a ≫ qa = chartB R a ≫ f := by
+  -- `f` is constant on the fibres of `invariantsπ` (they are orbits)
+  have hconst : ∀ x y : Spec (CommRingCat.of B),
+      invariantsπ G B R x = invariantsπ G B R y → f x = f y := by
+    intro x y hxy
+    obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G B R x y).mp hxy
+    rw [← hg, ← Scheme.Hom.comp_apply, hf g]
+  -- `invariantsπ` is a closed map (it is integral)
+  have hclosed : IsClosedMap ⇑(invariantsπ G B R) := by
+    have hint : (algebraMap (FixedPoints.subalgebra R B G) B).IsIntegral :=
+      Algebra.isIntegral_def.mp
+        (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
+    exact PrimeSpectrum.isClosedMap_comap_of_isIntegral _ hint
+  -- a point of the fibre and an affine chart of `Y` around its image
+  obtain ⟨x, hx⟩ := invariantsπ_surjective G B R p
+  obtain ⟨i₀, y₀, hy₀⟩ := Y.affineCover.exists_eq (f x)
+  set ι := Y.affineCover.f i₀ with hι
+  -- the saturated open `U` and the separating invariant basic open
+  set U : Set (Spec (CommRingCat.of B)) := f.base ⁻¹' Set.range ι with hU
+  have hUopen : IsOpen U := ι.isOpenEmbedding.isOpen_range.preimage f.continuous
+  have hfibU : ∀ x', invariantsπ G B R x' = p → x' ∈ U := by
+    intro x' hx'
+    have h4 : f x' = f x := hconst x' x (by rw [hx', hx])
+    show f x' ∈ Set.range ⇑ι
+    rw [h4]
+    exact ⟨y₀, hy₀⟩
+  have hpZ : p ∉ (invariantsπ G B R).base '' Uᶜ := by
+    rintro ⟨x', hx'U, hx'⟩
+    exact hx'U (hfibU x' hx')
+  have hZclosed : IsClosed ((invariantsπ G B R).base '' Uᶜ) :=
+    hclosed _ hUopen.isClosed_compl
+  obtain ⟨s, ⟨a, rfl⟩, hps, hsZ⟩ :=
+    PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open
+      (show p ∈ ((invariantsπ G B R).base '' Uᶜ)ᶜ from hpZ) hZclosed.isOpen_compl
+  refine ⟨a, hps, ?_⟩
+  -- the `B`-side chart lands in `U`
+  have hchartU : ∀ v, chartB R a v ∈ U := by
+    intro v
+    by_contra hvU
+    have hmemA : ∀ z, chartA R a z ∈ PrimeSpectrum.basicOpen a := by
+      intro z
+      have h9 : chartA R a z ∈ Set.range ⇑(chartA R a) := ⟨z, rfl⟩
+      exact chartA_opensRange R a ▸ h9
+    refine hsZ ?_ ⟨chartB R a v, hvU, rfl⟩
+    show invariantsπ G B R (chartB R a v) ∈
+      (↑(PrimeSpectrum.basicOpen a) :
+        Set (PrimeSpectrum (FixedPoints.subalgebra R B G)))
+    rw [← Scheme.Hom.comp_apply, chart_square G B R a, Scheme.Hom.comp_apply]
+    exact hmemA _
+  -- lift `chartB ≫ f` into the affine chart of `Y`
+  have hrange : Set.range ⇑(chartB R a ≫ f) ⊆ Set.range ⇑ι := by
+    rintro _ ⟨v, rfl⟩
+    rw [Scheme.Hom.comp_apply]
+    exact hchartU v
+  set t := IsOpenImmersion.lift ι (chartB R a ≫ f) hrange with htdef
+  have ht : t ≫ ι = chartB R a ≫ f := IsOpenImmersion.lift_fac ι _ hrange
+  -- the Γ-level ring hom of the lifted restriction
+  obtain ⟨φ, hφ⟩ := Spec.map_surjective (t ≫ (Y.affineCover.X i₀).isoSpec.hom)
+  -- `φ` has `G`-fixed image: transport the invariance of `f` through the chart
+  have hspec : ∀ g : G,
+      Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫
+        chartB R a = chartB R a ≫ specSMul g := by
+    intro g
+    rw [chartB_def, specSMul, ← Spec.map_comp, ← Spec.map_comp,
+      ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+    congr 2
+    exact IsLocalization.map_comp _
+  have hφfix : ∀ (g : G) (c), MulSemiringAction.awayHom (fun g => a.2 g) g
+      (φ.hom c) = φ.hom c := by
+    intro g
+    have h11 : Spec.map (CommRingCat.ofHom
+        (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫ t = t := by
+      rw [← cancel_mono ι, Category.assoc, ht, ← Category.assoc, hspec g,
+        Category.assoc, hf g]
+    have h12 : Spec.map (CommRingCat.ofHom
+          (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫ Spec.map φ =
+        Spec.map φ := by
+      rw [hφ, ← Category.assoc, h11]
+    rw [← Spec.map_comp] at h12
+    have h13 := Spec.map_injective h12
+    intro c
+    exact congrArg (fun ψ => ψ.hom c) h13
+  -- factor through the invariants (the algebra engine)
+  obtain ⟨ψ, hψ, -⟩ := existsUnique_factor_fixedPoints_away R a φ.hom hφfix
+  refine ⟨Spec.map (CommRingCat.ofHom ψ) ≫ (Y.affineCover.X i₀).isoSpec.inv ≫ ι, ?_⟩
+  have h14 : chartπ R a ≫ Spec.map (CommRingCat.ofHom ψ) = Spec.map φ := by
+    rw [chartπ_def, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    have h14' : CommRingCat.ofHom ((IsLocalization.map
+        (Localization.Away ((a : B)))
+        (algebraMap (FixedPoints.subalgebra R B G) B)
+        (Submonoid.powers_le_comap_algebraMap R a)).comp ψ) = φ := by
+      rw [hψ]
+      exact CommRingCat.ofHom_hom φ
+    rw [h14']
+  rw [← Category.assoc, h14, hφ, Category.assoc, Iso.hom_inv_id_assoc, ht]
+
 variable (G B) in
 /-- Existence of descent: every `G`-invariant morphism out of `Spec B` factors
 through the invariants morphism. -/
@@ -255,7 +453,59 @@ theorem exists_invariantsπ_lift [Finite G] {Y : Scheme.{u}}
     (f : Spec (CommRingCat.of B) ⟶ Y) (hf : ∀ g : G, specSMul g ≫ f = f) :
     ∃ q : Spec (CommRingCat.of (FixedPoints.subalgebra R B G)) ⟶ Y,
       invariantsπ G B R ≫ q = f := by
-  sorry
+  choose a hmem qa hqa using exists_chart_descent G B R f hf
+  have hcoverA : ∀ p : Spec (CommRingCat.of (FixedPoints.subalgebra R B G)),
+      ∃ v, chartA R (a p) v = p := by
+    intro p
+    have h15' : p ∈ (chartA R (a p)).opensRange := by
+      rw [chartA_opensRange]
+      exact hmem p
+    exact h15'
+  set 𝒰 : (Spec (CommRingCat.of (FixedPoints.subalgebra R B G))).OpenCover :=
+    Scheme.Cover.mkOfCovers
+    (J := ↥(Spec (CommRingCat.of (FixedPoints.subalgebra R B G))))
+    (fun p => Spec (CommRingCat.of (Localization.Away (a p))))
+    (fun p => chartA R (a p))
+    (fun p => ⟨p, hcoverA p⟩)
+    (fun p => inferInstance) with h𝒰
+  -- compatibility on overlaps, via the restriction-stable uniqueness
+  have hcompat : ∀ p q : Spec (CommRingCat.of (FixedPoints.subalgebra R B G)),
+      pullback.fst (chartA R (a p)) (chartA R (a q)) ≫ qa p =
+        pullback.snd (chartA R (a p)) (chartA R (a q)) ≫ qa q := by
+    intro p q
+    refine invariantsπ_hom_ext_of_isOpenImmersion G B R
+      (pullback.fst (chartA R (a p)) (chartA R (a q)) ≫ chartA R (a p)) _ _ ?_
+    rw [chart_descent_side G B R f _ (a p) (qa p) (hqa p)
+        (pullback.fst (chartA R (a p)) (chartA R (a q))) rfl,
+      chart_descent_side G B R f _ (a q) (qa q) (hqa q)
+        (pullback.snd (chartA R (a p)) (chartA R (a q))) pullback.condition.symm]
+  refine ⟨𝒰.glueMorphisms (fun p => qa p) hcompat, ?_⟩
+  -- verify the factorization on the `B`-side cover
+  have hcoverB : ∀ x : Spec (CommRingCat.of B),
+      ∃ v, chartB R (a (invariantsπ G B R x)) v = x := by
+    intro x
+    have h17 : x ∈ (chartB R (a (invariantsπ G B R x))).opensRange := by
+      rw [chartB_opensRange]
+      exact hmem (invariantsπ G B R x)
+    exact h17
+  refine Scheme.Cover.hom_ext
+    ((Scheme.Cover.mkOfCovers
+      (J := ↥(Spec (CommRingCat.of B)))
+      (fun x => Spec (CommRingCat.of
+        (Localization.Away ((a (invariantsπ G B R x) : B)))))
+      (fun x => chartB R (a (invariantsπ G B R x)))
+      (fun x => ⟨x, hcoverB x⟩)
+      (fun x => inferInstance) : (Spec (CommRingCat.of B)).OpenCover))
+    _ _ (fun x => ?_)
+  show chartB R (a (invariantsπ G B R x)) ≫ invariantsπ G B R ≫
+      𝒰.glueMorphisms (fun p => qa p) hcompat =
+    chartB R (a (invariantsπ G B R x)) ≫ f
+  rw [← Category.assoc, chart_square G B R, Category.assoc]
+  have h18 : chartA R (a (invariantsπ G B R x)) ≫
+      𝒰.glueMorphisms (fun p => qa p) hcompat = qa (invariantsπ G B R x) :=
+    𝒰.ι_glueMorphisms _ hcompat (invariantsπ G B R x)
+  rw [h18]
+  exact hqa (invariantsπ G B R x)
 
 variable (G B) in
 /-- **The affine quotient by a finite group** ([Loeffler, *Modular curves*,

@@ -2787,7 +2787,46 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   codRestrict`, `IsUnit` inverse-uniqueness. Sources: as T-Q3b.
 
 ### [T-Q3] Affine quotients: `Spec(A^G)` universal property — HEADLINE (v2 one-liner)
-- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:58Z
+- **Status**: done (beastmode-Q, 2026-07-06T15:58Z → 2026-07-06T16:19Z) ·
+  **Claimed**: beastmode-Q, 2026-07-06T15:58Z
+- **Progress** (2026-07-06T16:19 — AffineQuotient.lean sorry-free, zero warnings,
+  standard axioms ×5, module green; AG-QUOT's affine core is DISCHARGED):
+  - Delivered (namespace `AlgebraicGeometry`): `existsUnique_factor_fixedPoints_away`
+    (algebra engine, via `RingEquiv.ofLeftInverse` + `Function.invFun` — there is NO
+    `RingEquiv.ofInjective` in mathlib); `invariantsπ_hom_ext_of_isOpenImmersion`
+    (uniqueness in the route-locked transportable form: against `pullback π j` for
+    any open immersion j — Surjective-stable-under-base-change instance lives in
+    `PullbackCarrier.lean:431`); `invariantsπ_hom_ext` (j = 𝟙 corollary);
+    `exists_invariantsπ_lift`; `existsUnique_invariantsπ_lift` (= [Loe] 3.6.1
+    affine, absolute form). Private infra: chartA/chartB/chartπ + `_def`/
+    `_opensRange` lemmas, `chart_square` (IsLocalization.map_comp), and
+    `isPullback_chart` via `IsOpenImmersion.isPullback` (OpenImmersion.lean:752) —
+    the D(a)-square recognition KILLED the deferred T-Q3c(iii): no
+    invariants-of-tensor identification anywhere.
+  - PROOF SHAPE OF RECORD (β): per-point affine chart of Y (affineCover.exists_eq),
+    T := h₁⁻¹(range ι), push along j, basic open D(a) ⊆ j''T,
+    `IsOpenImmersion.lift` twice, cancel πa at Γ-level via `Spec.map_surjective` +
+    `Spec.map_injective` + T-Q3c(i); glue with `Scheme.Cover.mkOfCovers` (index :=
+    POINTS of W) + `Scheme.Cover.hom_ext`. (γ): fibres-are-orbits + closedness
+    (`PrimeSpectrum.isClosedMap_comap_of_isIntegral`) give the saturated basic open;
+    (α) factors the chart-restricted morphism; `Scheme.OpenCover.glueMorphisms` with
+    compat = TWO applications of (β) at `pullback.fst/snd chartA chartA` through
+    the `isPullback_chart`-lift (private `chart_descent_side`); factorization
+    verified on the B-side point-indexed cover.
+  - GOTCHAS OF RECORD: `Scheme.Cover.hom_ext` (NOT OpenCover.hom_ext — Gluing.lean
+    namespace Cover); `Cover.mkOfCovers` needs the cover TYPE ascribed
+    (`: (Spec _).OpenCover`) or map_prop's P stays a metavariable; rw of a def-name
+    under `Scheme.Hom.opensRange` is a dependent-instance motive error — state
+    `_opensRange` lemmas directly (IsOpenImmersion is Prop, proof-irrelevance
+    makes the instance mismatch free); a >150-line single proof hit 200k-heartbeat
+    whnf timeouts — FIXED BY DECOMPOSITION into 3 private lemmas (NO maxHeartbeats,
+    per the standing rule); `Y.affineCover.X i` is affine via
+    `Scheme.isAffine_affineCover` + `Scheme.isoSpec`, avoiding IsAffineOpen/Opens
+    plumbing entirely.
+  - Post-proof cleanup: DEFERRED (owner pause; debt tracked with T-Q1/T-Q3a-c for
+    the cleanup lane — CLEANUP-12 covers the three Q-files).
+  - Consumers unblocked: T-H4 (quotient half), T-E5 (KM 4.7 ⇐ bootstrap objects),
+    T-M2 (coarse Y₀(N) route), T-Q5 (gluing — next in lane).
 - **File**: ModularCurves/ForMathlib/AffineQuotient.lean (NEW) ·
   **Type**: theorem ×3 · **Depends on**: T-Q1, T-Q3a, T-Q3b, T-Q3c
 - **Route lock (claim-time design, binding unless B2)**: (α) pure-algebra
