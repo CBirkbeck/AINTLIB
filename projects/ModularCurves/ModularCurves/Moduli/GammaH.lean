@@ -758,7 +758,49 @@ of any `X` (finite étale surjective, so nonempty base persists), where the
 tautological level point is fixed by `[-1] ≠ 𝟙`. -/
 theorem gammaFullNaive_not_rigid_of_le_two (N : ℕ) [NeZero N] (hN : N ≤ 2)
     (hinv : IsUnit ((N : ℕ) : R)) (hR : ∃ X : EllObj R, Nonempty X.base) :
-    ¬ (gammaFullNaiveProblem R N).Rigid := by sorry
+    ¬ (gammaFullNaiveProblem R N).Rigid := by
+  intro hrig
+  -- A geometric point of some object's base, keeping `N` invertible (T-H7d).
+  obtain ⟨X₀, hne⟩ := hR
+  obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X₀ hne N hinv
+  letI := fk
+  letI := ak
+  -- The witness object: base change to the geometric point.
+  set X : EllObj R := X₀.pullbackAlong t with hX
+  -- A naive full level-`N` structure on it (T-H7b).
+  obtain ⟨P, Q, hPQ⟩ :=
+    EllipticCurve.exists_isNaiveFullLevel_of_le_two k X.curve N hN hk
+  -- `[-1]` is not the identity automorphism (T-H7c at the identity geometric point).
+  have hne' : EllObj.negIso R X ≠ Iso.refl X := by
+    intro h
+    have htop : X.curve.mulByHom (-1) = 𝟙 X.curve.E :=
+      congrArg (fun i : X ≅ X => i.hom.top) h
+    exact EllipticCurve.mulByHom_neg_one_ne_id X.curve k (𝟙 _) htop
+  -- Level points killed by `N ≤ 2` are `2`-torsion, hence fixed by negation.
+  have hfix2 : ∀ Z : X.curve.Section, ((N : ℕ) : ℤ) • Z = 0 → -Z = Z := by
+    intro Z hZ
+    have h2 : ((2 : ℕ) : ℤ) • Z = 0 := by
+      have hN0 := NeZero.ne N
+      rcases (by omega : N = 1 ∨ N = 2) with rfl | rfl
+      · have hZ0 : Z = 0 := by simpa using hZ
+        rw [hZ0]
+        simp
+      · exact hZ
+    have hZZ : Z + Z = 0 := by
+      have h2' : (2 : ℤ) • Z = 0 := by exact_mod_cast h2
+      rwa [two_zsmul] at h2'
+    exact neg_eq_of_add_eq_zero_left hZZ
+  -- The level structure is fixed by `[-1]` (T-H7a fixity engine).
+  have hfix : (gammaFullNaiveProblem R N).map (EllObj.negIso R X).hom.op ⟨(P, Q), hPQ⟩
+      = ⟨(P, Q), hPQ⟩ := by
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show EllHom.pullSection R (EllObj.negHom R X) P = P
+      rw [EllObj.pullSection_negHom]
+      exact hfix2 P hPQ.1.1
+    · show EllHom.pullSection R (EllObj.negHom R X) Q = Q
+      rw [EllObj.pullSection_negHom]
+      exact hfix2 Q hPQ.1.2
+  exact hrig X (EllObj.negIso R X) rfl hne' ⟨(P, Q), hPQ⟩ hfix
 
 end GammaH
 
