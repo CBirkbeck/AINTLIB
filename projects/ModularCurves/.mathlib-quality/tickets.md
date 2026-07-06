@@ -3012,6 +3012,28 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 - **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
+  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
+  - **Route lock (binding unless B2)**: hypothesis of record is the MODERN one —
+    "every `G`-orbit is contained in a `G`-stable affine open" (Stacks 07S7 shape;
+    quasi-projectivity over an affine base IMPLIES it and is deferred to a
+    corollary when a consumer needs that form — do NOT build a quasi-projectivity
+    predicate for this). Action vocabulary: a family `σ : G → (X ⟶ X)` with
+    `σ 1 = 𝟙` and `σ (g*h) = σ g ≫ σ h` (matches T-Q1's covariant `specSMul`
+    convention; `specSMul` is the `Spec B` instance). Leaves:
+    **T-Q5a** action-on-scheme vocabulary + stable opens + the Γ-bridge (a stable
+    affine open `U` gives `MulSemiringAction G Γ(X,U)` and `U ≅ Spec Γ(U)`
+    intertwines the actions — connects to the ENTIRE affine theory T-Q1/Q3);
+    **T-Q5b** stable-affine refinement (orbit ⊆ affine `U`, `X` separated ⟹
+    `⋂_g (σ g)⁻¹ U` is a G-stable affine open containing the point; finite
+    intersections of affine opens in separated schemes — check mathlib
+    `IsAffineOpen` inf lemmas at pickup);
+    **T-Q5c** glue data: pieces `Spec (Γ(V_i)ᴳ)` over a stable-affine cover,
+    transition isos from T-Q3's ExistsUnique (uniqueness kills cocycle checks);
+    **T-Q5d** `π : X ⟶ X/G` + invariance + the ∃!-universal property (existence
+    per-piece from T-Q3 + `invariantsπ_hom_ext_of_isOpenImmersion`-style glue,
+    which was PROVEN in transportable form for exactly this step).
+    Files: ForMathlib/SchemeQuotient.lean (NEW). NOTE: T-Q6/T-Q7 consume the
+    STATEMENT of T-Q5d only — they unblock at skeleton time.
 - **[T-Q6]** quotients of rigidified moduli problems (KM 4.7 ⇐ engine; T-E5).
 - **[T-Q7]** coarse quotient statements (`Y₀(N)`, `Y(1)`) — via groupoid layer (D6),
   phase M; consumes T-Q5 + T-M1/T-M2 vocabulary.
