@@ -1396,6 +1396,24 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (comap (I*J) ≤ comap I); the tensor half is genuinely local.
 - **Sources**: Stacks 01R5-area (scheme-theoretic preimage) · mathlib
   RingTheory/TensorProduct/Quotient.
+- **ROUTE REFINED (2026-07-08T18:30Z, two mathlib simplifiers found)**:
+  (i) `IdealSheafData.equivOfIsAffine : IdealSheafData X ≃+*o Ideal Γ(X,⊤)` (Basic:487)
+  is a RING-equiv over affines — so affine comap_mul ⟺ top-VALUE multiplicativity with
+  the mul-bookkeeping free; (ii) `ker_of_isAffine (f) [IsAffine Y] : f.ker =
+  ofIdealTop (RingHom.ker f.appTop.hom)` (Basic:750) — comap's value needs only
+  [IsAffine X], no QuasiCompact/ker_apply dance. AFFINE CORE now: identify
+  RingHom.ker ((pullback.fst f Iι).appTop) with (I⊤).map f.appTop: transport the
+  pullback square to Spec-side (X.isoSpec, subschemeObjIso for Iι at affine Y),
+  where fst becomes Spec.map (Quotient.mk of the extension) via
+  `isPullback_SpecMap_of_isPushout` + the quotient pushout square (build by
+  `Algebra.IsPushout.of_equiv` along `quotIdealMapEquivTensorQuot` — SAME pattern as
+  T-A5a's isPushout_sChart); then Ideal.mk_ker. Conjugation bookkeeping via
+  `Hom.ker_comp_of_isIso` (pre-isos) + `map_ker : f.ker.map g = (f ≫ g).ker`
+  (post-isos) + ofIdealTop-map-transport. Globalisation:
+  `IdealSheafData.ext_of_iSup_eq_top` (Basic:269) over affine covers refined into
+  Y-affines + a comap-restriction compat lemma (mirror
+  `ideal_comap_of_isOpenImmersion`, Functorial:199). File started:
+  ForMathlib/IdealSheafComapMul.lean (skeleton compiles, core sorried).
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
 - **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
