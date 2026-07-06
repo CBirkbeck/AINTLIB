@@ -281,6 +281,28 @@ forced redo. Deferred-not-redone: coarse moduli (KM 8), char `p ∣ N` theory (K
 compactification; formal DM-stack *packaging* tracks mathlib's stack API (T-E8) but
 no definition changes when it lands.
 
+## Expert-review amendments (2026-07-06) — v8 staging correction (Weierstrass atlas / quotient stack)
+
+Full detail + tickets in `tickets.md` §"Amendments v8". A **staging correction**, not a
+KM replacement:
+
+1. **`LocallyWeierstrass` is the Phase-1 definition of record** (owner's T-A8, validated);
+   the abstract genus-1-fibre definition is a **Phase-4 comparison target** (`T-W-cmp`). The
+   fibrewise-Weierstrass condition (`FibrewiseElliptic`) is NOT the definition of record — it
+   does not directly give local equations, and proving it does needs the coherent-cohomology
+   machine we avoid.
+2. **`M_ell = [U/G]` concretely**: `U = Spec ℤ[a₁..a₆,Δ⁻¹]`, `G =
+   WeierstrassCurve.VariableChange` (in mathlib). With locally-Weierstrass this is *almost the
+   definition* — no RR. New **Stream W** (`T-W1`–`T-W8`, `T-W-cmp`): projective-space warm-up,
+   groupoid-valued moduli core, quotient-stack core, coordinate-change group, universal atlas,
+   the `M_ell^W` equivalence, group-law-from-charts, level spaces `U_P`.
+3. **Group law from local Weierstrass charts + descent**, not Abel/Pic⁰ (`T-W7`); Abel/Pic⁰
+   canonicity (T-A6) leaves the critical path into the COH stream.
+4. **Coherent cohomology is a separate NON-blocking COH stream** — blocks only the abstract
+   comparison, Hodge/modular forms, and compactification, never `Y(N)`/`Y₁(N)`/`Y(ρ̄,p)`.
+5. **Cartier machinery is NOT replaced** — D-stream incidence still cuts out the level loci
+   over `U`; the stack layer only organises the moduli object.
+
 
 ## Worker-grade proof plans + ecosystem (2026-07-05, v4)
 

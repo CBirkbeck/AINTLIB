@@ -3571,3 +3571,159 @@ bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
 - **Cross-lane impact audit** (done at filing): `fibres` consumer count = 1
   (GroupLaw:163). H-lane T-H7 (in flight) consumes smooth/proper/grp + T-B6 fibre
   torsion, NOT `fibres` — unaffected. B/D/Q lanes: no `.fibres` references.
+- **PROGRESS** (beastmode-A, 2026-07-06): step 1 DONE — `LocallyWeierstrass` predicate
+  added to Basic.lean (commit ad9a3332), elaborates clean; spelling recorded above.
+  Remaining: `LocallyWeierstrass.baseChange` (→ sub-ticket **T-A8a**, route worked out:
+  `isBasis_iff_nbhd.mp T.isBasis_affineOpens` for `V ∋ t ≤ g⁻¹U`; `g.appLE U V` for
+  `W' := W.map`; two `pullbackRightPullbackFstIso` pastings; `isPullback_projModelBaseChange`
+  bridge; then field swap + `EllipticCurveGeom.fibrewiseElliptic` derived lemma + GroupLaw:163
+  fix). VALIDATED as the definition of record by the v8 expert review below.
+
+---
+
+## Amendments v8 (2026-07-06): EXPERT-REVIEW — Weierstrass-atlas / quotient-stack staging correction
+
+*Second expert-review pass (2026-07-06). A **major staging correction**, not a replacement
+for Katz–Mazur. It VALIDATES and EXTENDS the owner's T-A8 direction (`LocallyWeierstrass` as
+the record). Core moves:*
+
+1. **`LocallyWeierstrass` is the Phase-1 DEFINITION OF RECORD** for elliptic curves over `S`
+   (already the T-A8 direction — CONFIRMED). The abstract "smooth proper geometrically-
+   connected genus-1 fibres + section" definition is demoted to a **Phase-4 comparison
+   target** (`T-W-cmp`). Reviewer Q1 (revised): do NOT use the fibrewise Weierstrass
+   condition (`FibrewiseElliptic`) as the definition of record — a fibrewise condition does
+   not directly give local equations, and proving that it does needs exactly the coherent-
+   cohomology/base-change machine we are avoiding. `LocallyWeierstrass` is syntactically
+   stronger but immediately gives explicit equations, coordinate changes, local group laws,
+   division/torsion polynomials, Cartier divisors from sections, and the quotient-stack
+   atlas. *(Phrasing note: reviewer suggests an affine-open-COVER form; our pointwise
+   `∀ s, ∃ U ∋ s` form is equivalent — a cover gives point-neighbourhoods and the
+   neighbourhoods form a cover — keep the pointwise form; it is what
+   `isPullback_projModelBaseChange` drives.)*
+
+2. **`M_ell` as a concrete quotient stack `[U/G]`**, NOT a Riemann–Roch theorem:
+   `U = Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` (nonsingular Weierstrass equations), `G =
+   WeierstrassCurve.VariableChange` (the `(u,r,s,t)` coordinate-change group — **already in
+   mathlib as a `Group`**) acting on `U`. With the locally-Weierstrass definition, `[U/G]`
+   is *almost the definition* of the moduli stack — no RR needed. Aligns with KM's own remark
+   that their Ch. 4 relatively-representable formalism is "working systematically with stacks
+   without ever saying so".
+
+3. **Group law from local Weierstrass charts + descent, NOT Abel/Pic⁰** (reviewer Q3
+   revised). Construct/register the `grp` field of `EllipticCurve` from mathlib's Weierstrass
+   point group law on each chart + `variableChange`-invariance + descent (`T-W7`). Abel/Pic⁰
+   (the deferred `abelEnrichment` canonicity, T-A6) stays the *canonical explanation* but is
+   **removed from the critical path** — it becomes part of the Phase-4 abstract comparison.
+
+4. **Coherent cohomology → a separate long-term foundational stream (COH), NOT a
+   prerequisite.** BB-COHBC, BB-RR (abstract side), Serre duality, the genus-form comparison
+   (T-A9), and abelian-scheme⇒elliptic all live in COH and block ONLY the abstract comparison
+   + Hodge/modular-forms + compactification — **never** the open curves `Y(N)`, `Y₁(N)`,
+   `Y(ρ̄,p)`.
+
+5. **Cartier machinery is NOT replaced** — the D-stream incidence/subgroup-locus
+   representability (T-D11–T-D21) is still required to cut out the level conditions
+   (`E[N] = Σ[aP+bQ]`, exact order, cyclic subgroup) as closed subschemes over `U`. The
+   quotient-stack layer *organises* the moduli object; Cartier *constructs the level loci*.
+
+### Revised dependency spine (v8)
+
+```
+Weierstrass equations over rings (mathlib)
+ → universal Weierstrass curve E_U / U            [T-W5]
+ → coordinate-change group G = VariableChange     [T-W4]
+ → locally-Weierstrass elliptic curves            [T-A8]  ← DEFINITION OF RECORD
+ → quotient-stack layer  [U/G]                     [T-W3, T-W6]
+ → group law & [N] locally (Weierstrass/division polys) + descent   [T-W7]
+ → Cartier divisors & incidence (D-stream)         [T-D11–T-D21]
+ → level spaces U_P / U and stacks [U_P/G]         [T-W8]
+ → fine schemes Y(N), Y₁(N) when rigid             [T-E7, T-E9, T-H*]  → Y(ρ̄,p) [T-F*]
+Parallel, NON-blocking COH stream:
+ coherent cohomology → genus-1 fibres → Pic⁰/Abel → abstract elliptic curves
+ → M_ell^W ≃ M_ell^abstract [T-W-cmp] → abelian-scheme⇒elliptic → Hodge/modular forms
+```
+
+### Stream W — Weierstrass atlas & quotient stack for `M_ell` (NEW; per v8 review)
+
+*Deliberately small stack layer — no atlases/diagonals/algebraic-stack properties/coarse
+moduli yet, just enough groupoid-valued functor language. Sequenced BEFORE KM-4.7 (T-E5) and
+stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the relevant files.*
+
+- **[T-W1] `projective-space-moduli`** (WARM-UP — do first). `ℙⁿ` represents
+  `S ↦ {invertible quotients O_S^{n+1} ↠ L}`. Exercises the exact later API — moduli functor,
+  representability, base change, line bundles, universal object, descent under
+  trivialisations — and prepares Weierstrass equations as sections of line bundles.
+  **Lane**: E · **Depends**: none · **mathlib**: `AlgebraicGeometry.Proj` + its universal
+  property, scheme line bundles · **Type**: def + representability theorem · **Sources**:
+  reviewer v8; Hartshorne II.7.1; EGA II.4.2.3.
+
+- **[T-W2] `moduli-problem-core` (groupoid-valued)**. Add a groupoid-valued variant of
+  `ModuliProblem` (`Schemeᵒᵖ ⥤ Cat`/`⥤ Grpd`) so `M_ell` is not pretended set-valued; keep the
+  set-valued form for rigid problems (its `π₀`/coarse shadow). **Lane**: E · **Depends**:
+  existing `ModuliProblem`, `Moduli/Groupoid.lean` · **Type**: def + API · **Sources**:
+  reviewer v8 Q7; KM Ch. 4.
+
+- **[T-W3] `quotient-stack-core`**. Minimal API: `GroupAction G X`, `ActionGroupoid G X :
+  Category`, `QuotientStack G X : Schemeᵒᵖ ⥤ Cat`, and the user-facing theorem
+  `[U/G](S) ≃ groupoid of G-torsors P → S with a G-equivariant P → U`. No algebraic-stack
+  properties. **Lane**: Q (owns `SchemeQuotient`/`AffineQuotient`/`SpecGroupAction`) ·
+  **Depends**: Q-stream quotient infra (T-Q5/T-Q6) · **Type**: def + API + torsor-description
+  theorem · **Sources**: reviewer v8; standard `[U/G]` groupoid.
+
+- **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
+  `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
+  acting on `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` via `WeierstrassCurve.variableChange` on the
+  coefficients; register as a `GroupAction` (T-W3). **Lane**: A · **Depends**: T-W3 ·
+  **mathlib**: `WeierstrassCurve.VariableChange`, `.variableChange`, `variableChange_Δ`
+  (`Δ ↦ u⁻¹²·Δ`, a unit, so the action preserves `Δ⁻¹`) · **Type**: def + action lemmas ·
+  **Sources**: reviewer v8; Silverman III Table 1.2.
+
+- **[T-W5] `universal-weierstrass-atlas`**. `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
+  universal Weierstrass elliptic curve `E_U := projModel W_univ → U` (`W_univ` = the
+  tautological `WeierstrassCurve` over `ℤ[a₁..a₆,Δ⁻¹]`, `IsElliptic` since `Δ` is a unit).
+  **Lane**: A · **Depends**: T-A2 (`projModel`, done) · **Type**: def + `IsElliptic` witness ·
+  **Sources**: reviewer v8; KM 2.2 / GME 2.2. Mostly assembly over `projModel`.
+
+- **[T-W6] `Mell-Weierstrass-quotient-stack`** (HEADLINE). `M_ell^W := [U/G]` (T-W3 on
+  T-W4/T-W5) and `M_ell^W(S) ≃ groupoid of LocallyWeierstrass elliptic curves over S` — the
+  equivalence is descent of Weierstrass equations under coordinate changes; with T-A8 it is
+  *almost definitional*. **Lane**: W · **Depends**: T-W3, T-W4, T-W5, T-A8 (+ its
+  `baseChange`) · **Type**: def + equivalence theorem · **Sources**: reviewer v8; KM Ch. 4.
+
+- **[T-W7] `group-law-from-weierstrass-charts`** (Q3 reframe; HIGH LEVERAGE). Construct the
+  `grp` group-scheme structure on a LocallyWeierstrass curve from mathlib's Weierstrass point
+  group law per chart (`WeierstrassCurve.Jacobian.Point`/`.Affine.Point`), prove
+  `variableChange`-invariance so it descends chart-independently; `[N]` likewise from division
+  polynomials. Reviewer's replacement for Abel/Pic⁰ as the *route* to the group law.
+  **UNBLOCKS** the `abelEnrichment`-EXISTENCE direction (group law exists constructively),
+  potentially retiring the T-A6 gate on the level-functor `map` fields (`pullSection_add`).
+  **Lane**: A · **Depends**: T-A8, T-W4 · **Type**: def + descent/invariance lemmas ·
+  **Sources**: reviewer v8 Q3; Silverman III.2–3; mathlib `EllipticCurve.Weierstrass` group.
+
+- **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
+  `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
+  schemes/subfunctors over `U` cut out by the D-stream Cartier incidence loci; the quotient
+  stacks `[U_P/G]` are the level stacks, represented by `Y(P)` when rigid. **Lane**: W + D/H ·
+  **Depends**: T-W5, T-W6, T-D14+ (incidence), H-stream level defs · **Type**: def +
+  representability bridge · **Sources**: reviewer v8; KM 3.1/3.2/Ch. 4.
+
+- **[T-W-cmp] `abstract-comparison`** (DEFERRED, COH stream, NON-blocking). `M_ell^W ≃
+  M_ell^abstract`, abstract = smooth proper geometrically-connected genus-1 fibres + section.
+  Home of coherent cohomology / Serre duality / RR / Hodge bundle, and
+  `abelian-scheme dim 1 ⇒ elliptic curve`. Explicitly OFF the critical path to `Y(N)`.
+  **Lane**: COH (new parallel stream) · **Depends**: BB-COHBC, T-A9, T-A6 (`abelEnrichment`) ·
+  **Type**: equivalence theorem · **Sources**: reviewer v8; KM 2.1; Katz Antwerp; DR II.1.
+
+### Existing-ticket updates (v8)
+
+- **T-A8** — VALIDATED as the definition of record; continue (T-A8a `baseChange`, then field
+  swap + derived `EllipticCurveGeom.fibrewiseElliptic` — the record still IMPLIES
+  `FibrewiseElliptic`, now a theorem not a field). No phrasing change (pointwise ≡ open-cover).
+- **T-A6** (`abelEnrichment`) — reframed: NO LONGER on the critical path. Primary group-law
+  route is T-W7 (local Weierstrass + descent). Abel/Pic⁰ canonicity moves into T-W-cmp (COH
+  stream). Level-functor `map` fields (`pullSection_add`, gated on `abelEnrichment_unique`)
+  should re-route through T-W7 once it lands — re-audit that gate then.
+- **BB-COHBC / BB-RR (abstract side) / T-A9** — reclassified into the COH parallel stream;
+  block only T-W-cmp + Hodge/modular-forms + compactification, never the open curves.
+- **T-E5 / T-E8** (representability ⟺ rel-rep+rigid; stack packaging) — sequence AFTER the
+  Stream-W layer (T-W1–T-W6); T-E8 stack packaging can consume `QuotientStack` (T-W3).

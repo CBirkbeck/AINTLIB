@@ -10,6 +10,18 @@ and must be built). RR stays assumed per the directive.
 
 Mathlib coverage was surveyed 2026-07-09 (see the per-box "mathlib" lines).
 
+**v8 staging correction (2026-07-06 expert review; see `tickets.md` §"Amendments v8"):**
+the reviewer's Weierstrass-atlas / quotient-stack route removes the *abstract-side* boxes
+from the critical path to the open modular curves. Concretely: **BB-COHBC** (coherent
+cohomology & base change) and the *abstract-side* use of **BB-RR** now block ONLY the
+abstract-vs-locally-Weierstrass comparison (`T-W-cmp`), the Hodge bundle / modular forms, and
+compactification — **not** `Y(N)`/`Y₁(N)`/`Y(ρ̄,p)`. They form a parallel, non-blocking **COH
+stream**. The construction-side spine instead uses `LocallyWeierstrass` (T-A8) + the
+quotient-stack atlas `[U/G]` (Stream W), where the group law comes from mathlib's Weierstrass
+charts + descent (`T-W7`) rather than Abel/Pic⁰ — so **T-A6** (canonicity) also leaves the
+critical path. BB-FLAT / BB-DELIGNE / BB-DIFF (the `[N]`/`E[N]` rank+killing boxes) remain
+genuine construction-side gaps as classified below; the atlas route does not retire them.
+
 ---
 
 ## Tier 1 — BOUNDED (discharge in-project, routes verified)
