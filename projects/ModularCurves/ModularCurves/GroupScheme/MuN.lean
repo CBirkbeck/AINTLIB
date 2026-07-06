@@ -577,8 +577,15 @@ theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
 for `S = ∅`). -/
+private lemma etale_muNπ_of_isUnit (S : Scheme.{u}) (N : ℕ) [NeZero N]
+    (h : IsUnit (N : Γ(S, ⊤))) : Etale (muNπ S N) := by sorry
+
+private lemma isUnit_of_etale_muNπ (S : Scheme.{u}) (N : ℕ) [NeZero N]
+    (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by sorry
+
 theorem muNπ_etale_iff (S : Scheme.{u}) (N : ℕ) [NeZero N] :
-    Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) := by sorry
+    Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) :=
+  ⟨isUnit_of_etale_muNπ S N, etale_muNπ_of_isUnit S N⟩
 
 end RankAndEtale
 
