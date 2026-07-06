@@ -1,6 +1,7 @@
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Groupoid
 import ModularCurves.EllipticCurve.TorsionFibre
+import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 
 /-!
@@ -581,7 +582,19 @@ theorem EllipticCurve.exists_isNaiveFullLevel_of_le_two (k : Type u) [Field k]
 theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
     (N : ℕ) (hinv : IsUnit ((N : ℕ) : R)) :
     ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
-      (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by sorry
+      (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by
+  obtain ⟨s⟩ := hne
+  refine ⟨AlgebraicClosure (X.base.residueField s), inferInstance, inferInstance,
+    Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)
+      (AlgebraicClosure (X.base.residueField s)))) ≫ X.base.fromSpecResidueField s, ?_⟩
+  have hu : IsUnit ((N : ℕ) : AlgebraicClosure (X.base.residueField s)) := by
+    have φ := Spec.preimage
+      ((Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)
+          (AlgebraicClosure (X.base.residueField s)))) ≫
+        X.base.fromSpecResidueField s) ≫ X.structMap)
+    have h := hinv.map φ.hom
+    rwa [map_natCast] at h
+  exact hu.ne_zero
 
 /-- **(T-H7, the honest stack statement at small `N`)** For `N ≤ 2` the full-level
 problem is NOT rigid — `[-1]` is a nontrivial automorphism acting trivially on all
