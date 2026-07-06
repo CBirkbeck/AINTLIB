@@ -3398,3 +3398,70 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Sources**: standard.
 - **Generality**: for any `Scheme` with a `⟶ Spec R` — state against `X : EllObj R`
   minimally (match use site per beastmode rule).
+
+---
+
+## Amendments v7 (2026-07-06): OWNER DIRECTIVE — EllipticCurveGeom fibre field → Zariski-local Weierstrass (A-lane ticket)
+
+*Owner decision 2026-07-06 (chat, recorded by beastmode-H): the geometric record's
+fibre condition changes from the fibrewise bridge to the **Zariski-local-model
+bridge**; `FibrewiseElliptic` becomes a derived lemma; the converse is the Chain-A7
+comparison theorem, later. Rationale verified against the tree: (i) `fibres` has
+exactly ONE consumer today (GroupLaw.lean:163 baseChange) — cheapest-ever migration
+moment; (ii) model side done: T-A2 (projModel any CommRing), T-A3
+(`projModel_smooth` ⟺ Δ unit), `projModelπ_isProper` instance
+(WeierstrassModel.lean:278); (iii) every constructed curve (universal Tate/Y₁(N),
+Γ(3)/Legendre bootstrap for T-E5⇐, ℰ₃, j-line fibres) enters the record with a
+trivial witness instead of per-construction fibre analysis; (iv) BB-RR leaves the
+construction-side critical path (RR-only directive strengthened — RR then owed only
+by the Abel/canonicity chain + the A7 comparison). Honest cost: until A7 lands the
+record is a-priori a SUBCLASS of KM 2.1.1/DR II.1.1/Loe 3.3.1 — a stronger-direction
+bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
+
+### [T-A8] EllipticCurveGeom v2 — `LocallyWeierstrass` field swap (OWNER-DIRECTED)
+- **Status**: open · **Claimed**: — · **Lane**: A (files owned by A; bundle with the
+  in-flight 3-spelling refactor; NOT claimable by other lanes) ·
+  **Files**: EllipticCurve/Basic.lean (predicate + field swap + drift note),
+  EllipticCurve/GroupLaw.lean (:163), Moduli/EllCategory.lean +
+  Moduli/Representability.lean (header honesty notes) ·
+  **Depends on**: T-A2 (done), T-A3 (done), T-A5a (done) · **Type**: def change + lemmas
+- **New predicate** (content; executor picks the cleanest pointed-iso spelling and
+  records it here):
+  `def LocallyWeierstrass (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) : Prop :=
+    ∀ s : S, ∃ (U : S.affineOpens) (_ : s ∈ U.1) (W : WeierstrassCurve Γ(S, U.1)),
+      W.IsElliptic ∧ (pointed iso of the restriction E|_U with projModel W over
+      U.1.isoSpec, compatible with π and z)`
+- **Migration steps**:
+  1. Add `LocallyWeierstrass` next to `FibrewiseElliptic` (keep the latter, unchanged,
+     as a predicate).
+  2. Swap the record field `fibres : FibrewiseElliptic …` →
+     `localModel : LocallyWeierstrass …`. KEEP `smooth`/`proper` fields (docstring
+     note: redundant given localModel via T-A3 + `projModelπ_isProper` +
+     locality-at-target — the deliberate `grp`-pattern; derivable later).
+  3. GroupLaw.lean:163: `localModel := E.localModel.baseChange g` via new
+     `LocallyWeierstrass.baseChange`: for `t : T` pick affine `U ∋ g t` with model
+     `W`; affine `V ⊆ g⁻¹ᵁU` with `t ∈ V`; `(E ×_S T)|_V = (E|_U) ×_U V`; transport
+     `W` along `Γ(U) → Γ(V)` via `isPullback_projModelBaseChange` + pullback pasting.
+     (The old `FibrewiseElliptic.baseChange` lemma STAYS — it is about the predicate.)
+  4. Derived lemma `EllipticCurveGeom.fibrewiseElliptic : FibrewiseElliptic E.π
+     E.zero E.zero_π`. Sub-lemma `fibrewiseElliptic_projModel : FibrewiseElliptic
+     (projModelπ W) projModelZero _` for `W` elliptic over any ring: fibre at `p` ≅
+     `projModel (W.map (algebraMap _ κ(p)))` by `isPullback_projModelBaseChange` at
+     residue fields (T-A5b `hA`/`hB` pattern); `Δ`-unit maps to unit. Then transport
+     along the local iso + fibre-of-open-restriction identification.
+  5. Basic.lean header: v2 drift note mirroring the genus-bridge note — a-priori
+     stronger; equivalence = A7 comparison (gated COH-1 + [RR-box]); genus form
+     remains T-A9's target.
+  6. One-line honesty note in the two Moduli headers (functors quantify over the v2
+     record; post-A7 provably the sources' class).
+  7. Board-register **[T-A7-cmp]** `FibrewiseElliptic → LocallyWeierstrass`
+     (Chain A7, decomposition-gme2 pp. 111–115 transcribed; gated COH-1 + [RR-box]).
+     Skeleton `:= by sorry` in-file optional — executor's call; the board edge is
+     mandatory.
+- **Mathlib lemmas**: `IsAffineOpen.isoSpec`, affine-opens basis, `MorphismProperty`
+  iso-invariance, pullback pasting.
+- **Sources**: KM 2.2.5–2.2.6; GME 2.2.4–2.2.5 (= Chain A7); owner directive above.
+- **Generality**: predicate shape matches `FibrewiseElliptic` (any `π, z, hz`).
+- **Cross-lane impact audit** (done at filing): `fibres` consumer count = 1
+  (GroupLaw:163). H-lane T-H7 (in flight) consumes smooth/proper/grp + T-B6 fibre
+  torsion, NOT `fibres` — unaffected. B/D/Q lanes: no `.fibres` references.
