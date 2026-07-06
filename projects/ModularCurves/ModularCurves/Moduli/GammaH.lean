@@ -221,8 +221,14 @@ noncomputable def gammaFullDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem 
     X.unop.curve.IsFullLevel N PQ.1 PQ.2 }
   map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
     EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
-  map_id := by sorry
-  map_comp := by sorry
+  map_id X := by
+    ext PQ
+    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
+    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.2)
+  map_comp f g := by
+    ext PQ
+    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.1)
+    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.2)
 
 /-- The Drinfeld `Γ₁(N)` problem over an arbitrary base: points of exact order `N`
 (KM 3.2 via KM 1.4.1 — fully sourced Ch. 1 machinery). -/

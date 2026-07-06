@@ -328,7 +328,7 @@ theorem etale_quotient [Module.Finite k A] [Algebra.Etale k A] (J : Ideal A) :
     Algebra.Etale k (A ⧸ J) := by
   haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
   haveI : IsArtinianRing A := isArtinian_of_tower k inferInstance
-  haveI : IsSemisimpleRing A := isSemisimpleRing_of_isReduced
+  haveI : IsSemisimpleRing A := IsArtinianRing.isSemisimpleRing_of_isReduced
   obtain ⟨I, hIJ⟩ := exists_isCompl J
   have hrad2 : ∀ x : A, x * x ∈ J → x ∈ J := by
     intro x hx2
@@ -370,11 +370,10 @@ theorem etale_quotient [Module.Finite k A] [Algebra.Etale k A] (J : Ideal A) :
           exact ih ((n + 1) / 2) (by omega) x hxm (by omega)
     intro x hx
     obtain ⟨n, hn⟩ := hx
-    exact key n x hn (by
-      rintro rfl
-      simp only [pow_zero] at hn
-      exact (hIJ.symm.inf_eq_bot ▸ Submodule.mem_top :
-        (⊤ : Ideal A) ≠ ⊥ → False) sorry)
+    rcases Nat.eq_zero_or_pos n with rfl | hn0
+    · simp only [pow_zero] at hn
+      exact ((Ideal.eq_top_iff_one J).mpr hn).symm ▸ (Submodule.mem_top : x ∈ ⊤)
+    · exact key n x hn hn0.ne'
   haveI : IsReduced (A ⧸ J) := (Ideal.isRadical_iff_quotient_reduced J).mp hradJ
   haveI : Module.Finite k (A ⧸ J) :=
     Module.Finite.of_surjective (Ideal.Quotient.mkₐ k J).toLinearMap

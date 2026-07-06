@@ -77,13 +77,16 @@ theorem IsStableOpen.le_preimage {σ : SchemeAction G X} {U : X.Opens}
 `Scheme.Hom.appLE` (no `eqToHom` transport). Over a stable *affine* open this is
 the bridge back to the affine quotient theory. Not an instance (it depends on the
 stability hypothesis): bring it into scope with `letI`. -/
+@[implicit_reducible]
 noncomputable def gammaMulSemiringAction {U : X.Opens} (hU : σ.IsStableOpen U) :
     MulSemiringAction G ↑Γ(X, U) where
   smul g s := ((σ.hom g).appLE U U (hU.le_preimage g)).hom s
   one_smul s := by
     show ((σ.hom 1).appLE U U (hU.le_preimage 1)).hom s = s
     simp only [σ.hom_one]
-    simp [Scheme.Hom.appLE]
+    simp only [Scheme.Hom.appLE]
+    rw [show (homOfLE _ : U ⟶ U) = 𝟙 U from Subsingleton.elim _ _]
+    simp
   mul_smul g h s := by
     show ((σ.hom (g * h)).appLE U U (hU.le_preimage (g * h))).hom s =
       ((σ.hom g).appLE U U (hU.le_preimage g)).hom
