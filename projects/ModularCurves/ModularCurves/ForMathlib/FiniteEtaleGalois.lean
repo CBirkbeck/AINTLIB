@@ -114,6 +114,66 @@ instance hasFiniteProducts : HasFiniteProducts (CommAlgCat.FiniteEtale.{u} k) wh
           HasLimit.mk ⟨_, productFanIsLimit (F.obj ∘ Discrete.mk)⟩
         exact hasLimit_of_iso (Discrete.natIsoFunctor (F := F)).symm }
 
+/-! Pushouts in `FiniteEtale k` (leaf AG-GG-1.2): the pushout of finite étale algebras
+along finite étale algebras is the tensor product, which is again finite étale. -/
+
+section Pushout
+
+open scoped TensorProduct
+
+variable (A B C : Type u) [CommRing A] [CommRing B] [CommRing C]
+  [Algebra k A] [Algebra k B] [Algebra k C]
+  [Algebra A B] [Algebra A C] [IsScalarTower k A B] [IsScalarTower k A C]
+
+/-- The tensor product of finite étale `k`-algebras over a finite étale `k`-algebra is
+étale over `k` (uses the two-out-of-three property for étale maps). -/
+theorem etale_tensorProduct [Algebra.Etale k A] [Algebra.Etale k B] [Algebra.Etale k C] :
+    Algebra.Etale k (B ⊗[A] C) := by
+  haveI : Algebra.Etale A C := Algebra.Etale.of_restrictScalars k A C
+  haveI : Algebra.Etale B (B ⊗[A] C) := inferInstance
+  exact Algebra.Etale.comp k B (B ⊗[A] C)
+
+/-- The tensor product of finite `k`-algebras over a `k`-algebra is finite over `k`. -/
+theorem finite_tensorProduct [Module.Finite k B] [Module.Finite k C] :
+    Module.Finite k (B ⊗[A] C) := by
+  haveI : Module.Finite A C := Module.Finite.of_restrictScalars_finite k A C
+  haveI : Module.Finite B (B ⊗[A] C) := inferInstance
+  exact Module.Finite.trans B (B ⊗[A] C)
+
+end Pushout
+
+section PushoutCat
+
+variable {X Y Z : CommAlgCat.FiniteEtale.{u} k} (f : X ⟶ Y) (g : X ⟶ Z)
+
+/-- The pushout cocone on a span of finite étale `k`-algebras, with the tensor product
+as vertex (the `X`-algebra structures on `Y` and `Z` come from the span legs). -/
+noncomputable def spanPushoutCocone : PushoutCocone f g :=
+  letI : Algebra X.obj Y.obj := f.hom.hom.toRingHom.toAlgebra
+  letI : Algebra X.obj Z.obj := g.hom.hom.toRingHom.toAlgebra
+  haveI : IsScalarTower k X.obj Y.obj :=
+    IsScalarTower.of_algebraMap_eq fun r => (f.hom.hom.commutes r).symm
+  haveI : IsScalarTower k X.obj Z.obj :=
+    IsScalarTower.of_algebraMap_eq fun r => (g.hom.hom.commutes r).symm
+  haveI := etale_tensorProduct (k := k) X.obj Y.obj Z.obj
+  haveI := finite_tensorProduct (k := k) X.obj Y.obj Z.obj
+  PushoutCocone.mk
+    (W := CommAlgCat.FiniteEtale.of k (↑Y.obj ⊗[↑X.obj] ↑Z.obj))
+    (ObjectProperty.homMk
+      (show Y.obj ⟶ CommAlgCat.of k (↑Y.obj ⊗[↑X.obj] ↑Z.obj) from
+        CommAlgCat.ofHom (Algebra.TensorProduct.includeLeft (S := k))))
+    (ObjectProperty.homMk
+      (show Z.obj ⟶ CommAlgCat.of k (↑Y.obj ⊗[↑X.obj] ↑Z.obj) from
+        CommAlgCat.ofHom
+          ((Algebra.TensorProduct.includeRight (R := ↑X.obj)).restrictScalars k)))
+    (by
+      ext a
+      show (f.hom.hom a) ⊗ₜ (1 : Z.obj) = (1 : Y.obj) ⊗ₜ (g.hom.hom a)
+      exact ((Algebra.TensorProduct.includeLeft (S := (↑X.obj : Type u))).commutes a).trans
+        ((Algebra.TensorProduct.includeRight (R := (↑X.obj : Type u))).commutes a).symm)
+
+end PushoutCat
+
 end FiniteEtaleGalois
 
 end ModularCurves

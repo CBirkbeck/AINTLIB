@@ -220,6 +220,11 @@ noncomputable def Point.asSection {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g)
   ⟨pullback.lift P.1 (𝟙 T) (by rw [P.2, Category.id_comp]),
     pullback.lift_snd _ _ _⟩
 
+@[simp]
+lemma Point.asSection_coe {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
+    (Point.asSection E g P).1 =
+      pullback.lift P.1 (𝟙 T) (by rw [P.2, Category.id_comp]) := rfl
+
 /-- **(T-D6a-ii, final ingredient)** `asSection` intertwines integer scalar
 multiplication. Both underlying maps are `pullback.lift (P.1 ≫ [n]) (𝟙 T)` — LHS by
 `point_smul_eq_comp_mulBy` on `E`, RHS by the same plus `mulByHom_baseChange`.
@@ -234,19 +239,17 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- ARITHMETIC SETTLED, COERCION-SPELLING PARKED (2026-07-09). Every fact compiles:
+  -- ARITHMETIC SETTLED (all facts below compile as haves), COERCION-NORMALIZATION
+  -- PARKED: `↑(Point.asSection E g Q)` appears both as `.1` (folded) and as the
+  -- delta-unfolded `↑⟨pullback.lift …, _⟩`; neither `asSection_coe` (a rfl `.1`-lemma)
+  -- nor `simp only [Point.asSection]` normalises the anonymous-constructor coercion so
+  -- `pullback.lift_fst` fires. Proven ingredients (paste back once the coercion is
+  -- tamed, e.g. via a `Subtype.coe_mk`/`show`-to-raw-pullback recast):
   --   hmf : (E.baseChange g).mulByHom n ≫ pullback.fst E.π g
   --           = pullback.fst E.π g ≫ E.mulByHom n   (mulByHom_baseChange + lift_fst)
   --   hms : (E.baseChange g).mulByHom n ≫ pullback.snd E.π g = pullback.snd E.π g
-  --   hASf : (asSection E g P).1 ≫ pullback.fst E.π g = P.1   (lift_fst)
-  -- and both legs of `pullback.hom_ext` reduce to `P.1 ≫ E.mulByHom n` / `𝟙 T` via
-  -- point_smul_eq_comp_mulBy. The ONLY blocker: `↑(asSection E g P)` elaborates with
-  -- codomain `pullback E.π g` inside the goal but `(E.baseChange g).E` inside the
-  -- haves — defeq, but `reassoc_of% hASf` / `← Category.assoc` matchers distinguish
-  -- the two spellings. Fix = give `Point.asSection` a `@[simp] asSection_coe` lemma
-  -- unfolding `↑(asSection E g P)` to `pullback.lift P.1 (𝟙 T) _` at the RAW
-  -- `pullback E.π g` spelling, then `simp only [asSection_coe]` normalises both
-  -- occurrences before the reassoc. Non-blocking (T-D6a-ii is non-blocking).
+  --   then pullback.hom_ext, each leg via point_smul_eq_comp_mulBy + calc-assoc + the
+  --   above + asSection's own lift_fst/snd. Non-blocking (T-D6a-ii is non-blocking).
   sorry
 
 end EllipticCurve
