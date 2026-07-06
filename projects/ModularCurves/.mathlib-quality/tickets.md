@@ -3322,11 +3322,22 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     — the j-relative descent existence (AffineQuotient.lean, sorry-free, standard
     axioms; commit "T-Q5c KEYSTONE"). With the j-relative hom_ext this is the full
     effective-epi package. Also proven en route: `pullbackSpecSMul` + specs.
-    REMAINING for T-Q5: (α) `IsOpenImmersion (localQuotientMap …)` — apply the
-    keystone at j := the image-open of π^V(W) to build the inverse up to the
-    open-inclusion (UP-iso argument, q-lane.md note); (β) c4 GlueData over a
-    chosen stable-affine atlas + the five contract statements (board item (6));
-    T-Q6/Q7 unblock at (β)'s skeleton.
+    (α) DONE (2026-07-07): `isOpenImmersion_localQuotientMap` PROVED (window
+    layer: windowHom/imageOpens/windowIso via isoOfRangeEq + saturation;
+    keystone-descended inverse; UP-uniqueness both sides; `localQuotient` made
+    @[reducible] — REQUIRED for instance-transparency through the def). Also
+    (β1) DONE: `IsStableOpen.inf`, `localQuotientMap_self`,
+    `localQuotientMap_trans` (glue backbone; NOTE the ≤-proof-irrelevance makes
+    eqToHom-free t-maps possible). All sorry-free, axiom-clean, committed.
+    REMAINING (β2, route locked): β2a range_localQuotientMap = imageOpens
+    (extract from (α)'s m₀-iso); β2b imageOpens-intersection arithmetic
+    (π(A)∩π(B) = π(A∩B) for saturated A B — KEY: a stable set containing one
+    orbit point contains the orbit); β2c tripleIso : pullback (f i j) (f i k) ≅
+    Q_{V_i⊓V_j⊓V_k} via isoOfRangeEq, t' := tripleIso-conjugate of the
+    eq-map, t_fac/cocycle by mono-cancel + localQuotientMap_trans; then
+    GlueData.glued + π (glue per-chart π^{V_i} over the V_i-cover) + the five
+    contract statements (β3, keystone per chart). T-Q6/Q7 + NEW v8 consumer
+    T-W3 (quotient-stack core, lane Q) unblock at β3's skeleton.
     NEXT LEAVES (in order): c2 = local quotient of a stable affine open V
     (`Spec Γ(V)ᴳ` + local π := V.toScheme ≅ Spec Γ(V) [IsAffineOpen.isoSpec] ≫
     invariantsπ-of-Γ-bridge-action; invariance lemma); c3 = for stable affine
