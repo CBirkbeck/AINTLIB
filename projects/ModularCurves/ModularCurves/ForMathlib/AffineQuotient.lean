@@ -72,19 +72,24 @@ theorem existsUnique_factor_fixedPoints_away {C : Type u} [CommRing C]
     obtain ⟨y, hy⟩ := (mem_range_fixedPoints_awayMap_iff R a (φ c)).mpr
       (fun g => hφ g c)
     exact ⟨y, hy⟩
-  set e := RingEquiv.ofInjective inclMap hinj with he
+  have hinv : Function.LeftInverse (Function.invFun inclMap) inclMap :=
+    Function.leftInverse_invFun hinj
+  set e := RingEquiv.ofLeftInverse hinv with he
+  have hfac : ∀ c : C,
+      inclMap (e.symm.toRingHom.comp (φ.codRestrict inclMap.range hrange) c) = φ c := by
+    intro c
+    show inclMap (e.symm (φ.codRestrict inclMap.range hrange c)) = φ c
+    rw [he, RingEquiv.ofLeftInverse_symm_apply]
+    exact Function.invFun_eq (RingHom.mem_range.mp (hrange c))
   refine ⟨e.symm.toRingHom.comp (φ.codRestrict inclMap.range hrange), ?_, ?_⟩
   · ext c
-    have h1 := congrArg Subtype.val (e.apply_symm_apply ⟨φ c, hrange c⟩)
-    simpa [he, RingEquiv.ofInjective_apply] using h1
+    exact hfac c
   · intro ψ' hψ'
     ext c
     refine hinj ?_
     have h2 : inclMap (ψ' c) = φ c := by
       rw [← RingHom.comp_apply, hψ']
-    rw [h2]
-    have h3 := congrArg Subtype.val (e.apply_symm_apply ⟨φ c, hrange c⟩)
-    simpa [he, RingEquiv.ofInjective_apply] using h3.symm
+    rw [h2, hfac c]
 
 end Algebra
 
