@@ -115,6 +115,30 @@ theorem isSubdivisor_iff_le (D' D : RelEffCartierDiv π) :
   · intro h
     exact ⟨Scheme.IdealSheafData.inclusion h, Scheme.IdealSheafData.inclusion_subschemeι h⟩
 
+/-- **(T-D14b)** The ideal sheaf of the base-changed divisor is the `comap` of the
+ideal sheaf along the curve-level projection — formation of the divisor ideal commutes
+with base change (KM 1.1.4 in the working encoding). -/
+theorem baseChange_ideal (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
+    (D.baseChange t).ideal = D.ideal.comap (pullback.fst π t) := by
+  show (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker = _
+  rw [← pullbackSymmetry_hom_comp_fst D.ideal.subschemeι (pullback.fst π t),
+    Scheme.Hom.ker_comp_of_isIso, Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
+    Scheme.IdealSheafData.ker_subschemeι]
+
+/-- **(T-D14a′)** A morphism factors through the closed subscheme of an ideal sheaf
+iff the ideal is contained in its kernel — the object-level unpacking of mathlib's
+`kerAdjunction`, in the form the incidence loci consume. -/
+theorem _root_.ModularCurves.exists_factor_subschemeι_iff {T : Scheme.{u}}
+    (Z : S.IdealSheafData) (t : T ⟶ S) :
+    (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔ Z ≤ t.ker := by
+  constructor
+  · rintro ⟨h, rfl⟩
+    simpa using h.le_ker_comp Z.subschemeι
+  · intro hZ
+    exact ⟨t.toImage ≫ Scheme.IdealSheafData.inclusion hZ, by
+      rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι,
+        Scheme.Hom.toImage_imageι]⟩
+
 /-- **(T-D14 = KM 1.3.4, incidence `≤`)** For a smooth relative curve and effective
 divisors `D, D'` with `D'` proper (= finite) over `S`, there is a closed subscheme
 `Z ⊆ S` universal for `D' ≤ D`, cut out locally by `deg D'` equations, compatible with
