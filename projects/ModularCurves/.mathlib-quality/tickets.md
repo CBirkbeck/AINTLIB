@@ -427,7 +427,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: arbitrary `g : T ⟶ S`.
 
 ### [T-A5a] projModel commutes with base change (sub-ticket of T-A5)
-- **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean (section Points or new)
+- **Status**: in_progress (beastmode 2026-07-07T00:30Z — rungs 1–7a DONE sorry-free:
+  `mvMapGraded`, `projIdeal_le_comap` (mathlib `Projective.map_polynomial`),
+  `baseChangeGradedHom` (via new general `quotientGradingMap` in GradedQuotient.lean),
+  `baseChangeGradedHom_irrelevant_le` (X-generators; Proj.map's HomogeneousIdeal-≤
+  form is rfl-defeq to the toIdeal form — pass directly), `projModelBaseChange :=
+  Proj.map …`, **`projModelBaseChange_π` (the base-change square) PROVED** via
+  `mapAffineOpenCover.openCover.hom_ext` + `awayι_comp_map` + `awayι_toSpecZero` +
+  `bc_ring_square` (grade-zero val-chase; `simp only [Category.assoc]` after unfold,
+  rewrite side-goal `hs` discharged by `s.2.2`), and `projModelBaseChangeLift :=
+  pullback.lift`. REMAINING rung 7b: `IsIso (projModelBaseChangeLift f W)` —
+  IsZariskiLocalAtTarget over preimages of the `D₊(mk Xᵢ)` cover; per chart the lift
+  restricts to Spec of the comparison `chart-W ⊗_R R' → chart-(W.map f)`, iso by
+  `pullbackSpecIso` + `Algebra.TensorProduct.quotIdealMapEquivTensorQuot` +
+  `MvPolynomial.algebraTensorAlgEquiv` + `chartCoordEquiv` both sides
+  (generator chase on X-vars and scalars); then package the pointed iso
+  (zero-section compat via projModelZero_projModelπ-style rfl-chase or the
+  Equiv.swap-free direct route) for T-A5b. · **File**: EllipticCurve/WeierstrassModel.lean (section Points or new)
 - **Parent**: T-A5 · **Depends on**: T-A2 (done) · **Type**: def + theorem
 - **Statement**: for `f : R →+* R'` (consumer case: residue-field extension
   `κ(s) → κ(t)`), a pointed iso over `Spec R'`:
