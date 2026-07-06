@@ -3030,7 +3030,33 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     `IsAffineOpen.preimage_of_isIso` + `Opens.coe_iInf` (Finite) +
     `Surjective.iInter_comp (Equiv.mulLeft g)` for the reindex. Sorry-free,
     zero warnings, standard axioms. REMAINING LEAVES: T-Q5c (glue data over the
-    stable-affine cover) + T-Q5d (π + UP assembly) — route on board.
+    stable-affine cover) + T-Q5d (π + UP assembly) — route below.
+  - **T-Q5c/d fine route (banked 2026-07-06T17:40Z — READ BEFORE RESUMING; data-
+    sorries are FORBIDDEN so the quotient must be built proven-as-you-go, no
+    sorried-def skeleton)**:
+    (1) KEY TOPOLOGY FACTS available: π_V := invariantsπ on a stable affine V is
+    integral+surjective+fibres-orbits (T-Q1) ⟹ CLOSED+surjective ⟹ QUOTIENT map;
+    for stable open W ⊆ V: π_V⁻¹(π_V(W)) = W (stability+orbits) ⟹ π_V(W) open.
+    (2) STABLE-BASIC BASIS: inside a stable affine V, the stable basic opens
+    D(f), f ∈ Γ(V)ᴳ, form a basis of stable opens (the separation argument in
+    T-Q3's `exists_chart_descent` at every point; reuse its closedness idiom).
+    (3) GLUING KEYS: for f ∈ Γ(V)ᴳ: Γ(D(f))ᴳ ≅ (Γ(V)ᴳ)_f — this is EXACTLY
+    T-Q3b/T-Q3c(ii) (mem_range_fixedPoints_awayMap_iff) + T-Q5a's Γ-bridge.
+    (4) PRIMARY ROUTE (mathlib-supported): `Scheme.GlueData` with pieces
+    `Spec (Γ(V_i)ᴳ)` over a chosen stable-affine cover (T-Q5b per point + choice);
+    transition opens: image-in-Q_i of V_i ∩ V_j via (1)-(2)-(3); cocycle from
+    T-Q3's ExistsUnique (uniqueness kills the t_fac checks — same trick as
+    hcompat in exists_invariantsπ_lift).
+    (5) FALLBACK ROUTE (KM's actual construction, no cocycles): topological
+    quotient |X|/orbits + invariants-of-pushforward sheaf (π_* O_X)ᴳ as a
+    LocallyRingedSpace; scheme-property affine-locally via (3). Choose (4) unless
+    its t-maps fight; both are multi-session-scale — fine.
+    (6) T-Q5d STATEMENTS (the contract, single-conclusion each): `SchemeAction.
+    quotient σ : Scheme` + `quotientπ : X ⟶ quotient` (DATA — must be real);
+    `quotientπ_comp_hom : σ.hom g ≫ quotientπ = quotientπ`;
+    `quotientπ_hom_ext` (transportable j-form like T-Q3's);
+    `exists_quotientπ_lift`; `existsUnique_quotientπ_lift` (Loeffler 3.6.1 in
+    full). T-Q6/T-Q7 consume ONLY these five signatures.
   - **Route lock (binding unless B2)**: hypothesis of record is the MODERN one —
     "every `G`-orbit is contained in a `G`-stable affine open" (Stacks 07S7 shape;
     quasi-projectivity over an affine base IMPLIES it and is deferred to a
