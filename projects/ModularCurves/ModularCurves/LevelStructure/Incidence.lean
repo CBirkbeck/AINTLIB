@@ -295,6 +295,15 @@ noncomputable def vanishingLocus : S.IdealSheafData where
         (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)] at hglue
     exact hglue
 
+/-- **(T-D14c-i, free cover)** A finite flat finitely-presented morphism has free
+sections over an affine neighbourhood of every point of the base: shrink any affine
+to a basic open where the (finite locally free) pushforward module trivialises. -/
+theorem exists_affineOpen_mem_free (s : S) :
+    ∃ U : S.affineOpens, s ∈ U.1 ∧
+      (letI := ((p.app U.1).hom).toAlgebra
+       Module.Free Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)) := by
+  sorry
+
 /-- `≤ (ker f)` is a pointwise condition over all affine opens — no quasi-compactness
 needed, since `Scheme.Hom.ker` is the `ofIdeals`-closure of the sectionwise kernels. -/
 theorem le_ker_iff_forall {X Y : Scheme.{u}} (I : Y.IdealSheafData) (f : X ⟶ Y) :
