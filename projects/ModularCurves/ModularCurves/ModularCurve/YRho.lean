@@ -130,11 +130,18 @@ lemma continuous_galSepMulEquivGalQ : Continuous galSepMulEquivGalQ := by
     apply continuous_of_continuousAt_one
     rw [ContinuousAt, map_one]
     intro s hs
+    rw [Filter.mem_map]
     obtain ⟨E, hfin, hE⟩ :=
       (krullTopology_mem_nhds_one_iff ℚ (AlgebraicClosure ℚ) s).mp hs
-    refine Filter.mem_of_superset
-      (((krullTopology_mem_nhds_one_iff ℚ (SeparableClosure ℚ) _).mpr
-        ⟨E.map sepClosureQAlgEquiv.symm.toAlgHom, inferInstance, subset_rfl⟩)) ?_
+    haveI hfd : FiniteDimensional ℚ (E.map sepClosureQAlgEquiv.symm.toAlgHom) :=
+      LinearEquiv.finiteDimensional
+        (IntermediateField.intermediateFieldMap sepClosureQAlgEquiv.symm E).toLinearEquiv
+    have hmem1 : (((E.map sepClosureQAlgEquiv.symm.toAlgHom).fixingSubgroup :
+        Subgroup (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) :
+        Set (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) ∈ nhds 1 :=
+      (krullTopology_mem_nhds_one_iff ℚ (SeparableClosure ℚ) _).mpr
+        ⟨E.map sepClosureQAlgEquiv.symm.toAlgHom, hfd, subset_rfl⟩
+    refine Filter.mem_of_superset hmem1 ?_
     intro σ hσ
     refine hE ?_
     rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff] at hσ ⊢
@@ -169,8 +176,9 @@ open scoped FintypeCatDiscrete
 
 variable {N : ℕ} [NeZero N]
 
-/-- The `(ℤ/N)²`-fiber as a `Gal(ℚ^sep/ℚ)`-set via `ρ`. -/
-noncomputable def rhoAction (D : GaloisRepData N) :
+/-- The `(ℤ/N)²`-fiber as a `Gal(ℚ^sep/ℚ)`-set via `ρ`.  An `abbrev` so that the
+carrier projection reduces during instance search. -/
+noncomputable abbrev rhoAction (D : GaloisRepData N) :
     Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
   V := FintypeCat.of (Fin 2 → ZMod N)
   ρ :=
@@ -193,6 +201,7 @@ lemma rhoAction_ker_open (D : GaloisRepData N) :
   rw [h]
   exact D.ker_open.preimage continuous_galSepMulEquivGalQ
 
+open scoped Pointwise in
 /-- The `ρ`-action is continuous (the fiber is discrete and the kernel is open). -/
 lemma rhoAction_isContinuous (D : GaloisRepData N) :
     (rhoAction D).IsContinuous := by
@@ -212,15 +221,24 @@ lemma rhoAction_isContinuous (D : GaloisRepData N) :
   rw [hdecomp]
   refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
   refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
-  refine Filter.mem_of_superset ?_ (fun σ hσ => ?_)
-  · exact IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀)
-      ⟨1, by simpa using D.ρ.map_one?? PLACEHOLDER_MEM, mul_one σ₀⟩
-  · obtain ⟨τ, hτ, rfl⟩ := hσ
-    show (σ₀ * τ) • v = w
-    have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
-    show D.ρ (galSepMulEquivGalQ (σ₀ * τ)) • v = w
-    rw [map_mul, map_mul, hτ1, mul_one]
-    exact hσ₀
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hAct : (rhoAction D).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun x => ?_
+    show D.ρ (galSepMulEquivGalQ τ) • (x : Fin 2 → ZMod N) = x
+    rw [hτ1, one_smul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoAction D).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
 
 /-- The `ρ`-twisted `(ℤ/N)²` as a continuous Galois set. -/
 noncomputable def rhoContAction (D : GaloisRepData N) :
@@ -251,9 +269,11 @@ noncomputable def vRhoπ {N : ℕ} [NeZero N] (D : GaloisRepData N) :
 theorem vRhoπ_finite_etale {N : ℕ} [NeZero N] (D : GaloisRepData N) :
     IsFinite (vRhoπ D) ∧ Etale (vRhoπ D) := by
   constructor
-  · rw [vRhoπ, IsFinite.SpecMap_iff]
+  · show IsFinite (Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0))))
+    rw [IsFinite.SpecMap_iff]
     exact RingHom.finite_algebraMap.mpr inferInstance
-  · rw [vRhoπ, HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
+  · show Etale (Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0))))
+    rw [HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
     exact RingHom.etale_algebraMap.mpr inferInstance
 
 /-- **(DS5c / T-F1b, specification of DS5)** The canonical `ℚ̄`-points description of
