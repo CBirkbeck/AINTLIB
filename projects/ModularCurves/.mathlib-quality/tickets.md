@@ -1157,7 +1157,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   hand — pull quotes when cutting).
 
 ### [T-D2] Full sets of sections: reduced-base criterion (KM 1.9.2)
-- **Status**: open · **File**: CartierDivisor.lean ·
+- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
+  2026-07-08T03:30Z · **PLAN**: forward = instantiate. Backward: (1) specialize the
+  ∀A-definition to the UNIVERSAL case A₀ := MvPolynomial (Fin n) R, f₀ := Σ Tᵢ ⊗ bᵢ
+  over a basis — every (A, f) is the image of (A₀-free: actually any (A,f) directly)
+  under norm-base-change; (2) A₀ reduced (R reduced + MvPolynomial reduced ✓);
+  (3) separation: in a reduced ring x = y ⟺ every hom to a field equates them
+  (difference lies in every prime via residue fields ⟹ nilradical = 0);
+  (4) at each field-point φ : A₀ → K transport the norm equation via
+  NORM-BASE-CHANGE (linchpin lemma — mathlib name to verify; else ForMathlib via
+  leftMulMatrix functoriality) + sectionBaseChange-functoriality. Sub-lemmas born
+  split per statement-splitting.md. · **File**: CartierDivisor.lean ·
   `isFullSetOfSectionsAlg_iff_fields` · **Depends on**: none · **Parallel**: yes ·
   **Type**: theorem
 - **Sketch**: KM 1.9.2's proof (in hand, quoted in decomposition): reduce to reduced
