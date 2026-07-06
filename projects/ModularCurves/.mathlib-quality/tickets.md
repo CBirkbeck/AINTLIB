@@ -649,6 +649,29 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   val-normal forms. Then the CORE closes by RingHom.ext on chart generators:
   mk-C-r via retraction; U/W-coords via ζ-values = eval(X₀)=0 / eval(X₂)=0, and the
   Away.map-side values via Away.map_mk. THEN paste-assembly (plan v2).
+- **ζ-STATE (2026-07-07, late)**: `zeroChartHom` + `zeroChartHom_mk` +
+  `projModelZeroChart_comp_χ` PROVED and committed. REMAINING GLUE STEP (the last
+  hard piece of the zero-leg): `Spec.map (ofHom (zeroChartHom W)) ≫ awayι-Y =
+  projModelZero W`. Recipe refined: the map `projModelZero` is
+  `(openCoverOfMapIrrelevantEqTop …).glueMorphisms …` (its hf is an inline by-proof —
+  do NOT try to name the cover in a statement; work proof-internally). Use
+  `Scheme.Cover.ι_glueMorphisms` (Gluing.lean:462, @[simp]) after
+  `unfold projModelZero Proj.fromOfGlobalSections` at the piece
+  `x₀ := ⟨1, t₁, one_pos, mk_X_mem_quotientGrading_one W 1⟩`; the piece's cover map
+  is `(Spec R |_ basicOpen (evΓ t₁)).ι` with `basicOpen (evΓ t₁) = ⊤` (evΓ t₁ = 1 —
+  same computation as projModelZero_preimage_yChart); precompose both sides of the
+  target with this ι (an iso onto ⊤ — cancel_epi; get the iso via `Scheme.isoOfEq`
+  to ⊤ + `Scheme.topIso`), reducing to: ι-⊤ ≫ Spec-ζ ≫ (basicOpenIsoSpec).inv-free
+  comparison with `toBasicOpenOfGlobalSections` (def at ProjectiveSpectrum/Basic.lean
+  :368: its ring content is `IsLocalization.map f` conjugated by
+  `basicOpenIsoSpecAway` and `toSpecΓ`-restriction; for X = Spec R use
+  `toSpecΓ_SpecMap_ΓSpecIso_inv`-machinery already in this file). Final ring
+  comparison by `IsLocalization.ringHom_ext (Submonoid.powers t₁)` — both sides are
+  away-lifts of `projModelZeroEval`; note `awayι = basicOpenIsoSpec.inv ≫
+  (Proj.basicOpen _ _).ι` is rfl (Basic.lean:191). After the glue step:
+  `projModelZeroChart W = Spec.map (ofHom ζ)` by cancel_mono awayι + fac; then the
+  affine CORE closes by RingHom.ext on chart generators (recipe above); then
+  projModelZero_baseChange's sorry; then paste-assembly (plan v2).
  · **File**: EllipticCurve/GroupLaw.lean (or Basic)
 - **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
 - **Statement**: `FibrewiseElliptic (pullback.snd E.π g) (baseChange-zero) _` for
