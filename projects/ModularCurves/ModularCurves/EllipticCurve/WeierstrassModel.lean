@@ -1755,6 +1755,49 @@ noncomputable def projModelBaseChangeLift (W : WeierstrassCurve R) :
   Limits.pullback.lift (projModelBaseChange f W) (projModelπ (W.map f))
     (projModelBaseChange_π f W)
 
+section TensorComparison
+
+variable {R' : Type u} [CommRing R'] [Algebra R R']
+
+/-- Scalar extension identifies the dehomogenised cubics. -/
+lemma dehomog_baseChange (W : WeierstrassCurve R) (i : Fin 3) :
+    MvPolynomial.map (algebraMap R R')
+        (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) =
+      MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial := by
+  rw [show (W.map (algebraMap R R')).toProjective.polynomial =
+    MvPolynomial.map (algebraMap R R') W.toProjective.polynomial from
+    WeierstrassCurve.Projective.map_polynomial W.toProjective (algebraMap R R')]
+  rw [MvPolynomial.dehomogenizeAux_map]
+
+/-- The scalar-extension map between the affine chart quotients. -/
+noncomputable def sChartBaseChange (W : WeierstrassCurve R) (i : Fin 3) :
+    (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) →ₐ[R]
+    (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial}) := by
+  refine Ideal.Quotient.liftₐ _
+    ((Ideal.Quotient.mkₐ R _).comp
+      (MvPolynomial.mapAlgHom (Algebra.ofId R R'))) fun a ha => ?_
+  suffices h : Ideal.span {MvPolynomial.dehomogenizeAux R i
+      W.toProjective.polynomial} ≤ RingHom.ker ((Ideal.Quotient.mkₐ R _).comp
+      (MvPolynomial.mapAlgHom (R := R) (Algebra.ofId R R'))).toRingHom from h ha
+  rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker]
+  show Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R')
+    (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial)) = 0
+  rw [dehomog_baseChange]
+  exact Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)
+
+@[simp]
+lemma sChartBaseChange_mk (W : WeierstrassCurve R) (i : Fin 3)
+    (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
+    sChartBaseChange (R' := R') W i (Ideal.Quotient.mk _ p) =
+      Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R') p) :=
+  rfl
+
+end TensorComparison
+
 end BaseChangeGraded
 
 end Points

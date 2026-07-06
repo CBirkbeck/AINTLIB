@@ -4,6 +4,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Topology.LocallyConstant.Algebra
 
 /-!
 # The group schemes `μ_N` and `ℤ/N` over a base
@@ -51,11 +52,11 @@ def muNπ (S : Scheme.{u}) (N : ℕ) : muN S N ⟶ S := pullback.fst _ _
 /-- The constant `S`-scheme on a finite type `A`: the disjoint union of copies of `S`
 indexed by `A`. For `A = ZMod N` this is the constant group scheme `(ℤ/N)_S` of
 KM 1.4.4(5). -/
-def constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
+@[reducible] def constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
   ∐ fun _ : A ↦ S
 
 /-- The structure morphism of the constant scheme. -/
-def constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A ⟶ S :=
+@[reducible] def constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A ⟶ S :=
   Sigma.desc fun _ ↦ 𝟙 S
 
 section PointsFunctor
@@ -266,6 +267,10 @@ representability, exactly as for `μ_N`. The engine recognising a clopen partiti
 
 variable {S : Scheme.{u}} {A : Type} [Finite A]
 
+private instance sigmaι_isOpenImmersion (a : A) :
+    IsOpenImmersion (Sigma.ι (fun _ : A ↦ S) a) :=
+  (sigmaOpenCover (fun _ : A ↦ S)).map_prop a
+
 private lemma exists_sigmaι_eq {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) :
     ∃ a, h t ∈ Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
   obtain ⟨i, y, hy⟩ := (sigmaOpenCover (fun _ : A ↦ S)).exists_eq (h t)
@@ -307,6 +312,7 @@ private lemma isLocallyConstant_constIndex {T : Scheme.{u}} (h : T ⟶ constSche
 private def constFiber {T : Scheme.{u}} (c : LocallyConstant T A) (a : A) : T.Opens :=
   ⟨⇑c ⁻¹' {a}, c.isLocallyConstant {a}⟩
 
+omit [Finite A] in
 private lemma mem_constFiber {T : Scheme.{u}} (c : LocallyConstant T A) (t : T) :
     t ∈ constFiber c (c t) := rfl
 
@@ -345,9 +351,10 @@ private lemma constFiber_ι_constDesc {T : Scheme.{u}} (g : T ⟶ S) (c : Locall
 private lemma constDesc_π {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T A) :
     constDesc g c ≫ constSchemeπ S A = g :=
   (constFiberCofanIsColimit c).hom_ext fun ⟨a⟩ ↦ by
-    show (constFiber c a).ι ≫ constDesc g c ≫ constSchemeπ S A = (constFiber c a).ι ≫ g
+    show (constFiber c a).ι ≫ constDesc g c ≫ Sigma.desc (fun _ : A ↦ 𝟙 S) =
+      (constFiber c a).ι ≫ g
     rw [← Category.assoc, constFiber_ι_constDesc, Category.assoc, Category.assoc,
-      constSchemeπ, Sigma.ι_desc, Category.comp_id]
+      Sigma.ι_desc, Category.comp_id]
 
 /-- **(DS3b pin, ticket T-B2)** `S`-morphisms into the constant scheme `∐_A S` over
 `g : T ⟶ S` are the locally constant `A`-valued functions on `T`.
@@ -358,8 +365,8 @@ def constSchemePointsEquiv (S : Scheme.{u}) (A : Type) [Finite A] {T : Scheme.{u
     { h : T ⟶ constScheme S A // h ≫ constSchemeπ S A = g } ≃ LocallyConstant T A where
   toFun h := ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩
   invFun c := ⟨constDesc g c, constDesc_π g c⟩
-  left_inv h := Subtype.ext <| (constFiberCofanIsColimit _).hom_ext fun ⟨a⟩ ↦ by
-    simp only [Cofan.mk_pt, Cofan.mk_ι_app, constFiber_ι_constDesc]
+  left_inv h := Subtype.ext <| (constFiberCofanIsColimit
+      ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩).hom_ext fun ⟨a⟩ ↦ by
     have hrange : Set.range ((constFiber ⟨constIndex h.1,
         isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1) ⊆
         Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
@@ -368,20 +375,30 @@ def constSchemePointsEquiv (S : Scheme.{u}) (A : Type) [Finite A] {T : Scheme.{u
       exact (constIndex_eq_iff h.1 t a).mp ht
     have hfac := IsOpenImmersion.lift_fac (Sigma.ι (fun _ : A ↦ S) a)
       ((constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1) hrange
-    rw [← hfac]
-    congr 1
-    have hπ : Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A = 𝟙 S := by
-      simp [constSchemeπ]
-    calc IsOpenImmersion.lift _ _ hrange
-        = IsOpenImmersion.lift _ _ hrange ≫ Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A := by
-          rw [hπ, Category.comp_id]
-      _ = ((constFiber _ a).ι ≫ h.1) ≫ constSchemeπ S A := by rw [← Category.assoc, hfac]
-      _ = (constFiber _ a).ι ≫ g := by rw [Category.assoc, h.2]
+    have hπ : Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A = 𝟙 S := Sigma.ι_desc _ _
+    have hlift : IsOpenImmersion.lift (Sigma.ι (fun _ : A ↦ S) a)
+        ((constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1) hrange =
+        (constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫ g := by
+      calc IsOpenImmersion.lift _ _ hrange
+          = IsOpenImmersion.lift _ _ hrange ≫ Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A := by
+            rw [hπ, Category.comp_id]
+        _ = ((constFiber _ a).ι ≫ h.1) ≫ constSchemeπ S A := by rw [← Category.assoc, hfac]
+        _ = (constFiber _ a).ι ≫ g := by rw [Category.assoc, h.2]
+    show (constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫
+        constDesc g ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ =
+      (constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1
+    calc (constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫
+          constDesc g ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩
+        = (constFiber _ a).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) a := constFiber_ι_constDesc g _ a
+      _ = ((constFiber _ a).ι ≫ g) ≫ Sigma.ι (fun _ : A ↦ S) a := (Category.assoc _ _ _).symm
+      _ = IsOpenImmersion.lift _ _ hrange ≫ Sigma.ι (fun _ : A ↦ S) a := by rw [hlift]
+      _ = (constFiber _ a).ι ≫ h.1 := hfac
   right_inv c := by
     ext t
     have key : constDesc g c ((constFiber c (c t)).ι ⟨t, mem_constFiber c t⟩) =
         ((constFiber c (c t)).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) (c t)) ⟨t, mem_constFiber c t⟩ := by
       rw [← Scheme.Hom.comp_apply, constFiber_ι_constDesc]
+      rfl
     rw [Scheme.Opens.ι_apply] at key
     show constIndex (constDesc g c) t = c t
     rw [constIndex_eq_iff, key, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply]
