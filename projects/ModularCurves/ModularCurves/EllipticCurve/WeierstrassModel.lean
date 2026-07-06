@@ -892,6 +892,74 @@ lemma chartPointOfHom_factors_iff (W : WeierstrassCurve R) (i j : Fin 3)
       exact hmem.mpr hne
     exact ⟨IsOpenImmersion.lift _ _ hrange, IsOpenImmersion.lift_fac _ _ hrange⟩
 
+private lemma aeval_dehomog_two (W : WeierstrassCurve R) {K : Type u} [CommRing K]
+    [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
+    MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
+      v ⟨1, by decide⟩ ^ 2 + algebraMap R K W.a₁ * v ⟨0, by decide⟩ * v ⟨1, by decide⟩
+        + algebraMap R K W.a₃ * v ⟨1, by decide⟩
+        - (v ⟨0, by decide⟩ ^ 3 + algebraMap R K W.a₂ * v ⟨0, by decide⟩ ^ 2
+          + algebraMap R K W.a₄ * v ⟨0, by decide⟩ + algebraMap R K W.a₆) := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
+
+/-- Functions on the two non-`Z` indices are pairs. -/
+private def zCoordsEquiv (K : Type u) : ({j : Fin 3 // j ≠ 2} → K) ≃ K × K where
+  toFun v := (v ⟨0, by decide⟩, v ⟨1, by decide⟩)
+  invFun p j := if j.1 = 0 then p.1 else p.2
+  left_inv v := by
+    refine funext fun j => ?_
+    rcases j with ⟨j, hj⟩
+    fin_cases j
+    · simp
+    · simp
+    · exact absurd rfl hj
+  right_inv p := by
+    refine Prod.ext ?_ ?_
+    · simp
+    · simp
+
+/-- `Z`-chart solutions are affine Weierstrass points. -/
+private noncomputable def zSolutionsToAffine (W : WeierstrassCurve R)
+    (K : Type u) [Field K] [Algebra R K] :
+    { v : {j : Fin 3 // j ≠ 2} → K //
+      MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) = 0 } ≃
+    { p : K × K // (W.baseChange K).toAffine.Equation p.1 p.2 } :=
+  Equiv.subtypeEquiv (zCoordsEquiv K) (fun v => by
+    rw [aeval_dehomog_two, WeierstrassCurve.Affine.equation_iff]
+    simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁,
+      WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄,
+      WeierstrassCurve.map_a₆, zCoordsEquiv, Equiv.coe_fn_mk]
+    constructor
+    · intro h
+      linear_combination h
+    · intro h
+      linear_combination h)
+
+/-- The affine points of an elliptic curve over a field split as the equation's
+solutions plus the point at infinity. -/
+private noncomputable def affinePointSplit (W : WeierstrassCurve R)
+    (hell : W.IsElliptic) (K : Type u) [Field K] [Algebra R K] :
+    (W.baseChange K).toAffine.Point ≃
+      { p : K × K // (W.baseChange K).toAffine.Equation p.1 p.2 } ⊕ PUnit.{u + 1} where
+  toFun P := match P with
+    | .zero => Sum.inr PUnit.unit
+    | .some x y h => Sum.inl ⟨(x, y), h.1⟩
+  invFun s := match s with
+    | .inl p => .some p.1.1 p.1.2 (by
+        haveI := hell
+        haveI : ((W.baseChange K).toAffine).IsElliptic :=
+          inferInstanceAs ((W.map (algebraMap R K)).IsElliptic)
+        exact WeierstrassCurve.Affine.equation_iff_nonsingular.mp p.2)
+    | .inr _ => .zero
+  left_inv P := by cases P <;> rfl
+  right_inv s := by rcases s with p | u <;> rfl
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
