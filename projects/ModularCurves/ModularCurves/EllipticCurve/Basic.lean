@@ -184,25 +184,24 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       (pullback.snd (pullback.snd π g) Vι) π (gV ≫ U.1.ι) := by rw [hgVfac]; exact hP1
   -- cancel the U-square: the restriction is a pullback of `pullback.snd π U.1.ι` along `gV`
   have hP2 := hP1'.of_right' (IsPullback.of_hasPullback π U.1.ι)
-  -- REMAINING (T-A8a): build `hA`, expressing `pullback (pullback.snd π g) VA.ι` as a
-  -- pullback of `projModelπ W` along `Spec.map φ` (φ = `g.appLE U.1 V`), then set
-  -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. All ingredient lemmas identified:
-  --  (1) pasting (CONFIRMED): `Limits.pullbackLeftPullbackSndIso π g Vι :
-  --      pullback (pullback.snd π g) Vι ≅ pullback π (Vι ≫ g)`; then via
-  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g`, `(pullbackLeftPullbackSndIso π U.1.ι gV).symm :
-  --      pullback π (gV ≫ U.1.ι) ≅ pullback (pullback.snd π U.1.ι) gV`; then transport by
-  --      `e : pullback π U.1.ι ≅ projModel W` (fibre-product congruence over ↑U). Assemble
-  --      the IsPullback with `IsPullback.of_hasPullback ... |>.of_iso ...` as in
-  --      `WeierstrassModel.isPullback_coverPiece`/`coverPiece_f_eq` (WeierstrassModel:2088–2134);
-  --  (2) BRIDGE `gV ↔ Spec.map φ`: `IsAffineOpen.Spec_map_appLE_fromSpec` gives
-  --      `Spec.map (g.appLE U.1 V hVle) ≫ U.2.fromSpec = hVaff.fromSpec ≫ g`, and
-  --      `hgVfac` + `U.2.fromSpec = U.2.isoSpec.inv ≫ U.1.ι` move the pullback base from
-  --      `↑U` (along `gV`) to `Spec Γ(S,U)` (along `Spec.map φ`) — matching `hB`'s cospan.
-  -- Then `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`; the two compatibility conjuncts by
-  -- `pullback.hom_ext`, mirroring `FibrewiseElliptic.baseChange` lines 100–127
-  -- (isoPullback_hom_fst/snd + `projModelZero` naturality). Scaffolding above
-  -- (`Vι`, `gV`, `hgVfac`, `hB`) is proven and reusable.
-  sorry
+  -- the isoSpec ↔ appLE bridge (comm₄): `Spec.map φ` conjugated by the two `isoSpec`s is `gV`
+  have hbridge : hVaff.isoSpec.hom ≫
+      Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V))) = gV ≫ U.2.isoSpec.hom := by
+    have hsp := IsAffineOpen.SpecMap_appLE_fromSpec g U.2 hVaff hVle
+    rw [← IsAffineOpen.isoSpec_inv_ι U.2, ← IsAffineOpen.isoSpec_inv_ι hVaff, ← Category.assoc,
+      Category.assoc hVaff.isoSpec.inv, ← hVι, ← hgVfac, ← Category.assoc] at hsp
+    have hsp2 := (cancel_mono U.1.ι).mp hsp
+    rw [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) = g.appLE U.1 V hVle from rfl,
+      ← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id,
+      Category.id_comp]
+  -- `e' := restriction ≅ pullback(snd π U.1.ι, gV) ≅ pullback(projModelπ W, Spec.map φ) ≅ projModel W'`
+  refine ⟨hP2.isoPullback ≪≫ asIso (pullback.map (pullback.snd π U.1.ι) gV (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) e.hom hVaff.isoSpec.hom
+      U.2.isoSpec.hom heπ.symm hbridge.symm) ≪≫ hB.isoPullback.symm, ?_, ?_⟩
+  · simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+    rw [(Iso.inv_comp_eq _).mpr hB.isoPullback_hom_snd.symm, pullback.lift_snd, ← Category.assoc,
+      hP2.isoPullback_hom_snd]
+  · sorry
 
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
