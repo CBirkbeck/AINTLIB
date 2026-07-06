@@ -133,3 +133,18 @@ with `1 = ⊤`; simp pins `ideal_mul`, `ideal_one`; order lemma `mul_le_inf`.
   mathlib's own `SemilatticeInf` instance which also uses the default. SURVIVES.
 - Verdict: **SURVIVED** (statement-level); proofs are 1–3-liners against
   `Ideal.map_mul` / pointwise `CommSemiring Ideal` lemmas.
+
+### T-D25 / T-D26 findings of record (2026-07-06T13:25Z, beastmode-D2)
+
+**T-D25 RESOLVED-BY-MATHLIB** (no statement needed, no attack block needed):
+`Module.algebraMap_bijective_iff_rankAtStalk` + alias (Flat/Rank.lean:120–129,
+finite flat algebra) and `Module.Free.bijective_algebraMap_of_finrank_eq_one`
+(Trace.lean:399, free rank-1, [Nontrivial R]). Both directions of KM 1.2.7's
+"invertible-module algebra is R".
+
+**T-D26 algebra engine mathlib-present**:
+`Module.rankAtStalk_eq_zero_iff_subsingleton` (FreeLocus.lean:303) +
+`Module.support_eq_empty_iff` (Support.lean:119). Divisor-level wrapper deferred
+into T-D15 (needs the Scheme.Hom.finrank ↔ RingHom.finrank ↔ rankAtStalk affine
+dictionary; `RingHom.finrank` exists at Flat/Rank.lean:138 — bridge half-built
+upstream already).

@@ -1458,6 +1458,24 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
+  - **[T-D25] Status**: done (beastmode-D2, 2026-07-06T13:25Z,
+    **RESOLVED-BY-MATHLIB, no project code**) — pin 11b908e5cdd9 has BOTH forms:
+    `Module.algebraMap_bijective_iff_rankAtStalk` (rankAtStalk S = 1 ↔ Bijective
+    (algebraMap R S), for [Module.Flat R S] [Module.Finite R S]; + alias
+    `algebraMap_bijective_of_rankAtStalk`) in RingTheory/Flat/Rank.lean:120–129,
+    and the free form `Module.Free.bijective_algebraMap_of_finrank_eq_one`
+    (LinearAlgebra/Trace.lean:399). KM 1.2.7 engine ready for the degree-1
+    divisor = section argument. Flat/Rank.lean is ALSO the home of
+    `RingHom.finrank` (rankAtStalk of a ring hom) — the affine dictionary for
+    `Scheme.Hom.finrank` degree work (T-D3/T-D15/T-D26 wrappers).
+  - **[T-D26] annotation** (beastmode-D2, 2026-07-06T13:25Z): the algebra engine
+    is mathlib-present — `Module.rankAtStalk_eq_zero_iff_subsingleton`
+    (FreeLocus.lean:303, finite flat) + `Module.support_eq_empty_iff`. What
+    remains of T-D26 is only the divisor-level wrapper (`D.degree ≡ 0 →
+    D.ideal = ⊤`), which needs the Scheme.Hom.finrank ↔ rankAtStalk affine
+    dictionary — fold it into T-D15's proof (Wave 3) where that dictionary is
+    built anyway; do NOT build it standalone now. Status stays open, scoped
+    to the wrapper.
   charpoly-as-norm (`LinearMap.charpoly f = Algebra.norm R[T] (T•1 − f)`).
   - **[T-D29] Status**: done (beastmode-D2, 2026-07-06T11:55Z → 2026-07-06T12:05Z) ·
     `Algebra.charpoly_lmul_eq_norm` in NEW ForMathlib/CharpolyNorm.lean
