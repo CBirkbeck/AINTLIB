@@ -1680,6 +1680,24 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T16:30Z — [T-D14c-0] KEYSTONE DONE+committed:
+    `submoduleVanishingIdeal` (⨆ of sectionVanishingIdeal over a submodule —
+    basis-free) + membership API + `submoduleVanishingIdeal_localized` (commutes
+    with localization for fp modules; proof: ≤ via mapExtendScalars-of-functional
+    at defining property, ≥ via IsLocalizedModule.surj on the Hom-instance +
+    two unit-cancellations `Ideal.unit_mul_mem_iff_mem` + `mk'_cancel'`;
+    LEAN GOTCHAS: Submonoid-smul vs R-coe-smul needs `← Submonoid.smul_def`
+    before mk'_cancel'/hφ-rw; IsLocalizedModule.surj's pair needs `dsimp only at`
+    to beta the .2-projection; span_le membership goals arrive beta-unreduced +
+    set-coe — open with `show`; own SECTION with implicit {R}{M} required —
+    ZeroLocus's explicit section-vars break the internal applications).
+    All axioms standard. NEXT: [T-D14c-1] `vanishingLocus (p : W ⟶ S) [IsFinite p]
+    [Flat p] [lfp p] (E : W.IdealSheafData) : S.IdealSheafData` — ideal U :=
+    submoduleVanishingIdeal Γ(U) Γ(p⁻¹U) (E.ideal ⟨p⁻¹U, affine⟩-as-submodule);
+    gluing via the keystone at S := powers f with the structure-sheaf
+    localization instances (p finite ⟹ p⁻¹U affine: IsAffineHom.preimage;
+    sections-of-finite = fp module: the affine dictionary for IsFinite/Flat/lfp);
+    then [T-D14c-2] le_ker_iff via the T-D14c bridge; then [T-D14] assembly.
   - **Progress**: 2026-07-06T16:00Z — T-D14c REFORMULATED CURVE-FREE (design of
     record, supersedes the (i)-(iii) map where they differ): via Galois
     (`map_bot : map ⊥ f = f.ker` + `map_gc`), `IsSubdivisor D′ D ⟺ D.ideal ≤
