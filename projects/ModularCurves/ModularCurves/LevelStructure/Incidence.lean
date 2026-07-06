@@ -181,6 +181,40 @@ theorem submoduleVanishingIdeal_localized {Rₛ Nₛ : Type u} [CommRing Rₛ] [
     rw [hunit s₂ _, hunit s _, mul_left_comm, h1, h2]
     exact Ideal.mem_map_of_mem _ (apply_mem_submoduleVanishingIdeal hm φ)
 
+open IsLocalizedModule in
+/-- Localizing an ideal of an `R`-algebra `A` (viewed as an `R`-submodule) into the
+localization `Af` of `A` at the image monoid is the pushforward ideal, restricted:
+the tower version of `Ideal.localized'_eq_map`. -/
+theorem localized'_restrictScalars_eq_restrictScalars_map
+    {R Rf A Af : Type u} [CommRing R] [CommRing Rf] [CommRing A] [CommRing Af]
+    [Algebra R Rf] [Algebra R A] [Algebra A Af] [Algebra R Af] [Algebra Rf Af]
+    [IsScalarTower R A Af] [IsScalarTower R Rf Af]
+    (S : Submonoid R) [IsLocalization S Rf]
+    [IsLocalization (Algebra.algebraMapSubmonoid A S) Af]
+    [IsLocalizedModule S (IsScalarTower.toAlgHom R A Af).toLinearMap]
+    (J : Ideal A) :
+    Submodule.localized' Rf S (IsScalarTower.toAlgHom R A Af).toLinearMap
+        (J.restrictScalars R) =
+      (J.map (algebraMap A Af)).restrictScalars Rf := by
+  ext x
+  rw [Submodule.mem_localized', Submodule.restrictScalars_mem,
+    IsLocalization.mem_map_algebraMap_iff (Algebra.algebraMapSubmonoid A S)]
+  constructor
+  · rintro ⟨m, hm, s, rfl⟩
+    refine ⟨⟨⟨m, hm⟩, ⟨algebraMap R A s, s, s.2, rfl⟩⟩, ?_⟩
+    have h1 : (mk' (IsScalarTower.toAlgHom R A Af).toLinearMap m s : Af) *
+        algebraMap A Af (algebraMap R A s) = algebraMap A Af m := by
+      rw [← IsScalarTower.algebraMap_apply, mul_comm, ← Algebra.smul_def,
+        ← Submonoid.smul_def, mk'_cancel']
+      rfl
+    exact h1
+  · rintro ⟨⟨⟨j, hj⟩, ⟨t, ⟨s, hs, rfl⟩⟩⟩, hx⟩
+    refine ⟨j, hj, ⟨s, hs⟩, ?_⟩
+    rw [mk'_eq_iff]
+    show algebraMap A Af j = _
+    rw [Submonoid.smul_def, Algebra.smul_def, IsScalarTower.algebraMap_apply R A Af, ← hx]
+    ring
+
 end SubmoduleVanishing
 
 section VanishingLocus
@@ -255,7 +289,11 @@ noncomputable def vanishingLocus : S.IdealSheafData where
       (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
         Γ(W, p ⁻¹ᵁ S.basicOpen f)).toLinearMap
       ((E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars Γ(S, U.1))
-    sorry
+    rw [localized'_restrictScalars_eq_restrictScalars_map, RingHom.algebraMap_toAlgebra,
+      RingHom.algebraMap_toAlgebra,
+      E.map_ideal' (U := ⟨p ⁻¹ᵁ S.basicOpen f, (S.affineBasicOpen f).2.preimage p⟩)
+        (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)] at hglue
+    exact hglue
 
 end VanishingLocus
 
