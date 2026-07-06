@@ -1575,7 +1575,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Depends on**: T-D6 · **Type**: theorem (thin wrapper — golf target).
 
 ### [T-D10] ⧗KM Γ₀(N): literal fppf-local cyclicity
-- **Status**: quote-gate-satisfied, DESIGN-DECISION-GATED (beastmode-A 2026-07-09T10:00Z
+- **Status**: STATEMENT DONE, proof ⧗-gated (beastmode-A 2026-07-09T10:30Z —
+  `IsGammaZeroFppf` def + `isGammaZero_iff_fppf` statement ADDED and building green in
+  LevelStructure/Basic.lean, discharging the ticket's "def + equivalence statement"
+  deliverable. Implemented design option (a): fppf cover = `Function.Surjective h.base
+  ∧ Flat h ∧ LocallyOfFinitePresentation h` + a generating `(E.baseChange h).Section`
+  of exact order N whose orderDivisor ideal = G.baseChange ideal. The iff PROOF stays
+  a registered WIP sorry — it is KM 3.7.1's étale-descent representability argument
+  (⧗ do-not-formalize-from-memory; ⟸ descends a generator to geometric points, ⟹ needs
+  the constant-E[N] reduction + étale descent). Formerly:) quote-gate-satisfied,
+  DESIGN-DECISION-GATED (beastmode-A 2026-07-09T10:00Z
   mined KM 3.4/3.7, printed pp. 105-106). VERBATIM (KM 3.7.1 proof, p.105): *"the
   notion of cyclicity is by definition local for the f.p.p.f. topology, so a fortiori
   for the etale topology"*; *"our constant group-scheme K is cyclic in the sense of
