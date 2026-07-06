@@ -153,4 +153,32 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
 
 end Schemes
 
+/-- `Spec L`-valued points of `Spec A` over `Spec k` are `k`-algebra homomorphisms
+`A →ₐ[k] L`. -/
+noncomputable def specPointsEquivAlgHom (k A L : Type u) [CommRing k] [CommRing A]
+    [CommRing L] [Algebra k A] [Algebra k L] :
+    { h : Spec (CommRingCat.of L) ⟶ Spec (CommRingCat.of A) //
+        h ≫ Spec.map (CommRingCat.ofHom (algebraMap k A)) =
+          Spec.map (CommRingCat.ofHom (algebraMap k L)) } ≃ (A →ₐ[k] L) where
+  toFun h :=
+    { toRingHom := (Spec.preimage h.1).hom
+      commutes' := fun r => by
+        have htri : CommRingCat.ofHom (algebraMap k A) ≫ Spec.preimage h.1 =
+            CommRingCat.ofHom (algebraMap k L) := by
+          apply Spec.map_injective
+          rw [Spec.map_comp, Spec.map_preimage]
+          exact h.2
+        have h2 := congrArg (fun q : CommRingCat.of k ⟶ CommRingCat.of L => q.hom r) htri
+        simpa using h2 }
+  invFun φ := ⟨Spec.map (CommRingCat.ofHom φ.toRingHom), by
+    rw [← Spec.map_comp]
+    congr 1
+    ext r
+    exact φ.commutes r⟩
+  left_inv h := Subtype.ext (Spec.map_preimage h.1)
+  right_inv φ := by
+    refine AlgHom.ext fun a => ?_
+    exact congrArg (fun q : CommRingCat.of A ⟶ CommRingCat.of L => q.hom a)
+      (Spec.preimage_map _)
+
 end ModularCurves
