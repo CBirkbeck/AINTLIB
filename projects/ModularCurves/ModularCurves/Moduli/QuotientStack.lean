@@ -246,6 +246,73 @@ theorem id_hom (A : TorsorPair σ S) : (𝟙 A : A ⟶ A).hom = 𝟙 A.P := rfl
 
 end TorsorPair
 
+/-! ### The trivial torsor (T-W3b, trivialization data)
+
+The underlying data of the trivial `G`-torsor `∐_G S → S`: the translation
+action and the equivariant map attached to an `S`-point of `X`. The
+morphism-property fields (`finite`/`etale`/`surjective`/`torsor`) of the
+corresponding `TorsorPair` are the T-W3b remainder. -/
+
+variable (G) in
+/-- The translation action of `G` on `∐_G S`: `g` maps the `h`-summand
+identically onto the `h * g`-summand. -/
+noncomputable def trivialTorsorAction (S : Scheme.{u}) :
+    SchemeAction G (∐ fun _ : G => S) where
+  hom g := Limits.Sigma.desc fun h => Limits.Sigma.ι (fun _ : G => S) (h * g)
+  hom_one := by
+    refine Limits.Sigma.hom_ext _ _ fun h => ?_
+    rw [Limits.Sigma.ι_desc, mul_one, Category.comp_id]
+  hom_mul g g' := by
+    refine Limits.Sigma.hom_ext _ _ fun h => ?_
+    rw [Limits.Sigma.ι_desc, ← Category.assoc, Limits.Sigma.ι_desc,
+      Limits.Sigma.ι_desc, mul_assoc]
+
+omit [Finite G] in
+@[reassoc (attr := simp)]
+theorem ι_trivialTorsorAction_hom (S : Scheme.{u}) (g h : G) :
+    Limits.Sigma.ι (fun _ : G => S) h ≫ (trivialTorsorAction G S).hom g =
+      Limits.Sigma.ι (fun _ : G => S) (h * g) :=
+  Limits.Sigma.ι_desc _ _
+
+/-- The projection of the trivial torsor. -/
+noncomputable def trivialTorsorπ (S : Scheme.{u}) :
+    (∐ fun _ : G => S) ⟶ S :=
+  Limits.Sigma.desc fun _ => 𝟙 S
+
+omit [Group G] [Finite G] in
+@[reassoc (attr := simp)]
+theorem ι_trivialTorsorπ (S : Scheme.{u}) (h : G) :
+    Limits.Sigma.ι (fun _ : G => S) h ≫ trivialTorsorπ S = 𝟙 S :=
+  Limits.Sigma.ι_desc _ _
+
+omit [Finite G] in
+theorem trivialTorsorAction_over_base (S : Scheme.{u}) (g : G) :
+    (trivialTorsorAction G S).hom g ≫ trivialTorsorπ S = trivialTorsorπ S := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [← Category.assoc, ι_trivialTorsorAction_hom, ι_trivialTorsorπ,
+    ι_trivialTorsorπ]
+
+/-- The equivariant map of the trivial torsor pair attached to an `S`-point
+`t : S ⟶ X`: on the `g`-summand it is `t` translated by `g`. -/
+noncomputable def trivialTorsorMap (S : Scheme.{u}) (t : S ⟶ X) :
+    (∐ fun _ : G => S) ⟶ X :=
+  Limits.Sigma.desc fun g => t ≫ σ.hom g
+
+omit [Finite G] in
+@[reassoc (attr := simp)]
+theorem ι_trivialTorsorMap (S : Scheme.{u}) (t : S ⟶ X) (h : G) :
+    Limits.Sigma.ι (fun _ : G => S) h ≫ trivialTorsorMap σ S t =
+      t ≫ σ.hom h :=
+  Limits.Sigma.ι_desc _ _
+
+omit [Finite G] in
+theorem trivialTorsorMap_equivariant (S : Scheme.{u}) (t : S ⟶ X) (g : G) :
+    (trivialTorsorAction G S).hom g ≫ trivialTorsorMap σ S t =
+      trivialTorsorMap σ S t ≫ σ.hom g := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  rw [← Category.assoc, ι_trivialTorsorAction_hom, ι_trivialTorsorMap,
+    ← Category.assoc, ι_trivialTorsorMap, Category.assoc, ← σ.hom_mul]
+
 end TorsorPair
 
 end ModularCurves
