@@ -231,6 +231,92 @@ instance hasPushouts : HasPushouts (CommAlgCat.FiniteEtale.{u} k) where
 
 end PushoutCat
 
+/-! The heart of leaf AG-GG-1.4: subalgebras of finite étale algebras over a field are
+finite étale. Route: every element of a finite étale algebra is separable
+(via the product-of-separable-extensions classification and a distinct-minimal-polynomials
+annihilator), and a reduced artinian algebra all of whose elements are separable is
+formally étale (via `IsArtinianRing.equivPi` and the field case). -/
+
+section EtaleSubalgebra
+
+variable {k : Type u} [Field k] {A : Type u} [CommRing A] [Algebra k A]
+
+/-- Every element of a finite étale algebra over a field is separable. -/
+theorem isSeparable_of_etale [Module.Finite k A] [Algebra.Etale k A] (x : A) :
+    IsSeparable k x := by
+  classical
+  obtain ⟨I, hI, L, hfield, halg, e, hLi⟩ :=
+    (Algebra.Etale.iff_exists_algEquiv_prod k A).mp inferInstance
+  haveI := fun i => (hLi i).1
+  haveI := fun i => (hLi i).2
+  haveI : Fintype I := Fintype.ofFinite I
+  have hint : ∀ i, IsIntegral k (e x i) := fun i =>
+    Algebra.IsIntegral.isIntegral (R := k) (e x i)
+  set S : Finset (Polynomial k) :=
+    Finset.image (fun i => minpoly k (e x i)) Finset.univ with hS
+  have hFsep : Polynomial.Separable (S.prod id) := by
+    refine Polynomial.separable_prod' ?_ ?_
+    · intro p hp q hq hpq
+      obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hp
+      obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hq
+      refine (minpoly.irreducible (hint i)).coprime_iff_not_dvd.mpr ?_
+      intro hdvd
+      exact hpq (Polynomial.eq_of_monic_of_associated (minpoly.monic (hint i))
+        (minpoly.monic (hint j))
+        ((minpoly.irreducible (hint i)).associated_of_dvd
+          (minpoly.irreducible (hint j)) hdvd))
+    · intro p hp
+      obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hp
+      exact Algebra.IsSeparable.isSeparable k (e x i)
+  have hann : Polynomial.aeval x (S.prod id) = 0 := by
+    apply e.injective
+    rw [map_zero]
+    refine Eq.trans (Polynomial.aeval_algHom_apply e.toAlgHom x (S.prod id)).symm ?_
+    funext i
+    refine Eq.trans (Polynomial.aeval_algHom_apply (Pi.evalAlgHom k L i) (e x)
+      (S.prod id)).symm ?_
+    show Polynomial.aeval (e x i) (S.prod id) = 0
+    obtain ⟨F, hFS⟩ : ∃ F, S.prod id = minpoly k (e x i) * F :=
+      (Finset.dvd_prod_of_mem id (Finset.mem_image_of_mem _ (Finset.mem_univ i))).elim
+        fun F hF => ⟨F, hF⟩
+    rw [hFS, map_mul, minpoly.aeval, zero_mul]
+  exact Polynomial.Separable.of_dvd hFsep (minpoly.dvd k x hann)
+
+/-- A subalgebra of a finite étale algebra over a field is étale. -/
+theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra k A) :
+    Algebra.Etale k B := by
+  classical
+  haveI : Module.Finite k B := inferInstanceAs (Module.Finite k B.toSubmodule)
+  haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
+  haveI : IsReduced B := ⟨fun x hx => by
+    have h2 : ((x : A)) = 0 := (hx.map (B.subtype)).eq_zero
+    exact Subtype.ext h2⟩
+  haveI : IsArtinianRing B := isArtinian_of_tower k inferInstance
+  have hsepB : ∀ x : B, IsSeparable k x := fun x => by
+    have h1 : minpoly k (B.val x) = minpoly k x :=
+      minpoly.algHom_eq B.val (fun _ _ h => Subtype.ext h) x
+    have h2 := isSeparable_of_etale (k := k) (B.val x)
+    rwa [IsSeparable, h1] at h2
+  haveI hFE : Algebra.FormallyEtale k B := by
+    letI _ (m : MaximalSpectrum B) : Field (B ⧸ m.asIdeal) :=
+      Ideal.Quotient.field m.asIdeal
+    rw [Algebra.FormallyEtale.iff_of_equiv ((IsArtinianRing.equivPi B).restrictScalars k),
+      Algebra.FormallyEtale.pi_iff]
+    intro m
+    haveI : Algebra.IsSeparable k (B ⧸ m.asIdeal) := ⟨fun y => by
+      obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective y
+      have hann : Polynomial.aeval (Ideal.Quotient.mk m.asIdeal b) (minpoly k b) = 0 := by
+        have h := Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ k m.asIdeal) b
+          (minpoly k b)
+        rwa [minpoly.aeval, map_zero] at h
+      exact Polynomial.Separable.of_dvd (hsepB b) (minpoly.dvd k _ hann)⟩
+    exact Algebra.FormallyEtale.of_isSeparable k (B ⧸ m.asIdeal)
+  haveI : Algebra.FinitePresentation k B :=
+    (Algebra.FinitePresentation.of_finiteType).mp inferInstance
+  exact ⟨inferInstance, inferInstance⟩
+
+end EtaleSubalgebra
+
 end FiniteEtaleGalois
 
 end ModularCurves
