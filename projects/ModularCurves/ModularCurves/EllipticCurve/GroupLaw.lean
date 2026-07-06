@@ -260,20 +260,22 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- STRUCTURAL-REFACTOR-GATED (2026-07-09, fully diagnosed after ~20 attempts). Two
-  -- compounding obstacles, both requiring a deliberate refactor rather than a tactic:
-  -- (1) `mulByHom_baseChange`'s sides are defeq-but-syntactically-distinct types
-  --     (`(E.baseChange g).E ⟶ …` vs `pullback E.π g ⟶ …`) — rewriting leaves a term
-  --     Lean tracks at the wrong spelling, defeating lift_fst/Category.assoc matchers.
-  --     WORKED AROUND by the projection lemmas `mulByHom_baseChange_fst/snd` above.
-  -- (2) after `Subtype.ext (pullback.hom_ext …)`, the goal carries `↑(asSection …)`
-  --     (the `Point`/Subtype COERCION) but every bridge lemma (`asSection_coe`,
-  --     `asSection_val_fst/snd`) is stated with `.1`; simp does NOT bridge `↑ ↔ .1`
-  --     here, so no named lemma fires. Fix: either restate the bridge lemmas at the
-  --     `↑`-coercion spelling, or normalise `↑(asSection …) → (asSection …).1` first
-  --     (a `Point`-coe simp lemma), combined with making `EllipticCurve.baseChange.E`
-  --     syntactically `pullback E.π g`. All arithmetic is proven; this is pure
-  --     coercion/spelling normalisation. Non-blocking (T-D6a-ii is non-blocking).
+  -- STRUCTURAL-REFACTOR-GATED (2026-07-09, both obstacles precisely diagnosed):
+  -- (2) coercion `↑(asSection …)` vs `.1` — SOLVED: a full `simp` (or
+  --     `simp only [Point.asSection_coe, point_smul_eq_comp_mulBy]`) after
+  --     `refine Subtype.ext ?_; apply pullback.hom_ext` normalises both coercions to
+  --     `pullback.lift …`, reducing each leg to
+  --       `lift (P.1 ≫ [n]) (𝟙 T) _ ≫ fst = (lift P.1 (𝟙 T) _ ≫ (baseChange).mulByHom n) ≫ fst`.
+  -- (1) STILL BLOCKS: the RHS `lift P.1 (𝟙 T) _ ≫ (E.baseChange g).mulByHom n` STRADDLES
+  --     the defeq-distinct types (`pullback E.π g` codomain of the lift vs
+  --     `(E.baseChange g).E` domain of mulByHom), so `Category.assoc` (needed to expose
+  --     `(baseChange).mulByHom n ≫ fst` for `mulByHom_baseChange_fst`) refuses to fire.
+  --     The `@[simp]` projection lemmas `mulByHom_baseChange_fst/snd` work around this
+  --     ELSEWHERE (where mulByHom meets fst directly) but not through the straddling
+  --     composition. Genuine fix = make `EllipticCurve.baseChange.E` SYNTACTICALLY
+  --     `pullback E.π g` (redefine the structure so `.E`/`.π` unfold to the pullback
+  --     spelling), after which every reassoc is single-spelling. All arithmetic proven.
+  --     Non-blocking (T-D6a-ii is non-blocking).
   sorry
 
 end EllipticCurve
