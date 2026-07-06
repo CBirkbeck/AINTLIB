@@ -1,1 +1,1 @@
-FOCUS: T-W3b-i — IsFinite fold: model-fold-Spec route (banked on board)
+FOCUS: T-W3b-i step (ii) — general fold IsFinite via base change of the model along terminal.from S (VanKampen template AG/Geometrically/Reduced.lean:97); then the ∐-comparison torsor field; then assemble trivial TorsorPair + trivialization functor
