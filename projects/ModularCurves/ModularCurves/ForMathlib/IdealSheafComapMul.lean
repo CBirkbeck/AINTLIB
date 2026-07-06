@@ -184,6 +184,22 @@ LHS/RHS ⊤-values via `comap_comap_ι_ideal_top`, inner `(K.comap V.ι).⊤`-va
 (`Ideal.map_of_equiv` round-trip). -/
 theorem comap_mul (I J : Y.IdealSheafData) (f : X ⟶ Y) :
     (I * J).comap f = I.comap f * J.comap f := by
+  -- ASSEMBLY PLAN (all hard pieces proven above; frictions observed 2026-07-09):
+  -- cover: choose per x an affine V ∋ f x (iSup_affineOpens_eq_top) and affine
+  -- U ∋ x, U ≤ f⁻¹V (isBasis_affineOpens + isBasis_iff_nbhd); ext_of_iSup_eq_top.
+  -- Per U: chain the value through
+  --   hA := (map_ideal _ (ι_image_top).ge).symm  -- value at U from image-open value
+  --   hB : image-open value = (⊤-value of comap along U.ι).map eU.symm
+  --        [from ideal_comap_of_isOpenImmersion; NOTE comap_symm's LHS pattern is
+  --         Ideal.comap ↑(RingEquiv.symm _) — restate h1's iso-side by a defeq
+  --         `show` BEFORE rw, or keep the comap-form and multiply via a local
+  --         comap-equiv-mul fact; naked rw hits the coe-pattern mismatch AND the
+  --         Γ(U-scheme)-instances poison]
+  --   comap_comap_ι_ideal_top  -- ⊤-value via resLE into (K.comap V.ι)'s ⊤-value
+  --   hBV : that value = (K.ideal ⟨Vι''⊤⟩).map eV  [same OI formula on Y]
+  -- then multiplicativity: ideal_mul + Pi.mul_apply at the ⟨Vι''⊤⟩-index (index-
+  -- homogeneous!) and Ideal.map_mul at every layer (map eV, map resLE.appTop,
+  -- map eU.symm, map res); finish by assembling the three chains.
   sorry
 
 end AlgebraicGeometry.Scheme.IdealSheafData

@@ -207,10 +207,53 @@ noncomputable def vanishingLocus : S.IdealSheafData where
     letI := ((p.appLE U.1 (affinePreimage p U).1 le_rfl).hom).toAlgebra
     letI := ((p.appLE (S.affineBasicOpen f).1 (affinePreimage p (S.affineBasicOpen f)).1
       le_rfl).hom).toAlgebra
-    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le f).op).hom).toAlgebra
+    letI := ((S.presheaf.map ((homOfLE <| S.basicOpen_le f :
+      (S.affineBasicOpen f).1 ⟶ U.1)).op).hom).toAlgebra
     letI := ((W.presheaf.map (homOfLE
       (show (affinePreimage p (S.affineBasicOpen f)).1 ≤ (affinePreimage p U).1 from
         fun _ hx => S.basicOpen_le f hx)).op).hom).toAlgebra
+    letI := ((p.appLE U.1 (affinePreimage p (S.affineBasicOpen f)).1
+      (show (affinePreimage p (S.affineBasicOpen f)).1 ≤ p ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le f hx)).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(S, (S.affineBasicOpen f).1)
+        Γ(W, (affinePreimage p (S.affineBasicOpen f)).1) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp, Scheme.Hom.map_appLE])
+    haveI : IsScalarTower Γ(S, U.1) Γ(W, (affinePreimage p U).1)
+        Γ(W, (affinePreimage p (S.affineBasicOpen f)).1) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp, Scheme.Hom.appLE_map])
+    haveI hfin : RingHom.Finite (p.appLE U.1 (affinePreimage p U).1 le_rfl).hom :=
+      HasRingHomProperty.appLE @IsFinite p ‹_› U (affinePreimage p U) le_rfl
+    haveI hfp : RingHom.FinitePresentation (p.appLE U.1 (affinePreimage p U).1 le_rfl).hom :=
+      HasRingHomProperty.appLE @LocallyOfFinitePresentation p ‹_› U
+        (affinePreimage p U) le_rfl
+    haveI : Module.FinitePresentation Γ(S, U.1) Γ(W, (affinePreimage p U).1) :=
+      Module.FinitePresentation.of_finite_of_finitePresentation
+    haveI hSloc : IsLocalization.Away f Γ(S, (S.affineBasicOpen f).1) :=
+      U.2.isLocalization_basicOpen f
+    haveI hWloc := (affinePreimage p U).2.isLocalization_of_eq_basicOpen
+      (algebraMap Γ(S, U.1) Γ(W, (affinePreimage p U).1) f)
+      (homOfLE (show (affinePreimage p (S.affineBasicOpen f)).1 ≤ (affinePreimage p U).1 from
+        fun _ hx => S.basicOpen_le f hx))
+      (by
+        show p ⁻¹ᵁ S.basicOpen f = _
+        rw [Scheme.preimage_basicOpen]
+        rfl)
+    haveI : IsLocalizedModule (Submonoid.powers f)
+        (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, (affinePreimage p U).1)
+          Γ(W, (affinePreimage p (S.affineBasicOpen f)).1)).toLinearMap := by
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid Γ(W, (affinePreimage p U).1)
+          (Submonoid.powers f)) Γ(W, (affinePreimage p (S.affineBasicOpen f)).1) := by
+        rw [Algebra.algebraMapSubmonoid, Submonoid.map_powers]
+        exact hWloc
+      infer_instance
+    have hglue := submoduleVanishingIdeal_localized (Submonoid.powers f)
+      (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, (affinePreimage p U).1)
+        Γ(W, (affinePreimage p (S.affineBasicOpen f)).1)).toLinearMap
+      ((E.ideal (affinePreimage p U)).restrictScalars Γ(S, U.1))
     sorry
 
 end VanishingLocus
