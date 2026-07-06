@@ -1,3 +1,4 @@
+import Mathlib.CategoryTheory.Galois.Equivalence
 import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
 import Mathlib.FieldTheory.Galois.Profinite
 import Mathlib.FieldTheory.KrullTopology
@@ -24,7 +25,7 @@ universe u
 
 open CategoryTheory Limits CommAlgCat
 
-open scoped TensorProduct CategoryTheory.PreGaloisCategory
+open scoped TensorProduct CategoryTheory.PreGaloisCategory FintypeCatDiscrete
 
 namespace ModularCurves
 
@@ -331,6 +332,52 @@ noncomputable instance isFundamentalGroup_galSepClosure :
   non_trivial' σ h := eq_one_of_smul_eq σ h
 
 end FundamentalGroup
+
+/-! The Galois correspondence (leaf AG-GG-4a): `(FiniteEtale k)ᵒᵖ` is equivalent to
+the category of finite discrete sets with continuous `Gal(k^sep/k)`-action. -/
+
+section Correspondence
+
+variable {k}
+
+open PreGaloisCategory in
+/-- The comparison isomorphism of a fundamental group with `Aut F`, bundled as a
+continuous multiplicative equivalence. -/
+noncomputable def toAutContinuousMulEquiv {C : Type*} [Category C] [GaloisCategory C]
+    (F : C ⥤ FintypeCat.{u}) [FiberFunctor F] (G : Type*) [Group G]
+    [∀ X, MulAction G (F.obj X)] [TopologicalSpace G] [IsTopologicalGroup G]
+    [CompactSpace G] [IsFundamentalGroup F G] : G ≃ₜ* Aut F :=
+  { toAutMulEquiv F G with
+    continuous_toFun := (toAut_isHomeomorph F G).continuous
+    continuous_invFun := by
+      have h := (toAut_isHomeomorph F G).homeomorph.symm.continuous
+      have heq : ⇑(toAutMulEquiv F G).symm =
+          ⇑(toAut_isHomeomorph F G).homeomorph.symm := by
+        funext a
+        apply (toAutMulEquiv F G).injective
+        rw [MulEquiv.apply_symm_apply]
+        exact ((toAut_isHomeomorph F G).homeomorph.apply_symm_apply a).symm
+      show Continuous ⇑(toAutMulEquiv F G).symm
+      rw [heq]
+      exact h }
+
+variable (k)
+
+/-- **The Galois correspondence for finite étale algebras**: the opposite of the
+category of finite étale `k`-algebras is equivalent to the category of finite
+discrete sets with continuous action of the absolute Galois group `Gal(k^sep/k)`. -/
+noncomputable def finiteEtaleEquivContAction :
+    (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ≌
+      ContAction FintypeCat.{u} (SeparableClosure k ≃ₐ[k] SeparableClosure k) :=
+  (PreGaloisCategory.functorToContAction
+    (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u})).asEquivalence.trans
+    (ContAction.resEquiv FintypeCat.{u}
+      (toAutContinuousMulEquiv
+        (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k))
+        (SeparableClosure k ≃ₐ[k] SeparableClosure k)))
+
+end Correspondence
 
 end FiniteEtaleGalois
 
