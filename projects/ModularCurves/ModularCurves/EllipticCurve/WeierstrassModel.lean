@@ -574,6 +574,127 @@ lemma chartCoordEquiv_mk (W : WeierstrassCurve R) (i : Fin 3)
   rw [RingEquiv.trans_apply, Ideal.quotEquivOfEq_mk]
   exact RingHom.quotientKerEquivOfSurjective_apply_mk _ _
 
+set_option backward.isDefEq.respectTransparency false in
+lemma chartCoordEquiv_mk_C (W : WeierstrassCurve R) (i : Fin 3) (r : R) :
+    chartCoordEquiv W i (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+        (MvPolynomial.C r)) =
+      (algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))))
+        ((gradeZeroRingEquiv W) r) := by
+  rw [chartCoordEquiv_mk]
+  exact (RingHom.congr_fun (algebraMap_gradeZero_comp_eq W i) r).symm
+
+private lemma ringHom_eq_aeval {σ : Type} {K : Type u} [CommRing K] [Algebra R K]
+    (χ : MvPolynomial σ R →+* K)
+    (hχ : ∀ r, χ (MvPolynomial.C r) = algebraMap R K r)
+    (p : MvPolynomial σ R) :
+    χ p = MvPolynomial.aeval (fun j => χ (MvPolynomial.X j)) p := by
+  have hχ' : ∀ r, χ (algebraMap R (MvPolynomial σ R) r) = algebraMap R K r := by
+    intro r
+    rw [MvPolynomial.algebraMap_eq]
+    exact hχ r
+  have h := MvPolynomial.aeval_unique (⟨χ, hχ'⟩ : MvPolynomial σ R →ₐ[R] K)
+  calc χ p = (⟨χ, hχ'⟩ : MvPolynomial σ R →ₐ[R] K) p := rfl
+    _ = _ := by rw [h]; rfl
+
+private lemma chart_hom_aeval (W : WeierstrassCurve R) (i : Fin 3) {K : Type u}
+    [CommRing K] [Algebra R K]
+    (φ : Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K)
+    (hφ : φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R K)
+    (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
+    φ (chartCoordEquiv W i (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) p)) =
+      MvPolynomial.aeval (fun j => φ (chartCoordEquiv W i (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+        (MvPolynomial.X j)))) p := by
+  refine ringHom_eq_aeval (φ.comp (((chartCoordEquiv W i) :
+    MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial} →+*
+      Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))).comp
+    (Ideal.Quotient.mk _))) (fun r => ?_) p
+  show φ (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.C r))) = _
+  rw [chartCoordEquiv_mk_C]
+  exact RingHom.congr_fun hφ r
+
+private def ringHomPrecompEquiv {A B C : Type*} [Semiring A] [Semiring B]
+    [Semiring C] (e : A ≃+* B) : (B →+* C) ≃ (A →+* C) where
+  toFun φ := φ.comp (e : A →+* B)
+  invFun ψ := ψ.comp (e.symm : B →+* A)
+  left_inv φ := RingHom.ext fun x => by simp
+  right_inv ψ := RingHom.ext fun x => by simp
+
+/-- `R`-compatible ring homomorphisms out of `R[u,v]/(F̃)` are the `K`-solutions
+of `F̃`. -/
+private noncomputable def quotSolutionsEquiv {i : Fin 3}
+    (F : MvPolynomial {j : Fin 3 // j ≠ i} R)
+    (K : Type u) [CommRing K] [Algebra R K] :
+    { ψ : (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸ Ideal.span {F}) →+* K //
+      ∀ r, ψ (Ideal.Quotient.mk (Ideal.span {F}) (MvPolynomial.C r)) =
+        algebraMap R K r } ≃
+    { v : {j : Fin 3 // j ≠ i} → K // MvPolynomial.aeval v F = 0 } where
+  toFun ψ := ⟨fun j => ψ.1 (Ideal.Quotient.mk _ (MvPolynomial.X j)), by
+    have h0 := ringHom_eq_aeval (ψ.1.comp (Ideal.Quotient.mk (Ideal.span {F})))
+      (fun r => ψ.2 r) F
+    rw [show (ψ.1.comp (Ideal.Quotient.mk (Ideal.span {F}))) F =
+      ψ.1 0 from congrArg ψ.1 (Ideal.Quotient.eq_zero_iff_mem.mpr
+        (Ideal.mem_span_singleton_self _)), map_zero] at h0
+    exact h0.symm⟩
+  invFun v := ⟨Ideal.Quotient.lift (Ideal.span {F})
+      ((MvPolynomial.aeval v.1 : MvPolynomial {j : Fin 3 // j ≠ i} R →ₐ[R] K) :
+        MvPolynomial {j : Fin 3 // j ≠ i} R →+* K)
+      (fun a ha => by
+        obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton.mp ha
+        simp only [RingHom.coe_coe, map_mul, v.2, zero_mul]), fun r => by
+    rw [Ideal.Quotient.lift_mk]
+    simp⟩
+  left_inv ψ := by
+    refine Subtype.ext (Ideal.Quotient.ringHom_ext (RingHom.ext fun p => ?_))
+    simp only [RingHom.comp_apply, Ideal.Quotient.lift_mk]
+    exact (ringHom_eq_aeval (ψ.1.comp (Ideal.Quotient.mk (Ideal.span {F})))
+      (fun r => ψ.2 r) p).symm
+  right_inv v := by
+    refine Subtype.ext (funext fun j => ?_)
+    simp only [Ideal.Quotient.lift_mk, RingHom.coe_coe, MvPolynomial.aeval_X]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Ring homomorphisms from a chart of the model, compatible with the `R`-structure,
+are the `K`-solutions of the dehomogenised cubic. -/
+noncomputable def chartSolutionsEquiv (W : WeierstrassCurve R) (i : Fin 3)
+    (K : Type u) [CommRing K] [Algebra R K] :
+    { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K } ≃
+    { v : {j : Fin 3 // j ≠ i} → K //
+      MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) = 0 } :=
+  (Equiv.subtypeEquiv (ringHomPrecompEquiv (chartCoordEquiv W i)) (fun φ => by
+    constructor
+    · intro h r
+      show φ (chartCoordEquiv W i _) = _
+      rw [chartCoordEquiv_mk_C]
+      exact RingHom.congr_fun h r
+    · intro h
+      refine RingHom.ext fun r => ?_
+      have := h r
+      rw [show (ringHomPrecompEquiv (chartCoordEquiv W i) φ)
+          (Ideal.Quotient.mk _ (MvPolynomial.C r)) =
+          φ (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.C r))) from rfl,
+        chartCoordEquiv_mk_C] at this
+      exact this)).trans
+    (quotSolutionsEquiv (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) K)
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
