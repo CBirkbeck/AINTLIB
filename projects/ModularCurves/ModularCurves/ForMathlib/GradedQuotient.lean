@@ -7,6 +7,7 @@ ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2a.
 -/
 import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
 import Mathlib.RingTheory.GradedAlgebra.RingHom
+import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Maps
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 
 /-!
@@ -32,7 +33,7 @@ namespace HomogeneousIdeal
 
 open DirectSum
 
-variable {ι R A : Type*} [DecidableEq ι] [AddMonoid ι] [CommRing R] [CommRing A]
+variable {ι R A : Type*} [DecidableEq ι] [AddCommMonoid ι] [CommRing R] [CommRing A]
   [Algebra R A] {𝒜 : ι → Submodule R A} [GradedAlgebra 𝒜] (I : HomogeneousIdeal 𝒜)
 
 /-- The quotient map `A → A ⧸ I`, as a linear map over `R`. -/
@@ -181,5 +182,37 @@ lemma quotientGradingHom_surjective :
 lemma quotientGradingHom_apply (a : A) :
     quotientGradingHom I a = Ideal.Quotient.mk I.toIdeal a :=
   rfl
+
+/-- Componentwise description of the quotient decomposition on classes. -/
+lemma decompose_quotientGrading_mk_apply (a : A) (n : ι) :
+    (DirectSum.decompose (quotientGrading I) (Ideal.Quotient.mk I.toIdeal a) n :
+        A ⧸ I.toIdeal) =
+      Ideal.Quotient.mk I.toIdeal (DirectSum.decompose 𝒜 a n) :=
+  rfl
+
+section Irrelevant
+
+variable [PartialOrder ι] [CanonicallyOrderedAdd ι]
+
+/-- The irrelevant ideal of the quotient grading is contained in the image of the
+irrelevant ideal — the hypothesis of `Proj.map` for the quotient map. -/
+lemma quotientGradingHom_irrelevant_le :
+    HomogeneousIdeal.irrelevant (quotientGrading I) ≤
+      HomogeneousIdeal.map (quotientGradingHom I) (HomogeneousIdeal.irrelevant 𝒜) := by
+  intro x hx
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [HomogeneousIdeal.mem_irrelevant_iff, GradedRing.proj_apply,
+    decompose_quotientGrading_mk_apply] at hx
+  have hmem : a - (DirectSum.decompose 𝒜 a 0 : A) ∈ HomogeneousIdeal.irrelevant 𝒜 := by
+    rw [HomogeneousIdeal.mem_irrelevant_iff, GradedRing.proj_apply,
+      DirectSum.decompose_sub]
+    simp [DirectSum.sub_apply, DirectSum.decompose_coe, DirectSum.of_eq_same]
+  have hval : Ideal.Quotient.mk I.toIdeal a =
+      quotientGradingHom I (a - (DirectSum.decompose 𝒜 a 0 : A)) := by
+    rw [quotientGradingHom_apply, map_sub, hx, sub_zero]
+  rw [hval]
+  exact Ideal.mem_map_of_mem _ hmem
+
+end Irrelevant
 
 end HomogeneousIdeal

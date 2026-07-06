@@ -174,6 +174,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: EGA II 2.9 / Stacks 01M6-adjacent (standard); no KM gate.
 - **Generality**: step 3 for arbitrary `[GradedRing]` over ℕ; step 4 for arbitrary σ
   finite; upstream candidates both.
+- **Progress**:
+  - 2026-07-06T05:30: steps 1–3 DONE, sorry-free: `quotientGradingHom` (+
+    `decompose_quotientGrading_mk_apply`, `quotientGradingHom_irrelevant_le` — the
+    `Proj.map` hypothesis) in GradedQuotient.lean;
+    `away_map_quotientGradingHom_surjective` (4 lines via `Away.mk_surjective` +
+    `Away.map_mk` — componentwise surjectivity is definitional for quotient gradings)
+    and `isClosedImmersion_proj_map_quotientGradingHom` in ProjClosedImmersion.lean
+    (IsZariskiLocalAtTarget over `iSup_basicOpen_eq_top` + conjugation
+    `map ∣_ D₊(t) = isoQ.hom ≫ Spec.map (Away.map) ≫ iso𝒜.inv` from `awayι_comp_map`
+    by mono-cancellation + `spec_of_surjective`; comp via
+    `IsStableUnderComposition.comp_mem` — same transparency gotcha as before).
+    NOTE for step 3-generality: proved for `Submodule R`-valued gradings (our
+    GradedQuotient setting), ℕ-indexed — fine for all consumers here.
 
 ### [T-A2e] Elliptic points clause via the ℙ² embedding (sub-ticket of T-A2)
 - **Status**: open (after T-A2d) · **File**: WeierstrassModel.lean · **Parent**: T-A2
