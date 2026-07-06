@@ -773,22 +773,100 @@ private lemma etale_field_nezero (K : Type u) [Field K] (N : ℕ) [NeZero N]
   intro hNK
   -- transfer étale to the model over K (LEFT square with identity factor)
   have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
-  have big := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
-  have hfactor : (𝟙 (Spec (CommRingCat.of K))) ≫ Spec.map (muNBaseMap K)
-      = terminal.from _ ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom :=
+  have hterm : terminal.from (Spec (CommRingCat.of K)) ≫
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap K) :=
     specULiftZIsTerminal.hom_ext _ _
-  rw [← hfactor] at big
-  let mid := t.lift (pullback.snd _ _) (muNπ _ N ≫ 𝟙 _)
-    (by rw [← Category.assoc]; exact big.w)
+  have b := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  rw [hterm] at b
+  let mid := t.lift (pullback.snd _ _) (muNπ _ N) b.w
   have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ := t.lift_fst _ _ _
-  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N ≫ 𝟙 _ := t.lift_snd _ _ _
-  rw [← hmid1] at big
-  have LEFT := IsPullback.of_right big hmid2 t
-  have triv : IsPullback (𝟙 (muNModelRing K N).1?? placeholder) (𝟙 _) (𝟙 _) (𝟙 _) := sorry
-  sorry
+  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N := t.lift_snd _ _ _
+  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare K N))
+      (muNπ (Spec (CommRingCat.of K)) N) (Spec.map (muNRingMap N))
+      (𝟙 (Spec (CommRingCat.of K)) ≫ Spec.map (muNBaseMap K)) := by
+    rw [Category.id_comp, hmid1]
+    exact b
+  have LEFT := IsPullback.of_right big2 (by rw [Category.comp_id]; exact hmid2) t
+  have triv : IsPullback (𝟙 (Spec (muNModelRing K N))) (Spec.map (muNModelStruct K N))
+      (Spec.map (muNModelStruct K N)) (𝟙 (Spec (CommRingCat.of K))) :=
+    IsPullback.of_horiz_isIso ⟨by simp⟩
+  have hSpecEtale : Etale (Spec.map (muNModelStruct K N)) := by
+    have hesnd : (LEFT.isoIsPullback _ _ triv).hom ≫ Spec.map (muNModelStruct K N)
+        = muNπ (Spec (CommRingCat.of K)) N :=
+      LEFT.isoIsPullback_hom_snd _ _ triv
+    rw [← MorphismProperty.cancel_left_of_respectsIso @Etale
+      (LEFT.isoIsPullback _ _ triv).hom, hesnd]
+    exact h
+  have hre : RingHom.Etale (muNModelStruct K N).hom :=
+    HasRingHomProperty.Spec_iff.mp hSpecEtale
+  haveI halg : Algebra.Etale K (AdjoinRoot (muNModelPoly K N)) := by
+    refine (RingHom.etale_algebraMap (R := K)
+      (S := AdjoinRoot (muNModelPoly K N))).mp ?_
+    rw [AdjoinRoot.algebraMap_eq]
+    exact hre
+  haveI hred : IsReduced (AdjoinRoot (muNModelPoly K N)) :=
+    Algebra.FormallyUnramified.isReduced_of_field K _
+  -- char analysis: q := ringChar K divides N
+  haveI : CharP K (ringChar K) := ringChar.charP K
+  have hqdvd : ringChar K ∣ N := (CharP.cast_eq_zero_iff K (ringChar K) N).mp hNK
+  have hqprime : (ringChar K).Prime := by
+    rcases CharP.char_is_prime_or_zero K (ringChar K) with hp | h0
+    · exact hp
+    · rw [h0] at hqdvd
+      exact absurd (zero_dvd_iff.mp hqdvd) (NeZero.ne N)
+  haveI := Fact.mk hqprime
+  haveI : CharP (Polynomial K) (ringChar K) := by
+    constructor
+    intro n
+    rw [← Polynomial.C_eq_natCast, Polynomial.C_eq_zero]
+    exact CharP.cast_eq_zero_iff K _ n
+  -- the nonzero nilpotent
+  have hy : (AdjoinRoot.mk (muNModelPoly K N) (X ^ (N / ringChar K) - 1)) ^ ringChar K
+      = 0 := by
+    rw [← map_pow, sub_pow_char, one_pow, ← pow_mul, Nat.div_mul_cancel hqdvd]
+    exact AdjoinRoot.mk_self
+  have h1q : N / ringChar K ≠ 0 :=
+    Nat.div_ne_zero_iff.mpr ⟨hqprime.ne_zero,
+      Nat.le_of_dvd (Nat.pos_of_ne_zero (NeZero.ne N)) hqdvd⟩
+  have hne : (X : Polynomial K) ^ (N / ringChar K) - 1 ≠ 0 := by
+    simpa using (Polynomial.monic_X_pow_sub_C (1 : K) h1q).ne_zero
+  have hnil : IsNilpotent (AdjoinRoot.mk (muNModelPoly K N) (X ^ (N / ringChar K) - 1)) :=
+    ⟨ringChar K, hy⟩
+  have h0 := hnil.eq_zero
+  have hdvd := AdjoinRoot.mk_eq_zero.mp h0
+  have hdeg := Polynomial.natDegree_le_of_dvd hdvd hne
+  have hNle : N ≤ N / ringChar K := by
+    have e1 : (muNModelPoly K N).natDegree = N := by
+      simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (r := (1 : K))
+    have e2 : ((X : Polynomial K) ^ (N / ringChar K) - 1).natDegree = N / ringChar K := by
+      simpa using Polynomial.natDegree_X_pow_sub_C (n := N / ringChar K) (r := (1 : K))
+    rw [e1, e2] at hdeg
+    exact hdeg
+  have hlt : N / ringChar K < N :=
+    Nat.div_lt_self (Nat.pos_of_ne_zero (NeZero.ne N)) hqprime.one_lt
+  omega
 
 private lemma isUnit_of_etale_muNπ (S : Scheme.{u}) (N : ℕ) [NeZero N]
-    (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by sorry
+    (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by
+  by_contra hN
+  have hex : ∃ x : S, (N : S.residueField x) = 0 := by
+    by_contra hall
+    refine hN (S.toLocallyRingedSpace.toRingedSpace.isUnit_of_isUnit_germ ⊤
+      (N : Γ(S, ⊤)) fun x hx ↦ ?_)
+    have hg : S.presheaf.germ ⊤ x hx ((N : Γ(S, ⊤))) = (N : S.presheaf.stalk x) :=
+      map_natCast (S.presheaf.germ ⊤ x hx).hom N
+    rw [hg]
+    refine (IsLocalRing.residue_ne_zero_iff_isUnit _).mp ?_
+    have hres : IsLocalRing.residue (S.presheaf.stalk x) (N : S.presheaf.stalk x)
+        = (N : S.residueField x) := map_natCast (IsLocalRing.residue _) N
+    rw [hres]
+    exact not_exists.mp hall x
+  obtain ⟨x, hx⟩ := hex
+  obtain ⟨θ, sq⟩ := isPullback_muN_baseChange S (Spec (S.residueField x)) N
+    (S.fromSpecResidueField x)
+  have hT : Etale (muNπ (Spec (S.residueField x)) N) :=
+    MorphismProperty.of_isPullback sq h
+  exact absurd hx (etale_field_nezero (S.residueField x) N hT)
 
 theorem muNπ_etale_iff (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) :=
