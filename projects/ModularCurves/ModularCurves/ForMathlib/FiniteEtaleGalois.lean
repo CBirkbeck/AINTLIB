@@ -68,8 +68,7 @@ variable (k : Type u) [Field k]
 
 instance subsingletonHomFromSelf (A : CommAlgCat.FiniteEtale.{u} k) :
     Subsingleton (CommAlgCat.FiniteEtale.of k k ⟶ A) :=
-  ⟨fun f g => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x =>
-    (f.hom.hom.commutes x).trans (g.hom.hom.commutes x).symm))⟩
+  ⟨fun f g => by ext⟩
 
 instance nonemptyHomFromSelf (A : CommAlgCat.FiniteEtale.{u} k) :
     Nonempty (CommAlgCat.FiniteEtale.of k k ⟶ A) :=
@@ -100,17 +99,20 @@ noncomputable def productFanIsLimit {ι : Type} [Finite ι]
     (fun s => ObjectProperty.homMk
       (show s.pt.obj ⟶ CommAlgCat.of k (Π j, A j) from
         CommAlgCat.ofHom (AlgHom.pi (fun i => (s.proj i).hom.hom))))
-    (fun s i => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x => rfl)))
-    (fun s m hm => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x =>
-      funext fun i => by
-        have h := congrArg (fun q => q.hom.hom x) (hm i)
-        simpa using h)))
+    (fun s i => by
+      ext x
+      rfl)
+    (fun s m hm => by
+      ext x
+      refine funext fun i => ?_
+      exact congrArg (fun q => q.hom.hom x) (hm i))
 
 instance hasFiniteProducts : HasFiniteProducts (CommAlgCat.FiniteEtale.{u} k) where
   out n :=
-    { has_limit := fun F =>
-        hasLimit_of_iso (Discrete.natIsoFunctor (F := F)).symm
-          (h := HasLimit.mk ⟨_, productFanIsLimit fun i => F.obj ⟨i⟩⟩) }
+    { has_limit := fun F => by
+        haveI : HasLimit (Discrete.functor (F.obj ∘ Discrete.mk)) :=
+          HasLimit.mk ⟨_, productFanIsLimit (F.obj ∘ Discrete.mk)⟩
+        exact hasLimit_of_iso (Discrete.natIsoFunctor (F := F)).symm }
 
 end FiniteEtaleGalois
 
