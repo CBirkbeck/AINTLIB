@@ -178,11 +178,13 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
   -- REMAINING (T-A8a): build `hA`, expressing `pullback (pullback.snd π g) VA.ι` as a
   -- pullback of `projModelπ W` along `Spec.map φ` (φ = `g.appLE U.1 V`), then set
   -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. All ingredient lemmas identified:
-  --  (1) pasting via `Limits.pullbackRightPullbackFstIso` (+ `_hom_fst`, `_inv_snd_snd`),
-  --      assembled with `IsPullback.of_hasPullback ... |>.of_iso ...` exactly as in
-  --      `WeierstrassModel.isPullback_coverPiece`/`coverPiece_f_eq` (WeierstrassModel:2088–
-  --      2134): `pullback (pullback.snd π g) VA.ι ≅ pullback π (Vι ≫ g)`, then via
-  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g` and `e`, `≅ pullback (projModel W) gV` (over ↑U);
+  --  (1) pasting (CONFIRMED): `Limits.pullbackLeftPullbackSndIso π g Vι :
+  --      pullback (pullback.snd π g) Vι ≅ pullback π (Vι ≫ g)`; then via
+  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g`, `(pullbackLeftPullbackSndIso π U.1.ι gV).symm :
+  --      pullback π (gV ≫ U.1.ι) ≅ pullback (pullback.snd π U.1.ι) gV`; then transport by
+  --      `e : pullback π U.1.ι ≅ projModel W` (fibre-product congruence over ↑U). Assemble
+  --      the IsPullback with `IsPullback.of_hasPullback ... |>.of_iso ...` as in
+  --      `WeierstrassModel.isPullback_coverPiece`/`coverPiece_f_eq` (WeierstrassModel:2088–2134);
   --  (2) BRIDGE `gV ↔ Spec.map φ`: `IsAffineOpen.Spec_map_appLE_fromSpec` gives
   --      `Spec.map (g.appLE U.1 V hVle) ≫ U.2.fromSpec = hVaff.fromSpec ≫ g`, and
   --      `hgVfac` + `U.2.fromSpec = U.2.isoSpec.inv ≫ U.1.ι` move the pullback base from
