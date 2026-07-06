@@ -382,6 +382,30 @@ theorem trivialTorsorπ_surjective (S : Scheme.{u}) :
   intro x _
   exact Set.mem_iUnion.mpr ⟨1, x, rfl⟩
 
+/-- **The fold of a finite coproduct of copies of an affine scheme is finite**
+(T-W3b-i, model case): conjugating by `sigmaSpec`, the fold is `Spec` of the
+diagonal `R →+* Π_ι R`, which is module-finite for finite `ι`. -/
+theorem isFinite_sigmaDesc_id_spec {ι : Type u} [Finite ι]
+    (R : CommRingCat.{u}) :
+    AlgebraicGeometry.IsFinite
+      (Limits.Sigma.desc fun _ : ι => 𝟙 (Spec R)) := by
+  have hdesc : Limits.Sigma.desc (fun _ : ι => 𝟙 (Spec R)) =
+      sigmaSpec (fun _ : ι => R) ≫
+        Spec.map (CommRingCat.ofHom (RingHom.pi fun _ => RingHom.id R)) := by
+    refine Limits.Sigma.hom_ext _ _ fun i => ?_
+    rw [Limits.Sigma.ι_desc, ← Category.assoc, ι_sigmaSpec, ← Spec.map_comp]
+    rw [show CommRingCat.ofHom (RingHom.pi fun _ : ι => RingHom.id ↑R) ≫
+        CommRingCat.ofHom (Pi.evalRingHom (fun _ : ι => ↑R) i) = 𝟙 R from rfl]
+    exact (Spec.map_id R).symm
+  rw [hdesc]
+  haveI : AlgebraicGeometry.IsFinite
+      (Spec.map (CommRingCat.ofHom (RingHom.pi fun _ : ι => RingHom.id ↑R))) := by
+    rw [AlgebraicGeometry.IsFinite.SpecMap_iff]
+    show (RingHom.pi fun _ : ι => RingHom.id ↑R).Finite
+    show Module.Finite ↑R (ι → ↑R)
+    exact Module.Finite.pi
+  infer_instance
+
 omit [Finite G] in
 theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
     trivialTorsorLeft G S (g * g') =
