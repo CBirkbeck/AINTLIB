@@ -467,6 +467,42 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: any ring hom `f`; upstream candidate (Proj-base-change for
   quotient gradings).
 
+### [T-A5a-iso] IsIso of the base-change comparison (sub-sub-ticket of T-A5a)
+- **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean (section
+  BaseChangeGraded/TensorComparison) · **Parent**: T-A5a
+- **Depends on**: everything committed under T-A5a (all green): `projModelBaseChange`,
+  `projModelBaseChange_π`, `projModelBaseChangeLift`, `sChartTensorEquiv`,
+  `isPushout_sChart(_commRingCat)`, `isPullback_sChart_spec` · **Type**: theorem
+- **Statement**: `IsIso (projModelBaseChangeLift (R' := R') W)` (with `[Algebra R R']`).
+- **FINDING OF RECORD (2026-07-07, do not re-discover)**: the naive ring-level
+  naturality `chartCoordEquiv (W.map alg) ∘ sChartBaseChange = Away.map bcHom ∘
+  chartCoordEquiv W` is NOT STATABLE as-is: `Away.map (baseChangeGradedHom …) t_i`
+  lands in `Away 𝒜' (bcHom t_i)` while the primed chart lives at
+  `Away 𝒜' (t_i')`; the element equality `bcHom t_i = t_i'` (mk∘map_X chain) is
+  propositional, not syntactic, so the two composites have different TYPES
+  (dependent-index wall — same class as the mk-vs-quotientGradingHom respelling
+  earlier, but now inside a statement, where `show`-casts don't help).
+- **Proof plan (scheme-level, avoids the wall)**: prove `IsIso` locally on the target:
+  isomorphisms are IsZariskiLocalAtTarget; cover `pullback (projModelπ W) (Spec.map
+  (ofHom (algebraMap R R')))` by `Scheme.Pullback.openCoverOfLeft` applied to the
+  three-chart cover of `projModel W`. Per chart `i`: (1) the cover component is
+  `pullback (awayι-i ≫ projModelπ W) (Spec.map alg)` = (rw `awayι_projModelπ`)
+  `pullback (Spec.map χ_R) (Spec.map alg)`, which `isPullback_sChart_spec` +
+  `IsPullback.isoIsPullback` identifies with `Spec (SW'-quotient)`; (2) the
+  lift-restriction over this component: compute `projModelBaseChangeLift`-pullback
+  along the component map via `pullback.lift_fst/snd` + `Proj.awayι_comp_map` at
+  s := t_i (this stays at the `bcHom t_i`-spelling; apply the ELEMENT equality
+  `bcHom t_i = t_i'` only inside `Proj.basicOpen`/morphism-`=`-Props, where rw is
+  legal); (3) conclude each restriction is the `Spec.map` of `sChartBaseChange`
+  conjugated by isos ⟹ IsIso (isPullback comparison uniqueness:
+  `IsPullback.hom_isIso?` or two-sided-inverse from the universal property).
+  Alternative if the cover-plumbing fights: construct the INVERSE morphism
+  `pullback ⟶ projModel (W.map alg)` directly by gluing the three
+  `Spec (SW') = component`-isos over the W'-model's chart cover
+  (`Scheme.OpenCover.glueMorphisms` on `mapAffineOpenCover`-restricted-to-X-gens),
+  then check both composites = id by `hom_ext` over the same covers.
+- **Sources**: EGA II 3.5.3; entirely infrastructure (no KM gate).
+
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
 - **Status**: open · **File**: EllipticCurve/GroupLaw.lean (or Basic)
 - **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
