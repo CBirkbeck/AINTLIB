@@ -1180,10 +1180,21 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     (Submodule.torsionBy ℤ G (d:ℤ)) = d ^ 2)` ⇒ `Nonempty (torsionBy ℤ G (N:ℤ)
     ≃+ (Fin 2 → ZMod N))` (single Nonempty). Sketch: card N² + killed by N +
     d-torsion counts force ℤ/N × ℤ/N via the finite-abelian structure theorem.
-  - **[T-B6f-dict]** (OPTIONAL for headline; the leaf BB-QF/BB-DEG cite for their
-    discharge): fibre group dictionary — E's abstract fibre group vs HasseWeil's
-    chord–tangent group on a Weierstrass fibre model (fibrewise instance of the
-    T-A6 canonicity cluster: rigidity over a field). Deferred; unclaimed.
+  - **[T-B6f-dict]** (the leaf BB-QF/BB-DEG cite for their discharge; T-B4x's
+    remaining gate now that T-B6 is done) — **Claimed**: beastmode-B, 2026-07-06.
+    Fibre group dictionary: E's abstract fibre group vs HasseWeil's chord–tangent
+    group on a Weierstrass fibre model (fibrewise canonicity/rigidity over a field).
+    RECON 2026-07-06 (game-changer): mathlib NOW HAS
+    `AlgebraicGeometry/Group/Abelian.lean` (Yang–Merten 2026):
+    `isCommMonObj_of_isProper_of_geometricallyIntegral` — proper geometrically
+    integral group scheme over a field is COMMUTATIVE, proved by the rigidity-style
+    constancy argument (commutator ≡ 1 via IsProper/IsIntegral/JacobsonSpace +
+    closed-immersion η). Attack: extract/mirror the constancy engine to prove
+    group-structure UNIQUENESS with fixed identity (two GrpObj structures on the
+    proper integral pointed fibre curve agree: id is basepoint-preserving ⇒ hom by
+    rigidity), then transport chord–tangent through the FibrewiseElliptic pointed
+    iso. Next: read Abelian.lean:55–130 for the reusable constancy lemma; check
+    Group/Smooth.lean; then decompose into leaves on this board.
 
 ### [T-C0] Char-0 étale-descent Weil pairing (v2 — first milestone, review Q5)
 - **Status**: open · **File**: WeilPairing/ (new construction file) ·
