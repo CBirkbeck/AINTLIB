@@ -1562,7 +1562,14 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   fppf-surjectivity ⟹ epi on points — check mathlib `Surjective` API).
 
 ### [T-F0] Roots-of-unity count in ℚ̄
-- **Status**: in_progress · **Claimed**: beastmode-B, 2026-07-06 (G6 pick: dep-free,
+- **Status**: done (beastmode-B, 2026-07-06 — sorry-free + axiom-clean, first-try
+  modulo one missing import: root of `Polynomial.cyclotomic N ℚ̄` exists
+  (IsAlgClosed.exists_root, degree = totient ≠ 0), is primitive
+  (isRoot_cyclotomic_iff, NeZero (N:ℚ̄) from CharZero), then
+  IsPrimitiveRoot.card_rootsOfUnity; added import
+  Mathlib.RingTheory.Polynomial.Cyclotomic.Roots. modularCyclotomicCharacter's
+  input hypothesis in GaloisRepData is now REAL.) ·
+  **Claimed**: beastmode-B, 2026-07-06 (G6 pick: dep-free,
   parallel-safe, disjoint file; T-D7 deliberately NOT taken — its (3)⟺(4) bridge
   shares the base-change ideal machinery D2 is actively building in
   ForMathlib/IdealSheafComapMul.lean for T-D6a, and duplicating that is the cardinal
