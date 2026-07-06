@@ -1184,7 +1184,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     remaining gate now that T-B6 is done) — **Claimed**: beastmode-B, 2026-07-06.
     Fibre group dictionary: E's abstract fibre group vs HasseWeil's chord–tangent
     group on a Weierstrass fibre model (fibrewise canonicity/rigidity over a field).
-    RECON 2026-07-06 (game-changer): mathlib NOW HAS
+    SCOPING AMENDED 2026-07-06 (beastmode-B, honest downgrade after reading the
+    engine): mathlib's rigidity toolbox covers the TOPOLOGICAL constancy half only;
+    the dictionary's true missing half is the CLASSICAL side as scheme data
+    (chord–tangent addition as a morphism, or the Pic⁰/Abel route) — exactly the
+    deferred T-A6 seven-box cluster, which the v2 plan of record parks. UNCLAIMED,
+    returned to the deferred pool with this recon banked. Original recon: mathlib NOW HAS
     `AlgebraicGeometry/Group/Abelian.lean` (Yang–Merten 2026):
     `isCommMonObj_of_isProper_of_geometricallyIntegral` — proper geometrically
     integral group scheme over a field is COMMUTATIVE, proved by the rigidity-style
@@ -1541,7 +1546,11 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   fppf-surjectivity ⟹ epi on points — check mathlib `Surjective` API).
 
 ### [T-F0] Roots-of-unity count in ℚ̄
-- **Status**: open · **File**: ModularCurve/YRho.lean · `card_rootsOfUnity_algClosureQ`
+- **Status**: in_progress · **Claimed**: beastmode-B, 2026-07-06 (G6 pick: dep-free,
+  parallel-safe, disjoint file; T-D7 deliberately NOT taken — its (3)⟺(4) bridge
+  shares the base-change ideal machinery D2 is actively building in
+  ForMathlib/IdealSheafComapMul.lean for T-D6a, and duplicating that is the cardinal
+  sin; revisit T-D7 when T-D6a lands) · **File**: ModularCurve/YRho.lean · `card_rootsOfUnity_algClosureQ`
   · **Depends on**: none · **Parallel**: yes · **Type**: lemma ·
   **Sketch**: `Xᴺ − 1` separable in char 0 + alg. closed ⟹ N distinct roots; mathlib
   `IsPrimitiveRoot`/`Polynomial.nthRoots` card lemmas (search first — likely nearly
