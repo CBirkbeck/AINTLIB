@@ -3523,12 +3523,20 @@ bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
   EllipticCurve/GroupLaw.lean (:163), Moduli/EllCategory.lean +
   Moduli/Representability.lean (header honesty notes) ·
   **Depends on**: T-A2 (done), T-A3 (done), T-A5a (done) · **Type**: def change + lemmas
-- **New predicate** (content; executor picks the cleanest pointed-iso spelling and
-  records it here):
+- **New predicate** (SPELLING CHOSEN + IMPLEMENTED 2026-07-06, elaborates clean —
+  mirrors `FibrewiseElliptic` but over an affine open instead of a residue field, so the
+  same `isPullback_projModelBaseChange` machinery drives the migration lemmas; the
+  restriction is `pullback π U.1.ι`, the section via the proven
+  `pullback.lift (U.1.ι ≫ z) (𝟙 _)` pattern from `FibrewiseElliptic.baseChange`):
   `def LocallyWeierstrass (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) : Prop :=
     ∀ s : S, ∃ (U : S.affineOpens) (_ : s ∈ U.1) (W : WeierstrassCurve Γ(S, U.1)),
-      W.IsElliptic ∧ (pointed iso of the restriction E|_U with projModel W over
-      U.1.isoSpec, compatible with π and z)`
+      W.IsElliptic ∧ ∃ e : pullback π U.1.ι ≅ projModel W,
+        e.hom ≫ projModelπ W = pullback.snd π U.1.ι ≫ U.2.isoSpec.hom ∧
+        (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _) …) ≫ e.hom = projModelZero W`
+  The `Spec Γ(S,U)` (isoSpec) and `Spec (.of ↥Γ(S,U))` (projModelπ) codomains coincide
+  defeq — no bridge. Predicate landed additively first (no field swap) so each commit stays
+  green + sorry-free; field swap gated on `LocallyWeierstrass.baseChange` (no regression of
+  the currently-proven base-change chain).
 - **Migration steps**:
   1. Add `LocallyWeierstrass` next to `FibrewiseElliptic` (keep the latter, unchanged,
      as a predicate).

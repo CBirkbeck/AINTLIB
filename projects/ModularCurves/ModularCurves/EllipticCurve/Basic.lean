@@ -126,6 +126,24 @@ lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       rw [hA.isoPullback_hom_snd, hB.isoPullback_hom_snd, projModelZero_projModelπ]
       exact pullback.lift_snd _ _ _
 
+/-- **The local-model condition** (v2, owner-directed 2026-07-06): every point of `S`
+has an affine open neighbourhood `U` over which `E`, pointed by the zero section, is
+isomorphic — as a scheme over `Γ(S, U)` (via `U ≅ Spec Γ(S, U)`), compatibly with `π`
+and the section — to the projective Weierstrass model of some elliptic Weierstrass curve
+`W / Γ(S, U)`. A-priori stronger than `FibrewiseElliptic`, which it implies
+(`EllipticCurveGeom.fibrewiseElliptic`); the converse is the Chain-A7 comparison
+(`T-A7-cmp`, gated on coherent cohomology + BB-RR). Source: KM 2.2.5–2.2.6; GME 2.2.4;
+owner directive 2026-07-06. -/
+def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) :
+    Prop :=
+  ∀ s : S, ∃ (U : S.affineOpens) (_ : s ∈ U.1) (W : WeierstrassCurve Γ(S, U.1)),
+    W.IsElliptic ∧
+    ∃ e : pullback π U.1.ι ≅ projModel W,
+      e.hom ≫ projModelπ W = pullback.snd π U.1.ι ≫ U.2.isoSpec.hom ∧
+      (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+          (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
+        projModelZero W
+
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
 expressed via `FibrewiseElliptic`.
