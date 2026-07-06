@@ -1029,13 +1029,49 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.3.1 (quote banked in T-B4 notes) · EGA IV 11.3.10 · [Sil] III.6.2.
 
 ### [T-B5] [N] étale when N invertible (+ E[N] finite étale)
-- **Status**: open · **File**: Torsion.lean · `mulBy_etale`, `torsionπ_etale`
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-08T00:45Z →
+  2026-07-08T02:00Z — both targets DERIVED: `mulBy_etale` via
+  `Etale.of_formallyUnramified_of_flat` (f explicit) from BB-DIFF
+  (`mulByHom_formallyUnramified`, Loeffler 3.4.2(2) verbatim quote in docstring) +
+  BB-FLAT + the lfp mini-box `mulByHom_locallyOfFinitePresentation` (scheme-level
+  cancellation lfp(f≫g)+lft(g)⟹lfp(f) MISSING from mathlib — ring-level exists as
+  RingHom.FinitePresentation.of_comp_finiteType; ForMathlib target → T-B5x);
+  `torsionπ_etale` by base change. The `N = 0`-invertible degenerate case is handled
+  FOR REAL: new lemma `isEmpty_of_nIsInvertible_zero` (IsUnit 0 ⟹ 0 = 1 in Γ ⟹ every
+  stalk would be a trivial local ring — germ + one_ne_zero), then E empty and [0] is
+  an iso (isIso_of_isEmpty target-empty) hence étale.) · **File**: Torsion.lean · `mulBy_etale`, `torsionπ_etale`
 - **Depends on**: invariant-differential input only (v2: not the Abel chain) · **Parallel**: with T-B4 · **Type**: theorems
 - **Sketch**: [Loe] 3.4.2(2) verbatim route: `[N]` multiplies the invariant
   differential by `N` ⟹ iso on (co)tangent ⟹ formally étale; + lfp. Needs the
   invariant-differential API (sub-ticket if mathlib's `Ω¹` for schemes is insufficient
   — check `RingTheory.Kaehler` sheafification status first).
 - **Sources**: [Loe] Lemma 3.4.2(2) (quote in decomposition).
+
+### [T-B5x] ForMathlib: scheme-level lfp cancellation (unblocks the T-B5 lfp mini-box)
+- **Status**: open · **New file**: ForMathlib/FinitePresentationCancel.lean ·
+  `LocallyOfFinitePresentation.of_comp` (f g; [LocallyOfFinitePresentation (f ≫ g)]
+  [LocallyOfFiniteType g] : LocallyOfFinitePresentation f) — then discharge
+  `mulByHom_locallyOfFinitePresentation` ([N] ≫ π = π, π lfp by smoothness, π lft).
+- **Depends on**: none · **Parallel**: yes · **Type**: theorem (upstream candidate)
+- **Sketch**: affine-locally: cover Y by affines V, X by affines U ⊆ f⁻¹V; on rings the
+  statement is `RingHom.FinitePresentation.of_comp_finiteType` (mathlib,
+  RingTheory/FinitePresentation.lean:443). Glue via the `HasRingHomProperty` /
+  `affineLocally` framework (mirror how mathlib proves composition-stability; the
+  cancellation direction needs the source-affine charts of `f ≫ g` refined against
+  `g`-charts — see Stacks 01TX for the classical bookkeeping).
+- **Sources**: Stacks 01TX/02FV · mathlib RingTheory/FinitePresentation.
+
+### [T-B5y] Discharge BB-DIFF (invariant differential; gated on scheme Ω¹ API)
+- **Status**: blocked (mathlib has no usable relative-differentials sheaf API for
+  schemes yet — check again after bumps; the ring-level `FormallyUnramified` is
+  `RingHom`-transferable once the translation-invariance of `Ω¹_{E/S}` is expressible)
+- **File**: Torsion.lean · `mulByHom_formallyUnramified` · **Depends on**: AG-Ω gap ·
+  **Type**: theorem
+- **Sketch**: Loeffler 3.4.2(2): `[N]^* ω = N · ω` for the invariant differential ω
+  (prove by induction from `[m+1] = [m] + id` and the rigidity of translation);
+  `N` unit ⟹ iso on cotangent ⟹ unramified. KM 2.3.2 Lie-algebra variant (quote
+  banked: `Lie([N]) = N`).
+- **Sources**: [Loe] 3.4.2(2) (verbatim quote in the box docstring) · [KM] 2.3.2.
 
 ### [T-B6] Fibre comparison: E[N] geometric fibres ≅ (ℤ/N)² (reuse HasseWeil)
 - **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
