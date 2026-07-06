@@ -752,6 +752,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Alternatively check first whether mathlib has any `fromOfGlobalSections`-naturality
   (`Proj.map_fromOfGlobalSections`?) — grep before building.
 
+### [T-A5c] Base-change group-structure Props: `comm` + `one_eq_zero` (sub-ticket of T-A5)
+- **Status**: in_progress (beastmode 2026-07-07T19:45Z — spawned: the two remaining
+  sorries in `EllipticCurve.baseChange` (GroupLaw.lean) are NOT Abel-gated — they are
+  concrete mathlib Over-pullback functoriality, misfiled under the T-A6 umbrella.)
+- **File**: EllipticCurve/GroupLaw.lean · `baseChange.comm`, `baseChange.one_eq_zero`
+- **Depends on**: T-A5 (done) · **Parallel**: yes · **Type**: Prop fields
+- **Sketch**: `comm`: mathlib instance `Over.isCommMonObj_mk_pullbackSnd`
+  (Cartesian/Over.lean:311) — pullback of a commutative monoid object is commutative;
+  instance-defeq between `grpObjMkPullbackSnd.toMonObj` and `monObjMkPullbackSnd`
+  (both via mapGrp/mapMon on `Over.pullback g`). `one_eq_zero`: the transported unit
+  is `LaxMonoidal.ε ≫ (Over.pullback g).map η` (simps-generated
+  `grpObjMkPullbackSnd_one` / `monObjMkPullbackSnd_one`, -isSimp); compute `.left`
+  by `pullback.hom_ext`: fst-leg reduces along `E.one_eq_zero`, snd-leg is the
+  Over-structure w-condition; `preservesTerminalIso_pullback` (same file, @[simp])
+  gives the ε-component.
+- **Sources**: mathlib `Mathlib.CategoryTheory.Monoidal.Cartesian.Over`. **Generality**: any `g : T ⟶ S`.
+
 ### [T-A6] ⧗KM Abel canonicity — the deferred "purity/comparison" project (v2)
 - **Status**: open, **phase 3+ — no longer blocks anything** (v2: group law is a field
   of the working record, D5) · **File**: EllipticCurve/GroupLaw.lean ·
@@ -1413,20 +1430,31 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
 - [T-D22] section-of-smooth-rel-curve ⟹ locally principal nzd ideal (HB-REGIMM;
   étale-local 𝔸¹ model route). [T-D23] closed pt of smooth curve /field has DVR
   local ring. [T-D24] finrank additivity in SES of finite free modules (local + glue).
-  - **[T-D24] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T12:30Z · new file ForMathlib/FinrankExact.lean
-    (mathlib-only imports, chain-independent). Statement package (all gaps,
-    duplicate-checked: only `rankAtStalk_prod` + a DivisionRing Euler-char lemma
-    exist): (a) SES with projective quotient splits —
-    `Nonempty (N ≃ₗ[R] M × P)` from `Exact f g` + inj + surj + `[Projective R P]`
-    (3-liner: `projective_lifting_property` + `Exact.splitSurjectiveEquiv`);
-    (b) `finrank R N = finrank R M + finrank R P` for M,P finite free (via (a) +
-    `finrank_prod`; no locality needed); (c) THE consumer form, feeds
-    degree-additivity D-curve.3: `rankAtStalk N p = rankAtStalk M p +
-    rankAtStalk P p` for M,P finite flat (localize the SES —
-    `IsLocalizedModule.map_exact/map_injective/map_surjective` — then
-    `free_of_flat_of_isLocalRing` + (b) at Rₚ). Attack block in
-    d-lane-helpers.md at statement time.
+  - **[T-D24] Status**: done (beastmode-D2, 2026-07-06T12:30Z → 2026-07-06T13:20Z) ·
+    NEW ForMathlib/FinrankExact.lean, sorry-free, standard axioms ×3, zero
+    warnings. Delivered (statements per the claim-time package, attack block in
+    d-lane-helpers.md): (a) `Function.Exact.nonempty_linearEquiv_prod_of_projective`
+    — SES with projective quotient splits, `Nonempty (N ≃ₗ[R] M × P)`, Semiring,
+    1-line term (projective_lifting_property + splitSurjectiveEquiv);
+    (b) `Module.finrank_eq_add_of_exact` — M, P finite free,
+    `[StrongRankCondition R]`, 1-line term ((a) + finrank_prod, no locality);
+    (c) `Module.rankAtStalk_eq_add_of_exact` — M, P finite FLAT, N
+    hypothesis-free, pointwise at every prime; THE degree-additivity engine for
+    D-curve.3. ROUTE CHANGE vs claim note: (c) went through TENSORS not
+    LocalizedModule (rankAtStalk_eq_finrank_tensorProduct + (b) over
+    Localization.AtPrime at f.baseChange/g.baseChange). FACTS OF RECORD:
+    `LinearMap.baseChange_eq_ltensor` is rfl ⟹ Flat.lTensor_exact /
+    lTensor_preserves_injective_linearMap / lTensor_surjective apply to
+    baseChange directly (no show/rw dance); `Localization.flat` instance fires
+    automatically; free-of-flat-local idiom = `attribute [local instance]
+    free_of_flat_of_isLocalRing in` (FreeLocus.lean precedent). Post-proof
+    cleanup: ✓ ran ×3 (one Mode-A worker per decl; bodies 5→1, 2→1, 20→4;
+    all hard gates pass; no renames; naming precedent
+    `Module.length_eq_add_of_exact`). Generality probed maximal per axis
+    (AddCommMonoid impossible — splitting needs groups). Nearest mathlib
+    analogue documented in module docstring: `ModuleCat.free_shortExact_
+    finrank_add` (bundled, single-universe) — ours is unbundled multi-universe.
+    Feeds T-D3 (`sectionsDivisor_degree`) + D-inc difference-divisor degrees.
   [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
