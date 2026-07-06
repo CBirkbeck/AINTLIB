@@ -4190,3 +4190,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     T-W7 (A-lane, spine-sequenced; W4/W5 just landed). H-lane keeps the gate-free
     side moving (T-C0c chain + T-C0d-i statement) and hands the concrete-map edge
     to the spine like the level-functor memberships.
+  - 2026-07-07T02:40Z: **T-C0c DONE, sorry-free + FULLY axiom-clean** (delegated;
+    888-line WeilPairing/GaloisEquivariance.lean, zero sorries, zero warnings).
+    `weilPairing_galois_equivariant : σ (e_ℓ(S,T)) = e_ℓ(σ•S, σ•T)` for any
+    σ : F ≃+* F with W.map σ = W; point action = pointHom (coordinatewise, additive
+    via HasseWeil's mapAddMonoidHom). DISCOVERY: HasseWeil's whole pairing chain
+    (weilPairing, frobeniusScaling_holds included) is SORRY-FREE — so the C0
+    field-level layer carries no boxes at all; only the scheme-side (torsionAlgebra
+    etc.) carries the T-B4/B5 boxes. Engineering notes in-file (KE-instance defeq
+    walls dodged via explicit translate formulas; S=0 case needs application-level
+    rewriting). NEXT: T-C0d-i (gate-free descent transport via functorToContAction).
