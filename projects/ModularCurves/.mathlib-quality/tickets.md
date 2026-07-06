@@ -1772,6 +1772,28 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T17:50Z — **[T-D14c-1] COMPLETE, sorry-free,
+    standard axioms, committed**: `vanishingLocus (p : W ⟶ S) [IsFinite p]
+    [Flat p] [lfp p] (E : W.IdealSheafData) : S.IdealSheafData` with the FULL
+    gluing proof. Final-mile actuals: (β) needed a NEW tower bridge lemma
+    `localized'_restrictScalars_eq_restrictScalars_map` (localized' of an
+    A-ideal along toAlgHom = pushforward-ideal restricted; mk'-chase via
+    `mem_localized'` + `IsLocalization.mem_map_algebraMap_iff` +
+    `mk'_eq_iff`/`mk'_cancel'`; GOTCHA: mul-order before ← Algebra.smul_def
+    needs mul_comm) — mathlib's `Ideal.localized'_eq_map` is R-SELF-only;
+    then mathlib's **`IdealSheafData.map_ideal'`** (arrow-form, works for ANY
+    affine pair — NO basicOpen-transport needed at all, kills the
+    preimage_basicOpen-congr entirely!) rewrote the pushforward to
+    `E.ideal ⟨p⁻¹(bo f)⟩`; rw-order: bridge, BOTH algebraMap_toAlgebra, then
+    map_ideal' with (U :=)(V :=) PINNED (implicit affineOpens have
+    prop-components rw can't invent); (γ) final `exact hglue` closed by defeq
+    across the basicOpen/affineBasicOpen spelling. Transient A-chain syntax
+    break (their live T-D6a edit) waited out with a build-retry loop.
+    REMAINING: [T-D14c-2] the spec `vanishingLocus_le_ker_iff`
+    (Z ≤ t.ker ⟺ E.comap (W-projection of t) = ⊥ — statement design: which
+    projection spelling; proof via affine-locality of both sides + the T-D14c
+    bridge `forall_one_tmul_eq_zero_iff_span_coord_le_ker` + freeness on a
+    shrunk cover), then [T-D14] assembly (Galois juggle over T-D14a/a′/b).
   - **Progress**: 2026-07-06T17:15Z — [T-D14c-1] SCAFFOLD GREEN+committed:
     `vanishingLocus` def at the `p.app`/`p ⁻¹ᵁ`-INLINE spelling (drop
     affinePreimage inside the def — spelling-defeq breaks instance synthesis
