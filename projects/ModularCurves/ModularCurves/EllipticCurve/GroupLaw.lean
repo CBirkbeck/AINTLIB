@@ -276,6 +276,15 @@ theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Po
   --     `pullback E.π g` (redefine the structure so `.E`/`.π` unfold to the pullback
   --     spelling), after which every reassoc is single-spelling. All arithmetic proven.
   --     Non-blocking (T-D6a-ii is non-blocking).
+  -- (3) THIRD spelling layer confirmed 2026-07-09: `E.π` (in bridge-lemma statements)
+  --     elaborates to `(E.toEllipticCurveGeom).π` while the goal's `pullback.fst E.π g`
+  --     (from `pullback.hom_ext` on `(E.baseChange g).E`) uses a different `E.π`
+  --     spelling — so even the bridge lemmas `asSection_val_fst/snd` fail to rw-match.
+  --     The holistic refactor must normalise ALL THREE: `↑`/`.1`, `(E.baseChange g).E`/
+  --     `pullback E.π g`, and `E.π`/`(E.toEllipticCurveGeom).π`. Cleanest single fix:
+  --     redefine `EllipticCurve.baseChange` and `Point.asSection` with `@[simp]`
+  --     projection-unfolding lemmas + state all base-change naturality bridges with a
+  --     consistent (pinned) spelling of `E.π`, then a single `simp` closes this.
   sorry
 
 end EllipticCurve

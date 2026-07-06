@@ -375,6 +375,80 @@ instance hasLimitsOfShapeSingleObj :
 
 end FixedPoints
 
+/-! Epimorphisms in `FiniteEtale k` are surjective (leaf AG-GG-1.5, part (i)):
+counting homomorphisms into the separable closure — `Nat.card (A →ₐ[k] Ω) = finrank k A`
+— plus a pigeonhole against the range subalgebra. -/
+
+section EpiSurjective
+
+variable {k : Type u} [Field k]
+
+/-- A finite étale algebra over `k` has exactly `finrank` many homomorphisms into the
+separable closure of `k`. -/
+theorem natCard_algHom_sepClosure (A : Type u) [CommRing A] [Algebra k A]
+    [Module.Finite k A] [Algebra.Etale k A] :
+    Nat.card (A →ₐ[k] SeparableClosure k) = Module.finrank k A := by
+  rw [Nat.card_congr (Algebra.TensorProduct.liftEquivRight k (SeparableClosure k) A
+    (SeparableClosure k)),
+    natCard_algHom_eq_finrank (SeparableClosure k) (SeparableClosure k ⊗[k] A)]
+  exact Module.finrank_baseChange
+
+/-- Epimorphisms in the category of finite étale algebras over a field are surjective. -/
+theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [Epi π] :
+    Function.Surjective π.hom.hom := by
+  classical
+  rcases subsingleton_or_nontrivial (X.obj : Type u) with hsub | hnt
+  · exact fun x => ⟨0, Subsingleton.elim _ _⟩
+  by_contra hns
+  set X' : Subalgebra k X.obj := π.hom.hom.range with hX'
+  have hne : X' ≠ ⊤ := fun h => hns (AlgHom.range_eq_top.mp h)
+  haveI : Algebra.Etale k X' := etale_subalgebra X'
+  haveI : Module.Finite k X' := inferInstanceAs (Module.Finite k X'.toSubmodule)
+  have hcard1 := natCard_algHom_sepClosure (k := k) X.obj
+  have hcard2 := natCard_algHom_sepClosure (k := k) X'
+  have hlt : Module.finrank k X' < Module.finrank k X.obj := by
+    have hsub : X'.toSubmodule ≠ ⊤ := fun h =>
+      hne (Subalgebra.toSubmodule_injective (by simpa using h))
+    exact Submodule.finrank_lt_top_of_ne_top?? PLACEHOLDER_LT hsub
+  haveI hfinX : Finite (X.obj →ₐ[k] SeparableClosure k) := by
+    refine Nat.finite_of_card_ne_zero ?_
+    rw [hcard1]
+    have : 0 < Module.finrank k X.obj := Module.finrank_pos
+    omega
+  haveI : Fintype (X.obj →ₐ[k] SeparableClosure k) := Fintype.ofFinite _
+  haveI hfinX' : Finite (X' →ₐ[k] SeparableClosure k) := by
+    rcases Nat.eq_zero_or_pos (Nat.card (X' →ₐ[k] SeparableClosure k)) with h0 | hpos
+    · rw [hcard2] at h0
+      exact absurd (hcard2.symm.trans hcard2) (by
+        intro _
+        exact absurd h0 (by
+          have : 0 < Module.finrank k X' := Module.finrank_pos
+          omega))
+    · exact Nat.finite_of_card_ne_zero hpos.ne'
+  haveI : Fintype (X' →ₐ[k] SeparableClosure k) := Fintype.ofFinite _
+  obtain ⟨g₁, g₂, hg, heq⟩ := Fintype.exists_ne_map_eq_of_card_lt
+    (fun g : X.obj →ₐ[k] SeparableClosure k => g.comp X'.val)
+    (by
+      rw [← Nat.card_eq_fintype_card, ← Nat.card_eq_fintype_card, hcard1, hcard2]
+      exact hlt)
+  set W : Subalgebra k (SeparableClosure k) := g₁.range ⊔ g₂.range with hW
+  haveI : Module.Finite k W := by
+    have hr : (Algebra.TensorProduct.productMap g₁.range.val g₂.range.val).range = W :=
+      Algebra.TensorProduct.productMap_range
+    haveI : Module.Finite k g₁.range :=
+      Module.Finite.of_surjective g₁.rangeRestrict.toLinearMap g₁.rangeRestrict_surjective
+    haveI : Module.Finite k g₂.range :=
+      Module.Finite.of_surjective g₂.rangeRestrict.toLinearMap g₂.rangeRestrict_surjective
+    rw [← hr]
+    exact Module.Finite.of_surjective
+      (Algebra.TensorProduct.productMap g₁.range.val g₂.range.val).rangeRestrict.toLinearMap
+      (AlgHom.rangeRestrict_surjective _)
+  haveI : IsDomain W := ?? PLACEHOLDER_DOMAIN
+  have hWfield : IsField W := ?? PLACEHOLDER_FIELD
+  sorry
+
+end EpiSurjective
+
 end FiniteEtaleGalois
 
 end ModularCurves

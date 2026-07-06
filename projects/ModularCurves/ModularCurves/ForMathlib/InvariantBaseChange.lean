@@ -137,6 +137,17 @@ private theorem exact_subtype_invariantsDelta :
     rw [invariantsDelta_apply]
     exact sub_eq_zero.mpr (hx g)
 
+/-- The underlying map of the comparison hom is the tensored inclusion. -/
+private theorem map_val_id_eq_rTensor
+    (x : (FixedPoints.subalgebra R A G) ⊗[R] R') :
+    (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+      (AlgHom.id R R')) x =
+    LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype x := by
+  induction x with
+  | zero => simp
+  | add x₁ x₂ h₁ h₂ => simp [h₁, h₂]
+  | tmul a r => rfl
+
 /-- **∗(A, G, R, R') holds for flat R'** (KM A7.1.3 (1)): the comparison map is
 bijective when `R'` is flat over `R`. -/
 theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
@@ -144,16 +155,6 @@ theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
       (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
   classical
   cases nonempty_fintype G
-  -- the underlying map agrees with the flat-tensored inclusion
-  have hagree : ∀ x : (FixedPoints.subalgebra R A G) ⊗[R] R',
-      (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
-        (AlgHom.id R R')) x =
-      LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype x := by
-    intro x
-    induction x with
-    | zero => simp
-    | add x₁ x₂ h₁ h₂ => simp [h₁, h₂]
-    | tmul a r => rfl
   have hval : Function.Injective
       ⇑(LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) :=
     Module.Flat.rTensor_preserves_injective_linearMap _ Subtype.val_injective
@@ -166,7 +167,7 @@ theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
           (AlgHom.id R R')) x₁ from rfl,
       show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₂ : A ⊗[R] R') =
         (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
-          (AlgHom.id R R')) x₂ from rfl, hagree, hagree] at h13
+          (AlgHom.id R R')) x₂ from rfl, map_val_id_eq_rTensor, map_val_id_eq_rTensor] at h13
     exact hval h13
   · -- surjectivity
     rintro ⟨z, hz⟩
@@ -207,7 +208,7 @@ theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
     refine ⟨w, Subtype.ext ?_⟩
     rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') w : A ⊗[R] R') =
         (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
-          (AlgHom.id R R')) w from rfl, hagree]
+          (AlgHom.id R R')) w from rfl, map_val_id_eq_rTensor]
     exact hw
 
 /-- **∗(A, G, R, R') holds when `#G` is invertible in `R`** (KM A7.1.3 (4)): the
