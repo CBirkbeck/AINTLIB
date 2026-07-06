@@ -84,9 +84,12 @@ noncomputable def gammaMulSemiringAction {U : X.Opens} (hU : σ.IsStableOpen U) 
   one_smul s := by
     show ((σ.hom 1).appLE U U (hU.le_preimage 1)).hom s = s
     simp only [σ.hom_one]
-    simp only [Scheme.Hom.appLE]
-    rw [show (homOfLE _ : U ⟶ U) = 𝟙 U from Subsingleton.elim _ _]
-    simp
+    rw [Scheme.Hom.appLE, Scheme.Hom.id_app]
+    have h1 : (homOfLE (show U ≤ (𝟙 X : X ⟶ X) ⁻¹ᵁ U from σ.hom_one ▸
+        hU.le_preimage 1)).op = 𝟙 (Opposite.op U) := rfl
+    rw [h1]
+    erw [X.presheaf.map_id]
+    rfl
   mul_smul g h s := by
     show ((σ.hom (g * h)).appLE U U (hU.le_preimage (g * h))).hom s =
       ((σ.hom g).appLE U U (hU.le_preimage g)).hom

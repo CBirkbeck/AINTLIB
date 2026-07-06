@@ -538,6 +538,104 @@ theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [E
 
 end EpiSurjective
 
+/-! Monomorphisms in `(FiniteEtale k)ᵒᵖ` induce isomorphisms on direct summands
+(axiom G3, leaf AG-GG-1.5 part (ii)): a mono in the opposite category is an epi of
+algebras, hence surjective; its kernel is complemented (the algebra is semisimple),
+and the Chinese remainder theorem splits the source as a binary product. -/
+
+section EpiSplitting
+
+variable {k : Type u} [Field k]
+
+/-- Chinese remainder splitting along an epimorphism of finite étale algebras: the
+source is the binary product of the target and the quotient by a complement of the
+kernel.  This is the content of axiom (G3) for `(FiniteEtale k)ᵒᵖ`. -/
+theorem monoInducesIsoOnDirectSummand_op {X Y : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ}
+    (i : X ⟶ Y) [Mono i] : ∃ (Z : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ) (u : Z ⟶ Y),
+    Nonempty (IsColimit (BinaryCofan.mk i u)) := by
+  classical
+  set π := i.unop with hπdef
+  have hsurj : Function.Surjective π.hom.hom := surjective_of_epi π
+  set I : Ideal (Y.unop.obj : Type u) := RingHom.ker π.hom.hom with hIdef
+  haveI : IsReduced (Y.unop.obj : Type u) :=
+    Algebra.FormallyUnramified.isReduced_of_field k _
+  haveI : IsArtinianRing (Y.unop.obj : Type u) := isArtinian_of_tower k inferInstance
+  haveI : IsSemisimpleRing (Y.unop.obj : Type u) :=
+    IsArtinianRing.isSemisimpleRing_of_isReduced _
+  obtain ⟨J, hIJ⟩ := exists_isCompl I
+  haveI : Algebra.Etale k ((Y.unop.obj : Type u) ⧸ J) := etale_quotient J
+  haveI : Module.Finite k ((Y.unop.obj : Type u) ⧸ J) :=
+    Module.Finite.of_surjective (Ideal.Quotient.mkₐ k J).toLinearMap
+      Ideal.Quotient.mk_surjective
+  set Zobj : CommAlgCat.FiniteEtale.{u} k :=
+    CommAlgCat.FiniteEtale.of k ((Y.unop.obj : Type u) ⧸ J) with hZdef
+  set q : Y.unop ⟶ Zobj :=
+    ObjectProperty.homMk (CommAlgCat.ofHom (Ideal.Quotient.mkₐ k J)) with hqdef
+  obtain ⟨e, he, f, hf, hef⟩ := Submodule.mem_sup.mp
+    (show (1 : (Y.unop.obj : Type u)) ∈ I ⊔ J from hIJ.sup_eq_top ▸ Submodule.mem_top)
+  have hπe : π.hom.hom e = 0 := he
+  have hπf : π.hom.hom f = 1 := by
+    have h := congrArg π.hom.hom hef
+    rw [map_add, map_one, hπe, zero_add] at h
+    exact h
+  have hqf : Ideal.Quotient.mk J f = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hf
+  have hqe : Ideal.Quotient.mk J e = 1 := by
+    have h := congrArg (Ideal.Quotient.mk J) hef
+    rw [map_add, map_one, hqf, add_zero] at h
+    exact h
+  have hbij : Function.Bijective
+      ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) := by
+    constructor
+    · intro x y hxy
+      have h1 : π.hom.hom (x - y) = 0 := by
+        have := congrArg Prod.fst hxy
+        simpa [map_sub, sub_eq_zero] using this
+      have h2 : x - y ∈ J := by
+        have := congrArg Prod.snd hxy
+        rw [show ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) x =
+          (π.hom.hom x, Ideal.Quotient.mk J x) from rfl] at hxy
+        have h2' : (Ideal.Quotient.mk J) x = (Ideal.Quotient.mk J) y :=
+          congrArg Prod.snd hxy
+        exact Ideal.Quotient.eq.mp h2'
+      have hmem : x - y ∈ I ⊓ J := ⟨h1, h2⟩
+      rw [hIJ.inf_eq_bot] at hmem
+      exact sub_eq_zero.mp (by simpa using hmem)
+    · rintro ⟨a', z⟩
+      obtain ⟨a, ha⟩ := hsurj a'
+      obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective z
+      refine ⟨a * f + b * e, Prod.ext ?_ ?_⟩
+      · show π.hom.hom (a * f + b * e) = a'
+        rw [map_add, map_mul, map_mul, hπf, hπe, mul_one, mul_zero, add_zero, ha]
+      · show Ideal.Quotient.mk J (a * f + b * e) = Ideal.Quotient.mk J b
+        rw [map_add, map_mul, map_mul, hqf, hqe, mul_zero, zero_add, mul_one]
+  set Φ : (Y.unop.obj : Type u) ≃ₐ[k] (X.unop.obj : Type u) × ((Y.unop.obj : Type u) ⧸ J) :=
+    AlgEquiv.ofBijective ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) hbij with hΦdef
+  have hlim : IsLimit (BinaryFan.mk π q) := by
+    refine BinaryFan.isLimitMk
+      (fun s => ObjectProperty.homMk (CommAlgCat.ofHom
+        (Φ.symm.toAlgHom.comp ((s.fst.hom.hom).prod (s.snd.hom.hom))))) ?_ ?_ ?_
+    · intro s
+      ext w
+      exact congrArg Prod.fst
+        (Φ.apply_symm_apply (s.fst.hom.hom w, s.snd.hom.hom w))
+    · intro s
+      ext w
+      exact congrArg Prod.snd
+        (Φ.apply_symm_apply (s.fst.hom.hom w, s.snd.hom.hom w))
+    · intro s m h₁ h₂
+      ext w
+      apply Φ.injective
+      refine Prod.ext ?_ ?_
+      · have := congrArg (fun (t : s.pt ⟶ X.unop) => t.hom.hom w) h₁
+        exact this.trans (congrArg Prod.fst
+          (Φ.apply_symm_apply (s.fst.hom.hom w, s.snd.hom.hom w))).symm
+      · have := congrArg (fun (t : s.pt ⟶ Zobj) => t.hom.hom w) h₂
+        exact this.trans (congrArg Prod.snd
+          (Φ.apply_symm_apply (s.fst.hom.hom w, s.snd.hom.hom w))).symm
+  exact ⟨Opposite.op Zobj, q.op, ⟨hlim.op⟩⟩
+
+end EpiSplitting
+
 end FiniteEtaleGalois
 
 end ModularCurves

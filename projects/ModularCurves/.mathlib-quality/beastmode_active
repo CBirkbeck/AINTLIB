@@ -1,2 +1,2 @@
-FOCUS: AG-GG-1.5 — part (i) epi⇒surjective DONE; part (ii) idempotent splitting for monoInducesIsoOnDirectSummand
-FOCUS-Q: (beastmode-Q) T-Q5 claimed+route-locked. NOW: T-Q5a SchemeQuotient.lean — action family σ, stable opens, Γ-bridge to MulSemiringAction
+FOCUS: AG-GG-1.5 part (ii) — CRT splitting AlgEquiv + BinaryFan IsLimit + op-glue for monoInducesIsoOnDirectSummand
+FOCUS-H: (beastmode-H) T-H7 claimed — PHASE 2: reading IsNaiveFullLevel/mulByHom/EllObj defs, then baseline build

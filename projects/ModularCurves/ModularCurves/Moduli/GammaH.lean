@@ -296,11 +296,15 @@ structure LevelledHom {N : ℕ} [NeZero N]
 noncomputable instance levelledCategory (N : ℕ) [NeZero N] :
     Category (Σ E : EllipticCurve S, E.FullLevelPt N) where
   Hom := LevelledHom
-  id X := ⟨𝟙 X.1, by sorry, by sorry⟩
-  comp f g := ⟨f.hom ≫ g.hom, by sorry, by sorry⟩
-  id_comp := by intros; sorry
-  comp_id := by intros; sorry
-  assoc := by intros; sorry
+  id X := ⟨𝟙 X.1, Category.comp_id _, Category.comp_id _⟩
+  comp f g := ⟨f.hom ≫ g.hom,
+    by rw [show (f.hom ≫ g.hom).hom = f.hom.hom ≫ g.hom.hom from rfl,
+      ← Category.assoc, f.level_w₁, g.level_w₁],
+    by rw [show (f.hom ≫ g.hom).hom = f.hom.hom ≫ g.hom.hom from rfl,
+      ← Category.assoc, f.level_w₂, g.level_w₂]⟩
+  id_comp := by intros; ext; simp
+  comp_id := by intros; ext; simp
+  assoc := by intros; ext; simp
 
 end EllipticCurve
 
