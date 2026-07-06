@@ -111,10 +111,57 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     the ring-level universal Tate curve. Post-proof cleanup: ✓ ran (gates pass,
     no flags).
 
+### [T-A2a] Quotient of a graded ring by a homogeneous ideal is graded (MATHLIB GAP)
+- **Status**: done (beastmode, 2026-07-06T02:30Z → 2026-07-06T03:30Z; core + consumer API
+  sorry-free — `quotientGrading`, `GradedAlgebra` instance, `decompose_quotientGrading_mk`,
+  `algebraMapGradeZero`; FiniteType transfer + degree-zero-iso deferred INTO T-A2's
+  isProper step where their exact form is dictated; /cleanup deferred to parent T-A2
+  Phase 6.5 — file still growing under the parent) ·
+  **File**: ForMathlib/GradedQuotient.lean (new) · **Parent**: T-A2
+- **Depends on**: none · **Parallel**: yes · **Type**: def + instance + lemmas
+- **Statement**: for `𝒜 : ι → Submodule R A` a `GradedAlgebra` and `I : HomogeneousIdeal 𝒜`,
+  the family `I.quotientGrading n := (𝒜 n).map (Ideal.Quotient.mkₐ R I.toIdeal)` is a
+  `GradedRing` on `A ⧸ I.toIdeal`; plus the degree-zero comparison
+  (`R →+* quotientGrading 0` iso under `I ⊓ 𝒜 0 = ⊥`-type hypothesis, in the form the
+  Proj consumer needs) and `Algebra.FiniteType` transfer.
+- **Proof sketch**:
+  1. `SetLike.GradedMonoid`: `one_mem` = image of `1 ∈ 𝒜 0`; `mul_mem` by choosing
+     preimages (`rintro ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩`, `SetLike.mul_mem_graded`).
+  2. `decompose'`: descend `DirectSum.decompose 𝒜` through `Quotient.lift` — components
+     map via `(mkₐ).toLinearMap.submoduleMap`; well-defined because `a − b ∈ I` ⟹
+     `decompose (a−b) n ∈ I` (that is literally `Ideal.IsHomogeneous`).
+  3. `left_inv`: naturality of `DirectSum.coeAddMonoidHom` under componentwise maps +
+     `DirectSum.sum_support_decompose`.
+  4. `right_inv`: check on `of`-singletons via `decompose_of_mem`.
+  5. Degree zero: elements of `I.toIdeal` generated in degrees ≥ 1 have zero
+     degree-0 component; specialise to the span-of-one-homogeneous-element case.
+- **Mathlib lemmas**: `GradedRing` (extends `SetLike.GradedMonoid`,
+  `DirectSum.Decomposition`), `Ideal.Quotient.mkₐ`, `LinearMap.submoduleMap`,
+  `DirectSum.decompose`, `DirectSum.decompose_of_mem`, `DirectSum.sum_support_decompose`,
+  `Ideal.IsHomogeneous` (defn: decompose-components stay in the ideal),
+  `SetLike.mul_mem_graded`, `SetLike.one_mem_graded?` (verify), `DFinsupp.mapRange`.
+- **Sources**: standard (Bourbaki Alg. II §11 / Stacks 00JW-adjacent); no KM content —
+  pure infrastructure. ForMathlib: upstream candidate, register in VENDOR-adjacent list
+  as OURS (not vendored — new).
+- **Generality**: `ι` an `AddMonoid` with `DecidableEq`, `𝒜 : ι → Submodule R A`,
+  `GradedAlgebra 𝒜` — matches mathlib's `GradedAlgebra` setup; do NOT over-generalise to
+  `SetLike σ` in v1 (Submodule is what the consumer and mathlib's `homogeneousSubmodule`
+  use).
+
 ### [T-A2] Construct the projective Weierstrass model (DS1)
-- **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean · `projModel`,
+- **Status**: in_progress (beastmode; **DATA HALF DONE 2026-07-06T03:30Z — DS1 is no
+  longer a data-sorry**: `projModel W := Proj (quotientGrading (projIdeal W))`,
+  `projModelπ := toSpecZero ≫ Spec.map algebraMapGradeZero`, `projModelZero :=
+  fromOfGlobalSections` at `[0:1:0]`, plus PROVED `projModelZero_projModelπ :
+  zero ≫ π = 𝟙` and real lemmas `projective_polynomial_isHomogeneous`,
+  `mk_Y_mem_irrelevant`, `projModelZeroEval_mk`. Remaining: the spec theorem
+  `projModel_isWeierstrassModel` (isProper via `algebraMapGradeZero` bijectivity +
+  mathlib's Proj-proper instance + FiniteType transfer; lfp; elliptic points clause)
+  and T-A3 smoothness. Route notes: `set_option backward.isDefEq.respectTransparency
+  false` needed around `fromOfGlobalSections_toSpecZero` consumers — same option
+  mathlib itself uses there.) · **File**: EllipticCurve/WeierstrassModel.lean · `projModel`,
   `projModelπ`, `projModelZero`, `projModel_isWeierstrassModel`
-- **Depends on**: none · **Parallel**: yes · **Type**: def + theorem
+- **Depends on**: T-A2a · **Parallel**: yes · **Type**: def + theorem
 - **Statement/spec**: replace the DS1 sorries; prove `IsWeierstrassModel` for the
   construction.
 - **Proof sketch**: two affine charts `Spec R[x,y]/(W_aff)` and `Spec R[t,s]/(W_∞)`

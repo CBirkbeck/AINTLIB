@@ -70,7 +70,7 @@ and the base-change group structure are real (sorry-free) definitions.*
 
 | ID | Declaration | File | Construction ticket | Pinned down by |
 |----|-------------|------|---------------------|----------------|
-| DS1 | `projModel`, `projModelπ`, `projModelZero` | EllipticCurve/WeierstrassModel.lean | T-A2 (chart gluing) | `IsWeierstrassModel` + uniqueness T-A4 |
+| DS1 | ~~`projModel`, `projModelπ`, `projModelZero`~~ **CONSTRUCTED 2026-07-06** (Proj of the quotient grading, `ForMathlib/GradedQuotient.lean`; `zero ≫ π = 𝟙` proved) | EllipticCurve/WeierstrassModel.lean | T-A2 remaining: spec theorem only | `IsWeierstrassModel` + uniqueness T-A4 |
 | DS3 | `muNGrpObj`, `constZModGrpObj`, `muNPointsEquiv` | GroupScheme/MuN.lean | T-B2 | `muN_points`-naturality (T-B2), `muNπ_isFinite`, étale iff `N` inv. |
 | DS4 | `weilPairing` | WeilPairing/Basic.lean | T-C1 (duality API; KM 2.8 backend; char-0 étale version first = T-C0) | `weilPairing_over`; bilinear/alternating/nondegenerate (T-C2/3); **base-change naturality (T-C2a); `N∣M` compatibility (T-C2b); symplectic pin (T-C2c, Silverman convention)**; fibre comparison T-C4 |
 | DS4a | `RelEffCartierDiv.sectionsDivisor` | LevelStructure/CartierDivisor.lean | T-D3 (ideal products) | `sectionsDivisor_degree`, base-change spec |
