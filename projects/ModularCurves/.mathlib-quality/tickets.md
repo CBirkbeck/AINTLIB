@@ -502,6 +502,24 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (`Scheme.OpenCover.glueMorphisms` on `mapAffineOpenCover`-restricted-to-X-gens),
   then check both composites = id by `hom_ext` over the same covers.
 - **Sources**: EGA II 3.5.3; entirely infrastructure (no KM gate).
+- **Progress (2026-07-06, beastmode)**: reduction skeleton GREEN in-file (sorry at the
+  per-piece goal): iff_of_openCover at P := isomorphisms + openCoverOfLeft of
+  modelChartCover (new def); component goal confirmed via LSP =
+  `isomorphisms (Cover.pullbackHom 𝒰 lift i)` with `pullbackHom = pullback.snd lift
+  (𝒰.f i)`; `algebraMap_chart_eq` extracted standalone; DecidableEq-bridge for the
+  wrapped cover-index type (`inferInstanceAs (DecidableEq (Fin 3))`) + hcosp
+  (cover-leg = χ-composite via awayι_projModelπ) both in place. TWO recorded traps:
+  (1) NEW chart-terms written at the cover index elaborate at the wrapped
+  `toPreZeroHypercover.1`-type (σ-argument of dehomogenizeAux!) and then mismatch the
+  Fin-3-elaborated library lemmas — parameterize all piece-level lemmas by `j : Fin 3`
+  as standalone defs/lemmas ABOVE the theorem and apply at `i` (defeq-application
+  is fine; fresh elaboration is not); (2) leg-order of `isPullback_sChart_spec` is
+  (R'-leg, SW-leg) vs the 𝒰-piece cospan (chart-leg, R'-leg): need
+  `IsPullback.flip` + corner-transport `IsPullback.of_iso` along
+  `Spec.map (ofHom (chartCoordEquiv W j).symm)` (SpecSW ≅ Spec-chart), with the
+  leg-compat squares from `algebraMap_chart_eq`/`hcosp`; then the per-piece
+  conclusion via `IsPullback.isoPullback` + `isoPullback_hom_snd`
+  (`pullbackHom = iso.inv ≫ κ`, κ iso).
 
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
 - **Status**: open · **File**: EllipticCurve/GroupLaw.lean (or Basic)
