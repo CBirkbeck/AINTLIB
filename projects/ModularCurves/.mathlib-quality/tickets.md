@@ -1634,6 +1634,26 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     with `Z ≤ t.ker ⟺ comap(I_D) ≤ comap(I_D')` for all t — affine-local
     equations (generators of I(D) pushed to B′ := O_{D′} flf, coordinates via
     T-D13/T-D27, glue over S, base-change bridge for the ⟺).
+  - **Progress**: 2026-07-06T15:45Z — T-D14c ALGEBRA BRIDGE DONE
+    (`forall_one_tmul_eq_zero_iff_span_coord_le_ker`, committed, axioms standard:
+    finitely many elements of a free R-algebra die in A ⊗[R] B iff the span of
+    all their coordinates ≤ ker (algebraMap R A); proof = `Basis.baseChange` +
+    `baseChange_repr_tmul` + repr-injectivity; KM 1.3.4's simultaneous-vanishing
+    engine verbatim-anchored — quote banked in d-lane-helpers.md, QUOTE-MISSING
+    #7 discharged from the FULL KM pdf pp. 13–14). REMAINING T-D14c (scheme
+    glue), in order: (i) affine-local presentation — over U ∈ S.affineOpens
+    shrunk into the free locus: B′ := pushforward of O_{D′} (finite flat lfp ⇒
+    locally free; use `Module.FinitePresentation.exists_free_localizedModule_powers`
+    / freeLocus-open + basicOpen refinement) with basis; image-ideal generators
+    gⱼ of I(D)·O_{D′} (f.type as image of lfp ideal, f.g. R-module via B′
+    finite); (ii) glue local `Ideal.span coords` into `Z : S.IdealSheafData`
+    (`map_ideal_basicOpen` condition — mind basis-change between overlapping
+    trivialisations: the SPAN is basis-independent by T-D13, that IS the gluing
+    argument); (iii) universality assembly: ∃h ⟺ Z ≤ t.ker (T-D14a′) vs
+    IsSubdivisor ⟺ comap ≤ comap (T-D14a+b) ⟺ affine-locally the bridge
+    (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
+    T-point dictionary (`ΓSpec` on affines; check IdealSheafData
+    `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
   - **ROUTE OF RECORD (analysis banked 2026-07-06T14:45Z, COUNT-FREE)**: the
     statement never mentions the `deg D′` equation count (docstring-only per the
     attack log), so NO local principality of `I(D)` is needed — the T-D11/AG-LB/
