@@ -294,7 +294,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: any `CommRing R`; no ellipticity needed for the model itself.
 
 ### [T-A3a] Weierstrass Jacobian comaximality, certificate-free (sub-ticket of T-A3)
-- **Status**: open · **File**: WeierstrassModel.lean (section Points or new Smooth section)
+- **Status**: done (beastmode 2026-07-06T17:30Z — `span_dehomog_jacobian_eq_top` +
+  `aeval_pderiv_dehomog_two_{u,v}` sorry-free in section Points; the maximal-ideal/
+  residue-field argument as sketched; engine reuse: `ringHom_eq_aeval` identifies
+  `Ideal.Quotient.mk m` with an `aeval` under the `toAlgebra`-structure, so the chart
+  evaluation lemmas apply verbatim; numerals need `map_ofNat`/`map_natCast` in the
+  aeval-simp set.) · **File**: WeierstrassModel.lean (section Points)
 - **Parent**: T-A3 · **Depends on**: T-A2 (done) · **Type**: theorem
 - **Statement**: for `W : WeierstrassCurve R` `[W.IsElliptic]`, in `MvPolynomial (Fin 2) R`
   (or the two-variable polynomial ring of the Z-chart),
