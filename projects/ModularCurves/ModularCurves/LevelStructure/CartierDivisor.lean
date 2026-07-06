@@ -71,6 +71,42 @@ noncomputable def degree (D : RelEffCartierDiv π) (s : S) : ℕ :=
   haveI := D.flat
   (D.ideal.subschemeι ≫ π).finrank s
 
+/-- **(T-D3, single-section case — KM 1.2.2)** The divisor `[P]` of a single section of
+a separated morphism: the closed subscheme cut out by the kernel ideal of the section.
+Its subscheme is isomorphic to `S` itself (`IsIso z.toImage`), so all relative
+finiteness properties transport from the identity. -/
+noncomputable def sectionDivisor (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
+    (hz : z ≫ π = 𝟙 S) : RelEffCartierDiv π := by
+  haveI hzc : IsClosedImmersion z := by
+    have h1 : IsClosedImmersion (z ≫ π) := by
+      rw [hz]
+      infer_instance
+    exact IsClosedImmersion.of_comp z π
+  have hι : z.ker.subschemeι = inv z.toImage ≫ z := by
+    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+  have hπ : z.ker.subschemeι ≫ π = inv z.toImage := by
+    rw [hι, Category.assoc, hz, Category.comp_id]
+  exact
+    { ideal := z.ker
+      finite := by rw [hπ]; infer_instance
+      flat := by rw [hπ]; infer_instance
+      lfp := by rw [hπ]; infer_instance }
+
+/-- **(T-D3, single-section degree)** The divisor of a single section has degree `1`. -/
+theorem sectionDivisor_degree (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
+    (hz : z ≫ π = 𝟙 S) (s : S) : (sectionDivisor π z hz).degree s = 1 := by
+  haveI hzc : IsClosedImmersion z := by
+    have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
+    exact IsClosedImmersion.of_comp z π
+  have hπ : (Scheme.Hom.ker z).subschemeι ≫ π = inv z.toImage := by
+    rw [show (Scheme.Hom.ker z).subschemeι = inv z.toImage ≫ z from by
+      rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι], Category.assoc, hz,
+      Category.comp_id]
+  show ((sectionDivisor π z hz).ideal.subschemeι ≫ π).finrank s = 1
+  rw [show (sectionDivisor π z hz).ideal = Scheme.Hom.ker z from rfl, hπ]
+  have h1 := Scheme.Hom.finrank_eq_one_of_isIso (inv z.toImage)
+  simp [h1]
+
 /-- **(DS4a, ticket T-D3)** The divisor `Σᵢ [Pᵢ]` attached to a finite family of sections
 of `π` — the closed subscheme whose ideal is the *product* of the ideal sheaves of the
 (closed-immersion) sections. DATA-SORRY (register entry DS4a).
