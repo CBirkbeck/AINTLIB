@@ -5,6 +5,7 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.RingTheory.MvPolynomial.Ideal
 
@@ -1124,6 +1125,105 @@ theorem projModel_points (W : WeierstrassCurve R) (hell : W.IsElliptic)
     projModelZero W, by
       rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩) 0), ?_⟩
   rw [Equiv.trans_apply, Equiv.swap_apply_left]
+
+private lemma aeval_pderiv_dehomog_two_u (W : WeierstrassCurve R) {K : Type u}
+    [CommRing K] [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
+    MvPolynomial.aeval v (MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)) =
+      algebraMap R K W.a₁ * v ⟨1, by decide⟩ - (3 * v ⟨0, by decide⟩ ^ 2
+        + 2 * algebraMap R K W.a₂ * v ⟨0, by decide⟩ + algebraMap R K W.a₄) := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+    mul_one, one_pow]
+  simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
+    MvPolynomial.pderiv_X_self,
+    MvPolynomial.pderiv_X_of_ne (show (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2}) ≠
+      ⟨0, by decide⟩ by simp), map_sub, map_add,
+    MvPolynomial.pderiv_one]
+  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+  ring
+
+private lemma aeval_pderiv_dehomog_two_v (W : WeierstrassCurve R) {K : Type u}
+    [CommRing K] [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
+    MvPolynomial.aeval v (MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)) =
+      2 * v ⟨1, by decide⟩ + algebraMap R K W.a₁ * v ⟨0, by decide⟩
+        + algebraMap R K W.a₃ := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+    mul_one, one_pow]
+  simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
+    MvPolynomial.pderiv_X_self,
+    MvPolynomial.pderiv_X_of_ne (show (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2}) ≠
+      ⟨1, by decide⟩ by simp), map_sub, map_add,
+    MvPolynomial.pderiv_one]
+  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+  ring
+
+/-- **(T-A3a)** Certificate-free Weierstrass Jacobian comaximality: for elliptic `W`,
+the dehomogenised cubic and its two partials generate the unit ideal. A maximal ideal
+above them would give a singular point of an elliptic curve over its residue field,
+contradicting `equation_iff_nonsingular`. -/
+theorem span_dehomog_jacobian_eq_top (W : WeierstrassCurve R) [W.IsElliptic] :
+    Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial,
+      MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial),
+      MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)} = ⊤ := by
+  by_contra hne
+  obtain ⟨m, hmax, hle⟩ := Ideal.exists_le_maximal _ hne
+  letI : Field (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸ m) := Ideal.Quotient.field m
+  set q : MvPolynomial {j : Fin 3 // j ≠ 2} R →+*
+      MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸ m := Ideal.Quotient.mk m with hq
+  letI : Algebra R (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸ m) :=
+    (q.comp (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ 2} R))).toAlgebra
+  have haev : ∀ p : MvPolynomial {j : Fin 3 // j ≠ 2} R,
+      q p = MvPolynomial.aeval (fun j => q (MvPolynomial.X j)) p :=
+    ringHom_eq_aeval q (fun r => rfl)
+  set f : R →+* MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸ m :=
+    q.comp (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ 2} R)) with hf
+  have halg : algebraMap R (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸ m) = f := rfl
+  have hmem : ∀ p ∈ ({MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial,
+      MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial),
+      MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)} :
+      Set (MvPolynomial {j : Fin 3 // j ≠ 2} R)), q p = 0 := by
+    intro p hp
+    exact Ideal.Quotient.eq_zero_iff_mem.mpr (hle (Ideal.subset_span hp))
+  have h1 : (W.map f).toAffine.Equation (q (MvPolynomial.X ⟨0, by decide⟩))
+      (q (MvPolynomial.X ⟨1, by decide⟩)) := by
+    rw [WeierstrassCurve.Affine.equation_iff]
+    have hF := hmem _ (Set.mem_insert _ _)
+    rw [haev, aeval_dehomog_two] at hF
+    simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆, halg]
+    linear_combination hF
+  have h2 : ¬ (W.map f).toAffine.Nonsingular (q (MvPolynomial.X ⟨0, by decide⟩))
+      (q (MvPolynomial.X ⟨1, by decide⟩)) := by
+    rw [WeierstrassCurve.Affine.nonsingular_iff']
+    rintro ⟨-, hu | hv⟩
+    · apply hu
+      have hFu := hmem _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _))
+      rw [haev, aeval_pderiv_dehomog_two_u] at hFu
+      simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+        WeierstrassCurve.map_a₄, halg]
+      linear_combination hFu
+    · apply hv
+      have hFv := hmem _ (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ rfl))
+      rw [haev, aeval_pderiv_dehomog_two_v] at hFv
+      simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃, halg]
+      linear_combination hFv
+  haveI : ((W.map f).toAffine).IsElliptic := inferInstanceAs ((W.map f).IsElliptic)
+  exact h2 (WeierstrassCurve.Affine.equation_iff_nonsingular.mp h1)
 
 end Points
 
