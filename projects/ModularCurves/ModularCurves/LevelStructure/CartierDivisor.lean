@@ -11,6 +11,7 @@ import Mathlib.RingTheory.TensorProduct.Free
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.Algebra.MvPolynomial.Nilpotent
 import ModularCurves.ForMathlib.NormBaseChange
+import ModularCurves.ForMathlib.IdealSheafComapMul
 
 /-!
 # Relative effective Cartier divisors and full sets of sections (KM Ch. 1)
@@ -260,6 +261,20 @@ noncomputable def baseChange (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T �
   finite := baseChange_prop @IsFinite D t D.finite
   flat := baseChange_prop @Flat D t D.flat
   lfp := baseChange_prop @LocallyOfFinitePresentation D t D.lfp
+
+/-- The ideal sheaf of a base-changed divisor is the scheme-theoretic preimage of the
+original ideal along the first projection. -/
+theorem baseChange_ideal (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
+    (D.baseChange t).ideal = D.ideal.comap (Limits.pullback.fst π t) := by
+  show (Limits.pullback.snd D.ideal.subschemeι (Limits.pullback.fst π t)).ker =
+    D.ideal.comap (Limits.pullback.fst π t)
+  rw [show (Limits.pullback.snd D.ideal.subschemeι (Limits.pullback.fst π t)) =
+      (Limits.pullbackSymmetry D.ideal.subschemeι (Limits.pullback.fst π t)).hom ≫
+        Limits.pullback.fst (Limits.pullback.fst π t) D.ideal.subschemeι from
+    (Limits.pullbackSymmetry_hom_comp_fst _ _).symm,
+    Scheme.Hom.ker_comp_of_isIso,
+    Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
+    Scheme.IdealSheafData.ker_subschemeι]
 
 end RelEffCartierDiv
 
