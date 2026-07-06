@@ -61,6 +61,41 @@ def FullLevelPt (E : EllipticCurve S) (N : ℕ) [NeZero N] : Type u :=
 
 variable (E : EllipticCurve S)
 
+/-- On an element killed by `N`, an integer scalar depends only on its residue mod `N`:
+if `a ≡ b (mod N)` in `ZMod N`, then `a • R = b • R`. The workhorse for lifting `ZMod N`
+matrix arithmetic (via `ZMod.val`) onto `N`-torsion points. -/
+theorem zsmul_eq_of_intCast_eq {G : Type*} [AddCommGroup G] {N : ℕ} (R : G)
+    (hR : (N : ℤ) • R = 0) {a b : ℤ} (h : (a : ZMod N) = (b : ZMod N)) :
+    a • R = b • R := by
+  have hdvd : (N : ℤ) ∣ (a - b) := by
+    rw [← ZMod.intCast_zmod_eq_zero_iff_dvd, Int.cast_sub, h, sub_self]
+  obtain ⟨j, hj⟩ := hdvd
+  have hz : (a - b) • R = 0 := by rw [hj, mul_comm, mul_zsmul, hR, smul_zero]
+  rw [sub_zsmul] at hz
+  exact add_neg_eq_zero.mp hz
+
+/-- Reduction step for `GL₂`-recovery: a `ZMod N`-linear combination
+`(a.val)•P' + (b.val)•Q'` of the transformed points `P' = m₀₀·pp + m₁₀·pq`,
+`Q' = m₀₁·pp + m₁₁·pq` contracts, on `N`-torsion `pp, pq`, to the combination with
+`ZMod N`-multiplied coefficients. -/
+theorem recover_combo {N : ℕ} [NeZero N] {T : Scheme.{u}} (t : T ⟶ S)
+    (pp pq P' Q' : E.Point t) (hpp : (N : ℤ) • pp = 0) (hpq : (N : ℤ) • pq = 0)
+    (m00 m10 m01 m11 a b : ZMod N)
+    (hP' : P' = (m00.val : ℤ) • pp + (m10.val : ℤ) • pq)
+    (hQ' : Q' = (m01.val : ℤ) • pp + (m11.val : ℤ) • pq) :
+    (a.val : ℤ) • P' + (b.val : ℤ) • Q'
+      = ((a * m00 + b * m01).val : ℤ) • pp + ((a * m10 + b * m11).val : ℤ) • pq := by
+  have key : (a.val : ℤ) • P' + (b.val : ℤ) • Q'
+      = ((a.val : ℤ) * (m00.val : ℤ) + (b.val : ℤ) * (m01.val : ℤ)) • pp
+        + ((a.val : ℤ) * (m10.val : ℤ) + (b.val : ℤ) * (m11.val : ℤ)) • pq := by
+    rw [hP', hQ']; module
+  rw [key]
+  congr 1
+  · exact zsmul_eq_of_intCast_eq pp hpp
+      (by push_cast [ZMod.natCast_val, ZMod.cast_id]; ring)
+  · exact zsmul_eq_of_intCast_eq pq hpq
+      (by push_cast [ZMod.natCast_val, ZMod.cast_id]; ring)
+
 /-- The `GL₂(ℤ/N)`-action on full level structures, by precomposition of the
 isomorphism `(ℤ/N)² ≅ E[N]`: in coordinates,
 `g • (P, Q) = (g₁₁·P + g₂₁·Q, g₁₂·P + g₂₂·Q)` (entries lifted via `ZMod.val`;
@@ -80,7 +115,92 @@ noncomputable def glSmul {N : ℕ} [NeZero N]
           smul_comm (N : ℤ) ((m 1 0).val : ℤ), hP, hQ, smul_zero, smul_zero, add_zero]
       · rw [smul_add, smul_comm (N : ℤ) ((m 0 1).val : ℤ),
           smul_comm (N : ℤ) ((m 1 1).val : ℤ), hP, hQ, smul_zero, smul_zero, add_zero]
-      · sorry⟩
+      · intro k _ _ t x hx
+        set pp := Point.pull E t L.1.1 with hpp_def
+        set pq := Point.pull E t L.1.2 with hpq_def
+        set gi := (↑(g⁻¹) : Matrix (Fin 2) (Fin 2) (ZMod N)) with hgi_def
+        have hppN : (N : ℤ) • pp = 0 := by
+          rw [hpp_def, ← Point.pull_zsmul, hP, Point.pull_zero]
+        have hpqN : (N : ℤ) • pq = 0 := by
+          rw [hpq_def, ← Point.pull_zsmul, hQ, Point.pull_zero]
+        have hPP : Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2)
+            = ((m 0 0).val : ℤ) • pp + ((m 1 0).val : ℤ) • pq := by
+          rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp_def, ← hpq_def]
+        have hQQ : Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)
+            = ((m 0 1).val : ℤ) • pp + ((m 1 1).val : ℤ) • pq := by
+          rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp_def, ← hpq_def]
+        have hgg : m * gi = 1 := by
+          change (↑g : Matrix (Fin 2) (Fin 2) (ZMod N)) * gi = 1
+          rw [hgi_def, ← Matrix.GeneralLinearGroup.coe_mul, mul_inv_cancel,
+            Matrix.GeneralLinearGroup.coe_one]
+        have e00 : m 0 0 * gi 0 0 + m 0 1 * gi 1 0 = 1 := by
+          have h := congrFun (congrFun hgg 0) 0
+          simpa [Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply] using h
+        have e10 : m 1 0 * gi 0 0 + m 1 1 * gi 1 0 = 0 := by
+          have h := congrFun (congrFun hgg 1) 0
+          simpa [Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply] using h
+        have e01 : m 0 0 * gi 0 1 + m 0 1 * gi 1 1 = 0 := by
+          have h := congrFun (congrFun hgg 0) 1
+          simpa [Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply] using h
+        have e11 : m 1 0 * gi 0 1 + m 1 1 * gi 1 1 = 1 := by
+          have h := congrFun (congrFun hgg 1) 1
+          simpa [Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply] using h
+        have hpp_mem : pp ∈ AddSubgroup.closure
+            {Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2),
+             Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)} := by
+          have hrec := recover_combo E t pp pq
+            (Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2))
+            (Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2))
+            hppN hpqN (m 0 0) (m 1 0) (m 0 1) (m 1 1) (gi 0 0) (gi 1 0) hPP hQQ
+          have key : ((gi 0 0).val : ℤ) •
+                Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2)
+              + ((gi 1 0).val : ℤ) •
+                Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2) = pp := by
+            rw [hrec,
+              zsmul_eq_of_intCast_eq pp hppN
+                (a := ((gi 0 0 * m 0 0 + gi 1 0 * m 0 1).val : ℤ)) (b := 1)
+                (by push_cast [ZMod.natCast_val, ZMod.cast_id]; linear_combination e00),
+              zsmul_eq_of_intCast_eq pq hpqN
+                (a := ((gi 0 0 * m 1 0 + gi 1 0 * m 1 1).val : ℤ)) (b := 0)
+                (by push_cast [ZMod.natCast_val, ZMod.cast_id]; linear_combination e10),
+              one_zsmul, zero_zsmul, add_zero]
+          rw [← key]
+          exact add_mem (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+            (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+        have hpq_mem : pq ∈ AddSubgroup.closure
+            {Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2),
+             Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)} := by
+          have hrec := recover_combo E t pp pq
+            (Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2))
+            (Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2))
+            hppN hpqN (m 0 0) (m 1 0) (m 0 1) (m 1 1) (gi 0 1) (gi 1 1) hPP hQQ
+          have key : ((gi 0 1).val : ℤ) •
+                Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2)
+              + ((gi 1 1).val : ℤ) •
+                Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2) = pq := by
+            rw [hrec,
+              zsmul_eq_of_intCast_eq pp hppN
+                (a := ((gi 0 1 * m 0 0 + gi 1 1 * m 0 1).val : ℤ)) (b := 0)
+                (by push_cast [ZMod.natCast_val, ZMod.cast_id]; linear_combination e01),
+              zsmul_eq_of_intCast_eq pq hpqN
+                (a := ((gi 0 1 * m 1 0 + gi 1 1 * m 1 1).val : ℤ)) (b := 1)
+                (by push_cast [ZMod.natCast_val, ZMod.cast_id]; linear_combination e11),
+              zero_zsmul, one_zsmul, zero_add]
+          rw [← key]
+          exact add_mem (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+            (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+        have hmem := L.2.2 k t x hx
+        rw [← hpp_def, ← hpq_def] at hmem
+        have hle : AddSubgroup.closure {pp, pq} ≤ AddSubgroup.closure
+            {Point.pull E t (((m 0 0).val : ℤ) • L.1.1 + ((m 1 0).val : ℤ) • L.1.2),
+             Point.pull E t (((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)} := by
+          rw [AddSubgroup.closure_le]
+          intro z hz
+          simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+          rcases hz with rfl | rfl
+          · exact hpp_mem
+          · exact hpq_mem
+        exact hle hmem⟩
 
 /-- If `N • P = 0` then `m • P = 0` whenever `N ∣ m` — so `m • P` depends only on
 `m mod N`. Used to lift `ZMod N` matrix entries via `ZMod.val`. -/
