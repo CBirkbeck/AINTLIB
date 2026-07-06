@@ -317,6 +317,64 @@ theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra
 
 end EtaleSubalgebra
 
+/-! Limits of shape `SingleObj H` in `FiniteEtale k` (leaf AG-GG-1.4, categorical part):
+the limit of an `H`-action on a finite étale algebra is the fixed-point subalgebra,
+finite étale by `etale_subalgebra`. -/
+
+section FixedPoints
+
+variable {k : Type u} [Field k] {H : Type u} [Monoid H]
+
+variable (F : SingleObj H ⥤ CommAlgCat.FiniteEtale.{u} k)
+
+/-- The fixed points of a monoid action (by `k`-algebra endomorphisms) on a finite
+étale algebra, as a subalgebra. -/
+def actionFixedPoints : Subalgebra k (F.obj (SingleObj.star H)).obj where
+  carrier := {a | ∀ h : H,
+    (F.map (h : SingleObj.star H ⟶ SingleObj.star H)).hom.hom a = a}
+  mul_mem' := fun ha hb h => by rw [map_mul, ha h, hb h]
+  add_mem' := fun ha hb h => by rw [map_add, ha h, hb h]
+  algebraMap_mem' := fun r h =>
+    (F.map (h : SingleObj.star H ⟶ SingleObj.star H)).hom.hom.commutes r
+
+/-- The fixed-point cone on an `H`-action. -/
+noncomputable def actionFixedPointsCone : Cone F where
+  pt :=
+    haveI : Algebra.Etale k (actionFixedPoints F) :=
+      etale_subalgebra (actionFixedPoints F)
+    haveI : Module.Finite k (actionFixedPoints F) :=
+      inferInstanceAs (Module.Finite k (actionFixedPoints F).toSubmodule)
+    CommAlgCat.FiniteEtale.of k (actionFixedPoints F)
+  π :=
+    { app := fun _ => ObjectProperty.homMk
+        (show _ ⟶ (F.obj (SingleObj.star H)).obj from
+          CommAlgCat.ofHom (actionFixedPoints F).val)
+      naturality := fun _ _ h => by
+        ext ⟨a, ha⟩
+        exact (ha h).symm }
+
+/-- The fixed-point cone is a limit cone. -/
+noncomputable def actionFixedPointsConeIsLimit : IsLimit (actionFixedPointsCone F) where
+  lift s := ObjectProperty.homMk (CommAlgCat.ofHom
+    (AlgHom.codRestrict (s.π.app (SingleObj.star H)).hom.hom (actionFixedPoints F)
+      (fun t h => by
+        have hnat := congrArg (fun q => q.hom.hom t)
+          (s.π.naturality (show SingleObj.star H ⟶ SingleObj.star H from h))
+        exact hnat.symm)))
+  fac s j := by
+    ext t
+    rfl
+  uniq s m hm := by
+    ext t
+    have h := congrArg (fun q => q.hom.hom t) (hm (SingleObj.star H))
+    exact Subtype.ext h
+
+instance hasLimitsOfShapeSingleObj :
+    HasLimitsOfShape (SingleObj H) (CommAlgCat.FiniteEtale.{u} k) where
+  has_limit F := HasLimit.mk ⟨_, actionFixedPointsConeIsLimit F⟩
+
+end FixedPoints
+
 end FiniteEtaleGalois
 
 end ModularCurves
