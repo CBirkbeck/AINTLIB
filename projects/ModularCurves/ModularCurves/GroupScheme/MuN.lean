@@ -574,6 +574,86 @@ theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
   exact congrFun
     (Scheme.Hom.finrank_SpecMap_eq_finrank (muNRingMap_finite N) (muNRingMap_flat N)) _
 
+/-! #### The étale model over `ℤ[1/N]` (engine for `muNπ_etale_iff`)
+
+`AdjoinRoot (Xᴺ − 1)` over `ℤ[1/N]` is the base change of `μ_N`'s coordinate ring
+(a pushout square, proved by universal properties — no tensor products), and it is
+étale over `ℤ[1/N]` because `f'·X − N·f = N` makes `(Xᴺ − 1, C N)` a standard étale
+pair once `N` is invertible. Any `S` with `N` invertible factors through
+`Spec ℤ[1/N]`, so `μ_{N,S} ⟶ S` is a base change of an étale morphism. -/
+
+private abbrev muNAwayRing (N : ℕ) : Type u := ULift.{u} (Localization.Away (N : ℤ))
+
+private abbrev muNModelPoly (N : ℕ) : Polynomial (muNAwayRing N) :=
+  X ^ N - 1
+
+private def muNModelRing (N : ℕ) : CommRingCat.{u} := .of (AdjoinRoot (muNModelPoly N))
+
+/-- `ℤ → ℤ[1/N]`, universe-lifted. -/
+private def muNAwayMap (N : ℕ) : CommRingCat.of (ULift.{u} ℤ) ⟶ .of (muNAwayRing N) :=
+  CommRingCat.ofHom ((Int.castRingHom _).comp ULift.ringEquiv.toRingHom)
+
+/-- The structure map of the model. -/
+private def muNModelStruct (N : ℕ) : CommRingCat.of (muNAwayRing N) ⟶ muNModelRing N :=
+  CommRingCat.ofHom (AdjoinRoot.of (muNModelPoly N))
+
+private lemma muNModel_root_pow (N : ℕ) :
+    (AdjoinRoot.root (muNModelPoly N)) ^ N = 1 := by
+  have h := AdjoinRoot.mk_self (f := muNModelPoly N)
+  rw [muNModelPoly, map_sub, map_pow, map_one, AdjoinRoot.mk_X, sub_eq_zero] at h
+  exact h
+
+/-- The comparison `ℤ[T]/(Tᴺ−1) → ℤ[1/N][T]/(Tᴺ−1)`, classifying the root. -/
+private def muNModelCompare (N : ℕ) : muNRing N ⟶ muNModelRing N :=
+  muNRingLift (AdjoinRoot.root (muNModelPoly N)) (muNModel_root_pow N)
+
+/-- Ring homomorphisms out of `ULift ℤ` agree. -/
+private lemma uliftZ_hom_ext {R : CommRingCat.{u}} {f g : CommRingCat.of (ULift.{u} ℤ) ⟶ R} :
+    f = g := by
+  have key : f.hom.comp (ULift.ringEquiv.symm.toRingHom : ℤ →+* ULift.{u} ℤ)
+      = g.hom.comp ULift.ringEquiv.symm.toRingHom := RingHom.ext_int _ _
+  ext x
+  obtain ⟨x⟩ := x
+  exact DFunLike.congr_fun key x
+
+/-- The model is the pushout (base change) of `μ_N`'s coordinate ring to `ℤ[1/N]`. -/
+private lemma muNModel_isPushout (N : ℕ) :
+    IsPushout (muNAwayMap N) (muNRingMap N) (muNModelStruct N) (muNModelCompare N) := by
+  refine IsPushout.of_isColimit' ⟨uliftZ_hom_ext⟩ (PushoutCocone.IsColimit.mk _
+    (fun s ↦ CommRingCat.ofHom (AdjoinRoot.lift s.inl.hom (s.inr (muNRingGen N)) (by
+      have h1 : (s.inr (muNRingGen N)) ^ N = 1 := by
+        rw [← map_pow, muNRingGen_pow, map_one]
+      simp [muNModelPoly, h1])))
+    (fun s ↦ CommRingCat.hom_ext (AdjoinRoot.lift_comp_of _))
+    (fun s ↦ muNRing_hom_ext (by
+      rw [CommRingCat.comp_apply,
+        show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
+          muNRingLift_gen _ _]
+      simp [AdjoinRoot.lift_root]))
+    (fun s m' hleft hright ↦ ?_))
+  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) = s.inl.hom := by
+    have h3 := congrArg CommRingCat.Hom.hom hleft
+    simpa [muNModelStruct] using h3
+  have hX : m'.hom (AdjoinRoot.root (muNModelPoly N)) = s.inr (muNRingGen N) := by
+    have h2 := congrArg (fun (t : muNRing N ⟶ s.pt) ↦ t (muNRingGen N)) hright
+    simpa [CommRingCat.comp_apply,
+      show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
+        muNRingLift_gen _ _] using h2
+  have key : m'.hom.comp (AdjoinRoot.mk (muNModelPoly N)) =
+      (AdjoinRoot.lift s.inl.hom (s.inr (muNRingGen N)) (by
+        have h1 : (s.inr (muNRingGen N)) ^ N = 1 := by
+          rw [← map_pow, muNRingGen_pow, map_one]
+        simp [muNModelPoly, h1])).comp (AdjoinRoot.mk (muNModelPoly N)) := by
+    refine Polynomial.ringHom_ext' ?_ ?_
+    · rw [show (m'.hom.comp (AdjoinRoot.mk (muNModelPoly N))).comp Polynomial.C =
+          m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) from rfl, hC]
+      exact (AdjoinRoot.lift_comp_of _).symm
+    · rw [RingHom.comp_apply, RingHom.comp_apply, AdjoinRoot.mk_X, hX]
+      exact (AdjoinRoot.lift_root _).symm
+  refine CommRingCat.hom_ext (RingHom.ext fun x ↦ ?_)
+  obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
+  exact DFunLike.congr_fun key p
+
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
 for `S = ∅`). -/

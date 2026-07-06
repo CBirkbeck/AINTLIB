@@ -2092,7 +2092,10 @@ lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
       (projModelBaseChangeLift (algebraMap R R') W)
       ((Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
         (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j) := by
-  sorry
+  refine IsPullback.of_bot ?s ?p ?t
+  · sorry
+  · sorry
+  · sorry
 
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
