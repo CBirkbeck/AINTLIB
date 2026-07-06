@@ -107,18 +107,59 @@ theorem sectionDivisor_degree (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
   have h1 := Scheme.Hom.finrank_eq_one_of_isIso (inv z.toImage)
   simp [h1]
 
-/-- **(DS4a, ticket T-D3)** The divisor `Σᵢ [Pᵢ]` attached to a finite family of sections
-of `π` — the closed subscheme whose ideal is the *product* of the ideal sheaves of the
-(closed-immersion) sections. DATA-SORRY (register entry DS4a).
+/-- **Register box (T-D3/T-D1, finiteness; KM 1.2.2 + 1.2.3)**: over a separated smooth
+relative curve the product of the section ideals cuts out a subscheme finite over the
+base. KM 1.2.3 (verbatim quote banked on T-D3): *"Let `D ⊆ C` be a closed sub-scheme
+which is finite and flat over `S`, and of finite presentation over `S`. Then `D` is an
+effective Cartier divisor in `C/S` … Conversely every effective Cartier divisor in
+`C/S` which is proper over `S` is of this form."* Discharge is the T-D1 route
+(invertible ideal sheaves, API gap AG-LB). -/
+theorem sectionsIdeal_isFinite (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    IsFinite ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by sorry
 
-SCOPE (adversarial pass 2026-07-06): the construction and its specifications are pinned
-under KM 1.2.1's standing hypotheses — `π` separated (sections are closed immersions)
-and smooth of relative dimension 1 (ideal products have the right length); the data
-slot is total, but nothing is promised outside that scope. Specifications: degree `= n`
-(`sectionsDivisor_degree`, hypothesised accordingly), and formation commutes with
-arbitrary base change (KM 1.1). -/
+/-- **Register box (T-D3/T-D1, flatness; KM 1.2.2 + 1.2.3)** — see
+`sectionsIdeal_isFinite`. -/
+theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    Flat ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by sorry
+
+/-- **Register box (T-D3/T-D1, finite presentation; KM 1.2.2 + 1.2.3)** — see
+`sectionsIdeal_isFinite`. -/
+theorem sectionsIdeal_lfp (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    LocallyOfFinitePresentation ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
+  sorry
+
+/-- **Register box (T-D3, degree; KM 1.2.6)**: the divisor sum has rank `n` — KM 1.2.6
+(verbatim quote banked on T-D3): *"`deg(D₁ + D₂) = deg(D₁) + deg(D₂)`"*, applied `n`
+times to the degree-1 section divisors (`sectionDivisor_degree`); the SES argument
+consumes the invertibility of the ideals (AG-LB), same gate as the other boxes. -/
+theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
+    haveI := sectionsIdeal_isFinite π hsm P
+    haveI := sectionsIdeal_flat π hsm P
+    ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).finrank s = n := by sorry
+
+open scoped Classical in
 noncomputable def sectionsDivisor (π : C ⟶ S) {n : ℕ}
-    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) : RelEffCartierDiv π := sorry
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) : RelEffCartierDiv π :=
+  if h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π then
+    haveI := h.1
+    { ideal := ∏ i, Scheme.Hom.ker (P i).1
+      finite := sectionsIdeal_isFinite π h.2 P
+      flat := sectionsIdeal_flat π h.2 P
+      lfp := sectionsIdeal_lfp π h.2 P }
+  else
+    { ideal := ⊤
+      finite := ((IsClosedImmersion.iff_isFinite_and_mono
+        ((⊤ : C.IdealSheafData).subschemeι ≫ π)).mp inferInstance).1
+      flat := inferInstance
+      lfp := inferInstance }
 
 /-- **(T-D3a, specification of DS4a)** `Σᵢ [Pᵢ]` has degree `n`, under KM 1.2.1's
 standing hypotheses.
@@ -131,7 +172,12 @@ KM 1.2.1. -/
 theorem sectionsDivisor_degree (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
-    (sectionsDivisor π P).degree s = n := by sorry
+    (sectionsDivisor π P).degree s = n := by
+  have h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π := ⟨‹_›, hsm⟩
+  show ((sectionsDivisor π P).ideal.subschemeι ≫ π).finrank s = n
+  rw [show (sectionsDivisor π P).ideal = ∏ i, Scheme.Hom.ker (P i).1 from by
+    rw [sectionsDivisor, dif_pos h]]
+  exact sectionsIdeal_finrank π hsm P s
 
 /-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
 sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
