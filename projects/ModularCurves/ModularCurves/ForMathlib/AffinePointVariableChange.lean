@@ -101,4 +101,28 @@ lemma pointMap_neg (P : W.toAffine.Point) : C.pointMap W (-P) = -(C.pointMap W P
   | some x y h => rw [Affine.Point.neg_some, pointMap_some, pointMap_some,
       Affine.Point.neg_some]; simp only [negY_smul]
 
+section Field
+
+variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve F} (C : VariableChange F)
+
+/-- The coordinate change scales the addition `slope` (secant case): the secant of `C • W` through
+the transformed points is `u⁻¹` times the `s`-shifted secant of `W`. -/
+lemma slope_smul_of_X_ne {x₁ x₂ y₁ y₂ : F} (hx : x₁ ≠ x₂) :
+    (C • W).toAffine.slope (C.vcX x₁) (C.vcX x₂) (C.vcY x₁ y₁) (C.vcY x₂ y₂)
+      = ↑C.u⁻¹ * (W.toAffine.slope x₁ x₂ y₁ y₂ - C.s) := by
+  have hu : (↑C.u⁻¹ : F) ≠ 0 := Units.ne_zero _
+  have hx' : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hx
+  have hvx : C.vcX x₁ ≠ C.vcX x₂ := by
+    simp only [vcX]
+    intro he
+    have hcancel : x₁ - C.r = x₂ - C.r := mul_left_cancel₀ (pow_ne_zero 2 hu) he
+    exact hx (by linear_combination hcancel)
+  have hnum : C.vcY x₁ y₁ - C.vcY x₂ y₂ = ↑C.u⁻¹ ^ 3 * ((y₁ - y₂) - C.s * (x₁ - x₂)) := by
+    simp only [vcY]; ring
+  have hden : C.vcX x₁ - C.vcX x₂ = ↑C.u⁻¹ ^ 2 * (x₁ - x₂) := by simp only [vcX]; ring
+  rw [Affine.slope_of_X_ne hvx, Affine.slope_of_X_ne hx, hnum, hden]
+  field_simp
+
+end Field
+
 end WeierstrassCurve.VariableChange
