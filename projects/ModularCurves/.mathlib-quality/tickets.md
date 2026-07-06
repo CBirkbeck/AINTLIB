@@ -2362,7 +2362,22 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     GroupLaw; universal-point instantiation pattern (T-B3's pointToTorsion).
 - **[T-D17]** `exists_exactOrderLocus` (A-generators, `A = ℤ/N`; KM 1.6 instance).
   Depends: T-D16. Feeds T-E7.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T22:55Z (paired claim with T-D18 — same D-inc.4 pattern; T-D16
+    just landed). Route: T-D16 over the base E.torsion N at the universal
+    torsion point's orderDivisor; HasExactOrder := (orderDivisor).IsSubgroup
+    (ExactOrder.lean:105) makes the RHS the T-D16-condition at the base-changed
+    section; classifying-map equivalence by pullback.lift uniqueness
+    (pointToTorsion dictionary, Torsion.lean:50-72) + Point.pull/asSection
+    naturality (pull_zsmul exists; orderDivisor-baseChange compat =
+    sectionsDivisor-pullback bookkeeping).
 - **[T-D18]** `exists_fullLevelLocus` (`A = (ℤ/N)²`). Depends: T-D16. Feeds T-E9.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T22:55Z (paired with T-D17). Same pattern over
+    pullback (torsionπ N) (torsionπ N) with the (ℤ/N)²-divisor Σ[aP+bQ];
+    IsFullLevel def at Basic.lean:183 — read at execution for the exact
+    divisor-equality form (A-generator EQ-locus per D-inc.4 = T-D15/T-D14 +
+    degree bookkeeping).
 - **[T-D19]** `ecd-pair-section-interface` — `D ↔ (L, s)`, sum = tensor. BLOCKED on
   AG-LB. Sources: KM 1.2 (in hand).
 - **[T-D20]** flat pullback along `Y → X` + composition laws. Depends: T-D12.
