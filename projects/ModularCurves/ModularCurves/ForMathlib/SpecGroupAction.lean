@@ -35,7 +35,7 @@ statements (`Algebra.IsInvariant.isIntegral`, `exists_smul_of_under_eq`); nothin
 `Mathlib/AlgebraicGeometry/` currently touches `MulSemiringAction`.
 -/
 
-universe u
+universe u v
 
 open AlgebraicGeometry CategoryTheory
 
@@ -90,7 +90,7 @@ theorem specSMul_apply_asIdeal (g : G) (p : Spec (CommRingCat.of B)) :
 
 end SpecSMul
 
-variable (R : Type u) [CommRing R] [Algebra R B] [SMulCommClass G R B]
+variable (R : Type v) [CommRing R] [Algebra R B] [SMulCommClass G R B]
 variable (B)
 
 /-- Every fixed point of `B` lies in the fixed subalgebra — the tautological

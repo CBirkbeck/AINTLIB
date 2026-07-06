@@ -141,6 +141,20 @@ theorem exists_isStableOpen_isAffineOpen [Finite G]
     rw [TopologicalSpace.Opens.coe_iInf]
     exact Set.mem_iInter.mpr (fun g => horbit g)
 
+/-- The local quotient of a `G`-stable affine open: `Spec (Γ(X, V)ᴳ)` (T-Q5c,
+local piece). -/
+noncomputable def localQuotient {V : X.Opens} (hV : σ.IsStableOpen V) : Scheme.{u} :=
+  letI := σ.gammaMulSemiringAction hV
+  Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, V) G))
+
+/-- The local quotient map `V ⟶ Spec (Γ(X, V)ᴳ)` on a `G`-stable affine open:
+the affine identification followed by the invariants morphism of the section-ring
+action. -/
+noncomputable def localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
+    (hVa : IsAffineOpen V) : (V : Scheme.{u}) ⟶ σ.localQuotient hV :=
+  letI := σ.gammaMulSemiringAction hV
+  hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
+
 end SchemeAction
 
 end AlgebraicGeometry

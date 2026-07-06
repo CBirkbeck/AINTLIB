@@ -35,7 +35,7 @@ nicely"; SGA I V.1.1; Stacks 07S5): the scheme-level universal property is
 `ModularCurves/ForMathlib/AffineQuotient.lean` (ticket T-Q3).
 -/
 
-universe u
+universe u v
 
 variable {G : Type*} [Group G] {B : Type u} [CommRing B] [MulSemiringAction G B]
 variable {h : B}
@@ -154,7 +154,7 @@ end MulSemiringAction
 
 section FixedSubalgebra
 
-variable (R : Type u) [CommRing R] [Algebra R B] [SMulCommClass G R B]
+variable (R : Type v) [CommRing R] [Algebra R B] [SMulCommClass G R B]
 
 theorem Submonoid.powers_le_comap_algebraMap (h : FixedPoints.subalgebra R B G) :
     Submonoid.powers h ≤ (Submonoid.powers (h : B)).comap

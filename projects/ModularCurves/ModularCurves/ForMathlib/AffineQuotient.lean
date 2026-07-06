@@ -35,7 +35,7 @@ closed), and there the factorization is the algebra statement "invariants of the
 localization = localization of the invariants" (`InvariantLocalization.lean`).
 -/
 
-universe u
+universe u v
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
@@ -43,7 +43,7 @@ namespace AlgebraicGeometry
 
 variable {G : Type*} [Group G]
 variable {B : Type u} [CommRing B] [MulSemiringAction G B]
-variable (R : Type u) [CommRing R] [Algebra R B] [SMulCommClass G R B]
+variable (R : Type v) [CommRing R] [Algebra R B] [SMulCommClass G R B]
 
 section Algebra
 
