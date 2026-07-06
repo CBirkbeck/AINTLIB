@@ -23,7 +23,7 @@ the spectrum of the fixed subalgebra `A := FixedPoints.subalgebra R B G`:
   under `specSMul` (`specSMul_invariantsπ`).
 * For finite `G`: `invariantsπ` is integral (`invariantsπ_isIntegralHom`), surjective
   (`invariantsπ_surjective`), and its fibres are exactly the `G`-orbits
-  (`invariantsπ_base_eq_iff`).
+  (`invariantsπ_apply_eq_iff`).
 
 These are the affine bones of the quotient of a scheme by a finite group
 ([Loeffler, *Modular curves*, Prop 3.6.1]; SGA I V.1.1; Stacks 07S3–07S7): the
@@ -38,6 +38,8 @@ statements (`Algebra.IsInvariant.isIntegral`, `exists_smul_of_under_eq`); nothin
 universe u
 
 open AlgebraicGeometry CategoryTheory
+
+open scoped Pointwise
 
 namespace AlgebraicGeometry
 
@@ -58,19 +60,32 @@ noncomputable def specSMul (g : G) :
 
 @[simp]
 theorem specSMul_one : specSMul (1 : G) (B := B) = 𝟙 _ := by
-  sorry
+  rw [specSMul, show CommRingCat.ofHom (MulSemiringAction.toRingHom G B 1) =
+    𝟙 (CommRingCat.of B) from by ext b; exact one_smul G b, Spec.map_id]
 
 theorem specSMul_mul (g h : G) :
     specSMul (g * h) (B := B) = specSMul g ≫ specSMul h := by
-  sorry
+  rw [specSMul, show CommRingCat.ofHom (MulSemiringAction.toRingHom G B (g * h)) =
+    CommRingCat.ofHom (MulSemiringAction.toRingHom G B h) ≫
+      CommRingCat.ofHom (MulSemiringAction.toRingHom G B g) from by
+    ext b; exact mul_smul g h b, Spec.map_comp]
+  rfl
 
-instance (g : G) : IsIso (specSMul (B := B) g) := by
-  sorry
+instance (g : G) : IsIso (specSMul (B := B) g) :=
+  ⟨specSMul g⁻¹, by rw [← specSMul_mul, mul_inv_cancel, specSMul_one],
+    by rw [← specSMul_mul, inv_mul_cancel, specSMul_one]⟩
 
-@[simp]
-theorem specSMul_base (g : G) (p : Spec (CommRingCat.of B)) :
-    (specSMul g).base p = (Spec.map
-      (CommRingCat.ofHom (MulSemiringAction.toRingHom G B g))).base p :=
+theorem specSMul_apply (g : G) (p : Spec (CommRingCat.of B)) :
+    specSMul g p = PrimeSpectrum.comap (MulSemiringAction.toRingHom G B g) p :=
+  rfl
+
+/-- The scheme-theoretic action and the pointwise action on prime ideals: `specSMul g`
+sends a prime `p` to `g⁻¹ • p`. -/
+theorem specSMul_apply_asIdeal (g : G) (p : Spec (CommRingCat.of B)) :
+    (specSMul g p).asIdeal = g⁻¹ • p.asIdeal := by
+  ext b
+  rw [specSMul_apply, PrimeSpectrum.comap_asIdeal, Ideal.mem_comap,
+    Ideal.mem_inv_pointwise_smul_iff]
   rfl
 
 end SpecSMul
@@ -93,24 +108,41 @@ noncomputable def invariantsπ :
 @[reassoc (attr := simp)]
 theorem specSMul_invariantsπ (g : G) :
     specSMul g ≫ invariantsπ G B R = invariantsπ G B R := by
-  sorry
+  rw [specSMul, invariantsπ, ← Spec.map_comp]
+  congr 1
+  ext a
+  exact a.2 g
 
 /-- For a finite group, the invariants morphism is integral (in particular affine and
 universally closed). -/
 instance invariantsπ_isIntegralHom [Finite G] : IsIntegralHom (invariantsπ G B R) := by
-  sorry
+  rw [invariantsπ, IsIntegralHom.SpecMap_iff]
+  exact Algebra.isIntegral_def.mp
+    (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
 
 /-- For a finite group, the invariants morphism is surjective: every prime of the fixed
 subalgebra lies under a prime of `B`. -/
 theorem invariantsπ_surjective [Finite G] :
     Function.Surjective (invariantsπ G B R).base := by
-  sorry
+  have hint : (algebraMap (FixedPoints.subalgebra R B G) B).IsIntegral :=
+    Algebra.isIntegral_def.mp
+      (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
+  exact hint.comap_surjective Subtype.val_injective
 
 /-- The fibres of the invariants morphism are exactly the `G`-orbits: two primes of `B`
 lie over the same prime of `Bᴳ` iff they differ by the action of some `g : G`. -/
-theorem invariantsπ_base_eq_iff [Finite G] (x y : Spec (CommRingCat.of B)) :
-    (invariantsπ G B R).base x = (invariantsπ G B R).base y ↔
-      ∃ g : G, (specSMul g).base x = y := by
-  sorry
+theorem invariantsπ_apply_eq_iff [Finite G] (x y : Spec (CommRingCat.of B)) :
+    invariantsπ G B R x = invariantsπ G B R y ↔ ∃ g : G, specSMul g x = y := by
+  constructor
+  · intro hxy
+    have h : x.asIdeal.under (FixedPoints.subalgebra R B G) =
+        y.asIdeal.under (FixedPoints.subalgebra R B G) :=
+      congrArg PrimeSpectrum.asIdeal hxy
+    obtain ⟨g, hg⟩ := Algebra.IsInvariant.exists_smul_of_under_eq
+      (FixedPoints.subalgebra R B G) B G x.asIdeal y.asIdeal h
+    refine ⟨g⁻¹, PrimeSpectrum.ext ?_⟩
+    rw [specSMul_apply_asIdeal, inv_inv, hg]
+  · rintro ⟨g, rfl⟩
+    rw [← Scheme.Hom.comp_apply, specSMul_invariantsπ]
 
 end AlgebraicGeometry

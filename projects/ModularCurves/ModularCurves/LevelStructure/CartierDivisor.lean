@@ -71,6 +71,57 @@ noncomputable def degree (D : RelEffCartierDiv π) (s : S) : ℕ :=
   haveI := D.flat
   (D.ideal.subschemeι ≫ π).finrank s
 
+/-- The base-change square of a section is cartesian: `T` is the fibre product of
+`C ×_S T ⟶ C` against the section `z`. -/
+theorem isPullback_sectionBaseChange {π : C ⟶ S} (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    {T : Scheme.{u}} (t : T ⟶ S) :
+    IsPullback
+      (Limits.pullback.lift (t ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]))
+      t (Limits.pullback.fst π t) z := by
+  have hb' : ∀ s : Limits.PullbackCone (Limits.pullback.fst π t) z,
+      (s.fst ≫ Limits.pullback.snd π t) ≫ t = s.snd := by
+    intro s
+    have h2 : (s.fst ≫ Limits.pullback.fst π t) ≫ π =
+        (s.fst ≫ Limits.pullback.snd π t) ≫ t := by
+      rw [Category.assoc, Category.assoc, Limits.pullback.condition]
+    calc (s.fst ≫ Limits.pullback.snd π t) ≫ t
+        = (s.fst ≫ Limits.pullback.fst π t) ≫ π := h2.symm
+      _ = (s.snd ≫ z) ≫ π := by rw [s.condition]
+      _ = s.snd := by rw [Category.assoc, hz, Category.comp_id]
+  refine IsPullback.of_isLimit' ⟨by rw [Limits.pullback.lift_fst]⟩ ?_
+  refine Limits.PullbackCone.IsLimit.mk _ (fun s => s.fst ≫ Limits.pullback.snd π t)
+    (fun s => ?_) (fun s => ?_) (fun s m hm₁ hm₂ => ?_)
+  · apply Limits.pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [Limits.pullback.lift_fst, reassoc_of% (hb' s)]
+      exact s.condition.symm
+    · simp only [Category.assoc]
+      rw [Limits.pullback.lift_snd, Category.comp_id]
+  · exact hb' s
+  · have h := congrArg (fun q => q ≫ Limits.pullback.snd π t) hm₁
+    simp only [Category.assoc] at h
+    rw [show Limits.pullback.lift (t ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) ≫
+        Limits.pullback.snd π t = 𝟙 T from Limits.pullback.lift_snd _ _ _,
+      Category.comp_id] at h
+    exact h
+
+/-- The kernel of a base-changed section is the scheme-theoretic preimage of the
+kernel of the section. -/
+theorem ker_sectionBaseChange {π : C ⟶ S} [IsSeparated π] (z : S ⟶ C)
+    (hz : z ≫ π = 𝟙 S) {T : Scheme.{u}} (t : T ⟶ S) :
+    (Limits.pullback.lift (t ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) :
+      T ⟶ Limits.pullback π t).ker =
+      (Scheme.Hom.ker z).comap (Limits.pullback.fst π t) := by
+  haveI : IsClosedImmersion z := by
+    have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
+    exact IsClosedImmersion.of_comp z π
+  rw [← (isPullback_sectionBaseChange z hz t).isoPullback_hom_fst,
+    Scheme.Hom.ker_comp_of_isIso,
+    Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
+
 /-- **(T-D3, single-section case — KM 1.2.2)** The divisor `[P]` of a single section of
 a separated morphism: the closed subscheme cut out by the kernel ideal of the section.
 Its subscheme is isomorphic to `S` itself (`IsIso z.toImage`), so all relative
