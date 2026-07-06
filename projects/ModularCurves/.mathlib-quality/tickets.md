@@ -611,6 +611,28 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   zero-compat by pasting functoriality. Watch: the zero-section transport needs
   `sectionFiberPoint` naturality under both pastes (two small commuting squares).
 - **Sources**: [Loe] §3.7; standard fibre pasting.
+- **PLAN v2 (2026-07-07, after mathlib survey)**: the pasting engine EXISTS:
+  `AlgebraicGeometry.isPullback_fiberToSpecResidueField_of_isPullback`
+  (Fiber.lean:65): at the defining square `of_hasPullback E.π g` and `y := t` it
+  yields `IsPullback (pullback.map …) ((pullback.snd E.π g).fiberToSpecResidueField t)
+  (E.π.fiberToSpecResidueField (g t)) (Spec.map (g.residueFieldMap t))` — the fibre of
+  the base change at `t` is the pullback of the fibre at `s := g t` along
+  `Spec κ(t) → Spec κ(s)`. Assembly: (i) from `E.fibres s` get `W`, `e_s : fiber s ≅
+  projModel W` with π/zero legs; (ii) transport the pullback square along `e_s`
+  (IsPullback.of_iso on the X-corner) to get `fiber t` as a pullback of
+  `(projModelπ W, Spec residueFieldMap)`-cospan (after rewriting `fiberToSpec (g t) =
+  e_s.hom ≫ projModelπ W` via the e_s-π-leg); (iii) compare with
+  `projModelBaseChangeLift_isIso` at R := κ(s)-carrier, R' := κ(t)-carrier
+  (letI (residueFieldMap).hom.toAlgebra) — two pullbacks of the SAME cospan ⟹
+  canonical iso `fiber t ≅ projModel (W.map residue-hom)`; take `W' := W.map …`,
+  `IsElliptic` via map-instance; (iv) π-leg compat falls out of the pullback-legs +
+  lift_snd; (v) ZERO-LEG (the one genuinely new piece): need
+  `projModelBaseChange_zero : Spec.map (ofHom f) ≫ projModelZero W ≫?? — precisely:
+  zero-W' ≫ projModelBaseChange f W = Spec.map (ofHom f) ≫ projModelZero W`
+  (fromOfGlobalSections naturality under Proj.map — NOT in mathlib; derive via
+  fromOfGlobalSections_toSpecZero + faithfulness-style argument or chartwise through
+  the Y-chart with the T-A2e machinery; if it fights, spawn T-A5b-zero) and then
+  `sectionFiberPoint`-naturality (two small commuting squares).
 
 ### [T-A6] ⧗KM Abel canonicity — the deferred "purity/comparison" project (v2)
 - **Status**: open, **phase 3+ — no longer blocks anything** (v2: group law is a field
