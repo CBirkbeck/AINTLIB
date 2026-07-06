@@ -5,6 +5,7 @@ import Mathlib.CategoryTheory.Limits.Comma
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
 import Mathlib.CategoryTheory.Limits.FullSubcategory
 import Mathlib.RingTheory.Etale.Finite
+import ModularCurves.ForMathlib.EtaleSectionsCount
 
 /-!
 # Towards `PreGaloisCategory ((CommAlgCat.FiniteEtale k)ᵒᵖ)` (AG-GG-1)
@@ -401,7 +402,7 @@ theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [E
   · exact fun x => ⟨0, Subsingleton.elim _ _⟩
   by_contra hns
   set X' : Subalgebra k X.obj := π.hom.hom.range with hX'
-  have hne : X' ≠ ⊤ := fun h => hns (AlgHom.range_eq_top.mp h)
+  have hne : X' ≠ ⊤ := fun h => hns ((AlgHom.range_eq_top _).mp h)
   haveI : Algebra.Etale k X' := etale_subalgebra X'
   haveI : Module.Finite k X' := inferInstanceAs (Module.Finite k X'.toSubmodule)
   have hcard1 := natCard_algHom_sepClosure (k := k) X.obj
@@ -409,22 +410,20 @@ theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [E
   have hlt : Module.finrank k X' < Module.finrank k X.obj := by
     have hsub : X'.toSubmodule ≠ ⊤ := fun h =>
       hne (Subalgebra.toSubmodule_injective (by simpa using h))
-    exact Submodule.finrank_lt_top_of_ne_top?? PLACEHOLDER_LT hsub
+    exact Submodule.finrank_lt hsub
   haveI hfinX : Finite (X.obj →ₐ[k] SeparableClosure k) := by
     refine Nat.finite_of_card_ne_zero ?_
     rw [hcard1]
     have : 0 < Module.finrank k X.obj := Module.finrank_pos
     omega
   haveI : Fintype (X.obj →ₐ[k] SeparableClosure k) := Fintype.ofFinite _
+  haveI : Nontrivial X' := ⟨⟨1, 0, fun h =>
+    one_ne_zero (α := X.obj) (congrArg Subtype.val h)⟩⟩
   haveI hfinX' : Finite (X' →ₐ[k] SeparableClosure k) := by
-    rcases Nat.eq_zero_or_pos (Nat.card (X' →ₐ[k] SeparableClosure k)) with h0 | hpos
-    · rw [hcard2] at h0
-      exact absurd (hcard2.symm.trans hcard2) (by
-        intro _
-        exact absurd h0 (by
-          have : 0 < Module.finrank k X' := Module.finrank_pos
-          omega))
-    · exact Nat.finite_of_card_ne_zero hpos.ne'
+    refine Nat.finite_of_card_ne_zero ?_
+    rw [hcard2]
+    have : 0 < Module.finrank k X' := Module.finrank_pos
+    omega
   haveI : Fintype (X' →ₐ[k] SeparableClosure k) := Fintype.ofFinite _
   obtain ⟨g₁, g₂, hg, heq⟩ := Fintype.exists_ne_map_eq_of_card_lt
     (fun g : X.obj →ₐ[k] SeparableClosure k => g.comp X'.val)
@@ -433,8 +432,8 @@ theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [E
       exact hlt)
   set W : Subalgebra k (SeparableClosure k) := g₁.range ⊔ g₂.range with hW
   haveI : Module.Finite k W := by
-    have hr : (Algebra.TensorProduct.productMap g₁.range.val g₂.range.val).range = W :=
-      Algebra.TensorProduct.productMap_range
+    have hr : (Algebra.TensorProduct.productMap g₁.range.val g₂.range.val).range = W := by
+      rw [Algebra.TensorProduct.productMap_range, Subalgebra.range_val, Subalgebra.range_val]
     haveI : Module.Finite k g₁.range :=
       Module.Finite.of_surjective g₁.rangeRestrict.toLinearMap g₁.rangeRestrict_surjective
     haveI : Module.Finite k g₂.range :=
@@ -443,9 +442,30 @@ theorem surjective_of_epi {X Y : CommAlgCat.FiniteEtale.{u} k} (π : Y ⟶ X) [E
     exact Module.Finite.of_surjective
       (Algebra.TensorProduct.productMap g₁.range.val g₂.range.val).rangeRestrict.toLinearMap
       (AlgHom.rangeRestrict_surjective _)
-  haveI : IsDomain W := ?? PLACEHOLDER_DOMAIN
-  have hWfield : IsField W := ?? PLACEHOLDER_FIELD
-  sorry
+  have hWfield : IsField W :=
+    isField_of_isIntegral_of_isField' (R := k) (Field.toIsField k)
+  letI : Field W := hWfield.toField
+  haveI : Algebra.IsSeparable k W := ⟨fun x => by
+    have h1 : minpoly k (W.val x) = minpoly k x :=
+      minpoly.algHom_eq W.val (fun _ _ h => Subtype.ext h) x
+    have h2 := Algebra.IsSeparable.isSeparable k (W.val x)
+    rwa [IsSeparable, h1] at h2⟩
+  haveI : Algebra.FormallyEtale k W := Algebra.FormallyEtale.of_isSeparable k W
+  haveI : Algebra.FinitePresentation k W :=
+    Algebra.FinitePresentation.of_finiteType.mp inferInstance
+  haveI : Algebra.Etale k W := ⟨inferInstance, inferInstance⟩
+  have hmem₁ : ∀ x, g₁ x ∈ W := fun x => (le_sup_left : g₁.range ≤ W) ⟨x, rfl⟩
+  have hmem₂ : ∀ x, g₂ x ∈ W := fun x => (le_sup_right : g₂.range ≤ W) ⟨x, rfl⟩
+  have hcomp : π ≫ (ObjectProperty.homMk (CommAlgCat.ofHom
+        (g₁.codRestrict W hmem₁)) : X ⟶ CommAlgCat.FiniteEtale.of k W) =
+      π ≫ (ObjectProperty.homMk (CommAlgCat.ofHom (g₂.codRestrict W hmem₂))) := by
+    ext y
+    simpa using congrArg (fun q : X' →ₐ[k] SeparableClosure k =>
+      q ⟨π.hom.hom y, ⟨y, rfl⟩⟩) heq
+  have hG := (cancel_epi π).mp hcomp
+  refine hg (AlgHom.ext fun x => ?_)
+  exact congrArg (fun q : X ⟶ CommAlgCat.FiniteEtale.of k W =>
+    (q.hom.hom x : SeparableClosure k)) hG
 
 end EpiSurjective
 
