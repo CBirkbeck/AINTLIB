@@ -1,2 +1,3 @@
 FOCUS: AG-GG-2a/2c — baseChange k Omega preserves initial + finite products; new file FiniteEtaleFiberFunctor.lean
 FOCUS-Q: (beastmode-Q) T-Q5 leaf c3 IN PROGRESS: prove resLE/isoSpec naturality bridge ((σ.hom g).resLE V V ≫ isoSpec.hom = isoSpec.hom ≫ specSMul g, letI Γ-action) in SchemeQuotient.lean; tools: Scheme.isoSpec_hom_naturality (grep it) + appTop/appLE dictionary. Then c3 descended immersions Q_W→Q_V via T-Q3 ∃!, then c4 GlueData+contract. Route+status: board T-Q5 section.
+FOCUS-Q: (beastmode-Q) T-Q5c: localQuotientMap DONE+committed; NEXT: IsOpenImmersion (localQuotientMap) via of_stalk_iso route (attack note q-lane.md end) OR the UP-iso alternative; then c4 GlueData+contract (board route (4)-(7))

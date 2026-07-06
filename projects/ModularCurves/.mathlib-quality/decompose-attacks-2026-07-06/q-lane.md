@@ -275,3 +275,23 @@ for the proofs.
   verbatim minus the chart: fibre-of-π(x) = orbit ⊆ U (T-Q1 orbit lemma +
   stability), Z := π''(Uᶜ) closed (integrality), π(x) ∉ Z, basic open of Bᴳ
   inside Zᶜ, pull back. Same [Finite G] necessity. SURVIVES.
+
+## T-Q5c open-immersion-ness of localQuotientMap (route note, 2026-07-06T20:30Z)
+
+Route of record: `IsOpenImmersion.of_stalk_iso` (the same tool mathlib uses for the
+localization chart instance):
+- (i) base is an open embedding: injective (lift along surjective π^W, compare
+  V-orbits = W-orbits since W stable — fibres-are-orbits both levels) + OPEN MAP
+  (every open of Q_W is π^W(stable open) by quotient-map + saturation; its image is
+  π^V(same stable open), open by `isOpen_image_invariantsπ_of_stable` transported
+  through isoSpec) ⟹ `IsOpenMap.isOpenEmbedding` variant with injectivity.
+- (ii) stalk isos: at q = π^W(w), both stalks are the filtered colimit of sections
+  over INVARIANT BASIC opens around the orbit (basis lemma
+  `exists_mem_basicOpen_subset_of_stable`), and on invariant basics the two sides
+  agree by T-Q3c ((Γ_f)ᴳ = (Γᴳ)_f) — compare via `IsLocalization.AtPrime`
+  uniqueness or colimit-cofinality. THE algebra is done; this leaf is colimit
+  plumbing.
+- Alternative if stalk-plumbing fights: both Q_W and the image-open of Q_V satisfy
+  the categorical-quotient UP of W (uniqueness via
+  invariantsπ_hom_ext_of_isOpenImmersion at j := image-inclusion) ⟹ canonical iso;
+  then IsOpenImmersion (iso ≫ open-inclusion).
