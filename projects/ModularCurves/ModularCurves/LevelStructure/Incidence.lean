@@ -80,11 +80,9 @@ vanishing on `W` of a single function is equivalent to the vanishing on `S` of i
 coordinates", the `(deg D)²`-equations descent from `W = D ×_S D` to `S`. -/
 theorem sectionVanishingIdeal_eq_span_coord_coord {B : Type u} [CommRing B] [Algebra R B]
     [Module B M] [IsScalarTower R B M] {ι κ : Type u} (c : Module.Basis κ R B)
-    (b : Module.Basis ι B M) (σ : M) :
-    sectionVanishingIdeal R M σ =
-      Ideal.span (Set.range fun p : κ × ι => c.coord p.1 (b.coord p.2 σ)) := by
-  rw [sectionVanishingIdeal_eq_span_coord R M (c.smulTower b) σ]
-  congr 1
+    (b : Module.Basis ι B M) (σ : M) : sectionVanishingIdeal R M σ =
+      Ideal.span (Set.range fun p : κ × ι => c.coord p.1 (b.coord p.2 σ)) :=
+  sectionVanishingIdeal_eq_span_coord R M (c.smulTower b) σ
 
 end ZeroLocus
 

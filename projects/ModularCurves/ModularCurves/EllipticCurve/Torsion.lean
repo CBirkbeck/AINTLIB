@@ -3,6 +3,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
 
 /-!
 # Torsion subgroup schemes `E[N]`
@@ -27,7 +29,7 @@ with the fibres of this scheme-theoretic `E[N]` is ticket `T-B6` (kept out of th
 avoid the cross-project import in the definitional spine).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
@@ -87,11 +89,81 @@ theorem torsionι_isClosedImmersion (N : ℕ) :
   have h2 : IsClosedImmersion E.zero := IsClosedImmersion.of_comp (f := E.zero) (g := E.π)
   exact MorphismProperty.pullback_fst _ _ h2
 
+/-- The torsion inclusion followed by the structure morphism is the torsion structure
+morphism. -/
+@[reassoc]
+theorem torsionι_π (N : ℕ) : E.torsionι N ≫ E.π = E.torsionπ N := by
+  show pullback.fst (E.mulByHom N) E.zero ≫ E.π = pullback.snd (E.mulByHom N) E.zero
+  calc pullback.fst (E.mulByHom N) E.zero ≫ E.π
+      = pullback.fst (E.mulByHom N) E.zero ≫ E.mulByHom N ≫ E.π := by
+        rw [E.mulByHom_π]
+    _ = (pullback.fst (E.mulByHom N) E.zero ≫ E.mulByHom N) ≫ E.π :=
+        (Category.assoc _ _ _).symm
+    _ = (pullback.snd (E.mulByHom N) E.zero ≫ E.zero) ≫ E.π := by
+        rw [pullback.condition]
+    _ = pullback.snd (E.mulByHom N) E.zero ≫ E.zero ≫ E.π := Category.assoc _ _ _
+    _ = pullback.snd (E.mulByHom N) E.zero ≫ 𝟙 S := by rw [E.zero_π]
+    _ = pullback.snd (E.mulByHom N) E.zero := Category.comp_id _
+
+/-- `[n]` is proper: it is an `S`-endomorphism of the proper `S`-scheme `E`
+(cancellation along the separated `π`). KM 2.3.1 proof, first reduction ("Because `E`
+is proper over `S`, any `S`-endomorphism of `E` is proper"). -/
+instance mulByHom_isProper (n : ℤ) : IsProper (E.mulByHom n) := by
+  haveI h : IsProper (E.mulByHom n ≫ E.π) := by
+    rw [E.mulByHom_π]
+    exact E.proper
+  exact IsProper.of_comp (E.mulByHom n) E.π
+
+/-- The zero morphism `[0]` factors through the base: it is `π` followed by the zero
+section (the unit of the hom-group is `toUnit ≫ η`, and the unit of the group object
+is the zero section by `one_eq_zero`). -/
+theorem mulByHom_zero : E.mulByHom 0 = E.π ≫ E.zero := by
+  show (E.mulBy 0).left = E.π ≫ E.zero
+  have h0 : E.mulBy 0 = toUnit E.asOver ≫ (η[E.asOver] : _ ⟶ E.asOver) := rfl
+  have ht : (toUnit E.asOver).left = E.π := by
+    have hw := Over.w (toUnit E.asOver)
+    simpa using hw
+  rw [h0]
+  have key : (toUnit E.asOver).left ≫ ((𝟙_ (Over S)).hom ≫ E.zero) = E.π ≫ E.zero :=
+    (congrArg (fun q => q ≫ ((𝟙_ (Over S)).hom ≫ E.zero)) ht).trans
+      (congrArg (fun q => E.π ≫ q) (Category.id_comp E.zero))
+  refine Eq.trans ?_ key
+  exact congrArg (fun q => (toUnit E.asOver).left ≫ q) E.one_eq_zero
+
+/-- **Black box `BB-QF` (fibre input of KM 2.3.1)**: `[N]` is (locally) quasi-finite
+for `N ≥ 1`. KM 2.3.1 proof: finite fibres are checked geometric fibre by geometric
+fibre — on an elliptic curve over an algebraically closed field `[N]` is nonconstant
+(for `M` prime to `N·char k` it permutes the `M²`-many `M`-torsion points), and a
+nonconstant morphism of proper smooth connected curves has finite fibres. To be
+discharged via the fibre-comparison stream (T-B6 + HasseWeil `mulByInt_degree`). -/
+theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite (E.mulByHom N) := by sorry
+
+/-- **Black box `BB-FLAT` (flatness input of KM 2.3.1)**: `[N]` is flat for `N ≥ 1`.
+KM 2.3.1 proof: via miracle flatness over the universal (regular) Weierstrass base
+("any finite morphism between regular schemes of the same dimension is automatically
+flat [AK-1, V, 3.6]"); general fibrewise criterion: EGA IV 11.3.10. -/
+theorem mulByHom_flat (N : ℕ) [NeZero N] : Flat (E.mulByHom N) := by sorry
+
+/-- **Black box `BB-DEG` (degree input of KM 2.3.1)**: `[N]` has rank `N²` at every
+point. KM 2.3.1 proof: the rank is computed at a single geometric point (`E^an ≅ ℂ/L`,
+`E[N] = (1/N)L/L ≅ (ℤ/N)²`); algebraic anchor: HasseWeil `mulByInt_degree` via T-B6. -/
+theorem mulByHom_finrank (N : ℕ) [NeZero N] (x : E.E) :
+    (E.mulByHom N).finrank x = N ^ 2 := by sorry
+
+/-- **(KM 2.3.1, finiteness of `[N]`)** `[N]` is finite: proper + quasi-finite via
+Zariski's Main Theorem (`IsFinite.of_isProper_of_locallyQuasiFinite`). -/
+theorem mulByHom_isFinite (N : ℕ) [NeZero N] : IsFinite (E.mulByHom N) := by
+  haveI := E.mulByHom_locallyQuasiFinite N
+  exact IsFinite.of_isProper_of_locallyQuasiFinite _
+
 /-- **(T-B4 = KM 2.3.1)** `E[N] ⟶ S` is finite and flat (finite locally free) — of rank
 `N²` by `torsion_rank`. Black-box inputs: `[N]` finite flat of degree `N²` (KM 2.3.1; via
 fibrewise `deg [N] = N²`, Silverman III.6.2(d), + the fibrewise flatness criterion,
 EGA IV 11.3.10 — register item BB-FLAT). -/
-theorem torsionπ_isFinite (N : ℕ) [NeZero N] : IsFinite (E.torsionπ N) := by sorry
+theorem torsionπ_isFinite (N : ℕ) [NeZero N] : IsFinite (E.torsionπ N) := by
+  have h := E.mulByHom_isFinite N
+  exact MorphismProperty.pullback_snd _ _ h
 
 /-- **(T-B4, flatness half of KM 2.3.1; BB-FLAT/stream FLAT consumer)** `E[N] ⟶ S` is
 flat. -/

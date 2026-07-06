@@ -986,8 +986,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.3/2.3 ⧗; standard. **Generality**: any `N ≠ 0`.
 
 ### [T-B4] ⧗KM E[N]/S finite locally free of rank N² (KM 2.3.1; BB-FLAT)
-- **Status**: open · **File**: Torsion.lean · `torsionπ_isFinite`, `torsionπ_flat`,
-  `torsion_rank` · **Depends on**: T-B3; fibrewise degree input (HasseWeil/mathlib
+- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
+  2026-07-07T21:15Z · **File**: Torsion.lean · `torsionπ_isFinite`, `torsionπ_flat`,
+  `torsion_rank` · **Depends on**: T-B3 (done); fibrewise degree input (HasseWeil/mathlib
   fibre theory) · **Parallel**: with T-B5 · **Type**: theorems
 - **Sketch**: `[N]` proper + quasi-finite ⟹ finite (mathlib ZMT
   `IsFinite.of_isProper_of_locallyQuasiFinite` — verified present); fibrewise flatness
