@@ -960,6 +960,44 @@ private noncomputable def affinePointSplit (W : WeierstrassCurve R)
   left_inv P := by cases P <;> rfl
   right_inv s := by rcases s with p | u <;> rfl
 
+/-- Evaluation of the `Y`-chart cubic: `Z + a₁UZ + a₃Z² − (U³ + a₂U²Z + a₄UZ² + a₆Z³)`
+in the coordinates `U = X/Y`, `Z = Z/Y`. -/
+private lemma aeval_dehomog_one (W : WeierstrassCurve R) {K : Type u} [CommRing K]
+    [Algebra R K] (v : {j : Fin 3 // j ≠ 1} → K) :
+    MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial) =
+      v ⟨2, by decide⟩ + algebraMap R K W.a₁ * v ⟨0, by decide⟩ * v ⟨2, by decide⟩
+        + algebraMap R K W.a₃ * v ⟨2, by decide⟩ ^ 2
+        - (v ⟨0, by decide⟩ ^ 3
+          + algebraMap R K W.a₂ * v ⟨0, by decide⟩ ^ 2 * v ⟨2, by decide⟩
+          + algebraMap R K W.a₄ * v ⟨0, by decide⟩ * v ⟨2, by decide⟩ ^ 2
+          + algebraMap R K W.a₆ * v ⟨2, by decide⟩ ^ 3) := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 1 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (2 : Fin 3) ≠ 1 by decide),
+    MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow, one_mul]
+
+/-- Evaluation of the `X`-chart cubic. Its constant term is `-1`, so no point of the
+`X`-chart has vanishing `Z`-coordinate. -/
+private lemma aeval_dehomog_zero (W : WeierstrassCurve R) {K : Type u} [CommRing K]
+    [Algebra R K] (v : {j : Fin 3 // j ≠ 0} → K) :
+    MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial) =
+      v ⟨1, by decide⟩ ^ 2 * v ⟨2, by decide⟩
+        + algebraMap R K W.a₁ * v ⟨1, by decide⟩ * v ⟨2, by decide⟩
+        + algebraMap R K W.a₃ * v ⟨1, by decide⟩ * v ⟨2, by decide⟩ ^ 2
+        - (1 + algebraMap R K W.a₂ * v ⟨2, by decide⟩
+          + algebraMap R K W.a₄ * v ⟨2, by decide⟩ ^ 2
+          + algebraMap R K W.a₆ * v ⟨2, by decide⟩ ^ 3) := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 0 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (2 : Fin 3) ≠ 0 by decide),
+    MvPolynomial.aeval_C, MvPolynomial.aeval_X, map_one, mul_one, one_pow]
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
