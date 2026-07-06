@@ -1363,7 +1363,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   verbatim in decomposition); black box BB-DELIGNE stated as its own lemma first.
 
 ### [T-D6] KM 1.4.4 (1)⇔(3): Drinfeld = naive when N invertible
-- **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_geometric` ·
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-09T04:00Z —
+  `hasExactOrder_iff_geometric` DERIVED sorry-free from two register boxes stated
+  with verbatim KM 1.4.4 quotes: `HasExactOrder.pull_nsmul_ne_zero` (T-D6b,
+  (2)⟹(3) at a geometric point — fibre étale rank-N distinctness) and
+  `hasExactOrder_of_geometric` (T-D6c, (3)⟹(1) via the (4)-discriminant route).
+  FREE content proved: `Point.pull_zsmul` + `Point.pull_zero` (pull is compatible
+  with ℤ-smul because both sides are `≫ [a]` via point_smul_eq_comp_mulBy — no
+  cross-curve group-compat needed on the SAME curve); the killing conjunct comes
+  from hkill through them. Box discharge consumes the T-D6a machinery
+  (comap_mul ✓, ker_sectionBaseChange ✓, isPullback_sectionBaseChange ✓ — all
+  proven) + fibre étale/discriminant theory (T-D7-bridge-adjacent).) · **File**: ExactOrder.lean · `hasExactOrder_iff_geometric` ·
   **Depends on**: T-D3, T-B4 · **Parallel**: with T-D7 · **Type**: theorem
 - **FULL 1.4.4 QUOTE MINED (2026-07-08T11:30Z, printed pp. 18–19)** — statement (1)-(5)
   + proof structure: (1)⟹(2) "the property of having 'exact order N' is preserved
@@ -1475,7 +1485,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
-- **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-09T04:30Z —
+  `hasExactOrder_iff_etale` DERIVED from T-D6 + the `orderDivisor_etale_iff_geometric`
+  box (T-D7-bridge, (3)⟺(4) discriminant argument, verbatim KM quote in docstring);
+  the iff-plumbing collapses the killing conjunct via pull_zsmul + hkill.) · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
   **Depends on**: T-D3 · **Parallel**: with T-D6 · **Type**: theorem ·
   **Sources**: [KM] 1.4.4 (IN HAND; discriminant argument quoted in proof).
 
@@ -1485,7 +1498,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 3.1 + 3.7 ⧗; [Loe] Fact 3.8.1 (naive side, in hand).
 
 ### [T-D9] Γ₁(N): Drinfeld ⟺ naive (restatement of T-D6)
-- **Status**: open · **File**: LevelStructure/Basic.lean · `isGammaOne_iff_naive` ·
+- **Status**: done (beastmode-A 2026-07-09T05:00Z — PROVED first-try, sorry-free in
+  itself: forward direction gets the killing clause from T-D5's
+  HasExactOrder.smul_eq_zero (BB-DELIGNE consumer), then T-D6's iff both ways.
+  Transitively rests on the D5/D6 register boxes.) · **File**: LevelStructure/Basic.lean · `isGammaOne_iff_naive` ·
   **Depends on**: T-D6 · **Type**: theorem (thin wrapper — golf target).
 
 ### [T-D10] ⧗KM Γ₀(N): literal fppf-local cyclicity
