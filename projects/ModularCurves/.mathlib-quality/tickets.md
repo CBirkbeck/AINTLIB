@@ -546,6 +546,36 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `pullback.lift_fst/snd` to identify the composite legs. (c): `pullbackHom =
   (b).isoPullback.inv ≫ κ-arrangement` via `isoPullback_hom_snd`; IsIso from κ-iso;
   close `projModelBaseChangeLift_isIso`.
+- **STATE 2026-07-06 (late)**: IN FILE, GREEN: `thetaIso` (with manual IsIso via
+  two-sided CommRingCat inverse), `coverPiece_f_eq` (cover map =
+  pullbackRightPullbackFstIso.inv ≫ snd, by hom_ext + condition + inv_fst/inv_snd_snd),
+  `isPullback_coverPiece` (of_hasPullback transported by of_iso along the pasting iso;
+  hom_fst.symm for commfst; hom≫inv-collapse for commsnd), `isPullback_lift_piece`
+  wired by `(IsPullback.of_right ?s ?p (isPullback_coverPiece W j)).flip` — REMAINING
+  SORRIES: `piece_fst_natural` (the wall-crossing ring naturality, statement GREEN) and
+  the s/p cases (assemble from piece_fst_natural + a `hsnd`-analogue via
+  awayι_projModelπ at W' + algebraMap_chart_eq-W' symm-cancel; s := big-rect
+  `.of_iso` with θ.symm corner, then rw (pullback.lift_fst).symm to match of_right's
+  bottom-composite).
+- **WALL ANALYSIS v2 (binding for the continuation)**: do NOT try `rw [← elt-eq]` on
+  goals where the element occurs inside TYPES of subterms (chartCoordEquiv W' j's
+  type) — kabstract motive fails. Working options, in order of preference:
+  (1) prove `piece_fst_natural` via `Spec.map_injective` + `CommRingCat.hom_ext` +
+  elementwise generator chase on the QUOTIENT generators (mk-C and mk-X of SW'),
+  using `eqToHom_map` (Functor.map of eqToHom) once to convert the Spec-level
+  eqToHom into a CommRingCat-level eqToHom, and evaluating the CommRingCat-eqToHom
+  elementwise by first proving a tiny helper `Away`-index-cast-val lemma stated
+  GENERALIZED over the target element (`∀ t (h : bcElt = t), val (cast h x) = …`) so
+  that `subst`/`cases h` becomes legal (the closed-closed Eq blocks subst; generalize
+  the RHS first — standard technique); (2) alternatively define
+  `awayIndexCongr (h : s = t) : Away 𝒜 s ≃+* Away 𝒜 t` by tactic-`subst` after
+  generalizing, with `awayIndexCongr_mk` API, and phrase θ with it instead of
+  eqToIso (all later compat-proofs then go through awayIndexCongr_mk instead of
+  eqToHom juggling). Elementwise content of the naturality on generators: at mk-C r:
+  both sides = fromZero/algebraMap-image of e₀'(f r) — this is `bc_ring_square`
+  transported; at mk-X k: both sides are `Away.mk … 1 (mkW' (X k))`-normal forms —
+  val_injective + `Away.map_mk` + `chartCoordEquiv_mk_X`-W'-side + pow_one/pow_zero
+  witness congrArgs, exactly the `chartCoordEquiv_mk_X` proof pattern.
 
 
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)

@@ -2153,6 +2153,19 @@ private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
     (baseChangeGradedHom_mk_X (R' := R') W j).symm)
 
 set_option backward.isDefEq.respectTransparency false in
+/-- Chart naturality of the base change, across the wall: the plane-chart
+comparison equals the graded `Away.map` under the two chart identifications. -/
+private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
+    Spec.map (CommRingCat.ofHom
+      (((sChartBaseChange (R' := R') W j).toRingHom).comp
+        ((chartCoordEquiv W j).symm.toRingHom))) =
+    (thetaIso (R' := R') W j).hom ≫
+      Spec.map (CommRingCat.ofHom (HomogeneousLocalization.Away.map
+        (baseChangeGradedHom (algebraMap R R') W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))) := by
+  sorry
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The lift restricts over each cover piece to the base-changed chart. -/
 lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
     IsPullback
