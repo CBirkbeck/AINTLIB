@@ -365,6 +365,23 @@ theorem trivialTorsorLeft_one (S : Scheme.{u}) :
   refine Limits.Sigma.hom_ext _ _ fun h => ?_
   rw [ι_trivialTorsorLeft, one_mul, Category.comp_id]
 
+omit [Group G] [Finite G] in
+/-- The trivial-torsor projection is étale (a coproduct of identities;
+`Etale` is Zariski-local at the source). -/
+theorem trivialTorsorπ_etale (S : Scheme.{u}) :
+    AlgebraicGeometry.Etale (trivialTorsorπ (G := G) S) :=
+  IsZariskiLocalAtSource.sigmaDesc fun _ => inferInstance
+
+omit [Finite G] in
+/-- The trivial-torsor projection is surjective (any single summand already
+covers). -/
+theorem trivialTorsorπ_surjective (S : Scheme.{u}) :
+    Surjective (trivialTorsorπ (G := G) S) := by
+  refine Surjective.sigmaDesc_of_union_range_eq_univ ?_
+  refine Set.eq_univ_of_univ_subset ?_
+  intro x _
+  exact Set.mem_iUnion.mpr ⟨1, x, rfl⟩
+
 omit [Finite G] in
 theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
     trivialTorsorLeft G S (g * g') =
