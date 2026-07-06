@@ -28,6 +28,19 @@ is `Spec` of the comultiplication `T ↦ T ⊗ T`, pinned by `muNPointsEquiv` +
 `muNPointsEquiv_natural`/`_one`/`_mul`), and locally constant `ℤ/N`-valued functions
 for `(ℤ/N)_S` (pinned by `constSchemePointsEquiv` + naturality). Downstream code uses
 them only through these stated specifications (DATA-SORRY register rule).
+
+The construction pattern follows `Mathlib.AlgebraicGeometry.AffineSpace`
+(`toSpecMvPolyIntEquiv`): the points equivalences are assembled from the universal
+properties of `Spec ℤ[T]/(Tᴺ − 1)` and of the defining pullback, resp. — for the constant
+scheme — from mathlib's `nonempty_isColimit_cofanMk_of`, which recognises the clopen
+partition of `T` by a locally constant function as a coproduct decomposition. For the rank
+and étale statements (T-B7): `ℤ[T]/(Tᴺ − 1)` is free of rank `N` over `ℤ` (monic quotient
+basis `1, …, T^{N−1}`), and the relative statements descend along the defining pullback
+square. Étaleness for invertible `N` is transported from the model `AdjoinRoot (Xᴺ − 1)`
+over `ℤ[1/N]` — a pushout of the coordinate ring, standard étale because `f′·X − N·f = N`
+exhibits `(Xᴺ − 1, C N)` as a standard étale pair; the converse reduces along residue
+fields to the field case, where `X^{N/q} − 1` is a nonzero nilpotent in characteristic
+`q ∣ N`.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits Polynomial
@@ -65,18 +78,6 @@ KM 1.4.4(5). -/
   Sigma.desc fun _ ↦ 𝟙 S
 
 section PointsFunctor
-
-/-! ### The points functor of `μ_{N,S}` (ticket T-B2)
-
-`μ_N`-points over `g : T ⟶ S` are the `N`-th roots of unity of `Γ(T, ⊤)`. Following
-the pattern of `Mathlib.AlgebraicGeometry.AffineSpace` (`toSpecMvPolyIntEquiv`), the
-equivalence is assembled from the universal property of `Spec ℤ[T]/(Tᴺ − 1)` and of
-the defining pullback. The group-object structure (DS3a) is then *induced* from the
-presheaf of groups it represents (`GrpObj.ofRepresentableBy`), which makes the points
-description `muNPointsEquiv` — together with its naturality and multiplicativity —
-the definitional pin of the group law, as required by the DATA-SORRY register. On
-points the induced multiplication is multiplication of roots of unity, i.e. the
-comultiplication `T ↦ T ⊗ T` of KM 1.12. -/
 
 /-- The universal `N`-th root of unity: the class of `T` in `ℤ[T]/(Tᴺ − 1)`. -/
 private def muNRingGen (N : ℕ) : muNRing N :=
@@ -261,14 +262,6 @@ noncomputable instance muNGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
 end PointsFunctor
 
 section ConstPointsFunctor
-
-/-! ### The points functor of the constant scheme (ticket T-B2)
-
-An `S`-morphism `T ⟶ ∐_A S` over `g : T ⟶ S` is precisely a locally constant
-function `T → A` — the index of the copy of `S` each point is sent to. The
-group-object structure on `(ℤ/N)_S` (DS3b) is induced from this presheaf by
-representability, exactly as for `μ_N`. The engine recognising a clopen partition of
-`T` as a coproduct decomposition is mathlib's `nonempty_isColimit_cofanMk_of`. -/
 
 variable {S : Scheme.{u}} {A : Type} [Finite A]
 
@@ -473,13 +466,6 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
 
 section RankAndEtale
 
-/-! ### `μ_N` is finite locally free of rank `N` (ticket T-B7)
-
-`ℤ[T]/(Tᴺ − 1)` is free of rank `N` over `ℤ` (monic quotient basis `1, …, T^{N−1}`),
-so the absolute `μ_N ⟶ Spec ℤ` is finite flat of rank `N`; the relative statements
-follow by base change along the defining pullback square, transported from the
-abstract terminal scheme to `Spec (ULift ℤ)`. -/
-
 private lemma muN_poly_monic (N : ℕ) [NeZero N] : ((X : Polynomial ℤ) ^ N - 1).Monic := by
   simpa using Polynomial.monic_X_pow_sub_C (1 : ℤ) (NeZero.ne N)
 
@@ -574,14 +560,6 @@ theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
     ((terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom) s))
   exact congrFun
     (Scheme.Hom.finrank_SpecMap_eq_finrank (muNRingMap_finite N) (muNRingMap_flat N)) _
-
-/-! #### The étale model over `ℤ[1/N]` (engine for `muNπ_etale_iff`)
-
-`AdjoinRoot (Xᴺ − 1)` over `ℤ[1/N]` is the base change of `μ_N`'s coordinate ring
-(a pushout square, proved by universal properties — no tensor products), and it is
-étale over `ℤ[1/N]` because `f'·X − N·f = N` makes `(Xᴺ − 1, C N)` a standard étale
-pair once `N` is invertible. Any `S` with `N` invertible factors through
-`Spec ℤ[1/N]`, so `μ_{N,S} ⟶ S` is a base change of an étale morphism. -/
 
 private abbrev muNAwayRing (N : ℕ) : Type u := ULift.{u} (Localization.Away (N : ℤ))
 
