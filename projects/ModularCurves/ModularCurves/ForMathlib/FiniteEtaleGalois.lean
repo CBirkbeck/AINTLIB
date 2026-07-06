@@ -4,6 +4,8 @@ import Mathlib.CategoryTheory.Galois.Basic
 import Mathlib.CategoryTheory.Limits.Comma
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
 import Mathlib.CategoryTheory.Limits.FullSubcategory
+import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Products
+import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Pullbacks
 import Mathlib.RingTheory.Etale.Finite
 import ModularCurves.ForMathlib.EtaleSectionsCount
 
@@ -635,6 +637,49 @@ theorem monoInducesIsoOnDirectSummand_op {X Y : (CommAlgCat.FiniteEtale.{u} k)�
   exact ⟨Opposite.op Zobj, q.op, ⟨BinaryFan.IsLimit.op hlim⟩⟩
 
 end EpiSplitting
+
+/-! Assembly: `(FiniteEtale k)ᵒᵖ` is a PreGalois category.  Axioms (G1)/(G2) are the
+op-duals of the initial object, finite products, pushouts and `SingleObj`-shaped limits
+established above; (G3) is `monoInducesIsoOnDirectSummand_op`. -/
+
+section PreGalois
+
+open Opposite
+
+variable {k : Type u} [Field k]
+
+/-- The opposite of the one-object category of a monoid is the one-object category of
+the opposite monoid. -/
+def singleObjOpEquiv (M : Type*) [Monoid M] : SingleObj Mᵐᵒᵖ ≌ (SingleObj M)ᵒᵖ where
+  functor :=
+    { obj := fun _ => op (SingleObj.star M)
+      map := fun g => Quiver.Hom.op
+        (show SingleObj.star M ⟶ SingleObj.star M from MulOpposite.unop g)
+      map_id := fun _ => rfl
+      map_comp := fun _ _ => rfl }
+  inverse :=
+    { obj := fun _ => SingleObj.star Mᵐᵒᵖ
+      map := fun u => show SingleObj.star Mᵐᵒᵖ ⟶ SingleObj.star Mᵐᵒᵖ from
+        MulOpposite.op (show M from Quiver.Hom.unop u)
+      map_id := fun _ => rfl
+      map_comp := fun _ _ => rfl }
+  unitIso := Iso.refl _
+  counitIso := Iso.refl _
+
+instance hasQuotientsByFiniteGroupsOp (G : Type u) [Group G] [Finite G] :
+    HasColimitsOfShape (SingleObj G) (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ :=
+  haveI : HasLimitsOfShape (SingleObj G)ᵒᵖ (CommAlgCat.FiniteEtale.{u} k) :=
+    hasLimitsOfShape_of_equivalence (C := CommAlgCat.FiniteEtale.{u} k) (singleObjOpEquiv G)
+  hasColimitsOfShape_op_of_hasLimitsOfShape
+
+/-- The opposite of the category of finite étale algebras over a field is a PreGalois
+category in the sense of SGA1/Lenstra: axioms (G1)–(G3) hold.  Together with the fibre
+functor to `FintypeCat` this exhibits the absolute Galois group as the fundamental group
+of `Spec k`. -/
+instance : PreGaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ where
+  monoInducesIsoOnDirectSummand i := monoInducesIsoOnDirectSummand_op i
+
+end PreGalois
 
 end FiniteEtaleGalois
 

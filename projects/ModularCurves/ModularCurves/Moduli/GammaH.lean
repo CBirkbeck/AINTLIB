@@ -74,6 +74,27 @@ noncomputable def glSmul {N : ℕ} [NeZero N]
      ((m 0 1).val : ℤ) • L.1.1 + ((m 1 1).val : ℤ) • L.1.2)),
     by sorry⟩
 
+/-- The `GL₂`-action fixes level structures under the identity matrix (all `N`:
+`ZMod.val_one` for `N ≥ 2`; for `N = 1`, level points are `0`). -/
+theorem glSmul_one {N : ℕ} [NeZero N] (L : E.FullLevelPt N) :
+    E.glSmul 1 L = L := by
+  have hm : ∀ i j, (((1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+      Matrix (Fin 2) (Fin 2) (ZMod N)) i j) = (1 : Matrix _ _ (ZMod N)) i j := by
+    intro i j; rw [Matrix.GeneralLinearGroup.coe_one]
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · simp only [glSmul, hm, Matrix.one_apply_eq, Matrix.one_apply_ne (show (1:Fin 2) ≠ 0 by decide)]
+    rcases eq_or_lt_of_le (Nat.one_le_iff_ne_zero.mpr (NeZero.ne N)) with h1 | h2
+    · have hP : L.1.1 = 0 := by simpa [← h1] using L.2.1.1
+      simp [hP]
+    · haveI : Fact (1 < N) := ⟨h2⟩
+      simp [ZMod.val_one, ZMod.val_zero]
+  · simp only [glSmul, hm, Matrix.one_apply_eq, Matrix.one_apply_ne (show (0:Fin 2) ≠ 1 by decide)]
+    rcases eq_or_lt_of_le (Nat.one_le_iff_ne_zero.mpr (NeZero.ne N)) with h1 | h2
+    · have hQ : L.1.2 = 0 := by simpa [← h1] using L.2.1.2
+      simp [hQ]
+    · haveI : Fact (1 < N) := ⟨h2⟩
+      simp [ZMod.val_one, ZMod.val_zero]
+
 /-- **(T-H2a)** The action law. `glSmul` is *precomposition* of the trivialisation
 `(ℤ/N)² ≅ E[N]` with `g`, hence a **right** action: `(φ∘g)∘h = φ∘(g*h)` reads
 `(g*h) • L = h • (g • L)`. (Uses that level points are killed by `N`, so the
