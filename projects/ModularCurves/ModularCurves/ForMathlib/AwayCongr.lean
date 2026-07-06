@@ -71,4 +71,37 @@ lemma awayMap_congr {g₁ g₂ : GradedRingHom 𝒜 ℬ} (h : g₁ = g₂) (s : 
   subst h
   exact (awayCongr_self _ _).symm
 
+variable {τ C T : Type*} [CommRing T] [CommRing C] [Algebra T C]
+  {𝒞 : ι → Submodule T C} [GradedAlgebra 𝒞]
+
+/-- Applied form of `Away.map_comp`. -/
+lemma awayMap_map (f : GradedRingHom 𝒜 ℬ) (g : GradedRingHom ℬ 𝒞) (s : A)
+    (x : Away 𝒜 s) :
+    HomogeneousLocalization.Away.map g (f s)
+        (HomogeneousLocalization.Away.map f s x) =
+      HomogeneousLocalization.Away.map (g.comp f) s x :=
+  (DFunLike.congr_fun (HomogeneousLocalization.Away.map_comp f g s) x).symm
+
+variable {S' B' : Type*} [CommRing S'] [CommRing B'] [Algebra S' B']
+  {ℬ' : ι → Submodule S' B'} [GradedAlgebra ℬ']
+
+/-- Comparing the two ways around a commuting square of graded homs, with
+transports along any equalities of the localization elements. -/
+lemma awayMap_square {f₁ : GradedRingHom 𝒜 ℬ} {g₁ : GradedRingHom ℬ 𝒞}
+    {f₂ : GradedRingHom 𝒜 ℬ'} {g₂ : GradedRingHom ℬ' 𝒞}
+    (hsq : g₁.comp f₁ = g₂.comp f₂) (s : A) (x : Away 𝒜 s)
+    {t : C} (h₁ : g₁ (f₁ s) = t) (h₂ : g₂ (f₂ s) = t) :
+    awayCongr (𝒜 := 𝒞) h₁
+        (HomogeneousLocalization.Away.map g₁ (f₁ s)
+          (HomogeneousLocalization.Away.map f₁ s x)) =
+      awayCongr (𝒜 := 𝒞) h₂
+        (HomogeneousLocalization.Away.map g₂ (f₂ s)
+          (HomogeneousLocalization.Away.map f₂ s x)) := by
+  rw [awayMap_map, awayMap_map, awayMap_congr hsq s x]
+  refine Eq.trans ?_ (awayCongr_trans (𝒜 := 𝒞)
+    (congrArg (fun g : GradedRingHom 𝒜 𝒞 => g s) hsq) h₂
+    ((HomogeneousLocalization.Away.map (g₁.comp f₁) s) x)).symm
+  exact congrArg (fun hh => awayCongr (𝒜 := 𝒞) hh
+    ((HomogeneousLocalization.Away.map (g₁.comp f₁) s) x)) (Subsingleton.elim _ _)
+
 end ModularCurves

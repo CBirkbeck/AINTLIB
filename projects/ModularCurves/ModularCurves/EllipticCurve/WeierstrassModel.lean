@@ -2167,6 +2167,33 @@ lemma gradedSquare (W : WeierstrassCurve R) :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+/-- Elementwise chart naturality of the base change. -/
+private lemma bc_chart_value (W : WeierstrassCurve R) (j : Fin 3)
+    (p : MvPolynomial {k : Fin 3 // k ≠ j} R) :
+    (awayCongr (baseChangeGradedHom_mk_X (R' := R') W j))
+      ((HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap R R') W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+        ((HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+          (MvPolynomial.X j)) (MvPolynomial.homogenizeAt R j p))) =
+    (HomogeneousLocalization.Away.map
+      (quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
+      (MvPolynomial.X j))
+      (MvPolynomial.homogenizeAt R' j (MvPolynomial.map (algebraMap R R') p)) := by
+  rw [MvPolynomial.homogenizeAt_map, ModularCurves.awayCongr_map]
+  exact ModularCurves.awayMap_square
+    (f₁ := quotientGradingHom (projIdeal W))
+    (g₁ := baseChangeGradedHom (algebraMap R R') W)
+    (f₂ := mvMapGraded (algebraMap R R'))
+    (g₂ := quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
+    (gradedSquare (R' := R') W)
+    (MvPolynomial.X j) (MvPolynomial.homogenizeAt R j p)
+    (t := (quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
+      (MvPolynomial.X j))
+    (baseChangeGradedHom_mk_X (R' := R') W j)
+    (congrArg (fun z => (quotientGradingHom (projIdeal (W.map (algebraMap R R')))) z)
+      (MvPolynomial.map_X (algebraMap R R') j))
+
+set_option backward.isDefEq.respectTransparency false in
 /-- Chart naturality of the base change, across the wall: the plane-chart
 comparison equals the graded `Away.map` under the two chart identifications. -/
 private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
@@ -2177,7 +2204,23 @@ private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
       Spec.map (CommRingCat.ofHom (HomogeneousLocalization.Away.map
         (baseChangeGradedHom (algebraMap R R') W)
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))) := by
-  sorry
+  simp only [thetaIso, Iso.trans_hom, asIso_hom]
+  rw [Category.assoc, ← Spec.map_comp, ← Spec.map_comp]
+  refine congrArg Spec.map ?_
+  refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
+  obtain ⟨q, rfl⟩ := (chartCoordEquiv W j).surjective x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective q
+  show (sChartBaseChange (R' := R') W j) ((chartCoordEquiv W j).symm
+    (chartCoordEquiv W j (Ideal.Quotient.mk _ p))) =
+    (chartCoordEquiv (W.map (algebraMap R R')) j).symm
+      ((awayCongr (baseChangeGradedHom_mk_X (R' := R') W j))
+        ((HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap R R') W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+          (chartCoordEquiv W j (Ideal.Quotient.mk _ p))))
+  rw [RingEquiv.symm_apply_apply, sChartBaseChange_mk]
+  rw [RingEquiv.eq_symm_apply]
+  rw [chartCoordEquiv_mk, chartCoordEquiv_mk]
+  exact (bc_chart_value (R' := R') W j p).symm
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The lift restricts over each cover piece to the base-changed chart. -/

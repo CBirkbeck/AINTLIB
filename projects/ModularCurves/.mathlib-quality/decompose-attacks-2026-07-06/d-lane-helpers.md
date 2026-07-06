@@ -3,6 +3,44 @@
 New helper statements get their block here at statement time (v5 rule; standing
 rule 1). Format mirrors `level-structures.md`.
 
+### T-D29: `Algebra.charpoly_lmul_eq_norm` (ForMathlib/CharpolyNorm.lean)
+
+Statement: for `B` a finite free `R`-algebra and `b : B`,
+`(Algebra.lmul R B b).charpoly = Algebra.norm R[X] ((X : R[X]) ⊗ₜ[R] 1 - 1 ⊗ₜ[R] b)`
+(element of the `R[X]`-algebra `R[X] ⊗[R] B`).
+
+- Attacks: [1] **Statement-fidelity / the wrong reading**: the v4 board bullet's
+  loose spelling `LinearMap.charpoly f = Algebra.norm R[T] (T•1 − f⊗1)` admits a
+  general-endomorphism reading (`f : End R M`, element of `End R[X] (R[X]⊗M)`),
+  which is FALSE: for `g ∈ End(V)`, `Algebra.norm (End V/K) g = det(g)^{dim V}`
+  (lmul on End is dim-V copies of g), so the RHS would be `charpoly`-like only
+  after an n-th root. KM 1.8.2's own text ("the characteristic polynomial of
+  f ∈ B is just the norm of T−f relative to B⊗R[T]/R[T]") fixes `f ∈ B` an
+  ALGEBRA element and the endomorphism = multiplication by it. The formalised
+  statement takes `Algebra.lmul R B b` — the faithful reading. REJECTED-reading
+  documented, statement SURVIVES.
+- [2] **Convention (sign/monic)**: mathlib `charpoly = det (charmatrix) =
+  det(X•1 − A.map C)` is monic-in-X, matching `norm(X⊗1 − 1⊗b)` whose matrix is
+  `X•1 − (leftMulMatrix b).map C` — same matrix, no `(−1)ⁿ` skew (both are KM's
+  `det(T − f)`). SURVIVES.
+- [3] **Degenerate cases**: `B = 0` (rank 0): both sides are empty determinants
+  `= 1` (charpoly over the zero module; `R[X] ⊗ 0 = 0`, norm on the zero algebra
+  is det of the zero-module endomorphism `= 1`). `b = 0`: LHS = charpoly of 0-map
+  `= Xⁿ`; RHS = `norm(X ⊗ 1) = Xⁿ · norm(1⊗1) = Xⁿ` ✓. Free-of-rank-0 and
+  `Subsingleton R` cases carried by the same determinant conventions. SURVIVES.
+- [4] **Hypotheses**: `[Module.Free R B] [Module.Finite R B]` required by
+  `LinearMap.charpoly` (defined via `chooseBasis`); the norm side needs no extra
+  instances (basis via `Module.Basis.baseChange`; `Module.Free/Finite` of
+  `R[X] ⊗[R] B` over `R[X]` not even needed in the statement). `CommRing B` kept
+  to match the KM consumer (T-D30); relaxation to `Ring B` is a cleanup-lane
+  question, not load-bearing. SURVIVES.
+- [5] **Not-in-mathlib**: 4 searches (charpoly-grep in RingTheory/Norm/*;
+  global `charpoly∩norm` grep; `def charpoly` enumeration; instance/bridge grep +
+  `LinearMap.charpoly_baseChange` inspection — that lemma is base-change
+  functoriality, not the norm bridge). Genuine gap; upstream candidate. SURVIVES.
+- Verdict: **SURVIVED** (statement as formalised; loose board spelling refined
+  on the board at claim time).
+
 ### T-D3b: `IdealSheafData` multiplicative structure — **RESOLVED: MATHLIB HAS IT**
 
 2026-07-06T11:40Z (beastmode-D2): at the current pin (11b908e5cdd9), mathlib's
