@@ -1322,6 +1322,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 ### [T-D6] KM 1.4.4 (1)⇔(3): Drinfeld = naive when N invertible
 - **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_geometric` ·
   **Depends on**: T-D3, T-B4 · **Parallel**: with T-D7 · **Type**: theorem
+- **FULL 1.4.4 QUOTE MINED (2026-07-08T11:30Z, printed pp. 18–19)** — statement (1)-(5)
+  + proof structure: (1)⟹(2) "the property of having 'exact order N' is preserved
+  under arbitrary changes of base T → S" [needs divisor-formation + IsSubgroup
+  base-change compat = T-D12-family]; (2)⟹(3) over k: G := the rank-N
+  subgroup-scheme; N invertible in k ⟹ "G is automatically finite etale over k of
+  rank N. Therefore as a Cartier divisor in C_k, G consists of a uniquely determined
+  set of N distinct points. The equality of Cartier divisors G = Σ [aP_k] shows the
+  N points all distinct"; (3)⟺(4) D is finite locally free of rank N; "finite etale
+  over S if and only if its discriminant (determinant of the matrix tr(eᵢeⱼ)…) is
+  invertible on S. This holds if and only if for all geometric points the Cartier
+  divisor D_k is finite etale over k, i.e. iff (3)"; (3)⟺(5) ℤ/N → C factors
+  through D, iso-check at geometric points. SUB-TICKET DECOMPOSITION when executed
+  (one conclusion each, per statement-splitting): T-D6a exact-order base-change
+  ((1)⟹(2)); T-D6b field-case distinctness ((2)⟹(3): subgroup-divisor over a field
+  with N invertible has N distinct points); T-D6c étale-discriminant bridge
+  ((3)⟺(4), consumes T-B4-rank + a trace-form/discriminant input — check mathlib
+  `Algebra.discr` + finite-étale-iff-unramified-fibrewise before boxing).
 - **Sketch**: KM's proof IN HAND (preview pp. 18–19): (1)⟹(2) base change; (2)⟹(3)
   rank-N étale subgroup over field has N distinct points; (3)⟹(1) via (4). Attack
   obligation from decomposition D5 (killed-by-N hypothesis placement) must be resolved
