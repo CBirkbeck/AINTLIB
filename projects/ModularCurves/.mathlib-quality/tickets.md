@@ -2287,6 +2287,14 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
 - **[T-D16]** `exists_subgroupLocus` (KM 1.3.7, verbatim + proof in hand;
   `1 + deg + deg²` equations via `[e] ≤ D`, `D = inv*D`, `[m(P₁,P₂)] ≤ D_W`).
   Depends: T-D14, T-D15, T-D3.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T22:30Z (deps met: T-D14/T-D15 mine just now, T-D3 by A).
+    Route banked in the T-D15 done-note: three loci sup + vanishingLocus-as-
+    coordinate-descent for condition (3) + the IsSubgroup ⟺ three-conditions
+    dictionary (functor-of-points AddSubgroup form per ExactOrder.lean:91).
+    Recon next: inv*D iso-pullback divisor construction; A's sectionDivisor
+    signature; the m/inv morphisms + tautological-pair infrastructure in
+    GroupLaw; universal-point instantiation pattern (T-B3's pointToTorsion).
 - **[T-D17]** `exists_exactOrderLocus` (A-generators, `A = ℤ/N`; KM 1.6 instance).
   Depends: T-D16. Feeds T-E7.
 - **[T-D18]** `exists_fullLevelLocus` (`A = (ℤ/N)²`). Depends: T-D16. Feeds T-E9.
