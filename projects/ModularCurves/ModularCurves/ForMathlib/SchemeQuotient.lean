@@ -5,7 +5,7 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q5 (leaf T-Q5a).
 -/
-import ModularCurves.ForMathlib.SpecGroupAction
+import ModularCurves.ForMathlib.AffineQuotient
 
 /-!
 # Group actions on schemes: vocabulary for the quotient construction
@@ -206,6 +206,74 @@ theorem resLE_localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
   show (σ.hom g).resLE V V (hV.le_preimage g) ≫ hVa.isoSpec.hom ≫
       invariantsπ G ↑Γ(X, V) ℤ = hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
   rw [← Category.assoc, h1, Category.assoc, specSMul_invariantsπ]
+
+/-- Inverse form of the intertwiner bridge. -/
+@[reassoc]
+theorem specSMul_isoSpec_inv {V : X.Opens} (hV : σ.IsStableOpen V)
+    (hVa : IsAffineOpen V) (g : G) :
+    letI := σ.gammaMulSemiringAction hV
+    specSMul g ≫ hVa.isoSpec.inv =
+      hVa.isoSpec.inv ≫ (σ.hom g).resLE V V (hV.le_preimage g) := by
+  letI := σ.gammaMulSemiringAction hV
+  rw [Iso.eq_inv_comp, ← Category.assoc, ← resLE_isoSpec_hom σ hV hVa g,
+    Category.assoc, Iso.hom_inv_id, Category.comp_id]
+
+/-- The restricted action commutes with the inclusion of a smaller stable open. -/
+@[reassoc]
+theorem resLE_homOfLE {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hV : σ.IsStableOpen V) (hWV : W ≤ V) (g : G) :
+    (σ.hom g).resLE W W (hW.le_preimage g) ≫ X.homOfLE hWV =
+      X.homOfLE hWV ≫ (σ.hom g).resLE V V (hV.le_preimage g) := by
+  rw [Scheme.Hom.resLE_map, Scheme.Hom.map_resLE]
+
+variable [Finite G]
+
+private theorem localQuotientMap_invariance {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) :
+    letI := σ.gammaMulSemiringAction hW
+    ∀ g : G, specSMul g ≫
+        (hWa.isoSpec.inv ≫ X.homOfLE hWV ≫ σ.localQuotientπ hV hVa) =
+      hWa.isoSpec.inv ≫ X.homOfLE hWV ≫ σ.localQuotientπ hV hVa := by
+  letI := σ.gammaMulSemiringAction hW
+  intro g
+  rw [specSMul_isoSpec_inv_assoc σ hW hWa g, resLE_homOfLE_assoc σ hW hV hWV g,
+    resLE_localQuotientπ σ hV hVa g]
+
+/-- The descended map between the local quotients of nested stable affine opens:
+the (unique) morphism under `invariantsπ` induced by the inclusion `W ≤ V`. -/
+noncomputable def localQuotientMap {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) : σ.localQuotient hW ⟶ σ.localQuotient hV :=
+  letI := σ.gammaMulSemiringAction hW
+  (exists_invariantsπ_lift G ↑Γ(X, W) ℤ
+    (hWa.isoSpec.inv ≫ X.homOfLE hWV ≫ σ.localQuotientπ hV hVa)
+    (σ.localQuotientMap_invariance hW hWa hV hVa hWV)).choose
+
+/-- Defining property of `localQuotientMap`. -/
+theorem invariantsπ_localQuotientMap {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) :
+    letI := σ.gammaMulSemiringAction hW
+    invariantsπ G ↑Γ(X, W) ℤ ≫ σ.localQuotientMap hW hWa hV hVa hWV =
+      hWa.isoSpec.inv ≫ X.homOfLE hWV ≫ σ.localQuotientπ hV hVa :=
+  letI := σ.gammaMulSemiringAction hW
+  (exists_invariantsπ_lift G ↑Γ(X, W) ℤ
+    (hWa.isoSpec.inv ≫ X.homOfLE hWV ≫ σ.localQuotientπ hV hVa)
+    (σ.localQuotientMap_invariance hW hWa hV hVa hWV)).choose_spec
+
+/-- The local quotient maps are compatible with the local quotient projections. -/
+@[reassoc]
+theorem localQuotientπ_localQuotientMap {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) :
+    σ.localQuotientπ hW hWa ≫ σ.localQuotientMap hW hWa hV hVa hWV =
+      X.homOfLE hWV ≫ σ.localQuotientπ hV hVa := by
+  letI := σ.gammaMulSemiringAction hW
+  have h1 := σ.invariantsπ_localQuotientMap hW hWa hV hVa hWV
+  show (hWa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, W) ℤ) ≫
+      σ.localQuotientMap hW hWa hV hVa hWV = _
+  rw [Category.assoc, h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
 
 end SchemeAction
 
