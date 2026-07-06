@@ -247,9 +247,14 @@ noncomputable def vRhoπ {N : ℕ} [NeZero N] (D : GaloisRepData N) :
     vRho D ⟶ Spec (.of ℚ) :=
   Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0)))
 
-/-- **(T-F1a, specification of DS5)** `V_ρ ⟶ Spec ℚ` is finite étale (of degree `N²`). -/
+/-- **(T-F1a, specification of DS5)** `V_ρ ⟶ Spec ℚ` is finite étale. -/
 theorem vRhoπ_finite_etale {N : ℕ} [NeZero N] (D : GaloisRepData N) :
-    IsFinite (vRhoπ D) ∧ Etale (vRhoπ D) := by sorry
+    IsFinite (vRhoπ D) ∧ Etale (vRhoπ D) := by
+  constructor
+  · rw [vRhoπ, IsFinite.SpecMap_iff]
+    exact RingHom.finite_algebraMap.mpr inferInstance
+  · rw [vRhoπ, HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
+    exact RingHom.etale_algebraMap.mpr inferInstance
 
 /-- **(DS5c / T-F1b, specification of DS5)** The canonical `ℚ̄`-points description of
 `V_ρ`: points over `ℚ̄` biject with `(ℤ/N)²`. Registered as canonical data (it is part of
