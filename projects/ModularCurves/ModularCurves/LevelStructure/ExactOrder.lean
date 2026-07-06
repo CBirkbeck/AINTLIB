@@ -49,6 +49,22 @@ abbrev Section := E.Point (𝟙 S)
 def Point.pull {T : Scheme.{u}} (t : T ⟶ S) (P : E.Section) : E.Point t :=
   ⟨t ≫ P.1, by rw [Category.assoc, P.2, Category.comp_id]⟩
 
+/-- Pulling points back along `t : T ⟶ S` is compatible with integer scalars: both
+sides are `≫ [a]` by `point_smul_eq_comp_mulBy`. -/
+theorem Point.pull_zsmul {T : Scheme.{u}} (t : T ⟶ S) (a : ℤ) (P : E.Section) :
+    Point.pull E t (a • P) = a • Point.pull E t P := by
+  refine Subtype.ext ?_
+  show t ≫ ((a • P : E.Point (𝟙 S)) : S ⟶ E.E) = ((a • Point.pull E t P : E.Point t) :
+    T ⟶ E.E)
+  rw [point_smul_eq_comp_mulBy, point_smul_eq_comp_mulBy, ← Category.assoc]
+  rfl
+
+/-- Pulling back the zero point gives zero. -/
+theorem Point.pull_zero {T : Scheme.{u}} (t : T ⟶ S) :
+    Point.pull E t (0 : E.Section) = 0 := by
+  have h := Point.pull_zsmul E t 0 0
+  rwa [zero_smul, zero_smul] at h
+
 /-- **KM 1.3.6**: a relative effective Cartier divisor `D` in `E/S` *is a subgroup* if for
 every `T ⟶ S` the subset of `E(T)` consisting of points factoring through `D` is a
 subgroup of `E(T)`: it contains `0`, and is stable under addition and negation. -/
@@ -135,28 +151,79 @@ theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
   rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι]
   exact P.1.toImage_imageι
 
-/-- **(T-D6 = KM 1.4.4, (1) ⇔ (3), verbatim source in hand with proof)** For a point
-`P` **killed by `N`** (KM's standing hypothesis "Let `P ∈ C(S)` be a point killed by
-`N`" — REQUIRED: over `S = Spec ℚ̄[ε]` a lift `P̃` of an exact-order-`N` point with
-`N•P̃ ≠ 0` in the tangent kernel satisfies the geometric right-hand side but not the
-left; adversarial pass 2026-07-06) and `N` invertible on `S`: `P` has exact order `N`
-iff on every geometric point the induced point has exact order `N` "in the usual sense
-that `N` is the least positive integer which kills `P_k`". -/
+/-- **Register box `T-D6b` (KM 1.4.4, (2)⟹(3) at a geometric point)**: over an
+algebraically closed field the subgroup divisor of rank `N` is, for `N` invertible,
+finite étale, hence consists of `N` distinct points, which by the divisor equality
+`G = Σ [aP]` are exactly the multiples — so no proper multiple vanishes. KM
+(verbatim): *"G is automatically finite etale over k of rank N. Therefore as a
+Cartier divisor in C_k, G consists of a uniquely determined set of N distinct
+points."* Discharge: fibre étale theory (discriminant bridge, T-D6c-adjacent) +
+the base-change formation compat (T-D6a machinery: `comap_mul`,
+`ker_sectionBaseChange`). -/
+theorem Section.HasExactOrder.pull_nsmul_ne_zero {P : E.Section} {N : ℕ} [NeZero N]
+    (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) (h : P.HasExactOrder E N)
+    (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S)
+    {a : ℕ} (ha0 : 0 < a) (haN : a < N) :
+    (a : ℤ) • Point.pull E t P ≠ 0 := by sorry
+
+/-- **Register box `T-D6c` (KM 1.4.4, (3)⟹(1) via (4))**: if on every geometric point
+the multiples `aP`, `a = 1, …, N` are distinct, then the divisor `Σ [aP]` is finite
+étale over `S` (discriminant invertible fibrewise ⟹ invertible) and the subgroup
+property follows. KM (verbatim): *"It is finite etale over S if and only if its
+discriminant … is invertible on S. This holds if and only if for all geometric
+points Spec(k) → S, the Cartier divisor D_k … is finite etale over k"*. -/
+theorem Section.hasExactOrder_of_geometric {P : E.Section} {N : ℕ} [NeZero N]
+    (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0)
+    (h : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
+      ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0) :
+    P.HasExactOrder E N := by sorry
+
+/-- **(T-D6 = KM 1.4.4, (1) ⇔ (3))** For a point `P` killed by `N` (KM's standing
+hypothesis; the `ℚ̄[ε]` counterexample of the 2026-07-06 adversarial pass shows it is
+required) and `N` invertible on `S`: `P` has exact order `N` iff on every geometric
+point the induced point has exact order `N` in the usual sense. Derived from the
+`T-D6b`/`T-D6c` register boxes; the killing conjunct is `Point.pull_zsmul` + `hkill`. -/
 theorem Section.hasExactOrder_iff_geometric {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
     P.HasExactOrder E N ↔
       ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
         (N : ℤ) • Point.pull E t P = 0 ∧
+        ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0 := by
+  constructor
+  · intro h k _ _ t
+    refine ⟨?_, fun a ha0 haN => h.pull_nsmul_ne_zero E hN hkill k t ha0 haN⟩
+    rw [← Point.pull_zsmul, hkill, Point.pull_zero]
+  · intro h
+    exact Section.hasExactOrder_of_geometric E hN hkill fun k _ _ t => (h k t).2
+
+/-- **Register box `T-D7-bridge` (KM 1.4.4, (3)⟺(4))**: the divisor `Σ [aP]` is finite
+étale over `S` iff on every geometric point the multiples are distinct. KM (verbatim):
+*"It is finite etale over S if and only if its discriminant (determinant of the matrix
+tr(eᵢeⱼ)…) is invertible on S. This holds if and only if for all geometric points
+Spec(k) → S, the Cartier divisor D_k = Σ [aP_k] is finite etale over k, i.e., if and
+only if (3) holds."* Discharge: trace-form/discriminant theory for the finite locally
+free `orderDivisor` (T-B4 rank input) + fibre comparison. -/
+theorem Section.orderDivisor_etale_iff_geometric {P : E.Section} {N : ℕ} [NeZero N]
+    (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
+    Etale ((P.orderDivisor E N).ideal.subschemeι ≫ E.π) ↔
+      ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
         ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0 := by sorry
 
-/-- **(T-D7 = KM 1.4.4, (1) ⇔ (4))** For a point `P` killed by `N` (KM's standing
-hypothesis — required: the same `ℚ̄[ε]` lift makes `[P̃] + [2P̃]` a disjoint union
-`S ⊔ S`, finite étale, without `P̃` having exact order 2) and `N` invertible on `S`:
-`P` has exact order `N` iff the divisor `Σₐ [aP]` is finite étale over `S`. -/
+/-- **(T-D7 = KM 1.4.4, (1) ⇔ (4))** For a point `P` killed by `N` and `N` invertible
+on `S`: `P` has exact order `N` iff the divisor `Σₐ [aP]` is finite étale over `S`.
+Derived from T-D6 and the `T-D7-bridge` box. -/
 theorem Section.hasExactOrder_iff_etale {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
     P.HasExactOrder E N ↔
-      Etale ((P.orderDivisor E N).ideal.subschemeι ≫ E.π) := by sorry
+      Etale ((P.orderDivisor E N).ideal.subschemeι ≫ E.π) := by
+  rw [Section.hasExactOrder_iff_geometric E hN hkill,
+    Section.orderDivisor_etale_iff_geometric E hN hkill]
+  constructor
+  · intro h k _ _ t a ha0 haN
+    exact (h k t).2 a ha0 haN
+  · intro h k _ _ t
+    refine ⟨?_, h k t⟩
+    rw [← Point.pull_zsmul, hkill, Point.pull_zero]
 
 end EllipticCurve
 
