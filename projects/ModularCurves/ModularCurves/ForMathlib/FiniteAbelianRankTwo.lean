@@ -281,10 +281,17 @@ private def nsmulKerSubgroup (H : Type u) [AddCommGroup H] (a : ℕ) : AddSubgro
 
 private lemma nsmulKerSubgroup_kill (H : Type u) [AddCommGroup H] (a : ℕ)
     (z : nsmulKerSubgroup H a) : a • z = 0 := by
-  have h1 : a • (z : H) = 0 := z.2
-  exact Subtype.ext (by
-    rw [← h1]
-    exact map_nsmul (nsmulKerSubgroup H a).subtype a z)
+  apply Subtype.ext
+  have h2 : ((a • z : nsmulKerSubgroup H a) : H) = a • (z : H) :=
+    map_nsmul (nsmulKerSubgroup H a).subtype a z
+  rw [h2, ZeroMemClass.coe_zero]
+  exact z.2
+
+private lemma nsmulKerSubgroupKer_mem {H : Type u} [AddCommGroup H] {a d : ℕ}
+    (hda : d ∣ a) {x : H} (hx : d • x = 0) : x ∈ nsmulKerSubgroup H a := by
+  obtain ⟨c, hc⟩ := hda
+  show a • x = 0
+  rw [hc, mul_comm d c, mul_smul, hx, smul_zero]
 
 /-- Count transfer: the `d`-torsion of the `a`-torsion subgroup is the `d`-torsion,
 for `d ∣ a`. -/
@@ -294,14 +301,12 @@ private def nsmulKerSubgroupKerEquiv (H : Type u) [AddCommGroup H] (a d : ℕ)
   toFun z := ⟨z.1.1, by
     have h1 := congrArg ((nsmulKerSubgroup H a).subtype) z.2
     rwa [map_nsmul, map_zero] at h1⟩
-  invFun x := ⟨⟨x.1, by
-      obtain ⟨c, hc⟩ := hda
-      show a • x.1 = 0
-      rw [hc, mul_comm d c, mul_smul, x.2, smul_zero]⟩,
-    Subtype.ext (by
-      have h1 : d • x.1 = 0 := x.2
-      rw [← h1]
-      exact map_nsmul (nsmulKerSubgroup H a).subtype d _)⟩
+  invFun x := ⟨⟨x.1, nsmulKerSubgroupKer_mem hda x.2⟩, Subtype.ext (by
+    have h2 : ((d • (⟨x.1, nsmulKerSubgroupKer_mem hda x.2⟩ : nsmulKerSubgroup H a) :
+        nsmulKerSubgroup H a) : H) = d • x.1 :=
+      map_nsmul (nsmulKerSubgroup H a).subtype d _
+    rw [h2, ZeroMemClass.coe_zero]
+    exact x.2)⟩
   left_inv z := Subtype.ext (Subtype.ext rfl)
   right_inv x := Subtype.ext rfl
 
@@ -312,7 +317,8 @@ private noncomputable def coprimeTorsionSplit (H : Type u) [AddCommGroup H] (a b
   have hicop : IsCoprime (a : ℤ) (b : ℤ) := by
     rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_natCast_natCast]
     exact hco
-  obtain ⟨u, w, huw⟩ := hicop
+  obtain ⟨u, hw⟩ := Classical.indefiniteDescription _ hicop
+  obtain ⟨w, huw⟩ := Classical.indefiniteDescription _ hw
   have hkillZ : ∀ x : H, ((a : ℤ) * (b : ℤ)) • x = 0 := by
     intro x
     have h1 : ((a * b : ℕ) : ℤ) • x = 0 := by
@@ -345,24 +351,24 @@ private noncomputable def coprimeTorsionSplit (H : Type u) [AddCommGroup H] (a b
         exact y.1.2
       have h2 : (w * (b : ℤ)) • (y.1.1 : H) = (1 - u * a) • (y.1.1 : H) := by
         rw [show (1 : ℤ) - u * a = w * b from by linarith [huw]]
-      rw [h2, sub_zsmul, one_zsmul, smul_smul, ← smul_smul, hay, smul_zero, sub_zero]
+      rw [h2, sub_zsmul, one_zsmul, ← smul_smul, hay, smul_zero, neg_zero, add_zero]
     have hbz0 : (w * (b : ℤ)) • (y.2.1 : H) = 0 := by
       have hby : (b : ℤ) • (y.2.1 : H) = 0 := by
         rw [natCast_zsmul]
         exact y.2.2
-      rw [smul_smul, ← smul_smul, hby, smul_zero]
+      rw [← smul_smul, hby, smul_zero]
     have haz1 : (u * (a : ℤ)) • (y.2.1 : H) = y.2.1 := by
       have hby : (b : ℤ) • (y.2.1 : H) = 0 := by
         rw [natCast_zsmul]
         exact y.2.2
       have h2 : (u * (a : ℤ)) • (y.2.1 : H) = (1 - w * b) • (y.2.1 : H) := by
         rw [show (1 : ℤ) - w * b = u * a from by linarith [huw]]
-      rw [h2, sub_zsmul, one_zsmul, smul_smul, ← smul_smul, hby, smul_zero, sub_zero]
+      rw [h2, sub_zsmul, one_zsmul, ← smul_smul, hby, smul_zero, neg_zero, add_zero]
     have hay0 : (u * (a : ℤ)) • (y.1.1 : H) = 0 := by
       have hay : (a : ℤ) • (y.1.1 : H) = 0 := by
         rw [natCast_zsmul]
         exact y.1.2
-      rw [smul_smul, ← smul_smul, hay, smul_zero]
+      rw [← smul_smul, hay, smul_zero]
     refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
     · show (w * (b : ℤ)) • (y.1.1 + y.2.1) = (y.1.1 : H)
       rw [smul_add, hby1, hbz0, add_zero]
@@ -391,8 +397,8 @@ theorem addEquiv_pi_fin_two_zmod_of_natCard (N : ℕ) (hN : N ≠ 0) (H : Type u
     Nonempty (H ≃+ (Fin 2 → ZMod N)) := by
   induction N using Nat.recOnPosPrimePosCoprime generalizing H with
   | prime_pow p n hp hn =>
-    refine primePow_case p n hp.nat_prime hn H hkill fun j hj => ?_
-    rw [hcount (p ^ j) (pow_pos hp.nat_prime.pos j) (pow_dvd_pow p hj)]
+    refine primePow_case p n hp hn H hkill fun j hj => ?_
+    rw [hcount (p ^ j) (pow_pos hp.pos j) (pow_dvd_pow p hj)]
   | zero => exact absurd rfl hN
   | one =>
     refine ⟨{ toFun := fun _ => 0
