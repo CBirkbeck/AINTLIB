@@ -151,4 +151,39 @@ theorem comap_mul_of_isAffine [IsAffine X] [IsAffine Y]
     comap_ideal_top_of_isAffine I f (isAffineOpen_top X) (isAffineOpen_top Y),
     comap_ideal_top_of_isAffine J f (isAffineOpen_top X) (isAffineOpen_top Y)]
 
+/-- The `⊤`-value of the double preimage along an affine `U ≤ f⁻¹V`, expressed through
+the restriction `f.resLE`. -/
+theorem comap_comap_ι_ideal_top (K : Y.IdealSheafData) (f : X ⟶ Y)
+    (U : X.affineOpens) (V : Y.affineOpens) (hUV : U.1 ≤ f ⁻¹ᵁ V.1) :
+    haveI : IsAffine U.1.toScheme := U.2
+    haveI : IsAffine V.1.toScheme := V.2
+    ((K.comap f).comap U.1.ι).ideal ⟨⊤, isAffineOpen_top _⟩ =
+      ((K.comap V.1.ι).ideal ⟨⊤, isAffineOpen_top _⟩).map
+        ((f.resLE V.1 U.1 hUV).appTop).hom := by
+  haveI : IsAffine U.1.toScheme := U.2
+  haveI : IsAffine V.1.toScheme := V.2
+  rw [← comap_comp, show U.1.ι ≫ f = f.resLE V.1 U.1 hUV ≫ V.1.ι from
+    (Scheme.Hom.resLE_comp_ι f hUV).symm, comap_comp,
+    comap_ideal_top_of_isAffine (K.comap V.1.ι) (f.resLE V.1 U.1 hUV)
+      (isAffineOpen_top _) (isAffineOpen_top _)]
+
+/-- **The scheme-theoretic preimage of ideal sheaves is multiplicative.**
+
+REMAINING WORK (T-D6a-i; affine case and the resLE ⊤-value formula are proven above):
+glue `comap_mul_of_isAffine` over a cover by affines `U x ≤ f⁻¹(V x)` via
+`ext_of_iSup_eq_top`. The per-`U` value comparison transports through
+`ideal_comap_of_isOpenImmersion` at `W := ⊤`, whose right-hand side is indexed by the
+IMAGE open `(U x).1.ι ''ᵁ ⊤` — propositionally `U x` (`Scheme.Opens.ι_image_top`) but
+a different index, so the equiv `((U x).1.ι.appIso ⊤).commRingCatIsoToRingEquiv` has
+domain `Γ(X, ι''ᵁ⊤)`, not `Γ(X, U x)`. Close the cast either with `rw!` (as mathlib's
+`le_of_iSup_eq_top` does for exactly this index) or by formulating the injectivity
+transport entirely at the image index and casting the GOAL once at the start. Then:
+LHS/RHS ⊤-values via `comap_comap_ι_ideal_top`, inner `(K.comap V.ι).⊤`-values via
+`ideal_comap_of_isOpenImmersion` + `Ideal.comap_symm` (map-form), multiplicativity by
+`ideal_mul`/`Pi.mul_apply` + `Ideal.map_mul` twice, and injectivity of map-along-equiv
+(`Ideal.map_of_equiv` round-trip). -/
+theorem comap_mul (I J : Y.IdealSheafData) (f : X ⟶ Y) :
+    (I * J).comap f = I.comap f * J.comap f := by
+  sorry
+
 end AlgebraicGeometry.Scheme.IdealSheafData
