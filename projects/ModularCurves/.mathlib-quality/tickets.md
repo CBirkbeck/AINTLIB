@@ -1579,6 +1579,28 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `IsPrimitiveRoot`/`Polynomial.nthRoots` card lemmas (search first — likely nearly
   present).
 
+### [AG-GG] Grothendieck–Galois for ℚ: SCOPING DONE (beastmode-B, 2026-07-06)
+Mathlib 2026 has ALL the abstract machinery; the "scary lemma" (Loeffler §3.6 étale
+descent) reduces to instance work. Inventory: `CommAlgCat.FiniteEtale R` + fiber
+functor `S ↦ (S →ₐ[R] Ω)` + `FiniteEtale.equivOfIsSepClosed` (RingTheory/Etale/
+Finite.lean, Merten 2026 — the object-level fibre statement is my T-B6d);
+`CategoryTheory/Galois/*`: `GaloisCategory` + `Equivalence.lean` ("any fiber functor
+induces an equivalence with finite continuous `Aut F`-sets") +
+`IsFundamentalgroup.lean` (`IsFundamentalGroup G F ⇒ toAutMulEquiv : G ≃* Aut F`,
+homeo). MISSING (the sub-development, one leaf each, single-conclusion):
+- **[AG-GG-1]** `PreGaloisCategory ((CommAlgCat.FiniteEtale ℚ)ᵒᵖ)` (schemes-side =
+  opposite of algebras; exactness/(co)limit axioms for finite étale algebras).
+- **[AG-GG-2]** `FiberFunctor` instance for the `AlgebraicClosure ℚ`-points functor
+  on that opposite category (fiber exactness; sep-closed case anchors it).
+- **[AG-GG-3]** `IsFundamentalGroup GalQ F` (Krull topology, continuity +
+  transitivity axioms — classical infinite Galois theory, mathlib-supported).
+- **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
+  dictionary (finite ⇒ affine ⇒ Spec of the algebra IS the finite étale ℚ-scheme).
+Then T-F1: `V_ρ := Spec` of the algebra attached to the `ContAction` `(ℤ/N)²`-via-ρ;
+T-F1a/b specs = the equivalence's naturality; T-F1c group structure = group objects
+transported along the equivalence (GrpObj/ofRepresentableBy — T-B2 experience
+directly applicable). All leaves unclaimed.
+
 ### [T-F1] ⧗(AG-GG) V_ρ construction (DS5 discharge)
 - **Status**: open (scoping first: AG-GG sub-development) · **File**: YRho.lean ·
   `vRho`, `vRhoπ`, `vRhoPointsEquiv` + specs T-F1a/b (+ group structure T-F1c) ·
