@@ -626,6 +626,29 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   eq_infPoint_of_not_inZ gives base = infPoint (K := R'... careful: needs Field K —
   the points-route only works over fields; for general R' prefer (α)).
   RECOMMENDATION: (α).
+- **(α) CONCRETE ζ-DESIGN (2026-07-07, execute next)**: define
+  `zeroChartHom W : Away (quotientGrading (projIdeal W)) t₁ →+* R :=
+  (Localization.awayLift (projModelZeroEval W) t₁-underlying (unit: evaluates to 1 via
+  projModelZeroEval_mk + isUnit_one)).comp (HomogeneousLocalization.valRingHom _)`
+  (valRingHom is in ProjectiveSpaceChart). Values: ζ(Away.mk hs n a ha) =
+  evR(a)/1 = evR(a) — awayLift_mk-style + val_mk (mind the T-E-era gotcha: awayLift
+  needs the unit-witness syntactically `isUnit_iff_exists_inv.mpr ⟨v, hv⟩` for
+  awayLift_mk to fire; v := 1). Retraction-check: ζ ∘ χ_R = id from
+  projModelZeroChart_comp_χ ∘r Spec-faithfulness OR directly elementwise.
+  MAIN CLAIM: `projModelZeroChart W = Spec.map (ofHom (zeroChartHom W))` by
+  `cancel_mono (awayι-Y)`: reduces to `Spec.map (ofHom ζ) ≫ awayι-Y =
+  projModelZero W` — prove by the fromOfGlobalSections gluing equation at the
+  ⊤-piece: `Scheme.Cover.ι_glueMorphisms` (the cover map of the t₁-piece of
+  `openCoverOfMapIrrelevantEqTop` composed with fromOfGlobalSections equals
+  `toBasicOpenOfGlobalSections … ≫ (basicOpen 𝒜 t₁).ι`), the ⊤-piece cover-map is
+  an iso (basicOpen (f t₁) = ⊤ from the eval-1 computation — cancel it), and
+  `toBasicOpenOfGlobalSections`'s ring content is
+  `IsLocalization.map f : Localization.Away t₁ → Localization.Away (f t₁)`
+  conjugated by `basicOpenIsoSpecAway` + `toSpecΓ`-restriction (def at
+  Basic.lean:368) — compare with ζ via `IsLocalization.ringHom_ext (powers t₁)` +
+  val-normal forms. Then the CORE closes by RingHom.ext on chart generators:
+  mk-C-r via retraction; U/W-coords via ζ-values = eval(X₀)=0 / eval(X₂)=0, and the
+  Away.map-side values via Away.map_mk. THEN paste-assembly (plan v2).
  · **File**: EllipticCurve/GroupLaw.lean (or Basic)
 - **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
 - **Statement**: `FibrewiseElliptic (pullback.snd E.π g) (baseChange-zero) _` for
