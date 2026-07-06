@@ -283,7 +283,6 @@ theorem isSeparable_of_etale [Module.Finite k A] [Algebra.Etale k A] (x : A) :
     rw [hFS, map_mul, minpoly.aeval, zero_mul]
   exact Polynomial.Separable.of_dvd hFsep (minpoly.dvd k x hann)
 
-/-- A subalgebra of a finite étale algebra over a field is étale. -/
 /-- A finite reduced algebra over a field all of whose elements are separable is étale.
 This is the common core of `etale_subalgebra` and `etale_quotient`. -/
 theorem etale_of_isSeparable (B : Type u) [CommRing B] [Algebra k B] [Module.Finite k B]
@@ -308,6 +307,7 @@ theorem etale_of_isSeparable (B : Type u) [CommRing B] [Algebra k B] [Module.Fin
     (Algebra.FinitePresentation.of_finiteType).mp inferInstance
   exact ⟨inferInstance, inferInstance⟩
 
+/-- A subalgebra of a finite étale algebra over a field is étale. -/
 theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra k A) :
     Algebra.Etale k B := by
   haveI : Module.Finite k B := inferInstanceAs (Module.Finite k B.toSubmodule)
@@ -328,7 +328,7 @@ theorem etale_quotient [Module.Finite k A] [Algebra.Etale k A] (J : Ideal A) :
     Algebra.Etale k (A ⧸ J) := by
   haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
   haveI : IsArtinianRing A := isArtinian_of_tower k inferInstance
-  haveI : IsSemisimpleRing A := IsArtinianRing.isSemisimpleRing_of_isReduced
+  haveI : IsSemisimpleRing A := IsArtinianRing.isSemisimpleRing_of_isReduced A
   obtain ⟨I, hIJ⟩ := exists_isCompl J
   have hrad2 : ∀ x : A, x * x ∈ J → x ∈ J := by
     intro x hx2

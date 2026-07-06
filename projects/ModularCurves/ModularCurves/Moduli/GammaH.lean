@@ -235,8 +235,12 @@ noncomputable def gammaFullDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem 
 noncomputable def gammaOneDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem R where
   obj X := { P : X.unop.curve.Section // X.unop.curve.IsGammaOne N P }
   map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1, by sorry⟩
-  map_id := by sorry
-  map_comp := by sorry
+  map_id X := by
+    ext P
+    exact congrArg Subtype.val (EllHom.pullSection_id R P.1)
+  map_comp f g := by
+    ext P
+    exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop P.1)
 
 /-- **(T-H8 = GME Thm 2.6.8 scope; over-ℤ refinements = KM 4.7.2/5.1, ⧗KM)** For
 `N ≥ 3` with `N` **invertible**, the Drinfeld full-level problem is rigid and
