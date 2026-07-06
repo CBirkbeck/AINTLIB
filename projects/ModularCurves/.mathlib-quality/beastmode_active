@@ -1,1 +1,1 @@
-FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 4 worker 10/74 muNRing_span_vanish
+FOCUS: T-B6 — verify torsionPointsEquiv (now green), axiom-check, then attack headline via fibre-dictionary sub-ticket
