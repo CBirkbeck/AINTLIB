@@ -144,6 +144,45 @@ def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z �
           (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
         projModelZero W
 
+/-- **(T-A8a)** The local-model condition is stable under base change: shrink the model's
+affine open `U ∋ g t` to an affine `V ∋ t` inside `g⁻¹ U`, transport the Weierstrass
+curve `W` along `Γ(S, U) → Γ(T, V)` (`g.appLE`), and paste the pullbacks. -/
+lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
+    {hz : z ≫ π = 𝟙 S} (h : LocallyWeierstrass π z hz) (g : T ⟶ S) :
+    LocallyWeierstrass (pullback.snd π g)
+      (pullback.lift (g ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]))
+      (pullback.lift_snd _ _ _) := by
+  intro t
+  obtain ⟨U, hsU, W, hell, e, heπ, hez⟩ := h (g.base t)
+  obtain ⟨V, hVaff, htV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+    T.isBasis_affineOpens (show t ∈ g ⁻¹ᵁ U.1 from hsU)
+  replace hVaff : IsAffineOpen V := hVaff
+  letI : Algebra ↑Γ(S, U.1) ↑Γ(T, V) := ((g.appLE U.1 V hVle).hom).toAlgebra
+  refine ⟨⟨V, hVaff⟩, htV, W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)), inferInstance, ?_⟩
+  -- `gV : V ⟶ U` factoring `V.ι ≫ g` through the open immersion `U.ι`
+  set Vι := (⟨V, hVaff⟩ : T.affineOpens).1.ι with hVι
+  set gV := T.homOfLE hVle ≫ (g ∣_ U.1) with hgV
+  have hgVfac : gV ≫ U.1.ι = Vι ≫ g := by
+    rw [hgV, Category.assoc, morphismRestrict_ι, ← Category.assoc, Scheme.homOfLE_ι]
+  have hB : IsPullback (projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) W)
+      (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) :=
+    isPullback_projModelBaseChange W
+  -- REMAINING (T-A8a): build `hA`, expressing `pullback (pullback.snd π g) VA.ι` as a
+  -- pullback of `projModelπ W` along `Spec.map φ` (φ = `g.appLE U.1 V`), then set
+  -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. Route for `hA`:
+  --  (1) pasting `pullback (pullback.snd π g) VA.ι ≅ pullback π (Vι ≫ g)` and, via
+  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g`, `≅ pullback (pullback π U.1.ι) gV`
+  --      (`pullbackRightPullbackFstIso` ×2);
+  --  (2) transport by `e : pullback π U.1.ι ≅ projModel W` to `pullback (projModel W) gV`;
+  --  (3) bridge `gV : V ⟶ U` to `Spec.map φ` through `U.2.isoSpec`/`hVaff.isoSpec`
+  --      (the affine-open comorphism `IsAffineOpen.isoSpec_hom_appLE`-style identity).
+  -- The two compatibility conjuncts then follow by `pullback.hom_ext`, mirroring
+  -- `FibrewiseElliptic.baseChange` lines 100–127 (isoPullback_hom_fst/snd + projModelZero
+  -- naturality). All scaffolding above (`Vι`, `gV`, `hgVfac`, `hB`) is proven and reusable.
+  sorry
+
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
 expressed via `FibrewiseElliptic`.
