@@ -521,6 +521,49 @@ theorem existsUnique_invariantsπ_lift [Finite G] {Y : Scheme.{u}}
   obtain ⟨q, hq⟩ := exists_invariantsπ_lift G B R f hf
   exact ⟨q, hq, fun q' hq' => invariantsπ_hom_ext G B R q' q (hq'.trans hq.symm)⟩
 
+variable (G B) in
+/-- **Invariant basic opens form a basis of the stable opens** (the separation step
+of the quotient construction, isolated): inside `Spec B`, every `G`-stable open
+neighbourhood of a point contains an invariant basic open neighbourhood
+`D((a : B))`, `a ∈ Bᴳ`. -/
+theorem exists_mem_basicOpen_subset_of_stable [Finite G]
+    {U : Set (Spec (CommRingCat.of B))} (hU : IsOpen U)
+    (hstable : ∀ (g : G) (x : Spec (CommRingCat.of B)), x ∈ U → specSMul g x ∈ U)
+    (x : Spec (CommRingCat.of B)) (hx : x ∈ U) :
+    ∃ a : FixedPoints.subalgebra R B G,
+      x ∈ PrimeSpectrum.basicOpen ((a : B)) ∧
+      (↑(PrimeSpectrum.basicOpen ((a : B))) : Set (PrimeSpectrum B)) ⊆ U := by
+  have hclosed : IsClosedMap ⇑(invariantsπ G B R) := by
+    have hint : (algebraMap (FixedPoints.subalgebra R B G) B).IsIntegral :=
+      Algebra.isIntegral_def.mp
+        (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
+    exact PrimeSpectrum.isClosedMap_comap_of_isIntegral _ hint
+  -- the fibre through `x` lies in `U`
+  have hfibU : ∀ x', invariantsπ G B R x' = invariantsπ G B R x → x' ∈ U := by
+    intro x' hx'
+    obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G B R x x').mp hx'.symm
+    rw [← hg]
+    exact hstable g x hx
+  have hpZ : invariantsπ G B R x ∉ (invariantsπ G B R).base '' Uᶜ := by
+    rintro ⟨x', hx'U, hx'⟩
+    exact hx'U (hfibU x' hx')
+  have hZclosed : IsClosed ((invariantsπ G B R).base '' Uᶜ) :=
+    hclosed _ hU.isClosed_compl
+  obtain ⟨s, ⟨a, rfl⟩, hps, hsZ⟩ :=
+    PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open
+      (show invariantsπ G B R x ∈ ((invariantsπ G B R).base '' Uᶜ)ᶜ from hpZ)
+      hZclosed.isOpen_compl
+  refine ⟨a, ?_, ?_⟩
+  · exact hps
+  · intro y hy
+    by_contra hyU
+    refine hsZ ?_ ⟨y, hyU, rfl⟩
+    show invariantsπ G B R y ∈
+      (↑(PrimeSpectrum.basicOpen a) :
+        Set (PrimeSpectrum (FixedPoints.subalgebra R B G)))
+    exact hy
+  -- (membership dictionary: `y ∈ D((a : B)) ↔ π y ∈ D(a)` is definitional)
+
 end UniversalProperty
 
 end AlgebraicGeometry

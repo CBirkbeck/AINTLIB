@@ -260,3 +260,18 @@ for the proofs.
   algebra (le_antisymm + le_inf/inf_le for stability; membership via the ⨅-mem
   characterization or explicit fun-of-g). Pinned: use `⨅ g : G` (matches
   `IsAffineOpen.iInf`'s binder form directly). SURVIVES.
+
+## T-Q5c leaf: `exists_mem_basicOpen_subset_of_stable` (stable-basic basis)
+
+- **A1 (statement scope)** Set-level stable open U of `Spec B` + point: produce
+  `a : Bᴳ` with `x ∈ D(↑a) ⊆ U`. D(↑a) is automatically stable (↑a invariant ⟹
+  its non-vanishing locus is orbit-saturated — NOT claimed in the statement, no
+  need). SURVIVES.
+- **A2 (stability form)** `∀ g x, x ∈ U → specSMul g x ∈ U` — the ⊆-form (weaker
+  than =-form, sufficient: only "fibre ⊆ U" is used, which needs orbits INTO U).
+  For a GROUP the two are equivalent; take the weak form (easier for consumers).
+  SURVIVES.
+- **A3 (reuse)** Proof is the closedness separation from `exists_chart_descent`
+  verbatim minus the chart: fibre-of-π(x) = orbit ⊆ U (T-Q1 orbit lemma +
+  stability), Z := π''(Uᶜ) closed (integrality), π(x) ∉ Z, basic open of Bᴳ
+  inside Zᶜ, pull back. Same [Finite G] necessity. SURVIVES.
