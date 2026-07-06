@@ -125,11 +125,11 @@ private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ 
 private lemma specHom_ext {R : CommRingCat.{u}} {X : Scheme.{u}} {f₁ f₂ : X ⟶ Spec R}
     (h : f₁.appTop = f₂.appTop) : f₁ = f₂ := by
   apply (ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm.injective
+  rw [Adjunction.homEquiv_symm_apply, Adjunction.homEquiv_symm_apply]
+  congr 1
   apply Quiver.Hom.unop_inj
-  have e1 := ΓSpec_adjunction_homEquiv_eq ((ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm f₁).unop
-  have e2 := ΓSpec_adjunction_homEquiv_eq ((ΓSpec.adjunction.homEquiv X (Opposite.op R)).symm f₂).unop
-  simp only [Quiver.Hom.op_unop, Opposite.unop_op, Equiv.apply_symm_apply] at e1 e2
-  exact (cancel_epi (Scheme.ΓSpecIso R).hom).mp (e1.symm.trans (h.trans e2))
+  simp only [Functor.rightOp_map, Quiver.Hom.unop_op, Scheme.Γ_map]
+  exact congrArg (fun t ↦ t.op.unop) h
 
 /-- Morphisms into `Spec ℤ[T]/(Tᴺ − 1)` are `N`-th roots of unity of `Γ(X, ⊤)`. -/
 private def muNSpecHomEquiv {N : ℕ} {X : Scheme.{u}} :
