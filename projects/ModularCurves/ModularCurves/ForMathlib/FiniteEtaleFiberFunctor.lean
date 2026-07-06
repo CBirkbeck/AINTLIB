@@ -378,6 +378,119 @@ lemma preservesMonomorphisms_baseChange :
 
 end Monos
 
+/-! The fiber functor reflects isomorphisms (leaf AG-GG-2f): counting.  An algebra map
+inducing a bijection on `k̄`-points has zero kernel (else points would factor through a
+smaller quotient) and full range (else points would be determined by a smaller
+subalgebra), by `natCard_algHom_sepClosure` on both sides. -/
+
+section ReflectsIso
+
+variable {k}
+
+/-- Hom-sets into the separable closure are finite. -/
+lemma finite_algHom_sepClosure (W : Type u) [CommRing W] [Algebra k W]
+    [Module.Finite k W] [Algebra.Etale k W] :
+    Finite (W →ₐ[k] SeparableClosure k) := by
+  rcases subsingleton_or_nontrivial W with hW | hW
+  · exact Finite.of_fintype _
+  · refine Nat.finite_of_card_ne_zero ?_
+    rw [natCard_algHom_sepClosure]
+    have : 0 < Module.finrank k W := Module.finrank_pos
+    omega
+
+variable (k)
+
+/-- The fiber functor of `FiniteEtale k` at the separable closure reflects
+isomorphisms. -/
+lemma reflectsIsomorphisms_fiber :
+    (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).ReflectsIsomorphisms := by
+  constructor
+  intro X Y ψ hψ
+  set φ : (Y.unop.obj : Type u) →ₐ[k] (X.unop.obj : Type u) := ψ.unop.hom.hom with hφ
+  have hbij : Function.Bijective
+      (fun g : (X.unop.obj : Type u) →ₐ[k] SeparableClosure k => g.comp φ) :=
+    CategoryTheory.ConcreteCategory.bijective_of_isIso
+      ((CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).map ψ)
+  -- Step 1: φ is injective.
+  have hker : RingHom.ker φ = ⊥ := by
+    set I := RingHom.ker φ with hI
+    haveI : Algebra.Etale k ((Y.unop.obj : Type u) ⧸ I) := etale_quotient I
+    haveI : Module.Finite k ((Y.unop.obj : Type u) ⧸ I) :=
+      Module.Finite.of_surjective (Ideal.Quotient.mkₐ k I).toLinearMap
+        Ideal.Quotient.mk_surjective
+    have hcompinj : Function.Injective
+        (fun h : ((Y.unop.obj : Type u) ⧸ I) →ₐ[k] SeparableClosure k =>
+          h.comp (Ideal.Quotient.mkₐ k I)) := by
+      intro h₁ h₂ hh
+      refine AlgHom.ext fun b => ?_
+      obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective b
+      exact AlgHom.congr_fun hh x
+    have hcompsurj : Function.Surjective
+        (fun h : ((Y.unop.obj : Type u) ⧸ I) →ₐ[k] SeparableClosure k =>
+          h.comp (Ideal.Quotient.mkₐ k I)) := by
+      intro h
+      obtain ⟨g, hg⟩ := hbij.2 h
+      have hkill : ∀ a ∈ I, h a = 0 := by
+        intro a ha
+        have h1 : φ a = 0 := ha
+        calc h a = g (φ a) := (AlgHom.congr_fun hg a).symm
+          _ = g 0 := by rw [h1]
+          _ = 0 := map_zero g
+      refine ⟨Ideal.Quotient.liftₐ I h hkill, ?_⟩
+      refine AlgHom.ext fun a => ?_
+      exact Ideal.Quotient.lift_mk I h.toRingHom hkill
+    have hcard : Nat.card (((Y.unop.obj : Type u) ⧸ I) →ₐ[k] SeparableClosure k) =
+        Nat.card ((Y.unop.obj : Type u) →ₐ[k] SeparableClosure k) :=
+      Nat.card_congr (Equiv.ofBijective _ ⟨hcompinj, hcompsurj⟩)
+    rw [natCard_algHom_sepClosure, natCard_algHom_sepClosure] at hcard
+    have hmkinj : Function.Injective (Ideal.Quotient.mkₐ k I).toLinearMap :=
+      (LinearMap.injective_iff_surjective_of_finrank_eq_finrank hcard.symm).mpr
+        Ideal.Quotient.mk_surjective
+    have : RingHom.ker (Ideal.Quotient.mk I) = ⊥ :=
+      (RingHom.injective_iff_ker_eq_bot _).mp hmkinj
+    rwa [Ideal.mk_ker] at this
+  -- Step 2: φ is surjective.
+  have hrange : φ.range = ⊤ := by
+    by_contra hne
+    haveI : Algebra.Etale k (φ.range : Subalgebra k (X.unop.obj : Type u)) :=
+      etale_subalgebra _
+    haveI : Module.Finite k (φ.range : Subalgebra k (X.unop.obj : Type u)) :=
+      inferInstanceAs (Module.Finite k φ.range.toSubmodule)
+    haveI : Finite ((φ.range : Subalgebra k (X.unop.obj : Type u)) →ₐ[k]
+        SeparableClosure k) := finite_algHom_sepClosure _
+    have hres_inj : Function.Injective
+        (fun g : (X.unop.obj : Type u) →ₐ[k] SeparableClosure k =>
+          g.comp φ.range.val) := by
+      intro g₁ g₂ hg
+      apply hbij.1
+      refine AlgHom.ext fun b => ?_
+      exact AlgHom.congr_fun hg ⟨φ b, ⟨b, rfl⟩⟩
+    have hle := Nat.card_le_card_of_injective _ hres_inj
+    rw [natCard_algHom_sepClosure, natCard_algHom_sepClosure] at hle
+    have hlt : Module.finrank k (φ.range : Subalgebra k (X.unop.obj : Type u)) <
+        Module.finrank k (X.unop.obj : Type u) := by
+      have hsub : φ.range.toSubmodule ≠ ⊤ := fun h =>
+        hne (Subalgebra.toSubmodule_injective (by simpa using h))
+      exact Submodule.finrank_lt hsub
+    omega
+  -- Assemble the isomorphism.
+  have hφbij : Function.Bijective φ :=
+    ⟨(RingHom.injective_iff_ker_eq_bot φ.toRingHom).mpr hker, fun a => by
+      have : a ∈ φ.range := hrange ▸ Algebra.mem_top
+      exact this⟩
+  set e := AlgEquiv.ofBijective φ hφbij with he
+  have hiso : IsIso ψ.unop := by
+    refine ⟨⟨ObjectProperty.homMk (CommAlgCat.ofHom (e.symm : (X.unop.obj : Type u) ≃ₐ[k]
+      (Y.unop.obj : Type u)).toAlgHom), ?_, ?_⟩⟩
+    · ext b
+      exact e.symm_apply_apply b
+    · ext a
+      exact e.apply_symm_apply a
+  exact (isIso_unop_iff ψ).mp hiso
+
+end ReflectsIso
+
 end FiniteEtaleGalois
 
 end ModularCurves
