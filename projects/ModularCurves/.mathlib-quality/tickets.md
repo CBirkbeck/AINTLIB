@@ -3084,6 +3084,16 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     `quotientπ_hom_ext` (transportable j-form like T-Q3's);
     `exists_quotientπ_lift`; `existsUnique_quotientπ_lift` (Loeffler 3.6.1 in
     full). T-Q6/T-Q7 consume ONLY these five signatures.
+    (7) LEAF STATUS (2026-07-06T18:05Z): DONE — stable-basic basis
+    (`exists_mem_basicOpen_subset_of_stable`), quotient-map
+    (`invariantsπ_isQuotientMap`), stable-image openness
+    (`isOpen_image_invariantsπ_of_stable`), all in AffineQuotient.lean, sorry-free.
+    NEXT LEAVES (in order): c2 = local quotient of a stable affine open V
+    (`Spec Γ(V)ᴳ` + local π := V.toScheme ≅ Spec Γ(V) [IsAffineOpen.isoSpec] ≫
+    invariantsπ-of-Γ-bridge-action; invariance lemma); c3 = for stable affine
+    W ≤ V the descended open immersion Q_W ⟶ Q_V (descend (homOfLE ≫ π^V) along
+    π^W via T-Q3 ∃!; open-immersion-ness by reduction to invariant-basic W via
+    the basis lemma + isPullback_chart); c4 = GlueData + contract (6).
   - **Route lock (binding unless B2)**: hypothesis of record is the MODERN one —
     "every `G`-orbit is contained in a `G`-stable affine open" (Stacks 07S7 shape;
     quasi-projectivity over an affine base IMPLIES it and is deferred to a
