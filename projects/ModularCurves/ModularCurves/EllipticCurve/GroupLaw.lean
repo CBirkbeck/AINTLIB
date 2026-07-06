@@ -138,8 +138,12 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
   zero := pullback.lift (g ≫ E.zero) (𝟙 T)
     (by rw [Category.assoc, E.zero_π, Category.comp_id, Category.id_comp])
   zero_π := pullback.lift_snd _ _ _
-  smooth := by sorry
-  proper := by sorry
+  smooth := by
+    haveI : MorphismProperty.IsStableUnderBaseChange
+        (@SmoothOfRelativeDimension 1) :=
+      AlgebraicGeometry.isSmoothOfRelativeDimension_isStableUnderBaseChange 1
+    exact MorphismProperty.pullback_snd _ _ E.smooth
+  proper := MorphismProperty.pullback_snd _ _ E.proper
   fibres := by sorry
   grp := Over.grpObjMkPullbackSnd
   comm := by sorry

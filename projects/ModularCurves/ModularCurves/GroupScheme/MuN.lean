@@ -97,22 +97,26 @@ private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N �
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
   exact DFunLike.congr_fun key p
 
+private lemma muNRing_span_vanish {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
+    ∀ p ∈ Ideal.span {(X : Polynomial ℤ) ^ N - 1},
+      Polynomial.eval₂RingHom (Int.castRingHom R) a p = 0 := by
+  intro p hp
+  obtain ⟨q, rfl⟩ := Ideal.mem_span_singleton.mp hp
+  simp only [Polynomial.coe_eval₂RingHom, Polynomial.eval₂_mul, Polynomial.eval₂_sub,
+    Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_one, ha, sub_self, zero_mul]
+
 /-- The ring homomorphism `ℤ[T]/(Tᴺ − 1) ⟶ R` classifying an `N`-th root of unity. -/
 private def muNRingLift {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
     muNRing N ⟶ R :=
   CommRingCat.ofHom <|
     (Ideal.Quotient.lift (Ideal.span {(X : Polynomial ℤ) ^ N - 1})
-      (Polynomial.eval₂RingHom (Int.castRingHom R) a) <| by
-      intro p hp
-      obtain ⟨q, rfl⟩ := Ideal.mem_span_singleton.mp hp
-      simp only [Polynomial.coe_eval₂RingHom, Polynomial.eval₂_mul, Polynomial.eval₂_sub,
-        Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_one, ha, sub_self,
-        zero_mul]).comp (ULift.ringEquiv : muNRing N ≃+* _).toRingHom
+      (Polynomial.eval₂RingHom (Int.castRingHom R) a)
+      (muNRing_span_vanish a ha)).comp (ULift.ringEquiv : muNRing N ≃+* _).toRingHom
 
 private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
     muNRingLift a ha (muNRingGen N) = a := by
   show (Ideal.Quotient.lift (Ideal.span {(X : Polynomial ℤ) ^ N - 1})
-      (Polynomial.eval₂RingHom (Int.castRingHom R) a) _)
+      (Polynomial.eval₂RingHom (Int.castRingHom R) a) (muNRing_span_vanish a ha))
     (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) (X : Polynomial ℤ)) = a
   rw [Ideal.Quotient.lift_mk]
   simp [Polynomial.coe_eval₂RingHom]
@@ -128,11 +132,15 @@ private def muNSpecHomEquiv {N : ℕ} {X : Scheme.{u}} :
     apply Quiver.Hom.unop_inj
     rw [Adjunction.homEquiv_symm_apply, Adjunction.homEquiv_symm_apply]
     dsimp
-    first
-    | simp only [Scheme.Hom.comp_appTop, Scheme.toSpecΓ_appTop, Scheme.ΓSpecIso_naturality,
-        Iso.inv_hom_id_assoc, Category.assoc]
-    | skip
-    exact muNRing_hom_ext (by simp [muNRingLift_gen])
+    refine muNRing_hom_ext ?_
+    simp only [Quiver.Hom.unop_op, Functor.rightOp_map, Scheme.Γ_map]
+    rw [CommRingCat.comp_apply, CommRingCat.comp_apply, Scheme.Hom.comp_appTop,
+      CommRingCat.comp_apply,
+      ← CommRingCat.comp_apply ((Scheme.ΓSpecIso (muNRing N)).inv)
+        (Spec.map (muNRingLift (f.appTop ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)))
+          (by rw [← map_pow, ← map_pow, muNRingGen_pow, map_one, map_one]))).appTop,
+      ← Scheme.ΓSpecIso_inv_naturality, CommRingCat.comp_apply, Scheme.toSpecΓ_appTop,
+      Iso.inv_hom_id_apply, muNRingLift_gen]
   right_inv a := Subtype.ext <| by
     show (X.toSpecΓ ≫ Spec.map (muNRingLift a.1 a.2)).appTop
         ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) = a.1
@@ -151,7 +159,7 @@ private def muNHomEquivAbsHom (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T
   left_inv h := Subtype.ext <| by
     have hw : h.1 ≫ pullback.fst (terminal.from S) (terminal.from (muNAbs N)) = g := h.2
     exact pullback.hom_ext (by rw [pullback.lift_fst]; exact hw.symm)
-      (by rw [pullback.lift_snd])
+      (by rw [pullback.lift_snd]; rfl)
   right_inv k := pullback.lift_snd _ _ _
 
 /-- The core points description (engine for `muNGrpObj` and `muNPointsEquiv`). -/
@@ -220,10 +228,12 @@ private def muNRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
       (Y ⟶ Over.mk (muNπ S N)) ≃ { h : Y.left ⟶ muN S N // h ≫ muNπ S N = Y.hom }).trans
     (muNPointsEquivAux S N Y.hom)
   homEquiv_comp {Y Y'} f h := Subtype.ext <| by
-    have := muNPointsEquivAux_natural S N Y'.hom f.left ⟨h.left, Over.w h⟩
-    simp only [Over.comp_left] at this ⊢
-    convert this using 3
-    rw [Over.w f]
+    show ((f ≫ h).left ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
+        ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) =
+      f.left.appTop
+        ((h.left ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
+          ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)))
+    rw [Over.comp_left, Category.assoc, Scheme.Hom.comp_appTop, CommRingCat.comp_apply]
 
 /-- **(DS3a, ticket T-B2)** The group structure on `μ_{N,S}` in `Over S`, with
 comultiplication `Spec` of `T ↦ T ⊗ T`. Constructed by representability
