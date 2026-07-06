@@ -1404,7 +1404,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 1.4.1 cyclic (IN HAND) + 3.4 ⧗ + 6.1 ⧗.
 
 ### [T-E3] Ell/R category plumbing (Prop sorries)
-- **Status**: open · **File**: Moduli/EllCategory.lean · category instance fields,
+- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
+  2026-07-08T14:00Z · **File**: Moduli/EllCategory.lean · category instance fields,
   `pullbackAlongMap.isPullback/zero_w` · **Depends on**: none · **Parallel**: yes ·
   **Type**: lemmas · **Sketch**: `IsPullback.of_id_fst`-style + `IsPullback.paste_horiz`
   (find exact names); EllHom ext-lemma discipline.
