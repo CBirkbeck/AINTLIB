@@ -3896,12 +3896,33 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   properties. **Lane**: Q (owns `SchemeQuotient`/`AffineQuotient`/`SpecGroupAction`) ·
   **Depends**: Q-stream quotient infra (T-Q5/T-Q6) · **Type**: def + API + torsor-description
   theorem · **Sources**: reviewer v8; standard `[U/G]` groupoid.
-  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-07T02:20Z ·
-    **File**: Moduli/QuotientStack.lean (NEW)
+  - **Status**: done (2026-07-07T03:05Z; core scope: ActionGroupoid +
+    QuotientStack functor + coarse comparison — the torsor-description theorem
+    split to T-W3b at cut, see below) · **Claimed**: beastmode-Q,
+    2026-07-07T02:20Z · **File**: Moduli/QuotientStack.lean (NEW)
   - **Alias decision (at pickup, per v8 note)**: `GroupAction G X` :=
     `AlgebraicGeometry.SchemeAction G X` (ForMathlib/SchemeQuotient.lean) — the
     established Q-lane vocabulary IS the T-W3 `GroupAction`; no new structure,
-    no rename (T-W4 should `SchemeAction`-register its action).
+    no rename (T-W4 should `SchemeAction`-register its action). **T-W4 is
+    hereby UNBLOCKED** (its dep was the GroupAction vocabulary).
+  - **DELIVERED** (sorry-free, zero warnings, standard axioms):
+    `ActionGroupoid σ S` (objects = S-points, homs = {g // t ≫ σ.hom g = t'},
+    Groupoid instance, comp_val/id_val/eqToHom_val), `ActionGroupoid.restrict`
+    (precomposition functors), `QuotientStack σ : Schemeᵒᵖ ⥤ Cat` (strict laws
+    via private functor_ext; Cat.Hom-wrapper via Functor.toCatHom + congrArg),
+    `ActionGroupoid.toQuotient : [X/G](S) ⥤ Discrete (S ⟶ X/G)` (coarse
+    comparison via hom_quotientπ — the T-Q7 feed). GOTCHAS: bare @Functor.ext
+    resolves to core-Lean LawfulFunctor.ext — qualify @CategoryTheory.Functor.ext;
+    Discrete laws via Subsingleton.elim; congrArg-not-rw for subtype-motive.
+- **[T-W3b]** (open; split from T-W3 at cut) the torsor description of
+  `[X/G](S)`: define the groupoid of pairs (finite étale `G`-torsor `p : P ⟶ S`
+  in the ∐-comparison sense of `TorsorData`/Stack.lean, `G`-equivariant
+  `u : P ⟶ X`), the trivialization functor from `ActionGroupoid σ S`
+  (`t ↦ (∐_G S, γ ↦ σ γ ∘ t)`), full faithfulness (provable), and essential
+  image = locally-trivial pairs (the fppf/étale-descent half — gated on
+  stream-DESC like T-Q6e's descent step; for CONSTANT finite G étale-local
+  triviality of torsors is the honest scope). Sources: reviewer v8; KM 4.7
+  proof pp. 114–116 uses exactly the trivial-torsor comparison. Lane Q.
 
 - **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
   `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
