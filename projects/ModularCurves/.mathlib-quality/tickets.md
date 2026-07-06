@@ -1302,7 +1302,20 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.2.2 + 1.1 (in hand). **Generality**: smooth separated rel. curve.
 
 ### [T-D5] Exact order N ⟹ NP = 0 (KM 1.4.2; BB-DELIGNE)
-- **Status**: open · **File**: ExactOrder.lean · `HasExactOrder.smul_eq_zero` ·
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-08T10:00Z →
+  2026-07-08T11:00Z — `HasExactOrder.smul_eq_zero` DERIVED sorry-free from the box
+  `RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors` (BB-DELIGNE stated in the
+  project's subgroup-divisor encoding, exactly as this ticket designed). Real
+  content proved: P factors through the order divisor — new
+  `IdealSheafData.idealMonoidHom` (ideal-of-product = product-of-ideals via
+  map_prod; upstream-shaped), Ideal.prod_le_inf + Finset.inf_le at the a = 0
+  factor, `(0+1) • P = P` by simp, then `P.1.toImage ≫ inclusion hle` with
+  inclusion_subschemeι + toImage_imageι. Degree input = T-D3's
+  sectionsDivisor_degree (hypotheses discharged by E.proper→IsSeparated + E.smooth).
+  LEAN GOTCHA: `rw [← h0]` (h0 : (0+1)•P = P) rewrites EVERY P including inside the
+  ∏-binder — nested-smul junk; rewrite FORWARD in the hypothesis (`rw [h0] at hle0`)
+  instead — binder-bound occurrences don't match, so only the intended RHS moves.) ·
+  **File**: ExactOrder.lean · `HasExactOrder.smul_eq_zero` ·
   **Depends on**: T-D3 · **Type**: theorem · **Sources**: [KM] 1.4.2 (IN HAND,
   verbatim in decomposition); black box BB-DELIGNE stated as its own lemma first.
 
