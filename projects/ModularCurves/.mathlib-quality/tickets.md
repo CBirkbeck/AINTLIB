@@ -2617,10 +2617,32 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     tracked for the cleanup lane, same as T-D31/T-D32).
 
 ### [T-Q3a] Localized action ring homs at an invariant element
-- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:45Z
+- **Status**: done (beastmode-Q, 2026-07-06T15:45Z → 2026-07-06T15:50Z) ·
+  **Claimed**: beastmode-Q, 2026-07-06T15:45Z
 - **File**: ModularCurves/ForMathlib/InvariantLocalization.lean
   (NEW) · **Parent**: T-Q3 · **Type**: def + lemmas · **Depends on**: none
   (pure algebra; parallel with T-Q1)
+- **Progress** (2026-07-06T15:50, includes T-Q3b + T-Q3c(i)(ii) — whole file in one
+  pass, attack blocks in q-lane.md, all SURVIVED):
+  - Delivered (namespace `MulSemiringAction`): `powers_le_comap_toRingHom`,
+    `awayHom` (:= `IsLocalization.map` at `toRingHom g`; MonoidHom-into-RingAut
+    bundling deliberately NOT used — structure-field route with a private
+    `mk'_congr` helper), `awayHom_algebraMap`/`_mk'`/`_mk'_pow`/`_one`/`_mul`,
+    `away : MulSemiringAction G (Localization.Away h)` (@[implicit_reducible] def,
+    letI-consumed, IsFractionRing.mulSemiringAction precedent).
+  - SCOPE NOTE: the promised `SMulCommClass G R (Localization.Away h)` NOT stated —
+    only needed by the (iii) subalgebra packaging, deferred with it (see T-Q3c).
+  - GOTCHAS OF RECORD: `MulSemiringAction.toRingHom` has NO `_apply` simp lemma
+    (defeq only — use `show`); the pow lemma is `smul_pow'` (`smul_pow` is the
+    `r^n • x^n` one); structure-field proofs via `IsLocalization.map_unique` with
+    `_` holes cause whnf/isDefEq heartbeat blowups — standalone `awayHom_*` lemmas
+    first, then field-assign; `map_mk'`'s RHS denominator must be type-ascribed
+    `(⟨…⟩ : Submonoid.powers h)` in re-statements or the unifier grabs the comap
+    form; `rw` into a subtype component is a dependent-motive error — `show` both
+    sides down to `Subtype.val` form first; `mk'_cancel` args need the
+    `(⟨…⟩ : Submonoid.powers h)` ascription (M is a metavariable at elab time).
+  - Axioms: standard three on all decls. Zero warnings. Post-proof cleanup:
+    DEFERRED (owner pause, same as T-Q1/T-D31/T-D32).
 - **Statement**: for `h : B` with `hfix : ∀ g : G, g • h = h`, package the induced
   action on `Localization.Away h` as an honest `noncomputable def
   MulSemiringAction.away : MulSemiringAction G (Localization.Away h)` (NOT an
@@ -2640,8 +2662,16 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   algebra backend of [Loe] 3.6.1's "patch nicely".
 
 ### [T-Q3b] Fixed elements of the localization come from invariants over a power
-- **Status**: open · **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
+- **Status**: done (beastmode-Q, 2026-07-06T15:45Z → 2026-07-06T15:50Z, with T-Q3a)
+- **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
   T-Q3 · **Type**: lemma · **Depends on**: T-Q3a
+- **Progress**: `exists_fixed_mk'_eq_of_forall_awayHom_eq` — stated via `awayHom`
+  (instance-free); proof exactly per sketch (mk'_eq_iff_eq + eq_iff_exists at each
+  g, `choose` + `Finset.univ.sup` for the uniform power, h^M-bump for the invariant
+  numerator, `mk'_cancel` finish). ROUTE NOTE: the mk'_spec/congrArg-cancellation
+  route FAILS (the multiplier `algebraMap (h^N)` never matches `algebraMap ↑y`
+  patterns — elaborator pre-reduces the coercion); `IsLocalization.mk'_eq_iff_eq`
+  is the right cancellation lemma. Axioms standard; see T-Q3a note.
 - **Statement**: `[Finite G]`, `h` invariant, `x : Localization.Away h` with
   `∀ g, g • x = x` (T-Q3a action) → `∃ (b : B) (n : ℕ), (∀ g, g • b = b) ∧
   IsLocalization.mk' _ b (⟨h^n, _⟩) = x` (single conclusion; exact `mk'` spelling
@@ -2658,8 +2688,19 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   07S5 first display.
 
 ### [T-Q3c] Localization of the invariants inclusion: injective, range = fixed, IsLocalization
-- **Status**: open · **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
+- **Status**: done (beastmode-Q, 2026-07-06T15:45Z → 2026-07-06T15:55Z; (iii)
+  DEFERRED into T-Q3 per the attack-block scope note)
+- **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
   T-Q3 · **Type**: lemmas (3 single-conclusion decls) · **Depends on**: T-Q3a, T-Q3b
+- **Progress**: (i) `fixedPoints_awayMap_injective` (elementwise via
+  `mk'_eq_zero_iff` + `Subtype.ext`; statement spelled with `IsLocalization.map` +
+  `Submonoid.powers_le_comap_algebraMap`, NOT `Away.map` — the `Away (algebraMap h)`
+  instance does not fire syntactically on `Away ↑h`); (ii)
+  `mem_range_fixedPoints_awayMap_iff` (⊆ via `map_mk'`+`awayHom_mk'`+`mk'_congr`;
+  ⊇ via T-Q3b + `map_mk'`); (iii) the `IsLocalization.Away (h:A) ((B_h)^G)`
+  packaging DEFERRED — zero mathematical content beyond (i)+(ii), build it inside
+  T-Q3's assembly only if the factorization step wants it (attack A3 note). Axioms
+  standard three on both. Zero warnings.
 - **Statement** (A := FixedPoints.subalgebra R B G; `h : A`; localized inclusion
   `awayIncl := IsLocalization.Away.map (Localization.Away h) (Localization.Away
   (h:B)) (algebraMap A B) h`):
