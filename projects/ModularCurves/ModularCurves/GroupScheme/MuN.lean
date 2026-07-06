@@ -87,15 +87,10 @@ private lemma muNRingGen_pow (N : ℕ) : muNRingGen N ^ N = 1 :=
     change (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) X) ^ N = 1
     simp [← map_pow, Ideal.Quotient.mk_eq_one_iff_sub_mem]
 
-/-- Two ring homomorphisms out of `ℤ[T]/(Tᴺ − 1)` agreeing on the class of `T` agree. -/
 private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N ⟶ R}
     (h : f (muNRingGen N) = g (muNRingGen N)) : f = g := by
-  have key : (f.hom.comp (ULift.ringEquiv.symm.toRingHom :
-        (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) →+* muNRing N)).comp
-        (Ideal.Quotient.mk _) =
-      (g.hom.comp (ULift.ringEquiv.symm.toRingHom :
-        (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) →+* muNRing N)).comp
-        (Ideal.Quotient.mk _) :=
+  have key : (f.hom.comp ULift.ringEquiv.symm.toRingHom).comp (Ideal.Quotient.mk _) =
+      (g.hom.comp ULift.ringEquiv.symm.toRingHom).comp (Ideal.Quotient.mk _) :=
     Polynomial.ringHom_ext' (RingHom.ext_int _ _) h
   ext x
   obtain ⟨x⟩ := x

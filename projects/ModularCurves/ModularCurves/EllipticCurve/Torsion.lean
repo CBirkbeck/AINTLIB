@@ -166,12 +166,35 @@ theorem torsionπ_isFinite (N : ℕ) [NeZero N] : IsFinite (E.torsionπ N) := by
   exact MorphismProperty.pullback_snd _ _ h
 
 /-- **(T-B4, flatness half of KM 2.3.1; BB-FLAT/stream FLAT consumer)** `E[N] ⟶ S` is
-flat. -/
-theorem torsionπ_flat (N : ℕ) : Flat (E.torsionπ N) := by sorry
+flat. For `N = 0` the kernel of `[0] = π ≫ 0` is all of `E` (pulling back along the
+mono zero section), which is flat over `S` since `π` is smooth; for `N ≥ 1` this is
+the base change of `BB-FLAT`. -/
+theorem torsionπ_flat (N : ℕ) : Flat (E.torsionπ N) := by
+  rcases eq_or_ne N 0 with rfl | hN
+  · haveI : IsSplitMono E.zero := IsSplitMono.mk' ⟨E.π, E.zero_π⟩
+    show Flat (pullback.snd (E.mulByHom ((0 : ℕ) : ℤ)) E.zero)
+    rw [show (((0 : ℕ) : ℤ)) = (0 : ℤ) from rfl, E.mulByHom_zero]
+    have hsnd : pullback.snd (E.π ≫ E.zero) E.zero =
+        pullback.fst (E.π ≫ E.zero) E.zero ≫ E.π := by
+      have hc : (pullback.fst (E.π ≫ E.zero) E.zero ≫ E.π) ≫ E.zero =
+          pullback.snd (E.π ≫ E.zero) E.zero ≫ E.zero :=
+        (Category.assoc _ _ _).trans
+          (pullback.condition (f := E.π ≫ E.zero) (g := E.zero))
+      exact ((cancel_mono E.zero).mp hc).symm
+    rw [hsnd]
+    haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+    infer_instance
+  · haveI : NeZero N := ⟨hN⟩
+    have h := E.mulByHom_flat N
+    exact MorphismProperty.pullback_snd _ _ h
 
 /-- **(T-B4, rank part of KM 2.3.1)** `E[N]/S` has constant rank `N²`. -/
 theorem torsion_rank (N : ℕ) [NeZero N] (s : S) :
-    (E.torsionπ N).finrank s = N ^ 2 := by sorry
+    (E.torsionπ N).finrank s = N ^ 2 := by
+  haveI := E.mulByHom_flat N
+  haveI := E.mulByHom_isFinite N
+  have h := Scheme.Hom.finrank_pullback_snd (E.mulByHom N) E.zero s
+  exact h.trans (E.mulByHom_finrank N _)
 
 /-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
 (it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
