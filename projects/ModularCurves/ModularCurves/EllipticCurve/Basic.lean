@@ -205,10 +205,17 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
     simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc, Iso.inv_hom_id,
       Category.comp_id]
     apply pullback.hom_ext
-    · -- h₀ (fst / section): needs section naturality `sVlift ≫ hP2top = gV ≫ (U-model section)`
-      -- (pullback.hom_ext: fst via hgVfac + zbc.fst = g≫z; snd via lift_snd twice = gV), then
-      -- `isoSpec_V.inv ≫ gV = Spec.map φ ≫ isoSpec_U.inv` (from hbridge) + hez +
-      -- projModelZero_baseChange. ~15 lines — T-A8a final step.
+    · -- h₀ (fst / section). After `simp only [Category.assoc, pullback.lift_fst,
+      -- hB.isoPullback_hom_fst]` the goal is
+      --   `isoSpecV.inv ≫ sVlift ≫ hP2top ≫ e.hom = projModelZero W' ≫ projModelBaseChange`.
+      -- FINAL STEP (T-A8a, fully derived): the section naturality
+      --   `hnat : sVlift ≫ hP2top = gV ≫ sU`  (sU := pullback.lift (U.1.ι ≫ z) (𝟙 ↑U) …),
+      -- proven by `pullback.hom_ext` on `pullback π U.1.ι`:
+      --   · fst: sVlift≫hP2top≫fst(π,U.1.ι) = Vι≫g≫z = gV≫U.1.ι≫z = (gV≫sU)≫fst  [lift_fst ×3 + hgVfac];
+      --   · snd: sVlift≫hP2top≫snd(π,U.1.ι) = 𝟙≫gV = gV = (gV≫sU)≫snd            [lift_snd ×2].
+      -- Then rw hnat; from hez, `sU ≫ e.hom = isoSpecU.hom ≫ projModelZero W`; from hbridge,
+      -- `isoSpecV.inv ≫ gV ≫ isoSpecU.hom = Spec.map φ`; finish with `projModelZero_baseChange`
+      -- (`Spec.map φ ≫ projModelZero W = projModelZero W' ≫ projModelBaseChange`). ~20 lines.
       sorry
     · simp only [Category.assoc, hB.isoPullback_hom_snd, pullback.lift_snd]
       rw [hP2.isoPullback_hom_snd_assoc, pullback.lift_snd_assoc, Category.id_comp,
