@@ -398,7 +398,6 @@ def constSchemePointsEquiv (S : Scheme.{u}) (A : Type) [Finite A] {T : Scheme.{u
     have key : constDesc g c ((constFiber c (c t)).ι ⟨t, mem_constFiber c t⟩) =
         ((constFiber c (c t)).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) (c t)) ⟨t, mem_constFiber c t⟩ := by
       rw [← Scheme.Hom.comp_apply, constFiber_ι_constDesc]
-      rfl
     rw [Scheme.Opens.ι_apply] at key
     show constIndex (constDesc g c) t = c t
     rw [constIndex_eq_iff, key, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply]
@@ -420,15 +419,15 @@ lemma constSchemePointsEquiv_natural (S : Scheme.{u}) (A : Type) [Finite A]
 /-- The presheaf of groups on `Over S` represented by the constant scheme `(ℤ/N)_S`:
 locally constant `ℤ/N`-valued functions under pointwise addition (written
 multiplicatively for mathlib's `GrpObj`). -/
-private def constGrpFunctor (S : Scheme.{u}) (N : ℕ) : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
+private def constGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
   obj Y := GrpCat.of (Multiplicative (LocallyConstant Y.unop.left (ZMod N)))
   map k := GrpCat.ofHom
     (AddMonoidHom.toMultiplicative (LocallyConstant.comapAddMonoidHom k.unop.left.base.hom))
-  map_id Y := rfl
-  map_comp f g := rfl
+  map_id _ := rfl
+  map_comp _ _ := rfl
 
 /-- `(ℤ/N)_S` represents its points presheaf. -/
-private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) :
+private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     (constGrpFunctor S N ⋙ forget _).RepresentableBy
       (Over.mk (constSchemeπ S (ZMod N))) where
   homEquiv {Y} :=
@@ -439,11 +438,10 @@ private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) :
     ((constSchemePointsEquiv S (ZMod N) Y.hom).trans Multiplicative.ofAdd)
   homEquiv_comp {Y Y'} f h :=
     congrArg Multiplicative.ofAdd <| LocallyConstant.ext fun t ↦ by
-      rw [LocallyConstant.coe_comap_apply]
       show constIndex ((f ≫ h).left) t = constIndex h.left (f.left.base.hom t)
-      rw [constIndex_eq_iff,
-        show ((f ≫ h).left : Y.left ⟶ constScheme S (ZMod N)) = f.left ≫ h.left from rfl,
-        Scheme.Hom.comp_apply]
+      rw [constIndex_eq_iff]
+      show h.left (f.left t) ∈ Set.range (Sigma.ι (fun _ : ZMod N ↦ S)
+        (constIndex h.left (f.left t)))
       exact constIndex_mem h.left (f.left t)
 
 /-- **(DS3b, ticket T-B2)** The group structure on the constant group scheme `(ℤ/N)_S`,
