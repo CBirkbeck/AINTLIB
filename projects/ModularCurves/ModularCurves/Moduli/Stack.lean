@@ -98,6 +98,31 @@ theorem moduliProblem_fppf_separated (R : CommRingCat.{u}) (P : ModuliProblem R)
       Surjective f → ∀ (X : EllObj R) (g : T ⟶ X.base)
       (a b : P.obj (Opposite.op (X.pullbackAlong g))),
       P.map (X.pullbackAlongMap g f).op a = P.map (X.pullbackAlongMap g f).op b →
-      a = b := by sorry
+      a = b := by
+  intro T T' f hflat hlfp hsurj X g a b hab
+  haveI := hflat; haveI := hsurj
+  haveI : Epi f := AlgebraicGeometry.Flat.epi_of_flat_of_surjective f
+  -- unpack the relative-representability datum for `X`
+  obtain ⟨Z, fZ, eqv, hnat⟩ := hP X
+  -- transport `a`, `b` back to `Z`-points over `g`
+  set ha := (eqv g).symm a with hha
+  set hb := (eqv g).symm b with hhb
+  have haval : eqv g ha = a := (eqv g).apply_symm_apply a
+  have hbval : eqv g hb = b := (eqv g).apply_symm_apply b
+  -- the restriction of `a` along `f` is `eqv` of the restricted `Z`-point (naturality)
+  have hra : P.map (X.pullbackAlongMap g f).op a =
+      eqv (f ≫ g) ⟨f ≫ ha.1, by rw [Category.assoc, ha.2]⟩ := by
+    rw [← haval, hnat g f ha]
+  have hrb : P.map (X.pullbackAlongMap g f).op b =
+      eqv (f ≫ g) ⟨f ≫ hb.1, by rw [Category.assoc, hb.2]⟩ := by
+    rw [← hbval, hnat g f hb]
+  rw [hra, hrb] at hab
+  -- `eqv` is injective, so the two restricted `Z`-points agree
+  have hsub := (eqv (f ≫ g)).injective hab
+  have hfeq : f ≫ ha.1 = f ≫ hb.1 := congrArg Subtype.val hsub
+  -- cancel the epi `f`
+  have h1 : ha.1 = hb.1 := (cancel_epi f).mp hfeq
+  have : ha = hb := Subtype.ext h1
+  rw [← haval, ← hbval, this]
 
 end ModularCurves
