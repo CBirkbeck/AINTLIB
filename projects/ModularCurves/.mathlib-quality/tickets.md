@@ -986,15 +986,47 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.3/2.3 ⧗; standard. **Generality**: any `N ≠ 0`.
 
 ### [T-B4] ⧗KM E[N]/S finite locally free of rank N² (KM 2.3.1; BB-FLAT)
-- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
-  2026-07-07T21:15Z · **File**: Torsion.lean · `torsionπ_isFinite`, `torsionπ_flat`,
-  `torsion_rank` · **Depends on**: T-B3 (done); fibrewise degree input (HasseWeil/mathlib
-  fibre theory) · **Parallel**: with T-B5 · **Type**: theorems
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-07T21:15Z →
+  2026-07-08T00:30Z — all three targets DERIVED, sorry-free modulo the three named
+  KM 2.3.1 boxes now stated in Torsion.lean: `mulByHom_locallyQuasiFinite` (BB-QF,
+  fibre input), `mulByHom_flat` (BB-FLAT), `mulByHom_finrank` (BB-DEG, deg [N] = N²)
+  — box discharge is T-B4x (blocked on T-B6/HasseWeil comparison). QUOTE-GATE
+  SATISFIED: KM 2.3.1 full statement + proof mined from the full PDF (printed
+  pp. 73–75; proof = reduce to universal regular Weierstrass base + miracle flatness
+  [AK-1 V 3.6] + fibrewise nonconstancy via M²-torsion + rank at one ℂ-point).
+  REAL new infrastructure: `torsionι_π` (@[reassoc]), `mulByHom_isProper` (instance;
+  cancellation IsProper.of_comp along separated π), `mulByHom_zero`
+  ([0] = π ≫ zero — the hom-group unit is DEFINITIONALLY toUnit ≫ η: zpowRec 0
+  reduces, h0 := rfl!), `mulByHom_isFinite` (ZMT
+  IsFinite.of_isProper_of_locallyQuasiFinite), `torsionπ_isFinite` (base change),
+  `torsionπ_flat` (N = 0 branch REAL: kernel of [0] is all of E via
+  pullback_snd_iso_of_left_factors_mono against the split-mono zero section +
+  Smooth→Flat; N ≥ 1 via BB-FLAT base change), `torsion_rank`
+  (Scheme.Hom.finrank_pullback_snd + BB-DEG). LEAN GOTCHAS BANKED: calc chains
+  across defeq-but-not-syntactic types (E.torsion N vs raw pullback; Over-.left vs
+  raw) fail Trans-synthesis — show-recast to ONE raw spelling first;
+  `𝟙_` needs `open MonoidalCategory`; SmoothOfRelativeDimension.smooth is a lemma
+  (n explicit, f explicit), not an instance.) ·
+  **File**: Torsion.lean · `torsionπ_isFinite`, `torsionπ_flat`,
+  `torsion_rank` · **Depends on**: T-B3 (done); boxes → T-B4x · **Parallel**: with T-B5 · **Type**: theorems
 - **Sketch**: `[N]` proper + quasi-finite ⟹ finite (mathlib ZMT
   `IsFinite.of_isProper_of_locallyQuasiFinite` — verified present); fibrewise flatness
   criterion (BB-FLAT, stated black box) + fibre degree `N²` (Silverman III.6.2(d);
   fibre anchor: HasseWeil `mulByInt_degree`).
 - **Sources**: [KM] 2.3.1 ⧗ · EGA IV 11.3.10 · [Sil] III.6.2.
+
+### [T-B4x] Discharge the KM 2.3.1 boxes (BB-QF, BB-FLAT, BB-DEG)
+- **Status**: blocked (needs T-B6 fibre comparison — stream-B in progress — plus the
+  HasseWeil `mulByInt_degree` anchor; alternatively the KM-native route needs the
+  universal-Weierstrass reduction = BB-RR-adjacent moduli machinery)
+- **File**: Torsion.lean · `mulByHom_locallyQuasiFinite`, `mulByHom_flat`,
+  `mulByHom_finrank` · **Depends on**: T-B6 · **Type**: theorems
+- **Sketch**: KM 2.3.1 proof (mined, printed pp. 74–75): quasi-finiteness geometric
+  fibre by geometric fibre (nonconstancy via permuted M-torsion, M prime to N·char);
+  flatness by miracle flatness over the universal regular base (or fibrewise
+  criterion EGA IV 11.3.10); degree at a single geometric point per connected
+  component. One conclusion per box; do not merge.
+- **Sources**: [KM] 2.3.1 (quote banked in T-B4 notes) · EGA IV 11.3.10 · [Sil] III.6.2.
 
 ### [T-B5] [N] étale when N invertible (+ E[N] finite étale)
 - **Status**: open · **File**: Torsion.lean · `mulBy_etale`, `torsionπ_etale`
