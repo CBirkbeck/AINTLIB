@@ -2412,7 +2412,8 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   machinery); refinement, not divergence.
 
 ### [T-Q1] Spec-side action vocabulary — PROVABLE NOW
-- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:16Z
+- **Status**: done (beastmode-Q, 2026-07-06T15:16Z → 2026-07-06T15:40Z) ·
+  **Claimed**: beastmode-Q, 2026-07-06T15:16Z
 - **File**: ModularCurves/ForMathlib/SpecGroupAction.lean (NEW) · **Parent**: stream Q
   (v2 one-liner) · **Type**: def + lemmas · **Depends on**: none · **Parallel**: yes
 - **Statement** (decls to create; skeleton `sorry`-free where trivial):
@@ -2449,6 +2450,28 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 - **Progress**:
   - 2026-07-06T15:16: claimed; work order banked; attack block next
     (q-lane.md), then skeleton.
+  - 2026-07-06T15:25: attack block SURVIVED (6+3 attacks, q-lane.md — binding
+    orientation notes A1/A4: two contravariance flips cancel; orbit iff needs
+    g ↦ g⁻¹ reindex). Skeleton green (7 sorries).
+  - 2026-07-06T15:40: DONE — all 7 proofs closed first pass. Delivered (namespace
+    `AlgebraicGeometry`): `specSMul` + `_one`/`_mul`/`IsIso`/`_apply`/
+    `_apply_asIdeal` (comap (toRingHom g) = g⁻¹ • ·, via
+    `Ideal.mem_inv_pointwise_smul_iff` — NO toRingAut needed), tautological
+    `Algebra.IsInvariant (FixedPoints.subalgebra R B G) B G` instance,
+    `invariantsπ` + `specSMul_invariantsπ` (@[reassoc (attr := simp)];
+    membership proof is literally `a.2 g`), `invariantsπ_isIntegralHom`
+    (`IsIntegralHom.SpecMap_iff` + `Algebra.isIntegral_def` +
+    `Algebra.IsInvariant.isIntegral`), `invariantsπ_surjective`
+    (`RingHom.IsIntegral.comap_surjective` + `Subtype.val_injective` — needs
+    the explicit `have hint : (algebraMap …).IsIntegral` ascription, field
+    projection off the ∀-form fails), `invariantsπ_apply_eq_iff` (renamed from
+    `_base_eq_iff` — mathlib now uses the `Scheme.Hom` DFunLike coercion;
+    `Scheme.Hom.comp_apply` NOT `Scheme.comp_apply`). Axioms: standard three on
+    all 7. Zero warnings. GOTCHAS OF RECORD: `Spec.map_apply` is rfl;
+    `exists_smul_of_under_eq` orientation is `Q = g • P`; `Ideal.under` is an
+    abbrev (congrArg PrimeSpectrum.asIdeal lands defeq-on-target). Post-proof
+    cleanup: DEFERRED (owner paused cleanup passes 2026-07-06T14:05Z; debt
+    tracked for the cleanup lane, same as T-D31/T-D32).
 
 ### [T-Q3a] Localized action ring homs at an invariant element
 - **Status**: open · **File**: ModularCurves/ForMathlib/InvariantLocalization.lean
