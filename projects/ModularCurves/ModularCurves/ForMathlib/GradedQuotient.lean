@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2a.
 -/
 import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
+import Mathlib.RingTheory.GradedAlgebra.RingHom
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 
 /-!
@@ -165,5 +166,20 @@ lemma coe_algebraMapGradeZero (r : R) :
 
 instance : IsScalarTower R (↥(quotientGrading I 0)) (A ⧸ I.toIdeal) :=
   IsScalarTower.of_algebraMap_eq fun _ => rfl
+
+/-- The quotient map `A → A ⧸ I` as a graded ring homomorphism onto the quotient
+grading. -/
+def quotientGradingHom : 𝒜 →+*ᵍ quotientGrading I where
+  toRingHom := Ideal.Quotient.mk I.toIdeal
+  map_mem := mk_mem_quotientGrading I
+
+lemma quotientGradingHom_surjective :
+    Function.Surjective (quotientGradingHom I) :=
+  Ideal.Quotient.mk_surjective
+
+@[simp]
+lemma quotientGradingHom_apply (a : A) :
+    quotientGradingHom I a = Ideal.Quotient.mk I.toIdeal a :=
+  rfl
 
 end HomogeneousIdeal

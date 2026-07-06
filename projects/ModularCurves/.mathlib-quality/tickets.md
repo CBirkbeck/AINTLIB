@@ -148,6 +148,50 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `SetLike σ` in v1 (Submodule is what the consumer and mathlib's `homogeneousSubmodule`
   use).
 
+### [T-A2d] lfp of the model via the ℙ² embedding (sub-ticket of T-A2)
+- **Status**: in_progress (beastmode, spawned 2026-07-06T04:45Z) · **Files**:
+  ForMathlib/GradedQuotient.lean (graded mk-hom), ForMathlib/ProjClosedImmersion.lean
+  (new), WeierstrassModel.lean · **Parent**: T-A2
+- **Depends on**: T-A2a (done) · **Type**: def + theorems
+- **Statement/route (of record)**:
+  1. `HomogeneousIdeal.quotientGradingHom : 𝒜 →+*ᵍ quotientGrading I` (mk as graded hom;
+     trivial fields via `mk_mem_quotientGrading`).
+  2. `projModelToProjSpace W := Proj.map (quotientGradingHom …) : projModel W ⟶
+     Proj (homogeneousSubmodule (Fin 3) R)` (mathlib `Proj.map`, Functor.lean:144).
+  3. **General mathlib gap**: `Proj.map_isClosedImmersion_of_surjective` — Proj.map of a
+     surjective graded hom is a closed immersion. Proof: closed immersions are local on
+     the target (mathlib `IsClosedImmersion` + `IsZariskiLocalAtTarget`); over the
+     `awayι`-cover of Proj 𝒜, the pullback is `Spec (Away.map g)` by
+     `mapAffineOpenCover`/`awayι_comp_map` (Functor.lean:186/197), and `Away.map` of a
+     surjective graded hom is surjective (NumDenSameDeg lift — same style as mathlib's
+     `lift_awayMapₐ_awayMapₐ_surjective`, Proper.lean:37); surjective ring hom ⟺ Spec
+     closed immersion (mathlib `Spec_iff`).
+  4. lfp of `ℙ²_R → Spec R`: chart iso `(Away (homogeneousSubmodule σ R) (X i))₀ ≃+*
+     MvPolynomial {j // j ≠ i} R` (dehomogenisation; mathlib gap, ForMathlib) — then
+     `RingHom.FinitePresentation` chartwise + `HasRingHomProperty`.
+  5. Ideal of the immersion is chartwise principal (`F/Xᵢ³`) → immersion lfp;
+     compose for `projModelπ` lfp.
+- **Sources**: EGA II 2.9 / Stacks 01M6-adjacent (standard); no KM gate.
+- **Generality**: step 3 for arbitrary `[GradedRing]` over ℕ; step 4 for arbitrary σ
+  finite; upstream candidates both.
+
+### [T-A2e] Elliptic points clause via the ℙ² embedding (sub-ticket of T-A2)
+- **Status**: open (after T-A2d) · **File**: WeierstrassModel.lean · **Parent**: T-A2
+- **Depends on**: T-A2d (chart iso + closed immersion) · **Type**: theorem
+- **Statement**: the `points` field of `projModel_isWeierstrassModel`: for elliptic `W`
+  and every `R`-algebra field `K`, pointed `SpecPoints (projModel W) (projModelπ W) K ≃
+  (W.baseChange K).toAffine.Point` with `[0:1:0] ↦ 0`.
+- **Proof sketch**: K-points of the closed subscheme = K-points of ℙ² on the cubic
+  (closed-immersion mono + ideal-vanishing); each lands in an affine chart `D₊(Xᵢ)`
+  (the awayι cover restricted to Spec K factors through one basic open, K local);
+  chart-points = solutions of the dehomogenised cubic (T-A2d step 4 iso); nonsingularity
+  for elliptic `W` over a field (mathlib `Affine.nonsingular` route) identifies with
+  `Affine.Point` ∪ {∞}; the ∞-chart contributes exactly `[0:1:0]` (Z=0 ⟹ X³=0 ⟹ X=0 in a
+  field ⟹ unique point in `D₊(Y)` with `x = z = 0`); pointedness by construction of
+  `projModelZero`. Mathlib `Projective.Point.toAffineAddEquiv` as the final dictionary
+  where convenient.
+- **Sources**: KM 2.2/Loeffler §3.3 (display); Silverman III.3; standard.
+
 ### [T-A2] Construct the projective Weierstrass model (DS1)
 - **Status**: in_progress (beastmode; **DATA HALF DONE 2026-07-06T03:30Z — DS1 is no
   longer a data-sorry**: `projModel W := Proj (quotientGrading (projIdeal W))`,
