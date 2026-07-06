@@ -470,6 +470,45 @@ theorem isOpenImmersion_localQuotientMap (hW : σ.IsStableOpen W)
   rw [← hm₀]
   infer_instance
 
+omit [Finite G] in
+/-- Intersections of stable opens are stable. -/
+theorem IsStableOpen.inf {U V : X.Opens} (hU : σ.IsStableOpen U)
+    (hV : σ.IsStableOpen V) : σ.IsStableOpen (U ⊓ V) := by
+  intro g
+  rw [Scheme.Hom.preimage_inf, hU g, hV g]
+
+/-- The local quotient map at equal opens is the identity. -/
+theorem localQuotientMap_self {W : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) :
+    σ.localQuotientMap hW hWa hW hWa le_rfl = 𝟙 _ := by
+  letI := σ.gammaMulSemiringAction hW
+  refine invariantsπ_hom_ext G ↑Γ(X, W) ℤ _ _ ?_
+  have h1 : invariantsπ G ↑Γ(X, W) ℤ =
+      hWa.isoSpec.inv ≫ σ.localQuotientπ hW hWa := by
+    rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.comp_id, h1, Category.assoc]
+  congr 1
+  rw [localQuotientπ_localQuotientMap σ hW hWa hW hWa le_rfl, Scheme.homOfLE_rfl,
+    Category.id_comp]
+
+/-- The local quotient maps compose along inclusions. -/
+theorem localQuotientMap_trans {W V U : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hU : σ.IsStableOpen U) (hUa : IsAffineOpen U) (hWV : W ≤ V) (hVU : V ≤ U) :
+    σ.localQuotientMap hW hWa hV hVa hWV ≫ σ.localQuotientMap hV hVa hU hUa hVU =
+      σ.localQuotientMap hW hWa hU hUa (hWV.trans hVU) := by
+  letI := σ.gammaMulSemiringAction hW
+  refine invariantsπ_hom_ext G ↑Γ(X, W) ℤ _ _ ?_
+  have h1 : invariantsπ G ↑Γ(X, W) ℤ =
+      hWa.isoSpec.inv ≫ σ.localQuotientπ hW hWa := by
+    rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  rw [h1, Category.assoc, Category.assoc]
+  congr 1
+  rw [← Category.assoc, localQuotientπ_localQuotientMap σ hW hWa hV hVa hWV,
+    Category.assoc, localQuotientπ_localQuotientMap σ hV hVa hU hUa hVU,
+    localQuotientπ_localQuotientMap σ hW hWa hU hUa (hWV.trans hVU),
+    ← Category.assoc, ← Scheme.homOfLE_homOfLE (X := X) hWV hVU]
+
 end OpenImmersion
 
 end SchemeAction
