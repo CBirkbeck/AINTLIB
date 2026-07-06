@@ -2473,6 +2473,19 @@ lemma projModelZero_baseChange {R' : Type u} [CommRing R'] [Algebra R R']
     (mk_X_mem_quotientGrading_one W 1) one_pos) ?_
   sorry
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The chart factorisation of the zero section is a retraction of the chart's
+`R`-structuring. -/
+lemma projModelZeroChart_comp_χ (W : WeierstrassCurve R) :
+    projModelZeroChart W ≫ Spec.map (CommRingCat.ofHom
+      ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) =
+    𝟙 (Spec (.of R)) := by
+  rw [← awayι_projModelπ W 1, ← Category.assoc, projModelZeroChart_fac]
+  exact projModelZero_projModelπ W
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
