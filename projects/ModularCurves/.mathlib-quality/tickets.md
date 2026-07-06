@@ -1791,8 +1791,40 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
   Duplication watch: NOTHING imports RingTheory/Etale/Finite.lean yet; Merten's
   series is visibly heading here — re-check at each mathlib bump, swap ours out
   if mathlib lands it.
-- **[AG-GG-2]** `FiberFunctor` instance for the `AlgebraicClosure ℚ`-points functor
-  on that opposite category (fiber exactness; sep-closed case anchors it).
+- **[AG-GG-2]** `FiberFunctor` instance — RESTRUCTURED 2026-07-06 (beastmode-B) around
+  a DISCOVERY: mathlib's RingTheory/Etale/Finite.lean ALREADY HAS the functor —
+  `CommAlgCat.FiniteEtale.fiber R Ω : (FiniteEtale R)ᵒᵖ ⥤ FintypeCat` (Hom into Ω,
+  Fintype instances included), `fiberIsoBaseChangeFiber : fiber R Ω ≅
+  (baseChange R S).op ⋙ fiber S Ω`, and for Ω sep-closed `fiber Ω Ω` is an
+  **IsEquivalence** (fiberIsoFiniteSpec + equivOfIsSepClosed). DO NOT REBUILD THESE.
+  Consequence: F := fiber k (SeparableClosure k) factors through the equivalence, so
+  every FiberFunctor axiom reduces to an exactness property of
+  `baseChange k Ω : FiniteEtale k ⥤ FiniteEtale Ω` (equivalence-part preserves and
+  reflects everything; transport along the natiso + composition instances).
+  Leaves (new file ForMathlib/FiniteEtaleFiberFunctor.lean):
+  - AG-GG-2a preserves initial: Ω ⊗[k] k ≅ Ω (TensorProduct.rid; trivial).
+  - AG-GG-2b preserves tensor pushouts: Hom_Ω(Ω⊗(B⊗[A]C), T) equiv-chase via
+    liftEquivRight + raw TensorProduct.lift UP (NOT the categorical UP — T-as-k-alg
+    is not finite over k, so use mathlib algebra-level UP).
+  - AG-GG-2c preserves finite products: Algebra.TensorProduct.piRight (exists,
+    RingTheory/TensorProduct/Pi.lean, finite ι).
+  - AG-GG-2d preserves op-epis = monos: mono ⇒ injective in FiniteEtale k via the
+    KERNEL-PAIR SUBALGEBRA P := {(x,y) : j x = j y} ⊆ A × A (étale by
+    etale_subalgebra! two projections equalized by j ⇒ equal ⇒ diagonal);
+    then flat transfer (Ω free/flat over k: rTensor preserves injective) ⇒ mono.
+  - AG-GG-2e preserves SingleObj-G limits (fixed points): Ω ⊗ A^G ≅ (Ω⊗A)^G —
+    A^G = ker δ for the SINGLE map δ : A → ∏_{g∈G} A, a ↦ (g·a − a)ᵍ; flat base
+    change preserves kernels; piRight matches targets. THE one real math lemma.
+  - AG-GG-2f reflects isos: counting — Fi bijective ⇒ finrank equal (via
+    natCard_algHom_sepClosure both sides); injectivity: else factor through
+    A/ker (etale_quotient) with strictly smaller finrank, contradicting card;
+    surjectivity: range subalgebra + Submodule.finrank_lt. NO flatness needed.
+    (Alternatively faithfully-flat; counting is self-contained.)
+  - AG-GG-2g transport plumbing: per-axiom op-conversion (walkingCospanOpEquiv,
+    singleObjOpEquiv from AG-GG-1, Discrete PEmpty self-dual), composition
+    instances (equivalence auto-preserves), preservation-along-natIso ⇒
+    `instance : PreGaloisCategory.FiberFunctor (fiber k (SeparableClosure k))`.
+  Universe note: fiber k Ω lands in FintypeCat.{u} for k Ω : Type u ✓.
 - **[AG-GG-3]** `IsFundamentalGroup GalQ F` (Krull topology, continuity +
   transitivity axioms — classical infinite Galois theory, mathlib-supported).
 - **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
