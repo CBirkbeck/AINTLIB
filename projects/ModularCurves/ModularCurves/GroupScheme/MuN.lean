@@ -92,8 +92,7 @@ private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N �
   have key : (f.hom.comp ULift.ringEquiv.symm.toRingHom).comp (Ideal.Quotient.mk _) =
       (g.hom.comp ULift.ringEquiv.symm.toRingHom).comp (Ideal.Quotient.mk _) :=
     Polynomial.ringHom_ext' (RingHom.ext_int _ _) h
-  ext x
-  obtain ⟨x⟩ := x
+  ext ⟨x⟩
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
   exact DFunLike.congr_fun key p
 

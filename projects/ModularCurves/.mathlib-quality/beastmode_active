@@ -1,1 +1,2 @@
 FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 4 worker 9/74 muNRing_hom_ext
+FOCUS-D: (beastmode-D2) Wave 0: T-D13/D3b/D29/D24/D25/D27 DONE, T-D26 scoped-to-T-D15. Next: T-D31 (reduced-ring evaluation separation for MvPolynomial, feeds T-D2) then T-D32 (f.l.f. iso iff geometric-fibre iso, feeds T-D6). Then Wave 1: T-D12 (baseChange props in CartierDivisor.lean), T-D2, T-D22/23.

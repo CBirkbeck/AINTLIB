@@ -196,15 +196,53 @@ theorem torsion_rank (N : ℕ) [NeZero N] (s : S) :
   have h := Scheme.Hom.finrank_pullback_snd (E.mulByHom N) E.zero s
   exact h.trans (E.mulByHom_finrank N _)
 
+/-- If `0` is invertible on a scheme then the scheme is empty (its global sections
+are the zero ring, and every stalk is a nontrivial local ring). -/
+theorem _root_.ModularCurves.isEmpty_of_nIsInvertible_zero {X : Scheme.{u}}
+    (h : NIsInvertible X 0) : IsEmpty X := by
+  refine ⟨fun x => ?_⟩
+  rw [NIsInvertible, Nat.cast_zero] at h
+  have h0 : (0 : Γ(X, ⊤)) = 1 := isUnit_zero_iff.mp h
+  have hst := congrArg (X.presheaf.germ ⊤ x trivial).hom h0
+  rw [map_zero, map_one] at hst
+  exact one_ne_zero (α := X.presheaf.stalk x) hst.symm
+
+/-- **Mini box (T-B5x)**: `[N]` is locally of finite presentation — an `S`-endomorphism
+of the locally-finitely-presented `E/S` (cancellation `lfp (f ≫ g) + lft g ⟹ lfp f`;
+the ring-level lemma is `RingHom.FinitePresentation.of_comp_finiteType`, but the
+scheme-level cancellation is missing from mathlib — ForMathlib target, ticket T-B5x). -/
+theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
+    LocallyOfFinitePresentation (E.mulByHom N) := by sorry
+
+/-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness)**: if `N` is
+invertible on `S` then `[N]` is formally unramified — Loeffler (verbatim): *"The
+morphism `[N]` multiplies a global differential by `N`, so it induces an isomorphism
+of tangent space."* Discharge needs the invariant-differential API (relative `Ω¹` +
+group-translation invariance) — sub-development gated on mathlib's scheme-level
+differentials. -/
+theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
+    FormallyUnramified (E.mulByHom N) := by sorry
+
 /-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
 (it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
 theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.mulByHom N) := by sorry
+    Etale (E.mulByHom N) := by
+  rcases eq_or_ne N 0 with rfl | hN
+  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π x)⟩
+    infer_instance
+  · haveI : NeZero N := ⟨hN⟩
+    haveI := E.mulByHom_flat N
+    haveI := E.mulByHom_formallyUnramified N h
+    haveI := E.mulByHom_locallyOfFinitePresentation N
+    exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
 
 /-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
 Source: Loeffler §3.4; KM 2.3.5. -/
 theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.torsionπ N) := by sorry
+    Etale (E.torsionπ N) := by
+  have he := E.mulBy_etale N h
+  exact MorphismProperty.pullback_snd _ _ he
 
 end EllipticCurve
 
