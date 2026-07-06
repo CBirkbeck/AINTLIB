@@ -70,6 +70,21 @@ lemma dehomogenizeAux_X_ne (i : σ) {j : σ} (h : j ≠ i) :
     dehomogenizeAux R i (X j) = X ⟨j, h⟩ := by
   simp [dehomogenizeAux, h]
 
+/-- Dehomogenisation commutes with coefficient maps. -/
+lemma dehomogenizeAux_map {S : Type*} [CommRing S] (g : R →+* S) (i : σ)
+    (p : MvPolynomial σ R) :
+    dehomogenizeAux S i (MvPolynomial.map g p) =
+      MvPolynomial.map g (dehomogenizeAux R i p) := by
+  have h : (dehomogenizeAux S i).comp (MvPolynomial.map g) =
+      (MvPolynomial.map g).comp (dehomogenizeAux R i) := by
+    refine MvPolynomial.ringHom_ext (fun r => ?_) (fun j => ?_)
+    · simp [dehomogenizeAux_C]
+    · by_cases hj : j = i
+      · subst hj
+        simp [dehomogenizeAux_X_self]
+      · simp [dehomogenizeAux_X_ne _ _ hj]
+  exact RingHom.congr_fun h p
+
 /-- Dehomogenisation at the variable `X i`: the chart map
 `(R[X]_{X i})₀ → R[u_j : j ≠ i]`. -/
 noncomputable def dehomogenizeAt (i : σ) :

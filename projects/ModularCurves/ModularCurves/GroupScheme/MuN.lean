@@ -266,32 +266,42 @@ representability, exactly as for `μ_N`. The engine recognising a clopen partiti
 
 variable {S : Scheme.{u}} {A : Type} [Finite A]
 
-/-- The index function of a morphism into the constant scheme. -/
+private lemma exists_sigmaι_eq {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) :
+    ∃ a, h t ∈ Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+  obtain ⟨i, y, hy⟩ := (sigmaOpenCover (fun _ : A ↦ S)).exists_eq (h t)
+  exact ⟨i, y, hy⟩
+
+/-- The index function of a morphism into the constant scheme (the copy of `S` each
+point lands in; well defined by disjointness of the copies). -/
 private def constIndex {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) : A :=
-  ((sigmaMk (fun _ : A ↦ S)).symm (h t)).1
+  (exists_sigmaι_eq h t).choose
+
+private lemma constIndex_mem {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) :
+    h t ∈ Set.range (Sigma.ι (fun _ : A ↦ S) (constIndex h t)) :=
+  (exists_sigmaι_eq h t).choose_spec
 
 private lemma constIndex_eq_iff {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) (a : A) :
     constIndex h t = a ↔ h t ∈ Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
   constructor
   · intro ht
-    rw [← ht]
-    exact ⟨((sigmaMk (fun _ : A ↦ S)).symm (h t)).2, by
-      rw [← sigmaMk_mk]
-      exact Homeomorph.apply_symm_apply _ _⟩
-  · rintro ⟨x, hx⟩
-    have hp : (sigmaMk (fun _ : A ↦ S)).symm (h t) = ⟨a, x⟩ := by
-      rw [Homeomorph.symm_apply_eq, sigmaMk_mk]
-      exact hx.symm
-    rw [constIndex, hp]
+    exact ht ▸ constIndex_mem h t
+  · intro hmem
+    by_contra hne
+    have hd := disjoint_opensRange_sigmaι (fun _ : A ↦ S) (constIndex h t) a hne
+    have hmem2 : h t ∈ ((Sigma.ι (fun _ : A ↦ S) (constIndex h t)).opensRange ⊓
+        (Sigma.ι (fun _ : A ↦ S) a).opensRange : (constScheme S A).Opens) :=
+      ⟨constIndex_mem h t, hmem⟩
+    rw [hd.eq_bot] at hmem2
+    simp at hmem2
 
 private lemma isLocallyConstant_constIndex {T : Scheme.{u}} (h : T ⟶ constScheme S A) :
     IsLocallyConstant (constIndex h) := by
   refine IsLocallyConstant.iff_isOpen_fiber.mpr fun a ↦ ?_
-  have : { t | constIndex h t = a } = h.base ⁻¹' Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+  have heq : constIndex h ⁻¹' {a} = ⇑h ⁻¹' Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
     ext t
     exact constIndex_eq_iff h t a
-  rw [this]
-  exact (Sigma.ι (fun _ : A ↦ S) a).opensRange.isOpen.preimage h.base.hom.continuous
+  rw [heq]
+  exact (Sigma.ι (fun _ : A ↦ S) a).opensRange.isOpen.preimage h.continuous
 
 /-- The clopen piece of `T` where a locally constant function takes the value `a`. -/
 private def constFiber {T : Scheme.{u}} (c : LocallyConstant T A) (a : A) : T.Opens :=
@@ -312,10 +322,11 @@ private def constFiberCofanIsColimit {T : Scheme.{u}} (c : LocallyConstant T A) 
     (by
       intro a b hab
       rw [Function.onFun, Scheme.Opens.opensRange_ι, Scheme.Opens.opensRange_ι,
-        TopologicalSpace.Opens.disjoint_iff]
+        disjoint_iff]
+      refine TopologicalSpace.Opens.ext ?_
+      simp only [TopologicalSpace.Opens.coe_inf, TopologicalSpace.Opens.coe_bot]
       ext t
-      simp only [TopologicalSpace.Opens.coe_inf, TopologicalSpace.Opens.coe_bot,
-        Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false, not_and]
+      simp only [Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false, not_and]
       intro hta htb
       exact hab ((show c t = a from hta).symm.trans (show c t = b from htb)))).some
 
@@ -334,9 +345,9 @@ private lemma constFiber_ι_constDesc {T : Scheme.{u}} (g : T ⟶ S) (c : Locall
 private lemma constDesc_π {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T A) :
     constDesc g c ≫ constSchemeπ S A = g :=
   (constFiberCofanIsColimit c).hom_ext fun ⟨a⟩ ↦ by
-    simp only [Cofan.mk_pt, Cofan.mk_ι_app, ← Category.assoc, constFiber_ι_constDesc]
-    simp only [constSchemeπ, Category.assoc, colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app,
-      Category.comp_id]
+    show (constFiber c a).ι ≫ constDesc g c ≫ constSchemeπ S A = (constFiber c a).ι ≫ g
+    rw [← Category.assoc, constFiber_ι_constDesc, Category.assoc, Category.assoc,
+      constSchemeπ, Sigma.ι_desc, Category.comp_id]
 
 /-- **(DS3b pin, ticket T-B2)** `S`-morphisms into the constant scheme `∐_A S` over
 `g : T ⟶ S` are the locally constant `A`-valued functions on `T`.
@@ -384,11 +395,10 @@ lemma constSchemePointsEquiv_natural (S : Scheme.{u}) (A : Type) [Finite A]
     constSchemePointsEquiv S A (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
       (constSchemePointsEquiv S A g h).comap k.base.hom := by
   ext t
-  show constIndex (k ≫ h.1) t = _
   rw [LocallyConstant.coe_comap_apply]
-  show ((sigmaMk (fun _ : A ↦ S)).symm ((k ≫ h.1) t)).1 = _
-  rw [Scheme.Hom.comp_apply]
-  rfl
+  show constIndex (k ≫ h.1) t = constIndex h.1 (k.base.hom t)
+  rw [constIndex_eq_iff, Scheme.Hom.comp_apply]
+  exact constIndex_mem h.1 (k t)
 
 /-- The presheaf of groups on `Over S` represented by the constant scheme `(ℤ/N)_S`:
 locally constant `ℤ/N`-valued functions under pointwise addition (written
@@ -397,21 +407,8 @@ private def constGrpFunctor (S : Scheme.{u}) (N : ℕ) : (Over S)ᵒᵖ ⥤ GrpC
   obj Y := GrpCat.of (Multiplicative (LocallyConstant Y.unop.left (ZMod N)))
   map k := GrpCat.ofHom
     (AddMonoidHom.toMultiplicative (LocallyConstant.comapAddMonoidHom k.unop.left.base.hom))
-  map_id Y := by
-    refine GrpCat.hom_ext (MonoidHom.ext fun c ↦ ?_)
-    apply LocallyConstant.ext fun t ↦ ?_
-    show ((LocallyConstant.comap _ _ : LocallyConstant _ (ZMod N)) : _ → _) t = _
-    rw [LocallyConstant.coe_comap_apply]
-    rfl
-  map_comp f g := by
-    refine GrpCat.hom_ext (MonoidHom.ext fun c ↦ ?_)
-    apply LocallyConstant.ext fun t ↦ ?_
-    show ((LocallyConstant.comap _ _ : LocallyConstant _ (ZMod N)) : _ → _) t = _
-    rw [LocallyConstant.coe_comap_apply]
-    show _ = ((LocallyConstant.comap _ ((LocallyConstant.comap _ _ :
-      LocallyConstant _ (ZMod N))) : LocallyConstant _ (ZMod N)) : _ → _) t
-    rw [LocallyConstant.coe_comap_apply, LocallyConstant.coe_comap_apply]
-    rfl
+  map_id Y := rfl
+  map_comp f g := rfl
 
 /-- `(ℤ/N)_S` represents its points presheaf. -/
 private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) :
@@ -423,11 +420,14 @@ private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) :
       (Y ⟶ Over.mk (constSchemeπ S (ZMod N))) ≃
         { h : Y.left ⟶ constScheme S (ZMod N) // h ≫ constSchemeπ S (ZMod N) = Y.hom }).trans
     ((constSchemePointsEquiv S (ZMod N) Y.hom).trans Multiplicative.ofAdd)
-  homEquiv_comp {Y Y'} f h := by
-    show Multiplicative.ofAdd (constSchemePointsEquiv S (ZMod N) Y.hom
-        ⟨(f ≫ h).left, Over.w (f ≫ h)⟩) = _
-    have := constSchemePointsEquiv_natural S (ZMod N) Y'.hom f.left ⟨h.left, Over.w h⟩
-    apply Multiplicative.ofAdd.injective.eq_iff.mpr ?_ |>.symm ▸ rfl?? sorry
+  homEquiv_comp {Y Y'} f h :=
+    congrArg Multiplicative.ofAdd <| LocallyConstant.ext fun t ↦ by
+      rw [LocallyConstant.coe_comap_apply]
+      show constIndex ((f ≫ h).left) t = constIndex h.left (f.left.base.hom t)
+      rw [constIndex_eq_iff,
+        show ((f ≫ h).left : Y.left ⟶ constScheme S (ZMod N)) = f.left ≫ h.left from rfl,
+        Scheme.Hom.comp_apply]
+      exact constIndex_mem h.left (f.left t)
 
 /-- **(DS3b, ticket T-B2)** The group structure on the constant group scheme `(ℤ/N)_S`,
 induced by representability from the presheaf of locally constant `ℤ/N`-valued
