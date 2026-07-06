@@ -160,7 +160,13 @@ theorem glSmul_mul {N : ℕ} [NeZero N]
 noncomputable def hOrbitSetoid {N : ℕ} [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) :
     Setoid (E.FullLevelPt N) :=
-  ⟨fun L L' => ∃ g ∈ H, E.glSmul g L = L', by sorry⟩
+  ⟨fun L L' => ∃ g ∈ H, E.glSmul g L = L', by
+    refine ⟨fun L => ⟨1, H.one_mem, E.glSmul_one L⟩, ?_, ?_⟩
+    · rintro L L' ⟨g, hg, rfl⟩
+      exact ⟨g⁻¹, H.inv_mem hg, by
+        rw [← E.glSmul_mul, mul_inv_cancel, E.glSmul_one]⟩
+    · rintro L L' L'' ⟨g, hg, rfl⟩ ⟨g', hg', rfl⟩
+      exact ⟨g * g', H.mul_mem hg hg', by rw [E.glSmul_mul]⟩⟩
 
 /-- Pull a full level point back along a base morphism `σ : T' ⟶ T`: the level of the
 base-changed curve. (Membership Prop is `T-H2b`.) -/

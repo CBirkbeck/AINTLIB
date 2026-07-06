@@ -174,8 +174,19 @@ theorem resLE_isoSpec_hom {V : X.Opens} (hV : σ.IsStableOpen V)
   rw [Iso.trans_hom, Category.assoc]
   congr 1
   -- now a pure `Spec.map` computation
-  show Spec.map _ ≫ Scheme.Spec.map _ = Scheme.Spec.map _ ≫ specSMul g
-  sorry
+  show Spec.map ((σ.hom g).resLE V V (hV.le_preimage g)).appTop ≫
+      Spec.map V.topIso.inv =
+    Spec.map V.topIso.inv ≫
+      Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, V) g))
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  have hsq : ((σ.hom g).resLE V V (hV.le_preimage g)).appTop ≫ V.topIso.hom =
+      V.topIso.hom ≫ (σ.hom g).appLE V V (hV.le_preimage g) :=
+    (arrowResLEAppIso (σ.hom g) V V (hV.le_preimage g)).hom.w
+  have hof : CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, V) g) =
+      (σ.hom g).appLE V V (hV.le_preimage g) := rfl
+  rw [hof, Iso.inv_comp_eq, ← Category.assoc, hsq, Category.assoc,
+    Iso.hom_inv_id, Category.comp_id]
 
 end SchemeAction
 
