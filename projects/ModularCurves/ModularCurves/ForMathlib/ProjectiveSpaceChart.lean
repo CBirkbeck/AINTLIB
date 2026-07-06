@@ -47,6 +47,7 @@ variable (R : Type*) {σ : Type*} [CommRing R] [DecidableEq σ]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
+omit [DecidableEq σ] in
 lemma X_mem_homogeneousSubmodule_one (i : σ) :
     (X i : MvPolynomial σ R) ∈ homogeneousSubmodule σ R 1 :=
   (mem_homogeneousSubmodule _ _).mpr (isHomogeneous_X _ _)
@@ -81,8 +82,9 @@ noncomputable def dehomogenizeAt (i : σ) :
 noncomputable def awayConst (i : σ) (r : R) :
     Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R) :=
   Away.mk _ (X_mem_homogeneousSubmodule_one R i) 0 (C r)
-    (by simpa using (mem_homogeneousSubmodule _ _).mpr (isHomogeneous_C _ _))
+    (by simp)
 
+omit [DecidableEq σ] in
 lemma val_awayConst' (i : σ) (r : R) :
     (awayConst R i r).val =
       Localization.mk (C r) (⟨(X i : MvPolynomial σ R) ^ 0, 0, rfl⟩ :
@@ -101,6 +103,7 @@ noncomputable def awayVar (i : σ) (j : {j : σ // j ≠ i}) :
   Away.mk _ (X_mem_homogeneousSubmodule_one R i) 1 (X j.1)
     (by simpa using (mem_homogeneousSubmodule _ _).mpr (isHomogeneous_X _ _))
 
+omit [DecidableEq σ] in
 lemma val_awayVar' (i : σ) (j : {j : σ // j ≠ i}) :
     (awayVar R i j).val =
       Localization.mk (X j.1) (⟨(X i : MvPolynomial σ R) ^ 1, 1, rfl⟩ :
@@ -187,6 +190,7 @@ lemma dehomogenizeAt_mk (i : σ) {n : ℕ} {p : MvPolynomial σ R}
   simp only [map_pow, dehomogenizeAux_X_self, one_pow, mul_one] at happ
   exact happ
 
+omit [DecidableEq σ] in
 /-- The `mk`-image of `X_i` powers is invertible in the localization. -/
 private lemma isUnit_mk_X_pow (i : σ) (n : ℕ) :
     IsUnit (Localization.mk ((X i : MvPolynomial σ R) ^ n)
@@ -311,7 +315,7 @@ localization away from `X i` is a polynomial ring on the remaining variables. -/
 noncomputable def chartRingEquiv (i : σ) :
     Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R) ≃+*
       MvPolynomial {j : σ // j ≠ i} R :=
-  RingEquiv.ofHomInv (dehomogenizeAt R i) (homogenizeAt R i)
+  RingEquiv.ofRingHom (dehomogenizeAt R i) (homogenizeAt R i)
     (dehomogenizeAt_comp_homogenizeAt R i) (homogenizeAt_comp_dehomogenizeAt R i)
 
 end MvPolynomial
