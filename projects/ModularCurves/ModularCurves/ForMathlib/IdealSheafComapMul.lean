@@ -184,22 +184,71 @@ LHS/RHS ⊤-values via `comap_comap_ι_ideal_top`, inner `(K.comap V.ι).⊤`-va
 (`Ideal.map_of_equiv` round-trip). -/
 theorem comap_mul (I J : Y.IdealSheafData) (f : X ⟶ Y) :
     (I * J).comap f = I.comap f * J.comap f := by
-  -- ASSEMBLY PLAN (all hard pieces proven above; frictions observed 2026-07-09):
-  -- cover: choose per x an affine V ∋ f x (iSup_affineOpens_eq_top) and affine
-  -- U ∋ x, U ≤ f⁻¹V (isBasis_affineOpens + isBasis_iff_nbhd); ext_of_iSup_eq_top.
-  -- Per U: chain the value through
-  --   hA := (map_ideal _ (ι_image_top).ge).symm  -- value at U from image-open value
-  --   hB : image-open value = (⊤-value of comap along U.ι).map eU.symm
-  --        [from ideal_comap_of_isOpenImmersion; NOTE comap_symm's LHS pattern is
-  --         Ideal.comap ↑(RingEquiv.symm _) — restate h1's iso-side by a defeq
-  --         `show` BEFORE rw, or keep the comap-form and multiply via a local
-  --         comap-equiv-mul fact; naked rw hits the coe-pattern mismatch AND the
-  --         Γ(U-scheme)-instances poison]
-  --   comap_comap_ι_ideal_top  -- ⊤-value via resLE into (K.comap V.ι)'s ⊤-value
-  --   hBV : that value = (K.ideal ⟨Vι''⊤⟩).map eV  [same OI formula on Y]
-  -- then multiplicativity: ideal_mul + Pi.mul_apply at the ⟨Vι''⊤⟩-index (index-
-  -- homogeneous!) and Ideal.map_mul at every layer (map eV, map resLE.appTop,
-  -- map eU.symm, map res); finish by assembling the three chains.
-  sorry
+  classical
+  have hex : ∀ x : X, ∃ (U : X.affineOpens) (V : Y.affineOpens),
+      x ∈ U.1 ∧ U.1 ≤ f ⁻¹ᵁ V.1 := by
+    intro x
+    obtain ⟨V, hV⟩ : ∃ V : Y.affineOpens, f x ∈ V.1 := by
+      have hmem : f x ∈ (⊤ : Y.Opens) := trivial
+      rw [← iSup_affineOpens_eq_top Y] at hmem
+      exact TopologicalSpace.Opens.mem_iSup.mp hmem
+    obtain ⟨W, hW, hxW, hWle⟩ :=
+      TopologicalSpace.Opens.isBasis_iff_nbhd.mp X.isBasis_affineOpens
+        (U := f ⁻¹ᵁ V.1) hV
+    exact ⟨⟨W, hW⟩, V, hxW, hWle⟩
+  choose U V hxU hUV using hex
+  refine ext_of_iSup_eq_top U ?_ (fun x => ?_)
+  · rw [eq_top_iff]
+    exact fun y _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨y, hxU y⟩
+  · haveI : IsAffine (U x).1.toScheme := (U x).2
+    haveI : IsAffine (V x).1.toScheme := (V x).2
+    set eU : ↑Γ(X, (U x).1.ι ''ᵁ ⊤) ≃+* ↑Γ((U x).1.toScheme, ⊤) :=
+      ((U x).1.ι.appIso ⊤).commRingCatIsoToRingEquiv with heU
+    set eV : ↑Γ(Y, (V x).1.ι ''ᵁ ⊤) ≃+* ↑Γ((V x).1.toScheme, ⊤) :=
+      ((V x).1.ι.appIso ⊤).commRingCatIsoToRingEquiv with heV
+    have hchain : ∀ K : Y.IdealSheafData,
+        (K.comap f).ideal (U x) =
+          ((((K.ideal ⟨(V x).1.ι ''ᵁ ⊤,
+              (isAffineOpen_top _).image_of_isOpenImmersion _⟩).map
+            eV.toRingHom).map
+              ((f.resLE (V x).1 (U x).1 (hUV x)).appTop).hom).map
+                eU.symm.toRingHom).map
+                  (X.presheaf.map (homOfLE ((U x).1.ι_image_top).ge).op).hom := by
+      intro K
+      -- inner value via the OI formula on Y (already in map-form after comap_symm)
+      have hBV : ((K.comap (V x).1.ι).ideal ⟨⊤, isAffineOpen_top _⟩ :
+            Ideal ↑Γ((V x).1.toScheme, ⊤)) =
+          (K.ideal ⟨(V x).1.ι ''ᵁ ⊤,
+            (isAffineOpen_top _).image_of_isOpenImmersion _⟩).map eV.toRingHom :=
+        (ideal_comap_of_isOpenImmersion K (V x).1.ι ⟨⊤, isAffineOpen_top _⟩).trans
+          (Ideal.comap_symm eV)
+      -- ⊤-value of the double preimage via resLE
+      have hT := comap_comap_ι_ideal_top K f (U x) (V x) (hUV x)
+      rw [hBV] at hT
+      -- image-open value from the ⊤-value
+      have hB : ((K.comap f).ideal ⟨(U x).1.ι ''ᵁ ⊤,
+            (isAffineOpen_top _).image_of_isOpenImmersion _⟩ :
+            Ideal ↑Γ(X, (U x).1.ι ''ᵁ ⊤)) =
+          ((((K.comap f).comap (U x).1.ι).ideal ⟨⊤, isAffineOpen_top _⟩ :
+              Ideal ↑Γ((U x).1.toScheme, ⊤))).map
+            eU.symm.toRingHom := by
+        have h1 : (((K.comap f).comap (U x).1.ι).ideal ⟨⊤, isAffineOpen_top _⟩ :
+              Ideal ↑Γ((U x).1.toScheme, ⊤)) =
+            ((K.comap f).ideal ⟨(U x).1.ι ''ᵁ ⊤,
+              (isAffineOpen_top _).image_of_isOpenImmersion _⟩).map eU.toRingHom :=
+          (ideal_comap_of_isOpenImmersion (K.comap f) (U x).1.ι
+            ⟨⊤, isAffineOpen_top _⟩).trans (Ideal.comap_symm eU)
+        have h2 := congrArg (Ideal.map eU.symm.toRingHom) h1
+        exact (h2.trans (Ideal.map_of_equiv eU)).symm
+      -- value at U from the image-open value
+      have hA : ((K.comap f).ideal (U x) : Ideal ↑Γ(X, (U x).1)) =
+          ((K.comap f).ideal ⟨(U x).1.ι ''ᵁ ⊤,
+            (isAffineOpen_top _).image_of_isOpenImmersion _⟩).map
+            (X.presheaf.map (homOfLE ((U x).1.ι_image_top).ge).op).hom :=
+        (map_ideal (K.comap f) ((U x).1.ι_image_top).ge).symm
+      rw [hA, hB, hT]
+    rw [ideal_mul, Pi.mul_apply, hchain (I * J), hchain I, hchain J,
+      ideal_mul, Pi.mul_apply, Ideal.map_mul, Ideal.map_mul, Ideal.map_mul,
+      Ideal.map_mul]
 
 end AlgebraicGeometry.Scheme.IdealSheafData
