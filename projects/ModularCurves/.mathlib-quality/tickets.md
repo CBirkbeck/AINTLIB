@@ -3960,7 +3960,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     AG/Geometrically/Reduced.lean:97-101); (iii) IsFinite is stable under base
     change + respects isos (instances). Alternative fallback: iterate the
     binary coprod.desc instance by `Finite.induction_empty_option`.
-    ForMathlib-grade, upstream candidate. (4) pullback-∐
+    ForMathlib-grade, upstream candidate. **MODEL CASE LANDED**
+    (2026-07-07T04:30Z): `isFinite_sigmaDesc_id_spec` (QuotientStack.lean) —
+    the affine fold `∐_ι Spec R ⟶ Spec R` is finite (sigmaSpec-conjugation,
+    pi≫eval = 𝟙 by rfl, IsFinite.SpecMap_iff + Module.Finite.pi; the
+    RingHom.Finite letI-instance is DEFEQ to the Pi module structure — double
+    show-unfold + direct exact; Spec.map_id needed exact-not-rw). Remaining:
+    step (ii) base-change to general S per the route of record. (4) pullback-∐
     distributivity: `IsUniversalColimit.isPullback_of_isColimit_left`
     (VanKampen.lean:796) + `FinitaryPreExtensive.isUniversal_finiteCoproducts`
     (Extensive.lean:449) + `instance FinitaryExtensive Scheme`
