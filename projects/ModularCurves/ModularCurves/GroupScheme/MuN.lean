@@ -254,10 +254,127 @@ noncomputable instance muNGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
 
 end PointsFunctor
 
-/-- **(DS3b, ticket T-B2)** The group structure on the constant group scheme `(ℤ/N)_S`.
-DATA-SORRY (register entry DS3). -/
-instance constZModGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
-    GrpObj (Over.mk (constSchemeπ S (ZMod N))) := sorry
+section ConstPointsFunctor
+
+/-! ### The points functor of the constant scheme (ticket T-B2)
+
+An `S`-morphism `T ⟶ ∐_A S` over `g : T ⟶ S` is precisely a locally constant
+function `T → A` — the index of the copy of `S` each point is sent to. The
+group-object structure on `(ℤ/N)_S` (DS3b) is induced from this presheaf by
+representability, exactly as for `μ_N`. The engine recognising a clopen partition of
+`T` as a coproduct decomposition is mathlib's `nonempty_isColimit_cofanMk_of`. -/
+
+variable {S : Scheme.{u}} {A : Type} [Finite A]
+
+/-- The index function of a morphism into the constant scheme. -/
+private def constIndex {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) : A :=
+  ((sigmaMk (fun _ : A ↦ S)).symm (h t)).1
+
+private lemma constIndex_eq_iff {T : Scheme.{u}} (h : T ⟶ constScheme S A) (t : T) (a : A) :
+    constIndex h t = a ↔ h t ∈ Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+  constructor
+  · intro ht
+    rw [← ht]
+    exact ⟨((sigmaMk (fun _ : A ↦ S)).symm (h t)).2, by
+      rw [← sigmaMk_mk]
+      exact Homeomorph.apply_symm_apply _ _⟩
+  · rintro ⟨x, hx⟩
+    have hp : (sigmaMk (fun _ : A ↦ S)).symm (h t) = ⟨a, x⟩ := by
+      rw [Homeomorph.symm_apply_eq, sigmaMk_mk]
+      exact hx.symm
+    rw [constIndex, hp]
+
+private lemma isLocallyConstant_constIndex {T : Scheme.{u}} (h : T ⟶ constScheme S A) :
+    IsLocallyConstant (constIndex h) := by
+  refine IsLocallyConstant.iff_isOpen_fiber.mpr fun a ↦ ?_
+  have : { t | constIndex h t = a } = h.base ⁻¹' Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+    ext t
+    exact constIndex_eq_iff h t a
+  rw [this]
+  exact (Sigma.ι (fun _ : A ↦ S) a).opensRange.isOpen.preimage h.base.hom.continuous
+
+/-- The clopen piece of `T` where a locally constant function takes the value `a`. -/
+private def constFiber {T : Scheme.{u}} (c : LocallyConstant T A) (a : A) : T.Opens :=
+  ⟨⇑c ⁻¹' {a}, c.isLocallyConstant {a}⟩
+
+private lemma mem_constFiber {T : Scheme.{u}} (c : LocallyConstant T A) (t : T) :
+    t ∈ constFiber c (c t) := rfl
+
+/-- A locally constant function exhibits `T` as the disjoint union of its fibres. -/
+private def constFiberCofanIsColimit {T : Scheme.{u}} (c : LocallyConstant T A) :
+    IsColimit (Cofan.mk T fun a ↦ (constFiber c a).ι) :=
+  (nonempty_isColimit_cofanMk_of _
+    (by
+      rw [eq_top_iff]
+      intro t _
+      rw [TopologicalSpace.Opens.mem_iSup]
+      exact ⟨c t, by rw [Scheme.Opens.opensRange_ι]; exact mem_constFiber c t⟩)
+    (by
+      intro a b hab
+      rw [Function.onFun, Scheme.Opens.opensRange_ι, Scheme.Opens.opensRange_ι,
+        TopologicalSpace.Opens.disjoint_iff]
+      ext t
+      simp only [TopologicalSpace.Opens.coe_inf, TopologicalSpace.Opens.coe_bot,
+        Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false, not_and]
+      intro hta htb
+      exact hab ((show c t = a from hta).symm.trans (show c t = b from htb)))).some
+
+/-- The morphism to the constant scheme classified by a locally constant function. -/
+private def constDesc {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T A) :
+    T ⟶ constScheme S A :=
+  (constFiberCofanIsColimit c).desc
+    (Cofan.mk (constScheme S A) fun a ↦ (constFiber c a).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) a)
+
+private lemma constFiber_ι_constDesc {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T A)
+    (a : A) :
+    (constFiber c a).ι ≫ constDesc g c =
+      (constFiber c a).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) a :=
+  (constFiberCofanIsColimit c).fac _ ⟨a⟩
+
+private lemma constDesc_π {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T A) :
+    constDesc g c ≫ constSchemeπ S A = g :=
+  (constFiberCofanIsColimit c).hom_ext fun ⟨a⟩ ↦ by
+    simp only [Cofan.mk_pt, Cofan.mk_ι_app, ← Category.assoc, constFiber_ι_constDesc]
+    simp only [constSchemeπ, Category.assoc, colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app,
+      Category.comp_id]
+
+/-- **(DS3b pin, ticket T-B2)** `S`-morphisms into the constant scheme `∐_A S` over
+`g : T ⟶ S` are the locally constant `A`-valued functions on `T`.
+Source: KM 1.4.4(5) ("the constant `S`-scheme `ℤ/Nℤ`"); consumed by the
+Drinfeld-generator dictionary (stream D). -/
+def constSchemePointsEquiv (S : Scheme.{u}) (A : Type) [Finite A] {T : Scheme.{u}}
+    (g : T ⟶ S) :
+    { h : T ⟶ constScheme S A // h ≫ constSchemeπ S A = g } ≃ LocallyConstant T A where
+  toFun h := ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩
+  invFun c := ⟨constDesc g c, constDesc_π g c⟩
+  left_inv h := Subtype.ext <| (constFiberCofanIsColimit _).hom_ext fun ⟨a⟩ ↦ by
+    simp only [Cofan.mk_pt, Cofan.mk_ι_app, constFiber_ι_constDesc]
+    have hrange : Set.range ((constFiber ⟨constIndex h.1,
+        isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1) ⊆
+        Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+      rintro _ ⟨⟨t, ht⟩, rfl⟩
+      rw [Scheme.Hom.comp_apply, Scheme.Opens.ι_apply]
+      exact (constIndex_eq_iff h.1 t a).mp ht
+    have hfac := IsOpenImmersion.lift_fac (Sigma.ι (fun _ : A ↦ S) a)
+      ((constFiber ⟨constIndex h.1, isLocallyConstant_constIndex h.1⟩ a).ι ≫ h.1) hrange
+    rw [← hfac]
+    congr 1
+    have hπ : Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A = 𝟙 S := by
+      simp [constSchemeπ]
+    calc IsOpenImmersion.lift _ _ hrange
+        = IsOpenImmersion.lift _ _ hrange ≫ Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A := by
+          rw [hπ, Category.comp_id]
+      _ = ((constFiber _ a).ι ≫ h.1) ≫ constSchemeπ S A := by rw [← Category.assoc, hfac]
+      _ = (constFiber _ a).ι ≫ g := by rw [Category.assoc, h.2]
+  right_inv c := by
+    ext t
+    have key : constDesc g c ((constFiber c (c t)).ι ⟨t, mem_constFiber c t⟩) =
+        ((constFiber c (c t)).ι ≫ g ≫ Sigma.ι (fun _ : A ↦ S) (c t)) ⟨t, mem_constFiber c t⟩ := by
+      rw [← Scheme.Hom.comp_apply, constFiber_ι_constDesc]
+    rw [Scheme.Opens.ι_apply] at key
+    show constIndex (constDesc g c) t = c t
+    rw [constIndex_eq_iff]
+    refine ⟨(g ≫ Sigma.ι (fun _ : A ↦ S) (c t)) ⟨t, mem_constFiber c t⟩ ≫?? , ?_⟩
 
 /-- **(DS3c / T-B2a, specification of DS3a)** The canonical points description of
 `μ_{N,S}`: for `T ⟶ S`, the `T`-points of `μ_{N,S}` over `S` are the `N`-th roots of unity

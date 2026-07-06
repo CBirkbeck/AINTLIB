@@ -1667,6 +1667,86 @@ noncomputable def projModelBaseChange (W : WeierstrassCurve R) :
     projModel (W.map f) ⟶ projModel W :=
   Proj.map (baseChangeGradedHom f W) (baseChangeGradedHom_irrelevant_le f W)
 
+private lemma bc_ring_square (W : WeierstrassCurve R) {i : ℕ}
+    (s : projCoordRing W) (hs : s ∈ quotientGrading (projIdeal W) i) :
+    (HomogeneousLocalization.Away.map (baseChangeGradedHom f W) s).comp
+      ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W)) s)).comp
+        (algebraMapGradeZero (projIdeal W))) =
+      (((algebraMap (↥(quotientGrading (projIdeal (W.map f)) 0))
+        (Away (quotientGrading (projIdeal (W.map f)))
+          ((baseChangeGradedHom f W) s))).comp
+        (algebraMapGradeZero (projIdeal (W.map f)))).comp f) := by
+  refine RingHom.ext fun r => ?_
+  have hmem0 : (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r) :
+      projCoordRing W) ∈ quotientGrading (projIdeal W) (0 • i) := by
+    rw [zero_smul]
+    exact mk_mem_quotientGrading _ ((MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+      (MvPolynomial.isHomogeneous_C _ _))
+  have hL0 : (algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W)) s))
+        ((algebraMapGradeZero (projIdeal W)) r) =
+      HomogeneousLocalization.Away.mk (quotientGrading (projIdeal W)) hs 0
+        (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r)) hmem0 := by
+    apply val_injective
+    rw [HomogeneousLocalization.algebraMap_eq, Away.val_mk]
+    show Localization.mk (((algebraMapGradeZero (projIdeal W)) r :
+      ↥(quotientGrading (projIdeal W) 0)) : projCoordRing W) 1 = _
+    have hval : (((algebraMapGradeZero (projIdeal W)) r :
+        ↥(quotientGrading (projIdeal W) 0)) : projCoordRing W) =
+        Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r) := by
+      show algebraMap R (projCoordRing W) r = _
+      rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+        RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+    rw [hval]
+    exact congrArg _ (Subtype.ext (pow_zero _).symm)
+  have hmem0' : (Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal
+      (MvPolynomial.C (f r)) : projCoordRing (W.map f)) ∈
+      quotientGrading (projIdeal (W.map f)) 0 :=
+    mk_mem_quotientGrading _ ((MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+      (MvPolynomial.isHomogeneous_C _ _))
+  simp only [RingHom.comp_apply]
+  rw [hL0, Away.map_mk]
+  apply val_injective
+  rw [Away.val_mk, HomogeneousLocalization.algebraMap_eq]
+  have hbc : (baseChangeGradedHom f W)
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r)) =
+      Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (MvPolynomial.C (f r)) := by
+    show quotientGradingMap (mvMapGraded f) _ _ _ (Ideal.Quotient.mk _ _) = _
+    rw [quotientGradingMap_mk]
+    show Ideal.Quotient.mk _ (MvPolynomial.map f (MvPolynomial.C r)) = _
+    rw [MvPolynomial.map_C]
+  show _ = Localization.mk (((algebraMapGradeZero (projIdeal (W.map f))) (f r) :
+    ↥(quotientGrading (projIdeal (W.map f)) 0)) : projCoordRing (W.map f)) 1
+  have hval' : (((algebraMapGradeZero (projIdeal (W.map f))) (f r) :
+      ↥(quotientGrading (projIdeal (W.map f)) 0)) : projCoordRing (W.map f)) =
+      Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (MvPolynomial.C (f r)) := by
+    show algebraMap R' (projCoordRing (W.map f)) (f r) = _
+    rw [IsScalarTower.algebraMap_eq R' (MvPolynomial (Fin 3) R')
+      (projCoordRing (W.map f)), RingHom.comp_apply, Ideal.Quotient.algebraMap_eq,
+      MvPolynomial.algebraMap_eq]
+  rw [hval', hbc]
+  exact congrArg _ (Subtype.ext (pow_zero _))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-A5a)** The base-change square of the model over its structure morphisms. -/
+theorem projModelBaseChange_π (W : WeierstrassCurve R) :
+    projModelBaseChange f W ≫ projModelπ W =
+      projModelπ (W.map f) ≫ Spec.map (CommRingCat.ofHom f) := by
+  refine (Proj.mapAffineOpenCover (baseChangeGradedHom f W)
+    (baseChangeGradedHom_irrelevant_le f W)).openCover.hom_ext _ _ fun s => ?_
+  rw [Scheme.AffineOpenCover.openCover_f, Proj.mapAffineOpenCover_f]
+  unfold projModelBaseChange projModelπ
+  simp only [Category.assoc]
+  rw [Proj.awayι_comp_map_assoc]
+  rw [Proj.awayι_toSpecZero_assoc, ← Spec.map_comp_assoc, ← Spec.map_comp]
+  rw [Proj.awayι_toSpecZero_assoc, ← Spec.map_comp_assoc, ← Spec.map_comp]
+  congr 1
+  rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp,
+    ← CommRingCat.ofHom_comp]
+  · exact congrArg CommRingCat.ofHom (bc_ring_square f W _ s.2.2)
+  · exact s.2.2
+
 end BaseChangeGraded
 
 end Points
