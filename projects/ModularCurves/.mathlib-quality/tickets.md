@@ -1048,7 +1048,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] Lemma 3.4.2(2) (quote in decomposition).
 
 ### [T-B5x] ForMathlib: scheme-level lfp cancellation (unblocks the T-B5 lfp mini-box)
-- **Status**: open · **New file**: ForMathlib/FinitePresentationCancel.lean ·
+- **Status**: done (beastmode-A 2026-07-08T02:15Z → 2026-07-08T03:00Z —
+  `LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType` PROVED sorry-free in
+  ForMathlib/FinitePresentationCancel.lean (upstream candidate; axioms standard), and
+  `mulByHom_locallyOfFinitePresentation` discharged for real ([N] ≫ π = π + Smooth π).
+  Proof mirrors `HasRingHomProperty.of_comp`'s three-wlog cascade threading the lft
+  side-condition: step 1 restricts both hypotheses along Z-affines
+  (`IsZariskiLocalAtTarget.restrict`), step 2 turns f into `f ∣_ U` and g into
+  `U.ι ≫ g` (side condition re-established by the comp-instance — NB a bare
+  `haveI := hg` SHADOWS the wlog's `this`; name it), step 3 source-localises, and the
+  affine corner is `RingHom.FinitePresentation.of_comp_finiteType` after
+  `Scheme.Hom.comp_appTop` + `CommRingCat.hom_comp`.) · **File**: ForMathlib/FinitePresentationCancel.lean ·
   `LocallyOfFinitePresentation.of_comp` (f g; [LocallyOfFinitePresentation (f ≫ g)]
   [LocallyOfFiniteType g] : LocallyOfFinitePresentation f) — then discharge
   `mulByHom_locallyOfFinitePresentation` ([N] ≫ π = π, π lfp by smoothness, π lft).
