@@ -904,7 +904,12 @@ theorem exists_incidenceLocusEQ [IsSeparated π] (hsm : SmoothOfRelativeDimensio
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (IsSubdivisor (D'.baseChange t) (D.baseChange t) ∧
-         IsSubdivisor (D.baseChange t) (D'.baseChange t)) := by sorry
+         IsSubdivisor (D.baseChange t) (D'.baseChange t)) := by
+  obtain ⟨Z₁, hZ₁⟩ := exists_incidenceLocusLE hsm D D'
+  obtain ⟨Z₂, hZ₂⟩ := exists_incidenceLocusLE hsm D' D
+  refine ⟨Z₁ ⊔ Z₂, fun T t => ?_⟩
+  rw [exists_factor_subschemeι_iff, sup_le_iff, ← hZ₁ t, ← hZ₂ t,
+    exists_factor_subschemeι_iff, exists_factor_subschemeι_iff]
 
 end RelEffCartierDiv
 
