@@ -97,6 +97,22 @@ theorem val_smul_add {N : ℕ} [NeZero N] (P : E.Section) (hP : (N : ℤ) • P 
     ring
   rw [← h1, Nat.cast_add, add_zsmul]
 
+/-- `((x*y : ZMod N).val : ℤ) • P = (x.val * y.val) • P` when `P` is killed by `N`. -/
+theorem val_smul_mul {N : ℕ} [NeZero N] (P : E.Section) (hP : (N : ℤ) • P = 0)
+    (x y : ZMod N) :
+    (((x * y).val : ℤ) • P) = ((x.val : ℤ) * (y.val : ℤ)) • P := by
+  have hv : (x * y).val = (x.val * y.val) % N := ZMod.val_mul x y
+  have hle : (x.val * y.val) % N ≤ x.val * y.val := Nat.mod_le _ _
+  have hdvd : (N : ℤ) ∣ (((x.val * y.val : ℕ) : ℤ) - ((x * y).val : ℤ)) := by
+    rw [hv, ← Nat.cast_sub hle]
+    exact_mod_cast Nat.dvd_sub_mod (x.val * y.val)
+  have h0 := smul_eq_zero_of_dvd E P hP hdvd
+  have h1 : ((x.val * y.val : ℕ) : ℤ) • P = ((x * y).val : ℤ) • P := by
+    rw [← sub_eq_zero, sub_eq_add_neg, ← neg_zsmul, ← add_zsmul]
+    convert h0 using 2
+    ring
+  rw [← h1, Nat.cast_mul]
+
 /-- The `GL₂`-action fixes level structures under the identity matrix (all `N`:
 `ZMod.val_one` for `N ≥ 2`; for `N = 1`, level points are `0`). -/
 theorem glSmul_one {N : ℕ} [NeZero N] (L : E.FullLevelPt N) :
@@ -129,7 +145,16 @@ refuted on any honest basis of `E[N](ℂ)` by `g = (1 1; 0 1)`, `h = (1 0; 1 1)`
 H-orbits are unaffected (right orbits = left orbits as partitions). -/
 theorem glSmul_mul {N : ℕ} [NeZero N]
     (g h : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) :
-    E.glSmul (g * h) L = E.glSmul h (E.glSmul g L) := by sorry
+    E.glSmul (g * h) L = E.glSmul h (E.glSmul g L) := by
+  have hP : (N : ℤ) • L.1.1 = 0 := L.2.1.1
+  have hQ : (N : ℤ) • L.1.2 = 0 := L.2.1.2
+  refine Subtype.ext (Prod.ext ?_ ?_) <;>
+  · simp only [glSmul, Matrix.GeneralLinearGroup.coe_mul, Matrix.mul_apply,
+      Fin.sum_univ_two]
+    rw [val_smul_add E L.1.1 hP, val_smul_add E L.1.2 hQ,
+      val_smul_mul E L.1.1 hP, val_smul_mul E L.1.1 hP,
+      val_smul_mul E L.1.2 hQ, val_smul_mul E L.1.2 hQ]
+    module
 
 /-- The `H`-orbit equivalence on full level structures, for `H ≤ GL₂(ℤ/N)`. -/
 noncomputable def hOrbitSetoid {N : ℕ} [NeZero N]

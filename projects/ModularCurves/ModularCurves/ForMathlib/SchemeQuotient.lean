@@ -155,6 +155,28 @@ noncomputable def localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
   letI := σ.gammaMulSemiringAction hV
   hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
 
+/-- The affine identification intertwines the geometric action restricted to a
+stable affine open with the `Spec` of the section-ring action (the c3 bridge:
+`resLE`/`isoSpec` naturality). -/
+theorem resLE_isoSpec_hom {V : X.Opens} (hV : σ.IsStableOpen V)
+    (hVa : IsAffineOpen V) (g : G) :
+    letI := σ.gammaMulSemiringAction hV
+    (σ.hom g).resLE V V (hV.le_preimage g) ≫ hVa.isoSpec.hom =
+      hVa.isoSpec.hom ≫ specSMul g := by
+  letI := σ.gammaMulSemiringAction hV
+  haveI : IsAffine (V : Scheme.{u}) := hVa
+  have hnat := Scheme.isoSpec_hom_naturality ((σ.hom g).resLE V V (hV.le_preimage g))
+  -- unfold `IsAffineOpen.isoSpec` as `Scheme.isoSpec ≪≫ Spec.mapIso (topIso.symm.op)`
+  show (σ.hom g).resLE V V (hV.le_preimage g) ≫
+      ((V : Scheme.{u}).isoSpec ≪≫ Scheme.Spec.mapIso V.topIso.symm.op).hom = _
+  rw [Iso.trans_hom, ← Category.assoc, ← hnat, Category.assoc]
+  show _ = ((V : Scheme.{u}).isoSpec ≪≫ Scheme.Spec.mapIso V.topIso.symm.op).hom ≫ _
+  rw [Iso.trans_hom, Category.assoc]
+  congr 1
+  -- now a pure `Spec.map` computation
+  show Spec.map _ ≫ Scheme.Spec.map _ = Scheme.Spec.map _ ≫ specSMul g
+  sorry
+
 end SchemeAction
 
 end AlgebraicGeometry
