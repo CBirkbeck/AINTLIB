@@ -82,11 +82,26 @@ base-changed curve to the torsion of `E`, lifting `torsionι ≫ pr₁` and `tor
 noncomputable def torsionBaseChangeHom (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
     (E.baseChange g).torsion N ⟶ E.torsion N :=
   pullback.lift ((E.baseChange g).torsionι N ≫ pullback.fst E.π g)
-    ((E.baseChange g).torsionπ N ≫ g) (by
+    ((E.baseChange g).torsionπ N ≫ g) <| by
       have hcond : (E.baseChange g).torsionι N ≫ (E.baseChange g).mulByHom N =
           (E.baseChange g).torsionπ N ≫ (E.baseChange g).zero := pullback.condition
-      rw [Category.assoc, ← E.mulByHom_baseChange g (N : ℤ), ← Category.assoc, hcond,
-        Category.assoc, E.baseChange_zero_fst g, ← Category.assoc])
+      calc ((E.baseChange g).torsionι N ≫ pullback.fst E.π g) ≫ E.mulByHom N
+          = (E.baseChange g).torsionι N ≫ pullback.fst E.π g ≫ E.mulByHom N :=
+            Category.assoc _ _ _
+        _ = (E.baseChange g).torsionι N ≫ (E.baseChange g).mulByHom N ≫
+              pullback.fst E.π g :=
+            congrArg (fun q => (E.baseChange g).torsionι N ≫ q)
+              (E.mulByHom_baseChange g (N : ℤ)).symm
+        _ = ((E.baseChange g).torsionι N ≫ (E.baseChange g).mulByHom N) ≫
+              pullback.fst E.π g := (Category.assoc _ _ _).symm
+        _ = ((E.baseChange g).torsionπ N ≫ (E.baseChange g).zero) ≫
+              pullback.fst E.π g :=
+            congrArg (fun q => q ≫ pullback.fst E.π g) hcond
+        _ = (E.baseChange g).torsionπ N ≫ (E.baseChange g).zero ≫ pullback.fst E.π g :=
+            Category.assoc _ _ _
+        _ = (E.baseChange g).torsionπ N ≫ g ≫ E.zero :=
+            congrArg (fun q => (E.baseChange g).torsionπ N ≫ q) (E.baseChange_zero_fst g)
+        _ = ((E.baseChange g).torsionπ N ≫ g) ≫ E.zero := (Category.assoc _ _ _).symm
 
 @[reassoc (attr := simp)]
 theorem torsionBaseChangeHom_torsionι (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
@@ -100,67 +115,160 @@ theorem torsionBaseChangeHom_torsionπ (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) 
       (E.baseChange g).torsionπ N ≫ g :=
   pullback.lift_snd _ _ _
 
+private lemma torsionLiftAux_inner_w (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) :
+    (a ≫ E.torsionι N) ≫ E.π = b ≫ g :=
+  (Category.assoc _ _ _).trans
+    ((congrArg (fun q => a ≫ q) (E.torsionι_π N)).trans hab)
+
+private lemma torsionLiftAux_outer_w (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) :
+    pullback.lift (a ≫ E.torsionι N) b (E.torsionLiftAux_inner_w N g a b hab) ≫
+        (E.baseChange g).mulByHom N =
+      b ≫ (E.baseChange g).zero := by
+  have hcondS : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
+    pullback.condition
+  have hπT : (E.baseChange g).mulByHom (N : ℤ) ≫ pullback.snd E.π g =
+      pullback.snd E.π g := (E.baseChange g).mulByHom_π (N : ℤ)
+  have hzπT : (E.baseChange g).zero ≫ pullback.snd E.π g = 𝟙 T :=
+    (E.baseChange g).zero_π
+  set c := pullback.lift (a ≫ E.torsionι N) b (E.torsionLiftAux_inner_w N g a b hab)
+    with hc
+  apply pullback.hom_ext
+  · calc (c ≫ (E.baseChange g).mulByHom N) ≫ pullback.fst E.π g
+        = c ≫ (E.baseChange g).mulByHom N ≫ pullback.fst E.π g := Category.assoc _ _ _
+      _ = c ≫ pullback.fst E.π g ≫ E.mulByHom N :=
+          congrArg (fun q => c ≫ q) (E.mulByHom_baseChange g (N : ℤ))
+      _ = (c ≫ pullback.fst E.π g) ≫ E.mulByHom N := (Category.assoc _ _ _).symm
+      _ = (a ≫ E.torsionι N) ≫ E.mulByHom N :=
+          congrArg (fun q => q ≫ E.mulByHom (N : ℤ)) (pullback.lift_fst _ _ _)
+      _ = a ≫ E.torsionι N ≫ E.mulByHom N := Category.assoc _ _ _
+      _ = a ≫ E.torsionπ N ≫ E.zero := congrArg (fun q => a ≫ q) hcondS
+      _ = (a ≫ E.torsionπ N) ≫ E.zero := (Category.assoc _ _ _).symm
+      _ = (b ≫ g) ≫ E.zero := congrArg (fun q => q ≫ E.zero) hab
+      _ = b ≫ g ≫ E.zero := Category.assoc _ _ _
+      _ = b ≫ (E.baseChange g).zero ≫ pullback.fst E.π g :=
+          congrArg (fun q => b ≫ q) (E.baseChange_zero_fst g).symm
+      _ = (b ≫ (E.baseChange g).zero) ≫ pullback.fst E.π g :=
+          (Category.assoc _ _ _).symm
+  · calc (c ≫ (E.baseChange g).mulByHom N) ≫ pullback.snd E.π g
+        = c ≫ (E.baseChange g).mulByHom N ≫ pullback.snd E.π g := Category.assoc _ _ _
+      _ = c ≫ pullback.snd E.π g := congrArg (fun q => c ≫ q) hπT
+      _ = b := pullback.lift_snd _ _ _
+      _ = b ≫ 𝟙 T := (Category.comp_id _).symm
+      _ = b ≫ (E.baseChange g).zero ≫ pullback.snd E.π g :=
+          congrArg (fun q => b ≫ q) hzπT.symm
+      _ = (b ≫ (E.baseChange g).zero) ≫ pullback.snd E.π g :=
+          (Category.assoc _ _ _).symm
+
+/-- The universal lift into the base-changed torsion: a morphism into `E[N]` and a
+morphism into `T` agreeing over `S` assemble into a morphism into `(E ×_S T)[N]`. -/
+private noncomputable def torsionLiftAux (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) : X ⟶ (E.baseChange g).torsion N :=
+  pullback.lift
+    (pullback.lift (a ≫ E.torsionι N) b (E.torsionLiftAux_inner_w N g a b hab))
+    b (E.torsionLiftAux_outer_w N g a b hab)
+
+private lemma torsionLiftAux_torsionι (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) :
+    E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N =
+      pullback.lift (a ≫ E.torsionι N) b (E.torsionLiftAux_inner_w N g a b hab) :=
+  pullback.lift_fst _ _ _
+
+private lemma torsionLiftAux_torsionπ (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) :
+    E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionπ N = b :=
+  pullback.lift_snd _ _ _
+
+private lemma torsionLiftAux_comp (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) :
+    E.torsionLiftAux N g a b hab ≫ E.torsionBaseChangeHom N g = a := by
+  have hθι : E.torsionBaseChangeHom N g ≫ E.torsionι N =
+      (E.baseChange g).torsionι N ≫ pullback.fst E.π g :=
+    E.torsionBaseChangeHom_torsionι N g
+  have hθπ : E.torsionBaseChangeHom N g ≫ E.torsionπ N =
+      (E.baseChange g).torsionπ N ≫ g := E.torsionBaseChangeHom_torsionπ N g
+  set L := E.torsionLiftAux N g a b hab with hL
+  apply pullback.hom_ext
+  · calc (L ≫ E.torsionBaseChangeHom N g) ≫ pullback.fst (E.mulByHom N) E.zero
+        = L ≫ E.torsionBaseChangeHom N g ≫ E.torsionι N := Category.assoc _ _ _
+      _ = L ≫ (E.baseChange g).torsionι N ≫ pullback.fst E.π g :=
+          congrArg (fun q => L ≫ q) hθι
+      _ = (L ≫ (E.baseChange g).torsionι N) ≫ pullback.fst E.π g :=
+          (Category.assoc _ _ _).symm
+      _ = pullback.lift (a ≫ E.torsionι N) b
+            (E.torsionLiftAux_inner_w N g a b hab) ≫ pullback.fst E.π g :=
+          congrArg (fun q => q ≫ pullback.fst E.π g)
+            (E.torsionLiftAux_torsionι N g a b hab)
+      _ = a ≫ E.torsionι N := pullback.lift_fst _ _ _
+  · calc (L ≫ E.torsionBaseChangeHom N g) ≫ pullback.snd (E.mulByHom N) E.zero
+        = L ≫ E.torsionBaseChangeHom N g ≫ E.torsionπ N := Category.assoc _ _ _
+      _ = L ≫ (E.baseChange g).torsionπ N ≫ g :=
+          congrArg (fun q => L ≫ q) hθπ
+      _ = (L ≫ (E.baseChange g).torsionπ N) ≫ g := (Category.assoc _ _ _).symm
+      _ = b ≫ g := congrArg (fun q => q ≫ g) (E.torsionLiftAux_torsionπ N g a b hab)
+      _ = a ≫ E.torsionπ N := hab.symm
+
+private lemma torsionLiftAux_uniq (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    {X : Scheme.{u}} (a : X ⟶ E.torsion N) (b : X ⟶ T)
+    (hab : a ≫ E.torsionπ N = b ≫ g) (m : X ⟶ (E.baseChange g).torsion N)
+    (hm1 : m ≫ E.torsionBaseChangeHom N g = a)
+    (hm2 : m ≫ (E.baseChange g).torsionπ N = b) :
+    m = E.torsionLiftAux N g a b hab := by
+  have hιπT : (E.baseChange g).torsionι N ≫ pullback.snd E.π g =
+      (E.baseChange g).torsionπ N := (E.baseChange g).torsionι_π N
+  apply pullback.hom_ext
+  · apply pullback.hom_ext
+    · calc (m ≫ (E.baseChange g).torsionι N) ≫ pullback.fst E.π g
+          = m ≫ (E.baseChange g).torsionι N ≫ pullback.fst E.π g :=
+            Category.assoc _ _ _
+        _ = m ≫ E.torsionBaseChangeHom N g ≫ E.torsionι N :=
+            congrArg (fun q => m ≫ q) (E.torsionBaseChangeHom_torsionι N g).symm
+        _ = (m ≫ E.torsionBaseChangeHom N g) ≫ E.torsionι N :=
+            (Category.assoc _ _ _).symm
+        _ = a ≫ E.torsionι N := congrArg (fun q => q ≫ E.torsionι N) hm1
+        _ = pullback.lift (a ≫ E.torsionι N) b
+              (E.torsionLiftAux_inner_w N g a b hab) ≫ pullback.fst E.π g :=
+            (pullback.lift_fst _ _ _).symm
+        _ = (E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N) ≫
+              pullback.fst E.π g :=
+            congrArg (fun q => q ≫ pullback.fst E.π g)
+              (E.torsionLiftAux_torsionι N g a b hab).symm
+        _ = E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N ≫
+              pullback.fst E.π g := Category.assoc _ _ _
+        _ = (E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N) ≫
+              pullback.fst E.π g := (Category.assoc _ _ _).symm
+    · calc (m ≫ (E.baseChange g).torsionι N) ≫ pullback.snd E.π g
+          = m ≫ (E.baseChange g).torsionι N ≫ pullback.snd E.π g :=
+            Category.assoc _ _ _
+        _ = m ≫ (E.baseChange g).torsionπ N := congrArg (fun q => m ≫ q) hιπT
+        _ = b := hm2
+        _ = E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionπ N :=
+            (E.torsionLiftAux_torsionπ N g a b hab).symm
+        _ = E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N ≫
+              pullback.snd E.π g :=
+            congrArg (fun q => E.torsionLiftAux N g a b hab ≫ q) hιπT.symm
+        _ = (E.torsionLiftAux N g a b hab ≫ (E.baseChange g).torsionι N) ≫
+              pullback.snd E.π g := (Category.assoc _ _ _).symm
+  · exact hm2.trans (E.torsionLiftAux_torsionπ N g a b hab).symm
+
 /-- **(T-B6b)** Torsion commutes with base change: the square
 `(E ×_S T)[N] ⟶ E[N]`, `(E ×_S T)[N] ⟶ T`, `E[N] ⟶ S`, `T ⟶ S` is cartesian. -/
 theorem torsion_baseChange_isPullback (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
     IsPullback (E.torsionBaseChangeHom N g) ((E.baseChange g).torsionπ N)
-      (E.torsionπ N) g := by
-  refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk
-    (E.torsionBaseChangeHom_torsionπ N g) (fun s => ?_) (fun s => ?_) (fun s => ?_)
-    (fun s m h1 h2 => ?_))
-  case _ =>
-    exact pullback.lift
-      (pullback.lift (s.fst ≫ E.torsionι N) s.snd
-        (by rw [Category.assoc, E.torsionι_π]; exact s.condition))
-      s.snd (by
-        apply pullback.hom_ext
-        · rw [Category.assoc, Category.assoc, E.mulByHom_baseChange g (N : ℤ),
-            E.baseChange_zero_fst g, ← Category.assoc, pullback.lift_fst,
-            Category.assoc]
-          have hcondS : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
-            pullback.condition
-          rw [hcondS, ← Category.assoc, s.condition, Category.assoc]
-        · rw [Category.assoc, Category.assoc]
-          have hπT : (E.baseChange g).mulByHom (N : ℤ) ≫ (E.baseChange g).π =
-              (E.baseChange g).π := (E.baseChange g).mulByHom_π (N : ℤ)
-          have hzπT : (E.baseChange g).zero ≫ (E.baseChange g).π = 𝟙 T :=
-            (E.baseChange g).zero_π
-          show _ ≫ (E.baseChange g).mulByHom (N : ℤ) ≫ (E.baseChange g).π =
-            s.snd ≫ (E.baseChange g).zero ≫ (E.baseChange g).π
-          rw [hπT, hzπT, Category.comp_id]
-          exact pullback.lift_snd _ _ _)
-  case _ =>
-    apply pullback.hom_ext
-    · rw [Category.assoc]
-      show _ ≫ E.torsionBaseChangeHom N g ≫ E.torsionι N = s.fst ≫ E.torsionι N
-      rw [E.torsionBaseChangeHom_torsionι N g, ← Category.assoc]
-      show (pullback.lift _ _ _ ≫ (E.baseChange g).torsionι N) ≫ pullback.fst E.π g = _
-      rw [pullback.lift_fst, pullback.lift_fst]
-    · rw [Category.assoc]
-      show _ ≫ E.torsionBaseChangeHom N g ≫ E.torsionπ N = s.fst ≫ E.torsionπ N
-      rw [E.torsionBaseChangeHom_torsionπ N g, ← Category.assoc]
-      show (pullback.lift _ _ _ ≫ (E.baseChange g).torsionπ N) ≫ g = _
-      rw [pullback.lift_snd, s.condition]
-  case _ =>
-    show pullback.lift _ _ _ ≫ (E.baseChange g).torsionπ N = s.snd
-    exact pullback.lift_snd _ _ _
-  case _ =>
-    apply pullback.hom_ext
-    · apply pullback.hom_ext
-      · rw [Category.assoc, Category.assoc]
-        show m ≫ (E.baseChange g).torsionι N ≫ pullback.fst E.π g = _
-        rw [← E.torsionBaseChangeHom_torsionι N g, ← Category.assoc, h1]
-        rw [← Category.assoc, pullback.lift_fst, pullback.lift_fst]
-      · rw [Category.assoc, Category.assoc]
-        have hιπ : (E.baseChange g).torsionι N ≫ (E.baseChange g).π =
-            (E.baseChange g).torsionπ N := (E.baseChange g).torsionι_π N
-        show m ≫ (E.baseChange g).torsionι N ≫ pullback.snd E.π g = _
-        show m ≫ (E.baseChange g).torsionι N ≫ (E.baseChange g).π = _
-        rw [hιπ, h2, ← Category.assoc, pullback.lift_fst, pullback.lift_snd]
-    · show m ≫ (E.baseChange g).torsionπ N = _
-      rw [h2, ← pullback.lift_snd (pullback.lift (s.fst ≫ E.torsionι N) s.snd
-        (by rw [Category.assoc, E.torsionι_π]; exact s.condition)) s.snd]
-      · rfl
+      (E.torsionπ N) g :=
+  IsPullback.of_isLimit (PullbackCone.IsLimit.mk
+    (E.torsionBaseChangeHom_torsionπ N g)
+    (fun s => E.torsionLiftAux N g s.fst s.snd s.condition)
+    (fun s => E.torsionLiftAux_comp N g s.fst s.snd s.condition)
+    (fun s => E.torsionLiftAux_torsionπ N g s.fst s.snd s.condition)
+    (fun s m h1 h2 => E.torsionLiftAux_uniq N g s.fst s.snd s.condition m h1 h2))
 
 /-- The zero of the point group is the pulled-back zero section. -/
 theorem point_zero_val {T : Scheme.{u}} (g : T ⟶ S) :
