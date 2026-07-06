@@ -349,7 +349,23 @@ noncomputable def gammaHNaiveProblem (N : ℕ) [NeZero N]
 /-- **(T-H1)** `P_⊥` is the naive full-level problem: the `H = ⊥` orbits are
 singletons, recovering `gammaFullNaiveProblem`. -/
 theorem gammaHNaive_bot (N : ℕ) [NeZero N] :
-    Nonempty ((gammaHNaiveProblem R N ⊥) ≅ gammaFullNaiveProblem R N) := by sorry
+    Nonempty ((gammaHNaiveProblem R N ⊥) ≅ gammaFullNaiveProblem R N) :=
+  ⟨NatIso.ofComponents
+    (fun X => Equiv.toIso
+      { toFun := Quotient.lift (fun L => L)
+          fun L L' ⟨g, hg, hgl⟩ => by
+            rw [Subgroup.mem_bot] at hg
+            subst hg
+            rwa [X.unop.curve.glSmul_one] at hgl
+        invFun := Quotient.mk _
+        left_inv := fun q => by
+          induction q using Quotient.ind with
+          | _ L => rfl
+        right_inv := fun L => rfl })
+    (fun {X Y} f => by
+      ext q
+      induction q using Quotient.ind with
+      | _ L => exact Subtype.ext rfl)⟩
 
 /-- **(T-H4 = Loeffler Prop 3.8.2, BOTH halves)** `P_H` is relatively representable
 **and the representing objects are finite étale** over the base when `N` is invertible
