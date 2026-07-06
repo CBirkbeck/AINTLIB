@@ -1743,6 +1743,31 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T17:15Z — [T-D14c-1] SCAFFOLD GREEN+committed:
+    `vanishingLocus` def at the `p.app`/`p ⁻¹ᵁ`-INLINE spelling (drop
+    affinePreimage inside the def — spelling-defeq breaks instance synthesis
+    otherwise); gluing proof has ALL instances + the keystone applied (hglue):
+    5 letI-algebras (app-U, app-bo, S-res, W-res, DIAGONAL appLE), two towers
+    via of_algebraMap_eq' + rw[algebraMap_toAlgebra ×3, ← hom_comp] + simp only
+    [app_eq_appLE, map_appLE] (appLE_map unused-flagged in tower-2 — drop at
+    cleanup), Module.Finite via the CLASS FIELD `p.finite_app U.1 U.2`
+    (IsFinite has NO HasRingHomProperty — it is affineAnd, NOT source-local!),
+    Algebra.FinitePresentation via HasRingHomProperty.appLE @lfp + rw
+    [← app_eq_appLE] at hfp, hSloc := isLocalization_basicOpen, hWloc :=
+    isLocalization_of_eq_basicOpen (e absorbs preimage_basicOpen; NO trailing
+    rfl — rw auto-closes), mapped-monoid IsLocalizedModule via show-term
+    `Submonoid.map_powers _ f` (rw-unfold of algebraMapSubmonoid gets stuck)
+    + infer_instance, keystone call needs (Rₛ := Γ(S, S.basicOpen f)) pinned
+    (elaboration-stuck otherwise). REMAINING under the one sorry — FINAL MILE:
+    (α) rw [RingHom.algebraMap_toAlgebra] in hglue to align algebraMap = S-res;
+    (β) identify `J.localized' Rf (powers f) floc` with
+    `(E.ideal ⟨p⁻¹(bo f)⟩).restrictScalars`: via `Submodule.ext` +
+    `Submodule.mem_localized'` vs `IsLocalization.mem_map_algebraMap_iff`
+    (both mk'-characterizations; the Rf-span-vs-Af-span gap closes because
+    powers-f-units lie in the image of Rf) + E.map_ideal_basicOpen at the
+    W-affine ⟨p⁻¹U⟩ and fA := algebraMap f + affineOpens-Subtype-congr along
+    preimage_basicOpen; (γ) close with defeq-`exact` (goal at affineBasicOpen-
+    spelling vs haves at basicOpen — defeq).
   - **Progress**: 2026-07-06T16:30Z — [T-D14c-0] KEYSTONE DONE+committed:
     `submoduleVanishingIdeal` (⨆ of sectionVanishingIdeal over a submodule —
     basis-free) + membership API + `submoduleVanishingIdeal_localized` (commutes
