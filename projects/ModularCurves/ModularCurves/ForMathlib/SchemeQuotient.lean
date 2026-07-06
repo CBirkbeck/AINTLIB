@@ -653,6 +653,43 @@ private theorem tripleIso_hom_snd {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (h
     tripleIso_hom_comp σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a,
     localQuotientMap_trans σ (hW₁.inf hW₂) hW₁₂a hW₂ hW₂a hV hVa inf_le_right hW₂V]
 
+/-- Local quotient maps along equal opens are isomorphisms. -/
+theorem isIso_localQuotientMap_of_le_le {W V : X.Opens} (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) (hVW : V ≤ W) :
+    IsIso (σ.localQuotientMap hW hWa hV hVa hWV) := by
+  refine ⟨σ.localQuotientMap hV hVa hW hWa hVW, ?_, ?_⟩
+  · rw [localQuotientMap_trans σ hW hWa hV hVa hW hWa hWV hVW]
+    exact σ.localQuotientMap_self hW hWa
+  · rw [localQuotientMap_trans σ hV hVa hW hWa hV hVa hVW hWV]
+    exact σ.localQuotientMap_self hV hVa
+
+/-- The first projection of the local-quotient pullback, through the triple
+comparison. -/
+private theorem fst_eq_tripleIso_inv {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V)
+    (hW₂V : W₂ ≤ V) (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁)
+    (hW₁a : IsAffineOpen W₁) (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂)
+    (hV : σ.IsStableOpen V) (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    pullback.fst (σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V)
+        (σ.localQuotientMap hW₂ hW₂a hV hVa hW₂V) =
+      (σ.tripleIso hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a).inv ≫
+        σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hW₁ hW₁a inf_le_left := by
+  rw [Iso.eq_inv_comp]
+  exact tripleIso_hom_fst σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a
+
+/-- The second projection of the local-quotient pullback, through the triple
+comparison. -/
+private theorem snd_eq_tripleIso_inv {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V)
+    (hW₂V : W₂ ≤ V) (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁)
+    (hW₁a : IsAffineOpen W₁) (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂)
+    (hV : σ.IsStableOpen V) (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    pullback.snd (σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V)
+        (σ.localQuotientMap hW₂ hW₂a hV hVa hW₂V) =
+      (σ.tripleIso hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a).inv ≫
+        σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hW₂ hW₂a inf_le_right := by
+  rw [Iso.eq_inv_comp]
+  exact tripleIso_hom_snd σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a
+
 end OpenImmersion
 
 end SchemeAction
