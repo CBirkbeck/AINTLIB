@@ -409,7 +409,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] 3.3.3; [Sil] III.1.4(a). **Generality**: `CommRing R`.
 
 ### [T-A4] ⧗KM Uniqueness of the model (BB-RR consumer)
-- **Status**: open · **File**: WeierstrassModel.lean · `isWeierstrassModel_unique`
+- **Status**: blocked-B2 (beastmode 2026-07-07T19:30Z — **STATEMENT FALSE as written;
+  owner decision needed**; full record in `.mathlib-quality/b2_log.jsonl`. Quote-gate
+  satisfied: KM 2.2.5 full text mined from the full PDF (printed pp. 68–69) — it is
+  uniqueness of adapted coordinates x,y for a FIXED (E/S, ω) up to x↦x+a, y↦y+ax+b,
+  NOT reconstruction of the scheme from field-point cardinalities. Counterexample to
+  our statement: R = ℚ, E/E' a positive-rank 2-isogenous non-isomorphic pair
+  (y²=x³−36x vs y²=x³+144x): isogeny+dual force |E(K)| = |E'(K)| (equal infinite
+  cardinals) for EVERY char-0 field K, so projModel E' satisfies
+  IsWeierstrassModel (E-data) + smoothness, but the concluded pointed iso would give
+  E ≅ E'. NOTE the ∀K-quantifier DOES rule out cruder attacks (ℙ¹ dies at
+  K = ℚ(uncountably many generic points): constants-field argument keeps |ℙ¹(K)|
+  uncountable while |E(K)| = |E(ℚ)|; non-isogenous curves die the same way via
+  Hom_ℚ(A,B) = 0) — the interface pins the ISOGENY class, not the curve. Fix options
+  (owner picks): (1) make the points-clause NATURAL in K; (2) define the model
+  property as ∃ pointed iso to projModel W; (3) restate per KM: two Weierstrass data
+  with pointed-isomorphic smooth projModels differ by a VariableChange (BB-RR
+  consumer form).) · **File**: WeierstrassModel.lean · `isWeierstrassModel_unique`
 - **Depends on**: T-A2 · **Parallel**: with T-A3 · **Type**: theorem
 - **Sketch**: KM 2.2.5-route: both models are pointed smooth proper genus-1; RR
   black-box gives Weierstrass coordinates; two Weierstrass presentations differ by a
