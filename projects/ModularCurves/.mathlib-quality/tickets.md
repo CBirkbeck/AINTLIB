@@ -1734,9 +1734,20 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     it — then base-change + comp instances ✓ mathlib).
   - AG-GG-1.3 trivial closures: k initial ✓ (Etale R R), zero ring étale
     (empty product).
-  - AG-GG-1.4 fixed points `A^G` finite étale, G finite (via NEW leaf: a
-    k-subalgebra of a finite étale k-algebra is finite étale — reduced artinian +
-    factor-embedding separability; mathlib-grade) + SingleObj-limit identification.
+  - AG-GG-1.4 HEARTS DONE (2026-07-06): `isSeparable_of_etale` (every element of
+    a finite étale k-algebra is separable — classification equiv + Finset of
+    DISTINCT component-minpolys, separable_prod' with
+    Irreducible.coprime_iff_not_dvd + eq_of_monic_of_associated, annihilator
+    divides) and `etale_subalgebra` (subalgebra of finite étale over a field is
+    étale — IsReduced-transfer, IsArtinianRing.equivPi + FormallyEtale.pi_iff +
+    of_isSeparable per residue field, minpoly-divides through Quotient.mkₐ;
+    minpoly.algHom_eq needs **B.val** — B.subtype dot-resolves to the SUBSEMIRING
+    RingHom and silently poisons unification). Both sorry-free, mathlib-grade
+    upstream candidates. REMAINING for 1.4: FixedPoints.subalgebra (hand-roll if
+    absent), the SingleObj-H limit cone (fixed subalgebra + IsLimit via
+    equalizer-style UP), and the op-shape glue
+    (hasColimitsOfShape_op_of_hasLimitsOfShape ✓ instance +
+    (SingleObj G)ᵒᵖ ≌ SingleObj Gᵐᵒᵖ shape-equivalence).
   - AG-GG-1.5 G3 splitting: mono-in-op ⇒ direct summand (idempotent splitting of
     epis between finite étale algebras over a field).
   Duplication watch: NOTHING imports RingTheory/Etale/Finite.lean yet; Merten's
