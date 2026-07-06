@@ -602,7 +602,31 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Y↦1; call with NAMED hn/hr — leading section-var slots) and `projModelZeroChart`
   (+`_fac`, reassoc). NEXT: zero-leg (c) chart-level naturality square (cancel mono
   awayι-Y after awayι_comp_map; elementwise Away.mk chase for the zero-chart hom),
-  then the paste assembly per PLAN v2 below, then discharge `fibres :=`.) · **File**: EllipticCurve/GroupLaw.lean (or Basic)
+  then the paste assembly per PLAN v2 below, then discharge `fibres :=`.)
+- **Zero-leg (c) STATE**: `projModelZero_baseChange` in-file, reduced (GREEN up to one
+  sorry) to the affine CORE: `(projModelZeroChart (W.map alg) ≫
+  Spec.map (awayCongr …).toCommRingCatIso.hom) ≫ Spec.map (ofHom (Away.map bcHom t₁))
+  = Spec.map (ofHom alg) ≫ projModelZeroChart W` — morphisms of AFFINE schemes.
+  CORE ROUTES (pick one): (α) Spec-full-faithfulness: both sides = Spec.map of ring
+  homs (`Spec.map_preimage` on the zeroChart-lifts); the ring hom
+  ζ_W := (Spec.preimage (projModelZeroChart W)).hom : chart-W-ring →+* R is
+  characterised by: ζ∘χ_R = id (compose the fac with π and use
+  projModelZero_projModelπ + awayι_projModelπ + Spec.map_injective) AND its values
+  on the two chart coordinates U = X₀/X₁, W = X₂/X₁ are 0 — for THESE use the
+  Γ-side: fromOfGlobalSections is glued from `toBasicOpenOfGlobalSections`
+  (ProjectiveSpectrum/Basic.lean:445 area, `homOfLE_toBasicOpenOfGlobalSections_ι`)
+  whose chart ring map is an `awayLift` of the defining Γ-hom — the coordinate
+  values become (ΓSpecIso.inv ∘ projModelZeroEval)(X₀)/(X₁-image) = 0/1 = 0 ✓ and
+  (X₂)/(X₁) = 0 ✓; then RingHom.ext on quotient generators (mk-C via ζ∘χ = id;
+  mk-X-vars via the 0-values) on both sides of the core. (β) alternatively prove the
+  ζ-values through the T-A2e points machinery: the SpecPoint ⟨Spec.map alg ≫
+  projModelZero, …⟩ vs `infPoint`: show base-not-in-Z via projModelZero-preimage of
+  D₊(t₂): compute `fromOfGlobalSections_preimage_basicOpen` at r := t₂: eval sends
+  mk X₂ ↦ 0 ⟹ preimage = basicOpen 0 = ⊥ ⟹ base misses the Z-chart ⟹
+  eq_infPoint_of_not_inZ gives base = infPoint (K := R'... careful: needs Field K —
+  the points-route only works over fields; for general R' prefer (α)).
+  RECOMMENDATION: (α).
+ · **File**: EllipticCurve/GroupLaw.lean (or Basic)
 - **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
 - **Statement**: `FibrewiseElliptic (pullback.snd E.π g) (baseChange-zero) _` for
   `E : EllipticCurve S`, `g : T ⟶ S`.
