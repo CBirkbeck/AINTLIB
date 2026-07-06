@@ -1015,6 +1015,9 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   functoriality. Depends: none. Parallel: yes.
 - **[T-D13]** `sectionVanishingIdeal_spec` (zero locus in a finite locally free
   module). Depends: none. Parallel: yes. PROVABLE-NOW candidate.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T11:05Z · target `sectionVanishingIdeal_eq_span_coord`
+    (Incidence.lean:69) per §Amendments v5 Wave 0.
 - **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
   T-D12, T-D13.
 - **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
