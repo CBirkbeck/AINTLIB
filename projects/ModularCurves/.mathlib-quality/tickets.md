@@ -1520,10 +1520,18 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
 
 ### [T-D6a-ii] orderDivisor base-change naturality (standalone; gated on mulBy compat)
-- **Status**: open (spawned 2026-07-09T07:00Z; NOT blocking T-D6/D7/D8/D9 which are
-  done-modulo-boxes without it). All CartierDivisor infrastructure is proven
-  (baseChange_ideal, ker_sectionBaseChange, comap_mul/comap_prod). The one missing
-  ingredient is the group-law compat below.
+- **Status**: in_progress — CORE COMPAT DONE (beastmode-A 2026-07-09T08:30Z:
+  `mulBy_baseChange` PROVED — `(E.baseChange g).mulBy n = (Over.pullback g).map
+  (E.mulBy n)`, via the NEW ForMathlib lemma `Functor.map_zpow'` (zpow companion of
+  mathlib `Functor.map_inv'`; the `open scoped CategoryTheory.Obj` inside it resolves
+  `GrpObj (F.obj G)`, dissolving the `Hom.group` diamond that blocked 6 direct
+  attempts). REMAINING: (ii) `mulByHom_baseChange` at `.left` = a pullback.map
+  (take `.left` of the above + Over.pullback-map-left formula); (iii) L3 assembly:
+  `(orderDivisor P N).baseChange t . ideal = (orderDivisor-of-pulled-sections).ideal`
+  via baseChange_ideal + comap_prod + ker_sectionBaseChange + Point.pull_zsmul; (iv) L4
+  IsSubgroup transport via comapIso. Non-blocking; resume when convenient.). NOT
+  blocking T-D6/D7/D8/D9. All CartierDivisor infrastructure proven
+  (baseChange_ideal, ker_sectionBaseChange, comap_mul/comap_prod).
 - **File**: EllipticCurve/GroupLaw.lean (compat) + LevelStructure/ExactOrder.lean
   (assembly) · **Depends on**: T-A5c (done) · **Type**: lemma
 - **Sketch**: (i) `mulByHom_baseChange`: `(E.baseChange t).mulByHom n` = the pullback
