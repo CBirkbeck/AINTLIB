@@ -2925,6 +2925,13 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 ### Rest of the lane (bodies cut when reached; one-liners stand)
 - **[T-Q2]** free actions vs stabilizers — statements only; needed by KM Ch. 7
   regularity, NOT by T-Q3/T-E5. After T-Q3.
+  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:42Z ·
+    Scope: KM A7.1.1's freeness def (`no fixed points on Hom_{R-alg}(A,R')`,
+    quote banked under T-Q4) + sorried statements of A7.1.1 (étale-torsor: two
+    single-conclusion parts per Tier A5) and A7.1.2 (freeness ⟹ ∗(A,G,R), via
+    T-Q4's `fixedPointsBaseChange`). File: ForMathlib/InvariantTorsor.lean (NEW).
+    Proofs are SGA III Exp. V territory — statement-level now by design (the
+    board line says "statements").
 - **[T-Q4]** base change of invariants — KM Ch. 7 appendix ("base change for rings
   of invariants") — **full KM text NOW IN refs/** (`katz-mazur-arithmetic-moduli-
   FULL.pdf`); read the appendix at pickup (quote-gate), decide the flat/finite-free
