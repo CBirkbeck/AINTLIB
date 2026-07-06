@@ -2079,23 +2079,98 @@ lemma isPullback_projModelBaseChange_chart (W : WeierstrassCurve R) (j : Fin 3) 
     rw [Proj.opensRange_awayι, Proj.opensRange_awayι, Proj.map_preimage_basicOpen]
 
 set_option backward.isDefEq.respectTransparency false in
+private lemma coverPiece_f_eq (W : WeierstrassCurve R) (j : Fin 3) :
+    (Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+        (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j =
+      (Limits.pullbackRightPullbackFstIso (projModelπ W)
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))
+        ((modelChartCover W).openCover.f j)).inv ≫
+      Limits.pullback.snd ((modelChartCover W).openCover.f j)
+        (Limits.pullback.fst (projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap R R')))) := by
+  apply Limits.pullback.hom_ext
+  · rw [Category.assoc]
+    rw [show Limits.pullback.snd ((modelChartCover W).openCover.f j)
+        (Limits.pullback.fst (projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap R R')))) ≫
+        Limits.pullback.fst (projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+        Limits.pullback.fst ((modelChartCover W).openCover.f j)
+          (Limits.pullback.fst (projModelπ W)
+            (Spec.map (CommRingCat.ofHom (algebraMap R R')))) ≫
+          (modelChartCover W).openCover.f j from Limits.pullback.condition.symm]
+    rw [← Category.assoc, Limits.pullbackRightPullbackFstIso_inv_fst]
+    simp
+  · rw [Category.assoc, Limits.pullbackRightPullbackFstIso_inv_snd_snd]
+    simp
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The first-projection square over a cover piece is cartesian. -/
+private lemma isPullback_coverPiece (W : WeierstrassCurve R) (j : Fin 3) :
+    IsPullback
+      (Limits.pullback.fst ((modelChartCover W).openCover.f j ≫ projModelπ W)
+        (Spec.map (CommRingCat.ofHom (algebraMap R R'))))
+      ((Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+        (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j)
+      ((modelChartCover W).openCover.f j)
+      (Limits.pullback.fst (projModelπ W)
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))) := by
+  rw [coverPiece_f_eq]
+  have h0 := IsPullback.of_hasPullback ((modelChartCover W).openCover.f j)
+    (Limits.pullback.fst (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap R R'))))
+  refine h0.of_iso (Limits.pullbackRightPullbackFstIso (projModelπ W)
+    (Spec.map (CommRingCat.ofHom (algebraMap R R')))
+    ((modelChartCover W).openCover.f j)) (Iso.refl _) (Iso.refl _) (Iso.refl _)
+    ?_ ?_ ?_ ?_
+  · rw [Iso.refl_hom, Category.comp_id]
+    exact (Limits.pullbackRightPullbackFstIso_hom_fst _ _ _).symm
+  · rw [Iso.refl_hom, Category.comp_id, ← Category.assoc, Iso.hom_inv_id,
+      Category.id_comp]
+  · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+  · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The wall-crossing identification of the base-changed chart `Spec`s. -/
+private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
+    Spec (.of (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R' j
+        (W.map (algebraMap R R')).toProjective.polynomial})) ≅
+    Spec (.of (Away (quotientGrading (projIdeal (W.map (algebraMap R R'))))
+      ((baseChangeGradedHom (algebraMap R R') W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))))) :=
+  letI : IsIso (CommRingCat.ofHom
+      ((chartCoordEquiv (W.map (algebraMap R R')) j).symm.toRingHom)) :=
+    ⟨CommRingCat.ofHom ((chartCoordEquiv (W.map (algebraMap R R')) j).toRingHom),
+      CommRingCat.hom_ext (RingHom.ext fun x =>
+        (chartCoordEquiv (W.map (algebraMap R R')) j).apply_symm_apply x),
+      CommRingCat.hom_ext (RingHom.ext fun x =>
+        (chartCoordEquiv (W.map (algebraMap R R')) j).symm_apply_apply x)⟩
+  asIso (Spec.map (CommRingCat.ofHom
+    ((chartCoordEquiv (W.map (algebraMap R R')) j).symm.toRingHom))) ≪≫
+  eqToIso (congrArg (fun t => Spec (.of (Away
+    (quotientGrading (projIdeal (W.map (algebraMap R R')))) t)))
+    (baseChangeGradedHom_mk_X (R' := R') W j).symm)
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The lift restricts over each cover piece to the base-changed chart. -/
 lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
     IsPullback
-      (Spec.map (CommRingCat.ofHom
-          ((chartCoordEquiv (W.map (algebraMap R R')) j).symm.toRingHom)) ≫
+      ((thetaIso (R' := R') W j).hom ≫
         Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))
-          ((quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
-            (MvPolynomial.X j))
-          (mk_X_mem_quotientGrading_one (W.map (algebraMap R R')) j) one_pos)
+          ((baseChangeGradedHom (algebraMap R R') W)
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+          ((baseChangeGradedHom (algebraMap R R') W).2
+            (mk_X_mem_quotientGrading_one W j)) one_pos)
       ((isPullback_piece (R' := R') W j).isoPullback.hom)
       (projModelBaseChangeLift (algebraMap R R') W)
       ((Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
         (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j) := by
-  refine IsPullback.of_bot ?s ?p ?t
-  · sorry
-  · sorry
-  · sorry
+  refine (IsPullback.of_right ?s ?p (isPullback_coverPiece (R' := R') W j)).flip
+  case p =>
+    sorry
+  case s =>
+    sorry
 
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by

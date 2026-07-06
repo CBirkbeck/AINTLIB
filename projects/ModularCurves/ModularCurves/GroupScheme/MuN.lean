@@ -616,40 +616,55 @@ private lemma uliftZ_hom_ext {R : CommRingCat.{u}} {f g : CommRingCat.of (ULift.
   obtain ⟨x⟩ := x
   exact DFunLike.congr_fun key x
 
+private lemma muNModel_eval₂_vanish (N : ℕ) {Rc : CommRingCat.{u}}
+    (i : muNAwayRing N →+* Rc) (x : Rc) (hx : x ^ N = 1) :
+    (muNModelPoly N).eval₂ i x = 0 := by
+  simp [muNModelPoly, hx]
+
+private lemma pushout_inr_gen_pow (N : ℕ) (s : PushoutCocone (muNAwayMap N) (muNRingMap N)) :
+    (s.inr (muNRingGen N)) ^ N = 1 := by
+  rw [← map_pow, muNRingGen_pow, map_one]
+
 /-- The model is the pushout (base change) of `μ_N`'s coordinate ring to `ℤ[1/N]`. -/
 private lemma muNModel_isPushout (N : ℕ) :
     IsPushout (muNAwayMap N) (muNRingMap N) (muNModelStruct N) (muNModelCompare N) := by
+  have test : ∀ (s : PushoutCocone (muNAwayMap N) (muNRingMap N)),
+      (muNModelPoly N).eval₂ (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N)) = 0 :=
+    fun s ↦ muNModel_eval₂_vanish N (s.inl.hom : muNAwayRing N →+* s.pt)
+      (s.inr (muNRingGen N)) (pushout_inr_gen_pow N s)
   refine IsPushout.of_isColimit' ⟨uliftZ_hom_ext⟩ (PushoutCocone.IsColimit.mk _
-    (fun s ↦ CommRingCat.ofHom (AdjoinRoot.lift s.inl.hom (s.inr (muNRingGen N)) (by
-      have h1 : (s.inr (muNRingGen N)) ^ N = 1 := by
-        rw [← map_pow, muNRingGen_pow, map_one]
-      simp [muNModelPoly, h1])))
-    (fun s ↦ CommRingCat.hom_ext (AdjoinRoot.lift_comp_of _))
+    (fun s ↦ CommRingCat.ofHom (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt)
+      (s.inr (muNRingGen N)) (test s)))
+    (fun s ↦ CommRingCat.hom_ext (AdjoinRoot.lift_comp_of (test s)))
     (fun s ↦ muNRing_hom_ext (by
       rw [CommRingCat.comp_apply,
         show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
           muNRingLift_gen _ _]
-      simp [AdjoinRoot.lift_root]))
+      show AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N)) (test s)
+        (AdjoinRoot.root (muNModelPoly N)) = s.inr (muNRingGen N)
+      exact AdjoinRoot.lift_root (test s)))
     (fun s m' hleft hright ↦ ?_))
   have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) = s.inl.hom := by
     have h3 := congrArg CommRingCat.Hom.hom hleft
-    simpa [muNModelStruct] using h3
+    exact h3
   have hX : m'.hom (AdjoinRoot.root (muNModelPoly N)) = s.inr (muNRingGen N) := by
     have h2 := congrArg (fun (t : muNRing N ⟶ s.pt) ↦ t (muNRingGen N)) hright
     simpa [CommRingCat.comp_apply,
       show (muNModelCompare N) (muNRingGen N) = AdjoinRoot.root (muNModelPoly N) from
         muNRingLift_gen _ _] using h2
   have key : m'.hom.comp (AdjoinRoot.mk (muNModelPoly N)) =
-      (AdjoinRoot.lift s.inl.hom (s.inr (muNRingGen N)) (by
-        have h1 : (s.inr (muNRingGen N)) ^ N = 1 := by
-          rw [← map_pow, muNRingGen_pow, map_one]
-        simp [muNModelPoly, h1])).comp (AdjoinRoot.mk (muNModelPoly N)) := by
+      (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt) (s.inr (muNRingGen N))
+        (test s)).comp (AdjoinRoot.mk (muNModelPoly N)) := by
     refine Polynomial.ringHom_ext' ?_ ?_
     · rw [show (m'.hom.comp (AdjoinRoot.mk (muNModelPoly N))).comp Polynomial.C =
           m'.hom.comp (AdjoinRoot.of (muNModelPoly N)) from rfl, hC]
-      exact (AdjoinRoot.lift_comp_of _).symm
-    · rw [RingHom.comp_apply, RingHom.comp_apply, AdjoinRoot.mk_X, hX]
-      exact (AdjoinRoot.lift_root _).symm
+      exact (AdjoinRoot.lift_comp_of (test s)).symm
+    · have hmkX : (AdjoinRoot.mk (muNModelPoly N)) X = AdjoinRoot.root (muNModelPoly N) :=
+        AdjoinRoot.mk_X
+      exact ((congrArg (fun t ↦ m'.hom t) hmkX).trans hX).trans
+        (((congrArg (fun t ↦ (AdjoinRoot.lift (s.inl.hom : muNAwayRing N →+* s.pt)
+          (s.inr (muNRingGen N)) (test s)) t) hmkX).trans
+            (AdjoinRoot.lift_root (test s))).symm)
   refine CommRingCat.hom_ext (RingHom.ext fun x ↦ ?_)
   obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
   exact DFunLike.congr_fun key p
