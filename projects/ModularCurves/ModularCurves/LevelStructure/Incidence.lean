@@ -295,6 +295,12 @@ noncomputable def vanishingLocus : S.IdealSheafData where
         (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)] at hglue
     exact hglue
 
+/-- `≤ (ker f)` is a pointwise condition over all affine opens — no quasi-compactness
+needed, since `Scheme.Hom.ker` is the `ofIdeals`-closure of the sectionwise kernels. -/
+theorem le_ker_iff_forall {X Y : Scheme.{u}} (I : Y.IdealSheafData) (f : X ⟶ Y) :
+    I ≤ f.ker ↔ ∀ U : Y.affineOpens, I.ideal U ≤ RingHom.ker (f.app U.1).hom :=
+  Scheme.IdealSheafData.le_ofIdeals_iff
+
 /-- **(T-D14c-2, universal property of the vanishing locus)** `T → S` kills the
 vanishing locus of `E` iff `E` pulls back to the zero ideal sheaf on the base change
 of `W`. Combined with `exists_factor_subschemeι_iff`, `isSubdivisor_iff_le`,
@@ -337,15 +343,6 @@ theorem isSubdivisor_iff_le (D' D : RelEffCartierDiv π) :
   · intro h
     exact ⟨Scheme.IdealSheafData.inclusion h, Scheme.IdealSheafData.inclusion_subschemeι h⟩
 
-/-- **(T-D14b)** The ideal sheaf of the base-changed divisor is the `comap` of the
-ideal sheaf along the curve-level projection — formation of the divisor ideal commutes
-with base change (KM 1.1.4 in the working encoding). -/
-theorem baseChange_ideal (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
-    (D.baseChange t).ideal = D.ideal.comap (pullback.fst π t) := by
-  show (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker = _
-  rw [← pullbackSymmetry_hom_comp_fst D.ideal.subschemeι (pullback.fst π t),
-    Scheme.Hom.ker_comp_of_isIso, Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
-    Scheme.IdealSheafData.ker_subschemeι]
 
 /-- **(T-D14a′)** A morphism factors through the closed subscheme of an ideal sheaf
 iff the ideal is contained in its kernel — the object-level unpacking of mathlib's
