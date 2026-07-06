@@ -253,6 +253,47 @@ noncomputable def isoPullbackAlong {Y X : EllObj R} (u : Y ⟶ X) :
 theorem isoPullbackAlong_hom {Y X : EllObj R} (u : Y ⟶ X) :
     (isoPullbackAlong u).hom = toPullbackAlong u := rfl
 
+/-- **Two `Ell/R`-morphisms with equal base maps differ by an endomorphism over
+the identity** (the connecting endomorphism; KM p. 113's `θ(g)`). -/
+noncomputable def connectHom {V X : EllObj R} (v' v : V ⟶ X)
+    (hb : v'.baseHom = v.baseHom) : V ⟶ V :=
+  homToPullbackAlong v' (𝟙 V.base) (by rw [Category.id_comp, hb]) ≫
+    (isoPullbackAlong v).inv
+
+theorem connectHom_baseHom {V X : EllObj R} (v' v : V ⟶ X)
+    (hb : v'.baseHom = v.baseHom) :
+    (connectHom v' v hb).baseHom = 𝟙 V.base := by
+  show 𝟙 V.base ≫ 𝟙 V.base = 𝟙 V.base
+  rw [Category.id_comp]
+
+/-- The defining property of the connecting endomorphism. -/
+@[reassoc]
+theorem connectHom_comp {V X : EllObj R} (v' v : V ⟶ X)
+    (hb : v'.baseHom = v.baseHom) :
+    connectHom v' v hb ≫ v = v' := by
+  have h1 : (isoPullbackAlong v).inv ≫ v = X.pullbackAlongπ v.baseHom := by
+    rw [Iso.inv_comp_eq]
+    exact (toPullbackAlong_pullbackAlongπ v).symm
+  rw [connectHom, Category.assoc, h1, homToPullbackAlong_pullbackAlongπ]
+
+/-- An endomorphism over the identity fixing one morphism is the identity
+(cartesianness makes `v` "relatively mono" over its base map). -/
+theorem eq_id_of_baseHom_of_comp {V X : EllObj R} (v : V ⟶ X) (ξ : V ⟶ V)
+    (h1 : ξ.baseHom = 𝟙 V.base) (h2 : ξ ≫ v = v) : ξ = 𝟙 V := by
+  haveI : IsIso (toPullbackAlong v) :=
+    inferInstanceAs (IsIso (isoPullbackAlong v).hom)
+  have key : ξ ≫ toPullbackAlong v = toPullbackAlong v := by
+    apply (homPullbackAlongEquiv X v.baseHom V).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show (ξ ≫ toPullbackAlong v) ≫ X.pullbackAlongπ v.baseHom =
+        toPullbackAlong v ≫ X.pullbackAlongπ v.baseHom
+      rw [Category.assoc, toPullbackAlong_pullbackAlongπ, h2]
+    · show ξ.baseHom ≫ 𝟙 V.base = 𝟙 V.base
+      rw [Category.comp_id, h1]
+  have := (cancel_mono (toPullbackAlong v)).mp
+    (key.trans (Category.id_comp (toPullbackAlong v)).symm)
+  exact this
+
 end EllObj
 
 namespace ModuliProblem
@@ -565,12 +606,13 @@ structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
 problem is a rigidifier, no `g ≠ 1` fixes a point of the representing object of
 the simultaneous problem over a nonempty scheme.
 
-Proof route (banked; KM p. 113): a fixed `T`-point yields two `Ell/R`-morphisms
-over the same base map, hence (via `isoPullbackAlong`) an automorphism `θ(g)` of
-the pulled-back curve over `𝟙 T` fixing the `𝒫`-value; rigidity forces
-`θ(g) = 𝟙`, so the `δ`-value is `γ`-fixed, and the torsor axiom then forces
-`γ = 1` unless `T` is empty. WIP `sorry` (T-Q6d.β); the statement is the
-engine's working interface. -/
+Proof (KM p. 113): a fixed `T`-point yields two `Ell/R`-morphisms over the same
+base map, hence (`connectHom`) an automorphism `θ(γ)` of the pulled-back curve
+over `𝟙 T` fixing the `𝒫`-value; rigidity forces `θ(γ) = 𝟙`, so the `δ`-value
+is `γ`-fixed; the equivariance of the torsor datum turns this into a `γ`-fixed
+classifying map to `Z`, and the torsor comparison then factors the point through
+two distinct summands of `∐_G Z`, which are disjoint
+(`isEmpty_of_commSq_sigmaι_of_ne`). -/
 theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
     {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
     (rM : (P.simul Q).RepresentableBy XM)
@@ -578,7 +620,131 @@ theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
     (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.base)
     (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
     IsEmpty T := by
-  sorry
+  have hfix' : t ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = t :=
+    hfix
+  -- the Ell/R-level lift of `t` and the two morphisms it compares
+  have hb : (XM.pullbackAlongπ t ≫
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv).baseHom =
+      (XM.pullbackAlongπ t).baseHom := hfix'
+  have hb2 : (XM.pullbackAlongπ t ≫
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom).baseHom =
+      (XM.pullbackAlongπ t).baseHom := by
+    show t ≫ _ = t
+    have hcan : (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫
+        (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom = 𝟙 XM.base :=
+      congrArg EllHom.baseHom (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv_hom_id
+    conv_lhs => rw [← hfix']
+    rw [Category.assoc, hcan, Category.comp_id]
+  -- the connecting endomorphism θ(γ) and its inverse
+  have hξw := EllObj.connectHom_comp _ _ hb
+  have hξ'w := EllObj.connectHom_comp _ _ hb2
+  have hii : EllObj.connectHom _ _ hb ≫ EllObj.connectHom _ _ hb2 =
+      𝟙 (XM.pullbackAlong t) := by
+    refine EllObj.eq_id_of_baseHom_of_comp (XM.pullbackAlongπ t) _ ?_ ?_
+    · show (EllObj.connectHom _ _ hb).baseHom ≫
+        (EllObj.connectHom _ _ hb2).baseHom = 𝟙 _
+      rw [EllObj.connectHom_baseHom, EllObj.connectHom_baseHom,
+        Category.id_comp]
+    · rw [Category.assoc, hξ'w, ← Category.assoc, hξw, Category.assoc,
+        Iso.inv_hom_id, Category.comp_id]
+  have hii' : EllObj.connectHom _ _ hb2 ≫ EllObj.connectHom _ _ hb =
+      𝟙 (XM.pullbackAlong t) := by
+    refine EllObj.eq_id_of_baseHom_of_comp (XM.pullbackAlongπ t) _ ?_ ?_
+    · show (EllObj.connectHom _ _ hb2).baseHom ≫
+        (EllObj.connectHom _ _ hb).baseHom = 𝟙 _
+      rw [EllObj.connectHom_baseHom, EllObj.connectHom_baseHom,
+        Category.id_comp]
+    · rw [Category.assoc, hξw, ← Category.assoc, hξ'w, Category.assoc,
+        Iso.hom_inv_id, Category.comp_id]
+  -- value comparison: the P-component is θ(γ)-fixed, the Q-component γ-moved
+  have h1 : rM.homEquiv (XM.pullbackAlongπ t ≫
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) =
+      ((rM.homEquiv (XM.pullbackAlongπ t)).1,
+        (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+          (rM.homEquiv (XM.pullbackAlongπ t)).2) :=
+    rM.homEquiv_comp_transportHom (P.simulMapSnd (φ γ).inv) (XM.pullbackAlongπ t)
+  have h2 : rM.homEquiv (XM.pullbackAlongπ t ≫
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) =
+      (P.map (EllObj.connectHom _ _ hb).op
+        (rM.homEquiv (XM.pullbackAlongπ t)).1,
+       Q.map (EllObj.connectHom _ _ hb).op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) := by
+    conv_lhs => rw [← hξw]
+    rw [rM.homEquiv_comp]
+    exact rfl
+  have c1 : P.map (EllObj.connectHom _ _ hb).op
+      (rM.homEquiv (XM.pullbackAlongπ t)).1 =
+      (rM.homEquiv (XM.pullbackAlongπ t)).1 :=
+    congrArg Prod.fst (h2.symm.trans h1)
+  have c2 : Q.map (EllObj.connectHom _ _ hb).op
+      (rM.homEquiv (XM.pullbackAlongπ t)).2 =
+      (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+        (rM.homEquiv (XM.pullbackAlongπ t)).2 :=
+    congrArg Prod.snd (h2.symm.trans h1)
+  -- rigidity forces θ(γ) = 𝟙
+  have hΘ : EllObj.connectHom _ _ hb = 𝟙 (XM.pullbackAlong t) := by
+    by_contra hne
+    exact hrig (XM.pullbackAlong t)
+      ⟨EllObj.connectHom _ _ hb, EllObj.connectHom _ _ hb2, hii, hii'⟩
+      (EllObj.connectHom_baseHom _ _ hb)
+      (fun hEq => hne (congrArg Iso.hom hEq))
+      (rM.homEquiv (XM.pullbackAlongπ t)).1 c1
+  -- hence the δ-value is γ-fixed
+  have hfixval : (φ γ).hom.app (Opposite.op (XM.pullbackAlong t))
+      (rM.homEquiv (XM.pullbackAlongπ t)).2 =
+      (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
+    have c2' : (rM.homEquiv (XM.pullbackAlongπ t)).2 =
+        (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+          (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
+      rw [← c2, hΘ, op_id, Functor.map_id_apply]
+    conv_lhs => rw [c2']
+    exact congrArg
+      (fun η : Q ⟶ Q => η.app (Opposite.op (XM.pullbackAlong t))
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).inv_hom_id
+  -- transport into the torsor chart at the identity base map
+  obtain ⟨td⟩ := htors (XM.pullbackAlong t)
+  have hβ : (φ γ).hom.app
+      (Opposite.op ((XM.pullbackAlong t).pullbackAlong (𝟙 _)))
+      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) =
+      Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
+    rw [NatTrans.naturality_apply, hfixval]
+  have hZfix : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
+      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫ td.σZ.hom γ =
+      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
+      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 := by
+    have heq := td.equivariant (𝟙 (XM.pullbackAlong t).base)
+      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
+        (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+          (rM.homEquiv (XM.pullbackAlongπ t)).2)) γ
+    rw [Equiv.apply_symm_apply, hβ] at heq
+    exact congrArg Subtype.val ((td.eqv _).injective
+      (heq.trans (Equiv.apply_symm_apply _ _).symm))
+  -- torsor endgame: the point factors through two distinct summands
+  haveI := td.torsor
+  have hpt : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
+      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
+        Limits.Sigma.ι (fun _ : G => td.Z) γ =
+      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
+      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
+        Limits.Sigma.ι (fun _ : G => td.Z) (1 : G) := by
+    rw [← cancel_mono ((Limits.Sigma.desc fun γ' : G =>
+      Limits.pullback.lift (td.σZ.hom γ') (𝟙 td.Z)
+        (by rw [Category.id_comp]; exact td.over_base γ')) :
+      (∐ fun _ : G => td.Z) ⟶ Limits.pullback td.f td.f),
+      Category.assoc, Category.assoc, Limits.Sigma.ι_desc,
+      Limits.Sigma.ι_desc]
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, Limits.pullback.lift_fst, Category.assoc,
+        Limits.pullback.lift_fst, hZfix, td.σZ.hom_one, Category.comp_id]
+    · rw [Category.assoc, Limits.pullback.lift_snd, Category.assoc,
+        Limits.pullback.lift_snd]
+  exact isEmpty_of_commSq_sigmaι_of_ne ⟨hpt⟩ hγ
 
 /-- **The Katz–Mazur 4.7 engine** (SCHOLIE 4.7.0, axiomatized claim, KM p. 112:
 "We claim that over `ℤ[1/N]`, `𝒫` is represented by the affine `ℤ[1/N]`-scheme
