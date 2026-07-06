@@ -1125,7 +1125,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   *modulo the registered boxes* BB-QF/BB-FLAT/BB-DEG/BB-DIFF — same bar as T-B4/5;
   NOT circular: the boxes' own discharge is the separate dictionary leaf below).
   HasseWeil import becomes unnecessary for the headline. Sub-tickets:
-  - **[T-B6a]** `mulByHom_baseChange` — claimed beastmode-B ·
+  - **[T-B6a]** DONE (beastmode-B 2026-07-06, sorry-free + axiom-clean;
+    homMonoidHom/map_zpow route worked; carrier-seam gotcha: rw fails across
+    (E.baseChange g).E vs pullback E.π g spellings — term-glue/exact only) ·
     `(E.baseChange g).mulByHom n ≫ pullback.fst E.π g = pullback.fst E.π g ≫
     E.mulByHom n` (single equation). Sketch: `grpObjMkPullbackSnd =
     ((Over.pullback g).mapGrp …).grp` (mathlib Monoidal/Cartesian/Over.lean:317),
@@ -1133,21 +1135,32 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     (map_one via mapMon-η, map_mul via mapMon-μ/prodComparison lemmas ibid.
     260–302), then `map_zpow` + left-component extraction. Fallback:
     `Int.induction_on` with `monObjMkPullbackSnd_one/_mul` simps.
-  - **[T-B6b]** `torsionBaseChangeHom` (def, the canonical witness — per
+  - **[T-B6b]** DONE (beastmode-B 2026-07-06, sorry-free + axiom-clean; def
+    torsionBaseChangeHom + torsion_baseChange_isPullback via private
+    torsionLiftAux/comp/uniq, ALL term-glue calc chains — zero rw across the
+    carrier seam; typed have-bridges cast field-spellings to pullback-spellings) ·
+    was: (def, the canonical witness — per
     statement-splitting shared-witness-∃ preference) + spec
     `torsion_baseChange_isPullback : IsPullback (torsionBaseChangeHom)
     ((E.baseChange g).torsionπ N) (E.torsionπ N) g` (single IsPullback). Sketch:
     kernel-square pasting from T-B6a + zero-compat (`pullback.lift_fst`).
-  - **[T-B6c]** `nIsInvertible_spec_iff (k) [Field k] : NIsInvertible
-    (Spec (.of k)) N ↔ (N : k) ≠ 0` (single iff). Sketch: `Scheme.ΓSpecIso` +
-    `isUnit_iff_ne_zero` + `map_natCast`.
-  - **[T-B6d]** `card_sections_eq_finrank` — X ⟶ Spec (.of k) finite étale,
-    k sep. closed, constant finrank r ⇒ `Nat.card {s // s ≫ f = 𝟙} = r` (single
-    equation). Sketch: finite/affine ⇒ X = Spec A; sections ≃ (A →ₐ[k] k) via
-    Γ–Spec; `RingHom.Etale` via `HasRingHomProperty.Spec_iff`; mathlib
-    `Algebra.FormallyEtale.equivPiOfIsSepClosed : A ≃ₐ[k] (PrimeSpectrum A → k)`
-    (RingTheory/Etale/Field.lean:217); AlgHoms out of finite products of fields =
-    projections (sub-leaf if not in mathlib); finrank (Pi) = card.
+  - **[T-B6c]** DONE (beastmode-B 2026-07-06, sorry-free + axiom-clean, first
+    try; ΓSpecIso.hom/.inv + map_natCast both directions).
+  - **[T-B6d]** claimed beastmode-B, in progress. `card_sections_eq_finrank` —
+    X ⟶ Spec (.of k) finite étale, k sep. closed ⇒ `Nat.card {s // s ≫ f = 𝟙}
+    = f.finrank x₀` (single equation). NEW FILE ForMathlib/EtaleSectionsCount.lean
+    (upstream candidate, Mathlib-only imports). Recon done: no new classification
+    leaf needed — `(A →ₐ[k] k) ≃ PrimeSpectrum A` falls out of mathlib's
+    `equivPiOfIsSepClosed` + `_comap` + `_self_apply` (Etale/Field.lean:217/232/246;
+    ψ ↦ pt.comap ψ, inverse via Pi.evalAlgHom ∘ equivPi; injective since
+    ψ = eval_{Ψψ} ∘ equivPi; surjective via Pi.single-separation). Then finrank
+    k A = card (PrimeSpectrum A) via finrank_pi; scheme side: IsAffine X (finite
+    over affine), X.isoSpec conjugation, Spec.preimage/map_injective turn sections
+    into retractions {χ // ψ ≫ χ = 𝟙} ≃ (A →ₐ[k] k) (Algebra via ψ.hom.toAlgebra);
+    étale/finite transport via HasRingHomProperty.Spec_iff + cancel-iso; finrank
+    transport via IsPullback.of_horiz_isIso square (e.inv, f', f, 𝟙) +
+    finrank_of_isPullback + finrank_SpecMap_eq_finrank + rankAtStalk_eq_finrank_of_free
+    (all MuN-proven plumbing).
   - **[T-B6e]** `torsionBy_addEquiv_of_card` (pure algebra, no AG) — G
     AddCommGroup, `(h : ∀ d : ℕ, 0 < d → d ∣ N → Nat.card
     (Submodule.torsionBy ℤ G (d:ℤ)) = d ^ 2)` ⇒ `Nonempty (torsionBy ℤ G (N:ℤ)
