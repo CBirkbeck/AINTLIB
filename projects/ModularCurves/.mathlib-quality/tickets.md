@@ -3128,6 +3128,15 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     presheaf-coercion motive failures — `show`-expand localQuotientπ by defeq
     then rw closed terms), `resLE_localQuotientπ` (local invariance). All
     sorry-free, zero warnings, standard axioms.
+    KEYSTONE PROVED (2026-07-06T20:42Z): `exists_invariantsπ_lift_of_isOpenImmersion`
+    — the j-relative descent existence (AffineQuotient.lean, sorry-free, standard
+    axioms; commit "T-Q5c KEYSTONE"). With the j-relative hom_ext this is the full
+    effective-epi package. Also proven en route: `pullbackSpecSMul` + specs.
+    REMAINING for T-Q5: (α) `IsOpenImmersion (localQuotientMap …)` — apply the
+    keystone at j := the image-open of π^V(W) to build the inverse up to the
+    open-inclusion (UP-iso argument, q-lane.md note); (β) c4 GlueData over a
+    chosen stable-affine atlas + the five contract statements (board item (6));
+    T-Q6/Q7 unblock at (β)'s skeleton.
     NEXT LEAVES (in order): c2 = local quotient of a stable affine open V
     (`Spec Γ(V)ᴳ` + local π := V.toScheme ≅ Spec Γ(V) [IsAffineOpen.isoSpec] ≫
     invariantsπ-of-Γ-bridge-action; invariance lemma); c3 = for stable affine
