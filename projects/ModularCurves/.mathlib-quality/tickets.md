@@ -3039,3 +3039,64 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   phase M; consumes T-Q5 + T-M1/T-M2 vocabulary.
 - **[CLEANUP-12]** (already on the board, v2 cadence): quotient stream after
   T-Q3+T-Q4+T-Q5 — covers the three new ForMathlib files.
+
+---
+
+## Amendments v6 (2026-07-06): ★ Stream-H claim + execution order (beastmode-H)
+
+*Stream H (general levels, `Moduli/GammaH.lean`) claimed by **beastmode-H**,
+2026-07-06T16:55Z. Star reserves the lane; tickets claimed one at a time per rule 5.
+Attack blocks: `decompose-attacks-2026-07-06/levels-stack.md` (all GammaH statements
+covered; DEF fixes in-skeleton via 2bdae6cc). **Exclusion**: an in-flight unclaimed
+edit proving `gammaHNaiveProblem.map_id/map_comp` (T-H3 law-half, GammaH.lean:123–141,
+observed uncommitted 16:47Z, pullSection_id/comp route, T-E4 style) is NOT part of this
+claim — whoever lands it keeps it; H-lane will not touch that block until it lands.*
+
+### H-lane execution order (v6)
+1. **T-H7** (below) → 2. **T-H1** (`gammaHNaive_bot`; derive `glSmul_one` from the
+   group structure, NOT `ZMod.val` — N=1 edge per attack block) → 3. **T-H3**
+   remainder (orbit-compat + `map`-membership: gated on pullSection-additivity =
+   A6.δ/T-G2 hidden dep, attack finding 6 — state `EllHom.pullSection_add` spec,
+   leave sorried, register the edge) → 4. **T-H5** (rigid_iff; mathlib
+   CongruenceSubgroup API) → 5. T-H2/H2a LAST (provable via T-A6d but sits on the
+   A-lane's in-flight asSection/mulBy 3-spelling refactor — defer until that lands).
+- NOT workable now: T-H4 (T-C0/C1 unstarted + stream-Q in flight + T-D18 open),
+  T-H6 (T-E5 + T-H4), T-H8/H9 (⧗KM; statements re-scoped by the attack pass),
+  T-H10 discrete-half (T-G3).
+
+### [T-H7] full level is not rigid for N ≤ 2 (the honest stack statement)
+- **Status**: in_progress · **Claimed**: beastmode-H, 2026-07-06T16:55Z ·
+  **File**: Moduli/GammaH.lean · `gammaFullNaive_not_rigid_of_le_two` (skeleton :203)
+- **Depends on**: T-E4 (done-mod-gate; only the functor is consumed, not the gated
+  membership sorries) · **Parent**: none (v3 stream-H) · **Type**: theorem
+- **Statement**: in skeleton (post-DEF-1: `hN : N ≤ 2`, `hinv : IsUnit (N : R)`,
+  `hR : ∃ X : EllObj R, Nonempty X.base`; conclusion
+  `¬ (gammaFullNaiveProblem R N).Rigid`).
+- **Proof sketch** (attack verdict "sound"; route refined to one geometric point):
+  1. Unfold `Rigid` (EllCategory.lean:168): produce `X`, `e : X ≅ X` over `𝟙`-base,
+     `e ≠ Iso.refl X`, and `a : P(X)` with `P.map e.hom.op a = a`.
+  2. From `hR` pick `X₀` + a point `s` of `X₀.base`; base-change along
+     `Spec k̄ → X₀.base` (`k̄ := AlgebraicClosure κ(s)`; `X := X₀.pullbackAlong g`) —
+     nonempty base persists.
+  3. Level point `a`: over `k̄` with `N` invertible (from `hinv`), naive full
+     level-N structures exist — N=1: the zero pair; N=2: a basis of `E[2](k̄)` via
+     B-lane torsion-fibre machinery (TorsionFibre.lean, T-B6 done). Bridge to
+     `IsNaiveFullLevel` per its actual definition.
+  4. `e := [-1]` (`mulByHom (-1)` packaged as an EllObj-iso over `𝟙`).
+  5. `e ≠ refl`: else `[-1] = 𝟙`, contradicted on the k̄-fibre by a nonzero point
+     of odd order M ∈ {3,5} chosen coprime to char k̄ (T-B6 `E[M](k̄) ≅ (ℤ/M)²`).
+  6. Fixity: `P.map e.hom.op a = a` ⟺ `pullSection [-1] P = P` componentwise;
+     `pullSection [-1] P = -P` (mulBy/pullSection compat, T-A6d layer), and
+     `-P = P` since `2•P = 0` from killed-by-N + `N ∣ 2` (N=1: `P = 0`).
+  Steps 3/5/6 are expected sub-ticket spawns (T-H7a geometric-point object, T-H7b
+  level-existence over k̄, T-H7c pullSection/mulBy fixity) — cut at first contact
+  with the actual definitions.
+- **Mathlib lemmas**: `AlgebraicClosure`, `Scheme.fromSpecResidueField` (verify
+  name), `IsLocalRing.ResidueField` — five-method search at use time.
+- **Sources**: [Loe] §3.8 after 3.8.3 ("only a stack for N ≤ 2"); KM 4.4; attack
+  block levels-stack.md §T-H7 (hypotheses shown necessary there).
+- **Generality**: as stated (CommRingCat R, N ≤ 2, NeZero N) — frozen statement.
+- **Progress**:
+  - 2026-07-06T16:55Z: claimed; statement verified in skeleton at :203 against
+    Rigid (EllCategory:168). Route pinned to single-geometric-point witness
+    (avoids the trivialisation-scheme detour of the original attack sketch).
