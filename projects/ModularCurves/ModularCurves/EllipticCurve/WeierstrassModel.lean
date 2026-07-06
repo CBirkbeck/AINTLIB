@@ -2414,6 +2414,39 @@ lemma projModelZero_preimage_yChart (W : WeierstrassCurve R) :
     rw [map_one]]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The chart factorisation of the section at infinity through the `Y`-chart. -/
+noncomputable def projModelZeroChart (W : WeierstrassCurve R) :
+    Spec (.of R) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) := by
+  have hrange : Set.range ⇑(projModelZero W) ⊆
+      Set.range ⇑(Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos) := by
+    rw [show Set.range ⇑(Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos) =
+        (Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) :
+          Set (Proj (quotientGrading (projIdeal W)))) from by
+      rw [← Scheme.Hom.coe_opensRange, Proj.opensRange_awayι]]
+    rintro _ ⟨x, rfl⟩
+    have h := projModelZero_preimage_yChart W
+    have hx : x ∈ (projModelZero W ⁻¹ᵁ (Proj.basicOpen
+        (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) := by
+      rw [h]
+      trivial
+    exact hx
+  exact IsOpenImmersion.lift _ _ hrange
+
+@[reassoc]
+lemma projModelZeroChart_fac (W : WeierstrassCurve R) :
+    projModelZeroChart W ≫ Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos = projModelZero W :=
+  IsOpenImmersion.lift_fac _ _ _
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.

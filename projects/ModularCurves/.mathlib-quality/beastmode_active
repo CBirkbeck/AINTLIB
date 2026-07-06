@@ -1,1 +1,2 @@
 FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 4 per-decl workers (sequential, 74 decls)
+FOCUS-D: (beastmode-D2) T-D29 DONE (charpoly_lmul_eq_norm, cleaned, committed). Now: retry T-D13 gate (lake build ModularCurves.LevelStructure.Incidence); if A-chain still red, claim T-D24 (finrank additivity in SES, Wave 0 #4).
