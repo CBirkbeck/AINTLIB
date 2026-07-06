@@ -3653,7 +3653,10 @@ record is a-priori a SUBCLASS of KM 2.1.1/DR II.1.1/Loe 3.3.1 — a stronger-dir
 bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
 
 ### [T-A8] EllipticCurveGeom v2 — `LocallyWeierstrass` field swap (OWNER-DIRECTED)
-- **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-06 · **Lane**: A (files owned by A; bundle with the
+- **Status**: **DONE** (beastmode-A, 2026-07-06 — LocallyWeierstrass predicate + field swap
+  fibres→localModel + GroupLaw consumer + **T-A8a `LocallyWeierstrass.baseChange` fully proven,
+  axiom-clean**; Basic.lean sorry-free, green 2930 jobs; commits ad9a3332/3d862cbb/ca9fd165).
+  Validated as the definition of record by v8 review. · **Claimed**: beastmode-A, 2026-07-06 · **Lane**: A (files owned by A; bundle with the
   in-flight 3-spelling refactor; NOT claimable by other lanes) ·
   **Files**: EllipticCurve/Basic.lean (predicate + field swap + drift note),
   EllipticCurve/GroupLaw.lean (:163), Moduli/EllCategory.lean +
