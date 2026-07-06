@@ -554,9 +554,35 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     `Proj`-independent points engine. T-B7 statements (muNπ_isFinite/flat/finrank/
     etale_iff) remain open sorries as planned.
 
+### [T-B7] μ_N finite locally free of rank N, étale iff N invertible (spawned by beastmode-B, 2026-07-06)
+- **Status**: open · **File**: GroupScheme/MuN.lean · `muNπ_isFinite`, `muNπ_flat`,
+  `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
+  foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
+- **Depends on**: none · **Parallel**: yes · **Type**: theorems
+- **Proof sketch**:
+  1. `ℤ[T]/(Tᴺ−1)` is finite free of rank `N` over `ℤ` (monic quotient basis
+     `1,…,T^{N−1}`: mathlib `AdjoinRoot.powerBasis`/monic-quotient free module —
+     verify names; `X^N − 1` monic for `N ≠ 0`).
+  2. `Spec` of a finite free algebra is finite + flat + constant `finrank = N`;
+     transfer along the defining terminal-pullback (mathlib base-change stability
+     instances for `IsFinite`/`Flat`; `Scheme.Hom.finrank` pullback lemma in
+     FlatRank.lean — verify).
+  3. `muNπ_etale_iff`: (⟸) `Tᴺ−1` separable when `N` invertible (`derivative =
+     N·T^{N−1}` comaximal with `Tᴺ−1`); (⟹) at a point with residue char `p ∣ N`
+     the fibre `κ[T]/(Tᴺ−1)` is non-reduced (`T = 1` multiple root), contradicting
+     unramified ⟹ reduced fibres. Both sides vacuous for `S = ∅`.
+- **Mathlib lemmas needed**: monic-quotient basis, `Polynomial.separable_X_pow_sub_C`
+  -adjacent (verify for `Xⁿ − 1`), étale ⟺ flat + unramified dictionaries; verify all
+  names via the five-method search at start.
+- **Sources**: [Loe] §3.2 (representability quote in hand); [KM] 1.12 ⧗ (KM-quote
+  gate applies only to attributing the statement to KM — content is standard).
+- **Generality**: as stated (`[NeZero N]`, arbitrary `S`).
+
 ### [T-B3] E[N] ↪ E closed immersion + `torsionIdeal`
-- **Status**: open · **Files**: Torsion.lean (`torsionι_isClosedImmersion`),
-  LevelStructure/Basic.lean (`torsionIdeal` un-sorried via it)
+- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
+  2026-07-06T10:13Z · **Files**: Torsion.lean (`torsionι_isClosedImmersion`),
+  LevelStructure/Basic.lean (`torsionIdeal_subscheme` = T-B3a pin, per Amendments v5;
+  `torsionIdeal` itself is already a real def `(E.torsionι N).ker`)
 - **Depends on**: none (v2: group data is in the record) · **Parallel**: with T-B4/B5 · **Type**: theorem + def
 - **Sketch**: zero section is a closed immersion (`π` separated; mathlib
   `isClosedImmersion_of_comp_eq_id` pattern seen in `Group/Abelian.lean`); closed
