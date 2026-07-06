@@ -1878,6 +1878,48 @@ noncomputable def sChartTensorEquiv (W : WeierstrassCurve R) (i : Fin 3) :
     rw [sChartTensorInvAux_map_algebraMap]
     rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
+/-- The chart quotients form a pushout square over `R → R'`. -/
+lemma isPushout_sChart (W : WeierstrassCurve R) (i : Fin 3) :
+    letI : Algebra
+        (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+        (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial}) :=
+      ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
+    Algebra.IsPushout R R'
+      (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial}) := by
+  letI : Algebra
+      (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+    ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
+  haveI : IsScalarTower R
+      (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+    IsScalarTower.of_algebraMap_eq fun r =>
+      ((sChartBaseChange (R' := R') W i).commutes r).symm
+  refine Algebra.IsPushout.of_equiv (sChartTensorEquiv W i) ?_
+  refine RingHom.ext fun x => ?_
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  show sChartTensorEquiv (R' := R') W i
+    ((1 : R') ⊗ₜ[R] (Ideal.Quotient.mk _ p)) = _
+  show (Algebra.TensorProduct.lift (Algebra.ofId R' _)
+    (sChartBaseChange (R' := R') W i) fun _ _ => Commute.all _ _)
+    ((1 : R') ⊗ₜ[R] (Ideal.Quotient.mk _ p)) = _
+  rw [Algebra.TensorProduct.lift_tmul, map_one, one_mul]
+  rfl
+
 end TensorComparison
 
 end BaseChangeGraded

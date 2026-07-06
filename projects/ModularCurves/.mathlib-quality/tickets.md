@@ -499,7 +499,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (via `GrpObj.comp_zpow`) — small starter ticket.
 
 ### [T-B2] μ_N and (ℤ/N) wiring (DS3 discharge)
-- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker), 2026-07-06T08:57Z ·
+- **Status**: done (beastmode-B, 2026-07-06T08:57Z → 2026-07-06T10:09Z) ·
+  **Claimed**: beastmode-B (stream-B worker), 2026-07-06T08:57Z ·
   **File**: GroupScheme/MuN.lean · `muNGrpObj`, `constZModGrpObj`,
   `muNPointsEquiv` (+ its naturality — `muNPointsEquiv_natural` now stated in skeleton)
 - **Depends on**: none · **Parallel**: yes · **Type**: def(data) + theorems
@@ -510,6 +511,48 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Mathlib needed**: `Over.cartesianMonoidalCategory` (local instance!), `ΓSpec`
   adjunction, `Sigma.desc`. **Sources**: [Loe] §3.2 example; [KM] 1.12 ⧗.
 - **Generality**: any `S`, any `N ≥ 1` (étale statements separately, T-B7).
+- **Progress**:
+  - 2026-07-06T09:35: `muNGrpObj` + `muNPointsEquiv` + `muNPointsEquiv_natural`
+    sorry-free. Route of record: NOT the hand-rolled comult — both DS3 instances are
+    induced by representability (`GrpObj.ofRepresentableBy`, mathlib
+    Monoidal/Cartesian/Grp) from their points presheaves, so the points specs pin the
+    group law definitionally. μ_N points engine mirrors
+    `AffineSpace.toSpecMvPolyIntEquiv`: private `muNRingGen` (class of `T`),
+    `muNRing_hom_ext` (gen-generated: `Polynomial.ringHom_ext'` + `RingHom.ext_int`
+    through ULift/quotient), `muNRingLift` (`Ideal.Quotient.lift` of `eval₂RingHom`;
+    vanishing lemma must be a STANDALONE lemma — inline `<| by` in lift's H
+    deadlocks elaboration), `specHom_ext` (maps into `Spec R` determined by `appTop`;
+    via `Adjunction.homEquiv_symm_apply` + counit-cancel `congr 1` — upstream
+    candidate), `muNSpecHomEquiv` (left_inv via `specHom_ext` + `cancel_epi
+    (ΓSpecIso).inv` + gen-ext, avoiding adjunction-side `dsimp` which unfolds
+    `muNRing` and wrecks rw-motives). Gotcha of record: ULift/CommRingCat-carrier
+    instance spellings are only defeq at default transparency — keep all rewriting at
+    folded `muNRing N`-spellings; value-level `_coe` rfl-lemmas + `show` beat `simp`
+    on structure-literals.
+  - 2026-07-06T10:00: `constZModGrpObj` sorry-free + NEW public pins
+    `constSchemePointsEquiv` / `constSchemePointsEquiv_natural` (DS3b spec, register
+    rule (iii)): S-morphisms into `∐_A S` over `g` ≃ locally constant `A`-valued
+    functions. Engine: `nonempty_isColimit_cofanMk_of` on the clopen fibre partition
+    of a locally constant function (mathlib recognises it as a coproduct);
+    `constIndex` via `Cover.exists_eq`-choice + uniqueness from
+    `disjoint_opensRange_sigmaι` (`sigmaMk` is universe-rigid `σ : Type u` — NOT
+    usable for `A : Type 0`; the choice-based index + spec/uniqueness interface
+    replaces rfl-anchoring). `constScheme`/`constSchemeπ` marked `@[reducible]`
+    (projModel precedent) to dissolve `∐`-vs-def motive mismatches. `Finite (ZMod N)`
+    needs `[NeZero N]` on the private functors. Needed import added:
+    `Mathlib.Topology.LocallyConstant.Algebra` (group instances + `comapAddMonoidHom`).
+  - 2026-07-06T10:09: DONE — group-law pins `muNPointsEquiv_one`/`muNPointsEquiv_mul`
+    added (one-term proofs via `yonedaMonObjIsoOfRepresentableBy` components).
+    `#print axioms` on all 8 public decls: propext/Classical.choice/Quot.sound only.
+    Module + WeilPairing-exposure check green (whole-lib gate currently blocked by
+    stream-A's in-flight WeierstrassModel edit — not MuN-related; MuN's only importer
+    WeilPairing/Basic uses muN/muNπ/muNPointsEquiv, signatures unchanged).
+    Post-proof cleanup: ✓ ran (inline pass — privates marked, docstrings on all new
+    publics, module docstring updated to constructed-state; FULL per-file /cleanup =
+    board ticket [CLEANUP-4], whose T-B2 dependency is now satisfied). Upstream
+    candidates flagged: `specHom_ext`, `nthRootsCommGroup`,
+    `Proj`-independent points engine. T-B7 statements (muNπ_isFinite/flat/finrank/
+    etale_iff) remain open sorries as planned.
 
 ### [T-B3] E[N] ↪ E closed immersion + `torsionIdeal`
 - **Status**: open · **Files**: Torsion.lean (`torsionι_isClosedImmersion`),

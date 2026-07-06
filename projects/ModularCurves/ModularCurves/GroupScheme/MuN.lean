@@ -20,9 +20,13 @@ the source of Drinfeld generators (`ℤ/N`, KM 1.4.4(5)).
 Both are finite locally free of rank `N` over the base, étale exactly when `N` is invertible;
 `μ_N` and `ℤ/N` are Cartier dual (KM 2.8-adjacent; statement in `WeilPairing/Basic.lean`).
 
-The group-object structures are registered constructions (DS3): the comultiplication
-`T ↦ T ⊗ T` is elementary, but wiring it through the `Over S`/`GrpObj` API is genuine work
-(ticket `T-B2`), and nothing downstream may assume unstated properties of them.
+The group-object structures are registered constructions (DS3, constructed in ticket
+`T-B2`): both are induced by representability (`GrpObj.ofRepresentableBy`) from their
+presheaves of points — `N`-th roots of unity of `Γ(T, ⊤)` for `μ_N` (so the group law
+is `Spec` of the comultiplication `T ↦ T ⊗ T`, pinned by `muNPointsEquiv` +
+`muNPointsEquiv_natural`/`_one`/`_mul`), and locally constant `ℤ/N`-valued functions
+for `(ℤ/N)_S` (pinned by `constSchemePointsEquiv` + naturality). Downstream code uses
+them only through these stated specifications (DATA-SORRY register rule).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits Polynomial
