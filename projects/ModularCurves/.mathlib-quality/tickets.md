@@ -356,7 +356,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Upstream candidate.
 
 ### [T-A3c] Chartwise assembly of projModel smoothness (sub-ticket of T-A3)
-- **Status**: in_progress (beastmode 2026-07-06T19:45Z. SCOPE NOTE: T-A3a proved the
+- **Status**: done (beastmode 2026-07-06T21:30Z — `projModel_smooth` PROVED sorry-free,
+  standard axioms; X/Y-chart Jacobian-⊤ via the elementary dichotomies below, all
+  field_simp+linear_combination, with the ∂s-identity t-cancelled BEFORE field_simp;
+  `locally_isStandardSmooth_algebraMap_gradeZero_away` + primed 𝒜₀-wrapper via
+  RespectsIso.2 — Spec_iff endpoint is the bare algebraMap 𝒜₀→chart, matching
+  fp_algebraMap_gradeZero_away, NOT the e₀-composite; toSpecZero instance mirrors
+  lfp verbatim at P := @SmoothOfRelativeDimension 1; composite via (n+m) at 1+0.
+  Gotchas: RingHom.Locally is universe-uniform Type u; pin hstep's mk-ideal
+  (IsTwoSided-stuck); lives in section Points. ORIGINAL SCOPE NOTE: T-A3a proved the
   Z-chart Jacobian-⊤ only; the assembly needs all three charts. Elementary per-chart
   route fixed (NO homogeneous-Euler machinery): for the Y-chart, a singular point
   `(u,w)` has `w = 0 ⟹ u³ = 0 ∧ ∂W = 1 + a₁u − a₂u² = 0 ⟹ u = 0 ⟹ 1 = 0 ⊥`, and for
@@ -387,8 +395,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: GME pp. 114–115; KM 2.2.4; assembly = this project's lfp proof of record.
 
 ### [T-A3] Model smooth ⟺ Δ unit
-- **Status**: open (statement final; proof after T-A2) · **File**: WeierstrassModel.lean
-  · `projModel_smooth` · **Depends on**: T-A2 · **Parallel**: with T-A4 · **Type**: thm
+- **Status**: done (beastmode 2026-07-06T21:30Z — sub-tickets T-A3a/b/c all done;
+  `projModel_smooth` sorry-free, standard axioms) · **File**: WeierstrassModel.lean
+  · `projModel_smooth` · **Depends on**: T-A2 (done) · **Parallel**: with T-A4 · **Type**: thm
 - **Sketch**: Jacobian criterion chartwise; mathlib `IsStandardSmooth` presentation of
   the chart rings; Δ-unit ⟺ fibrewise nonsingular (mathlib `IsElliptic` ↔ `Δ` unit ✓).
 - **Sources**: [Loe] 3.3.3; [Sil] III.1.4(a). **Generality**: `CommRing R`.
