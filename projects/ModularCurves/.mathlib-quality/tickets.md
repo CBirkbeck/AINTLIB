@@ -418,11 +418,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.2.5 ⧗ · [Hida-GME]. **Generality**: `CommRing R`.
 
 ### [T-A5] Base change of elliptic curves (Prop fields)
-- **Status**: in_progress (beastmode 2026-07-06T22:30Z — smooth+proper DONE via
-  MorphismProperty.pullback_snd (SmoothOfRelativeDimension stability instance needs
-  explicit summoning); `fibres` remains: sub-tickets T-A5a (projModel base-change,
-  the real content) + T-A5b (fibre pasting) spawned with sketches) · **File**: EllipticCurve/Basic.lean · `EllipticCurve.baseChange`
-  (three Prop sorries) · **Depends on**: none · **Parallel**: yes · **Type**: lemma
+- **Status**: done (beastmode 2026-07-06T22:30Z → 2026-07-07T18:30Z — ALL three Prop
+  fields discharged: smooth+proper via MorphismProperty.pullback_snd
+  (SmoothOfRelativeDimension stability instance needs explicit summoning);
+  `fibres := E.fibres.baseChange g` via the new `FibrewiseElliptic.baseChange`
+  (Basic.lean) assembled from T-A5a + T-A5b. Axioms standard.) · **File**: EllipticCurve/Basic.lean · `EllipticCurve.baseChange`
+  · **Depends on**: none · **Parallel**: yes · **Type**: lemma
 - **Sketch**: `SmoothOfRelativeDimension`/`IsProper` base-change instances (mathlib,
   verify instance names); fibre condition: fibre of pullback ≅ fibre of original over
   the image point base-changed to the bigger residue field — use
@@ -597,12 +598,27 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 
 
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
-- **Status**: in_progress (beastmode 2026-07-07T05:30Z — zero-leg (a)+(b) DONE:
-  `projModelZero_preimage_yChart` (fromOfGlobalSections_preimage_basicOpen + eval
-  Y↦1; call with NAMED hn/hr — leading section-var slots) and `projModelZeroChart`
-  (+`_fac`, reassoc). NEXT: zero-leg (c) chart-level naturality square (cancel mono
-  awayι-Y after awayι_comp_map; elementwise Away.mk chase for the zero-chart hom),
-  then the paste assembly per PLAN v2 below, then discharge `fibres :=`.)
+- **Status**: done (beastmode 2026-07-07T05:30Z → 2026-07-07T18:30Z — COMPLETE.
+  Zero-leg: `projModelZero_preimage_yChart`, `projModelZeroChart`(+`_fac`),
+  `projModelZeroChart_comp_χ`, `zeroChartHom`(+`_mk`), glue
+  `spec_zeroChartHom_awayι` (stage 3 = `glue_pieceY`: toSpecΓ-insertion trick
+  `Spec.map ζ = toSpecΓ ≫ Spec.map (ofHom ζ ≫ ΓSpecIso.inv)` + morphismRestrict_ι +
+  basicOpenIsoSpecAway_hom_SpecMap + Iso.cancel_iso_hom_left + Spec.map-collapse +
+  IsLocalization.ringHom_ext/map_comp/Away.lift_comp — both sides away-lifts of
+  projModelZeroEval), `projModelZeroChart_eq_spec` (cancel_mono awayι),
+  `projModelZeroEval_baseChangeGradedHom` (eval₂_comp_left),
+  `projModelZero_baseChange` (elementwise Away.mk_surjective chase — NB mk_surjective
+  takes 𝒜 EXPLICIT and x must be type-ascribed out of the CommRingCat carrier).
+  Paste: `isPullback_projModelBaseChange` (of_iso_pullback from lift_isIso) +
+  `FibrewiseElliptic.baseChange` (Basic.lean — mathlib fibre-pasting engine
+  `isPullback_fiberToSpecResidueField_of_isPullback` transported by of_iso along e_s
+  [pullback.map MUST be type-ascribed to fiber-typed homs — ≫-elaboration does not
+  unfold Scheme.Hom.fiber]; u := hA.isoPullback ≪≫ hB.isoPullback.symm; zero-leg by
+  cancel_mono hB.isoPullback.hom + hom_ext with sectionFiberPoint-naturality `hnat`
+  consumed via reassoc_of% [naked rw ← Category.assoc breaks on lift-proof-args];
+  snd-residues closed by explicit `exact Category.id_comp _`/`pullback.lift_snd`
+  terms — simp chokes at instances-transparency after fiber-unfold]). Axioms
+  standard.)
 - **Zero-leg (c) STATE**: `projModelZero_baseChange` in-file, reduced (GREEN up to one
   sorry) to the affine CORE: `(projModelZeroChart (W.map alg) ≫
   Spec.map (awayCongr …).toCommRingCatIso.hom) ≫ Spec.map (ofHom (Away.map bcHom t₁))
