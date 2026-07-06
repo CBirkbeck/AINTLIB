@@ -204,6 +204,13 @@ noncomputable def vanishingLocus : S.IdealSheafData where
     submoduleVanishingIdeal Γ(S, U.1) Γ(W, (affinePreimage p U).1)
       ((E.ideal (affinePreimage p U)).restrictScalars Γ(S, U.1))
   map_ideal_basicOpen U f := by
+    letI := ((p.appLE U.1 (affinePreimage p U).1 le_rfl).hom).toAlgebra
+    letI := ((p.appLE (S.affineBasicOpen f).1 (affinePreimage p (S.affineBasicOpen f)).1
+      le_rfl).hom).toAlgebra
+    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le f).op).hom).toAlgebra
+    letI := ((W.presheaf.map (homOfLE
+      (show (affinePreimage p (S.affineBasicOpen f)).1 ≤ (affinePreimage p U).1 from
+        fun _ hx => S.basicOpen_le f hx)).op).hom).toAlgebra
     sorry
 
 end VanishingLocus
