@@ -43,6 +43,8 @@ Mathlib coverage was surveyed 2026-07-09 (see the per-box "mathlib" lines).
 - **Effort:** BOUNDED (the hard math is done in HasseWeil).
 
 ### BB-FLAT — `[N]` is flat / fibrewise-flatness (miracle flatness)  ·  consumer T-B4
+**(RECLASSIFIED MODERATE→MAJOR after 2026-07-09 survey: mathlib has NO `Module.depth`
+and no packaged local-flatness criterion — see the corrected note below.)**
 - **Statement (EGA IV 11.3.10 / AK-1 V.3.6):** `[N]` finite between regular schemes of
   equal dimension ⟹ flat (KM's own route); or the general fibrewise-flatness criterion.
 - **mathlib:** `RingTheory.Flat` basics + **`RingTheory/Regular/ProjectiveDimension.lean`**
@@ -60,8 +62,14 @@ Mathlib coverage was surveyed 2026-07-09 (see the per-box "mathlib" lines).
   via Auslander–Buchsbaum — check what `Regular/ProjectiveDimension` already gives),
   T-BB-FLAT-2 (miracle-flatness statement: finite + equidimensional + regular ⟹ flat),
   T-BB-FLAT-3 (apply to `[N]` over the universal base).
-- **Effort:** BOUNDED but non-trivial (Auslander–Buchsbaum is present; the miracle-flatness
-  wrapper + regularity of the universal base are the work). Upstream-candidate lemma.
+- **CORRECTION (2026-07-09 survey):** Auslander–Buchsbaum is NOT present — mathlib has
+  `projectiveDimension` but **no `Module.depth`** and no A-B theorem (`pd + depth = dim`),
+  and no general local-criterion-of-flatness for finite modules over noetherian local
+  rings. So BOTH routes need substantial NEW commutative-algebra infra (depth theory +
+  A-B, or `Tor₁(M, R/𝔪)=0 ⟹ flat`). `Module.Flat.of_free` exists, so the last step is
+  free; the gap is getting `Free`/`flat` from the finiteness+regularity data.
+- **Effort:** **MODERATE-to-MAJOR** — a real commutative-algebra development (depth + A-B,
+  OR the local flatness criterion). Upstream-candidate, but not a quick discharge.
 
 ### BB-DESC — torsor / fppf descent of levelled curves  ·  consumer T-E8/E10
 - **Statement:** (i) fppf covers are epimorphisms of schemes [**ALREADY DISCHARGED** this
@@ -141,12 +149,19 @@ their own workstreams (not blockers for the level-structure spine, which can con
 |-----|--------|-------------|------------------|
 | BB-QF | BOUNDED | HasseWeil import + fibre | T-BB-QF-1 |
 | BB-DEG | BOUNDED | HasseWeil (done over field) + fibre | T-BB-DEG-1 |
-| BB-FLAT | BOUNDED | Auslander–Buchsbaum (present) ⟹ miracle flatness | T-BB-FLAT-1 |
+| BB-FLAT | MODERATE-MAJOR | needs depth+A-B OR local flatness criterion (NEITHER in mathlib) | T-BB-FLAT-0 (build infra) |
 | BB-DESC | MODERATE | mathlib FlatDescent + `ω`-embedding | T-BB-DESC-0 |
 | BB-DIFF | MODERATE | relative `Ω¹` sheaf + group induction | T-BB-DIFF-0 |
 | BB-DELIGNE | MAJOR-INFRA | group-scheme theory + Deligne norm | T-SG / T-OT |
 | BB-COHBC | MAJOR-INFRA | coherent cohomology (coordinate w/ mathlib) | — |
 | BB-IRR | MAJOR-INFRA | KM Ch.10 or analytic | — (latest phase) |
+
+**GATING CORRECTION (2026-07-09 survey):** BB-QF and BB-DEG are bounded on the *math*
+(HasseWeil has the field-level degree) but **gated on T-B6** (the E[N]-geometric-fibre
+comparison, stream-B) to transport to scheme fibres. BB-FLAT needs new comm-alg infra
+(above). So NO black box is fully dischargeable in-project *today* without either stream-B
+(T-B6) landing or building mathlib infrastructure. The plan below stands; the *order* is:
+land T-B6 → BB-DEG/BB-QF fall out → then the infra boxes.
 
 **Recommendation:** the five Tier-1/moderate boxes are genuine in-project work and should
 be ticketed now (BB-QF, BB-DEG, BB-FLAT are the highest-leverage — they retire the T-B4

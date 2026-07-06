@@ -1,2 +1,1 @@
-FOCUS: AG-GG assembly — PreGaloisCategory instance for (FiniteEtale k)op: op-duality instances + SingleObj-op shape equivalence
-FOCUS-Q: (beastmode-Q) T-Q5a+b DONE. REMAINING: T-Q5c glue data (pieces Spec Γ(V_i)^G over stable-affine cover) + T-Q5d assembly; then T-Q6/Q7
+FOCUS: AG-GG-2 — FiberFunctor: read G4-G6 axioms, define the Hom(-, SeparableClosure k) functor to FintypeCat

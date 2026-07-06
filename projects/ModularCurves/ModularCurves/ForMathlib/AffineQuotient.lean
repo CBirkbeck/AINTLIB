@@ -564,6 +564,37 @@ theorem exists_mem_basicOpen_subset_of_stable [Finite G]
     exact hy
   -- (membership dictionary: `y ∈ D((a : B)) ↔ π y ∈ D(a)` is definitional)
 
+variable (G B) in
+/-- The invariants morphism is a topological quotient map (it is a closed
+surjection). -/
+theorem invariantsπ_isQuotientMap [Finite G] :
+    Topology.IsQuotientMap ⇑(invariantsπ G B R).base := by
+  have hclosed : IsClosedMap ⇑(invariantsπ G B R) := by
+    have hint : (algebraMap (FixedPoints.subalgebra R B G) B).IsIntegral :=
+      Algebra.isIntegral_def.mp
+        (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
+    exact PrimeSpectrum.isClosedMap_comap_of_isIntegral _ hint
+  exact hclosed.isQuotientMap (invariantsπ G B R).base.hom.continuous
+    (invariantsπ_surjective G B R)
+
+variable (G B) in
+/-- Images of `G`-stable opens under the invariants morphism are open. -/
+theorem isOpen_image_invariantsπ_of_stable [Finite G]
+    {U : Set (Spec (CommRingCat.of B))} (hU : IsOpen U)
+    (hstable : ∀ (g : G) (x : Spec (CommRingCat.of B)), x ∈ U → specSMul g x ∈ U) :
+    IsOpen (⇑(invariantsπ G B R).base '' U) := by
+  have hsat : ⇑(invariantsπ G B R).base ⁻¹' (⇑(invariantsπ G B R).base '' U) = U := by
+    ext y
+    constructor
+    · rintro ⟨x, hxU, hxy⟩
+      obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G B R x y).mp hxy
+      rw [← hg]
+      exact hstable g x hxU
+    · intro hy
+      exact ⟨y, hy, rfl⟩
+  rw [← (invariantsπ_isQuotientMap G B R).isOpen_preimage, hsat]
+  exact hU
+
 end UniversalProperty
 
 end AlgebraicGeometry
