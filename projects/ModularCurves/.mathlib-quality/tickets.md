@@ -3770,3 +3770,34 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   block only T-W-cmp + Hodge/modular-forms + compactification, never the open curves.
 - **T-E5 / T-E8** (representability ⟺ rel-rep+rigid; stack packaging) — sequence AFTER the
   Stream-W layer (T-W1–T-W6); T-E8 stack packaging can consume `QuotientStack` (T-W3).
+
+### H-lane progress log (beastmode-H, appended 2026-07-06T22:55Z)
+- **[T-H7] DONE** (2026-07-06T22:50Z; claimed 16:55Z). `gammaFullNaive_not_rigid_of_le_two`
+  PROVED, statement byte-identical to skeleton. Witness chain: T-H7d geometric point
+  (AlgebraicClosure of a residue field; IsUnit via Spec.preimage) → pullbackAlong →
+  T-H7b level point (N=1 zero pair; N=2 = T-B6 basis + Klein-four exhaustion by
+  `decide` in ZMod 2 × ZMod 2 coordinates) → T-H7a negIso ([m]≫[n]=[mn] via
+  GrpObj.comp_zpow; pullSection_negHom = negation) → T-H7c [-1]≠𝟙 (odd fibre
+  torsion M ∈ {3,5}, ringChar dvd-arithmetic char-dodge) → assembly.
+  **Axioms**: helpers `section_ext`/`pull_injective`/`exists_geometricPoint` + all of
+  T-H7a CLEAN (propext/Classical.choice/Quot.sound). `exists_isNaiveFullLevel_of_le_two`
+  + the headline carry `sorryAx` through exactly two REGISTERED gates: (i) the T-B6
+  KM 2.3.1 boxes (BB-QF/FLAT/DEG/DIFF via `torsion_geometricFibre_rank_two`), (ii) the
+  `gammaFullNaiveProblem.map` membership sorry (T-E4a/A6.δ gate; v8 re-routes it via
+  T-W7). Done-modulo-registered-boxes, stream-B convention.
+- **Sub-tickets**: T-H7a DONE (10 decls, axiom-clean) · T-H7b DONE · T-H7b-i DONE
+  (REVISED at contact: epi-route replaced by closed-point separation via mathlib
+  `ext_of_apply_closedPoint_eq` — `section_ext` + `pull_injective`, both clean) ·
+  T-H7c DONE · T-H7d DONE.
+- **Cross-lane repair** (flagged): `TorsionFibre.lean` was an ORPHAN module broken by
+  the A-lane's `mulByHom_baseChange` addition to GroupLaw.lean (duplicate decl —
+  T-B6a's copy was identical to GroupLaw's `mulByHom_baseChange_fst`). Repair: deleted
+  the duplicate, repointed 2 uses to `mulByHom_baseChange_fst`. B-lane heads-up left
+  here; GammaH.lean now imports TorsionFibre (first importer).
+- **Board sync notes**: T-H2 + the `gammaHNaiveProblem` functor laws were done
+  concurrently by another worker (landed 495b4030/6d851016 + earlier) — v6 execution
+  order updated accordingly: NEXT = T-H1 (`gammaHNaive_bot`), then T-H3 remainder
+  (orbit-compat; `map`-membership stays gated per v8 → T-W7), then T-H5.
+- **Cleanup**: headline decl /cleanup single-decl at close; helper-decl golf batched
+  into [CLEANUP-14] (GammaH.lean file cleanup — its T-H2/T-H3 preconditions are now
+  largely met; T-H5 outstanding).
