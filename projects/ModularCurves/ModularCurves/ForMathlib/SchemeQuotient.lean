@@ -885,6 +885,26 @@ theorem hom_quotientπ (g : G) :
       resLE_localQuotientπ_assoc σ (hVs x') (hVa x') g]
   exact (atlasCover V hVmem).hom_ext _ _ fun x => key x
 
+/-- **Uniqueness of descent along the quotient projection** (T-Q5d contract,
+part 2). -/
+theorem quotientπ_hom_ext {Y : Scheme.{u}} (h₁ h₂ : σ.quotient V hVs hVa ⟶ Y)
+    (H : σ.quotientπ V hVs hVa hVmem ≫ h₁ = σ.quotientπ V hVs hVa hVmem ≫ h₂) :
+    h₁ = h₂ := by
+  have key : ∀ x : X, (quotientGlueData σ V hVs hVa).ι x ≫ h₁ =
+      (quotientGlueData σ V hVs hVa).ι x ≫ h₂ := by
+    intro x
+    letI := σ.gammaMulSemiringAction (hVs x)
+    have hπ' : invariantsπ G ↑Γ(X, V x) ℤ =
+        (hVa x).isoSpec.inv ≫ σ.localQuotientπ (hVs x) (hVa x) := by
+      rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+    refine invariantsπ_hom_ext G ↑Γ(X, V x) ℤ _ _ ?_
+    rw [hπ', Category.assoc, Category.assoc]
+    congr 1
+    rw [← Category.assoc, ← opensι_quotientπ σ V hVs hVa hVmem x,
+      ← Category.assoc, ← opensι_quotientπ σ V hVs hVa hVmem x,
+      Category.assoc, Category.assoc, H]
+  exact (quotientGlueData σ V hVs hVa).openCover.hom_ext _ _ fun x => key x
+
 end Glue
 
 end OpenImmersion
