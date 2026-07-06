@@ -353,6 +353,75 @@ lemma quotient_irrelevant_le_span_mk_X (W : WeierstrassCurve R) :
     rfl
   exact h3 ▸ h2 h1
 
+/-- Finite presentation of the canonical map from the degree-zero part into each
+chart of the Weierstrass model. -/
+theorem fp_algebraMap_gradeZero_away (W : WeierstrassCurve R) (i : Fin 3) :
+    RingHom.FinitePresentation (algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))) := by
+  have hEq : (algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)) =
+      ((HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+          (MvPolynomial.X i)).comp
+        ((MvPolynomial.chartRingEquiv R i).symm :
+          MvPolynomial {j : Fin 3 // j ≠ i} R →+*
+            Away (MvPolynomial.homogeneousSubmodule (Fin 3) R)
+              (MvPolynomial.X i))).comp
+        (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R)) := by
+    refine RingHom.ext fun r => ?_
+    have h1 : ((MvPolynomial.chartRingEquiv R i).symm :
+        MvPolynomial {j : Fin 3 // j ≠ i} R →+* _)
+          (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R) r) =
+        MvPolynomial.awayConst R i r := by
+      show MvPolynomial.homogenizeAt R i
+        (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R) r) = _
+      rw [show algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R) r =
+        MvPolynomial.C r from rfl, MvPolynomial.homogenizeAt, MvPolynomial.eval₂Hom_C]
+      rfl
+    apply val_injective
+    have hR : (HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+        (MvPolynomial.X i) (MvPolynomial.awayConst R i r)).val =
+        Localization.mk ((quotientGradingHom (projIdeal W)) (MvPolynomial.C r)) 1 := by
+      rw [MvPolynomial.awayConst, Away.map_mk, Away.val_mk]
+      exact congrArg _ (Subtype.ext (pow_zero _))
+    simp only [RingHom.comp_apply]
+    rw [h1, hR, HomogeneousLocalization.algebraMap_eq]
+    show Localization.mk ((gradeZeroRingEquiv W r : ↥(quotientGrading (projIdeal W) 0)) :
+      projCoordRing W) 1 = _
+    have hval : ((gradeZeroRingEquiv W r : ↥(quotientGrading (projIdeal W) 0)) :
+        projCoordRing W) = Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r) := by
+      show algebraMap R (projCoordRing W) r = _
+      rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+        RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+    rw [hval]
+    rfl
+  have hCfp : RingHom.FinitePresentation
+      (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R)) :=
+    RingHom.finitePresentation_algebraMap.mpr inferInstance
+  have hfg : RingHom.FinitePresentation ((algebraMap
+      (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) := by
+    rw [hEq]
+    exact RingHom.FinitePresentation.comp (finitePresentation_awayQuotient W i) hCfp
+  have hsymm : RingHom.FinitePresentation
+      (((gradeZeroRingEquiv W).symm : ↥(quotientGrading (projIdeal W) 0) →+* R)) :=
+    RingHom.FinitePresentation.of_surjective _ (gradeZeroRingEquiv W).symm.surjective
+      (by rw [RingHom.ker_coe_equiv]; exact Submodule.fg_bot)
+  have hfinal : (algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))) =
+      ((algebraMap _ _).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))).comp
+      ((gradeZeroRingEquiv W).symm : ↥(quotientGrading (projIdeal W) 0) →+* R) := by
+    refine RingHom.ext fun x => ?_
+    simp only [RingHom.comp_apply, RingHom.coe_coe, RingEquiv.apply_symm_apply]
+  rw [hfinal]
+  exact RingHom.FinitePresentation.comp hfg hsymm
+
 end Lfp
 
 end ProjModel
