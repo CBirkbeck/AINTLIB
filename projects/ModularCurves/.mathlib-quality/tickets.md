@@ -196,7 +196,29 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     GradedQuotient setting), ℕ-indexed — fine for all consumers here.
 
 ### [T-A2e] Elliptic points clause via the ℙ² embedding (sub-ticket of T-A2)
-- **Status**: open (after T-A2d) · **File**: WeierstrassModel.lean · **Parent**: T-A2
+- **Status**: done (beastmode, 2026-07-06T09:00Z → 2026-07-06T15:30Z — `projModel_points`
+  PROVED sorry-free, axioms standard. Ladder as built (all in WeierstrassModel.lean
+  section Points): `specPoint_factors_through_chart` (K local + the D₊(mk Xᵢ) cover);
+  `chartQuotientEquiv`/`chartCoordEquiv`(+`_mk`, `_mk_C`, `_mk_X`) — chart ring =
+  R[u,v]/(dehomogenised cubic), forward-quotientEquiv orientation so the mk-computation
+  is a rewrite chain; `chartSolutionsEquiv` (R-compatible chart homs = cubic solutions;
+  factored ringHomPrecompEquiv ∘ quotient-level to avoid whnf blowups; engine =
+  `MvPolynomial.aeval_unique` + `Ideal.Quotient.lift`); `awayι_projModelπ` +
+  `chartPointOfHom`(+`_bijective` ⟹ `chartHomEquiv` via Equiv.ofBijective — surjectivity
+  eliminates ∃ in Prop, no choose-gymnastics); `chartPointOfHom_factors_iff` (in chart j
+  ⟺ j-th coordinate ≠ 0; `Proj.awayι_preimage_basicOpen` + `Away.isLocalizationElem` =
+  Xⱼ/Xᵢ + primes of a field are ⊥ — instance-independent, the two Unique-instances on
+  Spec K vs PrimeSpectrum K do NOT share defaults syntactically); chart evaluations
+  `aeval_dehomog_{two,one,zero}` (X-chart has constant term −1 ⟹ always meets Z-chart);
+  `infPoint` + `eq_infPoint_of_not_inZ` (Y-chart, U³=0 ⟹ U=0); assembly =
+  `Equiv.sumCompl` over Z-chart membership + `zSolutionsToAffine` +
+  `affinePointSplit` (`equation_iff_nonsingular`, base-change `IsElliptic` bridged
+  through `W.map`); POINTEDNESS by post-composing `Equiv.swap (e₀ base) 0` — zero
+  base-point chart computation needed. Gotchas of record: `projModel` made
+  @[reducible] to dissolve Proj/projModel motive mismatches;
+  `mk_X_mem_quotientGrading_one` restated at the `quotientGradingHom`-spelling;
+  fin_cases leaves `(fun i ↦ i) ⟨1,⋯⟩` — use an equation-disjunction + rcases rfl.)
+  · **File**: WeierstrassModel.lean · **Parent**: T-A2
 - **Depends on**: T-A2d (chart iso + closed immersion) · **Type**: theorem
 - **Statement**: the `points` field of `projModel_isWeierstrassModel`: for elliptic `W`
   and every `R`-algebra field `K`, pointed `SpecPoints (projModel W) (projModelπ W) K ≃
@@ -213,7 +235,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: KM 2.2/Loeffler §3.3 (display); Silverman III.3; standard.
 
 ### [T-A2] Construct the projective Weierstrass model (DS1)
-- **Status**: in_progress (beastmode; **DATA HALF DONE 2026-07-06T03:30Z — DS1 is no
+- **Status**: done (beastmode, 2026-07-06T15:30Z — **`projModel_isWeierstrassModel`
+  sorry-free**: isProper + lfp + section + elliptic pointed points-clause all PROVED
+  (T-A2a/T-A2d/T-A2e sub-tickets done); axioms propext/Classical.choice/Quot.sound;
+  no maxHeartbeats. /cleanup: inline pass only (privates marked, docstrings on new
+  publics, staged-rewrite proofs); the FULL Mode-B /cleanup of the grown files
+  (WeierstrassModel.lean ~1160 lines, ProjectiveSpaceChart.lean, GradedQuotient.lean,
+  ProjClosedImmersion.lean) is handed to the cleanup lane on merge to main — file-size
+  split candidate: section Points → EllipticCurve/ModelPoints.lean.) (previously:
+  **DATA HALF DONE 2026-07-06T03:30Z — DS1 is no
   longer a data-sorry**: `projModel W := Proj (quotientGrading (projIdeal W))`,
   `projModelπ := toSpecZero ≫ Spec.map algebraMapGradeZero`, `projModelZero :=
   fromOfGlobalSections` at `[0:1:0]`, plus PROVED `projModelZero_projModelπ :
