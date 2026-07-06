@@ -184,12 +184,31 @@ sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal
 pulled-back closed immersion), as a divisor in the base-changed curve (structure
 morphism `pullback.snd π t`). Finiteness/flatness/finite presentation are base-change
 stability, ticket `T-D12`; formation is functorial (KM 1.1). -/
+private lemma baseChange_prop (P : MorphismProperty Scheme.{u})
+    [P.IsStableUnderBaseChange] [P.RespectsIso] (D : RelEffCartierDiv π)
+    {T : Scheme.{u}} (t : T ⟶ S) (hD : P (D.ideal.subschemeι ≫ π)) :
+    P ((pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker.subschemeι ≫
+      pullback.snd π t) := by
+  haveI : IsClosedImmersion (pullback.snd D.ideal.subschemeι (pullback.fst π t)) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  have hι : (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker.subschemeι =
+      inv (pullback.snd D.ideal.subschemeι (pullback.fst π t)).toImage ≫
+        pullback.snd D.ideal.subschemeι (pullback.fst π t) := by
+    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+  have hsq := (IsPullback.of_hasPullback D.ideal.subschemeι
+    (pullback.fst π t)).paste_vert (IsPullback.of_hasPullback π t)
+  have hP : P (pullback.snd D.ideal.subschemeι (pullback.fst π t) ≫
+      pullback.snd π t) :=
+    MorphismProperty.of_isPullback hsq hD
+  rw [hι, Category.assoc]
+  exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hP
+
 noncomputable def baseChange (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
     RelEffCartierDiv (pullback.snd π t) where
   ideal := (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker
-  finite := by sorry
-  flat := by sorry
-  lfp := by sorry
+  finite := baseChange_prop @IsFinite D t D.finite
+  flat := baseChange_prop @Flat D t D.flat
+  lfp := baseChange_prop @LocallyOfFinitePresentation D t D.lfp
 
 end RelEffCartierDiv
 

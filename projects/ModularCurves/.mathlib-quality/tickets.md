@@ -1525,6 +1525,19 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   (in hand).
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T14:35Z · the three sorried Prop fields of
+    `RelEffCartierDiv.baseChange` (CartierDivisor.lean) — finite/flat/lfp via:
+    ker-of-closed-immersion dictionary (T-B3a precedent:
+    `IsClosedImmersion.lift`/`isIso_lift`/`lift_fac` against `ker_subschemeι` —
+    the base-changed `pullback.snd D.ι (fst π t)` is a closed immersion by
+    stability), then pasting iso to `pullback.snd (D.ι ≫ π) t` and
+    `MorphismProperty` base-change-stability + RespectsIso transport of
+    D.finite/flat/lfp (pattern: T-B7's `MorphismProperty.of_isPullback`).
+    Functoriality/composition laws (T-D20) NOT in this claim. Coordination
+    note: claimed partly to unblock beastmode-A's T-D6 (1)⟹(2) which flagged
+    the T-D12-family — A, if you need the base-change compat lemmas beyond the
+    three Props, ping via board note; I'll prioritise.
 - **[T-D13]** `sectionVanishingIdeal_spec` (zero locus in a finite locally free
   module). Depends: none. Parallel: yes. PROVABLE-NOW candidate.
   - **Status**: done (beastmode-D2, 2026-07-06T11:05Z → 2026-07-06T12:25Z) ·
@@ -1789,8 +1802,24 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
   lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
-  - **[T-D32] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T14:15Z · NEW ForMathlib/BijectiveResidueField.lean.
+  - **[T-D32] Status**: done (beastmode-D2, 2026-07-06T14:15Z → 2026-07-06T14:30Z) ·
+    ForMathlib/BijectiveResidueField.lean sorry-free, standard axioms ×3, module
+    green (landed via sibling sweep 6b061f6b; verified at HEAD). All three
+    statements delivered exactly as claimed below; the global assembly's
+    IsLocalizedModule-instance came from `isLocalizedModule_iff_isBaseChange` +
+    `TensorProduct.isBaseChange`; localized-map = baseChange by
+    `IsLocalizedModule.ext` + `map_comp`; fibre comparison = cancelBaseChange
+    square by 2-level tensor induction (`simp [eM, eN]` closes the pure-tensor
+    case). GOTCHA: `bijective_of_isLocalized_maximal`'s Rₚ-tower binders are
+    ELIDED from its signature (explicit args = Mₚ f Nₚ g F H; the localized
+    condition is spelled `IsLocalizedModule.AtPrime`). Post-proof cleanup:
+    DEFERRED (owner pause). WAVE 0 COMPLETE. DEDUP NOTE for CLEANUP-5/cleanup
+    lane: beastmode-A's T-D2 introduced `eq_of_forall_field_hom_eq` (in their
+    NormBaseChange/CartierDivisor work) duplicating my T-D31
+    `IsReduced.eq_of_forall_ringHom_field` (ForMathlib/ReducedSeparation.lean,
+    committed earlier same day) — consolidate to one, prefer the ForMathlib
+    upstream-candidate spelling. ORIGINAL CLAIM (audit): NEW
+    ForMathlib/BijectiveResidueField.lean.
     Route of record (NOT the det route — mathlib's det is endo-only; the
     Nakayama toolkit in RingTheory/LocalRing/Module.lean is the engine). Born
     split: (a) `IsLocalRing.surjective_of_surjective_lTensor_residueField`

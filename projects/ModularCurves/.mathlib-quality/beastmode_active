@@ -1,1 +1,1 @@
-FOCUS: T-B6c nIsInvertible_spec_iff — quick leaf, then T-B6a mulByHom_baseChange main attack
+FOCUS: T-B6b torsionBaseChangeHom + torsion_baseChange_isPullback (UP argument)
