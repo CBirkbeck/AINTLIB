@@ -251,4 +251,19 @@ theorem comap_mul (I J : Y.IdealSheafData) (f : X ⟶ Y) :
       ideal_mul, Pi.mul_apply, Ideal.map_mul, Ideal.map_mul, Ideal.map_mul,
       Ideal.map_mul]
 
+/-- Scheme-theoretic preimage as a monoid homomorphism on ideal sheaves. -/
+noncomputable def comapMonoidHom (f : X ⟶ Y) :
+    Y.IdealSheafData →* X.IdealSheafData where
+  toFun K := K.comap f
+  map_one' := by rw [one_eq_top, comap_top, one_eq_top]
+  map_mul' I J := comap_mul I J f
+
+@[simp] lemma comapMonoidHom_apply (f : X ⟶ Y) (K : Y.IdealSheafData) :
+    comapMonoidHom f K = K.comap f := rfl
+
+/-- The scheme-theoretic preimage of a finite product of ideal sheaves. -/
+lemma comap_prod {ι : Type*} (s : Finset ι) (K : ι → Y.IdealSheafData) (f : X ⟶ Y) :
+    (∏ i ∈ s, K i).comap f = ∏ i ∈ s, (K i).comap f :=
+  map_prod (comapMonoidHom f) K s
+
 end AlgebraicGeometry.Scheme.IdealSheafData
