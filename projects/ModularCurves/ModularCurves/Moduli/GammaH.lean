@@ -391,6 +391,80 @@ theorem gammaHNaive_representable_of_rigid (N : ℕ) [NeZero N]
       ∀ X : EllObj R, Nonempty ((gammaHNaiveProblem R N H).RepresentableBy X) →
         (Smooth X.structMap ∧ IsAffineHom X.structMap) := by sorry
 
+/-! ### T-H7 helpers (T-H7a–T-H7d): the negation automorphism and its witnesses
+
+Machinery for `gammaFullNaive_not_rigid_of_le_two`: multiplication morphisms compose
+(`[m] ≫ [n] = [m·n]`, convolution powers of `𝟙` via `GrpObj.comp_zpow`); `[-1]`
+packages as an `Ell/R`-automorphism over the identity base; section pullback along it
+is negation; `[-1] ≠ 𝟙` on any curve with a geometric point (odd fibre torsion,
+T-B6); and naive full level structures exist over an algebraically closed base for
+`N ≤ 2`. Helper home: this file (H-lane owned); `/cleanup` may relocate the
+`EllipticCurve`-level lemmas next to `mulBy` later. -/
+
+/-- **(T-H7a)** Multiplication morphisms compose multiplicatively:
+`[m] ≫ [n] = [m·n]` (both are convolution powers of the identity). -/
+theorem EllipticCurve.mulBy_comp_mulBy (E : EllipticCurve S) (m n : ℤ) :
+    E.mulBy m ≫ E.mulBy n = E.mulBy (m * n) := by sorry
+
+/-- **(T-H7a)** `[1]` is the identity of `E.asOver`. -/
+theorem EllipticCurve.mulBy_one (E : EllipticCurve S) : E.mulBy 1 = 𝟙 E.asOver := by
+  sorry
+
+/-- **(T-H7a)** Scheme-level composition law for the multiplication morphisms. -/
+theorem EllipticCurve.mulByHom_comp_mulByHom (E : EllipticCurve S) (m n : ℤ) :
+    E.mulByHom m ≫ E.mulByHom n = E.mulByHom (m * n) := by sorry
+
+/-- **(T-H7a)** Scheme-level: `[1] = 𝟙`. -/
+theorem EllipticCurve.mulByHom_one (E : EllipticCurve S) :
+    E.mulByHom 1 = 𝟙 E.E := by sorry
+
+/-- **(T-H7a)** `[n]` is pointed: it carries the zero section to the zero section. -/
+theorem EllipticCurve.zero_comp_mulByHom (E : EllipticCurve S) (n : ℤ) :
+    E.zero ≫ E.mulByHom n = E.zero := by sorry
+
+/-- **(T-H7a)** Negation `[-1]` as an `Ell/R`-endomorphism over the identity of the
+base: cartesian because `[-1]` is a self-inverse isomorphism. -/
+noncomputable def EllObj.negHom (X : EllObj R) : X ⟶ X where
+  baseHom := 𝟙 X.base
+  base_w := Category.id_comp _
+  top := X.curve.mulByHom (-1)
+  isPullback := by sorry
+  zero_w := by sorry
+
+/-- **(T-H7a)** `[-1]` as an automorphism of `X` in `Ell/R` (self-inverse). -/
+noncomputable def EllObj.negIso (X : EllObj R) : X ≅ X where
+  hom := EllObj.negHom R X
+  inv := EllObj.negHom R X
+  hom_inv_id := by sorry
+  inv_hom_id := by sorry
+
+/-- **(T-H7a, the fixity engine)** Pulling a section back along `[-1]` is negation. -/
+theorem EllObj.pullSection_negHom (X : EllObj R) (P : X.curve.Section) :
+    EllHom.pullSection R (EllObj.negHom R X) P = -P := by sorry
+
+/-- **(T-H7c)** Over a base with a geometric point, `[-1] ≠ 𝟙`: the geometric fibre
+has a nonzero point of odd order `M ∈ {3,5}` (T-B6), while `[-1] = 𝟙` forces every
+point to be `2`-torsion. -/
+theorem EllipticCurve.mulByHom_neg_one_ne_id (E : EllipticCurve S) (k : Type u)
+    [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
+    E.mulByHom (-1) ≠ 𝟙 E.E := by sorry
+
+/-- **(T-H7b)** Naive full level-`N` structures exist over an algebraically closed
+base when `N ≤ 2` and `N` is invertible: for `N = 1` the zero pair works (the killing
+clause forces it); for `N = 2` a basis of `E[2]` from the geometric-fibre structure
+(T-B6) does. -/
+theorem EllipticCurve.exists_isNaiveFullLevel_of_le_two (k : Type u) [Field k]
+    [IsAlgClosed k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ)
+    [NeZero N] (hN : N ≤ 2) (hk : (N : k) ≠ 0) :
+    ∃ P Q : E.Section, E.IsNaiveFullLevel N P Q := by sorry
+
+/-- **(T-H7d)** A nonempty `R`-scheme base has a geometric point in which every
+`R`-invertible `N` stays invertible: take the algebraic closure of a residue field. -/
+theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
+    (N : ℕ) (hinv : IsUnit ((N : ℕ) : R)) :
+    ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+      (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by sorry
+
 /-- **(T-H7, the honest stack statement at small `N`)** For `N ≤ 2` the full-level
 problem is NOT rigid — `[-1]` is a nontrivial automorphism acting trivially on all
 level data (on `E[2]`, `−P = P`) — so no fine scheme exists and the object of record
