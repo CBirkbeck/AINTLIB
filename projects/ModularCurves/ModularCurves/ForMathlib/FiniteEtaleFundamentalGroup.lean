@@ -377,6 +377,18 @@ noncomputable def finiteEtaleEquivContAction :
         (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k))
         (SeparableClosure k ≃ₐ[k] SeparableClosure k)))
 
+/-- The fiber of the finite étale algebra corresponding to a continuous Galois set
+recovers the set: the counit of the Galois correspondence, at the level of underlying
+finite sets. -/
+noncomputable def pointsEquivOfContAction
+    (X : ContAction FintypeCat.{u} (SeparableClosure k ≃ₐ[k] SeparableClosure k)) :
+    ((CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj
+      ((finiteEtaleEquivContAction k).inverse.obj X) : Type u) ≃ (X.obj.V : Type u) :=
+  FintypeCat.equivEquivIso.symm
+    ((CategoryTheory.forget₂ (ContAction FintypeCat.{u}
+        (SeparableClosure k ≃ₐ[k] SeparableClosure k)) FintypeCat.{u}).mapIso
+      ((finiteEtaleEquivContAction k).counitIso.app X))
+
 end Correspondence
 
 end FiniteEtaleGalois
