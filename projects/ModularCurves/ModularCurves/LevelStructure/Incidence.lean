@@ -66,19 +66,12 @@ tautology (`Ideal.span_le` unfolds it to itself) that a worker could "discharge"
 without producing the load-bearing content; this basis form is the real lemma. -/
 theorem sectionVanishingIdeal_eq_span_coord {ι : Type u} (b : Module.Basis ι R M) (σ : M) :
     sectionVanishingIdeal R M σ = Ideal.span (Set.range fun i => b.coord i σ) := by
-  unfold sectionVanishingIdeal
-  refine le_antisymm (Ideal.span_le.2 ?_) (Ideal.span_le.2 ?_)
-  · rintro _ ⟨φ, rfl⟩
-    have h1 : φ σ = ∑ i ∈ (b.repr σ).support, b.repr σ i * φ (b i) := by
-      conv_lhs => rw [← b.linearCombination_repr σ]
-      rw [Finsupp.linearCombination_apply, Finsupp.sum, map_sum]
-      simp only [map_smul, smul_eq_mul]
-    show φ σ ∈ _
-    rw [h1]
-    exact sum_mem fun i _ =>
-      Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨i, rfl⟩)
-  · rintro _ ⟨i, rfl⟩
-    exact Ideal.subset_span ⟨b.coord i, rfl⟩
+  refine Submodule.span_eq_span (Set.range_subset_iff.2 fun φ => ?_)
+    (Set.range_subset_iff.2 fun i => Ideal.subset_span ⟨b.coord i, rfl⟩)
+  have h : φ σ = ∑ i ∈ (b.repr σ).support, b.repr σ i * φ (b i) := by
+    conv_lhs => rw [← b.linearCombination_repr σ]
+    simp only [Finsupp.linearCombination_apply, Finsupp.sum, map_sum, map_smul, smul_eq_mul]
+  exact h ▸ sum_mem fun i _ => Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨i, rfl⟩)
 
 end ZeroLocus
 

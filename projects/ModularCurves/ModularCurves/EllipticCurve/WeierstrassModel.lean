@@ -2518,6 +2518,40 @@ lemma zeroChartHom_mk (W : WeierstrassCurve R) {i : ℕ}
     rw [one_mul])]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The `Spec` of the chart evaluation composed with the chart inclusion is the
+section at infinity (the glue step of the zero-leg). -/
+lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
+    Spec.map (CommRingCat.ofHom (zeroChartHom W)) ≫
+      Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos = projModelZero W := by
+  have hone : ((Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom.comp
+      (projModelZeroEval W)) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 1)) = 1 := by
+    rw [RingHom.comp_apply]
+    rw [show (projModelZeroEval W) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 1)) = 1 from by
+      show (projModelZeroEval W) (Ideal.Quotient.mk _ (MvPolynomial.X 1)) = 1
+      rw [projModelZeroEval_mk]
+      simp]
+    rw [map_one]
+  have htop : (Spec (.of R)).basicOpen
+      (((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) = ⊤ := by
+    rw [hone]
+    simp
+  haveI : IsIso ((Spec (.of R)).basicOpen
+      (((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).ι := by
+    rw [htop]
+    exact ⟨(Spec (.of R)).topIso.inv, (Spec (.of R)).topIso.hom_inv_id,
+      (Spec (.of R)).topIso.inv_hom_id⟩
+  rw [← cancel_epi (((Spec (.of R)).basicOpen
+      (((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).ι)]
+  sorry
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
