@@ -777,6 +777,121 @@ noncomputable def chartHomEquiv (W : WeierstrassCurve R) (i : Fin 3)
         algebraMap R K } :=
   (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm
 
+/-- The chart coordinate `Xⱼ/Xᵢ` is mathlib's localization element for the pair
+`(Xᵢ, Xⱼ)`. -/
+lemma chartCoordEquiv_mk_X (W : WeierstrassCurve R) (i : Fin 3)
+    (j : {j : Fin 3 // j ≠ i}) :
+    chartCoordEquiv W i (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+        (MvPolynomial.X j)) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W j.1) := by
+  rw [chartCoordEquiv_mk]
+  rw [show MvPolynomial.homogenizeAt R i (MvPolynomial.X j) =
+    MvPolynomial.awayVar R i j from MvPolynomial.eval₂Hom_X' _ _ _]
+  apply val_injective
+  rw [MvPolynomial.awayVar, Away.map_mk, Away.val_mk, Away.val_mk]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  exact ⟨1, by ring⟩
+
+/-- A `K`-point of the model sitting in chart `i` lies in chart `j` precisely when
+its `j`-th coordinate is nonzero. -/
+lemma chartPointOfHom_factors_iff (W : WeierstrassCurve R) (i j : Fin 3)
+    {K : Type u} [Field K] [Algebra R K]
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K }) :
+    (∃ h' : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))),
+      h' ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W j) one_pos = (chartPointOfHom W i φ).1.1) ↔
+      φ.1 (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W j)) ≠ 0 := by
+  have hbase : (chartPointOfHom W i φ).1.1 default =
+      (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
+        (mk_X_mem_quotientGrading_one W i) one_pos)
+        ((Spec.map (CommRingCat.ofHom φ.1)) default) := by
+    show (Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
+      (mk_X_mem_quotientGrading_one W i) one_pos) default = _
+    exact Scheme.Hom.comp_apply _ _ _
+  have hmem : (chartPointOfHom W i φ).1.1 default ∈
+      (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) :
+        Set (Proj (quotientGrading (projIdeal W)))) ↔
+      φ.1 (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W j)) ≠ 0 := by
+    rw [hbase]
+    show (Spec.map (CommRingCat.ofHom φ.1)) default ∈
+      (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
+        (mk_X_mem_quotientGrading_one W i) one_pos ⁻¹ᵁ
+        Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))) ↔ _
+    rw [Proj.awayι_preimage_basicOpen (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W i) one_pos
+      (mk_X_mem_quotientGrading_one W j) one_pos]
+    have hpt := Spec.map_apply (CommRingCat.ofHom φ.1) default
+    rw [CommRingCat.hom_ofHom] at hpt
+    rw [hpt]
+    have hprime : ∀ x : PrimeSpectrum K, x.asIdeal = ⊥ := fun x =>
+      (IsSimpleOrder.eq_bot_or_eq_top x.asIdeal).resolve_right x.2.ne_top
+    constructor
+    · intro hm h0
+      refine (PrimeSpectrum.mem_basicOpen _ _).mp hm ?_
+      show _ ∈ (PrimeSpectrum.comap φ.1 _).asIdeal
+      rw [PrimeSpectrum.comap_asIdeal, hprime, Ideal.mem_comap, Ideal.mem_bot]
+      exact h0
+    · intro hne
+      refine (PrimeSpectrum.mem_basicOpen _ _).mpr fun hm => hne ?_
+      rw [show (PrimeSpectrum.comap φ.1 _).asIdeal =
+        Ideal.comap φ.1 (PrimeSpectrum.asIdeal _) from PrimeSpectrum.comap_asIdeal ..,
+        hprime, Ideal.mem_comap, Ideal.mem_bot] at hm
+      exact hm
+  constructor
+  · rintro ⟨h', hfac⟩
+    refine hmem.mp ?_
+    have h1 : (chartPointOfHom W i φ).1.1 default =
+        (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+          (mk_X_mem_quotientGrading_one W j) one_pos) (h' default) := by
+      rw [← hfac]
+      show (h' ≫ Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+        (mk_X_mem_quotientGrading_one W j) one_pos) default = _
+      exact Scheme.Hom.comp_apply _ _ _
+    rw [h1]
+    have h2 : (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+        (mk_X_mem_quotientGrading_one W j) one_pos) (h' default) ∈
+        (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+          (mk_X_mem_quotientGrading_one W j) one_pos).opensRange :=
+      Scheme.Hom.mem_opensRange.mpr ⟨h' default, rfl⟩
+    rwa [Proj.opensRange_awayι] at h2
+  · intro hne
+    have hrange : Set.range ⇑(chartPointOfHom W i φ).1.1 ⊆
+        Set.range ⇑(Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+          (mk_X_mem_quotientGrading_one W j) one_pos) := by
+      rw [show Set.range ⇑(Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+          (mk_X_mem_quotientGrading_one W j) one_pos) =
+          (Proj.basicOpen (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) :
+            Set (Proj (quotientGrading (projIdeal W)))) from by
+        rw [← Scheme.Hom.coe_opensRange, Proj.opensRange_awayι]]
+      rw [show Set.range ⇑(chartPointOfHom W i φ).1.1 =
+        {(chartPointOfHom W i φ).1.1 default} from Set.range_unique]
+      rw [Set.singleton_subset_iff]
+      exact hmem.mpr hne
+    exact ⟨IsOpenImmersion.lift _ _ hrange, IsOpenImmersion.lift_fac _ _ hrange⟩
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
