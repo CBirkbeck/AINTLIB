@@ -1,1 +1,1 @@
-FOCUS: T-B6 (beastmode-B) — writing NEW file EllipticCurve/TorsionFibre.lean: torsionPointsEquiv (kernel UP, prove now: pointToTorsion + point_smul_eq_comp_mulBy + point_zero_val helper) + sorried headline rank-two statement importing HasseWeil.NTorsion.TorsionGeneralN. Other workers: A on WeierstrassModel/AwayCongr, D2 on CharpolyNorm — no file overlap.
+FOCUS: CLEANUP-4 (beastmode-B) — full /cleanup of GroupScheme/MuN.lean (sorry-free, independent import chain); T-B6 TorsionFibre.lean WIP-committed, build blocked on A-lane WeierstrassModel mid-edit — retry after cleanup.

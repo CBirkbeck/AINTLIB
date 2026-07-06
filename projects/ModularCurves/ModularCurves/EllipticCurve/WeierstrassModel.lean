@@ -2282,11 +2282,81 @@ lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
       (projModelBaseChangeLift (algebraMap R R') W)
       ((Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
         (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j) := by
+  have hfst : (isPullback_piece (R' := R') W j).isoPullback.hom ≫
+      Limits.pullback.fst ((modelChartCover W).openCover.f j ≫ projModelπ W)
+        (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+      Spec.map (CommRingCat.ofHom
+        (((sChartBaseChange (R' := R') W j).toRingHom).comp
+          ((chartCoordEquiv W j).symm.toRingHom))) :=
+    (isPullback_piece (R' := R') W j).isoPullback_hom_fst
+  have hsnd : (isPullback_piece (R' := R') W j).isoPullback.hom ≫
+      Limits.pullback.snd ((modelChartCover W).openCover.f j ≫ projModelπ W)
+        (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+      Spec.map (CommRingCat.ofHom (algebraMap R'
+        (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R' j
+            (W.map (algebraMap R R')).toProjective.polynomial}))) :=
+    (isPullback_piece (R' := R') W j).isoPullback_hom_snd
+  have hbcfst : (thetaIso (R' := R') W j).hom ≫
+      Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))
+        ((baseChangeGradedHom (algebraMap R R') W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))
+        ((baseChangeGradedHom (algebraMap R R') W).2
+          (mk_X_mem_quotientGrading_one W j)) one_pos ≫
+      projModelBaseChange (algebraMap R R') W =
+      Spec.map (CommRingCat.ofHom
+        (((sChartBaseChange (R' := R') W j).toRingHom).comp
+          ((chartCoordEquiv W j).symm.toRingHom))) ≫
+        (modelChartCover W).openCover.f j := by
+    rw [show projModelBaseChange (algebraMap R R') W =
+      Proj.map (baseChangeGradedHom (algebraMap R R') W)
+        (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) from rfl]
+    rw [Proj.awayι_comp_map (baseChangeGradedHom (algebraMap R R') W)
+      (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) one_pos _
+      (mk_X_mem_quotientGrading_one W j)]
+    rw [← Category.assoc, ← piece_fst_natural (R' := R') W j]
+    rfl
   refine (IsPullback.of_right ?s ?p (isPullback_coverPiece (R' := R') W j)).flip
   case p =>
-    sorry
+    refine Limits.pullback.hom_ext ?_ ?_
+    · unfold projModelBaseChangeLift
+      rw [Category.assoc, Category.assoc, Limits.pullback.lift_fst]
+      rw [← (isPullback_coverPiece (R' := R') W j).w]
+      rw [← Category.assoc, hfst, Category.assoc, hbcfst]
+    · unfold projModelBaseChangeLift
+      rw [Category.assoc, Category.assoc, Limits.pullback.lift_snd]
+      rw [show (Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+          (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R')))).f j ≫
+          Limits.pullback.snd (projModelπ W)
+            (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+          Limits.pullback.snd ((modelChartCover W).openCover.f j ≫ projModelπ W)
+            (Spec.map (CommRingCat.ofHom (algebraMap R R'))) from by
+        rw [coverPiece_f_eq (R' := R') W j, Category.assoc,
+          Limits.pullbackRightPullbackFstIso_inv_snd_snd]]
+      rw [hsnd, Category.assoc]
+      exact (theta_awayι_π (R' := R') W j).symm
   case s =>
-    sorry
+    rw [show (isPullback_piece (R' := R') W j).isoPullback.hom ≫
+        Limits.pullback.fst ((modelChartCover W).openCover.f j ≫ projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+        Spec.map (CommRingCat.ofHom
+          (((sChartBaseChange (R' := R') W j).toRingHom).comp
+            ((chartCoordEquiv W j).symm.toRingHom))) from hfst]
+    rw [show projModelBaseChangeLift (algebraMap R R') W ≫
+        Limits.pullback.fst (projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
+        projModelBaseChange (algebraMap R R') W from Limits.pullback.lift_fst _ _ _]
+    refine (isPullback_projModelBaseChange_chart (R' := R') W j).of_iso
+      (thetaIso (R' := R') W j).symm (Iso.refl _) (Iso.refl _) (Iso.refl _)
+      ?_ ?_ ?_ ?_
+    · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom]
+      rw [piece_fst_natural (R' := R') W j, ← Category.assoc, Iso.inv_hom_id,
+        Category.id_comp]
+    · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom, ← Category.assoc,
+        Iso.inv_hom_id, Category.id_comp]
+    · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+      rfl
+    · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
 
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
