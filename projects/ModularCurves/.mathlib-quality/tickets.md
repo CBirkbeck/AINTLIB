@@ -3947,9 +3947,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     IsIntegralHom of Sigma.desc: NOT in mathlib — only BINARY
     `coprod.desc` instances (Finite.lean:147, Affine.lean:218, Integral.lean:98;
     engine `HasAffineProperty.coprodDesc_affineAnd` AffineAnd.lean:283) ⟹
-    T-W3b-i sub-lemma: `IsFinite (Sigma.desc f)` for [Finite ι] by induction
-    (Fin-n normal form or `Finite.induction_empty_option`; iterate the binary
-    instance) — ForMathlib-grade, upstream candidate. (4) pullback-∐
+    T-W3b-i sub-lemma: `IsFinite (Sigma.desc fun _ : ι => 𝟙 S)` for
+    [Finite ι]. ROUTE OF RECORD (probed 2026-07-07T04:10Z, all pieces exist):
+    (i) `sigmaSpec R : (∐ Spec (R i)) ⟶ Spec (Π R i)` is an ISO for [Finite ι]
+    (AG/Limits.lean:606,640) ⟹ the model fold `∐_ι Spec ℤ ⟶ Spec ℤ` is
+    iso-conjugate to `Spec.map (diagonal ℤ →+* Π_ι ℤ)`, which is IsFinite via
+    the Spec-map/HasAffineProperty criterion + `Module.Finite` for finite Pi;
+    (ii) the general fold `∐_ι S ⟶ S` is the base change of the model along
+    `terminal.from S` (`Scheme.specZIsTerminal`) — identify via the
+    distributivity iso `IsUniversalColimit.isPullback_of_isColimit_left` +
+    `FinitaryPreExtensive.isUniversal_finiteCoproducts` (worked template
+    AG/Geometrically/Reduced.lean:97-101); (iii) IsFinite is stable under base
+    change + respects isos (instances). Alternative fallback: iterate the
+    binary coprod.desc instance by `Finite.induction_empty_option`.
+    ForMathlib-grade, upstream candidate. (4) pullback-∐
     distributivity: `IsUniversalColimit.isPullback_of_isColimit_left`
     (VanKampen.lean:796) + `FinitaryPreExtensive.isUniversal_finiteCoproducts`
     (Extensive.lean:449) + `instance FinitaryExtensive Scheme`
