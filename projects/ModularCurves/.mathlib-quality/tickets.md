@@ -2289,3 +2289,235 @@ a new file under `decompose-attacks-*/`), then prove.
    network search tools — loogle/leansearch — are safe).
 5. Mark done per rule 5 (`Status: done (<worker>, <start> → <end>)` in the same
    commit as the final proof); take the next wave item.
+
+
+---
+
+## Amendments v6 (2026-07-06): ★ Stream-Q claim + execution work order (beastmode-Q)
+
+*Stream Q (finite quotients, `ForMathlib/` + later `Moduli/`) claimed by
+**beastmode-Q**, 2026-07-06T15:16Z. This section is the Q-lane execution plan (the v2
+one-liners T-Q1–T-Q7 get their full /develop-template bodies here; the stream star
+reserves the lane and records the plan — tickets are still claimed ONE at a time per
+rule 5). Source of record: [Loe] Prop 3.6.1 p. 17, verbatim in `decomposition.md`
+§E4 and re-read from `refs/ModularCurves/modcurvesnotes.pdf` at claim time:*
+
+> **Proposition 3.6.1.** Let X be a quasiprojective S-scheme (for some base scheme
+> S), and let G be a finite group acting on X by S-automorphisms. Then there exists a
+> unique S-scheme X/G and a unique morphism X → X/G representing the functor
+> Y ↦ (homs. of S-schemes X → Y commuting the the G-action).
+> *Proof.* Uniqueness is obvious (representing a functor). Existence: for X = Spec(A)
+> affine, Spec(A^G) works, and one can show that these patch nicely. (One needs
+> quasiprojectiveness and finiteness of G here.)
+
+*Proof route for the affine case (T-Q3, "Spec(A^G) works"): the standard argument
+(SGA I V.1.1 / Stacks 07S3–07S7 shape; Loeffler's "one can show"): π : Spec B →
+Spec B^G is integral + surjective with fibres = G-orbits; every invariant morphism
+f : Spec B → Y descends affine-locally on Y via invariant basic opens (closedness of
+π + basic-open basis) and the key algebra lemma (B_h)^G = (B^G)_h for invariant h,
+finite G; uniqueness from surjectivity + Γ-injectivity on basic opens. Mathlib
+inventory verified at claim (pin 11b908e5cdd9): `FixedPoints.subalgebra` +
+`SMulCommClass G (FixedPoints.subalgebra A B G) B` (Subalgebra/Operations.lean),
+`Algebra.IsInvariant` + `.isIntegral` + `exists_smul_of_under_eq` +
+`orbit_eq_primesOver` (RingTheory/Invariant/Basic.lean), `RingHom.IsIntegral.
+comap_surjective` + `PrimeSpectrum.isClosedMap_comap_of_isIntegral`
+(Spectrum/Prime/Topology.lean), `IsIntegralHom` + `Spec.map φ`-iff
+(Morphisms/Integral.lean:90), `Spec.homEquiv` (GammaSpecAdjunction.lean:569),
+`Scheme.OpenCover.glueMorphisms`/`.hom_ext` (Gluing.lean:439/451),
+`MulSemiringAction.toRingHom`/`toRingEquiv` (Ring/Action). CONFIRMED ABSENT from
+mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeometry`
+(zero files), localization-of-invariants, scheme quotients by finite groups.*
+
+### Q-lane design decisions (recorded once, binding for the lane)
+
+- **Setting**: `G` a group (finiteness only where used, marked `[Finite G]`),
+  `B : Type u` a `CommRing`, `[MulSemiringAction G B]`; base ring `R` with
+  `[Algebra R B] [SMulCommClass G R B]` (= "G acts by R-algebra automorphisms";
+  R := ℤ recovers the absolute case). Invariants `A := FixedPoints.subalgebra R B G`.
+- **Action convention**: `specSMul g := Spec.map (ofHom (MulSemiringAction.toRingHom
+  G B g))` — NO inverse in the definition; composition law is covariant-in-≫
+  (`specSMul (g*h) = specSMul g ≫ specSMul h`); on points it is `PrimeSpectrum.comap
+  (toRingHom g)` (= the classical g⁻¹-action on primes). Invariance statements
+  (`∀ g, specSMul g ≫ f = f`) are convention-independent. An `Aut`-bundled
+  (anti)hom is deliberately NOT provided now (cleanup/generalise can add it).
+- **Universal property stated absolutely** (target `Y : Scheme`, plain `Scheme`
+  category, ∃!-form) — the S-relative form of [Loe] 3.6.1 follows formally
+  (uniqueness through π applied to the two factorizations of the structure map) and
+  is deferred to T-Q5/T-Q6 where `Over S` packaging is actually consumed.
+- **Files (all NEW, upstream candidates, OURS register)**:
+  `ForMathlib/SpecGroupAction.lean` (T-Q1) → `ForMathlib/InvariantLocalization.lean`
+  (T-Q3a/b/c, pure algebra, no scheme imports) → `ForMathlib/AffineQuotient.lean`
+  (T-Q3). Attack blocks: `decompose-attacks-2026-07-06/q-lane.md` (per statement,
+  before proving — standing rule 1).
+- **On-target check**: stream Q = plan.md API gap **AG-QUOT** (blocks KM 4.7 ⇐
+  = T-E5, coarse Y₀(N) = T-M2, Y(ρ̄) twists = T-F4); reviewer split recorded in
+  §Amendments v2. Within the project's mathematical area (arithmetic moduli
+  machinery); refinement, not divergence.
+
+### [T-Q1] Spec-side action vocabulary — PROVABLE NOW
+- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:16Z
+- **File**: ModularCurves/ForMathlib/SpecGroupAction.lean (NEW) · **Parent**: stream Q
+  (v2 one-liner) · **Type**: def + lemmas · **Depends on**: none · **Parallel**: yes
+- **Statement** (decls to create; skeleton `sorry`-free where trivial):
+  `specSMul (g : G) : Spec (.of B) ⟶ Spec (.of B)` := `Spec.map (ofHom (toRingHom G B
+  g))`; laws `specSMul_one` (= 𝟙), `specSMul_mul` (`specSMul (g*h) = specSMul g ≫
+  specSMul h`), `instance IsIso (specSMul g)`; point formula `specSMul_base`
+  (= `PrimeSpectrum.comap (toRingHom G B g)`);
+  `invariantsπ : Spec (.of B) ⟶ Spec (.of (FixedPoints.subalgebra R B G))` :=
+  `Spec.map (ofHom (algebraMap A B))`; `specSMul_invariantsπ : specSMul g ≫
+  invariantsπ = invariantsπ`; `instance Algebra.IsInvariant R-fixed-subalgebra`
+  (trivial, mathlib-shaped); `invariantsπ_isIntegralHom [Finite G]`;
+  `invariantsπ_surjective [Finite G] : Function.Surjective invariantsπ.base`;
+  `invariantsπ_base_eq_iff [Finite G] : invariantsπ.base x = invariantsπ.base y ↔
+  ∃ g, (specSMul g).base x = y` (fibres are orbits).
+- **Proof sketch**: (1) laws from `Spec.map_comp/map_id` + `toRingHom` mul/one
+  (compute: `toRingHom (g*h) = (toRingHom g).comp (toRingHom h)`, Spec.map flips ≫);
+  (2) invariance: `algebraMap A B` composed with `g•` is itself (`smul` fixes A
+  elementwise — `val_smul`-style), so the ring triangle commutes, apply `Spec.map`;
+  (3) `IsInvariant`: `⟨fun b hb ↦ ⟨⟨b, hb⟩, rfl⟩⟩`; (4) integrality:
+  `Algebra.IsInvariant.isIntegral` + `IsIntegralHom (Spec.map φ) ↔ φ.hom.IsIntegral`;
+  (5) surjectivity: `RingHom.IsIntegral.comap_surjective` + `Subtype.val`-injectivity
+  + `Spec.map`-base = comap dictionary; (6) orbits: `Algebra.IsInvariant.
+  exists_smul_of_under_eq` (SMulCommClass instance present in mathlib) + the
+  point-formula dictionary between `PrimeSpectrum.comap (toRingHom g)` and the
+  pointwise ideal action `g • ·` (comap of the g-hom = g⁻¹ • as ideals; both
+  directions of the iff by replacing g ↦ g⁻¹).
+- **Mathlib lemmas** (names verified at claim): `MulSemiringAction.toRingHom`,
+  `Spec.map_comp`, `Spec.map_id`, `FixedPoints.subalgebra`,
+  `Algebra.IsInvariant.isIntegral`, `Algebra.IsInvariant.exists_smul_of_under_eq`,
+  `RingHom.IsIntegral.comap_surjective`, `AlgebraicGeometry.IsIntegralHom` spec-iff
+  (Morphisms/Integral.lean:90), `Ideal.smul` pointwise (scoped `Pointwise`).
+- **Sources**: [Loe] 3.6.1 (above); SGA I V.1.1; Stacks 07S3 (topology of the orbit
+  map). Generality: arbitrary `Group G`, `CommRing B`, base via `SMulCommClass`.
+- **Progress**:
+  - 2026-07-06T15:16: claimed; work order banked; attack block next
+    (q-lane.md), then skeleton.
+
+### [T-Q3a] Localized action ring homs at an invariant element
+- **Status**: open · **File**: ModularCurves/ForMathlib/InvariantLocalization.lean
+  (NEW) · **Parent**: T-Q3 · **Type**: def + lemmas · **Depends on**: none
+  (pure algebra; parallel with T-Q1)
+- **Statement**: for `h : B` with `hfix : ∀ g : G, g • h = h`, package the induced
+  action on `Localization.Away h` as an honest `noncomputable def
+  MulSemiringAction.away : MulSemiringAction G (Localization.Away h)` (NOT an
+  instance — consumers `letI` it), with `smul g := IsLocalization.Away.map _ _
+  (toRingHom G B g) h`-transported; specification lemmas: `away_smul_mk`
+  (`g • (b /ₘ h^n) = (g • b) /ₘ h^n` in `mk'` form), and (with the def in scope)
+  `smul_algebraMap_away : g • algebraMap B (Localization.Away h) b = algebraMap _ _
+  (g • b)`; `SMulCommClass G R (Localization.Away h)` under the standing R-compat.
+- **Proof sketch**: `IsLocalization.Away.map` at `toRingHom g` (sends powers of h to
+  powers of h since `g • h = h`); action laws (one, mul) via `IsLocalization.
+  ringHom_ext` uniqueness against generators; `away_smul_mk` from
+  `IsLocalization.map_mk'`.
+- **Mathlib**: `IsLocalization.Away.map`, `IsLocalization.map_mk'`,
+  `IsLocalization.ringHom_ext`, `Localization.Away`. Generality: any Group G (no
+  finiteness), any invariant h.
+- **Sources**: standard (localization functoriality); the lemma cluster is the
+  algebra backend of [Loe] 3.6.1's "patch nicely".
+
+### [T-Q3b] Fixed elements of the localization come from invariants over a power
+- **Status**: open · **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
+  T-Q3 · **Type**: lemma · **Depends on**: T-Q3a
+- **Statement**: `[Finite G]`, `h` invariant, `x : Localization.Away h` with
+  `∀ g, g • x = x` (T-Q3a action) → `∃ (b : B) (n : ℕ), (∀ g, g • b = b) ∧
+  IsLocalization.mk' _ b (⟨h^n, _⟩) = x` (single conclusion; exact `mk'` spelling
+  pinned at skeleton time).
+- **Proof sketch**: write `x = mk' b (h^N)` (`IsLocalization.mk'_surjective`); for
+  each g, `mk' (g•b) (h^N) = mk' b (h^N)` (via `away_smul_mk`), so `∃ m_g, h^{m_g} *
+  (g•b − b) = 0` (`IsLocalization.eq_iff_exists` in `Away`-form); `G` finite ⟹ one
+  `m ≥ all m_g`; set `b' := h^m * b`: then `g • b' − b' = h^m*(g•b − b) = 0`
+  (h fixed), so `b'` invariant and `x = mk' b' (h^{N+m})`. NO averaging, NO |G|⁻¹ —
+  works over any base (this is the reason the lemma is not in mathlib's
+  field-flavoured fixed-point theory).
+- **Mathlib**: `IsLocalization.mk'_surjective`, `IsLocalization.eq_iff_exists` (or
+  `mk'_eq_iff`), `smul_sub/smul_mul'` bookkeeping. Sources: SGA I V.1.1 (i); Stacks
+  07S5 first display.
+
+### [T-Q3c] Localization of the invariants inclusion: injective, range = fixed, IsLocalization
+- **Status**: open · **File**: ForMathlib/InvariantLocalization.lean · **Parent**:
+  T-Q3 · **Type**: lemmas (3 single-conclusion decls) · **Depends on**: T-Q3a, T-Q3b
+- **Statement** (A := FixedPoints.subalgebra R B G; `h : A`; localized inclusion
+  `awayIncl := IsLocalization.Away.map (Localization.Away h) (Localization.Away
+  (h:B)) (algebraMap A B) h`):
+  (i) `Function.Injective awayIncl`;
+  (ii) `RingHom.range awayIncl = {x | ∀ g, g • x = x}`-as-subring (T-Q3a action;
+  `[Finite G]` for ⊇);
+  (iii) packaged: `IsLocalization.Away (h : A) (FixedPoints.subalgebra R
+  (Localization.Away (h:B)) G)` — algebra structure via `codRestrict` of
+  `awayIncl`-composition; `[Finite G]`.
+- **Proof sketch**: (i) elementwise: `a/h^n ↦ 0` ⟹ `∃ m, (h:B)^m * a = 0` in B ⟹
+  same equation in A (val injective) ⟹ `a/h^n = 0`; or mathlib
+  `IsLocalization.map_injective_of_injective` if signature fits (verify at pickup).
+  (ii) ⊆: image elements are fixed (T-Q3a `away_smul_mk`, invariant numerator +
+  invariant denominator); ⊇: T-Q3b gives `x = mk' b' (h^m)` with b' invariant =
+  image of `mk' ⟨b'⟩ ⟨h^m⟩`. (iii) characteristic predicate: `map_units` (image of
+  h is a unit whose inverse is fixed — inverse of a fixed unit is fixed by
+  uniqueness), `surj` = (ii)⊇-computation, `exists_of_eq` from B-level
+  `exists_of_eq` + val-injectivity.
+- **Mathlib**: `IsLocalization` characteristic predicate fields, `RingHom.
+  codRestrict`, `IsUnit` inverse-uniqueness. Sources: as T-Q3b.
+
+### [T-Q3] Affine quotients: `Spec(A^G)` universal property — HEADLINE (v2 one-liner)
+- **Status**: open · **File**: ModularCurves/ForMathlib/AffineQuotient.lean (NEW) ·
+  **Type**: theorem ×3 · **Depends on**: T-Q1, T-Q3a, T-Q3b, T-Q3c
+- **Statement** (all `[Finite G]`):
+  (i) `invariantsπ_hom_ext {Y : Scheme} (h₁ h₂ : Spec (.of A) ⟶ Y)
+  (H : invariantsπ ≫ h₁ = invariantsπ ≫ h₂) : h₁ = h₂` (+ corollary
+  `Epi invariantsπ`);
+  (ii) `exists_invariantsπ_lift {Y : Scheme} (f : Spec (.of B) ⟶ Y)
+  (hf : ∀ g, specSMul g ≫ f = f) : ∃ q, invariantsπ ≫ q = f`;
+  (iii) `invariantsπ_existsUnique …` : the ∃!-assembly (one-line ⟨⟩ from (i)+(ii)) —
+  [Loe] 3.6.1's "representing the functor", affine case, absolute form.
+- **Proof sketch** (SGA I V.1.1 / Stacks 07S7; fully explicit):
+  *(uniqueness)* base maps agree (`invariantsπ_surjective`); for any affine open
+  `V ⊆ Y`, `W := h₁ ⁻¹ᵁ V = h₂ ⁻¹ᵁ V`; cover W by basic opens `D_A(a)`; each
+  restriction factors through `V` (IsOpenImmersion.lift), giving affine-to-affine
+  morphisms = ring maps `Γ(V) → Γ(D_A a) ≅ (A)_a`; postcompose with the INJECTIVE
+  `(A)_a → (B)_a` (T-Q3c(i) at the invariant element a — note `a : A` is by
+  definition invariant): the composites agree (they compute `f`-restricted), so the
+  ring maps agree, so `h₁|_{D(a)} = h₂|_{D(a)}` (`Spec.homEquiv`-injectivity
+  transported through `IsAffineOpen`); conclude by `Scheme.OpenCover.hom_ext` on the
+  cover `{D_A(a)} ∪ (complement handled by W covering h₁⁻¹V as V ranges)`.
+  *(existence)* for `p : Spec A`: the fibre `π⁻¹(p)` is one G-orbit
+  (`invariantsπ_base_eq_iff`) and `f` is constant on it (apply `hf` at points); let
+  `y_p := f(any fibre point)`, pick affine `V_p ∋ y_p`, `U := f ⁻¹ᵁ V_p ⊇ π⁻¹(p)`
+  open; π closed (`isIntegralHom` ⟹ closed base map, or `PrimeSpectrum.
+  isClosedMap_comap_of_isIntegral` directly): `Z := π(Uᶜ)` closed, `p ∉ Z`; basic
+  opens form a basis: `∃ a : A, p ∈ D_A(a) ⊆ Zᶜ`, then `π ⁻¹ᵁ D_A(a) = D_B(a) ⊆ U`
+  (`Scheme.preimage_basicOpen`); restrict: `f| : Spec B_a-as-D_B(a) ⟶ V_p` affine
+  target ⟹ ring hom `φ : Γ(V_p) →+* (B)_a` (Spec.homEquiv + IsAffineOpen
+  dictionaries); invariance `hf` restricted to `D_B(a)` says every `φ c` is fixed
+  for the T-Q3a action ⟹ (T-Q3c(ii)) φ factors through the range of the injective
+  `(A)_a → (B)_a` ⟹ `φ' : Γ(V_p) →+* (A)_a` ⟹ `q_p : D_A(a) ⟶ V_p ⟶ Y` with
+  `π| ≫ q_p = f|`; glue: the `D_A(a_p)` cover Spec A; on an overlap `D_A(a) ∩
+  D_A(a') = D_A(a*a')` both restrictions factor `f|` through `π|_{D(aa')}`, which is
+  again an invariants-π up to the T-Q3c(iii) identification (`IsLocalization.Away
+  (aa') ((B_{aa'})^G)`) — so they agree by (i) applied at the localized instance
+  (this is why (i) is stated over arbitrary (B,G,R) FIRST); glue by
+  `Scheme.OpenCover.glueMorphisms`, factorization `π ≫ q = f` checked on the cover
+  `D_B(a_p)` of Spec B by `Scheme.OpenCover.hom_ext`.
+- **Mathlib**: `Scheme.OpenCover.glueMorphisms`/`hom_ext`/`ι_glueMorphisms`,
+  `IsOpenImmersion.lift` (+ `lift_fac`), `Spec.homEquiv`, `Scheme.preimage_
+  basicOpen`, `PrimeSpectrum.isBasis_basic_opens`, `IsAffineOpen.isLocalization_
+  basicOpen` + `IsAffineOpen.fromSpec` (dictionary D(a) ≅ Spec of localization —
+  exact spelling verified at pickup), `PrimeSpectrum.isClosedMap_comap_of_
+  isIntegral`. Sources: [Loe] 3.6.1 (verbatim above); SGA I V.1.1; Stacks 07S5/07S7.
+- **Generality**: `[Finite G]`, arbitrary `CommRing B`, arbitrary target scheme
+  (NOT restricted to S-schemes; NOT quasi-projective — that hypothesis is only
+  needed for the GLUING of affine quotients, T-Q5).
+
+### Rest of the lane (bodies cut when reached; one-liners stand)
+- **[T-Q2]** free actions vs stabilizers — statements only; needed by KM Ch. 7
+  regularity, NOT by T-Q3/T-E5. After T-Q3.
+- **[T-Q4]** base change of invariants — KM Ch. 7 appendix ("base change for rings
+  of invariants") — **full KM text NOW IN refs/** (`katz-mazur-arithmetic-moduli-
+  FULL.pdf`); read the appendix at pickup (quote-gate), decide the flat/finite-free
+  hypotheses honestly. Feeds T-Q6 and the Y(ρ̄) twist route.
+- **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
+  statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
+  S-relative + `Over S` packaging of the universal property.
+- **[T-Q6]** quotients of rigidified moduli problems (KM 4.7 ⇐ engine; T-E5).
+- **[T-Q7]** coarse quotient statements (`Y₀(N)`, `Y(1)`) — via groupoid layer (D6),
+  phase M; consumes T-Q5 + T-M1/T-M2 vocabulary.
+- **[CLEANUP-12]** (already on the board, v2 cadence): quotient stream after
+  T-Q3+T-Q4+T-Q5 — covers the three new ForMathlib files.
