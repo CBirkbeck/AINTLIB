@@ -295,6 +295,17 @@ noncomputable def vanishingLocus : S.IdealSheafData where
         (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)] at hglue
     exact hglue
 
+/-- **(T-D14c-2, universal property of the vanishing locus)** `T → S` kills the
+vanishing locus of `E` iff `E` pulls back to the zero ideal sheaf on the base change
+of `W`. Combined with `exists_factor_subschemeι_iff`, `isSubdivisor_iff_le`,
+`baseChange_ideal` and the `map_bot` Galois reduction, this is the whole content of
+KM 1.3.4. -/
+theorem vanishingLocus_le_ker_iff {T : Scheme.{u}} (t : T ⟶ S) :
+    vanishingLocus p E ≤ t.ker ↔ E.comap (pullback.snd t p) = ⊥ := by
+  rw [(Scheme.IdealSheafData.map_gc (pullback.snd t p)).l_eq_bot,
+    Scheme.IdealSheafData.map_bot]
+  sorry
+
 end VanishingLocus
 
 section Incidence

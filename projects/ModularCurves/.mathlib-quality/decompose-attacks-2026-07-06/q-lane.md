@@ -66,3 +66,60 @@ live in `ForMathlib/SpecGroupAction.lean`, `ForMathlib/InvariantLocalization.lea
 
 T-Q1 statements as planned: SURVIVED (6+3 attacks). Orientation notes A1/A4 binding
 for the proofs.
+
+## T-Q3a `mulSemiringActionAway` + spec lemmas
+
+- **A1 (is the action even well-defined — does `g • ·` stabilize the powers?)**
+  `IsLocalization.map` needs `powers h ≤ (powers h).comap (toRingHom g)`:
+  `toRingHom g (h^n) = g • h^n = (g•h)^n = h^n` by `smul_pow` + `hfix g`. Well-defined
+  ONLY for invariant h — the hypothesis is load-bearing, not decorative (for
+  non-invariant h, `g • ·` does not descend to Away h: e.g. B = k[x,y], G = C₂
+  swapping x,y, h = x: 1/x ↦ "1/y" ∉ B_x). SURVIVES with hfix required.
+- **A2 (def-not-instance)** An instance would need hfix as an instance argument —
+  impossible; also two different h give different actions on defeq-different types,
+  instance search could not disambiguate anyway. Precedent for def + `letI`-in-
+  statement: mathlib `IsFractionRing.mulSemiringAction` + `IsGaloisGroup.
+  to_isFractionRing` (Basic.lean:120). SURVIVES as def.
+- **A3 (compat direction of `smul_algebraMap_away`)** claim `g • (algebraMap b) =
+  algebraMap (g • b)`; from `IsLocalization.map_eq : map … (algebraMap x) =
+  algebraMap (g x)` — LHS smul IS the map by definition ✓; no inverse appears (the
+  action on the localization is genuinely covariant, unlike the Spec-side point
+  action). SURVIVES.
+- **A4 (mk' spec — denominator transport)** `g • mk' b ⟨h^n,_⟩ = mk' (g•b) ⟨toRingHom
+  g h^n, _⟩` by `map_mk'`; the subtype component needs `(g•h)^n = h^n` rewriting —
+  statement pins the FIXED denominator form `mk' (g•b) ⟨h^n,_⟩`. Mismatch risk is in
+  the proof, not the statement. SURVIVES.
+
+## T-Q3b fixed ⟹ invariant-over-power
+
+- **A1 (finiteness honest?)** Infinite G counterexample sketch: B = k[x_i : i ∈ ℕ] /
+  (relations making x_{i+1} = x_i/h-ish)… simpler: the proof needs ONE m with
+  h^m * (g•b − b) = 0 for ALL g; per-g exponents m_g exist always, sup over
+  infinite G need not. With G infinite the statement fails in general (folklore;
+  invariants of localization ≠ localization of invariants for infinite groups even
+  for free actions). [Finite G] present. SURVIVES.
+- **A2 (which power — same n?)** Statement only claims SOME n with x = mk' b (h^n),
+  b invariant — NOT that n can be taken equal to the original exponent. The h^m-
+  bump changes numerator AND denominator. ∃-form correct. SURVIVES.
+- **A3 (zero-divisor h)** h nilpotent ⟹ Away h trivial ⟹ every x fixed, and the
+  statement demands b, n with mk' b h^n = x: b := 0, need `∀ g, g • 0 = 0` ✓
+  smul_zero, and mk' 0 _ = 0 = x in the trivial ring ✓. No hidden regularity
+  assumption. SURVIVES.
+
+## T-Q3c localized inclusion (i) injective (ii) range = fixed (iii) IsLocalization
+
+- **A1 (i — injectivity really needs val-injectivity only?)** mathlib
+  `IsLocalization.Away.map_injective_iff : Injective ↔ ∀ a, f a = 0 → ∃ n, r^n * a
+  = 0`. f = algebraMap A B = Subtype.val: f a = 0 → a = 0 → n := 0 works. ONE LINE.
+  No G-finiteness for (i). SURVIVES.
+- **A2 (ii ⊇ needs Finite, ⊆ doesn't)** range ⊆ fixed: numerator+denominator
+  invariant ⟹ image fixed (map_mk' + hfix on components) — any G. fixed ⊆ range:
+  = T-Q3b ⟹ [Finite G]. Statement carries [Finite G] on the ⊇/(iff) form only.
+  SURVIVES.
+- **A3 (iii — which algebra structure?)** `IsLocalization.Away (h : A) S'` needs
+  `Algebra A S'` where S' = the fixed SUBRING of Away (h:B) under the T-Q3a action.
+  Structure: codRestrict of `(algebraMap B _).comp (algebraMap A B)` into the fixed
+  subring (lands there since the composite image is invariant — A3 of Q3a). If the
+  wiring fights elaboration, (iii) may be DEFERRED to T-Q3 pickup and the assembly
+  done through (i)+(ii) elementwise — (iii) is convenience packaging, zero
+  mathematical content beyond (i)+(ii)+Q3b. Recorded as scope note. SURVIVES.

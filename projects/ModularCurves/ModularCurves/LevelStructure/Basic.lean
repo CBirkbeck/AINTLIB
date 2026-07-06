@@ -112,7 +112,14 @@ theorem isFullLevel_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
 /-- **(T-D9 = KM 1.4.4 (1) ⇔ (3), restated)** For `N` invertible, Drinfeld Γ₁(N) equals
 naive Γ₁(N). -/
 theorem isGammaOne_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N) (P : E.Section) :
-    E.IsGammaOne N P ↔ E.IsNaiveGammaOne N P := by sorry
+    E.IsGammaOne N P ↔ E.IsNaiveGammaOne N P := by
+  constructor
+  · intro h
+    have hkill : (N : ℤ) • P = 0 := Section.HasExactOrder.smul_eq_zero E h
+    refine ⟨hkill, fun k _ _ t => ?_⟩
+    exact (Section.hasExactOrder_iff_geometric E hN hkill).mp h k t
+  · rintro ⟨hkill, h⟩
+    exact (Section.hasExactOrder_iff_geometric E hN hkill).mpr h
 
 /-- **Γ₀(N)-structure** (KM 3.4): a relative effective Cartier divisor `G ⊆ E` of degree
 `N` which is a subgroup (KM 1.3.6) and is *cyclic* (KM 1.4.1: fppf-locally on `S` admits a
