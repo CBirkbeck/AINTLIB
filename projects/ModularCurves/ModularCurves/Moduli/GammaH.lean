@@ -1,5 +1,6 @@
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Groupoid
+import ModularCurves.EllipticCurve.TorsionFibre
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 
 /-!
@@ -404,23 +405,46 @@ T-B6); and naive full level structures exist over an algebraically closed base f
 /-- **(T-H7a)** Multiplication morphisms compose multiplicatively:
 `[m] ≫ [n] = [m·n]` (both are convolution powers of the identity). -/
 theorem EllipticCurve.mulBy_comp_mulBy (E : EllipticCurve S) (m n : ℤ) :
-    E.mulBy m ≫ E.mulBy n = E.mulBy (m * n) := by sorry
+    E.mulBy m ≫ E.mulBy n = E.mulBy (m * n) := by
+  letI : Group (E.asOver ⟶ E.asOver) := Hom.group
+  show E.mulBy m ≫ (𝟙 E.asOver) ^ n = (𝟙 E.asOver) ^ (m * n)
+  rw [GrpObj.comp_zpow, Category.comp_id]
+  exact (zpow_mul (𝟙 E.asOver) m n).symm
 
 /-- **(T-H7a)** `[1]` is the identity of `E.asOver`. -/
 theorem EllipticCurve.mulBy_one (E : EllipticCurve S) : E.mulBy 1 = 𝟙 E.asOver := by
-  sorry
+  letI : Group (E.asOver ⟶ E.asOver) := Hom.group
+  show (𝟙 E.asOver) ^ (1 : ℤ) = 𝟙 E.asOver
+  exact zpow_one _
 
 /-- **(T-H7a)** Scheme-level composition law for the multiplication morphisms. -/
 theorem EllipticCurve.mulByHom_comp_mulByHom (E : EllipticCurve S) (m n : ℤ) :
-    E.mulByHom m ≫ E.mulByHom n = E.mulByHom (m * n) := by sorry
+    E.mulByHom m ≫ E.mulByHom n = E.mulByHom (m * n) := by
+  have h := congrArg CommaMorphism.left (E.mulBy_comp_mulBy m n)
+  simp only [Over.comp_left] at h
+  exact h
 
 /-- **(T-H7a)** Scheme-level: `[1] = 𝟙`. -/
 theorem EllipticCurve.mulByHom_one (E : EllipticCurve S) :
-    E.mulByHom 1 = 𝟙 E.E := by sorry
+    E.mulByHom 1 = 𝟙 E.E := by
+  have h := congrArg CommaMorphism.left E.mulBy_one
+  simp only [Over.id_left] at h
+  exact h
+
+/-- **(T-H7a)** `[-1]` is a (self-inverse) involution. -/
+theorem EllipticCurve.mulByHom_neg_one_involutive (E : EllipticCurve S) :
+    E.mulByHom (-1) ≫ E.mulByHom (-1) = 𝟙 E.E := by
+  rw [E.mulByHom_comp_mulByHom, show ((-1 : ℤ) * -1) = 1 by norm_num, E.mulByHom_one]
 
 /-- **(T-H7a)** `[n]` is pointed: it carries the zero section to the zero section. -/
 theorem EllipticCurve.zero_comp_mulByHom (E : EllipticCurve S) (n : ℤ) :
-    E.zero ≫ E.mulByHom n = E.zero := by sorry
+    E.zero ≫ E.mulByHom n = E.zero := by
+  have h : ((n • (0 : E.Point (𝟙 S)) : E.Point (𝟙 S)) : S ⟶ E.E)
+      = ((0 : E.Point (𝟙 S)) : S ⟶ E.E) :=
+    congrArg _ (smul_zero n)
+  rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at h
+  simp only [Category.id_comp] at h
+  exact h
 
 /-- **(T-H7a)** Negation `[-1]` as an `Ell/R`-endomorphism over the identity of the
 base: cartesian because `[-1]` is a self-inverse isomorphism. -/
@@ -428,19 +452,48 @@ noncomputable def EllObj.negHom (X : EllObj R) : X ⟶ X where
   baseHom := 𝟙 X.base
   base_w := Category.id_comp _
   top := X.curve.mulByHom (-1)
-  isPullback := by sorry
-  zero_w := by sorry
+  isPullback := by
+    haveI : IsIso (X.curve.mulByHom (-1)) :=
+      ⟨⟨X.curve.mulByHom (-1), X.curve.mulByHom_neg_one_involutive,
+        X.curve.mulByHom_neg_one_involutive⟩⟩
+    exact IsPullback.of_horiz_isIso ⟨by simp⟩
+  zero_w := by
+    rw [X.curve.zero_comp_mulByHom]
+    exact (Category.id_comp _).symm
+
+/-- **(T-H7a)** `[-1]` is a self-inverse `Ell/R`-endomorphism. -/
+theorem EllObj.negHom_comp_negHom (X : EllObj R) :
+    EllObj.negHom R X ≫ EllObj.negHom R X = 𝟙 X := by
+  apply EllHom.ext
+  · show 𝟙 X.base ≫ 𝟙 X.base = 𝟙 X.base
+    exact Category.id_comp _
+  · show X.curve.mulByHom (-1) ≫ X.curve.mulByHom (-1) = 𝟙 X.curve.E
+    exact X.curve.mulByHom_neg_one_involutive
 
 /-- **(T-H7a)** `[-1]` as an automorphism of `X` in `Ell/R` (self-inverse). -/
 noncomputable def EllObj.negIso (X : EllObj R) : X ≅ X where
   hom := EllObj.negHom R X
   inv := EllObj.negHom R X
-  hom_inv_id := by sorry
-  inv_hom_id := by sorry
+  hom_inv_id := EllObj.negHom_comp_negHom R X
+  inv_hom_id := EllObj.negHom_comp_negHom R X
 
 /-- **(T-H7a, the fixity engine)** Pulling a section back along `[-1]` is negation. -/
 theorem EllObj.pullSection_negHom (X : EllObj R) (P : X.curve.Section) :
-    EllHom.pullSection R (EllObj.negHom R X) P = -P := by sorry
+    EllHom.pullSection R (EllObj.negHom R X) P = -P := by
+  refine Subtype.ext ((EllObj.negHom R X).isPullback.hom_ext ?_ ?_)
+  · have h1 : (EllHom.pullSection R (EllObj.negHom R X) P).1 ≫ (EllObj.negHom R X).top
+        = (EllObj.negHom R X).baseHom ≫ P.1 :=
+      (EllObj.negHom R X).isPullback.lift_fst _ _ _
+    have h2 : ((-P : X.curve.Section) : X.base ⟶ X.curve.E)
+        = (P : X.base ⟶ X.curve.E) ≫ X.curve.mulByHom (-1) :=
+      (congrArg Subtype.val (neg_one_zsmul P)).symm.trans
+        (X.curve.point_smul_eq_comp_mulBy (𝟙 X.base) (-1) P)
+    rw [h1, h2]
+    show 𝟙 X.base ≫ (P : X.base ⟶ X.curve.E)
+        = ((P : X.base ⟶ X.curve.E) ≫ X.curve.mulByHom (-1)) ≫ X.curve.mulByHom (-1)
+    rw [Category.id_comp, Category.assoc, X.curve.mulByHom_neg_one_involutive,
+      Category.comp_id]
+  · rw [(EllHom.pullSection R (EllObj.negHom R X) P).2, (-P).2]
 
 /-- **(T-H7c)** Over a base with a geometric point, `[-1] ≠ 𝟙`: the geometric fibre
 has a nonzero point of odd order `M ∈ {3,5}` (T-B6), while `[-1] = 𝟙` forces every

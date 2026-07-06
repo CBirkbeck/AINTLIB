@@ -51,28 +51,6 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
-open scoped CategoryTheory.Obj in
-/-- **(T-B6a)** Multiplication by `n` commutes with base change: the first projection of
-the defining pullback intertwines `[n]` on `E ×_S T` with `[n]` on `E`. -/
-theorem mulByHom_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
-    (E.baseChange g).mulByHom n ≫ pullback.fst E.π g =
-      pullback.fst E.π g ≫ E.mulByHom n := by
-  letI : Group (E.asOver ⟶ E.asOver) := Hom.group
-  letI : Group ((Over.pullback g).obj E.asOver ⟶ (Over.pullback g).obj E.asOver) :=
-    Hom.group
-  have key : (E.baseChange g).mulBy n = (Over.pullback g).map (E.mulBy n) := by
-    show (𝟙 ((Over.pullback g).obj E.asOver)) ^ n =
-      (Over.pullback g).map ((𝟙 E.asOver) ^ n)
-    have h1 : (Over.pullback g).map ((𝟙 E.asOver) ^ n) =
-        (Over.pullback g).homMonoidHom ((𝟙 E.asOver) ^ n) := rfl
-    have h2 : (Over.pullback g).homMonoidHom (𝟙 E.asOver) =
-        𝟙 ((Over.pullback g).obj E.asOver) := (Over.pullback g).map_id E.asOver
-    rw [h1, map_zpow ((Over.pullback g).homMonoidHom) (𝟙 E.asOver) n, h2]
-  have hleft : (E.baseChange g).mulByHom n = ((Over.pullback g).map (E.mulBy n)).left :=
-    congrArg CommaMorphism.left key
-  rw [hleft]
-  exact pullback.lift_fst _ _ _
-
 /-- The zero section of the base-changed curve projects to the zero section. -/
 @[reassoc]
 theorem baseChange_zero_fst {T : Scheme.{u}} (g : T ⟶ S) :
@@ -93,7 +71,7 @@ noncomputable def torsionBaseChangeHom (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) 
         _ = (E.baseChange g).torsionι N ≫ (E.baseChange g).mulByHom N ≫
               pullback.fst E.π g :=
             congrArg (fun q => (E.baseChange g).torsionι N ≫ q)
-              (E.mulByHom_baseChange g (N : ℤ)).symm
+              (E.mulByHom_baseChange_fst g (N : ℤ)).symm
         _ = ((E.baseChange g).torsionι N ≫ (E.baseChange g).mulByHom N) ≫
               pullback.fst E.π g := (Category.assoc _ _ _).symm
         _ = ((E.baseChange g).torsionπ N ≫ (E.baseChange g).zero) ≫
@@ -142,7 +120,7 @@ private lemma torsionLiftAux_outer_w (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
   · calc (c ≫ (E.baseChange g).mulByHom N) ≫ pullback.fst E.π g
         = c ≫ (E.baseChange g).mulByHom N ≫ pullback.fst E.π g := Category.assoc _ _ _
       _ = c ≫ pullback.fst E.π g ≫ E.mulByHom N :=
-          congrArg (fun q => c ≫ q) (E.mulByHom_baseChange g (N : ℤ))
+          congrArg (fun q => c ≫ q) (E.mulByHom_baseChange_fst g (N : ℤ))
       _ = (c ≫ pullback.fst E.π g) ≫ E.mulByHom N := (Category.assoc _ _ _).symm
       _ = (a ≫ E.torsionι N) ≫ E.mulByHom N :=
           congrArg (fun q => q ≫ E.mulByHom (N : ℤ)) (pullback.lift_fst _ _ _)
