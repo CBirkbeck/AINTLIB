@@ -3144,3 +3144,111 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
   - 2026-07-06T16:55Z: claimed; statement verified in skeleton at :203 against
     Rigid (EllCategory:168). Route pinned to single-geometric-point witness
     (avoids the trivialisation-scheme detour of the original attack sketch).
+  - 2026-07-06T17:05Z: definitions contact done (IsNaiveFullLevel, Rigid, EllHom,
+    pullSection, mulBy = 𝟙^n in Hom.group, point_smul_eq_comp_mulBy, TorsionFibre
+    headline torsion_geometricFibre_rank_two + point_zero_val +
+    smul_eq_zero_iff_comp_mulByHom). Baseline lake build GammaH green. KEY
+    simplifications found: N=1 level point is the zero pair over ANY base (killing
+    clause forces P=Q=0, generation vacuous); functor-value fixity ignores the
+    E4a-gated membership sorry (Subtype.ext); [-1]∘[-1]=𝟙 via GrpObj.comp_zpow +
+    zpow arithmetic, no new mathlib needed. Spawning T-H7a..T-H7d (below), starting
+    T-H7a. glSmul_one found already proven in-skeleton (T-H1 gets cheaper).
+
+### [T-H7a] negation automorphism of an EllObj + pullSection compat (sub-ticket)
+- **Status**: in_progress · **Claimed**: beastmode-H, 2026-07-06T17:05Z ·
+  **File**: Moduli/GammaH.lean (helpers section before T-H7; /cleanup may relocate) ·
+  **Parent**: T-H7 · **Depends on**: none · **Type**: def + lemmas
+- **Statements**:
+  `EllipticCurve.mulBy_comp_mulBy : E.mulBy m ≫ E.mulBy n = E.mulBy (m * n)`;
+  `EllipticCurve.zero_comp_mulByHom : E.zero ≫ E.mulByHom n = E.zero`;
+  `EllObj.negIso (X : EllObj R) : X ≅ X` (baseHom `𝟙`, top `mulByHom (-1)`);
+  `EllObj.pullSection_negIso : EllHom.pullSection R X.negIso.hom P = -P`.
+- **Proof sketch**: (1) `mulBy = (𝟙)^n` in `Hom.group`; `mulBy m ≫ mulBy n =
+  (mulBy m ≫ 𝟙)^n` by `GrpObj.comp_zpow`, then `zpow_mul`-arithmetic. (2) zero:
+  `smul_zero` + `point_smul_eq_comp_mulBy` at the Section level + `point_zero_val`
+  (TorsionFibre) + `Category.id_comp`. (3) `negIso`: hom/inv both from top
+  `mulByHom (-1)` over `𝟙`; `hom_inv_id` by EllHom.ext from
+  `mulBy_comp_mulBy` at `(-1)*(-1)=1` + `mulBy_one : mulBy 1 = 𝟙` (from `zpow_one`);
+  `isPullback` by `IsPullback.of_horiz_isIso` (IsIso from self-inverse); `zero_w`
+  from (2). (4) `pullSection_negIso`: `isPullback.hom_ext`; fst-leg: `(-P).1 ≫
+  mulByHom (-1) = P.1` via `neg_one_zsmul`, `point_smul_eq_comp_mulBy`,
+  `mulByHom`-self-comp; snd-leg: section property.
+- **Mathlib lemmas**: `GrpObj.comp_zpow`, `zpow_mul`/`zpow_one`, `neg_one_zsmul`,
+  `IsPullback.of_horiz_isIso`, `IsPullback.hom_ext`.
+- **Sources**: parent T-H7 attack block; mulBy def GroupLaw.lean:85.
+- **Generality**: mulBy lemmas for all `m n : ℤ` (upstream-shaped); negIso minimal.
+
+### [T-H7b] naive full level structures exist over an algebraically closed base (sub-ticket)
+- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+  **Parent**: T-H7 · **Depends on**: T-H7b-i · **Type**: theorem
+- **Statement**: `(k : Type u) [Field k] [IsAlgClosed k]
+  (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N] (hN : N ≤ 2)
+  (hk : (N : k) ≠ 0) : ∃ P Q : E.Section, E.IsNaiveFullLevel N P Q`.
+- **Proof sketch**: N=1: `(0,0)`; killing by `one_zsmul`→`P=0`; generation: `1•x=0`
+  forces `x=0` (`one_zsmul`), `zero_mem`. N=2: `torsion_geometricFibre_rank_two`
+  at `t = 𝟙` gives `e : torsionBy ℤ (E.Section) 2 ≃+ (Fin 2 → ZMod 2)`; set
+  `P := e.symm ![1,0]`, `Q := e.symm ![0,1]`; killing = torsionBy membership.
+  Generation at `(k', t' : Spec k' ⟶ Spec k)`: headline again gives
+  `torsionBy ℤ (E.Point t') 2` of card 4; `Point.pull` restricted to 2-torsion is
+  injective (T-H7b-i + card/Klein-four argument: two distinct nonzero elements of
+  `(ℤ/2)²` generate); transport membership through `AddSubgroup.closure`.
+- **Mathlib lemmas**: `Nat.card` of `ZMod`-pi, `AddSubgroup.closure`,
+  `AddEquiv.symm`, Klein-four generation (search `ZMod` two-torsion API).
+- **Sources**: T-B6 headline TorsionFibre.lean:385; attack block T-H7 step 3.
+- **Generality**: exactly `N ≤ 2` (the theorem needs no more; full-level existence
+  for general `N` is T-H4/T-B6 territory).
+
+### [T-H7b-i] point separation along extensions of the base field (sub-sub-ticket)
+- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+  **Parent**: T-H7b · **Depends on**: none · **Type**: lemma
+- **Statement**: `{k k' : Type u} [Field k] [Field k'] (f : k →+* k')
+  (E : EllipticCurve S) (t : Spec (CommRingCat.of k) ⟶ S) :
+  Function.Injective (fun x : E.Point t => x.restrict (Spec.map (CommRingCat.ofHom f)))`
+  (up to the `Point (g ≫ t)` transport).
+- **Proof sketch**: reduces to `Spec.map (ofHom f)` being an epimorphism onto maps
+  into `E.E`: two morphisms `Spec k ⟶ E.E` with equal precompositions land at the
+  same point (surjectivity of `Spec.map` of a field embedding) and their residue
+  maps agree after composing with injective `f` — mathlib route candidates:
+  `Scheme.SpecToEquivOfField` (morphism-from-field-spec classification) or
+  epi-transfer through the affine-scheme equivalence. Five-method search at start.
+- **Mathlib lemmas**: `Scheme.SpecToEquivOfField` (verify name), `Spec.map`,
+  field-hom injectivity.
+- **Sources**: standard (points of schemes over field extensions).
+- **Generality**: any scheme target (state for `E.E` or general `Y`; prefer general).
+
+### [T-H7c] `[-1] ≠ 𝟙` over a base with a geometric point (sub-ticket)
+- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+  **Parent**: T-H7 · **Depends on**: none · **Type**: lemma
+- **Statement**: `(k : Type u) [Field k] [IsAlgClosed k] (E : EllipticCurve S)
+  (t : Spec (CommRingCat.of k) ⟶ S) : E.mulByHom (-1) ≠ 𝟙 E.E`.
+- **Proof sketch**: assume `=`; then every `x : E.Point t` has `-x = x`
+  (`neg_one_zsmul` + `point_smul_eq_comp_mulBy` + `comp_id`), so `2•x = 0`.
+  Set `M := if (3:k) = 0 then 5 else 3`; `(M:k) ≠ 0` (char case-split; char 3 ⟹
+  `(5:k) = (2:k) ≠ 0`). `torsion_geometricFibre_rank_two M` gives
+  `torsionBy ℤ (E.Point t) M ≃+ (Fin 2 → ZMod M)`; `x := e.symm ![1,0] ≠ 0`
+  (`(1 : ZMod M) ≠ 0` for `M ≥ 3`). Then `M•x = 0 ∧ 2•x = 0` with
+  `IsCoprime (2:ℤ) M` ⟹ `x = 0` (Bézout combination), contradiction.
+- **Mathlib lemmas**: `neg_one_zsmul`, `Int.isCoprime_iff_gcd_eq_one` (or
+  `Nat.Coprime` + cast), `ZMod.one_ne_zero` (M ≥ 3 side conditions), `CharP` API
+  for the case split.
+- **Sources**: attack block T-H7 step "e ≠ refl via odd fibre torsion".
+- **Generality**: any `S`, any geometric point — reusable by T-H5/T-G3 later.
+
+### [T-H7d] geometric point of a nonempty `R`-scheme with `N` invertible (sub-ticket)
+- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+  **Parent**: T-H7 · **Depends on**: none · **Type**: lemma
+- **Statement**: `(X : EllObj R) (hne : Nonempty X.base) (N : ℕ)
+  (hinv : IsUnit (N : R)) : ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+  (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0`.
+- **Proof sketch**: `s := hne.some`; `κ := X.base.residueField s`;
+  `k := AlgebraicClosure κ`; `t := Spec.map (ofHom (algebraMap κ k)) ≫
+  X.base.fromSpecResidueField s`. `(N:k) ≠ 0`: transport `IsUnit (N : R)` along a
+  ring hom `R → k` extracted from `t ≫ X.structMap : Spec k ⟶ Spec R` (Spec-Γ
+  adjunction / `Scheme.residueFieldMap` route — verify names), then
+  `IsUnit.ne_zero` in the field.
+- **Mathlib lemmas**: `Scheme.fromSpecResidueField`, `Scheme.residueField`,
+  `AlgebraicClosure` instances, Spec-Γ adjunction hom equivalence (verify exact
+  name: `Scheme.homSpecEquiv`?), `IsUnit.map`, `IsUnit.ne_zero`.
+- **Sources**: standard.
+- **Generality**: for any `Scheme` with a `⟶ Spec R` — state against `X : EllObj R`
+  minimally (match use site per beastmode rule).
