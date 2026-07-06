@@ -555,22 +555,24 @@ private lemma muNRingMap_finrank (N : ℕ) [NeZero N] (y : PrimeSpectrum (ULift.
   have hfr : Module.finrank ℤ (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) = N := by
     have h := (AdjoinRoot.powerBasis' (muN_poly_monic N)).finrank
     rw [AdjoinRoot.powerBasis'_dim] at h
-    exact h.trans (by simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (a := (1 : ℤ)))
-  simp [hfr]
+    exact h.trans (by simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (r := (1 : ℤ)))
+  simp only [Pi.natCast_apply, Nat.cast_id]
+  exact hfr
 
 theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
     (muNπ S N).finrank s = N := by
-  haveI : IsFinite (Spec.map (muNRingMap.{u} N)) :=
-    (IsFinite.SpecMap_iff _).mpr (muNRingMap_finite N)
-  haveI : Flat (Spec.map (muNRingMap.{u} N)) :=
-    Flat.SpecMap_iff.mpr (muNRingMap_flat N)
-  rw [Scheme.Hom.finrank_of_isPullback
+  rw [@Scheme.Hom.finrank_of_isPullback (muN S N) (muNAbs N) S
+      (Spec (CommRingCat.of (ULift.{u} ℤ)))
       (pullback.snd (terminal.from S) (terminal.from (muNAbs N))) (muNπ S N)
       (Spec.map (muNRingMap.{u} N))
       (terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom)
-      (isPullback_muN S N).flip s,
-    Scheme.Hom.finrank_SpecMap_eq_finrank (muNRingMap_finite.{u} N) (muNRingMap_flat.{u} N),
-    muNRingMap_finrank]
+      (isPullback_muN S N).flip
+      (Flat.SpecMap_iff.mpr (muNRingMap_flat N))
+      ((IsFinite.SpecMap_iff _).mpr (muNRingMap_finite N)) s]
+  refine Eq.trans ?_ (muNRingMap_finrank N
+    ((terminal.from S ≫ (terminalIsoIsTerminal specULiftZIsTerminal).hom) s))
+  exact congrFun
+    (Scheme.Hom.finrank_SpecMap_eq_finrank (muNRingMap_finite N) (muNRingMap_flat N)) _
 
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
