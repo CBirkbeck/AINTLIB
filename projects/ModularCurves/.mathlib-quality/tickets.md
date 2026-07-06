@@ -3495,6 +3495,21 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     value-transport.
     T-Q6c `simul_representable` : δ.Representable → 𝒫.RelativelyRepresentable →
     (𝒫.simul δ).Representable — KM step (i), fully formal, NO black box.
+    Q6a+Q6b DONE (2026-07-07T00:15Z, commit "T-Q6a/b"): simul (pointwise
+    product, defeq-transparent obj/map + @[simp] lemmas), pullbackAlongπ,
+    toPullbackAlong/isoPullbackAlong (every Ell/R-morphism is cartesian),
+    homToPullbackAlong + homPullbackAlongEquiv (universal property of the
+    tautological square), toPullbackAlong_pullbackAlongMap (decomposition).
+    Q6c DONE (2026-07-07T00:40Z, commit "T-Q6c"): **simul_representable
+    PROVEN** — (P.simul δ).Representable from δ.Representable +
+    P.RelativelyRepresentable, via simulRepresentableBy (universal-element
+    toFun ⟹ homEquiv_comp = functoriality; invFun via homToPullbackAlong;
+    map_val_eq transport by subst-generalization). All sorry-free, zero
+    warnings, standard axioms. GOTCHA OF RECORD: mixed defeq-spellings
+    ((v ≫ π).baseHom vs v.baseHom ≫ f) poison rw/simp kabstract at
+    instances-transparency ("target not type-correct" note) — workarounds:
+    erw (5 uses, cleanup-flagged), pure-term proofs (trans/congrArg), dsimp
+    only to beta-reduce Equiv-field goals, pin of_horiz_isIso with named args.
     T-Q6d engine statement (the axiomatized claim, quote above) + assembly:
     vocabulary `G →* Aut δ` (mathlib-native, no new structure), induced action
     on `simul`, freeness-from-rigidity, quotient via T-Q3/T-Q5 machinery
