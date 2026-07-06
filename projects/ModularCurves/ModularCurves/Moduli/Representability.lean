@@ -1,4 +1,5 @@
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.ForMathlib.TateNormalForm
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.RingTheory.Localization.Away.Basic
 
@@ -55,6 +56,7 @@ fibre"; division-polynomial dictionary: Silverman III Ex. 3.7 / mathlib
 def NowhereOrderLEThree (W : WeierstrassCurve R) (x y : R) : Prop :=
   IsUnit ((W.Ψ 2).evalEval x y * (W.Ψ 3).evalEval x y)
 
+open WeierstrassCurve.Affine in
 /-- **(T-E1 = Loeffler Prop 3.3.4, ring level — PROVABLE-NOW target)** If `W/R` is
 elliptic and `(x, y)` is a rational point nowhere of order `≤ 3`, there exist unique
 `(α, β)` and a unique change of variables `vc` with `vc • W` in Tate normal form and
@@ -65,7 +67,19 @@ uniqueness by comparing coefficients. All at the level of mathlib's `VariableCha
 theorem exists_unique_variableChange_isTateNormal (W : WeierstrassCurve R) [W.IsElliptic]
     (x y : R) (h : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
     ∃! vc : WeierstrassCurve.VariableChange R,
-      (vc • W).IsTateNormal ∧ vc.r = x ∧ vc.t = y := by sorry
+      (vc • W).IsTateNormal ∧ vc.r = x ∧ vc.t = y := by
+  obtain hR | hR := subsingleton_or_nontrivial R
+  · exact ⟨⟨1, x, 0, y⟩, ⟨⟨Subsingleton.elim _ _, Subsingleton.elim _ _, Subsingleton.elim _ _⟩,
+      rfl, rfl⟩, fun vc _ ↦ by ext <;> subsingleton⟩
+  · obtain ⟨h2, h3⟩ := IsUnit.mul_iff.mp hord
+    simp only [W.Ψ_two, W.Ψ_three, evalEval_C] at h2 h3
+    have hns : W.toAffine.Nonsingular x y := ⟨h, Or.inr h2.ne_zero⟩
+    have : (Point.some x y hns).NeZero := ⟨Point.some_ne_zero hns⟩
+    have : (Point.some x y hns).TwiceNeZero := Point.twiceNeZero_of_isUnit _ h2
+    have : (Point.some x y hns).ThriceNeZero := Point.thriceNeZero_of_isUnit _ h3
+    exact ⟨W.toAffine.toTateNF (.some x y hns), ⟨⟨toTateNF_a₂₃ W (.some x y hns),
+      toTateNF_a₄ W (.some x y hns), toTateNF_a₆ W (.some x y hns)⟩, rfl, rfl⟩,
+      fun vc hvc ↦ toTateNF_unique W (.some x y hns) vc hvc.2.1 hvc.2.2 hvc.1.2.1 hvc.1.1⟩
 
 /-- The universal Tate-normal Weierstrass curve `E(A, B) : Y² + AXY + BY = X³ + BX²` over
 `ℤ[A, B]`. Source: Loeffler Def 3.3.3. -/

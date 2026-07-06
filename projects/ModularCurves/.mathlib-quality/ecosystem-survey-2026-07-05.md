@@ -63,7 +63,8 @@ group law), #40500 (Hopf ≌ affine group schemes); YaelDillies/toric
 
 | Vendored file | Source | Delete when |
 |---|---|---|
-| (none yet — first candidates: #25218 → T-E1/T-E2; toric `Diag` → T-B2) | | |
+| `ModularCurves/ForMathlib/TateNormalForm.lean` | mathlib PR #25218 (kckennylau/tatenf @ 8b7741e0), Apache-2.0 | PR #25218 merges (then switch T-E1 to mathlib's `toTateNF` and offer our `toTateNF_unique` + `Ψ₃_eval_X` additions on the PR thread) |
+| (next candidates: toric `Diag` → T-B2) | | |
 
 **Tier 2 — RESOLVED by author permission (owner, 2026-07-05):** XYin (owner's
 student) and loefflerd/ModularFormDimensions — copying permitted; treat as Tier 1

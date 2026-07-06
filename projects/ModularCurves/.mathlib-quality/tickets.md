@@ -41,7 +41,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 ---
 
 ### [T-E1] Tate normal form (ring level) — PROVABLE NOW
-- **Status**: open · **File**: Moduli/Representability.lean ·
+- **Status**: done (beastmode, 2026-07-06T00:35Z → 2026-07-06T01:25Z) · **File**: Moduli/Representability.lean ·
   `exists_unique_variableChange_isTateNormal`
 - **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Statement**: in skeleton (∃! `vc : VariableChange R`, `(vc • W).IsTateNormal ∧
@@ -65,6 +65,26 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   coefficient formulas).
 - **Generality**: arbitrary `CommRing R` (Loeffler's proof is coefficient algebra +
   one sheaf-gluing step that is vacuous over a ring); no field/locality hypotheses.
+- **Progress**:
+  - 2026-07-06T00:40: Tier-1 vendor decision — mathlib PR #25218 (kckennylau, commit
+    8b7741e0) has the existence half over CommRing; vendored to
+    `ModularCurves/ForMathlib/TateNormalForm.lean` with provenance header (fixed for
+    current mathlib: explicit `some x y h` constructor args, calc/`mul_inv_cancel`
+    drift). VENDOR register updated below.
+  - 2026-07-06T01:00: PROJECT ADDITIONS (upstream candidates, in the vendored file):
+    `Ψ₃_eval_X` (bridge identity `Ψ₃(x) = (a₂+3x)pY² + pX·a₁·pY − pX²` on the curve,
+    cofactor `b₂ + 12x` — sympy-derived, linear_combination one-liner),
+    `twiceNeZero_of_isUnit`, `thriceNeZero_of_isUnit`, `toTateNF_unique` (uniqueness
+    half — s from a₄'=0, u from a₂'=a₃', both by unit cancellation; a₆' not needed).
+    Vendored file is fully sorry-free.
+  - 2026-07-06T01:10: `exists_unique_variableChange_isTateNormal` proven (subsingleton
+    split + IsUnit.mul_iff + Ψ_two/Ψ_three/evalEval_C + vendored toTateNF machinery).
+    Axioms: propext/Classical.choice/Quot.sound only.
+  - 2026-07-06T01:25: DONE — /cleanup single-decl ran (body 31 → 12 lines, all gates
+    pass, statement byte-identical). Flags recorded: `[W.IsElliptic]` unused by proof
+    (kept — source form, frozen statement); statement-line repacks blocked by freeze.
+    Post-proof cleanup: ✓ ran (gates pass, simplify n/a in single-decl mode, no
+    decompose flags).
 
 ### [T-E2] Universal Tate curve represents (ring level) — PROVABLE NOW · MILESTONE
 - **Status**: open · **File**: Moduli/Representability.lean · `tateRing_homEquiv`
