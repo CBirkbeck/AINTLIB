@@ -214,9 +214,26 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       --   · fst: sVlift≫hP2top≫fst(π,U.1.ι) = Vι≫g≫z = gV≫U.1.ι≫z = (gV≫sU)≫fst  [lift_fst ×3 + hgVfac];
       --   · snd: sVlift≫hP2top≫snd(π,U.1.ι) = 𝟙≫gV = gV = (gV≫sU)≫snd            [lift_snd ×2].
       -- Then rw hnat; from hez, `sU ≫ e.hom = isoSpecU.hom ≫ projModelZero W`; from hbridge,
-      -- `isoSpecV.inv ≫ gV ≫ isoSpecU.hom = Spec.map φ`; finish with `projModelZero_baseChange`
-      -- (`Spec.map φ ≫ projModelZero W = projModelZero W' ≫ projModelBaseChange`). ~20 lines.
-      sorry
+      -- `isoSpecV.inv ≫ gV ≫ isoSpecU.hom = Spec.map φ`; finish with `projModelZero_baseChange`.
+      simp only [Category.assoc, pullback.lift_fst, hB.isoPullback_hom_fst]
+      have hnat : pullback.lift (Vι ≫ pullback.lift (g ≫ z) (𝟙 T)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) (𝟙 _)
+            (by rw [Category.assoc, pullback.lift_snd, Category.comp_id, Category.id_comp]) ≫
+            hP2.isoPullback.hom ≫ pullback.fst (pullback.snd π U.1.ι) gV =
+          gV ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) := by
+        refine pullback.hom_ext ?_ ?_
+        · simp only [Category.assoc, hP2.isoPullback_hom_fst_assoc, IsPullback.lift_fst,
+            pullback.lift_fst_assoc, pullback.lift_fst]
+          rw [reassoc_of% hgVfac]
+        · simp only [Category.assoc, hP2.isoPullback_hom_fst_assoc, IsPullback.lift_snd,
+            pullback.lift_snd_assoc, pullback.lift_snd, Category.id_comp, Category.comp_id]
+      have hsU : pullback.lift (U.1.ι ≫ z) (𝟙 _)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) ≫ e.hom =
+          U.2.isoSpec.hom ≫ projModelZero W := by
+        rw [← hez]; simp
+      rw [reassoc_of% hnat, hsU, ← reassoc_of% hbridge, Iso.inv_hom_id_assoc,
+        projModelZero_baseChange]
     · simp only [Category.assoc, hB.isoPullback_hom_snd, pullback.lift_snd]
       rw [hP2.isoPullback_hom_snd_assoc, pullback.lift_snd_assoc, Category.id_comp,
         Iso.inv_hom_id]
