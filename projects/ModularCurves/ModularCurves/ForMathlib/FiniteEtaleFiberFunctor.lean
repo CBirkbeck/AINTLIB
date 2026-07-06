@@ -33,43 +33,42 @@ namespace FiniteEtaleGalois
 
 variable (k : Type u) [Field k] (Ω : Type u) [Field Ω] [Algebra k Ω]
 
+/-- The base change functor with both algebra universes pinned to `u`.  `baseChange`
+has a free object-universe parameter which otherwise leaks into every statement. -/
+noncomputable abbrev baseChangeU :
+    CommAlgCat.FiniteEtale.{u} k ⥤ CommAlgCat.FiniteEtale.{u} Ω :=
+  CommAlgCat.FiniteEtale.baseChange k Ω
+
 /-! Base change preserves the initial object (leaf AG-GG-2a). -/
 
 section Initial
 
 /-- `Ω ⊗[k] k` is the initial finite étale `Ω`-algebra. -/
 noncomputable def baseChangeInitialIso :
-    (CommAlgCat.FiniteEtale.baseChange k Ω).obj (CommAlgCat.FiniteEtale.of k k) ≅
+    (baseChangeU k Ω).obj (CommAlgCat.FiniteEtale.of k k) ≅
       CommAlgCat.FiniteEtale.of Ω Ω :=
   CommAlgCat.FiniteEtale.isoMk (Algebra.TensorProduct.rid k Ω Ω)
-
-/-- The unique-morphism structure on `FiniteEtale.of k k`, from the `Subsingleton` and
-`Nonempty` instances. -/
-noncomputable def uniqueHomFromSelf (A : CommAlgCat.FiniteEtale.{u} k) :
-    Unique (CommAlgCat.FiniteEtale.of k k ⟶ A) where
-  default := Nonempty.some inferInstance
-  uniq _ := Subsingleton.elim _ _
 
 /-- `FiniteEtale.of k k` is initial. -/
 noncomputable def isInitialOfSelf : IsInitial (CommAlgCat.FiniteEtale.of k k) :=
   haveI : ∀ A : CommAlgCat.FiniteEtale.{u} k,
-      Unique (CommAlgCat.FiniteEtale.of k k ⟶ A) := fun A => uniqueHomFromSelf k A
+      Unique (CommAlgCat.FiniteEtale.of k k ⟶ A) := fun _ =>
+    ⟨⟨Nonempty.some inferInstance⟩, fun _ => Subsingleton.elim _ _⟩
   IsInitial.ofUnique _
 
 lemma preservesInitial_baseChange :
     PreservesColimit (Functor.empty.{0} (CommAlgCat.FiniteEtale.{u} k))
-      (CommAlgCat.FiniteEtale.baseChange k Ω) := by
+      (baseChangeU k Ω) := by
   refine preservesInitial_of_iso _ ?_
   refine (initialIsoIsInitial (isInitialOfSelf Ω)).trans ?_
   refine (baseChangeInitialIso k Ω).symm.trans ?_
-  exact ((CommAlgCat.FiniteEtale.baseChange k Ω).mapIso
+  exact ((baseChangeU k Ω).mapIso
     (initialIsoIsInitial (isInitialOfSelf k))).symm
 
 lemma preservesColimitsOfShapePEmpty_baseChange :
-    PreservesColimitsOfShape (Discrete PEmpty.{1})
-      (CommAlgCat.FiniteEtale.baseChange k Ω) :=
+    PreservesColimitsOfShape (Discrete PEmpty.{1}) (baseChangeU k Ω) :=
   haveI := preservesInitial_baseChange k Ω
-  preservesColimitsOfShape_pempty_of_preservesInitial _
+  preservesColimitsOfShape_pempty_of_preservesInitial (baseChangeU k Ω)
 
 end Initial
 
