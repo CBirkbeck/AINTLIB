@@ -529,8 +529,42 @@ theorem muNπ_flat (S : Scheme.{u}) (N : ℕ) [NeZero N] : Flat (muNπ S N) :=
   MorphismProperty.of_isPullback (isPullback_muN S N).flip
     (Flat.SpecMap_iff.mpr (muNRingMap_flat N))
 
+private lemma muNRingMap_finrank (N : ℕ) [NeZero N] (y : PrimeSpectrum (ULift.{u} ℤ)) :
+    (muNRingMap N).hom.finrank y = N := by
+  haveI := (muN_poly_monic N).free_quotient
+  have hcomp : ULift.ringEquiv.symm.toRingHom.comp
+      (ULift.ringEquiv.toRingHom : ULift.{u} ℤ →+* ℤ) = RingHom.id _ :=
+    RingHom.ext fun x ↦ rfl
+  have hy : y = PrimeSpectrum.comap (ULift.ringEquiv.toRingHom : ULift.{u} ℤ →+* ℤ)
+      (PrimeSpectrum.comap ULift.ringEquiv.symm.toRingHom y) := by
+    rw [PrimeSpectrum.comap_comap, hcomp, PrimeSpectrum.comap_id]
+    rfl
+  rw [show (muNRingMap N).hom = (ULift.ringEquiv.symm.toRingHom.comp
+      (algebraMap ℤ (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}))).comp
+      ULift.ringEquiv.toRingHom from rfl,
+    RingHom.finrank_comp_right_of_bijective _ _ ULift.ringEquiv.bijective
+      (RingHom.Finite.comp
+        (RingHom.Finite.of_surjective _ ULift.ringEquiv.symm.surjective)
+        (RingHom.finite_algebraMap.mpr (muN_poly_monic N).finite_quotient))
+      (RingHom.Flat.comp (RingHom.flat_algebraMap_iff.mpr inferInstance)
+        (RingHom.Flat.of_bijective ULift.ringEquiv.symm.bijective))
+      y (PrimeSpectrum.comap ULift.ringEquiv.symm.toRingHom y) hy,
+    RingHom.finrank_comp_left_of_bijective _ _ ULift.ringEquiv.symm.bijective
+      (RingHom.finite_algebraMap.mpr (muN_poly_monic N).finite_quotient)
+      (RingHom.flat_algebraMap_iff.mpr inferInstance),
+    RingHom.finrank_algebraMap, Module.rankAtStalk_eq_finrank_of_free,
+    (AdjoinRoot.powerBasis' (muN_poly_monic N)).finrank, AdjoinRoot.powerBasis'_dim]
+  simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (a := (1 : ℤ))
+
 theorem muNπ_finrank (S : Scheme.{u}) (N : ℕ) [NeZero N] (s : S) :
-    (muNπ S N).finrank s = N := by sorry
+    (muNπ S N).finrank s = N := by
+  haveI : IsFinite (Spec.map (muNRingMap N)) :=
+    (IsFinite.SpecMap_iff _).mpr (muNRingMap_finite N)
+  haveI : Flat (Spec.map (muNRingMap N)) :=
+    Flat.SpecMap_iff.mpr (muNRingMap_flat N)
+  rw [Scheme.Hom.finrank_of_isPullback _ _ _ _ (isPullback_muN S N).flip s,
+    Scheme.Hom.finrank_SpecMap_eq_finrank (muNRingMap_finite N) (muNRingMap_flat N),
+    muNRingMap_finrank]
 
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous

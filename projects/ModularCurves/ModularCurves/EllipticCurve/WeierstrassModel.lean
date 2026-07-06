@@ -1444,6 +1444,25 @@ theorem span_dehomog_jacobian_eq_top_zero (W : WeierstrassCurve R) [W.IsElliptic
     · field_simp
       linear_combination hy0
 
+/-- The `R`-structuring of a chart factors through the plane-quotient chart
+identification. -/
+lemma algebraMap_chart_eq (W : WeierstrassCurve R) (i : Fin 3) :
+    ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      ((chartCoordEquiv W i).toRingHom).comp
+        (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) := by
+  refine RingHom.ext fun r => ?_
+  show _ = chartCoordEquiv W i (algebraMap R _ r)
+  rw [show (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) r =
+      Ideal.Quotient.mk _ (MvPolynomial.C r) from by
+    rw [IsScalarTower.algebraMap_apply R (MvPolynomial {j : Fin 3 // j ≠ i} R) _,
+      Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]]
+  exact (chartCoordEquiv_mk_C W i r).symm
+
 /-- The structure map into each chart of the model is locally standard smooth of
 relative dimension 1, for elliptic `W`: the chart is `R[u,v]/(F̃ᵢ)`, covered by the
 loci where one of the two partials is invertible (Jacobian comaximality), and each
@@ -1984,6 +2003,10 @@ theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     (Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
       (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R'))))]
   intro i
+  haveI : DecidableEq ((Scheme.Pullback.openCoverOfLeft (modelChartCover W).openCover
+      (projModelπ W) (Spec.map (CommRingCat.ofHom
+        (algebraMap R R')))).toPreZeroHypercover.1) :=
+    inferInstanceAs (DecidableEq (Fin 3))
   have hcosp : (modelChartCover W).openCover.f i ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom
         ((algebraMap (↥(quotientGrading (projIdeal W) 0))
@@ -1992,7 +2015,6 @@ theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
         ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) :=
     awayι_projModelπ W i
   sorry
-
 end TensorComparison
 
 end BaseChangeGraded
