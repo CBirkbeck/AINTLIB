@@ -3444,8 +3444,33 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     Files: ForMathlib/SchemeQuotient.lean (NEW). NOTE: T-Q6/T-Q7 consume the
     STATEMENT of T-Q5d only — they unblock at skeleton time.
 - **[T-Q6]** quotients of rigidified moduli problems (KM 4.7 ⇐ engine; T-E5).
-  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T22:50Z ·
-    **File**: Moduli/QuotientProblem.lean (NEW)
+  - **Status**: done (2026-07-07T02:10Z; scope-of-record met: Q6a-c + Q6d
+    machinery PROVEN, Scholie assembly stated + gated — see T-Q6e) ·
+    **Claimed**: beastmode-Q, 2026-07-06T22:50Z ·
+    **Files**: Moduli/QuotientProblem.lean (NEW), ForMathlib/RepresentableAut.lean
+    (NEW), ForMathlib/SchemeQuotient.lean (SchemeAction.ofAut added)
+  - **DELIVERED (all sorry-free + axiom-clean unless noted)**: Q6a `simul`;
+    Q6b `pullbackAlongπ`/`toPullbackAlong`/`isoPullbackAlong`/
+    `homToPullbackAlong`/`homPullbackAlongEquiv`/`toPullbackAlong_pullbackAlongMap`
+    + `connectHom` (KM's θ(g)) + `eq_id_of_baseHom_of_comp` (relative-mono);
+    Q6c **`simul_representable`** (KM 4.7 step (i), fully formal);
+    Q6d action chain: `RepresentableBy.transportHom`/`autMulHom` (ForMathlib,
+    generic Aut-transport along representability, upstream candidate),
+    `simulMapSnd`/`simulAutSnd`, `EllObj.autBase`, `SchemeAction.ofAut`,
+    **`simulSchemeAction`** (the KM geometric action landing in T-Q5/T-Q3
+    vocabulary); Q6d vocabulary: `RelRepData` (+ iff-bridge), `TorsorData`
+    (KM axiom 2, conventions attack-adjudicated in q-lane.md);
+    **`simulSchemeAction_free_of_rigid` PROVEN** (KM p. 113 θ(γ)-argument,
+    first-try green; endgame via mathlib `isEmpty_of_commSq_sigmaι_of_ne`).
+    ONE sorry: `representable_of_rigid_of_torsor` (SCHOLIE 4.7.0) — see T-Q6e.
+- **[T-Q6e]** (open; the gated tail of T-Q6) prove `representable_of_rigid_of_torsor`
+  (Moduli/QuotientProblem.lean): assembly per KM pp. 112–116 route banked in the
+  docstring. GATES: (1) T-Q2's A7.1.1/SGA III Exp. V 4.1 statements
+  (ForMathlib/InvariantTorsor.lean — free action ⟹ π is a finite étale G-torsor)
+  must land for the quotient-torsor step; (2) stream-DESC descent of the
+  universal curve + 𝒫-structure (SGA I Exp. VIII; `levelledCurve_descent_of_torsor`
+  shape, T-E10 v2). The affine quotient itself is T-Q3 (DONE); the freeness input
+  is `simulSchemeAction_free_of_rigid` (DONE). Cut/claim when the gates land.
   - **QUOTE-GATE SATISFIED** (2026-07-06T22:45Z; KM 4.7 read from
     `katz-mazur-arithmetic-moduli-FULL.pdf` pdf pp. 122–128 = book pp. 111–117;
     KM 7.1 read pdf pp. 197–199 = book pp. 186–188; Ch.4 Appendix (A.4) read pdf
