@@ -265,4 +265,164 @@ private lemma primePow_case (p v : ℕ) (hp : p.Prime) (hv : 0 < v) (H : Type u)
         (ZMod.ringEquivCongr hzm2).toAddEquiv)).trans
       (prodAddEquivFinTwoArrow (ZMod (p ^ v)))))⟩
 
+/-- The `a`-torsion, as an additive subgroup. -/
+private def nsmulKerSubgroup (H : Type u) [AddCommGroup H] (a : ℕ) : AddSubgroup H where
+  carrier := {x | a • x = 0}
+  zero_mem' := smul_zero a
+  add_mem' := fun {x y} hx hy => by
+    have hx' : a • x = 0 := hx
+    have hy' : a • y = 0 := hy
+    show a • (x + y) = 0
+    rw [smul_add, hx', hy', add_zero]
+  neg_mem' := fun {x} hx => by
+    have hx' : a • x = 0 := hx
+    show a • (-x) = 0
+    rw [smul_neg, hx', neg_zero]
+
+private lemma nsmulKerSubgroup_kill (H : Type u) [AddCommGroup H] (a : ℕ)
+    (z : nsmulKerSubgroup H a) : a • z = 0 := by
+  have h1 : a • (z : H) = 0 := z.2
+  exact Subtype.ext (by
+    rw [← h1]
+    exact map_nsmul (nsmulKerSubgroup H a).subtype a z)
+
+/-- Count transfer: the `d`-torsion of the `a`-torsion subgroup is the `d`-torsion,
+for `d ∣ a`. -/
+private def nsmulKerSubgroupKerEquiv (H : Type u) [AddCommGroup H] (a d : ℕ)
+    (hda : d ∣ a) :
+    {z : nsmulKerSubgroup H a // d • z = 0} ≃ {x : H // d • x = 0} where
+  toFun z := ⟨z.1.1, by
+    have h1 := congrArg ((nsmulKerSubgroup H a).subtype) z.2
+    rwa [map_nsmul, map_zero] at h1⟩
+  invFun x := ⟨⟨x.1, by
+      obtain ⟨c, hc⟩ := hda
+      show a • x.1 = 0
+      rw [hc, mul_comm d c, mul_smul, x.2, smul_zero]⟩,
+    Subtype.ext (by
+      have h1 : d • x.1 = 0 := x.2
+      rw [← h1]
+      exact map_nsmul (nsmulKerSubgroup H a).subtype d _)⟩
+  left_inv z := Subtype.ext (Subtype.ext rfl)
+  right_inv x := Subtype.ext rfl
+
+/-- Bezout splitting of a group killed by a coprime product into its two torsion parts. -/
+private noncomputable def coprimeTorsionSplit (H : Type u) [AddCommGroup H] (a b : ℕ)
+    (hco : Nat.Coprime a b) (hkill : ∀ x : H, (a * b) • x = 0) :
+    H ≃+ (nsmulKerSubgroup H a × nsmulKerSubgroup H b) := by
+  have hicop : IsCoprime (a : ℤ) (b : ℤ) := by
+    rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_natCast_natCast]
+    exact hco
+  obtain ⟨u, w, huw⟩ := hicop
+  have hkillZ : ∀ x : H, ((a : ℤ) * (b : ℤ)) • x = 0 := by
+    intro x
+    have h1 : ((a * b : ℕ) : ℤ) • x = 0 := by
+      rw [natCast_zsmul]
+      exact hkill x
+    rwa [Nat.cast_mul] at h1
+  have hmemA : ∀ x : H, (w * b) • x ∈ nsmulKerSubgroup H a := by
+    intro x
+    show a • ((w * (b : ℤ)) • x) = 0
+    rw [← natCast_zsmul, smul_smul,
+      show (a : ℤ) * (w * b) = w * ((a : ℤ) * b) from by ring, ← smul_smul, hkillZ,
+      smul_zero]
+  have hmemB : ∀ x : H, (u * a) • x ∈ nsmulKerSubgroup H b := by
+    intro x
+    show b • ((u * (a : ℤ)) • x) = 0
+    rw [← natCast_zsmul, smul_smul,
+      show (b : ℤ) * (u * a) = u * ((a : ℤ) * b) from by ring, ← smul_smul, hkillZ,
+      smul_zero]
+  refine
+    { toFun := fun x => (⟨(w * b) • x, hmemA x⟩, ⟨(u * a) • x, hmemB x⟩)
+      invFun := fun y => y.1.1 + y.2.1
+      left_inv := fun x => ?_
+      right_inv := fun y => ?_
+      map_add' := fun x y => ?_ }
+  · show (w * (b : ℤ)) • x + (u * (a : ℤ)) • x = x
+    rw [← add_zsmul, show w * (b : ℤ) + u * a = u * a + w * b from by ring, huw, one_zsmul]
+  · have hby1 : (w * (b : ℤ)) • (y.1.1 : H) = y.1.1 := by
+      have hay : (a : ℤ) • (y.1.1 : H) = 0 := by
+        rw [natCast_zsmul]
+        exact y.1.2
+      have h2 : (w * (b : ℤ)) • (y.1.1 : H) = (1 - u * a) • (y.1.1 : H) := by
+        rw [show (1 : ℤ) - u * a = w * b from by linarith [huw]]
+      rw [h2, sub_zsmul, one_zsmul, smul_smul, ← smul_smul, hay, smul_zero, sub_zero]
+    have hbz0 : (w * (b : ℤ)) • (y.2.1 : H) = 0 := by
+      have hby : (b : ℤ) • (y.2.1 : H) = 0 := by
+        rw [natCast_zsmul]
+        exact y.2.2
+      rw [smul_smul, ← smul_smul, hby, smul_zero]
+    have haz1 : (u * (a : ℤ)) • (y.2.1 : H) = y.2.1 := by
+      have hby : (b : ℤ) • (y.2.1 : H) = 0 := by
+        rw [natCast_zsmul]
+        exact y.2.2
+      have h2 : (u * (a : ℤ)) • (y.2.1 : H) = (1 - w * b) • (y.2.1 : H) := by
+        rw [show (1 : ℤ) - w * b = u * a from by linarith [huw]]
+      rw [h2, sub_zsmul, one_zsmul, smul_smul, ← smul_smul, hby, smul_zero, sub_zero]
+    have hay0 : (u * (a : ℤ)) • (y.1.1 : H) = 0 := by
+      have hay : (a : ℤ) • (y.1.1 : H) = 0 := by
+        rw [natCast_zsmul]
+        exact y.1.2
+      rw [smul_smul, ← smul_smul, hay, smul_zero]
+    refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
+    · show (w * (b : ℤ)) • (y.1.1 + y.2.1) = (y.1.1 : H)
+      rw [smul_add, hby1, hbz0, add_zero]
+    · show (u * (a : ℤ)) • (y.1.1 + y.2.1) = (y.2.1 : H)
+      rw [smul_add, hay0, haz1, zero_add]
+  · refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
+    · show (w * (b : ℤ)) • (x + y) = (w * (b : ℤ)) • x + (w * (b : ℤ)) • y
+      rw [smul_add]
+    · show (u * (a : ℤ)) • (x + y) = (u * (a : ℤ)) • x + (u * (a : ℤ)) • y
+      rw [smul_add]
+
+private def arrowProdAddEquiv (κ : Type) (A B : Type u) [AddCommGroup A]
+    [AddCommGroup B] : ((κ → A) × (κ → B)) ≃+ (κ → A × B) where
+  toFun x k := (x.1 k, x.2 k)
+  invFun f := (fun k => (f k).1, fun k => (f k).2)
+  left_inv _ := rfl
+  right_inv _ := rfl
+  map_add' _ _ := rfl
+
+/-- **Torsion-count characterisation of `(ℤ/N)²`** (pure group theory; T-B6e). A group
+killed by `N ≠ 0` whose `d`-torsion has exactly `d ^ 2` elements for every divisor
+`d` of `N` is isomorphic to `(Fin 2 → ZMod N)`. -/
+theorem addEquiv_pi_fin_two_zmod_of_natCard (N : ℕ) (hN : N ≠ 0) (H : Type u)
+    [AddCommGroup H] (hkill : ∀ x : H, N • x = 0)
+    (hcount : ∀ d : ℕ, 0 < d → d ∣ N → Nat.card {x : H // d • x = 0} = d ^ 2) :
+    Nonempty (H ≃+ (Fin 2 → ZMod N)) := by
+  induction N using Nat.recOnPosPrimePosCoprime generalizing H with
+  | prime_pow p n hp hn =>
+    refine primePow_case p n hp.nat_prime hn H hkill fun j hj => ?_
+    rw [hcount (p ^ j) (pow_pos hp.nat_prime.pos j) (pow_dvd_pow p hj)]
+  | zero => exact absurd rfl hN
+  | one =>
+    refine ⟨{ toFun := fun _ => 0
+              invFun := fun _ => 0
+              left_inv := fun x => ?_
+              right_inv := fun f => Subsingleton.elim _ _
+              map_add' := fun _ _ => (add_zero 0).symm }⟩
+    rw [← one_smul ℕ x, hkill x]
+  | coprime a b ha hb hco iha ihb =>
+    have haz : a ≠ 0 := by omega
+    have hbz : b ≠ 0 := by omega
+    have hkillA : ∀ z : nsmulKerSubgroup H a, a • z = 0 :=
+      nsmulKerSubgroup_kill H a
+    have hkillB : ∀ z : nsmulKerSubgroup H b, b • z = 0 :=
+      nsmulKerSubgroup_kill H b
+    have hcountA : ∀ d : ℕ, 0 < d → d ∣ a →
+        Nat.card {z : nsmulKerSubgroup H a // d • z = 0} = d ^ 2 := by
+      intro d hd hda
+      rw [Nat.card_congr (nsmulKerSubgroupKerEquiv H a d hda)]
+      exact hcount d hd (hda.trans (dvd_mul_right a b))
+    have hcountB : ∀ d : ℕ, 0 < d → d ∣ b →
+        Nat.card {z : nsmulKerSubgroup H b // d • z = 0} = d ^ 2 := by
+      intro d hd hdb
+      rw [Nat.card_congr (nsmulKerSubgroupKerEquiv H b d hdb)]
+      exact hcount d hd (hdb.trans (dvd_mul_left b a))
+    obtain ⟨ea⟩ := iha haz (nsmulKerSubgroup H a) hkillA hcountA
+    obtain ⟨eb⟩ := ihb hbz (nsmulKerSubgroup H b) hkillB hcountB
+    exact ⟨(coprimeTorsionSplit H a b hco hkill).trans
+      ((AddEquiv.prodCongr ea eb).trans ((arrowProdAddEquiv (Fin 2) (ZMod a)
+        (ZMod b)).trans (AddEquiv.piCongrRight fun _ =>
+          (ZMod.chineseRemainder hco).symm.toAddEquiv)))⟩
+
 end ModularCurves

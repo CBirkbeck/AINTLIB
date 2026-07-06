@@ -140,4 +140,15 @@ theorem comap_ideal_top_of_isAffine [IsAffine X] [IsAffine Y]
     rw [hz, map_zero] at hcomp
     exact hcomp
 
+/-- Over affine schemes, the scheme-theoretic preimage of ideal sheaves is
+multiplicative. -/
+theorem comap_mul_of_isAffine [IsAffine X] [IsAffine Y]
+    (I J : Y.IdealSheafData) (f : X ⟶ Y) :
+    (I * J).comap f = I.comap f * J.comap f := by
+  refine ext_of_isAffine ?_
+  rw [comap_ideal_top_of_isAffine (I * J) f (isAffineOpen_top X) (isAffineOpen_top Y),
+    ideal_mul, Pi.mul_apply, Ideal.map_mul, ideal_mul, Pi.mul_apply,
+    comap_ideal_top_of_isAffine I f (isAffineOpen_top X) (isAffineOpen_top Y),
+    comap_ideal_top_of_isAffine J f (isAffineOpen_top X) (isAffineOpen_top Y)]
+
 end AlgebraicGeometry.Scheme.IdealSheafData
