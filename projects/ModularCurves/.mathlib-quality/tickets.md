@@ -712,6 +712,31 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     (T^{N/p}−1)^p = T^N−1 nilpotent for p = char κ ∣ N. ULift-transports via
     RingHom-property-of-bijective composition lemmas (pattern proven in
     muNRingMap_finite/flat/finrank).
+  - 2026-07-06T11:50: (⟸) DONE — `etale_muNπ_of_isUnit` PROVED. Chain (all in
+    MuN.lean, private): `muNModel_isPushout` (AdjoinRoot(Xᴺ−1)/ℤ[1/N] is the
+    pushout of muNRing along ℤ→ℤ[1/N]; pure UP-proof via
+    `PushoutCocone.IsColimit.mk` + `AdjoinRoot.lift` as desc + `muNRing_hom_ext`;
+    KEY GOTCHA: ascribe `(s.inl.hom : muNAwayRing N →+* s.pt)` — AdjoinRoot.lift's
+    R picks up the bundled-carrier spelling otherwise and everything breaks
+    invisibly; term-glue congrArg chains instead of rw for mk-X computations);
+    `muNStdPair` ((Xᴺ−1, C N) standard étale: f'·X − N·f = N witness);
+    `muNModel_algebra_etale` (IsLocalization.atUnits collapse + equivAwayAdjoinRoot
+    + Algebra.Etale.of_equiv); `muNModelStruct_etale` (RingHom.etale_algebraMap);
+    assembly: factor S → Spec ℤ[1/N] via Away.lift on toSpecΓ (hom-ext to terminal
+    makes the square-leg identification FREE), `IsPullback.of_right`-extraction
+    with mid := t.lift, `MorphismProperty.of_isPullback` +
+    `HasRingHomProperty.Spec_iff`. New import: Mathlib.RingTheory.Etale.StandardEtale.
+    REMAINING (last sorry in file): `isUnit_of_etale_muNπ`. PLAN: (1) generalize
+    muNModel-pushout defs from Away(N) to arbitrary A : CommRingCat (proof is
+    base-agnostic); (2) reusable `isPullback_muN_baseChange` (θ, IsPullback θ π_T
+    π_S g) by the same of_right-extraction; (3) unit-criterion: IsUnit (N : Γ) ↔
+    basicOpen = ⊤ (grep exact name), pick s with (N : κ(s)) = 0, base-change étale
+    along fromSpecResidueField; (4) field case: A := κ(s)-instantiated LEFT-square
+    has g-leg 𝟙 ⟹ mid iso ⟹ Etale (Spec.map struct_κ) by iso-cancel ⟹
+    FormallyUnramified ⟹ `Algebra.FormallyUnramified.isReduced_of_field`;
+    contradiction: y := mk(X^{N/q}−1), y^q = 0 by `sub_pow_char` (q := ringChar κ,
+    prime since (N:κ)=0, q ∣ N via CharP.cast_eq_zero_iff), y ≠ 0 by
+    degree-lt-dvd.
   `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
   foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
 - **Depends on**: none · **Parallel**: yes · **Type**: theorems
@@ -1191,6 +1216,11 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
   lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
+  - **[T-D3b] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
+    successor), 2026-07-06T11:25Z · new file ForMathlib/IdealSheafMul.lean
+    (mathlib-only imports, independent of the A-chain); plan = D-off.2 sub-plan
+    (idealwise product on affineOpens, gluing via `Ideal.map_mul`); attack block
+    recorded at statement time per v5 rule.
 - [T-NORM0] norm/det of pushforward along finite locally free morphisms
   (`∧^r g_*`; engine for Cor 2.2.2, pairing C.2, charpoly bridge). HB-NORM.
 - [T-RED0] reduced-universal-base transfer principle (identities of morphisms of
