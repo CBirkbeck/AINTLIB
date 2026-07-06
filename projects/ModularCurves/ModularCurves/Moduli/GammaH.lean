@@ -500,7 +500,72 @@ has a nonzero point of odd order `M ∈ {3,5}` (T-B6), while `[-1] = 𝟙` force
 point to be `2`-torsion. -/
 theorem EllipticCurve.mulByHom_neg_one_ne_id (E : EllipticCurve S) (k : Type u)
     [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
-    E.mulByHom (-1) ≠ 𝟙 E.E := by sorry
+    E.mulByHom (-1) ≠ 𝟙 E.E := by
+  intro hid
+  -- If `[-1] = 𝟙`, every point over the geometric point is 2-torsion.
+  have h2tor : ∀ x : E.Point t, (2 : ℤ) • x = 0 := by
+    intro x
+    have hsm := E.point_smul_eq_comp_mulBy t (-1) x
+    rw [hid, Category.comp_id] at hsm
+    have hneg : -x = x := by
+      apply Subtype.ext
+      calc ((-x : E.Point t) : Spec (CommRingCat.of k) ⟶ E.E)
+          = (((-1 : ℤ) • x : E.Point t) : Spec (CommRingCat.of k) ⟶ E.E) := by
+            rw [neg_one_zsmul]
+        _ = (x : Spec (CommRingCat.of k) ⟶ E.E) := hsm
+    rw [two_zsmul]
+    nth_rewrite 2 [← hneg]
+    exact add_neg_cancel x
+  -- But for odd `M ≥ 3` invertible in `k`, `E[M](k) ≅ (ℤ/M)²` has a nonzero point,
+  -- and a 2-torsion `M`-torsion point with `gcd(2,M) = 1` is zero.
+  have key : ∀ M : ℕ, 3 ≤ M → Odd M → (M : k) ≠ 0 → False := by
+    intro M hM3 hModd hMk
+    haveI : NeZero M := ⟨by omega⟩
+    obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two M k t hMk
+    set xt := e.symm ![1, 0] with hxtdef
+    have hx0 : xt ≠ 0 := by
+      intro h0
+      have h1 : (![1, 0] : Fin 2 → ZMod M) = 0 := by
+        have h := congrArg e h0
+        rwa [hxtdef, AddEquiv.apply_symm_apply, map_zero] at h
+      have hone : (1 : ZMod M) = 0 := by simpa using congrFun h1 0
+      haveI : Fact (1 < M) := ⟨by omega⟩
+      exact one_ne_zero hone
+    have hxM : (M : ℤ) • (xt : E.Point t) = 0 :=
+      (Submodule.mem_torsionBy_iff _ _).mp xt.2
+    have hcop : IsCoprime (2 : ℤ) (M : ℤ) := by
+      have hnot2 : ¬ (2 ∣ M) := by
+        rw [Nat.odd_iff] at hModd
+        omega
+      have hnat : Nat.Coprime 2 M := (Nat.prime_two.coprime_iff_not_dvd).mpr hnot2
+      exact_mod_cast Nat.isCoprime_iff_coprime.mpr hnat
+    obtain ⟨u, v, huv⟩ := hcop
+    apply hx0
+    have hcoe : (xt : E.Point t) = 0 := by
+      calc (xt : E.Point t)
+          = (1 : ℤ) • (xt : E.Point t) := (one_zsmul _).symm
+        _ = (u * 2 + v * (M : ℤ)) • (xt : E.Point t) := by rw [huv]
+        _ = u • ((2 : ℤ) • (xt : E.Point t)) + v • ((M : ℤ) • (xt : E.Point t)) := by
+            rw [add_zsmul, mul_zsmul, mul_zsmul]
+        _ = 0 := by rw [h2tor, hxM, smul_zero, smul_zero, add_zero]
+    exact_mod_cast hcoe
+  -- Choose `M ∈ {3, 5}` by the residue characteristic.
+  by_cases h3 : (3 : k) = 0
+  · refine key 5 (by norm_num) ⟨2, by norm_num⟩ ?_
+    intro h5
+    haveI : CharP k (ringChar k) := ringChar.charP k
+    have hd3 : ringChar k ∣ 3 :=
+      (CharP.cast_eq_zero_iff k (ringChar k) 3).mp (by exact_mod_cast h3)
+    have hd5 : ringChar k ∣ 5 :=
+      (CharP.cast_eq_zero_iff k (ringChar k) 5).mp (by exact_mod_cast h5)
+    have hd2 : ringChar k ∣ 2 := by
+      have h := Nat.dvd_sub hd5 hd3
+      norm_num at h
+      exact h
+    have h := Nat.dvd_sub hd3 hd2
+    norm_num at h
+    exact not_subsingleton k h
+  · exact key 3 le_rfl ⟨1, by norm_num⟩ h3
 
 /-- **(T-H7b)** Naive full level-`N` structures exist over an algebraically closed
 base when `N ≤ 2` and `N` is invertible: for `N = 1` the zero pair works (the killing
