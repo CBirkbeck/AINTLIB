@@ -28,7 +28,7 @@ This is the vocabulary layer of the quotient of a scheme by a finite group
 
 universe u
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
 namespace AlgebraicGeometry
 
@@ -143,6 +143,7 @@ theorem exists_isStableOpen_isAffineOpen [Finite G]
 
 /-- The local quotient of a `G`-stable affine open: `Spec (Γ(X, V)ᴳ)` (T-Q5c,
 local piece). -/
+@[reducible]
 noncomputable def localQuotient {V : X.Opens} (hV : σ.IsStableOpen V) : Scheme.{u} :=
   letI := σ.gammaMulSemiringAction hV
   Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, V) G))
@@ -275,6 +276,107 @@ theorem localQuotientπ_localQuotientMap {W V : X.Opens} (hW : σ.IsStableOpen W
   show (hWa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, W) ℤ) ≫
       σ.localQuotientMap hW hWa hV hVa hWV = _
   rw [Category.assoc, h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+
+section OpenImmersion
+
+variable {W V : X.Opens}
+
+/-- The "window" of a smaller open inside the affine identification of a stable
+affine open: `W ⟶ Spec Γ(X, V)`. -/
+private noncomputable def windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V) :
+    (W : Scheme.{u}) ⟶ Spec Γ(X, V) :=
+  X.homOfLE hWV ≫ hVa.isoSpec.hom
+
+private instance (hWV : W ≤ V) (hVa : IsAffineOpen V) :
+    IsOpenImmersion (windowHom (X := X) hWV hVa) := by
+  rw [windowHom]
+  infer_instance
+
+/-- The window intertwines the restricted geometric action with `specSMul` of the
+section-ring action. -/
+private theorem resLE_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) (g : G) :
+    letI := σ.gammaMulSemiringAction hV
+    (σ.hom g).resLE W W (hW.le_preimage g) ≫ windowHom hWV hVa =
+      windowHom hWV hVa ≫ specSMul g := by
+  letI := σ.gammaMulSemiringAction hV
+  show (σ.hom g).resLE W W (hW.le_preimage g) ≫ X.homOfLE hWV ≫ hVa.isoSpec.hom =
+    (X.homOfLE hWV ≫ hVa.isoSpec.hom) ≫ specSMul g
+  rw [← Category.assoc, resLE_homOfLE σ hW hV hWV g, Category.assoc,
+    resLE_isoSpec_hom σ hV hVa g, Category.assoc]
+
+/-- Stability of the window range under the section-ring action. -/
+private theorem specSMul_mem_range_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) (g : G)
+    (x : Spec Γ(X, V))
+    (hx : x ∈ Set.range ⇑(windowHom (X := X) hWV hVa)) :
+    letI := σ.gammaMulSemiringAction hV
+    specSMul g x ∈ Set.range ⇑(windowHom (X := X) hWV hVa) := by
+  letI := σ.gammaMulSemiringAction hV
+  obtain ⟨w, rfl⟩ := hx
+  refine ⟨(σ.hom g).resLE W W (hW.le_preimage g) w, ?_⟩
+  rw [← Scheme.Hom.comp_apply, resLE_windowHom σ hWV hVa hW hV g,
+    Scheme.Hom.comp_apply]
+
+/-- The open of the local quotient carved out by a smaller stable open. -/
+private noncomputable def imageOpens (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) :
+    (σ.localQuotient hV).Opens :=
+  letI := σ.gammaMulSemiringAction hV
+  ⟨⇑(invariantsπ G ↑Γ(X, V) ℤ).base '' Set.range ⇑(windowHom (X := X) hWV hVa),
+    isOpen_image_invariantsπ_of_stable G ↑Γ(X, V) ℤ
+      (windowHom (X := X) hWV hVa).isOpenEmbedding.isOpen_range
+      (fun g x hx => specSMul_mem_range_windowHom σ hWV hVa hW hV g x hx)⟩
+
+/-- Saturation: the pullback of the image open is exactly the window. -/
+private theorem range_fst_imageOpens (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    Set.range ⇑(pullback.fst (invariantsπ G ↑Γ(X, V) ℤ)
+        (imageOpens σ hWV hVa hW hV).ι) =
+      Set.range ⇑(windowHom (X := X) hWV hVa) := by
+  letI := σ.gammaMulSemiringAction hV
+  rw [IsOpenImmersion.range_pullbackFst, Scheme.Opens.opensRange_ι]
+  ext x
+  constructor
+  · intro hx
+    obtain ⟨t, ht, htx⟩ := hx
+    obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G ↑Γ(X, V) ℤ t x).mp htx
+    rw [← hg]
+    exact specSMul_mem_range_windowHom σ hWV hVa hW hV g t ht
+  · intro hx
+    show invariantsπ G ↑Γ(X, V) ℤ x ∈
+      (imageOpens σ hWV hVa hW hV : Set (σ.localQuotient hV))
+    exact ⟨x, hx, rfl⟩
+
+/-- The window is the pullback of the image open: the canonical isomorphism. -/
+private noncomputable def windowIso (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    (W : Scheme.{u}) ≅
+      pullback (invariantsπ G ↑Γ(X, V) ℤ) (imageOpens σ hWV hVa hW hV).ι :=
+  letI := σ.gammaMulSemiringAction hV
+  IsOpenImmersion.isoOfRangeEq (windowHom (X := X) hWV hVa) (pullback.fst _ _)
+    (range_fst_imageOpens σ hWV hVa hW hV).symm
+
+private theorem windowIso_hom_fst (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    (windowIso σ hWV hVa hW hV).hom ≫
+        pullback.fst (invariantsπ G ↑Γ(X, V) ℤ) (imageOpens σ hWV hVa hW hV).ι =
+      windowHom (X := X) hWV hVa :=
+  letI := σ.gammaMulSemiringAction hV
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+private theorem windowIso_inv_window (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    (windowIso σ hWV hVa hW hV).inv ≫ windowHom (X := X) hWV hVa =
+      pullback.fst (invariantsπ G ↑Γ(X, V) ℤ) (imageOpens σ hWV hVa hW hV).ι :=
+  letI := σ.gammaMulSemiringAction hV
+  IsOpenImmersion.isoOfRangeEq_inv_fac _ _ _
+
+end OpenImmersion
 
 end SchemeAction
 
