@@ -923,3 +923,162 @@ and the daily bump). T-E1/T-E2's #25218 check becomes: fetch the PR branch, vend
 or align, then work. T-B2 may vendor toric's `Diag` layer. Tier-2 (unlicensed:
 XYin, Loeffler, WenrongZou) = read + re-prove until a licence lands (owner pings).
 Tier-3 = track/steer the COH, Weil-divisor, descent-effectivity mathlib lanes.
+
+
+---
+
+## Amendments v5 (2026-07-06): ★ Stream-D claim + execution work order (beastmode-D)
+
+*Stream D (Drinfeld structures, `LevelStructure/*`) claimed by **beastmode-D**,
+2026-07-06T09:25Z. This section is the D-lane execution plan, written so any successor
+agent can continue without replanning. The stream star reserves the lane and records
+the plan; it does NOT lock tickets — claim ONE ticket at a time per rule 5. Binding
+proof plans: `decomposition-km1.md` (KM Ch. 1, all proofs read + transcribed).
+Adversarial coverage: every existing LevelStructure declaration has a complete
+≥3-attack block in `decompose-attacks-2026-07-06/level-structures.md` (22 SURVIVED /
+4 REJECTED / 6 NEEDS-FIX — **all ten flagged fixes are already applied in the
+skeleton**, re-verified in-file 2026-07-06T09:25Z), so standing rule 1 is satisfied
+for every sorried statement listed below. NEW helper declarations (T-D22…T-D32 etc.)
+still need their own attack blocks when first stated.*
+
+### D-lane ground state (verified against the files, 2026-07-06T09:25Z)
+
+18 sorried declarations across the four files; 17 are D-lane (1 is B-lane):
+
+| File | Sorry (decl : line) | Ticket |
+|---|---|---|
+| CartierDivisor.lean | `sectionsDivisor` :81 (DATA, DS4a) · `sectionsDivisor_degree` :94 | T-D3 |
+| | `baseChange.finite/flat/lfp` :104–106 | T-D12 |
+| | `isFullSetOfSectionsAlg_iff_fields` :155 | T-D2 |
+| ExactOrder.lean | `HasExactOrder.smul_eq_zero` :75 | T-D5 (PARKED on OT) |
+| | `hasExactOrder_iff_geometric` :89 · `hasExactOrder_iff_etale` :98 | T-D6 · T-D7 |
+| Basic.lean | `torsionIdeal_subscheme` :85 | **T-B3a — B-lane, do NOT claim from D** |
+| | `isFullLevel_iff_naive` :102 · `isGammaOne_iff_naive` :107 | T-D8 (⧗KM) · T-D9 |
+| Incidence.lean | `sectionVanishingIdeal_eq_span_coord` :69 | T-D13 |
+| | `exists_incidenceLocusLE` :97 · `exists_incidenceLocusEQ` :106 | T-D14 · T-D15 |
+| | `exists_subgroupLocus` :118 | T-D16 |
+| | `exists_exactOrderLocus` :131 · `exists_fullLevelLocus` :146 | T-D17 · T-D18 |
+
+State notes (what changed on 2026-07-06, so nobody re-litigates it):
+- T-D6/T-D7 attack obligation **RESOLVED** — standing hypothesis
+  `hkill : (N : ℤ) • P = 0` is in the skeleton (ExactOrder.lean:85/:96), docstrings
+  record the `ℚ̄[ε]` counterexamples. Workable as stated.
+- `torsionIdeal` is REAL (`(E.torsionι N).ker`, Basic.lean:77) — no longer a
+  data-sorry; its pin `torsionIdeal_subscheme` is T-B3a (B-lane). `IsNaiveGammaOne`
+  carries the global killing clause (also repairs T-E7's functor). `IsGammaZero`'s
+  cyclicity clause is in Drinfeld divisor form. `IsFullSetOfSectionsAlg` carries
+  `[Module.Free R B] [Module.Finite R B]` (norm-junk fix). `sectionsDivisor(_degree)`
+  is scope-pinned to KM 1.2.1 standing hypotheses (`IsSeparated` +
+  `SmoothOfRelativeDimension 1`).
+- **DS4a (`sectionsDivisor`) is the stream's only remaining data-sorry.** While T-D3
+  is open, downstream tickets use it through its specs ONLY (standing rule 2). Its
+  register pins are `sectionsDivisor_degree` + a base-change spec — the latter is
+  NOT yet stated in the skeleton; stating+proving it is part of T-D3 (below).
+- FLAT-stream independence: only T-D11's fibrewise-recognition equivalence needs
+  T-FLAT1 (HB-FIBCRIT); nothing else in the D-lane blocks on FLAT (decomposition-km1
+  D-off.4). HB-NOETH policy: try direct proofs first; NEVER strengthen a statement
+  to noetherian hypotheses (that is B2-grade target drift).
+
+### Execution order (waves; recommended claim order within each wave)
+
+**Wave 0 — pure-algebra helpers, independent, PROVABLE NOW.** New statements go in
+`ModularCurves/ForMathlib/` (upstream candidates, OURS register) as `:= by sorry`
+skeleton first (module must build green), attack block recorded (decomposition.md or
+a new file under `decompose-attacks-*/`), then prove.
+1. **T-D13** `sectionVanishingIdeal_eq_span_coord` (Incidence.lean:69) — the
+   equation-count engine of the whole incidence chain; smallest ticket — **START
+   HERE**. Proof: `le_antisymm` on spans; (≤) for `φ : Module.Dual R M`, expand
+   `σ = Σᵢ (b.repr σ i) • b i` so `φ σ = Σᵢ φ (b i) • (b.coord i σ)` ∈ span of the
+   coord-values; (≥) each `b.coord i` is itself a dual functional.
+2. **T-D3b** `IdealSheafData.mul` — affine-open-wise ideal product; gluing condition
+   via `Ideal.map_mul` (decomposition-km1 D-off.2). Gateway to T-D3.
+3. **T-D29** charpoly-as-norm: `LinearMap.charpoly f = Algebra.norm R[T] (T•1 − f⊗1)`
+   (same matrix det over `R[T]`). Self-contained; feeds T-D30/KM 1.8.2.
+4. **T-D24** finrank additivity in SES of finite free modules (localise + glue);
+   feeds degree additivity (D-curve.3).
+5. **T-D25** rank-1 locally free algebra ⟹ `algebraMap` iso (feeds KM 1.2.7) ·
+   **T-D26** degree-0 effective divisor is empty (feeds T-D15) · **T-D27** zero-locus
+   over `W` of a module = zero-locus over `S` of its f.l.f. pushforward (feeds
+   T-D16(3)).
+6. **T-D31** reduced-ring evaluation separation for `MvPolynomial` (feeds T-D2) ·
+   **T-D32** f.l.f.-map iso ⟺ geometric-fibre iso via `LinearMap.det` unit-locus
+   (feeds T-D6 (3)⟺(5)).
+
+**Wave 1 — scheme-side plumbing + the two proofs-in-hand theorems (parallel).**
+- **T-D12** (+**T-D20**): `baseChange.finite/flat/lfp` via mathlib base-change
+  stability instances + the `Scheme.Hom.ker`/`ker_subschemeι` dictionary; then flat
+  pullback + composition laws (D-off.3). Unlocks every universality argument.
+- **T-D2** `isFullSetOfSectionsAlg_iff_fields` (KM 1.9.1/1.9.2, proofs in hand):
+  coefficient comparison of degree-N forms in `R[T₁..T_N]` + T-D31; `Algebra.norm`
+  base-change (verify name; else via `LinearMap.det` + matrix ⊗).
+- **T-D22** (+**T-D23**) HB-REGIMM: section of separated smooth rel-dim-1 curve is a
+  closed immersion with locally principal nzd ideal — étale-local 𝔸¹ route
+  (D-curve.1 (a)–(c); GME p. 107 quotable). The engine for T-D3. T-D23 (closed point
+  of smooth curve over a field has DVR local ring) alongside.
+
+**Wave 2 — DS4a discharge.**
+- **T-D3**: single-section divisor from T-D22 → `sectionsDivisor` := fold of
+  `IdealSheafData.mul` (T-D3b) → `sectionsDivisor_degree` (T-D24 + degree-1 of a
+  section) → **STATE + prove the base-change spec `sectionsDivisor_baseChange`**
+  (formation commutes with base change — the register's second pin, currently
+  missing from the skeleton; adding it is in-scope for T-D3, not a statement change).
+  Then **CLEANUP-5** (CartierDivisor.lean; deps T-D2+T-D3) unblocks.
+
+**Wave 3 — incidence chain (KM 1.3; mostly sequential).**
+- **T-D14** `exists_incidenceLocusLE` (KM 1.3.4; proof transcribed, D-inc.2):
+  incidence = zero locus of `f̄ ∈ B′` (rank-d′ locally free) = `sectionVanishingIdeal`
+  glued over an affine cover; small lemma `sectionVanishingIdeal_unit_smul` en route.
+  Pull the verbatim KM 1.3.4 statement quote (preview pp. 12–13, IN HAND) into the
+  decomposition at pickup (attack-log QUOTE-MISSING #7).
+- **T-D15** EQ-locus via T-D14 + T-D26 → **CLEANUP-9** (Incidence.lean).
+- **T-D16** subgroup locus (KM 1.3.7 verbatim + proof in hand): three loci
+  (`[e] ≤ D`; `D = inv*D` via T-D20; `[m(P₁,P₂)] ≤ D_W` over `W = D ×_S D` via
+  T-D27); tautological-pair universality per D-inc.3(c).
+- **T-D17/T-D18** instances over the Hom-scheme (`E.torsion N` / the pullback
+  square): universal point = transported `𝟙`, multiples via Point-group, T-D16 over
+  that base, classifying-map equivalence by `pullback.lift` uniqueness (D-inc.4).
+  Pull KM 1.6.2/1.6.3/1.6.5 statement quotes (pp. 22–25, IN HAND; QUOTE-MISSING #6).
+  → **CLEANUP-10**. These two feed milestones T-E7/T-E9 directly.
+
+**Wave 4 — KM 1.4.4 theorems.**
+- **T-D6** (1)⟺(3) per the transcribed steps (§KM 1.4.4 of decomposition-km1).
+  Stream-B coupling: (2)⟹(3) consumes E[N] finite étale of rank N² (T-B4/T-B5); if
+  B hasn't landed, do the (3)⟺(4)/(3)⟺(5) legs first (T-D32 + KM 1.8.3) and leave
+  the B-edge last. **T-D7** (1)⟺(4) with/after it. → **CLEANUP-6** (ExactOrder.lean;
+  fold T-D5 in only if OT has landed).
+- **T-D9** — thin wrapper over T-D6 (def-level killing clause already applied);
+  golf-sized. **T-D8** Γ(N) version: workable for lemmas but **⧗KM (KM 3.7)** — may
+  NOT be closed until the full KM text lands (do-not-formalize-from-memory gate).
+  → **CLEANUP-7** (Basic.lean final).
+
+**Parked / gated (do not start until the gate opens):**
+- **T-D5** — stream OT (Deligne/Oort–Tate; T-OT0 after T-SG1). Statement frozen.
+- **T-D10** — definition of record = T-SG2 (fppf-local cyclicity). GATE: no Γ₀
+  representability against the `IsGammaZero` surrogate.
+- **T-D1/T-D19** — AG-LB. T-D11's working-definition half (affine-local official
+  predicate + Zariski-locality + T-D23 equivalence) is workable before AG-LB; the
+  (L,ℓ)-half is not.
+- **T-D21/T-D28/T-D30** — phase 2; T-D30 becomes cheap after T-D29.
+
+### Worker bootstrap (fresh agent, zero context)
+
+1. Worktree `/Users/mcu22seu/Documents/GitHub/aintlib-modular-curves`, branch
+   `dev/modular-curves` (LOCAL-ONLY: upstream is `origin/main`, there is no remote
+   dev branch — do not create one without owner say-so). Read, in order: this
+   section; `decomposition-km1.md`; `decompose-attacks-2026-07-06/
+   level-structures.md`; `plan.md` §DATA-SORRY register.
+2. Claim exactly ONE ticket per rule 5 (top of this file): add the Claimed line, set
+   Status, commit `tickets.md` ALONE — before touching any `.lean`. Sibling workers
+   are live in this shared worktree (T-B2 live and T-A3 freshly done at time of
+   writing): `git add` only your own files, never `-A`.
+3. New helper statements: `:= by sorry` skeleton first (module builds green), attack
+   block recorded, then prove. Board statements are FROZEN — a wrong statement is a
+   B2 report (`b2_log.jsonl`), never a silent edit.
+4. Verify per standing rule 3: `lake build` (one module at a time, from the worktree
+   root) green; your declaration sorry-free; `#print axioms` = the standard three +
+   registered `sorryAx` deps (list them in the closing note); no `maxHeartbeats`.
+   Tooling caution: `lake build` is the sole build authority on this machine (the
+   lean-lsp MCP build/goal/hover tools have caused toolchain-skew breakage here; its
+   network search tools — loogle/leansearch — are safe).
+5. Mark done per rule 5 (`Status: done (<worker>, <start> → <end>)` in the same
+   commit as the final proof); take the next wave item.
