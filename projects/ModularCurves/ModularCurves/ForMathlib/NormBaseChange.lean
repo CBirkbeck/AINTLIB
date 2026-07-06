@@ -46,14 +46,14 @@ theorem norm_tensor_map (ψ : A →ₐ[R] A') (f : A ⊗[R] B) :
     | add y₁ y₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂]
     | tmul a' z =>
       simp only [LinearMap.comp_apply, LinearEquiv.coe_coe,
-        AlgEquiv.toLinearEquiv_symm, AlgEquiv.toLinearEquiv_apply,
+        AlgEquiv.toLinearEquiv_apply,
         Algebra.coe_lmul_eq_mul, LinearMap.mul_apply']
       rw [show (e.toLinearEquiv.symm) (a' ⊗ₜ[R] z) =
           a' ⊗ₜ[A] ((1 : A) ⊗ₜ[R] z) from
         Algebra.TensorProduct.cancelBaseChange_symm_tmul
           (R := R) (S := A) (T := A') (A := A') (B := B) a' z]
       rw [LinearMap.baseChange_tmul]
-      simp only [Algebra.coe_lmul_eq_mul, LinearMap.mul_apply']
+      simp only [LinearMap.mul_apply']
       induction f with
       | zero => rw [map_zero, zero_mul, zero_mul, tmul_zero, map_zero]
       | add f₁ f₂ g₁ g₂ =>

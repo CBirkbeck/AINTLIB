@@ -103,11 +103,38 @@ def IsFullLevel (N : ℕ) [NeZero N] (P Q : E.Section) : Prop :=
             E.Point (𝟙 S))))).ideal =
       (E.torsionIdeal N)
 
+/-- **Register box `T-D8-bridge` (KM 3.7 / 1.4.4 for Γ(N))**: for `N` invertible and
+`P, Q` killed by `N`, the divisor `Σ_{(a,b)} [aP + bQ]` equals `E[N]` (the Drinfeld
+full-level condition) iff on every geometric point the pulled-back `P, Q` generate the
+`N`-torsion. This is the Γ(N) upgrade of KM 1.4.4's `(1) ⇔ (3)`, established via the
+reduced-base full-set-of-sections criterion (`isFullSetOfSectionsAlg_iff_fields`,
+T-D2, PROVED) glued to the fibre comparison `E[N]_{k̄} ≅ (ℤ/N)²` (T-B6); the `N²`
+sections `aP + bQ` are a full set iff they exhaust `E[N]` fibrewise. -/
+theorem fullLevel_divisor_iff_naive_gen (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
+    (P Q : E.Section) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal =
+      (E.torsionIdeal N) ↔
+      ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
+        ∀ x : E.Point t, (N : ℤ) • x = 0 →
+          x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q} := by
+  sorry
+
 /-- **(T-D8 = KM 3.7 / KM 1.4.4 upgraded to Γ(N))** For `N` invertible on `S`, Drinfeld
-full-level structures and naive full-level structures coincide. -/
+full-level structures and naive full-level structures coincide. Derived from the
+`T-D8-bridge` box; the killing clauses are shared structurally. -/
 theorem isFullLevel_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
     (P Q : E.Section) :
-    E.IsFullLevel N P Q ↔ E.IsNaiveFullLevel N P Q := by sorry
+    E.IsFullLevel N P Q ↔ E.IsNaiveFullLevel N P Q := by
+  constructor
+  · rintro ⟨⟨hP, hQ⟩, hdiv⟩
+    exact ⟨⟨hP, hQ⟩,
+      (fullLevel_divisor_iff_naive_gen E N hN P Q hP hQ).mp hdiv⟩
+  · rintro ⟨⟨hP, hQ⟩, hgen⟩
+    exact ⟨⟨hP, hQ⟩,
+      (fullLevel_divisor_iff_naive_gen E N hN P Q hP hQ).mpr hgen⟩
 
 /-- **(T-D9 = KM 1.4.4 (1) ⇔ (3), restated)** For `N` invertible, Drinfeld Γ₁(N) equals
 naive Γ₁(N). -/
