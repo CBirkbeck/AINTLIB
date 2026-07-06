@@ -5,9 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D29.
 -/
-import Mathlib.LinearAlgebra.Charpoly.ToMatrix
-import Mathlib.RingTheory.Norm.Defs
+import Mathlib.LinearAlgebra.Charpoly.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.RingTheory.Norm.Defs
 import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
@@ -42,27 +42,17 @@ namespace Algebra
 variable (R : Type u) (B : Type v) [CommRing R] [CommRing B] [Algebra R B]
   [Module.Free R B] [Module.Finite R B]
 
-/-- **Characteristic polynomial as a norm** (KM 1.8.2): for a finite free
-`R`-algebra `B` and `b : B`, the characteristic polynomial of multiplication by
-`b` equals the norm, relative to `(R[X] ⊗[R] B) / R[X]`, of `X ⊗ 1 − 1 ⊗ b`
-("`T − b`"). Both sides are `det (X • 1 − (leftMulMatrix b).map C)`. -/
+/-- **Characteristic polynomial as a norm** (KM 1.8.2): for a finite free `R`-algebra `B` and
+`b : B`, the characteristic polynomial of multiplication by `b` equals the norm, relative to
+`(R[X] ⊗[R] B) / R[X]`, of `X ⊗ 1 − 1 ⊗ b` ("`T − b`"). -/
 theorem charpoly_lmul_eq_norm (b : B) :
     (Algebra.lmul R B b).charpoly =
       Algebra.norm R[X] ((X : R[X]) ⊗ₜ[R] (1 : B) - (1 : R[X]) ⊗ₜ[R] b) := by
-  classical
-  rw [← LinearMap.charpoly_toMatrix (Algebra.lmul R B b) (Module.Free.chooseBasis R B),
-    Algebra.norm_eq_matrix_det ((Module.Free.chooseBasis R B).baseChange R[X]),
-    ← Algebra.leftMulMatrix_apply, Matrix.charpoly]
+  rw [LinearMap.charpoly_def, ← leftMulMatrix_apply, Matrix.charpoly,
+    norm_eq_matrix_det ((Module.Free.chooseBasis R B).baseChange R[X])]
   congr 1
-  refine Matrix.ext fun i j => ?_
-  rw [Algebra.leftMulMatrix_eq_repr_mul, Module.Basis.baseChange_apply, sub_mul,
-    Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul,
-    one_mul, mul_one, map_sub, Finsupp.sub_apply, Module.Basis.baseChange_repr_tmul,
-    Module.Basis.baseChange_repr_tmul, Module.Basis.repr_self, Finsupp.single_apply]
-  rcases eq_or_ne j i with rfl | h
-  · simp [Matrix.charmatrix_apply_eq, Algebra.leftMulMatrix_eq_repr_mul,
-      Algebra.smul_def, Polynomial.algebraMap_eq]
-  · simp [Ne.symm h, h, Algebra.leftMulMatrix_eq_repr_mul, Algebra.smul_def,
-      Polynomial.algebraMap_eq]
+  ext i j
+  simp [Matrix.charmatrix_apply, Matrix.diagonal_apply, leftMulMatrix_eq_repr_mul, sub_mul,
+    Finsupp.single_apply, smul_def, Polynomial.algebraMap_eq, eq_comm]
 
 end Algebra

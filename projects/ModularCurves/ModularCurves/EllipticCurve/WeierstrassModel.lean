@@ -2394,6 +2394,26 @@ end TensorComparison
 
 end BaseChangeGraded
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The section at infinity lands entirely in the `Y`-chart. -/
+lemma projModelZero_preimage_yChart (W : WeierstrassCurve R) :
+    projModelZero W ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) = ⊤ := by
+  unfold projModelZero
+  rw [Proj.fromOfGlobalSections_preimage_basicOpen (hn := one_pos)
+    (hr := mk_X_mem_quotientGrading_one W 1)]
+  rw [show ((Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom.comp
+      (projModelZeroEval W)) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 1)) = 1 from by
+    rw [RingHom.comp_apply]
+    rw [show (projModelZeroEval W) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 1)) = 1 from by
+      show (projModelZeroEval W) (Ideal.Quotient.mk _ (MvPolynomial.X 1)) = 1
+      rw [projModelZeroEval_mk]
+      simp]
+    rw [map_one]]
+  simp
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
