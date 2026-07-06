@@ -228,7 +228,7 @@ theorem ker_away_map_quotientGradingHom {d : ℕ} {F : A} (hF : F ∈ 𝒜 d)
     obtain ⟨c, rfl⟩ := hz
     rw [RingHom.mem_ker, map_mul]
     have hFzero : Away.map (quotientGradingHom I) s
-        (HomogeneousLocalization.Away.mk 𝒜 hs d F (by simpa using hF)) = 0 := by
+        (HomogeneousLocalization.Away.mk 𝒜 hs d F (by simp [hF])) = 0 := by
       rw [Away.map_mk]
       have hFI : (quotientGradingHom I) F = 0 := by
         rw [quotientGradingHom_apply, ← RingHom.mem_ker, Ideal.mk_ker, hI]

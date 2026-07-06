@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.GradedQuotient
+import ModularCurves.ForMathlib.ProjClosedImmersion
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
@@ -270,6 +271,40 @@ instance projModelπ_isProper (W : WeierstrassCurve R) : IsProper (projModelπ W
   haveI h2 : IsProper (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
     inferInstance
   exact MorphismProperty.IsStableUnderComposition.comp_mem _ _ h1 h2
+
+section Lfp
+
+open HomogeneousLocalization
+
+/-- The class of `X i` in the quotient grading, in degree one. -/
+lemma mk_X_mem_quotientGrading_one (W : WeierstrassCurve R) (i : Fin 3) :
+    Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i) ∈
+      quotientGrading (projIdeal W) 1 :=
+  mk_mem_quotientGrading _ (MvPolynomial.X_mem_homogeneousSubmodule_one R i)
+
+/-- Finite presentation of each chart of the Weierstrass model over `R`:
+the chart of `ℙ²` (a polynomial ring in two variables, via `chartRingEquiv`) modulo
+the principal dehomogenised cubic. -/
+theorem finitePresentation_awayQuotient (W : WeierstrassCurve R) (i : Fin 3) :
+    RingHom.FinitePresentation
+      ((HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+        (MvPolynomial.X i)).comp
+          ((MvPolynomial.chartRingEquiv R i).symm :
+            MvPolynomial {j : Fin 3 // j ≠ i} R →+*
+              Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i))) := by
+  refine RingHom.FinitePresentation.comp_surjective ?_ ?_ ?_
+  · -- the chart equivalence is finitely presented (kernel ⊥, surjective)
+    exact RingHom.FinitePresentation.of_surjective _
+      (MvPolynomial.chartRingEquiv R i).symm.surjective
+      (by rw [RingHom.ker_coe_equiv]; exact Submodule.fg_bot)
+  · exact away_map_quotientGradingHom_surjective _
+      (MvPolynomial.X_mem_homogeneousSubmodule_one R i)
+  · rw [ker_away_map_quotientGradingHom (projIdeal W)
+      (projective_polynomial_isHomogeneous W) (projIdeal_toIdeal W)
+      (MvPolynomial.X_mem_homogeneousSubmodule_one R i)]
+    exact Submodule.fg_span_singleton _
+
+end Lfp
 
 end ProjModel
 
