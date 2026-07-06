@@ -3013,6 +3013,16 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
   - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
+  - **T-Q5a DONE** (2026-07-06T17:10Z): ForMathlib/SchemeQuotient.lean —
+    `SchemeAction` (two-law σ-family + derived `isIso_hom`), `SchemeAction.spec`
+    (the specSMul instance), `IsStableOpen`, and the Γ-bridge
+    `gammaMulSemiringAction : MulSemiringAction G Γ(X,U)` for stable U via
+    `Scheme.Hom.appLE` (mul-law by `appLE_comp_appLE`; one-law by
+    proof-irrelevance `homOfLE-op = 𝟙` + presheaf map_id — NOTE: the map_id
+    rewrite needs `erw` (TopCat.Presheaf-vs-functor coercion blocks rw), the ONE
+    erw in the Q-lane; flag for cleanup). Sorry-free, zero warnings, standard
+    axioms. NEXT LEAF: T-Q5b (stable-affine refinement: orbit ⊆ affine + separated
+    ⟹ stable affine open; check mathlib IsAffineOpen-inter lemmas).
   - **Route lock (binding unless B2)**: hypothesis of record is the MODERN one —
     "every `G`-orbit is contained in a `G`-stable affine open" (Stacks 07S7 shape;
     quasi-projectivity over an affine base IMPLIES it and is deferred to a
