@@ -30,9 +30,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    live claim — and the declarations/files its work owns — is off-limits until its
    Status turns `done`/`blocked` (a finished claim line stays as the record; set
    `Status: done (<worker>, <start> → <end>)` in the same commit as the final proof).
-   Shared-worktree hygiene: `git add` only your own files (never `-A`); commit before
-   long builds; if `tickets.md` conflicts, re-apply your lines on top — never drop
-   another worker's claim.
+   Shared-worktree hygiene — **index-free commits (rule tightened 2026-07-06 after
+   two cross-lane sweeps)**: commit with an explicit pathspec,
+   `git commit -m "…" -- <your files>`, and do NOT `git add` at all. A pathspec
+   commit is built from HEAD + the working-tree state of exactly the named paths,
+   so it ignores the shared index completely: a sibling's stray `git add -A` can
+   never leak into your commit, and you can never sweep a sibling's in-flight
+   edits. (`git add` + bare `git commit` is what caused the sweeps.) Commit before
+   long builds; never `git stash` (shared); if `tickets.md` conflicts, re-apply
+   your lines on top — never drop another worker's claim.
 
 ## Summary
 - Work tickets: 24 · Cleanup tickets: 11 · Milestones: T-E2, T-E7, T-E9, T-F4
