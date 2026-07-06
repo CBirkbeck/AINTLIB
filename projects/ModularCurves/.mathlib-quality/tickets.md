@@ -3813,3 +3813,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **Cleanup**: headline decl /cleanup single-decl at close; helper-decl golf batched
   into [CLEANUP-14] (GammaH.lean file cleanup — its T-H2/T-H3 preconditions are now
   largely met; T-H5 outstanding).
+  - 2026-07-06T23:20Z: T-H7 post-proof cleanup ✓ ran (single-decl /cleanup: gates all
+    pass, body 42→11 + 2 private helpers, one strictly more general
+    (gammaFullNaiveProblem_map_negIso_of_le_two — [-1] fixes EVERY level structure);
+    axioms unchanged; simplify n/a in single-decl mode). Claiming **T-H1**
+    (gammaHNaive_bot, :352) — ⊥-orbits are singletons via glSmul_one; iso by
+    NatIso.ofComponents + Quotient.lift id; naturality by Quotient.ind +
+    Subtype.ext (memberships proof-irrelevant, the map's gated sorries don't block).
