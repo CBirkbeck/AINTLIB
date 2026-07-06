@@ -2040,6 +2040,18 @@ lemma isPullback_piece (W : WeierstrassCurve R) (j : Fin 3) :
     refine RingHom.ext fun r => ?_
     exact ((chartCoordEquiv W j).symm_apply_apply _).symm
 
+lemma baseChangeGradedHom_mk_X (W : WeierstrassCurve R) (j : Fin 3) :
+    (baseChangeGradedHom (algebraMap R R') W)
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) =
+      (quotientGradingHom (projIdeal (W.map (algebraMap R R'))))
+        (MvPolynomial.X j) := by
+  show quotientGradingMap (mvMapGraded (algebraMap R R')) _ _ _
+    (Ideal.Quotient.mk _ _) = _
+  rw [quotientGradingMap_mk]
+  show Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R') (MvPolynomial.X j)) = _
+  rw [MvPolynomial.map_X]
+  rfl
+
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
   show (MorphismProperty.isomorphisms Scheme)
