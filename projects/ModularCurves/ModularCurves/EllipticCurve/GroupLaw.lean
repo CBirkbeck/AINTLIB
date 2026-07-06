@@ -239,17 +239,21 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- ARITHMETIC SETTLED (all facts below compile as haves), COERCION-NORMALIZATION
-  -- PARKED: `↑(Point.asSection E g Q)` appears both as `.1` (folded) and as the
-  -- delta-unfolded `↑⟨pullback.lift …, _⟩`; neither `asSection_coe` (a rfl `.1`-lemma)
-  -- nor `simp only [Point.asSection]` normalises the anonymous-constructor coercion so
-  -- `pullback.lift_fst` fires. Proven ingredients (paste back once the coercion is
-  -- tamed, e.g. via a `Subtype.coe_mk`/`show`-to-raw-pullback recast):
+  -- ARITHMETIC FULLY SETTLED, STRUCTURAL SPELLING PARKED (2026-07-09, ~14 attempts).
+  -- Every sub-fact compiles in isolation:
   --   hmf : (E.baseChange g).mulByHom n ≫ pullback.fst E.π g
   --           = pullback.fst E.π g ≫ E.mulByHom n   (mulByHom_baseChange + lift_fst)
-  --   hms : (E.baseChange g).mulByHom n ≫ pullback.snd E.π g = pullback.snd E.π g
-  --   then pullback.hom_ext, each leg via point_smul_eq_comp_mulBy + calc-assoc + the
-  --   above + asSection's own lift_fst/snd. Non-blocking (T-D6a-ii is non-blocking).
+  --   hms : … ≫ pullback.snd E.π g = pullback.snd E.π g
+  --   Point.asSection_coe : (asSection E g Q).1 = pullback.lift Q.1 (𝟙 T) _  (rfl)
+  -- and both `pullback.hom_ext` legs reduce (point_smul_eq_comp_mulBy + hmf/hms +
+  -- lift_fst/snd) to `P.1 ≫ E.mulByHom n` / `𝟙 T`. The ONLY blocker is structural:
+  -- `Point` (a Subtype of `T ⟶ (E.baseChange g).E`) fixes the ambient codomain at the
+  -- `(E.baseChange g).E` spelling, while `asSection_coe`'s `pullback.lift` and
+  -- `pullback.fst/snd E.π g` are at the defeq `pullback E.π g` spelling — so
+  -- `pullback.lift_fst`'s matcher misfires inside the hom_ext goals. Fix = make
+  -- `EllipticCurve.baseChange`'s `.E` field REDUCIBLY `pullback E.π g` (or add a
+  -- `@[simp] baseChange_E : (E.baseChange g).E = pullback E.π g` cast normalised
+  -- before the hom_ext). Non-blocking (T-D6a-ii is non-blocking; T-D6/7/8/9 stand).
   sorry
 
 end EllipticCurve
