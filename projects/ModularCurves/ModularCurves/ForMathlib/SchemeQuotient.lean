@@ -378,6 +378,98 @@ private theorem windowIso_inv_window (hWV : W ≤ V) (hVa : IsAffineOpen V)
   letI := σ.gammaMulSemiringAction hV
   IsOpenImmersion.isoOfRangeEq_inv_fac _ _ _
 
+/-- The relative action on the pullback of the image open is conjugate to the
+restricted geometric action under the window isomorphism. -/
+private theorem pullbackSpecSMul_windowIso_inv (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) (g : G) :
+    letI := σ.gammaMulSemiringAction hV
+    pullbackSpecSMul G ↑Γ(X, V) ℤ (imageOpens σ hWV hVa hW hV).ι g ≫
+        (windowIso σ hWV hVa hW hV).inv =
+      (windowIso σ hWV hVa hW hV).inv ≫
+        (σ.hom g).resLE W W (hW.le_preimage g) := by
+  letI := σ.gammaMulSemiringAction hV
+  rw [← cancel_mono (windowHom (X := X) hWV hVa), Category.assoc, Category.assoc,
+    resLE_windowHom σ hWV hVa hW hV g, windowIso_inv_window σ hWV hVa hW hV,
+    pullbackSpecSMul_fst, ← Category.assoc, windowIso_inv_window σ hWV hVa hW hV]
+
+/-- The local quotient projection is surjective on points. -/
+private theorem localQuotientπ_surjective {V' : X.Opens} (hV' : σ.IsStableOpen V')
+    (hV'a : IsAffineOpen V') :
+    Function.Surjective ⇑(σ.localQuotientπ hV' hV'a) := by
+  letI := σ.gammaMulSemiringAction hV'
+  intro q₀
+  obtain ⟨y, hy⟩ := invariantsπ_surjective G ↑Γ(X, V') ℤ q₀
+  refine ⟨hV'a.isoSpec.inv y, ?_⟩
+  show (σ.localQuotientπ hV' hV'a) (hV'a.isoSpec.inv y) = q₀
+  rw [localQuotientπ_def, Scheme.Hom.comp_apply]
+  have h60 : hV'a.isoSpec.hom (hV'a.isoSpec.inv y) = y := by
+    rw [← Scheme.Hom.comp_apply, Iso.inv_hom_id]
+    rfl
+  rw [h60]
+  exact hy
+
+/-- **The local quotient maps are open immersions** (T-Q5 (α)): the descended map
+between the local quotients of nested stable affine opens is an isomorphism onto
+the saturated image open. -/
+theorem isOpenImmersion_localQuotientMap (hW : σ.IsStableOpen W)
+    (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
+    (hWV : W ≤ V) :
+    IsOpenImmersion (σ.localQuotientMap hW hWa hV hVa hWV) := by
+  letI := σ.gammaMulSemiringAction hV
+  letI := σ.gammaMulSemiringAction hW
+  -- the inverse-up-to-inclusion, from the keystone
+  obtain ⟨q, hq⟩ := exists_invariantsπ_lift_of_isOpenImmersion G ↑Γ(X, V) ℤ
+    (imageOpens σ hWV hVa hW hV).ι
+    ((windowIso σ hWV hVa hW hV).inv ≫ σ.localQuotientπ hW hWa)
+    (fun g => by
+      rw [← Category.assoc, pullbackSpecSMul_windowIso_inv σ hWV hVa hW hV g,
+        Category.assoc, resLE_localQuotientπ σ hW hWa g])
+  -- the corestriction through the image open
+  have hrangeMap : Set.range ⇑(σ.localQuotientMap hW hWa hV hVa hWV) ⊆
+      Set.range ⇑(imageOpens σ hWV hVa hW hV).ι := by
+    rintro _ ⟨t, rfl⟩
+    obtain ⟨w, rfl⟩ := localQuotientπ_surjective σ hW hWa t
+    rw [Scheme.Opens.range_ι]
+    show (σ.localQuotientπ hW hWa ≫ σ.localQuotientMap hW hWa hV hVa hWV) w ∈
+      (imageOpens σ hWV hVa hW hV : Set (σ.localQuotient hV))
+    rw [localQuotientπ_localQuotientMap σ hW hWa hV hVa hWV]
+    refine ⟨windowHom (X := X) hWV hVa w, ⟨w, rfl⟩, ?_⟩
+    show invariantsπ G ↑Γ(X, V) ℤ (windowHom (X := X) hWV hVa w) =
+      (X.homOfLE hWV ≫ σ.localQuotientπ hV hVa) w
+    rw [Scheme.Hom.comp_apply, localQuotientπ_def, Scheme.Hom.comp_apply]
+    rfl
+  obtain ⟨m₀, hm₀⟩ : ∃ m₀, m₀ ≫ (imageOpens σ hWV hVa hW hV).ι =
+      σ.localQuotientMap hW hWa hV hVa hWV :=
+    ⟨IsOpenImmersion.lift _ _ hrangeMap, IsOpenImmersion.lift_fac _ _ hrangeMap⟩
+  -- `π^W ≫ m₀` is the window followed by `snd`
+  have hπm₀ : σ.localQuotientπ hW hWa ≫ m₀ =
+      (windowIso σ hWV hVa hW hV).hom ≫
+        pullback.snd (invariantsπ G ↑Γ(X, V) ℤ) (imageOpens σ hWV hVa hW hV).ι := by
+    rw [← cancel_mono (imageOpens σ hWV hVa hW hV).ι, Category.assoc, hm₀,
+      localQuotientπ_localQuotientMap σ hW hWa hV hVa hWV, Category.assoc,
+      ← pullback.condition, ← Category.assoc, windowIso_hom_fst σ hWV hVa hW hV]
+    show X.homOfLE hWV ≫ σ.localQuotientπ hV hVa =
+      (X.homOfLE hWV ≫ hVa.isoSpec.hom) ≫ invariantsπ G ↑Γ(X, V) ℤ
+    rw [localQuotientπ_def, Category.assoc]
+  -- the projection expressed through the local quotient map
+  have hπ' : invariantsπ G ↑Γ(X, W) ℤ = hWa.isoSpec.inv ≫ σ.localQuotientπ hW hWa := by
+    rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  -- two-sided inverse
+  have hmq : m₀ ≫ q = 𝟙 _ := by
+    refine invariantsπ_hom_ext G ↑Γ(X, W) ℤ _ _ ?_
+    rw [Category.comp_id, hπ', Category.assoc]
+    congr 1
+    rw [← Category.assoc, hπm₀, Category.assoc, hq, ← Category.assoc,
+      Iso.hom_inv_id, Category.id_comp]
+  have hqm : q ≫ m₀ = 𝟙 _ := by
+    refine invariantsπ_hom_ext_of_isOpenImmersion G ↑Γ(X, V) ℤ
+      (imageOpens σ hWV hVa hW hV).ι _ _ ?_
+    rw [Category.comp_id, ← Category.assoc, hq, Category.assoc, hπm₀,
+      ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  haveI : IsIso m₀ := ⟨q, hmq, hqm⟩
+  rw [← hm₀]
+  infer_instance
+
 end OpenImmersion
 
 end SchemeAction
