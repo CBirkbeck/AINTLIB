@@ -323,7 +323,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: any CommRing R, `[W.IsElliptic]`. Upstream candidate.
 
 ### [T-A3b] Standard-smooth presentations of localized hypersurfaces (sub-ticket of T-A3)
-- **Status**: open · **File**: ForMathlib (new StandardSmoothHypersurface.lean)
+- **Status**: done (beastmode 2026-07-06T19:30Z — ForMathlib/StandardSmoothHypersurface.lean
+  sorry-free: `PreSubmersivePresentation.naive` over vars `Option σ`, relations
+  `(rename some f, X none·rename some ∂f − 1)`, section `(some i, none)`; Jacobian
+  `(∂f)²` unit by the w-relation; `hypersurfaceAwayEquiv` to `(R[X]/f)_∂f` by
+  aeval-universal-properties (algHom_ext + DFunLike.congr_fun of aeval_unique — NOT
+  congrArg-gymnastics; `Ideal.Quotient.liftₐ` needs pointwise kill: route through
+  `RingHom.ker` + `Ideal.span_le`); `of_algEquiv` transfer; note mathlib's
+  `of_algEquiv` takes `n` EXPLICIT and the standard-smooth hypothesis as an
+  instance.) · **File**: ForMathlib/StandardSmoothHypersurface.lean
 - **Parent**: T-A3 · **Depends on**: none (pure commutative algebra) · **Type**: def+thm
 - **Statement**: for `f : MvPolynomial (Fin 2) R` and a variable `i : Fin 2`, the
   localization `(MvPolynomial (Fin 2) R ⧸ Ideal.span {f})_{∂f/∂xᵢ}` is
@@ -344,7 +352,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Upstream candidate.
 
 ### [T-A3c] Chartwise assembly of projModel smoothness (sub-ticket of T-A3)
-- **Status**: open · **File**: WeierstrassModel.lean
+- **Status**: in_progress (beastmode 2026-07-06T19:45Z. SCOPE NOTE: T-A3a proved the
+  Z-chart Jacobian-⊤ only; the assembly needs all three charts. Elementary per-chart
+  route fixed (NO homogeneous-Euler machinery): for the Y-chart, a singular point
+  `(u,w)` has `w = 0 ⟹ u³ = 0 ∧ ∂W = 1 + a₁u − a₂u² = 0 ⟹ u = 0 ⟹ 1 = 0 ⊥`, and for
+  `w ≠ 0` the affine point `(u/w, 1/w)` is singular via the scaling identities
+  `w³·E = F_Y`, `w²·E_x = ∂U`, `w²·E_y = 3F_Y − U∂U − W∂W` (each a linear_combination);
+  X-chart: `t = 0` contradicts `F_X = −1 + O(t)` immediately; `t ≠ 0` uses
+  `t³·E = F_X`, `t²·E_x = 3F_X − s∂s − t∂t`, `t²·E_y = ∂s` at `(1/t, s/t)`. Common
+  core: not_affine_singular from equation_iff_nonsingular + nonsingular_iff'.)
+  · **File**: WeierstrassModel.lean
 - **Parent**: T-A3 · **Depends on**: T-A3a, T-A3b · **Type**: theorem (discharges T-A3)
 - **Statement**: `projModel_smooth : SmoothOfRelativeDimension 1 (projModelπ W)` for
   `[W.IsElliptic]`.
