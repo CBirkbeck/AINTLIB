@@ -3880,11 +3880,30 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (`Δ ↦ u⁻¹²·Δ`, a unit, so the action preserves `Δ⁻¹`) · **Type**: def + action lemmas ·
   **Sources**: reviewer v8; Silverman III Table 1.2.
 
-- **[T-W5] `universal-weierstrass-atlas`** — **SUBSTANTIALLY DONE** (beastmode-A 2026-07-06: Moduli/WeierstrassAtlas.lean — universalWeierstrass over ℤ[a₁..a₆], atlas ring = Localization.Away Δ, universalWeierstrassLoc + IsElliptic instance, weierstrassAtlas U = Spec, universalCurve E_U = projModel, E_U→U proper+smooth+zero-section; commits f499f9c6+. REMAINING: localModel witness → E_U as EllipticCurveGeom, affine-base LocallyWeierstrass, U=⊤). `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
+- **[T-W5] `universal-weierstrass-atlas`** — **SUBSTANTIALLY DONE** (beastmode-A 2026-07-06/07: Moduli/WeierstrassAtlas.lean — universalWeierstrass over ℤ[a₁..a₆], atlas ring = Localization.Away Δ, universalWeierstrassLoc + IsElliptic instance, weierstrassAtlas U = Spec, universalCurve E_U = projModel, E_U→U proper+smooth+zero-section; localModel witness e-iso CORE built + committed green; commits f499f9c6+. REMAINING = **T-W5a** (localModel chart-compat c1/c2), then assemble `universalEllipticCurve : EllipticCurveGeom weierstrassAtlas`). `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
   universal Weierstrass elliptic curve `E_U := projModel W_univ → U` (`W_univ` = the
   tautological `WeierstrassCurve` over `ℤ[a₁..a₆,Δ⁻¹]`, `IsElliptic` since `Δ` is a unit).
   **Lane**: A · **Depends**: T-A2 (`projModel`, done) · **Type**: def + `IsElliptic` witness ·
   **Sources**: reviewer v8; KM 2.2 / GME 2.2. Mostly assembly over `projModel`.
+
+- **[T-W5a] `universal-curve-localModel-compat`** (spun off T-W5; beastmode-A 2026-07-07).
+  Close the two `LocallyWeierstrass` compatibility squares (`c1` structure-map, `c2` section)
+  in `universalCurve_localModel` (Moduli/WeierstrassAtlas.lean, currently `sorry`×2 with the
+  full recipe in-file). **Math is trivial** — it is the affine single-chart special case of
+  `LocallyWeierstrass.baseChange` (already proven, EllipticCurve/Basic.lean). Reduction (derived,
+  on paper): `c1 = simp [Iso.trans_hom, asIso_hom, asIso_inv, IsPullback.isoPullback_inv_snd]`
+  `+ hbc (inv(fst)≫snd = π ≫ inv φ, via pullback.condition) + pullback.condition + hid`
+  `(⊤.ι ≫ inv φ = isoSpec.hom, via Scheme.isoSpec_Spec_inv + IsAffineOpen.fromSpec_top +`
+  `IsAffineOpen.isoSpec_inv_ι)`; `c2` analogous landing on `projModelZero` naturality.
+  **BLOCKER is Lean elaboration, not math**: `inv φ` / `inv (pullback.fst _ φ)` (φ =
+  `Spec.map (ofHom (algebraMap WeierstrassAtlasRing Γ(⊤)))`) fail `IsIso` synthesis — the local
+  `IsIso φ` fact is not matched because (a) the `algebraMap` term is only defeq at *instances*
+  transparency, (b) `set φ` makes TC let-unfold φ and search the failing `IsIso (Spec.map …)`,
+  (c) `weierstrassAtlas.isoSpec` trips a presheaf-type skew under instances transparency.
+  **Fix path** (for the picking-up worker): hoist `hid`/`hbc`/`c1`/`c2` to *top-level* private
+  lemmas stated with explicit `@CategoryTheory.inv _ _ _ _ φ hφi` instance arguments (bypasses
+  synth entirely), or rebuild the e-iso without `isoSpec` (use `Scheme.ΓSpecIso`/`topIso`
+  directly). **Lane**: A · **Depends**: T-W5 (e-iso core, done) · **Type**: 2 compat lemmas.
 
 - **[T-W6] `Mell-Weierstrass-quotient-stack`** (HEADLINE). `M_ell^W := [U/G]` (T-W3 on
   T-W4/T-W5) and `M_ell^W(S) ≃ groupoid of LocallyWeierstrass elliptic curves over S` — the

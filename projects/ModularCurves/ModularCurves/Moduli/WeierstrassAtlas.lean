@@ -94,13 +94,15 @@ theorem universalCurve_localModel :
           ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))))).symm ≪≫
       (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback.symm,
     ?c1, ?c2⟩
-  -- REMAINING (localModel compatibilities). The e-iso above is built and elaborates.
-  -- c1 (structure map) reduces — via `simp [Iso.trans_hom, asIso_hom, asIso_inv,
-  --   IsPullback.isoPullback_inv_snd]` + `inv(fst)≫snd = projModelπ ≫ (Spec.map φ)⁻¹`
-  --   (pullback along the iso `Spec.map φ`) + `pullback.condition` on `universalCurveπ/⊤.ι` —
-  --   to the `isoSpec`/`topIso`/`ΓSpec` identity `⊤.ι ≫ inv(Spec.map φ) = isoSpec_⊤.hom`
-  --   (φ = ΓSpecIso.inv; `(Spec R).isoSpec = Spec.mapIso (ΓSpecIso R).op` + `topIso`).
-  -- c2 (section) is analogous, landing on `projModelZero` naturality + the same identity.
+  -- T-W5a: chart compatibilities. Math is trivial (affine single-chart special case of
+  -- `LocallyWeierstrass.baseChange`, proven in EllipticCurve/Basic.lean). Reduction derived:
+  --   c1 = simp [Iso.trans_hom, asIso_hom, asIso_inv, IsPullback.isoPullback_inv_snd]
+  --        + `inv(fst)≫snd = universalCurveπ ≫ inv φ` (pullback.condition)
+  --        + pullback.condition + `⊤.ι ≫ inv φ = isoSpec.hom` (Scheme.isoSpec_Spec_inv,
+  --          IsAffineOpen.fromSpec_top, IsAffineOpen.isoSpec_inv_ι); c2 analogous + projModelZero.
+  -- Blocked on Lean elaboration (not math): `inv φ` fails IsIso synth (defeq at instances
+  -- transparency on algebraMap; `set φ` let-unfolds; `isoSpec` presheaf-type skew). Fix path:
+  -- hoist hid/hbc/c1/c2 to top-level lemmas with explicit `@inv` instance args.
   case c1 => sorry
   case c2 => sorry
 
