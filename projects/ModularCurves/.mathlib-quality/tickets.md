@@ -1946,6 +1946,32 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T18:40Z — **[T-D14c-i] DONE sorry-free** (delegated
+    fill, verified green + standard axioms, landed via sibling sweep):
+    `exists_affineOpen_mem_free` — free cover of a finite flat lfp morphism.
+    DISCOVERIES OF RECORD: (1) the localization-transport keystone is
+    `Module.Free.iff_of_equiv` (SEMILINEAR, FreeModule/Basic) used exactly as in
+    mathlib's `Module.mem_freeLocus_of_isLocalization` — the whole
+    compHom/Basis.mapCoeffs dance collapses to one semilinear equiv over
+    σ := IsLocalization.algEquiv; supply only map_smul', closed by
+    denominator-killing (`(Module.End.isUnit_iff _).mp (map_units …)).1` +
+    `simp [← map_smul, ← smul_assoc]`); in-proof RingHomInvPair via
+    `haveI := RingHomInvPair.of_ringEquiv e` + `.of_ringEquiv_symm e`.
+    (2) Localized Finite/Flat instances are AUTOMATIC
+    (Localization/Finiteness.lean:175, Flat/Stability.lean:116 —
+    `Module.Flat.localizedModule`). (3) `RingHom.Flat → Module.Flat` delta-defeq
+    under matching toAlgebra letI (same as the FinitePresentation move);
+    `HasRingHomProperty.appLE @Flat` works. (4) affine-start idiom:
+    `TopologicalSpace.Opens.isBasis_iff_nbhd.mp S.isBasis_affineOpens` +
+    `replace hU₀ : IsAffineOpen U₀ := hU₀`. (5) `S.affineBasicOpen` needs
+    (U := ⟨U₀,hU₀⟩) explicit. (6) membership dictionary defeq-tight:
+    `fromSpec_preimage_basicOpen` + `fromSpec_primeIdealOf`. (7) parser: hoist
+    multi-line `{ __ := … }` fields into a have. REMAINING for c-2: the two
+    directions of `vanishingLocus_le_ker_iff` ([c2-ii] Γ-pushout dictionary =
+    mathlib `isPushout_appTop_of_isPullback` (Morphisms/Affine.lean:208) +
+    `IsAffine.of_isPullback`; T-affine reduction via
+    `Hom.iInf_ker_openCover_map_comp` + `Scheme.Pullback.openCoverOfLeft`;
+    then the T-D14c bridge + `X.IsSheaf.section_ext`).
   - **Progress**: 2026-07-06T17:50Z — **[T-D14c-1] COMPLETE, sorry-free,
     standard axioms, committed**: `vanishingLocus (p : W ⟶ S) [IsFinite p]
     [Flat p] [lfp p] (E : W.IdealSheafData) : S.IdealSheafData` with the FULL
