@@ -3826,7 +3826,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (`Δ ↦ u⁻¹²·Δ`, a unit, so the action preserves `Δ⁻¹`) · **Type**: def + action lemmas ·
   **Sources**: reviewer v8; Silverman III Table 1.2.
 
-- **[T-W5] `universal-weierstrass-atlas`**. `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
+- **[T-W5] `universal-weierstrass-atlas`** — **SUBSTANTIALLY DONE** (beastmode-A 2026-07-06: Moduli/WeierstrassAtlas.lean — universalWeierstrass over ℤ[a₁..a₆], atlas ring = Localization.Away Δ, universalWeierstrassLoc + IsElliptic instance, weierstrassAtlas U = Spec, universalCurve E_U = projModel, E_U→U proper+smooth+zero-section; commits f499f9c6+. REMAINING: localModel witness → E_U as EllipticCurveGeom, affine-base LocallyWeierstrass, U=⊤). `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
   universal Weierstrass elliptic curve `E_U := projModel W_univ → U` (`W_univ` = the
   tautological `WeierstrassCurve` over `ℤ[a₁..a₆,Δ⁻¹]`, `IsElliptic` since `Δ` is a unit).
   **Lane**: A · **Depends**: T-A2 (`projModel`, done) · **Type**: def + `IsElliptic` witness ·
