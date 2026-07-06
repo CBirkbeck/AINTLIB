@@ -753,9 +753,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (`Proj.map_fromOfGlobalSections`?) — grep before building.
 
 ### [T-A5c] Base-change group-structure Props: `comm` + `one_eq_zero` (sub-ticket of T-A5)
-- **Status**: in_progress (beastmode 2026-07-07T19:45Z — spawned: the two remaining
-  sorries in `EllipticCurve.baseChange` (GroupLaw.lean) are NOT Abel-gated — they are
-  concrete mathlib Over-pullback functoriality, misfiled under the T-A6 umbrella.)
+- **Status**: done (beastmode 2026-07-07T19:45Z → 2026-07-07T21:00Z —
+  `EllipticCurve.baseChange` is now FULLY sorry-free (all fields). `comm`:
+  `Over.isCommMonObj_mk_pullbackSnd` applies directly. `one_eq_zero`: the field goal
+  is instance-HETEROGENEOUS from birth (record-η typed via
+  `((Over.pullback g).obj _).left` vs raw pullback legs) — naked rw/simp refuse or
+  produce ill-typed goals; the working recipe: `pullback.hom_ext` → per-component
+  `dsimp [Over.grpObjMkPullbackSnd_one]` (dsimp REBUILDS a well-typed goal even when
+  the lemma itself doesn't fire) → `simp only [grpObjMkPullbackSnd_one, Over.pullback,
+  Over.comp_left, Over.homMk_left, id_comp, E.one_eq_zero, Over.mk_left]` (unfolds the
+  functor map into raw lifts) → finish in PURE TERM MODE (Category.assoc terms +
+  congrArg + pullback.lift_fst/snd + ε-facts `Over.w ε` and fst = snd ≫ g from
+  condition; congrArg-calc because rw's auto-rfl fails at reducible on the mixed
+  middles; `pullback.condition (f := 𝟙 S) (g := g)` needs pinning). Axioms standard.)
 - **File**: EllipticCurve/GroupLaw.lean · `baseChange.comm`, `baseChange.one_eq_zero`
 - **Depends on**: T-A5 (done) · **Parallel**: yes · **Type**: Prop fields
 - **Sketch**: `comm`: mathlib instance `Over.isCommMonObj_mk_pullbackSnd`
