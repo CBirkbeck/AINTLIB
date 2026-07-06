@@ -208,12 +208,81 @@ theorem projModelZero_projModelπ (W : WeierstrassCurve R) :
   rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, key, CommRingCat.ofHom_hom]
   exact toSpecΓ_SpecMap_ΓSpecIso_inv (CommRingCat.of R)
 
+/-- Evaluation at `[0:1:0]` retracts the degree-zero inclusion: the composite
+`R → (R[X,Y,Z]/(W))₀ → R[X,Y,Z]/(W) → R` is the identity. -/
+@[simp]
+lemma projModelZeroEval_algebraMapGradeZero (W : WeierstrassCurve R) (r : R) :
+    projModelZeroEval W (algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (projCoordRing W) (algebraMapGradeZero (projIdeal W) r)) = r := by
+  have hmk : algebraMap R (projCoordRing W) r =
+      Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.C r) := by
+    rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+      RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+  rw [show (algebraMap (↥(quotientGrading (projIdeal W) 0)) (projCoordRing W))
+      (algebraMapGradeZero (projIdeal W) r) = algebraMap R (projCoordRing W) r from rfl,
+    hmk, projModelZeroEval_mk]
+  simp
+
+theorem algebraMapGradeZero_bijective (W : WeierstrassCurve R) :
+    Function.Bijective (algebraMapGradeZero (projIdeal W)) := by
+  constructor
+  · exact Function.LeftInverse.injective (g := fun x =>
+      projModelZeroEval W (algebraMap _ (projCoordRing W) x))
+      fun r => projModelZeroEval_algebraMapGradeZero W r
+  · rintro ⟨x, hx⟩
+    obtain ⟨p, hp, rfl⟩ := Submodule.mem_map.mp hx
+    rw [MvPolynomial.mem_homogeneousSubmodule] at hp
+    have hdeg : p.totalDegree = 0 := Nat.le_zero.mp hp.totalDegree_le
+    have hC : p = MvPolynomial.C (MvPolynomial.coeff 0 p) :=
+      MvPolynomial.totalDegree_eq_zero_iff_eq_C.mp hdeg
+    refine ⟨MvPolynomial.coeff 0 p, Subtype.ext ?_⟩
+    show algebraMap R (projCoordRing W) _ = Ideal.Quotient.mk (projIdeal W).toIdeal p
+    rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+      RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq, ← hC]
+
+/-- The degree-zero part of the homogeneous coordinate ring is `R` itself. -/
+noncomputable def gradeZeroRingEquiv (W : WeierstrassCurve R) :
+    R ≃+* ↥(quotientGrading (projIdeal W) 0) :=
+  RingEquiv.ofBijective _ (algebraMapGradeZero_bijective W)
+
+instance (W : WeierstrassCurve R) :
+    IsIso (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) := by
+  have h : CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)) =
+      (gradeZeroRingEquiv W).toCommRingCatIso.hom := rfl
+  rw [h]
+  infer_instance
+
+instance (W : WeierstrassCurve R) :
+    Algebra.FiniteType (↥(quotientGrading (projIdeal W) 0)) (projCoordRing W) := by
+  haveI h1 : Algebra.FiniteType R (projCoordRing W) :=
+    Algebra.FiniteType.of_surjective
+      (Ideal.Quotient.mkₐ R (projIdeal W).toIdeal)
+      (Ideal.Quotient.mkₐ_surjective R _)
+  exact Algebra.FiniteType.of_restrictScalars_finiteType R
+    (↥(quotientGrading (projIdeal W) 0)) (projCoordRing W)
+
+/-- **(T-A2, PROVED)** The projective Weierstrass model is proper over the base:
+mathlib's properness of `Proj` (valuative criterion) composed with the degree-zero
+identification. -/
+instance projModelπ_isProper (W : WeierstrassCurve R) : IsProper (projModelπ W) := by
+  unfold projModelπ
+  haveI h1 : IsProper (Proj.toSpecZero (quotientGrading (projIdeal W))) := inferInstance
+  haveI h2 : IsProper (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
+    inferInstance
+  exact MorphismProperty.IsStableUnderComposition.comp_mem _ _ h1 h2
+
 end ProjModel
 
 /-- **(T-A2)** The constructed model satisfies its interface.
 Source: KM 2.2; Loeffler §3.3 Def 3.3.3. -/
 theorem projModel_isWeierstrassModel (W : WeierstrassCurve R) :
-    IsWeierstrassModel W (projModel W) (projModelπ W) (projModelZero W) := by sorry
+    IsWeierstrassModel W (projModel W) (projModelπ W) (projModelZero W) := by
+  refine ⟨inferInstance, ?_, projModelZero_projModelπ W, ?_⟩
+  · -- lfp (T-A2d): via the three affine charts `(Away (mk Xᵢ))₀ ≅ R[u,v]/(F̃ᵢ)`
+    sorry
+  · -- pointed K-points for elliptic W (T-A2e): via the chart description +
+    -- mathlib's `Projective.Point.toAffineAddEquiv`
+    sorry
 
 /-- **(T-A3)** The projective model of an *elliptic* Weierstrass curve (unit discriminant) is
 smooth of relative dimension 1 over the base.

@@ -159,7 +159,21 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   mathlib's Proj-proper instance + FiniteType transfer; lfp; elliptic points clause)
   and T-A3 smoothness. Route notes: `set_option backward.isDefEq.respectTransparency
   false` needed around `fromOfGlobalSections_toSpecZero` consumers — same option
-  mathlib itself uses there.) · **File**: EllipticCurve/WeierstrassModel.lean · `projModel`,
+  mathlib itself uses there.)
+- **Progress (2026-07-06T04:30)**: **isProper PROVED** (`projModelπ_isProper`
+  instance): `algebraMapGradeZero` bijective (injective via the evaluation-at-[0:1:0]
+  retraction — no graded analysis needed; surjective via `totalDegree_eq_zero_iff_eq_C`),
+  `gradeZeroRingEquiv : R ≃+* (coordRing)₀`, `Spec.map` of it is an iso,
+  `Algebra.FiniteType ((coordRing)₀) coordRing` by the scalar-tower transfer (new
+  general `IsScalarTower R (quotientGrading I 0) (A⧸I)` instance in GradedQuotient),
+  and mathlib's Proj-properness. Composite-instance gotcha: `IsProper (f ≫ g)`
+  instance-key unification fails on the defeq-but-not-reducibly-equal middle object —
+  closed with `MorphismProperty.IsStableUnderComposition.comp_mem _ _ h1 h2`.
+  `projModel_isWeierstrassModel` now `refine ⟨inferInstance, ?lfp, PROVED-section, ?points⟩`.
+  REMAINING (spawn on resume): [T-A2d] lfp and [T-A2e] elliptic points-clause — common
+  engine = the chart computation `(HomogeneousLocalization.Away (quotientGrading
+  (projIdeal W)) (mk Xᵢ))₀ ≅ R[u,v]/(F̃ᵢ)` (dehomogenised Weierstrass equations; also
+  the input for T-A3's chartwise Jacobian). · **File**: EllipticCurve/WeierstrassModel.lean · `projModel`,
   `projModelπ`, `projModelZero`, `projModel_isWeierstrassModel`
 - **Depends on**: T-A2a · **Parallel**: yes · **Type**: def + theorem
 - **Statement/spec**: replace the DS1 sorries; prove `IsWeierstrassModel` for the

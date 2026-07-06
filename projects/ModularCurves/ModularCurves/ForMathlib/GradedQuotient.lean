@@ -163,4 +163,7 @@ lemma coe_algebraMapGradeZero (r : R) :
     (algebraMapGradeZero I r : A ⧸ I.toIdeal) = algebraMap R (A ⧸ I.toIdeal) r :=
   rfl
 
+instance : IsScalarTower R (↥(quotientGrading I 0)) (A ⧸ I.toIdeal) :=
+  IsScalarTower.of_algebraMap_eq fun _ => rfl
+
 end HomogeneousIdeal
