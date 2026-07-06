@@ -93,6 +93,27 @@ lemma negY_smul (x y : R) :
   simp only [Affine.negY, variableChange_a₁, variableChange_a₃, vcX, vcY]
   ring
 
+/-- The coordinate change transforms the `x`-coordinate of a sum: for the transformed slope
+`u⁻¹(ℓ - s)`, the `addX` of `C • W` is `vcX` of the `addX` of `W`. A polynomial identity in `ℓ`. -/
+lemma addX_smul (x₁ x₂ ℓ : R) :
+    (C • W).toAffine.addX (C.vcX x₁) (C.vcX x₂) (↑C.u⁻¹ * (ℓ - C.s))
+      = C.vcX (W.toAffine.addX x₁ x₂ ℓ) := by
+  simp only [Affine.addX, variableChange_a₁, variableChange_a₂, vcX]
+  ring
+
+/-- The coordinate change transforms the pre-negation `y`-coordinate of a sum. -/
+lemma negAddY_smul (x₁ x₂ y₁ ℓ : R) :
+    (C • W).toAffine.negAddY (C.vcX x₁) (C.vcX x₂) (C.vcY x₁ y₁) (↑C.u⁻¹ * (ℓ - C.s))
+      = C.vcY (W.toAffine.addX x₁ x₂ ℓ) (W.toAffine.negAddY x₁ x₂ y₁ ℓ) := by
+  simp only [Affine.negAddY, Affine.addX, variableChange_a₁, variableChange_a₂, vcX, vcY]
+  ring
+
+/-- The coordinate change transforms the `y`-coordinate of a sum. -/
+lemma addY_smul (x₁ x₂ y₁ ℓ : R) :
+    (C • W).toAffine.addY (C.vcX x₁) (C.vcX x₂) (C.vcY x₁ y₁) (↑C.u⁻¹ * (ℓ - C.s))
+      = C.vcY (W.toAffine.addX x₁ x₂ ℓ) (W.toAffine.addY x₁ x₂ y₁ ℓ) := by
+  rw [Affine.addY, Affine.addY, addX_smul, negAddY_smul, negY_smul]
+
 /-- The induced point map is a group anti/homomorphism for negation: `pointMap (-P) = -pointMap P`.
 Valid over any `CommRing` (mathlib's `Point.neg` needs no field). -/
 lemma pointMap_neg (P : W.toAffine.Point) : C.pointMap W (-P) = -(C.pointMap W P) := by
