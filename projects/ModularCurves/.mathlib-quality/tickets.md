@@ -1233,8 +1233,18 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.9.1–1.9.2 with proofs (IN HAND).
 
 ### [T-D3] Divisor sums Σ[Pᵢ] (DS4a discharge)
-- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
-  2026-07-08T06:15Z · **DESIGN BANKED (2026-07-08T06:30Z)**:
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-08T06:15Z →
+  2026-07-08T09:30Z — DS4a DISCHARGED: `sectionsDivisor` is a TOTAL def with real
+  in-scope data (ideal := ∏ᵢ ker (Pᵢ), the KM product-of-ideal-sheaves — mathlib's
+  stock `Mul IdealSheafData`); out-of-scope branch ⊤-ideal with vacuous props (stock
+  `IsEmpty (⊤.subscheme)` instance + IsOpenImmersion-of-IsEmpty + ClosedImmersion
+  iff_isFinite_and_mono). `sectionDivisor` + `sectionDivisor_degree` (single section,
+  KM 1.2.2) PROVED sorry-free via ker + IsIso z.toImage transport.
+  `sectionsDivisor_degree` derived from the finrank box via dif_pos. FOUR register
+  boxes (KM 1.2.2/1.2.3/1.2.6 quotes banked): `sectionsIdeal_isFinite/flat/lfp/
+  finrank` — hypothesis-guarded, TRUE, discharge = T-D1 route once AG-LB lands
+  (same gate as T-D1; the SES degree argument consumes ideal invertibility).
+  Consumers (T-D5/6/7) are interface-unblocked.) · **DESIGN BANKED (2026-07-08T06:30Z)**:
   (0) mathlib NOW HAS `Mul X.IdealSheafData` (IdealSheaf/Basic.lean:410, with
   ideal_mul/support_mul/pow + top/bot lemmas) — the ticket's "add IdealSheafData.mul"
   is obsolete, use the stock one. (1) DATA (total): `ideal := ∏ i, ((P i).1 ≫ ?).ker`
