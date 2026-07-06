@@ -411,7 +411,7 @@ private theorem localQuotientπ_surjective {V' : X.Opens} (hV' : σ.IsStableOpen
 /-- **The local quotient maps are open immersions** (T-Q5 (α)): the descended map
 between the local quotients of nested stable affine opens is an isomorphism onto
 the saturated image open. -/
-theorem isOpenImmersion_localQuotientMap (hW : σ.IsStableOpen W)
+instance isOpenImmersion_localQuotientMap (hW : σ.IsStableOpen W)
     (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
     (hWV : W ≤ V) :
     IsOpenImmersion (σ.localQuotientMap hW hWa hV hVa hWV) := by
@@ -586,6 +586,72 @@ private theorem imageOpens_inf {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW�
       rw [range_windowHom_inter (X := X) hW₁V hW₂V hVa]
       exact haA
     exact ⟨⟨a, h71.1, ha⟩, ⟨a, h71.2, ha⟩⟩
+
+/-- The two saturated image opens of an intersection agree at the level of sets
+(coe of `imageOpens_inf`). -/
+private theorem range_inter_localQuotientMap {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V)
+    (hW₂V : W₂ ≤ V) (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁)
+    (hW₁a : IsAffineOpen W₁) (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂)
+    (hV : σ.IsStableOpen V) (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    Set.range ⇑(σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hV hVa
+        (inf_le_left.trans hW₁V)) =
+      Set.range ⇑(σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V) ∩
+        Set.range ⇑(σ.localQuotientMap hW₂ hW₂a hV hVa hW₂V) := by
+  rw [range_localQuotientMap σ (inf_le_left.trans hW₁V) hVa (hW₁.inf hW₂) hW₁₂a hV,
+    range_localQuotientMap σ hW₁V hVa hW₁ hW₁a hV,
+    range_localQuotientMap σ hW₂V hVa hW₂ hW₂a hV]
+  have h80 := imageOpens_inf σ hW₁V hW₂V hVa hW₁ hW₂ hV
+  have h81 := congrArg
+    (fun t : (σ.localQuotient hV).Opens => (t : Set (σ.localQuotient hV))) h80
+  exact h81.symm
+
+/-- **The triple-overlap comparison** (β2c): the pullback of two local quotient
+immersions is the local quotient of the intersection. -/
+private noncomputable def tripleIso {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW₂V : W₂ ≤ V)
+    (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁) (hW₁a : IsAffineOpen W₁)
+    (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂) (hV : σ.IsStableOpen V)
+    (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    σ.localQuotient (hW₁.inf hW₂) ≅
+      pullback (σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V)
+        (σ.localQuotientMap hW₂ hW₂a hV hVa hW₂V) :=
+  IsOpenImmersion.isoOfRangeEq
+    (σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hV hVa (inf_le_left.trans hW₁V))
+    (pullback.fst _ _ ≫ σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V)
+    (by
+      rw [IsOpenImmersion.range_pullback_to_base_of_left]
+      exact range_inter_localQuotientMap σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a)
+
+private theorem tripleIso_hom_comp {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW₂V : W₂ ≤ V)
+    (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁) (hW₁a : IsAffineOpen W₁)
+    (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂) (hV : σ.IsStableOpen V)
+    (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    (σ.tripleIso hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a).hom ≫
+        pullback.fst _ _ ≫ σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V =
+      σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hV hVa (inf_le_left.trans hW₁V) :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+/-- The first-projection compatibility of the triple comparison. -/
+private theorem tripleIso_hom_fst {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW₂V : W₂ ≤ V)
+    (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁) (hW₁a : IsAffineOpen W₁)
+    (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂) (hV : σ.IsStableOpen V)
+    (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    (σ.tripleIso hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a).hom ≫ pullback.fst _ _ =
+      σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hW₁ hW₁a inf_le_left := by
+  rw [← cancel_mono (σ.localQuotientMap hW₁ hW₁a hV hVa hW₁V), Category.assoc,
+    tripleIso_hom_comp σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a,
+    localQuotientMap_trans σ (hW₁.inf hW₂) hW₁₂a hW₁ hW₁a hV hVa inf_le_left hW₁V]
+
+/-- The second-projection compatibility of the triple comparison. -/
+private theorem tripleIso_hom_snd {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW₂V : W₂ ≤ V)
+    (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁) (hW₁a : IsAffineOpen W₁)
+    (hW₂ : σ.IsStableOpen W₂) (hW₂a : IsAffineOpen W₂) (hV : σ.IsStableOpen V)
+    (hW₁₂a : IsAffineOpen (W₁ ⊓ W₂)) :
+    (σ.tripleIso hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a).hom ≫ pullback.snd _ _ =
+      σ.localQuotientMap (hW₁.inf hW₂) hW₁₂a hW₂ hW₂a inf_le_right := by
+  rw [← cancel_mono (σ.localQuotientMap hW₂ hW₂a hV hVa hW₂V), Category.assoc,
+    ← pullback.condition, ← Category.assoc, Category.assoc,
+    tripleIso_hom_comp σ hW₁V hW₂V hVa hW₁ hW₁a hW₂ hW₂a hV hW₁₂a,
+    localQuotientMap_trans σ (hW₁.inf hW₂) hW₁₂a hW₂ hW₂a hV hVa inf_le_right hW₂V]
 
 end OpenImmersion
 
