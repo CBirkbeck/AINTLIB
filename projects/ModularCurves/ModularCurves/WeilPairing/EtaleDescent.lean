@@ -51,7 +51,32 @@ invertible (T-B5 box); its global sections carry the corresponding
 `CommAlgCat.FiniteEtale k` structure. -/
 noncomputable def torsionAlgebra (k : Type u) [Field k]
     (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
-    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k := by sorry
+    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k := by
+  -- `E[N] → Spec k` is finite (T-B4 box), hence an affine morphism with affine source.
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+  -- Global sections of `E[N]` as a `k`-algebra, through `k ≅ Γ(Spec k, ⊤)`.
+  letI : Algebra k Γ(E.torsion N, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom.toAlgebra
+  -- Finiteness of the algebra, from finiteness of `torsionπ`.
+  haveI : Module.Finite k Γ(E.torsion N, ⊤) := by
+    have h : RingHom.Finite
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom := by
+      rw [CommRingCat.hom_comp]
+      exact (RingHom.finite_respectsIso.cancel_left_isIso _ _).mpr
+        ((E.torsionπ N).finite_app ⊤ (isAffineOpen_top _))
+    exact h
+  -- Étaleness of the algebra, from étaleness of `torsionπ` (T-B5 box, `N` invertible).
+  haveI : Algebra.Etale k Γ(E.torsion N, ⊤) := by
+    have het : Etale (E.torsionπ N) :=
+      E.torsionπ_etale N ((nIsInvertible_spec_iff k N).mpr hk)
+    have h : RingHom.Etale
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom := by
+      rw [CommRingCat.hom_comp]
+      exact (RingHom.Etale.respectsIso.cancel_left_isIso _ _).mpr
+        ((HasRingHomProperty.iff_of_isAffine (P := @AlgebraicGeometry.Etale)).mp het)
+    exact h
+  exact CommAlgCat.FiniteEtale.of k Γ(E.torsion N, ⊤)
 
 /-- **(T-C0b)** The `k̄`-points of the torsion algebra are the `N`-torsion of the
 geometric point group: the fibre functor applied to `torsionAlgebra` is
