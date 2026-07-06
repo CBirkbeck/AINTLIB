@@ -472,8 +472,9 @@ theorem isOpenImmersion_localQuotientMap (hW : σ.IsStableOpen W)
 
 omit [Finite G] in
 /-- Intersections of stable opens are stable. -/
-theorem IsStableOpen.inf {U V : X.Opens} (hU : σ.IsStableOpen U)
-    (hV : σ.IsStableOpen V) : σ.IsStableOpen (U ⊓ V) := by
+theorem IsStableOpen.inf {τ : SchemeAction G X} {U V : X.Opens}
+    (hU : τ.IsStableOpen U) (hV : τ.IsStableOpen V) :
+    τ.IsStableOpen (U ⊓ V) := by
   intro g
   rw [Scheme.Hom.preimage_inf, hU g, hV g]
 
@@ -508,6 +509,83 @@ theorem localQuotientMap_trans {W V U : X.Opens} (hW : σ.IsStableOpen W)
     Category.assoc, localQuotientπ_localQuotientMap σ hV hVa hU hUa hVU,
     localQuotientπ_localQuotientMap σ hW hWa hU hUa (hWV.trans hVU),
     ← Category.assoc, ← Scheme.homOfLE_homOfLE (X := X) hWV hVU]
+
+/-- The range of the local quotient map is exactly the saturated image open
+(β2a). -/
+private theorem range_localQuotientMap (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) :
+    Set.range ⇑(σ.localQuotientMap hW hWa hV hVa hWV) =
+      (imageOpens σ hWV hVa hW hV : Set (σ.localQuotient hV)) := by
+  letI := σ.gammaMulSemiringAction hV
+  letI := σ.gammaMulSemiringAction hW
+  apply Set.Subset.antisymm
+  · rintro _ ⟨t, rfl⟩
+    obtain ⟨w, rfl⟩ := localQuotientπ_surjective σ hW hWa t
+    show (σ.localQuotientπ hW hWa ≫ σ.localQuotientMap hW hWa hV hVa hWV) w ∈
+      (imageOpens σ hWV hVa hW hV : Set (σ.localQuotient hV))
+    rw [localQuotientπ_localQuotientMap σ hW hWa hV hVa hWV]
+    refine ⟨windowHom (X := X) hWV hVa w, ⟨w, rfl⟩, ?_⟩
+    show invariantsπ G ↑Γ(X, V) ℤ (windowHom (X := X) hWV hVa w) =
+      (X.homOfLE hWV ≫ σ.localQuotientπ hV hVa) w
+    rw [Scheme.Hom.comp_apply, localQuotientπ_def, Scheme.Hom.comp_apply]
+    rfl
+  · rintro t ⟨s, ⟨w, rfl⟩, rfl⟩
+    -- π(window w) = map (π^W w)
+    refine ⟨σ.localQuotientπ hW hWa w, ?_⟩
+    rw [← Scheme.Hom.comp_apply, localQuotientπ_localQuotientMap σ hW hWa hV hVa hWV]
+    show (X.homOfLE hWV ≫ σ.localQuotientπ hV hVa) w =
+      invariantsπ G ↑Γ(X, V) ℤ (windowHom (X := X) hWV hVa w)
+    rw [Scheme.Hom.comp_apply, localQuotientπ_def, Scheme.Hom.comp_apply]
+    rfl
+
+omit [Finite G] in
+private theorem range_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V) :
+    Set.range ⇑(windowHom (X := X) hWV hVa) =
+      ⇑hVa.isoSpec.hom '' ↑(V.ι ⁻¹ᵁ W) := by
+  show Set.range (⇑hVa.isoSpec.hom ∘ ⇑(X.homOfLE hWV)) = _
+  rw [Set.range_comp]
+  congr 1
+  have h70 := Scheme.opensRange_homOfLE (X := X) hWV
+  exact congrArg (fun t : (V : Scheme.{u}).Opens => (t : Set (V : Scheme.{u}))) h70
+
+omit [Finite G] in
+/-- Windows intersect as expected (β2b, window level). -/
+private theorem range_windowHom_inter {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V)
+    (hW₂V : W₂ ≤ V) (hVa : IsAffineOpen V) :
+    Set.range ⇑(windowHom (X := X) hW₁V hVa) ∩
+        Set.range ⇑(windowHom (X := X) hW₂V hVa) =
+      Set.range ⇑(windowHom (X := X) (W := W₁ ⊓ W₂) (inf_le_left.trans hW₁V) hVa) := by
+  rw [range_windowHom (X := X) hW₁V hVa, range_windowHom (X := X) hW₂V hVa,
+    range_windowHom (X := X) (W := W₁ ⊓ W₂) (inf_le_left.trans hW₁V) hVa,
+    ← Set.image_inter (hVa.isoSpec.hom.isOpenEmbedding.injective)]
+  congr 1
+
+/-- Saturated image opens intersect as expected (β2b). -/
+private theorem imageOpens_inf {W₁ W₂ : X.Opens} (hW₁V : W₁ ≤ V) (hW₂V : W₂ ≤ V)
+    (hVa : IsAffineOpen V) (hW₁ : σ.IsStableOpen W₁) (hW₂ : σ.IsStableOpen W₂)
+    (hV : σ.IsStableOpen V) :
+    imageOpens σ hW₁V hVa hW₁ hV ⊓ imageOpens σ hW₂V hVa hW₂ hV =
+      imageOpens σ (inf_le_left.trans hW₁V) hVa (hW₁.inf hW₂) hV := by
+  letI := σ.gammaMulSemiringAction hV
+  refine TopologicalSpace.Opens.ext ?_
+  show (imageOpens σ hW₁V hVa hW₁ hV : Set (σ.localQuotient hV)) ∩
+      (imageOpens σ hW₂V hVa hW₂ hV : Set (σ.localQuotient hV)) = _
+  apply Set.Subset.antisymm
+  · rintro p ⟨⟨a, haA, ha⟩, ⟨b, hbB, hb⟩⟩
+    -- both fibre points are in the same orbit; stability puts one in both windows
+    obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G ↑Γ(X, V) ℤ a b).mp (by rw [ha, hb])
+    have hbA : b ∈ Set.range ⇑(windowHom (X := X) hW₁V hVa) := by
+      rw [← hg]
+      exact specSMul_mem_range_windowHom σ hW₁V hVa hW₁ hV g a haA
+    refine ⟨b, ?_, hb⟩
+    rw [← range_windowHom_inter (X := X) hW₁V hW₂V hVa]
+    exact ⟨hbA, hbB⟩
+  · rintro p ⟨a, haA, ha⟩
+    have h71 : a ∈ Set.range ⇑(windowHom (X := X) hW₁V hVa) ∩
+        Set.range ⇑(windowHom (X := X) hW₂V hVa) := by
+      rw [range_windowHom_inter (X := X) hW₁V hW₂V hVa]
+      exact haA
+    exact ⟨⟨a, h71.1, ha⟩, ⟨a, h71.2, ha⟩⟩
 
 end OpenImmersion
 
