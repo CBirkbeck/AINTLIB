@@ -91,6 +91,7 @@ lemma val_awayConst' (i : σ) (r : R) :
         Submonoid.powers (X i : MvPolynomial σ R)) := by
   rw [awayConst, Away.val_mk]
 
+omit [DecidableEq σ] in
 @[simp]
 lemma val_awayConst (i : σ) (r : R) :
     (awayConst R i r).val = Localization.mk (C r) 1 := by
