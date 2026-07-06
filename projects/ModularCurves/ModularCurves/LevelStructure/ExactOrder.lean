@@ -68,11 +68,72 @@ of `E/S`. -/
 def Section.HasExactOrder (P : E.Section) (N : ℕ) [NeZero N] : Prop :=
   (P.orderDivisor E N).IsSubgroup E
 
+/-- **Register box `BB-DELIGNE` (KM 1.4.2, cite [Oort–Tate])**, in the project's
+subgroup-divisor encoding: a subgroup divisor of constant degree `N` is killed by `N`
+— every point factoring through it is annihilated by `N`. KM (verbatim): *"a finite
+locally free commutative group scheme of rank `N` is killed by `N`"*. -/
+theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors
+    {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) {N : ℕ} [NeZero N]
+    (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (Q : E.Point g)
+    (hQ : ∃ h : T ⟶ D.ideal.subscheme, h ≫ D.ideal.subschemeι = Q.1) :
+    (N : ℤ) • Q = 0 := by sorry
+
+/-- `IdealSheafData.ideal` as a monoid homomorphism (products of ideal sheaves are
+computed pointwise). -/
+noncomputable def _root_.AlgebraicGeometry.Scheme.IdealSheafData.idealMonoidHom
+    (X : Scheme.{u}) :
+    X.IdealSheafData →* (∀ U : X.affineOpens, Ideal Γ(X, U.1)) where
+  toFun := Scheme.IdealSheafData.ideal
+  map_one' := by
+    funext U
+    simp [Scheme.IdealSheafData.one_eq_top, Scheme.IdealSheafData.ideal_top,
+      Ideal.one_eq_top]
+  map_mul' I J := Scheme.IdealSheafData.ideal_mul I J
+
 /-- **(T-D5 = KM 1.4.2)** Exact order `N` implies `N • P = 0`. Black box BB-DELIGNE: a
 finite locally free commutative group scheme of rank `N` is killed by `N` (KM cite
 [Oort–Tate]). -/
 theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
-    (h : P.HasExactOrder E N) : (N : ℤ) • P = 0 := by sorry
+    (h : P.HasExactOrder E N) : (N : ℤ) • P = 0 := by
+  haveI hsep : IsSeparated E.π := inferInstance
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π := ⟨hsep, E.smooth⟩
+  have hdeg : ∀ s, (P.orderDivisor E N).degree s = N := fun s =>
+    RelEffCartierDiv.sectionsDivisor_degree E.π E.smooth _ s
+  refine RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors E h hdeg (𝟙 S) P ?_
+  have hideal : (P.orderDivisor E N).ideal =
+      ∏ a : Fin N, Scheme.Hom.ker (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1 := by
+    rw [Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  have h0 : (((((0 : Fin N) : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S)) = P := by
+    simp
+  have hle : (P.orderDivisor E N).ideal ≤ Scheme.Hom.ker P.1 := by
+    rw [hideal]
+    have hle0 : (∏ a : Fin N,
+        Scheme.Hom.ker (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1) ≤
+        Scheme.Hom.ker (((((0 : Fin N) : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S)).1 := by
+      intro U
+      have hprod : (∏ a : Fin N,
+          Scheme.Hom.ker (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1).ideal =
+          ∏ a : Fin N,
+            (Scheme.Hom.ker (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1).ideal :=
+        map_prod (Scheme.IdealSheafData.idealMonoidHom E.E) _ _
+      calc (∏ a : Fin N,
+          Scheme.Hom.ker (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1).ideal U
+          = ∏ a : Fin N, (Scheme.Hom.ker
+              (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1).ideal U := by
+            rw [hprod]
+            exact Finset.prod_apply U Finset.univ _
+        _ ≤ _ :=
+          Ideal.prod_le_inf.trans (Finset.inf_le (Finset.mem_univ (0 : Fin N)))
+    rw [h0] at hle0
+    exact hle0
+  haveI hPc : IsClosedImmersion P.1 := by
+    have h1 : IsClosedImmersion (P.1 ≫ E.π) := by
+      rw [P.2]
+      infer_instance
+    exact IsClosedImmersion.of_comp P.1 E.π
+  refine ⟨P.1.toImage ≫ Scheme.IdealSheafData.inclusion hle, ?_⟩
+  rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι]
+  exact P.1.toImage_imageι
 
 /-- **(T-D6 = KM 1.4.4, (1) ⇔ (3), verbatim source in hand with proof)** For a point
 `P` **killed by `N`** (KM's standing hypothesis "Let `P ∈ C(S)` be a point killed by

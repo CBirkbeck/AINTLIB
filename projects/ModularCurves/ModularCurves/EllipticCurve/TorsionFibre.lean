@@ -49,6 +49,28 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
+open scoped CategoryTheory.Obj in
+/-- **(T-B6a)** Multiplication by `n` commutes with base change: the first projection of
+the defining pullback intertwines `[n]` on `E ×_S T` with `[n]` on `E`. -/
+theorem mulByHom_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
+    (E.baseChange g).mulByHom n ≫ pullback.fst E.π g =
+      pullback.fst E.π g ≫ E.mulByHom n := by
+  letI : Group (E.asOver ⟶ E.asOver) := Hom.group
+  letI : Group ((Over.pullback g).obj E.asOver ⟶ (Over.pullback g).obj E.asOver) :=
+    Hom.group
+  have key : (E.baseChange g).mulBy n = (Over.pullback g).map (E.mulBy n) := by
+    show (𝟙 ((Over.pullback g).obj E.asOver)) ^ n =
+      (Over.pullback g).map ((𝟙 E.asOver) ^ n)
+    have h1 : (Over.pullback g).map ((𝟙 E.asOver) ^ n) =
+        (Over.pullback g).homMonoidHom ((𝟙 E.asOver) ^ n) := rfl
+    have h2 : (Over.pullback g).homMonoidHom (𝟙 E.asOver) =
+        𝟙 ((Over.pullback g).obj E.asOver) := (Over.pullback g).map_id E.asOver
+    rw [h1, map_zpow ((Over.pullback g).homMonoidHom) (𝟙 E.asOver) n, h2]
+  have hleft : (E.baseChange g).mulByHom n = ((Over.pullback g).map (E.mulBy n)).left :=
+    congrArg CommaMorphism.left key
+  rw [hleft]
+  exact pullback.lift_fst _ _ _
+
 /-- The zero of the point group is the pulled-back zero section. -/
 theorem point_zero_val {T : Scheme.{u}} (g : T ⟶ S) :
     ((0 : E.Point g) : T ⟶ E.E) = g ≫ E.zero := by
