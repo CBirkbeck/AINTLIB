@@ -172,6 +172,62 @@ noncomputable def spanPushoutCocone : PushoutCocone f g :=
       exact ((Algebra.TensorProduct.includeLeft (S := (↑X.obj : Type u))).commutes a).trans
         ((Algebra.TensorProduct.includeRight (R := (↑X.obj : Type u))).commutes a).symm)
 
+/-- The tensor-product cocone is a colimit cocone: `FiniteEtale k` has pushouts. -/
+noncomputable def spanPushoutCoconeIsColimit : IsColimit (spanPushoutCocone f g) :=
+  PushoutCocone.isColimitAux' _ fun s => by
+    letI : Algebra X.obj Y.obj := f.hom.hom.toRingHom.toAlgebra
+    letI : Algebra X.obj Z.obj := g.hom.hom.toRingHom.toAlgebra
+    letI : Algebra X.obj s.pt.obj := (s.inl.hom.hom.comp f.hom.hom).toRingHom.toAlgebra
+    haveI : IsScalarTower k X.obj Y.obj :=
+      IsScalarTower.of_algebraMap_eq fun r => (f.hom.hom.commutes r).symm
+    haveI : IsScalarTower k X.obj Z.obj :=
+      IsScalarTower.of_algebraMap_eq fun r => (g.hom.hom.commutes r).symm
+    haveI : IsScalarTower k X.obj s.pt.obj :=
+      IsScalarTower.of_algebraMap_eq fun r => by
+        show algebraMap k s.pt.obj r = s.inl.hom.hom (f.hom.hom (algebraMap k X.obj r))
+        rw [f.hom.hom.commutes r, s.inl.hom.hom.commutes r]
+    have hcond : ∀ a : X.obj, s.inl.hom.hom (f.hom.hom a) = s.inr.hom.hom (g.hom.hom a) :=
+      fun a => congrArg (fun q => q.hom.hom a) s.condition
+    let f' : Y.obj →ₐ[X.obj] s.pt.obj :=
+      { s.inl.hom.hom with commutes' := fun a => rfl }
+    let g' : Z.obj →ₐ[X.obj] s.pt.obj :=
+      { s.inr.hom.hom with commutes' := fun a => (hcond a).symm }
+    refine ⟨ObjectProperty.homMk (CommAlgCat.ofHom
+      ((Algebra.TensorProduct.productMap f' g').restrictScalars k)), ?_, ?_, ?_⟩
+    · ext x
+      exact Algebra.TensorProduct.productMap_left_apply f' g' x
+    · ext x
+      exact Algebra.TensorProduct.productMap_right_apply f' g' x
+    · intro m hm1 hm2
+      have hml : ∀ y : Y.obj, m.hom.hom (y ⊗ₜ 1) = s.inl.hom.hom y :=
+        fun y => congrArg (fun q => q.hom.hom y) hm1
+      have hmr : ∀ z : Z.obj, m.hom.hom ((1 : Y.obj) ⊗ₜ z) = s.inr.hom.hom z :=
+        fun z => congrArg (fun q => q.hom.hom z) hm2
+      ext x
+      induction x using TensorProduct.induction_on with
+      | zero => exact (map_zero _).trans (map_zero _).symm
+      | tmul y z =>
+        have h1 : (y ⊗ₜ z : ↑Y.obj ⊗[↑X.obj] ↑Z.obj) = (y ⊗ₜ 1) * ((1 : Y.obj) ⊗ₜ z) := by
+          rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+        have h2 : m.hom.hom (y ⊗ₜ z) = s.inl.hom.hom y * s.inr.hom.hom z := by
+          have h := congrArg m.hom.hom h1
+          rw [map_mul] at h
+          rw [hml y, hmr z] at h
+          exact h
+        have h3 : ((Algebra.TensorProduct.productMap f' g').restrictScalars k) (y ⊗ₜ z) =
+            s.inl.hom.hom y * s.inr.hom.hom z := by
+          show Algebra.TensorProduct.productMap f' g' (y ⊗ₜ z) = _
+          rw [Algebra.TensorProduct.productMap_apply_tmul]
+          rfl
+        exact h2.trans h3.symm
+      | add x₁ x₂ ih₁ ih₂ =>
+        exact (map_add _ _ _).trans
+          (((congrArg₂ (· + ·) ih₁ ih₂).trans (map_add _ _ _).symm))
+
+instance hasPushouts : HasPushouts (CommAlgCat.FiniteEtale.{u} k) :=
+  hasPushouts_of_hasColimit_span fun f g =>
+    HasColimit.mk ⟨_, spanPushoutCoconeIsColimit f g⟩
+
 end PushoutCat
 
 end FiniteEtaleGalois

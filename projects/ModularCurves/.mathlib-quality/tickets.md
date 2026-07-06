@@ -1575,9 +1575,29 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Depends on**: T-D6 · **Type**: theorem (thin wrapper — golf target).
 
 ### [T-D10] ⧗KM Γ₀(N): literal fppf-local cyclicity
-- **Status**: open (statement to add) · **File**: LevelStructure/Basic.lean ·
+- **Status**: quote-gate-satisfied, DESIGN-DECISION-GATED (beastmode-A 2026-07-09T10:00Z
+  mined KM 3.4/3.7, printed pp. 105-106). VERBATIM (KM 3.7.1 proof, p.105): *"the
+  notion of cyclicity is by definition local for the f.p.p.f. topology, so a fortiori
+  for the etale topology"*; *"our constant group-scheme K is cyclic in the sense of
+  f.p.p.f.-locally admitting a generator if and only if the abstract group K(T) is a
+  cyclic group of order N"*. So Γ₀(N)-structure (KM 1.4.1) = a rank-N subgroup divisor
+  `G ⊆ E` that fppf-LOCALLY on `S` admits a generating section of exact order `N`
+  (`Σ_{a} [aP₀] = G`). CURRENT `IsGammaZero` uses the geometric-fibre (algebraically-
+  closed-point) surrogate of this. DESIGN DECISION NEEDED (owner): mathlib has fppf
+  DESCENT (`AlgebraicGeometry/Morphisms/FlatDescent.lean`, `Sites/Fpqc.lean`) but NO
+  clean "fppf-cover-admitting-a-generator" vocabulary — the literal form needs either
+  (a) a `∃ (S' ⟶ S) faithfully-flat lfp surjective, ∃ generator over S'` predicate
+  built on `@Surjective ⊓ @Flat` + `LocallyOfFinitePresentation` (all present as
+  MorphismProperties), or (b) a Sites-based sheafification. RECOMMEND (a): define
+  `IsGammaZeroFppf N G := ∃ (T : Scheme) (h : T ⟶ S), Surjective h ∧ Flat h ∧
+  LocallyOfFinitePresentation h ∧ ∃ P₀ : (E.baseChange h).Section, P₀.HasExactOrder N ∧
+  (P₀.orderDivisor N).ideal = (G.baseChange h).ideal`, then state
+  `isGammaZero_iff_fppf : IsGammaZero N G ↔ IsGammaZeroFppf N G` (⟸ by geometric-point
+  descent of the generator; ⟹ needs KM 3.7.1's étale-descent representability — ⧗-gated
+  proof, but the STATEMENT is addable now). NOT started in code pending the owner's
+  (a)-vs-(b) call — this is a genuine API-design fork, not a proof gap. · **File**: LevelStructure/Basic.lean ·
   **Depends on**: T-D3; fppf vocabulary · **Type**: def + equivalence statement ·
-  **Sources**: [KM] 1.4.1 cyclic (IN HAND) + 3.4 ⧗ + 6.1 ⧗.
+  **Sources**: [KM] 1.4.1 cyclic (IN HAND) + 3.4/3.7.1 (NOW IN HAND, quotes banked) + 6.1 ⧗.
 
 ### [T-E3] Ell/R category plumbing (Prop sorries)
 - **Status**: done (beastmode-A 2026-07-08T14:00Z → 2026-07-08T15:30Z — ALL fields

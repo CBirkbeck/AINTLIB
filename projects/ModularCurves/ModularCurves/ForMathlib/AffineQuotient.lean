@@ -109,7 +109,125 @@ theorem invariantsπ_hom_ext_of_isOpenImmersion [Finite G] {W Y : Scheme.{u}}
     (H : pullback.snd (invariantsπ G B R) j ≫ h₁ =
       pullback.snd (invariantsπ G B R) j ≫ h₂) :
     h₁ = h₂ := by
-  sorry
+  -- `pullback.snd π j` is surjective (`Surjective` is stable under base change),
+  -- so `h₁` and `h₂` agree on points.
+  have hπ : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
+  have hsnd : Surjective (pullback.snd (invariantsπ G B R) j) :=
+    MorphismProperty.pullback_snd _ _ hπ
+  have hbase : ∀ w : W, h₁ w = h₂ w := by
+    intro w
+    obtain ⟨z, hz⟩ := hsnd.surj w
+    rw [← hz, ← Scheme.Hom.comp_apply, ← Scheme.Hom.comp_apply, H]
+  -- Around every point of `W` there is an open chart on which `h₁` and `h₂` agree.
+  have key : ∀ w : W, ∃ (Z : Scheme.{u}) (ℓ : Z ⟶ W),
+      IsOpenImmersion ℓ ∧ (∃ z, ℓ z = w) ∧ ℓ ≫ h₁ = ℓ ≫ h₂ := by
+    intro w
+    -- an affine chart `ι` of `Y` around `h₁ w`
+    obtain ⟨i₀, y₀, hy₀⟩ := Y.affineCover.exists_eq (h₁ w)
+    set ι := Y.affineCover.f i₀ with hι
+    -- `T`: the locus where `h₁` (equivalently `h₂`) lands in the chart
+    set T : Set W := h₁.base ⁻¹' Set.range ι with hT
+    have hTopen : IsOpen T := ι.isOpenEmbedding.isOpen_range.preimage h₁.continuous
+    have hwT : w ∈ T := ⟨y₀, hy₀⟩
+    -- push into `Spec Bᴳ` along `j` and find an invariant basic open inside
+    have hOopen : IsOpen (j.base '' T) := j.isOpenEmbedding.isOpenMap _ hTopen
+    obtain ⟨s, ⟨a, rfl⟩, hjws, hsO⟩ :=
+      PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open
+        (⟨w, hwT, rfl⟩ : j w ∈ j.base '' T) hOopen
+    -- the localization chart over `D(a)` and its lift `ℓ` to `W`
+    set κ : Spec (CommRingCat.of (Localization.Away a)) ⟶
+        Spec (CommRingCat.of (FixedPoints.subalgebra R B G)) :=
+      Spec.map (CommRingCat.ofHom
+        (algebraMap (FixedPoints.subalgebra R B G) (Localization.Away a))) with hκ
+    have hκrange : Set.range κ.base = (PrimeSpectrum.basicOpen a : Set _) :=
+      PrimeSpectrum.localization_away_comap_range _ a
+    have hκj : Set.range κ.base ⊆ Set.range j.base := by
+      rw [hκrange]
+      exact hsO.trans (Set.image_subset_range _ _)
+    set ℓ := IsOpenImmersion.lift j κ hκj with hℓ
+    have hℓj : ℓ ≫ j = κ := IsOpenImmersion.lift_fac j κ hκj
+    have hℓimm : IsOpenImmersion ℓ := by
+      have : IsOpenImmersion (ℓ ≫ j) := hℓj ▸ inferInstance
+      exact IsOpenImmersion.of_comp ℓ j
+    -- the range of `ℓ` lies in `T` and contains `w`
+    have hrangeT : ∀ v, ℓ v ∈ T := by
+      intro v
+      have h5 : j (ℓ v) ∈ j.base '' T := by
+        refine hsO ?_
+        rw [← hκrange]
+        exact ⟨v, by rw [← hℓj, Scheme.Hom.comp_apply]⟩
+      obtain ⟨t, htT, ht⟩ := h5
+      rwa [← j.isOpenEmbedding.injective ht]
+    have hwℓ : ∃ z, ℓ z = w := by
+      have h6 : j w ∈ Set.range κ.base := hκrange ▸ hjws
+      obtain ⟨v, hv⟩ := h6
+      refine ⟨v, j.isOpenEmbedding.injective ?_⟩
+      rw [← hℓj, Scheme.Hom.comp_apply] at hv
+      exact hv
+    -- lift `ℓ ≫ hᵢ` into the affine chart
+    have hrange₁ : Set.range (ℓ ≫ h₁).base ⊆ Set.range ι.base := by
+      rintro _ ⟨v, rfl⟩
+      exact hrangeT v
+    have hrange₂ : Set.range (ℓ ≫ h₂).base ⊆ Set.range ι.base := by
+      rintro _ ⟨v, rfl⟩
+      have h7 : (ℓ ≫ h₂) v = h₁ (ℓ v) := by
+        rw [Scheme.Hom.comp_apply, hbase (ℓ v)]
+      rw [Scheme.Hom.comp_apply] at h7 ⊢
+      rw [h7]
+      exact hrangeT v
+    set t₁ := IsOpenImmersion.lift ι (ℓ ≫ h₁) hrange₁ with ht₁def
+    set t₂ := IsOpenImmersion.lift ι (ℓ ≫ h₂) hrange₂ with ht₂def
+    have ht₁ : t₁ ≫ ι = ℓ ≫ h₁ := IsOpenImmersion.lift_fac ι (ℓ ≫ h₁) hrange₁
+    have ht₂ : t₂ ≫ ι = ℓ ≫ h₂ := IsOpenImmersion.lift_fac ι (ℓ ≫ h₂) hrange₂
+    -- the B-side chart and the comparison map into the pullback
+    set κB : Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶
+        Spec (CommRingCat.of B) :=
+      Spec.map (CommRingCat.ofHom (algebraMap B (Localization.Away ((a : B))))) with hκB
+    set πa : Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶
+        Spec (CommRingCat.of (Localization.Away a)) :=
+      Spec.map (CommRingCat.ofHom (IsLocalization.map
+        (Localization.Away ((a : B)))
+        (algebraMap (FixedPoints.subalgebra R B G) B)
+        (Submonoid.powers_le_comap_algebraMap R a))) with hπa
+    have hsquare : κB ≫ invariantsπ G B R = πa ≫ κ := by
+      rw [hκB, hπa, hκ, invariantsπ, ← Spec.map_comp, ← Spec.map_comp,
+        ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+      congr 2
+      exact (IsLocalization.map_comp _).symm
+    set ρ := pullback.lift κB (πa ≫ ℓ)
+      (by rw [hsquare, Category.assoc, hℓj]) with hρ
+    have hρsnd : ρ ≫ pullback.snd (invariantsπ G B R) j = πa ≫ ℓ :=
+      pullback.lift_snd _ _ _
+    -- the localized invariants morphism coequalizes `h₁, h₂` after `ℓ`
+    have hπaℓ : πa ≫ ℓ ≫ h₁ = πa ≫ ℓ ≫ h₂ := by
+      rw [← Category.assoc, ← hρsnd, Category.assoc, Category.assoc, H]
+    have hπat : πa ≫ t₁ = πa ≫ t₂ := by
+      rw [← cancel_mono ι, Category.assoc, Category.assoc, ht₁, ht₂]
+      exact hπaℓ
+    -- cancel `πa` on `Γ`-level: the localized inclusion is injective
+    have ht : t₁ = t₂ := by
+      rw [← cancel_mono (Y.affineCover.X i₀).isoSpec.hom]
+      obtain ⟨φ₁, hφ₁⟩ := Spec.map_surjective (t₁ ≫ (Y.affineCover.X i₀).isoSpec.hom)
+      obtain ⟨φ₂, hφ₂⟩ := Spec.map_surjective (t₂ ≫ (Y.affineCover.X i₀).isoSpec.hom)
+      rw [← hφ₁, ← hφ₂]
+      congr 1
+      have h8 : πa ≫ Spec.map φ₁ = πa ≫ Spec.map φ₂ := by
+        rw [hφ₁, hφ₂, ← Category.assoc, ← Category.assoc, hπat]
+      rw [hπa, ← Spec.map_comp, ← Spec.map_comp] at h8
+      have h9 := Spec.map_injective h8
+      ext c
+      have h10 := congrArg (fun ψ => ψ.hom c) h9
+      exact fixedPoints_awayMap_injective R a h10
+    refine ⟨_, ℓ, hℓimm, hwℓ, ?_⟩
+    rw [← ht₁, ← ht₂, ht]
+  -- glue: the charts form an open cover of `W`
+  choose Z ℓ himm hcov heq using key
+  have := himm
+  exact Scheme.OpenCover.hom_ext
+    (Scheme.Cover.mkOfCovers W Z ℓ
+      (fun x => ⟨x, (hcov x).choose, (hcov x).choose_spec⟩)
+      (fun w => himm w))
+    h₁ h₂ heq
 
 variable (G B) in
 /-- Uniqueness of descent along the invariants morphism: `invariantsπ` is an
