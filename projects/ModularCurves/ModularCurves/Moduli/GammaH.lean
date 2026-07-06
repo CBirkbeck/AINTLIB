@@ -744,6 +744,22 @@ theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
     rwa [map_natCast] at h
   exact hu.ne_zero
 
+private theorem neg_eq_self_of_zsmul_eq_zero_of_le_two {G : Type*} [AddGroup G] {N : ℕ} [NeZero N]
+    (hN : N ≤ 2) {Z : G} (hZ : (N : ℤ) • Z = 0) : -Z = Z := by
+  rw [neg_eq_iff_add_eq_zero, ← two_zsmul]
+  rcases (by have := NeZero.ne N; lia : N = 1 ∨ N = 2) with rfl | rfl
+  · simp [show Z = 0 by simpa using hZ]
+  · exact_mod_cast hZ
+
+private theorem gammaFullNaiveProblem_map_negIso_of_le_two (N : ℕ) [NeZero N] (hN : N ≤ 2)
+    (X : EllObj R) (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
+    (gammaFullNaiveProblem R N).map (EllObj.negIso R X).hom.op L = L := by
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · exact (EllObj.pullSection_negHom R X L.1.1).trans
+      (neg_eq_self_of_zsmul_eq_zero_of_le_two hN L.2.1.1)
+  · exact (EllObj.pullSection_negHom R X L.1.2).trans
+      (neg_eq_self_of_zsmul_eq_zero_of_le_two hN L.2.1.2)
+
 /-- **(T-H7, the honest stack statement at small `N`)** For `N ≤ 2` the full-level
 problem is NOT rigid — `[-1]` is a nontrivial automorphism acting trivially on all
 level data (on `E[2]`, `−P = P`) — so no fine scheme exists and the object of record
@@ -753,54 +769,23 @@ level `N ≤ 2` we only get a stack".
 Hypotheses per the adversarial pass (2026-07-05, DEF-1): `N` invertible (over an
 `𝔽₂`-algebra naive full level-2 structures do not exist — `E[2]` is infinitesimal —
 so the problem is vacuously rigid), and an object with nonempty base (empty-base
-objects witness nothing). Proof route: pass to the full-level trivialisation scheme
-of any `X` (finite étale surjective, so nonempty base persists), where the
-tautological level point is fixed by `[-1] ≠ 𝟙`. -/
+objects witness nothing). Proof route: base-change any `X` to a geometric point of
+its base keeping `N` invertible (T-H7d), where a naive full level structure exists
+(T-H7b) and is fixed by the non-identity automorphism `[-1]` (T-H7a/T-H7c). -/
 theorem gammaFullNaive_not_rigid_of_le_two (N : ℕ) [NeZero N] (hN : N ≤ 2)
     (hinv : IsUnit ((N : ℕ) : R)) (hR : ∃ X : EllObj R, Nonempty X.base) :
     ¬ (gammaFullNaiveProblem R N).Rigid := by
   intro hrig
-  -- A geometric point of some object's base, keeping `N` invertible (T-H7d).
   obtain ⟨X₀, hne⟩ := hR
   obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X₀ hne N hinv
   letI := fk
   letI := ak
-  -- The witness object: base change to the geometric point.
-  set X : EllObj R := X₀.pullbackAlong t with hX
-  -- A naive full level-`N` structure on it (T-H7b).
-  obtain ⟨P, Q, hPQ⟩ :=
-    EllipticCurve.exists_isNaiveFullLevel_of_le_two k X.curve N hN hk
-  -- `[-1]` is not the identity automorphism (T-H7c at the identity geometric point).
-  have hne' : EllObj.negIso R X ≠ Iso.refl X := by
-    intro h
-    have htop : X.curve.mulByHom (-1) = 𝟙 X.curve.E :=
-      congrArg (fun i : X ≅ X => i.hom.top) h
-    exact EllipticCurve.mulByHom_neg_one_ne_id X.curve k (𝟙 _) htop
-  -- Level points killed by `N ≤ 2` are `2`-torsion, hence fixed by negation.
-  have hfix2 : ∀ Z : X.curve.Section, ((N : ℕ) : ℤ) • Z = 0 → -Z = Z := by
-    intro Z hZ
-    have h2 : ((2 : ℕ) : ℤ) • Z = 0 := by
-      have hN0 := NeZero.ne N
-      rcases (by omega : N = 1 ∨ N = 2) with rfl | rfl
-      · have hZ0 : Z = 0 := by simpa using hZ
-        rw [hZ0]
-        simp
-      · exact hZ
-    have hZZ : Z + Z = 0 := by
-      have h2' : (2 : ℤ) • Z = 0 := by exact_mod_cast h2
-      rwa [two_zsmul] at h2'
-    exact neg_eq_of_add_eq_zero_left hZZ
-  -- The level structure is fixed by `[-1]` (T-H7a fixity engine).
-  have hfix : (gammaFullNaiveProblem R N).map (EllObj.negIso R X).hom.op ⟨(P, Q), hPQ⟩
-      = ⟨(P, Q), hPQ⟩ := by
-    refine Subtype.ext (Prod.ext ?_ ?_)
-    · show EllHom.pullSection R (EllObj.negHom R X) P = P
-      rw [EllObj.pullSection_negHom]
-      exact hfix2 P hPQ.1.1
-    · show EllHom.pullSection R (EllObj.negHom R X) Q = Q
-      rw [EllObj.pullSection_negHom]
-      exact hfix2 Q hPQ.1.2
-  exact hrig X (EllObj.negIso R X) rfl hne' ⟨(P, Q), hPQ⟩ hfix
+  set X : EllObj R := X₀.pullbackAlong t
+  obtain ⟨P, Q, hPQ⟩ := EllipticCurve.exists_isNaiveFullLevel_of_le_two k X.curve N hN hk
+  have hne' : EllObj.negIso R X ≠ Iso.refl X := fun h ↦
+    EllipticCurve.mulByHom_neg_one_ne_id X.curve k (𝟙 _) (congrArg (fun i : X ≅ X ↦ i.hom.top) h)
+  exact hrig X (EllObj.negIso R X) rfl hne' ⟨(P, Q), hPQ⟩
+    (gammaFullNaiveProblem_map_negIso_of_le_two R N hN X ⟨(P, Q), hPQ⟩)
 
 end GammaH
 
