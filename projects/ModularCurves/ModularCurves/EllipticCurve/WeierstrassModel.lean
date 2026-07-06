@@ -2525,6 +2525,25 @@ lemma zeroChartHom_mk (W : WeierstrassCurve R) {i : ℕ}
   simp
 
 set_option backward.isDefEq.respectTransparency false in
+/-- The piece-level comparison for the glue step. -/
+private lemma glue_pieceY (W : WeierstrassCurve R) :
+    (Proj.openCoverOfMapIrrelevantEqTop (quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)).f
+      ⟨1, (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1),
+        one_pos, mk_X_mem_quotientGrading_one W 1⟩ ≫
+      Spec.map (CommRingCat.ofHom (zeroChartHom W)) ≫
+      Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos =
+    Proj.toBasicOpenOfGlobalSections (quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)) rfl
+      one_pos (mk_X_mem_quotientGrading_one W 1) ≫
+      (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).ι := by
+  sorry
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The `Spec` of the chart evaluation composed with the chart inclusion is the
 section at infinity (the glue step of the zero-leg). -/
 lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
@@ -2572,7 +2591,7 @@ lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
         one_pos, mk_X_mem_quotientGrading_one W 1⟩ ≫ projModelZero W
   conv_rhs => rw [projModelZero, Proj.fromOfGlobalSections]
   rw [Scheme.Cover.ι_glueMorphisms]
-  sorry
+  exact glue_pieceY W
 
 end Points
 
