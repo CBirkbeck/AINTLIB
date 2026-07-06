@@ -1305,15 +1305,25 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
   charpoly-as-norm (`LinearMap.charpoly f = Algebra.norm R[T] (T•1 − f)`).
-  - **[T-D29] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T11:55Z · new file ForMathlib/CharpolyNorm.lean
-    (mathlib-only imports). Reading of record (binding, KM 1.8.2 "char poly of
-    f ∈ B = norm of T−f rel B⊗R[T]/R[T]"): the endomorphism is `Algebra.lmul R B b`
-    — statement `(Algebra.lmul R B b).charpoly = Algebra.norm R[X]
-    (X ⊗ₜ 1 − 1 ⊗ₜ b)` in `R[X] ⊗[R] B`. The naive general-endomorphism reading
-    is FALSE (norm on End(V) is det^dim) — attack block in d-lane-helpers.md.
-    Gap re-verified (4 searches; `charpoly_baseChange` exists but is functoriality,
-    not the bridge). Proof scratch-verified green.
+  - **[T-D29] Status**: done (beastmode-D2, 2026-07-06T11:55Z → 2026-07-06T12:05Z) ·
+    `Algebra.charpoly_lmul_eq_norm` in NEW ForMathlib/CharpolyNorm.lean
+    (mathlib-only imports, chain-independent). Reading of record (binding, KM 1.8.2
+    "char poly of f ∈ B = norm of T−f rel B⊗R[T]/R[T]"): the endomorphism is
+    `Algebra.lmul R B b` — statement `(Algebra.lmul R B b).charpoly =
+    Algebra.norm R[X] ((X:R[X]) ⊗ₜ 1 − 1 ⊗ₜ b)` in `R[X] ⊗[R] B`. The naive
+    general-endomorphism reading is FALSE (norm on End(V) is det^dim) — attack
+    block in d-lane-helpers.md. Gap re-verified (my 4 searches + worker's loogle/
+    grep/name-pattern re-run; `charpoly_baseChange` is functoriality, not the
+    bridge). Proof: charpoly_def + norm_eq_matrix_det at the baseChange basis;
+    congr 1; ext; one terminal simp (charmatrix_apply/diagonal_apply/
+    leftMulMatrix_eq_repr_mul/baseChange_repr_tmul engine + eq_comm kills the
+    diagonal split). Axioms standard three; zero warnings. Post-proof cleanup:
+    ✓ ran (single-decl Mode A — body 15→6 lines, all gates pass incl. hard gates,
+    statement byte-identical, no renames queued). GENERALISE flag for the
+    /generalise lane: `CommRing B → Ring B` verified-compiling (worker probe;
+    mathlib precedent `aeval_self_charpoly_lmul` uses `[Ring M]`) — deferred,
+    statement frozen. Feeds T-D30 (KM 1.8.2 (2)⟹(1)); pin the element spelling
+    `X ⊗ₜ 1 − 1 ⊗ₜ b` at the T-D30 call site.
   [T-D30] char-poly form of full-sections + equivalence (KM 1.8.2). [T-D31]
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
