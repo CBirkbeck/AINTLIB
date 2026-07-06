@@ -85,6 +85,33 @@ theorem sectionVanishingIdeal_eq_span_coord_coord {B : Type u} [CommRing B] [Alg
       Ideal.span (Set.range fun p : κ × ι => c.coord p.1 (b.coord p.2 σ)) :=
   sectionVanishingIdeal_eq_span_coord R M (c.smulTower b) σ
 
+open TensorProduct in
+/-- **(T-D14c, base-change vanishing bridge)** Finitely many elements of a free
+`R`-algebra all die in the base change `A ⊗[R] B` iff the ideal of all their
+coordinates is killed by `R → A` — KM 1.3.4's "the condition `ℓ = 0` is represented
+by the simultaneous vanishing of `r₁,…,r_{d′}`", the T-point universality engine of
+the incidence loci. -/
+theorem forall_one_tmul_eq_zero_iff_span_coord_le_ker {A B : Type u} [CommRing A]
+    [CommRing B] [Algebra R A] [Algebra R B] {ι κ : Type u} (b : Module.Basis ι R B)
+    (g : κ → B) :
+    (∀ j, (1 : A) ⊗ₜ[R] g j = (0 : A ⊗[R] B)) ↔
+      Ideal.span (Set.range fun p : κ × ι => b.coord p.2 (g p.1)) ≤
+        RingHom.ker (algebraMap R A) := by
+  rw [Ideal.span_le]
+  constructor
+  · rintro h _ ⟨⟨j, i⟩, rfl⟩
+    have h0 := congrArg ((b.baseChange A).repr · i) (h j)
+    simpa [Module.Basis.baseChange_repr_tmul, Algebra.algebraMap_eq_smul_one] using h0
+  · intro h j
+    have hrepr : ∀ i, (b.baseChange A).repr ((1 : A) ⊗ₜ[R] g j) i = 0 := by
+      intro i
+      have hmem : b.coord i (g j) ∈ RingHom.ker (algebraMap R A) := h ⟨(j, i), rfl⟩
+      rw [RingHom.mem_ker] at hmem
+      simpa [Module.Basis.baseChange_repr_tmul, Algebra.algebraMap_eq_smul_one] using hmem
+    refine (b.baseChange A).repr.injective ?_
+    rw [map_zero]
+    exact Finsupp.ext hrepr
+
 end ZeroLocus
 
 section Incidence
