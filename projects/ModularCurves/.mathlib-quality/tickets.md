@@ -597,7 +597,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 
 
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
-- **Status**: open · **File**: EllipticCurve/GroupLaw.lean (or Basic)
+- **Status**: in_progress (beastmode 2026-07-07T05:30Z — zero-leg (a)+(b) DONE:
+  `projModelZero_preimage_yChart` (fromOfGlobalSections_preimage_basicOpen + eval
+  Y↦1; call with NAMED hn/hr — leading section-var slots) and `projModelZeroChart`
+  (+`_fac`, reassoc). NEXT: zero-leg (c) chart-level naturality square (cancel mono
+  awayι-Y after awayι_comp_map; elementwise Away.mk chase for the zero-chart hom),
+  then the paste assembly per PLAN v2 below, then discharge `fibres :=`.) · **File**: EllipticCurve/GroupLaw.lean (or Basic)
 - **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
 - **Statement**: `FibrewiseElliptic (pullback.snd E.π g) (baseChange-zero) _` for
   `E : EllipticCurve S`, `g : T ⟶ S`.
