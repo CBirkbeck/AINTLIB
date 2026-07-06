@@ -2731,8 +2731,19 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   codRestrict`, `IsUnit` inverse-uniqueness. Sources: as T-Q3b.
 
 ### [T-Q3] Affine quotients: `Spec(A^G)` universal property — HEADLINE (v2 one-liner)
-- **Status**: open · **File**: ModularCurves/ForMathlib/AffineQuotient.lean (NEW) ·
+- **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T15:58Z
+- **File**: ModularCurves/ForMathlib/AffineQuotient.lean (NEW) ·
   **Type**: theorem ×3 · **Depends on**: T-Q1, T-Q3a, T-Q3b, T-Q3c
+- **Route lock (claim-time design, binding unless B2)**: (α) pure-algebra
+  factorization lemma first (`∃! ψ : C →+* (A)_a` under fixed image, via T-Q3c
+  (i)+(ii) + `RingEquiv.ofInjective`); (β) uniqueness stated in TRANSPORTABLE form
+  (against an arbitrary open immersion `j : W ⟶ Spec A` via `pullback π j`, NOT
+  only W = ⊤) so the existence-glue compat on `pullback (ι_p) (ι_q)` is uniqueness
+  at the overlap — this dodges the deferred T-Q3c(iii) invariants-of-products
+  identification entirely; (γ) existence per-point via closedness
+  (`PrimeSpectrum.isClosedMap_comap_of_isIntegral`) + basic-open basis +
+  `IsOpenImmersion.lift` into an affine chart + (α), glued by
+  `Scheme.OpenCover.glueMorphisms` with (β) discharging compat.
 - **Statement** (all `[Finite G]`):
   (i) `invariantsπ_hom_ext {Y : Scheme} (h₁ h₂ : Spec (.of A) ⟶ Y)
   (H : invariantsπ ≫ h₁ = invariantsπ ≫ h₂) : h₁ = h₂` (+ corollary
