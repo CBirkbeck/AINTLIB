@@ -2058,8 +2058,18 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     commits (6fb3b414 wip + 2f03d68d golf) — content verified at HEAD.
 - **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
   T-D12, T-D13.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T14:45Z (deps both met: T-D13 mine, T-D12 core by A).
+  - **Status**: done (beastmode-D2, 2026-07-06T14:45Z → 2026-07-06T22:00Z) —
+    **`exists_incidenceLocusLE` (KM 1.3.4 KEY LEMMA) PROVED sorry-free, standard
+    axioms**. Witness: `Z := vanishingLocus (D'.ι ≫ π) (D.ideal.comap D'.ι)`;
+    proof = the a/a′/b lemmas + vanishingLocus_le_ker_iff + a Galois opener
+    (mirroring ker_fst_of_isClosedImmersion + ker_subschemeι so the terminal
+    goal closes syntactically) + one iso-transport aux
+    (`incidenceAux_comap_eq_bot_iff`: comap along compatible iso preserves ⊥;
+    iso = pullbackSymmetry ≪≫ pullbackRightPullbackFstIso π t D'.ι ≪≫
+    pullbackSymmetry; leg-compat = one `simp [pullback.condition]`).
+    `hsm`/[IsSeparated] unused by this route (statement furniture — the
+    count-free construction never needs principality). CLEANUP DEBT (paused):
+    the ~400-line vanishingLocusAux_* block + this file générally → CLEANUP-9.
   - **Progress**: 2026-07-06T15:05Z — T-D14a DONE (`isSubdivisor_iff_le`,
     commit 87a2f88a: factorization ⟺ ideal-≤ via `Scheme.Hom.le_ker_comp` +
     `ker_subschemeι` / mathlib `inclusion` + `inclusion_subschemeι`). T-D14a′ +
@@ -2261,6 +2271,19 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     the ⦃T⦄-spelling pins it); [T-D14] assembly. NEXT ACTION: T-D14a mathlib
     search (subscheme factorization ↔ ideal order), then state skeletons.
 - **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
+  - **Status**: done (beastmode-D2, 2026-07-06T22:05Z) — PROVED sorry-free,
+    standard axioms, 5-line proof: `Z := Z₁ ⊔ Z₂` from T-D14 applied both ways;
+    `exists_factor_subschemeι_iff` + `sup_le_iff` + the two universal
+    properties. NO degree argument needed (the frozen mutual-subdivisor form
+    bypasses KM's same-degree reduction entirely); T-D26's wrapper never
+    enters. Incidence.lean remaining sorries: T-D16/T-D17/T-D18 only.
+    T-D16 ROUTE BANKED: the (3)-condition's (deg D)²-descent IS a second
+    application of `vanishingLocus` (Z_S := vanishingLocus (W-structure) Z_W —
+    the operator is KM's coordinate-descent), so T-D16 = sup of three loci
+    ([e] ≤ D via T-D14 at A's sectionDivisor of E.zero; D = inv*D via T-D15 at
+    the iso-pullback divisor; [m(P₁,P₂)] ≤ D_W via T-D14-over-W +
+    vanishingLocus-descent) + the IsSubgroup ⟺ three-conditions dictionary
+    (D-inc.3(c) — the remaining NEW content).
 - **[T-D16]** `exists_subgroupLocus` (KM 1.3.7, verbatim + proof in hand;
   `1 + deg + deg²` equations via `[e] ≤ D`, `D = inv*D`, `[m(P₁,P₂)] ≤ D_W`).
   Depends: T-D14, T-D15, T-D3.
