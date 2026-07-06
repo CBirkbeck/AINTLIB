@@ -228,6 +228,7 @@ theorem resLE_homOfLE {W V : X.Opens} (hW : σ.IsStableOpen W)
 
 variable [Finite G]
 
+omit [Finite G] in
 private theorem localQuotientMap_invariance {W V : X.Opens} (hW : σ.IsStableOpen W)
     (hWa : IsAffineOpen W) (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V)
     (hWV : W ≤ V) :
