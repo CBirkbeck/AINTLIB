@@ -526,6 +526,27 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   leg-compat squares from `algebraMap_chart_eq`/`hcosp`; then the per-piece
   conclusion via `IsPullback.isoPullback` + `isoPullback_hom_snd`
   (`pullbackHom = iso.inv ≫ κ`, κ iso).
+- **ENDGAME (2026-07-06, fully designed — execute mechanically)**: (b) via
+  `IsPullback.of_right` on the FLIPPED target: bindings h₁₁ := κ :=
+  `(isPullback_piece W j).isoPullback.hom`, v₁₁ := θ.hom ≫ awayι-W'-bcHom-form
+  (REDEFINE the fst-leg this way), v₁₂ := 𝒰.f j, h₂₁ := lift; t := COVER-SQUARE
+  `IsPullback pfst (𝒰.f j) (awayι-W-j) (pb.fst π alg)` — derive by transporting
+  `of_hasPullback` along `pullbackRightPullbackFstIso π (Spec alg) awayι-j`
+  (hom_fst/hom_snd @[simp]-lemmas at Pasting.lean:465-475) PLUS the identity mathlib
+  itself proves inside `openCoverOfLeft.mem₀` (Pullbacks.lean:521, by aesop):
+  `pullback.map (𝒰f i ≫ f) g f g (𝒰f i) 𝟙 𝟙 = (pullbackSymmetry _ _).hom ≫
+  (pullbackLeftPullbackSndIso _ _ _).inv ≫ pullback.fst _ _ ≫ (pullbackSymmetry _ _).hom`
+  (re-prove locally by aesop/hom_ext); s := big-rect
+  `isPullback_projModelBaseChange_chart` (PROVED) corner-transported by of_iso along
+  θ := asIso (Spec.map (ofHom (chartCoordEquiv (W.map alg) j).symm.toRingHom)) ≪≫
+  eqToIso (congrArg (fun t => Spec (.of (Away (quotientGrading (projIdeal
+  (W.map alg))) t))) (baseChangeGradedHom_mk_X …).symm); WALL-RECIPE: in each
+  compat-Prop first `rw [← baseChangeGradedHom_mk_X]` normalizing t'ⱼ-spellings to
+  bcHom-spelling, then `eqToHom_refl` collapses; use `isoPullback_hom_fst/snd` and
+  `pullback.lift_fst/snd` to identify the composite legs. (c): `pullbackHom =
+  (b).isoPullback.inv ≫ κ-arrangement` via `isoPullback_hom_snd`; IsIso from κ-iso;
+  close `projModelBaseChangeLift_isIso`.
+
 
 ### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
 - **Status**: open · **File**: EllipticCurve/GroupLaw.lean (or Basic)
