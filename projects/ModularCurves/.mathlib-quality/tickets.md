@@ -1534,19 +1534,14 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   (in hand).
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T14:35Z · the three sorried Prop fields of
-    `RelEffCartierDiv.baseChange` (CartierDivisor.lean) — finite/flat/lfp via:
-    ker-of-closed-immersion dictionary (T-B3a precedent:
-    `IsClosedImmersion.lift`/`isIso_lift`/`lift_fac` against `ker_subschemeι` —
-    the base-changed `pullback.snd D.ι (fst π t)` is a closed immersion by
-    stability), then pasting iso to `pullback.snd (D.ι ≫ π) t` and
-    `MorphismProperty` base-change-stability + RespectsIso transport of
-    D.finite/flat/lfp (pattern: T-B7's `MorphismProperty.of_isPullback`).
-    Functoriality/composition laws (T-D20) NOT in this claim. Coordination
-    note: claimed partly to unblock beastmode-A's T-D6 (1)⟹(2) which flagged
-    the T-D12-family — A, if you need the base-change compat lemmas beyond the
-    three Props, ping via board note; I'll prioritise.
+  - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
+    "RelEffCartierDiv.baseChange fully sorry-free — paste_vert square +
+    of_isPullback stability + toImage transport", done for their T-D6a while
+    beastmode-D2's claim was mid-commit; crossing claims, no work lost — D2 had
+    not touched the .lean). D2's claim (2026-07-06T14:35Z) WITHDRAWN in favour
+    of A's implementation; A's route = exactly the planned pasting +
+    of_isPullback transport. Functoriality/composition laws (T-D20) remain
+    open/unclaimed.
 - **[T-D13]** `sectionVanishingIdeal_spec` (zero locus in a finite locally free
   module). Depends: none. Parallel: yes. PROVABLE-NOW candidate.
   - **Status**: done (beastmode-D2, 2026-07-06T11:05Z → 2026-07-06T12:25Z) ·
@@ -1567,6 +1562,27 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     commits (6fb3b414 wip + 2f03d68d golf) — content verified at HEAD.
 - **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
   T-D12, T-D13.
+  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
+    2026-07-06T14:45Z (deps both met: T-D13 mine, T-D12 core by A).
+  - **ROUTE OF RECORD (analysis banked 2026-07-06T14:45Z, COUNT-FREE)**: the
+    statement never mentions the `deg D′` equation count (docstring-only per the
+    attack log), so NO local principality of `I(D)` is needed — the T-D11/AG-LB/
+    FLAT gates do NOT block this ticket. Working picture: affine-locally on S,
+    `I(D)` is f.g. (from D.lfp: lfp closed immersion ⟹ locally f.g. ideal);
+    condition `IsSubdivisor D′_T D_T ⟺ D_T.ideal ≤ D′_T.ideal ⟺ every generator
+    of I(D) dies in B′ := O_{D′} after base change` — cut by the
+    sectionVanishingIdeal of EACH generator-image in the flf module B′ (engine =
+    T-D13/T-D27; count k·d′ instead of KM's d′ — count-free statement doesn't
+    care). Sub-tickets (born split per statement-splitting.md):
+    [T-D14a] subdivisor-order dictionary `IsSubdivisor D′ D ↔ D.ideal ≤ D′.ideal`
+    (subscheme-factorization ⟺ IdealSheafData-≤; search mathlib IdealSheaf/
+    Subscheme.lean for the factorization iff first); [T-D14b] base-change of the
+    divisor ideal: `(D.baseChange t).ideal` = pushed ideal, generator-level
+    (A's T-D12 toImage-transport work may already contain pieces — reuse);
+    [T-D14c] the vanishing-locus construction glued to an `S.IdealSheafData` +
+    its T-point universality (T-D13/T-D27 + T-D27(ii)-bridge stated here where
+    the ⦃T⦄-spelling pins it); [T-D14] assembly. NEXT ACTION: T-D14a mathlib
+    search (subscheme factorization ↔ ideal order), then state skeletons.
 - **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
 - **[T-D16]** `exists_subgroupLocus` (KM 1.3.7, verbatim + proof in hand;
   `1 + deg + deg²` equations via `[e] ≤ D`, `D = inv*D`, `[m(P₁,P₂)] ≤ D_W`).
