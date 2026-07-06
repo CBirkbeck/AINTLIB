@@ -201,7 +201,19 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
   · simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
     rw [(Iso.inv_comp_eq _).mpr hB.isoPullback_hom_snd.symm, pullback.lift_snd, ← Category.assoc,
       hP2.isoPullback_hom_snd]
-  · sorry
+  · rw [← cancel_mono hB.isoPullback.hom]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc, Iso.inv_hom_id,
+      Category.comp_id]
+    apply pullback.hom_ext
+    · -- h₀ (fst / section): needs section naturality `sVlift ≫ hP2top = gV ≫ (U-model section)`
+      -- (pullback.hom_ext: fst via hgVfac + zbc.fst = g≫z; snd via lift_snd twice = gV), then
+      -- `isoSpec_V.inv ≫ gV = Spec.map φ ≫ isoSpec_U.inv` (from hbridge) + hez +
+      -- projModelZero_baseChange. ~15 lines — T-A8a final step.
+      sorry
+    · simp only [Category.assoc, hB.isoPullback_hom_snd, pullback.lift_snd]
+      rw [hP2.isoPullback_hom_snd_assoc, pullback.lift_snd_assoc, Category.id_comp,
+        Iso.inv_hom_id]
+      exact (projModelZero_projModelπ _).symm
 
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
