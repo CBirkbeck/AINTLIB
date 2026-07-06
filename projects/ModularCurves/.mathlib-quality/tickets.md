@@ -1401,7 +1401,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.4.4 with proof (IN HAND).
 
 ### [T-D6a-i] ForMathlib: `IdealSheafData.comap_mul` (formation-compat linchpin)
-- **Status**: open (spawned by T-D6a; mathlib-PR-sized — full design banked)
+- **Status**: done (beastmode-A 2026-07-08T18:00Z → 2026-07-09T02:00Z —
+  `IdealSheafData.comap_mul` PROVED sorry-free for ARBITRARY schemes (axioms
+  standard; full build green). Structure: (1) `comap_ideal_top_of_isAffine` —
+  TENSOR-FREE affine core (competitor cone Spec(Γ(X)/extension) +
+  IsClosedImmersion.lift + u ≫ fst = ιX reads the kernel off; ΓSpecIso_naturality
+  value-chases with the isoSpec round-trip `hround` at the CommRingCat.of-eta
+  spelling); (2) `comap_mul_of_isAffine` via equivOfIsAffine + Ideal.map_mul
+  (+Pi.mul_apply); (3) `comap_comap_ι_ideal_top` (resLE ⊤-value formula, pure
+  comap_comp + resLE_comp_ι rewriting); (4) global glue: isBasis_affineOpens cover
+  {U ≤ f⁻¹V} + ext_of_iSup_eq_top; per-U chain map_ideal ∘ OI-formula(+comap_symm as
+  term-trans) ∘ resLE-formula ∘ OI-formula-on-Y, multiplicative layerwise by
+  Ideal.map_mul. LEAN GOTCHAS BANKED: (a) `.toRingHom` instead of `(e : _ →+* _)`
+  coe-holes flips elaboration so the equiv's ⊤-spelling wins over the ideal's
+  ↑⟨⊤,_⟩-coe — resolves the FunLike mismatch; (b) `Ideal.map_of_equiv`'s ↑-coe
+  pattern never rw-matches toRingHom-terms — consume it as a defeq `Eq.trans` term;
+  (c) rw the goal-RHS ideal_mul BEFORE the hchain rewrites (comap-of-product doesn't
+  match the (A*B).ideal pattern, so order is safe).) 
 - **New file**: ForMathlib/IdealSheafComapMul.lean ·
   `Scheme.IdealSheafData.comap_mul : (I * J).comap f = I.comap f * J.comap f` ·
   **Depends on**: none · **Type**: theorem (upstream candidate)
