@@ -456,15 +456,26 @@ end Lfp
 
 end ProjModel
 
+/-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
+biject with `(W.baseChange K).toAffine.Point`, sending `[0:1:0]` to `0`.
+Route: every `Spec K`-point factors through one of the three affine charts (`K` is
+local and the `D₊(mk Xᵢ)` cover); chart points are dehomogenised-cubic solutions via
+`chartRingEquiv` + `ker_away_map_quotientGradingHom`; the `Z`-chart dichotomy
+(`v` unit or `v = 0 ⟹ [0:1:0]`) matches `Affine.Point`'s `some`/`zero`. -/
+theorem projModel_points (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    (K : Type u) [Field K] [Algebra R K] :
+    ∃ e : SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point,
+      e ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
+        rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ = 0 := by
+  sorry
+
 /-- **(T-A2)** The constructed model satisfies its interface.
 Source: KM 2.2; Loeffler §3.3 Def 3.3.3. -/
 theorem projModel_isWeierstrassModel (W : WeierstrassCurve R) :
     IsWeierstrassModel W (projModel W) (projModelπ W) (projModelZero W) := by
   refine ⟨inferInstance, ?_, projModelZero_projModelπ W, ?_⟩
   · exact projModelπ_lfp W
-  · -- pointed K-points for elliptic W (T-A2e): via the chart description +
-    -- mathlib's `Projective.Point.toAffineAddEquiv`
-    sorry
+  · exact fun hell K _ _ => projModel_points W hell K
 
 /-- **(T-A3)** The projective model of an *elliptic* Weierstrass curve (unit discriminant) is
 smooth of relative dimension 1 over the base.
