@@ -2892,6 +2892,8 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   of invariants") — **full KM text NOW IN refs/** (`katz-mazur-arithmetic-moduli-
   FULL.pdf`); read the appendix at pickup (quote-gate), decide the flat/finite-free
   hypotheses honestly. Feeds T-Q6 and the Y(ρ̄) twist route.
+  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:25Z
+    (quote-gate read first; full ticket body + statements to follow)
 - **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
