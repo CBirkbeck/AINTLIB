@@ -491,6 +491,35 @@ theorem muNPointsEquiv_natural (S : Scheme.{u}) (N : ℕ) [NeZero N]
       (Scheme.Γ.map k.op).hom (muNPointsEquiv S N g h : Γ(T, ⊤)) :=
   muNPointsEquivAux_natural S N g k h
 
+open MonObj in
+/-- **(T-B2, DS3a group-law pin)** The points description of `μ_{N,S}` sends the unit
+of the group structure `muNGrpObj` to `1`. -/
+theorem muNPointsEquiv_one (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Scheme.{u}}
+    (g : T ⟶ S) :
+    letI : Monoid (Over.mk g ⟶ Over.mk (muNπ S N)) := Hom.monoid
+    (muNPointsEquiv S N g ⟨(1 : Over.mk g ⟶ Over.mk (muNπ S N)).left, Over.w _⟩ :
+      Γ(T, ⊤)) = 1 :=
+  congrArg Subtype.val
+    (((yonedaMonObjIsoOfRepresentableBy (Over.mk (muNπ S N))
+        (muNGrpFunctor S N ⋙ forget₂ GrpCat MonCat) (muNRepresentableBy S N)).hom.app
+      (Opposite.op (Over.mk g))).hom.map_one)
+
+open MonObj in
+/-- **(T-B2, DS3a group-law pin — register rule (iii))** The points description of
+`μ_{N,S}` is multiplicative: the group structure `muNGrpObj` is, on `T`-points,
+multiplication of `N`-th roots of unity in `Γ(T, ⊤)` — i.e. `Spec` of the
+comultiplication `T ↦ T ⊗ T` (KM 1.12). -/
+theorem muNPointsEquiv_mul (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Scheme.{u}}
+    (g : T ⟶ S) (f₁ f₂ : Over.mk g ⟶ Over.mk (muNπ S N)) :
+    letI : Monoid (Over.mk g ⟶ Over.mk (muNπ S N)) := Hom.monoid
+    (muNPointsEquiv S N g ⟨(f₁ * f₂).left, Over.w _⟩ : Γ(T, ⊤)) =
+      (muNPointsEquiv S N g ⟨f₁.left, Over.w f₁⟩ : Γ(T, ⊤)) *
+        (muNPointsEquiv S N g ⟨f₂.left, Over.w f₂⟩ : Γ(T, ⊤)) :=
+  congrArg Subtype.val
+    (((yonedaMonObjIsoOfRepresentableBy (Over.mk (muNπ S N))
+        (muNGrpFunctor S N ⋙ forget₂ GrpCat MonCat) (muNRepresentableBy S N)).hom.app
+      (Opposite.op (Over.mk g))).hom.map_mul f₁ f₂)
+
 end ModularCurves
 
 end
