@@ -2152,6 +2152,20 @@ private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
   asIso (Spec.map ((awayCongr
     (baseChangeGradedHom_mk_X (R' := R') W j)).toCommRingCatIso.hom))
 
+/-- The graded square of the base change: quotient map after coefficient map. -/
+lemma gradedSquare (W : WeierstrassCurve R) :
+    (baseChangeGradedHom (algebraMap R R') W).comp
+      (quotientGradingHom (projIdeal W)) =
+    (quotientGradingHom (projIdeal (W.map (algebraMap R R')))).comp
+      (mvMapGraded (algebraMap R R')) := by
+  refine GradedRingHom.ext fun x => ?_
+  show quotientGradingMap (mvMapGraded (algebraMap R R')) (projIdeal W)
+    (projIdeal (W.map (algebraMap R R')))
+    (projIdeal_le_comap (algebraMap R R') W)
+    (Ideal.Quotient.mk (projIdeal W).toIdeal x) = _
+  rw [quotientGradingMap_mk]
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Chart naturality of the base change, across the wall: the plane-chart
 comparison equals the graded `Away.map` under the two chart identifications. -/
