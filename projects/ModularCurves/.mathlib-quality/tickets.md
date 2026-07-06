@@ -1084,8 +1084,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] 3.4.2(2) (verbatim quote in the box docstring) · [KM] 2.3.2.
 
 ### [T-B6] Fibre comparison: E[N] geometric fibres ≅ (ℤ/N)² (reuse HasseWeil)
-- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
-  2026-07-06T11:30Z · **New file**: EllipticCurve/TorsionFibre.lean (B-lane owned) ·
+- **Status**: done-modulo-registered-boxes (beastmode-B, 2026-07-06 — HEADLINE
+  `torsion_geometricFibre_rank_two` PROVED via the counting route; sorryAx enters
+  ONLY through the four registered Torsion.lean boxes BB-QF/BB-FLAT/BB-DEG/BB-DIFF
+  (same bar as T-B4/T-B5). All five sub-tickets T-B6a–e sorry-free AND axiom-clean:
+  mulByHom_baseChange, torsionBaseChangeHom + torsion_baseChange_isPullback,
+  nIsInvertible_spec_iff, natCard_sections_eq_finrank
+  (ForMathlib/EtaleSectionsCount.lean — NEW upstream candidate),
+  addEquiv_pi_fin_two_zmod_of_natCard (ForMathlib/FiniteAbelianRankTwo.lean — NEW
+  upstream candidate: torsion-count characterisation of (ℤ/N)² via
+  recOnPosPrimePosCoprime + elementary divisors + Bezout splitting). Kernel-UP
+  torsionPointsEquiv + helpers axiom-clean. HasseWeil import DROPPED from
+  TorsionFibre.lean (headline no longer needs the chord–tangent comparison);
+  the dictionary remains ONLY as the optional T-B6f-dict leaf for the BB-QF/BB-DEG
+  box discharges. Assembly glue: sectionsEquivOverPoints (IsPullback.lift/hom_ext),
+  torsionByNsmulKerEquiv (d-torsion inside N-torsion).) ·
+  **Claimed**: beastmode-B (stream-B worker), 2026-07-06T11:30Z · **New file**: EllipticCurve/TorsionFibre.lean (B-lane owned) ·
   **Depends on**: T-B3 · **Parallel**: yes · **Type**: theorem
 - **Progress**:
   - 2026-07-06T11:35: statement design + ADVERSARIAL FINDING (recorded per standing
