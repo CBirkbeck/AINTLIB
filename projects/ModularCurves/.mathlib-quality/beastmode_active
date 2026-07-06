@@ -1,1 +1,2 @@
 FOCUS: T-B6b torsionBaseChangeHom + torsion_baseChange_isPullback (UP argument)
+FOCUS-D: (beastmode-D2) WAVE 0 COMPLETE (T-D13/D3b/D29/D24/D25/D27/D31/D32; D26 scoped into T-D15). beastmode-A entered D-lane (T-D3/D5/D2 done-modulo-boxes, now on T-D6) — avoid ExactOrder.lean + their T-D6/D7 area. NOW: T-D12 (claimed) — three Prop sorries of RelEffCartierDiv.baseChange in CartierDivisor.lean via ker-dictionary + pasting iso + MorphismProperty stability. Next after: T-D14 (needs T-D12+T-D13 both mine).

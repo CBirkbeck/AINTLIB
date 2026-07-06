@@ -1339,6 +1339,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   with N invertible has N distinct points); T-D6c étale-discriminant bridge
   ((3)⟺(4), consumes T-B4-rank + a trace-form/discriminant input — check mathlib
   `Algebra.discr` + finite-étale-iff-unramified-fibrewise before boxing).
+  T-D6a-PROGRESS (2026-07-08T12:30Z): `RelEffCartierDiv.baseChange` Prop-fields
+  DISCHARGED sorry-free (paste_vert of the two of_hasPullback squares +
+  MorphismProperty.of_isPullback [slots: sq : IsPullback f' g' g f transfers P g →
+  P g'] + toImage-transport + cancel_left_of_respectsIso-as-term [rw fails: metavar
+  pattern P (f ≫ g)]). NEXT: formation-compat needs `IdealSheafData.comap_mul`
+  (missing from mathlib — comap I f := (pullback.fst f I.subschemeι).ker,
+  Functorial.lean:39, has map_gc lattice facts only; extension IS multiplicative,
+  glue Ideal.map_mul affine-locally) + comap-of-section-ker = ker-of-pulled-section
+  + IsSubgroup pullback-transport.
 - **Sketch**: KM's proof IN HAND (preview pp. 18–19): (1)⟹(2) base change; (2)⟹(3)
   rank-N étale subgroup over field has N distinct points; (3)⟹(1) via (4). Attack
   obligation from decomposition D5 (killed-by-N hypothesis placement) must be resolved
