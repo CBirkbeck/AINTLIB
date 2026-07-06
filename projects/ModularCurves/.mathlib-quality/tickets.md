@@ -1672,7 +1672,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   statement first as its own lemma); [KM] 4.1 ⧗ context.
 
 ### [T-E11] fppf separatedness of relatively representable problems
-- **Status**: open · **File**: Moduli/Stack.lean · `moduliProblem_fppf_separated` ·
+- **Status**: done (beastmode-A 2026-07-09T12:00Z — `moduliProblem_fppf_separated` PROVED sorry-free, axioms standard. Formal proof from RelativelyRepresentable naturality + Equiv.injective + Flat.epi_of_flat_of_surjective [Stacks 02VW, present in mathlib] + cancel_epi. The PENDING-SOURCE note concerned statement justification only; the committed statement proves cleanly.) · **File**: Moduli/Stack.lean · `moduliProblem_fppf_separated` ·
   **Depends on**: T-E3 · **Type**: theorem (direct from rel. representability +
   fppf-surjectivity ⟹ epi on points — check mathlib `Surjective` API).
 
