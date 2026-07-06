@@ -549,8 +549,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.1 ⧗ (do-not-formalize-from-memory) · Mumford AV p. 53 ·
   [Hida-GME] §2.1. **Generality**: any base scheme.
 - Note: `pointEquivOverHom`, `pointAddCommGroup`, base-change group data are **done**
-  (real definitions, integration commit). `point_smul_eq_comp_mulBy` is provable-now
-  (via `GrpObj.comp_zpow`) — small starter ticket.
+  (real definitions, integration commit). `point_smul_eq_comp_mulBy` **DONE**
+  (beastmode 2026-07-06: transported smul is rfl-transparent through the equiv;
+  `GrpObj.comp_zpow` + `Over.comp_left`; close by defeq `exact` — `rw` fails on the
+  CommaMorphism/Over.Hom.left spelling split, `simp only [Over.comp_left]` matches).
 
 ### [T-B2] μ_N and (ℤ/N) wiring (DS3 discharge)
 - **Status**: done (beastmode-B, 2026-07-06T08:57Z → 2026-07-06T10:09Z) ·
