@@ -109,6 +109,38 @@ theorem gammaMulSemiringAction_smul_def {U : X.Opens} (hU : σ.IsStableOpen U)
     (gammaMulSemiringAction σ hU).smul g s =
       ((σ.hom g).appLE U U (hU.le_preimage g)).hom s := rfl
 
+/-- **Stable-affine refinement** (T-Q5b): if the `σ`-orbit of a point lies in an
+affine open of a scheme with affine diagonal (e.g. any separated scheme), then the
+point has a `G`-stable affine open neighbourhood, namely `⨅ g, (σ.hom g) ⁻¹ᵁ U`.
+This is where "quasi-projective and `G` finite" enters Loeffler's Prop 3.6.1: quasi-
+projectivity guarantees the orbit-in-affine hypothesis, and finiteness keeps the
+refinement open and affine. -/
+theorem exists_isStableOpen_isAffineOpen [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    {U : X.Opens} (hU : IsAffineOpen U)
+    (x : X) (horbit : ∀ g : G, σ.hom g x ∈ U) :
+    ∃ V : X.Opens, σ.IsStableOpen V ∧ IsAffineOpen V ∧ x ∈ V := by
+  refine ⟨⨅ g : G, (σ.hom g) ⁻¹ᵁ U, ?_, ?_, ?_⟩
+  · intro g
+    have hcoe : ∀ (f : X ⟶ X) (V : X.Opens), (↑(f ⁻¹ᵁ V) : Set X) = ⇑f.base ⁻¹' ↑V :=
+      fun f V => rfl
+    refine TopologicalSpace.Opens.ext ?_
+    rw [hcoe, TopologicalSpace.Opens.coe_iInf, Set.preimage_iInter]
+    have h1 : ∀ h : G, ⇑(σ.hom g).base ⁻¹' (↑(σ.hom h ⁻¹ᵁ U) : Set X) =
+        ↑(σ.hom (g * h) ⁻¹ᵁ U) := by
+      intro h
+      rw [hcoe, hcoe, ← Set.preimage_comp]
+      congr 1
+      rw [σ.hom_mul]
+      rfl
+    rw [Set.iInter_congr h1]
+    exact (Equiv.mulLeft g).surjective.iInter_comp
+      (fun k => (↑(σ.hom k ⁻¹ᵁ U) : Set X))
+  · exact IsAffineOpen.iInf (fun g => hU.preimage_of_isIso (σ.hom g))
+  · show x ∈ (↑(⨅ g : G, (σ.hom g) ⁻¹ᵁ U) : Set X)
+    rw [TopologicalSpace.Opens.coe_iInf]
+    exact Set.mem_iInter.mpr (fun g => horbit g)
+
 end SchemeAction
 
 end AlgebraicGeometry

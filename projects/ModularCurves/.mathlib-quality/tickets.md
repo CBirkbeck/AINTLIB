@@ -3021,8 +3021,16 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     proof-irrelevance `homOfLE-op = 𝟙` + presheaf map_id — NOTE: the map_id
     rewrite needs `erw` (TopCat.Presheaf-vs-functor coercion blocks rw), the ONE
     erw in the Q-lane; flag for cleanup). Sorry-free, zero warnings, standard
-    axioms. NEXT LEAF: T-Q5b (stable-affine refinement: orbit ⊆ affine + separated
-    ⟹ stable affine open; check mathlib IsAffineOpen-inter lemmas).
+    axioms.
+  - **T-Q5b DONE** (2026-07-06T17:35Z): `exists_isStableOpen_isAffineOpen` —
+    orbit ⊆ affine U + affine diagonal (`IsAffineHom (pullback.diagonal
+    (terminal.from X))`, WEAKER than X.IsSeparated which implies it) ⟹
+    `⨅ g, (σ.hom g) ⁻¹ᵁ U` is a G-stable affine open ∋ x. Tools:
+    `IsAffineOpen.iInf` (Morphisms/Affine.lean — needs Nonempty ✓ group) +
+    `IsAffineOpen.preimage_of_isIso` + `Opens.coe_iInf` (Finite) +
+    `Surjective.iInter_comp (Equiv.mulLeft g)` for the reindex. Sorry-free,
+    zero warnings, standard axioms. REMAINING LEAVES: T-Q5c (glue data over the
+    stable-affine cover) + T-Q5d (π + UP assembly) — route on board.
   - **Route lock (binding unless B2)**: hypothesis of record is the MODERN one —
     "every `G`-orbit is contained in a `G`-stable affine open" (Stacks 07S7 shape;
     quasi-projectivity over an affine base IMPLIES it and is deferred to a

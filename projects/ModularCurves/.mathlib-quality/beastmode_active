@@ -1,3 +1,2 @@
-FOCUS: AG-GG-1.5 part (ii) — CRT splitting AlgEquiv + BinaryFan IsLimit + op-glue for monoInducesIsoOnDirectSummand
-FOCUS-H: (beastmode-H) T-H7 claimed — PHASE 2: reading IsNaiveFullLevel/mulByHom/EllObj defs, then baseline build
-FOCUS-Q: (beastmode-Q) T-Q5a DONE (SchemeAction+Γ-bridge). NEXT: T-Q5b stable-affine refinement, then T-Q5c/d glue+UP (route on board)
+FOCUS: AG-GG assembly — PreGaloisCategory instance for (FiniteEtale k)op: op-duality instances + SingleObj-op shape equivalence
+FOCUS-Q: (beastmode-Q) T-Q5a+b DONE. REMAINING: T-Q5c glue data (pieces Spec Γ(V_i)^G over stable-affine cover) + T-Q5d assembly; then T-Q6/Q7

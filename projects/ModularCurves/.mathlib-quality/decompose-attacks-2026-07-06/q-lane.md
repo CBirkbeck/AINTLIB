@@ -241,3 +241,22 @@ for the proofs.
   laws via appLE-composition lemmas. SURVIVES with appLE pinned as the route.
 - **A4 (degenerate stable set)** U = ⊥: Γ = 0-ring; action trivial ✓ no
   nontriviality assumptions anywhere. SURVIVES.
+
+## T-Q5b stable-affine refinement
+
+- **A1 (hypothesis honest?)** `IsAffineHom (pullback.diagonal (terminal.from X))`
+  (affine diagonal) is WEAKER than separated — mathlib's `IsAffineOpen.inf/iInf`
+  take exactly it, and X.IsSeparated ⟹ closed-immersion diagonal ⟹ affine ⟹
+  instance-derivable. Statement takes the weaker hypothesis (maximal generality,
+  free). SURVIVES.
+- **A2 (nonempty index)** `IsAffineOpen.iInf` requires `[Nonempty ι]`; G a group ⟹
+  Nonempty G ✓ (One.nonempty instance). No gap. SURVIVES.
+- **A3 (orbit hypothesis orientation)** `∀ g, σ.hom g x ∈ U` — the ORBIT through
+  the covariant σ (σ g x for all g covers the orbit; g := 1 gives x ∈ U). The
+  refinement V := ⨅_g (σ g)⁻¹ᵁ U: x ∈ V ⟺ ∀ g, σ g x ∈ U ✓ matches. Stability:
+  (σ g)⁻¹ᵁ V = ⨅_h (σ(g*h))⁻¹ᵁ U = V by mul-reindex (group!). SURVIVES.
+- **A4 (Finset.inf vs iInf spelling)** ⨅-Opens over a Finite index has
+  set-coe = ⋂ only through `Opens`-completeness quirks; route via lattice-only
+  algebra (le_antisymm + le_inf/inf_le for stability; membership via the ⨅-mem
+  characterization or explicit fun-of-g). Pinned: use `⨅ g : G` (matches
+  `IsAffineOpen.iInf`'s binder form directly). SURVIVES.
