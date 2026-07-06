@@ -118,6 +118,13 @@ noncomputable instance pointAddCommGroup {T : Scheme.{u}} (g : T ⟶ S) :
   letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
   ((E.pointEquivOverHom g).trans Additive.ofMul).addCommGroup
 
+/-- `pointEquivOverHom` carries point-addition to multiplication of `Over`-homs (the
+transport that defines `pointAddCommGroup`). -/
+theorem pointEquivOverHom_add {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
+    letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+    (E.pointEquivOverHom g) (P + Q) =
+      (E.pointEquivOverHom g) P * (E.pointEquivOverHom g) Q := rfl
+
 /-- **(T-A6d, specification)** Scalar multiplication on points is composition with
 `mulBy`: `(n • P) = P ≫ [n]`. Provable from `pointEquivOverHom` +
 `GrpObj.comp_zpow`; keeps the point-level and morphism-level `[n]` from diverging. -/
