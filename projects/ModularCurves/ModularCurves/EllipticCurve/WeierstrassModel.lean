@@ -1967,6 +1967,32 @@ lemma isPullback_sChart_spec (W : WeierstrassCurve R) (i : Fin 3) :
   AlgebraicGeometry.isPullback_SpecMap_of_isPushout _ _ _ _
     (isPushout_sChart_commRingCat (R' := R') W i)
 
+/-- The three-chart affine open cover of the projective Weierstrass model. -/
+noncomputable def modelChartCover (W : WeierstrassCurve R) :
+    (projModel W).AffineOpenCover :=
+  Proj.affineOpenCoverOfIrrelevantLESpan (quotientGrading (projIdeal W))
+    (fun i : Fin 3 => (quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
+    (fun i => mk_X_mem_quotientGrading_one W i) (fun _ => one_pos)
+    (quotient_irrelevant_le_span_mk_X W)
+
+theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
+    IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
+  show (MorphismProperty.isomorphisms Scheme)
+    (projModelBaseChangeLift (algebraMap R R') W)
+  rw [IsZariskiLocalAtTarget.iff_of_openCover
+    (P := MorphismProperty.isomorphisms Scheme)
+    (Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+      (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R'))))]
+  intro i
+  have hcosp : (modelChartCover W).openCover.f i ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom
+        ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) :=
+    awayι_projModelπ W i
+  sorry
+
 end TensorComparison
 
 end BaseChangeGraded
