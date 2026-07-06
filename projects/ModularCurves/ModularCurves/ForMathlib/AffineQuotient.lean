@@ -595,6 +595,29 @@ theorem isOpen_image_invariantsπ_of_stable [Finite G]
   rw [← (invariantsπ_isQuotientMap G B R).isOpen_preimage, hsat]
   exact hU
 
+variable (G B) in
+/-- The `G`-action on `pullback π j` covering `specSMul` (the `j`-relative action
+of the descent theory). -/
+noncomputable def pullbackSpecSMul {Q' : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G))) (g : G) :
+    pullback (invariantsπ G B R) j ⟶ pullback (invariantsπ G B R) j :=
+  pullback.lift (pullback.fst _ _ ≫ specSMul g) (pullback.snd _ _)
+    (by rw [Category.assoc, specSMul_invariantsπ]; exact pullback.condition)
+
+@[reassoc (attr := simp)]
+theorem pullbackSpecSMul_fst {Q' : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G))) (g : G) :
+    pullbackSpecSMul G B R j g ≫ pullback.fst (invariantsπ G B R) j =
+      pullback.fst (invariantsπ G B R) j ≫ specSMul g :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem pullbackSpecSMul_snd {Q' : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G))) (g : G) :
+    pullbackSpecSMul G B R j g ≫ pullback.snd (invariantsπ G B R) j =
+      pullback.snd (invariantsπ G B R) j :=
+  pullback.lift_snd _ _ _
+
 end UniversalProperty
 
 end AlgebraicGeometry
