@@ -302,7 +302,95 @@ theorem exists_affineOpen_mem_free (s : S) :
     ∃ U : S.affineOpens, s ∈ U.1 ∧
       (letI := ((p.app U.1).hom).toAlgebra
        Module.Free Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)) := by
-  sorry
+  -- an affine open `U₀ ∋ s` to start from
+  obtain ⟨U₀, hU₀, hs, -⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp S.isBasis_affineOpens
+    (TopologicalSpace.Opens.mem_top s)
+  replace hU₀ : IsAffineOpen U₀ := hU₀
+  -- the sections over `U₀` are a finite flat finitely presented module
+  letI := ((p.app U₀).hom).toAlgebra
+  haveI hfin : Module.Finite Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := p.finite_app U₀ hU₀
+  haveI hfp : RingHom.FinitePresentation (p.appLE U₀ (p ⁻¹ᵁ U₀) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation p ‹_› ⟨U₀, hU₀⟩
+      ⟨p ⁻¹ᵁ U₀, hU₀.preimage p⟩ le_rfl
+  haveI hflat : RingHom.Flat (p.appLE U₀ (p ⁻¹ᵁ U₀) le_rfl).hom :=
+    HasRingHomProperty.appLE @Flat p ‹_› ⟨U₀, hU₀⟩ ⟨p ⁻¹ᵁ U₀, hU₀.preimage p⟩ le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfp hflat
+  haveI : Algebra.FinitePresentation Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := hfp
+  haveI : Module.FinitePresentation Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) :=
+    Module.FinitePresentation.of_finite_of_finitePresentation _ _
+  haveI : Module.Flat Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := hflat
+  -- finite + flat over the local ring at `s` gives freeness there; descend to some `D(r) ∋ s`
+  haveI : Module.Free (Localization.AtPrime (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal)
+      (LocalizedModule (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl Γ(W, p ⁻¹ᵁ U₀)) :=
+    Module.free_of_flat_of_isLocalRing
+  obtain ⟨r, hr, hfree, -⟩ := Module.FinitePresentation.exists_free_localizedModule_powers
+    (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl
+    (LocalizedModule.mkLinearMap (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl
+      Γ(W, p ⁻¹ᵁ U₀))
+    (Localization.AtPrime (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal)
+  refine ⟨S.affineBasicOpen (U := ⟨U₀, hU₀⟩) r, ?_, ?_⟩
+  · -- membership: `r ∉ 𝔭ₛ` says exactly `s ∈ D(r)`
+    show s ∈ S.basicOpen r
+    have h1 : hU₀.primeIdealOf ⟨s, hs⟩ ∈ hU₀.fromSpec ⁻¹ᵁ S.basicOpen r := by
+      rw [hU₀.fromSpec_preimage_basicOpen]
+      exact hr
+    have h2 : hU₀.fromSpec (hU₀.primeIdealOf ⟨s, hs⟩) ∈ S.basicOpen r := h1
+    rwa [hU₀.fromSpec_primeIdealOf ⟨s, hs⟩] at h2
+  · -- freeness: transport `hfree` along the canonical identifications of the localizations
+    show (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+      Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r))
+    letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le r).op).hom).toAlgebra
+    letI := ((W.presheaf.map (homOfLE
+      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx)).op).hom).toAlgebra
+    letI := ((p.appLE U₀ (p ⁻¹ᵁ S.basicOpen r)
+      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx)).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U₀) Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI : IsScalarTower Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI hSloc : IsLocalization.Away r Γ(S, S.basicOpen r) :=
+      hU₀.isLocalization_basicOpen r
+    haveI hWloc := (hU₀.preimage p).isLocalization_of_eq_basicOpen
+      (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r)
+      (homOfLE (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+        fun _ hx => S.basicOpen_le r hx))
+      (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
+    haveI : IsLocalizedModule (Submonoid.powers r)
+        (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+          Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap := by
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U₀))
+          Γ(W, p ⁻¹ᵁ U₀) (Submonoid.powers r)) Γ(W, p ⁻¹ᵁ S.basicOpen r) := by
+        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U₀)) Γ(W, p ⁻¹ᵁ U₀)
+            (Submonoid.powers r) = Submonoid.powers
+              (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r) from
+          Submonoid.map_powers _ r]
+        exact hWloc
+      infer_instance
+    set e := (IsLocalization.algEquiv (Submonoid.powers r)
+      (Localization (Submonoid.powers r)) Γ(S, S.basicOpen r)).toRingEquiv
+    haveI := RingHomInvPair.of_ringEquiv e
+    haveI := RingHomInvPair.of_ringEquiv_symm e
+    refine (Module.Free.iff_of_equiv (σ := (e : Localization (Submonoid.powers r) →+*
+      Γ(S, S.basicOpen r))) ?_).mp hfree
+    have iso0 := IsLocalizedModule.iso (Submonoid.powers r)
+      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap
+    refine { __ := iso0, map_smul' := ?_ }
+    intro c x
+    obtain ⟨c, t, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers r) c
+    apply ((Module.End.isUnit_iff _).mp (IsLocalizedModule.map_units
+      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap t)).1
+    simp [e, ← map_smul, ← smul_assoc]
 
 /-- `≤ (ker f)` is a pointwise condition over all affine opens — no quasi-compactness
 needed, since `Scheme.Hom.ker` is the `ofIdeals`-closure of the sectionwise kernels. -/

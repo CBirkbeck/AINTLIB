@@ -1,2 +1,1 @@
-FOCUS: AG-GG-1.4 remainder — FixedPoints.subalgebra + SingleObj-limit cone + op glue; then 1.5
-FOCUS-Q: (beastmode-Q) T-Q3 DONE (affine quotient UP proven end-to-end). Next: G6 re-scan; T-Q2 statements or T-Q4 (KM Ch.7 appendix now in refs) or T-Q5 gluing
+FOCUS: AG-GG-1.5 — epi surjectivity via counting + idempotent splitting; then PreGaloisCategory assembly
