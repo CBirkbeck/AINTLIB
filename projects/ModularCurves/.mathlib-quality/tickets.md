@@ -433,7 +433,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: arbitrary `g : T ⟶ S`.
 
 ### [T-A5a] projModel commutes with base change (sub-ticket of T-A5)
-- **Status**: in_progress (beastmode 2026-07-07T00:30Z — rungs 1–7a DONE sorry-free:
+- **Status**: done (beastmode 2026-07-07T04:00Z — ALL rungs including the IsIso
+  (T-A5a-iso) complete; `projModelBaseChange`, the π-square, `projModelBaseChangeLift`
+  and its IsIso all sorry-free. Remaining consumer packaging (pointed iso for A5b)
+  lives in T-A5b.) (rungs 1–7a record:
   `mvMapGraded`, `projIdeal_le_comap` (mathlib `Projective.map_polynomial`),
   `baseChangeGradedHom` (via new general `quotientGradingMap` in GradedQuotient.lean),
   `baseChangeGradedHom_irrelevant_le` (X-generators; Proj.map's HomogeneousIdeal-≤
@@ -474,7 +477,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   quotient gradings).
 
 ### [T-A5a-iso] IsIso of the base-change comparison (sub-sub-ticket of T-A5a)
-- **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean (section
+- **Status**: done (beastmode 2026-07-07T04:00Z — `projModelBaseChangeLift_isIso`
+  PROVED sorry-free, standard axioms, no maxHeartbeats. Final architecture:
+  ForMathlib/AwayCongr.lean (awayCongr subst-transport + mk/map/trans/self +
+  awayMap_map + awayMap_square — the wall-killer; ℬ' needs its own scalar ring);
+  homogenizeAt_map (ProjectiveSpaceChart, induction form; UNtargeted map_X rw
+  grabs the ambient occurrence in transport-proof types — instantiate);
+  gradedSquare; bc_chart_value + piece_fst_natural (SPLIT value/wrapper — the
+  single-declaration heartbeat budget was the binding constraint; pin ALL six
+  graded homs + t + both index proofs in the awayMap_square application);
+  thetaIso (coordW'symm-Spec ≪≫ awayCongr-toCommRingCatIso, eqToHom-free);
+  awayι_awayCongr + theta_awayι_π; coverPiece_f_eq + isPullback_coverPiece
+  (pullbackRightPullbackFstIso transport); isPullback_lift_piece via
+  of_right + flip (p-case: hom_ext with cover-square w + hbcfst/hfst and
+  inv_snd_snd + theta_awayι_π; s-case: chart-square corner-transport along
+  thetaIso.symm); final: pullbackHom = isoPullback.inv ≫ piece-iso.hom, iso as
+  (symm ≪≫ ·).hom instance.) · **File**: EllipticCurve/WeierstrassModel.lean (section
   BaseChangeGraded/TensorComparison) · **Parent**: T-A5a
 - **Depends on**: everything committed under T-A5a (all green): `projModelBaseChange`,
   `projModelBaseChange_π`, `projModelBaseChangeLift`, `sChartTensorEquiv`,
