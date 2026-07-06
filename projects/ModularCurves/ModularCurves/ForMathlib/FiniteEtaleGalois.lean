@@ -665,6 +665,7 @@ def singleObjOpEquiv (M : Type*) [Monoid M] : SingleObj Mᵐᵒᵖ ≌ (SingleOb
       map_comp := fun _ _ => rfl }
   unitIso := Iso.refl _
   counitIso := Iso.refl _
+  functor_unitIso_comp _ := Category.id_comp _
 
 instance hasQuotientsByFiniteGroupsOp (G : Type u) [Group G] [Finite G] :
     HasColimitsOfShape (SingleObj G) (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ :=
@@ -677,6 +678,7 @@ category in the sense of SGA1/Lenstra: axioms (G1)–(G3) hold.  Together with t
 functor to `FintypeCat` this exhibits the absolute Galois group as the fundamental group
 of `Spec k`. -/
 instance : PreGaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ where
+  hasQuotientsByFiniteGroups G _ _ := inferInstance
   monoInducesIsoOnDirectSummand i := monoInducesIsoOnDirectSummand_op i
 
 end PreGalois
