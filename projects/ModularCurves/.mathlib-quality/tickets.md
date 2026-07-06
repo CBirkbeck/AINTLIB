@@ -591,7 +591,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     etale_iff) remain open sorries as planned.
 
 ### [T-B7] μ_N finite locally free of rank N, étale iff N invertible (spawned by beastmode-B, 2026-07-06)
-- **Status**: open · **File**: GroupScheme/MuN.lean · `muNπ_isFinite`, `muNπ_flat`,
+- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
+  2026-07-06T10:18Z · **File**: GroupScheme/MuN.lean · `muNπ_isFinite`, `muNπ_flat`,
   `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
   foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
 - **Depends on**: none · **Parallel**: yes · **Type**: theorems
@@ -615,10 +616,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Generality**: as stated (`[NeZero N]`, arbitrary `S`).
 
 ### [T-B3] E[N] ↪ E closed immersion + `torsionIdeal`
-- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
-  2026-07-06T10:13Z · **Files**: Torsion.lean (`torsionι_isClosedImmersion`),
+- **Status**: done (beastmode-B, 2026-07-06T10:13Z → 2026-07-06T10:18Z) ·
+  **Claimed**: beastmode-B (stream-B worker), 2026-07-06T10:13Z ·
+  **Files**: Torsion.lean (`torsionι_isClosedImmersion`),
   LevelStructure/Basic.lean (`torsionIdeal_subscheme` = T-B3a pin, per Amendments v5;
   `torsionIdeal` itself is already a real def `(E.torsionι N).ker`)
+- **Progress**:
+  - 2026-07-06T10:18: DONE both halves, first-try. `torsionι_isClosedImmersion`:
+    `IsClosedImmersion (zero ≫ π)` by `rw [zero_π]; infer_instance`, then
+    `IsClosedImmersion.of_comp` (section of the separated `π`; `IsProper extends
+    IsSeparated` so the instance chain fires), then base-change stability
+    `MorphismProperty.pullback_fst`. `torsionIdeal_subscheme` (T-B3a):
+    `IsClosedImmersion.lift`/`isIso_lift` + `lift_fac` against
+    `Scheme.IdealSheafData.ker_subschemeι` (torsionIdeal := (torsionι).ker is defeq
+    on the nose). `#print axioms` both: propext/Classical.choice/Quot.sound.
+    Torsion.lean + LevelStructure/Basic.lean modules green. Unblocks T-B6 and the
+    D-lane consumers of the E[N]-subscheme dictionary.
 - **Depends on**: none (v2: group data is in the record) · **Parallel**: with T-B4/B5 · **Type**: theorem + def
 - **Sketch**: zero section is a closed immersion (`π` separated; mathlib
   `isClosedImmersion_of_comp_eq_id` pattern seen in `Group/Abelian.lean`); closed
