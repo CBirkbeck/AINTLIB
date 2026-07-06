@@ -159,7 +159,7 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
     apply pullback.hom_ext
     all_goals dsimp [Over.grpObjMkPullbackSnd_one]
     all_goals simp only [Over.grpObjMkPullbackSnd_one, Over.pullback, Over.comp_left,
-      Over.homMk_left, Category.id_comp, E.one_eq_zero, Over.mk_left]
+      Over.homMk_left, Category.id_comp, E.one_eq_zero]
     all_goals
       have hε2 : (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
           pullback.snd (𝟙 S) g = 𝟙 T := Over.w _

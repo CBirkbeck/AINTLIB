@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.GroupLaw
+import ModularCurves.ForMathlib.FinitePresentationCancel
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
@@ -207,12 +208,16 @@ theorem _root_.ModularCurves.isEmpty_of_nIsInvertible_zero {X : Scheme.{u}}
   rw [map_zero, map_one] at hst
   exact one_ne_zero (α := X.presheaf.stalk x) hst.symm
 
-/-- **Mini box (T-B5x)**: `[N]` is locally of finite presentation — an `S`-endomorphism
-of the locally-finitely-presented `E/S` (cancellation `lfp (f ≫ g) + lft g ⟹ lfp f`;
-the ring-level lemma is `RingHom.FinitePresentation.of_comp_finiteType`, but the
-scheme-level cancellation is missing from mathlib — ForMathlib target, ticket T-B5x). -/
+/-- `[N]` is locally of finite presentation — an `S`-endomorphism of the
+locally-finitely-presented `E/S`, by the cancellation
+`ForMathlib.FinitePresentationCancel` (Stacks 01TX). -/
 theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
-    LocallyOfFinitePresentation (E.mulByHom N) := by sorry
+    LocallyOfFinitePresentation (E.mulByHom N) := by
+  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+  have h : LocallyOfFinitePresentation (E.mulByHom N ≫ E.π) := by
+    rw [E.mulByHom_π]
+    infer_instance
+  exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
 
 /-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness)**: if `N` is
 invertible on `S` then `[N]` is formally unramified — Loeffler (verbatim): *"The
