@@ -144,6 +144,43 @@ lemma slope_smul_of_X_ne {x₁ x₂ y₁ y₂ : F} (hx : x₁ ≠ x₂) :
   rw [Affine.slope_of_X_ne hvx, Affine.slope_of_X_ne hx, hnum, hden]
   field_simp
 
+/-- The coordinate change scales the addition `slope` (tangent case): the tangent slope of `C • W`
+at the transformed point is `u⁻¹` times the `s`-shifted tangent slope of `W`. The hypothesis
+`hne` (the point is not `2`-torsion) makes the tangent denominator nonzero; in the group-law
+`else` branch it follows from the two points lying on the curve. -/
+lemma slope_smul_of_Y_ne {x₁ x₂ y₁ y₂ : F} (hx : x₁ = x₂) (hy : y₁ ≠ W.toAffine.negY x₂ y₂)
+    (hne : y₁ ≠ W.toAffine.negY x₁ y₁) :
+    (C • W).toAffine.slope (C.vcX x₁) (C.vcX x₂) (C.vcY x₁ y₁) (C.vcY x₂ y₂)
+      = ↑C.u⁻¹ * (W.toAffine.slope x₁ x₂ y₁ y₂ - C.s) := by
+  subst hx
+  have hu : (↑C.u⁻¹ : F) ≠ 0 := Units.ne_zero _
+  have hvy : C.vcY x₁ y₁ ≠ (C • W).toAffine.negY (C.vcX x₁) (C.vcY x₁ y₂) := by
+    rw [negY_smul]
+    simp only [vcY]
+    intro he
+    exact hy (by linear_combination mul_left_cancel₀ (pow_ne_zero 3 hu) he)
+  have hd : y₁ - W.toAffine.negY x₁ y₁ ≠ 0 := sub_ne_zero.mpr hne
+  have hnum : 3 * C.vcX x₁ ^ 2 + 2 * (C • W).toAffine.a₂ * C.vcX x₁ + (C • W).toAffine.a₄
+        - (C • W).toAffine.a₁ * C.vcY x₁ y₁
+      = ↑C.u⁻¹ ^ 4 * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
+        - C.s * (y₁ - W.toAffine.negY x₁ y₁)) := by
+    simp only [variableChange_a₁, variableChange_a₂, variableChange_a₄, Affine.negY, vcX, vcY]; ring
+  have hden : C.vcY x₁ y₁ - (C • W).toAffine.negY (C.vcX x₁) (C.vcY x₁ y₁)
+      = ↑C.u⁻¹ ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by
+    rw [negY_smul]; simp only [vcY]; ring
+  rw [Affine.slope_of_Y_ne rfl hvy, Affine.slope_of_Y_ne rfl hy, hnum, hden]
+  field_simp
+
+/-- The coordinate change scales the addition `slope` by `u⁻¹` (with the `s`-shift), in either the
+secant or tangent branch of the group law (i.e. whenever the sum is not the point at infinity). -/
+lemma slope_smul {x₁ x₂ y₁ y₂ : F} (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂))
+    (hne : x₁ = x₂ → y₁ ≠ W.toAffine.negY x₁ y₁) :
+    (C • W).toAffine.slope (C.vcX x₁) (C.vcX x₂) (C.vcY x₁ y₁) (C.vcY x₂ y₂)
+      = ↑C.u⁻¹ * (W.toAffine.slope x₁ x₂ y₁ y₂ - C.s) := by
+  by_cases hx : x₁ = x₂
+  · exact slope_smul_of_Y_ne C hx (fun hy => hxy ⟨hx, hy⟩) (hne hx)
+  · exact slope_smul_of_X_ne C hx
+
 end Field
 
 end WeierstrassCurve.VariableChange
