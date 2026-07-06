@@ -540,23 +540,39 @@ noncomputable def chartCoordEquiv (W : WeierstrassCurve R) (i : Fin 3) :
       Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) ≃+*
     Away (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) :=
-  (Ideal.quotientEquiv _ _
-    ((MvPolynomial.chartRingEquiv R i).symm :
-      MvPolynomial {j : Fin 3 // j ≠ i} R ≃+*
-        Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i))
+  ((Ideal.quotientEquiv
+    (Ideal.span {HomogeneousLocalization.Away.mk
+      (MvPolynomial.homogeneousSubmodule (Fin 3) R)
+      (MvPolynomial.X_mem_homogeneousSubmodule_one R i) 3 W.toProjective.polynomial
+      (by
+        rw [smul_eq_mul, mul_one]
+        exact (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+          (projective_polynomial_isHomogeneous W))})
+    (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+    ((MvPolynomial.chartRingEquiv R i) :
+      Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i) ≃+*
+        MvPolynomial {j : Fin 3 // j ≠ i} R)
     (by
       rw [Ideal.map_span, Set.image_singleton]
       congr 1
       rw [Set.singleton_eq_singleton_iff]
       symm
-      show MvPolynomial.homogenizeAt R i
-          (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) = _
-      rw [MvPolynomial.homogenizeAt_dehomogenizeAux R i (n := 3)
-        (by
-          rw [smul_eq_mul, mul_one]
-          exact (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
-            (projective_polynomial_isHomogeneous W))])).trans
-    (chartQuotientEquiv W i)
+      show MvPolynomial.dehomogenizeAt R i _ = _
+      rw [MvPolynomial.dehomogenizeAt_mk])).symm).trans (chartQuotientEquiv W i)
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+lemma chartCoordEquiv_mk (W : WeierstrassCurve R) (i : Fin 3)
+    (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
+    chartCoordEquiv W i (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) p) =
+      HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+        (MvPolynomial.X i) (MvPolynomial.homogenizeAt R i p) := by
+  unfold chartCoordEquiv
+  rw [RingEquiv.trans_apply, Ideal.quotientEquiv_symm_mk]
+  unfold chartQuotientEquiv
+  rw [RingEquiv.trans_apply, Ideal.quotEquivOfEq_mk]
+  exact RingHom.quotientKerEquivOfSurjective_apply_mk _ _
 
 end Points
 
