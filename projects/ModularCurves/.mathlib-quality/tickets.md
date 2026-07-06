@@ -3859,3 +3859,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   first milestone; deps T-B6 ✓ done-mod-boxes, Galois machinery ✓ AG-GG landed):
   it unblocks H-lane's own T-H4 (H=1 Weil-pairing open locus). **Claimed**:
   beastmode-H, 2026-07-06T23:55Z, Status: in_progress.
+  - 2026-07-07T00:15Z: T-C0 decomposed + skeleton landed (WeilPairing/EtaleDescent.lean,
+    builds green): **T-C0a** `torsionAlgebra` (E[N] over Spec k as CommAlgCat.FiniteEtale k
+    — finite ⟹ affine + T-B5 étale boxes + Γ-transport) → **T-C0b**
+    `torsionAlgebraPointsEquiv` (fibre functor value ≃ torsionBy of the geometric point
+    group; Galois-equivariance clause cut at contact) → **T-C0c** HasseWeil pairing
+    Gal(k̄/k)-equivariance (statement at contact; HasseWeil has DivisorGalois /
+    FrobeniusConjugation to mine) → **T-C0d** transport through the AG-GG Galois
+    equivalence (PreGaloisCategory (FiniteEtale k)ᵒᵖ landed by B) → **T-C0e**
+    `exists_weilPairingSpecField` (field-base DS4 discharge; general ℚ-scheme case
+    recorded as follow-up — needs the étale-trivialisation tower, T-H4-adjacent).
+    Scope note: field-base first per review Q5's own milestone framing; YRho consumer
+    (AlgebraicClosure ℚ) is covered.
