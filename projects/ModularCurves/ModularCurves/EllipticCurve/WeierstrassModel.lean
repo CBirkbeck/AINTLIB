@@ -2130,6 +2130,21 @@ private lemma isPullback_coverPiece (W : WeierstrassCurve R) (j : Fin 3) :
   · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
   · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
 
+/-- Transport an `Away` ring along an equality of localization elements. -/
+private noncomputable def awayCongr {A : Type u} [CommRing A] [Algebra R' A]
+    {𝒢 : ℕ → Submodule R' A} [GradedAlgebra 𝒢] {s t : A} (h : s = t) :
+    Away 𝒢 s ≃+* Away 𝒢 t := by
+  subst h
+  exact RingEquiv.refl _
+
+private lemma awayCongr_mk {A : Type u} [CommRing A] [Algebra R' A]
+    {𝒢 : ℕ → Submodule R' A} [GradedAlgebra 𝒢] {s t : A} (h : s = t) {i : ℕ}
+    (hs : s ∈ 𝒢 i) (n : ℕ) (a : A) (ha : a ∈ 𝒢 (n • i)) :
+    awayCongr (R' := R') h (HomogeneousLocalization.Away.mk 𝒢 hs n a ha) =
+      HomogeneousLocalization.Away.mk 𝒢 (h ▸ hs) n a ha := by
+  subst h
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The wall-crossing identification of the base-changed chart `Spec`s. -/
 private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
@@ -2148,9 +2163,8 @@ private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
         (chartCoordEquiv (W.map (algebraMap R R')) j).symm_apply_apply x)⟩
   asIso (Spec.map (CommRingCat.ofHom
     ((chartCoordEquiv (W.map (algebraMap R R')) j).symm.toRingHom))) ≪≫
-  eqToIso (congrArg (fun t => Spec (.of (Away
-    (quotientGrading (projIdeal (W.map (algebraMap R R')))) t)))
-    (baseChangeGradedHom_mk_X (R' := R') W j).symm)
+  asIso (Spec.map ((awayCongr (R' := R')
+    (baseChangeGradedHom_mk_X (R' := R') W j)).toCommRingCatIso.hom))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Chart naturality of the base change, across the wall: the plane-chart

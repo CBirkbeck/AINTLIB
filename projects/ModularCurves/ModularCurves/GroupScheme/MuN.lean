@@ -4,6 +4,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.RingTheory.Etale.StandardEtale
 import Mathlib.Topology.LocallyConstant.Algebra
 
 /-!
@@ -668,6 +669,51 @@ private lemma muNModel_isPushout (N : ℕ) :
   refine CommRingCat.hom_ext (RingHom.ext fun x ↦ ?_)
   obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
   exact DFunLike.congr_fun key p
+
+private lemma muNAway_natCast_isUnit (N : ℕ) [NeZero N] : IsUnit (N : muNAwayRing N) := by
+  have h0 : IsUnit (algebraMap ℤ (Localization.Away (N : ℤ)) (N : ℤ)) :=
+    IsLocalization.Away.algebraMap_isUnit _
+  have h1 : IsUnit ((N : ℕ) : Localization.Away (N : ℤ)) := by simpa using h0
+  have h2 := h1.map
+    (ULift.ringEquiv.symm : Localization.Away (N : ℤ) ≃+* muNAwayRing N).toRingHom
+  simpa using h2
+
+/-- `(Xᴺ − 1, C N)` is a standard étale pair: `f'·X − N·f = N`. -/
+private def muNStdPair (N : ℕ) [NeZero N] : StandardEtalePair (muNAwayRing N) where
+  f := muNModelPoly N
+  monic_f := by simpa using Polynomial.monic_X_pow_sub_C (1 : muNAwayRing N) (NeZero.ne N)
+  g := Polynomial.C (N : muNAwayRing N)
+  cond := by
+    refine ⟨X, -Polynomial.C (N : muNAwayRing N), 1, ?_⟩
+    have h1 : (X : (muNAwayRing N)[X]) ^ (N - 1) * X = X ^ N := by
+      rw [← pow_succ, Nat.sub_add_cancel NeZero.one_le]
+    have hder : derivative (muNModelPoly N)
+        = Polynomial.C (N : muNAwayRing N) * X ^ (N - 1) := by
+      simp [muNModelPoly, Polynomial.derivative_X_pow]
+    rw [hder, mul_assoc, h1]
+    ring
+
+private lemma muNModel_algebra_etale (N : ℕ) [NeZero N] :
+    Algebra.Etale (muNAwayRing N) (AdjoinRoot (muNModelPoly N)) := by
+  have hg : IsUnit (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g) := by
+    show IsUnit (AdjoinRoot.mk (muNModelPoly N) (Polynomial.C (N : muNAwayRing N)))
+    rw [AdjoinRoot.mk_C]
+    exact (muNAway_natCast_isUnit N).map (AdjoinRoot.of (muNModelPoly N))
+  have e2 := IsLocalization.atUnits (AdjoinRoot (muNStdPair N).f)
+    (Submonoid.powers (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g))
+    (S := Localization.Away (AdjoinRoot.mk (muNStdPair N).f (muNStdPair N).g))
+    (Submonoid.powers_le.mpr ((IsUnit.mem_submonoid_iff _).mpr hg))
+  have e3 : (muNStdPair N).Ring ≃ₐ[muNAwayRing N] AdjoinRoot (muNModelPoly N) :=
+    (muNStdPair N).equivAwayAdjoinRoot.trans
+      (AlgEquiv.restrictScalars (muNAwayRing N) e2).symm
+  exact Algebra.Etale.of_equiv e3
+
+private lemma muNModelStruct_etale (N : ℕ) [NeZero N] :
+    RingHom.Etale (muNModelStruct N).hom := by
+  have h5 := (RingHom.etale_algebraMap (R := muNAwayRing N)
+    (S := AdjoinRoot (muNModelPoly N))).mpr (muNModel_algebra_etale N)
+  rw [AdjoinRoot.algebraMap_eq] at h5
+  exact h5
 
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
