@@ -148,3 +148,46 @@ finite flat algebra) and `Module.Free.bijective_algebraMap_of_finrank_eq_one`
 into T-D15 (needs the Scheme.Hom.finrank ↔ RingHom.finrank ↔ rankAtStalk affine
 dictionary; `RingHom.finrank` exists at Flat/Rank.lean:138 — bridge half-built
 upstream already).
+
+### Plugin update incorporated (2026-07-06T13:45Z, beastmode-D2)
+
+`references/statement-splitting.md` landed (one conclusion per declaration;
+∧-chains and numbered source parts born split; assembly lemmas must be one-line
+anonymous constructors with a real consumer; shared-witness existentials NOT
+split — witness-def + per-property specs preferred; mutual-induction bundles as
+private aux + projections; ≥3-way equivalences via TFAE). Audit of D-lane
+statements delivered so far: T-D13 (one equation), T-D24 (three single-conclusion
+lemmas — the split/finrank/rankAtStalk trio is exactly the born-split shape),
+T-D29 (one equation) — all conform. Board-frozen skeleton statements checked
+against trigger shapes: `exists_incidenceLocusEQ`'s `∧` sits under an iff inside
+`∃ Z, ∀ T` with a SHARED witness Z — non-trigger (exceptions 1+3). All future
+D-lane helper statements and sub-tickets born split per the reference.
+
+### T-D27 (i): `sectionVanishingIdeal_eq_span_coord_coord` (Incidence.lean §ZeroLocus)
+
+Statement: for a tower `R → B ↷ M` (`[Algebra R B] [Module B M]
+[IsScalarTower R B M]`), `c : Module.Basis κ R B`, `b : Module.Basis ι B M`:
+`sectionVanishingIdeal R M σ = Ideal.span (Set.range fun p : κ × ι =>
+c.coord p.1 (b.coord p.2 σ))`. Single conclusion ✓ statement-splitting-conformant.
+
+- Attacks: [1] **Tower coherence**: without `[IsScalarTower R B M]` the R-module
+  structure on M is unrelated to B and the statement is junk-false; with it, the
+  R-structure is the restriction — `Basis.smulTower` (AlgebraTower.lean:126)
+  requires exactly this configuration, and `smulTower_repr` gives
+  `(c.smulTower b).repr σ (j,i) = c.repr (b.repr σ i) j`, which is verbatim the
+  RHS generator set. SURVIVES.
+- [2] **Argument-order convention**: mathlib's `smulTower (b : Basis ι R S)
+  (c : Basis ι' S A)` takes the BASE basis first; our `c` (R-basis of B) plays
+  that role. Index pair `κ × ι` (base × top) matches `smulTower`'s `ι × ι'`.
+  Misreading the order would produce a type-correct but WRONG generator set
+  (`b.coord` applied to elements of B) — caught because `b.coord p.2 σ : B` and
+  `c.coord p.1 : B →ₗ R` compose only in the stated order. SURVIVES.
+- [3] **Consumer fidelity (KM count)**: for T-D16(3), the descended condition has
+  rank_B(M)·rank_R(B) = 1·(deg D)² equations — matches KM 1.3.7's "(deg D)²"
+  via "the vanishing on W of a single function is equivalent to the vanishing on
+  S of its coordinates". Degenerates: B = 0 (κ empty ⟹ both sides ⊥ on the
+  zero module), σ = 0, ι empty — all coherent junk-⊥. SURVIVES.
+- [4] **Scope split**: deliverable (ii) (base-change vanishing bridge
+  `σ ⊗ 1 = 0 ↔ I(σ) ≤ ker`) deferred into T-D14/T-D16 whose ⦃T⦄-statements pin
+  the tensor spelling — same scoping as T-D26's wrapper. Recorded on the board.
+- Verdict: **SURVIVED**.
