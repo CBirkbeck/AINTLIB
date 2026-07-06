@@ -412,7 +412,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.2.5 ⧗ · [Hida-GME]. **Generality**: `CommRing R`.
 
 ### [T-A5] Base change of elliptic curves (Prop fields)
-- **Status**: open · **File**: EllipticCurve/Basic.lean · `EllipticCurve.baseChange`
+- **Status**: in_progress (beastmode 2026-07-06T22:30Z — smooth+proper DONE via
+  MorphismProperty.pullback_snd (SmoothOfRelativeDimension stability instance needs
+  explicit summoning); `fibres` remains: sub-tickets T-A5a (projModel base-change,
+  the real content) + T-A5b (fibre pasting) spawned with sketches) · **File**: EllipticCurve/Basic.lean · `EllipticCurve.baseChange`
   (three Prop sorries) · **Depends on**: none · **Parallel**: yes · **Type**: lemma
 - **Sketch**: `SmoothOfRelativeDimension`/`IsProper` base-change instances (mathlib,
   verify instance names); fibre condition: fibre of pullback ≅ fibre of original over
@@ -422,6 +425,47 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   compat of the points-interface).
 - **Sources**: [Loe] §3.7 (Ell is fibered); [KM] 2.1 ⧗ (reconciliation only).
 - **Generality**: arbitrary `g : T ⟶ S`.
+
+### [T-A5a] projModel commutes with base change (sub-ticket of T-A5)
+- **Status**: open · **File**: EllipticCurve/WeierstrassModel.lean (section Points or new)
+- **Parent**: T-A5 · **Depends on**: T-A2 (done) · **Type**: def + theorem
+- **Statement**: for `f : R →+* R'` (consumer case: residue-field extension
+  `κ(s) → κ(t)`), a pointed iso over `Spec R'`:
+  `pullback (projModelπ W) (Spec.map f) ≅ projModel (W.map f)` commuting with the
+  π's and carrying the base-changed zero to `projModelZero (W.map f)`.
+- **Proof sketch**: both sides are the Proj of the base-changed homogeneous coordinate
+  ring. Route A (chartwise, all machinery in-repo): both schemes carry the 3-chart
+  affine cover by `D₊(Xᵢ)`; pullback-of-chart = Spec of `chart ⊗_R R'` =
+  `R'[u,v]/(F̃ᵢ-mapped)` (tensor-quotient + MvPolynomial base change:
+  `MvPolynomial.algebraTensorAlgEquiv`-family + `Ideal.map`-quotient tensor iso —
+  mathlib has `Algebra.TensorProduct.quotIdealMapEquivTensorQuot`); glue chart isos
+  via the `Proj.awayι`-cover pasting (`IsOpenImmersion` + `openCoverOfSuprEqTop`
+  gluing, or `Scheme.OpenCover.glueMorphisms`); pointedness on the Y-chart.
+  Route B (global): `Proj.map` of the base-change graded hom
+  `quotientGrading (projIdeal W) →+*ᵍ quotientGrading (projIdeal (W.map f))` into the
+  pullback via universal property; isomorphism checked chartwise (same charts). Note
+  `WeierstrassCurve.Projective.polynomial` commutes with `MvPolynomial.map f`
+  (coefficient-wise, `map_polynomial`-style simp) — needed to identify the mapped
+  ideal with `projIdeal (W.map f)`.
+- **Sources**: EGA II 3.5.3 (Proj and base change, standard); no KM gate.
+- **Generality**: any ring hom `f`; upstream candidate (Proj-base-change for
+  quotient gradings).
+
+### [T-A5b] Fibres of a pullback along residue-field extension (sub-ticket of T-A5)
+- **Status**: open · **File**: EllipticCurve/GroupLaw.lean (or Basic)
+- **Parent**: T-A5 · **Depends on**: T-A5a · **Type**: theorem (discharges `fibres`)
+- **Statement**: `FibrewiseElliptic (pullback.snd E.π g) (baseChange-zero) _` for
+  `E : EllipticCurve S`, `g : T ⟶ S`.
+- **Proof sketch**: fix `t : T`, `s := g.base t`. Pasting: `(pullback.snd E.π g).fiber t
+  = Spec κ(t) ×_T (E ×_S T) ≅ Spec κ(t) ×_S E` (pullback pasting, `IsPullback.paste`)
+  `≅ Spec κ(t) ×_{Spec κ(s)} (Spec κ(s) ×_S E) = Spec κ(t) ×_{κ(s)} E.π.fiber s` (paste
+  along `Scheme.residueFieldMap`/`fromSpecResidueField` triangle —
+  `Scheme.Hom.residueFieldMap_fromSpecResidueField` comm square). Take `W` from
+  `E.fibres s`, set `W' := W.map (residue-field map κ(s) → κ(t))`; compose the pasted
+  iso with (fibre-iso from E.fibres) base-changed, then T-A5a's iso; π- and
+  zero-compat by pasting functoriality. Watch: the zero-section transport needs
+  `sectionFiberPoint` naturality under both pastes (two small commuting squares).
+- **Sources**: [Loe] §3.7; standard fibre pasting.
 
 ### [T-A6] ⧗KM Abel canonicity — the deferred "purity/comparison" project (v2)
 - **Status**: open, **phase 3+ — no longer blocks anything** (v2: group law is a field
