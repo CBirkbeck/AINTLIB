@@ -1341,6 +1341,17 @@ maxHeartbeats` anywhere; DS-register unchanged; `#print axioms` audit)
   isPullback_muN_baseChange (shared-witness ∃, constructible witness) queued for
   def+spec-lemma extraction per the preference order. Beastmode Tier A5: future
   sub-tickets born single-conclusion.
+  · **PAUSED 2026-07-06 (user request: resume proving).** State at pause: Phase 4
+  workers 9/74 done (through muNRing_hom_ext; all gates pass; edits so far:
+  constScheme/constSchemeπ→abbrev, muNRingGen+muNRing_hom_ext docstring strips,
+  hom_ext golf 14→8 lines, muNRingGen_pow change+simp form). Rename queue (1):
+  muNRingGen_pow→muNRingGen_pow_eq_one. Phase-5a queue: [NeZero N] drop on
+  muNPointsEquiv/_natural (runLinter-backed); constScheme [Finite A] drop + 2
+  omit-fixes; muN_poly_monic→muNModelPoly_monic generalize+dedup with
+  muNStdPair.monic_f; pullback-lift-transfer motif dedup (etale_muNπ_of_isUnit /
+  etale_field_nezero); isPullback_muN_baseChange→def+spec; muNSpecHomEquiv state
+  vs muNAbs N; muNRingGen_pow×muNModel_root_pow dedup. Resume at worker 10/74
+  (muNRing_span_vanish), decl order per the 1d list.
 - **[CLEANUP-5]** after T-D2+T-D3 → CartierDivisor.lean (deps: those) — includes
   upstreaming review of `IdealSheafData.mul`
 - **[CLEANUP-6]** after T-D5+T-D6+T-D7 → ExactOrder.lean (deps: those)
