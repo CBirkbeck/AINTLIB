@@ -191,3 +191,42 @@ c.coord p.1 (b.coord p.2 σ))`. Single conclusion ✓ statement-splitting-confor
   `σ ⊗ 1 = 0 ↔ I(σ) ≤ ker`) deferred into T-D14/T-D16 whose ⦃T⦄-statements pin
   the tensor spelling — same scoping as T-D26's wrapper. Recorded on the board.
 - Verdict: **SURVIVED**.
+
+### T-D31: reduced-ring separation by field-valued homs (ForMathlib/ReducedSeparation.lean)
+
+Statements (born split): (i) `IsReduced.eq_zero_of_forall_ringHom_field`:
+`[CommRing A] [IsReduced A]`, `(∀ (K : Type u) [Field K] (φ : A →+* K), φ a = 0) → a = 0`;
+(ii) `IsReduced.eq_of_forall_ringHom_field`: same quantifier with `φ a = φ b → a = b`
+(one-line corollary via `sub_eq_zero` + `map_sub`).
+
+- Attacks: [1] **Reducedness necessity**: false without it — `A = k[ε]`, `a = ε`:
+  every hom to a field kills ε (nilpotents die in fields/domains), yet ε ≠ 0.
+  The hypothesis is load-bearing and minimal. SURVIVES.
+- [2] **Prime-vs-maximal**: the proof needs ⋂ primes = nilradical
+  (`nilpotent_iff_mem_prime`); restricting the family to maximal-residue fields
+  would prove the FALSE Jacobson-radical variant (local domain: ⋂ max ⊋ 0).
+  The fraction field of `A⧸J` for every PRIME J is exactly the needed family,
+  and it lives in the same universe u — the `∀ K : Type u` quantifier is
+  sufficient (attack: a smaller quantifier universe would break the internal
+  instantiation; same-u matches T-D2's consumer which quantifies `K : Type u`).
+  SURVIVES.
+- [3] **Alg-closed strengthening**: KM 1.9.2 checks at geometric (alg. closed)
+  points; our field-level family is FINER (more homs available ⟹ weaker
+  hypothesis per instance... careful: hypothesis quantifies over ALL fields, so
+  field-version hypothesis is STRONGER than alg-closed-version hypothesis).
+  Consumer check: T-D2's RHS quantifies over all fields `K` with `[Algebra R K]`
+  — matches exactly; no alg-closed gap enters the Lean route (KM's geometric
+  points are an informal-side strengthening we do not need). SURVIVES.
+- [4] **Degenerates**: `A = 0` (trivial ring): reduced ✓, every a = 0 ✓ statement
+  vacuous-true; fields are nontrivial so no hom A → K exists when... A = 0 has
+  no ring hom to any field?? `A →+* K` with A trivial: φ 1 = 1 forces K
+  trivial — no field K admits it, hypothesis vacuously true, and a = 0 holds in
+  the trivial ring ✓ coherent. `a` a unit: hypothesis fails at any K (φ a unit
+  ≠ 0) unless no homs exist — Spec A ≠ ∅ for A ≠ 0 so some prime/hom exists ✓.
+  SURVIVES.
+- [5] **Not-in-mathlib**: `IsReduced (MvPolynomial σ R)` instance EXISTS
+  (Nilpotent.lean:55) — that half is mathlib-present; the separation lemma
+  absent (greps `eq_zero_of_forall.*field` / `forall_ringHom` / nilradical
+  consumers — none state the field-hom form). Upstream candidate. SURVIVES.
+- Verdict: **SURVIVED** (both statements; single-conclusion each ✓
+  statement-splitting-conformant).
