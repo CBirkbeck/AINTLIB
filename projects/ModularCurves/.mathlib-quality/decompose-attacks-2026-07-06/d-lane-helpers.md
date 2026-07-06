@@ -298,3 +298,28 @@ count-free so this is invisible; the T-D11/AG-LB/FLAT principality gates are
 avoided entirely. KM 1.3.5/1.3.7 quotes also now IN CONTEXT (pp. 15–16) for T-D15/
 T-D16 pickup; 1.3.7's proof confirms the three-conditions design incl. the
 "(deg D)² coordinates" descent (= T-D27's lemma).
+
+### T-D14c-1: `vanishingLocus` (Incidence.lean §VanishingLocus)
+
+Statement: for `p : W ⟶ S` finite+flat+lfp and `E : W.IdealSheafData`, the
+`S.IdealSheafData` with `ideal U := submoduleVanishingIdeal Γ(S,U) Γ(W,p⁻¹U)
+(E-sections restricted)`; gluing field sorried at skeleton commit (fill next).
+
+- Attacks: [1] **Well-definedness of the data**: needs Module Γ(S,U) Γ(W,p⁻¹U) —
+  provided per-U by `letI (p.appLE …).hom.toAlgebra`; SPELLING TRAP (hit at
+  skeleton build): every Γ must be at the `(affinePreimage p U).1`-spelling, not
+  `p ⁻¹ᵁ U.1` — defeq but instance-synthesis-visible. [2] **Gluing (the sorried
+  field)** ⟸ keystone `submoduleVanishingIdeal_localized` at S := powers f +
+  the mapped-monoid instance (`isLocalizedModule_iff_isLocalization` + its
+  INSTANCE at `algebraMapSubmonoid`), `Submonoid.map_powers`,
+  `IsAffineOpen.isLocalization_basicOpen` both levels, `Scheme.preimage_basicOpen`
+  for the open-alignment, `Submodule.localized'_eq_span` to match E's own
+  `map_ideal_basicOpen`. All ingredients verified present in mathlib (session
+  notes in board T-D14 progress). [3] **Junk robustness**: E arbitrary (no
+  f.type needed for the DEF or gluing — only the le_ker spec's ⟸ uses
+  generators); W empty / U with empty preimage: Γ(W,∅) = 0, dual of 0-module,
+  submoduleVanishingIdeal = ⊥?? — over the ZERO ring Γ(W,∅)... M := 0-module:
+  functional values all 0 ⟹ ideal = span{0} = ⊥ ✓ coherent (locus = all of U:
+  E pulls to ⊥ on empty W vacuously ✓ matches ⊥-ideal = no condition ✓).
+  SURVIVES (data + gluing plan); spec statement (T-D14c-2) gets its own block
+  at statement time.

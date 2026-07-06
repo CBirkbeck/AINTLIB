@@ -200,8 +200,8 @@ KM 1.3.4's locus of "simultaneous vanishing of the coordinates", in the basis-fr
 form; its universal property is `vanishingLocus_le_ker_iff` (T-D14c-2). -/
 noncomputable def vanishingLocus : S.IdealSheafData where
   ideal U :=
-    letI := ((p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom).toAlgebra
-    submoduleVanishingIdeal Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
+    letI := ((p.appLE U.1 (affinePreimage p U).1 le_rfl).hom).toAlgebra
+    submoduleVanishingIdeal Γ(S, U.1) Γ(W, (affinePreimage p U).1)
       ((E.ideal (affinePreimage p U)).restrictScalars Γ(S, U.1))
   map_ideal_basicOpen U f := by
     sorry
