@@ -456,6 +456,61 @@ end Lfp
 
 end ProjModel
 
+section Points
+
+open HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Every `K`-point of the model factors through one of the three affine charts. -/
+lemma specPoint_factors_through_chart (W : WeierstrassCurve R)
+    {K : Type u} [Field K] [Algebra R K] (g : Spec (.of K) ⟶ projModel W) :
+    ∃ (i : Fin 3) (h : Spec (.of K) ⟶
+        Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))))),
+      h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos = g := by
+  have htop := Proj.iSup_basicOpen_eq_top (quotientGrading (projIdeal W))
+    (fun i : Fin 3 => Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+    (quotient_irrelevant_le_span_mk_X W)
+  have h1 : (⋃ i : Fin 3, ((Proj.basicOpen (quotientGrading (projIdeal W))
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))) :
+        Set (Proj (quotientGrading (projIdeal W))))) = Set.univ := by
+    have h2 := congrArg
+      (fun U : (Proj (quotientGrading (projIdeal W))).Opens =>
+        (U : Set (Proj (quotientGrading (projIdeal W))))) htop
+    simp only [TopologicalSpace.Opens.coe_iSup, TopologicalSpace.Opens.coe_top] at h2
+    exact h2
+  have hmem : g.base default ∈ ⋃ i : Fin 3,
+      ((Proj.basicOpen (quotientGrading (projIdeal W))
+        (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))) :
+        Set (Proj (quotientGrading (projIdeal W)))) := by
+    rw [h1]
+    exact Set.mem_univ _
+  obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem
+  refine ⟨i, IsOpenImmersion.lift
+    (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W i) one_pos) g ?_,
+    IsOpenImmersion.lift_fac _ _ _⟩
+  intro x hx
+  obtain ⟨y, rfl⟩ := hx
+  have hy : y = default := Subsingleton.elim _ _
+  subst hy
+  have hrange : ((Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W i) one_pos).opensRange :
+      TopologicalSpace.Opens (projModel W)) =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i)) :=
+    Proj.opensRange_awayι _ _ _ _
+  have : g.base default ∈ (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W i) one_pos).opensRange := by
+    rw [hrange]
+    exact hi
+  exact this
+
+end Points
+
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
 biject with `(W.baseChange K).toAffine.Point`, sending `[0:1:0]` to `0`.
 Route: every `Spec K`-point factors through one of the three affine charts (`K` is
