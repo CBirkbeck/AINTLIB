@@ -1661,6 +1661,12 @@ lemma baseChangeGradedHom_irrelevant_le (W : WeierstrassCurve R) :
     DirectSum.coe_of_apply]
   simp
 
+/-- **(T-A5a)** The base-change morphism between projective Weierstrass models:
+`Proj` of the graded base-change homomorphism. -/
+noncomputable def projModelBaseChange (W : WeierstrassCurve R) :
+    projModel (W.map f) ⟶ projModel W :=
+  Proj.map (baseChangeGradedHom f W) (baseChangeGradedHom_irrelevant_le f W)
+
 end BaseChangeGraded
 
 end Points

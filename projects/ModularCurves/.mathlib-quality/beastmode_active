@@ -1,1 +1,1 @@
-FOCUS: T-B2 (beastmode-B) — writing muN points-functor block (muNRingGen/specHomEquiv/GrpFunctor/RepresentableBy) into MuN.lean, then build
+FOCUS: T-B2 (beastmode-B) — muN half DONE+committed; now constZModGrpObj via LocallyConstant points presheaf (nonempty_isColimit_cofanMk_of engine)
