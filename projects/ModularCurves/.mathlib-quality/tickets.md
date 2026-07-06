@@ -1518,18 +1518,25 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
-  - **[T-D27] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T13:40Z · deliverable (i) = the coordinate-descent
-    basis form in Incidence.lean §ZeroLocus:
-    `sectionVanishingIdeal R M σ = span (range fun p : κ × ι =>
-    c.coord p.1 (b.coord p.2 σ))` for a tower `R → B ↷ M` with `c : Basis κ R B`,
-    `b : Basis ι B M`, `[IsScalarTower R B M]` — one rw from T-D13 at
-    `c.smulTower b` + `smulTower_repr` (KM's "vanishing on W of a single
-    function ⟺ vanishing on S of its coordinates", the (deg D)²-equations
-    descent). Deliverable (ii), the base-change vanishing bridge
-    (`σ ⊗ 1 = 0 in M ⊗[R] A ↔ I(σ) ≤ ker`), DEFERRED into T-D14/T-D16 where
-    their ⦃T⦄-statements pin the exact tensor spelling (same scoping decision
-    as T-D26's wrapper). Attack block in d-lane-helpers.md.
+  - **[T-D27] Status**: done (beastmode-D2, 2026-07-06T13:40Z → 2026-07-06T13:50Z) ·
+    `sectionVanishingIdeal_eq_span_coord_coord` (Incidence.lean §ZeroLocus:81)
+    sorry-free, standard axioms, module green. FINDING OF RECORD: the composed
+    coordinate function `fun p => c.coord p.1 (b.coord p.2 σ)` is DEFEQ to
+    `(c.smulTower b).coord · σ` at default transparency — the whole proof is the
+    ONE-LINE term `sectionVanishingIdeal_eq_span_coord R M (c.smulTower b) σ`
+    (a tactic route needs congr-by-defeq since rw's auto-rfl is reducible-only).
+    Post-proof cleanup: ✓ ran (Mode-A worker — 2-line tactic → 1-line term, all
+    hard gates pass, heartbeats unchanged, statement byte-identical mod line
+    packing; statement-splitting.md conformance: single equation ✓). Upstream
+    note: mathlib lacks `smulTower_coord` next to `@[simp] smulTower_repr`.
+    Deferred /generalise flags (statement frozen; ALL scratch-verified):
+    CommRing B→Semiring B; Algebra R B→Module R B (tower is module-theoretic);
+    section CommRing R→CommSemiring + AddCommGroup M→AddCommMonoid (whole
+    ZeroLocus section incl. T-D13's proof compiles); ι κ universe split.
+    Deliverable (ii), the base-change vanishing bridge (`σ ⊗ 1 = 0 in M ⊗[R] A ↔
+    I(σ) ≤ ker`), DEFERRED into T-D14/T-D16 where their ⦃T⦄-statements pin the
+    exact tensor spelling (same scoping decision as T-D26's wrapper). Attack
+    block in d-lane-helpers.md. Wave 0 REMAINING: T-D31, T-D32.
   - **[T-D25] Status**: done (beastmode-D2, 2026-07-06T13:25Z,
     **RESOLVED-BY-MATHLIB, no project code**) — pin 11b908e5cdd9 has BOTH forms:
     `Module.algebraMap_bijective_iff_rankAtStalk` (rankAtStalk S = 1 ↔ Bijective
