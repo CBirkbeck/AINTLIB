@@ -204,6 +204,15 @@ theorem mulBy_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
   simp only [EllipticCurve.mulBy, Functor.map_zpow', CategoryTheory.Functor.map_id]
   rfl
 
+/-- The underlying scheme morphism of `[n]` on the base-changed curve is the pullback
+of `E`'s `[n]` (the `.left` of `mulBy_baseChange`, in explicit `pullback.lift` form). -/
+theorem mulByHom_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
+    (E.baseChange g).mulByHom n =
+      Limits.pullback.lift (Limits.pullback.fst E.π g ≫ E.mulByHom n)
+        (Limits.pullback.snd E.π g) (by simp [Limits.pullback.condition]) := by
+  have h := congrArg CommaMorphism.left (mulBy_baseChange E g n)
+  exact h
+
 /-- A point of `E` over `g : T ⟶ S`, viewed as a section of the base-changed curve
 `E ×_S T / T`. -/
 noncomputable def Point.asSection {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
