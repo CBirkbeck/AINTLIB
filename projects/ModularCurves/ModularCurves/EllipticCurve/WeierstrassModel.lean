@@ -133,7 +133,7 @@ Weierstrass curve, as a scheme over `Spec R`: `Proj` of the homogeneous coordina
 Route of record: decomposition-gme2 A7.e (Hida GME §2.2.5).
 Consumers must use only `IsWeierstrassModel` facts about it (plus the fibrewise bridge,
 expert review Q2). -/
-noncomputable def projModel (W : WeierstrassCurve R) : Scheme.{u} :=
+@[reducible] noncomputable def projModel (W : WeierstrassCurve R) : Scheme.{u} :=
   Proj (quotientGrading (projIdeal W))
 
 /-- **(T-A2)** The structure morphism of the projective Weierstrass model:
@@ -279,7 +279,7 @@ open HomogeneousLocalization
 
 /-- The class of `X i` in the quotient grading, in degree one. -/
 lemma mk_X_mem_quotientGrading_one (W : WeierstrassCurve R) (i : Fin 3) :
-    Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i) ∈
+    (quotientGradingHom (projIdeal W)) (MvPolynomial.X i) ∈
       quotientGrading (projIdeal W) 1 :=
   mk_mem_quotientGrading _ (MvPolynomial.X_mem_homogeneousSubmodule_one R i)
 
@@ -694,6 +694,88 @@ noncomputable def chartSolutionsEquiv (W : WeierstrassCurve R) (i : Fin 3)
         chartCoordEquiv_mk_C] at this
       exact this)).trans
     (quotSolutionsEquiv (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) K)
+
+/-- Restricted to a chart, the structure morphism of the model is `Spec` of the
+`R`-structuring of the chart ring. -/
+lemma awayι_projModelπ (W : WeierstrassCurve R) (i : Fin 3) :
+    Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
+      (mk_X_mem_quotientGrading_one W i) one_pos ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom
+        ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) := by
+  show Proj.awayι _ _ _ _ ≫ Proj.toSpecZero (quotientGrading (projIdeal W)) ≫
+    Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) = _
+  rw [← Category.assoc, Proj.awayι_toSpecZero, ← Spec.map_comp]
+  rfl
+
+/-- The `K`-point of the model attached to an `R`-compatible ring homomorphism out
+of the chart ring at `i`. -/
+private noncomputable def chartPointOfHom (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K]
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K }) :
+    { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 } :=
+  ⟨⟨Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι _ _
+      (mk_X_mem_quotientGrading_one W i) one_pos, by
+    rw [Category.assoc, awayι_projModelπ W i, ← Spec.map_comp,
+      ← CommRingCat.ofHom_comp, φ.2]⟩, ⟨Spec.map (CommRingCat.ofHom φ.1), rfl⟩⟩
+
+private lemma chartPointOfHom_bijective (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K] :
+    Function.Bijective (chartPointOfHom W i (K := K)) := by
+  constructor
+  · intro φ₁ φ₂ h
+    have h1 : Spec.map (CommRingCat.ofHom φ₁.1) ≫ Proj.awayι _ _
+        (mk_X_mem_quotientGrading_one W i) one_pos =
+        Spec.map (CommRingCat.ofHom φ₂.1) ≫ Proj.awayι _ _
+          (mk_X_mem_quotientGrading_one W i) one_pos :=
+      congrArg (fun g => g.1.1) h
+    have h2 := Spec.map_injective ((cancel_mono _).mp h1)
+    exact Subtype.ext (congrArg CommRingCat.Hom.hom h2)
+  · rintro ⟨⟨g, hg⟩, h, hfac⟩
+    have hπ : (h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos) ≫ projModelπ W =
+        Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+      rw [hfac]
+      exact hg
+    rw [Category.assoc, awayι_projModelπ W i, ← Spec.map_preimage h,
+      ← Spec.map_comp] at hπ
+    have hcond := congrArg CommRingCat.Hom.hom (Spec.map_injective hπ)
+    refine ⟨⟨(Spec.preimage h).hom, hcond⟩, ?_⟩
+    refine Subtype.ext (Subtype.ext ?_)
+    show Spec.map (CommRingCat.ofHom (Spec.preimage h).hom) ≫ _ = g
+    rw [CommRingCat.ofHom_hom, Spec.map_preimage]
+    exact hfac
+
+/-- `K`-points of the model that factor through chart `i` are the `R`-compatible
+ring homomorphisms out of the chart ring. -/
+noncomputable def chartHomEquiv (W : WeierstrassCurve R) (i : Fin 3)
+    (K : Type u) [CommRing K] [Algebra R K] :
+    { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 } ≃
+    { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K } :=
+  (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm
 
 end Points
 
