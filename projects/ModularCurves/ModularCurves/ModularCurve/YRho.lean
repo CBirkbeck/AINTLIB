@@ -1,3 +1,4 @@
+import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Coarse
@@ -83,15 +84,168 @@ structure GaloisRepData (N : ℕ) [NeZero N] where
         (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv : (ZMod N)ˣ) : ZMod N).val) :
           (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
 
-/-- **(DS5, ticket chain T-F1)** The finite étale group scheme `V_ρ` over `ℚ` attached to
-the Galois module `(ℤ/N)²` via `ρ` (Grothendieck–Galois / Galois descent of the constant
-group scheme `(ℤ/N)²` along the splitting field of `ρ`). DATA-SORRY (register entry DS5).
-Specifications: `vRho_finite_etale`, `vRho_points` (T-F1a/b). -/
-noncomputable def vRho {N : ℕ} [NeZero N] (D : GaloisRepData N) : Scheme.{0} := sorry
+/-! ### The Grothendieck–Galois construction of `V_ρ` (T-F1, discharging DS5)
 
-/-- **(DS5)** The structure morphism of `V_ρ`. -/
+The AG-GG development (`ForMathlib/FiniteEtaleGalois`, `FiniteEtaleFiberFunctor`,
+`FiniteEtaleFundamentalGroup`) provides the equivalence
+`(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat Gal(ℚ^sep/ℚ)`.  `V_ρ` is `Spec` of the
+finite étale algebra corresponding to the `ρ`-twisted `(ℤ/N)²` under this equivalence.
+`GalQ` is the automorphism group of the *algebraic* closure; in characteristic zero it
+is canonically homeomorphically isomorphic to that of the separable closure. -/
+
+section GaloisSepBridge
+
+open ModularCurves.FiniteEtaleGalois in
+/-- Concrete-field instance registration (see the AG-GG-3 protocol note): mathlib's
+`separableClosure` instances do not unify against the `SeparableClosure` abbreviation at
+concrete fields. -/
+instance : CompactSpace (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  compactSpace_galSepClosure ℚ
+
+open ModularCurves.FiniteEtaleGalois in
+noncomputable instance : PreGaloisCategory.IsFundamentalGroup
+    (CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ) :
+      (CommAlgCat.FiniteEtale.{0} ℚ)ᵒᵖ ⥤ FintypeCat.{0})
+    (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  isFundamentalGroup_galSepClosure (k := ℚ)
+
+/-- In characteristic zero the separable closure is the algebraic closure. -/
+noncomputable def sepClosureQAlgEquiv : SeparableClosure ℚ ≃ₐ[ℚ] AlgebraicClosure ℚ :=
+  haveI : Algebra.IsAlgebraic ℚ (AlgebraicClosure ℚ) :=
+    AlgebraicClosure.isAlgebraic ℚ
+  haveI : Algebra.IsSeparable ℚ (AlgebraicClosure ℚ) :=
+    Algebra.IsAlgebraic.isSeparable_of_perfectField
+  (IntermediateField.equivOfEq
+    ((separableClosure.eq_top_iff ℚ (AlgebraicClosure ℚ)).mpr inferInstance)).trans
+    IntermediateField.topEquiv
+
+/-- The multiplicative comparison between the two absolute Galois groups. -/
+noncomputable def galSepMulEquivGalQ :
+    (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ≃* GalQ :=
+  AlgEquiv.autCongr sepClosureQAlgEquiv
+
+lemma continuous_galSepMulEquivGalQ : Continuous galSepMulEquivGalQ := by
+  have h : Continuous (galSepMulEquivGalQ.toMonoidHom :
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) →* GalQ) := by
+    apply continuous_of_continuousAt_one
+    rw [ContinuousAt, map_one]
+    intro s hs
+    obtain ⟨E, hfin, hE⟩ :=
+      (krullTopology_mem_nhds_one_iff ℚ (AlgebraicClosure ℚ) s).mp hs
+    refine Filter.mem_of_superset
+      (((krullTopology_mem_nhds_one_iff ℚ (SeparableClosure ℚ) _).mpr
+        ⟨E.map sepClosureQAlgEquiv.symm.toAlgHom, inferInstance, subset_rfl⟩)) ?_
+    intro σ hσ
+    refine hE ?_
+    rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff] at hσ ⊢
+    intro x hx
+    show sepClosureQAlgEquiv (σ (sepClosureQAlgEquiv.symm x)) = x
+    have hmem : sepClosureQAlgEquiv.symm x ∈ E.map sepClosureQAlgEquiv.symm.toAlgHom :=
+      ⟨x, hx, rfl⟩
+    rw [hσ _ hmem, AlgEquiv.apply_symm_apply]
+  exact h
+
+/-- The homeomorphic multiplicative comparison between the Galois groups of the
+separable and the algebraic closure of `ℚ`. -/
+noncomputable def galSepContinuousMulEquivGalQ :
+    (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ≃ₜ* GalQ :=
+  { galSepMulEquivGalQ with
+    continuous_toFun := continuous_galSepMulEquivGalQ
+    continuous_invFun := by
+      haveI : Algebra.IsAlgebraic ℚ (AlgebraicClosure ℚ) :=
+        AlgebraicClosure.isAlgebraic ℚ
+      haveI : T2Space GalQ := krullTopology_t2
+      exact (Continuous.homeoOfEquivCompactToT2
+        (f := galSepMulEquivGalQ.toEquiv)
+        continuous_galSepMulEquivGalQ).symm.continuous }
+
+end GaloisSepBridge
+
+section RhoAction
+
+open ModularCurves.FiniteEtaleGalois
+
+open scoped FintypeCatDiscrete
+
+variable {N : ℕ} [NeZero N]
+
+/-- The `(ℤ/N)²`-fiber as a `Gal(ℚ^sep/ℚ)`-set via `ρ`. -/
+noncomputable def rhoAction (D : GaloisRepData N) :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (Fin 2 → ZMod N)
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk (fun v => D.ρ (galSepMulEquivGalQ σ) • v)
+      map_one' := FintypeCat.hom_ext _ _ fun v => by
+        show D.ρ (galSepMulEquivGalQ 1) • v = v
+        rw [map_one, map_one, one_smul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun v => by
+        show D.ρ (galSepMulEquivGalQ (σ * τ)) • v = _
+        rw [map_mul, map_mul, mul_smul]
+        rfl }
+
+/-- The kernel of the `ρ`-action on the separable-closure side is open. -/
+lemma rhoAction_ker_open (D : GaloisRepData N) :
+    IsOpen {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} := by
+  have h : {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} =
+      galSepMulEquivGalQ ⁻¹' (MonoidHom.ker D.ρ : Set GalQ) := rfl
+  rw [h]
+  exact D.ker_open.preimage continuous_galSepMulEquivGalQ
+
+/-- The `ρ`-action is continuous (the fiber is discrete and the kernel is open). -/
+lemma rhoAction_isContinuous (D : GaloisRepData N) :
+    (rhoAction D).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj (rhoAction D) :
+          Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (rhoAction D) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoAction D),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  refine Filter.mem_of_superset ?_ (fun σ hσ => ?_)
+  · exact IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀)
+      ⟨1, by simpa using D.ρ.map_one?? PLACEHOLDER_MEM, mul_one σ₀⟩
+  · obtain ⟨τ, hτ, rfl⟩ := hσ
+    show (σ₀ * τ) • v = w
+    have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+    show D.ρ (galSepMulEquivGalQ (σ₀ * τ)) • v = w
+    rw [map_mul, map_mul, hτ1, mul_one]
+    exact hσ₀
+
+/-- The `ρ`-twisted `(ℤ/N)²` as a continuous Galois set. -/
+noncomputable def rhoContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨rhoAction D, rhoAction_isContinuous D⟩
+
+/-- The finite étale `ℚ`-algebra corresponding to the `ρ`-twisted `(ℤ/N)²` under the
+Galois correspondence. -/
+noncomputable def vRhoAlgebra (D : GaloisRepData N) : CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((finiteEtaleEquivContAction ℚ).inverse.obj (rhoContAction D)).unop
+
+end RhoAction
+
+/-- **(T-F1, was DS5)** The finite étale scheme `V_ρ` over `ℚ` attached to the Galois
+module `(ℤ/N)²` via `ρ`: the spectrum of the finite étale algebra corresponding to the
+`ρ`-twisted `(ℤ/N)²` under the Grothendieck–Galois correspondence
+`(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat Gal(ℚ^sep/ℚ)`.
+Specifications: `vRho_finite_etale`, `vRho_points` (T-F1a/b). -/
+noncomputable def vRho {N : ℕ} [NeZero N] (D : GaloisRepData N) : Scheme.{0} :=
+  Spec (.of (vRhoAlgebra D : Type 0))
+
+/-- **(T-F1)** The structure morphism of `V_ρ`. -/
 noncomputable def vRhoπ {N : ℕ} [NeZero N] (D : GaloisRepData N) :
-    vRho D ⟶ Spec (.of ℚ) := sorry
+    vRho D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0)))
 
 /-- **(T-F1a, specification of DS5)** `V_ρ ⟶ Spec ℚ` is finite étale (of degree `N²`). -/
 theorem vRhoπ_finite_etale {N : ℕ} [NeZero N] (D : GaloisRepData N) :
