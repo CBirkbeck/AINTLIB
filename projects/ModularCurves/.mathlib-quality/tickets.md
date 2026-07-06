@@ -1688,9 +1688,36 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
   lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
+  - **[T-D32] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
+    successor), 2026-07-06T14:15Z · NEW ForMathlib/BijectiveResidueField.lean.
+    Route of record (NOT the det route — mathlib's det is endo-only; the
+    Nakayama toolkit in RingTheory/LocalRing/Module.lean is the engine). Born
+    split: (a) `IsLocalRing.surjective_of_surjective_lTensor_residueField`
+    ([Module.Finite R N] only): via `map_tensorProduct_mk_eq_top` (Nakayama) +
+    `TensorProduct.mk_surjective` (quotient scalars pull through) + lTensor_tmul;
+    (b) `IsLocalRing.bijective_of_bijective_lTensor_residueField` ([Finite M]
+    [Finite N] [Flat N]): injectivity leg = mathlib's PACKAGED
+    `split_injective_iff_lTensor_residueField_injective` (needs Free N =
+    free_of_flat_of_isLocalRing) + (a); (c) global
+    `LinearMap.bijective_of_forall_bijective_lTensor_residueField` (fibres at
+    all maximal J via `J.ResidueField`): `bijective_of_isLocalized_maximal`
+    (LocalProperties/Exactness.lean:71) instantiated at TENSOR localizations
+    (Mₚ := Rₚ ⊗ M, f := TensorProduct.mk 1, instance via
+    `isLocalizedModule_iff_isBaseChange` + `TensorProduct.isBaseChange`),
+    localized map identified with `φ.baseChange Rₚ` by IsLocalizedModule-ext,
+    then (b) + the `AlgebraTensorModule.cancelBaseChange` comparison square
+    (pattern: mem_support_iff_nontrivial_residueField_tensorProduct's proof).
+    ⟹-direction (iso → fibre-iso) NOT stated (no consumer; assembly test).
+    Consumer: T-D6 (3)⟺(5). Attack block in d-lane-helpers.md. NOTE: cleanup
+    passes PAUSED by owner instruction (2026-07-06T14:05Z) — proving
+    prioritized; accumulated cleanup debt for the new ForMathlib files
+    (ReducedSeparation, BijectiveResidueField) goes to the cleanup lane /
+    a later batch pass.
   - **[T-D31] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T13:55Z · NEW ForMathlib/ReducedSeparation.lean
-    (mathlib-only imports). Deliverables (born split): (i)
+    successor), 2026-07-06T13:55Z → **done 2026-07-06T14:10Z** ·
+    NEW ForMathlib/ReducedSeparation.lean (mathlib-only imports), sorry-free,
+    standard axioms ×2, zero warnings, committed (landed via sibling sweep
+    2fb2b06a; content verified at HEAD). Delivered (born split): (i)
     `IsReduced.eq_zero_of_forall_ringHom_field`: in a reduced CommRing, an
     element killed by every ring hom to a (same-universe) field is 0 — proof:
     `nilpotent_iff_mem_prime` + at each prime the hom
@@ -1702,6 +1729,8 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     lemma (greps: eq_zero_of_forall∩field, forall_ringHom — zero hits). Fields
     (not just alg. closed) suffice for the KM 1.9.2 consumer; maximal ideals
     would NOT (Jacobson ≠ nil). Feeds T-D2's reduce-to-geometric-points step.
+    Post-proof cleanup: DEFERRED (owner paused cleanup passes 2026-07-06T14:05Z;
+    debt tracked for the cleanup lane).
   - **[T-D3b] Status**: done (beastmode-D2, 2026-07-06T11:25Z → 2026-07-06T11:40Z,
     **RESOLVED-BY-MATHLIB, no project code**) — the current pin (11b908e5cdd9)
     already has the full multiplicative structure on `IdealSheafData`:
