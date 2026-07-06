@@ -776,6 +776,23 @@ private theorem glueT'_cocycle (i j k : X) :
       σ.localQuotientMap_self _ _,
     Category.id_comp, Iso.inv_hom_id]
 
+/-- **The quotient glue data** (T-Q5 c4): the local quotients of a stable affine
+atlas, glued along the saturated overlaps. -/
+private noncomputable def quotientGlueData : Scheme.GlueData where
+  J := X
+  U := fun i => σ.localQuotient (hVs i)
+  V := fun p => σ.localQuotient ((hVs p.1).inf (hVs p.2))
+  f := fun i j => glueF σ V hVs hVa i j
+  f_id := fun i =>
+    σ.isIso_localQuotientMap_of_le_le ((hVs i).inf (hVs i))
+      ((hVa i).inf (hVa i)) (hVs i) (hVa i) inf_le_left (le_inf le_rfl le_rfl)
+  t := fun i j => glueT σ V hVs hVa i j
+  t_id := fun i => σ.localQuotientMap_self ((hVs i).inf (hVs i)) ((hVa i).inf (hVa i))
+  t' := fun i j k => glueT' σ V hVs hVa i j k
+  t_fac := fun i j k => glueT'_fac σ V hVs hVa i j k
+  cocycle := fun i j k => glueT'_cocycle σ V hVs hVa i j k
+  f_open := fun i j => inferInstance
+
 end Glue
 
 end OpenImmersion
