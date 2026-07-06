@@ -83,10 +83,10 @@ private def sectionsEquivOfIso {Y Z W : Scheme.{u}} (e : Y ≅ Z) (f : Y ⟶ W) 
   left_inv s := Subtype.ext (by simp)
   right_inv t := Subtype.ext (by simp)
 
-private def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (ψ : R ⟶ A) :
+private noncomputable def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (ψ : R ⟶ A) :
     { t : Spec R ⟶ Spec A // t ≫ Spec.map ψ = 𝟙 (Spec R) } ≃
       { χ : A ⟶ R // ψ ≫ χ = 𝟙 R } where
-  toFun t := ⟨Spec.preimage t.1, Spec.map_injective _ (by
+  toFun t := ⟨Spec.preimage t.1, Spec.map_injective (by
     rw [Spec.map_comp, Spec.map_preimage, t.2, Spec.map_id])⟩
   invFun χ := ⟨Spec.map χ.1, by rw [← Spec.map_comp, χ.2, Spec.map_id]⟩
   left_inv t := Subtype.ext (Spec.map_preimage t.1)
@@ -130,7 +130,7 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
       inferInstance
   have hRE : RingHom.Etale ψ.hom := HasRingHomProperty.Spec_iff.mp hE
   have hRF : RingHom.Finite ψ.hom := (IsFinite.SpecMap_iff ψ).mp hF
-  haveI : Algebra.Etale k ↑Γ(X, ⊤) := RingHom.etale_algebraMap.mp (hAlg ▸ hRE)
+  haveI : Algebra.Etale k ↑Γ(X, ⊤) := RingHom.etale_algebraMap.mp hRE
   haveI : Module.Finite k ↑Γ(X, ⊤) := hRF
   have hcard :
       Nat.card { s : Spec (CommRingCat.of k) ⟶ X //
@@ -148,6 +148,7 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
     Scheme.Hom.finrank_SpecMap_algebraMap k ↑Γ(X, ⊤) x₀
   have h4 : Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ = Module.finrank k ↑Γ(X, ⊤) := by
     rw [Module.rankAtStalk_eq_finrank_of_free]
+    rfl
   rw [h1, h2, h3, h4]
 
 end Schemes
