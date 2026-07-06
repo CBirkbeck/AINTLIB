@@ -1,1 +1,1 @@
-FOCUS: T-B7 (beastmode-B) — muN finite/flat/rank-N/etale-iff: find monic-quotient basis + base-change transfer lemmas
+FOCUS: T-B7 (beastmode-B) — muNπ_etale_iff: two directional sorries in MuN.lean (etale_muNπ_of_isUnit / isUnit_of_etale_muNπ). Full route+engine map in T-B7 board progress note (2026-07-06T11:00 entry). NEXT CONCRETE STEP: (⟸) build the Z[1/N]-model pushout square at ULift level (Algebra.IsPushout / localization-tensor), then StandardEtalePair etale-ness, then paste with isPullback_muN.

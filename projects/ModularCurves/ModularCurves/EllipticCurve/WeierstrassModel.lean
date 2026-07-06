@@ -1994,6 +1994,52 @@ noncomputable def modelChartCover (W : WeierstrassCurve R) :
     (fun i => mk_X_mem_quotientGrading_one W i) (fun _ => one_pos)
     (quotient_irrelevant_le_span_mk_X W)
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Each cover piece of the pulled-back model is `Spec` of the base-changed chart
+quotient: the pullback square at chart `j`. -/
+lemma isPullback_piece (W : WeierstrassCurve R) (j : Fin 3) :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom
+        (((sChartBaseChange (R' := R') W j).toRingHom).comp
+          ((chartCoordEquiv W j).symm.toRingHom))))
+      (Spec.map (CommRingCat.ofHom (algebraMap R'
+        (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R' j
+            (W.map (algebraMap R R')).toProjective.polynomial}))))
+      ((modelChartCover W).openCover.f j ≫ projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap R R'))) := by
+  have h := (isPullback_sChart_spec (R' := R') W j).flip
+  refine h.of_iso (Iso.refl _)
+    (asIso (Spec.map ((chartCoordEquiv W j).toCommRingCatIso.inv)))
+    (Iso.refl _) (Iso.refl _) ?commfst ?commsnd ?commf ?commg
+  case commfst =>
+    rw [Iso.refl_hom, Category.id_comp, asIso_hom,
+      show (chartCoordEquiv W j).toCommRingCatIso.inv =
+        CommRingCat.ofHom ((chartCoordEquiv W j).symm.toRingHom) from rfl,
+      ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  case commsnd =>
+    rw [Iso.refl_hom, Iso.refl_hom, Category.id_comp, Category.comp_id]
+  case commg =>
+    rw [Iso.refl_hom, Iso.refl_hom, Category.id_comp, Category.comp_id]
+  case commf =>
+    rw [Iso.refl_hom, Category.comp_id, asIso_hom]
+    rw [show (modelChartCover W).openCover.f j ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom
+        ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) from
+      awayι_projModelπ W j]
+    rw [← Spec.map_comp]
+    congr 1
+    rw [show ((chartCoordEquiv W j).toCommRingCatIso.inv) =
+      CommRingCat.ofHom ((chartCoordEquiv W j).symm.toRingHom) from rfl,
+      ← CommRingCat.ofHom_comp]
+    congr 1
+    rw [algebraMap_chart_eq]
+    refine RingHom.ext fun r => ?_
+    exact ((chartCoordEquiv W j).symm_apply_apply _).symm
+
 theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
     IsIso (projModelBaseChangeLift (algebraMap R R') W) := by
   show (MorphismProperty.isomorphisms Scheme)
