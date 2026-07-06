@@ -2894,6 +2894,39 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
   hypotheses honestly. Feeds T-Q6 and the Y(ρ̄) twist route.
   - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:25Z
     (quote-gate read first; full ticket body + statements to follow)
+  - **QUOTE-GATE SATISFIED** (2026-07-06T16:35Z; KM pp. 215–218 read from
+    `katz-mazur-arithmetic-moduli-FULL.pdf`, pdf pp. 226–229 — the PDF is a pure
+    scan, read visually; page offset = book + 11). Verbatim of record:
+    - (A7.1) setup: "Let R be a ring, A an R-algebra, and G a finite group which
+      acts on A by R-linear ring automorphisms. We denote by A^G ⊂ A the
+      R-subalgebra of all G-invariants. For any R-algebra R', the group G acts
+      R'-linearly on A ⊗_R R' [by g(a⊗r') = g(a)⊗r'], and we have a natural
+      R'-homomorphism A^G ⊗_R R' → (A ⊗_R R')^G." ∗(A,G,R,R') = "the statement
+      that the above map is an isomorphism"; ∗(A,G,R) = for every R-algebra R'.
+    - THM A7.1.1 (freeness ⟹ étale torsor; proof deferred to SGA III Exp. V
+      Thm 4.1): G acting freely (no fixed points on Hom_{R-alg}(A,R') for g ≠ id,
+      R' ≠ 0) ⟹ A is a finite étale G-torsor over A^G and A ⊗_{A^G} A ≅ ∏_G A
+      via x⊗y ↦ (x·g(y))_g. COR A7.1.2: then ∗(A,G,R). [NOT stated in Lean now —
+      needs torsor vocabulary; belongs with T-Q2's freeness circle.]
+    - PROP A7.1.3: (0) ∗(A,G,R) ⟹ ∗(A⊗_R R', G, R'); (1) R' flat over R ⟹
+      ∗(A,G,R,R') ["A^G is a kernel: 0 → A^G → A → ⊕_g A via ⊕(1−g)"];
+      (2) R' faithfully flat ⟹ (∗(A,G,R) ⟺ ∗(A⊗R',G,R')); (3) #G invertible in
+      R' ⟹ ∗(A,G,R,R'); (4) #G invertible in R ⟹ ∗(A,G,R) ["divided trace
+      T = (1/#G)·Σ_g g as a projection: A = A^G ⊕ (1−T)(A)"].
+    - PROP A7.1.4 (DVR criterion): R DVR, π uniformizer: (1) ∗(A,G,R) ⟺
+      (2) ∗(A,G,R,R/πⁿ) ∀n ⟹ (3) ∗(A/πⁿA,G,R/πⁿ) ∀n; all three ⟺ if
+      char Frac(R) = 0 and A is R-flat.
+  - **Lean decomposition (T-Q4a–d; File: ForMathlib/InvariantBaseChange.lean NEW)**:
+    Q4a = the `G`-action on `A ⊗[R] R'` through the left factor (survey mathlib
+    tensor-action instances FIRST — if a compatible `SMul` instance exists the ring
+    action must EXTEND it, no diamond); Q4b = the comparison hom
+    `(A^G) ⊗[R] R' → (A ⊗[R] R')^G` (KM's natural map; exact bundling decided at
+    skeleton time against elaboration); Q4c = A7.1.3(1) flat ⟹ bijective (route:
+    `A^G = ker(⊕(1−g))` + `Module.Flat.lTensor_exact` — the D-lane's T-D24 finding
+    of record says the Flat-exactness API applies to baseChange directly);
+    Q4d = A7.1.3(4) |G|-invertible ⟹ bijective (divided-trace projection;
+    check `GroupTheory/Maschke` for the averaging idiom). (0)/(2)/A7.1.4 = phase 2
+    of the ticket after a–d land.
 - **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
