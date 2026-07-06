@@ -608,8 +608,8 @@ theorem monoInducesIsoOnDirectSummand_op {X Y : (CommAlgCat.FiniteEtale.{u} k)�
         rw [map_add, map_mul, map_mul, hπf, hπe, mul_one, mul_zero, add_zero, ha]
       · show Ideal.Quotient.mk J (a * f + b * e) = Ideal.Quotient.mk J b
         rw [map_add, map_mul, map_mul, hqf, hqe, mul_zero, zero_add, mul_one]
-  set Φ : (Y.unop.obj : Type u) ≃ₐ[k] (X.unop.obj : Type u) × ((Y.unop.obj : Type u) ⧸ J) :=
-    AlgEquiv.ofBijective ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) hbij with hΦdef
+  set Φ := AlgEquiv.ofBijective ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) hbij
+    with hΦdef
   have hlim : IsLimit (BinaryFan.mk π q) := by
     refine BinaryFan.isLimitMk
       (fun s => ObjectProperty.homMk (CommAlgCat.ofHom
