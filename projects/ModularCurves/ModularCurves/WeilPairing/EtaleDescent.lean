@@ -90,7 +90,66 @@ theorem torsionAlgebraPointsEquiv (k : Type u) [Field k]
       Submodule.torsionBy ℤ
         (E.Point (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)))))
         (N : ℤ)) := by
-  sorry
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+  letI : Algebra k Γ(E.torsion N, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom.toAlgebra
+  -- The structure map of the torsion algebra, in `CommRingCat` form (definitional).
+  have halg : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop := rfl
+  -- Compose the affine `Γ ⊣ Spec` correspondence with the kernel universal property
+  -- of `E.torsion N` (`torsionPointsEquiv`).
+  refine ⟨Equiv.trans ?_ (E.torsionPointsEquiv N _)⟩
+  -- The carrier of `torsionAlgebra` is (definitionally) `Γ(E.torsion N, ⊤)`.
+  show (Γ(E.torsion N, ⊤) →ₐ[k] AlgebraicClosure k) ≃
+    { h : Spec (CommRingCat.of (AlgebraicClosure k)) ⟶ E.torsion N //
+      h ≫ E.torsionπ N = Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) }
+  -- `k`-algebra maps `Γ(E[N], ⊤) →ₐ[k] k̄` are scheme maps `Spec k̄ ⟶ E[N]` over `Spec k`,
+  -- since `E[N]` is affine: `Spec`-transport one way, global sections the other.
+  refine
+    { toFun := fun f =>
+        ⟨Spec.map (CommRingCat.ofHom f.toRingHom :
+            Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) ≫
+          (E.torsion N).isoSpec.inv, ?_⟩
+      invFun := fun h =>
+        ⟨(h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom).hom,
+          fun c => ?_⟩
+      left_inv := fun f => ?_
+      right_inv := fun h => ?_ }
+  · -- the transported morphism lies over `Spec k`
+    have hcomp : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) ≫
+        (CommRingCat.ofHom f.toRingHom :
+          Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) =
+        CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)) :=
+      CommRingCat.hom_ext (RingHom.ext fun c => f.commutes c)
+    rw [Category.assoc, ← Scheme.isoSpec_inv_naturality, Scheme.isoSpec_Spec_inv,
+      ← Spec.map_comp, ← Spec.map_comp, ← halg, hcomp]
+  · -- the global-sections map of a morphism over `Spec k` is a `k`-algebra map
+    have key : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) ≫
+        (h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom) =
+        CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)) := by
+      rw [halg, Category.assoc, ← Scheme.Hom.comp_appTop_assoc, h.2,
+        Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+    exact RingHom.congr_fun (congrArg CommRingCat.Hom.hom key) c
+  · -- left inverse: global sections of the `Spec`-transport recovers the algebra map
+    have key : (Spec.map (CommRingCat.ofHom f.toRingHom :
+          Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) ≫
+          (E.torsion N).isoSpec.inv).appTop ≫
+        (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom =
+        CommRingCat.ofHom f.toRingHom := by
+      rw [Scheme.Hom.comp_appTop, Category.assoc, Scheme.ΓSpecIso_naturality,
+        ← Scheme.toSpecΓ_appTop, ← Scheme.Hom.comp_appTop_assoc, Scheme.toSpecΓ_isoSpec_inv,
+        Scheme.Hom.id_appTop, Category.id_comp]
+    ext x
+    exact RingHom.congr_fun (congrArg CommRingCat.Hom.hom key) x
+  · -- right inverse: `Spec`-transport of the global-sections map recovers the morphism
+    apply Subtype.ext
+    show Spec.map (CommRingCat.ofHom
+        ((h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom).hom)) ≫
+        (E.torsion N).isoSpec.inv = h.1
+    rw [CommRingCat.ofHom_hom, Spec.map_comp, Category.assoc, Scheme.isoSpec_inv_naturality,
+      Scheme.isoSpec_Spec_inv, ← Spec.map_comp_assoc, Iso.inv_hom_id, Spec.map_id,
+      Category.id_comp]
 
 /-- **(T-C0e)** The étale-descent Weil pairing over a characteristic-zero field base:
 the scheme-level pairing morphism with the same API as the DS4 register entry
