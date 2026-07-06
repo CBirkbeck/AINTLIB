@@ -72,27 +72,26 @@ the definitional pin of the group law, as required by the DATA-SORRY register. O
 points the induced multiplication is multiplication of roots of unity, i.e. the
 comultiplication `T ↦ T ⊗ T` of KM 1.12. -/
 
-open Ideal.Quotient in
 /-- The universal `N`-th root of unity: the class of `T` in `ℤ[T]/(Tᴺ − 1)`. -/
 private def muNRingGen (N : ℕ) : muNRing N :=
-  ULift.ringEquiv.symm (mk _ (X : Polynomial ℤ))
+  ULift.up (Ideal.Quotient.mk _ (X : Polynomial ℤ))
 
-private lemma muNRingGen_pow (N : ℕ) : muNRingGen N ^ N = 1 := by
-  rw [muNRingGen, ← map_pow, ← map_pow, ← map_one ULift.ringEquiv.symm,
-    ← map_one (Ideal.Quotient.mk _)]
-  exact congrArg _ <| Ideal.Quotient.eq.mpr <| Ideal.mem_span_singleton_self _
+private lemma muNRingGen_pow (N : ℕ) : muNRingGen N ^ N = 1 :=
+  ULift.down_injective <| by
+    show (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) X) ^ N = 1
+    rw [← map_pow, ← map_one (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}))]
+    exact Ideal.Quotient.eq.mpr (Ideal.mem_span_singleton_self _)
 
 /-- Two ring homomorphisms out of `ℤ[T]/(Tᴺ − 1)` agreeing on the class of `T` agree. -/
 private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N ⟶ R}
     (h : f (muNRingGen N) = g (muNRingGen N)) : f = g := by
-  have key : (f.hom.comp (ULift.ringEquiv.symm : _ ≃+* muNRing N).toRingHom).comp
+  have key : (f.hom.comp (ULift.ringEquiv.symm.toRingHom :
+        (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) →+* muNRing N)).comp
         (Ideal.Quotient.mk _) =
-      (g.hom.comp (ULift.ringEquiv.symm : _ ≃+* muNRing N).toRingHom).comp
-        (Ideal.Quotient.mk _) := by
-    refine Polynomial.ringHom_ext (fun a ↦ ?_) h
-    exact DFunLike.congr_fun
-      (RingHom.ext_int (_root_.RingHom.comp _ (Polynomial.C : ℤ →+* Polynomial ℤ))
-        (_root_.RingHom.comp _ (Polynomial.C : ℤ →+* Polynomial ℤ))) a
+      (g.hom.comp (ULift.ringEquiv.symm.toRingHom :
+        (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) →+* muNRing N)).comp
+        (Ideal.Quotient.mk _) :=
+    Polynomial.ringHom_ext' (RingHom.ext_int _ _) h
   ext x
   obtain ⟨x⟩ := x
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
@@ -102,19 +101,25 @@ private lemma muNRing_hom_ext {N : ℕ} {R : CommRingCat.{u}} {f g : muNRing N �
 private def muNRingLift {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
     muNRing N ⟶ R :=
   CommRingCat.ofHom <|
-    (Ideal.Quotient.lift _ (Polynomial.eval₂RingHom (Int.castRingHom R) a) <| by
+    (Ideal.Quotient.lift (Ideal.span {(X : Polynomial ℤ) ^ N - 1})
+      (Polynomial.eval₂RingHom (Int.castRingHom R) a) <| by
       intro p hp
       obtain ⟨q, rfl⟩ := Ideal.mem_span_singleton.mp hp
-      simp [ha, sub_self]).comp (ULift.ringEquiv : muNRing N ≃+* _).toRingHom
+      simp only [Polynomial.coe_eval₂RingHom, Polynomial.eval₂_mul, Polynomial.eval₂_sub,
+        Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_one, ha, sub_self,
+        zero_mul]).comp (ULift.ringEquiv : muNRing N ≃+* _).toRingHom
 
 private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ N = 1) :
     muNRingLift a ha (muNRingGen N) = a := by
-  simp [muNRingLift, muNRingGen]
+  show (Ideal.Quotient.lift (Ideal.span {(X : Polynomial ℤ) ^ N - 1})
+      (Polynomial.eval₂RingHom (Int.castRingHom R) a) _)
+    (Ideal.Quotient.mk (Ideal.span {(X : Polynomial ℤ) ^ N - 1}) (X : Polynomial ℤ)) = a
+  rw [Ideal.Quotient.lift_mk]
+  simp [Polynomial.coe_eval₂RingHom]
 
-/-- Morphisms into the absolute `μ_N` are `N`-th roots of unity of `Γ(X, ⊤)`
-(universal property of `Spec ℤ[T]/(Tᴺ − 1)`). -/
-private def muNAbsHomEquiv {N : ℕ} {X : Scheme.{u}} :
-    (X ⟶ muNAbs N) ≃ { a : Γ(X, ⊤) // a ^ N = 1 } where
+/-- Morphisms into `Spec ℤ[T]/(Tᴺ − 1)` are `N`-th roots of unity of `Γ(X, ⊤)`. -/
+private def muNSpecHomEquiv {N : ℕ} {X : Scheme.{u}} :
+    (X ⟶ Spec (muNRing N)) ≃ { a : Γ(X, ⊤) // a ^ N = 1 } where
   toFun f := ⟨f.appTop ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)), by
     rw [← map_pow, ← map_pow, muNRingGen_pow, map_one, map_one]⟩
   invFun a := X.toSpecΓ ≫ Spec.map (muNRingLift a.1 a.2)
@@ -123,13 +128,19 @@ private def muNAbsHomEquiv {N : ℕ} {X : Scheme.{u}} :
     apply Quiver.Hom.unop_inj
     rw [Adjunction.homEquiv_symm_apply, Adjunction.homEquiv_symm_apply]
     dsimp
-    simp only [Scheme.toSpecΓ_appTop, Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+    first
+    | simp only [Scheme.Hom.comp_appTop, Scheme.toSpecΓ_appTop, Scheme.ΓSpecIso_naturality,
+        Iso.inv_hom_id_assoc, Category.assoc]
+    | skip
     exact muNRing_hom_ext (by simp [muNRingLift_gen])
-  right_inv a := by
-    ext
-    simp only [Scheme.comp_appTop, CommRingCat.comp_apply]
-    rw [← Scheme.ΓSpecIso_inv_naturality_apply, Scheme.toSpecΓ_appTop]
-    simp [muNRingLift_gen]
+  right_inv a := Subtype.ext <| by
+    show (X.toSpecΓ ≫ Spec.map (muNRingLift a.1 a.2)).appTop
+        ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) = a.1
+    rw [Scheme.Hom.comp_appTop, CommRingCat.comp_apply,
+      ← CommRingCat.comp_apply ((Scheme.ΓSpecIso (muNRing N)).inv)
+        (Spec.map (muNRingLift a.1 a.2)).appTop,
+      ← Scheme.ΓSpecIso_inv_naturality, CommRingCat.comp_apply, Scheme.toSpecΓ_appTop,
+      Iso.inv_hom_id_apply, muNRingLift_gen]
 
 /-- `S`-morphisms into `μ_{N,S}` over `g` are morphisms into the absolute `μ_N`
 (universal property of the defining pullback). -/
@@ -138,26 +149,32 @@ private def muNHomEquivAbsHom (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T
   toFun h := h.1 ≫ pullback.snd _ _
   invFun k := ⟨pullback.lift g k (by simp), pullback.lift_fst _ _ _⟩
   left_inv h := Subtype.ext <| by
-    apply pullback.hom_ext
-    · rw [pullback.lift_fst]; exact h.2.symm
-    · rw [pullback.lift_snd]
+    have hw : h.1 ≫ pullback.fst (terminal.from S) (terminal.from (muNAbs N)) = g := h.2
+    exact pullback.hom_ext (by rw [pullback.lift_fst]; exact hw.symm)
+      (by rw [pullback.lift_snd])
   right_inv k := pullback.lift_snd _ _ _
 
 /-- The core points description (engine for `muNGrpObj` and `muNPointsEquiv`). -/
 private def muNPointsEquivAux (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
     { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
-  (muNHomEquivAbsHom S N g).trans muNAbsHomEquiv
+  (muNHomEquivAbsHom S N g).trans muNSpecHomEquiv
+
+private lemma muNPointsEquivAux_coe (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S)
+    (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
+    (muNPointsEquivAux S N g h : Γ(T, ⊤)) =
+      (h.1 ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
+        ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) := rfl
 
 private lemma muNPointsEquivAux_natural (S : Scheme.{u}) (N : ℕ) {T T' : Scheme.{u}}
     (g : T ⟶ S) (k : T' ⟶ T) (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
     (muNPointsEquivAux S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
       k.appTop ((muNPointsEquivAux S N g h : Γ(T, ⊤))) := by
-  simp only [muNPointsEquivAux, muNAbsHomEquiv, muNHomEquivAbsHom, Equiv.trans_apply,
-    Equiv.coe_fn_mk, Category.assoc, Scheme.comp_appTop, CommRingCat.comp_apply]
+  rw [muNPointsEquivAux_coe, muNPointsEquivAux_coe, Category.assoc,
+    Scheme.Hom.comp_appTop, CommRingCat.comp_apply]
 
 /-- The group of `N`-th roots of unity of a commutative monoid, as a group structure
-on the subtype `{a // a ^ N = 1}` (upstream candidate). -/
-private def nthRootsCommGroup (R : Type*) [CommMonoid R] (N : ℕ) [NeZero N] :
+on the subtype `{a // a ^ N = 1}` (upstream candidate; file-local). -/
+private instance nthRootsCommGroup (R : Type*) [CommMonoid R] (N : ℕ) [NeZero N] :
     CommGroup { a : R // a ^ N = 1 } where
   mul a b := ⟨a.1 * b.1, by rw [mul_pow, a.2, b.2, one_mul]⟩
   one := ⟨1, one_pow N⟩
@@ -168,9 +185,7 @@ private def nthRootsCommGroup (R : Type*) [CommMonoid R] (N : ℕ) [NeZero N] :
   mul_comm a b := Subtype.ext (mul_comm _ _)
   inv_mul_cancel a := Subtype.ext <| by
     show a.1 ^ (N - 1) * a.1 = 1
-    rw [← pow_succ, Nat.succ_pred_eq_of_pos (NeZero.pos N), a.2]
-
-attribute [local instance] nthRootsCommGroup
+    rw [← pow_succ, tsub_add_cancel_of_le NeZero.one_le, a.2]
 
 /-- Roots of unity are functorial along monoid homomorphisms. -/
 private def nthRootsMap {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N : ℕ} [NeZero N]
@@ -179,30 +194,36 @@ private def nthRootsMap {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N : ℕ} 
   map_one' := Subtype.ext (map_one f)
   map_mul' a b := Subtype.ext (map_mul f _ _)
 
+@[simp]
+private lemma nthRootsMap_coe {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N : ℕ}
+    [NeZero N] (f : R →* R') (a : { a : R // a ^ N = 1 }) :
+    (nthRootsMap f a : R') = f a.1 := rfl
+
 /-- The presheaf of groups on `Over S` represented by `μ_{N,S}`: `N`-th roots of unity
 of the global sections, with pointwise multiplication. -/
 private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
   obj Y := GrpCat.of { a : Γ(Y.unop.left, ⊤) // a ^ N = 1 }
   map k := GrpCat.ofHom (nthRootsMap k.unop.left.appTop.hom.toMonoidHom)
   map_id Y := by
-    ext a
-    exact Subtype.ext (by simp [nthRootsMap])
+    refine GrpCat.hom_ext (MonoidHom.ext fun a ↦ Subtype.ext ?_)
+    simp
   map_comp f g := by
-    ext a
-    exact Subtype.ext (by simp [nthRootsMap])
+    refine GrpCat.hom_ext (MonoidHom.ext fun a ↦ Subtype.ext ?_)
+    simp
 
 /-- `μ_{N,S}` represents its points presheaf. -/
 private def muNRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     (muNGrpFunctor S N ⋙ forget _).RepresentableBy (Over.mk (muNπ S N)) where
   homEquiv {Y} :=
     (⟨fun f ↦ ⟨f.left, Over.w f⟩, fun h ↦ Over.homMk h.1 h.2, fun _ ↦ rfl,
-        fun _ ↦ Over.OverMorphism.ext rfl⟩ :
+        fun _ ↦ by ext; rfl⟩ :
       (Y ⟶ Over.mk (muNπ S N)) ≃ { h : Y.left ⟶ muN S N // h ≫ muNπ S N = Y.hom }).trans
     (muNPointsEquivAux S N Y.hom)
   homEquiv_comp {Y Y'} f h := Subtype.ext <| by
     have := muNPointsEquivAux_natural S N Y'.hom f.left ⟨h.left, Over.w h⟩
-    simp only [Over.w f, Over.comp_left] at this ⊢
-    exact this
+    simp only [Over.comp_left] at this ⊢
+    convert this using 3
+    rw [Over.w f]
 
 /-- **(DS3a, ticket T-B2)** The group structure on `μ_{N,S}` in `Over S`, with
 comultiplication `Spec` of `T ↦ T ⊗ T`. Constructed by representability

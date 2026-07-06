@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.GradedQuotient
+import ModularCurves.ForMathlib.StandardSmoothHypersurface
 import ModularCurves.ForMathlib.ProjClosedImmersion
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
@@ -1443,6 +1444,169 @@ theorem span_dehomog_jacobian_eq_top_zero (W : WeierstrassCurve R) [W.IsElliptic
     · field_simp
       linear_combination hy0
 
+/-- The structure map into each chart of the model is locally standard smooth of
+relative dimension 1, for elliptic `W`: the chart is `R[u,v]/(F̃ᵢ)`, covered by the
+loci where one of the two partials is invertible (Jacobian comaximality), and each
+localized hypersurface is standard smooth. -/
+theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve R)
+    [W.IsElliptic] (i : Fin 3) :
+    RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 1)
+      ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) := by
+  have hg : ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      ((chartCoordEquiv W i).toRingHom).comp
+        (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) := by
+    refine RingHom.ext fun r => ?_
+    show _ = chartCoordEquiv W i (algebraMap R _ r)
+    rw [show (algebraMap R (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) r =
+        Ideal.Quotient.mk _ (MvPolynomial.C r) from by
+      rw [IsScalarTower.algebraMap_apply R (MvPolynomial {j : Fin 3 // j ≠ i} R) _,
+        Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]]
+    exact (chartCoordEquiv_mk_C W i r).symm
+  rw [hg]
+  refine (RingHom.locally_respectsIso
+    RingHom.isStandardSmoothOfRelativeDimension_respectsIso).1 _
+    (chartCoordEquiv W i) ?_
+  have hcard : Fintype.card {j : Fin 3 // j ≠ i} = 2 := by
+    simp [Fintype.card_subtype_compl]
+  have hstep : ∀ j : {j : Fin 3 // j ≠ i},
+      RingHom.IsStandardSmoothOfRelativeDimension 1
+        ((algebraMap (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+            Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+          (Localization.Away (Ideal.Quotient.mk
+            (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+            (MvPolynomial.pderiv j
+              (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial))))).comp
+          (algebraMap R _)) := by
+    intro j
+    rw [← IsScalarTower.algebraMap_eq R _ (Localization.Away _),
+      RingHom.isStandardSmoothOfRelativeDimension_algebraMap]
+    have h2 := isStandardSmoothOfRelativeDimension_away_pderiv
+      (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) j
+    rwa [hcard] at h2
+  fin_cases i
+  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial)),
+      Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨2, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial))}, ?_, ?_⟩
+    · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial})))
+        (span_dehomog_jacobian_eq_top_zero W)
+      rw [Ideal.map_top, Ideal.map_span, Set.image_insert_eq, Set.image_insert_eq,
+        Set.image_singleton,
+        Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
+        Ideal.span_insert_zero] at h3
+      exact h3
+    · intro t ht
+      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      rcases ht with rfl | rfl
+      · exact hstep ⟨1, by decide⟩
+      · exact hstep ⟨2, by decide⟩
+  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial)),
+      Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨2, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial))}, ?_, ?_⟩
+    · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial})))
+        (span_dehomog_jacobian_eq_top_one W)
+      rw [Ideal.map_top, Ideal.map_span, Set.image_insert_eq, Set.image_insert_eq,
+        Set.image_singleton,
+        Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
+        Ideal.span_insert_zero] at h3
+      exact h3
+    · intro t ht
+      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      rcases ht with rfl | rfl
+      · exact hstep ⟨0, by decide⟩
+      · exact hstep ⟨2, by decide⟩
+  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)),
+      Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial))}, ?_, ?_⟩
+    · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})))
+        (span_dehomog_jacobian_eq_top W)
+      rw [Ideal.map_top, Ideal.map_span, Set.image_insert_eq, Set.image_insert_eq,
+        Set.image_singleton,
+        Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
+        Ideal.span_insert_zero] at h3
+      exact h3
+    · intro t ht
+      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      rcases ht with rfl | rfl
+      · exact hstep ⟨0, by decide⟩
+      · exact hstep ⟨1, by decide⟩
+
+/-- The chart inclusion from the degree-zero part is locally standard smooth of
+relative dimension 1, for elliptic `W`. -/
+theorem locally_isStandardSmooth_algebraMap_gradeZero_away' (W : WeierstrassCurve R)
+    [W.IsElliptic] (i : Fin 3) :
+    RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 1)
+      (algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))) := by
+  have h1 := locally_isStandardSmooth_algebraMap_gradeZero_away W i
+  have h2 := (RingHom.locally_respectsIso
+    RingHom.isStandardSmoothOfRelativeDimension_respectsIso).2 _
+    (gradeZeroRingEquiv W).symm h1
+  have h3 : ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))).comp
+      ((gradeZeroRingEquiv W).symm.toRingHom) =
+      algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))) :=
+    RingHom.ext fun x => by
+      show algebraMap _ _ ((gradeZeroRingEquiv W)
+        ((gradeZeroRingEquiv W).symm.toRingHom x)) = algebraMap _ _ x
+      exact congrArg _ ((gradeZeroRingEquiv W).apply_symm_apply x)
+  rwa [h3] at h2
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The `Proj`-to-degree-zero morphism of the model is smooth of relative
+dimension 1, for elliptic `W`. -/
+theorem toSpecZero_smoothOfRelativeDimension (W : WeierstrassCurve R)
+    [W.IsElliptic] :
+    SmoothOfRelativeDimension 1 (Proj.toSpecZero (quotientGrading (projIdeal W))) := by
+  rw [IsZariskiLocalAtSource.iff_of_iSup_eq_top (P := @SmoothOfRelativeDimension 1) _
+    (Proj.iSup_basicOpen_eq_top (quotientGrading (projIdeal W))
+      (fun i : Fin 3 => Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+      (quotient_irrelevant_le_span_mk_X W))]
+  intro i
+  rw [← MorphismProperty.cancel_left_of_respectsIso (P := @SmoothOfRelativeDimension 1)
+    (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W))
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+      (mk_X_mem_quotientGrading_one W i) one_pos).inv, ← Category.assoc,
+    ← Proj.awayι, Proj.awayι_toSpecZero,
+    HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension 1)]
+  exact locally_isStandardSmooth_algebraMap_gradeZero_away' W i
+
+/-- **(T-A3)** The projective model of an *elliptic* Weierstrass curve (unit discriminant) is
+smooth of relative dimension 1 over the base.
+Source: Loeffler §3.3 ("If `Δ(α,β) ∈ Γ(S,O_S)ˣ`, this is an elliptic curve over `S`");
+KM 2.2.4; Silverman III.1.4(a). -/
+theorem projModel_smooth (W : WeierstrassCurve R) [W.IsElliptic] :
+    SmoothOfRelativeDimension 1 (projModelπ W) := by
+  haveI h1 := toSpecZero_smoothOfRelativeDimension W
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
+    inferInstance
+  haveI h2 : SmoothOfRelativeDimension 0
+      (Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
+    inferInstance
+  have h3 : SmoothOfRelativeDimension (1 + 0)
+      (Proj.toSpecZero (quotientGrading (projIdeal W)) ≫
+        Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) :=
+    inferInstance
+  exact h3
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
@@ -1453,12 +1617,6 @@ theorem projModel_isWeierstrassModel (W : WeierstrassCurve R) :
   · exact projModelπ_lfp W
   · exact fun hell K _ _ => projModel_points W hell K
 
-/-- **(T-A3)** The projective model of an *elliptic* Weierstrass curve (unit discriminant) is
-smooth of relative dimension 1 over the base.
-Source: Loeffler §3.3 ("If `Δ(α,β) ∈ Γ(S,O_S)ˣ`, this is an elliptic curve over `S`");
-KM 2.2.4; Silverman III.1.4(a). -/
-theorem projModel_smooth (W : WeierstrassCurve R) [W.IsElliptic] :
-    SmoothOfRelativeDimension 1 (projModelπ W) := by sorry
 
 /-- **(T-A4, uniqueness of the model — KM 2.2.5 scope)** For **elliptic** `W`, any two
 pointed **smooth** models satisfying `IsWeierstrassModel W` are isomorphic over
