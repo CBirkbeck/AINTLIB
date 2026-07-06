@@ -213,6 +213,17 @@ theorem mulByHom_baseChange {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
   have h := congrArg CommaMorphism.left (mulBy_baseChange E g n)
   exact h
 
+@[reassoc (attr := simp)]
+lemma mulByHom_baseChange_fst {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
+    (E.baseChange g).mulByHom n ≫ pullback.fst E.π g =
+      pullback.fst E.π g ≫ E.mulByHom n := by
+  rw [mulByHom_baseChange]; exact pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+lemma mulByHom_baseChange_snd {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) :
+    (E.baseChange g).mulByHom n ≫ pullback.snd E.π g = pullback.snd E.π g := by
+  rw [mulByHom_baseChange]; exact pullback.lift_snd _ _ _
+
 /-- A point of `E` over `g : T ⟶ S`, viewed as a section of the base-changed curve
 `E ×_S T / T`. -/
 noncomputable def Point.asSection {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
@@ -249,22 +260,20 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- STRUCTURAL-REFACTOR-GATED (2026-07-09, ~18 attempts across every technique).
-  -- `Point.asSection_coe` + `Point.asSection_val_fst/snd(_assoc)` (bridge lemmas above,
-  -- all @[simp]) reduce this to: after `Subtype.ext (pullback.hom_ext …)` +
-  -- `simp [point_smul_eq_comp_mulBy, mulByHom_baseChange]`, each leg becomes
-  -- `pullback.lift (P.1 ≫ [n]) (𝟙 T) _ ≫ fst/snd = (asSection-lift ≫ [n]-lift) ≫ fst/snd`
-  -- — purely raw-spelling `pullback.lift` compositions that SHOULD close by lift_fst/snd.
-  -- ROOT BLOCKER (now fully diagnosed): `mulByHom_baseChange`'s two sides are at
-  -- DEFEQ-but-SYNTACTICALLY-DISTINCT types `(E.baseChange g).E ⟶ (E.baseChange g).E`
-  -- vs `pullback E.π g ⟶ pullback E.π g`; rewriting with it leaves a term Lean tracks
-  -- at the `(E.baseChange g).E` spelling, which `pullback.lift_fst`'s matcher and
-  -- `Category.assoc` reject. NO tactic normalizes this — it needs the STRUCTURAL FIX:
-  -- make `EllipticCurve.baseChange`'s `.E`/`.π` fields definitionally-transparent to
-  -- `pullback E.π g` / `pullback.snd E.π g` at the syntactic level (e.g. a `@[simp]`
-  -- unfolding pass applied before the naturality proofs, or restructure baseChange so
-  -- the pullback spelling is canonical). Deliberate refactor, best done fresh.
-  -- Non-blocking (T-D6a-ii is non-blocking); unblocks T-D6a-ii L3/L4 + T-D10 ⟹ once done.
+  -- STRUCTURAL-REFACTOR-GATED (2026-07-09, fully diagnosed after ~20 attempts). Two
+  -- compounding obstacles, both requiring a deliberate refactor rather than a tactic:
+  -- (1) `mulByHom_baseChange`'s sides are defeq-but-syntactically-distinct types
+  --     (`(E.baseChange g).E ⟶ …` vs `pullback E.π g ⟶ …`) — rewriting leaves a term
+  --     Lean tracks at the wrong spelling, defeating lift_fst/Category.assoc matchers.
+  --     WORKED AROUND by the projection lemmas `mulByHom_baseChange_fst/snd` above.
+  -- (2) after `Subtype.ext (pullback.hom_ext …)`, the goal carries `↑(asSection …)`
+  --     (the `Point`/Subtype COERCION) but every bridge lemma (`asSection_coe`,
+  --     `asSection_val_fst/snd`) is stated with `.1`; simp does NOT bridge `↑ ↔ .1`
+  --     here, so no named lemma fires. Fix: either restate the bridge lemmas at the
+  --     `↑`-coercion spelling, or normalise `↑(asSection …) → (asSection …).1` first
+  --     (a `Point`-coe simp lemma), combined with making `EllipticCurve.baseChange.E`
+  --     syntactically `pullback E.π g`. All arithmetic is proven; this is pure
+  --     coercion/spelling normalisation. Non-blocking (T-D6a-ii is non-blocking).
   sorry
 
 end EllipticCurve

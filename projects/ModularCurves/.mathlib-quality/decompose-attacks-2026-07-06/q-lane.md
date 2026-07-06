@@ -168,3 +168,31 @@ for the proofs.
 - **A3 (choice hygiene)** V_p, a_p, ψ_p all chosen per-point via `Classical.choice`
   — glue needs only the PROPERTIES, discharged by (β) at overlaps. No canonicity
   claim anywhere in the statement (∃ q). SURVIVES.
+
+## T-Q4a tensor ring action / Q4b comparison map / Q4c flat / Q4d invertible
+
+- **A1 (diamond risk on the smul)** mathlib ALREADY instances `TensorProduct.
+  leftHasSMul : SMul G (A ⊗[R] R')` + `leftDistribMulAction` (Defs.lean:226/292,
+  via `[DistribMulAction G A] [SMulCommClass R G A]`-shaped hypotheses). The
+  MulSemiringAction instance MUST be built `{ TensorProduct.leftDistribMulAction
+  with ... }` so the underlying SMul is literally the existing one — any fresh smul
+  is an instant diamond. SURVIVES with this constraint pinned.
+- **A2 (does g act by RING maps on the tensor at all?)** g•((a⊗r)(b⊗s)) =
+  g•(ab⊗rs) = (g•ab)⊗rs = ((g•a)(g•b))⊗rs = ((g•a)⊗r)((g•b)⊗s) ✓ on pure tensors;
+  bilinear extension by 2-variable tensor induction. Needs `[SMulCommClass G R A]`
+  (R-linearity of the action) — without it leftHasSMul does not even apply.
+  KM's setup says exactly "acts on A by R-linear ring automorphisms". SURVIVES.
+- **A3 (Q4b: which base for the target fixed subalgebra?)** KM's map is
+  R'-linear; `FixedPoints.subalgebra R (A ⊗[R] R') G` (R-bundled) has the same
+  carrier; all bijectivity statements are bundle-independent. R-bundling chosen
+  (avoids the SMulCommClass G R' wiring for now); the R'-refinement is a
+  /generalise-lane flag, recorded here, NOT a statement change later (new decl if
+  needed). SURVIVES.
+- **A4 (Q4c flat — false without flatness?)** Yes: KM proves only ⟸; the
+  standard counterexample family (torsion base change killing invariants
+  mismatches, e.g. G = C₂ on A = ℤ[x]/(x²) sign-action styles over R' = 𝔽₂)
+  shows ∗ can fail for non-flat R'. Hypothesis `[Module.Flat R R']` honest.
+  SURVIVES.
+- **A5 (Q4d — which invertibility?)** KM (4): #G invertible in R. Spelling:
+  `IsUnit (Nat.card G : R)` (G finite, Nat.card). The divided trace needs the
+  inverse only in R (acts on A through algebraMap). SURVIVES.
