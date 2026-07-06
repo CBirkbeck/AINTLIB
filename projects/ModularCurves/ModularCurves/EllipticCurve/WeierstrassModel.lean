@@ -1920,6 +1920,36 @@ lemma isPushout_sChart (W : WeierstrassCurve R) (i : Fin 3) :
   rw [Algebra.TensorProduct.lift_tmul, map_one, one_mul]
   rfl
 
+/-- The categorical (CommRingCat) pushout square of the chart quotients. -/
+lemma isPushout_sChart_commRingCat (W : WeierstrassCurve R) (i : Fin 3) :
+    IsPushout
+      (CommRingCat.ofHom (algebraMap R R'))
+      (CommRingCat.ofHom (algebraMap R
+        (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})))
+      (CommRingCat.ofHom (algebraMap R'
+        (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial})))
+      (CommRingCat.ofHom ((sChartBaseChange (R' := R') W i).toRingHom)) := by
+  letI : Algebra
+      (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+    ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
+  haveI : IsScalarTower R
+      (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+    IsScalarTower.of_algebraMap_eq fun r =>
+      ((sChartBaseChange (R' := R') W i).commutes r).symm
+  haveI := isPushout_sChart (R' := R') W i
+  exact CommRingCat.isPushout_of_isPushout R R' _ _
+
 end TensorComparison
 
 end BaseChangeGraded
