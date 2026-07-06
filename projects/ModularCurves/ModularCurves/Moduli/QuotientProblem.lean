@@ -495,6 +495,119 @@ noncomputable def simulSchemeAction (P Q : ModuliProblem R) {G : Type*} [Group G
   AlgebraicGeometry.SchemeAction.ofAut
     ((XM.autBase.comp rM.autMulHom).comp ((P.simulAutSnd Q).comp φ))
 
+section Engine
+
+open AlgebraicGeometry
+
+/-- A **relative representation datum** for `Q` at `X : Ell/R` — the components
+of one instance of `RelativelyRepresentable` (T-E3), bundled as data so the
+KM 4.7 engine can consume them functionally. -/
+structure RelRepData (Q : ModuliProblem R) (X : EllObj R) where
+  /-- The relative representing scheme. -/
+  Z : Scheme.{u}
+  /-- Its structure map to the base. -/
+  f : Z ⟶ X.base
+  /-- The representing bijections. -/
+  eqv : ∀ {T : Scheme.{u}} (g : T ⟶ X.base),
+    { h : T ⟶ Z // h ≫ f = g } ≃ Q.obj (Opposite.op (X.pullbackAlong g))
+  /-- Naturality of the representing bijections in `T`. -/
+  nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (h : { h : T ⟶ Z // h ≫ f = g }),
+    eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+      Q.map (X.pullbackAlongMap g k).op (eqv g h)
+
+/-- The bundled and the `∃`-form of relative representability agree. -/
+theorem relativelyRepresentable_iff_nonempty_relRepData (Q : ModuliProblem R) :
+    Q.RelativelyRepresentable ↔ ∀ X : EllObj R, Nonempty (RelRepData Q X) := by
+  constructor
+  · intro hQ X
+    obtain ⟨Z, f, eqv, hnat⟩ := hQ X
+    exact ⟨⟨Z, f, @eqv, @hnat⟩⟩
+  · intro hQ X
+    obtain ⟨d⟩ := hQ X
+    exact ⟨d.Z, d.f, @d.eqv, @d.nat⟩
+
+/-- **KM 4.7, axiom 2 vocabulary** (KM p. 112: "G operates upon δ, in such a way
+that for every elliptic curve E/S […] the S-scheme `δ_{E/S}` is a finite etale
+G-torsor"): a relative representation datum for the auxiliary problem carrying a
+compatible `G`-action which makes it a finite étale `G`-torsor over the base.
+
+Convention (attack-adjudicated): the `G`-action on classifying maps is by
+precomposition with `σZ.hom γ`, intertwining `(φ γ).hom` on values. -/
+structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
+    (φ : G →* Aut Q) (X : EllObj R) extends RelRepData Q X where
+  /-- The `G`-action on the relative representing scheme. -/
+  σZ : SchemeAction G Z
+  /-- The action lies over the base. -/
+  over_base : ∀ γ : G, σZ.hom γ ≫ f = f
+  /-- The representing bijections are `G`-equivariant. -/
+  equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
+    eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
+      (φ γ).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+  /-- The structure map is finite. -/
+  finite : IsFinite f
+  /-- The structure map is étale. -/
+  etale : AlgebraicGeometry.Etale f
+  /-- The structure map is surjective (torsors cover their base; see the attack
+  block — KM's Legendre example is a torsor only over `S[1/2]`, and the engine
+  is invoked over bases where the axiom holds with honest content). -/
+  surjective : Surjective f
+  /-- The torsor condition: `(γ, z) ↦ (γ·z, z)` identifies `∐_G Z` with
+  `Z ×_{X.base} Z`. -/
+  torsor : IsIso ((Limits.Sigma.desc fun γ : G =>
+    Limits.pullback.lift (σZ.hom γ) (𝟙 Z)
+      (by rw [Category.id_comp]; exact over_base γ)) :
+    (∐ fun _ : G => Z) ⟶ Limits.pullback f f)
+
+/-- **Freeness of the KM action** (KM p. 113: "By axiom 2) and the rigidity of
+`𝒫`, `G` operates freely on `𝕸(𝒫,δ)`"): if `𝒫` is rigid and the auxiliary
+problem is a rigidifier, no `g ≠ 1` fixes a point of the representing object of
+the simultaneous problem over a nonempty scheme.
+
+Proof route (banked; KM p. 113): a fixed `T`-point yields two `Ell/R`-morphisms
+over the same base map, hence (via `isoPullbackAlong`) an automorphism `θ(g)` of
+the pulled-back curve over `𝟙 T` fixing the `𝒫`-value; rigidity forces
+`θ(g) = 𝟙`, so the `δ`-value is `γ`-fixed, and the torsor axiom then forces
+`γ = 1` unless `T` is empty. WIP `sorry` (T-Q6d.β); the statement is the
+engine's working interface. -/
+theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.Rigid) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.base)
+    (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
+    IsEmpty T := by
+  sorry
+
+/-- **The Katz–Mazur 4.7 engine** (SCHOLIE 4.7.0, axiomatized claim, KM p. 112:
+"We claim that over `ℤ[1/N]`, `𝒫` is represented by the affine `ℤ[1/N]`-scheme
+`𝕸(𝒫,δ)/G`"): a rigid, relatively representable moduli problem that is affine
+over `(Ell)` is representable, given an auxiliary problem `δ` that is
+representable by an affine scheme and carries a `G`-action making its relative
+representing schemes finite étale `G`-torsors.
+
+Proof route (banked; KM pp. 112–116): `𝕸(𝒫,δ)` represents `𝒫.simul δ`
+(`simul_representable`, PROVEN); `G` acts via `simulSchemeAction` (PROVEN);
+rigidity makes the action free (`simulSchemeAction_free_of_rigid`); the base is
+affine, so the T-Q3 affine quotient applies and `π` is a finite étale `G`-torsor
+[SGA III Exp. V 4.1 = `ForMathlib/InvariantTorsor.lean` T-Q2 interface]; the
+universal curve and its `𝒫`-structure descend [SGA I Exp. VIII = stream-DESC
+black box, `levelledCurve_descent_of_torsor` shape]; the descended pair
+represents `𝒫` by the torsor argument of KM pp. 114–116. WIP `sorry` (T-Q6d.γ);
+gated on T-Q2's SGA III V 4.1 statements and the stream-DESC descent engine. -/
+theorem representable_of_rigid_of_torsor (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q)
+    (hQrep : Q.Representable)
+    (hQaff : ∀ {XQ : EllObj R}, Q.RepresentableBy XQ → IsAffine XQ.base)
+    (hPaff : ∀ X : EllObj R, ∃ d : RelRepData P X, IsAffineHom d.f)
+    (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (hrig : P.Rigid) :
+    P.Representable := by
+  sorry
+
+end Engine
+
 end ModuliProblem
 
 end ModularCurves

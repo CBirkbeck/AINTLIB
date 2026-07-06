@@ -329,3 +329,94 @@ restriction, which IS the descent content of Loeffler 3.6.1.
 - **A4 (degenerate W = ⊥)** Q_⊥ = Spec of invariants of the zero ring = empty
   scheme; imageOpens = ∅; everything holds vacuously; no nontriviality used.
   SURVIVES.
+
+## T-Q6 attack blocks (2026-07-06T22:55Z)
+
+### `ModuliProblem.simul P δ` (pointwise product presheaf)
+- **A1 (universe)**: `P.obj X × δ.obj X : Type u` — fine, both factors land in
+  `Type u`; no `ULift` needed. PASS.
+- **A2 (functoriality)**: `map (f ≫ g) = map f ≫ map g` componentwise via
+  `Prod.map` — `P.map_comp`/`δ.map_comp` pointwise; `Prod.ext` closes. PASS.
+- **A3 (wrong-shape risk: should it be the categorical product `P ⨯ δ`?)**: the
+  categorical product in `(EllObj R)ᵒᵖ ⥤ Type u` IS computed pointwise, but its
+  mathlib packaging (chosen limits) makes `obj`-values opaque
+  (`limit (pair P δ) |>.obj`); KM's proof constantly reads pairs `(α, β)`.
+  Hand-rolled product with `obj := P.obj X × δ.obj X` is defeq-transparent; if a
+  consumer ever needs the `Limits.prod` comparison it is a one-iso lemma. Choice
+  of record: hand-rolled. PASS with note.
+- **A4 (naming)**: KM says "simultaneous problem (𝒫,δ)" — name `simul`, keep KM
+  order (P first, δ second; the G-action will live on the SECOND factor).
+
+### `simul_representable` (KM 4.7 step (i): 𝕸(𝒫,δ) = 𝒫_{E/𝕸(δ)})
+- **A1 (truth as stated)**: KM p. 112 asserts exactly this with 𝒫 relatively
+  representable and δ representable. The proof needs the NATURALITY clause of
+  `RelativelyRepresentable` (restriction-compat of the `eqv`s) — present in the
+  project def since T-E3. No affineness needed for bare representability (the
+  affineness conclusion "𝕸(𝒫,δ) affine over 𝕸(δ)" is a SEPARATE statement, cut
+  only when T-Q6d's quotient step demands it). PASS.
+- **A2 (the hidden lemma)**: transporting `P`-values along the tautological
+  cartesian square: for `u : Y ⟶ Xδ` in `Ell/R`, need `Y ≅ Xδ.pullbackAlong
+  u.baseHom` (comparison of Y.curve with the CHOSEN pullback). This is T-Q6b —
+  `EllHom.isPullback` + `IsPullback.isoPullback` + `zero_w`. Without it the
+  ∃-chain does not compose. Cut FIRST.
+- **A3 (choice hygiene)**: `RelativelyRepresentable` is an ∃-Prop; the
+  representing `Z` per `X` comes via `choose` — noncomputable, fine (the
+  STATEMENT `(P.simul δ).Representable` is a Prop; no data leaks).
+- **A4 (adversarial: Loeffler's "converse not quite true" remark)**: that remark
+  is about P̃ vs P (Sch/R-side), NOT about simul-representability. Not a
+  counterexample to this statement. PASS.
+
+### T-Q6b `isoPullbackAlong` (every EllHom is cartesian)
+- **A1 (data honesty)**: the iso is DATA (an `Iso` in `Ell/R`) — must be a real
+  def; both directions + hom_inv_id/inv_hom_id. Route: `EllHom.isPullback u`
+  gives `IsPullback u.top Y.curve.π Xδ.curve.π ...`? — CHECK the exact field
+  shape before writing (the file defines `EllHom` with `top`, `isPullback`,
+  `zero_w`); the comparison to `pullbackAlong` (which uses
+  `EllipticCurve.baseChange` = `Limits.pullback`) is
+  `IsPullback.isoPullback`-vs-`limit.cone` — same mk-pt friction class as the
+  T-Q5 vPullbackCone fight; budget a cleanly-typed-∃ repackaging if rw-motives
+  bite.
+- **A2 (zero-section compat)**: an `Ell/R`-iso needs `zero_w` BOTH directions;
+  inverse direction zero_w follows from forward + iso-cancellation — prove via
+  `IsPullback.hom_ext` on the pullback, not by inverting rectangles by hand.
+- **A3 (base leg)**: the comparison should be OVER `𝟙 Y.base` (baseHom = 𝟙) —
+  check `pullbackAlong u.baseHom` has base `Y.base` definitionally (it does:
+  `base := T`). PASS.
+
+### T-Q6d statements (RelRepData / TorsorData / Scholie) — 2026-07-07T01:20Z
+- **A1 (RelRepData = honest bundling?)**: fields Z/f/eqv/nat are EXACTLY the
+  ∃-chain of `RelativelyRepresentable` (T-E3 def) — no strengthening, no loss;
+  bridge lemma `relativelyRepresentable_iff_nonempty_relRepData` is
+  choice-only. PASS.
+- **A2 (equivariance convention)**: `eqv g ⟨h.1 ≫ σZ.hom γ, _⟩ = (φ γ).hom.app _
+  (eqv g h)` — precomposition on the Z-side vs `φ γ`-hom on the value side.
+  Attack: γ ↦ γ⁻¹ flip risk. Verdict: σZ is DATA quantified inside TorsorData,
+  so either convention is satisfiable by reindexing (σZ ↦ σZ ∘ inv); the
+  statement is honest under either; convention pinned = this one, chosen to
+  match `SchemeAction`'s covariant `hom` and KM's "the S-scheme δ_{E/S} is a
+  G-torsor" (left action on points by postcomposition-of-action =
+  precomposition on classifying maps). Consumers must NOT assume the other
+  convention silently — bridge lemmas at instantiation time.
+- **A3 (torsor comparison map)**: `∐_G Z ⟶ Z ×_{X.base} Z`, `γ ↦ (σZ γ, 𝟙)` —
+  matches Stack.lean's `levelledCurve_descent_of_torsor` htorsor shape
+  (in-project precedent, adversarially fixed 2026-07-05 there). Surjectivity
+  of f is NOT separately demanded: for a G-TORSOR KM's "finite etale G-torsor"
+  over the base includes f fppf-cover; ATTACK: over ∅-fibres the comparison
+  being iso is vacuous, so a torsor in this weak sense can have empty fibres
+  (Legendre over ℤ: concentrated over S[1/2]!). KM p. 111: "concentrated over
+  S[1/2], over which it is a torsor" — the ENGINE is stated over a base where
+  the axioms hold with honest content; f Surjective ADDED as a field to make
+  "torsor" mean torsor (KM applies the engine only over ℤ[1/N] where it holds).
+- **A4 (Scholie hypotheses honesty)**: KM 4.7.0 needs 𝒫 affine over (Ell) and
+  M(δ) affine (axiom 1). Both carried as explicit hypotheses (IsAffineHom on a
+  P-rel-rep datum's f, IsAffine on the δ-representing base). Loeffler drops
+  affineness — T-E5 statement-risk already flagged on the board; the ENGINE
+  stays KM-honest.
+- **A5 (freeness statement)**: scheme-level freeness = `t ≫ hom g = t → g = 1 ∨
+  IsEmpty T`? NO — KM: free on nonempty T only makes sense pointwise:
+  statement: g ≠ 1 → no fixed T-point with T nonempty, i.e.
+  `t ≫ hom g = t → IsEmpty T`. Attack: IsEmpty vs ¬Nonempty — same;
+  formulation quantifies T arbitrary (not just Spec R'), STRONGER than KM's
+  ring-points form but what SGA III V 4.1 needs; provable since a fixed
+  T-point restricts to fixed geometric points. Statement stays; proof is the
+  θ(g)-rigidity argument (KM p. 113) — sorried this session with route banked.
