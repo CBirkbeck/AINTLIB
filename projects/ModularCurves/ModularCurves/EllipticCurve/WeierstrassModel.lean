@@ -2378,7 +2378,18 @@ theorem projModelBaseChangeLift_isIso (W : WeierstrassCurve R) :
             ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
         ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0)))) :=
     awayι_projModelπ W i
-  sorry
+  have h := isPullback_lift_piece (R' := R') W i
+  have hcomp : Scheme.Cover.pullbackHom
+      (Scheme.Pullback.openCoverOfLeft ((modelChartCover W).openCover)
+        (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap R R'))))
+      (projModelBaseChangeLift (algebraMap R R') W) i =
+      h.isoPullback.inv ≫ (isPullback_piece (R' := R') W i).isoPullback.hom := by
+    refine (Iso.eq_inv_comp _).mpr ?_
+    exact h.isoPullback_hom_snd
+  rw [hcomp]
+  exact inferInstanceAs (IsIso (h.isoPullback.symm ≪≫
+    (isPullback_piece (R' := R') W i).isoPullback).hom)
+
 end TensorComparison
 
 end BaseChangeGraded

@@ -1,1 +1,1 @@
-FOCUS: CLEANUP-4 (beastmode-B) — full /cleanup of GroupScheme/MuN.lean (sorry-free, independent import chain); T-B6 TorsionFibre.lean WIP-committed, build blocked on A-lane WeierstrassModel mid-edit — retry after cleanup.
+FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 1d declaration list, then Phase 2 audit
