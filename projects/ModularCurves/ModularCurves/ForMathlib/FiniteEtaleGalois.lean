@@ -632,7 +632,7 @@ theorem monoInducesIsoOnDirectSummand_op {X Y : (CommAlgCat.FiniteEtale.{u} k)�
       · have := congrArg (fun (t : s.pt ⟶ Zobj) => t.hom.hom w) h₂
         exact this.trans (congrArg Prod.snd
           (Φ.apply_symm_apply (s.fst.hom.hom w, s.snd.hom.hom w))).symm
-  exact ⟨Opposite.op Zobj, q.op, ⟨hlim.op⟩⟩
+  exact ⟨Opposite.op Zobj, q.op, ⟨BinaryFan.IsLimit.op hlim⟩⟩
 
 end EpiSplitting
 
