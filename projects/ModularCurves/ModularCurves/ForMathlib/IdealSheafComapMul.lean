@@ -43,8 +43,79 @@ theorem comap_ideal_top_of_isAffine [IsAffine X] [IsAffine Y]
     simp
   rw [hker]
   refine le_antisymm ?_ ?_
-  · -- the tensor half: the kernel of the pulled-back inclusion is the extension
-    sorry
+  · -- the hard half: the kernel is at most the extension. Instead of computing the
+    -- tensor product, map the competitor `Spec (Γ(X)/extension)` into the pullback
+    -- and read off the kernel inclusion from the first projection.
+    have hround : ∀ w : ↑Γ(X, ⊤),
+        (Scheme.ΓSpecIso (CommRingCat.of (↑Γ(X, ⊤)))).hom.hom
+          ((X.isoSpec.inv.appTop).hom w) = w := by
+      intro w
+      have h1 : X.isoSpec.inv.appTop ≫ X.isoSpec.hom.appTop = 𝟙 _ := by
+        rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id]
+        rfl
+      have h2 := congrArg (fun g : Γ(X, ⊤) ⟶ Γ(X, ⊤) => g.hom w) h1
+      simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply,
+        CommRingCat.hom_id, RingHom.coe_id, id_eq] at h2
+      rw [show X.isoSpec.hom.appTop =
+          (Scheme.ΓSpecIso (CommRingCat.of (↑Γ(X, ⊤)))).hom from
+        Scheme.toSpecΓ_appTop X] at h2
+      exact h2
+    set K := (I.ideal ⟨⊤, hY⟩).map (f.appTop).hom with hK
+    set ιX : Spec (.of (↑Γ(X, ⊤) ⧸ K)) ⟶ X :=
+      Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk K)) ≫ X.isoSpec.inv with hιX
+    have hle : I.subschemeι.ker ≤ (ιX ≫ f).ker := by
+      rw [ker_subschemeι, ker_of_isAffine]
+      refine le_of_isAffine ?_
+      rw [show (ofIdealTop (RingHom.ker ((ιX ≫ f).appTop).hom)).ideal
+          ⟨⊤, isAffineOpen_top Y⟩ = RingHom.ker ((ιX ≫ f).appTop).hom by simp]
+      intro x hx
+      rw [RingHom.mem_ker]
+      have hxK : (f.appTop).hom x ∈ K := Ideal.mem_map_of_mem _ hx
+      have hval : ((ιX ≫ f).appTop).hom x =
+          ((Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk K))).appTop).hom
+            ((X.isoSpec.inv.appTop).hom ((f.appTop).hom x)) := rfl
+      rw [hval]
+      have hnat1 := congrArg
+        (fun g : Γ(Spec (CommRingCat.of (↑Γ(X, ⊤))), ⊤) ⟶
+            CommRingCat.of (↑Γ(X, ⊤) ⧸ K) =>
+          g.hom ((X.isoSpec.inv.appTop).hom ((f.appTop).hom x)))
+        (Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (Ideal.Quotient.mk K)))
+      simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply,
+        CommRingCat.hom_ofHom] at hnat1
+      rw [hround ((f.appTop).hom x)] at hnat1
+      refine (Scheme.ΓSpecIso (CommRingCat.of
+        (↑Γ(X, ⊤) ⧸ K))).commRingCatIsoToRingEquiv.injective ?_
+      show (Scheme.ΓSpecIso (CommRingCat.of (↑Γ(X, ⊤) ⧸ K))).hom.hom _ =
+        (Scheme.ΓSpecIso (CommRingCat.of (↑Γ(X, ⊤) ⧸ K))).hom.hom 0
+      rw [map_zero, hnat1,
+        show Ideal.Quotient.mk K ((f.appTop).hom x) = 0 from
+          Ideal.Quotient.eq_zero_iff_mem.mpr hxK]
+    set u : Spec (.of (↑Γ(X, ⊤) ⧸ K)) ⟶ Limits.pullback f I.subschemeι :=
+      Limits.pullback.lift ιX (IsClosedImmersion.lift I.subschemeι (ιX ≫ f) hle)
+        (IsClosedImmersion.lift_fac _ _ _).symm with hu
+    have hufst : u ≫ Limits.pullback.fst f I.subschemeι = ιX :=
+      Limits.pullback.lift_fst _ _ _
+    intro z hz
+    rw [RingHom.mem_ker] at hz
+    have hzero : ((ιX).appTop).hom z = 0 := by
+      rw [← hufst, Scheme.Hom.comp_appTop]
+      simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
+      rw [hz, map_zero]
+    have hnatval := congrArg
+      (fun g : Γ(Spec (CommRingCat.of (↑Γ(X, ⊤))), ⊤) ⟶
+          CommRingCat.of (↑Γ(X, ⊤) ⧸ K) => g.hom ((X.isoSpec.inv.appTop).hom z))
+      (Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (Ideal.Quotient.mk K)))
+    simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply,
+      CommRingCat.hom_ofHom] at hnatval
+    -- hnatval : ΓSpecIsoS.hom (SpecMapMk.appTop (isoSpecInv.appTop z)) =
+    --           mk (ΓSpecIsoR.hom (isoSpecInv.appTop z))
+    have hdecomp : ((ιX).appTop).hom z =
+        ((Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk K))).appTop).hom
+          ((X.isoSpec.inv.appTop).hom z) := rfl
+    rw [hdecomp] at hzero
+    rw [hzero, map_zero] at hnatval
+    rw [hround z] at hnatval
+    exact Ideal.Quotient.eq_zero_iff_mem.mp hnatval.symm
   · rw [Ideal.map_le_iff_le_comap]
     intro x hx
     rw [Ideal.mem_comap, RingHom.mem_ker]
