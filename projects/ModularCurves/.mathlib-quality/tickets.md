@@ -820,8 +820,31 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] Lemma 3.4.2(2) (quote in decomposition).
 
 ### [T-B6] Fibre comparison: E[N] geometric fibres ≅ (ℤ/N)² (reuse HasseWeil)
-- **Status**: open · **New file**: EllipticCurve/TorsionFibre.lean · **Depends on**:
-  T-B3 · **Parallel**: yes · **Type**: theorem
+- **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
+  2026-07-06T11:30Z · **New file**: EllipticCurve/TorsionFibre.lean (B-lane owned) ·
+  **Depends on**: T-B3 · **Parallel**: yes · **Type**: theorem
+- **Progress**:
+  - 2026-07-06T11:35: statement design + ADVERSARIAL FINDING (recorded per standing
+    rule 1, new-statement attack): the ticket sketch silently assumes a
+    *group-compatible* fibre identification, but `FibrewiseElliptic` provides only
+    a POINTED SCHEME iso fibre ≅ projModel W — no compatibility between E's
+    abstract `GrpObj` group and mathlib's chord–tangent `Affine.Point` group.
+    Without it, "N-killed abstract points ≅ classical E(k̄)[N]" does not follow —
+    that dictionary is a genuine leaf adjacent to the deferred Abel/canonicity
+    cluster (a fibrewise instance of it), NOT derivable from the current
+    interfaces. DESIGN of record: (1) `torsionPointsEquiv` — scheme-points of
+    `E[N]` over `t` ≃ `Submodule.torsionBy ℤ (E.Point t) (N : ℤ)` (kernel UP;
+    provable NOW from `pointToTorsion` + `point_smul_eq_comp_mulBy` (T-A6d, done
+    today) + a small `point_zero_val` helper from the `one_eq_zero` field; this is
+    the half stream D consumes). (2) headline
+    `torsion_geometricFibre_rank_two : Nonempty (torsionBy … ≃+ (Fin 2 → ZMod N))`
+    over alg. closed k with (N : k) ≠ 0 — STATED, sorried, docstring records the
+    dependency on the fibre-group-dictionary leaf + HasseWeil's
+    `torsion_genN_addEquiv` (import isolated in this file). Attacks run: (i) shape
+    matches HasseWeil's `Submodule.torsionBy` spelling; (ii) no NeZero needed for
+    (1) (kernel UP is N-uniform); (iii) t-generality: arbitrary T for (1),
+    Spec k for (2); (iv) the killed-hypothesis form matches the D-lane's
+    `hkill`-convention ((N : ℤ) • P = 0).
 - **Sketch**: identify `E[N](k̄)` (scheme fibre points) with Weierstrass-model points
   via `IsWeierstrassModel.points`; then **import
   `HasseWeil.NTorsion.TorsionGeneralN`** (`E[N] ≃ₗ[ZMod N] (Fin 2 → ZMod N)`,
