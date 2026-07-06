@@ -1615,6 +1615,20 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
   lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
+  - **[T-D31] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
+    successor), 2026-07-06T13:55Z · NEW ForMathlib/ReducedSeparation.lean
+    (mathlib-only imports). Deliverables (born split): (i)
+    `IsReduced.eq_zero_of_forall_ringHom_field`: in a reduced CommRing, an
+    element killed by every ring hom to a (same-universe) field is 0 — proof:
+    `nilpotent_iff_mem_prime` + at each prime the hom
+    `A → A⧸J → FractionRing (A⧸J)` + `IsFractionRing.injective` +
+    `isNilpotent_iff_eq_zero`; (ii) the `eq_of` corollary via `sub_eq_zero`.
+    Mathlib state verified: `IsReduced (MvPolynomial σ R)` instance EXISTS
+    (MvPolynomial/Nilpotent.lean:55 — the reducedness half of T-D31 is
+    mathlib-present); `nilpotent_iff_mem_prime` exists; NO field-hom separation
+    lemma (greps: eq_zero_of_forall∩field, forall_ringHom — zero hits). Fields
+    (not just alg. closed) suffice for the KM 1.9.2 consumer; maximal ideals
+    would NOT (Jacobson ≠ nil). Feeds T-D2's reduce-to-geometric-points step.
   - **[T-D3b] Status**: done (beastmode-D2, 2026-07-06T11:25Z → 2026-07-06T11:40Z,
     **RESOLVED-BY-MATHLIB, no project code**) — the current pin (11b908e5cdd9)
     already has the full multiplicative structure on `IdealSheafData`:
