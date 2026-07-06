@@ -295,3 +295,19 @@ localization chart instance):
   the categorical-quotient UP of W (uniqueness via
   invariantsπ_hom_ext_of_isOpenImmersion at j := image-inclusion) ⟹ canonical iso;
   then IsOpenImmersion (iso ≫ open-inclusion).
+
+## REFINEMENT (2026-07-06T20:40Z, supersedes the of_stalk_iso preference):
+`exists_invariantsπ_lift_of_isOpenImmersion` — the j-RELATIVE existence
+
+Statement: for an open immersion `j : Q' ⟶ Spec Bᴳ` and `f : pullback π j ⟶ Y`
+invariant under the pulled-back action, `∃ q : Q' ⟶ Y, pullback.snd π j ≫ q = f`.
+Proof = T-Q3's existence VERBATIM with the per-point charts chosen INSIDE
+`range j` (the basis lemma already produces basics inside any open). Payoff:
+- at j := 𝟙: re-derives exists_invariantsπ_lift;
+- at j := image-open inclusion: gives the UP of `π^V(W)` ⟹ the canonical iso
+  `Q_W ≅ π^V(W)-open` ⟹ `IsOpenImmersion (localQuotientMap …)` with NO stalk
+  plumbing;
+- at T-Q5d: the global existence glue reuses it per stable-affine chart.
+Mirror of the already-proven `invariantsπ_hom_ext_of_isOpenImmersion` — the two
+j-relative statements together say `π` is an effective epi stable under open
+restriction, which IS the descent content of Loeffler 3.6.1.
