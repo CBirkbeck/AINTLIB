@@ -3914,7 +3914,8 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     comparison via hom_quotientπ — the T-Q7 feed). GOTCHAS: bare @Functor.ext
     resolves to core-Lean LawfulFunctor.ext — qualify @CategoryTheory.Functor.ext;
     Discrete laws via Subsingleton.elim; congrArg-not-rw for subtype-motive.
-- **[T-W3b]** (open; split from T-W3 at cut) the torsor description of
+- **[T-W3b]** (in_progress, beastmode-Q 2026-07-07T03:30Z; split from T-W3 at
+  cut) the torsor description of
   `[X/G](S)`: define the groupoid of pairs (finite étale `G`-torsor `p : P ⟶ S`
   in the ∐-comparison sense of `TorsorData`/Stack.lean, `G`-equivariant
   `u : P ⟶ X`), the trivialization functor from `ActionGroupoid σ S`
@@ -3923,6 +3924,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   stream-DESC like T-Q6e's descent step; for CONSTANT finite G étale-local
   triviality of torsors is the honest scope). Sources: reviewer v8; KM 4.7
   proof pp. 114–116 uses exactly the trivial-torsor comparison. Lane Q.
+  - **Progress (2026-07-07T03:35Z)**: `TorsorPair σ S` + `TorsorPair.Hom` +
+    Category instance DONE (Moduli/QuotientStack.lean, sorry-free); trivial-
+    torsor DATA layer DONE: `trivialTorsorAction` (translation on `∐_G S`),
+    `trivialTorsorπ`, `over_base`, `trivialTorsorMap` + equivariance.
+    REMAINING: the four property fields of the trivial `TorsorPair`
+    (IsFinite/Etale/Surjective of `trivialTorsorπ` + the `∐`-comparison iso —
+    mathlib sigma-facts survey dispatched), then the trivialization functor
+    `ActionGroupoid σ S ⥤ TorsorPair σ S` (morphism-level: `f : t ⟶ t'` maps to
+    the summand-translation `trivialTorsorAction.hom f.1`-conjugate; check
+    left/right convention against `equivariant` at write time), full
+    faithfulness, and the (descent-gated) essential-image statement.
 
 - **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
   `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
