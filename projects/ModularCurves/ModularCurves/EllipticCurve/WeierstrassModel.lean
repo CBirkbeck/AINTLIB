@@ -2447,6 +2447,32 @@ lemma projModelZeroChart_fac (W : WeierstrassCurve R) :
       (mk_X_mem_quotientGrading_one W 1) one_pos = projModelZero W :=
   IsOpenImmersion.lift_fac _ _ _
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Naturality of the section at infinity under base change (T-A5b zero-leg). -/
+lemma projModelZero_baseChange {R' : Type u} [CommRing R'] [Algebra R R']
+    (W : WeierstrassCurve R) :
+    projModelZero (W.map (algebraMap R R')) ≫
+        projModelBaseChange (algebraMap R R') W =
+      Spec.map (CommRingCat.ofHom (algebraMap R R')) ≫ projModelZero W := by
+  rw [← projModelZeroChart_fac (W.map (algebraMap R R')), Category.assoc]
+  rw [show projModelBaseChange (algebraMap R R') W =
+    Proj.map (baseChangeGradedHom (algebraMap R R') W)
+      (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) from rfl]
+  rw [← awayι_awayCongr (W.map (algebraMap R R'))
+    (baseChangeGradedHom_mk_X (R' := R') W 1)
+    ((baseChangeGradedHom (algebraMap R R') W).2
+      (mk_X_mem_quotientGrading_one W 1))]
+  rw [Category.assoc]
+  rw [Proj.awayι_comp_map (baseChangeGradedHom (algebraMap R R') W)
+    (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) one_pos _
+    (mk_X_mem_quotientGrading_one W 1)]
+  rw [← projModelZeroChart_fac W, ← Category.assoc, ← Category.assoc,
+    ← Category.assoc]
+  refine congrArg (· ≫ Proj.awayι (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos) ?_
+  sorry
+
 end Points
 
 /-- **(T-A2)** The constructed model satisfies its interface.
