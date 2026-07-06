@@ -123,3 +123,48 @@ for the proofs.
   wiring fights elaboration, (iii) may be DEFERRED to T-Q3 pickup and the assembly
   done through (i)+(ii) elementwise — (iii) is convenience packaging, zero
   mathematical content beyond (i)+(ii)+Q3b. Recorded as scope note. SURVIVES.
+
+## T-Q3 (α) `RingHom.existsUnique_factor_fixedPoints_away`
+
+- **A1 (∃!-shape justified?)** Shared-witness: uniqueness of ψ is part of the
+  factorization package and both halves are consumed together at every use site
+  (statement-splitting exception: single witness ψ, conjunction is `inclMap.comp ψ
+  = φ` only — the uniqueness is the ∃! binder, not a second conclusion). SURVIVES.
+- **A2 (injectivity direction)** ψ unique BECAUSE inclMap injective (Q3c(i)) —
+  ∃!-uniqueness leg is `fun ψ' hψ' => RingHom.ext fun c => (Q3c-i) (by rw ...)`.
+  Without (i) the statement would be false-ish (non-unique). Hypothesis set exactly
+  right. SURVIVES.
+- **A3 (fixed-image hypothesis form)** `∀ g c, awayHom hfix g (φ c) = φ c` matches
+  Q3c(ii)'s RHS pointwise; hfix for ↑a instantiated by `fun g => a.2 g`. The
+  alternative `Set.range φ ⊆ fixed` is the same statement — pointwise form chosen
+  (usable directly). SURVIVES.
+
+## T-Q3 (β) uniqueness `hom_ext_of_isOpenImmersion` (schematic form)
+
+- **A1 (is the pullback the right "π over W"?)** πW := `pullback.snd π j :
+  pullback π j ⟶ W`. Fibre of πW over w ∈ W = fibre of π over j(w) ≠ ∅ (π
+  surjective) — surjectivity of πW = base-change stability of `Surjective` (mathlib
+  instance). If instead πW were `pullback.fst`, variance breaks — pin: π along
+  fst-leg, j along snd-leg ⟹ `pullback.snd (f := π) (g := j)`. SURVIVES with the
+  orientation pinned.
+- **A2 (degenerate W = ∅)** Then h₁ h₂ : ∅ ⟶ Y; equality holds by empty-cover
+  hom_ext; the argument's per-point step quantifies over points of W — vacuous ✓.
+  No hidden nonemptiness. SURVIVES.
+- **A3 (why does Γ-injectivity transport to W's charts?)** The per-point argument
+  restricts to a basic open D(a) ⊆ range(j) ∩ h₁⁻¹(V); the chart is
+  Spec (A_a) ⟶ W (lift of the immersion along j — `IsOpenImmersion.lift` with
+  range D(a) ⊆ range j) and injectivity input is Q3c(i) at a — the SAME algebra
+  fact regardless of W. W only enters through open-immersion transport. SURVIVES.
+
+## T-Q3 (γ) existence
+
+- **A1 (the closed-set separation)** Z := π''(Uᶜ) closed needs π closed map =
+  `PrimeSpectrum.isClosedMap_comap_of_isIntegral` (algebra-side, no scheme detour);
+  p ∉ Z ⟺ fibre ⊆ U — uses fibres-are-orbits (T-Q1) + f constant on orbits (from
+  invariance hf at POINTS: apply congrArg base to hf g). SURVIVES.
+- **A2 (does D(a) ⊆ Zᶜ give π⁻¹D(a) ⊆ U?)** π⁻¹(Zᶜ) ⊆ U: x ∉ π⁻¹π(Uᶜ) ⟹ x ∉ Uᶜ.
+  Preimage of basic open = basic open of the image element (comap_basicOpen).
+  SURVIVES.
+- **A3 (choice hygiene)** V_p, a_p, ψ_p all chosen per-point via `Classical.choice`
+  — glue needs only the PROPERTIES, discharged by (β) at overlaps. No canonicity
+  claim anywhere in the statement (∃ q). SURVIVES.

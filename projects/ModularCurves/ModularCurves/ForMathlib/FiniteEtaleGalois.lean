@@ -58,4 +58,60 @@ instance hasColimitsOfShapeSingleObj (G : Type u) [Group G] :
 
 end CommAlgCatLimits
 
+namespace FiniteEtaleGalois
+
+open CommAlgCat
+
+variable (k : Type u) [Field k]
+
+/-! `k` is initial in `FiniteEtale k` (leaf AG-GG-1.3a). -/
+
+instance subsingletonHomFromSelf (A : CommAlgCat.FiniteEtale.{u} k) :
+    Subsingleton (CommAlgCat.FiniteEtale.of k k ⟶ A) :=
+  ⟨fun f g => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x =>
+    (f.hom.hom.commutes x).trans (g.hom.hom.commutes x).symm))⟩
+
+instance nonemptyHomFromSelf (A : CommAlgCat.FiniteEtale.{u} k) :
+    Nonempty (CommAlgCat.FiniteEtale.of k k ⟶ A) :=
+  ⟨ObjectProperty.homMk
+    (show CommAlgCat.of k k ⟶ A.obj from CommAlgCat.ofHom (Algebra.ofId k A.obj))⟩
+
+instance hasInitial : HasInitial (CommAlgCat.FiniteEtale.{u} k) :=
+  hasInitial_of_unique (CommAlgCat.FiniteEtale.of k k)
+
+/-! Finite products in `FiniteEtale k` (leaf AG-GG-1.1): the product of finitely many
+finite étale algebras is their pointwise product algebra. -/
+
+variable {k}
+
+/-- The product fan on a finite family of finite étale algebras, with pointwise-product
+vertex. -/
+noncomputable def productFan {ι : Type} [Finite ι] (A : ι → CommAlgCat.FiniteEtale.{u} k) :
+    Fan A :=
+  Fan.mk (CommAlgCat.FiniteEtale.of k (Π i, A i))
+    (fun i => ObjectProperty.homMk
+      (show CommAlgCat.of k (Π j, A j) ⟶ (A i).obj from
+        CommAlgCat.ofHom (Pi.evalAlgHom k (fun j => (A j : Type u)) i)))
+
+/-- The product fan is a limit fan. -/
+noncomputable def productFanIsLimit {ι : Type} [Finite ι]
+    (A : ι → CommAlgCat.FiniteEtale.{u} k) : IsLimit (productFan A) :=
+  Fan.IsLimit.mk _
+    (fun s => ObjectProperty.homMk
+      (show s.pt.obj ⟶ CommAlgCat.of k (Π j, A j) from
+        CommAlgCat.ofHom (AlgHom.pi (fun i => (s.proj i).hom.hom))))
+    (fun s i => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x => rfl)))
+    (fun s m hm => ObjectProperty.hom_ext (CommAlgCat.hom_ext (AlgHom.ext fun x =>
+      funext fun i => by
+        have h := congrArg (fun q => q.hom.hom x) (hm i)
+        simpa using h)))
+
+instance hasFiniteProducts : HasFiniteProducts (CommAlgCat.FiniteEtale.{u} k) where
+  out n :=
+    { has_limit := fun F =>
+        hasLimit_of_iso (Discrete.natIsoFunctor (F := F)).symm
+          (h := HasLimit.mk ⟨_, productFanIsLimit fun i => F.obj ⟨i⟩⟩) }
+
+end FiniteEtaleGalois
+
 end ModularCurves

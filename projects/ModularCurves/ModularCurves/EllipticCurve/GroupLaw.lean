@@ -220,6 +220,22 @@ noncomputable def Point.asSection {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g)
   ⟨pullback.lift P.1 (𝟙 T) (by rw [P.2, Category.id_comp]),
     pullback.lift_snd _ _ _⟩
 
+/-- **(T-D6a-ii, final ingredient)** `asSection` intertwines integer scalar
+multiplication. Both underlying maps are `pullback.lift (P.1 ≫ [n]) (𝟙 T)` — LHS by
+`point_smul_eq_comp_mulBy` on `E`, RHS by the same plus `mulByHom_baseChange`.
+
+PARKED (2026-07-09): the arithmetic is settled (fst-leg = `P.1 ≫ E.mulByHom n`,
+snd-leg = `𝟙 T` on both sides via `pullback.hom_ext`); the residual friction is the
+`(E.baseChange g).E` vs `pullback E.π g` defeq-heterogeneity — `mulByHom_baseChange`
+rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
+`pullback.fst E.π g` composition is at the raw `pullback E.π g` spelling, so
+`pullback.lift_fst`'s matcher misfires. Clean route: recast the whole goal to the raw
+`pullback E.π g` spelling with a single `show` before any rewriting, then the
+fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
+theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
+    Point.asSection E g (n • P) = n • Point.asSection E g P := by
+  sorry
+
 end EllipticCurve
 
 end ModularCurves
