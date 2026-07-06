@@ -1,4 +1,4 @@
-import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.EllipticCurve.Basic
 import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
@@ -45,6 +45,8 @@ instance : universalWeierstrassLoc.IsElliptic :=
 /-- The **Weierstrass atlas** `U = Spec ℤ[a₁,…,a₆][Δ⁻¹]`. -/
 noncomputable def weierstrassAtlas : Scheme.{0} := Spec (.of WeierstrassAtlasRing)
 
+instance : IsAffine weierstrassAtlas := isAffine_Spec _
+
 /-- The **universal Weierstrass elliptic curve** `E_U`, the total space over the atlas. -/
 noncomputable def universalCurve : Scheme.{0} := projModel universalWeierstrassLoc
 
@@ -66,5 +68,40 @@ noncomputable def universalCurveZero : weierstrassAtlas ⟶ universalCurve :=
 @[simp]
 theorem universalCurveZero_π : universalCurveZero ≫ universalCurveπ = 𝟙 weierstrassAtlas :=
   projModelZero_projModelπ universalWeierstrassLoc
+
+open Limits in
+/-- The universal Weierstrass curve is locally Weierstrass (it *is* a global Weierstrass
+model over the affine atlas — the whole space `⊤` witnesses it). -/
+theorem universalCurve_localModel :
+    LocallyWeierstrass universalCurveπ universalCurveZero universalCurveZero_π := by
+  intro s
+  letI : Algebra WeierstrassAtlasRing
+      ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)) :=
+    (Scheme.ΓSpecIso (.of WeierstrassAtlasRing)).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (weierstrassAtlas).Opens).ι := by
+    rw [← Scheme.topIso_hom]; infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom
+      (algebraMap WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))) := by
+    have : CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
+        ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))) =
+        (Scheme.ΓSpecIso (.of WeierstrassAtlasRing)).inv := rfl
+    rw [this]; infer_instance
+  refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial,
+    universalWeierstrassLoc.map (algebraMap WeierstrassAtlasRing _), inferInstance,
+    asIso (pullback.fst universalCurveπ (⊤ : (weierstrassAtlas).Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ universalWeierstrassLoc) (Spec.map (CommRingCat.ofHom
+        (algebraMap WeierstrassAtlasRing
+          ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))))).symm ≪≫
+      (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback.symm,
+    ?c1, ?c2⟩
+  -- REMAINING (localModel compatibilities). The e-iso above is built and elaborates.
+  -- c1 (structure map) reduces — via `simp [Iso.trans_hom, asIso_hom, asIso_inv,
+  --   IsPullback.isoPullback_inv_snd]` + `inv(fst)≫snd = projModelπ ≫ (Spec.map φ)⁻¹`
+  --   (pullback along the iso `Spec.map φ`) + `pullback.condition` on `universalCurveπ/⊤.ι` —
+  --   to the `isoSpec`/`topIso`/`ΓSpec` identity `⊤.ι ≫ inv(Spec.map φ) = isoSpec_⊤.hom`
+  --   (φ = ΓSpecIso.inv; `(Spec R).isoSpec = Spec.mapIso (ΓSpecIso R).op` + `topIso`).
+  -- c2 (section) is analogous, landing on `projModelZero` naturality + the same identity.
+  case c1 => sorry
+  case c2 => sorry
 
 end ModularCurves
