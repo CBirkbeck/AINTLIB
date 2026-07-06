@@ -1157,8 +1157,21 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   hand — pull quotes when cutting).
 
 ### [T-D2] Full sets of sections: reduced-base criterion (KM 1.9.2)
-- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
-  2026-07-08T03:30Z · **PLAN**: forward = instantiate. Backward: (1) specialize the
+- **Status**: done (beastmode-A 2026-07-08T03:30Z → 2026-07-08T06:00Z —
+  `isFullSetOfSectionsAlg_iff_fields` PROVED sorry-free, axioms standard. Pieces:
+  (1) ForMathlib/NormBaseChange.lean `norm_tensor_map` (norm commutes with base
+  change; det-conjugation via cancelBaseChange + LinearMap.det_baseChange + det_conj
+  — NO matrix crawling; upstream candidate); (2) `eq_of_forall_field_hom_eq` (reduced
+  separation via nilradical_eq_sInf + residue FractionRing at each prime; NB
+  nilradical_eq_zero yields the 0-ideal, not ⊥ — close membership with simpa);
+  (3) `sectionBaseChange_tensor_map` (functoriality, induction + simp);
+  (4) main proof: universal reduction to A₀ := MvPolynomial ι R over the chosen basis
+  (IsReduced instance exists for MvPolynomial), f₀ := Σ Xⱼ ⊗ bⱼ, field-point check
+  transported by (1)+(3) with the R-algebra structure on K given by
+  (χ₀.comp (algebraMap R A₀)).toAlgebra, then specialisation along aeval of the
+  TensorProduct.basis coordinates. LEAN GOTCHA: `set φ := aeval …` blocks
+  MvPolynomial.aeval_X from firing inside subsequent simp/rw — quantify the helper
+  over `∀ bb, bb = … → …` and instantiate after the sets instead.) · **PLAN**: forward = instantiate. Backward: (1) specialize the
   ∀A-definition to the UNIVERSAL case A₀ := MvPolynomial (Fin n) R, f₀ := Σ Tᵢ ⊗ bᵢ
   over a basis — every (A, f) is the image of (A₀-free: actually any (A,f) directly)
   under norm-base-change; (2) A₀ reduced (R reduced + MvPolynomial reduced ✓);
