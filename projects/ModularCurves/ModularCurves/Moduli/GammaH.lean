@@ -123,8 +123,22 @@ noncomputable def gammaHNaiveProblem (N : ℕ) [NeZero N]
     (fun L => ⟨⟨EllHom.pullSection R f.unop L.1.1, EllHom.pullSection R f.unop L.1.2⟩,
       by sorry⟩)
     (by sorry)
-  map_id := by sorry
-  map_comp := by sorry
+  map_id X := by
+    ext L
+    induction L using Quotient.ind with
+    | _ L =>
+      refine congrArg (Quotient.mk ((Opposite.unop X).curve.hOrbitSetoid H)) ?_
+      refine Subtype.ext (Prod.ext ?_ ?_)
+      · exact EllHom.pullSection_id R L.1.1
+      · exact EllHom.pullSection_id R L.1.2
+  map_comp {X Y Z} f g := by
+    ext L
+    induction L using Quotient.ind with
+    | _ L =>
+      refine congrArg (Quotient.mk ((Opposite.unop Z).curve.hOrbitSetoid H)) ?_
+      refine Subtype.ext (Prod.ext ?_ ?_)
+      · exact EllHom.pullSection_comp R g.unop f.unop L.1.1
+      · exact EllHom.pullSection_comp R g.unop f.unop L.1.2
 
 /-- **(T-H1)** `P_⊥` is the naive full-level problem: the `H = ⊥` orbits are
 singletons, recovering `gammaFullNaiveProblem`. -/

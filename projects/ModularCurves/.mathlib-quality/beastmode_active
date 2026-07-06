@@ -1,3 +1,2 @@
-FOCUS: AG-GG-1.5 — epi surjectivity via counting + idempotent splitting; then PreGaloisCategory assembly
-FOCUS-D: (beastmode-D2) T-D14c: keystone+gluing+free-cover ALL DONE sorry-free. LAST PIECE: the two directions of vanishingLocus_le_ker_iff (sorry at the Galois-reduced goal: vanishingLocus p E ≤ t.ker ↔ E ≤ (pullback.snd t p).ker, pointwise via le_ker_iff_forall both sides). Plan banked in board 18:40Z + 17:50Z entries. Delegation pattern works well (c2-i done that way) — next: delegate or grind the (⟸) direction first (easier: E-side ⟹ Z-side needs only the free cover + bridge + section_ext), then (⟹) with openCoverOfLeft + isPushout_appTop.
-FOCUS-Q: (beastmode-Q) T-Q4 core DONE (flat + |G|-invertible base change of invariants). Next: T-Q2 statements, then T-Q5 gluing
+FOCUS: AG-GG-1.5 — part (i) epi⇒surjective DONE; part (ii) idempotent splitting for monoInducesIsoOnDirectSummand
+FOCUS-Q: (beastmode-Q) T-Q5 claimed+route-locked. NOW: T-Q5a SchemeQuotient.lean — action family σ, stable opens, Γ-bridge to MulSemiringAction

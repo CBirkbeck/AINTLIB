@@ -221,3 +221,23 @@ for the proofs.
   bilinear over A^G? (a·x)⊗y and x⊗(a·y) for a ∈ A^G: fun g => a x g•(y) needs
   g•(a y) = a (g•y) ✓ since a fixed. Well-defined ✓. Ring hom: pointwise product ✓
   (target Pi.ring). SURVIVES.
+
+## T-Q5a scheme-action vocabulary + Γ-bridge
+
+- **A1 (why a bare σ-family, not a bundled structure/MonoidHom into Aut?)**
+  Consumers (T-E5's GL₂(F₃) on ℰ/Y(3)) produce morphism families; Aut-bundling
+  adds iso-bookkeeping with zero payoff (IsIso is derivable: σ g ≫ σ g⁻¹ = 𝟙 from
+  the two laws, as in T-Q1). The two-law family is the minimal faithful datum;
+  covariant order matches specSMul (`σ (g*h) = σ g ≫ σ h`). SURVIVES.
+- **A2 (stable-open def orientation)** `IsStableOpen σ U : ∀ g, (σ g) ⁻¹ᵁ U = U`.
+  Preimage (not image) form — composes with `Scheme.Hom.preimage` API and needs no
+  IsIso. Equivalent to image-stability for invertible σ (lemma, later if needed).
+  SURVIVES.
+- **A3 (the Γ-bridge action — smul or hom family?)** On `Γ(X, U)` for stable `U`:
+  `g • s := ((σ g).app U-appropriately-transported) s`. The transport (preimage-U
+  vs U through `IsStableOpen`) is the classic eqToHom pain point — route: define
+  via `(σ g).appLE U U (le-of-stable)`: `Scheme.Hom.appLE V U (e : U ≤ f ⁻¹ᵁ V) :
+  Γ(Y,V) ⟶ Γ(X,U)` avoids eqToHom entirely (e from stability equality). Action
+  laws via appLE-composition lemmas. SURVIVES with appLE pinned as the route.
+- **A4 (degenerate stable set)** U = ⊥: Γ = 0-ring; action trivial ✓ no
+  nontriviality assumptions anywhere. SURVIVES.

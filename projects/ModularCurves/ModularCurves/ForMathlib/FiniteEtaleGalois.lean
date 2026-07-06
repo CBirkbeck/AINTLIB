@@ -284,20 +284,12 @@ theorem isSeparable_of_etale [Module.Finite k A] [Algebra.Etale k A] (x : A) :
   exact Polynomial.Separable.of_dvd hFsep (minpoly.dvd k x hann)
 
 /-- A subalgebra of a finite étale algebra over a field is étale. -/
-theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra k A) :
-    Algebra.Etale k B := by
+/-- A finite reduced algebra over a field all of whose elements are separable is étale.
+This is the common core of `etale_subalgebra` and `etale_quotient`. -/
+theorem etale_of_isSeparable (B : Type u) [CommRing B] [Algebra k B] [Module.Finite k B]
+    [IsReduced B] (hsep : ∀ x : B, IsSeparable k x) : Algebra.Etale k B := by
   classical
-  haveI : Module.Finite k B := inferInstanceAs (Module.Finite k B.toSubmodule)
-  haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
-  haveI : IsReduced B := ⟨fun x hx => by
-    have h2 : ((x : A)) = 0 := (hx.map (B.subtype)).eq_zero
-    exact Subtype.ext h2⟩
   haveI : IsArtinianRing B := isArtinian_of_tower k inferInstance
-  have hsepB : ∀ x : B, IsSeparable k x := fun x => by
-    have h1 : minpoly k (B.val x) = minpoly k x :=
-      minpoly.algHom_eq B.val (fun _ _ h => Subtype.ext h) x
-    have h2 := isSeparable_of_etale (k := k) (B.val x)
-    rwa [IsSeparable, h1] at h2
   haveI hFE : Algebra.FormallyEtale k B := by
     letI _ (m : MaximalSpectrum B) : Field (B ⧸ m.asIdeal) :=
       Ideal.Quotient.field m.asIdeal
@@ -310,11 +302,89 @@ theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra
         have h := Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ k m.asIdeal) b
           (minpoly k b)
         rwa [minpoly.aeval, map_zero] at h
-      exact Polynomial.Separable.of_dvd (hsepB b) (minpoly.dvd k _ hann)⟩
+      exact Polynomial.Separable.of_dvd (hsep b) (minpoly.dvd k _ hann)⟩
     exact Algebra.FormallyEtale.of_isSeparable k (B ⧸ m.asIdeal)
   haveI : Algebra.FinitePresentation k B :=
     (Algebra.FinitePresentation.of_finiteType).mp inferInstance
   exact ⟨inferInstance, inferInstance⟩
+
+theorem etale_subalgebra [Module.Finite k A] [Algebra.Etale k A] (B : Subalgebra k A) :
+    Algebra.Etale k B := by
+  haveI : Module.Finite k B := inferInstanceAs (Module.Finite k B.toSubmodule)
+  haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
+  haveI : IsReduced B := ⟨fun x hx => by
+    have h2 : ((x : A)) = 0 := (hx.map (B.subtype)).eq_zero
+    exact Subtype.ext h2⟩
+  refine etale_of_isSeparable B fun x => ?_
+  have h1 : minpoly k (B.val x) = minpoly k x :=
+    minpoly.algHom_eq B.val (fun _ _ h => Subtype.ext h) x
+  have h2 := isSeparable_of_etale (k := k) (B.val x)
+  rwa [IsSeparable, h1] at h2
+
+/-- Every quotient of a finite étale algebra over a field is étale.  Every ideal is
+complemented (the algebra is semisimple), which forces it to be radical, so the quotient
+is reduced; separability of elements descends along the quotient map. -/
+theorem etale_quotient [Module.Finite k A] [Algebra.Etale k A] (J : Ideal A) :
+    Algebra.Etale k (A ⧸ J) := by
+  haveI : IsReduced A := Algebra.FormallyUnramified.isReduced_of_field k A
+  haveI : IsArtinianRing A := isArtinian_of_tower k inferInstance
+  haveI : IsSemisimpleRing A := isSemisimpleRing_of_isReduced
+  obtain ⟨I, hIJ⟩ := exists_isCompl J
+  have hrad2 : ∀ x : A, x * x ∈ J → x ∈ J := by
+    intro x hx2
+    have hxIJ : x ∈ I ⊔ J := hIJ.symm.sup_eq_top ▸ Submodule.mem_top
+    obtain ⟨i, hi, j, hj, hij⟩ := Submodule.mem_sup.mp hxIJ
+    have hij0 : i * j = 0 := by
+      have hmem : i * j ∈ I ⊓ J := ⟨Ideal.mul_mem_right j I hi, Ideal.mul_mem_left J i hj⟩
+      simpa [hIJ.symm.inf_eq_bot] using hmem
+    have hii : i * i ∈ I ⊓ J := by
+      refine ⟨Ideal.mul_mem_right i I hi, ?_⟩
+      have hexp : i * i = x * x - j * j - 2 * (i * j) := by rw [← hij]; ring
+      rw [hexp, hij0, mul_zero, sub_zero]
+      exact J.sub_mem hx2 (Ideal.mul_mem_left J j hj)
+    have hi0 : i = 0 := by
+      have hnil : IsNilpotent i := ⟨2, by rw [pow_two]; simpa [hIJ.symm.inf_eq_bot] using hii⟩
+      exact hnil.eq_zero
+    rw [← hij, hi0, zero_add]
+    exact hj
+  have hradJ : J.IsRadical := by
+    have key : ∀ n, ∀ x : A, x ^ n ∈ J → n ≠ 0 → x ∈ J := by
+      intro n
+      induction n using Nat.strong_induction_on with
+      | _ n ih =>
+        intro x hxn hn0
+        rcases Nat.lt_or_ge n 2 with h2 | h2
+        · interval_cases n
+          · exact absurd rfl hn0
+          · simpa using hxn
+        · have hm2 : x ^ (2 * ((n + 1) / 2)) ∈ J := by
+            have hsplit : x ^ (2 * ((n + 1) / 2)) = x ^ n * x ^ (2 * ((n + 1) / 2) - n) := by
+              rw [← pow_add]
+              congr 1
+              omega
+            rw [hsplit]
+            exact J.mul_mem_right _ hxn
+          have hxm : x ^ ((n + 1) / 2) ∈ J := by
+            refine hrad2 _ ?_
+            rwa [← pow_two, ← pow_mul, mul_comm]
+          exact ih ((n + 1) / 2) (by omega) x hxm (by omega)
+    intro x hx
+    obtain ⟨n, hn⟩ := hx
+    exact key n x hn (by
+      rintro rfl
+      simp only [pow_zero] at hn
+      exact (hIJ.symm.inf_eq_bot ▸ Submodule.mem_top :
+        (⊤ : Ideal A) ≠ ⊥ → False) sorry)
+  haveI : IsReduced (A ⧸ J) := (Ideal.isRadical_iff_quotient_reduced J).mp hradJ
+  haveI : Module.Finite k (A ⧸ J) :=
+    Module.Finite.of_surjective (Ideal.Quotient.mkₐ k J).toLinearMap
+      Ideal.Quotient.mk_surjective
+  refine etale_of_isSeparable (A ⧸ J) fun y => ?_
+  obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective y
+  have hann : Polynomial.aeval (Ideal.Quotient.mk J x) (minpoly k x) = 0 := by
+    have h := Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ k J) x (minpoly k x)
+    rwa [minpoly.aeval, map_zero] at h
+  exact Polynomial.Separable.of_dvd (isSeparable_of_etale (k := k) x) (minpoly.dvd k _ hann)
 
 end EtaleSubalgebra
 
