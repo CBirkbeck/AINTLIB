@@ -1190,7 +1190,26 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.9.1–1.9.2 with proofs (IN HAND).
 
 ### [T-D3] Divisor sums Σ[Pᵢ] (DS4a discharge)
-- **Status**: open · **File**: CartierDivisor.lean · `sectionsDivisor`,
+- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
+  2026-07-08T06:15Z · **DESIGN BANKED (2026-07-08T06:30Z)**:
+  (0) mathlib NOW HAS `Mul X.IdealSheafData` (IdealSheaf/Basic.lean:410, with
+  ideal_mul/support_mul/pow + top/bot lemmas) — the ticket's "add IdealSheafData.mul"
+  is obsolete, use the stock one. (1) DATA (total): `ideal := ∏ i, ((P i).1 ≫ ?).ker`
+  — sections' kernel ideals via `Scheme.Hom.ker` (total for any morphism); the three
+  Prop-fields need KM 1.2.1's standing hypotheses, so make the WHOLE structure-value
+  total by classical split: `if h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π
+  then real-product-construction else ⟨⊤-ideal, empty-subscheme props⟩` — the
+  ⊤-branch's subscheme is empty (support ⊥), and maps out of the empty scheme are
+  closed immersions (mathlib instance) hence finite/flat/lfp provable vacuously.
+  (2) IN-SCOPE PROPS (the real KM 1.2.2 content): finite/flat/lfp of the
+  product-ideal subscheme over S: locally the quotient by ∏ᵢ Iᵢ with each Iᵢ the
+  kernel of a section of a smooth relative curve; CRT off the diagonal + filtration
+  Iᵢ-powers on the diagonal give finite local freeness; degree additivity ⟹
+  `sectionsDivisor_degree = n`. Decompose when executing: (a) section-ker is an
+  effective divisor of degree 1 (KM 1.2.2 single-section case); (b) product of
+  divisors is a divisor with additive degree (KM 1.1.10-area); (c) assembly.
+  (3) `RelEffCartierDiv.baseChange` Prop-fields (same file, T-D12-adjacent) are
+  base-change-stability one-liners once (2) is packaged. · **File**: CartierDivisor.lean · `sectionsDivisor`,
   `sectionsDivisor_degree` · **Depends on**: none · **Parallel**: yes ·
   **Type**: def(data) + theorem
 - **Sketch**: section ⟹ closed immersion (π separated) ⟹ ideal sheaf via
