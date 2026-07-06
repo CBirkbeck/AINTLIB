@@ -1666,8 +1666,29 @@ Finite.lean, Merten 2026 — the object-level fibre statement is my T-B6d);
 induces an equivalence with finite continuous `Aut F`-sets") +
 `IsFundamentalgroup.lean` (`IsFundamentalGroup G F ⇒ toAutMulEquiv : G ≃* Aut F`,
 homeo). MISSING (the sub-development, one leaf each, single-conclusion):
-- **[AG-GG-1]** `PreGaloisCategory ((CommAlgCat.FiniteEtale ℚ)ᵒᵖ)` (schemes-side =
-  opposite of algebras; exactness/(co)limit axioms for finite étale algebras).
+- **[AG-GG-1]** `PreGaloisCategory ((CommAlgCat.FiniteEtale k)ᵒᵖ)` — claimed
+  beastmode-B 2026-07-06; NEW FILE ForMathlib/FiniteEtaleGalois.lean (mathlib-only
+  imports; general field k). Leaf tree (Lenstra G1–G3 via op-duality, ambient =
+  CommAlgCat k with (co)limits transported along `commAlgCatEquivUnder` +
+  Under CommRingCat; subcategory closure via
+  `ObjectProperty.IsClosedUnderLimitsOfShape` + `Algebra.Etale.of_equiv`):
+  - AG-GG-1.0 ambient instances: HasFiniteProducts/HasPushouts/HasInitial (+
+    SingleObj-G limits) for CommAlgCat k, via the Under-equivalence.
+  - AG-GG-1.1 closure under finite products (Etale-Pi instance ✓ in mathlib;
+    concrete product cones in CommAlgCat).
+  - AG-GG-1.2 closure under pushouts B ⊗[A] C (needs the 2-out-of-3
+    `A → B étale when k → A, k → B étale` — formal-lifting leaf if mathlib lacks
+    it — then base-change + comp instances ✓ mathlib).
+  - AG-GG-1.3 trivial closures: k initial ✓ (Etale R R), zero ring étale
+    (empty product).
+  - AG-GG-1.4 fixed points `A^G` finite étale, G finite (via NEW leaf: a
+    k-subalgebra of a finite étale k-algebra is finite étale — reduced artinian +
+    factor-embedding separability; mathlib-grade) + SingleObj-limit identification.
+  - AG-GG-1.5 G3 splitting: mono-in-op ⇒ direct summand (idempotent splitting of
+    epis between finite étale algebras over a field).
+  Duplication watch: NOTHING imports RingTheory/Etale/Finite.lean yet; Merten's
+  series is visibly heading here — re-check at each mathlib bump, swap ours out
+  if mathlib lands it.
 - **[AG-GG-2]** `FiberFunctor` instance for the `AlgebraicClosure ℚ`-points functor
   on that opposite category (fiber exactness; sep-closed case anchors it).
 - **[AG-GG-3]** `IsFundamentalGroup GalQ F` (Krull topology, continuity +
