@@ -8,11 +8,17 @@ Per the expert-review integration (2026-07-05), elliptic curves are packaged in 
 records**:
 
 * `EllipticCurveGeom` (this file): the pure geometry — a morphism `π : E ⟶ S`, smooth of
-  relative dimension 1 and proper, a section `0 : S ⟶ E`, and pointed genus-1 fibres.
-  This matches the definition of all sources (KM 2.1.1; Deligne–Rapoport II.1.1;
-  Loeffler Def 3.3.1, verbatim: *"An elliptic curve over `S` is a scheme `ℰ` with a
-  morphism `π : ℰ → S` (an `S`-scheme) such that `π` is proper and flat and all fibres
-  are smooth genus 1 curves, given with a section `0 : S → ℰ`"*).
+  relative dimension 1 and proper, a section `0 : S ⟶ E`, and — the **definition of record**
+  (owner-directed + expert-review v8, 2026-07-06) — the **Zariski-local-Weierstrass**
+  condition `localModel : LocallyWeierstrass` (`E` is locally on `S` the projective
+  Weierstrass model of an elliptic Weierstrass curve). This is the *executable* route to
+  modular curves: it gives explicit local equations, coordinate changes, and the
+  quotient-stack atlas without coherent cohomology. It **implies** the abstract genus-1
+  fibre condition (`fibrewiseElliptic` / `FibrewiseElliptic`, kept below as the derived,
+  Phase-4-comparison target — DR II.1.1 / KM 2.1.1 / Loeffler Def 3.3.1: *"a scheme `ℰ`
+  with `π : ℰ → S` proper and flat, all fibres smooth genus-1, and a section `0`"*). The
+  converse (genus-1 ⟹ locally Weierstrass) is the deferred Chain-A7 comparison (`T-W-cmp`,
+  coherent-cohomology stream), off the critical path to `Y(N)`.
 * `EllipticCurve` (`GroupLaw.lean`): the working record for the Katz–Mazur programme —
   the geometry **together with** a commutative group-scheme structure whose identity is
   the zero section. Mathematically the group datum is redundant (Abel), but it is the
@@ -171,16 +177,20 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
     isPullback_projModelBaseChange W
   -- REMAINING (T-A8a): build `hA`, expressing `pullback (pullback.snd π g) VA.ι` as a
   -- pullback of `projModelπ W` along `Spec.map φ` (φ = `g.appLE U.1 V`), then set
-  -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. Route for `hA`:
-  --  (1) pasting `pullback (pullback.snd π g) VA.ι ≅ pullback π (Vι ≫ g)` and, via
-  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g`, `≅ pullback (pullback π U.1.ι) gV`
-  --      (`pullbackRightPullbackFstIso` ×2);
-  --  (2) transport by `e : pullback π U.1.ι ≅ projModel W` to `pullback (projModel W) gV`;
-  --  (3) bridge `gV : V ⟶ U` to `Spec.map φ` through `U.2.isoSpec`/`hVaff.isoSpec`
-  --      (the affine-open comorphism `IsAffineOpen.isoSpec_hom_appLE`-style identity).
-  -- The two compatibility conjuncts then follow by `pullback.hom_ext`, mirroring
-  -- `FibrewiseElliptic.baseChange` lines 100–127 (isoPullback_hom_fst/snd + projModelZero
-  -- naturality). All scaffolding above (`Vι`, `gV`, `hgVfac`, `hB`) is proven and reusable.
+  -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. All ingredient lemmas identified:
+  --  (1) pasting via `Limits.pullbackRightPullbackFstIso` (+ `_hom_fst`, `_inv_snd_snd`),
+  --      assembled with `IsPullback.of_hasPullback ... |>.of_iso ...` exactly as in
+  --      `WeierstrassModel.isPullback_coverPiece`/`coverPiece_f_eq` (WeierstrassModel:2088–
+  --      2134): `pullback (pullback.snd π g) VA.ι ≅ pullback π (Vι ≫ g)`, then via
+  --      `hgVfac : gV ≫ U.1.ι = Vι ≫ g` and `e`, `≅ pullback (projModel W) gV` (over ↑U);
+  --  (2) BRIDGE `gV ↔ Spec.map φ`: `IsAffineOpen.Spec_map_appLE_fromSpec` gives
+  --      `Spec.map (g.appLE U.1 V hVle) ≫ U.2.fromSpec = hVaff.fromSpec ≫ g`, and
+  --      `hgVfac` + `U.2.fromSpec = U.2.isoSpec.inv ≫ U.1.ι` move the pullback base from
+  --      `↑U` (along `gV`) to `Spec Γ(S,U)` (along `Spec.map φ`) — matching `hB`'s cospan.
+  -- Then `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`; the two compatibility conjuncts by
+  -- `pullback.hom_ext`, mirroring `FibrewiseElliptic.baseChange` lines 100–127
+  -- (isoPullback_hom_fst/snd + `projModelZero` naturality). Scaffolding above
+  -- (`Vι`, `gV`, `hgVfac`, `hB`) is proven and reusable.
   sorry
 
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
@@ -200,7 +210,13 @@ structure EllipticCurveGeom (S : Scheme.{u}) where
   zero_π : zero ≫ π = 𝟙 S
   smooth : SmoothOfRelativeDimension 1 π
   proper : IsProper π
-  fibres : FibrewiseElliptic π zero zero_π
+  /-- **The local-model condition** (v2 definition of record, owner-directed + expert-review
+  v8): `E` is Zariski-locally on `S` the projective Weierstrass model of an elliptic
+  Weierstrass curve. This *implies* the fibrewise genus-1 condition
+  (`EllipticCurveGeom.fibrewiseElliptic`, T-A8 step 4); the converse is the deferred Chain-A7
+  comparison (`T-W-cmp`, coherent-cohomology stream). `smooth`/`proper` are kept as fields
+  (derivable from `localModel` via T-A3 + `projModelπ_isProper`, the deliberate `grp`-pattern). -/
+  localModel : LocallyWeierstrass π zero zero_π
 
 namespace EllipticCurveGeom
 

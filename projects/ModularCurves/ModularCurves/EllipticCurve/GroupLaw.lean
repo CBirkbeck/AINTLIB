@@ -160,7 +160,7 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
       AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
     exact MorphismProperty.pullback_snd _ _ E.smooth
   proper := MorphismProperty.pullback_snd _ _ E.proper
-  fibres := E.fibres.baseChange g
+  localModel := E.localModel.baseChange g
   grp := Over.grpObjMkPullbackSnd
   comm := by exact Over.isCommMonObj_mk_pullbackSnd
   one_eq_zero := by
