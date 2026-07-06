@@ -1434,8 +1434,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (find exact names); EllHom ext-lemma discipline.
 
 ### [T-E4] Moduli-problem functor laws (Prop sorries)
-- **Status**: in_progress · **Claimed**: beastmode-A (main-stream worker),
-  2026-07-08T15:30Z · **File**: Moduli/Representability.lean · `gammaOneNaiveProblem`
+- **Status**: done-modulo-E4a-gate (beastmode-A 2026-07-08T15:30Z →
+  2026-07-08T17:00Z — the FOUR functor-law sorries (map_id/map_comp ×2 functors)
+  PROVED sorry-free via new `EllHom.pullSection_id` + `EllHom.pullSection_comp`
+  (IsPullback.hom_ext with the lift-legs stated as defeq HAVES — a raw
+  `rw [IsPullback.lift_fst]` never matches under the Subtype-coe; laws close by
+  `congrArg Subtype.val` at the depth `ext` reaches). The two map-MEMBERSHIP sorries
+  remain: they are T-E4a-gated by design (pullSection additivity consumes the
+  canonicity chain / abelEnrichment_unique per the file's adversarial note; the
+  killing clause + fibre-smul clauses all route through mulByHom-compat across the
+  cartesian square). They discharge when T-E4a does.) · **File**: Moduli/Representability.lean · `gammaOneNaiveProblem`
   and `gammaFullNaiveProblem` `map_id/map_comp/map`-membership sorries ·
   **Depends on**: T-E3 · **Type**: lemmas.
 
