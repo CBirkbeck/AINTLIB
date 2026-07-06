@@ -1357,6 +1357,33 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `ℚ̄[ε]` counterexample); same for T-D7 (line 96). Both are workable as stated.
 - **Sources**: [KM] 1.4.4 with proof (IN HAND).
 
+### [T-D6a-i] ForMathlib: `IdealSheafData.comap_mul` (formation-compat linchpin)
+- **Status**: open (spawned by T-D6a; mathlib-PR-sized — full design banked)
+- **New file**: ForMathlib/IdealSheafComapMul.lean ·
+  `Scheme.IdealSheafData.comap_mul : (I * J).comap f = I.comap f * J.comap f` ·
+  **Depends on**: none · **Type**: theorem (upstream candidate)
+- **BANKED DESIGN (2026-07-08T13:30Z)**: comap K f := (pullback.fst f K.subschemeι).ker
+  (Functorial.lean:39); GC `map_gc : GaloisConnection (comap · f) (map · f)` with
+  le_map_comap/comap_map_le. (≤-half) comap (I*J) f ≤ comap I f * comap J f via
+  GC l_le needs MAP-SUPERMULTIPLICATIVITY map K₁ f * map K₂ f ≤ map (K₁K₂) f —
+  pointwise via ker: elements a·b with a ∈ ker((K₁ι ≫ f).app U): CAUTION the
+  composite app passes through NON-affine opens f⁻¹U; route instead through
+  `Hom.le_ker_iff/le_ofIdeals_iff` (Basic:125) + `ker_subschemeι` pointwise
+  ((K₁K₂).ideal V ≤ RingHom.ker ((K₁K₂)ι.app V) via ideal_ker_le). (≥-half = the
+  TENSOR half) comap I f * comap J f ≤ comap (I*J) f: affine-locally the pullback
+  piece ring is B ⊗_A A/K with kernel of B → B ⊗_A A/K equal to K.map(algebraMap)
+  — identification `Algebra.TensorProduct.quotIdealMapEquivTensorQuot (B) (I) :
+  B ⧸ I.map (algebraMap A B) ≃ₐ B ⊗[A] (A ⧸ I)` (RingTheory.TensorProduct.Quotient
+  ✓ exists) — then Ideal.map-multiplicativity `Ideal.map_mul` closes; the
+  cover-reduction glue mirrors `ker_ideal_of_isPullback_of_isOpenImmersion`
+  (IdealSheaf/Basic.lean:823) + `Hom.ker_apply` [QuasiCompact fst ✓ instance] +
+  pullbackSpecIso-app computation. SANITY BANKED: the naive scheme-level shortcut
+  fails — the comparison q : pullback f Iι ⟶ pullback f (I*J)ι via
+  pullback.map (𝟙) (inclusion (mul_le_left)) only reproves monotonicity
+  (comap (I*J) ≤ comap I); the tensor half is genuinely local.
+- **Sources**: Stacks 01R5-area (scheme-theoretic preimage) · mathlib
+  RingTheory/TensorProduct/Quotient.
+
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
 - **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
   **Depends on**: T-D3 · **Parallel**: with T-D6 · **Type**: theorem ·
