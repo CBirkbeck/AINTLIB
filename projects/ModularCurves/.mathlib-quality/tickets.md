@@ -1262,7 +1262,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `sectionDivisor (π) [IsSeparated π] (z) (hz) : RelEffCartierDiv π` first, then the
   n-fold product (CRT/filtration = the remaining mountain; consult KM 1.1-1.2 pages
   via the full PDF, printed pp. ~7-20, before formalising — quote-gate for 1.2.2).
-  NEXT ACTION: write sectionDivisor + its degree-1 lemma in CartierDivisor.lean. · **File**: CartierDivisor.lean · `sectionsDivisor`,
+  (2a) DONE 2026-07-08T08:00Z: `sectionDivisor` + `sectionDivisor_degree` sorry-free
+  in CartierDivisor.lean (ker + toImage-transport; degree via
+  finrank_eq_one_of_isIso; NB IsIso.eq_inv_comp for the `= inv _ ≫ _`-orientation).
+  NEXT ACTION: (2b) the n-fold product: mine KM 1.1.10-1.2.2 quotes from the full PDF
+  (printed pp. ~7-20); then state the product-divisor lemma family (one conclusion
+  each): product of two RelEffCartierDivs is a RelEffCartierDiv (finite/flat/lfp of
+  the product-ideal subscheme — CRT off the common support + filtration 0 → I/IJ →
+  R/IJ → R/I → 0 with I/IJ ≅ J-module-locally-free-transport) + degree-additivity;
+  then `sectionsDivisor := ∏ sectionDivisor` via the classical-split for totality. · **File**: CartierDivisor.lean · `sectionsDivisor`,
   `sectionsDivisor_degree` · **Depends on**: none · **Parallel**: yes ·
   **Type**: def(data) + theorem
 - **Sketch**: section ⟹ closed immersion (π separated) ⟹ ideal sheaf via
