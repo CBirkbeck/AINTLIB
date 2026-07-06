@@ -613,6 +613,25 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 ### [T-B7] μ_N finite locally free of rank N, étale iff N invertible (spawned by beastmode-B, 2026-07-06)
 - **Status**: in_progress · **Claimed**: beastmode-B (stream-B worker),
   2026-07-06T10:18Z · **File**: GroupScheme/MuN.lean · `muNπ_isFinite`, `muNπ_flat`,
+- **Progress**:
+  - 2026-07-06T10:45: THREE OF FOUR proved+committed (muNπ_isFinite, muNπ_flat,
+    muNπ_finrank = N). Engine: `Monic.finite_quotient`/`free_quotient` for
+    ℤ[T]/(Tᴺ−1); `isPullback_muN` (private) moves the defining square's corner from
+    the abstract terminal to `Spec (ULift ℤ)` via `paste_vert` + `of_vert_isIso` +
+    `specULiftZIsTerminal.hom_ext`; property transport by
+    `MorphismProperty.of_isPullback (…).flip`; rank via
+    `finrank_comp_{left,right}_of_bijective` (strip ULift equivs) +
+    `rankAtStalk_eq_finrank_of_free` + `powerBasis'` dim. GOTCHAS: pass
+    @-explicit instances to `finrank_of_isPullback` and use
+    `congrFun (finrank_SpecMap_eq_finrank …)` instead of rw (invisible
+    instance-spelling mismatches defeat kabstract); `natDegree_X_pow_sub_C`'s value
+    arg is named `r`. REMAINING: `muNπ_etale_iff` — plan: (⟸) factor S through
+    Spec ℤ[1/N] via Away.lift on toSpecΓ, base-change the étale absolute
+    μ_N/ℤ[1/N] (standard-smooth-of-rel-dim-0 presentation: jacobian N·T^{N−1},
+    T invertible in the quotient); (⟹) reduce to fibres at points where N ∈ 𝔪_s
+    (isUnit-iff-basicOpen-⊤), field case via unramified ⟹ T^N−1 separable ⟹
+    N ≠ 0 in κ(s). Check RingTheory/{Etale,Unramified} for
+    AdjoinRoot-separable dictionaries before hand-rolling.
   `muNπ_finrank`, `muNπ_etale_iff` (statements already in skeleton; attack log
   foundations.md verdicts SURVIVED/QUOTE-MISSING) · **Parent**: T-B2
 - **Depends on**: none · **Parallel**: yes · **Type**: theorems
