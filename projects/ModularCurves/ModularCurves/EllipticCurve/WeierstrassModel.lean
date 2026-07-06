@@ -1757,6 +1757,8 @@ noncomputable def projModelBaseChangeLift (W : WeierstrassCurve R) :
 
 section TensorComparison
 
+open scoped TensorProduct
+
 variable {R' : Type u} [CommRing R'] [Algebra R R']
 
 /-- Scalar extension identifies the dehomogenised cubics. -/
@@ -1795,6 +1797,86 @@ lemma sChartBaseChange_mk (W : WeierstrassCurve R) (i : Fin 3)
     sChartBaseChange (R' := R') W i (Ideal.Quotient.mk _ p) =
       Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R') p) :=
   rfl
+
+/-- The canonical evaluation into the tensor corner. -/
+private noncomputable def sChartTensorInvAux (W : WeierstrassCurve R) (i : Fin 3) :
+    MvPolynomial {j : Fin 3 // j ≠ i} R' →ₐ[R']
+      (R' ⊗[R] (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) :=
+  MvPolynomial.aeval fun j => (1 : R') ⊗ₜ[R]
+    (Ideal.Quotient.mk _ (MvPolynomial.X j))
+
+private lemma sChartTensorInvAux_map_algebraMap (W : WeierstrassCurve R) (i : Fin 3)
+    (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
+    sChartTensorInvAux (R' := R') W i (MvPolynomial.map (algebraMap R R') p) =
+      1 ⊗ₜ[R] (Ideal.Quotient.mk _ p) := by
+  rw [sChartTensorInvAux, MvPolynomial.aeval_map_algebraMap]
+  have h : (MvPolynomial.aeval (R := R) fun j => ((1 : R') ⊗ₜ[R]
+      (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R i
+        W.toProjective.polynomial}) (MvPolynomial.X j)))) =
+      (Algebra.TensorProduct.includeRight.comp
+        (Ideal.Quotient.mkₐ R (Ideal.span {MvPolynomial.dehomogenizeAux R i
+          W.toProjective.polynomial}))) := by
+    refine MvPolynomial.algHom_ext fun j => ?_
+    simp
+  rw [h]
+  rfl
+
+/-- Scalar extension of the chart quotient as a tensor identification. -/
+noncomputable def sChartTensorEquiv (W : WeierstrassCurve R) (i : Fin 3) :
+    (R' ⊗[R] (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}))
+      ≃ₐ[R'] (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial}) := by
+  refine AlgEquiv.ofAlgHom
+    (Algebra.TensorProduct.lift (Algebra.ofId R' _)
+      (sChartBaseChange (R' := R') W i) fun _ _ => Commute.all _ _)
+    (Ideal.Quotient.liftₐ _ (sChartTensorInvAux W i) fun a ha => ?_) ?_ ?_
+  · suffices h : Ideal.span {MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial} ≤
+        RingHom.ker (sChartTensorInvAux (R' := R') W i).toRingHom from h ha
+    rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker,
+      ← dehomog_baseChange]
+    show sChartTensorInvAux (R' := R') W i
+      (MvPolynomial.map (algebraMap R R')
+        (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial)) = 0
+    rw [sChartTensorInvAux_map_algebraMap,
+      Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
+      TensorProduct.tmul_zero]
+  · -- forward ∘ inverse = id on the R'-side quotient
+    refine AlgHom.ext fun x => ?_
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    have h : ∀ q : MvPolynomial {j : Fin 3 // j ≠ i} R',
+        (Algebra.TensorProduct.lift (Algebra.ofId R' _)
+          (sChartBaseChange (R' := R') W i) fun _ _ => Commute.all _ _)
+          (sChartTensorInvAux (R' := R') W i q) = Ideal.Quotient.mk _ q := by
+      intro q
+      induction q using MvPolynomial.induction_on with
+      | C r =>
+        rw [sChartTensorInvAux, MvPolynomial.aeval_C, AlgHom.commutes]
+        rfl
+      | add p q hp hq => simp only [map_add, hp, hq]
+      | mul_X p j hp =>
+        simp only [sChartTensorInvAux] at hp ⊢
+        simp only [map_mul, MvPolynomial.aeval_X, hp,
+          Algebra.TensorProduct.lift_tmul, map_one, one_mul,
+          sChartBaseChange_mk, MvPolynomial.map_X]
+    exact h p
+  · -- inverse ∘ forward = id on the tensor side
+    refine Algebra.TensorProduct.ext' fun a b => ?_
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective b
+    rw [AlgHom.comp_apply, AlgHom.id_apply, Algebra.TensorProduct.lift_tmul]
+    rw [show (Algebra.ofId R' _) a * (sChartBaseChange (R' := R') W i)
+        (Ideal.Quotient.mk _ p) = a • ((sChartBaseChange (R' := R') W i)
+        (Ideal.Quotient.mk _ p)) from (Algebra.smul_def a _).symm]
+    rw [map_smul, sChartBaseChange_mk]
+    rw [show ((Ideal.Quotient.liftₐ _ (sChartTensorInvAux (R' := R') W i) _)
+        (Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R') p))) =
+        sChartTensorInvAux (R' := R') W i
+          (MvPolynomial.map (algebraMap R R') p) from rfl]
+    rw [sChartTensorInvAux_map_algebraMap]
+    rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
 
 end TensorComparison
 
