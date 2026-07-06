@@ -2308,7 +2308,11 @@ DS-register unchanged; `#print axioms` audit.
 ### Stream H — general levels & full level over ℤ (`Moduli/GammaH.lean`, statements in skeleton)
 - **[T-H1]** `gammaHNaive_bot`: `P_⊥ ≅` naive full level. Depends: T-E4. Golf-sized.
 - **[T-H2]** `glSmul` membership + **[T-H2a]** action law (needs killed-by-N; uses
-  `point_smul_eq_comp_mulBy`). Depends: T-A6d spec only.
+  `point_smul_eq_comp_mulBy`). Depends: T-A6d spec only. **DONE** (beastmode 2026-07-06
+  → glSmul FULLY sorry-free, axiom-clean: killing halves + generation via matrix-inverse
+  recovery `pull P = (g⁻¹)₀₀·pull P' + (g⁻¹)₁₀·pull Q'`, coefficients reduced mod N by
+  `↑g·↑g⁻¹ = 1`; new helpers `zsmul_eq_of_intCast_eq`, `recover_combo`; `glSmul_one`,
+  `glSmul_mul`, `hOrbitSetoid` now also axiom-clean). Commit 6d851016.
 - **[T-H3]** `gammaHNaiveProblem` functor laws + orbit-compat of pullback.
 - **[T-H4]** `gammaHNaive_relativelyRepresentable` (Loeffler 3.8.2; Weil-pairing open
   locus for H = 1, quotient for general H). Depends: T-C0/T-C1, stream Q, T-D18.
