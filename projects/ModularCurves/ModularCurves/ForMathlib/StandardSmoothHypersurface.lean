@@ -1,0 +1,112 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.RingTheory.Smooth.StandardSmooth
+import Mathlib.RingTheory.Localization.Away.Basic
+
+/-!
+# Localized hypersurfaces are standard smooth
+
+For `f : MvPolynomial σ R` over a finite variable type, the hypersurface
+`S := R[Xⱼ]/(f)` localized away from the image of a partial derivative `∂f/∂Xᵢ` is
+standard smooth over `R` of relative dimension `#σ - 1`: the presentation with
+variables `σ ⊕ {w}`, relations `(f, w·∂f/∂Xᵢ - 1)` and section `(Xᵢ, w)` has Jacobian
+`(∂f/∂Xᵢ)²`, a unit after the localization.
+
+This is the chartwise smoothness engine for the projective Weierstrass model
+(AINTLIB ModularCurves T-A3b); upstream candidate.
+
+## Main results
+
+* `ModularCurves.hypersurfaceAwayEquiv`: the model quotient
+  `R[Option σ]/(f, X none·∂f - 1)` is the localized hypersurface.
+* `ModularCurves.isStandardSmoothOfRelativeDimension_hypersurface_away`: the localized
+  hypersurface is standard smooth of relative dimension `#σ - 1` over `R`.
+-/
+
+open MvPolynomial
+
+namespace ModularCurves
+
+variable {R : Type*} [CommRing R] {σ : Type} [Fintype σ] [DecidableEq σ]
+  (f : MvPolynomial σ R) (i : σ)
+
+/-- The two relations of the localized hypersurface: `f` and `X none · ∂f/∂Xᵢ - 1`. -/
+noncomputable def hypersurfaceRels : Fin 2 → MvPolynomial (Option σ) R :=
+  ![rename Option.some f,
+    X none * rename Option.some (pderiv i f) - 1]
+
+/-- The model quotient presenting the localized hypersurface. -/
+noncomputable abbrev HypersurfaceModel : Type _ :=
+  MvPolynomial (Option σ) R ⧸ Ideal.span (Set.range (hypersurfaceRels f i))
+
+/-- The naive presentation of the model quotient, with section `(Xᵢ, w)`. -/
+noncomputable def hypersurfacePresentation :
+    Algebra.PreSubmersivePresentation R (HypersurfaceModel f i) (Option σ) (Fin 2) :=
+  Algebra.PreSubmersivePresentation.naive (v := hypersurfaceRels f i)
+    ![Option.some i, none]
+    (by
+      intro a b hab
+      fin_cases a <;> fin_cases b <;> simp_all)
+
+lemma pderiv_none_rename_some (p : MvPolynomial σ R) :
+    pderiv (none : Option σ) (rename Option.some p) = 0 :=
+  pderiv_eq_zero_of_notMem_vars fun h => by
+    obtain ⟨j, -, hj⟩ := mem_vars_rename _ _ h
+    exact Option.some_ne_none j hj
+
+lemma hypersurfacePresentation_jacobian_isUnit :
+    IsUnit (hypersurfacePresentation f i).jacobian := by
+  classical
+  rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det]
+  have h00 : (hypersurfacePresentation f i).jacobiMatrix 0 0 =
+      rename Option.some (pderiv i f) := by
+    rw [hypersurfacePresentation,
+      Algebra.PreSubmersivePresentation.jacobiMatrix_naive]
+    show pderiv (Option.some i) (rename Option.some f) = _
+    rw [pderiv_rename (Option.some_injective _)]
+  have h10 : (hypersurfacePresentation f i).jacobiMatrix 1 0 = 0 := by
+    rw [hypersurfacePresentation,
+      Algebra.PreSubmersivePresentation.jacobiMatrix_naive]
+    show pderiv none (rename Option.some f) = 0
+    exact pderiv_none_rename_some f
+  have h11 : (hypersurfacePresentation f i).jacobiMatrix 1 1 =
+      rename Option.some (pderiv i f) := by
+    rw [hypersurfacePresentation,
+      Algebra.PreSubmersivePresentation.jacobiMatrix_naive]
+    show pderiv none (X none * rename Option.some (pderiv i f) - 1) = _
+    rw [map_sub, pderiv_mul, pderiv_X_self, one_mul, pderiv_none_rename_some,
+      mul_zero, add_zero, Derivation.map_one_eq_zero, sub_zero]
+  rw [Matrix.det_fin_two, h00, h10, h11, mul_zero, sub_zero, map_mul]
+  refine (isUnit_iff_exists_inv.mpr ⟨algebraMap ((hypersurfacePresentation f i).Ring)
+      (HypersurfaceModel f i) (X none), ?_⟩).mul
+    (isUnit_iff_exists_inv.mpr ⟨algebraMap ((hypersurfacePresentation f i).Ring)
+      (HypersurfaceModel f i) (X none), ?_⟩) <;>
+  · rw [← map_mul, show ((algebraMap ((hypersurfacePresentation f i).Ring)
+        (HypersurfaceModel f i)) : MvPolynomial (Option σ) R →+*
+        HypersurfaceModel f i) = Ideal.Quotient.mk _ from rfl,
+      ← map_one (Ideal.Quotient.mk (Ideal.span (Set.range (hypersurfaceRels f i)))),
+      Ideal.Quotient.mk_eq_mk_iff_sub_mem]
+    refine Ideal.subset_span ⟨1, ?_⟩
+    show X none * rename Option.some (pderiv i f) - 1 = _
+    ring
+
+/-- The submersive presentation of the model quotient. -/
+noncomputable def hypersurfaceSubmersivePresentation :
+    Algebra.SubmersivePresentation R (HypersurfaceModel f i) (Option σ) (Fin 2) where
+  __ := hypersurfacePresentation f i
+  jacobian_isUnit := hypersurfacePresentation_jacobian_isUnit f i
+
+lemma hypersurfaceModel_isStandardSmoothOfRelativeDimension :
+    Algebra.IsStandardSmoothOfRelativeDimension (Fintype.card σ - 1) R
+      (HypersurfaceModel f i) := by
+  refine (hypersurfaceSubmersivePresentation f i).isStandardSmoothOfRelativeDimension ?_
+  show (hypersurfacePresentation f i).dimension = _
+  rw [Algebra.Presentation.dimension]
+  simp only [Nat.card_eq_fintype_card, Fintype.card_option, Fintype.card_fin]
+  omega
+
+end ModularCurves
