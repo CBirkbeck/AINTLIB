@@ -1887,6 +1887,29 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     integral) with point (adjoin).val: σ ω = ω for all ω ⇒ σ = 1.
   Then `instance : IsFundamentalGroup (fiber k (SeparableClosure k)) Gal` and via
   mathlib toAutMulEquiv/toAutHomeo the identification with Aut F = π₁.
+  ✓✓ AG-GG-3 COMPLETE (2026-07-06, beastmode-B) — all leaves + GaloisCategory
+  instance, axiom-clean. File ForMathlib/FiniteEtaleFundamentalGroup.lean. Landing
+  notes: (3a) fiber elements are NOT functions syntactically — `let x' : A →ₐ[k] Ω
+  := x` (tactic-let keeps defeq; `have` loses it and breaks σ • x goals); action
+  instance MUST be parameterized over general Ω — a SeparableClosure-headed
+  MulAction instance gets isDefEqStuck at unification (Field-instance chains).
+  (3d) `Fin 0 → k` is the subsingleton terminal (PLift bumps universes — avoid);
+  FormallyEtale of it via the Pi-INSTANCE (pi_iff's family arg is explicit, awkward).
+  (3e) AlgEquiv.ofInjectiveField lands in .range (Subalgebra) — its Algebra/
+  IsScalarTower instances suffice for liftNormal, NO IntermediateField promotion
+  needed; letI Field from isField_of_isIntegral_of_isField'. (3c) fixingSubgroup
+  membership needs IntermediateField.mem_fixingSubgroup_iff (defeq intro fails);
+  coset-openness via preimage under continuous_const.mul continuous_id.
+  (3f) adjoin.finiteDimensional + isSeparable_tower_bot_of_isSeparable.
+  CRITICAL DOWNSTREAM PROTOCOL: at CONCRETE k (e.g. ℚ) the topology/fundamental
+  instances DON'T synthesize (mathlib's separableClosure instances are keyed on
+  ↥(separableClosure F E), the abbreviation SeparableClosure unifies stuck, and
+  the stuck-exception ABORTS search). Register two one-liners before use:
+    instance : CompactSpace (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+      compactSpace_galSepClosure ℚ
+    noncomputable instance : ... := isFundamentalGroup_galSepClosure (k := ℚ)
+  (named bridges also exported: isSepClosure/isGalois/normal/isSepClosed/
+  isSeparable_sepClosure). Probe at ℚ axiom-clean with this protocol.
 - **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
   dictionary (finite ⇒ affine ⇒ Spec of the algebra IS the finite étale ℚ-scheme).
 Then T-F1: `V_ρ := Spec` of the algebra attached to the `ContAction` `(ℤ/N)²`-via-ρ;
