@@ -1759,8 +1759,35 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     Y ≅ X × Z via CRT-pair (e, 1-e), Z étale via classification/quotient.
     Then ASSEMBLY: PreGaloisCategory ((FiniteEtale k)ᵒᵖ) from op-duality
     instances + hand-rolled (SingleObj G)ᵒᵖ ≌ SingleObj Gᵐᵒᵖ.
-  - AG-GG-1.5 G3 splitting: mono-in-op ⇒ direct summand (idempotent splitting of
-    epis between finite étale algebras over a field).
+  - AG-GG-1.5 ✓ DONE (2026-07-06, beastmode-B): part (i) epi⇒surjective —
+    `natCard_algHom_sepClosure` (# homs into SeparableClosure = finrank, via
+    liftEquivRight base change + natCard_algHom_eq_finrank) + `surjective_of_epi`
+    (PIGEONHOLE against the range subalgebra — counting both X and X' kills the
+    faithful-flatness step entirely; two k̄-homs agreeing on the range land in
+    W := g₁.range ⊔ g₂.range, finite via productMap_range, a FIELD via
+    isField_of_isIntegral_of_isField', étale via minpoly.algHom_eq W.val ⇒
+    contradicts Epi via cancel_epi). Part (ii): `etale_of_isSeparable` core
+    refactored out of etale_subalgebra (finite + reduced + separable elements ⇒
+    étale); `etale_quotient` (every ideal complemented by semisimplicity
+    (IsArtinianRing.isSemisimpleRing_of_isReduced), complement ⇒ RADICAL by the
+    i·j = 0 trick + 2^k-descent induction, quotient reduced via
+    isRadical_iff_quotient_reduced, separability descends through mkₐ);
+    `monoInducesIsoOnDirectSummand_op` (CRT AlgEquiv.ofBijective on
+    π.prod(mkₐ J) — inj: ker ⊓ J = ⊥; surj: Bezout e + f = 1;
+    BinaryFan.isLimitMk + BinaryFan.IsLimit.op — NOT bare hlim.op which grabs
+    the generic Cone.op). ASSEMBLY ✓ DONE: `singleObjOpEquiv`
+    ((SingleObj M)ᵒᵖ ≌ SingleObj Mᵐᵒᵖ — map_id/map_comp rfl, Iso.refl units,
+    functor_unitIso_comp := Category.id_comp explicitly since 1·1 isn't rfl;
+    disambiguate MulOpposite.unop vs Quiver.Hom.unop or metavars poison the
+    functor literal) + op-duality instances (hasTerminal_op_of_hasInitial,
+    hasPullbacks_opposite, hasFiniteCoproducts_opposite,
+    hasColimitsOfShape_op_of_hasLimitsOfShape with C pinned explicitly) ⇒
+    **instance PreGaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ for ANY
+    field k** — hasQuotientsByFiniteGroups field must be given explicitly
+    (`fun G _ _ => inferInstance`); the Pi-typed default infer_instance can't.
+    Axiom-clean: all four theorems + instance probe = propext/choice/Quot.sound.
+    NOTE for probes: FiniteEtale has TWO universes — `FiniteEtale ℚ` without
+    `.{0}` leaves a metavar head and synthesis silently fails.
   Duplication watch: NOTHING imports RingTheory/Etale/Finite.lean yet; Merten's
   series is visibly heading here — re-check at each mathlib bump, swap ours out
   if mathlib lands it.
