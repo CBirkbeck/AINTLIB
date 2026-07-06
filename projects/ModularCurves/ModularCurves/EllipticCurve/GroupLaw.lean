@@ -234,6 +234,19 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
+  -- ARITHMETIC SETTLED, COERCION-SPELLING PARKED (2026-07-09). Every fact compiles:
+  --   hmf : (E.baseChange g).mulByHom n ≫ pullback.fst E.π g
+  --           = pullback.fst E.π g ≫ E.mulByHom n   (mulByHom_baseChange + lift_fst)
+  --   hms : (E.baseChange g).mulByHom n ≫ pullback.snd E.π g = pullback.snd E.π g
+  --   hASf : (asSection E g P).1 ≫ pullback.fst E.π g = P.1   (lift_fst)
+  -- and both legs of `pullback.hom_ext` reduce to `P.1 ≫ E.mulByHom n` / `𝟙 T` via
+  -- point_smul_eq_comp_mulBy. The ONLY blocker: `↑(asSection E g P)` elaborates with
+  -- codomain `pullback E.π g` inside the goal but `(E.baseChange g).E` inside the
+  -- haves — defeq, but `reassoc_of% hASf` / `← Category.assoc` matchers distinguish
+  -- the two spellings. Fix = give `Point.asSection` a `@[simp] asSection_coe` lemma
+  -- unfolding `↑(asSection E g P)` to `pullback.lift P.1 (𝟙 T) _` at the RAW
+  -- `pullback E.π g` spelling, then `simp only [asSection_coe]` normalises both
+  -- occurrences before the reassoc. Non-blocking (T-D6a-ii is non-blocking).
   sorry
 
 end EllipticCurve
