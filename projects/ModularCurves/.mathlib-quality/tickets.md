@@ -1680,6 +1680,28 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T16:00Z — T-D14c REFORMULATED CURVE-FREE (design of
+    record, supersedes the (i)-(iii) map where they differ): via Galois
+    (`map_bot : map ⊥ f = f.ker` + `map_gc`), `IsSubdivisor D′ D ⟺ D.ideal ≤
+    D′.ideal ⟺ E = ⊥` where `E := D.ideal.comap D′.ideal.subschemeι` (the
+    intersection ideal ON the subscheme D′); base-changed condition ⟺
+    `E.comap q_t = ⊥` (comap_comp along D′_T → D′ → C). SO T-D14c = a standalone
+    statement about FINITE LOCALLY FREE morphisms, no curves: for p : W ⟶ S
+    finite+flat+lfp and E : W.IdealSheafData, ∃ Z : S.IdealSheafData with
+    `Z ≤ t.ker ⟺ E.comap (W-projection of t) = ⊥` for all t. Construction:
+    `Z.ideal U := dual-span of E's sections over the affine p⁻¹U` (dual-span :=
+    span {φ g | φ ∈ Dual, g ∈ J} = ⨆_{g} sectionVanishingIdeal — BASIS-FREE, so
+    globally defined; basis enters only in proofs via T-D13). Gluing keystone
+    [T-D14c-0]: dual-span commutes with localization for f.p. modules — engine
+    DISCOVERED: `Module.FinitePresentation.isLocalizedModule_map` (instance,
+    Algebra/Module/FinitePresentation.lean:546: Hom-modules localize for fp
+    source; at N := R this is Dual-localization; `IsLocalizedModule.surj` gives
+    every localized functional as unit⁻¹ • localized-φ). Bridge for
+    universality = `forall_one_tmul_eq_zero_iff_span_coord_le_ker` (DONE).
+    Instantiation plumbing back to divisors via `comapIso`. Sub-ladder:
+    [T-D14c-0] dual-span-localizes (pure algebra) → [T-D14c-1] `vanishingLocus
+    p E : S.IdealSheafData` (def + gluing) → [T-D14c-2] `le_ker_iff` spec →
+    [T-D14] assembly (Galois juggle, ~10 lines).
   - **ROUTE OF RECORD (analysis banked 2026-07-06T14:45Z, COUNT-FREE)**: the
     statement never mentions the `deg D′` equation count (docstring-only per the
     attack log), so NO local principality of `I(D)` is needed — the T-D11/AG-LB/
