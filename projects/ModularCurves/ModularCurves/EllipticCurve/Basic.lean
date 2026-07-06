@@ -175,6 +175,11 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) (projModelπ W)
       (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) :=
     isPullback_projModelBaseChange W
+  -- the restriction is a pullback of `π` along `Vι ≫ g` (paste the two base squares)
+  have hP1 : IsPullback (pullback.fst (pullback.snd π g) Vι ≫ pullback.fst π g)
+      (pullback.snd (pullback.snd π g) Vι) π (Vι ≫ g) :=
+    (IsPullback.of_hasPullback (pullback.snd π g) Vι).paste_horiz
+      (IsPullback.of_hasPullback π g)
   -- REMAINING (T-A8a): build `hA`, expressing `pullback (pullback.snd π g) VA.ι` as a
   -- pullback of `projModelπ W` along `Spec.map φ` (φ = `g.appLE U.1 V`), then set
   -- `e' := hA.isoPullback ≪≫ hB.isoPullback.symm`. All ingredient lemmas identified:
