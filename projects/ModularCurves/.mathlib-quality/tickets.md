@@ -1381,6 +1381,20 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
 - [T-D22] section-of-smooth-rel-curve ⟹ locally principal nzd ideal (HB-REGIMM;
   étale-local 𝔸¹ model route). [T-D23] closed pt of smooth curve /field has DVR
   local ring. [T-D24] finrank additivity in SES of finite free modules (local + glue).
+  - **[T-D24] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
+    successor), 2026-07-06T12:30Z · new file ForMathlib/FinrankExact.lean
+    (mathlib-only imports, chain-independent). Statement package (all gaps,
+    duplicate-checked: only `rankAtStalk_prod` + a DivisionRing Euler-char lemma
+    exist): (a) SES with projective quotient splits —
+    `Nonempty (N ≃ₗ[R] M × P)` from `Exact f g` + inj + surj + `[Projective R P]`
+    (3-liner: `projective_lifting_property` + `Exact.splitSurjectiveEquiv`);
+    (b) `finrank R N = finrank R M + finrank R P` for M,P finite free (via (a) +
+    `finrank_prod`; no locality needed); (c) THE consumer form, feeds
+    degree-additivity D-curve.3: `rankAtStalk N p = rankAtStalk M p +
+    rankAtStalk P p` for M,P finite flat (localize the SES —
+    `IsLocalizedModule.map_exact/map_injective/map_surjective` — then
+    `free_of_flat_of_isLocalRing` + (b) at Rₚ). Attack block in
+    d-lane-helpers.md at statement time.
   [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
