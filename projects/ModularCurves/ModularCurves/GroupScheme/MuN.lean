@@ -70,7 +70,7 @@ def muNπ (S : Scheme.{u}) (N : ℕ) : muN S N ⟶ S := pullback.fst _ _
 /-- The constant `S`-scheme on a finite type `A`: the disjoint union of copies of `S`
 indexed by `A`. For `A = ZMod N` this is the constant group scheme `(ℤ/N)_S` of
 KM 1.4.4(5). -/
-@[reducible] def constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
+abbrev constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
   ∐ fun _ : A ↦ S
 
 /-- The structure morphism of the constant scheme. -/

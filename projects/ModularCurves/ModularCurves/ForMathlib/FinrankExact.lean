@@ -44,13 +44,11 @@ variable {R : Type u} {M : Type v} {N : Type w} {P : Type x} [Semiring R]
   [Module R M] [Module R N] [Module R P]
   {f : M →ₗ[R] N} {g : N →ₗ[R] P}
 
-/-- A short exact sequence `0 → M → N → P → 0` with `P` projective splits:
-`N ≅ M × P`. -/
+/-- A short exact sequence `0 → M → N → P → 0` with `P` projective splits: `N ≅ M × P`. -/
 theorem Function.Exact.nonempty_linearEquiv_prod_of_projective [Module.Projective R P]
     (h : Function.Exact f g) (hf : Function.Injective f) (hg : Function.Surjective g) :
-    Nonempty (N ≃ₗ[R] M × P) := by
-  obtain ⟨l, hl⟩ := Module.projective_lifting_property g LinearMap.id hg
-  exact ⟨(h.splitSurjectiveEquiv hf ⟨l, hl⟩).1⟩
+    Nonempty (N ≃ₗ[R] M × P) :=
+  (projective_lifting_property g .id hg).elim fun l hl ↦ ⟨(h.splitSurjectiveEquiv hf ⟨l, hl⟩).1⟩
 
 /-- Rank additivity in a short exact sequence `0 → M → N → P → 0` of modules with
 `M` and `P` finite free. -/

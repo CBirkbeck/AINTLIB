@@ -2454,32 +2454,6 @@ lemma projModelZeroChart_fac (W : WeierstrassCurve R) :
   IsOpenImmersion.lift_fac _ _ _
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Naturality of the section at infinity under base change (T-A5b zero-leg). -/
-lemma projModelZero_baseChange {R' : Type u} [CommRing R'] [Algebra R R']
-    (W : WeierstrassCurve R) :
-    projModelZero (W.map (algebraMap R R')) ≫
-        projModelBaseChange (algebraMap R R') W =
-      Spec.map (CommRingCat.ofHom (algebraMap R R')) ≫ projModelZero W := by
-  rw [← projModelZeroChart_fac (W.map (algebraMap R R')), Category.assoc]
-  rw [show projModelBaseChange (algebraMap R R') W =
-    Proj.map (baseChangeGradedHom (algebraMap R R') W)
-      (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) from rfl]
-  rw [← awayι_awayCongr (W.map (algebraMap R R'))
-    (baseChangeGradedHom_mk_X (R' := R') W 1)
-    ((baseChangeGradedHom (algebraMap R R') W).2
-      (mk_X_mem_quotientGrading_one W 1))]
-  rw [Category.assoc]
-  rw [Proj.awayι_comp_map (baseChangeGradedHom (algebraMap R R') W)
-    (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) one_pos _
-    (mk_X_mem_quotientGrading_one W 1)]
-  rw [← projModelZeroChart_fac W, ← Category.assoc, ← Category.assoc,
-    ← Category.assoc]
-  refine congrArg (· ≫ Proj.awayι (quotientGrading (projIdeal W))
-    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-    (mk_X_mem_quotientGrading_one W 1) one_pos) ?_
-  sorry
-
-set_option backward.isDefEq.respectTransparency false in
 /-- The chart factorisation of the zero section is a retraction of the chart's
 `R`-structuring. -/
 lemma projModelZeroChart_comp_χ (W : WeierstrassCurve R) :
@@ -2638,6 +2612,75 @@ lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
   conv_rhs => rw [projModelZero, Proj.fromOfGlobalSections]
   rw [Scheme.Cover.ι_glueMorphisms]
   exact glue_pieceY W
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The `Y`-chart factorisation of the zero section is `Spec` of the evaluation
+at the point at infinity. -/
+lemma projModelZeroChart_eq_spec (W : WeierstrassCurve R) :
+    projModelZeroChart W = Spec.map (CommRingCat.ofHom (zeroChartHom W)) := by
+  rw [← cancel_mono (Proj.awayι (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos),
+    projModelZeroChart_fac, spec_zeroChartHom_awayι]
+
+/-- The point-at-infinity evaluation is natural in the base ring. -/
+lemma projModelZeroEval_baseChangeGradedHom {R' : Type u} [CommRing R'] [Algebra R R']
+    (W : WeierstrassCurve R) (x : projCoordRing W) :
+    projModelZeroEval (W.map (algebraMap R R'))
+      ((baseChangeGradedHom (algebraMap R R') W) x) =
+      algebraMap R R' (projModelZeroEval W x) := by
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [show ((baseChangeGradedHom (algebraMap R R') W)
+      (Ideal.Quotient.mk (projIdeal W).toIdeal p)) =
+      Ideal.Quotient.mk (projIdeal (W.map (algebraMap R R'))).toIdeal
+        (MvPolynomial.map (algebraMap R R') p) from
+    quotientGradingMap_mk _ _ _ _ p]
+  rw [projModelZeroEval_mk, projModelZeroEval_mk, MvPolynomial.eval_map]
+  have h2 := MvPolynomial.eval₂_comp_left (algebraMap R R') (RingHom.id R)
+    (fun i : Fin 3 => if i = 1 then (1 : R) else 0) p
+  rw [MvPolynomial.eval₂_id, RingHom.comp_id] at h2
+  rw [h2]
+  congr 1
+  funext i
+  by_cases hi : i = 1 <;> simp [hi]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Naturality of the section at infinity under base change (T-A5b zero-leg). -/
+lemma projModelZero_baseChange {R' : Type u} [CommRing R'] [Algebra R R']
+    (W : WeierstrassCurve R) :
+    projModelZero (W.map (algebraMap R R')) ≫
+        projModelBaseChange (algebraMap R R') W =
+      Spec.map (CommRingCat.ofHom (algebraMap R R')) ≫ projModelZero W := by
+  rw [← projModelZeroChart_fac (W.map (algebraMap R R')), Category.assoc]
+  rw [show projModelBaseChange (algebraMap R R') W =
+    Proj.map (baseChangeGradedHom (algebraMap R R') W)
+      (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) from rfl]
+  rw [← awayι_awayCongr (W.map (algebraMap R R'))
+    (baseChangeGradedHom_mk_X (R' := R') W 1)
+    ((baseChangeGradedHom (algebraMap R R') W).2
+      (mk_X_mem_quotientGrading_one W 1))]
+  rw [Category.assoc]
+  rw [Proj.awayι_comp_map (baseChangeGradedHom (algebraMap R R') W)
+    (baseChangeGradedHom_irrelevant_le (algebraMap R R') W) one_pos _
+    (mk_X_mem_quotientGrading_one W 1)]
+  rw [← projModelZeroChart_fac W, ← Category.assoc, ← Category.assoc,
+    ← Category.assoc]
+  refine congrArg (· ≫ Proj.awayι (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos) ?_
+  rw [projModelZeroChart_eq_spec, projModelZeroChart_eq_spec,
+    ← Spec.map_comp, ← Spec.map_comp, ← Spec.map_comp]
+  refine congrArg Spec.map ?_
+  ext x
+  obtain ⟨n, a, ha, rfl⟩ := HomogeneousLocalization.Away.mk_surjective
+    (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 1)
+    (x : Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))
+  simp only [CommRingCat.hom_comp, CommRingCat.hom_ofHom, RingHom.coe_comp,
+    Function.comp_apply]
+  simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_ofHom, RingHom.coe_coe]
+  rw [HomogeneousLocalization.Away.map_mk, awayCongr_mk, zeroChartHom_mk,
+    zeroChartHom_mk, projModelZeroEval_baseChangeGradedHom]
 
 end Points
 
