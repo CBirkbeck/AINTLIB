@@ -790,6 +790,26 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Poincare; Abel-isomorphism; group-law-from-Abel; torsion. Then transport + uniqueness.
 - **Sources**: [KM] 2.1 ⧗ (do-not-formalize-from-memory) · Mumford AV p. 53 ·
   [Hida-GME] §2.1. **Generality**: any base scheme.
+- **AINTLIB Pic SURVEY (beastmode-B, 2026-07-06 — user-requested; reshapes this
+  ticket)**: HasseWeil (`Foundation/Curves/Divisor/`) has a SORRY-FREE field-level
+  Pic⁰ theory for Weierstrass curves: `ProjectiveDivisor` + degree + `degZero` +
+  `projPrincipalSubgroup` + `PicProj₀`; κ = `picZeroOfPoint` (P ↦ [P]−[O]) with
+  **injectivity proved** (`picZeroOfPoint_injective`, `kappaDivisor_inj`,
+  Miller.lean:1576); σ̄ : `PicProj₀ →+ W.Point` ASSEMBLED as AddMonoidHom
+  (MillerAllChar.lean:676); **Miller's relation char-uniform**
+  (`miller_hypothesis_holds_allChar`: (P)+(Q)−(P+Q)−(O) ∈ Princ, via mathlib's
+  char-free `XYIdeal_mul_XYIdeal`) = κ-additivity FOR CHORD–TANGENT, all chars;
+  divisor pushforward along isogenies (PicZeroPushforward); Miller functions
+  (Weil-pairing backend); `DegreeQuadraticForm.lean`: dual-isogeny degree theory
+  incl. `β.comp α = mulByInt α.degree` — the `deg [N] = N²` anchor BB-DEG cites.
+  Mathlib has ring-level `CommRing.Pic` (RingTheory/PicardGroup.lean, invertible
+  modules) but NO scheme-level Pic yet. CONSEQUENCE: chord–tangent ≅ Pic⁰ over a
+  field is DONE on the shelf; the seven-box cluster's live mathematical content
+  narrows to ONE heart — κ-additivity for an ABSTRACT GrpObj law with identity O
+  (equivalently: realize chord–tangent as a scheme morphism, now anchored by
+  `XYIdeal_mul_XYIdeal`, or the see-saw/KM 2.1.2 route needing relative Pic).
+  Shelf-ready supporting leaf: GrpObj-uniqueness-with-fixed-identity over k̄ via
+  the Yang–Merten rigidity toolbox (mathlib Group/Abelian.lean).
 - Note: `pointEquivOverHom`, `pointAddCommGroup`, base-change group data are **done**
   (real definitions, integration commit). `point_smul_eq_comp_mulBy` **DONE**
   (beastmode 2026-07-06: transported smul is rfl-transparent through the equiv;
