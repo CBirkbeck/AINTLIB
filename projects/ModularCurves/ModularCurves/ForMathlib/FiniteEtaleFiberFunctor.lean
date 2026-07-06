@@ -329,6 +329,55 @@ lemma preservesColimitsOfShapeWalkingSpan_baseChange :
 
 end Pushouts
 
+/-! Base change preserves monomorphisms (leaf AG-GG-2d): a mono of finite étale
+`k`-algebras is injective — the kernel pair is a finite étale subalgebra of the square,
+and its two projections are equalised — and injectivity survives flat base change. -/
+
+section Monos
+
+variable {k Ω}
+
+/-- Monomorphisms of finite étale algebras over a field are injective. -/
+theorem injective_of_mono {A B : CommAlgCat.FiniteEtale.{u} k} (j : A ⟶ B) [Mono j] :
+    Function.Injective j.hom.hom := by
+  intro x y hxy
+  set P : Subalgebra k (Π _ : Fin 2, (A.obj : Type u)) :=
+    AlgHom.equalizer
+      (j.hom.hom.comp (Pi.evalAlgHom k (fun _ : Fin 2 => (A.obj : Type u)) 0))
+      (j.hom.hom.comp (Pi.evalAlgHom k (fun _ : Fin 2 => (A.obj : Type u)) 1)) with hP
+  haveI : Algebra.Etale k P := etale_subalgebra P
+  haveI : Module.Finite k P := inferInstanceAs (Module.Finite k P.toSubmodule)
+  set U : CommAlgCat.FiniteEtale.of k P ⟶ A := ObjectProperty.homMk (CommAlgCat.ofHom
+    ((Pi.evalAlgHom k (fun _ : Fin 2 => (A.obj : Type u)) 0).comp P.val)) with hU
+  set V : CommAlgCat.FiniteEtale.of k P ⟶ A := ObjectProperty.homMk (CommAlgCat.ofHom
+    ((Pi.evalAlgHom k (fun _ : Fin 2 => (A.obj : Type u)) 1).comp P.val)) with hV
+  have hUV : U ≫ j = V ≫ j := by
+    ext p
+    exact p.2
+  have hUV' : U = V := (cancel_mono j).mp hUV
+  have hmem : (![x, y] : Fin 2 → (A.obj : Type u)) ∈ P := by
+    show j.hom.hom (![x, y] 0) = j.hom.hom (![x, y] 1)
+    simpa using hxy
+  have h := congrArg (fun q : CommAlgCat.FiniteEtale.of k P ⟶ A =>
+    q.hom.hom ⟨![x, y], hmem⟩) hUV'
+  exact h
+
+/-- Base change preserves monomorphisms of finite étale algebras. -/
+lemma preservesMonomorphisms_baseChange :
+    (baseChangeU k Ω).PreservesMonomorphisms where
+  preserves {A B} j hj := by
+    have hinj : Function.Injective j.hom.hom := injective_of_mono j
+    have hinj2 : Function.Injective
+        (((baseChangeU k Ω).map j).hom.hom : Ω ⊗[k] (A.obj : Type u) → Ω ⊗[k] B.obj) :=
+      Module.Flat.lTensor_preserves_injective_linearMap
+        (M := Ω) j.hom.hom.toLinearMap hinj
+    have hmono : Mono ((ObjectProperty.ι (CommAlgCat.finiteEtale Ω)).map
+        ((baseChangeU k Ω).map j)) :=
+      ConcreteCategory.mono_of_injective _ hinj2
+    exact (ObjectProperty.ι (CommAlgCat.finiteEtale Ω)).mono_of_mono_map hmono
+
+end Monos
+
 end FiniteEtaleGalois
 
 end ModularCurves
