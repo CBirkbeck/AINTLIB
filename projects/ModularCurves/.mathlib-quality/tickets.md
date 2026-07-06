@@ -1910,8 +1910,18 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     noncomputable instance : ... := isFundamentalGroup_galSepClosure (k := ℚ)
   (named bridges also exported: isSepClosure/isGalois/normal/isSepClosed/
   isSeparable_sepClosure). Probe at ℚ axiom-clean with this protocol.
-- **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
-  dictionary (finite ⇒ affine ⇒ Spec of the algebra IS the finite étale ℚ-scheme).
+- **[AG-GG-4]** 4a ✓✓ DONE (2026-07-06, beastmode-B):
+  **`finiteEtaleEquivContAction k : (FiniteEtale k)ᵒᵖ ≌ ContAction FintypeCat
+  (SeparableClosure k ≃ₐ[k] SeparableClosure k)`** — THE GALOIS CORRESPONDENCE,
+  axiom-clean, any field k. mathlib's functorToContAction is already an equivalence
+  given our GaloisCategory + FiberFunctor instances; composed with
+  ContAction.resEquiv along new `toAutContinuousMulEquiv` (bundles toAutMulEquiv +
+  toAut_isHomeomorph; the ▸-cast needs a `show Continuous ⇑e.symm` first).
+  Consumers: `open scoped FintypeCatDiscrete` (HasForget₂ FintypeCat TopCat is
+  scoped there; without it even statements fail).
+  REMAINING 4b: Spec-side dictionary (finite étale algebra ↔ finite étale ℚ-scheme
+  via Spec/Γ — affineness from finiteness) — the bridge from V_ρ-as-algebra to
+  V_ρ-as-scheme for T-F1.
 Then T-F1: `V_ρ := Spec` of the algebra attached to the `ContAction` `(ℤ/N)²`-via-ρ;
 T-F1a/b specs = the equivalence's naturality; T-F1c group structure = group objects
 transported along the equivalence (GrpObj/ofRepresentableBy — T-B2 experience
@@ -3476,7 +3486,7 @@ record is a-priori a SUBCLASS of KM 2.1.1/DR II.1.1/Loe 3.3.1 — a stronger-dir
 bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
 
 ### [T-A8] EllipticCurveGeom v2 — `LocallyWeierstrass` field swap (OWNER-DIRECTED)
-- **Status**: open · **Claimed**: — · **Lane**: A (files owned by A; bundle with the
+- **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-06 · **Lane**: A (files owned by A; bundle with the
   in-flight 3-spelling refactor; NOT claimable by other lanes) ·
   **Files**: EllipticCurve/Basic.lean (predicate + field swap + drift note),
   EllipticCurve/GroupLaw.lean (:163), Moduli/EllCategory.lean +
