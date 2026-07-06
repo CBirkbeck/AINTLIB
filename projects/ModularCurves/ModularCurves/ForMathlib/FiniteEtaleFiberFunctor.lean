@@ -167,13 +167,19 @@ noncomputable def isColimitMapCoconeSpanPushout :
   letI : Algebra k s.pt.obj :=
     ((algebraMap Ω s.pt.obj).comp (algebraMap k Ω)).toAlgebra
   haveI : IsScalarTower k Ω s.pt.obj := IsScalarTower.of_algebraMap_eq fun r => rfl
-  have hinl : (Ω ⊗[k] (Y.obj : Type u)) →ₐ[Ω] s.pt.obj := s.inl.hom.hom
-  have hinr : (Ω ⊗[k] (Z.obj : Type u)) →ₐ[Ω] s.pt.obj := s.inr.hom.hom
+  letI : Algebra k (((baseChangeU k Ω).obj Y).obj : Type u) :=
+    inferInstanceAs (Algebra k (Ω ⊗[k] (Y.obj : Type u)))
+  letI : Algebra k (((baseChangeU k Ω).obj Z).obj : Type u) :=
+    inferInstanceAs (Algebra k (Ω ⊗[k] (Z.obj : Type u)))
+  haveI : IsScalarTower k Ω (((baseChangeU k Ω).obj Y).obj : Type u) :=
+    inferInstanceAs (IsScalarTower k Ω (Ω ⊗[k] (Y.obj : Type u)))
+  haveI : IsScalarTower k Ω (((baseChangeU k Ω).obj Z).obj : Type u) :=
+    inferInstanceAs (IsScalarTower k Ω (Ω ⊗[k] (Z.obj : Type u)))
   set β : (Y.obj : Type u) →ₐ[k] s.pt.obj :=
-    ((s.inl.hom.hom : (Ω ⊗[k] (Y.obj : Type u)) →ₐ[Ω] s.pt.obj).restrictScalars k).comp
+    (s.inl.hom.hom.restrictScalars k).comp
       (Algebra.TensorProduct.includeRight (R := k) (A := Ω)) with hβ
   set γ : (Z.obj : Type u) →ₐ[k] s.pt.obj :=
-    ((s.inr.hom.hom : (Ω ⊗[k] (Z.obj : Type u)) →ₐ[Ω] s.pt.obj).restrictScalars k).comp
+    (s.inr.hom.hom.restrictScalars k).comp
       (Algebra.TensorProduct.includeRight (R := k) (A := Ω)) with hγ
   have hβ_apply : ∀ y : Y.obj, β y = s.inl.hom.hom ((1 : Ω) ⊗ₜ[k] y) := fun _ => rfl
   have hγ_apply : ∀ z : Z.obj, γ z = s.inr.hom.hom ((1 : Ω) ⊗ₜ[k] z) := fun _ => rfl
@@ -211,47 +217,59 @@ noncomputable def isColimitMapCoconeSpanPushout :
   have hdesc_left : ∀ (ω : Ω) (y : Y.obj),
       desc (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) = s.inl.hom.hom (ω ⊗ₜ[k] y) := by
     intro ω y
-    rw [hdesc_tmul, hd0_left]
-    have h3 : (ω ⊗ₜ[k] y : Ω ⊗[k] Y.obj) =
-        (ω ⊗ₜ[k] (1 : Y.obj)) * ((1 : Ω) ⊗ₜ[k] y) := by
-      rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-    rw [hβ_apply, h3, map_mul]
-    congr 1
-    exact ((s.inl.hom.hom : (Ω ⊗[k] (Y.obj : Type u)) →ₐ[Ω] s.pt.obj).commutes ω).symm
+    rw [hdesc_tmul, hd0_left, hβ_apply]
+    calc algebraMap Ω s.pt.obj ω * s.inl.hom.hom ((1 : Ω) ⊗ₜ[k] y)
+        = s.inl.hom.hom (ω ⊗ₜ[k] (1 : Y.obj)) * s.inl.hom.hom ((1 : Ω) ⊗ₜ[k] y) :=
+          congrArg (· * s.inl.hom.hom ((1 : Ω) ⊗ₜ[k] y))
+            (s.inl.hom.hom.commutes ω).symm
+      _ = s.inl.hom.hom ((ω ⊗ₜ[k] (1 : Y.obj)) * ((1 : Ω) ⊗ₜ[k] y)) :=
+          (map_mul s.inl.hom.hom _ _).symm
+      _ = s.inl.hom.hom (ω ⊗ₜ[k] y) := by
+          rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
   have hdesc_right : ∀ (ω : Ω) (z : Z.obj),
       desc (ω ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z)) = s.inr.hom.hom (ω ⊗ₜ[k] z) := by
     intro ω z
-    rw [hdesc_tmul, hd0_right]
-    have h3 : (ω ⊗ₜ[k] z : Ω ⊗[k] Z.obj) =
-        (ω ⊗ₜ[k] (1 : Z.obj)) * ((1 : Ω) ⊗ₜ[k] z) := by
-      rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-    rw [hγ_apply, h3, map_mul]
-    congr 1
-    exact ((s.inr.hom.hom : (Ω ⊗[k] (Z.obj : Type u)) →ₐ[Ω] s.pt.obj).commutes ω).symm
+    rw [hdesc_tmul, hd0_right, hγ_apply]
+    calc algebraMap Ω s.pt.obj ω * s.inr.hom.hom ((1 : Ω) ⊗ₜ[k] z)
+        = s.inr.hom.hom (ω ⊗ₜ[k] (1 : Z.obj)) * s.inr.hom.hom ((1 : Ω) ⊗ₜ[k] z) :=
+          congrArg (· * s.inr.hom.hom ((1 : Ω) ⊗ₜ[k] z))
+            (s.inr.hom.hom.commutes ω).symm
+      _ = s.inr.hom.hom ((ω ⊗ₜ[k] (1 : Z.obj)) * ((1 : Ω) ⊗ₜ[k] z)) :=
+          (map_mul s.inr.hom.hom _ _).symm
+      _ = s.inr.hom.hom (ω ⊗ₜ[k] z) := by
+          rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
   refine ⟨ObjectProperty.homMk (CommAlgCat.ofHom desc), ?_, ?_, ?_⟩
   · ext x
     show desc (Algebra.TensorProduct.map (AlgHom.id Ω Ω)
       Algebra.TensorProduct.includeLeft x) = s.inl.hom.hom x
     induction x using TensorProduct.induction_on with
-    | zero => rw [map_zero, map_zero, map_zero]
+    | zero =>
+      exact ((congrArg desc (map_zero _)).trans (map_zero desc)).trans
+        (map_zero s.inl.hom.hom).symm
     | tmul ω y =>
       rw [show Algebra.TensorProduct.map (AlgHom.id Ω Ω)
           (Algebra.TensorProduct.includeLeft (R := ↑X.obj) (S := k)) (ω ⊗ₜ[k] y) =
           ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj)) from rfl]
       exact hdesc_left ω y
-    | add a b ha hb => rw [map_add, map_add, ha, hb, map_add]
+    | add a b ha hb =>
+      exact ((congrArg desc (map_add _ a b)).trans (map_add desc _ _)).trans
+        ((congrArg₂ (· + ·) ha hb).trans (map_add s.inl.hom.hom a b).symm)
   · ext x
     show desc (Algebra.TensorProduct.map (AlgHom.id Ω Ω)
       ((Algebra.TensorProduct.includeRight (R := ↑X.obj)).restrictScalars k) x) =
       s.inr.hom.hom x
     induction x using TensorProduct.induction_on with
-    | zero => rw [map_zero, map_zero, map_zero]
+    | zero =>
+      exact ((congrArg desc (map_zero _)).trans (map_zero desc)).trans
+        (map_zero s.inr.hom.hom).symm
     | tmul ω z =>
       rw [show Algebra.TensorProduct.map (AlgHom.id Ω Ω)
           ((Algebra.TensorProduct.includeRight (R := ↑X.obj)).restrictScalars k)
           (ω ⊗ₜ[k] z) = ω ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z) from rfl]
       exact hdesc_right ω z
-    | add a b ha hb => rw [map_add, map_add, ha, hb, map_add]
+    | add a b ha hb =>
+      exact ((congrArg desc (map_add _ a b)).trans (map_add desc _ _)).trans
+        ((congrArg₂ (· + ·) ha hb).trans (map_add s.inr.hom.hom a b).symm)
   · intro m hm1 hm2
     have hml : ∀ (ω : Ω) (y : Y.obj), m.hom.hom (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) =
         s.inl.hom.hom (ω ⊗ₜ[k] y) :=
@@ -262,20 +280,43 @@ noncomputable def isColimitMapCoconeSpanPushout :
     ext x
     show m.hom.hom x = desc x
     induction x using TensorProduct.induction_on with
-    | zero => rw [map_zero, map_zero]
+    | zero => exact (map_zero m.hom.hom).trans (map_zero desc).symm
     | tmul ω w =>
       induction w using TensorProduct.induction_on with
-      | zero => rw [TensorProduct.tmul_zero, map_zero, map_zero]
+      | zero =>
+        exact ((congrArg m.hom.hom (TensorProduct.tmul_zero _ ω)).trans
+          ((map_zero m.hom.hom).trans (map_zero desc).symm)).trans
+          (congrArg desc (TensorProduct.tmul_zero _ ω)).symm
       | tmul y z =>
         have hsplit : (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] z) : Ω ⊗[k] (↑Y.obj ⊗[↑X.obj] ↑Z.obj)) =
             (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) *
               ((1 : Ω) ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z)) := by
           rw [Algebra.TensorProduct.tmul_mul_tmul,
             Algebra.TensorProduct.tmul_mul_tmul, mul_one, mul_one, one_mul]
-        rw [hsplit, map_mul, map_mul, hml ω y, hmr 1 z, hdesc_left ω y, hdesc_right 1 z]
+        calc m.hom.hom (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] z))
+            = m.hom.hom ((ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) *
+                ((1 : Ω) ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z))) :=
+              congrArg m.hom.hom hsplit
+          _ = m.hom.hom (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) *
+              m.hom.hom ((1 : Ω) ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z)) :=
+              map_mul m.hom.hom _ _
+          _ = s.inl.hom.hom (ω ⊗ₜ[k] y) * s.inr.hom.hom ((1 : Ω) ⊗ₜ[k] z) :=
+              congrArg₂ (· * ·) (hml ω y) (hmr 1 z)
+          _ = desc (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) *
+              desc ((1 : Ω) ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z)) :=
+              (congrArg₂ (· * ·) (hdesc_left ω y) (hdesc_right 1 z)).symm
+          _ = desc ((ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] (1 : Z.obj))) *
+              ((1 : Ω) ⊗ₜ[k] ((1 : Y.obj) ⊗ₜ[↑X.obj] z))) :=
+              (map_mul desc _ _).symm
+          _ = desc (ω ⊗ₜ[k] (y ⊗ₜ[↑X.obj] z)) := (congrArg desc hsplit).symm
       | add w₁ w₂ ih₁ ih₂ =>
-        rw [TensorProduct.tmul_add, map_add, map_add, ih₁, ih₂]
-    | add a b ha hb => rw [map_add, map_add, ha, hb]
+        exact ((congrArg m.hom.hom (TensorProduct.tmul_add ω w₁ w₂)).trans
+          ((map_add m.hom.hom _ _).trans ((congrArg₂ (· + ·) ih₁ ih₂).trans
+            (map_add desc _ _).symm))).trans
+          (congrArg desc (TensorProduct.tmul_add ω w₁ w₂)).symm
+    | add a b ha hb =>
+      exact (map_add m.hom.hom a b).trans
+        ((congrArg₂ (· + ·) ha hb).trans (map_add desc a b).symm)
 
 lemma preservesColimitsOfShapeWalkingSpan_baseChange :
     PreservesColimitsOfShape WalkingSpan (baseChangeU k Ω) where
