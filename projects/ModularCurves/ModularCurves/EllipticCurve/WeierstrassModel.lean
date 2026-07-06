@@ -1747,6 +1747,14 @@ theorem projModelBaseChange_π (W : WeierstrassCurve R) :
   · exact congrArg CommRingCat.ofHom (bc_ring_square f W _ s.2.2)
   · exact s.2.2
 
+/-- **(T-A5a)** The comparison morphism from the model of `W.map f` into the base
+change of the model of `W`. -/
+noncomputable def projModelBaseChangeLift (W : WeierstrassCurve R) :
+    projModel (W.map f) ⟶
+      Limits.pullback (projModelπ W) (Spec.map (CommRingCat.ofHom f)) :=
+  Limits.pullback.lift (projModelBaseChange f W) (projModelπ (W.map f))
+    (projModelBaseChange_π f W)
+
 end BaseChangeGraded
 
 end Points

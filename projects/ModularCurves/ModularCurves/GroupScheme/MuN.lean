@@ -373,8 +373,71 @@ def constSchemePointsEquiv (S : Scheme.{u}) (A : Type) [Finite A] {T : Scheme.{u
       rw [← Scheme.Hom.comp_apply, constFiber_ι_constDesc]
     rw [Scheme.Opens.ι_apply] at key
     show constIndex (constDesc g c) t = c t
-    rw [constIndex_eq_iff]
-    refine ⟨(g ≫ Sigma.ι (fun _ : A ↦ S) (c t)) ⟨t, mem_constFiber c t⟩ ≫?? , ?_⟩
+    rw [constIndex_eq_iff, key, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply]
+    exact Set.mem_range_self _
+
+/-- Naturality of the constant-scheme points description: restriction along
+`k : T' ⟶ T` is composition with `k` on locally constant functions. -/
+lemma constSchemePointsEquiv_natural (S : Scheme.{u}) (A : Type) [Finite A]
+    {T T' : Scheme.{u}} (g : T ⟶ S) (k : T' ⟶ T)
+    (h : { h : T ⟶ constScheme S A // h ≫ constSchemeπ S A = g }) :
+    constSchemePointsEquiv S A (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+      (constSchemePointsEquiv S A g h).comap k.base.hom := by
+  ext t
+  show constIndex (k ≫ h.1) t = _
+  rw [LocallyConstant.coe_comap_apply]
+  show ((sigmaMk (fun _ : A ↦ S)).symm ((k ≫ h.1) t)).1 = _
+  rw [Scheme.Hom.comp_apply]
+  rfl
+
+/-- The presheaf of groups on `Over S` represented by the constant scheme `(ℤ/N)_S`:
+locally constant `ℤ/N`-valued functions under pointwise addition (written
+multiplicatively for mathlib's `GrpObj`). -/
+private def constGrpFunctor (S : Scheme.{u}) (N : ℕ) : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
+  obj Y := GrpCat.of (Multiplicative (LocallyConstant Y.unop.left (ZMod N)))
+  map k := GrpCat.ofHom
+    (AddMonoidHom.toMultiplicative (LocallyConstant.comapAddMonoidHom k.unop.left.base.hom))
+  map_id Y := by
+    refine GrpCat.hom_ext (MonoidHom.ext fun c ↦ ?_)
+    apply LocallyConstant.ext fun t ↦ ?_
+    show ((LocallyConstant.comap _ _ : LocallyConstant _ (ZMod N)) : _ → _) t = _
+    rw [LocallyConstant.coe_comap_apply]
+    rfl
+  map_comp f g := by
+    refine GrpCat.hom_ext (MonoidHom.ext fun c ↦ ?_)
+    apply LocallyConstant.ext fun t ↦ ?_
+    show ((LocallyConstant.comap _ _ : LocallyConstant _ (ZMod N)) : _ → _) t = _
+    rw [LocallyConstant.coe_comap_apply]
+    show _ = ((LocallyConstant.comap _ ((LocallyConstant.comap _ _ :
+      LocallyConstant _ (ZMod N))) : LocallyConstant _ (ZMod N)) : _ → _) t
+    rw [LocallyConstant.coe_comap_apply, LocallyConstant.coe_comap_apply]
+    rfl
+
+/-- `(ℤ/N)_S` represents its points presheaf. -/
+private def constRepresentableBy (S : Scheme.{u}) (N : ℕ) :
+    (constGrpFunctor S N ⋙ forget _).RepresentableBy
+      (Over.mk (constSchemeπ S (ZMod N))) where
+  homEquiv {Y} :=
+    (⟨fun f ↦ ⟨f.left, Over.w f⟩, fun h ↦ Over.homMk h.1 h.2, fun _ ↦ rfl,
+        fun _ ↦ by ext; rfl⟩ :
+      (Y ⟶ Over.mk (constSchemeπ S (ZMod N))) ≃
+        { h : Y.left ⟶ constScheme S (ZMod N) // h ≫ constSchemeπ S (ZMod N) = Y.hom }).trans
+    ((constSchemePointsEquiv S (ZMod N) Y.hom).trans Multiplicative.ofAdd)
+  homEquiv_comp {Y Y'} f h := by
+    show Multiplicative.ofAdd (constSchemePointsEquiv S (ZMod N) Y.hom
+        ⟨(f ≫ h).left, Over.w (f ≫ h)⟩) = _
+    have := constSchemePointsEquiv_natural S (ZMod N) Y'.hom f.left ⟨h.left, Over.w h⟩
+    apply Multiplicative.ofAdd.injective.eq_iff.mpr ?_ |>.symm ▸ rfl?? sorry
+
+/-- **(DS3b, ticket T-B2)** The group structure on the constant group scheme `(ℤ/N)_S`,
+induced by representability from the presheaf of locally constant `ℤ/N`-valued
+functions; the points description `constSchemePointsEquiv` (+ naturality) pins it.
+Source: KM 1.4.4(5). -/
+noncomputable instance constZModGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
+    GrpObj (Over.mk (constSchemeπ S (ZMod N))) :=
+  .ofRepresentableBy _ (constGrpFunctor S N) (constRepresentableBy S N)
+
+end ConstPointsFunctor
 
 /-- **(DS3c / T-B2a, specification of DS3a)** The canonical points description of
 `μ_{N,S}`: for `T ⟶ S`, the `T`-points of `μ_{N,S}` over `S` are the `N`-th roots of unity
