@@ -3896,6 +3896,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   properties. **Lane**: Q (owns `SchemeQuotient`/`AffineQuotient`/`SpecGroupAction`) ·
   **Depends**: Q-stream quotient infra (T-Q5/T-Q6) · **Type**: def + API + torsor-description
   theorem · **Sources**: reviewer v8; standard `[U/G]` groupoid.
+  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-07T02:20Z ·
+    **File**: Moduli/QuotientStack.lean (NEW)
+  - **Alias decision (at pickup, per v8 note)**: `GroupAction G X` :=
+    `AlgebraicGeometry.SchemeAction G X` (ForMathlib/SchemeQuotient.lean) — the
+    established Q-lane vocabulary IS the T-W3 `GroupAction`; no new structure,
+    no rename (T-W4 should `SchemeAction`-register its action).
 
 - **[T-W4] `weierstrass-coordinate-change-group`**. Package mathlib's
   `WeierstrassCurve.VariableChange R` (`(u,r,s,t)`, `[Group]` EXISTS) as a group-scheme `G`
