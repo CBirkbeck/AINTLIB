@@ -2541,6 +2541,20 @@ private lemma glue_pieceY (W : WeierstrassCurve R) :
       one_pos (mk_X_mem_quotientGrading_one W 1) ≫
       (Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).ι := by
+  rw [show Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos =
+      (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
+      (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).ι from
+    (Proj.basicOpenIsoSpec_inv_ι _ _ _ _).symm]
+  rw [Proj.toBasicOpenOfGlobalSections]
+  rw [← Category.assoc, ← Category.assoc]
+  refine congrArg (· ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).ι) ?_
+  rw [Iso.cancel_iso_inv_right]
   sorry
 
 set_option backward.isDefEq.respectTransparency false in
