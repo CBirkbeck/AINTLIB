@@ -998,6 +998,95 @@ private lemma aeval_dehomog_zero (W : WeierstrassCurve R) {K : Type u} [CommRing
     MvPolynomial.dehomogenizeAux_X_ne _ _ (show (2 : Fin 3) ≠ 0 by decide),
     MvPolynomial.aeval_C, MvPolynomial.aeval_X, map_one, mul_one, one_pow]
 
+/-- The `K`-point at infinity `[0:1:0]`, presented as the `Y`-chart point with
+coordinates `(U, Z) = (0, 0)`. -/
+private noncomputable def infPoint (W : WeierstrassCurve R) (K : Type u) [Field K]
+    [Algebra R K] : SpecPoints (projModel W) (projModelπ W) K :=
+  (chartPointOfHom W 1 ((chartSolutionsEquiv W 1 K).symm ⟨fun _ => 0, by
+    rw [aeval_dehomog_one]
+    simp⟩)).1
+
+private lemma infPoint_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K]
+    [Algebra R K] :
+    ¬ ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+      h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos = (infPoint W K).1 := by
+  intro hfac
+  have hne := (chartPointOfHom_factors_iff W 1 2 _).mp hfac
+  apply hne
+  rw [← chartCoordEquiv_mk_X W 1 ⟨2, by decide⟩]
+  have hv : ((chartSolutionsEquiv W 1 K)
+      ((chartSolutionsEquiv W 1 K).symm ⟨fun _ => 0, by
+        rw [aeval_dehomog_one]; simp⟩)).1 ⟨2, by decide⟩ = 0 := by
+    rw [Equiv.apply_symm_apply]
+  exact hv
+
+private lemma eq_infPoint_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K]
+    [Algebra R K] (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hg : ¬ ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+      h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos = g.1) :
+    g = infPoint W K := by
+  obtain ⟨i, h, hfac⟩ := specPoint_factors_through_chart W g.1
+  obtain ⟨φ, hφ⟩ := (chartPointOfHom_bijective W i (K := K)).2 ⟨g, ⟨h, hfac⟩⟩
+  have gproj : (chartPointOfHom W i φ).1 = g := congrArg Subtype.val hφ
+  rw [← gproj] at hg
+  have hi : i = 0 ∨ i = 1 ∨ i = 2 := by
+    fin_cases i
+    · exact Or.inl rfl
+    · exact Or.inr (Or.inl rfl)
+    · exact Or.inr (Or.inr rfl)
+  rcases hi with rfl | rfl | rfl
+  · -- the X-chart: impossible, the cubic has constant term -1 there
+    exfalso
+    have hz : φ.1 (chartCoordEquiv W 0 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨2, by decide⟩ : {j : Fin 3 // j ≠ 0})))) = 0 := by
+      rw [chartCoordEquiv_mk_X W 0 ⟨2, by decide⟩]
+      by_contra hne
+      exact hg ((chartPointOfHom_factors_iff W 0 2 φ).mpr hne)
+    have hv := ((chartSolutionsEquiv W 0 K) φ).2
+    have hcomp : ((chartSolutionsEquiv W 0 K) φ).1 =
+        fun j : {j : Fin 3 // j ≠ 0} => φ.1 (chartCoordEquiv W 0
+          (Ideal.Quotient.mk _ (MvPolynomial.X j))) := rfl
+    rw [hcomp, aeval_dehomog_zero] at hv
+    simp only [hz, mul_zero, zero_mul, zero_pow, add_zero, zero_add, sub_zero] at hv
+    simp at hv
+  · -- the Y-chart: the coordinates are forced to (0,0), the point at infinity
+    have hz : φ.1 (chartCoordEquiv W 1 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨2, by decide⟩ : {j : Fin 3 // j ≠ 1})))) = 0 := by
+      rw [chartCoordEquiv_mk_X W 1 ⟨2, by decide⟩]
+      by_contra hne
+      exact hg ((chartPointOfHom_factors_iff W 1 2 φ).mpr hne)
+    have hv := ((chartSolutionsEquiv W 1 K) φ).2
+    have hcomp : ((chartSolutionsEquiv W 1 K) φ).1 =
+        fun j : {j : Fin 3 // j ≠ 1} => φ.1 (chartCoordEquiv W 1
+          (Ideal.Quotient.mk _ (MvPolynomial.X j))) := rfl
+    rw [hcomp, aeval_dehomog_one, hz] at hv
+    have hv3 : φ.1 (chartCoordEquiv W 1 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 1})))) ^ 3 = 0 := by
+      linear_combination -hv
+    have hu : φ.1 (chartCoordEquiv W 1 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 1})))) = 0 :=
+      pow_eq_zero_iff (by norm_num : (3 : ℕ) ≠ 0) |>.mp hv3
+    have hsol : (chartSolutionsEquiv W 1 K) φ = ⟨fun _ => 0, by
+        rw [aeval_dehomog_one]; simp⟩ := by
+      refine Subtype.ext ?_
+      rw [hcomp]
+      funext j
+      rcases j with ⟨j, hj⟩
+      fin_cases j
+      · exact hu
+      · exact absurd rfl hj
+      · exact hz
+    have hφ0 : φ = (chartSolutionsEquiv W 1 K).symm ⟨fun _ => 0, by
+        rw [aeval_dehomog_one]; simp⟩ := by
+      rw [← hsol, Equiv.symm_apply_apply]
+    rw [← gproj, infPoint, hφ0]
+  · -- the Z-chart: contradicts the hypothesis
+    exact absurd ⟨Spec.map (CommRingCat.ofHom φ.1), rfl⟩ hg
+
 end Points
 
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
