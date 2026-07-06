@@ -1209,7 +1209,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   effective divisor of degree 1 (KM 1.2.2 single-section case); (b) product of
   divisors is a divisor with additive degree (KM 1.1.10-area); (c) assembly.
   (3) `RelEffCartierDiv.baseChange` Prop-fields (same file, T-D12-adjacent) are
-  base-change-stability one-liners once (2) is packaged. · **File**: CartierDivisor.lean · `sectionsDivisor`,
+  base-change-stability one-liners once (2) is packaged.
+  **(2a) IS NEARLY FREE (discovery 2026-07-08T07:00Z)**: mathlib has
+  `instance [IsClosedImmersion f] : IsIso f.toImage` (ClosedImmersion.lean:154) and
+  `f.image := f.ker.subscheme`, `toImage ≫ imageι = f`. For a section z of separated π
+  (closed immersion via the T-B3 of_comp pattern): z.ker.subschemeι = z.imageι =
+  inv z.toImage ≫ z, so subschemeι ≫ π = inv z.toImage ≫ 𝟙 = inv z.toImage — an ISO —
+  finite/flat/lfp/rank-1 all transported from iso-instances. Write
+  `sectionDivisor (π) [IsSeparated π] (z) (hz) : RelEffCartierDiv π` first, then the
+  n-fold product (CRT/filtration = the remaining mountain; consult KM 1.1-1.2 pages
+  via the full PDF, printed pp. ~7-20, before formalising — quote-gate for 1.2.2).
+  NEXT ACTION: write sectionDivisor + its degree-1 lemma in CartierDivisor.lean. · **File**: CartierDivisor.lean · `sectionsDivisor`,
   `sectionsDivisor_degree` · **Depends on**: none · **Parallel**: yes ·
   **Type**: def(data) + theorem
 - **Sketch**: section ⟹ closed immersion (π separated) ⟹ ideal sheaf via
