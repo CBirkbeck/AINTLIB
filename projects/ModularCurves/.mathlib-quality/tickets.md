@@ -1146,7 +1146,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     kernel-square pasting from T-B6a + zero-compat (`pullback.lift_fst`).
   - **[T-B6c]** DONE (beastmode-B 2026-07-06, sorry-free + axiom-clean, first
     try; ΓSpecIso.hom/.inv + map_natCast both directions).
-  - **[T-B6d]** claimed beastmode-B, in progress. `card_sections_eq_finrank` —
+  - **[T-B6d]** DONE (beastmode-B 2026-07-06, sorry-free + axiom-clean). `card_sections_eq_finrank` —
     X ⟶ Spec (.of k) finite étale, k sep. closed ⇒ `Nat.card {s // s ≫ f = 𝟙}
     = f.finrank x₀` (single equation). NEW FILE ForMathlib/EtaleSectionsCount.lean
     (upstream candidate, Mathlib-only imports). Recon done: no new classification
