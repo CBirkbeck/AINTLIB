@@ -3838,3 +3838,14 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (gammaHNaive_bot, :352) — ⊥-orbits are singletons via glSmul_one; iso by
     NatIso.ofComponents + Quotient.lift id; naturality by Quotient.ind +
     Subtype.ext (memberships proof-irrelevant, the map's gated sorries don't block).
+  - 2026-07-06T23:40Z: **T-H1 DONE** — gammaHNaive_bot proven (18-line NatIso term;
+    ⊥-orbits singletons via glSmul_one; naturality by proof-irrelevance on the gated
+    membership fields). Axioms: registered-gate profile (sorryAx via the functors'
+    internal T-E4a-gated sorries only). Cleanup: golf-clean term proof; file-level
+    pass batched into [CLEANUP-14] per board cadence. T-H2/T-H2a/T-H3-laws +
+    hOrbitSetoid.iseqv confirmed landed by the concurrent worker — H-lane remaining:
+    T-H5 (next), gated memberships (T-W7), T-H4/H6/H8/H9/H10 (gated).
+    **T-H5 recon**: statement sound (Nontrivial R guard present); ⟸ direction needs
+    T-G3 content (GME 2.6.4 Aut-computation, transcribed §B9) — T-G3 is UNCLAIMED →
+    recursing into it as the dependency (Tier A3). ⟹ direction (elliptic-point
+    witnesses j=0/1728) sequenced after the A-lane W4/W5 layer per v8 spine.
