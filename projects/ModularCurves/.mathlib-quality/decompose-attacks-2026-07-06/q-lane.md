@@ -196,3 +196,28 @@ for the proofs.
 - **A5 (Q4d — which invertibility?)** KM (4): #G invertible in R. Spelling:
   `IsUnit (Nat.card G : R)` (G finite, Nat.card). The divided trace needs the
   inverse only in R (acts on A through algebraMap). SURVIVES.
+
+## T-Q2 freeness def + A7.1.1/A7.1.2 statements (statements-only ticket)
+
+- **A1 (freeness def faithful to KM?)** KM: "G acts freely on A in the sense that
+  for any non-zero R-algebra R', and any element g ≠ id of G, g operates without
+  fixed points on the set Hom_{R-alg}(A, R')". Lean: `∀ g ≠ (1 : G), ∀ R'
+  [CommRing R'] [Algebra R R'] [Nontrivial R'] (φ : A →ₐ[R] R'),
+  φ.comp (g-action-as-AlgHom) ≠ φ`. "Without fixed points" = the g-precomposition
+  map has no fixed φ — pointwise ∃-witness form equivalent; hom-inequality form
+  chosen (cleaner). Universe: R' quantified in `Type u` (same as A — KM quantifies
+  over all R-algebras; u suffices for the ∗-consequences, note recorded). SURVIVES.
+- **A2 (A7.1.1 split per Tier A5)** KM's conclusion bundles (a) A finite étale
+  over A^G as a G-torsor and (b) the multiplication iso `A ⊗_{A^G} A ≅ ∏_G A`.
+  Two sorried single-conclusion statements: (a) as `Algebra.Etale (A^G) A ∧
+  Module.Finite`? — NO ∧: split further into `Module.Finite (A^G) A` +
+  `Algebra.Etale (A^G) A`; (b) `Function.Bijective (torsorMul)` where torsorMul
+  x⊗y g = x * g•y (an AlgHom into `G → A`). The "G-torsor" phrasing IS (b) given
+  (a) — no separate torsor-typeclass needed now. SURVIVES.
+- **A3 (degenerate G = 1)** Freeness vacuous (no g ≠ 1); A = A^G; torsorMul :
+  A ⊗_A A ≅ (Unit → A) ✓ true; A étale finite over itself ✓. Statements remain
+  true — no hidden nontriviality needed. SURVIVES.
+- **A4 (does (b)'s map even land where claimed?)** x ⊗ y ↦ (fun g => x * g•y):
+  bilinear over A^G? (a·x)⊗y and x⊗(a·y) for a ∈ A^G: fun g => a x g•(y) needs
+  g•(a y) = a (g•y) ✓ since a fixed. Well-defined ✓. Ring hom: pointwise product ✓
+  (target Pi.ring). SURVIVES.

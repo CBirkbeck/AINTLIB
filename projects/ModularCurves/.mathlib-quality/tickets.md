@@ -2925,7 +2925,19 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 ### Rest of the lane (bodies cut when reached; one-liners stand)
 - **[T-Q2]** free actions vs stabilizers — statements only; needed by KM Ch. 7
   regularity, NOT by T-Q3/T-E5. After T-Q3.
-  - **Status**: in_progress · **Claimed**: beastmode-Q, 2026-07-06T16:42Z ·
+  - **Status**: done (beastmode-Q, 2026-07-06T16:42Z → 2026-07-06T16:55Z;
+    statements-only per scope — the four A7.1.1/A7.1.2 targets carry WIP sorries
+    BY DESIGN, SGA III Exp. V is the proof source when someone picks them up) ·
+  - **Delivered** (ForMathlib/InvariantTorsor.lean): `IsFreeAlgebraAction` (KM's
+    freeness verbatim, hom-inequality form); `MulSemiringAction.torsorMul`
+    (`A ⊗[Aᴳ] A →ₐ[Aᴳ] (G → A)` via `Algebra.TensorProduct.lift` of
+    `Pi.constAlgHom` + `AlgHom.pi ∘ toAlgHom`; `torsorMul_tmul` is `rfl` — the
+    rw-route hits a Pi.algebra instance mismatch, rfl doesn't); sorried:
+    `Module.Finite.of_isFreeAlgebraAction`, `Algebra.Etale.of_isFreeAlgebraAction`,
+    `torsorMul_bijective_of_isFreeAlgebraAction` (A7.1.1 split per Tier A5),
+    `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` (A7.1.2, against
+    T-Q4's map). Def layer axiom-clean; only warnings are the 4 intended sorries.
+    Attack block in q-lane.md. Post-proof cleanup deferred (owner pause). ·
     Scope: KM A7.1.1's freeness def (`no fixed points on Hom_{R-alg}(A,R')`,
     quote banked under T-Q4) + sorried statements of A7.1.1 (étale-torsor: two
     single-conclusion parts per Tier A5) and A7.1.2 (freeness ⟹ ∗(A,G,R), via
