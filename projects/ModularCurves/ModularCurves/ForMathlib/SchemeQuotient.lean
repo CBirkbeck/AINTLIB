@@ -158,6 +158,7 @@ noncomputable def localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
 /-- The affine identification intertwines the geometric action restricted to a
 stable affine open with the `Spec` of the section-ring action (the c3 bridge:
 `resLE`/`isoSpec` naturality). -/
+@[reassoc]
 theorem resLE_isoSpec_hom {V : X.Opens} (hV : σ.IsStableOpen V)
     (hVa : IsAffineOpen V) (g : G) :
     letI := σ.gammaMulSemiringAction hV
@@ -187,6 +188,24 @@ theorem resLE_isoSpec_hom {V : X.Opens} (hV : σ.IsStableOpen V)
       (σ.hom g).appLE V V (hV.le_preimage g) := rfl
   rw [hof, Iso.inv_comp_eq, ← Category.assoc, hsq, Category.assoc,
     Iso.hom_inv_id, Category.comp_id]
+
+private theorem localQuotientπ_def {V : X.Opens} (hV : σ.IsStableOpen V)
+    (hVa : IsAffineOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    σ.localQuotientπ hV hVa = hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ := rfl
+
+/-- The local quotient map coequalizes the restricted action (T-Q5c, local
+invariance). -/
+@[reassoc]
+theorem resLE_localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
+    (hVa : IsAffineOpen V) (g : G) :
+    (σ.hom g).resLE V V (hV.le_preimage g) ≫ σ.localQuotientπ hV hVa =
+      σ.localQuotientπ hV hVa := by
+  letI := σ.gammaMulSemiringAction hV
+  have h1 := resLE_isoSpec_hom σ hV hVa g
+  show (σ.hom g).resLE V V (hV.le_preimage g) ≫ hVa.isoSpec.hom ≫
+      invariantsπ G ↑Γ(X, V) ℤ = hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
+  rw [← Category.assoc, h1, Category.assoc, specSMul_invariantsπ]
 
 end SchemeAction
 

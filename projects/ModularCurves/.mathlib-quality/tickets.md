@@ -3120,6 +3120,14 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
     (`exists_mem_basicOpen_subset_of_stable`), quotient-map
     (`invariantsπ_isQuotientMap`), stable-image openness
     (`isOpen_image_invariantsπ_of_stable`), all in AffineQuotient.lean, sorry-free.
+    c2+c3-bridge DONE (2026-07-06T20:35Z): `localQuotient`/`localQuotientπ`
+    (Spec Γ(V)ᴳ, R := ℤ after universe-widening R : Type v across the Q-files),
+    `resLE_isoSpec_hom` (@[reassoc] — the geometric/algebraic intertwiner; proof:
+    Scheme.isoSpec_hom_naturality + arrowResLEAppIso.hom.w + a Spec.map
+    computation; GOTCHA: rw/reassoc-rw on goals containing the letI-Γ-action hit
+    presheaf-coercion motive failures — `show`-expand localQuotientπ by defeq
+    then rw closed terms), `resLE_localQuotientπ` (local invariance). All
+    sorry-free, zero warnings, standard axioms.
     NEXT LEAVES (in order): c2 = local quotient of a stable affine open V
     (`Spec Γ(V)ᴳ` + local π := V.toScheme ≅ Spec Γ(V) [IsAffineOpen.isoSpec] ≫
     invariantsπ-of-Γ-bridge-action; invariance lemma); c3 = for stable affine
