@@ -263,3 +263,38 @@ J.ResidueField` at every maximal J).
   but no composed fibrewise-detection statement (greps: surjective/bijective ∩
   residueField, of_isLocalized_maximal consumers). Upstream candidates ×3. SURVIVES.
 - Verdict: **SURVIVED** (single-conclusion each; statement-splitting-conformant).
+
+### KM 1.3.4 verbatim quote (QUOTE-MISSING #7 DISCHARGED, 2026-07-06T15:15Z, from
+katz-mazur-arithmetic-moduli-FULL.pdf pp. 13–14 [book pp. 13–14, PDF pp. 25–26])
+
+**Statement**: "KEY LEMMA 1.3.4. Let C/S be a smooth curve, D and D′ effective
+Cartier divisors in C/S, with D′ proper over S. Then (1) there exists a unique
+closed subscheme Z ⊂ S which is universal for the relation D′ ≤ D in the following
+sense: given any morphism of schemes T → S, the inverse images D′_T and D_T in C_T
+satisfy D′_T ≤ D_T if and only if the morphism T → S factors through Z; (2) the
+subscheme Z ⊂ S is defined locally on S by deg(D′) equations; (3) formation of the
+closed subscheme Z ⊂ S commutes with arbitrary change of base S′ → S, in the sense
+that the closed subscheme Z′ of S′ 'universal for the relation D′_{S′} ≤ D_{S′}' is
+none other than Z ×_S S′."
+
+**Proof**: "The question is clearly local on S, which we may assume affine, say
+S = Spec(R). In terms of a representative (𝔏, ℓ) for D, the condition D′ ≤ D is
+that the global section ℓ of 𝔏 vanish identically in 𝔏 ⊗_{𝒪_C} 𝒪_{D′} = 𝔏|D′.
+Because D′ is finite locally-free over S, and 𝔏|D′ is an invertible 𝒪_{D′}-module,
+the module H⁰(D′, 𝔏|D′) is a locally free R-module of rank = deg(D′). Locally on R,
+we may choose an R-basis e₁,…,e_{d′} of this R-module. The element ℓ has a unique
+expression ℓ = Σᵢ rᵢeᵢ, coefficients rᵢ ∈ R. The condition 'ℓ = 0' is then
+represented by the closed subscheme of Spec(R) defined by the simultaneous
+vanishing of r₁,…,r_{d′}. Q.E.D."
+
+**Lean route-deviation note (NOT B2 — statement untouched, route strictly weaker
+hypotheses)**: decomposition-km1 D-inc.2's binding Lean plan already eliminates
+(𝔏, ℓ); it kept a SINGLE local equation f̄ ∈ B′ (principality). Our route replaces
+the single f̄ by the finitely many R-module generators of the image ideal
+J := I(D)·O_{D′} (f.type: image of the lfp ideal under O_C ↠ O_{D′}, pushed to a
+f.g. R-submodule of the finite R-module B′) — the vanishing locus is the span of
+ALL their coordinates. Equation count k·d′ instead of d′; the Lean statement is
+count-free so this is invisible; the T-D11/AG-LB/FLAT principality gates are
+avoided entirely. KM 1.3.5/1.3.7 quotes also now IN CONTEXT (pp. 15–16) for T-D15/
+T-D16 pickup; 1.3.7's proof confirms the three-conditions design incl. the
+"(deg D)² coordinates" descent (= T-D27's lemma).
