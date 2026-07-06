@@ -74,7 +74,7 @@ abbrev constScheme (S : Scheme.{u}) (A : Type) [Finite A] : Scheme.{u} :=
   ∐ fun _ : A ↦ S
 
 /-- The structure morphism of the constant scheme. -/
-@[reducible] def constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A ⟶ S :=
+abbrev constSchemeπ (S : Scheme.{u}) (A : Type) [Finite A] : constScheme S A ⟶ S :=
   Sigma.desc fun _ ↦ 𝟙 S
 
 section PointsFunctor
