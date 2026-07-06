@@ -1743,11 +1743,22 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     of_isSeparable per residue field, minpoly-divides through Quotient.mkₐ;
     minpoly.algHom_eq needs **B.val** — B.subtype dot-resolves to the SUBSEMIRING
     RingHom and silently poisons unification). Both sorry-free, mathlib-grade
-    upstream candidates. REMAINING for 1.4: FixedPoints.subalgebra (hand-roll if
-    absent), the SingleObj-H limit cone (fixed subalgebra + IsLimit via
-    equalizer-style UP), and the op-shape glue
-    (hasColimitsOfShape_op_of_hasLimitsOfShape ✓ instance +
-    (SingleObj G)ᵒᵖ ≌ SingleObj Gᵐᵒᵖ shape-equivalence).
+    upstream candidates. 1.4 CATEGORICAL PART ALSO DONE (2026-07-06):
+    actionFixedPoints (direct fixed-set Subalgebra — no MulSemiringAction
+    packaging needed since etale_subalgebra eats ANY subalgebra) + cone + IsLimit
+    (AlgHom.codRestrict lift; naturality-hom needs `show ⋆ ⟶ ⋆ from h`
+    elaboration-forcing; const-id side closes by DEFEQ exact, simpa breaks) ⇒
+    HasLimitsOfShape (SingleObj H) (FiniteEtale k) for ANY monoid H. 1.4 ✓ DONE.
+  - AG-GG-1.5 (G3 splitting) ATTACK PLAN (only remaining leaf before assembly):
+    mono-in-op = subcategory-epi π : Y ⟶ X; (i) π surjective: X' := range
+    (étale by etale_subalgebra); X étale over X' (of_restrictScalars) ⇒ faithfully
+    flat ⇒ AlgHom-to-k̄ extension X' → X surjective on fibres; counting
+    (natCard_algHom_eq_finrank!) forces dim X' = dim X else two k̄-homs agree on
+    range and land in a common finite subextension W ∈ FiniteEtale k, refuting
+    epi; (ii) splitting: ker π idempotent-generated in artinian reduced Y ⇒
+    Y ≅ X × Z via CRT-pair (e, 1-e), Z étale via classification/quotient.
+    Then ASSEMBLY: PreGaloisCategory ((FiniteEtale k)ᵒᵖ) from op-duality
+    instances + hand-rolled (SingleObj G)ᵒᵖ ≌ SingleObj Gᵐᵒᵖ.
   - AG-GG-1.5 G3 splitting: mono-in-op ⇒ direct summand (idempotent splitting of
     epis between finite étale algebras over a field).
   Duplication watch: NOTHING imports RingTheory/Etale/Finite.lean yet; Merten's
