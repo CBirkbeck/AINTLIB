@@ -230,3 +230,36 @@ Statements (born split): (i) `IsReduced.eq_zero_of_forall_ringHom_field`:
   consumers — none state the field-hom form). Upstream candidate. SURVIVES.
 - Verdict: **SURVIVED** (both statements; single-conclusion each ✓
   statement-splitting-conformant).
+
+### T-D32: fibrewise bijectivity detection (ForMathlib/BijectiveResidueField.lean)
+
+Statements (born split): (a) `IsLocalRing.surjective_of_surjective_lTensor_residueField`
+([Module.Finite R N] only); (b) `IsLocalRing.bijective_of_bijective_lTensor_residueField`
+([Finite M] [Finite N] [Flat N]); (c) global
+`LinearMap.bijective_of_forall_bijective_lTensor_residueField` (fibres `φ.lTensor
+J.ResidueField` at every maximal J).
+
+- Attacks: [1] **Hypothesis necessity**: (a) N finite is Nakayama's requirement (fails
+  for non-fg: R = ℤ_(p), N = ℚ, φ = 0 from M = 0: κ⊗ℚ = 0 so fibre-surjective, φ not).
+  (b) N flat is what makes free-over-local fire; injectivity genuinely needs the
+  splitting (nonfree N: R = k[x]/x², M = k = R/x, N = R, φ = x·incl? fibre-inj can
+  fail/hold accidentally — the split-iff is the honest engine). N ≠ hypothesis-free:
+  drop Flat N and take R = k[x]/x², M = R, N = k, φ = quotient: κ⊗φ : k → k identity
+  bijective, φ not injective ⟹ Flat N load-bearing ✓. [2] **Maximal vs prime
+  quantifier** (c): maximals suffice for DETECTION (bijective_of_isLocalized_maximal);
+  the consumer (T-D6) has fibre-isos at all points ⟹ maximals instantiate. Converse
+  direction deliberately NOT stated (statement-splitting assembly test: no consumer).
+  [3] **Spelling**: fibres as `lTensor J.ResidueField` with `Ideal.ResidueField` an
+  ABBREV for `IsLocalRing.ResidueField (Localization.AtPrime J)` — the local lemma at
+  Rⱼ needs κ(Rⱼ) which is DEFINITIONALLY J.ResidueField; no transport. The localized
+  map is identified with `φ.baseChange Rⱼ` by `IsLocalizedModule.ext` + `map_comp`
+  (defining property) + `TensorProduct.isBaseChange` instance via
+  `isLocalizedModule_iff_isBaseChange`; fibre comparison by the
+  `cancelBaseChange` square proven on pure tensors (2-level induction). [4] **Det
+  route rejected**: mathlib `LinearMap.det` is endo-only; φ connects different
+  modules — recorded in module docstring so nobody re-attempts it. [5]
+  **Not-in-mathlib**: the Nakayama toolkit exists (map_tensorProduct_mk_eq_top,
+  split_injective_iff_lTensor_residueField_injective, bijective_of_isLocalized_maximal)
+  but no composed fibrewise-detection statement (greps: surjective/bijective ∩
+  residueField, of_isLocalized_maximal consumers). Upstream candidates ×3. SURVIVES.
+- Verdict: **SURVIVED** (single-conclusion each; statement-splitting-conformant).
