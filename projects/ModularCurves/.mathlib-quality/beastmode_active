@@ -1,1 +1,1 @@
-FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 1d declaration list, then Phase 2 audit
+FOCUS: [CLEANUP-4] /cleanup MuN.lean — Phase 4 per-decl workers (sequential, 74 decls)

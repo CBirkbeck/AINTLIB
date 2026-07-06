@@ -633,6 +633,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   fromOfGlobalSections_toSpecZero + faithfulness-style argument or chartwise through
   the Y-chart with the T-A2e machinery; if it fights, spawn T-A5b-zero) and then
   `sectionFiberPoint`-naturality (two small commuting squares).
+- **ZERO-LEG ROUTE (v2)**: mathlib has `Proj.fromOfGlobalSections_preimage_basicOpen`
+  (ProjectiveSpectrum/Basic.lean:455). The evaluation defining `projModelZero` sends
+  `t₁ = mk Y ↦ 1` (a unit), so `projModelZero ⁻¹ᵁ D₊(t₁) = ⊤`; factor BOTH sides of
+  the naturality square through the Y-chart by `IsOpenImmersion.lift` (range-condition
+  from that preimage computation + opensRange_awayι), then cancel the mono `awayι-Y`
+  and compare chart-level ring maps: `Away.map bcHom t₁ ∘ (zero-W-chart-hom) =
+  (zero-W'-chart-hom) ∘ f`-elementwise on `Away.mk` normal forms (the zero-chart-hom
+  is evaluation `U ↦ 0, W ↦ 0` under chartCoordEquiv — relate via
+  `chartSolutionsEquiv`/`infPoint`-style computations or directly by val_injective).
+  Alternatively check first whether mathlib has any `fromOfGlobalSections`-naturality
+  (`Proj.map_fromOfGlobalSections`?) — grep before building.
 
 ### [T-A6] ⧗KM Abel canonicity — the deferred "purity/comparison" project (v2)
 - **Status**: open, **phase 3+ — no longer blocks anything** (v2: group law is a field
