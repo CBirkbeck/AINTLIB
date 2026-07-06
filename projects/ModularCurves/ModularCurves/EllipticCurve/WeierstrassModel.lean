@@ -2555,7 +2555,39 @@ private lemma glue_pieceY (W : WeierstrassCurve R) :
   refine congrArg (· ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
     ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).ι) ?_
   rw [Iso.cancel_iso_inv_right]
-  sorry
+  rw [show (Proj.openCoverOfMapIrrelevantEqTop (quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)).f
+      ⟨1, (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1),
+        one_pos, mk_X_mem_quotientGrading_one W 1⟩ =
+    Scheme.Opens.ι ((Spec (CommRingCat.of R)).basicOpen
+      (((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) from rfl]
+  rw [Iso.eq_inv_comp, Scheme.isoOfEq_hom_ι_assoc]
+  have hζ : Spec.map (CommRingCat.ofHom (zeroChartHom W)) =
+      (Spec (CommRingCat.of R)).toSpecΓ ≫
+        Spec.map (CommRingCat.ofHom (zeroChartHom W) ≫
+          (Scheme.ΓSpecIso (CommRingCat.of R)).inv) := by
+    rw [Spec.map_comp, toSpecΓ_SpecMap_ΓSpecIso_inv_assoc]
+  rw [hζ, ← morphismRestrict_ι_assoc]
+  congr 1
+  rw [← basicOpenIsoSpecAway_hom_SpecMap_assoc, Iso.cancel_iso_hom_left, ← Spec.map_comp]
+  congr 1
+  apply CommRingCat.hom_ext
+  simp only [CommRingCat.hom_comp, CommRingCat.hom_ofHom]
+  have hval : (HomogeneousLocalization.valRingHom
+      (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) :
+        Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) →+*
+        Localization.Away ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) =
+      algebraMap _ _ :=
+    RingHom.ext fun y => rfl
+  rw [zeroChartHom, hval, ← RingHom.comp_assoc, ← RingHom.comp_assoc]
+  congr 1
+  apply IsLocalization.ringHom_ext
+    (M := Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))
+  rw [IsLocalization.map_comp, RingHom.comp_assoc, IsLocalization.Away.lift_comp,
+    RingHom.comp_assoc]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The `Spec` of the chart evaluation composed with the chart inclusion is the

@@ -3,6 +3,49 @@
 New helper statements get their block here at statement time (v5 rule; standing
 rule 1). Format mirrors `level-structures.md`.
 
+### T-D24: rank additivity in short exact sequences (ForMathlib/FinrankExact.lean)
+
+Statements: (a) `Function.Exact.nonempty_linearEquiv_prod_of_projective`:
+`0 → M →f→ N →g→ P → 0` exact with `[Module.Projective R P]` ⟹
+`Nonempty (N ≃ₗ[R] M × P)`; (b) `Module.finrank_eq_add_of_exact`:
+`finrank R N = finrank R M + finrank R P` for `M`, `P` finite free; (c)
+`Module.rankAtStalk_eq_add_of_exact`: pointwise
+`rankAtStalk N p = rankAtStalk M p + rankAtStalk P p` for `M`, `P` finite flat.
+
+- Attacks: [1] **Hypothesis necessity / falsity probes**: (b) fails without
+  freeness of the OUTER terms even over ℤ? Take `0 → ℤ →2→ ℤ → ℤ/2 → 0`: P = ℤ/2
+  not free; finrank ℤ (ℤ/2) = 0 (junk: no basis, finrank of non-free f.g. torsion
+  = 0), additivity would claim 1 = 1 + 0 ✓ accidentally true BUT the split (a)
+  fails (ℤ ≄ ℤ × ℤ/2) — so (b) genuinely needs P projective for the route, and
+  the free hypotheses are the honest scope (KM's modules are finite locally free).
+  For (c): M, P finite flat localize to finite free over the local ring — the
+  hypotheses are exactly what the proof consumes; N needs NOTHING (its rank is
+  computed through the splitting) — adversarially minimal. SURVIVES.
+- [2] **Junk-value coherence**: `finrank`/`rankAtStalk` are ℕ-valued junk-0 on
+  non-free/non-finite modules; all statements only ever evaluate them on
+  free-or-localized-free modules (b: M, P, and N ≅ M × P which IS free+finite;
+  c: localizations at a prime of finite flats are finite free). No statement
+  reads a junk value. SURVIVES.
+- [3] **Triviality/degenerate cases**: `Subsingleton R` — every module is
+  subsingleton, all ranks 0, both sides 0 ✓ (finrank_prod route must not need
+  `Nontrivial R`; verify at build — if `Module.finrank_prod` requires
+  StrongRankCondition-with-Nontrivial, case-split or add the instance mathlib
+  requires and record). `n = 0` SES (`M = P = 0`): N ≅ 0 ✓. `Exact` with junk
+  zero maps: hf/hg exclude pathologies. SURVIVES (with the Subsingleton check
+  discharged at build time).
+- [4] **Not-in-mathlib**: greps `finrank_eq_add`/`finrank_add_finrank_eq`/
+  `rankAtStalk.*add` → only `rankAtStalk_prod` (FreeLocus.lean:313) and the
+  DivisionRing-only Euler-characteristic lemma
+  (`Module.sum_neg_one_pow_finrank_eq_zero_of_exact`, Algebra/Exact/Sequence.lean
+  — fields only); `Exact.splitSurjectiveEquiv` needs a SECTION, mathlib never
+  composes it with `projective_lifting_property`. Genuine gaps; (a)–(c) all
+  upstream candidates. SURVIVES.
+- [5] **Orientation/convention**: SES written as `(f, g)` with `Injective f`,
+  `Surjective g`, `Function.Exact f g` — mathlib's standard encoding (no
+  ComplexShape machinery); conclusion sides `N = M + P` ordered sub-then-quotient
+  matching `rankAtStalk_prod`'s `M × N` order. SURVIVES.
+- Verdict: **SURVIVED** (statement package as designed).
+
 ### T-D29: `Algebra.charpoly_lmul_eq_norm` (ForMathlib/CharpolyNorm.lean)
 
 Statement: for `B` a finite free `R`-algebra and `b : B`,
