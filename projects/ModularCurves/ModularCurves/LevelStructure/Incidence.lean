@@ -854,6 +854,19 @@ theorem _root_.ModularCurves.exists_factor_subschemeι_iff {T : Scheme.{u}}
       rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι,
         Scheme.Hom.toImage_imageι]⟩
 
+/-- Pulling back an ideal sheaf along two morphisms whose sources agree up to a
+compatible isomorphism gives simultaneously trivial ideal sheaves — the transport step
+aligning the two fibre-product presentations of `D'_T` in `exists_incidenceLocusLE`. -/
+private theorem incidenceAux_comap_eq_bot_iff {X Y Z : Scheme.{u}} (e : X ≅ Y)
+    {f : X ⟶ Z} {g : Y ⟶ Z} (hfg : e.hom ≫ g = f) (I : Z.IdealSheafData) :
+    I.comap f = ⊥ ↔ I.comap g = ⊥ := by
+  have hg : g = e.inv ≫ f := by rw [← hfg, Iso.inv_hom_id_assoc]
+  constructor
+  · intro h
+    rw [hg, Scheme.IdealSheafData.comap_comp, h, Scheme.IdealSheafData.comap_bot]
+  · intro h
+    rw [← hfg, Scheme.IdealSheafData.comap_comp, h, Scheme.IdealSheafData.comap_bot]
+
 /-- **(T-D14 = KM 1.3.4, incidence `≤`)** For a smooth relative curve and effective
 divisors `D, D'` with `D'` proper (= finite) over `S`, there is a closed subscheme
 `Z ⊆ S` universal for `D' ≤ D`, cut out locally by `deg D'` equations, compatible with
@@ -862,7 +875,27 @@ theorem exists_incidenceLocusLE [IsSeparated π] (hsm : SmoothOfRelativeDimensio
     (D D' : RelEffCartierDiv π) :
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
-        IsSubdivisor (D'.baseChange t) (D.baseChange t) := by sorry
+        IsSubdivisor (D'.baseChange t) (D.baseChange t) := by
+  haveI := D'.finite
+  haveI := D'.flat
+  haveI := D'.lfp
+  refine ⟨vanishingLocus (D'.ideal.subschemeι ≫ π) (D.ideal.comap D'.ideal.subschemeι), ?_⟩
+  intro T t
+  have hgal : D.ideal.comap (pullback.fst π t) ≤ D'.ideal.comap (pullback.fst π t) ↔
+      (D.ideal.comap (pullback.fst π t)).comap
+        (pullback.fst (pullback.fst π t) D'.ideal.subschemeι) = ⊥ := by
+    rw [(Scheme.IdealSheafData.map_gc
+        (pullback.fst (pullback.fst π t) D'.ideal.subschemeι)).l_eq_bot,
+      Scheme.IdealSheafData.map_bot, Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
+      Scheme.IdealSheafData.ker_subschemeι]
+  rw [exists_factor_subschemeι_iff, vanishingLocus_le_ker_iff, isSubdivisor_iff_le,
+    baseChange_ideal, baseChange_ideal, hgal, ← Scheme.IdealSheafData.comap_comp,
+    ← Scheme.IdealSheafData.comap_comp]
+  exact (incidenceAux_comap_eq_bot_iff
+    (pullbackSymmetry (pullback.fst π t) D'.ideal.subschemeι ≪≫
+      pullbackRightPullbackFstIso π t D'.ideal.subschemeι ≪≫
+      pullbackSymmetry (D'.ideal.subschemeι ≫ π) t)
+    (by simp [pullback.condition]) D.ideal).symm
 
 /-- **(T-D15 = KM 1.3.5, incidence `=`, verbatim source in hand)** As above, universal
 for `D_T = D'_T`, cut out locally by `deg D` equations. -/
