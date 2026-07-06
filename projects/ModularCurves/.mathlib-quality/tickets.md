@@ -1208,17 +1208,22 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   functoriality. Depends: none. Parallel: yes.
 - **[T-D13]** `sectionVanishingIdeal_spec` (zero locus in a finite locally free
   module). Depends: none. Parallel: yes. PROVABLE-NOW candidate.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T11:05Z · target `sectionVanishingIdeal_eq_span_coord`
-    (Incidence.lean:69) per §Amendments v5 Wave 0.
-  - **Progress**: 2026-07-06T11:20Z — proof WRITTEN + verified green standalone
-    against mathlib (le_antisymm; ≤: expand φσ along `b.linearCombination_repr` +
-    `map_sum`, termwise `Ideal.mul_mem_right` of coord-generators; ≥: `b.coord i`
-    is a functional; gotcha: rintro-rfl leaves beta-unreduced membership — `show φ σ ∈ _`).
-    Module gate + #print axioms PENDING: Incidence's import chain passes through
-    stream-A's in-flight WIP (ProjectiveSpaceChart.lean heartbeat-timeout mid-edit,
-    working tree only — NOT the committed baseline). Close-out on next A-green;
-    meanwhile continuing Wave 0 with T-D3b (chain-independent ForMathlib).
+  - **Status**: done (beastmode-D2, 2026-07-06T11:05Z → 2026-07-06T12:25Z) ·
+    `sectionVanishingIdeal_eq_span_coord` (Incidence.lean:67) sorry-free; module
+    green; `#print axioms` on the REAL module = standard three (no sorryAx —
+    independent of the file's other sorried tickets). Proof of record (post-golf,
+    6-line body): `Submodule.span_eq_span` + `Set.range_subset_iff` both ways
+    (kills le_antisymm/span_le plumbing AND the rintro-rfl beta gotcha); ≤-side:
+    expand φσ along `b.linearCombination_repr` via conv_lhs + one squeezed
+    simp only (squeeze is LOAD-BEARING: bare simp re-collapses the expansion via
+    @[simp] linearCombination_repr), close by `h ▸ sum_mem` of
+    `Ideal.mul_mem_right` at coord-generators. Post-proof cleanup: ✓ ran
+    (single-decl Mode A — body 14→6, all gates pass, statement byte-identical,
+    def untouched, no renames). Deferred /generalise flags (statement frozen,
+    section-variable-shared with the def): CommRing→CommSemiring +
+    AddCommGroup→AddCommMonoid compiles; universe split R/M/ι to u/v/w compiles.
+    Unblocks T-D14 (with T-D12). Note: proof landed at HEAD via sibling sweep
+    commits (6fb3b414 wip + 2f03d68d golf) — content verified at HEAD.
 - **[T-D14]** `exists_incidenceLocusLE` (KM 1.3.4; `deg D'` equations). Depends:
   T-D12, T-D13.
 - **[T-D15]** `exists_incidenceLocusEQ` (KM 1.3.5, verbatim in hand). Depends: T-D14.
