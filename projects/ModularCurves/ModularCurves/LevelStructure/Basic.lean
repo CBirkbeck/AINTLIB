@@ -1,4 +1,6 @@
 import ModularCurves.LevelStructure.ExactOrder
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 
 /-!
 # Level structures: Γ(N), Γ₁(N), Γ₀(N) (KM Ch. 3)
@@ -169,6 +171,30 @@ structure IsGammaZero (N : ℕ) [NeZero N] (G : RelEffCartierDiv E.π) : Prop wh
     ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
       ∃ P₀ : (E.baseChange t).Section,
         (P₀.orderDivisor (E.baseChange t) N).ideal = (G.baseChange t).ideal
+
+/-- **(T-D10, literal fppf-local form — KM 1.4.1 / 3.7.1)** A rank-`N` subgroup divisor
+`G ⊆ E` is Γ₀(N)-cyclic in KM's definitional sense: *fppf-locally on `S` it admits a
+generating section of exact order `N`*. Concretely, there is a faithfully-flat, locally
+finitely presented, surjective base change `h : T ⟶ S` (an fppf cover) and a section
+`P₀` of `E ×_S T` of exact order `N` whose order divisor `Σ_{a} [aP₀]` is `G` pulled
+back to `T`. KM (verbatim, 3.7.1 proof): *"the notion of cyclicity is by definition
+local for the f.p.p.f. topology"*. -/
+def IsGammaZeroFppf (N : ℕ) [NeZero N] (G : RelEffCartierDiv E.π) : Prop :=
+  G.IsSubgroup E ∧ (∀ s : S, G.degree s = N) ∧
+    ∃ (T : Scheme.{u}) (h : T ⟶ S),
+      Function.Surjective h.base ∧ Flat h ∧ LocallyOfFinitePresentation h ∧
+      ∃ P₀ : (E.baseChange h).Section,
+        haveI : NeZero N := ‹_›
+        P₀.HasExactOrder (E.baseChange h) N ∧
+        (P₀.orderDivisor (E.baseChange h) N).ideal = (G.baseChange h).ideal
+
+/-- **(T-D10 — KM 3.7.1)** The geometric-fibre Drinfeld cyclicity of record
+(`IsGammaZero`) agrees with KM's literal fppf-local cyclicity (`IsGammaZeroFppf`).
+The reverse implication descends a generator from an fppf cover to geometric points;
+the forward implication is KM 3.7.1's étale-descent representability argument
+(⧗ KM 3.7, proof deferred). -/
+theorem isGammaZero_iff_fppf (N : ℕ) [NeZero N] (G : RelEffCartierDiv E.π) :
+    E.IsGammaZero N G ↔ E.IsGammaZeroFppf N G := by sorry
 
 end EllipticCurve
 

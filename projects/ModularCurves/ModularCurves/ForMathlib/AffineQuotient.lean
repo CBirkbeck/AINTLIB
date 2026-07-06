@@ -139,9 +139,10 @@ theorem invariantsπ_hom_ext_of_isOpenImmersion [Finite G] {W Y : Scheme.{u}}
         Spec (CommRingCat.of (FixedPoints.subalgebra R B G)) :=
       Spec.map (CommRingCat.ofHom
         (algebraMap (FixedPoints.subalgebra R B G) (Localization.Away a))) with hκ
-    have hκrange : Set.range κ.base = (PrimeSpectrum.basicOpen a : Set _) :=
-      PrimeSpectrum.localization_away_comap_range _ a
-    have hκj : Set.range κ.base ⊆ Set.range j.base := by
+    have hκrange : Set.range ⇑κ = (↑(PrimeSpectrum.basicOpen a) :
+        Set (PrimeSpectrum (FixedPoints.subalgebra R B G))) :=
+      PrimeSpectrum.localization_away_comap_range (Localization.Away a) a
+    have hκj : Set.range ⇑κ ⊆ Set.range ⇑j := by
       rw [hκrange]
       exact hsO.trans (Set.image_subset_range _ _)
     set ℓ := IsOpenImmersion.lift j κ hκj with hℓ
@@ -154,21 +155,25 @@ theorem invariantsπ_hom_ext_of_isOpenImmersion [Finite G] {W Y : Scheme.{u}}
       intro v
       have h5 : j (ℓ v) ∈ j.base '' T := by
         refine hsO ?_
+        show j (ℓ v) ∈ (↑(PrimeSpectrum.basicOpen a) :
+          Set (PrimeSpectrum (FixedPoints.subalgebra R B G)))
         rw [← hκrange]
         exact ⟨v, by rw [← hℓj, Scheme.Hom.comp_apply]⟩
       obtain ⟨t, htT, ht⟩ := h5
       rwa [← j.isOpenEmbedding.injective ht]
     have hwℓ : ∃ z, ℓ z = w := by
-      have h6 : j w ∈ Set.range κ.base := hκrange ▸ hjws
+      have h6 : j w ∈ Set.range ⇑κ := by
+        rw [hκrange]
+        exact hjws
       obtain ⟨v, hv⟩ := h6
       refine ⟨v, j.isOpenEmbedding.injective ?_⟩
       rw [← hℓj, Scheme.Hom.comp_apply] at hv
       exact hv
     -- lift `ℓ ≫ hᵢ` into the affine chart
-    have hrange₁ : Set.range (ℓ ≫ h₁).base ⊆ Set.range ι.base := by
+    have hrange₁ : Set.range ⇑(ℓ ≫ h₁) ⊆ Set.range ⇑ι := by
       rintro _ ⟨v, rfl⟩
       exact hrangeT v
-    have hrange₂ : Set.range (ℓ ≫ h₂).base ⊆ Set.range ι.base := by
+    have hrange₂ : Set.range ⇑(ℓ ≫ h₂) ⊆ Set.range ⇑ι := by
       rintro _ ⟨v, rfl⟩
       have h7 : (ℓ ≫ h₂) v = h₁ (ℓ v) := by
         rw [Scheme.Hom.comp_apply, hbase (ℓ v)]
@@ -200,7 +205,8 @@ theorem invariantsπ_hom_ext_of_isOpenImmersion [Finite G] {W Y : Scheme.{u}}
       pullback.lift_snd _ _ _
     -- the localized invariants morphism coequalizes `h₁, h₂` after `ℓ`
     have hπaℓ : πa ≫ ℓ ≫ h₁ = πa ≫ ℓ ≫ h₂ := by
-      rw [← Category.assoc, ← hρsnd, Category.assoc, Category.assoc, H]
+      rw [← Category.assoc, ← hρsnd, Category.assoc, H, ← Category.assoc, hρsnd,
+        Category.assoc]
     have hπat : πa ≫ t₁ = πa ≫ t₂ := by
       rw [← cancel_mono ι, Category.assoc, Category.assoc, ht₁, ht₂]
       exact hπaℓ
@@ -223,7 +229,7 @@ theorem invariantsπ_hom_ext_of_isOpenImmersion [Finite G] {W Y : Scheme.{u}}
   -- glue: the charts form an open cover of `W`
   choose Z ℓ himm hcov heq using key
   have := himm
-  exact Scheme.OpenCover.hom_ext
+  exact Scheme.Cover.hom_ext
     (Scheme.Cover.mkOfCovers W Z ℓ
       (fun x => ⟨x, (hcov x).choose, (hcov x).choose_spec⟩)
       (fun w => himm w))
