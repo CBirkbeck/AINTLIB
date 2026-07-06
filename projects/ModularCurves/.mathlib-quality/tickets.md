@@ -1225,6 +1225,23 @@ maxHeartbeats` anywhere; DS-register unchanged; `#print axioms` audit)
   `muNRing` · **Claimed**: beastmode-B, 2026-07-06T11:55Z (in_progress; deps T-B2 ✓
   T-B7 ✓ both done, file sorry-free; running while the A-lane WIP blocks the
   Torsion import chain)
+  · **Progress** (2026-07-06): Phases 0–3 done (baseline green 2877 jobs/0 warn;
+  punch-list ~50 items; 4 subsection dividers folded into module docstring,
+  commit 4b7d8615). Phase 4 per-decl workers 7/74 done, all gates pass:
+  muNRing/muNAbs/muN/muNπ (clean, no edits; flagged big-changes: AdjoinRoot
+  respelling, ULift-on-coefficients, CanonicallyOverClass/↘ migration, Diag(M)),
+  constScheme+constSchemeπ (`@[reducible] def`→`abbrev`, green; NOTE constScheme
+  hunk was swept into stream-A commit 50c86595 by a sibling `git add -A` —
+  content correct, attribution wrong, no history fix in shared worktree),
+  muNRingGen (private docstring stripped). Phase-5a queue so far: [Finite A]
+  drop (+2 omit fixes), A : Type universe question — both deferred big-change.
+  · **Plugin 0.55.0 incorporated** (2026-07-06): statement-splitting.md is
+  reference doc #8 for remaining workers; item 12 STRUCTURE now enforces
+  one-conclusion-per-declaration (∧-chain → part-lemmas + one-line ⟨…⟩ assembly;
+  exceptions: shared-witness ∃, mutual-induction bundles, single Iff);
+  isPullback_muN_baseChange (shared-witness ∃, constructible witness) queued for
+  def+spec-lemma extraction per the preference order. Beastmode Tier A5: future
+  sub-tickets born single-conclusion.
 - **[CLEANUP-5]** after T-D2+T-D3 → CartierDivisor.lean (deps: those) — includes
   upstreaming review of `IdealSheafData.mul`
 - **[CLEANUP-6]** after T-D5+T-D6+T-D7 → ExactOrder.lean (deps: those)
@@ -1458,6 +1475,18 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   [T-D25] rank-1 locally free algebra ⟹ structure iso. [T-D26] degree-0 effective ⟹
   empty. [T-D27] zero-locus over W of a module = zero-locus over S of its f.l.f.
   pushforward. [T-D28] A-Str ≅ ∏ A_i-Str (KM 1.7.3, phase 2). [T-D29]
+  - **[T-D27] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
+    successor), 2026-07-06T13:40Z · deliverable (i) = the coordinate-descent
+    basis form in Incidence.lean §ZeroLocus:
+    `sectionVanishingIdeal R M σ = span (range fun p : κ × ι =>
+    c.coord p.1 (b.coord p.2 σ))` for a tower `R → B ↷ M` with `c : Basis κ R B`,
+    `b : Basis ι B M`, `[IsScalarTower R B M]` — one rw from T-D13 at
+    `c.smulTower b` + `smulTower_repr` (KM's "vanishing on W of a single
+    function ⟺ vanishing on S of its coordinates", the (deg D)²-equations
+    descent). Deliverable (ii), the base-change vanishing bridge
+    (`σ ⊗ 1 = 0 in M ⊗[R] A ↔ I(σ) ≤ ker`), DEFERRED into T-D14/T-D16 where
+    their ⦃T⦄-statements pin the exact tensor spelling (same scoping decision
+    as T-D26's wrapper). Attack block in d-lane-helpers.md.
   - **[T-D25] Status**: done (beastmode-D2, 2026-07-06T13:25Z,
     **RESOLVED-BY-MATHLIB, no project code**) — pin 11b908e5cdd9 has BOTH forms:
     `Module.algebraMap_bijective_iff_rankAtStalk` (rankAtStalk S = 1 ↔ Bijective
