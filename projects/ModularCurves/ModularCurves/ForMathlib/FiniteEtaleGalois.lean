@@ -62,6 +62,8 @@ namespace FiniteEtaleGalois
 
 open CommAlgCat
 
+open scoped TensorProduct
+
 variable (k : Type u) [Field k]
 
 /-! `k` is initial in `FiniteEtale k` (leaf AG-GG-1.3a). -/
@@ -118,8 +120,6 @@ instance hasFiniteProducts : HasFiniteProducts (CommAlgCat.FiniteEtale.{u} k) wh
 along finite étale algebras is the tensor product, which is again finite étale. -/
 
 section Pushout
-
-open scoped TensorProduct
 
 variable (A B C : Type u) [CommRing A] [CommRing B] [CommRing C]
   [Algebra k A] [Algebra k B] [Algebra k C]
