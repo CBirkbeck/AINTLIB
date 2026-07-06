@@ -1412,6 +1412,21 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   with N invertible has N distinct points); T-D6c étale-discriminant bridge
   ((3)⟺(4), consumes T-B4-rank + a trace-form/discriminant input — check mathlib
   `Algebra.discr` + finite-étale-iff-unramified-fibrewise before boxing).
+  T-D6a-INFRA COMPLETE (2026-07-09T07:00Z): ALL CartierDivisor-side base-change
+  infrastructure PROVED sorry-free — `isPullback_sectionBaseChange` (section
+  base-change square cartesian, limit-cone construction), `ker_sectionBaseChange`
+  (ker of pulled section = comap of ker), `baseChange_ideal` (base-changed divisor
+  ideal = D.ideal.comap fst, via pullbackSymmetry + ker_fst_of_isClosedImmersion +
+  ker_subschemeι), `comap_mul`/`comap_prod` (T-D6a-i, done). ALSO `Point.pull_zsmul`
+  + `Point.pull_zero` (ExactOrder). NOTE: T-D6 (the headline (1)⇔(3)) was ultimately
+  DERIVED via the T-D6b/T-D6c fibre-étale boxes WITHOUT needing the full
+  orderDivisor-base-change naturality — so the remaining assembly (L3: identify
+  `(orderDivisor P N).baseChange t` with `orderDivisor (pull P) N` across the
+  `E.baseChange t` frame; L4: IsSubgroup transport) is now a STANDALONE naturality
+  ticket, spawned as T-D6a-ii, gated on the single missing compat
+  `(E.baseChange t).mulByHom n` vs pullback of `E.mulByHom n` (grpObjMkPullbackSnd
+  functoriality, T-A6-adjacent group-law plumbing). Not blocking any current result.
+  ---
   T-D6a-PROGRESS (2026-07-08T12:30Z): `RelEffCartierDiv.baseChange` Prop-fields
   DISCHARGED sorry-free (paste_vert of the two of_hasPullback squares +
   MorphismProperty.of_isPullback [slots: sq : IsPullback f' g' g f transfers P g →
@@ -1503,6 +1518,26 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (`ext_of_iSup_eq_top` over an affine cover of X refined into Y-affines + a
   comap-restriction lemma), then `comap_mul` general, then back to T-D6a
   (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
+
+### [T-D6a-ii] orderDivisor base-change naturality (standalone; gated on mulBy compat)
+- **Status**: open (spawned 2026-07-09T07:00Z; NOT blocking T-D6/D7/D8/D9 which are
+  done-modulo-boxes without it). All CartierDivisor infrastructure is proven
+  (baseChange_ideal, ker_sectionBaseChange, comap_mul/comap_prod). The one missing
+  ingredient is the group-law compat below.
+- **File**: EllipticCurve/GroupLaw.lean (compat) + LevelStructure/ExactOrder.lean
+  (assembly) · **Depends on**: T-A5c (done) · **Type**: lemma
+- **Sketch**: (i) `mulByHom_baseChange`: `(E.baseChange t).mulByHom n` = the pullback
+  map of `E.mulByHom n` over `t` — from `grpObjMkPullbackSnd` being
+  `(Over.pullback g).mapGrp`-functorial, so `[n]` (an n-th power in the hom-group)
+  commutes with the monoidal functor `Over.pullback`; concretely
+  `(E.baseChange t).mulBy n = (Over.pullback t).map (E.mulBy n)` at `.left`. (ii) then
+  `Point.pull (a•P) = a • Point.pull P` already gives the section identification;
+  combine with `baseChange_ideal` + `comap_prod` + `ker_sectionBaseChange` to get
+  `(orderDivisor P N).baseChange t . ideal = (orderDivisor (E.baseChange t)
+  (pull-sections) N).ideal`. (iii) L4: IsSubgroup transports along `comapIso`
+  (points of the base-changed subscheme ↔ points factoring through the pullback).
+- **Sources**: [KM] 1.4.4 (1)⟹(2) base-change preservation; mathlib
+  Cartesian/Over.lean mapGrp functoriality.
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
 - **Status**: done-modulo-registered-box (beastmode-A 2026-07-09T04:30Z —

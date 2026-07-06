@@ -14,12 +14,14 @@ import Mathlib.Algebra.Algebra.Subalgebra.Operations
 For a group `G` acting on a commutative ring `B` and an element `h : B` fixed by the
 action, the action descends to the localization away from `h`:
 
-* `MulSemiringAction.away hfix : MulSemiringAction G (Localization.Away h)` — a `def`,
-  not an instance (it depends on the hypothesis `hfix : ∀ g, g • h = h`); consumers
-  bring it into scope with `letI`, following the `IsFractionRing.mulSemiringAction`
-  precedent.
-* `smul_away_algebraMap`, `smul_away_mk'` — the action acts on numerators.
-* `exists_fixed_mk'_eq_of_forall_smul_eq` (T-Q3b): for **finite** `G`, every fixed
+* `MulSemiringAction.awayHom hfix g : Localization.Away h →+* Localization.Away h` —
+  the ring endomorphism induced by `g • ·`, with `awayHom_one`, `awayHom_mul`,
+  `awayHom_mk'`, `awayHom_mk'_pow`.
+* `MulSemiringAction.away hfix : MulSemiringAction G (Localization.Away h)` — the
+  bundled action; a `def`, not an instance (it depends on the hypothesis
+  `hfix : ∀ g, g • h = h`); consumers bring it into scope with `letI`, following the
+  `IsFractionRing.mulSemiringAction` precedent.
+* `exists_fixed_mk'_eq_of_forall_awayHom_eq` (T-Q3b): for **finite** `G`, every fixed
   element of `Localization.Away h` is of the form `b / hⁿ` with `b` invariant —
   "invariants of the localization = localization of the invariants", surjectivity
   half. No averaging: the numerator is corrected by a power of `h` instead of
@@ -38,73 +40,92 @@ universe u
 variable {G : Type*} [Group G] {B : Type u} [CommRing B] [MulSemiringAction G B]
 variable {h : B}
 
-open MulSemiringAction in
-theorem Submonoid.powers_le_comap_toRingHom (hfix : ∀ g : G, g • h = h) (g : G) :
+namespace MulSemiringAction
+
+theorem powers_le_comap_toRingHom (hfix : ∀ g : G, g • h = h) (g : G) :
     Submonoid.powers h ≤ (Submonoid.powers h).comap (toRingHom G B g) := by
   rintro x ⟨n, rfl⟩
   refine Submonoid.mem_comap.mpr ⟨n, ?_⟩
-  rw [toRingHom_apply, smul_pow, hfix]
+  show h ^ n = g • h ^ n
+  rw [smul_pow, hfix]
+
+/-- The ring endomorphism of `Localization.Away h` induced by localizing `g • ·` at
+the invariant element `h`. Bundled into an action by `MulSemiringAction.away`. -/
+noncomputable def awayHom (hfix : ∀ g : G, g • h = h) (g : G) :
+    Localization.Away h →+* Localization.Away h :=
+  IsLocalization.map (Localization.Away h) (toRingHom G B g)
+    (powers_le_comap_toRingHom hfix g)
+
+theorem awayHom_algebraMap (hfix : ∀ g : G, g • h = h) (g : G) (b : B) :
+    awayHom hfix g (algebraMap B (Localization.Away h) b) =
+      algebraMap B (Localization.Away h) (g • b) :=
+  IsLocalization.map_eq _ b
+
+theorem awayHom_mk' (hfix : ∀ g : G, g • h = h) (g : G) (b : B)
+    (s : Submonoid.powers h) :
+    awayHom hfix g (IsLocalization.mk' (Localization.Away h) b s) =
+      IsLocalization.mk' (Localization.Away h) (g • b)
+        ⟨g • (s : B), powers_le_comap_toRingHom hfix g s.2⟩ :=
+  IsLocalization.map_mk' _ b s
+
+/-- `awayHom` on a fraction with invariant denominator `hⁿ`: only the numerator
+moves. -/
+theorem awayHom_mk'_pow (hfix : ∀ g : G, g • h = h) (g : G) (b : B) (n : ℕ) :
+    awayHom hfix g (IsLocalization.mk' (Localization.Away h) b
+        (⟨h ^ n, n, rfl⟩ : Submonoid.powers h)) =
+      IsLocalization.mk' (Localization.Away h) (g • b)
+        (⟨h ^ n, n, rfl⟩ : Submonoid.powers h) := by
+  rw [awayHom_mk']
+  exact congrArg _ (Subtype.ext (by show g • h ^ n = h ^ n; rw [smul_pow, hfix]))
+
+theorem awayHom_one (hfix : ∀ g : G, g • h = h) (x : Localization.Away h) :
+    awayHom hfix (1 : G) x = x := by
+  obtain ⟨b, s, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers h) x
+  rw [awayHom_mk']
+  exact congrArg₂ _ (one_smul G b) (Subtype.ext (one_smul G (s : B)))
+
+theorem awayHom_mul (hfix : ∀ g : G, g • h = h) (g g' : G) (x : Localization.Away h) :
+    awayHom hfix (g * g') x = awayHom hfix g (awayHom hfix g' x) := by
+  obtain ⟨b, s, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers h) x
+  rw [awayHom_mk', awayHom_mk', awayHom_mk']
+  exact congrArg₂ _ (mul_smul g g' b) (Subtype.ext (mul_smul g g' (s : B)))
 
 /-- The action of `G` on `Localization.Away h` induced by localizing each `g • ·` at
 the invariant element `h`. Not an instance (it depends on the invariance hypothesis):
 bring it into scope with `letI := MulSemiringAction.away hfix`. -/
-noncomputable def MulSemiringAction.away (hfix : ∀ g : G, g • h = h) :
+noncomputable def away (hfix : ∀ g : G, g • h = h) :
     MulSemiringAction G (Localization.Away h) where
-  smul g := IsLocalization.map (Localization.Away h) (toRingHom G B g)
-    (Submonoid.powers_le_comap_toRingHom hfix g)
-  one_smul x := DFunLike.congr_fun (IsLocalization.map_unique _ (RingHom.id _)
-    fun b => by simp) x
-  mul_smul g g' x := DFunLike.congr_fun (IsLocalization.map_unique _
-    ((IsLocalization.map _ (toRingHom G B g)
-        (Submonoid.powers_le_comap_toRingHom hfix g)).comp
-      (IsLocalization.map _ (toRingHom G B g')
-        (Submonoid.powers_le_comap_toRingHom hfix g')))
-    fun b => by simp [IsLocalization.map_eq, mul_smul]) x
-  smul_zero g := map_zero _
-  smul_add g := map_add _
-  smul_one g := map_one _
-  smul_mul g := map_mul _
-
-theorem smul_away_algebraMap (hfix : ∀ g : G, g • h = h) (g : G) (b : B) :
-    letI := MulSemiringAction.away hfix
-    g • algebraMap B (Localization.Away h) b =
-      algebraMap B (Localization.Away h) (g • b) :=
-  IsLocalization.map_eq _ b
-
-theorem smul_away_mk' (hfix : ∀ g : G, g • h = h) (g : G) (b : B)
-    (s : Submonoid.powers h) :
-    letI := MulSemiringAction.away hfix
-    g • IsLocalization.mk' (Localization.Away h) b s =
-      IsLocalization.mk' (Localization.Away h) (g • b)
-        ⟨g • (s : B), Submonoid.powers_le_comap_toRingHom hfix g s.2⟩ :=
-  IsLocalization.map_mk' _ b s
+  smul g x := awayHom hfix g x
+  one_smul := awayHom_one hfix
+  mul_smul := awayHom_mul hfix
+  smul_zero g := map_zero (awayHom hfix g)
+  smul_add g := map_add (awayHom hfix g)
+  smul_one g := map_one (awayHom hfix g)
+  smul_mul g := map_mul (awayHom hfix g)
 
 /-- **Invariants of a localization are the localization of the invariants**
 (surjectivity half, T-Q3b): for a finite group and an invariant element `h`, every
 fixed element of `Localization.Away h` is `b / hⁿ` for an invariant numerator `b`.
 
+Stated via `awayHom` (`x` is fixed under the action `MulSemiringAction.away hfix`).
 No averaging over `G` — the numerator is corrected by a power of `h` instead, so
 there is no hypothesis on `|G|` being invertible in `B`. -/
-theorem exists_fixed_mk'_eq_of_forall_smul_eq [Finite G]
-    (hfix : ∀ g : G, g • h = h) (x : Localization.Away h) :
-    letI := MulSemiringAction.away hfix
-    (∀ g : G, g • x = x) →
-      ∃ (b : B) (n : ℕ), (∀ g : G, g • b = b) ∧
-        IsLocalization.mk' (Localization.Away h) b
-          (⟨h ^ n, n, rfl⟩ : Submonoid.powers h) = x := by
-  letI := MulSemiringAction.away hfix
-  intro hx
+theorem exists_fixed_mk'_eq_of_forall_awayHom_eq [Finite G]
+    (hfix : ∀ g : G, g • h = h) (x : Localization.Away h)
+    (hx : ∀ g : G, awayHom hfix g x = x) :
+    ∃ (b : B) (n : ℕ), (∀ g : G, g • b = b) ∧
+      IsLocalization.mk' (Localization.Away h) b
+        (⟨h ^ n, n, rfl⟩ : Submonoid.powers h) = x := by
   obtain ⟨b, s, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers h) x
   obtain ⟨sv, N, rfl⟩ := s
   have key : ∀ g : G, ∃ m : ℕ, h ^ m * (g • b) = h ^ m * b := by
     intro g
     have hg := hx g
-    rw [smul_away_mk' hfix g b] at hg
+    rw [awayHom_mk'_pow hfix g b] at hg
     have h2 : algebraMap B (Localization.Away h) (g • b) =
         algebraMap B (Localization.Away h) b := by
-      have := congrArg (· * algebraMap B (Localization.Away h) (h ^ N)) hg
-      simpa [IsLocalization.mk'_spec, MulSemiringAction.toRingHom_apply, smul_pow,
-        hfix] using this
+      have h3 := congrArg (· * algebraMap B (Localization.Away h) (h ^ N)) hg
+      simpa only [IsLocalization.mk'_spec] using h3
     obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists (Submonoid.powers h) _).mp h2
     obtain ⟨cv, m, rfl⟩ := c
     exact ⟨m, hc⟩
@@ -113,9 +134,13 @@ theorem exists_fixed_mk'_eq_of_forall_smul_eq [Finite G]
   refine ⟨h ^ (Finset.univ.sup m) * b, N + Finset.univ.sup m, fun g => ?_, ?_⟩
   · obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le (Finset.le_sup (Finset.mem_univ g))
     rw [smul_mul', smul_pow, hfix, hk, pow_add, mul_assoc, mul_assoc, hm g]
-  · rw [show h ^ (N + Finset.univ.sup m) = h ^ (Finset.univ.sup m) * h ^ N by
-      rw [← pow_add, Nat.add_comm]]
-    exact IsLocalization.mk'_cancel _ _ _ ▸ rfl
+  · rw [show (⟨h ^ (N + Finset.univ.sup m), N + Finset.univ.sup m, rfl⟩ :
+        Submonoid.powers h) =
+        ⟨h ^ N, N, rfl⟩ * ⟨h ^ (Finset.univ.sup m), Finset.univ.sup m, rfl⟩ from
+      Subtype.ext (by rw [Submonoid.coe_mul]; exact pow_add h N _), mul_comm]
+    exact IsLocalization.mk'_cancel b ⟨h ^ N, N, rfl⟩ _
+
+end MulSemiringAction
 
 section FixedSubalgebra
 
