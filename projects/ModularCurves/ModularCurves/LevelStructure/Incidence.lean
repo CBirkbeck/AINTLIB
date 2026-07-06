@@ -183,6 +183,31 @@ theorem submoduleVanishingIdeal_localized {Rₛ Nₛ : Type u} [CommRing Rₛ] [
 
 end SubmoduleVanishing
 
+section VanishingLocus
+
+variable {W S : Scheme.{u}} (p : W ⟶ S) [IsFinite p] [Flat p]
+  [LocallyOfFinitePresentation p] (E : W.IdealSheafData)
+
+/-- The preimage of an affine open under a finite (hence affine) morphism, as an
+affine open. -/
+def affinePreimage (U : S.affineOpens) : W.affineOpens :=
+  ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩
+
+/-- **(T-D14c-1)** The vanishing locus on `S` of an ideal sheaf `E` on a scheme `W`
+finite locally free over `S`: over an affine `U ⊆ S` it is the vanishing ideal of the
+sections of `E` inside the finite locally free `Γ(S, U)`-module `Γ(W, p⁻¹U)`. This is
+KM 1.3.4's locus of "simultaneous vanishing of the coordinates", in the basis-free
+form; its universal property is `vanishingLocus_le_ker_iff` (T-D14c-2). -/
+noncomputable def vanishingLocus : S.IdealSheafData where
+  ideal U :=
+    letI := ((p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom).toAlgebra
+    submoduleVanishingIdeal Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
+      ((E.ideal (affinePreimage p U)).restrictScalars Γ(S, U.1))
+  map_ideal_basicOpen U f := by
+    sorry
+
+end VanishingLocus
+
 section Incidence
 
 variable {C S : Scheme.{u}} {π : C ⟶ S}

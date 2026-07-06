@@ -1414,6 +1414,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Y-affines + a comap-restriction compat lemma (mirror
   `ideal_comap_of_isOpenImmersion`, Functorial:199). File started:
   ForMathlib/IdealSheafComapMul.lean (skeleton compiles, core sorried).
+- **AFFINE CASE DONE (2026-07-08T21:00Z)**: `comap_ideal_top_of_isAffine` +
+  `comap_mul_of_isAffine` PROVED sorry-free (axioms standard) — and TENSOR-FREE:
+  instead of computing Γ(pullback), map the competitor `Spec (Γ(X)/extension)` into
+  the pullback by `pullback.lift ιX (IsClosedImmersion.lift Iι (ιX ≫ f) hle)` and
+  read `ker fst.appTop ≤ extension` off `u ≫ fst = ιX`; the two value chases close
+  by `ΓSpecIso_naturality`-at-the-element + the isoSpec round-trip `hround` (state
+  hround at the `CommRingCat.of ↑Γ(X,⊤)` spelling to match ofHom-mk's naturality —
+  the eta-spelling mismatch otherwise blocks rw). Cheap half: pullback.condition
+  appTop-chase + `subschemeι_app` consumed via congrArg-value terms.
+  `Pi.mul_apply` needed after `ideal_mul`. REMAINING: globalisation
+  (`ext_of_iSup_eq_top` over an affine cover of X refined into Y-affines + a
+  comap-restriction lemma), then `comap_mul` general, then back to T-D6a
+  (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
 - **Status**: open · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
