@@ -618,6 +618,168 @@ theorem pullbackSpecSMul_snd {Q' : Scheme.{u}}
       pullback.snd (invariantsπ G B R) j :=
   pullback.lift_snd _ _ _
 
+variable (G B) in
+/-- **`j`-relative existence of descent** (the keystone of the glued quotient): for
+an open immersion `j : Q' ⟶ Spec Bᴳ`, every morphism out of `pullback π j` that is
+invariant for the relative action descends to `Q'`. At `j = 𝟙` this recovers
+`exists_invariantsπ_lift`; applied to the image of a stable open it produces the
+open-immersion property of the local quotient maps; applied chart-wise it glues the
+global quotient (T-Q5d). -/
+theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    [IsOpenImmersion j]
+    (f : pullback (invariantsπ G B R) j ⟶ Y)
+    (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f) :
+    ∃ q : Q' ⟶ Y, pullback.snd (invariantsπ G B R) j ≫ q = f := by
+  classical
+  have hπ : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
+  have hsnd : Surjective (pullback.snd (invariantsπ G B R) j) :=
+    MorphismProperty.pullback_snd _ _ hπ
+  -- per-point local descent data: an invariant basic chart inside `range j` and a
+  -- local descent of `f` over it
+  have key : ∀ p : Q', ∃ a : FixedPoints.subalgebra R B G,
+      j p ∈ PrimeSpectrum.basicOpen a ∧
+      (↑(PrimeSpectrum.basicOpen a) :
+        Set (PrimeSpectrum (FixedPoints.subalgebra R B G))) ⊆ Set.range ⇑j ∧
+      ∃ qa : Spec (CommRingCat.of (Localization.Away a)) ⟶ Y,
+        ∀ (κB' : Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶
+            pullback (invariantsπ G B R) j),
+          κB' ≫ pullback.fst (invariantsπ G B R) j = chartB R a →
+          chartπ R a ≫ qa = κB' ≫ f := by
+    intro p
+    obtain ⟨z, hz⟩ := hsnd.surj p
+    obtain ⟨i₀, y₀, hy₀⟩ := Y.affineCover.exists_eq (f z)
+    set ι := Y.affineCover.f i₀ with hι
+    -- the stable open `U ⊆ Spec B` where `f` (through `fst`) lands in the chart
+    set U : Set (Spec (CommRingCat.of B)) :=
+      ⇑(pullback.fst (invariantsπ G B R) j) '' (⇑f ⁻¹' Set.range ⇑ι) with hU
+    have hUopen : IsOpen U :=
+      (pullback.fst (invariantsπ G B R) j).isOpenEmbedding.isOpenMap _
+        (ι.isOpenEmbedding.isOpen_range.preimage f.continuous)
+    have hUstable : ∀ (g : G) (x' : Spec (CommRingCat.of B)),
+        x' ∈ U → specSMul g x' ∈ U := by
+      rintro g _ ⟨z', hz', rfl⟩
+      refine ⟨pullbackSpecSMul G B R j g z', ?_, ?_⟩
+      · show f _ ∈ Set.range ⇑ι
+        rw [← Scheme.Hom.comp_apply, hf g]
+        exact hz'
+      · rw [← Scheme.Hom.comp_apply, pullbackSpecSMul_fst, Scheme.Hom.comp_apply]
+    have hxU : pullback.fst (invariantsπ G B R) j z ∈ U := ⟨z, ⟨y₀, hy₀⟩, rfl⟩
+    have hπx : invariantsπ G B R (pullback.fst (invariantsπ G B R) j z) = j p := by
+      rw [← Scheme.Hom.comp_apply, pullback.condition, Scheme.Hom.comp_apply, hz]
+    -- an invariant basic open inside `π(U) ∩ range j` around `j p`
+    have hO : IsOpen ((⇑(invariantsπ G B R).base '' U) ∩ Set.range ⇑j) :=
+      (isOpen_image_invariantsπ_of_stable G B R hUopen hUstable).inter
+        j.isOpenEmbedding.isOpen_range
+    obtain ⟨s, ⟨a, rfl⟩, hjs, hsO⟩ :=
+      PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open
+        (⟨⟨_, hxU, hπx⟩, ⟨p, rfl⟩⟩ :
+          j p ∈ (⇑(invariantsπ G B R).base '' U) ∩ Set.range ⇑j) hO
+    refine ⟨a, hjs, fun t ht => (hsO ht).2, ?_⟩
+    -- `D((a : B)) ⊆ U` by saturation
+    have hDU : (↑(PrimeSpectrum.basicOpen ((a : B))) : Set (PrimeSpectrum B)) ⊆ U := by
+      intro y hy
+      obtain ⟨u, huU, hu⟩ := (hsO (show invariantsπ G B R y ∈
+        (↑(PrimeSpectrum.basicOpen a) :
+          Set (PrimeSpectrum (FixedPoints.subalgebra R B G))) from hy)).1
+      obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G B R u y).mp hu
+      rw [← hg]
+      exact hUstable g u huU
+    -- lift the `B`-side chart through `fst`
+    have hrangeκ : Set.range ⇑(chartB R a) ⊆
+        Set.range ⇑(pullback.fst (invariantsπ G B R) j) := by
+      rintro _ ⟨v, rfl⟩
+      have h8 : chartB R a v ∈ U := hDU (by
+        have h9 : chartB R a v ∈ (chartB R a).opensRange := ⟨v, rfl⟩
+        rwa [chartB_opensRange] at h9)
+      obtain ⟨z', _, hz'⟩ := h8
+      exact ⟨z', hz'⟩
+    set κB₀ := IsOpenImmersion.lift (pullback.fst (invariantsπ G B R) j)
+      (chartB R a) hrangeκ with hκB₀
+    have hκB₀fst : κB₀ ≫ pullback.fst (invariantsπ G B R) j = chartB R a :=
+      IsOpenImmersion.lift_fac _ _ hrangeκ
+    -- `κB₀ ≫ f` lands in the affine chart of `Y`
+    have hrangeY : Set.range ⇑(κB₀ ≫ f) ⊆ Set.range ⇑ι := by
+      rintro _ ⟨v, rfl⟩
+      have h10 : chartB R a v ∈ U := hDU (by
+        have h9 : chartB R a v ∈ (chartB R a).opensRange := ⟨v, rfl⟩
+        rwa [chartB_opensRange] at h9)
+      obtain ⟨z', hz'mem, hz'⟩ := h10
+      have h11 : κB₀ v = z' :=
+        (pullback.fst (invariantsπ G B R) j).isOpenEmbedding.injective (by
+          rw [← Scheme.Hom.comp_apply, hκB₀fst, hz'])
+      rw [Scheme.Hom.comp_apply, h11]
+      exact hz'mem
+    set t := IsOpenImmersion.lift ι (κB₀ ≫ f) hrangeY with htdef
+    have ht : t ≫ ι = κB₀ ≫ f := IsOpenImmersion.lift_fac ι _ hrangeY
+    -- the equivariance square for `κB₀`, via `fst`-monomorphy
+    have hspec : ∀ g : G,
+        Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫
+          κB₀ = κB₀ ≫ pullbackSpecSMul G B R j g := by
+      intro g
+      rw [← cancel_mono (pullback.fst (invariantsπ G B R) j)]
+      rw [Category.assoc, Category.assoc, hκB₀fst, pullbackSpecSMul_fst,
+        ← Category.assoc, hκB₀fst]
+      rw [chartB_def, specSMul, ← Spec.map_comp, ← Spec.map_comp,
+        ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+      congr 2
+      exact IsLocalization.map_comp _
+    -- the Γ-level ring hom of the lifted restriction, with G-fixed image
+    obtain ⟨φ, hφ⟩ := Spec.map_surjective (t ≫ (Y.affineCover.X i₀).isoSpec.hom)
+    have hφfix : ∀ (g : G) (c), MulSemiringAction.awayHom (fun g => a.2 g) g
+        (φ.hom c) = φ.hom c := by
+      intro g
+      have h11 : Spec.map (CommRingCat.ofHom
+          (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫ t = t := by
+        rw [← cancel_mono ι, Category.assoc, ht, ← Category.assoc, hspec g,
+          Category.assoc, hf g]
+      have h12 : Spec.map (CommRingCat.ofHom
+            (MulSemiringAction.awayHom (fun g => a.2 g) g)) ≫ Spec.map φ =
+          Spec.map φ := by
+        rw [hφ, ← Category.assoc, h11]
+      rw [← Spec.map_comp] at h12
+      have h13 := Spec.map_injective h12
+      intro c
+      exact congrArg (fun ψ => ψ.hom c) h13
+    obtain ⟨ψ, hψ, -⟩ := existsUnique_factor_fixedPoints_away R a φ.hom hφfix
+    refine ⟨Spec.map (CommRingCat.ofHom ψ) ≫ (Y.affineCover.X i₀).isoSpec.inv ≫ ι,
+      fun κB' hκB' => ?_⟩
+    -- any factorization agrees with `κB₀` (fst is mono)
+    have hκκ : κB' = κB₀ :=
+      (cancel_mono (pullback.fst (invariantsπ G B R) j)).mp (by rw [hκB₀fst, hκB'])
+    have h14 : chartπ R a ≫ Spec.map (CommRingCat.ofHom ψ) = Spec.map φ := by
+      rw [chartπ_def, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      have h14' : CommRingCat.ofHom ((IsLocalization.map
+          (Localization.Away ((a : B)))
+          (algebraMap (FixedPoints.subalgebra R B G) B)
+          (Submonoid.powers_le_comap_algebraMap R a)).comp ψ) = φ := by
+        rw [hψ]
+        exact CommRingCat.ofHom_hom φ
+      rw [h14']
+    rw [hκκ, ← Category.assoc, h14, hφ, Category.assoc, Iso.hom_inv_id_assoc, ht]
+  -- choose the local data and glue over the induced cover of `Q'`
+  choose a hmem hrange qa hqa using key
+  have hliftA : ∀ p : Q', Set.range ⇑(chartA R (a p)) ⊆ Set.range ⇑j := by
+    intro p t ht
+    refine hrange p ?_
+    obtain ⟨v, rfl⟩ := ht
+    have h15 : chartA R (a p) v ∈ (chartA R (a p)).opensRange := ⟨v, rfl⟩
+    rwa [chartA_opensRange] at h15
+  -- the cover pieces: charts lifted through `j`
+  have hcoverQ' : ∀ p : Q',
+      ∃ v, IsOpenImmersion.lift j (chartA R (a p)) (hliftA p) v = p := by
+    intro p
+    have h16 : j p ∈ Set.range ⇑(chartA R (a p)) := by
+      have h17 : j p ∈ (chartA R (a p)).opensRange := by
+        rw [chartA_opensRange]
+        exact hmem p
+      exact h17
+    obtain ⟨v, hv⟩ := h16
+    refine ⟨v, j.isOpenEmbedding.injective ?_⟩
+    rw [← Scheme.Hom.comp_apply, IsOpenImmersion.lift_fac]
+    exact hv
+  sorry
+
 end UniversalProperty
 
 end AlgebraicGeometry
