@@ -6,6 +6,8 @@ Authors: AINTLIB ModularCurves project
 Ticket T-Q6 (quotients of rigidified moduli problems — the KM 4.7 ⇐ engine).
 -/
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.ForMathlib.RepresentableAut
+import ModularCurves.ForMathlib.SchemeQuotient
 
 /-!
 # The simultaneous moduli problem and the Katz–Mazur 4.7 engine (T-Q6)
@@ -402,6 +404,96 @@ theorem simul_representable (P Q : ModuliProblem R)
     ⟨simulRepresentableBy P Q rδ @eqv @hnat⟩⟩⟩
 
 end SimulRepresentable
+
+section GroupAction
+
+variable (P Q : ModuliProblem R)
+
+/-- The natural transformation of simultaneous problems acting through the second
+factor. -/
+def simulMapSnd {Q Q' : ModuliProblem R} (η : Q ⟶ Q') :
+    P.simul Q ⟶ P.simul Q' where
+  app X := ↾fun a => (a.1, η.app X a.2)
+  naturality X X' f := by
+    ext a
+    show ((P.map f a.1, η.app X' (Q.map f a.2)) : P.obj X' × Q'.obj X') =
+      (P.map f a.1, Q'.map f (η.app X a.2))
+    exact Prod.ext rfl (NatTrans.naturality_apply η f a.2)
+
+@[simp]
+theorem simulMapSnd_app {Q Q' : ModuliProblem R} (η : Q ⟶ Q')
+    (X : (EllObj R)ᵒᵖ) (a : (P.simul Q).obj X) :
+    (P.simulMapSnd η).app X a = (a.1, η.app X a.2) := rfl
+
+@[simp]
+theorem simulMapSnd_id : P.simulMapSnd (𝟙 Q) = 𝟙 (P.simul Q) := by
+  ext X a
+  rfl
+
+theorem simulMapSnd_comp {Q Q' Q'' : ModuliProblem R} (η : Q ⟶ Q')
+    (θ : Q' ⟶ Q'') :
+    P.simulMapSnd (η ≫ θ) = P.simulMapSnd η ≫ P.simulMapSnd θ := by
+  ext X a
+  rfl
+
+/-- **The action of `Aut δ` on the simultaneous problem `(𝒫,δ)` through the
+second factor** (KM p. 112: `G` acts on `(𝒫,δ)` through its action on `δ`). -/
+def simulAutSnd : Aut Q →* Aut (P.simul Q) where
+  toFun e :=
+    { hom := P.simulMapSnd e.hom
+      inv := P.simulMapSnd e.inv
+      hom_inv_id := by rw [← simulMapSnd_comp, e.hom_inv_id, simulMapSnd_id]
+      inv_hom_id := by rw [← simulMapSnd_comp, e.inv_hom_id, simulMapSnd_id] }
+  map_one' := by
+    ext1
+    exact P.simulMapSnd_id Q
+  map_mul' e₁ e₂ := by
+    ext1
+    exact P.simulMapSnd_comp e₂.hom e₁.hom
+
+@[simp]
+theorem simulAutSnd_apply_hom (e : Aut Q) :
+    ((P.simulAutSnd Q) e).hom = P.simulMapSnd e.hom := rfl
+
+end GroupAction
+
+end ModuliProblem
+
+namespace EllObj
+
+/-- Base-scheme projection of `Ell/R`-automorphisms: an automorphism of an
+`Ell/R`-object restricts to an automorphism of its base scheme. -/
+def autBase (X : EllObj R) : Aut X →* Aut X.base where
+  toFun e :=
+    { hom := e.hom.baseHom
+      inv := e.inv.baseHom
+      hom_inv_id := congrArg EllHom.baseHom e.hom_inv_id
+      inv_hom_id := congrArg EllHom.baseHom e.inv_hom_id }
+  map_one' := rfl
+  map_mul' _ _ := rfl
+
+@[simp]
+theorem autBase_apply_hom (X : EllObj R) (e : Aut X) :
+    (X.autBase e).hom = e.hom.baseHom := rfl
+
+end EllObj
+
+namespace ModuliProblem
+
+open CategoryTheory.Functor
+
+/-- **The KM 4.7 geometric action** (KM p. 112–113: "Let `G` operate upon
+`𝕸(𝒫,δ)` through its action on `δ`", then "The action of `g ∈ G` on `𝕸(𝒫,δ)` is
+defined as follows: the curve `E` with `(α_univ, g·β_univ)` is classified by a
+unique morphism `g : 𝕸(𝒫,δ) → 𝕸(𝒫,δ)`"): the scheme action of `G` on the base of
+any representing object of the simultaneous problem `(𝒫,δ)`, induced by an action
+`φ : G →* Aut δ` on the auxiliary problem. -/
+noncomputable def simulSchemeAction (P Q : ModuliProblem R) {G : Type*} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM) :
+    AlgebraicGeometry.SchemeAction G XM.base :=
+  AlgebraicGeometry.SchemeAction.ofAut
+    ((XM.autBase.comp rM.autMulHom).comp ((P.simulAutSnd Q).comp φ))
 
 end ModuliProblem
 
