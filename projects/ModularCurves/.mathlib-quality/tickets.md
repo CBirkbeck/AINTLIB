@@ -1216,11 +1216,16 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
   lacks). [T-D3b] `IdealSheafData.mul` (upstream candidate).
-  - **[T-D3b] Status**: in_progress · **Claimed**: beastmode-D2 (stream-D
-    successor), 2026-07-06T11:25Z · new file ForMathlib/IdealSheafMul.lean
-    (mathlib-only imports, independent of the A-chain); plan = D-off.2 sub-plan
-    (idealwise product on affineOpens, gluing via `Ideal.map_mul`); attack block
-    recorded at statement time per v5 rule.
+  - **[T-D3b] Status**: done (beastmode-D2, 2026-07-06T11:25Z → 2026-07-06T11:40Z,
+    **RESOLVED-BY-MATHLIB, no project code**) — the current pin (11b908e5cdd9)
+    already has the full multiplicative structure on `IdealSheafData`:
+    `Mul`/`Pow`/`IdemCommSemiring` + `ideal_mul`/`support_mul`/`top_mul`/… simp API
+    (Mathlib/AlgebraicGeometry/IdealSheaf/Basic.lean §Semiring, lines 400–460;
+    daily-bump gift postdating the D-off.2 sub-plan). T-D3's `sectionsDivisor` fold
+    = `∏` against these instances. Finding + superseded attack block recorded in
+    `decompose-attacks-2026-07-06/d-lane-helpers.md`. NOTE for the whole D-lane:
+    IdealSheaf/Basic.lean also has `radical`, `zeroLocus_mul`, `mkOfMemSupportIff` —
+    re-run the five-method search per ticket; the bump keeps landing KM-1 tools.
 - [T-NORM0] norm/det of pushforward along finite locally free morphisms
   (`∧^r g_*`; engine for Cor 2.2.2, pairing C.2, charpoly bridge). HB-NORM.
 - [T-RED0] reduced-universal-base transfer principle (identities of morphisms of
