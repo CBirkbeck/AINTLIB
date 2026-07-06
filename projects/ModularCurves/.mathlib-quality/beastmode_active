@@ -1,1 +1,1 @@
-FOCUS: AG-GG-2 — FiberFunctor: read G4-G6 axioms, define the Hom(-, SeparableClosure k) functor to FintypeCat
+FOCUS: AG-GG-2a/2c — baseChange k Omega preserves initial + finite products; new file FiniteEtaleFiberFunctor.lean
