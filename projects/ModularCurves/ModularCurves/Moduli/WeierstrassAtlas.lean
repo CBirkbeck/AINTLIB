@@ -52,4 +52,19 @@ noncomputable def universalCurve : Scheme.{0} := projModel universalWeierstrassL
 noncomputable def universalCurveπ : universalCurve ⟶ weierstrassAtlas :=
   projModelπ universalWeierstrassLoc
 
+/-- The universal Weierstrass curve is **proper** over the atlas. -/
+instance : IsProper universalCurveπ := projModelπ_isProper _
+
+/-- The universal Weierstrass curve is **smooth of relative dimension one** over the atlas. -/
+theorem universalCurve_smooth : SmoothOfRelativeDimension 1 universalCurveπ :=
+  projModel_smooth _
+
+/-- The **zero section** `U → E_U` of the universal Weierstrass curve. -/
+noncomputable def universalCurveZero : weierstrassAtlas ⟶ universalCurve :=
+  projModelZero universalWeierstrassLoc
+
+@[simp]
+theorem universalCurveZero_π : universalCurveZero ≫ universalCurveπ = 𝟙 weierstrassAtlas :=
+  projModelZero_projModelπ universalWeierstrassLoc
+
 end ModularCurves
