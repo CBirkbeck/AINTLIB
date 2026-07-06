@@ -491,6 +491,138 @@ lemma reflectsIsomorphisms_fiber :
 
 end ReflectsIso
 
+/-! Base change preserves fixed points of finite monoid actions (leaf AG-GG-2e):
+`Ω ⊗[k] A^H ≅ (Ω ⊗[k] A)^H`.  The fixed points are the equaliser of the action map
+against the diagonal, and flat base change commutes with equalisers
+(`Module.Flat.eqLocus_lTensor_eq`). -/
+
+section FixedPointsBaseChange
+
+variable {k Ω}
+
+variable {H : Type u} [Monoid H] [Finite H]
+  (F : SingleObj H ⥤ CommAlgCat.FiniteEtale.{u} k)
+
+/-- The action map `a ↦ (h • a)ₕ`. -/
+private noncomputable def actionDelta :
+    (F.obj (SingleObj.star H) : Type u) →ₗ[k]
+      (H → (F.obj (SingleObj.star H) : Type u)) :=
+  LinearMap.pi fun h =>
+    ((F.map (show SingleObj.star H ⟶ SingleObj.star H from h)).hom.hom).toLinearMap
+
+/-- The diagonal map `a ↦ (a)ₕ`. -/
+private noncomputable def actionDiag :
+    (F.obj (SingleObj.star H) : Type u) →ₗ[k]
+      (H → (F.obj (SingleObj.star H) : Type u)) :=
+  LinearMap.pi fun _ => LinearMap.id
+
+private lemma eqLocus_actionDelta :
+    LinearMap.eqLocus (actionDelta F) (actionDiag F) =
+      Subalgebra.toSubmodule (actionFixedPoints F) := by
+  ext a
+  show actionDelta F a = actionDiag F a ↔ _
+  constructor
+  · intro ha h
+    exact congrFun ha h
+  · intro ha
+    exact funext fun h => ha h
+
+/-- The comparison map `Ω ⊗[k] A^H →ₐ[Ω] (Ω ⊗[k] A)^H`. -/
+private noncomputable def fixedPointsCompare :
+    (Ω ⊗[k] ((actionFixedPoints F : Subalgebra k _) : Type u)) →ₐ[Ω]
+      ((actionFixedPoints (F ⋙ baseChangeU k Ω) : Subalgebra Ω _) : Type u) :=
+  AlgHom.codRestrict
+    (Algebra.TensorProduct.map (AlgHom.id Ω Ω) (actionFixedPoints F).val)
+    (actionFixedPoints (F ⋙ baseChangeU k Ω))
+    (by
+      intro x h
+      induction x using TensorProduct.induction_on with
+      | zero =>
+        exact (congrArg _ (map_zero _)).trans ((map_zero _).trans (map_zero _).symm)
+      | tmul ω a => exact congrArg (ω ⊗ₜ[k] ·) (a.2 h)
+      | add x y hx hy =>
+        exact (congrArg _ (map_add _ x y)).trans ((map_add _ _ _).trans
+          ((congrArg₂ (· + ·) hx hy).trans (map_add _ _ _).symm)))
+
+/-- The fixed points of the base-changed action are the base change of the fixed
+points. -/
+private noncomputable def fixedPointsCompareEquiv :
+    (Ω ⊗[k] ((actionFixedPoints F : Subalgebra k _) : Type u)) ≃ₐ[Ω]
+      ((actionFixedPoints (F ⋙ baseChangeU k Ω) : Subalgebra Ω _) : Type u) :=
+  AlgEquiv.ofBijective (fixedPointsCompare F) (by
+    constructor
+    · have hval : Function.Injective
+          (Algebra.TensorProduct.map (AlgHom.id Ω Ω) (actionFixedPoints F).val) :=
+        Module.Flat.lTensor_preserves_injective_linearMap (M := Ω)
+          (actionFixedPoints F).val.toLinearMap Subtype.val_injective
+      intro x y hxy
+      exact hval (congrArg Subtype.val hxy)
+    · haveI := Fintype.ofFinite H
+      haveI := Classical.decEq H
+      have hcomp1 : ∀ (x : Ω ⊗[k] (F.obj (SingleObj.star H) : Type u)) (h : H),
+          TensorProduct.piRightHom k Ω Ω
+          (fun _ : H => (F.obj (SingleObj.star H) : Type u))
+          (TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDelta F) x) h =
+          ((F ⋙ baseChangeU k Ω).map
+            (show SingleObj.star H ⟶ SingleObj.star H from h)).hom.hom x := by
+        intro x h
+        induction x using TensorProduct.induction_on with
+        | zero => rw [map_zero, map_zero]; rfl
+        | tmul ω a => rfl
+        | add a b ha hb =>
+          exact (congrArg (fun t => TensorProduct.piRightHom k Ω Ω
+              (fun _ : H => (F.obj (SingleObj.star H) : Type u)) t h)
+              (map_add _ a b)).trans
+            (((congrFun (map_add (TensorProduct.piRightHom k Ω Ω
+              (fun _ : H => (F.obj (SingleObj.star H) : Type u))) _ _) h).trans
+              (congrArg₂ (· + ·) ha hb)).trans (map_add _ a b).symm)
+      have hcomp2 : ∀ (x : Ω ⊗[k] (F.obj (SingleObj.star H) : Type u)) (h : H),
+          TensorProduct.piRightHom k Ω Ω
+          (fun _ : H => (F.obj (SingleObj.star H) : Type u))
+          (TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDiag F) x) h = x := by
+        intro x h
+        induction x using TensorProduct.induction_on with
+        | zero => rw [map_zero]; rfl
+        | tmul ω a => rfl
+        | add a b ha hb =>
+          exact (congrArg (fun t => TensorProduct.piRightHom k Ω Ω
+              (fun _ : H => (F.obj (SingleObj.star H) : Type u)) t h)
+              (map_add _ a b)).trans
+            ((congrFun (map_add (TensorProduct.piRightHom k Ω Ω
+              (fun _ : H => (F.obj (SingleObj.star H) : Type u))) _ _) h).trans
+              (congrArg₂ (· + ·) ha hb))
+      rintro ⟨x, hx⟩
+      have hmem : x ∈ LinearMap.eqLocus
+          (TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDelta F))
+          (TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDiag F)) := by
+        show TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDelta F) x =
+          TensorProduct.AlgebraTensorModule.lTensor Ω Ω (actionDiag F) x
+        apply (TensorProduct.piRight k Ω Ω
+          (fun _ : H => (F.obj (SingleObj.star H) : Type u))).injective
+        refine funext fun h => ?_
+        exact (hcomp1 x h).trans ((hx h).trans (hcomp2 x h).symm)
+      rw [Module.Flat.eqLocus_lTensor_eq, eqLocus_actionDelta] at hmem
+      obtain ⟨y, hy⟩ := hmem
+      exact ⟨y, Subtype.ext hy⟩)
+
+/-- The base change of the fixed-point cone is a limit cone. -/
+noncomputable def isLimitMapConeFixedPoints :
+    IsLimit ((baseChangeU k Ω).mapCone (actionFixedPointsCone F)) := by
+  refine IsLimit.ofIsoLimit (actionFixedPointsConeIsLimit (F ⋙ baseChangeU k Ω)) ?_
+  refine Cone.ext (CommAlgCat.FiniteEtale.isoMk (fixedPointsCompareEquiv F).symm) ?_
+  intro j
+  ext u
+  exact (congrArg Subtype.val
+    ((fixedPointsCompareEquiv F).apply_symm_apply u)).symm
+
+lemma preservesLimitsOfShapeSingleObj_baseChange (H : Type u) [Monoid H] [Finite H] :
+    PreservesLimitsOfShape (SingleObj H) (baseChangeU k Ω) where
+  preservesLimit {K} :=
+    preservesLimit_of_preserves_limit_cone
+      (actionFixedPointsConeIsLimit K) (isLimitMapConeFixedPoints K)
+
+end FixedPointsBaseChange
+
 end FiniteEtaleGalois
 
 end ModularCurves
