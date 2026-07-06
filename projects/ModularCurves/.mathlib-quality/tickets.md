@@ -1825,6 +1825,38 @@ homeo). MISSING (the sub-development, one leaf each, single-conclusion):
     instances (equivalence auto-preserves), preservation-along-natIso ⇒
     `instance : PreGaloisCategory.FiberFunctor (fiber k (SeparableClosure k))`.
   Universe note: fiber k Ω lands in FintypeCat.{u} for k Ω : Type u ✓.
+  ✓✓ AG-GG-2 COMPLETE (2026-07-06, beastmode-B) — ALL leaves done, axiom-clean
+  (`probe_fiberfunctor`: propext/choice/Quot.sound). File
+  ForMathlib/FiniteEtaleFiberFunctor.lean (~700 lines). Per-leaf landing notes:
+  - 2a: rid + preservesInitial_of_iso; `baseChangeU` abbrev pins baseChange's FREE
+    object-universe (else it leaks as u_1 into every statement — max u u vs u).
+  - 2c: piRight needs [Fintype ι][DecidableEq ι] in STATEMENTS (Finite+classical
+    haveI inside proofs); uniq via `baseChangePi_hom_ext` (hom-level ext through
+    piRight-injectivity) — CommAlgCat.hom_ofHom does NOT fire across the mapCone
+    carrier spelling, so never rw on the wrapped lift.
+  - 2b: isColimitMapCoconePushoutCoconeEquiv (root Limits ns, NOT PushoutCocone.*)
+    + isColimitAux'; desc := liftEquivRight of productMap over the letI-algebra;
+    ALL map_* steps as term-glue (rw pattern-unify trips on InducedCategory
+    carriers); s.inl-commutes gives algebraMap-tmul identities.
+  - 2d: kernel-pair equalizer P ⊆ Π(Fin 2) A is étale (etale_subalgebra!), two
+    evals equalised ⇒ mono injective; ![x,y]-eval is rfl (exact h, simpa breaks);
+    lTensor_preserves_injective_linearMap + ConcreteCategory.mono_of_injective +
+    faithful-ι mono_of_mono_map.
+  - 2e: Merten's Flat/Equalizer.lean has THE toolkit (eqLocus_lTensor_eq,
+    tensorKerEquiv); fixed points = eqLocus(actionDelta, actionDiag); membership
+    transfer via TensorProduct.piRightHom components (hcomp-lemmas MUST be hoisted
+    before rintro ⟨x,hx⟩ — induction reverts hx into the motive otherwise);
+    fullyqualify TensorProduct.AlgebraTensorModule.lTensor (open scoped ≠ open);
+    bijectivity proofs INLINE in AlgEquiv.ofBijective (standalone lemma statements
+    re-elaborate the AlgHom type and get stuck on Algebra k ?m).
+  - 2f: counting reflection — ker = ⊥ via factor-through-quotient card equality +
+    injective_iff_surjective_of_finrank_eq_finrank + Ideal.mk_ker; range = ⊤ via
+    Submodule.finrank_lt; Ideal.Quotient.lift_mk needs h.toRingHom explicit.
+  - 2g: transport names: preserves(Co)LimitsOfShape_of_equiv (NOT _of_equivalence),
+    preservesLimitsOfShape_op takes J-THEN-F explicit (`_ _`), Discrete.opposite,
+    walkingCospanOpEquiv, singleObjOpEquiv (AG-GG-1), Finite Gᵐᵒᵖ via
+    Finite.of_equiv G MulOpposite.opEquiv; epis: op-side hand-lemma via
+    unop_mono_of_epi + preservesMonomorphisms + op_epi_of_mono.
 - **[AG-GG-3]** `IsFundamentalGroup GalQ F` (Krull topology, continuity +
   transitivity axioms — classical infinite Galois theory, mathlib-supported).
 - **[AG-GG-4]** assemble `(FiniteEtale ℚ)ᵒᵖ ≌ ContAction FintypeCat GalQ`; Spec-side
