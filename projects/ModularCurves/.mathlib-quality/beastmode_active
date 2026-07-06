@@ -1,1 +1,2 @@
 FOCUS: T-B6e torsionBy_addEquiv_of_card — pure group theory leaf
+FOCUS-D: (beastmode-D2) T-D14c curve-free design banked on board (2026-07-06T16:00Z entry). NOW BUILDING [T-D14c-0]: dual-span commutes with localization for fp modules (scratch TD14c0.lean) via Module.FinitePresentation.isLocalizedModule_map + IsLocalizedModule.surj. Then [T-D14c-1] vanishingLocus def+gluing, [T-D14c-2] le_ker_iff, [T-D14] assembly.
