@@ -2065,6 +2065,36 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     (T-D14c-alg) — affine-locality of both sides over S + the A-algebra ↔
     T-point dictionary (`ΓSpec` on affines; check IdealSheafData
     `le_ker`-affine-local lemmas in Basic.lean:776-794 for the U-wise reduction).
+  - **Progress**: 2026-07-06T21:15Z — **[T-D14c-2] COMPLETE sorry-free, standard
+    axioms, committed d355db4e** (delegated; 9 private vanishingLocusAux_*
+    helpers, ~400 lines). ARCHITECTURE OF RECORD (simpler than planned — worth
+    reusing): χ (tensor→scheme) = `Algebra.TensorProduct.productMap` of the two
+    appLEs into Γ(PB, fst⁻¹V ⊓ snd⁻¹D) (towers by of_algebraMap_eq' +
+    appLE_comp_appLE ×2 + simp[pullback.condition]) — NO pushout-square
+    computation; ψ (scheme→tensor) = `pullback.lift` of fromSpec-legs
+    (SpecMap_appLE_fromSpec + includeLeftRingHom_comp_algebraMap) evaluated
+    with fromSpec_app_self/map_appLE_assoc/ΓSpecIso_naturality — NO IsPushout,
+    NO coconePointUniqueUpToIso. Both directions pointwise (le_ker_iff_forall)
+    + sheaf-injectivity (`TopCat.Sheaf.eq_of_locally_eq'`) over point-indexed
+    covers; (⟹) refines an arbitrary W-affine by basicOpens inside p⁻¹U +
+    `Submodule.span_induction`. CORRECTIONS TO THE PLAN: (1) `pullback.snd t p`
+    is NOT quasi-compact (it base-changes t, not p) — the iInf_ker route was
+    wrong; pointwise replaces it. (2) `map_ideal` works for arbitrary affine
+    pairs — no basicOpen gymnastics. GOTCHAS: appLE ⊤ ⊤ = appTop needs a
+    3-line helper (preimage_top rfl + proof-irrelevance); core `Functor.map_id`
+    shadows CategoryTheory's in rw; rewrite at HYPOTHESES to inherit lemma
+    spelling (invisible instance-spelling defeats rw on hand-spelled terms);
+    prefer `exact map_zero _` over `rw [map_zero]` on presheaf maps. Names:
+    `IsAffineOpen.SpecMap_appLE_fromSpec`, `Scheme.Hom.comp_preimage` (rfl),
+    `Scheme.Hom.preimage_mono`, `Algebra.TensorProduct.productMap_apply_tmul`.
+    REMAINING FOR T-D14 = ASSEMBLY ONLY: instantiate W := D'.ideal.subscheme,
+    p := D'.ι ≫ π (fields = D'.finite/flat/lfp), E := D.ideal.comap D'.ι;
+    Z := vanishingLocus p E; chain: ∃h ⟺ Z ≤ t.ker (T-D14a′) ⟺(c-2)
+    E.comap (snd t p) = ⊥ ⟺(pasting iso pullback t (D'.ι≫π) ≅
+    pullback (fst π t) D'.ι — pullbackRightPullbackFstIso/pullbackAssoc +
+    ker_comp_of_isIso + comap_comp) comap_ft I_D ≤ comap_ft I_D'
+    (map_bot-Galois) ⟺(T-D14b ×2) (D.bc t).ideal ≤ (D'.bc t).ideal ⟺(T-D14a)
+    IsSubdivisor (D'.bc t) (D.bc t).
   - **Progress**: 2026-07-06T18:40Z — **[T-D14c-i] DONE sorry-free** (delegated
     fill, verified green + standard axioms, landed via sibling sweep):
     `exists_affineOpen_mem_free` — free cover of a finite flat lfp morphism.
