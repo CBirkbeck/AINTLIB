@@ -1,6 +1,7 @@
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Basic
 import Mathlib.LinearAlgebra.Basis.Defs
+import Mathlib.LinearAlgebra.TensorProduct.Basis
 
 /-!
 # The Cartier-incidence representability block (KM 1.3; expert-review addition)

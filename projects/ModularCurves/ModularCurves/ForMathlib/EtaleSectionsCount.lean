@@ -1,3 +1,6 @@
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.RingTheory.Etale.Field
 import Mathlib.LinearAlgebra.Dimension.Free
 
@@ -64,5 +67,89 @@ theorem natCard_algHom_eq_finrank : Nat.card (A →ₐ[K] K) = Module.finrank K 
   rw [Nat.card_congr (algHomEquivPrimeSpectrum K A),
     (equivPiOfIsSepClosed K A).toLinearEquiv.finrank_eq, Module.finrank_pi,
     Nat.card_eq_fintype_card]
+
+open AlgebraicGeometry CategoryTheory Limits
+
+section Schemes
+
+variable {k : Type u} [Field k] [IsSepClosed k]
+
+private def sectionsEquivOfIso {Y Z W : Scheme.{u}} (e : Y ≅ Z) (f : Y ⟶ W) :
+    { s : W ⟶ Y // s ≫ f = 𝟙 W } ≃ { t : W ⟶ Z // t ≫ (e.inv ≫ f) = 𝟙 W } where
+  toFun s := ⟨s.1 ≫ e.hom, by
+    rw [Category.assoc, Iso.hom_inv_id_assoc]
+    exact s.2⟩
+  invFun t := ⟨t.1 ≫ e.inv, by rw [Category.assoc]; exact t.2⟩
+  left_inv s := Subtype.ext (by simp)
+  right_inv t := Subtype.ext (by simp)
+
+private def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (ψ : R ⟶ A) :
+    { t : Spec R ⟶ Spec A // t ≫ Spec.map ψ = 𝟙 (Spec R) } ≃
+      { χ : A ⟶ R // ψ ≫ χ = 𝟙 R } where
+  toFun t := ⟨Spec.preimage t.1, Spec.map_injective _ (by
+    rw [Spec.map_comp, Spec.map_preimage, t.2, Spec.map_id])⟩
+  invFun χ := ⟨Spec.map χ.1, by rw [← Spec.map_comp, χ.2, Spec.map_id]⟩
+  left_inv t := Subtype.ext (Spec.map_preimage t.1)
+  right_inv χ := Subtype.ext (Spec.preimage_map χ.1)
+
+private def retractionsEquivAlgHom {A : CommRingCat.{u}} (ψ : CommRingCat.of k ⟶ A)
+    [Algebra k ↑A] (hAlg : algebraMap k ↑A = ψ.hom) :
+    { χ : A ⟶ CommRingCat.of k // ψ ≫ χ = 𝟙 (CommRingCat.of k) } ≃ (↑A →ₐ[k] k) where
+  toFun χ :=
+    { toRingHom := χ.1.hom
+      commutes' := fun r => by
+        have h := congrArg (fun q : CommRingCat.of k ⟶ CommRingCat.of k =>
+          q.hom r) χ.2
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+          RingHom.id_apply] at h
+        rw [hAlg]
+        exact h }
+  invFun φ := ⟨CommRingCat.ofHom φ.toRingHom, by
+    ext r
+    have h := φ.commutes r
+    rw [hAlg] at h
+    simpa using h⟩
+  left_inv χ := Subtype.ext (by ext; rfl)
+  right_inv φ := by ext; rfl
+
+/-- **(T-B6d)** A finite étale scheme over the spectrum of a separably closed field has
+exactly `finrank` many sections. -/
+theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k))
+    [IsFinite f] [Etale f] (x₀ : ↑(Spec (CommRingCat.of k))) :
+    Nat.card { s : Spec (CommRingCat.of k) ⟶ X // s ≫ f = 𝟙 (Spec (CommRingCat.of k)) }
+      = f.finrank x₀ := by
+  haveI : IsAffine X := isAffine_of_isAffineHom f
+  set ψ : CommRingCat.of k ⟶ Γ(X, ⊤) := Spec.preimage (X.isoSpec.inv ≫ f) with hψdef
+  have hψ : Spec.map ψ = X.isoSpec.inv ≫ f := Spec.map_preimage _
+  letI : Algebra k ↑Γ(X, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
+  haveI hE : Etale (Spec.map ψ) := by rw [hψ]; infer_instance
+  haveI hF : IsFinite (Spec.map ψ) := by
+    rw [hψ]
+    exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
+      inferInstance
+  have hRE : RingHom.Etale ψ.hom := HasRingHomProperty.Spec_iff.mp hE
+  have hRF : RingHom.Finite ψ.hom := (IsFinite.SpecMap_iff ψ).mp hF
+  haveI : Algebra.Etale k ↑Γ(X, ⊤) := RingHom.etale_algebraMap.mp (hAlg ▸ hRE)
+  haveI : Module.Finite k ↑Γ(X, ⊤) := hRF
+  have hcard :
+      Nat.card { s : Spec (CommRingCat.of k) ⟶ X //
+          s ≫ f = 𝟙 (Spec (CommRingCat.of k)) } =
+        Nat.card (↑Γ(X, ⊤) →ₐ[k] k) := by
+    refine Nat.card_congr (((sectionsEquivOfIso X.isoSpec f).trans
+      (Equiv.subtypeEquivRight fun t => ?_)).trans
+      ((sectionsSpecEquivRetractions ψ).trans (retractionsEquivAlgHom ψ hAlg)))
+    rw [hψ]
+  rw [hcard, natCard_algHom_eq_finrank k ↑Γ(X, ⊤)]
+  have h1 : f.finrank x₀ = (X.isoSpec.inv ≫ f).finrank x₀ :=
+    (congrFun (Scheme.Hom.finrank_comp_left_of_isIso X.isoSpec.inv f) x₀).symm
+  have h2 : (X.isoSpec.inv ≫ f).finrank x₀ = (Spec.map ψ).finrank x₀ := by rw [hψ]
+  have h3 : (Spec.map ψ).finrank x₀ = Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ :=
+    Scheme.Hom.finrank_SpecMap_algebraMap k ↑Γ(X, ⊤) x₀
+  have h4 : Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ = Module.finrank k ↑Γ(X, ⊤) := by
+    rw [Module.rankAtStalk_eq_finrank_of_free]
+  rw [h1, h2, h3, h4]
+
+end Schemes
 
 end ModularCurves

@@ -73,18 +73,18 @@ instance : Category (EllObj R) where
     { baseHom := 𝟙 _
       base_w := by simp
       top := 𝟙 _
-      isPullback := by sorry
+      isPullback := IsPullback.of_horiz_isIso ⟨by simp⟩
       zero_w := by simp }
   comp f g :=
     { baseHom := f.baseHom ≫ g.baseHom
       base_w := by rw [Category.assoc, g.base_w, f.base_w]
       top := f.top ≫ g.top
-      isPullback := by sorry
+      isPullback := f.isPullback.paste_horiz g.isPullback
       zero_w := by rw [← Category.assoc, f.zero_w, Category.assoc, g.zero_w,
         Category.assoc] }
-  id_comp := by intros; sorry
-  comp_id := by intros; sorry
-  assoc := by intros; sorry
+  id_comp := by intros; ext <;> simp
+  comp_id := by intros; ext <;> simp
+  assoc := by intros; ext <;> simp
 
 /-- A **moduli problem** for elliptic curves over `R`: a contravariant functor
 `Ell/R → Set`. Source: Loeffler Def 3.7.1(2); KM 4.2. -/
@@ -108,8 +108,40 @@ noncomputable def _root_.ModularCurves.EllObj.pullbackAlongMap (X : EllObj R)
   baseHom := k
   base_w := by simp [EllObj.pullbackAlong]
   top := Limits.pullback.map _ _ _ _ (𝟙 _) k (𝟙 _) (by simp) (by simp)
-  isPullback := by sorry
-  zero_w := by sorry
+  isPullback := by
+    have hbig := IsPullback.of_hasPullback X.curve.π (k ≫ g)
+    have hfst : Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+          (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+        Limits.pullback.fst X.curve.π (k ≫ g) := by
+      rw [Limits.pullback.lift_fst, Category.comp_id]
+    rw [← hfst] at hbig
+    refine IsPullback.of_right hbig ?_ (IsPullback.of_hasPullback X.curve.π g)
+    show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) ≫ Limits.pullback.snd X.curve.π g =
+      Limits.pullback.snd X.curve.π (k ≫ g) ≫ k
+    rw [Limits.pullback.lift_snd]
+  zero_w := by
+    show Limits.pullback.lift ((k ≫ g) ≫ X.curve.zero) (𝟙 T')
+        (by rw [Category.assoc, X.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+      Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) =
+      k ≫ Limits.pullback.lift (g ≫ X.curve.zero) (𝟙 T)
+        (by rw [Category.assoc, X.curve.zero_π, Category.comp_id, Category.id_comp])
+    apply Limits.pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+            (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+          Limits.pullback.fst X.curve.π (k ≫ g) ≫ 𝟙 _ from
+        Limits.pullback.lift_fst _ _ _]
+      rw [Limits.pullback.lift_fst_assoc, Limits.pullback.lift_fst]
+      exact Category.comp_id _
+    · simp only [Category.assoc]
+      rw [show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+            (by simp) (by simp) ≫ Limits.pullback.snd X.curve.π g =
+          Limits.pullback.snd X.curve.π (k ≫ g) ≫ k from
+        Limits.pullback.lift_snd _ _ _]
+      rw [Limits.pullback.lift_snd_assoc, Limits.pullback.lift_snd]
+      exact (Category.id_comp k).trans (Category.comp_id k).symm
 
 /-- `P` is **representable** if it is a representable presheaf on `Ell/R` — mathlib's
 `Functor.IsRepresentable`, under the project's name (kept as an `abbrev` so the two
