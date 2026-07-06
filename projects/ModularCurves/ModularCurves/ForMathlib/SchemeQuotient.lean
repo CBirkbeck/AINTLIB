@@ -292,6 +292,7 @@ private instance (hWV : W ≤ V) (hVa : IsAffineOpen V) :
   rw [windowHom]
   infer_instance
 
+omit [Finite G] in
 /-- The window intertwines the restricted geometric action with `specSMul` of the
 section-ring action. -/
 private theorem resLE_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V)
@@ -305,6 +306,7 @@ private theorem resLE_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V)
   rw [← Category.assoc, resLE_homOfLE σ hW hV hWV g, Category.assoc,
     resLE_isoSpec_hom σ hV hVa g, Category.assoc]
 
+omit [Finite G] in
 /-- Stability of the window range under the section-ring action. -/
 private theorem specSMul_mem_range_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V)
     (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) (g : G)
