@@ -4328,3 +4328,8 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     etc.) carries the T-B4/B5 boxes. Engineering notes in-file (KE-instance defeq
     walls dodged via explicit translate formulas; S=0 case needs application-level
     rewriting). NEXT: T-C0d-i (gate-free descent transport via functorToContAction).
+  - 2026-07-07T03:00Z: T-C0d-i first dispatch died on a session-limit API error
+    BEFORE any edit (tree verified clean at the T-C0b commit); re-dispatched
+    post-reset. Deliverables unchanged: muNAlgebra + fibre desc, tensor pair
+    algebra + fibre desc, packaging theorem (equivariant point-pairing ⟹
+    FiniteEtale morphism via functorToContAction.Full).
