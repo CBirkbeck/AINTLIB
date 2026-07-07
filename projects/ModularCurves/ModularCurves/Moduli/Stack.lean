@@ -156,4 +156,71 @@ theorem moduliProblem_fppf_separated (R : CommRingCat.{u}) (P : ModuliProblem R)
   have : ha = hb := Subtype.ext h1
   rw [← haval, ← hbval, this]
 
+/-- **(stream-DESC, gluing half of "the moduli problems are fppf sheaves" — dual to
+`moduliProblem_fppf_separated`).** For a relatively-representable moduli problem `P` and an
+**fppf cover** `f : T' ⟶ T` (flat + locally of finite presentation + surjective), a
+`P`-value `a'` over `T'` whose two pullbacks to the kernel pair `T' ×_T T'` agree descends
+to a `P`-value over `T` (restricting back to `a'`). Together with
+`moduliProblem_fppf_separated` this says relatively representable moduli problems are fppf
+sheaves.
+
+The proof descends the classifying map into the representing scheme `Z` along the effective
+epimorphism `f` (mathlib's `EffectiveEpi` instance for fppf covers, via
+`descend_hom_of_effectiveEpi`), then transports back through the representing bijection
+`eqv`. The cocycle hypothesis carries a `cast` because the two kernel-pair projections agree
+only after composing with `f`, so the two restriction targets are propositionally — not
+definitionally — equal. Source: SGA 1 VIII; Stacks 023Q (fppf descent of morphisms). -/
+theorem moduliProblem_fppf_descent (R : CommRingCat.{u}) (P : ModuliProblem R)
+    (hP : P.RelativelyRepresentable) {T T' : Scheme.{u}} (f : T' ⟶ T)
+    [Flat f] [LocallyOfFinitePresentation f] [Surjective f]
+    (X : EllObj R) (g : T ⟶ X.base)
+    (a' : P.obj (Opposite.op (X.pullbackAlong (f ≫ g))))
+    (hcocyc : P.map (X.pullbackAlongMap (f ≫ g) (Limits.pullback.fst f f)).op a' =
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q)))
+          (show Limits.pullback.snd f f ≫ (f ≫ g) = Limits.pullback.fst f f ≫ (f ≫ g) by
+            simp only [← Category.assoc, Limits.pullback.condition]))
+        (P.map (X.pullbackAlongMap (f ≫ g) (Limits.pullback.snd f f)).op a')) :
+    ∃ a : P.obj (Opposite.op (X.pullbackAlong g)),
+      P.map (X.pullbackAlongMap g f).op a = a' := by
+  haveI : Epi f := AlgebraicGeometry.Flat.epi_of_flat_of_surjective f
+  obtain ⟨Z, fZ, eqv, hnat⟩ := hP X
+  set hz := (eqv (f ≫ g)).symm a' with hhz
+  have hzval : eqv (f ≫ g) hz = a' := (eqv (f ≫ g)).apply_symm_apply a'
+  -- Transporting an `eqv`-value between two equal base maps only permutes the (irrelevant)
+  -- factorisation proof, so it commutes with the underlying map.
+  have transport_eqv : ∀ (q₁ q₂ : Limits.pullback f f ⟶ X.base) (hq : q₂ = q₁)
+      (m : Limits.pullback f f ⟶ Z) (pf1 : m ≫ fZ = q₁) (pf2 : m ≫ fZ = q₂),
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q))) hq) (eqv q₂ ⟨m, pf2⟩)
+        = eqv q₁ ⟨m, pf1⟩ := by
+    intro q₁ q₂ hq m pf1 pf2
+    subst hq
+    rfl
+  -- The classifying map `hz.1 : T' ⟶ Z` coequalizes the kernel pair of `f`.
+  have hcoeq : Limits.pullback.fst f f ≫ hz.1 = Limits.pullback.snd f f ≫ hz.1 := by
+    have E1 := hnat (f ≫ g) (Limits.pullback.fst f f) hz
+    have E2 := hnat (f ≫ g) (Limits.pullback.snd f f) hz
+    rw [hzval] at E1 E2
+    have key : eqv (Limits.pullback.fst f f ≫ (f ≫ g))
+          ⟨Limits.pullback.fst f f ≫ hz.1, by rw [Category.assoc, hz.2]⟩ =
+        eqv (Limits.pullback.fst f f ≫ (f ≫ g))
+          ⟨Limits.pullback.snd f f ≫ hz.1, by
+            rw [Category.assoc, hz.2]
+            simp only [← Category.assoc, Limits.pullback.condition]⟩ := by
+      rw [E1, hcocyc, ← E2]
+      exact transport_eqv (Limits.pullback.fst f f ≫ (f ≫ g))
+        (Limits.pullback.snd f f ≫ (f ≫ g))
+        (by simp only [← Category.assoc, Limits.pullback.condition]) _ _ _
+    exact congrArg Subtype.val ((eqv (Limits.pullback.fst f f ≫ (f ≫ g))).injective key)
+  -- Descend the classifying map along the effective epimorphism `f`, then transport back.
+  obtain ⟨ζ, hζ, -⟩ := descend_hom_of_effectiveEpi f hz.1 hcoeq
+  have hζfZ : ζ ≫ fZ = g := by
+    have hfe : f ≫ (ζ ≫ fZ) = f ≫ g := by rw [← Category.assoc, hζ]; exact hz.2
+    exact (cancel_epi f).mp hfe
+  refine ⟨eqv g ⟨ζ, hζfZ⟩, ?_⟩
+  have hkey := hnat g f ⟨ζ, hζfZ⟩
+  rw [← hkey]
+  have harg : (⟨f ≫ ζ, by rw [Category.assoc, hζfZ]⟩ :
+      { h : T' ⟶ Z // h ≫ fZ = f ≫ g }) = hz := Subtype.ext hζ
+  exact (congrArg (eqv (f ≫ g)) harg).trans hzval
+
 end ModularCurves
