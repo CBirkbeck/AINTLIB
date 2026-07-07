@@ -4287,16 +4287,23 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (`Δ ↦ u⁻¹²·Δ`, a unit, so the action preserves `Δ⁻¹`) · **Type**: def + action lemmas ·
   **Sources**: reviewer v8; Silverman III Table 1.2.
 
-- **[T-W5] `universal-weierstrass-atlas`** — **SUBSTANTIALLY DONE** (beastmode-A 2026-07-06/07: Moduli/WeierstrassAtlas.lean — universalWeierstrass over ℤ[a₁..a₆], atlas ring = Localization.Away Δ, universalWeierstrassLoc + IsElliptic instance, weierstrassAtlas U = Spec, universalCurve E_U = projModel, E_U→U proper+smooth+zero-section; localModel witness e-iso CORE built + committed green; commits f499f9c6+. REMAINING = **T-W5a** (localModel chart-compat c1/c2), then assemble `universalEllipticCurve : EllipticCurveGeom weierstrassAtlas`). `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
+- **[T-W5] `universal-weierstrass-atlas`** — **DONE, axiom-clean** (beastmode-A 2026-07-06/07: Moduli/WeierstrassAtlas.lean — universalWeierstrass over ℤ[a₁..a₆], atlas ring = Localization.Away Δ, universalWeierstrassLoc + IsElliptic, weierstrassAtlas U = Spec, universalCurve E_U = projModel, proper+smooth+zero-section, **`universalCurve_localModel` FULLY PROVEN** (T-W5a — both chart-compat squares, via term-`▸` crux + `erw` poison-bypass), and **`universalEllipticCurve : EllipticCurveGeom weierstrassAtlas` assembled**; all sorry-free + axiom-clean. Feeds T-W6 quotient stack). `U := Spec ℤ[a₁,a₂,a₃,a₄,a₆][Δ⁻¹]` and the
   universal Weierstrass elliptic curve `E_U := projModel W_univ → U` (`W_univ` = the
   tautological `WeierstrassCurve` over `ℤ[a₁..a₆,Δ⁻¹]`, `IsElliptic` since `Δ` is a unit).
   **Lane**: A · **Depends**: T-A2 (`projModel`, done) · **Type**: def + `IsElliptic` witness ·
   **Sources**: reviewer v8; KM 2.2 / GME 2.2. Mostly assembly over `projModel`.
 
-- **[T-W5a] `universal-curve-localModel-compat`** (spun off T-W5; beastmode-A 2026-07-07).
-  Close the two `LocallyWeierstrass` compatibility squares (`c1` structure-map, `c2` section)
-  in `universalCurve_localModel` (Moduli/WeierstrassAtlas.lean, currently `sorry`×2 with the
-  full recipe in-file). **Math is trivial** — it is the affine single-chart special case of
+- **[T-W5a] `universal-curve-localModel-compat`** — **DONE, axiom-clean** (beastmode-A 2026-07-07).
+  Both `LocallyWeierstrass` compatibility squares (`c1` structure-map, `c2` section) in
+  `universalCurve_localModel` are PROVEN. **Breakthrough**: the crux skew was bypassed via
+  **term-`▸`** (`hφ_eq := (Scheme.isoSpec_Spec_inv _).symm` and `hcrux := hφ_eq ▸ crux_test` —
+  the direct-term defeq coercion works where `rw`/`simp` on `isoSpec_Spec_inv` trips the
+  presheaf-representation skew), and the affineOpens-subtype coercion **poison** (`rw` fails at
+  *instances* transparency) was bypassed with **`erw`** (default transparency) + `cancel_mono φ`
+  (c1) and conv-isolated poison-elimination-first (c2, keeping it under the heartbeat budget).
+  `crux_test : isoSpec_⊤.hom ≫ isoSpec.inv = ⊤.ι` is a clean standalone lemma. Historical recipe
+  below (the earlier `inv φ` route was abandoned; the `@inv`-explicit fix was insufficient).
+  **Math is trivial** — it is the affine single-chart special case of
   `LocallyWeierstrass.baseChange` (already proven, EllipticCurve/Basic.lean). Reduction (derived,
   on paper): `c1 = simp [Iso.trans_hom, asIso_hom, asIso_inv, IsPullback.isoPullback_inv_snd]`
   `+ hbc (inv(fst)≫snd = π ≫ inv φ, via pullback.condition) + pullback.condition + hid`
