@@ -79,6 +79,55 @@ lemma nonsingular_smul {x y : R} (h : W.toAffine.Nonsingular x y) :
   · exact hns (by linear_combination hdX)
   · exact hns (by linear_combination hdY)
 
+/-- Equation-preservation is an iff: since `u⁻⁶` is a unit, the coordinate change reflects the
+Weierstrass equation as well as preserving it. -/
+lemma equation_smul_iff {x y : R} :
+    (C • W).toAffine.Equation (C.vcX x) (C.vcY x y) ↔ W.toAffine.Equation x y := by
+  rw [Affine.equation_iff, Affine.equation_iff]
+  simp only [variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
+    variableChange_a₆, vcX, vcY]
+  constructor
+  · intro h
+    rw [← sub_eq_zero]
+    refine (IsUnit.mul_right_eq_zero (C.u⁻¹.isUnit.pow 6)).mp ?_
+    linear_combination h
+  · intro h
+    linear_combination (↑C.u⁻¹ : R) ^ 6 * h
+
+/-- Nonsingularity is likewise reflected by the coordinate change (the Jacobian is invertible), so
+a smooth point of `C • W` pulls back to a smooth point of `W`. -/
+lemma nonsingular_smul' {x y : R} (h : (C • W).toAffine.Nonsingular (C.vcX x) (C.vcY x y)) :
+    W.toAffine.Nonsingular x y := by
+  rw [Affine.nonsingular_iff] at h ⊢
+  obtain ⟨heq, hns⟩ := h
+  refine ⟨(equation_smul_iff C W).mp heq, ?_⟩
+  by_contra hc
+  push Not at hc
+  obtain ⟨hc1, hc2⟩ := hc
+  rcases hns with hns | hns
+  · refine hns ?_
+    simp only [variableChange_a₁, variableChange_a₂, variableChange_a₄, vcX, vcY]
+    linear_combination (↑C.u⁻¹ : R) ^ 4 * hc1 + (↑C.u⁻¹ : R) ^ 4 * C.s * hc2
+  · refine hns ?_
+    simp only [variableChange_a₁, variableChange_a₃, vcX, vcY]
+    linear_combination (↑C.u⁻¹ : R) ^ 3 * hc2
+
+/-- The `x`-coordinate map inverse to `vcX`: `x = u²X + r`. -/
+def ivcX (X : R) : R := ↑C.u ^ 2 * X + C.r
+
+/-- The `y`-coordinate map inverse to `vcY`: `y = u³Y + s·u²X + t`. -/
+def ivcY (X Y : R) : R := ↑C.u ^ 3 * Y + C.s * ↑C.u ^ 2 * X + C.t
+
+@[simp] lemma vcX_ivcX (X : R) : C.vcX (C.ivcX X) = X := by
+  have huu : (↑C.u⁻¹ : R) * ↑C.u = 1 := Units.inv_mul C.u
+  simp only [vcX, ivcX]
+  linear_combination (X * (↑C.u⁻¹ * ↑C.u + 1)) * huu
+
+@[simp] lemma vcY_ivcX_ivcY (X Y : R) : C.vcY (C.ivcX X) (C.ivcY X Y) = Y := by
+  have huu : (↑C.u⁻¹ : R) * ↑C.u = 1 := Units.inv_mul C.u
+  simp only [vcY, ivcX, ivcY]
+  linear_combination (Y * ((↑C.u⁻¹ * ↑C.u) ^ 2 + ↑C.u⁻¹ * ↑C.u + 1)) * huu
+
 /-- The map on affine points induced by the coordinate change `C`, sending a point `(x, y)` on `W`
 to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))` on `C • W` (and the point at infinity to itself). -/
 def pointMap : W.toAffine.Point → (C • W).toAffine.Point
@@ -258,6 +307,26 @@ def pointHom : W.toAffine.Point →+ (C • W).toAffine.Point where
 @[simp] lemma pointHom_apply (P : W.toAffine.Point) : C.pointHom P = C.pointMap W P := rfl
 
 lemma pointHom_injective : Function.Injective (C.pointHom (W := W)) := C.pointMap_injective
+
+omit [DecidableEq F] in
+/-- The induced point map is surjective: every point of `C • W` is the image of its preimage under
+the inverse coordinate maps `ivcX`/`ivcY`. -/
+lemma pointMap_surjective : Function.Surjective (C.pointMap W) := by
+  rintro (_ | ⟨X, Y, h⟩)
+  · exact ⟨0, rfl⟩
+  · refine ⟨.some (C.ivcX X) (C.ivcY X Y) ?_, ?_⟩
+    · apply nonsingular_smul' C W
+      rwa [vcX_ivcX, vcY_ivcX_ivcY]
+    · rw [pointMap_some]
+      simp only [vcX_ivcX, vcY_ivcX_ivcY]
+
+/-- The coordinate change `C` as a group **isomorphism** on affine points,
+`W.Point ≃+ (C • W).Point`: the elliptic-curve group law is invariant under a change of
+Weierstrass coordinates (ticket `T-W7`). -/
+noncomputable def pointEquiv : W.toAffine.Point ≃+ (C • W).toAffine.Point :=
+  AddEquiv.ofBijective C.pointHom ⟨C.pointMap_injective, C.pointMap_surjective⟩
+
+@[simp] lemma pointEquiv_apply (P : W.toAffine.Point) : C.pointEquiv P = C.pointMap W P := rfl
 
 end Field
 
