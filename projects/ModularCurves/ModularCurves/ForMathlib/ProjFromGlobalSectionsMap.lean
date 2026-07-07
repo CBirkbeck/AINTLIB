@@ -24,6 +24,8 @@ the section at infinity (T-W7.0b, `negModelHom_zero`).
 
 * `Proj.fromOfGlobalSections_map`: the naturality square above.
 * `Proj.toBasicOpenOfGlobalSections_map`: the per-chart form it is glued from.
+* `Proj.irrelevant_map_comp_toRingHom_eq_top`: the hypothesis transport supplying the
+  irrelevant-ideal condition on `f ∘ g` from the one on `f`.
 
 AINTLIB ModularCurves (T-W7.0b infrastructure); upstream candidate.
 -/
@@ -39,6 +41,19 @@ variable {A B : Type u} {σ τ : Type u} [CommRing A] [SetLike σ A] [AddSubgrou
   [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
   {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
   {X : Scheme.{u}}
+
+/-- Hypothesis transport for `fromOfGlobalSections_map`: if `f` sends `ℬ`'s irrelevant ideal
+to a generating set and the graded hom `g` covers (`ℬ₊ ≤ 𝒜₊.map g`), then `f ∘ g` sends
+`𝒜`'s irrelevant ideal to a generating set. -/
+lemma irrelevant_map_comp_toRingHom_eq_top {C : Type u} [CommRing C]
+    (g : 𝒜 →+*ᵍ ℬ) (hg : ℬ₊ ≤ 𝒜₊.map g)
+    (f : B →+* C) (hf : (HomogeneousIdeal.irrelevant ℬ).toIdeal.map f = ⊤) :
+    (HomogeneousIdeal.irrelevant 𝒜).toIdeal.map (f.comp g.toRingHom) = ⊤ := by
+  refine top_le_iff.mp ?_
+  rw [← hf, ← Ideal.map_map]
+  refine Ideal.map_mono ?_
+  have h := toIdeal_le_toIdeal_iff.mpr hg
+  rwa [HomogeneousIdeal.toIdeal_map] at h
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The per-chart form of `fromOfGlobalSections_map`: on the basic open `D(g t)`, the point
