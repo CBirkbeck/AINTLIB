@@ -1739,6 +1739,234 @@ theorem flatPullback_flatPullback (D : RelEffCartierDiv π) {C' C'' : Scheme.{u}
   rw [flatPullback_ideal, flatPullback_ideal, flatPullback_ideal,
     Scheme.IdealSheafData.comap_comp]
 
+/-- Kernel of the `R`-algebra quotient map, as an `R`-submodule. -/
+private theorem sliceAux_ker_mkₐ (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+    (I : Ideal A) :
+    LinearMap.ker (Ideal.Quotient.mkₐ R I).toLinearMap = I.restrictScalars R := by
+  ext x; simp [Ideal.Quotient.eq_zero_iff_mem]
+
+/-- **Flat 2-out-of-3 for a principal ideal.** If `A` is `R`-flat and `A ⧸ (f)` is `R`-flat, then
+the ideal `(f)` is `R`-flat. Proof: `(f) ↪ A ↠ A ⧸ (f)` with flat quotient makes `B ⊗ (f) ↪ B ⊗ A`
+injective for every `B` (`lTensor_injective_of_exact_of_flat`); combined with `A`-flatness in the
+naturality square this gives the flatness criterion for `(f)`. -/
+private theorem sliceAux_span_flat (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+    [Module.Flat R A] (f : A) (hq : Module.Flat R (A ⧸ Ideal.span {f})) :
+    Module.Flat R ((Ideal.span {f}).restrictScalars R) := by
+  set I : Ideal A := Ideal.span {f}
+  have hvert : ∀ (B : Type u) [AddCommGroup B] [Module R B],
+      Function.Injective (LinearMap.lTensor B (I.restrictScalars R).subtype) := by
+    intro B _ _
+    refine LinearMap.lTensor_injective_of_exact_of_flat
+      (Ideal.Quotient.mkₐ R I).toLinearMap ?_ (I.restrictScalars R).subtype
+      (Submodule.injective_subtype _) ?_ B
+    · exact fun z => by obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective z; exact ⟨a, rfl⟩
+    · rw [LinearMap.exact_iff, sliceAux_ker_mkₐ, Submodule.range_subtype]
+  rw [Module.Flat.iff_rTensor_preserves_injective_linearMap]
+  intro N N' _ _ _ _ h hinj
+  have hsquare : (LinearMap.lTensor N' (I.restrictScalars R).subtype) ∘ₗ
+      (LinearMap.rTensor ((I.restrictScalars R)) h)
+      = (LinearMap.rTensor A h) ∘ₗ (LinearMap.lTensor N (I.restrictScalars R).subtype) := by
+    ext n x; simp
+  have hbot : Function.Injective (LinearMap.rTensor A h) :=
+    Module.Flat.rTensor_preserves_injective_linearMap h hinj
+  have key : Function.Injective
+      (⇑(LinearMap.lTensor N' (I.restrictScalars R).subtype) ∘
+        ⇑(LinearMap.rTensor ((I.restrictScalars R)) h)) := by
+    rw [← LinearMap.coe_comp, hsquare, LinearMap.coe_comp]
+    exact hbot.comp (hvert N)
+  exact key.of_comp
+
+/-- The range of left multiplication by `f` is the principal ideal `(f)`. -/
+private theorem sliceAux_range_mulLeft (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+    (f : A) :
+    LinearMap.range (LinearMap.mulLeft R f) = (Ideal.span {f}).restrictScalars R := by
+  ext y
+  simp only [LinearMap.mem_range, LinearMap.mulLeft_apply, Submodule.restrictScalars_mem,
+    Ideal.mem_span_singleton]
+  constructor
+  · rintro ⟨x, rfl⟩; exact ⟨x, rfl⟩
+  · rintro ⟨x, rfl⟩; exact ⟨x, rfl⟩
+
+open TensorProduct in
+/-- **Homological input (EGA IV 11.3.8, the Tor-free half).** For `A` and `A ⧸ (f)` both `R`-flat
+and `f` a nonzerodivisor in every field fibre, the annihilator `ker(·f)` of `f` becomes zero after
+tensoring with any field `K` over `R`: `K ⊗_R ker(·f) = 0`. Route: `(f)` is `R`-flat
+(`sliceAux_span_flat`), so `K ⊗ ker(·f) ≃ ker(K ⊗ (·f))` via `kerLTensorEquivOfSurjective`, and the
+latter is `0` because `·f` is injective on the fibre `A ⊗_R K` (`hfib`, transported by
+`TensorProduct.comm`). -/
+private theorem sliceAux_tmul_ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+    [Module.Flat R A] (f : A) (hq : Module.Flat R (A ⧸ Ideal.span {f}))
+    (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
+      f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
+    ∀ (K : Type u) [Field K] [Algebra R K],
+      Subsingleton (K ⊗[R] (LinearMap.ker (LinearMap.mulLeft R f))) := by
+  intro K _ _
+  set μ : A →ₗ[R] A := LinearMap.mulLeft R f with hμ
+  haveI hrangeflat : Module.Flat R (LinearMap.range μ) := by
+    rw [sliceAux_range_mulLeft]; exact sliceAux_span_flat R A f hq
+  have hrT : Function.Injective (LinearMap.rTensor K μ) := by
+    have heq : ⇑(LinearMap.rTensor K μ) = ⇑(LinearMap.mulLeft (A ⊗[R] K) (f ⊗ₜ[R] (1 : K))) := by
+      funext x
+      induction x using TensorProduct.induction_on with
+      | zero => simp
+      | tmul a k =>
+        simp only [LinearMap.rTensor_tmul, hμ, LinearMap.mulLeft_apply,
+          Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+      | add x y hx hy => simp only [map_add, hx, hy]
+    rw [heq]
+    intro x y hxy
+    simp only [LinearMap.mulLeft_apply] at hxy
+    have h : (f ⊗ₜ[R] (1 : K)) * (x - y) = 0 := by rw [mul_sub, hxy, sub_self]
+    exact sub_eq_zero.mp ((mul_left_mem_nonZeroDivisors_eq_zero_iff (hfib K)).mp h)
+  have hlT : Function.Injective (LinearMap.lTensor K μ) := by
+    have hconj : LinearMap.lTensor K μ =
+        (TensorProduct.comm R A K).toLinearMap ∘ₗ (LinearMap.rTensor K μ)
+          ∘ₗ (TensorProduct.comm R A K).symm.toLinearMap := by
+      ext k a
+      simp [LinearMap.rTensor_tmul, LinearMap.lTensor_tmul]
+    rw [hconj]
+    exact ((TensorProduct.comm R A K).injective.comp hrT).comp
+      (TensorProduct.comm R A K).symm.injective
+  have hπ : Function.Injective (LinearMap.lTensor K μ.rangeRestrict) := by
+    have hfac : LinearMap.lTensor K μ =
+        (LinearMap.lTensor K (LinearMap.range μ).subtype) ∘ₗ (LinearMap.lTensor K μ.rangeRestrict) := by
+      conv_lhs => rw [show μ = (LinearMap.range μ).subtype ∘ₗ μ.rangeRestrict from rfl]
+      rw [LinearMap.lTensor_comp]
+    rw [hfac, LinearMap.coe_comp] at hlT
+    exact hlT.of_comp
+  have hker : LinearMap.ker (LinearMap.lTensor K μ.rangeRestrict) = ⊥ :=
+    LinearMap.ker_eq_bot.mpr hπ
+  have hequiv := LinearMap.kerLTensorEquivOfSurjective μ.rangeRestrict
+    (LinearMap.surjective_rangeRestrict μ) K
+  haveI : Subsingleton (LinearMap.ker (LinearMap.lTensor K μ.rangeRestrict)) := by
+    rw [hker]; infer_instance
+  have hsub : Subsingleton (K ⊗[R] (LinearMap.ker μ.rangeRestrict)) := hequiv.symm.toEquiv.subsingleton
+  rwa [LinearMap.ker_rangeRestrict] at hsub
+
+open TensorProduct in
+/-- The canonical base-change surjection `M ⊗[R] N ↠ M ⊗[A] N` for an `R`-algebra `A` and
+`A`-modules `M`, `N` (scalars are further identified over `A`). -/
+private noncomputable def sliceAux_baseChange (R A M N : Type u) [CommRing R] [CommRing A]
+    [Algebra R A] [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M]
+    [AddCommGroup N] [Module R N] [Module A N] [IsScalarTower R A N] :
+    M ⊗[R] N →ₗ[R] M ⊗[A] N :=
+  TensorProduct.lift
+    { toFun := fun m => (TensorProduct.mk A M N m).restrictScalars R
+      map_add' := fun m m' => by ext n; simp
+      map_smul' := fun r m => by ext n; simp }
+
+open TensorProduct in
+/-- The base-change map `M ⊗[R] N → M ⊗[A] N` is surjective. -/
+private theorem sliceAux_baseChange_surjective (R A M N : Type u) [CommRing R] [CommRing A]
+    [Algebra R A] [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M]
+    [AddCommGroup N] [Module R N] [Module A N] [IsScalarTower R A N] :
+    Function.Surjective (sliceAux_baseChange R A M N) := by
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => exact ⟨0, map_zero _⟩
+  | tmul m n => exact ⟨m ⊗ₜ[R] n, by simp [sliceAux_baseChange]⟩
+  | add x y hx hy =>
+    obtain ⟨a, rfl⟩ := hx; obtain ⟨b, rfl⟩ := hy
+    exact ⟨a + b, map_add _ _ _⟩
+
+open TensorProduct in
+/-- **Support/Nakayama input.** For a Noetherian `A` and an ideal `Ann` such that `K ⊗_R Ann = 0`
+for every field `K` over `R`, one has `Ann = 0`. Route: `Ann` is `A`-finite; for a maximal ideal
+`𝔪 ⊇ Ann` the fibre `Ann ⧸ 𝔪·Ann = (A ⧸ 𝔪) ⊗_A Ann` is a quotient of `(A ⧸ 𝔪) ⊗_R Ann = 0`, so
+`𝔪 ∉ Supp Ann` (`Module.support_quotient`), contradicting `Ann ≤ 𝔪`. Hence `Ann` lies in no
+maximal ideal, so `Supp Ann = ∅` and `Ann = 0`. -/
+private theorem sliceAux_ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+    [IsNoetherianRing A] (Ann : Ideal A)
+    (hI : ∀ (K : Type u) [Field K] [Algebra R K], Subsingleton (K ⊗[R] (Ann : Submodule A A))) :
+    Subsingleton (Ann : Submodule A A) := by
+  haveI : Module.Finite A (Ann : Submodule A A) :=
+    Module.Finite.iff_fg.mpr (IsNoetherian.noetherian Ann)
+  rw [← Module.support_eq_empty_iff (R := A), Module.support_eq_zeroLocus]
+  suffices h : Module.annihilator A (Ann : Submodule A A) = ⊤ by rw [h]; simp
+  by_contra hne
+  obtain ⟨𝔪, hm, hle⟩ := Ideal.exists_le_maximal _ hne
+  haveI : 𝔪.IsMaximal := hm
+  have hmem : (⟨𝔪, hm.isPrime⟩ : PrimeSpectrum A) ∈ Module.support A (Ann : Submodule A A) :=
+    Module.mem_support_iff_of_finite.mpr hle
+  letI : Field (A ⧸ 𝔪) := Ideal.Quotient.field 𝔪
+  haveI := hI (A ⧸ 𝔪)
+  have hsub : Subsingleton ((A ⧸ 𝔪) ⊗[A] (Ann : Submodule A A)) :=
+    (sliceAux_baseChange_surjective R A (A ⧸ 𝔪) (Ann : Submodule A A)).subsingleton
+  have hquot : Subsingleton ((Ann : Submodule A A) ⧸ 𝔪 • (⊤ : Submodule A (Ann : Submodule A A))) :=
+    (TensorProduct.quotTensorEquivQuotSMul (Ann : Submodule A A) 𝔪).toEquiv.subsingleton_congr.mp hsub
+  have hemp : Module.support A ((Ann : Submodule A A) ⧸ 𝔪 • ⊤) = ∅ :=
+    Module.support_eq_empty_iff.mpr hquot
+  rw [Module.support_quotient] at hemp
+  have : (⟨𝔪, hm.isPrime⟩ : PrimeSpectrum A) ∈ (∅ : Set (PrimeSpectrum A)) := by
+    rw [← hemp]; exact ⟨hmem, by simp [PrimeSpectrum.mem_zeroLocus]⟩
+  simp at this
+
+open TensorProduct in
+/-- **T-FLAT1-SLICE at the Noetherian stage (EGA IV 11.3.8).** The slicing nonzerodivisor
+criterion when `A` is already a Noetherian ring: the honest Tor-free + support/Nakayama argument,
+with no dévissage needed. Combines `sliceAux_tmul_ann_subsingleton` (homology) and
+`sliceAux_ann_subsingleton` (support). -/
+private theorem sliceAux_nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [CommRing A]
+    [Algebra R A] [Module.Flat R A] [IsNoetherianRing A] (f : A)
+    (hq : Module.Flat R (A ⧸ Ideal.span {f}))
+    (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
+      f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
+    f ∈ nonZeroDivisors A := by
+  have hI := sliceAux_tmul_ann_subsingleton R A f hq hfib
+  set Ann : Ideal A := LinearMap.ker (LinearMap.mulLeft A f) with hAnn
+  have hbridge : (Ann : Submodule A A).restrictScalars R = LinearMap.ker (LinearMap.mulLeft R f) := by
+    ext x; simp [hAnn, LinearMap.mulLeft_apply]
+  have hI' : ∀ (K : Type u) [Field K] [Algebra R K],
+      Subsingleton (K ⊗[R] (Ann : Submodule A A)) := by
+    intro K _ _
+    have := hI K
+    rwa [← hbridge] at this
+  have hss : Subsingleton (Ann : Submodule A A) := sliceAux_ann_subsingleton R A Ann hI'
+  have hAnnbot : Ann = ⊥ := by
+    rw [Submodule.eq_bot_iff]
+    intro x hx
+    exact congrArg Subtype.val (Subsingleton.elim (⟨x, hx⟩ : Ann) 0)
+  have hinj : Function.Injective (LinearMap.mulLeft A f) := by
+    rw [← LinearMap.ker_eq_bot]; exact hAnnbot
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => hinj (by simpa using hx), fun x hx => hinj (by simpa [mul_comm] using hx)⟩
+
+open TensorProduct in
+/-- **T-FLAT1-SLICE over a Noetherian base.** If the base `R` is Noetherian then the
+finitely-presented `A` is a Noetherian ring, and `sliceAux_nzd_of_isNoetherianRing` applies. -/
+private theorem sliceAux_nzd_of_noetherianBase (R A : Type u) [CommRing R] [CommRing A]
+    [Algebra R A] [Algebra.FinitePresentation R A] [Module.Flat R A] [IsNoetherianRing R] (f : A)
+    (hq : Module.Flat R (A ⧸ Ideal.span {f}))
+    (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
+      f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
+    f ∈ nonZeroDivisors A := by
+  haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing R A
+  exact sliceAux_nzd_of_isNoetherianRing R A f hq hfib
+
+open TensorProduct in
+/-- **[ISOLATED SUB-PIECE — Noetherian approximation, EGA IV 11.2.6 / Stacks 07RF spreading-out].**
+The single mathlib-absent step of the slicing box: descend the whole datum `(A, f, hq, hfib)` to a
+Noetherian base. There is a Noetherian ring `R'`, a finitely-presented flat `R'`-algebra `A'`, an
+element `f' : A'` with `A' ⧸ (f')` flat over `R'` and `f'` fibrewise-nonzerodivisor over `R'`, and a
+ring map `ψ : A' → A` under which every annihilator relation `f · a = 0` lifts to `f' · a' = 0` with
+`ψ a' = a`. `ModularCurves.exists_noetherian_descent_flat` provides the flat descent
+`A ≃ R ⊗[R₀] A₀`; what remains boxed here is the *compatible* spreading-out of the quotient-flatness
+`hq` and the fibrewise condition `hfib` to a finitely-generated Noetherian stage `R₀ ⊆ R₁ ⊆ R`,
+together with the filtered-colimit descent of the relation `f · a = 0` — infrastructure mathlib does
+not yet support. -/
+private theorem sliceAux_exists_noetherianStage (R A : Type u) [CommRing R] [CommRing A]
+    [Algebra R A] [Algebra.FinitePresentation R A] [Module.Flat R A] (f : A)
+    (hq : Module.Flat R (A ⧸ Ideal.span {f}))
+    (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
+      f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
+    ∃ (R' A' : Type u) (_ : CommRing R') (_ : CommRing A') (_ : Algebra R' A')
+      (_ : Algebra.FinitePresentation R' A') (_ : Module.Flat R' A') (_ : IsNoetherianRing R')
+      (ψ : A' →+* A) (f' : A'),
+      Module.Flat R' (A' ⧸ Ideal.span {f'}) ∧
+      (∀ (K : Type u) [Field K] [Algebra R' K], f' ⊗ₜ[R'] (1 : K) ∈ nonZeroDivisors (A' ⊗[R'] K)) ∧
+      (∀ a : A, f * a = 0 → ∃ a' : A', ψ a' = a ∧ f' * a' = 0) :=
+  sorry
+
 open TensorProduct in
 /-- **[REGISTERED BOX: T-FLAT1-SLICE]** — *do not use outside `RelEffCartierDiv.isOfficial`
 without registering the consumer on the board.*
@@ -1752,15 +1980,31 @@ WHY A BOX: the naive noetherian-free local form is FALSE — over a rank-one non
 valuation ring `R` take `M := m` (flat, as torsion-free) and `u := 0`: `M/mM = 0` since
 `m² = m`, so `u` is vacuously regular on the closed fibre, yet `u` is not regular on
 `M ≠ 0`. The finite-presentation hypotheses are therefore load-bearing, and the honest
-proof is EGA's noetherian-approximation dévissage (the plan's HB-NOETH machine), out of
-scope for this ticket. The plan earmarked exactly this gap as T-FLAT1. -/
+proof is EGA's noetherian-approximation dévissage (the plan's HB-NOETH machine).
+
+STATUS: discharged. The Noetherian-stage argument (`sliceAux_nzd_of_isNoetherianRing`, the
+Tor-free homological step `sliceAux_tmul_ann_subsingleton` + the support/Nakayama step
+`sliceAux_ann_subsingleton`) is fully proven. The dévissage that reduces the general
+finitely-presented base to a Noetherian one (`sliceAux_exists_noetherianStage`) is isolated as
+the sole remaining sorry: it is the *compatible* spreading-out of `hq`/`hfib` (EGA IV 11.2.6 /
+Stacks 07RF) plus the filtered-colimit descent of the annihilator relation, infrastructure that
+mathlib does not yet support. -/
 theorem nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor (R A : Type u) [CommRing R]
     [CommRing A] [Algebra R A] [Algebra.FinitePresentation R A] [Module.Flat R A]
     (f : A) (hq : Module.Flat R (A ⧸ Ideal.span {f}))
     (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
       f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
     f ∈ nonZeroDivisors A := by
-  sorry
+  obtain ⟨R', A', _, _, _, _, _, _, ψ, f', hq', hfib', hrel⟩ :=
+    sliceAux_exists_noetherianStage R A f hq hfib
+  have hf' : f' ∈ nonZeroDivisors A' := sliceAux_nzd_of_noetherianBase R' A' f' hq' hfib'
+  have hkey : ∀ x : A, f * x = 0 → x = 0 := by
+    intro x hx
+    obtain ⟨x', hxeq, hx'⟩ := hrel x hx
+    have hx'0 : x' = 0 := (mem_nonZeroDivisors_iff.mp hf').1 x' hx'
+    rw [← hxeq, hx'0, map_zero]
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨hkey, fun x hx => hkey x (by rw [mul_comm]; exact hx)⟩
 
 open TensorProduct in
 /-- Flatness of `A ⧸ I` over `R` forces `I ∩ pA ≤ p·I` (here only the `≤` direction),
