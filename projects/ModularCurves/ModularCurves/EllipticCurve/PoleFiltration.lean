@@ -605,31 +605,61 @@ noncomputable def chartZAffineEquiv (W : WeierstrassCurve R) :
         W.toAffine.CoordinateRing :=
   sorry
 
+/-- The `t`-element of the infinity chart (the element the overlap localization inverts). -/
+noncomputable abbrev infChartTElem (W : WeierstrassCurve R) :
+    AdjoinRoot (infChartCubic W) :=
+  algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X
+
+/-- `1/t` in the localized infinity chart. -/
+noncomputable def overlapInvT (W : WeierstrassCurve R) :
+    Localization.Away (infChartTElem W) :=
+  Localization.mk 1 ⟨infChartTElem W, ⟨1, pow_one _⟩⟩
+
+/-- `s/t` in the localized infinity chart. -/
+noncomputable def overlapXElem (W : WeierstrassCurve R) :
+    Localization.Away (infChartTElem W) :=
+  Localization.mk (AdjoinRoot.root (infChartCubic W)) ⟨infChartTElem W, ⟨1, pow_one _⟩⟩
+
+/-- **(T-W7.0i-b4-1rel)** The affine Weierstrass relation holds at `(s/t, 1/t)` in the
+localized infinity chart: the chart-cubic relation for `root`, divided by `t³`. -/
+lemma overlap_eval₂_polynomial (W : WeierstrassCurve R) :
+    Polynomial.eval₂
+      (Polynomial.eval₂RingHom
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
+        (overlapXElem W))
+      (overlapInvT W) W.toAffine.polynomial = 0 := by
+  sorry
+
 /-- **(T-W7.0i-b4-1)** The overlap map from the affine part into the localized infinity
 chart: `x ↦ s/t`, `y ↦ 1/t`. -/
 noncomputable def overlapMap (W : WeierstrassCurve R) :
     W.toAffine.CoordinateRing →+*
       Localization.Away (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
         Polynomial.X) :=
-  sorry
+  AdjoinRoot.lift
+    (Polynomial.eval₂RingHom
+      ((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))).comp
+        ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
+      (overlapXElem W))
+    (overlapInvT W) (overlap_eval₂_polynomial W)
 
 /-- **(T-W7.0i-b4-1x)** `overlapMap` sends `x` to `s/t`. -/
 theorem overlapMap_coordX (W : WeierstrassCurve R) :
-    overlapMap W (coordX W) =
-      Localization.mk (AdjoinRoot.root (infChartCubic W))
-        (⟨algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X, ⟨1, pow_one _⟩⟩ :
-          Submonoid.powers (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
-            Polynomial.X)) := by
-  sorry
+    overlapMap W (coordX W) = overlapXElem W := by
+  rw [show coordX W = AdjoinRoot.of W.toAffine.polynomial Polynomial.X from rfl]
+  unfold overlapMap
+  rw [AdjoinRoot.lift_of]
+  exact Polynomial.eval₂_X _ _
 
 /-- **(T-W7.0i-b4-1y)** `overlapMap` sends `y` to `1/t`. -/
 theorem overlapMap_coordY (W : WeierstrassCurve R) :
-    overlapMap W (coordY W) =
-      Localization.mk 1
-        (⟨algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X, ⟨1, pow_one _⟩⟩ :
-          Submonoid.powers (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
-            Polynomial.X)) := by
-  sorry
+    overlapMap W (coordY W) = overlapInvT W := by
+  rw [show coordY W = AdjoinRoot.root W.toAffine.polynomial from rfl]
+  unfold overlapMap
+  rw [AdjoinRoot.lift_root]
 
 /-- **(T-W7.0i-b4, the equalizer core)** A pair — a function on the affine part and a
 function on the infinity chart — agreeing in the overlap localization is a (shared)
