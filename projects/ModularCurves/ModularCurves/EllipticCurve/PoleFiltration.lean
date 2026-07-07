@@ -2073,6 +2073,96 @@ private lemma awayIso_res_squareZ (W : WeierstrassCurve R)
     RingHom.id_apply] at this
   exact this
 
+private lemma awayToSection_inv_cancelY (W : WeierstrassCurve R)
+    (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) :
+    (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom u) = u := by
+  have := congrArg (fun φ => CommRingCat.Hom.hom φ u)
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).inv_hom_id)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at this
+  exact this
+
+private lemma awayToSection_inv_cancelZ (W : WeierstrassCurve R)
+    (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
+    (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).hom
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom u) = u := by
+  have := congrArg (fun φ => CommRingCat.Hom.hom φ u)
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).inv_hom_id)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at this
+  exact this
+
+/-- The two chart transports of a global section agree in the overlap localization. -/
+private lemma chart_transports_agree (W : WeierstrassCurve R) (s : Γ(projModel W, ⊤)) :
+    overlapMap W (chartZRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+        (((projModel W).presheaf.map (homOfLE le_top).op).hom s))) =
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (chartYRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+        (((projModel W).presheaf.map (homOfLE le_top).op).hom s))) := by
+  have hle₁ : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) :=
+    Proj.basicOpen_mono _ _ _ ⟨_, rfl⟩
+  have hle₂ : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) :=
+    Proj.basicOpen_mono _ _ _
+      ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩
+  have hf₁ : ((projModel W).presheaf.map (homOfLE hle₁).op).hom
+      (((projModel W).presheaf.map (homOfLE le_top).op).hom s) =
+      ((projModel W).presheaf.map (homOfLE le_top).op).hom s := by
+    have hcomp : (projModel W).presheaf.map (homOfLE le_top).op ≫
+        (projModel W).presheaf.map (homOfLE hle₁).op =
+        (projModel W).presheaf.map (homOfLE le_top).op := by
+      rw [← Functor.map_comp]
+      exact congrArg (projModel W).presheaf.map
+        (Quiver.Hom.unop_inj (Subsingleton.elim _ _))
+    rw [← hcomp]
+    rfl
+  have hf₂ : ((projModel W).presheaf.map (homOfLE hle₂).op).hom
+      (((projModel W).presheaf.map (homOfLE le_top).op).hom s) =
+      ((projModel W).presheaf.map (homOfLE le_top).op).hom s := by
+    have hcomp : (projModel W).presheaf.map (homOfLE le_top).op ≫
+        (projModel W).presheaf.map (homOfLE hle₂).op =
+        (projModel W).presheaf.map (homOfLE le_top).op := by
+      rw [← Functor.map_comp]
+      exact congrArg (projModel W).presheaf.map
+        (Quiver.Hom.unop_inj (Subsingleton.elim _ _))
+    rw [← hcomp]
+    rfl
+  have hagree := congrArg ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv).hom
+    (hf₁.trans hf₂.symm)
+  rw [awayIso_res_squareY W, awayIso_res_squareZ W] at hagree
+  have hℓ := congrArg (overlapLocEquiv W) hagree
+  rw [overlapLocEquiv_awayMap_y, overlapLocEquiv_awayMap_z] at hℓ
+  exact hℓ.symm
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
@@ -2081,7 +2171,130 @@ argument (equalizers do not commute with base change). Source: reviewer round 1 
 (2-chart equalizer; `x²y⁻¹` excluded). -/
 theorem projModel_globalSections_eq_baseRing (W : WeierstrassCurve R) :
     IsIso ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop) := by
-  sorry
+  rw [ConcreteCategory.isIso_iff_bijective]
+  have happly : ∀ r : R, ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+      (projModelπ W).appTop).hom r =
+      ((projModelπ W).appTop).hom (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r) := by
+    intro r
+    simp [CommRingCat.hom_comp, RingHom.comp_apply]
+  constructor
+  · -- injectivity: read off through the Y-chart and grade zero
+    rcases subsingleton_or_nontrivial R with hR | hR
+    · exact fun r r' _ => Subsingleton.elim r r'
+    intro r r' h
+    have h' : ((projModelπ W).appTop).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r) =
+        ((projModelπ W).appTop).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r') := by
+      rw [← happly r, ← happly r']
+      exact h
+    have h1 := structure_section_square_apply W _
+      (mk_X_mem_quotientGrading_one W 1) one_pos r
+    have h2 := structure_section_square_apply W _
+      (mk_X_mem_quotientGrading_one W 1) one_pos r'
+    have key : (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        ((algebraMapGradeZero (projIdeal W)) r) =
+        (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        ((algebraMapGradeZero (projIdeal W)) r') := by
+      rw [← h1, ← h2, h']
+    have := congrArg (chartYRingEquiv W) key
+    rw [chartYRingEquiv_fromZero, chartYRingEquiv_fromZero] at this
+    exact algebraMap_adjoinRoot_injective W this
+  · -- surjectivity: glue the constant from the overlap-pair theorem
+    intro s
+    obtain ⟨r, hra, hrb⟩ := overlap_pair_eq_baseRing W
+      (chartZRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+        (((projModel W).presheaf.map (homOfLE le_top).op).hom s)))
+      (chartYRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+        (((projModel W).presheaf.map (homOfLE le_top).op).hom s)))
+      (chart_transports_agree W s)
+    refine ⟨r, ?_⟩
+    refine sections_ext W _ s ?_ ?_
+    · have hval : ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+          (((projModel W).presheaf.map (homOfLE le_top).op).hom
+            (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+              (projModelπ W).appTop).hom r)) =
+          ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+          (((projModel W).presheaf.map (homOfLE le_top).op).hom s) :=
+        ((congrArg (fun z => ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+            (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+            (((projModel W).presheaf.map (homOfLE le_top).op).hom z)) (happly r)).trans
+          (structure_section_square_apply W _
+            (mk_X_mem_quotientGrading_one W 1) one_pos r)).trans
+          (((chartYRingEquiv W).injective (by
+            rw [chartYRingEquiv_fromZero, hrb])).symm)
+      calc ((projModel W).presheaf.map (homOfLE le_top).op).hom
+            (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop).hom r)
+          = (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom
+              (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+                (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+                (((projModel W).presheaf.map (homOfLE le_top).op).hom
+                  (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+                    (projModelπ W).appTop).hom r))) :=
+            (awayToSection_inv_cancelY W _).symm
+        _ = (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom
+              (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+                (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+                (((projModel W).presheaf.map (homOfLE le_top).op).hom s)) :=
+            congrArg (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom hval
+        _ = ((projModel W).presheaf.map (homOfLE le_top).op).hom s :=
+            awayToSection_inv_cancelY W _
+    · have hval : ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+          (((projModel W).presheaf.map (homOfLE le_top).op).hom
+            (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+              (projModelπ W).appTop).hom r)) =
+          ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+          (((projModel W).presheaf.map (homOfLE le_top).op).hom s) :=
+        ((congrArg (fun z => ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+            (((projModel W).presheaf.map (homOfLE le_top).op).hom z)) (happly r)).trans
+          (structure_section_square_apply W _
+            (mk_X_mem_quotientGrading_one W 2) one_pos r)).trans
+          (((chartZRingEquiv W).injective (by
+            rw [chartZRingEquiv_fromZero, hra])).symm)
+      calc ((projModel W).presheaf.map (homOfLE le_top).op).hom
+            (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop).hom r)
+          = (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).hom
+              (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+                (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+                (((projModel W).presheaf.map (homOfLE le_top).op).hom
+                  (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+                    (projModelπ W).appTop).hom r))) :=
+            (awayToSection_inv_cancelZ W _).symm
+        _ = (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).hom
+              (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+                (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom
+                (((projModel W).presheaf.map (homOfLE le_top).op).hom s)) :=
+            congrArg (Proj.awayToSection (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).hom hval
+        _ = ((projModel W).presheaf.map (homOfLE le_top).op).hom s :=
+            awayToSection_inv_cancelZ W _
+
 
 /-- **(T-W7.0i·i4-core)** In the infinity-chart ring (chart `i = 1`, coordinates
 `s = X/Y, t = Z/Y`), the coordinate `s` is a nonzerodivisor. This is the McCoy computation

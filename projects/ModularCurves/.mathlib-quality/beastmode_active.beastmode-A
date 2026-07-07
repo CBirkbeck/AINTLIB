@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-i3 — T3 transport COMPLETE (fraction relations, x/y-frac values, grade-zero compat, overlapLocEquiv_awayMap_z). Next: T4 bijectivity assembly of projModel_globalSections_eq_baseRing
+FOCUS: T-W7.0i-i3 DONE — Gamma(projModel W) = R PROVEN axiom-clean for every ring. Next: i5 locallyWeierstrass_pushforward_O_eq_O (last PoleFiltration sorry)

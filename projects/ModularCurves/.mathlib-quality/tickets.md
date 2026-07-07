@@ -4948,6 +4948,21 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     corollary, found in mathlib). NOTE: chart-0 z-nzd deferred until hom_ext's cover choice
     fixes whether chart-0 is needed (2-chart route may suffice).
 
+- **[T-W7.0i·i3]** — **DONE (beastmode-A 2026-07-07; axiom-clean)**:
+  `projModel_globalSections_eq_baseRing` PROVEN for every commutative ring `R`. Route:
+  bijectivity of `ΓSpecIso.inv ≫ π.appTop`. Injectivity: Y-chart + grade-zero readoff +
+  `algebraMap_adjoinRoot_injective` (basis index-0). Surjectivity: two-chart transports
+  (`chartY/ZRingEquiv` of the `basicOpenIsoAway.inv`-images), overlap agreement
+  (`chart_transports_agree` via `awayIso_res_squareY/Z` from `Proj.awayMap_awayToSection` +
+  `overlapLocEquiv` transport with compat-i (`ringEquivOfRingEquiv_eq`) and compat-ii
+  (`overlapLocEquiv_awayMap_z` by `chart_hom_aeval` on generators + `overlapMap` pins)),
+  then `overlap_pair_eq_baseRing` produces the constant and
+  `sections_ext` (`eq_of_locally_eq₂`) + `structure_section_square`(_apply) +
+  `awayToSection_inv_cancelY/Z` glue `Φ r = s`. All heavy `rw`s replaced by
+  `congrArg`-term chains (motive-search on the graded types times out otherwise);
+  the `Γ`-bridge `Proj_awayι_appTop_ΓSpecIso` is stated generically over any
+  `GradedAlgebra` (ForMathlib-grade).
+
 - **[T-W7.0i-b3]** two-chart Γ plumbing — SKELETON LANDED 2026-07-07T14:15Z per coordinator §2:
   `chartY_sup_chartZ_eq_top`, `chartYSectionsEquiv`, `chartZSectionsEquiv`
   (PoleFiltration.lean; overlap-sections equiv folded into b4's `overlapMap` route);

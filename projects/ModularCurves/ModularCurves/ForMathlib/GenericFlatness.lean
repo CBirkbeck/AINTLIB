@@ -23,6 +23,10 @@ import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.RingTheory.Localization.Module
 import Mathlib.RingTheory.FiniteType
 import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
+import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+import Mathlib.Algebra.MvPolynomial.Equiv
+import Mathlib.Algebra.Polynomial.Div
+import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # Generic flatness (Stacks 051R) — building blocks and dévissage
@@ -99,6 +103,172 @@ theorem exists_noetherNormalization_baseChange {R S : Type*} [CommRing R] [IsDom
     ∃ (d : ℕ) (φ : MvPolynomial (Fin d) (FractionRing R) →ₐ[FractionRing R]
       ((FractionRing R) ⊗[R] S)), Function.Injective φ ∧ φ.Finite :=
   exists_finite_inj_algHom_of_fg (FractionRing R) ((FractionRing R) ⊗[R] S)
+
+/-!
+## Transcendence-degree dimension theory (for the domain-case induction)
+
+The domain-case induction of Stacks 051R is run on the transcendence degree
+`Algebra.trdeg R (S ⧸ 𝔮)` (a well-defined natural number by `trdeg_lt_aleph0`). The mathematical
+crux — that a nonzero element cuts transcendence degree down — is `trdeg_quotient_prime_lt`: for a
+prime `𝔮'` of a polynomial ring `R[X₁,…,X_d]` (`d ≥ 1`) containing a nonzero `g`, the quotient
+domain has strictly smaller transcendence degree. This is the "a hypersurface in `𝔸ᵈ` has
+dimension `< d`" fact, proved here from scratch via algebraic independence (mathlib lacks the
+`dim = trdeg` bridge and the field-polynomial hypersurface drop). -/
+
+section PolynomialTrdeg
+open scoped Polynomial
+open Cardinal
+
+/-- Evaluation of a multivariate polynomial at a `Fin.cons`ed point factors through
+`finSuccEquiv`: evaluating `f` at `(y, s₀, …, s_{n-1})` equals evaluating the univariate image of
+`f` (coefficients pushed through `aeval s`) at `y`. -/
+private theorem aeval_cons_eq' {R B : Type*} [CommRing R] [CommRing B] [Algebra R B] {n : ℕ}
+    (s : Fin n → B) (y : B) (f : MvPolynomial (Fin (n + 1)) R) :
+    MvPolynomial.aeval (Fin.cons y s : Fin (n + 1) → B) f
+      = Polynomial.aeval y (Polynomial.mapAlgHom (MvPolynomial.aeval s)
+          (MvPolynomial.finSuccEquiv R n f)) := by
+  have key : (MvPolynomial.aeval (Fin.cons y s : Fin (n + 1) → B) :
+        MvPolynomial (Fin (n + 1)) R →ₐ[R] B)
+      = ((Polynomial.aeval y).restrictScalars R).comp
+          ((Polynomial.mapAlgHom (MvPolynomial.aeval s)).comp
+            (MvPolynomial.finSuccEquiv R n).toAlgHom) := by
+    apply MvPolynomial.algHom_ext
+    intro i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp [MvPolynomial.finSuccEquiv_X_zero]
+    · simp [MvPolynomial.finSuccEquiv_X_succ]
+  exact DFunLike.congr_fun key f
+
+/-- If `g ≠ 0` in a domain and `q(g) = 0` for a univariate polynomial `q`, then `g` divides the
+trailing coefficient of `q`. (Factor out `X ^ natTrailingDegree`, cancel `g ^ k`, then the constant
+term of the cofactor is `≡ 0 mod g`.) -/
+private theorem dvd_trailingCoeff_of_eval {B : Type*} [CommRing B] [IsDomain B] {g : B} (hg : g ≠ 0)
+    {q : B[X]} (h : Polynomial.eval g q = 0) : g ∣ q.trailingCoeff := by
+  set k := q.natTrailingDegree with hk
+  have hdvd : (Polynomial.X : B[X]) ^ k ∣ q := by
+    rw [Polynomial.X_pow_dvd_iff]; intro e he
+    exact Polynomial.coeff_eq_zero_of_lt_natTrailingDegree he
+  obtain ⟨q₁, hq₁⟩ := hdvd
+  have heval : g ^ k * Polynomial.eval g q₁ = 0 := by
+    have h2 := h; rw [hq₁] at h2; simpa [Polynomial.eval_mul, Polynomial.eval_pow] using h2
+  have hq1eval : Polynomial.eval g q₁ = 0 := by
+    rcases mul_eq_zero.mp heval with h1 | h1
+    · exact absurd h1 (pow_ne_zero k hg)
+    · exact h1
+  have hcoeff : q.trailingCoeff = q₁.coeff 0 := by
+    rw [Polynomial.trailingCoeff, ← hk, hq₁]; simpa using Polynomial.coeff_X_pow_mul q₁ k 0
+  have hsub : g ∣ Polynomial.eval g q₁ - Polynomial.eval 0 q₁ := by
+    simpa using Polynomial.sub_dvd_eval_sub g 0 q₁
+  rw [hq1eval, zero_sub, dvd_neg] at hsub
+  rw [hcoeff, Polynomial.coeff_zero_eq_eval_zero]; exact hsub
+
+/-- **Hypersurface transcendence drop.** For `d ≥ 1`, a prime `𝔮'` of `R[X₀,…,X_{d-1}]` containing a
+nonzero `g`, the quotient domain has transcendence degree strictly below that of the polynomial
+ring. Proof: were there `d` algebraically independent elements in the quotient, lifting them and
+adjoining `g` would give `d + 1` "almost independent" elements, but `g` satisfies a nontrivial
+algebraic relation over the lift (trdeg of the polynomial ring is `d`), whose trailing coefficient
+is a nonzero element of the lifted subring divisible by `g` — hence a nonzero relation among the
+`d` elements in the quotient, a contradiction. -/
+private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d : ℕ} (hd : 1 ≤ d)
+    {g : MvPolynomial (Fin d) R} (hg : g ≠ 0) (q' : Ideal (MvPolynomial (Fin d) R)) [q'.IsPrime]
+    (hgq : g ∈ q') :
+    Algebra.trdeg R (MvPolynomial (Fin d) R ⧸ q')
+      < Algebra.trdeg R (MvPolynomial (Fin d) R) := by
+  have hPd : Algebra.trdeg R (MvPolynomial (Fin d) R) = (d : Cardinal) := by
+    rw [MvPolynomial.trdeg_of_isDomain]; simp
+  rw [hPd]
+  set C := MvPolynomial (Fin d) R ⧸ q' with hC
+  haveI : IsDomain C := Ideal.Quotient.isDomain q'
+  by_cases hinj : Function.Injective (algebraMap R C)
+  · haveI : FaithfulSMul R C := (faithfulSMul_iff_algebraMap_injective R C).mpr hinj
+    have hfin : Algebra.trdeg R C < ℵ₀ := trdeg_lt_aleph0
+    by_contra hcon
+    push_neg at hcon
+    obtain ⟨ι, x, hx⟩ := exists_isTranscendenceBasis' R C
+    have hmk : (#ι) = Algebra.trdeg R C := hx.cardinalMk_eq_trdeg
+    haveI : Finite ι := Cardinal.lt_aleph0_iff_finite.mp (hmk ▸ hfin)
+    haveI : Fintype ι := Fintype.ofFinite ι
+    have hdcard : d ≤ Fintype.card ι := by
+      have h2 : Cardinal.toNat (d : Cardinal) ≤ Cardinal.toNat (Algebra.trdeg R C) :=
+        Cardinal.toNat_le_toNat hcon hfin
+      rw [Cardinal.toNat_natCast] at h2
+      rwa [← Cardinal.mk_toNat_eq_card, hmk]
+    obtain ⟨emb⟩ : Nonempty (Fin d ↪ ι) := by
+      apply Function.Embedding.nonempty_of_card_le; simpa using hdcard
+    set f : Fin d → C := x ∘ emb with hf
+    have hfai : AlgebraicIndependent R f := hx.1.comp emb emb.injective
+    choose F hF using fun i => Ideal.Quotient.mk_surjective (f i)
+    have hnotai :
+        ¬ AlgebraicIndependent R (Fin.cons g F : Fin (d + 1) → MvPolynomial (Fin d) R) := by
+      intro hai
+      have hle : (d : ℕ) + 1 ≤ d := by
+        have h3 := hai.lift_cardinalMk_le_trdeg
+        rw [hPd] at h3
+        simpa [Cardinal.mk_fin, Cardinal.lift_natCast] using h3
+      omega
+    rw [AlgebraicIndependent, Function.Injective] at hnotai
+    push_neg at hnotai
+    obtain ⟨a, b, hab, hne⟩ := hnotai
+    have hPol0 : a - b ≠ 0 := sub_ne_zero.mpr hne
+    have hPolev :
+        MvPolynomial.aeval (Fin.cons g F : Fin (d + 1) → MvPolynomial (Fin d) R) (a - b) = 0 := by
+      rw [map_sub, hab, sub_self]
+    rw [aeval_cons_eq' F g (a - b)] at hPolev
+    set qB := Polynomial.mapAlgHom (MvPolynomial.aeval F) (MvPolynomial.finSuccEquiv R d (a - b))
+      with hqB
+    have hevalqB : Polynomial.eval g qB = 0 := by
+      rw [← Polynomial.coe_aeval_eq_eval]; exact hPolev
+    have haevalFinj : Function.Injective
+        (MvPolynomial.aeval F : MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R) := by
+      have hFai : AlgebraicIndependent R F := by
+        rw [AlgebraicIndependent]
+        have hcompeq : (MvPolynomial.aeval f : MvPolynomial (Fin d) R →ₐ[R] C)
+            = (Ideal.Quotient.mkₐ R q').comp (MvPolynomial.aeval F) := by
+          rw [MvPolynomial.comp_aeval]; congr 1; funext i; exact (hF i).symm
+        have hfinj : Function.Injective (MvPolynomial.aeval f) := hfai
+        rw [hcompeq] at hfinj
+        exact fun p1 p2 h12 => hfinj (by rw [AlgHom.comp_apply, AlgHom.comp_apply, h12])
+      exact hFai
+    have hcoeffqB : ∀ m, qB.coeff m
+        = MvPolynomial.aeval F ((MvPolynomial.finSuccEquiv R d (a - b)).coeff m) := by
+      intro m
+      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
+          (MvPolynomial.finSuccEquiv R d (a - b))
+          = Polynomial.map (MvPolynomial.aeval F :
+            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
+            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl, Polynomial.coeff_map]
+      rfl
+    have hqB0 : qB ≠ 0 := by
+      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
+          (MvPolynomial.finSuccEquiv R d (a - b))
+          = Polynomial.map (MvPolynomial.aeval F :
+            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
+            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl]
+      intro h0
+      have h1 : MvPolynomial.finSuccEquiv R d (a - b) ≠ 0 := fun h =>
+        hPol0 ((MvPolynomial.finSuccEquiv R d).injective (by rw [h]; simp))
+      exact h1 (Polynomial.map_injective _ haevalFinj (by rw [h0]; simp))
+    have hc0 : qB.trailingCoeff ≠ 0 := Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr hqB0
+    have hgc : g ∣ qB.trailingCoeff := dvd_trailingCoeff_of_eval hg hevalqB
+    set Q' := (MvPolynomial.finSuccEquiv R d (a - b)).coeff qB.natTrailingDegree with hQ'
+    have hcQ : MvPolynomial.aeval F Q' = qB.trailingCoeff := by
+      rw [Polynomial.trailingCoeff]; exact (hcoeffqB _).symm
+    have hQ'0 : Q' ≠ 0 := by
+      intro h0; rw [h0, map_zero] at hcQ; exact hc0 hcQ.symm
+    have hmem : MvPolynomial.aeval F Q' ∈ q' := by
+      rw [hcQ]
+      exact (Ideal.span_singleton_le_iff_mem q').mpr hgq (Ideal.mem_span_singleton.mpr hgc)
+    have hfeval : MvPolynomial.aeval f Q' = 0 := by
+      have hFf : (fun i => (Ideal.Quotient.mkₐ R q') (F i)) = f := by
+        funext i; rw [Ideal.Quotient.mkₐ_eq_mk]; exact hF i
+      have e1 : (Ideal.Quotient.mkₐ R q') (MvPolynomial.aeval F Q') = MvPolynomial.aeval f Q' := by
+        rw [← AlgHom.comp_apply, MvPolynomial.comp_aeval, hFf]
+      rw [← e1, Ideal.Quotient.mkₐ_eq_mk, Ideal.Quotient.eq_zero_iff_mem]; exact hmem
+    exact hQ'0 (hfai (by rw [hfeval, map_zero]))
+  · rw [trdeg_eq_zero_of_not_injective hinj]
+    exact_mod_cast hd
+
+end PolynomialTrdeg
 
 /-!
 ## The dévissage (Stacks 051R, GF5)
