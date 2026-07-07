@@ -390,6 +390,54 @@ theorem projModelVCIso_map {R' : Type u} [CommRing R'] [Algebra R R']
   exact (mk_heq e.symm _).trans
     (heq_of_eq (congrArg _ (map_aeval_vcMvSubst (algebraMap R R') C a)))
 
+/-- **Substitution cocycle**: the group product of variable changes composes the substitutions. -/
+lemma vcMvSubst_mul (C C' : VariableChange R) (i : Fin 3) :
+    vcMvSubst (C * C') i = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' i) := by
+  fin_cases i
+  · show vcMvSubst (C * C') (0 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (0 : Fin 3))
+    simp only [vcMvSubst, VariableChange.mul_def, Fin.isValue, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
+      map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq,
+      Units.val_mul]
+    ring
+  · show vcMvSubst (C * C') (1 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (1 : Fin 3))
+    simp only [vcMvSubst, VariableChange.mul_def, Fin.isValue, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
+      map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq,
+      Units.val_mul]
+    ring
+  · show vcMvSubst (C * C') (2 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (2 : Fin 3))
+    simp only [vcMvSubst, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val, MvPolynomial.aeval_X]
+
+/-- Ring-level substitution cocycle on a general polynomial. -/
+lemma aeval_vcMvSubst_mul (C C' : VariableChange R) (p : MvPolynomial (Fin 3) R) :
+    MvPolynomial.aeval (vcMvSubst (C * C')) p =
+      MvPolynomial.aeval (vcMvSubst C) (MvPolynomial.aeval (vcMvSubst C') p) := by
+  conv_rhs => rw [← AlgHom.comp_apply, MvPolynomial.comp_aeval]
+  congr 1
+  exact congrArg MvPolynomial.aeval (funext fun i => vcMvSubst_mul C C' i)
+
+/-- **(T-W7.0h-i, cocycle)** The model isomorphisms compose according to the
+`VariableChange` group law (contravariantly on the acted curve). Source: the affine cocycle
+`vcX_comp`/`vcY_comp` (`ForMathlib/AffinePointVariableChange`, DONE), projectivised. -/
+theorem projModelVCIso_mul (C C' : VariableChange R) (W : WeierstrassCurve R) :
+    (projModelVCIso (C * C') W).hom =
+      (eqToHom (by rw [mul_smul])) ≫ (projModelVCIso C (C' • W)).hom ≫
+        (projModelVCIso C' W).hom := by
+  have e : C • (C' • W) = (C * C') • W := (mul_smul C C' W).symm
+  show Proj.map (vcGradedHom (C * C') W) _ =
+    eqToHom (by rw [mul_smul]) ≫ Proj.map (vcGradedHom C (C' • W)) _ ≫
+      Proj.map (vcGradedHom C' W) _
+  rw [← Proj.map_comp]
+  refine projMap_transport_heq W e _ _ _ _ (gradedHom_heq W e.symm _ _ fun x => ?_)
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  show HEq (vcGradedHom (C * C') W (Ideal.Quotient.mk _ a))
+    (vcGradedHom C (C' • W) (vcGradedHom C' W (Ideal.Quotient.mk _ a)))
+  rw [vcGradedHom, quotientGradingMap_mk, vcGradedHom, vcGradedHom, quotientGradingMap_mk,
+    quotientGradingMap_mk]
+  exact (mk_heq e.symm _).trans (heq_of_eq (congrArg _ (aeval_vcMvSubst_mul C C' a)))
+
 /-- **(T-W7.1b-b1, coordinator §2)** A pointed isomorphism of projective models restricts to
 the affine parts (it preserves the complement of the zero section) and hence induces an
 `R`-algebra isomorphism of the affine coordinate rings. DESIGN-DERIVED (audit A1 b1; no
