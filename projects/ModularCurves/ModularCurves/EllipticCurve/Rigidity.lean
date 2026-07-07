@@ -463,7 +463,53 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   -- zero; quasi-compactness of the fibre + properness produce the tube.
   have hW : ∃ U₀ : S.Opens, t ∈ U₀ ∧
       (eqLocusι f g hf hg).ker ≤ ((p ⁻¹ᵁ U₀ : X.Opens).ι).ker := by
-    sorry
+    classical
+    haveI hXnoeth : IsLocallyNoetherian X := LocallyOfFiniteType.isLocallyNoetherian p
+    -- (1) the good locus: union over affines of the germ-vanishing sets (open, proven)
+    set Wset : Set X := ⋃ U : X.affineOpens, {z : X | ∃ hz : z ∈ U.1,
+      Ideal.map (X.presheaf.germ U.1 z hz).hom
+        ((eqLocusι f g hf hg).ker.ideal U) = ⊥} with hWset
+    have hWopen : IsOpen Wset :=
+      isOpen_iUnion fun U => isOpen_germMap_ideal_eq_bot U _
+    -- (2) the fibre lies in the good locus: the c·i germs + Krull intersection
+    have hfib : p.base ⁻¹' {t} ⊆ Wset := by
+      intro x hx
+      have hxt : p.base x = t := hx
+      obtain ⟨U, hxU⟩ : ∃ U : X.affineOpens, x ∈ U.1 := by
+        have : x ∈ (⊤ : X.Opens) := trivial
+        rw [← iSup_affineOpens_eq_top X, TopologicalSpace.Opens.mem_iSup] at this
+        exact this
+      refine Set.mem_iUnion.mpr ⟨U, hxU, ?_⟩
+      rw [eq_bot_iff, Ideal.map_le_iff_le_comap]
+      intro a ha
+      have hloc : IsLocalHom (p.stalkMap x).hom := inferInstance
+      have hle : Ideal.map (p.stalkMap x).hom
+          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ≤
+          IsLocalRing.maximalIdeal (X.presheaf.stalk x) := by
+        rw [Ideal.map_le_iff_le_comap]
+        intro m hm
+        rw [Ideal.mem_comap, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
+        rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff] at hm
+        exact fun hu => hm (hloc.map_nonunit m hu)
+      have hpow : ∀ n, X.presheaf.germ U.1 x hxU a ∈
+          (Ideal.map (p.stalkMap x).hom
+            (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ n :=
+        fun n => germ_ker_mem_pow_of_fibre_subset hp e he f g hf hg x
+          (hxt ▸ hset) U hxU a ha n
+      have hbot : (⨅ n : ℕ, (IsLocalRing.maximalIdeal (X.presheaf.stalk x)) ^ n) = ⊥ :=
+        Ideal.iInf_pow_eq_bot_of_isLocalRing _
+          (Ideal.IsMaximal.ne_top (IsLocalRing.maximalIdeal.isMaximal _))
+      have hmem : X.presheaf.germ U.1 x hxU a ∈ (⊥ : Ideal (X.presheaf.stalk x)) := by
+        rw [← hbot]
+        exact Ideal.mem_iInf.mpr fun n => Ideal.pow_right_mono hle n (hpow n)
+      simpa using hmem
+    -- (3) the properness tube around the fibre
+    have hclosed : IsClosed (p.base '' Wsetᶜ) := p.isClosedMap _ hWopen.isClosed_compl
+    refine ⟨⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩, fun hmem => ?_, ?_⟩
+    · obtain ⟨x, hxW, hpx⟩ := hmem
+      exact hxW (hfib (show x ∈ p.base ⁻¹' {t} from hpx))
+    · -- (4) the equalizer ideal is contained in the kernel of the tube inclusion
+      sorry
   obtain ⟨U₀, htU₀, hker⟩ := hW
   exact ⟨U₀, htU₀, IsClosedImmersion.lift _ _ hker, IsClosedImmersion.lift_fac _ _ hker⟩
 
