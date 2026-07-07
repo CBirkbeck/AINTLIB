@@ -3413,4 +3413,110 @@ lemma ker_infChartAug (W : WeierstrassCurve R) :
     · intro c g _ hg
       rw [smul_eq_mul, map_mul, hg, mul_zero]
 
+
+/-- `overlapMap` is injective: the affine part embeds in the overlap. -/
+theorem overlapMap_injective (W : WeierstrassCurve R) :
+    Function.Injective (overlapMap W) := by
+  rcases subsingleton_or_nontrivial R with hR | hR
+  · haveI : Subsingleton W.toAffine.CoordinateRing := Module.subsingleton R _
+    exact fun a b _ => Subsingleton.elim a b
+  intro a a' hae
+  -- it suffices to show the kernel is trivial
+  suffices hker : ∀ c : W.toAffine.CoordinateRing, overlapMap W c = 0 → c = 0 by
+    have := hker (a - a') (by rw [map_sub, hae, sub_self])
+    linear_combination this
+  intro c hc
+  obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq c
+  have hof : ∀ g : Polynomial R,
+      overlapMap W (AdjoinRoot.of W.toAffine.polynomial g) =
+        Polynomial.eval₂ (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+          (overlapXElem W) g := fun g => by
+    unfold overlapMap
+    rw [AdjoinRoot.lift_of, Polynomial.coe_eval₂RingHom]
+  rw [map_add, WeierstrassCurve.Affine.CoordinateRing.smul,
+    WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_mul,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C p) =
+      AdjoinRoot.of W.toAffine.polynomial p from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C q) =
+      AdjoinRoot.of W.toAffine.polynomial q from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+      coordY W from rfl,
+    overlapMap_coordY, hof p, hof q] at hc
+  -- clear to the coordinate identities with `b := 0`
+  have h1 := le_max_left p.natDegree (q.natDegree + 1)
+  have h2 := le_max_right p.natDegree (q.natDegree + 1)
+  set N := max p.natDegree (q.natDegree + 1) with hN
+  have hab : (Polynomial.eval₂
+      (((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))).comp
+        ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+      (overlapXElem W) p +
+    Polynomial.eval₂
+      (((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))).comp
+        ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+      (overlapXElem W) q * overlapInvT W) *
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (AdjoinRoot.root (infChartCubic W)) ^ 0 =
+    algebraMap _ _ (0 : AdjoinRoot (infChartCubic W)) := by
+    rw [pow_zero, mul_one, hc, map_zero]
+  have hstar := fun j => overlap_coordOfShift_eq W p q 0
+    (show p.natDegree < N + 1 by omega) (show q.natDegree < N by omega) hab j
+  simp only [map_zero, Finsupp.coe_zero, Pi.zero_apply, mul_zero] at hstar
+  -- kill the leading coefficients: both polynomials vanish
+  have hq0 : q = 0 := by
+    by_contra hq0
+    rcases Nat.lt_or_ge (2 * q.natDegree + 3) (2 * p.natDegree) with hcase | hcase
+    · have hp0 : p ≠ 0 := by
+        intro h
+        rw [h] at hcase
+        simp at hcase
+      have hcoeff := congrArg (Polynomial.coeff ·
+        (N - p.natDegree + (p.natDegree + 0) / 3))
+        (hstar ⟨(p.natDegree + 0) % 3, by omega⟩)
+      simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff
+      rw [coordOfShift_coeff_lead (W := W) (f := p) (N := N) (n := 0)
+          (by omega) rfl,
+        coordOfShift_coeff_eq_zero (W := W) (f := q) (N := N - 1) (n := 0)
+          (k := N - p.natDegree + (p.natDegree + 0) / 3)
+          (j := ⟨(p.natDegree + 0) % 3, by omega⟩) (by
+            have hj : ((⟨(p.natDegree + 0) % 3, by omega⟩ : Fin 3) : ℕ) =
+              (p.natDegree + 0) % 3 := rfl
+            omega)] at hcoeff
+      exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+    · have hcoeff := congrArg (Polynomial.coeff ·
+        (N - 1 - q.natDegree + (q.natDegree + 0) / 3))
+        (hstar ⟨(q.natDegree + 0) % 3, by omega⟩)
+      simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff
+      rw [coordOfShift_coeff_lead (W := W) (f := q) (N := N - 1) (n := 0)
+          (by omega) rfl,
+        coordOfShift_coeff_eq_zero (W := W) (f := p) (N := N) (n := 0)
+          (k := N - 1 - q.natDegree + (q.natDegree + 0) / 3)
+          (j := ⟨(q.natDegree + 0) % 3, by omega⟩) (by
+            have hj : ((⟨(q.natDegree + 0) % 3, by omega⟩ : Fin 3) : ℕ) =
+              (q.natDegree + 0) % 3 := rfl
+            omega)] at hcoeff
+      exact hq0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  subst hq0
+  have hp0 : p = 0 := by
+    by_contra hp0
+    -- with q = 0 the p-lead kill has no cross terms and no right side
+    have hcoeff := congrArg (Polynomial.coeff ·
+      (N - p.natDegree + (p.natDegree + 0) / 3))
+      (hstar ⟨(p.natDegree + 0) % 3, by omega⟩)
+    simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff
+    rw [coordOfShift_coeff_lead (W := W) (f := p) (N := N) (n := 0)
+        (by omega) rfl] at hcoeff
+    have hzero : (coordOfShift W 0 (N - 1) 0
+        ⟨(p.natDegree + 0) % 3, by omega⟩).coeff
+        (N - p.natDegree + (p.natDegree + 0) / 3) = 0 := by
+      rw [coordOfShift_zero]
+      simp
+    rw [hzero] at hcoeff
+    exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  subst hp0
+  simp
+
 end ModularCurves

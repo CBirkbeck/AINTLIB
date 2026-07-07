@@ -666,8 +666,10 @@ private lemma negModelHom_zEquation (W : WeierstrassCurve R) (K : Type u) [Field
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
   linear_combination h2
 
-set_option backward.isDefEq.respectTransparency false in
-/-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`). -/
+/-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`).
+`simp only` (not `rw`): the goal mixes `chartSolutionsEquiv`- and `chartHomEquiv`-headed terms, and
+`rw`'s kabstract has no discrimination-tree pre-filter — it would `isDefEq` the `chartHomEquiv`
+pattern against the heavy `chartSolutionsEquiv` coords and time out whnf-ing them. -/
 private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
     (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
@@ -676,11 +678,12 @@ private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K
         ⟨⟨P.1 ≫ negModelHom W, negComp_π W K P⟩, hZ'⟩)).1
         ⟨0, by decide⟩ =
       (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩ := by
-  rw [coord_val W K _ hZ' ⟨0, by decide⟩, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply,
-    negChartMap_coord0, ← coord_val W K P hZ ⟨0, by decide⟩]
+  simp only [coord_val, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply, negChartMap_coord0]
 
-set_option backward.isDefEq.respectTransparency false in
-/-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. -/
+/-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. `simp only`
+front (see `negModelHom_zCoord0`): it rewrites both the composite's coordinate and the two `negY`
+arguments into `φ_P`-of-chart-coordinate form, so no `chartSolutionsEquiv`-vs-`chartHomEquiv`
+`isDefEq` ever fires; the remaining `chart_hom_aeval`/`negY`/`ring` steps then run over `φ_P`-atoms. -/
 private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
     (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
@@ -691,12 +694,10 @@ private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K
       (W.baseChange K).toAffine.negY
         ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩)
         ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨1, by decide⟩) := by
-  rw [coord_val W K _ hZ' ⟨1, by decide⟩, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply,
-    negChartMap_coord1, chart_hom_aeval W 2 _ (chartHomEquiv W 2 K ⟨P, hZ⟩).2,
-    WeierstrassCurve.Affine.negY]
+  simp only [coord_val, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply, negChartMap_coord1]
+  rw [chart_hom_aeval W 2 _ (chartHomEquiv W 2 K ⟨P, hZ⟩).2, WeierstrassCurve.Affine.negY]
   simp only [map_sub, map_neg, map_mul, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
     WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃]
-  rw [← coord_val W K P hZ ⟨1, by decide⟩, ← coord_val W K P hZ ⟨0, by decide⟩]
   ring
 
 set_option backward.isDefEq.respectTransparency false in

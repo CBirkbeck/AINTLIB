@@ -614,13 +614,51 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   have happ : (τ.app U.1).hom a = 0 := by
     rw [Scheme.Hom.congr_app hτfac U.1]
     simp [hι0]
-  -- SORRIED FINAL UNPACKING: `τ.app` computes as `germ` followed by `Quotient.mk` up to
-  -- the `ΓSpecIso`/restriction isomorphisms (`fromSpecStalk_app`,
-  -- `ΓSpecIso_inv_naturality`, `Spec.map`-app naturality); the restrictions are isos
-  -- because every open of the `Spec` of a local ring containing the closed point is `⊤`
-  -- (`fromSpecStalk_closedPoint` lands at `x ∈ U`), so `happ` forces
-  -- `Ideal.Quotient.mk _ (germ a) = 0`, which is the goal.
-  sorry
+  -- final unpacking: `τ.app` is `germ` followed by `Quotient.mk`, then isomorphisms
+  rw [← Ideal.Quotient.eq_zero_iff_mem]
+  have hcp : IsLocalRing.closedPoint (X.presheaf.stalk x) ∈ (X.fromSpecStalk x) ⁻¹ᵁ U.1 := by
+    show (X.fromSpecStalk x).base _ ∈ U.1
+    rw [Scheme.fromSpecStalk_closedPoint]
+    exact hxU
+  have hV' : (X.fromSpecStalk x) ⁻¹ᵁ U.1 = ⊤ := IsLocalRing.closed_point_mem_iff.mp hcp
+  have hτapp : τ.app U.1 = X.presheaf.germ U.1 x hxU ≫
+      CommRingCat.ofHom (Ideal.Quotient.mk _) ≫
+      (Scheme.ΓSpecIso _).inv ≫
+      (Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
+        (Ideal.map (p.stalkMap x).hom
+          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
+        ).presheaf.map (homOfLE le_top).op := by
+    rw [hτ, Scheme.Hom.comp_app, Scheme.fromSpecStalk_app hxU]
+    simp only [Category.assoc]
+    congr 1
+    rw [← Scheme.ΓSpecIso_inv_naturality_assoc]
+    congr 1
+    rw [Scheme.Hom.naturality (f := Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk _)))
+      ((homOfLE le_top).op)]
+    congr 1
+  rw [hτapp] at happ
+  -- the tail after `Quotient.mk` is injective: an iso followed by restriction along `⊤ = ⊤`
+  have hinj : Function.Injective (((Scheme.ΓSpecIso _).inv ≫
+      (Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
+        (Ideal.map (p.stalkMap x).hom
+          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
+        ).presheaf.map (homOfLE le_top).op).hom) := by
+    haveI : IsIso (homOfLE (le_top : τ ⁻¹ᵁ U.1 ≤ ⊤)) := by
+      have hτU : τ ⁻¹ᵁ U.1 = ⊤ := by
+        rw [hτ]
+        show Spec.map _ ⁻¹ᵁ ((X.fromSpecStalk x) ⁻¹ᵁ U.1) = ⊤
+        rw [hV']
+        rfl
+      exact ⟨⟨homOfLE (hτU ▸ le_refl ⊤), Subsingleton.elim _ _, Subsingleton.elim _ _⟩⟩
+    haveI : IsIso ((Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
+        (Ideal.map (p.stalkMap x).hom
+          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
+        ).presheaf.map (homOfLE le_top).op) := inferInstance
+    exact ((ConcreteCategory.isIso_iff_bijective _).mp inferInstance).injective
+  have hzero : (Ideal.Quotient.mk _) ((X.presheaf.germ U.1 x hxU).hom a) = 0 := by
+    apply hinj
+    simpa using happ
+  exact hzero
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
 `p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,
