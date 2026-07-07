@@ -5014,9 +5014,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.mvc]** variable-change model isos — `projModelVCIso` + `_π`, `_zero`, `_mul`,
   `_map` (ModelVariableChange.lean:34–58).
-  - **Status**: in_progress (lane P5) — **`projModelVCIso` + `_π` + `_map` PROVED**
-    (axiom-clean); `_zero`/`_mul` remain (gated like `negModelHom_zero` on the
-    `Proj.fromOfGlobalSections` naturality leaves). **Progress 2026-07-07**: crux+graded-hom
+  - **Status**: **DONE** (lane P5, 2026-07-07) — **`projModelVCIso` + `_π` + `_map` + `_mul`
+    + `_zero` ALL PROVED, axiom-clean** (`[propext, Classical.choice, Quot.sound]`).
+    `_mul` (cocycle, bb51832c) via `vcMvSubst_mul`/`aeval_vcMvSubst_mul` + the shared HEq
+    transport; `_zero` (pointedness, abd89c16) via a NEW unit-rescaling automorphism
+    `allScaleGradedQuot` (generalises GLC's `−1` `allNeg` to a unit `μ = u³`): `Proj.map` of
+    it is `𝟙` by `Proj.map_degScaling_eq_id`, and `projModelZeroEval_vc_eq_allScale`
+    (both sides = eval at `(0,u³,0)`) + `fromOfGlobalSections_map` naturality assemble it,
+    exactly mirroring `negModelHom_zero`. Remaining file sorries are T-W7.1b (separate lane).
+    **Progress 2026-07-07**: crux+graded-hom
     layer (66300bb4) → `projModelVCIso` iso via `Proj.map`(C)/`Proj.map`(C⁻¹) + `Proj_map_congr`
     (064b040c) → `_π` via `map_comp_toSpecZero`+`vcGradedHom_algebraMapGradeZero` (0efff5f2) →
     `_map` (coordinator §2-P5) via a novel eqToHom-transport route: `projMap_transport_heq`
@@ -5042,8 +5048,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   iso-invariant for free), `pointedIsoCoordEquiv_coordX`/`_coordY` (b3, several hundred
   lines, shared-witness ∃-bundles documented). Source status: DESIGN-DERIVED (decomposition.md
   addendum) — no verbatim KM/formulaire quote available (image-only scans).
-  - **Status**: blocked · **Depends**: T-W7.0i-a (done), T-W7.0i-b, T-W7.mvc · **Type**:
+  - **Status**: blocked · **Depends**: T-W7.0i-a (done), **T-W7.0i-b (in_progress,
+    beastmode-A — `locallyWeierstrass_pushforward_O_eq_O` still `sorry` @
+    PoleFiltration.lean:~2594)**, T-W7.mvc (**DONE** 2026-07-07 lane-P5) · **Type**:
     def + 5 theorems
+  - **Blocker note (P5, 2026-07-07)**: T-W7.mvc unblocked, but b2 `pointedIsoCoordEquiv_filtration`
+    (the intrinsic-filtration bridge) GATES all 6 leaves and needs the pole-filtration theory
+    from T-W7.0i-b (stream-W, beastmode-A's lane — DON'T cross). `projModelVCIso_injective` is
+    NOT dischargeable from T-W7.mvc alone: `Proj.map` is not injective (the new `allScale_map_id`
+    exhibits nontrivial graded homs → `𝟙`, the projective unit-scaling ambiguity), so it needs the
+    affine coordinate ring from b1. Skeletons live in ModelVariableChange.lean:~641-712; resume
+    once beastmode-A lands T-W7.0i-b.
   - Sketch: pointed iso preserves `E∖O` (Z-chart) ⟹ ring iso `Φ`; `Φ(F'_n) = F_n`
     (intrinsic via section ideal); `F₂`/`F₃` freeness forces `x' ↦ αx+β`, `y' ↦ γy+δx+ε`,
     units; relations force `α³ = γ²`, `u := γ/α`; extend by `projModel_hom_ext_of_affine`.
