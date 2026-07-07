@@ -1058,6 +1058,17 @@ lemma comp_mul_inv_left {S : Scheme.{u}} {P A G : Over S} [GrpObj G]
   have h2 := congrArg CommaMorphism.left h1
   simpa [Over.comp_left, Hom.one_def, Over.toUnit_left] using h2
 
+/-- Mirror of `comp_mul_inv_left` for the left quotient `f⁻¹ · g`: the order matters for the
+GIT 6.4 endgame (Mumford's `g(x)·h(y)` with the `x`-factor on the LEFT is what makes the
+pointed map a homomorphism rather than an antihomomorphism). -/
+lemma comp_inv_mul_left {S : Scheme.{u}} {P A G : Over S} [GrpObj G]
+    (h : P ⟶ A) (f g : A ⟶ G) (hfg : h ≫ f = h ≫ g) :
+    h.left ≫ (f⁻¹ * g).left = P.hom ≫ η[G].left := by
+  have h1 : h ≫ (f⁻¹ * g) = (1 : P ⟶ G) := by
+    rw [MonObj.comp_mul, GrpObj.comp_inv, hfg, inv_mul_cancel]
+  have h2 := congrArg CommaMorphism.left h1
+  simpa [Over.comp_left, Hom.one_def, Over.toUnit_left] using h2
+
 /-- **(T-W7.7·C1, GIT Cor 6.2, PROVEN)** Two `S`-morphisms from a proper flat
 universally-`O`-connected pointed `A` into a separated group object `G` that agree on ONE
 fibre differ by a constant section: `f = (χ ∘ toUnit) · g` for a point `χ` of `G`. Proof:
@@ -1164,30 +1175,31 @@ lemma fromSpecResidueField_comp_section {B S : Scheme.{u}} (q : B ⟶ S) (e : S 
 
 /-- **(T-W7.7·C2, GIT Cor 6.3, PROVEN)** A morphism `A ⊗ B ⟶ G` out of a product, with `A`
 proper flat universally-`O`-connected carrying a unit point, `B` pointed with `B.left`
-connected locally noetherian, splits as a product `f(x,y) = h(y)·g(x)`. Proof (raw-scheme
-route, all Hom-group algebra in `Over S`): `δ := f · (Ẽ ≫ f)⁻¹` for the second-argument
+connected locally noetherian, splits as a product `f(x,y) = g(x)·h(y)`. Proof (raw-scheme
+route, all Hom-group algebra in `Over S`): `δ := (Ẽ ≫ f)⁻¹ · f` for the second-argument
 freeze `Ẽ := lift (fst) (toUnit ≫ e₂)`; rigidity over the base `B.left` applied to
 `⟨δ.left, snd⟩` into `pullback G.hom B.hom` (instances by base change), with section
 `(B.hom ≫ e₁.left, 𝟙)` and collapsed fibre over `y₀ := e₂(B.hom b₀)` — the fibre inclusion
 fixes `Ẽ` by the residue-retraction lemma, so `δ` is unit-constant there
 (`comp_mul_inv_left`), and the fibre image lands in the one-point `Spec κ(y₀)`-factor.
-Statement changes logged on the board (rule 5): `e₂` (the source quote's second point),
-`[IsLocallyNoetherian B.left]`, and the `h·g` product order (C1's constant is on the left;
-`G` is not yet known commutative). Source: GIT p. 116, Cor 6.3 (verbatim in quotes file). -/
+Statement changes logged on the board (rule 5): `e₂` (the source quote's second point) and
+`[IsLocallyNoetherian B.left]`; the product order is Mumford's `g(x)·h(y)` — obtained from
+the LEFT quotient `(Ẽ≫f)⁻¹·f`, and load-bearing: the flipped order would make GIT 6.4
+produce an antihomomorphism. Source: GIT p. 116, Cor 6.3 (verbatim in quotes file). -/
 theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
     {A B G : Over S} [GrpObj G] [IsLocallyNoetherian B.left]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
     (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A) (e₂ : 𝟙_ (Over S) ⟶ B)
     [IsSeparated G.hom] (f : A ⊗ B ⟶ G) :
     ∃ (g : A ⟶ G) (h : B ⟶ G),
-      f = lift (snd A B ≫ h) (fst A B ≫ g) ≫ μ[G] := by
+      f = lift (fst A B ≫ g) (snd A B ≫ h) ≫ μ[G] := by
   classical
   -- freeze the second argument at the point `e₂` (all Hom-group algebra stays in `Over S`)
   set E : A ⊗ B ⟶ A ⊗ B := lift (fst A B) (toUnit (A ⊗ B) ≫ e₂) with hE
   -- raw-typed bridges across the `tensorObj_left`/`tensorUnit_left` defeq seams
   set El : pullback A.hom B.hom ⟶ pullback A.hom B.hom := E.left with hEl
   set fl : pullback A.hom B.hom ⟶ G.left := f.left with hfl
-  set δl : pullback A.hom B.hom ⟶ G.left := (f * (E ≫ f)⁻¹).left with hδl
+  set δl : pullback A.hom B.hom ⟶ G.left := ((E ≫ f)⁻¹ * f).left with hδl
   set ηl : S ⟶ G.left := η[G].left with hηl
   set e₂l : S ⟶ B.left := e₂.left with he₂l
   have he₂B : e₂l ≫ B.hom = 𝟙 S := Over.w e₂
@@ -1236,7 +1248,7 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
     apply Over.OverMorphism.ext
     simp only [Over.comp_left, Over.homMk_left]
     exact hgoalIf
-  have hconst0 := comp_mul_inv_left _ f (E ≫ f) hIf
+  have hconst0 := comp_inv_mul_left _ (E ≫ f) f hIf.symm
   simp only [Over.homMk_left, Over.mk_hom] at hconst0
   have hconst : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
       ≫ δl
@@ -1244,7 +1256,7 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
           ≫ (pullback.fst A.hom B.hom ≫ A.hom)) ≫ ηl := hconst0
   -- the difference, over the base `B.left`, into the base-changed group
   have hδq : δl ≫ G.hom = pullback.snd A.hom B.hom ≫ B.hom := by
-    have hw : δl ≫ G.hom = pullback.fst A.hom B.hom ≫ A.hom := Over.w (f * (E ≫ f)⁻¹)
+    have hw : δl ≫ G.hom = pullback.fst A.hom B.hom ≫ A.hom := Over.w ((E ≫ f)⁻¹ * f)
     rw [hw, pullback.condition]
   -- the restricted difference factors through the one-point `Spec κ(y₀)`
   have hη : ηl ≫ G.hom = 𝟙 S := Over.w η[G]
@@ -1308,18 +1320,20 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
   have h4 : δl = pullback.snd A.hom B.hom ≫ sec ≫ pullback.fst G.hom B.hom := by
     have h3 := congrArg (fun m => m ≫ pullback.fst G.hom B.hom) hfac
     simpa [pullback.lift_fst, Category.assoc] using h3
-  have hδsnd : f * (E ≫ f)⁻¹
+  have hδsnd : (E ≫ f)⁻¹ * f
       = snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw := by
     apply Over.OverMorphism.ext
     simp only [Over.comp_left, Over.homMk_left, Over.snd_left]
     exact h4
   have hEg : E ≫ f = fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f) := by
     rw [hE, ← Category.assoc, comp_lift, Category.comp_id, ← Category.assoc, comp_toUnit]
-  calc f = (f * (E ≫ f)⁻¹) * (E ≫ f) := (inv_mul_cancel_right f (E ≫ f)).symm
-    _ = (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw)
-          * (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f)) := by rw [hδsnd, hEg]
-    _ = lift (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw)
-          (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f)) ≫ μ[G] := Hom.mul_def _ _
+  calc f = (E ≫ f) * ((E ≫ f)⁻¹ * f) := (mul_inv_cancel_left (E ≫ f) f).symm
+    _ = (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f))
+          * (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw) := by
+        rw [hδsnd, hEg]
+    _ = lift (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f))
+          (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw) ≫ μ[G] :=
+        Hom.mul_def _ _
 
 /-- **(T-W7.7a-C3, GIT Cor 6.4)** A pointed morphism of group objects in `Over S`, whose
 source is proper flat and universally `O`-connected over a locally noetherian `S`, is a
