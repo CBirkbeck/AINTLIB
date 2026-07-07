@@ -212,13 +212,26 @@ theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
 /-- **(T-W7.0b-zero)** Negation fixes the point at infinity. -/
 theorem negModelHom_zero (W : WeierstrassCurve R) :
     projModelZero W ≫ negModelHom W = projModelZero W := by
-  -- WIP (subtle — the point at infinity is fixed only PROJECTIVELY). At the cone level
-  -- `projModelZeroEval ∘ negGradedQuot` is evaluation at `(0, −1, 0)` (the `−1` from `Y ↦ −Y`),
-  -- NOT at `(0, 1, 0) = projModelZeroEval`: the two affine representatives of `O` differ by the
-  -- unit `−1`. So this does NOT reduce to a ring-hom equality on global sections; it needs the
-  -- comparison of two maps *into* `Proj` that respects the projective rescaling by `−1`
-  -- (`[0:−1:0] = [0:1:0]`). Cleanest via `Proj.fromOfGlobalSections` functoriality under
-  -- `Proj.map`, rescaling the chosen section-at-infinity generator `Y ↦ −Y`.
+  -- ROUTE (worked out; gated on one reusable ForMathlib lemma being built — see leaves below).
+  -- The point at infinity is fixed only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is
+  -- evaluation at `(0,−1,0)` (the `−1` from `Y ↦ −Y`), NOT at `(0,1,0) = projModelZeroEval`;
+  -- the two affine representatives of `O` differ by the unit `−1`. Since
+  -- `projModelZero W = Proj.fromOfGlobalSections _ f _` with `f = ιΓ ∘ projModelZeroEval W`, the
+  -- rescaling is discharged through the "negate all variables" automorphism, via three leaves:
+  --  (N)  [L-0b-zero-N, ForMathlib] naturality of `Proj.fromOfGlobalSections` under `Proj.map`:
+  --        `fromOfGlobalSections ℬ f hf ≫ Proj.map g hg = fromOfGlobalSections 𝒜 (f.comp g) hf'`.
+  --  (ρ)  [L-0b-zero-ρ] the `X,Y,Z ↦ −X,−Y,−Z` graded automorphism `allNegGradedQuot` (the
+  --        `(−1)`-rescaling `a ↦ (−1)^{deg a} a`; built parallel to `negGradedQuot`, fixes the
+  --        cubic since `F` is homogeneous of the ODD degree 3) with `Proj.map allNegGradedQuot
+  --        = 𝟙` (unit rescaling ⇒ identity on `Proj`: `Away.map` of it is the identity on each
+  --        degree-`0` chart, the `±1` cancelling numerator/denominator).
+  --  (=)  [L-0b-zero-ring] `projModelZeroEval W ∘ negGradedQuot W = projModelZeroEval W ∘
+  --        allNegGradedQuot W` (both are evaluation at `(0,−1,0)`), hence `f ∘ negGradedQuot =
+  --        f ∘ allNegGradedQuot`.
+  -- Assembly: `projModelZero ≫ negModelHom = fromOfGlobalSections (f ∘ negGradedQuot)`  [N]
+  --   `= fromOfGlobalSections (f ∘ allNegGradedQuot)`  [=]
+  --   `= fromOfGlobalSections f ≫ Proj.map allNegGradedQuot`  [N, reversed]
+  --   `= fromOfGlobalSections f ≫ 𝟙 = projModelZero`  [ρ].
   sorry
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's negation through the

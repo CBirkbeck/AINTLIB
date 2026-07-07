@@ -1134,6 +1134,123 @@ theorem projModel_points (W : WeierstrassCurve R) (hell : W.IsElliptic)
       rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩) 0), ?_⟩
   rw [Equiv.trans_apply, Equiv.swap_apply_left]
 
+/-! ### T-W7.0f-val: the explicit field-points equivalence and its chartwise values
+
+`projModel_points` above is choice-extracted by its consumers, so it pins no values. Here we
+expose the *explicit* bijection `projModelPointsEquivEll` — the same assembly minus the
+normalising `swap` (the zero point already lands on `0`, since it lies off the `Z`-chart) — and
+prove its values: the zero point `[0:1:0] ↦ 0`, a `Z`-chart point with dehomogenised coordinates
+`(x, y) ↦ some x y`, and every off-`Z`-chart point `↦ 0`. The negation/multiplication
+specifications (`negModelHom_specPoints`, `mulModelHom_specPoints`) and the group axioms read the
+coordinates through these. -/
+
+/-- A `K`-point of the projective model factors through the `Z = X₂`-chart. -/
+abbrev InZChart (W : WeierstrassCurve R) {K : Type u} [CommRing K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) : Prop :=
+  ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+    h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos = g.1
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The zero section avoids the `Z`-chart: `X₂` evaluates to `0` at `[0:1:0]`, so the preimage of
+the `Z`-chart basic open is empty. (Analogue of `projModelZero_preimage_yChart`, with `1 ↦ 0`.) -/
+lemma projModelZero_not_preimage_zChart (W : WeierstrassCurve R) :
+    projModelZero W ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) = ⊥ := by
+  unfold projModelZero
+  rw [Proj.fromOfGlobalSections_preimage_basicOpen (hn := one_pos)
+    (hr := mk_X_mem_quotientGrading_one W 2)]
+  rw [show ((Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom.comp
+      (projModelZeroEval W)) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 2)) = 0 from by
+    rw [RingHom.comp_apply]
+    rw [show (projModelZeroEval W) ((quotientGradingHom (projIdeal W))
+        (MvPolynomial.X 2)) = 0 from by
+      show (projModelZeroEval W) (Ideal.Quotient.mk _ (MvPolynomial.X 2)) = 0
+      rw [projModelZeroEval_mk]
+      simp]
+    rw [map_zero]]
+  simp
+
+/-- The zero `K`-point `[0:1:0]` does not factor through the `Z`-chart. -/
+lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K] :
+    ¬ InZChart W (K := K)
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
+        rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ := by
+  rintro ⟨h, hfac⟩
+  have h1 : (Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W) default =
+      (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos) (h default) := by
+    have hc := congrArg (fun m => m default) hfac.symm
+    rw [Scheme.Hom.comp_apply] at hc
+    exact hc
+  have hin : (Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W) default ∈
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+    rw [h1, ← Proj.opensRange_awayι]
+    exact Scheme.Hom.mem_opensRange.mpr ⟨h default, rfl⟩
+  rw [Scheme.Hom.comp_apply] at hin
+  have hpre : Spec.map (CommRingCat.ofHom (algebraMap R K)) default ∈
+      (projModelZero W ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := hin
+  rw [projModelZero_not_preimage_zChart] at hpre
+  simpa using hpre
+
+/-- The **explicit** field-points bijection for elliptic `W`: `K`-points of the projective model
+correspond to affine Weierstrass points — `Z`-chart points via their dehomogenised coordinates,
+the single off-chart point to `[0:1:0] = O`. Unlike `projModel_points`'s choice-extracted
+equivalence, this one has computable values (`_zero`, `_some`, `_infinity` below). -/
+noncomputable def projModelPointsEquivEll (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    (K : Type u) [Field K] [Algebra R K] :
+    SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point :=
+  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
+  (Equiv.sumCompl (InZChart W (K := K))).symm.trans
+    ((((chartHomEquiv W 2 K).trans ((chartSolutionsEquiv W 2 K).trans
+        (zSolutionsToAffine W K))).sumCongr
+      ({ toFun := fun _ => PUnit.unit
+         invFun := fun _ => ⟨infPoint W K, infPoint_not_inZ W K⟩
+         left_inv := fun g => Subtype.ext (eq_infPoint_of_not_inZ W K g.1 g.2).symm
+         right_inv := fun _ => rfl } :
+        { g : SpecPoints (projModel W) (projModelπ W) K // ¬ InZChart W g } ≃
+          PUnit.{u + 1})).trans
+      (affinePointSplit W hell K).symm)
+
+/-- Value of the explicit equivalence on an off-`Z`-chart point: the point at infinity `0`. -/
+lemma projModelPointsEquivEll_infinity (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hg : ¬ InZChart W g) :
+    projModelPointsEquivEll W hell K g = 0 := by
+  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
+  rw [projModelPointsEquivEll, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_neg (h := hg),
+    Equiv.trans_apply, Equiv.sumCongr_apply, Sum.map_inr]
+  rfl
+
+/-- Value of the explicit equivalence at the zero point `[0:1:0]`: the group identity `0`. -/
+lemma projModelPointsEquivEll_zero (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    (K : Type u) [Field K] [Algebra R K] :
+    projModelPointsEquivEll W hell K
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
+        rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ = 0 :=
+  projModelPointsEquivEll_infinity W hell K _ (projModelZero_not_inZ W K)
+
+/-- Value of the explicit equivalence on a `Z`-chart point: the affine point whose coordinates are
+the dehomogenised `Z`-chart solution `(X₀/X₂, X₁/X₂)`. Stated with the coordinates and their
+nonsingularity as hypotheses so consumers can supply their own (proof-irrelevant) witness. -/
+lemma projModelPointsEquivEll_some (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g)
+    (x y : K) (hxy : (W.baseChange K).toAffine.Nonsingular x y)
+    (hx : x = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨0, by decide⟩)
+    (hy : y = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨1, by decide⟩) :
+    projModelPointsEquivEll W hell K g = WeierstrassCurve.Affine.Point.some x y hxy := by
+  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
+  subst hx hy
+  rw [projModelPointsEquivEll, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos (h := hZ),
+    Equiv.trans_apply, Equiv.sumCongr_apply, Sum.map_inl]
+  rfl
+
 private lemma aeval_pderiv_dehomog_two_u (W : WeierstrassCurve R) {K : Type u}
     [CommRing K] [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
     MvPolynomial.aeval v (MvPolynomial.pderiv ⟨0, by decide⟩

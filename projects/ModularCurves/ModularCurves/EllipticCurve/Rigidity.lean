@@ -352,7 +352,19 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     ∃ U₀ : S.Opens, t ∈ U₀ ∧
       ∃ w : (p ⁻¹ᵁ U₀).toScheme ⟶ eqLocus f g hf hg,
         w ≫ eqLocusι f g hf hg = (p ⁻¹ᵁ U₀).ι := by
-  sorry
+  -- The factorization consumable is `IsClosedImmersion.lift` (ker-inclusion universal
+  -- property), so the whole leaf reduces to: the equalizer ideal sheaf vanishes on a tube
+  -- `p⁻¹(U₀)` — i.e. `ι.ker ≤ (tube-inclusion).ker`. That vanishing statement is the
+  -- Artinian-thickening + affine-local-Krull composite (sub-route on the board ticket):
+  -- (c·i) case 1 over `Spec (Γstalk t ⧸ 𝔪ⁿ)` via the r2·b preimmersion mechanism gives
+  -- `ι.ker ≤ (thickened fibre).ker` for every `n`; (c·ii) affine-locally the f.g. ideal
+  -- then lands in `⋂ₙ 𝔪ᵗⁿ·O_{X,x} = ⊥` (Krull), giving a basicOpen ∋ x on which it is
+  -- zero; quasi-compactness of the fibre + properness produce the tube.
+  have hW : ∃ U₀ : S.Opens, t ∈ U₀ ∧
+      (eqLocusι f g hf hg).ker ≤ ((p ⁻¹ᵁ U₀ : X.Opens).ι).ker := by
+    sorry
+  obtain ⟨U₀, htU₀, hker⟩ := hW
+  exact ⟨U₀, htU₀, IsClosedImmersion.lift _ _ hker, IsClosedImmersion.lift_fac _ _ hker⟩
 
 /-- **(T-W7.r2·d, clopen assembly — SORRIED LEAF)** On a connected base, if the agreement
 locus contains one fibre set-theoretically and every set-theoretic fibre containment

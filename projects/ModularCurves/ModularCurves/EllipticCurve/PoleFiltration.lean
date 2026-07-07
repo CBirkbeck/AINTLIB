@@ -704,6 +704,38 @@ noncomputable def overlapXElem (W : WeierstrassCurve R) :
     Localization.Away (infChartTElem W) :=
   Localization.mk (AdjoinRoot.root (infChartCubic W)) ⟨infChartTElem W, ⟨1, pow_one _⟩⟩
 
+/-- **(T-W7.0i-b4-1rel)** The chart-cubic relation for `root`, in `algebraMap` form:
+`s³ + (a₂t)s² + (a₄t² − a₁t)s + (a₆t³ − a₃t² − t) = 0` in the infinity-chart ring. -/
+lemma infChart_root_relation (W : WeierstrassCurve R) :
+    AdjoinRoot.root (infChartCubic W) ^ 3 +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₂ * Polynomial.X) *
+        AdjoinRoot.root (infChartCubic W) ^ 2 +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+        Polynomial.C W.a₁ * Polynomial.X) * AdjoinRoot.root (infChartCubic W) +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+        Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) = 0 := by
+  have h : Polynomial.eval₂ (AdjoinRoot.of (infChartCubic W))
+      (AdjoinRoot.root (infChartCubic W))
+      (Polynomial.X ^ 3 +
+        Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
+        Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+          Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
+        Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+          Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X)) = 0 := by
+    rw [show (Polynomial.X ^ 3 +
+        Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
+        Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+          Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
+        Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+          Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) :
+        Polynomial (Polynomial R)) = infChartCubic W from rfl]
+    exact AdjoinRoot.eval₂_root _
+  simp only [Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
+    Polynomial.eval₂_X, Polynomial.eval₂_C] at h
+  rw [show (AdjoinRoot.of (infChartCubic W) : Polynomial R →+* _) =
+    algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) from rfl] at h
+  linear_combination h
+
 /-- **(T-W7.0i-b4-1rel)** The affine Weierstrass relation holds at `(s/t, 1/t)` in the
 localized infinity chart: the chart-cubic relation for `root`, divided by `t³`. -/
 lemma overlap_eval₂_polynomial (W : WeierstrassCurve R) :
@@ -714,34 +746,7 @@ lemma overlap_eval₂_polynomial (W : WeierstrassCurve R) :
           ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
         (overlapXElem W))
       (overlapInvT W) W.toAffine.polynomial = 0 := by
-  have hrel : AdjoinRoot.root (infChartCubic W) ^ 3 +
-      algebraMap (Polynomial R) _ (Polynomial.C W.a₂ * Polynomial.X) *
-        AdjoinRoot.root (infChartCubic W) ^ 2 +
-      algebraMap (Polynomial R) _ (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
-        Polynomial.C W.a₁ * Polynomial.X) * AdjoinRoot.root (infChartCubic W) +
-      algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
-        Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) = 0 := by
-    have h : Polynomial.eval₂ (AdjoinRoot.of (infChartCubic W))
-        (AdjoinRoot.root (infChartCubic W))
-        (Polynomial.X ^ 3 +
-          Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
-          Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
-            Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
-          Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
-            Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X)) = 0 := by
-      rw [show (Polynomial.X ^ 3 +
-          Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
-          Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
-            Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
-          Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
-            Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) :
-          Polynomial (Polynomial R)) = infChartCubic W from rfl]
-      exact AdjoinRoot.eval₂_root _
-    simp only [Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
-      Polynomial.eval₂_X, Polynomial.eval₂_C] at h
-    rw [show (AdjoinRoot.of (infChartCubic W) : Polynomial R →+* _) =
-      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) from rfl] at h
-    linear_combination h
+  have hrel := infChart_root_relation W
   rw [show W.toAffine.polynomial = Polynomial.X ^ 2 +
       Polynomial.C (Polynomial.C W.toAffine.a₁ * Polynomial.X +
         Polynomial.C W.toAffine.a₃) * Polynomial.X -
@@ -789,6 +794,190 @@ theorem overlapMap_coordY (W : WeierstrassCurve R) :
   rw [show coordY W = AdjoinRoot.root W.toAffine.polynomial from rfl]
   unfold overlapMap
   rw [AdjoinRoot.lift_root]
+
+/-- The `1`-coordinate of `s³` in the infinity chart: `t + a₃t² − a₆t³`. -/
+private noncomputable def sCubeCoord₀ (W : WeierstrassCurve R) : Polynomial R :=
+  Polynomial.X + Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.C W.a₆ * Polynomial.X ^ 3
+
+/-- The `s`-coordinate of `s³` in the infinity chart: `a₁t − a₄t²`. -/
+private noncomputable def sCubeCoord₁ (W : WeierstrassCurve R) : Polynomial R :=
+  Polynomial.C W.a₁ * Polynomial.X - Polynomial.C W.a₄ * Polynomial.X ^ 2
+
+/-- The `s²`-coordinate of `s³` in the infinity chart: `−a₂t`. -/
+private noncomputable def sCubeCoord₂ (W : WeierstrassCurve R) : Polynomial R :=
+  -(Polynomial.C W.a₂ * Polynomial.X)
+
+private lemma X_dvd_sCubeCoord₀ (W : WeierstrassCurve R) : Polynomial.X ∣ sCubeCoord₀ W :=
+  ⟨1 + Polynomial.C W.a₃ * Polynomial.X - Polynomial.C W.a₆ * Polynomial.X ^ 2, by
+    unfold sCubeCoord₀; ring⟩
+
+private lemma X_dvd_sCubeCoord₁ (W : WeierstrassCurve R) : Polynomial.X ∣ sCubeCoord₁ W :=
+  ⟨Polynomial.C W.a₁ - Polynomial.C W.a₄ * Polynomial.X, by unfold sCubeCoord₁; ring⟩
+
+private lemma X_dvd_sCubeCoord₂ (W : WeierstrassCurve R) : Polynomial.X ∣ sCubeCoord₂ W :=
+  ⟨-Polynomial.C W.a₂, by unfold sCubeCoord₂; ring⟩
+
+/-- `s³` expanded in the basis `(1, s, s²)` of the infinity chart over `R[t]`. -/
+private lemma root_cube_eq (W : WeierstrassCurve R) :
+    AdjoinRoot.root (infChartCubic W) ^ 3 =
+      algebraMap (Polynomial R) _ (sCubeCoord₀ W) +
+        algebraMap (Polynomial R) _ (sCubeCoord₁ W) * AdjoinRoot.root (infChartCubic W) +
+        algebraMap (Polynomial R) _ (sCubeCoord₂ W) *
+          AdjoinRoot.root (infChartCubic W) ^ 2 := by
+  have h := infChart_root_relation W
+  unfold sCubeCoord₀ sCubeCoord₁ sCubeCoord₂
+  simp only [map_sub, map_add, map_mul, map_pow, map_neg] at h ⊢
+  linear_combination h
+
+/-- Coordinates of `sⁱ` in the basis `(1, s, s²)` of the infinity chart over `R[t]`: the
+3-term recursion induced by the chart cubic (all recursion coefficients are divisible by
+`t`, which encodes `t = s³·unit` — the pole-order bookkeeping). -/
+private noncomputable def sPowCoord (W : WeierstrassCurve R) : ℕ → Fin 3 → Polynomial R
+  | 0 => ![1, 0, 0]
+  | i + 1 =>
+    ![sPowCoord W i 2 * sCubeCoord₀ W,
+      sPowCoord W i 0 + sPowCoord W i 2 * sCubeCoord₁ W,
+      sPowCoord W i 1 + sPowCoord W i 2 * sCubeCoord₂ W]
+
+private lemma sPowCoord_succ_zero (W : WeierstrassCurve R) (i : ℕ) :
+    sPowCoord W (i + 1) 0 = sPowCoord W i 2 * sCubeCoord₀ W := rfl
+
+private lemma sPowCoord_succ_one (W : WeierstrassCurve R) (i : ℕ) :
+    sPowCoord W (i + 1) 1 = sPowCoord W i 0 + sPowCoord W i 2 * sCubeCoord₁ W := rfl
+
+private lemma sPowCoord_succ_two (W : WeierstrassCurve R) (i : ℕ) :
+    sPowCoord W (i + 1) 2 = sPowCoord W i 1 + sPowCoord W i 2 * sCubeCoord₂ W := rfl
+
+/-- `sⁱ` expanded in the basis `(1, s, s²)`: correctness of the coordinate recursion. -/
+private lemma root_pow_eq (W : WeierstrassCurve R) (i : ℕ) :
+    AdjoinRoot.root (infChartCubic W) ^ i =
+      algebraMap (Polynomial R) _ (sPowCoord W i 0) +
+        algebraMap (Polynomial R) _ (sPowCoord W i 1) * AdjoinRoot.root (infChartCubic W) +
+        algebraMap (Polynomial R) _ (sPowCoord W i 2) *
+          AdjoinRoot.root (infChartCubic W) ^ 2 := by
+  induction i with
+  | zero => simp [sPowCoord]
+  | succ i ih =>
+    rw [pow_succ, ih, sPowCoord_succ_zero, sPowCoord_succ_one, sPowCoord_succ_two]
+    simp only [map_add, map_mul]
+    linear_combination
+      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (sPowCoord W i 2) *
+        root_cube_eq W
+
+/-- **(K1, slotwise)** T-adic order lower bounds for the three coordinates of `sⁱ`:
+`t^⌈i/3⌉ ∣ c₀(sⁱ)`, `t^⌈(i−1)/3⌉ ∣ c₁(sⁱ)`, `t^⌊i/3⌋ ∣ c₂(sⁱ)`. -/
+private lemma X_pow_dvd_sPowCoord_aux (W : WeierstrassCurve R) (i : ℕ) :
+    Polynomial.X ^ ((i + 2) / 3) ∣ sPowCoord W i 0 ∧
+      Polynomial.X ^ ((i + 1) / 3) ∣ sPowCoord W i 1 ∧
+        Polynomial.X ^ (i / 3) ∣ sPowCoord W i 2 := by
+  induction i with
+  | zero => exact ⟨by simp [sPowCoord], by simp [sPowCoord], by simp [sPowCoord]⟩
+  | succ i ih =>
+    obtain ⟨h0, h1, h2⟩ := ih
+    refine ⟨?_, ?_, ?_⟩
+    · rw [sPowCoord_succ_zero, show (i + 1 + 2) / 3 = i / 3 + 1 by omega, pow_succ]
+      exact mul_dvd_mul h2 (X_dvd_sCubeCoord₀ W)
+    · rw [sPowCoord_succ_one]
+      refine dvd_add ((pow_dvd_pow _ (by omega)).trans h0) ?_
+      refine (pow_dvd_pow (Polynomial.X : Polynomial R)
+        (show (i + 1 + 1) / 3 ≤ i / 3 + 1 by omega)).trans ?_
+      rw [pow_succ]
+      exact mul_dvd_mul h2 (X_dvd_sCubeCoord₁ W)
+    · rw [sPowCoord_succ_two]
+      refine dvd_add ((pow_dvd_pow _ (by omega)).trans h1) ?_
+      refine (pow_dvd_pow (Polynomial.X : Polynomial R)
+        (show (i + 1) / 3 ≤ i / 3 + 1 by omega)).trans ?_
+      rw [pow_succ]
+      exact mul_dvd_mul h2 (X_dvd_sCubeCoord₂ W)
+
+/-- **(K1)** T-adic order lower bound: the `sʲ`-coordinate of `sⁱ` is divisible by
+`t^⌈(i−j)/3⌉`. -/
+private lemma X_pow_dvd_sPowCoord (W : WeierstrassCurve R) (i : ℕ) (j : Fin 3) :
+    Polynomial.X ^ ((i - (j : ℕ) + 2) / 3) ∣ sPowCoord W i j := by
+  obtain rfl | rfl | rfl : j = 0 ∨ j = 1 ∨ j = 2 := by omega
+  · exact (pow_dvd_pow _ (by omega)).trans (X_pow_dvd_sPowCoord_aux W i).1
+  · exact (pow_dvd_pow _ (by omega)).trans (X_pow_dvd_sPowCoord_aux W i).2.1
+  · exact (pow_dvd_pow _ (by omega)).trans (X_pow_dvd_sPowCoord_aux W i).2.2
+
+/-- **(K1, coefficient form)** Coefficients of the `sʲ`-coordinate of `sⁱ` vanish below the
+leading T-adic level: `3c + j < i` kills `coeff c`. -/
+private lemma sPowCoord_coeff_eq_zero (W : WeierstrassCurve R) {i c : ℕ} {j : Fin 3}
+    (h : 3 * c + (j : ℕ) < i) : (sPowCoord W i j).coeff c = 0 :=
+  Polynomial.X_pow_dvd_iff.mp (X_pow_dvd_sPowCoord W i j) c
+    (by have hj := j.isLt; omega)
+
+/-- **(K2, slotwise)** The leading coefficient is exactly `1`: on the matching slot
+`j = i % 3`, the coordinate is `t^(i/3) + O(t^(i/3+1))`. -/
+private lemma sPowCoord_sub_lead_aux (W : WeierstrassCurve R) (i : ℕ) :
+    (i % 3 = 0 → Polynomial.X ^ (i / 3 + 1) ∣ sPowCoord W i 0 - Polynomial.X ^ (i / 3)) ∧
+      (i % 3 = 1 → Polynomial.X ^ (i / 3 + 1) ∣ sPowCoord W i 1 - Polynomial.X ^ (i / 3)) ∧
+        (i % 3 = 2 → Polynomial.X ^ (i / 3 + 1) ∣ sPowCoord W i 2 - Polynomial.X ^ (i / 3)) := by
+  induction i with
+  | zero =>
+    refine ⟨fun _ => by simp [sPowCoord], fun h => absurd h (by omega),
+      fun h => absurd h (by omega)⟩
+  | succ i ih =>
+    obtain ⟨ih0, ih1, ih2⟩ := ih
+    refine ⟨fun h => ?_, fun h => ?_, fun h => ?_⟩
+    · obtain ⟨A, hA⟩ := ih2 (by omega)
+      have hs : sPowCoord W i 2 =
+          Polynomial.X ^ (i / 3 + 1) * A + Polynomial.X ^ (i / 3) := by
+        linear_combination hA
+      rw [sPowCoord_succ_zero, hs, show (i + 1) / 3 = i / 3 + 1 by omega]
+      refine ⟨A * (1 + Polynomial.C W.a₃ * Polynomial.X -
+        Polynomial.C W.a₆ * Polynomial.X ^ 2) +
+        Polynomial.C W.a₃ - Polynomial.C W.a₆ * Polynomial.X, ?_⟩
+      unfold sCubeCoord₀
+      ring
+    · obtain ⟨A, hA⟩ := ih0 (by omega)
+      obtain ⟨B, hB⟩ := (X_pow_dvd_sPowCoord_aux W i).2.2
+      rw [sPowCoord_succ_one, show (i + 1) / 3 = i / 3 by omega]
+      have hsplit : sPowCoord W i 0 + sPowCoord W i 2 * sCubeCoord₁ W -
+          Polynomial.X ^ (i / 3) =
+          (sPowCoord W i 0 - Polynomial.X ^ (i / 3)) +
+            sPowCoord W i 2 * sCubeCoord₁ W := by ring
+      rw [hsplit]
+      refine dvd_add ⟨A, hA⟩ ?_
+      rw [hB]
+      exact ⟨B * (Polynomial.C W.a₁ - Polynomial.C W.a₄ * Polynomial.X), by
+        unfold sCubeCoord₁; ring⟩
+    · obtain ⟨A, hA⟩ := ih1 (by omega)
+      obtain ⟨B, hB⟩ := (X_pow_dvd_sPowCoord_aux W i).2.2
+      rw [sPowCoord_succ_two, show (i + 1) / 3 = i / 3 by omega]
+      have hsplit : sPowCoord W i 1 + sPowCoord W i 2 * sCubeCoord₂ W -
+          Polynomial.X ^ (i / 3) =
+          (sPowCoord W i 1 - Polynomial.X ^ (i / 3)) +
+            sPowCoord W i 2 * sCubeCoord₂ W := by ring
+      rw [hsplit]
+      refine dvd_add ⟨A, hA⟩ ?_
+      rw [hB]
+      exact ⟨B * -Polynomial.C W.a₂, by unfold sCubeCoord₂; ring⟩
+
+/-- **(K2)** For `i ≡ j (mod 3)`, the `sʲ`-coordinate of `sⁱ` is
+`t^((i−j)/3) + O(t^((i−j)/3+1))`. -/
+private lemma X_pow_dvd_sPowCoord_sub (W : WeierstrassCurve R) (i : ℕ) (j : Fin 3)
+    (hmod : i % 3 = (j : ℕ)) :
+    Polynomial.X ^ ((i - (j : ℕ)) / 3 + 1) ∣
+      sPowCoord W i j - Polynomial.X ^ ((i - (j : ℕ)) / 3) := by
+  obtain rfl | rfl | rfl : j = 0 ∨ j = 1 ∨ j = 2 := by omega
+  · rw [show ((i - ((0 : Fin 3) : ℕ)) / 3) = i / 3 by omega]
+    exact (sPowCoord_sub_lead_aux W i).1 hmod
+  · rw [show ((i - ((1 : Fin 3) : ℕ)) / 3) = i / 3 by omega]
+    exact (sPowCoord_sub_lead_aux W i).2.1 hmod
+  · rw [show ((i - ((2 : Fin 3) : ℕ)) / 3) = i / 3 by omega]
+    exact (sPowCoord_sub_lead_aux W i).2.2 hmod
+
+/-- **(K2, coefficient form)** The leading coefficient of the matching coordinate is `1`. -/
+private lemma sPowCoord_coeff_lead (W : WeierstrassCurve R) {i : ℕ} {j : Fin 3}
+    (hmod : i % 3 = (j : ℕ)) :
+    (sPowCoord W i j).coeff ((i - (j : ℕ)) / 3) = 1 := by
+  obtain ⟨A, hA⟩ := X_pow_dvd_sPowCoord_sub W i j hmod
+  have h := congrArg (Polynomial.coeff · ((i - (j : ℕ)) / 3)) hA
+  simp only [Polynomial.coeff_sub, Polynomial.coeff_X_pow, if_true] at h
+  have hzero : (Polynomial.X ^ ((i - (j : ℕ)) / 3 + 1) * A).coeff ((i - (j : ℕ)) / 3) = 0 :=
+    Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) _ (Nat.lt_succ_self _)
+  rw [hzero] at h
+  linear_combination h
 
 /-- **(T-W7.0i-b4, the equalizer core)** A pair — a function on the affine part and a
 function on the infinity chart — agreeing in the overlap localization is a (shared)

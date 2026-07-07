@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-b4 — chartZAffineEquiv PROVEN (affChart bridge, first-try green); next: overlap_pair_eq_baseRing (equalizer core, normal-form bookkeeping on free bases)
+FOCUS: T-W7.0i-b4 — overlap_pair_eq_baseRing: K1/K2 sPowCoord tower GREEN (T-adic order bounds + leading-coeff-1); next: coordOf + clearing lemma + basis comparison + parity-gap endgame

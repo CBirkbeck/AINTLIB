@@ -55,13 +55,28 @@ Invent. Math. 79 (1985) ✓ (GDZ scan); ④ Mumford *Abelian Varieties* ✓ (sca
   [`ForMathlib/ProjIntegral.lean`, `Proj.isIntegral_of_isDomain`, upstreamable] ⟹
   `IsIntegral (projModel W_K)`; base-change transport (`isPullback_projModelBaseChange` +
   `geometrically_iff_of_isClosedUnderIsomorphisms`) ⟹ `GeometricallyIntegral universalCurveπ`, hence
-  `IsIntegral E_U` and `IsIntegral (E_U^{×_U n})` for n = 2, 3. In `Moduli/PointsDictionary.lean`.
-- **T-W7.0f points dictionary** — dictionary ✅ DONE (axiom-clean): `projModelPointsEquiv`
+  `IsIntegral E_U` and `IsIntegral (E_U^{×_U n})` for n = 2, 3. Now in the canonical
+  `EllipticCurve/PointsDictionary.lean` (ported + deduped, commit 30f67b1a; the atlas-ring
+  `IsDomain`/`Δ≠0`/`IsNoetherianRing` hosted upstream in `Moduli/WeierstrassAtlas.lean`, single source).
+  **Sub-IDs (board-registered per coordinator §2):** `T-W7.0e-proj` ✅ = `Proj.isIntegral_of_isDomain`
+  (`ForMathlib/ProjIntegral.lean`, upstreamable) · `T-W7.0e-affine` ✅ = `projective_polynomial_prime`
+  + `IsDomain (projCoordRing W)` (`ForMathlib/WeierstrassProjectivePrime.lean`). Rule-5: claim was
+  committed alone before the first edit (retro-documented; the two ForMathlib leaves landed in 9b47bd47).
+- **T-W7.0f points dictionary** — bijection ✅ DONE (axiom-clean): `projModelPointsEquiv`
   (`SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point`) +
   `projModelPointsEquiv_zero` (pointed, `[0:1:0] ↦ 0`), choice-extracted from the proven existential
-  `projModel_points` (T-A2e), in `Moduli/PointsDictionary.lean`. REMAINING: the generic-point
-  inclusion `Spec κ(η) ⟶ E_U^n` is dominant (`fromSpecResidueField` ⓜ + closure of `{η}` = ⊤ — now
-  backed by `E_U^n` integral).
+  `projModel_points` (T-A2e), now in canonical `EllipticCurve/PointsDictionary.lean` (commit 30f67b1a).
+  - **T-W7.0f-val value-characterization** ⚙ NEW (coordinator §2): a bare choice-extracted equiv pins
+    *no values* — `.choose_spec` only records `⟨zero⟩ ↦ 0`. Consumers `negModelHom_specPoints`
+    (GLC:244), 0c-iii and 0g need the VALUES: `projModelPointsEquiv_some` (a `SpecPoints` in the affine
+    chart `Z≠0` with coordinates `(x,y)` maps to `Affine.Point.some ⟨x,y,_⟩`) and the infinity-chart
+    case. Route: `projModel_points` is choice-extracted from private WeierstrassModel components
+    (`zSolutionsToAffine`/`affinePointSplit`/`infPoint`); either (a) strengthen `projModel_points` to a
+    *pointed-and-valued* existential carrying the chart-case equalities, or (b) expose those components
+    (make the equiv explicit, not by choice) and prove the values directly. Attack via (a) — least
+    surface. **Gates:** GLC:244 `negModelHom_specPoints`, 0c-iii, 0g η-evaluation.
+  - **T-W7.0f-dominance** ⚙ generic-point inclusion `Spec κ(η) ⟶ E_U^n` dominant
+    (`fromSpecResidueField` ⓜ + closure of `{η}` = ⊤ — backed by `E_U^n` integral, 0e).
 - **T-W7.0g atlas group axioms** ⚙ each axiom = two morphisms `E_U^n ⟶ E_U`; equal ⟸
   (`ext_of_isDominant` ⓜ; source reduced by 0e, target separated) agreement at `η` ⟸ 0f dictionary +
   0c(c6) + mathlib `Affine.Point.instAddCommGroup` over `L = κ(η)` (`add_assoc`, `add_comm`,
