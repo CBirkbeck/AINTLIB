@@ -3269,4 +3269,148 @@ theorem mem_range_algebraMap_of_forall_maximal (W : WeierstrassCurve R)
   obtain ⟨b, hb⟩ := h1
   exact ⟨b, hb.trans (by rw [map_one, one_mul])⟩
 
+
+/-- The unit-shaped cofactor at the section: `t·U = s²(s + a₂t)` rearranges the chart cubic.
+`U ≡ 1` modulo the section ideal `(s,t)`, so `U` is invertible near the section. -/
+noncomputable def sectionUnitElem (W : WeierstrassCurve R) : AdjoinRoot (infChartCubic W) :=
+  1 + algebraMap (Polynomial R) _ (Polynomial.C W.a₁) * AdjoinRoot.root (infChartCubic W)
+    + algebraMap (Polynomial R) _ (Polynomial.C W.a₃ * Polynomial.X)
+    - algebraMap (Polynomial R) _ (Polynomial.C W.a₄ * Polynomial.X) *
+        AdjoinRoot.root (infChartCubic W)
+    - algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X ^ 2)
+
+lemma tel_mul_sectionUnitElem (W : WeierstrassCurve R) :
+    infChartTElem W * sectionUnitElem W =
+      AdjoinRoot.root (infChartCubic W) ^ 2 *
+        (AdjoinRoot.root (infChartCubic W) +
+          algebraMap (Polynomial R) _ (Polynomial.C W.a₂ * Polynomial.X)) := by
+  have h := infChart_root_relation W
+  unfold sectionUnitElem
+  simp only [map_add, map_sub, map_mul, map_pow] at h ⊢
+  linear_combination -h
+
+/-- `U − 1` lies in the section ideal `(s,t)`. -/
+lemma sectionUnitElem_sub_one_mem (W : WeierstrassCurve R) :
+    sectionUnitElem W - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W),
+      infChartTElem W} := by
+  have hs : AdjoinRoot.root (infChartCubic W) ∈ Ideal.span
+      {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+    Ideal.subset_span (Set.mem_insert _ _)
+  have ht : infChartTElem W ∈ Ideal.span
+      {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+    Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  have hexp : sectionUnitElem W - 1 =
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₁) *
+        AdjoinRoot.root (infChartCubic W)
+      + (algebraMap (Polynomial R) _ (Polynomial.C W.a₃)
+        - algebraMap (Polynomial R) _ (Polynomial.C W.a₄) *
+            AdjoinRoot.root (infChartCubic W)
+        - algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X)) *
+          infChartTElem W := by
+    unfold sectionUnitElem
+    simp only [map_add, map_sub, map_mul, map_pow]
+    rw [show algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X =
+      infChartTElem W from rfl]
+    ring
+  rw [hexp]
+  exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ hs) (Ideal.mul_mem_left _ _ ht)
+
+/-- The augmentation of the infinity chart at the section: `s, t ↦ 0`. -/
+noncomputable def infChartAug (W : WeierstrassCurve R) :
+    AdjoinRoot (infChartCubic W) →+* R :=
+  AdjoinRoot.lift (Polynomial.evalRingHom 0) 0 (by
+    unfold infChartCubic
+    simp only [Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
+      Polynomial.eval₂_X, Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp)
+
+@[simp]
+lemma infChartAug_root (W : WeierstrassCurve R) :
+    infChartAug W (AdjoinRoot.root (infChartCubic W)) = 0 :=
+  AdjoinRoot.lift_root _
+
+lemma infChartAug_poly (W : WeierstrassCurve R) (c : Polynomial R) :
+    infChartAug W (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) c) =
+      c.eval 0 := by
+  show infChartAug W (AdjoinRoot.of (infChartCubic W) c) = c.eval 0
+  unfold infChartAug
+  rw [AdjoinRoot.lift_of]
+  rfl
+
+@[simp]
+lemma infChartAug_tel (W : WeierstrassCurve R) :
+    infChartAug W (infChartTElem W) = 0 := by
+  rw [show infChartTElem W = algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+    Polynomial.X from rfl, infChartAug_poly]
+  simp
+
+@[simp]
+lemma infChartAug_algebraMap (W : WeierstrassCurve R) (r : R) :
+    infChartAug W (algebraMap R (AdjoinRoot (infChartCubic W)) r) = r := by
+  rw [IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
+    Polynomial.algebraMap_eq, infChartAug_poly]
+  simp
+
+/-- The kernel of the augmentation is exactly the section ideal `(s,t)`. -/
+lemma ker_infChartAug (W : WeierstrassCurve R) :
+    RingHom.ker (infChartAug W) = Ideal.span {AdjoinRoot.root (infChartCubic W),
+      infChartTElem W} := by
+  ext b
+  constructor
+  · intro hb
+    rcases subsingleton_or_nontrivial R with hR | hR
+    · haveI : Subsingleton (AdjoinRoot (infChartCubic W)) := Module.subsingleton R _
+      rw [Subsingleton.elim b 0]
+      exact Ideal.zero_mem _
+    have hs : AdjoinRoot.root (infChartCubic W) ∈ Ideal.span
+        {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+      Ideal.subset_span (Set.mem_insert _ _)
+    have ht : infChartTElem W ∈ Ideal.span
+        {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+      Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+    have hrepr := (infChartBasis W).sum_repr b
+    rw [Fin.sum_univ_three] at hrepr
+    simp only [infChartBasis_apply, Algebra.smul_def,
+      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one] at hrepr
+    have haug0 : ((infChartBasis W).repr b 0).eval 0 = 0 := by
+      have h1 := congrArg (infChartAug W) hrepr
+      rw [map_add, map_add, map_mul, map_mul, map_pow, infChartAug_root,
+        infChartAug_poly, infChartAug_poly, infChartAug_poly] at h1
+      rw [RingHom.mem_ker] at hb
+      rw [hb] at h1
+      linear_combination h1
+    obtain ⟨ctilde, hct⟩ := (Polynomial.X_dvd_iff
+        (f := (infChartBasis W).repr b 0)).mpr
+      (by rw [Polynomial.coeff_zero_eq_eval_zero]; exact haug0)
+    have hbexp : b = infChartTElem W *
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) ctilde +
+        AdjoinRoot.root (infChartCubic W) *
+          (algebraMap (Polynomial R) _ ((infChartBasis W).repr b 1) +
+            algebraMap (Polynomial R) _ ((infChartBasis W).repr b 2) *
+              AdjoinRoot.root (infChartCubic W)) := by
+      calc b = algebraMap (Polynomial R) _ ((infChartBasis W).repr b 0) +
+            algebraMap (Polynomial R) _ ((infChartBasis W).repr b 1) *
+              AdjoinRoot.root (infChartCubic W) +
+            algebraMap (Polynomial R) _ ((infChartBasis W).repr b 2) *
+              AdjoinRoot.root (infChartCubic W) ^ 2 := hrepr.symm
+        _ = _ := by
+            rw [hct, map_mul,
+              show algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+                Polynomial.X = infChartTElem W from rfl]
+            ring
+    rw [hbexp]
+    exact Ideal.add_mem _ (Ideal.mul_mem_right _ _ ht) (Ideal.mul_mem_right _ _ hs)
+  · intro hb
+    rw [RingHom.mem_ker]
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hb
+    · rintro g (rfl | rfl)
+      · exact infChartAug_root W
+      · exact infChartAug_tel W
+    · exact map_zero _
+    · intro g h _ _ hg hh
+      rw [map_add, hg, hh, add_zero]
+    · intro c g _ hg
+      rw [smul_eq_mul, map_mul, hg, mul_zero]
+
 end ModularCurves
