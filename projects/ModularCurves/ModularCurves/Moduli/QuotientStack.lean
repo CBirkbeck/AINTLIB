@@ -604,6 +604,40 @@ noncomputable def trivialize (S : Scheme.{u}) :
       trivialTorsorLeft G S f.1⁻¹ ≫ trivialTorsorLeft G S g.1⁻¹
     rw [mul_inv_rev, trivialTorsorLeft_mul]
 
+/-- The range of a coproduct component is clopen: open as an open immersion,
+closed because the complement is the (open) union of the other components.
+(T-W3b fullness ingredient: the clopen pieces a pair-endomorphism cuts out of a
+connected base.) -/
+theorem isClopen_range_sigmaι {σ' : Type u} (g : σ' → Scheme.{u}) (i : σ') :
+    IsClopen (Set.range (Limits.Sigma.ι g i).base) := by
+  haveI him : ∀ j : σ', IsOpenImmersion (Limits.Sigma.ι g j) := fun j =>
+    inferInstanceAs (IsOpenImmersion (Limits.colimit.ι (Discrete.functor g) ⟨j⟩))
+  constructor
+  · rw [← isOpen_compl_iff]
+    have hcompl : (Set.range (Limits.Sigma.ι g i).base)ᶜ =
+        ⋃ j : σ', ⋃ (_ : j ≠ i), Set.range (Limits.Sigma.ι g j).base := by
+      ext x
+      simp only [Set.mem_compl_iff, Set.mem_iUnion]
+      constructor
+      · intro hx
+        obtain ⟨y, hy⟩ := (sigmaOpenCover g).covers x
+        have hy' : (Limits.Sigma.ι g ((sigmaOpenCover g).idx x)).base y = x := hy
+        refine ⟨(sigmaOpenCover g).idx x, fun hji => hx ?_, y, hy'⟩
+        rw [← hji]
+        exact ⟨y, hy'⟩
+      · rintro ⟨j, hji, y, rfl⟩ hmem
+        have hd := (disjoint_opensRange_sigmaι g i j (Ne.symm hji)).eq_bot
+        have hin : (Limits.Sigma.ι g j).base y ∈
+            ((Limits.Sigma.ι g i).opensRange ⊓
+              (Limits.Sigma.ι g j).opensRange : Scheme.Opens _) :=
+          ⟨hmem, ⟨y, rfl⟩⟩
+        rw [hd] at hin
+        exact hin
+    rw [hcompl]
+    exact isOpen_iUnion fun j => isOpen_iUnion fun _ =>
+      (Limits.Sigma.ι g j).opensRange.2
+  · exact (Limits.Sigma.ι g i).opensRange.2
+
 /-- **The trivialization functor is faithful over a nonempty base** (the
 `S = ∅` counterexample in the attack log is the only obstruction; fullness
 additionally needs `S` connected). -/
