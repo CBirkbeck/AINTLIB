@@ -4779,7 +4779,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0b]** negation on the model — `negModelHom` + `_π`, involution, `_zero`,
   `_specPoints` (GroupLawConstruction.lean:346–430 — pointer refreshed per coordinator 1a).
-  - **Status**: in_progress (4/5 decls DONE) · **Claimed**: beastmode-B (lane P0),
+  - **Status**: **DONE (5/5 decls, axiom-clean)** · **Claimed**: beastmode-B (lane P0),
     2026-07-07T16:55Z. **DONE (axiom-clean, committed)**: `negModelHom` (def), `negModelHom_π`
     (7ddc51b6, via new ForMathlib `map_comp_toSpecZero` 25a8a4c9 + `awayMap_fromZeroRingHom`
     d627068f + `gradedRingHomZero`), `negModelHom_negModelHom` (involution), **`negModelHom_zero`
@@ -4788,9 +4788,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     ForMathlib `Proj.map_negScaling_eq_id`/`map_degScaling_eq_id` "unit-rescaling ⇒ id on Proj"
     (f32dbc1e), (=) `projModelZeroEval_neg_eq_allNeg`, plus GLC helpers `allNegVec_smul_of_homogeneous`
     (aeval of `−X` scales homogeneous deg-`d` by `(−1)^d`), `allNegGradedQuot_scale`, `allNeg_map_id`.
-    **`_specPoints`**: UNBLOCKED — P2 landed the real `projModelPointsEquiv` (+ `_zero`/`_some`
-    value lemmas); now in progress: split on `InZChart`, Z-chart = projectivised `negY`, infinity
-    = `negModelHom_zero`. Needs a Z-chart-coordinate-of-`negModelHom` sub-lemma (spawn). ·
+    **`_specPoints` PROVED (axiom-clean, in HEAD)** — `by_cases InZChart`: infinity via
+    `specPoint_eq_zero_of_not_inZ` + `negModelHom_zero` + `projModelPointsEquiv_zero`; Z-chart via
+    `projModelPointsEquiv_some` on both `P` and the composite, with the coordinate leaf **L2**
+    (`negChartMap = Away.map (negGradedQuot) ∘ awayCongr`; chart action `X₀/X₂↦X₀/X₂`,
+    `X₁/X₂↦(−X₁−a₁X₀−a₃X₂)/X₂`) proved via `negChartMap_coord0`/`_coord1`, threaded through
+    `chartHom_negModelHom` (L2a: `φ_{g≫neg} = φ_g ∘ negChartMap`, via `cancel_mono` on `awayι(X₂)`)
+    and `negModelHom_zEquation`/`_zCoord0`/`_zCoord1`; RHS by `Affine.Point.neg_some`.
+    **KEY (leaf infra)**: the coordinate lemmas MUST use `simp only` not `rw` — the goals mix
+    `chartSolutionsEquiv`- and `chartHomEquiv`-headed heavy terms, and `rw`/kabstract (no
+    discrimination-tree pre-filter) `isDefEq`s the pattern against the wrong-headed term and times
+    out whnf-ing the equiv (200000 heartbeats); `simp only`'s disc-tree skips non-matching heads.
+    Also caught+fixed: `Scheme.comp_base` → `Scheme.Hom.comp_base` (mathlib rename) had SILENTLY
+    sorried `inZChart_iff_opensRange` (L1's leaf) — a failed `rw` injects `sorryAx` via error
+    recovery; only `#print axioms` (not `lake build`, which was green) surfaced it. ·
     **File**: GroupLawConstruction.lean · **Depends**:
     T-W7.0a (done; specPoints also T-W7.0f, now done) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
   - Sketch: projectivise `[X : −Y−a₁X−a₃Z : Z]` via the `baseChangeGradedHom` template
