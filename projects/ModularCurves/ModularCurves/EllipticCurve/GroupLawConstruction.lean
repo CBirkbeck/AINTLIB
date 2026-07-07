@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.ForMathlib.ProjToSpecZero
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 import Mathlib.RingTheory.Localization.Basic
@@ -167,6 +168,24 @@ lemma negGradedQuot_irrelevant_le (W : WeierstrassCurve R) :
     ← negGradedQuot_comp_self W, HomogeneousIdeal.map_comp]
   exact HomogeneousIdeal.map_mono _ (irrelevant_map_le (negGradedQuot W))
 
+/-- Negation fixes the degree-`0` structural image of `R`: restricting `negGradedQuot` to
+degree `0` and precomposing with the base map `algebraMapGradeZero` recovers the base map
+(negation is an `R`-algebra endomorphism — it fixes constants). This is the ring-level input
+that makes `negModelHom` a morphism over `Spec R`. -/
+lemma negGradedQuot_algebraMapGradeZero (W : WeierstrassCurve R) :
+    (gradedRingHomZero (negGradedQuot W)).comp (algebraMapGradeZero (projIdeal W)) =
+      algebraMapGradeZero (projIdeal W) := by
+  refine RingHom.ext fun r => Subtype.ext ?_
+  simp only [RingHom.coe_comp, Function.comp_apply, gradedRingHomZero_coe]
+  show negGradedQuot W (algebraMap R (projCoordRing W) r) = algebraMap R (projCoordRing W) r
+  have hmk : algebraMap R (projCoordRing W) r =
+      Ideal.Quotient.mk (projIdeal W).toIdeal (C r) := by
+    rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+      RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+  rw [hmk, negGradedQuot, quotientGradingMap_mk]
+  exact congrArg (Ideal.Quotient.mk _)
+    (show aeval (negVec W) (C r) = C r by rw [aeval_C, MvPolynomial.algebraMap_eq])
+
 end NegationConstruction
 
 /-- **(T-W7.0b)** Negation on the projective Weierstrass model: the projectivisation of
@@ -180,14 +199,9 @@ noncomputable def negModelHom (W : WeierstrassCurve R) : projModel W ⟶ projMod
 @[reassoc]
 theorem negModelHom_π (W : WeierstrassCurve R) :
     negModelHom W ≫ projModelπ W = projModelπ W := by
-  -- WIP (route worked out): `projModelπ = toSpecZero ≫ Spec.map (algebraMapGradeZero …)`, so
-  -- reduce to `negModelHom W ≫ Proj.toSpecZero _ = Proj.toSpecZero _`. Prove by
-  -- `(Proj.mapAffineOpenCover (negGradedQuot W) (negGradedQuot_irrelevant_le W)).openCover.hom_ext`;
-  -- per chart use `Proj.awayι_comp_map` then `Proj.awayι_toSpecZero`. The ring core is
-  -- `(HomogeneousLocalization.Away.map (negGradedQuot W) s).comp (fromZeroRingHom _ s)
-  --    = fromZeroRingHom _ (negGradedQuot W s)`, which holds because `negGradedQuot W` fixes the
-  -- degree-`0` part (it is an `R`-algebra endomorphism: `negGradedQuot W (algebraMap R _ r) = _`).
-  sorry
+  rw [negModelHom, projModelπ, ← Category.assoc,
+    map_comp_toSpecZero (negGradedQuot W) (negGradedQuot_irrelevant_le W), Category.assoc,
+    ← Spec.map_comp, ← CommRingCat.ofHom_comp, negGradedQuot_algebraMapGradeZero]
 
 /-- **(T-W7.0b-invol)** Negation is an involution. -/
 theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
