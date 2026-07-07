@@ -79,20 +79,42 @@ provided the second is nonzero. -/
 lemma exists_eq_smul_of_cross_eq_zero {v w : Fin 3 → F} (hw : w ≠ 0)
     (h01 : v x * w y = v y * w x) (h02 : v x * w z = v z * w x)
     (h12 : v y * w z = v z * w y) : ∃ c : F, v = c • w := by
-  obtain ⟨i, hi⟩ := Function.ne_iff.mp hw
-  fin_cases i
+  rcases eq_or_ne (w x) 0 with hwx | hwx
+  · rcases eq_or_ne (w y) 0 with hwy | hwy
+    · rcases eq_or_ne (w z) 0 with hwz | hwz
+      · refine absurd (funext fun j => ?_) hw
+        fin_cases j
+        exacts [hwx, hwy, hwz]
+      · refine ⟨v z / w z, funext fun j => ?_⟩
+        fin_cases j
+        · show v x = v z / w z * w x
+          rw [div_mul_eq_mul_div, eq_div_iff hwz]
+          linear_combination h02
+        · show v y = v z / w z * w y
+          rw [div_mul_eq_mul_div, eq_div_iff hwz]
+          linear_combination h12
+        · show v z = v z / w z * w z
+          rw [div_mul_cancel₀ _ hwz]
+    · refine ⟨v y / w y, funext fun j => ?_⟩
+      fin_cases j
+      · show v x = v y / w y * w x
+        rw [div_mul_eq_mul_div, eq_div_iff hwy]
+        linear_combination h01
+      · show v y = v y / w y * w y
+        rw [div_mul_cancel₀ _ hwy]
+      · show v z = v y / w y * w z
+        rw [div_mul_eq_mul_div, eq_div_iff hwy]
+        linear_combination -h12
   · refine ⟨v x / w x, funext fun j => ?_⟩
-    fin_cases j <;> simp only [Pi.smul_apply, smul_eq_mul] <;> field_simp
-    · linear_combination -h01
-    · linear_combination -h02
-  · refine ⟨v y / w y, funext fun j => ?_⟩
-    fin_cases j <;> simp only [Pi.smul_apply, smul_eq_mul] <;> field_simp
-    · linear_combination h01
-    · linear_combination -h12
-  · refine ⟨v z / w z, funext fun j => ?_⟩
-    fin_cases j <;> simp only [Pi.smul_apply, smul_eq_mul] <;> field_simp
-    · linear_combination h02
-    · linear_combination h12
+    fin_cases j
+    · show v x = v x / w x * w x
+      rw [div_mul_cancel₀ _ hwx]
+    · show v y = v x / w x * w y
+      rw [div_mul_eq_mul_div, eq_div_iff hwx]
+      linear_combination -h01
+    · show v z = v x / w x * w z
+      rw [div_mul_eq_mul_div, eq_div_iff hwx]
+      linear_combination -h02
 
 /-- **(T-W7.0c-c5α, field layer)** Over a field, the second Bosma–Lenstra addition law lands
 on the curve: no polynomial certificate — the diagonal class reduces to mathlib's doubling via
@@ -103,8 +125,8 @@ theorem equation_dblAddXYZ {P Q : Fin 3 → F} (hP : W.Nonsingular P) (hQ : W.No
   classical
   by_cases hPQ : P ≈ Q
   · rcases hPQ with ⟨u, rfl⟩
-    rw [Units.smul_def, dblAddXYZ_smul_left, equation_smul _ (u.isUnit.pow 2),
-      dblAddXYZ_self hQ.left]
+    show W.Equation (W.dblAddXYZ ((u : F) • Q) Q)
+    rw [dblAddXYZ_smul_left, equation_smul _ (u.isUnit.pow 2), dblAddXYZ_self hQ.left]
     have h := (nonsingular_add hQ hQ).left
     rwa [add_of_equiv (Setoid.refl Q)] at h
   · have hNS := nonsingular_add hP hQ
@@ -114,8 +136,7 @@ theorem equation_dblAddXYZ {P Q : Fin 3 → F} (hP : W.Nonsingular P) (hQ : W.No
       exact equation_zero_triple
     · have h01 : W.dblAddXYZ P Q x * W.addXYZ P Q y
           = W.dblAddXYZ P Q y * W.addXYZ P Q x := by
-        simp only [dblAddXYZ_x, dblAddXYZ_y, addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one,
-          Matrix.head_cons]
+        simp only [dblAddXYZ_x, dblAddXYZ_y, addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one]
         linear_combination -W.addX_mul_dblAddY hP.left hQ.left
       have h02 : W.dblAddXYZ P Q x * W.addXYZ P Q z
           = W.dblAddXYZ P Q z * W.addXYZ P Q x := by
@@ -124,8 +145,8 @@ theorem equation_dblAddXYZ {P Q : Fin 3 → F} (hP : W.Nonsingular P) (hQ : W.No
         linear_combination -W.addX_mul_dblAddZ hP.left hQ.left
       have h12 : W.dblAddXYZ P Q y * W.addXYZ P Q z
           = W.dblAddXYZ P Q z * W.addXYZ P Q y := by
-        simp only [dblAddXYZ_y, dblAddXYZ_z, addXYZ, Matrix.cons_val_one, Matrix.cons_val_two,
-          Matrix.tail_cons, Matrix.head_cons]
+        simp only [dblAddXYZ_y, dblAddXYZ_z, addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
         linear_combination -W.addY_mul_dblAddZ hP.left hQ.left
       obtain ⟨c, hc⟩ := exists_eq_smul_of_cross_eq_zero hNS.ne_zero h01 h02 h12
       have hc0 : c ≠ 0 := by
