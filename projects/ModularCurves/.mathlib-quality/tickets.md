@@ -5979,3 +5979,19 @@ Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
   - **assembly:** T-G3 = T-G3d ⟹ `ε = N•g`; T-G3b gives `deg(e.hom)=deg(1+N•g)=1+N·tr g+N²·deg g`;
     `e.hom ∈ Aut ⟹ deg = 1` ⟹ T-G3a ⟹ `deg g = 0` ⟹ (deg pos-def) `g = 0` ⟹ `ε = 0` ⟹
     `e.hom = 1` ⟹ (T-G3e) `e = refl`.
+
+### T-G3 landing (beastmode-P2, 2026-07-07) — done-modulo-boxes at the KM-Ch2 gated frontier
+- **T-G3a DONE** — `gme_deg_trace_forces_zero` (Groupoid.lean:88): the pure-ℤ GME 2.6.4 engine
+  (`n≥3, d=deg g≥0, n·t+n²·d=0, t²≤4d ⟹ d=0`) proven + **axiom-clean** `[propext, Classical.choice,
+  Quot.sound]`. The one piece of GME 2.6.4 outside the KM gate (no EC content). Reused by T-H5.
+- **`aut_trivial_of_fullLevel` PROVEN** (iso-plumbing) — `Iso.ext ∘ HomOver.ext` reduces
+  `e = Iso.refl E` to the scheme-morphism equation `e.hom.hom = 𝟙 E.E` (`(Iso.refl E).hom.hom = 𝟙`
+  by rfl; `HomOver.ext` uses only the `hom` field). Content factored into the named box below.
+- **T-G3 core box** `aut_hom_eq_id_of_fullLevel` (Groupoid.lean:120, sorried) — clean statement
+  `e.hom.hom = 𝟙 E.E`, gated proof. Its docstring records the full GME reduction wiring T-G3a +
+  the gated infra (T-G2 additivity [Rigidity.lean, A-lane]; T-G3b deg quad-form; T-G3c Hasse;
+  T-G3d divisibility). **GATE**: T-G3b/c/d = End(E/S)/deg/dual-isogeny/Hasse = **KM Chapter 2**,
+  under the binding do-not-formalize-from-memory gate — may NOT be closed from memory; stated
+  from §B8/§B9 quotes. Commits f43f76ef (G3a), 78adbfd3 (board), + reduction commit.
+- **Frontier reached**: T-G3's non-gated content is exhausted (G3a + plumbing). Closing the box
+  requires either KM-Ch2 text (gate) or T-G2 (another lane's sorried rigidity). G6 → next ticket.
