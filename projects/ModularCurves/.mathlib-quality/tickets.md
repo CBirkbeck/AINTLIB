@@ -4251,7 +4251,9 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Generality**: mulBy lemmas for all `m n : ℤ` (upstream-shaped); negIso minimal.
 
 ### [T-H7b] naive full level structures exist over an algebraically closed base (sub-ticket)
-- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+- **Status**: **DONE — already landed in-file** (board stale; verified sorry-free by
+  fable-P4 2026-07-08: `exists_isNaiveFullLevel_of_le_two` GammaH.lean:~680) · **File**:
+  Moduli/GammaH.lean (helpers) ·
   **Parent**: T-H7 · **Depends on**: T-H7b-i · **Type**: theorem
 - **Statement**: `(k : Type u) [Field k] [IsAlgClosed k]
   (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N] (hN : N ≤ 2)
@@ -4293,7 +4295,9 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Generality**: any scheme target (state for `E.E` or general `Y`; prefer general).
 
 ### [T-H7c] `[-1] ≠ 𝟙` over a base with a geometric point (sub-ticket)
-- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+- **Status**: **DONE — already landed in-file** (board stale; verified sorry-free by
+  fable-P4 2026-07-08: `EllipticCurve.mulByHom_neg_one_ne_id` GammaH.lean:519) · **File**:
+  Moduli/GammaH.lean (helpers) ·
   **Parent**: T-H7 · **Depends on**: none · **Type**: lemma
 - **Statement**: `(k : Type u) [Field k] [IsAlgClosed k] (E : EllipticCurve S)
   (t : Spec (CommRingCat.of k) ⟶ S) : E.mulByHom (-1) ≠ 𝟙 E.E`.
