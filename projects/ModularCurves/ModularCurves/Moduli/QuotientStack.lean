@@ -844,6 +844,26 @@ private theorem isPullback_pullbackSnd_map {P : Scheme.{u}} (p : P ⟶ S) :
   · exact Limits.pullback.lift_fst _ _ _
   · exact Limits.pullback.lift_snd _ _ _
 
+/-- **Distributivity identification.** Finite coproducts distribute over the base
+change: `∐_G (P ×_S S')` is the base change of `∐_G P → S` along `q`, via the
+extensivity of `Scheme` (`FinitaryPreExtensive`). -/
+omit [Group G] in
+private theorem isPullback_sigma_pullbackSnd {P : Scheme.{u}} (p : P ⟶ S) :
+    IsPullback
+      (Limits.Sigma.desc (fun _ : G => Limits.pullback.snd p q))
+      (Limits.Sigma.desc (fun g : G =>
+        Limits.pullback.fst p q ≫ Limits.Sigma.ι (fun _ : G => P) g))
+      q (Limits.Sigma.desc (fun _ : G => p)) := by
+  have key := (FinitaryPreExtensive.isUniversal_finiteCoproducts
+      (Limits.coproductIsCoproduct (fun _ : G => P))).isPullback_of_isColimit_left
+    (f := fun _ : G => p) (u := Limits.Sigma.desc fun _ : G => p) (v := q)
+    (q₁ := fun _ : G => Limits.pullback.snd p q)
+    (q₂ := fun _ : G => Limits.pullback.fst p q)
+    (fun _ => (IsPullback.of_hasPullback p q).flip)
+    (Limits.coproductIsCoproduct (fun _ : G => Limits.pullback p q))
+    (fun i => Limits.Sigma.ι_desc _ _)
+  exact key
+
 end PullbackTorsor
 
 end Trivialize
