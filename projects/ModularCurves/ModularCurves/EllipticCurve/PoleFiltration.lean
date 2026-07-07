@@ -573,6 +573,75 @@ lemma infChart_t_nonZeroDivisor (W : WeierstrassCurve R) :
     rw [ht]
     exact infChart_t_mem_nonZeroDivisors W
 
+/-- **(T-W7.0i-b3-1)** The `Y`-chart and `Z`-chart opens cover the model: the complement of
+the `Z`-chart is the zero section, which lies in the `Y`-chart. (Two charts suffice for the
+global-sections equalizer — single overlap.) Source: audit A3. -/
+theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
+    ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange ⊔
+      ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange = ⊤ := by
+  sorry
+
+/-- **(T-W7.0i-b3-2)** Sections over the `Y`-chart open are the chart ring (open-immersion
+`Γ`-comparison composed with the repo's `chartCoordEquiv`). -/
+noncomputable def chartYSectionsEquiv (W : WeierstrassCurve R) :
+    Γ(projModel W, ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange) ≃+*
+      (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) :=
+  sorry
+
+/-- **(T-W7.0i-b3-3)** Sections over the `Z`-chart open are the chart ring. -/
+noncomputable def chartZSectionsEquiv (W : WeierstrassCurve R) :
+    Γ(projModel W, ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange) ≃+*
+      (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial}) :=
+  sorry
+
+/-- **(T-W7.0i-b4-0)** The `Z`-chart quotient ring is mathlib's affine coordinate ring
+(`x = X⟨0⟩`, `y = X⟨1⟩`) — the ring-level sibling of the repo's points-level
+`zSolutionsToAffine`. -/
+noncomputable def chartZAffineEquiv (W : WeierstrassCurve R) :
+    (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial}) ≃ₐ[R]
+        W.toAffine.CoordinateRing :=
+  sorry
+
+/-- **(T-W7.0i-b4-1)** The overlap map from the affine part into the localized infinity
+chart: `x ↦ s/t`, `y ↦ 1/t`. -/
+noncomputable def overlapMap (W : WeierstrassCurve R) :
+    W.toAffine.CoordinateRing →+*
+      Localization.Away (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+        Polynomial.X) :=
+  sorry
+
+/-- **(T-W7.0i-b4-1x)** `overlapMap` sends `x` to `s/t`. -/
+theorem overlapMap_coordX (W : WeierstrassCurve R) :
+    overlapMap W (coordX W) =
+      Localization.mk (AdjoinRoot.root (infChartCubic W))
+        (⟨algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X, ⟨1, pow_one _⟩⟩ :
+          Submonoid.powers (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            Polynomial.X)) := by
+  sorry
+
+/-- **(T-W7.0i-b4-1y)** `overlapMap` sends `y` to `1/t`. -/
+theorem overlapMap_coordY (W : WeierstrassCurve R) :
+    overlapMap W (coordY W) =
+      Localization.mk 1
+        (⟨algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X, ⟨1, pow_one _⟩⟩ :
+          Submonoid.powers (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            Polynomial.X)) := by
+  sorry
+
+/-- **(T-W7.0i-b4, the equalizer core)** A pair — a function on the affine part and a
+function on the infinity chart — agreeing in the overlap localization is a (shared)
+constant. Shared-witness `∃`-with-`∧` (statement-splitting exception: one witness `r`
+serves both charts). This is the algebraic heart of `Γ ≅ R`; the `x²y⁻¹` pole-order-1
+exclusion lives inside its proof (audit A3 normal form on the free bases from 0i-a/b2). -/
+theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
+    (a : W.toAffine.CoordinateRing) (b : AdjoinRoot (infChartCubic W))
+    (hab : overlapMap W a = algebraMap _ _ b) :
+    ∃ r : R, a = algebraMap R _ r ∧ b = algebraMap R _ r := by
+  sorry
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for

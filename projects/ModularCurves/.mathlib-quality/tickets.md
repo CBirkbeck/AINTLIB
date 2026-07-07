@@ -4920,16 +4920,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     corollary, found in mathlib). NOTE: chart-0 z-nzd deferred until hom_ext's cover choice
     fixes whether chart-0 is needed (2-chart route may suffice).
 
-- **[T-W7.0i-b3]** two-chart Γ plumbing — chart-1 ⊔ chart-2 = ⊤ (complement of D₊(Z) is the
-  section, inside D₊(Y)); `objSupIsoProdEqLocus` for the sup; `Γ(opensRange awayι) ≅` chart
-  ring (open-immersion Γ-iso); overlap `Γ(U ⊓ V) ≅` localization at the overlap coordinate.
-  - **Status**: open · **Parent**: T-W7.0i-b · **Depends**: T-W7.0i-b1 · **Type**: 4 lemmas
+- **[T-W7.0i-b3]** two-chart Γ plumbing — SKELETON LANDED 2026-07-07T14:15Z per coordinator §2:
+  `chartY_sup_chartZ_eq_top`, `chartYSectionsEquiv`, `chartZSectionsEquiv`
+  (PoleFiltration.lean; overlap-sections equiv folded into b4's `overlapMap` route);
+  `objSupIsoProdEqLocus` remains the discharge tool for i3's assembly.
+  - **Status**: open · **Claimed**: (unclaimed) · **Parent**: T-W7.0i-b · **Depends**:
+    T-W7.0i-b1 (done) · **Type**: 3 decls + assembly
 
-- **[T-W7.0i-b4]** the algebraic equalizer core — pairs `(a, b)` in Y-chart × Z-chart rings
-  agreeing in the overlap localization are exactly `R` (normal-form bookkeeping: `A` free
-  `{xⁱ, xⁱy}` (0i-a), `B` free `{sᵉtᵏ}` (b2); `x²y⁻¹` the excluded order-1 witness).
-  - **Status**: open · **Parent**: T-W7.0i-b · **Depends**: T-W7.0i-a, T-W7.0i-b1, T-W7.0i-b2 ·
-    **Type**: theorem
+- **[T-W7.0i-b4]** the algebraic equalizer core — SKELETON LANDED 2026-07-07T14:15Z per coordinator §2:
+  `chartZAffineEquiv` (Z-chart ≃ mathlib CoordinateRing), `overlapMap` (x ↦ s/t, y ↦ 1/t)
+  + `overlapMap_coordX`/`_coordY` pins, `overlap_pair_eq_baseRing` (the equalizer heart;
+  shared-witness ∃∧ documented). The A_y normal-form-basis leaf lives INSIDE
+  `overlap_pair_eq_baseRing`'s proof plan (free bases from 0i-a/b2 + the x²y⁻¹ exclusion).
+  - **Status**: open · **Claimed**: (unclaimed) · **Parent**: T-W7.0i-b · **Depends**:
+    T-W7.0i-a (done), T-W7.0i-b1 (done), T-W7.0i-b2 (done) · **Type**: 2 defs + 3 theorems
   - Sketch: 2-chart equalizer (`x²y⁻¹` excluded = the `H¹` witness); universality BY
     INSTANTIATION (never base-change the proof); McCoy for `s`-nonzerodivisor; sheafify
     over chart opens via `isPullback_projModelBaseChange` ⓟ. Leaf **L-P3** (part 2).
@@ -4952,8 +4956,14 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     to the leaf — 0h's transport along `classifyRingHom` needs it.
 
 - **[T-W7.1b]** THE comparison theorem — `pointedIso_exists_variableChange`,
-  `projModelVCIso_injective` (ModelVariableChange.lean:66,79).
-  - **Status**: blocked · **Depends**: T-W7.0i-a, T-W7.0i-b, T-W7.mvc · **Type**: 2 theorems
+  `projModelVCIso_injective`; **sub-decls SKELETONIZED 2026-07-07T14:15Z per coordinator §2**:
+  `pointedIsoCoordEquiv` (b1), `pointedIsoCoordEquiv_filtration` (b2 + the
+  INTRINSIC-FILTRATION BRIDGE — gates all of 1b; the landed monomial-span filtration is not
+  iso-invariant for free), `pointedIsoCoordEquiv_coordX`/`_coordY` (b3, several hundred
+  lines, shared-witness ∃-bundles documented). Source status: DESIGN-DERIVED (decomposition.md
+  addendum) — no verbatim KM/formulaire quote available (image-only scans).
+  - **Status**: blocked · **Depends**: T-W7.0i-a (done), T-W7.0i-b, T-W7.mvc · **Type**:
+    def + 5 theorems
   - Sketch: pointed iso preserves `E∖O` (Z-chart) ⟹ ring iso `Φ`; `Φ(F'_n) = F_n`
     (intrinsic via section ideal); `F₂`/`F₃` freeness forces `x' ↦ αx+β`, `y' ↦ γy+δx+ε`,
     units; relations force `α³ = γ²`, `u := γ/α`; extend by `projModel_hom_ext_of_affine`.

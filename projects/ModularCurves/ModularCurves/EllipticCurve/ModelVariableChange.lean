@@ -55,6 +55,69 @@ theorem projModelVCIso_mul (C C' : VariableChange R) (W : WeierstrassCurve R) :
         (projModelVCIso C' W).hom := by
   sorry
 
+/-- **(T-W7.0h-i, base-change naturality — coordinator §2-P5)** `projModelVCIso` is natural
+under base change of the ground ring: base-changing then applying the base-changed variable
+change agrees with applying the variable change then base-changing (`map_variableChange`
+identifies the two source models). Consumed by the `classifyRingHom` transport in the
+group-law descent (`T-W7.0h`), which reduces a chart's variable change to the universal one. -/
+theorem projModelVCIso_map {R' : Type u} [CommRing R'] [Algebra R R']
+    (C : VariableChange R) (W : WeierstrassCurve R) :
+    projModelBaseChange (algebraMap R R') (C • W) ≫ (projModelVCIso C W).hom =
+      eqToHom (by rw [map_variableChange]) ≫
+        (projModelVCIso (C.map (algebraMap R R')) (W.map (algebraMap R R'))).hom ≫
+          projModelBaseChange (algebraMap R R') W := by
+  sorry
+
+/-- **(T-W7.1b-b1, coordinator §2)** A pointed isomorphism of projective models restricts to
+the affine parts (it preserves the complement of the zero section) and hence induces an
+`R`-algebra isomorphism of the affine coordinate rings. DESIGN-DERIVED (audit A1 b1; no
+verbatim source — KM is image-only). -/
+noncomputable def pointedIsoCoordEquiv {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing :=
+  sorry
+
+/-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
+ring isomorphism preserves the pole-order filtration. NOT free: the landed
+`poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
+intrinsic (section-ideal/overlap-order) characterization inside its proof — it GATES all of
+1b. DESIGN-DERIVED (audit A1 b2). -/
+theorem pointedIsoCoordEquiv_filtration {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') (n : ℕ) :
+    Submodule.map (pointedIsoCoordEquiv e heπ hez).toLinearEquiv.toLinearMap
+        (poleOrderFiltration W' n) =
+      poleOrderFiltration W n := by
+  sorry
+
+/-- **(T-W7.1b-b3x, coordinator §2)** Coefficient extraction, `x`-side: `Φ(x') = αx + β`
+with `α` a unit (from `F₂`-preservation + the freeness of `{1, x}`). Shared-witness
+`∃`-bundle (α, β and the unitness travel together into b3y/the relation-matching). -/
+theorem pointedIsoCoordEquiv_coordX {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    ∃ α β : R, IsUnit α ∧
+      pointedIsoCoordEquiv e heπ hez (coordX W') =
+        algebraMap R _ α * coordX W + algebraMap R _ β := by
+  sorry
+
+/-- **(T-W7.1b-b3y, coordinator §2)** Coefficient extraction, `y`-side:
+`Φ(y') = γy + δx + ε` with `γ` a unit (from `F₃`-preservation). The five variable-change
+coefficient equations + `α³ = γ²` (yielding `u := γ/α`) are the body of the main theorem
+below, consuming b3x/b3y. -/
+theorem pointedIsoCoordEquiv_coordY {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    ∃ γ δ ε : R, IsUnit γ ∧
+      pointedIsoCoordEquiv e heπ hez (coordY W') =
+        algebraMap R _ γ * coordY W + algebraMap R _ δ * coordX W + algebraMap R _ ε := by
+  sorry
+
 /-- **(T-W7.1b, main — the comparison theorem)** Every isomorphism of projective Weierstrass
 models over a ring `R` that respects the structure morphisms and the points at infinity is
 induced by a variable change: there is a `C : VariableChange R` with `C • W = W'`, and `e` is
