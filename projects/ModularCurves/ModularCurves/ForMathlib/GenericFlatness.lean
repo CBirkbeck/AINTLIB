@@ -144,8 +144,8 @@ private theorem GFree.subsingleton (N : Type*) [AddCommGroup N] [Module S N] [Su
   letI : Module R N := Module.compHom N (algebraMap R S)
   exact ⟨1, one_ne_zero, inferInstance⟩
 
-/-- Generic freeness transfers along an `S`-linear equivalence. -/
 omit [IsDomain R] in
+/-- Generic freeness transfers along an `S`-linear equivalence. -/
 private theorem GFree.of_linearEquiv {N N' : Type*} [AddCommGroup N] [Module S N]
     [AddCommGroup N'] [Module S N'] (e : N ≃ₗ[S] N') (h : GFree R S N') : GFree R S N := by
   letI : Module R N := Module.compHom N (algebraMap R S)

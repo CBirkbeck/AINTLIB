@@ -1,1 +1,1 @@
-FOCUS: T-W7.mvc (P5) — graded-hom layer LANDED (66300bb4). Now iso: testing vcMvSubst inverse (C⁻¹ composition=id) → Proj.map iso. Handle=P5
+FOCUS: T-W7.mvc iso — vcMvSubst_comp_inv GREEN standalone. Next: inv_comp (via inv_inv) + ring-comp lemmas (comp_aeval). BLOCKED: WeierstrassModel+PoleFiltration RED (beastmode-A refactoring projModelPointsEquivEll L1189-1230; PoleFiltration A-lane). Develop max standalone, transplant steps 3-7 (vcGradedHomInv/comp-id/irrelevant_le/projModelVCIso+_pi/_zero/_mul/_map) when base green.

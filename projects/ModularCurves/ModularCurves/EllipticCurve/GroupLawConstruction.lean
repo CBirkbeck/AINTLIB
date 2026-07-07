@@ -186,6 +186,112 @@ lemma negGradedQuot_algebraMapGradeZero (W : WeierstrassCurve R) :
   exact congrArg (Ideal.Quotient.mk _)
     (show aeval (negVec W) (C r) = C r by rw [aeval_C, MvPolynomial.algebraMap_eq])
 
+/-! ### The `(−1)`-rescaling `ρ`: negate all variables
+
+`ρ = allNegGradedQuot` (`X, Y, Z ↦ −X, −Y, −Z`, i.e. `a ↦ (−1)^{deg a} a`) is the auxiliary
+graded automorphism through which `negModelHom_zero` discharges the projective rescaling
+`[0:−1:0] = [0:1:0]`. Built exactly parallel to `negGradedQuot`. -/
+
+/-- Negate all three variables `X, Y, Z ↦ −X, −Y, −Z` — the `(−1)`-rescaling. -/
+noncomputable def allNegVec (W : WeierstrassCurve R) : Fin 3 → MvPolynomial (Fin 3) R :=
+  ![-X 0, -X 1, -X 2]
+
+lemma allNegVec_isHomogeneous (W : WeierstrassCurve R) (i : Fin 3) :
+    (allNegVec W i).IsHomogeneous 1 := by
+  fin_cases i <;>
+    simp only [allNegVec, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val_two, Matrix.tail_cons]
+  · exact (isHomogeneous_X R 0).neg
+  · exact (isHomogeneous_X R 1).neg
+  · exact (isHomogeneous_X R 2).neg
+
+/-- Negating all variables sends the (degree-`3`, odd) Weierstrass cubic to its negative,
+hence maps the Weierstrass ideal into itself. -/
+lemma allNegVec_polynomial (W : WeierstrassCurve R) :
+    aeval (allNegVec W) W.toProjective.polynomial = -W.toProjective.polynomial := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_add, map_sub, map_mul, map_pow, aeval_X, aeval_C, allNegVec,
+    MvPolynomial.algebraMap_eq, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.cons_val_two, Matrix.tail_cons]
+  ring
+
+lemma allNegVec_involutive (W : WeierstrassCurve R) (i : Fin 3) :
+    aeval (allNegVec W) (allNegVec W i) = X i := by
+  fin_cases i
+  · show aeval (allNegVec W) (allNegVec W 0) = X 0
+    simp [allNegVec]
+  · show aeval (allNegVec W) (allNegVec W 1) = X 1
+    simp [allNegVec]
+  · show aeval (allNegVec W) (allNegVec W 2) = X 2
+    simp [allNegVec]
+
+lemma allNegRingHom_involutive (W : WeierstrassCurve R) (p : MvPolynomial (Fin 3) R) :
+    aeval (allNegVec W) (aeval (allNegVec W) p) = p := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simp
+  | add p q hp hq => rw [map_add, map_add, hp, hq]
+  | mul_X p i hp => rw [map_mul, aeval_X, map_mul, hp, allNegVec_involutive]
+
+/-- Negate-all-variables as a graded endomorphism of `R[X,Y,Z]`. -/
+noncomputable def allNegGradedPoly (W : WeierstrassCurve R) :
+    homogeneousSubmodule (Fin 3) R →+*ᵍ homogeneousSubmodule (Fin 3) R where
+  toRingHom := (aeval (allNegVec W)).toRingHom
+  map_mem {n x} hx := by
+    have h := ((mem_homogeneousSubmodule _ _).mp hx).aeval (allNegVec W)
+      (allNegVec_isHomogeneous W)
+    rw [one_mul] at h
+    exact (mem_homogeneousSubmodule _ _).mpr h
+
+lemma allNegGradedPoly_comap (W : WeierstrassCurve R) :
+    (projIdeal W).toIdeal ≤ (projIdeal W).toIdeal.comap (allNegGradedPoly W).toRingHom := by
+  rw [projIdeal_toIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+    Ideal.mem_comap]
+  show aeval (allNegVec W) W.toProjective.polynomial ∈ _
+  rw [allNegVec_polynomial]
+  exact neg_mem (Ideal.mem_span_singleton_self _)
+
+/-- The `(−1)`-rescaling automorphism `ρ` of the quotient coordinate ring. -/
+noncomputable def allNegGradedQuot (W : WeierstrassCurve R) :
+    quotientGrading (projIdeal W) →+*ᵍ quotientGrading (projIdeal W) :=
+  quotientGradingMap (allNegGradedPoly W) (projIdeal W) (projIdeal W) (allNegGradedPoly_comap W)
+
+lemma allNegGradedQuot_involutive (W : WeierstrassCurve R) (x : projCoordRing W) :
+    allNegGradedQuot W (allNegGradedQuot W x) = x := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [allNegGradedQuot, quotientGradingMap_mk, quotientGradingMap_mk]
+  exact congrArg (Ideal.Quotient.mk _) (allNegRingHom_involutive W a)
+
+lemma allNegGradedQuot_comp_self (W : WeierstrassCurve R) :
+    (allNegGradedQuot W).comp (allNegGradedQuot W) = GradedRingHom.id _ :=
+  GradedRingHom.ext fun x => allNegGradedQuot_involutive W x
+
+lemma allNegGradedQuot_irrelevant_le (W : WeierstrassCurve R) :
+    (quotientGrading (projIdeal W))₊ ≤
+      ((quotientGrading (projIdeal W))₊).map (allNegGradedQuot W) := by
+  conv_lhs => rw [← HomogeneousIdeal.map_id (I := (quotientGrading (projIdeal W))₊),
+    ← allNegGradedQuot_comp_self W, HomogeneousIdeal.map_comp]
+  exact HomogeneousIdeal.map_mono _ (irrelevant_map_le (allNegGradedQuot W))
+
+/-- On global sections, evaluation at infinity kills the difference between the two negations:
+`projModelZeroEval ∘ negGradedQuot = projModelZeroEval ∘ allNegGradedQuot` — both are evaluation
+at `(0, −1, 0)`. This is the ring-level identity feeding the `negModelHom_zero` route. -/
+lemma projModelZeroEval_neg_eq_allNeg (W : WeierstrassCurve R) :
+    (projModelZeroEval W).comp (negGradedQuot W).toRingHom =
+      (projModelZeroEval W).comp (allNegGradedQuot W).toRingHom := by
+  refine RingHom.ext fun x => ?_
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  simp only [RingHom.comp_apply]
+  show projModelZeroEval W (negGradedQuot W (Ideal.Quotient.mk _ p)) =
+    projModelZeroEval W (allNegGradedQuot W (Ideal.Quotient.mk _ p))
+  rw [negGradedQuot, allNegGradedQuot, quotientGradingMap_mk, quotientGradingMap_mk,
+    projModelZeroEval_mk, projModelZeroEval_mk]
+  show (aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0)) (aeval (negVec W) p) =
+       (aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0)) (aeval (allNegVec W) p)
+  rw [comp_aeval_apply, comp_aeval_apply]
+  refine congrArg (fun g => aeval g p) (funext fun i => ?_)
+  fin_cases i <;>
+    simp [negVec, allNegVec]
+
 end NegationConstruction
 
 /-- **(T-W7.0b)** Negation on the projective Weierstrass model: the projectivisation of

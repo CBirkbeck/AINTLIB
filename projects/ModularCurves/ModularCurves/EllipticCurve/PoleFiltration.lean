@@ -979,6 +979,249 @@ private lemma sPowCoord_coeff_lead (W : WeierstrassCurve R) {i : ℕ} {j : Fin 3
   rw [hzero] at h
   linear_combination h
 
+private lemma tel_mul_overlapInvT (W : WeierstrassCurve R) :
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (infChartTElem W) * overlapInvT W = 1 := by
+  unfold overlapInvT
+  rw [Localization.mk_eq_mk', IsLocalization.mul_mk'_eq_mk'_of_mul,
+    IsLocalization.mk'_eq_iff_eq_mul]
+  simp [mul_comm]
+
+private lemma tel_mul_overlapXElem (W : WeierstrassCurve R) :
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (infChartTElem W) * overlapXElem W =
+      algebraMap _ _ (AdjoinRoot.root (infChartCubic W)) := by
+  unfold overlapXElem
+  rw [Localization.mk_eq_mk', IsLocalization.mul_mk'_eq_mk'_of_mul,
+    IsLocalization.mk'_eq_iff_eq_mul]
+  simp [mul_comm]
+
+/-- The `sʲ`-coordinate of the `t`-cleared image of `f(x)`: `Σᵢ fᵢ·cⱼ(sⁱ)·t^(N−i)`. -/
+private noncomputable def coordOf (W : WeierstrassCurve R) (f : Polynomial R) (N : ℕ)
+    (j : Fin 3) : Polynomial R :=
+  ∑ i ∈ Finset.range (N + 1),
+    Polynomial.C (f.coeff i) * (sPowCoord W i j * Polynomial.X ^ (N - i))
+
+private lemma coordOf_zero (W : WeierstrassCurve R) (N : ℕ) (j : Fin 3) :
+    coordOf W 0 N j = 0 := by
+  unfold coordOf
+  simp
+
+private lemma coordOf_C (W : WeierstrassCurve R) (r : R) (N : ℕ) (j : Fin 3) :
+    coordOf W (Polynomial.C r) N j =
+      Polynomial.C r * (sPowCoord W 0 j * Polynomial.X ^ N) := by
+  unfold coordOf
+  rw [Finset.sum_eq_single 0]
+  · rw [Polynomial.coeff_C_zero, Nat.sub_zero]
+  · intro i _ hne
+    rw [Polynomial.coeff_C, if_neg hne, Polynomial.C_0, zero_mul]
+  · intro h
+    exact absurd (Finset.mem_range.mpr (by omega)) h
+
+/-- **(cross-kill)** Every coefficient of `coordOf` strictly below the leading T-adic level
+`3N − 2·deg f` vanishes. -/
+private lemma coordOf_coeff_eq_zero (W : WeierstrassCurve R) {f : Polynomial R} {N k : ℕ}
+    {j : Fin 3} (h : 3 * k + (j : ℕ) + 2 * f.natDegree < 3 * N) :
+    (coordOf W f N j).coeff k = 0 := by
+  unfold coordOf
+  rw [Polynomial.finsetSum_coeff]
+  refine Finset.sum_eq_zero fun i hi => ?_
+  have hiN : i < N + 1 := Finset.mem_range.mp hi
+  rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow']
+  rcases Nat.lt_or_ge k (N - i) with hlt | hle
+  · rw [if_neg (not_le.mpr hlt), mul_zero]
+  · rcases Nat.lt_or_ge f.natDegree i with hid | hid
+    · rw [Polynomial.coeff_eq_zero_of_natDegree_lt hid, zero_mul]
+    · rw [if_pos hle, sPowCoord_coeff_eq_zero W (by have := j.isLt; omega), mul_zero]
+
+/-- **(the leading slot)** At the leading T-adic level of `f` — coordinate `deg f % 3`,
+T-order `N − deg f + deg f/3` — the coefficient of `coordOf` is exactly the leading
+coefficient of `f`. -/
+private lemma coordOf_coeff_lead (W : WeierstrassCurve R) {f : Polynomial R} {N : ℕ}
+    (hfN : f.natDegree ≤ N) {j : Fin 3}
+    (hj : f.natDegree % 3 = (j : ℕ)) :
+    (coordOf W f N j).coeff (N - f.natDegree + f.natDegree / 3) = f.leadingCoeff := by
+  unfold coordOf
+  rw [Polynomial.finsetSum_coeff]
+  rw [Finset.sum_eq_single f.natDegree]
+  · have hj3 := j.isLt
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow', if_pos (by omega),
+      show N - f.natDegree + f.natDegree / 3 - (N - f.natDegree) = (f.natDegree - (j : ℕ)) / 3
+        by omega,
+      sPowCoord_coeff_lead W hj, mul_one]
+    rfl
+  · intro i hi hne
+    have hiN : i < N + 1 := Finset.mem_range.mp hi
+    have hj3 := j.isLt
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow']
+    rcases Nat.lt_or_ge (N - f.natDegree + f.natDegree / 3) (N - i) with hlt | hle
+    · rw [if_neg (not_le.mpr hlt), mul_zero]
+    · rcases Nat.lt_or_ge f.natDegree i with hid | hid
+      · rw [Polynomial.coeff_eq_zero_of_natDegree_lt hid, zero_mul]
+      · have hilt : i < f.natDegree := lt_of_le_of_ne hid hne
+        rw [if_pos hle, sPowCoord_coeff_eq_zero W (by omega), mul_zero]
+  · intro h
+    exact absurd (Finset.mem_range.mpr (by omega)) h
+
+/-- The `t`-cleared evaluation, reduced to the basis `(1, s, s²)`: the `Σᵢ fᵢ·sⁱ·t^(N−i)`
+element of the infinity chart in coordinate form. -/
+private lemma sum_range_eq_coordOf (W : WeierstrassCurve R) (f : Polynomial R) (N : ℕ) :
+    ∑ i ∈ Finset.range (N + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (f.coeff i) * Polynomial.X ^ (N - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ i =
+      algebraMap (Polynomial R) _ (coordOf W f N 0) +
+        algebraMap (Polynomial R) _ (coordOf W f N 1) *
+          AdjoinRoot.root (infChartCubic W) +
+        algebraMap (Polynomial R) _ (coordOf W f N 2) *
+          AdjoinRoot.root (infChartCubic W) ^ 2 := by
+  unfold coordOf
+  rw [map_sum, map_sum, map_sum, Finset.sum_mul, Finset.sum_mul,
+    ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [root_pow_eq W i]
+  simp only [map_mul]
+  ring
+
+/-- One cleared term: `t^N·(φ(c)·(s/t)ⁱ) = image of (c·t^(N−i))·sⁱ` for `i ≤ N`. -/
+private lemma cleared_term (W : WeierstrassCurve R) (c : R) {i N : ℕ} (hiN : i ≤ N) :
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (infChartTElem W) ^ N *
+        (((algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)) c *
+          overlapXElem W ^ i) =
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C c * Polynomial.X ^ (N - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ i) := by
+  have hxel := tel_mul_overlapXElem W
+  rw [RingHom.comp_apply, RingHom.comp_apply]
+  simp only [map_mul, map_pow]
+  rw [← hxel, mul_pow]
+  rw [show (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ N =
+    (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (N - i) *
+    (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ i from by
+      rw [← pow_add, Nat.sub_add_cancel hiN]]
+  rw [show algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X =
+    infChartTElem W from rfl]
+  ring
+
+private lemma infChartBasis_apply (W : WeierstrassCurve R) [Nontrivial R] (j : Fin 3) :
+    infChartBasis W j = AdjoinRoot.root (infChartCubic W) ^ (j : ℕ) := by
+  simp [infChartBasis, Module.Basis.reindex_apply, PowerBasis.coe_basis,
+    AdjoinRoot.powerBasis'_gen]
+
+/-- Absorb one `t` of `t^N` into `1/t`: `t^N·(z/t) = t^(N−1)·z` for `N ≥ 1`. -/
+private lemma pow_mul_mul_overlapInvT (W : WeierstrassCurve R) {N : ℕ} (hN : 1 ≤ N)
+    (z : Localization.Away (infChartTElem W)) :
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (infChartTElem W) ^ N * (z * overlapInvT W) =
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (infChartTElem W) ^ (N - 1) * z := by
+  rw [show (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ N =
+    (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (N - 1) *
+    algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W) from by
+      rw [← pow_succ, Nat.sub_add_cancel hN]]
+  calc algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+          (infChartTElem W) ^ (N - 1) *
+        algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+          (infChartTElem W) * (z * overlapInvT W) =
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+          (infChartTElem W) ^ (N - 1) * z *
+        (algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+          (infChartTElem W) * overlapInvT W) := by ring
+    _ = _ := by rw [tel_mul_overlapInvT W, mul_one]
+
+/-- **(the cleared coordinate identity)** From agreement of `p(x) + q(x)y` with a chart
+function `b` in the overlap, clearing `t^N` and comparing `(1, s, s²)`-coordinates:
+`coordOf p N j + coordOf q (N−1) j = t^N·(repr b)ⱼ` in `R[t]`. -/
+private lemma overlap_coordOf_eq (W : WeierstrassCurve R) [Nontrivial R]
+    (p q : Polynomial R) (b : AdjoinRoot (infChartCubic W)) {N : ℕ}
+    (hp : p.natDegree < N + 1) (hq : q.natDegree < N)
+    (hab : Polynomial.eval₂
+        (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+        (overlapXElem W) p +
+      Polynomial.eval₂
+        (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+        (overlapXElem W) q * overlapInvT W =
+      algebraMap _ _ b) (j : Fin 3) :
+    coordOf W p N j + coordOf W q (N - 1) j =
+      Polynomial.X ^ N * ((infChartBasis W).repr b j) := by
+  have htel := tel_mul_overlapInvT W
+  have hNpos : 1 ≤ N := by omega
+  -- Clear `t^N` in the localization and pull back along the injective `algebraMap`.
+  have hinj : Function.Injective (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) :=
+    IsLocalization.injective _ (Submonoid.powers_le.mpr (infChart_t_mem_nonZeroDivisors W))
+  have key : (∑ i ∈ Finset.range (N + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (p.coeff i) * Polynomial.X ^ (N - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ i) +
+      (∑ i ∈ Finset.range (N - 1 + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (q.coeff i) * Polynomial.X ^ (N - 1 - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ i) =
+      infChartTElem W ^ N * b := by
+    apply hinj
+    rw [map_add, map_sum, map_sum, map_mul, map_pow, ← hab, mul_add]
+    congr 1
+    · rw [Polynomial.eval₂_eq_sum_range' _ hp, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun i hi => ?_
+      have hiN : i ≤ N := by have := Finset.mem_range.mp hi; omega
+      exact (cleared_term W (p.coeff i) hiN).symm
+    · rw [Polynomial.eval₂_eq_sum_range' _
+        (show q.natDegree < N - 1 + 1 by omega),
+        pow_mul_mul_overlapInvT W hNpos, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun i hi => ?_
+      have hiN : i ≤ N - 1 := by have := Finset.mem_range.mp hi; omega
+      exact (cleared_term W (q.coeff i) hiN).symm
+  -- Reduce both sides to `(1, s, s²)`-coordinates and compare via the basis.
+  rw [sum_range_eq_coordOf W p N, sum_range_eq_coordOf W q (N - 1)] at key
+  have hb : b = algebraMap (Polynomial R) _ ((infChartBasis W).repr b 0) +
+      algebraMap (Polynomial R) _ ((infChartBasis W).repr b 1) *
+        AdjoinRoot.root (infChartCubic W) +
+      algebraMap (Polynomial R) _ ((infChartBasis W).repr b 2) *
+        AdjoinRoot.root (infChartCubic W) ^ 2 := by
+    conv_lhs => rw [← (infChartBasis W).sum_repr b]
+    rw [Fin.sum_univ_three]
+    simp only [infChartBasis_apply, Algebra.smul_def,
+      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+  rw [hb] at key
+  have hT : infChartTElem W ^ N =
+      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.X ^ N) := by
+    rw [map_pow]
+  rw [hT] at key
+  have hz : ∀ j : Fin 3,
+      (coordOf W p N j + coordOf W q (N - 1) j) -
+        Polynomial.X ^ N * ((infChartBasis W).repr b j) = 0 := by
+    have hli := Fintype.linearIndependent_iff.mp (infChartBasis W).linearIndependent
+      (fun j => (coordOf W p N j + coordOf W q (N - 1) j) -
+        Polynomial.X ^ N * ((infChartBasis W).repr b j))
+    have hsum : ∑ j : Fin 3,
+        ((coordOf W p N j + coordOf W q (N - 1) j) -
+          Polynomial.X ^ N * ((infChartBasis W).repr b j)) • infChartBasis W j = 0 := by
+      rw [Fin.sum_univ_three]
+      simp only [infChartBasis_apply, Algebra.smul_def,
+        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one,
+        map_sub, map_add, map_mul]
+      linear_combination key
+    exact hli hsum
+  have := hz j
+  linear_combination this
+
 /-- **(T-W7.0i-b4, the equalizer core)** A pair — a function on the affine part and a
 function on the infinity chart — agreeing in the overlap localization is a (shared)
 constant. Shared-witness `∃`-with-`∧` (statement-splitting exception: one witness `r`

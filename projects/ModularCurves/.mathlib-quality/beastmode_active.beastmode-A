@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-b4 — overlap_pair_eq_baseRing: K1/K2 sPowCoord tower GREEN (T-adic order bounds + leading-coeff-1); next: coordOf + clearing lemma + basis comparison + parity-gap endgame
+FOCUS: T-W7.0i-b4 — overlap_coordOf_eq PROVEN (clearing + basis comparison); next: endgame case analysis in overlap_pair_eq_baseRing (parity-gap kills q=0 then deg p=0)
