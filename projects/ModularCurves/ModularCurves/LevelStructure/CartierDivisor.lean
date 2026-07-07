@@ -17,8 +17,10 @@ import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.TensorProduct.Free
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.Algebra.MvPolynomial.Nilpotent
-import ModularCurves.ForMathlib.NormBaseChange
+import ModularCurves.ForMathlib.FinrankExact
 import ModularCurves.ForMathlib.IdealSheafComapMul
+import ModularCurves.ForMathlib.NormBaseChange
+import ModularCurves.ForMathlib.SheafDisjointUnion
 
 /-!
 # Relative effective Cartier divisors and full sets of sections (KM Ch. 1)
@@ -921,24 +923,599 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
 
 end KerPrincipal
 
+/-! #### Register boxes (T-D3/T-D1): the divisor of a family of sections is finite locally
+free of rank `n`
+
+The `sectionsIdealAux` helpers implement the multi-section chart route: around each point
+of the base, group the sections by their value in the fibre; each group is confined to an
+affine chart on which every kernel ideal is principal on a nonzerodivisor (T-D22, via
+common basic-open refinements), charts of different groups being disjoint on the divisor.
+Over a small affine base the divisor subscheme is then the disjoint union of closed
+subschemes of affine opens, hence affine, and its coordinate ring is a product of
+quotients `A/(∏ᵢ fᵢ)`, each free by the KM 1.1.2 filtration. -/
+
+/-- A section of a separated morphism is a closed immersion. -/
+private lemma sectionsIdealAux_isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
+    (hz : z ≫ π = 𝟙 S) : IsClosedImmersion z := by
+  have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
+  exact IsClosedImmersion.of_comp z π
+
+/-- An ideal sheaf is the unit ideal on any affine open disjoint from its support. -/
+private lemma sectionsIdealAux_ideal_eq_top_of_disjoint (I : C.IdealSheafData)
+    (W : C.affineOpens) (h : Disjoint (I.support : Set C) (W.1 : Set C)) :
+    I.ideal W = ⊤ := by
+  have h1 : C.zeroLocus (U := W.1) (I.ideal W : Set Γ(C, W.1)) ∩ W.1 = ∅ := by
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro x ⟨h2, h3⟩
+    exact Set.disjoint_left.mp h (I.zeroLocus_inter_subset_supportSet W ⟨h2, h3⟩) h3
+  have h4 := W.2.fromSpec_image_zeroLocus (I.ideal W : Set Γ(C, W.1))
+  rw [h1, Set.image_eq_empty] at h4
+  exact PrimeSpectrum.zeroLocus_empty_iff_eq_top.mp h4
+
+/-- Restriction to an affine basic open preserves "principal on a nonzerodivisor". -/
+private lemma sectionsIdealAux_basicOpen_span_nzd {I : C.IdealSheafData} {V : C.affineOpens}
+    {f : Γ(C, V.1)} (hspan : I.ideal V = Ideal.span {f})
+    (hnzd : f ∈ nonZeroDivisors Γ(C, V.1)) (t : Γ(C, V.1)) :
+    I.ideal (C.affineBasicOpen t) =
+      Ideal.span {(C.presheaf.map (homOfLE (C.basicOpen_le t)).op) f} ∧
+    (C.presheaf.map (homOfLE (C.basicOpen_le t)).op) f
+      ∈ nonZeroDivisors Γ(C, C.basicOpen t) := by
+  letI := V.2.isLocalization_basicOpen t
+  constructor
+  · rw [← I.map_ideal_basicOpen V t, hspan, Ideal.map_span, Set.image_singleton]
+  · exact IsLocalization.map_nonZeroDivisors_le (Submonoid.powers t) Γ(C, C.basicOpen t)
+      ⟨f, hnzd, rfl⟩
+
+/-- **Multi-section chart**: around any point of the total space there is an affine open on
+which the kernel ideal of *every* section in a finite family is principal on a
+nonzerodivisor (T-D22, iterated via common basic-open refinements). -/
+private lemma sectionsIdealAux_exists_multiChart (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (c : C) :
+    ∃ V : C.affineOpens, c ∈ V.1 ∧ ∀ i : Fin n, ∃ f : Γ(C, V.1),
+      (Scheme.Hom.ker (P i).1).ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(C, V.1) := by
+  classical
+  suffices h : ∀ s : Finset (Fin n), ∃ V : C.affineOpens, c ∈ V.1 ∧ ∀ i ∈ s,
+      ∃ f : Γ(C, V.1), (Scheme.Hom.ker (P i).1).ideal V = Ideal.span {f} ∧
+        f ∈ nonZeroDivisors Γ(C, V.1) by
+    obtain ⟨V, h1, h2⟩ := h Finset.univ
+    exact ⟨V, h1, fun i ↦ h2 i (Finset.mem_univ i)⟩
+  intro s
+  induction s using Finset.induction_on with
+  | empty =>
+    have hc : c ∈ (⊤ : C.Opens) := trivial
+    rw [← iSup_affineOpens_eq_top] at hc
+    obtain ⟨V, hV⟩ := TopologicalSpace.Opens.mem_iSup.mp hc
+    exact ⟨V, hV, by simp⟩
+  | insert j s hjs ih =>
+    obtain ⟨V₁, hcV₁, hV₁⟩ := ih
+    obtain ⟨V₂, hcV₂, f₂, hf₂span, hf₂nzd⟩ :=
+      exists_affineOpen_ker_principal_nonZeroDivisor π hsm (P j).1 (P j).2 c
+    obtain ⟨t₁, t₂, hteq, hct⟩ := exists_basicOpen_le_affine_inter V₁.2 V₂.2 c ⟨hcV₁, hcV₂⟩
+    refine ⟨C.affineBasicOpen t₁, hct, ?_⟩
+    intro i hi
+    rcases Finset.mem_insert.mp hi with rfl | hi'
+    · have hopen : C.affineBasicOpen t₁ = C.affineBasicOpen t₂ := Subtype.ext hteq
+      rw [hopen]
+      obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hf₂span hf₂nzd t₂
+      exact ⟨_, h1, h2⟩
+    · obtain ⟨f, hspan, hnzd⟩ := hV₁ i hi'
+      obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hspan hnzd t₁
+      exact ⟨_, h1, h2⟩
+
+/-- Evaluation of a finite product of ideal sheaves on an affine open. -/
+private lemma sectionsIdealAux_ideal_prod {ι : Type*} (s : Finset ι)
+    (I : ι → C.IdealSheafData) (U : C.affineOpens) :
+    (∏ i ∈ s, I i).ideal U = ∏ i ∈ s, (I i).ideal U := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [Scheme.IdealSheafData.one_eq_top, Ideal.one_eq_top]
+  | insert j s hjs ih =>
+    rw [Finset.prod_insert hjs, Finset.prod_insert hjs, Scheme.IdealSheafData.ideal_mul,
+      Pi.mul_apply, ih]
+
+/-- The support of the product of the section ideals is the union of the section images. -/
+private lemma sectionsIdealAux_support_prod (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    ((∏ i, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i, Set.range (P i).1.base := by
+  classical
+  haveI : ∀ i : Fin n, IsClosedImmersion (P i).1 := fun i ↦
+    sectionsIdealAux_isClosedImmersion (P i).2
+  suffices h : ∀ s : Finset (Fin n),
+      ((∏ i ∈ s, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i ∈ s, Set.range (P i).1.base by
+    rw [h Finset.univ]
+    simp
+  intro s
+  induction s using Finset.induction_on with
+  | empty => simp [Scheme.IdealSheafData.one_eq_top]
+  | insert j s hjs ih =>
+    rw [Finset.prod_insert hjs, Scheme.IdealSheafData.support_mul]
+    have hker : ((Scheme.Hom.ker (P j).1).support : Set C) = Set.range (P j).1.base := by
+      rw [Scheme.Hom.support_ker]
+      exact (P j).1.isClosedEmbedding.isClosed_range.closure_eq
+    rw [TopologicalSpace.Closeds.coe_sup, hker, ih,
+      Finset.set_biUnion_insert j s (fun i ↦ Set.range (P i).1.base)]
+
+
+open Function in
+/-- **KM 1.1.2 filtration, packaged**: if `f 0, …, f (m-1)` are nonzerodivisors of an
+`R`-algebra `A`, each generating the kernel of an `R`-algebra retraction `σ i : A →ₐ[R] R`,
+then `A ⧸ (∏ᵢ f i)` is a free `R`-module of rank `m` (successive extensions
+`0 → A/(f₁⋯f_{k-1}) → A/(f₀⋯f_{k-1}) → A/(f₀) → 0` split since `A/(f₀) ≅ R` is free). -/
+private theorem sectionsIdealAux_free_quotient {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] :
+    ∀ (m : ℕ) (f : Fin m → A), (∀ i, f i ∈ nonZeroDivisors A) →
+      ∀ σ : Fin m → (A →ₐ[R] R), (∀ i, RingHom.ker (σ i) = Ideal.span {f i}) →
+      Nonempty ((A ⧸ Ideal.span {∏ i, f i}) ≃ₗ[R] (Fin m → R))
+  | 0, f, _, σ, _ => by
+    have h1 : (Ideal.span {∏ i : Fin 0, f i} : Ideal A) = ⊤ := by
+      simp [Ideal.span_singleton_one]
+    haveI : Subsingleton (A ⧸ Ideal.span {∏ i : Fin 0, f i}) := by
+      rw [h1]
+      infer_instance
+    exact ⟨{ toFun := fun _ ↦ 0
+             map_add' := fun _ _ ↦ by simp
+             map_smul' := fun _ _ ↦ by simp
+             invFun := fun _ ↦ 0
+             left_inv := fun x ↦ Subsingleton.elim _ _
+             right_inv := fun x ↦ Subsingleton.elim _ _ }⟩
+  | m + 1, f, hf, σ, hσ => by
+    obtain ⟨e₂⟩ := sectionsIdealAux_free_quotient m (fun i ↦ f i.succ) (fun i ↦ hf i.succ)
+      (fun i ↦ σ i.succ) (fun i ↦ hσ i.succ)
+    set t : A := ∏ i : Fin m, f i.succ with ht
+    set J : Ideal A := Ideal.span {f 0 * t} with hJ
+    set J₂ : Ideal A := Ideal.span {t} with hJ₂
+    have hmap : J₂ ≤ Submodule.comap (LinearMap.mulLeft A (f 0)) J := by
+      intro x hx
+      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+      exact Ideal.mem_span_singleton'.mpr ⟨c, by simp [LinearMap.mulLeft_apply]; ring⟩
+    set μ : (A ⧸ J₂) →ₗ[R] (A ⧸ J) :=
+      (Submodule.mapQ J₂ J (LinearMap.mulLeft A (f 0)) hmap).restrictScalars R with hμ
+    have hμ_mk : ∀ x : A, μ (Ideal.Quotient.mk J₂ x) = Ideal.Quotient.mk J (f 0 * x) :=
+      fun x ↦ rfl
+    have hJle : ∀ a ∈ J, σ 0 a = 0 := by
+      intro a ha
+      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
+      have hf0 : σ 0 (f 0) = 0 := by
+        have : f 0 ∈ RingHom.ker (σ 0) := (hσ 0) ▸ Ideal.subset_span rfl
+        rwa [RingHom.mem_ker] at this
+      simp [map_mul, hf0]
+    set ν : (A ⧸ J) →ₗ[R] R := (Ideal.Quotient.liftₐ J (σ 0) hJle).toLinearMap with hν
+    have hν_mk : ∀ x : A, ν (Ideal.Quotient.mk J x) = σ 0 x := fun x ↦ rfl
+    have hinj : Function.Injective μ := by
+      rw [injective_iff_map_eq_zero]
+      intro x hx
+      obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+      rw [hμ_mk, Ideal.Quotient.eq_zero_iff_mem] at hx
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hx
+      rw [Ideal.Quotient.eq_zero_iff_mem]
+      refine Ideal.mem_span_singleton'.mpr ⟨c, ?_⟩
+      have h0 : (x - c * t) * f 0 = 0 := by linear_combination -hc
+      exact (sub_eq_zero.mp ((mem_nonZeroDivisors_iff.mp (hf 0)).2 _ h0)).symm
+    have hsurj : Function.Surjective ν := fun r ↦
+      ⟨Ideal.Quotient.mk J (algebraMap R A r), by rw [hν_mk]; exact (σ 0).commutes r⟩
+    have hexact : Function.Exact μ ν := by
+      rw [LinearMap.exact_iff]
+      ext x
+      obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+      constructor
+      · intro hx
+        rw [LinearMap.mem_ker, hν_mk, ← RingHom.mem_ker, hσ 0] at hx
+        obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+        exact ⟨Ideal.Quotient.mk J₂ c, by rw [hμ_mk, mul_comm]⟩
+      · rintro ⟨y, hy⟩
+        obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
+        rw [LinearMap.mem_ker, ← hy, hμ_mk, hν_mk]
+        have hf0 : σ 0 (f 0) = 0 := by
+          have : f 0 ∈ RingHom.ker (σ 0) := (hσ 0) ▸ Ideal.subset_span rfl
+          rwa [RingHom.mem_ker] at this
+        simp [map_mul, hf0]
+    obtain ⟨e₁⟩ := hexact.nonempty_linearEquiv_prod_of_projective hinj hsurj
+    have hquot : (A ⧸ Ideal.span {∏ i : Fin (m + 1), f i}) ≃ₗ[R] (A ⧸ J) :=
+      (Submodule.quotEquivOfEq _ _ (by rw [hJ, Fin.prod_univ_succ])).restrictScalars R
+    have easm : ((Fin m → R) × R) ≃ₗ[R] (Fin (m + 1) → R) :=
+      ((LinearEquiv.refl R (Fin m → R)).prodCongr
+          (LinearEquiv.funUnique (Fin 1) R R).symm).trans
+        ((LinearEquiv.sumArrowLequivProdArrow (Fin m) (Fin 1) R R).symm.trans
+          (LinearEquiv.piCongrLeft R (fun _ ↦ R) finSumFinEquiv))
+    exact ⟨hquot.trans (e₁.trans ((e₂.prodCongr (LinearEquiv.refl R R)).trans easm))⟩
+
+/-- `π ∘ z = id` on points, for a section `z`. -/
+private lemma sectionsIdealAux_base_section (π : C ⟶ S) {z : S ⟶ C} (hz : z ≫ π = 𝟙 S)
+    (x : S) : π.base (z.base x) = x := by
+  have h3 : π.base (z.base x) = (z ≫ π).base x := rfl
+  rw [h3, hz]
+  rfl
+
+/-- **Group chart**: around a point `c` of the fibre over `s`, an affine chart contained in
+`π ⁻¹ᵁ U₀`, avoiding all sections not passing through `c` at `s`, on which every section
+ideal is principal on a nonzerodivisor. -/
+private lemma sectionsIdealAux_exists_groupChart (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) {s : S} (U₀ : S.affineOpens) (hs : s ∈ U₀.1)
+    (c : C) (hcπ : π.base c = s) :
+    ∃ W : C.affineOpens, c ∈ W.1 ∧ W.1 ≤ π ⁻¹ᵁ U₀.1 ∧
+      (∀ i, (P i).1.base s ≠ c → Disjoint (Set.range (P i).1.base) (W.1 : Set C)) ∧
+      ∀ i : Fin n, ∃ f : Γ(C, W.1), (Scheme.Hom.ker (P i).1).ideal W = Ideal.span {f} ∧
+        f ∈ nonZeroDivisors Γ(C, W.1) := by
+  classical
+  obtain ⟨V, hcV, hV⟩ := sectionsIdealAux_exists_multiChart π hsm P c
+  have hcnot : ∀ i, (P i).1.base s ≠ c → c ∉ Set.range (P i).1.base := by
+    rintro i hne ⟨x, hx⟩
+    refine hne ?_
+    have h1 : π.base c = x := by rw [← hx, sectionsIdealAux_base_section π (P i).2]
+    rw [← hx, ← h1, hcπ]
+  set bad : Finset (Fin n) := Finset.univ.filter (fun i ↦ (P i).1.base s ≠ c) with hbad
+  set Os : Set C := ((V.1 : Set C) ∩ (π ⁻¹ᵁ U₀.1 : Set C)) ∩
+      ⋂ i ∈ bad, (Set.range (P i).1.base)ᶜ with hOs
+  have hOsopen : IsOpen Os := by
+    haveI : ∀ i : Fin n, IsClosedImmersion (P i).1 := fun i ↦
+      sectionsIdealAux_isClosedImmersion (P i).2
+    refine (V.1.2.inter (π ⁻¹ᵁ U₀.1).2).inter (isOpen_biInter_finset fun i _ ↦ ?_)
+    exact (P i).1.isClosedEmbedding.isClosed_range.isOpen_compl
+  have hcOs : c ∈ Os := by
+    refine ⟨⟨hcV, show π.base c ∈ U₀.1 from hcπ ▸ hs⟩, ?_⟩
+    refine Set.mem_biInter fun i hi ↦ hcnot i ?_
+    exact (Finset.mem_filter.mp hi).2
+  obtain ⟨t, htle, hct⟩ := V.2.exists_basicOpen_le (V := ⟨Os, hOsopen⟩) ⟨c, hcOs⟩ hcV
+  refine ⟨C.affineBasicOpen t, hct, ?_, ?_, ?_⟩
+  · intro x hx
+    exact (htle hx).1.2
+  · intro i hne
+    refine Set.disjoint_right.mpr fun x hx hr ↦ ?_
+    have h2 := (htle hx).2
+    exact Set.mem_iInter₂.mp h2 i (Finset.mem_filter.mpr ⟨Finset.mem_univ i, hne⟩) hr
+  · intro i
+    obtain ⟨f, hspan, hnzd⟩ := hV i
+    obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hspan hnzd t
+    exact ⟨_, h1, h2⟩
+
+
+/-- **Piece freeness** (KM 1.1.2 filtration, packaged): on an affine `W'` lying over the
+affine `U`, meeting only the sections listed in `g` (the other section ideals being the
+unit ideal on `W'`), with retraction pairs and principal-nzd kernel ideals for `i ∈ g`,
+the coordinate ring of the divisor piece is a free module of rank `g.card` over
+`Γ(S, U)`. -/
+private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (U : S.affineOpens) (W' : C.affineOpens)
+    (hVU : W'.1 ≤ π ⁻¹ᵁ U.1) (g : Finset (Fin n))
+    (hsec : ∀ i ∈ g, U.1 ≤ (P i).1 ⁻¹ᵁ W'.1)
+    (hprin : ∀ i ∈ g, ∃ f : Γ(C, W'.1),
+      (Scheme.Hom.ker (P i).1).ideal W' = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(C, W'.1))
+    (htop : ∀ i ∉ g, (Scheme.Hom.ker (P i).1).ideal W' = ⊤)
+    [alg : Algebra Γ(S, U.1) Γ(C, W'.1)]
+    (halg : algebraMap Γ(S, U.1) Γ(C, W'.1) = (π.appLE U.1 W'.1 hVU).hom) :
+    Nonempty ((Γ(C, W'.1) ⧸ (∏ i, Scheme.Hom.ker (P i).1).ideal W') ≃ₗ[Γ(S, U.1)]
+      (Fin g.card → Γ(S, U.1))) := by
+  classical
+  choose fW hfWspan hfWnzd using fun i : ↥g ↦ hprin i.1 i.2
+  set σW : ↥g → (Γ(C, W'.1) →ₐ[Γ(S, U.1)] Γ(S, U.1)) := fun i ↦
+    { toRingHom := ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom
+      commutes' := fun a ↦ by
+        have h2 := congrArg (fun (w : Γ(S, U.1) ⟶ Γ(S, U.1)) ↦ w.hom a)
+          (kerPrincipalAux_retraction π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2))
+        simpa [halg] using h2 } with hσW
+  have hkerW : ∀ i : ↥g, RingHom.ker (σW i) = Ideal.span {fW i} := by
+    intro i
+    haveI : IsClosedImmersion (P i.1).1 := sectionsIdealAux_isClosedImmersion (P i.1).2
+    have h1 : RingHom.ker ((P i.1).1.app W'.1).hom
+        = RingHom.ker ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom :=
+      kerPrincipalAux_ker_app π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2)
+    have h2 : (Scheme.Hom.ker (P i.1).1).ideal W' = RingHom.ker ((P i.1).1.app W'.1).hom :=
+      Scheme.Hom.ker_apply _ _
+    show RingHom.ker ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom = _
+    rw [← h1, ← h2, hfWspan i]
+  set e : ↥g ≃ Fin g.card := g.equivFin with he
+  have hKid : (∏ i, Scheme.Hom.ker (P i).1).ideal W'
+      = Ideal.span {∏ k, fW (e.symm k)} := by
+    rw [sectionsIdealAux_ideal_prod,
+      ← Finset.prod_filter_mul_prod_filter_not Finset.univ (· ∈ g)
+        (fun i ↦ (Scheme.Hom.ker (P i).1).ideal W')]
+    have hsecond : (∏ i ∈ Finset.univ.filter (¬ · ∈ g),
+        (Scheme.Hom.ker (P i).1).ideal W') = 1 :=
+      Finset.prod_eq_one fun i hi ↦
+        (htop i (Finset.mem_filter.mp hi).2).trans Ideal.one_eq_top.symm
+    rw [hsecond, mul_one, Finset.filter_univ_mem,
+      ← Finset.prod_attach g (fun i ↦ (Scheme.Hom.ker (P i).1).ideal W'),
+      Finset.prod_congr rfl (fun i _ ↦ hfWspan i), Ideal.prod_span_singleton]
+    have hpe : (∏ x ∈ g.attach, fW x) = ∏ k, fW (e.symm k) := by
+      rw [show (∏ x ∈ g.attach, fW x) = ∏ x : ↥g, fW x from by rw [Finset.univ_eq_attach]]
+      exact Fintype.prod_equiv e fW (fun k ↦ fW (e.symm k))
+        (fun x ↦ (congrArg fW (e.symm_apply_apply x)).symm)
+    rw [hpe]
+  obtain ⟨e₀⟩ := sectionsIdealAux_free_quotient g.card (fun k ↦ fW (e.symm k))
+    (fun k ↦ hfWnzd (e.symm k)) (fun k ↦ σW (e.symm k)) (fun k ↦ hkerW (e.symm k))
+  exact ⟨((Submodule.quotEquivOfEq _ _ hKid).restrictScalars Γ(S, U.1)).trans e₀⟩
+
+
+/-- **Master chart** (the local model of KM 1.2.2/1.2.3 for `Σᵢ [Pᵢ]`): every point of the
+base has an affine neighbourhood `U` over which the subscheme cut out by `∏ᵢ ker (Pᵢ)` is
+an affine open of the subscheme whose coordinate ring is a free `Γ(S, U)`-module of rank
+`n`; consequently the structure map of sections is finite, flat, finitely presented and
+of constant rank `n`. -/
+private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
+    ∃ U : S.affineOpens, s ∈ U.1 ∧
+      IsAffineOpen (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) ⁻¹ᵁ U.1) ∧
+      RingHom.Finite ((((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app U.1).hom) ∧
+      RingHom.Flat ((((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app U.1).hom) ∧
+      RingHom.FinitePresentation
+        ((((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app U.1).hom) ∧
+      ∀ p, ((((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app U.1).hom).finrank p = n := by
+  classical
+  set K : C.IdealSheafData := ∏ i, Scheme.Hom.ker (P i).1 with hK
+  set q : K.subscheme ⟶ S := K.subschemeι ≫ π with hq
+  -- STEP 1: a first affine neighbourhood of `s`
+  obtain ⟨U₀, hsU₀⟩ : ∃ U₀ : S.affineOpens, s ∈ U₀.1 := by
+    have hc : s ∈ (⊤ : S.Opens) := trivial
+    rw [← iSup_affineOpens_eq_top] at hc
+    exact TopologicalSpace.Opens.mem_iSup.mp hc
+  -- STEP 2: the group charts, one per point of the fibre met by the sections
+  set G : Finset C := Finset.image (fun i ↦ (P i).1.base s) Finset.univ with hG
+  have hWex : ∀ c : ↥G, ∃ W : C.affineOpens, ↑c ∈ W.1 ∧ W.1 ≤ π ⁻¹ᵁ U₀.1 ∧
+      (∀ i, (P i).1.base s ≠ ↑c → Disjoint (Set.range (P i).1.base) (W.1 : Set C)) ∧
+      ∀ i : Fin n, ∃ f : Γ(C, W.1), (Scheme.Hom.ker (P i).1).ideal W = Ideal.span {f} ∧
+        f ∈ nonZeroDivisors Γ(C, W.1) := by
+    rintro ⟨c, hc⟩
+    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hc
+    exact sectionsIdealAux_exists_groupChart π hsm P U₀ hsU₀ _
+      (sectionsIdealAux_base_section π (P i).2 s)
+  choose W hcW hWU₀ hWdisj hWprin using hWex
+  -- STEP 3: shrink the base
+  set gc : Fin n → ↥G := fun i ↦
+    ⟨(P i).1.base s, Finset.mem_image_of_mem _ (Finset.mem_univ i)⟩ with hgc
+  set Os : Set S := (U₀.1 : Set S) ∩ ⋂ i, (P i).1.base ⁻¹' ((W (gc i)).1 : Set C) with hOs
+  have hOsopen : IsOpen Os := U₀.1.2.inter (isOpen_iInter_of_finite fun i ↦
+    (W (gc i)).1.2.preimage (P i).1.continuous)
+  have hsOs : s ∈ Os := ⟨hsU₀, Set.mem_iInter.mpr fun i ↦ hcW (gc i)⟩
+  obtain ⟨u₀, hu₀le, hsu₀⟩ := U₀.2.exists_basicOpen_le (V := ⟨Os, hOsopen⟩) ⟨s, hsOs⟩ hsU₀
+  set U : S.affineOpens := S.affineBasicOpen u₀ with hU
+  -- STEP 4: the pieces over `U`
+  set tW : (c : ↥G) → Γ(C, (W c).1) := fun c ↦ π.appLE U₀.1 (W c).1 (hWU₀ c) u₀ with htW
+  have hW'eq : ∀ c : ↥G, C.basicOpen (tW c) = (W c).1 ⊓ π ⁻¹ᵁ (S.basicOpen u₀) := by
+    intro c
+    have h1 : tW c = (C.presheaf.map (homOfLE (hWU₀ c)).op) (π.app U₀.1 u₀) := rfl
+    rw [h1, Scheme.basicOpen_res, ← Scheme.preimage_basicOpen]
+  set W' : (c : ↥G) → C.affineOpens := fun c ↦ C.affineBasicOpen (tW c) with hW'
+  have hW'le : ∀ c : ↥G, (W' c).1 ≤ π ⁻¹ᵁ U.1 := fun c ↦ by
+    rw [show (W' c).1 = C.basicOpen (tW c) from rfl, hW'eq c]
+    exact inf_le_right
+  set piece : ↥G → K.subscheme.Opens := fun c ↦ K.subschemeι ⁻¹ᵁ (W' c).1 with hpiece
+  have hple : ∀ c : ↥G, piece c ≤ q ⁻¹ᵁ U.1 := by
+    intro c x hx
+    show q.base x ∈ U.1
+    have h1 : K.subschemeι.base x ∈ (W' c).1 := hx
+    have h2 : q.base x = π.base (K.subschemeι.base x) := rfl
+    rw [h2]
+    exact hW'le c h1
+  -- membership of a point of the subscheme in a `W`-chart, from support
+  have hsupp : (K.support : Set C) = ⋃ i, Set.range (P i).1.base :=
+    sectionsIdealAux_support_prod π P
+  have hmem : ∀ x : K.subscheme, q.base x ∈ U.1 → ∃ i : Fin n,
+      K.subschemeι.base x ∈ (W' (gc i)).1 := by
+    intro x hx
+    have hxsupp : K.subschemeι.base x ∈ (K.support : Set C) := by
+      rw [← K.range_subschemeι]
+      exact ⟨x, rfl⟩
+    rw [hsupp] at hxsupp
+    obtain ⟨i, u, hu⟩ := Set.mem_iUnion.mp hxsupp
+    refine ⟨i, ?_⟩
+    have h3 : π.base (K.subschemeι.base x) = u := by
+      rw [← hu, sectionsIdealAux_base_section π (P i).2 u]
+    have hu2 : u ∈ S.basicOpen u₀ := by
+      rw [← h3]
+      exact hx
+    rw [show (W' (gc i)).1 = C.basicOpen (tW (gc i)) from rfl, hW'eq (gc i)]
+    constructor
+    · rw [← hu]
+      exact Set.mem_iInter.mp (hu₀le hu2).2 i
+    · show π.base (K.subschemeι.base x) ∈ S.basicOpen u₀
+      rw [h3]
+      exact hu2
+  -- STEP 5: the pieces cover `q ⁻¹ᵁ U` and are pairwise disjoint
+  have hcover : q ⁻¹ᵁ U.1 = ⨆ c : ↥G, piece c := by
+    apply le_antisymm
+    · intro x hx
+      obtain ⟨i, hi⟩ := hmem x hx
+      exact TopologicalSpace.Opens.mem_iSup.mpr ⟨gc i, hi⟩
+    · exact iSup_le hple
+  have hWsub : ∀ d : ↥G, ((W' d).1 : Set C) ⊆ ((W d).1 : Set C) := by
+    intro d
+    rw [show (W' d).1 = C.basicOpen (tW d) from rfl, hW'eq d]
+    exact fun y hy ↦ hy.1
+  have hdisj : Pairwise (Function.onFun Disjoint piece) := by
+    intro c c' hne
+    show Disjoint (piece c) (piece c')
+    refine disjoint_iff.mpr (TopologicalSpace.Opens.ext ?_)
+    rw [TopologicalSpace.Opens.coe_inf, TopologicalSpace.Opens.coe_bot,
+      Set.eq_empty_iff_forall_notMem]
+    rintro x ⟨hx1, hx2⟩
+    have hxsupp : K.subschemeι.base x ∈ (K.support : Set C) := by
+      rw [← K.range_subschemeι]
+      exact ⟨x, rfl⟩
+    rw [hsupp] at hxsupp
+    obtain ⟨i, u, hu⟩ := Set.mem_iUnion.mp hxsupp
+    have hval : ∀ d : ↥G, K.subschemeι.base x ∈ (W' d).1 → (P i).1.base s = ↑d := by
+      intro d hxd
+      by_contra hne'
+      exact Set.disjoint_left.mp (hWdisj d i hne') ⟨u, hu⟩ (hWsub d hxd)
+    exact hne (Subtype.ext ((hval c hx1).symm.trans (hval c' hx2)))
+  -- STEP 6: each piece is affine, hence so is `q ⁻¹ᵁ U`
+  have haffpiece : ∀ c : ↥G, IsAffineOpen (piece c) := by
+    intro c
+    rw [show piece c = K.subschemeι ⁻¹ᵁ (W' c).1 from rfl,
+      ← K.opensRange_subschemeCover_map (W' c)]
+    exact isAffineOpen_opensRange _
+  have haff : IsAffineOpen (q ⁻¹ᵁ U.1) := by
+    rw [hcover]
+    exact IsAffineOpen.iSup_of_disjoint haffpiece hdisj
+  -- STEP 7: per-piece module data
+  set gs : ↥G → Finset (Fin n) :=
+    fun c ↦ Finset.univ.filter (fun i ↦ (P i).1.base s = ↑c) with hgs
+  have hsec' : ∀ c : ↥G, ∀ i ∈ gs c, U.1 ≤ (P i).1 ⁻¹ᵁ (W' c).1 := by
+    intro c i hi x hx
+    have hie : (P i).1.base s = ↑c := (Finset.mem_filter.mp hi).2
+    show (P i).1.base x ∈ (W' c).1
+    rw [show (W' c).1 = C.basicOpen (tW c) from rfl, hW'eq c]
+    constructor
+    · have h6 := Set.mem_iInter.mp (hu₀le hx).2 i
+      have h7 : gc i = c := Subtype.ext hie
+      rw [← h7]
+      exact h6
+    · show π.base ((P i).1.base x) ∈ S.basicOpen u₀
+      rw [sectionsIdealAux_base_section π (P i).2 x]
+      exact hx
+  have hprin' : ∀ c : ↥G, ∀ i ∈ gs c, ∃ f : Γ(C, (W' c).1),
+      (Scheme.Hom.ker (P i).1).ideal (W' c) = Ideal.span {f} ∧
+        f ∈ nonZeroDivisors Γ(C, (W' c).1) := by
+    intro c i _
+    obtain ⟨f, h1, h2⟩ := hWprin c i
+    obtain ⟨h3, h4⟩ := sectionsIdealAux_basicOpen_span_nzd h1 h2 (tW c)
+    exact ⟨_, h3, h4⟩
+  have htop' : ∀ c : ↥G, ∀ i ∉ gs c, (Scheme.Hom.ker (P i).1).ideal (W' c) = ⊤ := by
+    intro c i hi
+    have hne : (P i).1.base s ≠ ↑c := fun h ↦
+      hi (Finset.mem_filter.mpr ⟨Finset.mem_univ i, h⟩)
+    haveI : IsClosedImmersion (P i).1 := sectionsIdealAux_isClosedImmersion (P i).2
+    refine sectionsIdealAux_ideal_eq_top_of_disjoint _ _ ?_
+    have h1 : ((Scheme.Hom.ker (P i).1).support : Set C) = Set.range (P i).1.base := by
+      rw [Scheme.Hom.support_ker]
+      exact (P i).1.isClosedEmbedding.isClosed_range.closure_eq
+    rw [h1]
+    exact (hWdisj c i hne).mono_right (hWsub c)
+  -- STEP 8: the coordinate ring of `q ⁻¹ᵁ U` is free of rank `n`
+  letI algU : Algebra Γ(S, U.1) Γ(K.subscheme, q ⁻¹ᵁ U.1) := (q.app U.1).hom.toAlgebra
+  letI algP : ∀ c : ↥G, Algebra Γ(S, U.1) Γ(K.subscheme, piece c) :=
+    fun c ↦ (q.appLE U.1 (piece c) (hple c)).hom.toAlgebra
+  letI algW : ∀ c : ↥G, Algebra Γ(S, U.1) Γ(C, (W' c).1) :=
+    fun c ↦ (π.appLE U.1 (W' c).1 (hW'le c)).hom.toAlgebra
+  have hpiecefree : ∀ c : ↥G, Nonempty
+      (Γ(K.subscheme, piece c) ≃ₗ[Γ(S, U.1)] (Fin (gs c).card → Γ(S, U.1))) := by
+    intro c
+    obtain ⟨eC⟩ := sectionsIdealAux_piece_free π P U (W' c) (hW'le c) (gs c)
+      (hsec' c) (hprin' c) (htop' c) rfl
+    have hcomp : q.appLE U.1 (piece c) (hple c) ≫ (K.subschemeObjIso (W' c)).hom
+        = π.appLE U.1 (W' c).1 (hW'le c) ≫
+          CommRingCat.ofHom (Ideal.Quotient.mk (K.ideal (W' c))) := by
+      have h1 : q.appLE U.1 (piece c) (hple c)
+          = π.appLE U.1 (W' c).1 (hW'le c) ≫
+            K.subschemeι.appLE (W' c).1 (piece c) le_rfl := by
+        rw [Scheme.Hom.appLE_comp_appLE]
+      have h2 : K.subschemeι.appLE (W' c).1 (piece c) le_rfl = K.subschemeι.app (W' c).1 :=
+        Scheme.Hom.appLE_eq_app _
+      rw [h1, h2, K.subschemeι_app (W' c), Category.assoc, Category.assoc,
+        Iso.inv_hom_id, Category.comp_id]
+    have hf : ∀ r : Γ(S, U.1),
+        (K.subschemeObjIso (W' c)).commRingCatIsoToRingEquiv (algebraMap _ _ r)
+          = algebraMap Γ(S, U.1) (Γ(C, (W' c).1) ⧸ K.ideal (W' c)) r := by
+      intro r
+      exact congrArg (fun w : Γ(S, U.1) ⟶ CommRingCat.of (Γ(C, (W' c).1) ⧸ K.ideal (W' c)) ↦
+        w.hom r) hcomp
+    exact ⟨(AlgEquiv.ofRingEquiv hf).toLinearEquiv.trans eC⟩
+  have hglue := TopCat.Sheaf.bijective_restrict_pi_of_pairwise_disjoint K.subscheme.sheaf
+    piece (q ⁻¹ᵁ U.1) hple hcover.le hdisj
+  set eglueRing : Γ(K.subscheme, q ⁻¹ᵁ U.1) ≃+* ((c : ↥G) → Γ(K.subscheme, piece c)) :=
+    RingEquiv.ofBijective (RingHom.pi fun c : ↥G ↦
+      (K.subscheme.presheaf.map (homOfLE (hple c)).op).hom) hglue with heglueRing
+  have hgluecompat : ∀ r : Γ(S, U.1),
+      eglueRing (algebraMap _ _ r)
+        = algebraMap Γ(S, U.1) ((c : ↥G) → Γ(K.subscheme, piece c)) r := by
+    intro r
+    funext c
+    show (K.subscheme.presheaf.map (homOfLE (hple c)).op).hom ((q.app U.1).hom r)
+      = (q.appLE U.1 (piece c) (hple c)).hom r
+    have h1 : q.app U.1 ≫ K.subscheme.presheaf.map (homOfLE (hple c)).op
+        = q.appLE U.1 (piece c) (hple c) := by
+      rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map]
+    exact congrArg (fun w : Γ(S, U.1) ⟶ Γ(K.subscheme, piece c) ↦ w.hom r) h1
+  have hcard : Fintype.card ((c : ↥G) × Fin ((gs c).card)) = n := by
+    rw [Fintype.card_sigma]
+    simp only [Fintype.card_fin]
+    have h1 := Finset.card_eq_sum_card_fiberwise
+      (f := fun i : Fin n ↦ (P i).1.base s) (s := Finset.univ) (t := G)
+      (fun i _ ↦ Finset.mem_image_of_mem _ (Finset.mem_univ i))
+    rw [Finset.card_univ, Fintype.card_fin] at h1
+    rw [← Finset.sum_attach G
+      (fun c ↦ (Finset.univ.filter fun i ↦ (P i).1.base s = c).card)] at h1
+    rw [Finset.univ_eq_attach]
+    exact h1.symm
+  have efinal : Nonempty
+      (Γ(K.subscheme, q ⁻¹ᵁ U.1) ≃ₗ[Γ(S, U.1)] (Fin n → Γ(S, U.1))) := by
+    refine ⟨(AlgEquiv.ofRingEquiv hgluecompat).toLinearEquiv.trans
+      ((LinearEquiv.piCongrRight fun c ↦ (hpiecefree c).some).trans
+        (((LinearEquiv.piCurry Γ(S, U.1)
+            fun (c : ↥G) (_ : Fin (gs c).card) ↦ Γ(S, U.1)).symm).trans
+          (LinearEquiv.piCongrLeft Γ(S, U.1) (fun _ : Fin n ↦ Γ(S, U.1))
+            (Fintype.equivFinOfCardEq hcard))))⟩
+  -- STEP 9: conclusions
+  obtain ⟨efree⟩ := efinal
+  refine ⟨U, hsu₀, haff, ?_, ?_, ?_, ?_⟩
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
+    exact RingHom.finite_algebraMap.mpr (Module.Finite.equiv efree.symm)
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
+    exact RingHom.flat_algebraMap_iff.mpr (Module.Flat.of_linearEquiv efree)
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
+    haveI := Module.FinitePresentation.of_equiv efree.symm
+    exact RingHom.finitePresentation_algebraMap.mpr inferInstance
+  · intro p
+    haveI := p.nontrivial
+    rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom, RingHom.finrank_algebraMap,
+      Module.rankAtStalk_eq_of_equiv efree, Module.rankAtStalk_eq_finrank_of_free]
+    simp
+
+
+/-- The isomorphism square: a restriction of `q` over an affine open with affine preimage
+is a pullback of the `Spec` of its ring map. -/
+private lemma sectionsIdealAux_isPullback {X : Scheme.{u}} (q : X ⟶ S) (U : S.affineOpens)
+    (haff : IsAffineOpen (q ⁻¹ᵁ U.1)) :
+    IsPullback ((q ⁻¹ᵁ U.1).toSpecΓ) (q ∣_ U.1) (Spec.map (q.app U.1)) ((U.1).toSpecΓ) := by
+  haveI h1 : IsIso ((q ⁻¹ᵁ U.1).toSpecΓ) := haff.isoSpec_hom ▸ inferInstance
+  haveI h2 : IsIso ((U.1).toSpecΓ) := U.2.isoSpec_hom ▸ inferInstance
+  exact IsPullback.of_horiz_isIso ⟨Scheme.Opens.toSpecΓ_naturality q U.1⟩
+
+
 /-- **Register box (T-D3/T-D1, finiteness; KM 1.2.2 + 1.2.3)**: over a separated smooth
 relative curve the product of the section ideals cuts out a subscheme finite over the
 base. KM 1.2.3 (verbatim quote banked on T-D3): *"Let `D ⊆ C` be a closed sub-scheme
 which is finite and flat over `S`, and of finite presentation over `S`. Then `D` is an
 effective Cartier divisor in `C/S` … Conversely every effective Cartier divisor in
-`C/S` which is proper over `S` is of this form."* Discharge is the T-D1 route
-(invertible ideal sheaves, API gap AG-LB). -/
+`C/S` which is proper over `S` is of this form."* Discharged by the multi-section chart
+route (`sectionsIdealAux_exists_chart`): affine-locally on `S` the subscheme is a disjoint
+union of closed subschemes of affine charts on which the ideal is principal on a
+nonzerodivisor (T-D22), hence affine with coordinate ring free of rank `n` by the
+KM 1.1.2 filtration. -/
 theorem sectionsIdeal_isFinite (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
-    IsFinite ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by sorry
+    IsFinite ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
+  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
+  · rw [eq_top_iff]
+    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
+  · intro s
+    haveI : IsFinite (Spec.map
+        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
+      (IsFinite.SpecMap_iff _).mpr (hFin s)
+    exact MorphismProperty.of_isPullback
+      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
 
 /-- **Register box (T-D3/T-D1, flatness; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
 theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
-    Flat ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by sorry
+    Flat ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
+  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
+  · rw [eq_top_iff]
+    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
+  · intro s
+    haveI : Flat (Spec.map
+        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
+      Flat.SpecMap_iff.mpr (hFlat s)
+    exact MorphismProperty.of_isPullback
+      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
 
 /-- **Register box (T-D3/T-D1, finite presentation; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
@@ -946,18 +1523,44 @@ theorem sectionsIdeal_lfp (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     LocallyOfFinitePresentation ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
-  sorry
+  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
+  · rw [eq_top_iff]
+    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
+  · intro s
+    haveI : LocallyOfFinitePresentation (Spec.map
+        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
+      (LocallyOfFinitePresentation.SpecMap_iff _).mpr (hFP s)
+    exact MorphismProperty.of_isPullback
+      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
 
 /-- **Register box (T-D3, degree; KM 1.2.6)**: the divisor sum has rank `n` — KM 1.2.6
 (verbatim quote banked on T-D3): *"`deg(D₁ + D₂) = deg(D₁) + deg(D₂)`"*, applied `n`
-times to the degree-1 section divisors (`sectionDivisor_degree`); the SES argument
-consumes the invertibility of the ideals (AG-LB), same gate as the other boxes. -/
+times to the degree-1 section divisors (`sectionDivisor_degree`); discharged via the
+rank-`n` local freeness of the chart route (`sectionsIdealAux_exists_chart`), whose SES
+splitting is `Function.Exact.nonempty_linearEquiv_prod_of_projective` (T-D24). -/
 theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
     haveI := sectionsIdeal_isFinite π hsm P
     haveI := sectionsIdeal_flat π hsm P
-    ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).finrank s = n := by sorry
+    ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).finrank s = n := by
+  haveI := sectionsIdeal_isFinite π hsm P
+  haveI := sectionsIdeal_flat π hsm P
+  obtain ⟨U, hsU, haff, hFin, hFlat, hFP, hrank⟩ := sectionsIdealAux_exists_chart π hsm P s
+  set q := (∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π with hq
+  haveI : IsFinite (Spec.map (q.app U.1)) := (IsFinite.SpecMap_iff _).mpr (hFin)
+  haveI : Flat (Spec.map (q.app U.1)) := Flat.SpecMap_iff.mpr (hFlat)
+  have h1 : q.finrank s = (q ∣_ U.1).finrank ⟨s, hsU⟩ := by
+    have h0 := Scheme.Hom.finrank_of_isPullback ((q ⁻¹ᵁ U.1).ι) (q ∣_ U.1) q ((U.1).ι)
+      (isPullback_morphismRestrict q U.1).flip ⟨s, hsU⟩
+    rw [h0]
+    rfl
+  have h2 : (q ∣_ U.1).finrank ⟨s, hsU⟩
+      = (Spec.map (q.app U.1)).finrank ((U.1).toSpecΓ ⟨s, hsU⟩) :=
+    Scheme.Hom.finrank_of_isPullback _ _ _ _ (sectionsIdealAux_isPullback q U haff) ⟨s, hsU⟩
+  rw [h1, h2, Scheme.Hom.finrank_SpecMap_eq_finrank (hFin) (hFlat)]
+  exact hrank _
 
 open scoped Classical in
 noncomputable def sectionsDivisor (π : C ⟶ S) {n : ℕ}
