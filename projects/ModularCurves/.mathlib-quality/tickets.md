@@ -4770,18 +4770,21 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     Leaf **L-0a** (decomposition.md).
 
 - **[T-W7.0b]** negation on the model — `negModelHom` + `_π`, involution, `_zero`,
-  `_specPoints` (GroupLawConstruction.lean:197–244 — pointer refreshed per coordinator 1a).
-  - **Status**: in_progress (3/5 decls DONE) · **Claimed**: beastmode-B (lane P0),
-    2026-07-07T14:05Z. **DONE (axiom-clean, committed)**: `negModelHom` (def), `negModelHom_π`
+  `_specPoints` (GroupLawConstruction.lean:346–430 — pointer refreshed per coordinator 1a).
+  - **Status**: in_progress (4/5 decls DONE) · **Claimed**: beastmode-B (lane P0),
+    2026-07-07T16:55Z. **DONE (axiom-clean, committed)**: `negModelHom` (def), `negModelHom_π`
     (7ddc51b6, via new ForMathlib `map_comp_toSpecZero` 25a8a4c9 + `awayMap_fromZeroRingHom`
-    d627068f + `gradedRingHomZero`), `negModelHom_negModelHom` (involution). **`_zero`**: decomposed
-    + infra landed — `allNeg{Vec,GradedQuot,…}` (the `(−1)`-rescaling ρ) + `projModelZeroEval_neg_eq_allNeg`
-    (ring-eq, both evals to `(0,−1,0)`) all sorry-free in GLC; remaining = two reusable lemmas
-    (L-0b-zero-N `fromOfGlobalSections`-naturality-under-`Proj.map` [ForMathlib]; L-0b-zero-ρ
-    `Proj.map allNegGradedQuot = 𝟙`) + the short assembly (routes in the `negModelHom_zero`
-    in-file comment). **`_specPoints`**: blocked on T-W7.0f (opaque `projModelPointsEquiv`) ·
+    d627068f + `gradedRingHomZero`), `negModelHom_negModelHom` (involution), **`negModelHom_zero`
+    PROVED** (swept into HEAD). `_zero` infra all axiom-clean: (N) ForMathlib
+    `Proj.fromOfGlobalSections_map` + `irrelevant_map_comp_toRingHom_eq_top` (9bae1c62), (ρ=id)
+    ForMathlib `Proj.map_negScaling_eq_id`/`map_degScaling_eq_id` "unit-rescaling ⇒ id on Proj"
+    (f32dbc1e), (=) `projModelZeroEval_neg_eq_allNeg`, plus GLC helpers `allNegVec_smul_of_homogeneous`
+    (aeval of `−X` scales homogeneous deg-`d` by `(−1)^d`), `allNegGradedQuot_scale`, `allNeg_map_id`.
+    **`_specPoints`**: UNBLOCKED — P2 landed the real `projModelPointsEquiv` (+ `_zero`/`_some`
+    value lemmas); now in progress: split on `InZChart`, Z-chart = projectivised `negY`, infinity
+    = `negModelHom_zero`. Needs a Z-chart-coordinate-of-`negModelHom` sub-lemma (spawn). ·
     **File**: GroupLawConstruction.lean · **Depends**:
-    T-W7.0a (done; specPoints also T-W7.0f) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
+    T-W7.0a (done; specPoints also T-W7.0f, now done) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
   - Sketch: projectivise `[X : −Y−a₁X−a₃Z : Z]` via the `baseChangeGradedHom` template
     (`WeierstrassModel.lean:1657`, PROVEN pattern); points-spec by the `projModel_points`
     chart analysis. Δ-free except specPoints. Leaf **L-0b**.
@@ -5785,7 +5788,22 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
 
 ### [T-GF6] openness of the flat locus (Stacks 00RC = Thm 10.129.4)
 - **Status**: open · **Depends on**: T-GF5 · **Type**: theorem
-- **Source CONFIRMED (fetched)**: Stacks Thm 10.129.4 (tag 00RC), §10.129 "Openness of the
+- **Status**: BLOCKED-ON-FOUNDATION (beastmode-D2 2026-07-07, delegate + verified). Setup
+  landed in `ForMathlib/FlatLocus.lean`: `flat_localizedModule_of_flat` (the flat-localization
+  ENGINE — R-flat survives localizing at any S-submonoid, axiom-clean, mathlib-worthy),
+  `flatLocus_stableUnderGeneralization`, `basicOpen_subset_flatLocus_of_free` (generic-flatness
+  neighbourhood, axiom-clean). But **`isOpen_flatLocus` is BOXED** and CANNOT be closed without
+  the **LOCAL CRITERION OF FLATNESS** (Stacks 00MK/039A; Matsumura Thm 22.3; EGA IV): the
+  generic-flatness→openness reduction needs to reconcile `flat over R⧸𝔭` with `flat over R`,
+  which is Tor-theoretic (`Tor₁^R(M, R⧸𝔭) = 0`). **VERIFIED mathlib-absent**: only abstract
+  monoidal-category `CategoryTheory/Monoidal/Tor.lean` exists — NO commutative-ring `Tor₁`, NO
+  local criterion (grep decisive). EVERY route to 00RC hits this: the classical
+  generic-flatness route AND Stacks 00RC's own resolution route (00MH/00MI) both need it. This
+  is the TRUE FOUNDATIONAL BOTTOM under the box: box ← 07RF ← 00RC ← **local criterion / commutative
+  Tor** — a published-theorem-scale, multi-week+ mathlib-library development (a recognized major
+  gap). Generic flatness (GF5, built) does NOT suffice — it doesn't provide the criterion.
+  **This is a B3 OFF-TRACK boundary** (see beastmode report). ORIGINAL note follows —
+  **Source CONFIRMED (fetched)**: Stacks Thm 10.129.4 (tag 00RC), §10.129 "Openness of the
   flat locus". Statement: R Noetherian, S fp over R, M fp S-module ⟹ `{𝔮 ∈ Spec S : M_𝔮 flat
   over R}` is open. **ROUTE DECISION (source-study finding)**: Stacks 00RC's OWN proof does
   NOT use generic flatness — it uses finite-free-resolutions + the LOCAL FLATNESS CRITERION
