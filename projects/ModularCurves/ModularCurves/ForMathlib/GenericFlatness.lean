@@ -652,16 +652,17 @@ Noether-normalising the generic fibre `B ⊗_R Frac R` over `Frac R`
 (`d = trdeg R B`, so `d ≤ trdeg R B`) with `P ↪ B` over which `B` becomes module-finite after
 clearing denominators / inverting one nonzero element of `R` (generic finiteness), and the finite
 torsion cokernel `N` of a free `P`-submodule `P^r ↪ B`, annihilated by a nonzero `g ∈ P`
-(`exists_smul_eq_zero_of_notMem_support`, GF4), *together with* the reduction of `GF R B` to
-`GF R N` provided by the short exact sequence `0 → P^r → B → N → 0` (`P^r` is `R`-free by
-`GF.of_free`, so `GF.of_exact` reduces the middle term to the cokernel).
+(`exists_smul_eq_zero_of_notMem_support`, GF4), together with the defining short exact sequence
+`0 → P^r → B → N → 0` (the free part `F = P^r`, its `R`-freeness, and the two `R`-linear maps with
+injectivity/surjectivity/exactness).
 
-Bundled as a structure so it carries the module instances on `N`. This packages precisely the
-commutative-algebra input still missing from mathlib — the generic-finiteness descent and the
+Bundled as a structure so it carries the module instances on `N` and `F`. This packages precisely
+the commutative-algebra input still missing from mathlib — the generic-finiteness descent and the
 choice of the free `P`-submodule with finite torsion cokernel — as the single `sorry` of the
-domain case. Everything the induction is assembled *from* (GF1–GF4, `trdeg_quotient_prime_lt`, the
-transcendence recursion `gf_of_finite_module_killed`, the base cases, and all localisation
-bookkeeping) is proved. -/
+domain case. Everything the induction is assembled *from* is proved: GF1–GF4,
+`trdeg_quotient_prime_lt`, the transcendence recursion `gf_of_finite_module_killed`, the base
+cases, the reduction of the sequence to the cokernel (`GF.of_free` + `GF.of_exact`, GF2), and all
+localisation bookkeeping. -/
 private structure GFDatum (R : Type u) [CommRing R] (B : Type u) [CommRing B] [Algebra R B] where
   /-- Transcendence degree of the generic fibre / number of Noether coordinates. -/
   d : ℕ
@@ -676,30 +677,45 @@ private structure GFDatum (R : Type u) [CommRing R] (B : Type u) [CommRing B] [A
   g : MvPolynomial (Fin d) R
   hg : g ≠ 0
   hgN : ∀ x : N, g • x = 0
-  /-- The short exact sequence `0 → P^r → B → N → 0` reduces `GF R B` to `GF R N`. -/
-  reduce : (letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R)); GF R N)
-    → GF R B
+  /-- The free `R`-module `P^r` (the polynomial ring `P` is `R`-free, hence so is `P^r`). -/
+  F : Type u
+  addF : AddCommGroup F
+  modF : Module R F
+  freeF : Module.Free R F
+  /-- The defining short exact sequence `0 → F → B → N → 0` (`F = P^r`), with `N` regarded as an
+  `R`-module through `R → P`. -/
+  fF : F →ₗ[R] B
+  gN : letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R)); B →ₗ[R] N
+  hfF : Function.Injective fF
+  hsurj : letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R))
+    Function.Surjective gN
+  hexact : letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R))
+    Function.Exact fF gN
 
 /-- **The domain case, injective core** (Stacks 051R main step, GF5 heart).
 
 `B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B`. Given the boxed
 geometric data `GFDatum R B` and generic freeness for every domain of strictly smaller
-transcendence degree (`IH`), `B` is generically free over `R`: the reduction `GFDatum.reduce`
-turns the goal into generic freeness of the torsion cokernel `N`, which is discharged by the
-transcendence recursion `gf_of_finite_module_killed` when `d ≥ 1` (`N` is a finite `P`-module
-killed by a nonzero `g ∈ P`), and by `GF.of_smul_eq_zero` when `d = 0` (then `P ≅ R` and `N` is
-`R`-torsion). -/
+transcendence degree (`IH`), `B` is generically free over `R`: the short exact sequence
+`0 → F → B → N → 0` with `F = P^r` free over `R` reduces the goal (`GF.of_exact` on `GF.of_free F`,
+GF2) to generic freeness of the torsion cokernel `N`, which is discharged by the transcendence
+recursion `gf_of_finite_module_killed` when `d ≥ 1` (`N` is a finite `P`-module killed by a nonzero
+`g ∈ P`), and by `GF.of_smul_eq_zero` when `d = 0` (then `P ≅ R` and `N` is `R`-torsion). -/
 private theorem gf_of_injective_domain {R : Type u} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     (B : Type u) [CommRing B] [IsDomain B] [Algebra R B] [Algebra.FiniteType R B]
     (hinj : Function.Injective (algebraMap R B))
     (IH : ∀ (C : Type u) [CommRing C] [IsDomain C] [Algebra R C] [Algebra.FiniteType R C],
       Algebra.trdeg R C < Algebra.trdeg R B → GF R C) :
     GF R B := by
-  obtain ⟨d, hdle, N, iN, mN, fN, g, hg, hgN, hreduce⟩ : GFDatum R B := sorry
-  refine hreduce ?_
+  obtain ⟨d, hdle, N, iN, mN, fN, g, hg, hgN, F, iF, mF, freeF, fF, gN, hfF, hsurj, hexact⟩ :
+    GFDatum R B := sorry
   letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R))
+  -- The short exact sequence `0 → F → B → N → 0` with `F = P^r` free reduces `GF R B` (GF2)
+  -- to generic freeness of the torsion cokernel `N`.
+  suffices hN : GF R N by exact GF.of_exact fF gN hfF hsurj hexact (GF.of_free F) hN
   rcases Nat.eq_zero_or_pos d with hd0 | hd1
-  · subst hd0
+  · -- `d = 0`: `P ≅ R`, so `N` is `R`-torsion (killed by a nonzero element of `R`).
+    subst hd0
     obtain ⟨f, hf0, hfg⟩ : ∃ f : R, f ≠ 0 ∧ algebraMap R (MvPolynomial (Fin 0) R) f = g := by
       refine ⟨MvPolynomial.isEmptyAlgEquiv R (Fin 0) g, ?_, ?_⟩
       · intro h; apply hg
@@ -710,7 +726,8 @@ private theorem gf_of_injective_domain {R : Type u} [CommRing R] [IsDomain R] [I
     refine GF.of_smul_eq_zero hf0 fun x => ?_
     show algebraMap R (MvPolynomial (Fin 0) R) f • x = 0
     rw [hfg]; exact hgN x
-  · exact gf_of_finite_module_killed hd1 hdle IH N hg hgN
+  · -- `d ≥ 1`: the transcendence recursion filters `N` into prime quotients of lower `trdeg`.
+    exact gf_of_finite_module_killed hd1 hdle IH N hg hgN
 
 /-- **Domain-case transcendence induction** (Stacks 051R main step, GF5): every domain `B` of
 finite type over the Noetherian domain `R` with `trdeg R B ≤ n` is generically free over `R`.
