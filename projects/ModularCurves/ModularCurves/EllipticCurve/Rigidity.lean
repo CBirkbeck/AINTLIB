@@ -812,15 +812,14 @@ map (`UniversallyOpen.of_flat`: `Flat` + `LocallyOfFinitePresentation` from prop
 a locally noetherian base); connectedness gives `U₁ = S`; the open factorizations glue
 along `⨆ = ⊤` since `eqLocusι` is a monomorphism (closed immersion), giving the global
 factorization. -/
-theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
-    (hconn : ConnectedSpace S)
+theorem exists_factor_of_forall_component [IsLocallyNoetherian S] [IsProper p] [Flat p]
     (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
     (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
-    (hgconst : g = p ≫ (e ≫ f)) (s : S)
-    (hseed : p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
+    (hgconst : g = p ≫ (e ≫ f))
+    (hseed : ∀ t : S, ∃ s ∈ connectedComponent t,
+      p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
     ∃ w : X ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = 𝟙 X := by
   classical
-  haveI := hconn
   -- the locus of set-theoretic fibrewise containment
   set U₁ : Set S := {t | p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base} with hU₁
   -- open, by the Krull-neighbourhood leaf
@@ -850,8 +849,13 @@ theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
     rw [hcompl]
     exact p.isOpenMap _
       (Scheme.Hom.isClosedEmbedding (eqLocusι f g hf hg)).isClosed_range.isOpen_compl
-  -- connectedness: the clopen locus containing `s` is everything
-  have huniv : U₁ = Set.univ := IsClopen.eq_univ ⟨hclosed, hopen⟩ ⟨s, hseed⟩
+  -- every connected component meets the clopen locus, so it is everything
+  have huniv : U₁ = Set.univ := by
+    rw [Set.eq_univ_iff_forall]
+    intro t
+    obtain ⟨s, hs_comp, hs_seed⟩ := hseed t
+    exact isPreconnected_connectedComponent.subset_isClopen ⟨hclosed, hopen⟩
+      ⟨s, hs_comp, hs_seed⟩ mem_connectedComponent
   -- choose a factorization neighbourhood around every point
   have hmem : ∀ t : S, p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base := fun t => by
     have ht : t ∈ U₁ := by rw [huniv]; trivial
@@ -897,6 +901,20 @@ theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
         congrArg (· ≫ eqLocusι f g hf hg) (𝒰.ι_glueMorphisms w₀ hcompat t)
     _ = ((p ⁻¹ᵁ U₀ t : X.Opens)).ι := hw₀ t
 
+/-- **(T-W7.r2·d, connected-base wrapper)** On a connected base one seed fibre suffices:
+its component is everything. -/
+theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
+    (hconn : ConnectedSpace S)
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+    (hgconst : g = p ≫ (e ≫ f)) (s : S)
+    (hseed : p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
+    ∃ w : X ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = 𝟙 X := by
+  refine exists_factor_of_forall_component hp e he f g hf hg hgconst (fun t => ⟨s, ?_, hseed⟩)
+  haveI := hconn
+  rw [PreconnectedSpace.connectedComponent_eq_univ t]
+  trivial
+
 end RigidityLeaves
 
 /-- **(T-W7.7a, GIT Prop 6.1, case 2)** The rigidity lemma: `S` connected and locally
@@ -922,6 +940,33 @@ theorem rigidity {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
     exact Category.comp_id p
   obtain ⟨w, hw⟩ := exists_factor_of_connected hconn hp e he f (p ≫ (e ≫ f)) hf hg rfl s
     (fibre_subset_eqLocus_of_collapsed hp e he f hf s hs)
+  calc f = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ f := by rw [hw, Category.id_comp]
+    _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ f) := Category.assoc _ _ _
+    _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ (p ≫ (e ≫ f))) :=
+        congrArg (w ≫ ·) (eqLocusι_comp_eq f (p ≫ (e ≫ f)) hf hg)
+    _ = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ (p ≫ (e ≫ f)) := (Category.assoc _ _ _).symm
+    _ = p ≫ (e ≫ f) := by rw [hw, Category.id_comp]
+
+/-- **(T-W7.7a′, rigidity with a seed in every component)** The disconnected-base form of
+GIT Prop 6.1: if EVERY connected component of `S` contains a point whose fibre `f`
+collapses, then `f` factors through a section — the clopen good locus meets every
+component, so it is everything; no connectedness needed. Engine for the componentwise
+canonicity glue (C4glue). -/
+theorem rigidity_of_forall_component {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
+    {p : X ⟶ S} [IsProper p] [Flat p] (hp : UniversallyOConnected p)
+    (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    {q : Y ⟶ S} [IsSeparated q] (f : X ⟶ Y) (hf : f ≫ q = p)
+    (hs : ∀ t : S, ∃ s ∈ connectedComponent t,
+      Set.Subsingleton (f.base '' (p.base ⁻¹' {s}))) :
+    ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
+  refine ⟨e ≫ f, by rw [Category.assoc, hf, he], ?_⟩
+  have hg : (p ≫ (e ≫ f)) ≫ q = p := by
+    rw [Category.assoc, Category.assoc, hf, he]
+    exact Category.comp_id p
+  obtain ⟨w, hw⟩ := exists_factor_of_forall_component hp e he f (p ≫ (e ≫ f)) hf hg rfl
+    (fun t => by
+      obtain ⟨s, hscomp, hssub⟩ := hs t
+      exact ⟨s, hscomp, fibre_subset_eqLocus_of_collapsed hp e he f hf s hssub⟩)
   calc f = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ f := by rw [hw, Category.id_comp]
     _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ f) := Category.assoc _ _ _
     _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ (p ≫ (e ≫ f))) :=
