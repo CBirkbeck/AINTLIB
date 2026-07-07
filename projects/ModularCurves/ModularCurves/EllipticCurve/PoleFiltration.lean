@@ -424,6 +424,161 @@ lemma infChart_root_mem_nonZeroDivisors (W : WeierstrassCurve R) :
   constructor <;> intro x hx <;>
     simpa [neg_eq_zero] using hx
 
+/-- Nonzerodivisors transport backwards along ring equivalences. -/
+lemma mem_nonZeroDivisors_of_ringEquiv {A B : Type*} [CommRing A] [CommRing B]
+    (e : A ≃+* B) {x : A} (h : e x ∈ nonZeroDivisors B) : x ∈ nonZeroDivisors A := by
+  rw [mem_nonZeroDivisors_iff] at h ⊢
+  constructor <;> intro z hz
+  · exact e.injective (by
+      simpa using h.1 (e z) (by rw [← map_mul, hz, map_zero]))
+  · exact e.injective (by
+      simpa using h.2 (e z) (by rw [← map_mul, hz, map_zero]))
+
+/-! ### The chart-0 (`X`-chart) bridge: `z`-outer presentation -/
+
+/-- The chart-0 index bijection: `z ↦ 0` (outer), `y ↦ 1` (inner). -/
+def zChartIndexEquiv : {k : Fin 3 // k ≠ 0} ≃ Fin 2 where
+  toFun k := if k.1 = 2 then 0 else 1
+  invFun i := if i = 0 then ⟨2, by decide⟩ else ⟨1, by decide⟩
+  left_inv := by decide
+  right_inv := by decide
+
+/-- The chart-0 polynomial ring as an iterated polynomial ring, `z` outer. -/
+noncomputable def zChartPolyEquiv :
+    MvPolynomial {k : Fin 3 // k ≠ 0} R ≃ₐ[R] Polynomial (Polynomial R) :=
+  (MvPolynomial.renameEquiv R zChartIndexEquiv).trans <|
+    (MvPolynomial.finSuccEquiv R 1).trans <|
+      Polynomial.mapAlgEquiv (MvPolynomial.uniqueAlgEquiv R (Fin 1))
+
+@[simp]
+lemma zChartPolyEquiv_X_z :
+    zChartPolyEquiv (R := R) (MvPolynomial.X ⟨2, by decide⟩) = Polynomial.X := by
+  simp [zChartPolyEquiv, zChartIndexEquiv, MvPolynomial.finSuccEquiv_X_zero]
+
+@[simp]
+lemma zChartPolyEquiv_X_y :
+    zChartPolyEquiv (R := R) (MvPolynomial.X ⟨1, by decide⟩) =
+      Polynomial.C Polynomial.X := by
+  simp [zChartPolyEquiv, zChartIndexEquiv]
+  rw [show ((1 : Fin 2) : Fin 2) = Fin.succ 0 from rfl, MvPolynomial.finSuccEquiv_X_succ]
+  simp
+
+/-- The chart-0 dehomogenised cubic, explicitly:
+`y²z + a₁yz + a₃yz² − (1 + a₂z + a₄z² + a₆z³)`. -/
+lemma dehomogenizeAux_zero_projective_polynomial (W : WeierstrassCurve R) :
+    MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial =
+      MvPolynomial.X ⟨1, by decide⟩ ^ 2 * MvPolynomial.X ⟨2, by decide⟩ +
+        MvPolynomial.C W.toProjective.a₁ * MvPolynomial.X ⟨1, by decide⟩ *
+          MvPolynomial.X ⟨2, by decide⟩ +
+        MvPolynomial.C W.toProjective.a₃ * MvPolynomial.X ⟨1, by decide⟩ *
+          MvPolynomial.X ⟨2, by decide⟩ ^ 2 -
+        (1 + MvPolynomial.C W.toProjective.a₂ * MvPolynomial.X ⟨2, by decide⟩ +
+          MvPolynomial.C W.toProjective.a₄ * MvPolynomial.X ⟨2, by decide⟩ ^ 2 +
+          MvPolynomial.C W.toProjective.a₆ * MvPolynomial.X ⟨2, by decide⟩ ^ 3) := by
+  rw [show W.toProjective.polynomial =
+    MvPolynomial.X 1 ^ 2 * MvPolynomial.X 2 +
+      MvPolynomial.C W.toProjective.a₁ * MvPolynomial.X 0 * MvPolynomial.X 1 *
+        MvPolynomial.X 2 +
+      MvPolynomial.C W.toProjective.a₃ * MvPolynomial.X 1 * MvPolynomial.X 2 ^ 2 -
+      (MvPolynomial.X 0 ^ 3 +
+        MvPolynomial.C W.toProjective.a₂ * MvPolynomial.X 0 ^ 2 * MvPolynomial.X 2 +
+        MvPolynomial.C W.toProjective.a₄ * MvPolynomial.X 0 * MvPolynomial.X 2 ^ 2 +
+        MvPolynomial.C W.toProjective.a₆ * MvPolynomial.X 2 ^ 3) from rfl]
+  simp only [map_add, map_sub, map_mul, map_pow, MvPolynomial.dehomogenizeAux_C,
+    MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne R 0 (show (1 : Fin 3) ≠ 0 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne R 0 (show (2 : Fin 3) ≠ 0 by decide)]
+  ring
+
+/-- The chart-0 cubic in the `z`-outer presentation (NOT monic in `z`; only its constant
+coefficient `−1` matters). -/
+noncomputable def zChartCubic (W : WeierstrassCurve R) : Polynomial (Polynomial R) :=
+  Polynomial.C (Polynomial.X ^ 2 + Polynomial.C W.a₁ * Polynomial.X -
+      Polynomial.C W.a₂) * Polynomial.X +
+    Polynomial.C (Polynomial.C W.a₃ * Polynomial.X - Polynomial.C W.a₄) * Polynomial.X ^ 2 -
+    Polynomial.C (Polynomial.C W.a₆) * Polynomial.X ^ 3 - 1
+
+lemma zChartPolyEquiv_dehomogenize (W : WeierstrassCurve R) :
+    zChartPolyEquiv (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial) =
+      zChartCubic W := by
+  rw [dehomogenizeAux_zero_projective_polynomial]
+  have hC : ∀ r : R, zChartPolyEquiv (MvPolynomial.C r) =
+      Polynomial.C (Polynomial.C r) := fun r => by
+    have := (zChartPolyEquiv (R := R)).commutes r
+    simpa [MvPolynomial.algebraMap_eq, Polynomial.algebraMap_eq] using this
+  unfold zChartCubic
+  simp only [map_add, map_sub, map_mul, map_pow, map_one, zChartPolyEquiv_X_z,
+    zChartPolyEquiv_X_y, hC]
+  ring
+
+lemma zChartCubic_coeff_zero (W : WeierstrassCurve R) :
+    (zChartCubic W).coeff 0 = -1 := by
+  unfold zChartCubic
+  simp only [Polynomial.coeff_sub, Polynomial.coeff_add, Polynomial.coeff_C_mul,
+    Polynomial.coeff_X_pow, Polynomial.coeff_X_zero, Polynomial.coeff_one_zero]
+  norm_num
+
+/-- The chart-0 quotient as `AdjoinRoot` of the `z`-outer cubic. -/
+noncomputable def zChartQuotEquiv (W : WeierstrassCurve R) :
+    (MvPolynomial {k : Fin 3 // k ≠ 0} R ⧸
+      Ideal.span {MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial}) ≃ₐ[R]
+        AdjoinRoot (zChartCubic W) :=
+  Ideal.quotientEquivAlg _ _ (zChartPolyEquiv (R := R)) <| by
+    rw [Ideal.map_span, Set.image_singleton,
+      show ((zChartPolyEquiv (R := R)) :
+          MvPolynomial {k : Fin 3 // k ≠ 0} R →+* Polynomial (Polynomial R))
+          (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial) =
+        zChartCubic W from zChartPolyEquiv_dehomogenize W]
+
+/-- **(chart-0 `z`-nonzerodivisor)** The class of the `Z/X`-coordinate in the chart-0 ring
+is a nonzerodivisor: the chart cubic has constant coefficient `−1` in the `z`-outer
+presentation. -/
+lemma zChart_z_nonZeroDivisor (W : WeierstrassCurve R) :
+    (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 0
+        W.toProjective.polynomial}) (MvPolynomial.X ⟨2, by decide⟩)) ∈
+      nonZeroDivisors (MvPolynomial {k : Fin 3 // k ≠ 0} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial}) := by
+  refine mem_nonZeroDivisors_of_ringEquiv (zChartQuotEquiv W).toRingEquiv ?_
+  show (zChartQuotEquiv W) (Ideal.Quotient.mk _ (MvPolynomial.X ⟨2, by decide⟩)) ∈
+    nonZeroDivisors (AdjoinRoot (zChartCubic W))
+  have hz : zChartQuotEquiv W (Ideal.Quotient.mk _
+      (MvPolynomial.X ⟨2, by decide⟩)) = AdjoinRoot.root (zChartCubic W) := by
+    show Ideal.quotientEquivAlg _ _ (zChartPolyEquiv (R := R)) _
+      (Ideal.Quotient.mk _ (MvPolynomial.X ⟨2, by decide⟩)) = _
+    rw [Ideal.quotientEquivAlg_mk, zChartPolyEquiv_X_z]
+    rfl
+  rw [hz]
+  refine adjoinRoot_root_mem_nonZeroDivisors ?_
+  rw [zChartCubic_coeff_zero]
+  rw [mem_nonZeroDivisors_iff]
+  constructor <;> intro x hx <;> simpa [neg_eq_zero] using hx
+
+/-- **(chart-1 `t`-nonzerodivisor, quotient spelling)** The class of the `Z/Y`-coordinate
+in the infinity-chart ring is a nonzerodivisor. -/
+lemma infChart_t_nonZeroDivisor (W : WeierstrassCurve R) :
+    (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
+        W.toProjective.polynomial}) (MvPolynomial.X infChartT)) ∈
+      nonZeroDivisors (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) := by
+  rcases subsingleton_or_nontrivial R with hR | hR
+  · haveI : Subsingleton (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) :=
+      Module.subsingleton R _
+    rw [mem_nonZeroDivisors_iff]
+    exact ⟨fun z _ => Subsingleton.elim _ _, fun z _ => Subsingleton.elim _ _⟩
+  · refine mem_nonZeroDivisors_of_ringEquiv (infChartQuotEquiv W).toRingEquiv ?_
+    show (infChartQuotEquiv W) (Ideal.Quotient.mk _ (MvPolynomial.X infChartT)) ∈
+      nonZeroDivisors (AdjoinRoot (infChartCubic W))
+    have ht : infChartQuotEquiv W (Ideal.Quotient.mk _
+        (MvPolynomial.X infChartT)) =
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X := by
+      show Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+        (Ideal.Quotient.mk _ (MvPolynomial.X infChartT)) = _
+      rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_t]
+      rfl
+    rw [ht]
+    exact infChart_t_mem_nonZeroDivisors W
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
@@ -528,7 +683,33 @@ lemma chart_isLocalizationElem_nonZeroDivisor (W : WeierstrassCurve R) (j : Fin 
         (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W 2) ∈
       nonZeroDivisors (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))) := by
-  sorry
+  obtain rfl | rfl | rfl : j = 0 ∨ j = 1 ∨ j = 2 := by omega
+  · -- chart 0: the z-coordinate, via the z-outer bridge
+    refine mem_nonZeroDivisors_of_ringEquiv (chartCoordEquiv W 0).symm ?_
+    have hkey : (chartCoordEquiv W 0).symm (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 0) (mk_X_mem_quotientGrading_one W 2)) =
+        Ideal.Quotient.mk _ (MvPolynomial.X (⟨2, by decide⟩ : {k : Fin 3 // k ≠ 0})) := by
+      rw [RingEquiv.symm_apply_eq]
+      exact (chartCoordEquiv_mk_X W 0 ⟨2, by decide⟩).symm
+    exact hkey.symm ▸ zChart_z_nonZeroDivisor W
+  · -- chart 1: the t-coordinate, via the infinity-chart bridge
+    refine mem_nonZeroDivisors_of_ringEquiv (chartCoordEquiv W 1).symm ?_
+    have hkey : (chartCoordEquiv W 1).symm (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+        Ideal.Quotient.mk _ (MvPolynomial.X infChartT) := by
+      rw [RingEquiv.symm_apply_eq]
+      exact (chartCoordEquiv_mk_X W 1 infChartT).symm
+    exact hkey.symm ▸ infChart_t_nonZeroDivisor W
+  · -- chart 2: the element is 1
+    have h1 : HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 2) = 1 := by
+      apply HomogeneousLocalization.val_injective
+      rw [HomogeneousLocalization.Away.val_mk, HomogeneousLocalization.val_one,
+        show (1 : Localization (Submonoid.powers ((quotientGradingHom (projIdeal W))
+          (MvPolynomial.X 2)))) = Localization.mk 1 1 from Localization.mk_one.symm,
+        Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+      exact ⟨1, by push_cast; ring⟩
+    exact h1.symm ▸ Submonoid.one_mem _
 
 theorem projModel_hom_ext_of_affine (W : WeierstrassCurve R) {Z : Scheme.{u}}
     [Z.IsSeparated] {f g : projModel W ⟶ Z}

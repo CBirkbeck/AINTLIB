@@ -4849,7 +4849,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `projModel_hom_ext_of_affine`, `locallyWeierstrass_pushforward_O_eq_O`
   (PoleFiltration.lean:85–117).
   - **Status**: in_progress (lane P3 — THIS session, beastmode-A 2026-07-07) ·
-    **Depends**: T-W7.0i-a (done), T-W7.0i-b1..b4 (spawned below) · **Type**: 4 lemmas
+    **Depends**: T-W7.0i-a (done), T-W7.0i-b1..b4 (b1, b2 done) · **Type**: 4 lemmas
+  - **Progress** (2026-07-07, session cont.): **2 of 4 leaves FULLY PROVEN, axiom-clean**:
+    `infChart_s_nonZeroDivisor` (transport along the b1 bridge) and
+    `projModel_hom_ext_of_affine` — the latter END-TO-END: general
+    `spec_hom_ext_of_nonZeroDivisor` (equalizer-closed-immersion + appTop-injectivity ending,
+    any `IsLocalization.Away` presentation) + mathlib Proj overlap API
+    (`SpecMap_awayMap_awayι`, `Away.isLocalization_mul`) + per-chart ζ-nzd
+    (`chart_isLocalizationElem_nonZeroDivisor`: j=0 via NEW z-outer chart-0 bridge
+    `zChartQuotEquiv` + coeff-0 = −1 unit trick; j=1 via infChart t-transport with
+    subsingleton split; j=2 via isLocalizationElem-self = 1). Recurrent poison + antidotes
+    logged: fin_cases literal skew → omega-obtain; rw-in-big-motive → term-calc
+    calc/▸/congrArg; AlgEquiv-coe → `show`-recast at wrapper def. REMAINING: i3 `Γ ≅ R`
+    (b3 scheme plumbing + b4 equalizer core) and i5 pushforward.
   - **Progress**: 2026-07-07: execution decomposition — spawned b1–b4 (Tier A2/A4). SKEW
     FOUND: `hom_ext_of_affine` consumes the *t*-coordinate (and chart-0 *z*-) nonzerodivisor,
     not the skeleton's s-version (which serves 1b's filtration side; kept, still true). Both
