@@ -5273,6 +5273,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     from mathlib (verified 2026-07-07): build via sheaf-gluing on the two-clopen cover
     (`Γ(C ⊔ Cᶜ) ≅ Γ(C) × Γ(Cᶜ)`, glue `(1,0)`), est. 80–120 lines, its own leaf. `p`
     open (`UniversallyOpen.of_flat`) + closed (proper) as in r2·d.
+  - **P5 supply note (2026-07-07, commit b182e1a5)** — the *topological* core is now a general
+    reusable lemma, `ForMathlib/ConnectedTotalSpace.lean`:
+    `connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage`
+    `(IsOpenMap f) (IsClosedMap f) [ConnectedSpace Y] (∀ y, IsConnected (f ⁻¹' {y})) : ConnectedSpace X`
+    (axiom-clean; mathlib `CardComponents` has only the vacuous cardinality bound). It packages
+    the "clopen image is clopen = full base, splits a connected fibre" argument once, so the
+    scheme wrapper reduces to: `p` open+closed (as noted) + per-fibre `IsConnected (p.base ⁻¹' t)`
+    via `Scheme.Hom.fiberHomeo` (already in mathlib) + the ONE idempotent-from-clopen leaf. Use
+    or ignore per the section-based route — **fable-P4 owns the wrapper + the idempotent leaf**;
+    this is offered as shared infra, not a claim on the ticket.
 
 - **[T-W7.7·C1]** GIT Cor 6.2 — `eq_mul_of_fibre_eq` (Rigidity.lean). **Status**: open ·
   **Depends**: T-W7.r2 · **Type**: theorem · Route: `rigidity` on the GIT quotient
