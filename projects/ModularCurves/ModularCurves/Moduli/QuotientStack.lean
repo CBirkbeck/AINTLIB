@@ -440,6 +440,120 @@ theorem trivialTorsorπ_finite [Finite G] (S : Scheme.{u}) :
     AlgebraicGeometry.IsFinite (trivialTorsorπ (G := G) S) :=
   isFinite_sigmaDesc_id S
 
+section TorsorComparison
+
+variable (S : Scheme.{u})
+
+/-- Stage A of the trivial-torsor comparison: distributing the pullback of the
+trivial projection over the second coproduct factor. The square exhibits
+`∐_k (∐_G S)` as `(∐_G S) ×_S (∐_G S)` via `(k, x) ↦ (x, π(x)-in-k-copy)`. -/
+private theorem trivialTorsor_distrib :
+    IsPullback
+      (Limits.Cofan.IsColimit.desc
+        (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
+        (fun _ => 𝟙 (∐ fun _ : G => S)))
+      (Limits.Cofan.IsColimit.desc
+        (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
+        (fun k => trivialTorsorπ S ≫
+          (Limits.Cofan.mk (∐ fun _ : G => S)
+            (Limits.Sigma.ι (fun _ : G => S))).inj k))
+      (trivialTorsorπ S) (trivialTorsorπ S) :=
+  (FinitaryPreExtensive.isUniversal_finiteCoproducts
+      (Limits.coproductIsCoproduct (fun _ : G => S))
+      ).isPullback_of_isColimit_left
+    (f := fun _ : G => 𝟙 S)
+    (u := trivialTorsorπ S)
+    (v := trivialTorsorπ S)
+    (q₁ := fun _ : G => 𝟙 (∐ fun _ : G => S))
+    (q₂ := fun _ : G => trivialTorsorπ S)
+    (fun _ => IsPullback.of_horiz_isIso
+      ⟨by rw [Category.id_comp, Category.comp_id]⟩)
+    (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
+    (fun i => Limits.Sigma.ι_desc _ _)
+
+/-- The reindexing `(γ, h) ↦ (h, h·γ)` of the double coproduct. -/
+private noncomputable def trivialTorsorReindex :
+    (∐ fun _ : G => (∐ fun _ : G => S)) ⟶ (∐ fun _ : G => (∐ fun _ : G => S)) :=
+  Limits.Sigma.desc fun γ => Limits.Sigma.desc fun h =>
+    Limits.Sigma.ι (fun _ : G => S) (h * γ) ≫
+      Limits.Sigma.ι (fun _ : G => ∐ fun _ : G => S) h
+
+/-- The inverse reindexing `(k, m) ↦ (k⁻¹·m, k)`. -/
+private noncomputable def trivialTorsorReindexInv :
+    (∐ fun _ : G => (∐ fun _ : G => S)) ⟶ (∐ fun _ : G => (∐ fun _ : G => S)) :=
+  Limits.Sigma.desc fun k => Limits.Sigma.desc fun m =>
+    Limits.Sigma.ι (fun _ : G => S) k ≫
+      Limits.Sigma.ι (fun _ : G => ∐ fun _ : G => S) (k⁻¹ * m)
+
+private instance : IsIso (trivialTorsorReindex (G := G) S) := by
+  rw [trivialTorsorReindex]
+  refine ⟨trivialTorsorReindexInv S, ?_, ?_⟩
+  · rw [trivialTorsorReindexInv]
+    refine Limits.Sigma.hom_ext _ _ fun γ => ?_
+    rw [Category.comp_id, ← Category.assoc, Limits.Sigma.ι_desc]
+    refine Limits.Sigma.hom_ext _ _ fun h => ?_
+    rw [← Category.assoc, Limits.Sigma.ι_desc, Category.assoc,
+      Limits.Sigma.ι_desc, Limits.Sigma.ι_desc, inv_mul_cancel_left]
+  · rw [trivialTorsorReindexInv]
+    refine Limits.Sigma.hom_ext _ _ fun k => ?_
+    rw [Category.comp_id, ← Category.assoc, Limits.Sigma.ι_desc]
+    refine Limits.Sigma.hom_ext _ _ fun m => ?_
+    rw [← Category.assoc, Limits.Sigma.ι_desc, Category.assoc,
+      Limits.Sigma.ι_desc, Limits.Sigma.ι_desc, mul_inv_cancel_left]
+
+/-- The trivial-torsor comparison map factors as the reindexing followed by the
+distributivity identification. -/
+private theorem trivialTorsor_comparison_eq :
+    (Limits.Sigma.desc fun γ : G =>
+      Limits.pullback.lift ((trivialTorsorAction G S).hom γ)
+        (𝟙 (∐ fun _ : G => S))
+        (by rw [Category.id_comp]; exact trivialTorsorAction_over_base S γ)) =
+    trivialTorsorReindex S ≫ (trivialTorsor_distrib S).isoPullback.hom := by
+  have hfac1 : ∀ k : G, Limits.Sigma.ι (fun _ : G => ∐ fun _ : G => S) k ≫
+      Limits.Cofan.IsColimit.desc
+        (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
+        (fun _ => 𝟙 (∐ fun _ : G => S)) = 𝟙 (∐ fun _ : G => S) :=
+    fun k => Limits.Cofan.IsColimit.fac _ _ k
+  have hfac2 : ∀ k : G, Limits.Sigma.ι (fun _ : G => ∐ fun _ : G => S) k ≫
+      Limits.Cofan.IsColimit.desc
+        (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
+        (fun k => trivialTorsorπ S ≫
+          (Limits.Cofan.mk (∐ fun _ : G => S)
+            (Limits.Sigma.ι (fun _ : G => S))).inj k) =
+      trivialTorsorπ S ≫ Limits.Sigma.ι (fun _ : G => S) k :=
+    fun k => Limits.Cofan.IsColimit.fac _ _ k
+  rw [trivialTorsorReindex]
+  refine Limits.Sigma.hom_ext _ _ fun γ => ?_
+  rw [Limits.Sigma.ι_desc]
+  erw [Limits.Sigma.ι_desc_assoc]
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  erw [Limits.Sigma.ι_desc_assoc]
+  refine Limits.pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, Limits.pullback.lift_fst, ι_trivialTorsorAction_hom,
+      Category.assoc, Category.assoc]
+    erw [(trivialTorsor_distrib S).isoPullback_hom_fst]
+    rw [hfac1, Category.comp_id]
+  · rw [Category.assoc, Limits.pullback.lift_snd, Category.comp_id,
+      Category.assoc, Category.assoc]
+    erw [(trivialTorsor_distrib S).isoPullback_hom_snd]
+    erw [hfac2]
+    rw [ι_trivialTorsorπ_assoc]
+
+/-- **The trivial torsor satisfies the torsor condition** (the last property
+field of the trivial `TorsorPair`): `(γ, x) ↦ (γ·x, x)` identifies
+`∐_G (∐_G S)` with `(∐_G S) ×_S (∐_G S)`. -/
+theorem trivialTorsor_torsor :
+    IsIso ((Limits.Sigma.desc fun γ : G =>
+      Limits.pullback.lift ((trivialTorsorAction G S).hom γ)
+        (𝟙 (∐ fun _ : G => S))
+        (by rw [Category.id_comp]; exact trivialTorsorAction_over_base S γ)) :
+      (∐ fun _ : G => (∐ fun _ : G => S)) ⟶
+        Limits.pullback (trivialTorsorπ S) (trivialTorsorπ S)) := by
+  rw [trivialTorsor_comparison_eq]
+  exact IsIso.comp_isIso' inferInstance inferInstance
+
+end TorsorComparison
+
 omit [Finite G] in
 theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
     trivialTorsorLeft G S (g * g') =
