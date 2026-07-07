@@ -604,6 +604,25 @@ noncomputable def trivialize (S : Scheme.{u}) :
       trivialTorsorLeft G S f.1⁻¹ ≫ trivialTorsorLeft G S g.1⁻¹
     rw [mul_inv_rev, trivialTorsorLeft_mul]
 
+/-- **The trivialization functor is faithful over a nonempty base** (the
+`S = ∅` counterexample in the attack log is the only obstruction; fullness
+additionally needs `S` connected). -/
+theorem trivialize_faithful (S : Scheme.{u}) [Nonempty S] :
+    (trivialize σ S).Faithful where
+  map_injective {t t'} {f g} hfg := by
+    obtain ⟨x⟩ := ‹Nonempty S›
+    have hhom : trivialTorsorLeft G S f.1⁻¹ = trivialTorsorLeft G S g.1⁻¹ :=
+      congrArg TorsorPair.Hom.hom hfg
+    have hpt : (trivialTorsorLeft G S f.1⁻¹).base
+        ((Limits.Sigma.ι (fun _ : G => S) (1 : G)).base x) =
+        (trivialTorsorLeft G S g.1⁻¹).base
+        ((Limits.Sigma.ι (fun _ : G => S) (1 : G)).base x) := by
+      rw [hhom]
+    rw [← Scheme.Hom.comp_apply, ← Scheme.Hom.comp_apply,
+      ι_trivialTorsorLeft, ι_trivialTorsorLeft, mul_one, mul_one] at hpt
+    have hmk := (sigmaι_eq_iff _ _ _ _ _).mp hpt
+    exact Subtype.ext (inv_injective (congrArg Sigma.fst hmk))
+
 end Trivialize
 
 end TorsorPair
