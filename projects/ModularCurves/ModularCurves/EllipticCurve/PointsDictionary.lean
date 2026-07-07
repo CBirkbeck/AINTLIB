@@ -188,7 +188,8 @@ hypothesis is now discharged for `X = E_U^n` by the 0e integrality above. Discha
 theorem hom_ext_of_forall_specPoint {X Y : Scheme.{u}} [IsReduced X] [Y.IsSeparated]
     {f g : X ⟶ Y}
     (h : ∀ (K : Type u) [Field K] (p : Spec (CommRingCat.of K) ⟶ X), p ≫ f = p ≫ g) :
-    f = g := by
-  sorry
+    f = g :=
+  ext_of_fromSpecResidueField_eq f g (terminal.from Y) Set.univ dense_univ
+    (fun x _ => h (X.residueField x) (X.fromSpecResidueField x)) (Subsingleton.elim _ _)
 
 end ModularCurves
