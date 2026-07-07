@@ -578,6 +578,72 @@ private theorem GF.of_smul_eq_zero {R N : Type*} [CommRing R] [AddCommGroup N] [
   have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := ⟨fun a b => by rw [hz a, hz b]⟩
   infer_instance
 
+/-- **Cokernel filtering** (the transcendence-drop reduction, consuming GF1/GF2 and
+`trdeg_quotient_prime_lt`). A finite module `N` over the polynomial ring
+`P = R[X₀,…,X_{d-1}]` (`d ≥ 1`) annihilated by a nonzero `g ∈ P` is generically free over `R`
+(as an `R`-module via `R → P`), provided every domain of transcendence degree `< cB` is
+generically free (`IH`), where `d ≤ cB`. Filter `N` over `P` by the Noetherian prime filtration
+(`IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime`), threading the annihilation
+`g • - = 0` through the induction motive: each cyclic quotient `P ⧸ 𝔮` then inherits it, so
+`g ∈ 𝔮`, whence `trdeg R (P ⧸ 𝔮) < d ≤ cB` (`trdeg_quotient_prime_lt`) and `IH` applies;
+subsingletons and extensions close by `GF.of_subsingleton` / `GF.of_exact`. -/
+private theorem gf_of_finite_module_killed {R : Type u} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] {d : ℕ} (hd : 1 ≤ d) {cB : Cardinal} (hdcB : (d : Cardinal) ≤ cB)
+    (IH : ∀ (C : Type u) [CommRing C] [IsDomain C] [Algebra R C] [Algebra.FiniteType R C],
+      Algebra.trdeg R C < cB → GF R C)
+    (N : Type u) [AddCommGroup N] [Module (MvPolynomial (Fin d) R) N]
+    [Module.Finite (MvPolynomial (Fin d) R) N]
+    {g : MvPolynomial (Fin d) R} (hg : g ≠ 0) (hgN : ∀ x : N, g • x = 0) :
+    letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R))
+    GF R N := by
+  have hPtrdeg : Algebra.trdeg R (MvPolynomial (Fin d) R) = (d : Cardinal) := by
+    rw [MvPolynomial.trdeg_of_isDomain]; simp
+  refine (IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime (MvPolynomial (Fin d) R)
+    inferInstance
+    (motive := fun M _ _ _ =>
+      letI : Module R M := Module.compHom M (algebraMap R (MvPolynomial (Fin d) R))
+      (∀ x : M, g • x = 0) → GF R M) ?_ ?_ ?_) hgN
+  · intro M _ _ _ _ _
+    letI : Module R M := Module.compHom M (algebraMap R (MvPolynomial (Fin d) R))
+    exact GF.of_subsingleton M
+  · intro M _ _ _ p e hkill
+    letI : Module R M := Module.compHom M (algebraMap R (MvPolynomial (Fin d) R))
+    haveI : IsScalarTower R (MvPolynomial (Fin d) R) M :=
+      IsScalarTower.of_algebraMap_smul fun r x => rfl
+    haveI : p.asIdeal.IsPrime := p.isPrime
+    haveI : IsDomain (MvPolynomial (Fin d) R ⧸ p.asIdeal) := Ideal.Quotient.isDomain _
+    have hkillq : ∀ y : MvPolynomial (Fin d) R ⧸ p.asIdeal, g • y = 0 := fun y => by
+      obtain ⟨x, rfl⟩ := e.surjective y
+      rw [← map_smul e, hkill x, map_zero]
+    have hgmem : g ∈ p.asIdeal := by
+      have h1 : g • (1 : MvPolynomial (Fin d) R ⧸ p.asIdeal) = 0 := hkillq 1
+      rwa [Algebra.smul_def, mul_one, Ideal.Quotient.algebraMap_eq,
+        Ideal.Quotient.eq_zero_iff_mem] at h1
+    have hlt : Algebra.trdeg R (MvPolynomial (Fin d) R ⧸ p.asIdeal) < cB :=
+      calc Algebra.trdeg R (MvPolynomial (Fin d) R ⧸ p.asIdeal)
+          < Algebra.trdeg R (MvPolynomial (Fin d) R) :=
+            trdeg_quotient_prime_lt hd hg p.asIdeal hgmem
+        _ = (d : Cardinal) := hPtrdeg
+        _ ≤ cB := hdcB
+    exact GF.of_linearEquiv (e.restrictScalars R) (IH (MvPolynomial (Fin d) R ⧸ p.asIdeal) hlt)
+  · intro N₁ _ _ _ N₂ _ _ _ N₃ _ _ _ f q hf hq hfq h₁ h₃ hkill₂
+    letI : Module R N₁ := Module.compHom N₁ (algebraMap R (MvPolynomial (Fin d) R))
+    letI : Module R N₂ := Module.compHom N₂ (algebraMap R (MvPolynomial (Fin d) R))
+    letI : Module R N₃ := Module.compHom N₃ (algebraMap R (MvPolynomial (Fin d) R))
+    haveI : IsScalarTower R (MvPolynomial (Fin d) R) N₁ :=
+      IsScalarTower.of_algebraMap_smul fun r x => rfl
+    haveI : IsScalarTower R (MvPolynomial (Fin d) R) N₂ :=
+      IsScalarTower.of_algebraMap_smul fun r x => rfl
+    haveI : IsScalarTower R (MvPolynomial (Fin d) R) N₃ :=
+      IsScalarTower.of_algebraMap_smul fun r x => rfl
+    have hkill₁ : ∀ x : N₁, g • x = 0 := fun x =>
+      hf (by rw [map_smul, hkill₂ (f x), map_zero])
+    have hkill₃ : ∀ z : N₃, g • z = 0 := fun z => by
+      obtain ⟨y, rfl⟩ := hq z
+      rw [← map_smul, hkill₂ y, map_zero]
+    exact GF.of_exact (f.restrictScalars R) (q.restrictScalars R) hf hq hfq
+      (h₁ hkill₁) (h₃ hkill₃)
+
 /-- **The domain case, injective core** (Stacks 051R main step, GF5 heart) — *boxed*.
 
 `B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B` (so `B` is

@@ -64,7 +64,7 @@ private theorem exists_fibre_adapted_surjection
     (hfib : Module.Free (S ⧸ (maximalIdeal R).map (algebraMap R S))
       (M ⧸ ((maximalIdeal R).map (algebraMap R S) • (⊤ : Submodule S M)))) :
     ∃ (r : ℕ) (φ : (Fin r → S) →ₗ[S] M), Function.Surjective φ ∧
-      Function.Bijective
+      Function.Injective
         (LinearMap.lTensor (R ⧸ maximalIdeal R) (LinearMap.restrictScalars R φ)) := by
   sorry
 
@@ -98,7 +98,7 @@ theorem Module.free_of_flat_of_fibre_free [Module.Flat R M]
   have hkK : Subsingleton (k ⊗[R] Ksub) := by
     refine (subsingleton_iff_forall_eq 0).mpr fun z => ?_
     have hz : LinearMap.lTensor k (LinearMap.restrictScalars R Ksub.subtype) z = 0 := by
-      apply hbij.1
+      apply hbij
       rw [map_zero, ← LinearMap.comp_apply, ← LinearMap.lTensor_comp, hcomp,
         LinearMap.lTensor_zero, LinearMap.zero_apply]
     exact hAinj (by rw [hz, map_zero])

@@ -2673,4 +2673,152 @@ theorem locallyWeierstrass_pushforward_O_eq_O {S : Scheme.{u}} (G : EllipticCurv
       G.E.sheaf) U
   exact this
 
+
+/-- `s³ = t·(unit-shaped element)` in the infinity chart: the cubic relation with its
+`t`-divisible coefficients factored. -/
+lemma root_pow_three_eq (W : WeierstrassCurve R) :
+    AdjoinRoot.root (infChartCubic W) ^ 3 =
+      infChartTElem W *
+        (algebraMap (Polynomial R) _ (1 + Polynomial.C W.a₃ * Polynomial.X -
+            Polynomial.C W.a₆ * Polynomial.X ^ 2) +
+          algebraMap (Polynomial R) _ (Polynomial.C W.a₁ -
+            Polynomial.C W.a₄ * Polynomial.X) * AdjoinRoot.root (infChartCubic W) +
+          algebraMap (Polynomial R) _ (-Polynomial.C W.a₂) *
+            AdjoinRoot.root (infChartCubic W) ^ 2) := by
+  rw [root_cube_eq]
+  unfold sCubeCoord₀ sCubeCoord₁ sCubeCoord₂
+  simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_one]
+  ring
+
+/-- `overlapMap` is `R`-linear on constants. -/
+lemma overlapMap_algebraMap (W : WeierstrassCurve R) (r : R) :
+    overlapMap W (algebraMap R W.toAffine.CoordinateRing r) =
+      algebraMap R (Localization.Away (infChartTElem W)) r := by
+  rw [← chartZRingEquiv_fromZero W r]
+  exact overlapMap_chartZRingEquiv_gradeZero W r
+
+/-- **(T-W7.1b-b2, criterion ⟸ membership)** Filtration members extend after `s`-twisting:
+for `f ∈ Fₙ`, the overlap image of `f·sⁿ` is regular on the infinity chart. -/
+theorem overlapMap_mul_root_pow_mem_range_of_mem (W : WeierstrassCurve R) {n : ℕ}
+    {f : W.toAffine.CoordinateRing} (hf : f ∈ poleOrderFiltration W n) :
+    overlapMap W f * algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (AdjoinRoot.root (infChartCubic W)) ^ n ∈
+    Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) := by
+  have hu : IsUnit (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) :=
+    IsLocalization.map_units _
+      (⟨infChartTElem W, ⟨1, pow_one _⟩⟩ : Submonoid.powers (infChartTElem W))
+  set b₀ : AdjoinRoot (infChartCubic W) :=
+    algebraMap (Polynomial R) _ (1 + Polynomial.C W.a₃ * Polynomial.X -
+        Polynomial.C W.a₆ * Polynomial.X ^ 2) +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₁ -
+        Polynomial.C W.a₄ * Polynomial.X) * AdjoinRoot.root (infChartCubic W) +
+      algebraMap (Polynomial R) _ (-Polynomial.C W.a₂) *
+        AdjoinRoot.root (infChartCubic W) ^ 2 with hb₀
+  have hcube : AdjoinRoot.root (infChartCubic W) ^ 3 = infChartTElem W * b₀ :=
+    root_pow_three_eq W
+  induction hf using Submodule.span_induction with
+  | mem g hg =>
+    rcases hg with ⟨i, hi, rfl⟩ | ⟨i, hi, rfl⟩
+    · refine ⟨b₀ ^ i * AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i), ?_⟩
+      have hroot : AdjoinRoot.root (infChartCubic W) ^ (i + n) =
+          infChartTElem W ^ i * (b₀ ^ i *
+            AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i)) := by
+        rw [show i + n = 3 * i + (n - 2 * i) by omega, pow_add, pow_mul, hcube, mul_pow]
+        ring
+      conv_rhs => rw [map_pow, overlapMap_coordX]
+      refine ((hu.pow i).mul_left_cancel ?_).symm
+      calc (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ i *
+            (overlapXElem W ^ i * algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ n)
+          = (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W) *
+              overlapXElem W) ^ i *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ n := by ring
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ i *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ n := by
+            rw [tel_mul_overlapXElem]
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W) ^ (i + n)) := by
+            rw [← map_pow, ← map_pow, ← map_mul, ← pow_add]
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (infChartTElem W ^ i * (b₀ ^ i *
+                AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i))) := by
+            rw [hroot]
+        _ = (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ i *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (b₀ ^ i * AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i)) := by
+            rw [map_mul, map_pow]
+    · refine ⟨b₀ ^ (i + 1) * AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i - 3), ?_⟩
+      have hroot : AdjoinRoot.root (infChartCubic W) ^ (i + n) =
+          infChartTElem W ^ (i + 1) * (b₀ ^ (i + 1) *
+            AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i - 3)) := by
+        rw [show i + n = 3 * (i + 1) + (n - 2 * i - 3) by omega, pow_add, pow_mul,
+          hcube, mul_pow]
+        ring
+      conv_rhs => rw [map_mul, map_pow, overlapMap_coordX, overlapMap_coordY]
+      refine ((hu.pow (i + 1)).mul_left_cancel ?_).symm
+      calc (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (i + 1) *
+            (overlapXElem W ^ i * overlapInvT W *
+              algebraMap (AdjoinRoot (infChartCubic W))
+                (Localization.Away (infChartTElem W))
+                (AdjoinRoot.root (infChartCubic W)) ^ n)
+          = (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W) *
+              overlapXElem W) ^ i *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W) *
+              overlapInvT W) *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ n := by ring
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ i *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W)) ^ n := by
+            rw [tel_mul_overlapXElem, tel_mul_overlapInvT, mul_one]
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (AdjoinRoot.root (infChartCubic W) ^ (i + n)) := by
+            rw [← map_pow, ← map_pow, ← map_mul, ← pow_add]
+        _ = algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (infChartTElem W ^ (i + 1) * (b₀ ^ (i + 1) *
+                AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i - 3))) := by
+            rw [hroot]
+        _ = (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (i + 1) *
+            algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))
+              (b₀ ^ (i + 1) * AdjoinRoot.root (infChartCubic W) ^ (n - 2 * i - 3)) := by
+            rw [map_mul, map_pow]
+  | zero =>
+    exact ⟨0, by rw [map_zero, map_zero, zero_mul]⟩
+  | add g h _ _ hg hh =>
+    obtain ⟨bg, hbg⟩ := hg
+    obtain ⟨bh, hbh⟩ := hh
+    exact ⟨bg + bh, by simp only [map_add, add_mul, hbg, hbh]⟩
+  | smul r g _ hg =>
+    obtain ⟨bg, hbg⟩ := hg
+    refine ⟨algebraMap R _ r * bg, ?_⟩
+    rw [map_mul, hbg, Algebra.smul_def, map_mul, overlapMap_algebraMap, mul_assoc]
+    rw [IsScalarTower.algebraMap_apply R (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) r]
+
 end ModularCurves
