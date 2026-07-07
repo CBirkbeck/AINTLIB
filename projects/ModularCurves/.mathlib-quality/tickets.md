@@ -1959,7 +1959,23 @@ directly applicable). All leaves unclaimed.
     for Action FintypeCat / ContAction; grep came up EMPTY in Action/Monoidal.lean,
     so plan for hand-rolled BinaryFan routes as in AG-GG-1).
   - F1c-5 (spec): through vRhoPointsEquiv, vRhoAdd is coordinatewise addition on
-    (ℤ/N)² — the morphism-level upgrade T-F3 wants for coords_additive. Final seam notes in commit eab704fb
+    (ℤ/N)² — the morphism-level upgrade T-F3 wants for coords_additive.
+  **F1c PROGRESS (2026-07-07, beastmode-B)**: F1c-1 ✓ GREEN (VRhoGroup.lean:
+  rhoSqAction/rhoSqContAction + rhoAddMor/rhoZeroMor/rhoNegMor — equivariance from
+  linearity, continuity by the coset argument; pointAction continuity via PUnit-eta
+  rfl). F1c-2 ✓ GREEN (rhoSqIsProduct: BinaryFan.isLimitMk; uniq needs ext +
+  congrFun-at-inaccessible — the ext-chain descends through Prod and funext).
+  F1c-3 ForMathlib-half ✓ GREEN (FiniteEtaleGalois.lean TensorCoproduct section:
+  tensorObj/tensorBinaryCofan(IsColimit)/tensorBinaryFanOpIsLimit — Etale.baseChange
+  arg order is Etale N (N ⊗ M); never elaborate a fresh `*` between cone-leg factors
+  across the const-functor carrier spelling — rw the factors in place).
+  F1c-3 REMAINING: the transport iso `(finiteEtaleEquivContAction ℚ).inverse.obj
+  (rhoSqContAction D) ≅ Opposite.op (tensorObj (vRhoAlgebra D) (vRhoAlgebra D))` via
+  isLimitOfPreserves inverse (rhoSqIsProduct D) vs tensorBinaryFanOpIsLimit +
+  IsLimit.conePointUniqueUpToIso (pair-diagram seam: the two fans live over
+  `pair X Y ⋙ inverse` vs `pair (op ..) (op ..)` — bridge with Discrete-pair natIso /
+  Cones.postcompose, the standard Discrete.natIso plumbing). Then F1c-4 Spec-side
+  (pullbackSpecIso) + comultiplication := inverse.map (rhoAddMor D), and F1c-5. Final seam notes in commit eab704fb
   (Filter.mem_map; intermediateFieldMap-f.d.-transport; open-scoped-Pointwise ABOVE
   docstring; **rhoAction must be abbrev** — structure projections don't reduce at
   instance-search transparency; coset endgame at Action-smul via ρτ = 𝟙 + map_id).
