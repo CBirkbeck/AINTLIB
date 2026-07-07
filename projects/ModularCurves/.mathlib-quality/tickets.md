@@ -4356,8 +4356,14 @@ record is a-priori a SUBCLASS of KM 2.1.1/DR II.1.1/Loe 3.3.1 — a stronger-dir
 bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
 
 ### [T-A8-4] the derived fibre condition — `EllipticCurveGeom.fibrewiseElliptic` (step-4 leftover)
-- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-07T23:25Z (OWNER-DIRECTED
-  2026-07-08: "can we prove the fibrewise defn and LocallyWeierstrass equivalent") ·
+- **Status**: **DONE** (fable-P4, 2026-07-08; `#print axioms` clean; Basic.lean sorry-free,
+  GroupLaw + GammaH downstream green). Landed: `Spec_fromSpecResidueField_eq` (Spec-affine
+  compat), `fibrewiseElliptic_projModel` (model fibres are elliptic),
+  `LocallyWeierstrass.fibrewiseElliptic` (ONE paste of the base-change square onto the
+  chart square puts the model over `κ(s)` in a pullback square over
+  `(π, fromSpecResidueField s)` — single `isoPullback`, no fibre-congr plumbing), and the
+  record corollary `EllipticCurveGeom.fibrewiseElliptic`. · **Claimed**: fable-P4,
+  2026-07-07T23:25Z (OWNER-DIRECTED 2026-07-08) ·
   **File**: EllipticCurve/Basic.lean · **Depends**: T-A8 (done) · **Type**: 2 theorems
 - **Scope note (the owner's question, answered)**: the FULL equivalence is two directions.
   (⟸ = this ticket) `LocallyWeierstrass ⟹ FibrewiseElliptic` — provable now, sketch was
