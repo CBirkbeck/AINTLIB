@@ -73,6 +73,25 @@ theorem detFun_gl2Both (N : ℕ) (g : Matrix (Fin 2) (Fin 2) (ZMod N))
     Matrix.det_fin_two]
   ring
 
+/-- The determinant pairing is alternating: `e(v, v) = 0` (KM 2.8; Silverman III.8.1(b)). -/
+@[simp] theorem detFun_self (N : ℕ) (v : Fin 2 → ZMod N) : detFun N (v, v) = 0 := by
+  simp only [detFun]; ring
+
+/-- Antisymmetry: `e(w, v) = - e(v, w)`. -/
+theorem detFun_swap (N : ℕ) (v w : Fin 2 → ZMod N) :
+    detFun N (w, v) = -detFun N (v, w) := by
+  simp only [detFun]; ring
+
+/-- Bilinearity, left slot: `e(v + v', w) = e(v, w) + e(v', w)` (KM 2.8; Silverman III.8.1(a)). -/
+theorem detFun_add_left (N : ℕ) (v v' w : Fin 2 → ZMod N) :
+    detFun N (v + v', w) = detFun N (v, w) + detFun N (v', w) := by
+  simp only [detFun, Pi.add_apply]; ring
+
+/-- Bilinearity, right slot: `e(v, w + w') = e(v, w) + e(v, w')`. -/
+theorem detFun_add_right (N : ℕ) (v w w' : Fin 2 → ZMod N) :
+    detFun N (v, w + w') = detFun N (v, w) + detFun N (v, w') := by
+  simp only [detFun, Pi.add_apply]; ring
+
 section ConstSchemeMap
 
 variable {S : Scheme.{u}}
@@ -94,6 +113,11 @@ theorem constSchemeMap_comp {A B C : Type} [Finite A] [Finite B] [Finite C]
   refine Sigma.hom_ext _ _ fun a => ?_
   simp only [constSchemeMap, Sigma.ι_desc_assoc, Sigma.ι_desc, Function.comp_apply]
 
+@[simp] theorem constSchemeMap_id {A : Type} [Finite A] :
+    constSchemeMap (S := S) (id : A → A) = 𝟙 (constScheme S A) := by
+  refine Sigma.hom_ext _ _ fun a => ?_
+  simp only [constSchemeMap, Sigma.ι_desc, id_eq, Category.comp_id]
+
 /-- The local determinant-pairing model as a morphism of constant schemes over `S`, induced by
 `detFun`: `(ℤ/N)² × (ℤ/N)²` (constant scheme on the product index) → `(ℤ/N)` (which is `μ_N`
 after a splitting). -/
@@ -112,6 +136,15 @@ theorem detConstMor_gl2Both (N : ℕ) [NeZero N] (g : Matrix (Fin 2) (Fin 2) (ZM
     funext p
     rw [Function.comp_apply, Function.comp_apply, detFun_gl2Both, mul_comm]
   rw [detConstMor, constSchemeMap_comp, constSchemeMap_comp, hfun]
+
+/-- **`SL₂`-invariance of the local model.** When `det g = 1` the determinant pairing is
+invariant under the change of basis `g` — the change-of-trivialisation cocycle vanishes, which
+is exactly why the Weil pairing descends along an `SL₂`-reduction of the trivialising cover. -/
+theorem detConstMor_sl2 (N : ℕ) [NeZero N] (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hg : g.det = 1) :
+    constSchemeMap (gl2Both N g) ≫ detConstMor (S := S) N = detConstMor (S := S) N := by
+  have hid : (fun k : ZMod N => k * g.det) = id := by funext k; rw [hg, mul_one, id_eq]
+  rw [detConstMor_gl2Both, hid, constSchemeMap_id, Category.comp_id]
 
 end ConstSchemeMap
 
@@ -175,6 +208,23 @@ theorem weilPairingCharZero_over (N : ℕ) [NeZero N]
   haveI : Epi (pullback.fst (E.torsionSqπ N) p) := inferInstance
   refine (cancel_epi (pullback.fst (E.torsionSqπ N) p)).mp ?_
   rw [← Category.assoc, E.weilPairingCharZero_restrict N p ζ' hcocyc, hover]
+
+/-- **(T-C0e spec, uniqueness)** The char-0 Weil pairing is the unique morphism into `μ_{N,S}`
+whose restriction along the trivialising cover is the local pairing `ζ'`. -/
+theorem weilPairingCharZero_unique (N : ℕ) [NeZero N]
+    {S' : Scheme.{u}} (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (ζ' : pullback (E.torsionSqπ N) p ⟶ muN S N)
+    (hcocyc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ'
+        = pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ')
+    (e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N)
+    (he : pullback.fst (E.torsionSqπ N) p ≫ e = ζ') :
+    e = E.weilPairingCharZero N p ζ' hcocyc := by
+  haveI : Surjective (pullback.fst (E.torsionSqπ N) p) :=
+    MorphismProperty.pullback_fst _ _ ‹Surjective p›
+  haveI : LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
+    MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
+  exact (descend_hom_of_effectiveEpi (pullback.fst (E.torsionSqπ N) p) ζ' hcocyc).choose_spec.2 e he
 
 end EllipticCurve
 
