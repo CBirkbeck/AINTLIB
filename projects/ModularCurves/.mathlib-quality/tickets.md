@@ -4952,8 +4952,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   + `overlapMap_coordX`/`_coordY` pins, `overlap_pair_eq_baseRing` (the equalizer heart;
   shared-witness ∃∧ documented). The A_y normal-form-basis leaf lives INSIDE
   `overlap_pair_eq_baseRing`'s proof plan (free bases from 0i-a/b2 + the x²y⁻¹ exclusion).
-  - **Status**: open · **Claimed**: (unclaimed) · **Parent**: T-W7.0i-b · **Depends**:
-    T-W7.0i-a (done), T-W7.0i-b1 (done), T-W7.0i-b2 (done) · **Type**: 2 defs + 3 theorems
+  - **Status**: done (beastmode-A 2026-07-07; commits c7202f94, 2d6af093, 812afe60,
+    d34ef42d, + endgame) · **Claimed**: beastmode-A, 2026-07-07T05:00Z · **Parent**:
+    T-W7.0i-b · **Depends**: T-W7.0i-a (done), T-W7.0i-b1 (done), T-W7.0i-b2 (done) ·
+    **Type**: 2 defs + 3 theorems
+  - **Progress**: ALL PROVEN, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`):
+    `overlap_eval₂_polynomial` (mk-normalization + `linear_combination -t⁷·hrel` after a
+    timed-out algebraMap-calc route was replaced), `overlapMap` + `_coordX`/`_coordY`,
+    `chartZAffineEquiv` (via new affChart bridge: `affChartX/Y`,
+    `dehomogenizeAux_two_projective_polynomial`, `affChartPolyEquiv` + X-pins +
+    `_dehomogenize` — exact sign match, no negation), and `overlap_pair_eq_baseRing` via
+    the **sPowCoord coordinate tower**: `sCubeCoord₀/₁/₂` (t-divisible), `sPowCoord`
+    3-term recursion + `root_pow_eq`, K1 T-adic lower bounds (slotwise conjunction
+    induction, `X_pow_dvd_sPowCoord` + coeff form), K2 leading-coefficient-exactly-1
+    (`sPowCoord_sub_lead_aux`), `coordOf` cleared coordinates + cross-kill + leading-slot
+    lemmas, `cleared_term`/`pow_mul_mul_overlapInvT` clearing, `overlap_coordOf_eq`
+    (t^N-clearing + `IsLocalization.injective` + free-basis comparison), then the
+    parity-gap endgame (2·deg p vs 2·deg q + 3 never equal ⟹ q = 0 ⟹ deg p = 0 ⟹
+    shared constant; the x²y⁻¹ exclusion is exactly the odd-slot kill). The A_y
+    normal-form leaf discharged in-proof as planned.
   - Sketch: 2-chart equalizer (`x²y⁻¹` excluded = the `H¹` witness); universality BY
     INSTANTIATION (never base-change the proof); McCoy for `s`-nonzerodivisor; sheafify
     over chart opens via `isPullback_projModelBaseChange` ⓟ. Leaf **L-P3** (part 2).

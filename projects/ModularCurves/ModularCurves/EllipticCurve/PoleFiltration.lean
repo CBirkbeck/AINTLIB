@@ -1231,7 +1231,125 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
     (a : W.toAffine.CoordinateRing) (b : AdjoinRoot (infChartCubic W))
     (hab : overlapMap W a = algebraMap _ _ b) :
     ∃ r : R, a = algebraMap R _ r ∧ b = algebraMap R _ r := by
-  sorry
+  rcases subsingleton_or_nontrivial R with hR | hR
+  · haveI : Subsingleton W.toAffine.CoordinateRing := Module.subsingleton R _
+    haveI : Subsingleton (AdjoinRoot (infChartCubic W)) := Module.subsingleton R _
+    exact ⟨0, Subsingleton.elim _ _, Subsingleton.elim _ _⟩
+  obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq a
+  -- Rewrite the overlap agreement into evaluated form.
+  have hof : ∀ f : Polynomial R,
+      overlapMap W (AdjoinRoot.of W.toAffine.polynomial f) =
+        Polynomial.eval₂ (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+          (overlapXElem W) f := fun f => by
+    unfold overlapMap
+    rw [AdjoinRoot.lift_of, Polynomial.coe_eval₂RingHom]
+  rw [map_add, WeierstrassCurve.Affine.CoordinateRing.smul,
+    WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_mul,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C p) =
+      AdjoinRoot.of W.toAffine.polynomial p from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C q) =
+      AdjoinRoot.of W.toAffine.polynomial q from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+      coordY W from rfl,
+    overlapMap_coordY, hof p, hof q] at hab
+  -- The cleared coordinate identities at level `N`.
+  have h1 := le_max_left p.natDegree (q.natDegree + 1)
+  have h2 := le_max_right p.natDegree (q.natDegree + 1)
+  set N := max p.natDegree (q.natDegree + 1) with hN
+  have hstar := fun j => overlap_coordOf_eq W p q b
+    (show p.natDegree < N + 1 by omega) (show q.natDegree < N by omega) hab j
+  have hXN : (Polynomial.X : Polynomial R) ^ N ∈ nonZeroDivisors (Polynomial R) :=
+    pow_mem Polynomial.X_mem_nonzeroDivisors N
+  -- Step 1: `q = 0` — its leading coefficient dies at an odd pole-order slot.
+  have hq0 : q = 0 := by
+    by_contra hq0
+    rcases Nat.lt_or_ge (2 * q.natDegree + 3) (2 * p.natDegree) with hcase | hcase
+    · -- The `p`-side leads: kill `p.leadingCoeff`, contradicting `p ≠ 0` (deg ≥ 2).
+      have hp0 : p ≠ 0 := by
+        intro h
+        rw [h] at hcase
+        simp at hcase
+      have hstar_d := hstar ⟨p.natDegree % 3, by omega⟩
+      have hcoeff := congrArg
+        (Polynomial.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
+      simp only [Polynomial.coeff_add] at hcoeff
+      rw [coordOf_coeff_lead (W := W) (f := p) (N := N)
+          (j := ⟨p.natDegree % 3, by omega⟩) (by omega) rfl,
+        coordOf_coeff_eq_zero (W := W) (f := q) (N := N - 1)
+          (k := N - p.natDegree + p.natDegree / 3) (j := ⟨p.natDegree % 3, by omega⟩)
+          (show 3 * (N - p.natDegree + p.natDegree / 3) + p.natDegree % 3 +
+            2 * q.natDegree < 3 * (N - 1) by omega),
+        Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) _ (show
+          N - p.natDegree + p.natDegree / 3 < N by omega)] at hcoeff
+      exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+    · -- The `q`-side leads (parity: `2·deg p ≠ 2·deg q + 3`): kill `q.leadingCoeff`.
+      have hstar_m := hstar ⟨q.natDegree % 3, by omega⟩
+      have hcoeff := congrArg
+        (Polynomial.coeff · (N - 1 - q.natDegree + q.natDegree / 3)) hstar_m
+      simp only [Polynomial.coeff_add] at hcoeff
+      rw [coordOf_coeff_lead (W := W) (f := q) (N := N - 1)
+          (j := ⟨q.natDegree % 3, by omega⟩) (by omega) rfl,
+        coordOf_coeff_eq_zero (W := W) (f := p) (N := N)
+          (k := N - 1 - q.natDegree + q.natDegree / 3) (j := ⟨q.natDegree % 3, by omega⟩)
+          (show 3 * (N - 1 - q.natDegree + q.natDegree / 3) + q.natDegree % 3 +
+            2 * p.natDegree < 3 * N by omega),
+        Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) _ (show
+          N - 1 - q.natDegree + q.natDegree / 3 < N by omega)] at hcoeff
+      exact hq0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  subst hq0
+  -- Step 2: `p` is a constant — a positive degree dies at an even pole-order slot.
+  have hpdeg : p.natDegree = 0 := by
+    by_contra hpd
+    have hp0 : p ≠ 0 := by
+      intro h
+      rw [h] at hpd
+      simp at hpd
+    have hstar_d := hstar ⟨p.natDegree % 3, by omega⟩
+    have hcoeff := congrArg
+      (Polynomial.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
+    simp only [Polynomial.coeff_add] at hcoeff
+    rw [coordOf_coeff_lead (W := W) (f := p) (N := N)
+        (j := ⟨p.natDegree % 3, by omega⟩) (by omega) rfl,
+      coordOf_zero,
+      Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) _ (show
+        N - p.natDegree + p.natDegree / 3 < N by omega)] at hcoeff
+    simp only [Polynomial.coeff_zero] at hcoeff
+    exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  have hpC := Polynomial.eq_C_of_natDegree_eq_zero hpdeg
+  -- Step 3: read off `b`'s coordinates.
+  have h0 := hstar 0
+  rw [hpC, coordOf_C, coordOf_zero, add_zero,
+    show sPowCoord W 0 0 = 1 from rfl, one_mul] at h0
+  have hb0 : (infChartBasis W).repr b 0 = Polynomial.C (p.coeff 0) :=
+    ((mul_cancel_left_mem_nonZeroDivisors hXN).mp (by linear_combination h0)).symm
+  have hb1 : (infChartBasis W).repr b 1 = 0 := by
+    have h1' := hstar 1
+    rw [hpC, coordOf_C, coordOf_zero, add_zero,
+      show sPowCoord W 0 1 = 0 from rfl, zero_mul, mul_zero] at h1'
+    exact (mul_cancel_left_mem_nonZeroDivisors hXN).mp (by linear_combination -h1')
+  have hb2 : (infChartBasis W).repr b 2 = 0 := by
+    have h2' := hstar 2
+    rw [hpC, coordOf_C, coordOf_zero, add_zero,
+      show sPowCoord W 0 2 = 0 from rfl, zero_mul, mul_zero] at h2'
+    exact (mul_cancel_left_mem_nonZeroDivisors hXN).mp (by linear_combination -h2')
+  refine ⟨p.coeff 0, ?_, ?_⟩
+  · conv_lhs => rw [zero_smul, add_zero, hpC]
+    rw [← Polynomial.algebraMap_eq, algebraMap_smul, ← Algebra.algebraMap_eq_smul_one]
+  · have hbexp : b = algebraMap (Polynomial R) _ ((infChartBasis W).repr b 0) +
+        algebraMap (Polynomial R) _ ((infChartBasis W).repr b 1) *
+          AdjoinRoot.root (infChartCubic W) +
+        algebraMap (Polynomial R) _ ((infChartBasis W).repr b 2) *
+          AdjoinRoot.root (infChartCubic W) ^ 2 := by
+      conv_lhs => rw [← (infChartBasis W).sum_repr b]
+      rw [Fin.sum_univ_three]
+      simp only [infChartBasis_apply, Algebra.smul_def,
+        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+    rw [hbexp, hb0, hb1, hb2, map_zero, zero_mul, add_zero, zero_mul, add_zero,
+      IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
+      Polynomial.algebraMap_eq]
 
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:

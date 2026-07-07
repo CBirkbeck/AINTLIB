@@ -130,7 +130,14 @@ variable {R S : Type*} [CommRing R] [IsDomain R] [CommRing S] [Algebra R S]
 
 /-- Freeness of a localised module survives inverting more: from `X_a` free over `R_a` we get
 `X_{ab}` free over `R_{ab}`, since `R_{ab}` (resp. `X_{ab}`) is a further localisation of `R_a`
-(resp. `X_a`). -/
+(resp. `X_a`).
+
+This is pure localisation-of-localisation plumbing — provable from existing mathlib, no missing
+theory. `Module.free_of_isLocalizedModule` gives freeness over the localisation-of-localisation
+ring `Localization.Away (algebraMap R (Localization.Away a) b)` in one step; the remaining work is
+transferring that across the localisation-uniqueness isomorphism to the standard `Localization.Away
+(a * b)` / `LocalizedModule (powers (a * b)) X`, which mathlib lacks a one-shot lemma for. Left as a
+`sorry` in this pass. -/
 private theorem free_localizedModule_away_mul {X : Type*}
     [AddCommGroup X] [Module R X] (a b : R)
     (h : Module.Free (Localization.Away a) (LocalizedModule (Submonoid.powers a) X)) :

@@ -66,15 +66,17 @@ Invent. Math. 79 (1985) ✓ (GDZ scan); ④ Mumford *Abelian Varieties* ✓ (sca
   (`SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point`) +
   `projModelPointsEquiv_zero` (pointed, `[0:1:0] ↦ 0`), choice-extracted from the proven existential
   `projModel_points` (T-A2e), now in canonical `EllipticCurve/PointsDictionary.lean` (commit 30f67b1a).
-  - **T-W7.0f-val value-characterization** ⚙ NEW (coordinator §2): a bare choice-extracted equiv pins
-    *no values* — `.choose_spec` only records `⟨zero⟩ ↦ 0`. Consumers `negModelHom_specPoints`
-    (GLC:244), 0c-iii and 0g need the VALUES: `projModelPointsEquiv_some` (a `SpecPoints` in the affine
-    chart `Z≠0` with coordinates `(x,y)` maps to `Affine.Point.some ⟨x,y,_⟩`) and the infinity-chart
-    case. Route: `projModel_points` is choice-extracted from private WeierstrassModel components
-    (`zSolutionsToAffine`/`affinePointSplit`/`infPoint`); either (a) strengthen `projModel_points` to a
-    *pointed-and-valued* existential carrying the chart-case equalities, or (b) expose those components
-    (make the equiv explicit, not by choice) and prove the values directly. Attack via (a) — least
-    surface. **Gates:** GLC:244 `negModelHom_specPoints`, 0c-iii, 0g η-evaluation.
+  - **T-W7.0f-val value-characterization** ✅ DONE (commits 473460bf + 91f8b7f6, axiom-clean). Route
+    taken = **(b) explicit equiv, not choice**: the private components stay private, and the explicit
+    `SpecPoints ≃ Point` is exposed in WeierstrassModel as `projModelPointsEquivEll` — the same
+    assembly *minus the normalising `swap`* (which the choice route needed only because it never proved
+    `e₀ [0:1:0] = 0`). Crux enabling the swap-drop: `projModelZero_not_inZ` — `[0:1:0]` avoids the
+    `Z`-chart (its `X₂`-coordinate vanishes; `projModelZero_not_preimage_zChart`, the `1 ↦ 0` analogue
+    of the existing `projModelZero_preimage_yChart`). Values: `projModelPointsEquivEll_zero`/`_some`/
+    `_infinity`; canonical `projModelPointsEquiv` now aliases the explicit equiv, exposing
+    `projModelPointsEquiv_zero` + **`projModelPointsEquiv_some`** (`Z`-chart `(x,y) ↦ some x y`, coords
+    + nonsingularity as hypotheses so it stays public). **Unblocks:** GLC `negModelHom_specPoints`,
+    `mulModelHom_specPoints`, 0c-iii, 0g η-evaluation (P0/P1/0g consume the values now).
   - **T-W7.0f-dominance** ⚙ generic-point inclusion `Spec κ(η) ⟶ E_U^n` dominant
     (`fromSpecResidueField` ⓜ + closure of `{η}` = ⊤ — backed by `E_U^n` integral, 0e).
 - **T-W7.0g atlas group axioms** ⚙ each axiom = two morphisms `E_U^n ⟶ E_U`; equal ⟸

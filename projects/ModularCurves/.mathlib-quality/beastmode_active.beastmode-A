@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-b4 — overlap_coordOf_eq PROVEN (clearing + basis comparison); next: endgame case analysis in overlap_pair_eq_baseRing (parity-gap kills q=0 then deg p=0)
+FOCUS: T-W7.0i-b4 DONE (overlap_pair_eq_baseRing PROVEN, axiom-clean). Next: T-W7.0i-b3 (chartY_sup_chartZ_eq_top + section equivs) then i3 assembly
