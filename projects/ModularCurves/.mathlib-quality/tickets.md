@@ -4465,6 +4465,63 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   descent needs the elliptic-curve group-SCHEME structure (mult morphism `E ×_S E → E`) built
   first — its own sub-project (route via the abelEnrichment/T-A6 machinery or a dedicated
   group-scheme development). The affine/fibrewise invariance (this ticket) is the reusable input.
+  **PLANNED (2026-07-07, `/develop`, rigidity route, full-GrpObj scope)**: sharp goal =
+  construct `GrpObj (Over.mk π)` = discharge `abelEnrichment_exists` (GroupLaw.lean:74); everything
+  else (`mulBy`/[N], `pointAddCommGroup`, `baseChange`) is already derived from the `grp` field. On
+  the critical path (owner directive: only BB-RR assumed). Full decomposition +
+  Lean-skeleton design + source status in **`.mathlib-quality/tw7-plan.md`**. Sub-tickets below.
+
+- **[T-W7.1] `negHom`** — the negation morphism `E ⟶ E` over `S`. **Statement**: `def negHom
+  (G : EllipticCurveGeom S) : G.E ⟶ G.E` + `negHom_π : negHom ≫ G.π = G.π`, `negHom_zero :
+  G.zero ≫ negHom = G.zero`. **Sketch**: `negY` is denominator-free ⇒ a morphism on each
+  `projModel` chart; `negY_smul` (DONE) glues it chart-independently over `LocallyWeierstrass`.
+  **Sources**: Silverman III.2 (`negY` formula); `negY_smul` (ForMathlib/AffinePointVariableChange).
+  **Lane**: A · **Depends**: T-A8 (done), affine cocycle (done) · **Type**: def + 2 lemmas ·
+  **READY NOW** (tractable, do first). **Generality**: any `EllipticCurveGeom S`, any `S`.
+
+- **[T-W7.2] `mulHom`** — the multiplication morphism `pullback G.π G.π ⟶ G.E`. **Internal node**,
+  sub-leaves **T-W7.2a** (chart-local `mul = (addX, addY)`, lands on curve via `equation_add`/
+  `nonsingular_add`), **T-W7.2b** (charts + coordinate-changed charts cover `E ×_S E`; any config
+  moved into the affine locus by a variableChange), **T-W7.2c** (chart-local `mul`s agree on
+  overlaps via `addX_smul`/`addY_smul`/`slope_smul` DONE → glue). **Statement**: `def mulHom (G) :
+  pullback G.π G.π ⟶ G.E` + `mulHom_π`. **Sources**: Silverman III.2 (addition formulas); the
+  invariance cocycle (DONE). **Lane**: A · **Depends**: T-A8, affine cocycle (done) · **Type**:
+  def + gluing lemmas · **READY NOW** (the crux gap; unblocked). **Generality**: any `S`.
+
+- **[T-W7.3] group-unit/inverse laws** — `mulHom ∘ (zero-left) = fst`, `∘ (zero-right) = snd`,
+  `negHom` two-sided inverse for `mulHom`. **Sketch**: affine identities at `O` (`add_zero`,
+  `add_left_neg`) + gluing. **Depends**: T-W7.1, T-W7.2 · **Type**: 3 lemmas.
+
+- **[T-W7.4a] `rigidityLemma`** (heaviest new AG lemma). **Statement**: for `p : X ⟶ S` proper
+  flat with `p_*O_X = O_S` + section `e`, and `f : X ×_S Y ⟶ Z` constant along the `e`-axis, `f`
+  factors through `X ×_S Y ⟶ Y`. **Sources**: **Faltings–Chai I** (⚠ `.djvu`, unreadable by
+  tools — CONVERT TO PDF or substitute **Hida GME ch.2 / Katz–Mazur 2.1** before working) /
+  **Mumford GIT §6.1**. Likely internal: sub-fact `p_*O_E = O_S` for `E/S` may need
+  **BB-COHBC** (coherent cohomology & base change) — re-audit; if unavailable, partially gated.
+  **Lane**: A · **Depends**: readable rigidity source (OWED); possibly BB-COHBC · **Type**:
+  theorem (+ sub-tree). **PARALLEL** with T-W7.1/.2. **BLOCKS** T-W7.4/.5/.7.
+
+- **[T-W7.4] `mulHom_assoc`** — associativity as a morphism identity over an ARBITRARY base. **Sketch**:
+  the two associators `E×_S E×_S E ⟶ E` agree on every geometric fibre (mathlib affine
+  associativity, field-level) and are pointed ⇒ **rigidity (T-W7.4a) forces equality over all `S`,
+  incl. non-reduced** (the whole reason for the rigidity route — never re-prove the polynomial
+  identity over `ℤ[ε]`). **Depends**: T-W7.2, T-W7.3, T-W7.4a · **Sources**: Faltings–Chai I;
+  mathlib `Affine.Point.instAddCommGroup` (fibrewise assoc).
+
+- **[T-W7.5] `mulHom_comm`** — `mul ∘ swap = mul` via rigidity (proper connected-fibre group scheme
+  is commutative). **Depends**: T-W7.2, T-W7.4a · **Type**: 1 lemma.
+
+- **[T-W7.6] assemble `grpObj` + `abelEnrichment_exists`** (MILESTONE — retires T-A6 EXISTENCE).
+  Package `neg`/`mul`/`zero` + T-W7.3/.4/.5 as `MonObj`+`GrpObj`+`IsCommMonObj`; then
+  `abelEnrichment_exists G := ⟨{ …, grp := grpObj G, … }, rfl⟩`. **Depends**: T-W7.1–.5 · **Type**:
+  instance + theorem (plumbing). **Preceded by** `[CLEANUP-ALL-W7]`.
+
+- **[T-W7.7] `abelEnrichment_unique`** (T-A6b canonicity). Two group structures with the same zero
+  section coincide — comparison morphism is pointed ⇒ rigidity. **Depends**: T-W7.4a · **Parallel**
+  with T-W7.1–.6 · **Type**: theorem.
+
+- **[CLEANUP-W7-1]** `/cleanup` GroupLawConstruction.lean (after T-W7.3). **[CLEANUP-ALL-W7]**
+  `/cleanup-all` before T-W7.6 (milestone). **[CLEANUP-W7-2]** final `/cleanup` after T-W7.6/.7.
 
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
