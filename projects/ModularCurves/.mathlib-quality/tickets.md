@@ -4209,6 +4209,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (C•W).Point`** (`AddEquiv.ofBijective`). The elliptic-curve group law is invariant under a
   Weierstrass coordinate change AS A FULL GROUP ISOMORPHISM, axiom-clean. Also `pointEquiv_zsmul`
   (carries `n`-torsion to `n`-torsion → level-structure invariance, feeds T-W8).
+  **DESCENT DATA COMPLETE (2026-07-07, ~37 decls)**: the coordinate change now has the full
+  cocycle — `vcX_comp`/`vcY_comp` (coordinate), **`pointMap_mul`** (point-level, via `eqRec`
+  `subst` transport helpers) and **`pointMap_one`** (unit) so `pointMap` is a genuine action of the
+  `VariableChange` group on points; plus **base-change naturality** `vcX_map`/`vcY_map` (functorial
+  in the base ring). The affine/fibrewise descent datum for the group law is fully formalised.
   **SCOPING (2026-07-07)**: the SCHEME-level descent (retiring T-A6) is a LARGE foundational phase,
   not a quick next step — mathlib's elliptic-curve group law is **field-only**
   (`Affine.Point`/`Projective.Point.instAddCommGroup` need `[Field F]`); there is **no group-scheme
