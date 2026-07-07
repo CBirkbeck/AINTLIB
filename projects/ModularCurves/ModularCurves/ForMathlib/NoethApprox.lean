@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-NOETH.
 -/
 import Mathlib
+import ModularCurves.ForMathlib.FlatLocus
 
 /-!
 # Noetherian approximation for finitely-presented algebras
@@ -34,14 +35,16 @@ the noetherian stage (where annihilators are finitely generated) and base-changi
   `MvPolynomial.algebraTensorAlgEquiv` (`R ⊗[R₀] MvPolynomial (Fin n) R₀ ≃ MvPolynomial (Fin n) R`)
   and `Ideal.quotientKerAlgEquivOfSurjective`.
 
-* `exists_noetherian_descent_flat`: the flat refinement — if `A` is additionally `R`-flat then
-  (possibly after enlarging `R₀`) `A₀` is `R₀`-flat. This is **EGA IV 11.2.6** (spreading out of
-  flatness). The non-flatness component is currently a **registered `sorry`**: a faithful proof
-  needs the uniform enlargement bound supplied by *openness of the flat locus* over a noetherian
-  ring (EGA IV 11.1.1), which mathlib does not yet have. Everything else — `R₀`, `A₀`, their
-  noetherianity, finite presentation, and the base-change isomorphism — is discharged by
-  `exists_noetherian_descent`; only `Module.Flat R₀ A₀` is boxed. See the note before the
-  declaration for the precise sticking point.
+* `exists_noetherian_descent_flat`: the flat refinement — if `A` is additionally `R`-flat then,
+  after enlarging `R₀` if necessary, `A₀` is `R₀`-flat. This is **Stacks 07RF / EGA IV 11.2.6**
+  (spreading out of flatness). The proof enlarges the first descent's base `R₀` to a noetherian
+  `R₁ ⊆ R` at which the flat locus is all of `Spec (R₁ ⊗[R₀] A₀)`, then reads off flatness by
+  locality (`flat_of_flatLocus_univ`, from `Module.flat_of_isLocalized_maximal`) and re-expresses
+  the base change through `Algebra.TensorProduct.cancelBaseChange`. Enlargement is genuinely
+  necessary (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not flat although `ℚ ⊗ A₀ = 0` is). The single
+  remaining **registered box** is the geometric step `exists_flatLocus_univ_stage` (Stacks 07RF's
+  directed-colimit + quasi-compactness assembly around *openness of the flat locus*,
+  `isOpen_flatLocus`), which mathlib's spreading-out infrastructure does not yet support.
 
 ## References
 
@@ -148,30 +151,81 @@ theorem exists_noetherian_descent (R A : Type u) [CommRing R] [CommRing A] [Alge
             (MvPolynomial.algebraTensorAlgEquiv R₀ (σ := Fin n) R) hJI.symm).trans
           (Ideal.quotientKerAlgEquivOfSurjective hf_surj))).symm
 
-/-- **Spreading out of flatness (EGA IV 11.2.6).** If a finitely-presented `R`-algebra `A` is
-`R`-flat, then it is the base change of a finitely-presented, `R₀`-flat algebra `A₀` over a
-noetherian finitely-generated `ℤ`-subalgebra `R₀ ⊆ R`.
+/-- **Flatness is local on the total space.** If the flat locus `flatLocus R₁ A₁ A₁ ⊆ Spec A₁` of
+the `R₁`-algebra `A₁` is all of `Spec A₁` — i.e. the localisation `(A₁)_𝔮` is `R₁`-flat at every
+prime `𝔮` of `A₁` — then `A₁` itself is flat over `R₁`.
 
-The base ring `R₀`, the descended algebra `A₀`, its noetherianity, finite presentation and the
-base-change isomorphism `A ≃ₐ[R] R ⊗[R₀] A₀` are all provided by `exists_noetherian_descent`.
-The remaining flatness `Module.Flat R₀ A₀` is a **registered `sorry`** for EGA IV 11.2.6.
+This is `Module.flat_of_isLocalized_maximal`: flatness over `R₁` can be checked at the maximal
+ideals of `A₁`, and those are among the primes recorded by the flat locus. It is the
+module-theoretic half of Stacks 07RF (the geometric half is `exists_flatLocus_univ_stage`). -/
+private theorem flat_of_flatLocus_univ {R₁ A₁ : Type u} [CommRing R₁] [CommRing A₁]
+    [Algebra R₁ A₁] (h : flatLocus R₁ A₁ A₁ = Set.univ) : Module.Flat R₁ A₁ := by
+  apply Module.flat_of_isLocalized_maximal A₁ A₁ (fun P _ => LocalizedModule P.primeCompl A₁)
+    (fun P _ => LocalizedModule.mkLinearMap P.primeCompl A₁)
+  intro P hP
+  have hmem : (⟨P, hP.isPrime⟩ : PrimeSpectrum A₁) ∈ flatLocus R₁ A₁ A₁ := by
+    rw [h]; exact Set.mem_univ _
+  exact mem_flatLocus.mp hmem
 
-Sticking point: descending flatness requires *enlarging* `R₀` (flatness genuinely need not hold
-for the first `R₀` produced by the presentation-coefficient descent — e.g. `A₀ = ℤ ⧸ pℤ` over
-`R₀ = ℤ` is not flat even when its base change is), and one needs a *single* enlargement that
-trivialises **every** relation simultaneously (via the equational criterion
-`Module.Flat.iff_forall_exists_factorization`, each individual relation can be trivialised after
-some enlargement because tensor products commute with the filtered colimit `R = colim R₁`, but a
-uniform bound is required). That uniform bound is exactly *openness of the flat locus* over a
-noetherian ring (EGA IV 11.1.1) — not currently available in mathlib. -/
+/-- **Spreading out of flatness, geometric core (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6)**
+— the sole **registered box** of the flatness descent.
+
+Given the noetherian base `R₀ ⊆ R` and the finitely-presented `R₀`-algebra `A₀` whose base change
+`R ⊗[R₀] A₀` is `R`-flat, there is a *larger* finitely-generated `ℤ`-subalgebra `R₁`,
+`R₀ ⊆ R₁ ⊆ R` (still noetherian), at which the **entire** flat locus is captured:
+`flatLocus R₁ (R₁ ⊗[R₀] A₀) (R₁ ⊗[R₀] A₀) = Set.univ`.
+
+Enlargement is genuinely necessary — flatness need not hold for the `R₀` produced by the
+presentation-coefficient descent (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not `ℤ`-flat although
+`ℚ ⊗ A₀ = 0` is `ℚ`-flat).
+
+The proof (not yet formalised: mathlib lacks the directed-colimit / spreading-out infrastructure it
+requires) writes `R` as the filtered colimit `R = colimᵢ Rᵢ` of its finitely-generated
+`ℤ`-subalgebras `Rᵢ ⊇ R₀`, so `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)`. For each prime `𝔮` of
+`R ⊗[R₀] A₀`, `R`-flatness at `𝔮` descends to `Rᵢ`-flatness at a finite stage (Stacks 10.128.3, via
+the equational criterion `Module.Flat.iff_forall_exists_factorization` — one relation is trivialised
+in the colimit at a time); **openness of the flat locus** over the noetherian `Rᵢ`
+(`isOpen_flatLocus`, Thm 10.129.4, applied below) upgrades this to an open neighbourhood, and
+**quasi-compactness** of `Spec (R ⊗[R₀] A₀)` (`CompactSpace (PrimeSpectrum _)`) collapses the cover
+to a single stage `R₁` at which the flat locus is everything. -/
+private theorem exists_flatLocus_univ_stage {R : Type u} [CommRing R]
+    (R₀ : Subalgebra ℤ R) [IsNoetherianRing R₀]
+    (A₀ : Type u) [CommRing A₀] [Algebra R₀ A₀] [Algebra.FinitePresentation R₀ A₀]
+    (hflat : Module.Flat R (R ⊗[R₀] A₀)) :
+    ∃ (R₁ : Subalgebra ℤ R) (h : R₀ ≤ R₁), IsNoetherianRing R₁ ∧
+      (letI : Algebra R₀ R₁ := (Subalgebra.inclusion h).toAlgebra
+       flatLocus R₁ (R₁ ⊗[R₀] A₀) (R₁ ⊗[R₀] A₀) = Set.univ) := by
+  -- Openness of the flat locus over the noetherian base (Thm 10.129.4) is the homological input;
+  -- the colimit/quasi-compactness assembly around it is the remaining box.
+  have _hopen : IsOpen (flatLocus R₀ A₀ A₀) := isOpen_flatLocus
+  sorry
+
+/-- **Spreading out of flatness (Stacks 07RF / EGA IV 11.2.6).** If a finitely-presented
+`R`-algebra `A` is `R`-flat, then — *after enlarging the base if necessary* — it is the base change
+of a finitely-presented, `R₀`-flat algebra `A₀` over a noetherian finitely-generated
+`ℤ`-subalgebra `R₀ ⊆ R`.
+
+`exists_noetherian_descent` supplies a first noetherian descent `A ≃ₐ[R] R ⊗[R₀] A₀`; over that
+`R₀` the algebra `A₀` need not be flat, so the base is enlarged to a noetherian `R₁` with
+`R₀ ⊆ R₁ ⊆ R` at which the flat locus is everything (`exists_flatLocus_univ_stage`, the registered
+Stacks 07RF box), whence `A₁ := R₁ ⊗[R₀] A₀` is flat by locality of flatness on the total space
+(`flat_of_flatLocus_univ`), and the base change is re-expressed `A ≃ₐ[R] R ⊗[R₁] A₁` through
+`Algebra.TensorProduct.cancelBaseChange`. -/
 theorem exists_noetherian_descent_flat (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [Algebra.FinitePresentation R A] [Module.Flat R A] :
     ∃ (R₀ : Subalgebra ℤ R) (A₀ : Type u) (_ : CommRing A₀) (_ : Algebra R₀ A₀),
       IsNoetherianRing R₀ ∧ Algebra.FinitePresentation R₀ A₀ ∧ Module.Flat R₀ A₀ ∧
       Nonempty (A ≃ₐ[R] (R ⊗[R₀] A₀)) := by
-  obtain ⟨R₀, A₀, hCR, hAlg, hNoeth, hFP, he⟩ := exists_noetherian_descent R A
+  obtain ⟨R₀, A₀, hCR, hAlg, hNoeth, hFP, ⟨e⟩⟩ := exists_noetherian_descent R A
   letI := hCR
   letI := hAlg
-  refine ⟨R₀, A₀, hCR, hAlg, hNoeth, hFP, ?_, he⟩
-  -- EGA IV 11.2.6 (spreading out of flatness): registered box. See the docstring above.
-  sorry
+  -- transport `R`-flatness across the base-change isomorphism
+  haveI hRflat : Module.Flat R (R ⊗[R₀] A₀) := Module.Flat.of_linearEquiv e.symm.toLinearEquiv
+  -- Stacks 07RF: enlarge `R₀` to a noetherian `R₁` at which the flat locus is everything
+  obtain ⟨R₁, hle, hNoeth₁, huniv⟩ := exists_flatLocus_univ_stage R₀ A₀ hRflat
+  letI : Algebra R₀ R₁ := (Subalgebra.inclusion hle).toAlgebra
+  haveI : IsScalarTower R₀ R₁ R := IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  -- flatness is local on the total space `Spec (R₁ ⊗[R₀] A₀)`
+  haveI hflat₁ : Module.Flat R₁ (R₁ ⊗[R₀] A₀) := flat_of_flatLocus_univ huniv
+  refine ⟨R₁, R₁ ⊗[R₀] A₀, inferInstance, inferInstance, hNoeth₁, inferInstance, hflat₁, ⟨?_⟩⟩
+  exact e.trans (Algebra.TensorProduct.cancelBaseChange R₀ R₁ R R A₀).symm
