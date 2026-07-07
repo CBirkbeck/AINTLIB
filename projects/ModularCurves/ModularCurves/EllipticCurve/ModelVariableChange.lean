@@ -1,6 +1,8 @@
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.ForMathlib.AffinePointVariableChange
 import ModularCurves.ForMathlib.ProjToSpecZero
+import ModularCurves.ForMathlib.ProjMapScaling
+import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
 
 /-!
 # Variable changes on the projective Weierstrass model, and the comparison theorem

@@ -463,14 +463,113 @@ stalk-of-pullback API needed). -/
 theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
     (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+    (hgconst : g = p ≫ (e ≫ f))
     (x : X) (hset : p.base ⁻¹' {p.base x} ⊆ Set.range (eqLocusι f g hf hg).base)
     (U : X.affineOpens) (hxU : x ∈ U.1) (a : Γ(X, U.1))
     (ha : a ∈ (eqLocusι f g hf hg).ker.ideal U) (n : ℕ) :
     X.presheaf.germ U.1 x hxU a ∈
       (Ideal.map (p.stalkMap x).hom
         (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ n := by
+  subst hgconst
+  rcases n with - | n
+  · simpa using Submodule.mem_top
+  -- the (n+1)-st infinitesimal neighbourhood of `p x`, as a scheme over `S`
+  set gT : Spec (CommRingCat.of (S.presheaf.stalk (p.base x) ⧸
+      (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))) ⟶ S :=
+    Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk _)) ≫ S.fromSpecStalk (p.base x) with hgT
+  -- its range is contained in the single point `p x` (SORRIED micro-leaf: the quotient's
+  -- primes all contain the maximal ideal, so `Spec.map` hits only the closed point, which
+  -- `fromSpecStalk` sends to `p x`; names: `PrimeSpectrum.range_comap_of_surjective`,
+  -- `Ideal.IsPrime.pow_le_iff`, `IsLocalRing.closedPoint`, `fromSpecStalk_closedPoint`)
+  have hrange_gT : Set.range gT.base ⊆ {p.base x} := by
+    sorry
+  haveI hpre : IsPreimmersion gT := by
+    -- SORRIED micro-leaf: `Spec.map` of the surjective quotient is a closed immersion,
+    -- closed immersions are preimmersions, `fromSpecStalk` is a preimmersion, compose.
+    sorry
+  have hFcond : (pullback.fst p gT ≫ f) ≫ q = pullback.snd p gT ≫ gT := by
+    rw [Category.assoc, hf]
+    exact pullback.condition
+  obtain ⟨F, hFρ, hFqT⟩ : ∃ F : pullback p gT ⟶ pullback q gT,
+      F ≫ pullback.fst q gT = pullback.fst p gT ≫ f ∧
+      F ≫ pullback.snd q gT = pullback.snd p gT :=
+    ⟨pullback.lift _ _ hFcond, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+  have heTcond : (gT ≫ e) ≫ p = 𝟙 _ ≫ gT := by
+    rw [Category.assoc, he, Category.comp_id, Category.id_comp]
+  obtain ⟨eT, heTπ, heTpT⟩ : ∃ eT, eT ≫ pullback.fst p gT = gT ≫ e ∧
+      eT ≫ pullback.snd p gT = 𝟙 _ :=
+    ⟨pullback.lift _ _ heTcond, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+  have hπland : ∀ z, (pullback.fst p gT).base z ∈ p.base ⁻¹' {p.base x} := by
+    intro z
+    have hz : (pullback.fst p gT).base z ∈ Set.range (pullback.fst p gT).base := ⟨z, rfl⟩
+    rw [Scheme.Pullback.range_fst] at hz
+    exact hrange_gT (Set.mem_preimage.mp hz)
+  -- the collapse: on the fibre over `p x`, `f` agrees with the constant through the locus
+  have hs : Set.Subsingleton (f.base '' (p.base ⁻¹' {p.base x})) := by
+    have hval : ∀ z ∈ p.base ⁻¹' {p.base x},
+        f.base z = (e ≫ f).base (p.base x) := by
+      intro z hz
+      obtain ⟨y, hy⟩ := hset hz
+      have hc := congrArg
+        (fun m : eqLocus f (p ≫ (e ≫ f)) hf hg ⟶ Y => m.base y)
+        (eqLocusι_comp_eq f (p ≫ (e ≫ f)) hf hg)
+      simp only [Scheme.Hom.comp_base, TopCat.comp_app] at hc
+      rw [hy] at hc
+      rw [hc]
+      have hpz : p.base z = p.base x := hz
+      simp [Scheme.Hom.comp_base, hpz]
+    rintro _ ⟨z₁, hz₁, rfl⟩ _ ⟨z₂, hz₂, rfl⟩
+    rw [hval z₁ hz₁, hval z₂ hz₂]
+  have hone : Set.Subsingleton (Set.range F.base) := by
+    rintro _ ⟨z₁, rfl⟩ _ ⟨z₂, rfl⟩
+    apply (Scheme.Hom.isEmbedding (pullback.fst q gT)).injective
+    have h₁ : (pullback.fst q gT).base (F.base z₁) =
+        f.base ((pullback.fst p gT).base z₁) :=
+      congrArg (fun m : pullback p gT ⟶ Y => m.base z₁) hFρ
+    have h₂ : (pullback.fst q gT).base (F.base z₂) =
+        f.base ((pullback.fst p gT).base z₂) :=
+      congrArg (fun m : pullback p gT ⟶ Y => m.base z₂) hFρ
+    rw [h₁, h₂]
+    exact hs ⟨_, hπland z₁, rfl⟩ ⟨_, hπland z₂, rfl⟩
+  obtain ⟨sec, -, hFsec⟩ := rigidity_of_subsingleton_range
+    (hp.baseChange gT) eT heTpT F hFqT hone
+  have hsec' : sec = eT ≫ F := by
+    have h1 : eT ≫ F = eT ≫ (pullback.snd p gT ≫ sec) := congrArg (eT ≫ ·) hFsec
+    have h2 : eT ≫ (pullback.snd p gT ≫ sec) = (eT ≫ pullback.snd p gT) ≫ sec :=
+      (Category.assoc _ _ _).symm
+    rw [h1, h2, heTpT, Category.id_comp]
+  have hπeq : pullback.fst p gT ≫ f = pullback.fst p gT ≫ (p ≫ (e ≫ f)) := by
+    calc pullback.fst p gT ≫ f
+        = F ≫ pullback.fst q gT := hFρ.symm
+      _ = (pullback.snd p gT ≫ sec) ≫ pullback.fst q gT :=
+        congrArg (· ≫ pullback.fst q gT) hFsec
+      _ = pullback.snd p gT ≫ (eT ≫ F) ≫ pullback.fst q gT := by
+        rw [hsec']
+        simp only [Category.assoc]
+      _ = pullback.snd p gT ≫ eT ≫ (pullback.fst p gT ≫ f) := by
+        rw [← hFρ]
+        simp only [Category.assoc]
+      _ = pullback.snd p gT ≫ (gT ≫ e) ≫ f := by
+        rw [← Category.assoc eT, heTπ]
+      _ = (pullback.snd p gT ≫ gT) ≫ e ≫ f := by
+        simp only [Category.assoc]
+      _ = (pullback.fst p gT ≫ p) ≫ e ≫ f := by
+        rw [pullback.condition]
+      _ = pullback.fst p gT ≫ (p ≫ (e ≫ f)) := by
+        simp only [Category.assoc]
+  -- the thickened fibre factors through the agreement locus
+  obtain ⟨w, hw⟩ := exists_factor_eqLocus f (p ≫ (e ≫ f)) hf hg
+    (pullback.fst p gT) hπeq
+  -- SORRIED ENDGAME (the last mile of `rigidity`): from `hw` the section `a` of the
+  -- equalizer ideal dies in `Γ` of the thickened fibre (`ker_apply` + `comp_app`), hence
+  -- its germ dies in the thickened stalk at a preimage `x'` of `x` (`range_fst` supplies
+  -- `x'`; `germ_stalkMap_apply` pushes; point-transport along `π x' = x` via `▸` or
+  -- `arrowStalkMapIsoOfEq` — `subst` is unavailable since `gT` mentions `x`). The
+  -- thickened stalk at `x'` is `O_{X,x} ⧸ (𝔪·O)^{n+1}` — affine-locally
+  -- `pullbackSpecIso` + `isLocalization_stalk`, with the localization trivial because
+  -- the quotient is already local (`IsLocalization.atUnits`) — so dying there is exactly
+  -- membership in `(map (p.stalkMap x) 𝔪)^{n+1}` (`Ideal.map_pow`).
   sorry
-
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
 `p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,
@@ -482,7 +581,8 @@ finite-type, so it vanishes on an open `W ⊇ p⁻¹(t)`; `IsProper p` (closed) 
 `p⁻¹(U₀)`. -/
 theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
-    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p) (t : S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+    (hgconst : g = p ≫ (e ≫ f)) (t : S)
     (hset : p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base) :
     ∃ U₀ : S.Opens, t ∈ U₀ ∧
       ∃ w : (p ⁻¹ᵁ U₀).toScheme ⟶ eqLocus f g hf hg,
@@ -528,7 +628,7 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
       have hpow : ∀ n, X.presheaf.germ U.1 x hxU a ∈
           (Ideal.map (p.stalkMap x).hom
             (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ n :=
-        fun n => germ_ker_mem_pow_of_fibre_subset hp e he f g hf hg x
+        fun n => germ_ker_mem_pow_of_fibre_subset hp e he f g hf hg hgconst x
           (hxt ▸ hset) U hxU a ha n
       have hbot : (⨅ n : ℕ, (IsLocalRing.maximalIdeal (X.presheaf.stalk x)) ^ n) = ⊥ :=
         Ideal.iInf_pow_eq_bot_of_isLocalRing _
@@ -595,7 +695,8 @@ factorization. -/
 theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
     (hconn : ConnectedSpace S)
     (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
-    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p) (s : S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+    (hgconst : g = p ≫ (e ≫ f)) (s : S)
     (hseed : p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
     ∃ w : X ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = 𝟙 X := by
   classical
@@ -606,7 +707,7 @@ theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
   have hopen : IsOpen U₁ := by
     rw [isOpen_iff_forall_mem_open]
     intro t ht
-    obtain ⟨U₀, htU₀, w₀, hw₀⟩ := exists_open_factor_of_fibre_subset hp e he f g hf hg t ht
+    obtain ⟨U₀, htU₀, w₀, hw₀⟩ := exists_open_factor_of_fibre_subset hp e he f g hf hg hgconst t ht
     have hsub : ((p ⁻¹ᵁ U₀) : Set X) ⊆ Set.range (eqLocusι f g hf hg).base := by
       rintro x hx
       refine ⟨w₀.base ⟨x, hx⟩, ?_⟩
@@ -638,7 +739,7 @@ theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
   have hall : ∀ t : S, ∃ U₀ : S.Opens, t ∈ U₀ ∧
       ∃ w : ((p ⁻¹ᵁ U₀) : X.Opens).toScheme ⟶ eqLocus f g hf hg,
         w ≫ eqLocusι f g hf hg = ((p ⁻¹ᵁ U₀) : X.Opens).ι :=
-    fun t => exists_open_factor_of_fibre_subset hp e he f g hf hg t (hmem t)
+    fun t => exists_open_factor_of_fibre_subset hp e he f g hf hg hgconst t (hmem t)
   choose U₀ hU₀mem w₀ hw₀ using hall
   -- the preimages cover `X`
   have hcover : TopologicalSpace.IsOpenCover fun t : S => (p ⁻¹ᵁ U₀ t : X.Opens) := by
@@ -699,7 +800,7 @@ theorem rigidity {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
   have hg : (p ≫ (e ≫ f)) ≫ q = p := by
     rw [Category.assoc, Category.assoc, hf, he]
     exact Category.comp_id p
-  obtain ⟨w, hw⟩ := exists_factor_of_connected hconn hp e he f (p ≫ (e ≫ f)) hf hg s
+  obtain ⟨w, hw⟩ := exists_factor_of_connected hconn hp e he f (p ≫ (e ≫ f)) hf hg rfl s
     (fibre_subset_eqLocus_of_collapsed hp e he f hf s hs)
   calc f = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ f := by rw [hw, Category.id_comp]
     _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ f) := Category.assoc _ _ _

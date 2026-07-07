@@ -470,6 +470,96 @@ private theorem GFree.of_exact {N₁ N₂ N₃ : Type*}
   have hrange : LinearMap.range j' = LinearMap.ker q' := (LinearMap.exact_iff.mp hj'q'exact).symm
   exact free_of_exact_of_free j' q' hj'inj hq'surj hrange
 
+/-!
+### `R`-module generic freeness `GF`
+
+The domain-case induction switches the ambient algebra (from `S` to a polynomial ring `R[X]` and to
+its prime quotients). To carry it out cleanly we work with the ambient-algebra-free predicate `GF N`
+("`N`, as an `R`-module, is free after inverting one nonzero element"), which is exactly `GFree R S N`
+with `S` forgotten. All the closure properties of `GFree` are re-established for `GF` (the proofs are
+identical, only simpler as no `restrictScalars` is needed). -/
+
+/-- `GF R N`: the `R`-module `N` becomes free after inverting a single nonzero `f ∈ R`. This is
+`GFree R S N` with the ambient algebra `S` stripped away, so it is insensitive to how `N`'s
+`R`-module structure arises. -/
+private def GF (R N : Type*) [CommRing R] [AddCommGroup N] [Module R N] : Prop :=
+  ∃ f : R, f ≠ 0 ∧ Module.Free (Localization.Away f) (LocalizedModule (Submonoid.powers f) N)
+
+/-- A free `R`-module is generically free (invert `1`; a localisation of a free module is free). -/
+private theorem GF.of_free (N : Type*) [AddCommGroup N] [Module R N] [Module.Free R N] : GF R N :=
+  ⟨1, one_ne_zero, Module.free_of_isLocalizedModule (Submonoid.powers (1 : R))
+    (LocalizedModule.mkLinearMap (Submonoid.powers (1 : R)) N)⟩
+
+/-- A subsingleton `R`-module is generically free. -/
+private theorem GF.of_subsingleton (N : Type*) [AddCommGroup N] [Module R N] [Subsingleton N] :
+    GF R N :=
+  ⟨1, one_ne_zero, inferInstance⟩
+
+omit [IsDomain R] in
+/-- Generic freeness transfers along an `R`-linear equivalence. -/
+private theorem GF.of_linearEquiv {N N' : Type*} [AddCommGroup N] [Module R N]
+    [AddCommGroup N'] [Module R N'] (e : N ≃ₗ[R] N') (h : GF R N') : GF R N := by
+  obtain ⟨f, hf, hfree⟩ := h
+  refine ⟨f, hf, ?_⟩
+  haveI : IsLocalizedModule (Submonoid.powers f)
+      ((LocalizedModule.mkLinearMap (Submonoid.powers f) N').comp e.toLinearMap) :=
+    IsLocalizedModule.of_linearEquiv_right _ _ e
+  let iso : LocalizedModule (Submonoid.powers f) N ≃ₗ[R]
+      LocalizedModule (Submonoid.powers f) N' :=
+    IsLocalizedModule.iso (Submonoid.powers f)
+      ((LocalizedModule.mkLinearMap (Submonoid.powers f) N').comp e.toLinearMap)
+  exact Module.Free.of_equiv (iso.extendScalarsOfIsLocalization (Submonoid.powers f)
+    (Localization.Away f)).symm
+
+/-- Generic freeness is stable under short exact sequences of `R`-modules. -/
+private theorem GF.of_exact {N₁ N₂ N₃ : Type*}
+    [AddCommGroup N₁] [Module R N₁] [AddCommGroup N₂] [Module R N₂] [AddCommGroup N₃] [Module R N₃]
+    (f : N₁ →ₗ[R] N₂) (g : N₂ →ₗ[R] N₃)
+    (hf : Function.Injective f) (hg : Function.Surjective g) (hfg : Function.Exact f g)
+    (h₁ : GF R N₁) (h₃ : GF R N₃) : GF R N₂ := by
+  obtain ⟨a, ha, hfree1⟩ := h₁
+  obtain ⟨b, hb, hfree3⟩ := h₃
+  refine ⟨a * b, mul_ne_zero ha hb, ?_⟩
+  haveI hF1 : Module.Free (Localization.Away (a * b))
+      (LocalizedModule (Submonoid.powers (a * b)) N₁) := free_localizedModule_away_mul a b hfree1
+  haveI hF3 : Module.Free (Localization.Away (a * b))
+      (LocalizedModule (Submonoid.powers (a * b)) N₃) := by
+    have := free_localizedModule_away_mul b a hfree3
+    rwa [mul_comm] at this
+  set c := a * b with hc
+  let j : LocalizedModule (Submonoid.powers c) N₁ →ₗ[R] LocalizedModule (Submonoid.powers c) N₂ :=
+    IsLocalizedModule.map (Submonoid.powers c) (LocalizedModule.mkLinearMap (Submonoid.powers c) N₁)
+      (LocalizedModule.mkLinearMap (Submonoid.powers c) N₂) f
+  let q : LocalizedModule (Submonoid.powers c) N₂ →ₗ[R] LocalizedModule (Submonoid.powers c) N₃ :=
+    IsLocalizedModule.map (Submonoid.powers c) (LocalizedModule.mkLinearMap (Submonoid.powers c) N₂)
+      (LocalizedModule.mkLinearMap (Submonoid.powers c) N₃) g
+  have hjinj : Function.Injective j := IsLocalizedModule.map_injective _ _ _ f hf
+  have hqsurj : Function.Surjective q := IsLocalizedModule.map_surjective _ _ _ g hg
+  have hjqexact : Function.Exact j q := IsLocalizedModule.map_exact (Submonoid.powers c)
+    (LocalizedModule.mkLinearMap (Submonoid.powers c) N₁)
+    (LocalizedModule.mkLinearMap (Submonoid.powers c) N₂)
+    (LocalizedModule.mkLinearMap (Submonoid.powers c) N₃) f g hfg
+  let j' := j.extendScalarsOfIsLocalization (Submonoid.powers c) (Localization.Away c)
+  let q' := q.extendScalarsOfIsLocalization (Submonoid.powers c) (Localization.Away c)
+  have hj'inj : Function.Injective j' := hjinj
+  have hq'surj : Function.Surjective q' := hqsurj
+  have hj'q'exact : Function.Exact j' q' := hjqexact
+  have hrange : LinearMap.range j' = LinearMap.ker q' := (LinearMap.exact_iff.mp hj'q'exact).symm
+  exact free_of_exact_of_free j' q' hj'inj hq'surj hrange
+
+/-- `GFree R S N` follows from `GF N` when the `R`- and `S`-module structures are compatible
+(`IsScalarTower R S N`): both express "`N_f` is free over `R_f` for one nonzero `f`", read off the
+same `R`-module structure. -/
+omit [IsDomain R] in
+private theorem GFree.of_GF {N : Type*} [AddCommGroup N] [Module S N] [Module R N]
+    [IsScalarTower R S N] (h : GF R N) : GFree R S N := by
+  have hst : (Module.compHom N (algebraMap R S) : Module R N) = ‹Module R N› := by
+    apply Module.ext; funext r m
+    show algebraMap R S r • m = r • m
+    exact (algebra_compatible_smul S r m).symm
+  rw [GFree]
+  exact hst.symm ▸ h
+
 /-- **The domain case** (Stacks 051R main step, GF5 core) — *boxed*.
 
 For a prime `𝔮` of `S`, the domain `S ⧸ 𝔮` (finite type over the Noetherian domain `R`) becomes

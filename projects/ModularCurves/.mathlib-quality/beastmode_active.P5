@@ -1,1 +1,1 @@
-FOCUS: T-W7.mvc — projModelVCIso + _pi + _map ALL PROVED+committed (426212ed, axiom-clean). Coordinator §2-P5 DONE. Now _mul (cocycle, tractable via same transport machinery): needs substitution cocycle vcMvSubst (C*C^) i = aeval (vcMvSubst C) (vcMvSubst C^ i) [check direction]. _zero GATED (negModelHom_zero precedent, fromOfGlobalSections leaves) — skip. Develop _mul in vc_gen.lean scratch.
+FOCUS: T-W7.mvc — projModelVCIso_zero PROVED in scratch (axiom-clean); transplanting allScale block + real proof into ModelVariableChange.lean

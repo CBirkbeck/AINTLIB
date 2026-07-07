@@ -2518,7 +2518,73 @@ private lemma locallyWeierstrass_app_affine_isIso {S : Scheme.{u}} (G : Elliptic
     (heπ : e.hom ≫ projModelπ W = Limits.pullback.snd G.π U.1.ι ≫ U.2.isoSpec.hom)
     {V : S.Opens} (hVaff : IsAffineOpen V) (hVle : V ≤ U.1) :
     IsIso (G.π.app V) := by
-  sorry
+  letI : Algebra ↑Γ(S, U.1) ↑Γ(S, V) :=
+    ((Scheme.Hom.appLE (𝟙 S) U.1 V (by simpa using hVle)).hom).toAlgebra
+  set gV := S.homOfLE hVle with hgV
+  have hgVfac : gV ≫ U.1.ι = V.ι := Scheme.homOfLE_ι _ _
+  have hB : IsPullback (projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)) W)
+      (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)))) (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)))) :=
+    isPullback_projModelBaseChange W
+  -- `(π ∣_ V)` is a pullback of `pullback.snd π U.1.ι` along `gV`
+  have hQ1' : IsPullback ((G.π ⁻¹ᵁ V).ι) (G.π ∣_ V) G.π (gV ≫ U.1.ι) := by
+    rw [hgVfac]
+    exact (isPullback_morphismRestrict G.π V).flip
+  have hP2 := hQ1'.of_right' (IsPullback.of_hasPullback G.π U.1.ι)
+  -- the isoSpec ↔ restriction bridge
+  have hbridge : hVaff.isoSpec.hom ≫
+      Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))) =
+      gV ≫ U.2.isoSpec.hom := by
+    have hsp := IsAffineOpen.SpecMap_appLE_fromSpec (𝟙 S) U.2 hVaff (by simpa using hVle)
+    rw [Category.comp_id, ← IsAffineOpen.isoSpec_inv_ι U.2,
+      ← IsAffineOpen.isoSpec_inv_ι hVaff, ← hgVfac, ← Category.assoc,
+      ← Category.assoc] at hsp
+    have hsp2 := (cancel_mono U.1.ι).mp hsp
+    rw [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)) =
+        Scheme.Hom.appLE (𝟙 S) U.1 V (by simpa using hVle) from rfl,
+      ← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id,
+      Category.id_comp]
+  -- the composite iso `(π⁻¹V) ≅ projModel (W.map ρ)` and its `π`-compatibility
+  have hmapiso : IsIso (Limits.pullback.map (Limits.pullback.snd G.π U.1.ι) gV
+      (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))))
+      e.hom hVaff.isoSpec.hom U.2.isoSpec.hom heπ.symm hbridge.symm) := by
+    infer_instance
+  set ε : (G.π ⁻¹ᵁ V).toScheme ≅ projModel (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))) :=
+    hP2.isoPullback ≪≫ asIso (Limits.pullback.map (Limits.pullback.snd G.π U.1.ι) gV
+      (projModelπ W) (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))))
+      e.hom hVaff.isoSpec.hom U.2.isoSpec.hom heπ.symm hbridge.symm) ≪≫
+      hB.isoPullback.symm with hε
+  have hεπ : ε.hom ≫ projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))) =
+      (G.π ∣_ V) ≫ hVaff.isoSpec.hom := by
+    simp only [hε, Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+    rw [(Iso.inv_comp_eq _).mpr hB.isoPullback_hom_snd.symm, Limits.pullback.lift_snd,
+      ← Category.assoc, hP2.isoPullback_hom_snd]
+  -- extract the sections isomorphism through `morphismRestrict_appTop`
+  have hres : (G.π ∣_ V) = ε.hom ≫
+      projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V))) ≫ hVaff.isoSpec.inv := by
+    rw [← Category.assoc, hεπ, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  haveI hπ' : IsIso (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)))).appTop := by
+    have h3 := projModel_globalSections_eq_baseRing
+      (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)))
+    exact IsIso.of_isIso_comp_left
+      (Scheme.ΓSpecIso (CommRingCat.of ↑Γ(S, V))).inv
+      (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(S, V)))).appTop
+  haveI hεTop : IsIso (Scheme.Hom.appTop ε.hom) :=
+    inferInstanceAs (IsIso (Scheme.Γ.map ε.hom.op))
+  haveI hisoTop : IsIso (Scheme.Hom.appTop hVaff.isoSpec.inv) :=
+    inferInstanceAs (IsIso (Scheme.Γ.map hVaff.isoSpec.inv.op))
+  have hResTop : IsIso ((G.π ∣_ V).appTop) := by
+    rw [hres, Scheme.Hom.comp_appTop, Scheme.Hom.comp_appTop]
+    infer_instance
+  have h5 : IsIso (G.π.app (V.ι ''ᵁ ⊤)) := by
+    have h4 := morphismRestrict_appTop G.π V
+    have h6 : IsIso (G.π.app (V.ι ''ᵁ ⊤) ≫
+        G.E.presheaf.map (eqToHom (image_morphismRestrict_preimage G.π V ⊤)).op) := by
+      rw [← h4]
+      exact hResTop
+    exact IsIso.of_isIso_comp_right _
+      (G.E.presheaf.map (eqToHom (image_morphismRestrict_preimage G.π V ⊤)).op)
+  rwa [Scheme.Opens.ι_image_top] at h5
 
 theorem locallyWeierstrass_pushforward_O_eq_O {S : Scheme.{u}} (G : EllipticCurveGeom S)
     (U : S.Opens) : IsIso (G.π.app U) := by
