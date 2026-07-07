@@ -17,3 +17,5 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Stack
 import ModularCurves.Moduli.PointsDictionary
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.WeierstrassProjectivePrime

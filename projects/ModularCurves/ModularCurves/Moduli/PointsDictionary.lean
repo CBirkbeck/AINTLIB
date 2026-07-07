@@ -1,4 +1,6 @@
 import ModularCurves.Moduli.WeierstrassAtlas
+import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import Mathlib.AlgebraicGeometry.Geometrically.Integral
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -21,7 +23,9 @@ This file carries lane **P2** of the constructive group-law programme (`tw7-plan
 The atlas `U = Spec ℤ[a₁..a₆][Δ⁻¹]` is a domain (T-W7.0a: `Δ ≠ 0`) and noetherian.
 -/
 
-open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
+open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace ModularCurves
 
@@ -75,28 +79,56 @@ instance : Flat universalCurveπ := inferInstance
 
 instance : UniversallyOpen universalCurveπ := inferInstance
 
+/-- `IsIntegral` is closed under isomorphism as a property of schemes (it is
+`IrreducibleSpace ⊓ IsReduced`, both closed under isomorphism). -/
+instance : ObjectProperty.IsClosedUnderIsomorphisms (C := Scheme) (IsIntegral ·) where
+  of_iso e hX := by
+    rw [isIntegral_iff_irreducibleSpace_and_isReduced] at hX ⊢
+    exact ⟨ObjectProperty.prop_of_iso (C := Scheme) (IrreducibleSpace ·) e hX.1,
+           ObjectProperty.prop_of_iso (C := Scheme) (IsReduced ·) e hX.2⟩
+
+/-- **(T-W7.0e-proj applied)** The projective model of a Weierstrass curve over a field is an
+integral scheme: `projModel W = Proj (projCoordRing W)` and `projCoordRing W` is a graded domain
+with nonzero positive-degree part `[X₀]`, so `AlgebraicGeometry.Proj.isIntegral_of_isDomain`
+applies. -/
+instance isIntegral_projModel {K : Type} [Field K] (W : WeierstrassCurve K) :
+    IsIntegral (projModel W) := by
+  show IsIntegral (Proj (quotientGrading (projIdeal W)))
+  refine AlgebraicGeometry.Proj.isIntegral_of_isDomain (𝒜 := quotientGrading (projIdeal W)) ?_
+  refine ⟨1, one_pos, Ideal.Quotient.mk _ (MvPolynomial.X 0), ?_, ?_⟩
+  · exact mk_mem_quotientGrading _ ((MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+      (MvPolynomial.isHomogeneous_X _ _))
+  · rw [Ne, Ideal.Quotient.eq_zero_iff_mem, projIdeal_toIdeal, Ideal.mem_span_singleton]
+    intro hdvd
+    have hX0 : (MvPolynomial.X (0 : Fin 3) : MvPolynomial (Fin 3) K) ≠ 0 :=
+      MvPolynomial.X_ne_zero _
+    have hF0 : W.toProjective.polynomial ≠ 0 := by
+      rintro h
+      rw [h] at hdvd
+      exact hX0 (zero_dvd_iff.mp hdvd)
+    have hle := MvPolynomial.totalDegree_le_of_dvd_of_isDomain hdvd hX0
+    rw [(projective_polynomial_isHomogeneous W).totalDegree hF0, MvPolynomial.totalDegree_X] at hle
+    omega
+
 /-- **(T-W7.0e crux — geometric integrality of the universal curve)** Each geometric fibre of
-`E_U → U` is a nonsingular projective plane Weierstrass cubic, hence an integral scheme.
-Reduces (via `GeometricallyIntegral.iff_geometricallyIntegral_fiber` +
-`isPullback_projModelBaseChange`) to `IsIntegral (projModel W)` for `W` elliptic over a field.
-Cleanest route (avoids the `smooth ⟹ regular` mathlib gap): **`projCoordRing W` is a domain ⟹
-`Proj` of it is integral**:
-
-* **T-W7.0e-dom** — `projCoordRing W = K[X,Y,Z]/(F_W)` is a domain, i.e. the projective
-  Weierstrass polynomial `F_W` is prime. Route: the `Z`-dehomogenisation is the affine
-  Weierstrass polynomial, whose quotient `WeierstrassCurve.Affine.CoordinateRing` is a mathlib
-  domain; `F_W` is homogeneous with `Z ∤ F_W`, so primality lifts through homogenisation
-  (project `ForMathlib/ProjectiveSpaceChart` dehomogenisation API). Gives both irreducible AND
-  reduced at once (a domain is reduced).
-* **T-W7.0e-proj** — `Proj` of a graded integral domain is an integral scheme (generic point =
-  the `(0)` prime; structure-sheaf sections are localisations of a domain, hence reduced). A
-  clean, general, upstreamable mathlib-gap lemma.
-
-Both are substantial Proj-geometry developments; this crux is the hard center of the group-law
-construction (multi-session). Everything ELSE in this file (0a, the plumbing, and the `E_U^n`
-integrality reduction) is proven and rests only on this one instance. -/
+`E_U → U` is a projective plane Weierstrass cubic, hence an integral scheme. A field-valued point
+`y : Spec K ⟶ U` makes `K` a `WeierstrassAtlasRing`-algebra (`Spec.preimage`), and
+`isPullback_projModelBaseChange` identifies the base change `E_U ×_U Spec K` with
+`projModel (universalWeierstrassLoc.map (algebraMap _ K))`, which is integral by
+`isIntegral_projModel`. Transporting across the pullback isomorphism discharges the geometric
+integrality (avoiding the `smooth ⟹ geometrically reduced` mathlib gap entirely). -/
 instance geometricallyIntegral_universalCurveπ : GeometricallyIntegral universalCurveπ := by
-  sorry
+  rw [geometricallyIntegral_iff, geometrically_iff_of_isClosedUnderIsomorphisms]
+  intro K _ y
+  letI : Algebra WeierstrassAtlasRing K := (Spec.preimage y).hom.toAlgebra
+  have hy : y = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K) = Spec.preimage y :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hpb := isPullback_projModelBaseChange (R := WeierstrassAtlasRing) (R' := K)
+    universalWeierstrassLoc
+  rw [← hy] at hpb
+  exact ObjectProperty.prop_of_iso (IsIntegral ·) hpb.isoPullback (isIntegral_projModel _)
 
 /-- The universal curve `E_U` is itself an integral scheme (geometrically integral over the
 integral, locally noetherian atlas). -/
