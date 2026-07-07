@@ -2479,6 +2479,20 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     not finite over ℤp) — the [IsFinite f] hypothesis is genuinely required for
     OUR (proper/KM-1.2.3) structure; KM p. 6's bare-flat statement is about the
     finiteness-free 1.1.1 notion.
+  - **Status**: done (beastmode-D2, 2026-07-07T04:05Z → 2026-07-07T05:35Z) — ALL SIX
+    delivered axiom-clean (standard three), CartierDivisor.lean now ZERO sorries:
+    `ext` (obtain-rfl type-ascription coerces the projection-eq across defeq — plain
+    subst fails), `flatPullback_prop` (mirror of baseChange_prop; composite transport
+    `rw [← w, ← Category.assoc, ← pullback.condition, Category.assoc]` +
+    `P.comp_mem _ _ (MorphismProperty.pullback_fst _ _ hf) hD` — pullback_fst's
+    IsStableUnderBaseChangeAlong instance auto-derives from IsStableUnderBaseChange),
+    `flatPullback` def, `flatPullback_ideal` (byte-mirror of baseChange_ideal),
+    `flatPullback_id` (`Scheme.IdealSheafData.comap_id` EXISTS —
+    IdealSheaf/Functorial.lean:68 @[simp]), `flatPullback_flatPullback`
+    (comap_comp forward), `baseChange_baseChange_ideal` (3× baseChange_ideal + 2×
+    ← comap_comp + `pullbackLeftPullbackSndIso_hom_fst` (Pasting.lean:532) closes rfl).
+    Delegated (fresh-context, first-try green). NOTE for consumers: identity/composite
+    IsFinite/Flat/lfp instances all synthesize — divisor-level laws usable directly.
 - **[T-D21]** general-`A` A-structures/A-generators representability (KM 1.5–1.6,
   in hand): closed subscheme of `Hom(A, E)`. Depends: T-D16; structure theorem for
   finite abelian `A` (mathlib). The two instances T-D17/T-D18 do not wait for this.
@@ -2815,6 +2829,27 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     `A[X] ⊗[A] (A ⊗[R] B) ≃ₐ A[X] ⊗[R] B`, apply hyp (2) at the R-algebra A[X],
     factors compute to `X − C cᵢ` via `sectionBaseChange_tensor_map` with
     ψ = C-as-R-AlgHom. Element spelling pinned per T-D29 note: `X ⊗ₜ 1 − 1 ⊗ₜ f`.
+  - **[T-D30] Status**: done (beastmode-D2, 2026-07-07T04:05Z → 2026-07-07T05:35Z) —
+    `IsFullSetOfSectionsCharpoly` + `isFullSetOfSectionsAlg_iff_charpoly` PROVED
+    axiom-clean (standard three), scratch-first (TD30.lean replica → paste; file was
+    delegate-locked for T-D20 meanwhile). Route AS PLANNED, all gadgets existed:
+    (⟹) T-D29 at base A + `Algebra.norm_eq_of_algEquiv` (Norm/Basic.lean:211 — import
+    upgraded Norm.Defs→Norm.Basic) along `Algebra.TensorProduct.cancelBaseChange
+    R A A[X] A[X] B` (Maps.lean:470, @[simp] cancelBaseChange_tmul), element transport
+    by tmul-induction (a • (1:A[X]) = CAlgHom a is RFL after Algebra.smul_def+mul_one),
+    then hyp at R-algebra A[X]; factors via sectionBaseChange_tensor_map with
+    ψ = Polynomial.CAlgHom (AlgebraMap.lean:95). (⟸) subsingleton_or_nontrivial;
+    nontrivial: n = finrank from congrArg natDegree (LinearMap.charpoly_natDegree
+    [StrongRankCondition ← Nontrivial CommRing TC] + natDegree_prod_of_monic +
+    natDegree_X_sub_C), then norm_apply + det_eq_sign_charpoly_coeff +
+    coeff_zero_eq_eval_zero + eval_prod; sign closes by Finset.prod_neg + pow_add +
+    Even.neg_one_pow ⟨n,rfl⟩. GOTCHAS: (i) `C` shadowed by the Scheme section variable
+    — Polynomial.C must be qualified in CartierDivisor.lean; (ii) simp with
+    neg_eq_neg_one_mul spirals (HasDistribNeg maxRecDepth) where `rw [Finset.prod_neg]`
+    succeeds — simp-motive pathology, banked; (iii) `even_add_self` does not exist —
+    use ⟨n, rfl⟩. n-vs-rank adversarial note: def does NOT force n = finrank; iff still
+    unconditionally true (degree comparison inside the nontrivial branch; zero ring
+    vacuous both sides).
   [T-D30] char-poly form of full-sections + equivalence (KM 1.8.2). [T-D31]
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
