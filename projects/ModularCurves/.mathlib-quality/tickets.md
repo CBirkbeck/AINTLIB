@@ -4215,6 +4215,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     IsOpenImmersion instance exists, route via inferInstanceAs at the
     colimit.ι head, Gluing.lean:813) and the (descent-gated) essential-image
     statement (stackification-level comparison).
+    **`trivialize_full` PROVEN** (2026-07-07T06:40Z): full for
+    [ConnectedSpace S] — the clopen argument exactly as banked; with
+    trivialize_faithful, **full faithfulness of the [X/G]-trivialization
+    holds over connected nonempty bases** (the attack-log obstructions are
+    exactly the failures). GOTCHAS: explicit args to IsOpenImmersion.lift
+    (instance synth at metavars fails); ∀-shaped haveI instances fine but
+    set-vars trip TC; reassoc_of% + erw for transparency-poisoned steps;
+    ∃-repackage for opaque indices. REMAINING: only the (descent-gated)
+    essential-image statement.
   - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
     (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
     (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
