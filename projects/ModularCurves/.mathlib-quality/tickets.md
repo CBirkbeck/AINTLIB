@@ -5664,18 +5664,23 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
   via GF1 (reduce M to R⧸𝔮 pieces by noetherian induction) + GF2 (assemble free) + GF3
   (Noether norm) + GF4 (kill the cokernel N, drop dimension). ~150 lines. LARGE — delegate.
 
-### [T-GF6] flat locus is open (Stacks 00R4/052F)
+### [T-GF6] openness of the flat locus (Stacks 00RC = Thm 10.129.4)
 - **Status**: open · **Depends on**: T-GF5 · **Type**: theorem
-- **Statement**: M fp over Noetherian R ⟹ `{𝔭 ∈ PrimeSpectrum R : Module.Flat (Localization.
-  AtPrime 𝔭) (localized M)}` (the flat locus) is open. Proof = Noetherian induction using
-  GF5 (generic flatness ⟹ flat on a dense open; recurse on the closed complement). ~150-250
-  lines. LARGE — delegate.
+- **Source CONFIRMED (fetched)**: Stacks Thm 10.129.4 (tag 00RC), §10.129 "Openness of the
+  flat locus". Statement: R Noetherian, S fp over R, M fp S-module ⟹ `{𝔮 ∈ Spec S : M_𝔮 flat
+  over R}` is open in Spec S. Proof = Noetherian induction using **generic flatness (GF5 /
+  051R)**: generic flatness gives flatness on a dense open of each irreducible component;
+  Noetherian-induct on the closed complement. ~150-250 lines. LARGE — delegate.
 
-### [T-GF7] flatness descent along the colimit (= NOETH3 discharge; EGA IV 11.2.6)
+### [T-GF7] flatness descends in a directed colimit (Stacks 07RF = Lemma 10.168.1(3))
 - **Status**: open · **Depends on**: T-GF6 · **File**: ForMathlib/NoethApprox.lean · **Type**: theorem
-- **Statement**: discharge the `Module.Flat R₀ A₀` sorry in `exists_noetherian_descent_flat`:
-  A = R⊗_{R₀}A₀ flat over R=colim Rᵢ ⟹ ∃ enlargement stage where A_stage flat over R_stage,
-  via GF6 (flat locus of A₀ over Noetherian R₀ is open; the colimit lands in it). ~100-200 lines.
+- **Source CONFIRMED (fetched)**: Stacks Lemma 10.168.1 part (3) (tag 07RF). This is EXACTLY
+  the NOETH3 statement: `(R→S,M) = colim (R_λ→S_λ, M_λ)`, R_λ→S_λ fp, M_λ fp over S_λ, M flat
+  over R ⟹ M_λ flat over R_λ for all large λ. Proof (fetched, verbatim): descend a base
+  presentation `(R₀→S₀,M₀)` with `R₀→R`, `M₀` flat over R₀; the transition maps Ψ_λ become
+  isos at large λ; conclude via **Thm 10.129.4 (GF6 / flat-locus openness)**. Discharges the
+  `Module.Flat R₀ A₀` sorry in `exists_noetherian_descent_flat` (NoethApprox.lean) directly —
+  our NoethApprox R₀ IS the finite stage. ~100-200 lines.
 
 ### [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box
 - **Status**: open · **Depends on**: T-GF7 (NOETH3), T-NOETH1, T-NOETH2 · **File**:
