@@ -1119,20 +1119,207 @@ theorem eq_mul_of_fibre_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
     _ = (toUnit A ≫ Over.homMk sec hsecq) * g := by rw [hφconst]
     _ = lift (toUnit A ≫ Over.homMk sec hsecq) g ≫ μ[G] := Hom.mul_def _ _
 
-/-- **(T-W7.7·C2, GIT Cor 6.3 — SORRIED LEAF)** A morphism `A ⊗ B ⟶ G` out of a product,
-with `A` proper flat universally-`O`-connected carrying a unit point and `B.left`
-connected, splits as a product `f(x,y) = g(x)·h(y)`. Proof route: GIT — apply C1 to the
-`B`-family of morphisms `f` vs `f(e₁, ·)` (connectedness running along `B`, supplied for
-the C3 application by `connectedSpace_of_universallyOConnected`). Source: GIT p. 116,
-Cor 6.3 (verbatim in quotes file). -/
+/-- **(T-W7.7·C2·res — residue-field retraction rigidity)** Along a section–retraction pair
+`e ≫ q = 𝟙 S`, the canonical map from the residue field of a point in the section's image
+absorbs the roundtrip `q ≫ e`: the two residue maps are a split pair of field maps, hence
+both isomorphisms with composite the congr iso. Supply for C2·fib. -/
+lemma fromSpecResidueField_comp_section {B S : Scheme.{u}} (q : B ⟶ S) (e : S ⟶ B)
+    (he : e ≫ q = 𝟙 S) (s : S) :
+    B.fromSpecResidueField (e.base s) ≫ q ≫ e = B.fromSpecResidueField (e.base s) := by
+  have hqe : q.base (e.base s) = s := by
+    have h := congrArg (fun m : S ⟶ S => m.base s) he
+    simpa using h
+  have hcomp : q.residueFieldMap (e.base s) ≫ e.residueFieldMap s
+      = (S.residueFieldCongr hqe).hom := by
+    have h1 := Scheme.residueFieldMap_comp e q s
+    rw [Scheme.Hom.residueFieldMap_congr he s] at h1
+    simpa [Scheme.residueFieldMap_id] using h1.symm
+  haveI hmono : Mono (e.residueFieldMap s) :=
+    ConcreteCategory.mono_of_injective _ (RingHom.injective _)
+  haveI hsplit : IsSplitEpi (e.residueFieldMap s) :=
+    IsSplitEpi.mk' ⟨(S.residueFieldCongr hqe).inv ≫ q.residueFieldMap (e.base s), by
+      rw [Category.assoc, hcomp, Iso.inv_hom_id]⟩
+  haveI : IsIso (e.residueFieldMap s) := isIso_of_mono_of_isSplitEpi _
+  have hu : q.residueFieldMap (e.base s)
+      = (S.residueFieldCongr hqe).hom ≫ inv (e.residueFieldMap s) := by
+    rw [← hcomp, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+  calc B.fromSpecResidueField (e.base s) ≫ q ≫ e
+      = (B.fromSpecResidueField (e.base s) ≫ q) ≫ e := (Category.assoc _ _ _).symm
+    _ = (Spec.map (q.residueFieldMap (e.base s))
+          ≫ S.fromSpecResidueField (q.base (e.base s))) ≫ e := by
+        rw [Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField]
+    _ = Spec.map (q.residueFieldMap (e.base s))
+          ≫ (Spec.map (S.residueFieldCongr hqe).inv ≫ S.fromSpecResidueField s) ≫ e := by
+        rw [← Scheme.residueFieldCongr_fromSpecResidueField hqe, ← Spec.map_comp_assoc,
+          Iso.hom_inv_id, Spec.map_id, Category.id_comp, Category.assoc]
+    _ = Spec.map (q.residueFieldMap (e.base s)) ≫ Spec.map (S.residueFieldCongr hqe).inv
+          ≫ Spec.map (e.residueFieldMap s) ≫ B.fromSpecResidueField (e.base s) := by
+        rw [Category.assoc, Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField]
+    _ = Spec.map (e.residueFieldMap s ≫ (S.residueFieldCongr hqe).inv
+          ≫ q.residueFieldMap (e.base s)) ≫ B.fromSpecResidueField (e.base s) := by
+        rw [Spec.map_comp, Spec.map_comp]
+        simp only [Category.assoc]
+    _ = B.fromSpecResidueField (e.base s) := by
+        rw [hu, Iso.inv_hom_id_assoc, IsIso.hom_inv_id, Spec.map_id, Category.id_comp]
+
+/-- **(T-W7.7·C2, GIT Cor 6.3, PROVEN)** A morphism `A ⊗ B ⟶ G` out of a product, with `A`
+proper flat universally-`O`-connected carrying a unit point, `B` pointed with `B.left`
+connected locally noetherian, splits as a product `f(x,y) = h(y)·g(x)`. Proof (raw-scheme
+route, all Hom-group algebra in `Over S`): `δ := f · (Ẽ ≫ f)⁻¹` for the second-argument
+freeze `Ẽ := lift (fst) (toUnit ≫ e₂)`; rigidity over the base `B.left` applied to
+`⟨δ.left, snd⟩` into `pullback G.hom B.hom` (instances by base change), with section
+`(B.hom ≫ e₁.left, 𝟙)` and collapsed fibre over `y₀ := e₂(B.hom b₀)` — the fibre inclusion
+fixes `Ẽ` by the residue-retraction lemma, so `δ` is unit-constant there
+(`comp_mul_inv_left`), and the fibre image lands in the one-point `Spec κ(y₀)`-factor.
+Statement changes logged on the board (rule 5): `e₂` (the source quote's second point),
+`[IsLocallyNoetherian B.left]`, and the `h·g` product order (C1's constant is on the left;
+`G` is not yet known commutative). Source: GIT p. 116, Cor 6.3 (verbatim in quotes file). -/
 theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
-    {A B G : Over S} [GrpObj G]
+    {A B G : Over S} [GrpObj G] [IsLocallyNoetherian B.left]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
-    (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A)
+    (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A) (e₂ : 𝟙_ (Over S) ⟶ B)
     [IsSeparated G.hom] (f : A ⊗ B ⟶ G) :
     ∃ (g : A ⟶ G) (h : B ⟶ G),
-      f = lift (fst A B ≫ g) (snd A B ≫ h) ≫ μ[G] := by
-  sorry
+      f = lift (snd A B ≫ h) (fst A B ≫ g) ≫ μ[G] := by
+  classical
+  -- freeze the second argument at the point `e₂` (all Hom-group algebra stays in `Over S`)
+  set E : A ⊗ B ⟶ A ⊗ B := lift (fst A B) (toUnit (A ⊗ B) ≫ e₂) with hE
+  -- raw-typed bridges across the `tensorObj_left`/`tensorUnit_left` defeq seams
+  set El : pullback A.hom B.hom ⟶ pullback A.hom B.hom := E.left with hEl
+  set fl : pullback A.hom B.hom ⟶ G.left := f.left with hfl
+  set δl : pullback A.hom B.hom ⟶ G.left := (f * (E ≫ f)⁻¹).left with hδl
+  set ηl : S ⟶ G.left := η[G].left with hηl
+  set e₂l : S ⟶ B.left := e₂.left with he₂l
+  have he₂B : e₂l ≫ B.hom = 𝟙 S := Over.w e₂
+  -- the point of `B.left` where the fibre collapses
+  obtain ⟨b₀⟩ := hBconn.toNonempty
+  set y₀ : ↥B.left := e₂l.base (B.hom.base b₀) with hy₀
+  -- components of the frozen map, in the raw spelling
+  have hElfst : El ≫ pullback.fst A.hom B.hom = pullback.fst A.hom B.hom := by
+    have h := congrArg CommaMorphism.left (lift_fst (fst A B) (toUnit (A ⊗ B) ≫ e₂))
+    simp only [Over.comp_left, Over.fst_left] at h
+    rw [hEl, hE]
+    exact h
+  have hElsnd : El ≫ pullback.snd A.hom B.hom
+      = pullback.snd A.hom B.hom ≫ B.hom ≫ e₂l := by
+    have h := congrArg CommaMorphism.left (lift_snd (fst A B) (toUnit (A ⊗ B) ≫ e₂))
+    simp only [Over.comp_left, Over.snd_left, Over.toUnit_left, Over.tensorObj_hom] at h
+    have h2 : (pullback.fst A.hom B.hom ≫ A.hom) ≫ e₂l
+        = pullback.snd A.hom B.hom ≫ B.hom ≫ e₂l := by
+      rw [pullback.condition (f := A.hom) (g := B.hom)]
+      simp only [Category.assoc]
+    rw [hEl, hE]
+    exact h.trans h2
+  -- the fibre inclusion over `y₀` fixes the frozen map (C2·fib, via C2·res)
+  have hEfix : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+      ≫ El = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀) := by
+    apply pullback.hom_ext
+    · rw [Category.assoc, hElfst]
+    · rw [Category.assoc, hElsnd,
+        ← Category.assoc, pullback.condition (f := pullback.snd A.hom B.hom)
+          (g := B.left.fromSpecResidueField y₀)]
+      simp only [Category.assoc]
+      have hres := fromSpecResidueField_comp_section B.hom e₂l he₂B (B.hom.base b₀)
+      rw [← hy₀] at hres
+      rw [hres]
+  -- morphism-level fibre agreement of `f` and `E ≫ f`, packaged over `S`
+  have hgoalIf : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+      ≫ fl = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ El ≫ fl := by
+    rw [← Category.assoc, hEfix]
+  have hIf : (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
+        (B.left.fromSpecResidueField y₀)) rfl :
+      Over.mk (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ (A ⊗ B).hom) ⟶ A ⊗ B) ≫ f
+      = (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
+          (B.left.fromSpecResidueField y₀)) rfl) ≫ (E ≫ f) := by
+    apply Over.OverMorphism.ext
+    simp only [Over.comp_left, Over.homMk_left]
+    exact hgoalIf
+  have hconst0 := comp_mul_inv_left _ f (E ≫ f) hIf
+  simp only [Over.homMk_left, Over.mk_hom] at hconst0
+  have hconst : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+      ≫ δl
+      = (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+          ≫ (pullback.fst A.hom B.hom ≫ A.hom)) ≫ ηl := hconst0
+  -- the difference, over the base `B.left`, into the base-changed group
+  have hδq : δl ≫ G.hom = pullback.snd A.hom B.hom ≫ B.hom := by
+    have hw : δl ≫ G.hom = pullback.fst A.hom B.hom ≫ A.hom := Over.w (f * (E ≫ f)⁻¹)
+    rw [hw, pullback.condition]
+  -- the restricted difference factors through the one-point `Spec κ(y₀)`
+  have hη : ηl ≫ G.hom = 𝟙 S := Over.w η[G]
+  have hzw : (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl) ≫ G.hom
+      = B.left.fromSpecResidueField y₀ ≫ B.hom := by
+    rw [Category.assoc, Category.assoc, hη, Category.comp_id]
+  have hfactor : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ pullback.lift δl (pullback.snd A.hom B.hom) hδq
+      = pullback.snd (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
+            (B.left.fromSpecResidueField y₀) hzw := by
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullback.lift_fst, pullback.lift_fst, hconst]
+      simp only [← Category.assoc]
+      congr 1
+      rw [← pullback.condition (f := pullback.snd A.hom B.hom)
+        (g := B.left.fromSpecResidueField y₀)]
+      simp only [Category.assoc]
+      rw [pullback.condition (f := A.hom) (g := B.hom)]
+    · rw [Category.assoc, Category.assoc, pullback.lift_snd, pullback.lift_snd]
+      exact pullback.condition
+  have hsub : Set.Subsingleton
+      ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base ''
+        ((pullback.snd A.hom B.hom).base ⁻¹' {y₀})) := by
+    have hrange : (pullback.snd A.hom B.hom).base ⁻¹' {y₀}
+        = Set.range (pullback.fst (pullback.snd A.hom B.hom)
+            (B.left.fromSpecResidueField y₀)).base := by
+      rw [Scheme.Pullback.range_fst, Scheme.range_fromSpecResidueField]
+    rw [hrange, ← Set.range_comp]
+    rintro p ⟨w, rfl⟩ p' ⟨w', rfl⟩
+    have h1 : ∀ v, ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base
+          ∘ (pullback.fst (pullback.snd A.hom B.hom)
+              (B.left.fromSpecResidueField y₀)).base) v
+        = (pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
+              (B.left.fromSpecResidueField y₀) hzw).base
+            ((pullback.snd (pullback.snd A.hom B.hom)
+              (B.left.fromSpecResidueField y₀)).base v) := by
+      intro v
+      have h2 := congrArg (fun m : (pullback (pullback.snd A.hom B.hom)
+          (B.left.fromSpecResidueField y₀) : Scheme.{u}) ⟶ pullback G.hom B.hom => m v)
+        hfactor
+      simpa [Scheme.Hom.comp_apply] using h2
+    rw [h1 w, h1 w']
+    exact congrArg _ (Subsingleton.elim _ _)
+  -- rigidity over `B.left`
+  haveI := hBconn
+  haveI hpO : UniversallyOConnected (pullback.snd A.hom B.hom) := hO.baseChange B.hom
+  set e₁l : S ⟶ A.left := e₁.left with he₁l
+  have he₁A : e₁l ≫ A.hom = 𝟙 S := Over.w e₁
+  obtain ⟨sec, hsecq, hfac⟩ := rigidity hBconn hpO
+    (pullback.lift (B.hom ≫ e₁l) (𝟙 B.left)
+      (by rw [Category.assoc, he₁A, Category.comp_id, Category.id_comp]))
+    (pullback.lift_snd _ _ _)
+    (pullback.lift δl (pullback.snd A.hom B.hom) hδq)
+    (pullback.lift_snd _ _ _) y₀ hsub
+  -- extract `h` and close with Hom-group algebra
+  have hsecw : (sec ≫ pullback.fst G.hom B.hom) ≫ G.hom = B.hom := by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, hsecq, Category.id_comp]
+  refine ⟨lift (𝟙 A) (toUnit A ≫ e₂) ≫ f,
+    Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw, ?_⟩
+  have h4 : δl = pullback.snd A.hom B.hom ≫ sec ≫ pullback.fst G.hom B.hom := by
+    have h3 := congrArg (fun m => m ≫ pullback.fst G.hom B.hom) hfac
+    simpa [pullback.lift_fst, Category.assoc] using h3
+  have hδsnd : f * (E ≫ f)⁻¹
+      = snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw := by
+    apply Over.OverMorphism.ext
+    simp only [Over.comp_left, Over.homMk_left, Over.snd_left]
+    exact h4
+  have hEg : E ≫ f = fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f) := by
+    rw [hE, ← Category.assoc, comp_lift, Category.comp_id, ← Category.assoc, comp_toUnit]
+  calc f = (f * (E ≫ f)⁻¹) * (E ≫ f) := (inv_mul_cancel_right f (E ≫ f)).symm
+    _ = (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw)
+          * (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f)) := by rw [hδsnd, hEg]
+    _ = lift (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw)
+          (fst A B ≫ (lift (𝟙 A) (toUnit A ≫ e₂) ≫ f)) ≫ μ[G] := Hom.mul_def _ _
 
 /-- **(T-W7.7a-C3, GIT Cor 6.4)** A pointed morphism of group objects in `Over S`, whose
 source is proper flat and universally `O`-connected over a locally noetherian `S`, is a
