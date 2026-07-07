@@ -2407,6 +2407,24 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
 - **[T-D19]** `ecd-pair-section-interface` — `D ↔ (L, s)`, sum = tensor. BLOCKED on
   AG-LB. Sources: KM 1.2 (in hand).
 - **[T-D20]** flat pullback along `Y → X` + composition laws. Depends: T-D12.
+  - **Claimed**: beastmode-D2, 2026-07-07T04:05Z. Status: in-progress. SCOPE per
+    KM p. 6 verbatim (quote-gate ✓ read at claim: "any effective Cartier divisor D
+    in X/S gives rise to an effective Cartier divisor f*(D) in Y/S … the ideal
+    sheaf I(f*(D)) is none other than f*(I(D)) … the short exact sequence …
+    remains short exact after f*, thanks to the flatness of f"): (a) def
+    `flatPullback` along `f : C' ⟶ C` over `S` with `[IsFinite f] [Flat f]
+    [LocallyOfFinitePresentation f]` (our structure carries finite/flat/lfp over
+    S per KM 1.2.3 propriety, so f needs the same three; fields = base-change of
+    f to the subscheme ≫ D-over-S, mirroring A's baseChange_prop); (b)
+    `flatPullback_ideal` = comap; (c) composition laws at divisor level via
+    `ext` (comap_id/comap_comp); (d) `baseChange_baseChange` — iterated base
+    change = base change along the composite, transported through
+    `pullbackLeftPullbackSndIso` (ideal-level). NOTE (adversarial, banked): for
+    NON-finite flat f the pullback of a proper divisor can fail finiteness over
+    S (𝔾ₘ ↪ 𝔸¹_{ℤp} against D = V(x²−p): pullback = the generic point of a DVR,
+    not finite over ℤp) — the [IsFinite f] hypothesis is genuinely required for
+    OUR (proper/KM-1.2.3) structure; KM p. 6's bare-flat statement is about the
+    finiteness-free 1.1.1 notion.
 - **[T-D21]** general-`A` A-structures/A-generators representability (KM 1.5–1.6,
   in hand): closed subscheme of `Hom(A, E)`. Depends: T-D16; structure theorem for
   finite abelian `A` (mathlib). The two instances T-D17/T-D18 do not wait for this.
@@ -2732,6 +2750,17 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     mathlib precedent `aeval_self_charpoly_lmul` uses `[Ring M]`) — deferred,
     statement frozen. Feeds T-D30 (KM 1.8.2 (2)⟹(1)); pin the element spelling
     `X ⊗ₜ 1 − 1 ⊗ₜ b` at the T-D30 call site.
+  - **[T-D30] Claimed**: beastmode-D2, 2026-07-07T04:05Z. Status: in-progress.
+    PLAN (KM 1.8.2, transcribed-in-hand; no ⧗): add form (1)
+    `IsFullSetOfSectionsCharpoly` — ∀ A f, `(Algebra.lmul A (A ⊗[R] B) f).charpoly
+    = ∏ i, (X − C (sectionBaseChange … f))` — + `isFullSetOfSectionsAlg_iff_charpoly`.
+    (1)⟹(2) at T=0: coeff 0 via `LinearMap.det_eq_sign_charpoly_coeff` +
+    `Algebra.norm_apply`; n = finrank from monic-degree comparison (nontrivial
+    case; subsingleton A trivial). (2)⟹(1): T-D29 `Algebra.charpoly_lmul_eq_norm`
+    over base A at f, transport the norm along cancelBaseChange
+    `A[X] ⊗[A] (A ⊗[R] B) ≃ₐ A[X] ⊗[R] B`, apply hyp (2) at the R-algebra A[X],
+    factors compute to `X − C cᵢ` via `sectionBaseChange_tensor_map` with
+    ψ = C-as-R-AlgHom. Element spelling pinned per T-D29 note: `X ⊗ₜ 1 − 1 ⊗ₜ f`.
   [T-D30] char-poly form of full-sections + equivalence (KM 1.8.2). [T-D31]
   reduced-ring evaluation separation for MvPolynomial. [T-D32] f.l.f.-map iso ⟺
   geometric-fibre iso (det-unit local-global). [T-D3a′] Flat-of-SES (if mathlib
