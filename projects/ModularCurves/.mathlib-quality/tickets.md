@@ -2833,8 +2833,31 @@ DS-register unchanged; `#print axioms` audit.
     board-note for the equational-criterion factorisation sketch). fp hypotheses are
     LOAD-BEARING (counterexample in docstring: M=m over a rank-1 non-discrete valuation
     ring). CONSUMER: `RelEffCartierDiv.isOfficial` (T-D11 ⇐). Discharging this makes the
-    ENTIRE D-chain axiom-clean (removes the last sorryAx). Est. 100-200 lines. Not
-    started — dispatch when the D-lane critical path clears.
+    ENTIRE D-chain axiom-clean (removes the last sorryAx).
+  - **DIFFICULTY RE-ASSESSED (2026-07-07T14:55Z, beastmode-D2 — CORRECTS the optimistic
+    "100-200 line Tor-free" estimate above)**: I worked the proof through. The Tor-free
+    part IS clean and reaches `Ann_A(f) ⊗_R κ(𝔭) = 0 for all residue fields κ(𝔭)` — via
+    mathlib's flat-tensor-exactness (`Module.Flat.lTensor_exact`/`rTensor_exact`): fB is
+    R-flat (kernel of A ↠ A/fB, both flat), so `0→Ann(f)→A→fB→0` stays exact after ⊗κ
+    (Ann⊗κ ↪ A⊗κ) AND the fibrewise-nzd hyp kills the image ⟹ Ann(f)⊗κ = 0 ∀κ. **BUT the
+    final step `Ann(f)⊗κ(𝔭)=0 ∀𝔭 ⟹ Ann(f)=0` FAILS without finiteness of `Ann_A(f)`** —
+    `Ann(f)_𝔭 = 𝔭·Ann(f)_𝔭` only forces 0 under Nakayama, i.e. `Ann(f)` fin. gen. over R,
+    which a general fp-flat (even standard-smooth) A does NOT give (A is not module-finite
+    over R; ideals of the non-noetherian A needn't be fg). CONSUMER CHECK: the box is
+    applied at B/(f) = (A⧸I)[1/r], a LOCALIZATION of the module-finite A⧸I — a localization
+    of a finite module is NOT finite, so the consumer does NOT supply `Module.Finite R
+    (B/(f))` either. CONCLUSION: at full generality the box is **EGA IV 11.3.8 / Stacks
+    00ME proper**, genuinely gated on **noetherian approximation (HB-NOETH)** — descend to
+    a noeth subring R₀ where Ann(f) is fg, conclude there, base-change up. HB-NOETH is
+    itself a substantial unbuilt piece (decomposition-km1 §HB-NOETH: mathlib
+    `SpreadingOut.lean`/`AffineTransitionLimit.lean`, ticket T-NOETH0, unbuilt). `nzd is
+    local on Spec B` reduces to stalks B_𝔪 but each is only ess-smooth over R_𝔭 (a field
+    base is needed for the wave-2 DVR route — not available here). NET: T-FLAT1-SLICE is
+    NOT a clean standalone discharge; it needs T-NOETH first (or a smoothness-specific
+    argument that is itself research-level). RECOMMENDATION: keep it a registered box (a
+    legitimate WIP marker for a classical, mathlib-absent result) UNLESS the owner wants
+    to fund the T-NOETH noetherian-approximation build. Est. REVISED: T-NOETH (multi-
+    ticket) + ~150 lines, NOT 100-200 alone.
 - **[T-OT0]** scoping after T-SG1; statement "flf comm. group scheme of rank N killed
   by N"; Deligne norm-argument decomposition (FltRegular norm lemmas per rescan).
 - **[T-DESC0]** scoping — **DONE (beastmode-DESC, 2026-07-07)**. mathlib coverage:
