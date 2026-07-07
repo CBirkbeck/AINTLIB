@@ -1206,6 +1206,21 @@ lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Alg
   rw [projModelZero_not_preimage_zChart] at hpre
   simpa using hpre
 
+/-- **(T-W7.1b input)** The `Spec K`-point dichotomy, public form: a `K`-point of the model
+that does not factor through the `Z`-chart IS the zero section point (both equal the
+canonical infinity point). -/
+lemma specPoint_eq_zero_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K]
+    [Algebra R K] (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hg : ¬ InZChart W g) :
+    g.1 = Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W := by
+  have h1 := eq_infPoint_of_not_inZ W K g hg
+  have h2 := eq_infPoint_of_not_inZ W K
+    ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
+      rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩
+    (projModelZero_not_inZ W K)
+  have := h1.trans h2.symm
+  exact congrArg Subtype.val this
+
 open Classical in
 /-- The **explicit** field-points bijection for elliptic `W`: `K`-points of the projective model
 correspond to affine Weierstrass points — `Z`-chart points via their dehomogenised coordinates,

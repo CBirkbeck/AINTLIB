@@ -560,22 +560,106 @@ private theorem GFree.of_GF {N : Type*} [AddCommGroup N] [Module S N] [Module R 
   rw [GFree]
   exact hst.symm ▸ h
 
-/-- **The domain case** (Stacks 051R main step, GF5 core) — *boxed*.
+/-- Killed-by-a-scalar modules are generically free: if a nonzero `f : R` annihilates the
+`R`-module `N`, then `GF R N` (invert `f`; the localisation `N_f` is a subsingleton — every
+`mk x s = mk (f • x) (f * s) = 0` — hence free). This is the vanishing-fibre base case of the
+domain induction (`R → B` not injective ⇒ `B` is `R`-torsion) and handles the torsion cokernel
+killed by an element of `R`. -/
+private theorem GF.of_smul_eq_zero {R N : Type*} [CommRing R] [AddCommGroup N] [Module R N]
+    {f : R} (hf : f ≠ 0) (hann : ∀ x : N, f • x = 0) : GF R N := by
+  refine ⟨f, hf, ?_⟩
+  have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := by
+    refine ⟨fun a b => ?_⟩
+    have hz : ∀ y : LocalizedModule (Submonoid.powers f) N, y = 0 := by
+      intro y
+      induction y using LocalizedModule.induction_on with
+      | _ x s =>
+        have hu : IsUnit (algebraMap R (Localization.Away f) f) :=
+          IsLocalization.Away.algebraMap_isUnit f
+        rw [← hu.smul_eq_zero (x := LocalizedModule.mk x s), algebraMap_smul,
+          LocalizedModule.smul'_mk, hann x, LocalizedModule.zero_mk]
+    rw [hz a, hz b]
+  infer_instance
 
-For a prime `𝔮` of `S`, the domain `S ⧸ 𝔮` (finite type over the Noetherian domain `R`) becomes
-free over `R_f` after inverting one nonzero `f`. This is the mathematical heart of generic
-flatness: Noether-normalise `(S ⧸ 𝔮) ⊗_R Frac R` over `Frac R` (GF3), spread the finite
-polynomial subring down to `R_f`, form the torsion cokernel `N`, kill it by a nonzero `g` (GF4),
-and recurse on `N` over `R[y]/(g)`, whose generic fibre has strictly smaller Krull dimension.
+/-- **The domain case, injective core** (Stacks 051R main step, GF5 heart) — *boxed*.
 
-This step is left as a `sorry`: the induction on `dim((S⧸𝔮) ⊗_R Frac R)` rests on
-commutative-algebra infrastructure not yet in mathlib — notably that a module-finite (integral)
-ring extension preserves `ringKrullDim`, the exact hypersurface dimension drop
-`dim(k[x]/(g)) = d - 1`, and `(S⧸𝔮) ⊗_R Frac R` being a domain. Everything *around* this step
-(GF1–GF4, the filtration reduction, and all localisation bookkeeping) is proved. -/
+`B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B` (so `B` is
+`R`-torsion-free). Then `B` is generically free over `R`, *given* generic freeness for every
+domain of strictly smaller transcendence degree (the induction hypothesis `IH`).
+
+Mathematically: Noether-normalise the generic fibre `B ⊗_R Frac R` over `Frac R`
+(`exists_noetherNormalization_baseChange`, GF3) to get `Frac R[y₁,…,y_d] ↪ B ⊗_R Frac R` finite
+with `d = trdeg R B`; clear denominators so the `yᵢ` lie in `B`, giving a polynomial subring
+`P = R[y₁,…,y_d] ↪ B` (`trdeg R P = d`) over which `B` becomes module-finite after inverting a
+single nonzero element of `R` (generic finiteness). A basis of `Frac B` over `Frac P` spans a
+free `P`-submodule `P^r ↪ B` with finite torsion cokernel `N`, killed by a nonzero `g ∈ P`
+(`exists_smul_eq_zero_of_notMem_support`, GF4). Since `P^r` is `R`-free (`GF.of_free`) and `N` —
+filtered over `P ⧸ (g)` into prime quotients `P ⧸ 𝔮` with `𝔮 ∋ g`, each of transcendence degree
+`< d` by `trdeg_quotient_prime_lt` — is generically free by `IH`, the defining short exact
+sequence `0 → P^r → B → N → 0` gives `GF R B` via `GF.of_exact` (GF2).
+
+Left as a `sorry`: the construction of this sequence rests on the generic-finiteness descent
+(module-finiteness of `B` over `P` after inverting an element of `R`) plus the choice of the free
+`P`-submodule with finite torsion cokernel — commutative-algebra input not yet in mathlib.
+Everything the induction is assembled *from* (GF1–GF4, `trdeg_quotient_prime_lt`, the
+transcendence induction, the non-injective base case, and all localisation bookkeeping) is
+proved. -/
+private theorem gf_of_injective_domain {R : Type u} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    (B : Type u) [CommRing B] [IsDomain B] [Algebra R B] [Algebra.FiniteType R B]
+    (hinj : Function.Injective (algebraMap R B))
+    (IH : ∀ (C : Type u) [CommRing C] [IsDomain C] [Algebra R C] [Algebra.FiniteType R C],
+      Algebra.trdeg R C < Algebra.trdeg R B → GF R C) :
+    GF R B := by
+  sorry
+
+/-- **Domain-case transcendence induction** (Stacks 051R main step, GF5): every domain `B` of
+finite type over the Noetherian domain `R` with `trdeg R B ≤ n` is generically free over `R`.
+Strong induction on `n`: if `R → B` is not injective, `B` is `R`-torsion and `GF.of_smul_eq_zero`
+finishes; otherwise `gf_of_injective_domain` runs the Noether-normalisation dévissage, whose
+recursive pieces have strictly smaller transcendence degree and are supplied by the induction
+hypothesis. -/
+private theorem gf_of_trdeg_le {R : Type u} [CommRing R] [IsDomain R] [IsNoetherianRing R] :
+    ∀ (n : ℕ) (B : Type u) [CommRing B] [IsDomain B] [Algebra R B] [Algebra.FiniteType R B],
+      Algebra.trdeg R B ≤ (n : Cardinal) → GF R B := by
+  intro n
+  induction n using Nat.strong_induction_on with
+  | _ n IH =>
+    intro B _ _ _ _ hn
+    by_cases hinj : Function.Injective (algebraMap R B)
+    · refine gf_of_injective_domain B hinj (fun C _ _ _ _ hCB => ?_)
+      have hm : Algebra.trdeg R C = ((Algebra.trdeg R C).toNat : Cardinal) :=
+        (Cardinal.cast_toNat_of_lt_aleph0 trdeg_lt_aleph0).symm
+      have hmn : (Algebra.trdeg R C).toNat < n := by
+        have h1 : Algebra.trdeg R C < (n : Cardinal) := lt_of_lt_of_le hCB hn
+        rw [hm] at h1; exact_mod_cast h1
+      exact IH _ hmn C (le_of_eq hm)
+    · rw [RingHom.injective_iff_ker_eq_bot] at hinj
+      obtain ⟨f, hfker, hf0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hinj
+      rw [RingHom.mem_ker] at hfker
+      exact GF.of_smul_eq_zero hf0 (fun x => by rw [Algebra.smul_def, hfker, zero_mul])
+
+/-- **The domain case** (Stacks 051R main step, GF5 core): for a prime `𝔮` of `S`, the domain
+`S ⧸ 𝔮` (finite type over the Noetherian domain `R`) is generically free over `R`.
+
+Assembled from the transcendence induction `gf_of_trdeg_le`: present `S ⧸ 𝔮` as a quotient
+`R[X₁,…,X_m] ⧸ 𝔮₀` of a polynomial ring (`Algebra.FiniteType.iff_quotient_mvPolynomial''`, putting
+the object in `R`'s universe so the polynomial-quotient recursion closes), run the induction there,
+and transport freeness back along the resulting `R`-algebra equivalence (`GF.of_linearEquiv`), then
+reconcile the `R`- and `S`-module structures (`GFree.of_GF`). -/
 private theorem exists_generically_free_domain [IsNoetherianRing R] [Algebra.FiniteType R S]
     (p : Ideal S) [p.IsPrime] : GFree R S (S ⧸ p) := by
-  sorry
+  haveI : IsDomain (S ⧸ p) := Ideal.Quotient.isDomain p
+  obtain ⟨m, ψ, hψ⟩ :=
+    (Algebra.FiniteType.iff_quotient_mvPolynomial'' (R := R) (S := S ⧸ p)).mp inferInstance
+  haveI hker : (RingHom.ker ψ).IsPrime := RingHom.ker_isPrime ψ
+  haveI : IsDomain (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) := Ideal.Quotient.isDomain _
+  let e : (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) ≃ₐ[R] (S ⧸ p) :=
+    Ideal.quotientKerAlgEquivOfSurjective hψ
+  have hGF : GF R (S ⧸ p) :=
+    GF.of_linearEquiv e.symm.toLinearEquiv
+      (gf_of_trdeg_le (Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ)).toNat _
+        (le_of_eq (Cardinal.cast_toNat_of_lt_aleph0 trdeg_lt_aleph0).symm))
+  exact GFree.of_GF hGF
 
 end Devissage
 

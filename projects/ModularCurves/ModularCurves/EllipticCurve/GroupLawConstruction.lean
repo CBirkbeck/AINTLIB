@@ -424,23 +424,45 @@ lemma negModelHom_preimage_basicOpen_X2 (W : WeierstrassCurve R) :
   rw [negModelHom, Proj.map_preimage_basicOpen]
   exact congrArg (Proj.basicOpen _) (negGradedQuot_mk_X2 W)
 
+/-- A field point is in the `Z`-chart iff its base point lands in the range of the affine
+`Z`-chart `Proj.awayι(X₂)`. Forward: the factoring morphism's image lies in the range; backward:
+`IsOpenImmersion.lift` (the domain `Spec K` is a single point, `Subsingleton`). The
+open-immersion factoring criterion specialised to `awayι(X₂)`. -/
+lemma inZChart_iff_opensRange (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) :
+    InZChart W g ↔ g.1.base default ∈ (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange := by
+  constructor
+  · rintro ⟨h, hh⟩
+    refine ⟨h.base default, ?_⟩
+    rw [← hh, Scheme.comp_base]
+    rfl
+  · intro hmem
+    refine ⟨IsOpenImmersion.lift (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos) g.1 ?_, IsOpenImmersion.lift_fac _ _ _⟩
+    rintro _ ⟨y, rfl⟩
+    have hy : y = default := Subsingleton.elim _ _
+    subst hy
+    exact hmem
+
 /-- **(L1 — T-W7.0b-points leaf)** Negation preserves the `Z`-chart: a field point is in the
-`Z`-chart iff its `negModelHom`-image is. ROUTE: `InZChart W g` = "`g.1` factors through
-`Proj.awayι(X₂)`", whose range is `D₊(X₂)` (`Proj.opensRange_awayι`); for the open immersion
-`awayι(X₂)` this is equivalent to `g.1 ⁻¹ᵁ D₊(X₂) = ⊤`. Build that `InZChart ↔ preimage = ⊤`
-bridge (an open-immersion factoring criterion — P2 exposes none, so it is a NEW leaf), then finish
-via `Scheme.comp_preimage` + `negModelHom_preimage_basicOpen_X2`
-(`(g.1 ≫ neg)⁻¹ᵁ D₊ = g.1⁻¹ᵁ (neg⁻¹ᵁ D₊) = g.1⁻¹ᵁ D₊`).
-PITFALL (do NOT retry the naive route): `awayι 𝒜 s` and `awayι 𝒜 (neg s)` have DIFFERENT domain
-types `Spec(Away 𝒜 s)` vs `Spec(Away 𝒜 (neg s))` — their `=` does not typecheck; stay at the opens
-level (`basicOpen`, a fixed type). -/
+`Z`-chart iff its `negModelHom`-image is. Via `inZChart_iff_opensRange` both sides reduce to
+base-point membership in `D₊(X₂)` (`Proj.opensRange_awayι`), then
+`(g.1 ≫ neg)⁻¹ᵁ D₊(X₂) = g.1⁻¹ᵁ (neg⁻¹ᵁ D₊(X₂)) = g.1⁻¹ᵁ D₊(X₂)` by `Scheme.Hom.comp_preimage`
+and `negModelHom_preimage_basicOpen_X2`.
+NOTE: this stays at the opens level (`basicOpen`, a fixed type) — `awayι 𝒜 s` and `awayι 𝒜 (neg s)`
+have DIFFERENT domain types `Spec(Away 𝒜 s)` vs `Spec(Away 𝒜 (neg s))`, so their `=` does not
+typecheck. -/
 lemma inZChart_comp_negModelHom (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (g : SpecPoints (projModel W) (projModelπ W) K)
     (hcomp : (g.1 ≫ negModelHom W) ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom (algebraMap R K))) :
     InZChart W (⟨g.1 ≫ negModelHom W, hcomp⟩ : SpecPoints (projModel W) (projModelπ W) K) ↔
-      InZChart W g :=
-  sorry
+      InZChart W g := by
+  rw [inZChart_iff_opensRange, inZChart_iff_opensRange, Proj.opensRange_awayι,
+    ← Scheme.Hom.mem_preimage, ← Scheme.Hom.mem_preimage]
+  show default ∈ (g.1 ≫ negModelHom W) ⁻¹ᵁ _ ↔ default ∈ g.1 ⁻¹ᵁ _
+  rw [Scheme.Hom.comp_preimage, negModelHom_preimage_basicOpen_X2]
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
 dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:

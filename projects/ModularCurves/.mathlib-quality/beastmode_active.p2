@@ -1,1 +1,1 @@
-FOCUS: T-D6a-ii asSection_zsmul (GroupLaw.lean:295) — cracking the 3-layer defeq/spelling fight INLINE (no struct refactor); parked by prior worker as refactor-gated
+FOCUS: T-G3 aut_trivial_of_fullLevel (Groupoid.lean) — GME 2.6.4 rigidification; surveying decomposition + available Aut/torsion/degree infrastructure before decomposing
