@@ -435,7 +435,7 @@ lemma inZChart_iff_opensRange (W : WeierstrassCurve R) (K : Type u) [Field K] [A
   constructor
   · rintro ⟨h, hh⟩
     refine ⟨h.base default, ?_⟩
-    rw [← hh, Scheme.comp_base]
+    rw [← hh, Scheme.Hom.comp_base]
     rfl
   · intro hmem
     refine ⟨IsOpenImmersion.lift (Proj.awayι (quotientGrading (projIdeal W)) _

@@ -3640,4 +3640,65 @@ lemma exists_overlapMap_mul_tel_pow (W : WeierstrassCurve R)
     exact this
   · exact hpoly ((infChartBasis W).repr b 2) 2
 
+
+/-- **(the overlap as an affine localization)** The overlap ring is the localization of the
+affine coordinate ring at `y`: `Γ(U₁ ∩ U₂) = A[1/y]`, via `overlapMap`. -/
+lemma overlapY_isLocalization (W : WeierstrassCurve R) :
+    letI := (overlapMap W).toAlgebra
+    IsLocalization.Away (coordY W) (Localization.Away (infChartTElem W)) := by
+  letI := (overlapMap W).toAlgebra
+  have halg : ∀ a : W.toAffine.CoordinateRing,
+      algebraMap W.toAffine.CoordinateRing (Localization.Away (infChartTElem W)) a =
+      overlapMap W a := fun _ => rfl
+  constructor
+  constructor
+  · rintro ⟨z, k, rfl⟩
+    rw [halg, map_pow, overlapMap_coordY]
+    refine isUnit_iff_exists_inv.mpr ⟨(algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ k, ?_⟩
+    rw [← mul_pow, mul_comm, tel_mul_overlapInvT, one_pow]
+  · intro z
+    obtain ⟨⟨b, den⟩, hbd⟩ := IsLocalization.surj
+      (Submonoid.powers (infChartTElem W)) z
+    obtain ⟨m, hm⟩ := den.2
+    obtain ⟨a, j, haj⟩ := exists_overlapMap_mul_tel_pow W b
+    refine ⟨⟨a * coordY W ^ m, ⟨coordY W ^ j, j, rfl⟩⟩, ?_⟩
+    show z * algebraMap W.toAffine.CoordinateRing (Localization.Away (infChartTElem W))
+        (coordY W ^ j) =
+      algebraMap W.toAffine.CoordinateRing (Localization.Away (infChartTElem W))
+        (a * coordY W ^ m)
+    rw [halg, halg, map_pow, map_mul, map_pow, overlapMap_coordY]
+    have hz : z * (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ m =
+        overlapMap W a * (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j := by
+      rw [← haj, ← map_pow]
+      rw [show (infChartTElem W ^ m : AdjoinRoot (infChartCubic W)) = den.1 from hm]
+      exact hbd
+    have hu : ∀ K : ℕ, (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ K *
+        overlapInvT W ^ K = 1 := by
+      intro K
+      rw [← mul_pow, tel_mul_overlapInvT, one_pow]
+    calc z * overlapInvT W ^ j
+        = z * ((algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ m *
+            overlapInvT W ^ m) * overlapInvT W ^ j := by
+          rw [hu m, mul_one]
+      _ = z * (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ m *
+          (overlapInvT W ^ m * overlapInvT W ^ j) := by ring
+      _ = overlapMap W a * (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j *
+          (overlapInvT W ^ m * overlapInvT W ^ j) := by rw [hz]
+      _ = overlapMap W a * overlapInvT W ^ m *
+          ((algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j *
+            overlapInvT W ^ j) := by ring
+      _ = overlapMap W a * overlapInvT W ^ m := by
+          rw [hu j, mul_one]
+  · intro a a' he
+    rw [halg, halg] at he
+    exact ⟨1, by rw [overlapMap_injective W he]⟩
+
 end ModularCurves

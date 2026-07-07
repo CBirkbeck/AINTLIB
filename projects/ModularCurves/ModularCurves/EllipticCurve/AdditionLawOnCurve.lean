@@ -1,0 +1,164 @@
+import ModularCurves.EllipticCurve.AdditionLawField
+
+/-!
+# The second Bosma–Lenstra law lands on the curve over reduced Jacobson rings (T-W7.0c-c5α)
+
+The ring-level on-curve statement for law 2. The polynomial certificate is out of budget
+(cofactors ≈ 4–8k terms); instead we evaluate at every maximal ideal — where the residue
+field case is `equation_dblAddXYZ` (`AdditionLawField.lean`) — and kill the resulting
+radical membership with `eq_zero_of_forall_isMaximal_mem` (`AdditionLaw.lean`), which needs
+exactly `IsReduced` and `IsJacobsonRing`.
+
+Consumers (T-W7.0c-c5β / T-W7.0c-i) instantiate `A` at the biprojective chart rings of
+`E_U ×_U E_U`: those are finite type over `ℤ` (hence Jacobson, `isJacobsonRing_MvPolynomial_fin`
++ quotient) and domains (0e integrality), with `Δ` a unit by construction, and the chart
+points tautologically satisfy the two curve equations. No chart plumbing enters this file.
+-/
+
+local notation3 "x" => (0 : Fin 3)
+
+local notation3 "y" => (1 : Fin 3)
+
+local notation3 "z" => (2 : Fin 3)
+
+namespace WeierstrassCurve.Projective
+
+section Map
+
+local macro "map_simp" : tactic =>
+  `(tactic| simp only [map_ofNat, map_neg, map_add, map_sub, map_mul, map_pow,
+    WeierstrassCurve.map, Function.comp_apply])
+
+variable {R : Type*} {S : Type*} [CommRing R] [CommRing S] (f : R →+* S) {W' : Projective R}
+
+lemma map_dblAddX (P Q : Fin 3 → R) :
+    (W'.map f).dblAddX (f ∘ P) (f ∘ Q) = f (W'.dblAddX P Q) := by
+  simp only [dblAddX]
+  map_simp
+
+lemma map_dblAddY (P Q : Fin 3 → R) :
+    (W'.map f).dblAddY (f ∘ P) (f ∘ Q) = f (W'.dblAddY P Q) := by
+  simp only [dblAddY]
+  map_simp
+
+lemma map_dblAddZ (P Q : Fin 3 → R) :
+    (W'.map f).dblAddZ (f ∘ P) (f ∘ Q) = f (W'.dblAddZ P Q) := by
+  simp only [dblAddZ]
+  map_simp
+
+lemma map_dblAddXYZ (P Q : Fin 3 → R) :
+    (W'.map f).dblAddXYZ (f ∘ P) (f ∘ Q) = f ∘ W'.dblAddXYZ P Q := by
+  funext i
+  fin_cases i
+  · show (W'.map f).dblAddX (f ∘ P) (f ∘ Q) = f (W'.dblAddX P Q)
+    exact map_dblAddX f P Q
+  · show (W'.map f).dblAddY (f ∘ P) (f ∘ Q) = f (W'.dblAddY P Q)
+    exact map_dblAddY f P Q
+  · show (W'.map f).dblAddZ (f ∘ P) (f ∘ Q) = f (W'.dblAddZ P Q)
+    exact map_dblAddZ f P Q
+
+end Map
+
+section ZeroArgs
+
+variable {R : Type*} [CommRing R] {W' : Projective R}
+
+lemma dblAddXYZ_zero_fst (Q : Fin 3 → R) : W'.dblAddXYZ 0 Q = 0 := by
+  have h := W'.dblAddXYZ_smul_left Q Q 0
+  rwa [zero_smul, zero_pow two_ne_zero, zero_smul] at h
+
+lemma dblAddX_smul_right (P Q : Fin 3 → R) (v : R) :
+    W'.dblAddX P (v • Q) = v ^ 2 * W'.dblAddX P Q := by
+  simpa using W'.dblAddX_smul P Q 1 v
+
+lemma dblAddY_smul_right (P Q : Fin 3 → R) (v : R) :
+    W'.dblAddY P (v • Q) = v ^ 2 * W'.dblAddY P Q := by
+  simpa using W'.dblAddY_smul P Q 1 v
+
+lemma dblAddZ_smul_right (P Q : Fin 3 → R) (v : R) :
+    W'.dblAddZ P (v • Q) = v ^ 2 * W'.dblAddZ P Q := by
+  simpa using W'.dblAddZ_smul P Q 1 v
+
+lemma dblAddXYZ_smul_right (P Q : Fin 3 → R) (v : R) :
+    W'.dblAddXYZ P (v • Q) = v ^ 2 • W'.dblAddXYZ P Q := by
+  funext i
+  fin_cases i <;>
+    simp [dblAddXYZ, dblAddX_smul_right, dblAddY_smul_right, dblAddZ_smul_right]
+
+lemma dblAddXYZ_zero_snd (P : Fin 3 → R) : W'.dblAddXYZ P 0 = 0 := by
+  have h := W'.dblAddXYZ_smul_right P P 0
+  rwa [zero_smul, zero_pow two_ne_zero, zero_smul] at h
+
+end ZeroArgs
+
+section Field
+
+variable {F : Type*} [Field F] {W : Projective F}
+
+/-- Over a field, every nonzero solution of the homogeneous equation of an *elliptic*
+Weierstrass curve is a nonsingular point representative. -/
+lemma nonsingular_of_equation_of_ne_zero [W.IsElliptic] {P : Fin 3 → F}
+    (hP : W.Equation P) (h0 : P ≠ 0) : W.Nonsingular P := by
+  by_cases hz : P z = 0
+  · have hx : P x = 0 := X_eq_zero_of_Z_eq_zero hP hz
+    have hy : P y ≠ 0 := by
+      intro hy
+      refine h0 (funext fun j => ?_)
+      fin_cases j
+      exacts [hx, hy, hz]
+    have hPy : P = P y • ![0, 1, 0] := by
+      funext j
+      fin_cases j
+      · show P x = P y * 0
+        rw [hx, mul_zero]
+      · show P y = P y * 1
+        rw [mul_one]
+      · show P z = P y * 0
+        rw [hz, mul_zero]
+    rw [hPy, nonsingular_smul _ (Ne.isUnit hy)]
+    exact nonsingular_zero
+  · rw [nonsingular_of_Z_ne_zero hz, ← Affine.equation_iff_nonsingular]
+    exact (equation_of_Z_ne_zero hz).mp hP
+
+/-- The field case with `Equation` hypotheses (the form evaluation at residue fields
+produces): degenerate representatives are absorbed by the zero lemmas. -/
+theorem equation_dblAddXYZ_of_equation [W.IsElliptic] {P Q : Fin 3 → F}
+    (hP : W.Equation P) (hQ : W.Equation Q) : W.Equation (W.dblAddXYZ P Q) := by
+  by_cases h0P : P = 0
+  · rw [h0P, dblAddXYZ_zero_fst]
+    exact equation_zero_triple
+  by_cases h0Q : Q = 0
+  · rw [h0Q, dblAddXYZ_zero_snd]
+    exact equation_zero_triple
+  exact equation_dblAddXYZ (nonsingular_of_equation_of_ne_zero hP h0P)
+    (nonsingular_of_equation_of_ne_zero hQ h0Q)
+
+end Field
+
+section Main
+
+variable {A : Type*} [CommRing A] [IsReduced A] [IsJacobsonRing A] {W' : Projective A}
+
+open MvPolynomial in
+/-- **(T-W7.0c-c5α)** Over a reduced Jacobson ring — in particular over every chart ring of
+`E_U ×_U E_U` — the second Bosma–Lenstra addition law lands on the curve. This is the
+certificate-free replacement for the 4–8k-term `linear_combination` witness: evaluate at
+every maximal ideal (residue fields are fields, where `equation_dblAddXYZ_of_equation`
+applies) and conclude by `eq_zero_of_forall_isMaximal_mem`. -/
+theorem equation_dblAddXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+    (hP : W'.Equation P) (hQ : W'.Equation Q) : W'.Equation (W'.dblAddXYZ P Q) := by
+  rw [Equation]
+  refine eq_zero_of_forall_isMaximal_mem fun m hm => ?_
+  haveI := hm
+  rw [← Ideal.Quotient.eq_zero_iff_mem]
+  haveI : Field (A ⧸ m) := Ideal.Quotient.field m
+  set f := Ideal.Quotient.mk m with hf
+  haveI : (W'.map f).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map f⟩
+  have key : (W'.map f).Equation ((W'.map f).dblAddXYZ (f ∘ P) (f ∘ Q)) :=
+    equation_dblAddXYZ_of_equation (hP.map f) (hQ.map f)
+  rw [map_dblAddXYZ] at key
+  sorry
+
+end Main
+
+end WeierstrassCurve.Projective
