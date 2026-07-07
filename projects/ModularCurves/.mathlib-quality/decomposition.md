@@ -269,7 +269,12 @@ Skeleton pointers are file:line of the `sorry` declarations (lines as of this pa
     - [2] False without separatedness: line-with-doubled-origin — hypothesis present.
     - [3] Scope-creep to general `S` — descent leaves do not cite it (checked).
     - Verdict: SURVIVED. Discharge: equalizer-closed + surjective-closed-immersion-onto-
-      reduced-is-iso (mathlib names verify-at-impl; ≤ 3 conceptual steps).
+      reduced-is-iso — names VERIFIED at the pin (coordinator §3 record, 2026-07-07):
+      `isClosedImmersion_equalizer_ι_left` (Morphisms/Separated.lean, in `Over S`) ·
+      `isIso_of_isClosedImmersion_of_surjective` (`[IsReduced]`) ·
+      `Scheme.fromSpecResidueField`. **Scope guard (coordinator §2/§3)**: L-ext proves
+      equality of EXISTING morphisms; it is NOT a discharge for T-W7.0c's c5 (on-curve =
+      ideal membership) — c5 goes through the Jacobson-density bridge c5α (board).
 
 - **L-0h** (leaf ×1 + P3-file leaves ×4): `mulModelHom_vc`; `projModelVCIso` + `_π`,
   `_zero`, `_mul`.
@@ -523,3 +528,24 @@ group-law uniqueness). CLEAN.
   one-liner is withdrawn; see the two new c5 leaves above (P1).
 - **T-W7.8 relabel**: mathlib spreading-out EXISTS at the pin (`spread_out_of_isGermInjective`
   et al.) — AG-1 demoted from "genuine infra" to "thin wrapper; re-check at implementation".
+
+### Attack-log addendum (lane P4 / fable-P4, 2026-07-07T14:25Z — coordinator §2)
+
+- **L-R1′ NEAR-MISS (logged; new sweep rule)**: the committed skeleton statement of
+  `rigidity_of_subsingleton_base` was FALSE — GIT case 1's collapse hypothesis ("`f(X_s)`
+  is set-theoretically a single point") was dropped; counterexample `f = 𝟙 ℙ¹` over a
+  field. Caught at implementation (103ae635); fixed by the STRONGER
+  `rigidity_of_subsingleton_range` (any base, `Set.Subsingleton (Set.range f.base)`,
+  separatedness dropped) + chart core `rigidity_of_range_le_affine` (3199e396). New rule:
+  every GIT-transcribed leaf gets a hypothesis-by-hypothesis diff against its verbatim
+  quote in `tw7-source-quotes.md` BEFORE proving.
+- **Sweep of remaining GIT leaves (fable-P4, 2026-07-07T14:25Z)**: `rigidity` (r2) vs GIT
+  Prop 6.1 — connected ✓ loc.noeth ✓ flat ✓ proper(-as-closed, case 2) ✓ section ✓
+  separated target ✓ one collapsed fibre ✓; `UniversallyOConnected` replaces
+  `H⁰(X_s) = κ(s)` (documented swap, audit A4). COMPLETE.
+  `isMonHom_of_one_comp_eq` (C3) vs Cor 6.3/6.4: GIT's Cor 6.3 runs connectedness along
+  the SECOND factor — needs `A` (not just `S`) connected componentwise: the sub-leaf
+  **L-C2conn** ("`E` connected when `S` is": flat + proper + surjective + connected fibres
+  + O-connected ⟹ connected total space; no single mathlib name) is REQUIRED and was
+  unplanned — ticketed with the r2 4-leaf split. `abelEnrichment_unique_of_isLocallyNoetherian`
+  (C4) vs Cor 6.6: packaging only; hypothesis-complete relative to C3. No other drops.

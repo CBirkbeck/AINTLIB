@@ -145,7 +145,7 @@ Independent lanes — no shared files, no shared dependencies until the marked j
 | Lane | Tickets (in order) | Gate | Can start |
 |------|--------------------|------|-----------|
 | **P0** | T-W7.0a → 0b | none | **NOW** |
-| **P1** | T-W7.0c (c1–c6; c3 splits into per-coordinate worker-parallel lemmas) | none (B–L acquired ✓) | **NOW** |
+| **P1** | T-W7.0c (c1–c6; c3 splits into per-coordinate worker-parallel lemmas) | **c5 gated on 0e+0f** (bridge leaves c5α/c5β on the board — coordinator §2); rest ungated | CAS layer DONE (see P1 status below); Lean layer after 0e/0f |
 | **P2** | T-W7.0e → 0f | none | **NOW** |
 | **P3** | T-W7.0i (i1–i5) → 1b (b1–b5) | none | **NOW** |
 | **P4** | R1 → R2 → R3 → C1 → C2 → C3 → C4 (all GIT-transcribed; state with `π_*O=O` as hypothesis; discharge via 0i later) | none (GIT acquired ✓) | **NOW** |

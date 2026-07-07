@@ -1012,7 +1012,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 
 ### [T-B4] ⧗KM E[N]/S finite locally free of rank N² (KM 2.3.1; BB-FLAT)
 - **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-07T21:15Z →
-  2026-07-08T00:30Z — all three targets DERIVED, sorry-free modulo the three named
+  2026-07-07T00:30Z — all three targets DERIVED, sorry-free modulo the three named
   KM 2.3.1 boxes now stated in Torsion.lean: `mulByHom_locallyQuasiFinite` (BB-QF,
   fibre input), `mulByHom_flat` (BB-FLAT), `mulByHom_finrank` (BB-DEG, deg [N] = N²)
   — box discharge is T-B4x (blocked on T-B6/HasseWeil comparison). QUOTE-GATE
@@ -1054,8 +1054,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 2.3.1 (quote banked in T-B4 notes) · EGA IV 11.3.10 · [Sil] III.6.2.
 
 ### [T-B5] [N] étale when N invertible (+ E[N] finite étale)
-- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-08T00:45Z →
-  2026-07-08T02:00Z — both targets DERIVED: `mulBy_etale` via
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-07T00:45Z →
+  2026-07-07T02:00Z — both targets DERIVED: `mulBy_etale` via
   `Etale.of_formallyUnramified_of_flat` (f explicit) from BB-DIFF
   (`mulByHom_formallyUnramified`, Loeffler 3.4.2(2) verbatim quote in docstring) +
   BB-FLAT + the lfp mini-box `mulByHom_locallyOfFinitePresentation` (scheme-level
@@ -1073,7 +1073,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] Lemma 3.4.2(2) (quote in decomposition).
 
 ### [T-B5x] ForMathlib: scheme-level lfp cancellation (unblocks the T-B5 lfp mini-box)
-- **Status**: done (beastmode-A 2026-07-08T02:15Z → 2026-07-08T03:00Z —
+- **Status**: done (beastmode-A 2026-07-07T02:15Z → 2026-07-07T03:00Z —
   `LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType` PROVED sorry-free in
   ForMathlib/FinitePresentationCancel.lean (upstream candidate; axioms standard), and
   `mulByHom_locallyOfFinitePresentation` discharged for real ([N] ≫ π = π + Smooth π).
@@ -1268,7 +1268,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   hand — pull quotes when cutting).
 
 ### [T-D2] Full sets of sections: reduced-base criterion (KM 1.9.2)
-- **Status**: done (beastmode-A 2026-07-08T03:30Z → 2026-07-08T06:00Z —
+- **Status**: done (beastmode-A 2026-07-07T03:30Z → 2026-07-07T06:00Z —
   `isFullSetOfSectionsAlg_iff_fields` PROVED sorry-free, axioms standard. Pieces:
   (1) ForMathlib/NormBaseChange.lean `norm_tensor_map` (norm commutes with base
   change; det-conjugation via cancelBaseChange + LinearMap.det_baseChange + det_conj
@@ -1301,8 +1301,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.9.1–1.9.2 with proofs (IN HAND).
 
 ### [T-D3] Divisor sums Σ[Pᵢ] (DS4a discharge)
-- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-08T06:15Z →
-  2026-07-08T09:30Z — DS4a DISCHARGED: `sectionsDivisor` is a TOTAL def with real
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-07T06:15Z →
+  2026-07-07T09:30Z — DS4a DISCHARGED: `sectionsDivisor` is a TOTAL def with real
   in-scope data (ideal := ∏ᵢ ker (Pᵢ), the KM product-of-ideal-sheaves — mathlib's
   stock `Mul IdealSheafData`); out-of-scope branch ⊤-ideal with vacuous props (stock
   `IsEmpty (⊤.subscheme)` instance + IsOpenImmersion-of-IsEmpty + ClosedImmersion
@@ -1312,7 +1312,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   boxes (KM 1.2.2/1.2.3/1.2.6 quotes banked): `sectionsIdeal_isFinite/flat/lfp/
   finrank` — hypothesis-guarded, TRUE, discharge = T-D1 route once AG-LB lands
   (same gate as T-D1; the SES degree argument consumes ideal invertibility).
-  Consumers (T-D5/6/7) are interface-unblocked.) · **DESIGN BANKED (2026-07-08T06:30Z)**:
+  Consumers (T-D5/6/7) are interface-unblocked.) · **DESIGN BANKED (2026-07-07T06:30Z)**:
   (0) mathlib NOW HAS `Mul X.IdealSheafData` (IdealSheaf/Basic.lean:410, with
   ideal_mul/support_mul/pow + top/bot lemmas) — the ticket's "add IdealSheafData.mul"
   is obsolete, use the stock one. (1) DATA (total): `ideal := ∏ i, ((P i).1 ≫ ?).ker`
@@ -1331,7 +1331,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   divisors is a divisor with additive degree (KM 1.1.10-area); (c) assembly.
   (3) `RelEffCartierDiv.baseChange` Prop-fields (same file, T-D12-adjacent) are
   base-change-stability one-liners once (2) is packaged.
-  **(2a) IS NEARLY FREE (discovery 2026-07-08T07:00Z)**: mathlib has
+  **(2a) IS NEARLY FREE (discovery 2026-07-07T07:00Z)**: mathlib has
   `instance [IsClosedImmersion f] : IsIso f.toImage` (ClosedImmersion.lean:154) and
   `f.image := f.ker.subscheme`, `toImage ≫ imageι = f`. For a section z of separated π
   (closed immersion via the T-B3 of_comp pattern): z.ker.subschemeι = z.imageι =
@@ -1340,10 +1340,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `sectionDivisor (π) [IsSeparated π] (z) (hz) : RelEffCartierDiv π` first, then the
   n-fold product (CRT/filtration = the remaining mountain; consult KM 1.1-1.2 pages
   via the full PDF, printed pp. ~7-20, before formalising — quote-gate for 1.2.2).
-  (2a) DONE 2026-07-08T08:00Z: `sectionDivisor` + `sectionDivisor_degree` sorry-free
+  (2a) DONE 2026-07-07T08:00Z: `sectionDivisor` + `sectionDivisor_degree` sorry-free
   in CartierDivisor.lean (ker + toImage-transport; degree via
   finrank_eq_one_of_isIso; NB IsIso.eq_inv_comp for the `= inv _ ≫ _`-orientation).
-  (2b) QUOTES MINED (2026-07-08T08:30Z, printed pp. 7-9): KM 1.2.2 "any section
+  (2b) QUOTES MINED (2026-07-07T08:30Z, printed pp. 7-9): KM 1.2.2 "any section
   s ∈ C(S) defines an effective Cartier divisor [s]" (proof: EGA IV 8.9.1 noetherian
   reduction + 1.1.5.2 geometric-fibre flatness); KM 1.2.3 "D closed, finite flat and
   of finite presentation over S ⟺ effective Cartier divisor proper over S" (THE
@@ -1370,8 +1370,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.2.2 + 1.1 (in hand). **Generality**: smooth separated rel. curve.
 
 ### [T-D5] Exact order N ⟹ NP = 0 (KM 1.4.2; BB-DELIGNE)
-- **Status**: done-modulo-registered-box (beastmode-A 2026-07-08T10:00Z →
-  2026-07-08T11:00Z — `HasExactOrder.smul_eq_zero` DERIVED sorry-free from the box
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-07T10:00Z →
+  2026-07-07T11:00Z — `HasExactOrder.smul_eq_zero` DERIVED sorry-free from the box
   `RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors` (BB-DELIGNE stated in the
   project's subgroup-divisor encoding, exactly as this ticket designed). Real
   content proved: P factors through the order divisor — new
@@ -1388,7 +1388,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   verbatim in decomposition); black box BB-DELIGNE stated as its own lemma first.
 
 ### [T-D6] KM 1.4.4 (1)⇔(3): Drinfeld = naive when N invertible
-- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-09T04:00Z —
+- **Status**: done-modulo-registered-boxes (beastmode-A 2026-07-07T04:00Z —
   `hasExactOrder_iff_geometric` DERIVED sorry-free from two register boxes stated
   with verbatim KM 1.4.4 quotes: `HasExactOrder.pull_nsmul_ne_zero` (T-D6b,
   (2)⟹(3) at a geometric point — fibre étale rank-N distinctness) and
@@ -1400,7 +1400,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (comap_mul ✓, ker_sectionBaseChange ✓, isPullback_sectionBaseChange ✓ — all
   proven) + fibre étale/discriminant theory (T-D7-bridge-adjacent).) · **File**: ExactOrder.lean · `hasExactOrder_iff_geometric` ·
   **Depends on**: T-D3, T-B4 · **Parallel**: with T-D7 · **Type**: theorem
-- **FULL 1.4.4 QUOTE MINED (2026-07-08T11:30Z, printed pp. 18–19)** — statement (1)-(5)
+- **FULL 1.4.4 QUOTE MINED (2026-07-07T11:30Z, printed pp. 18–19)** — statement (1)-(5)
   + proof structure: (1)⟹(2) "the property of having 'exact order N' is preserved
   under arbitrary changes of base T → S" [needs divisor-formation + IsSubgroup
   base-change compat = T-D12-family]; (2)⟹(3) over k: G := the rank-N
@@ -1417,7 +1417,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   with N invertible has N distinct points); T-D6c étale-discriminant bridge
   ((3)⟺(4), consumes T-B4-rank + a trace-form/discriminant input — check mathlib
   `Algebra.discr` + finite-étale-iff-unramified-fibrewise before boxing).
-  T-D6a-INFRA COMPLETE (2026-07-09T07:00Z): ALL CartierDivisor-side base-change
+  T-D6a-INFRA COMPLETE (2026-07-07T07:00Z): ALL CartierDivisor-side base-change
   infrastructure PROVED sorry-free — `isPullback_sectionBaseChange` (section
   base-change square cartesian, limit-cone construction), `ker_sectionBaseChange`
   (ker of pulled section = comap of ker), `baseChange_ideal` (base-changed divisor
@@ -1432,7 +1432,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `(E.baseChange t).mulByHom n` vs pullback of `E.mulByHom n` (grpObjMkPullbackSnd
   functoriality, T-A6-adjacent group-law plumbing). Not blocking any current result.
   ---
-  T-D6a-PROGRESS (2026-07-08T12:30Z): `RelEffCartierDiv.baseChange` Prop-fields
+  T-D6a-PROGRESS (2026-07-07T12:30Z): `RelEffCartierDiv.baseChange` Prop-fields
   DISCHARGED sorry-free (paste_vert of the two of_hasPullback squares +
   MorphismProperty.of_isPullback [slots: sq : IsPullback f' g' g f transfers P g →
   P g'] + toImage-transport + cancel_left_of_respectsIso-as-term [rw fails: metavar
@@ -1451,7 +1451,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [KM] 1.4.4 with proof (IN HAND).
 
 ### [T-D6a-i] ForMathlib: `IdealSheafData.comap_mul` (formation-compat linchpin)
-- **Status**: done (beastmode-A 2026-07-08T18:00Z → 2026-07-09T02:00Z —
+- **Status**: done (beastmode-A 2026-07-07T18:00Z → 2026-07-07T02:00Z —
   `IdealSheafData.comap_mul` PROVED sorry-free for ARBITRARY schemes (axioms
   standard; full build green). Structure: (1) `comap_ideal_top_of_isAffine` —
   TENSOR-FREE affine core (competitor cone Spec(Γ(X)/extension) +
@@ -1471,7 +1471,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **New file**: ForMathlib/IdealSheafComapMul.lean ·
   `Scheme.IdealSheafData.comap_mul : (I * J).comap f = I.comap f * J.comap f` ·
   **Depends on**: none · **Type**: theorem (upstream candidate)
-- **BANKED DESIGN (2026-07-08T13:30Z)**: comap K f := (pullback.fst f K.subschemeι).ker
+- **BANKED DESIGN (2026-07-07T13:30Z)**: comap K f := (pullback.fst f K.subschemeι).ker
   (Functorial.lean:39); GC `map_gc : GaloisConnection (comap · f) (map · f)` with
   le_map_comap/comap_map_le. (≤-half) comap (I*J) f ≤ comap I f * comap J f via
   GC l_le needs MAP-SUPERMULTIPLICATIVITY map K₁ f * map K₂ f ≤ map (K₁K₂) f —
@@ -1492,7 +1492,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (comap (I*J) ≤ comap I); the tensor half is genuinely local.
 - **Sources**: Stacks 01R5-area (scheme-theoretic preimage) · mathlib
   RingTheory/TensorProduct/Quotient.
-- **ROUTE REFINED (2026-07-08T18:30Z, two mathlib simplifiers found)**:
+- **ROUTE REFINED (2026-07-07T18:30Z, two mathlib simplifiers found)**:
   (i) `IdealSheafData.equivOfIsAffine : IdealSheafData X ≃+*o Ideal Γ(X,⊤)` (Basic:487)
   is a RING-equiv over affines — so affine comap_mul ⟺ top-VALUE multiplicativity with
   the mul-bookkeeping free; (ii) `ker_of_isAffine (f) [IsAffine Y] : f.ker =
@@ -1510,7 +1510,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Y-affines + a comap-restriction compat lemma (mirror
   `ideal_comap_of_isOpenImmersion`, Functorial:199). File started:
   ForMathlib/IdealSheafComapMul.lean (skeleton compiles, core sorried).
-- **AFFINE CASE DONE (2026-07-08T21:00Z)**: `comap_ideal_top_of_isAffine` +
+- **AFFINE CASE DONE (2026-07-07T21:00Z)**: `comap_ideal_top_of_isAffine` +
   `comap_mul_of_isAffine` PROVED sorry-free (axioms standard) — and TENSOR-FREE:
   instead of computing Γ(pullback), map the competitor `Spec (Γ(X)/extension)` into
   the pullback by `pullback.lift ιX (IsClosedImmersion.lift Iι (ιX ≫ f) hle)` and
@@ -1525,7 +1525,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
 
 ### [T-D6a-ii] orderDivisor base-change naturality (standalone; gated on mulBy compat)
-- **Status**: in_progress — CORE COMPAT DONE (beastmode-A 2026-07-09T08:30Z:
+- **Status**: in_progress — CORE COMPAT DONE (beastmode-A 2026-07-07T08:30Z:
   `mulBy_baseChange` PROVED — `(E.baseChange g).mulBy n = (Over.pullback g).map
   (E.mulBy n)`, via the NEW ForMathlib lemma `Functor.map_zpow'` (zpow companion of
   mathlib `Functor.map_inv'`; the `open scoped CategoryTheory.Obj` inside it resolves
@@ -1553,7 +1553,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Cartesian/Over.lean mapGrp functoriality.
 
 ### [T-D7] KM 1.4.4 (1)⇔(4): étale-divisor criterion
-- **Status**: done-modulo-registered-box (beastmode-A 2026-07-09T04:30Z —
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-07T04:30Z —
   `hasExactOrder_iff_etale` DERIVED from T-D6 + the `orderDivisor_etale_iff_geometric`
   box (T-D7-bridge, (3)⟺(4) discriminant argument, verbatim KM quote in docstring);
   the iff-plumbing collapses the killing conjunct via pull_zsmul + hkill.) · **File**: ExactOrder.lean · `hasExactOrder_iff_etale` ·
@@ -1561,7 +1561,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 1.4.4 (IN HAND; discriminant argument quoted in proof).
 
 ### [T-D8] ⧗KM Γ(N): Drinfeld ⟺ naive (N invertible)
-- **Status**: done-modulo-registered-box (beastmode-A 2026-07-09T05:30Z —
+- **Status**: done-modulo-registered-box (beastmode-A 2026-07-07T05:30Z —
   `isFullLevel_iff_naive` DERIVED sorry-free from the single register box
   `fullLevel_divisor_iff_naive_gen` (T-D8-bridge, verbatim KM 3.7 / 1.4.4-for-Γ(N)
   content: divisor Σ_{(a,b)}[aP+bQ] = E[N] ⟺ fibrewise P,Q generate the N-torsion).
@@ -1573,14 +1573,14 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Type**: theorem · **Sources**: [KM] 3.1 + 3.7 ⧗; [Loe] Fact 3.8.1 (naive side, in hand).
 
 ### [T-D9] Γ₁(N): Drinfeld ⟺ naive (restatement of T-D6)
-- **Status**: done (beastmode-A 2026-07-09T05:00Z — PROVED first-try, sorry-free in
+- **Status**: done (beastmode-A 2026-07-07T05:00Z — PROVED first-try, sorry-free in
   itself: forward direction gets the killing clause from T-D5's
   HasExactOrder.smul_eq_zero (BB-DELIGNE consumer), then T-D6's iff both ways.
   Transitively rests on the D5/D6 register boxes.) · **File**: LevelStructure/Basic.lean · `isGammaOne_iff_naive` ·
   **Depends on**: T-D6 · **Type**: theorem (thin wrapper — golf target).
 
 ### [T-D10] ⧗KM Γ₀(N): literal fppf-local cyclicity
-- **Status**: STATEMENT DONE, proof ⧗-gated (beastmode-A 2026-07-09T10:30Z —
+- **Status**: STATEMENT DONE, proof ⧗-gated (beastmode-A 2026-07-07T10:30Z —
   `IsGammaZeroFppf` def + `isGammaZero_iff_fppf` statement ADDED and building green in
   LevelStructure/Basic.lean, discharging the ticket's "def + equivalence statement"
   deliverable. Implemented design option (a): fppf cover = `Function.Surjective h.base
@@ -1589,7 +1589,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   a registered WIP sorry — it is KM 3.7.1's étale-descent representability argument
   (⧗ do-not-formalize-from-memory; ⟸ descends a generator to geometric points, ⟹ needs
   the constant-E[N] reduction + étale descent). Formerly:) quote-gate-satisfied,
-  DESIGN-DECISION-GATED (beastmode-A 2026-07-09T10:00Z
+  DESIGN-DECISION-GATED (beastmode-A 2026-07-07T10:00Z
   mined KM 3.4/3.7, printed pp. 105-106). VERBATIM (KM 3.7.1 proof, p.105): *"the
   notion of cyclicity is by definition local for the f.p.p.f. topology, so a fortiori
   for the etale topology"*; *"our constant group-scheme K is cyclic in the sense of
@@ -1614,7 +1614,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Sources**: [KM] 1.4.1 cyclic (IN HAND) + 3.4/3.7.1 (NOW IN HAND, quotes banked) + 6.1 ⧗.
 
 ### [T-E3] Ell/R category plumbing (Prop sorries)
-- **Status**: done (beastmode-A 2026-07-08T14:00Z → 2026-07-08T15:30Z — ALL fields
+- **Status**: done (beastmode-A 2026-07-07T14:00Z → 2026-07-07T15:30Z — ALL fields
   sorry-free: id-square `IsPullback.of_horiz_isIso ⟨by simp⟩`; comp-square
   `f.isPullback.paste_horiz g.isPullback`; category laws `intros; ext <;> simp`;
   `pullbackAlongMap.isPullback` via `IsPullback.of_right` after rewriting the big
@@ -1631,8 +1631,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (find exact names); EllHom ext-lemma discipline.
 
 ### [T-E4] Moduli-problem functor laws (Prop sorries)
-- **Status**: done-modulo-E4a-gate (beastmode-A 2026-07-08T15:30Z →
-  2026-07-08T17:00Z — the FOUR functor-law sorries (map_id/map_comp ×2 functors)
+- **Status**: done-modulo-E4a-gate (beastmode-A 2026-07-07T15:30Z →
+  2026-07-07T17:00Z — the FOUR functor-law sorries (map_id/map_comp ×2 functors)
   PROVED sorry-free via new `EllHom.pullSection_id` + `EllHom.pullSection_comp`
   (IsPullback.hom_ext with the lift-legs stated as defeq HAVES — a raw
   `rw [IsPullback.lift_fst]` never matches under the Subtype-coe; laws close by
@@ -1690,7 +1690,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   object-descent-from-scratch route is B3-scale. Not dispatchable in DESC alone.
 
 ### [T-E11] fppf separatedness of relatively representable problems
-- **Status**: done (beastmode-A 2026-07-09T12:00Z — `moduliProblem_fppf_separated` PROVED sorry-free, axioms standard. Formal proof from RelativelyRepresentable naturality + Equiv.injective + Flat.epi_of_flat_of_surjective [Stacks 02VW, present in mathlib] + cancel_epi. The PENDING-SOURCE note concerned statement justification only; the committed statement proves cleanly.) · **File**: Moduli/Stack.lean · `moduliProblem_fppf_separated` ·
+- **Status**: done (beastmode-A 2026-07-07T12:00Z — `moduliProblem_fppf_separated` PROVED sorry-free, axioms standard. Formal proof from RelativelyRepresentable naturality + Equiv.injective + Flat.epi_of_flat_of_surjective [Stacks 02VW, present in mathlib] + cancel_epi. The PENDING-SOURCE note concerned statement justification only; the committed statement proves cleanly.) · **File**: Moduli/Stack.lean · `moduliProblem_fppf_separated` ·
   **Depends on**: T-E3 · **Type**: theorem (direct from rel. representability +
   fppf-surjectivity ⟹ epi on points — check mathlib `Surjective` API).
 
@@ -4793,6 +4793,24 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     before Lean**; opens = complements of the common-vanishing loci; triple-on-open ⟹
     morphism (repo `Proj` chart plumbing). Leaves **L-0c1** (quotes: B–L Thm 2 + p. 230–231).
 
+- **[T-W7.0c-c5α]** on-curve factorization bridge (NEW leaf, coordinator §2): the B–L
+  triples land on the curve at the RING level over the universal atlas. Element form: in
+  the biprojective chart rings of `E_U ×_U E_U` (reduced by 0e; **Jacobson** — f.g. over
+  `ℤ[a][Δ⁻¹]`), `F(dblAddX, dblAddY, dblAddZ)` vanishes because it vanishes at every field
+  point (0f dictionary + mathlib `nonsingular_add`/`dblXYZ` specs) and closed points are
+  dense with reduced stalks. Decls: `eq_zero_of_forall_residueField_eq_zero` (reduced
+  Jacobson f.t. algebra) + per-chart vanishing. Skeleton decls land with
+  `EllipticCurve/AdditionLaw.lean` (P1's next file; polynomial layer =
+  `scripts/tw7-p1-bosma-lenstra`). **Depends**: 0e, 0f · Est. 150–300 lines · **NOTE**:
+  L-ext is NOT the engine here (it proves morphism equality, not ideal membership).
+
+- **[T-W7.0c-c5β]** bihomogeneous-triple → morphism template (NEW leaf, coordinator §2):
+  `toProjOfBihomTriple` (new ForMathlib on the `ProjectiveSpaceChart` plumbing): where a
+  (2,2)-triple generates the unit ideal on an open of `E_U ×_U E_U`, it defines a morphism
+  to `ℙ²_U`; c5α's vanishing factors it through the closed subscheme `projModel W`
+  (`ProjClosedImmersion` API). This is the actual content of `addOnZ`/`addOnY`
+  (GLC:252–274). **Depends**: c5α · Est. 200–400 lines.
+
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
 
@@ -5006,7 +5024,8 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     instantiated. Leaf **L-hyp**.
 
 - **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean).
-  - **Status**: open (T-W7.r1 DONE 2026-07-07 — startable NOW) · **Type**: theorem
+  - **Status**: in_progress · **Claimed**: fable-P4, 2026-07-07T14:25Z (r1 core refactored
+    3199e396; next per coordinator §2: 4-leaf split, then the κ(s) seed) · **Type**: theorem
   - Sketch (GIT pp. 115–116, transcribed; mathlib names VERIFIED in this checkout,
     assembly map inline at the `rigidity` sorry): equalizer backbone
     `isClosedImmersion_equalizer_ι_left` (in `Over S`, uses `[IsSeparated q]`); case 1
