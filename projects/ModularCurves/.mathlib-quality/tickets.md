@@ -4771,8 +4771,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0b]** negation on the model — `negModelHom` + `_π`, involution, `_zero`,
   `_specPoints` (GroupLawConstruction.lean:197–244 — pointer refreshed per coordinator 1a).
-  - **Status**: in_progress · **Claimed**: lane-P0 worker (handle unrecorded — OWNER: retrofit
-    your handle per rule 5), retrofit 2026-07-07T14:03Z ·
+  - **Status**: in_progress · **Claimed**: beastmode-B (lane P0), 2026-07-07T14:05Z (rule-5
+    retrofit; on 0b since c48f7a0e — negModelHom + involution proven; _π/_zero in progress,
+    _specPoints blocked on T-W7.0f). ForMathlib infra committed: awayMap_fromZeroRingHom
+    (d627068f), map_comp_toSpecZero (25a8a4c9) ·
     **File**: GroupLawConstruction.lean · **Depends**:
     T-W7.0a (done; specPoints also T-W7.0f) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
   - Sketch: projectivise `[X : −Y−a₁X−a₃Z : Z]` via the `baseChangeGradedHom` template
