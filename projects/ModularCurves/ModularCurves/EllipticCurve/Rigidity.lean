@@ -223,6 +223,34 @@ theorem exists_factor_eqLocus {W : Scheme.{u}} (τ : W ⟶ X) (hτ : τ ≫ f = 
 
 end EqLocus
 
+/-- **(T-W7.r2·c·ii, the ring-level Krull engine)** A finitely generated ideal whose every
+element is annihilated by some element outside a prime admits a single annihilator outside
+the prime. This turns stalkwise vanishing of the equalizer ideal (supplied by Krull
+intersection on the noetherian stalk) into vanishing on a basic open around the point. -/
+theorem _root_.Ideal.exists_notMem_mul_eq_zero_of_fg {R : Type*} [CommRing R]
+    {I : Ideal R} (hI : I.FG) {𝔭 : Ideal R} [𝔭.IsPrime]
+    (h : ∀ a ∈ I, ∃ s ∉ 𝔭, s * a = 0) :
+    ∃ s ∉ 𝔭, ∀ a ∈ I, s * a = 0 := by
+  obtain ⟨T, hT⟩ := hI
+  choose sf hsf hzero using fun a (ha : a ∈ (T : Set R)) => h a (hT ▸ Ideal.subset_span ha)
+  classical
+  refine ⟨∏ a ∈ T.attach, sf a.1 a.2, fun hmem => ?_, fun a ha => ?_⟩
+  · obtain ⟨⟨a, haT⟩, -, hpa⟩ := Ideal.IsPrime.prod_mem_iff.mp hmem
+    exact hsf a haT hpa
+  · rw [← hT] at ha
+    induction ha using Submodule.span_induction with
+    | mem x hx =>
+      calc (∏ b ∈ T.attach, sf b.1 b.2) * x
+          = (∏ b ∈ T.attach.erase ⟨x, hx⟩, sf b.1 b.2) * (sf x hx * x) := by
+            rw [← Finset.prod_erase_mul T.attach _ (Finset.mem_attach T ⟨x, hx⟩)]
+            ring
+        _ = 0 := by rw [hzero x hx, mul_zero]
+    | zero => rw [mul_zero]
+    | add x y _ _ hx hy => rw [mul_add, hx, hy, add_zero]
+    | smul c x _ hx =>
+      rw [smul_eq_mul, show (∏ b ∈ T.attach, sf b.1 b.2) * (c * x) =
+        c * ((∏ b ∈ T.attach, sf b.1 b.2) * x) by ring, hx, mul_zero]
+
 section RigidityLeaves
 
 variable {X Y S : Scheme.{u}} {p : X ⟶ S} {q : Y ⟶ S} [IsSeparated q]
