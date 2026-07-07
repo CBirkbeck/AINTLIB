@@ -6151,8 +6151,22 @@ fibre-model on top to identify D_k with Σ[aP_k]. Recorded for whoever builds th
 Source: decomposition-devs.md + Stacks 00RC/00LP/00N1/07RF. mathlib foundation richer than earlier
 delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1b→DEV1c ‖ DEV2a→DEV2b.
 
-### [T-DEV1a] Hilbert syzygy — finite global dimension of a polynomial ring over a field — MAKE-OR-BREAK
-- **Status**: open · **File**: ForMathlib/HilbertSyzygy.lean (new) · **Depends on**: none · **Type**: theorem
+### [T-DEV1a] Hilbert syzygy — finite global dimension of a polynomial ring over a field — MAKE-OR-BREAK — VALIDATED
+- **Status**: DONE-modulo-[T-DEV1a-prime] · commit 8918fe97 · **File**: ForMathlib/HilbertSyzygy.lean (build green)
+- **VERDICT (2026-07-07): proj-dim route WORKS — NO Buchsbaum-Eisenbud.** Landed `HilbertSyzygy.hasProjectiveDimensionLE_of_field
+  (K field) (n) (M : ModuleCat (MvPolynomial (Fin n) K)) : HasProjectiveDimensionLE M n` (stronger than target: no [Finite]).
+  Axiom-clean: base case + `hasProjectiveDimensionLE_extendScalars` (base-change half). One isolated sorry → [T-DEV1a-prime].
+- **BRIDGE CONFIRMED (de-risks DEV1c)**: `ShortComplex.Exact.moduleCat_of_range_eq_ker` + `moduleCat_exact_iff_function_exact`
+  + `ModuleCat.projective_of_free` connect DEV1b's CONCRETE `range_d_succ` to categorical `hasProjectiveDimensionLT_X₃_iff`
+  (syzygy-shifting) — so NO separate categorical-ProjectiveResolution packaging (no T-DEV1b') is needed.
+
+### [T-DEV1a-prime] characteristic short exact sequence (isolated HilbertSyzygy box, ~L146)
+- **Status**: in-progress (dispatched 2026-07-07) · **File**: ForMathlib/HilbertSyzygy.lean · **Depends on**: none · **Type**: lemma
+- **Statement**: `exists_characteristicShortExact` — `0 → R[X]⊗_R M →^{X⊗1−1⊗X} R[X]⊗_R M →^{counit} M → 0` as `ShortComplex.ShortExact`.
+- **Proof sketch**: transport via `PolynomialModule.polynomialTensorProductLEquivPolynomialModule` to `ℕ→₀M`; φ=shift−X-action
+  (injective by leading coeff; range=ker by downward support induction), ε=counit. ~100-150 lines. ⟹ HilbertSyzygy fully clean.
+
+### [T-DEV1a-OLD] (superseded — original sketch below, kept for the trdeg-recursion idea)
 - **Statement**: for a field K, a finite `MvPolynomial (Fin n) K`-module has projective dimension ≤ n
   (`HasProjectiveDimensionLE`). Design exact spelling vs mathlib `projectiveDimension`/`HasProjectiveDimensionLE`.
 - **Proof sketch**: induction on n. Base n=0: K field ⟹ finite module free ⟹ pd 0. Step: `MvPolynomial (Fin (n+1)) K
@@ -6162,15 +6176,20 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
   `hasProjectiveDimensionLE_iff_forall_primeSpectrum`, `MvPolynomial.finSuccEquiv`/`optionEquivLeft`, `Polynomial` regular X. (#check at execution.)
 - **Sources**: Stacks Hilbert-syzygy tag; Weibel *Homological Algebra* §4.3. Validates the proj-dim route for DEV-1.
 
-### [T-DEV1b] finite free resolution of an fp module over a Noetherian ring (Stacks 00LP)
-- **Status**: open · **File**: ForMathlib/FiniteFreeResolution.lean (new) · **Depends on**: none · **Type**: def+theorem
+### [T-DEV1b] finite free resolution of an fp module over a Noetherian ring (Stacks 00LP) — DONE
+- **Status**: DONE · commit d81a0918 · AXIOM-CLEAN · **File**: ForMathlib/FiniteFreeResolution.lean (build green 8614 jobs)
+- Landed: `Module.exists_finite_free_surjective_finite_ker` + explicit resolution (`aug`,`d n`,`range_d_succ`,`d_comp_d`,
+  `syzygy n`,`finite_syzygy n`) with syzygies as genuine `Submodule S (Fin b → S)`. Consumed by DEV1c via CONCRETE form.
 - **Statement**: M fp over noetherian S ⟹ a resolution by finite free S-modules (inductive syzygy chain / `CochainComplex`).
 - **Proof sketch**: `S^n ↠ M` (fp gives generators); kernel fg (S noeth ⟹ submodule of fg is fg); iterate. API: the n-th syzygy is finite.
 - **Mathlib lemmas**: `Module.Finite`, `Submodule.fg_of_...` (noeth), `IsNoetherian`, `Module.FinitePresentation`. ~100 lines.
 - **Sources**: Stacks 00LP.
 
 ### [T-DEV1c] local openness at a flat point — fill `exists_basicOpen_subset_flatLocus_of_mem` (Stacks 00RC) — MAKE-OR-BREAK
-- **Status**: open · **File**: ForMathlib/FlatLocus.lean · **Depends on**: T-DEV1a, T-DEV1b, (T-LC1 done) · **Type**: theorem
+- **Status**: in-progress (dispatched 2026-07-07; deps DEV1a+DEV1b landed, T-LC1 proven, bridge confirmed) · **File**: ForMathlib/FlatLocus.lean · **Depends on**: T-DEV1a, T-DEV1b, (T-LC1 done) · **Type**: theorem
+- **ROUTE FIRMED (no B-E)**: view M as R[x]-module (S fp); fibre resolution ⊗κ(𝔭) over κ(𝔭)[x]; DEV1a bounds pd n; iterate
+  `hasProjectiveDimensionLT_X₃_iff` (via `moduleCat_of_range_eq_ker` on DEV1b's `range_d_succ`) ⟹ n-th fibre syzygy projective⟹free at q;
+  syzygy R-flat by `lTensor_exact` dévissage; T-LC1 (00MH) ⟹ Kₙ free at q; free spreads to D(g); finite free res ⟹ M flat on D(g).
 - **Statement**: the boxed lemma in FlatLocus.lean (each flat point has a basic-open nbhd in the flat locus).
 - **Proof sketch**: finite free resolution (DEV1b) of M; at a flat 𝔮 over 𝔭, the fibre `M⊗κ(𝔭)` over `S⊗κ(𝔭) ≅ κ(𝔭)[x]`
   has finite proj dim (DEV1a) ⟹ the syzygy `K_d` at d=gldim is fibre-free; K_d also R-flat (`Module.Flat.lTensor_exact` +
