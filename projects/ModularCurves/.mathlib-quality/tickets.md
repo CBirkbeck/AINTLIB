@@ -4474,3 +4474,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     post-reset. Deliverables unchanged: muNAlgebra + fibre desc, tensor pair
     algebra + fibre desc, packaging theorem (equivariant point-pairing ⟹
     FiniteEtale morphism via functorToContAction.Full).
+  - 2026-07-07T03:35Z: **T-C0d-i DONE, zero new sorries** (retry worker). Descent
+    heart `exists_finiteEtaleHom_of_galoisEquivariant` AXIOM-CLEAN; packaging
+    `exists_pairingAlgebraHom_of_galoisEquivariant` carries only the torsionAlgebra
+    boxes. muNAlgebra needed NO boxes (muNπ_isFinite/muNπ_etale_iff are proven in
+    MuN.lean). Upstream candidates minted: `algHomEquivSpecOver` (generic Γ⊣Spec
+    over-points correspondence), `tensorAlgHomPairEquiv` (no bundled mathlib form
+    exists). FINDINGS: mathlib's fibre functor Ω = SeparableClosure k (hence
+    [CharZero k] + IsSepClosure.equiv conjugation in the packaging); the Aut-F
+    action bridge is DEFINITIONAL (toAut ∘ fiberMulAction = AlgHom.comp — no
+    comparison lemma needed). **T-C0 gate-free portion COMPLETE**: a+b+c+d-i proven.
+    Remaining: T-C0d-ii (concrete pairing map on fibres — model bridge, T-W7 edge)
+    then T-C0e re-cut with the comparison spec. C-stream hands the baton to the
+    A-lane spine (T-W7) exactly like the level-functor memberships.
