@@ -595,7 +595,7 @@ lemma chartCoordEquiv_mk_C (W : WeierstrassCurve R) (i : Fin 3) (r : R) :
   rw [chartCoordEquiv_mk]
   exact (RingHom.congr_fun (algebraMap_gradeZero_comp_eq W i) r).symm
 
-private lemma ringHom_eq_aeval {σ : Type} {K : Type u} [CommRing K] [Algebra R K]
+lemma ringHom_eq_aeval {σ : Type} {K : Type u} [CommRing K] [Algebra R K]
     (χ : MvPolynomial σ R →+* K)
     (hχ : ∀ r, χ (MvPolynomial.C r) = algebraMap R K r)
     (p : MvPolynomial σ R) :
@@ -608,7 +608,7 @@ private lemma ringHom_eq_aeval {σ : Type} {K : Type u} [CommRing K] [Algebra R 
   calc χ p = (⟨χ, hχ'⟩ : MvPolynomial σ R →ₐ[R] K) p := rfl
     _ = _ := by rw [h]; rfl
 
-private lemma chart_hom_aeval (W : WeierstrassCurve R) (i : Fin 3) {K : Type u}
+lemma chart_hom_aeval (W : WeierstrassCurve R) (i : Fin 3) {K : Type u}
     [CommRing K] [Algebra R K]
     (φ : Away (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K)

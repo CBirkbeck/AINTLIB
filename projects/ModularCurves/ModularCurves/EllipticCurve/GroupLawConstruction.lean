@@ -1,6 +1,8 @@
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.ForMathlib.ProjToSpecZero
+import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
+import ModularCurves.ForMathlib.ProjMapScaling
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 import Mathlib.RingTheory.Localization.Basic
@@ -292,6 +294,49 @@ lemma projModelZeroEval_neg_eq_allNeg (W : WeierstrassCurve R) :
   fin_cases i <;>
     simp [negVec, allNegVec]
 
+/-- The "negate all variables" substitution scales a degree-`d` homogeneous polynomial by
+`(-1)^d`. -/
+lemma allNegVec_smul_of_homogeneous (W : WeierstrassCurve R) {d : ℕ}
+    {p : MvPolynomial (Fin 3) R} (hp : p.IsHomogeneous d) :
+    aeval (allNegVec W) p = (-1 : MvPolynomial (Fin 3) R) ^ d * p := by
+  have hv : (allNegVec W) = (fun i : Fin 3 => -X i) := by
+    funext i; fin_cases i <;> simp [allNegVec]
+  rw [hv]
+  conv_lhs => rw [p.as_sum]
+  conv_rhs => rw [p.as_sum]
+  rw [map_sum, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun v hv => ?_
+  have hvdeg : v.degree = d := by
+    by_contra h
+    exact (MvPolynomial.mem_support_iff.mp hv) (hp.coeff_eq_zero h)
+  have hprod : (v.prod fun i e => (-X i : MvPolynomial (Fin 3) R) ^ e)
+      = (-1) ^ d * v.prod (fun i e => (X i) ^ e) := by
+    simp only [Finsupp.prod]
+    rw [Finset.prod_congr rfl (fun i _ => neg_pow (X i : MvPolynomial (Fin 3) R) (v i)),
+      Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, ← Finsupp.degree_apply, hvdeg]
+  rw [aeval_monomial, algebraMap_eq, monomial_eq, hprod]
+  ring
+
+/-- `allNegGradedQuot` scales a degree-`d` homogeneous class by `(-1)^d`: the `hscale`
+hypothesis feeding `Proj.map_negScaling_eq_id`. -/
+lemma allNegGradedQuot_scale (W : WeierstrassCurve R) (d : ℕ) {a : projCoordRing W}
+    (ha : a ∈ (quotientGrading (projIdeal W)) d) :
+    allNegGradedQuot W a = (-1 : projCoordRing W) ^ d * a := by
+  obtain ⟨p, hp, hmap⟩ := Submodule.mem_map.mp ha
+  have ha_eq : a = Ideal.Quotient.mk (projIdeal W).toIdeal p := hmap.symm
+  rw [ha_eq, allNegGradedQuot, quotientGradingMap_mk]
+  show Ideal.Quotient.mk (projIdeal W).toIdeal (aeval (allNegVec W) p) =
+    (-1) ^ d * Ideal.Quotient.mk (projIdeal W).toIdeal p
+  rw [allNegVec_smul_of_homogeneous W ((mem_homogeneousSubmodule _ _).mp hp),
+    map_mul, map_pow, map_neg, map_one]
+
+/-- **(T-W7.0b-ρ)** `Proj.map` of the "negate all variables" automorphism is the identity:
+rescaling every homogeneous coordinate by `−1` fixes each point of `Proj` projectively. -/
+theorem allNeg_map_id (W : WeierstrassCurve R) :
+    Proj.map (allNegGradedQuot W) (allNegGradedQuot_irrelevant_le W) = 𝟙 (projModel W) :=
+  Proj.map_negScaling_eq_id (allNegGradedQuot W) (allNegGradedQuot_irrelevant_le W)
+    (allNegGradedQuot_scale W)
+
 end NegationConstruction
 
 /-- **(T-W7.0b)** Negation on the projective Weierstrass model: the projectivisation of
@@ -315,30 +360,44 @@ theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
   rw [negModelHom, ← Proj.map_comp]
   exact (Proj_map_congr (negGradedQuot_comp_self W) _ _).trans Proj.map_id
 
-/-- **(T-W7.0b-zero)** Negation fixes the point at infinity. -/
+/-- **(T-W7.0b-zero)** Negation fixes the point at infinity. The point at infinity is fixed
+only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is evaluation at `(0,−1,0)` (the `−1`
+from `Y ↦ −Y`), not at `(0,1,0)`; the two affine representatives of `O` differ by the unit
+`−1`. The rescaling is discharged through the "negate all variables" automorphism `allNeg`,
+using naturality of `Proj.fromOfGlobalSections` under `Proj.map` (`fromOfGlobalSections_map`),
+the ring identity `projModelZeroEval_neg_eq_allNeg`, and `allNeg_map_id`
+(`Proj.map allNeg = 𝟙`). Source: Silverman III.2.3. -/
 theorem negModelHom_zero (W : WeierstrassCurve R) :
     projModelZero W ≫ negModelHom W = projModelZero W := by
-  -- ROUTE (worked out; gated on one reusable ForMathlib lemma being built — see leaves below).
-  -- The point at infinity is fixed only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is
-  -- evaluation at `(0,−1,0)` (the `−1` from `Y ↦ −Y`), NOT at `(0,1,0) = projModelZeroEval`;
-  -- the two affine representatives of `O` differ by the unit `−1`. Since
-  -- `projModelZero W = Proj.fromOfGlobalSections _ f _` with `f = ιΓ ∘ projModelZeroEval W`, the
-  -- rescaling is discharged through the "negate all variables" automorphism, via three leaves:
-  --  (N)  [L-0b-zero-N, ForMathlib] naturality of `Proj.fromOfGlobalSections` under `Proj.map`:
-  --        `fromOfGlobalSections ℬ f hf ≫ Proj.map g hg = fromOfGlobalSections 𝒜 (f.comp g) hf'`.
-  --  (ρ)  [L-0b-zero-ρ] the `X,Y,Z ↦ −X,−Y,−Z` graded automorphism `allNegGradedQuot` (the
-  --        `(−1)`-rescaling `a ↦ (−1)^{deg a} a`; built parallel to `negGradedQuot`, fixes the
-  --        cubic since `F` is homogeneous of the ODD degree 3) with `Proj.map allNegGradedQuot
-  --        = 𝟙` (unit rescaling ⇒ identity on `Proj`: `Away.map` of it is the identity on each
-  --        degree-`0` chart, the `±1` cancelling numerator/denominator).
-  --  (=)  [L-0b-zero-ring] `projModelZeroEval W ∘ negGradedQuot W = projModelZeroEval W ∘
-  --        allNegGradedQuot W` (both are evaluation at `(0,−1,0)`), hence `f ∘ negGradedQuot =
-  --        f ∘ allNegGradedQuot`.
-  -- Assembly: `projModelZero ≫ negModelHom = fromOfGlobalSections (f ∘ negGradedQuot)`  [N]
-  --   `= fromOfGlobalSections (f ∘ allNegGradedQuot)`  [=]
-  --   `= fromOfGlobalSections f ≫ Proj.map allNegGradedQuot`  [N, reversed]
-  --   `= fromOfGlobalSections f ≫ 𝟙 = projModelZero`  [ρ].
-  sorry
+  have key := Proj.fromOfGlobalSections_map (negGradedQuot W) (negGradedQuot_irrelevant_le W)
+    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+    (projModelZeroEval_irrelevant_map_top W)
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (negGradedQuot W) (negGradedQuot_irrelevant_le W) _
+      (projModelZeroEval_irrelevant_map_top W))
+  have key2 := Proj.fromOfGlobalSections_map (allNegGradedQuot W) (allNegGradedQuot_irrelevant_le W)
+    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+    (projModelZeroEval_irrelevant_map_top W)
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (allNegGradedQuot W)
+      (allNegGradedQuot_irrelevant_le W) _ (projModelZeroEval_irrelevant_map_top W))
+  have hfeq : ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)).comp
+        (negGradedQuot W).toRingHom =
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)).comp
+        (allNegGradedQuot W).toRingHom := by
+    rw [RingHom.comp_assoc, projModelZeroEval_neg_eq_allNeg, ← RingHom.comp_assoc]
+  have congr_from : ∀ (g₁ g₂ : projCoordRing W →+* Γ(Spec (.of R), ⊤))
+      (h₁ : (HomogeneousIdeal.irrelevant
+          (HomogeneousIdeal.quotientGrading (projIdeal W))).toIdeal.map g₁ = ⊤)
+      (h₂ : (HomogeneousIdeal.irrelevant
+          (HomogeneousIdeal.quotientGrading (projIdeal W))).toIdeal.map g₂ = ⊤),
+      g₁ = g₂ →
+      Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W)) g₁ h₁ =
+        Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W)) g₂ h₂ := by
+    rintro g₁ g₂ h₁ h₂ rfl; rfl
+  rw [negModelHom, projModelZero, key,
+    ← Category.comp_id (Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)), ← allNeg_map_id W, key2]
+  exact congr_from _ _ _ _ hfeq
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's negation through the
 dictionary. Source: `Affine.negY` vs the projectivised formula; `projModelPointsEquiv`. -/

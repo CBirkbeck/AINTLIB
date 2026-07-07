@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-i3 — chart ring-equiv package PROVEN (chartY/ZRingEquiv + isLocElem/s/x/y/fromZero computations). Next: T3 localization transport ell + compat, then T4 bijectivity assembly
+FOCUS: T-W7.0i-i3 — T3 transport COMPLETE (fraction relations, x/y-frac values, grade-zero compat, overlapLocEquiv_awayMap_z). Next: T4 bijectivity assembly of projModel_globalSections_eq_baseRing

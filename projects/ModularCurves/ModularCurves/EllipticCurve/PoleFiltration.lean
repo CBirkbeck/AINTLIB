@@ -1685,6 +1685,218 @@ private lemma overlapLocEquiv_awayMap_y (W : WeierstrassCurve R) (z :
       (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _) one_ne_zero
   exact IsLocalization.ringEquivOfRingEquiv_eq _ _
 
+/-- `x`-fraction relation in the overlap chart: `α₂(x-frac)·α₁(t-frac) = α₁(s-frac)`. -/
+private lemma awayMap_x_mul_t (W : WeierstrassCurve R) :
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 1)
+        (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)) *
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 2)
+        (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 2)
+        (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 0)) := by
+  apply HomogeneousLocalization.val_injective
+  simp only [HomogeneousLocalization.awayMap_mk, HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.Away.val_mk, Localization.mk_mul]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  exact ⟨1, by push_cast; ring⟩
+
+/-- `y`-fraction relation in the overlap chart: `α₂(y-frac)·α₁(t-frac) = 1`. -/
+private lemma awayMap_y_mul_t (W : WeierstrassCurve R) :
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 1)
+        (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)) *
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 2)
+        (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) = 1 := by
+  apply HomogeneousLocalization.val_injective
+  simp only [HomogeneousLocalization.awayMap_mk, HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.Away.val_mk, Localization.mk_mul,
+    HomogeneousLocalization.val_one]
+  rw [show (1 : Localization (Submonoid.powers
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) =
+    Localization.mk 1 1 from Localization.mk_one.symm]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  exact ⟨1, by push_cast; ring⟩
+
+/-- Generator value: the `x`-fraction of the `Z`-chart maps to `s/t` in the overlap. -/
+private lemma overlapLocEquiv_x_frac (W : WeierstrassCurve R) :
+    overlapLocEquiv W ((HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0))) =
+    overlapXElem W := by
+  have hu : IsUnit (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) :=
+    IsLocalization.map_units _
+      (⟨infChartTElem W, ⟨1, pow_one _⟩⟩ : Submonoid.powers (infChartTElem W))
+  have h := congrArg (overlapLocEquiv W) (awayMap_x_mul_t W)
+  rw [map_mul, overlapLocEquiv_awayMap_y, overlapLocEquiv_awayMap_y,
+    chartYRingEquiv_isLocalizationElem, chartYRingEquiv_sElem] at h
+  refine hu.mul_right_cancel ?_
+  rw [h, ← tel_mul_overlapXElem W]
+  ring
+
+/-- Generator value: the `y`-fraction of the `Z`-chart maps to `1/t` in the overlap. -/
+private lemma overlapLocEquiv_y_frac (W : WeierstrassCurve R) :
+    overlapLocEquiv W ((HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1))) =
+    overlapInvT W := by
+  have hu : IsUnit (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (infChartTElem W)) :=
+    IsLocalization.map_units _
+      (⟨infChartTElem W, ⟨1, pow_one _⟩⟩ : Submonoid.powers (infChartTElem W))
+  have h := congrArg (overlapLocEquiv W) (awayMap_y_mul_t W)
+  rw [map_mul, map_one, overlapLocEquiv_awayMap_y,
+    chartYRingEquiv_isLocalizationElem] at h
+  refine hu.mul_right_cancel ?_
+  rw [h, ← tel_mul_overlapInvT W]
+  ring
+
+/-- `R`-compatibility of the left composite `ℓ ∘ α₂` on grade zero. -/
+private lemma overlapLocEquiv_awayMap_gradeZero (W : WeierstrassCurve R) (r : R) :
+    overlapLocEquiv W ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      ((HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) r))) =
+    algebraMap R (Localization.Away (infChartTElem W)) r := by
+  rw [HomogeneousLocalization.awayMap_fromZeroRingHom]
+  rw [show (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+      (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      ((algebraMapGradeZero (projIdeal W)) r) =
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2)
+      (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      ((HomogeneousLocalization.fromZeroRingHom _ _)
+        ((algebraMapGradeZero (projIdeal W)) r)) from
+    (HomogeneousLocalization.awayMap_fromZeroRingHom _ _ _ _).symm]
+  rw [overlapLocEquiv_awayMap_y, chartYRingEquiv_fromZero]
+  exact (IsScalarTower.algebraMap_apply R (AdjoinRoot (infChartCubic W)) _ r).symm
+
+/-- `R`-compatibility of the right composite `overlapMap ∘ chartZRingEquiv` on grade zero. -/
+private lemma overlapMap_chartZRingEquiv_gradeZero (W : WeierstrassCurve R) (r : R) :
+    overlapMap W (chartZRingEquiv W
+      ((HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) r))) =
+    algebraMap R (Localization.Away (infChartTElem W)) r := by
+  rw [chartZRingEquiv_fromZero]
+  rw [IsScalarTower.algebraMap_apply R (Polynomial R) W.toAffine.CoordinateRing r]
+  rw [show algebraMap (Polynomial R) W.toAffine.CoordinateRing =
+    AdjoinRoot.of W.toAffine.polynomial from rfl]
+  unfold overlapMap
+  rw [AdjoinRoot.lift_of]
+  rw [show (Polynomial.eval₂RingHom ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))).comp
+      ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
+      (overlapXElem W)) (algebraMap R (Polynomial R) r) =
+    Polynomial.eval₂ ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))).comp
+      ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
+      (overlapXElem W) (Polynomial.C r) from by rw [Polynomial.algebraMap_eq]; rfl]
+  rw [Polynomial.eval₂_C]
+  show algebraMap (AdjoinRoot (infChartCubic W)) _
+    (algebraMap (Polynomial R) _ (Polynomial.C r)) = _
+  rw [← Polynomial.algebraMap_eq,
+    ← IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
+    ← IsScalarTower.algebraMap_apply R (AdjoinRoot (infChartCubic W))]
+
+/-- Transport compatibility on the `Z`-chart side: `ℓ ∘ α₂ = overlapMap ∘ chartZRingEquiv`. -/
+private lemma overlapLocEquiv_awayMap_z (W : WeierstrassCurve R)
+    (w : HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :
+    overlapLocEquiv W ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) w) =
+    overlapMap W (chartZRingEquiv W w) := by
+  have hφ₁ : (((overlapLocEquiv W) : _ →+* _).comp
+      ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 1)
+        (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))).comp
+      ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R (Localization.Away (infChartTElem W)) :=
+    RingHom.ext fun r => overlapLocEquiv_awayMap_gradeZero W r
+  have hφ₂ : ((overlapMap W).comp
+      ((chartZRingEquiv W) : _ →+* W.toAffine.CoordinateRing)).comp
+      ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R (Localization.Away (infChartTElem W)) :=
+    RingHom.ext fun r => overlapMap_chartZRingEquiv_gradeZero W r
+  obtain ⟨q, rfl⟩ := (chartCoordEquiv W 2).surjective w
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective q
+  have h₁ := chart_hom_aeval (K := Localization.Away (infChartTElem W)) W 2
+    (((overlapLocEquiv W) : _ →+* _).comp
+    ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) hφ₁ p
+  have h₂ := chart_hom_aeval (K := Localization.Away (infChartTElem W)) W 2
+    ((overlapMap W).comp
+    ((chartZRingEquiv W) : _ →+* W.toAffine.CoordinateRing)) hφ₂ p
+  show (((overlapLocEquiv W) : _ →+* _).comp
+    ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))))
+    ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ p)) =
+    ((overlapMap W).comp ((chartZRingEquiv W) : _ →+* W.toAffine.CoordinateRing))
+    ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ p))
+  rw [h₁, h₂]
+  congr 1
+  congr 1
+  funext j
+  obtain ⟨jv, hj⟩ := j
+  obtain rfl | rfl | rfl : jv = 0 ∨ jv = 1 ∨ jv = 2 := by omega
+  · show overlapLocEquiv W ((HomogeneousLocalization.awayMap _ _ _)
+      ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ (MvPolynomial.X affChartX)))) =
+      overlapMap W (chartZRingEquiv W
+        ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ (MvPolynomial.X affChartX))))
+    rw [chartCoordEquiv_mk_X W 2 affChartX, overlapLocEquiv_x_frac,
+      chartZRingEquiv_x, overlapMap_coordX]
+  · show overlapLocEquiv W ((HomogeneousLocalization.awayMap _ _ _)
+      ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ (MvPolynomial.X affChartY)))) =
+      overlapMap W (chartZRingEquiv W
+        ((chartCoordEquiv W 2) (Ideal.Quotient.mk _ (MvPolynomial.X affChartY))))
+    rw [chartCoordEquiv_mk_X W 2 affChartY, overlapLocEquiv_y_frac,
+      chartZRingEquiv_y, overlapMap_coordY]
+  · exact absurd rfl hj
+
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
