@@ -1,1 +1,1 @@
-FOCUS: T-W7.0b negModelHom_specPoints — infinity case PROVED+committed; now proving L2 (Z-chart coordinate formula (x,y)↦(x,negY x y))
+FOCUS: T-W7.0b specPoints — V1 (negChartMap_coord1) PROVED; only Z-chart assembly of negModelHom_specPoints remains

@@ -626,6 +626,70 @@ lemma negChartMap_coord1 (W : WeierstrassCurve R) :
   norm_num [Submonoid.coe_mul, OneMemClass.coe_one]
   ring
 
+/-- The dehomogenised `Z`-chart cubic evaluated at a coordinate vector is the affine Weierstrass
+equation in `(v₀, v₁)`. (Local copy of the `private` `aeval_dehomog_two`.) -/
+private lemma aeval_dehomog_two' (W : WeierstrassCurve R) {K : Type u} [CommRing K]
+    [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
+    MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
+      v ⟨1, by decide⟩ ^ 2 + algebraMap R K W.a₁ * v ⟨0, by decide⟩ * v ⟨1, by decide⟩
+        + algebraMap R K W.a₃ * v ⟨1, by decide⟩
+        - (v ⟨0, by decide⟩ ^ 3 + algebraMap R K W.a₂ * v ⟨0, by decide⟩ ^ 2
+          + algebraMap R K W.a₄ * v ⟨0, by decide⟩ + algebraMap R K W.a₆) := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_sub, map_add, map_mul, map_pow,
+    MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
+
+/-- The `Z`-chart coordinates of a point satisfy the affine Weierstrass equation. -/
+private lemma negModelHom_zEquation (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P) :
+    (W.baseChange K).toAffine.Equation
+      ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩)
+      ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨1, by decide⟩) := by
+  have h2 := (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).2
+  rw [aeval_dehomog_two'] at h2
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
+  linear_combination h2
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`). -/
+private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
+    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+      SpecPoints (projModel W) (projModelπ W) K)) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K
+        ⟨⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩, hZ'⟩)).1
+        ⟨0, by decide⟩ =
+      (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩ := by
+  rw [coord_val W K _ hZ' ⟨0, by decide⟩, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply,
+    negChartMap_coord0, ← coord_val W K P hZ ⟨0, by decide⟩]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. -/
+private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
+    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+      SpecPoints (projModel W) (projModelπ W) K)) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K
+        ⟨⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩, hZ'⟩)).1
+        ⟨1, by decide⟩ =
+      (W.baseChange K).toAffine.negY
+        ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩)
+        ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨1, by decide⟩) := by
+  rw [coord_val W K _ hZ' ⟨1, by decide⟩, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply,
+    negChartMap_coord1, chart_hom_aeval W 2 _ (chartHomEquiv W 2 K ⟨P, hZ⟩).2,
+    WeierstrassCurve.Affine.negY]
+  simp only [map_sub, map_neg, map_mul, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
+    WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃]
+  rw [← coord_val W K P hZ ⟨1, by decide⟩, ← coord_val W K P hZ ⟨0, by decide⟩]
+  ring
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
 dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:
 `by_cases hZ : InZChart W P`, using `inZChart_comp_negModelHom` (L1) both ways.
@@ -648,7 +712,18 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     -- coordinates as `X₀/X₂ ↦ X₀/X₂`, `X₁/X₂ ↦ (−X₁ − a₁X₀ − a₃X₂)/X₂`, so the composite's
     -- coordinates are `(x, W.negY x y)`; then `projModelPointsEquiv_some` on both sides and
     -- `Affine.Point.neg_some` (`negY x y = −y − a₁x − a₃`) finish.
-    sorry
+    have hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+        SpecPoints (projModel W) (projModelπ W) K) :=
+      (inZChart_comp_negModelHom W K P _).mpr hZ
+    haveI : ((W.baseChange K).toAffine).IsElliptic :=
+      inferInstanceAs ((W.map (algebraMap R K)).IsElliptic)
+    have hxy := WeierstrassCurve.Affine.equation_iff_nonsingular.mp (negModelHom_zEquation W K P hZ)
+    rw [projModelPointsEquiv_some W K P hZ _ _ hxy rfl rfl,
+      projModelPointsEquiv_some W K
+        ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ hZ' _ _
+        ((WeierstrassCurve.Affine.nonsingular_neg ..).mpr hxy)
+        (negModelHom_zCoord0 W K P hZ hZ').symm (negModelHom_zCoord1 W K P hZ hZ').symm,
+      WeierstrassCurve.Affine.Point.neg_some]
   · -- Infinity case: off the `Z`-chart, `P` is the point at infinity `[0:1:0]` (its morphism is
     -- the zero section), which `negModelHom` fixes (`negModelHom_zero`); both sides are `0`.
     have hP : P.1 = Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W :=
