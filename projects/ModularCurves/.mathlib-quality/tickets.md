@@ -4916,13 +4916,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[CLEANUP-PF]** final `/cleanup` PoleFiltration.lean. **Depends**: T-W7.0i-b.
 
-- **[T-W7.mvc]** variable-change model isos — `projModelVCIso` + `_π`, `_zero`, `_mul`
-  (ModelVariableChange.lean:34–58).
-  - **Status**: open (lane P3/P5) · **File**: EllipticCurve/ModelVariableChange.lean ·
-    **Depends**: none · **Parallel**: yes · **Type**: def + 3 lemmas
-  - Sketch: graded hom of the linear substitution (`baseChangeGradedHom` template);
+- **[T-W7.mvc]** variable-change model isos — `projModelVCIso` + `_π`, `_zero`, `_mul`,
+  `_map` (ModelVariableChange.lean:34–58).
+  - **Status**: in_progress (lane P5) · **Claimed**: lane-P5 (beastmode),
+    2026-07-07T14:04Z (claimed BEFORE skeleton edit — rule 5) ·
+    **File**: EllipticCurve/ModelVariableChange.lean ·
+    **Depends**: none · **Parallel**: yes · **Type**: def + 4 lemmas
+  - Sketch: graded hom of the linear substitution (`baseChangeGradedHom` template) — the
+    homogenized `ivcX`/`ivcY` substitution `X↦u²X+rZ, Y↦u³Y+su²X+tZ, Z↦Z` (each generator
+    degree-1 ⟹ graded via `MvPolynomial.IsHomogeneous.aeval`); crux polynomial identity
+    `aeval σ_C poly_W = u⁶·poly_{C•W}` (clears via `variableChange_aᵢ` + `↑u·↑u⁻¹=1`);
+    then `quotientGradingMap` + `Proj.map`, iso via `Proj.map_comp`/`map_id` on `C`/`C⁻¹`;
     cocycle via `eqToHom (mul_smul …)`; affine side from the ⓟ cocycle. Leaf **L-0h**
-    (iso half).
+    (iso half). **coordinator §2-P5**: `projModelVCIso_map` (base-change naturality) added
+    to the leaf — 0h's transport along `classifyRingHom` needs it.
 
 - **[T-W7.1b]** THE comparison theorem — `pointedIso_exists_variableChange`,
   `projModelVCIso_injective` (ModelVariableChange.lean:66,79).

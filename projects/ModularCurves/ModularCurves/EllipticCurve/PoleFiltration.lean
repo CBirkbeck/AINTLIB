@@ -218,8 +218,6 @@ theorem linearIndependent_one_coordX_coordY (W : WeierstrassCurve R) :
   intro i
   fin_cases i <;> assumption
 
-/-! ### T-W7.0i-b1: the infinity chart as a monic cubic over `R[t]` -/
-
 /-- The `s = X/Y` coordinate index of the infinity chart. -/
 abbrev infChartS : {j : Fin 3 // j ≠ 1} := ⟨0, by decide⟩
 
@@ -332,8 +330,6 @@ noncomputable def infChartQuotEquiv (W : WeierstrassCurve R) :
         -infChartCubic W from infChartPolyEquiv_dehomogenize W,
       Ideal.span_singleton_neg]
 
-/-! ### T-W7.0i-b2: basis and nonzerodivisors of the infinity chart -/
-
 /-- **(T-W7.0i-b2, general)** The root adjoined to a polynomial whose constant coefficient is
 a nonzerodivisor is itself a nonzerodivisor: from `q·X = f·g`, the constant coefficient gives
 `g(0) = 0`, so `X ∣ g`, and cancelling `X` exhibits `f ∣ q`. (The one-variable form of the
@@ -433,8 +429,6 @@ lemma mem_nonZeroDivisors_of_ringEquiv {A B : Type*} [CommRing A] [CommRing B]
       simpa using h.1 (e z) (by rw [← map_mul, hz, map_zero]))
   · exact e.injective (by
       simpa using h.2 (e z) (by rw [← map_mul, hz, map_zero]))
-
-/-! ### The chart-0 (`X`-chart) bridge: `z`-outer presentation -/
 
 /-- The chart-0 index bijection: `z ↦ 0` (outer), `y ↦ 1` (inner). -/
 def zChartIndexEquiv : {k : Fin 3 // k ≠ 0} ≃ Fin 2 where

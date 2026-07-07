@@ -2704,7 +2704,16 @@ theorem projModel_isWeierstrassModel (W : WeierstrassCurve R) :
   · exact fun hell K _ _ => projModel_points W hell K
 
 
-/-- **(T-A4, uniqueness of the model — KM 2.2.5 scope)** For **elliptic** `W`, any two
+/-- **⚠ DEPRECATED-FALSE — DO NOT PROVE (coordinator §4, 2026-07-07; v9.4 retirement order).**
+This statement is refuted by `b2_log.jsonl` (2026-07-07, T-A4): over `R = ℚ` the 2-isogenous
+non-isomorphic positive-rank pair `y² = x³ − 36x` / `y² = x³ + 144x` satisfies all hypotheses
+(the points clause is a bare pointed `Equiv` — cardinality only, and isogeny + duals give equal
+cardinalities over every field) while the conclusion would force `E ≅ E'`. Kept only as a
+tombstone until the owner deletes it; the CORRECT uniqueness is the comparison theorem
+**T-W7.1b** (`pointedIso_exists_variableChange`, ModelVariableChange.lean), which supersedes
+this (b2 fix-option 3).
+
+**(T-A4, uniqueness of the model — KM 2.2.5 scope)** For **elliptic** `W`, any two
 pointed **smooth** models satisfying `IsWeierstrassModel W` are isomorphic over
 `Spec R`, compatibly with the base points.
 

@@ -489,3 +489,37 @@ group-law uniqueness). CLEAN.
    `∃ sec, _ ∧ _`; one `∃!`; the comparison theorem's shared-witness `∃ C, ∃ hW, _`).
 
 **REVIEW-PENDING:** none blocking T-W7a or T-W7b-loc-noeth (F1′/F2/F3 refine, don't gate).
+
+---
+
+## COORDINATOR-AUDIT ADDENDUM (2026-07-07T14:06Z, per the all-lanes directive)
+
+- **L-ext discharge names, now execution-verified** (supersedes the "verify-at-impl" notes):
+  `isClosedImmersion_equalizer_ι_left` (Mathlib/AlgebraicGeometry/Morphisms/Separated.lean:273),
+  `isIso_of_isClosedImmersion_of_surjective` (with `[IsReduced]` — hence L-ext is REDUCED-ONLY),
+  `Scheme.fromSpecResidueField`. **L-ext must NOT be cited as the discharge for P1's c5**
+  (coordinator §2-P1): an ext principle proves equality of existing morphisms; c5 must
+  CONSTRUCT `addOnZ`/`addOnY` — the two new c5 leaves (factorization bridge;
+  (2,2)-triple→morphism plumbing) are P1's to skeletonize.
+- **L-R1′ NEAR-MISS (attack-log correction — the adversarial pass MISSED a dropped
+  hypothesis).** The skeleton statement of `rigidity_of_subsingleton_base` as committed in
+  `ba82784b` OMITTED GIT 6.1's constancy hypothesis ("If, for one point s ∈ S, f(X_s) is
+  set-theoretically a single point") — over a one-point base the hypothesis is still needed:
+  counterexample `f = 𝟙 (ℙ¹_k)` over `Spec k` (no factorization through a section). The
+  original attack block claimed source-fidelity without re-checking the hypothesis list
+  against the quote — a Step-4.5 attack-4 failure. Statement since corrected in-lane (P4).
+  **Sweep order (open):** re-check every GIT-transcribed skeleton statement's hypothesis
+  list verbatim against `tw7-source-quotes.md` (rigidity, C1–C4 forms) before proving into
+  them; record per-leaf sweep outcomes here.
+- **L-1b source status: DESIGN-DERIVED (downgraded from source-quoted).** 1b has no verbatim
+  KM §2.2/Deligne-formulaire quote (KM is an image-only scan; the route was re-derived in
+  audit A1). Per the directive it carries its own attack obligations: (1) the b2 bridge —
+  the landed `poleOrderFiltration` is a MONOMIAL SPAN, which a ring iso does NOT preserve
+  for free; the intrinsic (section-ideal) characterization is a REQUIRED new leaf gating all
+  of 1b; (2) b3 is several hundred lines (unitness of α,γ; α³ = γ²; five coefficient
+  equations), not bookkeeping; (3) skeleton decls for b1/b2-bridge/b3/b5 must exist before
+  proving into 1b. Board updated accordingly (P3 lane).
+- **L-0c1 discharge text STALE** (pre-dates the c5 reroute): the "repo Proj chart plumbing"
+  one-liner is withdrawn; see the two new c5 leaves above (P1).
+- **T-W7.8 relabel**: mathlib spreading-out EXISTS at the pin (`spread_out_of_isGermInjective`
+  et al.) — AG-1 demoted from "genuine infra" to "thin wrapper; re-check at implementation".

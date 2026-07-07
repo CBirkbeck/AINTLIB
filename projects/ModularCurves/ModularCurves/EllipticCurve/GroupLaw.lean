@@ -257,7 +257,7 @@ lemma Point.asSection_val_snd {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
 multiplication. Both underlying maps are `pullback.lift (P.1 ≫ [n]) (𝟙 T)` — LHS by
 `point_smul_eq_comp_mulBy` on `E`, RHS by the same plus `mulByHom_baseChange`.
 
-PARKED (2026-07-09): the arithmetic is settled (fst-leg = `P.1 ≫ E.mulByHom n`,
+PARKED (2026-07-06): the arithmetic is settled (fst-leg = `P.1 ≫ E.mulByHom n`,
 snd-leg = `𝟙 T` on both sides via `pullback.hom_ext`); the residual friction is the
 `(E.baseChange g).E` vs `pullback E.π g` defeq-heterogeneity — `mulByHom_baseChange`
 rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
@@ -267,7 +267,7 @@ rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
 fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- STRUCTURAL-REFACTOR-GATED (2026-07-09, both obstacles precisely diagnosed):
+  -- STRUCTURAL-REFACTOR-GATED (2026-07-06, both obstacles precisely diagnosed):
   -- (2) coercion `↑(asSection …)` vs `.1` — SOLVED: a full `simp` (or
   --     `simp only [Point.asSection_coe, point_smul_eq_comp_mulBy]`) after
   --     `refine Subtype.ext ?_; apply pullback.hom_ext` normalises both coercions to
@@ -283,7 +283,7 @@ theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Po
   --     `pullback E.π g` (redefine the structure so `.E`/`.π` unfold to the pullback
   --     spelling), after which every reassoc is single-spelling. All arithmetic proven.
   --     Non-blocking (T-D6a-ii is non-blocking).
-  -- (3) THIRD spelling layer confirmed 2026-07-09: `E.π` (in bridge-lemma statements)
+  -- (3) THIRD spelling layer confirmed 2026-07-06: `E.π` (in bridge-lemma statements)
   --     elaborates to `(E.toEllipticCurveGeom).π` while the goal's `pullback.fst E.π g`
   --     (from `pullback.hom_ext` on `(E.baseChange g).E`) uses a different `E.π`
   --     spelling — so even the bridge lemmas `asSection_val_fst/snd` fail to rw-match.
