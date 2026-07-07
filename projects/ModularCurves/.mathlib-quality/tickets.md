@@ -2262,6 +2262,18 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     CartierDivisor.lean intact; route fully banked (scratchpad/wave3a-prompt.md).
     REMAINING for T-D11: wave-3a (chart-level `officialAux_exists_away_span`) +
     wave-4 isOfficial scheme assembly (mine); isFinite leg parked (ZMT).
+  - **WAVE-3a FIBRE TRANSPORT — verified peer contribution** (2026-07-07T13:40Z):
+    a sibling session delivered `exists_mem_fibre_principal` (fibre-level
+    principality of I·S in the stalk-fibre S/pS, generator drawn from I) —
+    scratchpad/ai_fibre_complete.lean, 246 lines, which I INDEPENDENTLY VERIFIED
+    (compiles clean, #print axioms = standard three, no sorryAx). This discharges
+    my route's steps 3-5 (the κ ⊗[R/p] (A/pA) transport — the hardest part) via
+    `Algebra.TensorProduct.quotIdealMapEquivQuotTensor` + `.of_algEquiv` +
+    `rightAlgebra`/`IsLocalization.tensorRight` + `localizationAlgebraOfSubmonoidLe`.
+    My Opus wave-3a delegate redirected (SendMessage) to ADOPT this lemma and finish
+    only the two remaining legs: (6) Nakayama lift+spread fibre-principal ⟹
+    away-principal on Localization.Away r (r ∉ q), (7) nzd via the T-FLAT1-SLICE box.
+    Two efforts converged onto one verified building block.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
