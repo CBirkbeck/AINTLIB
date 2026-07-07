@@ -7,6 +7,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.Separated
 import Mathlib.AlgebraicGeometry.Noetherian
 import ModularCurves.ForMathlib.ConnectedTotalSpace
+import ModularCurves.EllipticCurve.PoleFiltration
 
 /-!
 # The rigidity lemma and canonicity of the group law
@@ -48,12 +49,28 @@ checks that `p_*(o_X) ≅ o_S`", case 1) + audit A4/R1. -/
 def UniversallyOConnected {X S : Scheme.{u}} (p : X ⟶ S) : Prop :=
   ∀ ⦃T : Scheme.{u}⦄ (g : T ⟶ S) (U : T.Opens), IsIso ((pullback.snd p g).app U)
 
-/-- **(T-W7.7a-hyp-supply)** Locally-Weierstrass families are universally `O`-connected:
-base changes are again locally Weierstrass (`LocallyWeierstrass.baseChange`), so the uniform
-global-sections theorem instantiates. -/
+/-- **(T-W7.7a-hyp-supply, PROVEN)** Locally-Weierstrass families are universally
+`O`-connected: base changes are again locally Weierstrass (`LocallyWeierstrass.baseChange`
+and the base-change stability of the geometry fields), so the uniform global-sections
+theorem `locallyWeierstrass_pushforward_O_eq_O` (T-W7.0i·i5) instantiates on the
+base-changed geometry. -/
 theorem EllipticCurveGeom.universallyOConnected {S : Scheme.{u}} (G : EllipticCurveGeom S) :
     UniversallyOConnected G.π := by
-  sorry
+  intro T g U
+  let G' : EllipticCurveGeom T :=
+    { E := pullback G.π g
+      π := pullback.snd G.π g
+      zero := pullback.lift (g ≫ G.zero) (𝟙 T)
+        (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])
+      zero_π := pullback.lift_snd _ _ _
+      smooth := by
+        haveI : MorphismProperty.IsStableUnderBaseChange
+            (@SmoothOfRelativeDimension 1) :=
+          AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
+        exact MorphismProperty.pullback_snd _ _ G.smooth
+      proper := MorphismProperty.pullback_snd _ _ G.proper
+      localModel := G.localModel.baseChange g }
+  exact locallyWeierstrass_pushforward_O_eq_O G' U
 
 /-- Morphisms into an affine scheme are determined by their pullback on global sections
 (the `Γ`–`Spec` adjunction, in the form every rigidity argument below consumes). -/
