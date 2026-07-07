@@ -630,7 +630,52 @@ lemma overlap_eval₂_polynomial (W : WeierstrassCurve R) :
           ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
         (overlapXElem W))
       (overlapInvT W) W.toAffine.polynomial = 0 := by
-  sorry
+  have hrel : AdjoinRoot.root (infChartCubic W) ^ 3 +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₂ * Polynomial.X) *
+        AdjoinRoot.root (infChartCubic W) ^ 2 +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+        Polynomial.C W.a₁ * Polynomial.X) * AdjoinRoot.root (infChartCubic W) +
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+        Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) = 0 := by
+    have h : Polynomial.eval₂ (AdjoinRoot.of (infChartCubic W))
+        (AdjoinRoot.root (infChartCubic W))
+        (Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+            Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
+          Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+            Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X)) = 0 := by
+      rw [show (Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C W.a₂ * Polynomial.X) * Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C W.a₄ * Polynomial.X ^ 2 -
+            Polynomial.C W.a₁ * Polynomial.X) * Polynomial.X +
+          Polynomial.C (Polynomial.C W.a₆ * Polynomial.X ^ 3 -
+            Polynomial.C W.a₃ * Polynomial.X ^ 2 - Polynomial.X) :
+          Polynomial (Polynomial R)) = infChartCubic W from rfl]
+      exact AdjoinRoot.eval₂_root _
+    simp only [Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
+      Polynomial.eval₂_X, Polynomial.eval₂_C] at h
+    rw [show (AdjoinRoot.of (infChartCubic W) : Polynomial R →+* _) =
+      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) from rfl] at h
+    linear_combination h
+  rw [show W.toAffine.polynomial = Polynomial.X ^ 2 +
+      Polynomial.C (Polynomial.C W.toAffine.a₁ * Polynomial.X +
+        Polynomial.C W.toAffine.a₃) * Polynomial.X -
+      Polynomial.C (Polynomial.X ^ 3 + Polynomial.C W.toAffine.a₂ * Polynomial.X ^ 2 +
+        Polynomial.C W.toAffine.a₄ * Polynomial.X + Polynomial.C W.toAffine.a₆) from rfl]
+  simp only [Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_C,
+    Polynomial.coe_eval₂RingHom, RingHom.coe_comp, Function.comp_apply]
+  unfold overlapInvT overlapXElem
+  simp only [← Localization.mk_one_eq_algebraMap, Localization.mk_pow, Localization.mk_mul,
+    sub_eq_add_neg, Localization.neg_mk, Localization.add_mk]
+  rw [← Localization.mk_zero (1 : Submonoid.powers (infChartTElem W)),
+    Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  push_cast
+  simp only [map_sub, map_mul, map_pow] at hrel
+  linear_combination (-(infChartTElem W ^ 7)) * hrel
+
 
 /-- **(T-W7.0i-b4-1)** The overlap map from the affine part into the localized infinity
 chart: `x ↦ s/t`, `y ↦ 1/t`. -/
