@@ -5325,14 +5325,43 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     or ignore per the section-based route — **fable-P4 owns the wrapper + the idempotent leaf**;
     this is offered as shared infra, not a claim on the ticket.
 
-- **[T-W7.7·C1]** GIT Cor 6.2 — `eq_mul_of_fibre_eq` (Rigidity.lean). **Status**: open ·
-  **Depends**: T-W7.r2 · **Type**: theorem · Route: `rigidity` on the GIT quotient
-  `f·g⁻¹` = `lift f g ≫ (𝟙 ⊗ ι[G]) ≫ μ[G]`; fibre-equality hypothesis stated
-  morphism-level at `pullback.fst A.hom (S.fromSpecResidueField s)`.
+- **[T-W7.7·C1]** GIT Cor 6.2 — `eq_mul_of_fibre_eq` (Rigidity.lean). **Status**: **DONE**
+  (fable-P4, commit 637280a4) · **Depends**: T-W7.r2 · **Type**: theorem
+  - **Claimed**: fable-P4, 2026-07-07T22:05Z · **Done**: 2026-07-07 (`#print axioms` clean).
+    Route as planned, via the mathlib `Hom`-group of `G` (`Hom.mul_def` etc. all rfl):
+    `comp_mul_inv_left` (generic collapse helper, reusable for C2) + rigidity + Hom-group
+    algebra (`inv_mul_cancel_right`).
+  - **Statement change (logged per rule 5)**: added `(e : 𝟙_ (Over S) ⟶ A)` — rigidity's
+    section. Faithful to the banked case-2 scope decision (quotes file: case 3 sectionless
+    fppf descent NOT NEEDED; `E` has the zero section). C2/C3 applications have it.
 
-- **[T-W7.7·C2]** GIT Cor 6.3 — `factor_mul_of_tensor` (Rigidity.lean). **Status**: open ·
-  **Depends**: T-W7.7·C1, T-W7.7·C2conn · **Type**: theorem · Route: C1 for the
-  `B`-family `f` vs `f(e₁,·)`, connectedness along `B.left`.
+- **[T-W7.7·C2]** GIT Cor 6.3 — `factor_mul_of_tensor` (Rigidity.lean). **Status**:
+  in-progress · **Claimed**: fable-P4, 2026-07-07T22:20Z · **Depends**: T-W7.7·C1 (DONE),
+  T-W7.7·C2conn (DONE) · **Type**: theorem
+  - **Statement changes (pre-logged per rule 5, sorried leaf)**: (i) add
+    `(e₂ : 𝟙_ (Over S) ⟶ B)` — the source quote's `e₂` (GIT reduction composite
+    `f ∘ (1_X, e₂ ∘ q₁)` uses a point of the SECOND factor too; the C3 application takes
+    `B := A` pointed, so this is free downstream); (ii) add `[IsLocallyNoetherian B.left]`
+    (rigidity runs over base `B.left`; for C3, `A.left` is lft over loc-noeth `S`, fine);
+    (iii) conclusion order becomes `lift (snd ≫ h) (fst ≫ g) ≫ μ` = `h(y)·g(x)` — the
+    C1 constant lands on the LEFT and `G` is not yet known commutative; C3's endgame is
+    order-symmetric (GIT 6.4: `h(e)⁻¹g(e)⁻¹ = f(e)⁻¹ = 1`).
+  - Route (raw-scheme, NO Over-`B.left` category / no `GrpObj` base-change needed): all
+    Hom-group algebra stays in `Over S`: `F₂ := lift (fst) (toUnit _ ≫ e₂) ≫ f`,
+    `δ := f * F₂⁻¹`; rigidity applied over base `B.left` to
+    `⟨δ.left, (snd A B).left⟩ : pullback A.hom B.hom ⟶ pullback G.hom B.hom` (Over-monoidal
+    is definitionally pullbacks: `tensorObj_left`/`fst_left`/`snd_left` rfl); instances by
+    base change (`IsProper`/`Flat`/`IsSeparated` for `pullback.snd`, hO.baseChange);
+    section `ẽ := pullback.lift (B.hom ≫ e₁.left) (𝟙 _)`; collapsed fibre at
+    `y₀ := e₂.left (B.hom b₀)` via `comp_mul_inv_left`. Leaves:
+  - **[C2·res]** `fromSpecResidueField_comp_section`: for a section–retraction
+    `e ≫ q = 𝟙 S`, `B.fromSpecResidueField (e s) ≫ q ≫ e = B.fromSpecResidueField (e s)`
+    (residue maps: split injection + retraction of fields ⟹ both isos, composite = id).
+  - **[C2·fib]** fibre-inclusion fixes `E₂ := lift (fst) (toUnit _ ≫ e₂)`:
+    `ι ≫ E₂.left = ι` for `ι := pullback.fst p̃ (fromSpecResidueField y₀)` — pullback
+    hom-ext + C2·res.
+  - **[C2·asm]** assembly: `g := lift (𝟙 A) (toUnit A ≫ e₂) ≫ f`, `h := homMk (sec ≫ fst)`;
+    `fst ≫ g = F₂` by terminal-uniqueness; `f = δ * F₂` closes.
 
 - **[T-W7.7]** canonicity (= MILESTONE T-W7b, loc-noetherian) — `isMonHom_of_one_comp_eq`,
   `abelEnrichment_unique_of_isLocallyNoetherian` (Rigidity.lean:101,114).
