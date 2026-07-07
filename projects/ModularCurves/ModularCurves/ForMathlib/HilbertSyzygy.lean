@@ -44,20 +44,21 @@ ingredients:
   preserves projective objects (it is a left adjoint whose right adjoint `restrictScalars` preserves
   epimorphisms).
 
-* `exists_characteristicShortExact` (**the single `sorry`**): the *characteristic short exact
+* `exists_characteristicShortExact` (**now fully proved**): the *characteristic short exact
   sequence* of `R[X]`-modules `0 → R[X] ⊗_R M → R[X] ⊗_R M → M → 0`, whose surjection is the counit
   of `extendScalars ⊣ restrictScalars` (`ModuleCat.extendRestrictScalarsAdj`) and whose injection is
   `s ⊗ m ↦ sX ⊗ m - s ⊗ (X • m)`.  This is standard mathematics; via
   `PolynomialModule.polynomialTensorProductLEquivPolynomialModule` it becomes an explicit `Finsupp`
-  exactness computation.  It is the only piece not yet formalized in mathlib.
+  exactness computation (a leading-coefficient injectivity argument and a downward-induction
+  `range = ker` argument), carried out below.
 
 Feeding the short exact sequence (both outer terms `R[X] ⊗_R M`, of `pd ≤ d`) into
 `ShortComplex.ShortExact.hasProjectiveDimensionLT_X₃` yields the `d + 1` bound.
 
 **Validation conclusion.**  The projective-dimension route to Hilbert's syzygy theorem — and hence
 the Tor-free flat-locus development (DEV-1) — goes through with mathlib's present machinery: the
-entire theorem reduces to the single classical `exists_characteristicShortExact`, whose every
-ingredient already exists in mathlib.  No Buchsbaum–Eisenbud criterion is required.
+entire theorem reduces to the classical `exists_characteristicShortExact`, now proved from existing
+mathlib ingredients.  No Buchsbaum–Eisenbud criterion is required.
 -/
 
 universe u
@@ -129,21 +130,264 @@ lemma hasProjectiveDimensionLE_extendScalars (R : Type u) [CommRing R] (n : ℕ)
     have := (T_exact.hasProjectiveDimensionLT_X₃_iff n ‹_›).mp ‹_›
     exact (TS_exact.hasProjectiveDimensionLT_X₃_iff n hp2).mpr (ih (kernel g))
 
+section Char
+open Polynomial TensorProduct
+open scoped ChangeOfRings
+variable (R : Type u) [CommRing R] (M : ModuleCat.{u} (Polynomial R))
+
+/-- `M` restricted to an `R`-module. -/
+abbrev Mr : ModuleCat.{u} R := (restrictScalars (polyAlg R)).obj M
+/-- Left tensor factor `S` as an `R`-module (via `restrictScalars`). -/
+abbrev SL := ((restrictScalars (polyAlg R)).obj (ModuleCat.of (Polynomial R) (Polynomial R)))
+/-- The extended module `R[X] ⊗_R Mᵣ`. -/
+abbrev X2 : ModuleCat.{u} (Polynomial R) := (extendScalars (polyAlg R)).obj (Mr R M)
+/-- The concrete `R[X]`-module `PolynomialModule R Mᵣ ≅ ℕ →₀ M`. -/
+abbrev P := PolynomialModule R (Mr R M)
+
+/-- `Module R` on `↑X2` (the tensor's base `R`-module), needed to bridge instances. -/
+instance instModuleRX2 : Module R (X2 R M) :=
+  inferInstanceAs (Module R (TensorProduct R (SL R) (Mr R M)))
+
+/-! ### The bridge `P ≃ₗ[R[X]] X2` -/
+
+def Lequiv : (Polynomial R) ⊗[R] (Mr R M) ≃ₗ[Polynomial R] P R M :=
+  PolynomialModule.polynomialTensorProductLEquivPolynomialModule R (Mr R M)
+
+def leftBridge : (Polynomial R) ≃ₗ[R] (SL R) where
+  toFun s := s
+  invFun s := s
+  map_add' _ _ := rfl
+  map_smul' r s := by
+    simp only [RingHom.id_apply]
+    show (r • s : Polynomial R) = polyAlg R r • (s : SL R)
+    rw [Algebra.smul_def, smul_eq_mul]
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+@[simp] lemma leftBridge_apply (s : Polynomial R) : leftBridge R s = s := rfl
+
+def bridgeR : (Polynomial R) ⊗[R] (Mr R M) ≃ₗ[R] (X2 R M) :=
+  TensorProduct.congr (leftBridge R) (LinearEquiv.refl R (Mr R M))
+
+@[simp] lemma bridgeR_tmul (s : Polynomial R) (m : Mr R M) :
+    bridgeR R M (s ⊗ₜ[R] m) = (s ⊗ₜ[R, polyAlg R] m : X2 R M) := rfl
+
+def bridgeS : (Polynomial R) ⊗[R] (Mr R M) ≃ₗ[Polynomial R] (X2 R M) where
+  toFun := bridgeR R M
+  invFun := (bridgeR R M).symm
+  map_add' := map_add _
+  map_smul' s x := by
+    simp only [RingHom.id_apply]
+    induction x using TensorProduct.induction_on with
+    | zero => rw [smul_zero, map_zero, smul_zero]
+    | tmul a m =>
+      rw [TensorProduct.smul_tmul', smul_eq_mul, bridgeR_tmul, bridgeR_tmul]
+      exact (ExtendScalars.smul_tmul (polyAlg R) s a m).symm
+    | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add]
+  left_inv := (bridgeR R M).left_inv
+  right_inv := (bridgeR R M).right_inv
+
+def eLin : P R M ≃ₗ[Polynomial R] (X2 R M) := (Lequiv R M).symm.trans (bridgeS R M)
+
+lemma Lequiv_Xpow_tmul (i : ℕ) (m : Mr R M) :
+    Lequiv R M (((X:Polynomial R)^i) ⊗ₜ[R] m) = PolynomialModule.single R i m := by
+  change LinearMap.liftBaseChange (Polynomial R)
+    (PolynomialModule.lsingle R 0) (((X:Polynomial R)^i) ⊗ₜ[R] m) = _
+  rw [LinearMap.liftBaseChange_tmul, ← Polynomial.monomial_one_right_eq_X_pow]
+  show monomial i (1:R) • PolynomialModule.single R 0 m = PolynomialModule.single R i m
+  rw [PolynomialModule.monomial_smul_single, one_smul, Nat.add_zero]
+
+lemma eLin_single (i : ℕ) (m : Mr R M) :
+    eLin R M (PolynomialModule.single R i m) = (((X:Polynomial R)^i) ⊗ₜ[R, polyAlg R] m : X2 R M) := by
+  rw [eLin, LinearEquiv.trans_apply, ← Lequiv_Xpow_tmul, LinearEquiv.symm_apply_apply]
+  exact bridgeR_tmul R M _ m
+
+/-! ### The counit surjection `ε` -/
+
+lemma counit_tmul (s : Polynomial R) (m : Mr R M) :
+    (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom
+      (s ⊗ₜ[R, polyAlg R] m : X2 R M) = s • m := by
+  erw [ExtendRestrictScalarsAdj.Counit.map_hom_apply]
+  rfl
+
+/-- `ε : P → M`, the counit transported along the bridge. -/
+def epsP : P R M →ₗ[Polynomial R] (M : Type u) :=
+  (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom ∘ₗ (eLin R M).toLinearMap
+
+lemma epsP_single (i : ℕ) (m : Mr R M) :
+    epsP R M (PolynomialModule.single R i m) = ((X:Polynomial R)^i) • m := by
+  show (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom (eLin R M (PolynomialModule.single R i m)) = _
+  rw [eLin_single, counit_tmul]
+
+/-! ### The injection `φ` -/
+
+def xAction : (Mr R M) →ₗ[R] (Mr R M) where
+  toFun x := (X : Polynomial R) • x
+  map_add' := smul_add _
+  map_smul' r x := by
+    show (X : Polynomial R) • ((polyAlg R r) • x) = (polyAlg R r) • ((X : Polynomial R) • x)
+    rw [smul_smul, smul_smul, mul_comm]
+
+@[simp] lemma xAction_apply (x : Mr R M) : xAction R M x = (X : Polynomial R) • x := rfl
+
+/-- `mapψ : P → P`, applying the `X`-action degreewise; `R[X]`-linear. -/
+def mapPsi : P R M →ₗ[Polynomial R] P R M where
+  toFun := PolynomialModule.map R (xAction R M)
+  map_add' := map_add _
+  map_smul' p q := by
+    simp only [RingHom.id_apply]
+    rw [PolynomialModule.map_smul, Algebra.algebraMap_self, Polynomial.map_id]
+
+@[simp] lemma mapPsi_single (i : ℕ) (m : Mr R M) :
+    mapPsi R M (PolynomialModule.single R i m) = PolynomialModule.single R i ((X:Polynomial R) • m) := by
+  show PolynomialModule.map R (xAction R M) (PolynomialModule.single R i m) = _
+  rw [PolynomialModule.map_single, xAction_apply]
+
+lemma X_smul_single (i : ℕ) (m : Mr R M) :
+    (X : Polynomial R) • PolynomialModule.single R i m = PolynomialModule.single R (i+1) m := by
+  rw [← Polynomial.monomial_one_one_eq_X, PolynomialModule.monomial_smul_single, one_smul,
+    Nat.add_comm]
+
+/-- `φ : P → P`, the injection `single i m ↦ single (i+1) m − single i (X • m)`. -/
+def phiP : P R M →ₗ[Polynomial R] P R M :=
+  LinearMap.lsmul (Polynomial R) (P R M) (X : Polynomial R) - mapPsi R M
+
+@[simp] lemma phiP_single (i : ℕ) (m : Mr R M) :
+    phiP R M (PolynomialModule.single R i m)
+      = PolynomialModule.single R (i+1) m - PolynomialModule.single R i ((X:Polynomial R) • m) := by
+  rw [phiP, LinearMap.sub_apply, mapPsi_single, LinearMap.lsmul_apply, X_smul_single]
+
+/-! ### Exactness -/
+
+/-- `ε ∘ φ = 0`. -/
+lemma epsP_phiP (q : P R M) : epsP R M (phiP R M q) = 0 := by
+  induction q using PolynomialModule.induction_linear with
+  | zero => simp
+  | add p q hp hq => rw [map_add, map_add, hp, hq, add_zero]
+  | single i m =>
+    rw [phiP_single, map_sub, epsP_single, epsP_single, smul_smul, ← pow_succ, sub_self]
+
+/-- `ε` is surjective. -/
+lemma epsP_surjective : Function.Surjective (epsP R M) :=
+  fun m => ⟨PolynomialModule.single R 0 m, by rw [epsP_single, pow_zero, one_smul]⟩
+
+/-- The `(n+1)`-coefficient of `φ q`. -/
+lemma phiP_coeff_succ (q : P R M) (n : ℕ) :
+    (phiP R M q) (n+1) = q n - (X:Polynomial R) • (q (n+1)) := by
+  show (LinearMap.lsmul (Polynomial R) (P R M) (X:Polynomial R) - mapPsi R M) q (n+1) = _
+  rw [LinearMap.sub_apply, LinearMap.lsmul_apply]
+  change ((X:Polynomial R) • q) (n+1) - (mapPsi R M q) (n+1) = q n - (X:Polynomial R) • (q (n+1))
+  congr 1
+  rw [← Polynomial.monomial_one_one_eq_X, PolynomialModule.monomial_smul_apply]
+  simp
+
+lemma Pcoe_sub (a b : P R M) (i : ℕ) : (a - b) i = a i - b i := Finsupp.sub_apply a b i
+lemma Pcoe_single (k : ℕ) (a : Mr R M) (i : ℕ) :
+    (PolynomialModule.single R k a) i = if k = i then a else 0 := PolynomialModule.single_apply R k a i
+
+/-- `φ` is injective. -/
+lemma phiP_injective : Function.Injective (phiP R M) := by
+  rw [injective_iff_map_eq_zero]
+  intro q hq
+  by_contra h
+  have hne : q.support.Nonempty := Finsupp.support_nonempty_iff.mpr h
+  set N := q.support.max' hne with hN
+  have hNmem : N ∈ q.support := q.support.max'_mem hne
+  have hqN : q N ≠ 0 := Finsupp.mem_support_iff.mp hNmem
+  have hqN1 : q (N+1) = 0 := by
+    by_contra hc
+    have : N+1 ∈ q.support := Finsupp.mem_support_iff.mpr hc
+    have := q.support.le_max' _ this
+    omega
+  have : (phiP R M q) (N+1) = q N := by
+    rw [phiP_coeff_succ, hqN1, smul_zero, sub_zero]
+  rw [hq] at this
+  exact hqN this.symm
+
+/-- `ker ε ⊆ range φ`, by downward induction on the degree bound `n`. -/
+lemma ker_le_range_aux : ∀ (n : ℕ) (q : P R M),
+    (∀ i, n < i → q i = 0) → epsP R M q = 0 → q ∈ LinearMap.range (phiP R M) := by
+  intro n
+  induction n with
+  | zero =>
+    intro q hq he
+    have hq0 : q = PolynomialModule.single R 0 (q 0) := by
+      refine DFunLike.ext _ _ fun j => ?_
+      rw [Pcoe_single]
+      rcases Nat.eq_zero_or_pos j with hj | hj
+      · subst hj; simp
+      · rw [hq j hj, if_neg (by omega)]
+    have hval : epsP R M q = q 0 := by
+      conv_lhs => rw [hq0]
+      rw [epsP_single, pow_zero, one_smul]
+    rw [hval] at he
+    refine ⟨0, ?_⟩
+    rw [map_zero, hq0, he]
+    exact (map_zero (PolynomialModule.single R 0)).symm
+  | succ n ih =>
+    intro q hq he
+    set m := q (n+1) with hm
+    set q' := q - phiP R M (PolynomialModule.single R n m) with hq'
+    have hbound : ∀ i, n < i → q' i = 0 := by
+      intro i hi
+      rw [hq', Pcoe_sub, phiP_single, Pcoe_sub, Pcoe_single, Pcoe_single]
+      rcases Nat.lt_or_ge (n+1) i with h1 | h1
+      · rw [hq i h1, if_neg (by omega), if_neg (by omega)]; simp
+      · have : i = n+1 := by omega
+        subst this
+        rw [if_pos rfl, if_neg (by omega), ← hm]; simp
+    have he' : epsP R M q' = 0 := by rw [hq', map_sub, he, epsP_phiP, sub_zero]
+    obtain ⟨p', hp'⟩ := ih q' hbound he'
+    refine ⟨p' + PolynomialModule.single R n m, ?_⟩
+    rw [map_add, hp', hq']
+    abel
+
+/-- The sequence `P --φ--> P --ε--> M` is exact. -/
+lemma phiP_epsP_exact : Function.Exact (phiP R M) (epsP R M) := by
+  intro q
+  constructor
+  · intro he
+    refine ker_le_range_aux R M (q.support.sup id) q (fun i hi => ?_) he
+    by_contra hc
+    have hle := Finset.le_sup (f := id) (Finsupp.mem_support_iff.mpr hc)
+    simp only [id_eq] at hle
+    omega
+  · rintro ⟨p, rfl⟩
+    exact epsP_phiP R M p
+
+/-! ### Assembly -/
+
+lemma of_coe_X2 : ModuleCat.of (Polynomial R) (X2 R M : Type u) = X2 R M := rfl
+lemma of_coe_M : ModuleCat.of (Polynomial R) (M : Type u) = M := rfl
+
+/-- The characteristic short complex `P --φ--> P --ε--> M`. -/
+def charSES : ShortComplex (ModuleCat.{u} (Polynomial R)) :=
+  ModuleCat.shortComplexOfCompEqZero (phiP R M) (epsP R M)
+    (by ext q; exact epsP_phiP R M q)
+
+lemma charSES_shortExact : (charSES R M).ShortExact :=
+  ModuleCat.shortComplex_shortExact _ (phiP_epsP_exact R M)
+    (phiP_injective R M) (epsP_surjective R M)
+
+end Char
+
 /-- **The characteristic short exact sequence** of an `R[X]`-module `M`:
 `0 → R[X] ⊗_R M → R[X] ⊗_R M → M → 0` (restriction of scalars is left implicit in the tensor
 factors).  The surjection is the counit of `extendScalars ⊣ restrictScalars`; the injection is
 `s ⊗ m ↦ sX ⊗ m - s ⊗ (X • m)`.
 
-This is the one piece of the classical proof of Hilbert's syzygy theorem not yet available in
-mathlib.  It is a standard `Finsupp` exactness computation once transported through
-`PolynomialModule.polynomialTensorProductLEquivPolynomialModule`; see the module docstring. -/
+It is proved as a standard `Finsupp` exactness computation, transporting the concrete
+`PolynomialModule R Mᵣ` model to `R[X] ⊗_R Mᵣ` through
+`PolynomialModule.polynomialTensorProductLEquivPolynomialModule`; see the module docstring and the
+`charSES` helpers above. -/
 lemma exists_characteristicShortExact (R : Type u) [CommRing R]
     (M : ModuleCat.{u} (Polynomial R)) :
     ∃ S : ShortComplex (ModuleCat.{u} (Polynomial R)), S.ShortExact ∧
       Nonempty (S.X₁ ≅ (extendScalars (polyAlg R)).obj ((restrictScalars (polyAlg R)).obj M)) ∧
       Nonempty (S.X₂ ≅ (extendScalars (polyAlg R)).obj ((restrictScalars (polyAlg R)).obj M)) ∧
       Nonempty (S.X₃ ≅ M) := by
-  sorry
+  exact ⟨charSES R M, charSES_shortExact R M,
+    ⟨(eLin R M).toModuleIso⟩, ⟨(eLin R M).toModuleIso⟩, ⟨Iso.refl _⟩⟩
 
 /-- **Polynomial change of rings for projective dimension.**  If every `R`-module has projective
 dimension `≤ d`, then every `R[X]`-module has projective dimension `≤ d + 1`.
