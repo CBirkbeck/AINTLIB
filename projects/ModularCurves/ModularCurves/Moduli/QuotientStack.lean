@@ -928,6 +928,64 @@ noncomputable def TorsorPair.pullback (A : TorsorPair σ S) : TorsorPair σ S' w
     rw [← Category.assoc, TorsorPair.pullbackAction_hom_fst, Category.assoc,
       A.equivariant g, Category.assoc]
 
+/-! ### Self-trivialization (T-W3c-ii)
+
+Pulling a torsor pair back along its own projection trivializes it: the comparison
+`∐_G P ≅ P ×_S P` (`A.torsor`) *is* the trivialization. This is NOT descent-gated —
+the `torsor` field already witnesses local triviality along `p`. -/
+
+/-- A torsor-pair morphism whose underlying scheme map is an isomorphism has an
+inverse morphism of torsor pairs (torsor pairs form a groupoid). -/
+noncomputable def TorsorPair.homInv {T : Scheme.{u}} {A' B' : TorsorPair σ T}
+    (f : A' ⟶ B') [IsIso f.hom] : B' ⟶ A' where
+  hom := inv f.hom
+  over := by rw [← f.over, IsIso.inv_hom_id_assoc]
+  equiv := fun g => by
+    rw [IsIso.comp_inv_eq, Category.assoc, f.equiv g, IsIso.inv_hom_id_assoc]
+  compat := by rw [← f.compat, IsIso.inv_hom_id_assoc]
+
+/-- A torsor-pair morphism with isomorphic underlying map is an isomorphism. -/
+noncomputable def TorsorPair.isoOfHom {T : Scheme.{u}} {A' B' : TorsorPair σ T}
+    (f : A' ⟶ B') [IsIso f.hom] : A' ≅ B' where
+  hom := f
+  inv := TorsorPair.homInv f
+  hom_inv_id := by
+    refine TorsorPair.Hom.ext ?_
+    show f.hom ≫ inv f.hom = 𝟙 _
+    exact IsIso.hom_inv_id _
+  inv_hom_id := by
+    refine TorsorPair.Hom.ext ?_
+    show inv f.hom ≫ f.hom = 𝟙 _
+    exact IsIso.inv_hom_id _
+
+/-- **Self-trivialization** (T-W3c-ii): the base change of a torsor pair `A` along
+its own projection `A.p` is the trivial torsor pair over the total space `A.P`
+(attached to the equivariant map `A.u`). The comparison is `A.torsor`'s shear
+`∐_G A.P ≅ A.P ×_S A.P`, read as a morphism of torsor pairs. -/
+noncomputable def TorsorPair.selfTrivialization (A : TorsorPair σ S) :
+    A.pullback A.p ≅ trivialTorsorPair σ A.P A.u := by
+  let f : trivialTorsorPair σ A.P A.u ⟶ A.pullback A.p :=
+    { hom := Limits.Sigma.desc fun g : G => Limits.pullback.lift (A.τ.hom g)
+        (𝟙 A.P) (by rw [Category.id_comp]; exact A.over_base g)
+      over := by
+        refine Limits.Sigma.hom_ext _ _ fun g => ?_
+        simp only [TorsorPair.pullback, trivialTorsorPair, Limits.Sigma.ι_desc_assoc,
+          Limits.pullback.lift_snd, ι_trivialTorsorπ]
+      equiv := fun g => by
+        refine Limits.Sigma.hom_ext _ _ fun h => ?_
+        refine Limits.pullback.hom_ext ?_ ?_ <;>
+          simp only [TorsorPair.pullback, trivialTorsorPair, ι_trivialTorsorAction_hom_assoc,
+            Limits.Sigma.ι_desc_assoc, Limits.pullback.lift_fst, Limits.pullback.lift_fst_assoc,
+            Limits.pullback.lift_snd,
+            TorsorPair.pullbackAction_hom_fst, TorsorPair.pullbackAction_hom_snd,
+            SchemeAction.hom_mul, Category.assoc]
+      compat := by
+        refine Limits.Sigma.hom_ext _ _ fun g => ?_
+        simp only [TorsorPair.pullback, trivialTorsorPair, Limits.Sigma.ι_desc_assoc,
+          Limits.pullback.lift_fst_assoc, ι_trivialTorsorMap, A.equivariant] }
+  haveI : IsIso f.hom := A.torsor
+  exact (TorsorPair.isoOfHom f).symm
+
 end PullbackTorsor
 
 end Trivialize
