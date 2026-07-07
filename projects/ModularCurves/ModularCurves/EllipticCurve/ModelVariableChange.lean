@@ -916,6 +916,29 @@ lemma pointedIso_chartPointOf_mem_chartY {W W' : WeierstrassCurve R}
     trivial
   exact h2
 
+/-- The basic open of the `t`-section lies in the `Z`-chart: its complement in the `Y`-chart
+is the zero section, on which `t` vanishes. -/
+lemma basicOpen_tSection_le_chartZ {W : WeierstrassCurve R} :
+    (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ≤
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+  intro q hq
+  by_contra hq2
+  obtain ⟨y, hy⟩ := mem_range_zero_of_not_mem_zChart hq2
+  rw [← hy] at hq
+  exact zero_not_mem_basicOpen_tSection W y hq
+
+/-- **The chart overlap is the basic open of the `t`-section** — the key identification
+turning overlap sections into a localization of `Y`-chart sections. -/
+lemma chartY_inf_chartZ_eq_basicOpen_tSection (W : WeierstrassCurve R) :
+    Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) ⊓
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
+    (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm (infChartTElem W)) :=
+  le_antisymm (chartY_inf_chartZ_le_basicOpen_tSection W)
+    (le_inf ((projModel W).basicOpen_le _) basicOpen_tSection_le_chartZ)
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the

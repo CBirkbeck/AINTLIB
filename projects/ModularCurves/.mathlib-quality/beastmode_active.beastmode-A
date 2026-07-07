@@ -1,4 +1,4 @@
-FOCUS: T-W7.1b b2-(γ) INC-3a — chartPointOf package in PoleFiltration.lean: chartYSectionsRingEquiv + isUnit_res_tSection + chartPointOf + mem_chartY + mem_basicOpen_iff + not_mem_chartZ (splice after awayToSection_inv_cancelZ). Then MVC: chartPointOf_mem_range_zero. Pipeline in this sentinel below.
+FOCUS: T-W7.1b b2-(γ) INC-3d — L1b: X.basicOpen(ΓB.symm t) ≤ Z-chart (MVC; stalk-contradiction via Z2 + stalkMap_germ + infChartAug_chartYRingEquiv/zeroChartHom route). Then INC-3e: eps-def + R-scalar + aug compat.
 
-PIPELINE b2-(gamma): (1) chartPointOf DONE-> (2) g-choice inside e-preimage opens (3) e.app transport to Gamma(X.basicOpen g)[1/t] (4) divisions sigma=alpha*s via image_ker_aug_le_span_of_isUnit + two-sided alpha-unit via s-nzd (5) rebalance -> witness for mem_range_algebraMap_of_forall_maximal (6) delta-assembly both inclusions.
-ANTIDOTES: no maxHeartbeats; congrArg-chains over rw on graded types; set-abbrevs; explicit simp only [CommRingCat.hom_comp, RingHom.comp_apply] not simpa; python-splice anchors MUST be count==1; lake env lean for truth.
+PIPELINE b2-(gamma): (1) chartPointOf DONE (2) aug=zeroChartHom DONE -> (3) L1b overlap=basicOpen r_t -> (4) eps transport + divisions -> (5) witness -> (6) delta-assembly.
+ANTIDOTES: no maxHeartbeats; congrArg-chains; set-abbrevs; explicit simp only [CommRingCat.hom_comp, RingHom.comp_apply]; splice anchors count==1; AlgEquiv.coe_ringEquiv before quotientEquivAlg-shows; omega for Fin-3 case splits (never fin_cases on subtype vals); isAffineOpen_basicOpen takes (grading) (f) (f_deg) (hm).
