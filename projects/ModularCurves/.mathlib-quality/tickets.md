@@ -2222,6 +2222,33 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     M_q = 0 Nakayama transfer sound; fibre-injectivity route = equational
     criterion (Flat/EquationalCriterion.lean) for I ∩ pA = pI, then κ = Frac(R/p)
     localization transport.
+  - **WAVE-2 DONE** (beastmode-D2, 2026-07-07T09:30Z — Opus 4.8 salvage):
+    ForMathlib/StandardSmoothStalkDVR.lean PROVED, both consumer theorems
+    (`exists_span_nonZeroDivisor_map_localizationAtPrime`,
+    `mem_nonZeroDivisors_of_finite_quotient`) axiom-clean (standard three), 594
+    lines. NOTE: the two Fable-5 delegates (wave-2 + wave-3a) BOTH died mid-run on
+    a usage-credit wall; wave-2's delegate had written a coherent 594-line draft
+    before dying (build-broken, ~10 localized errors). Per salvage protocol I
+    preserved (scratchpad/wave2-crashed-594.lean) and REPAIRED in place rather than
+    discarding: the Jacobi-Zariski core (H1Cotangent.exact_δ_mapBaseChange/
+    exact_map_δ), away-localization std-smooth transport
+    (`IsStandardSmoothOfRelativeDimension.localization_away` — THE right API, dim-0),
+    prime transfer (`isLocalization_of_submonoid_le` +
+    `isLocalization_of_is_exists_mul_mem`), étale-fibre DVR analysis
+    (FormallyUnramified.map_maximalIdeal over the field-fibre) + the
+    PrincipalMaximalDVR criterion, and ideal classification
+    (`IsDiscreteValuationRing.ideal_eq_span_pow_irreducible`) were ALL sound. Fixes:
+    dot-notation on prime instances (`‹q.IsPrime›.ne_top`/`.mem_of_pow_mem`),
+    `mk'_surjective` pair-destructure `⟨⟨a,s⟩,rfl⟩`, `IsPrime.to_maximal_ideal`
+    (ROOT namespace, not `Ideal.IsPrime.`), `Units.mkOfMulEqOne` (no
+    `isUnit_of_mul_eq_one` in this pin), and — the load-bearing one —
+    `isLocalization_of_is_exists_mul_mem` / `EssFiniteType.of_isLocalization` take
+    the localization RING `S` as FIRST EXPLICIT arg (delegate passed the submonoid
+    there → `CommSemiring ↥(submonoid)` synth failure). GOTCHAS BANKED. WAVE-3a
+    (officialAux chart core) delegate ALSO died on credits before writing anything —
+    CartierDivisor.lean intact; route fully banked (scratchpad/wave3a-prompt.md).
+    REMAINING for T-D11: wave-3a (chart-level `officialAux_exists_away_span`) +
+    wave-4 isOfficial scheme assembly (mine); isFinite leg parked (ZMT).
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
