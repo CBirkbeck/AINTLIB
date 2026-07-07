@@ -543,14 +543,16 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     · obtain ⟨x, hxW, hpx⟩ := hmem
       exact hxW (hfib (show x ∈ p.base ⁻¹' {t} from hpx))
     · -- (4) the equalizer ideal is contained in the kernel of the tube inclusion.
-      -- SORRIED FINALE (route + failed-shape notes on the board): per-affine `U`, test the
-      -- restricted section by germs. Two verified approaches: (a) `Scheme.Opens.ι_app` +
-      -- `TopCat.Presheaf.section_ext X.sheaf` — blocked on the `opensFunctor`-spelling of
-      -- the embedded open (bridge via `Hom.image_preimage_eq_opensRange_inf` +
-      -- `Opens.opensRange_ι`); (b) `section_ext` on the SUBSCHEME sheaf + elementwise
-      -- `Scheme.stalkMap_germ` (open-immersion stalk maps kill zeros both ways). Germ
-      -- vanishing at each tube point: `Wset`-membership + `exists_basicOpen_le_affine_inter`
-      -- + the `map_ideal_basicOpen` field on both sides + `Ideal.map_map`/`germ_res`.
+      -- SORRIED FINALE, one seam left: the conceptual content is DONE —
+      -- `germ_ideal_eq_zero_of_exists_affine` (proven above) kills ambient germs on the
+      -- good locus, and `Scheme.Hom.germ_stalkMap_apply` transports them to subscheme
+      -- germs for `TopCat.Presheaf.section_ext`. What remains is ONLY the coercion seam
+      -- at the `section_ext` application: the goal arrives `sheaf.presheaf`-headed with
+      -- mixed `ConcreteCategory.hom`/`CommRingCat.Hom.hom` wrappers and resists
+      -- `exact`/`show`/`convert` bridging (session log: /tmp/rig31-33). Next attack:
+      -- state the per-germ fact as its own lemma in the goal's native spelling (copy the
+      -- expected-type printout verbatim), or use the sheaf-level
+      -- `TopCat.Sheaf`-ext API directly instead of `section_ext`.
       sorry
   obtain ⟨U₀, htU₀, hker⟩ := hW
   exact ⟨U₀, htU₀, IsClosedImmersion.lift _ _ hker, IsClosedImmersion.lift_fac _ _ hker⟩
