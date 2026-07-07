@@ -4,6 +4,7 @@ import ModularCurves.EllipticCurve.GroupLaw
 -- `locallyWeierstrass_pushforward_O_eq_O`); nothing here references it yet, and keeping it
 -- out decouples lane P4 builds from lane P3's in-flight file.
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Morphisms.Separated
 import Mathlib.AlgebraicGeometry.Noetherian
 
 /-!
@@ -175,6 +176,109 @@ theorem UniversallyOConnected.baseChange {X S : Scheme.{u}} {p : X ⟶ S}
       (pullback.snd p (g' ≫ g) ⁻¹ᵁ U)) := inferInstance
   exact IsIso.comp_isIso' (hp (g' ≫ g) U) h2
 
+/-! ### The r2 leaf decomposition (coordinator §2, 2026-07-07)
+
+`Z := eqLocus` is the agreement locus of `f` and the constant comparison `p ≫ e ≫ f`, as
+the underlying scheme of the `Over S`-equalizer; its structure morphism to `X` is a closed
+immersion because `q` is separated (mathlib `isClosedImmersion_equalizer_ι_left`). The
+proof of `rigidity` is assembled from three sorried leaves below (seed · Krull
+neighbourhood · clopen glue), each independently attackable. -/
+
+section EqLocus
+
+variable {X Y S : Scheme.{u}} {p : X ⟶ S} {q : Y ⟶ S} [IsSeparated q]
+  (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+
+/-- **(T-W7.r2·a)** The agreement locus of two `S`-morphisms `f, g : X ⟶ Y` with separated
+`q : Y ⟶ S`: the underlying scheme of the equalizer in `Over S`. A REAL construction (no
+data-sorry): the `Over S`-equalizer exists since `Scheme` has finite limits. -/
+instance : IsSeparated (Over.mk q).hom := inferInstanceAs (IsSeparated q)
+
+noncomputable def eqLocus : Scheme.{u} :=
+  (equalizer (Over.homMk f hf : Over.mk p ⟶ Over.mk q) (Over.homMk g hg)).left
+
+/-- **(T-W7.r2·a)** The closed immersion from the agreement locus. -/
+noncomputable def eqLocusι : eqLocus f g hf hg ⟶ X :=
+  (equalizer.ι (Over.homMk f hf : Over.mk p ⟶ Over.mk q) (Over.homMk g hg)).left
+
+instance : IsClosedImmersion (eqLocusι f g hf hg) :=
+  isClosedImmersion_equalizer_ι_left _ _
+
+/-- **(T-W7.r2·a)** The two morphisms agree on the agreement locus. -/
+theorem eqLocusι_comp_eq : eqLocusι f g hf hg ≫ f = eqLocusι f g hf hg ≫ g := by
+  have h := equalizer.condition (Over.homMk f hf : Over.mk p ⟶ Over.mk q) (Over.homMk g hg)
+  exact congrArg CategoryTheory.CommaMorphism.left h
+
+/-- **(T-W7.r2·a)** Universal property in consumable form: any test morphism equalizing
+`f` and `g` factors (uniquely, but existence is what the seed/thickening steps use)
+through the agreement locus. -/
+theorem exists_factor_eqLocus {W : Scheme.{u}} (τ : W ⟶ X) (hτ : τ ≫ f = τ ≫ g) :
+    ∃ w : W ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = τ := by
+  refine ⟨(equalizer.lift (f := (Over.homMk f hf : Over.mk p ⟶ Over.mk q))
+    (g := Over.homMk g hg) (Over.homMk (U := Over.mk (τ ≫ p)) τ rfl)
+    (by ext; exact hτ)).left, ?_⟩
+  have h := equalizer.lift_ι (f := (Over.homMk f hf : Over.mk p ⟶ Over.mk q))
+    (g := Over.homMk g hg) (Over.homMk (U := Over.mk (τ ≫ p)) τ rfl) (by ext; exact hτ)
+  exact congrArg CategoryTheory.CommaMorphism.left h
+
+end EqLocus
+
+section RigidityLeaves
+
+variable {X Y S : Scheme.{u}} {p : X ⟶ S} {q : Y ⟶ S} [IsSeparated q]
+
+/-- **(T-W7.r2·b, the seed — SORRIED LEAF)** Case 1 over `Spec κ(s)`: if `f` collapses the
+fibre over `s` set-theoretically, then the fibre is contained in the agreement locus of
+`f` and `p ≫ (e ≫ f)`. Attack route (all names verified at the pin): base-change the whole
+situation along `S.fromSpecResidueField s` (`UniversallyOConnected.baseChange`, section
+`pullback.lift (fromSpecResidueField ≫ e) (𝟙 _)`); the collapsed image lies in an affine
+chart `V` of `Y` with `V ×_S Spec κ(s)` affine, so `rigidity_of_range_le_affine` applies;
+push the resulting equality into `exists_factor_eqLocus` and take ranges — the fibre is the
+range of `pullback.fst p (S.fromSpecResidueField s)` (mathlib pullback-carrier API). -/
+theorem fibre_subset_eqLocus_of_collapsed (hp : UniversallyOConnected p)
+    (e : S ⟶ X) (he : e ≫ p = 𝟙 S) (f : X ⟶ Y) (hf : f ≫ q = p) (s : S)
+    (hs : Set.Subsingleton (f.base '' (p.base ⁻¹' {s}))) :
+    p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f (p ≫ (e ≫ f)) hf
+      (by rw [Category.assoc, Category.assoc, hf, he]; exact Category.comp_id p)).base := by
+  sorry
+
+/-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
+set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
+`p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,
+`rigidity_of_range_le_affine` + `UniversallyOConnected.baseChange`) factors the thickened
+fibre through the locus; on stalks at `x ∈ p⁻¹(t)` the ideal of the closed immersion lands
+in `⋂ₙ 𝔪ₜⁿ·O_{X,x} = ⊥` (`Ideal.iInf_pow_smul_eq_bot_of_isLocalRing`; stalks noetherian —
+`X` is locally noetherian via `IsProper p` over locally noetherian `S`); the ideal sheaf is
+finite-type, so it vanishes on an open `W ⊇ p⁻¹(t)`; `IsProper p` (closed) turns `W` into
+`p⁻¹(U₀)`. -/
+theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p) (t : S)
+    (hset : p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base) :
+    ∃ U₀ : S.Opens, t ∈ U₀ ∧
+      ∃ w : (p ⁻¹ᵁ U₀).toScheme ⟶ eqLocus f g hf hg,
+        w ≫ eqLocusι f g hf hg = (p ⁻¹ᵁ U₀).ι := by
+  sorry
+
+/-- **(T-W7.r2·d, clopen assembly — SORRIED LEAF)** On a connected base, if the agreement
+locus contains one fibre set-theoretically and every set-theoretic fibre containment
+upgrades to an open scheme-theoretic one (the Krull leaf), then the identity of `X`
+factors through the locus. Attack route: `U₁ := {t | p⁻¹(t) ⊆ range ι}` contains `s`, is
+open by the Krull leaf, and is closed because `U₁ = S ∖ p(X ∖ range ι)` with `p` an open
+map (`UniversallyOpen.of_flat`: `Flat` + `LocallyOfFinitePresentation` from properness over
+a locally noetherian base); connectedness gives `U₁ = S`; the open factorizations glue
+along `⨆ = ⊤` since `eqLocusι` is a monomorphism (closed immersion), giving the global
+factorization. -/
+theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
+    (hconn : ConnectedSpace S)
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p) (s : S)
+    (hseed : p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
+    ∃ w : X ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = 𝟙 X := by
+  sorry
+
+end RigidityLeaves
+
 /-- **(T-W7.7a, GIT Prop 6.1, case 2)** The rigidity lemma: `S` connected and locally
 noetherian, `p : X ⟶ S` proper flat and universally `O`-connected with a section, `Y ⟶ S`
 separated, `f : X ⟶ Y` an `S`-morphism collapsing ONE fibre `X_s` to a single point. Then
@@ -191,25 +295,62 @@ theorem rigidity {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
     {q : Y ⟶ S} [IsSeparated q] (f : X ⟶ Y) (hf : f ≫ q = p)
     (s : S) (hs : Set.Subsingleton (f.base '' (p.base ⁻¹' {s}))) :
     ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
-  -- Assembly map (P4 session 2026-07-07; every mathlib name verified in this checkout):
-  -- * equalizer backbone: `Z := equalizer (Over.homMk f) (Over.homMk (p ≫ e ≫ f))` in
-  --   `Over S`; its `ι.left` is a closed immersion by `isClosedImmersion_equalizer_ι_left`
-  --   (uses `[IsSeparated q]`).
-  -- * seed at `s`: case 1 over `Spec κ(s)` — `rigidity_of_subsingleton_range` +
-  --   `UniversallyOConnected.baseChange`; the range-subsingleton hypothesis descends from
-  --   `hs` because the base-changed model injects on points (mono pullback).
-  -- * thickening at `t ∈ U₁`: case 1 over `Spec (Γ stalk quotient 𝔪ₜⁿ)`, same two lemmas,
-  --   giving scheme-theoretic factorization of every infinitesimal fibre through `Z`.
-  -- * Krull: on stalks at `x ∈ p⁻¹(t)`, the equalizer ideal lies in `⋂ₙ 𝔪ₜⁿ·O_{X,x} = ⊥`
-  --   by `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` (stalks noetherian: the
-  --   `IsLocallyNoetherian` stalk instance; `X` loc. noeth. since `p` is of finite type
-  --   over loc. noeth. `S`); coherence + properness (`p` closed) upgrade stalk vanishing
-  --   near the fibre to `p ⁻¹ᵁ U₀ ⟶ X` factoring through `Z`, `U₀ ∋ t` open.
-  -- * clopen: `U₁ := S ∖ p.base '' (X ∖ range ι.left)` is closed since `p` is an open map
-  --   (`UniversallyOpen.of_flat`: `[Flat p]` + `LocallyOfFinitePresentation` from
-  --   properness over a locally noetherian base) and open by the Krull neighbourhoods;
-  --   `hconn` + `s ∈ U₁` give `U₁ = S`; the neighbourhood factorizations glue (`ι` mono),
-  --   so `ι.left` is a split-epi closed immersion, hence an iso, hence `f = p ≫ (e ≫ f)`.
+  -- Assembled from the three leaves above (T-W7.r2·b/c/d); leaf ·c is consumed by ·d.
+  refine ⟨e ≫ f, by rw [Category.assoc, hf, he], ?_⟩
+  have hg : (p ≫ (e ≫ f)) ≫ q = p := by
+    rw [Category.assoc, Category.assoc, hf, he]
+    exact Category.comp_id p
+  obtain ⟨w, hw⟩ := exists_factor_of_connected hconn hp e he f (p ≫ (e ≫ f)) hf hg s
+    (fibre_subset_eqLocus_of_collapsed hp e he f hf s hs)
+  calc f = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ f := by rw [hw, Category.id_comp]
+    _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ f) := Category.assoc _ _ _
+    _ = w ≫ (eqLocusι f (p ≫ (e ≫ f)) hf hg ≫ (p ≫ (e ≫ f))) :=
+        congrArg (w ≫ ·) (eqLocusι_comp_eq f (p ≫ (e ≫ f)) hf hg)
+    _ = (w ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg) ≫ (p ≫ (e ≫ f)) := (Category.assoc _ _ _).symm
+    _ = p ≫ (e ≫ f) := by rw [hw, Category.id_comp]
+
+/-! ### The corollary chain, split (coordinator §2): C1 (Cor 6.2) → C2 (Cor 6.3) → C3 -/
+
+/-- **(T-W7.7·C2conn — SORRIED LEAF, found by the hypothesis sweep)** The total space of a
+proper flat universally-`O`-connected family with a section over a connected base is
+connected — GIT Cor 6.3 runs its connectedness argument along the SECOND factor, so C3's
+application to `A ⊗ A` needs `A.left` connected, not just `S`. No single mathlib name
+(2026-07-07). Route: clopen `C ⊆ X` meets every fibre in a clopen set; fibres are connected
+(`O`-connectedness at residue fields); `p` open (flat + lfp) and closed (proper) makes
+`p(C)` clopen in connected `S`; the section decides which side is full. -/
+theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
+    [IsProper p] [Flat p] (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    [hconn : ConnectedSpace S] : ConnectedSpace X := by
+  sorry
+
+/-- **(T-W7.7·C1, GIT Cor 6.2 — SORRIED LEAF)** Two `S`-morphisms from a proper flat
+universally-`O`-connected `A` into a separated group object `G` that agree on ONE fibre
+differ by a constant section: `f = (χ ∘ toUnit) · g` for a point `χ` of `G`. Proof route:
+apply `rigidity` to the pointwise quotient `lift f g ≫ (𝟙 ⊗ ι[G]) ≫ μ[G]` (the GIT `f·g⁻¹`),
+whose collapsed fibre is supplied by the fibre-equality hypothesis. Source: GIT p. 116,
+Cor 6.2 (verbatim in quotes file). -/
+theorem eq_mul_of_fibre_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
+    (hconn : ConnectedSpace S) {A G : Over S} [GrpObj G]
+    [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
+    [IsSeparated G.hom] (f g : A ⟶ G) (s : S)
+    (hfib : pullback.fst A.hom (S.fromSpecResidueField s) ≫ f.left =
+      pullback.fst A.hom (S.fromSpecResidueField s) ≫ g.left) :
+    ∃ χ : 𝟙_ (Over S) ⟶ G, f = lift (toUnit A ≫ χ) g ≫ μ[G] := by
+  sorry
+
+/-- **(T-W7.7·C2, GIT Cor 6.3 — SORRIED LEAF)** A morphism `A ⊗ B ⟶ G` out of a product,
+with `A` proper flat universally-`O`-connected carrying a unit point and `B.left`
+connected, splits as a product `f(x,y) = g(x)·h(y)`. Proof route: GIT — apply C1 to the
+`B`-family of morphisms `f` vs `f(e₁, ·)` (connectedness running along `B`, supplied for
+the C3 application by `connectedSpace_of_universallyOConnected`). Source: GIT p. 116,
+Cor 6.3 (verbatim in quotes file). -/
+theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
+    {A B G : Over S} [GrpObj G]
+    [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
+    (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A)
+    [IsSeparated G.hom] (f : A ⊗ B ⟶ G) :
+    ∃ (g : A ⟶ G) (h : B ⟶ G),
+      f = lift (fst A B ≫ g) (snd A B ≫ h) ≫ μ[G] := by
   sorry
 
 /-- **(T-W7.7a-C3, GIT Cor 6.4)** A pointed morphism of group objects in `Over S`, whose

@@ -5034,8 +5034,33 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     instantiated. Leaf **L-hyp**.
 
 - **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean).
-  - **Status**: in_progress · **Claimed**: fable-P4, 2026-07-07T14:25Z (r1 core refactored
-    3199e396; next per coordinator §2: 4-leaf split, then the κ(s) seed) · **Type**: theorem
+  - **Status**: in_progress (ASSEMBLED — coordinator-§2 4-leaf split landed: `rigidity`'s
+    own proof is complete over the three sorried leaves below; leaf ·a = the eqLocus API is
+    PROVEN: `eqLocus`, `eqLocusι` real defs, `IsClosedImmersion` instance,
+    `eqLocusι_comp_eq`, `exists_factor_eqLocus`) · **Claimed**: fable-P4,
+    2026-07-07T14:25Z · **Type**: theorem
+
+- **[T-W7.r2·b]** the κ(s) seed — `fibre_subset_eqLocus_of_collapsed` (Rigidity.lean).
+  - **Status**: open (claimed with parent, fable-P4) · **Depends**: T-W7.r1 (done) ·
+    **Type**: theorem
+  - Route (docstring has details): base-change along `S.fromSpecResidueField s` +
+    `UniversallyOConnected.baseChange`; chart = affine `V ×_S Spec κ(s)` fed to
+    `rigidity_of_range_le_affine`; land in `exists_factor_eqLocus`; fibre = range of
+    `pullback.fst` (pullback-carrier API).
+
+- **[T-W7.r2·c]** Krull neighbourhood — `exists_open_factor_of_fibre_subset`
+  (Rigidity.lean). **Status**: open · **Depends**: T-W7.r1 (done) · **Type**: theorem ·
+  Route: Artinian thickenings `Spec (Γstalk/𝔪ₜⁿ)` through case 1;
+  `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` on stalks (loc-noeth X from `IsProper` over
+  loc-noeth S); finite-type ideal sheaf vanishes on an open ⊇ fibre; properness ⟹ tube
+  `p⁻¹(U₀)`. THE hard leaf (est. 300–500 lines; may spawn sub-leaves for the ideal-sheaf
+  support API).
+
+- **[T-W7.r2·d]** clopen assembly — `exists_factor_of_connected` (Rigidity.lean).
+  - **Status**: open (claimed with parent, fable-P4 — next up) · **Depends**: T-W7.r2·c
+    (consumes it), `UniversallyOpen.of_flat` (verified) · **Type**: theorem
+  - Route: `U₁` closed via flat+lfp open map; open via ·c; connected ⟹ `U₁ = S`; glue the
+    open factorizations along `⊤` (mono `eqLocusι`).
   - Sketch (GIT pp. 115–116, transcribed; mathlib names VERIFIED in this checkout,
     assembly map inline at the `rigidity` sorry): equalizer backbone
     `isClosedImmersion_equalizer_ι_left` (in `Over S`, uses `[IsSeparated q]`); case 1
@@ -5049,6 +5074,22 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     split-epi closed immersion ⟹ iso. Leaf **L-R2**.
 
 - **[CLEANUP-RIG-1]** `/cleanup` Rigidity.lean. **Depends**: T-W7.r2 (3rd proof ticket).
+
+- **[T-W7.7·C2conn]** total space connected over connected base —
+  `connectedSpace_of_universallyOConnected` (Rigidity.lean). **Status**: open (NEW —
+  unplanned sub-leaf found by the coordinator-§2 hypothesis sweep; GIT Cor 6.3 runs
+  connectedness along the SECOND factor) · **Depends**: none · **Type**: theorem ·
+  Route: clopen meets fibres clopen; fibres connected from O-connectedness; p open+closed;
+  section decides. No single mathlib name (2026-07-07).
+
+- **[T-W7.7·C1]** GIT Cor 6.2 — `eq_mul_of_fibre_eq` (Rigidity.lean). **Status**: open ·
+  **Depends**: T-W7.r2 · **Type**: theorem · Route: `rigidity` on the GIT quotient
+  `f·g⁻¹` = `lift f g ≫ (𝟙 ⊗ ι[G]) ≫ μ[G]`; fibre-equality hypothesis stated
+  morphism-level at `pullback.fst A.hom (S.fromSpecResidueField s)`.
+
+- **[T-W7.7·C2]** GIT Cor 6.3 — `factor_mul_of_tensor` (Rigidity.lean). **Status**: open ·
+  **Depends**: T-W7.7·C1, T-W7.7·C2conn · **Type**: theorem · Route: C1 for the
+  `B`-family `f` vs `f(e₁,·)`, connectedness along `B.left`.
 
 - **[T-W7.7]** canonicity (= MILESTONE T-W7b, loc-noetherian) — `isMonHom_of_one_comp_eq`,
   `abelEnrichment_unique_of_isLocallyNoetherian` (Rigidity.lean:101,114).
