@@ -5108,6 +5108,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     immersion). Assembly after that: engine per fibre-point → basicOpen union →
     quasi-compact fibre → properness tube → `IsClosedImmersion.lift` (already wired in the
     committed hW-consumable shape).
+  - **Progress (fable-P4, 2026-07-07T17:15Z)**: c·i STATED green (`germ_ker_mem_pow_of_fibre_subset`,
+    402ade6a). hW-assembly design settled after the cross-affine-germ analysis: work on the
+    BASICOPEN BASIS to make the stalk-ideal well-defined — per affine `U`, let
+    `Z_U := {z ∈ U | Ideal.map (germ_z) (ker.ideal U) = ⊥}`; `Z_U` is open (the proven
+    engine `exists_notMem_mul_eq_zero_of_fg` + noetherian f.g. + `fromSpec_preimage_basicOpen`
+    membership bridge + s-annihilation kills germs on `basicOpen s`), fibre∩U ⊆ Z_U (c·i +
+    `Ideal.iInf_pow_eq_bot_of_isLocalRing` + `IsLocalHom (stalkMap)`), and cross-affine
+    consistency via `map_ideal_basicOpen` (IdealSheaf/Basic ~:300) on basicOpen refinements.
+    Then `W := ⋃ Z_U`, tube `U₀ := (p '' Wᶜ)ᶜ` via `Scheme.Hom.isClosedMap`
+    ([UniversallyClosed] from [IsProper]), and the final `ι.ker ≤ (tube.ι).ker` per-affine
+    via germ-ext (`Hom.ker_apply` needs [QuasiCompact (V.ι)] — from loc-noeth instance
+    Noetherian.lean:205). Est. 150–250 lines + c·i's own proof (preimmersion mechanism +
+    `pullbackSpecIso` kernel algebra).
 
 - **[T-W7.r2·d]** clopen assembly — `exists_factor_of_connected` (Rigidity.lean).
   - **Status**: ✅ PROVEN (fable-P4, 2026-07-07T15:00Z) — modulo consuming the sorried ·c
