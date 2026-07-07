@@ -48,15 +48,40 @@ structure WeierstrassAtlasData {S : Scheme.{u}} (G : EllipticCurveGeom S) where
 /-- **(T-W7.1a′-extract)** Every geometric elliptic curve admits a bundled atlas (choice from
 the `localModel` field; index the atlas by the points of `S`). -/
 noncomputable def EllipticCurveGeom.atlas {S : Scheme.{u}} (G : EllipticCurveGeom S) :
-    WeierstrassAtlasData G :=
-  sorry
+    WeierstrassAtlasData G where
+  ι := S
+  U s := (G.localModel s).choose
+  covers s := ⟨s, (G.localModel s).choose_spec.choose⟩
+  W s := (G.localModel s).choose_spec.choose_spec.choose
+  elliptic s := (G.localModel s).choose_spec.choose_spec.choose_spec.1
+  e s := (G.localModel s).choose_spec.choose_spec.choose_spec.2.choose
+  compat_π s := (G.localModel s).choose_spec.choose_spec.choose_spec.2.choose_spec.1
+  compat_zero s := (G.localModel s).choose_spec.choose_spec.choose_spec.2.choose_spec.2
+
+/-- **(T-W7.1a-i, coefficients)** The coefficient ring map `MvPolynomial (Fin 5) ℤ →+* R` of a
+Weierstrass curve `W` over `R`, sending the `i`-th coordinate `Xᵢ` to the coefficient `aᵢ`. This
+is the pre-localization half of the classifying map. -/
+noncomputable def classifyCoeffHom {R : Type u} [CommRing R] (W : WeierstrassCurve R) :
+    MvPolynomial (Fin 5) ℤ →+* R :=
+  MvPolynomial.eval₂Hom (Int.castRingHom R) ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆]
+
+/-- Specialising the universal Weierstrass curve along `classifyCoeffHom W` (`Xᵢ ↦ aᵢ`) recovers
+`W` — the defining property of the coefficient map. -/
+theorem universalWeierstrass_map_classifyCoeffHom {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) : universalWeierstrass.map (classifyCoeffHom W) = W := by
+  ext <;>
+    simp [map_a₁, map_a₂, map_a₃, map_a₄, map_a₆, universalWeierstrass, classifyCoeffHom,
+      MvPolynomial.eval₂Hom_X']
 
 /-- **(T-W7.1a-i)** The classifying ring map of an elliptic Weierstrass curve: the universal
 coefficient ring maps to `R` by `Xᵢ ↦ aᵢ`, well-defined on the localization because `Δ` maps
 to a unit. Source: `Localization.Away` universal property (`IsLocalization.Away.lift`). -/
 noncomputable def classifyRingHom {R : Type u} [CommRing R] (W : WeierstrassCurve R)
     [W.IsElliptic] : WeierstrassAtlasRing →+* R :=
-  sorry
+  IsLocalization.Away.lift (g := classifyCoeffHom W) universalWeierstrass.Δ <| by
+    have hΔ : classifyCoeffHom W universalWeierstrass.Δ = W.Δ := by
+      rw [← map_Δ, universalWeierstrass_map_classifyCoeffHom]
+    rw [hΔ]; exact W.isUnit_Δ
 
 /-- **(T-W7.1a-ii)** The classifying map classifies: pushing the universal curve along it
 recovers `W`. With `isPullback_projModelBaseChange` this exhibits `projModel W` as the base
@@ -65,6 +90,9 @@ every locally-Weierstrass family is a base change of `E_U`. -/
 theorem universalWeierstrassLoc_map_classifyRingHom {R : Type u} [CommRing R]
     (W : WeierstrassCurve R) [W.IsElliptic] :
     universalWeierstrassLoc.map (classifyRingHom W) = W := by
-  sorry
+  have hcomp : (classifyRingHom W).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing) = classifyCoeffHom W := by
+    simp only [classifyRingHom, IsLocalization.Away.lift_comp]
+  rw [universalWeierstrassLoc, map_map, hcomp, universalWeierstrass_map_classifyCoeffHom]
 
 end ModularCurves
