@@ -69,6 +69,13 @@ noncomputable def universalCurveZero : weierstrassAtlas ⟶ universalCurve :=
 theorem universalCurveZero_π : universalCurveZero ≫ universalCurveπ = 𝟙 weierstrassAtlas :=
   projModelZero_projModelπ universalWeierstrassLoc
 
+/-- The crux affine identity: the top affine chart's `isoSpec.hom` composed with the scheme's
+`isoSpec.inv` is the top inclusion. Stated over an arbitrary affine-open proof `h` so it matches
+the `LocallyWeierstrass` witness's proof up to proof irrelevance. -/
+theorem crux_test (h : IsAffineOpen (⊤ : (weierstrassAtlas).Opens)) :
+    h.isoSpec.hom ≫ weierstrassAtlas.isoSpec.inv = (⊤ : (weierstrassAtlas).Opens).ι := by
+  rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
+
 open Limits in
 /-- The universal Weierstrass curve is locally Weierstrass (it *is* a global Weierstrass
 model over the affine atlas — the whole space `⊤` witnesses it). -/
@@ -86,6 +93,9 @@ theorem universalCurve_localModel :
         ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))) =
         (Scheme.ΓSpecIso (.of WeierstrassAtlasRing)).inv := rfl
     rw [this]; infer_instance
+  have hφ_eq : Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
+      ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) = weierstrassAtlas.isoSpec.inv :=
+    (Scheme.isoSpec_Spec_inv (.of WeierstrassAtlasRing)).symm
   refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial,
     universalWeierstrassLoc.map (algebraMap WeierstrassAtlasRing _), inferInstance,
     asIso (pullback.fst universalCurveπ (⊤ : (weierstrassAtlas).Opens).ι) ≪≫
@@ -103,7 +113,25 @@ theorem universalCurve_localModel :
   -- Blocked on Lean elaboration (not math): `inv φ` fails IsIso synth (defeq at instances
   -- transparency on algebraMap; `set φ` let-unfolds; `isoSpec` presheaf-type skew). Fix path:
   -- hoist hid/hbc/c1/c2 to top-level lemmas with explicit `@inv` instance args.
-  case c1 => sorry
+  have hcrux : ∀ (h : (⊤ : (weierstrassAtlas).Opens) ∈ weierstrassAtlas.affineOpens),
+      (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))
+      = (⊤ : (weierstrassAtlas).Opens).ι := fun h => hφ_eq ▸ crux_test h
+  case c1 =>
+    rw [← cancel_mono (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
+        ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))))]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      IsPullback.isoPullback_inv_snd]
+    conv_rhs => erw [hcrux]
+    erw [← pullback.condition, IsIso.inv_hom_id_assoc]
+    exact pullback.condition
+  -- c2 (section): reduction fully DERIVED (same crux tech as c1, now unblocked):
+  --   simp; `pullback.lift_fst_assoc`; `hcrux2 : isoSpec.inv ≫ ⊤.ι = φ`
+  --   (= `hφ_eq ▸ (isoSpec_inv_ι _).trans fromSpec_top`); then
+  --   `projModelZero_baseChange` (φ ≫ zero = projModelZero W' ≫ projModelBaseChange)
+  --   + `isoPullback_hom_fst` (projModelBaseChange = isoPullback.hom ≫ fst) + `hom_inv_id`.
+  --   Closes mathematically; needs conv-isolated steps to stay under the heartbeat budget
+  --   (the affineOpens-coercion poison makes whole-goal erw expensive; NO maxHeartbeats).
   case c2 => sorry
 
 end ModularCurves
