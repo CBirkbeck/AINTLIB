@@ -186,4 +186,19 @@ noncomputable def vRhoSqAlgebraIso (D : GaloisRepData N) :
   exact h1'.conePointUniqueUpToIso
     (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D))
 
+/-- The comultiplication: the finite étale algebra map corresponding to the addition
+of the `ρ`-twisted Galois module (leaf F1c-4). -/
+noncomputable def vRhoComulHom (D : GaloisRepData N) :
+    vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D) :=
+  ((vRhoSqAlgebraIso D).inv ≫
+    (finiteEtaleEquivContAction ℚ).inverse.map (rhoAddMor D)).unop
+
+/-- **(T-F1c)** The addition morphism of `V_ρ`: `V_ρ ×_ℚ V_ρ ⟶ V_ρ`, `Spec` of the
+comultiplication through the tensor identification of the fibre product. -/
+noncomputable def vRhoAdd (D : GaloisRepData N) :
+    pullback (vRhoπ D) (vRhoπ D) ⟶ vRho D :=
+  (AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+    (vRhoAlgebra D : Type 0)).hom ≫
+    AlgebraicGeometry.Spec.map (CommRingCat.ofHom (vRhoComulHom D).hom.hom.toRingHom)
+
 end ModularCurves
