@@ -139,15 +139,17 @@ section Main
 
 variable {A : Type*} [CommRing A] [IsReduced A] [IsJacobsonRing A] {W' : Projective A}
 
+omit [IsReduced A] [IsJacobsonRing A] in
 open MvPolynomial in
 /-- The field case, packaged along an arbitrary ring homomorphism into a field: the image of
 the equation value of `dblAddXYZ` vanishes. Keeping the entire elaboration inside one honest
 `[Field K]` world avoids the quotient-ring instance-path collision (whnf blowup) that a
 direct residue-field formulation hits. -/
-lemma map_polynomial_eval_dblAddXYZ_eq_zero {K : Type*} [Field K] (φ : A →+* K)
-    {W' : Projective A} (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+lemma map_polynomial_eval_dblAddXYZ_eq_zero {K : Type*} [CommRing K] (hK : IsField K)
+    (φ : A →+* K) {W' : Projective A} (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
     (hP : W'.Equation P) (hQ : W'.Equation Q) :
     φ (eval (W'.dblAddXYZ P Q) W'.polynomial) = 0 := by
+  letI := hK.toField
   haveI : (W'.map φ).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map φ⟩
   have key : (W'.map φ).Equation ((W'.map φ).dblAddXYZ (φ ∘ P) (φ ∘ Q)) :=
     equation_dblAddXYZ_of_equation (hP.map φ) (hQ.map φ)
@@ -164,10 +166,9 @@ theorem equation_dblAddXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 �
     (hP : W'.Equation P) (hQ : W'.Equation Q) : W'.Equation (W'.dblAddXYZ P Q) := by
   rw [Equation]
   refine eq_zero_of_forall_isMaximal_mem fun m hm => ?_
-  haveI := hm
-  haveI : Field (A ⧸ m) := Ideal.Quotient.field m
   rw [← Ideal.Quotient.eq_zero_iff_mem]
-  exact map_polynomial_eval_dblAddXYZ_eq_zero (Ideal.Quotient.mk m) hΔ hP hQ
+  exact map_polynomial_eval_dblAddXYZ_eq_zero
+    ((Ideal.Quotient.maximal_ideal_iff_isField_quotient m).mp hm) (Ideal.Quotient.mk m) hΔ hP hQ
 
 end Main
 

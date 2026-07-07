@@ -18,6 +18,7 @@ import ModularCurves.Moduli.Stack
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.AdditionLaw
 import ModularCurves.EllipticCurve.AdditionLawField
+import ModularCurves.EllipticCurve.AdditionLawOnCurve
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
