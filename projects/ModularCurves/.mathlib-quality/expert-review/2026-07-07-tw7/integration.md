@@ -113,6 +113,18 @@ path** (feeds the comparison theorem T-W7.1b), schedulable in parallel with T-W7
 - **Unanswered by reviewer**: nothing explicitly unanswered from Q1–Q6, but F1–F3 (follow-up) arise
   from the audit.
 
+## ROUND-2 REPLY INTAKE (2026-07-07 pm, `reply2.md`) — assessed as a ROUND-1 DIGEST
+
+| # | Point | Verdict |
+|---|-------|---------|
+| 1 | T-W7a/T-W7b split; 7-step order; only T-W7a on the critical path | already integrated in round 1 — no change |
+| 2 | m_U by 5-piece open-cover/glue; global morphism before generic fibre; global VC-equivariance | already integrated; the 5-piece cover is **superseded** by the B–L two-law cover (this reply predates/never saw round 2 — it does not mention B–L) |
+| 3 | Γ = R uniformly per ring, not by base change; three-chart Čech | already integrated (we use the 2-chart cover — single overlap); **ADOPT the decl names**: `projModel_globalSections_eq_baseRing` (0i·i3), `locallyWeierstrass_pushforward_O_eq_O` (0i·i5) |
+| 4 | Rigidity sketch (closed images + affine factorisation, shrinking) | superseded by the GIT §6.1 verbatim transcription — the reply's sketch still carries the incomplete globalization step audit A4 flagged |
+| 5 | **"Urgent Γ₁(N) drift"** — brief allegedly defines Γ₁ via `Σ_a[aP] = E[N]` | **VERIFIED FALSE (stale)**. Code: `Section.orderDivisor` = `[P]+[2P]+⋯+[NP]` (LevelStructure/ExactOrder.lean:97–99, degree N); `HasExactOrder` = `(orderDivisor).IsSubgroup` = KM 1.4.1 (ExactOrder.lean:104–105); `IsGammaOne := HasExactOrder` (LevelStructure/Basic.lean:70). Brief §2.1 + appendix state the degree-N-subgroup-divisor form and explicitly warn "**not** an equality with the degree-N² divisor E[N]" (REVIEW_BRIEF.md:24, :72). `IsFullLevel` (Γ(N)) is the one that equals `E[N]`, correctly. No fix needed; do NOT spawn a worker on this. |
+| 6 | Worker allocation order; skip coarse j-line / coherent cohomology | matches our lanes P0–P5 (their #1 removed per row 5); the skip-list was already our stance |
+| — | **F1′ / F2 / F3 NOT ADDRESSED** | the round-2 follow-up (`REVIEW_FOLLOWUP-tw7.md`) remains outstanding — re-send it |
+
 ## UPDATE (2026-07-07 pm) — acquisitions closed the audit's open items
 Owner supplied Mumford GIT (djvu) + Mumford *Abelian Varieties*; agent fetched Bosma–Lenstra (author
 copy, Lenstra's Leiden publication archive `1995c`) and Lange–Ruppert (GDZ scan of Invent. 79,

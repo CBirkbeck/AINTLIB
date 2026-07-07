@@ -59,3 +59,17 @@ formalise this as stated — with one consequence, hence:
 > standard proof over an arbitrary base (Katz–Mazur §2.2-style), and are there pitfalls over rings
 > with nilpotents or many idempotents? (c) Is uniqueness of $(u,r,s,t)$ automatic from the
 > filtration argument, or does it need a separate small argument?
+
+---
+
+**Note on the Γ₁(N) remark in your last message.** We checked the claim against the current
+formalisation before acting on it, and it appears to describe a stale draft: the definition of
+record is Katz–Mazur 1.4.1 exactly — the degree-$N$ divisor $[P] + [2P] + \dots + [NP]$ required to
+be a *subgroup divisor* (Deligne's exact-order condition), with **no** equality against the
+degree-$N^2$ divisor $E[N]$ anywhere in the $\Gamma_1$ layer; the equality with $E[N]$ is used only
+for full level-$N$ structures $(P,Q)$ via $\sum_{a,b}[aP+bQ] = E[N]$, as it should be. The current
+programme brief also states this distinction explicitly (twice, with the $N$ vs $N^2$ degree
+warning). So no fix is needed there — but do say if you had a *different* location in mind.
+
+**Also note:** questions F1′, F2, F3 above were not addressed in your last message — we would still
+very much value answers to those three.

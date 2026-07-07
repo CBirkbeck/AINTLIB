@@ -4583,6 +4583,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   P0–P5 NOW UNBLOCKED** (P1 ungated by B–L; P4 fully specified R1–R3+C1–C4). Follow-up revised:
   F1 retired (answered by source), F1′ = is loc.-noeth. canonicity enough downstream; F2 = B–L
   `{Z=0,Y=0}` instantiation check; F3 = comparison theorem (unchanged).
+  **ROUND-2 REPLY INTAKE (2026-07-07 pm; `reply2.md`, table in `integration.md`)**: assessed as a
+  ROUND-1 DIGEST — F1′/F2/F3 NOT addressed (re-send `REVIEW_FOLLOWUP-tw7.md`); its m_U/rigidity
+  sketches superseded by B–L/GIT. Adopted: 0i decl names `projModel_globalSections_eq_baseRing` /
+  `locallyWeierstrass_pushforward_O_eq_O`. Its **"urgent Γ₁(N) drift" VERIFIED FALSE (stale)**:
+  code is KM-correct — `orderDivisor = [P]+⋯+[NP]` deg-N (ExactOrder.lean:97), `HasExactOrder` =
+  subgroup divisor KM 1.4.1 (:104), `IsGammaOne := HasExactOrder` (LevelStructure/Basic.lean:70);
+  brief warns N-vs-N² explicitly (REVIEW_BRIEF.md:24,:72). **Do NOT spawn a worker on the "drift".**
 
 - **[T-W7.0a] `atlasRing_isDomain`** — `IsLocalization.isDomain_localization` (mathlib, verified) +
   `Δ ≠ 0` in `MvPolynomial (Fin 5) ℤ` (evaluate at `y² = x³ − x` over `ℚ`: `Δ = 64`). **Lane P0 ·

@@ -67,10 +67,11 @@ Invent. Math. 79 (1985) ✓ (GDZ scan); ④ Mumford *Abelian Varieties* ✓ (sca
   model (`A` free ⓜ `CoordinateRing`-basis; `B = R[t][s]/(monic cubic)` free; `A_y` normal-form
   basis, one element per pole order): (i1) `F_n` filtration via the ideal `(s)` of `O` on `D(u)`;
   (i2) `F₀ = R`, `F₂ = R⊕Rx`, `F₃ = R⊕Rx⊕Ry` free; (i3) **`Γ(projModel W, O) ≅ R` for EVERY
-  ring** (equalizer computation; `x²y^{-1}` = the `H¹` witness excluded); (i4) `E∖O` scheme-dense in
+  ring** (equalizer computation; `x²y^{-1}` = the `H¹` witness excluded) — decl
+  `projModel_globalSections_eq_baseRing` (round-2 naming); (i4) `E∖O` scheme-dense in
   `projModel` (`s` nonzerodivisor via McCoy); (i5) sheafify: `π_*O = O_S` for every locally-
   Weierstrass family, **universally by instantiation** (`W.map`; base-change compat ⓟ
-  `isPullback_projModelBaseChange`).
+  `isPullback_projModelBaseChange`) — decl `locallyWeierstrass_pushforward_O_eq_O`.
 
 ### Part I — descent to general `E/S` (existence)
 
