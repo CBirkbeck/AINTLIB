@@ -143,27 +143,58 @@ theorem le_rank_of_det_submatrix_ne_zero {r : ℕ} (M : Matrix (Fin b) (Fin a) K
   calc r = (M.submatrix ri ci).rank := hrank.symm
     _ ≤ M.rank := rank_submatrix_le M ri ci
 
+/-- From a finite family `v` over a field whose span has `finrank ≥ r`, one can select `r` of the
+`v i` — an injective reindexing `g : Fin r → Fin p` — on which `v` is linearly independent.  Take a
+maximal linearly independent subfamily (`exists_linearIndependent'`, of cardinality `= finrank`),
+then embed `Fin r` into its index set. -/
+theorem exists_injective_comp_linearIndependent {V : Type*} [AddCommGroup V] [Module K V]
+    {p : ℕ} (v : Fin p → V) {r : ℕ}
+    (hr : r ≤ Module.finrank K (Submodule.span K (Set.range v))) :
+    ∃ g : Fin r → Fin p, Function.Injective g ∧ LinearIndependent K (v ∘ g) := by
+  obtain ⟨κ, α, hα_inj, hα_span, hα_li⟩ := exists_linearIndependent' (K := K) v
+  have hκ : Fintype κ := Fintype.ofInjective α hα_inj
+  have hcard : Module.finrank K (Submodule.span K (Set.range v)) = Fintype.card κ := by
+    rw [← hα_span, finrank_span_eq_card hα_li]
+  obtain ⟨g⟩ : Nonempty (Fin r ↪ κ) :=
+    Function.Embedding.nonempty_of_card_le (by rw [Fintype.card_fin]; exact hr.trans hcard.le)
+  exact ⟨fun i => α (g i), hα_inj.comp g.injective, hα_li.comp _ g.injective⟩
+
 /-- **McCoy, hard direction** (over a field): if `r ≤ M.rank` then some `r × r` minor of `M` is
 nonzero.  Equivalently, the *determinantal rank* (the largest size of a nonvanishing minor) is at
 least the linear rank `M.rank = dim (column span)`.
 
-ISOLATED RESIDUAL.  ABSENT from mathlib (checked against the 2026-07 pin): `Matrix.rank` is defined
-as `finrank` of the range / column span (`rank_eq_finrank_span_cols`) and there is **no** lemma
-bridging it to minors.  The classical proof: from `r ≤ M.rank` choose `r` linearly independent
-columns (indexed by an injective `ci`), giving a `b × r` submatrix of full column rank `r`; over a
-field row rank equals column rank, so choose `r` linearly independent rows `ri`; the resulting
-`r × r` submatrix has rank `r`, hence unit determinant.  Missing mathlib facts: extraction of a
-size-`r` linearly independent family of columns as an injective `Fin r → Fin a`, and row-rank =
-column-rank for the full-column-rank block.
+Proof: from `r ≤ M.rank = dim (column span)` pick `r` linearly independent columns `ci`
+(`exists_injective_comp_linearIndependent`); the `b × r` block `M.submatrix id ci` then has rank
+`r`, so (row rank = rank over a field) it has `r` linearly independent rows `ri`; the resulting
+square block `M.submatrix ri ci` has linearly independent rows, hence is a unit
+(`linearIndependent_rows_iff_isUnit`), so its determinant is nonzero.
 
 Stacks: the ideal of minors `I(φ)` and its rank characterisation underlie **00N1** (Buchsbaum–
-Eisenbud, Prop 10.102.9).  Classical reference: N. H. McCoy, *Rings and Ideals* (Carus Monograph
-No. 8), or W. C. Brown, *Matrices over Commutative Rings*, Thm 4.9 (rank = largest nonzero minor
-size over a field). -/
+Eisenbud, Prop 10.102.9).  Classical statement: McCoy's theorem — over a field the rank equals the
+largest size of a nonvanishing minor. -/
 theorem exists_det_submatrix_ne_zero_of_le_rank {r : ℕ} (M : Matrix (Fin b) (Fin a) K)
     (h : r ≤ M.rank) :
     ∃ (ri : Fin r → Fin b) (ci : Fin r → Fin a), (M.submatrix ri ci).det ≠ 0 := by
-  sorry
+  -- pick `r` linearly independent columns
+  have hcol : r ≤ Module.finrank K (Submodule.span K (Set.range M.col)) := by
+    rwa [← rank_eq_finrank_span_cols]
+  obtain ⟨ci, -, hci⟩ := exists_injective_comp_linearIndependent M.col hcol
+  have hNcol : (M.submatrix (id : Fin b → Fin b) ci).col = M.col ∘ ci := rfl
+  -- the `b × r` block then has rank `r`
+  have hNrank : r ≤ (M.submatrix (id : Fin b → Fin b) ci).rank := by
+    rw [rank_eq_finrank_span_cols, hNcol, finrank_span_eq_card hci, Fintype.card_fin]
+  -- pick `r` linearly independent rows of that block
+  have hrow : r ≤ Module.finrank K
+      (Submodule.span K (Set.range (M.submatrix (id : Fin b → Fin b) ci).row)) := by
+    rwa [← rank_eq_finrank_span_row]
+  obtain ⟨ri, -, hri⟩ :=
+    exists_injective_comp_linearIndependent (M.submatrix (id : Fin b → Fin b) ci).row hrow
+  -- the square block `M.submatrix ri ci` has linearly independent rows, hence unit determinant
+  refine ⟨ri, ci, ?_⟩
+  have hProw : (M.submatrix ri ci).row = (M.submatrix (id : Fin b → Fin b) ci).row ∘ ri := rfl
+  have hunit : IsUnit (M.submatrix ri ci) := by
+    rw [← linearIndependent_rows_iff_isUnit, hProw]; exact hri
+  exact isUnit_iff_ne_zero.mp ((isUnit_iff_isUnit_det _).mp hunit)
 
 /-- **McCoy over a field.**  The `r`-th minor ideal is trivial iff the rank drops below `r`:
 `idealOfMinors r M = ⊥ ↔ M.rank < r`.  Combines the two directions above with

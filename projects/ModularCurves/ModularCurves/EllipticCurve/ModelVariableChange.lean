@@ -939,6 +939,61 @@ lemma chartY_inf_chartZ_eq_basicOpen_tSection (W : WeierstrassCurve R) :
   le_antisymm (chartY_inf_chartZ_le_basicOpen_tSection W)
     (le_inf ((projModel W).basicOpen_le _) basicOpen_tSection_le_chartZ)
 
+/-- The `Y`-chart transport of a pointed isomorphism: pull back `Y'`-chart functions of the
+target model along `e` and restrict to an open below the chart preimage. -/
+noncomputable def pointedIsoChartTransport {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W') {V : (projModel W).Opens}
+    (hV : V ≤ e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) :
+    AdjoinRoot (infChartCubic W') →+* ↑Γ(projModel W, V) :=
+  ((((projModel W).presheaf.map (homOfLE hV).op).hom).comp
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom)).comp
+    ((chartYSectionsRingEquiv W').symm :
+      AdjoinRoot (infChartCubic W') →+* _)
+
+/-- The basic open of a transported chart function: the chart preimage of the source basic
+open, cut to `V`. -/
+lemma pointedIsoChartTransport_basicOpen {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W') {V : (projModel W).Opens}
+    (hV : V ≤ e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))
+    (b' : AdjoinRoot (infChartCubic W')) :
+    (projModel W).basicOpen (pointedIsoChartTransport e hV b') =
+      V ⊓ e.hom ⁻¹ᵁ ((projModel W').basicOpen
+        ((chartYSectionsRingEquiv W').symm b')) := by
+  have h1 : pointedIsoChartTransport e hV b' =
+      ((projModel W).presheaf.map (homOfLE hV).op)
+        ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+          ((chartYSectionsRingEquiv W').symm b')) := rfl
+  rw [h1, Scheme.basicOpen_res, ← Scheme.preimage_basicOpen]
+
+/-- **Unit augmentations transport to chart-point neighbourhoods**: if `aug'(b')` is a unit,
+the chart point of any section prime lies in the basic open of the transported `b'`. -/
+lemma chartPointOf_mem_basicOpen_transport {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    {V : (projModel W).Opens}
+    (hV : V ≤ e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) (hpV : chartPointOf W P ∈ V)
+    (b' : AdjoinRoot (infChartCubic W')) (hb' : IsUnit (infChartAug W' b')) :
+    chartPointOf W P ∈ (projModel W).basicOpen
+      (pointedIsoChartTransport e hV b') := by
+  rw [pointedIsoChartTransport_basicOpen]
+  refine ⟨hpV, ?_⟩
+  obtain ⟨y, hy⟩ := chartPointOf_mem_range_zero P ht
+  show e.hom.base (chartPointOf W P) ∈ (projModel W').basicOpen
+    ((chartYSectionsRingEquiv W').symm b')
+  have h1 : e.hom.base (chartPointOf W P) = (projModelZero W').base y := by
+    rw [← hy, show e.hom.base ((projModelZero W) y) =
+      (projModelZero W ≫ e.hom) y from rfl, hez]
+  rw [h1, zero_mem_basicOpen_chartYSection_iff]
+  intro hmem
+  exact y.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hmem hb')
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
