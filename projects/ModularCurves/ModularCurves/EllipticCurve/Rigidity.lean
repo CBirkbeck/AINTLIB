@@ -6,6 +6,7 @@ import ModularCurves.EllipticCurve.GroupLaw
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.Separated
 import Mathlib.AlgebraicGeometry.Noetherian
+import ModularCurves.ForMathlib.ConnectedTotalSpace
 
 /-!
 # The rigidity lemma and canonicity of the group law
@@ -912,17 +913,138 @@ theorem rigidity {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
 
 /-! ### The corollary chain, split (coordinator §2): C1 (Cor 6.2) → C2 (Cor 6.3) → C3 -/
 
-/-- **(T-W7.7·C2conn — SORRIED LEAF, found by the hypothesis sweep)** The total space of a
-proper flat universally-`O`-connected family with a section over a connected base is
-connected — GIT Cor 6.3 runs its connectedness argument along the SECOND factor, so C3's
-application to `A ⊗ A` needs `A.left` connected, not just `S`. No single mathlib name
-(2026-07-07). Route: clopen `C ⊆ X` meets every fibre in a clopen set; fibres are connected
-(`O`-connectedness at residue fields); `p` open (flat + lfp) and closed (proper) makes
-`p(C)` clopen in connected `S`; the section decides which side is full. -/
+/-- **(T-W7.7·C2conn·idem — clopen-to-idempotent leaf)** A scheme whose ring of global
+sections is a field is preconnected: a nontrivial clopen decomposition glues the section
+`(1, 0)`, giving a global idempotent that a field forces to `0` or `1`; either case kills
+one nonempty piece via the nontriviality of a stalk. No mathlib name (2026-07-07); upstream
+candidate. -/
+theorem preconnectedSpace_of_isField {Z : Scheme.{u}} (hf : IsField ↑(Γ(Z, ⊤))) :
+    PreconnectedSpace Z := by
+  rw [preconnectedSpace_iff_clopen]
+  intro s hs
+  rw [or_iff_not_imp_left]
+  intro hs0
+  by_contra hsu
+  have hs1 : s.Nonempty := Set.nonempty_iff_ne_empty.mpr hs0
+  have hs2 : sᶜ.Nonempty := Set.nonempty_compl.mpr hsu
+  classical
+  set U : Bool → Z.Opens :=
+    fun b => if b then ⟨s, hs.isOpen⟩ else ⟨sᶜ, hs.isClosed.isOpen_compl⟩ with hU
+  have hmem₁ : ∀ z ∈ s, z ∈ U true := fun z hz => by simpa [hU] using hz
+  have hmem₂ : ∀ z ∈ sᶜ, z ∈ U false := fun z hz => by simpa [hU] using hz
+  have hdisj : U true ⊓ U false = ⊥ := by
+    apply TopologicalSpace.Opens.ext
+    simp [hU]
+  have hcover : (⊤ : Z.Opens) ≤ iSup U := by
+    intro z _
+    rw [TopologicalSpace.Opens.mem_iSup]
+    by_cases hz : z ∈ s
+    · exact ⟨true, hmem₁ z hz⟩
+    · exact ⟨false, hmem₂ z hz⟩
+  have hsub : Subsingleton (ToType (Γ(Z, U true ⊓ U false))) := by
+    rw [hdisj]; infer_instance
+  have hsub' : Subsingleton (ToType (Γ(Z, U false ⊓ U true))) := by
+    rw [inf_comm, hdisj]; infer_instance
+  -- glue the idempotent candidate: `1` on `s`, `0` on `sᶜ`
+  have hglue : ∃ χ : ↑(Γ(Z, ⊤)),
+      (Z.presheaf.map (homOfLE (le_top : U true ≤ ⊤)).op).hom χ = 1 ∧
+      (Z.presheaf.map (homOfLE (le_top : U false ≤ ⊤)).op).hom χ = 0 := by
+    obtain ⟨χ, hχ, -⟩ := Z.sheaf.existsUnique_gluing' U ⊤ (fun _ => homOfLE le_top) hcover
+      (fun b => match b with
+        | true => (1 : ToType (Γ(Z, U true)))
+        | false => (0 : ToType (Γ(Z, U false))))
+      (by
+        intro i j
+        match i, j with
+        | true, true => rfl
+        | false, false => rfl
+        | true, false => exact hsub.elim _ _
+        | false, true => exact hsub'.elim _ _)
+    exact ⟨χ, hχ true, hχ false⟩
+  obtain ⟨χ, h₁, h₂⟩ := hglue
+  have hcover₂ : (⊤ : Z.Opens) ≤ U true ⊔ U false := by
+    intro z _
+    rw [TopologicalSpace.Opens.mem_sup]
+    by_cases hz : z ∈ s
+    · exact Or.inl (hmem₁ z hz)
+    · exact Or.inr (hmem₂ z hz)
+  have hidem : χ * (χ - 1) = 0 := by
+    apply Z.sheaf.eq_of_locally_eq₂ (homOfLE (le_top : U true ≤ ⊤))
+      (homOfLE (le_top : U false ≤ ⊤)) hcover₂
+    · show (Z.presheaf.map (homOfLE (le_top : U true ≤ ⊤)).op).hom (χ * (χ - 1)) =
+        (Z.presheaf.map (homOfLE (le_top : U true ≤ ⊤)).op).hom 0
+      rw [map_mul, map_sub, map_one, map_zero, h₁]
+      ring
+    · show (Z.presheaf.map (homOfLE (le_top : U false ≤ ⊤)).op).hom (χ * (χ - 1)) =
+        (Z.presheaf.map (homOfLE (le_top : U false ≤ ⊤)).op).hom 0
+      rw [map_mul, map_sub, map_one, map_zero, h₂]
+      ring
+  rcases eq_or_ne χ 0 with h0 | hne
+  · -- `χ = 0` makes `1 = 0` on the nonempty open `s`
+    obtain ⟨z, hz⟩ := hs1
+    have hz' : z ∈ U true := hmem₁ z hz
+    have hbad : (1 : ToType (Γ(Z, U true))) = 0 := by
+      rw [← h₁, h0, map_zero]
+    exact one_ne_zero (α := ToType (Z.presheaf.stalk z))
+      (by simpa using congrArg (Z.presheaf.germ (U true) z hz').hom hbad)
+  · -- otherwise the field inverts `χ`, so `χ = 1` makes `1 = 0` on the nonempty `sᶜ`
+    obtain ⟨inv, hinv⟩ := hf.mul_inv_cancel hne
+    have hχ1 : χ = 1 := by
+      have h1' : χ - 1 = 0 := by
+        calc χ - 1 = (χ * inv) * (χ - 1) := by rw [hinv]; ring
+          _ = inv * (χ * (χ - 1)) := by ring
+          _ = inv * 0 := by rw [hidem]
+          _ = 0 := mul_zero inv
+      exact sub_eq_zero.mp h1'
+    obtain ⟨z, hz⟩ := hs2
+    have hz' : z ∈ U false := hmem₂ z hz
+    have hbad : (1 : ToType (Γ(Z, U false))) = 0 := by
+      rw [← h₂, hχ1, map_one]
+    exact one_ne_zero (α := ToType (Z.presheaf.stalk z))
+      (by simpa using congrArg (Z.presheaf.germ (U false) z hz').hom hbad)
+
+/-- **(T-W7.7·C2conn, PROVEN)** The total space of a proper flat universally-`O`-connected
+family with a section over a connected locally noetherian base is connected — GIT Cor 6.3
+runs its connectedness argument along the SECOND factor, so C3's application to `A ⊗ A`
+needs `A.left` connected, not just `S`. Assembly: `p` is open (flat + lfp over locally
+noetherian, as in T-W7.r2·d) and closed (proper); each fibre is the range of
+`pullback.fst p (S.fromSpecResidueField t)`, whose total space has global sections the
+field `κ(t)` by `O`-connectedness, hence is preconnected (`preconnectedSpace_of_isField`)
+and nonempty (the section); `connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_-
+preimage` closes. `[IsLocallyNoetherian S]` was added to the original skeleton statement
+for the open-map instance chain — every consumer (C1–C4) already assumes it. -/
 theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
-    [IsProper p] [Flat p] (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    [IsLocallyNoetherian S] [IsProper p] [Flat p]
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
     [hconn : ConnectedSpace S] : ConnectedSpace X := by
-  sorry
+  refine connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
+    p.isOpenMap p.isClosedMap (fun t => ?_)
+  -- the fibre is the range of the projection from the residue-field pullback
+  have hrange : Set.range (pullback.fst p (S.fromSpecResidueField t)).base
+      = p.base ⁻¹' {t} := by
+    rw [Scheme.Pullback.range_fst p (S.fromSpecResidueField t),
+      Scheme.range_fromSpecResidueField]
+  -- nonempty, via the section
+  have hne : (p.base ⁻¹' {t}).Nonempty := by
+    refine ⟨e.base t, ?_⟩
+    have hpe := congrArg (fun m : S ⟶ S => m.base t) he
+    simpa using hpe
+  haveI : Nonempty ↥(pullback p (S.fromSpecResidueField t)) := by
+    rw [← hrange] at hne
+    exact Set.range_nonempty_iff_nonempty.mp hne
+  -- global sections of the fibre form the field `κ(t)`, by `O`-connectedness
+  have hfield : IsField ↑(Γ(pullback p (S.fromSpecResidueField t), ⊤)) := by
+    haveI hiso : IsIso ((pullback.snd p (S.fromSpecResidueField t)).app ⊤) :=
+      hp (S.fromSpecResidueField t) ⊤
+    have e₂ :=
+      (asIso ((pullback.snd p (S.fromSpecResidueField t)).app ⊤)).commRingCatIsoToRingEquiv
+    have e₁ := (Scheme.ΓSpecIso (S.residueField t)).commRingCatIsoToRingEquiv
+    exact (e₂.symm.trans e₁).toMulEquiv.isField (Field.toIsField ↑(S.residueField t))
+  haveI : PreconnectedSpace ↥(pullback p (S.fromSpecResidueField t)) :=
+    preconnectedSpace_of_isField hfield
+  haveI : ConnectedSpace ↥(pullback p (S.fromSpecResidueField t)) := ⟨‹_›⟩
+  rw [← hrange]
+  exact isConnected_range (pullback.fst p (S.fromSpecResidueField t)).base.hom.continuous
 
 /-- **(T-W7.7·C1, GIT Cor 6.2 — SORRIED LEAF)** Two `S`-morphisms from a proper flat
 universally-`O`-connected `A` into a separated group object `G` that agree on ONE fibre
