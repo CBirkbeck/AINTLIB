@@ -5185,10 +5185,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `g = 𝟙 S`; empty-`X` case via `isInitialOfIsEmpty`.
 
 - **[T-W7.r-supply]** the hypothesis supply — `EllipticCurveGeom.universallyOConnected`
-  (Rigidity.lean:48).
-  - **Status**: blocked · **Depends**: T-W7.0i-b · **Type**: lemma
-  - Sketch: `LocallyWeierstrass.baseChange` ⓟ + `locallyWeierstrass_pushforward_O_eq_O`
-    instantiated. Leaf **L-hyp**.
+  (Rigidity.lean).
+  - **Status**: **DONE** (fable-P4, 2026-07-07, minutes after P3's i5 landed; `#print
+    axioms` clean) · **Depends**: T-W7.0i·i5 (DONE) · **Type**: lemma
+  - As sketched: base-changed geometry constructed inline (the `EllipticCurve.baseChange`
+    field-recipe) + `locallyWeierstrass_pushforward_O_eq_O` instantiated; let-defeq closes.
+  - **CONSEQUENCE (MILESTONE)**: `abelEnrichment_unique_of_connectedSpace` — canonicity of
+    the group law over every connected locally noetherian base — now verifies to
+    `[propext, Classical.choice, Quot.sound]`: the full GIT chain 6.1→6.2→6.3→6.4→6.6conn
+    is sorry-free end-to-end. Rigidity.lean has ONE sorry left (C4glue).
 
 - **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean).
   - **Status**: ✅ **DONE — SORRY-FREE, AXIOM-CLEAN** (fable-P4, 2026-07-07; #print axioms
