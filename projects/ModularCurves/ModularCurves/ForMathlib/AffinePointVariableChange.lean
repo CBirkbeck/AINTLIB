@@ -21,16 +21,26 @@ affine Weierstrass polynomial scales by `u⁻⁶`, so the defining equation is p
 
 ## Main definitions
 
-* `WeierstrassCurve.VariableChange.vcX` / `vcY`: the transformed affine coordinates.
+* `WeierstrassCurve.VariableChange.vcX` / `vcY`: the transformed affine coordinates, with inverses
+  `ivcX` / `ivcY`.
+* `WeierstrassCurve.VariableChange.pointMap`: the induced map on affine points; `pointHom` /
+  `pointEquiv` package it (over a field) as a group homomorphism / isomorphism.
 
 ## Main results
 
-* `WeierstrassCurve.VariableChange.equation_smul` / `nonsingular_smul`: the transformed coordinates
-  satisfy the Weierstrass equation / are nonsingular whenever `(x, y)` is on `W`.
-* `WeierstrassCurve.VariableChange.pointMap` / `pointHom`: the induced map on affine points, and
-  (over a field) its packaging as a group homomorphism `W.Point →+ (C • W).Point` via
-  `pointMap_neg` and `pointMap_add` — the affine invariance of the group law under coordinate
-  change.
+* `equation_smul_iff` / `nonsingular_smul_iff`: the transformed coordinates satisfy the Weierstrass
+  equation / are nonsingular **iff** `(x, y)` is on `W` (preserved and reflected).
+* `pointMap_add` / `pointHom` / `pointEquiv`: the elliptic-curve group law is invariant under a
+  Weierstrass coordinate change, as a full group isomorphism `W.Point ≃+ (C • W).Point`. Torsion is
+  carried to torsion (`pointEquiv_zsmul`).
+* `vcX_comp` / `vcY_comp` / `pointMap_mul` / `pointMap_one`: the descent **cocycle** — coordinate
+  changes compose (`(C * C') = C ∘ C'`) with the identity change acting trivially, so `pointMap` is
+  an action of the `VariableChange` group on points.
+* `vcX_map` / `vcY_map`: **naturality** in the base ring (the coordinate change commutes with ring
+  maps `φ : R →+* A`).
+
+Together these are the affine/fibrewise descent datum for the elliptic-curve group law; the
+scheme-level descent (ticket `T-W7`) consumes them once the group-scheme framework is available.
 -/
 
 namespace WeierstrassCurve.VariableChange
