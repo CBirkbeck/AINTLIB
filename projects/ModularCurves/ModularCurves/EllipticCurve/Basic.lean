@@ -297,6 +297,98 @@ theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCu
         projModelZero_projModelπ]
       exact pullback.lift_snd _ _ _
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-A8-4)** The definition of record implies the abstract fibre condition: a locally
+Weierstrass family is fibrewise elliptic. The fibre at `s` is the fibre of the local model
+at the corresponding point of `Spec Γ(S, U)` (two pastes of cartesian squares; the residue
+fields agree since the chart inclusion is an open immersion through an isomorphism), and
+model fibres are elliptic by `fibrewiseElliptic_projModel`. -/
+theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
+    {hz : z ≫ π = 𝟙 S} (h : LocallyWeierstrass π z hz) :
+    FibrewiseElliptic π z hz := by
+  intro s
+  obtain ⟨U, hsU, W, hell, e, heπ, hez⟩ := h s
+  haveI := hell
+  -- the local model as a cartesian square over `S`
+  have hsq : IsPullback (e.inv ≫ pullback.fst π U.1.ι) (projModelπ W) π
+      (U.2.isoSpec.inv ≫ U.1.ι) := by
+    refine (IsPullback.of_hasPullback π U.1.ι).of_iso e (Iso.refl _) U.2.isoSpec
+      (Iso.refl _) ?_ ?_ ?_ ?_
+    · rw [Iso.refl_hom, Category.comp_id, Iso.hom_inv_id_assoc]
+    · exact heπ.symm
+    · simp
+    · simp
+  -- the corresponding point of the chart
+  set q : ↥(Spec (CommRingCat.of Γ(S, U.1))) := U.2.isoSpec.hom.base ⟨s, hsU⟩ with hqdef
+  have hq : (U.2.isoSpec.inv ≫ U.1.ι).base q = s := by
+    rw [hqdef, ← Scheme.Hom.comp_apply, Iso.hom_inv_id_assoc]
+    simp
+  haveI : IsOpenImmersion (U.2.isoSpec.inv ≫ U.1.ι) := inferInstance
+  haveI : IsIso ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q) := inferInstance
+  -- the residue transport `Γ(S, U) ⟶ κ(s)` through the chart point
+  letI : Algebra ↑Γ(S, U.1) ↑(S.residueField s) :=
+    ((StructureSheaf.toStalk ↑Γ(S, U.1) q ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+      ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+      ≫ (S.residueFieldCongr hq).hom).hom.toAlgebra
+  -- the model of `W` over `κ(s)` is the fibre: paste the base-change square onto the
+  -- family square, and identify the resulting bottom with `fromSpecResidueField s`
+  have hbc : IsPullback
+      (projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)) W)
+      (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑(S.residueField s))))
+      (projModelπ W)
+      (Spec.map ((StructureSheaf.toStalk ↑Γ(S, U.1) q
+          ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+        ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+        ≫ (S.residueFieldCongr hq).hom)) := by
+    have hbc0 := isPullback_projModelBaseChange (R' := ↑(S.residueField s)) W
+    rwa [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑(S.residueField s))
+      = (StructureSheaf.toStalk ↑Γ(S, U.1) q
+          ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+        ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+        ≫ (S.residueFieldCongr hq).hom from rfl] at hbc0
+  have hbot : Spec.map ((StructureSheaf.toStalk ↑Γ(S, U.1) q
+          ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+        ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+        ≫ (S.residueFieldCongr hq).hom)
+      ≫ (U.2.isoSpec.inv ≫ U.1.ι) = S.fromSpecResidueField s := by
+    rw [Spec.map_comp, Category.assoc, ← Spec_fromSpecResidueField_eq,
+      ← Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField, ← Spec.map_comp_assoc]
+    simp only [IsIso.hom_inv_id_assoc]
+    exact Scheme.residueFieldCongr_fromSpecResidueField hq
+  -- pasted: the model of `W` over `κ(s)` IS the fibre of `π` at `s`
+  have hgrand := hbc.paste_horiz hsq
+  rw [hbot] at hgrand
+  -- the zero-leg of the base-change square, in the transported spelling
+  have hzbc : projModelZero (W.map (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)))
+      ≫ projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)) W
+      = Spec.map ((StructureSheaf.toStalk ↑Γ(S, U.1) q
+          ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+        ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+        ≫ (S.residueFieldCongr hq).hom) ≫ projModelZero W := by
+    have h0 := projModelZero_baseChange (R' := ↑(S.residueField s)) W
+    rwa [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑(S.residueField s))
+      = (StructureSheaf.toStalk ↑Γ(S, U.1) q
+          ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
+        ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
+        ≫ (S.residueFieldCongr hq).hom from rfl] at h0
+  refine ⟨W.map (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)), inferInstance,
+    hgrand.isoPullback.symm, ?_, ?_⟩
+  · exact (Iso.inv_comp_eq _).mpr hgrand.isoPullback_hom_snd.symm
+  · rw [Iso.symm_hom, Iso.comp_inv_eq]
+    apply pullback.hom_ext
+    · rw [Category.assoc, hgrand.isoPullback_hom_fst, reassoc_of% hzbc,
+        reassoc_of% (show projModelZero W ≫ e.inv
+          = U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) from
+          by rw [← hez, Category.assoc, Iso.hom_inv_id, Category.comp_id])]
+      simp only [sectionFiberPoint, pullback.lift_fst, Category.assoc,
+        pullback.lift_fst_assoc]
+      rw [← hbot]
+      simp only [Category.assoc]
+    · rw [Category.assoc, hgrand.isoPullback_hom_snd]
+      simp only [sectionFiberPoint, pullback.lift_snd, projModelZero_projModelπ]
+      rfl
+
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
 expressed via `FibrewiseElliptic`.
@@ -325,6 +417,14 @@ structure EllipticCurveGeom (S : Scheme.{u}) where
 namespace EllipticCurveGeom
 
 attribute [instance] EllipticCurveGeom.smooth EllipticCurveGeom.proper
+
+/-- **(T-A8 step 4, closing the derived-fibre-condition gap)** The record's local-model
+field implies the abstract fibrewise genus-1 condition: the definition of record is at
+least as strong as the sources' class (DR II.1.1 / KM 2.1.1 / Loeffler 3.3.1). The
+converse is the deferred coherent-cohomology comparison `T-A7-cmp`/`T-W-cmp`. -/
+theorem fibrewiseElliptic {S : Scheme.{u}} (G : EllipticCurveGeom S) :
+    FibrewiseElliptic G.π G.zero G.zero_π :=
+  G.localModel.fibrewiseElliptic
 
 end EllipticCurveGeom
 
