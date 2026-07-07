@@ -590,16 +590,36 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     have hker := Scheme.Hom.ker_apply (eqLocusι f (p ≫ (e ≫ f)) hf hg) U
     rw [hker] at ha
     exact ha
-  -- SORRIED ENDGAME (the last mile of `rigidity`): transport `hι0` along `hw` to kill
-  -- `a` in the thickened fibre's sections (the morphism-dependent `app`-type needs the
-  -- `appLE`-idiom or `Scheme.Hom.congr_app`, not `congrArg`); then the germ of `a` dies
-  -- in the thickened stalk at a preimage `x'` of `x` (`range_fst` supplies `x'`;
-  -- `germ_stalkMap_apply` pushes; point-transport along `π x' = x` via eq-rec/`arrowStalkMapIsoOfEq` —
-  -- `subst` unavailable since `gT` mentions `x`). The thickened stalk at `x'` is
-  -- `O_{X,x} ⧸ (𝔪·O)^{n+1}` — affine-locally `pullbackSpecIso` + `isLocalization_stalk`,
-  -- with the localization trivial because the quotient is already local
-  -- (`IsLocalization.atUnits`) — so dying there is exactly membership in
-  -- `(map (p.stalkMap x) 𝔪)^{n+1}` (`Ideal.map_pow`).
+  -- the direct thickened point: `Spec` of the stalk quotient, mapping into `X` through
+  -- `fromSpecStalk`; it lifts into the thickened fibre by `fromSpecStalk`-naturality,
+  -- hence factors through the agreement locus, killing `a`'s germ mod `(𝔪·O)^{n+1}`.
+  have hle : Ideal.map (p.stalkMap x).hom
+      ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1)) ≤
+      (Ideal.map (p.stalkMap x).hom
+        (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1) :=
+    le_of_eq (Ideal.map_pow _ _ _)
+  set τ : Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
+      (Ideal.map (p.stalkMap x).hom
+        (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1))) ⟶ X :=
+    Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk _)) ≫ X.fromSpecStalk x with hτ
+  have hsquare : τ ≫ p = Spec.map (CommRingCat.ofHom (Ideal.quotientMap _
+      (p.stalkMap x).hom (Ideal.map_le_iff_le_comap.mp hle))) ≫ gT := by
+    rw [hτ, hgT, Category.assoc, ← Scheme.SpecMap_stalkMap_fromSpecStalk,
+      ← Category.assoc, ← Category.assoc, ← Spec.map_comp, ← Spec.map_comp]
+    congr 2
+  obtain ⟨ℓ, hℓτ⟩ : ∃ ℓ, ℓ ≫ pullback.fst p gT = τ :=
+    ⟨pullback.lift τ _ hsquare, pullback.lift_fst _ _ _⟩
+  have hτfac : τ = (ℓ ≫ w) ≫ eqLocusι f (p ≫ (e ≫ f)) hf hg := by
+    rw [Category.assoc, hw, hℓτ]
+  have happ : (τ.app U.1).hom a = 0 := by
+    rw [Scheme.Hom.congr_app hτfac U.1]
+    simp [hι0]
+  -- SORRIED FINAL UNPACKING: `τ.app` computes as `germ` followed by `Quotient.mk` up to
+  -- the `ΓSpecIso`/restriction isomorphisms (`fromSpecStalk_app`,
+  -- `ΓSpecIso_inv_naturality`, `Spec.map`-app naturality); the restrictions are isos
+  -- because every open of the `Spec` of a local ring containing the closed point is `⊤`
+  -- (`fromSpecStalk_closedPoint` lands at `x ∈ U`), so `happ` forces
+  -- `Ideal.Quotient.mk _ (germ a) = 0`, which is the goal.
   sorry
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
