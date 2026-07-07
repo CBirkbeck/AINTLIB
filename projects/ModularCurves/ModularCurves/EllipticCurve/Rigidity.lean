@@ -585,15 +585,21 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   -- the thickened fibre factors through the agreement locus
   obtain ⟨w, hw⟩ := exists_factor_eqLocus f (p ≫ (e ≫ f)) hf hg
     (pullback.fst p gT) hπeq
-  -- SORRIED ENDGAME (the last mile of `rigidity`): from `hw` the section `a` of the
-  -- equalizer ideal dies in `Γ` of the thickened fibre (`ker_apply` + `comp_app`), hence
-  -- its germ dies in the thickened stalk at a preimage `x'` of `x` (`range_fst` supplies
-  -- `x'`; `germ_stalkMap_apply` pushes; point-transport along `π x' = x` via `▸` or
-  -- `arrowStalkMapIsoOfEq` — `subst` is unavailable since `gT` mentions `x`). The
-  -- thickened stalk at `x'` is `O_{X,x} ⧸ (𝔪·O)^{n+1}` — affine-locally
-  -- `pullbackSpecIso` + `isLocalization_stalk`, with the localization trivial because
-  -- the quotient is already local (`IsLocalization.atUnits`) — so dying there is exactly
-  -- membership in `(map (p.stalkMap x) 𝔪)^{n+1}` (`Ideal.map_pow`).
+  -- the section dies in the sections of the thickened fibre over `U`
+  have hι0 : (((eqLocusι f (p ≫ (e ≫ f)) hf hg)).app U.1).hom a = 0 := by
+    have hker := Scheme.Hom.ker_apply (eqLocusι f (p ≫ (e ≫ f)) hf hg) U
+    rw [hker] at ha
+    exact ha
+  -- SORRIED ENDGAME (the last mile of `rigidity`): transport `hι0` along `hw` to kill
+  -- `a` in the thickened fibre's sections (the morphism-dependent `app`-type needs the
+  -- `appLE`-idiom or `Scheme.Hom.congr_app`, not `congrArg`); then the germ of `a` dies
+  -- in the thickened stalk at a preimage `x'` of `x` (`range_fst` supplies `x'`;
+  -- `germ_stalkMap_apply` pushes; point-transport along `π x' = x` via eq-rec/`arrowStalkMapIsoOfEq` —
+  -- `subst` unavailable since `gT` mentions `x`). The thickened stalk at `x'` is
+  -- `O_{X,x} ⧸ (𝔪·O)^{n+1}` — affine-locally `pullbackSpecIso` + `isLocalization_stalk`,
+  -- with the localization trivial because the quotient is already local
+  -- (`IsLocalization.atUnits`) — so dying there is exactly membership in
+  -- `(map (p.stalkMap x) 𝔪)^{n+1}` (`Ideal.map_pow`).
   sorry
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
