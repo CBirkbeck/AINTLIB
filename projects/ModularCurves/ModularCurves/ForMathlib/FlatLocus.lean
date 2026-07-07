@@ -9,6 +9,7 @@ import Mathlib.RingTheory.Flat.Localization
 import Mathlib.RingTheory.Flat.Stability
 import Mathlib.RingTheory.Localization.BaseChange
 import Mathlib.RingTheory.Spectrum.Prime.Topology
+import Mathlib.RingTheory.Spectrum.Prime.ConstructibleSet
 import Mathlib.Topology.NoetherianSpace
 import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
 import Mathlib.Algebra.Module.LocalizedModule.Exact
@@ -158,29 +159,47 @@ theorem exists_basicOpen_subset_flatLocus_of_isDomain [IsDomain R] [IsNoetherian
   obtain ⟨f, hf, hfree⟩ := exists_generically_free (R := R) (S := S) (M := M)
   exact ⟨f, hf, basicOpen_subset_flatLocus_of_free f hfree⟩
 
+/-- **Constructibility of the flat locus** — the sole remaining boxed step of Stacks Tag 00RC.
+Under the openness hypotheses (`R` Noetherian, `R → S` of finite presentation, `M` finitely
+presented over `S`, so `S` is Noetherian and `Spec S` is a Noetherian — hence spectral — space),
+the flat locus `{q : M_q flat over R}` is a **constructible** subset of `Spec S`.
+
+Combined with generisation-stability (`flatLocus_stableUnderGeneralization`, proved above) and the
+spectral criterion `PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible`
+(Stacks 00I0: constructible + stable-under-generisation ⟹ open), it yields openness
+(`isOpen_flatLocus`).  So the entire openness statement is reduced to this single constructibility
+fact — the *only* `sorry` in the flat-locus development.
+
+*What closing this box still requires.*  Following the proof of Stacks 00RC, one takes a finite free
+resolution `F_• → M` over `S` (Stacks 00LP) and studies the syzygy `K_n = ker(F_{n-1} → F_{n-2})`.
+The three fibre criteria that feed the argument are:
+* **00MH** = `Module.free_of_flat_of_fibre_free` (`ModularCurves.ForMathlib.LocalCriterion`,
+  proved `Tor`-free) — **available**;
+* **00RB** (Stacks 10.129.3, exactness of a complex of finite frees on all fibres) — *not yet
+  formalised*;
+* **00MI** (Stacks 10.99.5, flatness of a cokernel from fibre exactness — the resolution companion
+  of 00MH) — *not yet formalised*.
+None of mathlib's flatness API currently supplies finite free resolutions of finitely-presented
+modules (00LP) or the fibre-exactness criteria 00RB/00MI, and these are genuinely stronger than
+00MH alone (00MH gives *freeness from flatness*, whereas 00RC needs *flatness from fibre exactness*).
+Hence the assembly is boxed here as one clean constructibility lemma. -/
+private theorem isConstructible_flatLocus {R S M : Type*} [CommRing R] [IsNoetherianRing R]
+    [CommRing S] [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M]
+    [Module S M] [IsScalarTower R S M] [Module.FinitePresentation S M] :
+    Topology.IsConstructible (flatLocus R S M) := by
+  sorry
+
 /-- **Openness of the flat locus** (Stacks Tag 00RC / Theorem 10.129.4).  Let `R` be Noetherian,
 `R → S` of finite presentation and `M` a finitely-presented `S`-module.  Then the locus of primes
 `q` of `S` at which `M_q` is flat over `R` is open.
 
-*Route and current status.*  The generisation-stability of the flat locus
-(`flatLocus_stableUnderGeneralization`) and the neighbourhood/density input from generic flatness
-(`basicOpen_subset_flatLocus_of_free`, `exists_basicOpen_subset_flatLocus_of_isDomain`) are proved
-above and are the two structural halves of the classical argument.  Assembling them into full
-openness proceeds by **Noetherian induction on `Spec R`**: one shows the non-flat locus
-`(flatLocus)ᶜ` is closed by inducting on closed subsets `Z ⊆ Spec R`, at each stage peeling off an
-irreducible component `V(𝔭)` on whose generic point generic flatness (over the domain `R ⧸ 𝔭`)
-provides a flat basic open, so that the non-flat part sinks into a strictly smaller closed
-`Z ∩ V(f)`.
-
-*The one boxed step.*  This reduction requires the **local criterion of flatness** / *critère de
-platitude par fibres* (Stacks Tags 00MK, 039A): passing from flatness of the base-changed module
-`M ⧸ 𝔭·M` over the domain `R ⧸ 𝔭` back to flatness of `M` over `R` in a neighbourhood.  That
-criterion is `Tor`-theoretic and is **not yet available in mathlib** (there is no
-`Tor₁`/local-flatness-criterion API), so the assembly is left as a single `sorry` here.  Everything
-that does *not* depend on it — the localisation-preserves-flatness engine, generisation-stability,
-and the generic-flatness neighbourhood lemma — is proved unconditionally above. -/
+It is the conjunction of two facts about the flat locus: it is **stable under generisation**
+(`flatLocus_stableUnderGeneralization`, an exact localisation argument) and it is **constructible**
+(`isConstructible_flatLocus`), and in the spectral space `Spec S` a constructible generisation-stable
+set is open (`PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible`, Stacks 00I0). -/
 theorem isOpen_flatLocus {R S M : Type*} [CommRing R] [IsNoetherianRing R] [CommRing S]
     [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M] [Module S M]
     [IsScalarTower R S M] [Module.FinitePresentation S M] :
-    IsOpen (flatLocus R S M) := by
-  sorry
+    IsOpen (flatLocus R S M) :=
+  PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible
+    flatLocus_stableUnderGeneralization isConstructible_flatLocus
