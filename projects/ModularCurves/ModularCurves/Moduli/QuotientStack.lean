@@ -657,6 +657,78 @@ theorem trivialize_faithful (S : Scheme.{u}) [Nonempty S] :
     have hmk := (sigmaι_eq_iff _ _ _ _ _).mp hpt
     exact Subtype.ext (inv_injective (congrArg Sigma.fst hmk))
 
+/-- **The trivialization functor is full over a connected base** (T-W3b): a
+torsor-pair morphism between trivial pairs restricts on the identity summand to
+a map into a single summand (the clopen pieces it cuts out of the connected
+base collapse to one), and equivariance then forces it to be a left
+translation. -/
+theorem trivialize_full (S : Scheme.{u}) [ConnectedSpace S] :
+    (trivialize σ S).Full where
+  map_surjective {t t'} m := by
+    -- restated fields at the trivial-torsor spelling
+    have hover : m.hom ≫ trivialTorsorπ S = trivialTorsorπ S := m.over
+    have hequiv : ∀ h : G, (trivialTorsorAction G S).hom h ≫ m.hom =
+        m.hom ≫ (trivialTorsorAction G S).hom h := m.equiv
+    have hcompat : m.hom ≫ trivialTorsorMap σ S t'.pt =
+        trivialTorsorMap σ S t.pt := m.compat
+    haveI him : ∀ j : G, IsOpenImmersion (Limits.Sigma.ι (fun _ : G => S) j) :=
+      fun j => inferInstanceAs
+        (IsOpenImmersion (Limits.colimit.ι (Discrete.functor fun _ : G => S) ⟨j⟩))
+    -- the clopen decomposition of S cut out by the restricted morphism
+    obtain ⟨x₀⟩ : Nonempty S := inferInstance
+    obtain ⟨γ₀, y₀, hy₀'⟩ : ∃ (γ₀ : G) (y₀ : S),
+        (Limits.Sigma.ι (fun _ : G => S) γ₀).base y₀ =
+        (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).base x₀ := by
+      obtain ⟨y₀, hy₀⟩ := (sigmaOpenCover (fun _ : G => S)).covers
+        ((Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).base x₀)
+      exact ⟨_, y₀, hy₀⟩
+    -- factor the restriction through that single summand
+    have hrange : Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom) ⊆
+        Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) γ₀) := by
+      rcases isClopen_iff.mp
+        ((isClopen_range_sigmaι (fun _ : G => S) γ₀).preimage
+          (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).continuous) with h | h
+      · exfalso
+        exact Set.eq_empty_iff_forall_notMem.mp h x₀ ⟨y₀, hy₀'⟩
+      · rintro _ ⟨x, rfl⟩
+        exact Set.eq_univ_iff_forall.mp h x
+    have hfac := IsOpenImmersion.lift_fac
+      (Limits.Sigma.ι (fun _ : G => S) γ₀)
+      (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom) hrange
+    have h1 := congrArg (fun k => k ≫ trivialTorsorπ S) hfac
+    rw [Category.assoc, ι_trivialTorsorπ, Category.comp_id, Category.assoc]
+      at h1
+    erw [hover] at h1
+    rw [ι_trivialTorsorπ] at h1
+    have hι1 : Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom =
+        Limits.Sigma.ι (fun _ : G => S) γ₀ := by
+      erw [← hfac]
+      rw [h1, Category.id_comp]
+    -- equivariance propagates the identification to every summand
+    have hall : m.hom = trivialTorsorLeft G S γ₀ := by
+      refine Limits.Sigma.hom_ext _ _ fun h => ?_
+      have h2 : Limits.Sigma.ι (fun _ : G => S) h =
+          Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫
+            (trivialTorsorAction G S).hom h := by
+        rw [ι_trivialTorsorAction_hom, one_mul]
+      erw [ι_trivialTorsorLeft]
+      rw [h2, Category.assoc, hequiv h]
+      erw [reassoc_of% hι1]
+      erw [ι_trivialTorsorAction_hom]
+    -- the compatibility with the maps to X yields the groupoid morphism
+    have hpt : t.pt ≫ σ.hom γ₀⁻¹ = t'.pt := by
+      have h3 := congrArg
+        (fun k => Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ k) hcompat
+      erw [reassoc_of% hι1] at h3
+      rw [ι_trivialTorsorMap, σ.hom_one, Category.comp_id] at h3
+      erw [ι_trivialTorsorMap] at h3
+      rw [← h3, Category.assoc, ← σ.hom_mul, mul_inv_cancel, σ.hom_one,
+        Category.comp_id]
+    refine ⟨⟨γ₀⁻¹, hpt⟩, ?_⟩
+    refine TorsorPair.Hom.ext ?_
+    show trivialTorsorLeft G S γ₀⁻¹⁻¹ = m.hom
+    rw [inv_inv, hall]
+
 end Trivialize
 
 end TorsorPair
