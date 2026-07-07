@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.ForMathlib.AffinePointVariableChange
+import ModularCurves.ForMathlib.ProjToSpecZero
 
 /-!
 # Variable changes on the projective Weierstrass model, and the comparison theorem
@@ -266,10 +267,33 @@ noncomputable def projModelVCIso (C : VariableChange R) (W : WeierstrassCurve R)
     rw [← Proj.map_comp]
     exact (Proj_map_congr (vcGradedHom_inv_comp C W) _ _).trans Proj.map_id
 
+/-- The variable-change hom fixes the degree-`0` structural image of `R` (it fixes constants),
+landing in the target curve's `R`-structure — the ring-level input making `projModelVCIso` a
+morphism over `Spec R`. -/
+lemma vcGradedHom_algebraMapGradeZero (C : VariableChange R) (W : WeierstrassCurve R) :
+    (gradedRingHomZero (vcGradedHom C W)).comp (algebraMapGradeZero (projIdeal W)) =
+      algebraMapGradeZero (projIdeal (C • W)) := by
+  refine RingHom.ext fun r => Subtype.ext ?_
+  simp only [RingHom.coe_comp, Function.comp_apply, gradedRingHomZero_coe]
+  show vcGradedHom C W (algebraMap R (projCoordRing W) r) = algebraMap R (projCoordRing (C • W)) r
+  have hmk : ∀ V : WeierstrassCurve R, algebraMap R (projCoordRing V) r =
+      Ideal.Quotient.mk (projIdeal V).toIdeal (MvPolynomial.C r) := fun V => by
+    rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing V),
+      RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+  rw [hmk W, hmk (C • W), vcGradedHom, quotientGradingMap_mk]
+  exact congrArg (Ideal.Quotient.mk _)
+    (show MvPolynomial.aeval (vcMvSubst C) (MvPolynomial.C r) = MvPolynomial.C r by
+      rw [MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq])
+
 /-- **(T-W7.0h-i, π-compatibility)** `projModelVCIso` is a morphism over `Spec R`. -/
 theorem projModelVCIso_π (C : VariableChange R) (W : WeierstrassCurve R) :
     (projModelVCIso C W).hom ≫ projModelπ W = projModelπ (C • W) := by
-  sorry
+  show Proj.map (vcGradedHom C W) (vcGradedHom_irrelevant_le C W) ≫ projModelπ W =
+    projModelπ (C • W)
+  simp only [projModelπ]
+  rw [← Category.assoc,
+    map_comp_toSpecZero (vcGradedHom C W) (vcGradedHom_irrelevant_le C W), Category.assoc,
+    ← Spec.map_comp, ← CommRingCat.ofHom_comp, vcGradedHom_algebraMapGradeZero]
 
 /-- **(T-W7.0h-i, pointedness)** `projModelVCIso` carries the point at infinity to the point
 at infinity ( `[0:1:0]` is fixed by the projectivised coordinate change). -/
