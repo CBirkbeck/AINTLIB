@@ -4031,10 +4031,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `∂/∂Y↦u⁻³∂/∂Y`, `∂/∂X↦u⁻⁴(∂/∂X+s·∂/∂Y)`); `pointMap`+`pointMap_neg`; `addX/negAddY/addY_smul`
   (poly identities); `slope_smul` (secant + tangent, `= u⁻¹(slope−s)`); **`pointMap_add`**
   (case analysis over `Point.add_of_X_ne/Y_ne/Y_eq`) and **`pointHom : W.Point →+ (C•W).Point`**.
-  The affine invariance of the group law under coordinate change. NEXT (optional): `pointEquiv ≃+`
-  via `C⁻¹` (dependent-transport along `inv_smul_smul`); then the SCHEME-level descent for the
-  LocallyWeierstrass group scheme (retires the T-A6 gate) — a separate scheme-theoretic
-  construction consuming this affine/fibrewise invariance.
+  **AFFINE GROUP-ISO NOW COMPLETE** (commit, ~25 decls): added `equation_smul_iff`/`nonsingular_smul'`
+  (reverse via unit-cancellation kept in the `u⁻¹` atom — `IsUnit.mul_right_eq_zero`), `ivcX`/`ivcY`
+  + composition identities, `pointMap_injective`/`surjective`, and **`pointEquiv : W.Point ≃+
+  (C•W).Point`** (`AddEquiv.ofBijective`). The elliptic-curve group law is invariant under a
+  Weierstrass coordinate change AS A FULL GROUP ISOMORPHISM, axiom-clean. NEXT: the SCHEME-level
+  descent for the LocallyWeierstrass group scheme (retires the T-A6 gate) — a separate
+  scheme-theoretic construction consuming this affine/fibrewise invariance.
 
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
