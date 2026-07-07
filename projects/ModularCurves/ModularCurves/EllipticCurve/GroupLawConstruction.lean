@@ -362,7 +362,7 @@ theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
 
 section
 attribute [local instance] MvPolynomial.gradedAlgebra
-open MvPolynomial HomogeneousIdeal
+open MvPolynomial HomogeneousIdeal HomogeneousLocalization
 
 /-- **(T-W7.0b-zero)** Negation fixes the point at infinity. The point at infinity is fixed
 only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is evaluation at `(0,−1,0)` (the `−1`
@@ -463,6 +463,148 @@ lemma inZChart_comp_negModelHom (W : WeierstrassCurve R) (K : Type u) [Field K] 
     ← Scheme.Hom.mem_preimage, ← Scheme.Hom.mem_preimage]
   show default ∈ (g.1 ≫ negModelHom W) ⁻¹ᵁ _ ↔ default ∈ g.1 ⁻¹ᵁ _
   rw [Scheme.Hom.comp_preimage, negModelHom_preimage_basicOpen_X2]
+
+/-! ### (L2) The `Z`-chart coordinate formula `(x, y) ↦ (x, negY x y)`
+
+`negModelHom` acts on the `X₂`-chart as the ring endomorphism `negChartMap` (negate the numerator
+by `negGradedQuot`, transported back along `negGradedQuot X₂ = X₂`); on dehomogenised coordinates
+this is `X₀/X₂ ↦ X₀/X₂`, `X₁/X₂ ↦ (−X₁−a₁X₀−a₃X₂)/X₂`. -/
+
+lemma negGradedQuot_mk_X0 (W : WeierstrassCurve R) :
+    negGradedQuot W (quotientGradingHom (projIdeal W) (X 0)) =
+      quotientGradingHom (projIdeal W) (X 0) := by
+  rw [quotientGradingHom_apply, negGradedQuot, quotientGradingMap_mk]
+  refine congrArg (Ideal.Quotient.mk _) ?_
+  show aeval (negVec W) (X 0) = X 0
+  simp [negVec]
+
+lemma negGradedQuot_mk_X1 (W : WeierstrassCurve R) :
+    negGradedQuot W (quotientGradingHom (projIdeal W) (X 1)) =
+      quotientGradingHom (projIdeal W) (-X 1 - C W.a₁ * X 0 - C W.a₃ * X 2) := by
+  rw [quotientGradingHom_apply, quotientGradingHom_apply, negGradedQuot, quotientGradingMap_mk]
+  refine congrArg (Ideal.Quotient.mk _) ?_
+  show aeval (negVec W) (X 1) = -X 1 - C W.a₁ * X 0 - C W.a₃ * X 2
+  simp [negVec]
+
+/-- The negation's action on the `X₂`-chart ring `Away X₂`, as a ring endomorphism:
+`Away.map (negGradedQuot W)` followed by the transport `Away (neg X₂) ≃ Away X₂`. -/
+noncomputable def negChartMap (W : WeierstrassCurve R) :
+    Away (quotientGrading (projIdeal W)) (quotientGradingHom (projIdeal W) (X 2)) →+*
+    Away (quotientGrading (projIdeal W)) (quotientGradingHom (projIdeal W) (X 2)) :=
+  (awayCongr (negGradedQuot_mk_X2 W)).toRingHom.comp
+    (Away.map (negGradedQuot W) (quotientGradingHom (projIdeal W) (X 2)))
+
+private lemma awayι_awayCongr_local (W : WeierstrassCurve R)
+    {s t : projCoordRing W} (h : s = t) (hs : s ∈ quotientGrading (projIdeal W) 1) :
+    Spec.map (CommRingCat.ofHom
+        (awayCongr (𝒜 := quotientGrading (projIdeal W)) h).toRingHom) ≫
+      Proj.awayι (quotientGrading (projIdeal W)) s hs one_pos =
+    Proj.awayι (quotientGrading (projIdeal W)) t (h ▸ hs) one_pos := by
+  subst h
+  rw [show (awayCongr (𝒜 := quotientGrading (projIdeal W)) (rfl : s = s)).toRingHom =
+      RingHom.id _ from by rw [awayCongr_rfl]; rfl]
+  rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
+
+/-- **(L2b)** The chart-level negation intertwines the `X₂`-chart inclusion with `negModelHom`. -/
+lemma awayι_X2_negModelHom (W : WeierstrassCurve R) :
+    Spec.map (CommRingCat.ofHom (negChartMap W)) ≫
+      Proj.awayι (quotientGrading (projIdeal W)) (quotientGradingHom (projIdeal W) (X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos =
+    Proj.awayι (quotientGrading (projIdeal W)) (quotientGradingHom (projIdeal W) (X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos ≫ negModelHom W := by
+  rw [negChartMap, CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc,
+    ← Proj.awayι_comp_map (negGradedQuot W) (negGradedQuot_irrelevant_le W) one_pos
+      (quotientGradingHom (projIdeal W) (X 2)) (mk_X_mem_quotientGrading_one W 2),
+    ← Category.assoc, awayι_awayCongr_local W (negGradedQuot_mk_X2 W) _, negModelHom]
+
+/-- The morphism recovered from a chart ring hom via `chartHomEquiv.symm` (unfolds the
+`chartPointOfHom` construction). -/
+lemma chartHomEquiv_symm_coe (W : WeierstrassCurve R) (i : Fin 3) {K : Type u}
+    [CommRing K] [Algebra R K]
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K }) :
+    ((chartHomEquiv W i K).symm φ).1.1 =
+      Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos :=
+  rfl
+
+/-- The `Z`-chart coordinate value is the chart ring hom applied to `Xⱼ/X₂`. -/
+lemma coord_val (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g)
+    (j : {j : Fin 3 // j ≠ 2}) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 j =
+      (chartHomEquiv W 2 K ⟨g, hZ⟩).1 (chartCoordEquiv W 2
+        (Ideal.Quotient.mk _ (MvPolynomial.X j))) :=
+  rfl
+
+/-- **(L2a)** The composite `g ≫ negModelHom`'s chart ring hom factors as `φ_g ∘ negChartMap`. -/
+lemma chartHom_negModelHom (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g)
+    (hZ' : InZChart W (⟨g.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, g.2]⟩ :
+      SpecPoints (projModel W) (projModelπ W) K)) :
+    (chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, g.2]⟩,
+        hZ'⟩).1 =
+      (chartHomEquiv W 2 K ⟨g, hZ⟩).1.comp (negChartMap W) := by
+  set φP := chartHomEquiv W 2 K ⟨g, hZ⟩ with hφP
+  set φQ := chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, _⟩, hZ'⟩ with hφQ
+  have hPfac : Spec.map (CommRingCat.ofHom φP.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 := by
+    rw [← chartHomEquiv_symm_coe W 2 φP, hφP, Equiv.symm_apply_apply]
+  have hQfac : Spec.map (CommRingCat.ofHom φQ.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 ≫ negModelHom W := by
+    rw [← chartHomEquiv_symm_coe W 2 φQ, hφQ, Equiv.symm_apply_apply]
+  have hψfac : Spec.map (CommRingCat.ofHom (φP.1.comp (negChartMap W))) ≫
+      Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 ≫ negModelHom W := by
+    rw [CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc, awayι_X2_negModelHom,
+      ← Category.assoc, hPfac]
+  have hmono := hQfac.trans hψfac.symm
+  have hcancel := (cancel_mono (Proj.awayι (quotientGrading (projIdeal W))
+    (quotientGradingHom (projIdeal W) (X 2)) (mk_X_mem_quotientGrading_one W 2) one_pos)).mp hmono
+  exact congrArg CommRingCat.Hom.hom (Spec.map_injective hcancel)
+
+/-- `negChartMap` on an `X₂`-chart normal form: the numerator is negated by `negGradedQuot`. -/
+lemma negChartMap_mk (W : WeierstrassCurve R) (n : ℕ) (a : projCoordRing W)
+    (ha : a ∈ quotientGrading (projIdeal W) (n • 1)) :
+    negChartMap W (Away.mk (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 2) n a ha) =
+      Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n
+        (negGradedQuot W a) (GradedRingHom.map_mem (negGradedQuot W) ha) := by
+  rw [negChartMap, RingHom.comp_apply, Away.map_mk, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
+    awayCongr_mk]
+
+/-- Numerator congruence for the `X₂`-chart `Away.mk` normal form. -/
+lemma away_mk_num_congr (W : WeierstrassCurve R) {n : ℕ} {a b : projCoordRing W}
+    (ha : a ∈ quotientGrading (projIdeal W) (n • 1)) (hab : a = b) :
+    Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n a ha =
+      Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n b (hab ▸ ha) := by
+  subst hab; rfl
+
+/-- **(V0)** `negChartMap` fixes the `X₀/X₂` chart coordinate. -/
+lemma negChartMap_coord0 (W : WeierstrassCurve R) :
+    negChartMap W (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (X (⟨0, by decide⟩ :
+        {j : Fin 3 // j ≠ 2})))) =
+      chartCoordEquiv W 2 (Ideal.Quotient.mk _ (X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2}))) := by
+  rw [chartCoordEquiv_mk_X, Away.isLocalizationElem, negChartMap_mk]
+  refine (away_mk_num_congr W _ ?_).trans rfl
+  rw [map_pow, negGradedQuot_mk_X0]
+
+/-- **(V1)** `negChartMap` sends the `X₁/X₂` chart coordinate to `(−X₁−a₁X₀−a₃X₂)/X₂`, i.e. the
+dehomogenised `negY` substitution. -/
+lemma negChartMap_coord1 (W : WeierstrassCurve R) :
+    negChartMap W (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (X (⟨1, by decide⟩ :
+        {j : Fin 3 // j ≠ 2})))) =
+      chartCoordEquiv W 2 (Ideal.Quotient.mk _
+        (-X (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2})
+          - C W.a₁ * X ⟨0, by decide⟩ - C W.a₃)) := by
+  rw [chartCoordEquiv_mk_X, Away.isLocalizationElem, negChartMap_mk]
+  sorry
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
 dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:
