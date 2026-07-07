@@ -729,6 +729,57 @@ theorem trivialize_full (S : Scheme.{u}) [ConnectedSpace S] :
     show trivialTorsorLeft G S γ₀⁻¹⁻¹ = m.hom
     rw [inv_inv, hall]
 
+section PullbackTorsor
+
+variable {σ} {S S' : Scheme.{u}} (q : S' ⟶ S)
+
+/-- The base-changed action on the pulled-back torsor total space (T-W3c). -/
+noncomputable def TorsorPair.pullbackAction (A : TorsorPair σ S) :
+    SchemeAction G (Limits.pullback A.p q) where
+  hom g := Limits.pullback.map A.p q A.p q (A.τ.hom g) (𝟙 S') (𝟙 S)
+    (by rw [A.over_base, Category.comp_id])
+    (by rw [Category.id_comp, Category.comp_id])
+  hom_one := by
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Limits.pullback.lift_fst, A.τ.hom_one, Category.comp_id,
+        Category.id_comp]
+    · rw [Limits.pullback.lift_snd, Category.comp_id, Category.id_comp]
+  hom_mul g h := by
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Limits.pullback.lift_fst, A.τ.hom_mul, Category.assoc]
+      erw [Limits.pullback.lift_fst]
+      conv_rhs => rw [← Category.assoc]
+      erw [Limits.pullback.lift_fst]
+      rw [Category.assoc]
+    · rw [Limits.pullback.lift_snd,
+        Category.comp_id (Limits.pullback.snd A.p q), Category.assoc]
+      erw [Limits.pullback.lift_snd]
+      rw [Category.comp_id (Limits.pullback.snd A.p q)]
+      erw [Limits.pullback.lift_snd]
+      rw [Category.comp_id (Limits.pullback.snd A.p q)]
+
+@[reassoc (attr := simp)]
+theorem TorsorPair.pullbackAction_hom_fst (A : TorsorPair σ S) (g : G) :
+    (A.pullbackAction q).hom g ≫ Limits.pullback.fst A.p q =
+      Limits.pullback.fst A.p q ≫ A.τ.hom g :=
+  Limits.pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem TorsorPair.pullbackAction_hom_snd (A : TorsorPair σ S) (g : G) :
+    (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
+      Limits.pullback.snd A.p q := by
+  rw [show (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
+      Limits.pullback.snd A.p q ≫ 𝟙 S' from Limits.pullback.lift_snd _ _ _,
+    Category.comp_id (Limits.pullback.snd A.p q)]
+
+/-- The base-changed action lies over the new base. -/
+theorem TorsorPair.pullbackAction_over_base (A : TorsorPair σ S) (g : G) :
+    (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
+      Limits.pullback.snd A.p q :=
+  A.pullbackAction_hom_snd q g
+
+end PullbackTorsor
+
 end Trivialize
 
 end TorsorPair
