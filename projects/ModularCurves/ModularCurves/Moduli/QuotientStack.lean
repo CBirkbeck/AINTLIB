@@ -910,6 +910,24 @@ theorem TorsorPair.pullback_shear_isIso (A : TorsorPair σ S) :
   exact MorphismProperty.of_isPullback (P := MorphismProperty.isomorphisms Scheme)
     hLeft.flip A.torsor
 
+/-- **Base change of a torsor pair** (T-W3c-i): pull `A : TorsorPair σ S` back along
+`q : S' ⟶ S`. Total space `P ×_S S'`, projection `pullback.snd`, action by
+functoriality (`pullbackAction`); the property fields are base-change stability and
+`pullback_shear_isIso`, and the equivariant map factors through `A.u`. -/
+noncomputable def TorsorPair.pullback (A : TorsorPair σ S) : TorsorPair σ S' where
+  P := Limits.pullback A.p q
+  p := Limits.pullback.snd A.p q
+  τ := A.pullbackAction q
+  over_base := A.pullbackAction_over_base q
+  finite := by haveI := A.finite; infer_instance
+  etale := MorphismProperty.pullback_snd A.p q A.etale
+  surjective := MorphismProperty.pullback_snd A.p q A.surjective
+  torsor := A.pullback_shear_isIso q
+  u := Limits.pullback.fst A.p q ≫ A.u
+  equivariant := fun g => by
+    rw [← Category.assoc, TorsorPair.pullbackAction_hom_fst, Category.assoc,
+      A.equivariant g, Category.assoc]
+
 end PullbackTorsor
 
 end Trivialize
