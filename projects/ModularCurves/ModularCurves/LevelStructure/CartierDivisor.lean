@@ -17,6 +17,7 @@ import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.TensorProduct.Free
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.Algebra.MvPolynomial.Nilpotent
+import ModularCurves.ForMathlib.CharpolyNorm
 import ModularCurves.ForMathlib.FinrankExact
 import ModularCurves.ForMathlib.IdealSheafComapMul
 import ModularCurves.ForMathlib.NormBaseChange
@@ -1641,6 +1642,68 @@ theorem baseChange_ideal (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S
     Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
     Scheme.IdealSheafData.ker_subschemeι]
 
+/-- Two relative effective Cartier divisors of `C/S` with the same ideal sheaf are
+equal. -/
+@[ext] theorem ext {D₁ D₂ : RelEffCartierDiv π} (h : D₁.ideal = D₂.ideal) : D₁ = D₂ := by
+  sorry
+
+private lemma flatPullback_prop (P : MorphismProperty Scheme.{u})
+    [P.IsStableUnderBaseChange] [P.IsStableUnderComposition] [P.RespectsIso]
+    (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C' ⟶ S} (f : C' ⟶ C)
+    (w : f ≫ π = π') (hf : P f) (hD : P (D.ideal.subschemeι ≫ π)) :
+    P ((pullback.snd D.ideal.subschemeι f).ker.subschemeι ≫ π') := by
+  sorry
+
+/-- **Flat pullback of a relative effective Cartier divisor** (KM 1.1.4, p. 6: "any
+effective Cartier divisor `D` in `X/S` gives rise to an effective Cartier divisor
+`f*(D)` in `Y/S`"): the preimage `f⁻¹(D) = D ×_C C'` of `D` along an `S`-morphism
+`f : C' ⟶ C` which is finite, flat and of finite presentation.
+
+KM state this for `f` merely flat, for their propriety-free notion of divisor
+(KM 1.1.1); our structure carries finiteness over `S` (the proper divisors of
+KM 1.2.3), and for those `f` must be finite as well: pulling back along the open
+immersion `𝔾ₘ ↪ 𝔸¹_{ℤₚ}` (flat, not finite) sends the proper divisor `V(x² − p)`
+to the spectrum of `ℚₚ(√p)`, which is not finite over `ℤₚ`. -/
+noncomputable def flatPullback (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C' ⟶ S}
+    (f : C' ⟶ C) (w : f ≫ π = π')
+    [IsFinite f] [Flat f] [LocallyOfFinitePresentation f] :
+    RelEffCartierDiv π' where
+  ideal := (pullback.snd D.ideal.subschemeι f).ker
+  finite := flatPullback_prop @IsFinite D f w inferInstance D.finite
+  flat := flatPullback_prop @Flat D f w inferInstance D.flat
+  lfp := flatPullback_prop @LocallyOfFinitePresentation D f w inferInstance D.lfp
+
+/-- The ideal sheaf of a flat pullback is the scheme-theoretic preimage of the original
+ideal (KM p. 6: "this ideal sheaf is none other than `f*(I(D))`"). -/
+theorem flatPullback_ideal (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C' ⟶ S}
+    (f : C' ⟶ C) (w : f ≫ π = π')
+    [IsFinite f] [Flat f] [LocallyOfFinitePresentation f] :
+    (D.flatPullback f w).ideal = D.ideal.comap f := by
+  sorry
+
+/-- Flat pullback along the identity is the identity. -/
+theorem flatPullback_id (D : RelEffCartierDiv π) :
+    D.flatPullback (𝟙 C) (Category.id_comp π) = D := by
+  sorry
+
+/-- Flat pullbacks compose contravariantly. -/
+theorem flatPullback_flatPullback (D : RelEffCartierDiv π) {C' C'' : Scheme.{u}}
+    {π' : C' ⟶ S} {π'' : C'' ⟶ S} (f : C' ⟶ C) (w : f ≫ π = π')
+    (g : C'' ⟶ C') (w' : g ≫ π' = π'')
+    [IsFinite f] [Flat f] [LocallyOfFinitePresentation f]
+    [IsFinite g] [Flat g] [LocallyOfFinitePresentation g] :
+    (D.flatPullback f w).flatPullback g w' =
+      D.flatPullback (g ≫ f) (by rw [Category.assoc, w, w']) := by
+  sorry
+
+/-- Iterated base change is base change along the composite, up to the canonical
+pullback isomorphism (ideal-sheaf form). -/
+theorem baseChange_baseChange_ideal (D : RelEffCartierDiv π) {T T' : Scheme.{u}}
+    (t : T ⟶ S) (t' : T' ⟶ T) :
+    ((D.baseChange t).baseChange t').ideal =
+      (D.baseChange (t' ≫ t)).ideal.comap (pullbackLeftPullbackSndIso π t t').hom := by
+  sorry
+
 end RelEffCartierDiv
 
 section FullSections
@@ -1780,6 +1843,28 @@ theorem isFullSetOfSectionsAlg_iff_fields [IsReduced R] [Module.Free R B]
       _ = ∏ i, AlgHom.sectionBaseChange R B A (P i) f := by
           refine Finset.prod_congr rfl fun i _ => ?_
           rw [← sectionBaseChange_tensor_map R B φ (P i) f₀, hf]
+
+open TensorProduct Polynomial in
+/-- **Full set of sections, characteristic-polynomial form** (KM 1.8.2 form (1)): for
+every `R`-algebra `A` and every `f ∈ A ⊗_R B`, the characteristic polynomial of
+multiplication by `f` on the free `A`-module `A ⊗_R B` is `∏ᵢ (X − f(Pᵢ))`. -/
+def IsFullSetOfSectionsCharpoly [Module.Free R B] [Module.Finite R B] {n : ℕ}
+    (P : Fin n → (B →ₐ[R] R)) : Prop :=
+  ∀ (A : Type u) [CommRing A] [Algebra R A],
+    ∀ f : A ⊗[R] B,
+      (Algebra.lmul A (A ⊗[R] B) f).charpoly =
+        ∏ i, ((X : A[X]) - Polynomial.C (AlgHom.sectionBaseChange R B A (P i) f))
+
+open TensorProduct Polynomial in
+/-- **KM 1.8.2**: the norm form and the characteristic-polynomial form of "full set of
+sections" agree. The norm form follows from the characteristic-polynomial form by
+evaluating at `T = 0`; the converse applies the norm form over `A[X]` to the element
+`X ⊗ 1 − 1 ⊗ f` ("`T − f`"), whose norm is the characteristic polynomial
+(`Algebra.charpoly_lmul_eq_norm`). -/
+theorem isFullSetOfSectionsAlg_iff_charpoly [Module.Free R B] [Module.Finite R B]
+    {n : ℕ} (P : Fin n → (B →ₐ[R] R)) :
+    IsFullSetOfSectionsAlg R B P ↔ IsFullSetOfSectionsCharpoly R B P := by
+  sorry
 
 end FullSections
 

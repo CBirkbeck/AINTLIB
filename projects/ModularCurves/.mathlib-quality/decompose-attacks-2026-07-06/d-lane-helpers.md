@@ -323,3 +323,58 @@ Statement: for `p : W ⟶ S` finite+flat+lfp and `E : W.IdealSheafData`, the
   E pulls to ⊥ on empty W vacuously ✓ matches ⊥-ideal = no condition ✓).
   SURVIVES (data + gluing plan); spec statement (T-D14c-2) gets its own block
   at statement time.
+
+
+## T-D20 + T-D30 statements (beastmode-D2, 2026-07-07)
+
+### T-D20 `flatPullback` (+ `ext`, `flatPullback_prop`, `flatPullback_ideal`, `_id`, `_flatPullback`, `baseChange_baseChange_ideal`)
+Attacks:
+1. **Finiteness sabotage** — bare-flat f: 𝔾ₘ ↪ 𝔸¹_{ℤₚ} (flat, NOT finite) pulls the
+   proper divisor V(x²−p) back to Spec ℚₚ(√p), not finite over ℤₚ. So [IsFinite f]
+   is REQUIRED for our KM-1.2.3 (proper) structure; KM p.6's bare-flat claim is for
+   the propriety-free 1.1.1 notion. Hypothesis set finite+flat+lfp matches the
+   structure's own fields (f contributes each by composition). DEFENDED.
+2. **Orientation** — pullback ι f: condition fst ≫ ι = snd ≫ f; subscheme leg = fst,
+   ambient leg = snd (closed immersion by pullback_snd). w : f ≫ π = π' (S-morphism).
+   Skeleton elaborates ✓.
+3. **Ideal formula truth** — ker(base-changed closed immersion) = comap needs NO
+   flatness (scheme-pullback of closed subscheme = extended ideal, always):
+   same 3-lemma rw as A's `baseChange_ideal` (pullbackSymmetry + ker_comp_of_isIso +
+   ker_fst_of_isClosedImmersion + ker_subschemeι), f in place of (fst π t).
+   KM's flatness is for INVERTIBILITY, which our working form does not carry.
+4. **Instance availability for 𝟙/≫ in _id/_comp statements** — build-verified ✓
+   (statements elaborate). comap_id/comap_comp existence: comap_comp ✓ (T-D14 used
+   it); comap_id to probe (fallback: ext at subschemeι or map_gc).
+5. **Triviality check** — composition laws are comap_id/comap_comp + `ext`; that is
+   the point (API lemmas). baseChange_baseChange_ideal needs the
+   pullbackLeftPullbackSndIso hom-fst compatibility simp lemma (loogle at execution).
+
+### T-D30 `IsFullSetOfSectionsCharpoly` + `isFullSetOfSectionsAlg_iff_charpoly`
+Attacks:
+1. **General-endomorphism trap (T-D29's)** — form (1) MUST use `Algebra.lmul A (A⊗B) f`
+   (algebra element), not an arbitrary endomorphism. Pinned ✓.
+2. **n ≠ rank sabotage** — def does not force n = finrank R B. Over nontrivial A,
+   either form forces n = finrank (charpoly is monic of natDegree = finrank; ∏ of n
+   monic linears has natDegree n; for the norm form: at the universal/adversarial
+   element the degree comparison fails likewise), and over subsingleton A both forms
+   are vacuous; the iff is TRUE unconditionally. (⟸) leg: subsingleton_or_nontrivial A;
+   nontrivial case derives fr = n from hyp-(1)-at-A, then sign (−1)^{fr+n} = 1.
+3. **Junk-norm/junk-charpoly stratum** — [Module.Free R B] ⟹ A⊗B free over A (TC ✓
+   build) — both norm and charpoly honest throughout the ∀A quantifier; the ADVERSARIAL
+   FIX note on the Alg def carries over verbatim.
+4. **Route for (⟹)** — hyp (2) at the R-algebra A[X] (Type u ✓) at element
+   g := X ⊗ₜ 1 − (map CAlgHom id) f; `Algebra.charpoly_lmul_eq_norm A (A⊗[R]B) f`
+   (T-D29, base A) + transport along e := Algebra.TensorProduct.cancelBaseChange
+   R A A[X] A[X] B (EXISTS — used in NormBaseChange.lean, with cancelBaseChange_tmul /
+   _symm_tmul); norm invariance under ≃ₐ: probe Algebra.norm_eq_of_algEquiv, fallback
+   = norm_apply + lmul-conjugation + LinearMap.det_conj (pattern verbatim in
+   NormBaseChange.lean's hconj). Factors: sectionBaseChange_tensor_map with
+   ψ = Polynomial.CAlgHom (probe name; fallback: mk from C + algebraMap_eq) gives
+   X − C(cᵢ) per factor; X-factor by simp [AlgHom.sectionBaseChange].
+5. **(⟸) gadgets** — Algebra.norm_apply; LinearMap.det_eq_sign_charpoly_coeff;
+   coeff_zero_eq_eval_zero + eval_prod/eval_sub/eval_X/eval_C; ∏(−cᵢ) = (−1)^n ∏cᵢ;
+   natDegree: charpoly monic + Matrix.charpoly_natDegree route or
+   LinearMap.charpoly_natDegree (probe), natDegree_prod_of_monic + natDegree_X_sub_C
+   [Nontrivial A].
+6. **Shadowing gotcha (hit at skeleton)** — `C` is the ambient-curve section variable
+   in CartierDivisor.lean: `Polynomial.C` must be written QUALIFIED in this file.
