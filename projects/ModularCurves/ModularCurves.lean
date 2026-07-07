@@ -16,6 +16,7 @@ import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Stack
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.AdditionLaw
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
