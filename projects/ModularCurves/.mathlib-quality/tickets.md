@@ -4797,6 +4797,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `refs/ModularCurves/bosma-lenstra-addition-laws.pdf` §5, **CAS-verify each polynomial
     before Lean**; opens = complements of the common-vanishing loci; triple-on-open ⟹
     morphism (repo `Proj` chart plumbing). Leaves **L-0c1** (quotes: B–L Thm 2 + p. 230–231).
+  - **Progress** (coordinator-P1, 2026-07-07T14:49Z): **increment 1 LANDED** (dba3aa8c) —
+    `EllipticCurve/AdditionLaw.lean` green + axiom-clean (propext/choice/quot only on all 10
+    audited decls), ZERO sorries, default heartbeats (27s elaboration / 24s lake build):
+    law-2 defs `dblAddX/Y/Z` + `dblAddXYZ` (verbatim from the CAS exports via
+    `emit_addition_law.py` — transcription is not a trust step); **all six core certificates
+    kernel-checked on the first sign convention** (3 cross-law minors, cofactors 45–110
+    terms; 3 diagonal-is-`dblXYZ`, cofactors 3–13 terms); 6 O-columns + 3 bidegree-smul by
+    plain `ring`. BONUS: c5α's engine `eq_zero_of_forall_isMaximal_mem` PROVEN (not
+    sorried). REMAINING for 0c-i: the 4 GLC defs (`blOpenZ/Y`, `addOnZ/Y`) = c5β plumbing +
+    c5α per-chart vanishing; GLC held by P0's live edits — claim stays open for increment 2.
 
 - **[T-W7.0c-c5α]** on-curve factorization bridge (NEW leaf, coordinator §2): the B–L
   triples land on the curve at the RING level over the universal atlas. Element form: in
@@ -4808,6 +4818,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `EllipticCurve/AdditionLaw.lean` (P1's next file; polynomial layer =
   `scripts/tw7-p1-bosma-lenstra`). **Depends**: 0e, 0f · Est. 150–300 lines · **NOTE**:
   L-ext is NOT the engine here (it proves morphism equality, not ideal membership).
+  - **Progress** (coordinator-P1, 2026-07-07T14:49Z, dba3aa8c): the residue-field engine
+    `eq_zero_of_forall_isMaximal_mem` (reduced Jacobson ring: in every maximal ideal ⟹ 0)
+    is **PROVEN** in `AdditionLaw.lean`. Remaining: `IsJacobsonRing`/`IsReduced` instances
+    for the `E_U ×_U E_U` chart rings (f.g. over `ℤ[a][Δ⁻¹]` — Jacobson by
+    finite-type-over-Jacobson; reduced by 0e) + the per-chart vanishing statements.
 
 - **[T-W7.0c-c5β]** bihomogeneous-triple → morphism template (NEW leaf, coordinator §2):
   `toProjOfBihomTriple` (new ForMathlib on the `ProjectiveSpaceChart` plumbing): where a
