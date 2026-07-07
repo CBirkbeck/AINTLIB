@@ -2105,6 +2105,147 @@ lemma awayToSection_inv_cancelZ (W : WeierstrassCurve R)
     RingHom.id_apply] at this
   exact this
 
+/-- The `Y`-chart sections of the model as the infinity-chart `AdjoinRoot`: composite of
+`Proj.basicOpenIsoAway` with `chartYRingEquiv`. -/
+noncomputable def chartYSectionsRingEquiv (W : WeierstrassCurve R) :
+    Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ≃+*
+      AdjoinRoot (infChartCubic W) :=
+  ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).commRingCatIsoToRingEquiv.symm).trans
+    (chartYRingEquiv W)
+
+/-- Restriction of the `t`-section of the `Y`-chart to the chart overlap is a unit. -/
+private lemma isUnit_res_tSection (W : WeierstrassCurve R) :
+    IsUnit (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W))) := by
+  have hval : ((chartYSectionsRingEquiv W).symm (infChartTElem W)) =
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).hom).hom
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) := by
+    have hsymm : (chartYRingEquiv W).symm (infChartTElem W) =
+        HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartYRingEquiv_isLocalizationElem W).symm
+    show ((chartYRingEquiv W).symm.trans
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          (mk_X_mem_quotientGrading_one W 1) one_pos).commRingCatIsoToRingEquiv)
+        (infChartTElem W) = _
+    rw [RingEquiv.trans_apply, hsymm]
+    rfl
+  have hsq := awayIso_res_squareY W ((chartYSectionsRingEquiv W).symm (infChartTElem W))
+  have hcancel : ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2) := by
+    rw [hval]
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)))
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).hom_inv_id)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at this
+    exact this
+  rw [hcancel] at hsq
+  have hunit : IsUnit ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2)
+      (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2))) :=
+    isUnit_iff_exists_inv.mpr ⟨_, (mul_comm _ _).trans (awayMap_y_mul_t W)⟩
+  have := hunit.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).hom).hom
+  rw [← hsq] at this
+  have hcancel2 := congrArg (fun φ => CommRingCat.Hom.hom φ
+    (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W))))
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv_hom_id)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at hcancel2
+  rwa [hcancel2] at this
+
+/-- The model point of a prime of the infinity chart, through the `Y`-chart. -/
+noncomputable def chartPointOf (W : WeierstrassCurve R)
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime] : projModel W :=
+  ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec).base
+    (PrimeSpectrum.comap ((chartYSectionsRingEquiv W) : _ →+* _) ⟨P, inferInstance⟩)
+
+lemma chartPointOf_mem_chartY (W : WeierstrassCurve R)
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime] :
+    chartPointOf W P ∈ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) := by
+  have h := (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).range_fromSpec
+  show chartPointOf W P ∈ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) : Set _)
+  rw [← h]
+  exact Set.mem_range_self _
+
+/-- Membership of the chart point in a sections-basic-open, in terms of the prime. -/
+lemma chartPointOf_mem_basicOpen_iff (W : WeierstrassCurve R)
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) :
+    chartPointOf W P ∈ (projModel W).basicOpen r ↔ chartYSectionsRingEquiv W r ∉ P := by
+  have hkey : chartPointOf W P ∈ (projModel W).basicOpen r ↔
+      (PrimeSpectrum.comap ((chartYSectionsRingEquiv W) : _ →+* _) ⟨P, inferInstance⟩) ∈
+        PrimeSpectrum.basicOpen r := by
+    rw [← (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_basicOpen]
+    exact Iff.rfl
+  rw [hkey]
+  simp only [PrimeSpectrum.mem_basicOpen, PrimeSpectrum.comap_asIdeal, Ideal.mem_comap,
+    RingEquiv.coe_toRingHom]
+
+/-- When `t ∈ P`, the chart point avoids the `Z`-chart. -/
+lemma chartPointOf_not_mem_chartZ (W : WeierstrassCurve R)
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    chartPointOf W P ∉ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+  intro hmem
+  have hover : chartPointOf W P ∈ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+    rw [Proj.basicOpen_mul]
+    exact ⟨chartPointOf_mem_chartY W P, hmem⟩
+  have hunit : chartPointOf W P ∈ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) := by
+    rw [Scheme.mem_basicOpen (projModel W) _ _ (chartPointOf_mem_chartY W P)]
+    rw [← TopCat.Presheaf.germ_res_apply (projModel W).presheaf
+      (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)) (chartPointOf W P) hover
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W))]
+    exact (isUnit_res_tSection W).map
+      ((projModel W).presheaf.germ _ (chartPointOf W P) hover).hom
+  rw [chartPointOf_mem_basicOpen_iff, RingEquiv.apply_symm_apply] at hunit
+  exact hunit ht
+
 /-- The two chart transports of a global section agree in the overlap localization. -/
 private lemma chart_transports_agree (W : WeierstrassCurve R) (s : Γ(projModel W, ⊤)) :
     overlapMap W (chartZRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))

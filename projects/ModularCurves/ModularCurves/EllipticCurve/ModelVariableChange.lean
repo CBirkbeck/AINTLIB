@@ -637,7 +637,7 @@ theorem projModelVCIso_mul (C C' : VariableChange R) (W : WeierstrassCurve R) :
 /-- **(T-W7.1b-a, Z2)** Every point of the model outside the `Z`-chart lies on the zero
 section: take the residue-field point and apply the `Spec K`-dichotomy
 (`specPoint_eq_zero_of_not_inZ`). -/
-private lemma mem_range_zero_of_not_mem_zChart {W : WeierstrassCurve R}
+lemma mem_range_zero_of_not_mem_zChart {W : WeierstrassCurve R}
     {p : projModel W} (hp : p ∉ Proj.basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :
     p ∈ Set.range (projModelZero W).base := by
@@ -685,7 +685,7 @@ private lemma mem_range_zero_of_not_mem_zChart {W : WeierstrassCurve R}
   exact Scheme.fromSpecResidueField_apply p s₀
 
 /-- **(T-W7.1b-a, Z3)** The zero section misses the `Z`-chart. -/
-private lemma not_mem_zChart_of_mem_range_zero {W : WeierstrassCurve R}
+lemma not_mem_zChart_of_mem_range_zero {W : WeierstrassCurve R}
     {p : projModel W} (hp : p ∈ Set.range (projModelZero W).base) :
     p ∉ Proj.basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
@@ -698,7 +698,7 @@ private lemma not_mem_zChart_of_mem_range_zero {W : WeierstrassCurve R}
 
 /-- **(T-W7.1b-a, Z4)** A pointed isomorphism of models preserves the affine (`Z`-chart)
 part: the preimage of the `Z`-chart is the `Z`-chart. -/
-private lemma pointedIso_preimage_zChart {W W' : WeierstrassCurve R}
+lemma pointedIso_preimage_zChart {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (hez : projModelZero W ≫ e.hom = projModelZero W') :
     e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
@@ -733,7 +733,7 @@ private lemma pointedIso_preimage_zChart {W W' : WeierstrassCurve R}
 /-- **(T-W7.1b-b1, the Γ-piece)** The section-ring equivalence of the affine charts induced
 by a pointed isomorphism: `e.app` at the `Z`-chart, transported along
 `pointedIso_preimage_zChart`. -/
-private noncomputable def pointedIsoΓ {W W' : WeierstrassCurve R}
+noncomputable def pointedIsoΓ {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (hez : projModelZero W ≫ e.hom = projModelZero W') :
     Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
@@ -749,7 +749,7 @@ private noncomputable def pointedIsoΓ {W W' : WeierstrassCurve R}
       (eqToIso (pointedIso_preimage_zChart e hez).symm).op)).commRingCatIsoToRingEquiv
 
 /-- The transport of the restricted structure section along a pointed isomorphism. -/
-private lemma pointedIsoΓ_structure_section {W W' : WeierstrassCurve R}
+lemma pointedIsoΓ_structure_section {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
     (hez : projModelZero W ≫ e.hom = projModelZero W') (r : R) :
@@ -887,6 +887,34 @@ noncomputable def pointedIsoCoordEquiv {W W' : WeierstrassCurve R}
             (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm.trans
             (chartZRingEquiv W)))))
     (fun r => pointedIsoCoord_algebraMap e heπ hez r)
+
+/-- The chart point of a prime containing `t` lies on the zero section. -/
+lemma chartPointOf_mem_range_zero {W : WeierstrassCurve R}
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    chartPointOf W P ∈ Set.range (projModelZero W).base :=
+  mem_range_zero_of_not_mem_zChart (chartPointOf_not_mem_chartZ W P ht)
+
+/-- A pointed isomorphism carries the chart point of a section prime into the `Y`-chart of
+the target model (the image lies on the target zero section, which the `Y`-chart contains). -/
+lemma pointedIso_chartPointOf_mem_chartY {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    e.hom.base (chartPointOf W P) ∈ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)) := by
+  obtain ⟨y, hy⟩ := chartPointOf_mem_range_zero P ht
+  have h1 : e.hom.base (chartPointOf W P) = (projModelZero W') y := by
+    rw [← hy, show e.hom.base ((projModelZero W) y) =
+      (projModelZero W ≫ e.hom) y from rfl, hez]
+  rw [h1]
+  have h2 : (y : Spec (CommRingCat.of R)) ∈ (projModelZero W' ⁻¹ᵁ
+      (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) := by
+    rw [projModelZero_preimage_yChart]
+    trivial
+  exact h2
 
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
