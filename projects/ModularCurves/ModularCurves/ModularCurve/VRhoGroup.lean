@@ -38,8 +38,8 @@ noncomputable abbrev rhoSqAction (D : GaloisRepData N) :
         rw [map_mul, map_mul, mul_smul, mul_smul]
         rfl }
 
-/-- The diagonal action on the square is continuous: the kernel of `ρ` acts trivially. -/
 open scoped Pointwise in
+/-- The diagonal action on the square is continuous: the kernel of `ρ` acts trivially. -/
 lemma rhoSqAction_isContinuous (D : GaloisRepData N) :
     (rhoSqAction D).IsContinuous := by
   constructor
@@ -93,18 +93,33 @@ noncomputable def rhoAddMor (D : GaloisRepData N) :
           D.ρ (galSepMulEquivGalQ σ) • (vw.1 + vw.2)
         rw [smul_add] }
 
+/-- The one-point Galois set. -/
+noncomputable abbrev pointAction :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of PUnit
+  ρ := { toFun := fun _ => FintypeCat.homMk id
+         map_one' := rfl
+         map_mul' := fun _ _ => rfl }
+
+lemma pointAction_isContinuous : pointAction.IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj pointAction :
+          Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun y => ?_
+  have huniv : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+      (CategoryTheory.forget₂ _ TopCat).obj pointAction => p.1 • p.2) ⁻¹'
+      ({y} : Set _) = Set.univ := by
+    ext p
+    exact ⟨fun _ => trivial, fun _ => rfl⟩
+  rw [huniv]
+  exact isOpen_univ
+
 /-- The zero section: the one-point continuous Galois set. -/
 noncomputable abbrev rhoPointContAction :
     ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
-  ⟨{ V := FintypeCat.of PUnit
-     ρ := { toFun := fun _ => FintypeCat.homMk id
-            map_one' := rfl
-            map_mul' := fun _ _ => rfl } },
-   by
-    constructor
-    haveI : DiscreteTopology ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj _ : Type 0) := ⟨rfl⟩
-    exact continuous_of_discreteTopology⟩
+  ⟨pointAction, pointAction_isContinuous⟩
 
 /-- The zero morphism of continuous Galois sets. -/
 noncomputable def rhoZeroMor (D : GaloisRepData N) :
