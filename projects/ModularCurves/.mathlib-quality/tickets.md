@@ -4771,10 +4771,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0b]** negation on the model — `negModelHom` + `_π`, involution, `_zero`,
   `_specPoints` (GroupLawConstruction.lean:197–244 — pointer refreshed per coordinator 1a).
-  - **Status**: in_progress · **Claimed**: beastmode-B (lane P0), 2026-07-07T14:05Z (rule-5
-    retrofit; on 0b since c48f7a0e — negModelHom + involution proven; _π/_zero in progress,
-    _specPoints blocked on T-W7.0f). ForMathlib infra committed: awayMap_fromZeroRingHom
-    (d627068f), map_comp_toSpecZero (25a8a4c9) ·
+  - **Status**: in_progress (3/5 decls DONE) · **Claimed**: beastmode-B (lane P0),
+    2026-07-07T14:05Z. **DONE (axiom-clean, committed)**: `negModelHom` (def), `negModelHom_π`
+    (7ddc51b6, via new ForMathlib `map_comp_toSpecZero` 25a8a4c9 + `awayMap_fromZeroRingHom`
+    d627068f + `gradedRingHomZero`), `negModelHom_negModelHom` (involution). **`_zero`**: decomposed
+    + infra landed — `allNeg{Vec,GradedQuot,…}` (the `(−1)`-rescaling ρ) + `projModelZeroEval_neg_eq_allNeg`
+    (ring-eq, both evals to `(0,−1,0)`) all sorry-free in GLC; remaining = two reusable lemmas
+    (L-0b-zero-N `fromOfGlobalSections`-naturality-under-`Proj.map` [ForMathlib]; L-0b-zero-ρ
+    `Proj.map allNegGradedQuot = 𝟙`) + the short assembly (routes in the `negModelHom_zero`
+    in-file comment). **`_specPoints`**: blocked on T-W7.0f (opaque `projModelPointsEquiv`) ·
     **File**: GroupLawConstruction.lean · **Depends**:
     T-W7.0a (done; specPoints also T-W7.0f) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
   - Sketch: projectivise `[X : −Y−a₁X−a₃Z : Z]` via the `baseChangeGradedHom` template
