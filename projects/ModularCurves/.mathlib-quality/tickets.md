@@ -5849,3 +5849,68 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
   sorried box): descend (R,A,f) to a noetherian stage (NOETH1-3), where Ann(f) is fg, and
   the flat-tensor-exactness argument (Ann⊗κ=0 ∀κ) + Nakayama closes Ann(f)=0. ~150 lines.
   DISCHARGE ⟹ the ENTIRE Drinfeld D-chain is axiom-clean.
+
+---
+
+## Flat-locus / local-criterion stream (T-LC*) — TOR-FREE route (owner-funded 2026-07-07)
+
+Discharges the D-chain's last sorryAx. Source: Stacks 00MH/00MI/00RC/07RF (fetched) +
+decomposition-flatlocus.md. **Key finding: NO derived-functor Tor needed** — the fibre
+criteria use `Module.Flat.lTensor_exact` (flatness ⟹ Tor₁-vanishing, from the hypothesis) +
+Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
+
+### [T-LC1] freeness from fibre freeness (Stacks 00MH) — THE MAKE-OR-BREAK
+- **Status**: open · **File**: ForMathlib/FlatLocus.lean (or new LocalCriterion.lean) ·
+  **Depends on**: none · **Type**: theorem
+- **Statement**: `R→S` comm rings, M finite S-module, 𝔮 : PrimeSpectrum S, 𝔭 := 𝔮.comap,
+  M flat over R (at 𝔮), `M ⊗_R κ(𝔭)` free over κ(𝔭) ⟹ `LocalizedModule 𝔮.primeCompl M` free
+  over `Localization.AtPrime 𝔮`. (Design the exact Lean spelling for "fibre" and "at 𝔮".)
+- **Proof sketch**: (1) Fibre `M⊗_R κ(𝔭)` free rank r; lift a basis to `φ : S_𝔮^r → M_𝔮`,
+  iso mod 𝔮 by construction (Nakayama: `eq_bot_of_le_smul_of_le_jacobson_bot` for surjectivity).
+  (2) `K = ker φ`. M flat over R ⟹ `0→K→S_𝔮^r→M_𝔮→0` stays exact after `⊗_R κ(𝔭)`
+  (`Module.Flat.lTensor_exact` / `rTensor_preserves_injective_linearMap`). (3) `M_𝔮⊗κ(𝔭) ≅ κ^r`
+  and `φ⊗κ` iso ⟹ `K⊗_R κ(𝔭) = 0` ⟹ `K = 𝔭·K ⊆ 𝔪_𝔮·K`. (4) K fg (S noeth) ⟹ Nakayama ⟹ K=0
+  ⟹ φ iso ⟹ M_𝔮 free.
+- **Mathlib lemmas**: `Module.Flat.lTensor_exact`, `rTensor_preserves_injective_linearMap`,
+  `RingTheory.Nakayama.eq_bot_of_le_smul_of_le_jacobson_bot`, `Module.free_of_isLocalizedModule`,
+  `LocalizedModule.*`, `IsScalarTower`. All #check-confirmed present.
+- **Sources**: Stacks 00MH (Lemma 10.129.1); Matsumura *CRT* Thm 22.5. Tor-FREE.
+- **Generality**: `[CommRing R] [CommRing S] [Algebra R S] [Module.Finite S M]`, S noetherian
+  (or Module.Finite for the Nakayama K-fg step).
+
+### [T-LC2] exactness/flatness from fibres (Stacks 00MI/00RB)
+- **Status**: open · **Depends on**: T-LC1 · **Type**: theorem
+- **Statement**: a bounded complex of finite free S-modules, flat over R and exact on the
+  fibre κ(𝔭), is exact near 𝔮 with flat cokernel. (Companion criterion assembling LC1 along a
+  resolution.) Exact Lean form designed at execution.
+- **Proof sketch**: induct down the resolution applying T-LC1 at each stage (fibre-exact +
+  flat ⟹ the boundary maps have free cokernels near 𝔮), Nakayama + flat-tensor-exactness.
+- **Sources**: Stacks 00MI (10.129.3), 00RB. Tor-free.
+
+### [T-LC3] openness of the flat locus (Stacks 00RC) — discharge isOpen_flatLocus
+- **Status**: open · **Depends on**: T-LC1, T-LC2 · **File**: ForMathlib/FlatLocus.lean ·
+  **Type**: theorem
+- **Statement**: fill the boxed `isOpen_flatLocus` in FlatLocus.lean.
+- **Proof sketch**: EITHER (i) resolution route: finite free resolution of M (M fp), apply
+  T-LC2 to show flatness is an open condition at each 𝔮 (a basic-open nbhd of every flat
+  point); OR (ii) constructible route: flat locus is `IsConstructible` (T-LC1 + generic-flatness
+  neighbourhood `basicOpen_subset_flatLocus_of_free` + Noetherian induction over Spec S) then
+  `PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible` + the proven
+  `flatLocus_stableUnderGeneralization`. Pick the cleaner.
+- **Mathlib lemmas**: `PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible`,
+  `isConstructible_basicOpen`, `IsConstructible.{union,inter,sdiff,iUnion}`, resolution API.
+- **Sources**: Stacks 00RC (Thm 10.129.4).
+
+### [T-GF7] flatness descends in a directed colimit (Stacks 07RF) — discharge NOETH3
+- **Status**: open · **Depends on**: T-LC3 · **File**: ForMathlib/NoethApprox.lean · **Type**: theorem
+- **Statement**: fill `exists_noetherian_descent_flat`'s `Module.Flat R₀ A₀` sorry.
+- **Proof sketch**: Stacks 07RF (fetched): descend a base presentation with M₀ flat over R₀;
+  transition maps Ψ_λ iso at large λ; conclude via T-LC3 (00RC). Our NoethApprox R₀ IS the stage.
+- **Sources**: Stacks 07RF (Lemma 10.168.1(3)).
+
+### [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box
+- **Status**: open · **Depends on**: T-GF7, T-NOETH1, T-NOETH2 · **File**: LevelStructure/CartierDivisor.lean
+- **Statement**: prove `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor` (the box).
+- **Proof sketch**: descend (R,A,f) to the noeth stage (NOETH1/2 done + T-GF7 for the flat
+  hypothesis), where Ann(f) is fg; flat-tensor-exactness gives Ann(f)⊗κ=0 ∀κ; Nakayama ⟹
+  Ann(f)=0. ⟹ **entire Drinfeld D-chain axiom-clean.**
