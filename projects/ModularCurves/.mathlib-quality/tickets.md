@@ -4783,7 +4783,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0c-i]** the two B–L addition laws — transcribe §5, define `blOpenZ`, `blOpenY`,
   `addOnZ`, `addOnY` (GroupLawConstruction.lean:252–274 — pointer refreshed per coordinator 1a).
-  - **Status**: open (lane P1) · **File**: GroupLawConstruction.lean · **Depends**: T-A8
+  - **Status**: in_progress (lane P1) · **Claimed**: coordinator-P1, 2026-07-07T14:33Z ·
+    **Increment 1** (this claim): `EllipticCurve/AdditionLaw.lean` polynomial layer — law-2
+    defs + the 6 core certified identities (3 minors, 3 diagonal) + O-columns/scaling +
+    c5α skeleton decls; certificate policy per coordinator: nothing above ~150-term
+    cofactors (equation_addXYZ + c5 go via c5α/c5β). GLC scheme defs deferred while P0
+    holds live edits there. · **File**: GroupLawConstruction.lean · **Depends**: T-A8
     (done), **T-W7.0e, T-W7.0f (coordinator §2: the c5 reroute consumes the ext principle +
     dictionary — "Depends: none" was FALSE; P1 is NO LONGER gate-free)** · **Parallel**: after
     0e/0f · **Type**: 4 defs + 2 NEW leaves (factorization bridge; (2,2)-triple→morphism
