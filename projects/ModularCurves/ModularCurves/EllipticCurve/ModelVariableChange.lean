@@ -297,11 +297,205 @@ theorem projModelVCIso_π (C : VariableChange R) (W : WeierstrassCurve R) :
     map_comp_toSpecZero (vcGradedHom C W) (vcGradedHom_irrelevant_le C W), Category.assoc,
     ← Spec.map_comp, ← CommRingCat.ofHom_comp, vcGradedHom_algebraMapGradeZero]
 
+/-! ### The unit-rescaling automorphism `μ = u³`: projective triviality of `[0:u³:0] = [0:1:0]`
+
+The variable change scales the leading `Y`-coordinate at infinity by `u³`
+(`projModelZeroEval (C • W) ∘ vcGradedHom C W` is evaluation at `(0, u³, 0)`, not `(0, 1, 0)`).
+That rescaling is discharged through the "scale all coordinates by the unit `μ`" automorphism
+`allScaleGradedQuot`, generalising `GroupLawConstruction`'s `−1`-rescaling `allNeg` to an
+arbitrary unit; `Proj.map` of it is the identity by `Proj.map_degScaling_eq_id`. -/
+
+/-- Uniform rescaling of all three homogeneous coordinates by a unit `μ`. -/
+noncomputable def allScaleVec (μ : Rˣ) : Fin 3 → MvPolynomial (Fin 3) R :=
+  ![(μ : R) • MvPolynomial.X 0, (μ : R) • MvPolynomial.X 1, (μ : R) • MvPolynomial.X 2]
+
+lemma allScaleVec_isHomogeneous (μ : Rˣ) (i : Fin 3) :
+    (allScaleVec μ i : MvPolynomial (Fin 3) R).IsHomogeneous 1 := by
+  fin_cases i <;>
+    simp only [allScaleVec, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
+  · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
+  · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
+  · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
+
+/-- Scaling all variables by `μ` sends the degree-`3` Weierstrass cubic to `μ³` times itself. -/
+lemma allScaleVec_polynomial (μ : Rˣ) (W : WeierstrassCurve R) :
+    MvPolynomial.aeval (allScaleVec μ) W.toProjective.polynomial
+      = (μ : R) ^ 3 • W.toProjective.polynomial := by
+  rw [WeierstrassCurve.Projective.polynomial]
+  simp only [map_add, map_sub, map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
+    allScaleVec, MvPolynomial.algebraMap_eq, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
+  ring
+
+lemma allScaleVec_comp_inv (μ : Rˣ) (i : Fin 3) :
+    MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ i) = MvPolynomial.X i := by
+  fin_cases i
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (0 : Fin 3)) = MvPolynomial.X (0 : Fin 3)
+    simp [allScaleVec, smul_smul, Units.inv_mul]
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (1 : Fin 3)) = MvPolynomial.X (1 : Fin 3)
+    simp [allScaleVec, smul_smul, Units.inv_mul]
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (2 : Fin 3)) = MvPolynomial.X (2 : Fin 3)
+    simp [allScaleVec, smul_smul, Units.inv_mul]
+
+lemma allScaleRingHom_comp_inv (μ : Rˣ) (p : MvPolynomial (Fin 3) R) :
+    MvPolynomial.aeval (allScaleVec μ) (MvPolynomial.aeval (allScaleVec μ⁻¹) p) = p := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simp
+  | add p q hp hq => rw [map_add, map_add, hp, hq]
+  | mul_X p i hp => rw [map_mul, MvPolynomial.aeval_X, map_mul, hp, allScaleVec_comp_inv]
+
+/-- The uniform rescaling as a graded endomorphism of `R[X,Y,Z]`. -/
+noncomputable def allScaleGradedPoly (μ : Rˣ) :
+    MvPolynomial.homogeneousSubmodule (Fin 3) R →+*ᵍ
+      MvPolynomial.homogeneousSubmodule (Fin 3) R where
+  toRingHom := (MvPolynomial.aeval (allScaleVec μ)).toRingHom
+  map_mem {n x} hx := by
+    have h := ((MvPolynomial.mem_homogeneousSubmodule _ _).mp hx).aeval (allScaleVec μ)
+      (allScaleVec_isHomogeneous μ)
+    rw [one_mul] at h
+    exact (MvPolynomial.mem_homogeneousSubmodule _ _).mpr h
+
+lemma allScaleGradedPoly_comap (μ : Rˣ) (W : WeierstrassCurve R) :
+    (projIdeal W).toIdeal ≤ (projIdeal W).toIdeal.comap (allScaleGradedPoly μ).toRingHom := by
+  rw [projIdeal_toIdeal, Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, Ideal.mem_comap]
+  show MvPolynomial.aeval (allScaleVec μ) W.toProjective.polynomial ∈ _
+  rw [allScaleVec_polynomial, MvPolynomial.smul_eq_C_mul]
+  exact Ideal.mul_mem_left _ _ (Ideal.mem_span_singleton_self _)
+
+/-- The unit-rescaling automorphism of the quotient coordinate ring (`μ = u³` at infinity). -/
+noncomputable def allScaleGradedQuot (μ : Rˣ) (W : WeierstrassCurve R) :
+    quotientGrading (projIdeal W) →+*ᵍ quotientGrading (projIdeal W) :=
+  quotientGradingMap (allScaleGradedPoly μ) (projIdeal W) (projIdeal W)
+    (allScaleGradedPoly_comap μ W)
+
+lemma allScaleGradedQuot_comp_inv_apply (μ : Rˣ) (W : WeierstrassCurve R) (x : projCoordRing W) :
+    allScaleGradedQuot μ W (allScaleGradedQuot μ⁻¹ W x) = x := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [allScaleGradedQuot, allScaleGradedQuot, quotientGradingMap_mk, quotientGradingMap_mk]
+  exact congrArg (Ideal.Quotient.mk _) (allScaleRingHom_comp_inv μ a)
+
+lemma allScaleGradedQuot_comp_inv (μ : Rˣ) (W : WeierstrassCurve R) :
+    (allScaleGradedQuot μ W).comp (allScaleGradedQuot μ⁻¹ W) = GradedRingHom.id _ :=
+  GradedRingHom.ext fun x => allScaleGradedQuot_comp_inv_apply μ W x
+
+lemma allScaleGradedQuot_irrelevant_le (μ : Rˣ) (W : WeierstrassCurve R) :
+    (quotientGrading (projIdeal W))₊ ≤
+      ((quotientGrading (projIdeal W))₊).map (allScaleGradedQuot μ W) := by
+  conv_lhs => rw [← HomogeneousIdeal.map_id (I := (quotientGrading (projIdeal W))₊),
+    ← allScaleGradedQuot_comp_inv μ W, HomogeneousIdeal.map_comp]
+  exact HomogeneousIdeal.map_mono _ (irrelevant_map_le (allScaleGradedQuot μ⁻¹ W))
+
+/-- Uniform rescaling scales a degree-`d` homogeneous polynomial by `μᵈ`. -/
+lemma allScaleVec_smul_of_homogeneous (μ : Rˣ) {d : ℕ} {p : MvPolynomial (Fin 3) R}
+    (hp : p.IsHomogeneous d) :
+    MvPolynomial.aeval (allScaleVec μ) p = MvPolynomial.C ((μ : R) ^ d) * p := by
+  have hv : (allScaleVec μ) = (fun i : Fin 3 => MvPolynomial.C (μ : R) * MvPolynomial.X i) := by
+    funext i; fin_cases i <;> simp [allScaleVec, MvPolynomial.smul_eq_C_mul]
+  rw [hv]
+  conv_lhs => rw [p.as_sum]
+  conv_rhs => rw [p.as_sum]
+  rw [map_sum, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun v hv => ?_
+  have hvdeg : v.degree = d := by
+    by_contra h
+    exact (MvPolynomial.mem_support_iff.mp hv) (hp.coeff_eq_zero h)
+  have hprod : (v.prod fun i e =>
+        (MvPolynomial.C (μ : R) * MvPolynomial.X i : MvPolynomial (Fin 3) R) ^ e)
+      = MvPolynomial.C ((μ : R) ^ d) * v.prod (fun i e => (MvPolynomial.X i) ^ e) := by
+    simp only [Finsupp.prod]
+    rw [Finset.prod_congr rfl
+        (fun i _ => mul_pow (MvPolynomial.C (μ : R)) (MvPolynomial.X i) (v i)),
+      Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, ← Finsupp.degree_apply, hvdeg,
+      ← map_pow]
+  rw [MvPolynomial.aeval_monomial, MvPolynomial.algebraMap_eq, MvPolynomial.monomial_eq, hprod]
+  ring
+
+/-- `allScaleGradedQuot μ` scales a degree-`d` homogeneous class by `μᵈ`: the `hscale` hypothesis
+feeding `Proj.map_degScaling_eq_id`. -/
+lemma allScaleGradedQuot_scale (μ : Rˣ) (W : WeierstrassCurve R) (d : ℕ) {a : projCoordRing W}
+    (ha : a ∈ (quotientGrading (projIdeal W)) d) :
+    allScaleGradedQuot μ W a = (algebraMap R (projCoordRing W) (μ : R)) ^ d * a := by
+  obtain ⟨p, hp, hmap⟩ := Submodule.mem_map.mp ha
+  have ha_eq : a = Ideal.Quotient.mk (projIdeal W).toIdeal p := hmap.symm
+  rw [ha_eq, allScaleGradedQuot, quotientGradingMap_mk]
+  show Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.aeval (allScaleVec μ) p) =
+    (algebraMap R (projCoordRing W) (μ : R)) ^ d * Ideal.Quotient.mk (projIdeal W).toIdeal p
+  rw [allScaleVec_smul_of_homogeneous μ ((MvPolynomial.mem_homogeneousSubmodule _ _).mp hp),
+    map_mul, ← map_pow]
+  congr 1
+
+/-- **(T-W7.0h-i-μ)** `Proj.map` of the unit-rescaling automorphism is the identity: rescaling
+every homogeneous coordinate by a unit fixes each point of `Proj` projectively. -/
+theorem allScale_map_id (μ : Rˣ) (W : WeierstrassCurve R) :
+    Proj.map (allScaleGradedQuot μ W) (allScaleGradedQuot_irrelevant_le μ W) = 𝟙 (projModel W) :=
+  Proj.map_degScaling_eq_id (allScaleGradedQuot μ W)
+    (Units.map (algebraMap R (projCoordRing W)).toMonoidHom μ)
+    (allScaleGradedQuot_scale μ W)
+    (allScaleGradedQuot_irrelevant_le μ W)
+
+/-- On global sections, evaluation at infinity absorbs the variable change into the `u³`
+rescaling: `projModelZeroEval (C • W) ∘ vcGradedHom C W = projModelZeroEval W ∘ allScale u³`
+(both are evaluation at `(0, u³, 0)`). This is the ring-level identity feeding
+`projModelVCIso_zero`. -/
+lemma projModelZeroEval_vc_eq_allScale (C : VariableChange R) (W : WeierstrassCurve R) :
+    (projModelZeroEval (C • W)).comp (vcGradedHom C W).toRingHom =
+      (projModelZeroEval W).comp (allScaleGradedQuot (C.u ^ 3) W).toRingHom := by
+  refine RingHom.ext fun x => ?_
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  simp only [RingHom.comp_apply]
+  show projModelZeroEval (C • W) (vcGradedHom C W (Ideal.Quotient.mk _ p)) =
+    projModelZeroEval W (allScaleGradedQuot (C.u ^ 3) W (Ideal.Quotient.mk _ p))
+  rw [vcGradedHom, allScaleGradedQuot, quotientGradingMap_mk, quotientGradingMap_mk,
+    projModelZeroEval_mk, projModelZeroEval_mk]
+  show (MvPolynomial.aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0))
+        (MvPolynomial.aeval (vcMvSubst C) p) =
+      (MvPolynomial.aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0))
+        (MvPolynomial.aeval (allScaleVec (C.u ^ 3)) p)
+  rw [MvPolynomial.comp_aeval_apply, MvPolynomial.comp_aeval_apply]
+  refine congrArg (fun g => MvPolynomial.aeval g p) (funext fun i => ?_)
+  fin_cases i <;>
+    simp [vcMvSubst, allScaleVec, Units.val_pow_eq_pow_val]
+
 /-- **(T-W7.0h-i, pointedness)** `projModelVCIso` carries the point at infinity to the point
-at infinity ( `[0:1:0]` is fixed by the projectivised coordinate change). -/
+at infinity ( `[0:1:0]` is fixed by the projectivised coordinate change). The change scales the
+leading `Y` at infinity by `u³`; the rescaling `[0:u³:0] = [0:1:0]` is discharged through the
+unit-rescaling automorphism `allScale u³` (`allScale_map_id`), via naturality of
+`Proj.fromOfGlobalSections` under `Proj.map`. -/
 theorem projModelVCIso_zero (C : VariableChange R) (W : WeierstrassCurve R) :
     projModelZero (C • W) ≫ (projModelVCIso C W).hom = projModelZero W := by
-  sorry
+  show projModelZero (C • W) ≫ Proj.map (vcGradedHom C W) (vcGradedHom_irrelevant_le C W) =
+    projModelZero W
+  have key := Proj.fromOfGlobalSections_map (vcGradedHom C W) (vcGradedHom_irrelevant_le C W)
+    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval (C • W)))
+    (projModelZeroEval_irrelevant_map_top (C • W))
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (vcGradedHom C W) (vcGradedHom_irrelevant_le C W) _
+      (projModelZeroEval_irrelevant_map_top (C • W)))
+  have key2 := Proj.fromOfGlobalSections_map (allScaleGradedQuot (C.u ^ 3) W)
+    (allScaleGradedQuot_irrelevant_le (C.u ^ 3) W)
+    ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+    (projModelZeroEval_irrelevant_map_top W)
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (allScaleGradedQuot (C.u ^ 3) W)
+      (allScaleGradedQuot_irrelevant_le (C.u ^ 3) W) _ (projModelZeroEval_irrelevant_map_top W))
+  have hfeq : ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval (C • W))).comp
+        (vcGradedHom C W).toRingHom =
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W)).comp
+        (allScaleGradedQuot (C.u ^ 3) W).toRingHom := by
+    rw [RingHom.comp_assoc, projModelZeroEval_vc_eq_allScale, ← RingHom.comp_assoc]
+  have congr_from : ∀ (g₁ g₂ : projCoordRing W →+* Γ(Spec (.of R), ⊤))
+      (h₁ : (HomogeneousIdeal.irrelevant
+          (HomogeneousIdeal.quotientGrading (projIdeal W))).toIdeal.map g₁ = ⊤)
+      (h₂ : (HomogeneousIdeal.irrelevant
+          (HomogeneousIdeal.quotientGrading (projIdeal W))).toIdeal.map g₂ = ⊤),
+      g₁ = g₂ →
+      Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W)) g₁ h₁ =
+        Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W)) g₂ h₂ := by
+    rintro g₁ g₂ h₁ h₂ rfl; rfl
+  rw [projModelZero, projModelZero, key,
+    ← Category.comp_id (Proj.fromOfGlobalSections (HomogeneousIdeal.quotientGrading (projIdeal W))
+      ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
+      (projModelZeroEval_irrelevant_map_top W)), ← allScale_map_id (C.u ^ 3) W, key2]
+  exact congr_from _ _ _ _ hfeq
 
 /-- **Base-change naturality of the substitution**: applying the coefficient map `f` to the
 variable-change substitution for `C` gives the substitution for the base-changed `C.map f`. -/
