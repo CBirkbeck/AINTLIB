@@ -30,6 +30,7 @@ locators in `.mathlib-quality/tw7-source-quotes.md`; audit A4.
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj
+  MonObj
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
@@ -1046,20 +1047,77 @@ theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
   rw [← hrange]
   exact isConnected_range (pullback.fst p (S.fromSpecResidueField t)).base.hom.continuous
 
-/-- **(T-W7.7·C1, GIT Cor 6.2 — SORRIED LEAF)** Two `S`-morphisms from a proper flat
-universally-`O`-connected `A` into a separated group object `G` that agree on ONE fibre
-differ by a constant section: `f = (χ ∘ toUnit) · g` for a point `χ` of `G`. Proof route:
-apply `rigidity` to the pointwise quotient `lift f g ≫ (𝟙 ⊗ ι[G]) ≫ μ[G]` (the GIT `f·g⁻¹`),
-whose collapsed fibre is supplied by the fibre-equality hypothesis. Source: GIT p. 116,
-Cor 6.2 (verbatim in quotes file). -/
+/-- Components of the GIT pointwise-quotient collapse: if `h` equalizes `f` and `g` into a
+group object, then `h ≫ (f · g⁻¹)` is the unit constant, in `Over`-components. Generic
+supply for C1/C2. -/
+lemma comp_mul_inv_left {S : Scheme.{u}} {P A G : Over S} [GrpObj G]
+    (h : P ⟶ A) (f g : A ⟶ G) (hfg : h ≫ f = h ≫ g) :
+    h.left ≫ (f * g⁻¹).left = P.hom ≫ η[G].left := by
+  have h1 : h ≫ (f * g⁻¹) = (1 : P ⟶ G) := by
+    rw [MonObj.comp_mul, GrpObj.comp_inv, hfg, _root_.mul_inv_cancel]
+  have h2 := congrArg CommaMorphism.left h1
+  simpa [Over.comp_left, Hom.one_def, Over.toUnit_left] using h2
+
+/-- **(T-W7.7·C1, GIT Cor 6.2, PROVEN)** Two `S`-morphisms from a proper flat
+universally-`O`-connected pointed `A` into a separated group object `G` that agree on ONE
+fibre differ by a constant section: `f = (χ ∘ toUnit) · g` for a point `χ` of `G`. Proof:
+`rigidity` applied to the pointwise quotient `f · g⁻¹` (the `Hom`-group of `G`), whose
+`s`-fibre image is the single point `η(s)` by the fibre-equality hypothesis. The point
+`e` of `A` supplies rigidity's section — faithful to the banked case-2 scope decision
+(quotes file: case 3 = sectionless fppf descent is NOT NEEDED for T-W7, `E` has the zero
+section); logged per rule 5. Source: GIT p. 116, Cor 6.2 (verbatim in quotes file). -/
 theorem eq_mul_of_fibre_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
     (hconn : ConnectedSpace S) {A G : Over S} [GrpObj G]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
-    [IsSeparated G.hom] (f g : A ⟶ G) (s : S)
+    [IsSeparated G.hom] (e : 𝟙_ (Over S) ⟶ A) (f g : A ⟶ G) (s : S)
     (hfib : pullback.fst A.hom (S.fromSpecResidueField s) ≫ f.left =
       pullback.fst A.hom (S.fromSpecResidueField s) ≫ g.left) :
     ∃ χ : 𝟙_ (Over S) ⟶ G, f = lift (toUnit A ≫ χ) g ≫ μ[G] := by
-  sorry
+  -- the projection from the fibre, as a morphism over `S`
+  have hfib' : (Over.homMk (pullback.fst A.hom (S.fromSpecResidueField s)) rfl :
+      Over.mk (pullback.fst A.hom (S.fromSpecResidueField s) ≫ A.hom) ⟶ A) ≫ f =
+      (Over.homMk (pullback.fst A.hom (S.fromSpecResidueField s)) rfl) ≫ g :=
+    Over.OverMorphism.ext (by simp only [Over.comp_left, Over.homMk_left]; exact hfib)
+  -- the quotient `f · g⁻¹` collapses the `s`-fibre to the unit's image point
+  have hconst0 := comp_mul_inv_left _ f g hfib'
+  simp only [Over.homMk_left, Over.mk_hom] at hconst0
+  -- re-type the components equation at the pullback (defeq, but syntactically clean)
+  have hconst : pullback.fst A.hom (S.fromSpecResidueField s) ≫ (f * g⁻¹).left
+      = (pullback.fst A.hom (S.fromSpecResidueField s) ≫ A.hom) ≫ η[G].left := hconst0
+  have hsub : Set.Subsingleton ((f * g⁻¹).left.base '' (A.hom.base ⁻¹' {s})) := by
+    have hrange : A.hom.base ⁻¹' {s}
+        = Set.range (pullback.fst A.hom (S.fromSpecResidueField s)).base := by
+      rw [Scheme.Pullback.range_fst A.hom (S.fromSpecResidueField s),
+        Scheme.range_fromSpecResidueField]
+    have hval : ∀ w : ↥(pullback A.hom (S.fromSpecResidueField s)),
+        (f * g⁻¹).left ((pullback.fst A.hom (S.fromSpecResidueField s)) w)
+          = η[G].left s := by
+      intro w
+      have hbase := congrArg (fun m : (pullback A.hom (S.fromSpecResidueField s) :
+          Scheme.{u}) ⟶ G.left => m w) hconst
+      have hs' : (pullback.fst A.hom (S.fromSpecResidueField s) ≫ A.hom) w = s := by
+        rw [pullback.condition]
+        have hmem : (pullback.snd A.hom (S.fromSpecResidueField s) ≫
+            S.fromSpecResidueField s) w ∈ Set.range (S.fromSpecResidueField s).base := by
+          rw [Scheme.Hom.comp_apply]
+          exact Set.mem_range_self _
+        rwa [Scheme.range_fromSpecResidueField] at hmem
+      simp only [Scheme.Hom.comp_apply] at hbase hs'
+      rw [hs'] at hbase
+      exact hbase
+    rw [hrange, ← Set.range_comp]
+    rintro y ⟨w, rfl⟩ y' ⟨w', rfl⟩
+    simp only [Function.comp_apply]
+    rw [hval w, hval w']
+  -- rigidity factors the quotient through a section of `G`
+  obtain ⟨sec, hsecq, hfac⟩ :=
+    rigidity hconn hO e.left (Over.w e) (f * g⁻¹).left (Over.w (f * g⁻¹)) s hsub
+  refine ⟨Over.homMk sec hsecq, ?_⟩
+  have hφconst : f * g⁻¹ = toUnit A ≫ Over.homMk sec hsecq :=
+    Over.OverMorphism.ext (by simpa [Over.comp_left, Over.toUnit_left] using hfac)
+  calc f = (f * g⁻¹) * g := (inv_mul_cancel_right f g).symm
+    _ = (toUnit A ≫ Over.homMk sec hsecq) * g := by rw [hφconst]
+    _ = lift (toUnit A ≫ Over.homMk sec hsecq) g ≫ μ[G] := Hom.mul_def _ _
 
 /-- **(T-W7.7·C2, GIT Cor 6.3 — SORRIED LEAF)** A morphism `A ⊗ B ⟶ G` out of a product,
 with `A` proper flat universally-`O`-connected carrying a unit point and `B.left`
