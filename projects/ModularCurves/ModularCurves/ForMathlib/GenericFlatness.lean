@@ -128,22 +128,100 @@ section Devissage
 
 variable {R S : Type*} [CommRing R] [IsDomain R] [CommRing S] [Algebra R S]
 
+omit [IsDomain R] in
 /-- Freeness of a localised module survives inverting more: from `X_a` free over `R_a` we get
 `X_{ab}` free over `R_{ab}`, since `R_{ab}` (resp. `X_{ab}`) is a further localisation of `R_a`
 (resp. `X_a`).
 
-This is pure localisation-of-localisation plumbing — provable from existing mathlib, no missing
-theory. `Module.free_of_isLocalizedModule` gives freeness over the localisation-of-localisation
-ring `Localization.Away (algebraMap R (Localization.Away a) b)` in one step; the remaining work is
-transferring that across the localisation-uniqueness isomorphism to the standard `Localization.Away
-(a * b)` / `LocalizedModule (powers (a * b)) X`, which mathlib lacks a one-shot lemma for. Left as a
-`sorry` in this pass. -/
+`Module.free_of_isLocalizedModule` gives freeness over the iterated ring
+`Localization.Away (algebraMap R (Localization.Away a) b)`; base change composes
+(`IsBaseChange.comp`), so via `isLocalizedModule_iff_isBaseChange` the iterated module is a
+localisation of `X` at `powers (a*b)`; then `IsLocalization.algEquiv` supplies the ring iso to the
+standard `Localization.Away (a * b)` and `Module.Free.of_equiv` transports freeness across the
+resulting semilinear equivalence. -/
 private theorem free_localizedModule_away_mul {X : Type*}
     [AddCommGroup X] [Module R X] (a b : R)
     (h : Module.Free (Localization.Away a) (LocalizedModule (Submonoid.powers a) X)) :
     Module.Free (Localization.Away (a * b))
       (LocalizedModule (Submonoid.powers (a * b)) X) := by
-  sorry
+  haveI := h
+  -- Freeness over the iterated ring `T = Localization.Away (image of b in R_a)`.
+  have hfreeT : Module.Free (Localization.Away (algebraMap R (Localization.Away a) b))
+      (LocalizedModule (Submonoid.powers (algebraMap R (Localization.Away a) b))
+        (LocalizedModule (Submonoid.powers a) X)) :=
+    Module.free_of_isLocalizedModule (R := Localization.Away a)
+      (Submonoid.powers (algebraMap R (Localization.Away a) b))
+      (LocalizedModule.mkLinearMap (Submonoid.powers (algebraMap R (Localization.Away a) b))
+        (LocalizedModule (Submonoid.powers a) X))
+  set mk_a := LocalizedModule.mkLinearMap (Submonoid.powers a) X with hmk_a
+  set mk_bS := LocalizedModule.mkLinearMap
+    (Submonoid.powers (algebraMap R (Localization.Away a) b))
+    (LocalizedModule (Submonoid.powers a) X) with hmk_bS
+  -- The composite `X → X_a → X_{ab}` is a localisation of `X` at `powers (a*b)` (base change
+  -- composes).
+  have hbc : IsBaseChange (Localization.Away (algebraMap R (Localization.Away a) b))
+      ((mk_bS.restrictScalars R).comp mk_a) :=
+    (IsLocalizedModule.isBaseChange (Submonoid.powers a) (Localization.Away a) mk_a).comp
+      (IsLocalizedModule.isBaseChange
+        (Submonoid.powers (algebraMap R (Localization.Away a) b))
+        (Localization.Away (algebraMap R (Localization.Away a) b)) mk_bS)
+  have hLM : IsLocalizedModule (Submonoid.powers (a * b)) ((mk_bS.restrictScalars R).comp mk_a) :=
+    (isLocalizedModule_iff_isBaseChange (Submonoid.powers (a * b))
+      (Localization.Away (algebraMap R (Localization.Away a) b))
+      ((mk_bS.restrictScalars R).comp mk_a)).mpr hbc
+  have hLMab : IsLocalizedModule (Submonoid.powers (a * b))
+      (LocalizedModule.mkLinearMap (Submonoid.powers (a * b)) X) := inferInstance
+  -- `R`-linear equivalence between the two localisations of `X` at `powers (a*b)`.
+  have φ := IsLocalizedModule.linearEquiv (Submonoid.powers (a * b))
+    ((mk_bS.restrictScalars R).comp mk_a)
+    (LocalizedModule.mkLinearMap (Submonoid.powers (a * b)) X)
+  -- Ring iso `T ≃ₐ[R] R_{ab}` (both localise `R` at `powers (a*b)`).
+  let σA : (Localization.Away (algebraMap R (Localization.Away a) b)) ≃ₐ[R]
+      (Localization.Away (a * b)) :=
+    IsLocalization.algEquiv (Submonoid.powers (a * b)) _ _
+  -- `φ` is semilinear over `σA`.
+  have hsl : ∀ (t : Localization.Away (algebraMap R (Localization.Away a) b))
+      (y : LocalizedModule (Submonoid.powers (algebraMap R (Localization.Away a) b))
+        (LocalizedModule (Submonoid.powers a) X)),
+      φ (t • y) = σA t • φ y := by
+    intro t y
+    obtain ⟨⟨r, s⟩, hrs⟩ := IsLocalization.surj (Submonoid.powers (a * b)) t
+    simp only at hrs
+    have hu := IsLocalizedModule.map_units
+      (LocalizedModule.mkLinearMap (Submonoid.powers (a * b)) X) s
+    have eL : (↑s : R) • φ (t • y) = r • φ y := by
+      rw [← map_smul φ,
+        ← algebraMap_smul (A := Localization.Away (algebraMap R (Localization.Away a) b))
+          (↑s : R) (t • y),
+        smul_smul,
+        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R)) t,
+        hrs, algebraMap_smul, map_smul φ]
+    have hsc : (↑s : R) • σA t = algebraMap R (Localization.Away (a * b)) r := by
+      rw [← algebraMap_smul (A := Localization.Away (a * b)) (↑s : R) (σA t), smul_eq_mul,
+        ← σA.commutes (↑s : R), ← map_mul,
+        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R)) t,
+        hrs, σA.commutes r]
+    have eR : (↑s : R) • (σA t • φ y) = r • φ y := by
+      rw [← smul_assoc, hsc, algebraMap_smul]
+    apply ((Module.End.isUnit_iff _).mp hu).injective
+    simp only [Module.algebraMap_end_apply]
+    rw [eL, eR]
+  -- Assemble the semilinear equivalence and transport freeness.
+  haveI := hfreeT
+  haveI := RingHomInvPair.of_ringEquiv σA.toRingEquiv
+  haveI := RingHomInvPair.of_ringEquiv σA.toRingEquiv.symm
+  let e₂ : (LocalizedModule (Submonoid.powers (algebraMap R (Localization.Away a) b))
+        (LocalizedModule (Submonoid.powers a) X)) ≃ₛₗ[(σA.toRingEquiv :
+        (Localization.Away (algebraMap R (Localization.Away a) b)) →+*
+        (Localization.Away (a * b)))]
+      (LocalizedModule (Submonoid.powers (a * b)) X) :=
+    { toFun := φ
+      map_add' := fun x y => φ.map_add x y
+      map_smul' := fun t y => hsl t y
+      invFun := φ.symm
+      left_inv := φ.left_inv
+      right_inv := φ.right_inv }
+  exact Module.Free.of_equiv e₂
 
 /-- The zero module is generically free (invert `f = 1`; a subsingleton is free). -/
 private theorem GFree.subsingleton (N : Type*) [AddCommGroup N] [Module S N] [Subsingleton N] :
