@@ -157,6 +157,24 @@ REDUCEDNESS + a field-points ext principle (`hom_ext_of_forall_specPoint`) repla
 generic-point route; `Point.add`'s mathlib `[DecidableEq K]` gate surfaced (instance-argument
 pattern).
 
+## P1 status (2026-07-07, lane session)
+
+**T-W7.0c CAS layer COMPLETE** — see `scripts/tw7-p1-bosma-lenstra/` (README maps every file).
+Headlines: mathlib's `Projective.addX/addY/addZ` **is** B–L law (1) up to global sign (verified
+exactly, term-by-term), so P1 reduces to law (2); law (2) was **derived** (not transcribed) from
+the B–L p. 237 anchor `law2 = s*(Y/Z)·law1` and certified (exact anchor ideal-identity +
+end-to-end numeric group law, diagonal doubling included). All `linear_combination` cofactors
+exported in Lean syntax: c3 minors 45–110 terms ✓, diagonal `law2(P,P) = dblXYZ P` 3–13 terms ✓
+(sign +1 — mathlib's doubling IS the diagonal of law 2), O-columns plain `ring` ✓,
+`equation_addXYZ` (law 1 on-curve over any ring, absent from mathlib) 422/584 terms — test.
+**One hard case: law-2 on-curve (c5)** — cofactors ≈ 4–8k terms in every reduction order (raw
+expansion 20 254 monomials): NOT a single `linear_combination` under the no-`maxHeartbeats` bar.
+Route of record per the v3 design delta: the field-points ext principle
+(`hom_ext_of_forall_specPoint` — reducedness route) once P2 lands; field case is mathlib's
+`nonsingular_add`. Remaining P1 Lean work: `AdditionLaw.lean` polynomial file (mechanical from
+the exports), then the `GroupLawConstruction.lean` scheme layer (`blOpenZ/Y`, `addOnZ/Y`,
+`blOpen_cover`, `addOn_agree`, `mulModelHom`).
+
 ## Cleanup cadence
 
 `[CLEANUP-W7-1]` after 0g; `[CLEANUP-W7-2]` after 1b; `[CLEANUP-ALL-W7]` before T-W7.6 (milestone);

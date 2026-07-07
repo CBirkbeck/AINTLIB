@@ -107,9 +107,16 @@ For this application to rings, it is essential that each of the addition formula
 valid on an open subset of E × E; thus, the traditional formulae as in [5, Chapter III, Section 2]
 cannot be used."
 
-**Explicit formulas**: §5 of the paper (pp. ~236–240) — transcribe at T-W7.0c implementation time
-directly from the PDF (OCR of the big displays is unreliable; verify each polynomial by CAS before
-`linear_combination`).
+**Explicit formulas**: §5 of the paper (pp. 236–240). **Resolved 2026-07-07 (lane P1): the §5
+polynomials were re-DERIVED exactly** from the paper's own anchor ("Multiplying the addition law
+just given by s*(Y/Z) we obtain the addition law corresponding to (0:1:0)", p. 237) rather than
+trusted from OCR/eyeball — see `scripts/tw7-p1-bosma-lenstra/` (polynomials + certificates +
+regenerating script). Findings of record: (i) law (1) as printed (p. 236–237) equals
+`−(Projective.addX, addY, addZ)` of mathlib, exactly; (ii) the diagonal of law (2) equals
+mathlib's `dblXYZ` exactly mod the curve relation, sign `+1`; (iii) one printed line of `X₃⁽²⁾`
+is `− a₃a₄(2X₁Z₂ + X₂Z₁)X₂Z₁` (an earlier reading as `+ a₃a₄(X₁Z₂ − 2X₂Z₁)X₂Z₁` was wrong —
+the derived polynomials are authoritative, being overdetermined by the anchor identity and
+independent numeric group-law validation).
 
 ## Lange–Ruppert, Invent. Math. 79 (1985) 603–610 (GDZ scan, `LOG_0040`)
 
