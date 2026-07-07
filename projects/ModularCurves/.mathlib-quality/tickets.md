@@ -4114,11 +4114,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     ι_desc_assoc/isoPullback/Cofan.fac steps (instances-transparency);
     IsIso.comp_isIso' explicit; reassoc-variants pre-normalize (no trailing
     id_comp); duplicate [Finite G] section-vars poison instance synthesis.
-    REMAINING TAIL (statement-level): full faithfulness **for connected
-    nonempty S only** (ATTACK FINDING 2026-07-07, q-lane.md: fails for S = ∅ —
-    Hom-sets G vs 1 — and for disconnected S — componentwise translations; the
-    general comparison lives at stackification level), and the
-    (descent-gated) essential-image statement.
+    **`trivialize_faithful` PROVEN** (2026-07-07T05:40Z, first-try): faithful
+    for [Nonempty S] exactly (left translations distinguished on a 1-summand
+    point via sigmaι_eq_iff; the S = ∅ counterexample is the only faithfulness
+    obstruction). REMAINING TAIL: fullness **for connected nonempty S**
+    (clopen-decomposition argument: restrict a pair-hom to the 1-summand,
+    the ι_γ-range preimages are a finite clopen partition of S, connectedness
+    picks the unique γ, then hom = left γ⁻¹ by equivariance — attack finding
+    q-lane.md; needs PreconnectedSpace vocabulary) and the (descent-gated)
+    essential-image statement (stackification-level comparison).
   - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
     (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
     (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
