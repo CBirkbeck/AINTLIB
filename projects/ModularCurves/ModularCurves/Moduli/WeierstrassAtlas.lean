@@ -125,13 +125,23 @@ theorem universalCurve_localModel :
     conv_rhs => erw [hcrux]
     erw [← pullback.condition, IsIso.inv_hom_id_assoc]
     exact pullback.condition
-  -- c2 (section): reduction fully DERIVED (same crux tech as c1, now unblocked):
-  --   simp; `pullback.lift_fst_assoc`; `hcrux2 : isoSpec.inv ≫ ⊤.ι = φ`
-  --   (= `hφ_eq ▸ (isoSpec_inv_ι _).trans fromSpec_top`); then
-  --   `projModelZero_baseChange` (φ ≫ zero = projModelZero W' ≫ projModelBaseChange)
-  --   + `isoPullback_hom_fst` (projModelBaseChange = isoPullback.hom ≫ fst) + `hom_inv_id`.
-  --   Closes mathematically; needs conv-isolated steps to stay under the heartbeat budget
-  --   (the affineOpens-coercion poison makes whole-goal erw expensive; NO maxHeartbeats).
-  case c2 => sorry
+  case c2 =>
+    have hcrux2 : (isAffineOpen_top weierstrassAtlas).isoSpec.inv ≫
+        (⊤ : (weierstrassAtlas).Opens).ι = Spec.map (CommRingCat.ofHom (algebraMap
+          WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) :=
+      hφ_eq ▸ (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
+    have hcrux2' : ∀ {Z : Scheme.{0}} (g : weierstrassAtlas ⟶ Z),
+        (isAffineOpen_top weierstrassAtlas).isoSpec.inv ≫ (⊤ : (weierstrassAtlas).Opens).ι ≫ g
+          = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
+            ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) ≫ g :=
+      fun g => by rw [← Category.assoc]; exact congrArg (· ≫ g) hcrux2
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc]
+    rw [pullback.lift_fst_assoc]
+    simp only [Category.assoc]
+    conv_lhs => erw [hcrux2']
+    rw [show universalCurveZero = projModelZero universalWeierstrassLoc from rfl]
+    erw [← reassoc_of% projModelZero_baseChange universalWeierstrassLoc,
+      ← (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback_hom_fst_assoc,
+      IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
 
 end ModularCurves
