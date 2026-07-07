@@ -2973,6 +2973,27 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     NOETH1→2→3→FLAT1. **COORDINATION w/ T-W7.8**: DISTINCT (W = morphism-equality descent,
     largely already in mathlib; D = object/module descent) — same foundation, no shared
     files (D builds `ForMathlib/NoethApprox*.lean`; W wraps existing SpreadingOut).
+  - **T-NOETH1+2 DONE, T-NOETH3 BOXED** (beastmode-D2, 2026-07-07T16:10Z, Opus delegate +
+    independently verified): `ForMathlib/NoethApprox.lean` (177 lines, committed).
+    `exists_noetherianSubalgebra_supset` (NOETH1) + `exists_noetherian_descent` (NOETH2:
+    fp R-algebra ≅ `R ⊗[R₀] A₀` over a noetherian fg-ℤ-subalgebra R₀, via
+    presentation-coefficient descent — `Algebra.FinitePresentation.out` +
+    `MvPolynomial.algebraTensorAlgEquiv` + `Algebra.TensorProduct.tensorQuotientEquiv`)
+    BOTH axiom-clean (standard three). `exists_noetherian_descent_flat` (NOETH3) BOXED:
+    R₀/A₀/noeth/fp/iso all DERIVED from NOETH2; ONLY the `Module.Flat R₀ A₀` component is
+    sorried. **NOETH3 STICKING POINT (confirmed genuine mathlib gap)**: flatness must be
+    descended after ENLARGING R₀ (can fail for the first R₀), needing a SINGLE enlargement
+    that trivialises EVERY relation at once — that uniform bound IS **flat-locus openness /
+    generic flatness (EGA IV 11.1.1)**, which mathlib does NOT have (no generic-flatness,
+    no ring/module flat-locus-openness — only scheme-morphism `Flat.lean`). So NOETH3 is a
+    clean box for EGA IV 11.2.6/11.1.1. **IMPLICATION FOR T-FLAT1-SLICE**: the box discharge
+    (NOETH-FLAT1) needs flatness to descend (A/f flat at the noeth stage) ⟹ needs NOETH3 ⟹
+    needs GENERIC FLATNESS. So the D-chain's last sorryAx bottoms out at a THIRD mathlib gap
+    (generic flatness), beneath noetherian approximation. NOETH1+2 stand as reusable
+    upstream-candidate infrastructure regardless. RECOMMENDATION FIRMED: keep T-FLAT1-SLICE
+    boxed — full discharge = build noeth-approx (mostly done) + generic-flatness (EGA IV
+    11.1.1, new multi-hundred-line project). Generic flatness is itself a good standalone
+    mathlib contribution with many consumers if the owner wants to fund it.
 - [T-D22] section-of-smooth-rel-curve ⟹ locally principal nzd ideal (HB-REGIMM;
   étale-local 𝔸¹ model route). [T-D23] closed pt of smooth curve /field has DVR
   local ring.
