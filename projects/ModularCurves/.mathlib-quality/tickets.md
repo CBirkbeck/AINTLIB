@@ -5262,11 +5262,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-RIG-1]** `/cleanup` Rigidity.lean. **Depends**: T-W7.r2 (3rd proof ticket).
 
 - **[T-W7.7·C2conn]** total space connected over connected base —
-  `connectedSpace_of_universallyOConnected` (Rigidity.lean). **Status**: open (NEW —
-  unplanned sub-leaf found by the coordinator-§2 hypothesis sweep; GIT Cor 6.3 runs
-  connectedness along the SECOND factor) · **Depends**: none · **Type**: theorem ·
-  Route: clopen meets fibres clopen; fibres connected from O-connectedness; p open+closed;
-  section decides. No single mathlib name (2026-07-07).
+  `connectedSpace_of_universallyOConnected` (Rigidity.lean). **Status**: open (design
+  refined, fable-P4 2026-07-07T20:30Z) · **Depends**: none · **Type**: theorem
+  - Route (refined): WLOG `e(S) ⊆ C` for a nonempty clopen `C` (pull back along the
+    section, connectedness of `S`); for `x ∉ C` the fibre over `p x` meets both `C`
+    (through `e`) and `Cᶜ` (through `x`); fibre-connectedness kills it. Fibre
+    connectedness = the ONE sub-leaf: `Γ(fibre) ≅ κ(t)` (instantiate hp at
+    `fromSpecResidueField`, `U := ⊤`) is a field, and a clopen decomposition of a scheme
+    yields a nontrivial idempotent in `Γ` — the idempotent-from-clopen bridge is ABSENT
+    from mathlib (verified 2026-07-07): build via sheaf-gluing on the two-clopen cover
+    (`Γ(C ⊔ Cᶜ) ≅ Γ(C) × Γ(Cᶜ)`, glue `(1,0)`), est. 80–120 lines, its own leaf. `p`
+    open (`UniversallyOpen.of_flat`) + closed (proper) as in r2·d.
 
 - **[T-W7.7·C1]** GIT Cor 6.2 — `eq_mul_of_fibre_eq` (Rigidity.lean). **Status**: open ·
   **Depends**: T-W7.r2 · **Type**: theorem · Route: `rigidity` on the GIT quotient
