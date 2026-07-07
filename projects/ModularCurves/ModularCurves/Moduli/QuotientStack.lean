@@ -864,6 +864,52 @@ private theorem isPullback_sigma_pullbackSnd {P : Scheme.{u}} (p : P ⟶ S) :
     (fun i => Limits.Sigma.ι_desc _ _)
   exact key
 
+/-- **The base-changed shear map is an isomorphism** (T-W3c-i, the `torsor` field of
+`A.pullback q`). The shear of the base-changed action is the base change of `A`'s
+shear map (`A.torsor`) along `q`: the pasting (`isPullback_pullbackSnd_map`) and
+distributivity (`isPullback_sigma_pullbackSnd`) squares cancel to exhibit it as such,
+and isomorphisms are stable under base change. -/
+theorem TorsorPair.pullback_shear_isIso (A : TorsorPair σ S) :
+    IsIso (Limits.Sigma.desc fun g : G => Limits.pullback.lift ((A.pullbackAction q).hom g)
+        (𝟙 (Limits.pullback A.p q))
+        (by rw [Category.id_comp]; exact A.pullbackAction_over_base q g) :
+      (∐ fun _ : G => Limits.pullback A.p q) ⟶
+        Limits.pullback (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q)) := by
+  set Φ' := Limits.Sigma.desc (fun g : G => Limits.pullback.lift ((A.pullbackAction q).hom g)
+      (𝟙 (Limits.pullback A.p q))
+      (by rw [Category.id_comp]; exact A.pullbackAction_over_base q g)) with hΦ'
+  set Φ := Limits.Sigma.desc (fun g : G => Limits.pullback.lift (A.τ.hom g) (𝟙 A.P)
+      (by rw [Category.id_comp]; exact A.over_base g)) with hΦ
+  have hπ : Φ' ≫ (Limits.pullback.fst (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q) ≫
+        Limits.pullback.snd A.p q) = Limits.Sigma.desc fun _ : G => Limits.pullback.snd A.p q := by
+    refine Limits.Sigma.hom_ext _ _ fun g => ?_
+    simp only [hΦ', Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc,
+      Limits.pullback.lift_fst_assoc, TorsorPair.pullbackAction_hom_snd]
+  have hpp : Φ ≫ (Limits.pullback.fst A.p A.p ≫ A.p) = Limits.Sigma.desc fun _ : G => A.p := by
+    refine Limits.Sigma.hom_ext _ _ fun g => ?_
+    simp only [hΦ, Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc,
+      Limits.pullback.lift_fst_assoc, A.over_base]
+  have hcomm : Φ' ≫ Limits.pullback.map (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q)
+        A.p A.p (Limits.pullback.fst A.p q) (Limits.pullback.fst A.p q) q
+        Limits.pullback.condition.symm Limits.pullback.condition.symm =
+      (Limits.Sigma.desc fun g : G =>
+        Limits.pullback.fst A.p q ≫ Limits.Sigma.ι (fun _ : G => A.P) g) ≫ Φ := by
+    refine Limits.Sigma.hom_ext _ _ fun g => ?_
+    refine Limits.pullback.hom_ext ?_ ?_ <;>
+      simp only [hΦ', hΦ, Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc, Category.assoc,
+        Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_fst_assoc,
+        Limits.pullback.lift_snd, Limits.pullback.lift_snd_assoc,
+        TorsorPair.pullbackAction_hom_fst, Category.id_comp, Category.comp_id]
+  have s : IsPullback (Φ' ≫ (Limits.pullback.fst (Limits.pullback.snd A.p q)
+        (Limits.pullback.snd A.p q) ≫ Limits.pullback.snd A.p q))
+      (Limits.Sigma.desc fun g : G =>
+        Limits.pullback.fst A.p q ≫ Limits.Sigma.ι (fun _ : G => A.P) g)
+      q (Φ ≫ (Limits.pullback.fst A.p A.p ≫ A.p)) := by
+    rw [hπ, hpp]; exact isPullback_sigma_pullbackSnd q A.p
+  have hLeft := s.of_right hcomm (isPullback_pullbackSnd_map q A.p)
+  exact MorphismProperty.of_isPullback (P := MorphismProperty.isomorphisms Scheme)
+    hLeft.flip A.torsor
+
 end PullbackTorsor
 
 end Trivialize
