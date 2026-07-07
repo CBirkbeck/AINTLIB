@@ -4968,12 +4968,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-PD]** final `/cleanup` PointsDictionary.lean. **Depends**: T-W7.0e, T-W7.0f.
 
 - **[T-W7.1a]** bundled atlas + classifying map — `EllipticCurveGeom.atlas`,
-  `classifyRingHom`, `universalWeierstrassLoc_map_classifyRingHom`
-  (WeierstrassAtlasBundle.lean:50–65; the structure itself already compiles).
-  - **Status**: open (lane P5) · **File**: EllipticCurve/WeierstrassAtlasBundle.lean ·
-    **Depends**: none · **Parallel**: yes · **Type**: 2 defs + lemma
+  `classifyRingHom`, `universalWeierstrassLoc_map_classifyRingHom` (+ helper
+  `classifyCoeffHom` and `universalWeierstrass_map_classifyCoeffHom`)
+  (WeierstrassAtlasBundle.lean:50–96).
+  - **Status**: done (lane P5) · **Claimed**: lane-P5 (beastmode), retrofit
+    2026-07-07T14:04Z (work landed 8cd4beba BEFORE claim — rule-5 incident, retro-legalized) ·
+    **File**: EllipticCurve/WeierstrassAtlasBundle.lean · **Depends**: none · **Type**: 3 defs + 2 lemmas
   - Sketch: choice from `localModel` (index by points); `IsLocalization.Away.lift` with
-    `Δ ↦` unit; the spec is five coefficient equations `Xᵢ ↦ aᵢ`. Leaf **L-1a′/1a**.
+    `Δ ↦` unit (via `classifyCoeffHom` + `universalWeierstrass_map_classifyCoeffHom`); the
+    spec via `map_map` + `Away.lift_comp`. Leaf **L-1a′/1a**. DONE axiom-clean — all 5 decls
+    `[propext, Classical.choice, Quot.sound]`.
 
 - **[CLEANUP-WAB]** final `/cleanup` WeierstrassAtlasBundle.lean. **Depends**: T-W7.1a.
 
