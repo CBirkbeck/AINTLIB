@@ -482,11 +482,36 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   -- `fromSpecStalk` sends to `p x`; names: `PrimeSpectrum.range_comap_of_surjective`,
   -- `Ideal.IsPrime.pow_le_iff`, `IsLocalRing.closedPoint`, `fromSpecStalk_closedPoint`)
   have hrange_gT : Set.range gT.base ⊆ {p.base x} := by
-    sorry
+    rw [hgT]
+    rintro _ ⟨z, rfl⟩
+    have hz : (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))))).base z =
+        IsLocalRing.closedPoint (S.presheaf.stalk (p.base x)) := by
+      have hmem : (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+          ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))))).base z ∈
+          Set.range (PrimeSpectrum.comap (Ideal.Quotient.mk
+            ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1)))) :=
+        ⟨z, rfl⟩
+      rw [range_comap_of_surjective _ _ Ideal.Quotient.mk_surjective,
+        Ideal.mk_ker] at hmem
+      have hle0 : (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1) ≤
+          ((Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+            ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))))).base
+              z).asIdeal := by
+        have hsub := (PrimeSpectrum.mem_zeroLocus _ _).mp hmem
+        exact fun y hy => hsub hy
+      have hle : IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)) ≤
+          ((Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+            ((IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))))).base
+              z).asIdeal :=
+        Ideal.IsPrime.le_of_pow_le hle0
+      exact (PrimeSpectrum.ext ((IsLocalRing.maximalIdeal.isMaximal _).eq_of_le
+        (Ideal.IsPrime.ne_top inferInstance) hle)).symm
+    rw [Scheme.Hom.comp_apply, hz, Scheme.fromSpecStalk_closedPoint]
+    rfl
   haveI hpre : IsPreimmersion gT := by
-    -- SORRIED micro-leaf: `Spec.map` of the surjective quotient is a closed immersion,
-    -- closed immersions are preimmersions, `fromSpecStalk` is a preimmersion, compose.
-    sorry
+    rw [hgT]
+    infer_instance
   have hFcond : (pullback.fst p gT ≫ f) ≫ q = pullback.snd p gT ≫ gT := by
     rw [Category.assoc, hf]
     exact pullback.condition
