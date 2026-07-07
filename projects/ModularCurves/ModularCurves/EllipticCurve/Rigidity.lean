@@ -364,6 +364,28 @@ theorem fibre_subset_eqLocus_of_collapsed (hp : UniversallyOConnected p)
   have hwz := congrArg (fun m : pullback p (S.fromSpecResidueField s) ⟶ X => m.base z) hw
   simpa using hwz.trans hz
 
+/-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
+the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
+fibre over `t := p x` lies set-theoretically in the agreement locus, then the germ at `x`
+of any section of `(eqLocusι f g hf hg).ker` lies in `(𝔪_{p x}·O_{X,x})ⁿ` for every `n`.
+Route (all names verified at the pin; board ticket has the full map): case 1 over
+`Spec (Γstalk (p x) ⧸ 𝔪ⁿ)` factors the thickened fibre through the locus — the
+`fromSpecStalk`-composite is a preimmersion, so the r2·b subsingleton mechanism applies
+verbatim; then push `a` along `Scheme.stalkMap_germ` at a preimage point
+(`Scheme.Pullback.range_fst`), and compute the kernel affine-locally via `pullbackSpecIso`
+(`Γ(U) ⊗ (stalk/𝔪ⁿ)`; `IsLocalization` torsion + `Ideal.map` extension — no
+stalk-of-pullback API needed). -/
+theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p)
+    (x : X) (hset : p.base ⁻¹' {p.base x} ⊆ Set.range (eqLocusι f g hf hg).base)
+    (U : X.affineOpens) (hxU : x ∈ U.1) (a : Γ(X, U.1))
+    (ha : a ∈ (eqLocusι f g hf hg).ker.ideal U) (n : ℕ) :
+    X.presheaf.germ U.1 x hxU a ∈
+      (Ideal.map (p.stalkMap x).hom
+        (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ n := by
+  sorry
+
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
 `p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,
