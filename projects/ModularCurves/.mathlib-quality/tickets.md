@@ -47,6 +47,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    by the root module; HEAD carries the corrected version via `91f9499e`), but this is
    the exact failure mode this rule exists to stop. beastmode-A: switch to
    `git commit -- <your files>`, no `git add`, effective immediately.
+   **FOURTH SWEEP INCIDENT (2026-07-07T20:34Z, coordinator-P1)**: commit `552a037c`
+   (P3/beastmode-A again, 27 minutes AFTER the third-incident instruction above) swept
+   P1's in-flight `AdditionLawOnCurve.lean`. Same pattern, same session; the board note
+   alone is not reaching it. ESCALATED TO OWNER: the beastmode-A session needs the
+   pathspec-commit instruction pasted directly into it (and/or a pre-commit guard).
+   No build damage (file not yet root-imported at 552a037c; HEAD corrected via 217f7aba).
 
 ## Summary
 - Work tickets: 24 · Cleanup tickets: 11 · Milestones: T-E2, T-E7, T-E9, T-F4
@@ -4837,10 +4843,22 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0c-c5α]** on-curve factorization bridge (NEW leaf, coordinator §2): the B–L
   triples land on the curve at the RING level over the universal atlas.
-  - **Status**: in_progress · **Claimed**: coordinator-P1, 2026-07-07T18:06Z. Route note at
-    claim: the field-level input needs NO new content — at a field point `dblAdd(P,Q)` is
-    either `0` (equation trivial) or, by the six dba3aa8c certificates, projectively
-    proportional to a law-1/doubling value, which mathlib's equation specs put on the curve.
+  - **Status**: done (coordinator-P1, 2026-07-07T18:06Z → 20:34Z) · **Claimed**:
+    coordinator-P1, 2026-07-07T18:06Z. Route note at claim: the field-level input needs NO
+    new content — at a field point `dblAdd(P,Q)` is either `0` (equation trivial) or, by
+    the six dba3aa8c certificates, projectively proportional to a law-1/doubling value,
+    which mathlib's equation specs put on the curve.
+  - **DONE** (91f9499e field layer + 217f7aba ring layer, both zero-sorry, axiom-clean):
+    headline `equation_dblAddXYZ_of_isJacobsonRing` — over ANY reduced Jacobson ring with
+    `Δ` a unit, `Equation P → Equation Q → Equation (dblAddXYZ P Q)`. Files:
+    `AdditionLawField.lean` (field case via nonsingular_add + the six certificates),
+    `AdditionLawOnCurve.lean` (maximal-ideal evaluation through
+    `eq_zero_of_forall_isMaximal_mem`; `IsField`-parametrized to dodge the quotient
+    instance-path whnf blowup — see the 217f7aba commit message). Consumers instantiate at
+    the `E_U ×_U E_U` chart rings (reduced by 0e, Jacobson by f.t.-over-ℤ, Δ unit, chart
+    points tautologically on the curves) — that one-line instantiation is c5β/0c-i work.
+    Base-change naturality of law 2 (`map_dblAddXYZ`) landed alongside — 0c-iii's
+    `mulModelHom_map` leg can reuse it.
   Element form: in
   the biprojective chart rings of `E_U ×_U E_U` (reduced by 0e; **Jacobson** — f.g. over
   `ℤ[a][Δ⁻¹]`), `F(dblAddX, dblAddY, dblAddZ)` vanishes because it vanishes at every field
