@@ -177,6 +177,18 @@ lemma pointMap_mul (C C' : VariableChange R) (P : W.toAffine.Point) :
     rw [pointMap_some, pointMap_some, pointMap_some, eqRec_point_some]
     simp only [vcX_comp, vcY_comp]
 
+/-- Unit condition of the descent cocycle: the identity coordinate change induces the identity on
+points (transported along `one_smul`). With `pointMap_mul` this makes `pointMap` an action. -/
+lemma pointMap_one (P : W.toAffine.Point) :
+    one_smul (M := VariableChange R) W ▸ (1 : VariableChange R).pointMap W P = P := by
+  have hX : ∀ x : R, (1 : VariableChange R).vcX x = x := fun x => by
+    rw [show (1 : VariableChange R) = ⟨1, 0, 0, 0⟩ from rfl]; simp [vcX]
+  have hY : ∀ x y : R, (1 : VariableChange R).vcY x y = y := fun x y => by
+    rw [show (1 : VariableChange R) = ⟨1, 0, 0, 0⟩ from rfl]; simp [vcY]
+  cases P with
+  | zero => rw [pointMap_zero, eqRec_point_zero]
+  | some x y h => rw [pointMap_some, eqRec_point_some]; simp only [hX, hY]
+
 /-- The coordinate change commutes with the `y`-negation `negY`: transforming then negating equals
 negating then transforming. This is the coordinate identity behind `pointMap_neg`. -/
 lemma negY_smul (x y : R) :
