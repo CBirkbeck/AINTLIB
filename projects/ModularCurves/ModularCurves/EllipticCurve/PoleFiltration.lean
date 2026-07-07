@@ -17,7 +17,9 @@ statements require `W.IsElliptic` — the chart rings are free `R`-modules with 
 for arbitrary Weierstrass data.
 -/
 
-open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
+open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -463,45 +465,45 @@ density arguments: the equalizer is a closed immersion (separatedness), the loca
 factors through it, and injectivity of `A → A[1/a]` kills the ideal. Mirrors the
 Over-packaging of mathlib's `ext_of_isDominant_of_isSeparated`; the ending is
 `IsClosedImmersion.isIso_of_injective_of_isAffine` instead of reducedness. -/
-theorem spec_hom_ext_of_nonZeroDivisor {A : Type u} [CommRing A] {Z : Scheme.{u}}
-    [Z.IsSeparated] {f g : Spec (CommRingCat.of A) ⟶ Z} (a : A)
+theorem spec_hom_ext_of_nonZeroDivisor {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (a : A) [IsLocalization.Away a B] {Z : Scheme.{u}}
+    [Z.IsSeparated] {f g : Spec (CommRingCat.of A) ⟶ Z}
     (ha : a ∈ nonZeroDivisors A)
-    (h : Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ f =
-      Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ g) : f = g := by
+    (h : Spec.map (CommRingCat.ofHom (algebraMap A B)) ≫ f =
+      Spec.map (CommRingCat.ofHom (algebraMap A B)) ≫ g) : f = g := by
   have hfg : f ≫ terminal.from Z = g ≫ terminal.from Z := terminal.hom_ext _ _
   let X' : Over (⊤_ Scheme.{u}) := Over.mk (f ≫ terminal.from Z)
   let Y' : Over (⊤_ Scheme.{u}) := Over.mk (terminal.from Z)
   let U' : Over (⊤_ Scheme.{u}) := Over.mk
-    (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ f ≫ terminal.from Z)
+    (Spec.map (CommRingCat.ofHom (algebraMap A B)) ≫ f ≫ terminal.from Z)
   let f' : X' ⟶ Y' := Over.homMk f
   let g' : X' ⟶ Y' := Over.homMk g hfg.symm
   let ι' : U' ⟶ X' :=
-    Over.homMk (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))))
+    Over.homMk (Spec.map (CommRingCat.ofHom (algebraMap A B)))
   haveI : IsSeparated Y'.hom :=
     show IsSeparated (terminal.from Z) from Scheme.IsSeparated.isSeparated_terminal_from
   have hlift : (equalizer.lift ι' (by ext1; exact h)).left ≫ (equalizer.ι f' g').left =
-      Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) := by
+      Spec.map (CommRingCat.ofHom (algebraMap A B)) := by
     rw [← Over.comp_left, equalizer.lift_ι]
     rfl
   have hinj : Function.Injective ((equalizer.ι f' g').left.appTop) := by
     have happ := congrArg Scheme.Hom.appTop hlift
     rw [Scheme.Hom.comp_appTop] at happ
     have hloc : Function.Injective
-        ((Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a)))).appTop) := by
-      have hnat := Scheme.ΓSpecIso_naturality
-        (CommRingCat.ofHom (algebraMap A (Localization.Away a)))
-      have halg : Function.Injective (algebraMap A (Localization.Away a)) :=
-        IsLocalization.injective (Localization.Away a) (Submonoid.powers_le.mpr ha)
-      have : (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a)))).appTop =
+        ((Spec.map (CommRingCat.ofHom (algebraMap A B))).appTop) := by
+      have hnat := Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (algebraMap A B))
+      have halg : Function.Injective (algebraMap A B) :=
+        IsLocalization.injective B (Submonoid.powers_le.mpr ha)
+      have : (Spec.map (CommRingCat.ofHom (algebraMap A B))).appTop =
           (Scheme.ΓSpecIso (CommRingCat.of A)).hom ≫
-            CommRingCat.ofHom (algebraMap A (Localization.Away a)) ≫
-              (Scheme.ΓSpecIso (CommRingCat.of (Localization.Away a))).inv := by
+            CommRingCat.ofHom (algebraMap A B) ≫
+              (Scheme.ΓSpecIso (CommRingCat.of B)).inv := by
         rw [← Category.assoc, ← hnat, Category.assoc, Iso.hom_inv_id, Category.comp_id]
       rw [this]
       intro x y hxy
       simp only [CommRingCat.comp_apply] at hxy
       have h1 := (ConcreteCategory.isIso_iff_bijective
-        (Scheme.ΓSpecIso (CommRingCat.of (Localization.Away a))).inv).mp
+        (Scheme.ΓSpecIso (CommRingCat.of B)).inv).mp
         inferInstance |>.injective hxy
       have h2 := halg h1
       exact ((ConcreteCategory.isIso_iff_bijective
@@ -516,17 +518,106 @@ theorem spec_hom_ext_of_nonZeroDivisor {A : Type u} [CommRing A] {Z : Scheme.{u}
     (f := (equalizer.ι f' g').left) hinj
   exact (cancel_epi (equalizer.ι f' g').left).mp congr($(equalizer.condition f' g').left)
 
-/-- **(T-W7.0i·i4)** Morphisms out of the projective model into a separated scheme are
-determined by their restriction to the affine part (the `Z`-chart, whose complement is the
-zero section): the affine part is *scheme-theoretically dense*, valid over arbitrary — in
-particular non-reduced — `R` via `infChart_s_nonZeroDivisor` (NOT via topological density +
-reducedness). Consumed by the comparison theorem (b4). Source: audit A1 (b4). -/
+/-- **(T-W7.0i·i4-ζ)** In each chart `j` of the model, the localization element carrying the
+`Z`-coordinate (`Xⱼ`-denominator) is a nonzerodivisor: `j = 2` trivially (it is `1`-ish);
+`j = 1` via the infinity-chart bridge (`infChart_t_mem_nonZeroDivisors`); `j = 0` via the
+constant-coefficient-unit form of the chart cubic in the `z`-variable
+(`adjoinRoot_root_mem_nonZeroDivisors`-style). -/
+lemma chart_isLocalizationElem_nonZeroDivisor (W : WeierstrassCurve R) (j : Fin 3) :
+    HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W 2) ∈
+      nonZeroDivisors (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))) := by
+  sorry
+
 theorem projModel_hom_ext_of_affine (W : WeierstrassCurve R) {Z : Scheme.{u}}
     [Z.IsSeparated] {f g : projModel W ⟶ Z}
     (h : (modelChartCover W).openCover.f (2 : Fin 3) ≫ f =
       (modelChartCover W).openCover.f (2 : Fin 3) ≫ g) :
     f = g := by
-  sorry
+  apply (modelChartCover W).openCover.hom_ext
+  intro j
+  letI := (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X j) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _)).toAlgebra
+  haveI := HomogeneousLocalization.Away.isLocalization_mul
+    (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X j) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _) one_ne_zero
+  refine spec_hom_ext_of_nonZeroDivisor
+    (B := HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+    (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W 2))
+    (chart_isLocalizationElem_nonZeroDivisor W j) ?_
+  -- **(T-W7.0i·i4)** the affine part is scheme-theoretically dense: agreement on the Z-chart
+  -- extends chart-by-chart through the overlap localizations (audit A1/b4; non-reduced-safe).
+  have hsqj : Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+        (modelChartCover W).openCover.f j =
+      Proj.awayι (quotientGrading (projIdeal W)) _
+        (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W j)
+          (mk_X_mem_quotientGrading_one W 2)) (by omega) :=
+    Proj.SpecMap_awayMap_awayι _ _ _ _ rfl
+  have hsq2 : Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+        (modelChartCover W).openCover.f (2 : Fin 3) =
+      Proj.awayι (quotientGrading (projIdeal W)) _
+        (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W j)
+          (mk_X_mem_quotientGrading_one W 2)) (by omega) :=
+    Proj.SpecMap_awayMap_awayι _ _ _ _ (mul_comm _ _)
+  have hcomp : Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+        (modelChartCover W).openCover.f j =
+      Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+        (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+        (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+          (modelChartCover W).openCover.f (2 : Fin 3) := by
+    rw [hsqj]
+    exact hsq2.symm
+  show Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+        ((modelChartCover W).openCover.f j ≫ f) =
+    Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+        ((modelChartCover W).openCover.f j ≫ g)
+  calc Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+        ((modelChartCover W).openCover.f j ≫ f)
+      = (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+          (modelChartCover W).openCover.f j) ≫ f := (Category.assoc _ _ _).symm
+    _ = (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+          (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+          (modelChartCover W).openCover.f (2 : Fin 3)) ≫ f := congrArg (· ≫ f) hcomp
+    _ = Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+          (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+          ((modelChartCover W).openCover.f (2 : Fin 3) ≫ f) := Category.assoc _ _ _
+    _ = Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+          (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+          ((modelChartCover W).openCover.f (2 : Fin 3) ≫ g) := congrArg _ h
+    _ = (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W j)
+          (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+          (modelChartCover W).openCover.f (2 : Fin 3)) ≫ g := (Category.assoc _ _ _).symm
+    _ = (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+          (modelChartCover W).openCover.f j) ≫ g := congrArg (· ≫ g) hcomp.symm
+    _ = Spec.map (CommRingCat.ofHom (HomogeneousLocalization.awayMap
+          (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) rfl)) ≫
+          ((modelChartCover W).openCover.f j ≫ g) := Category.assoc _ _ _
 
 /-- **(T-W7.0i·i5, decl `locallyWeierstrass_pushforward_O_eq_O`)** For any locally-Weierstrass
 family `π : E ⟶ S` the structure map on sections `Γ(S, U) ⟶ Γ(E, π⁻¹U)` is an isomorphism for
