@@ -4333,9 +4333,29 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     set-vars trip TC; reassoc_of% + erw for transparency-poisoned steps;
     ∃-repackage for opaque indices. REMAINING: only the (descent-gated)
     essential-image statement.
-- **[T-W3c]** (in_progress, beastmode-Q 2026-07-07T07:00Z; cut from T-W3b at
-  close) TorsorPair base change +
-  self-trivialization. (i) `TorsorPair.pullback (q : S' ⟶ S) : TorsorPair σ S →
+- **[T-W3c]** (**DONE** 2026-07-07T11:30Z, beastmode-Q — both parts, sorry-free,
+  zero warnings, axiom-clean [propext/Classical.choice/Quot.sound]) TorsorPair base
+  change + self-trivialization. **DELIVERED** (Moduli/QuotientStack.lean):
+  `TorsorPair.pullbackAction` (base-changed action) + hom_fst/hom_snd/over_base;
+  `isPullback_pullbackSnd_map` (pasting `(P×_S S')²_{S'} ≅ (P×_S P)×_S S'` via
+  of_iso_pullback + explicit inverse); `isPullback_sigma_pullbackSnd` (distributivity
+  `∐_G(P×_S S') ≅ (∐_G P)×_S S'` — extensivity template, `Sigma.desc` defeq to the
+  Cofan.desc so `exact key` closes); `TorsorPair.pullback_shear_isIso` (the `torsor`
+  field: `of_right` cancels distributivity-outer + pasting-right to exhibit the
+  base-changed shear as base change of `A.torsor`, then `of_isPullback` on
+  `isomorphisms Scheme`); `TorsorPair.pullback` (full base-changed pair; finite via
+  inferInstance, etale/surjective via `MorphismProperty.pullback_snd`, u through `A.u`);
+  `TorsorPair.homInv`/`isoOfHom` (TorsorPair.Hom with iso underlying ⟹ groupoid iso);
+  `TorsorPair.selfTrivialization` (**part ii**: `A.pullback A.p ≅ trivialTorsorPair
+  σ A.P A.u`, the comparison IS `A.torsor`'s shear as a torsor-pair morphism — NOT
+  descent-gated). GOTCHAS: `pullback.map` cond is `condition.symm`; `pullback.lift_fst/snd`
+  are `@[reassoc]` NOT `@[simp]` (pass `_assoc` variants; base won't fire on right-assoc);
+  `simp [condition]` corrupts pullback type-indices — use targeted `← condition`; TC won't
+  reduce `{..}.hom` for `[IsIso f.hom]` synth → name the Hom (`let f` + `haveI : IsIso
+  f.hom := A.torsor`); `omit [Group G] in` goes BEFORE the docstring. **T-Q6e's
+  f₀-pullback vocabulary now available.**
+  - **(superseded planning notes below; kept for the SIGMA-FACTS survey)** (i)
+  `TorsorPair.pullback (q : S' ⟶ S) : TorsorPair σ S →
   TorsorPair σ S'` — total space `P ×_S S'`, action by functoriality, property
   fields via base-change stability instances (IsFinite/Etale/Surjective ✓
   mathlib instances; the ∐-comparison for the pulled-back pair from the
