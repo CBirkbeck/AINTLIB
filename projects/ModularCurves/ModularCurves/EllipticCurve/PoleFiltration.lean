@@ -3519,4 +3519,125 @@ theorem overlapMap_injective (W : WeierstrassCurve R) :
   subst hp0
   simp
 
+
+/-- Every infinity-chart function is an affine function times a `t`-power, in the overlap:
+`algLoc b = overlapMap a · t̂ʲ`. -/
+lemma exists_overlapMap_mul_tel_pow (W : WeierstrassCurve R)
+    (b : AdjoinRoot (infChartCubic W)) :
+    ∃ (a : W.toAffine.CoordinateRing) (j : ℕ),
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W)) b =
+      overlapMap W a * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ j := by
+  have hpad : ∀ (a : W.toAffine.CoordinateRing) (j J : ℕ), j ≤ J →
+      overlapMap W a * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ j =
+      overlapMap W (a * coordY W ^ (J - j)) * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ J := by
+    intro a j J hjJ
+    rw [map_mul, map_pow, overlapMap_coordY]
+    have hsplit : (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ J =
+        (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (J - j) *
+        (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j := by
+      rw [← pow_add]
+      congr 1
+      omega
+    rw [hsplit]
+    have hcancel : overlapInvT W ^ (J - j) * (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (J - j) = 1 := by
+      rw [← mul_pow, mul_comm, tel_mul_overlapInvT, one_pow]
+    calc overlapMap W a * (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j
+        = overlapMap W a * (overlapInvT W ^ (J - j) *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (J - j)) *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j := by
+          rw [hcancel, mul_one]
+      _ = overlapMap W a * overlapInvT W ^ (J - j) *
+          ((algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ (J - j) *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j) := by
+          ring
+  have hadd : ∀ b₁ b₂ : AdjoinRoot (infChartCubic W),
+      (∃ a j, algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) b₁ =
+        overlapMap W a * algebraMap _ _ (infChartTElem W) ^ j) →
+      (∃ a j, algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) b₂ =
+        overlapMap W a * algebraMap _ _ (infChartTElem W) ^ j) →
+      ∃ a j, algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (b₁ + b₂) =
+        overlapMap W a * algebraMap _ _ (infChartTElem W) ^ j := by
+    rintro b₁ b₂ ⟨a₁, j₁, h₁⟩ ⟨a₂, j₂, h₂⟩
+    refine ⟨a₁ * coordY W ^ (max j₁ j₂ - j₁) + a₂ * coordY W ^ (max j₁ j₂ - j₂),
+      max j₁ j₂, ?_⟩
+    rw [map_add, h₁, h₂, hpad a₁ j₁ (max j₁ j₂) (le_max_left _ _),
+      hpad a₂ j₂ (max j₁ j₂) (le_max_right _ _), map_add, add_mul]
+  -- reduce to basis monomials `c(t)·sⁱ`, then to `C c · tᵈ · sⁱ`
+  have hmono : ∀ (c : R) (d i : ℕ),
+      ∃ (a : W.toAffine.CoordinateRing) (j : ℕ),
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (algebraMap (Polynomial R) _ (Polynomial.C c * Polynomial.X ^ d) *
+          AdjoinRoot.root (infChartCubic W) ^ i) =
+      overlapMap W a * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ j := by
+    intro c d i
+    refine ⟨algebraMap R _ c * coordX W ^ i, d + i, ?_⟩
+    have h1 := cleared_term W c (show i ≤ d + i by omega)
+    rw [show d + i - i = d by omega] at h1
+    rw [← h1, map_mul, map_pow, overlapMap_coordX, overlapMap_algebraMap]
+    rw [show (((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))).comp
+        ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+        c = algebraMap R (Localization.Away (infChartTElem W)) c from by
+      rw [RingHom.comp_apply, RingHom.comp_apply,
+        ← Polynomial.algebraMap_eq,
+        ← IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
+        ← IsScalarTower.algebraMap_apply R (AdjoinRoot (infChartCubic W))]]
+    ring
+  have hpoly : ∀ (c : Polynomial R) (i : ℕ),
+      ∃ (a : W.toAffine.CoordinateRing) (j : ℕ),
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (algebraMap (Polynomial R) _ c * AdjoinRoot.root (infChartCubic W) ^ i) =
+      overlapMap W a * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ j := by
+    intro c i
+    induction c using Polynomial.induction_on' with
+    | add f g hf hg =>
+      obtain ⟨af, jf, hf'⟩ := hf
+      obtain ⟨ag, jg, hg'⟩ := hg
+      have := hadd (algebraMap (Polynomial R) _ f * AdjoinRoot.root (infChartCubic W) ^ i)
+        (algebraMap (Polynomial R) _ g * AdjoinRoot.root (infChartCubic W) ^ i)
+        ⟨af, jf, hf'⟩ ⟨ag, jg, hg'⟩
+      rw [← add_mul, ← map_add] at this
+      exact this
+    | monomial d c =>
+      have := hmono c d i
+      rw [show Polynomial.C c * Polynomial.X ^ d = Polynomial.monomial d c from
+        Polynomial.C_mul_X_pow_eq_monomial] at this
+      exact this
+  -- expand `b` in the basis and finish by additivity
+  rcases subsingleton_or_nontrivial R with hR | hR
+  · haveI : Subsingleton (AdjoinRoot (infChartCubic W)) := Module.subsingleton R _
+    refine ⟨0, 0, ?_⟩
+    rw [Subsingleton.elim b 0, map_zero, map_zero, zero_mul]
+  have hrepr := (infChartBasis W).sum_repr b
+  rw [Fin.sum_univ_three] at hrepr
+  simp only [infChartBasis_apply, Algebra.smul_def,
+    show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+    show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one] at hrepr
+  rw [← hrepr]
+  refine hadd _ _ (hadd _ _ ?_ ?_) ?_
+  · have := hpoly ((infChartBasis W).repr b 0) 0
+    simp only [pow_zero, mul_one] at this
+    exact this
+  · have := hpoly ((infChartBasis W).repr b 1) 1
+    simp only [pow_one] at this
+    exact this
+  · exact hpoly ((infChartBasis W).repr b 2) 2
+
 end ModularCurves

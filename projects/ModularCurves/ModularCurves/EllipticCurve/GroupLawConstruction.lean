@@ -698,9 +698,7 @@ private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K
   rw [chart_hom_aeval W 2 _ (chartHomEquiv W 2 K ⟨P, hZ⟩).2, WeierstrassCurve.Affine.negY]
   simp only [map_sub, map_neg, map_mul, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
     WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃]
-  ring
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
 dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:
 `by_cases hZ : InZChart W P`, using `inZChart_comp_negModelHom` (L1) both ways.
@@ -729,7 +727,7 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     haveI : ((W.baseChange K).toAffine).IsElliptic :=
       inferInstanceAs ((W.map (algebraMap R K)).IsElliptic)
     have hxy := WeierstrassCurve.Affine.equation_iff_nonsingular.mp (negModelHom_zEquation W K P hZ)
-    rw [projModelPointsEquiv_some W K P hZ _ _ hxy rfl rfl,
+    simp only [projModelPointsEquiv_some W K P hZ _ _ hxy rfl rfl,
       projModelPointsEquiv_some W K
         ⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ hZ' _ _
         ((WeierstrassCurve.Affine.nonsingular_neg ..).mpr hxy)

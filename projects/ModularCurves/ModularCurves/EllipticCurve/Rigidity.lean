@@ -449,6 +449,56 @@ theorem germ_ideal_eq_zero_of_exists_affine {X : Scheme.{u}}
   have h3 := h2 ▸ Ideal.mem_map_of_mem (X.presheaf.germ (X.affineBasicOpen r).1 w hwr).hom h1
   exact Ideal.mem_bot.mp h3
 
+/-- **(T-W7.r2·c, generic stalk-evaluation)** If a section dies under the `Spec`-point of
+the stalk twisted by any ring map `φ` out of the stalk, then its germ dies under `φ`:
+`(Spec.map φ ≫ fromSpecStalk).app` is `germ` followed by `φ` up to isomorphisms — the
+`ΓSpecIso` and a restriction along an equality of opens (every open of the local `Spec` of
+the stalk containing the closed point is `⊤`). Stated for an abstract `B` so that
+elaboration never unfolds a concrete quotient ring. -/
+theorem germ_eq_zero_of_fromSpecStalk_app {X : Scheme.{u}} {U : X.Opens} {x : X}
+    (hxU : x ∈ U) {B : CommRingCat.{u}} (φ : X.presheaf.stalk x ⟶ B)
+    (a : Γ(X, U)) (h : (((Spec.map φ ≫ X.fromSpecStalk x)).app U).hom a = 0) :
+    φ.hom ((X.presheaf.germ U x hxU).hom a) = 0 := by
+  have hcp : IsLocalRing.closedPoint (X.presheaf.stalk x) ∈ (X.fromSpecStalk x) ⁻¹ᵁ U := by
+    show (X.fromSpecStalk x).base _ ∈ U
+    rw [Scheme.fromSpecStalk_closedPoint]
+    exact hxU
+  have hV' : (X.fromSpecStalk x) ⁻¹ᵁ U = ⊤ := IsLocalRing.closed_point_mem_iff.mp hcp
+  have hτapp : (Spec.map φ ≫ X.fromSpecStalk x).app U = X.presheaf.germ U x hxU ≫
+      φ ≫ (Scheme.ΓSpecIso B).inv ≫ (Spec B).presheaf.map
+        ((TopologicalSpace.Opens.map (Spec.map φ).base).map
+          (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop).op := by
+    rw [Scheme.Hom.comp_app, Scheme.fromSpecStalk_app hxU]
+    simp only [Category.assoc]
+    congr 1
+    rw [Scheme.Hom.naturality (f := Spec.map φ) ((homOfLE le_top).op),
+      show (Spec.map φ).app ⊤ = (Spec.map φ).appTop from rfl,
+      Scheme.ΓSpecIso_inv_naturality_assoc]
+  rw [hτapp] at h
+  have hmapped : (TopologicalSpace.Opens.map (Spec.map φ).base).obj
+      ((X.fromSpecStalk x) ⁻¹ᵁ U) = ⊤ := by
+    rw [hV']
+    rfl
+  haveI hI1 : IsIso ((TopologicalSpace.Opens.map (Spec.map φ).base).map
+      (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop) :=
+    ⟨⟨homOfLE hmapped.ge, Subsingleton.elim _ _, Subsingleton.elim _ _⟩⟩
+  haveI hI2 : IsIso (((TopologicalSpace.Opens.map (Spec.map φ).base).map
+      (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop).op) := inferInstance
+  haveI hI3 : IsIso ((Spec B).presheaf.map
+      ((TopologicalSpace.Opens.map (Spec.map φ).base).map
+        (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop).op) := inferInstance
+  have hinj : Function.Injective (((Scheme.ΓSpecIso B).inv ≫
+      (Spec B).presheaf.map
+        ((TopologicalSpace.Opens.map (Spec.map φ).base).map
+          (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop).op).hom) :=
+    ((ConcreteCategory.isIso_iff_bijective _).mp inferInstance).injective
+  apply hinj
+  first
+  | simpa using h
+  | (rw [map_zero]; simpa using h)
+  | (rw [map_zero]; simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h ⊢; exact h)
+  | (rw [map_zero]; simp only [← Category.assoc] at h ⊢; simpa using h)
+
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
 fibre over `t := p x` lies set-theoretically in the agreement locus, then the germ at `x`
@@ -614,51 +664,10 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   have happ : (τ.app U.1).hom a = 0 := by
     rw [Scheme.Hom.congr_app hτfac U.1]
     simp [hι0]
-  -- final unpacking: `τ.app` is `germ` followed by `Quotient.mk`, then isomorphisms
+  -- final unpacking through the generic stalk-evaluation lemma
   rw [← Ideal.Quotient.eq_zero_iff_mem]
-  have hcp : IsLocalRing.closedPoint (X.presheaf.stalk x) ∈ (X.fromSpecStalk x) ⁻¹ᵁ U.1 := by
-    show (X.fromSpecStalk x).base _ ∈ U.1
-    rw [Scheme.fromSpecStalk_closedPoint]
-    exact hxU
-  have hV' : (X.fromSpecStalk x) ⁻¹ᵁ U.1 = ⊤ := IsLocalRing.closed_point_mem_iff.mp hcp
-  have hτapp : τ.app U.1 = X.presheaf.germ U.1 x hxU ≫
-      CommRingCat.ofHom (Ideal.Quotient.mk _) ≫
-      (Scheme.ΓSpecIso _).inv ≫
-      (Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
-        (Ideal.map (p.stalkMap x).hom
-          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
-        ).presheaf.map (homOfLE le_top).op := by
-    rw [hτ, Scheme.Hom.comp_app, Scheme.fromSpecStalk_app hxU]
-    simp only [Category.assoc]
-    congr 1
-    rw [← Scheme.ΓSpecIso_inv_naturality_assoc]
-    congr 1
-    rw [Scheme.Hom.naturality (f := Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk _)))
-      ((homOfLE le_top).op)]
-    congr 1
-  rw [hτapp] at happ
-  -- the tail after `Quotient.mk` is injective: an iso followed by restriction along `⊤ = ⊤`
-  have hinj : Function.Injective (((Scheme.ΓSpecIso _).inv ≫
-      (Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
-        (Ideal.map (p.stalkMap x).hom
-          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
-        ).presheaf.map (homOfLE le_top).op).hom) := by
-    haveI : IsIso (homOfLE (le_top : τ ⁻¹ᵁ U.1 ≤ ⊤)) := by
-      have hτU : τ ⁻¹ᵁ U.1 = ⊤ := by
-        rw [hτ]
-        show Spec.map _ ⁻¹ᵁ ((X.fromSpecStalk x) ⁻¹ᵁ U.1) = ⊤
-        rw [hV']
-        rfl
-      exact ⟨⟨homOfLE (hτU ▸ le_refl ⊤), Subsingleton.elim _ _, Subsingleton.elim _ _⟩⟩
-    haveI : IsIso ((Spec (CommRingCat.of ((X.presheaf.stalk x) ⧸
-        (Ideal.map (p.stalkMap x).hom
-          (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ (n + 1)))
-        ).presheaf.map (homOfLE le_top).op) := inferInstance
-    exact ((ConcreteCategory.isIso_iff_bijective _).mp inferInstance).injective
-  have hzero : (Ideal.Quotient.mk _) ((X.presheaf.germ U.1 x hxU).hom a) = 0 := by
-    apply hinj
-    simpa using happ
-  exact hzero
+  exact germ_eq_zero_of_fromSpecStalk_app hxU
+    (CommRingCat.ofHom (Ideal.Quotient.mk _)) a (hτ ▸ happ)
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
 `p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,
