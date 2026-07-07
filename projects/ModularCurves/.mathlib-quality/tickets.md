@@ -6131,3 +6131,53 @@ CITES rather than proves, and mathlib lacks:**
 geometric fibres are étale (⟺ discriminant a unit)" criterion (feeds T-D6c/T-D7-bridge). Buildable as
 ForMathlib, but is *substrate not a ticket-closer* — the ModularCurves sorries still need the T-W7
 fibre-model on top to identify D_k with Σ[aP_k]. Recorded for whoever builds the discriminant layer.
+
+---
+
+## DEV-1/DEV-2 stream (T-DEV*) — the D-chain's last two boxes, TOR-FREE (owner-funded 2026-07-07)
+
+Source: decomposition-devs.md + Stacks 00RC/00LP/00N1/07RF. mathlib foundation richer than earlier
+delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1b→DEV1c ‖ DEV2a→DEV2b.
+
+### [T-DEV1a] Hilbert syzygy — finite global dimension of a polynomial ring over a field — MAKE-OR-BREAK
+- **Status**: open · **File**: ForMathlib/HilbertSyzygy.lean (new) · **Depends on**: none · **Type**: theorem
+- **Statement**: for a field K, a finite `MvPolynomial (Fin n) K`-module has projective dimension ≤ n
+  (`HasProjectiveDimensionLE`). Design exact spelling vs mathlib `projectiveDimension`/`HasProjectiveDimensionLE`.
+- **Proof sketch**: induction on n. Base n=0: K field ⟹ finite module free ⟹ pd 0. Step: `MvPolynomial (Fin (n+1)) K
+  = (MvPolynomial (Fin n) K)[X]`; the last variable X is a regular element; `projectiveDimension_quotSMulTop_eq_succ_of_isSMulRegular`
+  raises pd by 1; combine with the IH via `hasProjectiveDimensionLE_iff_forall_primeSpectrum` / the poly-extension pd bound.
+- **Mathlib lemmas**: `projectiveDimension_quotSMulTop_eq_succ_of_isSMulRegular`, `hasProjectiveDimensionLT_of_forall_finite`,
+  `hasProjectiveDimensionLE_iff_forall_primeSpectrum`, `MvPolynomial.finSuccEquiv`/`optionEquivLeft`, `Polynomial` regular X. (#check at execution.)
+- **Sources**: Stacks Hilbert-syzygy tag; Weibel *Homological Algebra* §4.3. Validates the proj-dim route for DEV-1.
+
+### [T-DEV1b] finite free resolution of an fp module over a Noetherian ring (Stacks 00LP)
+- **Status**: open · **File**: ForMathlib/FiniteFreeResolution.lean (new) · **Depends on**: none · **Type**: def+theorem
+- **Statement**: M fp over noetherian S ⟹ a resolution by finite free S-modules (inductive syzygy chain / `CochainComplex`).
+- **Proof sketch**: `S^n ↠ M` (fp gives generators); kernel fg (S noeth ⟹ submodule of fg is fg); iterate. API: the n-th syzygy is finite.
+- **Mathlib lemmas**: `Module.Finite`, `Submodule.fg_of_...` (noeth), `IsNoetherian`, `Module.FinitePresentation`. ~100 lines.
+- **Sources**: Stacks 00LP.
+
+### [T-DEV1c] local openness at a flat point — fill `exists_basicOpen_subset_flatLocus_of_mem` (Stacks 00RC) — MAKE-OR-BREAK
+- **Status**: open · **File**: ForMathlib/FlatLocus.lean · **Depends on**: T-DEV1a, T-DEV1b, (T-LC1 done) · **Type**: theorem
+- **Statement**: the boxed lemma in FlatLocus.lean (each flat point has a basic-open nbhd in the flat locus).
+- **Proof sketch**: finite free resolution (DEV1b) of M; at a flat 𝔮 over 𝔭, the fibre `M⊗κ(𝔭)` over `S⊗κ(𝔭) ≅ κ(𝔭)[x]`
+  has finite proj dim (DEV1a) ⟹ the syzygy `K_d` at d=gldim is fibre-free; K_d also R-flat (`Module.Flat.lTensor_exact` +
+  the resolution flat) ⟹ `(K_d)_𝔮` free over `S_𝔮` by T-LC1 (00MH) ⟹ the truncated finite free complex is fibre-exact on a
+  basic-open nbhd ⟹ M flat there. MAKE-OR-BREAK: if the "fibre-exact ⟹ exact near 𝔮" step needs Buchsbaum-Eisenbud (00N1)
+  beyond the proj-dim/T-LC1 toolkit, SPAWN [T-DEV1b'] 00N1. ~200-300 lines.
+- **Mathlib lemmas**: T-LC1 `Module.free_of_flat_of_fibre_free`, `Module.Flat.lTensor_exact`, `isConstructible_basicOpen`,
+  the resolution API (DEV1b), `Localization.AtPrime`. **Sources**: Stacks 00RC.
+
+### [T-DEV2a] flatness descends along a directed colimit of rings (Stacks 07RF module form)
+- **Status**: open · **File**: ForMathlib/NoethApprox.lean (or new FlatDescentLimit.lean) · **Depends on**: (isOpen_flatLocus ⟸ DEV1c) · **Type**: theorem
+- **Statement**: `M = colimᵢ Mᵢ` (fp data) over `R = colimᵢ Rᵢ`, M flat over R ⟹ `Mᵢ` flat over `Rᵢ` for large i.
+- **Proof sketch**: `flat_of_flatLocus_univ` reduces "Mᵢ flat over Rᵢ" to "flat locus = univ"; `isOpen_flatLocus` (DEV1c) makes it
+  open; the colimit's flatness ⟹ the open flat locus at the colimit = univ ⟹ by quasi-compactness (`AffineTransitionLimit`
+  machinery) some finite stage's flat locus is univ. ~200-300 lines.
+- **Mathlib lemmas**: `flat_of_flatLocus_univ` (ours), `isOpen_flatLocus` (ours), `AffineTransitionLimit` limit/quasi-compact
+  lemmas (`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`, etc.). **Sources**: Stacks 07RF, 10.128.3.
+
+### [T-DEV2b] fill `exists_flatLocus_univ_stage`
+- **Status**: open · **File**: ForMathlib/NoethApprox.lean · **Depends on**: T-DEV2a · **Type**: theorem
+- **Statement**: the boxed lemma (∃ noeth enlargement R₁ with flat locus univ). Thin wrapper of T-DEV2a onto the
+  NoethApprox colimit (R = colim fg-ℤ-subalgebras). ~50-100 lines. Discharging this + DEV1c ⟹ FLAT1 axiom-clean ⟹ D-chain done.
