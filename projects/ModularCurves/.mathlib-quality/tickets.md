@@ -4944,8 +4944,8 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `chartY_sup_chartZ_eq_top`, `chartYSectionsEquiv`, `chartZSectionsEquiv`
   (PoleFiltration.lean; overlap-sections equiv folded into b4's `overlapMap` route);
   `objSupIsoProdEqLocus` remains the discharge tool for i3's assembly.
-  - **Status**: open · **Claimed**: (unclaimed) · **Parent**: T-W7.0i-b · **Depends**:
-    T-W7.0i-b1 (done) · **Type**: 3 decls + assembly
+  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T06:55Z · **Parent**:
+    T-W7.0i-b · **Depends**: T-W7.0i-b1 (done) · **Type**: 3 decls + assembly
 
 - **[T-W7.0i-b4]** the algebraic equalizer core — SKELETON LANDED 2026-07-07T14:15Z per coordinator §2:
   `chartZAffineEquiv` (Z-chart ≃ mathlib CoordinateRing), `overlapMap` (x ↦ s/t, y ↦ 1/t)
