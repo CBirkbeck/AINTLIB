@@ -360,6 +360,9 @@ theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
   rw [negModelHom, ← Proj.map_comp]
   exact (Proj_map_congr (negGradedQuot_comp_self W) _ _).trans Proj.map_id
 
+section
+attribute [local instance] MvPolynomial.gradedAlgebra
+
 /-- **(T-W7.0b-zero)** Negation fixes the point at infinity. The point at infinity is fixed
 only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is evaluation at `(0,−1,0)` (the `−1`
 from `Y ↦ −Y`), not at `(0,1,0)`; the two affine representatives of `O` differ by the unit
@@ -398,6 +401,8 @@ theorem negModelHom_zero (W : WeierstrassCurve R) :
       ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
       (projModelZeroEval_irrelevant_map_top W)), ← allNeg_map_id W, key2]
   exact congr_from _ _ _ _ hfeq
+
+end
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's negation through the
 dictionary. Source: `Affine.negY` vs the projectivised formula; `projModelPointsEquiv`. -/

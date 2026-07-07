@@ -310,6 +310,65 @@ theorem projModelVCIso_mul (C C' : VariableChange R) (W : WeierstrassCurve R) :
         (projModelVCIso C' W).hom := by
   sorry
 
+/-- **Base-change naturality of the substitution**: applying the coefficient map `f` to the
+variable-change substitution for `C` gives the substitution for the base-changed `C.map f`. -/
+lemma vcMvSubst_map {R' : Type u} [CommRing R'] (f : R →+* R') (C : VariableChange R) (i : Fin 3) :
+    MvPolynomial.map f (vcMvSubst C i) = vcMvSubst (C.map f) i := by
+  fin_cases i
+  · show MvPolynomial.map f (vcMvSubst C (0 : Fin 3)) = vcMvSubst (C.map f) (0 : Fin 3)
+    simp only [vcMvSubst, VariableChange.map_u, VariableChange.map_r, Fin.isValue,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val,
+      MvPolynomial.smul_eq_C_mul, map_add, map_mul, map_pow, MvPolynomial.map_C,
+      MvPolynomial.map_X, Units.coe_map, MonoidHom.coe_coe]
+  · show MvPolynomial.map f (vcMvSubst C (1 : Fin 3)) = vcMvSubst (C.map f) (1 : Fin 3)
+    simp only [vcMvSubst, VariableChange.map_u, VariableChange.map_r, VariableChange.map_s,
+      VariableChange.map_t, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add, map_mul, map_pow,
+      MvPolynomial.map_C, MvPolynomial.map_X, Units.coe_map, MonoidHom.coe_coe]
+  · show MvPolynomial.map f (vcMvSubst C (2 : Fin 3)) = vcMvSubst (C.map f) (2 : Fin 3)
+    simp only [vcMvSubst, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val, MvPolynomial.map_X]
+
+/-- HEq-based transport: an `eqToHom` from a curve equality absorbs into `Proj.map`, bridged
+by an `HEq` of the graded homs. -/
+private lemma projMap_transport_heq {R' : Type u} [CommRing R'] (W : WeierstrassCurve R)
+    {V V' : WeierstrassCurve R'} (e : V' = V)
+    (g : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V)))
+    (hg : (quotientGrading (projIdeal V))₊ ≤ ((quotientGrading (projIdeal W))₊).map g)
+    (g' : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V')))
+    (hg' : (quotientGrading (projIdeal V'))₊ ≤ ((quotientGrading (projIdeal W))₊).map g')
+    (hgg : HEq g g') :
+    Proj.map g hg = eqToHom (congrArg projModel e.symm) ≫ Proj.map g' hg' := by
+  subst e
+  obtain rfl := eq_of_heq hgg
+  simp
+
+/-- `HEq` of graded homs into coordinate rings of equal curves, from pointwise `HEq`. -/
+private lemma gradedHom_heq {R' : Type u} [CommRing R'] (W : WeierstrassCurve R)
+    {V V' : WeierstrassCurve R'} (e : V = V')
+    (g : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V)))
+    (g' : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V')))
+    (h : ∀ x, HEq (g x) (g' x)) : HEq g g' := by
+  subst e
+  exact heq_of_eq (GradedRingHom.ext fun x => eq_of_heq (h x))
+
+/-- `HEq` of quotient classes from an equality of the underlying curves. -/
+private lemma mk_heq {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e : V = V')
+    (q : MvPolynomial (Fin 3) R') :
+    HEq (Ideal.Quotient.mk (projIdeal V).toIdeal q)
+      (Ideal.Quotient.mk (projIdeal V').toIdeal q) := by
+  subst e; rfl
+
+/-- The coefficient map commutes with the variable-change substitution (general polynomial). -/
+lemma map_aeval_vcMvSubst {R' : Type u} [CommRing R'] (f : R →+* R') (C : VariableChange R)
+    (p : MvPolynomial (Fin 3) R) :
+    MvPolynomial.map f (MvPolynomial.aeval (vcMvSubst C) p) =
+      MvPolynomial.aeval (vcMvSubst (C.map f)) (MvPolynomial.map f p) := by
+  induction p using MvPolynomial.induction_on with
+  | C r => simp only [MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq, MvPolynomial.map_C]
+  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
+  | mul_X p i hp => simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.map_X, hp, vcMvSubst_map]
+
 /-- **(T-W7.0h-i, base-change naturality — coordinator §2-P5)** `projModelVCIso` is natural
 under base change of the ground ring: base-changing then applying the base-changed variable
 change agrees with applying the variable change then base-changing (`map_variableChange`
@@ -321,7 +380,24 @@ theorem projModelVCIso_map {R' : Type u} [CommRing R'] [Algebra R R']
       eqToHom (by rw [map_variableChange]) ≫
         (projModelVCIso (C.map (algebraMap R R')) (W.map (algebraMap R R'))).hom ≫
           projModelBaseChange (algebraMap R R') W := by
-  sorry
+  have e : (C.map (algebraMap R R')) • (W.map (algebraMap R R')) = (C • W).map (algebraMap R R') :=
+    map_variableChange ..
+  show Proj.map (baseChangeGradedHom (algebraMap R R') (C • W)) _ ≫
+      Proj.map (vcGradedHom C W) _ =
+    eqToHom (by rw [map_variableChange]) ≫
+      Proj.map (vcGradedHom (C.map (algebraMap R R')) (W.map (algebraMap R R'))) _ ≫
+        Proj.map (baseChangeGradedHom (algebraMap R R') W) _
+  rw [← Proj.map_comp, ← Proj.map_comp]
+  refine projMap_transport_heq W e _ _ _ _ (gradedHom_heq W e.symm _ _ fun x => ?_)
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  show HEq (baseChangeGradedHom (algebraMap R R') (C • W)
+      (vcGradedHom C W (Ideal.Quotient.mk _ a)))
+    (vcGradedHom (C.map (algebraMap R R')) (W.map (algebraMap R R'))
+      (baseChangeGradedHom (algebraMap R R') W (Ideal.Quotient.mk _ a)))
+  rw [vcGradedHom, baseChangeGradedHom, quotientGradingMap_mk, quotientGradingMap_mk,
+    baseChangeGradedHom, vcGradedHom, quotientGradingMap_mk, quotientGradingMap_mk]
+  exact (mk_heq e.symm _).trans
+    (heq_of_eq (congrArg _ (map_aeval_vcMvSubst (algebraMap R R') C a)))
 
 /-- **(T-W7.1b-b1, coordinator §2)** A pointed isomorphism of projective models restricts to
 the affine parts (it preserves the complement of the zero section) and hence induces an

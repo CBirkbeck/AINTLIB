@@ -147,6 +147,38 @@ theorem basicOpen_subset_flatLocus_of_free (f : R)
       (LocalizedModule.mkLinearMap (Submonoid.powers (algebraMap R S f)) M)
       (LocalizedModule.mkLinearMap q.asIdeal.primeCompl M))
 
+/-- **Generic flatness, geometric form.** Over a Noetherian *domain* `R`, the flat locus of a
+finite `S`-module `M` contains a nonempty basic open of the base: there is a nonzero `f : R` with
+`D(algebraMap R S f) ⊆ flatLocus`.  This is the direct geometric consumption of
+`exists_generically_free` through the neighbourhood lemma, and shows the flat locus is dense
+(indeed contains a dense open) when `R` is a domain. -/
+theorem exists_basicOpen_subset_flatLocus_of_isDomain [IsDomain R] [IsNoetherianRing R]
+    [Algebra.FiniteType R S] [Module.Finite S M] :
+    ∃ f : R, f ≠ 0 ∧ ↑(PrimeSpectrum.basicOpen (algebraMap R S f)) ⊆ flatLocus R S M := by
+  obtain ⟨f, hf, hfree⟩ := exists_generically_free (R := R) (S := S) (M := M)
+  exact ⟨f, hf, basicOpen_subset_flatLocus_of_free f hfree⟩
+
+/-- **Openness of the flat locus** (Stacks Tag 00RC / Theorem 10.129.4).  Let `R` be Noetherian,
+`R → S` of finite presentation and `M` a finitely-presented `S`-module.  Then the locus of primes
+`q` of `S` at which `M_q` is flat over `R` is open.
+
+*Route and current status.*  The generisation-stability of the flat locus
+(`flatLocus_stableUnderGeneralization`) and the neighbourhood/density input from generic flatness
+(`basicOpen_subset_flatLocus_of_free`, `exists_basicOpen_subset_flatLocus_of_isDomain`) are proved
+above and are the two structural halves of the classical argument.  Assembling them into full
+openness proceeds by **Noetherian induction on `Spec R`**: one shows the non-flat locus
+`(flatLocus)ᶜ` is closed by inducting on closed subsets `Z ⊆ Spec R`, at each stage peeling off an
+irreducible component `V(𝔭)` on whose generic point generic flatness (over the domain `R ⧸ 𝔭`)
+provides a flat basic open, so that the non-flat part sinks into a strictly smaller closed
+`Z ∩ V(f)`.
+
+*The one boxed step.*  This reduction requires the **local criterion of flatness** / *critère de
+platitude par fibres* (Stacks Tags 00MK, 039A): passing from flatness of the base-changed module
+`M ⧸ 𝔭·M` over the domain `R ⧸ 𝔭` back to flatness of `M` over `R` in a neighbourhood.  That
+criterion is `Tor`-theoretic and is **not yet available in mathlib** (there is no
+`Tor₁`/local-flatness-criterion API), so the assembly is left as a single `sorry` here.  Everything
+that does *not* depend on it — the localisation-preserves-flatness engine, generisation-stability,
+and the generic-flatness neighbourhood lemma — is proved unconditionally above. -/
 theorem isOpen_flatLocus {R S M : Type*} [CommRing R] [IsNoetherianRing R] [CommRing S]
     [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M] [Module S M]
     [IsScalarTower R S M] [Module.FinitePresentation S M] :

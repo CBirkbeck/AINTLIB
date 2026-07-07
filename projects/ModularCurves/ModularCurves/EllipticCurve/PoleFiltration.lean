@@ -1897,6 +1897,49 @@ private lemma overlapLocEquiv_awayMap_z (W : WeierstrassCurve R)
   · exact absurd rfl hj
 
 
+private lemma algebraMap_adjoinRoot_injective (W : WeierstrassCurve R) [Nontrivial R] :
+    Function.Injective (algebraMap R (AdjoinRoot (infChartCubic W))) := by
+  intro r r' h
+  have h0 : algebraMap R (AdjoinRoot (infChartCubic W)) (r - r') = 0 := by
+    rw [map_sub, h, sub_self]
+  have hsmul : (Polynomial.C (r - r') : Polynomial R) • (1 : AdjoinRoot (infChartCubic W)) =
+      0 := by
+    rw [Algebra.smul_def, mul_one, ← Polynomial.algebraMap_eq,
+      ← IsScalarTower.algebraMap_apply]
+    exact h0
+  have hrepr := congrArg (fun z => ((infChartBasis W).repr z) 0) hsmul
+  simp only [map_smul, map_zero, Finsupp.coe_zero, Pi.zero_apply, Finsupp.smul_apply,
+    smul_eq_mul] at hrepr
+  have h1 : (infChartBasis W).repr 1 0 = 1 := by
+    have hb : (1 : AdjoinRoot (infChartCubic W)) = infChartBasis W 0 := by
+      rw [infChartBasis_apply]
+      simp
+    rw [hb, Module.Basis.repr_self]
+    simp
+  rw [h1, mul_one] at hrepr
+  have := Polynomial.C_eq_zero.mp hrepr
+  exact sub_eq_zero.mp this
+
+/-- Two global sections agreeing on the two covering charts are equal. -/
+private lemma sections_ext (W : WeierstrassCurve R) (s t : Γ(projModel W, ⊤))
+    (h₁ : ((projModel W).presheaf.map (homOfLE (le_top (a := Proj.basicOpen
+        (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))).op).hom s =
+      ((projModel W).presheaf.map (homOfLE le_top).op).hom t)
+    (h₂ : ((projModel W).presheaf.map (homOfLE (le_top (a := Proj.basicOpen
+        (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).op).hom s =
+      ((projModel W).presheaf.map (homOfLE le_top).op).hom t) : s = t := by
+  refine (projModel W).sheaf.eq_of_locally_eq₂
+    (homOfLE (le_top : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) ≤ ⊤))
+    (homOfLE (le_top : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤ ⊤))
+    (basicOpen_X1_sup_basicOpen_X2_eq_top W).ge s t ?_ ?_
+  · exact h₁
+  · exact h₂
+
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
