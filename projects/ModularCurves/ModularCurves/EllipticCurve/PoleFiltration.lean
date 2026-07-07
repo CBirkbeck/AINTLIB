@@ -596,6 +596,85 @@ noncomputable def chartZSectionsEquiv (W : WeierstrassCurve R) :
         Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial}) :=
   sorry
 
+/-- The `x = X/Z` coordinate index of the affine chart. -/
+abbrev affChartX : {j : Fin 3 // j ≠ 2} := ⟨0, by decide⟩
+
+/-- The `y = Y/Z` coordinate index of the affine chart. -/
+abbrev affChartY : {j : Fin 3 // j ≠ 2} := ⟨1, by decide⟩
+
+/-- **(T-W7.0i-b4-0)** The dehomogenised affine-chart polynomial, explicitly:
+`y² + a₁xy + a₃y − (x³ + a₂x² + a₄x + a₆)`. -/
+lemma dehomogenizeAux_two_projective_polynomial (W : WeierstrassCurve R) :
+    MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial =
+      MvPolynomial.X affChartY ^ 2 +
+        MvPolynomial.C W.toProjective.a₁ * MvPolynomial.X affChartX * MvPolynomial.X affChartY +
+        MvPolynomial.C W.toProjective.a₃ * MvPolynomial.X affChartY -
+        (MvPolynomial.X affChartX ^ 3 +
+          MvPolynomial.C W.toProjective.a₂ * MvPolynomial.X affChartX ^ 2 +
+          MvPolynomial.C W.toProjective.a₄ * MvPolynomial.X affChartX +
+          MvPolynomial.C W.toProjective.a₆) := by
+  rw [show W.toProjective.polynomial =
+    MvPolynomial.X 1 ^ 2 * MvPolynomial.X 2 +
+      MvPolynomial.C W.toProjective.a₁ * MvPolynomial.X 0 * MvPolynomial.X 1 *
+        MvPolynomial.X 2 +
+      MvPolynomial.C W.toProjective.a₃ * MvPolynomial.X 1 * MvPolynomial.X 2 ^ 2 -
+      (MvPolynomial.X 0 ^ 3 +
+        MvPolynomial.C W.toProjective.a₂ * MvPolynomial.X 0 ^ 2 * MvPolynomial.X 2 +
+        MvPolynomial.C W.toProjective.a₄ * MvPolynomial.X 0 * MvPolynomial.X 2 ^ 2 +
+        MvPolynomial.C W.toProjective.a₆ * MvPolynomial.X 2 ^ 3) from rfl]
+  simp only [map_add, map_sub, map_mul, map_pow, MvPolynomial.dehomogenizeAux_C,
+    MvPolynomial.dehomogenizeAux_X_self,
+    MvPolynomial.dehomogenizeAux_X_ne R 2 (show (0 : Fin 3) ≠ 2 by decide),
+    MvPolynomial.dehomogenizeAux_X_ne R 2 (show (1 : Fin 3) ≠ 2 by decide)]
+  ring
+
+/-- The index bijection of the affine chart: `y ↦ 0` (outer), `x ↦ 1` (inner). -/
+def affChartIndexEquiv : {j : Fin 3 // j ≠ 2} ≃ Fin 2 where
+  toFun j := if j.1 = 1 then 0 else 1
+  invFun i := if i = 0 then affChartY else affChartX
+  left_inv := by decide
+  right_inv := by decide
+
+/-- **(T-W7.0i-b4-0)** The affine-chart polynomial ring as an iterated polynomial ring:
+`y` becomes the outer variable, `x` the inner — matching mathlib's `R[X][Y]` convention
+for `WeierstrassCurve.Affine.polynomial`. -/
+noncomputable def affChartPolyEquiv :
+    MvPolynomial {j : Fin 3 // j ≠ 2} R ≃ₐ[R] Polynomial (Polynomial R) :=
+  (MvPolynomial.renameEquiv R affChartIndexEquiv).trans <|
+    (MvPolynomial.finSuccEquiv R 1).trans <|
+      Polynomial.mapAlgEquiv (MvPolynomial.uniqueAlgEquiv R (Fin 1))
+
+@[simp]
+lemma affChartPolyEquiv_X_y :
+    affChartPolyEquiv (R := R) (MvPolynomial.X affChartY) = Polynomial.X := by
+  simp [affChartPolyEquiv, affChartIndexEquiv, MvPolynomial.finSuccEquiv_X_zero]
+
+@[simp]
+lemma affChartPolyEquiv_X_x :
+    affChartPolyEquiv (R := R) (MvPolynomial.X affChartX) = Polynomial.C Polynomial.X := by
+  simp [affChartPolyEquiv, affChartIndexEquiv]
+  rw [show ((1 : Fin 2) : Fin 2) = Fin.succ 0 from rfl, MvPolynomial.finSuccEquiv_X_succ]
+  simp
+
+/-- **(T-W7.0i-b4-0)** The equiv carries the dehomogenised affine-chart polynomial to
+mathlib's affine Weierstrass polynomial (sign match is exact — no negation). -/
+lemma affChartPolyEquiv_dehomogenize (W : WeierstrassCurve R) :
+    affChartPolyEquiv (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
+      W.toAffine.polynomial := by
+  rw [dehomogenizeAux_two_projective_polynomial]
+  have hC : ∀ r : R, affChartPolyEquiv (MvPolynomial.C r) =
+      Polynomial.C (Polynomial.C r) := fun r => by
+    have := (affChartPolyEquiv (R := R)).commutes r
+    simpa [MvPolynomial.algebraMap_eq, Polynomial.algebraMap_eq] using this
+  rw [show W.toAffine.polynomial = Polynomial.X ^ 2 +
+      Polynomial.C (Polynomial.C W.toAffine.a₁ * Polynomial.X +
+        Polynomial.C W.toAffine.a₃) * Polynomial.X -
+      Polynomial.C (Polynomial.X ^ 3 + Polynomial.C W.toAffine.a₂ * Polynomial.X ^ 2 +
+        Polynomial.C W.toAffine.a₄ * Polynomial.X + Polynomial.C W.toAffine.a₆) from rfl]
+  simp only [map_add, map_sub, map_mul, map_pow, affChartPolyEquiv_X_x,
+    affChartPolyEquiv_X_y, hC]
+  ring
+
 /-- **(T-W7.0i-b4-0)** The `Z`-chart quotient ring is mathlib's affine coordinate ring
 (`x = X⟨0⟩`, `y = X⟨1⟩`) — the ring-level sibling of the repo's points-level
 `zSolutionsToAffine`. -/
@@ -603,7 +682,12 @@ noncomputable def chartZAffineEquiv (W : WeierstrassCurve R) :
     (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
       Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial}) ≃ₐ[R]
         W.toAffine.CoordinateRing :=
-  sorry
+  Ideal.quotientEquivAlg _ _ (affChartPolyEquiv (R := R)) <| by
+    rw [Ideal.map_span, Set.image_singleton,
+      show ((affChartPolyEquiv (R := R)) :
+          MvPolynomial {j : Fin 3 // j ≠ 2} R →+* Polynomial (Polynomial R))
+          (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
+        W.toAffine.polynomial from affChartPolyEquiv_dehomogenize W]
 
 /-- The `t`-element of the infinity chart (the element the overlap localization inverts). -/
 noncomputable abbrev infChartTElem (W : WeierstrassCurve R) :

@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-b4 — overlap_eval2_polynomial PROVEN (mk-normalization + linear_combination -t^7*hrel); next: verify file green, commit, then chartZAffineEquiv + overlap_pair_eq_baseRing
+FOCUS: T-W7.0i-b4 — chartZAffineEquiv PROVEN (affChart bridge, first-try green); next: overlap_pair_eq_baseRing (equalizer core, normal-form bookkeeping on free bases)

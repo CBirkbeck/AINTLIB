@@ -96,6 +96,7 @@ those). Register (construction ticket in parentheses):
 | `projModelVCIso` | EllipticCurve/ModelVariableChange.lean | T-W7.mvc |
 | `projModelPointsEquiv` | EllipticCurve/PointsDictionary.lean | T-W7.0f (+ §2-P2 value-lemmas) |
 | `EllipticCurveGeom.negHom`, `.mulHom`, `.grpObj` | EllipticCurve/GroupLawDescent.lean | T-W7.12 / T-W7.36 |
+| `chartYSectionsEquiv`, `chartZSectionsEquiv` | EllipticCurve/PoleFiltration.lean | T-W7.0i-b3 (in progress, lane P3) |
 
 Rule for future decompose passes: skeleton `def := sorry` decls MUST be added to this
 register in the same commit that creates them.
