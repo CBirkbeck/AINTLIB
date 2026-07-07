@@ -5137,6 +5137,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     immersion). Assembly after that: engine per fibre-point → basicOpen union →
     quasi-compact fibre → properness tube → `IsClosedImmersion.lift` (already wired in the
     committed hW-consumable shape).
+  - **Progress (fable-P4, 2026-07-07T18:30Z — beastmode stretch)**: r2·c is CONCEPTUALLY
+    COMPLETE, mechanically 2 residues. PROVEN sorry-free this stretch:
+    `Ideal.exists_notMem_mul_eq_zero_of_fg` (ring engine), `isOpen_germMap_ideal_eq_bot`
+    (Z_U openness), `germ_ideal_eq_zero_of_exists_affine` (cross-affine vanishing —
+    `IdealSheafData.map_ideal` (:221, full equality along ANY affine inclusion) dissolved
+    the basicOpen-HEq swamp), hW steps 1–3 (good locus + fibre-membership via c·i+Krull +
+    properness tube). RESIDUE 1: section_ext coercion seam (in-file notes, /tmp/rig31-33
+    shapes); RESIDUE 2: c·i proof (route banked). `rigidity` axioms trace through exactly
+    these two + T-W7.7 chain untouched.
   - **Progress (fable-P4, 2026-07-07T17:15Z)**: c·i STATED green (`germ_ker_mem_pow_of_fibre_subset`,
     402ade6a). hW-assembly design settled after the cross-affine-germ analysis: work on the
     BASICOPEN BASIS to make the stalk-ideal well-defined — per affine `U`, let
