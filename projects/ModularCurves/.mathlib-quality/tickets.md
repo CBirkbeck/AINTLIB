@@ -2180,6 +2180,29 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     "mathlib ZMT IsFinite.of_isProper_of_locallyQuasiFinite PRESENT" is STALE/WRONG
     (searched: absent; mathlib has IsFinite = IsIntegralHom ⊓ LocallyOfFiniteType,
     affine-over-S is the hard part) — park-eligible per claim scope.
+  - **BOX REGISTERED** (2026-07-07T07:20Z): `nonZeroDivisor_of_flat_of_fibrewise_
+    nonZeroDivisor` (CartierDivisor.lean, tag T-FLAT1-SLICE) — EGA IV 11.3.10 nzd
+    part, fp+flat hypotheses, ∀-field-fibre form (deliberately: what thm-D supplies
+    uniformly AND the easiest-to-discharge shape — a future discharge proves the
+    residue-field form and specializes). Falseness-without-fp counterexample in the
+    docstring. Sole permitted consumer: RelEffCartierDiv.isOfficial. WAVE-1 DONE
+    (delegate, first-try, axiom-clean): ForMathlib/PrincipalMaximalDVR.lean —
+    `IsLocalRing.exists_eq_pow_mul_unit_of_maximalIdeal_eq_span` (public
+    order-extraction), `IsDomain.of_maximalIdeal_eq_span_nonZeroDivisor`,
+    `IsDiscreteValuationRing.of_maximalIdeal_eq_span`; deltas: Nontrivial redundant
+    (IsLocalRing extends it), ¬IsUnit redundant, TFAE 0↔4 route; Krull intersection
+    = `Ideal.iInf_pow_eq_bot_of_isLocalRing` (Filtration.lean:431). GAP CONFIRMED:
+    mathlib has NO principal-max⟹DVR without a priori IsDomain. WAVE-2 dispatched
+    (StandardSmoothStalkDVR.lean, delegate in flight): thm-AB
+    `exists_span_nonZeroDivisor_map_localizationAtPrime` + thm-D
+    `mem_nonZeroDivisors_of_finite_quotient`. WAVE-3 core designed (chart-ring
+    level): fibre-stalk generator f CHOSEN IN THE IMAGE OF I by valuation-Nakayama
+    (span{ι(i)} + m·IO = IO for some i, else IO = m·IO = 0 contra nzd), then
+    I/(f) fg + fibre-vanishing ⟹ M_q = pM_q ⊆ m M_q ⟹ Nakayama ⟹ away-shrink
+    r ∉ q with I_r = (f); box-input fibrewise-nzd = thm-D at every κ(p')
+    ((A_r/I_r)⊗κ finite via IsArtinianRing.localization_surjective). Scheme glue:
+    chart opener hsm.exists_isStandardSmoothOfRelativeDimension; Γ-dictionary for
+    subscheme quotients per sectionsIdealAux/toSpecΓ_naturality pattern.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
