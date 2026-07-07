@@ -4761,25 +4761,31 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   P4, P5 open for workers now.
 
 - **[T-W7.0a]** atlas ring is a domain — `universalWeierstrass_Δ_ne_zero`,
-  `instance IsDomain WeierstrassAtlasRing` (GroupLawConstruction.lean:42,49).
-  - **Status**: in_progress (lane P0) · **File**: EllipticCurve/GroupLawConstruction.lean ·
+  `instance IsDomain WeierstrassAtlasRing` (GroupLawConstruction.lean:44–66).
+  - **Status**: done (lane P0; both decls proven; board flipped 2026-07-07T14:01Z per coordinator 1a) ·
+    **File**: EllipticCurve/GroupLawConstruction.lean ·
     **Depends**: none · **Parallel**: yes · **Type**: lemma + instance
   - Sketch: evaluate `Δ` at `y² = x³ − x` over `ℚ` (`Δ = 64`); then
     `IsLocalization.isDomain_localization` (verified) with `Δ ∈ nonZeroDivisors`.
     Leaf **L-0a** (decomposition.md).
 
 - **[T-W7.0b]** negation on the model — `negModelHom` + `_π`, involution, `_zero`,
-  `_specPoints` (GroupLawConstruction.lean:55–83).
-  - **Status**: in_progress (lane P0) · **File**: GroupLawConstruction.lean · **Depends**:
-    T-W7.0a (specPoints also T-W7.0f) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
+  `_specPoints` (GroupLawConstruction.lean:197–244 — pointer refreshed per coordinator 1a).
+  - **Status**: in_progress · **Claimed**: lane-P0 worker (handle unrecorded — OWNER: retrofit
+    your handle per rule 5), retrofit 2026-07-07T14:03Z ·
+    **File**: GroupLawConstruction.lean · **Depends**:
+    T-W7.0a (done; specPoints also T-W7.0f) · **Parallel**: with P1–P5 · **Type**: def + 4 lemmas
   - Sketch: projectivise `[X : −Y−a₁X−a₃Z : Z]` via the `baseChangeGradedHom` template
     (`WeierstrassModel.lean:1657`, PROVEN pattern); points-spec by the `projModel_points`
     chart analysis. Δ-free except specPoints. Leaf **L-0b**.
 
 - **[T-W7.0c-i]** the two B–L addition laws — transcribe §5, define `blOpenZ`, `blOpenY`,
-  `addOnZ`, `addOnY` (GroupLawConstruction.lean:90–116).
+  `addOnZ`, `addOnY` (GroupLawConstruction.lean:252–274 — pointer refreshed per coordinator 1a).
   - **Status**: open (lane P1) · **File**: GroupLawConstruction.lean · **Depends**: T-A8
-    (done) · **Parallel**: yes · **Type**: 4 defs
+    (done), **T-W7.0e, T-W7.0f (coordinator §2: the c5 reroute consumes the ext principle +
+    dictionary — "Depends: none" was FALSE; P1 is NO LONGER gate-free)** · **Parallel**: after
+    0e/0f · **Type**: 4 defs + 2 NEW leaves (factorization bridge; (2,2)-triple→morphism
+    plumbing — skeletonize per coordinator §2 BEFORE proving c5 into them)
   - Sketch: transcribe the two bidegree-(2,2) triples (lines `Z=0`, `Y=0`) from
     `refs/ModularCurves/bosma-lenstra-addition-laws.pdf` §5, **CAS-verify each polynomial
     before Lean**; opens = complements of the common-vanishing loci; triple-on-open ⟹
@@ -4828,7 +4834,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0i-a]** pole filtration + freeness — `poleOrderFiltration` + `_one`, `_two`,
   `_three`, `_mul_le`, `linearIndependent_one_coordX_coordY`
   (PoleFiltration.lean:41–75; `coordX`/`coordY` already real).
-  - **Status**: done (lane P3, beastmode-A, finished 2026-07-07)
+  - **Status**: done · **Claimed**: beastmode-A, 2026-07-07T~12:30Z (retrofit)
   - **Progress**: 2026-07-07: ALL SIX LEAVES + helper PROVEN, axiom-clean (propext/choice/quot
     only), `lake build` green. Def = R-span of pole-order-bounded monomials {x^i : 2i ≤ n} ∪
     {x^i y : 2i+3 ≤ n} (KM-Weierstrass-sections form; the intrinsic ideal-sheaf characterization
@@ -4848,8 +4854,9 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `projModel_globalSections_eq_baseRing`, `infChart_s_nonZeroDivisor`,
   `projModel_hom_ext_of_affine`, `locallyWeierstrass_pushforward_O_eq_O`
   (PoleFiltration.lean:85–117).
-  - **Status**: in_progress (lane P3 — THIS session, beastmode-A 2026-07-07) ·
-    **Depends**: T-W7.0i-a (done), T-W7.0i-b1..b4 (b1, b2 done) · **Type**: 4 lemmas
+  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T14:01Z ·
+    **Depends**: T-W7.0i-a (done), T-W7.0i-b1 (done), b2 (done), b3/b4 (skeleton pending —
+    coordinator §2) · **Type**: 4 lemmas
   - **Progress** (2026-07-07, session cont.): **2 of 4 leaves FULLY PROVEN, axiom-clean**:
     `infChart_s_nonZeroDivisor` (transport along the b1 bridge) and
     `projModel_hom_ext_of_affine` — the latter END-TO-END: general
@@ -4871,7 +4878,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0i-b1]** chart-ring bridge — explicit `infChartPoly` (= dehomogenizeAux at Y of the
   projective cubic, computed: `t + a₁st + a₃t² − s³ − a₂s²t − a₄st² − a₆t³`) + alg-equiv of the
   Y-chart quotient to `AdjoinRoot` of the monic-in-`s` cubic over `R[t]`.
-  - **Status**: in_progress (THIS session) · **File**: PoleFiltration.lean · **Parent**:
+  - **Status**: done (committed 4c89b0c5; board flipped 2026-07-07T14:01Z per coordinator 1a) · **File**: PoleFiltration.lean · **Parent**:
     T-W7.0i-b · **Depends**: none · **Type**: def + equiv + 2 lemmas
   - Sketch: subtype-index ≃ Fin 2; `finSuccEquiv` + Fin-1 ≃ `Polynomial R`; transport the
     span along `Ideal.quotientEquivAlg` (pattern: repo `chartCoordEquiv`). Monicity: leading
@@ -4929,7 +4936,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0f]** the canonical points dictionary — `projModelPointsEquiv`,
   `projModelPointsEquiv_zero` (PointsDictionary.lean:30,37).
-  - **Status**: in_progress (lane P2) · **File**: EllipticCurve/PointsDictionary.lean ·
+  - **Status**: in_progress · **Claimed**: lane-P2 worker (handle unrecorded — OWNER: retrofit
+    per rule 5), retrofit 2026-07-07T14:03Z; 9373a093 landed the equiv — coordinator §2-P2: add the chartwise
+    VALUE-lemma decls (`projModelPointsEquiv_some`/chart-case characterizations) BEFORE flipping
+    done · **File**: EllipticCurve/PointsDictionary.lean ·
     **Depends**: none (discharges from PROVEN `projModel_points`) · **Type**: def + lemma
   - Sketch: choice-extract from the `∃`-form; pin at `O ↦ 0`. Leaf **L-0f** (prior-B2
     naturality caveat noted there).
@@ -4937,8 +4947,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0e]** field-points extensionality + reducedness — `hom_ext_of_forall_specPoint`,
   `isReduced_of_smoothOfRelativeDimension`, instances for the atlas, `universalCurve`, the
   double and triple products (PointsDictionary.lean:51–84).
-  - **Status**: in_progress (lane P2) · **Depends**: T-W7.0a (atlas domain ⟹ reduced) ·
-    **Type**: 2 lemmas + 4 instances
+  - **Status**: in_progress · **Claimed**: lane-P2 worker (handle unrecorded — OWNER: retrofit
+    per rule 5), retrofit 2026-07-07T14:03Z; 9b47bd47 landed integrality — coordinator §2-P2: PORT greens into
+    the canonical EllipticCurve/PointsDictionary.lean, DEDUP the doubled
+    `IsDomain WeierstrassAtlasRing` (keep GLC:62; drop Moduli/PD:54) + IsNoetherianRing; board-
+    register off-board sub-IDs T-W7.0e-proj (done, ProjIntegral.lean) and T-W7.0e-affine ·
+    **Depends**: T-W7.0a (done) · **Type**: 2 lemmas + 4 instances
   - Sketch: equalizer closed (separated) + hit by residue-field points + surjective closed
     immersion onto reduced ⟹ iso; engine: smooth ⟹ flat + regular fibres over reduced base
     (mathlib check FIRST; fallback = repo standard-smooth charts, AG-2). Leaves
@@ -5029,8 +5043,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[CLEANUP-DESC]** final `/cleanup` GroupLawDescent.lean. **Depends**: T-W7.36.
 
-- **[T-W7.8]** arbitrary-`S` canonicity upgrade (**API gap AG-1**; genuine infra; LOW
-  priority pending reviewer F1′). EGA IV §8 spreading-out (FC Rem. 1.2(a) names the
+- **[T-W7.8]** arbitrary-`S` canonicity upgrade (**RELABELED per coordinator 2026-07-07:
+  thin wrapper — re-check at implementation**; the "absent from mathlib" note is CONFIRMED
+  STALE — `spread_out_of_isGermInjective` SpreadingOut.lean:329,
+  `spread_out_unique_of_isGermInjective` :198,
+  `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType` AffineTransitionLimit.lean:632;
+  LOW priority pending reviewer F1′). EGA IV §8 spreading-out (FC Rem. 1.2(a) names the
   vehicle): `(E,e,m,m')` finitely presented ⟹ descend to a f.g. `ℤ`-subalgebra; equality
   descends. Needs Hom-spreading-out along filtered colimits — **absent from mathlib**
   (watch noetherian-approximation work). NOT skeletonized (quote-or-delete: EGA IV 8.8.2
