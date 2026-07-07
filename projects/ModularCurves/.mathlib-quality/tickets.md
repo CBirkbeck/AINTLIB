@@ -5091,6 +5091,23 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     f.g. + stalk-zero ⟹ a basicOpen ∋ x where the ideal restricts to 0; union the
     basicOpens over the (quasi-compact, `IsProper`) fibre; properness tube
     `U₀ := S ∖ p(X ∖ W)`.
+  - **Progress (fable-P4, 2026-07-07T16:40Z)**: (c·ii) ring engine
+    `Ideal.exists_notMem_mul_eq_zero_of_fg` PROVEN standalone (axiom-clean, scratch-compiled
+    against pure mathlib) and inserted into Rigidity.lean — build verification pending an
+    upstream red window (WeierstrassModel.lean mid-edit by another lane; olean watcher
+    armed). Remaining (c·i) names ALL verified at pin: `IsPreimmersion (X.fromSpecStalk x)`
+    (Stalk.lean:89, so the r2·b subsingleton mechanism transfers to
+    `Spec (stalk/𝔪ⁿ) ⟶ Spec stalk ⟶ S` via preimmersion-comp), `IsLocalization.map_eq_zero_iff`
+    (elementwise annihilation on `IsAffineOpen.isLocalization_stalk`),
+    `Ideal.iInf_pow_eq_bot_of_isLocalRing` (Krull), `Scheme.stalkMap_germ` (push sections of
+    `ι.ker` to the thickened stalk). Remaining sub-statement to formalize (THE one honest
+    gap): the one-point base-change stalk computation — stalk of `X ×_S Spec (stalk t/𝔪ⁿ)`
+    at a point over `x` is `O_{X,x} ⧸ 𝔪ᵗⁿ·O_{X,x}` (equivalently: ker of the projection's
+    stalkMap contains exactly the `𝔪ᵗⁿ`-multiples) — plus the ker-≤ translation
+    `vanishing near the fibre ⟹ ι.ker ≤ (tube).ι.ker` (per-affine, `Hom.ker` of an open
+    immersion). Assembly after that: engine per fibre-point → basicOpen union →
+    quasi-compact fibre → properness tube → `IsClosedImmersion.lift` (already wired in the
+    committed hW-consumable shape).
 
 - **[T-W7.r2·d]** clopen assembly — `exists_factor_of_connected` (Rigidity.lean).
   - **Status**: ✅ PROVEN (fable-P4, 2026-07-07T15:00Z) — modulo consuming the sorried ·c
