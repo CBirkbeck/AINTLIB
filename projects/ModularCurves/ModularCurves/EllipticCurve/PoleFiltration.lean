@@ -3492,6 +3492,96 @@ lemma infChartAug_algebraMap (W : WeierstrassCurve R) (r : R) :
     Polynomial.algebraMap_eq, infChartAug_poly]
   simp
 
+/-- **The augmentation is the zero-section chart evaluation**: `aug ∘ chartYRingEquiv =
+zeroChartHom` on the `Y`-chart ring. This is the algebraic core of "the `t`-section vanishes
+on the zero section" and of the augmentation-compatibility of pointed transports. -/
+lemma infChartAug_chartYRingEquiv (W : WeierstrassCurve R)
+    (v : HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) :
+    infChartAug W (chartYRingEquiv W v) = zeroChartHom W v := by
+  obtain ⟨q, rfl⟩ := (chartCoordEquiv W 1).surjective v
+  have hY : chartYRingEquiv W (chartCoordEquiv W 1 q) =
+      (infChartQuotEquiv W).toRingEquiv q := by
+    unfold chartYRingEquiv
+    rw [RingEquiv.trans_apply, RingEquiv.symm_apply_apply]
+  rw [hY]
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective q
+  have hhom : ((infChartAug W).comp ((infChartQuotEquiv W).toRingEquiv :
+      (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
+        Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) →+*
+      AdjoinRoot (infChartCubic W))).comp
+      (Ideal.Quotient.mk (Ideal.span
+        {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial})) =
+      ((zeroChartHom W).comp ((chartCoordEquiv W 1) :
+        (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) →+*
+        HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).comp
+      (Ideal.Quotient.mk (Ideal.span
+        {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial})) := by
+    apply MvPolynomial.ringHom_ext
+    · intro r
+      simp only [RingHom.comp_apply, RingHom.coe_coe]
+      have h1 : (Ideal.Quotient.mk (Ideal.span
+          {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}))
+          (MvPolynomial.C r) = algebraMap R _ r := rfl
+      rw [h1, show ((infChartQuotEquiv W).toRingEquiv) (algebraMap R _ r) =
+          (infChartQuotEquiv W) (algebraMap R _ r) from rfl,
+        AlgEquiv.commutes, infChartAug_algebraMap, ← h1, chartCoordEquiv_mk_C]
+      rw [HomogeneousLocalization.algebraMap_eq, zeroChartHom, RingHom.comp_apply]
+      have hval : (HomogeneousLocalization.valRingHom
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+          ((HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+            (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+            ((gradeZeroRingEquiv W) r)) =
+          algebraMap (projCoordRing W)
+            (Localization.Away ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))
+            ((gradeZeroRingEquiv W r : ↥(quotientGrading (projIdeal W) 0)) :
+              projCoordRing W) := by
+        show Localization.mk _ 1 = _
+        rw [← Localization.mk_one_eq_algebraMap]
+      rw [hval, IsLocalization.Away.lift_eq]
+      have hmk : ((gradeZeroRingEquiv W r : ↥(quotientGrading (projIdeal W) 0)) :
+          projCoordRing W) = Ideal.Quotient.mk (projIdeal W).toIdeal
+            (MvPolynomial.C r) := by
+        show algebraMap R (projCoordRing W) r = _
+        rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+          RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+      rw [hmk, projModelZeroEval_mk]
+      simp
+    · intro j
+      simp only [RingHom.comp_apply, RingHom.coe_coe]
+      rw [chartCoordEquiv_mk_X]
+      have hRHS : zeroChartHom W (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W j.1)) =
+          0 := by
+        rw [show HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W j.1) =
+          HomogeneousLocalization.Away.mk _ (mk_X_mem_quotientGrading_one W 1) 1
+            (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1) _ from rfl,
+          zeroChartHom_mk, map_pow]
+        rw [show ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) =
+          Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1) from rfl,
+          projModelZeroEval_mk]
+        obtain ⟨jv, hj⟩ := j
+        rw [MvPolynomial.eval_X, if_neg hj]
+        exact zero_pow one_ne_zero
+      rw [hRHS]
+      rcases j with ⟨jv, hj⟩
+      obtain rfl | rfl | rfl : jv = 0 ∨ jv = 1 ∨ jv = 2 := by omega
+      · simp only [AlgEquiv.coe_ringEquiv]
+        show infChartAug W (Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+          ((Ideal.Quotient.mk _) (MvPolynomial.X infChartS))) = 0
+        rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_s]
+        exact infChartAug_root W
+      · exact absurd rfl hj
+      · simp only [AlgEquiv.coe_ringEquiv]
+        show infChartAug W (Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+          ((Ideal.Quotient.mk _) (MvPolynomial.X infChartT))) = 0
+        rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_t]
+        exact infChartAug_tel W
+  exact RingHom.congr_fun hhom p
+
 /-- The kernel of the augmentation is exactly the section ideal `(s,t)`. -/
 lemma ker_infChartAug (W : WeierstrassCurve R) :
     RingHom.ker (infChartAug W) = Ideal.span {AdjoinRoot.root (infChartCubic W),
