@@ -160,6 +160,50 @@ theorem exists_basicOpen_subset_flatLocus_of_isDomain [IsDomain R] [IsNoetherian
   obtain ⟨f, hf, hfree⟩ := exists_generically_free (R := R) (S := S) (M := M)
   exact ⟨f, hf, basicOpen_subset_flatLocus_of_free f hfree⟩
 
+/-- **The local criterion of flatness with fibre-exactness openness (Stacks Tag 00MK + 00RB
+= 00MI), specialised to the flat-locus neighbourhood statement — the ONE isolated,
+genuinely-mathlib-absent input.**  `R` Noetherian, `R → S` of finite presentation, `M` finitely
+presented over `S`; if `M_q` is flat over `R` then flatness over `R` spreads to a basic open
+`D(g) ∋ q` (`g ∉ q`).
+
+This is the true homological heart of Stacks 00RC, isolated here as the sole `sorry`.  The
+committed projective-dimension ingredients discharge every *other* step but **cannot** discharge
+this one, for a concrete and structural reason recorded below.
+
+*What the committed ingredients DO give (the necessary — but not sufficient — half).*  View `M` as a
+finitely-presented module over the polynomial ring `P = R[x₁,…,xₙ]` through the finite presentation
+`P ↠ S`.  The fibre ring `P ⊗_R κ(𝔭) = κ(𝔭)[x]` has finite global dimension `n`
+(`HilbertSyzygy.hasProjectiveDimensionLE_of_field`, DEV1a), so the `n`-th fibre syzygy is projective;
+take a finite free `P`-resolution `F_• → M` (`Module.FiniteFreeResolution`, DEV1b); dévissage
+(Stacks 00HM) makes the `n`-th syzygy `Kₙ` flat over `R` at `q`; and `Module.free_of_flat_of_fibre_free`
+(Stacks 00MH, `ModularCurves.ForMathlib.LocalCriterion`) makes `(Kₙ)_q` **free over `P_q`**, which
+spreads to a basic open via `Module.basicOpen_subset_freeLocus_iff`.
+
+*Why syzygy-freeness is NOT sufficient (the structural gap — with a counterexample).*  Take
+`R = k[t]`, `S = R[x] = k[t,x]` (so `n = 1`), `M = S/(xt)`.  The first syzygy is `K₁ = (xt) ≅ S`,
+which is **free over `S` everywhere**, so the "free spreads out" step yields the whole of `Spec S`;
+yet `M` is **not** `R`-flat on `V(t)`, because `x ∈ M` is a nonzero `t`-torsion element
+(`t · x = tx = 0`, `x ≠ 0`) and over the PID `k[t]` flatness is torsion-freeness.  Freeness of the
+syzygy fails to detect the non-flatness because the fibre complex `Kₙ ⊗_R κ(𝔭') → F_{n-1} ⊗_R κ(𝔭')`
+drops rank at the nearby primes `𝔭' = (t)` (there the map is literally `0`).  What actually controls
+`R`-flatness at `q'` is the **exactness of that fibre complex** — equivalently `Tor₁ᴿ(M, κ(𝔭'))_{q'} = 0`,
+the local criterion of flatness (Stacks **00MK**) — together with the **openness of the fibre-exact
+locus** (Stacks **00RB / 00MI**), which classically rests on the Buchsbaum–Eisenbud exactness
+criterion (Stacks 00N1).
+
+*Why it is mathlib-absent.*  A 2026-07 survey finds mathlib has no `Module.depth`, no
+Auslander–Buchsbaum, no `Tor₁(M, κ)=0 ⟹ Flat` (local criterion), no fibrewise-flatness criterion,
+and no dévissage lemma `SES + F,N flat ⟹ ker flat`; and none of these is derivable from the
+committed projective-dimension ingredients (the counterexample above).  Hence this single clean
+local statement is the isolated residual of the whole openness proof. -/
+private theorem flatLocus_spreads_of_flat {R S M : Type*} [CommRing R]
+    [IsNoetherianRing R] [CommRing S] [Algebra R S] [Algebra.FinitePresentation R S]
+    [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower R S M]
+    [Module.FinitePresentation S M] {q : PrimeSpectrum S} (hq : q ∈ flatLocus R S M) :
+    ∃ g : S, g ∉ q.asIdeal ∧
+      (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum S)) ⊆ flatLocus R S M :=
+  sorry
+
 /-- **Local openness of the flat locus at a flat point** — the sole remaining boxed step of
 Stacks Tag 00RC, isolated as a *topology-free, purely local* homological statement.  If `M_q` is
 flat over `R`, then there is a basic open neighbourhood `D(g) ∋ q` (`g ∉ q`) contained entirely in
@@ -195,7 +239,7 @@ private theorem exists_basicOpen_subset_flatLocus_of_mem {R S M : Type*} [CommRi
     [Module.FinitePresentation S M] {q : PrimeSpectrum S} (hq : q ∈ flatLocus R S M) :
     ∃ g : S, g ∉ q.asIdeal ∧
       (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum S)) ⊆ flatLocus R S M :=
-  sorry
+  flatLocus_spreads_of_flat hq
 
 /-- **Openness of the flat locus at flat points assembled into global openness.**  From the local
 box `exists_basicOpen_subset_flatLocus_of_mem` (each flat point has a basic-open neighbourhood
