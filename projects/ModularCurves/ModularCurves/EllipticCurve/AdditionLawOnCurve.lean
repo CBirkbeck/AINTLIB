@@ -140,6 +140,21 @@ section Main
 variable {A : Type*} [CommRing A] [IsReduced A] [IsJacobsonRing A] {W' : Projective A}
 
 open MvPolynomial in
+/-- The field case, packaged along an arbitrary ring homomorphism into a field: the image of
+the equation value of `dblAddXYZ` vanishes. Keeping the entire elaboration inside one honest
+`[Field K]` world avoids the quotient-ring instance-path collision (whnf blowup) that a
+direct residue-field formulation hits. -/
+lemma map_polynomial_eval_dblAddXYZ_eq_zero {K : Type*} [Field K] (φ : A →+* K)
+    {W' : Projective A} (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+    (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    φ (eval (W'.dblAddXYZ P Q) W'.polynomial) = 0 := by
+  haveI : (W'.map φ).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map φ⟩
+  have key : (W'.map φ).Equation ((W'.map φ).dblAddXYZ (φ ∘ P) (φ ∘ Q)) :=
+    equation_dblAddXYZ_of_equation (hP.map φ) (hQ.map φ)
+  rw [map_dblAddXYZ] at key
+  rwa [Equation, map_polynomial, eval_map, ← eval₂_comp] at key
+
+open MvPolynomial in
 /-- **(T-W7.0c-c5α)** Over a reduced Jacobson ring — in particular over every chart ring of
 `E_U ×_U E_U` — the second Bosma–Lenstra addition law lands on the curve. This is the
 certificate-free replacement for the 4–8k-term `linear_combination` witness: evaluate at
@@ -150,13 +165,9 @@ theorem equation_dblAddXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 �
   rw [Equation]
   refine eq_zero_of_forall_isMaximal_mem fun m hm => ?_
   haveI := hm
-  rw [← Ideal.Quotient.eq_zero_iff_mem]
   haveI : Field (A ⧸ m) := Ideal.Quotient.field m
-  set f := Ideal.Quotient.mk m with hf
-  haveI : (W'.map f).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map f⟩
-  have key : (W'.map f).Equation ((W'.map f).dblAddXYZ (f ∘ P) (f ∘ Q)) :=
-    equation_dblAddXYZ_of_equation (hP.map f) (hQ.map f)
-  sorry
+  rw [← Ideal.Quotient.eq_zero_iff_mem]
+  exact map_polynomial_eval_dblAddXYZ_eq_zero (Ideal.Quotient.mk m) hΔ hP hQ
 
 end Main
 
