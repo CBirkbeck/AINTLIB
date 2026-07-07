@@ -102,6 +102,32 @@ theorem gme_deg_trace_forces_zero {n t d : ℤ} (hn : 3 ≤ n) (hd : 0 ≤ d)
   nlinarith [hb2, mul_nonneg (by linarith : (0 : ℤ) ≤ n - 3) (by linarith : (0 : ℤ) ≤ n + 3),
     mul_nonneg hd (sub_nonneg.mpr hd1), hd1, sq_nonneg d]
 
+/-- **(T-G3 core box — GME 2.6.4 scheme-morphism content; KM Ch. 2, do-not-formalize-from-
+memory gate)** The geometric heart of `aut_trivial_of_fullLevel`, separated from the trivial
+categorical wrapper: an automorphism `e` of `E/S` fixing a naive full level-`N` structure
+(`N ≥ 3` invertible) has **underlying map** the identity `𝟙 E.E`. The statement is a clean
+scheme-morphism equation (no `deg`/isogeny); only its *proof* is gated.
+
+REDUCTION (the arithmetic glue `gme_deg_trace_forces_zero` above is the one non-gated piece):
+`e.hom.hom` fixes `P, Q` (hyps `hP`/`hQ`); once it is additive on points — **T-G2** rigidity
+(`isMonHom_of_one_comp_eq`, `EllipticCurve/Rigidity.lean`, sorried) — and `P, Q` generate
+`E[N]` fibrewise (`IsNaiveFullLevel`), it fixes `E[N]`. Writing `ε = e.hom.hom` in `End(E/S)`,
+`ε - 1` kills `E[N] = ker[N]`, so `ε = 1 + N•g` for some `g` (**T-G3d** divisibility). Then
+`deg ε = 1` (automorphism) and the degree quadratic form `deg(1 + N•g) = 1 + N·tr g + N²·deg g`
+(**T-G3b**) give `N·tr g + N²·deg g = 0`; with the Hasse/Cauchy–Schwarz bound `tr(g)² ≤ 4·deg g`
+(**T-G3c**) and `N ≥ 3`, `gme_deg_trace_forces_zero` yields `deg g = 0`, hence `g = 0`
+(positive-definiteness of `deg`) and `ε = 1`.
+
+GATE: `End(E/S)`, `deg`, the dual isogeny (§B8) and the Hasse bound (§B9) are **KM Chapter 2** —
+under the project's binding do-not-formalize-from-memory gate (tickets.md §"Do-not-formalize-
+from-memory gate"); stated from the quotes in `.mathlib-quality/decomposition-gme2.md` §B8/§B9,
+closed when the KM text lands. Sub-tickets T-G3b–T-G3e (board). -/
+theorem aut_hom_eq_id_of_fullLevel (N : ℕ) [NeZero N] (hN : 3 ≤ N)
+    (hinv : NIsInvertible S N) (E : EllipticCurve S) (P Q : E.Section)
+    (hPQ : E.IsNaiveFullLevel N P Q) (e : E ≅ E)
+    (hP : P.1 ≫ e.hom.hom = P.1) (hQ : Q.1 ≫ e.hom.hom = Q.1) :
+    e.hom.hom = 𝟙 E.E := by sorry
+
 /-- **(T-G3 = rigidification bridge; GME 2.6.4 Aut-computation, p. 151)**
 For `N ≥ 3` and `N` invertible, an **automorphism** of an elliptic curve over `S`
 fixing a naive full level-`N` structure is the identity — the groupoid of `(E, P, Q)`
@@ -112,12 +138,19 @@ ADVERSARIAL FIX (2026-07-06): the previous endomorphism form (`f : E ⟶ E`) was
 `[1+N]` fixes every level point (`(1+N)•P = P + N•P = P`) but has degree `(1+N)² > 1`.
 GME's proof consumes `deg ε = 1`, i.e. `ε ∈ Aut` ("1 = deg ε = 1 + nTr(g) + n²deg g",
 GME p. 151, quote in hand at decomposition-gme2 B9); the statement is now about
-isomorphisms, exactly the quoted scope. -/
+isomorphisms, exactly the quoted scope.
+
+PROOF (2026-07-07): the iso/categorical layer is trivial plumbing — `HomOver.ext` uses only
+the `hom` field (`over_w`/`zero_w` are `Prop`) and `(Iso.refl E).hom.hom = 𝟙 E.E` by `rfl`,
+so `e = Iso.refl E` reduces to the scheme-morphism equation `aut_hom_eq_id_of_fullLevel`
+(the GME 2.6.4 core; see its docstring for the gated reduction through `gme_deg_trace_forces_zero`). -/
 theorem aut_trivial_of_fullLevel (N : ℕ) [NeZero N] (hN : 3 ≤ N)
     (hinv : NIsInvertible S N) (E : EllipticCurve S) (P Q : E.Section)
     (hPQ : E.IsNaiveFullLevel N P Q) (e : E ≅ E)
     (hP : P.1 ≫ e.hom.hom = P.1) (hQ : Q.1 ≫ e.hom.hom = Q.1) :
-    e = Iso.refl E := by sorry
+    e = Iso.refl E := by
+  refine Iso.ext (HomOver.ext ?_)
+  exact aut_hom_eq_id_of_fullLevel N hN hinv E P Q hPQ e hP hQ
 
 end EllipticCurve
 
