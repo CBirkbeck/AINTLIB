@@ -1189,8 +1189,16 @@ lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Alg
   have hin : (Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W) default ∈
       Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
-    rw [h1, ← Proj.opensRange_awayι]
-    exact Scheme.Hom.mem_opensRange.mpr ⟨h default, rfl⟩
+    have h2 : (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos) (h default) ∈
+        (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange :=
+      Scheme.Hom.mem_opensRange.mpr ⟨h default, rfl⟩
+    rw [Proj.opensRange_awayι] at h2
+    rw [h1]
+    exact h2
   rw [Scheme.Hom.comp_apply] at hin
   have hpre : Spec.map (CommRingCat.ofHom (algebraMap R K)) default ∈
       (projModelZero W ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W))
@@ -1198,6 +1206,7 @@ lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Alg
   rw [projModelZero_not_preimage_zChart] at hpre
   simpa using hpre
 
+open Classical in
 /-- The **explicit** field-points bijection for elliptic `W`: `K`-points of the projective model
 correspond to affine Weierstrass points — `Z`-chart points via their dehomogenised coordinates,
 the single off-chart point to `[0:1:0] = O`. Unlike `projModel_points`'s choice-extracted
@@ -1205,7 +1214,6 @@ equivalence, this one has computable values (`_zero`, `_some`, `_infinity` below
 noncomputable def projModelPointsEquivEll (W : WeierstrassCurve R) (hell : W.IsElliptic)
     (K : Type u) [Field K] [Algebra R K] :
     SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point :=
-  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
   (Equiv.sumCompl (InZChart W (K := K))).symm.trans
     ((((chartHomEquiv W 2 K).trans ((chartSolutionsEquiv W 2 K).trans
         (zSolutionsToAffine W K))).sumCongr
@@ -1222,9 +1230,10 @@ lemma projModelPointsEquivEll_infinity (W : WeierstrassCurve R) (hell : W.IsElli
     (K : Type u) [Field K] [Algebra R K]
     (g : SpecPoints (projModel W) (projModelπ W) K) (hg : ¬ InZChart W g) :
     projModelPointsEquivEll W hell K g = 0 := by
-  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
-  rw [projModelPointsEquivEll, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_neg (h := hg),
-    Equiv.trans_apply, Equiv.sumCongr_apply, Sum.map_inr]
+  classical
+  unfold projModelPointsEquivEll
+  simp only [Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_neg hg, Equiv.sumCongr_apply,
+    Sum.map_inr]
   rfl
 
 /-- Value of the explicit equivalence at the zero point `[0:1:0]`: the group identity `0`. -/
@@ -1245,10 +1254,11 @@ lemma projModelPointsEquivEll_some (W : WeierstrassCurve R) (hell : W.IsElliptic
     (hx : x = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨0, by decide⟩)
     (hy : y = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨1, by decide⟩) :
     projModelPointsEquivEll W hell K g = WeierstrassCurve.Affine.Point.some x y hxy := by
-  haveI : DecidablePred (InZChart W (K := K)) := fun _ => Classical.dec _
+  classical
   subst hx hy
-  rw [projModelPointsEquivEll, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos (h := hZ),
-    Equiv.trans_apply, Equiv.sumCongr_apply, Sum.map_inl]
+  unfold projModelPointsEquivEll
+  simp only [Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos hZ, Equiv.sumCongr_apply,
+    Sum.map_inl]
   rfl
 
 private lemma aeval_pderiv_dehomog_two_u (W : WeierstrassCurve R) {K : Type u}
