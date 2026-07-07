@@ -1969,7 +1969,19 @@ directly applicable). All leaves unclaimed.
   tensorObj/tensorBinaryCofan(IsColimit)/tensorBinaryFanOpIsLimit — Etale.baseChange
   arg order is Etale N (N ⊗ M); never elaborate a fresh `*` between cone-leg factors
   across the const-functor carrier spelling — rw the factors in place).
-  F1c-3 REMAINING: the transport iso `(finiteEtaleEquivContAction ℚ).inverse.obj
+  F1c-3 ✓ COMPLETE + **F1c-4 ✓ vRhoAdd GREEN, AXIOM-CLEAN** (2026-07-07):
+  `vRhoSqAlgebraIso` (isLimitOfPreserves + postcomposeHomEquiv-along-pairComp +
+  conePointUniqueUpToIso against tensorBinaryFanOpIsLimit — first-try green, op-unop
+  eta bridges the pair diagrams); `vRhoComulHom` (unop of iso.inv ≫ inverse.map
+  rhoAddMor); `vRhoAdd : pullback (vRhoπ D) (vRhoπ D) ⟶ vRho D` via
+  AlgebraicGeometry.pullbackSpecIso (vRhoπ is definitionally Spec.map of the
+  structure algebraMap, so the iso applies verbatim; qualify Spec.map).
+  F1c REMAINING: zero/neg scheme-morphisms (same pattern: inverse.map rhoZeroMor/
+  rhoNegMor, the point-object's algebra ≅ ℚ via the terminal identification),
+  group laws (assoc/unit/inv — transport or direct via the equivalence's
+  faithfulness), F1c-5 points-spec (vRhoAdd through vRhoPointsEquiv is coordinate
+  addition — via pointsEquivOfContAction-naturality on rhoAddMor).
+  (superseded planning note below:) the transport iso `(finiteEtaleEquivContAction ℚ).inverse.obj
   (rhoSqContAction D) ≅ Opposite.op (tensorObj (vRhoAlgebra D) (vRhoAlgebra D))` via
   isLimitOfPreserves inverse (rhoSqIsProduct D) vs tensorBinaryFanOpIsLimit +
   IsLimit.conePointUniqueUpToIso (pair-diagram seam: the two fans live over
