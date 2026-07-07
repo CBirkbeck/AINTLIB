@@ -4271,7 +4271,8 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
   for general `N` is T-H4/T-B6 territory).
 
 ### [T-H7b-i] point separation along extensions of the base field (sub-sub-ticket)
-- **Status**: open · **Claimed**: — · **File**: Moduli/GammaH.lean (helpers) ·
+- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-07T23:07Z · **File**:
+  Moduli/GammaH.lean (helpers) ·
   **Parent**: T-H7b · **Depends on**: none · **Type**: lemma
 - **Statement**: `{k k' : Type u} [Field k] [Field k'] (f : k →+* k')
   (E : EllipticCurve S) (t : Spec (CommRingCat.of k) ⟶ S) :
