@@ -2594,6 +2594,27 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
 ### New stream SG — finite locally free closed subgroups (review requirement)
 - **[T-SG1]** finite locally free closed subgroup schemes of `E/S`: definition +
   basic API (kernel-style constructors; `E[N]` as the leading example).
+  **DONE** (beastmode-H, 2026-07-07) — `GroupScheme/Subgroup.lean` builds green; core
+  (`FiniteLocallyFreeSubgroup` structure, `pointSubgroup`, `rank`/`HasRank`, the
+  `RelEffCartierDiv` divisor dictionary `toRelEffCartierDiv`/`ofRelEffCartierDiv` +
+  roundtrip, `torsionSubgroup` = `E[N]` leading example, `torsionι_factors_iff`,
+  `torsionSubgroup_hasRank` KM 2.3.1 rank part, `HasRank.smul_eq_zero_of_factors`
+  KM 1.4.2) all proven. Axiom audit: the three pure divisor-dictionary lemmas
+  (`toRelEffCartierDiv_isSubgroup`, `torsionι_factors_iff`, `toRelEffCartierDiv_degree`)
+  are AXIOM-CLEAN; the `torsionSubgroup`/`HasRank` decls carry `sorryAx` ONLY through the
+  pre-registered upstream boxes (BB-QF/BB-FLAT/BB-DEG in Torsion.lean, BB-DELIGNE in
+  ExactOrder.lean) — no new box minted. One parked follow-on = **T-SG1b** below.
+- **[T-SG1b]** point-level base-change dictionary for `FiniteLocallyFreeSubgroup`
+  (`baseChange.subgroup` field, the one parked `sorry` in Subgroup.lean:357): transport
+  `G.subgroup (g' ≫ g)` across `(E.baseChange g).Point g' ≃+ E.Point (g' ≫ g)`, with
+  factorisations corresponding via the universal property of `pullback G.ι
+  (pullback.fst E.π g)`. The finite/flat/lfp/closedImmersion fields of `baseChange` are
+  already proven (pasted-pullback descent); ONLY the subgroup condition is sorried.
+  **BLOCKED on the same `(E.baseChange g).E`-vs-`pullback E.π g` spelling normalisation
+  that parks `Point.asSection_zsmul`** (GroupLaw.lean PARKED note) — i.e. this funnels
+  into the A-lane 3-spelling-normalisation refactor, exactly like the other gated
+  H/C base-change memberships. Non-blocking for SG2 (which quantifies over a fixed
+  base). Depends: A-lane spelling normalisation (asSection_zsmul unblock).
 - **[T-SG2]** fppf-local cyclicity (KM 1.4.1 verbatim, in hand) as the **definition of
   record** for Γ₀(N); discharges/replaces the geometric-fibre surrogate in
   `IsGammaZero` (upgrade `T-D10`). **GATE: no Γ₀ representability theorem may be
@@ -4620,3 +4641,26 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     **Claimed**: beastmode-H, 2026-07-07T03:45Z, Status: in_progress. Planning
     contact first (definition ticket — design against Torsion/CartierDivisor
     vocabulary; adversarial attack block before any proof per standing rule 1).
+  - 2026-07-07 (resumed session, model switched to Opus 4.8 past the Fable-5 credit
+    wall): **T-SG1 DONE.** A prior firing had written the full `GroupScheme/Subgroup.lean`
+    (503 lines, matching the planned design: structure-not-predicate, RelEffCartierDiv
+    divisor dictionary, HasRank predicate, torsionSubgroup leading example, all ATTACK
+    blocks) but died BEFORE getting it green — it had 2 hard errors + the parked sorry.
+    ROOT CAUSE of the 2 errors: `IsIso (Scheme.Hom.toImage G.ι)` (the mathlib instance
+    `[IsClosedImmersion f] → IsIso f.toImage`, ClosedImmersion.lean:153) synthesises in
+    the MAIN tactic context but NOT in the goals under `refine ⟨H, fun P => (hH P).trans
+    ⟨?_, ?_⟩⟩` — the delayed metavariable goals under the `fun P` lambda don't consult
+    the instance for `inv G.ι.toImage`, even with a local `have : IsIso … := inferInstance`
+    hoisted. FIX (3-step): (1) `set j := inv G.ι.toImage with hj` in the MAIN context
+    (synthesis works there); (2) derive `hjeq : j ≫ G.ι = G.ι.ker.subschemeι` in the
+    main context via `IsIso.inv_comp_eq`; (3) `simp only [toRelEffCartierDiv_ideal]` to
+    normalise the goal's `G.toRelEffCartierDiv.ideal` → `G.ι.ker` BEFORE the bullets, so
+    `k`'s type aligns syntactically with `j`/`hjeq` (the `rw` motive needs syntactic, not
+    just defeq, match — image=ker.subscheme is reducible but toRelEffCartierDiv.ideal is
+    not). Bullets then use the plain named term `j` (no synthesis). Green in build7.
+    AXIOM AUDIT (lake env lean scratch): toRelEffCartierDiv_isSubgroup / torsionι_factors_iff
+    / toRelEffCartierDiv_degree AXIOM-CLEAN; torsionSubgroup / torsionSubgroup_hasRank /
+    torsionSubgroup_pointSubgroup / HasRank.smul_eq_zero_of_factors carry sorryAx ONLY via
+    the registered upstream boxes (BB-QF/BB-FLAT/BB-DEG/BB-DELIGNE) — no new box. Spawned
+    **T-SG1b** (base-change subgroup field, the one parked sorry) → funnels to the A-lane
+    asSection_zsmul spelling normalisation. NEXT: G6 re-scan.
