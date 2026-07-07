@@ -3217,4 +3217,56 @@ theorem mem_poleOrderFiltration_iff (W : WeierstrassCurve R)
   · exact ⟨fun hf => overlapMap_mul_root_pow_mem_range_of_mem W hf,
       fun hf => mem_poleOrderFiltration_of_overlapMap W hf⟩
 
+
+/-- **(T-W7.1b-b2, the local-to-global extension principle)** An overlap function extends to
+the infinity chart as soon as it extends after a denominator away from each maximal ideal
+containing `t` — the denominator-ideal argument. Away from `V(t)` the extension is
+automatic (`t` is invertible), and `V(t) = V(s,t)` is the section. -/
+theorem mem_range_algebraMap_of_forall_maximal (W : WeierstrassCurve R)
+    (x : Localization.Away (infChartTElem W))
+    (h : ∀ P : Ideal (AdjoinRoot (infChartCubic W)), P.IsMaximal →
+      infChartTElem W ∈ P →
+      ∃ c ∉ P, algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) c * x ∈
+        Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)))) :
+    x ∈ Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) := by
+  -- the denominator ideal
+  set D : Ideal (AdjoinRoot (infChartCubic W)) :=
+    { carrier := {c | algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) c * x ∈
+        Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)))}
+      add_mem' := by
+        rintro a b ⟨u, hu⟩ ⟨v, hv⟩
+        exact ⟨u + v, by rw [map_add, map_add, add_mul, hu, hv]⟩
+      zero_mem' := ⟨0, by rw [map_zero, zero_mul]⟩
+      smul_mem' := by
+        rintro r c ⟨u, hu⟩
+        refine ⟨r * u, ?_⟩
+        rw [smul_eq_mul, map_mul, map_mul, mul_assoc, hu] } with hD
+  have hDtop : D = ⊤ := by
+    by_contra hne
+    obtain ⟨P, hPmax, hDP⟩ := Ideal.exists_le_maximal D hne
+    by_cases ht : infChartTElem W ∈ P
+    · obtain ⟨c, hcP, hcx⟩ := h P hPmax ht
+      exact hcP (hDP hcx)
+    · -- `t ∉ P`: a `t`-power clears the denominator, and `t`-powers avoid the prime `P`
+      obtain ⟨⟨num, den⟩, hnd⟩ := IsLocalization.surj (Submonoid.powers (infChartTElem W)) x
+      obtain ⟨k, hk⟩ := den.2
+      have hden : algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W ^ k) * x ∈
+          Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W))) := by
+        refine ⟨num, ?_⟩
+        rw [show (infChartTElem W ^ k : AdjoinRoot (infChartCubic W)) = den.1 from hk]
+        rw [mul_comm]
+        exact hnd.symm
+      have hmem : infChartTElem W ^ k ∈ D := hden
+      exact ht (hPmax.isPrime.mem_of_pow_mem k (hDP hmem))
+  have h1 : (1 : AdjoinRoot (infChartCubic W)) ∈ D := hDtop ▸ Submodule.mem_top
+  obtain ⟨b, hb⟩ := h1
+  exact ⟨b, hb.trans (by rw [map_one, one_mul])⟩
+
 end ModularCurves

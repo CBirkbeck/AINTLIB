@@ -542,17 +542,27 @@ lemma coord_val (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
         (Ideal.Quotient.mk _ (MvPolynomial.X j))) :=
   rfl
 
+/-- The composite `P.1 ≫ negModelHom W` is again a `K`-point (negation commutes with the
+structure map `projModelπ`). Factored out as a single named proof so that every occurrence of
+`⟨P.1 ≫ negModelHom W, ·⟩` is *syntactically* identical — this keeps `rw` from unfolding the heavy
+`chartHomEquiv` during its occurrence search (proof-irrelevant `by rw` terms differ per site and
+force `isDefEq` to whnf the equiv, which times out). -/
+private lemma negComp_π (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (P : SpecPoints (projModel W) (projModelπ W) K) :
+    (P.1 ≫ negModelHom W) ≫ projModelπ W = Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+  rw [Category.assoc, negModelHom_π, P.2]
+
 /-- **(L2a)** The composite `g ≫ negModelHom`'s chart ring hom factors as `φ_g ∘ negChartMap`. -/
 lemma chartHom_negModelHom (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (g : SpecPoints (projModel W) (projModelπ W) K)
     (hZ : InZChart W g)
-    (hZ' : InZChart W (⟨g.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, g.2]⟩ :
+    (hZ' : InZChart W (⟨g.1 ≫ negModelHom W, negComp_π W K g⟩ :
       SpecPoints (projModel W) (projModelπ W) K)) :
-    (chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, g.2]⟩,
+    (chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, negComp_π W K g⟩,
         hZ'⟩).1 =
       (chartHomEquiv W 2 K ⟨g, hZ⟩).1.comp (negChartMap W) := by
   set φP := chartHomEquiv W 2 K ⟨g, hZ⟩ with hφP
-  set φQ := chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, _⟩, hZ'⟩ with hφQ
+  set φQ := chartHomEquiv W 2 K ⟨⟨g.1 ≫ negModelHom W, negComp_π W K g⟩, hZ'⟩ with hφQ
   have hPfac : Spec.map (CommRingCat.ofHom φP.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
       (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 := by
     rw [← chartHomEquiv_symm_coe W 2 φP, hφP, Equiv.symm_apply_apply]
@@ -660,10 +670,10 @@ set_option backward.isDefEq.respectTransparency false in
 /-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`). -/
 private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
-    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
       SpecPoints (projModel W) (projModelπ W) K)) :
     (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K
-        ⟨⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩, hZ'⟩)).1
+        ⟨⟨P.1 ≫ negModelHom W, negComp_π W K P⟩, hZ'⟩)).1
         ⟨0, by decide⟩ =
       (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩ := by
   rw [coord_val W K _ hZ' ⟨0, by decide⟩, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply,
@@ -673,10 +683,10 @@ set_option backward.isDefEq.respectTransparency false in
 /-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. -/
 private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
-    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+    (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
       SpecPoints (projModel W) (projModelπ W) K)) :
     (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K
-        ⟨⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩, hZ'⟩)).1
+        ⟨⟨P.1 ≫ negModelHom W, negComp_π W K P⟩, hZ'⟩)).1
         ⟨1, by decide⟩ =
       (W.baseChange K).toAffine.negY
         ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩)
@@ -705,14 +715,14 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) :
     projModelPointsEquiv W K
-        ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ =
+        ⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ =
       -(projModelPointsEquiv W K P) := by
   by_cases hZ : InZChart W P
   · -- Z-chart case: coordinate leaf L2. `negModelHom` acts on the dehomogenised `Z`-chart
     -- coordinates as `X₀/X₂ ↦ X₀/X₂`, `X₁/X₂ ↦ (−X₁ − a₁X₀ − a₃X₂)/X₂`, so the composite's
     -- coordinates are `(x, W.negY x y)`; then `projModelPointsEquiv_some` on both sides and
     -- `Affine.Point.neg_some` (`negY x y = −y − a₁x − a₃`) finish.
-    have hZ' : InZChart W (⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ :
+    have hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
         SpecPoints (projModel W) (projModelπ W) K) :=
       (inZChart_comp_negModelHom W K P _).mpr hZ
     haveI : ((W.baseChange K).toAffine).IsElliptic :=
@@ -720,7 +730,7 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     have hxy := WeierstrassCurve.Affine.equation_iff_nonsingular.mp (negModelHom_zEquation W K P hZ)
     rw [projModelPointsEquiv_some W K P hZ _ _ hxy rfl rfl,
       projModelPointsEquiv_some W K
-        ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ hZ' _ _
+        ⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ hZ' _ _
         ((WeierstrassCurve.Affine.nonsingular_neg ..).mpr hxy)
         (negModelHom_zCoord0 W K P hZ hZ').symm (negModelHom_zCoord1 W K P hZ hZ').symm,
       WeierstrassCurve.Affine.Point.neg_some]
@@ -732,7 +742,7 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
       rw [← projModelPointsEquiv_zero W K]
       exact congrArg (projModelPointsEquiv W K) (Subtype.ext hP)
     have hLHS : projModelPointsEquiv W K
-        ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ = 0 := by
+        ⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ = 0 := by
       rw [← projModelPointsEquiv_zero W K]
       refine congrArg (projModelPointsEquiv W K) (Subtype.ext ?_)
       show P.1 ≫ negModelHom W = _
