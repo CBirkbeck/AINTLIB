@@ -4799,8 +4799,49 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `projModel_globalSections_eq_baseRing`, `infChart_s_nonZeroDivisor`,
   `projModel_hom_ext_of_affine`, `locallyWeierstrass_pushforward_O_eq_O`
   (PoleFiltration.lean:85–117).
-  - **Status**: open (lane P3; the McCoy leaf is independent — startable first) ·
-    **Depends**: T-W7.0i-a (normal form, for `Γ ≅ R`) · **Type**: 4 lemmas
+  - **Status**: in_progress (lane P3 — THIS session, beastmode-A 2026-07-07) ·
+    **Depends**: T-W7.0i-a (done), T-W7.0i-b1..b4 (spawned below) · **Type**: 4 lemmas
+  - **Progress**: 2026-07-07: execution decomposition — spawned b1–b4 (Tier A2/A4). SKEW
+    FOUND: `hom_ext_of_affine` consumes the *t*-coordinate (and chart-0 *z*-) nonzerodivisor,
+    not the skeleton's s-version (which serves 1b's filtration side; kept, still true). Both
+    proved by the mod-variable two-step (kill by constant-unit/monic leading coefficient), or
+    via the b2 basis.
+
+- **[T-W7.0i-b1]** chart-ring bridge — explicit `infChartPoly` (= dehomogenizeAux at Y of the
+  projective cubic, computed: `t + a₁st + a₃t² − s³ − a₂s²t − a₄st² − a₆t³`) + alg-equiv of the
+  Y-chart quotient to `AdjoinRoot` of the monic-in-`s` cubic over `R[t]`.
+  - **Status**: in_progress (THIS session) · **File**: PoleFiltration.lean · **Parent**:
+    T-W7.0i-b · **Depends**: none · **Type**: def + equiv + 2 lemmas
+  - Sketch: subtype-index ≃ Fin 2; `finSuccEquiv` + Fin-1 ≃ `Polynomial R`; transport the
+    span along `Ideal.quotientEquivAlg` (pattern: repo `chartCoordEquiv`). Monicity: leading
+    s-coefficient −1 (unit).
+
+- **[T-W7.0i-b2]** basis and nonzerodivisors — `Basis (Fin 3) R[t]` of the AdjoinRoot
+  (`AdjoinRoot.powerBasis'`, monic) + `s`-nzd (basis matrix triangularity + McCoy) + `t`-nzd
+  (scalar on a free module) + chart-0 `z`-nzd (constant term −1 unit trick).
+  - **Status**: done (with b1; beastmode-A 2026-07-07) · **Parent**: T-W7.0i-b · **Depends**:
+    T-W7.0i-b1 (done) · **Type**: 4 lemmas
+  - **Progress**: b1+b2 PROVEN, build green: `infChartS/T`, `dehomogenizeAux_projective_polynomial`
+    (explicit chart cubic), `infChartCubic` (+`_monic` via `monicity!`, `_natDegree` — needs
+    honest `[Nontrivial R]`), `infChartPolyEquiv` (+ generator/`dehomogenize` computation; the
+    `uniqueAlgEquiv` route, universe-safe), `infChartQuotEquiv` (≃ₐ via `quotientEquivAlg`;
+    coe-path fixed by `→+*`-ascribed `show`), general `adjoinRoot_root_mem_nonZeroDivisors`
+    (mod-X two-step; ForMathlib-grade), `infChartBasis` (`Module.Basis` — mathlib renamed!),
+    `infChart_algebraMap_mem_nonZeroDivisors`, `infChart_t_mem_nonZeroDivisors`,
+    `infChart_root_mem_nonZeroDivisors` (s-nzd; `mem_nonzeroDivisors_of_coeff_mem` = McCoy
+    corollary, found in mathlib). NOTE: chart-0 z-nzd deferred until hom_ext's cover choice
+    fixes whether chart-0 is needed (2-chart route may suffice).
+
+- **[T-W7.0i-b3]** two-chart Γ plumbing — chart-1 ⊔ chart-2 = ⊤ (complement of D₊(Z) is the
+  section, inside D₊(Y)); `objSupIsoProdEqLocus` for the sup; `Γ(opensRange awayι) ≅` chart
+  ring (open-immersion Γ-iso); overlap `Γ(U ⊓ V) ≅` localization at the overlap coordinate.
+  - **Status**: open · **Parent**: T-W7.0i-b · **Depends**: T-W7.0i-b1 · **Type**: 4 lemmas
+
+- **[T-W7.0i-b4]** the algebraic equalizer core — pairs `(a, b)` in Y-chart × Z-chart rings
+  agreeing in the overlap localization are exactly `R` (normal-form bookkeeping: `A` free
+  `{xⁱ, xⁱy}` (0i-a), `B` free `{sᵉtᵏ}` (b2); `x²y⁻¹` the excluded order-1 witness).
+  - **Status**: open · **Parent**: T-W7.0i-b · **Depends**: T-W7.0i-a, T-W7.0i-b1, T-W7.0i-b2 ·
+    **Type**: theorem
   - Sketch: 2-chart equalizer (`x²y⁻¹` excluded = the `H¹` witness); universality BY
     INSTANTIATION (never base-change the proof); McCoy for `s`-nonzerodivisor; sheafify
     over chart opens via `isPullback_projModelBaseChange` ⓟ. Leaf **L-P3** (part 2).
