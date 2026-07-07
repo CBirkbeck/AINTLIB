@@ -5,7 +5,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.AlgebraicGeometry.Morphisms.Separated
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import Mathlib.RingTheory.Norm.Defs
+import Mathlib.RingTheory.Norm.Basic
 import Mathlib.RingTheory.Etale.Kaehler
 import Mathlib.RingTheory.Flat.TorsionFree
 import Mathlib.RingTheory.Kaehler.Basic
@@ -1645,14 +1645,27 @@ theorem baseChange_ideal (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S
 /-- Two relative effective Cartier divisors of `C/S` with the same ideal sheaf are
 equal. -/
 @[ext] theorem ext {D₁ D₂ : RelEffCartierDiv π} (h : D₁.ideal = D₂.ideal) : D₁ = D₂ := by
-  sorry
+  obtain ⟨i₁, f₁, l₁, p₁⟩ := D₁
+  obtain ⟨i₂, f₂, l₂, p₂⟩ := D₂
+  obtain rfl : i₁ = i₂ := h
+  rfl
 
 private lemma flatPullback_prop (P : MorphismProperty Scheme.{u})
     [P.IsStableUnderBaseChange] [P.IsStableUnderComposition] [P.RespectsIso]
     (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C' ⟶ S} (f : C' ⟶ C)
     (w : f ≫ π = π') (hf : P f) (hD : P (D.ideal.subschemeι ≫ π)) :
     P ((pullback.snd D.ideal.subschemeι f).ker.subschemeι ≫ π') := by
-  sorry
+  haveI : IsClosedImmersion (pullback.snd D.ideal.subschemeι f) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  have hι : (pullback.snd D.ideal.subschemeι f).ker.subschemeι =
+      inv (pullback.snd D.ideal.subschemeι f).toImage ≫
+        pullback.snd D.ideal.subschemeι f := by
+    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+  have hP : P (pullback.snd D.ideal.subschemeι f ≫ π') := by
+    rw [← w, ← Category.assoc, ← pullback.condition, Category.assoc]
+    exact P.comp_mem _ _ (MorphismProperty.pullback_fst _ _ hf) hD
+  rw [hι, Category.assoc]
+  exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hP
 
 /-- **Flat pullback of a relative effective Cartier divisor** (KM 1.1.4, p. 6: "any
 effective Cartier divisor `D` in `X/S` gives rise to an effective Cartier divisor
@@ -1679,12 +1692,20 @@ theorem flatPullback_ideal (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C'
     (f : C' ⟶ C) (w : f ≫ π = π')
     [IsFinite f] [Flat f] [LocallyOfFinitePresentation f] :
     (D.flatPullback f w).ideal = D.ideal.comap f := by
-  sorry
+  show (Limits.pullback.snd D.ideal.subschemeι f).ker = D.ideal.comap f
+  rw [show (Limits.pullback.snd D.ideal.subschemeι f) =
+      (Limits.pullbackSymmetry D.ideal.subschemeι f).hom ≫
+        Limits.pullback.fst f D.ideal.subschemeι from
+    (Limits.pullbackSymmetry_hom_comp_fst _ _).symm,
+    Scheme.Hom.ker_comp_of_isIso,
+    Scheme.IdealSheafData.ker_fst_of_isClosedImmersion,
+    Scheme.IdealSheafData.ker_subschemeι]
 
 /-- Flat pullback along the identity is the identity. -/
 theorem flatPullback_id (D : RelEffCartierDiv π) :
     D.flatPullback (𝟙 C) (Category.id_comp π) = D := by
-  sorry
+  refine ext ?_
+  rw [flatPullback_ideal, Scheme.IdealSheafData.comap_id]
 
 /-- Flat pullbacks compose contravariantly. -/
 theorem flatPullback_flatPullback (D : RelEffCartierDiv π) {C' C'' : Scheme.{u}}
@@ -1694,7 +1715,9 @@ theorem flatPullback_flatPullback (D : RelEffCartierDiv π) {C' C'' : Scheme.{u}
     [IsFinite g] [Flat g] [LocallyOfFinitePresentation g] :
     (D.flatPullback f w).flatPullback g w' =
       D.flatPullback (g ≫ f) (by rw [Category.assoc, w, w']) := by
-  sorry
+  refine ext ?_
+  rw [flatPullback_ideal, flatPullback_ideal, flatPullback_ideal,
+    Scheme.IdealSheafData.comap_comp]
 
 /-- Iterated base change is base change along the composite, up to the canonical
 pullback isomorphism (ideal-sheaf form). -/
@@ -1702,7 +1725,9 @@ theorem baseChange_baseChange_ideal (D : RelEffCartierDiv π) {T T' : Scheme.{u}
     (t : T ⟶ S) (t' : T' ⟶ T) :
     ((D.baseChange t).baseChange t').ideal =
       (D.baseChange (t' ≫ t)).ideal.comap (pullbackLeftPullbackSndIso π t t').hom := by
-  sorry
+  rw [baseChange_ideal, baseChange_ideal, baseChange_ideal,
+    ← Scheme.IdealSheafData.comap_comp, ← Scheme.IdealSheafData.comap_comp,
+    pullbackLeftPullbackSndIso_hom_fst]
 
 end RelEffCartierDiv
 
@@ -1864,7 +1889,51 @@ evaluating at `T = 0`; the converse applies the norm form over `A[X]` to the ele
 theorem isFullSetOfSectionsAlg_iff_charpoly [Module.Free R B] [Module.Finite R B]
     {n : ℕ} (P : Fin n → (B →ₐ[R] R)) :
     IsFullSetOfSectionsAlg R B P ↔ IsFullSetOfSectionsCharpoly R B P := by
-  sorry
+  constructor
+  · intro h A _ _ f
+    have he : (Algebra.TensorProduct.cancelBaseChange R A A[X] A[X] B)
+          ((X : A[X]) ⊗ₜ[A] (1 : A ⊗[R] B) - (1 : A[X]) ⊗ₜ[A] f) =
+        (X : A[X]) ⊗ₜ[R] (1 : B) -
+          (Algebra.TensorProduct.map (Polynomial.CAlgHom : A →ₐ[R] A[X])
+            (AlgHom.id R B)) f := by
+      rw [map_sub]
+      congr 1
+      · rw [Algebra.TensorProduct.one_def, Algebra.TensorProduct.cancelBaseChange_tmul,
+          one_smul]
+      · induction f with
+        | zero => simp
+        | add f₁ f₂ h₁ h₂ => rw [tmul_add, map_add, map_add, h₁, h₂]
+        | tmul a b =>
+          rw [Algebra.TensorProduct.cancelBaseChange_tmul,
+            Algebra.TensorProduct.map_tmul]
+          congr 1
+          rw [Algebra.smul_def, mul_one]
+          rfl
+    rw [Algebra.charpoly_lmul_eq_norm A (A ⊗[R] B) f,
+      ← Algebra.norm_eq_of_algEquiv
+        (Algebra.TensorProduct.cancelBaseChange R A A[X] A[X] B),
+      he, h A[X]]
+    refine Finset.prod_congr rfl fun i _ => ?_
+    rw [map_sub, sectionBaseChange_tensor_map]
+    congr 1
+    simp [AlgHom.sectionBaseChange]
+  · intro h A _ _ f
+    rcases subsingleton_or_nontrivial A with hA | hA
+    · exact Subsingleton.elim _ _
+    · have h1 := h A f
+      have hn : Module.finrank A (A ⊗[R] B) = n := by
+        have hdeg := congrArg Polynomial.natDegree h1
+        rwa [LinearMap.charpoly_natDegree,
+          Polynomial.natDegree_prod_of_monic _ _
+            (fun i _ => Polynomial.monic_X_sub_C _),
+          Finset.sum_congr rfl (fun i _ => Polynomial.natDegree_X_sub_C _),
+          Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul,
+          mul_one] at hdeg
+      rw [Algebra.norm_apply, LinearMap.det_eq_sign_charpoly_coeff, h1,
+        Polynomial.coeff_zero_eq_eval_zero, Polynomial.eval_prod]
+      simp only [Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, zero_sub]
+      rw [hn, Finset.prod_neg, Finset.card_univ, Fintype.card_fin, ← mul_assoc,
+        ← pow_add, Even.neg_one_pow ⟨n, rfl⟩, one_mul]
 
 end FullSections
 
