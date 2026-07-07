@@ -5995,3 +5995,22 @@ Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
   from §B8/§B9 quotes. Commits f43f76ef (G3a), 78adbfd3 (board), + reduction commit.
 - **Frontier reached**: T-G3's non-gated content is exhausted (G3a + plumbing). Closing the box
   requires either KM-Ch2 text (gate) or T-G2 (another lane's sorried rigidity). G6 → next ticket.
+
+### G-lane PHASE-8 terminal (beastmode-P2, 2026-07-07, Opus 4.8) — cross-stream T-G3 landed
+Session accomplishment (committed): **T-G3 landed done-modulo-boxes** — the cross-stream ticket
+the owner directed ("work on other streams"). **T-G3a** `gme_deg_trace_forces_zero` PROVEN +
+axiom-clean (the pure-ℤ GME 2.6.4 engine, reusable by T-H5); **`aut_trivial_of_fullLevel` PROVEN**
+via iso-plumbing (`Iso.ext ∘ HomOver.ext`); geometric content in one precise source-quoted box
+`aut_hom_eq_id_of_fullLevel` (T-G3b–e decomposed on board). Build green (3087 jobs).
+**Terminal reason — PHASE-8 (dispatchable G-lane work done; blocked/owned remainder):** mirrors the
+H-lane PHASE-8 (L5707) exactly.
+- T-G3's remaining content = `End(E/S)`/`deg`/dual-isogeny/Hasse = **KM Chapter 2**, under the binding
+  do-not-formalize-from-memory gate (may NOT close from memory); + **T-G2** additivity (Rigidity.lean,
+  fable-P4's active lane). Both blocked/owned.
+- Every other startable ticket is CLAIMED + in-progress by another lane (T-W7=A, T-B5z=B, W3c=Q,
+  D11/D-stream=D2, Rigidity/T-G2=fable-P4) — one-worker-per-lane; taking any collides.
+- The only gate-free-and-mine option (T-GG-gen1/gen2) is coordinator-deprioritized (v9 "move effort
+  away from generality polishing"; LATE/post-critical-path).
+**Resume trigger for G-lane**: when the KM Ch.2 text lands in `refs/ModularCurves/` (degree/dual-isogeny/
+Hasse), OR when T-G2 (`isMonHom_of_one_comp_eq`) + a `deg` API land — then close the box
+`aut_hom_eq_id_of_fullLevel` via the reduction already documented in its docstring (wiring T-G3a).
