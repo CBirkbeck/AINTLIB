@@ -4174,8 +4174,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     comparison via hom_quotientπ — the T-Q7 feed). GOTCHAS: bare @Functor.ext
     resolves to core-Lean LawfulFunctor.ext — qualify @CategoryTheory.Functor.ext;
     Discrete laws via Subsingleton.elim; congrArg-not-rw for subtype-motive.
-- **[T-W3b]** (in_progress, beastmode-Q 2026-07-07T03:30Z; split from T-W3 at
-  cut) the torsor description of
+- **[T-W3b]** (done 2026-07-07T06:50Z — scope: the v8 one-line equivalence is
+  FALSE as literally stated (attack log); the mathematically-correct core is
+  PROVEN: TorsorPair groupoid + trivialization functor + full faithfulness
+  over connected nonempty bases + all trivial-torsor fields; the base-change/
+  self-trivialization tail is T-W3c below) the torsor description of
   `[X/G](S)`: define the groupoid of pairs (finite étale `G`-torsor `p : P ⟶ S`
   in the ∐-comparison sense of `TorsorData`/Stack.lean, `G`-equivariant
   `u : P ⟶ X`), the trivialization functor from `ActionGroupoid σ S`
@@ -4224,6 +4227,18 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     set-vars trip TC; reassoc_of% + erw for transparency-poisoned steps;
     ∃-repackage for opaque indices. REMAINING: only the (descent-gated)
     essential-image statement.
+- **[T-W3c]** (open; cut from T-W3b at close) TorsorPair base change +
+  self-trivialization. (i) `TorsorPair.pullback (q : S' ⟶ S) : TorsorPair σ S →
+  TorsorPair σ S'` — total space `P ×_S S'`, action by functoriality, property
+  fields via base-change stability instances (IsFinite/Etale/Surjective ✓
+  mathlib instances; the ∐-comparison for the pulled-back pair from the
+  original by pullback-juggling). (ii) **self-trivialization** (NOT
+  descent-gated — CORRECTION of the earlier note: the torsor FIELD is exactly
+  local triviality along p): for `A : TorsorPair σ S`, `A.pullback A.p ≅
+  trivialTorsorPair σ A.P A.u` — the comparison IS `A.torsor`'s iso read
+  through `∐_G P ≅ P ×_S P`. This is the KM pp. 114–116 f₀-pullback step's
+  vocabulary (T-Q6e-adjacent). The full stackification equivalence stays out
+  of scope (that half is genuinely descent/sheafification). Lane Q.
   - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
     (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
     (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
