@@ -2123,6 +2123,31 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   closed subschemes are ECDs; proper ECDs are finite flat). File: CartierDivisor.lean
   (extends T-D1; AG-LB only for the (L,s)-interface half, T-D19). Sources: KM 1.1–1.2
   (in hand).
+  - **Claimed**: beastmode-D2, 2026-07-07T05:50Z. Status: in-progress. Quote-gate ✓
+    KM 1.1.1 verbatim read at claim (p. 3): "By an effective Cartier divisor D in
+    X/S we mean a closed subscheme D ⊂ X such that: D is flat over S; the ideal
+    sheaf I(D) ⊂ O_X is an invertible O_X-module … When S is affine, say
+    S = Spec(R), it means that we can cover X by affine opens Uᵢ = Spec(Aᵢ) …
+    such that D ∩ Uᵢ is defined in Uᵢ by one equation fᵢ = 0 … Aᵢ/fᵢAᵢ is flat
+    over R; fᵢ is not a zero-divisor in Aᵢ." SCOPE: (1) `IsOfficialCartier` as a
+    2-field Prop structure — global flatness of the subscheme over S (KM clause 1)
+    + affine-local principal-nzd ideal (KM's affine unpacking, decoupled: given the
+    covering, per-chart quotient-flatness ⟺ global flatness); invertible-MODULE
+    interface stays T-D19 (AG-LB). (2) Zariski-locality plumbing as needed by
+    consumers. (3) THE MEAT — `RelEffCartierDiv.isOfficial` : working ⟹ official
+    for smooth separated rel-dim-1 C/S, attempting an HB-NOETH-FREE route (vs KM
+    1.2.3's noetherian reduction): ideal is loc. fg (lfp closed immersion via
+    cancellation against smooth), fibre-generator at x ∈ D from DVR stalks of the
+    fibre curve (x is closed in its fibre since D_s is finite; T-D23 REVIVES as
+    sub-ticket if mathlib lacks smooth-over-field ⟹ DVR stalks — fallback route =
+    T-D22's étale-over-𝔸¹ + Jacobi–Zariski toolkit), then Nakayama-spread f from
+    the fibre (I/(f) fg + vanishes on fibre) and nzd-spread by S-flatness of A/I
+    (T-D22's torsion-free technology). Sections-give-ECDs = corollary (also =
+    T-D22 directly). (4) Converse (official + proper-over-S ⟹ working) statement +
+    ZMT attempt (`IsFinite.of_isProper_of_locallyQuasiFinite` PRESENT per
+    decomposition); register/park if the fibre-finiteness leg (dim-0 + finite-type
+    ⟹ finite) is heavy. If (3)'s Nakayama-spread genuinely needs noetherian input,
+    REGISTER a box for exactly that step, never silently weaken.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
