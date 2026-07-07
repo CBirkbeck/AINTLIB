@@ -1537,6 +1537,575 @@ theorem exists_subgroupLocus (E : EllipticCurve S) (D : RelEffCartierDiv E.π) :
     subgroupLocusAux_Z1_iff, subgroupLocusAux_Z2_iff, subgroupLocusAux_Z3_le_ker_iff,
     subgroupLocusAux_isSubgroup_iff, and_assoc]
 
+/-! ### Tier 6: the KM 1.6 instances (T-D17/T-D18) — raw-typed value layer
+
+Everything below is spelled at the raw `pullback` types (never at `(E.baseChange t).E`),
+following the Tier-2 raw-typed-alias discipline above; generic facts are imported into
+the raw spelling by definitional `exact`-casts. The engine is
+`exactOrderLocusAux_ker_comap_eq`: sections of two base-changed curves matched along a
+classifying map `c` have kernels agreeing after pullback to any matched pair of points. -/
+
+/-- Two morphisms that factor through each other have equal kernel ideal sheaves. -/
+private theorem exactOrderLocusAux_ker_eq_of_comp {X Y₁ Y₂ : Scheme.{u}} (f₁ : Y₁ ⟶ X)
+    (f₂ : Y₂ ⟶ X) (d₁ : Y₁ ⟶ Y₂) (d₂ : Y₂ ⟶ Y₁) (h₁ : d₁ ≫ f₂ = f₁)
+    (h₂ : d₂ ≫ f₁ = f₂) : f₁.ker = f₂.ker := by
+  refine le_antisymm ?_ ?_
+  · have h := Scheme.Hom.le_ker_comp d₂ f₁
+    rwa [h₂] at h
+  · have h := Scheme.Hom.le_ker_comp d₁ f₂
+    rwa [h₁] at h
+
+/-- **The two-sided kernel–comap comparison.** For closed-immersion sections `W` (of
+`C ×_{S'} B / B`) and `V` (of `C ×_{S'} T / T`) matched along `c : T ⟶ B`, and points
+`z, w` over `T'` with matched first legs, the pulled-back kernels agree. This is the
+value-level engine identifying the base-changed universal order/level divisors with
+their `t`-level counterparts (KM 1.6.2–1.6.5 bookkeeping). -/
+private theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π : C ⟶ S'}
+    {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (W : B ⟶ pullback π b) (V : T ⟶ pullback π t)
+    (hWc : IsClosedImmersion W) (hVc : IsClosedImmersion V)
+    (hWsnd : W ≫ pullback.snd π b = 𝟙 B) (hVsnd : V ≫ pullback.snd π t = 𝟙 T)
+    (hm : c ≫ W ≫ pullback.fst π b = V ≫ pullback.fst π t)
+    {g : T' ⟶ T} (z : T' ⟶ pullback π b) (w : T' ⟶ pullback π t)
+    (hz : z ≫ pullback.snd π b = g ≫ c) (hw : w ≫ pullback.snd π t = g)
+    (hzw : w ≫ pullback.fst π t = z ≫ pullback.fst π b) :
+    W.ker.comap z = V.ker.comap w := by
+  haveI := hWc
+  haveI := hVc
+  rw [← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion W z,
+    ← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion V w]
+  have hzW : pullback.snd z W = pullback.fst z W ≫ g ≫ c := by
+    calc pullback.snd z W = pullback.snd z W ≫ 𝟙 B := (Category.comp_id _).symm
+      _ = pullback.snd z W ≫ (W ≫ pullback.snd π b) := by rw [hWsnd]
+      _ = (pullback.snd z W ≫ W) ≫ pullback.snd π b := (Category.assoc _ _ _).symm
+      _ = (pullback.fst z W ≫ z) ≫ pullback.snd π b := by rw [pullback.condition]
+      _ = pullback.fst z W ≫ z ≫ pullback.snd π b := Category.assoc _ _ _
+      _ = pullback.fst z W ≫ g ≫ c := by rw [hz]
+  have hwV : pullback.snd w V = pullback.fst w V ≫ g := by
+    calc pullback.snd w V = pullback.snd w V ≫ 𝟙 T := (Category.comp_id _).symm
+      _ = pullback.snd w V ≫ (V ≫ pullback.snd π t) := by rw [hVsnd]
+      _ = (pullback.snd w V ≫ V) ≫ pullback.snd π t := (Category.assoc _ _ _).symm
+      _ = (pullback.fst w V ≫ w) ≫ pullback.snd π t := by rw [pullback.condition]
+      _ = pullback.fst w V ≫ w ≫ pullback.snd π t := Category.assoc _ _ _
+      _ = pullback.fst w V ≫ g := by rw [hw]
+  have hc₁ : pullback.fst z W ≫ w = (pullback.fst z W ≫ g) ≫ V := by
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Category.assoc]
+      rw [hzw, pullback.condition_assoc, hzW]
+      simp only [Category.assoc]
+      rw [hm]
+    · simp only [Category.assoc]
+      rw [hw, hVsnd, Category.comp_id]
+  have hc₂ : pullback.fst w V ≫ z = (pullback.snd w V ≫ c) ≫ W := by
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Category.assoc]
+      rw [← hzw, pullback.condition_assoc, ← hm]
+    · simp only [Category.assoc]
+      rw [hz, hWsnd, Category.comp_id, ← Category.assoc, ← hwV]
+  exact exactOrderLocusAux_ker_eq_of_comp _ _
+    (pullback.lift (pullback.fst z W) (pullback.fst z W ≫ g) hc₁)
+    (pullback.lift (pullback.fst w V) (pullback.snd w V ≫ c) hc₂)
+    (pullback.lift_fst _ _ _) (pullback.lift_fst _ _ _)
+
+/-- Sections of the base-changed curve are closed immersions (raw spelling). -/
+private theorem exactOrderLocusAux_val_isClosedImmersion {T : Scheme.{u}}
+    (E : EllipticCurve S) (t : T ⟶ S) (R : (E.baseChange t).Point (𝟙 T)) :
+    IsClosedImmersion (subgroupLocusAux_val E t R) := by
+  haveI : IsSeparated (pullback.snd E.π t) :=
+    inferInstanceAs (IsSeparated (E.baseChange t).π)
+  have h1 : IsClosedImmersion (subgroupLocusAux_val E t R ≫ pullback.snd E.π t) := by
+    rw [subgroupLocusAux_val_snd]
+    infer_instance
+  exact IsClosedImmersion.of_comp _ (pullback.snd E.π t)
+
+/-- The zero section of the base-changed curve projects to the zero section. -/
+private theorem exactOrderLocusAux_zeroT_fst {T : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) : subgroupLocusAux_zeroT E t ≫ pullback.fst E.π t = t ≫ E.zero :=
+  pullback.lift_fst _ _ _
+
+/-- Scalar multiplication at the raw pullback spelling (`point_smul_eq_comp_mulBy`). -/
+private theorem exactOrderLocusAux_val_smul {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (m : ℤ) (R : (E.baseChange t).Point g) :
+    subgroupLocusAux_val E t (m • R) =
+      subgroupLocusAux_val E t R ≫ (E.baseChange t).mulByHom m :=
+  (E.baseChange t).point_smul_eq_comp_mulBy g m R
+
+/-- The first leg of a scalar multiple: `(m • R) ≫ fst = (R ≫ fst) ≫ [m]`. -/
+private theorem exactOrderLocusAux_val_smul_fst {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (m : ℤ) (R : (E.baseChange t).Point g) :
+    subgroupLocusAux_val E t (m • R) ≫ pullback.fst E.π t =
+      (subgroupLocusAux_val E t R ≫ pullback.fst E.π t) ≫ E.mulByHom m := by
+  have h1 := congrArg (fun q : T' ⟶ (E.baseChange t).E => q ≫ pullback.fst E.π t)
+    (exactOrderLocusAux_val_smul E t m R)
+  calc subgroupLocusAux_val E t (m • R) ≫ pullback.fst E.π t
+      = (subgroupLocusAux_val E t R ≫ (E.baseChange t).mulByHom m) ≫
+          pullback.fst E.π t := h1
+    _ = subgroupLocusAux_val E t R ≫
+          ((E.baseChange t).mulByHom m ≫ pullback.fst E.π t) := Category.assoc _ _ _
+    _ = subgroupLocusAux_val E t R ≫ (pullback.fst E.π t ≫ E.mulByHom m) :=
+        congrArg (fun q : (E.baseChange t).E ⟶ E.E => subgroupLocusAux_val E t R ≫ q)
+          (E.mulByHom_baseChange_fst t m)
+    _ = (subgroupLocusAux_val E t R ≫ pullback.fst E.π t) ≫ E.mulByHom m :=
+        (Category.assoc _ _ _).symm
+
+/-- The first leg of a scalar multiple of `asSection`: `(m • asSection P) ≫ fst = P ≫ [m]`. -/
+private theorem exactOrderLocusAux_val_smul_asSection_fst {T : Scheme.{u}}
+    (E : EllipticCurve S) (t : T ⟶ S) (m : ℤ) (P : E.Point t) :
+    subgroupLocusAux_val E t (m • EllipticCurve.Point.asSection E t P) ≫
+      pullback.fst E.π t = P.1 ≫ E.mulByHom m := by
+  refine (exactOrderLocusAux_val_smul_fst E t m (EllipticCurve.Point.asSection E t P)).trans ?_
+  rw [show subgroupLocusAux_val E t (EllipticCurve.Point.asSection E t P) ≫
+    pullback.fst E.π t = P.1 from pullback.lift_fst _ _ _]
+
+/-- The `E`-value of a point of the base-changed curve. -/
+private noncomputable def exactOrderLocusAux_toE' {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (A : (E.baseChange t).Point g) : T' ⟶ E.E :=
+  subgroupLocusAux_val E t A ≫ pullback.fst E.π t
+
+private theorem exactOrderLocusAux_toE'_pi {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (A : (E.baseChange t).Point g) :
+    exactOrderLocusAux_toE' E t A ≫ E.π = g ≫ t :=
+  subgroupLocusAux_val_fst_π E t A
+
+private theorem exactOrderLocusAux_toE'_zero {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) (g : T' ⟶ T) :
+    exactOrderLocusAux_toE' E t (0 : (E.baseChange t).Point g) = g ≫ t ≫ E.zero := by
+  show subgroupLocusAux_val E t (0 : (E.baseChange t).Point g) ≫ pullback.fst E.π t =
+    g ≫ t ≫ E.zero
+  rw [subgroupLocusAux_zero_valT, Category.assoc, exactOrderLocusAux_zeroT_fst]
+
+private theorem exactOrderLocusAux_toE'_neg {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (A : (E.baseChange t).Point g) :
+    exactOrderLocusAux_toE' E t (-A) =
+      exactOrderLocusAux_toE' E t A ≫ E.mulByHom (-1) := by
+  show subgroupLocusAux_val E t (-A) ≫ pullback.fst E.π t =
+    (subgroupLocusAux_val E t A ≫ pullback.fst E.π t) ≫ E.mulByHom (-1)
+  rw [subgroupLocusAux_neg_valT, Category.assoc, subgroupLocusAux_negT_fst,
+    ← Category.assoc]
+
+private theorem exactOrderLocusAux_toE'_add {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} (A B : (E.baseChange t).Point g) :
+    exactOrderLocusAux_toE' E t (A + B) =
+      ((⟨exactOrderLocusAux_toE' E t A, exactOrderLocusAux_toE'_pi E t A⟩ +
+        ⟨exactOrderLocusAux_toE' E t B, exactOrderLocusAux_toE'_pi E t B⟩ :
+          E.Point (g ≫ t)) : T' ⟶ E.E) :=
+  subgroupLocusAux_add_fst E t A B
+
+/-- Points of the base-changed curve are determined by their `E`-values. -/
+private theorem exactOrderLocusAux_pt_ext' {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) {g : T' ⟶ T} {A B : (E.baseChange t).Point g}
+    (h : exactOrderLocusAux_toE' E t A = exactOrderLocusAux_toE' E t B) : A = B := by
+  refine Subtype.ext ?_
+  show subgroupLocusAux_val E t A = subgroupLocusAux_val E t B
+  refine pullback.hom_ext h ?_
+  exact (subgroupLocusAux_val_snd E t A).trans (subgroupLocusAux_val_snd E t B).symm
+
+/-- The generic `sectionsDivisor`-unfolding of the order divisor. -/
+private theorem exactOrderLocusAux_orderDivisor_ideal {Y : Scheme.{u}}
+    (F : EllipticCurve Y) (N : ℕ) (σ : F.Section) :
+    (EllipticCurve.Section.orderDivisor F σ N).ideal =
+      ∏ a : Fin N, Scheme.Hom.ker
+        ((((a : ℕ) : ℤ) + 1) • σ : F.Point (𝟙 Y)).1 := by
+  rw [EllipticCurve.Section.orderDivisor, RelEffCartierDiv.sectionsDivisor,
+    dif_pos ⟨inferInstance, F.smooth⟩]
+
+/-- The `E`-value of a point of the doubly-base-changed curve over `E[N]`. -/
+private noncomputable def exactOrderLocusAux_toE {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) : T' ⟶ E.E :=
+  (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+    pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫ pullback.fst E.π (E.torsionπ N)
+
+/-- The middle leg of a doubly-base-changed point lies over `g ≫ c`. -/
+private theorem exactOrderLocusAux_val_fst_snd {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+      pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+        pullback.snd E.π (E.torsionπ N) = g ≫ c := by
+  have h1 : (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+      pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+        (E.baseChange (E.torsionπ N)).π = g ≫ c := by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, subgroupLocusAux_val_snd]
+  exact h1
+
+private theorem exactOrderLocusAux_toE_pi {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_toE E N c Q ≫ E.π = (g ≫ c) ≫ E.torsionπ N := by
+  calc exactOrderLocusAux_toE E N c Q ≫ E.π
+      = (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            (pullback.fst E.π (E.torsionπ N) ≫ E.π) := Category.assoc _ _ _
+    _ = (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            (pullback.snd E.π (E.torsionπ N) ≫ E.torsionπ N) :=
+        congrArg (fun q : pullback E.π (E.torsionπ N) ⟶ S =>
+          (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+            pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫ q) pullback.condition
+    _ = ((subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            pullback.snd E.π (E.torsionπ N)) ≫ E.torsionπ N :=
+        (Category.assoc _ _ _).symm
+    _ = (g ≫ c) ≫ E.torsionπ N := by rw [exactOrderLocusAux_val_fst_snd]
+
+private theorem exactOrderLocusAux_toE_zero {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) (g : T' ⟶ T) :
+    exactOrderLocusAux_toE E N c
+        (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) =
+      (g ≫ c) ≫ E.torsionπ N ≫ E.zero := by
+  have h1 : subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c
+      (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c =
+      (g ≫ c) ≫ subgroupLocusAux_zeroT E (E.torsionπ N) := by
+    have e1 : subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c
+        (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c =
+        (g ≫ subgroupLocusAux_zeroT (E.baseChange (E.torsionπ N)) c) ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c := by
+      rw [subgroupLocusAux_zero_valT]
+    have e2 : (g ≫ subgroupLocusAux_zeroT (E.baseChange (E.torsionπ N)) c) ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c =
+        g ≫ (subgroupLocusAux_zeroT (E.baseChange (E.torsionπ N)) c ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) := Category.assoc _ _ _
+    have e3 : g ≫ (subgroupLocusAux_zeroT (E.baseChange (E.torsionπ N)) c ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c) =
+        g ≫ (c ≫ subgroupLocusAux_zeroT E (E.torsionπ N)) :=
+      congrArg (fun q : T ⟶ pullback E.π (E.torsionπ N) => g ≫ q)
+        (exactOrderLocusAux_zeroT_fst (E.baseChange (E.torsionπ N)) c)
+    exact e1.trans (e2.trans (e3.trans (Category.assoc _ _ _).symm))
+  have h2 : exactOrderLocusAux_toE E N c
+      (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) =
+      ((g ≫ c) ≫ subgroupLocusAux_zeroT E (E.torsionπ N)) ≫
+        pullback.fst E.π (E.torsionπ N) :=
+    congrArg (fun q : T' ⟶ (E.baseChange (E.torsionπ N)).E =>
+      q ≫ pullback.fst E.π (E.torsionπ N)) h1
+  have h3 : ((g ≫ c) ≫ subgroupLocusAux_zeroT E (E.torsionπ N)) ≫
+      pullback.fst E.π (E.torsionπ N) =
+      (g ≫ c) ≫ (subgroupLocusAux_zeroT E (E.torsionπ N) ≫
+        pullback.fst E.π (E.torsionπ N)) := Category.assoc _ _ _
+  refine h2.trans (h3.trans ?_)
+  rw [exactOrderLocusAux_zeroT_fst]
+
+/-- The zero points on the two sides have matched `E`-values. -/
+private theorem exactOrderLocusAux_toE_zero_eq {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    (g : T' ⟶ T) :
+    exactOrderLocusAux_toE' E t (0 : (E.baseChange t).Point g) =
+      exactOrderLocusAux_toE E N c
+        (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) := by
+  rw [exactOrderLocusAux_toE'_zero, exactOrderLocusAux_toE_zero, ← hct]
+  simp only [Category.assoc]
+
+private theorem exactOrderLocusAux_toE_neg {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_toE E N c (-Q) =
+      exactOrderLocusAux_toE E N c Q ≫ E.mulByHom (-1) := by
+  have h1 : subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c (-Q) ≫
+      pullback.fst (E.baseChange (E.torsionπ N)).π c =
+      (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+          (E.baseChange (E.torsionπ N)).mulByHom (-1) := by
+    rw [subgroupLocusAux_neg_valT, Category.assoc, subgroupLocusAux_negT_fst,
+      ← Category.assoc]
+  have h2 := congrArg (fun q : T' ⟶ (E.baseChange (E.torsionπ N)).E =>
+    q ≫ pullback.fst E.π (E.torsionπ N)) h1
+  refine h2.trans ?_
+  calc ((subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+          (E.baseChange (E.torsionπ N)).mulByHom (-1)) ≫ pullback.fst E.π (E.torsionπ N)
+      = (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            ((E.baseChange (E.torsionπ N)).mulByHom (-1) ≫
+              pullback.fst E.π (E.torsionπ N)) := Category.assoc _ _ _
+    _ = (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            (pullback.fst E.π (E.torsionπ N) ≫ E.mulByHom (-1)) :=
+        congrArg (fun q : (E.baseChange (E.torsionπ N)).E ⟶ E.E =>
+          (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+            pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫ q)
+          (E.mulByHom_baseChange_fst (E.torsionπ N) (-1))
+    _ = ((subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+          pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫
+            pullback.fst E.π (E.torsionπ N)) ≫ E.mulByHom (-1) :=
+        (Category.assoc _ _ _).symm
+
+/-- Matched values are preserved by negation. -/
+private theorem exactOrderLocusAux_toE_neg_eq {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} {g : T' ⟶ T}
+    {Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g}
+    {A : (E.baseChange t).Point g}
+    (hm : exactOrderLocusAux_toE' E t A = exactOrderLocusAux_toE E N c Q) :
+    exactOrderLocusAux_toE' E t (-A) = exactOrderLocusAux_toE E N c (-Q) := by
+  rw [exactOrderLocusAux_toE'_neg, exactOrderLocusAux_toE_neg, hm]
+
+private theorem exactOrderLocusAux_toE_add {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    (Q Q' : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_toE E N c (Q + Q') =
+      ((⟨exactOrderLocusAux_toE E N c Q, exactOrderLocusAux_toE_pi E N c Q⟩ +
+        ⟨exactOrderLocusAux_toE E N c Q', exactOrderLocusAux_toE_pi E N c Q'⟩ :
+          E.Point ((g ≫ c) ≫ E.torsionπ N)) : T' ⟶ E.E) := by
+  have h1 := subgroupLocusAux_add_fst (E.baseChange (E.torsionπ N)) c Q Q'
+  have h2 := congrArg (fun q : T' ⟶ (E.baseChange (E.torsionπ N)).E =>
+    q ≫ pullback.fst E.π (E.torsionπ N)) h1
+  have h3 := subgroupLocusAux_add_fst E (E.torsionπ N)
+    (⟨subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c,
+      subgroupLocusAux_val_fst_π (E.baseChange (E.torsionπ N)) c Q⟩ :
+        (E.baseChange (E.torsionπ N)).Point (g ≫ c))
+    (⟨subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q' ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c,
+      subgroupLocusAux_val_fst_π (E.baseChange (E.torsionπ N)) c Q'⟩ :
+        (E.baseChange (E.torsionπ N)).Point (g ≫ c))
+  exact h2.trans h3
+
+/-- Matched values are preserved by addition (across the two curves). -/
+private theorem exactOrderLocusAux_toE_add_eq {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (Q Q' : ((E.baseChange (E.torsionπ N)).baseChange c).Point g)
+    (A A' : (E.baseChange t).Point g)
+    (hA : exactOrderLocusAux_toE' E t A = exactOrderLocusAux_toE E N c Q)
+    (hA' : exactOrderLocusAux_toE' E t A' = exactOrderLocusAux_toE E N c Q') :
+    exactOrderLocusAux_toE' E t (A + A') = exactOrderLocusAux_toE E N c (Q + Q') := by
+  rw [exactOrderLocusAux_toE'_add, exactOrderLocusAux_toE_add]
+  refine (subgroupLocusAux_add_comp E (𝟙 T')
+    (⟨exactOrderLocusAux_toE E N c Q, exactOrderLocusAux_toE_pi E N c Q⟩ :
+      E.Point ((g ≫ c) ≫ E.torsionπ N))
+    ⟨exactOrderLocusAux_toE E N c Q', exactOrderLocusAux_toE_pi E N c Q'⟩
+    (⟨exactOrderLocusAux_toE' E t A, exactOrderLocusAux_toE'_pi E t A⟩ :
+      E.Point (g ≫ t))
+    ⟨exactOrderLocusAux_toE' E t A', exactOrderLocusAux_toE'_pi E t A'⟩
+    ?_ ?_).trans (Category.id_comp _)
+  · show exactOrderLocusAux_toE' E t A = 𝟙 T' ≫ exactOrderLocusAux_toE E N c Q
+    rw [hA, Category.id_comp]
+  · show exactOrderLocusAux_toE' E t A' = 𝟙 T' ≫ exactOrderLocusAux_toE E N c Q'
+    rw [hA', Category.id_comp]
+
+/-- Points of the doubly-base-changed curve are determined by their `E`-values. -/
+private theorem exactOrderLocusAux_pt_ext {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (c : T ⟶ E.torsion N) {g : T' ⟶ T}
+    {Q Q' : ((E.baseChange (E.torsionπ N)).baseChange c).Point g}
+    (h : exactOrderLocusAux_toE E N c Q = exactOrderLocusAux_toE E N c Q') : Q = Q' := by
+  refine Subtype.ext ?_
+  show subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q =
+    subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q'
+  refine pullback.hom_ext ?_ ?_
+  · refine pullback.hom_ext (f := E.π) (g := E.torsionπ N) ?_ ?_
+    · exact h
+    · exact (exactOrderLocusAux_val_fst_snd E N c Q).trans
+        (exactOrderLocusAux_val_fst_snd E N c Q').symm
+  · exact (subgroupLocusAux_val_snd (E.baseChange (E.torsionπ N)) c Q).trans
+      (subgroupLocusAux_val_snd (E.baseChange (E.torsionπ N)) c Q').symm
+
+/-- The values of the universal and the classified order-divisor sections match along
+the classifying map `c`. -/
+private theorem exactOrderLocusAux_match {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    (t : T ⟶ S) (P : E.Point t) (c : T ⟶ E.torsion N)
+    (hcP : c ≫ E.torsionι N = P.1) (m : ℤ) :
+    c ≫ subgroupLocusAux_val E (E.torsionπ N)
+        (m • EllipticCurve.Point.asSection E (E.torsionπ N)
+          ⟨E.torsionι N, E.torsionι_π N⟩) ≫ pullback.fst E.π (E.torsionπ N) =
+      subgroupLocusAux_val E t (m • EllipticCurve.Point.asSection E t P) ≫
+        pullback.fst E.π t := by
+  rw [exactOrderLocusAux_val_smul_asSection_fst, exactOrderLocusAux_val_smul_asSection_fst]
+  show c ≫ E.torsionι N ≫ E.mulByHom m = P.1 ≫ E.mulByHom m
+  rw [← Category.assoc, hcP]
+
+/-- Transport of a point of `E ×_S T` to the doubly-base-changed curve over `E[N]`. -/
+private noncomputable def exactOrderLocusAux_phi {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (A : (E.baseChange t).Point g) :
+    ((E.baseChange (E.torsionπ N)).baseChange c).Point g :=
+  ⟨pullback.lift
+    (pullback.lift (exactOrderLocusAux_toE' E t A) (g ≫ c)
+      (by rw [exactOrderLocusAux_toE'_pi, ← hct, Category.assoc]) :
+        T' ⟶ pullback E.π (E.torsionπ N))
+    g (pullback.lift_snd _ _ _), pullback.lift_snd _ _ _⟩
+
+private theorem exactOrderLocusAux_phi_toE {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (A : (E.baseChange t).Point g) :
+    exactOrderLocusAux_toE E N c (exactOrderLocusAux_phi E N hct A) =
+      exactOrderLocusAux_toE' E t A := by
+  show (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c
+      (exactOrderLocusAux_phi E N hct A) ≫
+    pullback.fst (E.baseChange (E.torsionπ N)).π c) ≫ pullback.fst E.π (E.torsionπ N) =
+    exactOrderLocusAux_toE' E t A
+  rw [show subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c
+      (exactOrderLocusAux_phi E N hct A) ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c =
+      (pullback.lift (exactOrderLocusAux_toE' E t A) (g ≫ c)
+        (by rw [exactOrderLocusAux_toE'_pi, ← hct, Category.assoc]) :
+          T' ⟶ pullback E.π (E.torsionπ N)) from pullback.lift_fst _ _ _]
+  exact pullback.lift_fst _ _ _
+
+private theorem exactOrderLocusAux_phi_zero {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    (g : T' ⟶ T) :
+    exactOrderLocusAux_phi E N hct (0 : (E.baseChange t).Point g) = 0 :=
+  exactOrderLocusAux_pt_ext E N c ((exactOrderLocusAux_phi_toE E N hct 0).trans
+    (exactOrderLocusAux_toE_zero_eq E N hct g))
+
+private theorem exactOrderLocusAux_phi_neg {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (A : (E.baseChange t).Point g) :
+    exactOrderLocusAux_phi E N hct (-A) = -exactOrderLocusAux_phi E N hct A := by
+  refine exactOrderLocusAux_pt_ext E N c ?_
+  rw [exactOrderLocusAux_phi_toE, exactOrderLocusAux_toE'_neg,
+    exactOrderLocusAux_toE_neg, exactOrderLocusAux_phi_toE]
+
+private theorem exactOrderLocusAux_phi_add {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (A B : (E.baseChange t).Point g) :
+    exactOrderLocusAux_phi E N hct (A + B) =
+      exactOrderLocusAux_phi E N hct A + exactOrderLocusAux_phi E N hct B := by
+  refine exactOrderLocusAux_pt_ext E N c ?_
+  rw [exactOrderLocusAux_phi_toE]
+  exact exactOrderLocusAux_toE_add_eq E N hct _ _ A B
+    (exactOrderLocusAux_phi_toE E N hct A).symm (exactOrderLocusAux_phi_toE E N hct B).symm
+
+/-- Transport of a point of the doubly-base-changed curve to `E ×_S T`. -/
+private noncomputable def exactOrderLocusAux_psi {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    (E.baseChange t).Point g :=
+  ⟨pullback.lift (exactOrderLocusAux_toE E N c Q) g
+    (by rw [exactOrderLocusAux_toE_pi, Category.assoc, hct]), pullback.lift_snd _ _ _⟩
+
+private theorem exactOrderLocusAux_psi_toE' {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_toE' E t (exactOrderLocusAux_psi E N hct Q) =
+      exactOrderLocusAux_toE E N c Q :=
+  pullback.lift_fst _ _ _
+
+private theorem exactOrderLocusAux_psi_zero {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    (g : T' ⟶ T) :
+    exactOrderLocusAux_psi E N hct
+      (0 : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) = 0 :=
+  exactOrderLocusAux_pt_ext' E t ((exactOrderLocusAux_psi_toE' E N hct 0).trans
+    (exactOrderLocusAux_toE_zero_eq E N hct g).symm)
+
+private theorem exactOrderLocusAux_psi_neg {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_psi E N hct (-Q) = -exactOrderLocusAux_psi E N hct Q := by
+  refine exactOrderLocusAux_pt_ext' E t ?_
+  rw [exactOrderLocusAux_psi_toE', exactOrderLocusAux_toE_neg,
+    exactOrderLocusAux_toE'_neg, exactOrderLocusAux_psi_toE']
+
+private theorem exactOrderLocusAux_psi_add {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) {t : T ⟶ S} {c : T ⟶ E.torsion N} (hct : c ≫ E.torsionπ N = t)
+    {g : T' ⟶ T} (Q Q' : ((E.baseChange (E.torsionπ N)).baseChange c).Point g) :
+    exactOrderLocusAux_psi E N hct (Q + Q') =
+      exactOrderLocusAux_psi E N hct Q + exactOrderLocusAux_psi E N hct Q' := by
+  refine exactOrderLocusAux_pt_ext' E t ?_
+  rw [exactOrderLocusAux_psi_toE']
+  exact (exactOrderLocusAux_toE_add_eq E N hct Q Q' _ _
+    (exactOrderLocusAux_psi_toE' E N hct Q) (exactOrderLocusAux_psi_toE' E N hct Q')).symm
+
+/-- **The factorization dictionary**: a point factors through the base-changed
+universal order divisor iff its matched companion factors through the `t`-level order
+divisor. -/
+private theorem exactOrderLocusAux_factor_iff {T T' : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (t : T ⟶ S) (P : E.Point t) (c : T ⟶ E.torsion N)
+    (hcP : c ≫ E.torsionι N = P.1) {g : T' ⟶ T}
+    (Q : ((E.baseChange (E.torsionπ N)).baseChange c).Point g)
+    (A : (E.baseChange t).Point g)
+    (hm : exactOrderLocusAux_toE' E t A = exactOrderLocusAux_toE E N c Q) :
+    (∃ h : T' ⟶ ((EllipticCurve.Section.orderDivisor (E.baseChange (E.torsionπ N))
+        (EllipticCurve.Point.asSection E (E.torsionπ N)
+          ⟨E.torsionι N, E.torsionι_π N⟩) N).baseChange c).ideal.subscheme,
+      h ≫ ((EllipticCurve.Section.orderDivisor (E.baseChange (E.torsionπ N))
+        (EllipticCurve.Point.asSection E (E.torsionπ N)
+          ⟨E.torsionι N, E.torsionι_π N⟩) N).baseChange c).ideal.subschemeι = Q.1) ↔
+    (∃ h : T' ⟶ (EllipticCurve.Section.orderDivisor (E.baseChange t)
+        (EllipticCurve.Point.asSection E t P) N).ideal.subscheme,
+      h ≫ (EllipticCurve.Section.orderDivisor (E.baseChange t)
+        (EllipticCurve.Point.asSection E t P) N).ideal.subschemeι = A.1) := by
+  have key : ((EllipticCurve.Section.orderDivisor (E.baseChange (E.torsionπ N))
+      (EllipticCurve.Point.asSection E (E.torsionπ N)
+        ⟨E.torsionι N, E.torsionι_π N⟩) N).baseChange c).ideal.comap
+        (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q) =
+      (EllipticCurve.Section.orderDivisor (E.baseChange t)
+        (EllipticCurve.Point.asSection E t P) N).ideal.comap
+        (subgroupLocusAux_val E t A) := by
+    rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
+      exactOrderLocusAux_orderDivisor_ideal, exactOrderLocusAux_orderDivisor_ideal,
+      Scheme.IdealSheafData.comap_prod, Scheme.IdealSheafData.comap_prod]
+    refine Finset.prod_congr rfl fun a _ => ?_
+    exact exactOrderLocusAux_ker_comap_eq
+      (subgroupLocusAux_val E (E.torsionπ N) ((((a : ℕ) : ℤ) + 1) •
+        EllipticCurve.Point.asSection E (E.torsionπ N) ⟨E.torsionι N, E.torsionι_π N⟩))
+      (subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) •
+        EllipticCurve.Point.asSection E t P))
+      (exactOrderLocusAux_val_isClosedImmersion E (E.torsionπ N) _)
+      (exactOrderLocusAux_val_isClosedImmersion E t _)
+      (subgroupLocusAux_val_snd E (E.torsionπ N) _)
+      (subgroupLocusAux_val_snd E t _)
+      (exactOrderLocusAux_match E N t P c hcP _)
+      (subgroupLocusAux_val (E.baseChange (E.torsionπ N)) c Q ≫
+        pullback.fst (E.baseChange (E.torsionπ N)).π c)
+      (subgroupLocusAux_val E t A)
+      (exactOrderLocusAux_val_fst_snd E N c Q)
+      (subgroupLocusAux_val_snd E t A) hm
+  exact Iff.trans (subgroupLocusAux_factors_iff _ _)
+    (Iff.trans (Iff.of_eq (congrArg (· = ⊥) key))
+      (subgroupLocusAux_factors_iff _ _).symm)
+
+/-- **The IsSubgroup transport** (KM 1.6.4-style bookkeeping): the base-changed
+universal order divisor over `E[N]` is a subgroup iff the `t`-level order divisor is. -/
+private theorem exactOrderLocusAux_isSubgroup_iff {T : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) (t : T ⟶ S) (P : E.Point t) (c : T ⟶ E.torsion N)
+    (hct : c ≫ E.torsionπ N = t) (hcP : c ≫ E.torsionι N = P.1) :
+    ((EllipticCurve.Section.orderDivisor (E.baseChange (E.torsionπ N))
+        (EllipticCurve.Point.asSection E (E.torsionπ N)
+          ⟨E.torsionι N, E.torsionι_π N⟩) N).baseChange c).IsSubgroup
+      ((E.baseChange (E.torsionπ N)).baseChange c) ↔
+    (EllipticCurve.Section.orderDivisor (E.baseChange t)
+      (EllipticCurve.Point.asSection E t P) N).IsSubgroup (E.baseChange t) := by
+  constructor
+  · intro h T' g
+    obtain ⟨H, hH⟩ := h g
+    refine ⟨{ carrier := {A | exactOrderLocusAux_phi E N hct A ∈ H},
+              add_mem' := ?_, zero_mem' := ?_, neg_mem' := ?_ }, fun A => ?_⟩
+    · intro A B hA hB
+      show exactOrderLocusAux_phi E N hct (A + B) ∈ H
+      rw [exactOrderLocusAux_phi_add]
+      exact add_mem hA hB
+    · show exactOrderLocusAux_phi E N hct 0 ∈ H
+      rw [exactOrderLocusAux_phi_zero]
+      exact zero_mem H
+    · intro A hA
+      show exactOrderLocusAux_phi E N hct (-A) ∈ H
+      rw [exactOrderLocusAux_phi_neg]
+      exact neg_mem hA
+    · show exactOrderLocusAux_phi E N hct A ∈ H ↔ _
+      rw [hH (exactOrderLocusAux_phi E N hct A)]
+      exact exactOrderLocusAux_factor_iff E N t P c hcP _ A
+        (exactOrderLocusAux_phi_toE E N hct A).symm
+  · intro h T' g
+    obtain ⟨H, hH⟩ := h g
+    refine ⟨{ carrier := {Q | exactOrderLocusAux_psi E N hct Q ∈ H},
+              add_mem' := ?_, zero_mem' := ?_, neg_mem' := ?_ }, fun Q => ?_⟩
+    · intro Q Q' hQ hQ'
+      show exactOrderLocusAux_psi E N hct (Q + Q') ∈ H
+      rw [exactOrderLocusAux_psi_add]
+      exact add_mem hQ hQ'
+    · show exactOrderLocusAux_psi E N hct 0 ∈ H
+      rw [exactOrderLocusAux_psi_zero]
+      exact zero_mem H
+    · intro Q hQ
+      show exactOrderLocusAux_psi E N hct (-Q) ∈ H
+      rw [exactOrderLocusAux_psi_neg]
+      exact neg_mem hQ
+    · show exactOrderLocusAux_psi E N hct Q ∈ H ↔ _
+      rw [hH (exactOrderLocusAux_psi E N hct Q)]
+      exact (exactOrderLocusAux_factor_iff E N t P c hcP Q _
+        (exactOrderLocusAux_psi_toE' E N hct Q)).symm
+
 /-- **(T-D17 = KM 1.6 for `A = ℤ/N`; the exact-order locus)** There is a closed
 subscheme of `E[N]` universal for "the (torsion) point has exact order `N`": a point
 of `E` killed by `N` over `t` has exact order `N` (as a section of the base-changed
@@ -1547,8 +2116,431 @@ theorem exists_exactOrderLocus (E : EllipticCurve S) (N : ℕ) [NeZero N] :
     ∃ Z : (E.torsion N).IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S)
       (P : E.Point t) (hP : P.1 ≫ E.mulByHom N = t ≫ E.zero),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = E.pointToTorsion P hP) ↔
-        EllipticCurve.Section.HasExactOrder (E.baseChange t) (EllipticCurve.Point.asSection E t P) N :=
-  by sorry
+        EllipticCurve.Section.HasExactOrder (E.baseChange t) (EllipticCurve.Point.asSection E t P) N := by
+  obtain ⟨Z, hZ⟩ := exists_subgroupLocus (E.baseChange (E.torsionπ N))
+    (EllipticCurve.Section.orderDivisor (E.baseChange (E.torsionπ N))
+      (EllipticCurve.Point.asSection E (E.torsionπ N)
+        ⟨E.torsionι N, E.torsionι_π N⟩) N)
+  refine ⟨Z, fun T t P hP => ?_⟩
+  rw [hZ (E.pointToTorsion P hP)]
+  exact exactOrderLocusAux_isSubgroup_iff E N t P (E.pointToTorsion P hP)
+    (E.pointToTorsion_torsionπ P hP) (E.pointToTorsion_torsionι P hP)
+
+/-! ### Tier 7: T-D18 (the full-level locus over `E[N] ×_S E[N]`) -/
+
+/-- `E[N] ⟶ S` is locally of finite presentation (base change of
+`mulByHom_locallyOfFinitePresentation`). -/
+private theorem fullLevelLocusAux_torsionπ_lfp {Y : Scheme.{u}} (F : EllipticCurve Y)
+    (N : ℕ) : LocallyOfFinitePresentation (F.torsionπ N) :=
+  MorphismProperty.pullback_snd _ _ (F.mulByHom_locallyOfFinitePresentation N)
+
+private theorem fullLevelLocusAux_torsionDivisor_prop {Y : Scheme.{u}}
+    (F : EllipticCurve Y) (N : ℕ) (P : MorphismProperty Scheme.{u}) [P.RespectsIso]
+    (h : P (F.torsionπ N)) : P ((F.torsionIdeal N).subschemeι ≫ F.π) := by
+  obtain ⟨e, he⟩ := F.torsionIdeal_subscheme N
+  have hι : (F.torsionIdeal N).subschemeι ≫ F.π = e.hom ≫ F.torsionπ N := by
+    rw [← he, Category.assoc, F.torsionι_π]
+  rw [hι, MorphismProperty.cancel_left_of_respectsIso P]
+  exact h
+
+/-- `E[N]` as a relative effective Cartier divisor in `E/S` — the ambient divisor of
+the full-level incidence condition (KM 2.3.1 consumers via the `T-B3a` dictionary). -/
+private noncomputable def fullLevelLocusAux_torsionDivisor {Y : Scheme.{u}}
+    (F : EllipticCurve Y) (N : ℕ) [NeZero N] : RelEffCartierDiv F.π where
+  ideal := F.torsionIdeal N
+  finite := fullLevelLocusAux_torsionDivisor_prop F N @IsFinite (F.torsionπ_isFinite N)
+  flat := fullLevelLocusAux_torsionDivisor_prop F N @Flat (F.torsionπ_flat N)
+  lfp := fullLevelLocusAux_torsionDivisor_prop F N @LocallyOfFinitePresentation
+    (fullLevelLocusAux_torsionπ_lfp F N)
+
+/-- **`E[N]`-formation commutes with base change, at the ideal-sheaf level**: the
+torsion ideal of `E ×_S Y` is the preimage of the torsion ideal of `E`. -/
+private theorem fullLevelLocusAux_torsionIdeal_baseChange {Y : Scheme.{u}}
+    (E : EllipticCurve S) (N : ℕ) (s : Y ⟶ S) :
+    (E.baseChange s).torsionIdeal N =
+      (E.torsionIdeal N).comap (pullback.fst E.π s) := by
+  haveI := E.torsionι_isClosedImmersion N
+  have hker : (E.torsionIdeal N).comap (pullback.fst E.π s) =
+      (pullback.fst (pullback.fst E.π s) (E.torsionι N)).ker :=
+    (Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (E.torsionι N)
+      (pullback.fst E.π s)).symm
+  rw [hker]
+  -- the universal comparison morphisms between `(E ×_S Y)[N]` and `(E ×_S Y) ×_E E[N]`
+  have hκ : ((E.baseChange s).torsionι N ≫ pullback.fst E.π s) ≫ E.mulByHom N =
+      ((E.baseChange s).torsionπ N ≫ s) ≫ E.zero := by
+    have k1 : ((E.baseChange s).torsionι N ≫ pullback.fst E.π s) ≫ E.mulByHom N =
+        (E.baseChange s).torsionι N ≫ (pullback.fst E.π s ≫ E.mulByHom N) :=
+      Category.assoc _ _ _
+    have k2 : (E.baseChange s).torsionι N ≫ (pullback.fst E.π s ≫ E.mulByHom N) =
+        (E.baseChange s).torsionι N ≫
+          ((E.baseChange s).mulByHom N ≫ pullback.fst E.π s) :=
+      congrArg (fun q : (E.baseChange s).E ⟶ E.E => (E.baseChange s).torsionι N ≫ q)
+        (E.mulByHom_baseChange_fst s N).symm
+    have k3 : (E.baseChange s).torsionι N ≫
+        ((E.baseChange s).mulByHom N ≫ pullback.fst E.π s) =
+        ((E.baseChange s).torsionι N ≫ (E.baseChange s).mulByHom N) ≫
+          pullback.fst E.π s := (Category.assoc _ _ _).symm
+    have k4 : ((E.baseChange s).torsionι N ≫ (E.baseChange s).mulByHom N) ≫
+        pullback.fst E.π s =
+        ((E.baseChange s).torsionπ N ≫ (E.baseChange s).zero) ≫ pullback.fst E.π s :=
+      congrArg (fun q : (E.baseChange s).torsion N ⟶ (E.baseChange s).E =>
+        q ≫ pullback.fst E.π s) pullback.condition
+    have k5 : ((E.baseChange s).torsionπ N ≫ (E.baseChange s).zero) ≫
+        pullback.fst E.π s =
+        (E.baseChange s).torsionπ N ≫ ((E.baseChange s).zero ≫ pullback.fst E.π s) :=
+      Category.assoc _ _ _
+    have k6 : (E.baseChange s).torsionπ N ≫ ((E.baseChange s).zero ≫
+        pullback.fst E.π s) = (E.baseChange s).torsionπ N ≫ (s ≫ E.zero) :=
+      congrArg (fun q : Y ⟶ E.E => (E.baseChange s).torsionπ N ≫ q)
+        (exactOrderLocusAux_zeroT_fst E s)
+    exact k1.trans (k2.trans (k3.trans (k4.trans (k5.trans (k6.trans
+      (Category.assoc _ _ _).symm)))))
+  refine exactOrderLocusAux_ker_eq_of_comp ((E.baseChange s).torsionι N)
+    (pullback.fst (pullback.fst E.π s) (E.torsionι N))
+    (pullback.lift ((E.baseChange s).torsionι N)
+      (pullback.lift ((E.baseChange s).torsionι N ≫ pullback.fst E.π s)
+        ((E.baseChange s).torsionπ N ≫ s) hκ)
+      (pullback.lift_fst _ _ _).symm)
+    (pullback.lift (pullback.fst (pullback.fst E.π s) (E.torsionι N))
+      (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ?_)
+    (pullback.lift_fst _ _ _) (pullback.lift_fst _ _ _)
+  refine pullback.hom_ext (f := E.π) (g := s) ?_ ?_
+  · -- first legs: both are the composite `(w₁ ≫ snd ≫ s) ≫ 0` via the two kernel squares
+    have l1 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        (E.baseChange s).mulByHom N) ≫ pullback.fst E.π s =
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          ((E.baseChange s).mulByHom N ≫ pullback.fst E.π s) := Category.assoc _ _ _
+    have l2 : pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        ((E.baseChange s).mulByHom N ≫ pullback.fst E.π s) =
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          (pullback.fst E.π s ≫ E.mulByHom N) :=
+      congrArg (fun q : (E.baseChange s).E ⟶ E.E =>
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ q)
+        (E.mulByHom_baseChange_fst s N)
+    have l3 : pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        (pullback.fst E.π s ≫ E.mulByHom N) =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.fst E.π s) ≫
+          E.mulByHom N := (Category.assoc _ _ _).symm
+    have l4 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.fst E.π s) ≫ E.mulByHom N =
+        (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionι N) ≫
+          E.mulByHom N := by rw [pullback.condition]
+    have l5 : (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionι N) ≫
+        E.mulByHom N =
+        pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+          (E.torsionι N ≫ E.mulByHom N) := Category.assoc _ _ _
+    have l6 : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
+      pullback.condition
+    have l7 : pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+        (E.torsionι N ≫ E.mulByHom N) =
+        pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+          (E.torsionπ N ≫ E.zero) :=
+      congrArg (fun q : E.torsion N ⟶ E.E =>
+        pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ q) l6
+    have l8 : pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionπ N =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          s := by
+      have m1 : pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionπ N =
+          pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+            (E.torsionι N ≫ E.π) := by rw [E.torsionι_π]
+      have m2 : pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+          (E.torsionι N ≫ E.π) =
+          (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionι N) ≫ E.π :=
+        (Category.assoc _ _ _).symm
+      have m3 : (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionι N) ≫
+          E.π = (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+            pullback.fst E.π s) ≫ E.π := by rw [pullback.condition]
+      have m4 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          pullback.fst E.π s) ≫ E.π =
+          pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+            (pullback.fst E.π s ≫ E.π) := Category.assoc _ _ _
+      have m5 : pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          (pullback.fst E.π s ≫ E.π) =
+          pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+            (pullback.snd E.π s ≫ s) := by rw [pullback.condition]
+      have m6 : pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          (pullback.snd E.π s ≫ s) =
+          (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+            s := (Category.assoc _ _ _).symm
+      exact m1.trans (m2.trans (m3.trans (m4.trans (m5.trans m6))))
+    have l9 : pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫
+        (E.torsionπ N ≫ E.zero) =
+        (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionπ N) ≫
+          E.zero := (Category.assoc _ _ _).symm
+    have l10 : (pullback.snd (pullback.fst E.π s) (E.torsionι N) ≫ E.torsionπ N) ≫
+        E.zero = ((pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          pullback.snd E.π s) ≫ s) ≫ E.zero := congrArg (· ≫ E.zero) l8
+    have r1 : ((pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.snd E.π s) ≫ (E.baseChange s).zero) ≫ pullback.fst E.π s =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          ((E.baseChange s).zero ≫ pullback.fst E.π s) := Category.assoc _ _ _
+    have r2 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.snd E.π s) ≫ ((E.baseChange s).zero ≫ pullback.fst E.π s) =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          (s ≫ E.zero) :=
+      congrArg (fun q : Y ⟶ E.E => (pullback.fst (pullback.fst E.π s)
+        (E.torsionι N) ≫ pullback.snd E.π s) ≫ q)
+        (exactOrderLocusAux_zeroT_fst E s)
+    have r3 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.snd E.π s) ≫ (s ≫ E.zero) =
+        ((pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          s) ≫ E.zero := (Category.assoc _ _ _).symm
+    exact (l1.trans (l2.trans (l3.trans (l4.trans (l5.trans (l7.trans (l9.trans
+      l10))))))).trans (r1.trans (r2.trans r3)).symm
+  · -- second legs: both are `w₁ ≫ snd`
+    have s1 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        (E.baseChange s).mulByHom N) ≫ pullback.snd E.π s =
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+          ((E.baseChange s).mulByHom N ≫ pullback.snd E.π s) := Category.assoc _ _ _
+    have s2 : pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        ((E.baseChange s).mulByHom N ≫ pullback.snd E.π s) =
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s :=
+      congrArg (fun q : (E.baseChange s).E ⟶ Y =>
+        pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ q)
+        (E.mulByHom_baseChange_snd s N)
+    have hz0 : (E.baseChange s).zero ≫ pullback.snd E.π s = 𝟙 Y :=
+      (E.baseChange s).zero_π
+    have r1 : ((pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.snd E.π s) ≫ (E.baseChange s).zero) ≫ pullback.snd E.π s =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          ((E.baseChange s).zero ≫ pullback.snd E.π s) := Category.assoc _ _ _
+    have r2 : (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫
+        pullback.snd E.π s) ≫ ((E.baseChange s).zero ≫ pullback.snd E.π s) =
+        (pullback.fst (pullback.fst E.π s) (E.torsionι N) ≫ pullback.snd E.π s) ≫
+          𝟙 Y :=
+      congrArg (fun q : Y ⟶ Y => (pullback.fst (pullback.fst E.π s)
+        (E.torsionι N) ≫ pullback.snd E.π s) ≫ q) hz0
+    exact (s1.trans s2).trans
+      ((r1.trans (r2.trans (Category.comp_id _))).symm)
+
+/-- The first tautological killed point over `E[N] ×_S E[N]`. -/
+private noncomputable def fullLevelLocusAux_u₁ (E : EllipticCurve S) (N : ℕ) :
+    E.Point (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) :=
+  ⟨pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    rw [Category.assoc, E.torsionι_π]⟩
+
+/-- The second tautological killed point over `E[N] ×_S E[N]`. -/
+private noncomputable def fullLevelLocusAux_u₂ (E : EllipticCurve S) (N : ℕ) :
+    E.Point (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) :=
+  ⟨pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    rw [Category.assoc, E.torsionι_π]
+    exact pullback.condition.symm⟩
+
+/-- The generic `sectionsDivisor`-ideal unfolding. -/
+private theorem fullLevelLocusAux_sectionsDivisor_ideal {Y : Scheme.{u}}
+    (F : EllipticCurve Y) {n : ℕ} (P : Fin n → F.Point (𝟙 Y)) :
+    (RelEffCartierDiv.sectionsDivisor F.π P).ideal =
+      ∏ i : Fin n, Scheme.Hom.ker (P i).1 := by
+  rw [RelEffCartierDiv.sectionsDivisor, dif_pos ⟨inferInstance, F.smooth⟩]
+
+private theorem fullLevelLocusAux_comp_mulByHom_pi {T : Scheme.{u}}
+    (E : EllipticCurve S) (t : T ⟶ S) (P : E.Point t) (m : ℤ) :
+    (P.1 ≫ E.mulByHom m) ≫ E.π = 𝟙 T ≫ t := by
+  rw [Category.assoc, E.mulByHom_π, P.2, Category.id_comp]
+
+/-- The value of the level-pair combination `m₁•P + m₂•Q` (as a section of the
+base-changed curve), projected to `E`. -/
+private theorem fullLevelLocusAux_pair_fst {T : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) (P Q : E.Point t) (m₁ m₂ : ℤ) :
+    subgroupLocusAux_val E t (m₁ • EllipticCurve.Point.asSection E t P +
+        m₂ • EllipticCurve.Point.asSection E t Q) ≫ pullback.fst E.π t =
+      ((⟨P.1 ≫ E.mulByHom m₁, fullLevelLocusAux_comp_mulByHom_pi E t P m₁⟩ +
+        ⟨Q.1 ≫ E.mulByHom m₂, fullLevelLocusAux_comp_mulByHom_pi E t Q m₂⟩ :
+          E.Point (𝟙 T ≫ t)) : T ⟶ E.E) := by
+  refine (exactOrderLocusAux_toE'_add E t (m₁ • EllipticCurve.Point.asSection E t P)
+    (m₂ • EllipticCurve.Point.asSection E t Q)).trans ?_
+  refine Eq.trans ?_ (Category.id_comp _)
+  refine subgroupLocusAux_add_comp E (𝟙 T)
+    (⟨P.1 ≫ E.mulByHom m₁, fullLevelLocusAux_comp_mulByHom_pi E t P m₁⟩ :
+      E.Point (𝟙 T ≫ t))
+    ⟨Q.1 ≫ E.mulByHom m₂, fullLevelLocusAux_comp_mulByHom_pi E t Q m₂⟩
+    (⟨exactOrderLocusAux_toE' E t (m₁ • EllipticCurve.Point.asSection E t P),
+      exactOrderLocusAux_toE'_pi E t _⟩ : E.Point (𝟙 T ≫ t))
+    ⟨exactOrderLocusAux_toE' E t (m₂ • EllipticCurve.Point.asSection E t Q),
+      exactOrderLocusAux_toE'_pi E t _⟩ ?_ ?_
+  · show exactOrderLocusAux_toE' E t (m₁ • EllipticCurve.Point.asSection E t P) =
+      𝟙 T ≫ (P.1 ≫ E.mulByHom m₁)
+    rw [Category.id_comp]
+    exact exactOrderLocusAux_val_smul_asSection_fst E t m₁ P
+  · show exactOrderLocusAux_toE' E t (m₂ • EllipticCurve.Point.asSection E t Q) =
+      𝟙 T ≫ (Q.1 ≫ E.mulByHom m₂)
+    rw [Category.id_comp]
+    exact exactOrderLocusAux_val_smul_asSection_fst E t m₂ Q
+
+/-- The values of the universal and the classified level-pair combinations match
+along the classifying map `cc`. -/
+private theorem fullLevelLocusAux_match {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    (t : T ⟶ S) (P Q : E.Point t) (cc : T ⟶ pullback (E.torsionπ N) (E.torsionπ N))
+    (hccP : cc ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) = P.1)
+    (hccQ : cc ≫ (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) = Q.1)
+    (m₁ m₂ : ℤ) :
+    cc ≫ subgroupLocusAux_val E
+        (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        (m₁ • EllipticCurve.Point.asSection E
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+            (fullLevelLocusAux_u₁ E N) +
+          m₂ • EllipticCurve.Point.asSection E
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+            (fullLevelLocusAux_u₂ E N)) ≫
+          pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+            E.torsionπ N) =
+      subgroupLocusAux_val E t (m₁ • EllipticCurve.Point.asSection E t P +
+        m₂ • EllipticCurve.Point.asSection E t Q) ≫ pullback.fst E.π t := by
+  rw [fullLevelLocusAux_pair_fst, fullLevelLocusAux_pair_fst]
+  have hcompP : P.1 ≫ E.mulByHom m₁ =
+      cc ≫ ((fullLevelLocusAux_u₁ E N).1 ≫ E.mulByHom m₁) := by
+    rw [← Category.assoc]
+    rw [show cc ≫ (fullLevelLocusAux_u₁ E N).1 = P.1 from hccP]
+  have hcompQ : Q.1 ≫ E.mulByHom m₂ =
+      cc ≫ ((fullLevelLocusAux_u₂ E N).1 ≫ E.mulByHom m₂) := by
+    rw [← Category.assoc]
+    rw [show cc ≫ (fullLevelLocusAux_u₂ E N).1 = Q.1 from hccQ]
+  exact (subgroupLocusAux_add_comp E cc
+    (⟨(fullLevelLocusAux_u₁ E N).1 ≫ E.mulByHom m₁,
+      fullLevelLocusAux_comp_mulByHom_pi E _ (fullLevelLocusAux_u₁ E N) m₁⟩ :
+        E.Point (𝟙 (pullback (E.torsionπ N) (E.torsionπ N)) ≫
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)))
+    ⟨(fullLevelLocusAux_u₂ E N).1 ≫ E.mulByHom m₂,
+      fullLevelLocusAux_comp_mulByHom_pi E _ (fullLevelLocusAux_u₂ E N) m₂⟩
+    (⟨P.1 ≫ E.mulByHom m₁, fullLevelLocusAux_comp_mulByHom_pi E t P m₁⟩ :
+      E.Point (𝟙 T ≫ t))
+    ⟨Q.1 ≫ E.mulByHom m₂, fullLevelLocusAux_comp_mulByHom_pi E t Q m₂⟩
+    hcompP hcompQ).symm
+
+/-- The comparison morphism `E ×_S T ⟶ E ×_S B` over a factorization `c ≫ b = t`. -/
+private noncomputable def fullLevelLocusAux_theta {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+    {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
+    pullback π t ⟶ pullback π b :=
+  pullback.lift (pullback.fst π t) (pullback.snd π t ≫ c)
+    (by rw [pullback.condition, ← hct, Category.assoc])
+
+private theorem fullLevelLocusAux_theta_fst {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+    {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
+    fullLevelLocusAux_theta hct ≫ pullback.fst π b = pullback.fst π t :=
+  pullback.lift_fst _ _ _
+
+private theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+    {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
+    fullLevelLocusAux_theta hct ≫ pullback.snd π b = pullback.snd π t ≫ c :=
+  pullback.lift_snd _ _ _
+
+/-- **The comap-transport along the pasting comparison**: equality of preimage ideals
+along the base-change projection of `C ×_{S'} B` over `c` is equality of preimages
+along `θ` on `C ×_{S'} T`. -/
+private theorem fullLevelLocusAux_comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+    {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t)
+    (A B' : (pullback π b).IdealSheafData) :
+    A.comap (pullback.fst (pullback.snd π b) c) =
+      B'.comap (pullback.fst (pullback.snd π b) c) ↔
+    A.comap (fullLevelLocusAux_theta hct) = B'.comap (fullLevelLocusAux_theta hct) := by
+  have hcondInv : (pullback.fst (pullback.snd π b) c ≫ pullback.fst π b) ≫ π =
+      pullback.snd (pullback.snd π b) c ≫ t := by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, pullback.condition,
+      Category.assoc, hct]
+  have hΨΘ : pullback.lift (pullback.fst (pullback.snd π b) c ≫ pullback.fst π b)
+      (pullback.snd (pullback.snd π b) c) hcondInv ≫ fullLevelLocusAux_theta hct =
+      pullback.fst (pullback.snd π b) c := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, fullLevelLocusAux_theta_fst, pullback.lift_fst]
+    · rw [Category.assoc, fullLevelLocusAux_theta_snd, ← Category.assoc,
+        pullback.lift_snd, pullback.condition]
+  have hhom : pullback.lift (fullLevelLocusAux_theta hct) (pullback.snd π t)
+      (fullLevelLocusAux_theta_snd hct) ≫ pullback.fst (pullback.snd π b) c =
+      fullLevelLocusAux_theta hct := pullback.lift_fst _ _ _
+  constructor
+  · intro h
+    rw [← hhom, Scheme.IdealSheafData.comap_comp, Scheme.IdealSheafData.comap_comp, h]
+  · intro h
+    rw [← hΨΘ, Scheme.IdealSheafData.comap_comp, Scheme.IdealSheafData.comap_comp, h]
+
+/-- **(P1)** The base-changed universal pair divisor pulls back along `θ` to the
+`t`-level pair divisor. -/
+private theorem fullLevelLocusAux_P1 {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    {t : T ⟶ S} (P Q : E.Point t)
+    {cc : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)}
+    (hcct : cc ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = t)
+    (hccP : cc ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) = P.1)
+    (hccQ : cc ≫ (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) = Q.1) :
+    (RelEffCartierDiv.sectionsDivisor
+        (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+              (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+              (fullLevelLocusAux_u₁ E N) +
+            ((((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+              (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+              (fullLevelLocusAux_u₂ E N)) :
+            (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+              E.torsionπ N)).Point
+              (𝟙 (pullback (E.torsionπ N) (E.torsionπ N))))))).ideal.comap
+      (fullLevelLocusAux_theta hcct) =
+    (RelEffCartierDiv.sectionsDivisor (E.baseChange t).π
+      (fun i : Fin (N ^ 2) =>
+        (((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.Point.asSection E t P +
+          ((((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.Point.asSection E t Q) :
+          (E.baseChange t).Point (𝟙 T))))).ideal := by
+  rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal,
+    Scheme.IdealSheafData.comap_prod]
+  refine Finset.prod_congr rfl fun i _ => ?_
+  have key := exactOrderLocusAux_ker_comap_eq
+    (subgroupLocusAux_val E (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+      ((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+          (fullLevelLocusAux_u₁ E N) +
+        (((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+          (fullLevelLocusAux_u₂ E N)))
+    (subgroupLocusAux_val E t
+      ((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.Point.asSection E t P +
+        (((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.Point.asSection E t Q))
+    (exactOrderLocusAux_val_isClosedImmersion E _ _)
+    (exactOrderLocusAux_val_isClosedImmersion E t _)
+    (subgroupLocusAux_val_snd E _ _)
+    (subgroupLocusAux_val_snd E t _)
+    (fullLevelLocusAux_match E N t P Q cc hccP hccQ _ _)
+    (fullLevelLocusAux_theta hcct) (𝟙 (pullback E.π t))
+    (fullLevelLocusAux_theta_snd hcct) (Category.id_comp _)
+    (by rw [Category.id_comp, fullLevelLocusAux_theta_fst])
+  rw [Scheme.IdealSheafData.comap_id] at key
+  exact key
+
+/-- **(P2)** The base-changed universal torsion divisor pulls back along `θ` to the
+`t`-level torsion ideal. -/
+private theorem fullLevelLocusAux_P2 {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    [NeZero N] {t : T ⟶ S} {cc : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)}
+    (hcct : cc ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = t) :
+    (fullLevelLocusAux_torsionDivisor
+        (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N))
+        N).ideal.comap (fullLevelLocusAux_theta hcct) =
+      (E.baseChange t).torsionIdeal N := by
+  have e1 : ((E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+      E.torsionπ N)).torsionIdeal N).comap (fullLevelLocusAux_theta hcct) =
+      ((E.torsionIdeal N).comap (pullback.fst E.π (pullback.fst (E.torsionπ N)
+        (E.torsionπ N) ≫ E.torsionπ N))).comap (fullLevelLocusAux_theta hcct) :=
+    congrArg (fun I : (pullback E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+        E.torsionπ N)).IdealSheafData => I.comap (fullLevelLocusAux_theta hcct))
+      (fullLevelLocusAux_torsionIdeal_baseChange E N _)
+  have e2 : ((E.torsionIdeal N).comap (pullback.fst E.π (pullback.fst (E.torsionπ N)
+      (E.torsionπ N) ≫ E.torsionπ N))).comap (fullLevelLocusAux_theta hcct) =
+      (E.torsionIdeal N).comap (fullLevelLocusAux_theta hcct ≫
+        pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+          E.torsionπ N)) := (Scheme.IdealSheafData.comap_comp _ _ _).symm
+  have e3 : (E.torsionIdeal N).comap (fullLevelLocusAux_theta hcct ≫
+      pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+        E.torsionπ N)) = (E.torsionIdeal N).comap (pullback.fst E.π t) :=
+    congrArg (fun q : pullback E.π t ⟶ E.E => (E.torsionIdeal N).comap q)
+      (fullLevelLocusAux_theta_fst hcct)
+  exact e1.trans (e2.trans (e3.trans
+    (fullLevelLocusAux_torsionIdeal_baseChange E N t).symm))
+
+/-- A morphism-level killed point gives a group-theoretically killed section. -/
+private theorem fullLevelLocusAux_killed {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    (t : T ⟶ S) (P : E.Point t) (hP : P.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    (N : ℤ) • EllipticCurve.Point.asSection E t P = 0 := by
+  refine exactOrderLocusAux_pt_ext' E t ?_
+  rw [exactOrderLocusAux_toE'_zero]
+  refine (exactOrderLocusAux_val_smul_asSection_fst E t (N : ℤ) P).trans ?_
+  rw [hP, Category.id_comp]
 
 /-- **(T-D18 = KM 1.5–1.6 for `A = (ℤ/N)²`; the full-level locus)** There is a closed
 subscheme of `E[N] ×_S E[N]` universal for "the pair is a Drinfeld full level-`N`
@@ -1562,8 +2554,45 @@ theorem exists_fullLevelLocus (E : EllipticCurve S) (N : ℕ) [NeZero N] :
       (∃ h : T ⟶ Z.subscheme,
           h ≫ Z.subschemeι = pullback.lift (E.pointToTorsion P hP)
             (E.pointToTorsion Q hQ) (by simp)) ↔
-        (E.baseChange t).IsFullLevel N (EllipticCurve.Point.asSection E t P) (EllipticCurve.Point.asSection E t Q) :=
-  by sorry
+        (E.baseChange t).IsFullLevel N (EllipticCurve.Point.asSection E t P) (EllipticCurve.Point.asSection E t Q) := by
+  obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
+    (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).smooth
+    (RelEffCartierDiv.sectionsDivisor
+      (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).π
+      (fun i : Fin (N ^ 2) =>
+        (((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+            (fullLevelLocusAux_u₁ E N) +
+          ((((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.Point.asSection E
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+            (fullLevelLocusAux_u₂ E N)) :
+          (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫
+            E.torsionπ N)).Point (𝟙 (pullback (E.torsionπ N) (E.torsionπ N)))))))
+    (fullLevelLocusAux_torsionDivisor
+      (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) N)
+  refine ⟨Z, fun T t P Q hP hQ => ?_⟩
+  have hcct : pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ)
+      (by simp) ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = t := by
+    rw [← Category.assoc, pullback.lift_fst, E.pointToTorsion_torsionπ]
+  have hccP : pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ)
+      (by simp) ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) =
+      P.1 := by
+    rw [← Category.assoc, pullback.lift_fst, E.pointToTorsion_torsionι]
+  have hccQ : pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ)
+      (by simp) ≫ (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) =
+      Q.1 := by
+    rw [← Category.assoc, pullback.lift_snd, E.pointToTorsion_torsionι]
+  refine Iff.trans (hZ (pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ)
+    (by simp))) ?_
+  rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
+    ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal,
+    RelEffCartierDiv.baseChange_ideal]
+  refine Iff.trans (fullLevelLocusAux_comap_iff hcct _ _) ?_
+  refine Iff.trans (Iff.of_eq (congrArg₂ Eq
+    (fullLevelLocusAux_P1 E N P Q hcct hccP hccQ)
+    (fullLevelLocusAux_P2 E N hcct))) ?_
+  exact (and_iff_right ⟨fullLevelLocusAux_killed E N t P hP,
+    fullLevelLocusAux_killed E N t Q hQ⟩).symm
 
 end Incidence
 
