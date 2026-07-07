@@ -1672,9 +1672,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **Type**: theorem · **Sources**: [Loe] 3.8.2/3.8.3 (in hand); [KM] 5.1 ⧗.
 
 ### [T-E10] fppf descent for elliptic curves (BB-DESC consumer)
-- **Status**: open · **File**: Moduli/Stack.lean · `ellipticCurve_fppf_descent` ·
-  **Depends on**: T-A5 · **Type**: theorem · **Sources**: SGA 1 VIII (black box
-  statement first as its own lemma); [KM] 4.1 ⧗ context.
+- **Status**: open (v2 = `levelledCurve_descent_of_torsor`, `sorry`) · **File**:
+  Moduli/Stack.lean · **Depends on**: T-A5 · **Type**: theorem · **Sources**: GME
+  Lemma 2.6.7; SGA 1 VIII; [KM] 4.1 ⧗ context.
+- **DESC engine LANDED (beastmode-DESC, 2026-07-07, axiom-clean):** the
+  descent-of-morphisms half is done — `descend_hom_of_effectiveEpi` +
+  `moduliProblem_fppf_descent` (gluing half; with the proven `moduliProblem_fppf_separated`
+  ⟹ **relatively representable moduli problems are fppf sheaves**). Built on mathlib
+  `Sites/Fpqc` `EffectiveEpi`/`Subcanonical` — the T-E8 descent-data vocabulary is NOT
+  needed for the single-cover gluing.
+- **Remaining gating (why `levelledCurve_descent_of_torsor` is still `sorry`):** needs to
+  *produce the curve* `E/T` (object descent), gated on ONE of {T-E9 representability
+  [E-stream, sorried] · relative Proj + QC-sheaf descent + relatively-ample [ABSENT from
+  mathlib, each B3-scale — see T-DESC0] · T-Q2 SGA-III quotient charts [plan-deferred]},
+  PLUS **T-G3 rigidity** (`aut_trivial_of_fullLevel`, sorried) for the strict cocycle.
+  The morphism-descent engine + representability (T-E9) would assemble it cleanly; the
+  object-descent-from-scratch route is B3-scale. Not dispatchable in DESC alone.
 
 ### [T-E11] fppf separatedness of relatively representable problems
 - **Status**: done (beastmode-A 2026-07-09T12:00Z — `moduliProblem_fppf_separated` PROVED sorry-free, axioms standard. Formal proof from RelativelyRepresentable naturality + Equiv.injective + Flat.epi_of_flat_of_surjective [Stacks 02VW, present in mathlib] + cancel_epi. The PENDING-SOURCE note concerned statement justification only; the committed statement proves cleanly.) · **File**: Moduli/Stack.lean · `moduliProblem_fppf_separated` ·
@@ -2757,9 +2770,34 @@ DS-register unchanged; `#print axioms` audit.
   statement of the fibrewise criterion + fibre-morphism helper; then proof tickets.
 - **[T-OT0]** scoping after T-SG1; statement "flf comm. group scheme of rank N killed
   by N"; Deligne norm-argument decomposition (FltRegular norm lemmas per rescan).
-- **[T-DESC0]** scoping: exact coverage of mathlib Morphisms/Descent + FlatDescent
-  (survey); route via relatively-ample embedding + module descent; target
-  `ellipticCurve_fppf_descent` (statement exists).
+- **[T-DESC0]** scoping — **DONE (beastmode-DESC, 2026-07-07)**. mathlib coverage:
+  - **LANDED (in-lane, axiom-clean, `Moduli/Stack.lean`):** the **descent-of-morphisms
+    engine** — `descend_hom_of_effectiveEpi` (a map coequalizing `f`'s kernel pair
+    factors uniquely through `f`, via mathlib's `EffectiveEpi.desc`) + the **gluing
+    half** `moduliProblem_fppf_descent` (dual to the proven `moduliProblem_fppf_separated`).
+    Together: **relatively representable moduli problems are fppf sheaves** — the gluing
+    half the file had deferred to T-E8's descent-data vocabulary, landed instead via
+    mathlib `Sites/Fpqc` (`fppfTopology.Subcanonical`; `EffectiveEpi f` for
+    flat+LFP+surjective, i.e. the plan's "fppf-covers-are-epis" DESC deliverable — now
+    *in mathlib*, no longer a DESC target).
+  - **mathlib-gap findings (survey):** the plan's stated object-descent route
+    (relatively-ample embedding → module descent + Proj) rests on **three absent
+    foundations**: (i) FF module *effective* descent in cocycle form — mathlib has only
+    `comonadicExtendScalars` (comonadicity) + the abstract `DescentDataAsCoalgebra`
+    framework, the effective/cocycle packaging is mathlib's own flagged TODO (single-map
+    case is essentially `ComonadicLeftAdjoint`, but QC-globalization is absent);
+    (ii) **relative `Proj`** over a base scheme — ABSENT (only absolute
+    `ProjectiveSpectrum`); (iii) **relatively-ample / relative projective embedding** —
+    ABSENT. Each of (ii)/(iii) is a multi-week mathlib-PR-scale AG development.
+  - **Precise gating of `levelledCurve_descent_of_torsor` (T-E10):** every route needs
+    an object-descent mechanism to *produce* the curve `E/T`, gated on ONE of
+    {representability T-E9 [E-stream, sorried] · relative Proj+QC-descent+ample [absent,
+    B3-scale] · T-Q2 SGA-III quotient charts [plan-deferred "statements-only by design"]},
+    AND additionally on **T-G3 rigidity** (`aut_trivial_of_fullLevel`, sorried) to turn
+    `hdesc`'s mere-existence isos into a strict cocycle. DESC's clean morphism-descent
+    engine is delivered; the remaining object-descent is blocked on other-lane sorries or
+    B3-scale absent mathlib AG foundations. `ellipticCurve_fppf_descent`/T-E10 stays
+    `sorry` pending those.
 - **[T-IRR0]** scoping: algebraic (KM Ch. 10 ⧗, Tate-curve degeneration) vs analytic
   (uniformisation ↔ LeanModularForms) route; target `yRho_geometricallyIrreducible`
   (statement exists). Late-phase; parallel.
