@@ -275,7 +275,83 @@ theorem exists_factor_of_connected [IsLocallyNoetherian S] [IsProper p] [Flat p]
     (f g : X ⟶ Y) (hf : f ≫ q = p) (hg : g ≫ q = p) (s : S)
     (hseed : p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f g hf hg).base) :
     ∃ w : X ⟶ eqLocus f g hf hg, w ≫ eqLocusι f g hf hg = 𝟙 X := by
-  sorry
+  classical
+  haveI := hconn
+  -- the locus of set-theoretic fibrewise containment
+  set U₁ : Set S := {t | p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base} with hU₁
+  -- open, by the Krull-neighbourhood leaf
+  have hopen : IsOpen U₁ := by
+    rw [isOpen_iff_forall_mem_open]
+    intro t ht
+    obtain ⟨U₀, htU₀, w₀, hw₀⟩ := exists_open_factor_of_fibre_subset hp e he f g hf hg t ht
+    have hsub : ((p ⁻¹ᵁ U₀) : Set X) ⊆ Set.range (eqLocusι f g hf hg).base := by
+      rintro x hx
+      refine ⟨w₀.base ⟨x, hx⟩, ?_⟩
+      have e5 := congrArg
+        (fun m : ((p ⁻¹ᵁ U₀ : X.Opens)).toScheme ⟶ X => m.base ⟨x, hx⟩) hw₀
+      simpa using e5
+    exact ⟨U₀, fun t' ht' x hx => hsub (show p.base x ∈ U₀ by rw [hx]; exact ht'), U₀.2, htU₀⟩
+  -- closed: the complement is the image of the open complement of the locus under open `p`
+  have hclosed : IsClosed U₁ := by
+    rw [← isOpen_compl_iff]
+    have hcompl : U₁ᶜ = p.base '' (Set.range (eqLocusι f g hf hg).base)ᶜ := by
+      ext t
+      constructor
+      · intro ht
+        rw [Set.mem_compl_iff, hU₁, Set.mem_setOf_eq, Set.not_subset] at ht
+        obtain ⟨x, hx1, hx2⟩ := ht
+        exact ⟨x, hx2, hx1⟩
+      · rintro ⟨x, hx, rfl⟩ h
+        exact hx (h rfl)
+    rw [hcompl]
+    exact p.isOpenMap _
+      (Scheme.Hom.isClosedEmbedding (eqLocusι f g hf hg)).isClosed_range.isOpen_compl
+  -- connectedness: the clopen locus containing `s` is everything
+  have huniv : U₁ = Set.univ := IsClopen.eq_univ ⟨hclosed, hopen⟩ ⟨s, hseed⟩
+  -- choose a factorization neighbourhood around every point
+  have hmem : ∀ t : S, p.base ⁻¹' {t} ⊆ Set.range (eqLocusι f g hf hg).base := fun t => by
+    have ht : t ∈ U₁ := by rw [huniv]; trivial
+    exact ht
+  have hall : ∀ t : S, ∃ U₀ : S.Opens, t ∈ U₀ ∧
+      ∃ w : ((p ⁻¹ᵁ U₀) : X.Opens).toScheme ⟶ eqLocus f g hf hg,
+        w ≫ eqLocusι f g hf hg = ((p ⁻¹ᵁ U₀) : X.Opens).ι :=
+    fun t => exists_open_factor_of_fibre_subset hp e he f g hf hg t (hmem t)
+  choose U₀ hU₀mem w₀ hw₀ using hall
+  -- the preimages cover `X`
+  have hcover : TopologicalSpace.IsOpenCover fun t : S => (p ⁻¹ᵁ U₀ t : X.Opens) := by
+    refine eq_top_iff.mpr fun x _ => ?_
+    rw [TopologicalSpace.Opens.mem_iSup]
+    exact ⟨p.base x, hU₀mem (p.base x)⟩
+  set 𝒰 := X.openCoverOfIsOpenCover _ hcover with h𝒰
+  have hface : ∀ t, 𝒰.f t = ((p ⁻¹ᵁ U₀ t : X.Opens)).ι := fun t => rfl
+  have hcompat : ∀ a b, pullback.fst (𝒰.f a) (𝒰.f b) ≫ w₀ a =
+      pullback.snd (𝒰.f a) (𝒰.f b) ≫ w₀ b := by
+    intro a b
+    rw [← cancel_mono (eqLocusι f g hf hg)]
+    have e1 : (pullback.fst (𝒰.f a) (𝒰.f b) ≫ w₀ a) ≫ eqLocusι f g hf hg =
+        pullback.fst (𝒰.f a) (𝒰.f b) ≫ ((p ⁻¹ᵁ U₀ a : X.Opens)).ι :=
+      (Category.assoc _ _ _).trans
+        (congrArg (pullback.fst (𝒰.f a) (𝒰.f b) ≫ ·) (hw₀ a))
+    have e2 : (pullback.snd (𝒰.f a) (𝒰.f b) ≫ w₀ b) ≫ eqLocusι f g hf hg =
+        pullback.snd (𝒰.f a) (𝒰.f b) ≫ ((p ⁻¹ᵁ U₀ b : X.Opens)).ι :=
+      (Category.assoc _ _ _).trans
+        (congrArg (pullback.snd (𝒰.f a) (𝒰.f b) ≫ ·) (hw₀ b))
+    have e3 : pullback.fst (𝒰.f a) (𝒰.f b) ≫ ((p ⁻¹ᵁ U₀ a : X.Opens)).ι =
+        pullback.snd (𝒰.f a) (𝒰.f b) ≫ ((p ⁻¹ᵁ U₀ b : X.Opens)).ι := by
+      rw [← hface a, ← hface b]
+      exact pullback.condition
+    exact e1.trans (e3.trans e2.symm)
+  refine ⟨𝒰.glueMorphisms w₀ hcompat, 𝒰.hom_ext _ _ fun t => ?_⟩
+  have hend : 𝒰.f t ≫ 𝟙 X = ((p ⁻¹ᵁ U₀ t : X.Opens)).ι := by
+    rw [Category.comp_id]
+    exact hface t
+  rw [hend]
+  calc 𝒰.f t ≫ 𝒰.glueMorphisms w₀ hcompat ≫ eqLocusι f g hf hg
+      = (𝒰.f t ≫ 𝒰.glueMorphisms w₀ hcompat) ≫ eqLocusι f g hf hg :=
+        (Category.assoc _ _ _).symm
+    _ = w₀ t ≫ eqLocusι f g hf hg :=
+        congrArg (· ≫ eqLocusι f g hf hg) (𝒰.ι_glueMorphisms w₀ hcompat t)
+    _ = ((p ⁻¹ᵁ U₀ t : X.Opens)).ι := hw₀ t
 
 end RigidityLeaves
 

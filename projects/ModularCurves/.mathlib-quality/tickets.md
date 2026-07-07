@@ -5057,10 +5057,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   support API).
 
 - **[T-W7.r2·d]** clopen assembly — `exists_factor_of_connected` (Rigidity.lean).
-  - **Status**: open (claimed with parent, fable-P4 — next up) · **Depends**: T-W7.r2·c
-    (consumes it), `UniversallyOpen.of_flat` (verified) · **Type**: theorem
-  - Route: `U₁` closed via flat+lfp open map; open via ·c; connected ⟹ `U₁ = S`; glue the
-    open factorizations along `⊤` (mono `eqLocusι`).
+  - **Status**: ✅ PROVEN (fable-P4, 2026-07-07T15:00Z) — modulo consuming the sorried ·c
+    (leaf-DAG design). Route as planned: `U₁` clopen (flat+lfp open map / closed-immersion
+    range), connectedness, `Cover.glueMorphisms` glue with `cancel_mono`-compatibility.
+    With this, `rigidity` rests on exactly ·b + ·c.
   - Sketch (GIT pp. 115–116, transcribed; mathlib names VERIFIED in this checkout,
     assembly map inline at the `rigidity` sorry): equalizer backbone
     `isClosedImmersion_equalizer_ι_left` (in `Over S`, uses `[IsSeparated q]`); case 1
