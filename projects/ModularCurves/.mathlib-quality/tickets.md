@@ -5566,3 +5566,70 @@ Completed the char-0 Weil-pairing API (all axiom-clean, gate-free) in WeilPairin
   The local compatibility hζ is an honest hypothesis (analogous to hcocyc); wiring ζ'_T = base-change-of-ζ'
   to DISCHARGE hζ is the same point-level trivialisation step that funnels into T-W7.
 Commits: 4f3ab9a9 (axioms+SL₂+uniq), 24a159f8 (constSchemeMap_ι), 41f19f09 (μ_N base change), + this (naturality).
+
+
+---
+
+## Generic Flatness stream (T-GF*) — owner-funded 2026-07-07, discharges the D-chain's last sorryAx
+
+Source: Stacks 051R (fetched + transcribed; decomposition-genericflatness.md). File:
+`ForMathlib/GenericFlatness.lean` (new, upstream-candidate) unless noted. Order:
+GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
+
+### [T-GF1] prime-quotient injection (Stacks 10.62.1 building block)
+- **Status**: done · **Claimed**: beastmode-D2, 2026-07-07T16:40Z · **File**:
+  ForMathlib/GenericFlatness.lean · **Depends on**: none · **Type**: theorem
+- **Statement**: `exists_primeQuotient_injection {R M} [CommRing R][IsNoetherianRing R]
+  [AddCommGroup M][Module R M][Nontrivial M] : ∃ p : Ideal R, p.IsPrime ∧
+  ∃ f : (R ⧸ p) →ₗ[R] M, Function.Injective f`
+- **Proof**: `associatedPrimes.nonempty` → `isAssociatedPrime_iff` (I prime, I = colon ⊥ {x})
+  → `toSpanSingleton R M x` has ker = I (mem_colon_singleton) → `I.liftQ … ` injective by
+  `ker_liftQ_eq_bot'`. PROVEN in scratch, axiom-clean.
+
+### [T-GF2] extension of free modules is free (Stacks 0516)
+- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Statement**: for a SES `0→A→B→C→0` of R-modules with A, C free (C free ⟹ projective ⟹
+  split), B is free. Lean: `Module.Free R A → Module.Free R C → (∃ split) → Module.Free R B`,
+  or via `Function.Exact` + `Module.Projective C`. Mathlib: `Module.free_of_...`? survey; likely
+  via split ≅ A × C then `Module.Free.prod`. ~30 lines.
+
+### [T-GF3] generic finiteness / Noether normalization over a domain (Stacks 10.115.7)
+- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Statement**: R Noetherian domain, S = domain, finite-type R-algebra ⟹ ∃ 0≠f∈R and
+  y₁..y_d ∈ S_f with R_f[y] → S_f finite (i.e. after inverting f, S is finite over a poly
+  subring). Mathlib: field-base Noether normalization (`RingTheory/NoetherNormalization.lean`)
+  applied to S_K over K=Frac R + spread down. ~100 lines. May itself spawn sub-tickets.
+
+### [T-GF4] support-avoidance annihilation (Stacks 10.40.5)
+- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Statement**: N finite R-module, 𝔭 prime, 𝔭 ∉ Module.support N ⟹ ∃ g ∉ 𝔭, g • N = 0
+  (g annihilates N). Mathlib: `Module.mem_support_iff_exists_annihilator` + finite ⟹
+  ann-determines-support. ~20 lines.
+
+### [T-GF5] generic flatness (Stacks 051R main dévissage)
+- **Status**: open · **Depends on**: T-GF1, T-GF2, T-GF3, T-GF4 · **Type**: theorem
+- **Statement**: `R Noetherian domain, R→S finite type, M finite S-module ⟹ ∃ 0≠f∈R,
+  Module.Free R_f M_f` (equivalently `Module.Flat`). Proof = strong induction on d=dim(S_K)
+  via GF1 (reduce M to R⧸𝔮 pieces by noetherian induction) + GF2 (assemble free) + GF3
+  (Noether norm) + GF4 (kill the cokernel N, drop dimension). ~150 lines. LARGE — delegate.
+
+### [T-GF6] flat locus is open (Stacks 00R4/052F)
+- **Status**: open · **Depends on**: T-GF5 · **Type**: theorem
+- **Statement**: M fp over Noetherian R ⟹ `{𝔭 ∈ PrimeSpectrum R : Module.Flat (Localization.
+  AtPrime 𝔭) (localized M)}` (the flat locus) is open. Proof = Noetherian induction using
+  GF5 (generic flatness ⟹ flat on a dense open; recurse on the closed complement). ~150-250
+  lines. LARGE — delegate.
+
+### [T-GF7] flatness descent along the colimit (= NOETH3 discharge; EGA IV 11.2.6)
+- **Status**: open · **Depends on**: T-GF6 · **File**: ForMathlib/NoethApprox.lean · **Type**: theorem
+- **Statement**: discharge the `Module.Flat R₀ A₀` sorry in `exists_noetherian_descent_flat`:
+  A = R⊗_{R₀}A₀ flat over R=colim Rᵢ ⟹ ∃ enlargement stage where A_stage flat over R_stage,
+  via GF6 (flat locus of A₀ over Noetherian R₀ is open; the colimit lands in it). ~100-200 lines.
+
+### [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box
+- **Status**: open · **Depends on**: T-GF7 (NOETH3), T-NOETH1, T-NOETH2 · **File**:
+  LevelStructure/CartierDivisor.lean · **Type**: theorem
+- **Statement**: prove `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor` (currently the
+  sorried box): descend (R,A,f) to a noetherian stage (NOETH1-3), where Ann(f) is fg, and
+  the flat-tensor-exactness argument (Ann⊗κ=0 ∀κ) + Nakayama closes Ann(f)=0. ~150 lines.
+  DISCHARGE ⟹ the ENTIRE Drinfeld D-chain is axiom-clean.
