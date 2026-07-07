@@ -6214,11 +6214,20 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
 - **Mathlib lemmas**: `Module.Finite`, `Submodule.fg_of_...` (noeth), `IsNoetherian`, `Module.FinitePresentation`. ~100 lines.
 - **Sources**: Stacks 00LP.
 
-### [T-DEV1c] local openness at a flat point — fill `exists_basicOpen_subset_flatLocus_of_mem` (Stacks 00RC) — MAKE-OR-BREAK
-- **Status**: in-progress (dispatched 2026-07-07; deps DEV1a+DEV1b landed, T-LC1 proven, bridge confirmed) · **File**: ForMathlib/FlatLocus.lean · **Depends on**: T-DEV1a, T-DEV1b, (T-LC1 done) · **Type**: theorem
-- **ROUTE FIRMED (no B-E)**: view M as R[x]-module (S fp); fibre resolution ⊗κ(𝔭) over κ(𝔭)[x]; DEV1a bounds pd n; iterate
-  `hasProjectiveDimensionLT_X₃_iff` (via `moduleCat_of_range_eq_ker` on DEV1b's `range_d_succ`) ⟹ n-th fibre syzygy projective⟹free at q;
-  syzygy R-flat by `lTensor_exact` dévissage; T-LC1 (00MH) ⟹ Kₙ free at q; free spreads to D(g); finite free res ⟹ M flat on D(g).
+### [T-DEV1c] local openness at a flat point — MAKE-OR-BREAK: FAILED (proj-dim does NOT avoid Buchsbaum-Eisenbud)
+- **Status**: box→isolated residual (commit 7b15980a); TRUE residual = `flatLocus_spreads_of_flat` (00MK+00RB) · **File**: ForMathlib/FlatLocus.lean:199 · **Type**: theorem
+- **VERDICT (2026-07-07): the projective-dimension route is REFUTED.** Airtight counterexample: R=k[t], S=k[t,x], M=S/(xt) —
+  first syzygy K₁=(xt)≅S FREE everywhere, yet M NOT R-flat on V(t) (t·x=0, x≠0). So "Kₙ free on D(g) ⟹ M flat on D(g)" is FALSE;
+  syzygy-freeness ≠ fibre-EXACTNESS. Flatness needs the local criterion of flatness (00MK) + fibre-exact-locus openness (00RB/00MI),
+  classically via Buchsbaum-Eisenbud (00N1). None of 00MK/00RB/00MI/00N1 (nor Module.depth/Auslander-Buchsbaum/dévissage) in mathlib.
+  DEV1a (HilbertSyzygy) is now ORPHANED from the D-chain (still a valid standalone result); DEV1b likewise.
+- **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — DECISION PENDING WITH OWNER):
+  (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
+  (B) route (ii): flat locus CONSTRUCTIBLE via generic flatness GF5 (needs GFDatum/051R) + Noeth induction, then open via 00I0
+      (sidesteps this box, fills isOpen_flatLocus differently — but T-LC3 earlier found constructible⟺open so may not be cheaper);
+  (C) CONSOLIDATE: accept the D-chain discharged to this minimal set of named registered boxes (WIP markers, AINTLIB-tolerant).
+- **DOWNSTREAM IMPACT**: T-00R6 (colimit flat descent) needs isOpen_flatLocus ⟹ transitively needs `flatLocus_spreads_of_flat`;
+  T-FLAT1-STAGE needs T-00R6. So the ENTIRE FLAT1-box axiom-cleanliness now rests on `flatLocus_spreads_of_flat` (00MK+00RB).
 - **Statement**: the boxed lemma in FlatLocus.lean (each flat point has a basic-open nbhd in the flat locus).
 - **Proof sketch**: finite free resolution (DEV1b) of M; at a flat 𝔮 over 𝔭, the fibre `M⊗κ(𝔭)` over `S⊗κ(𝔭) ≅ κ(𝔭)[x]`
   has finite proj dim (DEV1a) ⟹ the syzygy `K_d` at d=gldim is fibre-free; K_d also R-flat (`Module.Flat.lTensor_exact` +
