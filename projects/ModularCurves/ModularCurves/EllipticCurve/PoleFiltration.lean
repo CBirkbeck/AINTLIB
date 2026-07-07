@@ -2889,4 +2889,125 @@ private lemma sum_range_eq_coordOfShift (W : WeierstrassCurve R) (f : Polynomial
   simp only [map_mul]
   ring
 
+
+/-- **(the `sⁿ`-twisted cleared coordinate identity)** If `(p(x) + q(x)y)·sⁿ` extends to the
+infinity chart, the twisted cleared coordinates match the extension's coordinates. -/
+private lemma overlap_coordOfShift_eq (W : WeierstrassCurve R) [Nontrivial R]
+    (p q : Polynomial R) (b : AdjoinRoot (infChartCubic W)) {N n : ℕ}
+    (hp : p.natDegree < N + 1) (hq : q.natDegree < N)
+    (hab : (Polynomial.eval₂
+        (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+        (overlapXElem W) p +
+      Polynomial.eval₂
+        (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+        (overlapXElem W) q * overlapInvT W) *
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (AdjoinRoot.root (infChartCubic W)) ^ n =
+      algebraMap _ _ b) (j : Fin 3) :
+    coordOfShift W p N n j + coordOfShift W q (N - 1) n j =
+      Polynomial.X ^ N * ((infChartBasis W).repr b j) := by
+  have hNpos : 1 ≤ N := by omega
+  set Φc : R →+* Localization.Away (infChartTElem W) :=
+    ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))).comp
+      ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C))
+    with hΦc
+  set T : Localization.Away (infChartTElem W) :=
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (infChartTElem W) with hT
+  set ρ : Localization.Away (infChartTElem W) :=
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (AdjoinRoot.root (infChartCubic W)) with hρ
+  have hinj : Function.Injective (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) :=
+    IsLocalization.injective _ (Submonoid.powers_le.mpr (infChart_t_mem_nonZeroDivisors W))
+  have hterm : ∀ (c : R) (M i : ℕ), i ≤ M →
+      T ^ M * (Φc c * overlapXElem W ^ i) * ρ ^ n =
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C c * Polynomial.X ^ (M - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ (i + n)) := by
+    intro c M i hiM
+    have h1 := cleared_term W c hiM
+    calc T ^ M * (Φc c * overlapXElem W ^ i) * ρ ^ n
+        = algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W))
+            (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+                (Polynomial.C c * Polynomial.X ^ (M - i)) *
+              AdjoinRoot.root (infChartCubic W) ^ i) * ρ ^ n := by rw [← h1]
+      _ = _ := by
+          rw [hρ, ← map_pow, ← map_mul, pow_add, mul_assoc]
+  have key : (∑ i ∈ Finset.range (N + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (p.coeff i) * Polynomial.X ^ (N - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ (i + n)) +
+      (∑ i ∈ Finset.range (N - 1 + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (q.coeff i) * Polynomial.X ^ (N - 1 - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ (i + n)) =
+      infChartTElem W ^ N * b := by
+    apply hinj
+    rw [map_add, map_sum, map_sum, map_mul, map_pow, ← hab]
+    rw [Polynomial.eval₂_eq_sum_range' (n := N + 1) _ hp,
+      Polynomial.eval₂_eq_sum_range' (n := N - 1 + 1) _
+        (show q.natDegree < N - 1 + 1 by omega)]
+    set Sp := ∑ i ∈ Finset.range (N + 1), Φc (p.coeff i) * overlapXElem W ^ i with hSp
+    set Sq := ∑ i ∈ Finset.range (N - 1 + 1), Φc (q.coeff i) * overlapXElem W ^ i with hSq
+    rw [show T ^ N * ((Sp + Sq * overlapInvT W) * ρ ^ n) =
+      T ^ N * (Sp * ρ ^ n) + T ^ N * ((Sq * ρ ^ n) * overlapInvT W) from by ring]
+    rw [pow_mul_mul_overlapInvT W hNpos (Sq * ρ ^ n)]
+    rw [show T ^ N * (Sp * ρ ^ n) = ∑ i ∈ Finset.range (N + 1),
+        T ^ N * (Φc (p.coeff i) * overlapXElem W ^ i) * ρ ^ n from by
+      rw [hSp, Finset.sum_mul, Finset.mul_sum]
+      exact Finset.sum_congr rfl fun i _ => by ring]
+    rw [show T ^ (N - 1) * (Sq * ρ ^ n) = ∑ i ∈ Finset.range (N - 1 + 1),
+        T ^ (N - 1) * (Φc (q.coeff i) * overlapXElem W ^ i) * ρ ^ n from by
+      rw [hSq, Finset.sum_mul, Finset.mul_sum]
+      exact Finset.sum_congr rfl fun i _ => by ring]
+    congr 1
+    · refine Finset.sum_congr rfl fun i hi => ?_
+      have hiN : i ≤ N := by have := Finset.mem_range.mp hi; omega
+      exact (hterm (p.coeff i) N i hiN).symm
+    · refine Finset.sum_congr rfl fun i hi => ?_
+      have hiN : i ≤ N - 1 := by have := Finset.mem_range.mp hi; omega
+      exact (hterm (q.coeff i) (N - 1) i hiN).symm
+  rw [sum_range_eq_coordOfShift W p N n, sum_range_eq_coordOfShift W q (N - 1) n] at key
+  have hb : b = algebraMap (Polynomial R) _ ((infChartBasis W).repr b 0) +
+      algebraMap (Polynomial R) _ ((infChartBasis W).repr b 1) *
+        AdjoinRoot.root (infChartCubic W) +
+      algebraMap (Polynomial R) _ ((infChartBasis W).repr b 2) *
+        AdjoinRoot.root (infChartCubic W) ^ 2 := by
+    conv_lhs => rw [← (infChartBasis W).sum_repr b]
+    rw [Fin.sum_univ_three]
+    simp only [infChartBasis_apply, Algebra.smul_def,
+      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+  rw [hb] at key
+  have hTN : infChartTElem W ^ N =
+      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.X ^ N) := by
+    rw [map_pow]
+  rw [hTN] at key
+  have hz : ∀ j : Fin 3,
+      (coordOfShift W p N n j + coordOfShift W q (N - 1) n j) -
+        Polynomial.X ^ N * ((infChartBasis W).repr b j) = 0 := by
+    have hli := Fintype.linearIndependent_iff.mp (infChartBasis W).linearIndependent
+      (fun j => (coordOfShift W p N n j + coordOfShift W q (N - 1) n j) -
+        Polynomial.X ^ N * ((infChartBasis W).repr b j))
+    have hsum : ∑ j : Fin 3,
+        ((coordOfShift W p N n j + coordOfShift W q (N - 1) n j) -
+          Polynomial.X ^ N * ((infChartBasis W).repr b j)) • infChartBasis W j = 0 := by
+      rw [Fin.sum_univ_three]
+      simp only [infChartBasis_apply, Algebra.smul_def,
+        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
+        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one,
+        map_sub, map_add, map_mul]
+      linear_combination key
+    exact hli hsum
+  have := hz j
+  linear_combination this
+
 end ModularCurves
