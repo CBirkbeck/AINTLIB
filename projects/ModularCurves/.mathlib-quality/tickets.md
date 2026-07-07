@@ -5733,27 +5733,34 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
   `ker_liftQ_eq_bot'`. PROVEN in scratch, axiom-clean.
 
 ### [T-GF2] extension of free modules is free (Stacks 0516)
-- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Status**: done (beastmode-D2 2026-07-07, delegate; `free_of_exact_of_free`, axiom-clean, via lequivProdOfRightSplitExact) · **Depends on**: none · **Type**: theorem
 - **Statement**: for a SES `0→A→B→C→0` of R-modules with A, C free (C free ⟹ projective ⟹
   split), B is free. Lean: `Module.Free R A → Module.Free R C → (∃ split) → Module.Free R B`,
   or via `Function.Exact` + `Module.Projective C`. Mathlib: `Module.free_of_...`? survey; likely
   via split ≅ A × C then `Module.Free.prod`. ~30 lines.
 
 ### [T-GF3] generic finiteness / Noether normalization over a domain (Stacks 10.115.7)
-- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Status**: done-field-core (beastmode-D2 2026-07-07; `exists_noetherNormalization_baseChange` = Noether norm of the generic fibre K⊗S over K, axiom-clean; the spread-down is inside the domain-case box) · **Depends on**: none · **Type**: theorem
 - **Statement**: R Noetherian domain, S = domain, finite-type R-algebra ⟹ ∃ 0≠f∈R and
   y₁..y_d ∈ S_f with R_f[y] → S_f finite (i.e. after inverting f, S is finite over a poly
   subring). Mathlib: field-base Noether normalization (`RingTheory/NoetherNormalization.lean`)
   applied to S_K over K=Frac R + spread down. ~100 lines. May itself spawn sub-tickets.
 
 ### [T-GF4] support-avoidance annihilation (Stacks 10.40.5)
-- **Status**: open · **Depends on**: none · **Type**: theorem
+- **Status**: done (beastmode-D2 2026-07-07, delegate; `exists_smul_eq_zero_of_notMem_support`, axiom-clean, via support_eq_zeroLocus + mem_annihilator) · **Depends on**: none · **Type**: theorem
 - **Statement**: N finite R-module, 𝔭 prime, 𝔭 ∉ Module.support N ⟹ ∃ g ∉ 𝔭, g • N = 0
   (g annihilates N). Mathlib: `Module.mem_support_iff_exists_annihilator` + finite ⟹
   ann-determines-support. ~20 lines.
 
 ### [T-GF5] generic flatness (Stacks 051R main dévissage)
-- **Status**: open · **Depends on**: T-GF1, T-GF2, T-GF3, T-GF4 · **Type**: theorem
+- **Status**: done-modulo-domain-box (beastmode-D2 2026-07-07, delegate + verified). `exists_generically_free`
+  landed: the FULL prime-filtration dévissage PROVEN (via mathlib's
+  `IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime` + GFree.of_exact localization plumbing);
+  sorryAx sourced SOLELY from `exists_generically_free_domain` (the domain-case dim induction).
+  **DOMAIN-CASE BOX IN FLIGHT** (delegate ae294be5): survey CORRECTED the delegate's over-flagging —
+  `MvPolynomial.ringKrullDim_of_isNoetherianRing` (dim k[x]=d) EXISTS, hypersurface-drop exists
+  (KrullDimension/Regular.lean), tensor-domain via localization; the ONE real gap = dim-under-integral-ext
+  (or use trdeg as the measure). Bounded. · **Depends on**: T-GF1..GF4 · **Type**: theorem
 - **Statement**: `R Noetherian domain, R→S finite type, M finite S-module ⟹ ∃ 0≠f∈R,
   Module.Free R_f M_f` (equivalently `Module.Flat`). Proof = strong induction on d=dim(S_K)
   via GF1 (reduce M to R⧸𝔮 pieces by noetherian induction) + GF2 (assemble free) + GF3
