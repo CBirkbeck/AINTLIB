@@ -687,6 +687,45 @@ private lemma Proj_awayι_appTop_ΓSpecIso {R₀ A : Type u} [CommRing R₀] [Co
     (congrArg ((Proj 𝒜).presheaf.map) ?_)
   exact Quiver.Hom.unop_inj (Subsingleton.elim _ _)
 
+/-- **(the structure square)** The composite `R → Γ(model, ⊤) → Γ(model, D₊(F)) ≅ (A_F)₀`
+is the canonical grade-zero algebra map. -/
+private lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
+    (F : MvPolynomial (Fin 3) R ⧸ (projIdeal W).toIdeal)
+    (F_deg : F ∈ quotientGrading (projIdeal W) m) (hm : 0 < m) :
+    (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop ≫
+      (projModel W).presheaf.map (homOfLE le_top).op ≫
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W)) F F_deg hm).inv =
+    CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
+      (algebraMapGradeZero (projIdeal W))) := by
+  have hbridge := Proj_awayι_appTop_ΓSpecIso (quotientGrading (projIdeal W)) F F_deg hm
+  have hscheme : Proj.awayι (quotientGrading (projIdeal W)) F F_deg hm ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
+        (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
+        (algebraMapGradeZero (projIdeal W)))) := by
+    rw [show projModelπ W = Proj.toSpecZero (quotientGrading (projIdeal W)) ≫
+      Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) from rfl]
+    rw [← Category.assoc, Proj.awayι_toSpecZero, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  have hΓ := congrArg Scheme.Hom.appTop hscheme
+  rw [Scheme.Hom.comp_appTop] at hΓ
+  calc (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop ≫
+        (projModel W).presheaf.map (homOfLE le_top).op ≫
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W)) F F_deg hm).inv
+      = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ ((projModelπ W).appTop ≫
+          (Proj.awayι (quotientGrading (projIdeal W)) F F_deg hm).appTop) ≫
+          (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away
+            (quotientGrading (projIdeal W)) F))).hom := by
+        rw [← hbridge]
+        simp only [Category.assoc]
+    _ = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+          (Spec.map (CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
+            (algebraMapGradeZero (projIdeal W))))).appTop ≫
+          (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away
+            (quotientGrading (projIdeal W)) F))).hom := by rw [hΓ]
+    _ = _ := by
+        rw [Scheme.ΓSpecIso_naturality, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
 /-- Sections over a chart open are the chart's degree-zero localization: open-immersion
 `Γ`-comparison (`appIso` at `⊤`) composed with `ΓSpecIso`. -/
 private noncomputable def chartSectionsIso (W : WeierstrassCurve R) (j : Fin 3) :
