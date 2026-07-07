@@ -2301,6 +2301,78 @@ lemma chartPointOf_not_mem_chartZ (W : WeierstrassCurve R)
   rw [chartPointOf_mem_basicOpen_iff, RingEquiv.apply_symm_apply] at hunit
   exact hunit ht
 
+/-- The `Z`-chart sections of the model as the affine coordinate ring. -/
+noncomputable def chartZSectionsRingEquiv (W : WeierstrassCurve R) :
+    Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) ≃+*
+      W.toAffine.CoordinateRing :=
+  ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv.symm).trans
+    (chartZRingEquiv W)
+
+/-- The chart-overlap sections of the model as the `t`-localization of the infinity chart. -/
+noncomputable def overlapSectionsEquiv (W : WeierstrassCurve R) :
+    Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) ≃+*
+      Localization.Away (infChartTElem W) :=
+  ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2))
+      (by omega)).commRingCatIsoToRingEquiv.symm).trans (overlapLocEquiv W)
+
+/-- Restriction from the `Y`-chart to the overlap is `algebraMap` under the chart
+identifications. -/
+lemma overlapSectionsEquiv_res_chartY (W : WeierstrassCurve R)
+    (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) :
+    overlapSectionsEquiv W (((projModel W).presheaf.map (homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom u) =
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (chartYSectionsRingEquiv W u) := by
+  show overlapLocEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv).hom
+      (((projModel W).presheaf.map (homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom u)) = _
+  rw [awayIso_res_squareY W u, overlapLocEquiv_awayMap_y]
+  rfl
+
+/-- Restriction from the `Z`-chart to the overlap is `overlapMap` under the chart
+identifications. -/
+lemma overlapSectionsEquiv_res_chartZ (W : WeierstrassCurve R)
+    (w : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
+    overlapSectionsEquiv W (((projModel W).presheaf.map (homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op).hom w) =
+      overlapMap W (chartZSectionsRingEquiv W w) := by
+  show overlapLocEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv).hom
+      (((projModel W).presheaf.map (homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op).hom w)) = _
+  rw [awayIso_res_squareZ W w, overlapLocEquiv_awayMap_z]
+  rfl
+
 /-- The two chart transports of a global section agree in the overlap localization. -/
 private lemma chart_transports_agree (W : WeierstrassCurve R) (s : Γ(projModel W, ⊤)) :
     overlapMap W (chartZRingEquiv W (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
