@@ -1,5 +1,8 @@
 import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.PoleFiltration
+-- NOTE (P4, 2026-07-07): `import ModularCurves.EllipticCurve.PoleFiltration` deliberately
+-- deferred to the T-W7.r-supply ticket (which will consume
+-- `locallyWeierstrass_pushforward_O_eq_O`); nothing here references it yet, and keeping it
+-- out decouples lane P4 builds from lane P3's in-flight file.
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Noetherian
 
@@ -49,6 +52,13 @@ theorem EllipticCurveGeom.universallyOConnected {S : Scheme.{u}} (G : EllipticCu
     UniversallyOConnected G.π := by
   sorry
 
+/-- Morphisms into an affine scheme are determined by their pullback on global sections
+(the `Γ`–`Spec` adjunction, in the form every rigidity argument below consumes). -/
+theorem hom_ext_of_isAffine {W Z : Scheme.{u}} [IsAffine Z] {f g : W ⟶ Z}
+    (h : f.appTop = g.appTop) : f = g := by
+  rw [← cancel_mono Z.isoSpec.hom, Scheme.isoSpec, asIso_hom,
+    Scheme.toSpecΓ_naturality, Scheme.toSpecΓ_naturality, h]
+
 /-- **(T-W7.7a-R1, the affine core)** Every `S`-morphism from `X ×_S Y` to an affine scheme
 factors uniquely through the projection to `Y`, when `p : X ⟶ S` is universally
 `O`-connected: morphisms to an affine are ring maps out of global sections, and
@@ -59,19 +69,105 @@ theorem exists_unique_factor_of_isAffine {X S : Scheme.{u}} {p : X ⟶ S}
     (hp : UniversallyOConnected p) {Y : Scheme.{u}} (g : Y ⟶ S)
     {Z : Scheme.{u}} [IsAffine Z] (f : pullback p g ⟶ Z) :
     ∃! h : Y ⟶ Z, f = pullback.snd p g ≫ h := by
-  sorry
+  have hφ : IsIso ((pullback.snd p g).appTop) := hp g ⊤
+  -- the transported ring map `Γ(Z) ⟶ Γ(Y)` and the corresponding morphism `Y ⟶ Z`
+  set ψ := f.appTop ≫ inv ((pullback.snd p g).appTop) with hψ
+  have hZinv : Z.isoSpec.inv.appTop = (Scheme.ΓSpecIso Γ(Z, ⊤)).inv := by
+    rw [← Iso.hom_comp_eq_id, ← Scheme.toSpecΓ_appTop, ← Scheme.Hom.comp_appTop,
+      show Z.isoSpec.inv ≫ Z.toSpecΓ = 𝟙 _ from Z.isoSpec.inv_hom_id, Scheme.Hom.id_appTop]
+  set h₀ : Y ⟶ Z := (ΓSpec.adjunction.homEquiv Y (Opposite.op Γ(Z, ⊤))) ψ.op ≫
+    Z.isoSpec.inv with hh₀
+  have happ : h₀.appTop = ψ := by
+    rw [hh₀, Scheme.Hom.comp_appTop, hZinv, ΓSpec_adjunction_homEquiv_eq]
+    exact Iso.inv_hom_id_assoc _ _
+  have hfac : ∀ h : Y ⟶ Z, f = pullback.snd p g ≫ h ↔ h.appTop = ψ := by
+    intro h
+    constructor
+    · intro hE
+      have h2 : f.appTop = h.appTop ≫ (pullback.snd p g).appTop := by
+        rw [hE, Scheme.Hom.comp_appTop]
+      rw [hψ, h2]
+      simp
+    · intro hh
+      refine (hom_ext_of_isAffine ?_).symm
+      rw [Scheme.Hom.comp_appTop, hh, hψ, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+  exact ⟨h₀, (hfac h₀).mpr happ, fun h' hh' =>
+    hom_ext_of_isAffine (((hfac h').mp hh').trans happ.symm)⟩
 
-/-- **(T-W7.7a-R1′, GIT case 1)** Rigidity over a one-point base: if the base's carrier is a
-single point (e.g. `Spec` of an Artinian local ring), a morphism `f : X ⟶ Y` over `S` with
-`X` universally `O`-connected over `S` factors through a section of `Y ⟶ S`, via `η := f∘e`
-made scheme-theoretic by the ringed-space argument. The Artinian instances of this lemma
-drive the thickening step of case 2. Source: GIT p. 115, case 1 (verbatim in quotes file). -/
-theorem rigidity_of_subsingleton_base {X Y S : Scheme.{u}}
-    (hS : ∀ a b : S, a = b)
+/-- **(T-W7.7a-R1′, GIT case 1, generalized)** Rigidity for morphisms with set-theoretically
+constant image: a morphism `f : X ⟶ Y` over `S` whose topological image is a single point
+(GIT's "`f(X_s)` is set-theoretically a single point", which over a one-point base says
+exactly this), with `X` universally `O`-connected over `S` and carrying a section, factors
+through the section `η := e ≫ f` of `Y ⟶ S`.
+
+Two deliberate deltas against GIT's phrasing, both strengthenings (recorded on the v3 board):
+the one-point-base hypothesis is dropped — the `Γ`-argument never uses it, and the general
+form is what the Artinian thickening step of case 2 actually consumes — and no separatedness
+of `Y ⟶ S` is needed. (The skeleton's original statement without the constant-image
+hypothesis was FALSE — take `f = 𝟙 (ℙ¹)` over a field — caught at implementation.)
+Source: GIT p. 115, case 1 (verbatim in quotes file). -/
+theorem rigidity_of_subsingleton_range {X Y S : Scheme.{u}}
     {p : X ⟶ S} (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
-    {q : Y ⟶ S} [IsSeparated q] (f : X ⟶ Y) (hf : f ≫ q = p) :
+    {q : Y ⟶ S} (f : X ⟶ Y) (hf : f ≫ q = p)
+    (hone : Set.Subsingleton (Set.range f.base)) :
     ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
-  sorry
+  refine ⟨e ≫ f, by rw [Category.assoc, hf, he], ?_⟩
+  -- if `X` is empty there is nothing to prove
+  by_cases hX : IsEmpty X
+  · haveI := hX
+    exact isInitialOfIsEmpty.hom_ext _ _
+  rw [not_isEmpty_iff] at hX
+  obtain ⟨x₀⟩ := hX
+  -- both `f` and any candidate factorization land in one affine chart of `Y` at `y₀ := f x₀`
+  -- (packaged existentially so that the chart's type does not mention `f`, keeping
+  -- rewrite motives type-correct)
+  obtain ⟨V, u, hVimm, hVaff, hrange⟩ :
+      ∃ (V : Scheme.{u}) (u : V ⟶ Y), IsOpenImmersion u ∧ IsAffine V ∧
+        Set.range f.base ⊆ Set.range u.base := by
+    refine ⟨_, Y.affineCover.f (Y.affineCover.idx (f.base x₀)), inferInstance,
+      inferInstance, fun y hy => ?_⟩
+    rw [hone hy ⟨x₀, rfl⟩]
+    exact Y.affineCover.covers (f.base x₀)
+  haveI := hVimm
+  haveI := hVaff
+  set f' : X ⟶ V := IsOpenImmersion.lift u f hrange with hf'
+  have hfac : f' ≫ u = f := IsOpenImmersion.lift_fac u f hrange
+  -- `X` is the pullback of `p` along `𝟙 S`
+  set i : X ⟶ pullback p (𝟙 S) := pullback.lift (𝟙 X) p (by simp) with hi
+  have hip : i ≫ pullback.snd p (𝟙 S) = p := by
+    rw [hi]; exact pullback.lift_snd _ _ _
+  have hiso : IsIso i := by
+    refine ⟨⟨pullback.fst p (𝟙 S), ?_, ?_⟩⟩
+    · rw [hi]; exact pullback.lift_fst _ _ _
+    · apply pullback.hom_ext <;>
+        simp [hi, pullback.lift_fst, pullback.lift_snd, pullback.condition]
+  -- the affine core applied over `g := 𝟙 S`
+  obtain ⟨h, hh, -⟩ := exists_unique_factor_of_isAffine hp (𝟙 S) (inv i ≫ f')
+  have hf'p : f' = p ≫ h :=
+    (IsIso.hom_inv_id_assoc i f').symm.trans ((congrArg (i ≫ ·) hh).trans
+      ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ h) hip)))
+  -- assemble: `f = p ≫ (h ≫ u)` and `h ≫ u = e ≫ f`
+  have hfeq : f = p ≫ (h ≫ u) := by rw [← hfac, hf'p, Category.assoc]
+  have huf : e ≫ f = h ≫ u :=
+    (congrArg (e ≫ ·) hfeq).trans ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ (h ≫ u)) he).trans (Category.id_comp _)))
+  rw [huf]
+  exact hfeq
+
+/-- **(T-W7.r2 prep)** Universal `O`-connectedness is stable under base change: the second
+projection of the pullback along any `g : T ⟶ S` is universally `O`-connected over `T`
+(pasting of pullbacks). The rigidity lemma instantiates this at the Artinian thickenings
+`Spec (O_{S,t}/𝔪ₜⁿ) ⟶ S` and at `Spec κ(s) ⟶ S` for the seed fibre. -/
+theorem UniversallyOConnected.baseChange {X S : Scheme.{u}} {p : X ⟶ S}
+    (hp : UniversallyOConnected p) {T : Scheme.{u}} (g : T ⟶ S) :
+    UniversallyOConnected (pullback.snd p g) := by
+  intro T' g' U
+  rw [← pullbackLeftPullbackSndIso_hom_snd p g g', Scheme.Hom.comp_app]
+  haveI h1 : IsIso ((pullbackLeftPullbackSndIso p g g').hom) :=
+    (pullbackLeftPullbackSndIso p g g').isIso_hom
+  haveI h2 : IsIso ((pullbackLeftPullbackSndIso p g g').hom.app
+      (pullback.snd p (g' ≫ g) ⁻¹ᵁ U)) := inferInstance
+  exact IsIso.comp_isIso' (hp (g' ≫ g) U) h2
 
 /-- **(T-W7.7a, GIT Prop 6.1, case 2)** The rigidity lemma: `S` connected and locally
 noetherian, `p : X ⟶ S` proper flat and universally `O`-connected with a section, `Y ⟶ S`
@@ -89,6 +185,25 @@ theorem rigidity {X Y S : Scheme.{u}} [IsLocallyNoetherian S]
     {q : Y ⟶ S} [IsSeparated q] (f : X ⟶ Y) (hf : f ≫ q = p)
     (s : S) (hs : Set.Subsingleton (f.base '' (p.base ⁻¹' {s}))) :
     ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
+  -- Assembly map (P4 session 2026-07-07; every mathlib name verified in this checkout):
+  -- * equalizer backbone: `Z := equalizer (Over.homMk f) (Over.homMk (p ≫ e ≫ f))` in
+  --   `Over S`; its `ι.left` is a closed immersion by `isClosedImmersion_equalizer_ι_left`
+  --   (uses `[IsSeparated q]`).
+  -- * seed at `s`: case 1 over `Spec κ(s)` — `rigidity_of_subsingleton_range` +
+  --   `UniversallyOConnected.baseChange`; the range-subsingleton hypothesis descends from
+  --   `hs` because the base-changed model injects on points (mono pullback).
+  -- * thickening at `t ∈ U₁`: case 1 over `Spec (Γ stalk quotient 𝔪ₜⁿ)`, same two lemmas,
+  --   giving scheme-theoretic factorization of every infinitesimal fibre through `Z`.
+  -- * Krull: on stalks at `x ∈ p⁻¹(t)`, the equalizer ideal lies in `⋂ₙ 𝔪ₜⁿ·O_{X,x} = ⊥`
+  --   by `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` (stalks noetherian: the
+  --   `IsLocallyNoetherian` stalk instance; `X` loc. noeth. since `p` is of finite type
+  --   over loc. noeth. `S`); coherence + properness (`p` closed) upgrade stalk vanishing
+  --   near the fibre to `p ⁻¹ᵁ U₀ ⟶ X` factoring through `Z`, `U₀ ∋ t` open.
+  -- * clopen: `U₁ := S ∖ p.base '' (X ∖ range ι.left)` is closed since `p` is an open map
+  --   (`UniversallyOpen.of_flat`: `[Flat p]` + `LocallyOfFinitePresentation` from
+  --   properness over a locally noetherian base) and open by the Krull neighbourhoods;
+  --   `hconn` + `s ∈ U₁` give `U₁ = S`; the neighbourhood factorizations glue (`ι` mono),
+  --   so `ι.left` is a split-epi closed immersion, hence an iso, hence `f = p ≫ (e ≫ f)`.
   sorry
 
 /-- **(T-W7.7a-C3, GIT Cor 6.4)** A pointed morphism of group objects in `Over S`, whose

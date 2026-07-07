@@ -4945,13 +4945,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-WAB]** final `/cleanup` WeierstrassAtlasBundle.lean. **Depends**: T-W7.1a.
 
 - **[T-W7.r1]** rigidity cores — `exists_unique_factor_of_isAffine`,
-  `rigidity_of_subsingleton_base` (Rigidity.lean:58,69).
-  - **Status**: open (lane P4 — startable NOW: `UniversallyOConnected` is a hypothesis) ·
-    **File**: EllipticCurve/Rigidity.lean · **Depends**: none · **Parallel**: yes ·
-    **Type**: 2 theorems
-  - Sketch (GIT case 1, verbatim in `tw7-source-quotes.md`): Γ-Spec adjunction for affine
-    targets + `Γ(X×Y) = Γ(Y)` from hO; one-point case by the ringed-space argument
-    (`o_Y → f_*o_X ≅ η_*o_S`). Leaves **L-R1/L-R1′** (∃!/∃∧ exceptions documented).
+  `rigidity_of_subsingleton_range` (né `_base`), plus `hom_ext_of_isAffine` and
+  `UniversallyOConnected.baseChange` (EllipticCurve/Rigidity.lean).
+  - **Status**: ✅ DONE (lane P4, 2026-07-07) — sorry-free, axiom-clean. **Statement
+    corrections at implementation** (producer-scope, recorded): the skeleton's
+    `rigidity_of_subsingleton_base` was FALSE as stated — it lacked GIT's collapse
+    hypothesis ("`f(X_s)` set-theoretically a single point"); counterexample `f = 𝟙 ℙ¹`
+    over a field. Replaced by the STRONGER `rigidity_of_subsingleton_range`: any base
+    (one-point never used by the Γ-argument), hypothesis
+    `Set.Subsingleton (Set.range f.base)`, and `[IsSeparated q]` dropped (unused). This is
+    the exact form the case-2 seed/thickening steps consume.
+  - Route: Γ-Spec (`ΓSpec_adjunction_homEquiv_eq`, `Scheme.toSpecΓ_naturality`) for the
+    affine core `Γ(X ×_S Y) = Γ(Y)`; constant-image case factors through an affine chart
+    (`Scheme.Cover.idx/covers` + `IsOpenImmersion.lift`) then applies the affine core at
+    `g = 𝟙 S`; empty-`X` case via `isInitialOfIsEmpty`.
 
 - **[T-W7.r-supply]** the hypothesis supply — `EllipticCurveGeom.universallyOConnected`
   (Rigidity.lean:48).
@@ -4959,12 +4966,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   - Sketch: `LocallyWeierstrass.baseChange` ⓟ + `locallyWeierstrass_pushforward_O_eq_O`
     instantiated. Leaf **L-hyp**.
 
-- **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean:85).
-  - **Status**: blocked · **Depends**: T-W7.r1 · **Type**: theorem
-  - Sketch (GIT pp. 115–116, transcribed): `Z = (f, η∘p)⁻¹(Δ)`; case 1 over every Artinian
-    subscheme at `t` ⟹ `Z ⊇ p⁻¹(T)`; Krull intersection [mathlib name: verify] +
-    coherence + `p` closed ⟹ neighbourhood; `U₁ = S ∖ p(X−Z)` clopen (flat ⟹ open
-    [verify]) ⟹ connectedness. Leaf **L-R2**.
+- **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean).
+  - **Status**: open (T-W7.r1 DONE 2026-07-07 — startable NOW) · **Type**: theorem
+  - Sketch (GIT pp. 115–116, transcribed; mathlib names VERIFIED in this checkout,
+    assembly map inline at the `rigidity` sorry): equalizer backbone
+    `isClosedImmersion_equalizer_ι_left` (in `Over S`, uses `[IsSeparated q]`); case 1
+    over `Spec κ(s)` (seed) and the Artinian thickenings via
+    `rigidity_of_subsingleton_range` + `UniversallyOConnected.baseChange` (both DONE);
+    Krull intersection = `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` (stalks noetherian by
+    the `IsLocallyNoetherian` stalk instance) + coherence + `p` closed ⟹ neighbourhood;
+    `U₁ = S ∖ p(X−Z)` clopen — closed via flat ⟹ open = `UniversallyOpen.of_flat`
+    (`[Flat p]` + `LocallyOfFinitePresentation` from properness over loc-noeth), open via
+    the Krull neighbourhoods; connectedness + glue-the-factorizations (`ι` mono) ⟹
+    split-epi closed immersion ⟹ iso. Leaf **L-R2**.
 
 - **[CLEANUP-RIG-1]** `/cleanup` Rigidity.lean. **Depends**: T-W7.r2 (3rd proof ticket).
 
