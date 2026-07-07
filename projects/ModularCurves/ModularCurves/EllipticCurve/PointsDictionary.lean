@@ -146,14 +146,15 @@ and any field `K`, the `K`-points of the projective model `projModel W` biject w
 affine points `(W.baseChange K).toAffine.Point`. Canonical (choice-extracted) form of the proven
 existential dictionary `projModel_points` (T-A2e).
 
-**Value-characterisation is a remaining leaf (T-W7.0f-val):** this bare equiv pins only the zero
-value (`projModelPointsEquiv_zero`); consumers that need `projModelPointsEquiv` on affine chart
-points (`negModelHom_specPoints`, `T-W7.0c-iii`, `T-W7.0g`) require a `projModelPointsEquiv_some`
-lemma, which is currently blocked on the `private` chart components of `projModel_points`. -/
+**Value-characterisation (T-W7.0f-val) is now available:** `projModelPointsEquiv` is the *explicit*
+bijection `projModelPointsEquivEll` (not the choice-extracted one), so its values are pinned —
+`projModelPointsEquiv_zero` (`[0:1:0] ↦ 0`) and `projModelPointsEquiv_some` (a `Z`-chart point with
+coordinates `(x,y) ↦ some x y`), which the consumers `negModelHom_specPoints`, `T-W7.0c-iii` and
+`T-W7.0g` read the coordinates through. -/
 noncomputable def projModelPointsEquiv (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K] :
     SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point :=
-  (projModel_points W ‹W.IsElliptic› K).choose
+  projModelPointsEquivEll W ‹W.IsElliptic› K
 
 /-- **(T-W7.0f-ii — the dictionary is pointed)** The point at infinity `[0:1:0]` — the zero
 section evaluated over `K` — corresponds under `projModelPointsEquiv` to the group identity `0`. -/
@@ -161,7 +162,21 @@ theorem projModelPointsEquiv_zero (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K] :
     projModelPointsEquiv W K ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
       rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ = 0 :=
-  (projModel_points W ‹W.IsElliptic› K).choose_spec
+  projModelPointsEquivEll_zero W ‹W.IsElliptic› K
+
+/-- **(T-W7.0f-val — the dictionary on affine chart points)** A `K`-point of the model factoring
+through the `Z`-chart with dehomogenised coordinates `(x, y)` corresponds under
+`projModelPointsEquiv` to the affine point `some x y`. The value-characterisation the negation and
+multiplication specs (`negModelHom_specPoints`, `mulModelHom_specPoints`) and the group axioms read
+through. Coordinates and their nonsingularity are hypotheses, so callers supply their own witness. -/
+theorem projModelPointsEquiv_some (W : WeierstrassCurve R) [W.IsElliptic]
+    (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g)
+    (x y : K) (hxy : (W.baseChange K).toAffine.Nonsingular x y)
+    (hx : x = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨0, by decide⟩)
+    (hy : y = (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨1, by decide⟩) :
+    projModelPointsEquiv W K g = WeierstrassCurve.Affine.Point.some x y hxy :=
+  projModelPointsEquivEll_some W ‹W.IsElliptic› K g hZ x y hxy hx hy
 
 /-- **(T-W7.0g-ext)** The field-points extensionality principle: two morphisms from a *reduced*
 scheme to a *separated* scheme agreeing on composition with every field-valued point are equal.
