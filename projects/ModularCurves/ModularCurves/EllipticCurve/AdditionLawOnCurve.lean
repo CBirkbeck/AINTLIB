@@ -156,7 +156,6 @@ theorem equation_dblAddXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 �
   haveI : (W'.map f).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map f⟩
   have key : (W'.map f).Equation ((W'.map f).dblAddXYZ (f ∘ P) (f ∘ Q)) :=
     equation_dblAddXYZ_of_equation (hP.map f) (hQ.map f)
-  rw [map_dblAddXYZ] at key
   sorry
 
 end Main

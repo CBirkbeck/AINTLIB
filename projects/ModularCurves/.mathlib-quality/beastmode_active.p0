@@ -1,1 +1,1 @@
-FOCUS: T-W7.0b specPoints — V1 (negChartMap_coord1) PROVED; only Z-chart assembly of negModelHom_specPoints remains
+FOCUS: T-W7.0b negModelHom_specPoints DONE (5/5, axiom-clean) — verifying + committing
