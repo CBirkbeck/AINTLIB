@@ -144,4 +144,18 @@ theorem universalCurve_localModel :
       ← (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback_hom_fst_assoc,
       IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
 
+/-- **The universal elliptic curve** `E_U → U` over the Weierstrass atlas, as an
+`EllipticCurveGeom`: the projective Weierstrass model of the tautological elliptic curve, proper,
+smooth of relative dimension one, with its zero section, and locally Weierstrass (globally, on the
+single chart `⊤`). This is the atlas object the quotient-stack description of `M_ell` is built on
+(tickets `T-W5`/`T-W6`). -/
+noncomputable def universalEllipticCurve : EllipticCurveGeom weierstrassAtlas where
+  E := universalCurve
+  π := universalCurveπ
+  zero := universalCurveZero
+  zero_π := universalCurveZero_π
+  smooth := universalCurve_smooth
+  proper := inferInstance
+  localModel := universalCurve_localModel
+
 end ModularCurves
