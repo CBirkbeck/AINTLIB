@@ -4991,8 +4991,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.mvc]** variable-change model isos — `projModelVCIso` + `_π`, `_zero`, `_mul`,
   `_map` (ModelVariableChange.lean:34–58).
-  - **Status**: in_progress (lane P5) · **Claimed**: lane-P5 (beastmode),
-    2026-07-07T14:04Z (claimed BEFORE skeleton edit — rule 5) ·
+  - **Status**: in_progress (lane P5) — **`projModelVCIso` + `_π` + `_map` PROVED**
+    (axiom-clean); `_zero`/`_mul` remain (gated like `negModelHom_zero` on the
+    `Proj.fromOfGlobalSections` naturality leaves). **Progress 2026-07-07**: crux+graded-hom
+    layer (66300bb4) → `projModelVCIso` iso via `Proj.map`(C)/`Proj.map`(C⁻¹) + `Proj_map_congr`
+    (064b040c) → `_π` via `map_comp_toSpecZero`+`vcGradedHom_algebraMapGradeZero` (0efff5f2) →
+    `_map` (coordinator §2-P5) via a novel eqToHom-transport route: `projMap_transport_heq`
+    (HEq bridge, `subst`) + `gradedHom_heq` + `mk_heq` + `map_aeval_vcMvSubst`
+    (`map f ∘ aeval σ_C = aeval σ_{C.map f} ∘ map f`) + `vcMvSubst_map`. Inverse graded hom
+    reuses ALL C-infra via `C⁻¹` (clean types by `inv_smul_smul` at the ideal level). ·
+    **Claimed**: lane-P5 (beastmode), 2026-07-07T14:04Z (claimed BEFORE skeleton edit — rule 5) ·
     **File**: EllipticCurve/ModelVariableChange.lean ·
     **Depends**: none · **Parallel**: yes · **Type**: def + 4 lemmas
   - Sketch: graded hom of the linear substitution (`baseChangeGradedHom` template) — the
