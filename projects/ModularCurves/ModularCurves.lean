@@ -15,4 +15,5 @@ import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Stack
+import ModularCurves.Moduli.PointsDictionary
 import ModularCurves.ModularCurve.YRho
