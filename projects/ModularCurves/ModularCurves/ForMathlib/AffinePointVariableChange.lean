@@ -328,6 +328,11 @@ noncomputable def pointEquiv : W.toAffine.Point ≃+ (C • W).toAffine.Point :=
 
 @[simp] lemma pointEquiv_apply (P : W.toAffine.Point) : C.pointEquiv P = C.pointMap W P := rfl
 
+/-- The group iso is compatible with multiplication-by-`n`, so it carries `n`-torsion to
+`n`-torsion — the invariance a level structure needs under a coordinate change (ticket `T-W8`). -/
+lemma pointEquiv_zsmul (n : ℤ) (P : W.toAffine.Point) :
+    C.pointEquiv (n • P) = n • C.pointEquiv P := map_zsmul _ _ _
+
 end Field
 
 end WeierstrassCurve.VariableChange
