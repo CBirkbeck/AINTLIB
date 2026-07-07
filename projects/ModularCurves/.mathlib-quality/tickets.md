@@ -5126,3 +5126,27 @@ zsmul_eq_mul; Submodule.coe_eq_zero/coe_smul; ZMod.intCast_zmod_eq_zero_iff_dvd)
 SCOPE: this is the generic-automorphism case (Aut(E)={±1}, all j∉{0,1728}) — reviewer v9's requested
 "positive rigidity for N≥3". FULL `Rigid` (every automorphism incl. the extra ones at j∈{0,1728})
 needs the automorphism group scheme and stays the ⧗KM/T-W7-gated `gammaFullDrinfeld_representable`.
+
+### C-lane: T-C0e weilPairingCharZero — descent + local model LANDED (beastmode-H, 2026-07-07, user-directed)
+Reviewer v9 work-order #5 (T-relative char-0 Weil pairing) — new file `WeilPairing/CharZeroDescent.lean`,
+ALL decls axiom-CLEAN ([propext,Classical.choice,Quot.sound], ZERO sorryAx), zero warnings.
+DELIVERED in two gate-free layers:
+- **Descent (the "then descend" half):** `weilPairingCharZero E N p ζ' hcocyc :
+  pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N` — descends a local pairing ζ' (on the base
+  change of E[N]×_S E[N] along a trivialising fppf cover p:S'→S, valued in the FIXED target μ_{N,S})
+  to the DS4 target shape (Basic.lean:42's weilPairing), via `descend_hom_of_effectiveEpi` (stream-DESC
+  reuse; fppf⟹EffectiveEpi mathlib instance, base-change-stable Flat/lfp/Surjective on the pulled-back
+  cover). Specs `_restrict`/`_over`. Approach-2 geometry (descend along a cover of the SOURCE, fixed
+  target μ_{N,S}) — sidesteps the point-level 3-spelling trap (E[N] base change is clean at scheme
+  level via `torsion_baseChange_isPullback`).
+- **Local model (the "build étale-locally" half, gate-free):** `detFun`/`gl2Both`/`constSchemeMap`
+  (+`_comp`/`_π`) and the symplectic pin `detConstMor_gl2Both`: e(g·v,g·w)=e(v,w)·det g on the
+  constant (ℤ/N)²-scheme (= v9 review Q6 normalization pin; the change-of-triv cocycle, invariant on
+  SL₂). Pure constScheme+ZMod (Matrix.det_fin_two); NO E[N], NO torsion boxes.
+HONEST GATING: the descent theorem is axiom-clean because the gated content is its LABELED INPUTS —
+the cover exists since E[N] finite étale for N inv (torsionπ_etale ⟸ T-B5 box mulByHom_formallyUnramified),
+and (ζ',hcocyc) come from trivialising E[N]/μ_N on the cover + the local det model. WIRING the local
+model into ζ' over a concrete étale-local full-level trivialisation (Layer 3) is the point-level
+E[N]≅(ℤ/N)² step that funnels into T-W7 (A-lane) — that's what would discharge the DS4 weilPairing sorry
+over ℚ-schemes. Field case unchanged (exists_pairingAlgebraHom_of_galoisEquivariant, EtaleDescent.lean).
+Commits: d9961638 (descent), + this (local model).

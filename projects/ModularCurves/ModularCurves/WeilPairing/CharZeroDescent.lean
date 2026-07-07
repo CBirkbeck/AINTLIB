@@ -43,6 +43,78 @@ universe u
 
 namespace ModularCurves
 
+/-! ### The local symplectic determinant model
+
+Gate-free infrastructure for the local pairing that `weilPairingCharZero` descends: the
+determinant pairing on the constant `(ℤ/N)²`-scheme, and its GL₂ change-of-basis law
+`e(g·v, g·w) = e(v, w) · det g` — the symplectic normalisation pin (v9 review Q6) and the
+cocycle that makes the Weil pairing descend (it is invariant precisely on `SL₂`). Nothing here
+touches `E[N]` or the torsion boxes; on a cover trivialising `E[N]` to `(ℤ/N)²` and `μ_N` to
+`(ℤ/N)`, this is the local pairing fed to `weilPairingCharZero`. -/
+
+/-- The determinant pairing on `(ℤ/N)² = (Fin 2 → ZMod N)`:
+`detFun (v, w) = v 0 * w 1 - v 1 * w 0`. The combinatorial local model of the Weil pairing. -/
+def detFun (N : ℕ) : (Fin 2 → ZMod N) × (Fin 2 → ZMod N) → ZMod N :=
+  fun p => p.1 0 * p.2 1 - p.1 1 * p.2 0
+
+/-- The diagonal GL₂-action on a pair of `(ℤ/N)²`-vectors (change of basis on both entries). -/
+def gl2Both (N : ℕ) (g : Matrix (Fin 2) (Fin 2) (ZMod N)) :
+    (Fin 2 → ZMod N) × (Fin 2 → ZMod N) → (Fin 2 → ZMod N) × (Fin 2 → ZMod N) :=
+  fun p => (g.mulVec p.1, g.mulVec p.2)
+
+/-- **Symplectic law (combinatorial core).** `det(g·v, g·w) = det g · det(v, w)` — the
+determinant pairing multiplies by `det g` under a diagonal change of basis. Pure `ZMod`
+linear algebra (`Matrix.det_fin_two`). -/
+theorem detFun_gl2Both (N : ℕ) (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (p : (Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :
+    detFun N (gl2Both N g p) = g.det * detFun N p := by
+  obtain ⟨v, w⟩ := p
+  simp only [detFun, gl2Both, Matrix.mulVec, dotProduct, Fin.sum_univ_two,
+    Matrix.det_fin_two]
+  ring
+
+section ConstSchemeMap
+
+variable {S : Scheme.{u}}
+
+/-- Functoriality of the constant scheme: a map `f : A → B` of finite index types induces an
+`S`-morphism `∐_A S ⟶ ∐_B S` over `S`. -/
+noncomputable def constSchemeMap {A B : Type} [Finite A] [Finite B] (f : A → B) :
+    constScheme S A ⟶ constScheme S B :=
+  Sigma.desc fun a => Sigma.ι (fun _ : B => S) (f a)
+
+@[simp] theorem constSchemeMap_π {A B : Type} [Finite A] [Finite B] (f : A → B) :
+    constSchemeMap (S := S) f ≫ constSchemeπ S B = constSchemeπ S A := by
+  refine Sigma.hom_ext _ _ fun a => ?_
+  simp only [constSchemeMap, constSchemeπ, Sigma.ι_desc_assoc, Sigma.ι_desc]
+
+theorem constSchemeMap_comp {A B C : Type} [Finite A] [Finite B] [Finite C]
+    (f : A → B) (g : B → C) :
+    constSchemeMap (S := S) f ≫ constSchemeMap g = constSchemeMap (g ∘ f) := by
+  refine Sigma.hom_ext _ _ fun a => ?_
+  simp only [constSchemeMap, Sigma.ι_desc_assoc, Sigma.ι_desc, Function.comp_apply]
+
+/-- The local determinant-pairing model as a morphism of constant schemes over `S`, induced by
+`detFun`: `(ℤ/N)² × (ℤ/N)²` (constant scheme on the product index) → `(ℤ/N)` (which is `μ_N`
+after a splitting). -/
+noncomputable def detConstMor (N : ℕ) [NeZero N] :
+    constScheme S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) ⟶ constScheme S (ZMod N) :=
+  constSchemeMap (detFun N)
+
+/-- **Symplectic law of the local model (v9 review Q6 pin), scheme level.** Precomposing the
+determinant pairing with the diagonal GL₂-action equals postcomposing with multiplication by
+`det g`: `e(g·v, g·w) = e(v, w) · det g`. This is the change-of-trivialisation cocycle that
+descends the Weil pairing (invariant on `SL₂`). -/
+theorem detConstMor_gl2Both (N : ℕ) [NeZero N] (g : Matrix (Fin 2) (Fin 2) (ZMod N)) :
+    constSchemeMap (gl2Both N g) ≫ detConstMor (S := S) N =
+      detConstMor (S := S) N ≫ constSchemeMap (· * g.det) := by
+  have hfun : detFun N ∘ gl2Both N g = (· * g.det) ∘ detFun N := by
+    funext p
+    rw [Function.comp_apply, Function.comp_apply, detFun_gl2Both, mul_comm]
+  rw [detConstMor, constSchemeMap_comp, constSchemeMap_comp, hfun]
+
+end ConstSchemeMap
+
 namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
