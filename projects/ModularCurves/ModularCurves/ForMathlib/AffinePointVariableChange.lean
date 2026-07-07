@@ -159,6 +159,24 @@ def pointMap : W.toAffine.Point → (C • W).toAffine.Point
 @[simp] lemma pointMap_some {x y : R} (h : W.toAffine.Nonsingular x y) :
     C.pointMap W (.some x y h) = .some (C.vcX x) (C.vcY x y) (nonsingular_smul C W h) := rfl
 
+private lemma eqRec_point_zero {W₁ W₂ : WeierstrassCurve R} (h : W₁ = W₂) :
+    h ▸ (Affine.Point.zero : W₁.toAffine.Point) = Affine.Point.zero := by subst h; rfl
+
+private lemma eqRec_point_some {W₁ W₂ : WeierstrassCurve R} (h : W₁ = W₂) {x y : R}
+    (hns : W₁.toAffine.Nonsingular x y) :
+    h ▸ (Affine.Point.some x y hns : W₁.toAffine.Point) = Affine.Point.some x y (h ▸ hns) := by
+  subst h; rfl
+
+/-- Point-level descent cocycle: transporting `(C * C').pointMap` along `mul_smul` equals
+`C.pointMap ∘ C'.pointMap`. The content is the coordinate cocycle `vcX_comp`/`vcY_comp`. -/
+lemma pointMap_mul (C C' : VariableChange R) (P : W.toAffine.Point) :
+    mul_smul C C' W ▸ (C * C').pointMap W P = C.pointMap (C' • W) (C'.pointMap W P) := by
+  cases P with
+  | zero => rw [pointMap_zero, eqRec_point_zero]; rfl
+  | some x y h =>
+    rw [pointMap_some, pointMap_some, pointMap_some, eqRec_point_some]
+    simp only [vcX_comp, vcY_comp]
+
 /-- The coordinate change commutes with the `y`-negation `negY`: transforming then negating equals
 negating then transforming. This is the coordinate identity behind `pointMap_neg`. -/
 lemma negY_smul (x y : R) :
