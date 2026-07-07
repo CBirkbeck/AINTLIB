@@ -720,8 +720,10 @@ private lemma etale_muNπ_of_isUnit (S : Scheme.{u}) (N : ℕ) [NeZero N]
   exact MorphismProperty.of_isPullback LEFT
     (HasRingHomProperty.Spec_iff.mpr (muNModelStruct_etale N))
 
-/-- Base change of `μ_{N}` along `g : T ⟶ S`. -/
-private lemma isPullback_muN_baseChange (S T : Scheme.{u}) (N : ℕ) (g : T ⟶ S) :
+/-- Base change of `μ_{N}` along `g : T ⟶ S`: `μ_{N,T} ⟶ μ_{N,S}` exhibiting `μ_{N,T}` as the
+base change `μ_{N,S} ×_S T`. Made public for consumers (e.g. the char-0 Weil-pairing
+base-change naturality, `WeilPairing/CharZeroDescent.lean`). -/
+lemma isPullback_muN_baseChange (S T : Scheme.{u}) (N : ℕ) (g : T ⟶ S) :
     ∃ θ : muN T N ⟶ muN S N, IsPullback θ (muNπ T N) (muNπ S N) g := by
   have t := (isPullback_muN S N).flip
   have big := (isPullback_muN T N).flip

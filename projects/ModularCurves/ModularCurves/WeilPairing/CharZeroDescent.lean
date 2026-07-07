@@ -154,6 +154,28 @@ theorem detConstMor_sl2 (N : ℕ) [NeZero N] (g : Matrix (Fin 2) (Fin 2) (ZMod N
 
 end ConstSchemeMap
 
+section MuNBaseChange
+
+variable {S S' : Scheme.{u}}
+
+/-- Base change of `μ_N` along `g : S' ⟶ S`: the projection `μ_{N,S'} ⟶ μ_{N,S}` exhibiting
+`μ_{N,S'}` as `μ_{N,S} ×_S S'`. A named wrapper around the (now public) `isPullback_muN_baseChange`
+for use in base-change naturality. -/
+noncomputable def muNBaseChange (g : S' ⟶ S) (N : ℕ) : muN S' N ⟶ muN S N :=
+  (isPullback_muN_baseChange S S' N g).choose
+
+/-- `μ_{N,S'} ⟶ μ_{N,S}` exhibits `μ_{N,S'}` as the base change `μ_{N,S} ×_S S'`. -/
+theorem muNBaseChange_isPullback (g : S' ⟶ S) (N : ℕ) :
+    IsPullback (muNBaseChange g N) (muNπ S' N) (muNπ S N) g :=
+  (isPullback_muN_baseChange S S' N g).choose_spec
+
+@[reassoc]
+theorem muNBaseChange_muNπ (g : S' ⟶ S) (N : ℕ) :
+    muNBaseChange g N ≫ muNπ S N = muNπ S' N ≫ g :=
+  (muNBaseChange_isPullback g N).w
+
+end MuNBaseChange
+
 namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
