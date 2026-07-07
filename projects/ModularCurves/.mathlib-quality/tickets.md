@@ -4840,3 +4840,23 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
   μ_{N,T} target is free). Concrete point identification funnels into **T-W7**. T-C0e now = that
   T-relative construction (spec to be cut carefully against KM 2.8/Silverman when T-W7 lands —
   NOT reconstructed from memory, per the v9 statement-drift caution).
+
+### H-lane PHASE-8 terminal (beastmode-H, 2026-07-07, Opus 4.8) — v9 incorporated, lane drained
+Session accomplishments (all committed): **T-SG1 DONE** (fixed the prior firing's 2 IsIso-synthesis
+errors + committed, green, axiom-audited); **T-SG2 DONE** (Γ₀ cyclicity def-of-record,
+CyclicSubgroup.lean, sorry-free); **v9 expert-review integrated & committed**; **T-C0e re-cut per
+v9.4** (removed the too-weak field placeholder → EtaleDescent.lean sorry-free; documented the honest
+T-relative weilPairingCharZero target).
+**Terminal reason — PHASE-8 (all dispatchable H-lane tickets done; blocked/owned ones remain):**
+- Critical-path remainder is CLAIMED + actively in-progress by other lanes: **T-W7** group-scheme law
+  (beastmode-A, ~37 decls done, scheme-level phase ongoing), **T-B5z** invertible-N étale
+  (beastmode-B, in_progress), W3c (Q), D11 (D2). Taking any collides with an active worker.
+- ALL remaining H/C items funnel into **T-W7** (the E↔Weierstrass point identification / scheme-level
+  group law that the level-functor `map`-memberships and the concrete Weil-pairing values both need) —
+  gated on beastmode-A's in-progress work.
+- The only gate-free-and-mine work left (T-GG-gen1/gen2 fibre-functor generality) is EXPLICITLY
+  deprioritized by the v9 review ("move effort away from generality polishing"; LATE/post-critical-path).
+- N≤2 non-rigidity (T-H7) done and PARKED per v9 ("do not re-staff").
+**Resume trigger for H-lane**: when T-W7 lands (scheme-level group law), re-audit the `map`-membership
+gate (T-A6/A6.δ) and the concrete Weil-pairing values (T-C0d-ii / T-C0e T-relative construction) — both
+unblock together, per v8/v9.
