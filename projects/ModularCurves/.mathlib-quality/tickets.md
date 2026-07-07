@@ -5668,9 +5668,17 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
 - **Status**: open · **Depends on**: T-GF5 · **Type**: theorem
 - **Source CONFIRMED (fetched)**: Stacks Thm 10.129.4 (tag 00RC), §10.129 "Openness of the
   flat locus". Statement: R Noetherian, S fp over R, M fp S-module ⟹ `{𝔮 ∈ Spec S : M_𝔮 flat
-  over R}` is open in Spec S. Proof = Noetherian induction using **generic flatness (GF5 /
-  051R)**: generic flatness gives flatness on a dense open of each irreducible component;
-  Noetherian-induct on the closed complement. ~150-250 lines. LARGE — delegate.
+  over R}` is open. **ROUTE DECISION (source-study finding)**: Stacks 00RC's OWN proof does
+  NOT use generic flatness — it uses finite-free-resolutions + the LOCAL FLATNESS CRITERION
+  (00MH "freeness from fibre freeness" / 00MI / 00RB), which is ALSO mathlib-absent. We
+  instead take the CLASSICAL route via **GF5 (generic flatness 051R, being built)** +
+  Noetherian induction: for R a domain GF5 gives flatness on a dense open; over general
+  Noetherian R, Noetherian-induct on Spec R (the non-flat locus is closed) applying GF5 to
+  each irreducible component mod its generic point. This reuses GF5; do NOT chase the
+  resolution/local-criterion route (a separate mathlib-absent foundation). ~150-250 lines.
+  LARGE — delegate. NOTE: the classical route needs "flat over a dense open ⟹ ..." glue;
+  if that glue is heavy, the resolution route's `Module.Flat` fibre-criterion (00MH/00MI)
+  is the fallback and would be its own sub-development.
 
 ### [T-GF7] flatness descends in a directed colimit (Stacks 07RF = Lemma 10.168.1(3))
 - **Status**: open · **Depends on**: T-GF6 · **File**: ForMathlib/NoethApprox.lean · **Type**: theorem
