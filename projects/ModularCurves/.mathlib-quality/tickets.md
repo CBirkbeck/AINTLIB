@@ -2313,6 +2313,34 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     for T-D11 ⇐: WAVE-4 `isOfficial` scheme assembly (dispatched, Opus) — chart
     translation of D.finite/flat/lfp→ring hyps + officialAux + basicOpen transport,
     mirroring T-D22's `exists_affineOpen_ker_principal_nonZeroDivisor`.
+  - **WAVE-4 DONE (body) + NEW GAP ISOLATED** (beastmode-D2, 2026-07-07T15:55Z, Opus
+    delegate + independently verified): `RelEffCartierDiv.isOfficial` BODY PROVED
+    sorry-free (+144 lines). Full scheme translation landed: off-support unit-ideal
+    branch (mirrors T-D22 neg branch), appLE-algebra bridge, `HasRingHomProperty.appLE
+    @Flat`/`@LocallyOfFinitePresentation` transport of D.flat/D.lfp to `Module.Flat/
+    FinitePresentation R (A⧸I)`, `I.FG` via `FinitePresentation.ker_fG_of_surjective`,
+    point→prime `IsAffineOpen.primeIdealOf` + `mem_support_iff_of_mem`, officialAux ring
+    core, and `IsLocalization.algEquiv` basicOpen transport (`map_ideal_basicOpen` +
+    `MulEquivClass.map_nonZeroDivisors`). VERIFIED: build green, #print axioms isOfficial
+    = [propext, sorryAx, Classical.choice, Quot.sound]. sorryAx = EXACTLY two isolated
+    sources: (1) T-FLAT1-SLICE box, (2) NEW **[T-D11-FINCHART]** box below.
+  - **[T-D11-FINCHART] BOX REGISTERED** (the finiteness gap wave-4 surfaced):
+    `officialAux_exists_finite_chart` (CartierDivisor.lean ~2304, sorried). FINDING
+    (real, subtle — my wave-4 plan MISSED it): `Module.Finite R (A⧸I)` — needed by
+    officialAux — is NOT source-local. `IsFinite = affineAnd RingHom.Finite` is
+    Zariski-local-at-TARGET only, so `A⧸I = Γ(D∩V₀)` is finite over R IFF `D∩V₀` is
+    CLOPEN in D, i.e. the std-smooth chart must capture the ENTIRE (finite, by D.finite)
+    D-fibre over π(c). An arbitrary chart FAILS: counterexample `V(tx−1) ⊆ 𝔸¹` escapes
+    to infinity ⟹ `A⧸I ≅ R[t,t⁻¹]` non-finite. DISCHARGE = "finitely many points of a
+    smooth separated curve lie in one affine open" (+ std-smoothness of the enlarged
+    chart + base-shrink closedness) — mathlib-ABSENT (no clopen/idempotent tooling for
+    finite morphisms). MIRRORS the file's EXISTING sections-only machinery
+    (`sectionsIdealAux_exists_chart` + `exists_groupChart` + disjoint-pieces gluing,
+    ~200 lines) generalized from a section's image to a general finite subscheme —
+    DISCHARGEABLE (~200 lines) by reusing/generalizing that. Everything else in
+    isOfficial (flat/fp/FG/point-prime) is source-local + fully discharged. NET T-D11 ⇐:
+    body proven modulo 2 boxes ([T-FLAT1-SLICE]→T-NOETH being built; [T-D11-FINCHART]→
+    this generalization). T-D11 ⇒ (`isFinite`) parked (ZMT).
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
