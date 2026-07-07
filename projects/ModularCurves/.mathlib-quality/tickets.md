@@ -2274,6 +2274,24 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     only the two remaining legs: (6) Nakayama lift+spread fibre-principal ⟹
     away-principal on Localization.Away r (r ∉ q), (7) nzd via the T-FLAT1-SLICE box.
     Two efforts converged onto one verified building block.
+  - **WAVE-3a DONE** (beastmode-D2, 2026-07-07T14:10Z): `officialAux_exists_away_span`
+    PROVED + integrated into CartierDivisor.lean (Opus delegate; +526 lines, 8
+    `officialAux_*` privates). INDEPENDENTLY VERIFIED by me: build green (exactly the
+    3 pre-existing box/isOfficial/isFinite sorries, +526/−0), and #print axioms
+    confirms `officialAux_exists_away_span` = [propext, sorryAx, Classical.choice,
+    Quot.sound] with sorryAx tracing ONLY through `officialAux_away_nzd`→the box;
+    both cruxes `officialAux_stalk_span` (fibre-descent) and
+    `officialAux_flat_ideal_inf_le` (EGA flat-descent I⊓pA≤pA·I) individually
+    standard-three clean. Helpers: flat_ideal_inf_le, exists_mem_fibre_principal
+    (κ⊗A base change + wave-2 field-case + Nakayama generator descent), stalk_span
+    (IsLocalization.map_inf + Submodule.le_of_le_smul_of_le_jacobson_bot), spread,
+    finite_quotient_loc, fibre_nzd, away_nzd. Key names banked:
+    `Algebra.IsStandardSmoothOfRelativeDimension.baseChange`,
+    `IsLocalization.tensorProduct_tensorProduct_right`,
+    `Algebra.TensorProduct.quotIdealMapEquivQuotTensor`, `Ideal.map_mapₐ`. REMAINING
+    for T-D11 ⇐: WAVE-4 `isOfficial` scheme assembly (dispatched, Opus) — chart
+    translation of D.finite/flat/lfp→ring hyps + officialAux + basicOpen transport,
+    mirroring T-D22's `exists_affineOpen_ker_principal_nonZeroDivisor`.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
