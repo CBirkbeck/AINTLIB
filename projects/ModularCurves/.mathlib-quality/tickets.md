@@ -1931,9 +1931,14 @@ directly applicable). All leaves unclaimed.
 - ✓✓ **LANDED GREEN + AXIOM-CLEAN** (2026-07-06, beastmode-B): YRho.lean builds;
   `#print axioms` on vRho / rhoContAction / vRhoπ_finite_etale =
   propext/choice/Quot.sound ONLY — the whole AG-GG tower under V_ρ is sorry-free.
-  T-F1a (finite étale) PROVED. Remaining in T-F1: T-F1b vRhoPointsEquiv (chain below;
-  step-1 `specPointsEquivAlgHom` GREEN in ForMathlib/EtaleSectionsCount) +
-  equivariance spec; T-F1c group structure. Final seam notes in commit eab704fb
+  T-F1a (finite étale) PROVED. **T-F1b COMPLETE (2026-07-07)**: `vRhoPointsEquiv`
+  (one-term assembly: specPointsEquivAlgHom ∘ arrowCongr-bridge ∘
+  pointsEquivOfContAction) AND `vRhoPointsEquiv_equivariant` (three-layer chase;
+  seams: state the L1-translation lemma ∀-the-triangle-proof — re-elaborating the
+  concrete subtype proof at the carrier spelling breaks rw; rhoContAction must be
+  abbrev like rhoAction; Equiv.trans-applied goals need Eq.trans-of-congrArgs, not
+  rw; counit equivariance = pointsEquivOfContAction_smul from Action.Hom.comm +
+  ConcreteCategory.comp_apply). All axiom-clean. Remaining: T-F1c group structure. Final seam notes in commit eab704fb
   (Filter.mem_map; intermediateFieldMap-f.d.-transport; open-scoped-Pointwise ABOVE
   docstring; **rhoAction must be abbrev** — structure projections don't reduce at
   instance-search transparency; coset endgame at Action-smul via ρτ = 𝟙 + map_id).
