@@ -389,6 +389,20 @@ noncomputable def pointsEquivOfContAction
         (SeparableClosure k ≃ₐ[k] SeparableClosure k)) FintypeCat.{u}).mapIso
       ((finiteEtaleEquivContAction k).counitIso.app X))
 
+/-- The counit points-equivalence is Galois-equivariant: the fiber action (by
+post-composition) corresponds to the action of the continuous Galois set. -/
+lemma pointsEquivOfContAction_smul
+    (X : ContAction FintypeCat.{u} (SeparableClosure k ≃ₐ[k] SeparableClosure k))
+    (σ : SeparableClosure k ≃ₐ[k] SeparableClosure k)
+    (x : ((CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj
+      ((finiteEtaleEquivContAction k).inverse.obj X) : Type u)) :
+    pointsEquivOfContAction k X (σ • x) =
+      (show X.obj.V ⟶ X.obj.V from X.obj.ρ σ) (pointsEquivOfContAction k X x) := by
+  have hc := ((finiteEtaleEquivContAction k).counitIso.hom.app X).hom.comm σ
+  have h2 := congrArg (fun q => q x) hc
+  rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h2
+  exact h2
+
 end Correspondence
 
 end FiniteEtaleGalois
