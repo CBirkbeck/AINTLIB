@@ -6180,4 +6180,37 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
 ### [T-DEV2b] fill `exists_flatLocus_univ_stage`
 - **Status**: open · **File**: ForMathlib/NoethApprox.lean · **Depends on**: T-DEV2a · **Type**: theorem
 - **Statement**: the boxed lemma (∃ noeth enlargement R₁ with flat locus univ). Thin wrapper of T-DEV2a onto the
-  NoethApprox colimit (R = colim fg-ℤ-subalgebras). ~50-100 lines. Discharging this + DEV1c ⟹ FLAT1 axiom-clean ⟹ D-chain done.
+  NoethApprox colimit (R = colim fg-ℤ-subalgebras). ~50-100 lines. Discharges NoethApprox's box (NOETH3 clean).
+
+### [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box — DONE (2026-07-07, beastmode-D2), reduced to one leaf
+- **Status**: DONE-modulo-T-FLAT1-STAGE · **File**: LevelStructure/CartierDivisor.lean · commit c0ba1428
+- `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor`: own sorry GONE; 9 helpers inserted; noeth-stage
+  argument (Part I Tor-free homology `sliceAux_tmul_ann_subsingleton` + Part II support/Nakayama
+  `sliceAux_ann_subsingleton` + core `sliceAux_nzd_of_isNoetherianRing`) all AXIOM-CLEAN
+  ([propext,Classical.choice,Quot.sound]). Box axioms = [propext,sorryAx,Classical.choice,Quot.sound].
+- **The one residual leaf** is the new box below, T-FLAT1-STAGE. GF7 `exists_noetherian_descent_flat`
+  descends only A's flatness — the FLAT1 datum needs MORE (A/(f)-flatness + hfib + relation reflection),
+  so the delegate correctly isolated a self-contained spreading box rather than routing through GF7.
+
+### [T-FLAT1-STAGE] fill `sliceAux_exists_noetherianStage` (EGA IV 11.2.6 / Stacks 07RF, FLAT1 datum spreading)
+- **Status**: open · **File**: LevelStructure/CartierDivisor.lean (private, ~L1957) · **Depends on**: T-DEV2a (07RF core), T-FLAT1-INJ · **Type**: theorem
+- **Statement**: given R→A fp with (f) such that A/(f) is R-flat and ·f is fibrewise-injective (hfib), plus
+  a relation f·a=0, descend the whole datum to a fg-ℤ Noetherian base R₀⊆R: A≃R⊗_{R₀}A₀, A₀/(f₀) flat over R₀,
+  hfib₀, and reflect f·a=0 to f₀·a₀=0. (Then `sliceAux_nzd_of_noetherianBase` at R₀ + pull back a=0.)
+- **Proof sketch**: three spreadings to a common stage + a colimit reflection:
+  (i) A flat over R descends — T-DEV2a with M=A (also NOETH1/2 give A≃R⊗A₀ fp);
+  (ii) A/(f) flat over R descends — T-DEV2a with M=A/(f);
+  (iii) hfib (·f injective on every fibre) descends — T-FLAT1-INJ (injectivity-spreading, 05LN);
+  (iv) reflect f·a=0 back to a finite stage (filtered-colimit bookkeeping on the fp presentation).
+  Take the max stage; apply `sliceAux_nzd_of_noetherianBase`; base-change a₀=0 back to a=0. ~150-250 lines.
+- **Mathlib/ours**: T-DEV2a (07RF, ours), NOETH1/2 `exists_noetherian_descent` (ours), `AffineTransitionLimit`
+  colimit reflection, `sliceAux_nzd_of_noetherianBase` (ours, proven). **Sources**: EGA IV 11.2.6, Stacks 07RF/05LN.
+- Discharging T-FLAT1-STAGE ⟹ FLAT1 box axiom-clean ⟹ **entire D-chain axiom-clean**.
+
+### [T-FLAT1-INJ] injectivity of a morphism of fp modules spreads to a Noetherian stage (Stacks 05LN)
+- **Status**: open · **File**: ForMathlib/NoethApprox.lean (or FlatDescentLimit.lean) · **Depends on**: (AffineTransitionLimit) · **Type**: theorem
+- **Statement**: `φ : M →ₗ N` a morphism of fp `R=colimᵢRᵢ`-modules, injective on every fibre `M⊗κ(𝔭)→N⊗κ(𝔭)`
+  (equivalently the FLAT1 case: ·f injective on `A⊗κ(𝔭)`) ⟹ some `φᵢ : Mᵢ→Nᵢ` is fibrewise-injective at stage i.
+- **Proof sketch**: fibrewise-injectivity of an fp-morphism is a constructible-open condition on Spec (its
+  non-locus is the support of a fp cokernel/kernel datum), quasi-compact ⟹ spreads to a stage. Parallels
+  T-DEV2a's openness+quasi-compactness route. ~100-150 lines. **Sources**: Stacks 05LN, EGA IV 11.2.6.
