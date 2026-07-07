@@ -2588,9 +2588,89 @@ private lemma locallyWeierstrass_app_affine_isIso {S : Scheme.{u}} (G : Elliptic
 
 theorem locallyWeierstrass_pushforward_O_eq_O {S : Scheme.{u}} (G : EllipticCurveGeom S)
     (U : S.Opens) : IsIso (G.π.app U) := by
-  -- stalkwise from the affine-basis case (`app_isIso_of_stalkFunctor_map_iso` route):
-  -- every point has a cofinal family of affine opens inside a trivializing chart where
-  -- `locallyWeierstrass_app_affine_isIso` applies.
-  sorry
+  -- the affine-basis refinement: below any open neighborhood sits an affine `V` with iso app
+  have hbasis : ∀ (x : S) (U' : TopologicalSpace.Opens S), x ∈ U' →
+      ∃ V : TopologicalSpace.Opens S, x ∈ V ∧ V ≤ U' ∧ IsIso (G.π.app V) := by
+    intro x U' hxU'
+    obtain ⟨U₀, hxU₀, W, _, e, heπ, _⟩ := G.localModel x
+    obtain ⟨V, hVaff, hxV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+      S.isBasis_affineOpens (show x ∈ U' ⊓ U₀.1 from ⟨hxU', hxU₀⟩)
+    replace hVaff : IsAffineOpen V := hVaff
+    exact ⟨V, hxV, hVle.trans inf_le_left,
+      locallyWeierstrass_app_affine_isIso G e heπ hVaff (hVle.trans inf_le_right)⟩
+  -- elementwise naturality of `π.c`
+  have happnat : ∀ {A B : TopologicalSpace.Opens S} (i : B ⟶ A) (z : Γ(S, A)),
+      (G.π.c.app (Opposite.op B)).hom ((S.presheaf.map i.op).hom z) =
+      (((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj G.E.presheaf).map i.op).hom
+        ((G.π.c.app (Opposite.op A)).hom z) := by
+    intro A B i z
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ z) (G.π.c.naturality i.op)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at this
+    exact this
+  -- stalkwise isomorphism of `π.c`
+  have hstalk : ∀ x : S, IsIso ((TopCat.Presheaf.stalkFunctor CommRingCat x).map G.π.c) := by
+    intro x
+    rw [ConcreteCategory.isIso_iff_bijective]
+    constructor
+    · intro a b hab
+      obtain ⟨Ua, hxa, sa, rfl⟩ := TopCat.Presheaf.exists_germ_eq _ a
+      obtain ⟨Ub, hxb, sb, rfl⟩ := TopCat.Presheaf.exists_germ_eq _ b
+      rw [TopCat.Presheaf.stalkFunctor_map_germ_apply,
+        TopCat.Presheaf.stalkFunctor_map_germ_apply] at hab
+      obtain ⟨W', hxW', iUa, iUb, hres⟩ := TopCat.Presheaf.germ_eq _ x hxa hxb _ _ hab
+      obtain ⟨V, hxV, hVle, hiso⟩ := hbasis x W' hxW'
+      have hfuse : ∀ {UU : TopologicalSpace.Opens S} (i : W' ⟶ UU)
+          (z : ((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+            G.E.presheaf).obj (Opposite.op UU)),
+          ((((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+            G.E.presheaf).map (homOfLE hVle ≫ i).op).hom) z =
+          ((((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+            G.E.presheaf).map (homOfLE hVle).op).hom)
+            (((((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+              G.E.presheaf).map i.op).hom) z) := by
+        intro UU i z
+        rw [op_comp, Functor.map_comp]
+        rfl
+      have key : (G.π.app V).hom ((S.presheaf.map (homOfLE hVle ≫ iUa).op).hom sa) =
+          (G.π.app V).hom ((S.presheaf.map (homOfLE hVle ≫ iUb).op).hom sb) := by
+        show (G.π.c.app (Opposite.op V)).hom _ = (G.π.c.app (Opposite.op V)).hom _
+        rw [happnat (homOfLE hVle ≫ iUa) sa, happnat (homOfLE hVle ≫ iUb) sb,
+          hfuse iUa _, hfuse iUb _, hres]
+      have hSres := ((ConcreteCategory.isIso_iff_bijective
+        (G.π.app V)).mp hiso).injective key
+      calc S.presheaf.germ Ua x hxa sa
+          = S.presheaf.germ V x hxV ((S.presheaf.map (homOfLE hVle ≫ iUa).op).hom sa) :=
+            (TopCat.Presheaf.germ_res_apply _ (homOfLE hVle ≫ iUa) x hxV sa).symm
+        _ = S.presheaf.germ V x hxV ((S.presheaf.map (homOfLE hVle ≫ iUb).op).hom sb) := by
+            rw [hSres]
+        _ = S.presheaf.germ Ub x hxb sb :=
+            TopCat.Presheaf.germ_res_apply _ (homOfLE hVle ≫ iUb) x hxV sb
+    · intro t
+      obtain ⟨U', hxU', s, rfl⟩ := TopCat.Presheaf.exists_germ_eq _ t
+      obtain ⟨V, hxV, hVle, hiso⟩ := hbasis x U' hxU'
+      obtain ⟨r, hr⟩ := ((ConcreteCategory.isIso_iff_bijective (G.π.app V)).mp
+        hiso).surjective ((((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+          G.E.presheaf).map (homOfLE hVle).op).hom s)
+      refine ⟨S.presheaf.germ V x hxV r, ?_⟩
+      rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+      calc ((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+              G.E.presheaf).germ V x hxV ((G.π.c.app (Opposite.op V)).hom r)
+          = ((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+              G.E.presheaf).germ V x hxV
+              ((((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+                G.E.presheaf).map (homOfLE hVle).op).hom s) := by
+            rw [show (G.π.c.app (Opposite.op V)).hom r = (G.π.app V).hom r from rfl, hr]
+        _ = ((TopCat.Presheaf.pushforward CommRingCat G.π.base).obj
+              G.E.presheaf).germ U' x hxU' s :=
+            TopCat.Presheaf.germ_res_apply _ (homOfLE hVle) x hxV s
+  -- assemble: the sheaf-level morphism is iso on `U`, and `π.app U` is its `U`-component
+  haveI hI : ∀ x : (U : TopologicalSpace.Opens S),
+      IsIso ((TopCat.Presheaf.stalkFunctor CommRingCat x.val).map
+        ((⟨G.π.c⟩ : S.sheaf ⟶ (TopCat.Sheaf.pushforward CommRingCat G.π.base).obj
+          G.E.sheaf)).1) := fun x => hstalk x.val
+  have := TopCat.Presheaf.app_isIso_of_stalkFunctor_map_iso
+    (⟨G.π.c⟩ : S.sheaf ⟶ (TopCat.Sheaf.pushforward CommRingCat G.π.base).obj
+      G.E.sheaf) U
+  exact this
 
 end ModularCurves

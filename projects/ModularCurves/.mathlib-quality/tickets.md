@@ -4953,6 +4953,18 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     corollary, found in mathlib). NOTE: chart-0 z-nzd deferred until hom_ext's cover choice
     fixes whether chart-0 is needed (2-chart route may suffice).
 
+- **[T-W7.0i·i5]** — **DONE (beastmode-A 2026-07-07; axiom-clean)**:
+  `locallyWeierstrass_pushforward_O_eq_O` PROVEN: `IsIso (G.π.app U)` for every open `U`
+  of every locally-Weierstrass family — `O_S ≅ π_*O_E` as sheaves. Route:
+  `locallyWeierstrass_app_affine_isIso` (affine V inside a trivializing chart: (π∣_V) is a
+  pullback of the chart pullback along `S.homOfLE` via `isPullback_morphismRestrict` +
+  `of_right'`; isoSpec/appLE bridge at the identity; transport along `e` and
+  `isPullback_projModelBaseChange` to `projModel (W.map ρ)`; `appTop` iso by i3; exit
+  `morphismRestrict_appTop`), then stalkwise assembly: `π.c` packaged as a sheaf morphism,
+  `app_isIso_of_stalkFunctor_map_iso`, germ-level bijectivity from the affine basis
+  (exists_germ_eq/germ_eq/germ_res_apply + c-naturality elementwise).
+  **T-W7.0i IS COMPLETE — PoleFiltration.lean is sorry-free (2660+ lines).**
+
 - **[T-W7.0i·i3]** — **DONE (beastmode-A 2026-07-07; axiom-clean)**:
   `projModel_globalSections_eq_baseRing` PROVEN for every commutative ring `R`. Route:
   bijectivity of `ΓSpecIso.inv ≫ π.appTop`. Injectivity: Y-chart + grade-zero readoff +
