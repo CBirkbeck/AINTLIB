@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Topology.Connected.Clopen
+import Mathlib.Topology.LocalAtTarget
 
 /-!
 # Connected total space of an open–closed map with connected fibres
@@ -58,3 +59,62 @@ theorem connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
     rw [inter_compl_self, inter_empty] at hsplit
     exact hsplit.ne_empty rfl
   exact { toPreconnectedSpace := hpre, toNonempty := hne }
+
+/-- Connectedness transfers up a subtype inclusion. -/
+lemma isConnected_preimage_val {Z : Type*} [TopologicalSpace Z] {u A : Set Z} (hAu : A ⊆ u)
+    (hA : IsConnected A) : IsConnected (Subtype.val ⁻¹' A : Set u) := by
+  haveI : ConnectedSpace ↑A := isConnected_iff_connectedSpace.mp hA
+  have h1 : IsConnected ((Set.inclusion hAu) '' Set.univ) :=
+    isConnected_univ.image _ (continuous_inclusion hAu).continuousOn
+  have h2 : (Set.inclusion hAu) '' Set.univ = (Subtype.val ⁻¹' A : Set u) := by
+    ext z
+    simp only [Set.image_univ, Set.mem_range, Set.mem_preimage]
+    constructor
+    · rintro ⟨a, rfl⟩
+      exact a.2
+    · intro hz
+      exact ⟨⟨z.1, hz⟩, rfl⟩
+  rwa [h2] at h1
+
+/-- **Components of the total space of an open–closed map with connected fibres are the
+fibres of the components**: `connectedComponent x = f ⁻¹' (connectedComponent (f x))`.
+The `⊇` direction restricts `f` over a component and applies
+`connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage`. Supply for the
+componentwise canonicity glue (AINTLIB T-W7.7·C4glue); upstream candidate. -/
+theorem connectedComponent_eq_preimage_connectedComponent
+    (hcont : Continuous f) (hopen : IsOpenMap f) (hclosed : IsClosedMap f)
+    (hfib : ∀ y, IsConnected (f ⁻¹' {y})) (x : X) :
+    connectedComponent x = f ⁻¹' (connectedComponent (f x)) := by
+  apply Set.eq_of_subset_of_subset
+  · intro z hz
+    have himg : f '' connectedComponent x ⊆ connectedComponent (f x) :=
+      (isPreconnected_connectedComponent.image f
+        hcont.continuousOn).subset_connectedComponent
+        ⟨x, mem_connectedComponent, rfl⟩
+    exact himg ⟨z, hz, rfl⟩
+  · have hpre : IsConnected (f ⁻¹' connectedComponent (f x)) := by
+      rw [isConnected_iff_connectedSpace]
+      have hopen' : IsOpenMap ((connectedComponent (f x)).restrictPreimage f) :=
+        hopen.restrictPreimage _
+      have hclosed' : IsClosedMap ((connectedComponent (f x)).restrictPreimage f) :=
+        hclosed.restrictPreimage _
+      haveI : ConnectedSpace (connectedComponent (f x)) :=
+        isConnected_iff_connectedSpace.mp isConnected_connectedComponent
+      have hfib' : ∀ y : connectedComponent (f x),
+          IsConnected ((connectedComponent (f x)).restrictPreimage f ⁻¹' {y}) := by
+        intro y
+        have hker : ((connectedComponent (f x)).restrictPreimage f ⁻¹' {y})
+            = (Subtype.val ⁻¹' (f ⁻¹' {y.1}) :
+                Set (f ⁻¹' connectedComponent (f x))) := by
+          ext z
+          simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.restrictPreimage,
+            Subtype.ext_iff]
+          rfl
+        rw [hker]
+        exact isConnected_preimage_val
+          (fun w hw => by simp only [Set.mem_preimage] at hw ⊢; rw [hw]; exact y.2)
+          (hfib y.1)
+      exact connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
+        hopen' hclosed' hfib'
+    exact hpre.isPreconnected.subset_connectedComponent
+      (by simp only [Set.mem_preimage]; exact mem_connectedComponent)
