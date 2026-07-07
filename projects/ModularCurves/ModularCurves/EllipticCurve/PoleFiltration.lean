@@ -579,7 +579,73 @@ global-sections equalizer — single overlap.) Source: audit A3. -/
 theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
     ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange ⊔
       ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange = ⊤ := by
-  sorry
+  have hr1 : ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) := by
+    show (Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).opensRange = _
+    exact Proj.opensRange_awayι _ _ _ _
+  have hr2 : ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+    show (Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange = _
+    exact Proj.opensRange_awayι _ _ _ _
+  rw [hr1, hr2, _root_.eq_top_iff]
+  rintro x -
+  rw [TopologicalSpace.Opens.mem_sup]
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨h1, h2⟩ := hcon
+  rw [Proj.mem_basicOpen, not_not] at h1 h2
+  -- The Weierstrass relation puts `(mk X₀)³` in the span of `mk X₁, mk X₂`.
+  have hpoly : (quotientGradingHom (projIdeal W)) W.toProjective.polynomial = 0 := by
+    rw [quotientGradingHom_apply, Ideal.Quotient.eq_zero_iff_mem, projIdeal_toIdeal]
+    exact Ideal.mem_span_singleton_self _
+  have h3 : ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 0)) ^ 3 ∈
+      x.asHomogeneousIdeal.toIdeal := by
+    have hrel : ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 0)) ^ 3 =
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1 * MvPolynomial.X 2 +
+          MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+          MvPolynomial.C W.a₃ * MvPolynomial.X 2 ^ 2) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) -
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.C W.a₂ * MvPolynomial.X 0 ^ 2 +
+          MvPolynomial.C W.a₄ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+          MvPolynomial.C W.a₆ * MvPolynomial.X 2 ^ 2) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) := by
+      have hz : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 0 ^ 3 -
+          ((MvPolynomial.X 1 * MvPolynomial.X 2 +
+            MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+            MvPolynomial.C W.a₃ * MvPolynomial.X 2 ^ 2) * MvPolynomial.X 1 -
+          (MvPolynomial.C W.a₂ * MvPolynomial.X 0 ^ 2 +
+            MvPolynomial.C W.a₄ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+            MvPolynomial.C W.a₆ * MvPolynomial.X 2 ^ 2) * MvPolynomial.X 2)) = 0 := by
+        rw [show MvPolynomial.X 0 ^ 3 -
+            ((MvPolynomial.X 1 * MvPolynomial.X 2 +
+              MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+              MvPolynomial.C W.a₃ * MvPolynomial.X 2 ^ 2) * MvPolynomial.X 1 -
+            (MvPolynomial.C W.a₂ * MvPolynomial.X 0 ^ 2 +
+              MvPolynomial.C W.a₄ * MvPolynomial.X 0 * MvPolynomial.X 2 +
+              MvPolynomial.C W.a₆ * MvPolynomial.X 2 ^ 2) * MvPolynomial.X 2) =
+          -W.toProjective.polynomial from by
+            rw [WeierstrassCurve.Projective.polynomial]; ring, map_neg, hpoly, neg_zero]
+      simp only [map_sub, map_mul, map_pow] at hz
+      linear_combination hz
+    rw [hrel]
+    exact sub_mem (Ideal.mul_mem_left _ _ h1) (Ideal.mul_mem_left _ _ h2)
+  have h0 : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 0) ∈
+      x.asHomogeneousIdeal.toIdeal :=
+    x.isPrime.mem_of_pow_mem 3 h3
+  -- A prime containing all three coordinates contains the irrelevant ideal.
+  refine x.not_irrelevant_le fun z hz => ?_
+  refine Ideal.span_le.mpr ?_ (quotient_irrelevant_le_span_mk_X W hz)
+  rintro _ ⟨i, rfl⟩
+  obtain rfl | rfl | rfl : i = 0 ∨ i = 1 ∨ i = 2 := by omega
+  · exact h0
+  · exact h1
+  · exact h2
 
 /-- **(T-W7.0i-b3-2)** Sections over the `Y`-chart open are the chart ring (open-immersion
 `Γ`-comparison composed with the repo's `chartCoordEquiv`). -/
