@@ -5865,7 +5865,10 @@ criteria use `Module.Flat.lTensor_exact` (flatness ⟹ Tor₁-vanishing, from th
 Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
 
 ### [T-LC1] freeness from fibre freeness (Stacks 00MH) — THE MAKE-OR-BREAK
-- **Status**: open · **File**: ForMathlib/FlatLocus.lean (or new LocalCriterion.lean) ·
+- **Status**: in_progress · **Claimed**: beastmode-D2, 2026-07-07T18:10Z (Opus delegate
+  a42306399 → ForMathlib/LocalCriterion.lean). Validates the whole Tor-free route: if
+  the Nakayama + `Module.Flat.lTensor_exact` proof lands, the box chain opens Tor-free.
+- **File**: ForMathlib/LocalCriterion.lean ·
   **Depends on**: none · **Type**: theorem
 - **Statement**: `R→S` comm rings, M finite S-module, 𝔮 : PrimeSpectrum S, 𝔭 := 𝔮.comap,
   M flat over R (at 𝔮), `M ⊗_R κ(𝔭)` free over κ(𝔭) ⟹ `LocalizedModule 𝔮.primeCompl M` free
