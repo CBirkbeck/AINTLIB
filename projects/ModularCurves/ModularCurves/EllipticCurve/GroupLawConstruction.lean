@@ -362,6 +362,7 @@ theorem negModelHom_negModelHom (W : WeierstrassCurve R) :
 
 section
 attribute [local instance] MvPolynomial.gradedAlgebra
+open MvPolynomial HomogeneousIdeal
 
 /-- **(T-W7.0b-zero)** Negation fixes the point at infinity. The point at infinity is fixed
 only PROJECTIVELY: `projModelZeroEval ∘ negGradedQuot` is evaluation at `(0,−1,0)` (the `−1`
@@ -402,22 +403,65 @@ theorem negModelHom_zero (W : WeierstrassCurve R) :
       (projModelZeroEval_irrelevant_map_top W)), ← allNeg_map_id W, key2]
   exact congr_from _ _ _ _ hfeq
 
-end
+/-- Negation fixes the class of `X₂ = Z` in the quotient coordinate ring (`negVec` fixes `X 2`).
+Foundational fact behind chart-preservation (`inZChart_comp_negModelHom`). -/
+lemma negGradedQuot_mk_X2 (W : WeierstrassCurve R) :
+    negGradedQuot W (quotientGradingHom (projIdeal W) (X 2)) =
+      quotientGradingHom (projIdeal W) (X 2) := by
+  rw [quotientGradingHom_apply, negGradedQuot, quotientGradingMap_mk]
+  refine congrArg (Ideal.Quotient.mk _) ?_
+  show aeval (negVec W) (X 2) = X 2
+  simp [negVec]
 
-/-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's negation through the
-dictionary. Source: `Affine.negY` vs the projectivised formula; `projModelPointsEquiv`. -/
+/-- `negModelHom` preserves the `Z`-chart basic open `D₊(X₂)`: since negation fixes `X₂`, the
+`Proj.map` preimage of `D₊(X₂)` is `D₊(X₂)` again (`Proj.map_preimage_basicOpen` +
+`negGradedQuot_mk_X2`). The geometric heart of chart-preservation. -/
+lemma negModelHom_preimage_basicOpen_X2 (W : WeierstrassCurve R) :
+    negModelHom W ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+        (quotientGradingHom (projIdeal W) (X 2))) =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        (quotientGradingHom (projIdeal W) (X 2)) := by
+  rw [negModelHom, Proj.map_preimage_basicOpen]
+  exact congrArg (Proj.basicOpen _) (negGradedQuot_mk_X2 W)
+
+/-- **(L1 — T-W7.0b-points leaf)** Negation preserves the `Z`-chart: a field point is in the
+`Z`-chart iff its `negModelHom`-image is. ROUTE: `InZChart W g` = "`g.1` factors through
+`Proj.awayι(X₂)`", whose range is `D₊(X₂)` (`Proj.opensRange_awayι`); for the open immersion
+`awayι(X₂)` this is equivalent to `g.1 ⁻¹ᵁ D₊(X₂) = ⊤`. Build that `InZChart ↔ preimage = ⊤`
+bridge (an open-immersion factoring criterion — P2 exposes none, so it is a NEW leaf), then finish
+via `Scheme.comp_preimage` + `negModelHom_preimage_basicOpen_X2`
+(`(g.1 ≫ neg)⁻¹ᵁ D₊ = g.1⁻¹ᵁ (neg⁻¹ᵁ D₊) = g.1⁻¹ᵁ D₊`).
+PITFALL (do NOT retry the naive route): `awayι 𝒜 s` and `awayι 𝒜 (neg s)` have DIFFERENT domain
+types `Spec(Away 𝒜 s)` vs `Spec(Away 𝒜 (neg s))` — their `=` does not typecheck; stay at the opens
+level (`basicOpen`, a fixed type). -/
+lemma inZChart_comp_negModelHom (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hcomp : (g.1 ≫ negModelHom W) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K))) :
+    InZChart W (⟨g.1 ≫ negModelHom W, hcomp⟩ : SpecPoints (projModel W) (projModelπ W) K) ↔
+      InZChart W g :=
+  sorry
+
+/-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
+dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:
+`by_cases hZ : InZChart W P`, using `inZChart_comp_negModelHom` (L1) both ways.
+• `¬InZChart` (infinity): `projModelPointsEquivEll_infinity` gives `projModelPointsEquiv W K P = 0`
+  and (via L1) `= 0` on the composite, so LHS `= 0 = -0 =` RHS (`neg_zero`).
+• `InZChart` (Z-chart): `projModelPointsEquiv_some` gives `P ↦ some x y`; the composite `↦ some x
+  (negY x y)` by the **coordinate leaf L2** (`negModelHom` acts on `Z`-chart coords as
+  `X₀/X₂↦X₀/X₂`, `X₁/X₂↦(−X₁−a₁X₀−a₃X₂)/X₂`, traced through `chartHomEquiv`/`chartSolutionsEquiv`
+  precomposed with `HomogeneousLocalization.Away.map (negGradedQuot W)`); and RHS
+  `-(some x y) = some x (W.negY x y)` by `Affine.Point.neg_some` (`negY x y = −y−a₁x−a₃`).
+  `Nonsingular` witnesses are proof-irrelevant. Source: Silverman III.2.3; `Affine.negY`. -/
 theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) :
     projModelPointsEquiv W K
         ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ =
       -(projModelPointsEquiv W K P) := by
-  -- BLOCKED on P2 (T-W7.0f): `projModelPointsEquiv` is currently an opaque `sorry` in
-  -- `PointsDictionary.lean`, so nothing can be proved about its values (`sorry x` vs `-(sorry y)`
-  -- are unrelatable). Provable once P2 lands the real field-points dictionary together with its
-  -- chartwise characterisation — then this is the projectivised `Affine.negY` computation
-  -- `(x, y) ↦ (x, −y−a₁x−a₃)` read through the dictionary. Do NOT close before P2 lands.
   sorry
+
+end
 
 /-! ## Lane P1: the Bosma–Lenstra two-law multiplication -/
 
