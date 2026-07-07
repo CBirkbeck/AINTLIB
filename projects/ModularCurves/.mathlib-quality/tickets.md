@@ -5054,12 +5054,28 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `range_fromSpecResidueField` finish. `rigidity` now rests on the single leaf ·c.
 
 - **[T-W7.r2·c]** Krull neighbourhood — `exists_open_factor_of_fibre_subset`
-  (Rigidity.lean). **Status**: open · **Depends**: T-W7.r1 (done) · **Type**: theorem ·
-  Route: Artinian thickenings `Spec (Γstalk/𝔪ₜⁿ)` through case 1;
-  `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` on stalks (loc-noeth X from `IsProper` over
-  loc-noeth S); finite-type ideal sheaf vanishes on an open ⊇ fibre; properness ⟹ tube
-  `p⁻¹(U₀)`. THE hard leaf (est. 300–500 lines; may spawn sub-leaves for the ideal-sheaf
-  support API).
+  (Rigidity.lean). **Status**: in_progress (fable-P4, 2026-07-07T16:05Z — route REFINED
+  after IdealSheaf API survey) · **Depends**: T-W7.r1 (done) · **Type**: theorem
+  - **Refined route (names verified at pin)**: the factorization consumable is
+    `IsClosedImmersion.lift (ι) (V.ι) (H : ι.ker ≤ V.ι.ker)` + `lift_fac`
+    (Morphisms/ClosedImmersion.lean:207–215) — NO glue-data plumbing needed. So the leaf
+    reduces to: `(eqLocusι f g hf hg).ker ≤ ((p ⁻¹ᵁ U₀).ι).ker` for some open `U₀ ∋ t`,
+    i.e. the ideal sheaf J := ι.ker VANISHES on `p⁻¹(U₀)` (ker of an open immersion = the
+    sections vanishing on the open).
+  - **TRAP documented**: `IdealSheafData.support` is the VANISHING LOCUS V(J) (= range ι,
+    by `range_gluedTo`) — NOT the module-support {x | J_x ≠ 0} that Krull kills. Do not
+    use `support` for the vanishing statement; work affine-locally.
+  - Two sub-steps (in-proof): (c·i) thickening input: for every n, the Artinian fibre
+    `X ×_S Spec (Γstalk t ⧸ 𝔪ⁿ)` factors through ι — case-1-over-Artinian-point via the
+    SAME preimmersion/subsingleton-range mechanism as the r2·b seed (fromSpecStalk-composite
+    preimmersion; one-point base; collapse from `hset` + `eqLocusι_comp_eq` pointwise);
+    gives `ι.ker ≤ (thickened-fibre).ker`, whose affine-local kernel is `𝔪ᵗⁿ`-multiples.
+    (c·ii) affine-local Krull: on affine `U ∋ x` (x in the fibre), `J.ideal U` is f.g.
+    (noetherian, `LocallyOfFiniteType.isLocallyNoetherian`); its image in
+    `O_{X,x}` lies in `⋂ₙ (𝔪ᵗ·O_{X,x})ⁿ = ⊥` (`Ideal.iInf_pow_eq_bot_of_isLocalRing`);
+    f.g. + stalk-zero ⟹ a basicOpen ∋ x where the ideal restricts to 0; union the
+    basicOpens over the (quasi-compact, `IsProper`) fibre; properness tube
+    `U₀ := S ∖ p(X ∖ W)`.
 
 - **[T-W7.r2·d]** clopen assembly — `exists_factor_of_connected` (Rigidity.lean).
   - **Status**: ✅ PROVEN (fable-P4, 2026-07-07T15:00Z) — modulo consuming the sorried ·c
