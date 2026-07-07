@@ -6251,7 +6251,11 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
   syzygy-freeness ≠ fibre-EXACTNESS. Flatness needs the local criterion of flatness (00MK) + fibre-exact-locus openness (00RB/00MI),
   classically via Buchsbaum-Eisenbud (00N1). None of 00MK/00RB/00MI/00N1 (nor Module.depth/Auslander-Buchsbaum/dévissage) in mathlib.
   DEV1a (HilbertSyzygy) is now ORPHANED from the D-chain (still a valid standalone result); DEV1b likewise.
-- **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — DECISION PENDING WITH OWNER):
+- **OWNER DECISION (2026-07-08): ROUTE A FUNDED** (Buchsbaum–Eisenbud / local flatness criterion). Source-faithful
+  B-E decomposition delegate dispatched → `decomposition-buchsbaum-eisenbud.md` + `ForMathlib/BuchsbaumEisenbud.lean`
+  skeleton; T-BE* tickets to follow. Steer: grade/depth via Ext (`grade≥k ⟺ Extⁱ(R/I,R)=0 ∀i<k`) makes "grade≥k" open
+  (Ext-modules have closed support) — may make 00RB openness lean, avoiding the full 00N1 minor-ideal combinatorics.
+- **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
   (B) route (ii): flat locus CONSTRUCTIBLE via generic flatness GF5 (needs GFDatum/051R) + Noeth induction, then open via 00I0
       (sidesteps this box, fills isOpen_flatLocus differently — but T-LC3 earlier found constructible⟺open so may not be cheaper);
