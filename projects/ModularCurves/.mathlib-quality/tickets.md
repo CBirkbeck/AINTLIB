@@ -5291,8 +5291,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-RIG-1]** `/cleanup` Rigidity.lean. **Depends**: T-W7.r2 (3rd proof ticket).
 
 - **[T-W7.7·C2conn]** total space connected over connected base —
-  `connectedSpace_of_universallyOConnected` (Rigidity.lean). **Status**: open (design
-  refined, fable-P4 2026-07-07T20:30Z) · **Depends**: none · **Type**: theorem
+  `connectedSpace_of_universallyOConnected` (Rigidity.lean). **Status**: **DONE**
+  (fable-P4, commit 3e9e51af) · **Depends**: none · **Type**: theorem
+  - **Claimed**: fable-P4, 2026-07-07T20:30Z · **Done**: 2026-07-07 (`#print axioms` =
+    propext/Classical.choice/Quot.sound on both decls). The idempotent-from-clopen leaf
+    landed as `preconnectedSpace_of_isField` (glue `(1,0)` via `existsUnique_gluing'`,
+    idempotency via `eq_of_locally_eq₂`, field ⟹ `χ ∈ {0,1}`, stalk nontriviality kills a
+    piece; ~90 lines, upstream candidate). Assembly consumed P5's engine exactly as
+    offered (thanks): open (flat+lfp chain, as r2·d) + closed (proper) + fibre =
+    `range (pullback.fst p (fromSpecResidueField t)).base` with `Γ ≅ κ(t)` via `hp _ ⊤` +
+    `commRingCatIsoToRingEquiv` transfer, nonempty via the section.
+  - **Statement change (logged per rule 5)**: added `[IsLocallyNoetherian S]` to the
+    skeleton statement — needed for `p.isOpenMap` (lfp from properness over loc-noeth,
+    same instance chain as r2·d). Every consumer (C1–C4, all in the loc-noeth regime)
+    already assumes it.
   - Route (refined): WLOG `e(S) ⊆ C` for a nonempty clopen `C` (pull back along the
     section, connectedness of `S`); for `x ∉ C` the fibre over `p x` meets both `C`
     (through `e`) and `Cᶜ` (through `x`); fibre-connectedness kills it. Fibre
