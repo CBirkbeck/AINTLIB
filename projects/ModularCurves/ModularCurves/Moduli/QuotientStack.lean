@@ -844,10 +844,10 @@ private theorem isPullback_pullbackSnd_map {P : Scheme.{u}} (p : P ⟶ S) :
   · exact Limits.pullback.lift_fst _ _ _
   · exact Limits.pullback.lift_snd _ _ _
 
+omit [Group G] in
 /-- **Distributivity identification.** Finite coproducts distribute over the base
 change: `∐_G (P ×_S S')` is the base change of `∐_G P → S` along `q`, via the
 extensivity of `Scheme` (`FinitaryPreExtensive`). -/
-omit [Group G] in
 private theorem isPullback_sigma_pullbackSnd {P : Scheme.{u}} (p : P ⟶ S) :
     IsPullback
       (Limits.Sigma.desc (fun _ : G => Limits.pullback.snd p q))
