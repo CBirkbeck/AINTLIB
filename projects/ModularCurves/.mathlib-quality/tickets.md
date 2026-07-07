@@ -2203,6 +2203,20 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     ((A_r/I_r)⊗κ finite via IsArtinianRing.localization_surjective). Scheme glue:
     chart opener hsm.exists_isStandardSmoothOfRelativeDimension; Γ-dictionary for
     subscheme quotients per sectionsIdealAux/toSpecΓ_naturality pattern.
+  - **isFinite leg: PARK DECISION** (2026-07-07T07:50Z): mathlib HAS
+    `IsFinite f ↔ IsProper f ∧ IsAffineHom f` (Morphisms/Proper.lean:93), so the
+    KM 1.2.3 (⇒) leg reduces EXACTLY to affineness of a proper locally-quasi-finite
+    morphism = Zariski's Main Theorem (EGA IV 8.11.1) — genuinely absent from
+    mathlib and its own project. `IsOfficialCartier.isFinite` stays a sorried
+    producer-WIP (statement frozen, correct); `toRelEffCartierDiv` assembled
+    against it. NOT a register box (no downstream consumer needs it; the working
+    def is primary — the ⇒ direction is review-completeness only). Candidate
+    future ForMathlib target: ZMT for schemes. Wave-3a prompt banked
+    (scratch wave3a-prompt.md) incl. the localization-transitivity fix: O =
+    AtPrime(q/pA) of A/pA via submonoid-composition, making the fibre-vanishing ⟹
+    M_q = 0 Nakayama transfer sound; fibre-injectivity route = equational
+    criterion (Flat/EquationalCriterion.lean) for I ∩ pA = pI, then κ = Frac(R/p)
+    localization transport.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
