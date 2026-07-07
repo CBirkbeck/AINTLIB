@@ -542,18 +542,44 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     refine ⟨⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩, fun hmem => ?_, ?_⟩
     · obtain ⟨x, hxW, hpx⟩ := hmem
       exact hxW (hfib (show x ∈ p.base ⁻¹' {t} from hpx))
-    · -- (4) the equalizer ideal is contained in the kernel of the tube inclusion.
-      -- SORRIED FINALE, one seam left: the conceptual content is DONE —
-      -- `germ_ideal_eq_zero_of_exists_affine` (proven above) kills ambient germs on the
-      -- good locus, and `Scheme.Hom.germ_stalkMap_apply` transports them to subscheme
-      -- germs for `TopCat.Presheaf.section_ext`. What remains is ONLY the coercion seam
-      -- at the `section_ext` application: the goal arrives `sheaf.presheaf`-headed with
-      -- mixed `ConcreteCategory.hom`/`CommRingCat.Hom.hom` wrappers and resists
-      -- `exact`/`show`/`convert` bridging (session log: /tmp/rig31-33). Next attack:
-      -- state the per-germ fact as its own lemma in the goal's native spelling (copy the
-      -- expected-type printout verbatim), or use the sheaf-level
-      -- `TopCat.Sheaf`-ext API directly instead of `section_ext`.
-      sorry
+    · -- (4) the equalizer ideal is contained in the kernel of the tube inclusion:
+      -- test the restricted section by germs of the subscheme sheaf; each germ is the
+      -- stalk-map image of an ambient germ (`germ_stalkMap_apply`), which dies on the
+      -- good locus by the cross-affine vanishing lemma. The final `convert … using 1; rfl`
+      -- crosses the `sheaf.presheaf`-vs-`presheaf` stalk spelling (defeq, but only at
+      -- default transparency — `exact` fails on the coerced carriers, `rfl` closes).
+      intro U a ha
+      rw [Scheme.Hom.ker_apply, RingHom.mem_ker]
+      apply TopCat.Presheaf.section_ext
+        ((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).toScheme.sheaf
+      intro v hv
+      have hvW : ((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι.base v ∈
+          Wset := by
+        by_contra hzW
+        exact v.2 (Set.mem_image_of_mem _ hzW)
+      have hvU : ((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι.base v ∈
+          U.1 := hv
+      have hgermzero : (X.presheaf.germ U.1 _ hvU).hom a = 0 := by
+        obtain ⟨U', hU'⟩ := Set.mem_iUnion.mp hvW
+        exact germ_ideal_eq_zero_of_exists_affine _ _ ⟨U', hU'⟩ U hvU ha
+      have hz : ((((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).toScheme
+          ).presheaf.germ
+            (((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι ⁻¹ᵁ U.1)
+            v hv).hom
+          ((((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι.app U.1).hom
+            a) =
+          ((((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).toScheme
+          ).presheaf.germ
+            (((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι ⁻¹ᵁ U.1)
+            v hv).hom 0 := by
+        rw [map_zero]
+        rw [← Scheme.Hom.germ_stalkMap_apply
+          ((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ, hclosed.isOpen_compl⟩ : X.Opens)).ι U.1 v hv a]
+        show (((p ⁻¹ᵁ ⟨(p.base '' Wsetᶜ)ᶜ,
+            hclosed.isOpen_compl⟩ : X.Opens)).ι.stalkMap v).hom
+          ((X.presheaf.germ U.1 _ hvU).hom a) = 0
+        rw [hgermzero, map_zero]
+      convert hz using 1 <;> rfl
   obtain ⟨U₀, htU₀, hker⟩ := hW
   exact ⟨U₀, htU₀, IsClosedImmersion.lift _ _ hker, IsClosedImmersion.lift_fac _ _ hker⟩
 
