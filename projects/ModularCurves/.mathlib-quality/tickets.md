@@ -4355,6 +4355,20 @@ by the Abel/canonicity chain + the A7 comparison). Honest cost: until A7 lands t
 record is a-priori a SUBCLASS of KM 2.1.1/DR II.1.1/Loe 3.3.1 — a stronger-direction
 bridge, documented, same pattern as the existing genus-bridge note (T-A9).*
 
+### [T-A8-4] the derived fibre condition — `EllipticCurveGeom.fibrewiseElliptic` (step-4 leftover)
+- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-07T23:25Z (OWNER-DIRECTED
+  2026-07-08: "can we prove the fibrewise defn and LocallyWeierstrass equivalent") ·
+  **File**: EllipticCurve/Basic.lean · **Depends**: T-A8 (done) · **Type**: 2 theorems
+- **Scope note (the owner's question, answered)**: the FULL equivalence is two directions.
+  (⟸ = this ticket) `LocallyWeierstrass ⟹ FibrewiseElliptic` — provable now, sketch was
+  banked in T-A8 step 4: sub-lemma `fibrewiseElliptic_projModel` (model fibres are elliptic,
+  `isPullback_projModelBaseChange` at residue fields, A5b `hA`/`hB` pattern) + transport
+  along the local iso `e` + fibre-of-open-restriction pasting + `IsOpenImmersion`
+  residue-field iso. (⟹ = NOT this ticket) `FibrewiseElliptic ⟹ LocallyWeierstrass` is
+  T-A7-cmp/T-W-cmp (COH stream): needs cohomology-and-base-change + RR (`BB-COHBC`/`BB-RR`);
+  mathlib has neither (verified 2026-07-08: no higher direct images / base-change /
+  semicontinuity in Mathlib/AlgebraicGeometry) — stays deferred.
+
 ### [T-A8] EllipticCurveGeom v2 — `LocallyWeierstrass` field swap (OWNER-DIRECTED)
 - **Status**: **DONE** (beastmode-A, 2026-07-06 — LocallyWeierstrass predicate + field swap
   fibres→localModel + GroupLaw consumer + **T-A8a `LocallyWeierstrass.baseChange` fully proven,
