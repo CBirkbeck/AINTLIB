@@ -2148,6 +2148,38 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     decomposition); register/park if the fibre-finiteness leg (dim-0 + finite-type
     ⟹ finite) is heavy. If (3)'s Nakayama-spread genuinely needs noetherian input,
     REGISTER a box for exactly that step, never silently weaken.
+  - **Progress** (2026-07-07T06:40Z): skeleton green (def + isOfficial + lfp/isFinite
+    legs + toRelEffCartierDiv assembly). ROUTE REFINED after probing: WAVE-1
+    (delegated, in flight) = ForMathlib/PrincipalMaximalDVR.lean — nontrivial
+    noetherian local + maximalIdeal = span{nzd non-unit} ⟹ IsDomain + DVR (Krull
+    intersection + order-extraction; `IsDiscreteValuationRing.TFAE` confirmed in
+    mathlib). WAVE-2 (next, ForMathlib/StandardSmoothStalkDVR.lean) = fibre-side ring
+    theory for std-smooth-1 over a field k: thm-A `Localization.AtPrime q` is a DVR
+    given I ≤ q with Module.Finite k (A⧸I) (route: Ω free rank 1
+    (rank_kaehlerDifferential) + span_range_derivation coordinate-extraction ⟹ dg
+    generates Ω on an away-shrink ⟹ Jacobi–Zariski (mirror in-file
+    kerPrincipalAux_nzd lines ~589-608: H1Cotangent.exact_δ_mapBaseChange/exact_map_δ)
+    ⟹ FormallySmooth k[X] + fp-of-away ⟹ Smooth ⟹ flat (`Algebra.Smooth.flat` ✓
+    instance) ⟹ π := q₀-generator-image nzd; m = q₀O via `Algebra.Etale.
+    iff_exists_algEquiv_prod` (RingTheory/Etale/Field.lean ✓ EXISTS) on the étale
+    fibre; field-case killed by k[X] ↪ O torsion-free vs O = localization of the
+    fin-dim A/I (`IsArtinianRing` loc-is-quotient) — NOTE Localization.AtPrime is NOT
+    fp, so Smooth.flat applies only at away-level, then localize); thm-B I·O_q ≠ ⊥
+    (Artinian-DVR contradiction); thm-D f ∈ nonZeroDivisors A whenever
+    Module.Finite k (A⧸span{f}) — KEY SIMPLIFICATION: nzd is stalk-local, and at each
+    maximal m the thm-A dichotomy + fin-dim contradictions close both branches — NO
+    reducedness, NO Ass-theory needed. WAVE-3 = scheme assembly in CartierDivisor.lean
+    (chart opener = hsm.exists_isStandardSmoothOfRelativeDimension per in-file
+    pattern; I fg via `Algebra.FinitePresentation.ker_fG_of_surjective` ✓ mathlib;
+    fibre comparison I⊗κ ↪ A⊗κ from D.flat chart-form Tor-vanish; Nakayama-spread at
+    O_x + fg-support; T-FLAT1 slicing BOX registered for the total-space nzd step —
+    ADVERSARIAL: naive noetherian-free local slicing is FALSE (M = m over a rank-1
+    non-discrete valuation ring, u = 0: M/mM = 0 vacuously regular, M ≠ 0), so the
+    box carries fp hypotheses honestly (EGA IV 11.3.10 nzd part)). WAVE-4: lfp leg
+    (principal ⟹ fg ⟹ fp quotient); isFinite leg AT RISK — decomposition's claim
+    "mathlib ZMT IsFinite.of_isProper_of_locallyQuasiFinite PRESENT" is STALE/WRONG
+    (searched: absent; mathlib has IsFinite = IsIntegralHom ⊓ LocallyOfFiniteType,
+    affine-over-S is the hard part) — park-eligible per claim scope.
 - **[T-D12]** divisor base change: Props of `RelEffCartierDiv.baseChange` +
   functoriality. Depends: none. Parallel: yes.
   - **Status**: done — CORE RESOLVED BY beastmode-A (commit 03d76119,
