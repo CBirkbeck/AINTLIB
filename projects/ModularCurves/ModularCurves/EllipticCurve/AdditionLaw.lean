@@ -22,10 +22,11 @@ Law 2 was **derived, not transcribed** — solved exactly from the paper's ancho
 curves*, J. Number Theory 53 (1995), p. 237; verbatim quotes with locators in
 `.mathlib-quality/tw7-source-quotes.md`) by mod-p interpolation over the graded (2,2)-monomial
 basis with integer lift, then certified by the exact ideal identity and 25 end-to-end numeric
-group-law checks (`derive_law2.py`). The printed `X₃⁽²⁾` on p. 237 contains a sign misprint in
-an `a₃a₄` term; the derived polynomials are authoritative (the derivation is overdetermined).
-Every `linear_combination` cofactor below is kernel-checked here — the CAS is a search
-procedure, not a trust step.
+group-law checks (`derive_law2.py`). The derivation surfaced a discrepancy against a reading
+of the printed `X₃⁽²⁾` on p. 237 — see the warning on `dblAddX`; the derived polynomials are
+authoritative independently of anyone's reading of the printed page (the derivation is
+overdetermined). Every `linear_combination` cofactor below is kernel-checked here — the CAS
+is a search procedure, not a trust step.
 
 The remaining B–L facts are NOT certificates by design (certificate policy, board
 T-W7.0c-i): law 2 landing on the curve (c5) and law 1's `equation_addXYZ` route through the
@@ -52,7 +53,17 @@ variable {R : Type*} [CommRing R] {W' : Projective R}
 variable (W') in
 /-- The `X`-coordinate of the second Bosma–Lenstra addition law (the law of the line `Y = 0`),
 evaluated at two projective point representatives `P` and `Q`. Its diagonal is `dblX`.
-Source: B–L Thm 2 + §5 p. 237 (derived; see the module docstring). -/
+Source: B–L Thm 2 + §5 p. 237 (derived; see the module docstring).
+
+**Paper-fidelity warning — do NOT "correct" this polynomial against the printed page.** In
+the printed `X₃⁽²⁾` (B–L p. 237; paper coordinates `P = (X₁:Y₁:Z₁)`, `Q = (X₂:Y₂:Z₂)`), the
+`a₃a₄` term is easily (mis)read as `+ a₃a₄·(X₁Z₂ − 2X₂Z₁)·X₂Z₁`. The true term, as derived
+and certified here, is `− a₃a₄·(2X₁Z₂ + X₂Z₁)·X₂Z₁` — the two monomials
+`- 2 * W'.a₃ * W'.a₄ * P x * P z * Q x * Q z - W'.a₃ * W'.a₄ * P z ^ 2 * Q x ^ 2` below.
+The derivation is overdetermined (exact anchor ideal identity `d³Z₁Z₂·law2ᵢ ≡ N_Y·law1ᵢ`
+plus 25 independent end-to-end numeric group-law samples; `derive_law2.py`), so the stored
+polynomial is authoritative independently of any reading of the page — and the six
+kernel-checked certificates in this file would all fail against the misread variant. -/
 noncomputable def dblAddX (P Q : Fin 3 → R) : R :=
       -W'.a₁ * W'.a₂ * P x ^ 2 * Q x ^ 2 - W'.a₂ * P x ^ 2 * Q x * Q y - W'.a₁ ^ 2 * W'.a₃ * P
         x ^ 2 * Q x * Q z - 2 * W'.a₁ * W'.a₄ * P x ^ 2 * Q x * Q z - W'.a₁ * W'.a₃ * P x ^ 2
