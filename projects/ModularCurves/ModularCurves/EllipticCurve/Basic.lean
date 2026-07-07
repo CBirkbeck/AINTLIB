@@ -239,6 +239,64 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
         Iso.inv_hom_id]
       exact (projModelZero_projModelπ _).symm
 
+/-- On the spectrum of a ring, the canonical map from the residue field at a point is
+`Spec` of the ring-level residue composite. -/
+lemma Spec_fromSpecResidueField_eq (R : Type u) [CommRing R] (p : ↥(Spec (CommRingCat.of R))) :
+    (Spec (CommRingCat.of R)).fromSpecResidueField p
+      = Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p) := by
+  show Spec.map ((Spec (CommRingCat.of R)).residue p)
+      ≫ (Spec (CommRingCat.of R)).fromSpecStalk p = _
+  rw [Spec.fromSpecStalk_eq']
+  exact (Spec.map_comp _ _).symm
+
+/-- **(T-A8-4, sub-lemma)** The fibres of a projective Weierstrass model over any ring are
+elliptic: the fibre at `p` is the model of `W` extended to the residue field `κ(p)`
+(`isPullback_projModelBaseChange` against the fibre square, both over
+`Spec κ(p) ⟶ Spec R`). -/
+theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] :
+    FibrewiseElliptic (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) := by
+  intro p
+  letI : Algebra R ↑((Spec (CommRingCat.of R)).residueField p) :=
+    (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p).hom.toAlgebra
+  -- everything below is stated over the single canonical morphism `ψ`
+  have hfib : IsPullback ((projModelπ W).fiberι p)
+      ((projModelπ W).fiberToSpecResidueField p) (projModelπ W)
+      (Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p)) :=
+    Spec_fromSpecResidueField_eq R p ▸ IsPullback.of_hasPullback (projModelπ W)
+      ((Spec (CommRingCat.of R)).fromSpecResidueField p)
+  have hbc : IsPullback
+      (projModelBaseChange (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p)) W)
+      (projModelπ (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))))
+      (projModelπ W)
+      (Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p)) := by
+    have hbc0 := isPullback_projModelBaseChange
+      (R' := ↑((Spec (CommRingCat.of R)).residueField p)) W
+    rwa [show CommRingCat.ofHom
+        (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))
+      = StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p from rfl] at hbc0
+  refine ⟨W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p)), inferInstance,
+    hfib.isoPullback ≪≫ hbc.isoPullback.symm, ?_, ?_⟩
+  · simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+    rw [(Iso.inv_comp_eq _).mpr hbc.isoPullback_hom_snd.symm, hfib.isoPullback_hom_snd]
+  · rw [← cancel_mono hbc.isoPullback.hom]
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id_assoc,
+      Iso.inv_hom_id, Category.comp_id]
+    apply pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [hfib.isoPullback_hom_fst, hbc.isoPullback_hom_fst, projModelZero_baseChange,
+        show CommRingCat.ofHom
+            (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))
+          = StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p from rfl]
+      simp only [sectionFiberPoint, Scheme.Hom.fiberι]
+      exact (pullback.lift_fst _ _ _).trans
+        (congrArg (· ≫ projModelZero W) (Spec_fromSpecResidueField_eq R p))
+    · simp only [Category.assoc]
+      rw [hfib.isoPullback_hom_snd, hbc.isoPullback_hom_snd]
+      simp only [sectionFiberPoint, Scheme.Hom.fiberToSpecResidueField,
+        projModelZero_projModelπ]
+      exact pullback.lift_snd _ _ _
+
 /-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
 relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
 expressed via `FibrewiseElliptic`.
