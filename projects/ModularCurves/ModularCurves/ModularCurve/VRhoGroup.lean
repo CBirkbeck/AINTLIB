@@ -139,4 +139,36 @@ noncomputable def rhoNegMor (D : GaloisRepData N) :
         show -(D.ρ (galSepMulEquivGalQ σ) • v) = D.ρ (galSepMulEquivGalQ σ) • (-v)
         rw [smul_neg] }
 
+/-- First projection of the square. -/
+noncomputable def rhoSqFst (D : GaloisRepData N) :
+    rhoSqContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.fst
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+
+/-- Second projection of the square. -/
+noncomputable def rhoSqSnd (D : GaloisRepData N) :
+    rhoSqContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.snd
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+
+/-- The square with its projections is the categorical binary product in the category
+of continuous Galois sets (leaf F1c-2). -/
+noncomputable def rhoSqIsProduct (D : GaloisRepData N) :
+    IsLimit (BinaryFan.mk (rhoSqFst D) (rhoSqSnd D)) := by
+  refine BinaryFan.isLimitMk
+    (fun s => ObjectProperty.homMk
+      { hom := FintypeCat.homMk (fun x => (s.fst.hom.hom x, s.snd.hom.hom x))
+        comm := fun σ => FintypeCat.hom_ext _ _ fun x => ?_ })
+    (fun s => rfl) (fun s => rfl) (fun s m h₁ h₂ => ?_)
+  · have h1 := congrArg (fun q => q x) (s.fst.hom.comm σ)
+    have h2 := congrArg (fun q => q x) (s.snd.hom.comm σ)
+    rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h1 h2
+    exact Prod.ext h1 h2
+  · ext x
+    exact Prod.ext
+      (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₁)
+      (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₂)
+
 end ModularCurves
