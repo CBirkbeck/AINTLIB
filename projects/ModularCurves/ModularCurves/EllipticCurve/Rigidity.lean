@@ -373,7 +373,47 @@ theorem isOpen_germMap_ideal_eq_bot {X : Scheme.{u}} [IsLocallyNoetherian X]
     (U : X.affineOpens) (I : Ideal Γ(X, U.1)) :
     IsOpen {z : X | ∃ hz : z ∈ U.1,
       Ideal.map (X.presheaf.germ U.1 z hz).hom I = ⊥} := by
-  sorry
+  rw [isOpen_iff_forall_mem_open]
+  rintro z ⟨hz, hbot⟩
+  haveI : IsNoetherianRing Γ(X, U.1) := IsLocallyNoetherian.component_noetherian U
+  -- the stalk at `z` is the localization of `Γ(U)` at the prime of `z`
+  letI := X.presheaf.algebra_section_stalk ⟨z, hz⟩
+  haveI hloc := U.2.isLocalization_stalk ⟨z, hz⟩
+  have halg : algebraMap Γ(X, U.1) (X.presheaf.stalk z) =
+      (X.presheaf.germ U.1 z hz).hom := rfl
+  -- engine input: every element of `I` is annihilated away from the prime of `z`
+  have hann : ∀ a ∈ I, ∃ s ∉ (U.2.primeIdealOf ⟨z, hz⟩).asIdeal, s * a = 0 := by
+    intro a ha
+    have hgerm : (X.presheaf.germ U.1 z hz).hom a = 0 := by
+      have : (X.presheaf.germ U.1 z hz).hom a ∈
+          Ideal.map (X.presheaf.germ U.1 z hz).hom I := Ideal.mem_map_of_mem _ ha
+      rw [hbot] at this
+      simpa using this
+    have := (IsLocalization.map_eq_zero_iff
+      (U.2.primeIdealOf ⟨z, hz⟩).asIdeal.primeCompl
+      (X.presheaf.stalk z) a).mp (by rwa [halg])
+    obtain ⟨⟨s, hs⟩, hsa⟩ := this
+    exact ⟨s, hs, hsa⟩
+  obtain ⟨s, hs, hskill⟩ := Ideal.exists_notMem_mul_eq_zero_of_fg
+    (IsNoetherian.noetherian I) hann
+  -- the basic open of the common annihilator is the required neighbourhood
+  refine ⟨X.basicOpen s, fun w hw => ?_, (X.basicOpen s).2, ?_⟩
+  · have hwU : w ∈ U.1 := X.basicOpen_le s hw
+    refine ⟨hwU, ?_⟩
+    have hunit : IsUnit ((X.presheaf.germ U.1 w hwU).hom s) :=
+      (Scheme.mem_basicOpen X s w hwU).mp hw
+    rw [eq_bot_iff, Ideal.map_le_iff_le_comap]
+    intro a ha
+    have : (X.presheaf.germ U.1 w hwU).hom (s * a) = 0 := by rw [hskill a ha, map_zero]
+    rw [map_mul] at this
+    simpa [hunit.mul_right_eq_zero] using this
+  · have hmem : z ∈ X.basicOpen s := by
+      rw [Scheme.mem_basicOpen X s z hz]
+      have := IsLocalization.AtPrime.isUnit_to_map_iff (X.presheaf.stalk z)
+        (U.2.primeIdealOf ⟨z, hz⟩).asIdeal s
+      rw [halg] at this
+      exact this.mpr hs
+    exact hmem
 
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
