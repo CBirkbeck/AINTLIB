@@ -94,42 +94,20 @@ theorem exists_unique_factor_of_isAffine {X S : Scheme.{u}} {p : X ⟶ S}
   exact ⟨h₀, (hfac h₀).mpr happ, fun h' hh' =>
     hom_ext_of_isAffine (((hfac h').mp hh').trans happ.symm)⟩
 
-/-- **(T-W7.7a-R1′, GIT case 1, generalized)** Rigidity for morphisms with set-theoretically
-constant image: a morphism `f : X ⟶ Y` over `S` whose topological image is a single point
-(GIT's "`f(X_s)` is set-theoretically a single point", which over a one-point base says
-exactly this), with `X` universally `O`-connected over `S` and carrying a section, factors
-through the section `η := e ≫ f` of `Y ⟶ S`.
-
-Two deliberate deltas against GIT's phrasing, both strengthenings (recorded on the v3 board):
-the one-point-base hypothesis is dropped — the `Γ`-argument never uses it, and the general
-form is what the Artinian thickening step of case 2 actually consumes — and no separatedness
-of `Y ⟶ S` is needed. (The skeleton's original statement without the constant-image
-hypothesis was FALSE — take `f = 𝟙 (ℙ¹)` over a field — caught at implementation.)
-Source: GIT p. 115, case 1 (verbatim in quotes file). -/
-theorem rigidity_of_subsingleton_range {X Y S : Scheme.{u}}
+/-- **(T-W7.7a-R1′ core, GIT case 1)** Rigidity for morphisms landing in one affine chart:
+a morphism `f : X ⟶ Y` over `S` whose topological image is contained in the range of an
+open immersion from an affine scheme, with `X` universally `O`-connected over `S` and
+carrying a section, factors through the section `η := e ≫ f` of `Y ⟶ S`. The chart is a
+parameter (rather than produced from a constant-image hypothesis) so that the seed step of
+case 2 can feed it the affine `V ×_S Spec κ(s)` without any point-injectivity reasoning
+about fibre products. Source: GIT p. 115, case 1 (verbatim in quotes file). -/
+theorem rigidity_of_range_le_affine {X Y S : Scheme.{u}}
     {p : X ⟶ S} (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
     {q : Y ⟶ S} (f : X ⟶ Y) (hf : f ≫ q = p)
-    (hone : Set.Subsingleton (Set.range f.base)) :
+    {V : Scheme.{u}} (u : V ⟶ Y) [IsOpenImmersion u] [IsAffine V]
+    (hrange : Set.range f.base ⊆ Set.range u.base) :
     ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
   refine ⟨e ≫ f, by rw [Category.assoc, hf, he], ?_⟩
-  -- if `X` is empty there is nothing to prove
-  by_cases hX : IsEmpty X
-  · haveI := hX
-    exact isInitialOfIsEmpty.hom_ext _ _
-  rw [not_isEmpty_iff] at hX
-  obtain ⟨x₀⟩ := hX
-  -- both `f` and any candidate factorization land in one affine chart of `Y` at `y₀ := f x₀`
-  -- (packaged existentially so that the chart's type does not mention `f`, keeping
-  -- rewrite motives type-correct)
-  obtain ⟨V, u, hVimm, hVaff, hrange⟩ :
-      ∃ (V : Scheme.{u}) (u : V ⟶ Y), IsOpenImmersion u ∧ IsAffine V ∧
-        Set.range f.base ⊆ Set.range u.base := by
-    refine ⟨_, Y.affineCover.f (Y.affineCover.idx (f.base x₀)), inferInstance,
-      inferInstance, fun y hy => ?_⟩
-    rw [hone hy ⟨x₀, rfl⟩]
-    exact Y.affineCover.covers (f.base x₀)
-  haveI := hVimm
-  haveI := hVaff
   set f' : X ⟶ V := IsOpenImmersion.lift u f hrange with hf'
   have hfac : f' ≫ u = f := IsOpenImmersion.lift_fac u f hrange
   -- `X` is the pullback of `p` along `𝟙 S`
@@ -153,6 +131,34 @@ theorem rigidity_of_subsingleton_range {X Y S : Scheme.{u}}
       ((congrArg (· ≫ (h ≫ u)) he).trans (Category.id_comp _)))
   rw [huf]
   exact hfeq
+
+/-- **(T-W7.7a-R1′, GIT case 1, generalized)** Rigidity for morphisms with set-theoretically
+constant image: a morphism `f : X ⟶ Y` over `S` whose topological image is a single point
+(GIT's "`f(X_s)` is set-theoretically a single point", which over a one-point base says
+exactly this), with `X` universally `O`-connected over `S` and carrying a section, factors
+through the section `η := e ≫ f` of `Y ⟶ S`.
+
+Two deliberate deltas against GIT's phrasing, both strengthenings (recorded on the v3 board):
+the one-point-base hypothesis is dropped — the `Γ`-argument never uses it, and the general
+form is what the Artinian thickening step of case 2 actually consumes — and no separatedness
+of `Y ⟶ S` is needed. (The skeleton's original statement without the constant-image
+hypothesis was FALSE — take `f = 𝟙 (ℙ¹)` over a field — caught at implementation.)
+Source: GIT p. 115, case 1 (verbatim in quotes file). -/
+theorem rigidity_of_subsingleton_range {X Y S : Scheme.{u}}
+    {p : X ⟶ S} (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    {q : Y ⟶ S} (f : X ⟶ Y) (hf : f ≫ q = p)
+    (hone : Set.Subsingleton (Set.range f.base)) :
+    ∃ sec : S ⟶ Y, sec ≫ q = 𝟙 S ∧ f = p ≫ sec := by
+  by_cases hX : IsEmpty X
+  · haveI := hX
+    exact ⟨e ≫ f, by rw [Category.assoc, hf, he], isInitialOfIsEmpty.hom_ext _ _⟩
+  rw [not_isEmpty_iff] at hX
+  obtain ⟨x₀⟩ := hX
+  exact rigidity_of_range_le_affine hp e he f hf
+    (Y.affineCover.f (Y.affineCover.idx (f.base x₀)))
+    (fun y hy => by
+      rw [hone hy ⟨x₀, rfl⟩]
+      exact Y.affineCover.covers (f.base x₀))
 
 /-- **(T-W7.r2 prep)** Universal `O`-connectedness is stable under base change: the second
 projection of the pullback along any `g : T ⟶ S` is universally `O`-connected over `T`
