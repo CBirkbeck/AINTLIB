@@ -82,6 +82,37 @@ theorem levelledCurve_descent_of_torsor {T T' : Scheme.{u}} (f : T' ⟶ T)
       ((⟨E.baseChange f, EllipticCurve.FullLevelPt.pullAlong f L⟩ :
           Σ E₀ : EllipticCurve T', E₀.FullLevelPt N) ≅ ⟨E', L'⟩) := by sorry
 
+/-- **(stream-DESC, morphism descent along an effective epimorphism — the geometric heart
+of fppf gluing.)** If a morphism `ζ' : T' ⟶ Z` coequalizes the kernel pair of `f`
+(`pr₁ ≫ ζ' = pr₂ ≫ ζ'`), it factors uniquely through `f`. For an **fppf cover** `f`
+(flat + locally of finite presentation + surjective) this hypothesis makes `f` an
+effective epimorphism (mathlib's `EffectiveEpi` instance, from subcanonicity of the fppf
+topology, `AlgebraicGeometry.Sites.Fpqc`), so maps to any scheme `Z` descend — this is
+the "descent of morphisms" half of subcanonicity that `moduliProblem_fppf_descent`
+consumes. Source: SGA 1 VIII (fppf covers are effective epis); Stacks 023Q. -/
+theorem descend_hom_of_effectiveEpi {T T' Z : Scheme.{u}} (f : T' ⟶ T) [EffectiveEpi f]
+    (ζ' : T' ⟶ Z)
+    (hcoeq : Limits.pullback.fst f f ≫ ζ' = Limits.pullback.snd f f ≫ ζ') :
+    ∃! ζ : T ⟶ Z, f ≫ ζ = ζ' := by
+  -- Any pair `g₁, g₂` coequalized by `f` factors through the kernel pair, so `ζ'`
+  -- coequalizes it too.
+  have h : ∀ {W : Scheme.{u}} (g₁ g₂ : W ⟶ T'), g₁ ≫ f = g₂ ≫ f → g₁ ≫ ζ' = g₂ ≫ ζ' := by
+    intro W g₁ g₂ hg
+    have hl1 : Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.fst f f = g₁ :=
+      Limits.pullback.lift_fst _ _ _
+    have hl2 : Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.snd f f = g₂ :=
+      Limits.pullback.lift_snd _ _ _
+    calc g₁ ≫ ζ'
+        = (Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.fst f f) ≫ ζ' := by rw [hl1]
+      _ = Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.fst f f ≫ ζ' := by
+          rw [Category.assoc]
+      _ = Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.snd f f ≫ ζ' := by rw [hcoeq]
+      _ = (Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.snd f f) ≫ ζ' := by
+          rw [Category.assoc]
+      _ = g₂ ≫ ζ' := by rw [hl2]
+  exact ⟨EffectiveEpi.desc f ζ' h, EffectiveEpi.fac f ζ' h,
+    fun ζ hζ => EffectiveEpi.uniq f ζ' h ζ hζ⟩
+
 /-- **(T-E11, separatedness half of "the moduli problems are fppf sheaves")** For a
 relatively representable moduli problem `P`, sections of `P` are determined fppf-locally:
 restriction along an fppf cover `f : T' ⟶ T` is injective on `P`-values. (The gluing half
