@@ -4149,8 +4149,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (clopen-decomposition argument: restrict a pair-hom to the 1-summand,
     the ι_γ-range preimages are a finite clopen partition of S, connectedness
     picks the unique γ, then hom = left γ⁻¹ by equivariance — attack finding
-    q-lane.md; needs PreconnectedSpace vocabulary) and the (descent-gated)
-    essential-image statement (stackification-level comparison).
+    q-lane.md; needs PreconnectedSpace vocabulary;
+    **`isClopen_range_sigmaι` LANDED** 2026-07-07T06:00Z — clopen ranges of
+    coproduct components, the partition ingredient; GOTCHA: no Sigma.ι-headed
+    IsOpenImmersion instance exists, route via inferInstanceAs at the
+    colimit.ι head, Gluing.lean:813) and the (descent-gated) essential-image
+    statement (stackification-level comparison).
   - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
     (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
     (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
