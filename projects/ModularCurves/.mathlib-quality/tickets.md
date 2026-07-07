@@ -5060,10 +5060,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   iso-invariant for free), `pointedIsoCoordEquiv_coordX`/`_coordY` (b3, several hundred
   lines, shared-witness ∃-bundles documented). Source status: DESIGN-DERIVED (decomposition.md
   addendum) — no verbatim KM/formulaire quote available (image-only scans).
-  - **Status**: blocked · **Depends**: T-W7.0i-a (done), **T-W7.0i-b (in_progress,
-    beastmode-A — `locallyWeierstrass_pushforward_O_eq_O` still `sorry` @
-    PoleFiltration.lean:~2594)**, T-W7.mvc (**DONE** 2026-07-07 lane-P5) · **Type**:
-    def + 5 theorems
+  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T12:55Z ·
+    **Depends**: T-W7.0i-a (done), T-W7.0i-b (**DONE** beastmode-A 2026-07-07 —
+    PoleFiltration.lean is sorry-free incl. `locallyWeierstrass_pushforward_O_eq_O`),
+    T-W7.mvc (**DONE** 2026-07-07 lane-P5) · **Type**: def + 5 theorems
   - **Blocker note (P5, 2026-07-07)**: T-W7.mvc unblocked, but b2 `pointedIsoCoordEquiv_filtration`
     (the intrinsic-filtration bridge) GATES all 6 leaves and needs the pole-filtration theory
     from T-W7.0i-b (stream-W, beastmode-A's lane — DON'T cross). `projModelVCIso_injective` is
