@@ -146,9 +146,16 @@ Independent lanes — no shared files, no shared dependencies until the marked j
 **All six lanes are now unblocked** — every lane can take a worker immediately. Joins: **0g** needs
 P0+P1+P2 · **0h** needs P1 · **1/2/3** need 0g+0h+P3+P5 · **T-W7a milestone** joins P0–P3+P5 ·
 **T-W7b** joins P4+P3 (+T-W7.6); only the arbitrary-`S` polish T-W7.8 remains gated (mathlib
-spreading-out infra). Suggested file split to keep workers collision-free:
-`GroupLawConstruction.lean` (P0/P1), `PointsDictionary.lean` (P2), `PoleFiltration.lean` (P3),
-`Rigidity.lean` (P4), `WeierstrassAtlasBundle.lean` (P5).
+spreading-out infra). **File split (SKELETON WRITTEN, `/develop --decompose` 2026-07-07 — all
+seven build green, 72 sorries):** `GroupLawConstruction.lean` (P0/P1),
+`PointsDictionary.lean` (P2), `PoleFiltration.lean` + `ModelVariableChange.lean` (P3),
+`Rigidity.lean` (P4), `WeierstrassAtlasBundle.lean` (P5), `GroupLawDescent.lean` (join).
+Leaf-level statements, sources, attack logs: `decomposition.md`. Design deltas from the
+decompose pass: `mulModelHom` is GENERAL-`W` (axioms transport along `classifyRingHom`
+naturality rather than per-chart base change of `E_U`-axioms); integrality (0e) weakened to
+REDUCEDNESS + a field-points ext principle (`hom_ext_of_forall_specPoint`) replacing the
+generic-point route; `Point.add`'s mathlib `[DecidableEq K]` gate surfaced (instance-argument
+pattern).
 
 ## Cleanup cadence
 
