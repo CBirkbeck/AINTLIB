@@ -4035,9 +4035,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (reverse via unit-cancellation kept in the `u⁻¹` atom — `IsUnit.mul_right_eq_zero`), `ivcX`/`ivcY`
   + composition identities, `pointMap_injective`/`surjective`, and **`pointEquiv : W.Point ≃+
   (C•W).Point`** (`AddEquiv.ofBijective`). The elliptic-curve group law is invariant under a
-  Weierstrass coordinate change AS A FULL GROUP ISOMORPHISM, axiom-clean. NEXT: the SCHEME-level
-  descent for the LocallyWeierstrass group scheme (retires the T-A6 gate) — a separate
-  scheme-theoretic construction consuming this affine/fibrewise invariance.
+  Weierstrass coordinate change AS A FULL GROUP ISOMORPHISM, axiom-clean. Also `pointEquiv_zsmul`
+  (carries `n`-torsion to `n`-torsion → level-structure invariance, feeds T-W8).
+  **SCOPING (2026-07-07)**: the SCHEME-level descent (retiring T-A6) is a LARGE foundational phase,
+  not a quick next step — mathlib's elliptic-curve group law is **field-only**
+  (`Affine.Point`/`Projective.Point.instAddCommGroup` need `[Field F]`); there is **no group-scheme
+  structure over a general base** (only the categorical `MonObj`/group-object machinery). So the
+  descent needs the elliptic-curve group-SCHEME structure (mult morphism `E ×_S E → E`) built
+  first — its own sub-project (route via the abelEnrichment/T-A6 machinery or a dedicated
+  group-scheme development). The affine/fibrewise invariance (this ticket) is the reusable input.
 
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
