@@ -6199,19 +6199,27 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
 - **Mathlib lemmas**: T-LC1 `Module.free_of_flat_of_fibre_free`, `Module.Flat.lTensor_exact`, `isConstructible_basicOpen`,
   the resolution API (DEV1b), `Localization.AtPrime`. **Sources**: Stacks 00RC.
 
-### [T-DEV2a] flatness descends along a directed colimit of rings (Stacks 07RF module form)
-- **Status**: open · **File**: ForMathlib/NoethApprox.lean (or new FlatDescentLimit.lean) · **Depends on**: (isOpen_flatLocus ⟸ DEV1c) · **Type**: theorem
-- **Statement**: `M = colimᵢ Mᵢ` (fp data) over `R = colimᵢ Rᵢ`, M flat over R ⟹ `Mᵢ` flat over `Rᵢ` for large i.
-- **Proof sketch**: `flat_of_flatLocus_univ` reduces "Mᵢ flat over Rᵢ" to "flat locus = univ"; `isOpen_flatLocus` (DEV1c) makes it
-  open; the colimit's flatness ⟹ the open flat locus at the colimit = univ ⟹ by quasi-compactness (`AffineTransitionLimit`
-  machinery) some finite stage's flat locus is univ. ~200-300 lines.
-- **Mathlib lemmas**: `flat_of_flatLocus_univ` (ours), `isOpen_flatLocus` (ours), `AffineTransitionLimit` limit/quasi-compact
-  lemmas (`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`, etc.). **Sources**: Stacks 07RF, 10.128.3.
+### [T-DEV2a/2b] exists_flatLocus_univ_stage (07RF geometric box) — DONE, residual isolated to 00R6
+- **Status**: DONE-modulo-[T-00R6] · commit e037338a · **File**: ForMathlib/NoethApprox.lean (build green 8616)
+- Box `exists_flatLocus_univ_stage` sorry GONE. Assembled from `flatLocus_eq_univ_of_flat` (PROVEN axiom-clean,
+  converse of flat_of_flatLocus_univ) + the isolated residual `exists_subalgebra_flat_baseChange` (= T-00R6).
+- **STRUCTURAL FINDING**: naive openness+quasi-compactness has an IMAGE GAP (`Spec(R⊗A₀)→Spec(Rᵢ⊗A₀)` non-surjective,
+  ℤ[1/n]→ℚ), so fixed-space `elim_directed_cover` gives only ψ⁻¹(U)=univ, never U=univ. Honest route = cofiltered
+  limit of spectra. `exists_noetherian_descent_flat` axioms sorryAx ← 00R6 only.
 
-### [T-DEV2b] fill `exists_flatLocus_univ_stage`
-- **Status**: open · **File**: ForMathlib/NoethApprox.lean · **Depends on**: T-DEV2a · **Type**: theorem
-- **Statement**: the boxed lemma (∃ noeth enlargement R₁ with flat locus univ). Thin wrapper of T-DEV2a onto the
-  NoethApprox colimit (R = colim fg-ℤ-subalgebras). ~50-100 lines. Discharges NoethApprox's box (NOETH3 clean).
+### [T-00R6] colimit flat descent — fill `exists_subalgebra_flat_baseChange` (Stacks 00R6 = 10.128.3) — LAST HARD CORE
+- **Status**: open (dispatch after DEV1c lands so isOpen_flatLocus is clean) · **File**: ForMathlib/NoethApprox.lean:215 · **Depends on**: isOpen_flatLocus (⟸ DEV1c), AffineTransitionLimit · **Type**: theorem
+- **Statement**: `Module.Flat R (R⊗[R₀]A₀) → ∃ R₁ (h:R₀≤R₁), IsNoetherianRing R₁ ∧ Module.Flat R₁ (R₁⊗[R₀]A₀)` — flatness of the
+  colimit descends to a finite fg-ℤ stage. THE SHARED LEAF: FLAT1's `sliceAux_exists_noetherianStage` also needs it (for A and A/(f)).
+- **Proof sketch (cofiltered-limit-of-spectra, avoids the image gap)**: the NON-flat locus `Zᵢ ⊆ Spec(Rᵢ⊗A₀)` is CLOSED
+  (complement of `isOpen_flatLocus` over the Noetherian `Rᵢ`, ⟸ DEV1c); `Spec(R⊗A₀) = lim_i Spec(Rᵢ⊗A₀)` as a cofiltered
+  limit of spectral spaces; the non-flat locus is limit-compatible (`Z = lim Zᵢ`, flatness base-changes); `M` flat over R
+  ⟹ `Z = ∅` ⟹ by AffineTransitionLimit `exists_mem_of_isClosed_of_nonempty'` (Stacks 01Z3: a cofiltered limit of nonempty
+  closeds is nonempty, contrapositive) some `Zᵢ = ∅` ⟹ `Rᵢ⊗A₀` flat over `Rᵢ`. Wire `Spec(R⊗A₀)` into the AffineTransitionLimit
+  cone (CT plumbing, engine present). ~250-450 lines, substantial but BOUNDED (not B3). Closing it ⟹ DEV-2 clean.
+- **Mathlib**: `isOpen_flatLocus`/`flat_of_flatLocus_univ`/`flatLocus_eq_univ_of_flat` (ours), `AffineTransitionLimit`
+  (`Scheme.nonempty_of_isLimit` 01Z2, `exists_mem_of_isClosed_of_nonempty'` 01Z3, `exists_map_eq_top`/`exists_preimage_eq` 01Z4),
+  `Module.Flat.iff_forall_exists_factorization`. **Sources**: Stacks 00R6/10.128.3, EGA IV 11.2.6.
 
 ### [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box — DONE (2026-07-07, beastmode-D2), reduced to one leaf
 - **Status**: DONE-modulo-T-FLAT1-STAGE · **File**: LevelStructure/CartierDivisor.lean · commit c0ba1428
@@ -6228,12 +6236,13 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
 - **Statement**: given R→A fp with (f) such that A/(f) is R-flat and ·f is fibrewise-injective (hfib), plus
   a relation f·a=0, descend the whole datum to a fg-ℤ Noetherian base R₀⊆R: A≃R⊗_{R₀}A₀, A₀/(f₀) flat over R₀,
   hfib₀, and reflect f·a=0 to f₀·a₀=0. (Then `sliceAux_nzd_of_noetherianBase` at R₀ + pull back a=0.)
+- **Depends on**: T-00R6 (×2 for A and A/(f) — generalise its statement or apply twice), T-FLAT1-INJ, NOETH1/2 (all ours).
 - **Proof sketch**: three spreadings to a common stage + a colimit reflection:
-  (i) A flat over R descends — T-DEV2a with M=A (also NOETH1/2 give A≃R⊗A₀ fp);
-  (ii) A/(f) flat over R descends — T-DEV2a with M=A/(f);
+  (i) A flat over R descends — **T-00R6** with M=A (also NOETH1/2 give A≃R⊗A₀ fp);
+  (ii) A/(f) flat over R descends — **T-00R6** with M=A/(f);
   (iii) hfib (·f injective on every fibre) descends — T-FLAT1-INJ (injectivity-spreading, 05LN);
   (iv) reflect f·a=0 back to a finite stage (filtered-colimit bookkeeping on the fp presentation).
-  Take the max stage; apply `sliceAux_nzd_of_noetherianBase`; base-change a₀=0 back to a=0. ~150-250 lines.
+  Take the max stage; apply `sliceAux_nzd_of_noetherianBase`; base-change a₀=0 back to a=0. ~150-250 lines assembly on T-00R6.
 - **Mathlib/ours**: T-DEV2a (07RF, ours), NOETH1/2 `exists_noetherian_descent` (ours), `AffineTransitionLimit`
   colimit reflection, `sliceAux_nzd_of_noetherianBase` (ours, proven). **Sources**: EGA IV 11.2.6, Stacks 07RF/05LN.
 - Discharging T-FLAT1-STAGE ⟹ FLAT1 box axiom-clean ⟹ **entire D-chain axiom-clean**.
