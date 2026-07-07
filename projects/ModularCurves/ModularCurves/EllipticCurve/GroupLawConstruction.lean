@@ -481,7 +481,27 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     projModelPointsEquiv W K
         ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ =
       -(projModelPointsEquiv W K P) := by
-  sorry
+  by_cases hZ : InZChart W P
+  · -- Z-chart case: coordinate leaf L2. `negModelHom` acts on the dehomogenised `Z`-chart
+    -- coordinates as `X₀/X₂ ↦ X₀/X₂`, `X₁/X₂ ↦ (−X₁ − a₁X₀ − a₃X₂)/X₂`, so the composite's
+    -- coordinates are `(x, W.negY x y)`; then `projModelPointsEquiv_some` on both sides and
+    -- `Affine.Point.neg_some` (`negY x y = −y − a₁x − a₃`) finish.
+    sorry
+  · -- Infinity case: off the `Z`-chart, `P` is the point at infinity `[0:1:0]` (its morphism is
+    -- the zero section), which `negModelHom` fixes (`negModelHom_zero`); both sides are `0`.
+    have hP : P.1 = Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W :=
+      specPoint_eq_zero_of_not_inZ W K P hZ
+    have hRHS : projModelPointsEquiv W K P = 0 := by
+      rw [← projModelPointsEquiv_zero W K]
+      exact congrArg (projModelPointsEquiv W K) (Subtype.ext hP)
+    have hLHS : projModelPointsEquiv W K
+        ⟨P.1 ≫ negModelHom W, by rw [Category.assoc, negModelHom_π, P.2]⟩ = 0 := by
+      rw [← projModelPointsEquiv_zero W K]
+      refine congrArg (projModelPointsEquiv W K) (Subtype.ext ?_)
+      show P.1 ≫ negModelHom W = _
+      rw [hP, Category.assoc, negModelHom_zero]
+    rw [hLHS, hRHS]
+    exact WeierstrassCurve.Affine.Point.neg_zero.symm
 
 end
 
