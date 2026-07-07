@@ -4311,8 +4311,10 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Generality**: any `S`, any geometric point — reusable by T-H5/T-G3 later.
 
 ### [T-H7d] geometric point of a nonempty `R`-scheme with `N` invertible (sub-ticket)
-- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-07T23:13Z · **File**:
-  Moduli/GammaH.lean (helpers) ·
+- **Status**: **DONE — was already landed in-file** (board was stale; verified sorry-free
+  by fable-P4, 2026-07-08: `EllObj.exists_geometricPoint` at GammaH.lean:836 is complete,
+  via `Spec.preimage` of the composite to `Spec R`; claim released, duplicate insert
+  removed per the no-dedup rule) · **File**: Moduli/GammaH.lean (helpers) ·
   **Parent**: T-H7 · **Depends on**: none · **Type**: lemma
 - **Statement**: `(X : EllObj R) (hne : Nonempty X.base) (N : ℕ)
   (hinv : IsUnit (N : R)) : ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
