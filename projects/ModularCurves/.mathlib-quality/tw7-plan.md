@@ -47,13 +47,21 @@ Invent. Math. 79 (1985) ✓ (GDZ scan); ④ Mumford *Abelian Varieties* ✓ (sca
   with precomputed cofactors, split per coordinate; NO maxHeartbeats); (c4) glue
   (`Scheme.Cover.glueMorphisms` ⓜ); (c5) lands on the curve + over `U` (identities mod relations);
   (c6) restriction to the affine secant open = mathlib `addX`/`addY` formulas (feeds 0g and 0h).
-- **T-W7.0e `E_U^n` integral** ⚙ route: "smooth over integral base + geometrically integral fibres ⟹
-  integral" (check mathlib at implementation; else the specialized chart/generic-fibre fallback —
-  both sketched in reply §Q4).
-- **T-W7.0f points dictionary** ⚙ over any field `L`: points of `projModel W` valued in `L` =
-  `W.toAffine.Point` (chart casework `D₊(Y)/D₊(Z)`; nonsingularity from `Δ` unit ⓜ-adjacent). Plus:
-  the generic-point inclusion `Spec κ(η) ⟶ E_U^n` is dominant (`fromSpecResidueField` ⓜ + closure of
-  `{η}` = ⊤).
+- **T-W7.0e `E_U^n` integral** ✅ DONE (commit 9b47bd47, axiom-clean). The "smooth ⟹ geometrically
+  reduced" engine is ABSENT from mathlib (verified: no `isReduced_of_smoothOfRelativeDimension`, no
+  `GeometricallyRegular`), so the chart/domain fallback was taken: `IsDomain (projCoordRing W)`
+  [`ForMathlib/WeierstrassProjectivePrime.lean` — the projective Weierstrass cubic is prime via
+  Eisenstein at `Z` after extracting `X`; no `Δ ≠ 0` needed] + `Proj` of a graded domain is integral
+  [`ForMathlib/ProjIntegral.lean`, `Proj.isIntegral_of_isDomain`, upstreamable] ⟹
+  `IsIntegral (projModel W_K)`; base-change transport (`isPullback_projModelBaseChange` +
+  `geometrically_iff_of_isClosedUnderIsomorphisms`) ⟹ `GeometricallyIntegral universalCurveπ`, hence
+  `IsIntegral E_U` and `IsIntegral (E_U^{×_U n})` for n = 2, 3. In `Moduli/PointsDictionary.lean`.
+- **T-W7.0f points dictionary** — dictionary ✅ DONE (axiom-clean): `projModelPointsEquiv`
+  (`SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point`) +
+  `projModelPointsEquiv_zero` (pointed, `[0:1:0] ↦ 0`), choice-extracted from the proven existential
+  `projModel_points` (T-A2e), in `Moduli/PointsDictionary.lean`. REMAINING: the generic-point
+  inclusion `Spec κ(η) ⟶ E_U^n` is dominant (`fromSpecResidueField` ⓜ + closure of `{η}` = ⊤ — now
+  backed by `E_U^n` integral).
 - **T-W7.0g atlas group axioms** ⚙ each axiom = two morphisms `E_U^n ⟶ E_U`; equal ⟸
   (`ext_of_isDominant` ⓜ; source reduced by 0e, target separated) agreement at `η` ⟸ 0f dictionary +
   0c(c6) + mathlib `Affine.Point.instAddCommGroup` over `L = κ(η)` (`add_assoc`, `add_comm`,

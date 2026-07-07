@@ -27,6 +27,8 @@ open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
+universe u
+
 namespace ModularCurves
 
 /-! ## T-W7.0a — the atlas ring is a domain (`Δ ≠ 0`) -/
@@ -146,5 +148,25 @@ instance : IsIntegral (pullback universalCurveπ universalCurveπ) := inferInsta
 (the source of the associativity axiom `E_U^3 ⟶ E_U`). -/
 instance : IsIntegral (pullback universalCurveπ (pullback.snd universalCurveπ universalCurveπ ≫
     universalCurveπ)) := inferInstance
+
+/-! ## T-W7.0f — the field-points dictionary (canonical form) -/
+
+/-- **(T-W7.0f-i — the field-points dictionary)** For an elliptic Weierstrass curve `W` over `R`
+and any field `K`, the `K`-points of the projective model `projModel W` biject with mathlib's
+affine points `(W.baseChange K).toAffine.Point`. This is the canonical (choice-extracted) form of
+the proven existential dictionary `projModel_points` (T-A2e), and is the identification through
+which the group law on `E_U` is transported from `WeierstrassCurve.Affine.Point` over fields. -/
+noncomputable def projModelPointsEquiv {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] (K : Type u) [Field K] [Algebra R K] :
+    SpecPoints (projModel W) (projModelπ W) K ≃ (W.baseChange K).toAffine.Point :=
+  (projModel_points W ‹W.IsElliptic› K).choose
+
+/-- **(T-W7.0f-ii — the dictionary is pointed)** The point at infinity `[0:1:0]` — the zero
+section evaluated over `K` — corresponds under `projModelPointsEquiv` to the group identity `0`. -/
+theorem projModelPointsEquiv_zero {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] (K : Type u) [Field K] [Algebra R K] :
+    projModelPointsEquiv W K ⟨Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ projModelZero W, by
+      rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ = 0 :=
+  (projModel_points W ‹W.IsElliptic› K).choose_spec
 
 end ModularCurves
