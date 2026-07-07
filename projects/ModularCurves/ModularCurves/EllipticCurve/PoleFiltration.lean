@@ -1506,6 +1506,136 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
       IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
       Polynomial.algebraMap_eq]
 
+/-- The `Y`-chart ring as the infinity-chart `AdjoinRoot` (ring form). -/
+private noncomputable def chartYRingEquiv (W : WeierstrassCurve R) :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) ≃+*
+      AdjoinRoot (infChartCubic W) :=
+  (chartCoordEquiv W 1).symm.trans (infChartQuotEquiv W).toRingEquiv
+
+/-- The `Z`-chart ring as mathlib's affine coordinate ring (ring form). -/
+private noncomputable def chartZRingEquiv (W : WeierstrassCurve R) :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≃+*
+      W.toAffine.CoordinateRing :=
+  (chartCoordEquiv W 2).symm.trans (chartZAffineEquiv W).toRingEquiv
+
+private lemma chartYRingEquiv_isLocalizationElem (W : WeierstrassCurve R) :
+    chartYRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+    infChartTElem W := by
+  unfold chartYRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 1).symm (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+      Ideal.Quotient.mk _ (MvPolynomial.X infChartT) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_X W 1 infChartT).symm
+  rw [hkey]
+  simp only [AlgEquiv.coe_ringEquiv]
+  show Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+    (Ideal.Quotient.mk _ (MvPolynomial.X infChartT)) = _
+  rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_t]
+  rfl
+
+private lemma chartYRingEquiv_sElem (W : WeierstrassCurve R) :
+    chartYRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 0)) =
+    AdjoinRoot.root (infChartCubic W) := by
+  unfold chartYRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 1).symm (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 0)) =
+      Ideal.Quotient.mk _ (MvPolynomial.X infChartS) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_X W 1 infChartS).symm
+  rw [hkey]
+  simp only [AlgEquiv.coe_ringEquiv]
+  show Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+    (Ideal.Quotient.mk _ (MvPolynomial.X infChartS)) = _
+  rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_s]
+  rfl
+
+private lemma chartYRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
+    chartYRingEquiv W ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      ((algebraMapGradeZero (projIdeal W)) r)) =
+    algebraMap R (AdjoinRoot (infChartCubic W)) r := by
+  unfold chartYRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 1).symm ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      ((algebraMapGradeZero (projIdeal W)) r)) =
+      Ideal.Quotient.mk _ (MvPolynomial.C r) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_C W 1 r).symm
+  rw [hkey]
+  have : (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
+      W.toProjective.polynomial}) (MvPolynomial.C r)) =
+      algebraMap R _ r := rfl
+  rw [this]
+  exact (infChartQuotEquiv W).commutes r
+
+private lemma chartZRingEquiv_x (W : WeierstrassCurve R) :
+    chartZRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)) =
+    coordX W := by
+  unfold chartZRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 2).symm (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)) =
+      Ideal.Quotient.mk _ (MvPolynomial.X affChartX) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_X W 2 affChartX).symm
+  rw [hkey]
+  simp only [AlgEquiv.coe_ringEquiv]
+  show Ideal.quotientEquivAlg _ _ (affChartPolyEquiv (R := R)) _
+    (Ideal.Quotient.mk _ (MvPolynomial.X affChartX)) = _
+  rw [Ideal.quotientEquivAlg_mk, affChartPolyEquiv_X_x]
+  rfl
+
+private lemma chartZRingEquiv_y (W : WeierstrassCurve R) :
+    chartZRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)) =
+    coordY W := by
+  unfold chartZRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 2).symm (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)) =
+      Ideal.Quotient.mk _ (MvPolynomial.X affChartY) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_X W 2 affChartY).symm
+  rw [hkey]
+  simp only [AlgEquiv.coe_ringEquiv]
+  show Ideal.quotientEquivAlg _ _ (affChartPolyEquiv (R := R)) _
+    (Ideal.Quotient.mk _ (MvPolynomial.X affChartY)) = _
+  rw [Ideal.quotientEquivAlg_mk, affChartPolyEquiv_X_y]
+  rfl
+
+private lemma chartZRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
+    chartZRingEquiv W ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      ((algebraMapGradeZero (projIdeal W)) r)) =
+    algebraMap R W.toAffine.CoordinateRing r := by
+  unfold chartZRingEquiv
+  rw [RingEquiv.trans_apply]
+  have hkey : (chartCoordEquiv W 2).symm ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      ((algebraMapGradeZero (projIdeal W)) r)) =
+      Ideal.Quotient.mk _ (MvPolynomial.C r) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartCoordEquiv_mk_C W 2 r).symm
+  rw [hkey]
+  have : (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 2
+      W.toProjective.polynomial}) (MvPolynomial.C r)) =
+      algebraMap R _ r := rfl
+  rw [this]
+  exact (chartZAffineEquiv W).commutes r
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
