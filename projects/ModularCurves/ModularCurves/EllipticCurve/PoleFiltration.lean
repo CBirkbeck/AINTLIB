@@ -1636,6 +1636,55 @@ private lemma chartZRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
   rw [this]
   exact (chartZAffineEquiv W).commutes r
 
+/-- **(the overlap transport)** The overlap chart ring `(A_{x₁x₂})₀` as the localization of
+the infinity chart at `t`: transport of `Away.isLocalization_mul` along `chartYRingEquiv`. -/
+private noncomputable def overlapLocEquiv (W : WeierstrassCurve R) :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≃+*
+      Localization.Away (infChartTElem W) :=
+  letI := (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _)).toAlgebra
+  haveI := HomogeneousLocalization.Away.isLocalization_mul
+    (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _) one_ne_zero
+  IsLocalization.ringEquivOfRingEquiv
+    (M := Submonoid.powers (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)))
+    (T := Submonoid.powers (infChartTElem W)) _ _
+    (chartYRingEquiv W)
+    (by
+      rw [Submonoid.map_powers]
+      rw [show (chartYRingEquiv W).toMonoidHom
+          (HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+        chartYRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) from rfl]
+      rw [chartYRingEquiv_isLocalizationElem])
+
+/-- Transport compatibility on the `Y`-chart side: `ℓ ∘ α₁ = algebraMap ∘ chartYRingEquiv`. -/
+private lemma overlapLocEquiv_awayMap_y (W : WeierstrassCurve R) (z :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) :
+    overlapLocEquiv W ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2)
+      (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _)) z) =
+    algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (chartYRingEquiv W z) := by
+  letI := (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _)).toAlgebra
+  haveI := HomogeneousLocalization.Away.isLocalization_mul
+    (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)
+    (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _) one_ne_zero
+  exact IsLocalization.ringEquivOfRingEquiv_eq _ _
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
