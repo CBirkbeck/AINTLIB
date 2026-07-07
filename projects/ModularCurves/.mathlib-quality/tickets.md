@@ -4487,3 +4487,10 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     Remaining: T-C0d-ii (concrete pairing map on fibres — model bridge, T-W7 edge)
     then T-C0e re-cut with the comparison spec. C-stream hands the baton to the
     A-lane spine (T-W7) exactly like the level-functor memberships.
+  - 2026-07-07T03:45Z: G6 — H+C gate-free frontiers drained; ALL remaining H/C items
+    funnel into T-W7 (A-lane spine, unstarted). Next unclaimed met-deps ticket:
+    **claiming T-SG1** (stream SG, definition + basic API of finite locally free
+    closed subgroup schemes of E/S; KM 1.4.1 quote in hand for SG2 downstream).
+    **Claimed**: beastmode-H, 2026-07-07T03:45Z, Status: in_progress. Planning
+    contact first (definition ticket — design against Torsion/CartierDivisor
+    vocabulary; adversarial attack block before any proof per standing rule 1).
