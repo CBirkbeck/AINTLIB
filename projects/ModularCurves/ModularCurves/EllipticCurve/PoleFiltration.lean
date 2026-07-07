@@ -3010,4 +3010,211 @@ private lemma overlap_coordOfShift_eq (W : WeierstrassCurve R) [Nontrivial R]
   have := hz j
   linear_combination this
 
+
+private lemma coordOfShift_zero (W : WeierstrassCurve R) (N n : ℕ) (j : Fin 3) :
+    coordOfShift W 0 N n j = 0 := by
+  unfold coordOfShift
+  simp
+
+/-- **(T-W7.1b-b2, membership ⟸ criterion)** If the overlap image of `f·sⁿ` is regular on
+the infinity chart, then `f` has pole order at most `n`. -/
+theorem mem_poleOrderFiltration_of_overlapMap (W : WeierstrassCurve R) [Nontrivial R]
+    {n : ℕ} {f : W.toAffine.CoordinateRing}
+    (hf : overlapMap W f * algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (AdjoinRoot.root (infChartCubic W)) ^ n ∈
+      Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)))) :
+    f ∈ poleOrderFiltration W n := by
+  obtain ⟨b, hb⟩ := hf
+  obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq f
+  have hof : ∀ g : Polynomial R,
+      overlapMap W (AdjoinRoot.of W.toAffine.polynomial g) =
+        Polynomial.eval₂ (((algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))).comp
+          ((algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))).comp Polynomial.C)))
+          (overlapXElem W) g := fun g => by
+    unfold overlapMap
+    rw [AdjoinRoot.lift_of, Polynomial.coe_eval₂RingHom]
+  rw [map_add, WeierstrassCurve.Affine.CoordinateRing.smul,
+    WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_mul,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C p) =
+      AdjoinRoot.of W.toAffine.polynomial p from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C q) =
+      AdjoinRoot.of W.toAffine.polynomial q from rfl,
+    show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+      coordY W from rfl,
+    overlapMap_coordY, hof p, hof q] at hb
+  have h1 := le_max_left p.natDegree (q.natDegree + 1)
+  have h2 := le_max_right p.natDegree (q.natDegree + 1)
+  set N := max p.natDegree (q.natDegree + 1) with hN
+  have hstar := fun j => overlap_coordOfShift_eq W p q b
+    (show p.natDegree < N + 1 by omega) (show q.natDegree < N by omega) hb.symm j
+  have hXvanish : ∀ (k : ℕ) (j : Fin 3), k < N →
+      (Polynomial.X ^ N * ((infChartBasis W).repr b j)).coeff k = 0 := fun k j hk =>
+    Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) k hk
+  -- step 1: the `y`-part obeys the bound (or vanishes)
+  have hqb : q = 0 ∨ 2 * q.natDegree + 3 ≤ n := by
+    by_contra hcon
+    push Not at hcon
+    obtain ⟨hq0, hqn⟩ := hcon
+    rcases Nat.lt_or_ge (2 * q.natDegree + 3) (2 * p.natDegree) with hcase | hcase
+    · -- the x-part leads; kill its top coefficient — contradiction with p ≠ 0
+      have hp0 : p ≠ 0 := by
+        intro h
+        rw [h] at hcase
+        simp at hcase
+      have hcoeff := congrArg (Polynomial.coeff ·
+        (N - p.natDegree + (p.natDegree + n) / 3))
+        (hstar ⟨(p.natDegree + n) % 3, by omega⟩)
+      simp only [Polynomial.coeff_add] at hcoeff
+      rw [coordOfShift_coeff_lead (W := W) (f := p) (N := N) (n := n)
+          (by omega) rfl,
+        coordOfShift_coeff_eq_zero (W := W) (f := q) (N := N - 1) (n := n)
+          (k := N - p.natDegree + (p.natDegree + n) / 3)
+          (j := ⟨(p.natDegree + n) % 3, by omega⟩) (by
+            have hj : ((⟨(p.natDegree + n) % 3, by omega⟩ : Fin 3) : ℕ) =
+              (p.natDegree + n) % 3 := rfl
+            omega),
+        hXvanish _ _ (by omega)] at hcoeff
+      exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+    · -- the y-part leads; kill its top coefficient — contradiction with q ≠ 0
+      have hcoeff := congrArg (Polynomial.coeff ·
+        (N - 1 - q.natDegree + (q.natDegree + n) / 3))
+        (hstar ⟨(q.natDegree + n) % 3, by omega⟩)
+      simp only [Polynomial.coeff_add] at hcoeff
+      rw [coordOfShift_coeff_lead (W := W) (f := q) (N := N - 1) (n := n)
+          (by omega) rfl,
+        coordOfShift_coeff_eq_zero (W := W) (f := p) (N := N) (n := n)
+          (k := N - 1 - q.natDegree + (q.natDegree + n) / 3)
+          (j := ⟨(q.natDegree + n) % 3, by omega⟩) (by
+            have hj : ((⟨(q.natDegree + n) % 3, by omega⟩ : Fin 3) : ℕ) =
+              (q.natDegree + n) % 3 := rfl
+            omega),
+        hXvanish _ _ (by omega)] at hcoeff
+      exact hq0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  -- step 2: the `x`-part obeys the bound (or vanishes)
+  have hpb : p = 0 ∨ 2 * p.natDegree ≤ n := by
+    by_contra hcon
+    push Not at hcon
+    obtain ⟨hp0, hpn⟩ := hcon
+    have hcoeff := congrArg (Polynomial.coeff ·
+      (N - p.natDegree + (p.natDegree + n) / 3))
+      (hstar ⟨(p.natDegree + n) % 3, by omega⟩)
+    simp only [Polynomial.coeff_add] at hcoeff
+    have hqside : (coordOfShift W q (N - 1) n
+        ⟨(p.natDegree + n) % 3, by omega⟩).coeff
+        (N - p.natDegree + (p.natDegree + n) / 3) = 0 := by
+      rcases hqb with rfl | hqn2
+      · rw [coordOfShift_zero]
+        simp
+      · exact coordOfShift_coeff_eq_zero (W := W) (f := q) (N := N - 1) (n := n)
+          (by
+            have hj : ((⟨(p.natDegree + n) % 3, by omega⟩ : Fin 3) : ℕ) =
+              (p.natDegree + n) % 3 := rfl
+            omega)
+    rw [coordOfShift_coeff_lead (W := W) (f := p) (N := N) (n := n)
+        (by omega) rfl, hqside,
+      hXvanish _ _ (by omega)] at hcoeff
+    exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
+  -- assemble the span membership
+  have hgenx : ∀ i : ℕ, 2 * i ≤ n →
+      (Polynomial.C (p.coeff i) * Polynomial.X ^ i) • (1 : W.toAffine.CoordinateRing) ∈
+      poleOrderFiltration W n := by
+    intro i hi
+    have hmem : coordX W ^ i ∈ poleOrderFiltration W n :=
+      Submodule.subset_span (Or.inl ⟨i, hi, rfl⟩)
+    have hrw : (Polynomial.C (p.coeff i) * Polynomial.X ^ i) •
+        (1 : W.toAffine.CoordinateRing) = p.coeff i • coordX W ^ i := by
+      rw [WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_mul, map_pow,
+        map_mul, map_pow]
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C (Polynomial.C (p.coeff i))) =
+        algebraMap R W.toAffine.CoordinateRing (p.coeff i) from rfl]
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C Polynomial.X) = coordX W from rfl]
+      rw [Algebra.smul_def]
+    rw [hrw]
+    exact Submodule.smul_mem _ _ hmem
+  have hgeny : ∀ i : ℕ, 2 * i + 3 ≤ n →
+      (Polynomial.C (q.coeff i) * Polynomial.X ^ i) •
+        WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X ∈
+      poleOrderFiltration W n := by
+    intro i hi
+    have hmem : coordX W ^ i * coordY W ∈ poleOrderFiltration W n :=
+      Submodule.subset_span (Or.inr ⟨i, hi, rfl⟩)
+    have hrw : (Polynomial.C (q.coeff i) * Polynomial.X ^ i) •
+        WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+        q.coeff i • (coordX W ^ i * coordY W) := by
+      rw [WeierstrassCurve.Affine.CoordinateRing.smul, map_mul, map_pow,
+        map_mul, map_pow]
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C (Polynomial.C (q.coeff i))) =
+        algebraMap R W.toAffine.CoordinateRing (q.coeff i) from rfl]
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C Polynomial.X) = coordX W from rfl]
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+        coordY W from rfl]
+      rw [Algebra.smul_def]
+      ring
+    rw [hrw]
+    exact Submodule.smul_mem _ _ hmem
+  have hpmem : p • (1 : W.toAffine.CoordinateRing) ∈ poleOrderFiltration W n := by
+    rcases hpb with rfl | hpn
+    · rw [zero_smul]
+      exact Submodule.zero_mem _
+    · have hexp : p • (1 : W.toAffine.CoordinateRing) =
+          ∑ i ∈ Finset.range (p.natDegree + 1),
+            ((Polynomial.monomial i) (p.coeff i)) • (1 : W.toAffine.CoordinateRing) := by
+        conv_lhs => rw [p.as_sum_range' (p.natDegree + 1) (Nat.lt_succ_self _)]
+        rw [Finset.sum_smul]
+      rw [hexp]
+      refine Submodule.sum_mem _ fun i hi => ?_
+      have hiN : i ≤ p.natDegree := by
+        have := Finset.mem_range.mp hi; omega
+      rw [show (Polynomial.monomial i) (p.coeff i) =
+        Polynomial.C (p.coeff i) * Polynomial.X ^ i from
+          (Polynomial.C_mul_X_pow_eq_monomial).symm]
+      exact hgenx i (by omega)
+  have hqmem : q • WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X ∈
+      poleOrderFiltration W n := by
+    rcases hqb with rfl | hqn
+    · rw [zero_smul]
+      exact Submodule.zero_mem _
+    · have hexp : q • WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X =
+          ∑ i ∈ Finset.range (q.natDegree + 1),
+            ((Polynomial.monomial i) (q.coeff i)) •
+              WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X := by
+        conv_lhs => rw [q.as_sum_range' (q.natDegree + 1) (Nat.lt_succ_self _)]
+        rw [Finset.sum_smul]
+      rw [hexp]
+      refine Submodule.sum_mem _ fun i hi => ?_
+      have hiN : i ≤ q.natDegree := by
+        have := Finset.mem_range.mp hi; omega
+      rw [show (Polynomial.monomial i) (q.coeff i) =
+        Polynomial.C (q.coeff i) * Polynomial.X ^ i from
+          (Polynomial.C_mul_X_pow_eq_monomial).symm]
+      exact hgeny i (by omega)
+  exact Submodule.add_mem _ hpmem hqmem
+
+
+/-- **(T-W7.1b-b2, the intrinsic criterion)** Membership in the pole-order filtration is
+intrinsic: `f ∈ Fₙ` iff the overlap image of `f·sⁿ` is regular on the infinity chart. The
+monomial-span filtration is thereby characterized without reference to the coordinates. -/
+theorem mem_poleOrderFiltration_iff (W : WeierstrassCurve R)
+    (f : W.toAffine.CoordinateRing) (n : ℕ) :
+    f ∈ poleOrderFiltration W n ↔
+    overlapMap W f * algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) (AdjoinRoot.root (infChartCubic W)) ^ n ∈
+    Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) := by
+  rcases subsingleton_or_nontrivial R with hR | hR
+  · constructor
+    · exact fun hf => overlapMap_mul_root_pow_mem_range_of_mem W hf
+    · intro _
+      haveI : Subsingleton W.toAffine.CoordinateRing := Module.subsingleton R _
+      rw [Subsingleton.elim f 0]
+      exact Submodule.zero_mem _
+  · exact ⟨fun hf => overlapMap_mul_root_pow_mem_range_of_mem W hf,
+      fun hf => mem_poleOrderFiltration_of_overlapMap W hf⟩
+
 end ModularCurves

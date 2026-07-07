@@ -644,36 +644,73 @@ private theorem gf_of_finite_module_killed {R : Type u} [CommRing R] [IsDomain R
     exact GF.of_exact (f.restrictScalars R) (q.restrictScalars R) hf hq hfq
       (h₁ hkill₁) (h₃ hkill₃)
 
-/-- **The domain case, injective core** (Stacks 051R main step, GF5 heart) — *boxed*.
+/-- **The geometric input of the domain case** (Stacks 051R main step, GF5 heart) — *boxed*.
 
-`B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B` (so `B` is
-`R`-torsion-free). Then `B` is generically free over `R`, *given* generic freeness for every
-domain of strictly smaller transcendence degree (the induction hypothesis `IH`).
+For a domain `B` finite type over the Noetherian domain `R` with `R ↪ B`, the data obtained by
+Noether-normalising the generic fibre `B ⊗_R Frac R` over `Frac R`
+(`exists_noetherNormalization_baseChange`, GF3): a polynomial ring `P = R[X₀,…,X_{d-1}]`
+(`d = trdeg R B`, so `d ≤ trdeg R B`) with `P ↪ B` over which `B` becomes module-finite after
+clearing denominators / inverting one nonzero element of `R` (generic finiteness), and the finite
+torsion cokernel `N` of a free `P`-submodule `P^r ↪ B`, annihilated by a nonzero `g ∈ P`
+(`exists_smul_eq_zero_of_notMem_support`, GF4), *together with* the reduction of `GF R B` to
+`GF R N` provided by the short exact sequence `0 → P^r → B → N → 0` (`P^r` is `R`-free by
+`GF.of_free`, so `GF.of_exact` reduces the middle term to the cokernel).
 
-Mathematically: Noether-normalise the generic fibre `B ⊗_R Frac R` over `Frac R`
-(`exists_noetherNormalization_baseChange`, GF3) to get `Frac R[y₁,…,y_d] ↪ B ⊗_R Frac R` finite
-with `d = trdeg R B`; clear denominators so the `yᵢ` lie in `B`, giving a polynomial subring
-`P = R[y₁,…,y_d] ↪ B` (`trdeg R P = d`) over which `B` becomes module-finite after inverting a
-single nonzero element of `R` (generic finiteness). A basis of `Frac B` over `Frac P` spans a
-free `P`-submodule `P^r ↪ B` with finite torsion cokernel `N`, killed by a nonzero `g ∈ P`
-(`exists_smul_eq_zero_of_notMem_support`, GF4). Since `P^r` is `R`-free (`GF.of_free`) and `N` —
-filtered over `P ⧸ (g)` into prime quotients `P ⧸ 𝔮` with `𝔮 ∋ g`, each of transcendence degree
-`< d` by `trdeg_quotient_prime_lt` — is generically free by `IH`, the defining short exact
-sequence `0 → P^r → B → N → 0` gives `GF R B` via `GF.of_exact` (GF2).
+Bundled as a structure so it carries the module instances on `N`. This packages precisely the
+commutative-algebra input still missing from mathlib — the generic-finiteness descent and the
+choice of the free `P`-submodule with finite torsion cokernel — as the single `sorry` of the
+domain case. Everything the induction is assembled *from* (GF1–GF4, `trdeg_quotient_prime_lt`, the
+transcendence recursion `gf_of_finite_module_killed`, the base cases, and all localisation
+bookkeeping) is proved. -/
+private structure GFDatum (R : Type u) [CommRing R] (B : Type u) [CommRing B] [Algebra R B] where
+  /-- Transcendence degree of the generic fibre / number of Noether coordinates. -/
+  d : ℕ
+  /-- The Noether-normalisation dimension is bounded by `trdeg R B`. -/
+  hdle : (d : Cardinal) ≤ Algebra.trdeg R B
+  /-- The torsion cokernel `N = B / P^r`. -/
+  N : Type u
+  addN : AddCommGroup N
+  modN : Module (MvPolynomial (Fin d) R) N
+  finN : Module.Finite (MvPolynomial (Fin d) R) N
+  /-- A nonzero element of `P` annihilating the cokernel. -/
+  g : MvPolynomial (Fin d) R
+  hg : g ≠ 0
+  hgN : ∀ x : N, g • x = 0
+  /-- The short exact sequence `0 → P^r → B → N → 0` reduces `GF R B` to `GF R N`. -/
+  reduce : (letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R)); GF R N)
+    → GF R B
 
-Left as a `sorry`: the construction of this sequence rests on the generic-finiteness descent
-(module-finiteness of `B` over `P` after inverting an element of `R`) plus the choice of the free
-`P`-submodule with finite torsion cokernel — commutative-algebra input not yet in mathlib.
-Everything the induction is assembled *from* (GF1–GF4, `trdeg_quotient_prime_lt`, the
-transcendence induction, the non-injective base case, and all localisation bookkeeping) is
-proved. -/
+/-- **The domain case, injective core** (Stacks 051R main step, GF5 heart).
+
+`B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B`. Given the boxed
+geometric data `GFDatum R B` and generic freeness for every domain of strictly smaller
+transcendence degree (`IH`), `B` is generically free over `R`: the reduction `GFDatum.reduce`
+turns the goal into generic freeness of the torsion cokernel `N`, which is discharged by the
+transcendence recursion `gf_of_finite_module_killed` when `d ≥ 1` (`N` is a finite `P`-module
+killed by a nonzero `g ∈ P`), and by `GF.of_smul_eq_zero` when `d = 0` (then `P ≅ R` and `N` is
+`R`-torsion). -/
 private theorem gf_of_injective_domain {R : Type u} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     (B : Type u) [CommRing B] [IsDomain B] [Algebra R B] [Algebra.FiniteType R B]
     (hinj : Function.Injective (algebraMap R B))
     (IH : ∀ (C : Type u) [CommRing C] [IsDomain C] [Algebra R C] [Algebra.FiniteType R C],
       Algebra.trdeg R C < Algebra.trdeg R B → GF R C) :
     GF R B := by
-  sorry
+  obtain ⟨d, hdle, N, iN, mN, fN, g, hg, hgN, hreduce⟩ : GFDatum R B := sorry
+  refine hreduce ?_
+  letI : Module R N := Module.compHom N (algebraMap R (MvPolynomial (Fin d) R))
+  rcases Nat.eq_zero_or_pos d with hd0 | hd1
+  · subst hd0
+    obtain ⟨f, hf0, hfg⟩ : ∃ f : R, f ≠ 0 ∧ algebraMap R (MvPolynomial (Fin 0) R) f = g := by
+      refine ⟨MvPolynomial.isEmptyAlgEquiv R (Fin 0) g, ?_, ?_⟩
+      · intro h; apply hg
+        have hinjE := (MvPolynomial.isEmptyAlgEquiv R (Fin 0)).injective (a₁ := g) (a₂ := 0)
+        simpa only [map_zero] using hinjE h
+      · apply (MvPolynomial.isEmptyAlgEquiv R (Fin 0)).injective
+        rw [AlgEquiv.commutes]; simp
+    refine GF.of_smul_eq_zero hf0 fun x => ?_
+    show algebraMap R (MvPolynomial (Fin 0) R) f • x = 0
+    rw [hfg]; exact hgN x
+  · exact gf_of_finite_module_killed hd1 hdle IH N hg hgN
 
 /-- **Domain-case transcendence induction** (Stacks 051R main step, GF5): every domain `B` of
 finite type over the Noetherian domain `R` with `trdeg R B ≤ n` is generically free over `R`.
