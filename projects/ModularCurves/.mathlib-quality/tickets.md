@@ -4227,7 +4227,8 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     set-vars trip TC; reassoc_of% + erw for transparency-poisoned steps;
     ∃-repackage for opaque indices. REMAINING: only the (descent-gated)
     essential-image statement.
-- **[T-W3c]** (open; cut from T-W3b at close) TorsorPair base change +
+- **[T-W3c]** (in_progress, beastmode-Q 2026-07-07T07:00Z; cut from T-W3b at
+  close) TorsorPair base change +
   self-trivialization. (i) `TorsorPair.pullback (q : S' ⟶ S) : TorsorPair σ S →
   TorsorPair σ S'` — total space `P ×_S S'`, action by functoriality, property
   fields via base-change stability instances (IsFinite/Etale/Surjective ✓
