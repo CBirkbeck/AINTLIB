@@ -284,7 +284,10 @@ in ticket `T-F1b`. -/
 noncomputable def vRhoPointsEquiv {N : ℕ} [NeZero N] (D : GaloisRepData N) :
     { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ vRho D //
         h ≫ vRhoπ D = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }
-      ≃ (Fin 2 → ZMod N) := sorry
+      ≃ (Fin 2 → ZMod N) :=
+  ((specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)).trans
+    (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
+    (FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D))
 
 /-- The `(ℤ/N)²`-coordinate of a `ℚ̄`-valued raw `N`-torsion point of `E`, read through a
 `ρ`-level isomorphism and the canonical points description of `V_ρ`. Real construction
