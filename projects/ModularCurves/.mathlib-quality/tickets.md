@@ -4096,19 +4096,29 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   stream-DESC like T-Q6e's descent step; for CONSTANT finite G étale-local
   triviality of torsors is the honest scope). Sources: reviewer v8; KM 4.7
   proof pp. 114–116 uses exactly the trivial-torsor comparison. Lane Q.
-  - **Progress (2026-07-07T03:35Z)**: `TorsorPair σ S` + `TorsorPair.Hom` +
-    Category instance DONE (Moduli/QuotientStack.lean, sorry-free); trivial-
-    torsor DATA layer DONE: `trivialTorsorAction` (translation on `∐_G S`),
-    `trivialTorsorπ`, `over_base`, `trivialTorsorMap` + equivariance.
-    REMAINING: the four property fields of the trivial `TorsorPair`
-    (IsFinite/Etale/Surjective of `trivialTorsorπ` + the `∐`-comparison iso —
-    mathlib sigma-facts survey dispatched), then the trivialization functor
-    `ActionGroupoid σ S ⥤ TorsorPair σ S` (morphism-level: `f : t ⟶ t'` maps to
-    the LEFT translation by `f.1⁻¹` — `trivialTorsorLeft_map`, landed), full
-    faithfulness **for connected nonempty S only** (ATTACK FINDING 2026-07-07,
-    q-lane.md: fails for S = ∅ — Hom-sets G vs 1 — and for disconnected S —
-    componentwise translations; the general comparison lives at stackification
-    level), and the (descent-gated) essential-image statement.
+  - **Progress (2026-07-07T05:20Z) — CONSTRUCTIBLE CORE COMPLETE** (all
+    sorry-free, zero warnings, axiom-clean, Moduli/QuotientStack.lean):
+    `TorsorPair σ S` + Hom + Category instance; trivial-torsor data layer
+    (`trivialTorsorAction`/`trivialTorsorπ`/`trivialTorsorMap` + laws +
+    `trivialTorsorLeft` left-translations); ALL FOUR property fields:
+    `trivialTorsorπ_etale` (IsZariskiLocalAtSource.sigmaDesc),
+    `trivialTorsorπ_surjective`, `trivialTorsorπ_finite` (via
+    `isFinite_sigmaDesc_id` — ForMathlib-grade: the fold of a finite coproduct
+    is finite, base change of the sigmaSpec-model along
+    specULiftZIsTerminal.from), and **`trivialTorsor_torsor`** (the
+    ∐-comparison iso: single-distributivity square via
+    isPullback_of_isColimit_left + the (γ,h) ↦ (h, h·γ) reindexing with
+    explicit inverse + factorization `trivialTorsor_comparison_eq`); the
+    **trivialization functor `trivialize : ActionGroupoid σ S ⥤ TorsorPair σ S`
+    ASSEMBLED** (morphisms = left translation by `f.1⁻¹`). GOTCHAS: erw at
+    ι_desc_assoc/isoPullback/Cofan.fac steps (instances-transparency);
+    IsIso.comp_isIso' explicit; reassoc-variants pre-normalize (no trailing
+    id_comp); duplicate [Finite G] section-vars poison instance synthesis.
+    REMAINING TAIL (statement-level): full faithfulness **for connected
+    nonempty S only** (ATTACK FINDING 2026-07-07, q-lane.md: fails for S = ∅ —
+    Hom-sets G vs 1 — and for disconnected S — componentwise translations; the
+    general comparison lives at stackification level), and the
+    (descent-gated) essential-image statement.
   - **MATHLIB SIGMA-FACTS SURVEY (2026-07-07T04:00Z, banked for pickup)**:
     (1) Etale (Sigma.desc f) ← `IsZariskiLocalAtSource.sigmaDesc`
     (Morphisms/Basic.lean:303; Etale is HasRingHomProperty ⟹
