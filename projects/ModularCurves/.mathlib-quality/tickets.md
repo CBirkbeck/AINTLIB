@@ -4766,6 +4766,10 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
   narrower than a full relative-differentials (Ω¹) scheme API (the T-B5y gate). **Lane**: B ·
   **Depends**: T-W5 (charts) · **Type**: theorem · **Sources**: reviewer v9. Supersedes T-B5y on
   the critical path (T-B5y stays as the general-API form).
+  - **Claimed**: beastmode-B, 2026-07-07T09:41Z · **Status**: in_progress · **Target**:
+    `mulByHom_formallyUnramified` in Torsion.lean (the BB-DIFF `sorry`). Route: chart-local
+    invariant differential `[N]^*ω = N·ω` + descent. Investigating mathlib `WeierstrassCurve`
+    differential API first.
 
 ### v9.4 Existing-ticket updates (v9)
 - **[T-A4] RE-FROZEN** (Q2; clears blocked-B2). New statement (owner-approved, torsor form):
