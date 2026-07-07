@@ -172,4 +172,18 @@ noncomputable def rhoSqIsProduct (D : GaloisRepData N) :
     · exact congrFun
         (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₂) _
 
+/-- Transport of the square through the Galois correspondence: the algebra of the
+`ρ`-square is the tensor square of `vRhoAlgebra` (leaf F1c-3). -/
+noncomputable def vRhoSqAlgebraIso (D : GaloisRepData N) :
+    (finiteEtaleEquivContAction ℚ).inverse.obj (rhoSqContAction D) ≅
+      Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D)) := by
+  have h1 : IsLimit ((finiteEtaleEquivContAction ℚ).inverse.mapCone
+      (BinaryFan.mk (rhoSqFst D) (rhoSqSnd D))) :=
+    isLimitOfPreserves _ (rhoSqIsProduct D)
+  have h1' := (IsLimit.postcomposeHomEquiv
+    (Limits.pairComp (rhoContAction D) (rhoContAction D)
+      (finiteEtaleEquivContAction ℚ).inverse) _).symm h1
+  exact h1'.conePointUniqueUpToIso
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D))
+
 end ModularCurves
