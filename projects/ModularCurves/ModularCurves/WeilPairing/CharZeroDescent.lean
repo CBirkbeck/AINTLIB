@@ -102,6 +102,12 @@ noncomputable def constSchemeMap {A B : Type} [Finite A] [Finite B] (f : A → B
     constScheme S A ⟶ constScheme S B :=
   Sigma.desc fun a => Sigma.ι (fun _ : B => S) (f a)
 
+/-- Points-level computation rule: `constSchemeMap f` sends the `a`-th copy of `S` to the
+`f a`-th copy — i.e. on `T`-points it is `f` applied to the locally constant index function. -/
+@[simp] theorem constSchemeMap_ι {A B : Type} [Finite A] [Finite B] (f : A → B) (a : A) :
+    Sigma.ι (fun _ : A => S) a ≫ constSchemeMap (S := S) f = Sigma.ι (fun _ : B => S) (f a) := by
+  simp only [constSchemeMap, Sigma.ι_desc]
+
 @[simp] theorem constSchemeMap_π {A B : Type} [Finite A] [Finite B] (f : A → B) :
     constSchemeMap (S := S) f ≫ constSchemeπ S B = constSchemeπ S A := by
   refine Sigma.hom_ext _ _ fun a => ?_
