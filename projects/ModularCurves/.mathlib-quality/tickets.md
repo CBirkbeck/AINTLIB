@@ -39,6 +39,14 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    edits. (`git add` + bare `git commit` is what caused the sweeps.) Commit before
    long builds; never `git stash` (shared); if `tickets.md` conflicts, re-apply
    your lines on top — never drop another worker's claim.
+   **THIRD SWEEP INCIDENT (2026-07-07T20:03Z, recorded by coordinator-P1)**: commit
+   `2de9271b` (P3/beastmode-A) swept the P1 lane's in-flight
+   `EllipticCurve/AdditionLawField.lean` (a broken mid-iteration snapshot) and
+   `GroupLawConstruction.lean` alongside its own PoleFiltration.lean — a bare-index
+   commit, not a pathspec commit. No build damage (the swept file was not yet imported
+   by the root module; HEAD carries the corrected version via `91f9499e`), but this is
+   the exact failure mode this rule exists to stop. beastmode-A: switch to
+   `git commit -- <your files>`, no `git add`, effective immediately.
 
 ## Summary
 - Work tickets: 24 · Cleanup tickets: 11 · Milestones: T-E2, T-E7, T-E9, T-F4
@@ -4836,6 +4844,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     is **PROVEN** in `AdditionLaw.lean`. Remaining: `IsJacobsonRing`/`IsReduced` instances
     for the `E_U ×_U E_U` chart rings (f.g. over `ℤ[a][Δ⁻¹]` — Jacobson by
     finite-type-over-Jacobson; reduced by 0e) + the per-chart vanishing statements.
+  - **Progress** (coordinator-P1, 2026-07-07T20:09Z): **FIELD LAYER DONE** (91f9499e) —
+    `EllipticCurve/AdditionLawField.lean`, zero sorries, axiom-clean:
+    `equation_dblAddXYZ` ([Field F], Nonsingular P/Q ⟹ Equation (dblAddXYZ P Q)),
+    certificate-free via mathlib's `nonsingular_add` + `add_of_equiv`/`add_of_not_equiv`
+    and the dba3aa8c minors/diagonal (proportionality lemma
+    `exists_eq_smul_of_cross_eq_zero`; helpers `Nonsingular.ne_zero`,
+    `equation_zero_triple`, `dblAdd*_smul_left`). REMAINING for c5α: ring-level wiring —
+    evaluate at maximal ideals of the biprojective chart rings (Jacobson: f.t. over ℤ via
+    `isJacobsonRing_MvPolynomial_fin` + quotient; reduced: from 0e integrality, or the
+    tensor-cone route via AdjoinRoot-monic freeness + `projective_polynomial_prime` over
+    `Frac`) and feed `equation_dblAddXYZ` through `eq_zero_of_forall_isMaximal_mem`.
+    Wiring architecture: tensor-cone `R[X₁..Z₂]/(F₁,F₂)` preferred over 4 chart rings
+    (single statement; c5β localizes it).
 
 - **[T-W7.0c-c5β]** bihomogeneous-triple → morphism template (NEW leaf, coordinator §2):
   `toProjOfBihomTriple` (new ForMathlib on the `ProjectiveSpaceChart` plumbing): where a
