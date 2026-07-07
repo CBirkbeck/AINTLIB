@@ -112,6 +112,11 @@ lemma nonsingular_smul' {x y : R} (h : (C • W).toAffine.Nonsingular (C.vcX x) 
     simp only [variableChange_a₁, variableChange_a₃, vcX, vcY]
     linear_combination (↑C.u⁻¹ : R) ^ 3 * hc2
 
+/-- Nonsingularity is both preserved and reflected by the coordinate change. -/
+lemma nonsingular_smul_iff {x y : R} :
+    (C • W).toAffine.Nonsingular (C.vcX x) (C.vcY x y) ↔ W.toAffine.Nonsingular x y :=
+  ⟨nonsingular_smul' C W, nonsingular_smul C W⟩
+
 /-- The `x`-coordinate map inverse to `vcX`: `x = u²X + r`. -/
 def ivcX (X : R) : R := ↑C.u ^ 2 * X + C.r
 
