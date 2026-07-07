@@ -2925,6 +2925,26 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
 **New hard-bit tickets (from the read proofs; statements per the decompositions):**
 - [T-NOETH0] scoping: mathlib `SpreadingOut`/`AffineTransitionLimit` coverage vs
   EGA IV 8.9.1 uses (HB-NOETH); policy: try direct proofs first.
+  - **SCOPED (2026-07-07T15:20Z, beastmode-D2 — owner requested the T-NOETH build).
+    MATHLIB SURVEY (grounds the scope; MUCH more is present than the stale "absent from
+    mathlib" notes claimed):** `AffineTransitionLimit.lean` (31 lemmas) = the EGA IV §8
+    FOUNDATION at scheme level (`nonempty_isColimit_Γ_mapCocone`,
+    `exists_app_map_eq_map_of_isLimit`, `Scheme.exists_hom_comp_eq_comp_of_
+    locallyOfFiniteType`) — PRESENT; `SpreadingOut.lean` (`spread_out_unique_of_
+    isGermInjective`, EGA IV 8.8.2) — PRESENT; `TensorProduct/Finite.lean`
+    `exists_fg_le_eq_rTensor_subtype` (module-element spreading) + `Finiteness/Descent`,
+    `Flat/.../Descent` — PRESENT. **THE GAP** = ring/algebra-level object spreading:
+    "fp-flat algebra + a chosen module over `R = colim Rᵢ` descends to a stage `Rᵢ`"
+    (EGA IV 8.9.1 fp + 11.2.6 flatness, algebra form). **CONCRETE TICKET TREE:**
+    [T-NOETH1] `R = colim (fg ℤ-subalgebras)` filtered, each stage noetherian (Hilbert
+    over ℤ) ~40 lines · [T-NOETH2] fp-algebra descent `A ≅ Aᵢ ⊗_{Rᵢ} R` (+ element f,
+    ideal I descend) — crux · [T-NOETH3] flatness + fibrewise-nzd descend (EGA IV 11.2.6)
+    + `Ann(f) = Ann(fᵢ) ⊗_{Rᵢ} R` · [T-NOETH-FLAT1] discharge the T-FLAT1-SLICE box via
+    NOETH1-3 + Nakayama at the noeth stage (removes last D-chain sorryAx). REVISED EFFORT:
+    NOT a from-scratch stream — foundation is in mathlib; ~4 bounded tickets. Order:
+    NOETH1→2→3→FLAT1. **COORDINATION w/ T-W7.8**: DISTINCT (W = morphism-equality descent,
+    largely already in mathlib; D = object/module descent) — same foundation, no shared
+    files (D builds `ForMathlib/NoethApprox*.lean`; W wraps existing SpreadingOut).
 - [T-D22] section-of-smooth-rel-curve ⟹ locally principal nzd ideal (HB-REGIMM;
   étale-local 𝔸¹ model route). [T-D23] closed pt of smooth curve /field has DVR
   local ring.
@@ -4759,7 +4779,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0i-a]** pole filtration + freeness — `poleOrderFiltration` + `_one`, `_two`,
   `_three`, `_mul_le`, `linearIndependent_one_coordX_coordY`
   (PoleFiltration.lean:41–75; `coordX`/`coordY` already real).
-  - **Status**: in_progress (lane P3 — THIS session, beastmode-A 2026-07-07) · **File**: EllipticCurve/PoleFiltration.lean · **Depends**:
+  - **Status**: done (lane P3, beastmode-A, finished 2026-07-07)
+  - **Progress**: 2026-07-07: ALL SIX LEAVES + helper PROVEN, axiom-clean (propext/choice/quot
+    only), `lake build` green. Def = R-span of pole-order-bounded monomials {x^i : 2i ≤ n} ∪
+    {x^i y : 2i+3 ≤ n} (KM-Weierstrass-sections form; the intrinsic ideal-sheaf characterization
+    is the 1b-side bridge, spawn there if needed). New helper `coordY_mul_coordY` (the Weierstrass
+    relation solved for y², algebraMap-mult form) — proven via AdjoinRoot.mk_self + index-preserving
+    expansion + linear_combination; feeds _mul_le case (x^i y)(x^k y). linearIndependent via
+    mathlib `smul_basis_eq_zero` + R→R[X] tower-cast + coefficient extraction. NOTE for
+    CLEANUP-PF: interval_cases lacked bounds (omega-obtain used); Phase-6.5 per-decl cleanup
+    deferred into CLEANUP-PF (same file, next ticket 0i-b builds directly on it — recorded
+    deviation). · **File**: EllipticCurve/PoleFiltration.lean · **Depends**:
     none · **Parallel**: yes · **Type**: def + 5 lemmas
   - Sketch: define `F n` via the section ideal `(s)` on `D(u)` (`t = s³u`); normal-form
     basis one-element-per-pole-order (mathlib `Affine.CoordinateRing` freeness; `B`
@@ -4889,6 +4919,14 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   descends. Needs Hom-spreading-out along filtered colimits — **absent from mathlib**
   (watch noetherian-approximation work). NOT skeletonized (quote-or-delete: EGA IV 8.8.2
   not yet transcribed). Gates ONLY the fully-general `abelEnrichment_unique`.
+  - **COORDINATION (2026-07-07T15:20Z, from beastmode-D2's T-NOETH scoping)**: the
+    "absent from mathlib" claim looks STALE — `AlgebraicGeometry/SpreadingOut.lean` has
+    `spread_out_of_isGermInjective` + `spread_out_unique_of_isGermInjective` (EGA IV
+    8.8.2 morphism spreading + uniqueness) and `AffineTransitionLimit.lean` has
+    `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`. W-lane: RE-CHECK whether
+    these discharge T-W7.8 directly (likely a thin wrapper). DISTINCT from the D-lane's
+    T-NOETH (fp-flat algebra/object descent, not morphism-equality) — same foundation,
+    no file overlap.
   - **Status**: blocked (source transcription first) · **Depends**: T-W7.7 · **Type**:
     infra + theorem.
 
