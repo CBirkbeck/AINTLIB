@@ -364,6 +364,17 @@ theorem fibre_subset_eqLocus_of_collapsed (hp : UniversallyOConnected p)
   have hwz := congrArg (fun m : pullback p (S.fromSpecResidueField s) ⟶ X => m.base z) hw
   simpa using hwz.trans hz
 
+/-- **(T-W7.r2·c, vanishing-locus openness)** On a locally noetherian scheme, the locus
+where a quasi-coherent ideal datum has zero stalk-image over a fixed affine is open: if
+every generator's germ dies at `x`, the finitely many annihilators multiply to a single
+`s ∉ 𝔭ₓ` (`Ideal.exists_notMem_mul_eq_zero_of_fg`), and on `X.basicOpen s ∋ x` the germs
+of the whole ideal vanish. -/
+theorem isOpen_germMap_ideal_eq_bot {X : Scheme.{u}} [IsLocallyNoetherian X]
+    (U : X.affineOpens) (I : Ideal Γ(X, U.1)) :
+    IsOpen {z : X | ∃ hz : z ∈ U.1,
+      Ideal.map (X.presheaf.germ U.1 z hz).hom I = ⊥} := by
+  sorry
+
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
 fibre over `t := p x` lies set-theoretically in the agreement locus, then the germ at `x`
