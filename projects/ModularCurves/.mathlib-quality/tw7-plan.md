@@ -1,189 +1,123 @@
-# T-W7 — constructive group-scheme structure (`/develop` full decomposition, no deferrals)
+# T-W7 — constructive group-scheme structure (v2: reviewer reply integrated, adversarially audited)
 
-**Planned:** beastmode-A 2026-07-07. **Scope:** full `GrpObj` + canonicity, **every subtlety and
-black box planned to the leaf** (owner: "do not defer any hard bits"). Genuinely-opaque leaves are
-routed to `/expert-review` (questions in §"Expert-review queue").
+**Planned:** beastmode-A 2026-07-07 (v1); **v2 2026-07-07** after the expert reply
+(`.mathlib-quality/expert-review/2026-07-07-tw7/{brief,reply,integration}.md` — integration.md holds
+the full adversarial audit). **Scope:** full `GrpObj` + canonicity, every hard bit planned to the
+leaf; the ONE remaining source-required leaf is rigidity-globalization (R3, canonicity-only).
 
-## Sharp goal + design principle
+## Sharp goal
 
 Discharge `abelEnrichment_exists` (GroupLaw.lean:74): construct `GrpObj (Over.mk G.π)` for any
-`EllipticCurveGeom G` over any `S`. Downstream (`mulBy`/[N], `pointAddCommGroup`, `baseChange`) is
-already derived from `grp`.
+`EllipticCurveGeom G` over any `S` (milestone **T-W7a**), then canonicity `abelEnrichment_unique`
+(milestone **T-W7b**, off the critical path to `E[N]`/Drinfeld/`Y(N)`).
 
-**Design principle (load-bearing, decided after the FC source check):** construct the group law
-**once over the universal integral atlas** `U = weierstrassAtlas = Spec R`, `R = ℤ[a₁..a₆][Δ⁻¹]`,
-then obtain the group law on **every** `E/S` by **base change + gluing** via the invariance cocycle.
-Consequences:
-- The only genuinely new *construction* is `mulHom_U`/`negHom_U` over `R` (Part 0).
-- **All axioms** (assoc/comm/unit/inverse) are proven **once over `R`** by reduction to the generic
-  fibre (a field, where mathlib supplies the group law), then base-change to all `S` (a morphism
-  identity is stable under base change and checkable on the chart cover).
-- The affine cocycle (`addX_smul`/`slope_smul`/`negY_smul`, DONE) is used precisely to check that the
-  per-chart base-changes of `mulHom_U` **agree on overlaps** for the gluing.
+## Design (post-reply, audited)
 
-## Infrastructure ledger (verified against mathlib)
+Construct once over the universal integral atlas `U = Spec R`, `R = ℤ[a₁..a₆][Δ⁻¹]` (domain);
+axioms over `U` by **evaluation at the generic point** (a single `L`-point lying in every nonempty
+open — all degeneracy loci vanish at `η`); descend to any `S` by base change + gluing along a bundled
+Weierstrass atlas. Overlap agreement = **comparison theorem** (pointed iso of projModels = variable
+change — the dependency the reviewer missed, caught in audit A1) + **global VC-equivariance** of
+`m_U`. `π_*O = O` is proved **uniformly per-ring** (2-chart computation, universality by
+instantiation — **BB-COHBC retired**); rigidity consumes it for canonicity.
 
-| Need | Status |
-|---|---|
-| `GrpObj`/`MonObj`, cartesian-monoidal `Over S` (product = pullback) | mathlib (`Monoidal.Grp_`, `cartesianMonoidalCategoryOver`) |
-| **density**: reduced source, separated target, dominant `ι`, agree on `ι` ⇒ equal | mathlib **`ext_of_isDominant`** / `ext_of_isDominant_of_isSeparated'` |
-| **glue morphisms** on an open cover agreeing on overlaps; `hom_ext` | mathlib **`Scheme.Cover.glueMorphisms`** / `Cover.hom_ext` / `glueMorphismsOverOfLocallyDirected` |
-| rational-map / partial-map with dense domain | mathlib **`Scheme.RationalMap`/`PartialMap`** |
-| affine formulas + `equation_add`/`nonsingular_add`; **field group law** `Affine.Point.instAddCommGroup` | mathlib |
-| `addX_smul`/`slope_smul`/`negY_smul` + `pointEquiv` (variableChange-invariance) | **DONE** |
-| `LocallyWeierstrass`+`baseChange`, `projModel`, `isPullback_projModelBaseChange`, `projModelZero_baseChange`, `universalEllipticCurve` | **DONE** |
-| `IsDomain (Localization.Away Δ (MvPolynomial (Fin 5) ℤ))` | mathlib (`Localization` of domain) — T-W7.0a |
-| **`p_*O_E = O_S`** (proper, geom-connected-reduced fibres) / cohomology & base change / Stein | **GAP — no mathlib infra** (BB-COHBC). Crux black box inside rigidity. |
-| **rigidity lemma** over an arbitrary base (GIT §6.1) | **GAP** — build it (needs the above) |
-| **`mulHom_U` as a scheme morphism** from the formulas | **GAP — the construction crux** |
+**Sources to acquire** (gate the marked tickets, nothing else): ① Mumford GIT (R3); ② Bosma–Lenstra,
+*Complete systems of two addition laws for elliptic curves*, JNT 53 (1995); ③ Lange–Ruppert, Invent.
+Math. 79 (1985); (optional ④ Deligne *Formulaire*, LNM 476, cross-check for 1b).
 
-## Full decomposition (leaves marked ⓜ mathlib / ⓟ project-done / ⚙ new-provable / ⛔ gap / 🧠 expert)
+## Leaves (ⓜ mathlib / ⓟ project-done / ⚙ new-provable / ⛔ source-required)
 
-### Part 0 — the group law over the universal atlas (all math lives here)
+### Part 0 — over the universal atlas
 
-- **T-W7.0a `atlasRing_isDomain`** ⚙ `instance : IsDomain WeierstrassAtlasRing`.
-  `Localization.Away Δ` of the domain `MvPolynomial (Fin 5) ℤ`. *Subtlety*: need `Δ ≠ 0` in
-  `MvPolynomial` so the localization isn't the zero ring — true (`Δ` is a nonzero polynomial). **1-liner.**
+- **T-W7.0a `atlasRing_isDomain`** ⚙ `IsLocalization.isDomain_localization` ⓜ + `Δ ≠ 0` in
+  `MvPolynomial (Fin 5) ℤ` (evaluate at `y² = x³ − x`: `Δ = 64 ≠ 0` — beware char-2 traps in the
+  evaluation target: use `ℚ`). 1-liner + a small evaluation lemma.
+- **T-W7.0b `negHom_U`** ⚙ negation on `projModel` (denominator-free; fixes `O`; infinity chart:
+  linear). Includes `negHom_U ≫ π = π`, involution, `zero`-fixing.
+- **T-W7.0c `mulHom_U`** ⚙(② ③ acquired first) **Bosma–Lenstra route**: two bidegree-(2,2)
+  polynomial law triples `ℓ₁, ℓ₂` for the long Weierstrass cubic; leaves: (c1) each `ℓᵢ` defines a
+  morphism on the open complement `Vᵢ` of its exceptional divisor; (c2) `V₁ ∪ V₂ = E_U ×_U E_U`
+  (B–L disjointness of exceptional divisors, fibrewise over all fields ⟹ topological cover); (c3)
+  `ℓ₁ = ℓ₂` on `V₁ ∩ V₂` (polynomial identity mod the two curve relations — `linear_combination`
+  with precomputed cofactors, split per coordinate; NO maxHeartbeats); (c4) glue
+  (`Scheme.Cover.glueMorphisms` ⓜ); (c5) lands on the curve + over `U` (identities mod relations);
+  (c6) restriction to the affine secant open = mathlib `addX`/`addY` formulas (feeds 0g and 0h).
+- **T-W7.0e `E_U^n` integral** ⚙ route: "smooth over integral base + geometrically integral fibres ⟹
+  integral" (check mathlib at implementation; else the specialized chart/generic-fibre fallback —
+  both sketched in reply §Q4).
+- **T-W7.0f points dictionary** ⚙ over any field `L`: points of `projModel W` valued in `L` =
+  `W.toAffine.Point` (chart casework `D₊(Y)/D₊(Z)`; nonsingularity from `Δ` unit ⓜ-adjacent). Plus:
+  the generic-point inclusion `Spec κ(η) ⟶ E_U^n` is dominant (`fromSpecResidueField` ⓜ + closure of
+  `{η}` = ⊤).
+- **T-W7.0g atlas group axioms** ⚙ each axiom = two morphisms `E_U^n ⟶ E_U`; equal ⟸
+  (`ext_of_isDominant` ⓜ; source reduced by 0e, target separated) agreement at `η` ⟸ 0f dictionary +
+  0c(c6) + mathlib `Affine.Point.instAddCommGroup` over `L = κ(η)` (`add_assoc`, `add_comm`,
+  `add_zero`, `neg_add_cancel`). **Audit A5: purely pointwise over `L`; no field-level addition
+  morphism needed.**
+- **T-W7.0h global VC-equivariance** ⚙ `m_{C•W} ∘ (φ_C × φ_C) = φ_C ∘ m_W` as morphisms of
+  projModels, proven over the universal VC-base `R ⊗ ℤ[u^±, r, s, t]` (still a domain — same
+  generic-point method as 0g; affine cocycle ⓟ supplies the `η`-evaluation). Reviewer caveat #2
+  upgraded to a leaf.
+- **T-W7.0i pole filtration + global sections** ⚙ (shared foundation; audit A3): on the 2-chart
+  model (`A` free ⓜ `CoordinateRing`-basis; `B = R[t][s]/(monic cubic)` free; `A_y` normal-form
+  basis, one element per pole order): (i1) `F_n` filtration via the ideal `(s)` of `O` on `D(u)`;
+  (i2) `F₀ = R`, `F₂ = R⊕Rx`, `F₃ = R⊕Rx⊕Ry` free; (i3) **`Γ(projModel W, O) ≅ R` for EVERY
+  ring** (equalizer computation; `x²y^{-1}` = the `H¹` witness excluded); (i4) `E∖O` scheme-dense in
+  `projModel` (`s` nonzerodivisor via McCoy); (i5) sheafify: `π_*O = O_S` for every locally-
+  Weierstrass family, **universally by instantiation** (`W.map`; base-change compat ⓟ
+  `isPullback_projModelBaseChange`).
 
-- **T-W7.0b `negHom_U`** ⚙ `E_U ⟶ E_U`. `negY` is denominator-free ⇒ a morphism on the affine chart;
-  fixes `O`. *Subtlety*: define it globally on `projModel` (affine chart + point at infinity — `negY`
-  extends since `[-1]` is a linear automorphism of the projective model). **Tractable.**
+### Part I — descent to general `E/S` (existence)
 
-- **T-W7.0c `mulHom_U`** 🧠 `pullback (projModelπ) (projModelπ) ⟶ E_U`. **THE construction crux.**
-  Two candidate routes — *expert-review Q1 to choose*:
-  - **(chord-tangent-as-total-morphism)** the "third intersection point of the line `PQ` with the
-    cubic" is given by *total* projective/resultant formulas (no equality case-split), and
-    `P +_U Q = neg(third(P,Q))`. Avoids the affine case-explosion; needs the projective/`Jacobian`
-    resultant formulas (partly in mathlib `WeierstrassCurve.Jacobian`?).
-  - **(affine-cover-and-glue)** cover `E_U ×_R E_U` by `V_secant = {x₁≠x₂}` (secant formula),
-    the tangent locus, and the `O`/`-P` loci (via a coordinate change moving the point), define `mul`
-    by the regular formula on each, glue with `glueMorphisms`. *Subtleties*: (i) proving the opens
-    **cover** `E_U ×_R E_U` incl. the diagonal, `O`, and the anti-diagonal `{Q=-P}`; (ii) at `O` use
-    the projective chart; (iii) overlaps agree — a polynomial identity.
-  - *Either way, subtle enough to warrant expert input on the cleanest formalizable construction.*
+- **T-W7.1a′ bundled atlas** ⚙ extract `WeierstrassAtlas`-structure (indexed affine opens + curves +
+  pointed isos) from the `LocallyWeierstrass` predicate by choice (reviewer caveat #3).
+- **T-W7.1a charts = base change of `E_U`** ⚙ classifying map via localization universal property
+  (`Δ ↦` unit); `projModel(W_i) = E_U ×_U —` ⓟ.
+- **T-W7.1b comparison theorem** ⚙ (audit A1 — NEW, on the existence path): a pointed iso of
+  projective Weierstrass models over any ring is induced by a unique `VariableChange`. Leaves: (b1)
+  pointed iso preserves `E∖O` ⟹ ring iso `Φ` of affine coordinate rings; (b2) `Φ` preserves `F_n`
+  (0i; intrinsic via the section's ideal sheaf); (b3) extract `(u,r,s,t)`: `Φ(x') = αx+β`,
+  `Φ(y') = γy+δx+ε`, units `α,γ`; matching relations ⟹ `α³ = γ²`, `u := γ/α`; (b4) affine
+  determines projective (0i(i4) + separatedness); (b5) uniqueness of the VC.
+- **T-W7.1 `negHom` / T-W7.2 `mulHom` over `S`** ⚙ per chart = base change of 0b/0c via 1a; overlap
+  agreement: transition = VC (1b) + equivariance (0h, base-changed); glue (`glueMorphisms` ⓜ over the
+  pullback cover of `E ×_S E`).
+- **T-W7.3 axioms over `S`** ⚙ each = base change of the universal identity (0g) per chart;
+  `Cover.hom_ext` ⓜ. No flatness needed (audit #10).
+- **T-W7.6 assemble = MILESTONE T-W7a** ⚙ `MonObj`/`GrpObj`/`IsCommMonObj` packaging;
+  `abelEnrichment_exists`. **No rigidity, no cohomology, no source gaps anywhere above.**
 
-- **T-W7.0d `mulHom_U` lands on the curve / is over `R`** ⚙ `mulHom_U ≫ projModelπ = fst ≫ projModelπ`
-  and image satisfies the Weierstrass equation. From `equation_add`/`nonsingular_add` ⓜ + the
-  construction. *Subtlety*: `nonsingular_add`'s hypothesis `¬(x₁=x₂ ∧ y₁=negY x₂ y₂)` is exactly the
-  non-degenerate locus — must match the cover of T-W7.0c.
+### Part III — canonicity (T-W7b)
 
-- **T-W7.0e `E_U` powers are integral** ⚙ `IsIntegral (E_U ×_R E_U ×_R E_U)` (and pairs). *Subtleties*:
-  (i) `E_U` smooth over the **domain** `R` ⇒ reduced; (ii) elliptic-curve fibres are **geometrically
-  integral** (smooth proper geom-connected genus-1) ⇒ `E_U` irreducible; (iii) fibre products of
-  geom-integral smooth `R`-schemes over an irreducible base are integral. Need mathlib lemmas for
-  "smooth over reduced ⇒ reduced" and "irreducible base + geom-irreducible fibres ⇒ irreducible" —
-  **check availability; possible ⚙ sub-lemmas.** *expert-review Q4 (exact statements).*
+- **T-W7.7a rigidity**, split (audit A4): **R1 affine core** ⚙ `Hom_S(X ×_S Y, Z_aff) ≅ Hom_S(Y,
+  Z_aff)` from `(pr₂)_*O = O_Y` (= 0i(i5) instantiated); **R2 local factorization** ⚙ proper
+  closed-image shrinking ⟹ `h ≡ e` on `A ×_S Y'`, `Y' ⊇ e(S)` open; **R3 globalization** ⛔ the
+  passage to all of `A ×_S A` over non-reduced `S` — the reviewer's sketch does NOT close it (their
+  own Q6 argument blocks open-neighbourhood ⟹ global). **SOURCE-REQUIRED: Mumford GIT §6.1 verbatim**
+  (mechanism unknown: connectedness along which factor / EGA IV §8 noetherian reduction / infinitesimal
+  argument). Follow-up F1 filed with the reviewer.
+- **T-W7.7 `abelEnrichment_unique`** ⚙(after R3) `h(x,y) = (x +_m y) −_{m'} (x +_{m'} y)` vanishes on
+  both axes; rigidity twice ⟹ `m = m'`.
 
-- **T-W7.0f generic-fibre identification** 🧠 `mulHom_U`, restricted to the generic fibre
-  `E_{U,K} = E_U ×_R Spec K` (`K = Frac R`), **equals** the field-level addition of
-  `WeierstrassCurve.Affine.Point` over `K`. *Subtlety*: this is the bridge from the *scheme* `mulHom_U`
-  to mathlib's *field* `Point.add` — needs: the generic fibre's points ↔ `Point`, and the two
-  agree on the non-degenerate locus (both `= (addX,addY)`) + at `O`/degenerate by continuity. *This
-  bridge is the second-subtlest leaf — expert-review Q4.*
+## Parallelization map (owner request: workers can be assigned per lane NOW)
 
-- **T-W7.0g atlas group axioms** ⚙ `mulHom_U` is associative/commutative and `zero_U` is a two-sided
-  unit with `negHom_U` inverse, **as morphism identities over `R`**. *Route (now fully grounded)*: each
-  axiom is an equality of two morphisms `E_U^n ⟶ E_U`; they agree on the generic fibre (T-W7.0f +
-  mathlib `Point.instAddCommGroup` `add_assoc`/`add_comm`/`add_zero`/`add_left_neg` over `K`); `E_U^n`
-  is integral (T-W7.0e, so the generic-point inclusion is **dominant** and `E_U^n` is **reduced**),
-  `E_U` is separated ⇒ **`ext_of_isDominant`** ⓜ ⇒ equal over `R`. *No rigidity, no `ℤ[ε]` identity.*
+Independent lanes — no shared files, no shared dependencies until the marked joins:
 
-### Part I — descent to a general `EllipticCurveGeom G/S`
+| Lane | Tickets (in order) | Gate | Can start |
+|------|--------------------|------|-----------|
+| **P0** | T-W7.0a → 0b | none | **NOW** |
+| **P1** | T-W7.0c (c1–c6; c3 splits into per-coordinate worker-parallel lemmas) | acquire ②③ | on acquisition |
+| **P2** | T-W7.0e → 0f | none | **NOW** |
+| **P3** | T-W7.0i (i1–i5) → 1b (b1–b5) | none | **NOW** |
+| **P4** | R1 → R2 (state with `π_*O=O` as hypothesis; discharge via 0i later) | none | **NOW** |
+| **P5** | T-W7.1a′ + 1a (atlas plumbing) | none | **NOW** |
 
-- **T-W7.1a chart = base change of `E_U`** ⚙ for each `LocallyWeierstrass` chart `(U_i, W_i, e_i)`:
-  the classifying ring map `ℤ[a..][Δ⁻¹] → Γ(U_i)` (`Xⱼ ↦ W_i.aⱼ`, well-defined since `W_i.Δ` is a
-  unit = `IsElliptic`) makes `projModel(W_i) = E_U ×_U (classifying)`; compose with the witness iso
-  `pullback(π, U_i.ι) ≅ projModel(W_i)`. *Subtlety*: the localization universal property (needs
-  `Δ ↦ unit`); functoriality `projModel(W.map φ) = projModel(W) ×_ φ` = `isPullback_projModelBaseChange`
-  ⓟ.
-
-- **T-W7.1 `negHom`** ⚙ glue the per-chart `(base change of negHom_U)` via `negY_smul` (overlaps agree)
-  with `glueMorphisms`. **T-W7.2 `mulHom`** ⚙ likewise, glue `(base change of mulHom_U)` via
-  `addX_smul`/`slope_smul` (the cocycle checks the two chart-classifying-maps' base-changed muls agree
-  on `U_i ∩ U_j`, related by a `variableChange`). **T-W7.3 axioms for `G`**: each axiom holds on each
-  chart (base change of T-W7.0g ⓜ-stable) ⇒ holds on `G` (`Cover.hom_ext` ⓜ). *Subtlety*: the
-  base-change stability of an associativity morphism identity — `pullback`/`baseChange` functoriality.
-
-- **T-W7.6 assemble** ⚙ package as `MonObj`/`GrpObj`/`IsCommMonObj`; `abelEnrichment_exists G :=
-  ⟨{…, grp := grpObj G,…}, rfl⟩`. **MILESTONE — retires T-A6 existence; depends on NO rigidity.**
-
-### Part III — canonicity (the genuine rigidity + cohomology black boxes; NOT deferred)
-
-- **T-W7.7a-i `properPushforwardStructureSheaf`** ⛔🧠 `p_*O_E = O_S` for `E/S` (proper, smooth,
-  geom-connected genus-1). **mathlib GAP** (no cohomology & base change / Stein). Sub-route options —
-  *expert-review Q2*: (a) full "cohomology and base change" (Grauert; large — BB-COHBC); (b) an
-  **elementary genus-1 argument** via the explicit `projModel` (`H⁰(ℙ¹-bundle-ish)`)/the `|O|`
-  linear system — possibly much smaller; (c) reduce to the universal `E_U/U` (integral) + base change,
-  as with the axioms — *does `p_*O = O` base-change? Yes if flat + the fibrewise `H⁰ = k` is constant
-  (Grauert), so this still needs the fibre statement.* **Plan both (b) and the BB-COHBC fallback.**
-
-- **T-W7.7a-ii `rigidityLemma`** 🧠 (GIT §6.1, over arbitrary base). Given T-W7.7a-i + proper
-  `X ×_S Y → Y`, "constant along the `e`-axis ⇒ factors through `Y`". *Proof (to transcribe from a
-  readable source — GIT §6.1 not in refs; Katz–Mazur 2.1 / Hida GME cite it — expert-review Q3):*
-  take affine `V ∋ z₀`; `p_Y(f⁻¹(Z∖V))` closed missing `y₀` ⇒ open `W ∋ y₀` with `X×W ⊆ f⁻¹(V)`;
-  `f|_{X×W}` to affine `V` is constant on the proper connected reduced fibres (`p_*O=O`) ⇒ factors
-  through `W`; spread out / connectedness of `Y`. *Subtleties*: proper pushforward of closed sets
-  ⓜ?; "morphism to affine constant on `p_*O=O` fibres factors" (the Stein core) ⚙/⛔.
-
-- **T-W7.7 `abelEnrichment_unique`** ⚙ two group structures `m, m'` with the same zero: `id : (E,m) →
-  (E,m')` is pointed ⇒ homomorphism (T-W7.7a-ii applied to `m'(m⁻¹×m⁻¹)…` / the standard corollary
-  "pointed morphism of abelian schemes is a homomorphism") ⇒ `m = m'`, over **arbitrary** `S`.
-  *Subtlety*: deriving "pointed ⇒ homomorphism" from the raw rigidity lemma (the standard two-line
-  corollary — transcribe).
-
-## Dependency graph
-
-```
-DONE ── T-W7.0a domain
-        T-W7.0b negHom_U ─┐
-        T-W7.0c mulHom_U ─┤ (🧠 Q1)
-        T-W7.0d on-curve  ┤
-        T-W7.0e integral ─┤ (Q4)      ┌ T-W7.1 negHom ┐
-        T-W7.0f generic ══╪ (🧠 Q4)   ├ T-W7.2 mulHom ┼ T-W7.3 axioms ─ T-W7.6 assemble ▸ EXISTENCE ✔
-        T-W7.0g axioms  ══�┘           └ T-W7.1a chart=bc┘        (no rigidity)
-                          (via ext_of_isDominant ⓜ)
-   T-W7.7a-i p_*O=O (⛔🧠 Q2, BB-COHBC/elementary) ─ T-W7.7a-ii rigidity (🧠 Q3) ─ T-W7.7 canonicity ✔
-```
-- **Existence path uses NO rigidity** — the big de-risk.
-- **Canonicity path is fully planned** (not deferred): its two hard leaves are `p_*O=O` (Q2) and the
-  rigidity proof (Q3); both routed to expert-review with concrete sub-routes.
-
-## Expert-review queue — BRIEF WRITTEN
-
-**Brief filed 2026-07-07** (topic-scoped): `projects/ModularCurves/REVIEW_BRIEF-tw7-group-law.md`
-(dated copy + `state.md` under `.mathlib-quality/expert-review/2026-07-07-tw7/`). Send to a senior
-arithmetic geometer; integrate the reply with `/expert-review --reply`. **Why a brief and not a
-transcription:** GIT (the canonical rigidity source) is not in `refs/`; FC only *cites* GIT 6.1; KM
-and Hida GME are image-only scans (no text layer to quote-mine). Source-faithfulness forbids inventing
-the GIT proof from memory, so the two genuinely-opaque leaves (Q2, Q3) go to the reviewer; the
-construction/design leaves (Q1, Q4–Q6) go too, since the best *formalizable* route is a design call.
-
-- **Q1** (→ T-W7.0c) — cleanest construction of the **multiplication morphism** `E_U ×_R E_U → E_U`
-  over the *domain* `R`: chord-tangent-via-resultant (total) vs. affine-cover-and-glue; `O` and the
-  anti-diagonal; does the secant rational map extend across `{x₁=x₂}`.
-- **Q2** (→ T-W7.7a-i) — is `p_*O_E = O_S` obtainable **elementarily** for a `projModel` genus-1 curve
-  (explicit `H⁰` / the section + ampleness of `O`) avoiding cohomology-and-base-change, or is BB-COHBC
-  unavoidable? Does it base-change from `E_U/U`, and with what flatness/constancy input?
-- **Q3** (→ T-W7.7a-ii) — formalization-friendly statement + proof of the **rigidity lemma** (GIT §6.1)
-  over an arbitrary base + "pointed ⇒ homomorphism"; which ingredient is the real obstruction; **may
-  the base be assumed reduced/normal without loss for our canonicity application** (would drop the
-  arbitrary-base requirement entirely).
-- **Q4** (→ T-W7.0e/0f) — (a) the **generic-fibre bridge** `mulHom_U|_{E_{U,K}} = Affine.Point.add`
-  (scheme-mul ↔ field-`Point.add`), cleanest statement; (b) minimal hypotheses for **`E_U^n` integral**.
-- **Q5** (→ T-W7.0g/3) — **soundness of reduce-to-universal**: axioms as morphism identities over the
-  integral atlas, obtained over arbitrary non-reduced `S` by base change + gluing, no reducedness of
-  `S`. Pitfalls (classifying map non-flat; charts failing to glue)?
-- **Q6** (→ T-W7.7) — **alternative to rigidity for canonicity**: construction-level uniqueness (`m`
-  the unique morphism restricting to chord-tangent on a dense open; flat `E×_S E`, closed graph);
-  survives over non-reduced `S`?
-
-**Plan status after the reply:** Q2/Q3 answers convert T-W7.7a-i/-ii from ⛔ to transcribed leaves (or
-Q3(b)/Q6 may excise the arbitrary-base rigidity lemma from the critical path); Q1 fixes the T-W7.0c
-construction route; Q4/Q5 confirm the atlas-axiom mechanics. **Nothing in the existence path (→ T-W7.6
-milestone) is blocked on the reply** — it can start now; the reply de-risks the construction route and
-unblocks canonicity.
+Joins: **0g** needs P0+P1+P2 · **0h** needs P1 · **1/2/3** need 0g+0h+P3+P5 · **T-W7a milestone**
+joins all of P0–P3+P5 · **R3** blocked on GIT (unblocks T-W7b with P4). Suggested file split to keep
+workers collision-free: `GroupLawConstruction.lean` (P0/P1), `PointsDictionary.lean` (P2),
+`PoleFiltration.lean` (P3), `Rigidity.lean` (P4), `WeierstrassAtlasBundle.lean` (P5).
 
 ## Cleanup cadence
 
-New file `EllipticCurve/GroupLawConstruction.lean`. `[CLEANUP-W7-1]` after T-W7.0g; `[CLEANUP-W7-2]`
-after T-W7.3; `[CLEANUP-ALL-W7]` before T-W7.6 (existence milestone); `[CLEANUP-W7-3]` after T-W7.7.
+`[CLEANUP-W7-1]` after 0g; `[CLEANUP-W7-2]` after 1b; `[CLEANUP-ALL-W7]` before T-W7.6 (milestone);
+`[CLEANUP-W7-3]` after T-W7.7.

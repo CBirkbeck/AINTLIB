@@ -6,8 +6,10 @@
   constructing (and proving canonical) the group-scheme structure on a locally-Weierstrass elliptic
   curve over an arbitrary base, and a sanity check on the reduce-to-universal reduction strategy
 - Scope: T-W7 only (the group law m/ι and its axioms + canonicity); NOT the whole programme
-- Reply received: false
-- Reply integrated: false
+- Reply received: true (2026-07-07; saved verbatim as reply.md)
+- Reply integrated: true (2026-07-07, ADVERSARIAL AUDIT — see integration.md; plan v2 + tickets
+  updated; follow-up round filed as REVIEW_FOLLOWUP-tw7.md with F1 rigidity-globalization /
+  F2 Bosma–Lenstra confirmation / F3 comparison-theorem check)
 
 ## Questions in the brief
 
