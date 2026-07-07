@@ -4817,7 +4817,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     c5α per-chart vanishing; GLC held by P0's live edits — claim stays open for increment 2.
 
 - **[T-W7.0c-c5α]** on-curve factorization bridge (NEW leaf, coordinator §2): the B–L
-  triples land on the curve at the RING level over the universal atlas. Element form: in
+  triples land on the curve at the RING level over the universal atlas.
+  - **Status**: in_progress · **Claimed**: coordinator-P1, 2026-07-07T18:06Z. Route note at
+    claim: the field-level input needs NO new content — at a field point `dblAdd(P,Q)` is
+    either `0` (equation trivial) or, by the six dba3aa8c certificates, projectively
+    proportional to a law-1/doubling value, which mathlib's equation specs put on the curve.
+  Element form: in
   the biprojective chart rings of `E_U ×_U E_U` (reduced by 0e; **Jacobson** — f.g. over
   `ℤ[a][Δ⁻¹]`), `F(dblAddX, dblAddY, dblAddZ)` vanishes because it vanishes at every field
   point (0f dictionary + mathlib `nonsingular_add`/`dblXYZ` specs) and closed points are
