@@ -80,6 +80,26 @@ and the base-change group structure are real (sorry-free) definitions.*
 `torsionIdeal` (LevelStructure/Basic.lean) is DS-adjacent: discharged by T-B3a from
 `torsionι_isClosedImmersion`.
 
+**DS-W7 block (added 2026-07-07T14:05Z per coordinator §3 — the decompose-skeleton carve-out).**
+The T-W7 `/develop --decompose` skeleton (commit `ba82784b`) deliberately states its
+construction *defs* with `sorry` bodies; they are governed by the SAME four-point DS rule
+above, with (ii) = their board tickets and (iii) = the skeleton's own spec lemmas (each def is
+followed in-file by its `_π`/`_left`/`_specPoints`/restriction pins — consumers may use ONLY
+those). Register (construction ticket in parentheses):
+
+| DS-W7 defs | File | Ticket |
+|---|---|---|
+| `blOpenZ`, `blOpenY`, `addOnZ`, `addOnY` | EllipticCurve/GroupLawConstruction.lean | T-W7.0c-i |
+| `mulModelHom` | 〃 | T-W7.0c-ii |
+| `mulOver`, `oneOver`, `invOver` | 〃 | T-W7.0g |
+| `negModelHom` | 〃 | T-W7.0b |
+| `projModelVCIso` | EllipticCurve/ModelVariableChange.lean | T-W7.mvc |
+| `projModelPointsEquiv` | EllipticCurve/PointsDictionary.lean | T-W7.0f (+ §2-P2 value-lemmas) |
+| `EllipticCurveGeom.negHom`, `.mulHom`, `.grpObj` | EllipticCurve/GroupLawDescent.lean | T-W7.12 / T-W7.36 |
+
+Rule for future decompose passes: skeleton `def := sorry` decls MUST be added to this
+register in the same commit that creates them.
+
 ## The BLACK-BOX REGISTER — **RR-ONLY** (owner directive, 2026-07-05)
 
 **Standing black box (the only one):**
