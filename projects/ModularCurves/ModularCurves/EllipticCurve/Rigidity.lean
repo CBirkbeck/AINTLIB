@@ -474,6 +474,7 @@ theorem germ_eq_zero_of_fromSpecStalk_app {X : Scheme.{u}} {U : X.Opens} {x : X}
     rw [Scheme.Hom.naturality (f := Spec.map φ) ((homOfLE le_top).op),
       show (Spec.map φ).app ⊤ = (Spec.map φ).appTop from rfl,
       Scheme.ΓSpecIso_inv_naturality_assoc]
+    rfl
   rw [hτapp] at h
   have hmapped : (TopologicalSpace.Opens.map (Spec.map φ).base).obj
       ((X.fromSpecStalk x) ⁻¹ᵁ U) = ⊤ := by
@@ -491,7 +492,8 @@ theorem germ_eq_zero_of_fromSpecStalk_app {X : Scheme.{u}} {U : X.Opens} {x : X}
       (Spec B).presheaf.map
         ((TopologicalSpace.Opens.map (Spec.map φ).base).map
           (homOfLE (le_top : (X.fromSpecStalk x) ⁻¹ᵁ U ≤ ⊤)).op.unop).op).hom) :=
-    ((ConcreteCategory.isIso_iff_bijective _).mp inferInstance).injective
+    ((ConcreteCategory.isIso_iff_bijective _).mp
+      (IsIso.comp_isIso' inferInstance hI3)).injective
   apply hinj
   first
   | simpa using h
@@ -666,8 +668,9 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
     simp [hι0]
   -- final unpacking through the generic stalk-evaluation lemma
   rw [← Ideal.Quotient.eq_zero_iff_mem]
+  rw [hτ] at happ
   exact germ_eq_zero_of_fromSpecStalk_app hxU
-    (CommRingCat.ofHom (Ideal.Quotient.mk _)) a (hτ ▸ happ)
+    (CommRingCat.ofHom (Ideal.Quotient.mk _)) a happ
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
 `p⁻¹(U₀)`. Attack route: for every `n`, case 1 over `Spec (Γstalk/𝔪ₜⁿ)` (Artinian local,

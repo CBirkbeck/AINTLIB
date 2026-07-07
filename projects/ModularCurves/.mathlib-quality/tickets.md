@@ -5162,10 +5162,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     instantiated. Leaf **L-hyp**.
 
 - **[T-W7.r2]** THE rigidity lemma (GIT 6.1, case 2) — `rigidity` (Rigidity.lean).
-  - **Status**: in_progress (ASSEMBLED — coordinator-§2 4-leaf split landed: `rigidity`'s
-    own proof is complete over the three sorried leaves below; leaf ·a = the eqLocus API is
-    PROVEN: `eqLocus`, `eqLocusι` real defs, `IsClosedImmersion` instance,
-    `eqLocusι_comp_eq`, `exists_factor_eqLocus`) · **Claimed**: fable-P4,
+  - **Status**: ✅ **DONE — SORRY-FREE, AXIOM-CLEAN** (fable-P4, 2026-07-07; #print axioms
+    = propext/Classical.choice/Quot.sound). Full dependency tree proven: eqLocus API,
+    seed (·b, preimmersion route), Krull neighbourhood (·c: ring engine + Z_U openness +
+    cross-affine vanishing via `map_ideal` + Artinian case-1 mechanism + the direct
+    thickened point through `fromSpecStalk` with the generic stalk-evaluation lemma
+    `germ_eq_zero_of_fromSpecStalk_app` — no stalk-of-pullback needed), clopen assembly
+    (·d). GIT-faithful statement (`hgconst`). · **Claimed**: fable-P4,
     2026-07-07T14:25Z · **Type**: theorem
 
 - **[T-W7.r2·b]** the κ(s) seed — `fibre_subset_eqLocus_of_collapsed` (Rigidity.lean).
