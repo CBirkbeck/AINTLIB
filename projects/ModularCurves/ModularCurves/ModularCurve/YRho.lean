@@ -241,7 +241,7 @@ lemma rhoAction_isContinuous (D : GaloisRepData N) :
     _ = w := hσ₀
 
 /-- The `ρ`-twisted `(ℤ/N)²` as a continuous Galois set. -/
-noncomputable def rhoContAction (D : GaloisRepData N) :
+noncomputable abbrev rhoContAction (D : GaloisRepData N) :
     ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
   ⟨rhoAction D, rhoAction_isContinuous D⟩
 
@@ -288,6 +288,61 @@ noncomputable def vRhoPointsEquiv {N : ℕ} [NeZero N] (D : GaloisRepData N) :
   ((specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)).trans
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D))
+
+/-- **(T-F1b, companion specification)** The points bijection is Galois-equivariant:
+translating a `ℚ̄`-point of `V_ρ` by `σ : Gal(ℚ̄/ℚ)` corresponds to acting by `ρ σ`
+on `(ℤ/N)²`. -/
+theorem vRhoPointsEquiv_equivariant {N : ℕ} [NeZero N] (D : GaloisRepData N) (σ : GalQ)
+    (h : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ vRho D //
+        h ≫ vRhoπ D = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    vRhoPointsEquiv D ⟨Spec.map (CommRingCat.ofHom σ.toAlgHom.toRingHom) ≫ h.1, by
+        rw [Category.assoc, h.2, ← Spec.map_comp]
+        congr 1
+        ext r
+        exact σ.commutes r⟩ =
+      D.ρ σ • vRhoPointsEquiv D h := by
+  set L1 := specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)
+    with hL1
+  set L2 := AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ) (A₁ := (vRhoAlgebra D : Type 0)))
+    sepClosureQAlgEquiv.symm with hL2
+  -- Layer 1: translation becomes post-composition with σ
+  have hA : ∀ hp : (Spec.map (CommRingCat.ofHom σ.toAlgHom.toRingHom) ≫ h.1) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))),
+      L1 ⟨Spec.map (CommRingCat.ofHom σ.toAlgHom.toRingHom) ≫ h.1, hp⟩ =
+        σ.toAlgHom.comp (L1 h) := by
+    intro hp
+    have hpre : Spec.preimage (Spec.map (CommRingCat.ofHom σ.toAlgHom.toRingHom) ≫ h.1) =
+        Spec.preimage h.1 ≫ CommRingCat.ofHom σ.toAlgHom.toRingHom := by
+      apply Spec.map_injective
+      rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+    refine AlgHom.ext fun a => ?_
+    exact congrArg (fun q : CommRingCat.of (vRhoAlgebra D : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom a) hpre
+  -- Layer 2: post-composition with σ becomes post-composition with the pulled-back σ
+  have hB : ∀ φ : (vRhoAlgebra D : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      L2 (σ.toAlgHom.comp φ) =
+        (galSepMulEquivGalQ.symm σ).toAlgHom.comp (L2 φ) := by
+    intro φ
+    refine AlgHom.ext fun a => ?_
+    show sepClosureQAlgEquiv.symm (σ (φ a)) =
+      sepClosureQAlgEquiv.symm (σ (sepClosureQAlgEquiv (sepClosureQAlgEquiv.symm (φ a))))
+    rw [AlgEquiv.apply_symm_apply]
+  -- Layer 3: the counit is equivariant
+  have hC : FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D)
+      ((galSepMulEquivGalQ.symm σ).toAlgHom.comp (L2 (L1 h))) =
+      D.ρ σ • FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D)
+        (L2 (L1 h)) := by
+    refine Eq.trans (FiniteEtaleGalois.pointsEquivOfContAction_smul (k := ℚ)
+      (rhoContAction D) (galSepMulEquivGalQ.symm σ) (L2 (L1 h))) ?_
+    show D.ρ (galSepMulEquivGalQ (galSepMulEquivGalQ.symm σ)) •
+        FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D) (L2 (L1 h)) = _
+    rw [MulEquiv.apply_symm_apply]
+  refine Eq.trans (congrArg (fun y => FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (rhoContAction D) (L2 y)) (hA _)) ?_
+  refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (rhoContAction D)) (hB (L1 h))) ?_
+  exact hC
 
 /-- The `(ℤ/N)²`-coordinate of a `ℚ̄`-valued raw `N`-torsion point of `E`, read through a
 `ρ`-level isomorphism and the canonical points description of `V_ρ`. Real construction
