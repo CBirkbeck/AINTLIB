@@ -2362,9 +2362,19 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     GroupLaw; universal-point instantiation pattern (T-B3's pointToTorsion).
 - **[T-D17]** `exists_exactOrderLocus` (A-generators, `A = ℤ/N`; KM 1.6 instance).
   Depends: T-D16. Feeds T-E7.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T22:55Z (paired claim with T-D18 — same D-inc.4 pattern; T-D16
-    just landed). Route: T-D16 over the base E.torsion N at the universal
+  - **Status**: done (beastmode-D2, 2026-07-06T22:55Z → 2026-07-07T00:20Z) —
+    **`exists_exactOrderLocus` PROVED** (commit 69e0901b), Incidence module
+    green. AXIOMS: standard three + `sorryAx` inherited EXCLUSIVELY through
+    REGISTERED boxes (T-D3/T-D1 `sectionsIdeal_isFinite/flat/lfp` +
+    T-B4 KM 2.3.1 BB-QF/BB-FLAT via torsionπ_isFinite/flat) — provenance
+    verified decl-by-decl; all in-file D-chain engines
+    (exists_subgroupLocus/EQ/vanishingLocus/torsionIdeal_subscheme) are CLEAN.
+    Construction: Z := exists_subgroupLocus (E.baseChange (torsionπ N))
+    (orderDivisor (asSection u)) at the universal killed point u := torsionι;
+    universality at c := pointToTorsion P hP via per-point additive transport
+    (ψ/φ E-value projections + T-D16 add/zero/neg bridges) + the SHARED ENGINE
+    `exactOrderLocusAux_ker_comap_eq` (raw-typed two-sided ker-comap comparison
+    by le_ker_comp-antisymmetry with two pullback.lift comparisons — reusable). Route: T-D16 over the base E.torsion N at the universal
     torsion point's orderDivisor; HasExactOrder := (orderDivisor).IsSubgroup
     (ExactOrder.lean:105) makes the RHS the T-D16-condition at the base-changed
     section; classifying-map equivalence by pullback.lift uniqueness
@@ -2372,8 +2382,24 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     naturality (pull_zsmul exists; orderDivisor-baseChange compat =
     sectionsDivisor-pullback bookkeeping).
 - **[T-D18]** `exists_fullLevelLocus` (`A = (ℤ/N)²`). Depends: T-D16. Feeds T-E9.
-  - **Status**: in_progress · **Claimed**: beastmode-D2 (stream-D successor),
-    2026-07-06T22:55Z (paired with T-D17). Same pattern over
+  - **Status**: done (beastmode-D2, 2026-07-06T22:55Z → 2026-07-07T00:20Z) —
+    **`exists_fullLevelLocus` PROVED** (same commit; Incidence.lean now has
+    ZERO sorries — the ENTIRE KM 1.3–1.6 INCIDENCE CHAIN T-D13→T-D18 IS
+    COMPLETE). Axioms: standard + sorryAx through registered boxes only (same
+    provenance audit as T-D17). Construction: Z := exists_incidenceLocusEQ over
+    E[N] ×ₛ E[N] between the universal pair divisor Σ[a·u₁+b·u₂] and the NEW
+    `fullLevelLocusAux_torsionDivisor` (E[N] as RelEffCartierDiv from
+    torsionπ_isFinite/flat + NEW torsionπ_lfp, transported along T-B3a);
+    killed-clause FREE from hP/hQ; NEW standalone
+    `fullLevelLocusAux_torsionIdeal_baseChange` (E[N]-formation commutes with
+    base change at ideal level — reusable, feeds T-D8/T-B6-style work).
+    GOTCHAS added to the trap-notes: baseChange-seam rewrites need
+    freshly-elaborated have/calc + congrArg-at-typed-motives; `rw [P1,P2]`
+    fails on instance-transparency — `Iff.of_eq (congrArg₂ Eq P1 P2)`;
+    IsFullLevel's family literal has an extra grouping paren. MILESTONE:
+    unblocks T-E7 (Y₁(N)) and T-E9 (Y(N)) representability feeders + v8's
+    T-W8 atlas-level spaces. CLEANUP DEBT (paused): ~1000 new aux lines +
+    dedup flags recorded in T-D16 note → CLEANUP-9/10. Same pattern over
     pullback (torsionπ N) (torsionπ N) with the (ℤ/N)²-divisor Σ[aP+bQ];
     IsFullLevel def at Basic.lean:183 — read at execution for the exact
     divisor-equality form (A-generator EQ-locus per D-inc.4 = T-D15/T-D14 +
