@@ -167,8 +167,9 @@ noncomputable def rhoSqIsProduct (D : GaloisRepData N) :
     rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h1 h2
     exact Prod.ext h1 h2
   · ext x
-    exact Prod.ext
-      (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₁)
-      (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₂)
+    · exact congrFun
+        (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₁) _
+    · exact congrFun
+        (congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₂) _
 
 end ModularCurves
