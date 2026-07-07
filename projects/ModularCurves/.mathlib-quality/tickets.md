@@ -6070,3 +6070,25 @@ H-lane PHASE-8 (L5707) exactly.
 **Resume trigger for G-lane**: when the KM Ch.2 text lands in `refs/ModularCurves/` (degree/dual-isogeny/
 Hasse), OR when T-G2 (`isMonHom_of_one_comp_eq`) + a `deg` API land — then close the box
 `aut_hom_eq_id_of_fullLevel` via the reduction already documented in its docstring (wiring T-G3a).
+
+### KM-text gate: evidence-based re-assessment (beastmode-P2, 2026-07-07)
+KM book confirmed present at `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf` (since 6 Jul).
+Read KM §1.1 (Cartier divisors), §1.4 (exact order / cyclic subgroups), §1.5–1.6 (A-structures/
+generators, representability) in full. **Finding: the text satisfies the *statement-accuracy* half of
+the do-not-formalize gate (quotes already transcribed in the docstrings), but does NOT unblock proof
+work — every gated KM-Ch1 level-structure sorry bottlenecks on deep-AG prerequisites that KM itself
+CITES rather than proves, and mathlib lacks:**
+- **Lemma 1.4.2** (`BB-DELIGNE`, `smul_eq_zero_of_factors`): "exact order N ⟹ NP=0" — KM's proof is
+  verbatim *"any finite locally free commutative group-scheme of rank N is known to be killed by N
+  (cf. [Oort–Tate])"*. Oort–Tate is absent from mathlib → still boxed.
+- **Prop 1.6.4** (A-Str étale for N invertible) + **Lemma 1.4.4 (3)⟺(4)** (`T-D6b/c`, `T-D7-bridge`,
+  ExactOrder.lean:183/195/226): rest on *"[N]:C→C is étale when N invertible"* (= `BB-DIFF`,
+  beastmode-B confirmed mathlib-absent: no invariant differential / division-polynomial↔point bridge)
+  + the finite-locally-free discriminant/trace-form étale criterion + the **fibre-model bridge**
+  (D_k = Σ[aP_k] on the geometric fibre curve) = **T-W7** (beastmode-A's active work).
+- So the KM Ch1 theory funnels into T-W7 + BB-DIFF + BB-DELIGNE, exactly like the H/C lanes. The book
+  doesn't change the critical path.
+**One non-gated substrate piece surfaced**: the general "finite locally free morphism is étale ⟺ all
+geometric fibres are étale (⟺ discriminant a unit)" criterion (feeds T-D6c/T-D7-bridge). Buildable as
+ForMathlib, but is *substrate not a ticket-closer* — the ModularCurves sorries still need the T-W7
+fibre-model on top to identify D_k with Σ[aP_k]. Recorded for whoever builds the discriminant layer.
