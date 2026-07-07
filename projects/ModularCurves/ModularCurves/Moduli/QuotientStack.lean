@@ -444,6 +444,7 @@ section TorsorComparison
 
 variable (S : Scheme.{u})
 
+omit [Group G] in
 /-- Stage A of the trivial-torsor comparison: distributing the pullback of the
 trivial projection over the second coproduct factor. The square exhibits
 `∐_k (∐_G S)` as `(∐_G S) ×_S (∐_G S)` via `(k, x) ↦ (x, π(x)-in-k-copy)`. -/
@@ -561,6 +562,49 @@ theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
   refine Limits.Sigma.hom_ext _ _ fun h => ?_
   rw [ι_trivialTorsorLeft, ← Category.assoc, ι_trivialTorsorLeft,
     ι_trivialTorsorLeft, mul_assoc]
+
+section Trivialize
+
+/-- **The trivial torsor pair** attached to an `S`-point `t : S ⟶ X`: the
+split torsor `∐_G S → S` with the translation action and the equivariant map
+`(g, s) ↦ σ(g)(t(s))`. -/
+noncomputable def trivialTorsorPair (S : Scheme.{u}) (t : S ⟶ X) :
+    TorsorPair σ S where
+  P := ∐ fun _ : G => S
+  p := trivialTorsorπ S
+  τ := trivialTorsorAction G S
+  over_base := trivialTorsorAction_over_base S
+  finite := trivialTorsorπ_finite S
+  etale := trivialTorsorπ_etale S
+  surjective := trivialTorsorπ_surjective S
+  torsor := trivialTorsor_torsor S
+  u := trivialTorsorMap σ S t
+  equivariant := trivialTorsorMap_equivariant σ S t
+
+/-- **The trivialization functor** (T-W3b): the prestack `[X/G](S)` maps to the
+groupoid of `G`-torsor pairs by sending an `S`-point to its trivial torsor pair
+and a group element `f : t ⟶ t'` to left translation by `f⁻¹`. Fully faithful
+for connected nonempty `S` (see the attack log — NOT in general); the essential
+image is the locally trivial pairs (descent-gated). -/
+noncomputable def trivialize (S : Scheme.{u}) :
+    ActionGroupoid σ S ⥤ TorsorPair σ S where
+  obj t := trivialTorsorPair σ S t.pt
+  map {t t'} f :=
+    { hom := trivialTorsorLeft G S f.1⁻¹
+      over := trivialTorsorLeft_over_base S f.1⁻¹
+      equiv := fun g => trivialTorsorLeft_equivariant S f.1⁻¹ g
+      compat := trivialTorsorLeft_map σ S f.2 }
+  map_id t := by
+    refine TorsorPair.Hom.ext ?_
+    show trivialTorsorLeft G S (1 : G)⁻¹ = 𝟙 _
+    rw [inv_one, trivialTorsorLeft_one]
+  map_comp {t t' t''} f g := by
+    refine TorsorPair.Hom.ext ?_
+    show trivialTorsorLeft G S (f.1 * g.1)⁻¹ =
+      trivialTorsorLeft G S f.1⁻¹ ≫ trivialTorsorLeft G S g.1⁻¹
+    rw [mul_inv_rev, trivialTorsorLeft_mul]
+
+end Trivialize
 
 end TorsorPair
 
