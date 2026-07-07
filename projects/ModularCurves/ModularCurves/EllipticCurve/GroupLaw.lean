@@ -257,42 +257,46 @@ lemma Point.asSection_val_snd {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
 multiplication. Both underlying maps are `pullback.lift (P.1 ≫ [n]) (𝟙 T)` — LHS by
 `point_smul_eq_comp_mulBy` on `E`, RHS by the same plus `mulByHom_baseChange`.
 
-PARKED (2026-07-06): the arithmetic is settled (fst-leg = `P.1 ≫ E.mulByHom n`,
-snd-leg = `𝟙 T` on both sides via `pullback.hom_ext`); the residual friction is the
-`(E.baseChange g).E` vs `pullback E.π g` defeq-heterogeneity — `mulByHom_baseChange`
-rewrites at the `(E.baseChange g).E`-typed spelling but the subsequent
-`pullback.fst E.π g` composition is at the raw `pullback E.π g` spelling, so
-`pullback.lift_fst`'s matcher misfires. Clean route: recast the whole goal to the raw
-`pullback E.π g` spelling with a single `show` before any rewriting, then the
-fst/snd-leg computation goes through. Non-blocking (T-D6a-ii is itself non-blocking). -/
+PROVEN (2026-07-07, axiom-clean): the previously-diagnosed friction was a single wall —
+`EllipticCurve.baseChange` is a semireducible `def`, so `(E.baseChange g).E` is defeq to
+`pullback E.π g` only at *default* transparency; every `rw`/`simp` route dies because its
+matcher (`kabstract`) re-checks the composition at `instances` transparency, where an
+`(E.baseChange g).E`-typed coercion against `pullback.fst/snd E.π g` is not type-correct.
+A **term-mode** proof (`Eq.trans`/`congrArg`/`Category.assoc` chains, elaborated at default
+transparency) sidesteps `kabstract` entirely — no structural refactor needed. -/
 theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
     Point.asSection E g (n • P) = n • Point.asSection E g P := by
-  -- STRUCTURAL-REFACTOR-GATED (2026-07-06, both obstacles precisely diagnosed):
-  -- (2) coercion `↑(asSection …)` vs `.1` — SOLVED: a full `simp` (or
-  --     `simp only [Point.asSection_coe, point_smul_eq_comp_mulBy]`) after
-  --     `refine Subtype.ext ?_; apply pullback.hom_ext` normalises both coercions to
-  --     `pullback.lift …`, reducing each leg to
-  --       `lift (P.1 ≫ [n]) (𝟙 T) _ ≫ fst = (lift P.1 (𝟙 T) _ ≫ (baseChange).mulByHom n) ≫ fst`.
-  -- (1) STILL BLOCKS: the RHS `lift P.1 (𝟙 T) _ ≫ (E.baseChange g).mulByHom n` STRADDLES
-  --     the defeq-distinct types (`pullback E.π g` codomain of the lift vs
-  --     `(E.baseChange g).E` domain of mulByHom), so `Category.assoc` (needed to expose
-  --     `(baseChange).mulByHom n ≫ fst` for `mulByHom_baseChange_fst`) refuses to fire.
-  --     The `@[simp]` projection lemmas `mulByHom_baseChange_fst/snd` work around this
-  --     ELSEWHERE (where mulByHom meets fst directly) but not through the straddling
-  --     composition. Genuine fix = make `EllipticCurve.baseChange.E` SYNTACTICALLY
-  --     `pullback E.π g` (redefine the structure so `.E`/`.π` unfold to the pullback
-  --     spelling), after which every reassoc is single-spelling. All arithmetic proven.
-  --     Non-blocking (T-D6a-ii is non-blocking).
-  -- (3) THIRD spelling layer confirmed 2026-07-06: `E.π` (in bridge-lemma statements)
-  --     elaborates to `(E.toEllipticCurveGeom).π` while the goal's `pullback.fst E.π g`
-  --     (from `pullback.hom_ext` on `(E.baseChange g).E`) uses a different `E.π`
-  --     spelling — so even the bridge lemmas `asSection_val_fst/snd` fail to rw-match.
-  --     The holistic refactor must normalise ALL THREE: `↑`/`.1`, `(E.baseChange g).E`/
-  --     `pullback E.π g`, and `E.π`/`(E.toEllipticCurveGeom).π`. Cleanest single fix:
-  --     redefine `EllipticCurve.baseChange` and `Point.asSection` with `@[simp]`
-  --     projection-unfolding lemmas + state all base-change naturality bridges with a
-  --     consistent (pinned) spelling of `E.π`, then a single `simp` closes this.
-  sorry
+  -- Both underlying morphisms are `pullback.lift (↑P ≫ E.mulByHom n) (𝟙 T) _`.  The proof
+  -- is deliberately term-mode: `(E.baseChange g).E` is only defeq to `pullback E.π g` at
+  -- default transparency, so any `rw`/`simp` step whose matcher (`kabstract`) re-checks a
+  -- composition of an `(E.baseChange g).E`-typed coercion against `pullback.fst E.π g`
+  -- fails ("not type-correct under instances").  `Eq.trans`/`congrArg` chains elaborate at
+  -- default transparency and sidestep this.  `pullback.hom_ext` splits into the two legs,
+  -- each reduced by the base-change naturality bridges `mulByHom_baseChange_fst/snd` and
+  -- the section identities `Point.asSection_val_fst/snd`; `point_smul_eq_comp_mulBy` ties
+  -- the point-level `[n]` to `mulByHom` on both `E` and `E.baseChange g`.
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · -- fst leg: both sides equal `↑P ≫ E.mulByHom n`
+    have lhs : (Point.asSection E g (n • P)).1 ≫ pullback.fst E.π g = ↑P ≫ E.mulByHom n :=
+      (Point.asSection_val_fst E g (n • P)).trans (point_smul_eq_comp_mulBy E g n P)
+    have rhs : (n • Point.asSection E g P).1 ≫ pullback.fst E.π g = ↑P ≫ E.mulByHom n :=
+      (congrArg (· ≫ pullback.fst E.π g)
+          (point_smul_eq_comp_mulBy (E.baseChange g) (𝟙 T) n (Point.asSection E g P))).trans <|
+        (Category.assoc _ _ _).trans <|
+          (congrArg ((Point.asSection E g P).1 ≫ ·) (mulByHom_baseChange_fst E g n)).trans <|
+            (Category.assoc _ _ _).symm.trans <|
+              congrArg (· ≫ E.mulByHom n) (Point.asSection_val_fst E g P)
+    exact lhs.trans rhs.symm
+  · -- snd leg: both sides equal `𝟙 T`
+    have lhs : (Point.asSection E g (n • P)).1 ≫ pullback.snd E.π g = 𝟙 T :=
+      Point.asSection_val_snd E g (n • P)
+    have rhs : (n • Point.asSection E g P).1 ≫ pullback.snd E.π g = 𝟙 T :=
+      (congrArg (· ≫ pullback.snd E.π g)
+          (point_smul_eq_comp_mulBy (E.baseChange g) (𝟙 T) n (Point.asSection E g P))).trans <|
+        (Category.assoc _ _ _).trans <|
+          (congrArg ((Point.asSection E g P).1 ≫ ·) (mulByHom_baseChange_snd E g n)).trans <|
+            Point.asSection_val_snd E g P
+    exact lhs.trans rhs.symm
 
 end EllipticCurve
 
