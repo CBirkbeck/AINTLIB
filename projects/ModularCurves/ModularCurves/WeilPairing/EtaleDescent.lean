@@ -44,11 +44,22 @@ Chain (board ticket T-C0, decomposition v6):
   transported through the Galois equivalence from T-C0b/T-C0c — the remaining input
   is the equivariant fibre-level pairing (T-C0b/T-C0c), fed to
   `exists_pairingAlgebraHom_of_galoisEquivariant`.
-* `weilPairingSpecField` (T-C0e): the scheme-level pairing
-  `E[N] ×_S E[N] ⟶ μ_N` over `S = Spec k`, `k` a char-0 field — the field-base
-  discharge of the DS4 data. The general ℚ-scheme discharge additionally needs the
-  étale-trivialisation tower (T-H4-adjacent); that edge is recorded on the board,
-  and the `YRho` consumer (over `AlgebraicClosure ℚ`) is served by the field case.
+The **field-valued-points** pairing of record is `exists_pairingAlgebraHom_of_galoisEquivariant`
+above: over a char-0 field `k`, it descends a `Gal(k̄/k)`-equivariant pairing on `k̄`-points to a
+finite-étale algebra hom `μ_N ⟶ E[N] ⊗ E[N]` — equivalently a scheme morphism on the geometric
+fibre. Per the v9 expert review (2026-07-07, §"Weil pairing"), **this field case is NOT the pairing
+the moduli functor needs**: `Y(ρ̄)` classifies elliptic curves over arbitrary `ℚ`-schemes `T`, not
+just fields, so the DS4 target is the **`T`-relative morphism**
+`weilPairingCharZero : E[N] ×_T E[N] ⟶ μ_{N,T}` over `Spec ℚ`-schemes, built étale-locally on `T`
+(where the finite-étale `E[N]` trivialises to a constant `(ℤ/N)²`) then descended (mathlib
+`AlgebraicGeometry.Morphisms.FlatDescent`), with Silverman/determinant normalisation and the
+symplectic pin `e_N(aP+bQ, cP+dQ) = e_N(P,Q)^{ad−bc}`. That construction is board ticket **T-C0e**
+(re-cut v9.4) — its concrete point identification funnels into **T-W7** (group law from Weierstrass
+charts, A-lane), the documented convergence point for the remaining H/C frontier. The earlier
+scheme-level field statement `exists_weilPairingSpecField` was **removed** (2026-07-07): its
+constraint `w ≫ muNπ = fst ≫ torsionπ` pins only "a morphism over the base", which a trivial
+section satisfies — it was neither the field-valued-points theorem (that is the descent heart
+above) nor the moduli pairing (that is `weilPairingCharZero`).
 
 The torsion side consumes the registered T-B4/T-B5 finiteness/étaleness boxes
 (`torsionπ_isFinite`/`torsionπ_etale`); axiom profiles record `sorryAx` through
@@ -475,14 +486,13 @@ theorem exists_pairingAlgebraHom_of_galoisEquivariant (k : Type u) [Field k]
   rw [h2] at hx
   exact AlgHom.ext fun a => (e.symm.injective (AlgHom.congr_fun hx a)).symm
 
-/-- **(T-C0e)** The étale-descent Weil pairing over a characteristic-zero field base:
-the scheme-level pairing morphism with the same API as the DS4 register entry
-(`weilPairing`), constructed by Galois descent of the HasseWeil field-level pairing.
-Field-base discharge of DS4; the general ℚ-scheme case is the recorded follow-up. -/
-theorem exists_weilPairingSpecField (k : Type u) [Field k] [CharZero k]
-    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N] :
-    ∃ w : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN (Spec (CommRingCat.of k)) N,
-      w ≫ muNπ _ N = pullback.fst _ _ ≫ E.torsionπ N := by sorry
+-- **(T-C0e, re-cut v9.4 — see the module docstring)** The DS4 Weil pairing of record is the
+-- `T`-relative morphism `weilPairingCharZero : E[N] ×_T E[N] ⟶ μ_{N,T}` over `Spec ℚ`-schemes,
+-- NOT a field-base statement. The earlier placeholder `exists_weilPairingSpecField` was removed:
+-- its "morphism over the base" constraint was satisfiable by a trivial section, so it captured
+-- neither the field-valued-points pairing (that is `exists_pairingAlgebraHom_of_galoisEquivariant`,
+-- proven above) nor the moduli pairing. The `T`-relative construction (étale-local trivialisation
+-- of `E[N]` + finite-flat descent of the morphism) funnels through T-W7 and is board ticket T-C0e.
 
 end EllipticCurve
 

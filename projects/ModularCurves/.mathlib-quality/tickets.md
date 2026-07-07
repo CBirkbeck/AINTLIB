@@ -4828,3 +4828,15 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
     for-mathlib, not now.
 - **NEXT**: scope the T-relative char-0 Weil pairing (v9.4 T-C0); re-cut T-C0e; advance gate-free
   scaffolding (μ_{N,T} target, étale-local trivialization of E[N], descent of the morphism over T).
+- **T-C0e RE-CUT DONE** (beastmode-H, 2026-07-07, per v9.4). Removed the too-weak
+  `exists_weilPairingSpecField` from `WeilPairing/EtaleDescent.lean` (its `w ≫ muNπ = fst ≫
+  torsionπ` constraint was satisfiable by a trivial section — neither the field-valued-points
+  theorem nor the moduli pairing). `EtaleDescent.lean` is now **sorry-free** (remaining decls
+  carry only the registered T-B4/B5 boxes). Module docstring re-cut: the field-valued-points
+  pairing of record is the PROVEN `exists_pairingAlgebraHom_of_galoisEquivariant` (descent heart,
+  reviewer-praised); the DS4 target is the T-relative `weilPairingCharZero : E[N] ×_T E[N] ⟶
+  μ_{N,T}` over ℚ-schemes (étale-local trivialisation + finite-flat descent — mathlib
+  `Morphisms/FlatDescent` EXISTS; `muN S N`/`muNPointsEquiv` are ALREADY base-general, so the
+  μ_{N,T} target is free). Concrete point identification funnels into **T-W7**. T-C0e now = that
+  T-relative construction (spec to be cut carefully against KM 2.8/Silverman when T-W7 lands —
+  NOT reconstructed from memory, per the v9 statement-drift caution).
