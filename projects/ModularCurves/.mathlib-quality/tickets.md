@@ -5828,6 +5828,13 @@ GF1→GF2→GF3→GF4→GF5→GF6→GF7→NOETH-FLAT1.
   `MvPolynomial.ringKrullDim_of_isNoetherianRing` (dim k[x]=d) EXISTS, hypersurface-drop exists
   (KrullDimension/Regular.lean), tensor-domain via localization; the ONE real gap = dim-under-integral-ext
   (or use trdeg as the measure). Bounded. · **Depends on**: T-GF1..GF4 · **Type**: theorem
+  - **UPDATE 2026-07-07T19:20Z**: domain-case dévissage PROVEN (delegate, verified) modulo ONE
+    box `GFDatum` (Noether-normalization data: generic-finiteness descent + free-P-submodule-with-
+    finite-torsion-cokernel — genuinely mathlib-absent). Route: TRANSCENDENCE DEGREE measure
+    (`trdeg_quotient_prime_lt` + `trdeg_le_of_injective`, NO going-up-dim). Also fixed a latent
+    doc-before-omit build error masked by stale olean; builds green from source. GF5 = axiom-clean
+    modulo GFDatum. OFF the box-discharge critical path (Tor-free T-LC route doesn't need generic
+    flatness); GFDatum is a standalone-completeness box, not a blocker.
 - **Statement**: `R Noetherian domain, R→S finite type, M finite S-module ⟹ ∃ 0≠f∈R,
   Module.Free R_f M_f` (equivalently `Module.Flat`). Proof = strong induction on d=dim(S_K)
   via GF1 (reduce M to R⧸𝔮 pieces by noetherian induction) + GF2 (assemble free) + GF3
