@@ -1,1 +1,1 @@
-FOCUS: T-W7.r2-b (kappa(s) seed) — lane P4, fable-P4. r2-d PROVEN+committed; next: base-change the collapsed-fibre situation to Spec kappa(s), chart = affine V x_S Spec kappa(s), rigidity_of_range_le_affine, exists_factor_eqLocus, pullback-range-of-fst lemma.
+FOCUS: T-W7.r2-c (Krull neighbourhood) — LAST leaf of rigidity. Step: survey mathlib IdealSheafData/ker API + stalk-of-closed-immersion; then Artinian thickenings via case 1 over Spec(Gammastalk/m^n); Krull iInf_pow_smul_eq_bot_of_isLocalRing; finite-type ideal sheaf zero near fibre; properness tube.

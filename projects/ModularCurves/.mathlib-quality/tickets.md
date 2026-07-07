@@ -5046,12 +5046,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     2026-07-07T14:25Z · **Type**: theorem
 
 - **[T-W7.r2·b]** the κ(s) seed — `fibre_subset_eqLocus_of_collapsed` (Rigidity.lean).
-  - **Status**: open (claimed with parent, fable-P4) · **Depends**: T-W7.r1 (done) ·
-    **Type**: theorem
-  - Route (docstring has details): base-change along `S.fromSpecResidueField s` +
-    `UniversallyOConnected.baseChange`; chart = affine `V ×_S Spec κ(s)` fed to
-    `rigidity_of_range_le_affine`; land in `exists_factor_eqLocus`; fibre = range of
-    `pullback.fst` (pullback-carrier API).
+  - **Status**: ✅ PROVEN (fable-P4, 2026-07-07T15:35Z) — simpler than planned: no chart
+    needed at all. The residue-field projection `pullback.fst q (fromSpecResidueField s)`
+    is a preimmersion (mathlib instance + `IsStableUnderBaseChange`), hence injective on
+    points, so the base-changed comparison morphism has SUBSINGLETON range directly and
+    `rigidity_of_subsingleton_range` applies; then `exists_factor_eqLocus` + `range_fst` +
+    `range_fromSpecResidueField` finish. `rigidity` now rests on the single leaf ·c.
 
 - **[T-W7.r2·c]** Krull neighbourhood — `exists_open_factor_of_fibre_subset`
   (Rigidity.lean). **Status**: open · **Depends**: T-W7.r1 (done) · **Type**: theorem ·

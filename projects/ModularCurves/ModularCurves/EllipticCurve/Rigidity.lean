@@ -240,7 +240,101 @@ theorem fibre_subset_eqLocus_of_collapsed (hp : UniversallyOConnected p)
     (hs : Set.Subsingleton (f.base '' (p.base ⁻¹' {s}))) :
     p.base ⁻¹' {s} ⊆ Set.range (eqLocusι f (p ≫ (e ≫ f)) hf
       (by rw [Category.assoc, Category.assoc, hf, he]; exact Category.comp_id p)).base := by
-  sorry
+  -- notation: everything is base-changed along the residue-field point of `s`
+  have hFcond : (pullback.fst p (S.fromSpecResidueField s) ≫ f) ≫ q =
+      pullback.snd p (S.fromSpecResidueField s) ≫ S.fromSpecResidueField s := by
+    rw [Category.assoc, hf]
+    exact pullback.condition
+  have heTcond : (S.fromSpecResidueField s ≫ e) ≫ p =
+      𝟙 (Spec (S.residueField s)) ≫ S.fromSpecResidueField s := by
+    rw [Category.assoc, he, Category.comp_id, Category.id_comp]
+  -- the comparison morphism over `Spec κ(s)`, and the section
+  obtain ⟨F, hFρ, hFqT⟩ : ∃ F : pullback p (S.fromSpecResidueField s) ⟶
+      pullback q (S.fromSpecResidueField s),
+      F ≫ pullback.fst q (S.fromSpecResidueField s) =
+        pullback.fst p (S.fromSpecResidueField s) ≫ f ∧
+      F ≫ pullback.snd q (S.fromSpecResidueField s) =
+        pullback.snd p (S.fromSpecResidueField s) :=
+    ⟨pullback.lift _ _ hFcond, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+  obtain ⟨eT, heTπ, heTpT⟩ : ∃ eT : Spec (S.residueField s) ⟶
+      pullback p (S.fromSpecResidueField s),
+      eT ≫ pullback.fst p (S.fromSpecResidueField s) = S.fromSpecResidueField s ≫ e ∧
+      eT ≫ pullback.snd p (S.fromSpecResidueField s) = 𝟙 _ :=
+    ⟨pullback.lift _ _ heTcond, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+  -- every point of the base-changed total space lies over the fibre of `s`
+  have hπland : ∀ z, (pullback.fst p (S.fromSpecResidueField s)).base z ∈
+      p.base ⁻¹' {s} := by
+    intro z
+    have hz : (pullback.fst p (S.fromSpecResidueField s)).base z ∈
+        Set.range (pullback.fst p (S.fromSpecResidueField s)).base := ⟨z, rfl⟩
+    rw [show Set.range (pullback.fst p (S.fromSpecResidueField s)).base =
+        p.base ⁻¹' Set.range (S.fromSpecResidueField s).base from
+      Scheme.Pullback.range_fst p (S.fromSpecResidueField s),
+      Scheme.range_fromSpecResidueField] at hz
+    exact hz
+  -- the base-changed morphism has subsingleton range: the first projection of the
+  -- residue-field base change is a preimmersion, hence injective, and it carries the
+  -- range into the collapsed image `f(p⁻¹(s))`
+  have hone : Set.Subsingleton (Set.range F.base) := by
+    rintro _ ⟨z₁, rfl⟩ _ ⟨z₂, rfl⟩
+    apply (Scheme.Hom.isEmbedding (pullback.fst q (S.fromSpecResidueField s))).injective
+    have h₁ : (pullback.fst q (S.fromSpecResidueField s)).base (F.base z₁) =
+        f.base ((pullback.fst p (S.fromSpecResidueField s)).base z₁) :=
+      congrArg (fun m : pullback p (S.fromSpecResidueField s) ⟶ Y => m.base z₁) hFρ
+    have h₂ : (pullback.fst q (S.fromSpecResidueField s)).base (F.base z₂) =
+        f.base ((pullback.fst p (S.fromSpecResidueField s)).base z₂) :=
+      congrArg (fun m : pullback p (S.fromSpecResidueField s) ⟶ Y => m.base z₂) hFρ
+    rw [h₁, h₂]
+    exact hs ⟨_, hπland z₁, rfl⟩ ⟨_, hπland z₂, rfl⟩
+  -- GIT case 1 over the residue field
+  obtain ⟨sec, -, hFsec⟩ := rigidity_of_subsingleton_range
+    (hp.baseChange (S.fromSpecResidueField s)) eT heTpT F hFqT hone
+  -- the two composites agree on the base-changed total space
+  have hsec' : sec = eT ≫ F := by
+    have h1 : eT ≫ F = eT ≫ (pullback.snd p (S.fromSpecResidueField s) ≫ sec) :=
+      congrArg (eT ≫ ·) hFsec
+    have h2 : eT ≫ (pullback.snd p (S.fromSpecResidueField s) ≫ sec) =
+        (eT ≫ pullback.snd p (S.fromSpecResidueField s)) ≫ sec :=
+      (Category.assoc _ _ _).symm
+    rw [h1, h2, heTpT, Category.id_comp]
+  have hπeq : pullback.fst p (S.fromSpecResidueField s) ≫ f =
+      pullback.fst p (S.fromSpecResidueField s) ≫ (p ≫ (e ≫ f)) := by
+    calc pullback.fst p (S.fromSpecResidueField s) ≫ f
+        = F ≫ pullback.fst q (S.fromSpecResidueField s) := hFρ.symm
+      _ = (pullback.snd p (S.fromSpecResidueField s) ≫ sec) ≫
+          pullback.fst q (S.fromSpecResidueField s) :=
+        congrArg (· ≫ pullback.fst q (S.fromSpecResidueField s)) hFsec
+      _ = pullback.snd p (S.fromSpecResidueField s) ≫ (eT ≫ F) ≫
+          pullback.fst q (S.fromSpecResidueField s) := by
+        rw [hsec']
+        simp only [Category.assoc]
+      _ = pullback.snd p (S.fromSpecResidueField s) ≫ eT ≫
+          (pullback.fst p (S.fromSpecResidueField s) ≫ f) := by
+        rw [← hFρ]
+        simp only [Category.assoc]
+      _ = pullback.snd p (S.fromSpecResidueField s) ≫ (S.fromSpecResidueField s ≫ e) ≫ f := by
+        rw [← Category.assoc eT, heTπ]
+      _ = (pullback.snd p (S.fromSpecResidueField s) ≫ S.fromSpecResidueField s) ≫ e ≫ f := by
+        simp only [Category.assoc]
+      _ = (pullback.fst p (S.fromSpecResidueField s) ≫ p) ≫ e ≫ f := by
+        rw [pullback.condition]
+      _ = pullback.fst p (S.fromSpecResidueField s) ≫ (p ≫ (e ≫ f)) := by
+        simp only [Category.assoc]
+  -- factor through the agreement locus and take ranges
+  obtain ⟨w, hw⟩ := exists_factor_eqLocus f (p ≫ (e ≫ f)) hf
+    (by rw [Category.assoc, Category.assoc, hf, he]; exact Category.comp_id p)
+    (pullback.fst p (S.fromSpecResidueField s)) hπeq
+  intro x hx
+  have hxr : x ∈ Set.range (pullback.fst p (S.fromSpecResidueField s)).base := by
+    rw [show Set.range (pullback.fst p (S.fromSpecResidueField s)).base =
+        p.base ⁻¹' Set.range (S.fromSpecResidueField s).base from
+      Scheme.Pullback.range_fst p (S.fromSpecResidueField s),
+      Scheme.range_fromSpecResidueField]
+    exact hx
+  obtain ⟨z, hz⟩ := hxr
+  refine ⟨w.base z, ?_⟩
+  have hwz := congrArg (fun m : pullback p (S.fromSpecResidueField s) ⟶ X => m.base z) hw
+  simpa using hwz.trans hz
 
 /-- **(T-W7.r2·c, Krull neighbourhood — SORRIED LEAF)** If the fibre over `t` lies
 set-theoretically in the agreement locus, it lies in it scheme-theoretically on an open
