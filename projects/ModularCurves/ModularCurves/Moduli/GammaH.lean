@@ -803,6 +803,71 @@ theorem gammaFullNaive_not_rigid_of_le_two (N : ℕ) [NeZero N] (hN : N ≤ 2)
   exact hrig X (EllObj.negIso R X) rfl hne' ⟨(P, Q), hPQ⟩
     (gammaFullNaiveProblem_map_negIso_of_le_two R N hN X ⟨(P, Q), hPQ⟩)
 
+/-- **(T-H7-positive, `N ≥ 3`)** The `[-1]` automorphism acts WITHOUT fixed points on the
+naive full-level-`N` problem for `N ≥ 3` (invertible): over any object with a nonempty base,
+`[-1]` moves every naive full level structure. The exact positive counterpart to
+`gammaFullNaiveProblem_map_negIso_of_le_two` (for `N ≤ 2`, `[-1]` FIXES every structure): if it
+fixed `(P, Q)` then `−P = P` and `−Q = Q`, so at a geometric point `pull P, pull Q` are
+`2`-torsion and the subgroup they generate is entirely `2`-torsion — yet by the full-level
+condition it contains all of `E[N] ≅ (ℤ/N)²`, forcing `2 = 0` in `ℤ/N`, i.e. `N ≤ 2`.
+
+This is the `[-1]`-part of KM/Loeffler rigidity for `N ≥ 3` — the generic-automorphism case
+(`Aut(E) = {±1}`, all `j ∉ {0, 1728}`). Full `Rigid` (every automorphism, including the extra
+ones at `j ∈ {0, 1728}`) needs the automorphism group scheme and is the ⧗KM-gated
+`gammaFullDrinfeld_representable`. -/
+theorem gammaFullNaiveProblem_map_negIso_ne_of_three_le (N : ℕ) [NeZero N] (hN : 3 ≤ N)
+    (hinv : IsUnit ((N : ℕ) : R)) (X : EllObj R) (hne : Nonempty X.base)
+    (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
+    (gammaFullNaiveProblem R N).map (EllObj.negIso R X).hom.op L ≠ L := by
+  intro heq
+  -- A fixed point forces `−P = P` and `−Q = Q`.
+  have hP : -L.1.1 = L.1.1 :=
+    (EllObj.pullSection_negHom R X L.1.1).symm.trans (congrArg (fun z => z.1.1) heq)
+  have hQ : -L.1.2 = L.1.2 :=
+    (EllObj.pullSection_negHom R X L.1.2).symm.trans (congrArg (fun z => z.1.2) heq)
+  -- Base change to a geometric point where `N` is invertible.
+  obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X hne N hinv
+  letI := fk; letI := ak
+  -- There, the pulled sections are `2`-torsion.
+  have h2 : ∀ Z : X.curve.Section, -Z = Z →
+      (2 : ℤ) • EllipticCurve.Point.pull X.curve t Z = 0 := by
+    intro Z hZ
+    have hneg : -(EllipticCurve.Point.pull X.curve t Z) =
+        EllipticCurve.Point.pull X.curve t Z := by
+      rw [← neg_one_zsmul, ← EllipticCurve.Point.pull_zsmul, neg_one_zsmul, hZ]
+    rw [two_zsmul]; nth_rewrite 2 [← hneg]; exact add_neg_cancel _
+  -- Hence the whole subgroup they generate is `2`-torsion.
+  let dbl : X.curve.Point t →+ X.curve.Point t :=
+    AddMonoidHom.mk' (fun x => (2 : ℤ) • x) (fun a b => smul_add 2 a b)
+  have hsub : AddSubgroup.closure {EllipticCurve.Point.pull X.curve t L.1.1,
+      EllipticCurve.Point.pull X.curve t L.1.2} ≤ dbl.ker := by
+    rw [AddSubgroup.closure_le]
+    rintro y (rfl | rfl)
+    · exact h2 _ hP
+    · exact h2 _ hQ
+  -- But `E[N] ≅ (ℤ/N)²` supplies an `N`-torsion point; the full-level condition puts it in
+  -- that subgroup, so it is `2`-torsion — impossible for `N ≥ 3`.
+  obtain ⟨e⟩ := X.curve.torsion_geometricFibre_rank_two N k t hk
+  have hxtN : (N : ℤ) • ((e.symm ![1, 0] :
+      Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) : X.curve.Point t) = 0 :=
+    (Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2
+  have hxt2 : (2 : ℤ) • ((e.symm ![1, 0] :
+      Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) : X.curve.Point t) = 0 :=
+    AddMonoidHom.mem_ker.mp (hsub (L.2.2 k t _ hxtN))
+  have hy2 : (2 : ℤ) • (e.symm ![1, 0] :
+      Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) = 0 := by
+    rw [← Submodule.coe_eq_zero, Submodule.coe_smul]
+    exact hxt2
+  have h20 : (2 : ℤ) • (![1, 0] : Fin 2 → ZMod N) = 0 := by
+    have h := congrArg e hy2
+    rwa [map_zsmul, AddEquiv.apply_symm_apply, map_zero] at h
+  have h2z : ((2 : ℤ) : ZMod N) = 0 := by
+    have h := congrFun h20 0
+    rwa [Pi.smul_apply, Matrix.cons_val_zero, zsmul_eq_mul, mul_one, Pi.zero_apply] at h
+  have hdvd : (N : ℤ) ∣ 2 := (ZMod.intCast_zmod_eq_zero_iff_dvd 2 N).mp h2z
+  have hle : N ≤ 2 := by exact_mod_cast Int.le_of_dvd (by norm_num) hdvd
+  omega
+
 end GammaH
 
 section DrinfeldOverZ

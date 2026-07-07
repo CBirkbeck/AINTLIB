@@ -5001,3 +5001,19 @@ T-relative weilPairingCharZero target).
 **Resume trigger for H-lane**: when T-W7 lands (scheme-level group law), re-audit the `map`-membership
 gate (T-A6/A6.δ) and the concrete Weil-pairing values (T-C0d-ii / T-C0e T-relative construction) — both
 unblock together, per v8/v9.
+
+### H-lane: N≥3 positive rigidity — [-1]-part (beastmode-H, 2026-07-07, user-directed)
+Proved `ModularCurves.gammaFullNaiveProblem_map_negIso_ne_of_three_le` (GammaH.lean) — the POSITIVE
+counterpart to `gammaFullNaiveProblem_map_negIso_of_le_two`: for N≥3 invertible, the [-1]
+automorphism has NO fixed points on the naive full-level problem (over any object with a nonempty
+base). Proof: a fixed structure forces −P=P, −Q=Q → at a geometric point pull P, pull Q are
+2-torsion → the subgroup they generate is 2-torsion → but the full-level condition puts all of
+E[N]≅(ℤ/N)² inside it (via `torsion_geometricFibre_rank_two`) → 2=0 in ℤ/N → N≤2, contradiction.
+Reuses the T-H7 machinery (negIso/pullSection_negHom/exists_geometricPoint/rank-two fibre).
+Sorry-FREE; axiom profile IDENTICAL to its T-H7 sibling ([propext,sorryAx,Classical.choice,
+Quot.sound] — sorryAx only via the pre-existing gammaFullNaiveProblem.map WIP, no NEW box).
+Engineering: whnf-timeout dodged by replacing simp with explicit rws (Pi.smul_apply/cons_val_zero/
+zsmul_eq_mul; Submodule.coe_eq_zero/coe_smul; ZMod.intCast_zmod_eq_zero_iff_dvd) — NO heartbeat bump.
+SCOPE: this is the generic-automorphism case (Aut(E)={±1}, all j∉{0,1728}) — reviewer v9's requested
+"positive rigidity for N≥3". FULL `Rigid` (every automorphism incl. the extra ones at j∈{0,1728})
+needs the automorphism group scheme and stays the ⧗KM/T-W7-gated `gammaFullDrinfeld_representable`.
