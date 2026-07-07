@@ -689,7 +689,7 @@ private lemma Proj_awayι_appTop_ΓSpecIso {R₀ A : Type u} [CommRing R₀] [Co
 
 /-- **(the structure square)** The composite `R → Γ(model, ⊤) → Γ(model, D₊(F)) ≅ (A_F)₀`
 is the canonical grade-zero algebra map. -/
-private lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
+lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
     (F : MvPolynomial (Fin 3) R ⧸ (projIdeal W).toIdeal)
     (F_deg : F ∈ quotientGrading (projIdeal W) m) (hm : 0 < m) :
     (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop ≫
@@ -1507,20 +1507,20 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
       Polynomial.algebraMap_eq]
 
 /-- The `Y`-chart ring as the infinity-chart `AdjoinRoot` (ring form). -/
-private noncomputable def chartYRingEquiv (W : WeierstrassCurve R) :
+noncomputable def chartYRingEquiv (W : WeierstrassCurve R) :
     HomogeneousLocalization.Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) ≃+*
       AdjoinRoot (infChartCubic W) :=
   (chartCoordEquiv W 1).symm.trans (infChartQuotEquiv W).toRingEquiv
 
 /-- The `Z`-chart ring as mathlib's affine coordinate ring (ring form). -/
-private noncomputable def chartZRingEquiv (W : WeierstrassCurve R) :
+noncomputable def chartZRingEquiv (W : WeierstrassCurve R) :
     HomogeneousLocalization.Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≃+*
       W.toAffine.CoordinateRing :=
   (chartCoordEquiv W 2).symm.trans (chartZAffineEquiv W).toRingEquiv
 
-private lemma chartYRingEquiv_isLocalizationElem (W : WeierstrassCurve R) :
+lemma chartYRingEquiv_isLocalizationElem (W : WeierstrassCurve R) :
     chartYRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
       (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
     infChartTElem W := by
@@ -1538,7 +1538,7 @@ private lemma chartYRingEquiv_isLocalizationElem (W : WeierstrassCurve R) :
   rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_t]
   rfl
 
-private lemma chartYRingEquiv_sElem (W : WeierstrassCurve R) :
+lemma chartYRingEquiv_sElem (W : WeierstrassCurve R) :
     chartYRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
       (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 0)) =
     AdjoinRoot.root (infChartCubic W) := by
@@ -1556,7 +1556,7 @@ private lemma chartYRingEquiv_sElem (W : WeierstrassCurve R) :
   rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_s]
   rfl
 
-private lemma chartYRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
+lemma chartYRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
     chartYRingEquiv W ((HomogeneousLocalization.fromZeroRingHom
       (quotientGrading (projIdeal W)) (Submonoid.powers
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
@@ -1578,7 +1578,7 @@ private lemma chartYRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
   rw [this]
   exact (infChartQuotEquiv W).commutes r
 
-private lemma chartZRingEquiv_x (W : WeierstrassCurve R) :
+lemma chartZRingEquiv_x (W : WeierstrassCurve R) :
     chartZRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
       (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)) =
     coordX W := by
@@ -1596,7 +1596,7 @@ private lemma chartZRingEquiv_x (W : WeierstrassCurve R) :
   rw [Ideal.quotientEquivAlg_mk, affChartPolyEquiv_X_x]
   rfl
 
-private lemma chartZRingEquiv_y (W : WeierstrassCurve R) :
+lemma chartZRingEquiv_y (W : WeierstrassCurve R) :
     chartZRingEquiv W (HomogeneousLocalization.Away.isLocalizationElem
       (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)) =
     coordY W := by
@@ -1614,7 +1614,7 @@ private lemma chartZRingEquiv_y (W : WeierstrassCurve R) :
   rw [Ideal.quotientEquivAlg_mk, affChartPolyEquiv_X_y]
   rfl
 
-private lemma chartZRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
+lemma chartZRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
     chartZRingEquiv W ((HomogeneousLocalization.fromZeroRingHom
       (quotientGrading (projIdeal W)) (Submonoid.powers
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
@@ -1941,7 +1941,7 @@ private lemma sections_ext (W : WeierstrassCurve R) (s t : Γ(projModel W, ⊤))
 
 
 /-- Elementwise structure square: the value of the canonical composite on `r`. -/
-private lemma structure_section_square_apply (W : WeierstrassCurve R) {m : ℕ}
+lemma structure_section_square_apply (W : WeierstrassCurve R) {m : ℕ}
     (F : MvPolynomial (Fin 3) R ⧸ (projIdeal W).toIdeal)
     (F_deg : F ∈ quotientGrading (projIdeal W) m) (hm : 0 < m) (r : R) :
     ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W)) F F_deg hm).inv).hom
@@ -2073,7 +2073,7 @@ private lemma awayIso_res_squareZ (W : WeierstrassCurve R)
     RingHom.id_apply] at this
   exact this
 
-private lemma awayToSection_inv_cancelY (W : WeierstrassCurve R)
+lemma awayToSection_inv_cancelY (W : WeierstrassCurve R)
     (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) :
     (Proj.awayToSection (quotientGrading (projIdeal W))
@@ -2089,7 +2089,7 @@ private lemma awayToSection_inv_cancelY (W : WeierstrassCurve R)
     RingHom.id_apply] at this
   exact this
 
-private lemma awayToSection_inv_cancelZ (W : WeierstrassCurve R)
+lemma awayToSection_inv_cancelZ (W : WeierstrassCurve R)
     (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
     (Proj.awayToSection (quotientGrading (projIdeal W))

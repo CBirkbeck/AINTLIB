@@ -730,6 +730,143 @@ private lemma pointedIso_preimage_zChart {W W' : WeierstrassCurve R}
         (projModelZero W' ≫ e.inv) y from rfl, hezinv]
     exact not_mem_zChart_of_mem_range_zero ⟨y, h1.symm⟩ hmem
 
+/-- **(T-W7.1b-b1, the Γ-piece)** The section-ring equivalence of the affine charts induced
+by a pointed isomorphism: `e.app` at the `Z`-chart, transported along
+`pointedIso_preimage_zChart`. -/
+private noncomputable def pointedIsoΓ {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))) ≃+*
+    Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
+  haveI : IsIso (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))) :=
+    Scheme.Hom.isIso_app _ _ (by rw [Scheme.Hom.opensRange_of_isIso]; exact le_top)
+  ((asIso (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).trans
+    ((projModel W).presheaf.mapIso
+      (eqToIso (pointedIso_preimage_zChart e hez).symm).op)).commRingCatIsoToRingEquiv
+
+/-- The transport of the restricted structure section along a pointed isomorphism. -/
+private lemma pointedIsoΓ_structure_section {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') (r : R) :
+    (pointedIsoΓ e hez) (((projModel W').presheaf.map (homOfLE le_top).op).hom
+      (((projModelπ W').appTop).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r))) =
+    ((projModel W).presheaf.map (homOfLE le_top).op).hom
+      (((projModelπ W).appTop).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r)) := by
+  -- `π`-compatibility at the level of global sections
+  have hπtop : ∀ u, (e.hom.appTop).hom (((projModelπ W').appTop).hom u) =
+      ((projModelπ W).appTop).hom u := by
+    intro u
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ u)
+      (congrArg Scheme.Hom.appTop heπ)
+    simp only [Scheme.Hom.comp_appTop, CommRingCat.hom_comp, RingHom.comp_apply] at this
+    exact this
+  -- naturality of `e.app` against restriction from `⊤`
+  have hnat : ∀ w, (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+        (((projModel W').presheaf.map (homOfLE le_top).op).hom w) =
+      ((projModel W).presheaf.map (homOfLE (le_top (a := e.hom ⁻¹ᵁ Proj.basicOpen
+        (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).op).hom
+        ((e.hom.appTop).hom w) := by
+    intro w
+    have hthis := congrArg (fun φ => CommRingCat.Hom.hom φ w)
+      (e.hom.c.naturality (homOfLE (le_top (a := Proj.basicOpen
+        (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).op)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hthis
+    exact hthis
+  -- unfold `pointedIsoΓ` and fuse the two restriction arrows
+  show ((projModel W).presheaf.map (eqToHom
+      (pointedIso_preimage_zChart e hez).symm).op).hom
+    ((e.hom.app _).hom (((projModel W').presheaf.map (homOfLE le_top).op).hom
+      (((projModelπ W').appTop).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r)))) = _
+  rw [hnat, hπtop]
+  have hfuse : (projModel W).presheaf.map (homOfLE le_top).op ≫
+      (projModel W).presheaf.map (eqToHom
+        (pointedIso_preimage_zChart e hez).symm).op =
+      (projModel W).presheaf.map (homOfLE le_top).op := by
+    rw [← Functor.map_comp]
+    exact congrArg (projModel W).presheaf.map (Quiver.Hom.unop_inj
+      (Subsingleton.elim _ _))
+  have := congrArg (fun φ => CommRingCat.Hom.hom φ
+    (((projModelπ W).appTop).hom
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r))) hfuse
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at this
+  exact this
+
+/-- The `algebraMap`-compatibility of the induced coordinate-ring equivalence. -/
+private lemma pointedIsoCoord_algebraMap {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') (r : R) :
+    (chartZRingEquiv W) (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm
+      ((pointedIsoΓ e hez) ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv
+        ((chartZRingEquiv W').symm
+          (algebraMap R W'.toAffine.CoordinateRing r))))) =
+    algebraMap R W.toAffine.CoordinateRing r := by
+  have h1 : (chartZRingEquiv W').symm (algebraMap R W'.toAffine.CoordinateRing r) =
+      (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W'))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W')) r) := by
+    rw [← chartZRingEquiv_fromZero W' r, RingEquiv.symm_apply_apply]
+  have h2 : (Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv
+      ((HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W'))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W')) r)) =
+      ((projModel W').presheaf.map (homOfLE le_top).op).hom
+        (((projModelπ W').appTop).hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r)) := by
+    have hsq := structure_section_square_apply W' _
+      (mk_X_mem_quotientGrading_one W' 2) one_pos r
+    exact (congrArg (Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv
+      hsq.symm).trans (awayToSection_inv_cancelZ W' _)
+  have h4 : ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm
+      (((projModel W).presheaf.map (homOfLE le_top).op).hom
+        (((projModelπ W).appTop).hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r))) =
+      (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) r) :=
+    structure_section_square_apply W _ (mk_X_mem_quotientGrading_one W 2) one_pos r
+  have step1 := congrArg (fun z => (chartZRingEquiv W)
+    (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm
+      ((pointedIsoΓ e hez) ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv z)))) h1
+  have step2 := congrArg (fun z => (chartZRingEquiv W)
+    (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm
+      ((pointedIsoΓ e hez) z))) h2
+  have step3 := congrArg (fun z => (chartZRingEquiv W)
+    (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm z))
+    (pointedIsoΓ_structure_section e heπ hez r)
+  have step4 := congrArg (chartZRingEquiv W) h4
+  exact (((step1.trans step2).trans step3).trans step4).trans
+    (chartZRingEquiv_fromZero W r)
+
 /-- **(T-W7.1b-b1, coordinator §2)** A pointed isomorphism of projective models restricts to
 the affine parts (it preserves the complement of the zero section) and hence induces an
 `R`-algebra isomorphism of the affine coordinate rings. DESIGN-DERIVED (audit A1 b1; no
@@ -739,7 +876,17 @@ noncomputable def pointedIsoCoordEquiv {W W' : WeierstrassCurve R}
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
     (hez : projModelZero W ≫ e.hom = projModelZero W') :
     W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing :=
-  sorry
+  AlgEquiv.ofRingEquiv
+    (f := (chartZRingEquiv W').symm.trans
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv).trans
+        ((pointedIsoΓ e hez).trans
+          (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm.trans
+            (chartZRingEquiv W)))))
+    (fun r => pointedIsoCoord_algebraMap e heπ hez r)
 
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed

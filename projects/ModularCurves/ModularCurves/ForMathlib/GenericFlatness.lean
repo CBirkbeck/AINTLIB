@@ -52,6 +52,8 @@ nonzero `f ∈ R`. This file collects the building blocks and assembles the dév
 
 open Submodule LinearMap TensorProduct
 
+universe u
+
 variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
 
 /-- **Prime-quotient injection** (Stacks 10.62.1 building block): a nonzero module over a
@@ -547,10 +549,10 @@ private theorem GF.of_exact {N₁ N₂ N₃ : Type*}
   have hrange : LinearMap.range j' = LinearMap.ker q' := (LinearMap.exact_iff.mp hj'q'exact).symm
   exact free_of_exact_of_free j' q' hj'inj hq'surj hrange
 
+omit [IsDomain R] in
 /-- `GFree R S N` follows from `GF N` when the `R`- and `S`-module structures are compatible
 (`IsScalarTower R S N`): both express "`N_f` is free over `R_f` for one nonzero `f`", read off the
 same `R`-module structure. -/
-omit [IsDomain R] in
 private theorem GFree.of_GF {N : Type*} [AddCommGroup N] [Module S N] [Module R N]
     [IsScalarTower R S N] (h : GF R N) : GFree R S N := by
   have hst : (Module.compHom N (algebraMap R S) : Module R N) = ‹Module R N› := by
@@ -568,20 +570,13 @@ killed by an element of `R`. -/
 private theorem GF.of_smul_eq_zero {R N : Type*} [CommRing R] [AddCommGroup N] [Module R N]
     {f : R} (hf : f ≠ 0) (hann : ∀ x : N, f • x = 0) : GF R N := by
   refine ⟨f, hf, ?_⟩
-  have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := by
-    refine ⟨fun a b => ?_⟩
-    have hz : ∀ y : LocalizedModule (Submonoid.powers f) N, y = 0 := by
-      intro y
-      induction y using LocalizedModule.induction_on with
-      | _ x s =>
-        have hu : IsUnit (algebraMap R (Localization.Away f) f) :=
-          IsLocalization.Away.algebraMap_isUnit f
-        rw [← hu.smul_eq_zero (x := LocalizedModule.mk x s), algebraMap_smul,
-          LocalizedModule.smul'_mk, hann x, LocalizedModule.zero_mk]
-    rw [hz a, hz b]
+  have hu : IsUnit (algebraMap R (Localization.Away f) f) := IsLocalization.Away.algebraMap_isUnit f
+  have hz : ∀ y : LocalizedModule (Submonoid.powers f) N, y = 0 := by
+    refine LocalizedModule.induction_on (fun x s => ?_)
+    rw [← hu.smul_eq_zero (x := LocalizedModule.mk x s), algebraMap_smul,
+      LocalizedModule.smul'_mk, hann x, LocalizedModule.zero_mk]
+  have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := ⟨fun a b => by rw [hz a, hz b]⟩
   infer_instance
-
-universe u
 
 /-- **The domain case, injective core** (Stacks 051R main step, GF5 heart) — *boxed*.
 
