@@ -148,6 +148,23 @@ lemma vcY_comp (C C' : VariableChange R) (x y : R) :
       (-(x - C'.r) * ↑C'.u⁻¹ ^ 2 + C.r * ((↑C'.u⁻¹ * ↑C'.u) ^ 2 + ↑C'.u⁻¹ * ↑C'.u + 1))
     - (↑C.u⁻¹ : R) ^ 3 * C.t * ((↑C'.u⁻¹ * ↑C'.u) ^ 2 + ↑C'.u⁻¹ * ↑C'.u + 1)) * hu'
 
+variable {A : Type*} [CommRing A]
+
+/-- Naturality of `vcX` in the base ring: the coordinate change commutes with a ring map `φ`. -/
+lemma vcX_map (φ : R →+* A) (C : VariableChange R) (x : R) :
+    (C.map φ).vcX (φ x) = φ (C.vcX x) := by
+  have hu : (↑(C.map φ).u⁻¹ : A) = φ ↑C.u⁻¹ := by
+    rw [WeierstrassCurve.VariableChange.map_u]; simp
+  simp only [vcX, hu, WeierstrassCurve.VariableChange.map_r, map_mul, map_pow, map_sub]
+
+/-- Naturality of `vcY` in the base ring. -/
+lemma vcY_map (φ : R →+* A) (C : VariableChange R) (x y : R) :
+    (C.map φ).vcY (φ x) (φ y) = φ (C.vcY x y) := by
+  have hu : (↑(C.map φ).u⁻¹ : A) = φ ↑C.u⁻¹ := by
+    rw [WeierstrassCurve.VariableChange.map_u]; simp
+  simp only [vcY, hu, WeierstrassCurve.VariableChange.map_r, WeierstrassCurve.VariableChange.map_s,
+    WeierstrassCurve.VariableChange.map_t, map_mul, map_pow, map_sub]
+
 /-- The map on affine points induced by the coordinate change `C`, sending a point `(x, y)` on `W`
 to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))` on `C • W` (and the point at infinity to itself). -/
 def pointMap : W.toAffine.Point → (C • W).toAffine.Point
