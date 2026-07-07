@@ -112,3 +112,15 @@ path** (feeds the comparison theorem T-W7.1b), schedulable in parallel with T-W7
   as a cross-check for T-W7.1b.
 - **Unanswered by reviewer**: nothing explicitly unanswered from Q1–Q6, but F1–F3 (follow-up) arise
   from the audit.
+
+## UPDATE (2026-07-07 pm) — acquisitions closed the audit's open items
+Owner supplied Mumford GIT (djvu) + Mumford *Abelian Varieties*; agent fetched Bosma–Lenstra (author
+copy, Lenstra's Leiden publication archive `1995c`) and Lange–Ruppert (GDZ scan of Invent. 79,
+`LOG_0040`). GIT §6.1 + Cor 6.2–6.6 quote-mined verbatim (→ `../../tw7-source-quotes.md`): **A4's
+missing globalization mechanism is Artinian-thickenings + Krull intersection + clopen/connected —
+confirming the audit's finding that it is NOT a density argument, and resolving R3 by
+transcription.** Honest new scoping surfaced by the source: GIT ch. 6 is locally-noetherian
+(Krull/coherence genuinely used) ⟹ canonicity lands loc.-noetherian now; arbitrary-`S` = new infra
+leaf T-W7.8 (EGA IV §8 spreading-out). Follow-up revised: F1 retired, F1′ (noetherian sufficiency
+downstream), F2 (B–L `{Z=0,Y=0}` instantiation), F3 (comparison theorem). All six worker lanes
+P0–P5 unblocked.

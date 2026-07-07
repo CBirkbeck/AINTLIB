@@ -4573,6 +4573,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (reviewer missed): chart-gluing needs the **comparison theorem** (pointed iso of projModels =
   unique variable change) — new 1b, elementary via the pole filtration (0i). **PARALLEL LANES
   P0–P5 in tw7-plan.md — workers can be assigned NOW to P0/P2/P3/P4/P5.**
+  **SOURCES ACQUIRED (2026-07-07 pm)**: Mumford GIT (djvu→pdf, text layer) + Mumford *Abelian
+  Varieties* (owner-supplied); Bosma–Lenstra JNT 53 (fetched, Lenstra's Leiden archive, OCR'd) +
+  Lange–Ruppert Invent. 79 (fetched, GDZ `LOG_0040`) — all local `refs/`, never committed. **GIT
+  §6.1 + Cor 6.2–6.6 quote-mined verbatim → `tw7-source-quotes.md`: R3 RESOLVED** (mechanism =
+  Artinian thickenings + Krull intersection + clopen/connected; case 3 not needed — `E` has a
+  section). Rigidity scope honest: **locally noetherian, componentwise** (GIT ch. 6 convention) —
+  arbitrary-`S` polish split off as T-W7.8 (EGA IV §8 spreading-out, mathlib gap). **ALL SIX LANES
+  P0–P5 NOW UNBLOCKED** (P1 ungated by B–L; P4 fully specified R1–R3+C1–C4). Follow-up revised:
+  F1 retired (answered by source), F1′ = is loc.-noeth. canonicity enough downstream; F2 = B–L
+  `{Z=0,Y=0}` instantiation check; F3 = comparison theorem (unchanged).
 
 - **[T-W7.0a] `atlasRing_isDomain`** — `IsLocalization.isDomain_localization` (mathlib, verified) +
   `Δ ≠ 0` in `MvPolynomial (Fin 5) ℤ` (evaluate at `y² = x³ − x` over `ℚ`: `Δ = 64`). **Lane P0 ·
@@ -4588,9 +4598,11 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   on `V₁ ∩ V₂` (polynomial identities mod the curve relations — `linear_combination` with
   precomputed cofactors, split per coordinate, **worker-parallel per identity**, NO maxHeartbeats);
   **c4** glue (`Scheme.Cover.glueMorphisms`); **c5** lands on curve + over `U`; **c6** restriction to
-  the affine secant open = mathlib `addX`/`addY` (feeds 0g/0h). **Lane P1 · GATED on acquiring
-  Bosma–Lenstra JNT 53 (1995) + Lange–Ruppert Invent. Math. 79 (1985)** · **Depends**: T-A8 ·
-  **Type**: def + ~8 lemmas.
+  the affine secant open = mathlib `addX`/`addY` (feeds 0g/0h). **Lane P1 · READY NOW (B–L + L–R
+  ACQUIRED 2026-07-07** — refs local; quotes+concrete two-law choice `{Z=0, Y=0}` in
+  `tw7-source-quotes.md`: law_{Z=0} exceptional ⟺ diagonal, law_{Y=0} exceptional ⟺
+  `P₁−P₂ ∈ E∩{Y=0}`, disjoint since `O ∉ {Y=0}`; §5 explicit polynomials — transcribe from PDF +
+  CAS-verify before Lean) · **Depends**: T-A8 · **Type**: def + ~8 lemmas.
 
 - **[T-W7.0e] `E_U^n` integral** — "smooth over integral base + geom. integral fibres ⟹ integral"
   (check mathlib; else specialized chart/generic-fibre fallback, reply §Q4). **Lane P2 · READY NOW ·
@@ -4653,19 +4665,35 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   packaging; `abelEnrichment_exists G := ⟨{…, grp := grpObj G, …}, rfl⟩`. **Depends**: T-W7.1–.3 ·
   **Preceded by** `[CLEANUP-ALL-W7]` · **No rigidity, no cohomology, no source gaps on this path.**
 
-- **[T-W7.7a] `rigidityLemma`** (canonicity only; audit A4 split): **R1 affine core** —
-  `Hom_S(X ×_S Y, Z_aff) ≅ Hom_S(Y, Z_aff)` from `(pr₂)_*O = O_Y` (= 0i·i5 instantiated; **Lane P4 ·
-  READY NOW** stated with `π_*O=O` as hypothesis); **R2 local factorization** — proper closed-image
-  shrinking ⟹ `h ≡ e` on `A ×_S Y'`, `Y' ⊇ e(S)` open (**Lane P4**); **R3 globalization** — passage
-  to ALL of `A ×_S A` over non-reduced `S`: **SOURCE-REQUIRED (Mumford GIT §6.1 verbatim — the
-  reviewer's sketch does NOT close this step; their own Q6 argument blocks open ⟹ global over
-  nilpotents; do NOT invent)**. Follow-up F1 filed. **Depends**: R1–R2 ⚙ now; R3 ⛔ GIT acquisition ·
-  **Type**: theorem tree.
+- **[T-W7.7a] `rigidityLemma`** — **RESOLVED-FROM-SOURCE (GIT ACQUIRED 2026-07-07; Prop 6.1 + proof
+  + Cor 6.2–6.6 transcribed verbatim → `tw7-source-quotes.md`)**. GIT's globalization mechanism (the
+  step the reviewer's sketch lacked): Artinian thickenings + Krull intersection, NOT density. Leaves
+  (**Lane P4 · ALL READY NOW**, `π_*O=O` as hypothesis until 0i lands): **R1** one-point/Artinian
+  case (GIT case 1: ringed-space factorization via `p_*O_X = O_S` — supplied by 0i·i3 instantiated
+  at Artinian rings; we replace GIT's fibrewise-`H⁰` hypothesis by universal O-connectedness);
+  **R2** thickening ⟹ neighbourhood (GIT case 2: `Z = (f,η∘p)⁻¹(Δ)`; R1 over every Artin subscheme
+  at `t` ⟹ `I_Z ⊆ ⋂ m_t^n·O_X` ⟹ Krull intersection [mathlib name: verify] ⟹ coherence + `p` closed
+  ⟹ `Z ⊇ p⁻¹(U₀)`); **R3** clopen+connected (`U₁ = S∖p(X−Z)` closed via `p` flat-open, open via R2;
+  `S` connected ⟹ `Z = X`). GIT case 3 (fppf descent) NOT needed — our `X = E` has the zero
+  section. **Corollary chain**: C1 = Cor 6.2 (`f·g⁻¹`), C2 = Cor 6.3 (product decomposition;
+  sub-leaf: `E` connected when `S` is), C3 = Cor 6.4 (pointed ⟹ hom via `f∘μ`), C4 = Cor 6.6
+  (uniqueness: `1_X` with two laws). **Scope: locally noetherian `S`, componentwise** (GIT ch. 6
+  convention; Krull/coherence genuinely used). **Depends**: 0i (to discharge the hypothesis) ·
+  **Type**: theorem tree, fully sourced.
 
 - **[T-W7.7] `abelEnrichment_unique` = MILESTONE T-W7b** (off the critical path to `E[N]`/Drinfeld/
-  `Y(N)` — reviewer confirms T-W7a suffices downstream). `h(x,y) = (x+_m y) −_{m'} (x+_{m'} y)`
-  vanishes on both axes; rigidity twice ⟹ `m = m'` over arbitrary `S`. **Depends**: T-W7.7a (incl.
-  R3), T-W7.6 · **Type**: theorem.
+  `Y(N)`). = C4 packaged for `EllipticCurve S`, **over locally noetherian `S`**: state
+  `abelEnrichment_unique_of_locallyNoetherian` alongside the general statement (do NOT alter the
+  existing general statement — it stays `sorry` until T-W7.8). **Depends**: T-W7.7a, T-W7.6 ·
+  **Type**: theorem.
+
+- **[T-W7.8] arbitrary-`S` canonicity upgrade** (NEW; genuine infra; LOW priority pending reviewer
+  F1′). Extend T-W7.7 from locally-noetherian to arbitrary `S` via EGA IV §8 spreading-out (FC Rem.
+  1.2(a) names the vehicle): `(E,e,m,m')` finitely presented ⟹ descend to a f.g. `ℤ`-subalgebra;
+  equality descends. Needs Hom-spreading-out along filtered colimits of rings — **absent from
+  mathlib** (watch noetherian-approximation work). Gates ONLY the fully-general
+  `abelEnrichment_unique`; nothing downstream is known to need it (F1′ asks the reviewer to
+  confirm). **Depends**: T-W7.7 · **Type**: infra + theorem.
 
 - **[CLEANUP-W7-1]** `/cleanup` GroupLawConstruction.lean (after T-W7.3). **[CLEANUP-ALL-W7]**
   `/cleanup-all` before T-W7.6 (milestone). **[CLEANUP-W7-2]** final `/cleanup` after T-W7.6; T-W7.7
