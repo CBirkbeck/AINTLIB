@@ -4823,10 +4823,27 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
   narrower than a full relative-differentials (Ω¹) scheme API (the T-B5y gate). **Lane**: B ·
   **Depends**: T-W5 (charts) · **Type**: theorem · **Sources**: reviewer v9. Supersedes T-B5y on
   the critical path (T-B5y stays as the general-API form).
-  - **Claimed**: beastmode-B, 2026-07-07T09:41Z · **Status**: in_progress · **Target**:
-    `mulByHom_formallyUnramified` in Torsion.lean (the BB-DIFF `sorry`). Route: chart-local
-    invariant differential `[N]^*ω = N·ω` + descent. Investigating mathlib `WeierstrassCurve`
-    differential API first.
+  - **Claimed**: beastmode-B, 2026-07-07T09:41Z → **BLOCKED (foundational gap), claim released
+    2026-07-07T10Z** after investigation (local + dedicated mathlib-API research agent). Target
+    was `mulByHom_formallyUnramified` (the BB-DIFF `sorry`). **FINDING**: the invariant-differential
+    route is INFEASIBLE at current mathlib — there is NO invariant differential `ω` for
+    `WeierstrassCurve`, NO `[N]`-as-a-map (division polynomials `ψ_N` exist as *polynomials* over
+    `CommRing` but are NOT connected to any point map; the only `[N]` is field-only `nsmul` on
+    `Point`), and elliptic curves are NOT realized as schemes in mathlib. The project's `[N]`
+    (`mulByHom = (mulBy n).left`) is **categorical** (`GrpObj`), not chart-based. **All routes to
+    BB-DIFF need a large foundational build**: (a) invariant-differential + Kähler API [absent];
+    (b) a `ψ_N`↔torsion-point separability bridge over fields [absent]; or (c) the
+    categorical-`[N]` ↔ Weierstrass-chart-`[N]` comparison = **T-W7 scope** (A-lane, in-progress,
+    its own "large phase"). The fibre result **T-B6 is CIRCULAR** (consumes `torsionπ_etale` ⟸
+    BB-DIFF). **RECOMMENDATION**: BB-DIFF is best unlocked by T-W7's group-scheme phase, OR
+    commissioned as its own multi-session ticket — the `ψ_N`-separability bridge is the most
+    self-contained mathlib-aligned route (`FormallyUnramified` reduces cleanly to
+    `Subsingleton Ω[coordinateRing⁄base]` via `HasRingHomProperty.Spec_iff` +
+    `Algebra.formallyUnramified_iff`). The reviewer's "local substitute is easier" premise
+    (v9 step 4) does NOT hold — the categorical `[N]` makes even the chart connection T-W7-scale.
+    (Reusable partial: `FormallyUnramified(torsionπ N) → FormallyUnramified(mulByHom N)` via group
+    infinitesimal-lifting is self-contained/buildable, but only *reframes* the box, not discharges
+    it.) Full route analysis: `scratchpad/tb5z_architecture.md`.
 
 ### v9.4 Existing-ticket updates (v9)
 - **[T-A4] RE-FROZEN** (Q2; clears blocked-B2). New statement (owner-approved, torsor form):
