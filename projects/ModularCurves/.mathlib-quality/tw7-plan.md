@@ -182,6 +182,12 @@ REDUCEDNESS + a field-points ext principle (`hom_ext_of_forall_specPoint`) repla
 generic-point route; `Point.add`'s mathlib `[DecidableEq K]` gate surfaced (instance-argument
 pattern).
 
+**Update 2026-07-07 (P2 landed):** `hom_ext_of_forall_specPoint` ✅ **PROVEN** (commit 081af6f8,
+axiom-clean) — two lines via mathlib `AlgebraicGeometry.ext_of_fromSpecResidueField_eq` (dense
+`Set.univ` + terminal leg), no bespoke equalizer/closed-immersion assembly. **Canonical
+`PointsDictionary.lean` is now SORRY-FREE** (0e integrality + 0f dictionary/values + 0g-ext all
+landed). P1's law-2-on-curve (c5) reducedness route and the 0g axioms may now consume it.
+
 ## P1 status (2026-07-07, lane session)
 
 **T-W7.0c CAS layer COMPLETE** — see `scripts/tw7-p1-bosma-lenstra/` (README maps every file).
