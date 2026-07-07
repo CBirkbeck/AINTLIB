@@ -128,6 +128,21 @@ def ivcY (X Y : R) : R := ↑C.u ^ 3 * Y + C.s * ↑C.u ^ 2 * X + C.t
   simp only [vcY, ivcX, ivcY]
   linear_combination (Y * ((↑C.u⁻¹ * ↑C.u) ^ 2 + ↑C.u⁻¹ * ↑C.u + 1)) * huu
 
+/-- Descent cocycle for the `x`-coordinate: applying `C'` then `C` is the change `C * C'`. -/
+lemma vcX_comp (C C' : VariableChange R) (x : R) : (C * C').vcX x = C.vcX (C'.vcX x) := by
+  have hu' : (↑C'.u⁻¹ : R) * ↑C'.u = 1 := Units.inv_mul C'.u
+  simp only [vcX, mul_def, mul_inv_rev, Units.val_mul]
+  linear_combination (-(↑C.u⁻¹ : R) ^ 2 * C.r * (↑C'.u⁻¹ * ↑C'.u + 1)) * hu'
+
+/-- Descent cocycle for the `y`-coordinate. -/
+lemma vcY_comp (C C' : VariableChange R) (x y : R) :
+    (C * C').vcY x y = C.vcY (C'.vcX x) (C'.vcY x y) := by
+  have hu' : (↑C'.u⁻¹ : R) * ↑C'.u = 1 := Units.inv_mul C'.u
+  simp only [vcX, vcY, mul_def, mul_inv_rev, Units.val_mul]
+  linear_combination ((↑C.u⁻¹ : R) ^ 3 * C.s *
+      (-(x - C'.r) * ↑C'.u⁻¹ ^ 2 + C.r * ((↑C'.u⁻¹ * ↑C'.u) ^ 2 + ↑C'.u⁻¹ * ↑C'.u + 1))
+    - (↑C.u⁻¹ : R) ^ 3 * C.t * ((↑C'.u⁻¹ * ↑C'.u) ^ 2 + ↑C'.u⁻¹ * ↑C'.u + 1)) * hu'
+
 /-- The map on affine points induced by the coordinate change `C`, sending a point `(x, y)` on `W`
 to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))` on `C • W` (and the point at infinity to itself). -/
 def pointMap : W.toAffine.Point → (C • W).toAffine.Point
