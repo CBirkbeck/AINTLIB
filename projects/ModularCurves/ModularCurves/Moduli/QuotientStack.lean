@@ -758,12 +758,14 @@ noncomputable def TorsorPair.pullbackAction (A : TorsorPair σ S) :
       erw [Limits.pullback.lift_snd]
       rw [Category.comp_id (Limits.pullback.snd A.p q)]
 
+omit [Finite G] in
 @[reassoc (attr := simp)]
 theorem TorsorPair.pullbackAction_hom_fst (A : TorsorPair σ S) (g : G) :
     (A.pullbackAction q).hom g ≫ Limits.pullback.fst A.p q =
       Limits.pullback.fst A.p q ≫ A.τ.hom g :=
   Limits.pullback.lift_fst _ _ _
 
+omit [Finite G] in
 @[reassoc (attr := simp)]
 theorem TorsorPair.pullbackAction_hom_snd (A : TorsorPair σ S) (g : G) :
     (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
@@ -772,11 +774,75 @@ theorem TorsorPair.pullbackAction_hom_snd (A : TorsorPair σ S) (g : G) :
       Limits.pullback.snd A.p q ≫ 𝟙 S' from Limits.pullback.lift_snd _ _ _,
     Category.comp_id (Limits.pullback.snd A.p q)]
 
+omit [Finite G] in
 /-- The base-changed action lies over the new base. -/
 theorem TorsorPair.pullbackAction_over_base (A : TorsorPair σ S) (g : G) :
     (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
       Limits.pullback.snd A.p q :=
   A.pullbackAction_hom_snd q g
+
+/-! ### Pullback-juggling for the base-changed torsor field (T-W3c-i)
+
+The `torsor` field of `A.pullback q` is `A.torsor` base-changed along `q`. Two
+geometric identifications carry it there: the *pasting* iso
+`(P ×_S S') ×_{S'} (P ×_S S') ≅ (P ×_S P) ×_S S'` (`isPullback_pullbackSnd_map`)
+and the *distributivity* iso `∐_G (P ×_S S') ≅ (∐_G P) ×_S S'`
+(`isPullback_sigma_pullbackSnd`, via extensivity). Composed by pasting-cancellation
+they exhibit the base-changed shear map as the base change of the original, hence an
+isomorphism. -/
+
+/-- **Pasting identification.** The double pullback
+`(P ×_S S') ×_{S'} (P ×_S S')` is the base change of `(P ×_S P) → S` along `q`:
+the square with `pullback (pullback.snd p q) (pullback.snd p q)` as apex,
+`pullback.map …` to `P ×_S P`, and `pullback.fst p p ≫ p` / `q` as the cospan. -/
+private theorem isPullback_pullbackSnd_map {P : Scheme.{u}} (p : P ⟶ S) :
+    IsPullback
+      (Limits.pullback.fst (Limits.pullback.snd p q) (Limits.pullback.snd p q) ≫
+        Limits.pullback.snd p q)
+      (Limits.pullback.map (Limits.pullback.snd p q) (Limits.pullback.snd p q) p p
+        (Limits.pullback.fst p q) (Limits.pullback.fst p q) q
+        Limits.pullback.condition.symm Limits.pullback.condition.symm)
+      q (Limits.pullback.fst p p ≫ p) := by
+  refine IsPullback.of_iso_pullback ⟨?_⟩
+    { hom := Limits.pullback.lift
+        (Limits.pullback.fst (Limits.pullback.snd p q) (Limits.pullback.snd p q) ≫
+          Limits.pullback.snd p q)
+        (Limits.pullback.map (Limits.pullback.snd p q) (Limits.pullback.snd p q) p p
+          (Limits.pullback.fst p q) (Limits.pullback.fst p q) q
+          Limits.pullback.condition.symm Limits.pullback.condition.symm) ?_
+      inv := Limits.pullback.lift
+        (Limits.pullback.lift
+          (Limits.pullback.snd q (Limits.pullback.fst p p ≫ p) ≫ Limits.pullback.fst p p)
+          (Limits.pullback.fst q (Limits.pullback.fst p p ≫ p)) ?_)
+        (Limits.pullback.lift
+          (Limits.pullback.snd q (Limits.pullback.fst p p ≫ p) ≫ Limits.pullback.snd p p)
+          (Limits.pullback.fst q (Limits.pullback.fst p p ≫ p)) ?_) ?_
+      hom_inv_id := ?_
+      inv_hom_id := ?_ } ?_ ?_
+  · -- CommSq: (fst ≫ p') ≫ q = map ≫ (fst_pp ≫ p)
+    simp only [Limits.pullback.map, Category.assoc, Limits.pullback.lift_fst_assoc]
+    rw [← Limits.pullback.condition]
+  · -- forward CommSq of the lift (same identity)
+    simp only [Limits.pullback.map, Category.assoc, Limits.pullback.lift_fst_assoc]
+    rw [← Limits.pullback.condition]
+  · -- cond1
+    rw [Category.assoc, ← Limits.pullback.condition]
+  · -- cond2
+    rw [Category.assoc, ← Limits.pullback.condition, ← Limits.pullback.condition]
+  · -- hlegs: both legs equal on p' = snd p q
+    rw [Limits.pullback.lift_snd, Limits.pullback.lift_snd]
+  · -- hom_inv_id
+    ext <;>
+      simp only [Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
+        Limits.pullback.lift_snd_assoc,
+        Limits.pullback.condition, Category.assoc, Category.id_comp]
+  · -- inv_hom_id
+    ext <;>
+      simp only [Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
+        Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc,
+        Limits.pullback.condition, Category.assoc, Category.id_comp]
+  · exact Limits.pullback.lift_fst _ _ _
+  · exact Limits.pullback.lift_snd _ _ _
 
 end PullbackTorsor
 
