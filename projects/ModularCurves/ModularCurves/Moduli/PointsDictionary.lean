@@ -76,11 +76,25 @@ instance : Flat universalCurveπ := inferInstance
 instance : UniversallyOpen universalCurveπ := inferInstance
 
 /-- **(T-W7.0e crux — geometric integrality of the universal curve)** Each geometric fibre of
-`E_U → U` is a nonsingular projective plane Weierstrass cubic, hence an integral scheme:
-irreducible because its affine chart `D₊(Z)` has domain coordinate ring
-(`WeierstrassCurve.Affine.CoordinateRing.instIsDomain`) and is dense, reduced because the fibre
-is smooth (`Δ` a unit). Reduces to `IsIntegral (projModel W)` for `W` over a field with `Δ` a
-unit, transported to the geometric fibres via `isPullback_projModelBaseChange`. -/
+`E_U → U` is a nonsingular projective plane Weierstrass cubic, hence an integral scheme.
+Reduces (via `GeometricallyIntegral.iff_geometricallyIntegral_fiber` +
+`isPullback_projModelBaseChange`) to `IsIntegral (projModel W)` for `W` elliptic over a field.
+Cleanest route (avoids the `smooth ⟹ regular` mathlib gap): **`projCoordRing W` is a domain ⟹
+`Proj` of it is integral**:
+
+* **T-W7.0e-dom** — `projCoordRing W = K[X,Y,Z]/(F_W)` is a domain, i.e. the projective
+  Weierstrass polynomial `F_W` is prime. Route: the `Z`-dehomogenisation is the affine
+  Weierstrass polynomial, whose quotient `WeierstrassCurve.Affine.CoordinateRing` is a mathlib
+  domain; `F_W` is homogeneous with `Z ∤ F_W`, so primality lifts through homogenisation
+  (project `ForMathlib/ProjectiveSpaceChart` dehomogenisation API). Gives both irreducible AND
+  reduced at once (a domain is reduced).
+* **T-W7.0e-proj** — `Proj` of a graded integral domain is an integral scheme (generic point =
+  the `(0)` prime; structure-sheaf sections are localisations of a domain, hence reduced). A
+  clean, general, upstreamable mathlib-gap lemma.
+
+Both are substantial Proj-geometry developments; this crux is the hard center of the group-law
+construction (multi-session). Everything ELSE in this file (0a, the plumbing, and the `E_U^n`
+integrality reduction) is proven and rests only on this one instance. -/
 instance geometricallyIntegral_universalCurveπ : GeometricallyIntegral universalCurveπ := by
   sorry
 
