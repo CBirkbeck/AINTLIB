@@ -5949,3 +5949,33 @@ Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
 - **Proof sketch**: descend (R,A,f) to the noeth stage (NOETH1/2 done + T-GF7 for the flat
   hypothesis), where Ann(f) is fg; flat-tensor-exactness gives Ann(f)⊗κ=0 ∀κ; Nakayama ⟹
   Ann(f)=0. ⟹ **entire Drinfeld D-chain axiom-clean.**
+
+## G-lane claim (beastmode-P2, 2026-07-07): T-G3 aut_trivial_of_fullLevel
+
+- **Claiming T-G3** (`aut_trivial_of_fullLevel`, Groupoid.lean:84; GME 2.6.4 Aut-computation,
+  transcribed §B9 of decomposition-gme2.md). UNCLAIMED per H-lane note L5388; parked by
+  beastmode-H (funnelled to T-W7 spine). **Claimed**: beastmode-P2, 2026-07-07, in_progress.
+- **Scope (honest, post-decomposition read):** the FULL theorem is the rigidity of level
+  structures over a base `S` — it needs elliptic-curve **endomorphism theory over `S`**:
+  the degree map `deg : End(E/S) → ℤ` as a positive quadratic form, its polar/trace form,
+  the dual isogeny (§B8: `fᵗ∘f = [deg f]`, T-RED0 reduced-base transfer, T-NORM0 norm of
+  pushforward), and the Hasse bound `tr(f)² ≤ 4·deg f` (§B9, fibrewise). Anchor for the
+  field case: HasseWeil `Foundation/DegreeQuadraticForm.lean` + `HasseBound.lean`. This is a
+  genuine multi-piece infrastructure build; rigidity-reduction (fibrewise→global over a base
+  with nilpotents) is adjacent to fable-P4's GIT engine.
+- **Decomposition (sub-tickets):**
+  - **[T-G3a]** *engine core (GME 2.6.4 arithmetic)* — pure ℤ: given `n ≥ 3`, `d = deg g ≥ 0`,
+    `t = tr g`, the linear relation `n·t + n²·d = 0` (from `deg ε = 1`) and the discriminant
+    bound `t² ≤ 4·d`, conclude `d = 0`. **SELF-CONTAINED, provable NOW.** ← building first.
+  - **[T-G3b]** `End(E/S)` as a (non-commutative) ring with `deg : End → ℤ` and the quadratic
+    expansion `deg(1 + n•g) = 1 + n·tr g + n²·deg g`. GATED on dual-isogeny infra (§B8).
+  - **[T-G3c]** fibrewise Hasse bound `tr(g)² ≤ 4·deg g` on `End(E/S)`. GATED on §B9 + HasseWeil
+    field-case transfer (T-RED0).
+  - **[T-G3d]** divisibility: `e : E ≅ E` fixing a naive full level-`N` structure ⟹ the
+    endomorphism `ε = e.hom - 1` is `N`-divisible in `End(E/S)`, `ε = N•g`. Needs the E[N]-action
+    of `End` + `IsNaiveFullLevel` generation.
+  - **[T-G3e]** rigidity reduction: `deg(e.hom) = 1 ∧ (e.hom = 1 on the generic/all fibres) ⟹
+    e = Iso.refl`. Reuses `hom_ext_of_forall_specPoint` (PointsDictionary) / fable-P4 rigidity.
+  - **assembly:** T-G3 = T-G3d ⟹ `ε = N•g`; T-G3b gives `deg(e.hom)=deg(1+N•g)=1+N·tr g+N²·deg g`;
+    `e.hom ∈ Aut ⟹ deg = 1` ⟹ T-G3a ⟹ `deg g = 0` ⟹ (deg pos-def) `g = 0` ⟹ `ε = 0` ⟹
+    `e.hom = 1` ⟹ (T-G3e) `e = refl`.

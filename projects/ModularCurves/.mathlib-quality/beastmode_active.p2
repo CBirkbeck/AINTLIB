@@ -1,1 +1,1 @@
-FOCUS: T-G3 aut_trivial_of_fullLevel (Groupoid.lean) — GME 2.6.4 rigidification; surveying decomposition + available Aut/torsion/degree infrastructure before decomposing
+FOCUS: T-G3 aut_trivial_of_fullLevel — building the self-contained GME 2.6.4 arithmetic engine core (deg/tr forces deg g = 0 for n≥3) as the first tractable piece; then decompose the endomorphism/rigidity infrastructure into sub-tickets.
