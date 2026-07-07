@@ -25,8 +25,12 @@ affine Weierstrass polynomial scales by `u⁻⁶`, so the defining equation is p
 
 ## Main results
 
-* `WeierstrassCurve.VariableChange.equation_smul`: `C • W` satisfies the Weierstrass equation at
-  the transformed coordinates whenever `W` does at `(x, y)`.
+* `WeierstrassCurve.VariableChange.equation_smul` / `nonsingular_smul`: the transformed coordinates
+  satisfy the Weierstrass equation / are nonsingular whenever `(x, y)` is on `W`.
+* `WeierstrassCurve.VariableChange.pointMap` / `pointHom`: the induced map on affine points, and
+  (over a field) its packaging as a group homomorphism `W.Point →+ (C • W).Point` via
+  `pointMap_neg` and `pointMap_add` — the affine invariance of the group law under coordinate
+  change.
 -/
 
 namespace WeierstrassCurve.VariableChange
@@ -180,6 +184,64 @@ lemma slope_smul {x₁ x₂ y₁ y₂ : F} (hxy : ¬(x₁ = x₂ ∧ y₁ = W.to
   by_cases hx : x₁ = x₂
   · exact slope_smul_of_Y_ne C hx (fun hy => hxy ⟨hx, hy⟩) (hne hx)
   · exact slope_smul_of_X_ne C hx
+
+omit [DecidableEq F] in
+/-- `vcX` is injective (the coordinate change scales by the unit `u⁻²`). -/
+lemma vcX_ne {x₁ x₂ : F} (hx : x₁ ≠ x₂) : C.vcX x₁ ≠ C.vcX x₂ := fun he =>
+  hx (by
+    have := mul_left_cancel₀ (pow_ne_zero 2 (Units.ne_zero C.u⁻¹)) (by simpa only [vcX] using he)
+    linear_combination this)
+
+/-- The induced point map is additive: `pointMap (P + Q) = pointMap P + pointMap Q`. Together with
+`pointMap_neg` this makes `pointMap` a group homomorphism `W.Point → (C • W).Point` — the affine
+statement that the group law is invariant under the coordinate change (ticket `T-W7`). -/
+lemma pointMap_add (P Q : W.toAffine.Point) :
+    C.pointMap W (P + Q) = C.pointMap W P + C.pointMap W Q := by
+  cases P with
+  | zero =>
+    show C.pointMap W (0 + Q) = C.pointMap W 0 + C.pointMap W Q
+    rw [zero_add, show C.pointMap W (0 : W.toAffine.Point) = 0 from rfl, zero_add]
+  | some x₁ y₁ h₁ =>
+    cases Q with
+    | zero =>
+      show C.pointMap W (.some x₁ y₁ h₁ + 0)
+        = C.pointMap W (.some x₁ y₁ h₁) + C.pointMap W 0
+      rw [add_zero, show C.pointMap W (0 : W.toAffine.Point) = 0 from rfl, add_zero]
+    | some x₂ y₂ h₂ =>
+      rw [pointMap_some, pointMap_some]
+      by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
+      · obtain ⟨hx, hy⟩ := hxy
+        have hvy : C.vcY x₁ y₁ = (C • W).toAffine.negY (C.vcX x₂) (C.vcY x₂ y₂) := by
+          rw [negY_smul, hx, hy]
+        rw [Affine.Point.add_of_Y_eq hx hy, Affine.Point.add_of_Y_eq (by rw [hx]) hvy,
+          show C.pointMap W (0 : W.toAffine.Point) = 0 from rfl]
+      · by_cases hx : x₁ = x₂
+        · have hy : y₁ ≠ W.toAffine.negY x₂ y₂ := fun h => hxy ⟨hx, h⟩
+          have hne : y₁ ≠ W.toAffine.negY x₁ y₁ := by
+            rcases Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx with h | h
+            · rw [show W.toAffine.negY x₁ y₁ = W.toAffine.negY x₂ y₂ from by rw [hx, h]]; exact hy
+            · exact absurd h hy
+          have hvy : C.vcY x₁ y₁ ≠ (C • W).toAffine.negY (C.vcX x₂) (C.vcY x₂ y₂) := by
+            rw [hx, negY_smul]
+            simp only [vcY]
+            intro he
+            have hc := mul_left_cancel₀ (pow_ne_zero 3 (Units.ne_zero C.u⁻¹)) he
+            exact hy (by linear_combination hc)
+          rw [Affine.Point.add_of_Y_ne hy, Affine.Point.add_of_Y_ne hvy, pointMap_some]
+          simp only [slope_smul_of_Y_ne C hx hy hne, addX_smul, addY_smul]
+        · have hvx : C.vcX x₁ ≠ C.vcX x₂ := vcX_ne C hx
+          rw [Affine.Point.add_of_X_ne hx, Affine.Point.add_of_X_ne hvx, pointMap_some]
+          simp only [slope_smul_of_X_ne C hx, addX_smul, addY_smul]
+
+/-- The coordinate change `C` as a group homomorphism on affine points,
+`W.Point →+ (C • W).Point`. This is the affine form of the invariance of the elliptic-curve group
+law under a change of Weierstrass coordinates (ticket `T-W7`). -/
+def pointHom : W.toAffine.Point →+ (C • W).toAffine.Point where
+  toFun := C.pointMap W
+  map_zero' := rfl
+  map_add' := C.pointMap_add
+
+@[simp] lemma pointHom_apply (P : W.toAffine.Point) : C.pointHom P = C.pointMap W P := rfl
 
 end Field
 
