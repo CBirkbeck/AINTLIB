@@ -415,6 +415,40 @@ theorem isOpen_germMap_ideal_eq_bot {X : Scheme.{u}} [IsLocallyNoetherian X]
       exact this.mpr hs
     exact hmem
 
+/-- **(T-W7.r2·c, cross-affine germ vanishing)** If some affine chart at `w` kills the
+ideal datum's germs, then EVERY chart does: refine both charts to a common basic open
+(`exists_basicOpen_le_affine_inter`) where the two presentations of the ideal agree
+(the `map_ideal_basicOpen` field, both sides), and push germs through `germ_res`. -/
+theorem germ_ideal_eq_zero_of_exists_affine {X : Scheme.{u}}
+    (K : Scheme.IdealSheafData X) (w : X)
+    (hW : ∃ U' : X.affineOpens, ∃ hw : w ∈ U'.1,
+      Ideal.map (X.presheaf.germ U'.1 w hw).hom (K.ideal U') = ⊥)
+    (U : X.affineOpens) (hwU : w ∈ U.1) {a : Γ(X, U.1)} (ha : a ∈ K.ideal U) :
+    (X.presheaf.germ U.1 w hwU).hom a = 0 := by
+  obtain ⟨U', hwU', hbot'⟩ := hW
+  obtain ⟨r, r', hrr', hwr⟩ := exists_basicOpen_le_affine_inter U.2 U'.2 w ⟨hwU, hwU'⟩
+  have hVU : X.affineBasicOpen r ≤ U := X.basicOpen_le r
+  have hVU' : X.affineBasicOpen r ≤ U' := by
+    show X.basicOpen r ≤ U'.1
+    rw [hrr']
+    exact X.basicOpen_le r'
+  rw [← TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE (hVU : _ ≤ U.1)) w hwr a]
+  have h1 : (X.presheaf.map (homOfLE (hVU : _ ≤ U.1)).op).hom a ∈
+      K.ideal (X.affineBasicOpen r) := by
+    rw [← K.map_ideal hVU]
+    exact Ideal.mem_map_of_mem _ ha
+  have h2 : Ideal.map (X.presheaf.germ (X.affineBasicOpen r).1 w hwr).hom
+      (K.ideal (X.affineBasicOpen r)) = ⊥ := by
+    rw [← K.map_ideal hVU', Ideal.map_map]
+    have hcomp : ((X.presheaf.germ (X.affineBasicOpen r).1 w hwr).hom).comp
+        (X.presheaf.map (homOfLE (hVU' : _ ≤ U'.1)).op).hom =
+        (X.presheaf.germ U'.1 w hwU').hom :=
+      congrArg CommRingCat.Hom.hom
+        (TopCat.Presheaf.germ_res X.presheaf (homOfLE (hVU' : _ ≤ U'.1)) w hwr)
+    rw [hcomp, hbot']
+  have h3 := h2 ▸ Ideal.mem_map_of_mem (X.presheaf.germ (X.affineBasicOpen r).1 w hwr).hom h1
+  exact Ideal.mem_bot.mp h3
+
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
 fibre over `t := p x` lies set-theoretically in the agreement locus, then the germ at `x`
