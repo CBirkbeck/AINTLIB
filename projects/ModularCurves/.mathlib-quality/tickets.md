@@ -409,7 +409,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Sources**: [Loe] 3.3.3; [Sil] III.1.4(a). **Generality**: `CommRing R`.
 
 ### [T-A4] ⧗KM Uniqueness of the model (BB-RR consumer)
-- **Status**: blocked-B2 (beastmode 2026-07-07T19:30Z — **STATEMENT FALSE as written;
+- **Status**: RE-FROZEN v9 (2026-07-07, owner-approved) — WORKABLE (no longer blocked).
+  New statement = **G-torsor form**: the sheaf of Weierstrass presentations of E is a torsor
+  under `G = VariableChange` (affine group scheme); after a Hodge/conormal `ω`-trivialization the
+  remaining changes are the `u=1` subgroup. Lean **consumes the group-action/torsor statement,
+  NOT a coordinate formula**. See **Amendments v9 §v9.4**. ── Prior blocked-B2 record retained
+  for the counterexample rationale: (beastmode 2026-07-07T19:30Z — **STATEMENT FALSE as written;
   owner decision needed**; full record in `.mathlib-quality/b2_log.jsonl`. Quote-gate
   satisfied: KM 2.2.5 full text mined from the full PDF (printed pp. 68–69) — it is
   uniqueness of adapted coordinates x,y for a FIXED (E/S, ω) up to x↦x+a, y↦y+ax+b,
@@ -2619,6 +2624,17 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   record** for Γ₀(N); discharges/replaces the geometric-fibre surrogate in
   `IsGammaZero` (upgrade `T-D10`). **GATE: no Γ₀ representability theorem may be
   stated against the surrogate.**
+  **DONE (def-of-record layer)** (beastmode-H, 2026-07-07) — `GroupScheme/CyclicSubgroup.lean`,
+  SORRY-FREE, axiom-clean. `FiniteLocallyFreeSubgroup.IsCyclic G N := E.IsGammaZeroFppf N
+  G.toRelEffCartierDiv` — cyclicity of record on the SG1 subgroup-scheme layer, routed through
+  the proven `toRelEffCartierDiv` bridge (T-SG1) into T-D10's existing `IsGammaZeroFppf` (NO new
+  fppf vocabulary, NO dependency on the T-SG1b sorry, does NOT touch the gated
+  `isGammaZero_iff_fppf`). API: `IsCyclic.hasRank` (rank N from the degree conjunct),
+  `IsCyclic.exists_fppf_generator`, `isCyclic_of_generator` constructor, and the Γ₀(N) datum
+  `GammaZeroStructure` (cyclic flf subgroup of rank N — what representability targets, per the
+  GATE). NOTE (v9): the reviewer DEPRIORITIZED Γ₀ cyclicity to work-order #7 ("only then");
+  this layer is banked as non-blocking infra — no further SG effort now, H-lane pivots to the
+  v9-sharpened T-C0 (#5). Downstream (SG2 representability via KM 3.7.1) stays gated.
 - **[T-SG3]** cyclicity is a closed condition (KM 6.4 ⧗; statement-level now, proof
   gated on full KM).
 
@@ -4664,3 +4680,147 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     the registered upstream boxes (BB-QF/BB-FLAT/BB-DEG/BB-DELIGNE) — no new box. Spawned
     **T-SG1b** (base-change subgroup field, the one parked sorry) → funnels to the A-lane
     asSection_zsmul spelling normalisation. NEXT: G6 re-scan.
+
+## Amendments v9 (2026-07-07): EXPERT-REVIEW integration — statement-drift audit reply
+
+*Third expert-review pass. Verdict: **ON TRACK**; the v8 restaging validated wholesale.
+Verbatim reply + brief + state archived at `.mathlib-quality/expert-review/2026-07-07/`
+(`reply.md`, `brief.md`, `state.md`). Three headline asks: (1) fix the Γ₁(N) drift [DONE — the
+code was correct, only the brief prose was wrong]; (2) separate finite quotients from the
+Weierstrass quotient stack; (3) keep marginal workers on the core Y₁(N)/Y(N) path, not the
+Galois/F-stream or the N≤2 guardrails. Owner approved "apply all" 2026-07-07.*
+
+### v9.0 Headline drift Γ₁(N) — RESOLVED (no Lean change)
+The reviewer feared `Σ_a [aP] = E[N]` (degree N vs N²). The code is CORRECT:
+`IsGammaOne` = `Section.HasExactOrder` = `(orderDivisor P N).IsSubgroup E`, i.e. the
+**degree-N** divisor `[P]+…+[NP]` is a **subgroup divisor** (Deligne exact order), NOT equated
+to E[N]; `IsFullLevel` = the **degree-N²** divisor `Σ_{(a,b)} [aP+bQ]` with `.ideal =
+torsionIdeal N` (= E[N]). Both match KM 3.1/3.2 + Deligne exactly. The drift was PROSE-ONLY in
+the brief (§2.1, §4), corrected in both copies. Reviewer's "fix the code before more depends on
+it" branch does not apply — nothing downstream is corrupted. The `IsNaiveGammaOne` killing-clause
+adversarial fix (2026-07-06) already handles the subtler `N·P=0` trap.
+
+### v9.1 Current work order (start-now set — SUPERSEDES the v3/v4/v8 start-now sets)
+Reviewer's marginal-worker priority (annotated with live board reality 2026-07-07T~04Z):
+1. Fix Γ₁(N) drift — **DONE** (prose; code was already right).
+2. Finish **T-W3/W4/W5** → state `[U/G](S)` as torsors + equivariant maps. (T-W3/W3b DONE;
+   T-W3c in_progress beastmode-Q; T-W5 DONE. Near.)
+3. **T-W7**: group law from Weierstrass charts + descent. ★ **CURRENT CRITICAL BOTTLENECK** —
+   UNSTARTED (A-lane); BOTH the H-lane (T-SG1 / level memberships) and C-lane (T-C0d-ii concrete
+   fibre pairing) frontiers now funnel into it. Marginal A-lane effort here unblocks the most.
+   This is reviewer step 3.
+4. Discharge the **invertible-N torsion/étale bottleneck** — **BB-DIFF or its local substitute
+   (new T-B5z) BEFORE BB-DELIGNE**. `[N]` étale when N invertible; E[N] finite étale rank N²;
+   geometric fibres (ℤ/N)² (T-B6 DONE).
+5. Char-0 **scheme-level** Weil pairing over arbitrary ℚ-schemes (T-C0 sharpened — v9.4).
+6. Symplectic Isom-scheme for Y(ρ̄) (T-F6).
+7. **Only then**: BB-DELIGNE (T-D5), Γ₀ cyclicity (T-D10), bad-level integral theory.
+Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
+
+### v9.2 Stream split directive (Q3) — W-stack ≠ Q-finite [BINDING]
+`G = WeierstrassCurve.VariableChange` is an **affine group scheme, morally `G_m ⋉ 𝔸³`** in
+`(u,r,s,t)` with `u` invertible — **NOT a finite constant group**. Consequences:
+- **W-stack** (owns [U/G]): affine-group-scheme actions, **G-torsors**, quotient groupoid
+  `[U/G]`. This is the T-W3b route (TorsorPair + trivialization + full faithfulness over
+  connected nonempty bases) — ALREADY the correct machinery. `[U/G]` is built from **torsors**,
+  NOT from the finite invariant quotient `Spec(A^G)`.
+- **Q-finite** (T-Q1–T-Q6): finite constant group actions, affine invariant quotients
+  `Spec(A^G)`, finite quotients of level schemes, and the **minimal finite-quotient API for
+  KM 4.7 / finite level quotients / Γ_H** (Q7: this API is NOT deferred, unlike full coarse
+  moduli / j-line / Stream M).
+- **ACTION**: verify T-W3's `Depends: T-Q5/T-Q6` is on the SchemeAction/torsor vocabulary
+  (the T-W3b basis), NOT on `Spec(A^G)` (T-Q3); sever any spurious dependency so `[U/G]` does
+  not wait on finite-invariant-quotient machinery. "Do not wait for coarse affine invariants to
+  finish [U/G]."
+
+### v9.3 New tickets (v9)
+- **[T-A8b] `weierstrass-atlas-cover-object`** (Q1a; REVERSES the v8 pointwise-only deferral —
+  owner-approved). Define an explicit cover-object `WeierstrassAtlas E S` (index set, affine
+  opens + cover, per-chart `WeierstrassCurve`, per-chart pointed iso `π⁻¹(Uᵢ) ≅ projModel Wᵢ`)
+  and prove **equivalence with the pointwise `LocallyWeierstrass` predicate EARLY**. Keep the
+  pointwise form public. Rationale (reviewer): descent, `[U/G]`, local group law, coordinate
+  changes, and patching `E[N]` are all easier from an explicit cover object. **Lane**: A ·
+  **Depends**: T-A8 · **Type**: structure + equivalence theorem · **Sources**: reviewer v9.
+  Distinct from the DONE universal atlas `Moduli/WeierstrassAtlas.lean` (that is the universal
+  U; this is the per-curve local-Weierstrass witness data).
+- **[T-D33] `subgroup-divisor-locus`** (Q — incidence-centre completion). The closed locus where
+  a relative effective Cartier divisor `D` is a **subgroup divisor** (representability of
+  `RelEffCartierDiv.IsSubgroup` as a closed subscheme). Needed to cut out the Γ₁ exact-order
+  condition over U. **Lane**: D · **Depends**: T-D14/T-D15 · **Type**: representability theorem ·
+  **Sources**: reviewer v9; KM 1.3. (The other four centres exist: incidenceLE = T-D14 DONE,
+  incidenceEQ = T-D15, A-str/A-gen representability = T-D21.)
+- **[T-GG-gen1] `fiber-functor-parameterized`** (Q5; for-mathlib, **LATE — post-critical-path**).
+  Reparameterize the finite-étale fibre functor over an arbitrary separably closed geometric
+  point `Ω/k` with `IsSepClosure k Ω`, NOT the hard-coded `SeparableClosure k`. The C-lane
+  ALREADY hit this friction (T-C0d-i FINDINGS: mathlib's fibre functor Ω = SeparableClosure k
+  forces [CharZero k] + IsSepClosure.equiv conjugation) — evidence the parameterized form is more
+  robust. **Lane**: F/for-mathlib · **Type**: generalization.
+- **[T-GG-gen2] `finite-etale-algebra-product-decomposition`** (Q5; for-mathlib, LATE). Upstream
+  via `finite étale k-algebra ≃ ∏ finite separable field extensions`, then derive `connected
+  finite étale k-algebra ↔ field` from the primitive-idempotent/product decomposition (replacing
+  the ad-hoc idempotent-splitting proof for the mathlib-facing version). **Lane**: for-mathlib ·
+  **Type**: refactor/generalization.
+- **[T-B5z] `mulBy-N-etale-local-weierstrass`** (Q4; BB-DIFF SUBSTITUTE, prioritized before
+  BB-DELIGNE). Prove `[N]` étale when N invertible via the **invariant differential on Weierstrass
+  charts** (mathlib `WeierstrassCurve` invariant differential / division polynomials) + descent —
+  narrower than a full relative-differentials (Ω¹) scheme API (the T-B5y gate). **Lane**: B ·
+  **Depends**: T-W5 (charts) · **Type**: theorem · **Sources**: reviewer v9. Supersedes T-B5y on
+  the critical path (T-B5y stays as the general-API form).
+
+### v9.4 Existing-ticket updates (v9)
+- **[T-A4] RE-FROZEN** (Q2; clears blocked-B2). New statement (owner-approved, torsor form):
+  *for a fixed locally-Weierstrass E/S, the sheaf of Weierstrass presentations of E is a **torsor
+  under `G = VariableChange`** (as an affine group scheme); after a trivialization of the
+  Hodge/conormal sheaf `ω_{E/S}` at the identity, the remaining changes are exactly the `u = 1`
+  subgroup.* The Lean theorem **consumes the G-action / torsor statement**, NOT a fragile
+  coordinate formula (general change `x = u²x' + r`, `y = u³y' + u²s·x' + t`; KM 2.2.5's further
+  2-parameter reduction depends on the precise meaning of "adapted" — do not hard-code). `ω` =
+  chosen Hodge/conormal trivialization (compatible with the Katz modular-forms `ω_{E/S}`). Ties
+  T-A4 to Stream W (G-torsors). Retire the false points-cardinality form; the B2 counterexample
+  record (2-isogenous pair y²=x³−36x vs y²=x³+144x) stays as the rationale.
+- **[T-C0] SHARPENED** (Q6). Target the **T-relative morphism**
+  `weilPairingCharZero : E[N] ×_T E[N] ⟶ μ_{N,T}` over arbitrary `Spec ℚ`-schemes T (construct
+  étale-locally on T where E[N] trivializes, then descend) — a pairing over FIELDS is NOT enough
+  for the moduli functor on ℚ-schemes. **If the first milestone proves only the field case, LABEL
+  it a field-valued-points theorem, not the pairing for `RepresentsYRho`.** Keep
+  Silverman/determinant normalization + the symplectic pin `e_N(aP+bQ, cP+dQ) = e_N(P,Q)^{ad−bc}`.
+  STATUS reality: T-C0 a+b+c+d-i already PROVEN (`exists_pairingAlgebraHom_of_galoisEquivariant`,
+  the descent heart the reviewer praised); remaining T-C0d-ii (concrete fibre pairing map) is a
+  T-W7 edge.
+- **[T-H7] PARKED — do not re-staff** (Q4). N≤2 non-rigidity is a useful GUARDRAIL but off the
+  critical path; put no more workers here. The `in_progress` marker (beastmode-H, 07-06T16:55Z) is
+  STALE — the H-lane correctly drained its gate-free frontier and moved to T-SG1 (07-07T03:45Z).
+  Critical path needs **positive rigidity for N≥3** (feeds T-E9/T-H*) + the quotient-stack/torsion
+  infra, not N≤2 guardrails.
+- **Convention**: results whose proof consumes a sorried black box are tagged
+  **[PROVED-MODULO-BOXES]**, not [PROVED] (kernel-checked ≠ box-free) — in future briefs and the
+  board scoreboard.
+
+### v9.5 Confirmations (no action)
+- Q1a def-of-record: `EllipticCurveGeom`/`LocallyWeierstrass` split ENDORSED (plus T-A8b).
+- Q3 strategy: post-v8 sequencing endorsed wholesale (W bottom-up, T-W7 group law, D unchanged,
+  F via the in-project Galois correspondence). "Nothing in §5–§6 to stop doing."
+- Q7 coarse moduli: deferral CONFIRMED (Stream M stays skeleton); only the minimal
+  finite-quotient API (v9.2 Q-finite) is near-term.
+
+### H-lane G6 + v9-integration (beastmode-H, 2026-07-07, Opus 4.8)
+- **T-SG2 DONE** (def-of-record layer), banked. `GroupScheme/CyclicSubgroup.lean` sorry-free,
+  axiom-clean (`IsCyclic`, `IsCyclic.hasRank`/`exists_fppf_generator`/`isCyclic_of_generator`,
+  `GammaZeroStructure`). Design: reuse T-D10's `IsGammaZeroFppf` on `G.toRelEffCartierDiv` — DRY,
+  no new fppf vocab, no T-SG1b/T-W7 dependency. Import chain: new file above both
+  `GroupScheme.Subgroup` and `LevelStructure.Basic` (acyclic; Basic imports ExactOrder).
+- **v9 expert-review incorporated** into the H/C lane direction (reply.md archived; owner wrote
+  Amendments v9). Effect on my streams:
+  - Γ₀ cyclicity (T-SG2/T-D10) DEPRIORITIZED to work-order #7 → T-SG2 banked, no more SG effort.
+  - T-H7 (N≤2 non-rigidity) PARKED — do not re-staff (already DONE). Stale in_progress marker cleared.
+  - **T-C0 SHARPENED (v9.4) = my next target (reviewer #5).** Field pairing is NOT enough for the
+    moduli functor; target the **T-relative** `weilPairingCharZero : E[N] ×_T E[N] ⟶ μ_{N,T}` over
+    `Spec ℚ`-schemes T (construct étale-locally on T where E[N] trivializes, then descend). My
+    `exists_pairingAlgebraHom_of_galoisEquivariant` (the descent heart the reviewer praised) is the
+    right abstraction; extend field→T-relative via the étale-descent route (NOT the T-W7 Weierstrass
+    route, which is the separate KM 2.8 path). Re-cut the too-weak `exists_weilPairingSpecField`
+    (T-C0e) as an explicitly-LABELED field-valued-points theorem + state the T-relative target.
+  - T-GG-gen1 (fiber functor over `IsSepClosure k Ω`) spun off from my T-C0d-i finding — LATE/
+    for-mathlib, not now.
+- **NEXT**: scope the T-relative char-0 Weil pairing (v9.4 T-C0); re-cut T-C0e; advance gate-free
+  scaffolding (μ_{N,T} target, étale-local trivialization of E[N], descent of the morphism over T).
