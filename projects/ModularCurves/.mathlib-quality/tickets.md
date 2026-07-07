@@ -5931,7 +5931,14 @@ Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
 - **Sources**: Stacks 00MI (10.129.3), 00RB. Tor-free.
 
 ### [T-LC3] openness of the flat locus (Stacks 00RC) — discharge isOpen_flatLocus
-- **Status**: open · **Depends on**: T-LC1, T-LC2 · **File**: ForMathlib/FlatLocus.lean ·
+- **Status**: PARTIAL (beastmode-D2 2026-07-07T20:30Z) — `isOpen_flatLocus` SORRY-FREE, reduced to
+  ONE box `isConstructible_flatLocus` (flat locus constructible) via the mathlib openness criterion +
+  proven generization-stability. HONEST ROADMAP: constructibility needs T-LC2 (00RB/00MI, "flatness
+  from fibre exactness" — the OTHER direction from T-LC1's "freeness from flatness") + finite-free-
+  resolution infra (00LP existence, 00HM syzygy-flatness), all mathlib-absent (surveyed) but TOR-FREE.
+  ~several hundred lines resolution-level. T-LC1 alone insufficient (confirmed). REMAINING sub-box:
+  `isConstructible_flatLocus`.
+- **PRIOR-Status**: open · **Depends on**: T-LC1, T-LC2 · **File**: ForMathlib/FlatLocus.lean ·
   **Type**: theorem
 - **Statement**: fill the boxed `isOpen_flatLocus` in FlatLocus.lean.
 - **Proof sketch**: EITHER (i) resolution route: finite free resolution of M (M fp), apply
