@@ -5899,7 +5899,8 @@ criteria use `Module.Flat.lTensor_exact` (flatness ⟹ Tor₁-vanishing, from th
 Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
 
 ### [T-LC1] freeness from fibre freeness (Stacks 00MH) — THE MAKE-OR-BREAK
-- **Status**: in_progress · **Claimed**: beastmode-D2, 2026-07-07T18:10Z (Opus delegate
+- **Status**: DONE (beastmode-D2 2026-07-07T19:40Z, verified) — `Module.free_of_flat_of_fibre_free` in ForMathlib/LocalCriterion.lean, AXIOM-CLEAN, TOR-FREE. ROUTE VALIDATED end-to-end; B3 'needs Tor' REFUTED. Landed the LOCAL form (R,S local); prime-localized form for T-LC3 = localization bookkeeping. Snake engine `lTensor_injective_of_exact_of_exact_of_rTensor_injective` + `rTensor_preserves_injective_linearMap` + Nakayama. Fibre = M⧸(𝔪S·⊤) free over S⧸𝔪S (NOT residue field — that's vacuous, delegate caught + counterexampled).
+- **PRIOR-Status**: in_progress · **Claimed**: beastmode-D2, 2026-07-07T18:10Z (Opus delegate
   a42306399 → ForMathlib/LocalCriterion.lean). Validates the whole Tor-free route: if
   the Nakayama + `Module.Flat.lTensor_exact` proof lands, the box chain opens Tor-free.
 - **File**: ForMathlib/LocalCriterion.lean ·
