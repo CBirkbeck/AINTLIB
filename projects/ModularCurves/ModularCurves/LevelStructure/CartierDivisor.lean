@@ -1792,7 +1792,23 @@ affine-locally principal, hence locally finitely generated. -/
 theorem locallyOfFinitePresentation {J : C.IdealSheafData}
     (hsm : SmoothOfRelativeDimension 1 π) (h : IsOfficialCartier π J) :
     LocallyOfFinitePresentation (J.subschemeι ≫ π) := by
-  sorry
+  -- The closed immersion `J.subschemeι` is locally of finite presentation: around any point
+  -- of the subscheme pick the chart `V` on which `J.ideal V` is principal; the induced ring
+  -- map `Γ(C, V) ⟶ Γ(D, ι ⁻¹ᵁ V)` is surjective with finitely generated kernel `J.ideal V`.
+  have hι : LocallyOfFinitePresentation J.subschemeι := by
+    rw [HasRingHomProperty.iff_exists_appLE (P := @LocallyOfFinitePresentation)
+      (RingHom.finitePresentation_stableUnderComposition.stableUnderCompositionWithLocalizationAway
+        RingHom.finitePresentation_holdsForLocalizationAway).left]
+    intro x
+    obtain ⟨V, hxV, f, hf, -⟩ := h.locallyPrincipal (J.subschemeι x)
+    refine ⟨V, ⟨J.subschemeι ⁻¹ᵁ V.1, V.2.preimage J.subschemeι⟩, hxV, le_rfl, ?_⟩
+    rw [Scheme.Hom.appLE_eq_app]
+    exact RingHom.FinitePresentation.of_surjective _ (J.subschemeι_app_surjective V)
+      (by rw [J.ker_subschemeι_app V, hf]; exact ⟨{f}, by simp⟩)
+  -- The base is smooth, hence locally of finite presentation; conclude by composition.
+  have := hsm
+  have : Smooth π := SmoothOfRelativeDimension.smooth 1 π
+  infer_instance
 
 /-- **KM 1.2.3 (⇒)**: an official effective Cartier divisor which is proper over the base
 is finite over it (Zariski's-main-theorem route: proper + locally quasi-finite). -/
