@@ -614,6 +614,62 @@ theorem EllipticCurve.pull_injective (k k' : Type u) [Field k] [IsAlgClosed k]
   rw [h4 P, h4 Q] at h2
   exact E.section_ext k h2
 
+/-- **(T-H7b-i)** `Spec` of a field embedding is an epimorphism onto morphisms into any
+scheme: two morphisms from `Spec k` agree as soon as they agree after the extension
+`Spec k' ⟶ Spec k`. The point components agree since the source spaces are single
+points; the residue components agree after composing with the injective `f`, via the
+canonical `stalkClosedPointTo` factorization and the mono `fromSpecResidueField`. -/
+theorem _root_.AlgebraicGeometry.Scheme.hom_ext_of_comp_specMap_field
+    {k k' : Type u} [Field k] [Field k']
+    (f : k →+* k') {Y : Scheme.{u}} (u v : Spec (CommRingCat.of k) ⟶ Y)
+    (h : Spec.map (CommRingCat.ofHom f) ≫ u = Spec.map (CommRingCat.ofHom f) ≫ v) :
+    u = v := by
+  have hpt : u (IsLocalRing.closedPoint k) = v (IsLocalRing.closedPoint k) := by
+    have h0 := congrArg
+      (fun m : Spec (CommRingCat.of k') ⟶ Y => m (IsLocalRing.closedPoint k')) h
+    simp only [Scheme.Hom.comp_apply] at h0
+    have huniq : (Spec.map (CommRingCat.ofHom f)) (IsLocalRing.closedPoint k')
+        = IsLocalRing.closedPoint k := Subsingleton.elim _ _
+    rwa [huniq] at h0
+  have hu := Scheme.descResidueField_stalkClosedPointTo_fromSpecResidueField k Y u
+  have hv := Scheme.descResidueField_stalkClosedPointTo_fromSpecResidueField k Y v
+  -- transport `v`'s factorization to the common point via the congr iso
+  have hv' : Spec.map ((Y.residueFieldCongr hpt).hom
+        ≫ Y.descResidueField (Scheme.stalkClosedPointTo v))
+      ≫ Y.fromSpecResidueField (u (IsLocalRing.closedPoint k)) = v := by
+    rw [Spec.map_comp, Category.assoc, Scheme.residueFieldCongr_fromSpecResidueField]
+    exact hv
+  rw [← hu, ← hv']
+  have hcomp : Spec.map (CommRingCat.ofHom f)
+        ≫ (Spec.map (Y.descResidueField (Scheme.stalkClosedPointTo u))
+          ≫ Y.fromSpecResidueField (u (IsLocalRing.closedPoint k)))
+      = Spec.map (CommRingCat.ofHom f)
+        ≫ (Spec.map ((Y.residueFieldCongr hpt).hom
+            ≫ Y.descResidueField (Scheme.stalkClosedPointTo v))
+          ≫ Y.fromSpecResidueField (u (IsLocalRing.closedPoint k))) := by
+    rw [hu, hv']
+    exact h
+  rw [← Category.assoc, ← Spec.map_comp, ← Category.assoc, ← Spec.map_comp] at hcomp
+  have h2 := (cancel_mono (Y.fromSpecResidueField (u (IsLocalRing.closedPoint k)))).mp hcomp
+  have h3 := Spec.map_injective h2
+  haveI : Mono (CommRingCat.ofHom f) :=
+    ConcreteCategory.mono_of_injective _ f.injective
+  have h4 := (cancel_mono (CommRingCat.ofHom f)).mp h3
+  rw [h4]
+
+/-- **(T-H7b-i)** Point separation along extensions of the base field: restricting
+`k`-points of `E/S` along `Spec k' ⟶ Spec k` is injective, for ANY field embedding
+`f : k →+* k'` (no algebraic closure needed, any base `S`). -/
+theorem EllipticCurve.Point.restrict_injective {k k' : Type u} [Field k] [Field k']
+    (f : k →+* k') (E : EllipticCurve S) (t : Spec (CommRingCat.of k) ⟶ S) :
+    Function.Injective
+      (fun x : E.Point t =>
+        EllipticCurve.Point.restrict E (Spec.map (CommRingCat.ofHom f)) x) := by
+  intro x y hxy
+  have h1 : Spec.map (CommRingCat.ofHom f) ≫ x.1 = Spec.map (CommRingCat.ofHom f) ≫ y.1 :=
+    congrArg Subtype.val hxy
+  exact Subtype.ext (Scheme.hom_ext_of_comp_specMap_field f x.1 y.1 h1)
+
 /-- **(T-H7b)** Naive full level-`N` structures exist over an algebraically closed
 base when `N ≤ 2` and `N` is invertible: for `N = 1` the zero pair works (the killing
 clause forces it); for `N = 2` a basis of `E[2]` from the geometric-fibre structure
