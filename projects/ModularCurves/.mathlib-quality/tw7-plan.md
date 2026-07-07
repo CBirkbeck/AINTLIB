@@ -1,7 +1,10 @@
 # T-W7 — constructive group-scheme structure on a LocallyWeierstrass curve (`/develop` plan)
 
-**Planned:** beastmode-A 2026-07-07. **Route:** rigidity lemma (Faltings–Chai I / Mumford
-GIT §6.1). **Scope:** full `GrpObj` construction + canonicity.
+**Planned:** beastmode-A 2026-07-07. **Scope:** full `GrpObj` construction + canonicity.
+**Route (CORRECTED after source check — see §"Source check" below):** *existence* axioms
+(assoc/comm/unit/inverse) via **reduction to the universal integral atlas + base change**, NOT
+rigidity; rigidity (Mumford GIT §6.1) is used **only** for *canonicity* (uniqueness), and only
+there because arbitrary (non-reduced) bases are needed.
 
 ## Sharp goal
 
@@ -12,132 +15,133 @@ theorem abelEnrichment_exists (G : EllipticCurveGeom S) :
     ∃ E : EllipticCurve S, E.toEllipticCurveGeom = G
 ```
 
-i.e. **construct `GrpObj (Over.mk G.π)`** (a commutative group-object in the cartesian-monoidal
-`Over S`, product = pullback, unit = zero section) for an arbitrary `EllipticCurveGeom` `G` (which
-carries `localModel : LocallyWeierstrass G.π G.zero G.zero_π`, T-A8). Everything downstream —
-`mulBy`/`mulByHom` ([N]), `pointEquivOverHom`, `pointAddCommGroup`, `baseChange` — is already
-derived from the `grp` field via mathlib's `GrpObj` API; T-W7 is the *only* missing piece, and it
-is on the critical path (owner directive: only BB-RR may be assumed).
+i.e. **construct `GrpObj (Over.mk G.π)`** (commutative group-object in cartesian-monoidal `Over S`,
+product = pullback, unit = zero section) for an arbitrary `EllipticCurveGeom` `G` (carrying
+`localModel : LocallyWeierstrass`, T-A8). Everything downstream — `mulBy`/`mulByHom` ([N]),
+`pointEquivOverHom`, `pointAddCommGroup`, `baseChange` — is already derived from the `grp` field via
+mathlib's `GrpObj` API. Critical path (owner directive: only BB-RR may be assumed).
+
+## Source check (BINDING — this changed the route)
+
+Read Faltings–Chai I (converted `.djvu`→`refs/ModularCurves/faltings-chai-degeneration.pdf`; OCR
+text confirms):
+
+- **FC I.1.1 (def):** "An abelian scheme is a **group scheme** π : A → S which is smooth, proper
+  with (geometrically) connected fibres." FC **assumes** the group structure and studies its
+  properties — it does **not** construct the group law from a bare genus-1-with-section curve.
+- **FC I.1.2(b):** "By the **rigidity lemma of GIT prop. 6.1.**, every abelian scheme is
+  commutative." → rigidity gives **commutativity** and (I.2.7) **unique extension of
+  homomorphisms**, *given* a group structure.
+- **FC I.2.7 (Prop):** extension of a homomorphism from a dense open requires S **noetherian
+  normal** — so it does **NOT** cover the arbitrary/non-reduced bases the moduli application needs.
+
+**Consequence (source-drift caught):** rigidity does **not** prove associativity of an
+explicitly-constructed `mul`. Associativity is *not* in FC's toolkit for our situation. The
+source-faithful route for the *existence* axioms is the **explicit-formula construction** (Silverman
+*AEC* III.2–3), with associativity/commutativity obtained by:
+
+> the addition formula's associativity is a **universal identity** — it holds over the *fraction
+> field* `K` of the integral universal atlas ring `R = ℤ[a₁..a₆][Δ⁻¹]` (mathlib's
+> `Affine.Point.instAddCommGroup` gives `add_assoc`/`add_comm` over any field), and `R ↪ K`
+> transfers the rational-function identity back to `R`; the degenerate locus is handled by density
+> (`E_U^n` integral over the domain `R`). Then **base change** carries it to every `S` (associativity
+> is a morphism identity, and every `EllipticCurveGeom` is *locally* a base change of `E_U`).
+
+Rigidity (GIT §6.1, "constant-on-an-axis ⇒ factors", valid over **arbitrary** bases) re-enters only
+for **canonicity** (T-W7.7). ⚠ GIT is not in refs/; its short proof must be reconstructed or found
+(KM 2.1 cites it; Hida GME) before T-W7.7 — but T-W7.7 is *separable* from the existence goal.
 
 ## Infrastructure ledger
 
 | Component | Status |
 |---|---|
-| `GrpObj`/`MonObj`/`Grp_Class`, cartesian-monoidal `Over S` | mathlib (`CategoryTheory.Monoidal.Grp_`, `ChosenPullbacksAlong.cartesianMonoidalCategoryOver`) |
-| affine formulas `addX`/`addY`/`negY`/`slope` + `equation_add`/`nonsingular_add` | mathlib (`EllipticCurve.Affine.Formula`, over `CommRing`/`Field`) |
-| `addX_smul`/`addY_smul`/`slope_smul`/`negY_smul` (coordinate-level variableChange-invariance) + `pointEquiv` | **DONE** (`ForMathlib/AffinePointVariableChange.lean`) — gluing data |
-| `LocallyWeierstrass` predicate + `baseChange`; `projModel`, `isPullback_projModelBaseChange`, `projModelZero_baseChange` | **DONE** (T-A8/T-A2, WeierstrassModel.lean) |
-| **negation morphism** `E → E` over `S` | **GAP** (T-W7.1) |
-| **multiplication morphism** `E ×_S E → E` over `S` | **GAP — crux** (T-W7.2) |
-| **rigidity lemma** for proper-flat-connected-fibre `S`-schemes | **GAP** (T-W7.4a — the heaviest new AG lemma) |
+| `GrpObj`/`MonObj`, cartesian-monoidal `Over S` | mathlib (`Monoidal.Grp_`, `cartesianMonoidalCategoryOver`) |
+| affine formulas `addX`/`addY`/`negY`/`slope` + `equation_add`/`nonsingular_add` | mathlib |
+| **field-level group axioms** `Affine.Point.instAddCommGroup` (`add_assoc`, `add_comm`, …) | **mathlib (the substrate for existence via K)** |
+| `addX_smul`/`addY_smul`/`slope_smul`/`negY_smul` + `pointEquiv` (variableChange-invariance) | **DONE** (`AffinePointVariableChange.lean`) |
+| `LocallyWeierstrass` + `baseChange`; `projModel`, `isPullback_projModelBaseChange`, `projModelZero_baseChange`; `universalEllipticCurve` over the **integral** atlas `R` | **DONE** (T-A8/T-A2/T-W5) |
+| atlas ring `R = Localization.Away Δ (MvPolynomial (Fin 5) ℤ)` is a **domain** | provable one-liner (`Localization` of a domain) — key to the K-embedding route |
+| **negation / multiplication morphisms** over `S` | **GAP** (T-W7.1 / T-W7.2) |
+| **rigidity lemma** over arbitrary base (GIT §6.1) | **GAP — canonicity only** (T-W7.7); source owed |
 
-## Source status (BINDING — source-faithfulness)
+## Decomposition
 
-- **Explicit formulas / group law over a field**: Silverman, *AEC* III.2 (formulas), III.3
-  (the group law; associativity via Riemann–Roch / the divisor-class isomorphism). *Not in
-  refs/* — **owed**: obtain Silverman III or use mathlib's `Affine.Point.instAddCommGroup`
-  (field-level associativity is already formalised) as the fibrewise substrate.
-- **Rigidity lemma / group-scheme axioms over an arbitrary base**: **Faltings–Chai**,
-  *Degeneration of Abelian Varieties* I (rigidity), and **Mumford**, *GIT* §6.1 ("Rigidity
-  Lemma"). ⚠ **Faltings–Chai is a `.djvu` in refs/ — the Read tool cannot open it.** Before
-  T-W7.4 is worked, this source must be made readable (convert to PDF) or replaced by a readable
-  equivalent (**Hida GME** ch. 2, or **Katz–Mazur** 2.1 which cites the rigidity argument, both
-  PDFs in refs/). A worker MUST NOT start T-W7.4 from memory — the over-a-base associativity is
-  exactly where invented-infra risk is highest.
-- **Moduli context / group scheme of the universal curve**: Katz–Mazur 2.1–2.3, Hida GME 2.2
-  (both readable in refs/).
+### Phase 0 — universal-atlas group law (the load-bearing lemmas; base = integral `R`)
 
-## Decomposition (rigidity route)
+- **T-W7.0a `atlasRing_isDomain`** : `IsDomain WeierstrassAtlasRing`. One-liner
+  (`Localization.Away` of the domain `MvPolynomial (Fin 5) ℤ`). **READY NOW.**
+- **T-W7.0b — the universal affine addition is associative/commutative over `R`** as a
+  rational-function identity, via `R ↪ Frac R` + `Affine.Point.add_assoc`/`add_comm` over `Frac R`.
+  This is where mathlib's field-level group law is imported. Statement: the `addX`/`addY` formulas
+  on `universalWeierstrassLoc` satisfy the group axioms on the non-degenerate locus.
 
-The construction has two halves. **(I)** build the three structure *morphisms* (`neg`, `mul`,
-`one=zero`) by gluing the affine formulas across Weierstrass charts using the invariance cocycle.
-**(II)** prove the group *axioms* — and here the rigidity lemma does the heavy lifting so we do
-**not** re-derive associativity as a giant polynomial identity over a non-reduced base.
+### Phase I — structure morphisms (glue via the DONE invariance cocycle)
 
-### Phase I — structure morphisms
+- **T-W7.1 `negHom`** (`G.E ⟶ G.E`, `negHom_π`, `negHom_zero`). `negY` denominator-free ⇒ morphism
+  on each `projModel` chart; `negY_smul` glues. **READY NOW — tractable first ticket.**
+- **T-W7.2 `mulHom`** (`pullback G.π G.π ⟶ G.E`). Sub-leaves **2a** chart-local `mul=(addX,addY)`
+  (`equation_add`/`nonsingular_add` land it on the curve), **2b** charts+coordinate-changed-charts
+  cover `E ×_S E`, **2c** overlaps agree via `addX_smul`/`addY_smul`/`slope_smul` (DONE) ⇒ glue.
+  For `E_U` (single global Weierstrass chart) this is markedly simpler than for general `E`. **crux.**
 
-- **T-W7.1 `negHom`** (negation morphism). `negY` is denominator-free, so on the single global
-  chart of `projModel` it is already a morphism; `negY_smul` shows it is chart-independent. Over a
-  general `LocallyWeierstrass` `G` it glues from the per-chart `negY`. *Tractable — do first.*
-  - `def negHom (G) : G.E ⟶ G.E`; `negHom_π : negHom ≫ π = π`; `negHom_zero : zero ≫ negHom = zero`.
-- **T-W7.2 `mulHom`** (multiplication morphism `pullback G.π G.π ⟶ G.E`). Internal node; sub-leaves:
-  - **T-W7.2a** — on the open `U ⊆ E ×_S E` where both points and their secant sum stay in a
-    fixed affine Weierstrass chart, `mul|U` is `Spec`-locally `(addX, addY)` (a morphism, over
-    `CommRing`; `equation_add`/`nonsingular_add` show it lands on the curve).
-  - **T-W7.2b** — these opens (ranging over charts + the coordinate-changed charts that move a
-    point off the degenerate/tangent/at-infinity locus) **cover** `E ×_S E`. Uses that any
-    two/three points can be simultaneously moved into the affine locus by a variableChange
-    (the atlas group acts transitively enough); `LocallyWeierstrass` gives the charts.
-  - **T-W7.2c** — the chart-local `mul`s **agree on overlaps** via `addX_smul`/`addY_smul`/
-    `slope_smul` (the invariance cocycle, DONE) → glue to a global `mulHom` (scheme-gluing of
-    morphisms, `Scheme.Hom` glueing / `IsOpenImmersion` cover).
-  - `def mulHom (G) : pullback G.π G.π ⟶ G.E`; `mulHom_π`.
-- **T-W7.3 unit laws.** `mulHom ∘ (zero-on-left) = fst`, `mulHom ∘ (zero-on-right) = snd`
-  (identity is the zero section), and `negHom` is a two-sided inverse for `mulHom`. On the affine
-  chart these are `addX/addY/negY` identities at `(x,y)=O`; `add_zero`/`add_left_neg`
-  mathlib-affine facts + gluing.
+### Phase II — group axioms (existence) by reduce-to-universal + base change
 
-### Phase II — axioms via rigidity
+- **T-W7.3 unit + inverse laws** (`mul(zero,·)=id`, `mul(·,zero)=id`, `neg` two-sided inverse).
+  Affine identities at `O` (`add_zero`, `add_left_neg`) transported; over `R` via Phase 0.
+- **T-W7.4 `mulHom_assoc`** — associativity **as a morphism identity, over any `S`**. Proof: holds
+  over the universal atlas `E_U` (Phase 0: `R↪K` + fibre density on integral `E_U³`), then **base
+  change** — every `EllipticCurveGeom` is *locally* `E_U ×_U (classifying map)`, so `mulHom` is
+  locally a base change of `E_U`'s associative `mulHom`; associativity is a morphism identity
+  checkable on the open cover. **No rigidity, no ℤ[ε] polynomial identity.**
+- **T-W7.5 `mulHom_comm`** — same reduce-to-universal route (`add_comm` over `K` + density +
+  base change). (Rigidity would also give it, but reduce-to-universal avoids the GIT dependency.)
+- **T-W7.6 assemble `grpObj` + `abelEnrichment_exists`** (MILESTONE — retires T-A6 EXISTENCE).
+  Package `neg`/`mul`/`zero` + T-W7.3/.4/.5 as `MonObj`+`GrpObj`+`IsCommMonObj`; then
+  `abelEnrichment_exists G := ⟨{ …, grp := grpObj G, … }, rfl⟩`. Plumbing.
 
-- **T-W7.4a `rigidityLemma`** (the heavy new AG lemma). *Statement (Faltings–Chai I / Mumford GIT
-  §6.1):* let `p : X → S` be proper, flat, with `p_* O_X = O_S` (geometrically connected fibres)
-  and a section `e : S → X`; let `f : X ×_S Y ⟶ Z` be an `S`-morphism with `f ∘ (e ×_S id)`
-  factoring through `S` (constant along the `e`-axis). Then `f` factors through the projection
-  `X ×_S Y ⟶ Y`. **This is the leaf that most needs the readable source** (proper pushforward of
-  `O`, `Stein`-type connectedness). Likely itself an internal node: needs (i) `p_*O_X = O_S`
-  for `E/S` (from smooth proper geometrically-connected genus-1 + section — cohomology-and-base-
-  change, gated behind BB-COHBC / the coherent-cohomology stream), (ii) the "constant on an axis ⇒
-  factors" core. **Flag: (i) may itself be a black box** unless BB-COHBC lands first — re-audit.
-- **T-W7.4 `mulHom_assoc`.** With `neg`, `mul`, `zero` in place, `E/S` is a "pre-group"; the two
-  associativity morphisms `E×_S E×_S E ⟶ E` agree on every geometric fibre (mathlib affine
-  associativity over the residue fields) and, being pointed (both send the triple-zero to zero),
-  **rigidity forces them equal** over the whole base — including non-reduced `S`. *This is why the
-  rigidity route was chosen: it never re-proves the polynomial identity over `ℤ[ε]`.*
-- **T-W7.5 `mulHom_comm`.** `mul ∘ swap` and `mul` are pointed morphisms agreeing on fibres →
-  rigidity ⇒ equal (or: any proper group scheme with connected fibres is commutative, Faltings–
-  Chai I / the standard corollary of rigidity).
-- **T-W7.6 assemble `grpObj` + `abelEnrichment_exists`.** Package `negHom`/`mulHom`/`zero` +
-  T-W7.3/.4/.5 as `MonObj` (mul, one, mul_assoc, mul_one, one_mul) + `GrpObj` (inv, laws) +
-  `IsCommMonObj`; then `abelEnrichment_exists G := ⟨{ toEllipticCurveGeom := G, grp := grpObj G,
-  comm := …, one_eq_zero := … }, rfl⟩`. Mostly plumbing once Phase I/II land.
-- **T-W7.7 `abelEnrichment_unique`** (canonicity, T-A6b). Two group structures with the same zero
-  section: their "difference/comparison" morphism is pointed → rigidity ⇒ they coincide. Same
-  rigidity lemma; independent of the existence tickets.
+### Phase III — canonicity (separable; the ONE genuine rigidity use)
 
-### Then (was folded into old T-W7; now free from `GrpObj`)
-
-- `[N]`/division polynomials: `mulBy n` is **already derived** from `grp` (`GrpObj.comp_zpow`).
-  Division-polynomial *formulas* for `[N]` are a separate optional refinement, not needed to
-  retire the T-A6 gate.
+- **T-W7.7a `rigidityLemma`** (GIT §6.1): for `p : X ⟶ S` proper flat with `p_*O_X = O_S`
+  (geom. connected fibres) + section, `f : X ×_S Y ⟶ Z` constant along the `e`-axis ⇒ factors
+  through `Y`. **Source owed** (GIT not in refs; reconstruct short proof or use KM 2.1/Hida GME).
+  Sub-fact `p_*O_E = O_S` may need coherent-cohomology-&-base-change (**BB-COHBC**) — re-audit.
+- **T-W7.7 `abelEnrichment_unique`** (T-A6b). Two group structures with the same zero section:
+  `id : (E,m) → (E,m')` is a pointed morphism ⇒ homomorphism (T-W7.7a) ⇒ `m = m'`. Works over
+  **arbitrary** `S` (rigidity needs no normality — unlike FC 2.7). **Deferrable** past the
+  existence milestone.
 
 ## Dependency graph & parallelism
 
 ```
 DONE: affine cocycle, LocallyWeierstrass, projModel(Zero/BaseChange), universalEllipticCurve
   │
-  ├── T-W7.1 negHom ──────────────┐
-  ├── T-W7.2 mulHom (2a,2b,2c) ───┤
-  │                                ├── T-W7.3 unit/inverse laws
-  │                                │
-  │        T-W7.4a rigidityLemma ──┼── T-W7.4 assoc ──┐
-  │        (⚠ needs readable src;  ├── T-W7.5 comm ───┤
-  │         maybe BB-COHBC for     │                   ├── T-W7.6 assemble → abelEnrichment_exists
-  │         p_*O = O)              └── T-W7.7 unique (parallel; also needs rigidityLemma)
+  ├── T-W7.0a atlasRing_isDomain (1-liner) ──┐
+  │                                          ├── T-W7.0b universal-atlas add group law
+  ├── T-W7.1 negHom ─────────────────────────┤       │
+  ├── T-W7.2 mulHom (2a/2b/2c) ──────────────┤       │
+  │                                          ├── T-W7.3 unit/inverse
+  │                                          ├── T-W7.4 assoc (uses 0b + base change)
+  │                                          ├── T-W7.5 comm  (uses 0b + base change)
+  │                                          └── T-W7.6 assemble → abelEnrichment_exists  [MILESTONE]
+  │
+  └── T-W7.7a rigidity (GIT §6.1; src OWED) ── T-W7.7 canonicity  [Phase III, separable/deferrable]
 ```
-- **Parallel now:** T-W7.1 ∥ T-W7.2 ∥ T-W7.4a (rigidity lemma is independent of the morphisms).
-- **Blocking:** T-W7.4/.5/.7 need T-W7.4a; T-W7.6 needs everything.
+- **Parallel now:** T-W7.0a, T-W7.1, T-W7.2 (all on DONE infra).
+- **Existence milestone (T-W7.6) does NOT depend on rigidity** — the big de-risk from the source check.
 
-## Feasibility verdict (honest)
+## Feasibility verdict (post source-check)
 
-Well-posed **modulo two owed items**: (1) a **readable rigidity source** (Faltings–Chai `.djvu`
-→ PDF, or substitute Hida GME / Katz–Mazur) — do this before T-W7.4a; (2) `p_*O_{E} = O_S`
-(T-W7.4a item i) may require **coherent-cohomology-and-base-change**, currently the BB-COHBC
-stream — if unavailable, T-W7.4a is partially gated and should be re-scoped or that sub-fact
-assumed under BB-COHBC. The morphism half (Phase I) is unblocked and rests entirely on DONE
-infrastructure (the affine cocycle) — **T-W7.1 and T-W7.2 are ready to work now**.
+- **Existence (T-W7.0–.6)** is **well-grounded on DONE infrastructure**: the atlas is an integral
+  domain, mathlib supplies the field-level group axioms, T-W5 gives `universalEllipticCurve`, and the
+  affine cocycle gives the gluing. No deep rigidity theory, no non-reduced-base polynomial identity.
+  The crux remains **T-W7.2** (building `mulHom` as a scheme morphism from the charts) — real
+  scheme-gluing work, but on solid inputs. **T-W7.0a/.1 are one-to-few-liners; start there.**
+- **Canonicity (T-W7.7)** genuinely needs the **GIT §6.1 rigidity lemma over arbitrary bases**
+  (FC 2.7 is normal-base-only). Source owed; `p_*O_E = O_S` may pull in BB-COHBC. **Separable** —
+  the existence gate can be retired first.
 
 ## Cleanup cadence
 
-New file `EllipticCurve/GroupLawConstruction.lean` (or extend GroupLaw.lean). Proof tickets
-T-W7.1, .2, .3, .4, .5, .6, .7 → insert `[CLEANUP-W7-1]` after T-W7.3, `[CLEANUP-W7-2]` (final,
-after T-W7.6/.7), and `[CLEANUP-ALL-W7]` before T-W7.6 (milestone: retires the T-A6 gate).
+New file `EllipticCurve/GroupLawConstruction.lean`. `[CLEANUP-W7-1]` after T-W7.3;
+`[CLEANUP-ALL-W7]` before T-W7.6 (milestone); `[CLEANUP-W7-2]` final after T-W7.6; T-W7.7 (Phase III)
+gets its own final cleanup when it lands.

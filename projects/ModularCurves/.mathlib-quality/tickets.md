@@ -4516,7 +4516,24 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   construct `GrpObj (Over.mk π)` = discharge `abelEnrichment_exists` (GroupLaw.lean:74); everything
   else (`mulBy`/[N], `pointAddCommGroup`, `baseChange`) is already derived from the `grp` field. On
   the critical path (owner directive: only BB-RR assumed). Full decomposition +
-  Lean-skeleton design + source status in **`.mathlib-quality/tw7-plan.md`**. Sub-tickets below.
+  Lean-skeleton design + source status in **`.mathlib-quality/tw7-plan.md`**. **ROUTE CORRECTED
+  after reading Faltings–Chai I (`.djvu`→`refs/…/faltings-chai-degeneration.pdf`):** FC I.1.1
+  *defines* an abelian scheme AS a group scheme (smooth/proper/connected) — rigidity does NOT prove
+  associativity of a constructed `mul`; FC 2.7's homomorphism-extension needs S *normal* (not the
+  moduli non-reduced case). Existence axioms instead go via **reduce-to-universal-integral-atlas +
+  base change** (mathlib field-level `Affine.Point.instAddCommGroup` over `Frac R`, `R↪K`, density);
+  rigidity (GIT §6.1) is used ONLY for canonicity (T-W7.7). Sub-tickets below.
+
+- **[T-W7.0a] `atlasRing_isDomain`** — `instance : IsDomain WeierstrassAtlasRing` (`Localization.Away
+  Δ` of the domain `MvPolynomial (Fin 5) ℤ`). **One-liner, READY NOW.** Load-bearing for the
+  `R ↪ Frac R` route. **Depends**: none · **Type**: instance.
+
+- **[T-W7.0b] universal-atlas affine group law over `R`** — the `addX`/`addY` formulas on
+  `universalWeierstrassLoc` satisfy `add_assoc`/`add_comm` on the non-degenerate locus, imported from
+  mathlib's field-level `Affine.Point.instAddCommGroup` over `Frac WeierstrassAtlasRing` via `R↪Frac R`
+  (rational-function-identity transfer). **Depends**: T-W7.0a · **Sources**:
+  `WeierstrassCurve.Affine.Point.instAddCommGroup` (mathlib, field); Silverman III.3 · **Type**:
+  lemmas. Substrate for T-W7.4/.5.
 
 - **[T-W7.1] `negHom`** — the negation morphism `E ⟶ E` over `S`. **Statement**: `def negHom
   (G : EllipticCurveGeom S) : G.E ⟶ G.E` + `negHom_π : negHom ≫ G.π = G.π`, `negHom_zero :
@@ -4539,36 +4556,39 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `negHom` two-sided inverse for `mulHom`. **Sketch**: affine identities at `O` (`add_zero`,
   `add_left_neg`) + gluing. **Depends**: T-W7.1, T-W7.2 · **Type**: 3 lemmas.
 
-- **[T-W7.4a] `rigidityLemma`** (heaviest new AG lemma). **Statement**: for `p : X ⟶ S` proper
-  flat with `p_*O_X = O_S` + section `e`, and `f : X ×_S Y ⟶ Z` constant along the `e`-axis, `f`
-  factors through `X ×_S Y ⟶ Y`. **Sources**: **Faltings–Chai I** (⚠ `.djvu`, unreadable by
-  tools — CONVERT TO PDF or substitute **Hida GME ch.2 / Katz–Mazur 2.1** before working) /
-  **Mumford GIT §6.1**. Likely internal: sub-fact `p_*O_E = O_S` for `E/S` may need
-  **BB-COHBC** (coherent cohomology & base change) — re-audit; if unavailable, partially gated.
-  **Lane**: A · **Depends**: readable rigidity source (OWED); possibly BB-COHBC · **Type**:
-  theorem (+ sub-tree). **PARALLEL** with T-W7.1/.2. **BLOCKS** T-W7.4/.5/.7.
+- **[T-W7.4] `mulHom_assoc`** — associativity as a morphism identity over an ARBITRARY base, via
+  **reduce-to-universal + base change** (NOT rigidity). **Sketch**: holds over the universal atlas
+  `E_U` (T-W7.0b: `R↪Frac R` transfers the field-level `add_assoc`; degenerate locus by density on
+  the integral `E_U³`), then every `EllipticCurveGeom` is *locally* a base change of `E_U`, so
+  `mulHom` is locally a base change of `E_U`'s associative `mulHom` — associativity is a morphism
+  identity checkable on the open cover. **Depends**: T-W7.2, T-W7.3, T-W7.0b · **Sources**: Silverman
+  III.3; `Affine.Point.instAddCommGroup` (mathlib). No rigidity; no `ℤ[ε]` polynomial identity.
 
-- **[T-W7.4] `mulHom_assoc`** — associativity as a morphism identity over an ARBITRARY base. **Sketch**:
-  the two associators `E×_S E×_S E ⟶ E` agree on every geometric fibre (mathlib affine
-  associativity, field-level) and are pointed ⇒ **rigidity (T-W7.4a) forces equality over all `S`,
-  incl. non-reduced** (the whole reason for the rigidity route — never re-prove the polynomial
-  identity over `ℤ[ε]`). **Depends**: T-W7.2, T-W7.3, T-W7.4a · **Sources**: Faltings–Chai I;
-  mathlib `Affine.Point.instAddCommGroup` (fibrewise assoc).
-
-- **[T-W7.5] `mulHom_comm`** — `mul ∘ swap = mul` via rigidity (proper connected-fibre group scheme
-  is commutative). **Depends**: T-W7.2, T-W7.4a · **Type**: 1 lemma.
+- **[T-W7.5] `mulHom_comm`** — `mul ∘ swap = mul`, same reduce-to-universal route (`add_comm` over
+  `Frac R` + density + base change). **Depends**: T-W7.2, T-W7.0b · **Type**: 1 lemma.
 
 - **[T-W7.6] assemble `grpObj` + `abelEnrichment_exists`** (MILESTONE — retires T-A6 EXISTENCE).
   Package `neg`/`mul`/`zero` + T-W7.3/.4/.5 as `MonObj`+`GrpObj`+`IsCommMonObj`; then
   `abelEnrichment_exists G := ⟨{ …, grp := grpObj G, … }, rfl⟩`. **Depends**: T-W7.1–.5 · **Type**:
-  instance + theorem (plumbing). **Preceded by** `[CLEANUP-ALL-W7]`.
+  instance + theorem (plumbing). **Preceded by** `[CLEANUP-ALL-W7]`. **Does NOT depend on rigidity**
+  (the source-check de-risk).
 
-- **[T-W7.7] `abelEnrichment_unique`** (T-A6b canonicity). Two group structures with the same zero
-  section coincide — comparison morphism is pointed ⇒ rigidity. **Depends**: T-W7.4a · **Parallel**
-  with T-W7.1–.6 · **Type**: theorem.
+- **[T-W7.7a] `rigidityLemma`** (GIT §6.1; canonicity only). **Statement**: for `p : X ⟶ S` proper
+  flat with `p_*O_X = O_S` (geom. connected fibres) + section `e`, and `f : X ×_S Y ⟶ Z` constant
+  along the `e`-axis, `f` factors through `X ×_S Y ⟶ Y`. Valid over **arbitrary** bases (unlike FC
+  2.7's normal-base extension). **Sources**: **Mumford GIT §6.1** (⚠ not in refs — reconstruct short
+  proof, or find in Katz–Mazur 2.1 / Hida GME); FC I.1.2(b) cites it. Sub-fact `p_*O_E = O_S` may
+  need **BB-COHBC** — re-audit. **Depends**: source OWED; possibly BB-COHBC · **Parallel** with
+  Phases 0–II · **Type**: theorem (+ sub-tree).
+
+- **[T-W7.7] `abelEnrichment_unique`** (T-A6b canonicity; **Phase III, separable/deferrable past the
+  existence milestone**). Two group structures with the same zero section: `id : (E,m) → (E,m')` is
+  pointed ⇒ homomorphism (T-W7.7a) ⇒ `m = m'`, over arbitrary `S`. **Depends**: T-W7.7a, T-W7.6 ·
+  **Type**: theorem.
 
 - **[CLEANUP-W7-1]** `/cleanup` GroupLawConstruction.lean (after T-W7.3). **[CLEANUP-ALL-W7]**
-  `/cleanup-all` before T-W7.6 (milestone). **[CLEANUP-W7-2]** final `/cleanup` after T-W7.6/.7.
+  `/cleanup-all` before T-W7.6 (milestone). **[CLEANUP-W7-2]** final `/cleanup` after T-W7.6; T-W7.7
+  (Phase III) gets its own final cleanup when it lands.
 
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
