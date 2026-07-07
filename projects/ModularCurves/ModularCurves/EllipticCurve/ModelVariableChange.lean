@@ -634,6 +634,102 @@ theorem projModelVCIso_mul (C C' : VariableChange R) (W : WeierstrassCurve R) :
     quotientGradingMap_mk]
   exact (mk_heq e.symm _).trans (heq_of_eq (congrArg _ (aeval_vcMvSubst_mul C C' a)))
 
+/-- **(T-W7.1b-a, Z2)** Every point of the model outside the `Z`-chart lies on the zero
+section: take the residue-field point and apply the `Spec K`-dichotomy
+(`specPoint_eq_zero_of_not_inZ`). -/
+private lemma mem_range_zero_of_not_mem_zChart {W : WeierstrassCurve R}
+    {p : projModel W} (hp : p ∉ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :
+    p ∈ Set.range (projModelZero W).base := by
+  letI algInst : Algebra R ↑((projModel W).residueField p) :=
+    ((Spec.preimage ((projModel W).fromSpecResidueField p ≫ projModelπ W)).hom).toAlgebra
+  have hcompat : (projModel W).fromSpecResidueField p ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R ↑((projModel W).residueField p))) := by
+    rw [show CommRingCat.ofHom (algebraMap R ↑((projModel W).residueField p)) =
+      Spec.preimage ((projModel W).fromSpecResidueField p ≫ projModelπ W) from rfl,
+      Spec.map_preimage]
+  obtain ⟨s₀⟩ : Nonempty (Spec (CommRingCat.of ((projModel W).residueField p))) :=
+    inferInstance
+  have hg : ¬ @InZChart R _ W ↑((projModel W).residueField p) _ algInst
+      ⟨(projModel W).fromSpecResidueField p, hcompat⟩ := by
+    rintro ⟨h, hfac⟩
+    apply hp
+    have h1 : ((projModel W).fromSpecResidueField p) s₀ =
+        (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos) (h s₀) := by
+      have hc := congrArg (fun m => m s₀) hfac.symm
+      rw [Scheme.Hom.comp_apply] at hc
+      exact hc
+    have h2 : (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos) (h s₀) ∈
+        (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange :=
+      Scheme.Hom.mem_opensRange.mpr ⟨h s₀, rfl⟩
+    rw [Proj.opensRange_awayι] at h2
+    rw [Scheme.fromSpecResidueField_apply] at h1
+    rw [h1]
+    exact h2
+  have hzero := @specPoint_eq_zero_of_not_inZ R _ W ↑((projModel W).residueField p) _ algInst
+    ⟨(projModel W).fromSpecResidueField p, hcompat⟩ hg
+  refine ⟨(Spec.map (CommRingCat.ofHom
+    (algebraMap R ↑((projModel W).residueField p)))) s₀, ?_⟩
+  have happ := congrArg (fun m => m s₀) hzero
+  rw [show (projModelZero W).base ((Spec.map (CommRingCat.ofHom
+      (algebraMap R ↑((projModel W).residueField p)))) s₀) =
+    (Spec.map (CommRingCat.ofHom (algebraMap R ↑((projModel W).residueField p))) ≫
+      projModelZero W) s₀ from rfl]
+  rw [← happ]
+  exact Scheme.fromSpecResidueField_apply p s₀
+
+/-- **(T-W7.1b-a, Z3)** The zero section misses the `Z`-chart. -/
+private lemma not_mem_zChart_of_mem_range_zero {W : WeierstrassCurve R}
+    {p : projModel W} (hp : p ∈ Set.range (projModelZero W).base) :
+    p ∉ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+  obtain ⟨y, rfl⟩ := hp
+  intro hmem
+  have h1 : y ∈ projModelZero W ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := hmem
+  rw [projModelZero_not_preimage_zChart] at h1
+  simp at h1
+
+/-- **(T-W7.1b-a, Z4)** A pointed isomorphism of models preserves the affine (`Z`-chart)
+part: the preimage of the `Z`-chart is the `Z`-chart. -/
+private lemma pointedIso_preimage_zChart {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))) =
+    Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+  have hezinv : projModelZero W' ≫ e.inv = projModelZero W := by
+    rw [← hez, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  ext p
+  constructor
+  · intro hmem
+    by_contra hp
+    obtain ⟨y, hy⟩ := mem_range_zero_of_not_mem_zChart hp
+    have h1 : e.hom.base p = (projModelZero W') y := by
+      rw [← hy, show e.hom.base ((projModelZero W) y) =
+        (projModelZero W ≫ e.hom) y from rfl, hez]
+    exact not_mem_zChart_of_mem_range_zero ⟨y, h1.symm⟩ hmem
+  · intro hmem
+    by_contra hp
+    have hp' : e.hom.base p ∉ Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) := hp
+    obtain ⟨y, hy⟩ := mem_range_zero_of_not_mem_zChart hp'
+    have h1 : p = (projModelZero W) y := by
+      have h2 : e.inv.base (e.hom.base p) = p := by
+        have := congrArg (fun m => m p) e.hom_inv_id
+        rw [Scheme.Hom.comp_apply] at this
+        exact this
+      rw [← h2, ← hy, show e.inv.base ((projModelZero W') y) =
+        (projModelZero W' ≫ e.inv) y from rfl, hezinv]
+    exact not_mem_zChart_of_mem_range_zero ⟨y, h1.symm⟩ hmem
+
 /-- **(T-W7.1b-b1, coordinator §2)** A pointed isomorphism of projective models restricts to
 the affine parts (it preserves the complement of the zero section) and hence induces an
 `R`-algebra isomorphism of the affine coordinate rings. DESIGN-DERIVED (audit A1 b1; no

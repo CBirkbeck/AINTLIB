@@ -581,6 +581,8 @@ private theorem GF.of_smul_eq_zero {R N : Type*} [CommRing R] [AddCommGroup N] [
     rw [hz a, hz b]
   infer_instance
 
+universe u
+
 /-- **The domain case, injective core** (Stacks 051R main step, GF5 heart) — *boxed*.
 
 `B` is a domain, finite type over the Noetherian domain `R`, with `R ↪ B` (so `B` is
@@ -651,15 +653,17 @@ private theorem exists_generically_free_domain [IsNoetherianRing R] [Algebra.Fin
   haveI : IsDomain (S ⧸ p) := Ideal.Quotient.isDomain p
   obtain ⟨m, ψ, hψ⟩ :=
     (Algebra.FiniteType.iff_quotient_mvPolynomial'' (R := R) (S := S ⧸ p)).mp inferInstance
-  haveI hker : (RingHom.ker ψ).IsPrime := RingHom.ker_isPrime ψ
+  haveI : (RingHom.ker ψ).IsPrime := RingHom.ker_isPrime ψ
   haveI : IsDomain (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) := Ideal.Quotient.isDomain _
+  haveI : Algebra.FiniteType R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) := inferInstance
+  have hfin : Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) < Cardinal.aleph0 :=
+    trdeg_lt_aleph0
+  have key : GF R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) :=
+    gf_of_trdeg_le (Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ)).toNat _
+      (le_of_eq (Cardinal.cast_toNat_of_lt_aleph0 hfin).symm)
   let e : (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) ≃ₐ[R] (S ⧸ p) :=
     Ideal.quotientKerAlgEquivOfSurjective hψ
-  have hGF : GF R (S ⧸ p) :=
-    GF.of_linearEquiv e.symm.toLinearEquiv
-      (gf_of_trdeg_le (Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ)).toNat _
-        (le_of_eq (Cardinal.cast_toNat_of_lt_aleph0 trdeg_lt_aleph0).symm))
-  exact GFree.of_GF hGF
+  exact GFree.of_GF (GF.of_linearEquiv e.symm.toLinearEquiv key)
 
 end Devissage
 
