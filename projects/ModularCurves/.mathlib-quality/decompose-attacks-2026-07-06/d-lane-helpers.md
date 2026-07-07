@@ -378,3 +378,50 @@ Attacks:
    [Nontrivial A].
 6. **Shadowing gotcha (hit at skeleton)** — `C` is the ambient-curve section variable
    in CartierDivisor.lean: `Polynomial.C` must be written QUALIFIED in this file.
+
+
+## T-D11 statements (beastmode-D2, 2026-07-07)
+
+### `IsOfficialCartier` (def, 2-field Prop structure)
+1. KM 1.1.1 verbatim in docstring (quote-gate ✓ p. 3). Affine-local principal-nzd form;
+   per-chart quotient-flatness repackaged as global subscheme flatness (Zariski-local,
+   equivalent given the covering). Invertible-MODULE interface excluded → T-D19 (AG-LB).
+2. ∀-points form: off-divisor points take complement charts + f = 1 (unit ideal; 1 is
+   nzd) — T-D22's own case split, so the shape is consumer-proven.
+3. NOT over-strong: no rank-1-freeness claim, no global principality.
+
+### `RelEffCartierDiv.isOfficial` (KM 1.2.3 ⇐, THE MEAT)
+1. Truth: KM 1.2.3 first statement verbatim (proof p. 8, transcribed in decomposition
+   D-curve.2). KM route = noetherian reduction (HB-NOETH) + 1.1.5.2; OUR route is
+   noetherian-FREE: (a) x ∈ D is closed in its fibre (D_s finite); fibre curve smooth
+   over k(s) ⟹ O_{C_s,x} DVR ⟹ fibre ideal principal at x [RISK 1: mathlib
+   smooth-over-field ⟹ DVR stalks — probe; fallback = T-D23 revival via étale-over-𝔸¹ +
+   T-D22 toolkit]; (b) I fg (lfp closed immersion by cancellation vs smooth π) + lift
+   fibre generator + Nakayama at O_x (m_s ⊆ m_x) + fg-support-spreading ⟹ I = (f) on a
+   basicOpen [unconditional]; injectivity I⊗k(s) ↪ A⊗k(s) from S-flatness of A/I
+   (Tor₁(A/I,k) = 0, KM 1.1.5.2's first-terms comparison); (c) f nzd: f̄ is fibrewise-nzd
+   at EVERY point of the shrunken chart (I⊗k(s') = (f̄_{s'}) cuts the finite D_{s'} in a
+   PURE-1-dim smooth fibre curve ⟹ nzd ∀ s'), then fibrewise-nzd + flat + fp ⟹ nzd =
+   the SLICING CRITERION (EGA IV 11.3.7 / crit. de platitude par fibres, nzd part)
+   [RISK 2 = the plan's own T-FLAT1/HB-FIBCRIT gap: probe mathlib; if absent, isolate as
+   ONE private lemma and REGISTER it as the T-FLAT1 box — do not silently weaken].
+   Tor-chase for (c) with J := ker(×f): J⊗k ↪ A⊗k needs Tor₁(fA,k) = 0 ⟸ Tor₂(A/f,k)=0
+   — fine — but J = ker is NOT fg, so J⊗κ = 0 ∀κ does NOT give J = 0 without fp
+   approximation: this is WHY (c) is genuinely the slicing lemma, not a 5-liner.
+2. Adversarial: smoothness necessary? Over a nodal curve the working form contains
+   non-Cartier examples (ideal of the node in a flat family) — smooth hypothesis is
+   load-bearing ✓. Separatedness: probably droppable (generalise-lane note; KM ambient
+   includes it — kept to match).
+3. n-vs-0 degenerate: D empty near x — case handled by the off-support chart (unit
+   ideal), no DVR needed there.
+
+### `IsOfficialCartier.locallyOfFinitePresentation` / `.isFinite` / `.toRelEffCartierDiv`
+1. lfp: principal ⟹ fg ideal ⟹ fp closed immersion (Algebra.FinitePresentation.quotient)
+   + π lfp from hsm + composition. Plumbing-only risk (HasRingHomProperty appLE).
+2. isFinite: ZMT — probe exact mathlib name (decomposition says
+   `IsFinite.of_isProper_of_locallyQuasiFinite` PRESENT); locally-quasi-finite from
+   fibre-finiteness of V(nzd) in a smooth affine curve over a field [RISK: dim-0 +
+   finite-type ⟹ finite — if heavy, park this leg with note per claim; the def
+   `toRelEffCartierDiv` then stays sorried-via-leg and is reported as such].
+3. toRelEffCartierDiv: pure assembly of the three legs (one-liner fields) ✓ sorry-free
+   modulo legs.
