@@ -683,6 +683,83 @@ instance : PreGaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ where
 
 end PreGalois
 
+/-! The tensor product is the binary coproduct of finite étale algebras (used to
+transport group structures through the Galois correspondence, T-F1c). -/
+
+section TensorCoproduct
+
+variable {k : Type u} [Field k]
+
+variable (A B : CommAlgCat.FiniteEtale.{u} k)
+
+instance : Algebra.Etale k ((A : Type u) ⊗[k] (B : Type u)) := by
+  haveI h1 : Algebra.Etale (A : Type u) ((A : Type u) ⊗[k] (B : Type u)) :=
+    Algebra.Etale.baseChange k (B : Type u) (A : Type u)
+  exact Algebra.Etale.comp k (A : Type u) ((A : Type u) ⊗[k] (B : Type u))
+
+instance : Module.Finite k ((A : Type u) ⊗[k] (B : Type u)) := by
+  haveI : Module.Finite (A : Type u) ((A : Type u) ⊗[k] (B : Type u)) :=
+    inferInstance
+  exact Module.Finite.trans (A : Type u) ((A : Type u) ⊗[k] (B : Type u))
+
+/-- The tensor product of two finite étale algebras, as an object. -/
+noncomputable def tensorObj : CommAlgCat.FiniteEtale.{u} k :=
+  CommAlgCat.FiniteEtale.of k ((A : Type u) ⊗[k] (B : Type u))
+
+/-- The coproduct cofan on the tensor product. -/
+noncomputable def tensorBinaryCofan : BinaryCofan A B :=
+  BinaryCofan.mk
+    (ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeLeft (R := k) (S := k) :
+        (A : Type u) →ₐ[k] (A : Type u) ⊗[k] (B : Type u))) :
+      A ⟶ tensorObj A B)
+    (ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeRight (R := k) :
+        (B : Type u) →ₐ[k] (A : Type u) ⊗[k] (B : Type u))))
+
+/-- The tensor product is the binary coproduct of finite étale algebras. -/
+noncomputable def tensorBinaryCofanIsColimit :
+    IsColimit (tensorBinaryCofan A B) := by
+  refine BinaryCofan.isColimitMk
+    (fun s => ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.productMap s.inl.hom.hom s.inr.hom.hom)))
+    (fun s => ?_) (fun s => ?_) (fun s m h₁ h₂ => ?_)
+  · ext a
+    exact Algebra.TensorProduct.productMap_left_apply _ _ a
+  · ext b
+    exact Algebra.TensorProduct.productMap_right_apply _ _ b
+  · have hml : ∀ a : (A : Type u), m.hom.hom (a ⊗ₜ[k] 1) = s.inl.hom.hom a :=
+      fun a => congrArg (fun q : A ⟶ s.pt => q.hom.hom a) h₁
+    have hmr : ∀ b : (B : Type u), m.hom.hom ((1 : (A : Type u)) ⊗ₜ[k] b) =
+        s.inr.hom.hom b :=
+      fun b => congrArg (fun q : B ⟶ s.pt => q.hom.hom b) h₂
+    ext x
+    show m.hom.hom x = Algebra.TensorProduct.productMap s.inl.hom.hom s.inr.hom.hom x
+    induction x using TensorProduct.induction_on with
+    | zero => exact (map_zero _).trans (map_zero _).symm
+    | tmul a b =>
+      have hsplit : (a ⊗ₜ[k] b : (A : Type u) ⊗[k] (B : Type u)) =
+          (a ⊗ₜ[k] 1) * ((1 : (A : Type u)) ⊗ₜ[k] b) := by
+        rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+      calc m.hom.hom (a ⊗ₜ[k] b)
+          = m.hom.hom ((a ⊗ₜ[k] 1) * ((1 : (A : Type u)) ⊗ₜ[k] b)) :=
+            congrArg m.hom.hom hsplit
+        _ = m.hom.hom (a ⊗ₜ[k] 1) * m.hom.hom ((1 : (A : Type u)) ⊗ₜ[k] b) :=
+            map_mul m.hom.hom _ _
+        _ = Algebra.TensorProduct.productMap s.inl.hom.hom s.inr.hom.hom (a ⊗ₜ[k] b) := by
+            rw [hml a, hmr b]
+            exact (Algebra.TensorProduct.productMap_apply_tmul _ _ a b).symm
+    | add x y hx hy =>
+      exact (map_add _ x y).trans
+        ((congrArg₂ (· + ·) hx hy).trans (map_add _ x y).symm)
+
+/-- The op of the tensor cofan is a binary product fan in `(FiniteEtale k)ᵒᵖ`. -/
+noncomputable def tensorBinaryFanOpIsLimit :
+    IsLimit ((tensorBinaryCofan A B).op) :=
+  BinaryCofan.IsColimit.op (tensorBinaryCofanIsColimit A B)
+
+end TensorCoproduct
+
 end FiniteEtaleGalois
 
 end ModularCurves
