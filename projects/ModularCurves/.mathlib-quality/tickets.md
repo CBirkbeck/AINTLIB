@@ -2592,7 +2592,31 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     H¹-vanishing. (iv) then finite = affine + module-finite (filtration
     algebra), flat/lfp via the KM 1.1.2 SES + extension-stability
     (Flat-of-extension may be missing in mathlib = T-D3a′ — check
-    Module.Flat.extension/of_shortExact at build), rank via T-D24. [T-D24] finrank additivity in SES of finite free modules (local + glue).
+    Module.Flat.extension/of_shortExact at build), rank via T-D24.
+  - **Progress**: 2026-07-07T02:20Z — **[Box-2] = T-D22-PROPER FULLY PROVEN**
+    (delegated, outcome (1)): `exists_affineOpen_ker_principal_nonZeroDivisor`
+    (CartierDivisor.lean:754, 13 kerPrincipalAux privates) — AXIOM-CLEAN
+    (standard three, NO register-box consumption), both CartierDivisor and
+    downstream Incidence green. ROUTE OF RECORD: off-section via
+    `Hom.support_ker`; on-section: SmoothOfRelativeDimension's DEFINITION
+    hands standard-smooth charts directly (no Locally-elimination!); one
+    basicOpen zigzag makes the retraction pair with `z⁻¹V = U` forced;
+    principality = hand-rolled conormal (explicit f with σ(κf)=1 via
+    span_range_derivation-induction; I ≤ (f) ⊔ I•I via a derivation into
+    A⧸I•I lifted by liftKaehlerDifferential; `ker_fG_of_surjective` +
+    Nakayama `exists_sub_one_mem_and_smul_le_of_fg_of_le_sup`; final open
+    D(r)). NZD LEG (novel, NO noetherian descent): on A[1/κf], df generates
+    Ω ⟹ Ω[A'/R[X]] = 0 (X ↦ f) ⟹ Jacobi–Zariski (H1Cotangent.exact_map_δ +
+    IsStandardSmooth.subsingleton_h1Cotangent) ⟹ A' formally smooth over
+    R[X] ⟹ smooth ⟹ FLAT ⟹ X-torsion-free ⟹ f regular; descend by the
+    gⁿ-binomial trick. GOTCHAS: Localization carries the R-tower via
+    OreLocalization — own letI Algebra creates SMul DIAMONDS (the
+    of_algebraMap_eq'-mismatch is the tell); `(𝟙 S).appLE U U e =
+    presheaf.map (𝟙 (op U))` by rfl (structure-eta) beats TopCat-synonym rw
+    failures; new imports: Etale.Kaehler, Flat.TorsionFree, Kaehler.Basic/
+    Polynomial, Nakayama, Smooth.Flat, Smooth.StandardSmoothCotangent.
+    REMAINING = [Box-1] only (the four sectionsIdeal boxes via the refined
+    (i)-(iv) route above, now with T-D22's principality as proven input). [T-D24] finrank additivity in SES of finite free modules (local + glue).
   - **[T-D24] Status**: done (beastmode-D2, 2026-07-06T12:30Z → 2026-07-06T13:20Z) ·
     NEW ForMathlib/FinrankExact.lean, sorry-free, standard axioms ×3, zero
     warnings. Delivered (statements per the claim-time package, attack block in
