@@ -2616,7 +2616,31 @@ via the classical fibre formula (C.3). KM 2.8 remains a reconciliation item only
     failures; new imports: Etale.Kaehler, Flat.TorsionFree, Kaehler.Basic/
     Polynomial, Nakayama, Smooth.Flat, Smooth.StandardSmoothCotangent.
     REMAINING = [Box-1] only (the four sectionsIdeal boxes via the refined
-    (i)-(iv) route above, now with T-D22's principality as proven input). [T-D24] finrank additivity in SES of finite free modules (local + glue).
+    (i)-(iv) route above, now with T-D22's principality as proven input).
+  - **Status**: done (beastmode-D2, 2026-07-07T00:40Z → 2026-07-07T03:30Z) —
+    **[Box-1] FULL DISCHARGE**: all four `sectionsIdeal_*` boxes PROVED
+    axiom-clean (delegated; +612 lines CartierDivisor, NEW
+    ForMathlib/SheafDisjointUnion.lean). ROUTE OF RECORD — the banked
+    union/thickening machinery was AVOIDED entirely via DISJOINTIFICATION:
+    sections through distinct fibre points are separated by shrinking CHARTS
+    into complements of the other sections' closed images (π(c) = s forces
+    collisions); per-fibre-value groups get merged T-D22-charts
+    (`exists_basicOpen_le_affine_inter` + principality/nzd descent along
+    map_ideal_basicOpen + `IsLocalization.map_nonZeroDivisors_le`); the pieces
+    are pairwise-disjoint affines covering q⁻¹U ⟹ affine by mathlib's
+    **`IsAffineOpen.iSup_of_disjoint`** (exists!). Module leg: KM 1.1.2
+    filtration with SPLIT SESs (A/(f) ≅ R free ⟹ T-D24's split lemma) ⟹
+    Γ(X, q⁻¹U) ≃ₗ R^n via the new sheaf-disjoint-union product lemma +
+    card_eq_sum_card_fiberwise. Boxes via IsZariskiLocalAtTarget.of_iSup_eq_top
+    + `Scheme.Opens.toSpecΓ_naturality`-pullback transport (NO appTop/resLE
+    juggling); `Algebra.FinitePresentation.of_finitePresentation` (module-fp ⟹
+    algebra-fp, EXISTS) closes lfp. AXIOM STATE OF THE CHAIN (verified):
+    sectionsDivisor/sectionsDivisor_degree/sectionsIdeal_* /
+    exists_exactOrderLocus (T-D17!) all STANDARD THREE; exists_fullLevelLocus
+    (T-D18) sorryAx only through T-B4's KM 2.3.1 boxes (B-lane: BB-QF/BB-FLAT/
+    BB-DEG) — the D-lane's own debt is ZERO. GOTCHAS: bind data with `set` not
+    `have` (defeq loss); doc-comments can't sit between `open … in` and decl;
+    Hom.ker_apply needs [QuasiCompact]. T-D23 (DVR) never needed — absorbed. [T-D24] finrank additivity in SES of finite free modules (local + glue).
   - **[T-D24] Status**: done (beastmode-D2, 2026-07-06T12:30Z → 2026-07-06T13:20Z) ·
     NEW ForMathlib/FinrankExact.lean, sorry-free, standard axioms ×3, zero
     warnings. Delivered (statements per the claim-time package, attack block in
