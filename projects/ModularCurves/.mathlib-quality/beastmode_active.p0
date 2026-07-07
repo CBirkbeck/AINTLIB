@@ -1,1 +1,1 @@
-FOCUS: T-W7.0b (P0) — _π DONE+committed (7ddc51b6). Now negModelHom_zero: build (N) fromOfGlobalSections≫Proj.map naturality + (rho) Proj.map unit-rescaling=id, in ForMathlib
+FOCUS: T-W7.0b (P0) — negModelHom_zero PROVED+committed (swept into HEAD, axiom-clean); ForMathlib N-lemma (9bae1c62) + rho=id (f32dbc1e) landed. Now FINAL decl negModelHom_specPoints — unblocked by P2 dictionary (projModelPointsEquiv_zero/_some); split on InZChart, Z-chart=negY, infinity=negModelHom_zero

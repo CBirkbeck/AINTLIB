@@ -1940,6 +1940,139 @@ private lemma sections_ext (W : WeierstrassCurve R) (s t : Γ(projModel W, ⊤))
   · exact h₂
 
 
+/-- Elementwise structure square: the value of the canonical composite on `r`. -/
+private lemma structure_section_square_apply (W : WeierstrassCurve R) {m : ℕ}
+    (F : MvPolynomial (Fin 3) R ⧸ (projIdeal W).toIdeal)
+    (F_deg : F ∈ quotientGrading (projIdeal W) m) (hm : 0 < m) (r : R) :
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W)) F F_deg hm).inv).hom
+      (((projModel W).presheaf.map (homOfLE le_top).op).hom
+        (((projModelπ W).appTop).hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom r))) =
+    (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+      (Submonoid.powers F)) ((algebraMapGradeZero (projIdeal W)) r) := by
+  have h := congrArg (fun φ => CommRingCat.Hom.hom φ r)
+    (structure_section_square W F F_deg hm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+  exact h
+
+/-- Elementwise `awayMap`-restriction square, chart-`1` side. -/
+private lemma awayIso_res_squareY (W : WeierstrassCurve R)
+    (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) :
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+          (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv).hom
+      (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ _ _
+        ⟨_, rfl⟩)).op).hom u) =
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2)
+      (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom u) := by
+  have hsq := Proj.awayMap_awayToSection (𝒜 := quotientGrading (projIdeal W))
+    (f := (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (g_deg := mk_X_mem_quotientGrading_one W 2)
+    (hx := rfl)
+  have h := congrArg (fun φ => CommRingCat.Hom.hom φ
+    (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom u)) hsq
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+  have hcancel : (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom u) = u := by
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ u)
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv_hom_id)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at this
+    exact this
+  rw [hcancel] at h
+  rw [← h]
+  have := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2)
+      (rfl : (quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2) = _))
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).inv).hom u)))
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).hom_inv_id)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at this
+  exact this
+
+/-- Elementwise `awayMap`-restriction square, chart-`2` side. -/
+private lemma awayIso_res_squareZ (W : WeierstrassCurve R)
+    (u : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+          (mk_X_mem_quotientGrading_one W 2)) (by omega)).inv).hom
+      (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ _ _
+        ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op).hom u) =
+    (HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom u) := by
+  have hsq := Proj.awayMap_awayToSection (𝒜 := quotientGrading (projIdeal W))
+    (f := (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (g_deg := mk_X_mem_quotientGrading_one W 1)
+    (hx := mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+  have h := congrArg (fun φ => CommRingCat.Hom.hom φ
+    (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom u)) hsq
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+  have hcancel : (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).hom
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom u) = u := by
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ u)
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv_hom_id)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at this
+    exact this
+  rw [hcancel] at h
+  rw [← h]
+  have := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((HomogeneousLocalization.awayMap (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1)
+      (mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      (((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv).hom u)))
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)).hom_inv_id)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at this
+  exact this
+
 /-- **(T-W7.0i·i3, decl `projModel_globalSections_eq_baseRing`)** The global sections of the
 projective Weierstrass model are exactly the base ring, for **every** commutative ring `R`:
 the canonical map `R = Γ(Spec R, ⊤) ⟶ Γ(projModel W, ⊤)` is an isomorphism. Universality for
