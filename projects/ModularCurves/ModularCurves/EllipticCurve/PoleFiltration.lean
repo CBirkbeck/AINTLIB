@@ -573,27 +573,23 @@ lemma infChart_t_nonZeroDivisor (W : WeierstrassCurve R) :
     rw [ht]
     exact infChart_t_mem_nonZeroDivisors W
 
-/-- **(T-W7.0i-b3-1)** The `Y`-chart and `Z`-chart opens cover the model: the complement of
-the `Z`-chart is the zero section, which lies in the `Y`-chart. (Two charts suffice for the
-global-sections equalizer — single overlap.) Source: audit A3. -/
-theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
-    ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange ⊔
-      ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange = ⊤ := by
-  have hr1 : ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange =
+/-- The chart opens of the model are the `basicOpen`s of the coordinate classes. -/
+lemma chartOpensRange_eq_basicOpen (W : WeierstrassCurve R) (j : Fin 3) :
+    ((modelChartCover W).openCover.f j).opensRange =
       Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) := by
-    show (Proj.awayι (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).opensRange = _
-    exact Proj.opensRange_awayι _ _ _ _
-  have hr2 : ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange =
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) := by
+  show (Proj.awayι (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))
+    (mk_X_mem_quotientGrading_one W j) one_pos).opensRange = _
+  exact Proj.opensRange_awayι _ _ _ _
+
+/-- **(T-W7.0i-b3-1, `basicOpen` form)** The `Y`- and `Z`-coordinate basic opens cover. -/
+theorem basicOpen_X1_sup_basicOpen_X2_eq_top (W : WeierstrassCurve R) :
+    Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) ⊔
       Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
-    show (Proj.awayι (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-      (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange = _
-    exact Proj.opensRange_awayι _ _ _ _
-  rw [hr1, hr2, _root_.eq_top_iff]
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) = ⊤ := by
+  rw [_root_.eq_top_iff]
   rintro x -
   rw [TopologicalSpace.Opens.mem_sup]
   by_contra hcon
@@ -646,6 +642,50 @@ theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
   · exact h0
   · exact h1
   · exact h2
+
+/-- **(T-W7.0i-b3-1)** The `Y`-chart and `Z`-chart opens cover the model: the complement of
+the `Z`-chart is the zero section, which lies in the `Y`-chart. (Two charts suffice for the
+global-sections equalizer — single overlap.) Source: audit A3. -/
+theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
+    ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange ⊔
+      ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange = ⊤ := by
+  rw [chartOpensRange_eq_basicOpen, chartOpensRange_eq_basicOpen]
+  exact basicOpen_X1_sup_basicOpen_X2_eq_top W
+
+/-- **(the `Γ`-bridge, ForMathlib-grade)** For a positive-degree homogeneous `f`, the
+global-sections map of `awayι` is restriction to the basic open followed by the canonical
+`awayToSection`-inverse: `Γ(awayι) ≫ ΓSpec = res ≫ (A_f)₀-identification`. -/
+private lemma Proj_awayι_appTop_ΓSpecIso {R₀ A : Type u} [CommRing R₀] [CommRing A]
+    [Algebra R₀ A] (𝒜 : ℕ → Submodule R₀ A) [GradedAlgebra 𝒜]
+    {m : ℕ} (f : A) (f_deg : f ∈ 𝒜 m) (hm : 0 < m) :
+    (Proj.awayι 𝒜 f f_deg hm).appTop ≫
+      (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away 𝒜 f))).hom =
+    (Proj 𝒜).presheaf.map (homOfLE le_top).op ≫
+      (Proj.basicOpenIsoAway 𝒜 f f_deg hm).inv := by
+  rw [Iso.eq_comp_inv, Category.assoc]
+  have hσ : (Proj.basicOpenIsoAway 𝒜 f f_deg hm).hom = Proj.awayToSection 𝒜 f := rfl
+  rw [hσ]
+  have hhomTop : (Proj.basicOpenToSpec 𝒜 f).appTop ≫
+      (Proj.basicOpen 𝒜 f).topIso.hom =
+      (Scheme.ΓSpecIso _).hom ≫ Proj.awayToSection 𝒜 f := by
+    rw [show (Proj.basicOpenToSpec 𝒜 f).appTop =
+      (Proj.basicOpenToSpec 𝒜 f).app ⊤ from rfl]
+    rw [Proj.basicOpenToSpec_app_top, Category.assoc, Category.assoc,
+      Iso.inv_hom_id, Category.comp_id]
+  rw [← hhomTop]
+  rw [← Proj.basicOpenIsoSpec_inv_ι 𝒜 f f_deg hm]
+  rw [Scheme.Hom.comp_appTop, Category.assoc]
+  rw [show Proj.basicOpenToSpec 𝒜 f =
+    (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).hom from rfl]
+  rw [← Category.assoc ((Proj.basicOpenIsoSpec 𝒜 f f_deg hm).inv.appTop)]
+  rw [show (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).inv.appTop ≫
+      (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).hom.appTop = 𝟙 _ from by
+    rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id]
+    simp]
+  rw [Category.id_comp, Scheme.Opens.ι_appTop, Scheme.Opens.topIso_hom]
+  refine ((Proj 𝒜).presheaf.map_comp _ _).symm.trans
+    (congrArg ((Proj 𝒜).presheaf.map) ?_)
+  exact Quiver.Hom.unop_inj (Subsingleton.elim _ _)
 
 /-- Sections over a chart open are the chart's degree-zero localization: open-immersion
 `Γ`-comparison (`appIso` at `⊤`) composed with `ΓSpecIso`. -/
