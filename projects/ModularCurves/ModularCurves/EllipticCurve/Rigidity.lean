@@ -1420,15 +1420,53 @@ theorem isMonHom_of_one_comp_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
     _ = MonoidalCategory.tensorHom f f ≫ μ[G] := by
         congr 1
 
+/-- **(T-W7.7·C4conn, GIT Cor 6.6 over a connected base, PROVEN modulo r-supply)**
+Canonicity of the group law over a connected locally noetherian base. The two units are
+both the zero section (`one_eq_zero`); C3 applied to `𝟙` (viewed from the `grp`-structure
+into the `grp'`-structure, pointed by the unit agreement) gives `μ = μ'`; `MonObj.ext`
+(the unit is determined by the multiplication) and `GrpObj.ext` (the inverse is
+determined) close the structure equality, with the `Prop` fields definitionally
+proof-irrelevant. Consumes `EllipticCurveGeom.universallyOConnected` (T-W7.r-supply,
+gated on P3's i5). -/
+theorem abelEnrichment_unique_of_connectedSpace {S : Scheme.{u}}
+    [IsLocallyNoetherian S] (hconn : ConnectedSpace S) (E E' : EllipticCurve S)
+    (h : E.toEllipticCurveGeom = E'.toEllipticCurveGeom) : E = E' := by
+  obtain ⟨geom, grp, comm, hone⟩ := E
+  obtain ⟨geom', grp', comm', hone'⟩ := E'
+  obtain rfl : geom = geom' := h
+  -- the two units agree: both are the zero section
+  have honeeq : (letI := grp; (η[Over.mk geom.π] : 𝟙_ (Over S) ⟶ Over.mk geom.π))
+      = (letI := grp'; (η[Over.mk geom.π] : 𝟙_ (Over S) ⟶ Over.mk geom.π)) := by
+    apply Over.OverMorphism.ext
+    rw [hone, hone']
+  -- the two multiplications agree: GIT 6.4 applied to the identity
+  have hmul : (letI := grp; (μ[Over.mk geom.π] : Over.mk geom.π ⊗ Over.mk geom.π ⟶ _))
+      = (letI := grp'; (μ[Over.mk geom.π] : Over.mk geom.π ⊗ Over.mk geom.π ⟶ _)) := by
+    haveI : Smooth geom.π := SmoothOfRelativeDimension.smooth (n := 1) (f := geom.π)
+    haveI hP : IsProper (Over.mk geom.π).hom := inferInstanceAs (IsProper geom.π)
+    haveI hFl : Flat (Over.mk geom.π).hom := inferInstanceAs (Flat geom.π)
+    haveI hSep : IsSeparated (Over.mk geom.π).hom := inferInstanceAs (IsSeparated geom.π)
+    have h64 := @isMonHom_of_one_comp_eq S _ hconn (Over.mk geom.π) (Over.mk geom.π)
+      grp grp' hP hFl geom.universallyOConnected hSep (𝟙 _)
+      (by rw [Category.comp_id]; exact honeeq)
+    simpa using h64
+  obtain rfl : grp = grp' := GrpObj.ext _ _ (MonObj.ext _ _ hmul)
+  rfl
+
 /-- **(T-W7.7 = T-W7b, GIT Cor 6.6)** Canonicity of the group law over a locally noetherian
-base: two working records with the same geometry are equal. Proof: apply the pointed-implies-
-homomorphism corollary to the identity morphism, with the two group structures on domain and
-codomain ("Apply Corollary 6.4 to `1_X`, with 2 different group laws considered on domain and
-image" — GIT p. 117, verbatim). The unrestricted-base statement (`abelEnrichment_unique`)
-additionally needs EGA IV §8 spreading-out — ticket T-W7.8, off this path. -/
+base: two working records with the same geometry are equal ("Apply Corollary 6.4 to `1_X`,
+with 2 different group laws considered on domain and image" — GIT p. 117, verbatim). The
+connected case is `abelEnrichment_unique_of_connectedSpace`; the unrestricted-base statement
+(`abelEnrichment_unique`) additionally needs EGA IV §8 spreading-out — ticket T-W7.8, off
+this path. -/
 theorem abelEnrichment_unique_of_isLocallyNoetherian {S : Scheme.{u}}
     [IsLocallyNoetherian S] (E E' : EllipticCurve S)
     (h : E.toEllipticCurveGeom = E'.toEllipticCurveGeom) : E = E' := by
+  -- (T-W7.7·C4glue — SORRIED LEAF) componentwise reduction: `S` locally noetherian is
+  -- locally connected, so its connected components are clopen; restrict both records to
+  -- each component (base change of the group objects along the open immersion), apply
+  -- `abelEnrichment_unique_of_connectedSpace` there, and glue the morphism equalities
+  -- `μ = μ'`, `η = η'` along the open cover of the total spaces.
   sorry
 
 end ModularCurves
