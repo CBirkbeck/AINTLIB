@@ -1,1 +1,1 @@
-FOCUS: T-W7.0f-val — WeierstrassModel: inZChart pred + projModelZero_not_preimage_zChart (analog yChart, eval X2=0) + projModelZero_not_inZ + explicit projModelPointsEquivEll (no swap) + _zero/_some/_infinity; then alias in canonical PD
+FOCUS: P2 lane COMPLETE (0e port/dedup, 0f-val, 0g-ext hom_ext all axiom-clean; canonical PointsDictionary SORRY-FREE). Assessing next dispatchable non-crossing work.

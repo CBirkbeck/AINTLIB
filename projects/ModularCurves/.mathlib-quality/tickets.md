@@ -4949,8 +4949,15 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `chartY_sup_chartZ_eq_top`, `chartYSectionsEquiv`, `chartZSectionsEquiv`
   (PoleFiltration.lean; overlap-sections equiv folded into b4's `overlapMap` route);
   `objSupIsoProdEqLocus` remains the discharge tool for i3's assembly.
-  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T06:55Z · **Parent**:
-    T-W7.0i-b · **Depends**: T-W7.0i-b1 (done) · **Type**: 3 decls + assembly
+  - **Status**: done (beastmode-A 2026-07-07; axiom-clean) · **Claimed**: beastmode-A,
+    2026-07-07T06:55Z · **Parent**: T-W7.0i-b · **Depends**: T-W7.0i-b1 (done) ·
+    **Type**: 3 decls + assembly
+  - **Progress**: all 3 PROVEN. `chartY_sup_chartZ_eq_top`: prime containing mk X₁ and
+    mk X₂ contains mk X₀³ (explicit Weierstrass grouping) hence mk X₀ hence the
+    irrelevant ideal — contradicts relevance; opensRange via show-recast to `awayι` +
+    `Proj.opensRange_awayι` (instance-transparency-safe). `chartSectionsIso` (new
+    private): Γ(model, chart-range) ≅ chart ring by `image_top_eq_opensRange` eqToIso +
+    `appIso ⊤` + `ΓSpecIso`. `chartY/ZSectionsEquiv` := that ∘ `chartCoordEquiv.symm`.
 
 - **[T-W7.0i-b4]** the algebraic equalizer core — SKELETON LANDED 2026-07-07T14:15Z per coordinator §2:
   `chartZAffineEquiv` (Z-chart ≃ mathlib CoordinateRing), `overlapMap` (x ↦ s/t, y ↦ 1/t)

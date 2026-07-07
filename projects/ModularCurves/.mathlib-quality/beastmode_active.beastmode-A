@@ -1,1 +1,1 @@
-FOCUS: T-W7.0i-b4 DONE (overlap_pair_eq_baseRing PROVEN, axiom-clean). Next: T-W7.0i-b3 (chartY_sup_chartZ_eq_top + section equivs) then i3 assembly
+FOCUS: T-W7.0i-b3 DONE (cover + both section equivs proven). Next: i3 projModel_globalSections_eq_baseRing assembly (objSupIsoProdEqLocus route)

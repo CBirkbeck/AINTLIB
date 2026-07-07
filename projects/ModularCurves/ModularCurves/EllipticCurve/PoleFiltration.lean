@@ -647,20 +647,30 @@ theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
   · exact h1
   · exact h2
 
+/-- Sections over a chart open are the chart's degree-zero localization: open-immersion
+`Γ`-comparison (`appIso` at `⊤`) composed with `ΓSpecIso`. -/
+private noncomputable def chartSectionsIso (W : WeierstrassCurve R) (j : Fin 3) :
+    Γ(projModel W, ((modelChartCover W).openCover.f j).opensRange) ≅
+      (modelChartCover W).X j :=
+  (((projModel W).presheaf.mapIso (eqToIso
+      (Scheme.Hom.image_top_eq_opensRange ((modelChartCover W).openCover.f j))).op).trans
+    (((modelChartCover W).openCover.f j).appIso ⊤)).trans
+    (Scheme.ΓSpecIso ((modelChartCover W).X j))
+
 /-- **(T-W7.0i-b3-2)** Sections over the `Y`-chart open are the chart ring (open-immersion
 `Γ`-comparison composed with the repo's `chartCoordEquiv`). -/
 noncomputable def chartYSectionsEquiv (W : WeierstrassCurve R) :
     Γ(projModel W, ((modelChartCover W).openCover.f (1 : Fin 3)).opensRange) ≃+*
       (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) :=
-  sorry
+  (chartSectionsIso W 1).commRingCatIsoToRingEquiv.trans (chartCoordEquiv W 1).symm
 
 /-- **(T-W7.0i-b3-3)** Sections over the `Z`-chart open are the chart ring. -/
 noncomputable def chartZSectionsEquiv (W : WeierstrassCurve R) :
     Γ(projModel W, ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange) ≃+*
       (MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial}) :=
-  sorry
+  (chartSectionsIso W 2).commRingCatIsoToRingEquiv.trans (chartCoordEquiv W 2).symm
 
 /-- The `x = X/Z` coordinate index of the affine chart. -/
 abbrev affChartX : {j : Fin 3 // j ≠ 2} := ⟨0, by decide⟩

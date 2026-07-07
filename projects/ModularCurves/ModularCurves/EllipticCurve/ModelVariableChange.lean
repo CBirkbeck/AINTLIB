@@ -135,14 +135,136 @@ noncomputable def vcGradedHom (C : VariableChange R) (W : WeierstrassCurve R) :
     GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal (C • W))) :=
   quotientGradingMap (vcMvGraded C) (projIdeal W) (projIdeal (C • W)) (projIdeal_le_comap_vc C W)
 
+/-- The variable-change substitution and its inverse (via `C⁻¹`) compose to the identity
+on the polynomial generators. -/
+theorem vcMvSubst_comp_inv (C : VariableChange R) (j : Fin 3) :
+    MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ j) = MvPolynomial.X j := by
+  have hupow : ∀ n : ℕ, (MvPolynomial.C (↑C.u⁻¹ : R) : MvPolynomial (Fin 3) R) ^ n
+      * MvPolynomial.C (↑C.u : R) ^ n = 1 := by
+    intro n; rw [← mul_pow, ← map_mul, Units.inv_mul, map_one, one_pow]
+  fin_cases j
+  · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (0 : Fin 3)) = MvPolynomial.X (0 : Fin 3)
+    simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
+      map_neg, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.smul_eq_C_mul,
+      MvPolynomial.algebraMap_eq]
+    linear_combination MvPolynomial.X (0 : Fin 3) * hupow 2
+  · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (1 : Fin 3)) = MvPolynomial.X (1 : Fin 3)
+    simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
+      map_neg, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.smul_eq_C_mul,
+      MvPolynomial.algebraMap_eq]
+    linear_combination MvPolynomial.X (1 : Fin 3) * hupow 3
+  · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (2 : Fin 3)) = MvPolynomial.X (2 : Fin 3)
+    simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.aeval_X]
+
+/-- Reverse composition on generators, free via `inv_inv`. -/
+theorem vcMvSubst_inv_comp (C : VariableChange R) (j : Fin 3) :
+    MvPolynomial.aeval (vcMvSubst C⁻¹) (vcMvSubst C j) = MvPolynomial.X j := by
+  have h := vcMvSubst_comp_inv C⁻¹ j
+  rwa [inv_inv] at h
+
+/-- Ring-level: the two substitutions compose to the identity `AlgHom`. -/
+theorem vcMvSubst_comp_inv_algHom (C : VariableChange R) :
+    (MvPolynomial.aeval (vcMvSubst C)).comp (MvPolynomial.aeval (vcMvSubst C⁻¹))
+      = AlgHom.id R (MvPolynomial (Fin 3) R) := by
+  rw [MvPolynomial.comp_aeval]; simp only [vcMvSubst_comp_inv]; exact MvPolynomial.aeval_X_left
+
+theorem vcMvSubst_inv_comp_algHom (C : VariableChange R) :
+    (MvPolynomial.aeval (vcMvSubst C⁻¹)).comp (MvPolynomial.aeval (vcMvSubst C))
+      = AlgHom.id R (MvPolynomial (Fin 3) R) := by
+  rw [MvPolynomial.comp_aeval]; simp only [vcMvSubst_inv_comp]; exact MvPolynomial.aeval_X_left
+
+/-- The inverse-direction ideal containment, via `C⁻¹ • (C • W) = W`. -/
+lemma projIdeal_le_comap_vc_inv (C : VariableChange R) (W : WeierstrassCurve R) :
+    (projIdeal (C • W)).toIdeal ≤ (projIdeal W).toIdeal.comap (vcMvGraded C⁻¹).toRingHom := by
+  have h := projIdeal_le_comap_vc C⁻¹ (C • W)
+  rwa [inv_smul_smul] at h
+
+/-- The inverse graded homomorphism of quotient coordinate rings, induced by `C⁻¹`. -/
+noncomputable def vcGradedHomInv (C : VariableChange R) (W : WeierstrassCurve R) :
+    GradedRingHom (quotientGrading (projIdeal (C • W))) (quotientGrading (projIdeal W)) :=
+  quotientGradingMap (vcMvGraded C⁻¹) (projIdeal (C • W)) (projIdeal W)
+    (projIdeal_le_comap_vc_inv C W)
+
+lemma vcGradedHom_comp_inv_apply (C : VariableChange R) (W : WeierstrassCurve R)
+    (x : projCoordRing (C • W)) : vcGradedHom C W (vcGradedHomInv C W x) = x := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [vcGradedHomInv, vcGradedHom, quotientGradingMap_mk, quotientGradingMap_mk]
+  refine congrArg (Ideal.Quotient.mk _) ?_
+  show MvPolynomial.aeval (vcMvSubst C) (MvPolynomial.aeval (vcMvSubst C⁻¹) a) = a
+  rw [← AlgHom.comp_apply, vcMvSubst_comp_inv_algHom, AlgHom.id_apply]
+
+lemma vcGradedHom_inv_comp_apply (C : VariableChange R) (W : WeierstrassCurve R)
+    (x : projCoordRing W) : vcGradedHomInv C W (vcGradedHom C W x) = x := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [vcGradedHom, vcGradedHomInv, quotientGradingMap_mk, quotientGradingMap_mk]
+  refine congrArg (Ideal.Quotient.mk _) ?_
+  show MvPolynomial.aeval (vcMvSubst C⁻¹) (MvPolynomial.aeval (vcMvSubst C) a) = a
+  rw [← AlgHom.comp_apply, vcMvSubst_inv_comp_algHom, AlgHom.id_apply]
+
+/-- The forward and inverse variable-change graded homs compose to the identity. -/
+lemma vcGradedHom_comp_inv (C : VariableChange R) (W : WeierstrassCurve R) :
+    (vcGradedHom C W).comp (vcGradedHomInv C W) = GradedRingHom.id _ :=
+  GradedRingHom.ext fun x => vcGradedHom_comp_inv_apply C W x
+
+lemma vcGradedHom_inv_comp (C : VariableChange R) (W : WeierstrassCurve R) :
+    (vcGradedHomInv C W).comp (vcGradedHom C W) = GradedRingHom.id _ :=
+  GradedRingHom.ext fun x => vcGradedHom_inv_comp_apply C W x
+
+/-- A graded ring homomorphism maps the irrelevant ideal into the irrelevant ideal. -/
+private lemma irrelevant_map_le {ι σ τ A B : Type*} [CommRing A] [CommRing B]
+    [SetLike σ A] [AddSubgroupClass σ A] [SetLike τ B] [AddSubgroupClass τ B]
+    [DecidableEq ι] [AddCommMonoid ι] [PartialOrder ι] [CanonicallyOrderedAdd ι]
+    {𝒜 : ι → σ} {ℬ : ι → τ} [GradedRing 𝒜] [GradedRing ℬ] (f : 𝒜 →+*ᵍ ℬ) :
+    HomogeneousIdeal.map f (HomogeneousIdeal.irrelevant 𝒜) ≤ HomogeneousIdeal.irrelevant ℬ := by
+  rw [← toIdeal_le_toIdeal_iff, HomogeneousIdeal.toIdeal_map,
+    Ideal.map_le_iff_le_comap, HomogeneousIdeal.toIdeal_irrelevant_le]
+  intro i hi x hx
+  exact HomogeneousIdeal.mem_irrelevant_of_mem _ hi (f.map_mem hx)
+
+/-- The irrelevant-ideal hypothesis of `Proj.map` for the forward variable-change hom,
+discharged via the inverse: `f = (f⁻¹)⁻¹` maps the irrelevant ideal onto itself. -/
+lemma vcGradedHom_irrelevant_le (C : VariableChange R) (W : WeierstrassCurve R) :
+    (quotientGrading (projIdeal (C • W)))₊ ≤
+      ((quotientGrading (projIdeal W))₊).map (vcGradedHom C W) := by
+  conv_lhs => rw [← HomogeneousIdeal.map_id (I := (quotientGrading (projIdeal (C • W)))₊),
+    ← vcGradedHom_comp_inv C W, HomogeneousIdeal.map_comp]
+  exact HomogeneousIdeal.map_mono _ (irrelevant_map_le (vcGradedHomInv C W))
+
+lemma vcGradedHomInv_irrelevant_le (C : VariableChange R) (W : WeierstrassCurve R) :
+    (quotientGrading (projIdeal W))₊ ≤
+      ((quotientGrading (projIdeal (C • W)))₊).map (vcGradedHomInv C W) := by
+  conv_lhs => rw [← HomogeneousIdeal.map_id (I := (quotientGrading (projIdeal W))₊),
+    ← vcGradedHom_inv_comp C W, HomogeneousIdeal.map_comp]
+  exact HomogeneousIdeal.map_mono _ (irrelevant_map_le (vcGradedHom C W))
+
+/-- Equality of `Proj.map`s from equal graded homomorphisms (the irrelevant-ideal
+hypotheses are propositions, so they may differ). -/
+private lemma Proj_map_congr {A B σ τ : Type u} [CommRing A] [SetLike σ A]
+    [AddSubgroupClass σ A] [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
+    {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
+    {f g : 𝒜 →+*ᵍ ℬ} (h : f = g)
+    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f)
+    (hg : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map g) :
+    Proj.map f hf = Proj.map g hg := by subst h; rfl
+
 /-- **(T-W7.0h-i)** The isomorphism of projective Weierstrass models induced by a variable
 change `C = (u, r, s, t)`: the projectivisation of the affine coordinate change
 `(x, y) ↦ (u²x + r, u³y + su²x + t)` (mathlib's `VariableChange` convention), an isomorphism
 `projModel (C • W) ≅ projModel W`. Source: Silverman III.3.1(b) (projective form); the graded
 ring map mirrors `baseChangeGradedHom`. -/
 noncomputable def projModelVCIso (C : VariableChange R) (W : WeierstrassCurve R) :
-    projModel (C • W) ≅ projModel W :=
-  sorry
+    projModel (C • W) ≅ projModel W where
+  hom := Proj.map (vcGradedHom C W) (vcGradedHom_irrelevant_le C W)
+  inv := Proj.map (vcGradedHomInv C W) (vcGradedHomInv_irrelevant_le C W)
+  hom_inv_id := by
+    rw [← Proj.map_comp]
+    exact (Proj_map_congr (vcGradedHom_comp_inv C W) _ _).trans Proj.map_id
+  inv_hom_id := by
+    rw [← Proj.map_comp]
+    exact (Proj_map_congr (vcGradedHom_inv_comp C W) _ _).trans Proj.map_id
 
 /-- **(T-W7.0h-i, π-compatibility)** `projModelVCIso` is a morphism over `Spec R`. -/
 theorem projModelVCIso_π (C : VariableChange R) (W : WeierstrassCurve R) :
