@@ -41,10 +41,14 @@ the noetherian stage (where annihilators are finitely generated) and base-changi
   `R₁ ⊆ R` at which the flat locus is all of `Spec (R₁ ⊗[R₀] A₀)`, then reads off flatness by
   locality (`flat_of_flatLocus_univ`, from `Module.flat_of_isLocalized_maximal`) and re-expresses
   the base change through `Algebra.TensorProduct.cancelBaseChange`. Enlargement is genuinely
-  necessary (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not flat although `ℚ ⊗ A₀ = 0` is). The single
-  remaining **registered box** is the geometric step `exists_flatLocus_univ_stage` (Stacks 07RF's
-  directed-colimit + quasi-compactness assembly around *openness of the flat locus*,
-  `isOpen_flatLocus`), which mathlib's spreading-out infrastructure does not yet support.
+  necessary (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not flat although `ℚ ⊗ A₀ = 0` is). The geometric step
+  `exists_flatLocus_univ_stage` is now a thin wrapper (via `flatLocus_eq_univ_of_flat`) around the
+  single remaining **registered box** `exists_subalgebra_flat_baseChange`: *flatness of the
+  colimit descends to a finite `ℤ`-stage*. Its irreducible missing ingredient is the pointwise
+  flat descent of **Stacks 00R6** (the local flatness criterion for finitely-presented algebras),
+  which mathlib does not yet support; the surrounding directed-colimit + quasi-compactness assembly
+  (*openness of the flat locus*, `isOpen_flatLocus`, and the cofiltered limit of affine schemes,
+  `AlgebraicGeometry.exists_mem_of_isClosed_of_nonempty`) is available in mathlib.
 
 ## References
 
@@ -167,8 +171,57 @@ private theorem flat_of_flatLocus_univ {R₁ A₁ : Type u} [CommRing R₁] [Com
     rw [h]; exact Set.mem_univ _
   exact mem_flatLocus.mp hmem
 
-/-- **Spreading out of flatness, geometric core (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6)**
-— the sole **registered box** of the flatness descent.
+/-- **Converse of `flat_of_flatLocus_univ`.** If the `R₁`-algebra `A₁` is `R₁`-flat then its flat
+locus is the whole spectrum: every localisation `(A₁)_𝔮` stays `R₁`-flat because localisation is an
+exact `R₁`-linear functor (`flat_localizedModule_of_flat`). Together with `flat_of_flatLocus_univ`
+this makes `flatLocus R₁ A₁ A₁ = Set.univ` and `Module.Flat R₁ A₁` equivalent, so the geometric box
+below only has to produce flatness at a finite stage. -/
+private theorem flatLocus_eq_univ_of_flat {R₁ A₁ : Type u} [CommRing R₁] [CommRing A₁]
+    [Algebra R₁ A₁] [Module.Flat R₁ A₁] : flatLocus R₁ A₁ A₁ = Set.univ := by
+  rw [Set.eq_univ_iff_forall]
+  intro q
+  rw [mem_flatLocus]
+  exact flat_localizedModule_of_flat q.asIdeal.primeCompl
+
+/-- **Flatness descends to a finite `ℤ`-stage (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6).**
+The genuinely homological core of the flatness-spreading box, isolated as a single statement:
+given the Noetherian base `R₀ ⊆ R` and the finitely-presented `R₀`-algebra `A₀` whose base change
+`R ⊗[R₀] A₀` is `R`-flat, there is a *larger* finitely-generated `ℤ`-subalgebra `R₁`,
+`R₀ ⊆ R₁ ⊆ R` (still Noetherian), at which `R₁ ⊗[R₀] A₀` is already `R₁`-flat.
+
+Enlargement past `R₀` is genuinely necessary: with `A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` inside `R = ℚ`, no
+`ℤ[1/n]` with `p ∤ n` gives a flat base change, but `R₁ = ℤ[1/p]` gives `R₁ ⊗[ℤ] A₀ = 0`, flat.
+
+**Intended proof and the precise mathlib gap.** Write `R` as the filtered colimit `R = colimᵢ Rᵢ`
+of its finitely-generated `ℤ`-subalgebras `Rᵢ ⊇ R₀` (each `IsNoetherianRing`, being finitely
+generated over `ℤ`), so `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)`. Then:
+* *Pointwise descent* (**Stacks 00R6** = Lemma 10.128.3): for each prime `𝔮` of `R ⊗[R₀] A₀`, the
+  `R`-flatness of the localisation at `𝔮` descends to `Rᵢ`-flatness of the localisation of
+  `Rᵢ ⊗[R₀] A₀` at the contracted prime, at a finite stage `i(𝔮)`. For the finitely *presented*
+  algebra `Rᵢ ⊗[R₀] A₀` this is a *finite* condition (the local criterion for flatness,
+  **Stacks 00MK/00R4**) which therefore survives the colimit. **This is the fact current mathlib
+  lacks**: there is no `Module.Flat` filtered-colimit descent, and no local flatness criterion for
+  finitely-presented algebras — it is the homological cousin of the boxed
+  `exists_basicOpen_subset_flatLocus_of_mem` in `FlatLocus`.
+* *Openness* (`isOpen_flatLocus`, **Stacks 00RC**): over the Noetherian `Rᵢ` the flat locus
+  `flatLocus Rᵢ (Rᵢ ⊗[R₀] A₀) (Rᵢ ⊗[R₀] A₀)` is open, upgrading each `𝔮` to an open
+  stage-neighbourhood.
+* *Cofiltered-limit collapse*: `Spec (R ⊗[R₀] A₀) = limᵢ Spec (Rᵢ ⊗[R₀] A₀)` is a cofiltered limit
+  of affine schemes with affine transition maps; the open flat loci cover it, and quasi-compactness
+  of this limit collapses the cover to a single stage `R₁`. This topological engine **is** present
+  in mathlib (`AlgebraicGeometry.exists_map_eq_top` / `exists_mem_of_isClosed_of_nonempty`,
+  **Stacks 01Z2/01Z3/01Z4**); only wiring the ring colimit `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)` into
+  its scheme-limit cone remains. The irreducible missing ingredient is the pointwise descent above. -/
+private theorem exists_subalgebra_flat_baseChange {R : Type u} [CommRing R]
+    (R₀ : Subalgebra ℤ R) [IsNoetherianRing R₀]
+    (A₀ : Type u) [CommRing A₀] [Algebra R₀ A₀] [Algebra.FinitePresentation R₀ A₀]
+    (hflat : Module.Flat R (R ⊗[R₀] A₀)) :
+    ∃ (R₁ : Subalgebra ℤ R) (h : R₀ ≤ R₁), IsNoetherianRing R₁ ∧
+      (letI : Algebra R₀ R₁ := (Subalgebra.inclusion h).toAlgebra
+       Module.Flat R₁ (R₁ ⊗[R₀] A₀)) :=
+  sorry
+
+/-- **Spreading out of flatness, geometric core (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6).**
 
 Given the noetherian base `R₀ ⊆ R` and the finitely-presented `R₀`-algebra `A₀` whose base change
 `R ⊗[R₀] A₀` is `R`-flat, there is a *larger* finitely-generated `ℤ`-subalgebra `R₁`,
@@ -179,15 +232,10 @@ Enlargement is genuinely necessary — flatness need not hold for the `R₀` pro
 presentation-coefficient descent (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not `ℤ`-flat although
 `ℚ ⊗ A₀ = 0` is `ℚ`-flat).
 
-The proof (not yet formalised: mathlib lacks the directed-colimit / spreading-out infrastructure it
-requires) writes `R` as the filtered colimit `R = colimᵢ Rᵢ` of its finitely-generated
-`ℤ`-subalgebras `Rᵢ ⊇ R₀`, so `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)`. For each prime `𝔮` of
-`R ⊗[R₀] A₀`, `R`-flatness at `𝔮` descends to `Rᵢ`-flatness at a finite stage (Stacks 10.128.3, via
-the equational criterion `Module.Flat.iff_forall_exists_factorization` — one relation is trivialised
-in the colimit at a time); **openness of the flat locus** over the noetherian `Rᵢ`
-(`isOpen_flatLocus`, Thm 10.129.4, applied below) upgrades this to an open neighbourhood, and
-**quasi-compactness** of `Spec (R ⊗[R₀] A₀)` (`CompactSpace (PrimeSpectrum _)`) collapses the cover
-to a single stage `R₁` at which the flat locus is everything. -/
+This is now a thin geometric wrapper: `exists_subalgebra_flat_baseChange` (the isolated Stacks 07RF
+core) produces a finite stage `R₁` at which `R₁ ⊗[R₀] A₀` is `R₁`-*flat*, and
+`flatLocus_eq_univ_of_flat` turns that module-level flatness into `flatLocus … = Set.univ` (each
+localisation stays flat, localisation being an exact functor). -/
 private theorem exists_flatLocus_univ_stage {R : Type u} [CommRing R]
     (R₀ : Subalgebra ℤ R) [IsNoetherianRing R₀]
     (A₀ : Type u) [CommRing A₀] [Algebra R₀ A₀] [Algebra.FinitePresentation R₀ A₀]
@@ -195,10 +243,11 @@ private theorem exists_flatLocus_univ_stage {R : Type u} [CommRing R]
     ∃ (R₁ : Subalgebra ℤ R) (h : R₀ ≤ R₁), IsNoetherianRing R₁ ∧
       (letI : Algebra R₀ R₁ := (Subalgebra.inclusion h).toAlgebra
        flatLocus R₁ (R₁ ⊗[R₀] A₀) (R₁ ⊗[R₀] A₀) = Set.univ) := by
-  -- Openness of the flat locus over the noetherian base (Thm 10.129.4) is the homological input;
-  -- the colimit/quasi-compactness assembly around it is the remaining box.
-  have _hopen : IsOpen (flatLocus R₀ A₀ A₀) := isOpen_flatLocus
-  sorry
+  obtain ⟨R₁, h, hNoeth, hfl⟩ := exists_subalgebra_flat_baseChange R₀ A₀ hflat
+  refine ⟨R₁, h, hNoeth, ?_⟩
+  letI : Algebra R₀ R₁ := (Subalgebra.inclusion h).toAlgebra
+  haveI : Module.Flat R₁ (R₁ ⊗[R₀] A₀) := hfl
+  exact flatLocus_eq_univ_of_flat
 
 /-- **Spreading out of flatness (Stacks 07RF / EGA IV 11.2.6).** If a finitely-presented
 `R`-algebra `A` is `R`-flat, then — *after enlarging the base if necessary* — it is the base change
