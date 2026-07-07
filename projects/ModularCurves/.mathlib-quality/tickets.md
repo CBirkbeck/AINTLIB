@@ -2198,12 +2198,33 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
     "mathlib ZMT IsFinite.of_isProper_of_locallyQuasiFinite PRESENT" is STALE/WRONG
     (searched: absent; mathlib has IsFinite = IsIntegralHom ⊓ LocallyOfFiniteType,
     affine-over-S is the hard part) — park-eligible per claim scope.
-  - **BOX REGISTERED** (2026-07-07T07:20Z): `nonZeroDivisor_of_flat_of_fibrewise_
-    nonZeroDivisor` (CartierDivisor.lean, tag T-FLAT1-SLICE) — EGA IV 11.3.10 nzd
-    part, fp+flat hypotheses, ∀-field-fibre form (deliberately: what thm-D supplies
-    uniformly AND the easiest-to-discharge shape — a future discharge proves the
-    residue-field form and specializes). Falseness-without-fp counterexample in the
-    docstring. Sole permitted consumer: RelEffCartierDiv.isOfficial. WAVE-1 DONE
+  - **BOX REGISTERED** (2026-07-07T07:20Z; SOURCE/TICKET RECONCILED 2026-07-07T14:40Z):
+    `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor` (CartierDivisor.lean, tag
+    T-FLAT1-SLICE) — fp+flat hypotheses, ∀-field-fibre form (deliberately: what thm-D
+    supplies uniformly AND the easiest-to-discharge shape — a future discharge proves
+    the residue-field form and specializes). Falseness-without-fp counterexample in the
+    docstring. Sole permitted consumer: RelEffCartierDiv.isOfficial.
+    **THIS IS A SUB-INSTANCE OF THE EXISTING FLAT STREAM `T-FLAT1`** (the fibre-by-fibre
+    flatness criterion): specifically the *regular-element-by-fibres* companion, sibling
+    of HB-FIBCRIT (KM 1.1.5.1 = the coherent-sheaf version). SOURCE CORRECTION: the
+    docstring's "EGA IV 11.3.10" tag is a pointer, NOT a source I hold — EGA and
+    Altman-Kleiman [A-K 1, V 3.6] (KM's actual citation) are NOT in refs/, and KM only
+    CITES the criterion without proof. Do NOT try to fetch EGA: (a) unavailable locally,
+    (b) unnecessary. The mathematically-standard, mathlib-aligned reference is the
+    **local criterion of flatness by fibres** (Stacks Tag 00MH / 051C — regular-element
+    form). MATHLIB SURVEY (2026-07-07): NO Tor in RingTheory, NO local-criterion lemma
+    (`localCriterion` empty) — genuinely absent, a real ~100-200-line development, not a
+    name-lookup. BUT the **equational criterion of flatness** IS present
+    (`Mathlib/RingTheory/Flat/EquationalCriterion.lean`: `isTrivialRelation_of_sum_smul_
+    eq_zero`), giving a **Tor-FREE proof route**: for `f·a = 0` in the fp flat A, the
+    relation `f·a = 0` is a trivial relation (equational criterion on A flat/R), factor
+    `a = Σ cⱼ zⱼ` with `Σ f cⱼ = 0`; the flatness of `A/fA` forces (via the same criterion
+    on the quotient) the `cⱼ` into `fA`, and the fibrewise-nzd hypothesis at each residue
+    field collapses `a`'s image to 0 in every fibre; fp + fibrewise-zero + the
+    isSMulRegular/torsion-free toolkit (`Flat/TorsionFree.lean` `isSMulRegular_of_
+    nonZeroDivisors`, `IsSMulRegular.of_flat`) closes `a = 0`. DISCHARGE = a proper
+    T-FLAT1 proof-ticket (below); NOT started (isOfficial's ⇐-completeness does not
+    block on it — the working definition is primary). WAVE-1 DONE
     (delegate, first-try, axiom-clean): ForMathlib/PrincipalMaximalDVR.lean —
     `IsLocalRing.exists_eq_pow_mul_unit_of_maximalIdeal_eq_span` (public
     order-extraction), `IsDomain.of_maximalIdeal_eq_span_nonZeroDivisor`,
@@ -2798,6 +2819,22 @@ DS-register unchanged; `#print axioms` audit.
   cut T-COH1.. with statements (`π_*O ≅ O_S` + base change; `R¹π_*O` line bundle).
 - **[T-FLAT0]** scoping (mathlib RingTheory.Flat + survey) · **[T-FLAT1]** Lean
   statement of the fibrewise criterion + fibre-morphism helper; then proof tickets.
+  - **[T-FLAT1-SLICE]** (proof-ticket cut 2026-07-07 by beastmode-D2; the FIRST concrete
+    T-FLAT1 discharge, driven by a real consumer). STATEMENT (frozen, already registered
+    as a box in LevelStructure/CartierDivisor.lean):
+    `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor (R A) [CommRing R][CommRing A]
+    [Algebra R A][Algebra.FinitePresentation R A][Module.Flat R A] (f : A)
+    (hq : Module.Flat R (A ⧸ Ideal.span {f}))
+    (hfib : ∀ K [Field K][Algebra R K], f ⊗ₜ 1 ∈ nonZeroDivisors (A ⊗[R] K)) :
+    f ∈ nonZeroDivisors A`. SOURCE: local criterion of flatness by fibres, Stacks 00MH/
+    051C (regular-element form) — NOT EGA (unheld; KM 1.1.5.1 cites A-K V 3.6, also
+    unheld; both merely cited, never needed for the Lean proof). ROUTE: Tor-free via
+    mathlib's `Flat/EquationalCriterion.lean` + `Flat/TorsionFree.lean` (see the box
+    board-note for the equational-criterion factorisation sketch). fp hypotheses are
+    LOAD-BEARING (counterexample in docstring: M=m over a rank-1 non-discrete valuation
+    ring). CONSUMER: `RelEffCartierDiv.isOfficial` (T-D11 ⇐). Discharging this makes the
+    ENTIRE D-chain axiom-clean (removes the last sorryAx). Est. 100-200 lines. Not
+    started — dispatch when the D-lane critical path clears.
 - **[T-OT0]** scoping after T-SG1; statement "flf comm. group scheme of rank N killed
   by N"; Deligne norm-argument decomposition (FltRegular norm lemmas per rescan).
 - **[T-DESC0]** scoping — **DONE (beastmode-DESC, 2026-07-07)**. mathlib coverage:
