@@ -604,7 +604,27 @@ lemma negChartMap_coord1 (W : WeierstrassCurve R) :
         (-X (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2})
           - C W.a₁ * X ⟨0, by decide⟩ - C W.a₃)) := by
   rw [chartCoordEquiv_mk_X, Away.isLocalizationElem, negChartMap_mk]
-  sorry
+  refine (away_mk_num_congr W _ (by rw [map_pow, pow_one, negGradedQuot_mk_X1])).trans ?_
+  simp only [map_sub, map_mul, map_neg, chartCoordEquiv_mk_X, chartCoordEquiv_mk_C,
+    Away.isLocalizationElem]
+  apply HomogeneousLocalization.val_injective
+  simp only [HomogeneousLocalization.val_sub, HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.val_neg, Away.val_mk, HomogeneousLocalization.algebraMap_eq,
+    HomogeneousLocalization.fromZeroRingHom, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
+    HomogeneousLocalization.val_mk, map_sub, map_mul, pow_one, Localization.mk_mul, mul_one,
+    Localization.neg_mk]
+  rw [Localization.sub_mk, Localization.sub_mk, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  have hbridge : ∀ r : R, (↑((gradeZeroRingEquiv W) r) : projCoordRing W) =
+      quotientGradingHom (projIdeal W) (C r) := by
+    intro r
+    rw [show (gradeZeroRingEquiv W) r = algebraMapGradeZero (projIdeal W) r from rfl,
+      coe_algebraMapGradeZero, quotientGradingHom_apply,
+      IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
+      RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq]
+  simp only [hbridge]
+  norm_num [Submonoid.coe_mul, OneMemClass.coe_one]
+  ring
 
 /-- **(T-W7.0b-points)** On field points, `negModelHom` is mathlib's affine negation through the
 dictionary. UNBLOCKED (P2 landed the real `projModelPointsEquiv` + `_zero`/`_some`). ROUTE:
