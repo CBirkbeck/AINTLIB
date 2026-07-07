@@ -37,33 +37,12 @@ namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 
-/-! ## Lane P0: the atlas ring is a domain; negation -/
+/-! ## Lane P0: negation -/
 
-/-- **(T-W7.0a-i)** The universal discriminant is a nonzero polynomial (evaluate at
-`y² = x³ − x` over `ℚ`: `Δ = 64`). -/
-theorem universalWeierstrass_Δ_ne_zero : universalWeierstrass.Δ ≠ 0 := by
-  intro hΔ
-  have key : (universalWeierstrass.map
-      (MvPolynomial.eval (![0, 0, 0, -1, 0] : Fin 5 → ℤ))).Δ = 64 := by
-    have e2 : (![0, 0, 0, -1, 0] : Fin 5 → ℤ) 2 = 0 := by decide
-    have e3 : (![0, 0, 0, -1, 0] : Fin 5 → ℤ) 3 = -1 := by decide
-    have e4 : (![0, 0, 0, -1, 0] : Fin 5 → ℤ) 4 = 0 := by decide
-    simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-      WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.map, universalWeierstrass,
-      MvPolynomial.eval_X, Matrix.cons_val_zero, Matrix.cons_val_one, e2, e3, e4]
-    norm_num
-  rw [WeierstrassCurve.map_Δ, hΔ, map_zero] at key
-  norm_num at key
-
-/-- **(T-W7.0a)** The Weierstrass atlas ring `ℤ[a₁,…,a₆][Δ⁻¹]` is an integral domain —
-the substrate making the universal atlas products *reduced*, hence amenable to the
-field-points extensionality principle. Source: `IsLocalization.isDomain_localization`
-(mathlib, verified) + `universalWeierstrass_Δ_ne_zero`. -/
-instance : IsDomain WeierstrassAtlasRing :=
-  have hle : Submonoid.powers universalWeierstrass.Δ ≤
-      nonZeroDivisors (MvPolynomial (Fin 5) ℤ) :=
-    Submonoid.powers_le.mpr (mem_nonZeroDivisors_of_ne_zero universalWeierstrass_Δ_ne_zero)
-  IsLocalization.isDomain_localization hle
+-- **(T-W7.0a)** `universalWeierstrass_Δ_ne_zero`, `instance : IsDomain WeierstrassAtlasRing`, and
+-- `instance : IsNoetherianRing WeierstrassAtlasRing` were moved upstream to
+-- `Moduli/WeierstrassAtlas.lean` (single source; deduplicated per the 2026-07-07 coordinator
+-- directive — they existed here and in `Moduli/PointsDictionary.lean`) and are inherited here.
 
 section NegationConstruction
 

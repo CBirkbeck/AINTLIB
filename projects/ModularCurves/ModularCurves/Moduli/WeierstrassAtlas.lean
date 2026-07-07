@@ -31,6 +31,34 @@ noncomputable def universalWeierstrass : WeierstrassCurve (MvPolynomial (Fin 5) 
 ring with the discriminant inverted. -/
 abbrev WeierstrassAtlasRing : Type := Localization.Away universalWeierstrass.Δ
 
+/-- **(T-W7.0a-i)** The universal discriminant is nonzero: evaluate the coefficients at the
+elliptic curve `y² = x³ − x` (i.e. `(a₁,…,a₆) = (0,0,0,−1,0)`) over `ℚ`, where `Δ = 64 ≠ 0`.
+Working over `ℚ` avoids the characteristic-2/3 degeneracies of the discriminant. -/
+theorem universalWeierstrass_Δ_ne_zero : universalWeierstrass.Δ ≠ 0 := by
+  intro h
+  have key : (MvPolynomial.aeval ![(0 : ℚ), 0, 0, -1, 0]).toRingHom universalWeierstrass.Δ = 64 := by
+    rw [← WeierstrassCurve.map_Δ universalWeierstrass
+      (MvPolynomial.aeval ![(0 : ℚ), 0, 0, -1, 0]).toRingHom]
+    show (universalWeierstrass.map _).Δ = 64
+    simp only [WeierstrassCurve.map, universalWeierstrass, AlgHom.toRingHom_eq_coe,
+      RingHom.coe_coe, MvPolynomial.aeval_X, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
+      Matrix.cons_val_four]
+    norm_num [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+      WeierstrassCurve.b₈]
+  rw [h, map_zero] at key
+  norm_num at key
+
+/-- **(T-W7.0a)** The Weierstrass-atlas coefficient ring `ℤ[a₁..a₆][Δ⁻¹]` is an integral domain
+(localisation of the polynomial domain away from the nonzero discriminant). -/
+instance : IsDomain WeierstrassAtlasRing :=
+  IsLocalization.isDomain_localization
+    (Submonoid.powers_le.mpr (mem_nonZeroDivisors_of_ne_zero universalWeierstrass_Δ_ne_zero))
+
+/-- The Weierstrass-atlas coefficient ring is noetherian (localisation of a noetherian ring). -/
+instance : IsNoetherianRing WeierstrassAtlasRing :=
+  IsLocalization.isNoetherianRing (Submonoid.powers universalWeierstrass.Δ) _ inferInstance
+
 /-- The universal Weierstrass curve pushed to the atlas ring (discriminant inverted). -/
 noncomputable def universalWeierstrassLoc : WeierstrassCurve WeierstrassAtlasRing :=
   universalWeierstrass.map (algebraMap _ _)
