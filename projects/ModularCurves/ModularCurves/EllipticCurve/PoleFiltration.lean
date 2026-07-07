@@ -2512,8 +2512,19 @@ family `π : E ⟶ S` the structure map on sections `Γ(S, U) ⟶ Γ(E, π⁻¹U
 every open `U` — i.e. `O_S ≅ π_*O_E` as sheaves. Universally valid (base changes are again
 locally Weierstrass, so this statement instantiates). Sheafification of
 `projModel_globalSections_eq_baseRing` over chart opens. Source: reviewer round 1 §Q2. -/
+private lemma locallyWeierstrass_app_affine_isIso {S : Scheme.{u}} (G : EllipticCurveGeom S)
+    {U : S.affineOpens} {W : WeierstrassCurve Γ(S, U.1)}
+    (e : Limits.pullback G.π U.1.ι ≅ projModel W)
+    (heπ : e.hom ≫ projModelπ W = Limits.pullback.snd G.π U.1.ι ≫ U.2.isoSpec.hom)
+    {V : S.Opens} (hVaff : IsAffineOpen V) (hVle : V ≤ U.1) :
+    IsIso (G.π.app V) := by
+  sorry
+
 theorem locallyWeierstrass_pushforward_O_eq_O {S : Scheme.{u}} (G : EllipticCurveGeom S)
     (U : S.Opens) : IsIso (G.π.app U) := by
+  -- stalkwise from the affine-basis case (`app_isIso_of_stalkFunctor_map_iso` route):
+  -- every point has a cofinal family of affine opens inside a trivializing chart where
+  -- `locallyWeierstrass_app_affine_isIso` applies.
   sorry
 
 end ModularCurves
