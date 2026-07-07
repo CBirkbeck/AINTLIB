@@ -5336,16 +5336,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     fppf descent NOT NEEDED; `E` has the zero section). C2/C3 applications have it.
 
 - **[T-W7.7·C2]** GIT Cor 6.3 — `factor_mul_of_tensor` (Rigidity.lean). **Status**:
-  in-progress · **Claimed**: fable-P4, 2026-07-07T22:20Z · **Depends**: T-W7.7·C1 (DONE),
-  T-W7.7·C2conn (DONE) · **Type**: theorem
-  - **Statement changes (pre-logged per rule 5, sorried leaf)**: (i) add
-    `(e₂ : 𝟙_ (Over S) ⟶ B)` — the source quote's `e₂` (GIT reduction composite
-    `f ∘ (1_X, e₂ ∘ q₁)` uses a point of the SECOND factor too; the C3 application takes
-    `B := A` pointed, so this is free downstream); (ii) add `[IsLocallyNoetherian B.left]`
-    (rigidity runs over base `B.left`; for C3, `A.left` is lft over loc-noeth `S`, fine);
-    (iii) conclusion order becomes `lift (snd ≫ h) (fst ≫ g) ≫ μ` = `h(y)·g(x)` — the
-    C1 constant lands on the LEFT and `G` is not yet known commutative; C3's endgame is
-    order-symmetric (GIT 6.4: `h(e)⁻¹g(e)⁻¹ = f(e)⁻¹ = 1`).
+  **DONE** (fable-P4, commits f3e9c6fc + order-flip) · **Claimed**: fable-P4,
+  2026-07-07T22:20Z · **Done**: 2026-07-07, `#print axioms` clean · **Depends**:
+  T-W7.7·C1 (DONE), T-W7.7·C2conn (DONE) · **Type**: theorem
+  - **Statement changes (logged per rule 5)**: (i) added `(e₂ : 𝟙_ (Over S) ⟶ B)` — the
+    source quote's `e₂`; (ii) added `[IsLocallyNoetherian B.left]`; (iii-RETRACTED) the
+    conclusion keeps the ORIGINAL boarded Mumford order `lift (fst ≫ g) (snd ≫ h) ≫ μ` =
+    `g(x)·h(y)` — obtained from the LEFT quotient `δ := (Ẽ≫f)⁻¹·f`; the flipped order
+    would make GIT 6.4 produce an ANTIhomomorphism and kill 6.5. All three leaves landed
+    (C2·res as `fromSpecResidueField_comp_section`; C2·fib inline via `hEfix`; C2·asm).
+    Defeq-seam discipline: ascribed `set`-bridges keep every rw uniformly pullback-typed.
   - Route (raw-scheme, NO Over-`B.left` category / no `GrpObj` base-change needed): all
     Hom-group algebra stays in `Over S`: `F₂ := lift (fst) (toUnit _ ≫ e₂) ≫ f`,
     `δ := f * F₂⁻¹`; rigidity applied over base `B.left` to
@@ -5364,13 +5364,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `fst ≫ g = F₂` by terminal-uniqueness; `f = δ * F₂` closes.
 
 - **[T-W7.7]** canonicity (= MILESTONE T-W7b, loc-noetherian) — `isMonHom_of_one_comp_eq`,
-  `abelEnrichment_unique_of_isLocallyNoetherian` (Rigidity.lean:101,114).
-  - **Status**: blocked · **Depends**: T-W7.r2, T-W7.r-supply, CLEANUP-RIG-1 · **Type**:
-    2 theorems
-  - Sketch (GIT Cor 6.2→6.3→6.4→6.6, verbatim): `f·g⁻¹` in the Hom-group; product
-    decomposition over base `Y` (`Y` connected; componentwise over loc-noeth `S`; sub-leaf
-    `E` connected when `S` is); apply to `1_X` with the two laws. The UNRESTRICTED
-    `abelEnrichment_unique` stays sorried, gated on T-W7.8. Leaves **L-C3/L-C4**.
+  `abelEnrichment_unique_of_isLocallyNoetherian` (Rigidity.lean).
+  - **Status**: **C3 DONE + C4conn DONE** (fable-P4, 2026-07-07; axiom-clean resp.
+    sorry-gated ONLY on r-supply) · **Depends**: T-W7.r-supply (last math gate), C4glue ·
+    **Type**: 2 theorems
+  - **C3 DONE** — `isMonHom_of_one_comp_eq` (GIT 6.4): C2 at `μ[A] ≫ f`, `e₁ = e₂ = η[A]`;
+    axis restrictions + unit identity + group flip; `tensorHom = lift` is defeq.
+    `#print axioms` clean. Statement change (rule 5): `(hconn : ConnectedSpace S)` added —
+    C2conn needs it; the arbitrary-base reduction is C4glue's job.
+  - **C4conn DONE** — `abelEnrichment_unique_of_connectedSpace` (GIT 6.6, connected base):
+    units agree via `one_eq_zero`; C3 at `𝟙` with the two `GrpObj` instances
+    (@-application) gives `μ = μ'`; `MonObj.ext` + `GrpObj.ext` + definitional
+    proof-irrelevance. Axioms: + `sorryAx` ONLY through the designed r-supply gate.
+  - **[C4glue] (SORRIED LEAF, open)** — `abelEnrichment_unique_of_isLocallyNoetherian`:
+    componentwise reduction. `S` loc-noeth ⟹ locally connected ⟹ components clopen;
+    restrict both records along the component open immersions (base change of group
+    objects, `Functor.mapGrpObj`-style as in `mulBy_baseChange`), apply C4conn per
+    component, glue `μ = μ'`/`η = η'` along the induced open cover of the total spaces
+    (`Scheme.OpenCover.hom_ext`), rebuild the record equality. Est. 120–180 lines.
+  - The UNRESTRICTED `abelEnrichment_unique` stays sorried, gated on T-W7.8.
 
 - **[CLEANUP-RIG-2]** final `/cleanup` Rigidity.lean. **Depends**: T-W7.7.
 
