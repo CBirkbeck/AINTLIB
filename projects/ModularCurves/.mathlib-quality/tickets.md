@@ -5370,9 +5370,22 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.7]** canonicity (= MILESTONE T-W7b, loc-noetherian) — `isMonHom_of_one_comp_eq`,
   `abelEnrichment_unique_of_isLocallyNoetherian` (Rigidity.lean).
-  - **Status**: **C3 DONE + C4conn DONE** (fable-P4, 2026-07-07; axiom-clean resp.
-    sorry-gated ONLY on r-supply) · **Depends**: T-W7.r-supply (last math gate), C4glue ·
-    **Type**: 2 theorems
+  - **Status**: **DONE — MILESTONE COMPLETE** (fable-P4, 2026-07-08; `#print axioms` =
+    propext/Classical.choice/Quot.sound; **Rigidity.lean is SORRY-FREE**) · **Type**:
+    2 theorems (+ ∀-component variants)
+  - **C4glue DISSOLVED** — no componentwise gluing was needed: the ∀-component rigidity
+    chain works over ANY loc-noeth base. New pieces (all axiom-clean):
+    `exists_factor_of_forall_component` + `rigidity_of_forall_component` (seed in every
+    component; clopen locus ∩ component nonempty ⟹ component ⊆ locus);
+    `isConnected_fibre_of_universallyOConnected` (extracted from C2conn);
+    `connectedComponent_eq_preimage_connectedComponent` (ForMathlib/ConnectedTotalSpace:
+    components of the total space = fibres of the base's components — engine restricted
+    over a component); `factor_mul_of_tensor_of_forall_component` (collapse at every
+    fixed point of `e₂∘q`); `isMonHom_of_one_comp_eq'` (no connectivity — fixed points
+    of `η∘π` in every component via the correspondence). Connected-base wrappers kept.
+    Also new ForMathlib: `NoetherianSpace.isOpen_connectedComponent` + noetherian ⟹
+    locally connected (upstream candidates; ended up unused by the final route but
+    independently valuable).
   - **C3 DONE** — `isMonHom_of_one_comp_eq` (GIT 6.4): C2 at `μ[A] ≫ f`, `e₁ = e₂ = η[A]`;
     axis restrictions + unit identity + group flip; `tensorHom = lift` is defeq.
     `#print axioms` clean. Statement change (rule 5): `(hconn : ConnectedSpace S)` added —
