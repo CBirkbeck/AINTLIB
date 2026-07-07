@@ -1335,19 +1335,90 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
           (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw) ≫ μ[G] :=
         Hom.mul_def _ _
 
-/-- **(T-W7.7a-C3, GIT Cor 6.4)** A pointed morphism of group objects in `Over S`, whose
-source is proper flat and universally `O`-connected over a locally noetherian `S`, is a
-homomorphism (the multiplication-compatibility equation; unit-compatibility is the
-hypothesis). Proof: GIT 6.2/6.3 (differences of morphisms into a group object; the product
-decomposition `f(x,y) = g(x)·h(y)`, connectedness running along the second factor,
-componentwise over `S`) applied to `μ[A] ≫ f`. Source: GIT p. 116–117, Cor 6.2–6.4
-(verbatim in quotes file). -/
+/-- **(T-W7.7a-C3, GIT Cor 6.4, PROVEN)** A pointed morphism of group objects in `Over S`,
+whose source is proper flat and universally `O`-connected over a connected locally
+noetherian `S`, is a homomorphism (the multiplication-compatibility equation;
+unit-compatibility is the hypothesis). Proof: C2 applied to `μ[A] ≫ f` with
+`e₁ = e₂ = η[A]` (the total space is connected by C2conn and locally noetherian since
+proper is of finite type); then pure Hom-group algebra: restricting the decomposition
+`f(xy) = g(x)h(y)` to the two axes gives `f = g·h(e)` and `f = g(e)·h`, the unit identity
+gives `g(e)h(e) = 1`, hence `h(e)g(e) = 1` (groups), and
+`f(x)f(y) = g(x)·[h(e)g(e)]·h(y) = f(xy)`. `(hconn : ConnectedSpace S)` added to the
+skeleton statement (logged, rule 5) — C2conn needs it; C4's arbitrary-loc-noeth reduction
+is componentwise, its own leaf. Source: GIT p. 116–117, Cor 6.4 (verbatim in quotes
+file). -/
 theorem isMonHom_of_one_comp_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
-    {A G : Over S} [GrpObj A] [GrpObj G]
+    (hconn : ConnectedSpace S) {A G : Over S} [GrpObj A] [GrpObj G]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
     [IsSeparated G.hom] (f : A ⟶ G) (hη : η[A] ≫ f = η[G]) :
     μ[A] ≫ f = MonoidalCategory.tensorHom f f ≫ μ[G] := by
-  sorry
+  -- the total space is locally noetherian and connected
+  haveI : IsLocallyNoetherian ↑A.left := LocallyOfFiniteType.isLocallyNoetherian A.hom
+  have heA : η[A].left ≫ A.hom = 𝟙 S := Over.w η[A]
+  haveI hAconn : ConnectedSpace ↥A.left :=
+    connectedSpace_of_universallyOConnected hO η[A].left heA
+  -- the product decomposition of `μ ≫ f` (GIT 6.3)
+  obtain ⟨g, h, hgh⟩ := factor_mul_of_tensor hO hAconn η[A] η[A] (μ[A] ≫ f)
+  have hF : μ[A] ≫ f = (fst A A ≫ g) * (snd A A ≫ h) := hgh
+  -- the two axis embeddings compose with `μ` to the identity
+  have hi₁ : lift (𝟙 A) (toUnit A ≫ η[A]) ≫ μ[A] = 𝟙 A := by
+    show (𝟙 A) * (1 : A ⟶ A) = 𝟙 A
+    rw [_root_.mul_one]
+  have hi₂ : lift (toUnit A ≫ η[A]) (𝟙 A) ≫ μ[A] = 𝟙 A := by
+    show (1 : A ⟶ A) * (𝟙 A) = 𝟙 A
+    rw [_root_.one_mul]
+  -- restricting the decomposition to the axes: `f = g · h(e)` and `f = g(e) · h`
+  have h1 : f = g * (toUnit A ≫ (η[A] ≫ h)) := by
+    calc f = lift (𝟙 A) (toUnit A ≫ η[A]) ≫ (μ[A] ≫ f) := by
+          rw [← Category.assoc, hi₁, Category.id_comp]
+      _ = lift (𝟙 A) (toUnit A ≫ η[A]) ≫ ((fst A A ≫ g) * (snd A A ≫ h)) := by rw [hF]
+      _ = (lift (𝟙 A) (toUnit A ≫ η[A]) ≫ (fst A A ≫ g))
+            * (lift (𝟙 A) (toUnit A ≫ η[A]) ≫ (snd A A ≫ h)) := MonObj.comp_mul _ _ _
+      _ = g * (toUnit A ≫ (η[A] ≫ h)) := by
+          rw [← Category.assoc, ← Category.assoc, lift_fst, lift_snd, Category.id_comp,
+            Category.assoc]
+  have h2 : f = (toUnit A ≫ (η[A] ≫ g)) * h := by
+    calc f = lift (toUnit A ≫ η[A]) (𝟙 A) ≫ (μ[A] ≫ f) := by
+          rw [← Category.assoc, hi₂, Category.id_comp]
+      _ = lift (toUnit A ≫ η[A]) (𝟙 A) ≫ ((fst A A ≫ g) * (snd A A ≫ h)) := by rw [hF]
+      _ = (lift (toUnit A ≫ η[A]) (𝟙 A) ≫ (fst A A ≫ g))
+            * (lift (toUnit A ≫ η[A]) (𝟙 A) ≫ (snd A A ≫ h)) := MonObj.comp_mul _ _ _
+      _ = (toUnit A ≫ (η[A] ≫ g)) * h := by
+          rw [← Category.assoc, ← Category.assoc, lift_fst, lift_snd, Category.id_comp,
+            Category.assoc]
+  -- the unit identity `g(e) · h(e) = 1`, and its group-theoretic flip
+  have hone : (η[A] ≫ g) * (η[A] ≫ h) = 1 := by
+    have h3 : η[A] ≫ f = (η[A] ≫ g) * (η[A] ≫ h) := by
+      calc η[A] ≫ f
+          = (η[A] ≫ g) * (η[A] ≫ (toUnit A ≫ (η[A] ≫ h))) := by
+            rw [h1]; exact MonObj.comp_mul _ _ _
+        _ = (η[A] ≫ g) * (η[A] ≫ h) := by
+            congr 1
+            rw [← Category.assoc, comp_toUnit, toUnit_unit, Category.id_comp]
+    rw [← h3, hη, Hom.one_def, toUnit_unit, Category.id_comp]
+  have hone' : (η[A] ≫ h) * (η[A] ≫ g) = 1 := by
+    rw [eq_inv_of_mul_eq_one_left hone, _root_.mul_inv_cancel]
+  -- assemble: `f(x)·f(y) = g(x)·[h(e)·g(e)]·h(y) = f(xy)`
+  have hfst : fst A A ≫ f = (fst A A ≫ g) * (toUnit (A ⊗ A) ≫ (η[A] ≫ h)) := by
+    rw [h1]
+    refine (MonObj.comp_mul _ _ _).trans ?_
+    congr 1
+  have hsnd : snd A A ≫ f = (toUnit (A ⊗ A) ≫ (η[A] ≫ g)) * (snd A A ≫ h) := by
+    rw [h2]
+    refine (MonObj.comp_mul _ _ _).trans ?_
+    congr 1
+    rw [← Category.assoc, comp_toUnit]
+  have hmid : (toUnit (A ⊗ A) ≫ (η[A] ≫ h)) * (toUnit (A ⊗ A) ≫ (η[A] ≫ g))
+      = (1 : A ⊗ A ⟶ G) := by
+    rw [← MonObj.comp_mul, hone', MonObj.comp_one]
+  have hfinal : (fst A A ≫ f) * (snd A A ≫ f) = (fst A A ≫ g) * (snd A A ≫ h) := by
+    rw [hfst, hsnd, _root_.mul_assoc, ← _root_.mul_assoc (toUnit (A ⊗ A) ≫ (η[A] ≫ h)),
+      hmid, _root_.one_mul]
+  calc μ[A] ≫ f = (fst A A ≫ g) * (snd A A ≫ h) := hF
+    _ = (fst A A ≫ f) * (snd A A ≫ f) := hfinal.symm
+    _ = lift (fst A A ≫ f) (snd A A ≫ f) ≫ μ[G] := Hom.mul_def _ _
+    _ = MonoidalCategory.tensorHom f f ≫ μ[G] := by
+        congr 1
 
 /-- **(T-W7.7 = T-W7b, GIT Cor 6.6)** Canonicity of the group law over a locally noetherian
 base: two working records with the same geometry are equal. Proof: apply the pointed-implies-
