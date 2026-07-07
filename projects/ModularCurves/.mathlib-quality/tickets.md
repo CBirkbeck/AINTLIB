@@ -5957,8 +5957,19 @@ Nakayama, all mathlib-present. Order: LC1→LC2→LC3→GF7→NOETH-FLAT1.
   proven generization-stability. HONEST ROADMAP: constructibility needs T-LC2 (00RB/00MI, "flatness
   from fibre exactness" — the OTHER direction from T-LC1's "freeness from flatness") + finite-free-
   resolution infra (00LP existence, 00HM syzygy-flatness), all mathlib-absent (surveyed) but TOR-FREE.
-  ~several hundred lines resolution-level. T-LC1 alone insufficient (confirmed). REMAINING sub-box:
-  `isConstructible_flatLocus`.
+  ~several hundred lines resolution-level. T-LC1 alone insufficient (confirmed).
+  - **UPDATE 2026-07-07T21:30Z (delegate + verified)**: DECISIVE — flat locus generization-stable
+    ⟹ **constructible ⟺ open** (no lightweight constructibility shortcut; full 00RC content
+    unavoidable). `isConstructible_flatLocus` + `isOpen_flatLocus` now BOTH PROVEN (NoetherianSpace
+    ⟹ open⟹retrocompact⟹constructible). SINGLE remaining box collapsed to
+    `exists_basicOpen_subset_flatLocus_of_mem` = LOCAL openness at a flat point (00RC true content).
+    `#print axioms isOpen_flatLocus` = standard three + sorryAx via THAT box only. ROADMAP for the box
+    (verified vs Stacks 00RC source): finite free resolution (00LP) + poly-ring reduction + finite
+    global dimension of κ(𝔭)[x] + **Buchsbaum-Eisenbud exactness (00N1)** + fibre-exactness (00RB) +
+    cokernel-flat (00MI) — ALL mathlib-absent, TOR-FREE (T-LC1 00MH + lTensor_exact + Nakayama +
+    resolutions). Substantial (~500-800 lines, several hard classical homological lemmas) but bounded.
+    T-LC2 = 00RB/00MI; NEW sub-tickets needed: 00LP (finite free resolutions of fp modules), poly-ring
+    global dimension, Buchsbaum-Eisenbud 00N1.
 - **PRIOR-Status**: open · **Depends on**: T-LC1, T-LC2 · **File**: ForMathlib/FlatLocus.lean ·
   **Type**: theorem
 - **Statement**: fill the boxed `isOpen_flatLocus` in FlatLocus.lean.
