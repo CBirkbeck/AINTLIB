@@ -2821,4 +2821,72 @@ theorem overlapMap_mul_root_pow_mem_range_of_mem (W : WeierstrassCurve R) {n : �
     rw [IsScalarTower.algebraMap_apply R (AdjoinRoot (infChartCubic W))
       (Localization.Away (infChartTElem W)) r]
 
+
+/-- The `sʲ`-coordinate of the `t`-cleared image of `f(x)·sⁿ`. -/
+private noncomputable def coordOfShift (W : WeierstrassCurve R) (f : Polynomial R)
+    (N n : ℕ) (j : Fin 3) : Polynomial R :=
+  ∑ i ∈ Finset.range (N + 1),
+    Polynomial.C (f.coeff i) * (sPowCoord W (i + n) j * Polynomial.X ^ (N - i))
+
+private lemma coordOfShift_coeff_eq_zero (W : WeierstrassCurve R) {f : Polynomial R}
+    {N n k : ℕ} {j : Fin 3} (h : 3 * k + (j : ℕ) + 2 * f.natDegree < 3 * N + n) :
+    (coordOfShift W f N n j).coeff k = 0 := by
+  unfold coordOfShift
+  rw [Polynomial.finsetSum_coeff]
+  refine Finset.sum_eq_zero fun i hi => ?_
+  have hiN : i < N + 1 := Finset.mem_range.mp hi
+  rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow']
+  rcases Nat.lt_or_ge k (N - i) with hlt | hle
+  · rw [if_neg (not_le.mpr hlt), mul_zero]
+  · rcases Nat.lt_or_ge f.natDegree i with hid | hid
+    · rw [Polynomial.coeff_eq_zero_of_natDegree_lt hid, zero_mul]
+    · rw [if_pos hle, sPowCoord_coeff_eq_zero W (by have := j.isLt; omega), mul_zero]
+
+private lemma coordOfShift_coeff_lead (W : WeierstrassCurve R) {f : Polynomial R}
+    {N n : ℕ} (hfN : f.natDegree ≤ N) {j : Fin 3}
+    (hj : (f.natDegree + n) % 3 = (j : ℕ)) :
+    (coordOfShift W f N n j).coeff (N - f.natDegree + (f.natDegree + n) / 3) =
+      f.leadingCoeff := by
+  unfold coordOfShift
+  rw [Polynomial.finsetSum_coeff]
+  rw [Finset.sum_eq_single f.natDegree]
+  · have hj3 := j.isLt
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow', if_pos (by omega),
+      show N - f.natDegree + (f.natDegree + n) / 3 - (N - f.natDegree) =
+        (f.natDegree + n - (j : ℕ)) / 3 by omega,
+      sPowCoord_coeff_lead W hj, mul_one]
+    rfl
+  · intro i hi hne
+    have hiN : i < N + 1 := Finset.mem_range.mp hi
+    have hj3 := j.isLt
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow']
+    rcases Nat.lt_or_ge (N - f.natDegree + (f.natDegree + n) / 3) (N - i) with hlt | hle
+    · rw [if_neg (not_le.mpr hlt), mul_zero]
+    · rcases Nat.lt_or_ge f.natDegree i with hid | hid
+      · rw [Polynomial.coeff_eq_zero_of_natDegree_lt hid, zero_mul]
+      · have hilt : i < f.natDegree := lt_of_le_of_ne hid hne
+        rw [if_pos hle, sPowCoord_coeff_eq_zero W (by omega), mul_zero]
+  · intro h
+    exact absurd (Finset.mem_range.mpr (by omega)) h
+
+/-- The `t`-cleared `sⁿ`-twisted evaluation in coordinate form. -/
+private lemma sum_range_eq_coordOfShift (W : WeierstrassCurve R) (f : Polynomial R)
+    (N n : ℕ) :
+    ∑ i ∈ Finset.range (N + 1),
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+            (Polynomial.C (f.coeff i) * Polynomial.X ^ (N - i)) *
+          AdjoinRoot.root (infChartCubic W) ^ (i + n) =
+      algebraMap (Polynomial R) _ (coordOfShift W f N n 0) +
+        algebraMap (Polynomial R) _ (coordOfShift W f N n 1) *
+          AdjoinRoot.root (infChartCubic W) +
+        algebraMap (Polynomial R) _ (coordOfShift W f N n 2) *
+          AdjoinRoot.root (infChartCubic W) ^ 2 := by
+  unfold coordOfShift
+  rw [map_sum, map_sum, map_sum, Finset.sum_mul, Finset.sum_mul,
+    ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [root_pow_eq W (i + n)]
+  simp only [map_mul]
+  ring
+
 end ModularCurves

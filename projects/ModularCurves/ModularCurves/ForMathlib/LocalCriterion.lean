@@ -55,8 +55,8 @@ variable {R S M : Type*} [CommRing R] [CommRing S] [Algebra R S]
 From freeness of the fibre `M ⧸ 𝔪M` over the fibre ring `S ⧸ 𝔪S` one extracts a finite free
 presentation `φ : Sʳ → M` that is
 * surjective (Nakayama, since the fibre basis generates `M ⧸ 𝔫M`), and
-* an isomorphism after reduction modulo `𝔪` (`φ ⊗_R R/𝔪` is bijective — it sends the standard
-  basis of `(S/𝔪S)ʳ` to a basis of the free fibre `M/𝔪M`).
+* injective after reduction modulo `𝔪` (`φ ⊗_R R/𝔪` is injective — indeed an isomorphism, as it
+  sends the standard basis of `(S/𝔪S)ʳ` to the basis of the free fibre `M/𝔪M`).
 
 This is where the freeness-of-the-fibre hypothesis is consumed; it involves no flatness.  It is
 isolated here so that the main theorem's proof is exactly the Tor-free homological argument. -/
@@ -94,7 +94,7 @@ theorem Module.free_of_flat_of_fibre_free [Module.Flat R M]
       (Module.Flat.lTensor_preserves_injective_linearMap _ Subtype.val_injective)
   have hcomp : φR ∘ₗ (LinearMap.restrictScalars R Ksub.subtype) = 0 := by
     ext w; exact LinearMap.mem_ker.mp w.2
-  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0` (as `φ ⊗ k` is bijective).
+  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0` (as `φ ⊗ k` is injective).
   have hkK : Subsingleton (k ⊗[R] Ksub) := by
     refine (subsingleton_iff_forall_eq 0).mpr fun z => ?_
     have hz : LinearMap.lTensor k (LinearMap.restrictScalars R Ksub.subtype) z = 0 := by
