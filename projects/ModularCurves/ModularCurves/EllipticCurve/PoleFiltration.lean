@@ -441,7 +441,80 @@ theorem infChart_s_nonZeroDivisor (W : WeierstrassCurve R) :
         W.toProjective.polynomial}) (MvPolynomial.X ⟨0, by decide⟩)) ∈
       nonZeroDivisors (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) := by
-  sorry
+  have hs : infChartQuotEquiv W (Ideal.Quotient.mk _ (MvPolynomial.X infChartS)) =
+      AdjoinRoot.root (infChartCubic W) := by
+    show Ideal.quotientEquivAlg _ _ (infChartPolyEquiv (R := R)) _
+      (Ideal.Quotient.mk _ (MvPolynomial.X infChartS)) = _
+    rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_s]
+    rfl
+  have key : ∀ m, m * (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
+      W.toProjective.polynomial}) (MvPolynomial.X ⟨0, by decide⟩)) = 0 → m = 0 := by
+    intro m hm
+    have h1 : infChartQuotEquiv W m * AdjoinRoot.root (infChartCubic W) = 0 := by
+      rw [← hs, ← map_mul, hm, map_zero]
+    have h2 := (mem_nonZeroDivisors_iff.mp (infChart_root_mem_nonZeroDivisors W)).2 _ h1
+    exact (infChartQuotEquiv W).injective (by rw [h2, map_zero])
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => key x (by rwa [mul_comm] at hx), key⟩
+
+/-- **(T-W7.0i·i4-core, general)** Two morphisms from `Spec A` to a separated scheme that
+agree after inverting a nonzerodivisor are equal — the NON-reduced replacement for
+density arguments: the equalizer is a closed immersion (separatedness), the localization
+factors through it, and injectivity of `A → A[1/a]` kills the ideal. Mirrors the
+Over-packaging of mathlib's `ext_of_isDominant_of_isSeparated`; the ending is
+`IsClosedImmersion.isIso_of_injective_of_isAffine` instead of reducedness. -/
+theorem spec_hom_ext_of_nonZeroDivisor {A : Type u} [CommRing A] {Z : Scheme.{u}}
+    [Z.IsSeparated] {f g : Spec (CommRingCat.of A) ⟶ Z} (a : A)
+    (ha : a ∈ nonZeroDivisors A)
+    (h : Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ f =
+      Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ g) : f = g := by
+  have hfg : f ≫ terminal.from Z = g ≫ terminal.from Z := terminal.hom_ext _ _
+  let X' : Over (⊤_ Scheme.{u}) := Over.mk (f ≫ terminal.from Z)
+  let Y' : Over (⊤_ Scheme.{u}) := Over.mk (terminal.from Z)
+  let U' : Over (⊤_ Scheme.{u}) := Over.mk
+    (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) ≫ f ≫ terminal.from Z)
+  let f' : X' ⟶ Y' := Over.homMk f
+  let g' : X' ⟶ Y' := Over.homMk g hfg.symm
+  let ι' : U' ⟶ X' :=
+    Over.homMk (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))))
+  haveI : IsSeparated Y'.hom :=
+    show IsSeparated (terminal.from Z) from Scheme.IsSeparated.isSeparated_terminal_from
+  have hlift : (equalizer.lift ι' (by ext1; exact h)).left ≫ (equalizer.ι f' g').left =
+      Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) := by
+    rw [← Over.comp_left, equalizer.lift_ι]
+    rfl
+  have hinj : Function.Injective ((equalizer.ι f' g').left.appTop) := by
+    have happ := congrArg Scheme.Hom.appTop hlift
+    rw [Scheme.Hom.comp_appTop] at happ
+    have hloc : Function.Injective
+        ((Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a)))).appTop) := by
+      have hnat := Scheme.ΓSpecIso_naturality
+        (CommRingCat.ofHom (algebraMap A (Localization.Away a)))
+      have halg : Function.Injective (algebraMap A (Localization.Away a)) :=
+        IsLocalization.injective (Localization.Away a) (Submonoid.powers_le.mpr ha)
+      have : (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a)))).appTop =
+          (Scheme.ΓSpecIso (CommRingCat.of A)).hom ≫
+            CommRingCat.ofHom (algebraMap A (Localization.Away a)) ≫
+              (Scheme.ΓSpecIso (CommRingCat.of (Localization.Away a))).inv := by
+        rw [← Category.assoc, ← hnat, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+      rw [this]
+      intro x y hxy
+      simp only [CommRingCat.comp_apply] at hxy
+      have h1 := (ConcreteCategory.isIso_iff_bijective
+        (Scheme.ΓSpecIso (CommRingCat.of (Localization.Away a))).inv).mp
+        inferInstance |>.injective hxy
+      have h2 := halg h1
+      exact ((ConcreteCategory.isIso_iff_bijective
+        (Scheme.ΓSpecIso (CommRingCat.of A)).hom).mp inferInstance).injective h2
+    intro x y hxy
+    have h1 := congrArg (fun φ => φ.hom x) happ
+    have h2 := congrArg (fun φ => φ.hom y) happ
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1 h2
+    exact hloc ((h1.symm.trans (congrArg _ hxy)).trans h2)
+  haveI : IsAffine X'.left := show IsAffine (Spec (CommRingCat.of A)) from inferInstance
+  haveI := IsClosedImmersion.isIso_of_injective_of_isAffine
+    (f := (equalizer.ι f' g').left) hinj
+  exact (cancel_epi (equalizer.ι f' g').left).mp congr($(equalizer.condition f' g').left)
 
 /-- **(T-W7.0i·i4)** Morphisms out of the projective model into a separated scheme are
 determined by their restriction to the affine part (the `Z`-chart, whose complement is the
