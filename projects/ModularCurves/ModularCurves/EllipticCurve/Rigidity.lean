@@ -1066,22 +1066,12 @@ theorem preconnectedSpace_of_isField {Z : Scheme.{u}} (hf : IsField ↑(Γ(Z, �
     exact one_ne_zero (α := ToType (Z.presheaf.stalk z))
       (by simpa using congrArg (Z.presheaf.germ (U false) z hz').hom hbad)
 
-/-- **(T-W7.7·C2conn, PROVEN)** The total space of a proper flat universally-`O`-connected
-family with a section over a connected locally noetherian base is connected — GIT Cor 6.3
-runs its connectedness argument along the SECOND factor, so C3's application to `A ⊗ A`
-needs `A.left` connected, not just `S`. Assembly: `p` is open (flat + lfp over locally
-noetherian, as in T-W7.r2·d) and closed (proper); each fibre is the range of
-`pullback.fst p (S.fromSpecResidueField t)`, whose total space has global sections the
-field `κ(t)` by `O`-connectedness, hence is preconnected (`preconnectedSpace_of_isField`)
-and nonempty (the section); `connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_-
-preimage` closes. `[IsLocallyNoetherian S]` was added to the original skeleton statement
-for the open-map instance chain — every consumer (C1–C4) already assumes it. -/
-theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
-    [IsLocallyNoetherian S] [IsProper p] [Flat p]
-    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
-    [hconn : ConnectedSpace S] : ConnectedSpace X := by
-  refine connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
-    p.isOpenMap p.isClosedMap (fun t => ?_)
+/-- **(T-W7.7·C2conn·fib)** Fibres of a universally-`O`-connected family with a section
+are connected: `Γ(fibre) ≅ κ(t)` is a field, so the fibre is preconnected
+(`preconnectedSpace_of_isField`), and the section provides a point. -/
+theorem isConnected_fibre_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S) (t : S) :
+    _root_.IsConnected (p.base ⁻¹' {t}) := by
   -- the fibre is the range of the projection from the residue-field pullback
   have hrange : Set.range (pullback.fst p (S.fromSpecResidueField t)).base
       = p.base ⁻¹' {t} := by
@@ -1108,6 +1098,24 @@ theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
   haveI : ConnectedSpace ↥(pullback p (S.fromSpecResidueField t)) := ⟨‹_›⟩
   rw [← hrange]
   exact isConnected_range (pullback.fst p (S.fromSpecResidueField t)).base.hom.continuous
+
+/-- **(T-W7.7·C2conn, PROVEN)** The total space of a proper flat universally-`O`-connected
+family with a section over a connected locally noetherian base is connected — GIT Cor 6.3
+runs its connectedness argument along the SECOND factor, so C3's application to `A ⊗ A`
+needs `A.left` connected, not just `S`. Assembly: `p` is open (flat + lfp over locally
+noetherian, as in T-W7.r2·d) and closed (proper); each fibre is the range of
+`pullback.fst p (S.fromSpecResidueField t)`, whose total space has global sections the
+field `κ(t)` by `O`-connectedness, hence is preconnected (`preconnectedSpace_of_isField`)
+and nonempty (the section); `connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_-
+preimage` closes. `[IsLocallyNoetherian S]` was added to the original skeleton statement
+for the open-map instance chain — every consumer (C1–C4) already assumes it. -/
+theorem connectedSpace_of_universallyOConnected {X S : Scheme.{u}} {p : X ⟶ S}
+    [IsLocallyNoetherian S] [IsProper p] [Flat p]
+    (hp : UniversallyOConnected p) (e : S ⟶ X) (he : e ≫ p = 𝟙 S)
+    [hconn : ConnectedSpace S] : ConnectedSpace X :=
+  connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
+    p.isOpenMap p.isClosedMap
+    (fun t => isConnected_fibre_of_universallyOConnected hp e he t)
 
 /-- Components of the GIT pointwise-quotient collapse: if `h` equalizes `f` and `g` into a
 group object, then `h ≫ (f · g⁻¹)` is the unit constant, in `Over`-components. Generic
@@ -1248,10 +1256,11 @@ Statement changes logged on the board (rule 5): `e₂` (the source quote's secon
 `[IsLocallyNoetherian B.left]`; the product order is Mumford's `g(x)·h(y)` — obtained from
 the LEFT quotient `(Ẽ≫f)⁻¹·f`, and load-bearing: the flipped order would make GIT 6.4
 produce an antihomomorphism. Source: GIT p. 116, Cor 6.3 (verbatim in quotes file). -/
-theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
+theorem factor_mul_of_tensor_of_forall_component {S : Scheme.{u}} [IsLocallyNoetherian S]
     {A B G : Over S} [GrpObj G] [IsLocallyNoetherian B.left]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
-    (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A) (e₂ : 𝟙_ (Over S) ⟶ B)
+    (e₁ : 𝟙_ (Over S) ⟶ A) (e₂ : 𝟙_ (Over S) ⟶ B)
+    (hfix : ∀ t : ↥B.left, ∃ b ∈ connectedComponent t, e₂.left.base (B.hom.base b) = b)
     [IsSeparated G.hom] (f : A ⊗ B ⟶ G) :
     ∃ (g : A ⟶ G) (h : B ⟶ G),
       f = lift (fst A B ≫ g) (snd A B ≫ h) ≫ μ[G] := by
@@ -1265,9 +1274,10 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
   set ηl : S ⟶ G.left := η[G].left with hηl
   set e₂l : S ⟶ B.left := e₂.left with he₂l
   have he₂B : e₂l ≫ B.hom = 𝟙 S := Over.w e₂
-  -- the point of `B.left` where the fibre collapses
-  obtain ⟨b₀⟩ := hBconn.toNonempty
-  set y₀ : ↥B.left := e₂l.base (B.hom.base b₀) with hy₀
+  -- the difference, over the base `B.left`, into the base-changed group
+  have hδq : δl ≫ G.hom = pullback.snd A.hom B.hom ≫ B.hom := by
+    have hw : δl ≫ G.hom = pullback.fst A.hom B.hom ≫ A.hom := Over.w ((E ≫ f)⁻¹ * f)
+    rw [hw, pullback.condition]
   -- components of the frozen map, in the raw spelling
   have hElfst : El ≫ pullback.fst A.hom B.hom = pullback.fst A.hom B.hom := by
     have h := congrArg CommaMorphism.left (lift_fst (fst A B) (toUnit (A ⊗ B) ≫ e₂))
@@ -1284,96 +1294,100 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
       simp only [Category.assoc]
     rw [hEl, hE]
     exact h.trans h2
-  -- the fibre inclusion over `y₀` fixes the frozen map (C2·fib, via C2·res)
-  have hEfix : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-      ≫ El = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀) := by
-    apply pullback.hom_ext
-    · rw [Category.assoc, hElfst]
-    · rw [Category.assoc, hElsnd,
-        ← Category.assoc, pullback.condition (f := pullback.snd A.hom B.hom)
-          (g := B.left.fromSpecResidueField y₀)]
-      simp only [Category.assoc]
-      have hres := fromSpecResidueField_comp_section B.hom e₂l he₂B (B.hom.base b₀)
-      rw [← hy₀] at hres
-      rw [hres]
-  -- morphism-level fibre agreement of `f` and `E ≫ f`, packaged over `S`
-  have hgoalIf : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-      ≫ fl = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-        ≫ El ≫ fl := by
-    rw [← Category.assoc, hEfix]
-  have hIf : (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
-        (B.left.fromSpecResidueField y₀)) rfl :
-      Over.mk (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-        ≫ (A ⊗ B).hom) ⟶ A ⊗ B) ≫ f
-      = (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
-          (B.left.fromSpecResidueField y₀)) rfl) ≫ (E ≫ f) := by
-    apply Over.OverMorphism.ext
-    simp only [Over.comp_left, Over.homMk_left]
-    exact hgoalIf
-  have hconst0 := comp_inv_mul_left _ (E ≫ f) f hIf.symm
-  simp only [Over.homMk_left, Over.mk_hom] at hconst0
-  have hconst : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-      ≫ δl
-      = (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-          ≫ (pullback.fst A.hom B.hom ≫ A.hom)) ≫ ηl := hconst0
-  -- the difference, over the base `B.left`, into the base-changed group
-  have hδq : δl ≫ G.hom = pullback.snd A.hom B.hom ≫ B.hom := by
-    have hw : δl ≫ G.hom = pullback.fst A.hom B.hom ≫ A.hom := Over.w ((E ≫ f)⁻¹ * f)
-    rw [hw, pullback.condition]
-  -- the restricted difference factors through the one-point `Spec κ(y₀)`
-  have hη : ηl ≫ G.hom = 𝟙 S := Over.w η[G]
-  have hzw : (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl) ≫ G.hom
-      = B.left.fromSpecResidueField y₀ ≫ B.hom := by
-    rw [Category.assoc, Category.assoc, hη, Category.comp_id]
-  have hfactor : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-        ≫ pullback.lift δl (pullback.snd A.hom B.hom) hδq
-      = pullback.snd (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
-        ≫ pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
-            (B.left.fromSpecResidueField y₀) hzw := by
-    apply pullback.hom_ext
-    · rw [Category.assoc, Category.assoc, pullback.lift_fst, pullback.lift_fst, hconst]
-      simp only [← Category.assoc]
-      congr 1
-      rw [← pullback.condition (f := pullback.snd A.hom B.hom)
-        (g := B.left.fromSpecResidueField y₀)]
-      simp only [Category.assoc]
-      rw [pullback.condition (f := A.hom) (g := B.hom)]
-    · rw [Category.assoc, Category.assoc, pullback.lift_snd, pullback.lift_snd]
-      exact pullback.condition
-  have hsub : Set.Subsingleton
-      ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base ''
+  -- the collapse locus: every fixed point of `e₂ ∘ q` has subsingleton fibre image
+  have key : ∀ y₀ : ↥B.left, e₂l.base (B.hom.base y₀) = y₀ →
+      Set.Subsingleton ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base ''
         ((pullback.snd A.hom B.hom).base ⁻¹' {y₀})) := by
-    have hrange : (pullback.snd A.hom B.hom).base ⁻¹' {y₀}
-        = Set.range (pullback.fst (pullback.snd A.hom B.hom)
-            (B.left.fromSpecResidueField y₀)).base := by
-      rw [Scheme.Pullback.range_fst, Scheme.range_fromSpecResidueField]
-    rw [hrange, ← Set.range_comp]
-    rintro p ⟨w, rfl⟩ p' ⟨w', rfl⟩
-    have h1 : ∀ v, ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base
-          ∘ (pullback.fst (pullback.snd A.hom B.hom)
-              (B.left.fromSpecResidueField y₀)).base) v
-        = (pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
-              (B.left.fromSpecResidueField y₀) hzw).base
-            ((pullback.snd (pullback.snd A.hom B.hom)
-              (B.left.fromSpecResidueField y₀)).base v) := by
-      intro v
-      have h2 := congrArg (fun m : (pullback (pullback.snd A.hom B.hom)
-          (B.left.fromSpecResidueField y₀) : Scheme.{u}) ⟶ pullback G.hom B.hom => m v)
-        hfactor
-      simpa [Scheme.Hom.comp_apply] using h2
-    rw [h1 w, h1 w']
-    exact congrArg _ (Subsingleton.elim _ _)
+    intro y₀ hbfix
+    -- the fibre inclusion over `y₀` fixes the frozen map (C2·fib, via C2·res)
+    have hEfix : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ El = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀) := by
+      apply pullback.hom_ext
+      · rw [Category.assoc, hElfst]
+      · rw [Category.assoc, hElsnd,
+          ← Category.assoc, pullback.condition (f := pullback.snd A.hom B.hom)
+            (g := B.left.fromSpecResidueField y₀)]
+        simp only [Category.assoc]
+        have hres := fromSpecResidueField_comp_section B.hom e₂l he₂B (B.hom.base y₀)
+        rw [hbfix] at hres
+        rw [hres]
+    -- morphism-level fibre agreement of `f` and `E ≫ f`, packaged over `S`
+    have hgoalIf : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ fl = pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+          ≫ El ≫ fl := by
+      rw [← Category.assoc, hEfix]
+    have hIf : (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
+          (B.left.fromSpecResidueField y₀)) rfl :
+        Over.mk (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+          ≫ (A ⊗ B).hom) ⟶ A ⊗ B) ≫ f
+        = (Over.homMk (pullback.fst (pullback.snd A.hom B.hom)
+            (B.left.fromSpecResidueField y₀)) rfl) ≫ (E ≫ f) := by
+      apply Over.OverMorphism.ext
+      simp only [Over.comp_left, Over.homMk_left]
+      exact hgoalIf
+    have hconst0 := comp_inv_mul_left _ (E ≫ f) f hIf.symm
+    simp only [Over.homMk_left, Over.mk_hom] at hconst0
+    have hconst : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+        ≫ δl
+        = (pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+            ≫ (pullback.fst A.hom B.hom ≫ A.hom)) ≫ ηl := hconst0
+    -- the restricted difference factors through the one-point `Spec κ(y₀)`
+    have hη : ηl ≫ G.hom = 𝟙 S := Over.w η[G]
+    have hzw : (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl) ≫ G.hom
+        = B.left.fromSpecResidueField y₀ ≫ B.hom := by
+      rw [Category.assoc, Category.assoc, hη, Category.comp_id]
+    have hfactor : pullback.fst (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+          ≫ pullback.lift δl (pullback.snd A.hom B.hom) hδq
+        = pullback.snd (pullback.snd A.hom B.hom) (B.left.fromSpecResidueField y₀)
+          ≫ pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
+              (B.left.fromSpecResidueField y₀) hzw := by
+      apply pullback.hom_ext
+      · rw [Category.assoc, Category.assoc, pullback.lift_fst, pullback.lift_fst, hconst]
+        simp only [← Category.assoc]
+        congr 1
+        rw [← pullback.condition (f := pullback.snd A.hom B.hom)
+          (g := B.left.fromSpecResidueField y₀)]
+        simp only [Category.assoc]
+        rw [pullback.condition (f := A.hom) (g := B.hom)]
+      · rw [Category.assoc, Category.assoc, pullback.lift_snd, pullback.lift_snd]
+        exact pullback.condition
+    have hsub : Set.Subsingleton
+        ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base ''
+          ((pullback.snd A.hom B.hom).base ⁻¹' {y₀})) := by
+      have hrange : (pullback.snd A.hom B.hom).base ⁻¹' {y₀}
+          = Set.range (pullback.fst (pullback.snd A.hom B.hom)
+              (B.left.fromSpecResidueField y₀)).base := by
+        rw [Scheme.Pullback.range_fst, Scheme.range_fromSpecResidueField]
+      rw [hrange, ← Set.range_comp]
+      rintro p ⟨w, rfl⟩ p' ⟨w', rfl⟩
+      have h1 : ∀ v, ((pullback.lift δl (pullback.snd A.hom B.hom) hδq).base
+            ∘ (pullback.fst (pullback.snd A.hom B.hom)
+                (B.left.fromSpecResidueField y₀)).base) v
+          = (pullback.lift (B.left.fromSpecResidueField y₀ ≫ B.hom ≫ ηl)
+                (B.left.fromSpecResidueField y₀) hzw).base
+              ((pullback.snd (pullback.snd A.hom B.hom)
+                (B.left.fromSpecResidueField y₀)).base v) := by
+        intro v
+        have h2 := congrArg (fun m : (pullback (pullback.snd A.hom B.hom)
+            (B.left.fromSpecResidueField y₀) : Scheme.{u}) ⟶ pullback G.hom B.hom => m v)
+          hfactor
+        simpa [Scheme.Hom.comp_apply] using h2
+      rw [h1 w, h1 w']
+      exact congrArg _ (Subsingleton.elim _ _)
+    exact hsub
   -- rigidity over `B.left`
-  haveI := hBconn
   haveI hpO : UniversallyOConnected (pullback.snd A.hom B.hom) := hO.baseChange B.hom
   set e₁l : S ⟶ A.left := e₁.left with he₁l
   have he₁A : e₁l ≫ A.hom = 𝟙 S := Over.w e₁
-  obtain ⟨sec, hsecq, hfac⟩ := rigidity hBconn hpO
+  obtain ⟨sec, hsecq, hfac⟩ := rigidity_of_forall_component hpO
     (pullback.lift (B.hom ≫ e₁l) (𝟙 B.left)
       (by rw [Category.assoc, he₁A, Category.comp_id, Category.id_comp]))
     (pullback.lift_snd _ _ _)
     (pullback.lift δl (pullback.snd A.hom B.hom) hδq)
-    (pullback.lift_snd _ _ _) y₀ hsub
+    (pullback.lift_snd _ _ _)
+    (fun t => by
+      obtain ⟨b, hbcomp, hbfix⟩ := hfix t
+      exact ⟨b, hbcomp, key b hbfix⟩)
   -- extract `h` and close with Hom-group algebra
   have hsecw : (sec ≫ pullback.fst G.hom B.hom) ≫ G.hom = B.hom := by
     rw [Category.assoc, pullback.condition, ← Category.assoc, hsecq, Category.id_comp]
@@ -1397,6 +1411,23 @@ theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
           (snd A B ≫ Over.homMk (sec ≫ pullback.fst G.hom B.hom) hsecw) ≫ μ[G] :=
         Hom.mul_def _ _
 
+/-- **(T-W7.7·C2, GIT Cor 6.3, connected-base wrapper)** With `B.left` connected, any
+point of the form `e₂(s)` is a fixed point of `e₂ ∘ q` in the unique component. -/
+theorem factor_mul_of_tensor {S : Scheme.{u}} [IsLocallyNoetherian S]
+    {A B G : Over S} [GrpObj G] [IsLocallyNoetherian B.left]
+    [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
+    (hBconn : ConnectedSpace B.left) (e₁ : 𝟙_ (Over S) ⟶ A) (e₂ : 𝟙_ (Over S) ⟶ B)
+    [IsSeparated G.hom] (f : A ⊗ B ⟶ G) :
+    ∃ (g : A ⟶ G) (h : B ⟶ G),
+      f = lift (fst A B ≫ g) (snd A B ≫ h) ≫ μ[G] := by
+  refine factor_mul_of_tensor_of_forall_component hO e₁ e₂ (fun t => ?_) f
+  refine ⟨e₂.left.base (B.hom.base t), ?_, ?_⟩
+  · haveI := hBconn
+    rw [PreconnectedSpace.connectedComponent_eq_univ t]
+    trivial
+  · exact congrArg
+      (fun m : S ⟶ S => e₂.left.base (m.base (B.hom.base t))) (Over.w e₂)
+
 /-- **(T-W7.7a-C3, GIT Cor 6.4, PROVEN)** A pointed morphism of group objects in `Over S`,
 whose source is proper flat and universally `O`-connected over a connected locally
 noetherian `S`, is a homomorphism (the multiplication-compatibility equation;
@@ -1409,18 +1440,32 @@ gives `g(e)h(e) = 1`, hence `h(e)g(e) = 1` (groups), and
 skeleton statement (logged, rule 5) — C2conn needs it; C4's arbitrary-loc-noeth reduction
 is componentwise, its own leaf. Source: GIT p. 116–117, Cor 6.4 (verbatim in quotes
 file). -/
-theorem isMonHom_of_one_comp_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
-    (hconn : ConnectedSpace S) {A G : Over S} [GrpObj A] [GrpObj G]
+theorem isMonHom_of_one_comp_eq' {S : Scheme.{u}} [IsLocallyNoetherian S]
+    {A G : Over S} [GrpObj A] [GrpObj G]
     [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
     [IsSeparated G.hom] (f : A ⟶ G) (hη : η[A] ≫ f = η[G]) :
     μ[A] ≫ f = MonoidalCategory.tensorHom f f ≫ μ[G] := by
-  -- the total space is locally noetherian and connected
+  -- the total space is locally noetherian
   haveI : IsLocallyNoetherian ↑A.left := LocallyOfFiniteType.isLocallyNoetherian A.hom
   have heA : η[A].left ≫ A.hom = 𝟙 S := Over.w η[A]
-  haveI hAconn : ConnectedSpace ↥A.left :=
-    connectedSpace_of_universallyOConnected hO η[A].left heA
-  -- the product decomposition of `μ ≫ f` (GIT 6.3)
-  obtain ⟨g, h, hgh⟩ := factor_mul_of_tensor hO hAconn η[A] η[A] (μ[A] ≫ f)
+  -- every component of the total space contains a fixed point of `η ∘ π`: components are
+  -- the fibres of the base's components (open + closed + connected fibres)
+  have hcorr := connectedComponent_eq_preimage_connectedComponent
+    (f := (A.hom.base : _ → ↥S)) A.hom.base.hom.continuous A.hom.isOpenMap A.hom.isClosedMap
+    (fun y => isConnected_fibre_of_universallyOConnected hO η[A].left heA y)
+  have hπη : ∀ s : ↥S, A.hom.base (η[A].left.base s) = s := fun s => by
+    exact congrArg (fun m : S ⟶ S => m.base s) heA
+  have hfix : ∀ t : ↥A.left, ∃ b ∈ connectedComponent t,
+      η[A].left.base (A.hom.base b) = b := by
+    intro t
+    refine ⟨η[A].left.base (A.hom.base t), ?_, ?_⟩
+    · rw [hcorr t]
+      show A.hom.base (η[A].left.base (A.hom.base t)) ∈ connectedComponent (A.hom.base t)
+      rw [hπη (A.hom.base t)]
+      exact mem_connectedComponent
+    · exact congrArg (fun s => η[A].left.base s) (hπη (A.hom.base t))
+  -- the product decomposition of `μ ≫ f` (GIT 6.3, componentwise)
+  obtain ⟨g, h, hgh⟩ := factor_mul_of_tensor_of_forall_component hO η[A] η[A] hfix (μ[A] ≫ f)
   have hF : μ[A] ≫ f = (fst A A ≫ g) * (snd A A ≫ h) := hgh
   -- the two axis embeddings compose with `μ` to the identity
   have hi₁ : lift (𝟙 A) (toUnit A ≫ η[A]) ≫ μ[A] = 𝟙 A := by
@@ -1482,6 +1527,14 @@ theorem isMonHom_of_one_comp_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
     _ = MonoidalCategory.tensorHom f f ≫ μ[G] := by
         congr 1
 
+/-- **(T-W7.7a-C3, connected-base wrapper)** -/
+theorem isMonHom_of_one_comp_eq {S : Scheme.{u}} [IsLocallyNoetherian S]
+    (hconn : ConnectedSpace S) {A G : Over S} [GrpObj A] [GrpObj G]
+    [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
+    [IsSeparated G.hom] (f : A ⟶ G) (hη : η[A] ≫ f = η[G]) :
+    μ[A] ≫ f = MonoidalCategory.tensorHom f f ≫ μ[G] :=
+  isMonHom_of_one_comp_eq' hO f hη
+
 /-- **(T-W7.7·C4conn, GIT Cor 6.6 over a connected base, PROVEN modulo r-supply)**
 Canonicity of the group law over a connected locally noetherian base. The two units are
 both the zero section (`one_eq_zero`); C3 applied to `𝟙` (viewed from the `grp`-structure
@@ -1524,11 +1577,30 @@ this path. -/
 theorem abelEnrichment_unique_of_isLocallyNoetherian {S : Scheme.{u}}
     [IsLocallyNoetherian S] (E E' : EllipticCurve S)
     (h : E.toEllipticCurveGeom = E'.toEllipticCurveGeom) : E = E' := by
-  -- (T-W7.7·C4glue — SORRIED LEAF) componentwise reduction: `S` locally noetherian is
-  -- locally connected, so its connected components are clopen; restrict both records to
-  -- each component (base change of the group objects along the open immersion), apply
-  -- `abelEnrichment_unique_of_connectedSpace` there, and glue the morphism equalities
-  -- `μ = μ'`, `η = η'` along the open cover of the total spaces.
-  sorry
+  -- (T-W7.7·C4glue, PROVEN) no componentwise reduction needed after all: the ∀-component
+  -- rigidity chain (`rigidity_of_forall_component` → `factor_mul_of_tensor_of_forall_-
+  -- component` → `isMonHom_of_one_comp_eq'`) works over any locally noetherian base —
+  -- every component of the total space contains a fixed point of `η ∘ π` because the
+  -- components of the total space are the fibres of the base's components
+  -- (`connectedComponent_eq_preimage_connectedComponent`).
+  obtain ⟨geom, grp, comm, hone⟩ := E
+  obtain ⟨geom', grp', comm', hone'⟩ := E'
+  obtain rfl : geom = geom' := h
+  have honeeq : (letI := grp; (η[Over.mk geom.π] : 𝟙_ (Over S) ⟶ Over.mk geom.π))
+      = (letI := grp'; (η[Over.mk geom.π] : 𝟙_ (Over S) ⟶ Over.mk geom.π)) := by
+    apply Over.OverMorphism.ext
+    rw [hone, hone']
+  have hmul : (letI := grp; (μ[Over.mk geom.π] : Over.mk geom.π ⊗ Over.mk geom.π ⟶ _))
+      = (letI := grp'; (μ[Over.mk geom.π] : Over.mk geom.π ⊗ Over.mk geom.π ⟶ _)) := by
+    haveI : Smooth geom.π := SmoothOfRelativeDimension.smooth (n := 1) (f := geom.π)
+    haveI hP : IsProper (Over.mk geom.π).hom := inferInstanceAs (IsProper geom.π)
+    haveI hFl : Flat (Over.mk geom.π).hom := inferInstanceAs (Flat geom.π)
+    haveI hSep : IsSeparated (Over.mk geom.π).hom := inferInstanceAs (IsSeparated geom.π)
+    have h64 := @isMonHom_of_one_comp_eq' S _ (Over.mk geom.π) (Over.mk geom.π)
+      grp grp' hP hFl geom.universallyOConnected hSep (𝟙 _)
+      (by rw [Category.comp_id]; exact honeeq)
+    simpa using h64
+  obtain rfl : grp = grp' := GrpObj.ext _ _ (MonObj.ext _ _ hmul)
+  rfl
 
 end ModularCurves
