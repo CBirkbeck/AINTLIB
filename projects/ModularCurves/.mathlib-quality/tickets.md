@@ -1938,7 +1938,28 @@ directly applicable). All leaves unclaimed.
   concrete subtype proof at the carrier spelling breaks rw; rhoContAction must be
   abbrev like rhoAction; Equiv.trans-applied goals need Eq.trans-of-congrArgs, not
   rw; counit equivariance = pointsEquivOfContAction_smul from Action.Hom.comm +
-  ConcreteCategory.comp_apply). All axiom-clean. Remaining: T-F1c group structure. Final seam notes in commit eab704fb
+  ConcreteCategory.comp_apply). All axiom-clean. Remaining: T-F1c group structure.
+  **T-F1c PLAN (banked 2026-07-07, beastmode-B)** — new file ModularCurve/VRhoGroup.lean:
+  - F1c-1: `rhoSqContAction D` (carrier (Fin 2 → ZMod N) × (Fin 2 → ZMod N), diagonal
+    ρ-action, continuity by the same coset argument) + `rhoAddMor : rhoSqContAction D ⟶
+    rhoContAction D` (v,w ↦ v+w; equivariant since ρ σ is LINEAR — mulVec distributes)
+    + zero/neg morphisms from the point-object.
+  - F1c-2: rhoSqContAction ≅ categorical product (rhoContAction D) ⨯ (rhoContAction D)
+    in ContAction (BinaryFan.IsLimit or transport from Action-products; check whether
+    ContAction has/creates binary products — the full subcategory is closed under them:
+    product action of continuous actions is continuous, same discrete-rng proof).
+  - F1c-3: transport along (finiteEtaleEquivContAction ℚ).inverse: comultiplication
+    `vRhoAlgebra D →ₐ[ℚ] (algebra of the square)` + identify the square's algebra with
+    a pushout/tensor via the equivalence's product-preservation
+    (equivalences preserve limits; PreservesLimitPair.iso) + my spanPushoutCocone.
+  - F1c-4: Spec-side: `vRhoAdd : pullback (vRhoπ D) (vRhoπ D) ⟶ vRho D` via
+    pullbackSpecIso (AlgebraicGeometry/Pullbacks:719) on the tensor; unit/inv/assoc
+    laws by transport (or GrpObj-packaging via Functor.mapGrp if the monoidal
+    plumbing on ContAction is available — check CartesianMonoidalCategory instances
+    for Action FintypeCat / ContAction; grep came up EMPTY in Action/Monoidal.lean,
+    so plan for hand-rolled BinaryFan routes as in AG-GG-1).
+  - F1c-5 (spec): through vRhoPointsEquiv, vRhoAdd is coordinatewise addition on
+    (ℤ/N)² — the morphism-level upgrade T-F3 wants for coords_additive. Final seam notes in commit eab704fb
   (Filter.mem_map; intermediateFieldMap-f.d.-transport; open-scoped-Pointwise ABOVE
   docstring; **rhoAction must be abbrev** — structure projections don't reduce at
   instance-search transparency; coset endgame at Action-smul via ρτ = 𝟙 + map_id).
