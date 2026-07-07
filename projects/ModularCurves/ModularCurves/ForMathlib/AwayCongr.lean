@@ -71,6 +71,22 @@ lemma awayMap_congr {g₁ g₂ : GradedRingHom 𝒜 ℬ} (h : g₁ = g₂) (s : 
   subst h
   exact (awayCongr_self _ _).symm
 
+/-- The graded `Away.map` commutes with the degree-zero inclusion `fromZeroRingHom`:
+`Away.map g s` sends `a/1` (for `a : 𝒜 0`) to `(g a)/1` in `Away ℬ (g s)`. This is the
+ring-hom heart of the naturality of `Proj.toSpecZero` under `Proj.map` — when `g` fixes the
+degree-zero part it exhibits `Proj.map g` as a morphism over `Spec (𝒜 0)`. -/
+lemma awayMap_fromZeroRingHom (g : GradedRingHom 𝒜 ℬ) (s : A) (a : 𝒜 0) :
+    HomogeneousLocalization.Away.map g s
+        (HomogeneousLocalization.fromZeroRingHom 𝒜 (Submonoid.powers s) a) =
+      HomogeneousLocalization.fromZeroRingHom ℬ (Submonoid.powers (g s))
+        ⟨g a, g.map_mem a.2⟩ := by
+  ext
+  simp only [HomogeneousLocalization.fromZeroRingHom, RingHom.coe_mk, MonoidHom.coe_mk,
+    OneHom.coe_mk, HomogeneousLocalization.Away.map, HomogeneousLocalization.map_mk,
+    HomogeneousLocalization.val_mk]
+  congr 1
+  exact Subtype.ext (by simp)
+
 variable {τ C T : Type*} [CommRing T] [CommRing C] [Algebra T C]
   {𝒞 : ι → Submodule T C} [GradedAlgebra 𝒞]
 
