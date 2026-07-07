@@ -233,6 +233,20 @@ lemma pointMap_add (P Q : W.toAffine.Point) :
           rw [Affine.Point.add_of_X_ne hx, Affine.Point.add_of_X_ne hvx, pointMap_some]
           simp only [slope_smul_of_X_ne C hx, addX_smul, addY_smul]
 
+/-- The induced point map is injective (the coordinate change is a monomorphism on points). -/
+lemma pointMap_injective : Function.Injective (C.pointMap W) := by
+  rintro (_ | ⟨x₁, y₁, h₁⟩) (_ | ⟨x₂, y₂, h₂⟩) hPQ
+  · rfl
+  · simp [pointMap] at hPQ
+  · simp [pointMap] at hPQ
+  · simp only [pointMap_some, Affine.Point.some.injEq] at hPQ
+    obtain ⟨hX, hY⟩ := hPQ
+    have hx : x₁ = x₂ := by by_contra hne; exact vcX_ne C hne hX
+    subst hx
+    have hc := mul_left_cancel₀ (pow_ne_zero 3 (Units.ne_zero C.u⁻¹)) (by simpa only [vcY] using hY)
+    obtain rfl : y₁ = y₂ := by linear_combination hc
+    rfl
+
 /-- The coordinate change `C` as a group homomorphism on affine points,
 `W.Point →+ (C • W).Point`. This is the affine form of the invariance of the elliptic-curve group
 law under a change of Weierstrass coordinates (ticket `T-W7`). -/
@@ -242,6 +256,8 @@ def pointHom : W.toAffine.Point →+ (C • W).toAffine.Point where
   map_add' := C.pointMap_add
 
 @[simp] lemma pointHom_apply (P : W.toAffine.Point) : C.pointHom P = C.pointMap W P := rfl
+
+lemma pointHom_injective : Function.Injective (C.pointHom (W := W)) := C.pointMap_injective
 
 end Field
 
