@@ -4759,7 +4759,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0i-a]** pole filtration + freeness — `poleOrderFiltration` + `_one`, `_two`,
   `_three`, `_mul_le`, `linearIndependent_one_coordX_coordY`
   (PoleFiltration.lean:41–75; `coordX`/`coordY` already real).
-  - **Status**: open (lane P3) · **File**: EllipticCurve/PoleFiltration.lean · **Depends**:
+  - **Status**: in_progress (lane P3 — THIS session, beastmode-A 2026-07-07) · **File**: EllipticCurve/PoleFiltration.lean · **Depends**:
     none · **Parallel**: yes · **Type**: def + 5 lemmas
   - Sketch: define `F n` via the section ideal `(s)` on `D(u)` (`t = s³u`); normal-form
     basis one-element-per-pole-order (mathlib `Affine.CoordinateRing` freeness; `B`
@@ -5346,3 +5346,19 @@ model into ζ' over a concrete étale-local full-level trivialisation (Layer 3) 
 E[N]≅(ℤ/N)² step that funnels into T-W7 (A-lane) — that's what would discharge the DS4 weilPairing sorry
 over ℚ-schemes. Field case unchanged (exists_pairingAlgebraHom_of_galoisEquivariant, EtaleDescent.lean).
 Commits: d9961638 (descent), + this (local model).
+
+### C-lane: weilPairingCharZero API completion + base-change naturality (beastmode-H, 2026-07-07, user-directed)
+Completed the char-0 Weil-pairing API (all axiom-clean, gate-free) in WeilPairing/CharZeroDescent.lean:
+- **Weil axioms (combinatorial):** detFun_self (alt e(v,v)=0), detFun_swap (antisym), detFun_add_left/_right
+  (bilinear); constSchemeMap_id/_ι (functoriality + points rule); detConstMor_sl2 (SL₂-invariance ⟹
+  cocycle vanishes); weilPairingCharZero_unique (∃! descent).
+- **μ_N base-change API (reusable):** de-privatised isPullback_muN_baseChange in GroupScheme/MuN.lean
+  (proof unchanged, 1-word); named wrapper muNBaseChange g N : muN S' N ⟶ muN S N + _isPullback + _muNπ.
+- **Base-change naturality (review Q4 "compatible with arbitrary base change"):** weilPairingSourceBaseChange
+  (E_T[N]×_T E_T[N] ⟶ E[N]×_S E[N] via torsion_baseChange_isPullback on each factor) + weilPairingCharZero_baseChange:
+  GIVEN cover-level local-pairing compatibility hζ, the T-pairing ≫ (μ_N proj to μ_{N,S}) = (source base change) ≫
+  S-pairing. Clean statement (equation in the FIXED target μ_{N,S}, avoids constructing e_T in μ_{N,T});
+  proof = epi-cancel + weilPairingCharZero_restrict (hζ propagates cover-local → scheme-level, mirroring _over).
+  The local compatibility hζ is an honest hypothesis (analogous to hcocyc); wiring ζ'_T = base-change-of-ζ'
+  to DISCHARGE hζ is the same point-level trivialisation step that funnels into T-W7.
+Commits: 4f3ab9a9 (axioms+SL₂+uniq), 24a159f8 (constSchemeMap_ι), 41f19f09 (μ_N base change), + this (naturality).

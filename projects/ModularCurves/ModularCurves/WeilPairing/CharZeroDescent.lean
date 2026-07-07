@@ -254,6 +254,46 @@ theorem weilPairingCharZero_unique (N : ℕ) [NeZero N]
     MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
   exact (descend_hom_of_effectiveEpi (pullback.fst (E.torsionSqπ N) p) ζ' hcocyc).choose_spec.2 e he
 
+/-- The base change of the Weil-pairing source `E[N] ×_S E[N]` along `g : T ⟶ S`: the induced
+map `E_T[N] ×_T E_T[N] ⟶ E[N] ×_S E[N]` (from `torsion_baseChange_isPullback` on each factor). -/
+noncomputable def weilPairingSourceBaseChange (N : ℕ) {T : Scheme.{u}} (g : T ⟶ S) :
+    pullback ((E.baseChange g).torsionπ N) ((E.baseChange g).torsionπ N) ⟶
+      pullback (E.torsionπ N) (E.torsionπ N) :=
+  pullback.map _ _ _ _ (E.torsionBaseChangeHom N g) (E.torsionBaseChangeHom N g) g
+    (E.torsion_baseChange_isPullback N g).w.symm (E.torsion_baseChange_isPullback N g).w.symm
+
+/-- **(T-C0e spec, base-change naturality — review Q4 "compatible with arbitrary base change")**
+If the local pairings agree after base change over the cover (`hζ`), then the char-0 Weil pairing
+is compatible with base change of `S` along `g`: the pairing for `E_T = E.baseChange g`, followed
+by the projection `μ_{N,T} ⟶ μ_{N,S}`, equals the base-changed source followed by the pairing for
+`E`. The cover-level hypothesis `hζ` propagates to the scheme level by the effective-epi property,
+exactly as `weilPairingCharZero_over` propagates the over-`S` condition. -/
+theorem weilPairingCharZero_baseChange (N : ℕ) [NeZero N] {T : Scheme.{u}} (g : T ⟶ S)
+    {S' : Scheme.{u}} (p : S' ⟶ S) [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (ζ' : pullback (E.torsionSqπ N) p ⟶ muN S N)
+    (hcocyc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ'
+        = pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ')
+    {S'' : Scheme.{u}} (p_T : S'' ⟶ T)
+    [Flat p_T] [LocallyOfFinitePresentation p_T] [Surjective p_T]
+    (ζ'_T : pullback ((E.baseChange g).torsionSqπ N) p_T ⟶ muN T N)
+    (hcocyc_T :
+      pullback.fst (pullback.fst ((E.baseChange g).torsionSqπ N) p_T)
+          (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) ≫ ζ'_T
+        = pullback.snd (pullback.fst ((E.baseChange g).torsionSqπ N) p_T)
+          (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) ≫ ζ'_T)
+    (hζ : pullback.fst ((E.baseChange g).torsionSqπ N) p_T ≫
+            E.weilPairingSourceBaseChange N g ≫ E.weilPairingCharZero N p ζ' hcocyc
+          = ζ'_T ≫ muNBaseChange g N) :
+    (E.baseChange g).weilPairingCharZero N p_T ζ'_T hcocyc_T ≫ muNBaseChange g N
+      = E.weilPairingSourceBaseChange N g ≫ E.weilPairingCharZero N p ζ' hcocyc := by
+  haveI : Surjective (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) :=
+    MorphismProperty.pullback_fst _ _ ‹Surjective p_T›
+  haveI : Epi (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) :=
+    AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
+  refine (cancel_epi (pullback.fst ((E.baseChange g).torsionSqπ N) p_T)).mp ?_
+  rw [← Category.assoc, (E.baseChange g).weilPairingCharZero_restrict N p_T ζ'_T hcocyc_T]
+  exact hζ.symm
+
 end EllipticCurve
 
 end ModularCurves
