@@ -4271,8 +4271,11 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
   for general `N` is T-H4/T-B6 territory).
 
 ### [T-H7b-i] point separation along extensions of the base field (sub-sub-ticket)
-- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-07T23:07Z · **File**:
-  Moduli/GammaH.lean (helpers) ·
+- **Status**: **DONE** (fable-P4, 2026-07-08; `#print axioms` clean) · **File**:
+  Moduli/GammaH.lean (helpers) — `Scheme.hom_ext_of_comp_specMap_field` (general: Spec of
+  a field embedding is an epi onto maps into ANY scheme; stalkClosedPointTo factorization
+  + residueFieldCongr transport + fromSpecResidueField mono + Spec.map_injective) and
+  `EllipticCurve.Point.restrict_injective` (the ticket statement, any base `S`) ·
   **Parent**: T-H7b · **Depends on**: none · **Type**: lemma
 - **Statement**: `{k k' : Type u} [Field k] [Field k'] (f : k →+* k')
   (E : EllipticCurve S) (t : Spec (CommRingCat.of k) ⟶ S) :
