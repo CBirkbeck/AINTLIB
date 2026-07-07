@@ -406,6 +406,40 @@ theorem isFinite_sigmaDesc_id_spec {ι : Type u} [Finite ι]
     exact Module.Finite.pi
   infer_instance
 
+/-- **The fold of a finite coproduct of copies of any scheme is a finite
+morphism** (T-W3b-i): it is the base change of the affine model
+(`isFinite_sigmaDesc_id_spec` over `Spec ℤ`) along `S ⟶ Spec ℤ`, via the
+extensivity of `Scheme` (pullbacks distribute over finite coproducts). -/
+theorem isFinite_sigmaDesc_id {ι : Type u} [Finite ι] (S : Scheme.{u}) :
+    AlgebraicGeometry.IsFinite (Limits.Sigma.desc fun _ : ι => 𝟙 S) := by
+  have hsq := (FinitaryPreExtensive.isUniversal_finiteCoproducts
+      (Limits.coproductIsCoproduct
+        (fun _ : ι => Spec (CommRingCat.of (ULift.{u} ℤ))))
+      ).isPullback_of_isColimit_left
+    (f := fun _ : ι => 𝟙 (Spec (CommRingCat.of (ULift.{u} ℤ))))
+    (u := Limits.Sigma.desc fun _ : ι => 𝟙 (Spec (CommRingCat.of (ULift.{u} ℤ))))
+    (v := specULiftZIsTerminal.from S)
+    (q₁ := fun _ : ι => 𝟙 S) (q₂ := fun _ : ι => specULiftZIsTerminal.from S)
+    (fun _ => IsPullback.of_horiz_isIso
+      ⟨by rw [Category.id_comp, Category.comp_id]⟩)
+    (Limits.coproductIsCoproduct (fun _ : ι => S))
+    (fun i => Limits.Sigma.ι_desc _ _)
+  have hdesc : Limits.Cofan.IsColimit.desc
+      (Limits.coproductIsCoproduct (fun _ : ι => S)) (fun _ => 𝟙 S) =
+      Limits.Sigma.desc (fun _ : ι => 𝟙 S) := by
+    refine Limits.Sigma.hom_ext _ _ fun i => ?_
+    rw [Limits.Sigma.ι_desc]
+    exact Limits.Cofan.IsColimit.fac _ _ i
+  rw [← hdesc]
+  exact MorphismProperty.of_isPullback hsq.flip
+    (isFinite_sigmaDesc_id_spec (CommRingCat.of (ULift.{u} ℤ)))
+
+omit [Group G] [Finite G] in
+/-- The trivial-torsor projection is a finite morphism. -/
+theorem trivialTorsorπ_finite [Finite G] (S : Scheme.{u}) :
+    AlgebraicGeometry.IsFinite (trivialTorsorπ (G := G) S) :=
+  isFinite_sigmaDesc_id S
+
 omit [Finite G] in
 theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
     trivialTorsorLeft G S (g * g') =
