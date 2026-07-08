@@ -135,6 +135,27 @@ lemma specMap_projGlueLift_awayι (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S
   rw [chartι, ← hsq, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp, hcomp]
 
 open HomogeneousLocalization in
+/-- **(final sub-leaf)** The chart morphism of a triple, on an `Away.mk` element: the fraction
+`b / (X k)^n` (with `b` homogeneous of degree `n`) is sent to `b(t) * u^n`, where `b(t)` is the
+evaluation of `b` at the triple. This is the computation both `projGlueLift_eq` and any future
+`toProjOfTriple` need; it is the ring-level content of "the chart morphism is evaluation at `t`,
+normalized by the invertible coordinate".
+
+Sub-ticket `T-W7.0c-c5β-projglue`, leaf 1. Route: `chartCoordEquiv_mk` (WeierstrassModel.lean:574)
+computes `chartCoordEquiv` on `Ideal.Quotient.mk p` as `Away.map … (homogenizeAt R k p)`; take
+`p := dehomogenizeAux R k b` and use `aeval_dehomogenizeAux_of_apply_eq_one` (AdditionChartHom) to
+identify the evaluation. -/
+lemma chartAwayHomOfTriple_awayMk (k : Fin 3) (t : Fin 3 → S) (u : S) (hu : t k * u = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t) (n : ℕ)
+    (b : MvPolynomial (Fin 3) R) (hb : b ∈ MvPolynomial.homogeneousSubmodule (Fin 3) R n) :
+    chartAwayHomOfTriple W k t u hu ht
+        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n
+          ((quotientGradingHom (projIdeal W)) b)
+          (by simp only [smul_eq_mul, mul_one]; exact mk_mem_quotientGrading (projIdeal W) hb)) =
+      MvPolynomial.aeval t b * u ^ n := by
+  sorry
+
+open HomogeneousLocalization in
 /-- **The last ring-level step.** The two lifts — built from the `k`-chart and the `l`-chart of the
 same triple — coincide as ring maps out of the overlap chart `Away 𝒜 (X k * X l)`.
 
