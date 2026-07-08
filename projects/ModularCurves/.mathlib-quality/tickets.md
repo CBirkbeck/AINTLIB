@@ -6794,3 +6794,26 @@ sorry sits precisely on 3.8.2).
   (gate lifted); late-phase but owner-directed to plan in parallel.
   (3) **T-Q2 proofs** (A7.1.1/A7.1.2, InvariantTorsor.lean) — OWNER ACTION first: add SGA III
   Exp. V to `refs/ModularCurves/` (the named proof source).
+
+## Amendments v10.11 (2026-07-08): ★ Stream claim — T-PIC0 + COH-1 (fable-PIC0)
+
+*Stream **T-PIC0 + COH-1** (Pic of a scheme + GME 1.10.4 cohomology-and-base-change; v10.10
+runner-up #1, owner-sanctioned parallel de-black-boxing per the 2026-07-05 directive) claimed
+by **fable-PIC0**, 2026-07-08T11:20Z. Sentinel: `beastmode_active.PIC0`. The stream star
+reserves the lane; individual leaf tickets are claimed one at a time per rule 5 as they are
+cut.*
+
+- **Claimed**: fable-PIC0, 2026-07-08T11:20Z (stream star: T-PIC0 + COH-1)
+- **Scope**: (a) **[T-PIC0]** Pic(X) for a scheme via invertible O_X-modules (mathlib
+  `SheafOfModules` + LocallyFree) + fibre-degree of an invertible sheaf; (b) **[COH-1]** GME
+  Lemma 1.10.4 cohomology-and-base-change exactness criterion, as pinned in
+  decomposition-gme2.md header. **COH-3 = mathlib lane (#36345/#36218) — coordinate, do NOT
+  build.** COH-2 not claimed (separate cut).
+- **First act (binding, v10.8 discipline)**: `/develop --decompose` — GME 1.10 + 2.2.2(2.17)
+  read from `refs/ModularCurves/` with verbatim quotes at decompose time, never from memory;
+  deliverables: prose proof per top-level result, ordered lemma decomposition, `:= by sorry`
+  skeleton that `lake build`s clean, verbatim source quotes per leaf + Lean↔source match
+  paragraph, leaf tickets on this board. Decomposition file: `decomposition-pic-coh.md`.
+- **FILE DISCIPLINE**: new files only — `ModularCurves/Picard/*.lean` +
+  `ForMathlib/*.lean` additions; no held files touched (GroupLawConstruction, Torsion, W7
+  files, LevelStructure/*, AdditionChart* are other workers' lanes).
