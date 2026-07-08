@@ -4974,6 +4974,12 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       equation_addXYZ via the SAME c5α theorem applied to law 1... requires the analogous
       field-level fact for addXYZ, which is `(nonsingular_add).left` + `add_of_not_equiv`
       — add `equation_addXYZ_of_isJacobsonRing` alongside, reusing the c5α engine).
+  - **Progress** (coordinator-P1, 2026-07-08T08:20Z): **β5's law-1 prerequisite DONE**
+    (68b33427) — `equation_addXYZ_of_isJacobsonRing` + field case + vector API
+    (`addXYZ_self'`, smul/zero lemmas) in `AdditionLawOnCurve.lean`; zero sorries,
+    axiom-clean. BOTH laws now have certificate-free on-curve theorems; the 422/584-term
+    `cof_I1_*.txt` exports are retired. Remaining: β1–β4 (chart-product cover, per-chart
+    triple + c5α instances, per-(i,j,k) ring homs, gluing) — the scheme-plumbing phase.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
