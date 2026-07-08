@@ -1510,6 +1510,84 @@ theorem subgroupTripleCompare_assoc_tmul (hD : D.IsSubgroup E) :
     simp only [map_mul, hpq, hpy]
     ring
 
+/-- **(coassoc, RIGHT half.)** `κ₃ (lTensor Δ w) = baseGate vmap (κ w)`. The comultiplication in the
+outer (second) tensor slot collapses along `vmap`. Proven by `TensorProduct.induction_on w`; the
+`tmul` case uses `κ₃(a⊗b) = Γ(fst₃) a · Γ(snd₃)(κ b)` and the pin `κ(Δy) = subgroupComulHom y`. -/
+theorem subgroupComul_coassoc_right (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    ∀ (w : Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupTripleCompare hD
+          (LinearMap.lTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupComul hD).toLinearMap w)
+        = E.baseGate hD (E.vmap hD) (E.vmap_base hD) (E.subgroupTensorCompare (D := D) w) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  intro w
+  induction w using TensorProduct.induction_on with
+  | zero => simp
+  | add w1 w2 h1 h2 => simp only [map_add, h1, h2]
+  | tmul x y =>
+    have hcm : (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+          (E.subgroupComulHom hD y)
+        = (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+            ≫ E.subgroupMul hD).appTop.hom y := by
+      show (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+        ((E.subgroupMul hD).appTop.hom y) = _
+      rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+    rw [LinearMap.lTensor_tmul, AlgHom.toLinearMap_apply, E.subgroupTripleCompare_tmul hD,
+      E.subgroupTensorCompare_subgroupComul hD,
+      E.baseGate_kappa_tmul hD (E.vmap hD) (E.vmap_base hD)]
+    simp only [E.vmap_fst, E.vmap_snd, hcm]
+
+/-- **(coassoc, LEFT half.)** `κ₃ (assoc (rTensor Δ w)) = baseGate vmap' (κ w)`. The comultiplication
+in the inner (first) tensor slot collapses along `vmap'`. Proven by `TensorProduct.induction_on w`;
+the `tmul` case uses the assoc-factoring `subgroupTripleCompare_assoc_tmul` (hZ), the pin, and the
+`baseGate` collapse over `umap` (which `vmap'` factors through). -/
+theorem subgroupComul_coassoc_left (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    ∀ (w : Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupTripleCompare hD ((TensorProduct.assoc R _ _ _)
+          (LinearMap.rTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupComul hD).toLinearMap w))
+        = E.baseGate hD (E.vmap' hD) (E.vmap'_base hD) (E.subgroupTensorCompare (D := D) w) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  intro w
+  induction w using TensorProduct.induction_on with
+  | zero => simp
+  | add w1 w2 h1 h2 => simp only [map_add, h1, h2]
+  | tmul x y =>
+    rw [LinearMap.rTensor_tmul, AlgHom.toLinearMap_apply, E.subgroupTripleCompare_assoc_tmul hD,
+      E.subgroupTensorCompare_subgroupComul hD, E.baseGate_comul hD (E.umap (D := D)) E.umap_base,
+      E.baseGate_kappa_tmul hD (E.vmap' hD) (E.vmap'_base hD)]
+    simp only [E.vmap'_fst, E.vmap'_snd]
+
+/-- **(Layer B, L3 — coassociativity.)** `Δ` is coassociative:
+`assoc ∘ (Δ ⊗ id) ∘ Δ = (id ⊗ Δ) ∘ Δ`. Dualizes the scheme associativity
+`subgroupMul_assoc` (`vmap' ≫ m = vmap ≫ m`) through the injective triple comparison `κ₃`:
+apply `κ₃` to both sides, reduce each via the RIGHT/LEFT halves to `baseGate vmap (Δa)` /
+`baseGate vmap' (Δa)`, i.e. `Γ(vmap ≫ m) a` / `Γ(vmap' ≫ m) a`, then `subgroupMul_assoc` closes it. -/
+theorem subgroupComul_coassoc (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)) :
+    letI := E.subgroupAlgebra D
+    (TensorProduct.assoc R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤))
+        (LinearMap.rTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupComul hD).toLinearMap
+          (E.subgroupComul hD a))
+      = LinearMap.lTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupComul hD).toLinearMap
+          (E.subgroupComul hD a) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  apply E.subgroupTripleCompare_injective hD
+  have hR := E.subgroupComul_coassoc_right hD (E.subgroupComul hD a)
+  have hL := E.subgroupComul_coassoc_left hD (E.subgroupComul hD a)
+  rw [E.subgroupTensorCompare_subgroupComul hD,
+    E.baseGate_comul hD (E.vmap hD) (E.vmap_base hD)] at hR
+  rw [E.subgroupTensorCompare_subgroupComul hD,
+    E.baseGate_comul hD (E.vmap' hD) (E.vmap'_base hD)] at hL
+  rw [hL, hR, E.subgroupMul_assoc hD]
+
 /-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
 `subgroupUnit` (`e : S ⟶ D`). Concretely `ε = Γ(e)` followed by `Γ(Spec R, ⊤) ≅ R`; it is
 `R`-linear because `e` is a section of the structure map (`subgroupUnit_structMap`). Counit laws
