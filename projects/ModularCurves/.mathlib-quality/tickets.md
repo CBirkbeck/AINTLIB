@@ -8622,3 +8622,57 @@ All proven decls axiom-clean (standard 3).*
   gap-gated (T-PIC-GAP1). Next dispatchable: **[T-PIC-GAP1]** scoping (ecosystem check
   first), **[T-PIC-DEG0]** scoping (HasseWeil degree-anchor audit). CLEANUP-PIC1
   (cadence) fires after the P1 proof wave completes (P1c pending unblock).
+
+## Amendments v10.34 (2026-07-08): three reports absorbed — CHARTERS issued for P3b3, fable-P4, c5β
+
+- **Absorbed**: (i) **P3b3: T-B5D-A DISCHARGED** (PR #5223, 7992f16e) — `formallyUnramified_mulByHom_of_torsionπ`
+  axiom-clean via the square-zero/N-killed-difference argument; NEW reusable
+  `ForMathlib/NilpotentKerSpecMap.lean` (`isNilpotent_ker_SpecMap`, mathlib-absent) + point
+  helpers; MASTER assembled term-mode awaiting L-BC. Subagent stalled 32min → correctly
+  stopped + proved directly; two gotchas banked. (ii) **fable-P4: étale 2/3 proven**
+  (separability idempotent → FormallyUnramified; Finite + Projective via trace-dual basis →
+  faithfully flat); rank-|G| flag RESOLVED-NEGATIVE (finiteness derived; no B2); full
+  `Algebra.Etale` walled on TWO mathlib gaps [A711-SM] (FormallySmooth constructor) +
+  [A711-FP] (FP-from-module-finite, non-noetherian — KM's "rather delicate", substrate
+  genuinely missing); **A7.1.2 NOT a corollary** — cut as [A711-BC] (~150–250 ll, exactness
+  of 0 → Aᴳ → A → ∏_G A under ⊗R′); **gate-2 audit: T-E5 ⇐ is gated on OBJECT DESCENT
+  independently of A7.1.1** (SGA I VIII 7.8; mathlib has morphism descent only) — three
+  routes boarded, route (a) = produce the curve from T-E15's explicit model, dodging
+  descent. (iii) **c5β: [projglue] DONE** — cross-index chart compatibility, zero sorries;
+  boarded "mathlib gap" RETRACTED (`Away.isLocalization_mul` exists — **antidote banked:
+  grep the section, not the name**); every β4(c) ingredient now proven.
+
+### [CHARTER-P3B3] — THE ÉTALE CASCADE (multi-session; report at the two named milestones)
+1. **T-B6′** (non-circular scheme-fibre ↔ HasseWeil comparison crux) + **T-DISC**
+   (finite + fibrewise-unramified ⟹ unramified) → L-BC closes → **MASTER discharges
+   Torsion.lean:228. MILESTONE 1 (report): BB-DIFF DISCHARGED.**
+2. **The étale falls-sweep**: `torsionπ_etale` and the [N]-étale consumers flip; audit
+   T-D6c/T-D7-bridge gates; signal beastmode-A (their reboxed T-D6b consumes your landing).
+3. **Discharge the hfix leaf** `torsionFixed_of_fixesLevel` (v10.29 landing-checklist):
+   p0's route 1 (`ext_of_isDominant_of_isSeparated'`, separatedness free from properness) —
+   E[N] finite étale is now YOURS. **MILESTONE 2 (report): the rigidity box closes modulo
+   PIC0 data** (`aut_trivial_of_fullLevel`).
+4. Then the **T-D8-bridge box** (`fullLevel_divisor_iff_naive_gen`) attempt with the new
+   étale + fibre toolkit; decompose-don't-grind; board the verdict.
+
+### [CHARTER-FP4] — THE KM 4.7 ENGINE (multi-session; report at route-(a) verdict + engine landing)
+1. **Scope + execute route (a)**: produce the ⇐-direction curve from T-E15's explicit model
+   instead of descending it (dodging SGA I VIII 7.8). Report the verdict either way — if it
+   works, [T-E5c]/T-Q6e's second gate DISSOLVES for the bootstrap objects.
+2. **[A711-BC]** (A7.1.2 base change, the averaging/idempotent exactness argument).
+3. **Étale, noetherian-first (AUTHORIZED)**: prove `Algebra.Etale.of_isFreeAlgebraAction`
+   under a noetherian base NOW per the drop-in-swap precedent (T-E4a-noeth) — FP from
+   module-finite is available there; [A711-SM]/[A711-FP] stay tracked gap tickets for the
+   general form (v10.8: tracked, never permanent).
+4. **Assemble the engine**: T-E5c via route (a) + your gate-1 results; then the T-E5 leaves
+   d/e/f as they open; then the ℤ[1/3] bootstrap half (not ω-gated). **MILESTONE (report):
+   the KM 4.7 engine lands.**
+
+### [CHARTER-C5B] — 0c THROUGH THE ENDGAME HALF (in-flight, formalized; report at 0c-ii)
+1. **β4(c)**: assemble `addOnY`/`addOnZ` + `blOpenY`/`blOpenZ` with the rule-3 opaque
+   interface in the same commit → the four GroupLawConstruction sorries fill → **0c-i
+   increment 2 DONE**.
+2. **0c-ii** (`mulModelHom`, pre-approved) against your own interface. **MILESTONE
+   (report): 0c-ii DONE — this fires beastmode-A's 0h interrupt** (board-signal it too).
+3. Then your half of the W7 endgame with A per CHARTER-A item 5 (split via board):
+   0c-iii specs, T-W7.12 glue inputs, CLEANUP-ALL-W7 prep.
