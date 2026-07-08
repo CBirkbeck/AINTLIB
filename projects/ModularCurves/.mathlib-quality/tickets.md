@@ -6567,3 +6567,133 @@ theory from Hopf algebras up). Its one virtue: **T-W7-INDEPENDENT** (attackable 
 beastmode-A). Prerequisite to start faithfully: add Tate's "Finite flat group schemes" to
 refs/ModularCurves/ for the general-base proof. NOT a quick discharge. Sentinel released pending
 owner's scope decision.
+
+---
+
+## Amendments v10 (2026-07-08): fleet re-dispatch — KM-lift execution order + new parallel streams
+
+*Coordinator pass (owner-directed, 2026-07-08T~10:45Z). Inputs: the six live worker reports, the
+`beastmode_active.*` sentinels, and the board above. The KM source gate is LIFTED (§Amendments v2
+gate note, commit 90ed0986); this amendment turns the lift into dispatched work and absorbs the
+idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
+PUSHED (`66300bb4..5f4829dc`, 238 commits).*
+
+### v10.0 Fleet ground truth (2026-07-08)
+| Worker | On | State / v10 action |
+|---|---|---|
+| c5β (A-lane, W7) | T-W7.0c-c5β triple→morphism; β2b ladder landed (cfae244c) | active — unchanged (next: single-chart `IsDomain` leaf, β1, β3, β4, then W7.0c-i inc. 2) |
+| P3b3 | T-W7.1b main-alg integration; b3x/b3y DONE; b5 poison → sub-ticket | active (`dev/modular-curves-b3`) — unchanged |
+| beastmode-A | T-W7.1b owner (b1/b2 done); coordination tail | GO given — v10.1 |
+| D2 | T-ACYC (00MZ/00MYW running, 00N0 queued) → B–E cores → T-RB | active — **do not disturb** |
+| p2 (=beastmode-P2) | BB-DELIGNE T-D5e, isolating to Lemma 3.8.2 | active — source acquisition v10.6 |
+| p0 | T-D6b assessment (no proof written) | REDIRECTED — v10.2 |
+| fable-P4 | idle after T-E4a-noeth ("awaiting instruction") | DISPATCHED — v10.4 |
+| beastmode-H | PHASE-8 terminal (C/H lanes drained) | resume target — v10.3 |
+| beastmode-Q | quiet since 07-07T15:03 (T-W3b/c, T-W5, T-Q1–Q4 done) | lane restaffed — v10.4(iii); its bare `beastmode_active` sentinel is STALE (says "T-W3c cut"; T-W3c is DONE) — ignore, do not claim from it |
+
+### v10.1 beastmode-A housekeeping — GO (owner, 2026-07-08)
+- Push: **DONE by coordinator** (`66300bb4..5f4829dc`) — no action left.
+- Flip the stale T-W7.0i-b parent label: **go**.
+- T-E scout: **answered here** — the E-cluster next claims are dispatched to fable-P4 (v10.4);
+  A does NOT open a new E claim. A's standing work order: (i) remain the T-W7.1b integrator
+  (wire-and-verify when P3b3's branch merges — that is the ticket's close-out), (ii) finish the
+  T-D6a-ii tail (in-progress, non-blocking, yours), (iii) T-W7 remains the v9 #3 bottleneck and
+  you own its comparison spine — stay on it.
+
+### v10.2 p0 redirect — T-D6b re-assessment, then [T-KMQ]
+- **Blocker-list CORRECTION**: `IdealSheafData.comap_mul` is NOT absent — **T-D6a-i landed DONE
+  overnight** (beastmode-A, `ForMathlib/IdealSheafComapMul.lean`, sorry-free, arbitrary schemes;
+  ticket above). p0's sentinel ("comap_mul machinery absent (may need to build)") predates it.
+  **First action: re-assess T-D6b against the landed lemma.** Do NOT take T-D6a-ii (beastmode-A's
+  in-progress tail).
+- If T-D6b still needs the étale-divisor layer beyond `comap_mul` (KM 1.4.4 (3)⟺(4) territory:
+  BB-DIFF + the flf-discriminant étale criterion + the T-W7 fibre-model bridge — see
+  beastmode-P2's "KM-text gate: evidence-based re-assessment" above), **REBOX it**: leave a
+  precise sorried statement + docstring route, return T-D6b to `state: open`, and pivot to:
+
+### [T-KMQ] the ⧗KM quote sweep — NEW (p0's pivot destination; fast lane)
+- **Status**: open · **Assignee**: p0 · **Type**: source-fidelity sweep (no new math) ·
+  **Depends on**: refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf (present)
+- **Job**: for every ⧗KM-marked ticket/decl — T-A4, T-A6, T-B4/T-B4x, T-D8(-bridge), T-D10,
+  T-E9, T-H8/T-H9, T-M1, the IRR KM-Ch.10 route (T-C1 and T-E5 are dispatched separately,
+  v10.3/v10.4) — read the cited pages in the PDF, bank the **verbatim quote (page + KM §)** in
+  the decl docstring / ticket per the lifted-gate rule, confirm the Lean statement matches, and
+  update the ticket's Sources line.
+- **Close outright** any ⧗KM decl whose proof is already complete from [Loe]/[Sil] and lacked
+  only the citation (p0 has a list from the T-D6b reading — those first).
+- **Statement MISMATCH protocol**: do NOT silently fix — flag it on the board immediately
+  (v9 statement-drift protocol) and stop on that item.
+- **Deliverable**: quote-debt zeroed + a table on the board: each ⧗KM ticket reclassified as
+  *closed* / *KM-quoted, still gated by <non-KM dependency>*.
+- **After T-KMQ**: p0 takes [T-END0] (v10.5) unless p2 has freed up first (P2 has right of
+  first refusal on the END stream — it closes their own T-G3 box).
+
+### v10.3 [T-C1-KM28] WS-C re-decompose (KM 2.8 backend) — the plan.md standing order, now DUE
+- **Status**: open · **Assignee**: beastmode-H on resume (C-lane is theirs), else any fresh
+  worker · **Type**: `/develop --decompose` planning ticket + skeleton ·
+  **Depends on**: KM full text (present); AG-CD substrate = `ForMathlib/CartierDual.lean`
+  (p2's BB-DELIGNE Layer A — REUSE, do not duplicate)
+- **Job**: execute plan.md's standing order (*"re-run `/develop --decompose` on WS-C['s]
+  KM-sourced subtree when the full text lands"*): read KM 2.8 in full (+ the KM 2.3 [N]-material
+  it consumes), transcribe verbatim quotes, and cut the **norm/divisor comparison backend** for
+  T-C1 into WeilPairing/ leaf tickets — reconciled against what already exists:
+  `CharZeroDescent.lean` (T-relative descent + local model + naturality, axiom-clean),
+  `EtaleDescent.lean` (field-level descent heart), and the D7 decision (duality is the final
+  API; KM 2.8 is the comparison backend + KM-faithful proof — do NOT re-litigate the API).
+- **Deliverable**: `decomposition-km28.md` + sorried skeleton (`lake build` clean; DS-register
+  rule for any def-level sorry) + leaf tickets on this board.
+
+### v10.4 [T-E5-KM47] WS-E re-decompose + Q-lane restaff — fable-P4 (dispatched)
+- **Status**: open · **Assignee**: fable-P4 (idle; E-lane is their recent context) ·
+  **Type**: planning + skeleton + proof tickets
+- **(i) KM 4.7 quote pass**: read the KM 4.7 proof (now allowed), reconcile against [Loe] 3.7.4
+  (quote in hand), bank verbatim quotes into `representable_iff`'s docstring + the T-E5 ticket.
+- **(ii) Bootstrap objects**: cut the KM-4.7 bootstrap sub-tickets from
+  `decomposition-gme2.md` §E12–E15 (M₁, rigidity, Legendre, ℰ₃ — bodies already fully explicit
+  there) into real board tickets + sorried skeleton decls in Moduli/ (DS-register rule applies).
+  These are T-E5's "sub-tickets at cut time", never cut — cut them now.
+- **(iii) Q-lane restaff**: beastmode-Q is quiet; the lane's next-in-lane is **T-Q5** (gluing
+  affine quotients, quasi-projective case, [Loe] 3.6.1 — body cut at pickup per the lane note),
+  then **T-Q6** (quotients of rigidified problems — the KM 4.7 ⇐ feeder), plus the T-Q4e
+  phase-2 remainder if quick. v9.2 is binding: this is the Q-finite minimal API (NOT deferred);
+  keep it severed from the W-stack torsor machinery.
+- **Order**: (i)+(ii) first (independent, unblocks T-E5 planning), then (iii).
+- fable-P4's named alternative T-H5-forward stays second-choice (v10.7) — this dispatch wins on
+  the v9 "keep marginal workers on the core Y₁(N)/Y(N) path" directive.
+
+### v10.5 [T-END0] End(E/S)/degree layer from KM Ch. 2 — the G-lane resume trigger has FIRED
+- **Status**: open · **Assignee**: beastmode-P2 when T-D5e wraps (right of first refusal — it
+  closes their T-G3 box), else p0 after T-KMQ · **Type**: quote pass + skeleton + proofs ·
+  **Depends on**: KM Ch. 2 (NOW in refs — this was the G-lane PHASE-8 resume trigger, verbatim:
+  *"when the KM Ch.2 text lands in refs/ModularCurves/ (degree/dual-isogeny/Hasse)"*); GME
+  §B8/§B9 transcriptions (`decomposition-gme2.md`); HasseWeil
+  `Foundation/DegreeQuadraticForm.lean` + `HasseBound.lean` (fibre anchor — IMPORT, never
+  re-prove)
+- **Job**: read the KM Ch. 2 degree/dual-isogeny/Hasse sections + §B8/§B9, bank quotes, then
+  skeletonize `End(E/S)` + `deg : End(E/S) → ℤ` (file placement at pickup; Groupoid-adjacent or
+  new EllipticCurve/EndomorphismDegree.lean) with the already-decomposed T-G3 sub-tickets as the
+  work order: **T-G3b** (deg quadratic expansion) → **T-G3d** (N-divisibility of a
+  level-fixing automorphism-minus-one) → **T-G3c** (fibrewise Hasse via T-RED0/HasseWeil
+  transfer) → close the box `aut_hom_eq_id_of_fullLevel` (Groupoid.lean:120) via the reduction
+  already documented in its docstring, wiring the PROVEN T-G3a engine.
+- **Consumers**: T-G3 = rigidity → T-E10 assembly, T-E9's rigid half, T-H6/T-H10; BB-DEG /
+  T-B4x synergy (KM 2.3 boxes). T-W7-INDEPENDENT — genuine parallel stream.
+- Cleanup cadence: add **[CLEANUP-END]** (EndomorphismDegree/Groupoid files) after T-G3b+d+c.
+
+### v10.6 OWNER ACTION — acquire Tate, "Finite flat group schemes"
+Add Tate's chapter (in Cornell–Silverman–Stevens, *Modular Forms and Fermat's Last Theorem*) to
+`refs/ModularCurves/` (local-only, gitignored — same handling as KM). It is the named general-base
+source for the LAST BB-DELIGNE sorry: p2 is isolating T-D5e onto exactly Lemma 3.8.2
+(`deligne_operators`); their scoping note above records Mumford AV §14 as field-only and this
+chapter as the missing text. Until it lands, p2's isolation work stands as designed (the one
+sorry sits precisely on 3.8.2).
+
+### v10.7 Available-not-priority (idle-capacity overflow list)
+- **[T-D10-proof]** `isGammaZero_iff_fppf` — the KM 3.7.1 étale-descent argument is now readable
+  (quotes ALREADY banked in the ticket; design (a) implemented). v9 priority #7 — take only if
+  the core lanes above are saturated.
+- **[T-H5-forward]** rigidity direction of `gammaHNaive_rigid_iff` via the PROVEN T-G3a engine —
+  legitimate but second to v10.4; memberships remain T-H3/T-W7.8-parked.
+- **T-W7.8 route (ii)** (concrete Weierstrass-shape hom-existence descent, ~300–500 lines) —
+  only on explicit owner override of the v9 F1′ LOW-priority call; default stays route (i)
+  wait-for-mathlib (fable-P4's 2026-07-08 re-check verdict stands).

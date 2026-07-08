@@ -228,10 +228,10 @@ data-sorries outside it); `#print axioms` on the file's theorems (only
 
 ## Constraints & risks
 
-- Full **Katz–Mazur text is not yet in `refs/`** (only Intro + Ch. 1 §§1.1–1.9). Ch. 2/3/4
-  leaves are cited via Loeffler (verbatim) + KM TOC; their verbatim-KM quotes are
-  PENDING-SOURCE — re-run `/develop --decompose` on WS-C and WS-E's KM-sourced subtrees
-  when the full text lands. **Owner action: drop full KM PDF into `refs/ModularCurves/`.**
+- ~~Full Katz–Mazur text is not yet in `refs/`~~ **RESOLVED 2026-07-08** — the full KM text
+  is in `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf` (gate lifted, 90ed0986).
+  The standing order to re-run `/develop --decompose` on WS-C and WS-E's KM-sourced subtrees
+  is now DUE and dispatched: **[T-C1-KM28]** + **[T-E5-KM47]** (tickets.md §Amendments v10).
 - Faltings–Chai is `.djvu` (unreadable by tooling); only needed in Phase 4.
 - Mathlib's `GrpObj`/`Over` monoidal API is young; if `mulBy`-style definitions fight
   elaboration, the fallback (recorded, faithful) is explicit structure-morphisms — a
