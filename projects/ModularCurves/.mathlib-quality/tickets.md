@@ -5134,7 +5134,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   `projModel_globalSections_eq_baseRing`, `infChart_s_nonZeroDivisor`,
   `projModel_hom_ext_of_affine`, `locallyWeierstrass_pushforward_O_eq_O`
   (PoleFiltration.lean:85–117).
-  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T14:01Z ·
+  - **Status**: done (all children b1/b2/b3/b4 + i3/i5 landed axiom-clean; parent label flipped per coordinator v10.1 GO, beastmode-A 2026-07-08) ·
     **Depends**: T-W7.0i-a (done), T-W7.0i-b1 (done), b2 (done), b3/b4 (skeleton pending —
     coordinator §2) · **Type**: 4 lemmas
   - **Progress** (2026-07-07, session cont.): **2 of 4 leaves FULLY PROVEN, axiom-clean**:
