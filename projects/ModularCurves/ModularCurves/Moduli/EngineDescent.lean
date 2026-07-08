@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.ForMathlib.PullbackLocalAtTarget
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
@@ -233,20 +234,49 @@ theorem exists_quotient_π_zero [Finite G]
 
 
 
+/-- **([a3-ii-chart])** The cartesian square, **on one affine chart**: for a `G`-stable affine
+open `W ⊆ E`, `W ≅ (W/G) ×_{X/G} X`.
+
+Plan (terminating in a proof, and *purely affine*): `W = Spec Γ(W)`, `W/G = Spec Γ(W)ᴳ`,
+`X = Spec Γ(X)` (route (a)'s `X` is affine, so its atlas is the constant `⊤`) and
+`X/G = Spec Γ(X)ᴳ`. The structure morphism makes `Γ(W)` a `Γ(X)`-algebra, and `π`-equivariance
+(`IsCurveAction.π_equivariant`) makes the `G`-action on it **semilinear**. Then
+`MulSemiringAction.isPullback_Spec_fixedPoints` (PROVEN, from Galois descent of semilinear
+modules) says exactly that the square is cartesian; the four corners are matched to the
+geometric ones by `IsAffineOpen.isoSpec` and `quotientChartIso`.
+
+Freeness of the algebra action is `SchemeAction.isFreeAlgebraAction_of_free` (PROVEN), fed by
+the geometric freeness of the action on `E` (`simulSchemeActionTotal_free_of_rigid`). -/
+theorem isPullback_chart [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (hπ' : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (i : C.E) :
+    IsPullback
+      (σE.localQuotientπ (hVEs i) (hVEa i) ≫ (σE.quotientChartIso VE hVEs hVEa i).hom)
+      ((VE i).ι ≫ C.π)
+      ((σE.quotientChart VE hVEs hVEa i).ι ≫ π')
+      (σ.quotientπ V hVs hVa hVmem) := by
+  sorry
+
 /-- **([a3-ii], the square is cartesian)** `E ≅ (E/G) ×_{X/G} X`.
 
-Plan (terminating in a proof): both horizontal maps are `G`-torsors, and the comparison
-`E ⟶ (E/G) ×_{X/G} X` is a `G`-equivariant map of `G`-torsors over `E/G`, hence an
-isomorphism. Formally, work Zariski-locally on `E/G`: on a stable affine chart `W ⊆ E` the map
-`W ⟶ Spec Γ(W)ᴳ` is a torsor by `torsorMul_bijective_of_isFreeAlgebraAction` (T-Q2, PROVEN),
-whose algebraic freeness hypothesis is supplied by `isFreeAlgebraAction_of_free_schemeAction`
-(the bridge from geometric freeness on `T`-points, `simulSchemeActionTotal_free_of_rigid`);
-likewise on `X`. Then `Γ(W) ⊗_{Γ(W)ᴳ} Γ(V)ᴳ ≅ Γ(W) ⊗_{Γ(V)} Γ(V)` chart-by-chart, and the
-comparison is an isomorphism on an open cover.
+**PROVEN**, modulo the affine chart square `isPullback_chart`: cartesianness is Zariski-local at
+the target (`isPullback_of_iSup_eq_top`, a mathlib gap filled in
+`ForMathlib/PullbackLocalAtTarget.lean`), the quotient charts of `E/G` cover it
+(`iSup_quotientChart_eq_top`), and over the `i`-th chart the projection `E ⟶ E/G` *is* the local
+quotient `VE i ⟶ Spec Γ(E, VE i)ᴳ` (`morphismRestrict_quotientπ`).
 
-This is the *only* place route (a) uses the torsor property of `T-Q2`; it replaces KM's appeal
-to SGA I Exp. VIII 7.8. -/
-theorem isPullback_quotientπ [Finite G]
+This replaces KM's appeal to SGA I Exp. VIII 7.8 (effective fppf descent of projective schemes,
+absent from mathlib) by a pushout of rings. -/
+theorem isPullback_quotientπ [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
@@ -257,8 +287,19 @@ theorem isPullback_quotientπ [Finite G]
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
     (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
     (hπ' : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem) :
-    IsPullback (σE.quotientπ VE hVEs hVEa hVEmem) C.π π' (σ.quotientπ V hVs hVa hVmem) := by
-  sorry
+    IsPullback (σE.quotientπ VE hVEs hVEa hVEmem) C.π π'
+      (σ.quotientπ V hVs hVa hVmem) := by
+  refine isPullback_of_iSup_eq_top hπ' (σE.quotientChart VE hVEs hVEa)
+    (σE.iSup_quotientChart_eq_top VE hVEs hVEa) fun i => ?_
+  have hW : σE.quotientπ VE hVEs hVEa hVEmem ⁻¹ᵁ σE.quotientChart VE hVEs hVEa i = VE i :=
+    σE.quotientπ_preimage_quotientChart VE hVEs hVEa hVEmem i
+  refine (isPullback_chart hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree π' hπ' i).of_iso
+    ((C.E).isoOfEq hW).symm (Iso.refl _) (Iso.refl _) (Iso.refl _) ?_ ?_ (by simp) (by simp)
+  · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom,
+      σE.morphismRestrict_quotientπ VE hVEs hVEa hVEmem i, ← Category.assoc,
+      Iso.inv_hom_id, Category.id_comp]
+  · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom, ← Category.assoc,
+      Scheme.isoOfEq_inv_ι]
 
 /-- **([a4], properness and smoothness descend)** `π' : E/G ⟶ X/G` is proper and smooth of
 relative dimension `1`.
