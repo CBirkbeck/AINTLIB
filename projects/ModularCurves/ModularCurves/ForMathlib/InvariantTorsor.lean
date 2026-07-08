@@ -195,13 +195,126 @@ theorem Algebra.Etale.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A)
     Algebra.Etale (FixedPoints.subalgebra R A G) A := by
   sorry
 
-/-- **KM A7.1.1, torsor part** (statement): for a free action the multiplication
-comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a `G`-torsor over
-`Spec Aᴳ`. WIP `sorry` per ticket T-Q2's statement-only scope. -/
-theorem torsorMul_bijective_of_isFreeAlgebraAction
+/-- The `G`-trace `a ↦ ∑_g g • a`, valued in the invariants. -/
+def traceInvariants [Fintype G] (a : A) : FixedPoints.subalgebra R A G :=
+  ⟨∑ g : G, g • a, by
+    intro h
+    show h • (∑ g : G, g • a) = ∑ g : G, g • a
+    rw [Finset.smul_sum]
+    have hre : ∀ g : G, h • (g • a) = (h * g) • a := fun g => (mul_smul h g a).symm
+    simp only [hre]
+    exact Fintype.sum_bijective (h * ·) (Group.mulLeft_bijective h) _ _ (fun _ => rfl)⟩
+
+/-- The candidate inverse of `torsorMul`, built from Galois coordinates `S`:
+`x ↦ ∑ᵢ aᵢ ⊗ (∑_g g⁻¹ • (x g · bᵢ))`. -/
+noncomputable def galoisInv [Fintype G] (S : Finset (A × A)) (x : G → A) :
+    A ⊗[FixedPoints.subalgebra R A G] A :=
+  ∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (∑ g : G, g⁻¹ • (x g * p.2))
+
+/-- **(T-Q2-A711, step 5 — KM A7.1.1, torsor part; PROVEN)** For a free action of a finite
+group the multiplication comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a
+`G`-torsor over `Spec Aᴳ`.
+
+This is SGA III Exp. V Thm 4.1 (iv) — *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme"* — obtained
+by the Chase–Harrison–Rosenberg route: the Galois coordinates of `exists_galoisCoords`
+give an explicit two-sided inverse `galoisInv`, so neither SGA's semi-local reduction, nor
+its Lemme 4.2, nor its faithfully-flat residue-field enlargement is needed (none of the
+three has a mathlib substrate — there is no `IsSemilocalRing`). No finiteness of `A` over
+`Aᴳ` is used either.
+
+`galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
+sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
+`(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
+theorem torsorMul_bijective_of_isFreeAlgebraAction [Fintype G] [DecidableEq G]
     (hfree : IsFreeAlgebraAction G R A) :
     Function.Bijective (MulSemiringAction.torsorMul G R A) := by
-  sorry
+  classical
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  -- `galoisInv S` is a right inverse
+  have hright : ∀ x : G → A,
+      MulSemiringAction.torsorMul G R A (galoisInv G R A S x) = x := by
+    intro x
+    funext h
+    rw [galoisInv, map_sum]
+    simp only [Finset.sum_apply, MulSemiringAction.torsorMul_tmul, Finset.smul_sum,
+      Finset.mul_sum]
+    rw [Finset.sum_comm]
+    have hterm : ∀ g : G, (∑ p ∈ S, p.1 * (h • g⁻¹ • (x g * p.2)))
+        = ((h * g⁻¹) • x g) * (if (h * g⁻¹) = 1 then 1 else 0) := by
+      intro g
+      rw [← hS (h * g⁻¹), Finset.mul_sum]
+      refine Finset.sum_congr rfl fun p _ => ?_
+      rw [← mul_smul, smul_mul']
+      ring
+    simp only [hterm]
+    rw [Finset.sum_eq_single h]
+    · simp
+    · intro g _ hgh
+      have hne : h * g⁻¹ ≠ 1 := fun hc => hgh (mul_inv_eq_one.mp hc).symm
+      simp [hne]
+    · intro hc
+      exact absurd (Finset.mem_univ h) hc
+  -- `galoisInv S` is additive, so it suffices to check the left inverse on pure tensors
+  have hadd : ∀ x y : G → A, galoisInv G R A S (x + y)
+      = galoisInv G R A S x + galoisInv G R A S y := by
+    intro x y
+    rw [galoisInv, galoisInv, galoisInv, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [← TensorProduct.tmul_add, ← Finset.sum_add_distrib]
+    refine congrArg _ (Finset.sum_congr rfl fun g _ => ?_)
+    rw [Pi.add_apply, add_mul, smul_add]
+  have hleft : ∀ y : A ⊗[FixedPoints.subalgebra R A G] A,
+      galoisInv G R A S (MulSemiringAction.torsorMul G R A y) = y := by
+    intro y
+    induction y using TensorProduct.induction_on with
+    | zero => simp [galoisInv]
+    | add y₁ y₂ h₁ h₂ => rw [map_add, hadd, h₁, h₂]
+    | tmul u v =>
+      rw [galoisInv]
+      have hterm : ∀ p : A × A,
+          (∑ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+              (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2))
+            = (traceInvariants G R A (u * p.2) : A) * v := by
+        intro p
+        have hinner : ∀ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+            (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2)
+              = (g⁻¹ • (u * p.2)) * v := by
+          intro g
+          rw [MulSemiringAction.torsorMul_tmul,
+            show u * g • v * p.2 = (u * p.2) * (g • v) by ring, smul_mul', smul_smul,
+            inv_mul_cancel, one_smul]
+        simp only [hinner, ← Finset.sum_mul]
+        congr 1
+        show (∑ g : G, g⁻¹ • (u * p.2)) = ∑ g : G, g • (u * p.2)
+        exact Fintype.sum_bijective (·⁻¹) (Equiv.inv G).bijective _ _ (fun _ => rfl)
+      simp only [hterm]
+      have hmove : ∀ p : A × A,
+          p.1 ⊗ₜ[FixedPoints.subalgebra R A G] ((traceInvariants G R A (u * p.2) : A) * v)
+            = ((traceInvariants G R A (u * p.2) : A) * p.1)
+                ⊗ₜ[FixedPoints.subalgebra R A G] v := by
+        intro p
+        show p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+            ((traceInvariants G R A (u * p.2)) • v) = _
+        rw [TensorProduct.tmul_smul]
+        rfl
+      simp only [hmove]
+      rw [← TensorProduct.sum_tmul]
+      congr 1
+      show (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1) = u
+      have hswap : (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1)
+          = ∑ g : G, (g • u) * (∑ p ∈ S, p.1 * (g • p.2)) := by
+        simp only [Finset.sum_mul]
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun g _ => ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun p _ => ?_
+        rw [smul_mul']
+        ring
+      rw [hswap, Finset.sum_eq_single (1 : G)]
+      · rw [hS (1 : G)]; simp
+      · intro g _ hg; rw [hS g, if_neg hg, mul_zero]
+      · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
+  exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨galoisInv G R A S x, hright x⟩⟩
 
 /-- **KM A7.1.2** (statement): free actions satisfy base change for rings of
 invariants — `∗(A, G, R, R')` for every `R'`. (KM's proof: extend scalars of the
