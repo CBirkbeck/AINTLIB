@@ -9720,3 +9720,38 @@ proven and axiom-clean.*
   maps, presented curves, the pointed pasting identification, the coordinate-change
   action on curves, and the equivalence functor with essential surjectivity are ALL
   proven. The milestone's remaining mass = two functor-law props + the gated ff.
+
+## Amendments v10.45 (2026-07-08, coordinator): PIC0 report absorbed — [U/G] substance LANDED; T-PIC1c SOLVED at root; PIC0 → map_comp then [STREAM-YFULL]
+
+- **T-PIC1c: SOLVED OUTRIGHT (e7be9d5e)** — the "environment anomaly" was never
+  environmental: tactic-mode `infer_instance` synthesizes the sheafification-counit IsIso
+  while the byte-identical term-mode instance-implicit deterministically fails on this pin.
+  **Antidote (banked v10.36, paid for itself twice more same day)**: `have h := by
+  infer_instance` then `@asIso _ _ _ _ _ h`. Nothing left to bump-retest; NO upstream
+  filing per v10.35b external-quiet. This retires the T-PIC1c block entirely.
+- **T-W4 premise correction RATIFIED**: T-W4 was NOT done and T-W3's abstract-group
+  `SchemeAction` cannot express Γ(S)-coefficient coordinate changes (v9.2's own point — G
+  is a group SCHEME). PIC0's rebuild is the v9.2-faithful form: the group functor
+  `G(B) = VariableChange B` acting ring-by-ring, with **T-W4 closed** via the full atlas
+  dictionary `(WeierstrassAtlasRing →+* B) ≃ ellipticW B` (both round-trips proven).
+- **THE v8 HEADLINE HAS SUBSTANCE (13 commits, through af0aabb9)**: `MellWScheme :
+  Schemeᵒᵖ ⥤ Cat` — **M_ell^W = [U/G] exists as a groupoid-valued functor on schemes**,
+  strict Cat laws included; full presentation pipeline proven (classifying maps, `curveOf`
+  with record transport, the pointed pasting identification incl. the forecast
+  zero-section battle, `curveOfVCIso`); `presentationFunctor` + `presentationFunctor_essSurj`
+  proven first-try (the v8 "almost definitional" clause held). Seam arsenal banked (v10.41).
+- **Remaining [U/G] items, each with an owner**: `map_comp` — PIC0, GO NOW (via
+  `projModelVCIso_mul` conjugation; sentinel holds it). `map_id` — the v10.42b cross-lane
+  request stands: a 3-liner on beastmode-A's private transport machinery — **added to A's
+  post-faith-infra quick-favor list**. Full-faithfulness — design gate on T-W7's
+  presentation-rigidity per the honest v10.42 scope cut (NOT debt) — recorded as the W7
+  endgame's FOURTH dependent cascade.
+- **PIC0 NEXT (after map_comp): claim [STREAM-YFULL]** (v10.37 ranking; Y1 is P3b3's).
+  First act: the dictionary spine L1→L2→L7→L9, then [YF-AFF]/[YF-FIN]; report milestone
+  per the stream card. GAP-1 watch duty continues read-only each session start.
+  [STREAM-GH] stays queued for the next freed account BEHIND fable-P4's B2 repoint
+  execution (GH work builds on the corrected statements).
+- **Cross-note (v10.44 seen)**: fable-FP's [A711-FP] discharge + general-base étale flip
+  cascades immediately: STREAM-GH's ⛩[A711-FP] gate is OPEN, and the noetherian
+  scaffolding on the étale-torsor layer can drop at the consumers' convenience. Full
+  absorption when the report is relayed.
