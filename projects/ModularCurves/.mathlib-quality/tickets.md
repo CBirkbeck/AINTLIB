@@ -9423,3 +9423,49 @@ artifact: `decomposition-a711-fp.md`. Stretch follow-ons per charter, after FP:
 - **NEXT ([T-W6c-ii], open, fable-PIC0 continues)**: `curveOfVCIso : curveOf W ≅
   curveOf (C • W)` pointed over S — pullback.map of `projModelVCIso`/`_π`/`_zero`
   along toSpecΓ, conjugated by curveOfPasting (+ its two compats). Then c-iii.
+
+### v10.42 (2026-07-08, c5β): ★ [CHARTER-C5B] item 1 — c4.2c CLOSED; the two B–L laws are morphisms
+
+*Milestone. `addOnYOnSup` / `addOnZOnSup` exist: each Bosma–Lenstra law, glued from its three
+chart pieces, is a single scheme morphism `(⨆ k, D(t_k)).toScheme ⟶ projModel W` on the `(i,j)`
+chart-product. Zero sorries, axiom-clean, no `maxHeartbeats`. Commits: 5daa234b (naturality),
+01f3b9e4 (`pieceMorOfTriple_agree` — THE agreement), 1a917a1e + 971d26da (scheme transport),
+f91b91ec (glue + rule-3 interface).*
+
+- **What is now behind us (0c-i increment 2, all but assembly):** law 2 derived + six certificates
+  (dba3aa8c); on-curve certificate-free via reduced+Jacobson (217f7aba, 68b33427); the four
+  covering chart-products are domains (d38f52b9, 7c9ddc07); the c4.2 crux — one triple, two
+  invertible coordinates, one morphism (3166d104); the three pieces of each law agree (01f3b9e4)
+  and glue (f91b91ec).
+- **Generality worth noting:** `pieceMorOfTriple_agree` knows nothing about B–L. It says a
+  projective triple over ANY ring defines a morphism to the model where it is nonvanishing. The two
+  laws are `t := lawTwoTriple` / `lawOneTriple`, both `rfl`. B–L-specific content is confined to the
+  six certified minors, which is where it belongs.
+- **TWO PERFORMANCE FINDINGS (fleet-wide, rule 3):**
+  1. `(PrimeSpectrum.basicOpen f : (Spec A).Opens)` at a CONCRETE `A` drives `whnf` into unfolding
+     `A` itself (here: `MvPolynomial` + quotient carrier). 200k heartbeats die. Antidote:
+     `specBasicOpen A f` — the open with its `Scheme.Opens` type declared, once, in ForMathlib.
+  2. Rewriting with `morphismRestrict_homOfLE` at a concrete pullback scheme unfolds
+     `Limits.pullback` (161 reducible unfoldings; `set_option diagnostics true` confirms). Local
+     `irreducible` does NOT fix it. Antidote: state the transport for VARIABLE `X Y : Scheme`,
+     `A : CommRingCat`, prove it where nothing can unfold, instantiate by application
+     (`homOfLE_morphismRestrict_agree`, `glueMorphisms_hf_of_agree`). **Rule 3 generalises: the
+     opacity barrier goes around the LEMMA, not only the definition.**
+- **c4.3 — SCOPED, and it is not free.** Assembling the per-chart-product laws into `addOnY` /
+  `addOnZ` on `E ×_R E` needs a SECOND agreement, across chart-products: on the overlap of the
+  `(i,j)` and `(i',j')` pieces, the two law-2 triples differ by a UNIT SCALAR (the bidegree-(2,2)
+  transition factor), not by equality. The tool is already proven and idle:
+  `chartHomOfTriple_congr` (1279497b) says the chart hom depends on a triple only through its
+  ratios, and `dblAdd{X,Y,Z}_smul` (dba3aa8c) computes the scalars. So c4.3 = transition-scalar
+  bookkeeping + one more `glueMorphisms` over `chartProductCover`. No new mathematics; ~300–500
+  lines. It is stated here explicitly because the earlier board wrote c4.3 as "assemble", which
+  understated it.
+- **Unchanged after c4.3:** c4.4 (universality by instantiation along `classifyRingHom` +
+  `isPullback_projModelBaseChange`, both proven), c4.5 (fill the four `GroupLawConstruction.lean`
+  sorries) ⟹ **0c-i increment 2 DONE**, then **0c-ii `mulModelHom`** (pre-approved; it fires
+  beastmode-A's 0h interrupt).
+- **Upstream ledger grows:** `specBasicOpen(_mul(_le_left/right))`, `specBasicOpenIsoAway(_hom_ι,
+  _hom_homOfLE)`, `homOfLE_specBasicOpenIsoAway_inv`, `homOfLE_morphismRestrict_agree`,
+  `glueMorphisms_hf_of_agree`, `chartHomOfTriple_naturality`, `MvPolynomial.IsHomogeneous.eval₂_mul_left`,
+  `AdjoinRoot.isDomain_of_monic_of_map`, `HomogeneousLocalization.isDomain_away`. pr-draft 02 still
+  omits two of these — coordinator note stands.
