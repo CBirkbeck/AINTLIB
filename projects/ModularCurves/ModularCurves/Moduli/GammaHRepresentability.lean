@@ -104,11 +104,16 @@ structure EquivariantRelRepData {Q : ModuliProblem R} {G : Type*} [Group G] [Fin
   σZ : SchemeAction G Z
   /-- The action lies over the base. -/
   over_base : ∀ γ : G, σZ.hom γ ≫ f = f
-  /-- The representing bijections are `G`-equivariant (diagram KM 7.1.1.1). -/
+  /-- The representing bijections are `G`-equivariant (diagram KM 7.1.1.1). The `γ⁻¹`
+  twist is forced by rigour: the classifying transport `γ ↦ classify(φ γ)` is
+  *anti*-homomorphic (Yoneda is contravariant), so a genuine `SchemeAction`
+  homomorphism (`SchemeAction.ofAut`, via `(·).inv`) realizes `σZ.hom γ` as
+  `classify((φ γ)⁻¹) = classify(φ γ⁻¹)`; consumers see the inverse and reindex freely
+  (`FreeAction` is invariant under `γ ↦ γ⁻¹`). -/
   equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
     (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
     eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
-      (φ γ).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
   /-- The structure map is finite (KM 3.7.1: "a finite etale S-scheme"). -/
   finite : IsFinite f
   /-- The structure map is étale. -/
@@ -168,7 +173,67 @@ theorem RelRepData.exists_equivariant {Q : ModuliProblem R} {G : Type*} [Group G
     [Finite G] (φ : G →* Aut Q) {X : EllObj R} (d : RelRepData Q X)
     (hfin : IsFinite d.f) (het : Etale d.f) :
     Nonempty (EquivariantRelRepData φ X) := by
-  sorry
+  -- The universal element.
+  set univ := d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩ with huniv
+  -- Relative `transportHom`: for `η : Q ⟶ Q`, the over-`f` endo of `Z` classifying `η(univ)`.
+  set rT : (Q ⟶ Q) → { s : d.Z ⟶ d.Z // s ≫ d.f = d.f } :=
+    fun η => (d.eqv d.f).symm (η.app _ univ) with hrT
+  have hrTspec : ∀ η : Q ⟶ Q, d.eqv d.f (rT η) = η.app _ univ := by
+    intro η; rw [hrT]; exact (d.eqv d.f).apply_symm_apply _
+  -- Reconstruction: any classifying map pulls the universal element.
+  have recon : ∀ {T : Scheme.{u}} (k : T ⟶ d.Z),
+      d.eqv (k ≫ d.f) ⟨k, rfl⟩ = Q.map (X.pullbackAlongMap d.f k).op univ := by
+    intro T k
+    have hnat := d.nat d.f k ⟨𝟙 d.Z, Category.id_comp d.f⟩
+    simp only [Category.comp_id] at hnat
+    rw [huniv, ← hnat]
+  -- The characterizing property (relative `homEquiv_comp_transportHom`).
+  have relKey : ∀ {T : Scheme.{u}} (g : T ⟶ X.base) (v1 : T ⟶ d.Z)
+      (hv : v1 ≫ d.f = g) (η : Q ⟶ Q),
+      d.eqv g ⟨v1 ≫ (rT η).1, by rw [Category.assoc, (rT η).2, hv]⟩
+        = η.app _ (d.eqv g ⟨v1, hv⟩) := by
+    intro T g v1 hv η
+    subst hv
+    have hnat := d.nat d.f v1 (rT η)
+    rw [hrTspec] at hnat
+    rw [hnat, ← NatTrans.naturality_apply η (X.pullbackAlongMap d.f v1).op univ, ← recon v1]
+  -- `rT` sends the identity to the identity.
+  have hidT : (rT (𝟙 Q)).1 = 𝟙 d.Z := by
+    have h := hrTspec (𝟙 Q)
+    simp only [NatTrans.id_app, types_id_apply] at h
+    rw [huniv] at h
+    exact congrArg Subtype.val ((d.eqv d.f).injective h)
+  -- `rT` is multiplicative (covariant in composition).
+  have hcompT : ∀ η θ : Q ⟶ Q, (rT (η ≫ θ)).1 = (rT η).1 ≫ (rT θ).1 := by
+    intro η θ
+    have key : d.eqv d.f (rT (η ≫ θ))
+        = d.eqv d.f ⟨(rT η).1 ≫ (rT θ).1,
+            by rw [Category.assoc, (rT θ).2, (rT η).2]⟩ := by
+      rw [hrTspec, relKey d.f (rT η).1 (rT η).2 θ,
+        show (⟨(rT η).1, (rT η).2⟩ : { s : d.Z ⟶ d.Z // s ≫ d.f = d.f }) = rT η from rfl,
+        hrTspec η]
+      rfl
+    exact congrArg Subtype.val ((d.eqv d.f).injective key)
+  refine ⟨{
+    toRelRepData := d
+    σZ :=
+      { hom := fun γ => (rT ((φ γ).inv)).1
+        hom_one := by
+          show (rT ((φ (1 : G)).inv)).1 = 𝟙 d.Z
+          rw [show (φ (1 : G)).inv = 𝟙 Q from by rw [map_one]; rfl, hidT]
+        hom_mul := fun γ₁ γ₂ => by
+          show (rT ((φ (γ₁ * γ₂)).inv)).1
+            = (rT ((φ γ₁).inv)).1 ≫ (rT ((φ γ₂).inv)).1
+          rw [show (φ (γ₁ * γ₂)).inv = (φ γ₁).inv ≫ (φ γ₂).inv from by rw [map_mul]; rfl,
+            hcompT] }
+    over_base := fun γ => (rT ((φ γ).inv)).2
+    equivariant := by
+      intro T g h γ
+      show d.eqv g ⟨h.1 ≫ (rT ((φ γ).inv)).1, _⟩ = (φ γ⁻¹).hom.app _ (d.eqv g h)
+      rw [show (φ γ⁻¹).hom = (φ γ).inv from by rw [map_inv]; rfl]
+      exact relKey g h.1 h.2 ((φ γ).inv)
+    finite := hfin
+    etale := het }⟩
 
 /-- **[GHB2] (scheme-level freeness from moduli freeness)** — the form consumed by the
 quotient-torsor layer (house shape of `simulSchemeAction_free_of_rigid`'s conclusion):

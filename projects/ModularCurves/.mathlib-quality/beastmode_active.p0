@@ -1,13 +1,18 @@
-FOCUS: [STREAM-GH] first wave (coordinator v10.50) — Γ_H relative representability via KM 7.1.2/7.1.3
-quotient problem. Skeleton Moduli/GammaHRepresentability.lean (23 sorries). Draining route-independent
-NOW-lane leaves in dep order: GHA2 (levelSpaceΓπ_isFinite) → GHB1 (RelRepData.exists_equivariant) →
-GHB3 (exists_quotient_over_base) → GH2 (gammaFullNaive_freeAction) → GHA4 (gammaFullNaive_relRepData)
-→ GHC4 (gammaHNaiveProblem_not_relativelyRepresentable, the F1 B2-refutation record).
-DEPS (all PROVEN in-repo, route-independent, NO B2-repoint wait): SchemeAction.quotient/existsUnique_
-quotientπ_lift (SchemeQuotient.lean T-Q5), RelRepData/TorsorData/simulRepresentableBy (QuotientProblem.
-lean T-Q6), torsorMul_bijective_of_isFreeAlgebraAction + Module.Finite/Projective.of_isFreeAlgebraAction
-(InvariantTorsor.lean, fable-FP READ-ONLY).
-[T-G3d-infra] DONE last session (6 axiom-clean ForMathlib files; crux = boarded coordinator decision v10.43/50).
-CONSTRAINTS: new files only (edit GammaHRepresentability.lean, my stream file); Held GammaH.lean/
-Representability.lean/InvariantTorsor.lean READ-ONLY (all bridges in the stream file); p2/fable-FP
-files READ-ONLY; HEAD-guard + pathspec commits; grep -nE "error[:(]" + #print axioms verify each.
+FOCUS: [STREAM-GH] first wave (coordinator v10.50). Γ_H relative representability via KM 7.1.2/7.1.3.
+File: Moduli/GammaHRepresentability.lean.
+DONE this session (committed): GHA2 levelSpaceΓπ_isFinite (24a5ae551), GHB3 exists_quotient_of_isAffineHom
+(axiom-CLEAN), GH2-core glSmul_eq_one_of_eq_self (COMPLETE PROOF, the GL₂-freeness engine), GH2
+gammaFullNaive_freeAction, GHA4 gammaFullNaive_relRepData (4aa25b563).
+GHB1 RelRepData.exists_equivariant PROVED axiom-CLEAN (this commit): relative transportHom/autMulHom.
+  KEY FIX: equivariant field twist (φ γ)→(φ γ⁻¹) — Yoneda-transport is anti-homo (GL₂ non-abelian), so a
+  genuine SchemeAction (ofAut via (·).inv) forces σZ.hom γ = classify((φγ)⁻¹); free_on_points invariant
+  under γ↦γ⁻¹. relKey = relative homEquiv_comp_transportHom; hcompT covariant; (a*b).inv=a.inv≫b.inv.
+File sorry count 19→18.
+NEXT (last first-wave leaf): GHC4 gammaHNaiveProblem_not_relativelyRepresentable (line ~652 sorry). F1
+  refutation over coproduct ∐(Bool→X.base). Full plan from scoping agent a583107a: (a) T=∐Bool, g=Sigma.desc,
+  ι=Sigma.ι; d:=relRep.mp X. (b) a=⟦L.pullAlong g⟧, b=⟦coprodGlue L (γ̄L)⟧. (c) separation lemma
+  relRepData_separates_over_coprod (d.nat+Equiv.injective+Sigma.hom_ext). (d) orbit-distinct via
+  glSmul_eq_one_of_eq_self. New infra: [COPROD-GLUE] (~100-150L, templated by isNaiveFullLevel_pullAlong)
+  + [GLSMUL-RESTRICT] + separation lemma. NO gates.
+CONSTRAINTS: new files only (edit GammaHRepresentability.lean); Held GammaH/Representability/InvariantTorsor
+READ-ONLY; p2/fable-FP READ-ONLY; HEAD-guard+pathspec commits; grep -nE "error[:(]"+#print axioms verify.
