@@ -55,6 +55,28 @@ def IsFreeAlgebraAction : Prop :=
   ∀ g : G, g ≠ 1 → ∀ (R' : Type u) [CommRing R'] [Algebra R R'] [Nontrivial R']
     (φ : A →ₐ[R] R'), ∃ a : A, φ (g • a) ≠ φ a
 
+/-- **(T-Q2-A711, step 1 — the Chase–Harrison–Rosenberg bridge; PROVEN)** KM's freeness
+condition implies the pointwise CHR condition: at every prime `𝔭` of `A` and every `g ≠ 1`
+there is `a : A` with `g • a - a ∉ 𝔭`.
+
+Take KM's `R' := A ⧸ 𝔭` (nonzero because `𝔭` is prime) and `φ :=` the quotient map. This is
+the hypothesis under which the classical Galois theory of commutative rings
+(Chase–Harrison–Rosenberg, Auslander–Goldman) proves `A ⊗_{Aᴳ} A ≅ ∏_G A` and étaleness —
+i.e. the route by which `torsorMul_bijective_of_isFreeAlgebraAction` and
+`Algebra.Etale.of_isFreeAlgebraAction` below will be discharged, KM's own reference being
+[SGA III, Exp. V, Thm 4.1] (not in `refs/`). -/
+theorem chr_of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A)
+    (p : Ideal A) [hp : p.IsPrime] (g : G) (hg : g ≠ 1) :
+    ∃ a : A, g • a - a ∉ p := by
+  haveI : Nontrivial (A ⧸ p) := Ideal.Quotient.nontrivial_iff.mpr hp.ne_top
+  obtain ⟨a, ha⟩ := hfree g hg (A ⧸ p) (Ideal.Quotient.mkₐ R p)
+  refine ⟨a, fun hmem => ha ?_⟩
+  have h0 : (Ideal.Quotient.mkₐ R p) (g • a - a) = 0 := by
+    rw [Ideal.Quotient.mkₐ_eq_mk, Ideal.Quotient.eq_zero_iff_mem]
+    exact hmem
+  rw [map_sub, sub_eq_zero] at h0
+  exact h0
+
 namespace MulSemiringAction
 
 /-- The torsor-multiplication comparison map `A ⊗[Aᴳ] A → (G → A)`,
