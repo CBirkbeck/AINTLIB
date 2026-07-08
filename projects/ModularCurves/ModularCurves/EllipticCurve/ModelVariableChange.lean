@@ -2041,6 +2041,79 @@ lemma exists_basicOpen_division_pack {W W' : WeierstrassCurve R}
         (homOfLE hrle₀).op) ((homOfLE ((projModel W).basicOpen_le r)).op))
     exact mem_of_eq_of_mem (hstep.symm.trans halign).symm hpush
 
+private lemma alpha_unit_aux {C : Type u} [CommRing C] (σ τ sW tW : C)
+    (hτσ : τ ∈ Ideal.span {σ}) (htW : tW ∈ Ideal.span {sW})
+    (hsp : sW ∈ Ideal.span {σ, τ}) (hσsp : σ ∈ Ideal.span {sW, tW})
+    (hnzd : sW ∈ nonZeroDivisors C) :
+    ∃ v : Cˣ, σ = ↑v * sW := by
+  obtain ⟨w, hw⟩ := Ideal.mem_span_singleton.mp hτσ
+  obtain ⟨v₀, hv₀⟩ := Ideal.mem_span_singleton.mp htW
+  obtain ⟨Θ, Ξ, hΘ⟩ := Ideal.mem_span_pair.mp hsp
+  obtain ⟨a, b, hab⟩ := Ideal.mem_span_pair.mp hσsp
+  have hσs : σ = (a + b * v₀) * sW := by
+    rw [← hab, hv₀]
+    ring
+  have hss : sW = (Θ + Ξ * w) * ((a + b * v₀) * sW) := by
+    conv_lhs => rw [← hΘ]
+    rw [hw, ← hσs]
+    ring
+  have hcancel : (1 - (Θ + Ξ * w) * (a + b * v₀)) * sW = 0 := by
+    rw [sub_mul, one_mul]
+    rw [show (Θ + Ξ * w) * (a + b * v₀) * sW =
+      (Θ + Ξ * w) * ((a + b * v₀) * sW) from by ring]
+    rw [← hss]
+    ring
+  have hone : (Θ + Ξ * w) * (a + b * v₀) = 1 := by
+    have h2 := (mem_nonZeroDivisors_iff.mp hnzd).2 _ hcancel
+    linear_combination -h2
+  have hunit : IsUnit (a + b * v₀) :=
+    isUnit_iff_exists_inv.mpr ⟨Θ + Ξ * w, by rw [mul_comm]; exact hone⟩
+  refine ⟨hunit.unit, ?_⟩
+  rw [IsUnit.unit_spec]
+  exact hσs
+
+/-- **The α-unit**: near every prime containing `t`, the transported `s'` is a unit multiple
+of `s` — pointed isomorphisms preserve the order of vanishing along the section exactly. -/
+lemma exists_basicOpen_transport_root_unit_mul {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    ∃ (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))),
+      chartYSectionsRingEquiv W r ∉ P ∧
+      ∃ v : (↑Γ(projModel W, (projModel W).basicOpen r))ˣ,
+        pointedIsoChartTransport e hr (AdjoinRoot.root (infChartCubic W')) =
+          ↑v * ((((projModel W).presheaf.map
+            (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+            ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)))) := by
+  obtain ⟨r, hr, hrP, hU', hÛ, hspan⟩ := exists_basicOpen_division_pack e hez P ht
+  refine ⟨r, hr, hrP, ?_⟩
+  refine alpha_unit_aux
+    (pointedIsoChartTransport e hr (AdjoinRoot.root (infChartCubic W')))
+    (pointedIsoChartTransport e hr (infChartTElem W'))
+    ((((projModel W).presheaf.map
+      (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
+    ((((projModel W).presheaf.map
+      (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)))
+    (tel_image_mem_span_of_isUnit (pointedIsoChartTransport e hr) hU')
+    (tel_image_mem_span_of_isUnit
+      ((((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom).comp
+        (chartYSectionsRingEquiv W).symm.toRingHom) hÛ) hspan
+    (pointedIsoChartTransport_mem_span_of_aug_eq_zero e hez r hr
+      (infChartAug_root W')) ?_
+  haveI := (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).isLocalization_basicOpen r
+  exact algebraMap_mem_nonZeroDivisors_of_away r
+    (RingEquiv_map_mem_nonZeroDivisors (chartYSectionsRingEquiv W).symm
+      (infChart_root_mem_nonZeroDivisors W))
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
