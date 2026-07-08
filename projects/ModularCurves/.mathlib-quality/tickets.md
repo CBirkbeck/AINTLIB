@@ -7058,3 +7058,25 @@ cut.*
   sub-ticketed. Do NOT hold the merge hostage to b5: unless b5 is imminent, OPEN THE PR NOW
   with the landed leaves — the integrator wire discharges 3 of the 4 remaining T-W7.1b
   sorries on merge; b5 keeps its sub-ticket and lands separately.
+
+### [T-END0] FIRST ACT DONE (p0, 2026-07-08) — leaf tickets (see §v10.5; full plan: decomposition-end0.md)
+*Appended at EOF (mid-file board region was under concurrent churn). `/develop --decompose` first act:*
+- **Decomposition**: `.mathlib-quality/decomposition-end0.md` — prose proof = **KM Cor 2.7.2(1)** verbatim,
+  ordered lemmas, verbatim KM §2.5–2.7 quotes per leaf + Lean↔source match, HasseWeil import anchors.
+  Confirms `aut_hom_eq_id_of_fullLevel` (Groupoid.lean:125) **is** KM 2.7.2(1).
+- **Skeleton**: `EllipticCurve/EndomorphismDegree.lean` (new) — `lake build` **CLEAN** (3074 jobs, 0
+  errors, 11 expected `sorry`s). `End(E/S) := E.asOver ⟶ E.asOver` (`Hom.commGroup` additive / `≫` mult;
+  `mulBy n = [n]`). Committed `745cd328`.
+- **DS-data (DS-END0)**: `endDeg`/`endDual`/`endTrace` — pins `endDual_comp_self` (KM 2.6.1),
+  `endDeg_mulBy` (2.6.1.1), `endDual_mulBy` (2.6.2.1), `endTrace_spec` (2.6.2.2).
+- **Leaf tickets** (work order T-END0a→b→c/d→G3b→G3d→G3c→G3e→close box):
+  - **[T-END0a]** `Ring (End E)` instance (biadditivity of `≫` over `Hom.commGroup`) · infra · KM 2.5.1 · instance
+  - **[T-END0b]** build `endDeg`/`endDual` (DS-data, dual via Abel `E ≅ Pic⁰` T-A6-adj) + pins · KM 2.5.1/2.6.1 · def(data)+thm
+  - **[T-END0c]** `endDeg_mulBy : deg[N]=N²` · KM 2.6.1.1 · anchor HasseWeil `mulByInt_degree`/BB-DEG (T-B6) · thm
+  - **[T-END0d]** build `endTrace` + `endTrace_spec` (`f+f^t=[tr f]`) · KM 2.6.2.2 · def(data)+thm
+  - **[T-G3b]** `endDeg_one_add_mulBy_comp` (`deg(1+g∘[N]) = 1+N·tr g+N²·deg g`) · KM 2.6.3/2.7.2 · thm
+  - **[T-G3c]** `endTrace_sq_le` (`(tr g)² ≤ 4·deg g`) · KM 2.6.3(2) · **IMPORT** HasseWeil `hasse_bound`/`degree_quadratic_closed` (T-RED0) · thm
+  - **[T-G3d]** `exists_eq_one_add_mulBy_comp_of_fixesTorsion` (ε fixes E[N] ⟹ ∃g, ε=1+g∘[N]) · KM 2.7.2 proof · thm
+  - **[T-G3e]** `eq_zero_of_endDeg_eq_zero` (deg g=0 ⟹ g=0, pos-definite) · KM 2.6.3(2) proof · thm
+  - **close** `aut_hom_eq_id_of_fullLevel` = T-G2 + G3d + G3b + `deg ε=1` + G3c + `gme_deg_trace_forces_zero` (**PROVEN**) + G3e
+- **Consumers**: T-G3 rigidity → T-E10, T-E9 rigid half, T-H6/T-H10. **NEXT (p0)**: execution — T-END0a then T-END0b. T-W7-independent.
