@@ -7319,3 +7319,29 @@ records why).*
   `Ring`-instance packaging on top of `endMonHom`).
 - **NEXT (p0)**: `endPostcomp_mul` (`(a*b) ≫ f = (a≫f)*(b≫f)` for pointed `f`, from `endMonHom` +
   cartesian `lift`) → ring algebra → **T-G3b** (deg quadratic from pins) → T-G3d/e → T-G3c (HasseWeil).
+
+## Amendments v10.18 (2026-07-08): c5β — β1 CLOSED (bb5c86d9); β3/β4 unblocked; W7 endgame pointer
+
+- **β1 CLOSED** (bb5c86d9): 111 lines (under the 150–250 estimate), zero sorries, axiom-clean.
+  Both v10.17 obstacles resolved as the route of record predicted: (i) `chartAwayAlgebra`
+  installed as the composite through `gradeZeroRingEquiv` makes `chartι_projModelπ` close by
+  `rw [awayι_projModelπ]` alone — `pullbackSpecIso` applies verbatim; (ii) the `AlgEquiv`
+  upgrade's commutes-obligation IS the existing `chartCoordEquiv_mk_C` — zero new math;
+  `chartCoordAlgEquiv` built once for β3's consumption.
+- **Deliverables**: `chartPieceIso : pullback (chartι i ≫ π) (chartι j ≫ π) ≅
+  Spec (biChartRing W i j)` + `chartProductCover` (left-right cover of E ×_R E by
+  chart-products). With β2b, the addition-law triples + on-curve theorems now read as regular
+  functions on honest open subschemes of E ×_R E — the exact input for `addOnZ`/`addOnY`.
+  **β3 and β4 are unblocked**; c5β continues (sentinel up): β3 per-(i,j,k) ring homs
+  (well-defined via `equation_lawTwoTriple_of_isDomain`), β4 gluing via the six certified
+  minors, then the four GroupLawConstruction.lean sorries fill.
+- **Upstreaming list grows**: `AdjoinRoot.isDomain_of_monic_of_map` (the STRONGEST candidate —
+  mathlib's `Affine.CoordinateRing` IsDomain instance hand-rolls exactly this descent, so the
+  PR would shorten an existing mathlib proof), `HomogeneousLocalization.isDomain_away`,
+  `quotientEquivQuotientMvPolynomial_symm_mk`.
+- **W7 endgame pointer (after β4, flag before claiming)**: with 0c-i inc. 2 completing and
+  1b merging via PR #5220, T-W7.12's outstanding deps reduce to **0c-ii (mulModelHom), 0h,
+  1a** — a W7-endgame sequencing review is due then (who takes 0c-ii; status of 0h/1a), since
+  T-W7.12 → T-W7.36 is the MILESTONE that retires `abelEnrichment_exists`.
+- Ops note absorbed by c5β: β3 builds will be the heaviest yet — exit 143 = OOM, build single
+  targets.
