@@ -329,10 +329,18 @@ theorem isProper_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S} {z : S
       MorphismProperty.cancel_right_of_respectsIso (P := @IsProper)]
     exact projModelπ_isProper (W s)
 
-/-- **([a4], properness and smoothness descend)** `π' : E/G ⟶ X/G` is proper and smooth of
-relative dimension `1`.
+/-- **([a4], properness and smoothness of the quotient curve)** `π' : E/G ⟶ X/G` is proper and
+smooth of relative dimension `1`.
 
-Plan (terminating in a proof): `q : X ⟶ X/G` is a **finite étale surjection** — finite by
+**PLAN SUPERSEDED (2026-07-08)**: do *not* descend these along `X ⟶ X/G`. mathlib has
+`DescendsAlong` for `Smooth`, `UniversallyClosed`, `LocallyOfFiniteType`, `Etale`,
+`isomorphisms` and `IsOpenImmersion`, but **not** for `IsSeparated` and **not** for
+`SmoothOfRelativeDimension n`, so the descent route opens two fresh mathlib gaps. Both properties
+follow instead from `localModel` (leaf `[a5]`): properness is `isProper_of_locallyWeierstrass`
+(PROVEN above), and smoothness is the identical Zariski-local-at-target argument once
+`SmoothOfRelativeDimension 1 (projModelπ W)` lands (T-A3, in flight).
+
+Superseded plan, kept for the record: `q : X ⟶ X/G` is a **finite étale surjection** — finite by
 `Module.Finite.of_isFreeAlgebraAction`, étale by
 `Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing` (general base = the tracked gap
 [A711-FP]), surjective because it is a torsor — hence an fppf cover. `IsProper` and
