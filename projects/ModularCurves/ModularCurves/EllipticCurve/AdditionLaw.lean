@@ -186,6 +186,16 @@ lemma dblAddZ_smul (P Q : Fin 3 → R) (u v : R) :
   simp only [dblAddZ, smul_fin3_ext]
   ring1
 
+/-- **(bidegree `(2,2)`, triple form)** The second Bosma-Lenstra law is bihomogeneous of bidegree
+`(2,2)`, exactly as mathlib's first law (`addXYZ_smul`). This is what makes the law descend to
+`P² × P² ⇢ P²`: rescaling either projective representative rescales the output triple, so the
+resulting point of `P²` is unchanged. It is the reason the per-chart-product morphisms agree on
+overlaps of chart-products, where the two representatives differ by the transition scalars. -/
+lemma dblAddXYZ_smul (P Q : Fin 3 → R) (u v : R) :
+    W'.dblAddXYZ (u • P) (v • Q) = (u * v) ^ 2 • W'.dblAddXYZ P Q := by
+  rw [dblAddXYZ, dblAddX_smul, dblAddY_smul, dblAddZ_smul, smul_fin3, dblAddXYZ]
+  simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+
 /-! ## The `O`-columns: `O + Q = Q` and `P + O = P`, projectively, with no curve hypothesis -/
 
 lemma dblAddX_zero_left (Y₁ : R) (Q : Fin 3 → R) :

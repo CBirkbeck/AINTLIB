@@ -162,6 +162,53 @@ lemma chartAwayHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd :
       chartAwayHomOfTriple W k t u hu ht := by
   rw [chartAwayHomOfTriple, chartAwayHomOfTriple, chartHomOfTriple_smul W k t u c d hcd hu ht hu']
 
+/-- **(c4.3 core, sharpened)** If two on-curve triples are proportional — `t' = e • t` for ANY
+scalar `e`, not assumed a unit — then their chart morphisms coincide. The unit witnesses do the
+work: `t k * u = 1` and `t' k * u' = 1` force `u = e * u'`, so the ratios agree.
+
+This is the form the chart-product transition needs: there `e` is the bidegree-`(2,2)` transition
+factor, and one never has to name its inverse. -/
+lemma chartHomOfTriple_congr_of_smul (k : Fin 3) (t t' : Fin 3 → S) (u u' e : S)
+    (hsmul : ∀ m, t' m = e * t m) (hu : t k * u = 1) (hu' : t' k * u' = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (ht' : (W.map (algebraMap R S)).toProjective.Equation t') :
+    chartHomOfTriple W k t' u' hu' ht' = chartHomOfTriple W k t u hu ht := by
+  have hue : u = e * u' :=
+    calc u = u * (t' k * u') := by rw [hu', mul_one]
+      _ = (t k * u) * (e * u') := by rw [hsmul k]; ring
+      _ = e * u' := by rw [hu, one_mul]
+  refine chartHomOfTriple_congr W k t t' u u' hu hu' ht ht' fun m => ?_
+  rw [hsmul m, hue]
+  ring
+
+/-- The `Away`-presentation form of `chartHomOfTriple_congr_of_smul`. -/
+lemma chartAwayHomOfTriple_congr_of_smul (k : Fin 3) (t t' : Fin 3 → S) (u u' e : S)
+    (hsmul : ∀ m, t' m = e * t m) (hu : t k * u = 1) (hu' : t' k * u' = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (ht' : (W.map (algebraMap R S)).toProjective.Equation t') :
+    chartAwayHomOfTriple W k t' u' hu' ht' = chartAwayHomOfTriple W k t u hu ht := by
+  rw [chartAwayHomOfTriple, chartAwayHomOfTriple,
+    chartHomOfTriple_congr_of_smul W k t t' u u' e hsmul hu hu' ht ht']
+
+/-- **(c4.3, the law-2 transition)** Rescaling the two input points of the second Bosma–Lenstra law
+does not change the chart morphism it defines: the law is bidegree `(2,2)` (`dblAddXYZ_smul`), so
+the output triple is rescaled by `(c·d)²`, and a chart morphism does not see scalars.
+
+Over the overlap of two chart-products, the two tautological points differ exactly by the chart
+transition scalars — so this is the cross-chart-product agreement, at ring level. -/
+lemma chartAwayHomOfTriple_dblAddXYZ_smul (k : Fin 3) (P Q : Fin 3 → S) (c d u u' : S)
+    (hu : (W.map (algebraMap R S)).toProjective.dblAddXYZ P Q k * u = 1)
+    (hu' : (W.map (algebraMap R S)).toProjective.dblAddXYZ (c • P) (d • Q) k * u' = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation
+      ((W.map (algebraMap R S)).toProjective.dblAddXYZ P Q))
+    (ht' : (W.map (algebraMap R S)).toProjective.Equation
+      ((W.map (algebraMap R S)).toProjective.dblAddXYZ (c • P) (d • Q))) :
+    chartAwayHomOfTriple W k
+        ((W.map (algebraMap R S)).toProjective.dblAddXYZ (c • P) (d • Q)) u' hu' ht' =
+      chartAwayHomOfTriple W k ((W.map (algebraMap R S)).toProjective.dblAddXYZ P Q) u hu ht :=
+  chartAwayHomOfTriple_congr_of_smul W k _ _ u u' ((c * d) ^ 2)
+    (fun m => by rw [dblAddXYZ_smul]; rfl) hu hu' ht ht'
+
 end Naturality
 
 /-- **(c4.2c, the agreement)** The `k`-th and `l`-th piece morphisms of an on-curve triple agree
