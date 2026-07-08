@@ -88,25 +88,18 @@ open HomogeneousLocalization in
 `Away.isLocalization_mul`. -/
 noncomputable def projGlueLift (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
     (hu : t k * u = 1) (hv : t l * v = 1)
-    (ht : (W.map (algebraMap R S)).toProjective.Equation t) :
-    letI : Algebra (chartAway W k)
-        (Away (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
-            (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))) :=
-      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
-        (rfl : _ = _ * _)).toAlgebra
-    Away (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
-        (quotientGradingHom (projIdeal W)) (MvPolynomial.X l)) →+* S := by
-  letI : Algebra (chartAway W k)
-      (Away (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
-          (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))) :=
-    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
-      (rfl : _ = _ * _)).toAlgebra
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (x : projCoordRing W)
+    (hx : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X l)) :
+    letI : Algebra (chartAway W k) (Away (quotientGrading (projIdeal W)) x) :=
+      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx).toAlgebra
+    Away (quotientGrading (projIdeal W)) x →+* S := by
+  letI : Algebra (chartAway W k) (Away (quotientGrading (projIdeal W)) x) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx).toAlgebra
   haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
     (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l)
-    (rfl : _ = _ * _) one_ne_zero
+    hx one_ne_zero
   exact IsLocalization.Away.lift
     (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W k)
       (mk_X_mem_quotientGrading_one W l))
@@ -118,49 +111,71 @@ open HomogeneousLocalization in
 `k`-chart composite equals `Spec ψ` followed by the overlap chart `awayι` at `X k * X l`. -/
 lemma specMap_projGlueLift_awayι (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
     (hu : t k * u = 1) (hv : t l * v = 1)
-    (ht : (W.map (algebraMap R S)).toProjective.Equation t) :
-    Spec.map (CommRingCat.ofHom (projGlueLift W k l hkl t u v hu hv ht)) ≫
-        Proj.awayι (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
-            (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))
-          (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W k)
-            (mk_X_mem_quotientGrading_one W l)) (by omega) =
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (x : projCoordRing W)
+    (hx : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))
+    (hxdeg : x ∈ quotientGrading (projIdeal W) 2) :
+    Spec.map (CommRingCat.ofHom (projGlueLift W k l hkl t u v hu hv ht x hx)) ≫
+        Proj.awayι (quotientGrading (projIdeal W)) x hxdeg (by omega) =
       Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k t u hu ht).toRingHom) ≫
         chartι W k := by
-  letI : Algebra (chartAway W k)
-      (Away (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
-          (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))) :=
-    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
-      (rfl : _ = _ * _)).toAlgebra
+  letI : Algebra (chartAway W k) (Away (quotientGrading (projIdeal W)) x) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx).toAlgebra
   haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
     (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l)
-    (rfl : _ = _ * _) one_ne_zero
-  have hcomp : (projGlueLift W k l hkl t u v hu hv ht).comp
-      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
-        (rfl : _ = _ * _)) = (chartAwayHomOfTriple W k t u hu ht).toRingHom :=
+    hx one_ne_zero
+  have hcomp : (projGlueLift W k l hkl t u v hu hv ht x hx).comp
+      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx) =
+      (chartAwayHomOfTriple W k t u hu ht).toRingHom :=
     IsLocalization.Away.lift_comp _ _
-  rw [chartι, ← Proj.SpecMap_awayMap_awayι (𝒜 := quotientGrading (projIdeal W))
-    (g_deg := mk_X_mem_quotientGrading_one W l) (hx := (rfl : _ = _ * _))
-    (f_deg := mk_X_mem_quotientGrading_one W k) (hm := one_pos), ← Category.assoc,
-    ← Spec.map_comp, ← CommRingCat.ofHom_comp, hcomp]
+  have hsq := Proj.SpecMap_awayMap_awayι (𝒜 := quotientGrading (projIdeal W))
+    (g_deg := mk_X_mem_quotientGrading_one W l) (hx := hx)
+    (f_deg := mk_X_mem_quotientGrading_one W k) (hm := one_pos) (m' := 1)
+  rw [chartι, ← hsq, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp, hcomp]
 
+open HomogeneousLocalization in
+/-- **The last ring-level step.** The two lifts — built from the `k`-chart and the `l`-chart of the
+same triple — coincide as ring maps out of the overlap chart `Away 𝒜 (X k * X l)`.
+
+By `IsLocalization.lift_unique` (against the `k`-side algebra structure) this is equivalent to
+`ψ_l ∘ awayMap_k = hom_k`, i.e. to computing `chartAwayHomOfTriple` on `Away.mk` elements: both
+sides send `b / (X k)^n` to `b(t) * u^n`. Sub-ticket `T-W7.0c-c5β-projglue`, final leaf. -/
+lemma projGlueLift_eq (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
+    (hu : t k * u = 1) (hv : t l * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (x : projCoordRing W)
+    (hx : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))
+    (hx' : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X l) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X k)) :
+    projGlueLift W k l hkl t u v hu hv ht x hx =
+      projGlueLift W l k (Ne.symm hkl) t v u hv hu ht x hx' := by
+  sorry
+
+open HomogeneousLocalization in
 /-- **(c4.2, the last crux of c5β)** A projective triple on the curve, regular at two indices,
 defines the same morphism to the model through either chart. Equivalently: the triple defines a
 morphism to `Proj`, independent of the chart used to read it off.
 
-Route (mathlib HAS the localization statement — see the module docstring):
-`HomogeneousLocalization.Away.isLocalization_mul` presents `Away 𝒜 (X k * X l)` as the
-localization of `Away 𝒜 (X k)` at `Away.isLocalizationElem`, whose image under the chart morphism
-is the unit `t l * u` (the two lemmas above). `IsLocalization.Away.lift` then produces the common
-map `ψ`, and `Proj.SpecMap_awayMap_awayι` pushes both sides through `awayι` at `X k * X l`
-(`awayCongr` for the `X l * X k` mismatch). Sub-ticket: `T-W7.0c-c5β-projglue`. -/
-theorem chartι_comp_specMap_chartAwayHom_eq (k l : Fin 3) (t : Fin 3 → S) (u v : S)
+Both chart composites factor through the overlap chart `awayι` at `X k * X l`
+(`specMap_projGlueLift_awayι`, proven), so the statement reduces to the equality of the two lifts
+(`projGlueLift_eq`). -/
+theorem chartι_comp_specMap_chartAwayHom_eq (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
     (hu : t k * u = 1) (hv : t l * v = 1)
     (ht : (W.map (algebraMap R S)).toProjective.Equation t) :
     Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k t u hu ht).toRingHom) ≫ chartι W k =
       Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W l t v hv ht).toRingHom) ≫
         chartι W l := by
-  sorry
+  set x : projCoordRing W := (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+    (quotientGradingHom (projIdeal W)) (MvPolynomial.X l) with hxdef
+  have hxdeg : x ∈ quotientGrading (projIdeal W) 2 :=
+    SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l)
+  have hx' : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X l) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) := by
+    rw [hxdef, mul_comm]
+  rw [← specMap_projGlueLift_awayι W k l hkl t u v hu hv ht x hxdef hxdeg,
+    ← specMap_projGlueLift_awayι W l k (Ne.symm hkl) t v u hv hu ht x hx' hxdeg,
+    projGlueLift_eq W k l hkl t u v hu hv ht x hxdef hx']
 
 end WeierstrassCurve.Projective
