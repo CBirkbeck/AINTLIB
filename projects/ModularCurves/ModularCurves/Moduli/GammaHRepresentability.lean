@@ -833,6 +833,74 @@ private theorem pullSection_asSection_aux {R : CommRingCat.{u}} (X : EllObj R)
       (Point.asSection X.curve g P)).2.trans
       (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
 
+open EllipticCurve in
+/-- **[GHC4, the glue]** Glue a `Bool`-family of naive full level structures on
+`X.curve` into a full level structure on the base change `X.curve.baseChange g`, where
+`g` restricts to `𝟙` on each `Bool`-summand. This is the constructor of the "second
+global orbit" separating the naive `Γ_H` orbit presheaf: the killing clause is
+`coprodPoint_nsmul_eq_zero` (through `asSection`); the fibrewise generation clause
+reduces, by factoring a geometric point through one summand (`spec_factors_coprod`), to
+that summand's own generation clause (mirroring `isNaiveFullLevel_pullAlong`). -/
+noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) :
+    (X.curve.baseChange g).FullLevelPt N := by
+  have hzero : Point.asSection X.curve g (0 : X.curve.Point g) = 0 := by
+    have h0 := Point.asSection_zsmul X.curve g 0 (0 : X.curve.Point g)
+    simpa using h0
+  refine ⟨(Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)),
+    Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))), ⟨?_, ?_⟩, ?_⟩
+  · rw [← Point.asSection_zsmul,
+      coprodPoint_nsmul_eq_zero X N g hg _ (fun b => (Lf b).2.1.1)]
+    exact hzero
+  · rw [← Point.asSection_zsmul,
+      coprodPoint_nsmul_eq_zero X N g hg _ (fun b => (Lf b).2.1.2)]
+    exact hzero
+  · intro k _ _ t x hx
+    obtain ⟨b, s, hs⟩ := spec_factors_coprod (fun _ : Bool => X.base) t
+    have htg : t ≫ g = s := by rw [← hs, Category.assoc, hg b, Category.comp_id]
+    have hdx : (N : ℤ) • Point.baseChangeEquiv X.curve g t x = 0 := by
+      rw [← map_zsmul (Point.baseChangeEquiv X.curve g t), hx, map_zero]
+    have hcompatP : Point.baseChangeEquiv X.curve g t
+        (Point.pull (X.curve.baseChange g) t
+          (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))))
+        = Point.pull X.curve (t ≫ g) (Lf b).1.1 := by
+      refine Subtype.ext ?_
+      rw [Point.baseChangeEquiv_apply_coe]
+      show (t ≫ (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))).1)
+            ≫ pullback.fst X.curve.π g = (t ≫ g) ≫ (Lf b).1.1.1
+      rw [htg, Category.assoc, Point.asSection_val_fst, ← hs, Category.assoc, coprodPoint_ι]
+    have hcompatQ : Point.baseChangeEquiv X.curve g t
+        (Point.pull (X.curve.baseChange g) t
+          (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))))
+        = Point.pull X.curve (t ≫ g) (Lf b).1.2 := by
+      refine Subtype.ext ?_
+      rw [Point.baseChangeEquiv_apply_coe]
+      show (t ≫ (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))).1)
+            ≫ pullback.fst X.curve.π g = (t ≫ g) ≫ (Lf b).1.2.1
+      rw [htg, Category.assoc, Point.asSection_val_fst, ← hs, Category.assoc, coprodPoint_ι]
+    have h1 := (Lf b).2.2 k (t ≫ g) (Point.baseChangeEquiv X.curve g t x) hdx
+    rw [← hcompatP, ← hcompatQ] at h1
+    have hKle : AddSubgroup.closure
+        ({Point.baseChangeEquiv X.curve g t (Point.pull (X.curve.baseChange g) t
+            (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)))),
+          Point.baseChangeEquiv X.curve g t (Point.pull (X.curve.baseChange g) t
+            (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))))} :
+          Set (X.curve.Point (t ≫ g)))
+        ≤ (AddSubgroup.closure
+            {Point.pull (X.curve.baseChange g) t
+                (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))),
+              Point.pull (X.curve.baseChange g) t
+                (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2)))}).map
+          (Point.baseChangeEquiv X.curve g t).toAddMonoidHom := by
+      rw [AddSubgroup.closure_le]
+      rintro z (rfl | rfl)
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert _ _), rfl⟩
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl), rfl⟩
+    obtain ⟨y, hy, hyx⟩ := hKle h1
+    exact ((Point.baseChangeEquiv X.curve g t).injective hyx) ▸ hy
+
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
