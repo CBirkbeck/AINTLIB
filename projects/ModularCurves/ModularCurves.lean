@@ -52,6 +52,7 @@ import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.HopfGalois
+import ModularCurves.ForMathlib.HopfGaloisQuotient
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.Moduli.MellWeierstrass
