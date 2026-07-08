@@ -2047,6 +2047,12 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **`isProper_of_locallyWeierstrass` PROVEN, axiom-clean** (`IsProper` is Zariski-local at the target;
   over each affine chart the morphism is `projModelπ W` up to iso, proper by `projModelπ_isProper`).
   The smooth half is the same argument once `SmoothOfRelativeDimension 1 (projModelπ W)` lands (T-A3).
+- **✔ VERIFICATION (fable-P4, 2026-07-08)**: full project `lake build ModularCurves` **green (exit 0)**
+  after this session's changes; a 14-decl `#print axioms` sweep of every proven (non-leaf) result of
+  the route-(a) engine is **`sorryAx`-free** (only propext/Classical.choice/Quot.sound): the local
+  coboundary, semilinear Galois descent (module + pushout + Spec forms), the T-Q2 bridge, finite+étale
+  quotient, affine quotient, the atlas-square + morphismRestrict, the `IsPullback`-local-at-target
+  filler, `isProper_of_locallyWeierstrass`, `exists_charts_of_globalModel`, `exists_quotient_π_zero`.
 - **★★★ ENGINE GEOMETRIC CORE ASSEMBLED (fable-P4, 2026-07-08)** — `exists_ellipticCurveGeom_quotient`
   is a **sorry-free assembly** (`#print axioms`: propext, Classical.choice, Quot.sound, sorryAx —
   the sorryAx *only* via the 3 isolated leaves below, none in the assembly proof term). It takes the
