@@ -1821,6 +1821,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     statement gap" worry does **not** touch the torsor part — the proof above uses **no**
     finiteness of `A` over `Aᴳ`. The flag survives only for `Module.Finite.of_isFreeAlgebraAction`
     and `Algebra.Etale.of_isFreeAlgebraAction` (both still sorried, both genuinely need it).
+  - **★ UPSTREAM-LEDGER FLAG → beastmode-A** (v10.27: *"the separability-idempotent trick …
+    the upstream ledger should eventually see; flag the chain to it"*). The whole chain is
+    mathlib-shaped and base-agnostic (no elliptic curves, no schemes; `R`, `A`, finite `G`):
+    `chr_of_isFreeAlgebraAction` · `span_displacement_eq_top` ·
+    `exists_torsorMul_eq_zero_one` · `exists_galoisCoords` (**the trick**: `torsorMul` is an
+    *algebra* hom into the product ring `G → A`, so evaluation at `g` is a ring hom and
+    `e = ∏_{g≠1}(1 − w_g)` has image literally `δ_{·,1}` — no idempotent gymnastics) ·
+    `galoisInv` + `torsorMul_bijective_of_isFreeAlgebraAction` · `galoisCoords_dual` ·
+    `Module.Finite.of_isFreeAlgebraAction` · `Module.Projective.of_isFreeAlgebraAction` ·
+    `exists_separabilityIdempotent` · `Algebra.FormallyUnramified.of_isFreeAlgebraAction`.
+    All in `ForMathlib/InvariantTorsor.lean`, all `#print axioms`-clean. Upstream framing:
+    *Galois theory of commutative rings (Chase–Harrison–Rosenberg) — mathlib currently has
+    `IsGaloisGroup`/`Algebra.IsInvariant` (fixed-ring, number-theoretic) but no CHR content.*
   - **★ MORE LANDED (fable-P4, 2026-07-08, all axiom-clean)**:
     · `galoisCoords_dual` — the coordinates are a **trace dual basis**, `∑ᵢ aᵢ·tr(bᵢx) = x`.
     · **`Module.Finite.of_isFreeAlgebraAction` PROVEN** — the `aᵢ` generate `A` over `Aᴳ`.
@@ -1850,6 +1863,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
       `galoisCoords_dual`, then `Module.Flat`.)*
     · **NOT a B2**: the statement is true (a Galois extension is finite étale); only the
       mathlib substrate is missing. Sorry retained **with the plan attached in the docstring**.
+    · *(update)* `Module.Projective.of_isFreeAlgebraAction` is now **PROVEN** too, so
+      `A` is f.g. projective (⟹ flat ⟹ faithfully flat) over `Aᴳ`: [A711-FP]'s input is in
+      hand, and only the algebra-level presentation step remains.
   - **A7.1.2** `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` — route reassessed:
     it is *not* a one-line corollary of the torsor iso. Honest route: the `R`-module sequence
     `0 → Aᴳ → A --Δ--> ∏_G A`, `Δ(a) = (g•a − a)_g`, identifies `(A ⊗_R R')ᴳ` with
