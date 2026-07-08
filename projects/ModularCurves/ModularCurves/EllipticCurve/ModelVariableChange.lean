@@ -994,6 +994,168 @@ lemma chartPointOf_mem_basicOpen_transport {W W' : WeierstrassCurve R}
   intro hmem
   exact y.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hmem hb')
 
+/-- The coordinate transport factors through the `Z`-chart sections transport. -/
+lemma pointedIsoCoordEquiv_sections {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (a' : W'.toAffine.CoordinateRing) :
+    (chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez a') =
+      pointedIsoΓ e hez ((chartZSectionsRingEquiv W').symm a') :=
+  (RingEquiv.symm_apply_eq _).mpr rfl
+
+/-- The transported overlap sits inside the transported `Y'`-chart. -/
+private lemma overlapPreimage_le_chartYPreimage {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W') :
+    e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) ≤
+    e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)) :=
+  ((TopologicalSpace.Opens.map e.hom.base).map (homOfLE (Proj.basicOpen_mono _
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) ⟨_, rfl⟩))).le
+
+/-- The transported overlap sits inside the `Z`-chart of the target model. -/
+private lemma overlapPreimage_le_chartZ {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) ≤
+    Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) :=
+  le_of_le_of_eq ((TopologicalSpace.Opens.map e.hom.base).map (homOfLE (Proj.basicOpen_mono _
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+    ⟨_, mul_comm ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))⟩))).le
+    (pointedIso_preimage_zChart e hez)
+
+/-- **The overlap equation transports along a pointed isomorphism**: a `t'`-cleared relation
+between a `Y'`-chart function `b'` and a `Z'`-chart function `a'` becomes, after `e.app` and
+restriction to the transported overlap, the same relation between the transported `b'` and
+`Φ a'`. All geometry of the comparison is concentrated here. -/
+lemma pointedIso_overlap_sections_equation {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (a' : W'.toAffine.CoordinateRing) (b' : AdjoinRoot (infChartCubic W')) (j : ℕ)
+    (h : algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W')) b' =
+      overlapMap W' a' *
+        algebraMap (AdjoinRoot (infChartCubic W'))
+          (Localization.Away (infChartTElem W')) (infChartTElem W') ^ j) :
+    ((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+        ((chartYSectionsRingEquiv W').symm b')) =
+    ((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom
+      ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez a')) *
+    (((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+        ((chartYSectionsRingEquiv W').symm (infChartTElem W')))) ^ j := by
+  have h1 := overlap_sections_equation_of_loc W' a' b' j h
+  have h2 := congrArg ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom) h1
+  rw [map_mul, map_pow] at h2
+  have hnatY : ∀ w' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))),
+      (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+        (((projModel W').presheaf.map (homOfLE
+          (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+            ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+              (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom w') =
+      ((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom
+        ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom w') := by
+    intro w'
+    have hnat := congrArg (fun φ => CommRingCat.Hom.hom φ w')
+      (Scheme.Hom.naturality e.hom ((homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op))
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
+    rw [hnat]
+    exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom w'))
+      (Subsingleton.elim _ _)
+  have hΦ : ((projModel W).presheaf.map
+      (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom
+      ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez a')) =
+      (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+        (((projModel W').presheaf.map (homOfLE
+          (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+            ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+              (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+            ⟨_, mul_comm ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+              ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))⟩)).op).hom
+          ((chartZSectionsRingEquiv W').symm a')) := by
+    have hΓ0 := congrArg (fun ψ : _ →+* _ => ψ ((chartZSectionsRingEquiv W').symm a'))
+      (Iso.commRingCatIsoToRingEquiv_toRingHom
+        ((asIso (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).trans
+          ((projModel W).presheaf.mapIso
+            (eqToIso (pointedIso_preimage_zChart e hez).symm).op)))
+    have hΓ : pointedIsoΓ e hez ((chartZSectionsRingEquiv W').symm a') =
+        ((projModel W).presheaf.map
+          (eqToIso (pointedIso_preimage_zChart e hez).symm).op.hom).hom
+          ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+            ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+            ((chartZSectionsRingEquiv W').symm a')) := by
+      refine hΓ0.trans ?_
+      rw [Iso.trans_hom]
+      simp only [CommRingCat.hom_comp, RingHom.comp_apply]
+      rfl
+    have c1 := congrArg (fun z => ((projModel W).presheaf.map
+      (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom z)
+      (pointedIsoCoordEquiv_sections e heπ hez a')
+    have c2 := congrArg (fun z => ((projModel W).presheaf.map
+      (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom z) hΓ
+    have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+        ((chartZSectionsRingEquiv W').symm a')))
+      ((projModel W).presheaf.map_comp
+        ((eqToIso (pointedIso_preimage_zChart e hez).symm).op.hom)
+        ((homOfLE (overlapPreimage_le_chartZ e hez)).op))
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+    have c4 := congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom
+        ((chartZSectionsRingEquiv W').symm a')))
+      (Subsingleton.elim
+        ((eqToIso (pointedIso_preimage_zChart e hez).symm).op.hom ≫
+          (homOfLE (overlapPreimage_le_chartZ e hez)).op)
+        (((TopologicalSpace.Opens.map e.hom.base).map (homOfLE
+          (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+            ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+              (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+            ⟨_, mul_comm ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+              ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))⟩))).op))
+    have hnatZ := congrArg (fun φ => CommRingCat.Hom.hom φ
+      ((chartZSectionsRingEquiv W').symm a'))
+      (Scheme.Hom.naturality e.hom ((homOfLE
+        (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+            (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+          ⟨_, mul_comm ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))
+            ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))⟩)).op))
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnatZ
+    exact c1.trans (c2.trans (hfuse.symm.trans (c4.trans hnatZ.symm)))
+  exact ((hnatY ((chartYSectionsRingEquiv W').symm b')).symm).trans
+    (h2.trans (congrArg₂ (· * ·) hΦ.symm
+      (congrArg (· ^ j) (hnatY ((chartYSectionsRingEquiv W').symm (infChartTElem W'))))))
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
