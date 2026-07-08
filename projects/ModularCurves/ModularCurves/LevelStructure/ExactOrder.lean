@@ -253,7 +253,24 @@ sorry-free over arbitrary schemes), but two layers still gate this box —
 (b) the genuinely-absent étale core — a finite locally free rank-`N` group scheme over
 a field with `N` invertible is finite étale (BB-DIFF / the flf-discriminant criterion,
 KM (3)⟺(4)), and finite étale over an algebraically closed `k` yields `N` distinct
-reduced geometric points. Not a leaf; returned to `state: open`. -/
+reduced geometric points.
+
+RE-ASSESSMENT 2026-07-08 (beastmode-A, post T-D6a-ii; SHARPER ROUTE — NOT CARTIER):
+the (1)⟹(2) half is now DISCHARGEABLE by `Section.HasExactOrder.baseChange` (proven
+today: exact order is base-change stable), reducing this box to the pure field-level
+(2)⟹(3). Crucially, (2)⟹(3) does NOT need Cartier's theorem in general: over the
+*algebraically closed* fibre `k̄` the argument is elementary given the project's
+already-proven `Torsion.torsionπ_etale` (T-B5′: `E[N] ⟶ S` finite étale when `N`
+invertible). Route: (a) the subgroup-divisor subscheme `G` is killed by `N`
+(`IsSubgroup.smul_eq_zero_of_factors`, proven) ⟹ `G` factors through `E[N]`; (b) `E[N]`
+finite étale over `k̄` ⟹ `E[N] ≅ Spec(k̄^{N²})`; (c) a closed subscheme of `Spec(k̄^n)`
+is a quotient `k̄^n/I ≅ k̄^m`, hence REDUCED — so `G` (length `N`) is `N` distinct
+reduced points; (d) `G = Σ_{b} [bP]` ⟹ the `b·P` are distinct ⟹ no proper multiple
+vanishes. MISSING (bounded, not Cartier): the divisor-`G` ↔ closed-subscheme bridge, the
+`closed-in-étale-over-k̄ ⟹ reduced` lemma (comm-alg over `k̄^n`), and length↔point-count
+(project has `ForMathlib/EtaleSectionsCount` + `TorsionFibre.torsionPointsEquiv` as
+substrate). Kept `state: open` (bounded field-level development, deferred while
+integrator duty stands); this is the concrete attack route. -/
 theorem Section.HasExactOrder.pull_nsmul_ne_zero {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) (h : P.HasExactOrder E N)
     (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S)
