@@ -5221,6 +5221,21 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `../aintlib-mc-b3` (branch `dev/modular-curves-b3`), PR back to `dev/modular-curves` when
     green. **NOT claiming b2** (`pointedIsoCoordEquiv_filtration`, in flight on beastmode-A) —
     final wiring of the four sorries in ModelVariableChange.lean deferred until b2 flips done.
+  - **PROGRESS (beastmode-P3b3, 2026-07-08)**: **b3x/b3y DONE** — `exists_coordX_image`,
+    `exists_coordY_image` cores + general-base wrappers `exists_coordX_image_of_filtration`,
+    `exists_coordY_image_of_filtration` (subsingleton split), axiom-clean (`ComparisonCoefficients.lean`,
+    commits 29cf027d + a39be9b7). **main-alg DONE** — `exists_variableChange_of_filtration`: builds
+    `C : VariableChange R` with `C•W'=W` + coordinate relations, via `six_ext` (R[X]-basis
+    coefficient extraction) + `α³=γ²` ⇒ `u:=γ/α` + `variableChange_aᵢ` unit-cancellation
+    certificates, axiom-clean (commit cb948d3d). **BRIDGE DONE** (was a *missing* sub-lemma, not
+    "b1 proven" as the sketch assumed) — NEW file `ComparisonBridge.lean`: `bridge_coordX`/
+    `bridge_coordY` compute `pointedIsoCoordEquiv (projModelVCIso C W)` explicitly (= the
+    `x↦u²x'+r, y↦u³y'+su²x'+t` affine variable change) via `pointedIsoCoordEquiv_sections` +
+    `Away.map (vcGradedHom)` + `chartZRingEquiv_x/_y` + AwayCongr transport, axiom-clean (commit
+    809f4616). **b5 IN PROGRESS** — `projModelVCIso_injective'` from the bridge + coordinate
+    comparison + unit arithmetic; the eqToHom-transport of `pointedIsoCoordEquiv` across the curve
+    equality is the remaining step (section-level, to dodge the AlgEquiv-equality kernel poison).
+    Final wiring of the four ModelVariableChange.lean sorries still deferred until b2 lands.
 
 - **[CLEANUP-MVC]** final `/cleanup` ModelVariableChange.lean. **Depends**: T-W7.1b.
 
