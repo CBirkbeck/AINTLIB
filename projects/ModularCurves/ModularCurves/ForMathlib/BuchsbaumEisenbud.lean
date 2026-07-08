@@ -123,9 +123,16 @@ minor ideal `I_{rᵢ}(φᵢ)` is the whole ring or contains a regular sequence o
 the "ranks given" form 00RB actually uses (00RB first fixes the ranks via 00MI, then invokes the
 depth half).  The rank relation `rnk i + rnk (i+1) = rk i` on the resolution range encodes condition
 (2)(a); the disjunction encodes (2)(b) (grade `≥ i`).  The HARD direction (⟸) is the acyclicity
-theorem. -/
+theorem.
 
-/-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form. -/
+INDEXING (corrected 2026-07-08 — the original skeleton had an off-by-one, machine-refuted):
+Lean `φ j : F_{j+1} → F_j`, so Stacks' `φᵢ` (the `i`-th differential `F_i → F_{i-1}`) is Lean `φ (i-1)`.
+The `i`-th condition (`1 ≤ i ≤ e`) is therefore on `φ (i-1)`, with minor size `rnk i = rank φᵢ` and
+grade `≥ i`.  (Writing `(φ i)` here is FALSE: `hrnk`+`hrnk_top` force `F_e = 0`, so `φ (e-1)` is out
+of the zero module and `idealOfMinors (rnk(e-1)) (φ(e-1))` would be `⊥`, making the RHS false for
+every complex with `rk(e-1) ≥ 1`.) -/
+
+/-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form (Lean `φ (i-1)` = Stacks `φᵢ`). -/
 theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
     (hrk : ∀ i, e ≤ i → rk i = 0)
@@ -135,8 +142,8 @@ theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNo
     (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0) :
     (∀ i, Function.Exact (φ (i + 1)) (φ i)) ↔
       (∀ i, 1 ≤ i → i ≤ e →
-        (LinearMap.idealOfMinors (rnk i) (φ i)).gradeGE i ∨
-          LinearMap.idealOfMinors (rnk i) (φ i) = ⊤) := by
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤) := by
   sorry
 
 /-! ## [T-RB] 00RB (Lemma 10.129.3): openness of the fibre-exact locus
