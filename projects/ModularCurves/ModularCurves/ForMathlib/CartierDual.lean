@@ -231,6 +231,21 @@ variable {R : Type u} [CommRing R]
 variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
 variable {B : Type w} [CommRing B] [Algebra R B]
 
+/-- **(T-D5e-τ ingredient — the base-changed right translation.)** For a `B`-point `φ`, the
+`R`-algebra map `A → B ⊗_R A`, `a ↦ ∑ φ(a₍₁₎) ⊗ a₍₂₎ = (φ ⊗ id)(Δ a)`. This is the coordinate
+form of Tate's right-translation operator `τ_λ` base-changed to `B` (Tate §3.8 p. 144: "`τ_λ` is
+the automorphism of the `R`-algebra `A` corresponding to right translation by λ"). It is an algebra
+hom because `Δ = comulAlgHom` and `φ ⊗ id` are; the automorphism `τ` of `M = A'_B ⊗_R A` and the
+identity `τ(u) = u·(λ⊗1)` are built on it (sub-tickets T-D5e-τ, T-D5e-3.8.2). -/
+noncomputable def rightTranslationAlgHom (φ : A →ₐ[R] B) : A →ₐ[R] B ⊗[R] A :=
+  (Algebra.TensorProduct.map φ (AlgHom.id R A)).comp (Bialgebra.comulAlgHom R A)
+
+omit [IsCocomm R A] in
+@[simp] lemma rightTranslationAlgHom_toLinearMap (φ : A →ₐ[R] B) :
+    (rightTranslationAlgHom φ).toLinearMap
+      = (Algebra.TensorProduct.map φ (AlgHom.id R A)).toLinearMap ∘ₗ Coalgebra.comul := by
+  rfl
+
 /-- **(Hopf core of Prop 3.8.1 = Lemma 3.8.2, Tate §3.8 p. 144 — SORRIED sub-ticket T-D5e-core.)**
 The operators underlying Deligne's commutator: for a `B`-point `φ` (with `λ = pointConv φ`), there
 is a unit `u` of the ring `M = A'_B ⊗_R A` — the **coevaluation element** `∑ eᵢ' ⊗ eᵢ`, i.e.
