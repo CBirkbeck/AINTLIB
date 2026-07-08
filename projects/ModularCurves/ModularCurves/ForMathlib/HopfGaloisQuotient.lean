@@ -120,4 +120,21 @@ noncomputable def isColimit_of_isHopfGalois (ρ : B →ₐ[R] B ⊗[R] A) (h : I
     isRegularEpi_specEqualizerπ ρ h.faithfullyFlat
   exact (isKernelPair_specEqualizerπ ρ h).toCoequalizer'
 
+/-- **The affine Hopf-Galois quotient is the categorical quotient** — the universal property packaged
+from `isColimit_of_isHopfGalois`. If `ρ` is Hopf-Galois, then every map `f : Spec B ⟶ Y` that
+coequalizes `Spec ρ, Spec includeLeft` (i.e. is constant on `G`-orbits) factors *uniquely* through the
+quotient map `π : Spec B ⟶ Spec B^{coρ}`. This is the ready-to-consume interface for the glue step
+(and, via the `ρ = act^#` geometry bridge, the `SubgroupQuotient` pins). -/
+theorem existsUnique_lift_of_isHopfGalois (ρ : B →ₐ[R] B ⊗[R] A) (h : IsHopfGalois ρ)
+    {Y : Scheme.{u}} (f : Spec (CommRingCat.of B) ⟶ Y)
+    (hf : Spec.map (CommRingCat.ofHom ρ.toRingHom) ≫ f
+        = Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeLeft : B →ₐ[R] B ⊗[R] A).toRingHom) ≫ f) :
+    ∃! g : Spec (CommRingCat.of (coinvariants ρ)) ⟶ Y,
+      specEqualizerπ ρ Algebra.TensorProduct.includeLeft ≫ g = f := by
+  have hcolim := isColimit_of_isHopfGalois ρ h
+  refine ⟨Cofork.IsColimit.desc hcolim f hf, Cofork.IsColimit.π_desc' hcolim f hf, fun g' hg' => ?_⟩
+  exact Cofork.IsColimit.hom_ext hcolim
+    (hg'.trans (Cofork.IsColimit.π_desc' hcolim f hf).symm)
+
 end ModularCurves
