@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
@@ -397,5 +398,100 @@ theorem curveOfPasting_zero :
     exact (curveOf W).zero_π
 
 end CurveOfPasting
+
+
+section VCTransport
+
+variable {S : Scheme.{0}} (C' : VariableChange ↑Γ(S, ⊤)) {W W' : ellipticW ↑Γ(S, ⊤)}
+
+/-- The variable-change map of projective models, retargeted along `C' • W = W'`
+(T-W7.0h's `projModelVCIso`, inverted and transported). -/
+private noncomputable def vcModelHom (hC : C' • W = W') :
+    projModel W.1 ⟶ projModel W'.1 :=
+  (projModelVCIso C' W.1).inv ≫
+    eqToHom (congrArg (projModel ·) (show C' • W.1 = W'.1 from congrArg Subtype.val hC))
+
+private theorem vcModelHom_π (hC : C' • W = W') :
+    vcModelHom C' hC ≫ projModelπ W'.1 = projModelπ W.1 := by
+  rw [vcModelHom, Category.assoc,
+    eqToHom_projModelπ (show C' • W.1 = W'.1 from congrArg Subtype.val hC),
+    Iso.inv_comp_eq]
+  exact (projModelVCIso_π C' W.1).symm
+
+private theorem zero_vcModelHom (hC : C' • W = W') :
+    projModelZero W.1 ≫ vcModelHom C' hC = projModelZero W'.1 := by
+  rw [vcModelHom, ← Category.assoc,
+    show projModelZero W.1 ≫ (projModelVCIso C' W.1).inv = projModelZero (C' • W.1) from
+      (Iso.comp_inv_eq _).mpr (projModelVCIso_zero C' W.1).symm]
+  exact eqToHom_projModelZero (show C' • W.1 = W'.1 from congrArg Subtype.val hC)
+
+private theorem vcMiddle_eq₁ (hC : C' • W = W') :
+    projModelπ W.1 ≫ 𝟙 (Spec (CommRingCat.of ↑Γ(S, ⊤))) =
+      vcModelHom C' hC ≫ projModelπ W'.1 := by
+  rw [Category.comp_id, vcModelHom_π]
+
+private theorem vcMiddle_eq₂ :
+    S.toSpecΓ ≫ 𝟙 (Spec (CommRingCat.of ↑Γ(S, ⊤))) = 𝟙 S ≫ S.toSpecΓ :=
+  (Category.comp_id _).trans (Category.id_comp _).symm
+
+private noncomputable def vcMiddleMap (hC : C' • W = W') :
+    pullback (projModelπ W.1) S.toSpecΓ ⟶ pullback (projModelπ W'.1) S.toSpecΓ :=
+  pullback.map _ _ _ _ (vcModelHom C' hC) (𝟙 S) (𝟙 (Spec (CommRingCat.of ↑Γ(S, ⊤))))
+    (vcMiddle_eq₁ C' hC) vcMiddle_eq₂
+
+private theorem isIso_vcMiddleMap (hC : C' • W = W') : IsIso (vcMiddleMap C' hC) := by
+  have : IsIso (vcModelHom C' hC) := by rw [vcModelHom]; infer_instance
+  rw [vcMiddleMap]
+  infer_instance
+
+private noncomputable def vcMiddleIso (hC : C' • W = W') :
+    pullback (projModelπ W.1) S.toSpecΓ ≅ pullback (projModelπ W'.1) S.toSpecΓ :=
+  @asIso _ _ _ _ (vcMiddleMap C' hC) (isIso_vcMiddleMap C' hC)
+
+private theorem vcMiddleIso_snd (hC : C' • W = W') :
+    (vcMiddleIso C' hC).hom ≫ pullback.snd (projModelπ W'.1) S.toSpecΓ =
+      pullback.snd (projModelπ W.1) S.toSpecΓ := by
+  simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
+  rw [pullback.lift_snd, Category.comp_id]
+
+private theorem vcMiddleIso_zerolift (hC : C' • W = W') :
+    pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
+        (by rw [Category.assoc, projModelZero_projModelπ]
+            exact (Category.comp_id _).trans (Category.id_comp _).symm) ≫
+      (vcMiddleIso C' hC).hom =
+    pullback.lift (S.toSpecΓ ≫ projModelZero W'.1) (𝟙 S)
+        (by rw [Category.assoc, projModelZero_projModelπ]
+            exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
+  apply pullback.hom_ext
+  · simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
+    rw [Category.assoc, pullback.lift_fst, ← Category.assoc, pullback.lift_fst,
+      Category.assoc, zero_vcModelHom, pullback.lift_fst]
+  · simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
+    rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
+      pullback.lift_snd, Category.comp_id]
+
+/-- **(T-W6c-ii)** A coordinate change carrying `W` to `W'` induces an isomorphism of
+the presented curves. -/
+noncomputable def curveOfVCIso (hC : C' • W = W') : (curveOf W).E ≅ (curveOf W').E :=
+  curveOfPasting W ≪≫ vcMiddleIso C' hC ≪≫ (curveOfPasting W').symm
+
+/-- `curveOfVCIso` is a morphism over `S`. -/
+theorem curveOfVCIso_π (hC : C' • W = W') :
+    (curveOfVCIso C' hC).hom ≫ (curveOf W').π = (curveOf W).π := by
+  have h3 : (curveOfPasting W').inv ≫ (curveOf W').π
+      = pullback.snd (projModelπ W'.1) S.toSpecΓ := by
+    rw [Iso.inv_comp_eq]
+    exact (curveOfPasting_snd W').symm
+  rw [curveOfVCIso, Iso.trans_hom, Iso.trans_hom, Iso.symm_hom, Category.assoc,
+    Category.assoc, h3, vcMiddleIso_snd, curveOfPasting_snd]
+
+/-- `curveOfVCIso` matches the zero sections. -/
+theorem curveOfVCIso_zero (hC : C' • W = W') :
+    (curveOf W).zero ≫ (curveOfVCIso C' hC).hom = (curveOf W').zero := by
+  rw [curveOfVCIso, Iso.trans_hom, Iso.trans_hom, Iso.symm_hom, ← Category.assoc,
+    ← Category.assoc, curveOfPasting_zero, Iso.comp_inv_eq, curveOfPasting_zero]
+  exact vcMiddleIso_zerolift C' hC
+
+end VCTransport
 
 end ModularCurves
