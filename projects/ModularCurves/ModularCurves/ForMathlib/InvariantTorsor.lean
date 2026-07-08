@@ -713,10 +713,14 @@ theorem torsorMul_bijective_of_isFreeAlgebraAction
       · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
   exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨galoisInv G R A S x, hright x⟩⟩
 
-/-- **KM A7.1.2** (statement): free actions satisfy base change for rings of
-invariants — `∗(A, G, R, R')` for every `R'`. (KM's proof: extend scalars of the
-étale torsor and use `(A ⊗ R')^G = A^G ⊗ R'` for trivializable torsors.) WIP
-`sorry`; becomes provable here once A7.1.1 lands. -/
+/-- **(A711-BC = KM A7.1.2; PROVEN)** Free actions satisfy base change for rings of
+invariants — `∗(A, G, R, R')` for every `R'`: `Aᴳ ⊗_R R' ≅ (A ⊗_R R')ᴳ`.
+
+KM's route (extend scalars of the étale torsor, then use trivializability) is bypassed:
+**averaging with a trace-one element suffices**. Injectivity comes from the `Aᴳ`-linear
+retraction `s(x) = tr(c·x)` of `Aᴳ ↪ A` (`exists_traceInvariants_eq_one`); surjectivity from
+the identity `φ(ψ(z)) = ∑_g g • ((c ⊗ 1) · z)`, whose right-hand side collapses to `z` when
+`z` is `G`-invariant. -/
 theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
     (hfree : IsFreeAlgebraAction G R A)
     (R' : Type u) [CommRing R'] [Algebra R R'] :

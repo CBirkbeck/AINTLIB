@@ -1866,7 +1866,13 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     · *(update)* `Module.Projective.of_isFreeAlgebraAction` is now **PROVEN** too, so
       `A` is f.g. projective (⟹ flat ⟹ faithfully flat) over `Aᴳ`: [A711-FP]'s input is in
       hand, and only the algebra-level presentation step remains.
-  - **A7.1.2** `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` — route reassessed:
+  - **★ [A711-BC] = KM A7.1.2 PROVEN (fable-P4, 2026-07-08; `#print axioms` clean)**:
+    `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`. Injectivity from the trace-one
+    retraction `s(x) = tr(c·x)`; surjectivity from `φ(ψ(z)) = ∑_g g•((c⊗1)·z)`, which
+    collapses to `z` on invariants. **KM's own route (extend scalars of the étale torsor,
+    trivializability) is bypassed — averaging suffices.** ⟹ **`ForMathlib/InvariantTorsor.lean`
+    now has exactly ONE sorry: `Algebra.Etale` over a non-noetherian base ([A711-FP]).**
+  - *(superseded route note, kept for the record)* A7.1.2 — route reassessed:
     it is *not* a one-line corollary of the torsor iso. Honest route: the `R`-module sequence
     `0 → Aᴳ → A --Δ--> ∏_G A`, `Δ(a) = (g•a − a)_g`, identifies `(A ⊗_R R')ᴳ` with
     `ker(Δ ⊗ id)` (finite products commute with `⊗`); exactness must survive `⊗ R'`, which
