@@ -1,1 +1,1 @@
-FOCUS: T-E4a-noeth — pullSection_add over loc-noeth X.base (owner chose to keep arbitrary EllObj bases; general case parks behind W7.8). Route: pointed comparison iso + C3-prime (GME 2.2.5) + T-H2b dictionary + pull_add + transport-injectivity. ~150-200 lines in Representability.lean (+ Rigidity import).
+FOCUS: T-E4a-noeth DONE (2026-07-08, axiom-clean, own file — no sweep exposure). Cluster status: functor-law sorries parked behind W7.8 per owner decision; the loc-noeth engine is staged. Next candidates on further instruction: T-H5 forward direction, or idle.
