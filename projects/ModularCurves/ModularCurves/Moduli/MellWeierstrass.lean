@@ -316,9 +316,20 @@ noncomputable def curveOfPasting :
 /-- The pasting identification is a morphism over `S`. -/
 theorem curveOfPasting_snd :
     (curveOfPasting W).hom ≫ pullback.snd (projModelπ W.1) S.toSpecΓ = (curveOf W).π := by
-  sorry
+  simp only [curveOfPasting, Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc,
+    pullback.lift_snd, Category.comp_id]
+  rw [Iso.inv_comp_eq]
+  exact (pullbackLeftPullbackSndIso_hom_snd universalCurveπ
+    (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) S.toSpecΓ).symm
 
-/-- The pasting identification matches the zero sections. -/
+/-- The pasting identification matches the zero sections.
+
+ROUTE (decomposed per v10.24(a), board v10.40): `pullback.hom_ext`; the `snd`-leg is
+`curveOfPasting_snd` + `zero_π`; the `fst`-leg needs (i) `pullbackLeftPullbackSndIso_inv_fst`
++ `_inv_fst_snd` to compute `zero ≫ pasting.inv ≫ fst` as the evident lift, and (ii) a
+`curveOfMiddle_zero` compat (`lift ≫ (curveOfMiddle W).hom = S.toSpecΓ ≫ projModelZero W.1`)
+via `IsPullback.isoPullback`-projections + `projModelZero_baseChange` — the exact analogue
+of the atlas file's T-W5a case-c2 battle, one seam-lemma per step. -/
 theorem curveOfPasting_zero :
     (curveOf W).zero ≫ (curveOfPasting W).hom =
       pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
