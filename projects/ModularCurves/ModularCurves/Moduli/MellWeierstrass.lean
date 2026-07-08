@@ -242,4 +242,11 @@ noncomputable def atlasDictionary : (WeierstrassAtlasRing →+* B) ≃ ellipticW
   left_inv := ringHomOfEllipticW_ellipticWOfRingHom
   right_inv := ellipticWOfRingHom_ringHomOfEllipticW
 
+/-- The classifying map of an atlas point over `S`: the morphism `S ⟶ U` whose
+`Γ`-transpose specialises the universal coefficients at `W`'s. The universal curve
+pulled back along `classify W` is the curve presented by `W` (T-W6 tail). -/
+noncomputable def classify {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤)) :
+    S ⟶ weierstrassAtlas :=
+  S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))
+
 end ModularCurves
