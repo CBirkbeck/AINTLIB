@@ -242,8 +242,16 @@ theorem Module.Finite.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A)
 
 /-- **KM A7.1.1, étaleness part** (statement; proof: SGA III Exp. V Thm 4.1;
 "In the absence of noetherian hypotheses, this is rather delicate"): for a free
-action, `A` is étale over the invariants. WIP `sorry` per ticket T-Q2's
-statement-only scope. -/
+action, `A` is étale over the invariants.
+
+**Status (fable-P4, 2026-07-08).** `Algebra.Etale = FormallyEtale + FinitePresentation`.
+Formal unramifiedness is now **PROVEN**
+(`Algebra.FormallyUnramified.of_isFreeAlgebraAction`), and `Module.Finite` +
+`Module.Projective` (dual basis) are available. What remains is
+(i) `Algebra.FormallySmooth` and (ii) `Algebra.FinitePresentation` — **mathlib has no
+constructor deriving algebra-level finite presentation from a module-finite projective
+algebra over a non-noetherian base** (verified). See the board (T-Q2-A711) for the two
+routes. WIP `sorry`, plan attached, NOT forced. -/
 theorem Algebra.Etale.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
     Algebra.Etale (FixedPoints.subalgebra R A G) A := by
   sorry
@@ -370,3 +378,73 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
     Function.Bijective
       (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
   sorry
+
+/-- **(T-Q2-A711, step 7 — the separability idempotent, in its classical form)** For a free
+action of a finite group there is `e ∈ A ⊗_{Aᴳ} A` with `mult(e) = 1` and
+`(1 ⊗ x − x ⊗ 1) · e = 0` for every `x` — i.e. `A` is a *separable* `Aᴳ`-algebra.
+
+`e := ∑ᵢ aᵢ ⊗ bᵢ` is the element already built in `exists_galoisCoords`. Both properties
+are read off through `torsorMul`: its `1`-component is the multiplication map, and the
+annihilation identity holds because `torsorMul` is an injective ring homomorphism
+(`torsorMul_bijective_of_isFreeAlgebraAction`) sending `(1 ⊗ x − x ⊗ 1) · e` to
+`g ↦ (g • x − x) · δ_{g,1} = 0`. -/
+theorem exists_separabilityIdempotent (hfree : IsFreeAlgebraAction G R A) :
+    ∃ e : A ⊗[FixedPoints.subalgebra R A G] A,
+      (Algebra.TensorProduct.lmul' (FixedPoints.subalgebra R A G) (S := A)) e = 1 ∧
+      ∀ x : A, ((1 : A) ⊗ₜ[FixedPoints.subalgebra R A G] x
+        - x ⊗ₜ[FixedPoints.subalgebra R A G] (1 : A)) * e = 0 := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  refine ⟨∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] p.2, ?_, ?_⟩
+  · rw [map_sum]
+    simpa using hS 1
+  · intro x
+    refine (torsorMul_bijective_of_isFreeAlgebraAction G R A hfree).1 ?_
+    rw [map_zero, map_mul, map_sub, map_sum]
+    funext g
+    simp only [Pi.mul_apply, Pi.sub_apply, Finset.sum_apply, Pi.zero_apply,
+      MulSemiringAction.torsorMul_tmul, one_mul, smul_one, mul_one]
+    rw [hS g]
+    by_cases hg : g = 1
+    · subst hg; simp
+    · rw [if_neg hg, mul_zero]
+
+/-- **(T-Q2-A711, step 8 — KM A7.1.1, unramifiedness; PROVEN)** For a free action of a
+finite group, `A` is formally unramified over `Aᴳ`.
+
+`Ω[A⁄Aᴳ] = I/I²` with `I = ker(A ⊗ A → A)`. For every `x`, the element
+`v = 1 ⊗ x − x ⊗ 1` lies in `I`, and `1 − e ∈ I` as well (`mult(e) = 1`); the separability
+identity `v · e = 0` gives `v = v · (1 − e) ∈ I·I = I²`, so `D x = 0`. Since the image of
+`D` spans `Ω`, it vanishes. -/
+theorem Algebra.FormallyUnramified.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
+    Algebra.FormallyUnramified (FixedPoints.subalgebra R A G) A := by
+  obtain ⟨e, hmul, hann⟩ := exists_separabilityIdempotent G R A hfree
+  let B := FixedPoints.subalgebra R A G
+  have hD : ∀ x : A, KaehlerDifferential.D B A x = 0 := by
+    intro x
+    have hmem : (1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A) ∈ KaehlerDifferential.ideal B A :=
+      KaehlerDifferential.one_smul_sub_smul_one_mem_ideal B x
+    have h1e : (1 : A ⊗[B] A) - e ∈ KaehlerDifferential.ideal B A := by
+      show _ ∈ RingHom.ker _
+      rw [RingHom.mem_ker, map_sub, hmul, map_one, sub_self]
+    have hfac : ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A))
+        = ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A)) * ((1 : A ⊗[B] A) - e) := by
+      rw [mul_sub, mul_one, hann x, sub_zero]
+    have hsq : ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A)) ∈ (KaehlerDifferential.ideal B A) ^ 2 := by
+      rw [pow_two, hfac]
+      exact Ideal.mul_mem_mul hmem h1e
+    show (KaehlerDifferential.ideal B A).toCotangent ⟨_, hmem⟩ = 0
+    rw [Ideal.toCotangent_eq_zero]
+    exact hsq
+  have htop : (⊤ : Submodule A (Ω[A⁄B])) = ⊥ := by
+    rw [← KaehlerDifferential.span_range_derivation, Submodule.span_eq_bot]
+    rintro _ ⟨x, rfl⟩
+    exact hD x
+  refine ⟨?_⟩
+  constructor
+  intro a b
+  have ha : a ∈ (⊥ : Submodule A (Ω[A⁄B])) := htop ▸ Submodule.mem_top
+  have hb : b ∈ (⊥ : Submodule A (Ω[A⁄B])) := htop ▸ Submodule.mem_top
+  rw [Submodule.mem_bot] at ha hb
+  rw [ha, hb]
