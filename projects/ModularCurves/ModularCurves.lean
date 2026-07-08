@@ -4,6 +4,7 @@ import ModularCurves.EllipticCurve.Basic
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.GroupScheme.MuN
+import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Basic
