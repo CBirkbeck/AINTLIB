@@ -1792,8 +1792,39 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     `torsorMul_bijective` from (2) (the standard `A ⊗_{Aᴳ} A → ∏_G A` inverse built from the
     Galois coordinates); (4) `Algebra.Etale.of_isFreeAlgebraAction` = unramified (from the
     idempotent) + flat (from (3), `∏_G A` faithfully flat descent); (5) A7.1.2 by base change.
-  - If (2) proves harder than budgeted, **route (γ)**: OWNER ACTION — acquire CHR (Trans. AMS
-    52 (1965) 15–33) or SGA III Exp. V into `refs/`; the RR-only rule forbids assuming it.
+  - **ROUTE (γ) OPENED BY THE OWNER (v10.27 CORRECTION): SGA III is in `refs/ModularCurves/
+    sga3-1.pdf`.** fable-P4 read Exposé V on 2026-07-08 and banked the locator + verbatim in
+    **`.mathlib-quality/sga3-expV-quotes.md`** (scanned, no text layer; **printed = pdf − 13**;
+    §4 Thm 4.1 ≈ printed 263–270 = pdf 276–283; Exp. VI_A starts pdf 300).
+    **KEY FINDING**: SGA's Thm 4.1 is about a *finite flat equivalence groupoid* `X₁ ⇉ X₀`, and
+    its part **(iv)** — *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme et `p` est fidèlement plat"* —
+    is, after the standard translation `X₁ = G × X₀`, **exactly our
+    `torsorMul_bijective_of_isFreeAlgebraAction`**; its proof opens *"Il suffit de montrer que,
+    pour tout idéal premier `𝔭` de `B`, l'homomorphisme `A_{0𝔭} ⊗_{B_𝔭} A_{0𝔭} ⟶ A_{1𝔭}` … est
+    bijectif."* Route (β) is therefore source-anchored end to end — **no memory-sourced maths**.
+  - **DECOMPOSED (rule 3; effort exceeded this turn's budget — boarded, not ground):** the
+    Lean leaves follow SGA's proof line by line:
+    · **[A711-L1]** localize at a prime `𝔭 ⊆ B = Aᴳ`; show `A_𝔭` is **semi-local** (its maximal
+      ideals are the `δ₁⁻¹(𝔫)`, at most `|G|` of them) — consumes the landed
+      `chr_of_isFreeAlgebraAction` at every prime.
+    · **[A711-L2]** **SGA Lemme 4.2** (verbatim in the quotes file): `B` local with infinite
+      residue field, `A` semi-local, `i(𝔫) ⊆ 𝔯`, `M` free of rank `n` over `A`, `N` a
+      `B`-submodule generating `M` over `A` ⟹ `N` contains an `A`-basis of `M`. Pure
+      Nakayama + `A/𝔯 = K₁ × ⋯ × K_r` induction. **Self-contained; ForMathlib candidate.**
+    · **[A711-L3]** the faithfully-flat base change making `B`'s residue field infinite
+      (*"Quitte à faire un changement de base fidèlement plat…"*), + descent of bijectivity.
+    · **[A711-L4]** assembly: `M = A₁`, `N = δ₀(A₀)` generates (because `d₀ ⊠ d₁` is a mono) ⟹
+      L2 gives a basis ⟹ `A₀ ⊗_B A₀ → A₁` maps a basis to a basis ⟹ bijective. Then
+      `Algebra.Etale.of_isFreeAlgebraAction` (unramified from the idempotent + flat from L4)
+      and A7.1.2 by base change.
+    · **WATCH**: SGA §5 (pdf 280) reduces to *"`d₁` fini localement libre de rang `n`"*; for a
+      free finite group action, **finiteness of `A` over `Aᴳ` is not hypothesized by KM** — this
+      is precisely KM's *"in the absence of noetherian hypotheses, this is rather delicate"*.
+      Either derive it (integrality is automatic; *finite locally free of rank `|G|`* is the
+      content) or add it as an explicit hypothesis and check the T-Q6e call-site supplies it.
+      **Flag for the owner: this may be a genuine statement gap in `IsFreeAlgebraAction`.**
+  - CHR (Trans. AMS 52 (1965) 15–33) stays an **optional** acquisition: it packages L1–L4 as
+    "`A/Aᴳ` is Galois with group `G`" and would replace four leaves by one citation.
 
 ### [T-E-OMEGA] the invariant differential `ω_{E/S}` — FUNDED (v10.27), **BLOCKED-ON-T-W7.1b**
 - **Status**: funded, decomposed (R1/R2 below), **blocked on T-W7.1b**; released to the board
