@@ -390,16 +390,107 @@ noncomputable def subgroupTensorCompare :
   Algebra.TensorProduct.lift (E.subgroupProj₁ (D := D)) (E.subgroupProj₂ (D := D))
     (fun _ _ => Commute.all _ _)
 
-/-- **BOARDED `[T-D5h-κbij]`.** The tensor comparison `κ` is bijective — the sole genuinely-heavy
-input to `Δ`. This is `pullbackSpecIso` (`Γ(Spec S ×_{Spec R} Spec T) ≅ S ⊗_R T`) transported
-across `D.subscheme.isoSpec` on each factor (both factors affine: `D.subscheme` is finite over
-`Spec R`). Once landed, `Δ = κ⁻¹ ∘ Γ(m)`, its `_apply` characterisation, and the Hopf axioms all
-follow mechanically. -/
+/-- **(Layer B, κ-bijectivity — base compatibility.)** Under the affine identification
+`D.subscheme ≅ Spec A` (`isoSpec`, `A = Γ(D.subscheme, ⊤)`), the structure map
+`q = subschemeι ≫ π : D.subscheme ⟶ Spec R` becomes `Spec.map` of the `R`-algebra structure map
+`R → A`. This is `isoSpec` inverse-naturality composed with `Spec (ΓSpecIso)⁻¹` on the affine base.
+It is what lets `pullbackSpecIso R A A` be transported onto `D ×_R D` (isomorphic cospans). -/
+theorem subgroupSpecAlgebraMap_eq :
+    letI := E.subgroupAlgebra D
+    haveI : IsFinite (E.subgroupStructMap D) := D.finite
+    haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+    Spec.map (CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤)))
+      = D.ideal.subscheme.isoSpec.inv ≫ D.ideal.subschemeι ≫ E.π := by
+  letI := E.subgroupAlgebra D
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  have hnat := Scheme.isoSpec_inv_naturality (E.subgroupStructMap D)
+  rw [Scheme.isoSpec_Spec_inv, ← Spec.map_comp] at hnat
+  have hAM : CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤))
+      = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop :=
+    CommRingCat.ofHom_hom _
+  rw [hAM]; exact hnat
+
+/-- **`[T-D5h-κbij]` — DISCHARGED.** The tensor comparison
+`κ = ⟨Γ(fst), Γ(snd)⟩ : A ⊗_R A →ₐ[R] Γ(D ×_R D)` is bijective. Route: `κ` is `Γ` of the canonical
+scheme iso `Spec(A ⊗_R A) ≅ D ×_R D` got by transporting `pullbackSpecIso R A A` across
+`D.subscheme.isoSpec` on each factor (base compatibility: `subgroupSpecAlgebraMap_eq`; both factors
+affine as `D.subscheme` is finite over `Spec R`). Concretely `Spec.map κ` is shown equal to a
+composite of isos `isoSpec.inv ≫ ρ.inv ≫ pullbackSpecIso.hom` via a `pullback.hom_ext` matching
+`κ ∘ includeLeft/Right = Γ(fst)/Γ(snd)` (`lift_comp_includeLeft/Right`); bijectivity then follows by
+reflecting `IsIso` through the fully faithful `Spec`. The sole genuinely-heavy leaf under `Δ`. -/
 theorem subgroupTensorCompare_bijective :
     letI := E.subgroupAlgebra D
     letI := E.biproductAlgebra (D := D)
     Function.Bijective (E.subgroupTensorCompare (D := D)) := by
-  sorry
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  have hbase : Spec.map (CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤)))
+      = D.ideal.subscheme.isoSpec.inv ≫ D.ideal.subschemeι ≫ E.π :=
+    E.subgroupSpecAlgebraMap_eq (D := D)
+  have e₁ : Spec.map (CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤)))
+        ≫ 𝟙 (Spec (CommRingCat.of R)) =
+      D.ideal.subscheme.isoSpec.inv ≫ (D.ideal.subschemeι ≫ E.π) :=
+    (Category.comp_id _).trans hbase
+  set ρ := asIso (pullback.map
+      (Spec.map (CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤))))
+      (Spec.map (CommRingCat.ofHom (algebraMap R Γ(D.ideal.subscheme, ⊤))))
+      (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      D.ideal.subscheme.isoSpec.inv D.ideal.subscheme.isoSpec.inv (𝟙 _) e₁ e₁) with hρ
+  set κ := E.subgroupTensorCompare (D := D) with hκ
+  have hL : κ.toRingHom.comp Algebra.TensorProduct.includeLeftRingHom
+      = (E.subgroupProj₁ (D := D)).toRingHom :=
+    congrArg AlgHom.toRingHom (Algebra.TensorProduct.lift_comp_includeLeft
+      (E.subgroupProj₁ (D := D)) (E.subgroupProj₂ (D := D)) (fun _ _ => Commute.all _ _))
+  have hR : κ.toRingHom.comp (Algebra.TensorProduct.includeRight).toRingHom
+      = (E.subgroupProj₂ (D := D)).toRingHom :=
+    congrArg AlgHom.toRingHom (Algebra.TensorProduct.lift_comp_includeRight
+      (E.subgroupProj₁ (D := D)) (E.subgroupProj₂ (D := D)) (fun _ _ => Commute.all _ _))
+  set pbS := pullbackSpecIso R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) with hpbS
+  -- `(ρ ≫ isoSpec) ≫ Spec.map κ`, composed with `pbS.inv`, is the identity of the tensor pullback.
+  have key : ((ρ.hom ≫ (pullback (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).isoSpec.hom)
+        ≫ Spec.map (CommRingCat.ofHom κ.toRingHom)) ≫ pbS.inv = 𝟙 _ := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [hpbS, pullbackSpecIso_inv_fst, ← Spec.map_comp, ← CommRingCat.ofHom_comp, hL,
+        show CommRingCat.ofHom (E.subgroupProj₁ (D := D)).toRingHom
+          = (pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop from
+          CommRingCat.ofHom_hom _, Scheme.isoSpec_hom_naturality, hρ, asIso_hom]
+      rw [← Category.assoc]
+      erw [pullback.lift_fst]
+      rw [Category.assoc, Iso.inv_hom_id, Category.comp_id, Category.id_comp]
+    · simp only [Category.assoc]
+      rw [hpbS, pullbackSpecIso_inv_snd, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      erw [hR]
+      rw [show CommRingCat.ofHom (E.subgroupProj₂ (D := D)).toRingHom
+          = (pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop from
+          CommRingCat.ofHom_hom _, Scheme.isoSpec_hom_naturality, hρ, asIso_hom]
+      rw [← Category.assoc]
+      erw [pullback.lift_snd]
+      rw [Category.assoc, Iso.inv_hom_id, Category.comp_id, Category.id_comp]
+  have hstar : (ρ.hom ≫ (pullback (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).isoSpec.hom)
+        ≫ Spec.map (CommRingCat.ofHom κ.toRingHom) = pbS.hom := by
+    have h := (Iso.comp_inv_eq pbS).mp key
+    rwa [Category.id_comp] at h
+  haveI hg : IsIso (ρ.hom ≫ (pullback (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).isoSpec.hom) := inferInstance
+  haveI hcomp : IsIso ((ρ.hom ≫ (pullback (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).isoSpec.hom) ≫ Spec.map (CommRingCat.ofHom κ.toRingHom)) := by
+    rw [hstar]; infer_instance
+  haveI hiso : IsIso (Spec.map (CommRingCat.ofHom κ.toRingHom)) :=
+    IsIso.of_isIso_comp_left (ρ.hom ≫ (pullback (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).isoSpec.hom) (Spec.map (CommRingCat.ofHom κ.toRingHom))
+  haveI : IsIso (Scheme.Spec.map (CommRingCat.ofHom κ.toRingHom).op) :=
+    inferInstanceAs (IsIso (Spec.map (CommRingCat.ofHom κ.toRingHom)))
+  have hringiso : IsIso (CommRingCat.ofHom κ.toRingHom) :=
+    (isIso_op_iff _).mp (Spec.fullyFaithful.isIso_of_isIso_map (CommRingCat.ofHom κ.toRingHom).op)
+  exact (ConcreteCategory.isIso_iff_bijective (CommRingCat.ofHom κ.toRingHom)).mp hringiso
 
 /-- The multiplication is a morphism over the base: `m ≫ structMap = bimulBase` (dualizing to the
 `R`-linearity of `Γ(m)`). -/
