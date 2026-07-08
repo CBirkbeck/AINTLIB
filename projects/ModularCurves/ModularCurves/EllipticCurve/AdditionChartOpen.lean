@@ -96,6 +96,26 @@ noncomputable def addOnZOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
       (lawOneTriple W i j k)).inv ≫
     addOnZPieceMor W i j k hΔ
 
+omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
+/-- The intersection of two `D(t_k)` opens of the piece is the `D(t_k · t_l)` open — where BOTH
+coordinates are invertible, i.e. exactly the hypotheses of the cross-index crux
+`chartι_comp_specMap_chartAwayHom_eq`. -/
+lemma blOpenYPieceFamily_inf (k l : Fin 3) :
+    blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l =
+      (chartPieceIso W i j).hom ⁻¹ᵁ
+        PrimeSpectrum.basicOpen (lawTwoTriple W i j k * lawTwoTriple W i j l) := by
+  rw [blOpenYPieceFamily, blOpenYPieceFamily, PrimeSpectrum.basicOpen_mul]
+  rfl
+
+omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
+/-- The law-1 analogue of `blOpenYPieceFamily_inf`. -/
+lemma blOpenZPieceFamily_inf (k l : Fin 3) :
+    blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l =
+      (chartPieceIso W i j).hom ⁻¹ᵁ
+        PrimeSpectrum.basicOpen (lawOneTriple W i j k * lawOneTriple W i j l) := by
+  rw [blOpenZPieceFamily, blOpenZPieceFamily, PrimeSpectrum.basicOpen_mul]
+  rfl
+
 end Morphisms
 
 end WeierstrassCurve.Projective
