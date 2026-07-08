@@ -33,6 +33,7 @@ import ModularCurves.EllipticCurve.AdditionChartCover
 import ModularCurves.EllipticCurve.AdditionChartAgree
 import ModularCurves.EllipticCurve.AdditionChartGlue
 import ModularCurves.EllipticCurve.AdditionChartProj
+import ModularCurves.EllipticCurve.AdditionChartOpen
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YRho
@@ -43,3 +44,4 @@ import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
+import ModularCurves.Moduli.MellWeierstrass
