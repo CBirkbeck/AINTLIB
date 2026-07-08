@@ -467,6 +467,125 @@ theorem twistedInvariants_finite [Fintype G] (hfree : IsFreeAlgebraAction G R A)
   refine Module.Finite.of_surjective (twistedAvg G R A w hw) fun m => ?_
   exact ⟨c * (m : A), twistedAvg_smul_eq G R A w hw c hc' m⟩
 
+/-- A `1`-cocycle is normalised: `w(1) = 1`. -/
+theorem cocycle_one (w : G → Aˣ)
+    (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) : ((w 1 : A)) = 1 := by
+  have h := hw 1 1
+  rw [mul_one, one_smul] at h
+  have h2 := congrArg (fun z => (((w 1)⁻¹ : Aˣ) : A) * z) h
+  simp only [← mul_assoc, (w 1).inv_mul, one_mul] at h2
+  exact h2.symm
+
+/-- The multiplication map `A ⊗_{Aᴳ} M_w → A`, `a ⊗ m ↦ a · m`. -/
+noncomputable def twistedMul (w : G → Aˣ) :
+    A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w)
+      →ₗ[FixedPoints.subalgebra R A G] A :=
+  TensorProduct.lift ((LinearMap.mul (FixedPoints.subalgebra R A G) A).compl₂
+    (twistedInvariants G R A w).subtype)
+
+@[simp] theorem twistedMul_tmul (w : G → Aˣ) (a : A) (m : twistedInvariants G R A w) :
+    twistedMul G R A w (a ⊗ₜ[FixedPoints.subalgebra R A G] m) = a * (m : A) := rfl
+
+/-- **(A711-DESC, the descent isomorphism; PROVEN)** For a free action of a finite group and
+a `1`-cocycle `w : G → Aˣ`, multiplication `A ⊗_{Aᴳ} M_w → A` is **bijective**: the twisted
+invariants are an *invertible* `Aᴳ`-module trivialised by `A`.
+
+This is Galois descent of (rank-one) modules, obtained from the Galois coordinates for the
+third time. The inverse is `x ↦ ∑ᵢ aᵢ ⊗ ρ(bᵢ · x)` with `ρ` the twisted average:
+* `mult ∘ inv = id` collapses `∑_g w(g)⁻¹ · δ_{g,1} · (g • x)` to `w(1)⁻¹ x = x`;
+* `inv ∘ mult = id` on `a ⊗ m` uses `ρ(bᵢ a m) = tr(bᵢ a) · m` (the `w(g)⁻¹ · w(g)` cancel
+  because `m` is twisted-invariant) and then the dual basis `∑ᵢ aᵢ · tr(bᵢ a) = a`.
+
+Consequence for `[T-E5c-ROUTE-A]`: `M_w` is finitely generated projective of rank one, so
+Zariski-locally on `Spec Aᴳ` it has a generator `d`, which multiplication forces to be a
+**unit** of `A`; then `g • d = w(g) · d`, i.e. the cocycle is locally a coboundary and the
+Weierstrass model descends. -/
+theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraAction G R A)
+    (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
+    Function.Bijective (twistedMul G R A w) := by
+  classical
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  set inv : A → A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w) :=
+    fun x => ∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (twistedAvg G R A w hw (p.2 * x))
+    with hinv
+  -- right inverse
+  have hright : ∀ x : A, twistedMul G R A w (inv x) = x := by
+    intro x
+    rw [hinv, map_sum]
+    have hterm : ∀ p : A × A, twistedMul G R A w
+        (p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (twistedAvg G R A w hw (p.2 * x)))
+          = ∑ g : G, (((w g)⁻¹ : Aˣ) : A) * (p.1 * (g • p.2) * (g • x)) := by
+      intro p
+      rw [twistedMul_tmul]
+      show p.1 * (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (p.2 * x)) = _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun g _ => ?_
+      rw [smul_mul']
+      ring
+    simp only [hterm]
+    rw [Finset.sum_comm]
+    have hg : ∀ g : G, (∑ p ∈ S, (((w g)⁻¹ : Aˣ) : A) * (p.1 * (g • p.2) * (g • x)))
+        = (((w g)⁻¹ : Aˣ) : A) * ((if g = 1 then (1 : A) else 0) * (g • x)) := by
+      intro g
+      rw [← hS g, Finset.sum_mul, Finset.mul_sum]
+    simp only [hg]
+    rw [Finset.sum_eq_single (1 : G)]
+    · have hw1 : w 1 = 1 := Units.ext (cocycle_one (G := G) (A := A) w hw)
+      rw [if_pos rfl, one_mul, one_smul, hw1]
+      simp
+    · intro g _ hg1; rw [if_neg hg1, zero_mul, mul_zero]
+    · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
+  -- additivity of `inv`
+  have hadd : ∀ x y : A, inv (x + y) = inv x + inv y := by
+    intro x y
+    rw [hinv, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [← TensorProduct.tmul_add]
+    congr 1
+    rw [mul_add, map_add]
+  -- left inverse
+  have hleft : ∀ z : A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w),
+      inv (twistedMul G R A w z) = z := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp [hinv]
+    | add z₁ z₂ h₁ h₂ => rw [map_add, hadd, h₁, h₂]
+    | tmul a m =>
+      rw [twistedMul_tmul, hinv]
+      have hrho : ∀ p : A × A, twistedAvg G R A w hw (p.2 * (a * (m : A)))
+          = (traceInvariants G R A (p.2 * a)) • m := by
+        intro p
+        ext
+        show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (p.2 * (a * (m : A))))
+            = (traceInvariants G R A (p.2 * a) : A) * (m : A)
+        have hterm : ∀ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (p.2 * (a * (m : A)))
+            = (g • (p.2 * a)) * (m : A) := by
+          intro g
+          rw [smul_mul', smul_mul', m.2 g]
+          rw [show (((w g)⁻¹ : Aˣ) : A) * ((g • p.2) * ((g • a) * ((w g : A) * (m : A))))
+              = ((g • p.2) * (g • a)) * ((((w g)⁻¹ : Aˣ) : A) * (w g : A)) * (m : A) by ring,
+            (w g).inv_mul, mul_one]
+          rw [smul_mul']
+        simp only [hterm, ← Finset.sum_mul]
+        rfl
+      simp only [hrho]
+      have hmove : ∀ p : A × A,
+          p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+              ((traceInvariants G R A (p.2 * a)) • m)
+            = ((traceInvariants G R A (p.2 * a) : A) * p.1)
+                ⊗ₜ[FixedPoints.subalgebra R A G] m := by
+        intro p
+        rw [TensorProduct.tmul_smul]
+        rfl
+      simp only [hmove]
+      rw [← TensorProduct.sum_tmul]
+      congr 1
+      show (∑ p ∈ S, (traceInvariants G R A (p.2 * a) : A) * p.1) = a
+      refine Eq.trans ?_ (galoisCoords_dual G R A hS a)
+      refine Finset.sum_congr rfl fun p _ => ?_
+      ring
+  exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨inv x, hright x⟩⟩
+
 /-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
 invariants.
 
