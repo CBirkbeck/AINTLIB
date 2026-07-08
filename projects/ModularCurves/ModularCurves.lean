@@ -37,12 +37,14 @@ import ModularCurves.EllipticCurve.AdditionChartOpen
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.ForMathlib.BaseChangeKerCoker
+import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.Moduli.MellWeierstrass
