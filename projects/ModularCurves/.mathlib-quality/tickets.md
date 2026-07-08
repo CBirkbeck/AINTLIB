@@ -8725,3 +8725,30 @@ All proven decls axiom-clean (standard 3).*
   this stream**; blocked set = {T-PIC1c (anomaly/bump-retest), T-PIC1b + P2 (Riou
   lane), CLEANUP-PIC1 (after P1c), T-PIC-DEG (consumer-gated)}. Sentinel
   beastmode_active.PIC0 removed.
+
+## Amendments v10.35 (2026-07-08): p0 / [T-G3d-infra] MILESTONE — the IsInvariant⟺coequalizer bridge is PROVEN; construction reduced to the coequalizer scheme
+
+*p0 self-pacing the [T-G3d-infra] arc (v10.29 dispatch) under the v10.32 charter mode. Named
+milestone reached; construction sharpened; continuing into Piece 3 per beastmode.*
+
+- **MILESTONE — the functor-of-points ⟺ scheme-coequalizer bridge is PROVEN (axiom-clean).** New
+  `GroupScheme/TranslationAction.lean` (4 commits, all propext/Classical.choice/Quot.sound):
+  - `translationAction` = `(ι ⊗ 𝟙) ≫ μ[E.asOver]` and `actionProj` = `pr_E`: the two coequalizer
+    legs `act, pr_E : G ×_S E ⇉ E`, in `Over S` (over-`S` compat free from `Over.w`).
+  - `translationAction_eq_mul`: `act = (pr_G ≫ ι) * pr_E` (hom-group form) — bridge to point addition.
+  - **`isInvariant_iff_coequalizes : G.IsInvariant f ↔ (act ≫ f = pr_E ≫ f)`** — PROVEN both ways
+    (`IsInvariant.coequalizes` via the universal points over `G ×_S E`; `IsInvariant.of_coequalizes`
+    via precomposition by a chosen point). **This is the key reduction.**
+- **Construction reduced to ONE piece.** With the bridge, the remaining [T-G3d-infra] construction is
+  exactly: **build the coequalizer scheme `E/G` of `act, pr_E`** (+ `quotientπ`/`quotientS`). All three
+  interface pins then read off mechanically: `quotientπ_isInvariant` = `of_coequalizes`;
+  `quotient_lift` = coequalizer UP + `coequalizes`; `quotientπ_over` from `quotientS`. This is the one
+  genuinely hard, scheme-theoretic piece (quotient of `E` by a free finite-locally-free action) — route
+  3a (affine co-invariant `Spec(B^{coG})` + glue on p2's `SchemeQuotient` pattern) or 3b (fppf
+  coequalizer representability, SGA 3 v_III 4.1). Multi-session; decompose when started.
+  (`.mathlib-quality/decomposition-g3d-infra.md` updated: Pieces 1,2,4 DONE; Piece 3 is the frontier.)
+- **Also landed this session** (v10.31b): interface (Piece 1), factored map `E/E[N] ⟶ E`
+  (`torsionQuotientToSelf`, Piece 4) + `[N]`'s `E[N]`-invariance. [T-G3d-Niso] (the `E/E[N] ≅ E` iso,
+  degree facts) boarded separately.
+- **p0 continues (beastmode)** into Piece 3: decompose the coequalizer-scheme construction (co-action
+  `ρ` → affine invariants → glue) and start the first sub-piece. New files only; p2 files READ-ONLY.

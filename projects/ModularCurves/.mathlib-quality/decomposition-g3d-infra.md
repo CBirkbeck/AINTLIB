@@ -19,39 +19,43 @@ Three consumers: T-G3d's `E/E[N] ≅ E`, review-Q8 N-Isog, the `Γ₀` path.*
 
 ## Pieces
 
-1. **[DONE] Interface** — the categorical-quotient universal property as the opaque interface.
-   Consumers touch only this. `quotientπ_hom_ext` is proved from `quotient_lift` +
+1. **[DONE] Interface** (`SubgroupQuotient.lean`) — the categorical-quotient universal property as
+   the opaque interface. Consumers touch only this. `quotientπ_hom_ext` proved from `quotient_lift` +
    `quotientπ_isInvariant`. The three DS-data + three pins are the deferred construction.
 
-2. **Affine co-invariant quotient** (the local block). For an affine `Spec B ⊆ E` translation-stable
-   under `G`, `(Spec B)/G = Spec(B^{coG})` where `B^{coG} = eq(coaction, b ↦ b⊗1)` are the invariants
-   of the **translation co-action** `ρ : B → B ⊗_{O_S} O_G`. Mirror p2's `ForMathlib/AffineQuotient.lean`
-   (which does `Spec Bᴳ` for a constant *group* `[Finite G]`) but for a **comodule**.
-   - The translation co-action `ρ` is **self-buildable** (do NOT wait on p2's Hopf `subgroupComul`,
-     which is the coalgebra `O_G → O_G ⊗ O_G`, a different map): `ρ` is dual to the action
-     `act : G ×_S E → E`, `(g,x) ↦ ι(g) + x`, i.e. `(ι ×_S 𝟙) ≫ addE` where `addE = (μ[E.asOver]).left`.
-   - Universal property of the affine block: a `ρ`-invariant `B → C` factors uniquely through `B^{coG}`
-     (the comodule analogue of `existsUnique_invariantsπ_lift`). This is the real construction work.
+2. **[DONE] Action legs + the functor-of-points ↔ coequalizer BRIDGE** (`TranslationAction.lean`,
+   all axiom-clean). The two coequalizer legs `act, pr_E : G ×_S E ⇉ E` are built in `Over S`:
+   `translationAction = (ι ⊗ 𝟙) ≫ μ[E.asOver]` (`= (pr_G ≫ ι) * pr_E` in hom-group form,
+   `translationAction_eq_mul`) and `actionProj = pr_E`. The **full bridge**
+   `isInvariant_iff_coequalizes : G.IsInvariant f ↔ (act ≫ f = pr_E ≫ f)` is PROVEN both ways
+   (`IsInvariant.coequalizes` via the universal points over `G ×_S E`; `IsInvariant.of_coequalizes`
+   via precomposition by a chosen point). **This reduces the entire remaining construction to Piece 3.**
 
-3. **Glue** — glue the local affine co-invariant quotients over a `G`-stable affine cover of `E`,
-   producing `quotient`/`quotientπ` and discharging the pins. Mirror p2's `SchemeQuotient.lean`
-   `quotientGlueData`/`quotient`/`quotientπ_hom_ext` — the same glue-data skeleton, with the local
-   piece supplied by Piece 2. `quotientS` from the induced map to `S`. This is p2-stack-scale
-   (~the size of their `SchemeQuotient`), a multi-session build.
+3. **Build the coequalizer scheme** `E/G` of `act, pr_E` (+ `quotientπ`, `quotientS`). Once this
+   scheme exists, ALL THREE PINS read off mechanically via Piece 2's bridge:
+   `quotientπ_isInvariant` = `IsInvariant.of_coequalizes` (π coequalizes by construction);
+   `quotient_lift` = coequalizer universal property + `IsInvariant.coequalizes`; `quotientπ_over`
+   from `quotientS`. **This is the one genuinely hard, scheme-theoretic piece** (existence of the
+   quotient of `E` by a free finite-locally-free action). Two routes:
+   - **(3a) affine co-invariant quotient + glue.** Local block: for affine `Spec B ⊆ E`,
+     `(Spec B)/G = Spec(B^{coG})`, invariants of the translation co-action `ρ : B → B ⊗_{O_S} O_G`
+     (self-built, structure-sheaf dual of `translationAction`; NOT p2's Hopf `subgroupComul`). Glue
+     on p2's `SchemeQuotient.lean` glue-data pattern. Mirror p2's `AffineQuotient` for a comodule.
+   - **(3b) fppf coequalizer representability.** `E/G` as the fppf-sheaf coequalizer, representable
+     because `G` is finite locally free and acts freely (SGA 3 v_III 4.1). Needs p2's fppf engine +
+     a representability input.
+   p2-stack-scale, a multi-session build; decompose into sub-tickets (co-action `ρ` → affine
+   invariants → glue) when started.
 
-4. **`[N]`-iso consumer** (T-G3d) — `E/E[N] ≅ E` via `[N]`. `[N] : E ⟶ E` is `E[N]`-invariant
-   (`[N](x+t) = [N]x + [N]t = [N]x` for `t ∈ E[N]`, since `[N]t = 0` and `mulByHom` is additive on
-   points), so `quotient_lift` gives a unique `q : E/E[N] ⟶ E` with `quotientπ ≫ q = [N]`. Then
-   `E/E[N] ≅ E`: `q` is an isogeny of degree `deg[N] / rank E[N] = N²/N² = 1`, hence an iso — **this
-   is the degree-facts half**; if it walls (needs `deg`/rank arithmetic on isogenies) decompose+board
-   as `[T-G3d-Niso]`. The factored map `q` and `exists_eq_one_add_mulBy_comp_of_fixesTorsion` (the
-   T-G3d leaf feeding `aut_endo_eq_one`) follow. The `[N]`-invariance of `[N]` (the input to
-   `quotient_lift`) is provable now against the interface (point arithmetic: `mulByHom` additive +
-   `t ∈ E[N] ⟹ [N]t = 0`).
+4. **[DONE] `[N]`-iso consumer, factored map** (`SubgroupQuotient.lean`) — `mulByHom_torsionSubgroup_isInvariant`
+   (`[N]` is `E[N]`-invariant) + `torsionQuotientToSelf` / `torsionQuotientπ_comp_toSelf` (the unique
+   `q : E/E[N] ⟶ E` with `π ≫ q = [N]`, via `quotient_lift`). The iso half `E/E[N] ≅ E` (`q` degree
+   `deg[N]/rank E[N] = N²/N² = 1`) is the **degree-facts half**, boarded as **[T-G3d-Niso]**.
 
 ## Status / route note
-Piece 1 (interface) LANDED. Pieces 2–3 (the construction) are p2-glue-pattern-scale and are the
-multi-session bulk; the translation co-action is self-built (no wait on p2's Hopf). Piece 4 (the
-consumer) is partly landable now (the factored map via the interface) with the iso-half gated on
-isogeny degree facts. Recommended order: 2 → 3 (discharge the pins) → 4; or land Piece 4's factored
-map against the interface first (validates the interface end-to-end and advances the T-G3d leaf).
+Pieces 1, 2, 4 LANDED (all axiom-clean modulo the interface's own DS-pins + p2's BB-QF/BB-FLAT under
+`torsionSubgroup`). **The bridge (Piece 2) is the key reduction: the remaining construction is exactly
+Piece 3 — build the coequalizer scheme; the three pins then read off through
+`isInvariant_iff_coequalizes`.** Piece 3 is the p2-stack-scale scheme-existence piece (route 3a affine
+co-invariant quotient + glue, or 3b fppf representability); decompose when started. [T-G3d-Niso] (the
+`E/E[N] ≅ E` iso, degree facts) is boarded separately.
