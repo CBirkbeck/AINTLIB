@@ -722,7 +722,70 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
     (R' : Type u) [CommRing R'] [Algebra R R'] :
     Function.Bijective
       (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
-  sorry
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨c, hc⟩ := exists_traceInvariants_eq_one G R A hfree
+  have hc' : (∑ g : G, g • c) = 1 := congrArg Subtype.val hc
+  -- the `Aᴳ`-linear retraction `s : A → Aᴳ`, `s x = tr(c · x)`
+  set s : A →ₗ[FixedPoints.subalgebra R A G] FixedPoints.subalgebra R A G :=
+    (traceLinear G R A).comp (LinearMap.mulLeft (FixedPoints.subalgebra R A G) c) with hs
+  have hs_apply : ∀ x : A, (s x : A) = ∑ g : G, g • (c * x) := fun _ => rfl
+  have hs_left : ∀ b : FixedPoints.subalgebra R A G, s (b : A) = b := by
+    intro b
+    ext
+    rw [hs_apply]
+    have hterm : ∀ g : G, g • (c * (b : A)) = (g • c) * (b : A) := by
+      intro g; rw [smul_mul', b.2 g]
+    simp only [hterm, ← Finset.sum_mul, hc', one_mul]
+  -- the base-changed retraction `ψ : A ⊗ R' → Aᴳ ⊗ R'`
+  set ψ : A ⊗[R] R' →ₗ[R] (FixedPoints.subalgebra R A G) ⊗[R] R' :=
+    TensorProduct.map (s.restrictScalars R) LinearMap.id with hψ
+  set φ : (FixedPoints.subalgebra R A G) ⊗[R] R' →ₐ[R] A ⊗[R] R' :=
+    Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val (AlgHom.id R R') with hφ
+  have hcoe : ∀ x, (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x :
+      A ⊗[R] R') = φ x := fun _ => rfl
+  -- `φ ∘ ψ` is the twisted average `z ↦ ∑_g g • ((c ⊗ 1) · z)`
+  have hΘ : ∀ z : A ⊗[R] R', φ (ψ z) = ∑ g : G, g • ((c ⊗ₜ[R] (1 : R')) * z) := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp [hψ]
+    | add z₁ z₂ h₁ h₂ =>
+      rw [map_add, map_add, h₁, h₂, ← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl fun g _ => by rw [mul_add, smul_add]
+    | tmul a r =>
+      rw [hψ, TensorProduct.map_tmul, LinearMap.id_apply, LinearMap.restrictScalars_apply, hφ]
+      show ((s a : A) ⊗ₜ[R] r) = _
+      rw [hs_apply, TensorProduct.sum_tmul]
+      refine Finset.sum_congr rfl fun g _ => ?_
+      rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul,
+        MulSemiringAction.smul_tmul_baseChange g (c * a) r]
+  refine ⟨fun x y hxy => ?_, fun y => ?_⟩
+  · -- injectivity: `ψ` is a left inverse of `φ`
+    have hleft : ∀ z : (FixedPoints.subalgebra R A G) ⊗[R] R', ψ (φ z) = z := by
+      intro z
+      induction z using TensorProduct.induction_on with
+      | zero => simp
+      | add z₁ z₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂]
+      | tmul b r =>
+        rw [hφ, Algebra.TensorProduct.map_tmul, AlgHom.id_apply, hψ]
+        show ψ ((b : A) ⊗ₜ[R] r) = _
+        rw [hψ, TensorProduct.map_tmul, LinearMap.id_apply, LinearMap.restrictScalars_apply,
+          hs_left b]
+    have h0 : φ x = φ y := by
+      have hval := congrArg Subtype.val hxy
+      simpa only [hcoe] using hval
+    have h1 := congrArg ψ h0
+    rwa [hleft, hleft] at h1
+  · -- surjectivity: for invariant `y`, `φ (ψ y) = y`
+    refine ⟨ψ (y : A ⊗[R] R'), ?_⟩
+    refine Subtype.ext ?_
+    rw [hcoe, hΘ]
+    have hterm : ∀ g : G, g • ((c ⊗ₜ[R] (1 : R')) * (y : A ⊗[R] R'))
+        = ((g • c) ⊗ₜ[R] (1 : R')) * (y : A ⊗[R] R') := by
+      intro g
+      rw [smul_mul', y.2 g, MulSemiringAction.smul_tmul_baseChange g c (1 : R')]
+    simp only [hterm, ← Finset.sum_mul, ← TensorProduct.sum_tmul, hc']
+    rw [show ((1 : A) ⊗ₜ[R] (1 : R')) = 1 from (Algebra.TensorProduct.one_def).symm, one_mul]
 
 /-- **(T-Q2-A711, step 7 — the separability idempotent, in its classical form)** For a free
 action of a finite group there is `e ∈ A ⊗_{Aᴳ} A` with `mult(e) = 1` and
