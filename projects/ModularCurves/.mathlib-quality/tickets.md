@@ -5674,6 +5674,18 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       (`chartHomOfTriple_lawOne_eq_lawTwo`, β4(b)) — this is `addOn_agree` (c3) at piece level.
     All four inputs are proven; c4.2 is assembly. `Cover/Directed.lean:216`'s
     `glueMorphismsOfLocallyDirected` is a fallback if the plain cover's agreement shape fights.
+  - **c4.2a DONE** (coordinator-P1, 2026-07-08T14:32Z, 57b5c987, `ForMathlib/SpecBasicOpenAway.lean`,
+    zero sorries, axiom-clean): **`specBasicOpenIsoAway : Spec (Localization.Away f) ≅
+    (Spec A).basicOpen f`**. Mathlib has both halves (the `Spec.map` of an away-localization is an
+    open immersion — instance, probe-confirmed; and `PrimeSpectrum.localization_away_comap_range`
+    computes its range) but does not package the iso; `IsOpenImmersion.isoOfRangeEq` assembles them.
+    **Fleet antidote**: `(PrimeSpectrum.basicOpen f : (Spec A).Opens)` does NOT elaborate as an
+    ascription (the projection is attempted at the pre-coercion type) — introduce it with
+    `letI U : (Spec A).Opens := PrimeSpectrum.basicOpen f`.
+    **SIXTH UPSTREAM CANDIDATE** (ledger): `specBasicOpenIsoAway` →
+    `Mathlib/AlgebraicGeometry/AffineScheme.lean`, next to `Spec_basicOpen`.
+    NEXT: c4.2b (the three-`D(t_k)` OpenCover of `blOpenYPiece`) then c4.2c (`glueMorphisms`;
+    agreement = the proven crux 3166d104).
   - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
     against the code, not the board:
     · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
