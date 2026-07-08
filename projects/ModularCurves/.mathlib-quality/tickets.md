@@ -1957,15 +1957,23 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   that `SchemeAction.quotient` consumes).
   *This retires the Stacks-01ZY worry*: route (a) never needs "a finite set of points of a
   quasi-projective scheme lies in an affine open".
-- **Open leaves** (theorem-level sorries with routed plans, no def-level sorry):
-  - **[a2-α]** `isAffineOpen_zeroComplement` — over an affine base, `E ∖ zero(X)` is affine.
-    Route: `IsAffineHom` is local at the target; `LocallyWeierstrass` gives `projModel W`
-    charts, and `projModel W ∖ [0:1:0]` is the affine Weierstrass curve (`Z ≠ 0` chart of
-    `Proj`); then `isAffine_of_isAffineHom`. **Canonical ⟹ automatically `G`-stable.**
-  - **[a2-β]** `exists_isAffineOpen_zeroSection` — an affine open containing the zero section,
-    given a section `s` disjoint from it (free in the bootstrap: `δ` = naive level `N` supplies
-    a universal point of exact order `N`). Route: translate `[a2-α]`'s chart by `τ_s`
-    (group law = T-W7), or use the `Y ≠ 0` chart of each `projModel W`.
+- **★★ [a2] CLOSED (fable-P4, 2026-07-08, axiom-clean)** — `E/G` **exists**. The two charts
+  are the two `Proj` basic opens of a *global* Weierstrass model, and both facts were already
+  in the repo:
+  - `exists_charts_of_globalModel` (**PROVEN**): `U₀ = D₊(X₁)` contains the whole zero-section
+    image (`projModelZero_preimage_yChart`, `WeierstrassModel.lean:2558`); `U₁ = D₊(X₂)`
+    contains everything off it (`mem_range_zero_of_not_mem_zChart`,
+    `ModelVariableChange.lean:640`); both affine by mathlib's `Proj.isAffineOpen_basicOpen`,
+    transported along `φ : E ≅ projModel W` by `IsAffineOpen.preimage_of_isIso`.
+    Hypotheses: **only** `Function.Surjective z.base` + `zero ≫ φ.hom = z ≫ projModelZero W`.
+    No affineness of `X`, no properness, no `LocallyWeierstrass` gluing.
+  - `exists_isStableOpen_isAffineOpen_of_globalModel` (**PROVEN**): the `G`-stable affine atlas
+    of `E` that `SchemeAction.quotient` consumes.
+  *No `[a2-α]`/`[a2-β]` sorries were ever needed — the global-model form (which is exactly what
+  route (a) has: `X = 𝕸(𝒫,δ)` affine, `E` pulled back from T-E15's explicit model) makes both
+  charts one-liners.* The Stacks-01ZY route (finite set of points in an affine open, ABSENT
+  from mathlib — confirmed: no `IsQuasiProjective`, no 01ZY/09NN) is **not needed**.
+- **Open leaf** (theorem-level sorry with a routed plan, no def-level sorry):
   - **[a3]–[a5]** `exists_ellipticCurveGeom_quotient` — the route-(a) descent theorem:
     `∃ C' : EllipticCurveGeom (X/G), ∃ q : E ⟶ C'.E`, cartesian over `X → X/G` and compatible
     with the zero sections (**exactly an `EllHom`**, which is what the engine consumes).

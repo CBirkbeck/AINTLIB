@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.EllipticCurve.ModelVariableChange
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
@@ -118,46 +119,79 @@ theorem exists_isStableOpen_isAffineOpen_of_orbit [Finite G]
   obtain ⟨U, hU, horb⟩ := horbit e
   exact σE.exists_isStableOpen_isAffineOpen hU e horb
 
-/-! ### The two charts (leaves `[a2-α]`, `[a2-β]`) -/
+/-! ### The two charts (leaves `[a2-α]`, `[a2-β]`) — PROVEN for a globally-modelled curve -/
 
-/-- **([a2-α], the zero-section complement is an affine chart)** For a geometric elliptic
-curve over an **affine** base, the complement of (the image of) the zero section is an affine
-open of `E`.
+attribute [local instance] MvPolynomial.gradedAlgebra
 
-Plan (terminating in a proof): the zero section of a proper morphism is a closed immersion,
-so the complement `U₁` is open. Affineness is Zariski-local on the base: `LocallyWeierstrass`
-covers `X` by affine opens `Uᵢ` over which `E|Uᵢ ≅ projModel Wᵢ` carrying `zero` to
-`projModelZero Wᵢ`, and `projModel W ∖ [0:1:0]` is the **affine Weierstrass curve**
-`Spec Γ(Uᵢ)[x,y]/(W)` (the `Z ≠ 0` chart of `Proj`). Hence `π|U₁ : U₁ ⟶ X` is an affine
-morphism (`IsAffineHom` is local at the target), and `X` is affine, so `U₁` is affine
-(`isAffine_of_isAffineHom`).
+open WeierstrassCurve.Projective HomogeneousIdeal WeierstrassCurve in
+/-- **([a2-α] + [a2-β], PROVEN)** A geometric elliptic curve with a **global** projective
+Weierstrass model has the two affine charts required by `orbit_mem_isAffineOpen_of_charts`:
 
-Note this chart is *canonical*, hence automatically `G`-stable — the reason the dichotomy in
-`orbit_mem_isAffineOpen_of_charts` works. -/
-theorem isAffineOpen_zeroComplement [IsAffine X] (C : EllipticCurveGeom X)
-    (U₁ : (C.E).Opens) (hU₁ : (U₁ : Set C.E) = (Set.range C.zero.base)ᶜ) :
-    IsAffineOpen U₁ := by
-  sorry
+* `U₀` = the `Y`-chart `D₊(X₁)` contains the whole image of the zero section
+  (`projModelZero_preimage_yChart`: the section at infinity lands entirely in the `Y`-chart);
+* `U₁` = the `Z`-chart `D₊(X₂)` contains everything *off* the zero section
+  (`mem_range_zero_of_not_mem_zChart`: a point outside the `Z`-chart lies on the zero section).
 
-/-- **([a2-β], an affine chart around the zero section)** For a geometric elliptic curve over
-an **affine** base admitting a section `s` disjoint from the zero section, there is an affine
-open of `E` containing the whole image of the zero section.
+Both are affine because they are basic opens of `Proj` (`Proj.isAffineOpen_basicOpen`), and
+affineness is preserved by preimage along the isomorphism `φ`.
 
-Plan (terminating in a proof): translation by `s` is an automorphism `τ_s` of `E` over `X`
-(the group law, `EllipticCurveGeom.toEllipticCurve`, T-W7); `τ_s` carries the zero section to
-`s`, hence carries the affine open `E ∖ s(X)` (affine by `isAffineOpen_zeroComplement`
-transported along `τ_{-s}`) onto an affine open containing the zero section. Equivalently and
-without the group law: over each Weierstrass chart the `Y ≠ 0` chart of `projModel W` is an
-affine open containing `[0:1:0]`, and these glue over an affine base because `π` restricted to
-them is an affine morphism.
+This is the situation route (a) is in: `X = 𝕸(𝒫,δ)` is affine and the universal curve upstairs
+is the pullback of the bootstrap object's explicit projective model (T-E15; the `VariableChange`
+presentation of the `G`-action is T-W7.1b). Only surjectivity of `z` on points is needed — no
+affineness of `X`, no properness, no `LocallyWeierstrass` gluing. -/
+theorem exists_charts_of_globalModel {R : Type u} [CommRing R] {C : EllipticCurveGeom X}
+    {W : WeierstrassCurve R} (φ : C.E ≅ projModel W)
+    {z : X ⟶ Spec (CommRingCat.of R)} (hz : Function.Surjective z.base)
+    (hzero : C.zero ≫ φ.hom = z ≫ projModelZero W) :
+    ∃ U₀ U₁ : (C.E).Opens, IsAffineOpen U₀ ∧ IsAffineOpen U₁ ∧
+      (∀ x : X, C.zero.base x ∈ U₀) ∧
+      (∀ e : C.E, e ∉ Set.range C.zero.base → e ∈ U₁) := by
+  refine ⟨φ.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))),
+    φ.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))),
+    ?_, ?_, ?_, ?_⟩
+  · exact (Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 1)
+      one_pos).preimage_of_isIso φ.hom
+  · exact (Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2)
+      one_pos).preimage_of_isIso φ.hom
+  · intro x
+    have hmem : z.base x ∈ (projModelZero W) ⁻¹ᵁ (Proj.basicOpen
+        (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) := by
+      rw [projModelZero_preimage_yChart W]; trivial
+    have hx : φ.hom.base (C.zero.base x) = (projModelZero W).base (z.base x) :=
+      congrArg (fun f : X ⟶ projModel W => f.base x) hzero
+    show φ.hom.base (C.zero.base x) ∈ (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))
+    rw [hx]
+    exact hmem
+  · intro e he
+    by_contra hcon
+    have hcon' : φ.hom.base e ∉ Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := hcon
+    obtain ⟨r, hr⟩ := mem_range_zero_of_not_mem_zChart hcon'
+    obtain ⟨x, rfl⟩ := hz r
+    refine he ⟨x, ?_⟩
+    have hx : φ.hom.base (C.zero.base x) = (projModelZero W).base (z.base x) :=
+      congrArg (fun f : X ⟶ projModel W => f.base x) hzero
+    exact (Scheme.homeoOfIso φ).injective (hx.trans (hr.trans rfl))
 
-In the KM bootstrap the section `s` is free: `δ` = naive level `N` supplies a universal point
-of exact order `N`, disjoint from the zero section by definition of a level structure. -/
-theorem exists_isAffineOpen_zeroSection [IsAffine X] (C : EllipticCurveGeom X)
-    (s : X ⟶ C.E) (hs : s ≫ C.π = 𝟙 X)
-    (hsz : ∀ x : X, s.base x ≠ C.zero.base x) :
-    ∃ U₀ : (C.E).Opens, IsAffineOpen U₀ ∧ ∀ x : X, C.zero.base x ∈ U₀ := by
-  sorry
+/-- **([a2], PROVEN end-to-end for a globally-modelled curve)** Composing
+`exists_charts_of_globalModel` with `orbit_mem_isAffineOpen_of_charts` and
+`exists_isStableOpen_isAffineOpen_of_orbit`: a free action lifted to a curve with a global
+projective Weierstrass model admits the **`G`-stable affine atlas** that `SchemeAction.quotient`
+consumes. `E/G` therefore exists. -/
+theorem exists_isStableOpen_isAffineOpen_of_globalModel [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE) {R : Type u} [CommRing R] {W : WeierstrassCurve R}
+    (φ : C.E ≅ projModel W) {z : X ⟶ Spec (CommRingCat.of R)}
+    (hz : Function.Surjective z.base) (hzero : C.zero ≫ φ.hom = z ≫ projModelZero W)
+    (e : C.E) :
+    ∃ V : (C.E).Opens, σE.IsStableOpen V ∧ IsAffineOpen V ∧ e ∈ V := by
+  obtain ⟨U₀, U₁, h0, h1, hz0, hz1⟩ := exists_charts_of_globalModel φ hz hzero
+  exact exists_isStableOpen_isAffineOpen_of_orbit
+    (fun e' => orbit_mem_isAffineOpen_of_charts hact h0 h1 hz0 hz1 e') e
 
 /-! ### The route-(a) descent theorem (leaves `[a3]`–`[a5]`) -/
 
