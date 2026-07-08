@@ -8791,3 +8791,14 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
 3. **Standing watch duty** (each session start): re-check #35545/#41383/#35773 — when
    Riou's lane merges what GAP-1 needs, RESUME P2 (tensor closure + Pic group) as the
    priority and report.
+
+### v10.35b (2026-07-08): OWNER POLICY — EXTERNAL-QUIET (binding until lifted)
+
+- **No external publishing of any kind for now**: no Zulip pings, no mathlib PRs, no
+  upstream issue filings. The v10.35 owner-action items (i)–(iii) are DEFERRED, not
+  pending. The upstream ledger, the staged PR-draft files, and the T-PIC1c minimal repro
+  remain INTERNAL deliverables — build them, keep them current, publish nothing.
+- GAP-1 watch duty (CHARTER-PIC0 item 3) continues READ-ONLY: track the Riou PRs' state;
+  do not comment, ping, or offer contributions.
+- Standing rule for all workers: anything outward-facing is an owner action, and the
+  owner has said NOT YET.
