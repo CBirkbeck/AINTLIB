@@ -99,15 +99,31 @@ general finite-flat route and the E[N] étale shortcut now aim at the *same* sta
 `IsColimit` of the `SpecEqualizer` cofork ⟹ (via `exists_unique_lift_of_isColimit` +
 `isInvariant_iff_coequalizes`) the six `SubgroupQuotient` pins.
 
-## Status / next
-Route DECIDED. Freeness DONE. Affine cofork DONE. **Route-independent algebra foundation DONE —
-the crux is now the named predicate `IsHopfGalois`.** Two obligations remain, both multi-week:
-1. **`isColimit_of_isHopfGalois` (the 023Q application, route-INDEPENDENT)** — `(h : IsHopfGalois ρ)
-   → IsColimit (SpecEqualizer cofork)`. Unconditional in `h`; scheme-theoretic (faithfully-flat ⟹
-   Spec surjective; `Spec.map` flat from module-flat; `isRegularEpi_of_flat_of_surjective_of_isAffine`;
-   kernel-pair = groupoid via `galoisEquiv`). Provable now; **next build target**.
-2. **`IsHopfGalois (translation co-action)` (the crux PROOF, route-DEPENDENT, scoping-blocked)** —
-   finite-flat-group-scheme torsor theory (general) vs. E[N] étale descent (shortcut). **Scoping
-   decision boarded v10.38**; coordinator input welcome; p0 proceeds on the general crux per beastmode
+## FULL ROUTE-INDEPENDENT REDUCTION — COMPLETE (2026-07-08, axiom-clean)
+`isColimit_of_isHopfGalois` is **PROVED** (`HopfGaloisQuotient.lean`): `(h : IsHopfGalois ρ) →
+IsColimit (SpecEqualizer cofork)`, unconditional in `h`. The whole abstract chain
+`IsHopfGalois ρ ⟹ affine-local IsColimit` is now axiom-clean, in three landed lemmas:
+- **`isRegularEpi_specEqualizerπ`** (023Q half 1): `Module.FaithfullyFlat B^{coρ} B` → `π` regular epi
+  (via `faithfullyFlat_algebraMap_iff` → `flat_and_surjective_SpecMap_iff` → `023Q`).
+- **`isKernelPair_specEqualizerπ`** (023Q half 2): the cofork pair `(Spec ρ, Spec includeLeft)` is a
+  kernel pair of `π` — tensor pushout `B ⊗_S B` → `Spec B ×_{Spec S} Spec B`
+  (`isPullback_SpecMap_of_isPushout`), transported along `galoisEquiv`
+  (`canonicalGaloisMap_comp_include{Right,Left}`, `IsPullback.of_iso`).
+- **`isColimit_of_isHopfGalois`**: regular epi + kernel pair ⟹ `IsColimit` via
+  `IsKernelPair.toCoequalizer'`.
+
+**So the ENTIRE abstract Hopf-Galois → coequalizer reduction is DONE** (self-contained, upstreamable —
+no E-specifics). Composed with `exists_unique_lift_of_isColimit` + `isInvariant_iff_coequalizes`, the
+`SubgroupQuotient` pins follow *per affine chart* once `IsHopfGalois` holds there.
+
+## Status / next — reduced to E-geometry + crux + glue
+The abstract algebra + affine reduction is COMPLETE. Three obligations remain, all needing the actual
+`E`-geometry (they connect the abstract `ρ`/`B⊗A` layer to the elliptic curve):
+1. **`ρ = translation co-action` (3a-ii, E-geometry)** — identify the abstract `ρ : B →ₐ B ⊗ A` with
+   `act^#` on a `G`-stable affine chart, under `O(G ×_S Spec B) ≅ B ⊗_R A` (`G` finite ⟹ affine over
+   base). Bridges `IsCoaction`/`IsHopfGalois` to `translationAction`/`FiniteLocallyFreeSubgroup`.
+2. **`IsHopfGalois (translation co-action)` (the crux PROOF, scoping-blocked v10.38)** — general
+   finite-flat torsor theory vs. E[N] étale descent. p0 proceeds on the general crux per beastmode
    absent a redirect.
-Plus the glue (G-stable cover + `SchemeQuotient` `GlueData`).
+3. **glue (3a-iii/iv)** — G-stable affine cover + `SchemeQuotient` `GlueData`; assembles the per-chart
+   affine quotients (from 1+2) into global `E/G`; discharges the six pins. Consumes 1+2.

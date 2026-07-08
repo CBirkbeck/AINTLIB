@@ -1,11 +1,15 @@
-FOCUS: [T-G3d-infra] Piece 3 — route-independent ALGEBRA FOUNDATION of the crux COMPLETE + axiom-clean.
-Landed this session (4 new ForMathlib files): ComoduleCoinvariants (coinvariants B^{coρ}), Coaction
-(IsCoaction axioms, mathlib-gap comodule structure), HopfGalois (canonicalGaloisMap β + IsHopfGalois
-predicate = THE CRUX now NAMED + galoisEquiv). Plus earlier: full IsInvariant⟺coequalizer bridge,
-exists_unique_lift_of_isColimit, actPair+freeness, SpecEqualizer affine cofork.
-NEXT: isColimit_of_isHopfGalois (023Q application, route-INDEPENDENT, unconditional in h:IsHopfGalois):
-faithfully-flat⟹Spec surjective + Spec.map flat from module-flat + isRegularEpi_of_flat_of_surjective_of_isAffine
-+ kernel-pair=groupoid via galoisEquiv. Then crux PROOF (route-dependent, scoping-blocked v10.38: general
-Hopf-Galois vs E[N] étale shortcut) + glue (G-stable cover + SchemeQuotient GlueData).
+FOCUS: [T-G3d-infra] Piece 3 — FULL ROUTE-INDEPENDENT REDUCTION COMPLETE + axiom-clean.
+isColimit_of_isHopfGalois PROVED (HopfGaloisQuotient.lean): IsHopfGalois ρ ⟹ affine-local IsColimit,
+via isRegularEpi_specEqualizerπ (023Q half 1, faithfullyFlat) + isKernelPair_specEqualizerπ (023Q half
+2: tensor pushout → Spec kernel pair, transported along galoisEquiv) + IsKernelPair.toCoequalizer'.
+The ENTIRE abstract Hopf-Galois → coequalizer chain is done (5 new ForMathlib files this session:
+ComoduleCoinvariants, Coaction, HopfGalois, SpecEqualizer, HopfGaloisQuotient). Composed with
+exists_unique_lift_of_isColimit + isInvariant_iff_coequalizes ⟹ SubgroupQuotient pins per affine chart.
+REMAINING (all need E-geometry, connecting abstract ρ/B⊗A to the curve):
+  (1) ρ = translation co-action [3a-ii E-geometry: O(G×ₛSpecB)≅B⊗A on a G-stable chart]
+  (2) IsHopfGalois(translation co-action) [crux PROOF, scoping-blocked v10.38: general vs E[N] shortcut]
+  (3) glue [3a-iii/iv: G-stable affine cover + SchemeQuotient GlueData; consumes 1+2]
+NEXT candidate: 3a-ii (co-action = act^# on affine chart) OR the geometry setup for the G-stable cover.
+Both need E's affine charts — deep geometry. Crux (2) scoping-blocked; glue (3) consumes crux.
 CONSTRAINTS: p2 Layer-B files READ-ONLY (their sentinel live); new files only; HEAD-guard + pathspec commits;
-#print axioms verify. NIsogeny/EngineDescent/AdditionChartOverlap = concurrent workers', don't touch.
+#print axioms verify. NIsogeny/EngineDescent/AdditionChartOverlap/SchemeActionFree = concurrent workers', don't touch.

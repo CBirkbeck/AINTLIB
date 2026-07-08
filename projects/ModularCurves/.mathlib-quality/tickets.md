@@ -9885,3 +9885,23 @@ subterm is index-defeq but not syntactic (`(f ≫ g).1` vs `g.1 * f.1`), a defeq
   axiom-clean, all in NEW ForMathlib files, zero cross-lane edits beyond the boarded
   [FP-B] surgical claim. Remaining charter stretch: [NISOG-GRASS] (next session,
   /develop --decompose first act).
+
+### v10.42-p0 (2026-07-08, p0): [T-G3d-infra] Piece 3 — FULL route-independent reduction COMPLETE (IsHopfGalois ⟹ IsColimit)
+
+*Major milestone. The entire ABSTRACT Hopf-Galois → affine coequalizer reduction is proved + axiom-clean.
+`isColimit_of_isHopfGalois` (commit b3400a01a): `IsHopfGalois ρ ⟹ IsColimit (SpecEqualizer cofork)`,
+unconditional. Built on `isRegularEpi_specEqualizerπ` (023Q half 1) + `isKernelPair_specEqualizerπ`
+(023Q half 2 — tensor pushout → Spec kernel pair, transported along `galoisEquiv`). 6 axiom-clean
+commits this arc: 9ce61c0a (regular epi), 62eb952d (Galois map on inclusions), b3400a01a (kernel pair +
+IsColimit), + the algebra foundation (56a95f91, 623758cd, bee2bc05, 98cd93a1).*
+
+- **What this buys:** the whole abstract layer is self-contained + upstreamable (no E-specifics).
+  Composed with `exists_unique_lift_of_isColimit` + `isInvariant_iff_coequalizes` ⟹ the six
+  SubgroupQuotient pins hold PER AFFINE CHART once `IsHopfGalois` is available there.
+- **Construction now reduced to 3 obligations, all E-GEOMETRY** (see `decomposition-g3d-piece3.md`):
+  (1) `ρ = translation co-action` (3a-ii: `O(G×ₛSpecB) ≅ B⊗A` on a G-stable chart);
+  (2) `IsHopfGalois(translation co-action)` — the crux PROOF, **scoping-blocked v10.38** (general vs
+  E[N] shortcut); (3) glue (G-stable cover + `SchemeQuotient` GlueData; consumes 1+2).
+- mathlib pieces reused: `isPullback_SpecMap_of_isPushout`, `CommRingCat.isPushout_tensorProduct`,
+  `IsKernelPair.toCoequalizer'`, `flat_and_surjective_SpecMap_iff`, `isRegularEpi_of_flat_of_surjective_of_isAffine`.
+- p0 continues per beastmode; crux (2) awaits the v10.38 scoping call, coordinator input welcome.
