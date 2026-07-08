@@ -25,7 +25,7 @@ law-2 triple rescaled by the bidegree-`(2,2)` factor. Combined with
 morphism on their overlap — the cross-chart-product agreement, at ring level.
 -/
 
-open MvPolynomial ModularCurves TensorProduct
+open MvPolynomial ModularCurves TensorProduct AlgebraicGeometry CategoryTheory
 
 namespace WeierstrassCurve.Projective
 
@@ -289,6 +289,81 @@ lemma chartHomOfTriple_biChartPointSnd :
   refine ((biChartRingTensorEquiv W i j).symm_apply_eq).mpr ?_ |>.symm
   rw [biChartPointSnd, dif_neg m.2, ← rename_X (R := R) (Sum.inr : {k : Fin 3 // k ≠ j} → _) m,
     biChartRingTensorEquiv_mk_rename_inr]
+
+/-- `biChartRingAwayTensorEquiv` and `biChartRingTensorEquiv` agree on `· ⊗ₜ 1`, after the chart
+presentation is applied. -/
+lemma awayTensorEquiv_symm_tmul_one (x : affineChartRing W i) :
+    (biChartRingAwayTensorEquiv W i j).symm
+        (chartCoordAlgEquiv W i x ⊗ₜ[R] (1 : chartAway W j)) =
+      (biChartRingTensorEquiv W i j).symm (x ⊗ₜ[R] (1 : affineChartRing W j)) := by
+  rw [biChartRingAwayTensorEquiv, AlgEquiv.symm_trans_apply,
+    Algebra.TensorProduct.congr_symm_apply, Algebra.TensorProduct.map_tmul]
+  simp
+
+/-- The right-hand analogue of `awayTensorEquiv_symm_tmul_one`. -/
+lemma awayTensorEquiv_symm_one_tmul (y : affineChartRing W j) :
+    (biChartRingAwayTensorEquiv W i j).symm
+        ((1 : chartAway W i) ⊗ₜ[R] chartCoordAlgEquiv W j y) =
+      (biChartRingTensorEquiv W i j).symm ((1 : affineChartRing W i) ⊗ₜ[R] y) := by
+  rw [biChartRingAwayTensorEquiv, AlgEquiv.symm_trans_apply,
+    Algebra.TensorProduct.congr_symm_apply, Algebra.TensorProduct.map_tmul]
+  simp
+
+/-- **(the leg, in `Away` presentation)** The ring map underlying `pullback.fst` of the `(i,j)`
+chart-product is the `Away`-presented chart morphism of the first tautological point. -/
+lemma chartAwayHomOfTriple_biChartPointFst :
+    chartAwayHomOfTriple W i (biChartPointFst W i j) 1 (biChartPointFst_self W i j)
+        (equation_biChartPointFst W i j) =
+      (biChartRingAwayTensorEquiv W i j).symm.toAlgHom.comp
+        (Algebra.TensorProduct.includeLeft (S := R)) := by
+  refine AlgHom.ext fun y => ?_
+  obtain ⟨x, rfl⟩ := (chartCoordAlgEquiv W i).surjective y
+  show chartHomOfTriple W i (biChartPointFst W i j) 1 (biChartPointFst_self W i j)
+      (equation_biChartPointFst W i j)
+      ((chartCoordAlgEquiv W i).symm (chartCoordAlgEquiv W i x)) =
+    (biChartRingAwayTensorEquiv W i j).symm (chartCoordAlgEquiv W i x ⊗ₜ[R] 1)
+  rw [AlgEquiv.symm_apply_apply, awayTensorEquiv_symm_tmul_one]
+  exact AlgHom.congr_fun (chartHomOfTriple_biChartPointFst W i j) x
+
+/-- The second-leg analogue of `chartAwayHomOfTriple_biChartPointFst`. -/
+lemma chartAwayHomOfTriple_biChartPointSnd :
+    chartAwayHomOfTriple W j (biChartPointSnd W i j) 1 (biChartPointSnd_self W i j)
+        (equation_biChartPointSnd W i j) =
+      (biChartRingAwayTensorEquiv W i j).symm.toAlgHom.comp
+        (Algebra.TensorProduct.includeRight (R := R)) := by
+  refine AlgHom.ext fun y => ?_
+  obtain ⟨x, rfl⟩ := (chartCoordAlgEquiv W j).surjective y
+  show chartHomOfTriple W j (biChartPointSnd W i j) 1 (biChartPointSnd_self W i j)
+      (equation_biChartPointSnd W i j)
+      ((chartCoordAlgEquiv W j).symm (chartCoordAlgEquiv W j x)) =
+    (biChartRingAwayTensorEquiv W i j).symm (1 ⊗ₜ[R] chartCoordAlgEquiv W j x)
+  rw [AlgEquiv.symm_apply_apply, awayTensorEquiv_symm_one_tmul]
+  exact AlgHom.congr_fun (chartHomOfTriple_biChartPointSnd W i j) x
+
+/-- **(the geometric leg)** `pullback.fst` of the `(i,j)` chart-product, read through
+`chartPieceIso`, is `Spec` of the chart morphism of the first tautological point.
+
+Together with `chartι_comp_specMap_chartAwayHom_eq` (the crux) this is what makes the source-side
+chart compatibility free: both chart-product legs and both transition legs are `chartHomOfTriple`s
+of the SAME on-curve triple, read in different charts. -/
+@[reassoc]
+lemma chartPieceIso_inv_fst_chartAwayHom :
+    (chartPieceIso W i j).inv ≫ Limits.pullback.fst (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W i (biChartPointFst W i j) 1
+        (biChartPointFst_self W i j) (equation_biChartPointFst W i j)).toRingHom) := by
+  rw [chartPieceIso_inv_fst, chartAwayHomOfTriple_biChartPointFst]
+  rfl
+
+/-- The second-leg analogue of `chartPieceIso_inv_fst_chartAwayHom`. -/
+@[reassoc]
+lemma chartPieceIso_inv_snd_chartAwayHom :
+    (chartPieceIso W i j).inv ≫ Limits.pullback.snd (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W j (biChartPointSnd W i j) 1
+        (biChartPointSnd_self W i j) (equation_biChartPointSnd W i j)).toRingHom) := by
+  rw [chartPieceIso_inv_snd, chartAwayHomOfTriple_biChartPointSnd]
+  rfl
 
 end Inclusions
 

@@ -78,9 +78,33 @@ lemma chartι_projModelπ :
 /-- The `(i,j)` chart-product piece of `E ×_R E`, as `Spec` of a tensor product. -/
 noncomputable def chartPieceTensorIso :
     pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W) ≅
-      Spec (CommRingCat.of (chartAway W i ⊗[R] chartAway W j)) := by
-  rw [chartι_projModelπ, chartι_projModelπ]
-  exact pullbackSpecIso R (chartAway W i) (chartAway W j)
+      Spec (CommRingCat.of (chartAway W i ⊗[R] chartAway W j)) :=
+  pullback.congrHom (chartι_projModelπ W i) (chartι_projModelπ W j) ≪≫
+    pullbackSpecIso R (chartAway W i) (chartAway W j)
+
+/-- The first leg of the chart-product, computed. Stating `chartPieceTensorIso` as a TERM (rather
+than by `rw`-ing the legs and `exact`-ing `pullbackSpecIso`) is what makes this provable: a
+tactic-built iso cannot be unfolded against `pullbackSpecIso_inv_fst`. Same lesson as
+`specBasicOpenIsoAway` (1a917a1e). -/
+@[reassoc]
+lemma chartPieceTensorIso_inv_fst :
+    (chartPieceTensorIso W i j).inv ≫ pullback.fst (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (A := chartAway W i) (B := chartAway W j))) := by
+  rw [chartPieceTensorIso, Iso.trans_inv, Category.assoc, pullback.congrHom_inv,
+    pullback.lift_fst, Category.comp_id, pullbackSpecIso_inv_fst]
+
+/-- The second leg of the chart-product, computed. -/
+@[reassoc]
+lemma chartPieceTensorIso_inv_snd :
+    (chartPieceTensorIso W i j).inv ≫ pullback.snd (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := R)
+        (A := chartAway W i) (B := chartAway W j)).toRingHom) := by
+  rw [chartPieceTensorIso, Iso.trans_inv, Category.assoc, pullback.congrHom_inv,
+    pullback.lift_snd, Category.comp_id, pullbackSpecIso_inv_snd]
+  rfl
 
 /-- The chart-product ring presents the tensor product of the two `Away` chart rings. -/
 noncomputable def biChartRingAwayTensorEquiv :
@@ -100,6 +124,38 @@ noncomputable def chartPieceIso :
   (chartPieceTensorIso W i j).trans
     (Scheme.Spec.mapIso
       ((biChartRingAwayTensorEquiv W i j).toRingEquiv.toCommRingCatIso).op)
+
+/-- `chartPieceIso`'s inverse, in the two-step form its legs are computed from. -/
+lemma chartPieceIso_inv :
+    (chartPieceIso W i j).inv =
+      Spec.map (CommRingCat.ofHom (biChartRingAwayTensorEquiv W i j).symm.toRingHom) ≫
+        (chartPieceTensorIso W i j).inv := by
+  rw [chartPieceIso, Iso.trans_inv]
+  rfl
+
+/-- **(the first leg of the chart-product)** -/
+@[reassoc]
+lemma chartPieceIso_inv_fst :
+    (chartPieceIso W i j).inv ≫ pullback.fst (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom
+        ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+          (Algebra.TensorProduct.includeLeftRingHom
+            (A := chartAway W i) (B := chartAway W j)))) := by
+  rw [chartPieceIso_inv, Category.assoc, chartPieceTensorIso_inv_fst, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp]
+
+/-- **(the second leg of the chart-product)** -/
+@[reassoc]
+lemma chartPieceIso_inv_snd :
+    (chartPieceIso W i j).inv ≫ pullback.snd (chartι W i ≫ projModelπ W)
+        (chartι W j ≫ projModelπ W) =
+      Spec.map (CommRingCat.ofHom
+        ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+          (Algebra.TensorProduct.includeRight (R := R)
+            (A := chartAway W i) (B := chartAway W j)).toRingHom)) := by
+  rw [chartPieceIso_inv, Category.assoc, chartPieceTensorIso_inv_snd, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp]
 
 /-- The pieces `chartPieceIso` identifies are an open cover of `E ×_R E`: they are the
 left-right cover induced by the model's chart cover on each factor. -/
