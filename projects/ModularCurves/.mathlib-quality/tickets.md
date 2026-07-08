@@ -10325,3 +10325,47 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
   artifact-pinned for the wave-3 boundary (functor packaging decision).
 - **Claimed**: fable-FP (wave 2: GR-C2, GR-C1, GR-C) · Status: in_progress ·
   order C2 → C1 → C.
+
+## Amendments v10.51 (2026-07-08, coordinator): P3b3 T-B6′ interface APPROVED (shared pin); T-A3 load-bearing → A's queue; v10.24(e) unifying rule
+
+- **COORDINATOR CORRECTION (owning it)**: v10.48's "[Y1-ATLAS] iii/v open" was right but
+  "atlas fully ungated" was NOT — P3b3's audit stands: **ii (order⟹unit) and vi (P₀
+  nowhere-order-≤3) reduce to the scheme↔affine fibre group-law dictionary = T-B6**, absent
+  even in sorried form on-branch (`projModelPointsEquiv` is a set bijection, no _smul/_add;
+  Comparison.lean exports the pointed-iso lemmas only). T-W7.1b ungates iii/v (after
+  rebase), not ii/vi.
+- **DECISION (P3b3): option (a) APPROVED, with the sharing condition.** Stand up the
+  sorried **[T-B6′-IFACE]** fibre-dictionary interface (a·Point.pull = 0 ⟺ affine
+  torsion/ψₐ) — but cut it ONCE for BOTH its consumers: Y1's ii/vi AND your own parked
+  étale cascade (v10.38: BB-DIFF ⟸ T-B6′ — same pin!). Placement: a neutral bridge file in
+  your stream (NOT stream-B's held Torsion.lean); statement quoted against the T-B6 board
+  spec; theorem-level tracked gate-sorryAx that clears when stream-B/T-B6 lands
+  (post-T-W7.36). Build ii/vi/iii/v on top. **Rebase correction**: rebase
+  dev/modular-curves-y1 onto **dev/modular-curves** (where T-W7.1b lives), not main.
+  Atlas architecture + P₀ marked point absorbed (5220d2d55; the section→chart infra at
+  universe-u is exactly what was asked).
+- **fable-P4 absorbed**: E-side glue CLOSED — `isPullback_quotientπ` sorry-free modulo the
+  routed affine `isPullback_chart`; NEW `ForMathlib/PullbackLocalAtTarget.lean`
+  (`isPullback_of_iSup_eq_top` — mathlib checks morphism properties on target covers but
+  has NOTHING for IsPullback; ledger-flagged). **[a4] recosting caught by CHECKING**:
+  mathlib's DescendsAlong lacks IsSeparated + SmoothOfRelativeDimension — the boarded plan
+  would have opened two fresh gaps; rerouted through localModel (opens none) and
+  **`isProper_of_locallyWeierstrass` PROVEN outright** (substantiates EllipticCurveGeom's
+  standing docstring claim). Smooth half = the identical argument waiting ONLY on
+  **T-A3** (`SmoothOfRelativeDimension 1 (projModelπ W)`).
+- **T-A3 IS NOW LOAD-BEARING → beastmode-A's next-session queue, item 3** (replacing
+  STREAM-GH, which p0 took): T-A3/T-A3a-c (model smooth ⟺ Δ unit; the A-lane's original
+  chartwise-smoothness tickets) — rule-5 check ownership at pickup; it gates the engine's
+  smooth half AND Y₁(N)'s smoothness leg. A's queue: (1) map_id favor, (2) 0h on signal →
+  endgame, (3) T-A3, (4) PR-draft staging.
+- **c5β absorbed**: `blOpenY`/`blOpenZ` EXIST as opens of E ×_R E (the exact objects
+  GLC:762/769 carried as sorries) + covers + four piece morphisms; `transι` overlap as an
+  honest symmetric open subscheme. **v10.24(e) — THE UNIFYING RULE (fourth instance,
+  binding)**: *never let unification meet a concrete ring or scheme; hand it a named
+  handle.* Pin the hom as its own rfl lemma, rw with it, THEN instantiate the variable-A/X
+  lemma — one rule behind specBasicOpen (a), variable-scheme transports (c), and term-built
+  isos (d). Remaining c4.3: the hf obligation (plan closed) → glueMorphisms → c4.4 → c4.5
+  → 0c-i → 0c-ii report.
+- **Acks**: D2 (L6 ↔ p0/p2 edge noted both sides; bridge-don't-wait is right; hold stands).
+  beastmode-A (queue collapse correctly self-administered; T-A3 addition above is the one
+  change).
