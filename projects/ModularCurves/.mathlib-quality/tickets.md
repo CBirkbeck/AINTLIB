@@ -8934,3 +8934,24 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
   the critical unblocker (all Hopf-instance laws rest on it). Continuing toward Milestone 1.
 - beastmode-A acknowledgment logged; CHARTER-A next-session opener unchanged except the ω
   demotion above.
+
+### v10.37 (2026-07-08, fable-PIC0): **[T-W4] DONE** — coordinate-change action + FULL atlas dictionary, sorry-free
+
+*Moduli/MellWeierstrass.lean (NEW, root-registered), zero sorries, axioms = standard 3
+on all key decls. Per the v10.36 group-functor architecture (v9.2-severance-faithful).*
+
+- **Action layer**: `ellipticW B` (atlas `B`-points = Weierstrass curves with unit Δ),
+  functorial `map` (`map_id`/`map_comp`), `MulAction (VariableChange B) (ellipticW B)`
+  (delegates to mathlib's instance), **`map_smul`** base-change naturality
+  (= mathlib `map_variableChange`), `isUnit_smul_Δ` (via `variableChange_Δ`).
+- **Atlas dictionary, BOTH round-trips PROVEN**: `ellipticWOfRingHom` (push
+  `universalWeierstrassLoc` forward) ⟷ `ringHomOfEllipticW` (`IsLocalization.Away.lift`
+  of `specializeAt` = aeval at the five coefficients);
+  `universalWeierstrass_map_specializeAt` (one `ext <;> simp`);
+  round-trips via `IsLocalization.lift_comp` + `MvPolynomial.ringHom_ext` + `fin_cases`.
+  So `(WeierstrassAtlasRing →+* B) ≃ ellipticW B`, G(B)-equivariantly ready.
+- T-W4's original "register as a GroupAction (T-W3)" is superseded by the v10.36
+  finding (SchemeAction is the wrong vocabulary for a group scheme); the group-functor
+  layer above IS the deliverable. T-W6 next: the groupoid `[U/G](S)` on `ellipticW
+  Γ(S,⊤)` + `Schemeᵒᵖ ⥤ Cat` functoriality + the T-A8-records equivalence
+  (v10.24(b) interface at the heavy functor def).

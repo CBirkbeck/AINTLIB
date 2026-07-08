@@ -98,4 +98,56 @@ noncomputable def ellipticWOfRingHom (φ : WeierstrassAtlasRing →+* B) : ellip
     rw [map_Δ]
     exact universalWeierstrassLoc.isUnit_Δ.map φ⟩
 
+/-- Specialisation of the universal coefficient ring at the coefficients of `W`. -/
+noncomputable def specializeAt (W : WeierstrassCurve B) :
+    MvPolynomial (Fin 5) ℤ →+* B :=
+  (MvPolynomial.aeval ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆]).toRingHom
+
+/-- The universal curve specialises to `W` at `W`'s own coefficients. -/
+theorem universalWeierstrass_map_specializeAt (W : WeierstrassCurve B) :
+    universalWeierstrass.map (specializeAt W) = W := by
+  ext <;>
+    simp [universalWeierstrass, WeierstrassCurve.map, specializeAt, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons,
+      Matrix.cons_val_three, Matrix.cons_val_four]
+
+theorem specializeAt_Δ (W : WeierstrassCurve B) :
+    specializeAt W universalWeierstrass.Δ = W.Δ := by
+  rw [← map_Δ, universalWeierstrass_map_specializeAt]
+
+/-- The atlas dictionary, reverse direction: an atlas point gives a ring map out of the
+atlas ring, by the universal property of `ℤ[a₁,…,a₆][Δ⁻¹]`. -/
+noncomputable def ringHomOfEllipticW (W : ellipticW B) : WeierstrassAtlasRing →+* B :=
+  IsLocalization.Away.lift universalWeierstrass.Δ
+    (g := specializeAt W.1) (by rw [specializeAt_Δ]; exact W.2)
+
+theorem ellipticWOfRingHom_ringHomOfEllipticW (W : ellipticW B) :
+    ellipticWOfRingHom (ringHomOfEllipticW W) = W := by
+  apply Subtype.ext
+  show universalWeierstrassLoc.map _ = W.1
+  rw [universalWeierstrassLoc, map_map]
+  have h : (ringHomOfEllipticW W).comp (algebraMap (MvPolynomial (Fin 5) ℤ)
+      WeierstrassAtlasRing) = specializeAt W.1 :=
+    IsLocalization.lift_comp _
+  rw [h]
+  exact universalWeierstrass_map_specializeAt W.1
+
+theorem ringHomOfEllipticW_ellipticWOfRingHom (φ : WeierstrassAtlasRing →+* B) :
+    ringHomOfEllipticW (ellipticWOfRingHom φ) = φ := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers universalWeierstrass.Δ)
+  have h : (ringHomOfEllipticW (ellipticWOfRingHom φ)).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing)
+      = specializeAt (ellipticWOfRingHom φ).1 :=
+    IsLocalization.lift_comp _
+  rw [h]
+  apply MvPolynomial.ringHom_ext
+  · intro r
+    simp [specializeAt, map_intCast]
+  · intro i
+    fin_cases i <;>
+      simp [specializeAt, ellipticWOfRingHom, universalWeierstrassLoc,
+        WeierstrassCurve.map, universalWeierstrass, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons,
+        Matrix.cons_val_three, Matrix.cons_val_four]
+
 end ModularCurves
