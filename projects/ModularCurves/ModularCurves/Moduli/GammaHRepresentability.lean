@@ -9,6 +9,7 @@ STREAM-GH skeleton (T-H4 corrected + route to T-H6). Decomposition of record:
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.ModularCurve.YFullRoute
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -337,6 +338,104 @@ theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
 
 end ModuliProblem
 
+open EllipticCurve in
+/-- **[GH2-core] (freeness of the `GL₂(ℤ/N)`-action on full level structures)** Over a
+nonempty base with `N` invertible, a matrix `g` fixing a naive full level structure `L` is the
+identity. At a geometric point `L` pins a basis of `E[N] ≅ (ℤ/N)²`
+(`torsion_geometricFibre_rank_two`) together with the full-level surjectivity (`L.2.2`); the
+resulting finite endomorphism `c ↦ (c 0)•P + (c 1)•Q` is surjective, hence injective
+(`Finite.injective_iff_surjective_of_equiv`), so `g` fixes the basis and equals `1`. The
+route-independent, `GH1`-free engine of `gammaFullNaive_freeAction` ([GH2]) and the
+orbit-distinctness of `gammaHNaiveProblem_not_relativelyRepresentable` ([GHC4]). -/
+theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
+    (hinv : IsUnit ((N : ℕ) : R)) (X : EllObj R) (hne : Nonempty X.base)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : X.curve.FullLevelPt N)
+    (hfix : X.curve.glSmul g L = L) : g = 1 := by
+  -- `N = 1`: `GL₂(ℤ/1)` is trivial.
+  rcases eq_or_ne N 1 with rfl | hN1
+  · exact Subsingleton.elim _ _
+  have hN2 : 2 ≤ N := by have := NeZero.ne N; omega
+  haveI : Fact (1 < N) := ⟨by omega⟩
+  -- Section equations from `(glSmul g L).1 = L.1`.
+  have h1 := congrArg (fun z => z.1.1) hfix
+  have h2 := congrArg (fun z => z.1.2) hfix
+  simp only [ModularCurves.EllipticCurve.glSmul] at h1 h2
+  set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (g : Matrix (Fin 2) (Fin 2) (ZMod N)) with hm
+  -- Geometric point.
+  obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X hne N hinv
+  letI := fk; letI := ak
+  set pp := Point.pull X.curve t L.1.1 with hpp
+  set pq := Point.pull X.curve t L.1.2 with hpq
+  have hppN : (N : ℤ) • pp = 0 := by rw [hpp, ← Point.pull_zsmul, L.2.1.1, Point.pull_zero]
+  have hpqN : (N : ℤ) • pq = 0 := by rw [hpq, ← Point.pull_zsmul, L.2.1.2, Point.pull_zero]
+  -- Pull the section equations to `t`.
+  have hi : ((m 0 0).val : ℤ) • pp + ((m 1 0).val : ℤ) • pq = pp := by
+    have := congrArg (Point.pull X.curve t) h1
+    rwa [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp, ← hpq] at this
+  have hii : ((m 0 1).val : ℤ) • pp + ((m 1 1).val : ℤ) • pq = pq := by
+    have := congrArg (Point.pull X.curve t) h2
+    rwa [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp, ← hpq] at this
+  -- The rank-two basis at the geometric point, and the torsion submodule.
+  obtain ⟨e⟩ := X.curve.torsion_geometricFibre_rank_two N k t hk
+  set M := Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ) with hMdef
+  have hppM : pp ∈ M := (Submodule.mem_torsionBy_iff _ _).mpr hppN
+  have hpqM : pq ∈ M := (Submodule.mem_torsionBy_iff _ _).mpr hpqN
+  -- The candidate map `S c = (c 0).val • pp + (c 1).val • pq : M`.
+  have hmem : ∀ c : Fin 2 → ZMod N,
+      ((c 0).val : ℤ) • pp + ((c 1).val : ℤ) • pq ∈ M := fun c =>
+    add_mem (M.smul_mem _ hppM) (M.smul_mem _ hpqM)
+  set S : (Fin 2 → ZMod N) → M :=
+    fun c => ⟨((c 0).val : ℤ) • pp + ((c 1).val : ℤ) • pq, hmem c⟩ with hS
+  -- Surjectivity of `S` from the full-level condition.
+  have hSsurj : Function.Surjective S := by
+    intro w
+    have hwmem : (w : X.curve.Point t) ∈ AddSubgroup.closure {pp, pq} := by
+      have hwN : (N : ℤ) • (w : X.curve.Point t) = 0 := by
+        have := w.2; rwa [Submodule.mem_torsionBy_iff] at this
+      exact L.2.2 k t (w : X.curve.Point t) hwN
+    rw [AddSubgroup.mem_closure_pair] at hwmem
+    obtain ⟨j, l, hjl⟩ := hwmem
+    refine ⟨![(j : ZMod N), (l : ZMod N)], ?_⟩
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    rw [zsmul_eq_of_intCast_eq pp hppN (a := (((j : ZMod N)).val : ℤ)) (b := j)
+          (by simp [ZMod.natCast_val]),
+        zsmul_eq_of_intCast_eq pq hpqN (a := (((l : ZMod N)).val : ℤ)) (b := l)
+          (by simp [ZMod.natCast_val])]
+    exact hjl
+  -- Injectivity via the finite equiv `e`.
+  have hSinj : Function.Injective S :=
+    (Finite.injective_iff_surjective_of_equiv e.symm.toEquiv).mpr hSsurj
+  -- `S ![m00, m10] = ⟨pp,_⟩` and `S ![1,0] = ⟨pp,_⟩`; likewise the second column.
+  have hcol1 : S ![m 0 0, m 1 0] = ⟨pp, hppM⟩ := by
+    apply Subtype.ext
+    simpa only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] using hi
+  have hcol2 : S ![m 0 1, m 1 1] = ⟨pq, hpqM⟩ := by
+    apply Subtype.ext
+    simpa only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] using hii
+  have hval1 : ((1 : ZMod N).val : ℤ) = 1 := by simp [ZMod.val_one]
+  have hval0 : ((0 : ZMod N).val : ℤ) = 0 := by simp
+  have hbase1 : S ![1, 0] = ⟨pp, hppM⟩ := by
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+      one_zsmul, zero_zsmul, add_zero]
+  have hbase2 : S ![0, 1] = ⟨pq, hpqM⟩ := by
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+      one_zsmul, zero_zsmul, zero_add]
+  -- Injectivity forces the columns.
+  have heq1 : (![m 0 0, m 1 0] : Fin 2 → ZMod N) = ![1, 0] := hSinj (hcol1.trans hbase1.symm)
+  have heq2 : (![m 0 1, m 1 1] : Fin 2 → ZMod N) = ![0, 1] := hSinj (hcol2.trans hbase2.symm)
+  have e00 : m 0 0 = 1 := by have := congrFun heq1 0; simpa using this
+  have e10 : m 1 0 = 0 := by have := congrFun heq1 1; simpa using this
+  have e01 : m 0 1 = 0 := by have := congrFun heq2 0; simpa using this
+  have e11 : m 1 1 = 1 := by have := congrFun heq2 1; simpa using this
+  -- Conclude `g = 1`.
+  apply Units.ext
+  rw [Units.val_one, ← hm]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [Matrix.one_apply, e00, e10, e01, e11]
+
 /-! ### PART 0 (instantiation) — the `H`-action on the naive full-level problem -/
 
 section GammaH
@@ -377,7 +476,15 @@ theorem gammaFullNaive_freeAction (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) :
     ModuliProblem.FreeAction (gammaHAut R N H) := by
-  sorry
+  intro X hne γ hγ a hfix
+  rw [gammaHAut_app_val] at hfix
+  apply hγ
+  have hg1 : ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 :=
+    glSmul_eq_one_of_eq_self N hinv X hne _ a hfix
+  have hinv1 : (γ⁻¹ : ↥H) = 1 := by
+    apply Subtype.ext
+    rw [hg1, OneMemClass.coe_one]
+  rwa [inv_eq_one] at hinv1
 
 end GammaH
 
@@ -456,7 +563,10 @@ theorem gammaFullNaive_relRepData (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
     (X : EllObj R) :
     ∃ d : ModuliProblem.RelRepData (gammaFullNaiveProblem R N) X,
       IsFinite d.f ∧ Etale d.f := by
-  sorry
+  obtain ⟨eqv, hnat⟩ := YFull.exists_pointsEquiv_family R X N hinv
+  refine ⟨⟨YFull.fullLevelSpace X N, YFull.fullLevelSpaceStruct X N, @eqv, @hnat⟩,
+    YFull.isFinite_fullLevelSpaceStruct X N, ?_⟩
+  exact levelSpaceΓπ_etale X.curve N (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- **[GHA5] (H = 1 data, equivariantly)** Upgrade of [GHA4] along the generic
 transport [GHB1]: the full-level relative data carries the `gammaHAut`-action. -/
