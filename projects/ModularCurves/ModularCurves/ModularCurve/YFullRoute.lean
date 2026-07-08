@@ -686,7 +686,14 @@ theorem smooth_affine_of_representableBy {P : ModuliProblem R} {X₀ : EllObj R}
     (ha : IsAffineHom X₀.structMap) (X : EllObj R)
     (hX : Nonempty (P.RepresentableBy X)) :
     Smooth X.structMap ∧ IsAffineHom X.structMap := by
-  sorry
+  obtain ⟨r⟩ := hX
+  have e : X ≅ X₀ := r.uniqueUpToIso r₀
+  have hii : IsIso e.hom.baseHom :=
+    ⟨e.inv.baseHom, congrArg EllHom.baseHom e.hom_inv_id,
+      congrArg EllHom.baseHom e.inv_hom_id⟩
+  rw [← e.hom.base_w]
+  exact ⟨(MorphismProperty.cancel_left_of_respectsIso @Smooth _ _).mpr hs,
+    (MorphismProperty.cancel_left_of_respectsIso @IsAffineHom _ _).mpr ha⟩
 
 /-- **([YF-QSM], étale descent of smoothness — the KM 4.7.1 quotient step's geometry)**
 If `π` is étale and surjective and `π ≫ f` is smooth, then `f` is smooth ("smooth is
