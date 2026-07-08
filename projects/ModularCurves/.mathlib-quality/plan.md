@@ -273,9 +273,11 @@ Reply archived at `expert-review/2026-07-05/reply.md`; integration record at
    stabilizers; affine quotient via invariants; base change of invariants; gluing;
    quotients of rigidified problems; coarse statements). Phase 2 additionally gets
    N-Isog and cyclicity-as-closed-condition as named blocks (review Q8 list).
-8. **Stricter source gate — do not formalize from memory**: KM 2.3 ([N]), KM 2.8
-   (pairings), KM 4.7, KM 5–7, KM 8–10, KM 12–13. These tickets may state (from
-   [Loe]/[Hida] quotes) but not prove-from-KM until the full text is in `refs/`.
+8. **Source gate — LIFTED 2026-07-08**: the full KM text is now in
+   `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`. KM 2.3 ([N]), KM 2.8 (pairings),
+   KM 4.7, KM 5–7, KM 8–10, KM 12–13 may now be **proved-from-KM** — read the cited pages and
+   quote them verbatim (page + section); do not prove from memory. (Was: may state from
+   [Loe]/[Hida] quotes but not prove-from-KM until the full text is in `refs/`.)
 
 ### Revised spine (reviewer's A–N, adopted)
 
