@@ -22,11 +22,13 @@ transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean 
 2. **0h interrupt** the moment c5β signals 0c-ii → then the **endgame WITH c5β**: T-W7.12 →
    T-W7.36 (**T-W7a** — the group law on the model over every base; `abelEnrichment_exists`
    becomes `rfl`).
-3. **T-A3** (model smooth ⟺ Δ unit) — my lane's original chartwise tickets, now **LOAD-BEARING**:
-   fable-P4's engine (smooth half) AND Y₁(N)'s smoothness leg both consume it. Claim if 0h
-   hasn't fired (or after the endgame).
+3. **T-A3** (model smooth ⟺ Δ unit) — my lane's original chartwise tickets, now **doubly
+   LOAD-BEARING**: fable-P4's engine (smooth leaf 3) AND Y₁(N)'s smoothness leg both consume it.
+   **PROMOTE ABOVE the 0h wait if c5β's 0c-ii signal is slow (v10.53)** — T-A3 is independent of
+   0h and dispatchable in my own lane, so do NOT idle waiting on 0h when T-A3 is available.
 4. **Drafts / standby.** NOTE: [STREAM-GH] is **no longer mine** — p0/beastmode-B claimed the
-   first wave (GHB1/GHB3/GHA2/GHA4/GH2/GHC4) per v10.50.
+   first wave (GHB1/GHB3/GHA2/GHA4/GH2/GHC4) per v10.50. (v10.52 Y1-vi absorption RETRACTED —
+   a fresh worker took Y1.)
 
 Rebase note (P3b3-relevant, confirmed): T-W7.1b lives on **dev/modular-curves** (my branch),
 NOT `main` (the integration branch). Charter ends at **T-W7a**. Next session resumes on the
