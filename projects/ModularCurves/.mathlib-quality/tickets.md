@@ -1981,6 +1981,18 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     a4 = proper + smooth descend along the finite étale surjection;
     a5 = `localModel` (T-W7.1b's `VariableChange` cocycle + additive Hilbert 90 +
     `exists_unit_smul_eq_of_isLocalRing`, both PROVEN).
+- **★★ [T-Q2-BRIDGE] CLOSED (fable-P4, 2026-07-08, `ForMathlib/SchemeActionFree.lean`, axiom-clean)**
+  — the two halves of T-Q2 finally *meet*. `SchemeQuotient` proves the quotient from **geometric**
+  freeness (no `γ ≠ 1` fixes a `T`-point over nonempty `T`); `InvariantTorsor` proves the whole
+  KM A7.1.1 package from **algebraic** freeness (`IsFreeAlgebraAction`). The bridge:
+  `SchemeAction.isFreeAlgebraAction_of_free` — on a `G`-stable affine open `U`, a `γ`-invariant
+  ring point `φ : Γ(X,U) →ₐ[ℤ] R'` gives the `γ`-fixed scheme point
+  `Spec R' → Spec Γ(X,U) ≅ U ↪ X` (this *is* `specSMul_isoSpec_inv`), so `Spec R'` is empty —
+  impossible for `R'` nontrivial. Corollaries `finite_gamma_of_free`, `torsorMul_bijective_of_free`:
+  **every stable affine chart `U ⟶ U/G` is a finite `G`-torsor**, which is what [a3-ii]/[a4] consume.
+  Prerequisite landed: **[A711-UNIV]** — `IsFreeAlgebraAction`/`fixedPointsBaseChange` had
+  `R A : Type u`, so `R = ℤ` (what the scheme side uses) was ill-typed; generalised to
+  `(R : Type v) (A : Type u)` in `InvariantBaseChange.lean` + `InvariantTorsor.lean`.
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 
