@@ -469,6 +469,104 @@ noncomputable def translationEquiv (φ : A →ₐ[R] B) :
 @[simp] lemma translationEquiv_apply (φ : A →ₐ[R] B) (m : WithConv (A →ₗ[R] B) ⊗[R] A) :
     translationEquiv φ m = translationEndo φ m := rfl
 
+/-! ### The coevaluation unit `u` and Lemma 3.8.2 (T-D5e-core)
+
+`u = ∑ᵢ eᵢ' ⊗ eᵢ ∈ M` (`eᵢ` a basis of `A`, `eᵢ'` the dual coordinate pushed into `A'_B` via
+`R → B`) is Tate's coevaluation element `𝟙 ∈ G(A)`. Under `Ψ` it becomes the universal point
+`pointConv (includeRight)` of `T` — hence a **unit** (`isUnit_pointConv`). Tate's **Lemma 3.8.2**
+`τ(u) = u · (λ ⊗ 1)` becomes, after applying `Ψ`,
+`pointConv (rightTranslationAlgHom φ) = pointConv includeRight ⋆ pointConv (includeLeft ∘ φ)`,
+i.e. `∑ φ(a₍₁₎) ⊗ a₍₂₎ = ∑ φ(a₍₂₎) ⊗ a₍₁₎`: **cocommutativity** (`comm_comul`). -/
+
+/-- **(T-D5e-core — the coevaluation element `u = 𝟙 ∈ G(A)`.)** `∑ᵢ eᵢ' ⊗ eᵢ ∈ M`, with `eᵢ`
+the chosen basis of the finite free `A` and `eᵢ'` its dual coordinate embedded `R → B`. -/
+noncomputable def coev : WithConv (A →ₗ[R] B) ⊗[R] A :=
+  ∑ i, toConv (Algebra.linearMap R B ∘ₗ (Module.Free.chooseBasis R A).coord i) ⊗ₜ[R]
+    (Module.Free.chooseBasis R A) i
+
+/-- **(T-D5e-core, key A.)** `Ψ(u) = pointConv (includeRight)`: under the comparison iso the
+coevaluation is the universal point `a ↦ 1 ⊗ a` of `T` (dual-basis collapse `∑ᵢ eᵢ'(x) • eᵢ = x`). -/
+lemma psiAlgEquiv_coev :
+    psiAlgEquiv coev = pointConv (Algebra.TensorProduct.includeRight : A →ₐ[R] B ⊗[R] A) := by
+  apply WithConv.ext
+  ext x
+  rw [psiAlgEquiv_apply, coev, map_sum, WithConv.ofConv_sum, LinearMap.coeFn_sum,
+    Finset.sum_apply]
+  rw [ofConv_pointConv, AlgHom.toLinearMap_apply, Algebra.TensorProduct.includeRight_apply]
+  have : ∀ i, (psiLinearEquiv (toConv (Algebra.linearMap R B ∘ₗ
+      (Module.Free.chooseBasis R A).coord i) ⊗ₜ[R] (Module.Free.chooseBasis R A) i)).ofConv x
+      = (Module.Free.chooseBasis R A).repr x i • ((1 : B) ⊗ₜ[R] (Module.Free.chooseBasis R A) i) := by
+    intro i
+    rw [psiLinearEquiv_tmul_ofConv, WithConv.ofConv_toConv, LinearMap.comp_apply,
+      Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
+      (Module.Free.chooseBasis R A).coord_apply, TensorProduct.smul_tmul']
+  simp only [this]
+  conv_rhs => rw [← (Module.Free.chooseBasis R A).sum_repr x, TensorProduct.tmul_sum]
+  exact Finset.sum_congr rfl fun i _ => TensorProduct.smul_tmul _ _ _
+
+/-- `rightTranslationAlgHom φ a = ∑ φ(a₍₁₎) ⊗ a₍₂₎` in any Sweedler representation of `a`. -/
+lemma rightTranslationAlgHom_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*} (repr : Coalgebra.Repr R a ι) :
+    rightTranslationAlgHom φ a = ∑ i ∈ repr.index, φ (repr.left i) ⊗ₜ[R] repr.right i := by
+  rw [rightTranslationAlgHom, AlgHom.comp_apply,
+    show (Bialgebra.comulAlgHom R A) a = Coalgebra.comul a from rfl, ← repr.eq, map_sum]
+  exact Finset.sum_congr rfl fun i _ => by rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+
+/-- `translationEndo φ (f ⊗ a) = ∑ (φ(a₍₁₎) • f) ⊗ a₍₂₎` (convolution with the point-element is a
+scalar action; `f · ptS φ(a₍₁₎) = φ(a₍₁₎) • f`). -/
+lemma translationEndo_tmul_expand (φ : A →ₐ[R] B) (f : WithConv (A →ₗ[R] B)) (a : A) :
+    translationEndo φ (f ⊗ₜ[R] a)
+      = ∑ i ∈ (ℛ R a).index, (φ ((ℛ R a).left i) • f) ⊗ₜ[R] (ℛ R a).right i := by
+  rw [translationEndo_tmul, translationTarget_apply φ a (ℛ R a), Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+  congr 1
+  rw [pointAlgHom, AlgHom.comp_apply, IsScalarTower.toAlgHom_apply, mul_comm, ← Algebra.smul_def]
+
+/-- **(T-D5e-core generator formula.)** `Ψ(τ (f ⊗ a))(x) = (f(x) ⊗ 1) · (∑ φ(a₍₁₎) ⊗ a₍₂₎)` — the
+key that makes the coevaluation computation basis-free: `x` enters only through `f(x)`, and the
+right-translation `∑ φ(a₍₁₎) ⊗ a₍₂₎` is undivided. -/
+lemma psiAlgEquiv_translationEndo_tmul (φ : A →ₐ[R] B) (f : WithConv (A →ₗ[R] B)) (a x : A) :
+    (psiAlgEquiv (translationEndo φ (f ⊗ₜ[R] a))).ofConv x
+      = (f.ofConv x ⊗ₜ[R] (1 : A)) * rightTranslationAlgHom φ a := by
+  rw [psiAlgEquiv_apply, translationEndo_tmul_expand, map_sum, WithConv.ofConv_sum,
+    LinearMap.coeFn_sum, Finset.sum_apply, rightTranslationAlgHom_apply φ a (ℛ R a), Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [psiLinearEquiv_tmul_ofConv, Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+  congr 1
+  rw [WithConv.ofConv_smul, LinearMap.smul_apply, smul_eq_mul, mul_comm]
+
+/-- **(T-D5e-core, LHS of Lemma 3.8.2.)** `Ψ(τ u) = pointConv (rightTranslationAlgHom φ)`: applying
+`τ` to the coevaluation and pushing through `Ψ` gives the point `a ↦ ∑ φ(a₍₁₎) ⊗ a₍₂₎`, by the
+generator formula and the dual-basis collapse `∑ᵢ eᵢ'(x) • rightTranslation(eᵢ) = rightTranslation x`. -/
+lemma psiAlgEquiv_translationEndo_coev (φ : A →ₐ[R] B) :
+    psiAlgEquiv (translationEndo φ coev) = pointConv (rightTranslationAlgHom φ) := by
+  apply WithConv.ext
+  ext x
+  rw [ofConv_pointConv, AlgHom.toLinearMap_apply, coev, map_sum, map_sum, WithConv.ofConv_sum,
+    LinearMap.coeFn_sum, Finset.sum_apply]
+  have step : ∀ i, (psiAlgEquiv (translationEndo φ
+      (toConv (Algebra.linearMap R B ∘ₗ (Module.Free.chooseBasis R A).coord i) ⊗ₜ[R]
+        (Module.Free.chooseBasis R A) i))).ofConv x
+      = (Module.Free.chooseBasis R A).repr x i •
+          rightTranslationAlgHom φ ((Module.Free.chooseBasis R A) i) := by
+    intro i
+    rw [psiAlgEquiv_translationEndo_tmul, WithConv.ofConv_toConv, LinearMap.comp_apply,
+      Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
+      (Module.Free.chooseBasis R A).coord_apply, ← TensorProduct.smul_tmul', smul_mul_assoc,
+      ← Algebra.TensorProduct.one_def, one_mul]
+  simp only [step, ← map_smul, ← map_sum, (Module.Free.chooseBasis R A).sum_repr]
+
+/-- **(T-D5e-core, RHS of Lemma 3.8.2.)** `Ψ(λ ⊗ 1) = pointConv (includeLeft ∘ φ)`, the point
+`a ↦ φ(a) ⊗ 1` of `T`. -/
+lemma psiAlgEquiv_pointConv_tmul_one (φ : A →ₐ[R] B) :
+    psiAlgEquiv (pointConv φ ⊗ₜ[R] (1 : A))
+      = pointConv ((Algebra.TensorProduct.includeLeft : B →ₐ[R] B ⊗[R] A).comp φ) := by
+  apply WithConv.ext
+  ext x
+  rw [psiAlgEquiv_apply, psiLinearEquiv_tmul_ofConv, ofConv_pointConv, ofConv_pointConv,
+    AlgHom.toLinearMap_apply, AlgHom.toLinearMap_apply, AlgHom.comp_apply,
+    Algebra.TensorProduct.includeLeft_apply]
+
 end DeligneLeaf
 
 /-- **(Hopf core of Prop 3.8.1 = Lemma 3.8.2, Tate §3.8 p. 144 — SORRIED sub-ticket T-D5e-core.)**
