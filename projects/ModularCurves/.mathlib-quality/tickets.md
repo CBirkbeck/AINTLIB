@@ -5136,6 +5136,30 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
        (fc670a51), and `Scheme.Pullback.openCoverOfLeftRight (modelChartCover W) (modelChartCover W)`
        assembles the pieces into a cover of `E ×_R E`.
     Est. 150–250 lines. Everything below it (β3/β4) is unblocked by this one iso.
+  - **β1 CLOSED** (coordinator-P1, 2026-07-08T10:54Z, bb5c86d9, `AdditionChartSpec.lean`,
+    zero sorries, axiom-clean, no sorryAx — 111 lines, under the 150–250 estimate). BOTH
+    boarded obstacles resolved exactly as the route of record predicted, and both were
+    cheaper than feared:
+    · Obstacle 1: `chartAwayAlgebra := ((algebraMap (grade 0) Away).comp (gradeZeroRingEquiv W))
+      .toAlgebra`. With it `chartι_projModelπ` closes by `rw [awayι_projModelπ]` ALONE — the
+      `toAlgebra` structure is DEFEQ to the composite that lemma produces, so `pullbackSpecIso`
+      applies verbatim (no `RingHom.algebraMap_toAlgebra` massaging needed).
+    · Obstacle 2: `chartCoordAlgEquiv := AlgEquiv.ofRingEquiv (chartCoordEquiv W i)` whose
+      `commutes'` obligation is EXACTLY the repo's existing `chartCoordEquiv_mk_C`
+      (WeierstrassModel.lean:586). Zero new math. Built once — **β3 should consume this**.
+    · Deliverables: `chartPieceTensorIso`, `biChartRingAwayTensorEquiv`, **`chartPieceIso` :
+      pullback (chartι i ≫ π) (chartι j ≫ π) ≅ Spec (biChartRing W i j)**, `chartProductCover`
+      (`Scheme.Pullback.openCoverOfLeftRight` on `modelChartCover`).
+    **β3 and β4 are unblocked.** The triples and their on-curve theorems (7c9ddc07) now read as
+    regular functions on honest open subschemes of `E ×_R E`.
+  - **UPSTREAM CANDIDATES from c5β** (for the forming upstreaming lane, per the D2 dispatch):
+    · `ForMathlib/MonicQuotientDescent.lean` — `Polynomial.dvd_of_monic_of_map_dvd_map`;
+      `AdjoinRoot.mapRingHom`/`_mk`/`_injective`/`isDomain_of_monic_of_map` (**upstreaming this
+      would let mathlib SHORTEN an existing proof**: `Affine.CoordinateRing`'s `IsDomain`
+      instance hand-rolls exactly this descent); `HomogeneousLocalization.isDomain_away`
+      (the `IsDomain` sibling of mathlib-adjacent `Proj.isReduced_away`).
+    · `AdditionChartLadder.lean` — `MvPolynomial.quotientEquivQuotientMvPolynomial_symm_mk`
+      (a missing `symm`-apply lemma for an existing mathlib equiv).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
