@@ -55,3 +55,4 @@ import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.Moduli.MellWeierstrass
+import ModularCurves.Moduli.EngineDescent

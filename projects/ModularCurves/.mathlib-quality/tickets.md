@@ -1947,6 +1947,35 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   the residual dependency **T-W7.1b** (beastmode-A/P3b3) feeding (a5). fable-P4 now works
   [a1]→[a4] in order; (a5) assembles once T-W7.1b lands.
 
+### [T-E5c-ROUTE-A] leaves — Lean skeleton LANDED (`Moduli/EngineDescent.lean`, fable-P4, 2026-07-08)
+- **PROVEN, axiom-clean**: `RouteA.IsCurveAction` (the three `EllHom` axioms as a Prop) ·
+  `mem_range_zero_of_smul` / `mem_range_zero_of_smul_mem` (the **image of the zero section is
+  `G`-stable**, both ways) · **`orbit_mem_isAffineOpen_of_charts`** (the orbit-in-an-affine-open
+  hypothesis follows from just **two** charts — one containing the whole zero section, one
+  containing its complement; the dichotomy works precisely because the zero-section image is
+  stable) · **`exists_isStableOpen_isAffineOpen_of_orbit`** (⟹ the `G`-stable affine atlas of `E`
+  that `SchemeAction.quotient` consumes).
+  *This retires the Stacks-01ZY worry*: route (a) never needs "a finite set of points of a
+  quasi-projective scheme lies in an affine open".
+- **Open leaves** (theorem-level sorries with routed plans, no def-level sorry):
+  - **[a2-α]** `isAffineOpen_zeroComplement` — over an affine base, `E ∖ zero(X)` is affine.
+    Route: `IsAffineHom` is local at the target; `LocallyWeierstrass` gives `projModel W`
+    charts, and `projModel W ∖ [0:1:0]` is the affine Weierstrass curve (`Z ≠ 0` chart of
+    `Proj`); then `isAffine_of_isAffineHom`. **Canonical ⟹ automatically `G`-stable.**
+  - **[a2-β]** `exists_isAffineOpen_zeroSection` — an affine open containing the zero section,
+    given a section `s` disjoint from it (free in the bootstrap: `δ` = naive level `N` supplies
+    a universal point of exact order `N`). Route: translate `[a2-α]`'s chart by `τ_s`
+    (group law = T-W7), or use the `Y ≠ 0` chart of each `projModel W`.
+  - **[a3]–[a5]** `exists_ellipticCurveGeom_quotient` — the route-(a) descent theorem:
+    `∃ C' : EllipticCurveGeom (X/G), ∃ q : E ⟶ C'.E`, cartesian over `X → X/G` and compatible
+    with the zero sections (**exactly an `EllHom`**, which is what the engine consumes).
+    a3 = quotient + torsor-cartesianness (uses `torsorMul_bijective_of_isFreeAlgebraAction`);
+    a4 = proper + smooth descend along the finite étale surjection;
+    a5 = `localModel` (T-W7.1b's `VariableChange` cocycle + additive Hilbert 90 +
+    `exists_unit_smul_eq_of_isLocalRing`, both PROVEN).
+- **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
+  `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
+
 ### [T-Q6e GATE AUDIT] (fable-P4, 2026-07-08 — requested by v10.27 item (3)) — STAND BY, do not claim
 - **Gate 1 (T-Q2 / KM A7.1.1)**: torsor part **PROVEN**, finiteness **PROVEN**, unramified
   **PROVEN**; only `Algebra.Etale` (mathlib gap [A711-SM] + [A711-FP]) and A7.1.2 remain.
