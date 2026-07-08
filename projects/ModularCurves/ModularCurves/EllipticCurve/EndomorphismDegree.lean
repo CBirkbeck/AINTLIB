@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
+import ModularCurves.EllipticCurve.Rigidity
 
 /-!
 # The endomorphism ring, degree, and Hasse bound of `E/S` (KM Ch. 2, §§2.5–2.7)
@@ -50,6 +51,23 @@ noncomputable def endDual (f : E.asOver ⟶ E.asOver) : E.asOver ⟶ E.asOver :=
 *"there exists an integer, called trace(f), such that f + f^t = trace(f)."* Pinned by
 `endTrace_spec`. -/
 noncomputable def endTrace (f : E.asOver ⟶ E.asOver) : ℤ := sorry
+
+/-- **(T-END0a foundation — KM 2.5.1, PROVEN via `isMonHom_of_one_comp_eq'`)** Over a locally
+noetherian base, a **pointed** endomorphism of `E/S` (one fixing the group unit / zero section)
+is a monoid homomorphism: `μ ≫ f = (f ⊗ f) ≫ μ`. This is the additivity underlying the ring
+structure on `End(E/S)` (postcomposition by such `f` distributes over the pointwise group law).
+The `[IsLocallyNoetherian S]` hypothesis drops out when T-W7.8 (EGA IV §8 spreading-out) lands,
+per the T-E4a-noeth future-proofing pattern. KM (verbatim, Thm 2.5.1): *"any S-morphism
+f : E → E′ with f(0) = 0 is a homomorphism."* Reuses the sorry-free T-W7.7 rigidity engine
+(`isMonHom_of_one_comp_eq'`) + `EllipticCurveGeom.universallyOConnected`. -/
+theorem endMonHom [IsLocallyNoetherian S] (f : E.asOver ⟶ E.asOver)
+    (hη : η[E.asOver] ≫ f = η[E.asOver]) :
+    μ[E.asOver] ≫ f = MonoidalCategory.tensorHom f f ≫ μ[E.asOver] := by
+  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) (f := E.π)
+  haveI : IsProper E.asOver.hom := inferInstanceAs (IsProper E.π)
+  haveI : Flat E.asOver.hom := inferInstanceAs (Flat E.π)
+  haveI : IsSeparated E.asOver.hom := inferInstanceAs (IsSeparated E.π)
+  exact isMonHom_of_one_comp_eq' E.toEllipticCurveGeom.universallyOConnected f hη
 
 /-- **(T-END0b pin — KM 2.6.1)** The defining identity of the degree: `f^t ∘ f = [deg f]`. -/
 theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :

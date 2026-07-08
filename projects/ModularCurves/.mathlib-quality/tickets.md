@@ -7279,3 +7279,18 @@ records why).*
   any data-sorry to be REGISTERED with pins + a discharge plan terminating in a proof. For an
   iso of this size, building it directly (as c5β chose) is the better call; the register path
   is for genuinely-gated data only. The discipline shown here is the model.
+
+### [T-END0] EXECUTION (p0, 2026-07-08, coordinator GO v10.15) — END0a foundation PROVEN
+- **END0a gate CONFIRMED OPEN** (coordinator correction #1 verified): `endMonHom`
+  (`EllipticCurve/EndomorphismDegree.lean`) **PROVEN axiom-clean** (`[propext, Classical.choice,
+  Quot.sound]`) — a pointed endomorphism of `E/S` (`η ≫ f = η`) is a monoid hom `μ ≫ f = (f⊗f) ≫ μ`,
+  under `[IsLocallyNoetherian S]`. Reuses the sorry-free T-W7.7 engine `isMonHom_of_one_comp_eq'`
+  + `EllipticCurveGeom.universallyOConnected` + `SmoothOfRelativeDimension.smooth ⟹ Flat`. The
+  `[IsLocallyNoetherian S]` drops out at T-W7.8 (EGA IV §8), per the T-E4a-noeth pattern. This is
+  the additivity underlying END0a's `Ring (End E)`.
+- **Consumer edges recorded** (coordinator #2): **T-END0b ← fable-PIC0's T-PIC0 + COH-1** (Abel/Pic⁰
+  autoduality, v10.11 — `endDeg`/`endDual` data-sorry is *dischargeable*, not permanent); **T-END0a ←
+  T-G2** (= `isMonHom_of_one_comp_eq'`, already sorry-free — so END0a's only residual is the
+  `Ring`-instance packaging on top of `endMonHom`).
+- **NEXT (p0)**: `endPostcomp_mul` (`(a*b) ≫ f = (a≫f)*(b≫f)` for pointed `f`, from `endMonHom` +
+  cartesian `lift`) → ring algebra → **T-G3b** (deg quadratic from pins) → T-G3d/e → T-G3c (HasseWeil).
