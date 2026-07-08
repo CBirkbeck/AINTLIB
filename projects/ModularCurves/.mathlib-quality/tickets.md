@@ -5402,6 +5402,21 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     minors (dba3aa8c) finally get consumed; (b) the (i,j)-pieces agree (dehomogenisation
     compat); (c) assemble `blOpenY`/`blOpenZ` + `addOnY`/`addOnZ`, then the four
     `GroupLawConstruction.lean` sorries. Will FLAG before claiming 0c-ii (per v10.18/v10.22).
+  - **β4(a) DONE — THE MINORS ARE CONSUMED** (coordinator-P1, 2026-07-08T11:33Z, 389c933f,
+    `AdditionChartAgree.lean`, zero sorries, axiom-clean):
+    `lawOneTriple_mul_lawTwoTriple : lawOne m * lawTwo n = lawOne n * lawTwo m` for all m,n —
+    every 2×2 minor of the pair of triples vanishes over `biChartRing W i j`, i.e. the two B–L
+    laws are PROPORTIONAL wherever both are regular. This is the ring-level content of
+    `addOn_agree` (c3). No certificate re-proved: it is `addX_mul_dblAddY` / `addX_mul_dblAddZ` /
+    `addY_mul_dblAddZ` — **this ticket's FIRST commit (dba3aa8c)** — applied at the tautological
+    points (`equation_biChartPointFst/_Snd`). Diagonal cases `rfl`; reversed pairs `.symm`.
+    Component lemmas `law{One,Two}Triple_{zero,one,two}` are `rfl`.
+  - **RULE-3 COMMITMENT (v10.24) for β4(c)**: `addOnY`/`addOnZ`/`blOpenY`/`blOpenZ` are
+    chart-iso-scale definitions, so the glue increment ships, in the SAME commit, their opaque
+    interface — `_apply` (chart-level computation rule), injectivity/cancellation lemmas, and
+    `irreducible` — with consumers (0c-ii's `mulModelHom`, 0c-iii's specs) never touching the raw
+    glued term. Recorded now so the increment is planned around it, not retrofitted; b1's bill
+    (`T-W7.1b-faith-infra`) is the counterexample.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
