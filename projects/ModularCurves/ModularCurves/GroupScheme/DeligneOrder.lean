@@ -638,7 +638,39 @@ reduction below; everything else (factoring transport, `asSection` descent) is p
 theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
     (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (t : T) :
     (D.baseChange g).degree t = N := by
-  sorry
+  haveI := D.finite
+  haveI := D.flat
+  haveI : IsClosedImmersion (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  -- the base-changed total space `D ×_S T` is the pasted pullback of `D.subscheme → S ← T`;
+  -- its structure map (a closed immersion followed by `pullback.snd`) has the same fibre rank as
+  -- the original structure map at `g t`, so degree is base-change invariant.
+  have hsq := (IsPullback.of_hasPullback D.ideal.subschemeι
+    (pullback.fst E.π g)).paste_vert (IsPullback.of_hasPullback E.π g)
+  haveI hfin : IsFinite (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)
+      ≫ pullback.snd E.π g) := MorphismProperty.of_isPullback hsq D.finite
+  haveI hfl : Flat (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)
+      ≫ pullback.snd E.π g) := MorphismProperty.of_isPullback hsq D.flat
+  have hι : (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).ker.subschemeι
+      = inv (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).toImage
+        ≫ pullback.snd D.ideal.subschemeι (pullback.fst E.π g) := by
+    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+  show ((D.baseChange g).ideal.subschemeι ≫ (E.baseChange g).π).finrank t = N
+  have hstruct : (D.baseChange g).ideal.subschemeι ≫ (E.baseChange g).π
+      = inv (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).toImage
+        ≫ (pullback.snd D.ideal.subschemeι (pullback.fst E.π g) ≫ pullback.snd E.π g) := by
+    show (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).ker.subschemeι
+        ≫ pullback.snd E.π g = _
+    rw [hι, Category.assoc]
+  have h1 : Scheme.Hom.finrank
+        (inv (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).toImage
+          ≫ (pullback.snd D.ideal.subschemeι (pullback.fst E.π g) ≫ pullback.snd E.π g))
+      = Scheme.Hom.finrank
+          (pullback.snd D.ideal.subschemeι (pullback.fst E.π g) ≫ pullback.snd E.π g) :=
+    Scheme.Hom.finrank_comp_left_of_isIso _ _
+  have h2 := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsq t
+  rw [hstruct]
+  exact (congrFun h1 t).trans (h2.trans (hdeg (g t)))
 
 /-- **(Layer B, L1 + assembly — the box.)** Deligne's order theorem in the project's
 subgroup-divisor encoding, over an arbitrary base `S` and for an arbitrary `T`-point `Q`
