@@ -5731,6 +5731,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (`Scheme.Opens.inf` / `homOfLE` pullback iso); restrict the crux to
     `D(t_k) ⊓ D(t_l)`, where both `t_k` and `t_l` are invertible — precisely the crux's hypotheses
     (`hu`, `hv`). No new mathematics; instance/defeq plumbing only.
+  - **c4.2c step 2a DONE** (coordinator-P1, 2026-07-08T14:52Z): `blOpen{Y,Z}PieceFamily_inf` —
+    `D(t_k) ⊓ D(t_l) = (chartPieceIso).hom ⁻¹ᵁ D(t_k * t_l)` (via `PrimeSpectrum.basicOpen_mul`;
+    the preimage-of-inf is `rfl`). **This is the structural fact that makes the agreement
+    obligation the crux verbatim**: on the overlap `t_k * t_l` is invertible, hence both `t_k`
+    and `t_l` are — exactly the crux's `hu`/`hv`. Zero sorries, axiom-clean.
+    REMAINING in c4.2c: transport the crux across `specBasicOpenIsoAway` + `morphismRestrict` to
+    produce `glueMorphisms`' `hf` obligation, then `addOnY`/`addOnZ` per piece.
   - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
     against the code, not the board:
     · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
