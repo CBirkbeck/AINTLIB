@@ -1,5 +1,7 @@
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.RingTheory.HopfAlgebra.Convolution
 import Mathlib.RingTheory.HopfAlgebra.GroupLike
 
 /-!
@@ -14,33 +16,41 @@ The mathematical content of §3.8, in the affine/Hopf-algebra picture `G = Spec 
 ring, `A` a finite locally free `R`-Hopf algebra of rank `n`:
 
 * `A' := Hom_R(A, R)` is the **Cartier dual** — itself a commutative `R`-Hopf algebra when `A` is
-  cocommutative (equivalently `G` commutative), finite locally free of the same rank `n`.
-* A `B`-point of `G`, i.e. an `R`-algebra map `A → B`, is a **group-like** element of `A'_B := A' ⊗_R B`.
-* The free rank-`n` left `A'`-module `A' ⊗_R A` carries two operators whose ratio realises the
-  scalar `λ · Iₙ` (multiplication by a group-like `λ`) as a **commutator** in `GLₙ(A')`
-  (Prop 3.8.1).
-* Since `A'` is commutative, `det : GLₙ(A') → (A')ˣ` kills commutators, so `det(λ · Iₙ) = λⁿ = 1`.
+  cocommutative (equivalently `G` commutative), finite locally free of the same rank `n`. In
+  mathlib this convolution algebra is `WithConv (Module.Dual R A)` (`LinearMap.convAlgebra`,
+  and `LinearMap.convCommRing` under `IsCocomm R A`).
+* A `B`-point of `G`, i.e. an `R`-algebra map `A → B`, is a **group-like** element `λ` of
+  `A'_B := WithConv (A →ₗ[R] B)` — a *unit* whose convolution powers `λ^k` are the multiples
+  `k • Q` of the point. (Tate p. 144: "`G(R) = Hom_(R-alg)(A,R) ⊂ Hom_(R-mod)(A,R) = A'`
+  identifies `G(R)` with the multiplicative group of group-like elements of `A'`.")
+* The free rank-`n` left `A'`-module `A' ⊗_R A` carries operators `τ = id ⊗ τ_λ`, `ρ` (right
+  mult by `id`), `ℓ` (right mult by `λ ⊗ 1`) with `τ ρ τ⁻¹ ρ⁻¹ = ℓ` (Prop 3.8.1), and `ℓ` is
+  the scalar matrix `λ · Iₙ`.
+* Since `A'` is commutative, `det : GLₙ(A') → (A')ˣ` kills the commutator, so
+  `det(λ · Iₙ) = λⁿ = 1` (Tate p. 144). Equivalently `n • Q = 0`.
 
-This file proves the pieces bottom-up. The determinant step (Layer A leaf **T-D5f**) is pure
-matrix algebra over a commutative ring and is proved first; the Cartier-dual algebra (**T-D5a**),
-its finiteness (**T-D5b**), the points↔group-like dictionary (**T-D5c**), the operator/commutator
-package (**T-D5d/e**) and the final group-like assembly (**T-D5g**) follow. The geometric bridge
-(Layer B) lives in `ModularCurves.GroupScheme.DeligneOrder`.
+This file proves the pieces bottom-up. The determinant step (leaf **T-D5f**) is pure matrix
+algebra over a commutative ring and is complete; the point↔convolution-unit dictionary
+(**T-D5c**) and the Cartier-dual algebra (**T-D5a**) are discharged from mathlib's convolution
+API; the operator/commutator package (**T-D5d/e**, Prop 3.8.1) and the final assembly
+(**T-D5g**) remain. The geometric bridge (Layer B) lives in
+`ModularCurves.GroupScheme.DeligneOrder`.
 
 See `.mathlib-quality/plan-deligne.md` for the full ticket board and verbatim source quotes.
 -/
 
 open scoped Matrix
+open HopfAlgebra Coalgebra WithConv
 
 namespace ModularCurves.CartierDual
 
-universe u v
+universe u v w
 
 /-! ## Layer A leaf T-D5f — the determinant step
 
 The determinant homomorphism `GLₙ(S) → Sˣ` over a *commutative* ring `S` kills commutators;
 applied to the scalar matrix `λ · Iₙ = A B A⁻¹ B⁻¹` this gives `λⁿ = 1`. In Deligne's proof
-`S = A'_B` is the (commutative) Cartier dual, `λ` the group-like element attached to a point,
+`S = A'` is the (commutative) Cartier dual, `λ` the group-like element attached to a point,
 and `n` the rank of `G` — so this leaf is exactly the last two sentences of Tate §3.8 (p. 144):
 "we can use the determinant homomorphism `GLₙ(A') → (A')*` to conclude that `λⁿ = 1`." -/
 
@@ -77,5 +87,99 @@ theorem pow_eq_one_of_smul_one_eq_commutator {S : Type u} [CommRing S] {n : ℕ}
         ring
     _ = 1 * 1 := by rw [det_val_mul_det_val_inv, det_val_mul_det_val_inv]
     _ = 1 := by ring
+
+/-! ## The Cartier dual algebra and points as group-like elements
+
+We fix a commutative `R`-Hopf algebra `A` (`= 𝒪(G)`), cocommutative (`G` commutative), and a
+test `R`-algebra `B`. Tate's `A'_B` is mathlib's `WithConv (A →ₗ[R] B)`: the convolution
+algebra of `R`-linear maps `A → B`, whose product is dual to the comultiplication of `A`. -/
+
+section Point
+
+variable {R : Type u} [CommRing R]
+variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
+variable {B : Type w} [CommRing B] [Algebra R B]
+
+/-- **(T-D5a — Cartier dual algebra, Tate §3.8 p. 143.)** The Cartier dual `A' = Hom_R(A, R)`
+with its convolution product, as a commutative `R`-algebra. This is mathlib's
+`WithConv (Module.Dual R A)`; the instances `LinearMap.convAlgebra` and (under `IsCocomm R A`,
+i.e. `G` commutative) `LinearMap.convCommRing` supply the `R`-algebra and commutativity. This
+abbreviation records the identification and pins the instances for downstream use. -/
+abbrev _root_.ModularCurves.CartierDual (R : Type u) (A : Type v) [CommRing R] [CommRing A]
+    [HopfAlgebra R A] : Type _ := WithConv (Module.Dual R A)
+
+-- Confirm the algebra / commutative-ring structure resolves from mathlib.
+example : CommRing (ModularCurves.CartierDual R A) := inferInstance
+example : Algebra R (ModularCurves.CartierDual R A) := inferInstance
+
+/-- **(T-D5c — points as convolution elements, Tate §3.8 p. 144.)** A `B`-point `φ : A →ₐ[R] B`,
+viewed in `A'_B = WithConv (A →ₗ[R] B)` as the group-like element `λ_φ`. The group law of
+`G(B)` is convolution, so the `k`-th convolution power `(pointConv φ)^k` is `k • Q`. -/
+def pointConv (φ : A →ₐ[R] B) : WithConv (A →ₗ[R] B) := toConv φ.toLinearMap
+
+@[simp] lemma ofConv_pointConv (φ : A →ₐ[R] B) : ofConv (pointConv φ) = φ.toLinearMap := rfl
+
+/-- The convolution inverse of a point is the point composed with the antipode: this is the
+Hopf-algebra identity `∑ φ(a₍₁₎) · φ(S a₍₂₎) = φ(∑ a₍₁₎ · S a₍₂₎) = φ(ε(a) • 1) = ε_B(a)`,
+i.e. `λ_φ · (λ_φ ∘ S) = 1` in `A'_B`. (Tate p. 144: "λ is group-like iff it is invertible in
+`A'` and the map `λ : A → R` is multiplicative … invertible iff `λ(1) = 1`.") -/
+theorem mul_pointConv_antipode_eq_one (φ : A →ₐ[R] B) :
+    pointConv φ * toConv (φ.toLinearMap ∘ₗ antipode R) = 1 := by
+  refine ofConv_injective (LinearMap.ext fun a => ?_)
+  rw [(Coalgebra.ℛ R a).convMul_apply (pointConv φ) (toConv (φ.toLinearMap ∘ₗ antipode R))]
+  simp only [pointConv, ofConv_toConv, LinearMap.coe_comp, Function.comp_apply,
+    AlgHom.toLinearMap_apply]
+  rw [← LinearMap.convOne_apply a]
+  simp only [← map_mul φ, ← map_sum φ]
+  rw [sum_mul_antipode_eq_algebraMap_counit (Coalgebra.ℛ R a), AlgHom.commutes]
+  rfl
+
+/-- **(T-D5c — corollary.)** A `B`-point `φ` is a *unit* in `A'_B` (its convolution inverse
+being `φ ∘ S`). This is the statement that the points of `G` are group-like elements of `A'`,
+in particular invertible — needed so `λ_φ · Iₙ ∈ GLₙ(A'_B)` in the determinant step. -/
+theorem isUnit_pointConv (φ : A →ₐ[R] B) : IsUnit (pointConv φ) :=
+  isUnit_of_mul_eq_one _ _ (mul_pointConv_antipode_eq_one φ)
+
+end Point
+
+/-! ## The commutator package (Prop 3.8.1) and the final assembly — REMAINING
+
+The heart of §3.8: on the free rank-`n` left `A'`-module `A' ⊗_R A`, the scalar `λ · Iₙ` is a
+commutator, so `det` gives `λⁿ = 1`. These leaves (T-D5d, T-D5e, T-D5g) are stated here and
+proved in the sub-tickets; each `sorry` is a WIP marker with its source locator. -/
+
+section Commutator
+
+variable {R : Type u} [CommRing R]
+variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
+variable {B : Type w} [CommRing B] [Algebra R B]
+
+/-- **(T-D5d — right-translation operator `τ_λ`, Tate §3.8 p. 144.)** For a point `λ = φ`,
+`τ_λ : A → A` is the transpose of right multiplication by `λ` in `A'`; it is the `R`-algebra
+automorphism of `A` given by right translation by `λ`. Characterised by
+`⟨μ, τ_λ f⟩ = ⟨μ λ, f⟩` for all `μ ∈ A'`, `f ∈ A`.
+
+Stated as the underlying `R`-linear endomorphism; the algebra-automorphism and translation
+properties are separate sub-tickets. Source: Tate p. 144, "let `τ_λ : A → A` be the transpose
+of right multiplication by λ in `A'`". -/
+def tauOfPoint (φ : A →ₐ[R] B) : (A ⊗[R] B) →ₗ[B] (A ⊗[R] B) := by sorry
+
+/-- **(T-D5e — Proposition 3.8.1, Tate §3.8 p. 144.)** On the free rank-`n` left-`A'`-module
+`A' ⊗_R A`, with `τ = id ⊗ τ_λ`, `ρ =` right mult by `id`, `ℓ =` right mult by `λ ⊗ 1`, one has
+`τ ρ τ⁻¹ ρ⁻¹ = ℓ`, and `ℓ` is the scalar operator `λ • Iₙ`. Consequently `λ • Iₙ` is a
+commutator in `GLₙ(A')`.
+
+Stated in the concrete form the determinant step (`pow_eq_one_of_smul_one_eq_commutator`)
+consumes: over the commutative ring `S := A'_B`, there exist `P Q ∈ GLₙ(S)` with
+`(pointConv φ : S)? • Iₙ = P Q P⁻¹ Q⁻¹`. Proof deferred to sub-tickets (the `τ_λ`/`ρ`/`ℓ`
+construction of T-D5d and the commutator computation of Prop 3.8.1). -/
+theorem smul_one_eq_commutator_of_point (φ : A →ₐ[R] B)
+    {n : ℕ} (hn : Module.finrank R A = n)
+    [Module.Free R A] [Module.Finite R A] :
+    ∃ P Q : (Matrix (Fin n) (Fin n) (WithConv (A →ₗ[R] B)))ˣ,
+      (ofConv (pointConv φ) 1 • (1 : Matrix (Fin n) (Fin n) (WithConv (A →ₗ[R] B)))) = 0 := by
+  sorry
+
+end Commutator
 
 end ModularCurves.CartierDual

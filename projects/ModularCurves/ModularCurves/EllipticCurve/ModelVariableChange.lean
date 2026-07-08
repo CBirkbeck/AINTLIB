@@ -2546,6 +2546,150 @@ private lemma witness_combine_generic {A C : Type u} [CommRing A] [CommRing C]
       _ = _ := by rw [← map_pow, ← map_mul, ← map_mul, ← map_mul]
   exact hLHS.symm.trans (h1.trans hRHS)
 
+private lemma hom_fold_generic {A B : Type u} [CommRing A] [CommRing B]
+    (φ : A →+* B) (g t bu bv bΦ rt : A) (m K nk j n : ℕ)
+    (h : (g * t) ^ m * (bu * t ^ K * g ^ nk) =
+      (g * t) ^ m * (bΦ * rt ^ n * bv ^ n * g ^ j)) :
+    (φ g * φ t) ^ m * (φ bu * (φ t) ^ K * (φ g) ^ nk) =
+    (φ g * φ t) ^ m * (φ bΦ * (φ rt) ^ n * (φ bv) ^ n * (φ g) ^ j) := by
+  simpa only [map_mul, map_pow] using congrArg φ h
+
+private lemma equiv_fold_generic {A B : Type u} [CommRing A] [CommRing B]
+    (φ : A ≃+* B) (r rt u₀ v₀ bΦs ss : A) (m K nk j n : ℕ)
+    (hm : (r * rt) ^ m * (u₀ * rt ^ K * r ^ nk) =
+      (r * rt) ^ m * (bΦs * ss ^ n * v₀ ^ n * r ^ j)) :
+    (φ r * φ rt) ^ m * (φ u₀ * (φ rt) ^ K * (φ r) ^ nk) =
+    (φ r * φ rt) ^ m * (φ bΦs * (φ ss) ^ n * (φ v₀) ^ n * (φ r) ^ j) := by
+  simpa only [map_mul, map_pow] using congrArg φ hm
+
+private lemma witness_B_data {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (f' : W'.toAffine.CoordinateRing) (n : ℕ)
+    (hf' : overlapMap W' f' * algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W'))
+        (AdjoinRoot.root (infChartCubic W')) ^ n ∈
+      Set.range (algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W'))))
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    ∃ (g bu bv bΦ : AdjoinRoot (infChartCubic W)) (m K j k : ℕ),
+      g ∉ P ∧ bv ∉ P ∧
+      (overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
+        (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (infChartTElem W) ^ K = (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) bΦ) ∧
+      ((g * infChartTElem W) ^ m *
+          (bu * infChartTElem W ^ K * g ^ (n * k)) =
+        (g * infChartTElem W) ^ m *
+          (bΦ * AdjoinRoot.root (infChartCubic W) ^ n * bv ^ n * g ^ j)) := by
+  classical
+  obtain ⟨b'', hb''⟩ := hf'
+  obtain ⟨⟨bΦ, u⟩, hbΦ0⟩ := IsLocalization.surj (Submonoid.powers (infChartTElem W))
+    (overlapMap W (pointedIsoCoordEquiv e heπ hez f'))
+  obtain ⟨K, hK⟩ := u.2
+  rw [← hK] at hbΦ0
+  rw [map_pow] at hbΦ0
+  obtain ⟨r, hr, hrP, v, hv⟩ := exists_basicOpen_transport_root_unit_mul e hez P ht
+  have hEQ := witness_eq_V' e heπ hez f' b'' n hb'' hr bΦ K hbΦ0
+  have hα := witness_res_unit_root e hr v hv
+  obtain ⟨u₀, j, hu₀⟩ := res_numerator_generic
+    (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos) r
+    ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+      (infChartTElem W))).le.trans inf_le_left)
+    ((projModel W).basicOpen_le
+      (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))
+    (pointedIsoChartTransport e hr b'')
+  have hu₀' : pointedIsoChartTransport e
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr)) b'' *
+      (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+        (r ^ j) =
+      (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom) u₀ := by
+    refine (congrArg (· * (((projModel W).presheaf.map (homOfLE
+      ((projModel W).basicOpen_le (r * (chartYSectionsRingEquiv W).symm
+        (infChartTElem W)))).op).hom) (r ^ j))
+      (pointedIsoChartTransport_res e hr ((Scheme.basicOpen_mul (projModel W) r
+        ((chartYSectionsRingEquiv W).symm (infChartTElem W))).le.trans
+        inf_le_left) b'').symm).trans ?_
+    exact hu₀
+  haveI := (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).isLocalization_basicOpen r
+  obtain ⟨v₀, k, hv₀, hv₀P⟩ := unit_numerator_generic
+    (S := ↑Γ(projModel W, (projModel W).basicOpen r)) r v
+  have hv₀' : (((projModel W).presheaf.map (homOfLE ((Scheme.basicOpen_mul
+      (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans inf_le_left)).op).hom) ↑v *
+      (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+        (r ^ k) =
+      (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom) v₀ := by
+    have hres := congrArg ((((projModel W).presheaf.map (homOfLE
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans inf_le_left)).op).hom)) hv₀
+    have hexp := (map_mul ((((projModel W).presheaf.map (homOfLE
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans inf_le_left)).op).hom)) (↑v)
+      ((algebraMap _ _) (r ^ k))).symm.trans hres
+    refine ?_
+    have hf1 := res_algebraMap_fuse_generic r
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans inf_le_left)
+      ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W))) (r ^ k)
+    have hf2 := res_algebraMap_fuse_generic r
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans inf_le_left)
+      ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W))) v₀
+    exact ((congrArg₂ (· * ·) rfl hf1).symm.trans (hexp.trans hf2))
+  have hcomb := witness_combine_generic
+    (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+      (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+    (pointedIsoChartTransport e
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr)) b'')
+    (pointedIsoChartTransport e
+      ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+        (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr))
+      (AdjoinRoot.root (infChartCubic W')))
+    ((((projModel W).presheaf.map (homOfLE ((Scheme.basicOpen_mul (projModel W) r
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W))).le.trans
+      inf_le_left)).op).hom) ↑v)
+    ((chartYSectionsRingEquiv W).symm (infChartTElem W)) r
+    ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)))
+    ((chartYSectionsRingEquiv W).symm bΦ) u₀ v₀ n K j k hEQ hα hu₀' hv₀'
+  obtain ⟨m, hm⟩ := res_eq_pull_generic
+    (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos)
+    (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)) hcomb
+  have hBfold := equiv_fold_generic (chartYSectionsRingEquiv W) r
+    ((chartYSectionsRingEquiv W).symm (infChartTElem W)) u₀ v₀
+    ((chartYSectionsRingEquiv W).symm bΦ)
+    ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)))
+    m K (n * k) j n hm
+  rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply,
+    RingEquiv.apply_symm_apply] at hBfold
+  -- bv ∉ P
+  have hbvP : chartYSectionsRingEquiv W v₀ ∉ P := by
+    intro hbv
+    exact (hv₀P (Ideal.comap ((chartYSectionsRingEquiv W) :
+        ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) →+*
+        AdjoinRoot (infChartCubic W)) P)
+      (Ideal.IsPrime.comap _)
+      (fun hr' => hrP (Ideal.mem_comap.mp hr'))) (Ideal.mem_comap.mpr hbv)
+  exact ⟨chartYSectionsRingEquiv W r, chartYSectionsRingEquiv W u₀,
+    chartYSectionsRingEquiv W v₀, bΦ, m, K, j, k, hrP, hbvP, hbΦ0, hBfold⟩
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
@@ -2571,7 +2715,55 @@ lemma pointedIso_exists_witness {W W' : WeierstrassCurve R}
           (AdjoinRoot.root (infChartCubic W)) ^ n) ∈
       Set.range (algebraMap (AdjoinRoot (infChartCubic W))
         (Localization.Away (infChartTElem W))) := by
-  sorry
+  obtain ⟨g, bu, bv, bΦ, m, K, j, k, hgP, hbvP, hbΦ0, hBfold⟩ :=
+    witness_B_data e heπ hez f' n hf' P ht
+  refine ⟨g ^ (m + j) * bv ^ n, ?_, ?_⟩
+  · intro hc
+    rcases (inferInstance : P.IsPrime).mem_or_mem hc with h1 | h2
+    · exact hgP ((inferInstance : P.IsPrime).mem_of_pow_mem _ h1)
+    · exact hbvP ((inferInstance : P.IsPrime).mem_of_pow_mem _ h2)
+  · refine ⟨g ^ (m + n * k) * bu, ?_⟩
+    have hLoc0 := hom_fold_generic (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g (infChartTElem W) bu bv bΦ
+      (AdjoinRoot.root (infChartCubic W)) m K (n * k) j n hBfold
+    have hUt : IsUnit ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (infChartTElem W)) :=
+      IsLocalization.map_units (M := Submonoid.powers (infChartTElem W)) _
+        ⟨infChartTElem W, 1, pow_one _⟩
+    have hDfold : (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (g ^ (m + n * k) * bu) =
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) bu := by
+      rw [map_mul, map_pow]
+    have hcfold : (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (g ^ (m + j) * bv ^ n) =
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) bv) ^ n := by
+      rw [map_mul, map_pow, map_pow]
+    refine hDfold.trans ?_
+    have hgoal : ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) bu =
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) bv) ^ n *
+        (overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
+          (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (AdjoinRoot.root (infChartCubic W)) ^ n) := by
+      refine ((hUt.pow (m + K)).mul_left_cancel ?_)
+      linear_combination -(((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))) (infChartTElem W)) ^ m *
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))) g) ^ (m + j) *
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))) bv) ^ n *
+        ((algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)))
+          (AdjoinRoot.root (infChartCubic W))) ^ n) * hbΦ0 + hLoc0
+    refine hgoal.trans ?_
+    rw [hcfold]
 
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed

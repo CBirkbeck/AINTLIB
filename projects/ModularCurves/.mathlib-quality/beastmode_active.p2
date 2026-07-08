@@ -1,1 +1,1 @@
-FOCUS: BB-DELIGNE T-D5f — det kills commutator ⟹ λ^n=1 (Tate §3.8 determinant step). Writing ForMathlib/CartierDual.lean; proving the pure-matrix lemma first, then Cartier-dual layer.
+FOCUS: BB-DELIGNE Layer A — CartierDual.lean. T-D5f DONE (det step, axiom-clean). Now writing skeleton: T-D5a (A'=WithConv(Dual R A) comm algebra, mathlib), T-D5c (pointConv φ is convolution-unit via antipode, proving via sum_mul_antipode_eq_algebraMap_counit + AlgHom.commutes), sorrying T-D5d/e (tau_lambda, Prop 3.8.1 commutator) + T-D5g assembly. Source: Tate §3.8 pp.143-145 (read).
