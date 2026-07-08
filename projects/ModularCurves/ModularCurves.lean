@@ -23,5 +23,6 @@ import ModularCurves.EllipticCurve.AdditionChartRing
 import ModularCurves.EllipticCurve.AdditionChartLadder
 import ModularCurves.EllipticCurve.AdditionChartDomain
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
