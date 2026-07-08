@@ -1715,6 +1715,37 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   counterexample (KM A.4.1.3, verbatim in the quotes file) proves `𝒫̃` is a strictly weaker
   object than `𝒫` — so it is genuinely a second definition, not a synonym. Cut only on demand.
 
+### [T-Q2-A711] KM A7.1.1 — free action ⟹ finite étale `G`-torsor (gate 1 of the KM 4.7 engine)
+- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-08T11:30Z (Q-lane restaff, v10.4(iii);
+  the genuine next-in-lane — see the RESTAFF REPORT under v10.4) · **File**:
+  `ForMathlib/InvariantTorsor.lean` · **Type**: 2 theorems (+ A7.1.2 corollary) ·
+  **Blocks**: T-Q6e = **T-E5c** = the KM 4.7 ⇐ engine ⟹ T-E5 ⟹ T-E9/T-H6.
+- **Statements** (already in-file, statement-only per T-Q2's scope, `sorry`):
+  `torsorMul_bijective_of_isFreeAlgebraAction` (free ⟹ `A ⊗_{Aᴳ} A ≅ ∏_G A`, i.e. `Spec A`
+  is a `G`-torsor over `Spec Aᴳ`) and `Algebra.Etale.of_isFreeAlgebraAction`; then
+  `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` (A7.1.2) follows.
+- **Source**: KM Appendix A7.1.1 (book pp. 215–218, pdf 226–229 — quotes already banked in
+  T-Q4e). KM defers the proof to **SGA III Exp. V Thm 4.1** and warns: *"In the absence of
+  noetherian hypotheses, this is rather delicate."* SGA is NOT in refs ⟹ **do not prove from
+  memory**; the classical published route is Chase–Harrison–Rosenberg / Auslander–Goldman
+  (Galois theory of commutative rings): the "free action" hypothesis is exactly CHR's
+  condition (for every prime `𝔭` of `A` and `g ≠ 1` there is `a` with `a − g(a) ∉ 𝔭`), which
+  is equivalent to `A/Aᴳ` being a Galois extension with group `G`, and then
+  `A ⊗_{Aᴳ} A ≅ ∏_G A` is CHR Thm 1.3 (a ⟺ b ⟺ c).
+- **MATHLIB SCOPING (fable-P4, 2026-07-08)**: mathlib has **`RingTheory/IsGaloisGroup`**
+  (`Defs.lean` + `Basic.lean`) and **`RingTheory/Invariant/{Defs,Basic,Galois,Profinite}.lean`
+  (`Algebra.IsInvariant`)**. But `IsGaloisGroup G A B := faithful + SMulCommClass +
+  Algebra.IsInvariant` is the *fixed-ring* condition, **strictly weaker** than KM's free
+  action, and I found **no** `A ⊗_{Aᴳ} A ≅ ∏_G A` comparison and **no** étaleness result there.
+  ⟹ First act at pickup: read `Invariant/Galois.lean` end-to-end (it may already contain the
+  CHR equivalence under another name) and only then decide: (α) instantiate mathlib, or
+  (β) prove CHR Thm 1.3 in ForMathlib (est. 300–600 lines, standard, bounded — the
+  idempotent/separability-element argument), or (γ) OWNER ACTION: acquire CHR (Trans. AMS 52,
+  1965) or SGA III into `refs/` (the RR-only rule forbids assuming it).
+- **Do not** re-derive the *scheme*-level quotient: `SchemeAction.quotient` +
+  `existsUnique_quotientπ_lift` (T-Q5) are proven and sorry-free; this ticket is the
+  *algebra*-level torsor/étale input that turns that quotient into a **torsor**.
+
 ### [T-E-OMEGA] the invariant differential `ω_{E/S}` — GAP TICKET (cut 2026-07-08, fable-P4)
 - **Status**: open, unclaimed · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
   **Blocks**: T-E12, T-E13, T-E14 ⟹ T-E5e ⟹ T-E5f ⟹ **the `ℤ[1/2]`-half of KM 4.7** ·
@@ -4103,7 +4134,10 @@ mathlib (the gap is real): any `MulSemiringAction` contact with `AlgebraicGeomet
 - **[T-Q5]** gluing affine quotients (quasi-projective case; [Loe] 3.6.1 full
   statement): orbits-in-affines via quasi-projectivity; glue the `Spec(A_i^G)`;
   S-relative + `Over S` packaging of the universal property.
-  - **Status**: done (2026-07-06T22:28Z) · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
+  - **Status**: **DONE, all four leaves** (2026-07-06T22:28Z; re-verified sorry-free + green
+    by fable-P4 2026-07-08 — `quotient`/`quotientπ`/`existsUnique_quotientπ_lift` are all
+    present in `ForMathlib/SchemeQuotient.lean`; the "REMAINING LEAVES: T-Q5c + T-Q5d" note
+    below is STALE — they landed) · **Claimed**: beastmode-Q, 2026-07-06T16:58Z
   - **T-Q5a DONE** (2026-07-06T17:10Z): ForMathlib/SchemeQuotient.lean —
     `SchemeAction` (two-law σ-family + derived `isIso_hom`), `SchemeAction.spec`
     (the specSMul instance), `IsStableOpen`, and the Γ-bridge
@@ -7119,6 +7153,26 @@ union of n(Γ) sections … n(Γ) = #(Hom Surj((Z/NZ)², Z/NZ)/±Γ)."*
   then **T-Q6** (quotients of rigidified problems — the KM 4.7 ⇐ feeder), plus the T-Q4e
   phase-2 remainder if quick. v9.2 is binding: this is the Q-finite minimal API (NOT deferred);
   keep it severed from the W-stack torsor machinery.
+- **RESTAFF REPORT (fable-P4, 2026-07-08T10:40Z) — the dispatch's (iii) ordering is STALE:**
+  1. **T-Q5 is DONE, not next-in-lane.** `ForMathlib/SchemeQuotient.lean` is **sorry-free and
+     green** and already contains the *global* object: `SchemeAction.quotient` (via
+     `Scheme.GlueData`), `quotientπ`, `quotientπ_hom_ext`, `exists_quotientπ_lift`,
+     **`existsUnique_quotientπ_lift`** — i.e. T-Q5c and T-Q5d both landed (the ticket body
+     still lists them as "REMAINING LEAVES"; corrected there). AG-QUOT is discharged in the
+     stable-affine-cover generality. Nothing to pick up.
+  2. **T-Q6's only remaining sorry is T-Q6e** = `representable_of_rigid_of_torsor`
+     (QuotientProblem.lean:773) = **the KM 4.7 engine** = **T-E5c** of my new T-E5
+     decomposition. It is **double-gated, both gates still open**:
+     · **gate 1** = T-Q2 / KM A7.1.1: `ForMathlib/InvariantTorsor.lean` still has 10 sorries
+       — `torsorMul_bijective_of_isFreeAlgebraAction` (free action ⟹ `A ⊗_{Aᴳ} A ≅ ∏_G A`)
+       and `Algebra.Etale.of_isFreeAlgebraAction`, both statement-only per T-Q2's scope;
+     · **gate 2** = stream-DESC: `levelledCurve_descent_of_torsor` (Stack.lean:68) sorried.
+     So T-Q6 cannot be "worked next" as written; **its critical path runs through gate 1**.
+  3. **T-Q4e** is a statements-only ticket ("cut when a consumer demands them") — not a proof
+     target yet.
+  ⟹ **fable-P4 claims gate 1 as [T-Q2-A711]** (below), the genuine next-in-lane on the
+  KM-4.7-⇐ critical path, consistent with the dispatch's stated intent ("T-Q6 — the KM 4.7 ⇐
+  feeder").
 - **Order**: (i)+(ii) first (independent, unblocks T-E5 planning), then (iii).
 - fable-P4's named alternative T-H5-forward stays second-choice (v10.7) — this dispatch wins on
   the v9 "keep marginal workers on the core Y₁(N)/Y(N) path" directive.
