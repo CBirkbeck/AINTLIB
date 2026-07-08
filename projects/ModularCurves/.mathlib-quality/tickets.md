@@ -2847,8 +2847,14 @@ DS-register unchanged; `#print axioms` audit.
     locally noetherian bases (Loeffler/KM lose nothing on the Y(N) path; all
     representing objects are finite type over `Spec R`) ⟹ the whole cluster discharges
     NOW via the C-chain; or (b) keep arbitrary bases and park the cluster behind
-    T-W7.8. Meanwhile-dispatchable either way: `pullSection_add` under
-    `[IsLocallyNoetherian X.base]` as a standalone (comparison-iso + C3′, ~150 lines).
+    T-W7.8. **OWNER DECIDED (2026-07-08): (b) — keep arbitrary bases.** The functor-law
+    sorries stay parked behind T-W7.8; fable-P4 executes the future-proof piece:
+    **[T-E4a-noeth]** `pullSection_add_of_isLocallyNoetherian` (claimed fable-P4
+    2026-07-08T09:55Z) — the comparison iso `X.curve.E ≅ pullback` is pointed
+    (zero_w + isoPullback), C3′ (`isMonHom_of_one_comp_eq'` = GME 2.2.5 over loc-noeth,
+    instances: proper record-field, Flat via smooth, hO := r-supply, sep via proper)
+    makes the transport additive, the bc-side is additive by the T-H2b dictionary +
+    `pull_add`, and injectivity of the transport closes.
 - **[T-H4]** `gammaHNaive_relativelyRepresentable` (Loeffler 3.8.2; Weil-pairing open
   locus for H = 1, quotient for general H). Depends: T-C0/T-C1, stream Q, T-D18.
 - **[T-H5]** `gammaHNaive_rigid_iff` (Loeffler 3.8.3, torsion-free preimage in SL₂(ℤ)).
