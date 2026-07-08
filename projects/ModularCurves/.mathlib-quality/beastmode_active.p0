@@ -1,1 +1,1 @@
-FOCUS: T-D6b re-assess vs landed comap_mul (ForMathlib/IdealSheafComapMul.lean); if still gated → rebox+return to open → pivot to T-KMQ (⧗KM quote sweep)
+FOCUS: T-KMQ DONE (ledger banked in tickets.md; 3 closed T-A2/B2/B7, rest reclassified non-KM-gated). NEXT: [T-END0] v10.5 — first act /develop --decompose on KM Ch.2 End(E/S)/deg (unless p2 claimed it)

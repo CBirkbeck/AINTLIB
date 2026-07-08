@@ -6607,7 +6607,7 @@ PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 | beastmode-A | T-W7.1b owner (b1/b2 done); coordination tail | GO given — v10.1 |
 | D2 | T-ACYC (00MZ/00MYW running, 00N0 queued) → B–E cores → T-RB | active — **do not disturb** |
 | p2 (=beastmode-P2) | BB-DELIGNE T-D5e, isolating to Lemma 3.8.2 | active — source acquisition v10.6 |
-| p0 | T-D6b assessment (no proof written) | REDIRECTED — v10.2 |
+| p0 | T-D6b reboxed→open; **T-KMQ DONE** (ledger banked, 3 closed) | → [T-END0] v10.5 (first act: `/develop --decompose`) |
 | fable-P4 | idle after T-E4a-noeth ("awaiting instruction") | DISPATCHED — v10.4 |
 | beastmode-H | PHASE-8 terminal (C/H lanes drained) | resume target — v10.3 |
 | beastmode-Q | quiet since 07-07T15:03 (T-W3b/c, T-W5, T-Q1–Q4 done) | lane restaffed — v10.4(iii); its bare `beastmode_active` sentinel is STALE (says "T-W3c cut"; T-W3c is DONE) — ignore, do not claim from it |
@@ -6656,6 +6656,140 @@ PUSHED (`66300bb4..5f4829dc`, 238 commits).*
   *closed* / *KM-quoted, still gated by <non-KM dependency>*.
 - **After T-KMQ**: p0 takes [T-END0] (v10.5) unless p2 has freed up first (P2 has right of
   first refusal on the END stream — it closes their own T-G3 box).
+
+### [T-KMQ] COMPLETE — the ⧗KM quote-debt ledger + reclassification (p0, 2026-07-08)
+
+**Deliverable of the v10.2 pivot.** Every ⧗KM-marked target ticket read against the full KM PDF
+(`refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`, offset PDF = print + 11). Verbatim
+quotes (page + §) banked below; each Lean statement confirmed to match the source (drift/locator
+caveats flagged per the v9 protocol — flagged, NOT silently fixed). The global gate note (line
+~2827) already redefined `⧗KM` = "cite the real text", so the markers stay; this ledger IS the
+citation. T-C1 (KM 2.8, →beastmode-H v10.3) and T-E5 (KM 4.7 headline, →fable-P4 v10.4) are
+dispatched separately and excluded.
+
+#### Reclassification table
+
+| Ticket | Decl | KM § banked | Proof status | Classification |
+|---|---|---|---|---|
+| T-A2 | `projModel`/`projModel_points` (DS1) | 2.2.5.1 | done, sorry-free | **CLOSED** (quote-only; real proof [Loe] 3.3.3 / [Sil] III.3) |
+| T-A4 | `isWeierstrassModel_unique` | 2.2.5 | sorried (torsor form) | KM-quoted; gated by **BB-RR** proof (v9.4 torsor form, workable — non-KM) |
+| T-A6 | `abelEnrichment_exists`/`_unique` | 2.1.2 (Abel) | open (deep) | KM-quoted; gated by the **7-box Abel/Pic⁰** canonicity project (non-KM; deferred) |
+| T-B2 | `muNGrpObj`, `muNPointsEquiv` | 1.12.1 / 1.12.2 | done, sorry-free | **CLOSED** (KM 1.12 attribution-only) |
+| T-B4 | E[N] flf rank N² | 2.3.1 (+ 2.3.2) | done-mod-boxes | KM-quoted; gated by **BB-FLAT** register box (non-KM) |
+| T-B5y | `mulByHom_formallyUnramified` | 2.3.2 (Lie variant) | **blocked** | KM-quoted; gated by **AG-Ω mathlib gap** (no relative-differentials sheaf API) |
+| T-B7 | `muNπ_etale_iff` | 1.12 (attribution) | done, sorry-free | **CLOSED** (KM 1.12 attribution-only; content standard) |
+| T-D8 | `isFullLevel_iff_naive` | 3.1.1-2 + 3.7.1 / Cor 3.7.2 | done-mod-box | KM-quoted; gated by **T-D8-bridge box + T-B6** (non-KM) |
+| T-D9 | `isGammaOne_iff_naive` | 3.2 | done | (bonus) KM 3.2 = "point of exact order N"; rests on D5/D6 boxes |
+| T-D10 | `isGammaZero_iff_fppf` | 3.4.2, 6.1.1, 3.7.1 (p.105) | stmt done, proof ⧗-gated | KM-quoted; gated by **KM 3.7.1 étale-descent representability** proof ([T-D10-proof], v10.7) |
+| T-E9 | `gammaFullNaive_representable` | **4.7.2** + 5.1.1 | open | KM-quoted (4.7.2 = Y(N) smooth affine /ℤ[1/N], N≥3 — the exact statement); gated by **T-E5 / explicit route + T-C1 + T-D8** (non-KM) |
+| T-SG3 | cyclicity closed condition | 6.4.1 | statement-level | KM-quoted; gated by **flattening-stratification** impl (non-KM) |
+| T-H8/H9 | `gammaOneDrinfeld_representable` &c. | 4.7.0/4.7.1/4.7.2 + 5.1.1 | sorried | KM-quoted (4.7.0 = representable⟺rigid); gated by **T-W7 memberships + T-G3** rigidity (non-KM) |
+| T-M1 | `jLine_coarse_points` | 8.2.1 + 8.1.3.1 | sorried | KM-quoted; gated by **coarse-moduli machinery** (non-KM) |
+| T-IRR | BB-IRR (geom. irreducibility) | 10.9.2 (+10.1, 10.9.1) | black box | KM-quoted; **BB-IRR** black-boxed for consumers (plan §; the 10.9.2 proof = transcendental H/Γ̃) |
+
+**Net: 3 tickets CLOSED (T-A2, T-B2, T-B7 — quote-only debt paid); the rest KM-quoted and
+reclassified as gated by explicitly NON-KM dependencies (or a mathlib gap).** No ⧗KM ticket
+remains blocked "waiting for KM".
+
+#### Banked verbatim quotes (page + §)
+
+**KM 1.12.1** (print p.55, PDF 66) — T-B2/T-B7: *"We denote by μ_N/Z the group-scheme 'N'th roots
+of unity', i.e., μ_N = G_m[N]."* **Lemma 1.12.2** (print p.55, PDF 66): *"Over any scheme S, (μ_N)_S
+is the unique closed S-subgroup-scheme of (G_m)_S which is finite flat over S of finite presentation
+and of rank N."* (μ_N-points ↔ roots of unity is packaged in μ_N = G_m[N].)
+
+**KM Theorem 2.1.2 (Abel)** (print p.63, PDF 74) — T-A6: *"There exists a unique structure of
+commutative group-scheme on E/S such that for any S-scheme T, and any three points P, Q, R in
+E(T), we have P + Q = R if and only if there exists an invertible sheaf L₀ on T and an isomorphism
+I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0) ≃ I⁻¹(R) ⊗ f_T*(L₀)."* ("unique structure" = existence + canonicity; the
+identity is the fixed section "0" of setup 2.1.1.)
+
+**KM 2.2.5** (print p.68–69, PDF 79–80) — T-A4: adapted bases — *"f_*(I⁻²(0)) is free on 1, x with
+x uniquely determined up to x ↦ x + a … f_*(I⁻³(0)) is free on 1, x, y with y uniquely determined
+up to y ↦ y + ax + b … We say that such x, y are 'adapted to ω'."* (Uniqueness for a FIXED ω = the
+u=1 subfamily of `VariableChange` — exactly the v9.4 torsor form.) **KM 2.2.5.1** (print p.69, PDF
+80) — T-A2: *"y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆ … the affine ring H⁰(E−{0}; O) … is none other
+than A[x,y]/(this Weierstrass equation)."*
+⚑ LOCATOR CAVEAT (not drift): a close-out citing "[KM] 2.2" for the *definition* of a generalized
+Weierstrass equation should cite **2.2.5.1** (print p.69); the §2.2 opening (2.2.1, p.67) defines
+ω_{E/S} = f_*Ω¹, not the equation.
+
+**KM Theorem 2.3.1** (print p.73, PDF 84) — T-B4: *"the S-homomorphism 'multiplication by N' [N]:E→E
+is finite locally free of rank N². If N is invertible on S, its kernel E[N] is finite etale over S,
+locally for the etale topology … isomorphic to Z/NZ × Z/NZ."* **Cor 2.3.2** (print p.75, PDF 86):
+*"If E[N] is finite etale over S … then N is invertible on S."* (2.3.2 is also the Lie([N])=N
+source noted for T-B5y.)
+
+**KM 3.1** (print p.98, PDF 109) — T-D8: *"A Γ(N)-structure on E/S … is a group homomorphism φ:
+(Z/NZ)² → E[N](S) which is a 'generator' of E[N] … Explicitly … an equality of effective Cartier
+divisors E[N] = Σ_{a,b mod N} [φ(a,b)] … the N² sections φ(a,b) form a 'full set of sections'."*
+
+**KM 3.2** (print p.99, PDF 110) — T-D9: *"A Γ₁(N)-structure on E/S, also called a point of 'exact
+order N' … is a homomorphism φ: Z/NZ → E[N](S) … [such that] the effective Cartier divisor
+Σ_{a mod N}[φ(a)] is a subgroup-scheme of E."*
+
+**KM 3.4** (print p.100, PDF 111) — T-D10: *"A Γ₀(N)-structure on E/S is … a finite flat
+subgroup-scheme K ⊂ E[N], locally free of rank N, which is cyclic in the sense that locally f.p.p.f.
+on S, it admits a generator."*
+
+**KM 3.6.0 Relative Representability Theorem** (print p.102, PDF 113): *"[the functors of Γ(N)-,
+Γ₁(N)-, balanced Γ₁(N)-structures] … Each of these functors is represented by a finite S-scheme."*
+⚑ LOCATOR CAVEAT: 3.6.0 covers only THREE problems; Γ₀(N) representability is asserted "much
+deeper" in Rem 3.6.1 (proved in Ch 6).
+
+**KM 3.7.1** (print p.104, PDF 115) — T-D8/T-D10: *"Let N … S a scheme on which N is invertible …
+Consider the four functors [Γ(N), Γ₁(N), bal.Γ₁(N), Γ₀(N)] … Each is represented by a finite etale
+S-scheme."* Γ₀ descent (p.105): *"the notion of cyclicity is by definition local for the f.p.p.f.
+topology, so a fortiori for the etale topology … reduce to the case when E[N] is the constant
+group-scheme (Z/NZ)² … our constant group-scheme K is cyclic … if and only if the abstract group
+K(T) is a cyclic group of order N."* **Cor 3.7.2** (print p.106) gives the constant-scheme
+description (naive bases / exact-order points / cyclic subgroups). ⚑ LOCATOR CAVEAT: the four cases
+are one Theorem 3.7.1; the per-structure constant-set description is Cor 3.7.2.
+
+**KM 5.1.1 First Main Theorem** (print p.129, PDF 140) — T-E9/T-H9: *"Each of the four moduli
+problems [Γ(N)], [Γ₁(N)], [bal.Γ₁(N)], and [Γ₀(N)] is relatively representable over (Ell). Each is
+finite and flat over (Ell) of constant rank ≥ 1, and regular (necessarily of dimension two). Each
+tensored with Z[1/N] is finite etale over (Ell/Z[1/N])."* (Base is (Ell); rigidity/absolute
+representability of Y(N) for N≥3 is a separate downstream consequence, not this wording.)
+
+**KM 6.1.1 Main Theorem on Cyclic Groups** (print p.152–153, PDF 163–164) — T-D10: *"G ⊂ E[N] a
+finite locally free commutative S-subgroup-scheme … of rank N … (1) G is cyclic if and only if its
+scheme of generators G^× is finite locally free over S, of rank φ(N). (2) … the Cartier divisor D =
+Σ_{(a,N)=1} [aP] … D = G^×."* with the divisor identity *"G as a Cartier divisor in E is given by
+G = Σ_{a mod N} [aP]"* and cyclic = *"locally f.p.p.f. on S, G admits a generator … {aP},
+a=0,…,N−1 form a 'full set of sections'."*
+
+**KM 6.4.1 Cyclicity as a closed condition** (print p.162, PDF 173) — T-SG3: *"there exists a closed
+subscheme W ⊂ S, defined locally … by finitely many equations, which is universal for the condition
+'G is cyclic', in the sense that for any T → S, the inverse image G_T/T is cyclic if and only if the
+map T → S factors through … W."* (Mechanism: cyclicity ⇔ O(G^×) locally free of rank φ(N), Lemma
+6.4.2 + Mumford flattening stratification Prop 6.4.3.)
+
+**KM 4.7.0 Scholie** (print p.111, PDF 122) — T-H8/H9, T-E5: *"Let 𝒫 be relatively representable and
+affine over (Ell); then a necessary and sufficient condition that 𝒫 be representable is that 𝒫 be
+rigid."* **Cor 4.7.1** (print p.116): *"Any relatively representable moduli problem 𝒫 which is affine
+and etale over (Ell), and rigid, is representable by a smooth affine curve over Z."* **Cor 4.7.2**
+(print p.117) — T-E9: *"For N ≥ 3, the naive level N moduli problem of 4.6 is representable, by a
+smooth affine curve Y(N) over Z[1/N]."*
+
+**KM 8.2.1** (print p.228, PDF 239) — T-M1: *"over any ring R, the coarse moduli scheme attached to
+the moduli problem [Γ(1)] is the j-line over R, M([Γ(1)]) = Spec(R[j]), with the j-invariant
+normalized à la Tate; j = 0 has complex multiplication by Z[ζ₃], j = 1728 by Z[i]."* **Lemma
+8.1.3.1** (print p.225, PDF 236): *"When k is an algebraically closed field, then M(𝒫)(k) = the set
+of k-isomorphism classes of 'elliptic curves E/k with given level 𝒫-structure'."* (The 𝔸¹(k) ↔
+iso-classes-via-j bijection T-M1 uses is the composite of 8.1.3.1 at 𝒫=[Γ(1)] with 8.2.1; the map
+is E ↦ j(E).)
+
+**KM Corollary 10.9.2(2)** (print p.303, PDF 314) — T-IRR: *"The scheme M̄(𝒫)[1/NK] is a proper
+smooth curve over Z[ζ_N,1/NK] with geometrically connected fibers."* (For 𝒫=[Γ(N)], Γ={1}, K=N:
+X(N) over Z[ζ_N,1/N] is proper smooth with geometrically connected — i.e. geometrically irreducible
+— fibers.) The **BB-IRR** black box is exactly the proof input (print p.303): *"the underlying
+complex manifold to M(𝒫) ⊗ C is isomorphic to the quotient of the upper half plane by the subgroup
+Γ̃ ⊂ SL(2,Z) … the complete inverse image of Γ by reduction mod N"* — connectedness from H being
+connected, the one non-algebraic input, flagged in **10.1 Motivation** (print p.287) as *"the
+transcendental description of our moduli spaces as quotients of the upper-half plane … used in the
+proof of 10.9.2."* Cusp count (**Thm 10.9.1**, print p.301): *"the cusps of M̄(𝒫) are the disjoint
+union of n(Γ) sections … n(Γ) = #(Hom Surj((Z/NZ)², Z/NZ)/±Γ)."*
 
 ### v10.3 [T-C1-KM28] WS-C re-decompose (KM 2.8 backend) — the plan.md standing order, now DUE
 - **Status**: open · **Assignee**: beastmode-H on resume (C-lane is theirs), else any fresh
