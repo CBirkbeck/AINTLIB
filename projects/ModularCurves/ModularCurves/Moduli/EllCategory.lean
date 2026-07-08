@@ -169,48 +169,114 @@ def Rigid (P : ModuliProblem R) : Prop :=
   ∀ (X : EllObj R) (e : X ≅ X), e.hom.baseHom = 𝟙 X.base → e ≠ Iso.refl X →
     ∀ a : P.obj (Opposite.op X), P.map e.hom.op a ≠ a
 
-/-- **(T-E5 = Loeffler Thm 3.7.4 = KM 4.7)** A moduli problem is representable iff it is
-relatively representable and rigid.
+/-- `P` is **affine over `Ell`**: relatively representable *by an affine morphism*. This is
+KM's standing hypothesis in SCHOLIE (4.7.0) — "relatively representable **and affine over**
+(Ell)" (book p. 111) — and it is what makes the free quotient `𝕸(𝒫, δ)/G` of the engine's
+proof exist as a scheme. Source: KM 4.7.0 + 4.2; the same hypothesis reappears as "affine and
+étale over (Ell)" in KM 4.7.1/4.7.2 and in [Loe] 3.8.2. -/
+def AffineOverEll (P : ModuliProblem R) : Prop :=
+  ∀ X : EllObj R, ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsAffineHom f ∧
+    ∃ eqv : ∀ {T : Scheme.{u}} (g : T ⟶ X.base),
+        { h : T ⟶ Z // h ≫ f = g } ≃ P.obj (Opposite.op (X.pullbackAlong g)),
+      ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+        (h : { h : T ⟶ Z // h ≫ f = g }),
+        eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+          P.map (X.pullbackAlongMap g k).op (eqv g h)
+
+/-- Affine-over-`Ell` forgets to relative representability (KM: "relatively representable
+*and* affine"). -/
+theorem AffineOverEll.relativelyRepresentable {P : ModuliProblem R} (hP : P.AffineOverEll) :
+    P.RelativelyRepresentable := fun X => by
+  obtain ⟨Z, f, -, eqv, hnat⟩ := hP X
+  exact ⟨Z, f, eqv, hnat⟩
+
+/-- **(T-E5a, KM 4.4 / [Loe] Exercise (1))** A representable moduli problem is rigid.
+
+KM p. 111, inside the proof of SCHOLIE (4.7.0): *"As already pointed out above (4.4), any
+representable problem is automatically rigid."*
+
+Proof: if `a ∈ P(X)` is fixed by an automorphism `e` of `X` over the identity of the base,
+transport `a` to the classifying morphism `u = homEquiv⁻¹ a : X ⟶ X₀`; the fixing says
+`e.hom ≫ u = u`, hence `e.hom.top ≫ u.top = u.top`, and `e.hom.top ≫ X.curve.π = X.curve.π`
+holds because `e.hom.baseHom = 𝟙`. Since `u`'s square is **cartesian** (this is where the
+`Ell`-morphism data is used), `IsPullback.hom_ext` forces `e.hom.top = 𝟙`, so `e = Iso.refl`.
+Note the cartesian square of `u` is indispensable: an elliptic curve does have nontrivial
+automorphisms over the identity of its base (e.g. `[-1]`), and it is exactly the existence of
+`a` — i.e. of `u` — that kills them. -/
+theorem rigid_of_representable {P : ModuliProblem R} (hP : P.Representable) : P.Rigid := by
+  intro X e hbase hne a
+  intro hfix
+  refine hne (Iso.ext ?_)
+  haveI : P.IsRepresentable := hP
+  set repr := Functor.representableBy P with hrepr
+  set u : X ⟶ Functor.reprX P := repr.homEquiv.symm a with hu
+  have hcomp : repr.homEquiv (e.hom ≫ u) = P.map e.hom.op (repr.homEquiv u) :=
+    repr.homEquiv_comp e.hom u
+  rw [hu, Equiv.apply_symm_apply] at hcomp
+  have heu : e.hom ≫ u = u := by
+    refine repr.homEquiv.injective ?_
+    rw [hcomp, hfix, hu, Equiv.apply_symm_apply]
+  -- the top component is forced to be the identity by the cartesian square of `u`
+  have htop : e.hom.top = 𝟙 X.curve.E := by
+    refine u.isPullback.hom_ext ?_ ?_
+    · exact (congrArg EllHom.top heu).trans (Category.id_comp u.top).symm
+    · calc e.hom.top ≫ X.curve.π = X.curve.π ≫ e.hom.baseHom := e.hom.isPullback.w
+        _ = X.curve.π := by rw [hbase, Category.comp_id]
+        _ = 𝟙 X.curve.E ≫ X.curve.π := (Category.id_comp _).symm
+  exact EllHom.ext hbase htop
+
+/-- **(T-E5 = KM SCHOLIE 4.7.0)** A moduli problem which is **affine over `Ell`** is
+representable iff it is relatively representable and rigid.
 
 **Source of record** (quote pass, T-E5-KM47, 2026-07-08; full verbatim in
 `.mathlib-quality/km47-source-quotes.md`).
 
-*Katz–Mazur, SCHOLIE (4.7.0), book p. 111*, verbatim:
+*Katz–Mazur, SCHOLIE (4.7.0), book p. 111 (pdf 122)*, verbatim:
 > "Let `𝒫` be relatively representable **and affine over** (Ell); then a necessary and
 > sufficient condition that `𝒫` be representable is that `𝒫` be rigid."
 
-*Loeffler, Theorem 3.7.4 (p. 18)*, verbatim:
-> "(Katz–Mazur) `P` is representable if and only if it is relatively representable and
-> rigid."
+**Lean ↔ source match.** `ModuliProblem R = (EllObj R)ᵒᵖ ⥤ Type u` is KM's "moduli problem on
+(Ell/R)" (Loe Def 3.7.1(2)); `Representable` is KM's "`𝒫` is representable" — the functor on
+`Ell/R`, *not* KM's `𝒫̃` on `Sch/R`; `RelativelyRepresentable` is KM 4.2 / Loe 3.7.1(3);
+`AffineOverEll` is KM's "affine over (Ell)"; `Rigid` is KM 4.4 / Loe Def 3.7.3 verbatim. With
+`hP : P.AffineOverEll` the statement below is **KM's SCHOLIE 4.7.0 verbatim**.
 
-**Lean ↔ source match.** `ModuliProblem R = (EllObj R)ᵒᵖ ⥤ Type u` is KM's "moduli problem
-on (Ell/R)" (Loe Def 3.7.1(2)); `Representable` is KM's "`𝒫` is representable" — the functor
-on `Ell/R`, *not* KM's `𝒫̃` on `Sch/R` (which our formalization does not have, and which by
-Gabber's counterexample KM (A.4.1.3) is a strictly weaker notion); `RelativelyRepresentable`
-is KM 4.2 / Loe 3.7.1(3) (our naturality clause is KM's implicit one); `Rigid` is KM 4.4 /
-Loe Def 3.7.3 verbatim. **The statement below is therefore Loeffler's 3.7.4 verbatim.**
+**B2 STATEMENT AMENDMENT (2026-07-08, owner-approved; logged in `b2_log.jsonl`).** The
+previous statement — `P.Representable ↔ P.RelativelyRepresentable ∧ P.Rigid` with *no*
+affineness, i.e. [Loe] Thm 3.7.4 verbatim — was **not supported by either source's proof**.
+KM uses affineness three times: p. 112 (`𝕸(𝒫, δ)` affine over the affine `𝕸(δ)` ⟹ absolutely
+affine), p. 113 (*"Because `𝕸(𝒫, δ)` is affine, the quotient `𝕸(𝒫, δ)/G` exists"* — a free
+finite-group quotient of a general scheme is only an algebraic space), p. 114 (α_univ descends
+*"because `𝒫` is relatively affine"*, SGA I VIII 7.8). Loeffler's own quotient input (Prop
+3.6.1) is stated only for **quasiprojective** `X`, so even his sketch tacitly assumes what his
+3.7.4 omits.
 
-**⚠️ STATEMENT MISMATCH — flagged, deliberately not fixed** (T-E5 owner decision; dispatch
-v10.4 "statement mismatch ⟹ flag, don't fix"). KM's SCHOLIE carries an "affine over (Ell)"
-hypothesis that this statement lacks, and it is **load-bearing twice** in KM's own proof:
-p. 112 "Because `𝕸(δ)` is affine, and `𝒫` is affine over (Ell), the scheme `𝕸(𝒫, δ)` is
-affine over `𝕸(δ)`, hence absolutely affine"; p. 113 "Because `𝕸(𝒫, δ)` is affine, the
-quotient `𝕸(𝒫, δ)/G` exists" — and a third time at p. 114, where α_univ descends "because
-`𝒫` is relatively affine". Without such a hypothesis the free quotient of a scheme by a
-finite group need not be a scheme (only an algebraic space); Loeffler's own quotient input
-(Prop 3.6.1) is stated only for **quasiprojective** `X`, so even his sketch's "take
-invariants" step tacitly assumes what 3.7.4 omits. Recommended resolution: add
-affine-over-`Ell` to the ⇐ direction only (every downstream consumer — KM 4.7.1/4.7.2,
-Loe 3.8.2, T-E7/T-E9/T-H4/T-H6 — is affine and étale over `Ell`).
+**DOCUMENTED NON-GOAL (never silently deleted).** The unrestricted form
+`∀ P, P.Representable ↔ P.RelativelyRepresentable ∧ P.Rigid` is **not** a target of this
+development. Beyond the three uses above, KM's own Appendix (A.4) is the warning label: it
+records that `𝒫̃`-representability is strictly weaker than `𝒫`-representability — *"it is not
+in general true that `𝒫̃` representable ⟹ `𝒫` rigid"* — and exhibits **Gabber's
+counterexample (A.4.1.3)**: over a ring carrying an elliptic curve `E₀`, the problem
+`𝒫(E/S) = {∗}` if `E/S ≅ E₀/S` and `∅` otherwise is not rigid (`[-1]` acts trivially) while
+`𝒫̃` is representable by `Spec R` itself. Any attempt at the unrestricted statement must first
+say which of `𝒫`, `𝒫̃` it means and must exit the category of schemes for the quotient; that
+is an algebraic-spaces development, out of scope (no algebraic spaces in mathlib). See
+[T-E5-ISOM] for the one direction that *is* unrestricted-but-gated.
 
-**Decomposition** (T-E5a–T-E5e on the board; bootstrap objects T-E12–T-E15):
-`⇒` splits as rigidity (KM 4.4, free) and relative representability (needs the Isom-scheme
-of the universal curve — own leaf, not free); `⇐` is the KM engine of p. 112 applied twice,
-with `(N, δ, G) = (2, Legendre, GL₂(ℤ/2) × {±1})` and `(3, naive level 3, GL₂(𝔽₃))`, then
-"recollement" over `ℤ[1/6]`. The engine itself is `representable_of_rigid_of_torsor`
-(`Moduli/QuotientProblem.lean`, T-Q6e). -/
-theorem representable_iff (P : ModuliProblem R) :
-    P.Representable ↔ P.RelativelyRepresentable ∧ P.Rigid := by sorry
+**Decomposition** (board): `⇒` = `rigid_of_representable` (T-E5a, **proven above**) together
+with `AffineOverEll.relativelyRepresentable` (free from the hypothesis — note that *without*
+`hP` this half needs the Isom-scheme of the universal curve, **[T-E5-ISOM]**, gated, not
+built). `⇐` = KM's engine of p. 112 (`representable_of_rigid_of_torsor`,
+`Moduli/QuotientProblem.lean`, T-Q6e) instantiated twice, at
+`(N, δ, G) = (3, naive level 3, GL₂(𝔽₃))` (T-E15, unblocked) and
+`(2, Legendre, GL₂(ℤ/2) × {±1})` (T-E14, blocked on [T-E-OMEGA]), then "recollement" over
+`ℤ[1/6]` (T-E5f). The engine is **never re-derived here** — only instantiated. -/
+theorem representable_iff (P : ModuliProblem R) (hP : P.AffineOverEll) :
+    P.Representable ↔ P.RelativelyRepresentable ∧ P.Rigid := by
+  refine ⟨fun h => ⟨hP.relativelyRepresentable, rigid_of_representable h⟩, fun h => ?_⟩
+  -- ⇐ : KM's engine (p. 112) instantiated at δ = naive level 3 and δ = Legendre, then
+  -- glued over ℤ[1/6]. Leaves T-E5c/d/e/f; gated on T-Q6e + T-E14 + T-E15.
+  sorry
 
 end ModuliProblem
 
