@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.AdditionChartMor
 import ModularCurves.EllipticCurve.AdditionChartProj
+import ModularCurves.EllipticCurve.AdditionChartGlue
 
 /-!
 # The piece morphisms agree on overlaps (T-W7.0c-c5β, c4.2c step 2b)
@@ -131,6 +132,35 @@ lemma chartAwayHomOfTriple_congr (k : Fin 3) (t s : Fin 3 → S) (u : S) (hts : 
     (hu' : s k * u = 1) (ht' : (W.map (algebraMap R S)).toProjective.Equation s) :
     chartAwayHomOfTriple W k t u hu ht = chartAwayHomOfTriple W k s u hu' ht' := by
   subst hts; rfl
+
+/-- A projective triple stays on the curve after rescaling by a unit — mathlib's `equation_smul`,
+with the scalar action spelled out pointwise (they are definitionally equal). -/
+lemma equation_mul_left (c : S) (hc : IsUnit c) (t : Fin 3 → S)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t) :
+    (W.map (algebraMap R S)).toProjective.Equation (fun m => c * t m) :=
+  (equation_smul t hc).mpr ht
+
+/-- **(c4.3 core)** The chart morphism of a triple is invariant under rescaling by a unit: the
+ratios `t m / t k` do not see the scalar. This is what makes the per-chart-product laws agree on
+overlaps of chart-products, where the two law-2 triples differ by the bidegree-`(2,2)` transition
+factor rather than being equal. -/
+lemma chartHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd : c * d = 1)
+    (hu : t k * u = 1) (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hu' : (fun m => c * t m) k * (d * u) = 1) :
+    chartHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
+      chartHomOfTriple W k t u hu ht := by
+  refine chartHomOfTriple_congr W k t (fun m => c * t m) u (d * u) hu hu' ht
+    (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) fun m => ?_
+  show c * t m * (d * u) = t m * u
+  rw [show c * t m * (d * u) = (c * d) * (t m * u) by ring, hcd, one_mul]
+
+/-- The `Away`-presentation form of `chartHomOfTriple_smul`. -/
+lemma chartAwayHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd : c * d = 1)
+    (hu : t k * u = 1) (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hu' : (fun m => c * t m) k * (d * u) = 1) :
+    chartAwayHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
+      chartAwayHomOfTriple W k t u hu ht := by
+  rw [chartAwayHomOfTriple, chartAwayHomOfTriple, chartHomOfTriple_smul W k t u c d hcd hu ht hu']
 
 end Naturality
 
