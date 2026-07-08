@@ -4250,6 +4250,32 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Sources**: parent T-H7 attack block; mulBy def GroupLaw.lean:85.
 - **Generality**: mulBy lemmas for all `m n : ℤ` (upstream-shaped); negIso minimal.
 
+### [T-H2b] the additive base-change point dictionary (LEAF, cut by fable-P4 2026-07-08)
+- **Status**: in-progress · **Claimed**: fable-P4, 2026-07-08T08:45Z · **File**:
+  EllipticCurve/GroupLaw.lean (next to `Point.asSection`) · **Depends**: none (all
+  ingredients landed) · **Type**: def (≃+) + 2 compat lemmas + consumer discharge
+- **Statement**: `Point.baseChangeEquiv : (E.baseChange σ).Point t ≃+ E.Point (t ≫ σ)`
+  for `σ : T' ⟶ T`?? roles: `E : EllipticCurve T`, `t : T'' ⟶ T'` — forward
+  `x ↦ ⟨x.1 ≫ pullback.fst, condition-chase⟩`, backward `pullback.lift`; roundtrips are
+  `hom_ext` one-liners (skeleton compile-validated in scratch).
+- **The content = additivity of the forward map**: point-addition is the Hom-group of
+  `grpObjMkPullbackSnd = ((Over.pullback σ).mapGrp.obj _).grp` (mathlib, with
+  `@[simps -isSimp mul one]` lemmas `grpObjMkPullbackSnd_mul/_one` available); the
+  `fst`-projection intertwines the μ's over the base-change square — mathlib's
+  `isMonHom_pullbackFst_id_right` shows the id-specialized pattern; do it over general
+  `σ` via the mapGrp/prodComparison plumbing OR the term-mode `mulByHom_baseChange`-style
+  chains (the `asSection_zsmul` proof documents the kabstract-vs-term-mode wall — REUSE
+  that discipline). Est. 150–250 lines.
+- **Consumers** (unblock immediately): `FullLevelPt.pullAlong` membership sorry
+  (GammaH.lean:311) — killing via existing `pull_zsmul/pull_zero/asSection_zsmul` (+
+  derive `asSection_zero` on the spot), generation via the dictionary (additive ⟹
+  `AddSubgroup.closure`-transport) + `Point.pull`-composition compat. NOTE: the
+  v8-era gate "pullSection_add gated on abelEnrichment_unique" is CONFIRMED STALE —
+  `Point.pull_add/pull_zsmul/pull_zero`, `EllHom.pullSection_add` (Representability:204),
+  `Point.asSection_zsmul` all landed independently. The Drinfeld-side sorries
+  (GammaH:943/957, `IsFullLevel`/`IsGammaOne` pull-stability) are D-stream Cartier
+  territory — NOT this leaf.
+
 ### [T-H7b] naive full level structures exist over an algebraically closed base (sub-ticket)
 - **Status**: **DONE — already landed in-file** (board stale; verified sorry-free by
   fable-P4 2026-07-08: `exists_isNaiveFullLevel_of_le_two` GammaH.lean:~680) · **File**:
