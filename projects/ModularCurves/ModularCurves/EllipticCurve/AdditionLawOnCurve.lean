@@ -172,4 +172,114 @@ theorem equation_dblAddXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 �
 
 end Main
 
+/-! ## The law-1 mirror: `addXYZ` lands on the curve over reduced Jacobson rings
+
+Law 1 (mathlib's `addXYZ`) needs the same on-curve statement; its 422/584-term certificate
+(`cof_I1_*.txt`) is hereby retired. The diagonal case is even easier than for law 2:
+`addXYZ P P = 0` (mathlib's `add*_self`). -/
+
+section AddXYZCommRing
+
+variable {R : Type*} [CommRing R] {W' : Projective R}
+
+lemma addXYZ_self' (P : Fin 3 → R) : W'.addXYZ P P = 0 := by
+  funext i
+  fin_cases i
+  · show W'.addX P P = 0
+    exact addX_self P
+  · show W'.addY P P = 0
+    exact addY_self P
+  · show W'.addZ P P = 0
+    exact addZ_self P
+
+lemma addXYZ_smul_left (P Q : Fin 3 → R) (u : R) :
+    W'.addXYZ (u • P) Q = u ^ 2 • W'.addXYZ P Q := by
+  funext i
+  fin_cases i
+  · show W'.addX (u • P) Q = u ^ 2 * W'.addX P Q
+    simpa using W'.addX_smul P Q u 1
+  · show W'.addY (u • P) Q = u ^ 2 * W'.addY P Q
+    simpa using W'.addY_smul P Q u 1
+  · show W'.addZ (u • P) Q = u ^ 2 * W'.addZ P Q
+    simpa using W'.addZ_smul P Q u 1
+
+lemma addXYZ_smul_right (P Q : Fin 3 → R) (v : R) :
+    W'.addXYZ P (v • Q) = v ^ 2 • W'.addXYZ P Q := by
+  funext i
+  fin_cases i
+  · show W'.addX P (v • Q) = v ^ 2 * W'.addX P Q
+    simpa using W'.addX_smul P Q 1 v
+  · show W'.addY P (v • Q) = v ^ 2 * W'.addY P Q
+    simpa using W'.addY_smul P Q 1 v
+  · show W'.addZ P (v • Q) = v ^ 2 * W'.addZ P Q
+    simpa using W'.addZ_smul P Q 1 v
+
+lemma addXYZ_zero_fst (Q : Fin 3 → R) : W'.addXYZ 0 Q = 0 := by
+  have h := W'.addXYZ_smul_left Q Q 0
+  rwa [zero_smul, zero_pow two_ne_zero, zero_smul] at h
+
+lemma addXYZ_zero_snd (P : Fin 3 → R) : W'.addXYZ P 0 = 0 := by
+  have h := W'.addXYZ_smul_right P P 0
+  rwa [zero_smul, zero_pow two_ne_zero, zero_smul] at h
+
+end AddXYZCommRing
+
+section AddXYZField
+
+variable {F : Type*} [Field F] {W : Projective F}
+
+/-- The field case for law 1, with bare `Equation` hypotheses: the diagonal class collapses
+to the zero triple (`addXYZ_self'`), and off it `nonsingular_add` applies. -/
+theorem equation_addXYZ_of_equation [W.IsElliptic] {P Q : Fin 3 → F}
+    (hP : W.Equation P) (hQ : W.Equation Q) : W.Equation (W.addXYZ P Q) := by
+  by_cases h0P : P = 0
+  · rw [h0P, addXYZ_zero_fst]
+    exact equation_zero_triple
+  by_cases h0Q : Q = 0
+  · rw [h0Q, addXYZ_zero_snd]
+    exact equation_zero_triple
+  by_cases hPQ : P ≈ Q
+  · rcases hPQ with ⟨u, rfl⟩
+    show W.Equation (W.addXYZ ((u : F) • Q) Q)
+    rw [addXYZ_smul_left, addXYZ_self', smul_zero]
+    exact equation_zero_triple
+  · have h := (nonsingular_add (nonsingular_of_equation_of_ne_zero hP h0P)
+      (nonsingular_of_equation_of_ne_zero hQ h0Q)).left
+    rwa [add_of_not_equiv hPQ] at h
+
+end AddXYZField
+
+section AddXYZMain
+
+variable {A : Type*} [CommRing A] [IsReduced A] [IsJacobsonRing A] {W' : Projective A}
+
+omit [IsReduced A] [IsJacobsonRing A] in
+open MvPolynomial in
+/-- Law 1's field case along an arbitrary ring homomorphism into a field (same
+`IsField`-parametrization as `map_polynomial_eval_dblAddXYZ_eq_zero`). -/
+lemma map_polynomial_eval_addXYZ_eq_zero {K : Type*} [CommRing K] (hK : IsField K)
+    (φ : A →+* K) {W' : Projective A} (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+    (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    φ (eval (W'.addXYZ P Q) W'.polynomial) = 0 := by
+  letI := hK.toField
+  haveI : (W'.map φ).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map φ⟩
+  have key : (W'.map φ).Equation ((W'.map φ).addXYZ (φ ∘ P) (φ ∘ Q)) :=
+    equation_addXYZ_of_equation (hP.map φ) (hQ.map φ)
+  rw [map_addXYZ] at key
+  rwa [Equation, map_polynomial, eval_map, ← eval₂_comp] at key
+
+open MvPolynomial in
+/-- **(T-W7.0c-c5β prerequisite, law-1 mirror of c5α)** Over a reduced Jacobson ring with
+`Δ` a unit, mathlib's addition law `addXYZ` lands on the curve. Retires the 422/584-term
+`equation_addXYZ` certificate. -/
+theorem equation_addXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+    (hP : W'.Equation P) (hQ : W'.Equation Q) : W'.Equation (W'.addXYZ P Q) := by
+  rw [Equation]
+  refine eq_zero_of_forall_isMaximal_mem fun m hm => ?_
+  rw [← Ideal.Quotient.eq_zero_iff_mem]
+  exact map_polynomial_eval_addXYZ_eq_zero
+    ((Ideal.Quotient.maximal_ideal_iff_isField_quotient m).mp hm) (Ideal.Quotient.mk m) hΔ hP hQ
+
+end AddXYZMain
+
 end WeierstrassCurve.Projective
