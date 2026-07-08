@@ -2307,6 +2307,11 @@ private lemma witness_res_dictY {W : WeierstrassCurve R}
   exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
     ((chartYSectionsRingEquiv W).symm b)) (Subsingleton.elim _ _)
 
+private lemma psi_clear_generic {L C : Type u} [CommRing L] [CommRing C]
+    (ψ : L →+* C) {x tL bL : L} {K : ℕ} (h : x * tL ^ K = bL) :
+    ψ x * (ψ tL) ^ K = ψ bL := by
+  rw [← map_pow, ← map_mul, h]
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
