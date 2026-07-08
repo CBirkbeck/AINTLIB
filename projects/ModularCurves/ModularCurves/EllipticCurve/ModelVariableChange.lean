@@ -2313,6 +2313,65 @@ private lemma psi_clear_generic {L C : Type u} [CommRing L] [CommRing C]
     ψ x * (ψ tL) ^ K = ψ bL := by
   rw [← map_pow, ← map_mul, h]
 
+private lemma witness_eq_V' {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (f' : W'.toAffine.CoordinateRing) (b'' : AdjoinRoot (infChartCubic W')) (n : ℕ)
+    (hb'' : algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W')) b'' =
+      overlapMap W' f' * algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W'))
+        (AdjoinRoot.root (infChartCubic W')) ^ n)
+    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (bΦ : AdjoinRoot (infChartCubic W)) (K : ℕ)
+    (hbΦ : overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
+        algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W)) (infChartTElem W) ^ K =
+      algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) bΦ) :
+    pointedIsoChartTransport e
+        ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+          (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr)) b'' *
+      ((((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+        ((chartYSectionsRingEquiv W).symm (infChartTElem W))) ^ K =
+    ((((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+        ((chartYSectionsRingEquiv W).symm bΦ)) *
+      (pointedIsoChartTransport e
+        ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+          (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr))
+        (AdjoinRoot.root (infChartCubic W'))) ^ n := by
+  have hVE := (Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+    (infChartTElem W))).le.trans (witness_V_le_overlapPreimage e hez hr)
+  have hVover := (Scheme.basicOpen_mul (projModel W) r
+    ((chartYSectionsRingEquiv W).symm (infChartTElem W))).le.trans
+    (witness_V_le_overlapW e (r := r))
+  have h0 := witness_eq_V e heπ hez f' b'' n hb'' hVE
+    ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+      (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr)) hVover
+  have h1 := congrArg (· * ((((projModel W).presheaf.map
+    (homOfLE hVover).op).hom) ((overlapSectionsEquiv W).symm
+      (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (infChartTElem W)))) ^ K) h0
+  have hclear := psi_clear_generic ((((projModel W).presheaf.map
+    (homOfLE hVover).op).hom).comp (overlapSectionsEquiv W).symm.toRingHom) hbΦ
+  have hdictT := witness_res_dictY hVover ((projModel W).basicOpen_le
+    (r * (chartYSectionsRingEquiv W).symm (infChartTElem W))) (infChartTElem W)
+  have hdictB := witness_res_dictY hVover ((projModel W).basicOpen_le
+    (r * (chartYSectionsRingEquiv W).symm (infChartTElem W))) bΦ
+  have hrearr : ∀ (z t₀ y : ↑Γ(projModel W, (projModel W).basicOpen
+      (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))),
+      z * y ^ n * t₀ ^ K = (z * t₀ ^ K) * y ^ n := fun z t₀ y => by ring
+  refine (congrArg₂ (· * ·) rfl (congrArg (· ^ K) hdictT.symm)).trans ?_
+  refine h1.trans ?_
+  refine (hrearr _ _ _).trans ?_
+  exact congrArg₂ (· * ·) (hclear.trans hdictB) rfl
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic

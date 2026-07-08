@@ -2,6 +2,7 @@ import ModularCurves.EllipticCurve.Basic
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 import ModularCurves.ForMathlib.FunctorMapZpow
+import ModularCurves.ForMathlib.OverPullbackMul
 import Mathlib.AlgebraicGeometry.Group.Smooth
 
 /-!
@@ -297,6 +298,90 @@ theorem Point.asSection_zsmul {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Po
           (congrArg ((Point.asSection E g P).1 ≫ ·) (mulByHom_baseChange_snd E g n)).trans <|
             Point.asSection_val_snd E g P
     exact lhs.trans rhs.symm
+
+/-- The forward map of the base-change point dictionary: compose with the projection. -/
+private noncomputable def pointBaseChangeFun {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
+    (x : (E.baseChange σ).Point t) : E.Point (t ≫ σ) :=
+  ⟨x.1 ≫ pullback.fst E.π σ,
+    (Category.assoc _ _ _).trans <|
+      (congrArg (x.1 ≫ ·) pullback.condition).trans <|
+      (Category.assoc _ _ _).symm.trans <|
+      congrArg (· ≫ σ) x.2⟩
+
+private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
+    (x y : (E.baseChange σ).Point t) :
+    pointBaseChangeFun E σ t (x + y)
+      = pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y := by
+  refine Subtype.ext ?_
+  -- both sides through the `Over`-hom groups
+  have hx : (x + y).1
+      = (lift ((E.baseChange σ).pointEquivOverHom t x)
+          ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ (μ[(E.baseChange σ).asOver]).left :=
+    (congrArg CommaMorphism.left ((E.baseChange σ).pointEquivOverHom_add t x y)).trans
+      (Over.comp_left _ _ _ _ _)
+  have hR : (pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y).1
+      = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
+          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
+        ≫ (μ[E.asOver]).left :=
+    (congrArg CommaMorphism.left (E.pointEquivOverHom_add (t ≫ σ) _ _)).trans
+      (Over.comp_left _ _ _ _ _)
+  -- the lifted pairs agree after the comparison morphism of the intertwining lemma
+  have hlift : (lift ((E.baseChange σ).pointEquivOverHom t x)
+        ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ pullback.lift
+          (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
+          (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
+          (by
+            simp only [Over.mk_hom, Category.assoc]
+            rw [pullback.condition (f := E.π) (g := σ), ← Category.assoc,
+              pullback.condition (f := pullback.snd E.π σ) (g := pullback.snd E.π σ),
+              Category.assoc])
+      = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
+          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left := by
+    apply Over.tensorObj_ext
+    · exact (Category.assoc _ _ _).trans <|
+        (congrArg (_ ≫ ·) (pullback.lift_fst _ _ _)).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+        (congrArg (· ≫ pullback.fst E.π σ)
+          ((congrArg CommaMorphism.left (lift_fst _ _)).trans (Over.homMk_left _))).trans <|
+        ((congrArg CommaMorphism.left (lift_fst _ _)).trans (Over.homMk_left _)).symm
+    · exact (Category.assoc _ _ _).trans <|
+        (congrArg (_ ≫ ·) (pullback.lift_snd _ _ _)).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+        (congrArg (· ≫ pullback.fst E.π σ)
+          ((congrArg CommaMorphism.left (lift_snd _ _)).trans (Over.homMk_left _))).trans <|
+        ((congrArg CommaMorphism.left (lift_snd _ _)).trans (Over.homMk_left _)).symm
+  show (x + y).1 ≫ pullback.fst E.π σ = _
+  rw [hR]
+  exact (congrArg (· ≫ pullback.fst E.π σ) hx).trans <|
+    (Category.assoc _ _ _).trans <|
+    (congrArg ((lift ((E.baseChange σ).pointEquivOverHom t x)
+        ((E.baseChange σ).pointEquivOverHom t y)).left ≫ ·)
+      (Over.grpObjMkPullbackSnd_mul_left_fst E.π σ)).trans <|
+    (Category.assoc _ _ _).symm.trans <|
+    congrArg (· ≫ (μ[E.asOver]).left) hlift
+
+/-- **(T-H2b)** The additive base-change point dictionary: `T'`-points of the base-changed
+curve are `T'`-points of `E` over the composite, additively. The underlying bijection is
+the universal property of the pullback; additivity of the forward map is
+`Over.grpObjMkPullbackSnd_mul_left_fst` (the projection intertwines the pullback
+multiplication). -/
+noncomputable def Point.baseChangeEquiv {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T) :
+    (E.baseChange σ).Point t ≃+ E.Point (t ≫ σ) where
+  toFun := pointBaseChangeFun E σ t
+  invFun y := ⟨pullback.lift y.1 t y.2, pullback.lift_snd _ _ _⟩
+  left_inv x := Subtype.ext <| by
+    apply pullback.hom_ext
+    · exact pullback.lift_fst _ _ _
+    · exact (pullback.lift_snd _ _ _).trans x.2.symm
+  right_inv y := Subtype.ext (pullback.lift_fst _ _ _)
+  map_add' := pointBaseChangeFun_add E σ t
+
+@[simp]
+lemma Point.baseChangeEquiv_apply_coe {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
+    (x : (E.baseChange σ).Point t) :
+    (Point.baseChangeEquiv E σ t x).1 = x.1 ≫ pullback.fst E.π σ := rfl
 
 end EllipticCurve
 

@@ -874,23 +874,27 @@ noncomputable def mulOver : modelOver W ⊗ modelOver W ⟶ modelOver W :=
 theorem mulOver_left : (mulOver W).left = mulModelHom W := by
   sorry
 
-/-- **(T-W7.0g-one)** The unit as an `Over`-morphism, via the zero section. -/
+/-- **(T-W7.0g-one)** The unit as an `Over`-morphism, via the zero section. Its underlying
+morphism is the structure map of the monoidal unit followed by the zero section; the `Over`
+compatibility is `zero ≫ π = 𝟙` (`projModelZero_projModelπ`). -/
 noncomputable def oneOver : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W :=
-  sorry
+  Over.homMk ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W)
+    (by rw [Category.assoc, projModelZero_projModelπ, Category.comp_id])
 
 /-- **(T-W7.0g-one-left)** The underlying morphism of the unit is the zero section
 (precomposed with the structure map of the monoidal unit). -/
 theorem oneOver_left :
-    (oneOver W).left = (𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W := by
-  sorry
+    (oneOver W).left = (𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W :=
+  rfl
 
-/-- **(T-W7.0g-inv)** The inverse as an `Over`-morphism, via `negModelHom`. -/
+/-- **(T-W7.0g-inv)** The inverse as an `Over`-morphism, via `negModelHom`. The `Over`
+compatibility is `negModelHom ≫ π = π` (`negModelHom_π`). -/
 noncomputable def invOver : modelOver W ⟶ modelOver W :=
-  sorry
+  Over.homMk (negModelHom W) (negModelHom_π W)
 
 /-- **(T-W7.0g-inv-left)** The underlying morphism of the inverse is `negModelHom`. -/
-theorem invOver_left : (invOver W).left = negModelHom W := by
-  sorry
+theorem invOver_left : (invOver W).left = negModelHom W :=
+  rfl
 
 /-- **(T-W7.0g-assoc)** Associativity, as the monoid-object equation in `Over (Spec R)`.
 Proof route: over the universal atlas by field-points extensionality + the dictionary +

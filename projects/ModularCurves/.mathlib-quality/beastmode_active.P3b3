@@ -1,1 +1,1 @@
-FOCUS: T-W7.1b b3x/b3y/main/b5 — PHASE 0: worktree ../aintlib-mc-b3 up; cache+baseline build running; reading sorried statements next
+FOCUS: T-W7.1b b3x — writing exists_coordX_image (Phi x in span{1,x} from hfil 2; unit via inverse expansion + coordXY_ext) in ComparisonCoefficients.lean
