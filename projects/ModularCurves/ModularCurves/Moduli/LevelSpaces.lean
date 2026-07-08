@@ -1,4 +1,5 @@
 import ModularCurves.LevelStructure.Incidence
+import ModularCurves.GroupScheme.CyclicSubgroup
 
 /-!
 # Level spaces over the Weierstrass atlas (T-W8)
@@ -73,5 +74,21 @@ theorem levelSpaceΓ_spec [NeZero N] :
         (E.baseChange t).IsFullLevel N (EllipticCurve.Point.asSection E t P)
           (EllipticCurve.Point.asSection E t Q) :=
   (exists_fullLevelLocus E N).choose_spec
+
+/-! ### `U_{Γ₀(N)}` — cyclic rank-`N` subgroup structures
+
+Unlike `Γ₁(N)`/`Γ(N)`, the `Γ₀(N)` level datum is **structure, not predicate**: it is a *choice*
+of a cyclic finite locally free rank-`N` subgroup scheme, not a condition cutting a locus inside a
+fixed torsion scheme. So there is no `levelSpaceΓ₀` closed subscheme of the Γ₁/Γ shape — the
+`Γ₀(N)` "level space" is the moduli of such subgroup schemes, whose representability is the
+separate Γ₀ GATE (SG3 closedness of cyclicity). The def-of-record `GammaZeroStructure`
+(`GroupScheme/CyclicSubgroup.lean`, T-SG2) is that datum; the T-W8 name below is a thin alias so
+the three level types share a uniform entry point. -/
+
+/-- **(T-W8, `U_{Γ₀(N)}` — as far as T-SG2 reaches)** The `Γ₀(N)` level datum over `S`: a cyclic
+finite locally free rank-`N` subgroup scheme of `E` (`GammaZeroStructure`, T-SG2's def-of-record).
+It is a *structure* on `E/S`, not a torsion-point locus, so it has no closed-subscheme
+presentation of the `Γ₁`/`Γ` shape; its representability is the separate SG3 GATE. -/
+abbrev levelStructureΓ₀ [NeZero N] := EllipticCurve.GammaZeroStructure E N
 
 end ModularCurves
