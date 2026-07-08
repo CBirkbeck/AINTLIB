@@ -8752,3 +8752,42 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
   degree facts) boarded separately.
 - **p0 continues (beastmode)** into Piece 3: decompose the coequalizer-scheme construction (co-action
   `ρ` → affine invariants → glue) and start the first sub-piece. New files only; p2 files READ-ONLY.
+
+## Amendments v10.35 (2026-07-08): PIC0 stream drained — COH-1 DE-BLACK-BOXED; GAP-1 track/steer; [CHARTER-PIC0] issued
+
+- **Absorbed (fable-PIC0, sentinel removed, 9 commits)**: **COH-1 is DE-BLACK-BOXED** —
+  GME 1.10.4/1.10.5/(2.15) proven in module form (`ForMathlib/BaseChangeKerCoker.lean`,
+  8 decls, zero sorries, Mumford-§5 route dodging Hida's EGA-III needs); two planned leaves
+  found in mathlib and DELETED not duplicated; full /cleanup + buzz (282→190 ll). Pic P1
+  3/5: `ForMathlib/OpensMapFinal.lean` (`(Opens.map f).Final` — upstream-grade,
+  mathlib-absent) unlocking `pullbackUnitIso`, `isInvertible_unit`,
+  `IsInvertible.pullback`, all axiom-clean.
+- **Blocks (dossiers on the board)**: (1) **T-PIC1c = build-environment anomaly, not math**
+  — sheafification-adjunction IsIso synthesizes under `lake env lean` but not in-lib
+  (suspect v4.32.0-rc1 module-system edge; 8 build-measured attempts). (2) **T-PIC1b/P2
+  parked on GAP-1** (no sheaf-of-modules monoidal in mathlib); scoping verdict
+  TRACK/STEER: Riou's active lane has the prerequisites (mathlib4 #35545, #41383, #35773).
+  T-PIC-DEG0 closed: HasseWeil Pic⁰ is ClassGroup-based, no reusable degree map.
+- **STRATEGIC RIPPLE — the DS-END0 pins now have TWO routes** (edge update to v10.15/29):
+  (a) PIC0's Pic-group route, gated on GAP-1/Riou (external); (b) the Cartier-duality /
+  KM 2.6 construction inside **CHARTER-P2 phase 2** (D7's own preferred API) +
+  HasseWeil's field-level dual isogenies. The pins are NOT stalled — route (b) is active;
+  coordinate edges, never build duality twice.
+- **OWNER ACTIONS (new)**: (i) Zulip-ping Riou's lane + offer `Opens.map_final` as a
+  contribution; (ii) the mathlib-PR-opening decision now covers 4 READY + `OpensMapFinal`
+  + `NilpotentKerSpecMap` (both flagged upstream-grade); (iii) optional: file the
+  v4.32.0-rc1 instance-synthesis repro upstream once produced (charter item 1).
+
+### [CHARTER-PIC0] — THE QUOTIENT-STACK HEADLINE + watch duty (multi-session)
+1. **T-PIC1c minimal repro**: distill the 8-attempt dossier into a self-contained repro
+   file + a bump-retest hook note for the daily-bump worker (if the anomaly clears on a
+   toolchain bump, T-PIC1c discharges immediately). Deliverable: repro + board note.
+2. **Claim [T-W6] — `M_ell^W := [U/G]`, the v8 quotient-stack HEADLINE** (verify unstaffed
+   at pickup per rule 5; beastmode-Q is long quiet). Its inputs are DONE: T-W3b/c
+   (TorsorPair + trivialization + full faithfulness), T-W5 (charts/atlas), the v9.2
+   severance (build from TORSORS, never `Spec(A^G)`). Assemble the groupoid equivalence;
+   v10.24(b) opaque interfaces on every heavy def; decompose-don't-grind. **MILESTONE
+   (report): the [U/G] equivalence lands.**
+3. **Standing watch duty** (each session start): re-check #35545/#41383/#35773 — when
+   Riou's lane merges what GAP-1 needs, RESUME P2 (tensor closure + Pic group) as the
+   priority and report.
