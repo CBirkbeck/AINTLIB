@@ -3,6 +3,7 @@ import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 import Mathlib.LinearAlgebra.Determinant
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.LinearAlgebra.Contraction
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.HopfAlgebra.Convolution
 import Mathlib.RingTheory.HopfAlgebra.GroupLike
@@ -276,6 +277,142 @@ omit [IsCocomm R A] in
     (rightTranslationAlgHom φ).toLinearMap
       = (Algebra.TensorProduct.map φ (AlgHom.id R A)).toLinearMap ∘ₗ Coalgebra.comul := by
   rfl
+
+/-! ### The comparison iso `Ψ : A'_B ⊗_R A ≅ A'_{B⊗A}` (T-D5e-core, coevaluation engine)
+
+Tate's Lemma 3.8.2 and the coevaluation unit `u = 𝟙 ∈ M` are cleanest through the natural
+identification of the free-module operators with honest convolution maps. For `A` finite free over
+`R`, the linear map
+`Ψ : (A →ₗ[R] B) ⊗_R A → (A →ₗ[R] B ⊗_R A)`, `f ⊗ a ↦ (x ↦ f x ⊗ a)`
+(mathlib's `rTensorHomEquivHomRTensor`) is an **isomorphism**, and — with `M = A'_B ⊗_R A`
+carrying the tensor-of-algebras product and `T = A'_{B⊗_R A}` the convolution product — it is an
+`R`-**algebra** isomorphism `M ≅ T`. Under Ψ the coevaluation `u = ∑ᵢ eᵢ' ⊗ eᵢ` becomes the
+universal point `pointConv (includeRight)` of `T` (hence a unit, by `isUnit_pointConv`), and Tate's
+Lemma 3.8.2 becomes the cocommutativity identity `∑ φ(x₍₁₎) ⊗ x₍₂₎ = ∑ φ(x₍₂₎) ⊗ x₍₁₎`. -/
+
+section DeligneLeaf
+
+variable [Module.Free R A] [Module.Finite R A]
+
+/-- `Ψ` as an `R`-linear equivalence `A'_B ⊗_R A ≃ A'_{B⊗A}`, `f ⊗ a ↦ (x ↦ f x ⊗ a)`, from
+mathlib's `rTensorHomEquivHomRTensor` (an equivalence since `A` is finite free) bridged through the
+`WithConv` type synonym on both sides. -/
+noncomputable def psiLinearEquiv :
+    WithConv (A →ₗ[R] B) ⊗[R] A ≃ₗ[R] WithConv (A →ₗ[R] B ⊗[R] A) :=
+  (TensorProduct.congr (WithConv.linearEquiv R (A →ₗ[R] B)) (LinearEquiv.refl R A)) ≪≫ₗ
+    rTensorHomEquivHomRTensor R A B A ≪≫ₗ
+    (WithConv.linearEquiv R (A →ₗ[R] B ⊗[R] A)).symm
+
+@[simp] lemma psiLinearEquiv_tmul_ofConv (f : WithConv (A →ₗ[R] B)) (a : A) (x : A) :
+    (psiLinearEquiv (f ⊗ₜ[R] a) : WithConv (A →ₗ[R] B ⊗[R] A)).ofConv x = f.ofConv x ⊗ₜ[R] a := by
+  simp only [psiLinearEquiv, LinearEquiv.trans_apply, TensorProduct.congr_tmul,
+    WithConv.linearEquiv_apply, LinearEquiv.refl_apply, rTensorHomEquivHomRTensor_apply,
+    WithConv.symm_linearEquiv_apply, WithConv.ofConv_toConv,
+    TensorProduct.rTensorHomToHomRTensor_apply]
+
+/-- `Ψ` preserves the unit: `1_M = 1_S ⊗ 1_A ↦ 1_T` (both send `x ↦ ε(x) • (1 ⊗ 1)`). -/
+lemma psiLinearEquiv_one :
+    psiLinearEquiv (1 : WithConv (A →ₗ[R] B) ⊗[R] A) = 1 := by
+  apply WithConv.ext
+  ext x
+  rw [Algebra.TensorProduct.one_def, psiLinearEquiv_tmul_ofConv]
+  simp [LinearMap.convOne_apply, Algebra.TensorProduct.algebraMap_apply,
+    Algebra.TensorProduct.one_def]
+
+/-- `Ψ` is multiplicative: it carries the tensor-of-algebras product on `M = A'_B ⊗_R A` to the
+convolution product on `T = A'_{B⊗A}`. On generators both sides send `x ↦ ∑ (f x₍₁₎ · g x₍₂₎) ⊗ (a·c)`
+(the convolution Sweedler sum), by `convMul_apply` on each side. -/
+lemma psiLinearEquiv_mul (m₁ m₂ : WithConv (A →ₗ[R] B) ⊗[R] A) :
+    psiLinearEquiv (m₁ * m₂) = psiLinearEquiv m₁ * psiLinearEquiv m₂ := by
+  induction m₁ using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp [add_mul, map_add, hx, hy]
+  | tmul f a =>
+    induction m₂ using TensorProduct.induction_on with
+    | zero => simp
+    | add x y hx hy => simp [mul_add, map_add, hx, hy]
+    | tmul g c =>
+      apply WithConv.ext
+      ext x
+      rw [Algebra.TensorProduct.tmul_mul_tmul, psiLinearEquiv_tmul_ofConv,
+        (ℛ R x).convMul_apply f g, (ℛ R x).convMul_apply (psiLinearEquiv (f ⊗ₜ[R] a))
+          (psiLinearEquiv (g ⊗ₜ[R] c)), TensorProduct.sum_tmul]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [psiLinearEquiv_tmul_ofConv, psiLinearEquiv_tmul_ofConv,
+        Algebra.TensorProduct.tmul_mul_tmul]
+
+/-- **(T-D5e-core — the comparison algebra isomorphism.)** `Ψ : M = A'_B ⊗_R A ≅ T = A'_{B⊗A}`
+as an `R`-algebra equivalence. Tensor-of-algebras product ↦ convolution product. -/
+noncomputable def psiAlgEquiv :
+    WithConv (A →ₗ[R] B) ⊗[R] A ≃ₐ[R] WithConv (A →ₗ[R] B ⊗[R] A) :=
+  AlgEquiv.ofLinearEquiv psiLinearEquiv psiLinearEquiv_one psiLinearEquiv_mul
+
+@[simp] lemma psiAlgEquiv_apply (m : WithConv (A →ₗ[R] B) ⊗[R] A) :
+    psiAlgEquiv m = psiLinearEquiv m := rfl
+
+/-! ### The right-translation automorphism `τ` (T-D5e-τ auto-ness)
+
+`τ = translationEndo φ` is promoted to an `A'_B`-algebra **automorphism** with inverse
+`translationEndo φ'`, `φ' = φ ∘ S`. The two compositions reduce (via `Algebra.TensorProduct.ext`)
+to `translationEndo φ (translationTarget φ' a) = 1 ⊗ a`, which is monoid algebra in the *commutative*
+linear-convolution ring `A'_M = WithConv (A →ₗ[R] M)`: writing `Pψ = pointConv(a ↦ ptS ψ(a) ⊗ 1)`,
+`η = pointConv includeRight`, one has `translationTarget φ = Pφ ⋆ η` and
+`translationEndo φ ∘ translationTarget ψ = Pψ ⋆ Pφ ⋆ η`, with `Pφ' = Pφ⁻¹` (the antipode is the
+convolution inverse, `mul_pointConv_antipode_eq_one`). -/
+
+/-- `A →ₐ[R] M`, `a ↦ ptS φ(a) ⊗ 1` — the "constant in the `A`-factor" leg of the right translation
+(here `ptS = pointAlgHom φ`). Its `pointConv` is Tate's `Pφ`. -/
+noncomputable def leftPointHom (φ : A →ₐ[R] B) :
+    A →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A :=
+  (Algebra.TensorProduct.includeLeft :
+    WithConv (A →ₗ[R] B) →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A).comp (pointAlgHom φ)
+
+@[simp] lemma leftPointHom_apply (φ : A →ₐ[R] B) (a : A) :
+    leftPointHom φ a = pointAlgHom φ a ⊗ₜ[R] (1 : A) := rfl
+
+/-- `translationEndo φ (s ⊗ a') = (s ⊗ 1) · translationTarget φ a'` (from the tensor-lift on
+generators; `Algebra.ofId S M s = s ⊗ 1`). -/
+lemma translationEndo_tmul (φ : A →ₐ[R] B) (s : WithConv (A →ₗ[R] B)) (a' : A) :
+    translationEndo φ (s ⊗ₜ[R] a') = (s ⊗ₜ[R] (1 : A)) * translationTarget φ a' := by
+  rw [translationEndo, Algebra.TensorProduct.lift_tmul, Algebra.ofId_apply,
+    Algebra.TensorProduct.algebraMap_apply, Algebra.algebraMap_self_apply]
+
+/-- `translationTarget φ a = ∑ ptS φ(a₍₁₎) ⊗ a₍₂₎` in any Sweedler representation of `a`. -/
+lemma translationTarget_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*} (repr : Coalgebra.Repr R a ι) :
+    translationTarget φ a = ∑ i ∈ repr.index, pointAlgHom φ (repr.left i) ⊗ₜ[R] repr.right i := by
+  rw [translationTarget, AlgHom.comp_apply,
+    show (Bialgebra.comulAlgHom R A) a = Coalgebra.comul a from rfl, ← repr.eq, map_sum]
+  exact Finset.sum_congr rfl fun i _ => by rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+
+/-- **(T-D5e-τ, L1.)** In `A'_M`, `translationEndo φ ∘ translationTarget ψ = Pψ ⋆ (translationTarget φ
+as a point)`: both send `a ↦ ∑ (ptS ψ(a₍₁₎) ⊗ 1) · translationTarget φ(a₍₂₎)`. -/
+lemma translationEndo_translationTarget_conv (φ ψ : A →ₐ[R] B) (a : A) :
+    translationEndo φ (translationTarget ψ a)
+      = (pointConv (leftPointHom ψ) * pointConv (translationTarget φ)) a := by
+  rw [translationTarget_apply ψ a (ℛ R a), map_sum,
+    (ℛ R a).convMul_apply (pointConv (leftPointHom ψ)) (pointConv (translationTarget φ))]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [translationEndo_tmul]
+  simp only [ofConv_pointConv, pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+    leftPointHom_apply]
+
+/-- **(T-D5e-τ, L2.)** `translationTarget φ = Pφ ⋆ η` in `A'_M`, `η = pointConv includeRight`:
+both send `a ↦ ∑ (ptS φ(a₍₁₎) ⊗ 1)(1 ⊗ a₍₂₎) = ∑ ptS φ(a₍₁₎) ⊗ a₍₂₎`. -/
+lemma pointConv_translationTarget_eq (φ : A →ₐ[R] B) :
+    pointConv (translationTarget φ)
+      = pointConv (leftPointHom φ) * pointConv (Algebra.TensorProduct.includeRight) := by
+  apply WithConv.ext
+  ext a
+  rw [ofConv_pointConv]
+  show translationTarget φ a = _
+  rw [translationTarget_apply φ a (ℛ R a),
+    (ℛ R a).convMul_apply (pointConv (leftPointHom φ)) (pointConv Algebra.TensorProduct.includeRight)]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  simp only [ofConv_pointConv, pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+    leftPointHom_apply, Algebra.TensorProduct.includeRight_apply,
+    Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
+
+end DeligneLeaf
 
 /-- **(Hopf core of Prop 3.8.1 = Lemma 3.8.2, Tate §3.8 p. 144 — SORRIED sub-ticket T-D5e-core.)**
 The operators underlying Deligne's commutator: for a `B`-point `φ` (with `λ = pointConv φ`), there
