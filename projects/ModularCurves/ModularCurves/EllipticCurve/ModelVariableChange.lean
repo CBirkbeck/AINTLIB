@@ -2765,6 +2765,22 @@ lemma pointedIso_exists_witness {W W' : WeierstrassCurve R}
     refine hgoal.trans ?_
     rw [hcfold]
 
+/-- **Forward inclusion of the filtration transport**: the induced coordinate isomorphism
+maps the pole-order filtration into the pole-order filtration. -/
+lemma pointedIsoCoordEquiv_filtration_le {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') (n : ℕ) :
+    Submodule.map (pointedIsoCoordEquiv e heπ hez).toLinearEquiv.toLinearMap
+        (poleOrderFiltration W' n) ≤ poleOrderFiltration W n := by
+  rintro _ ⟨f', hf', rfl⟩
+  have hf'loc := (mem_poleOrderFiltration_iff W' f' n).mp hf'
+  have hgoal : pointedIsoCoordEquiv e heπ hez f' ∈ poleOrderFiltration W n := by
+    rw [mem_poleOrderFiltration_iff]
+    exact mem_range_algebraMap_of_forall_maximal W _ (fun P hP htP =>
+      pointedIso_exists_witness e heπ hez f' n hf'loc P hP htP)
+  exact hgoal
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
