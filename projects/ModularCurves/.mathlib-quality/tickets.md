@@ -7871,3 +7871,32 @@ decompose) the heavy remainder is handed off as scoped sub-tickets, not ground t
 **Status:** p0's leaf-lane work dischargeable against registered pins + current infra is COMPLETE. The
 box reduces to a single named geometry bridge (hfix). Handing off; awaiting fable-PIC0 (DS-data) and/or
 an isogeny-quotient + finite-étale-descent infra ticket for the geometry remainder.
+
+## Amendments v10.26 (2026-07-08): T-B5D/T-DISC scoping DONE — PR #5222 MERGED; the v9.3 infeasibility read SUPERSEDED; P3b3 executes T-B5D-A
+
+- **P3b3's `/develop --decompose` delivered** (PR #5222 MERGED, coordinator light review: new
+  bridge file + board only): `decomposition-km2.3-b5d.md` (KM 2.3.1 / Cor. 2.3.2 / Loeffler
+  3.4.2(2) quoted verbatim, PDF = print + 11), `EllipticCurve/MulByHomUnramified.lean`
+  (3074 jobs green; L-A + L-BC sorried; **MASTER already sorry-free** — the composition
+  type-checks), leaf tickets **T-B5D-A** (L-A, build first), **T-B6′** (non-circular fibre
+  comparison), **T-DISC**.
+- **STRATEGIC SUPERSESSION (read carefully)**: the v9.3 T-B5z verdict ("invariant-differential
+  route INFEASIBLE at current mathlib") is superseded IN PART. beastmode-B correctly found the
+  math absent from MATHLIB; P3b3's decompose finds it PRESENT IN AINTLIB — HasseWeil's
+  `OmegaPullbackCoeff` / `InvariantDifferential` / `card_kernel_eq_degree_of_separable` /
+  `mulByInt_degree` / `TorsionGeneralN` (all verified present) supply the fibre-level
+  "tangent map = mult by N" content, and **KM Cor. 2.3.2 ("[N] is an f.p.p.f. E[N]-torsor")
+  reduces [N]-unramified to E[N]/S-unramified** — non-circular (T-B6′ replaces the circular
+  T-B6 consumption). The repo's reuse-don't-re-prove doctrine winning: in-repo import beats
+  the mathlib gap. The mapped dead ends (scheme-Ω¹ API, chart-[N], the circular chain)
+  remain dead — documented, not re-litigated.
+- **Feasibility: MODERATE-MAJOR, genuinely dischargeable.** Execution order (P3b3's
+  recommendation, adopted): **T-B5D-A first** (`formallyUnramified_mulByHom_of_torsionπ` —
+  self-contained, route-independent, collides with no lane) → T-B6′ + T-DISC close L-BC →
+  MASTER discharges **BB-DIFF** (reviewer work-order #4 falls; unblocks T-B5 → T-D6b /
+  T-D7-bridge / T-D8-bridge → the T-E7 Y₁(N) milestone chain).
+- **P3b3 next claim: T-B5D-A — execute your own decomposition** (freshest context; T-Q2-proofs
+  stays the queued unstaffed stream for the next free worker). v10.24 applies to the bridge
+  layer: heavy definitions ship their opaque interface in the same increment.
+- Session tally for the record (P3b3): #5220 merged, #5221 merged, #5222 merged — three
+  scoping/proving arcs in one day, each on the board with quotes.
