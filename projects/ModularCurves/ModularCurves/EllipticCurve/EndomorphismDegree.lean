@@ -94,6 +94,10 @@ theorem mulBy_pointed (n : ℤ) : η[E.asOver] ≫ E.mulBy n = η[E.asOver] := b
   simp only [EllipticCurve.mulBy]
   rw [GrpObj.comp_zpow, Category.comp_id, hη1, one_zpow]
 
+/-- `[1] = 𝟙 E.asOver`: multiplication-by-one is the identity endomorphism (`(𝟙)^1 = 𝟙`). -/
+theorem mulBy_one : E.mulBy 1 = 𝟙 E.asOver := by
+  simp only [EllipticCurve.mulBy, zpow_one]
+
 /-- **(T-END0b pin — KM 2.6.1)** The defining identity of the degree: `f^t ∘ f = [deg f]`. -/
 theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :
     E.endDual f ≫ f = E.mulBy (E.endDeg f) := sorry
@@ -106,6 +110,29 @@ theorem endDeg_mulBy (n : ℤ) : E.endDeg (E.mulBy n) = n ^ 2 := sorry
 `deg f = N ≥ 0` for an isogeny of degree `N`, and `deg 0 = 0`). Supplies the `0 ≤ d` hypothesis of
 `gme_deg_trace_forces_zero` in the rigidity computation. -/
 theorem endDeg_nonneg (f : E.asOver ⟶ E.asOver) : 0 ≤ E.endDeg f := sorry
+
+/-- **(T-END0c pin — KM 2.6.1, `deg` multiplicative)** The degree is multiplicative under
+composition: `deg(f ≫ g) = deg f · deg g`. KM (Thm 2.6.1 / Cor 2.6.1.1): the degree of a composite
+isogeny is the product of the degrees (`(f∘g)^t (f∘g) = g^t (f^t f) g = [deg f][deg g]`). -/
+theorem endDeg_comp (f g : E.asOver ⟶ E.asOver) :
+    E.endDeg (f ≫ g) = E.endDeg f * E.endDeg g := sorry
+
+/-- The identity endomorphism has degree `1`: `deg 𝟙 = 1` (`𝟙 = [1]` and `deg [1] = 1² = 1`).
+Proved from `mulBy_one` + `endDeg_mulBy` (no data-sorry of its own). -/
+theorem endDeg_one : E.endDeg (𝟙 E.asOver) = 1 := by
+  rw [← E.mulBy_one, E.endDeg_mulBy, one_pow]
+
+/-- **(deg of an automorphism = 1 — KM 2.7.1)** An invertible endomorphism (an automorphism of
+`E/S`) has degree `1`. From multiplicativity `deg f · deg (f⁻¹) = deg(f ≫ f⁻¹) = deg 𝟙 = 1` and
+`deg ≥ 0`, `deg f` is a non-negative integer dividing `1`, hence `1`. This discharges the
+`deg ε = 1` bridge of `aut_hom_eq_id_of_fullLevel`. -/
+theorem endDeg_eq_one_of_isIso (f : E.asOver ⟶ E.asOver) [IsIso f] : E.endDeg f = 1 := by
+  have hmul : E.endDeg f * E.endDeg (inv f) = 1 := by
+    rw [← E.endDeg_comp, IsIso.hom_inv_id, E.endDeg_one]
+  have hdvd : E.endDeg f ∣ 1 := ⟨E.endDeg (inv f), hmul.symm⟩
+  rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with h | h
+  · exact h
+  · have := E.endDeg_nonneg f; omega
 
 /-- **(KM 2.6.2.1)** The transpose of `[N]` is `[N]` itself: `[N]^t = [N]`. -/
 theorem endDual_mulBy (n : ℤ) : E.endDual (E.mulBy n) = E.mulBy n := sorry

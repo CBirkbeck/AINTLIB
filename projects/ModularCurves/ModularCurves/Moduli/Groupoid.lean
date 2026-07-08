@@ -104,10 +104,15 @@ theorem aut_hom_eq_id_of_fullLevel [IsLocallyNoetherian S] (N : ℕ) [NeZero N] 
     e.hom.hom = 𝟙 E.E := by
   -- Package the underlying automorphism as an `Over S`-endomorphism `ε` of `E`.
   let ε : E.asOver ⟶ E.asOver := Over.homMk e.hom.hom e.hom.over_w
-  -- BRIDGE 1 (deg of an automorphism = 1; KM 2.7.1). Spec of `endDeg`; awaits the `endDeg` data
-  -- (T-END0b, fable-PIC0's Pic⁰ lane) — `ε` is an iso (`e` is), and `deg` is multiplicative with
-  -- `deg 𝟙 = 1`, `deg ≥ 0`, forcing `deg ε = 1`.
-  have hdeg : E.endDeg ε = 1 := sorry
+  -- BRIDGE 1 (deg of an automorphism = 1; KM 2.7.1). `ε` is an iso in `Over S` (its inverse is the
+  -- `Over`-package of `e.inv.hom`, and the two round-trips are `e.hom_inv_id`/`e.inv_hom_id` read on
+  -- the `.hom` field), so `endDeg_eq_one_of_isIso` (deg multiplicative + `deg 𝟙 = 1` + `deg ≥ 0`)
+  -- forces `deg ε = 1`.
+  haveI : IsIso ε := by
+    refine ⟨⟨Over.homMk e.inv.hom e.inv.over_w, ?_, ?_⟩⟩
+    · ext1; exact congrArg HomOver.hom e.hom_inv_id
+    · ext1; exact congrArg HomOver.hom e.inv_hom_id
+  have hdeg : E.endDeg ε = 1 := E.endDeg_eq_one_of_isIso ε
   -- BRIDGE 2 (level structure → torsion fixing). `ε` fixes `P, Q` (`hP`, `hQ`); by T-G2 rigidity
   -- (`ε` pointed ⟹ additive) and `P, Q` generating `E[N] = ker[N]` fibrewise (`hPQ`,
   -- `IsNaiveFullLevel`), `ε` fixes the whole `N`-torsion subscheme.
