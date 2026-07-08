@@ -5631,8 +5631,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 
 - **[T-W7.0c-c5β-projglue]** cross-index chart compatibility — `chartι_comp_specMap_chartAwayHom_eq`
   (`EllipticCurve/AdditionChartProj.lean`, stated + sorried 81e925db).
-  - **Status**: in_progress · **Claimed**: coordinator-P1, 2026-07-08T13:05Z (spawned per
-    beastmode Tier-A from c5β's β4(c)) · **Type**: 1 theorem + 1 ForMathlib lemma
+  - **Status**: **done** (coordinator-P1, 2026-07-08T13:05Z → 13:54Z) · **Claimed**:
+    coordinator-P1, 2026-07-08T13:05Z (spawned per beastmode Tier-A from c5β's β4(c)) ·
+    **Type**: 1 theorem + supporting lemmas
+  - **DONE 2026-07-08T13:54Z** (3166d104; `AdditionChartProj.lean` ZERO sorries, axiom-clean).
+    `chartι_comp_specMap_chartAwayHom_eq` PROVEN. No new infrastructure was needed — the
+    boarded "mathlib gap" was false (`Away.isLocalization_mul` exists) and the `awayCongr`
+    transport was eliminated by taking the product element as a parameter. Chain:
+    `chartAwayHomOfTriple_isLocalizationElem` (transition element ↦ `t l * u`) →
+    `projGlueLift` (common map via `IsLocalization.Away.lift`) → `specMap_projGlueLift_awayι`
+    (k-side factorization via `lift_comp` + `Proj.SpecMap_awayMap_awayι`) →
+    `chartAwayHomOfTriple_awayMk` (leaf 1: **the chart morphism IS evaluation at the triple,
+    normalized by the invertible coordinate**) → `projGlueLift_eq` (the two lifts agree, by
+    `lift_unique` + the identity `awayMap_k(c/X_k^n)·(awayMap_l(X_k/X_l))^n = awayMap_l(c/X_l^n)`
+    and `(t_k v)(u t_l) = 1`).
   - **Statement**: a projective triple on the curve, regular at indices `k` and `l`, defines the
     SAME morphism to the model through either chart. (Equivalently: a triple defines a morphism
     to `Proj`, chart-independently — the original plan's `toProjOfBihomTriple`.)
