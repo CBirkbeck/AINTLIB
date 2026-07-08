@@ -5117,6 +5117,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `pullback (projModelπ W) (projModelπ W)` as `chartRing i ⊗[R] chartRing j`; compose with
     `biChartRingTensorEquiv.symm` + `chartCoordEquiv` to land the triples and their on-curve
     theorems on that `Γ`. Then β3.
+  - **β1-scheme: route pinned + two obstacles found** (coordinator-P1, 2026-07-08T10:35Z;
+    NO code yet — the iso would be a data-def and the DATA-SORRY register is frozen, so it is
+    boarded rather than sorried):
+    1. The cover piece is `pullback (awayι_i ≫ projModelπ) (awayι_j ≫ projModelπ)`; the repo's
+       `awayι_projModelπ` (WeierstrassModel.lean:709) rewrites each leg as
+       `Spec.map (ofHom ((algebraMap (quotientGrading _ 0) (Away …)).comp (gradeZeroRingEquiv W)))`.
+       **Obstacle 1**: `pullbackSpecIso R S T` wants `[Algebra R S]` with `algebraMap` DEFEQ to that
+       composite — so the R-algebra structure on `Away` must be introduced as a local instance
+       `((algebraMap _ (Away …)).comp (gradeZeroRingEquiv W)).toAlgebra` (it does not exist as a
+       global instance; the structure map factors through the degree-0 part).
+    2. Transport `Away_i ⊗[R] Away_j → affineChartRing i ⊗[R] affineChartRing j` by
+       `Algebra.TensorProduct.congr`. **Obstacle 2**: `chartCoordEquiv W i` is only a `≃+*`
+       (`chartZAffineEquiv` is the sole `≃ₐ[R]`), so it needs an `AlgEquiv` upgrade
+       (`AlgEquiv.ofRingEquiv` + a `commutes'` proof against the same `gradeZeroRingEquiv`
+       factorization). Do this ONCE as `chartCoordAlgEquiv` — β3 needs it too.
+    3. Then `Spec (of (biChartRing W i j)) ≅` the (i,j) piece, via `biChartRingTensorEquiv`
+       (fc670a51), and `Scheme.Pullback.openCoverOfLeftRight (modelChartCover W) (modelChartCover W)`
+       assembles the pieces into a cover of `E ×_R E`.
+    Est. 150–250 lines. Everything below it (β3/β4) is unblocked by this one iso.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
