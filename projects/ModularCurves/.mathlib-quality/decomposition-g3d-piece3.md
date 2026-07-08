@@ -18,38 +18,48 @@ uniquely through `π`), the pins are:
 
 So the deliverable is precisely: **a universal coequalizer `π : E ⟶ Q` of `act, pr_E`** (with `Q ⟶ S`).
 
-## Route decision (pending the mathlib/project recon)
-- **If mathlib has coequalizers of schemes for this shape, or a finite-flat-groupoid quotient**: use
-  it directly — `Q := coequalizer act pr_E` (or the groupoid-quotient API) and read off the pins.
-  Cheapest by far. (Recon Q1/Q2.)
-- **If the project's `ForMathlib/SchemeQuotient.lean` glue-data generalises**: adapt it. It is written
-  for a CONSTANT `[Group G]` action; the group-SCHEME case needs the local piece to be the comodule
-  coinvariants (below), but the glue skeleton may be reusable verbatim. (Recon Q3.)
-- **Else, from scratch (route 3a)** — the affine-coinvariants-glue stack:
-  - **3a-i (co-action `ρ`)**: the translation co-action at the ring/sheaf level, the dual of
-    `translationAction`. Affine-locally on a `G`-stable `Spec B ⊆ E`, `ρ : B → B ⊗_R A` (`A = O_G`),
-    `ρ = act^# ` under `O(G ×_S Spec B) ≅ B ⊗_R A` (`G` finite ⟹ affine over the base).
-  - **3a-ii (coinvariants)**: `B^{coG} := eq(ρ, b ↦ b ⊗ 1)` as an `R`-subalgebra (mathlib coalgebra
-    coinvariants if available — recon Q4 — else built here), and `Spec B ⟶ Spec B^{coG}` with its
-    universal property (comodule analogue of `AffineQuotient`'s `existsUnique_invariantsπ_lift`).
-  - **3a-iii (G-stable affine cover)**: `E` quasi-projective over `S` ⟹ every finite `G`-orbit lies
-    in an affine open ⟹ a `G`-stable affine cover exists. (Real theorem; may itself decompose.)
-  - **3a-iv (glue)**: glue the `Spec B^{coG}` on p2's `SchemeQuotient` glue-data pattern; `π`, `Q ⟶ S`,
-    universality. p2-stack-scale.
-- **fppf route (3b)** is GATED: representability of the fppf coequalizer needs SGA-III / ample inputs
-  (cf. the board's T-E10 gate) that are not currently available — do not take unless those land.
+## Route DECIDED (recon complete, 2026-07-08)
+The recon (`.mathlib-quality/` not committed) settled every question. Verdicts:
+- **No turnkey scheme coequalizer / finite-flat-groupoid quotient in mathlib.** `Scheme` has only
+  coproducts (`AlgebraicGeometry/Limits.lean`); no `HasCoequalizer`.
+- **BUT the quotient PROPERTY is free once `Q` exists**: `AlgebraicGeometry/Sites/Fpqc.lean` gives
+  `instance [Flat f] [Surjective f] [LocallyOfFinitePresentation f] : EffectiveEpi f` — an effective
+  epi IS the coequalizer of its kernel pair. So a finite-locally-free `π : E ⟶ E/G` is automatically
+  the universal coequalizer; its kernel pair is `G ×_S E` (via `actPair`, mono ⟹ the groupoid is an
+  equivalence relation — **`actPair_mono` now PROVEN**). And `isRegularEpi_of_flat_of_surjective_of_isAffine`
+  (`EffectiveEpi.lean`, `@[stacks 023Q]`) gives the same for the affine-local charts.
+- **`AffineQuotient`/`SchemeQuotient` are CONSTANT-`[Group G]` only** — reusable *architecture*
+  (`localQuotient → localQuotientMap` open-immersions → `tripleIso` cocycle → `Scheme.GlueData` →
+  `quotient` + the `j`-relative descent keystone), NOT the affine engine.
+- **`FixedPoints Bᴳ` must be replaced by Hopf-comodule co-invariants `{b : ρ b = b ⊗ 1}` — ABSENT
+  from mathlib** (no `coinvariant`/`cotensor` in `RingTheory/{Coalgebra,Bialgebra,HopfAlgebra}`; the
+  only near-hit is representation-coinvariants, the wrong object). **This is the one thing to build.**
 
-## Off-critical-path but needed for [T-G3d-Niso] (separate ticket): freeness
-`actPair = ⟨act, pr_E⟩ : G ×_S E ⟶ E ×_S E` is a **monomorphism** (the action is free). Route:
-`actPair = (ιOver ⊗ 𝟙) ≫ shear` where `shear = lift μ pr_E : E ×_S E ⟶ E ×_S E`, `(a,b) ↦ (a+b, b)`;
-`shear` is a split mono (retraction `(u,v) ↦ (u-v, v)`, needs the group-object cancellation
-`(a+b)-b = a`); `ιOver` mono from `G.closedImmersion` (`IsClosedImmersion ⟹ Mono`); `f ⊗ 𝟙` mono from
-`f` mono (cartesian). Feeds the degree count `deg[N] = N² = rank E[N]` in `E/E[N] ≅ E`. Route-
-independent of the construction, but only meaningful once `Q` exists — so sequence it AFTER a route
-for `Q` is chosen.
+**THE ROUTE (3a, confirmed):** affine co-invariants → glue, reusing the `SchemeQuotient` architecture.
+- **3a-i (Hopf-comodule co-invariants, PURE ALGEBRA, the mathlib-gap core)**: for a comodule
+  `ρ : B → B ⊗_R A` (`A = O_G`, a Hopf/bialgebra), the subalgebra `B^{coG} := {b : ρ b = b ⊗ 1}`, and
+  the affine categorical quotient `Spec B ⟶ Spec B^{coG}` (flat+surjective ⟹ regular epi via `023Q`;
+  universal property = comodule analogue of `existsUnique_invariantsπ_lift`). Self-contained; upstreamable.
+- **3a-ii (co-action `ρ`)**: the translation co-action, affine-local dual of `translationAction`;
+  `ρ = act^#` under `O(G ×_S Spec B) ≅ B ⊗_R A` (`G` finite ⟹ affine over the base).
+- **3a-iii (G-stable affine cover)**: `E` projective over `S` ⟹ finite orbits lie in affine opens ⟹
+  a `G`-stable affine cover exists (co-action analogue of `exists_isStableOpen_isAffineOpen`, which
+  needs the affine diagonal / separatedness — `E.π` proper gives it).
+- **3a-iv (glue)**: glue `Spec B^{coG}` on the `SchemeQuotient` `GlueData` skeleton; discharge the six
+  `SubgroupQuotient` pins through `isInvariant_iff_coequalizes`. p2-stack-scale.
+- **fppf route (3b)** stays GATED (representability of the fppf quotient sheaf needs SGA-III/ample per
+  the board's T-E10 gate; `Sites/Representability.lean` would glue it but still needs the local charts
+  from 3a-i). Do not take unless those land.
 
-## Status
-Recon dispatched (mathlib coequalizers / finite-flat-groupoid quotients / `AffineQuotient` reusability
-/ comodule coinvariants / closed-immersion mono). Route chosen on its return; then decompose the
-chosen route into leaf tickets and build. Route 3a is the fallback and is p2-stack-scale (multi-
-session); 3b is gated; a mathlib/`SchemeQuotient` reuse would collapse most of it.
+## Freeness — DONE (`actPair_mono`, axiom-clean, `TranslationAction.lean`)
+`actPair = ⟨act, pr_E⟩` is a monomorphism (proven via `GrpObj.lift_left_mul_ext` right-cancelling the
+common `pr_E` leg + `cancel_mono ιOver` + `hom_ext`; `ιOver` mono from `IsClosedImmersion ⟹ Mono`).
+The action is free ⟹ the groupoid `G ×_S E ⇉ E` is an equivalence relation (the input to 3a's
+effective-quotient existence) ⟹ the degree count `deg[N] = N² = rank E[N]` in `E/E[N] ≅ E`.
+
+## Status / next
+Route DECIDED. Freeness DONE. **Next leaf: 3a-i, the Hopf-comodule co-invariants affine quotient** —
+pure algebra, the mathlib gap, self-contained, upstreamable; build as a new `ForMathlib` file mirroring
+`FixedPoints.subalgebra`/`AffineQuotient` for co-invariants. Then 3a-ii/iii/iv. Multi-session
+(p2-stack-scale); decompose 3a-i into leaves (comodule structure → coinvariants subalgebra → affine
+universal property) when started.
