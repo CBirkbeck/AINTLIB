@@ -2373,6 +2373,35 @@ lemma overlapSectionsEquiv_res_chartZ (W : WeierstrassCurve R)
   rw [awayIso_res_squareZ W w, overlapLocEquiv_awayMap_z]
   rfl
 
+/-- `Y`-chart sections restrict to the overlap as `algebraMap`-values of the localization
+dictionary. -/
+lemma res_chartYSection_eq_symm_algebraMap (W : WeierstrassCurve R)
+    (b : AdjoinRoot (infChartCubic W)) :
+    ((projModel W).presheaf.map (homOfLE
+      (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
+      ((chartYSectionsRingEquiv W).symm b) =
+    (overlapSectionsEquiv W).symm (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W)) b) := by
+  rw [RingEquiv.eq_symm_apply, overlapSectionsEquiv_res_chartY,
+    RingEquiv.apply_symm_apply]
+
+/-- `Z`-chart sections restrict to the overlap as `overlapMap`-values of the localization
+dictionary. -/
+lemma res_chartZSection_eq_symm_overlapMap (W : WeierstrassCurve R)
+    (a : W.toAffine.CoordinateRing) :
+    ((projModel W).presheaf.map (homOfLE
+      (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op).hom
+      ((chartZSectionsRingEquiv W).symm a) =
+    (overlapSectionsEquiv W).symm (overlapMap W a) := by
+  rw [RingEquiv.eq_symm_apply, overlapSectionsEquiv_res_chartZ,
+    RingEquiv.apply_symm_apply]
+
 /-- A `t`-cleared overlap relation in the localization becomes a sections relation on the
 chart overlap. -/
 lemma overlap_sections_equation_of_loc (W : WeierstrassCurve R)
