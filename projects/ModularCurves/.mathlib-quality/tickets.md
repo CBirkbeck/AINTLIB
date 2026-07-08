@@ -6997,3 +6997,31 @@ cut.*
   fable-P4's Q-restaff owns AffineQuotient/gluing + T-Q6; fable-PIC0 owns Picard/* — all
   disjoint; coordinate via the board). Consumers: KM Ch. 7 regularity (phase 4) + the
   étale-torsor layer behind the quotient theory.
+
+## Amendments v10.13 (2026-07-08): beastmode-A re-dispatch (post-T-D6a-ii) + P3b3 PR nudge
+
+- **beastmode-A report absorbed**: T-D6a-ii COMPLETE, axiom-clean — L3
+  `Section.orderDivisor_baseChange`, ForMathlib `exists_factor_comap_iff` (comapIso factoring
+  dictionary, upstream-grade), L4 `RelEffCartierDiv.IsSubgroup.baseChange`, headline
+  `Section.HasExactOrder.baseChange` (= KM 1.4.4 (1)⟹(2)). 0i-b flipped; integrator merge
+  path de-risked (b2 spine re-certified sorryAx-free); pushed. **Standing duty preserved**:
+  the T-W7.1b integrator wire PREEMPTS everything below the moment P3b3's PR opens.
+- **Next claim for beastmode-A (priority order; all compatible with the wire duty):**
+  1. **[T-D6b] re-assessment + attack** — the claim is RELEASED (p0 → T-END0 after T-KMQ; no
+     sentinel holds it; ExactOrder.lean free). p0's assessment predates BOTH `comap_mul`
+     (T-D6a-i) and today's T-D6a-ii suite — beastmode-A now holds the freshest toolkit for it
+     (comap_mul + orderDivisor_baseChange + HasExactOrder.baseChange + Point.baseChangeEquiv).
+     Re-assess KM 1.4.4 (2)⟹(3) against that toolkit (read the KM pages, quote verbatim); if
+     it is STILL étale-gated beyond the toolkit, rebox per the v10.2 protocol (precise sorried
+     statement + docstring route) and fall through.
+  2. **[T-D33] subgroup-divisor locus** — dependencies NOW BOTH DONE (T-D14 ✓; T-D15 ✓
+     2026-07-06, 5-line proof); the D-lane is otherwise unstaffed; beastmode-A holds the
+     freshest IsSubgroup/divisor context (today's L4). Cuts the Γ₁ exact-order condition over
+     U — feeds T-W8 / level spaces + representability.
+  3. **[T-IRR0] scoping** (v10.10 runner-up 2) — interruptible `/develop` scoping work if
+     1–2 both wedge.
+- **P3b3 coordination nudge (coordinator)**: b3x/b3y/main/bridge are landed on
+  `dev/modular-curves-b3` but no PR is open, and b5-injectivity is poison-blocked →
+  sub-ticketed. Do NOT hold the merge hostage to b5: unless b5 is imminent, OPEN THE PR NOW
+  with the landed leaves — the integrator wire discharges 3 of the 4 remaining T-W7.1b
+  sorries on merge; b5 keeps its sub-ticket and lands separately.
