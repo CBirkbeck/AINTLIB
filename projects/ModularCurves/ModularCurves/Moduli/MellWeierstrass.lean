@@ -470,6 +470,37 @@ private theorem vcMiddleIso_zerolift (hC : C' • W = W') :
     rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
       pullback.lift_snd, Category.comp_id]
 
+private theorem vcIso_inv_transport {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (e : V = V')
+    (C'' : VariableChange ↑Γ(S, ⊤)) {Z : Scheme} (k : projModel (C'' • V') ⟶ Z) :
+    eqToHom (congrArg (projModel ·) e) ≫ (projModelVCIso C'' V').inv ≫ k
+      = (projModelVCIso C'' V).inv ≫
+          eqToHom (congrArg (projModel ·) (congrArg (C'' • ·) e)) ≫ k := by
+  subst e; simp
+
+private theorem vcModelHom_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
+    (Cf Cg : VariableChange ↑Γ(S, ⊤)) (hf : Cf • W = W') (hg : Cg • W' = W'')
+    (h : (Cg * Cf) • W = W'') :
+    vcModelHom (Cg * Cf) h = vcModelHom Cf hf ≫ vcModelHom Cg hg := by
+  have hinv : (projModelVCIso (Cg * Cf) W.1).inv =
+      (projModelVCIso Cf W.1).inv ≫ (projModelVCIso Cg (Cf • W.1)).inv ≫
+        eqToHom (congrArg (projModel ·) (mul_smul Cg Cf W.1).symm) := by
+    apply Iso.inv_ext
+    rw [projModelVCIso_mul]
+    simp [eqToHom_trans]
+  rw [vcModelHom, vcModelHom, vcModelHom, hinv]
+  simp only [Category.assoc]
+  rw [eqToHom_trans, vcIso_inv_transport (congrArg Subtype.val hf) Cg]
+  simp [eqToHom_trans]
+
+private theorem vcMiddleMap_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
+    (Cf Cg : VariableChange ↑Γ(S, ⊤)) (hf : Cf • W = W') (hg : Cg • W' = W'')
+    (h : (Cg * Cf) • W = W'') :
+    vcMiddleMap (Cg * Cf) h = vcMiddleMap Cf hf ≫ vcMiddleMap Cg hg := by
+  apply pullback.hom_ext
+  · simp only [vcMiddleMap, Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc]
+    rw [vcModelHom_mul Cf Cg hf hg h]
+  · simp only [vcMiddleMap, Category.assoc, pullback.lift_snd, Category.comp_id]
+
 /-- **(T-W6c-ii)** A coordinate change carrying `W` to `W'` induces an isomorphism of
 the presented curves. -/
 noncomputable def curveOfVCIso (hC : C' • W = W') : (curveOf W).E ≅ (curveOf W').E :=
@@ -536,7 +567,13 @@ noncomputable def presentationFunctor :
   map_id W := by
     sorry
   map_comp f g := by
-    sorry
+    apply Subtype.ext
+    show (curveOfVCIso (g.1 * f.1) (by rw [mul_smul, f.2, g.2])).hom =
+      (curveOfVCIso f.1 f.2).hom ≫ (curveOfVCIso g.1 g.2).hom
+    simp only [curveOfVCIso, Iso.trans_hom, Iso.symm_hom, Category.assoc, vcMiddleIso,
+      asIso_hom, Iso.inv_hom_id_assoc]
+    rw [vcMiddleMap_mul f.1 g.1 f.2 g.2]
+    simp only [Category.assoc]
 
 /-- **(T-W6c-iii, essential surjectivity — the "almost definitional" half of the v8
 equivalence)**: every Weierstrass-presented curve is isomorphic, in the groupoid of

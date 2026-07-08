@@ -1,1 +1,1 @@
-FOCUS: T-PIC0+COH-1 decompose — skeleton written (BaseChangeKerCoker.lean 8 leaves, InvertibleSheaf.lean 5 leaves); NOW: lake build both single targets, fix to green
+FOCUS: map_comp LANDED (green, 1 sorry = map_id on REQ). Next: board note + claim [STREAM-YFULL] §v10.37, start dictionary spine L1-L2-L7-L9.
