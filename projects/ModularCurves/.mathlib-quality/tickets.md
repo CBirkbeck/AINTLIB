@@ -2977,6 +2977,39 @@ DS-register unchanged; `#print axioms` audit.
 - **[T-IRR0]** scoping: algebraic (KM Ch. 10 ⧗, Tate-curve degeneration) vs analytic
   (uniformisation ↔ LeanModularForms) route; target `yRho_geometricallyIrreducible`
   (statement exists). Late-phase; parallel.
+  - **DONE (`/develop --decompose`, IRR-scoping, 2026-07-08)**: full decomposition in
+    `.mathlib-quality/decomposition-km10.md`; buildable `:= by sorry` skeleton (3456 jobs green)
+    in NEW `ModularCurve/IrreducibilityScoping.lean`. **KEY SOURCE FINDING (verbatim, KM 10.9.2
+    p. 303 + 10.1 p. 287): KM's "algebraic route" is NOT analytic-free — its connectedness proof
+    reduces to the geometric generic fibre and then invokes the transcendental `ℍ/Γ̃`
+    uniformisation** ("the underlying complex manifold to `M(𝒫)⊗ℂ` is isomorphic to the quotient of
+    the upper half plane by … `Γ̃ ⊂ SL(2,ℤ)`"). Both routes bottom out at `Y⊗ℂ ≅ ℍ/Γ̃` connected;
+    the KM `T[N]`/component machinery (10.2.5 / 10.6 / 10.8.2 / 10.9.1) only *reduces* to it and is
+    not needed for this single-fibre target. **Split = tractable shell + MAJOR-INFRA analytic core.**
+    Shell buildable NOW (leaf tickets below); core gated on a scheme-analytification functor +
+    LeanModularForms bridge (both absent from mathlib AND AINTLIB). Recommendation: keep BB-IRR a
+    registered assumption (Buzzard-sanctioned), land the shell so the reduction + the labelled
+    analytic `hconn` are on record. Route C (analytic-free geometric-monodromy `SL(2,ℤ/N)`-surjectivity
+    via Tate-curve unipotents) is the alternative if complex-analysis-free is later mandated — NOT in
+    KM, its own multi-session stream.
+- **[T-IRR1]** (shell leaf L1) `irreducibleSpace_of_connectedSpace_of_smooth`
+  (`IrreducibilityScoping.lean`): a nonempty connected smooth curve over `ℚ̄` is irreducible
+  (regular ⟹ components = connected components). **Buildable now** (≤ few mathlib lemmas; pin the
+  `regular ⟹ irreducible-of-connected` chain). Full statement/quote/attacks: decomposition-km10.md §L1.
+- **[T-IRR2]** (shell leaf L4) `connectedSpace_quotient_orbitRel` (`IrreducibilityScoping.lean`):
+  the quotient of a connected space by a group action is connected (the only property of `ℍ/Γ̃`
+  KM 10.9.2 uses). **Buildable now** (mathlib `IsPreconnected.image` + `Quotient.mk` cont/surj).
+  decomposition-km10.md §L4.
+- **[T-IRR3]** (shell assembly MASTER) `yRho_geometricallyIrreducible_of_connected`
+  (`IrreducibilityScoping.lean`): reduce the target to geometric connectedness `hconn` of `Y⊗ℚ̄`
+  via base-change smoothness + T-IRR1. **Buildable now.** decomposition-km10.md §MASTER.
+- **[T-IRR-L2]** (API-gap stream) geometric connectedness insensitive to `ℚ̄ ↪ ℂ` (Stacks 0363);
+  **status: blocked/MAJOR-INFRA** — scheme `π₀` base-change absent from mathlib.
+- **[T-IRR-L3]** (API-gap stream, THE core) `(Y⊗ℂ)^an ≅ ℍ/Γ̃` (KM 10.9.2 transcendental
+  description); **status: blocked/MAJOR-INFRA** — needs scheme-analytification functor +
+  LeanModularForms analytic-modular-curve bridge; gates BB-IRR; latest-phase.
+- **[T-IRR-L5]** (API-gap stream) GAGA: `ℂ`-scheme connected ⟺ analytification connected;
+  **status: blocked** on T-IRR-L3's analytification infrastructure.
 
 Former BB-usage edges become dependencies: T-B4 ← FLAT; T-D5 ← OT; T-E10/T-E8 ← DESC;
 T-A6 ← COH; T-F5 ← IRR. **BB-RR remains the only standing assumption.**
