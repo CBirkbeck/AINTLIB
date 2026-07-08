@@ -5478,13 +5478,23 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     these discharge T-W7.8 directly (likely a thin wrapper). DISTINCT from the D-lane's
     T-NOETH (fp-flat algebra/object descent, not morphism-equality) — same foundation,
     no file overlap.
-  - **Status**: in-progress (the dispatched RE-CHECK) · **Claimed**: fable-P4,
-    2026-07-08T08:14Z (owner go-ahead) · **Depends**: T-W7.7 (**DONE** 2026-07-08 —
-    gate open) · **Type**: infra + theorem.
-  - **Re-check scope note**: the EGA-transcription gate applies to formalizing 8.8.2
-    OURSELVES; if mathlib's `SpreadingOut`/`AffineTransitionLimit` lemmas are consumed
-    as-is, we cite their statements (mathlib is the source). Deliverable: verdict
-    thin-wrapper vs real-object-descent-gap, then execute or leaf-split accordingly.
+  - **Status**: blocked-on-mathlib (RE-CHECK COMPLETE, fable-P4 2026-07-08; claim
+    released) · **Depends**: T-W7.7 (DONE) + mathlib hom-existence descent · **Type**:
+    infra + theorem.
+  - **RE-CHECK VERDICT (fable-P4, 2026-07-08)**: NOT a thin wrapper. Mathlib's
+    `AffineTransitionLimit` has ONLY the INJECTIVE part of stacks 01ZC
+    (`Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType` — equality of
+    stage-morphisms descends); the SURJECTIVE part (hom-EXISTENCE: `colim Hom(Dᵢ,X) →
+    Hom(lim,X)` surjective for `X` lfp — what we need to descend `μ, μ'` to a f.g.
+    noetherian stage) is ABSENT (file TODO says morphism-property spreading is planned).
+    `SpreadingOut` is the stalk-germ-neighbourhood variant (needs germ-injectivity ≈
+    loc-noeth anyway — no help for arbitrary `S`). Routes forward: (i) WAIT for mathlib's
+    noetherian-approximation stream (D2's T-NOETH watches it); (ii) concrete descent for
+    the Weierstrass shape (a morphism into `projModel W` is chart-locally finitely many
+    ring elements — ~300–500 lines, partially duplicative of (i)); (iii) drop to the
+    stated loc-noeth theorem (DONE) as the permanent scope. Recommendation: (i), keep LOW
+    priority per reviewer F1′; the loc-noeth canonicity covers every base in the Y(N)
+    pipeline.
 
 - **[CLEANUP-W7-FINAL]** `/cleanup-all` on all T-W7 files (the Phase-III close-out).
   **Depends**: T-W7.7, T-W7.36 (and T-W7.8 if/when it lands).
