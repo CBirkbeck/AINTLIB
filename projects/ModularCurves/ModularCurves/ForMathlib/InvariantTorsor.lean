@@ -624,6 +624,96 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
       ring
   exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨inv x, hright x⟩⟩
 
+/-- **(A711-DESC-loc; PROVEN)** If the invariant ring `Aᴳ` is **local**, every `1`-cocycle
+`w : G → Aˣ` is a coboundary: there is a unit `d : Aˣ` with `g • d = w(g) · d` for all `g`.
+
+Over a local ring the finitely generated projective module `M_w` is free
+(`Module.free_of_flat_of_isLocalRing`); `twistedMul_bijective` forces its rank to be one —
+two distinct basis vectors `eᵢ, eⱼ` would give the nonzero kernel element
+`(eⱼ) ⊗ eᵢ − (eᵢ) ⊗ eⱼ` — and then surjectivity writes `1 = a · d` for the single basis
+vector `d`, making it a unit. Since `d ∈ M_w`, `g • d = w(g) · d`.
+
+This is the local (hence, after localizing `Spec Aᴳ`, the Zariski-local) triviality of the
+`u`-part of a `VariableChange` cocycle: the Weierstrass model of the quotient curve exists
+Zariski-locally on the base. Together with `exists_sub_smul_eq_of_isCocycle` (the additive
+Hilbert 90 for `(r, s, t)`) this discharges step `a5-ii` of `[T-E5c-ROUTE-A]`. -/
+theorem exists_unit_smul_eq_of_isLocalRing [Fintype G] [DecidableEq G] [Nontrivial A]
+    [IsLocalRing (FixedPoints.subalgebra R A G)] (hfree : IsFreeAlgebraAction G R A)
+    (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
+    ∃ d : Aˣ, ∀ g : G, g • (d : A) = (w g : A) * (d : A) := by
+  classical
+  haveI hfin : Module.Finite (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) :=
+    twistedInvariants_finite G R A hfree w hw
+  haveI hproj : Module.Projective (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) :=
+    twistedInvariants_projective G R A hfree w hw
+  haveI : Module.Flat (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) :=
+    Module.Flat.of_projective
+  haveI : Module.Free (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) :=
+    Module.free_of_flat_of_isLocalRing
+  set b := Module.Free.chooseBasis (FixedPoints.subalgebra R A G) (twistedInvariants G R A w)
+    with hb
+  set ι := Module.Free.ChooseBasisIndex (FixedPoints.subalgebra R A G)
+    (twistedInvariants G R A w) with hι
+  set bA := b.baseChange A with hbA
+  have hbij := twistedMul_bijective G R A hfree w hw
+  -- basis vectors are nonzero in `A`
+  have hbne : ∀ i : ι, ((b i : A)) ≠ 0 := by
+    intro i hzero
+    have : b i = 0 := Subtype.ext hzero
+    exact (b.ne_zero i) this
+  -- `ι` is a subsingleton
+  have hsub : Subsingleton ι := by
+    refine ⟨fun i j => ?_⟩
+    by_contra hij
+    set x : A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w) :=
+      ((b j : A)) ⊗ₜ[FixedPoints.subalgebra R A G] (b i)
+        - ((b i : A)) ⊗ₜ[FixedPoints.subalgebra R A G] (b j) with hx
+    have hx0 : x = 0 := by
+      refine hbij.1 ?_
+      rw [hx, map_sub, twistedMul_tmul, twistedMul_tmul, map_zero]
+      ring
+    -- read the `i`-coefficient of `x` in the base-changed basis
+    have hxrepr : x = ((b j : A)) • bA i - ((b i : A)) • bA j := by
+      rw [hx, hbA, Module.Basis.baseChange_apply, Module.Basis.baseChange_apply]
+      rw [TensorProduct.smul_tmul', TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul,
+        mul_one, mul_one]
+    have hcoef := congrArg (fun z => bA.repr z i) hx0
+    rw [hxrepr] at hcoef
+    simp only [map_sub, map_smul, Finsupp.coe_sub, Finsupp.coe_smul, Pi.sub_apply,
+      Pi.smul_apply, Module.Basis.repr_self, smul_eq_mul, map_zero, Finsupp.coe_zero,
+      Pi.zero_apply, Finsupp.single_apply] at hcoef
+    have hcoef2 : ((b j : A)) = 0 := by
+      simpa [Ne.symm hij] using hcoef
+    exact hbne j hcoef2
+  -- `ι` is nonempty (else `A ⊗ M_w = 0` cannot surject onto `A ∋ 1`)
+  have hne : Nonempty ι := by
+    by_contra hempty
+    rw [not_nonempty_iff] at hempty
+    obtain ⟨z, hz⟩ := hbij.2 (1 : A)
+    have hz0 : z = 0 := by
+      conv_lhs => rw [← bA.sum_repr z]
+      simp
+    rw [hz0, map_zero] at hz
+    exact one_ne_zero hz.symm
+  haveI : Unique ι := uniqueOfSubsingleton (Classical.choice hne)
+  -- the single basis vector is a unit of `A`
+  set d : A := (b default : A) with hd
+  obtain ⟨z, hz⟩ := hbij.2 (1 : A)
+  have hzrepr : z = (bA.repr z default) • bA default := by
+    conv_lhs => rw [← bA.sum_repr z]
+    rw [Finset.sum_eq_single (default : ι)]
+    · intro i _ hi; exact absurd (Subsingleton.elim i default) hi
+    · intro hc; exact absurd (Finset.mem_univ (default : ι)) hc
+  have hzt : z = (bA.repr z default) ⊗ₜ[FixedPoints.subalgebra R A G] (b default) := by
+    conv_lhs => rw [hzrepr]
+    rw [hbA, Module.Basis.baseChange_apply, TensorProduct.smul_tmul']
+    congr 1
+    rw [smul_eq_mul, mul_one]
+  rw [hzt, twistedMul_tmul] at hz
+  refine ⟨Units.mkOfMulEqOne d (bA.repr z default) (by rw [mul_comm]; exact hz), fun g => ?_⟩
+  show g • d = (w g : A) * d
+  exact (b default).2 g
+
 /-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
 invariants.
 
