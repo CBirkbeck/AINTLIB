@@ -249,6 +249,66 @@ projective Tate model, zero section the point at infinity `(0:1:0)`. -/
 theorem tateUniversal_geom : (tateUniversal R).toEllipticCurveGeom = tateGeom R :=
   (EllipticCurve.abelEnrichment_exists (tateGeom R)).choose_spec
 
+/-! #### The marked point `P₀ = (0,0)` of the atlas (Loeffler's `(0:0:1)`)
+
+Constructed through the affine chart `X₂ ≠ 0` (the `Z`-chart): the origin `(0,0)` is the affine
+solution `v ≡ 0` of the dehomogenised cubic (constant term `-a₆ = 0`), promoted to a section of the
+projective model by the chart dictionary `chartSolutionsEquiv`/`chartHomEquiv`, then transported to
+`tateUniversal` across the `tateUniversal_geom` bridge. This is the *witness* for `exists_tatePoint`
+(B2); its two universal properties (nowhere-order-≤3 and the classification) are the remaining
+atlas leaves. -/
+
+open MvPolynomial in
+/-- The `(0,0)` affine solution of the atlas curve in chart `X₂` (constant term `-a₆ = 0`). -/
+noncomputable def tateP0sol :
+    {v : {j : Fin 3 // j ≠ 2} → tateRingOver R //
+      aeval v (dehomogenizeAux (tateRingOver R) 2 (tateCurveLocOver R).toProjective.polynomial)
+        = 0} :=
+  ⟨fun _ => 0, by
+    have h6 : (tateCurveLocOver R).a₆ = 0 := by
+      simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
+    have h4 : (tateCurveLocOver R).a₄ = 0 := by
+      simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
+    simp only [WeierstrassCurve.Projective.polynomial, dehomogenizeAux]
+    simp [h4, h6]⟩
+
+/-- The marked point `P₀ = (0,0)` as a morphism into the projective atlas model, via the
+chart-`X₂` dictionary. -/
+noncomputable def tateP0mor : tateBase R ⟶ projModel (tateCurveLocOver R) :=
+  ((chartHomEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm
+    ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R))).1.1
+
+/-- `P₀` is a section of the projective model: it splits `projModelπ`. -/
+lemma tateP0mor_π :
+    tateP0mor R ≫ projModelπ (tateCurveLocOver R) = 𝟙 (tateBase R) := by
+  have h := ((chartHomEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm
+    ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R))).1.2
+  exact h.trans (by simp [tateBase])
+
+/-- Transport compatibility: for equal geometric records `G₁ = G₂`, the `eqToHom` bridge on
+total spaces intertwines the two structure morphisms. -/
+private lemma eqToHom_toGeom_π {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom S} (h : G₁ = G₂) :
+    eqToHom (congrArg EllipticCurveGeom.E h).symm ≫ G₁.π = G₂.π := by
+  subst h; simp
+
+/-- The total space of `tateUniversal` is the projective atlas model (through the bridge). -/
+lemma tateUniversal_E_eq : (tateUniversal R).E = projModel (tateCurveLocOver R) :=
+  congrArg EllipticCurveGeom.E (tateUniversal_geom R)
+
+/-- The atlas `π`, seen through the `tateUniversal ≟ tateGeom` bridge, is `projModelπ`. -/
+lemma tateUniversal_eqToHom_π :
+    eqToHom (tateUniversal_E_eq R).symm ≫ (tateUniversal R).π
+      = projModelπ (tateCurveLocOver R) :=
+  eqToHom_toGeom_π (tateUniversal_geom R)
+
+/-- **The marked point `P₀ = (0,0)`** of the universal Tate curve `tateUniversal R`, transported
+from the projective-model chart construction across the `tateUniversal_geom` bridge. This is the
+witness for `exists_tatePoint` (B2). -/
+noncomputable def tateMarkedPoint : (tateUniversal R).Section :=
+  ⟨tateP0mor R ≫ eqToHom (tateUniversal_E_eq R).symm, by
+    rw [Category.assoc, tateUniversal_eqToHom_π]
+    exact tateP0mor_π R⟩
+
 /-- The marked Tate atlas as an object of `Ell/R`. -/
 noncomputable def tateEllObj : EllObj R where
   base := tateBase R
