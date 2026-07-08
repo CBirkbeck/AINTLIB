@@ -9564,3 +9564,35 @@ one/mul laws IF present in ModelVariableChange.lean, else via hom_ext + the comp
 lemmas), and the equivalence bar (full faithfulness needs the presentation-rigidity
 input — scope decision at cut: the honest v8 statement may be essential-surjectivity
 + the explicit functor, with ff gated on T-W7's pointEquiv uniqueness).
+
+## Amendments v10.38 (2026-07-08): T-DISC banked; the étale cascade parks on the W7 endgame; P3b3 → [STREAM-Y1]
+
+- **T-DISC DONE (P3b3, 1a38dc29, axiom-clean)**:
+  `Algebra.FormallyUnramified.of_forall_residueField_fiber` (module-finite + all κ(p)-fibres
+  unramified ⟹ unramified — NO flatness; tensorKaehlerEquivBase + residue-field Nakayama) +
+  `AlgebraicGeometry.FormallyUnramified.of_finite_fiberToSpecResidueField` (the scheme
+  fibrewise criterion; unramified analogue of Smooth.of_smooth_fiberToSpecResidueField,
+  needs neither Flat nor lfp). **DUAL-USE EDGE**: this is the finite-étale-iff-
+  unramified-fibrewise input for beastmode-A's T-D6c / T-D7-bridge discriminant boxes —
+  consume from `ForMathlib/FormallyUnramifiedFibre.lean` (A: note for post-faith-infra).
+  Both upstream-ledger candidates.
+- **STANDING VERDICT (ratified)**: L-BC = L-A ✓ ∘ T-DISC ✓ ∘ **L-B = T-B6′** — the
+  group-compatible `E.baseChange t ≅ projModel W_k̄` fibre comparison, which is stream-B's
+  registered T-B6 box, transitively gated on `abelEnrichment_exists`. NOT a bounded P3B3
+  leaf; holding rather than grinding cross-stream is correct charter conduct.
+  **EDGES RECORDED**: BB-DIFF (Milestone 1) ⟸ T-B6′ ⟸ `abelEnrichment_exists` ⟸
+  **T-W7.36 = CHARTER-A item 5 + CHARTER-C5B item 3** (already the fleet's hottest path —
+  the assembly is pre-staged to compile by `rfl` once the endgame pieces land). No new
+  charter needed. **The W7 endgame now gates THREE cascades** (comparison milestone; the
+  KM 4.7 engine's residual; the entire étale cascade incl. the rigidity hfix leaf) — A's
+  next-session faith-infra is the single most consequential session on the board.
+- **CHARTER-P3B3 items 2–4 PARKED with automatic resume trigger** = T-B6′ becomes
+  dischargeable (post-T-W7.36). On trigger: MASTER → BB-DIFF DISCHARGED (Milestone 1) →
+  étale falls-sweep → hfix leaf (Milestone 2) → T-D8-bridge, exactly as chartered.
+- **P3b3 NEW ASSIGNMENT: [STREAM-Y1]** (v10.37 top priority — the Y₁(N) modular curve).
+  Zero-gate first wave: [Y1-EASY] ×8 + [Y1-B1], then [Y1-ATLAS] i/ii/vi; full leaf plan +
+  artifact in `decomposition-y1-assembly.md`; MASTER bridge term-assembled (T-E7 closes by
+  one `exact`). Rule 5 claim on pickup; v10.24 + rule-3 binding; held files bridged never
+  edited. **REPORT MILESTONE**: per the stream card — [Y1-EASY]+[Y1-B1] landed AND
+  [Y1-ATLAS] i/ii/vi proven → report T-E7 status vs gates before opening Y1-D/E.
+  (P3b3 resumes the étale cascade on its trigger, interleaving at their discretion.)
