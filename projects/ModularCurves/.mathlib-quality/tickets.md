@@ -6610,9 +6610,17 @@ PUSHED (`66300bb4..5f4829dc`, 238 commits).*
   BB-DIFF + the flf-discriminant étale criterion + the T-W7 fibre-model bridge — see
   beastmode-P2's "KM-text gate: evidence-based re-assessment" above), **REBOX it**: leave a
   precise sorried statement + docstring route, return T-D6b to `state: open`, and pivot to:
+- **v10.2 VERDICT (p0, 2026-07-08): REBOXED → state: open. Pivoting to [T-KMQ].** Re-assessed
+  `pull_nsmul_ne_zero` (ExactOrder.lean:183) against the landed `comap_mul`: it does NOT unblock
+  the box. comap_mul feeds only the base-change *assembly* (T-D6a-ii, beastmode-A's in-progress
+  tail — not crossed), while the operative content of KM (2)⟹(3) is the genuinely-absent étale
+  core (flf rank-`N` group scheme over a field with `N` invertible ⟹ finite étale ⟹ `N` distinct
+  reduced geometric points; BB-DIFF / the (3)⟺(4) discriminant criterion). Statement is already
+  precise + theorem-level `sorry` (DS-clean); docstring discharge route sharpened in-file to
+  record this. No statement drift. Registered as `state: open`, not a leaf for p0.
 
 ### [T-KMQ] the ⧗KM quote sweep — NEW (p0's pivot destination; fast lane)
-- **Status**: open · **Assignee**: p0 · **Type**: source-fidelity sweep (no new math) ·
+- **Status**: in-progress (p0, claimed 2026-07-08) · **Assignee**: p0 · **Type**: source-fidelity sweep (no new math) ·
   **Depends on**: refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf (present)
 - **Job**: for every ⧗KM-marked ticket/decl — T-A4, T-A6, T-B4/T-B4x, T-D8(-bridge), T-D10,
   T-E9, T-H8/T-H9, T-M1, the IRR KM-Ch.10 route (T-C1 and T-E5 are dispatched separately,
