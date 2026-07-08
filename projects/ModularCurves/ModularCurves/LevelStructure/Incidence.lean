@@ -1537,6 +1537,26 @@ theorem exists_subgroupLocus (E : EllipticCurve S) (D : RelEffCartierDiv E.π) :
     subgroupLocusAux_Z1_iff, subgroupLocusAux_Z2_iff, subgroupLocusAux_Z3_le_ker_iff,
     subgroupLocusAux_isSubgroup_iff, and_assoc]
 
+/-- **(T-D33 — the section-level exact-order locus over the base)** For `P ∈ E(S)` and `N`,
+there is a closed subscheme `Z ⊆ S` universal for "`P` has exact order `N`": a base change
+`t : T ⟶ S` factors through `Z` iff the restricted section `P|_T` has exact order `N` on
+`E ×_S T`. This is the direct cut of the Γ₁ exact-order condition over the base, for a given
+section (the `E[N]`-universal form is `exists_exactOrderLocus`). Consequence of
+`exists_subgroupLocus` at the order divisor `Σₐ[aP]` + `orderDivisor_baseChange` (T-D6a-ii L3). -/
+theorem exists_exactOrderLocus_section (E : EllipticCurve S) (P : E.Section) (N : ℕ)
+    [NeZero N] :
+    ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+      (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
+        EllipticCurve.Section.HasExactOrder (E.baseChange t)
+          (EllipticCurve.Point.asSection E t (EllipticCurve.Point.pull E t P)) N := by
+  obtain ⟨Z, hZ⟩ := exists_subgroupLocus E (EllipticCurve.Section.orderDivisor E P N)
+  refine ⟨Z, fun T t => (hZ t).trans ?_⟩
+  show ((EllipticCurve.Section.orderDivisor E P N).baseChange t).IsSubgroup (E.baseChange t) ↔
+    (EllipticCurve.Section.orderDivisor (E.baseChange t)
+      (EllipticCurve.Point.asSection E t (EllipticCurve.Point.pull E t P)) N).IsSubgroup
+      (E.baseChange t)
+  rw [EllipticCurve.Section.orderDivisor_baseChange]
+
 /-! ### Tier 6: the KM 1.6 instances (T-D17/T-D18) — raw-typed value layer
 
 Everything below is spelled at the raw `pullback` types (never at `(E.baseChange t).E`),
