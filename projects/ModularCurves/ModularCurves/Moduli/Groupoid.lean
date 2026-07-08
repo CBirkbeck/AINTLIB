@@ -77,6 +77,24 @@ def IsoClasses (S : Scheme.{u}) : Type (u + 1) :=
 -- of the whole rigidity computation. Close this box by importing that file and applying it through
 -- the pointed/automorphism/level-structure bridges.
 
+/-- **(T-G3h-hfix gate — finite-étale descent for `torsionι`; KM 2.3.2 + 2.7.2)** For `N` invertible
+on `S`, an `S`-endomorphism `ψ` of `E.E` (`ψ ≫ π = π`) fixing the two generators `P, Q` of a naive
+full level-`N` structure restricts to the **identity on the `N`-torsion subscheme** `E[N]`:
+`torsionι N ≫ ψ = torsionι N`. `ψ` fixes every combination `aP+bQ` (from `hP`, `hQ` and additivity of
+a pointed endomorphism — the proven `endMonHom`/`endPostcomp_mul`), and by `hPQ` those generate
+`E[N]`; the passage from that generator agreement to the scheme-morphism identity is **finite-étale
+descent** for `torsionι` (`E[N] → S` finite étale as `N` is invertible, KM 2.3.2).
+
+GATE: `E[N]` finite étale = Torsion.lean `BB-QF`/`BB-FLAT`. Full route analysis (three options via
+mathlib `ext_of_isDominant_of_isSeparated'` / full-level trivialization / p2's `torsionι_factors_iff`,
+plus `torsionSubgroup`/`SchemeQuotient` reuse) in `.mathlib-quality/decomposition-g3-geometry.md`.
+On discharge, `aut_trivial_of_fullLevel` becomes fully proven modulo the PIC0 data. -/
+theorem torsionFixed_of_fixesLevel [IsLocallyNoetherian S] (N : ℕ) [NeZero N]
+    (hinv : NIsInvertible S N) (E : EllipticCurve S) (P Q : E.Section)
+    (hPQ : E.IsNaiveFullLevel N P Q) (ψ : E.E ⟶ E.E) (hψ : ψ ≫ E.π = E.π)
+    (hP : P.1 ≫ ψ = P.1) (hQ : Q.1 ≫ ψ = Q.1) :
+    E.torsionι N ≫ ψ = E.torsionι N := sorry
+
 /-- **(T-G3 core box — GME 2.6.4 scheme-morphism content; KM Ch. 2, do-not-formalize-from-
 memory gate)** The geometric heart of `aut_trivial_of_fullLevel`, separated from the trivial
 categorical wrapper: an automorphism `e` of `E/S` fixing a naive full level-`N` structure
@@ -116,7 +134,8 @@ theorem aut_hom_eq_id_of_fullLevel [IsLocallyNoetherian S] (N : ℕ) [NeZero N] 
   -- BRIDGE 2 (level structure → torsion fixing). `ε` fixes `P, Q` (`hP`, `hQ`); by T-G2 rigidity
   -- (`ε` pointed ⟹ additive) and `P, Q` generating `E[N] = ker[N]` fibrewise (`hPQ`,
   -- `IsNaiveFullLevel`), `ε` fixes the whole `N`-torsion subscheme.
-  have hfix : E.torsionι N ≫ ε.left = E.torsionι N := sorry
+  have hfix : E.torsionι N ≫ ε.left = E.torsionι N :=
+    E.torsionFixed_of_fixesLevel N hinv P Q hPQ e.hom.hom e.hom.over_w hP hQ
   -- The arithmetic-geometric heart (KM 2.7.2(1)): a degree-1 endo fixing `E[N]` (`N ≥ 3`) is `𝟙`.
   have hone : ε = 𝟙 E.asOver := E.aut_endo_eq_one N (by exact_mod_cast hN) ε hdeg hfix
   -- Descend `ε = 𝟙 E.asOver` to the underlying scheme morphism `e.hom.hom = 𝟙 E.E`
