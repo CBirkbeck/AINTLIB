@@ -4128,6 +4128,60 @@ lemma infChartAug_sectionUnitElem (W : WeierstrassCurve R) :
   rw [map_sub, map_one, sub_eq_zero] at h0
   exact h0
 
+/-- Nonzerodivisors map to nonzerodivisors along ring equivalences. -/
+lemma RingEquiv_map_mem_nonZeroDivisors {A B : Type u} [CommRing A] [CommRing B]
+    (φ : A ≃+* B) {a : A} (ha : a ∈ nonZeroDivisors A) :
+    φ a ∈ nonZeroDivisors B := by
+  have key : ∀ x : B, x * φ a = 0 → x = 0 := by
+    intro x hx
+    have h1 : φ.symm x * a = 0 := by
+      have := congrArg φ.symm hx
+      rw [map_mul, map_zero, RingEquiv.symm_apply_apply] at this
+      exact this
+    have h2 := (mem_nonZeroDivisors_iff.mp ha).2 _ h1
+    have := congrArg φ h2
+    rw [RingEquiv.apply_symm_apply, map_zero] at this
+    exact this
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => key x (by rwa [mul_comm] at hx), key⟩
+
+/-- **(ForMathlib-grade)** Nonzerodivisors of the base stay nonzerodivisors in an
+`Away`-localization. -/
+lemma algebraMap_mem_nonZeroDivisors_of_away {A S : Type u} [CommRing A] [CommRing S]
+    (g : A) {a : A} (ha : a ∈ nonZeroDivisors A) [Algebra A S]
+    [IsLocalization.Away g S] :
+    algebraMap A S a ∈ nonZeroDivisors S := by
+  have key : ∀ x : S, x * algebraMap A S a = 0 → x = 0 := by
+    intro x hx
+    obtain ⟨⟨b, u⟩, hb⟩ := IsLocalization.surj (Submonoid.powers g) x
+    have h1 : algebraMap A S (b * a) = 0 := by
+      rw [map_mul, ← hb, mul_right_comm, hx, zero_mul]
+    obtain ⟨⟨w, hw⟩, hkill⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers g) S
+      (b * a)).mp h1
+    obtain ⟨m, hm⟩ := hw
+    have hres : (w * b) * a = 0 := by
+      rw [mul_assoc]
+      exact hkill
+    have hwb : w * b = 0 := (mem_nonZeroDivisors_iff.mp ha).2 _ hres
+    have hbS : algebraMap A S b = 0 := by
+      have h2 := congrArg (algebraMap A S) hwb
+      rw [map_mul, map_zero] at h2
+      have hwu : IsUnit (algebraMap A S w) := by
+        rw [← hm, map_pow]
+        exact (IsLocalization.map_units (M := Submonoid.powers g) S
+          ⟨g, 1, pow_one g⟩).pow m
+      exact (hwu.mul_right_eq_zero).mp h2
+    have hxu : x * algebraMap A S ↑u = 0 := by
+      rw [hb, hbS]
+    have huu : IsUnit (algebraMap A S ↑u) := by
+      obtain ⟨n, hn⟩ := u.2
+      rw [← hn, map_pow]
+      exact (IsLocalization.map_units (M := Submonoid.powers g) S
+        ⟨g, 1, pow_one g⟩).pow n
+    exact (huu.mul_left_eq_zero).mp hxu
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => key x (by rwa [mul_comm] at hx), key⟩
+
 /-- The root stays a nonzerodivisor in any `Away`-localization of the infinity chart. -/
 lemma infChart_root_image_mem_nonZeroDivisors (W : WeierstrassCurve R)
     {S : Type u} [CommRing S] (g : AdjoinRoot (infChartCubic W)) [Algebra
