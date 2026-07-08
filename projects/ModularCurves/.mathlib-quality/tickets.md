@@ -6309,12 +6309,15 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     - `be_backward_core` (L272, deep interior rk(i+1)≠0∧rk(i+2)≠0): conditions ⟹ exact. Needs **Peskine–Szpiro acyclicity** (00N1 (2)⟹(1), 0AVQ).
     These need the **depth-theory layer** route A explicitly funded ("Module.depth + Auslander–Buchsbaum from scratch") — the genuine
     frontier, now cleanly isolated. Foundations present: grade/regular-seq (Grade.lean), grade⟺Ext (T-REES Rees), McCoy (T-FIT). → [T-DEPTH] planning.
-  - **[T-REES] REES HALF DONE** [a709a155] — the classical Rees theorem (grade⟺Ext-vanishing over S_𝔮) PROVEN in full
-    (7 privates: k=1 boundary via `IsSMulRegular.subsingleton_linearMap_iff`; dimension shift via `smulShortComplex`
-    long-exact Ext; Rees induction), committed via sibling sweep. `gradeGE_localize` axiom-clean. Residual isolated to ONE
-    fact — **Ext-localization for higher Ext** `localizedModule_ext_subsingleton_iff` ((Extⁱ_S(S/I,S))_𝔮 ≅ Extⁱ_{S_𝔮}(...)),
-    mathlib-absent (degree-0 only). RESUMED to close it (finite free res + Hom-loc + localization-exact; bounded).
-  - **GATED** (in BuchsbaumEisenbud.lean, dispatch after T-BE): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
+  - **[T-REES + Ext-localization] DONE, AXIOM-CLEAN** (fbc6e376) — the ENTIRE grade-openness chain is sorry-free/axiom-clean
+    (`isOpen_gradeGE_locus`: [propext,Classical.choice,Quot.sound]). Two classical theorems mathlib lacked, both PROVEN:
+    (B) Rees grade⟺Ext-vanishing over S_𝔮 (Grade.lean ReesLocal); (A) **flat base change for higher Ext** — NEW
+    `ForMathlib/BaseChangeExt.lean` (~379 lines, `isLocalizedModule_mapExt` by induction, n+1 five-lemma dévissage on the
+    localized Ext LES; beat a Localization instance-diamond without maxHeartbeats). SECOND of T-RB's 3 inputs done (McCoy✓ grade-openness✓).
+  - **[T-DEPTH] planning IN PROGRESS** [a828b81c] — depth-theory layer for the 2 B-E cores (Module.depth + Auslander-Buchsbaum
+    + Peskine-Szpiro) → `decomposition-depth.md` + `Depth.lean`/`Acyclicity.lean` skeleton. Foundations present: grade/regular-seq,
+    grade⟺Ext (Rees), McCoy, assoc-prime recipe (in BuchsbaumEisenbud.lean). USER CHOSE CONTINUE (2026-07-08).
+  - **GATED** (BuchsbaumEisenbud.lean, split for parallel when core-closing): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
   (B) route (ii): flat locus CONSTRUCTIBLE via generic flatness GF5 (needs GFDatum/051R) + Noeth induction, then open via 00I0
