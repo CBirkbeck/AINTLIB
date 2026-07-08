@@ -6717,3 +6717,17 @@ sorry sits precisely on 3.8.2).
   leaf + a Lean↔source match paragraph each, and the leaf tickets on this board.
 - Coordinator note: these `/develop` runs belong to the **assignees' sessions** (this worktree
   hosts live builds; p2 holds right of first refusal on T-END0) — not to the coordinator pass.
+
+### v10.9 Addendum (2026-07-08): fable-P4 session report absorbed — cross-links
+- fable-P4's full report (relayed post-v10) confirms the v10.4 dispatch and surfaces reusable
+  API from **T-H2b** (done, 2026-07-07): `Point.baseChangeEquiv : (E.baseChange σ).Point t ≃+
+  E.Point (t ≫ σ)` (GroupLaw.lean) + `Over.monObjMkPullbackSnd_mul_left_fst` (NEW
+  `ForMathlib/OverPullbackMul.lean`, pure category theory, **upstream candidate**) +
+  `isNaiveFullLevel_pullAlong` discharged (GammaH 10 → 9 sorries). All axiom-clean.
+- **Cross-link → beastmode-A (T-D6a-ii)**: the additive `Point.baseChangeEquiv` dictionary may
+  shorten the remaining L3/L4 assembly (the `Point.pull_zsmul` / `ker_sectionBaseChange` steps) —
+  check it before hand-rolling.
+- Same session arc also banked (consistent with the board, no dispatch changes): T-A8-4 (record
+  ⟹ fibrewise-elliptic comparison), T-H7b-i (point separation along field extensions), and the
+  **T-W7.7/T-W7b canonicity milestone** (Rigidity.lean sorry-free, GIT 6.1→6.6 end-to-end) — the
+  input that made T-E4a-noeth possible.
