@@ -413,6 +413,19 @@ base, `Γ(D ×_{Spec R} D) ≅ A ⊗_R A` (via `Scheme.isoSpec` transport of `D.
 (`deligne_point_pow_eq_one`); points-equiv templates present (`torsionAlgebraPointsEquiv`,
 `muNPointsEquiv`). No genuinely-absent multi-week infra remains — the rest is bounded formal build.
 
+**ALL DEPENDENCIES CONFIRMED PRESENT (2026-07-08) — no genuinely-absent infra anywhere in Layer B.**
+Confirmed mathlib API for the Δ-construction transport (`Γ(D×_R D) ≅ A ⊗_R A`):
+`Scheme.isoSpec` (`AffineScheme.lean:68`, `X ≅ Spec Γ(X,⊤)` for `[IsAffine X]`),
+`Scheme.isoSpec_hom_naturality` (`:72`, `f ≫ Y.isoSpec.hom = X.isoSpec.hom ≫ Spec.map f.appTop`),
+`arrowIsoSpecΓOfIsAffine` (`:131`, `structMap ≅ Spec.map structMap.appTop` as an arrow), then
+`pullbackSpecIso` (`Pullbacks.lean:719`) + `Scheme.ΓSpecIso`. Δ = `Γ(subgroupMul)` = `m.appTop`
+post-composed with `Γ(D×_R D) ≅ A ⊗_R A`. Points (L6): `torsionAlgebraPointsEquiv` template
+(`ΓSpec.adjunction.homEquiv` + `isoSpec`). Localise-to-free (L5): `projective_of_finitePresentation`
+(`Flat/EquationalCriterion.lean:288`) + a free-trivialising basic-open cover. Reductions (L1):
+`Point.asSection`/`asSection_zsmul`, `Point.baseChangeEquiv` (`≃+`), `Point.pull_add`/`_zsmul`/`_zero`,
+`RelEffCartierDiv.IsSubgroup.baseChange`, `RelEffCartierDiv.baseChange` — all proven. The Δ/Hopf
+leaf statements are now STATED (`subgroupComul`/`subgroupCounit`/`subgroupAntipode` sorried, green).
+
 Next (downstream of the validated route): group AXIOMS as scheme equations (m assoc, unit/inv laws,
 via the mono `subschemeι` + curve group axioms on pullback products; `pullback.lift`/`.map` for the
 product morphisms) → dualize m/e/n to `Δ : A →ₐ[R] A ⊗_R A`, `ε : A →ₐ[R] R`, antipode over the
