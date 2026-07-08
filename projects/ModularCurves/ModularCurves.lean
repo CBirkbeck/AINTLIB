@@ -23,6 +23,7 @@ import ModularCurves.EllipticCurve.AdditionChartRing
 import ModularCurves.EllipticCurve.AdditionChartLadder
 import ModularCurves.EllipticCurve.AdditionChartDomain
 import ModularCurves.EllipticCurve.AdditionChartTensor
+import ModularCurves.EllipticCurve.AdditionChartSpec
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.MonicQuotientDescent
