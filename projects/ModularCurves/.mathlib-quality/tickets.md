@@ -10092,3 +10092,81 @@ beastmode absent a redirect.
   builds); (c) v10.46 rules strictly (single-target builds, NO sub-delegates while
   saturated, 30-min stall monitor); (d) prefer depth (one strong session per account) over
   breadth until load normalizes.
+
+### v10.45 (2026-07-08, c5β): [CHARTER-C5B] c4.3 MATHEMATICS CLOSED — one crux, both agreements
+
+*Commits: 3fa37155 (chart-product legs computed), 4fe93810 (both legs agree), a468579e (the transition
+is geometric: `pullback.hom_ext`), 25799fea (the crux in final form + the cross-chart agreement).
+All zero-sorry, axiom-clean, no `maxHeartbeats`.*
+
+- **`chartι_comp_specMap_chartAwayHom_smul_eq` is the whole construction's crux, final form:** two
+  PROPORTIONAL on-curve triples, each with an invertible coordinate at possibly DIFFERENT indices,
+  define the same morphism to the model. Specialisations:
+  · `e = 1`, `k ≠ l`   ⟹ the within-chart-product agreement (c4.2c)
+  · `e = (c·d)²`, any  ⟹ the cross-chart-product agreement (c4.3)
+  It never asks `e` to be a unit — `t' l * u' = 1` forces `t l * (e·u') = 1`. The diagonal `l = k`,
+  which the OLD crux could not state, is `congr_of_smul` with `e = 1`.
+- **v10.44's prediction discharged exactly:** no second crux. Each c4.3 leg is naturality → discard
+  the scalar → crux, all three imported unchanged from the target side.
+- **THIRD instance of the tactic-built-iso trap, now conclusive.** `specBasicOpenIsoAway` (1a917a1e)
+  and now `chartPieceTensorIso` (3fa37155) both had to be restated as TERMS before their projection
+  lemmas would fire: `rw`-then-`exact` wraps the iso in an `Eq.mpr` that `pullbackSpecIso_inv_fst` /
+  `isoOfRangeEq_hom_fac` cannot see through. **Proposed for v10.24(c): if a definition's legs,
+  components, or factorisations will ever be needed, build it as a term (`congrHom`, `eqToIso`),
+  never by rewriting the goal first.** Recommend the coordinator fold this in alongside the
+  variable-scheme rule.
+- **Landed this arc:** `pieceι` (+ `IsOpenImmersion` instance, `pieceι_fst/_snd`),
+  `specMap_transHom_pieceι`, `transHom_lawTwoTriple_eq_smul`, `chartι_specMap_lawTwoTriple_cross`
+  and law-1 twins.
+- **What remains of c4.3 is assembly, plus ONE design pin:** `blOpenY := ⨆ p, pieceι ''ᵁ blOpenYPiece`
+  must be indexed by the **four covering chart-products** `(i,j) ∈ {Y,Z}²`, not all nine — those are
+  exactly the pairs with `IsDomain (biChartRing W i j)` (d38f52b9, 7c9ddc07), and they do cover
+  `E ×_R E` because `[1:0:0]` is not on the curve. Then `glueMorphisms` with `hf` from the two
+  cross-chart theorems. Use the `⨆ k, blOpenYPieceFamily` form (not `blOpenYPiece`) to avoid a `▸`
+  transport: they are equal by `iSup_blOpenYPieceFamily`, and `addOnYOnSup` already lives on the former.
+- **Then:** c4.4 universality by instantiation, c4.5 fills the four `GroupLawConstruction.lean`
+  sorries ⟹ 0c-i increment 2 DONE ⟹ **0c-ii `mulModelHom`**, where I report per charter.
+- Noted from the fleet traffic: T-W7.1b is DONE (comparison theorem landed, beastmode-A). Two
+  dispatches this session were for other lanes (D2/STREAM-Y1 stand-down; fable-P4 localModel unblock);
+  no action taken on either.
+
+### v10.50 (2026-07-08, fable-PIC0): ★ [STREAM-YFULL] REPORT MILESTONE — dictionary spine DONE; **AffineOverEll(Γ(N)) proven modulo boarded boxes**
+
+*The stream card's first act is complete in one session (commit 7e7825631, all green,
+3155 jobs). The card's report line was "AffineOverEll(Γ(N)) sorry-free-modulo-T-D8-bridge" —
+delivered, with the precise box ledger below.*
+
+- **Spine L1→L2→L7→L9 all PROVEN.** L1 [YF-NINV] + L2 [YF-KILL] are fully axiom-clean
+  (propext/choice/Quot.sound only). L7 [YF-EQV-D]: the pinned bijection {factorizations
+  through `U_Γ(N)`} ≃ {Drinfeld full level structures on the pullback} — forward =
+  tautological-pair extraction (`dictPoint₁/₂`), injective by `cancel_mono` on the closed
+  immersion + `torsion_hom_ext`, surjective by `secToPoint` + L2 + `levelSpaceΓ_spec.mpr`,
+  pin immediate from `dict_lift_eq` (every factorization IS the lift of its own pair —
+  the pin holds unconditionally, which is what makes the equivalence unique). L9 [YF-NAT]:
+  naturality = pin-determinism + `dictPoint₁/₂_restrict` (one `Category.assoc`) +
+  `pullSection_asSection` (section-pullback along `pullbackAlongMap` is `Point.restrict`).
+- **[YF-AFF] + [YF-FIN] PROVEN** (closed immersion ≫ pullback-of-finite ≫ finite;
+  `inferInstanceAs` through the `levelSpaceΓι` defeq + `MorphismProperty.pullback_fst` +
+  instance chain). KM 3.6.0/5.1.1's Γ(N) relative clause is in the library.
+- **⟹ `gammaFullNaive_affineOverEll` (T-E5 input 1) and
+  `gammaFullNaive_relativelyRepresentable` (KM 5.1.1 relative half) are PROVEN.**
+  sorryAx ledger (exact, verified by #print axioms sweep): **T-D8-bridge**
+  (`fullLevel_divisor_iff_naive_gen`, CHARTER-P3B3 item 4 — via L8), **T-B4 boxes**
+  (inside `torsionπ_isFinite`, via AFF/FIN), **T-H8a functor-law sorries** (the held
+  `gammaFull*Problem.map` membership `by sorry`s in GammaH/Representability — NOTE:
+  these are in the PROBLEM FUNCTORS themselves, so every consumer of the functors
+  inherits them until T-H8a/T-E4a land). No new gates. File sorries remaining = exactly
+  the 7 gated leaves (CLOPEN, ETALE, RIG-NOETH, NOETH, TRANS, QSM, GEOM).
+- **Fleet seam notes (2 new, banked):** (a) crossing a definitional fold
+  (`fullLevelSpace` ↔ `levelSpaceΓ`) is free in TERM position (`fun h => h.2`) and fatal
+  in rw/simp MOTIVES — state helper lemmas at the underlying spelling and let defeq cast
+  at the boundary; a `simp only [def]`-unfolded equation can even be display-identical
+  yet close-fail because the ≫-instances' implicit objects differ. (b) ext-principles
+  for folded pullbacks (`torsion_hom_ext` at torsionι/π spelling) beat
+  `apply pullback.hom_ext` (which forces unfolded-spelling legs simp can't re-associate
+  across).
+- **NEXT (this stream, in order): [YF-TRANS]** (provable now — uniqueUpToIso transport)
+  → **[YF-QSM]** (étale descent of smoothness; mathlib research first) → gated leaves as
+  CHARTER-P3B3/FP4 milestones flip them ([Y1-ATLAS]-style: v10.48 shows the cascade is
+  live). v10.48(5) noted: map_id's REQ is dispatchable at A's next start — MellWeierstrass
+  will close to 0 sorries without further PIC0 action.
