@@ -8247,6 +8247,7 @@ named gate each; the hfix interface is landed in code.*
   deprioritized per v9 work-order #7). Universal instantiation follows automatically once a
   universal `EllipticCurve` record exists — i.e. T-W7.36-gated; noted, not dispatchable.
   These are the representability presentations T-E7 and the H-stream consume.
+- **CLAIMED beastmode-A 2026-07-08 (v10.30): building .mathlib-quality/upstream-ledger.md — verify each candidate vs current mathlib, rank, name target file, stage PR drafts. No external PRs.**
 - **NEW: [T-UPSTREAM-TRIAGE] — beastmode-A, this session, interruptible.** The board has
   accumulated flagged upstream candidates all day with no triage: c5β's
   `AdjoinRoot.isDomain_of_monic_of_map` (strongest — shortens an existing mathlib proof) +
