@@ -10540,3 +10540,49 @@ has every leaf proven; what remains is preimage bookkeeping.*
   working-tree risk in the SHARED worktree. Standing rule: **commit-early cadence** —
   workers commit green increments with pathspec IMMEDIATELY on build success, never
   batching multiple lemmas into one uncommitted stretch.
+
+## Amendments v10.53 (2026-07-08, coordinator): NEW-WORKER reassignments (Y1, GH); v10.52 hold-lift RETRACTED; engine geometric core MILESTONE
+
+- **★★ FP4 MILESTONE ABSORBED — the engine's geometric core LANDS**:
+  `exists_ellipticCurveGeom_quotient` (route (a)'s descent theorem) is a SORRY-FREE
+  assembly — sorryAx only via three isolated leaves, none in the assembly's own term:
+  (1) `isPullback_chart` (affine transport; FP4 continuing NOW, unblocked);
+  (2) `locallyWeierstrass_quotientπ` [a5] (ungated — T-W7.1b + both Hilbert-90 halves
+  proven; assembly only); (3) `smoothOfRelativeDimension_of_locallyWeierstrass`
+  (reduces to **T-A3**, beastmode-A's queue, by the identical Zariski-local argument as
+  the proven proper half). SCOPE NOTE recorded: the full engine
+  `representable_of_rigid_of_torsor` additionally needs the moduli-functor layer
+  (α_univ descent + representability bijection) — that layer stays inside CHARTER-FP4's
+  continuation, not a new stream.
+- **v10.52's "D2 hold lifted" is RETRACTED** — D2's on-the-ground fleet check reads
+  STILL ~70 workers/saturated; ground truth wins. **D2's hold STANDS** (their ratified
+  policy unchanged); note the two new workers below ADD load — D2 resumes on their OWN
+  load check, not on coordinator assumption.
+- **NEW-WORKER REASSIGNMENTS (owner cannot wait for rate-limit resets)**:
+  - **[NEW-Y1] a fresh account takes STREAM-Y1** (was P3b3's). First act: the **vi
+    assembly** (fully scoped, one step: the transfer pin `equiv(pull P₀) = some 0 0` via
+    chart naturality + `projModelPointsEquiv_some`; ALL inputs committed on
+    dev/modular-curves-y1, tip 88413f944). Then continue the leaf plan
+    (decomposition-y1-assembly.md). Worktree: `git worktree list` — reuse the y1 worktree
+    if present (its owner session is dead), else `git worktree add ../aintlib-mc-y1
+    dev/modular-curves-y1`. Rule-5 claim; P3b3 reclaims at a natural boundary on return.
+    **CONSEQUENTLY: beastmode-A's v10.52 Y1-vi absorption is RETRACTED** — A's queue
+    reverts to (1) map_id, (2) 0h on signal → endgame, (3) T-A3 (now doubly load-bearing:
+    Y₁(N) smoothness AND the engine's smooth leaf), (4) drafts.
+  - **[NEW-GH] a fresh account takes the STREAM-GH wave** (was p0's). First act: read the
+    salvage commit e5ef86ec9 (p0's green coprodPoint glue, coordinator-committed) + 
+    decomposition-gammah-route.md; continue the **GHC4 generation clause**, then
+    GHB1/GHB3. Main shared worktree; rule-5 claim; the B2 repoint stays FP4's; p0 reclaims
+    on return at a boundary.
+- **PIC0 directive**: CLEANUP-PIC1 absorbed (131→127, GAP-1 untouched; the T-PIC1c
+  refinement — instance-implicit position, whole-object `asIso` then `.app` as preferred
+  antidote — and the MonoidalClosed gap note are banked). **Queue check**: the STREAM-YFULL
+  ZERO-GATE spine (L1 [YF-NINV] → L2 [YF-KILL] → L7 [YF-EQV-D] → L9 [YF-NAT], plus
+  [YF-AFF]/[YF-FIN]/[YF-TRANS]) is NOT externally gated — if it is not already done,
+  it is your immediate dispatchable queue (your "queue empty" read appears to count only
+  gated items). Confirm status on the board either way.
+- **c5β checkpoint absorbed**: c4.2c restated-DONE; c4.3 math complete; hf reduced to a
+  single-pass assembly of located, proven inputs (recipe boarded) → B/C → glue → c4.4 →
+  c4.5 → 0c-i → **0c-ii milestone arms the endgame**. Carry on.
+- **Ops under saturation + new workers**: both new workers run STRICT rules — single-target
+  builds, no sub-delegates, commit-early cadence (v10.52), 30-min stall monitor.
