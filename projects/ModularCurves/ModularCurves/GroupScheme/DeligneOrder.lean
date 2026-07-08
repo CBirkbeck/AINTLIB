@@ -49,6 +49,7 @@ sub-tickets T-D5h..k (WIP, producer discipline).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
+open scoped TensorProduct
 
 universe u
 
@@ -449,6 +450,171 @@ theorem subgroupMul_inv' :
   rw [E.point_zero_val, hbase]
 
 end GroupObject
+
+section PairCompare
+
+/-! ### General coordinate-ring comparison for a pair of affine schemes
+
+For any two affine schemes `X`, `Y` over `Spec R` (with chosen structure maps `qX`, `qY`), the
+canonical map `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is an `R`-algebra isomorphism — the coordinate-ring
+incarnation of `pullbackSpecIso`. This is the reusable engine behind `κ` (the case `X = Y =
+D.subscheme`) and behind the triple comparison `κ_DP` (the case `X = D.subscheme`, `Y = D ×ₛ D`)
+used to dualize associativity into coassociativity. -/
+
+variable {R : Type u} [CommRing R] {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+  (qX : X ⟶ Spec (CommRingCat.of R)) (qY : Y ⟶ Spec (CommRingCat.of R))
+
+/-- Algebra structure on `Γ(X)` for an affine `X` with a chosen structure map to `Spec R`. -/
+noncomputable def schemeAlg : Algebra R Γ(X, ⊤) :=
+  ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qX.appTop).hom.toAlgebra
+
+/-- Base structure map of the pullback `X ×ₛ Y`. -/
+noncomputable abbrev pairBase : pullback qX qY ⟶ Spec (CommRingCat.of R) :=
+  pullback.fst qX qY ≫ qX
+
+/-- The general kbase: `Spec.map (algebraMap R Γ(X)) = X.isoSpec.inv ≫ qX`. -/
+theorem schemeSpecAlgebraMap_eq :
+    letI := schemeAlg (R := R) qX
+    Spec.map (CommRingCat.ofHom (algebraMap R Γ(X, ⊤))) = X.isoSpec.inv ≫ qX := by
+  letI := schemeAlg (R := R) qX
+  have hnat := Scheme.isoSpec_inv_naturality qX
+  rw [Scheme.isoSpec_Spec_inv, ← Spec.map_comp] at hnat
+  have hAM : CommRingCat.ofHom (algebraMap R Γ(X, ⊤))
+      = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qX.appTop :=
+    CommRingCat.ofHom_hom _
+  rw [hAM]; exact hnat
+
+/-- First coordinate projection `Γ(X) →ₐ Γ(X ×ₛ Y)`, i.e. `Γ(fst)`. -/
+noncomputable def pairProj₁ :
+    letI := schemeAlg (R := R) qX
+    letI : Algebra R Γ(pullback qX qY, ⊤) :=
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+    Γ(X, ⊤) →ₐ[R] Γ(pullback qX qY, ⊤) :=
+  letI := schemeAlg (R := R) qX
+  letI : Algebra R Γ(pullback qX qY, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+  { (pullback.fst qX qY).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qX.appTop) ≫
+            (pullback.fst qX qY).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop]
+      show (pullback.fst qX qY).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qX.appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- Second coordinate projection `Γ(Y) →ₐ Γ(X ×ₛ Y)`, i.e. `Γ(snd)`. -/
+noncomputable def pairProj₂ :
+    letI := schemeAlg (R := R) qY
+    letI : Algebra R Γ(pullback qX qY, ⊤) :=
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+    Γ(Y, ⊤) →ₐ[R] Γ(pullback qX qY, ⊤) :=
+  letI := schemeAlg (R := R) qY
+  letI : Algebra R Γ(pullback qX qY, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+  { (pullback.snd qX qY).appTop.hom with
+    commutes' := fun r => by
+      have hbase2 : pairBase qX qY = pullback.snd qX qY ≫ qY := pullback.condition
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qY.appTop) ≫
+            (pullback.snd qX qY).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, ← hbase2]
+      show (pullback.snd qX qY).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ qY.appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- The general tensor comparison `Γ(X) ⊗_R Γ(Y) →ₐ Γ(X ×ₛ Y)`. -/
+noncomputable def pairTensorCompare :
+    letI := schemeAlg (R := R) qX
+    letI := schemeAlg (R := R) qY
+    letI : Algebra R Γ(pullback qX qY, ⊤) :=
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+    TensorProduct R Γ(X, ⊤) Γ(Y, ⊤) →ₐ[R] Γ(pullback qX qY, ⊤) :=
+  letI := schemeAlg (R := R) qX
+  letI := schemeAlg (R := R) qY
+  letI : Algebra R Γ(pullback qX qY, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+  Algebra.TensorProduct.lift (pairProj₁ qX qY) (pairProj₂ qX qY) (fun _ _ => Commute.all _ _)
+
+/-- **(Layer B, reusable comparison.)** The pair comparison `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is bijective:
+it becomes an iso after `Spec`, via `pullbackSpecIso` and `isoSpec`, reflected back through the fully
+faithful `Spec`. -/
+theorem pairTensorCompare_bijective :
+    letI := schemeAlg (R := R) qX
+    letI := schemeAlg (R := R) qY
+    letI : Algebra R Γ(pullback qX qY, ⊤) :=
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+    Function.Bijective (pairTensorCompare qX qY) := by
+  letI := schemeAlg (R := R) qX
+  letI := schemeAlg (R := R) qY
+  letI : Algebra R Γ(pullback qX qY, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+  haveI : IsAffine (pullback qX qY) := by
+    haveI : IsAffineHom (pullback.fst qX qY) := MorphismProperty.pullback_fst _ _ inferInstance
+    exact isAffine_of_isAffineHom (pullback.fst qX qY)
+  have hbaseX : Spec.map (CommRingCat.ofHom (algebraMap R Γ(X, ⊤))) = X.isoSpec.inv ≫ qX :=
+    schemeSpecAlgebraMap_eq qX
+  have hbaseY : Spec.map (CommRingCat.ofHom (algebraMap R Γ(Y, ⊤))) = Y.isoSpec.inv ≫ qY :=
+    schemeSpecAlgebraMap_eq qY
+  have eX : Spec.map (CommRingCat.ofHom (algebraMap R Γ(X, ⊤))) ≫ 𝟙 (Spec (CommRingCat.of R))
+      = X.isoSpec.inv ≫ qX := (Category.comp_id _).trans hbaseX
+  have eY : Spec.map (CommRingCat.ofHom (algebraMap R Γ(Y, ⊤))) ≫ 𝟙 (Spec (CommRingCat.of R))
+      = Y.isoSpec.inv ≫ qY := (Category.comp_id _).trans hbaseY
+  set ρ := asIso (pullback.map
+      (Spec.map (CommRingCat.ofHom (algebraMap R Γ(X, ⊤))))
+      (Spec.map (CommRingCat.ofHom (algebraMap R Γ(Y, ⊤))))
+      qX qY X.isoSpec.inv Y.isoSpec.inv (𝟙 _) eX eY) with hρ
+  set κ := pairTensorCompare qX qY with hκ
+  have hL : κ.toRingHom.comp Algebra.TensorProduct.includeLeftRingHom
+      = (pairProj₁ qX qY).toRingHom :=
+    congrArg AlgHom.toRingHom (Algebra.TensorProduct.lift_comp_includeLeft
+      (pairProj₁ qX qY) (pairProj₂ qX qY) (fun _ _ => Commute.all _ _))
+  have hR : κ.toRingHom.comp (Algebra.TensorProduct.includeRight).toRingHom
+      = (pairProj₂ qX qY).toRingHom :=
+    congrArg AlgHom.toRingHom (Algebra.TensorProduct.lift_comp_includeRight
+      (pairProj₁ qX qY) (pairProj₂ qX qY) (fun _ _ => Commute.all _ _))
+  set pbS := pullbackSpecIso R Γ(X, ⊤) Γ(Y, ⊤) with hpbS
+  have key : ((ρ.hom ≫ (pullback qX qY).isoSpec.hom)
+        ≫ Spec.map (CommRingCat.ofHom κ.toRingHom)) ≫ pbS.inv = 𝟙 _ := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [hpbS, pullbackSpecIso_inv_fst, ← Spec.map_comp, ← CommRingCat.ofHom_comp, hL,
+        show CommRingCat.ofHom (pairProj₁ qX qY).toRingHom
+          = (pullback.fst qX qY).appTop from CommRingCat.ofHom_hom _,
+        Scheme.isoSpec_hom_naturality, hρ, asIso_hom]
+      rw [← Category.assoc]
+      erw [pullback.lift_fst]
+      rw [Category.assoc, Iso.inv_hom_id, Category.comp_id, Category.id_comp]
+    · simp only [Category.assoc]
+      rw [hpbS, pullbackSpecIso_inv_snd, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      erw [hR]
+      rw [show CommRingCat.ofHom (pairProj₂ qX qY).toRingHom
+          = (pullback.snd qX qY).appTop from CommRingCat.ofHom_hom _,
+        Scheme.isoSpec_hom_naturality, hρ, asIso_hom]
+      rw [← Category.assoc]
+      erw [pullback.lift_snd]
+      rw [Category.assoc, Iso.inv_hom_id, Category.comp_id, Category.id_comp]
+  have hstar : (ρ.hom ≫ (pullback qX qY).isoSpec.hom)
+        ≫ Spec.map (CommRingCat.ofHom κ.toRingHom) = pbS.hom := by
+    have h := (Iso.comp_inv_eq pbS).mp key
+    rwa [Category.id_comp] at h
+  haveI hg : IsIso (ρ.hom ≫ (pullback qX qY).isoSpec.hom) := inferInstance
+  haveI hcomp : IsIso ((ρ.hom ≫ (pullback qX qY).isoSpec.hom)
+      ≫ Spec.map (CommRingCat.ofHom κ.toRingHom)) := by rw [hstar]; infer_instance
+  haveI hiso : IsIso (Spec.map (CommRingCat.ofHom κ.toRingHom)) :=
+    IsIso.of_isIso_comp_left (ρ.hom ≫ (pullback qX qY).isoSpec.hom)
+      (Spec.map (CommRingCat.ofHom κ.toRingHom))
+  haveI : IsIso (Scheme.Spec.map (CommRingCat.ofHom κ.toRingHom).op) :=
+    inferInstanceAs (IsIso (Spec.map (CommRingCat.ofHom κ.toRingHom)))
+  have hringiso : IsIso (CommRingCat.ofHom κ.toRingHom) :=
+    (isIso_op_iff _).mp (Spec.fullyFaithful.isIso_of_isIso_map (CommRingCat.ofHom κ.toRingHom).op)
+  exact (ConcreteCategory.isIso_iff_bijective (CommRingCat.ofHom κ.toRingHom)).mp hringiso
+
+end PairCompare
 
 section AffineHopf
 
@@ -982,6 +1148,126 @@ theorem subgroupUnit_structMap (hD : D.IsSubgroup E) :
   show E.subgroupUnit hD ≫ (D.ideal.subschemeι ≫ E.π) = 𝟙 _
   rw [← Category.assoc, E.subgroupUnit_subschemeι hD]
   exact (0 : E.Point (𝟙 (Spec (CommRingCat.of R)))).2
+
+/-! ### Triple comparison `κ₃` (for coassociativity)
+
+`Δ` is coassociative because `m` is associative (`subgroupMul_assoc`). Dualizing that equality of
+scheme maps into an equality of comultiplications requires comparing `A ⊗ (A ⊗ A)` with the triple
+product's coordinate ring `Γ(P₃)`, `P₃ = D ×ₛ (D ×ₛ D)`. This comparison `κ₃ = κ_DP ∘ (id ⊗ κ)` is
+an isomorphism, so injective — the tool that turns `subgroupMul_assoc` into `Coalgebra.coassoc`. -/
+
+/-- Algebra on `Γ(P₃)`, `P₃ = D ×ₛ (D ×ₛ D)`. Matches the codomain algebra of
+`κ_DP = pairTensorCompare (subgroupStructMap D) bimulBase`. -/
+@[reducible] noncomputable def tripleAlgebra :
+    Algebra R Γ(pullback (E.subgroupStructMap D) (E.bimulBase (D := D)), ⊤) :=
+  ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+    (pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop).hom.toAlgebra
+
+/-- `P₃ = D ×ₛ (D ×ₛ D)` is affine: `pullback.snd` is a base change of the finite (hence affine)
+`subgroupStructMap D`, and `D ×ₛ D` is affine. -/
+theorem subgroupTriple_isAffine :
+    IsAffine (pullback (E.subgroupStructMap D) (E.bimulBase (D := D))) := by
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  haveI : IsAffineHom (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  exact isAffine_of_isAffineHom (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)))
+
+/-- `id_A ⊗ κ : A ⊗ (A ⊗ A) → A ⊗ Γ(D ×ₛ D)`, built homogeneously via `lift`
+(`includeLeft`, `includeRight ∘ κ`) to avoid the heterobasic `TensorProduct.map` instance clash. -/
+noncomputable def subgroupIdTensorCompare (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    (Γ(D.ideal.subscheme, ⊤) ⊗[R] (Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)))
+      →ₐ[R] (Γ(D.ideal.subscheme, ⊤) ⊗[R]
+        Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤)) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  Algebra.TensorProduct.lift Algebra.TensorProduct.includeLeft
+    (Algebra.TensorProduct.includeRight.comp (E.subgroupTensorCompare (D := D)))
+    (fun _ _ => Commute.all _ _)
+
+/-- `(id ⊗ κ)(a ⊗ b) = a ⊗ κ b`. (`∀` inside `letI` so the tensor-typed binder sees the algebra.) -/
+theorem subgroupIdTensorCompare_tmul (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    ∀ (a : Γ(D.ideal.subscheme, ⊤))
+      (b : Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupIdTensorCompare hD (a ⊗ₜ[R] b)
+        = a ⊗ₜ[R] (E.subgroupTensorCompare (D := D) b) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  intro a b
+  rw [subgroupIdTensorCompare, Algebra.TensorProduct.lift_tmul,
+    Algebra.TensorProduct.includeLeft_apply, AlgHom.comp_apply,
+    Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.tmul_mul_tmul,
+    one_mul, mul_one]
+
+/-- `id_A ⊗ κ` is injective (`κ` is an iso), via the retraction `lift includeLeft (includeRight ∘ κ⁻¹)`. -/
+theorem subgroupIdTensorCompare_injective (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Function.Injective (E.subgroupIdTensorCompare hD) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  letI κe := AlgEquiv.ofBijective (E.subgroupTensorCompare (D := D))
+    (E.subgroupTensorCompare_bijective (D := D))
+  set ret : (Γ(D.ideal.subscheme, ⊤) ⊗[R]
+        Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤)) →ₐ[R]
+      (Γ(D.ideal.subscheme, ⊤) ⊗[R] (Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤))) :=
+    Algebra.TensorProduct.lift Algebra.TensorProduct.includeLeft
+      (Algebra.TensorProduct.includeRight.comp κe.symm.toAlgHom)
+      (fun _ _ => Commute.all _ _) with hret
+  have hret_tmul : ∀ (a : Γ(D.ideal.subscheme, ⊤))
+      (w : Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤)),
+      ret (a ⊗ₜ[R] w) = a ⊗ₜ[R] (κe.symm.toAlgHom w) := by
+    intro a w
+    rw [hret, Algebra.TensorProduct.lift_tmul, Algebra.TensorProduct.includeLeft_apply,
+      AlgHom.comp_apply, Algebra.TensorProduct.includeRight_apply,
+      Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
+  have hcomp : ret.comp (E.subgroupIdTensorCompare hD) = AlgHom.id R _ := by
+    apply Algebra.TensorProduct.ext'
+    intro a b
+    rw [AlgHom.comp_apply, E.subgroupIdTensorCompare_tmul hD, hret_tmul, AlgHom.id_apply]
+    congr 1
+    exact κe.symm_apply_apply b
+  exact Function.LeftInverse.injective (g := ret)
+    (fun x => by rw [← AlgHom.comp_apply, hcomp, AlgHom.id_apply])
+
+/-- The triple comparison `κ₃ : A ⊗ (A ⊗ A) →ₐ Γ(P₃)`, `κ₃ = κ_DP ∘ (id ⊗ κ)`. Injective (both
+factors iso). Dualizes associativity of `m` (`subgroupMul_assoc`) into coassociativity of `Δ`. -/
+noncomputable def subgroupTripleCompare (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    (Γ(D.ideal.subscheme, ⊤) ⊗[R] (Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)))
+      →ₐ[R] Γ(pullback (E.subgroupStructMap D) (E.bimulBase (D := D)), ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  (pairTensorCompare (E.subgroupStructMap D) (E.bimulBase (D := D))).comp
+    (E.subgroupIdTensorCompare hD)
+
+/-- `κ₃` is injective. -/
+theorem subgroupTripleCompare_injective (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    Function.Injective (E.subgroupTripleCompare hD) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  have hpair : Function.Injective
+      (pairTensorCompare (E.subgroupStructMap D) (E.bimulBase (D := D))) :=
+    (pairTensorCompare_bijective (E.subgroupStructMap D) (E.bimulBase (D := D))).injective
+  exact hpair.comp (E.subgroupIdTensorCompare_injective hD)
 
 /-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
 `subgroupUnit` (`e : S ⟶ D`). Concretely `ε = Γ(e)` followed by `Γ(Spec R, ⊤) ≅ R`; it is
