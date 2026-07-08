@@ -1230,6 +1230,27 @@ private lemma appLE_le_rfl_apply {W W' : WeierstrassCurve R}
     ((projModel W).presheaf.map_id (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))))
 
+/-- **The zero-section value of a transported chart function is the source augmentation**:
+`zero^*(e^*(section of b')) = aug'(b')`. -/
+lemma pointedIso_zero_val_chartYSection {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (b' : AdjoinRoot (infChartCubic W')) :
+    (((projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
+        (zero_le_preimage_pointedPreimage e hez)).hom)
+      ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')) =
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom (infChartAug W' b') := by
+  have h1 := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((chartYSectionsRingEquiv W').symm b')) (pointedIso_zero_appLE_chartY e hez)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1
+  have h2 := congrArg ((((projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
+    (zero_le_preimage_pointedPreimage e hez))).hom)
+    (appLE_le_rfl_apply e ((chartYSectionsRingEquiv W').symm b'))
+  exact (h2.symm.trans h1).trans (projModelZero_appLE_chartYSection W' b')
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the

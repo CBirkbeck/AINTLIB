@@ -171,6 +171,7 @@ private lemma exists_isSMulRegular_iff_subsingleton_ext_zero {I : Ideal R}
     IsSMulRegular.subsingleton_linearMap_iff]
   simp only [ModuleCat.coe_of, Ideal.annihilator_quotient]
 
+omit [IsNoetherianRing R] in
 /-- The dimension shift of the Rees induction.  For an `M`-regular element `x ∈ I`, the covariant
 long exact `Ext`-sequence of `0 → M →ˣ M → M/xM → 0` collapses (because `x` kills `Ext(R/I, M)`)
 into short exact sequences `0 → Ext ⁿ(R/I, M) → Extⁿ(R/I, M/xM) → Extⁿ⁺¹(R/I, M) → 0`, whence the
@@ -194,7 +195,7 @@ private lemma subsingleton_ext_quotSMulTop_iff {I : Ideal R} {x : R} (hx : x ∈
       obtain ⟨δ, hδ⟩ := Ext.covariant_sequence_exact₁ (X := N) (hS := hSE) (x₁ := γ)
         (hx₁ := comp_mk₀_smul_id_eq_zero hx M γ) (hn₀ := rfl)
       rw [← hδ, Subsingleton.elim δ 0]
-      simp [Ext.zero_comp]
+      exact Ext.zero_comp N n hSE.extClass (n + 1) rfl
   · rintro ⟨hMn, hMn1⟩
     haveI : Subsingleton (Ext N (M.smulShortComplex x).X₂ n) := hMn
     haveI : Subsingleton (Ext N (M.smulShortComplex x).X₁ (n + 1)) := hMn1
@@ -204,7 +205,7 @@ private lemma subsingleton_ext_quotSMulTop_iff {I : Ideal R} {x : R} (hx : x ∈
     obtain ⟨β, hβ⟩ := Ext.covariant_sequence_exact₃ (X := N) (hS := hSE) (x₃ := α)
       (hn₁ := rfl) (hx₃ := hδα)
     rw [← hβ, Subsingleton.elim β 0]
-    simp [Ext.zero_comp]
+    exact Ext.zero_comp N n (Ext.mk₀ (M.smulShortComplex x).g) n (add_zero n)
 
 /-- **The Rees induction (core).** Over a Noetherian local ring `R` with `I ≤ 𝔪`, for every finite
 nontrivial module `M`, `I` contains an `M`-regular sequence of length `k` iff `Extⁱ(R/I, M) = 0` for
@@ -374,3 +375,6 @@ theorem isOpen_gradeGE_locus {S : Type*} [CommRing S] [IsNoetherianRing S] (I : 
   exact isOpen_iInter_of_finite fun i => (isClosed_zeroLocus _).isOpen_compl
 
 end
+
+-- TEMP axiom probe (to be removed)
+#print axioms isOpen_gradeGE_locus
