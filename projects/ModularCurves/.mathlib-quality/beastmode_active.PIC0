@@ -1,1 +1,1 @@
-FOCUS: map_comp LANDED (green, 1 sorry = map_id on REQ). Next: board note + claim [STREAM-YFULL] §v10.37, start dictionary spine L1-L2-L7-L9.
+FOCUS: [STREAM-YFULL] dictionary spine — L1 nIsInvertible_over_spec (YFullRoute.lean:77) via ΓSpecIso+appTop, then L2 point_killed_iff, L7 exists_pointsEquiv_drinfeld, L9 family. Then YF-AFF/YF-FIN.

@@ -76,7 +76,12 @@ Source: implicit throughout KM 3.7/4.7 ("`S` a `ℤ[1/N]`-scheme"); [Loe] §3.8 
 `map_natCast`. -/
 theorem nIsInvertible_over_spec {N : ℕ} {X : Scheme.{u}} (f : X ⟶ Spec R)
     (h : IsUnit (N : R)) : NIsInvertible X N := by
-  sorry
+  show IsUnit ((N : ℕ) : Γ(X, ⊤))
+  have h1 : IsUnit ((N : ℕ) : Γ(Spec R, ⊤)) := by
+    have h2 := h.map (Scheme.ΓSpecIso R).inv.hom
+    rwa [map_natCast] at h2
+  have h3 := h1.map f.appTop.hom
+  rwa [map_natCast] at h3
 
 /-- **([YF-KILL])** The raw killing equation of the torsion pullback (`P ≫ [N] = 0`,
 the `levelSpaceΓ_spec` register) is the group-theoretic killing of the associated
@@ -87,7 +92,37 @@ theorem point_killed_iff {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZer
     {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
     P.1 ≫ E.mulByHom N = g ≫ E.zero ↔
       (N : ℤ) • EllipticCurve.Point.asSection E g P = 0 := by
-  sorry
+  rw [EllipticCurve.smul_eq_zero_iff_comp_mulByHom]
+  -- `(E.baseChange g).E` is defeq to `pullback E.π g` only at default transparency, so
+  -- everything below is term-mode `Eq.trans`/`congrArg` (the `asSection_zsmul` idiom).
+  have hmf := EllipticCurve.mulByHom_baseChange_fst E g N
+  have hms := EllipticCurve.mulByHom_baseChange_snd E g N
+  have hsf := EllipticCurve.Point.asSection_val_fst E g P
+  have hss := EllipticCurve.Point.asSection_val_snd E g P
+  have hzf : (E.baseChange g).zero ≫ pullback.fst E.π g = g ≫ E.zero :=
+    pullback.lift_fst _ _ _
+  have hzs : (E.baseChange g).zero ≫ pullback.snd E.π g = 𝟙 T :=
+    pullback.lift_snd _ _ _
+  have lf : ((EllipticCurve.Point.asSection E g P).1 ≫ (E.baseChange g).mulByHom N) ≫
+      pullback.fst E.π g = P.1 ≫ E.mulByHom N :=
+    (Category.assoc _ _ _).trans <|
+      (congrArg ((EllipticCurve.Point.asSection E g P).1 ≫ ·) hmf).trans <|
+        (Category.assoc _ _ _).symm.trans <| congrArg (· ≫ E.mulByHom N) hsf
+  have ls : ((EllipticCurve.Point.asSection E g P).1 ≫ (E.baseChange g).mulByHom N) ≫
+      pullback.snd E.π g = 𝟙 T :=
+    (Category.assoc _ _ _).trans <|
+      (congrArg ((EllipticCurve.Point.asSection E g P).1 ≫ ·) hms).trans hss
+  have rf : (𝟙 T ≫ (E.baseChange g).zero) ≫ pullback.fst E.π g = g ≫ E.zero :=
+    (congrArg (· ≫ pullback.fst E.π g) (Category.id_comp _)).trans hzf
+  have rs : (𝟙 T ≫ (E.baseChange g).zero) ≫ pullback.snd E.π g = 𝟙 T :=
+    (congrArg (· ≫ pullback.snd E.π g) (Category.id_comp _)).trans hzs
+  constructor
+  · intro hk
+    apply pullback.hom_ext
+    · exact lf.trans (hk.trans rf.symm)
+    · exact ls.trans rs.symm
+  · intro hk
+    exact lf.symm.trans ((congrArg (· ≫ pullback.fst E.π g) hk).trans rf)
 
 /-! ### The relative presentation: `levelSpaceΓ` as the Γ(N)-scheme of `E/S`
 
