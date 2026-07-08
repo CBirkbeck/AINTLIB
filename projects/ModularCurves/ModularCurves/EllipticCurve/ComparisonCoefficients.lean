@@ -153,4 +153,39 @@ lemma exists_coordY_image {W W' : WeierstrassCurve R} [Nontrivial R]
   obtain ⟨_, _, hcc⟩ := coordXY_ext hpad
   exact isUnit_iff_exists.mpr ⟨c'', (mul_comm c c'').trans hcc.symm, hcc.symm⟩
 
+/-- Over a subsingleton base the coordinate ring is a subsingleton (its `0 = 1`). Used to
+discharge the degenerate case of the coefficient-extraction lemmas without `[Nontrivial R]`. -/
+lemma subsingleton_coordinateRing [Subsingleton R] (W : WeierstrassCurve R) :
+    Subsingleton W.toAffine.CoordinateRing := by
+  refine subsingleton_of_zero_eq_one ?_
+  rw [← map_zero (algebraMap R _), ← map_one (algebraMap R _), Subsingleton.elim (0 : R) 1]
+
+/-- **(T-W7.1b-b3x, general base)** The `x`-image extraction with the `[Nontrivial R]`
+hypothesis discharged by a subsingleton case split; this is the form the wiring instantiates
+at `Φ := pointedIsoCoordEquiv e heπ hez`. -/
+lemma exists_coordX_image_of_filtration {W W' : WeierstrassCurve R}
+    (Φ : W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing)
+    (hfil : ∀ n, Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' n)
+      = poleOrderFiltration W n) :
+    ∃ α β : R, IsUnit α ∧
+      Φ (coordX W') = algebraMap R _ α * coordX W + algebraMap R _ β := by
+  rcases subsingleton_or_nontrivial R with hs | hn
+  · have : Subsingleton W.toAffine.CoordinateRing := subsingleton_coordinateRing W
+    exact ⟨1, 0, isUnit_one, Subsingleton.elim _ _⟩
+  · exact exists_coordX_image Φ hfil
+
+/-- **(T-W7.1b-b3y, general base)** The `y`-image extraction with the `[Nontrivial R]`
+hypothesis discharged by a subsingleton case split. -/
+lemma exists_coordY_image_of_filtration {W W' : WeierstrassCurve R}
+    (Φ : W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing)
+    (hfil : ∀ n, Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' n)
+      = poleOrderFiltration W n) :
+    ∃ γ δ ε : R, IsUnit γ ∧
+      Φ (coordY W') = algebraMap R _ γ * coordY W + algebraMap R _ δ * coordX W
+        + algebraMap R _ ε := by
+  rcases subsingleton_or_nontrivial R with hs | hn
+  · have : Subsingleton W.toAffine.CoordinateRing := subsingleton_coordinateRing W
+    exact ⟨1, 0, 0, isUnit_one, Subsingleton.elim _ _⟩
+  · exact exists_coordY_image Φ hfil
+
 end ModularCurves
