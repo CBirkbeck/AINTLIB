@@ -1156,6 +1156,80 @@ lemma pointedIso_overlap_sections_equation {W W' : WeierstrassCurve R}
     (h2.trans (congrArg₂ (· * ·) hΦ.symm
       (congrArg (· ^ j) (hnatY ((chartYSectionsRingEquiv W').symm d')))))
 
+/-- The zero section of `W` lands in the transported `Y'`-chart. -/
+private lemma zero_le_preimage_pointedPreimage {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    (⊤ : (Spec (CommRingCat.of R)).Opens) ≤
+      (projModelZero W) ⁻¹ᵁ (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) := by
+  intro x _
+  have h1 : e.hom.base ((projModelZero W).base x) = (projModelZero W').base x := by
+    rw [show e.hom.base ((projModelZero W) x) =
+      (projModelZero W ≫ e.hom) x from rfl, hez]
+  have h2 : x ∈ (projModelZero W') ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) := by
+    rw [projModelZero_preimage_yChart W']
+    trivial
+  show e.hom.base ((projModelZero W).base x) ∈ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))
+  rw [h1]
+  exact h2
+
+/-- **(ForMathlib-grade)** A factorisation `z ≫ f = z'` induces the factorisation of top
+`appLE`s: `f^* ≫ z^* = z'^*`. Stated for opaque morphisms so instantiation at large
+composites stays kernel-cheap. -/
+lemma appLE_appLE_of_comp_eq {X Y Z : Scheme.{u}} (z : Z ⟶ X) (f : X ⟶ Y)
+    (z' : Z ⟶ Y) (hfz : z ≫ f = z') (U : Y.Opens)
+    (h₂ : ⊤ ≤ z ⁻¹ᵁ (f ⁻¹ᵁ U)) (h : ⊤ ≤ z' ⁻¹ᵁ U) :
+    f.appLE U (f ⁻¹ᵁ U) le_rfl ≫ z.appLE (f ⁻¹ᵁ U) ⊤ h₂ = z'.appLE U ⊤ h := by
+  subst hfz
+  exact Scheme.Hom.appLE_comp_appLE z f U (f ⁻¹ᵁ U) ⊤ le_rfl h₂
+
+/-- **Pointed transports respect the zero sections at the `Y`-charts** (morphism level,
+`appLE` form): pulling back along `e` and then along the zero section of `W` is pulling back
+along the zero section of `W'`. -/
+lemma pointedIso_zero_appLE_chartY {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    e.hom.appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) le_rfl ≫
+      (projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
+        (zero_le_preimage_pointedPreimage e hez) =
+    (projModelZero W').appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) ⊤
+        (le_of_eq (projModelZero_preimage_yChart W').symm) :=
+  appLE_appLE_of_comp_eq (projModelZero W) e.hom (projModelZero W') hez (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))
+    (zero_le_preimage_pointedPreimage e hez)
+    (le_of_eq (projModelZero_preimage_yChart W').symm)
+
+/-- The `le_rfl`-`appLE` of a morphism agrees with `app`, elementwise. -/
+private lemma appLE_le_rfl_apply {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (w' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) :
+    ((e.hom.appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) le_rfl).hom) w' =
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w' := by
+  have h2 : (homOfLE (le_rfl : e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))).op =
+      𝟙 (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))) := Subsingleton.elim _ _
+  have h3 := congrArg (fun ψ => (CommRingCat.Hom.hom
+    ((projModel W).presheaf.map ψ)) (((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w')) h2
+  refine h3.trans ?_
+  exact congrArg (fun φ => CommRingCat.Hom.hom φ (((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w'))
+    ((projModel W).presheaf.map_id (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))))
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the

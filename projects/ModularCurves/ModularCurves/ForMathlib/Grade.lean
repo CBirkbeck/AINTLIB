@@ -107,37 +107,236 @@ theorem Ideal.gradeGE_localize {S : Type*} [CommRing S] [IsNoetherianRing S]
     rw [key]
     exact (Ne.symm hbot)
 
-/-- ISOLATED RESIDUAL — the sole `sorry` in the file (Rees / Stacks 00LW ideal-grade form composed
-with the localisation-compatibility of `Ext`).
+/-!
+## The Rees theorem over a local ring — the `∨ = ⊤` grade/Ext characterisation, proved in full
 
-For a prime `𝔮`, the extended ideal `I·S_𝔮` has grade `≥ k` **or** is the unit ideal *iff* every
+The pointwise residual splits into two classical facts (see the module header and the docstring of
+`gradeGE_or_top_iff_forall_subsingleton_localizedExt`):
+
+* **(B) Rees / Stacks 00LW (ideal-grade form)** over a LOCAL Noetherian ring — proved below in full
+  as `gradeGE_or_top_iff_forall_subsingleton_ext_local`.  The proof is the classical Rees induction:
+  the boundary `grade ≥ 1 ⟺ Hom(R/I, M) = 0` is `IsSMulRegular.subsingleton_linearMap_iff`
+  (`Ext⁰ ≅ Hom`), and the dimension shift uses the covariant long exact `Ext`-sequence of the regular
+  short exact sequence `0 → M →ˣ M → M/xM → 0` (`ModuleCat.smulShortComplex`,
+  `Ext.covariant_sequence_exact₁/₂/₃`) together with the fact that `x ∈ ann(R/I)` acts as `0` on
+  `Ext(R/I, M)`.
+* **(A) `Ext`-localisation compatibility** — the single genuinely mathlib-absent classical fact,
+  ISOLATED below as `localizedModule_ext_subsingleton_iff`.
+-/
+
+section ReesLocal
+
+open scoped Pointwise
+
+variable {R : Type*} [CommRing R] [IsNoetherianRing R]
+
+omit [IsNoetherianRing R] in
+/-- If `x ∈ I` then multiplication by `x` on `R ⧸ I` is the zero endomorphism, hence `x` acts as `0`
+on every `Ext`-group `Ext (R ⧸ I) M n`: postcomposing an `Ext`-class with `mk₀ (x • 𝟙 M)` — which is
+the scalar action of `x` — gives `0`.  This is the key vanishing that collapses the Rees long exact
+sequence into short exact pieces. -/
+private lemma comp_mk₀_smul_id_eq_zero {I : Ideal R} {x : R} (hx : x ∈ I)
+    (M : ModuleCat R) {n : ℕ} (α : Ext (ModuleCat.of R (R ⧸ I)) M n) :
+    α.comp (Ext.mk₀ (x • 𝟙 M)) (add_zero n) = 0 := by
+  have hxN : (x • 𝟙 (ModuleCat.of R (R ⧸ I))) = 0 := by
+    have hxann : x ∈ Module.annihilator R (R ⧸ I) := by
+      rw [Ideal.annihilator_quotient]; exact hx
+    apply ModuleCat.hom_ext
+    refine LinearMap.ext fun y => ?_
+    simpa using Module.mem_annihilator.mp hxann y
+  rw [← Ext.smul_eq_comp_mk₀]
+  have step : x • α
+      = (Ext.mk₀ (x • 𝟙 (ModuleCat.of R (R ⧸ I)))).comp α (zero_add n) := by
+    rw [Ext.mk₀_smul, Ext.smul_comp, Ext.mk₀_id_comp]
+  rw [step, hxN, Ext.mk₀_zero, Ext.zero_comp]
+
+omit [IsNoetherianRing R] in
+/-- `Ext X M n` is subsingleton when `X` is a zero object (used for the unit-ideal disjunct, where
+`R ⧸ ⊤` is the zero module). -/
+private lemma subsingleton_ext_of_isZero_left (X M : ModuleCat R) (hX : Limits.IsZero X) (n : ℕ) :
+    Subsingleton (Ext X M n) := by
+  refine subsingleton_of_forall_eq 0 (fun α => ?_)
+  have hid : 𝟙 X = 0 := hX.eq_zero_of_tgt _
+  calc α = (Ext.mk₀ (𝟙 X)).comp α (zero_add n) := (Ext.mk₀_id_comp α).symm
+    _ = (Ext.mk₀ (0 : X ⟶ X)).comp α (zero_add n) := by rw [hid]
+    _ = 0 := by rw [Ext.mk₀_zero, Ext.zero_comp]
+
+/-- The grade-`≥ 1` boundary of the Rees theorem: `I` contains an `M`-regular element iff
+`Hom(R/I, M) = Ext⁰(R/I, M) = 0`.  This is `IsSMulRegular.subsingleton_linearMap_iff`
+(`Hom(N, M) = 0 ⟺ ∃ M-regular in ann N`) with `ann (R/I) = I` and `Ext⁰ ≅ Hom`. -/
+private lemma exists_isSMulRegular_iff_subsingleton_ext_zero {I : Ideal R}
+    (M : ModuleCat R) [Module.Finite R M] :
+    (∃ x ∈ I, IsSMulRegular M x) ↔ Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) M 0) := by
+  rw [Ext.homEquiv₀.subsingleton_congr, ModuleCat.homEquiv.subsingleton_congr,
+    IsSMulRegular.subsingleton_linearMap_iff]
+  simp only [ModuleCat.coe_of, Ideal.annihilator_quotient]
+
+/-- The dimension shift of the Rees induction.  For an `M`-regular element `x ∈ I`, the covariant
+long exact `Ext`-sequence of `0 → M →ˣ M → M/xM → 0` collapses (because `x` kills `Ext(R/I, M)`)
+into short exact sequences `0 → Ext ⁿ(R/I, M) → Extⁿ(R/I, M/xM) → Extⁿ⁺¹(R/I, M) → 0`, whence the
+middle term vanishes iff both ends do. -/
+private lemma subsingleton_ext_quotSMulTop_iff {I : Ideal R} {x : R} (hx : x ∈ I)
+    (M : ModuleCat R) (reg : IsSMulRegular M x) (n : ℕ) :
+    Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) (ModuleCat.of R (QuotSMulTop x M)) n) ↔
+      Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) M n) ∧
+        Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) M (n + 1)) := by
+  set N := ModuleCat.of R (R ⧸ I) with hN
+  have hSE : (M.smulShortComplex x).ShortExact := reg.smulShortComplex_shortExact
+  constructor
+  · intro hQ
+    haveI hQ' : Subsingleton (Ext N (M.smulShortComplex x).X₃ n) := hQ
+    refine ⟨subsingleton_of_forall_eq 0 (fun β => ?_), subsingleton_of_forall_eq 0 (fun γ => ?_)⟩
+    · -- `g* : Ext N M n → Ext N (M/xM) n` is injective since `f* = 0`.
+      have hg : β.comp (Ext.mk₀ (M.smulShortComplex x).g) (add_zero n) = 0 := Subsingleton.elim _ _
+      obtain ⟨α, hα⟩ := Ext.covariant_sequence_exact₂ (X := N) (hS := hSE) (x₂ := β) (hx₂ := hg)
+      rw [← hα]; exact comp_mk₀_smul_id_eq_zero hx M α
+    · -- `δ : Ext N (M/xM) n → Ext N M (n+1)` is surjective since `f* = 0`.
+      obtain ⟨δ, hδ⟩ := Ext.covariant_sequence_exact₁ (X := N) (hS := hSE) (x₁ := γ)
+        (hx₁ := comp_mk₀_smul_id_eq_zero hx M γ) (hn₀ := rfl)
+      rw [← hδ, Subsingleton.elim δ 0]
+      simp [Ext.zero_comp]
+  · rintro ⟨hMn, hMn1⟩
+    haveI : Subsingleton (Ext N (M.smulShortComplex x).X₂ n) := hMn
+    haveI : Subsingleton (Ext N (M.smulShortComplex x).X₁ (n + 1)) := hMn1
+    refine subsingleton_of_forall_eq 0 (fun α => ?_)
+    -- `ker δ = im g*`; `δ α = 0` (target subsingleton), so `α ∈ im g*` with preimage in `0`.
+    have hδα : α.comp hSE.extClass (rfl : n + 1 = n + 1) = 0 := Subsingleton.elim _ _
+    obtain ⟨β, hβ⟩ := Ext.covariant_sequence_exact₃ (X := N) (hS := hSE) (x₃ := α)
+      (hn₁ := rfl) (hx₃ := hδα)
+    rw [← hβ, Subsingleton.elim β 0]
+    simp [Ext.zero_comp]
+
+/-- **The Rees induction (core).** Over a Noetherian local ring `R` with `I ≤ 𝔪`, for every finite
+nontrivial module `M`, `I` contains an `M`-regular sequence of length `k` iff `Extⁱ(R/I, M) = 0` for
+all `i < k`.  Classical Rees (Stacks 0AUJ; Bruns–Herzog 1.2.10; Matsumura 16.7): induction on `k`,
+the base is nontriviality, the boundary `k = 1` is `exists_isSMulRegular_iff_subsingleton_ext_zero`,
+and the step is the dimension shift `subsingleton_ext_quotSMulTop_iff`. -/
+private lemma rees_core [IsLocalRing R] {I : Ideal R} (hI : I ≤ IsLocalRing.maximalIdeal R) :
+    ∀ (k : ℕ) (M : ModuleCat R), Module.Finite R M → Nontrivial M →
+      ((∃ rs : List R, rs.length = k ∧ IsRegular M rs ∧ ∀ x ∈ rs, x ∈ I) ↔
+        ∀ i : Fin k, Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) M i)) := by
+  intro k
+  induction k with
+  | zero =>
+    intro M _ hMnt
+    refine ⟨fun _ i => i.elim0, fun _ => ⟨[], rfl, ⟨by simp, ?_⟩, by simp⟩⟩
+    rw [Ideal.ofList_nil, Submodule.bot_smul]
+    exact bot_lt_top.ne'
+  | succ k ih =>
+    intro M hMfin hMnt
+    haveI := hMfin
+    haveI := hMnt
+    set N := ModuleCat.of R (R ⧸ I) with hN
+    constructor
+    · rintro ⟨rs, hlen, hreg, hmem⟩
+      cases rs with
+      | nil => simp at hlen
+      | cons x rs' =>
+        simp only [List.length_cons, Nat.add_right_cancel_iff] at hlen
+        rw [isRegular_cons_iff] at hreg
+        obtain ⟨hxreg, hrs'reg⟩ := hreg
+        have hxI : x ∈ I := hmem x List.mem_cons_self
+        have hmem' : ∀ y ∈ rs', y ∈ I := fun y hy => hmem y (List.mem_cons_of_mem x hy)
+        have hExt0 : Subsingleton (Ext N M 0) :=
+          (exists_isSMulRegular_iff_subsingleton_ext_zero M).mp ⟨x, hxI, hxreg⟩
+        haveI hQnt : Nontrivial (QuotSMulTop x M) :=
+          nontrivial_quotSMulTop_of_mem_maximalIdeal M (hI hxI)
+        have hQvanish : ∀ i : Fin k,
+            Subsingleton (Ext N (ModuleCat.of R (QuotSMulTop x M)) i) :=
+          (ih (ModuleCat.of R (QuotSMulTop x M)) inferInstance hQnt).mp ⟨rs', hlen, hrs'reg, hmem'⟩
+        intro i
+        refine Fin.cases ?_ (fun j => ?_) i
+        · simpa using hExt0
+        · have := (subsingleton_ext_quotSMulTop_iff hxI M hxreg (j : ℕ)).mp (hQvanish j)
+          simpa [Fin.val_succ] using this.2
+    · intro hvanish
+      have hExt0 : Subsingleton (Ext N M 0) := by simpa using hvanish 0
+      obtain ⟨x, hxI, hxreg⟩ :=
+        (exists_isSMulRegular_iff_subsingleton_ext_zero M).mpr hExt0
+      haveI hQnt : Nontrivial (QuotSMulTop x M) :=
+        nontrivial_quotSMulTop_of_mem_maximalIdeal M (hI hxI)
+      have hQvanish : ∀ j : Fin k,
+          Subsingleton (Ext N (ModuleCat.of R (QuotSMulTop x M)) j) := fun j =>
+        (subsingleton_ext_quotSMulTop_iff hxI M hxreg (j : ℕ)).mpr
+          ⟨hvanish ⟨j, by omega⟩, by simpa [Fin.val_succ] using hvanish ⟨j + 1, by omega⟩⟩
+      obtain ⟨rs', hlen', hrs'reg, hmem'⟩ :=
+        (ih (ModuleCat.of R (QuotSMulTop x M)) inferInstance hQnt).mpr hQvanish
+      refine ⟨x :: rs', by simp [hlen'], ?_, ?_⟩
+      · rw [isRegular_cons_iff]; exact ⟨hxreg, hrs'reg⟩
+      · intro y hy
+        rw [List.mem_cons] at hy
+        rcases hy with rfl | hy
+        · exact hxI
+        · exact hmem' y hy
+
+/-- **(B) The Rees theorem over a local ring**, in the `∨ = ⊤` unit-ideal form used by the openness
+argument: over a Noetherian local ring `L`, the ideal `J` has grade `≥ k` OR is the unit ideal iff
+every `Extⁱ(L/J, L)` (`i < k`) vanishes.  Assembled from `rees_core` (proper case, applied to the
+ring `L` as a module over itself) and `subsingleton_ext_of_isZero_left` (the `J = ⊤` disjunct, where
+`L/J` is the zero module). -/
+private lemma gradeGE_or_top_iff_forall_subsingleton_ext_local
+    {L : Type*} [CommRing L] [IsNoetherianRing L] [IsLocalRing L] (J : Ideal L) (k : ℕ) :
+    (J.gradeGE k ∨ J = ⊤) ↔
+      ∀ i : Fin k, Subsingleton (Ext (ModuleCat.of L (L ⧸ J)) (ModuleCat.of L L) i) := by
+  by_cases hJ : J = ⊤
+  · subst hJ
+    refine ⟨fun _ i => subsingleton_ext_of_isZero_left _ _ ?_ _, fun _ => Or.inr rfl⟩
+    exact ModuleCat.isZero_of_subsingleton _
+  · have hJle : J ≤ IsLocalRing.maximalIdeal L := IsLocalRing.le_maximalIdeal hJ
+    rw [or_iff_left hJ]
+    exact rees_core hJle k (ModuleCat.of L L) inferInstance inferInstance
+
+end ReesLocal
+
+/-- **(A) ISOLATED RESIDUAL — the sole `sorry` in the file.** `Ext`-localisation compatibility for
+finitely generated modules over a Noetherian ring: localising `Extⁱ_S(S/I, S)` at a prime `𝔮` gives
+`Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`, so the former is subsingleton (i.e. `= 0` after localisation) iff the
+latter vanishes.
+
+This is the one classical fact genuinely absent from mathlib at this pin: `Ext`-localisation is
+available only in degree `0` (`Module.FinitePresentation.linearEquivMapExtendScalars`,
+`IsSMulRegular.subsingleton_linearMap_iff`'s final step).  The general statement is flat base change
+for `Ext` — since localisation `S → S_𝔮` is flat, `S_𝔮 ⊗_S (–)` is exact and commutes with a finite
+free/projective resolution of the finitely-presented module `S/I`, giving
+`S_𝔮 ⊗_S Extⁱ_S(S/I, S) ≅ Extⁱ_{S_𝔮}(S_𝔮 ⊗_S S/I, S_𝔮 ⊗_S S) = Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`
+naturally in `i`.  (References: Stacks 00DL / 0AUJ; Bruns–Herzog, *Cohen–Macaulay Rings*, Prop 1.2.9;
+Matsumura, *Commutative Ring Theory*, p. 140.  Mathlib route: `Abelian.Ext.mapExactFunctor` for the
+comparison map, `Module.Flat` / `LocalizedModule` exactness, `ModuleCat.finite_ext` finiteness.)
+
+Everything ELSE in the grade/openness development — the Rees theorem
+(`gradeGE_or_top_iff_forall_subsingleton_ext_local`, proved in full above), the annihilator packaging
+(`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`) and the openness (`isOpen_gradeGE_locus`) — is
+proved from this single fact. -/
+private theorem localizedModule_ext_subsingleton_iff {S : Type*} [CommRing S] [IsNoetherianRing S]
+    (I : Ideal S) (q : PrimeSpectrum S) (i : ℕ) :
+    Subsingleton (LocalizedModule q.asIdeal.primeCompl
+        (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i))
+      ↔ Subsingleton (Ext
+          (ModuleCat.of (Localization q.asIdeal.primeCompl)
+            (Localization q.asIdeal.primeCompl ⧸
+              I.map (algebraMap S (Localization q.asIdeal.primeCompl))))
+          (ModuleCat.of (Localization q.asIdeal.primeCompl)
+            (Localization q.asIdeal.primeCompl)) i) := by
+  sorry
+
+/-- For a prime `𝔮`, the extended ideal `I·S_𝔮` has grade `≥ k` **or** is the unit ideal *iff* every
 `Ext`-module `Extⁱ_S(S/I, S)` (`i < k`) vanishes after localising at `𝔮`.  This is the pointwise
 form of the identity "grade-or-unit locus `=` complement of the Ext-supports"; the openness argument
 (`isOpen_gradeGE_locus`) needs exactly this, and the topological/annihilator packaging around it
 (`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`, below) is proved in full from it.
 
-Two genuinely mathlib-absent facts compose to give it (both confirmed absent at this mathlib pin —
-`RingTheory/Regular` has no `grade`/`depth`, `RingTheory/Regular/Depth.lean` is a deprecated stub,
-and `Ext`-localisation exists only in degree `0` as `Module.FinitePresentation.linearEquivMap`):
-
-* **Rees / Stacks 00LW (ideal-grade form)** over the LOCAL ring `S_𝔮`:
-  `grade(I_𝔮, S_𝔮) ≥ k ⟺ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮) = 0 ∀ i < k`.  Stacks 00LW is the
-  maximal-ideal/depth form (`depth M = min { i | Extⁱ(R/𝔪, M) ≠ 0 }`); the ideal-grade
-  generalisation is standard (Stacks 0AUJ; Bruns–Herzog, *Cohen–Macaulay Rings*, 1.2.10;
-  Matsumura, *Commutative Ring Theory*, Thm 16.7).  In the unit case `I_𝔮 = S_𝔮` we have
-  `S_𝔮/I_𝔮 = 0`, so every `Ext` vanishes — this is precisely the `∨ … = ⊤` disjunct.
-* **`Ext`-localisation compatibility** (finite modules over a Noetherian ring):
-  `Extⁱ_S(S/I, S)_𝔮 ≅ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`, whence
-  `Subsingleton (Extⁱ_S(S/I,S)_𝔮) ⟺ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮) = 0`.  (Only the degree-`0` Hom
-  case is in mathlib; higher degrees would be developed via flat base change,
-  `Abelian.Ext.mapExactFunctor` being the natural map to prove an iso.) -/
+The proof composes the Rees theorem over the local ring `S_𝔮`
+(`gradeGE_or_top_iff_forall_subsingleton_ext_local`, proved in full) with the `Ext`-localisation
+compatibility `localizedModule_ext_subsingleton_iff` (the single isolated residual). -/
 private theorem gradeGE_or_top_iff_forall_subsingleton_localizedExt {S : Type*} [CommRing S]
     [IsNoetherianRing S] (I : Ideal S) (k : ℕ) (q : PrimeSpectrum S) :
     ((I.map (algebraMap S (Localization q.asIdeal.primeCompl))).gradeGE k ∨
         I.map (algebraMap S (Localization q.asIdeal.primeCompl)) = ⊤)
       ↔ ∀ i : Fin k, Subsingleton (LocalizedModule q.asIdeal.primeCompl
           (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i)) := by
-  sorry
+  rw [gradeGE_or_top_iff_forall_subsingleton_ext_local]
+  refine forall_congr' fun i => ?_
+  rw [localizedModule_ext_subsingleton_iff I q i]
 
 /-- The grade-`≥ k`-or-unit locus of `I` is the complement of the finite family of Zariski-closed
 supports `Supp Extⁱ_S(S/I, S)` (`i < k`), phrased directly through the annihilator ideals
