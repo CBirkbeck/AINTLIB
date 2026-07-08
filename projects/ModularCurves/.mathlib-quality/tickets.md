@@ -4980,6 +4980,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     axiom-clean. BOTH laws now have certificate-free on-curve theorems; the 422/584-term
     `cof_I1_*.txt` exports are retired. Remaining: β1–β4 (chart-product cover, per-chart
     triple + c5α instances, per-(i,j,k) ring homs, gluing) — the scheme-plumbing phase.
+  - **Progress** (coordinator-P1, 2026-07-08T08:33Z): **β2 ring core DONE** (4eebfdee,
+    `AdditionChartRing.lean`, zero sorries, axiom-clean) — presented chart/chart-product
+    rings (`affineChartRing`/`biChartRing`, chartCoordEquiv-style), tautological points
+    with BY-CONSTRUCTION curve equations (`eval₂_…` tautology lemmas), both law triples
+    (`lawOneTriple`/`lawTwoTriple`) and their on-curve theorems under [IsReduced]
+    [IsJacobsonRing] on the chart-product. REMAINING: β2b instances at the universal atlas
+    (reduced: AdjoinRoot-monic freeness on Y/Z charts + `projective_polynomial_prime` over
+    `Frac`, then localization-injectivity; Jacobson: rename-to-Fin-4 +
+    `isJacobsonRing_MvPolynomial_fin` + quotient; note the X-chart cubic is NOT monic in
+    either variable — the domain chain must run on the Y/Z charts only, which suffices by
+    `chartY_sup_chartZ_eq_top` [P3's b3, landed]) · β1 Spec-identification (`pullbackSpecIso`
+    + `chartCoordEquiv` + tensor↔4-variable-quotient iso) · β3 per-(i,j,k) ring homs ·
+    β4 gluing.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
