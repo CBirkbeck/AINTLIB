@@ -6455,3 +6455,22 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
 - **Proof sketch**: fibrewise-injectivity of an fp-morphism is a constructible-open condition on Spec (its
   non-locus is the support of a fp cokernel/kernel datum), quasi-compact ⟹ spreads to a stage. Parallels
   T-DEV2a's openness+quasi-compactness route. ~100-150 lines. **Sources**: Stacks 05LN, EGA IV 11.2.6.
+
+### BB-DELIGNE scoping (beastmode-P2, 2026-07-07): major build + general-base source-gap
+Read Mumford AV §14 "Duality theory of finite commutative group schemes". Findings:
+1. **§14 is FIELD-ONLY** (opens: *"the ground field k is assumed algebraically closed, of positive
+   characteristic p>0"*) and proves things via heavy structure theory: Cartier dual G↦Ĝ, the
+   local/reduced decomposition G = G_rr×G_rl×G_lr×G_ll, p-Lie algebras, Frobenius/Verschiebung
+   (height-one ⟹ [p]=0 corollary, p.141).
+2. **The box `smul_eq_zero_of_factors` needs the GENERAL-BASE theorem** (incl. non-reduced, char p —
+   the Drinfeld raison d'être), which does NOT reduce to the field/fibre case: N•Q=0 over a
+   non-reduced T is a closed condition not detected by geometric points. Its clean general-base proof
+   (Deligne/Tate) is NOT in refs (Mumford = field-only; Tate "Finite flat group schemes"
+   [Cornell–Silverman–Stevens] absent).
+3. **mathlib substrate = Hopf algebras/bialgebras only** — no Cartier dual, Frobenius/Verschiebung,
+   or group schemes.
+**VERDICT:** BB-DELIGNE is a *major* multi-session foundational build (finite-group-scheme structure
+theory from Hopf algebras up). Its one virtue: **T-W7-INDEPENDENT** (attackable without waiting on
+beastmode-A). Prerequisite to start faithfully: add Tate's "Finite flat group schemes" to
+refs/ModularCurves/ for the general-base proof. NOT a quick discharge. Sentinel released pending
+owner's scope decision.
