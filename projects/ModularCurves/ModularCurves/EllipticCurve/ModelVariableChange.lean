@@ -2883,7 +2883,14 @@ theorem pointedIsoCoordEquiv_filtration {W W' : WeierstrassCurve R}
     Submodule.map (pointedIsoCoordEquiv e heπ hez).toLinearEquiv.toLinearMap
         (poleOrderFiltration W' n) =
       poleOrderFiltration W n := by
-  sorry
+  refine le_antisymm (pointedIsoCoordEquiv_filtration_le e heπ hez n) ?_
+  intro x hx
+  refine Submodule.mem_map.mpr
+    ⟨pointedIsoCoordEquiv e.symm (pointedIso_heπ_symm e heπ)
+      (pointedIso_hez_symm e hez) x, ?_, ?_⟩
+  · exact pointedIsoCoordEquiv_filtration_le e.symm (pointedIso_heπ_symm e heπ)
+      (pointedIso_hez_symm e hez) n (Submodule.mem_map_of_mem hx)
+  · exact pointedIsoCoordEquiv_symm_apply e heπ hez x
 
 /-- **(T-W7.1b-b3x, coordinator §2)** Coefficient extraction, `x`-side: `Φ(x') = αx + β`
 with `α` a unit (from `F₂`-preservation + the freeness of `{1, x}`). Shared-witness

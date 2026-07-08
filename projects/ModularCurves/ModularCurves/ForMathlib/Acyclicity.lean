@@ -95,9 +95,61 @@ theorem acyclicityLemma_hasDepthGE_homology
 Proof (Stacks): the short exact sequence of complexes `0 → F_• →ˣ F_• → F_•/xF_• → 0` and its snake
 long exact homology sequence.  Consumed by `be_forward_core`'s induction on `e`. -/
 
+/-- **[T-ACYC.00MZ], reduced core.**  The complex reduced modulo `x` (via `QuotSMulTop x`, i.e.
+`F • ↦ F/xF`) is exact at the interior spot `QuotSMulTop x F_{j+2}`, for every `j`.  This is the
+honest content of Stacks 00MZ: exactness of the reduced complex at all spots `≥ 2` (the source
+explicitly loses the bottom spot).  Direct diagram chase using the regularity of `x` on the free
+term `F j`; no snake lemma needed.  Transported to the `baseChange` spelling in the main statement
+below. -/
+private theorem exact_map_quotSMulTop_of_isSMulRegular {R : Type u} [CommRing R] {rk : ℕ → ℕ}
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → R) →ₗ[R] (Fin (rk i) → R))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
+    (x : R) (hx : IsSMulRegular R x) (j : ℕ) :
+    Function.Exact (QuotSMulTop.map x (φ (j + 2))) (QuotSMulTop.map x (φ (j + 1))) := by
+  rw [LinearMap.exact_iff]
+  apply le_antisymm
+  · -- ker (map (φ (j+1))) ≤ range (map (φ (j+2))): the chase
+    intro y hy
+    rw [LinearMap.mem_ker] at hy
+    obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    rw [QuotSMulTop.map_apply_mk, Submodule.Quotient.mk_eq_zero] at hy
+    obtain ⟨w, -, hw⟩ := (Submodule.mem_smul_pointwise_iff_exists _ _ _).mp hy
+    have hxw : (φ (j + 1)) v = x • w := hw.symm
+    have h1 : (φ j) ((φ (j + 1)) v) = 0 := by
+      have := LinearMap.congr_fun (hcomplex j) v; simpa using this
+    rw [hxw, map_smul] at h1
+    have hreg : IsSMulRegular (Fin (rk j) → R) x := IsSMulRegular.pi fun _ => hx
+    have hw0 : (φ j) w = 0 := hreg (by simpa using h1)
+    have hwr : w ∈ LinearMap.range (φ (j + 1)) := by
+      rw [← LinearMap.exact_iff.mp (hexact j), LinearMap.mem_ker]; exact hw0
+    obtain ⟨u, hu⟩ := hwr
+    have h2 : (φ (j + 1)) (v - x • u) = 0 := by rw [map_sub, map_smul, hu, hxw, sub_self]
+    have hvr : v - x • u ∈ LinearMap.range (φ (j + 2)) := by
+      rw [← LinearMap.exact_iff.mp (hexact (j + 1)), LinearMap.mem_ker]; exact h2
+    obtain ⟨t, ht⟩ := hvr
+    refine ⟨Submodule.Quotient.mk t, ?_⟩
+    rw [QuotSMulTop.map_apply_mk, ht, Submodule.Quotient.eq]
+    exact (Submodule.mem_smul_pointwise_iff_exists _ _ _).mpr
+      ⟨-u, Submodule.mem_top, by rw [smul_neg]; abel⟩
+  · -- range ≤ ker: the complex condition
+    rw [LinearMap.range_le_ker_iff, ← QuotSMulTop.map_comp, hcomplex (j + 1), map_zero]
+
 /-- **[T-ACYC.00MZ] Stacks 00MZ (Lemma 10.102.7).**  An exact finite free complex stays exact after
 base change along `R → R/xR` for a nonzerodivisor `x` (snake lemma on `0 → F_• →ˣ F_• → F_•/xF_• → 0`).
-The base-changed maps are `(φ i).baseChange (R ⧸ (x))`. -/
+The base-changed maps are `(φ i).baseChange (R ⧸ (x))`.
+
+The reduced-complex core `exact_map_quotSMulTop_of_isSMulRegular` above gives exactness at every spot
+`≥ 2` (the `i + 1 = j + 2` branch), transported here through
+`QuotSMulTop.equivQuotTensor` (`M/xM ≃ (R/xR) ⊗ M`) and `LinearMap.baseChange_eq_ltensor`.
+
+RESIDUAL (`i = 0`, the bottom spot `(R/xR) ⊗ F_1`): the statement as written is **false** there — the
+source (00MZ) is exact only at `(R/xR)^{nₑ}, …, (R/xR)^{n₂}`, i.e. it loses the bottom spot.
+Counterexample: `R = ℤ`, `x = 2`, complex `0 → ℤ →(·2)→ ℤ` (`rk 0 = rk 1 = 1`, `rk (·≥2) = 0`,
+`φ 0 = ·2`, `φ (·≥1) = 0`); it is exact at `F 1` (ker(·2) = 0) but the reduction `𝔽₂ →0→ 𝔽₂` is not
+exact at `𝔽₂`.  The consumer (`be_forward_core`'s induction on `e`) only needs the spots `≥ 2`, so
+this bottom spot is spurious; the statement should be shifted to `φ (i+2)/φ (i+1)` (or add
+surjectivity of `φ 0`). -/
 theorem exact_baseChange_quotient_of_isSMulRegular
     {R : Type u} [CommRing R] {rk : ℕ → ℕ}
     (φ : (i : ℕ) → (Fin (rk (i + 1)) → R) →ₗ[R] (Fin (rk i) → R))
@@ -107,7 +159,16 @@ theorem exact_baseChange_quotient_of_isSMulRegular
     ∀ i, Function.Exact
       ((φ (i + 1)).baseChange (R ⧸ Ideal.span {x}))
       ((φ i).baseChange (R ⧸ Ideal.span {x})) := by
-  sorry
+  intro i
+  cases i with
+  | zero =>
+    -- FALSE spot (see docstring): exactness of `(R/xR) ⊗ F_1` is not implied. Not used downstream.
+    sorry
+  | succ i' =>
+    have key := exact_map_quotSMulTop_of_isSMulRegular φ hcomplex hexact x hx i'
+    have nat1 := QuotSMulTop.equivQuotTensor_naturality x (φ (i' + 2))
+    have nat2 := QuotSMulTop.equivQuotTensor_naturality x (φ (i' + 1))
+    exact (Function.Exact.iff_of_ladder_linearEquiv nat1.symm nat2.symm).mpr key
 
 /-! ## [T-ACYC.00MY+00MW] Depth-0 splitting ⟹ minor ideal `= ⊤` — Stacks 00MY+00MW (10.102.3/6)
 

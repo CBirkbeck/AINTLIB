@@ -231,7 +231,7 @@ nontrivial module `M`, `I` contains an `M`-regular sequence of length `k` iff `E
 all `i < k`.  Classical Rees (Stacks 0AUJ; Bruns–Herzog 1.2.10; Matsumura 16.7): induction on `k`,
 the base is nontriviality, the boundary `k = 1` is `exists_isSMulRegular_iff_subsingleton_ext_zero`,
 and the step is the dimension shift `subsingleton_ext_quotSMulTop_iff`. -/
-private lemma rees_core [IsLocalRing R] {I : Ideal R} (hI : I ≤ IsLocalRing.maximalIdeal R) :
+lemma rees_core [IsLocalRing R] {I : Ideal R} (hI : I ≤ IsLocalRing.maximalIdeal R) :
     ∀ (k : ℕ) (M : ModuleCat R), Module.Finite R M → Nontrivial M →
       ((∃ rs : List R, rs.length = k ∧ IsRegular M rs ∧ ∀ x ∈ rs, x ∈ I) ↔
         ∀ i : Fin k, Subsingleton (Ext (ModuleCat.of R (R ⧸ I)) M i)) := by
