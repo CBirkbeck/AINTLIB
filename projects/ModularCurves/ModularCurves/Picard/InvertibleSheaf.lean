@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.AlgebraicGeometry.Modules.Sheaf
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+import ModularCurves.ForMathlib.OpensMapFinal
 
 /-!
 # Invertible sheaves of modules on a scheme
@@ -72,7 +73,14 @@ def IsInvertible (M : X.Modules) : Prop :=
 
 /-- The structure sheaf is an invertible `𝒪ₓ`-module. -/
 theorem isInvertible_unit : IsInvertible (unitObj X) := by
-  sorry
+  refine ⟨PUnit, fun _ => ⊤, iSup_const, fun _ => ?_⟩
+  have e : (SheafOfModules.pullback
+        (Scheme.Hom.toRingCatSheafHom (⊤ : X.Opens).ι)).obj
+      (SheafOfModules.unit X.ringCatSheaf)
+      ≅ SheafOfModules.unit (↑(⊤ : X.Opens) : Scheme.{u}).ringCatSheaf :=
+    asIso (SheafOfModules.pullbackObjUnitToUnit
+      (Scheme.Hom.toRingCatSheafHom (⊤ : X.Opens).ι))
+  exact ⟨⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩⟩
 
 /-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
 sheafification of a sheaf being itself; no GAP-1 content). -/

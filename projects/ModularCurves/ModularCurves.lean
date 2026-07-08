@@ -41,3 +41,4 @@ import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.Picard.InvertibleSheaf
+import ModularCurves.ForMathlib.OpensMapFinal
