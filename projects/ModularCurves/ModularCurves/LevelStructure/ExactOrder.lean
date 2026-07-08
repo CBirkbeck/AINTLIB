@@ -167,6 +167,33 @@ theorem Section.orderDivisor_baseChange (P : E.Section) (N : ℕ) {T : Scheme.{u
   exact ((congrArg (fun Q : (E.baseChange t).Point (𝟙 T) =>
     Scheme.Hom.ker Q.1) hsec).trans hker).symm
 
+/-- **(T-D6a-ii, L4 — KM 1.3.6 base-change stability)** Being a subgroup divisor is stable
+under base change: if `D` is a subgroup of `E/S`, then `D` base-changed along `t : T ⟶ S`
+is a subgroup of `E ×_S T / T`. The point-group transport is `Point.baseChangeEquiv`; the
+factoring correspondence is `exists_factor_comap_iff` (the `comapIso` dictionary). -/
+theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.baseChange
+    {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) {T : Scheme.{u}} (t : T ⟶ S) :
+    (D.baseChange t).IsSubgroup (E.baseChange t) := by
+  intro T' g'
+  obtain ⟨H, hH⟩ := hD (g' ≫ t)
+  refine ⟨H.comap (Point.baseChangeEquiv E t g').toAddMonoidHom, fun Q => ?_⟩
+  rw [AddSubgroup.mem_comap, AddEquiv.coe_toAddMonoidHom, hH,
+    Point.baseChangeEquiv_apply_coe, RelEffCartierDiv.baseChange_ideal]
+  exact (AlgebraicGeometry.Scheme.IdealSheafData.exists_factor_comap_iff D.ideal
+    (Limits.pullback.fst E.π t) Q.1).symm
+
+/-- **(T-D6a-ii, headline — KM 1.4.4 (1)⟹(2))** Exact order is preserved by base change:
+if `P ∈ E(S)` has exact order `N`, its restriction to any `T ⟶ S` has exact order `N` on
+the base-changed curve. -/
+theorem Section.HasExactOrder.baseChange {P : E.Section} {N : ℕ} [NeZero N]
+    (h : P.HasExactOrder E N) {T : Scheme.{u}} (t : T ⟶ S) :
+    Section.HasExactOrder (E.baseChange t)
+      (Point.asSection E t (Point.pull E t P)) N := by
+  show (Section.orderDivisor (E.baseChange t)
+    (Point.asSection E t (Point.pull E t P)) N).IsSubgroup (E.baseChange t)
+  rw [← Section.orderDivisor_baseChange]
+  exact RelEffCartierDiv.IsSubgroup.baseChange E (D := P.orderDivisor E N) h t
+
 /-- **(T-D5 = KM 1.4.2)** Exact order `N` implies `N • P = 0`. Black box BB-DELIGNE: a
 finite locally free commutative group scheme of rank `N` is killed by `N` (KM cite
 [Oort–Tate]). -/
