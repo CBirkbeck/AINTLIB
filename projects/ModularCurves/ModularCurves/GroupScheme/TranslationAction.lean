@@ -150,6 +150,26 @@ theorem isInvariant_iff_coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Schem
     G.IsInvariant f ↔ G.translationAction.left ≫ f = G.actionProj.left ≫ f :=
   ⟨IsInvariant.coequalizes, IsInvariant.of_coequalizes⟩
 
+/-- **The graph of the translation action** `⟨act, pr_E⟩ : G ×_S E ⟶ E ×_S E`, `(t, x) ↦ (x + ι t, x)`.
+Its image is the equivalence relation `x ∼ x + ι t` whose quotient is `E/G`: `E/G` is the coequalizer
+of `act, pr_E`, equivalently the quotient of `E` by (the image of) `actPair`. The two components
+recover the legs (`actPair_fst`, `actPair_snd`). The action is free — `actPair` is a monomorphism —
+which is what makes the finite-locally-free groupoid an equivalence relation with effective quotient
+(the input to Piece 3's existence, `.mathlib-quality/decomposition-g3d-infra.md`). -/
+noncomputable def actPair (G : FiniteLocallyFreeSubgroup E) :
+    (Over.mk G.π) ⊗ E.asOver ⟶ E.asOver ⊗ E.asOver :=
+  lift G.translationAction G.actionProj
+
+@[reassoc, simp]
+theorem actPair_fst (G : FiniteLocallyFreeSubgroup E) :
+    G.actPair ≫ fst E.asOver E.asOver = G.translationAction :=
+  lift_fst _ _
+
+@[reassoc, simp]
+theorem actPair_snd (G : FiniteLocallyFreeSubgroup E) :
+    G.actPair ≫ snd E.asOver E.asOver = G.actionProj :=
+  lift_snd _ _
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
