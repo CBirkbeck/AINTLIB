@@ -1,1 +1,1 @@
-FOCUS: T-W7.0g inv/identity half — invOver/invOver_left/oneOver/oneOver_left (build on negModelHom + projModelZero_projModelπ; mulOver stays for the 0c/mul side)
+FOCUS: T-W7.0g inv/identity half DONE + committed (e3a003fc, axiom-clean, in HEAD). Rest of 0g (mulOver + monoid axioms) BLOCKED on mulModelHom (0c-ii/iii, coordinator-P1). Global negHom (join) BLOCKED on 1b comparison (beastmode-A/P3b3). No unblocked P0-adjacent work remains — awaiting user steer or a blocker to clear.

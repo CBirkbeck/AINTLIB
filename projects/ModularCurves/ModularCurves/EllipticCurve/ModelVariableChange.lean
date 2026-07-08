@@ -2416,6 +2416,39 @@ private lemma witness_res_unit_root {W W' : WeierstrassCurve R}
     ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
     (Subsingleton.elim _ _)
 
+private lemma res_numerator_generic {X : Scheme.{u}} {U : X.Opens}
+    (hU : IsAffineOpen U) (f : Γ(X, U)) {V : X.Opens}
+    (hV : V ≤ X.basicOpen f) (hVU : V ≤ U)
+    (x : ↑Γ(X, X.basicOpen f)) :
+    ∃ (x₀ : ↑Γ(X, U)) (j : ℕ),
+      ((X.presheaf.map (homOfLE hV).op).hom) x *
+        ((X.presheaf.map (homOfLE hVU).op).hom) (f ^ j) =
+      ((X.presheaf.map (homOfLE hVU).op).hom) x₀ := by
+  haveI := hU.isLocalization_basicOpen f
+  obtain ⟨⟨x₀, u⟩, hx⟩ := IsLocalization.surj (Submonoid.powers f) x
+  obtain ⟨j, hj⟩ := u.2
+  rw [← hj] at hx
+  refine ⟨x₀, j, ?_⟩
+  have hres := congrArg ((X.presheaf.map (homOfLE hV).op).hom) hx
+  have hexp := (map_mul ((X.presheaf.map (homOfLE hV).op).hom) x
+    ((algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) (f ^ j))).symm.trans hres
+  have hfuse : ∀ y : ↑Γ(X, U),
+      ((X.presheaf.map (homOfLE hV).op).hom)
+        ((algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y) =
+      ((X.presheaf.map (homOfLE hVU).op).hom) y := by
+    intro y
+    have h0 : (algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y =
+        ((X.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom) y := rfl
+    rw [h0]
+    have hc := congrArg (fun φ => CommRingCat.Hom.hom φ y)
+      ((X.presheaf.map_comp (homOfLE (X.basicOpen_le f)).op
+        (homOfLE hV).op).symm)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+    refine hc.trans ?_
+    exact congrArg (fun ψ => (CommRingCat.Hom.hom (X.presheaf.map ψ)) y)
+      (Subsingleton.elim _ _)
+  exact (congrArg₂ (· * ·) rfl (hfuse (f ^ j))).symm.trans (hexp.trans (hfuse x₀))
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
