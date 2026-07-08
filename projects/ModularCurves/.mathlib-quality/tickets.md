@@ -10244,3 +10244,49 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
   (chart subfunctor ≅ affine-space functor, naturality of GR-B in the algebra), [GR-C]
   (Zariski-local covering, 089T step 5), [GR-D] (openness of the chart locus, 089T
   step 4). Signatures to be pinned against the now-proven wave-1 interface.
+
+## Amendments v10.50 (2026-07-08, coordinator): c4.3 math closed (one lemma); v10.24(d) tactic-iso rule; FP4 quotient-API wave; p0↔FP formulation RULING
+
+- **c5β — c4.3 MATHEMATICS CLOSED, collapsed to ONE lemma**:
+  `chartι_comp_specMap_chartAwayHom_smul_eq` — two proportional on-curve triples with
+  invertible coordinates at possibly different indices define the same morphism; subsumes
+  BOTH agreements (e=1, k≠l ⟹ c4.2c; e=(c·d)², any indices ⟹ c4.3 cross-product; the
+  diagonal l=k, which the old crux could not state, falls out). e never assumed a unit.
+  The v10.44/47 "no second crux" prediction discharged exactly as written. Six commits,
+  zero-sorry. **Design pin RATIFIED**: `blOpenY` indexed by the FOUR covering
+  chart-products (i,j) ∈ {Y,Z}² (exactly the domain pairs; they cover since [1:0:0] is
+  not on the curve). Remaining: glueMorphisms assembly → c4.4 → c4.5 → 0c-i → report 0c-ii.
+- **v10.24(d) — POLICY (c5β's third conclusive instance, binding)**: *a tactic-built iso
+  cannot be computed with.* The rw-then-exact idiom wraps the iso in an `Eq.mpr` that no
+  projection/factorisation lemma sees through (`specBasicOpenIsoAway`,
+  `chartPieceTensorIso` both had to be restated as terms). RULE: if a definition's legs,
+  components, or factorisations will EVER be consumed, build it as a TERM (`congrHom`,
+  `eqToIso`) — never by rewriting the goal first.
+- **fable-P4 — corrections acted on + quotient-API wave absorbed** (all axiom-clean):
+  [A711-FP] verified sorry-free at pickup and USED unconditionally; T-W7.1b consumed
+  (localModel ungated). Landed: the quotient chart API (T-Q5d 5–7;
+  `quotientπ_preimage_quotientChart` as the core; **`isAffine_quotient` = T-Q3 falls out
+  as a corollary**; the isPullback local-to-global engine; `isAffineHom_quotientπ`);
+  **X → X/G is a finite étale surjection** (KM A7.1.1 in geometric form, GENERAL base) =
+  [a4]'s descent cover; [a3-ii] as schemes (W ≅ X ×_{X/G} (W/G) cartesian). Standing:
+  three EngineDescent sorries; isPullback = E-side glue only (X affine, single chart);
+  [a5] unblocked. Sentinel → E-side glue; next report at engine or wall.
+- **p0 (beastmode-B) — [T-G3d-infra] Piece 3 abstract reduction COMPLETE** (6 ForMathlib
+  files, ~15 commits): IsHopfGalois → IsColimit cofork → ∃!-lift categorical quotient;
+  the crux is now the NAMED predicate `IsHopfGalois`. **RECONCILIATION RULING
+  (coordinator)**: **DEFER — build no bridge now.** (a) Constant-group consumers use
+  fable-FP/FP4's action-formulation results AS-IS (no comodule re-export, no parallel
+  bridge — the reuse rule cuts both ways: don't duplicate in either direction). (b) The
+  comodule crux for GENUINE subgroup schemes (the real [T-G3d-infra] deliverable, feeding
+  NISOG L6) takes its instances from **p2's Hopf-on-subgroup-divisor layer**
+  (subgroupComul/ε/antipode + HopfAlgebra, CHARTER-P2 in flight) — dependency edge
+  recorded; p2 is the natural supplier, not FP. (c) Formulation unification is deferred
+  until a concrete consumer forces the two to meet; premature unification is refactor
+  debt. **p0 next**: route-independent [T-G3d-infra] tail pieces; when drained, claim the
+  **[STREAM-GH] first wave** (GHB1/GHB3/GHA2/GHA4/GH2/GHC4 — PART A/B leaves consume
+  T-Q5/InvariantTorsor machinery p0 now knows deeply; they do NOT wait on the B2 repoint,
+  which remains FP4's; the corrected T-H4/H6 WIRING does wait).
+- **RELAY-ROUTING NOTE (owner)**: the v10.48 P3b3 stand-down + [Y1-ATLAS]-open message was
+  mis-delivered to p0 (correctly ignored there). **Ensure it reaches the actual
+  P3b3/STREAM-Y1 session** — until then P3b3 may still be running the redundant b5
+  subagent.
