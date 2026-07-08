@@ -8676,3 +8676,36 @@ All proven decls axiom-clean (standard 3).*
    (report): 0c-ii DONE — this fires beastmode-A's 0h interrupt** (board-signal it too).
 3. Then your half of the W7 endgame with A per CHARTER-A item 5 (split via board):
    0c-iii specs, T-W7.12 glue inputs, CLEANUP-ALL-W7 prep.
+
+### v10.11.4 (2026-07-08, fable-PIC0): scoping verdicts — T-PIC-GAP1 + T-PIC-DEG0 CLOSED (track/steer)
+
+- **[T-PIC-GAP1]** claimed+done (fable-PIC0, scoping) — **verdict: TRACK/STEER, do NOT
+  build** (Tier-3 reuse policy). Ecosystem evidence (gh search, 2026-07-08): NO open
+  mathlib4 PR builds `SheafOfModules` monoidal; but the Riou lane is ACTIVE on the
+  exact prerequisites — **#35545** (internal hom for presheaves of modules — the
+  closed-structure route that makes sheafify-⊗-compat cheap via Hom-transposition),
+  **#41383** (SheafOfModules Grothendieck abelian), **#35773** (stalks module
+  structure = the enough-points route substrate). The monoidal packaging is the
+  natural next step of #35545 in the same lane that shipped Sites/Monoidal.lean.
+  OWNER ACTION: Zulip ping the lane (same protocol as COH-3) — offer the
+  `Opens.map_final` instance (v10.11.3, upstream-grade) as a contribution.
+  T-PIC1b + stage P2 stay parked on the upstream lane (strictly better than parked
+  on our own unbuilt development). Re-check at each bump.
+- **[T-PIC-DEG0]** claimed+done (fable-PIC0, scoping) — **verdict: statements wait
+  for a consumer; two routes recorded.** HasseWeil audit: its Pic⁰ machinery
+  (Pic0/PicDual*.lean) is ClassGroup-of-coordinate-ring based (Silverman III.6.1
+  faithful) with degree entering as the isogeny-degree quadratic form — there is NO
+  reusable divisor-degree homomorphism `Div(C) → ℤ` / line-bundle degree over fields
+  to anchor fibre-degree on. Routes when a consumer (Pic^ν, GME (2.16)) lands:
+  (a) the tracked Weil-divisor mathlib lane (board ecosystem note: "Raph-DG lane")
+  which owns divisor degree; (b) bespoke length-based degree
+  (deg = ∑ Module.length of stalk quotients) on our effective-Cartier substrate.
+  No skeleton cut (statements-only-later per decomposition-pic-coh.md).
+- **fable-PIC0 stream status (session close)**: COH-1 module core COMPLETE (8/8
+  leaves, cleaned, axiom-clean; 2 resolved-by-mathlib). Pic stage P1: T-PIC1a ✓,
+  T-PIC1a-FIN ✓ (new Opens.map_final), T-PIC1d ✓, T-PIC1c blocked (env anomaly,
+  dossier v10.11.3), T-PIC1b blocked (upstream lane per GAP-1 verdict). Scopings
+  closed with verdicts. **No dispatchable ticket with met dependencies remains in
+  this stream**; blocked set = {T-PIC1c (anomaly/bump-retest), T-PIC1b + P2 (Riou
+  lane), CLEANUP-PIC1 (after P1c), T-PIC-DEG (consumer-gated)}. Sentinel
+  beastmode_active.PIC0 removed.
