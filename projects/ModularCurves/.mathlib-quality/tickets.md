@@ -6150,6 +6150,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-W7-FINAL]** `/cleanup-all` on all T-W7 files (the Phase-III close-out).
   **Depends**: T-W7.7, T-W7.36 (and T-W7.8 if/when it lands).
 
+- **[T-W8] `level-spaces-over-U`**. **CLAIMED beastmode-A 2026-07-08 (v10.28): new Moduli/LevelSpaces.lean; U_{Γ₁(N)} via exists_exactOrderLocus, U_{Γ(N)} via exists_fullLevelLocus, U_{Γ₀(N)} per T-SG2; v10.24(b) opaque interface per def.**
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
   schemes/subfunctors over `U` cut out by the D-stream Cartier incidence loci; the quotient
