@@ -1749,6 +1749,113 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) hVle hrleU
     ((chartYSectionsRingEquiv W).symm b)
 
+/-- Transports of restricted chart generators are transports at the smaller open. -/
+private lemma transport_res_of_chartY_gen {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    {r' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))} {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hrleE : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ ((projModel W').basicOpen r'))
+    (hrle' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (b' : AdjoinRoot (infChartCubic W')) :
+    (((projModel W).presheaf.map (homOfLE hrleE).op).hom)
+      ((e.hom.app ((projModel W').basicOpen r')).hom
+        ((((projModel W').presheaf.map (homOfLE
+          ((projModel W').basicOpen_le r')).op).hom)
+          ((chartYSectionsRingEquiv W').symm b'))) =
+    pointedIsoChartTransport e hrle' b' := by
+  have hnat := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((chartYSectionsRingEquiv W').symm b'))
+    (Scheme.Hom.naturality e.hom ((homOfLE ((projModel W').basicOpen_le r')).op))
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
+  refine (congrArg (((projModel W).presheaf.map (homOfLE hrleE).op).hom) hnat).trans ?_
+  have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+    (((projModel W).presheaf.map_comp
+      ((TopologicalSpace.Opens.map e.hom.base).map (homOfLE
+        ((projModel W').basicOpen_le r'))).op (homOfLE hrleE).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+  refine hfuse.trans ?_
+  exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+    (Subsingleton.elim _ _)
+
+private lemma mirror_span_aux {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    {r' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))}
+    (hr'le : (projModel W').basicOpen r' ≤ e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hrleE : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ ((projModel W').basicOpen r'))
+    (hrle' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (hmirror : pointedIsoChartTransport e.symm hr'le
+        (AdjoinRoot.root (infChartCubic W)) ∈ Ideal.span
+      {(((projModel W').presheaf.map (homOfLE
+          ((projModel W').basicOpen_le r')).op).hom)
+          ((chartYSectionsRingEquiv W').symm (AdjoinRoot.root (infChartCubic W'))),
+        (((projModel W').presheaf.map (homOfLE
+          ((projModel W').basicOpen_le r')).op).hom)
+          ((chartYSectionsRingEquiv W').symm (infChartTElem W'))}) :
+    (((projModel W).presheaf.map
+      (homOfLE ((projModel W).basicOpen_le r)).op).hom
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)))) ∈
+    Ideal.span {pointedIsoChartTransport e hrle' (AdjoinRoot.root (infChartCubic W')),
+      pointedIsoChartTransport e hrle' (infChartTElem W')} := by
+  obtain ⟨cs', ct', hct'⟩ := Ideal.mem_span_pair.mp hmirror
+  set χe : ↑Γ(projModel W', (projModel W').basicOpen r') →+*
+      ↑Γ(projModel W, (projModel W).basicOpen r) :=
+    ((((projModel W).presheaf.map (homOfLE hrleE).op).hom).comp
+      ((e.hom.app ((projModel W').basicOpen r')).hom)) with hχdef
+  have hχS : χe ((((projModel W').presheaf.map (homOfLE
+      ((projModel W').basicOpen_le r')).op).hom)
+      ((chartYSectionsRingEquiv W').symm (AdjoinRoot.root (infChartCubic W')))) =
+      pointedIsoChartTransport e hrle' (AdjoinRoot.root (infChartCubic W')) :=
+    transport_res_of_chartY_gen e hrleE hrle' (AdjoinRoot.root (infChartCubic W'))
+  have hχT : χe ((((projModel W').presheaf.map (homOfLE
+      ((projModel W').basicOpen_le r')).op).hom)
+      ((chartYSectionsRingEquiv W').symm (infChartTElem W'))) =
+      pointedIsoChartTransport e hrle' (infChartTElem W') :=
+    transport_res_of_chartY_gen e hrleE hrle' (infChartTElem W')
+  have hχL : χe (pointedIsoChartTransport e.symm hr'le
+      (AdjoinRoot.root (infChartCubic W))) =
+      (((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+        ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))) :=
+    transport_symm_roundtrip e hr'le hrleE ((projModel W).basicOpen_le r)
+      (AdjoinRoot.root (infChartCubic W))
+  have himg0 := congrArg χe hct'
+  have hexp := (map_add χe
+      (cs' * (((projModel W').presheaf.map (homOfLE
+        ((projModel W').basicOpen_le r')).op).hom)
+        ((chartYSectionsRingEquiv W').symm (AdjoinRoot.root (infChartCubic W'))))
+      (ct' * (((projModel W').presheaf.map (homOfLE
+        ((projModel W').basicOpen_le r')).op).hom)
+        ((chartYSectionsRingEquiv W').symm (infChartTElem W')))).trans
+    (congrArg₂ (· + ·)
+      (map_mul χe cs' ((((projModel W').presheaf.map (homOfLE
+        ((projModel W').basicOpen_le r')).op).hom)
+        ((chartYSectionsRingEquiv W').symm (AdjoinRoot.root (infChartCubic W')))))
+      (map_mul χe ct' ((((projModel W').presheaf.map (homOfLE
+        ((projModel W').basicOpen_le r')).op).hom)
+        ((chartYSectionsRingEquiv W').symm (infChartTElem W')))))
+  have hfinal : (((projModel W).presheaf.map
+      (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))) =
+      χe cs' * pointedIsoChartTransport e hrle' (AdjoinRoot.root (infChartCubic W')) +
+      χe ct' * pointedIsoChartTransport e hrle' (infChartTElem W') :=
+    hχL.symm.trans (himg0.symm.trans (hexp.trans (congrArg₂ (· + ·)
+      (congrArg (χe cs' * ·) hχS) (congrArg (χe ct' * ·) hχT))))
+  refine mem_of_eq_of_mem hfinal ?_
+  exact Ideal.add_mem _
+    (Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_insert _ _)))
+    (Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_insert_of_mem _ rfl)))
+
 /-- **The mirror inclusion**: near a section prime, the `W`-side coordinate `s` lies in the
 ideal generated by the transported `s'` and `t'` — the geometric heart of "pointed
 isomorphisms preserve the order of vanishing along the section". -/
@@ -1821,7 +1928,7 @@ lemma exists_basicOpen_root_mem_span_transport {W W' : WeierstrassCurve R}
   · have hres := pointedIsoChartTransport_res e hr₀le hrle₀ (sectionUnitElem W')
     rw [← hres]
     exact hr₀U.map _
-  · sorry
+  · exact mirror_span_aux e hr'le hrleE hrle' hmirror
 
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
