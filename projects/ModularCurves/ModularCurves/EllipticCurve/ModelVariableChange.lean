@@ -2114,6 +2114,33 @@ lemma exists_basicOpen_transport_root_unit_mul {W W' : WeierstrassCurve R}
     (RingEquiv_map_mem_nonZeroDivisors (chartYSectionsRingEquiv W).symm
       (infChart_root_mem_nonZeroDivisors W))
 
+/-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
+every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
+integral. The proof restricts the transported overlap equation to the division-pack basic
+open, replaces `σⁿ` by `unitⁿ·sⁿ`, clears `t`-denominators, and pulls back through the two
+localizations. -/
+lemma pointedIso_exists_witness {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (f' : W'.toAffine.CoordinateRing) (n : ℕ)
+    (hf' : overlapMap W' f' * algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W'))
+        (AdjoinRoot.root (infChartCubic W')) ^ n ∈
+      Set.range (algebraMap (AdjoinRoot (infChartCubic W'))
+        (Localization.Away (infChartTElem W'))))
+    (P : Ideal (AdjoinRoot (infChartCubic W))) (hP : P.IsMaximal)
+    (ht : infChartTElem W ∈ P) :
+    ∃ c ∉ P, algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) c *
+      (overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
+        algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))
+          (AdjoinRoot.root (infChartCubic W)) ^ n) ∈
+      Set.range (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))) := by
+  sorry
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
