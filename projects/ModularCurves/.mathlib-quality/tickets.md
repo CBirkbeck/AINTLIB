@@ -10640,3 +10640,116 @@ this session, before the cleanup pivot. Nothing in it is pending.*
   obligations beyond what exists).
 - Standing: map_id stays first in beastmode-A's queue (MellWeierstrass zero-sorry + its
   queued cleanup follow); GAP-1 read-only watch at session starts continues.
+
+### v10.48 (2026-07-08, c5β): [CHARTER-C5B] c4.3 hf — HELPER A DONE (topological blocker cleared)
+
+*Commits this run: 9778a08c (opensRange), b38c7b0b (isLocalizationElem↔transFst/snd), ec7e3a56
+(helper A). All zero-sorry, axiom-clean, no `maxHeartbeats`. The chart-products-overlap-within-the-
+transition-locus fact — the obstruction the whole `hf` bottomed out at — is proven.*
+
+- **`blOpenYImage_inf_le_transι` / `blOpenZImage_inf_le_transι`** (+ the Y/Z-independent core
+  `pieceι_range_inf_le_transι`): the overlap of two chart-products' regularity images lies inside
+  `range(transι)`. Proof was exactly the boarded assembly — `pieceι_opensRange`/`transι_opensRange`,
+  pull back along `pieceι` (`image_le_image_iff`), `Proj.awayι_preimage_basicOpen`,
+  `SpecMap_preimage_basicOpen`, `awayTensorEquiv_symm_isLocalizationElem_*`. No new mathematics.
+- **Three v10.24 traps cleared per policy** (recorded for the fleet): `hfst : pullback.fst =
+  chartPieceIso.hom ≫ Spec.map ρ` as a TERM via `Iso.inv_comp_eq` (rw blew whnf on the concrete
+  pullback); the diagonal `i'=i` as a TOTAL side-lemma (`fstLe`) so the assembly is a bare
+  `inf_le_inf` with zero `rw` on the concrete goal; `obtain rfl` inside the total lemma (scope-clean
+  subst) instead of `rcases … with rfl` on the outer goal (which substituted the wrong variable).
+- **`hf` now needs only B + C**, both on proven tools:
+  - **B (factor):** `κ := IsOpenImmersion.lift (transι …) O.ι (blOpenYImage_inf_le_transι)`,
+    `κ ≫ transι = O.ι` [`lift_fac`]. Show `homOfLE (O ≤ blOpenYImage ij) ≫ addOnYOnImage ij = κ ≫ Ψ`
+    for a common `Ψ : Spec transRing ⟶ projModel` (the law-2 morphism read over transRing). The
+    subtlety is relating `addOnYOnImage = isoImage.inv ≫ addOnYOnSup` to `κ` through the transition;
+    `transι = specMap transAlgHom ≫ chartPieceIso.inv ≫ pieceι` (def) and `= specMap transHom ≫
+    chartPieceIso'.inv ≫ pieceι'` (`transι_eq`) give the two readings.
+  - **C (crux):** `Ψ` is the same read via ij or i'j' — piece-level it is
+    `chartι_specMap_lawTwoTriple_cross` (25799fea), assembled over the `D(image lawTwoTriple k)` cover
+    of the regularity locus in `Spec transRing`. Likely via `addOnYOnSup`'s interface
+    (`ι_addOnYOnSup`, f91b91ec) transported along `transι`.
+  - Then `glueMorphisms_hf_of_agree` (f91b91ec) → `addOnY`/`addOnZ` (+ rule-3 interface, same commit),
+    then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
+- **This run's total (one session):** c4.2c fully closed; the ENTIRE c4.3 mathematical core; and
+  `hf`'s topological blocker (helper A) proven. The remaining B/C is isoImage↔lift plumbing over the
+  proven crux — the last scheme-plumbing before `addOnY`/`addOnZ` exist.
+
+### v10.44f (2026-07-08, fable-FP): ★ [NISOG-GRASS] WAVE 2 COMPLETE — the covering theorem is PROVEN; the chart-algebra layer of Stacks 089T is DONE
+
+- **Wave 2 DONE (fable-FP, → 2026-07-08T22:23Z)**: `GrassmannianChart.lean` is again
+  **sorry-free (0 sorries)**, all three covering decls axiom-clean:
+  · **[GR-C2]** `bijective_of_surjective_of_rankAtStalk` — equal-rank surjective ⟹
+    bijective (splitting route: `exists_rightInverse_of_surjective`, kernel = finite
+    projective summand, `rankAtStalk_prod` + `rankAtStalk_eq_zero_iff_subsingleton`);
+  · **[GR-C1]** `exists_localizationAway_surjective` — the Nakayama covering (generators
+    `1 ⊗ eⱼ` via `Basis.baseChange`; residue-field sub-selection `Fin k ↪ Fin n`;
+    `LocalizedModule.exists_subsingleton_away` spreading-out; transport through
+    `baseChangeMkQEquiv`);
+  · **[GR-C]** `exists_isChartAt_localizationAway` — Stacks 089T step (5) in full.
+  5 private helpers (incl. `range_coordMap`, `span_tmul_single_eq_top`,
+  `exists_emb_span_eq_top`, `subsingleton_baseChange_quotient_iff`).
+- **⚠ SECOND FLEET-REUSABLE INSTANCE FINDING** (lean4:sorry-filler-deep, banked):
+  `Grassmannian.map φ` bakes `φ.toAlgebra` into its type while `Localization.Away f`
+  carries the Ore-localization `Algebra` — a genuine scalar-instance diamond;
+  `rw`/`congr!`/`letI` all fail since `IsScalarTower R A B` depends structurally on the
+  algebra instance. Fix pattern: a `letI`-in-statement congruence lemma
+  (`ker_baseChangeMkQ_congr`) discharged by `subst h; congr!` — identifies the two
+  `Algebra.algebra_ext`-equal instances once and for all; consumers stay clean.
+- **089T scoreboard**: step (3) charts = wave 1 ✓ · step (4) base-change stability =
+  [GR-A2] ✓ · step (5) covering = wave 2 ✓ · REMAINING for the scheme: [GR-B2] chart
+  subfunctor ≅ 𝔸^{k(n−k)} functor + [GR-D] open-immersion form (089T step 4's openness) +
+  wave 3 ([GR-E] transitions / [GR-F] `Scheme.GlueData` / [GR-G] T-points) — boarded in
+  the artifact, signatures at the wave-3 boundary.
+
+### v10.44g (2026-07-08, fable-FP): [NISOG-GRASS] wave 2.5 DONE — congr-transport + pi-normalization PROVEN
+
+- **[GR-T1]** `Grassmannian.congr` (transport along a module equivalence; upstream-shaped,
+  mathlib has none) + `congr_toSubmodule` + `isChartAt_congr` — PROVEN.
+- **[GR-T2]** `piScalarRight_tmul_single` + `exists_isChartAt_congr_localizationAway` —
+  the covering theorem in the normalized `(Fin n → A)` presentation — PROVEN.
+  `GrassmannianChart.lean` remains sorry-free (0), both new decls axiom-clean, 22:32Z.
+- Elaboration note for the record: two more rewriter stalls on `∘ₗ`-composites defeated
+  by (i) stating squares at the FUNCTION level (`⇑f = ⇑e ∘ ⇑g`, never
+  `.toLinearMap`-composites — the equiv's `toLinearMap` eta-expands to a raw structure
+  literal that no simp lemma heads), and (ii) `show`-unfolding a stuck composite
+  application (comp_apply is rfl). Same disease family as the v10.44d/f findings.
+- **Remaining for the gate** (wave 3, artifact-pinned): [GR-B2] chart functor ≅
+  𝔸^{k(n−k)} (CommAlgCat naturality of GR-B), [GR-D] openness, [GR-E] transitions,
+  [GR-F] `Scheme.GlueData` glue, [GR-G] T-points ⟹ `exists_nIsogSpace` unblocks (with
+  the [BB-DIFF]-adjacent finiteness sub-leaf flagged in the NISOG artifact).
+
+### v10.56 (2026-07-08, fable-PIC0): [YF-QSM] BUILT as decomposed ForMathlib development — module flat-cancellation core PROVEN; QSM leaf discharged
+
+*Executing the v10.55 dispatch. Commit above: NEW `ForMathlib/SmoothDescent.lean` (root-
+registered), the Stacks-faithful decomposition of "smooth is étale-local on the source".*
+
+- **Source of record located and transcribed (quote-or-delete honored):** the [YF-QSM]
+  statement IS **Stacks 02KM** (Descent 35.14.4, smooth column; étale π specializes via
+  étale ⟹ smooth). Its proof = **02KL** (lfp right-cancellation along surjective flat lfp;
+  EGA IV 17.7.5) + **02K5** (Morphisms 29.35.19: lfp + flat-via-29.26.13 + Ω-rank
+  bookkeeping). All tags in the file's docstrings.
+- **PROVEN today, axiom-clean:** `Module.Flat.of_comp_of_faithfullyFlat` — for C → B → A
+  with A faithfully flat over B and flat over C, B is flat over C (module core of
+  29.26.13). Proof: reflect lTensor-injectivity through the ff step
+  (`lTensor_injective_iff_injective`) after conjugating by
+  `AlgebraTensorModule.cancelBaseChange`; the B-linear avatar via
+  `AlgebraTensorModule.map id f` bridges the C-linear/B-linear coercion gap. Seam note
+  (fleet): the ₛ-criteria with a free `v'` universe (`iff_lTensor_preserves_injective_
+  linearMapₛ [Small.{v'} R]`) leave unresolvable universe mvars under `rw` — the
+  single-universe SUBMODULE criterion (`iff_lTensor_injectiveₛ`, f := N.subtype) avoids
+  it and injectivity comes free.
+- **Staged (3 sorries, each with exact locators + route):** 02KL-lfp, 29.26.13-scheme-flat
+  (consumes the proven module core pointwise), and the 02KM smooth target (the last step's
+  mathlib route: `Algebra.smoothLocus_eq_univ_iff` pointwise + formally-étale local-ring
+  transfer — the open piece; mathlib has base-descent + localized H1Cotangent only).
+- **YFullRoute wiring:** `smooth_of_etale_surjective` DISCHARGED (exact onto the 02KM
+  target) — YFullRoute is at **4 own-sorries** (CLOPEN, ETALE, NOETH, GEOM; my v10.54
+  "seven" was a stale count — post-v10.51 it was 5, now 4). [YF-QSM] is no longer an
+  opaque leaf: it is a tagged 3-leaf development with its module core proven, workable
+  by any free hand.
+- **Correction to v10.51's route sketch:** the finite-affine-cover + product-ring
+  faithfully-flat trick is NOT needed for the Stacks route — 02KL's own ⊔-of-affines
+  reduction is the right shape; the v10.51 estimate (~200–400 lines) stands for the
+  remaining three leaves together.
+- Next (per dispatch): the optional T-E8 statement-level tail over MellWScheme, then
+  watch state (map_id via A, gated YFULL leaves, GAP-1).
