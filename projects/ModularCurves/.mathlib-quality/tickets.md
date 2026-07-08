@@ -2027,6 +2027,26 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     `Algebra.Etale.of_isFreeAlgebraAction` (general base; [A711-FP] confirmed CLOSED by fable-FP).
   Together with `quotientπ_surjective` this is KM A7.1.1 *geometrically*: **`X → X/G` is a finite
   étale surjection.** That is [a4]'s descent cover.
+- **★★ [a3-ii] E-SIDE GLUE DONE (fable-P4, 2026-07-08)** — `isPullback_quotientπ` is now
+  **sorry-free**, reduced to one *purely affine* input:
+  * new mathlib-gap filler `ForMathlib/PullbackLocalAtTarget.lean`:
+    **`isPullback_of_iSup_eq_top`** — *cartesianness is Zariski-local at the target* (mathlib has
+    this for morphism **properties** only). Proof: apply `IsZariskiLocalAtTarget (isomorphisms Scheme)`
+    to the comparison `A ⟶ B ×_D C`; over `Uᵢ` the pullback side is `paste_horiz` of
+    `isPullback_morphismRestrict` with the defining square, so the restricted comparison is a map
+    between two apexes of pullback squares over the same cospan (`IsPullback.isIso_of_isPullback`).
+  * **`isPullback_chart`** (the one remaining sorry of [a3-ii]): `W ≅ (W/G) ×_{X/G} X` for a stable
+    affine `W ⊆ E`. Purely affine; plan = transport `isPullback_Spec_fixedPoints` (PROVEN) along
+    `IsAffineOpen.isoSpec` + `quotientChartIso`. `Γ(E,W)` is a `Γ(X)`-algebra via `C.π`, and
+    `π`-equivariance makes the action semilinear.
+  * `isPullback_quotientπ` gained `[IsAffine X]` (route (a)'s `X` is affine); recorded, not silent.
+- **★ [a4] REROUTED (fable-P4)**: **do not descend properness/smoothness** along `X ⟶ X/G`.
+  mathlib descends `Smooth`, `UniversallyClosed`, `LocallyOfFiniteType`, `Etale` along fppf covers
+  but **NOT `IsSeparated`** and **NOT `SmoothOfRelativeDimension n`** — two fresh gaps. Instead derive
+  both from `localModel` ([a5]), which opens none:
+  **`isProper_of_locallyWeierstrass` PROVEN, axiom-clean** (`IsProper` is Zariski-local at the target;
+  over each affine chart the morphism is `projModelπ W` up to iso, proper by `projModelπ_isProper`).
+  The smooth half is the same argument once `SmoothOfRelativeDimension 1 (projModelπ W)` lands (T-A3).
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 

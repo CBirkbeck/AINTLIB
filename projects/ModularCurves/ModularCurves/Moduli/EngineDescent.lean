@@ -301,6 +301,34 @@ theorem isPullback_quotientπ [Finite G] [IsAffine X]
   · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom, ← Category.assoc,
       Scheme.isoOfEq_inv_ι]
 
+/-- **([a4], properness — PROVEN, from the local model)** A morphism admitting a Zariski-local
+Weierstrass model is **proper**.
+
+`IsProper` is Zariski-local at the target (mathlib), and over each affine `U` of the base the
+restriction is, up to isomorphism, `projModelπ W`, which is proper (`projModelπ_isProper`).
+
+This is the route `[a4]` should take: mathlib descends `Smooth`, `UniversallyClosed`,
+`LocallyOfFiniteType` and `Etale` along fppf covers, but **not** `IsSeparated` and **not**
+`SmoothOfRelativeDimension n` — so descending `IsProper`/`smooth` along `X ⟶ X/G` would open two
+fresh mathlib gaps. Deriving them from `localModel` (leaf `[a5]`) opens none. -/
+theorem isProper_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S} {z : S ⟶ E'}
+    {hz : z ≫ p = 𝟙 S} (hlw : LocallyWeierstrass p z hz) : IsProper p := by
+  classical
+  choose U hUmem W hW using hlw
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @IsProper) (fun s : S => (U s).1) ?_ ?_
+  · refine top_le_iff.mp fun s _ => ?_
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hUmem s⟩
+  · intro s
+    obtain ⟨-, e, he₁, -⟩ := hW s
+    have hres : p ∣_ (U s).1 =
+        (pullbackRestrictIsoRestrict p (U s).1).inv ≫ pullback.snd p (U s).1.ι := rfl
+    have hsnd : pullback.snd p (U s).1.ι = e.hom ≫ projModelπ (W s) ≫ (U s).2.isoSpec.inv := by
+      rw [← Category.assoc, he₁, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    rw [hres, MorphismProperty.cancel_left_of_respectsIso (P := @IsProper), hsnd,
+      MorphismProperty.cancel_left_of_respectsIso (P := @IsProper),
+      MorphismProperty.cancel_right_of_respectsIso (P := @IsProper)]
+    exact projModelπ_isProper (W s)
+
 /-- **([a4], properness and smoothness descend)** `π' : E/G ⟶ X/G` is proper and smooth of
 relative dimension `1`.
 
