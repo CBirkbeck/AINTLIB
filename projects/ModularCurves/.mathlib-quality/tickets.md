@@ -2066,11 +2066,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   * `smoothOfRelativeDimension_of_locallyWeierstrass` (LEAF, T-A3) — `smooth` from the local model;
   * `locallyWeierstrass_quotientπ` (LEAF, [a5]) — the descended Weierstrass model.
   **The three residual leaves are all isolated affine/model computations, none gating the others:**
-  1. **`isPullback_chart`** — `W ≅ (W/G) ×_{X/G} X` for a stable affine `W ⊆ E`. Purely affine;
-     transport `isPullback_Spec_fixedPoints` (PROVEN) along `isoSpec`/`quotientChartIso`.
-     *Simplification banked*: `FixedPoints.subalgebra Aᴳ C G` and `FixedPoints.subalgebra ℤ C G` have
-     **defeq `toSubring`** (`rfl`), so the fixed-points-base match is free; `invariantsπ G B ℤ =
-     Spec.map (algebraMap …)` by `rfl`; `Scheme.isoSpec_hom_naturality` supplies the map-matching.
+  1. **`isPullback_chart`** — `W ≅ (W/G) ×_{X/G} X` for a stable affine `W ⊆ E`. **AFFINE CORE PROVEN**
+     (fable-P4, 2026-07-08, axiom-clean): `isPullback_localQuotientπ` — for a free `σ` on stable affine
+     `U ⊆ X` and `W ⊆ E` with `W ≤ C.π⁻¹U`, the invariant-quotient square
+     `↥W → W/G`, `C.π.resLE`, `↥U → U/G` is **cartesian**. Proof = `isPullback_Spec_fixedPoints.flip`
+     transported by two `IsAffineOpen.isoSpec` corner isos (the quotient corners match by **defeq** —
+     `localQuotient = Spec (FixedPoints ℤ …)`, fixed-points bases defeq), with the four commuting
+     squares from `localQuotientπ_eq` and `toSpecΓ_SpecMap_appLE`. Also landed:
+     **`appLE_π_equivariant`** (the semilinearity, from `appLE_comp_appLE` + `π_equivariant`).
+     *Remaining*: connect this local-quotient square to `isPullback_chart`'s whole-`X`/`quotientπ_X`
+     form — with `U = ⊤` (`hVtop`), `U.ι` is iso and the `X`-chart is all of `X/G`; mechanical.
   2. **`locallyWeierstrass_quotientπ`** ([a5]) — the descended Weierstrass model. **Ungated now**:
      T-W7.1b (`pointedIso_exists_variableChange`) is DONE; additive Hilbert 90 + `exists_unit_smul_eq_of_isLocalRing`
      both PROVEN. Only the assembly of the VariableChange-cocycle trivialization remains.

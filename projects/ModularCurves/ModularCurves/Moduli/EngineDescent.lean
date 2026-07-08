@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
+import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.ForMathlib.GaloisDescentModule
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
@@ -138,6 +140,69 @@ theorem appLE_π_equivariant (hact : IsCurveAction σ C σE)
   rw [Scheme.Hom.appLE_comp_appLE (σE.hom g) C.π U W W,
     Scheme.Hom.appLE_comp_appLE C.π (σ.hom g) U U W]
   exact key (hact.π_equivariant g) _ _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([a3-ii] affine core, PROVEN)** For an `IsCurveAction` with `σ` free
+on the stable affine open `U ⊆ X`, and `W ⊆ E` stable affine with `W ≤ C.π⁻¹U`, the invariant-
+quotient square
+
+    ↥W ──localQuotientπ──▶ W/G
+    │                       │
+    C.π.resLE               q'
+    ▼                       ▼
+    ↥U ──localQuotientπ──▶ U/G
+
+is **cartesian**. This is `MulSemiringAction.isPullback_Spec_fixedPoints` (Galois descent of the
+semilinear `Γ(X,U)[G]`-module `Γ(E,W)`) transported by the two `IsAffineOpen.isoSpec` corner isos;
+the quotient corners match by defeq (`localQuotient = Spec (FixedPoints ℤ …)` and the fixed-points
+bases are defeq), and the commuting squares are `localQuotientπ_eq` / `toSpecΓ_SpecMap_appLE`. -/
+theorem isPullback_localQuotientπ [Finite G] (hact : IsCurveAction σ C σE)
+    {U : X.Opens} (hU : σ.IsStableOpen U) (hUa : IsAffineOpen U)
+    {W : (C.E).Opens} (hW : σE.IsStableOpen W) (hWa : IsAffineOpen W)
+    (h : W ≤ C.π ⁻¹ᵁ U)
+    (hfreeU : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    ∃ q' : σE.localQuotient hW ⟶ σ.localQuotient hU,
+      IsPullback (σE.localQuotientπ hW hWa) (C.π.resLE U W h) q' (σ.localQuotientπ hU hUa) := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  letI aX : MulSemiringAction G ↑Γ(X, U) := σ.gammaMulSemiringAction hU
+  letI aE : MulSemiringAction G ↑Γ(C.E, W) := σE.gammaMulSemiringAction hW
+  letI algInst : Algebra (↑Γ(X, U)) (↑Γ(C.E, W)) := (C.π.appLE U W h).hom.toAlgebra
+  have hφ : ∀ (g : G) (a : ↑Γ(X, U)),
+      g • (algebraMap (↑Γ(X,U)) (↑Γ(C.E,W)) a) = algebraMap _ _ (g • a) := by
+    intro g a
+    have hm := appLE_π_equivariant hact hU hW h g
+    have e2 := congrArg (fun m : Γ(X, U) ⟶ Γ(C.E, W) => m.hom a) hm
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at e2
+    simp only [SchemeAction.gammaMulSemiringAction_smul_def, RingHom.algebraMap_toAlgebra]
+    exact e2
+  haveI hsl : SMulCommClass G (↥(FixedPoints.subalgebra ℤ (↑Γ(X, U)) G)) (↑Γ(C.E, W)) := by
+    refine ⟨fun g b c => ?_⟩
+    show g • ((b : ↑Γ(X,U)) • c) = (b : ↑Γ(X,U)) • (g • c)
+    rw [Algebra.smul_def, Algebra.smul_def, smul_mul', hφ g, b.2 g]
+  have hslC : ∀ (g : G) (a : ↑Γ(X,U)) (c : ↑Γ(C.E,W)), g • a • c = (g • a) • g • c := by
+    intro g a c
+    rw [Algebra.smul_def, Algebra.smul_def, smul_mul', hφ g]
+  have hfreeA : IsFreeAlgebraAction G ℤ ↑Γ(X, U) :=
+    σ.isFreeAlgebraAction_of_free hU hUa hfreeU
+  have hpb := MulSemiringAction.isPullback_Spec_fixedPoints G ℤ (↑Γ(X, U)) (↑Γ(C.E, W)) hslC hfreeA
+  refine ⟨Spec.map (CommRingCat.ofHom (algebraMap
+      (↥(FixedPoints.subalgebra ℤ (↑Γ(X, U)) G))
+      (↥(FixedPoints.subalgebra (↥(FixedPoints.subalgebra ℤ (↑Γ(X, U)) G)) (↑Γ(C.E, W)) G)))),
+    hpb.flip.of_iso hWa.isoSpec.symm (Iso.refl _) hUa.isoSpec.symm (Iso.refl _)
+    ?_ ?_ ?_ ?_⟩
+  · simp only [Iso.refl_hom, Category.comp_id, Iso.symm_hom]
+    rw [SchemeAction.localQuotientπ_eq, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+    rfl
+  · simp only [Iso.symm_hom]
+    rw [Iso.comp_inv_eq, Category.assoc, hUa.isoSpec_hom,
+      ← Scheme.Opens.toSpecΓ_SpecMap_appLE, ← Category.assoc, ← hWa.isoSpec_hom,
+      Iso.inv_hom_id, Category.id_comp]
+    rfl
+  · simp only [Iso.refl_hom, Category.comp_id, Category.id_comp]
+  · simp only [Iso.refl_hom, Category.comp_id, Iso.symm_hom]
+    rw [SchemeAction.localQuotientπ_eq, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+    rfl
 
 /-! ### The two charts (leaves `[a2-α]`, `[a2-β]`) — PROVEN for a globally-modelled curve -/
 
