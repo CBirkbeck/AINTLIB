@@ -8974,3 +8974,27 @@ on all key decls. Per the v10.36 group-functor architecture (v9.2-severance-fait
   layer above IS the deliverable. T-W6 next: the groupoid `[U/G](S)` on `ellipticW
   Γ(S,⊤)` + `Schemeᵒᵖ ⥤ Cat` functoriality + the T-A8-records equivalence
   (v10.24(b) interface at the heavy functor def).
+
+## Amendments v10.37 (2026-07-08): p0 / [T-G3d-infra] — freeness DONE, Piece-3 route DECIDED (recon), next = Hopf-comodule co-invariants
+
+*p0 self-pacing the [T-G3d-infra] arc post-bridge-milestone (v10.35). Incremental progress → board.*
+
+- **Freeness PROVEN (axiom-clean, `TranslationAction.lean`)**: `actPair_mono` — the translation action
+  `G ×_S E ⟶ E ×_S E` is a monomorphism (via `GrpObj.lift_left_mul_ext` + `cancel_mono ιOver` +
+  `hom_ext`; `ιOver_mono` from `IsClosedImmersion ⟹ Mono`). The groupoid `G ×_S E ⇉ E` is an
+  equivalence relation — the input to the effective-quotient existence and to `deg[N]=N²=rank E[N]`.
+- **Piece-3 route DECIDED** (recon of mathlib + project; `.mathlib-quality/decomposition-g3d-piece3.md`):
+  - mathlib has **no** turnkey scheme coequalizer / finite-flat-groupoid quotient. BUT
+    `Sites/Fpqc.lean`'s `EffectiveEpi` instance (flat+surjective+lfp ⟹ effective epi = coequalizer of
+    kernel pair) makes a finite-locally-free `π : E ⟶ E/G` the universal coequalizer *for free* once
+    `E/G` exists; kernel pair = `G ×_S E` via the now-proven `actPair_mono`.
+  - `AffineQuotient`/`SchemeQuotient` (T-Q3/T-Q5) are **constant-`[Group G]` only** (confirmed) —
+    reusable ARCHITECTURE (glue-data skeleton), NOT the affine engine. `FixedPoints Bᴳ` must become
+    **Hopf-comodule co-invariants `{b : ρ b = b⊗1}` — ABSENT from mathlib** (the one thing to build).
+  - **ROUTE 3a**: (i) Hopf-comodule co-invariants affine quotient `Spec B^{coG}` (pure algebra, the
+    mathlib gap, upstreamable) → (ii) co-action `ρ` (affine dual of `translationAction`) → (iii)
+    G-stable affine cover (E projective ⟹ orbits in affine opens) → (iv) glue on `SchemeQuotient`'s
+    `GlueData`, discharge the six `SubgroupQuotient` pins via `isInvariant_iff_coequalizes`. fppf
+    route 3b stays GATED (SGA-III/ample per T-E10).
+- **Next leaf**: 3a-i, the Hopf-comodule co-invariants (new `ForMathlib` file mirroring
+  `FixedPoints.subalgebra` for co-invariants). p2-stack-scale; multi-session. p0 continues.
