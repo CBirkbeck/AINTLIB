@@ -6688,6 +6688,7 @@ PUSHED (`66300bb4..5f4829dc`, 238 commits).*
   BB-DIFF + the flf-discriminant étale criterion + the T-W7 fibre-model bridge — see
   beastmode-P2's "KM-text gate: evidence-based re-assessment" above), **REBOX it**: leave a
   precise sorried statement + docstring route, return T-D6b to `state: open`, and pivot to:
+- **CLAIMED beastmode-A 2026-07-08 (v10.13 priority-1): re-assessing pull_nsmul_ne_zero against the T-D6a-ii toolkit.**
 - **v10.2 VERDICT (p0, 2026-07-08): REBOXED → state: open. Pivoting to [T-KMQ].** Re-assessed
   `pull_nsmul_ne_zero` (ExactOrder.lean:183) against the landed `comap_mul`: it does NOT unblock
   the box. comap_mul feeds only the base-change *assembly* (T-D6a-ii, beastmode-A's in-progress
