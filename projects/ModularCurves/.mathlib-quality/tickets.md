@@ -10758,3 +10758,21 @@ registered), the Stacks-faithful decomposition of "smooth is étale-local on the
   remaining three leaves together.
 - Next (per dispatch): the optional T-E8 statement-level tail over MellWScheme, then
   watch state (map_id via A, gated YFULL leaves, GAP-1).
+
+### v10.57 (2026-07-08, fable-PIC0): T-E8 tail DONE (statement-level) — M_ell^W's stack claims are on the books
+
+*Commit above: NEW `Moduli/MellWStack.lean` (root-registered, green). Per the v10.55
+optional-tail spec: statements only, nothing load-bearing.*
+
+- `mellWPseudofunctor := MellWScheme.toPseudofunctor'` — REAL def (mathlib's
+  `Functor.toPseudofunctor'` promotion into the `Cat` bicategory; 2-cells by eqToIso).
+- **T-E8 claims STATED** (registered WIP sorries): `mellWPseudofunctor_isStack_zariski`
+  and `_etale` against mathlib's `Pseudofunctor.IsStack` (Sites/Descent, Stacks 026F)
+  at `Scheme.zariskiTopology` / `Scheme.etaleTopology`. Proof obligations = T-E8
+  proper: Zariski descent = gluing Weierstrass data (T-W4 dictionary + T-W6 groupoid
+  presentation); étale adds torsor descent (T-Q5/A711 layer). Note for the eventual
+  prover: mathlib's descent API wants `DescentData`-essential-surjectivity +
+  prestack fullness/faithfulness per sieve — the [U/G] fibered-groupoid shape fits.
+- PIC0 now in the dispatched watch state: map_id via A (→ MellWeierstrass zero-sorry +
+  queued cleanup), YFULL gated leaves as P3B3/FP4/A milestones flip, [YF-QSM]'s three
+  staged leaves workable by any free hand (v10.56), GAP-1 at session starts.
