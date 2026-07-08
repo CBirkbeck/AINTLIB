@@ -386,6 +386,28 @@ bridge needs (`n • [point] = 0` ⟺ `(toConv φ)^n = 1`). Axiom-clean `[propex
 `ExactOrder` import `DeligneOrder` (or relocating `IsSubgroup` to a shared low file) and calling
 `smul_eq_zero_of_factors'`. Deferred until the machinery is sorry-free.
 
+**[T-D5h-Δ] (boarded 2026-07-08, p2, per coordinator v10.27 + rule 3 — heavy definition, decomposed).**
+`subgroupComul` (Δ) is the one intricate Hopf-dual map; the transport `Γ(D ×_{Spec R} D) ≅ A ⊗_R A`
+is a confirmed multi-step iso chain, so it is boarded as its own leaf with this exact recipe
+(all APIs verified present):
+1. `Algebra R Γ(D×_R D)` via `bimulBase.appTop` (analogue of `subgroupAlgebra`; the base map of
+   `D×D` is `bimulBase = pullback.fst ≫ structMap`).
+2. The two projections `pr₁, pr₂ : D×D ⟶ D` are over the base (`prᵢ ≫ structMap = bimulBase`), so
+   `Γ(prᵢ) = prᵢ.appTop` are R-algebra maps `A → Γ(D×D)`; `κ := Algebra.TensorProduct.lift Γ(pr₁)
+   Γ(pr₂) (commute) : A ⊗_R A →ₐ[R] Γ(D×D)`.
+3. `κ` is bijective: `D.subscheme.isoSpec` turns each `structMap` leg into `Spec.map structMap.appTop`
+   (`arrowIsoSpecΓOfIsAffine` / `isoSpec_hom_naturality`), so `pullback structMap structMap ≅
+   pullback (Spec.map structMap.appTop)² ≅ Spec(A ⊗_{Γ(Spec R)} A)` (`pullbackSpecIso`) ≅
+   `Spec(A ⊗_R A)` (scalar tower `Γ(Spec R) ≅ R` via `ΓSpecIso`); `Γ` of that is `κ⁻¹` up to the
+   `pullbackSpecIso_inv_fst/snd` projection pins.
+4. `m : D×D ⟶ D` is over the base (`m ≫ structMap = bimulBase`, from `subgroupMul_subschemeι`), so
+   `Γ(m) : A →ₐ[R] Γ(D×D)`; **`Δ := κ.symm.comp Γ(m)`**.
+5. **Ship opaque interface in the same increment (v10.24(b)):** `subgroupComul_apply` (or the pin
+   `κ ∘ Δ = Γ(m)`, i.e. `pr₁^*(Δa₁)·pr₂^*(Δa₂) = m^*(a)`) + `irreducible`, so the Hopf-axiom proofs
+   never unfold Δ's construction (avoids the T-W7.1b whnf/kernel-poison wall).
+Consumers: the Coalgebra/Bialgebra/Hopf axioms (L4). Until it lands, `subgroupComul` stays sorried;
+downstream Hopf-instance work is gated on it. Next unblocked p2 item meanwhile: **L1 reductions**.
+
 **Status**: skeleton green (2 intended sorries: affine core L3-L7, general box L1).
 
 **L3 CRUX DE-RISKED ✅ (2026-07-08)** — the group-scheme multiplication `m : D ×_S D ⟶ D.subscheme`
