@@ -8424,3 +8424,44 @@ p2's glue-data pattern; new files only; v10.24(b) opaque interface same incremen
   (2) A7.1.2 as corollary → **gate 1 fully open** → (3) RE-AUDIT T-Q6e's second gate
   (stream-DESC `levelledCurve_descent_of_torsor`) honestly before claiming — if open, take
   **T-Q6e = T-E5c (the KM 4.7 engine)**; if not, board the gate state and stand by.
+
+## Amendments v10.32 (2026-07-08): COORDINATION MODE SHIFT — multi-session charters; CHARTER-A issued
+
+- **T-UPSTREAM-TRIAGE DONE (beastmode-A)**: `.mathlib-quality/upstream-ledger.md` staged +
+  pushed. 4 READY with PR drafts + targets: `Functor.map_zpow'` (exact missing sibling of
+  mathlib's `map_inv'`, Grp.lean:191, @[to_additive] one-liner);
+  `AdjoinRoot.isDomain_of_monic_of_map` (+2, shortens mathlib's CoordinateRing domain
+  instance, → RingTheory/AdjoinRoot.lean); `IdealSheafData.comap_mul` suite (completes the
+  comap API, → IdealSheaf/Functorial.lean); `exists_factor_comap_iff` (→ Functorial.lean).
+  Flagged-not-staged: OverPullbackMul + P3b3 bridge (owner-input; possibly derivable /
+  project-specific), D2 homological suite (B–E + Hilbert syzygy VERIFIED genuinely absent
+  from mathlib — high-value gaps — but mid-construction; defer to a D2 verify-pass when
+  sorry-free). No external PRs opened — **opening them is a pending OWNER decision**.
+- **OWNER DIRECTIVE — coordination mode shift (binding)**: no more per-task dispatching.
+  Each worker gets a **multi-session CHARTER**: a large connected arc they self-pace through
+  per /beastmode norms (no depth caps; decompose-don't-grind per v10.24; gates and
+  interrupts encoded in the charter). **Report only at**: a named milestone, a genuine
+  post-decomposition wall, a B2 statement event, or charter completion. Everything else goes
+  to the board, not the owner relay. Charters are issued per worker as their current reports
+  arrive; CHARTER-A is first.
+
+### [CHARTER-A] beastmode-A — THE W7 ENDGAME (multi-session; report at 1b-flip and W7a)
+1. **faith-infra** (next session, full budget, first act): the atomic def-site refactor —
+   definition-level irreducibility at ModelVariableChange + the complete whnf-free b1
+   interface, rebuilding b2's unfolding proofs against it (spec: v10.23 + v10.28; salvaged
+   `_apply`/mid-cancel = citizens 1–2). Atomic: a partial version leaves red, so land whole.
+2. Close **T-W7.1b-faith** + discharge `main`; full-file axiom sweep; **flip T-W7.1b → DONE**
+   (comparison milestone — REPORT this; 1b drops from T-W7.12's deps; T-E-OMEGA-R1 unlocks).
+3. Claim **T-E-OMEGA (route R1)** — you flip its gate, you take it: the ω_{E/S} line bundle
+   glued from the atlas with the T-W7.1b comparison as transition data; DS-register in the
+   same commit; v10.24(b) opaque interface. Unblocks T-E12–14 (ℤ[1/2] bootstrap) + T-A4's
+   torsor form + the modular-forms stream.
+4. **0h interrupt stands** throughout: the moment c5β lands 0c-ii, take `mulModelHom_vc`
+   (banked route: `projModel_hom_ext_of_affine` + per-chart addOn VC-equivariance), then
+   return to the charter.
+5. **The endgame assembly, jointly with c5β** (split via board, no owner relay): with
+   0c-ii/0h/1a/1b all ✓ — **T-W7.12** (glued `negHom`/`mulHom` over S, L-desc maps half) →
+   **CLEANUP-ALL-W7** → **T-W7.36** (grpObj + axioms + `abelEnrichment_exists` =
+   **MILESTONE T-W7a**, retiring T-A6 EXISTENCE — REPORT this).
+6. Standby tail (any session, interruptible): stage the standalone mathlib-shaped PR-draft
+   .lean files for READY #1–#4 (drafts only; opening = owner action).
