@@ -79,6 +79,19 @@ theorem Point.restrict_add {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q
     rfl
   rw [pointEquivOverHom_add, corr, corr, corr, pointEquivOverHom_add, MonObj.comp_mul]
 
+open MonoidalCategory CartesianMonoidalCategory MonObj in
+/-- **(Layer B, L4 infrastructure — the point-addition underlying-map spec.)** The underlying
+morphism of a sum of points is the cartesian lift of the two summands' morphisms into
+`E ×_S E`, post-composed with the group law `μ[E.asOver]`. This is the analog of
+`point_smul_eq_comp_mulBy` for binary addition (dualizing to the coproduct in the Hopf structure);
+it lets the scheme group axioms (m assoc/comm/unit/inv) be proven at the level of underlying
+morphisms — no base-dependent transport. Same 2-line proof as `PullSectionAdd`'s `hx`. -/
+theorem point_add_eq_lift {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
+    (P + Q).1 =
+      (lift (E.pointEquivOverHom g P) (E.pointEquivOverHom g Q)).left ≫ (μ[E.asOver]).left :=
+  (congrArg CommaMorphism.left (E.pointEquivOverHom_add g P Q)).trans
+    (Over.comp_left _ _ _ _ _)
+
 end PointRestrict
 
 section AffineBase
@@ -179,6 +192,64 @@ the two universal points. -/
 theorem subgroupMul_subschemeι :
     E.subgroupMul hD ≫ D.ideal.subschemeι = ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1 :=
   (E.exists_factor_bimul hD).choose_spec
+
+open MonoidalCategory CartesianMonoidalCategory MonObj in
+/-- **(Layer B, L4 — commutativity of the group-scheme multiplication.)** `swap ≫ m = m`. Proven at
+the level of underlying morphisms via `point_add_eq_lift`: `swap` exchanges the two universal points
+(`pullbackSymmetry_hom_comp_fst`/`_snd`), and `add_comm` in the point group closes it. No
+base-dependent transport. Dualizes to cocommutativity of `Δ` (`IsCocomm`). -/
+theorem subgroupMul_comm :
+    (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom ≫
+      E.subgroupMul hD = E.subgroupMul hD := by
+  have projfst : ∀ (a b : Over.mk (E.bimulBase (D := D)) ⟶ E.asOver),
+      (lift a b).left ≫ pullback.fst E.asOver.hom E.asOver.hom = a.left :=
+    fun a b => (Over.comp_left _ _ _ (lift a b) (fst E.asOver E.asOver)).symm.trans
+      (congrArg Over.Hom.left (lift_fst a b))
+  have projsnd : ∀ (a b : Over.mk (E.bimulBase (D := D)) ⟶ E.asOver),
+      (lift a b).left ≫ pullback.snd E.asOver.hom E.asOver.hom = b.left :=
+    fun a b => (Over.comp_left _ _ _ (lift a b) (snd E.asOver E.asOver)).symm.trans
+      (congrArg Over.Hom.left (lift_snd a b))
+  have hswap :
+      (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom ≫
+          (lift (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D)))).left
+        = (lift (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))).left := by
+    have hsf : (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+          (D.ideal.subschemeι ≫ E.π)).hom ≫ (E.bipt₁ (D := D)).1 = (E.bipt₂ (D := D)).1 := by
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π)).hom ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π) ≫ D.ideal.subschemeι)
+          = pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫
+            D.ideal.subschemeι
+      rw [← Category.assoc, Limits.pullbackSymmetry_hom_comp_fst]
+    have hss : (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+          (D.ideal.subschemeι ≫ E.π)).hom ≫ (E.bipt₂ (D := D)).1 = (E.bipt₁ (D := D)).1 := by
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π)).hom ≫ (pullback.snd (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π) ≫ D.ideal.subschemeι)
+          = pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫
+            D.ideal.subschemeι
+      rw [← Category.assoc, Limits.pullbackSymmetry_hom_comp_snd]
+    apply Over.tensorObj_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (fun m => (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).hom ≫ m)
+          (projfst (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D))))).trans
+          (hsf.trans (projfst (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))).symm))
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (fun m => (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).hom ≫ m)
+          (projsnd (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D))))).trans
+          (hss.trans (projsnd (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₂ (D := D)))
+            (E.pointEquivOverHom (E.bimulBase (D := D)) (E.bipt₁ (D := D)))).symm))
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, E.subgroupMul_subschemeι hD]
+  refine Eq.trans ?_ (congrArg Subtype.val (add_comm (E.bipt₂ (D := D)) (E.bipt₁ (D := D))))
+  rw [E.point_add_eq_lift, E.point_add_eq_lift]
+  exact (Category.assoc _ _ _).symm.trans (congrArg (· ≫ (μ[E.asOver]).left) hswap)
 
 /-- **(Layer B, L3 core — the unit section exists.)** The zero section factors through `D` (it lies
 in the subgroup `D(S)`), giving the identity section of the group scheme `D.subscheme`. -/

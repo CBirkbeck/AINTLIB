@@ -570,3 +570,26 @@ transport across `swap.hom ≫ bimulBase = bimulBase` (propositional, via `bimul
 solve (a `Point` congruence/`eqToHom` lemma, or an `Eq.mpr` on the base) — bounded, not blocked.
 Once the axioms land, dualize each to its Hopf law through `Γ` + the Δ/ε/antipode pins →
 `Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`.
+
+---
+
+**L4 Hopf-laws foundation LANDED (2026-07-08, p2)** — the ratified `point_add_eq_lift` route works:
+- **`point_add_eq_lift`** (axiom-clean): `(P+Q).1 = (lift (eqv P)(eqv Q)).left ≫ μ[E.asOver].left`.
+  2-line proof (`pointEquivOverHom_add` + `Over.comp_left`), mirroring `PullSectionAdd`'s `hx`. The
+  point-addition underlying-map spec — lets scheme group axioms be proven on underlying morphisms,
+  transport-free.
+- **`subgroupMul_comm`** (axiom-clean): `swap ≫ m = m` (scheme commutativity → `IsCocomm`). Route:
+  `cancel_mono subschemeι` → `subgroupMul_subschemeι` → `point_add_eq_lift` on both bipt-sums →
+  lift-swap via `Over.tensorObj_ext` (swap exchanges the two `bipt`s: `pullbackSymmetry_hom_comp_fst`/
+  `_snd`) + `add_comm`.
+- **KEY GOTCHA (cost real time):** `rw` AND `simp only` BOTH fail on compositions involving the Over
+  tensor's `.left` (`(lift a b).left ≫ pullback.fst E.asOver.hom E.asOver.hom`) — "not type-correct
+  under instances transparency" (the `(E.asOver⊗E.asOver).left` vs `pullback E.π E.π` defeq is
+  semireducible). MUST use **pure term-mode** `congrArg`/`.trans` (like `pointBaseChangeFun_add`,
+  `transportSection_add`). Projection helpers `projfst/projsnd : (lift a b).left ≫ pullback.fst/snd
+  E.asOver.hom E.asOver.hom = a.left/b.left` via `(Over.comp_left ..).symm.trans (congrArg
+  Over.Hom.left (lift_fst/snd ..))`. The swap-on-bipt facts (plain pullbacks, `rw`-safe) proven
+  separately as `hsf/hss`.
+
+Remaining L4: associativity, unit laws, inverse laws (same technique), then dualize each through the
+Δ/ε/antipode pins → `Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`. Then L5→L6→L7→affine core.
