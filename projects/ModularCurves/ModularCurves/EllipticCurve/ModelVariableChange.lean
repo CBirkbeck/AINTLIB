@@ -1315,19 +1315,251 @@ lemma pointedIso_zero_appLE_basicOpen {W W' : WeierstrassCurve R}
   exact congrArg (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
     (pointedIso_zero_val_chartYSection e hez b')
 
-/-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
-ring isomorphism preserves the pole-order filtration. NOT free: the landed
-`poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
-intrinsic (section-ideal/overlap-order) characterization inside its proof — it GATES all of
-1b. DESIGN-DERIVED (audit A1 b2). -/
-theorem pointedIsoCoordEquiv_filtration {W W' : WeierstrassCurve R}
+/-- Vanishing of a restricted global section of `Spec R` on the zero-preimage of a chart
+basic open kills the corresponding `R`-element after a power of the augmented equation. -/
+private lemma aug_pow_kill_of_res_eq_zero (W : WeierstrassCurve R)
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) (A : R)
+    (h : (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A) =
+      (0 : ↑Γ(Spec (CommRingCat.of R), (projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r))) :
+    ∃ m : ℕ, (infChartAug W (chartYSectionsRingEquiv W r)) ^ m * A = 0 := by
+  set g₀ : ↑Γ(Spec (CommRingCat.of R), ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom
+      (infChartAug W (chartYSectionsRingEquiv W r)) with hg₀
+  have hval : (((projModelZero W).appLE (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤
+      (le_of_eq (projModelZero_preimage_yChart W).symm)).hom) r = g₀ := by
+    have := projModelZero_appLE_chartYSection W (chartYSectionsRingEquiv W r)
+    rw [RingEquiv.symm_apply_apply] at this
+    exact this
+  have hopen : (projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r =
+      (Spec (CommRingCat.of R)).basicOpen g₀ := by
+    rw [Scheme.preimage_basicOpen]
+    have hbo : (Spec (CommRingCat.of R)).basicOpen
+        ((((projModelZero W).appLE (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤
+          (le_of_eq (projModelZero_preimage_yChart W).symm)).hom) r) =
+        (Spec (CommRingCat.of R)).basicOpen
+          ((projModelZero W).app (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) r) := by
+      show (Spec (CommRingCat.of R)).basicOpen
+        (((Spec (CommRingCat.of R)).presheaf.map (homOfLE
+          (le_of_eq (projModelZero_preimage_yChart W).symm)).op).hom
+          ((projModelZero W).app (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) r)) = _
+      rw [Scheme.basicOpen_res]
+      exact top_inf_eq _
+    rw [← hbo, hval]
+  haveI := (isAffineOpen_top (Spec (CommRingCat.of R))).isLocalization_basicOpen g₀
+  have h' : (algebraMap (↑Γ(Spec (CommRingCat.of R), ⊤))
+      (↑Γ(Spec (CommRingCat.of R), (Spec (CommRingCat.of R)).basicOpen g₀)))
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A) = 0 := by
+    show (((Spec (CommRingCat.of R)).presheaf.map (homOfLE
+      ((Spec (CommRingCat.of R)).basicOpen_le g₀)).op).hom)
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A) = 0
+    have htrans := congrArg (fun ψ =>
+      (CommRingCat.Hom.hom ((Spec (CommRingCat.of R)).presheaf.map ψ))
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A))
+      (Subsingleton.elim ((homOfLE ((Spec (CommRingCat.of R)).basicOpen_le g₀)).op)
+        ((homOfLE le_top).op ≫ (eqToHom hopen.symm).op))
+    refine htrans.trans ?_
+    have hsplit := congrArg (fun φ => CommRingCat.Hom.hom φ
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A))
+      ((Spec (CommRingCat.of R)).presheaf.map_comp (homOfLE le_top).op
+        (eqToHom hopen.symm).op)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hsplit
+    refine hsplit.trans ?_
+    rw [h, map_zero]
+  obtain ⟨⟨u, hu⟩, hkill⟩ := (IsLocalization.map_eq_zero_iff
+    (Submonoid.powers g₀)
+    (↑Γ(Spec (CommRingCat.of R), (Spec (CommRingCat.of R)).basicOpen g₀))
+    (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A)).mp h'
+  obtain ⟨m, hm⟩ := hu
+  refine ⟨m, ?_⟩
+  have hR := congrArg (((Scheme.ΓSpecIso (CommRingCat.of R)).hom).hom) hkill
+  rw [map_zero, map_mul] at hR
+  have hcancelA : ((Scheme.ΓSpecIso (CommRingCat.of R)).hom).hom
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom A) = A := by
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ A)
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv_hom_id)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at this
+    exact this
+  have hcancelG : ((Scheme.ΓSpecIso (CommRingCat.of R)).hom).hom u =
+      (infChartAug W (chartYSectionsRingEquiv W r)) ^ m := by
+    rw [← hm, hg₀]
+    rw [map_pow]
+    have := congrArg (fun φ => CommRingCat.Hom.hom φ
+      (infChartAug W (chartYSectionsRingEquiv W r)))
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv_hom_id)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at this
+    rw [this]
+  rw [hcancelA, hcancelG] at hR
+  exact hR
+
+private lemma mem_of_eq_of_mem {S : Type u} [CommRing S] {I : Ideal S} {a b : S}
+    (h : a = b) (hb : b ∈ I) : a ∈ I := h ▸ hb
+
+private lemma transport_mem_span_aux (W : WeierstrassCurve R)
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+    (x : ↑Γ(projModel W, (projModel W).basicOpen r))
+    (b₀ : ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) (k : ℕ)
+    (hb₀ : x * (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r))) (r ^ k) =
+      (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r))) b₀)
+    (hAkill : ∃ m : ℕ, (infChartAug W (chartYSectionsRingEquiv W r)) ^ m *
+      infChartAug W (chartYSectionsRingEquiv W b₀) = 0) :
+    x ∈ Ideal.span
+      {((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))),
+        ((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (infChartTElem W))} := by
+  haveI := (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).isLocalization_basicOpen r
+  obtain ⟨m, hm⟩ := hAkill
+  have hker : (chartYSectionsRingEquiv W r) ^ m * chartYSectionsRingEquiv W b₀ ∈
+      Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} := by
+    rw [← ker_infChartAug W]
+    show infChartAug W _ = 0
+    rw [map_mul, map_pow]
+    exact hm
+  obtain ⟨cs, ct, hct⟩ := Ideal.mem_span_pair.mp hker
+  have hfwd : chartYSectionsRingEquiv W (r ^ m * b₀) =
+      (chartYSectionsRingEquiv W r) ^ m * chartYSectionsRingEquiv W b₀ :=
+    (map_mul (chartYSectionsRingEquiv W) (r ^ m) b₀).trans
+      (congrArg₂ (· * ·) (map_pow (chartYSectionsRingEquiv W) r m) rfl)
+  have hBeq : r ^ m * b₀ = (chartYSectionsRingEquiv W).symm
+      (cs * AdjoinRoot.root (infChartCubic W) + ct * infChartTElem W) :=
+    (RingEquiv.symm_apply_apply (chartYSectionsRingEquiv W) (r ^ m * b₀)).symm.trans
+      (congrArg (chartYSectionsRingEquiv W).symm (hfwd.trans hct.symm))
+  have hsymm : (chartYSectionsRingEquiv W).symm
+      (cs * AdjoinRoot.root (infChartCubic W) + ct * infChartTElem W) =
+      (chartYSectionsRingEquiv W).symm cs *
+        (chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)) +
+      (chartYSectionsRingEquiv W).symm ct *
+        (chartYSectionsRingEquiv W).symm (infChartTElem W) :=
+    (map_add (chartYSectionsRingEquiv W).symm _ _).trans
+      (congrArg₂ (· + ·) (map_mul (chartYSectionsRingEquiv W).symm _ _)
+        (map_mul (chartYSectionsRingEquiv W).symm _ _))
+  have hspan : algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ m * b₀) ∈ Ideal.span
+      {((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))),
+        ((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (infChartTElem W))} := by
+    refine mem_of_eq_of_mem (congrArg (algebraMap _ _) (hBeq.trans hsymm)) ?_
+    refine mem_of_eq_of_mem (map_add (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
+    refine Ideal.add_mem _ ?_ ?_
+    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
+      exact Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_insert _ _))
+    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
+      exact Ideal.mul_mem_left _ _ (Ideal.subset_span
+        (Set.mem_insert_of_mem _ rfl))
+  have heq : x * algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ (k + m)) =
+      algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ m * b₀) := by
+    refine (congrArg (x * ·) (by rw [pow_add, map_mul])).trans ?_
+    refine (mul_assoc _ _ _).symm.trans ?_
+    refine (congrArg (· * algebraMap _ _ (r ^ m)) hb₀).trans ?_
+    refine (map_mul _ _ _).symm.trans ?_
+    exact congrArg (algebraMap _ _) (mul_comm b₀ (r ^ m))
+  have hpow : IsUnit (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ (k + m))) := by
+    rw [map_pow]
+    exact (IsLocalization.map_units (M := Submonoid.powers r) _
+      ⟨r, 1, pow_one r⟩).pow _
+  obtain ⟨v, hv⟩ := hpow
+  have h1 : x * ↑v = algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ m * b₀) := by
+    rw [hv]
+    exact heq
+  have h2 := congrArg (· * (↑v⁻¹ : ↑Γ(projModel W, (projModel W).basicOpen r))) h1
+  have h3 : x = algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (↑Γ(projModel W, (projModel W).basicOpen r)) (r ^ m * b₀) *
+      (↑v⁻¹ : ↑Γ(projModel W, (projModel W).basicOpen r)) :=
+    (v.mul_inv_cancel_right x).symm.trans h2
+  exact mem_of_eq_of_mem h3 (Ideal.mul_mem_right _ _ hspan)
+
+/-- **Transported augmentation-kernel elements lie in the localized section ideal**: if
+`aug'(b') = 0`, then on any basic open of the `Y`-chart inside the transported `Y'`-chart the
+transport of `b'` lies in the ideal generated by (the restrictions of) `s` and `t`. This is
+the scheme-theoretic vanishing of transports along the zero section. -/
+lemma pointedIsoChartTransport_mem_span_of_aug_eq_zero {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
-    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
-    (hez : projModelZero W ≫ e.hom = projModelZero W') (n : ℕ) :
-    Submodule.map (pointedIsoCoordEquiv e heπ hez).toLinearEquiv.toLinearMap
-        (poleOrderFiltration W' n) =
-      poleOrderFiltration W n := by
-  sorry
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    {b' : AdjoinRoot (infChartCubic W')} (hb' : infChartAug W' b' = 0) :
+    pointedIsoChartTransport e hr b' ∈ Ideal.span
+      {((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))),
+        ((projModel W).presheaf.map
+          (homOfLE ((projModel W).basicOpen_le r)).op).hom
+          ((chartYSectionsRingEquiv W).symm (infChartTElem W))} := by
+  haveI := (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).isLocalization_basicOpen r
+  obtain ⟨⟨b₀, u⟩, hb₀⟩ := IsLocalization.surj (Submonoid.powers r)
+    (pointedIsoChartTransport e hr b')
+  obtain ⟨k, hk⟩ := u.2
+  rw [← hk] at hb₀
+  have hzero : (((projModelZero W).appLE ((projModel W).basicOpen r)
+      ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl).hom)
+      (pointedIsoChartTransport e hr b') = 0 := by
+    refine (pointedIso_zero_appLE_basicOpen e hez hr b').trans ?_
+    rw [hb', map_zero, map_zero]
+  have hz0 := congrArg ((((projModelZero W).appLE ((projModel W).basicOpen r)
+    ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl)).hom) hb₀
+  have hz : (((projModelZero W).appLE ((projModel W).basicOpen r)
+      ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl).hom)
+      ((algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r))) b₀) = 0 := by
+    refine (hz0.symm.trans ?_)
+    refine (map_mul _ _ _).trans ?_
+    rw [hzero, zero_mul]
+  have halg : (((projModelZero W).appLE ((projModel W).basicOpen r)
+      ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl).hom)
+      ((algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+        (↑Γ(projModel W, (projModel W).basicOpen r))) b₀) =
+      (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom
+          (infChartAug W (chartYSectionsRingEquiv W b₀))) := by
+    have hc := zero_appLE_basicOpen_chartYSection W r (chartYSectionsRingEquiv W b₀)
+    rw [RingEquiv.symm_apply_apply] at hc
+    exact hc
+  have hzres := halg.symm.trans hz
+  exact transport_mem_span_aux W r _ b₀ k hb₀
+    (aug_pow_kill_of_res_eq_zero W r _ hzres)
 
 /-- **(T-W7.1b-b3x, coordinator §2)** Coefficient extraction, `x`-side: `Φ(x') = αx + β`
 with `α` a unit (from `F₂`-preservation + the freeness of `{1, x}`). Shared-witness
