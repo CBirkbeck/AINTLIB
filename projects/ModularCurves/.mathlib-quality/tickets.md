@@ -6955,3 +6955,22 @@ cut.*
 - **FILE DISCIPLINE**: new files only — `ModularCurves/Picard/*.lean` +
   `ForMathlib/*.lean` additions; no held files touched (GroupLawConstruction, Torsion, W7
   files, LevelStructure/*, AdditionChart* are other workers' lanes).
+
+## Amendments v10.12 (2026-07-08): SGA III LANDED — the T-Q2 proofs are dispatchable
+
+- **Source landed (coordinator)**: `refs/ModularCurves/sga3-1.pdf` + `sga3-2.pdf` (SGA 3,
+  1970 edition; intro verified: Exposé V "résultats généraux sur l'existence de quotients"
+  is in vol. 1; French text, legible scan). v10.10 runner-up (3)'s OWNER ACTION is satisfied.
+- **[T-Q2-proofs] — now a dispatchable fresh-worker stream**: discharge the four by-design
+  sorries in `ForMathlib/InvariantTorsor.lean` — `Module.Finite.of_isFreeAlgebraAction`,
+  `Algebra.Etale.of_isFreeAlgebraAction`, `torsorMul_bijective_of_isFreeAlgebraAction`
+  (A7.1.1, split per Tier A5), `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`
+  (A7.1.2, against T-Q4's `fixedPointsBaseChange`). Proof source: **SGA III Exp. V** — read +
+  quote verbatim (page + numbering) per the standard lifted-gate rule; no memory
+  reconstruction. beastmode-Q's banked attack block applies:
+  `decompose-attacks-2026-07-06/q-lane.md`. **First act (binding, v10.8):
+  `/develop --decompose`.**
+- **FILE DISCIPLINE**: this stream owns `InvariantTorsor.lean` ONLY (beastmode-Q is quiet;
+  fable-P4's Q-restaff owns AffineQuotient/gluing + T-Q6; fable-PIC0 owns Picard/* — all
+  disjoint; coordinate via the board). Consumers: KM Ch. 7 regularity (phase 4) + the
+  étale-torsor layer behind the quotient theory.
