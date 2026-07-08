@@ -1821,11 +1821,66 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     statement gap" worry does **not** touch the torsor part — the proof above uses **no**
     finiteness of `A` over `Aᴳ`. The flag survives only for `Module.Finite.of_isFreeAlgebraAction`
     and `Algebra.Etale.of_isFreeAlgebraAction` (both still sorried, both genuinely need it).
-  - **Remaining in this ticket**: `Algebra.Etale.of_isFreeAlgebraAction` (unramified = the
-    idempotent `e` splits the multiplication, now available; flat/finite from the torsor
-    isomorphism + faithfully flat descent along `Aᴳ → A`) and A7.1.2
-    `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` (base change of a trivialized
-    torsor — now a corollary). Gate 1 of the KM 4.7 engine (T-Q6e = T-E5c) is **half-open**.
+  - **★ MORE LANDED (fable-P4, 2026-07-08, all axiom-clean)**:
+    · `galoisCoords_dual` — the coordinates are a **trace dual basis**, `∑ᵢ aᵢ·tr(bᵢx) = x`.
+    · **`Module.Finite.of_isFreeAlgebraAction` PROVEN** — the `aᵢ` generate `A` over `Aᴳ`.
+      ⟹ **FLAG FULLY RESOLVED (negative)**: the "finite locally free of rank |G| may be a
+      statement gap" worry is dead. Finiteness is *derived* from the Galois coordinates; SGA
+      obtains it by its own §5 reduction, CHR gets it for free. `IsFreeAlgebraAction` is
+      exactly right as written — no B2 needed anywhere in this ticket.
+    · `exists_separabilityIdempotent` — `e` with `mult(e)=1`, `(1⊗x − x⊗1)·e = 0`
+      (annihilation via **injectivity of `torsorMul`**: the product maps to
+      `g ↦ (g•x − x)·δ_{g,1} = 0`). `A` is a separable `Aᴳ`-algebra.
+    · **`Algebra.FormallyUnramified.of_isFreeAlgebraAction` PROVEN** — `Ω[A⁄Aᴳ] = 0`:
+      `v = 1⊗x − x⊗1 ∈ I`, `1 − e ∈ I`, and `v = v·(1−e) ∈ I²`, so `D x = 0`; `D`'s image
+      spans `Ω`.
+  - **REMAINING: `Algebra.Etale.of_isFreeAlgebraAction` — WALLED ON A MATHLIB GAP, not forced**
+    (`Algebra.Etale = FormallyEtale + FinitePresentation`):
+    · **[A711-SM]** `Algebra.FormallySmooth` — mathlib's only constructor is
+      `FormallySmooth.of_split`, which wants a *polynomial presentation* `P ↠ A`. The
+      classical statement we want is "separable ⟹ formally smooth" (lift along a square-zero
+      extension by correcting with the idempotent `e`); **absent from mathlib**. ForMathlib
+      candidate, est. 150–250 lines. Stacks 00TQ / 092A.
+    · **[A711-FP]** `Algebra.FinitePresentation` — mathlib has **no** constructor giving
+      *algebra-level* finite presentation from a **module-finite projective** algebra over a
+      **non-noetherian** base (`FinitePresentation.of_finiteType` is the noetherian iff).
+      Stacks 00QQ / 05GH. **This is the real blocker**, and it is exactly what KM means by
+      *"in the absence of noetherian hypotheses, this is rather delicate."* ForMathlib
+      candidate; est. 300–500 lines. *(Next cheap step toward it: `Module.Projective` from
+      `galoisCoords_dual`, then `Module.Flat`.)*
+    · **NOT a B2**: the statement is true (a Galois extension is finite étale); only the
+      mathlib substrate is missing. Sorry retained **with the plan attached in the docstring**.
+  - **A7.1.2** `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` — route reassessed:
+    it is *not* a one-line corollary of the torsor iso. Honest route: the `R`-module sequence
+    `0 → Aᴳ → A --Δ--> ∏_G A`, `Δ(a) = (g•a − a)_g`, identifies `(A ⊗_R R')ᴳ` with
+    `ker(Δ ⊗ id)` (finite products commute with `⊗`); exactness must survive `⊗ R'`, which
+    needs the sequence **split** over `R` — the splitting comes from the separability
+    idempotent / averaging. Est. 150–250 lines. Cut as **[A711-BC]**, unclaimed.
+
+### [T-Q6e GATE AUDIT] (fable-P4, 2026-07-08 — requested by v10.27 item (3)) — STAND BY, do not claim
+- **Gate 1 (T-Q2 / KM A7.1.1)**: torsor part **PROVEN**, finiteness **PROVEN**, unramified
+  **PROVEN**; only `Algebra.Etale` (mathlib gap [A711-SM] + [A711-FP]) and A7.1.2 remain.
+- **Gate 2 (stream-DESC)**: **GENUINELY BLOCKING.** `levelledCurve_descent_of_torsor`
+  (Stack.lean:68) is sorried, and the board's own DESC note records why: it needs *object*
+  descent — *"produce the curve `E/T`"* — gated on ONE of {T-E9 representability (E-stream,
+  sorried, and T-E9 depends on T-E5 ⟹ **circular**) · relative Proj + QC-sheaf descent +
+  relatively ample (**ABSENT from mathlib, B3-scale**, T-DESC0) · T-Q2 SGA-III quotient charts
+  (plan-deferred)} **plus** T-G3 rigidity for the strict cocycle.
+- **Independently confirmed from the source**: KM's engine step (iv) reads *"Because `E` is
+  projective, via `I⁻¹(0)`, it descends, and because `𝒫` is relatively affine, `α_univ`
+  descends (SGA I, Exp VIII, 7.8, 1.2 and 1.7)"* — i.e. the engine **requires effective fppf
+  descent for projective schemes and for affine morphisms**. AINTLIB's DESC engine covers
+  *morphism* descent (`descend_hom_of_effectiveEpi`, proven); **object** descent for schemes
+  is absent from mathlib.
+- **VERDICT**: T-Q6e (= T-E5c) is **not takeable**; A7.1.1 was necessary but is not
+  sufficient. fable-P4 **stands by** rather than reaching, per dispatch. The structural
+  consequence for the coordinator: **T-E5's ⇐ direction is gated behind mathlib-absent
+  effective descent of projective schemes, independently of A7.1.1** — the same wall the
+  DESC lane hit. Route candidates, in increasing cost: (a) restrict the engine to `δ`'s where
+  the descent is *affine* (KM's `α_univ` half only) and get the curve from T-E15's explicit
+  model instead of descending it — **this may dodge SGA I VIII 7.8 entirely for the concrete
+  bootstrap objects**, worth a scoping pass; (b) formalize effective descent for
+  quasi-projective schemes (B3-scale); (c) wait for mathlib.
   - *(retired, for the record)* the SGA leaves, mirroring its proof:
     · **[A711-L1]** localize at a prime `𝔭 ⊆ B = Aᴳ`; show `A_𝔭` is **semi-local** (its maximal
       ideals are the `δ₁⁻¹(𝔫)`, at most `|G|` of them) — consumes the landed
