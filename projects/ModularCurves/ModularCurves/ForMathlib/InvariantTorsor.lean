@@ -180,21 +180,6 @@ theorem exists_galoisCoords (hfree : IsFreeAlgebraAction G R A) :
 
 end GaloisCoordinates
 
-/-- **KM A7.1.1, finiteness part** (statement; proof: SGA III Exp. V Thm 4.1):
-for a free action, `A` is finite over the invariants. WIP `sorry` per ticket
-T-Q2's statement-only scope. -/
-theorem Module.Finite.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
-    Module.Finite (FixedPoints.subalgebra R A G) A := by
-  sorry
-
-/-- **KM A7.1.1, étaleness part** (statement; proof: SGA III Exp. V Thm 4.1;
-"In the absence of noetherian hypotheses, this is rather delicate"): for a free
-action, `A` is étale over the invariants. WIP `sorry` per ticket T-Q2's
-statement-only scope. -/
-theorem Algebra.Etale.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
-    Algebra.Etale (FixedPoints.subalgebra R A G) A := by
-  sorry
-
 /-- The `G`-trace `a ↦ ∑_g g • a`, valued in the invariants. -/
 def traceInvariants [Fintype G] (a : A) : FixedPoints.subalgebra R A G :=
   ⟨∑ g : G, g • a, by
@@ -204,6 +189,64 @@ def traceInvariants [Fintype G] (a : A) : FixedPoints.subalgebra R A G :=
     have hre : ∀ g : G, h • (g • a) = (h * g) • a := fun g => (mul_smul h g a).symm
     simp only [hre]
     exact Fintype.sum_bijective (h * ·) (Group.mulLeft_bijective h) _ _ (fun _ => rfl)⟩
+
+/-- **(T-Q2-A711, step 6 — the dual-basis identity)** The Galois coordinates are a *dual
+basis* of `A` over `Aᴳ` with respect to the trace: `∑ᵢ aᵢ · tr(bᵢ · x) = x`.
+
+Indeed `∑ᵢ aᵢ · tr(bᵢx) = ∑_g (∑ᵢ aᵢ (g•bᵢ)) (g•x) = ∑_g δ_{g,1} (g•x) = x`. This is the
+classical statement that a Galois extension of commutative rings is finitely generated
+projective over its invariants (Chase–Harrison–Rosenberg). -/
+theorem galoisCoords_dual [Fintype G] [DecidableEq G] {S : Finset (A × A)}
+    (hS : ∀ g : G, (∑ p ∈ S, p.1 * (g • p.2)) = if g = 1 then 1 else 0) (x : A) :
+    (∑ p ∈ S, p.1 * (traceInvariants G R A (p.2 * x) : A)) = x := by
+  classical
+  have hexp : ∀ p : A × A, (traceInvariants G R A (p.2 * x) : A) = ∑ g : G, g • (p.2 * x) :=
+    fun _ => rfl
+  simp only [hexp, Finset.mul_sum]
+  rw [Finset.sum_comm]
+  have hterm : ∀ g : G, (∑ p ∈ S, p.1 * (g • (p.2 * x)))
+      = (∑ p ∈ S, p.1 * (g • p.2)) * (g • x) := by
+    intro g
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [smul_mul', mul_assoc]
+  simp only [hterm, hS]
+  rw [Finset.sum_eq_single (1 : G)]
+  · simp
+  · intro g _ hg; rw [if_neg hg, zero_mul]
+  · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
+
+/-- **KM A7.1.1, finiteness part; PROVEN** — for a free action of a finite group, `A` is a
+finite `Aᴳ`-module: the dual-basis identity `x = ∑ᵢ tr(bᵢ·x) • aᵢ` exhibits the finitely
+many `aᵢ` of `exists_galoisCoords` as generators.
+
+Note this is *derived*, not hypothesized — the flagged "finite locally free of rank `|G|`"
+content of SGA III Exp. V §5 comes out of the Galois coordinates. -/
+theorem Module.Finite.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
+    Module.Finite (FixedPoints.subalgebra R A G) A := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  refine ⟨⟨S.image Prod.fst, ?_⟩⟩
+  rw [eq_top_iff]
+  intro x _
+  rw [← galoisCoords_dual G R A hS x]
+  refine Submodule.sum_mem _ fun p hp => ?_
+  have hsm : p.1 * (traceInvariants G R A (p.2 * x) : A)
+      = (traceInvariants G R A (p.2 * x)) • p.1 := by
+    show _ = (traceInvariants G R A (p.2 * x) : A) * p.1
+    ring
+  rw [hsm]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span (Finset.mem_coe.mpr
+    (Finset.mem_image.mpr ⟨p, hp, rfl⟩)))
+
+/-- **KM A7.1.1, étaleness part** (statement; proof: SGA III Exp. V Thm 4.1;
+"In the absence of noetherian hypotheses, this is rather delicate"): for a free
+action, `A` is étale over the invariants. WIP `sorry` per ticket T-Q2's
+statement-only scope. -/
+theorem Algebra.Etale.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
+    Algebra.Etale (FixedPoints.subalgebra R A G) A := by
+  sorry
 
 /-- The candidate inverse of `torsorMul`, built from Galois coordinates `S`:
 `x ↦ ∑ᵢ aᵢ ⊗ (∑_g g⁻¹ • (x g · bᵢ))`. -/
