@@ -9548,3 +9548,19 @@ a chart hom is invariant under unit rescaling of the triple, since it sees only 
 **After c4.3:** c4.4 universality by instantiation (`classifyRingHom` + `isPullback_projModelBaseChange`,
 both proven), c4.5 fills the four sorries ⟹ 0c-i increment 2 DONE ⟹ **0c-ii `mulModelHom`**
 (pre-approved; board-signal it, it fires beastmode-A's 0h interrupt).
+
+### v10.42 (2026-07-08, fable-PIC0): **[T-W6c-ii] DONE first-pass** — the [U/G]-morphism action on curves
+
+*Commit 8584230d; file sorry-free, axiom-clean.* `curveOfVCIso : (curveOf W).E ≅
+(curveOf W').E` for any coordinate change `C' • W = W'`, over `S` (`curveOfVCIso_π`)
+and pointed (`curveOfVCIso_zero`) — assembled as pasting ≪≫ vc-middle ≪≫ pasting⁻¹
+with every seam a named top-level lemma (arsenal held: the whole c-ii block needed
+only 3 fix iterations). REMAINING for the CHARTER MILESTONE: **[T-W6c-iii]** — the
+groupoid of Weierstrass-presented curves over S (objects: EllipticCurveGeom + chosen
+global presentation; morphisms: pointed S-isos), the functor from
+`MellWGroupoid Γ(S,⊤)` (obj := curveOf, map := curveOfVCIso via the groupoid-hom
+subtype), functoriality (curveOfVCIso_id/comp — from the analogous projModelVCIso
+one/mul laws IF present in ModelVariableChange.lean, else via hom_ext + the compat
+lemmas), and the equivalence bar (full faithfulness needs the presentation-rigidity
+input — scope decision at cut: the honest v8 statement may be essential-surjectivity
++ the explicit functor, with ff gated on T-W7's pointEquiv uniqueness).
