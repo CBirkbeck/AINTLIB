@@ -4100,6 +4100,56 @@ lemma ker_infChartAug (W : WeierstrassCurve R) :
       rw [smul_eq_mul, map_mul, hg, mul_zero]
 
 
+/-- The section unit has augmentation `1`. -/
+lemma infChartAug_sectionUnitElem (W : WeierstrassCurve R) :
+    infChartAug W (sectionUnitElem W) = 1 := by
+  have h0 : infChartAug W (sectionUnitElem W - 1) = 0 := by
+    have hmem := sectionUnitElem_sub_one_mem W
+    rw [← ker_infChartAug W] at hmem
+    exact hmem
+  rw [map_sub, map_one, sub_eq_zero] at h0
+  exact h0
+
+/-- The root stays a nonzerodivisor in any `Away`-localization of the infinity chart. -/
+lemma infChart_root_image_mem_nonZeroDivisors (W : WeierstrassCurve R)
+    {S : Type u} [CommRing S] (g : AdjoinRoot (infChartCubic W)) [Algebra
+      (AdjoinRoot (infChartCubic W)) S] [IsLocalization.Away g S] :
+    algebraMap (AdjoinRoot (infChartCubic W)) S (AdjoinRoot.root (infChartCubic W)) ∈
+      nonZeroDivisors S := by
+  have key : ∀ x : S, x * algebraMap (AdjoinRoot (infChartCubic W)) S
+      (AdjoinRoot.root (infChartCubic W)) = 0 → x = 0 := by
+    intro x hx
+    obtain ⟨⟨b, u⟩, hb⟩ := IsLocalization.surj (Submonoid.powers g) x
+    have h1 : algebraMap (AdjoinRoot (infChartCubic W)) S
+        (b * AdjoinRoot.root (infChartCubic W)) = 0 := by
+      rw [map_mul, ← hb, mul_right_comm, hx, zero_mul]
+    obtain ⟨⟨w, hw⟩, hkill⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers g) S
+      (b * AdjoinRoot.root (infChartCubic W))).mp h1
+    obtain ⟨m, hm⟩ := hw
+    have hres : (w * b) * AdjoinRoot.root (infChartCubic W) = 0 := by
+      rw [mul_assoc]
+      exact hkill
+    have hwb : w * b = 0 :=
+      (mem_nonZeroDivisors_iff.mp (infChart_root_mem_nonZeroDivisors W)).2 _ hres
+    have hbS : algebraMap (AdjoinRoot (infChartCubic W)) S b = 0 := by
+      have h2 := congrArg (algebraMap (AdjoinRoot (infChartCubic W)) S) hwb
+      rw [map_mul, map_zero] at h2
+      have hwu : IsUnit (algebraMap (AdjoinRoot (infChartCubic W)) S w) := by
+        rw [← hm, map_pow]
+        exact (IsLocalization.map_units (M := Submonoid.powers g) S
+          ⟨g, 1, pow_one g⟩).pow m
+      exact (hwu.mul_right_eq_zero).mp h2
+    have hxu : x * algebraMap (AdjoinRoot (infChartCubic W)) S ↑u = 0 := by
+      rw [hb, hbS]
+    have huu : IsUnit (algebraMap (AdjoinRoot (infChartCubic W)) S ↑u) := by
+      obtain ⟨n, hn⟩ := u.2
+      rw [← hn, map_pow]
+      exact (IsLocalization.map_units (M := Submonoid.powers g) S
+        ⟨g, 1, pow_one g⟩).pow n
+    exact (huu.mul_left_eq_zero).mp hxu
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => key x (by rwa [mul_comm] at hx), key⟩
+
 /-- `overlapMap` is injective: the affine part embeds in the overlap. -/
 theorem overlapMap_injective (W : WeierstrassCurve R) :
     Function.Injective (overlapMap W) := by
