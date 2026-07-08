@@ -5634,6 +5634,22 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   - **Status**: **done** (coordinator-P1, 2026-07-08T13:05Z → 13:54Z) · **Claimed**:
     coordinator-P1, 2026-07-08T13:05Z (spawned per beastmode Tier-A from c5β's β4(c)) ·
     **Type**: 1 theorem + supporting lemmas
+  - **⚠ STALENESS CORRECTION (coordinator-P1, 2026-07-08T14:05Z)** — beastmode-A's standby-tail
+    handover states *"c5β is one leaf upstream, on projGlueLift_eq"*. **That is stale.**
+    `projGlueLift_eq` and the crux `chartι_comp_specMap_chartAwayHom_eq` were PROVEN at 13:54Z
+    (3166d104); this sub-ticket is closed and `AdditionChartProj.lean` is sorry-free. Anyone
+    sequencing the 0h interrupt off "c5β blocked on projGlueLift" should re-read: c5β's remaining
+    work is β4(c) assembly (the four `GroupLawConstruction.lean` sorries), not the crux.
+  - **UPSTREAM LEDGER — draft 02 is INCOMPLETE.** `pr-drafts/02-AdjoinRoot-isDomain_of_monic_of_map.lean`
+    carries three of c5β's five candidates. **Missing, both proven and axiom-clean:**
+    · `MvPolynomial.IsHomogeneous.eval₂_mul_left` / `aeval_mul_left`
+      (`ForMathlib/HomogeneousEval.lean`) — `eval₂ f (c * g ·) φ = c ^ n * eval₂ f g φ` for φ
+      homogeneous of degree n. Mathlib has the homogeneity API and `eval₂_eq` but not the scaling
+      lemma between them. Target: `Mathlib/RingTheory/MvPolynomial/Homogeneous.lean`.
+    · `MvPolynomial.quotientEquivQuotientMvPolynomial_symm_mk` (`AdditionChartLadder.lean`) — the
+      missing `symm`-apply lemma for an existing mathlib equiv. Target:
+      `Mathlib/RingTheory/Polynomial/Quotient.lean`.
+    Both are independent of draft 02's dependency chain and can ship as their own small PRs.
   - **DONE 2026-07-08T13:54Z** (3166d104; `AdditionChartProj.lean` ZERO sorries, axiom-clean).
     `chartι_comp_specMap_chartAwayHom_eq` PROVEN. No new infrastructure was needed — the
     boarded "mathlib gap" was false (`Away.isLocalization_mul` exists) and the `awayCongr`
