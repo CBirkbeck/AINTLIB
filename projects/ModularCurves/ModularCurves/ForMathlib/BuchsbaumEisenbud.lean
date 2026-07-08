@@ -710,6 +710,125 @@ private noncomputable def be_localizedHomology_reduceMapEquiv (rk : ℕ → ℕ)
 
 end LocalizedHomologyTransport
 
+universe u
+
+/-- A grade-`≥ k` ideal contained in the maximal ideal of a local ring witnesses `depth ≥ k`: its
+regular sequence lies in `𝔪`.  (The already-localised analogue of `hasDepthGE_localization_of_gradeGE`,
+consuming the grade condition *after* it has been transported to the local ring `L = S_𝔮`.) -/
+private theorem hasDepthGE_of_gradeGE_le_maximalIdeal {L : Type*} [CommRing L] [IsLocalRing L]
+    {I : Ideal L} {k : ℕ} (h : I.gradeGE k) (hI : I ≤ IsLocalRing.maximalIdeal L) :
+    Module.HasDepthGE L L k := by
+  obtain ⟨rs, hlen, hreg, hmem⟩ := h
+  exact ⟨rs, hlen, hreg, fun x hx => hI (hmem x hx)⟩
+
+/-- Depth is a linear-equivalence invariant (a non-`private`-scoped copy of the transport used inside
+`ForMathlib.Acyclicity`): a regular sequence moves along `e : M ≃ₗ[L] N` (`LinearEquiv.isRegular_congr`)
+and membership in `𝔪` is unchanged.  Used to transport the depth disjunct across the
+`be_localizedHomology_reduceMapEquiv` transport. -/
+private theorem hasDepthGE_congr {L : Type u} [CommRing L] [IsLocalRing L]
+    {M N : Type u} [AddCommGroup M] [Module L M] [AddCommGroup N] [Module L N]
+    (e : M ≃ₗ[L] N) {k : ℕ} (h : Module.HasDepthGE L M k) : Module.HasDepthGE L N k := by
+  obtain ⟨rs, hlen, hreg, hmem⟩ := h
+  exact ⟨rs, hlen, (e.isRegular_congr rs).mp hreg, hmem⟩
+
+/-- **[Core over the local ring `L` — the acyclicity disjunction].**  For the standard-free complex
+`ψ` over a local Noetherian ring `L` with the (already localised) grade conditions `hcondL`, exact at
+every spot `> i`: either `ψ` is exact at `F_{i+1}` too, or the homology `ker(ψ i)/im(ψ (i+1))` has
+`depth ≥ 1`.  This is Stacks 00N1 `(2)⟹(1)` over `L`, packaged so that
+`be_backward_localizedHomology_depth` obtains it (over `L = S_𝔮`) and transports it back to the
+abstract localised homology.  The interior no-gap block goes through `localAcyclicity_shift` with the
+depth supplied by the top proper minor ideal; the split (`= ⊤`) top differentials are peeled by the
+00MW direct-summand argument. -/
+private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRing L]
+    [IsNoetherianRing L] (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (ψ : (i : ℕ) → (Fin (rk (i + 1)) → L) →ₗ[L] (Fin (rk i) → L))
+    (hcomplex : ∀ i, (ψ i) ∘ₗ (ψ (i + 1)) = 0)
+    (hcondL : ∀ k, 1 ≤ k → k ≤ e →
+        (LinearMap.idealOfMinors (rnk k) (ψ (k - 1))).gradeGE k ∨
+          LinearMap.idealOfMinors (rnk k) (ψ (k - 1)) = ⊤)
+    (i : ℕ) (habove : ∀ j, i < j → Function.Exact (ψ (j + 1)) (ψ j)) :
+    Function.Exact (ψ (i + 1)) (ψ i) ∨
+      Module.HasDepthGE L (LinearMap.ker (ψ i) ⧸
+        (LinearMap.range (ψ (i + 1))).comap (LinearMap.ker (ψ i)).subtype) 1 := by
+  induction e using Nat.strong_induction_on generalizing rk rnk ψ hcomplex i habove with
+  | _ e IH =>
+  classical
+  by_cases hi1 : rk (i + 1) = 0
+  · -- `F_{i+1} = 0`, so the homology is a subquotient of `0`: the complex is exact at `F_{i+1}`.
+    haveI : Subsingleton (Fin (rk (i + 1)) → L) := subsingleton_pi_fin_of_eq_zero hi1
+    exact Or.inl (exact_of_subsingleton_mid _ _)
+  · -- `rk (i+1) ≠ 0`, hence `i + 1 < e`.
+    have hie : i + 1 < e := by by_contra h; exact hi1 (hrk (i + 1) (by omega))
+    by_cases htop2 : rk (i + 2) = 0
+    · -- **Top spot** `F_{i+2} = 0`: then `ψ (i+1) = 0` and `ψ i` is injective (maximal-minor McCoy
+      -- from the grade condition at `i+1`, where `rnk (i+1) = rk (i+1)`), so the homology
+      -- `ker (ψ i) / 0` vanishes — the complex is exact at `F_{i+1}`.
+      have hrnk2 : rnk (i + 2) = 0 := by
+        by_cases hle : e ≤ i + 2
+        · exact hrnk_top (i + 2) hle
+        · have h := hrnk (i + 2) (by omega) (by omega); omega
+      have hrnk_eq : rnk (i + 1) = rk (i + 1) := by
+        have h := hrnk (i + 1) (by omega) hie
+        have h2 : rnk (i + 1 + 1) = 0 := hrnk2
+        omega
+      have hinj : Function.Injective (ψ i) := by
+        apply injective_of_maxMinors_nonZeroDiv
+        have hc := hcondL (i + 1) (by omega) (by omega)
+        rw [show i + 1 - 1 = i from rfl, hrnk_eq] at hc
+        rcases hc with hg | ht
+        · refine Or.inl ?_
+          obtain ⟨rs, hlen, hreg, hmem⟩ := hg
+          have hne : rs ≠ [] := by rintro rfl; simp only [List.length_nil] at hlen; omega
+          obtain ⟨r, rest, rfl⟩ := List.exists_cons_of_ne_nil hne
+          rw [RingTheory.Sequence.isRegular_cons_iff] at hreg
+          exact ⟨r, hmem r (by simp), hreg.1⟩
+        · exact Or.inr ht
+      haveI : Subsingleton (Fin (rk (i + 2)) → L) := subsingleton_pi_fin_of_eq_zero htop2
+      refine Or.inl ?_
+      rw [LinearMap.exact_iff, LinearMap.ker_eq_bot.mpr hinj]
+      symm
+      rw [LinearMap.range_eq_bot]
+      exact Subsingleton.elim _ _
+    · -- `rk (i+2) ≠ 0`.
+      -- **Trailing-zero reduction.**  If `rk (e-1) = 0`, the same complex has effective length `e-1`
+      -- (its homology at `i` is unchanged), so the strong-induction hypothesis at `e-1` closes it.
+      by_cases htz : rk (e - 1) = 0
+      · have he1 : e - 1 + 1 = e := by omega
+        have hrnk1 : rnk (e - 1) = 0 := by
+          have h1 := hrnk (e - 1) (by omega) (by omega)
+          rw [he1, htz] at h1
+          have h2 := hrnk_top e le_rfl
+          omega
+        refine IH (e - 1) (by omega) rk rnk (fun j hj => ?_) (fun j hj => ?_)
+          (fun j hj1 hj2 => hrnk j hj1 (by omega)) ψ hcomplex
+          (fun k hk1 hk2 => hcondL k hk1 (by omega)) i habove
+        · rcases eq_or_lt_of_le hj with rfl | h
+          · exact htz
+          · exact hrk j (by omega)
+        · rcases eq_or_lt_of_le hj with rfl | h
+          · exact hrnk1
+          · exact hrnk_top j (by omega)
+      · -- `rk (e-1) ≠ 0`: the length `e` is tight.
+        by_cases hgap : ∀ j, i ≤ j → j < e → rk j ≠ 0
+        · -- **No gaps in `[i, e)`.**
+          by_cases htop : LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1)) = ⊤
+          · -- **Split (`= ⊤`) top differential: peel it (Stacks 00MW).**
+            sorry
+          · -- **Proper top minor ideal** ⟹ `depth L ≥ e-1 ≥ e-i-1`, then `localAcyclicity_shift`.
+            have hgrade : (LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1))).gradeGE (e - 1) := by
+              rcases hcondL (e - 1) (by omega) (by omega) with hg | ht
+              · exact hg
+              · exact absurd ht htop
+            have hdepth : Module.HasDepthGE L L (e - i - 1) :=
+              Module.hasDepthGE_mono (R := L)
+                (hasDepthGE_of_gradeGE_le_maximalIdeal hgrade (IsLocalRing.le_maximalIdeal htop))
+                (by omega)
+            exact localAcyclicity_shift e rk hrk ψ hcomplex i hie hgap hdepth habove
+        · -- **Gap in `[i, e)`: truncate at the first zero (or handle the cokernel `rk i = 0`).**
+          sorry
+
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
 
@@ -744,8 +863,46 @@ private theorem be_backward_localizedHomology_depth {S : Type*} [CommRing S] [Is
       Module.HasDepthGE (Localization.AtPrime 𝔮)
         (LocalizedModule 𝔮.primeCompl
           (LinearMap.ker (φ i) ⧸
-            (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)) 1 :=
-  sorry
+            (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)) 1 := by
+  classical
+  haveI : Module.Flat S (Localization.AtPrime 𝔮) :=
+    IsLocalization.flat (Localization.AtPrime 𝔮) 𝔮.primeCompl
+  -- The localised complex `ψ = reduceMap (S_𝔮) (φ ·)` over `L = S_𝔮`.
+  set ψ : (j : ℕ) → (Fin (rk (j + 1)) → Localization.AtPrime 𝔮) →ₗ[Localization.AtPrime 𝔮]
+      (Fin (rk j) → Localization.AtPrime 𝔮) := fun j => reduceMap (Localization.AtPrime 𝔮) (φ j)
+    with hψ
+  -- `ψ` is a complex.
+  have hcomplexL : ∀ j, (ψ j) ∘ₗ (ψ (j + 1)) = 0 := fun j => by
+    simp only [hψ, ← reduceMap_comp, hcomplex j, reduceMap_zero]
+  -- `ψ` is exact above `i` (flat base change of `habove`).
+  have haboveL : ∀ j, i < j → Function.Exact (ψ (j + 1)) (ψ j) := fun j hj =>
+    exact_reduceMap_of_flat (Localization.AtPrime 𝔮) _ _ (habove j hj)
+  -- The grade conditions localise (`Ideal.gradeGE_localize` + `idealOfMinors_reduceMap`).
+  have hcondL : ∀ k, 1 ≤ k → k ≤ e →
+      (LinearMap.idealOfMinors (rnk k) (ψ (k - 1))).gradeGE k ∨
+        LinearMap.idealOfMinors (rnk k) (ψ (k - 1)) = ⊤ := by
+    intro k hk1 hke
+    have hmap : LinearMap.idealOfMinors (rnk k) (ψ (k - 1))
+        = (LinearMap.idealOfMinors (rnk k) (φ (k - 1))).map
+            (algebraMap S (Localization.AtPrime 𝔮)) := by
+      simp only [hψ]; exact idealOfMinors_reduceMap _ _ _
+    rw [hmap]
+    rcases hcond k hk1 hke with hg | ht
+    · exact Ideal.gradeGE_localize _ 𝔮.primeCompl k hg
+    · exact Or.inr (by rw [ht, Ideal.map_top])
+  -- The transport `(H)_𝔮 ≃ₗ[L] (reduceMap-homology)`.
+  have transport := be_localizedHomology_reduceMapEquiv rk φ hcomplex i 𝔮
+  rcases localBE_homology_disjunction e rk rnk hrk hrnk_top hrnk ψ hcomplexL hcondL i haboveL with
+    hex | hd
+  · -- Exact ⟹ the reduceMap-homology is subsingleton ⟹ `(H)_𝔮` is subsingleton (transport).
+    refine Or.inl ?_
+    have hsub : Subsingleton (LinearMap.ker (ψ i) ⧸
+        (LinearMap.range (ψ (i + 1))).comap (LinearMap.ker (ψ i)).subtype) := by
+      rw [Submodule.Quotient.subsingleton_iff, Submodule.comap_subtype_eq_top]
+      exact (LinearMap.exact_iff.mp hex).le
+    exact (Equiv.subsingleton_congr transport.toEquiv).mpr hsub
+  · -- Depth ≥ 1 for the reduceMap-homology ⟹ for `(H)_𝔮` (transport).
+    exact Or.inr (hasDepthGE_congr transport.symm hd)
 
 /-- **[BE backward core, per-spot acyclicity step]** Stacks 00N1, (2)⟹(1), at a single interior
 spot, *given exactness at every higher spot* (`habove`).  This is the genuine acyclicity content:
@@ -939,6 +1096,8 @@ theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNo
           LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤) :=
   ⟨fun hexact i hi1 hie => be_forward e rk rnk hrk hrnk_top hrnk φ hcomplex hexact i hi1 hie,
    fun hcond i => be_backward e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i⟩
+
+#print axioms buchsbaumEisenbud_acyclic
 
 /-! ## [T-RB] 00RB (Lemma 10.129.3): openness of the fibre-exact locus
 
