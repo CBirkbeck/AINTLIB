@@ -1666,11 +1666,124 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   and `gammaFullNaiveProblem` `map_id/map_comp/map`-membership sorries ·
   **Depends on**: T-E3 · **Type**: lemmas.
 
-### [T-E5] ⧗KM + AG-QUOT: representable ⟺ rel. representable + rigid (KM 4.7)
-- **Status**: open · **File**: Moduli/EllCategory.lean · `representable_iff` ·
-  **Depends on**: AG-QUOT (Loeffler 3.6.1, quote in hand), naive-Γ(3)/Legendre
-  bootstrap objects (sub-tickets at cut time), T-E4 · **Type**: theorem (hard) ·
-  **Sources**: [Loe] 3.7.4 + proof sketch (in hand); [KM] 4.7 ⧗.
+### [T-E5] representable ⟺ rel. representable + rigid (KM 4.7) — DECOMPOSED 2026-07-08
+- **Status**: open (decomposed; leaves below) · **File**: Moduli/EllCategory.lean ·
+  `representable_iff` · **Depends on**: T-E5a–T-E5e · **Type**: theorem (hard) ·
+  **Sources**: [KM] SCHOLIE 4.7.0 + engine p. 112 + Appendix A.4 (**READ 2026-07-08,
+  verbatim in `.mathlib-quality/km47-source-quotes.md`; docstring carries the quotes**);
+  [Loe] 3.6.1/3.7.1–3.7.4.
+- **⚠️ STATEMENT MISMATCH — FLAGGED, NOT FIXED** (dispatch v10.4: "statement mismatch ⟹
+  flag, don't fix"; the earlier T-Q6e note called it and deferred the decision here).
+  KM 4.7.0 reads *"Let 𝒫 be relatively representable **and affine over** (Ell); then a
+  necessary and sufficient condition that 𝒫 be representable is that 𝒫 be rigid."* Our
+  statement (= Loeffler 3.7.4 verbatim) has no affineness. It is **load-bearing three
+  times** in KM's own proof: p. 112 (`𝕸(𝒫,δ)` affine over affine `𝕸(δ)` ⟹ *absolutely*
+  affine); p. 113 (*"Because `𝕸(𝒫,δ)` is affine, the quotient `𝕸(𝒫,δ)/G` exists"* — a free
+  finite-group quotient of a general scheme is only an algebraic space, cf. Hironaka);
+  p. 114 (α_univ descends *"because 𝒫 is relatively affine"*, SGA I VIII 7.8). Loeffler's
+  own quotient input (Prop 3.6.1) is stated only for **quasiprojective** `X`, so his sketch's
+  "take invariants" step tacitly assumes what his 3.7.4 omits. ⟹ **the Lean statement is
+  supported by neither source's proof.**
+  - **OWNER DECISION REQUESTED** (fable-P4 recommendation = **(a)**):
+    (a) add affine-over-`Ell` to the **⇐ direction only** — costless downstream: every
+        consumer (KM 4.7.1/4.7.2, [Loe] 3.8.2, T-E7/T-E9/T-H4/T-H6) is *affine and étale*
+        over `Ell`;
+    (b) weaken to quasi-projective-over-`Ell` and pay for [Loe] 3.6.1 in that generality
+        (⟹ T-Q5 must deliver the quasi-projective gluing, not just the affine case);
+    (c) keep the general statement ⟹ algebraic spaces ⟹ **out of scope** (absent from
+        mathlib).
+- **Leaves** (Tier A5 split; each single-conclusion):
+  - **[T-E5a]** `representable ⟹ rigid` — KM 4.4, [Loe] Exercise (1). Free-ish: a fixed
+    point of `Aut(E/S)` on `P(E/S)` contradicts the universal property's uniqueness clause.
+  - **[T-E5b]** `representable ⟹ relatively representable` — **NOT free** (KM leaves it
+    implicit in 4.3; Loeffler asserts it inside 3.7.4). Needs the `Isom`-scheme of the
+    universal curve: `T ↦ 𝒫(E_T/T) ≅ Hom_{Ell}(E_T/T, E_univ/𝕸(𝒫))`, to be exhibited as an
+    `S`-scheme. Own gap ticket if the `Isom`-scheme is missing (it is: mathlib has no
+    `Isom`-scheme for elliptic curves).
+  - **[T-E5c]** the KM engine, `ℤ[1/N]`-half — **already exists** as
+    `representable_of_rigid_of_torsor` (Moduli/QuotientProblem.lean, sorried = **T-Q6e**).
+    T-E5 must not re-derive it; it must *instantiate* it twice.
+  - **[T-E5d]** instantiation at `(N, δ, G) = (3, naive level 3, GL₂(𝔽₃))` — consumes
+    **T-E15**; unblocked.
+  - **[T-E5e]** instantiation at `(N, δ, G) = (2, Legendre, GL₂(ℤ/2) × {±1})` — consumes
+    **T-E14**, hence **blocked on [T-E-OMEGA]**.
+  - **[T-E5f]** "recollement": the two representing objects agree over `ℤ[1/6]` by rigidity
+    (the unique isomorphism), glue to one over `ℤ` (KM p. 111). Consumes T-E5d + T-E5e.
+- **NOT needed on this route**: `𝒫̃` (KM A.4.1.1) and Prop A.4.2. They are the *alternative*
+  ⇐ route ("𝒫̃ representable + rigid ⟹ 𝒫 representable", KM A.4.1.2 = [Loe] Exercise (2)),
+  which merely *moves* the difficulty into proving `𝒫̃` representable. Gabber's
+  counterexample (KM A.4.1.3, verbatim in the quotes file) proves `𝒫̃` is a strictly weaker
+  object than `𝒫` — so it is genuinely a second definition, not a synonym. Cut only on demand.
+
+### [T-E-OMEGA] the invariant differential `ω_{E/S}` — GAP TICKET (cut 2026-07-08, fable-P4)
+- **Status**: open, unclaimed · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
+  **Blocks**: T-E12, T-E13, T-E14 ⟹ T-E5e ⟹ T-E5f ⟹ **the `ℤ[1/2]`-half of KM 4.7** ·
+  **Type**: def + 3 lemmas (a bounded sub-stream, not a leaf)
+- **The gap (verified 2026-07-08, fable-P4)**: KM's Legendre problem (4.6.2, verbatim)
+  quantifies over *"an `S`-basis `ω` of `ω_{E/S}`"*, and `ω_{E/S}` exists **neither in
+  mathlib** (`Mathlib/AlgebraicGeometry`, 45 files: no `Ω¹`, no cotangent complex, no
+  relative differentials for schemes) **nor in this repo** (every `omega` hit is the
+  tactic). This is *not* a data-sorry: no decl was emitted (see `Moduli/Bootstrap.lean`).
+- **Plan terminating in a proof** (per v10.8 RR-only): do **not** wait for scheme-level
+  `Ω¹`. Our `EllipticCurveGeom` is *locally Weierstrass* (T-A8), so define `ω_{E/S}` as the
+  line bundle glued from the atlas with the classical local basis
+  `dx / (2y + a₁x + a₃)`, whose transition under a variable change `(u, r, s, t)` is
+  multiplication by `u` — **the cocycle is already proven**: `T-W7.1a` (atlas +
+  `classifyRingHom`) and `T-W7.mvc` (`projModelVCIso` + `_mul`, the cocycle identity,
+  axiom-clean). Steps: (i) `def invDiffLineBundle` via `Scheme.Cover.glueMorphisms`-style
+  gluing over the atlas (or as an invertible sheaf given by the `u`-cocycle); (ii)
+  `invertible` + rank 1; (iii) `basis_iff_unit`; (iv) base-change compatibility
+  (mirror `LocallyWeierstrass.baseChange`). Est. 400–700 lines. **Sources**: KM 2.2 / 4.6.2;
+  GME 2.2.
+- **ALTERNATIVE that dodges `ω` entirely (recorded, owner's call)**: KM's engine needs *some*
+  `δ` over `ℤ[1/2]` satisfying axioms 1–2. Take `δ = ` **naive level 4**, `G = GL₂(ℤ/4)`
+  (`E[4]` is finite étale when `2` is invertible; bases of `E[4]` form a `GL₂(ℤ/4)`-torsor;
+  rigid since `N ≥ 3`). This replaces "Legendre + `ω`" by "one more explicit affine model"
+  (`Y(4)/ℤ[1/2]`, reachable from `ForMathlib/TateNormalForm.lean`). Trade: T-E-OMEGA
+  (400–700 lines, reusable everywhere — Hodge bundle, modular forms) **vs** an explicit
+  `Y(4)` model (~T-E15-sized, single-use). Recommendation: **do T-E-OMEGA** — the Hodge
+  bundle `ω` is needed by the modular-forms stream regardless.
+
+### [T-E12] `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]` represents `(E, ω)` (GME Thm 2.2.3)
+- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean (no decl
+  yet — see its header) · **Type**: def + theorem · **Sources**: GME Thm 2.2.3; KM 2.2.
+- **Body** (from `decomposition-gme2.md` §E12, fully explicit): `P₁ : S ↦ [(E, ω)]` is
+  represented over `ℤ[1/6]` by `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]`; proof = A7 uniqueness of
+  `(g₂, g₃)` given `ω`; universal curve `y² = 4x³ − g₂x − g₃`.
+
+### [T-E13] `Aut_S(E, ω) = {1}` — the rigidity engine (GME Cor 2.2.4)
+- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean · **Type**:
+  theorem (short) · **Depends on**: T-E12 · **Sources**: GME Cor 2.2.4.
+- **Body**: one-liner from T-E12's representability ("two distinct identifications
+  `φ*(𝐄, ω) ≅ (E, ω)`"). **Do NOT re-derive rigidity from scratch** (dispatch v10.4): the
+  proven canonicity chain in `EllipticCurve/Rigidity.lean` — in particular C3′
+  `isMonHom_of_one_comp_eq'` (a pointed morphism of group objects is a homomorphism) — is
+  the intended engine wherever this argument needs "an automorphism fixing the zero section";
+  import it.
+
+### [T-E14] the Legendre bootstrap object `M'₂` over `ℤ[1/2]` (GME Ex. 2.2.1 / KM 4.6.2)
+- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean · **Type**:
+  def + 2 theorems (KM engine axioms 1 & 2) · **Depends on**: T-E-OMEGA, T-E13 ·
+  **Sources**: KM 4.6.2 + 2.2.9 (verbatim in the quotes file); GME Ex. 2.2.1 (p. 117).
+- **Body**: over `ℤ[1/2]` normalise `y² = x³ + a₂x² + a₄x + a₆`, `i(x, y) = (x, −y)` gives
+  `[−1]`; `E[2] − {0} ≅ Spec(A[X]/(F))` free of rank 3; `E[2]` is étale (distinct roots by
+  smoothness); the problem `P'₂` (pairs `P, Q ∈ E[2] − 0` with `x(P) = 0`, `x(Q) = 1`, plus
+  the `ω`-datum) is represented by `M'₂ = Spec ℤ[1/2, λ, (λ(λ−1))⁻¹]`, universal curve with
+  `P = (0,0,1)`, `Q = (1,0,1)`, `ω = dX/Y`. Engine axiom 2: `δ_{E/S}` is a finite étale
+  `GL₂(ℤ/2) × {±1}`-torsor (KM 4.6.2 verbatim).
+
+### [T-E15] the naive level 3 bootstrap object `ℰ₃` over `ℤ[1/3]` (GME Ex. 2.2.2 / AME 2.2.10)
+- **Status**: open, **UNBLOCKED**, unclaimed · **File**: `Moduli/Bootstrap.lean`
+  (**skeleton landed 2026-07-08, builds green**: `naiveLevelThree_representable_by_affine`
+  = engine axiom 1, `naiveLevelThree_relativelyRepresentable_finiteEtale` = engine axiom 2)
+  · **Type**: 2 theorems · **Depends on**: T-B5 (E[3] finite étale), stream C (Weil pairing,
+  for the `Isom`-scheme cut) · **Sources**: KM Ex. 2.2.2 (book pp. 117–118), AME 2.2.10.
+- **Body**: `[N]*ω = λω` with `λ = N` at flex points ⟹ `[3]` étale over `ℤ[1/3]` (the
+  `[N]*ω = Nω` trick — **also the proof core of T-B5**); `ℰ₃` represented over `ℤ[1/3]` by
+  `Spec ℤ[1/3, β, γ][((a₁³ − 27a₃)a₃)⁻¹] / (β³ − (β+γ)³)` with `a₁ = 3γ − 1`,
+  `a₃ = −3γ² − β − 3βγ`, `P = (0,0)`, `Q = (γ, β+γ)`. A T-E1-style `VariableChange`
+  gymnastics ticket, fully explicit. **Note**: proving this by KM 4.7.2 would be circular —
+  4.7.2 *consumes* this object. Prove by hand.
 
 ### [T-E7] Y₁(N) representable + smooth affine (N ≥ 4, N invertible) · MILESTONE
 - **Status**: open · **File**: Moduli/Representability.lean ·
