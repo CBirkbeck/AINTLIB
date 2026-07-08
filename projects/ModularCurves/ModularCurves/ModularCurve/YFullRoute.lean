@@ -644,7 +644,42 @@ theorem gammaFullNaive_rigid_of_locallyNoetherian (N : ℕ) [NeZero N] (hN : 3 �
     (e : X ≅ X) (hbase : e.hom.baseHom = 𝟙 X.base) (hne : e ≠ Iso.refl X)
     (a : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
     (gammaFullNaiveProblem R N).map e.hom.op a ≠ a := by
-  sorry
+  intro heq
+  -- the two level sections are fixed by `e.hom.top`
+  have h1 : EllHom.pullSection R e.hom a.1.1 = a.1.1 := congrArg (fun z => z.1.1) heq
+  have h2 : EllHom.pullSection R e.hom a.1.2 = a.1.2 := congrArg (fun z => z.1.2) heq
+  have hfixP : a.1.1.1 ≫ e.hom.top = a.1.1.1 :=
+    (congrArg (· ≫ e.hom.top) (congrArg Subtype.val h1).symm).trans <|
+      (e.hom.isPullback.lift_fst _ _ _).trans <|
+        (congrArg (· ≫ a.1.1.1) hbase).trans (Category.id_comp _)
+  have hfixQ : a.1.2.1 ≫ e.hom.top = a.1.2.1 :=
+    (congrArg (· ≫ e.hom.top) (congrArg Subtype.val h2).symm).trans <|
+      (e.hom.isPullback.lift_fst _ _ _).trans <|
+        (congrArg (· ≫ a.1.2.1) hbase).trans (Category.id_comp _)
+  -- repackage `e` as a pointed `S`-iso of the curve
+  have hbase' : e.inv.baseHom = 𝟙 X.base :=
+    (Category.id_comp _).symm.trans <|
+      (congrArg (· ≫ e.inv.baseHom) hbase.symm).trans
+        (congrArg EllHom.baseHom e.hom_inv_id)
+  have how : e.hom.top ≫ X.curve.π = X.curve.π :=
+    e.hom.isPullback.w.trans ((congrArg (X.curve.π ≫ ·) hbase).trans (Category.comp_id _))
+  have hoz : X.curve.zero ≫ e.hom.top = X.curve.zero :=
+    e.hom.zero_w.trans ((congrArg (· ≫ X.curve.zero) hbase).trans (Category.id_comp _))
+  have how' : e.inv.top ≫ X.curve.π = X.curve.π :=
+    e.inv.isPullback.w.trans ((congrArg (X.curve.π ≫ ·) hbase').trans (Category.comp_id _))
+  have hoz' : X.curve.zero ≫ e.inv.top = X.curve.zero :=
+    e.inv.zero_w.trans ((congrArg (· ≫ X.curve.zero) hbase').trans (Category.id_comp _))
+  let e' : X.curve ≅ X.curve :=
+    { hom := ⟨e.hom.top, how, hoz⟩
+      inv := ⟨e.inv.top, how', hoz'⟩
+      hom_inv_id := EllipticCurve.HomOver.ext (congrArg EllHom.top e.hom_inv_id)
+      inv_hom_id := EllipticCurve.HomOver.ext (congrArg EllHom.top e.inv_hom_id) }
+  -- the linchpin (GME 2.6.4 / KM 2.7.2 register)
+  have hlin : e' = Iso.refl X.curve :=
+    EllipticCurve.aut_trivial_of_fullLevel N hN
+      (nIsInvertible_over_spec R X.structMap hinv) X.curve a.1.1 a.1.2 a.2 e' hfixP hfixQ
+  have htop : e.hom.top = 𝟙 X.curve.E := congrArg (fun i => i.hom.hom) hlin
+  exact hne (Iso.ext (EllHom.ext hbase htop))
 
 /-- **(T-E9 input 2 = the rigid conjunct; KM 2.7.2 / [Loe] 3.8.3)** The naive
 full-level problem is rigid for `N ≥ 3` invertible. GATE **[YF-NOETH]**: the linchpin
