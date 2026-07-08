@@ -1,1 +1,1 @@
-FOCUS: [STREAM-FP] — session 1 COMPLETE 2026-07-08T15:43Z: [A711-FP] discharged + etale FLIPPED + [KM-FMT-FLAT] FMT-0 engine PROVEN (RegularSectionDensity.lean sorry-free). Files held: ForMathlib/FinitePresentationOfFinite.lean, ForMathlib/RegularSectionDensity.lean. NEXT SESSION: [NISOG-GRASS] /develop --decompose.
+FOCUS: [NISOG-GRASS] wave 1 — PHASE 4 PROVE [GR-A1] chartEquivRetraction (GrassmannianChart.lean:53). Then GR-B, GR-A2.

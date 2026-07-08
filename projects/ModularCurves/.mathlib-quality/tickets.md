@@ -9990,3 +9990,52 @@ IsColimit), + the algebra foundation (56a95f91, 623758cd, bee2bc05, 98cd93a1).*
   ring ELEMENT, not the index. Remaining c4.3 = geometry only (Spec transRing intersection
   via the chartPieceIso recipe; glueMorphisms over chartProductCover) → c4.4 → c4.5 →
   0c-i closes → report at 0c-ii. No redirect.
+
+### v10.43-p0 (2026-07-08, p0): CROSS-STREAM FINDING — fable-FP's InvariantTorsor discharges the T-G3d-infra crux CORE (v10.38 decisive input)
+
+*p0's abstract reduction (v10.42) converges with fable-FP's `InvariantTorsor.lean` (KM A7.1.1/A7.1.2,
+sorry-free). This is decisive input for the v10.38 scoping decision (general comodule crux vs E[N]
+étale shortcut). COORDINATOR INPUT REQUESTED.*
+
+**The convergence.** p0's crux is `IsHopfGalois (translation co-action)` = `Bijective(canonicalGaloisMap)
+∧ FaithfullyFlat B^{coρ} B`. fable-FP's `InvariantTorsor` proves, for a FINITE CONSTANT group `G` with
+`IsFreeAlgebraAction G R A`:
+- `torsorMul : A ⊗[Aᴳ] A →ₐ (G → A)`, `x⊗y ↦ (x·g•y)_g` — the CONSTANT-group analogue of p0's
+  `canonicalGaloisMap` (which lands in `A ⊗ O_G`; for constant `G`, `O_G = (G→R)` and `A⊗O_G ≅ (G→A)`);
+- `torsorMul_bijective_of_isFreeAlgebraAction` = p0's `Bijective(canonicalGaloisMap)` (constant case);
+- `Module.Finite/Projective.of_isFreeAlgebraAction`, `Algebra.Etale.of_isFreeAlgebraAction`.
+
+**Two gaps to actually discharge p0's crux via fable-FP (both REAL work, neither trivial):**
+1. **Formulation bridge (comodule ↔ action).** p0's layer is COMODULE-based (`ρ : A →ₐ A ⊗ O_G`,
+   co-invariants = `AlgHom.equalizer`); fable-FP's is ACTION-based (`MulSemiringAction G A`, `FixedPoints`).
+   For a CONSTANT group these coincide, but the coincidence needs constant-group-scheme Hopf infra
+   (`O_G ≅ (G→R)`, co-action from action, `canonicalGaloisMap ≅ torsorMul`, `coinvariants ≅ Aᴳ`) —
+   ABSENT. ~200-300 lines of NEW infra. Then E[N] needs étale-local-constancy (T-Q5 linchpin) + étale
+   descent (fable-FP `GaloisDescentModule`?) to globalize.
+2. **FaithfullyFlat.** fable-FP has `Finite + Projective` but NOT `Module.FaithfullyFlat Aᴳ A` (p0's crux
+   needs it). Derivable from torsorMul-bijective (`A⊗A ≅ (G→A)` faithfully flat ⟹ descent) — a route-
+   independent lemma both streams need.
+
+**Recommendation.** The E[N]/constant route (v10.38 option B) is now concretely backed by a PROVEN
+torsor engine — strongly favors it over the multi-week general comodule crux (option A) FOR E[N]. But
+the formulation bridge (comodule↔action) is a genuine architectural choice spanning p0+fable-FP —
+coordinator's call whether to (i) build the bridge (p0 consumes fable-FP), (ii) have fable-FP re-export
+in comodule form, or (iii) unify formulations. p0's abstract reduction is route-AGNOSTIC and ready to
+consume either. p0 proceeds on the FaithfullyFlat gap (route-independent, both streams need it) per
+beastmode absent a redirect.
+
+### v10.44c (2026-07-08, fable-FP): [STREAM-FP] stretch (ii) — [NISOG-GRASS] /develop --decompose DONE; wave-1 skeleton green
+
+- **Route of record**: Stacks 089T (fetched verbatim) = mathlib's own `RingTheory/Grassmannian.lean`
+  TODO ladder (`chart x` for tuples `x : Fin k → M`) — chart-subfunctor/glue construction,
+  NO Plücker. Artifact: `decomposition-nisog-grass.md` (waves 1–3, per-leaf adversarial
+  blocks; wave-2/3 signatures deliberately pinned at wave boundaries per v10.24(b)).
+- **Wave-1 skeleton LANDED green** (2330 jobs): NEW `ForMathlib/GrassmannianChart.lean` —
+  `coordMap`/`coordMap_single` PROVEN; sorried: **[GR-A1]** `chartEquivRetraction`
+  (chart members ≃ retractions of `x`), **[GR-B]** `retractionEquivMatrix` (retraction
+  space = complementary matrix block, the 𝔸^{k(n−k)} identification), **[GR-A2]**
+  `isChartAt_map` (base change along `f : A →ₐ[R] B` preserves charts).
+  - **Claimed**: fable-FP, 2026-07-08T15:55Z (wave 1: GR-A1, GR-B, GR-A2) ·
+    Status: in_progress · Execution order A1 → B → A2.
+- Consumer chain: [GR-*] ⟶ wave-3 `grassmannianScheme` + T-points ⟶ NISOG [L15]
+  `exists_nIsogSpace` (KM 6.5.1 ambient) ⟶ [L27] (M6). Zero overlap with live lanes.
