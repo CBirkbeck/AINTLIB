@@ -69,6 +69,21 @@ theorem endMonHom [IsLocallyNoetherian S] (f : E.asOver ⟶ E.asOver)
   haveI : IsSeparated E.asOver.hom := inferInstanceAs (IsSeparated E.π)
   exact isMonHom_of_one_comp_eq' E.toEllipticCurveGeom.universallyOConnected f hη
 
+/-- **(T-END0a — right-distributivity of `End(E/S)`)** Post-composition by a **pointed**
+endomorphism `f` distributes over the pointwise (additive) group law: `(a * b) ≫ f = (a ≫ f) * (b ≫ f)`
+(the `*` is the additive `Hom.commGroup`/`Hom.group` operation). This is the additive half of the
+ring structure that is *not* free — pre-composition distributes over `*` for **every** morphism
+(`MonObj.comp_mul`, naturality of `lift`), but post-composition distributes only through a *monoid
+homomorphism*. A pointed `f` is one (`endMonHom`), so post-composition by `f` is the bundled monoid
+hom `IsMonHom.monoidHom f` and the identity is its `map_mul`. -/
+theorem endPostcomp_mul [IsLocallyNoetherian S] (a b f : E.asOver ⟶ E.asOver)
+    (hη : η[E.asOver] ≫ f = η[E.asOver]) :
+    letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+    (a * b) ≫ f = (a ≫ f) * (b ≫ f) := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  haveI : IsMonHom f := { one_hom := hη, mul_hom := endMonHom E f hη }
+  exact map_mul (IsMonHom.monoidHom f E.asOver) a b
+
 /-- **(T-END0b pin — KM 2.6.1)** The defining identity of the degree: `f^t ∘ f = [deg f]`. -/
 theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :
     E.endDual f ≫ f = E.mulBy (E.endDeg f) := sorry
