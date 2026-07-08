@@ -10619,3 +10619,24 @@ this session, before the cleanup pivot. Nothing in it is pending.*
 - PIC0 queue therefore stands as at v10.52: map_id (A's favor) → MellWeierstrass cleanup;
   YFULL gated leaves as charters flip them; GAP-1 session-start watch. Taking next
   coordinator dispatch when it comes.
+
+## Amendments v10.55 (2026-07-08, coordinator): YFULL spine milestone acknowledged (retroactive); PIC0 → [YF-QSM]
+
+- **Directive answered + coordinator under-acknowledgment corrected**: the STREAM-YFULL
+  zero-gate spine (L1→L2→L7→L9 + [YF-AFF]/[YF-FIN]/[YF-TRANS]) was PROVEN earlier this
+  session (receipts: 7e7825631, 10f59af9b; bonus [YF-RIG-NOETH] reduction 7201ac5a5), and
+  the stream's REPORT MILESTONE — **"AffineOverEll(Γ(N)) sorry-free-modulo-T-D8-bridge"** —
+  was DELIVERED (PIC0's v10.50 entry, exact sorryAx ledger: T-D8-bridge, T-B4, T-H8a;
+  L1/L2 fully axiom-clean). **Y(N)'s relative-representability core exists.** The
+  remaining 7 YFullRoute sorries are charter-gated as listed; the watch state was correct.
+- **One re-classification**: **[YF-QSM] is NOT another lane's gate — it is a mathlib-gap
+  ForMathlib build**, i.e. dispatchable to whoever is free. **PIC0 dispatch: build
+  [YF-QSM]** (the smooth-étale-descent helper parked in YFullRoute.lean) as a
+  ForMathlib development — /develop-grade discipline for its decomposition if it forks,
+  v10.24 throughout, new file. Un-gates one of YFULL's seven.
+- **PIC0 tail item after QSM (optional, statement-level only)**: T-E8 stack packaging —
+  the `Pseudofunctor.IsStack` STATEMENT over the now-existing `MellWScheme` (their own
+  [U/G] machinery; bridge artifact per D3, non-load-bearing — statements, no proof
+  obligations beyond what exists).
+- Standing: map_id stays first in beastmode-A's queue (MellWeierstrass zero-sorry + its
+  queued cleanup follow); GAP-1 read-only watch at session starts continues.
