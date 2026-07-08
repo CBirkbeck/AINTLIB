@@ -124,6 +124,11 @@ noncomputable def bipt₂ : E.Point (E.bimulBase (D := D)) :=
   ⟨pullback.snd _ _ ≫ D.ideal.subschemeι, by
     rw [Category.assoc]; exact (pullback.condition).symm⟩
 
+/-- The universal point of `D.subscheme`: the identity morphism, viewed as a point of `E` factoring
+through `D` (over the structure map `subschemeι ≫ π`). Its negation gives the inversion morphism. -/
+noncomputable def upt : E.Point (D.ideal.subschemeι ≫ E.π) :=
+  ⟨D.ideal.subschemeι, rfl⟩
+
 include hD
 
 /-- **(Layer B, L3 core — the group-scheme multiplication exists.)** The sum `bipt₁ + bipt₂` of the
@@ -149,6 +154,40 @@ the two universal points. -/
 theorem subgroupMul_subschemeι :
     E.subgroupMul hD ≫ D.ideal.subschemeι = ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1 :=
   (E.exists_factor_bimul hD).choose_spec
+
+/-- **(Layer B, L3 core — the unit section exists.)** The zero section factors through `D` (it lies
+in the subgroup `D(S)`), giving the identity section of the group scheme `D.subscheme`. -/
+theorem exists_factor_unit :
+    ∃ e : S ⟶ D.ideal.subscheme, e ≫ D.ideal.subschemeι = (0 : E.Point (𝟙 S)).1 := by
+  obtain ⟨H, hH⟩ := hD (𝟙 S)
+  exact (hH 0).mp H.zero_mem
+
+/-- **(Layer B, L3 core.)** The unit (identity-section) morphism `e : S ⟶ D.subscheme` of the group
+scheme structure on `D.subscheme`. Its Hopf-dual is the counit `ε : A →ₐ[R] R`. -/
+noncomputable def subgroupUnit : S ⟶ D.ideal.subscheme :=
+  (E.exists_factor_unit hD).choose
+
+theorem subgroupUnit_subschemeι :
+    E.subgroupUnit hD ≫ D.ideal.subschemeι = (0 : E.Point (𝟙 S)).1 :=
+  (E.exists_factor_unit hD).choose_spec
+
+/-- **(Layer B, L3 core — the inversion morphism exists.)** The negation `-upt` of the universal
+point of `D.subscheme` factors through `D` (it lies in the subgroup `D(D.subscheme)`), giving the
+inversion of the group scheme. -/
+theorem exists_factor_inv :
+    ∃ n : D.ideal.subscheme ⟶ D.ideal.subscheme,
+      n ≫ D.ideal.subschemeι = (-(E.upt (D := D))).1 := by
+  obtain ⟨H, hH⟩ := hD (D.ideal.subschemeι ≫ E.π)
+  exact (hH _).mp (H.neg_mem ((hH _).mpr ⟨𝟙 _, Category.id_comp _⟩))
+
+/-- **(Layer B, L3 core.)** The inversion morphism `n : D.subscheme ⟶ D.subscheme` of the group
+scheme structure on `D.subscheme`. Its Hopf-dual is the antipode `S : A →ₐ[R] A`. -/
+noncomputable def subgroupInv : D.ideal.subscheme ⟶ D.ideal.subscheme :=
+  (E.exists_factor_inv hD).choose
+
+theorem subgroupInv_subschemeι :
+    E.subgroupInv hD ≫ D.ideal.subschemeι = (-(E.upt (D := D))).1 :=
+  (E.exists_factor_inv hD).choose_spec
 
 end GroupObject
 
