@@ -5062,6 +5062,26 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     for `i ∈ {1,2}` over a domain base (AdjoinRoot-monic freeness + field case via
     ProjIntegral + `IsIntegral.component_integral`, or reuse of PoleFiltration b1's
     `infChartQuotEquiv` machinery for the Y-chart).
+  - **Progress** (coordinator-P1, 2026-07-08T10:29Z): **β2b(Z) DONE** (d38f52b9,
+    `AdditionChartDomain.lean`, zero sorries, axiom-clean, NO sorryAx):
+    `instIsDomainAffineChartRingZ` — the Z-chart ring IS mathlib's affine `CoordinateRing`
+    (reusing P3's public `chartZAffineEquiv`), so mathlib's own `IsDomain` instance (its
+    Frac-descent from `irreducible_polynomial`) discharges it — the freeness chain I had
+    planned was NOT needed. Chained through the ladder: `instIsDomainBiChartRingZZ`.
+    **PAYOFF LANDED**: `equation_lawTwoTriple_zz` / `equation_lawOneTriple_zz` — BOTH B–L
+    laws land on the curve on the (Z,Z) chart-product over ANY Jacobson domain with Δ a
+    unit (atlas qualifies: f.t. over ℤ + T-W7.0a). No certificate, no side conditions.
+  - **ARCHITECTURE FINDING (supersedes the Y-chart leaf)**: do NOT grind
+    `IsDomain (affineChartRing W 1)` algebraically. P2's `IsIntegral universalCurve`
+    (PointsDictionary.lean:112, instance) + mathlib's `IsIntegral.component_integral`
+    (Γ of any nonempty open of an integral scheme is a domain, an instance) give
+    reducedness of EVERY chart-product ring for free — once β1 identifies
+    `biChartRing W i j` with `Γ` of the (i,j) chart-product open of `E_U ×_U E_U`.
+    So **β1 subsumes the Y-chart leaf**; the (Z,Z) result above stands as the
+    independent, base-general statement (any Jacobson domain, not just the atlas).
+    NEXT: β1 = `Spec (biChartRing W i j) ≅` chart-product open (via `pullbackSpecIso` +
+    `chartCoordEquiv` + a tensor presentation of `biChartRing`; mathlib has
+    `Algebra.TensorProduct.quotIdealMapEquivTensorQuot` / `MvPolynomial.sumAlgEquiv`).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
