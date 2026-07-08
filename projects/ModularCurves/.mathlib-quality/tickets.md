@@ -8465,3 +8465,37 @@ p2's glue-data pattern; new files only; v10.24(b) opaque interface same incremen
    **MILESTONE T-W7a**, retiring T-A6 EXISTENCE — REPORT this).
 6. Standby tail (any session, interruptible): stage the standalone mathlib-shaped PR-draft
    .lean files for READY #1–#4 (drafts only; opening = owner action).
+
+## Amendments v10.33 (2026-07-08): p2 Layer-B milestone absorbed — [CHARTER-P2] issued: BB-DELIGNE through the Weil pairing
+
+- **Milestone absorbed (5 axiom-clean commits)**: L1 general→section reduction —
+  `smul_eq_zero_of_factors'` (the exact ExactOrder.lean box shape, arbitrary S + T-point) is
+  a REAL PROOF modulo its two consumed leaves; **Δ (`subgroupComul`) BUILT** with the
+  v10.24(b) opaque interface in the same increment (pin `κ(Δ a) = Γ(m) a` +
+  `attribute [irreducible]`); full κ machinery axiom-clean; `subgroupBiproduct_isAffine`;
+  L4 gate `Point.restrict_add`. DeligneOrder.lean green, exactly 4 boarded sorries (affine
+  core, κ-bij crux, section box, degree-BC); pathspec discipline held.
+
+### [CHARTER-P2] p2 — BB-DELIGNE THROUGH THE WEIL PAIRING (multi-session; report at the three named milestones)
+1. **Frontier (A), ratified as next**: `point_add_eq_lift` via the GroupLaw.lean:340–385
+   baseChangeEquiv-additivity template → all scheme group axioms transport-free → Hopf laws
+   via the Δ/ε/antipode pins → `HopfAlgebra R A` + `IsCocomm`.
+2. Frontiers (B) κ-bijectivity crux (pullbackSpecIso↔lift) and (C) degree-BC
+   (`finrank_pullback_snd` + comapIso) — order at your discretion; decompose-don't-grind.
+3. L5 localise-to-free → L6 points↔convolution → L7 assemble via
+   `deligne_point_pow_eq_one` → discharge the 4 boarded sorries → wire
+   `smul_eq_zero_of_factors` in ExactOrder.lean. **MILESTONE 1 (report): BB-DELIGNE
+   DISCHARGED.**
+4. **The falls-sweep**: consumer axiom-sweep (T-D5, T-D9, T-H2a/glSmul, the HasExactOrder
+   chain), flip every modulo-BB-DELIGNE note, board-flip BB-DELIGNE → DISCHARGED; hand your
+   sorry-free suite to the upstream ledger (verify-pass). **MILESTONE 2 (report): sweep
+   done.**
+5. **Phase 2 — claim [T-C1-KM28]** (unclaimed since v10.3; the H-account never resumed):
+   the KM 2.8 Weil-pairing comparison backend — `/develop --decompose` first act (read KM
+   2.8 + the 2.3 [N]-material, verbatim quotes, PDF = print + 11), reconciled against
+   `CharZeroDescent.lean`/`EtaleDescent.lean` and YOUR OWN `CartierDual.lean` + the new
+   Hopf layer (AG-CD substrate — reuse, never duplicate; D7 stands: duality is the final
+   API). Then execute the leaves toward the DS4 `weilPairing` discharge. **MILESTONE 3
+   (report): the KM-2.8 decompose lands; report again at DS4 discharge.**
+- Standing: v10.24 binding; pathspec commits; sentinel current; everything else to the
+  board, not the owner relay.
