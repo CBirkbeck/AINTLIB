@@ -1561,6 +1561,46 @@ lemma pointedIsoChartTransport_mem_span_of_aug_eq_zero {W W' : WeierstrassCurve 
   exact transport_mem_span_aux W r _ b₀ k hb₀
     (aug_pow_kill_of_res_eq_zero W r _ hzres)
 
+/-- The zero-compatibility of the inverse of a pointed isomorphism. -/
+lemma pointedIso_hez_symm {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    projModelZero W' ≫ e.symm.hom = projModelZero W := by
+  show projModelZero W' ≫ e.inv = projModelZero W
+  rw [← hez, Category.assoc, e.hom_inv_id, Category.comp_id]
+
+/-- The base-compatibility of the inverse of a pointed isomorphism. -/
+lemma pointedIso_heπ_symm {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W) :
+    e.symm.hom ≫ projModelπ W = projModelπ W' := by
+  show e.inv ≫ projModelπ W = projModelπ W'
+  rw [← heπ, ← Category.assoc, e.inv_hom_id, Category.id_comp]
+
+/-- **(ForMathlib-grade)** Sections round-trip along a split pair, after restriction: if
+`f ≫ g = 𝟙` then `res ∘ f^* ∘ g^* = res`. Opaque morphisms keep instantiation kernel-cheap. -/
+lemma app_app_res_of_comp_eq_id {X Y : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ X)
+    (hfg : f ≫ g = 𝟙 X) (U : X.Opens) {V : X.Opens} (hV : V ≤ f ⁻¹ᵁ (g ⁻¹ᵁ U))
+    (hVU : V ≤ U) (w : Γ(X, U)) :
+    ((X.presheaf.map (homOfLE hV).op).hom)
+      (((f.app (g ⁻¹ᵁ U)).hom) (((g.app U).hom) w)) =
+    ((X.presheaf.map (homOfLE hVU).op).hom) w := by
+  have hcomp := congrArg (fun z => ((X.presheaf.map (homOfLE hV).op).hom) z)
+    (congrArg (fun φ => CommRingCat.Hom.hom φ w) (Scheme.Hom.comp_app f g U))
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hcomp
+  refine hcomp.symm.trans ?_
+  have hLE : (((f ≫ g).appLE U V (hV.trans (le_of_eq rfl))).hom) w =
+      ((X.presheaf.map (homOfLE hV).op).hom) ((((f ≫ g).app U).hom) w) := rfl
+  refine hLE.symm.trans ?_
+  have hz : ∀ (h : X ⟶ X) (hh : f ≫ g = h) (h' : V ≤ h ⁻¹ᵁ U),
+      (((f ≫ g).appLE U V (by rw [hh]; exact h')).hom) w =
+      ((h.appLE U V h').hom) w := by
+    intro h hh h'
+    subst hh
+    rfl
+  refine (hz (𝟙 X) hfg hVU).trans ?_
+  rfl
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the

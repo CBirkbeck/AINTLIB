@@ -195,9 +195,73 @@ private theorem be_forward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoet
     (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
       LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := sorry
 
-/-- **[BE backward core]** Stacks 00N1, (2)⟹(1) — the Peskine–Szpiro acyclicity lemma, interior
-indices.  If for every `1 ≤ i ≤ e` the minor ideal `I_{rnk i}(φ_{i-1})` is the unit ideal or has
-grade `≥ i`, then the complex is exact at every interior `F_{i+1}` (`rk (i+1) ≠ 0`).
+/-- **[McCoy annihilation — Cramer's rule].**  If `M *ᵥ x = 0` then every `m × m` minor of the
+`n × m` matrix `M` (`m` = number of columns) annihilates `x`.  For a bijective column selection this
+is `adjugate B * B = det B • 1` applied to `x ∘ ci`; a repeated column gives `det = 0`.  This is the
+computational heart of the acyclicity base case. -/
+open Matrix in
+private theorem det_submatrix_smul_eq_zero {S : Type*} [CommRing S] {n m : ℕ}
+    (M : Matrix (Fin n) (Fin m) S) (x : Fin m → S) (hx : M *ᵥ x = 0)
+    (ri : Fin m → Fin n) (ci : Fin m → Fin m) :
+    (M.submatrix ri ci).det • x = 0 := by
+  by_cases hci : Function.Injective ci
+  · have hbij : Function.Bijective ci := ⟨hci, Finite.surjective_of_injective hci⟩
+    set e₂ : Fin m ≃ Fin m := Equiv.ofBijective ci hbij with he₂
+    have hcie : ci = ⇑e₂ := rfl
+    have hBv : (M.submatrix ri ci) *ᵥ (x ∘ ci) = 0 := by
+      rw [hcie, submatrix_mulVec_equiv]
+      have hxc : (x ∘ ⇑e₂) ∘ ⇑e₂.symm = x := by funext k; simp [Function.comp]
+      rw [hxc, hx]; funext i'; simp
+    have hdet : (M.submatrix ri ci).det • (x ∘ ci) = 0 := by
+      have h1 : ((M.submatrix ri ci).adjugate * (M.submatrix ri ci)) *ᵥ (x ∘ ci)
+          = (M.submatrix ri ci).det • (x ∘ ci) := by
+        rw [adjugate_mul, smul_mulVec, one_mulVec]
+      rw [← h1, ← mulVec_mulVec, hBv, mulVec_zero]
+    funext k
+    obtain ⟨j, hj⟩ := hbij.surjective k
+    have hcong := congrFun hdet j
+    rw [← hj]; simpa [Function.comp] using hcong
+  · rw [Function.not_injective_iff] at hci
+    obtain ⟨a, b, hab, hne⟩ := hci
+    have hdet0 : (M.submatrix ri ci).det = 0 :=
+      det_zero_of_column_eq hne (fun k => by simp [Matrix.submatrix_apply, hab])
+    rw [hdet0, zero_smul]
+
+/-- **[McCoy injectivity — the length-1 acyclicity base case].**  `φ : Sᵐ → Sⁿ` is injective as soon
+as its ideal of maximal (`m × m`) column minors contains a nonzerodivisor, or is the whole ring.
+This is Stacks 00N1 for a complex of length 1, and it discharges the *top* exactness spot
+(= injectivity of the top differential) of the backward direction in `be_backward` below. -/
+open Matrix in
+private theorem injective_of_maxMinors_nonZeroDiv {S : Type*} [CommRing S] {n m : ℕ}
+    (φ : (Fin m → S) →ₗ[S] (Fin n → S))
+    (hcond : (∃ r ∈ LinearMap.idealOfMinors m φ, IsSMulRegular S r) ∨
+      LinearMap.idealOfMinors m φ = ⊤) :
+    Function.Injective φ := by
+  rw [← LinearMap.ker_eq_bot, Submodule.eq_bot_iff]
+  intro x hx
+  rw [LinearMap.mem_ker] at hx
+  have hMx : (LinearMap.toMatrix (Pi.basisFun S (Fin m)) (Pi.basisFun S (Fin n)) φ) *ᵥ x = 0 := by
+    show LinearMap.toMatrix' φ *ᵥ x = 0
+    rw [LinearMap.toMatrix'_mulVec]; exact hx
+  have hsub : LinearMap.idealOfMinors m φ ≤ (Submodule.span S {x}).annihilator := by
+    rw [LinearMap.idealOfMinors_eq]
+    apply Matrix.idealOfMinors_le
+    intro ri ci
+    rw [Submodule.mem_annihilator_span_singleton]
+    exact det_submatrix_smul_eq_zero _ x hMx ri ci
+  rcases hcond with ⟨r, hrI, hr_reg⟩ | htop
+  · have hrx : r • x = 0 := (Submodule.mem_annihilator_span_singleton x r).mp (hsub hrI)
+    funext i
+    exact hr_reg ((congrFun hrx i).trans (smul_zero r).symm)
+  · have h1 : (1 : S) • x = 0 :=
+      (Submodule.mem_annihilator_span_singleton x 1).mp (hsub (htop ▸ Submodule.mem_top))
+    simpa using h1
+
+/-- **[BE backward core]** Stacks 00N1, (2)⟹(1) — the Peskine–Szpiro acyclicity lemma, restricted to
+the **deep interior**: spots `F_{i+1}` with a nonzero free both below and above (`rk (i+1) ≠ 0` and
+`rk (i+2) ≠ 0`).  The *top* interior spot (`rk (i+2) = 0`, where exactness is injectivity of the top
+differential) is fully discharged by `injective_of_maxMinors_nonZeroDiv` (McCoy) inside `be_backward`;
+this residual is only the deeper homology, where genuine acyclicity (not mere injectivity) is needed.
 
 MATHLIB-ABSENT CONTENT: the hard acyclicity direction ("what makes a complex exact").  Classical
 proof: the Peskine–Szpiro acyclicity lemma — induction on the length `e`; if some homology
@@ -214,7 +278,7 @@ private theorem be_backward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoe
     (hcond : ∀ i, 1 ≤ i → i ≤ e →
         (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
           LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
-    (i : ℕ) (hi : rk (i + 1) ≠ 0) :
+    (i : ℕ) (hi : rk (i + 1) ≠ 0) (htop : rk (i + 2) ≠ 0) :
     Function.Exact (φ (i + 1)) (φ i) := sorry
 
 /-- Forward direction, all indices: dispatches the trivial `rnk i = 0` conjunct (unit ideal) and the
@@ -253,7 +317,38 @@ private theorem be_backward {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetheri
   by_cases h0 : rk (i + 1) = 0
   · haveI : Subsingleton (Fin (rk (i + 1)) → S) := subsingleton_pi_fin_of_eq_zero h0
     exact exact_of_subsingleton_mid _ _
-  · exact be_backward_core e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i h0
+  · by_cases htop : rk (i + 1 + 1) = 0
+    · -- top spot: `F_{i+2} = 0` ⟹ `φ (i+1)` has range `⊥` ⟹ exactness = injectivity of `φ i`,
+      -- which McCoy (`injective_of_maxMinors_nonZeroDiv`) gets from the grade condition at `i+1`.
+      have hlt : i + 1 < e := by
+        by_contra hge
+        exact h0 (hrk (i + 1) (not_lt.mp hge))
+      have hrnk2 : rnk (i + 1 + 1) = 0 := by
+        by_cases hle : e ≤ i + 1 + 1
+        · exact hrnk_top (i + 1 + 1) hle
+        · have h := hrnk (i + 1 + 1) (by omega) (by omega)
+          omega
+      have hrnk_eq : rnk (i + 1) = rk (i + 1) := by
+        have h := hrnk (i + 1) (by omega) hlt
+        omega
+      have hinj : Function.Injective (φ i) := by
+        apply injective_of_maxMinors_nonZeroDiv
+        have hc := hcond (i + 1) (by omega) (by omega)
+        rw [show i + 1 - 1 = i from rfl, hrnk_eq] at hc
+        rcases hc with hg | ht
+        · refine Or.inl ?_
+          obtain ⟨rs, hlen, hreg, hmem⟩ := hg
+          have hne : rs ≠ [] := by rintro rfl; simp only [List.length_nil] at hlen; omega
+          obtain ⟨r, rest, rfl⟩ := List.exists_cons_of_ne_nil hne
+          rw [RingTheory.Sequence.isRegular_cons_iff] at hreg
+          exact ⟨r, hmem r (by simp), hreg.1⟩
+        · exact Or.inr ht
+      haveI : Subsingleton (Fin (rk (i + 1 + 1)) → S) := subsingleton_pi_fin_of_eq_zero htop
+      rw [LinearMap.exact_iff, LinearMap.ker_eq_bot.mpr hinj]
+      symm
+      rw [LinearMap.range_eq_bot]
+      exact Subsingleton.elim _ _
+    · exact be_backward_core e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i h0 htop
 
 /-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form (Lean `φ (i-1)` = Stacks `φᵢ`). -/
 theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
