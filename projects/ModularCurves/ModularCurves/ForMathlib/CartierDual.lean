@@ -254,6 +254,14 @@ noncomputable def translationTarget (φ : A →ₐ[R] B) :
     A →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A :=
   (Algebra.TensorProduct.map (pointAlgHom φ) (AlgHom.id R A)).comp (Bialgebra.comulAlgHom R A)
 
+/-- **(T-D5e-τ chain link 4.)** The right-translation `S`-algebra *endomorphism* of `M = S ⊗_R A`,
+`s ⊗ a ↦ ∑ (s · ptS(a₍₁₎)) ⊗ a₍₂₎`, obtained from `translationTarget` by the tensor-product
+universal property (`Algebra.TensorProduct.liftEquiv`). Promoted to an automorphism `τ` in
+`deligne_operators` via the convolution-inverse point. -/
+noncomputable def translationEndo (φ : A →ₐ[R] B) :
+    WithConv (A →ₗ[R] B) ⊗[R] A →ₐ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A :=
+  Algebra.TensorProduct.lift (Algebra.ofId _ _) (translationTarget φ) (fun _ _ => Commute.all _ _)
+
 /-- **(T-D5e-τ ingredient — the base-changed right translation.)** For a `B`-point `φ`, the
 `R`-algebra map `A → B ⊗_R A`, `a ↦ ∑ φ(a₍₁₎) ⊗ a₍₂₎ = (φ ⊗ id)(Δ a)`. This is the coordinate
 form of Tate's right-translation operator `τ_λ` base-changed to `B` (Tate §3.8 p. 144: "`τ_λ` is
