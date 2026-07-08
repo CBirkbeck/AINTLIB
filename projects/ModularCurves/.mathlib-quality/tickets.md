@@ -5711,6 +5711,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     File deleted before commit. **Fleet antidote (reinforced): grep the NEIGHBOURHOOD, not the
     name — the constructor you want often lives in the file about the *object*, not the file about
     the *concept*.** Two false gap-claims in one ticket; the retraction discipline caught both.
+  - **c4.2c step 1 DONE** (coordinator-P1, 2026-07-08T14:36Z, aabdc61e): **`addOnYOnFamily` /
+    `addOnZOnFamily`** — each law's k-th piece as a morphism out of the OPEN SUBSCHEME `D(t_k)` of
+    the (i,j) piece (not an abstract `Spec (Away t_k)`): `morphismRestrict (chartPieceIso).hom
+    (basicOpen t_k) ≫ (specBasicOpenIsoAway …).inv ≫ addOn{Y,Z}PieceMor`. Zero sorries,
+    axiom-clean. This is exactly the shape `glueMorphisms` consumes against
+    `blOpen{Y,Z}PieceCover`.
+  - **c4.2c step 2 (the remaining obligation)**: pairwise agreement
+    `pullback.fst (𝒰.f k) (𝒰.f l) ≫ addOnYOnFamily k = pullback.snd … ≫ addOnYOnFamily l`.
+    Mathematically this IS the proven crux `chartι_comp_specMap_chartAwayHom_eq` (3166d104); the
+    work is transporting it across `morphismRestrict` + `specBasicOpenIsoAway`. Route: the cover
+    maps are `X.homOfLE` inclusions, so their pullback is the intersection open
+    (`Scheme.Opens.inf` / `homOfLE` pullback iso); restrict the crux to
+    `D(t_k) ⊓ D(t_l)`, where both `t_k` and `t_l` are invertible — precisely the crux's hypotheses
+    (`hu`, `hv`). No new mathematics; instance/defeq plumbing only.
   - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
     against the code, not the board:
     · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
