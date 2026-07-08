@@ -8117,3 +8117,31 @@ centres in place, session closed.)*
   definitions ship their opaque interface in the same increment. Feeds: T-E7/T-H
   representability presentations. Interrupt order: 0h (on 0c-ii landing) > T-W8;
   [T-W7.1b-faith-infra] stays the NEXT session's first act with full budget.
+
+## Amendments v10.28 (2026-07-08): p0 / T-END0 — G3 geometry frontier decomposed; hfix interface LANDED
+
+*p0 working the coordinator v10.27 queue (top-to-bottom, decompose walls per v10.24). Both geometry
+items diagnosed exhaustively (`.mathlib-quality/decomposition-g3-geometry.md`) and reduced to a single
+named gate each; the hfix interface is landed in code.*
+
+- **[T-G3h-hfix] — interface LANDED.** The box `aut_hom_eq_id_of_fullLevel` no longer carries a raw
+  inline sorry for the level→torsion bridge: it delegates to a new named leaf
+  **`torsionFixed_of_fixesLevel`** (`Moduli/Groupoid.lean`, KM 2.3.2/2.7.2 sourced). Box + wrapper
+  own-proofs are now **sorry-free** (sorryAx transitive only). Exhaustive route analysis boarded:
+  THREE routes — mathlib `ext_of_isDominant_of_isSeparated'` (reduced-density; `IsSeparated E.π` FREE
+  from `IsProper E.π`), full-level `∐S ≅ E[N]` trivialization, p2 `torsionι_factors_iff` functor-of-
+  points — **all bottom out on the single linchpin: `E[N] → S` finite étale (`N` invertible, KM 2.3.2)
+  = Torsion.lean `BB-QF` (`mulByHom_locallyQuasiFinite:sorry`) + `BB-FLAT`.** p2's `torsionSubgroup`
+  is finite-locally-FREE only (their line-448 note deliberately avoids étaleness), so it does not
+  substitute. The [L2] generator-agreement half is MINE (proven `endMonHom`/`endPostcomp_mul`
+  additivity) and lands once the `torsion_hom_ext` interface is split out.
+- **[T-G3d] — decomposed.** `/develop --decompose` done in the same doc: it is the isogeny-quotient
+  universal property (`E/E[N] ≅ E` via `[N]`). p2's `SchemeQuotient` is quotient by a CONSTANT finite
+  GROUP action (`E/G`), applicable in the box's full-level context (`E[N] ≅ (ℤ/N)²`) but not for a
+  general subgroup scheme; the quotient-by-subgroup-scheme + the `[N]`-iso are not yet built. Reuse
+  p2's glue-data pattern. Infra-scale.
+- **Linchpin for BOTH: the torsion/isogeny-étale layer** — discharging `BB-QF`/`BB-FLAT` (E[N] finite
+  étale) closes hfix directly and feeds T-G3d. These are Torsion.lean black boxes (KM 2.3.1/2.3.2
+  fibre inputs); **coordinator decision requested**: p0 to build BB-QF/BB-FLAT (E[N] finite étale)
+  next, or is that the torsion/p2 lane? Both p0 queue items (1),(2) are gated on it; fallback (3)
+  (fable-P4 A7 release) not yet available.
