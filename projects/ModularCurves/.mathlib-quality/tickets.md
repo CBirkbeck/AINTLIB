@@ -8232,3 +8232,32 @@ named gate each; the hfix interface is landed in code.*
   acknowledgment request inside returned content is ignored and boarded. Report recurrences.
 - Numbering: p0's amendment renumbered **v10.28b** — the collision convention (letter suffix)
   is affirmed as the standard.
+
+## Amendments v10.30 (2026-07-08): T-W8 DONE — level spaces live; beastmode-A → [T-UPSTREAM-TRIAGE] (interruptible)
+
+- **T-W8 DONE (beastmode-A)**: `Moduli/LevelSpaces.lean`, parametric over any
+  `E : EllipticCurve S`, each space shipping its opaque interface (closed immersion +
+  universal-property `_spec`) in the same increment per v10.24(b) — consumers use `_spec`,
+  never the raw `Classical.choose`. (1) `levelSpaceΓ₁ E N` closed in E[N] via
+  `exists_exactOrderLocus`; spec AXIOM-CLEAN. (2) `levelSpaceΓ E N` closed in
+  E[N] ×_S E[N] via `exists_fullLevelLocus`; spec carries only transitive upstream sorryAx.
+  (3) `levelStructureΓ₀ E N` bridged to T-SG2's `GammaZeroStructure` — Γ₀ is a STRUCTURE,
+  not a predicate (a choice of cyclic rank-N subgroup scheme), so it has no Γ₁/Γ-shaped
+  locus; its representability is the separate **SG3 gate** (recorded by name; stays
+  deprioritized per v9 work-order #7). Universal instantiation follows automatically once a
+  universal `EllipticCurve` record exists — i.e. T-W7.36-gated; noted, not dispatchable.
+  These are the representability presentations T-E7 and the H-stream consume.
+- **NEW: [T-UPSTREAM-TRIAGE] — beastmode-A, this session, interruptible.** The board has
+  accumulated flagged upstream candidates all day with no triage: c5β's
+  `AdjoinRoot.isDomain_of_monic_of_map` (strongest — shortens an existing mathlib proof) +
+  `HomogeneousLocalization.isDomain_away` + `quotientEquivQuotientMvPolynomial_symm_mk`;
+  A's own `exists_factor_comap_iff`, `IdealSheafData.comap_mul`, `Functor.map_zpow'`;
+  fable-P4's `Over.monObjMkPullbackSnd_mul_left_fst`; D2's ForMathlib suite (FittingIdeals,
+  BaseChangeExt, LocalCriterion, GenericFlatness, HilbertSyzygy, FiniteFreeResolution,
+  Depth, Acyclicity); P3b3's MonicQuotientDescent-adjacent pieces. TASK: for each, verify
+  against CURRENT mathlib (search, don't assume), rank by (shortens-existing-proof >
+  fills-cited-gap > generic-nicety), identify the target mathlib file, and produce
+  `.mathlib-quality/upstream-ledger.md` + locally-staged PR drafts. **Do NOT open external
+  PRs — publishing to mathlib is an OWNER action**; the ledger is the deliverable.
+- **Interrupt order (A)**: 0h (the moment c5β lands 0c-ii; route banked) > triage;
+  [T-W7.1b-faith-infra] owns the NEXT session with full budget, unchanged.
