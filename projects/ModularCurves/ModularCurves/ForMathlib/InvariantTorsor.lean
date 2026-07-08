@@ -40,12 +40,12 @@ The stabilizer dictionary: freeness in the above sense says exactly that no
 the "no elliptic points" condition under which the level quotients stay schemes.
 -/
 
-universe u
+universe u v
 
 open TensorProduct
 
 variable (G : Type*) [Group G]
-variable (R A : Type u)
+variable (R : Type v) (A : Type u)
 variable [CommRing R] [CommRing A] [Algebra R A]
 variable [MulSemiringAction G A] [SMulCommClass G R A] [SMulCommClass R G A]
 

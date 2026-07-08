@@ -39,12 +39,12 @@ for rings of invariants", pp. 215–218. The étale-torsor sufficient condition
 the free-action vocabulary (ticket T-Q2).
 -/
 
-universe u
+universe u v
 
 open TensorProduct
 
 variable {G : Type*} [Group G]
-variable {R : Type u} {A : Type u} {R' : Type u}
+variable {R : Type v} {A : Type u} {R' : Type u}
 variable [CommRing R] [CommRing A] [Algebra R A]
 variable [MulSemiringAction G A] [SMulCommClass G R A] [SMulCommClass R G A]
 variable [CommRing R'] [Algebra R R']
@@ -114,7 +114,7 @@ theorem fixedPointsBaseChange_tmul (a : FixedPoints.subalgebra R A G) (r : R') :
 
 /-- The "difference" map whose kernel is the ring of invariants: KM A7.1.3 (1),
 "A^G is a kernel: 0 → A^G → A → ⊕_g A via ⊕(1−g)". -/
-private noncomputable def invariantsDelta (G : Type*) [Group G] (R A : Type u)
+private noncomputable def invariantsDelta (G : Type*) [Group G] (R : Type v) (A : Type u)
     [CommRing R] [CommRing A] [Algebra R A] [MulSemiringAction G A]
     [SMulCommClass G R A] [SMulCommClass R G A] : A →ₗ[R] (G → A) :=
   LinearMap.pi fun g => DistribSMul.toLinearMap R A g - LinearMap.id
