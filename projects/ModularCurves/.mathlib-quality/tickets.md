@@ -5193,6 +5193,26 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       (the `IsDomain` sibling of mathlib-adjacent `Proj.isReduced_away`).
     · `AdditionChartLadder.lean` — `MvPolynomial.quotientEquivQuotientMvPolynomial_symm_mk`
       (a missing `symm`-apply lemma for an existing mathlib equiv).
+    · `ForMathlib/HomogeneousEval.lean` — `MvPolynomial.IsHomogeneous.eval₂_mul_left` /
+      `aeval_mul_left`: `eval₂ f (c * g ·) φ = c ^ n * eval₂ f g φ` for φ homogeneous of degree
+      n. Mathlib has the homogeneity API and `eval₂_eq` but not the scaling lemma between them.
+  - **β3 RING CORE DONE** (coordinator-P1, 2026-07-08T11:06Z, 345c75c9,
+    `AdditionChartHom.lean`, zero sorries, axiom-clean): **an on-curve triple with an invertible
+    k-th coordinate IS a chart morphism.**
+    · `aeval_dehomogenizeAux_eq_zero` — the β3 identity, proven with NO per-chart computation:
+      rescaling by `u` (`t k * u = 1`) makes the k-th entry `1`, so the dehomogenised value is
+      the cubic at `(u * t ·)` = `u ^ 3 * (curve equation at t)` = 0, by the new homogeneity
+      scaling lemma. (The per-chart `linear_combination` route I first sketched is unnecessary.)
+    · `chartHomOfTriple : affineChartRing W k →ₐ[R] S` (X m / X k ↦ t m * u) + `_coord` simp;
+      `chartAwayHomOfTriple` — the same into the model's `Away` chart ring via β1's
+      `chartCoordAlgEquiv` (the form `Proj.awayι` consumes; β1's build-once paid off here).
+    REMAINING in β3: instantiate `S := Localization.Away (lawTwoTriple W i j k)` over
+    `biChartRing W i j` (on-curve hypothesis = `equation_lawTwoTriple_of_isDomain`, 7c9ddc07),
+    and the basicOpen covering of the (i,j) piece by the three `t_k`-loci. Then β4 (gluing via
+    the six certified minors) and the four `GroupLawConstruction.lean` sorries.
+    Engineering note for whoever continues: state `hstep`/`hscale` as explicit `have`s with the
+    beta-redex shape before `rw` — unifying the homogeneity lemma against a beta-reduced goal
+    whnf-blows-up (200k heartbeats) on these terms.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
