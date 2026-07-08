@@ -268,3 +268,25 @@ Two findings that de-risk the remaining leaf:
 Net: the leaf is in-reach (no genuinely-absent multi-week infra strictly required — `u`'s inverse is
 an explicit dual-basis element), just a laborious dual-basis/base-change build. `τ` first (unblocked),
 then `u`+inverse (dual-basis), then 3.8.2.
+
+### T-D5e-τ empirical findings (2026-07-08) — the base-change plumbing chain
+
+Probed the τ construction; it bottoms out at a chain of `WithConv`/base-change lemmas, each
+needing its own proof (none automatic). Concrete findings:
+
+* `IsScalarTower R B (A →ₗ[R] B)` — **automatic** (`inferInstance` ✓).
+* `IsScalarTower R B (WithConv (A →ₗ[R] B))` — **NOT automatic**; needs transport through the
+  `ofConv` bijection (a `WithConv.ofConv_smul`-style lemma: `ofConv (s • x) = s • ofConv x`).
+  This is the first infra sub-ticket; once it lands, `ptS := (IsScalarTower.toAlgHom R B S).comp φ`
+  gives the point-as-S-algebra-map.
+* Then `τ`'s cleanest build is via the universal property: an `S`-algebra hom `S ⊗_R A → S ⊗_R A`
+  from the `R`-algebra hom `g := (Algebra.TensorProduct.map ptS (AlgHom.id R A)).comp (comulAlgHom R A)`
+  (`A →ₐ[R] S ⊗_R A`, `a ↦ ∑ ptS(a₁) ⊗ a₂`) via `Algebra.TensorProduct.lift` — avoids the
+  assoc/absorb gymnastics. Inverse via `g` for the convolution-inverse point `φ ∘ antipode`.
+* `u` (T-D5e-u): coevaluation `∑ eⁱ ⊗ eᵢ` with explicit dual-basis inverse `∑ eⁱ ⊗ (antipode-twist)`,
+  `u·u⁻¹=1` by the antipode/dual-basis identity — a Sweedler computation, no abstract dual-Hopf.
+* `τ(u) = u·(λ⊗1)` (Lemma 3.8.2): from the dual-basis forms.
+
+**Order to build:** `ofConv_smul` transfer lemma → `IsScalarTower R B S` → `ptS` → `g` → `τ` (lift) →
+`τ` inverse → `u` + `u⁻¹` (dual basis) → Lemma 3.8.2 → close `deligne_operators`. Multi-session but
+each link is bounded and in-area (no absent multi-week mathlib theory strictly required).
