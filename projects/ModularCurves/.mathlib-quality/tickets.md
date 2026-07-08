@@ -9596,3 +9596,33 @@ input — scope decision at cut: the honest v8 statement may be essential-surjec
   edited. **REPORT MILESTONE**: per the stream card — [Y1-EASY]+[Y1-B1] landed AND
   [Y1-ATLAS] i/ii/vi proven → report T-E7 status vs gates before opening Y1-D/E.
   (P3b3 resumes the étale cascade on its trigger, interleaving at their discretion.)
+
+## Amendments v10.39 (2026-07-08): c5β c4.2c CLOSED — both laws are scheme morphisms; v10.24(c) POLICY UPGRADE (opacity around the lemma)
+
+- **c4.2c CLOSED (c5β; 5daa234b…281354fc)**: `addOnYOnSup` / `addOnZOnSup` — BOTH
+  Bosma–Lenstra laws glued from their three chart pieces as honest scheme morphisms on
+  their regularity opens; zero sorries, axiom-clean, NO maxHeartbeats. Architecture note
+  of record: `pieceMorOfTriple_agree` is B–L-AGNOSTIC (any projective triple defines a
+  morphism where it is nonvanishing; both laws instantiate by `rfl`) — the B–L content
+  stays confined to the six certified minors, exactly where it belongs.
+- **v10.24(c) — POLICY UPGRADE (binding, generalizes rule 3)**: *the opacity barrier goes
+  around the LEMMA, not only the definition.* When a rewrite/transport at a CONCRETE
+  scheme/ring grinds (c5β measured: `morphismRestrict_homOfLE` at a concrete pullback =
+  161 reducible unfoldings of `Limits.pullback`; `local irreducible` does NOT help when
+  the culprit is an abbrev), do NOT raise budgets: **state the transport for variable
+  `X Y : Scheme` / `A : CommRingCat`, prove it where nothing can unfold, instantiate by
+  application.** Named exemplars now in ForMathlib: `homOfLE_morphismRestrict_agree`,
+  `glueMorphisms_hf_of_agree` (per-piece proofs collapse to 3 lines). Companion antidote:
+  the ascription `(PrimeSpectrum.basicOpen f : (Spec A).Opens)` at concrete A drives whnf
+  into unfolding the RING — use `specBasicOpen A f`. Both cost a 200k death before
+  diagnosis; neither should ever cost one again.
+- **Antidote reinforced**: grep the NAMESPACE, not the concept — mathlib's
+  `WeierstrassCurve.Projective.equation_smul` nearly got re-proven (third such catch this
+  arc; the namespace grep found it).
+- **c4.3 re-scoped honestly + its crux ALREADY PROVED**: cross-chart-product gluing needs
+  a second agreement where the law-2 triples differ by the bidegree-(2,2) transition
+  factor — `chartHomOfTriple_smul` / `chartAwayHomOfTriple_smul` (chart homs see triples
+  through ratios; the scalar cancels) are committed. Remaining c4.3 geometry = the c4.2c
+  pattern one level up, all inputs named on the board (`Away.isLocalization_mul`,
+  `dblAdd*_smul`, the two variable-scheme lemmas verbatim). Then c4.4 transport → c4.5
+  GLC fill → 0c-i closes → 0c-ii (fires A's 0h). CHARTER-C5B on track, no redirect.
