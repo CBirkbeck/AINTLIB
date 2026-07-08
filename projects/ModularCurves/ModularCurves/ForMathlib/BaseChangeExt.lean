@@ -9,9 +9,9 @@ variable {S : Type} [CommRing S] (𝔪 : Submonoid S)
 
 /-- The localization functor is `S`-linear. -/
 instance functorLinear : (ModuleCat.localizedModuleFunctor.{0} 𝔪).Linear S where
-  map_smul {M N} f s := by
-    ext x
-    simp [ModuleCat.localizedModuleMap]
+  map_smul {M N} f s := ModuleCat.hom_ext <|
+    (IsLocalizedModule.mapExtendScalars 𝔪 (M.localizedModuleMkLinearMap 𝔪)
+      (N.localizedModuleMkLinearMap 𝔪) (Localization 𝔪)).map_smul s f.hom
 
 end ModuleCat.BaseChangeExt
 
