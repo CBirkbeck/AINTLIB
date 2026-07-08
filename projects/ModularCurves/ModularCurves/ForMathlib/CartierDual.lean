@@ -225,11 +225,34 @@ theorem mulRight_tmul_one (lam : S) :
 
 end RightMulTensor
 
+/-- **(T-D5e-τ chain link 1.)** The scalar tower `R → B → A'_B`: the `R`- and `B`-algebra
+structures on `S = WithConv (A →ₗ[R] B)` are compatible (transported through the `ofConv`
+bijection via `WithConv.ofConv_smul`). This unblocks `pointAlgHom` (the point as an
+`R`-algebra map `A → S`) and hence the automorphism `τ`. -/
+instance instIsScalarTowerWithConv {R : Type u} [CommRing R] {A : Type v} [AddCommGroup A]
+    [Module R A] {B : Type w} [CommRing B] [Algebra R B] :
+    IsScalarTower R B (WithConv (A →ₗ[R] B)) where
+  smul_assoc r b x := by
+    apply WithConv.ofConv_injective
+    simp only [WithConv.ofConv_smul, smul_assoc]
+
 section Commutator
 
 variable {R : Type u} [CommRing R]
 variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
 variable {B : Type w} [CommRing B] [Algebra R B]
+
+/-- **(T-D5e-τ chain link 2.)** The `B`-point `φ` as an `R`-algebra map into `S = A'_B`
+(via the tower `R → B → S`). Feeds `translationTarget`/`τ`. -/
+noncomputable def pointAlgHom (φ : A →ₐ[R] B) : A →ₐ[R] WithConv (A →ₗ[R] B) :=
+  (IsScalarTower.toAlgHom R B (WithConv (A →ₗ[R] B))).comp φ
+
+/-- **(T-D5e-τ chain link 3.)** `g : A →ₐ[R] S ⊗_R A`, `a ↦ ∑ ptS(a₍₁₎) ⊗ a₍₂₎`, where `ptS`
+is `pointAlgHom φ`. This is the `R`-algebra map that defines the right-translation automorphism
+`τ` of `M = S ⊗_R A` through the tensor-product universal property. -/
+noncomputable def translationTarget (φ : A →ₐ[R] B) :
+    A →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A :=
+  (Algebra.TensorProduct.map (pointAlgHom φ) (AlgHom.id R A)).comp (Bialgebra.comulAlgHom R A)
 
 /-- **(T-D5e-τ ingredient — the base-changed right translation.)** For a `B`-point `φ`, the
 `R`-algebra map `A → B ⊗_R A`, `a ↦ ∑ φ(a₍₁₎) ⊗ a₍₂₎ = (φ ⊗ id)(Δ a)`. This is the coordinate
