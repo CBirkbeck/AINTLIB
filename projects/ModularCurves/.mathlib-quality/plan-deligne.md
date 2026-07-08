@@ -547,3 +547,26 @@ transport (built from `D.subscheme.isoSpec` on each factor + `pullbackSpecIso R 
 Layer B status: L1 general→section ✅, Δ (comul) ✅ (κ-bij boarded), ε ✅, antipode ✅, group-object
 data (m/e/n) ✅, D×_R D affine ✅. Remaining: κ-bij crux, Hopf LAWS (via restrict_add), L5/L6/L7,
 affine core, section→affine cover, degree-BC. All bounded; no genuinely-absent multi-week infra.
+
+---
+
+**L4 infrastructure landed (2026-07-08, p2)** — two axiom-clean lemmas that gate the Hopf LAWS:
+- **`Point.restrict_add`** — `Point.restrict E k (P+Q) = restrict E k P + restrict E k Q`. Mirrors
+  `Point.pull_add` exactly: `restrict` = left-composition by `Over.homMk k` in `Over S`, which
+  distributes over the point-group multiplication because `E.asOver` is a group object
+  (`pointEquivOverHom_add` + `MonObj.comp_mul`; the Over-morphism witness `k ≫ g = k ≫ g` is `rfl`,
+  cleaner than `pull`'s). NB `Point.restrict`/`Point.pull` take `E` **explicit** — dot notation on
+  the `E.Point` Subtype misassigns args; write `Point.restrict E k P`.
+- **`subgroupBiproduct_isAffine`** — `IsAffine (D ×_{Spec R} D)` (see κ-bij note above).
+
+**Scheme group axioms — the route (next L4 work), with its one real snag:** each axiom (e.g.
+commutativity `swap.hom ≫ m = m`, the `IsCocomm` input) is proven by post-composing with the mono
+`subschemeι`, rewriting `m ≫ subschemeι = (bipt₁+bipt₂).1`, and pushing the `swap`/reassoc through
+the bipt sum with `restrict_add` + `pullbackSymmetry_hom_comp_fst` (`swap.hom ≫ fst = snd`). **Snag:**
+`Point.restrict E swap.hom (bipt₁+bipt₂) : E.Point (swap.hom ≫ bimulBase)` while `bipt₂ : E.Point
+bimulBase` — the point addition is base-dependent, so equating the two sums needs the dependent
+transport across `swap.hom ≫ bimulBase = bimulBase` (propositional, via `bimulBase_eq_snd_structMap`
++ `pullbackSymmetry_hom_comp_fst`). That base-transport of a point-over-a-base is the fiddly step to
+solve (a `Point` congruence/`eqToHom` lemma, or an `Eq.mpr` on the base) — bounded, not blocked.
+Once the axioms land, dualize each to its Hopf law through `Γ` + the Δ/ε/antipode pins →
+`Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`.

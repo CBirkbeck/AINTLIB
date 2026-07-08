@@ -56,6 +56,31 @@ namespace ModularCurves
 
 namespace EllipticCurve
 
+section PointRestrict
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- **(Layer B, L4 infrastructure.)** Restriction of a point along `k : T' ⟶ T` is additive — it is
+a group homomorphism `E.Point g → E.Point (k ≫ g)`. Like `Point.pull_add`, this is precomposition
+in the `Over S`-category (`Over.homMk k`), which distributes over the point group multiplication
+because `E.asOver` is a group object (`MonObj.comp_mul`). This is the transport lemma underlying the
+scheme-level group axioms (m assoc/comm, unit, inverse) that dualize to the Hopf laws. -/
+theorem Point.restrict_add {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q : E.Point g) :
+    Point.restrict E k (P + Q) = Point.restrict E k P + Point.restrict E k Q := by
+  letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (Over.mk (k ≫ g) ⟶ E.asOver) := Hom.commGroup
+  refine (E.pointEquivOverHom (k ≫ g)).injective ?_
+  have hw : k ≫ (Over.mk g).hom = (Over.mk (k ≫ g)).hom := rfl
+  have corr : ∀ R : E.Point g, (E.pointEquivOverHom (k ≫ g)) (Point.restrict E k R) =
+      (Over.homMk k hw : Over.mk (k ≫ g) ⟶ Over.mk g) ≫ (E.pointEquivOverHom g) R := by
+    intro R
+    apply Over.OverMorphism.ext
+    rw [Over.comp_left]
+    rfl
+  rw [pointEquivOverHom_add, corr, corr, corr, pointEquivOverHom_add, MonObj.comp_mul]
+
+end PointRestrict
+
 section AffineBase
 
 variable {R : Type u} [CommRing R] (E : EllipticCurve (Spec (CommRingCat.of R)))
