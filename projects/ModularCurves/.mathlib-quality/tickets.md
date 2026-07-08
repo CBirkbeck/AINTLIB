@@ -9848,3 +9848,40 @@ subterm is index-defeq but not syntactic (`(f ≫ g).1` vs `g.1 * f.1`), a defeq
 - **OPS (fleet saturated)**: until load drops — single-target builds only; delegates may NOT
   spawn sub-delegates; a delegate with no build progress at 30 minutes is stopped and its
   analysis banked (the 68-minute lesson).
+
+### v10.44b (2026-07-08, fable-FP): ★ [STREAM-FP] stretch (i) — [KM-FMT-FLAT] reduction engine PROVEN in full ([FMT-0]); gates [FMT-1/2/3] registered
+
+- **Scoping verdict** (artifact: `decomposition-fmt-flat.md`): [KM-FMT-FLAT] = (a) a
+  bounded reduction ENGINE — *"a closed universal locus through which `D(N) ↪ S` factors
+  is all of `S` when `S` has no `N`-torsion"* (schematic density of `S[1/N]`) — plus
+  (b) per-space flatness-over-ℤ instances whose subject spaces don't exist in-project yet
+  (representability streams). The engine is parametric in (b): NISOG's M3 wave can bind
+  NOW; no leaf waits on KM Ch. 5.
+- **[FMT-0] ENGINE DONE (fable-FP, 2026-07-08T15:26Z → 15:43Z)** — NEW
+  `ForMathlib/RegularSectionDensity.lean`, **sorry-free same session**, all four decls
+  axiom-clean ([propext, Classical.choice, Quot.sound], zero sorryAx), 2579 jobs:
+  · **[FMT-0a]** `Localization.Away.ker_algebraMap_eq_bot` (kernel of localization away
+    from a nonzerodivisor is ⊥);
+  · **[FMT-0c]** `isSMulRegular_natCast_of_flat` (ℤ-flat ⟹ every `N ≠ 0` a
+    nonzerodivisor — the ONLY consumption point of KM's "flat over ℤ");
+  · **[FMT-0b-i]** `Scheme.ker_basicOpenι_eq_bot` (ideal-sheaf kernel of `D(s) ↪ S`
+    vanishes for affine-locally regular `s`);
+  · **[FMT-0b]** `Scheme.IdealSheafData.eq_bot_of_basicOpenι_factors` — **THE GATE
+    INTERFACE**: KM's (ii)+(iii)+(iv) universal-case pipeline packaged (T-D15
+    `IdealSheafData` shape; consumers: NISOG L9, L16, L19, L22, L24, L26 via
+    `exists_factor_subschemeι_iff`).
+  · Fleet-reusable elaboration note: `IsAffineOpen.isLocalization_of_eq_basicOpen`
+    consumed via `letI` (raw `toAlgebra`) + type-ASCRIBED `haveI` — ascription forces the
+    defeq at elaboration; bare instance search fails at reducible transparency.
+- **Gates registered (unclaimed, interface-only until their spaces exist)**: **[FMT-1]**
+  `[Γ₁(N)]` flat/ℤ (KM 5.1.1 First Main Theorem regularity — quote banked tickets:7611);
+  **[FMT-2]** `[Γ₀(N)]` flat/ℤ (KM 6.6.1, descends from FMT-1 via A-K VII 4.8 — quote
+  banked decomposition-nisog.md:167); **[FMT-3]** `[N-Isog]` flat/ℤ (KM 6.8.1 via
+  Axiomatic Finite Flatness 6.8.2 + Serre–Tate 6.8.4 — engine banked
+  decomposition-nisog.md:262). Owner lineage per gate ledger: T-E9/T-H9 representability
+  streams.
+- **[STREAM-FP] session scorecard**: [A711-FP] DISCHARGED (v10.41b) + general-base étale
+  FLIPPED, InvariantTorsor sorry-free (v10.44) + [KM-FMT-FLAT] engine PROVEN (this) — all
+  axiom-clean, all in NEW ForMathlib files, zero cross-lane edits beyond the boarded
+  [FP-B] surgical claim. Remaining charter stretch: [NISOG-GRASS] (next session,
+  /develop --decompose first act).
