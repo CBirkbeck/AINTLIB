@@ -593,3 +593,17 @@ Once the axioms land, dualize each to its Hopf law through `Γ` + the Δ/ε/anti
 
 Remaining L4: associativity, unit laws, inverse laws (same technique), then dualize each through the
 Δ/ε/antipode pins → `Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`. Then L5→L6→L7→affine core.
+
+**L4 continuation — strategic note (2026-07-08, p2):** the remaining scheme group axioms (unit,
+inverse, associativity) each reduce — via `point_add_eq_lift` at the `.1` (morphism) level, dodging
+the base-transport — to the corresponding axiom of `E`'s OWN commutative group object (`E.asOver` is
+a `CommGrpObj`): unit law of `m` ⟸ `upt + 0 = upt` (`add_zero`), inverse ⟸ `upt + (-upt) = 0`
+(`add_neg`), assoc ⟸ `add_assoc` on the three universal points of `D ×_S D ×_S D`. So each is the
+same shape as `subgroupMul_comm` (which used `add_comm`): `cancel_mono subschemeι` →
+`subgroupMul_subschemeι` → `point_add_eq_lift` → identify the `restrict`ed `bipt`s' underlying maps
+via the `projfst/projsnd` + the relevant pullback.lift/section facts → close with the `AddCommGroup`
+law. **Reuse the `subgroupMul_comm` proof skeleton verbatim** (term-mode only on tensor `.left`).
+Then dualize: IsCocomm ⟸ `subgroupMul_comm` + κ-intertwines-`TensorProduct.comm`-with-`swap.appTop`
++ κ-injective (boarded κ-bij); coassoc/counit/antipode laws similarly through the Δ/ε/antipode pins.
+All the HopfAlgebra-instance Hopf laws rest on κ-bijectivity [T-D5h-κbij] — so **κ-bij is the true
+critical unblocker**; prioritise it (foundation `subgroupBiproduct_isAffine` already landed).
