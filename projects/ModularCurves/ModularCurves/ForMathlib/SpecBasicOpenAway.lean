@@ -137,3 +137,23 @@ lemma homOfLE_morphismRestrict_agree {X Y : Scheme} (A : CommRingCat) (f : X ⟶
   conv_rhs => rw [← Category.assoc, hc]
   simp only [Category.assoc]
   rw [homOfLE_specBasicOpenIsoAway_inv_assoc, homOfLE_specBasicOpenIsoAway_inv'_assoc, h]
+
+open CategoryTheory.Limits in
+/-- **(gluing along an `iSup` cover)** The `hf` obligation of `Scheme.OpenCover.glueMorphisms` for
+the cover `Scheme.Opens.iSupOpenCover U` is exactly pairwise agreement on the intersections
+`U k ⊓ U l`: the pullback of two `homOfLE`s IS the intersection (`isPullback_opens_inf_le`).
+
+As with `homOfLE_morphismRestrict_agree`, this is stated over variable `X`, `Y`, so that no
+concrete scheme is ever unfolded. -/
+lemma glueMorphisms_hf_of_agree {X : Scheme} {J : Type*} (U : J → X.Opens) {Y : Scheme}
+    (F : ∀ k, (U k).toScheme ⟶ Y)
+    (h : ∀ k l, X.homOfLE (inf_le_left : U k ⊓ U l ≤ U k) ≫ F k =
+      X.homOfLE (inf_le_right : U k ⊓ U l ≤ U l) ≫ F l) (x y : J) :
+    pullback.fst ((Scheme.Opens.iSupOpenCover U).f x) ((Scheme.Opens.iSupOpenCover U).f y) ≫ F x =
+      pullback.snd _ _ ≫ F y := by
+  have hP := isPullback_opens_inf_le (le_iSup U x) (le_iSup U y)
+  show pullback.fst (X.homOfLE (le_iSup U x)) (X.homOfLE (le_iSup U y)) ≫ F x =
+    pullback.snd _ _ ≫ F y
+  rw [← cancel_epi hP.isoPullback.hom, IsPullback.isoPullback_hom_fst_assoc,
+    IsPullback.isoPullback_hom_snd_assoc]
+  exact h x y

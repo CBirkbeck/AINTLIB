@@ -167,6 +167,94 @@ lemma addOnZOnFamily_agree (k l : Fin 3) (hkl : l ≠ k)
 
 end Agreement
 
+section Glue
+
+open CategoryTheory.Limits
+
+variable (hΔ : IsUnit W.Δ)
+
+/-- Pairwise agreement of the three pieces of `addOnY`, in the shape
+`glueMorphisms_hf_of_agree` consumes: on `U k ⊓ U l`, which `blOpenYPieceFamily_inf` identifies
+with the `D(t_k · t_l)` locus. The diagonal `k = l` is proof-irrelevance. -/
+lemma addOnYOnFamily_agree_inf (k l : Fin 3) :
+    Scheme.homOfLE _ (inf_le_left : blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l ≤ _) ≫
+        addOnYOnFamily W i j k hΔ =
+      Scheme.homOfLE _ (inf_le_right : blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l ≤ _) ≫
+        addOnYOnFamily W i j l hΔ := by
+  rcases eq_or_ne l k with rfl | hkl
+  · rfl
+  · exact addOnYOnFamily_agree W i j hΔ k l hkl _ inf_le_left inf_le_right
+      (blOpenYPieceFamily_inf W i j k l)
+
+/-- The law-1 analogue of `addOnYOnFamily_agree_inf`. -/
+lemma addOnZOnFamily_agree_inf (k l : Fin 3) :
+    Scheme.homOfLE _ (inf_le_left : blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l ≤ _) ≫
+        addOnZOnFamily W i j k hΔ =
+      Scheme.homOfLE _ (inf_le_right : blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l ≤ _) ≫
+        addOnZOnFamily W i j l hΔ := by
+  rcases eq_or_ne l k with rfl | hkl
+  · rfl
+  · exact addOnZOnFamily_agree W i j hΔ k l hkl _ inf_le_left inf_le_right
+      (blOpenZPieceFamily_inf W i j k l)
+
+/-- **(c4.2c)** The second Bosma–Lenstra law as a single morphism on the whole regularity open of
+the `(i,j)` chart-product — glued from its three chart pieces.
+
+Stated on `⨆ k, blOpenYPieceFamily`, which `iSup_blOpenYPieceFamily` identifies with
+`blOpenYPiece`. Consumers should use only the interface below (`ι_addOnYOnSup`), never this body:
+it is a `glueMorphisms` term over a `Proj` chart-product and unfolding it is not viable. -/
+noncomputable irreducible_def addOnYOnSup :
+    (⨆ k, blOpenYPieceFamily W i j k).toScheme ⟶ projModel W :=
+  (Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j)).glueMorphisms
+    (fun k => addOnYOnFamily W i j k hΔ)
+    (glueMorphisms_hf_of_agree _ _ (addOnYOnFamily_agree_inf W i j hΔ))
+
+/-- **(c4.2c)** The first Bosma–Lenstra law (mathlib's `addXYZ`) as a single morphism on the whole
+regularity open of the `(i,j)` chart-product. -/
+noncomputable irreducible_def addOnZOnSup :
+    (⨆ k, blOpenZPieceFamily W i j k).toScheme ⟶ projModel W :=
+  (Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)).glueMorphisms
+    (fun k => addOnZOnFamily W i j k hΔ)
+    (glueMorphisms_hf_of_agree _ _ (addOnZOnFamily_agree_inf W i j hΔ))
+
+/-- **(rule 3, the opaque interface)** `addOnYOnSup` restricts on the `k`-th piece to
+`addOnYOnFamily k`. This characterises it: by `Scheme.Cover.hom_ext`, any two morphisms with
+this property are equal (`addOnYOnSup_ext`). -/
+@[reassoc (attr := simp)]
+lemma ι_addOnYOnSup (k : Fin 3) :
+    (Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j)).f k ≫ addOnYOnSup W i j hΔ =
+      addOnYOnFamily W i j k hΔ := by
+  rw [addOnYOnSup]
+  exact Scheme.Cover.ι_glueMorphisms (Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j))
+    (fun k => addOnYOnFamily W i j k hΔ)
+    (glueMorphisms_hf_of_agree _ _ (addOnYOnFamily_agree_inf W i j hΔ)) k
+
+/-- The law-1 analogue of `ι_addOnYOnSup`. -/
+@[reassoc (attr := simp)]
+lemma ι_addOnZOnSup (k : Fin 3) :
+    (Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)).f k ≫ addOnZOnSup W i j hΔ =
+      addOnZOnFamily W i j k hΔ := by
+  rw [addOnZOnSup]
+  exact Scheme.Cover.ι_glueMorphisms (Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j))
+    (fun k => addOnZOnFamily W i j k hΔ)
+    (glueMorphisms_hf_of_agree _ _ (addOnZOnFamily_agree_inf W i j hΔ)) k
+
+omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
+/-- **(rule 3, uniqueness)** `addOnYOnSup` is the unique morphism restricting to the pieces. -/
+lemma addOnYOnSup_ext {g₁ g₂ : (⨆ k, blOpenYPieceFamily W i j k).toScheme ⟶ projModel W}
+    (h : ∀ k, (Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j)).f k ≫ g₁ =
+      (Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j)).f k ≫ g₂) : g₁ = g₂ :=
+  Scheme.Cover.hom_ext _ _ _ h
+
+omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
+/-- The law-1 analogue of `addOnYOnSup_ext`. -/
+lemma addOnZOnSup_ext {g₁ g₂ : (⨆ k, blOpenZPieceFamily W i j k).toScheme ⟶ projModel W}
+    (h : ∀ k, (Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)).f k ≫ g₁ =
+      (Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)).f k ≫ g₂) : g₁ = g₂ :=
+  Scheme.Cover.hom_ext _ _ _ h
+
+end Glue
+
 end Morphisms
 
 end WeierstrassCurve.Projective
