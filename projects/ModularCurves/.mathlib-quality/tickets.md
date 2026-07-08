@@ -6295,7 +6295,7 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
   **Depends**: T-A8 · **Type**: structure + equivalence theorem · **Sources**: reviewer v9.
   Distinct from the DONE universal atlas `Moduli/WeierstrassAtlas.lean` (that is the universal
   U; this is the per-curve local-Weierstrass witness data).
-- **[T-D33] `subgroup-divisor-locus`** (Q — incidence-centre completion). The closed locus where
+- **[T-D33] `subgroup-divisor-locus`** (Q — incidence-centre completion). **CLAIMED beastmode-A 2026-07-08 (v10.23): assessing vs already-done `exists_subgroupLocus`/`exists_exactOrderLocus`; adding the section-level exact-order locus (L3/L4 consumer).** The closed locus where
   a relative effective Cartier divisor `D` is a **subgroup divisor** (representability of
   `RelEffCartierDiv.IsSubgroup` as a closed subscheme). Needed to cut out the Γ₁ exact-order
   condition over U. **Lane**: D · **Depends**: T-D14/T-D15 · **Type**: representability theorem ·
