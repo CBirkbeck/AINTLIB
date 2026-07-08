@@ -7,6 +7,8 @@ import Mathlib.LinearAlgebra.TensorProduct.Quotient
 import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.RingTheory.Flat.EquationalCriterion
+import Mathlib.RingTheory.Flat.Equalizer
+import Mathlib.RingTheory.LocalRing.Module
 import Mathlib.RingTheory.Support
 import Mathlib.RingTheory.Noetherian.Basic
 
@@ -69,7 +71,11 @@ right-exactness; Mumford §5 p. 49). The range of `f.lTensor M` agrees with the 
 theorem range_lTensor_range_subtype :
     LinearMap.range (f.lTensor M) =
       LinearMap.range ((LinearMap.range f).subtype.lTensor M) := by
-  sorry
+  have h : (LinearMap.range f).subtype ∘ₗ f.rangeRestrict = f :=
+    LinearMap.subtype_comp_codRestrict _ _ _
+  conv_lhs => rw [← h, LinearMap.lTensor_comp]
+  rw [LinearMap.range_comp, LinearMap.range_eq_top.mpr
+    (LinearMap.lTensor_surjective M f.surjective_rangeRestrict), Submodule.map_top]
 
 end CokerBaseChange
 
@@ -82,7 +88,11 @@ theorem Module.subsingleton_of_forall_field_tensor_subsingleton
     (N : Type v) [AddCommGroup N] [Module R N] [Module.Finite R N]
     (h : ∀ (K : Type u) [Field K] [Algebra R K], Subsingleton (K ⊗[R] N)) :
     Subsingleton N := by
-  sorry
+  rw [← Module.support_eq_empty_iff (R := R)]
+  rw [Set.eq_empty_iff_forall_notMem]
+  intro p hp
+  rw [Module.mem_support_iff_nontrivial_residueField_tensorProduct] at hp
+  exact not_subsingleton_iff_nontrivial.mpr hp (h p.asIdeal.ResidueField)
 
 section Purity
 
@@ -93,8 +103,9 @@ Stacks 00HL; `Tor₁(Q/N, M) = 0` in Tor-free form): if `Q ⧸ N` is flat, then
 `N ⊗ M → Q ⊗ M` is injective for every `M`. -/
 theorem Module.Flat.lTensor_subtype_injective_of_flat_quotient
     (N : Submodule R Q) [Module.Flat R (Q ⧸ N)] :
-    Function.Injective (N.subtype.lTensor M) := by
-  sorry
+    Function.Injective (N.subtype.lTensor M) :=
+  LinearMap.lTensor_injective_of_exact_of_flat N.mkQ (Submodule.mkQ_surjective N)
+    N.subtype N.injective_subtype (LinearMap.exact_subtype_mkQ N) M
 
 /-- **Two-out-of-three for flatness** (Mumford §5 p. 49: "it is easy to see that all
 the modules `Z^p = Ker(L^p → L^{p+1})` are flat too"): a submodule of a flat module
@@ -102,7 +113,29 @@ with flat quotient is flat. -/
 theorem Module.Flat.of_flat_quotient
     (N : Submodule R Q) [Module.Flat R Q] [Module.Flat R (Q ⧸ N)] :
     Module.Flat R N := by
-  sorry
+  rw [Module.Flat.iff_lTensor_injective']
+  intro I
+  have hsquare : (N.subtype.rTensor R).comp (I.subtype.lTensor N)
+      = (I.subtype.lTensor Q).comp (N.subtype.rTensor I) :=
+    TensorProduct.ext' fun n i => rfl
+  have h2 : Function.Injective (I.subtype.lTensor Q) :=
+    Module.Flat.lTensor_preserves_injective_linearMap _ I.injective_subtype
+  have h1 : Function.Injective (N.subtype.rTensor I) := by
+    have hA3 : Function.Injective (N.subtype.lTensor I) :=
+      Module.Flat.lTensor_subtype_injective_of_flat_quotient I N
+    have hconj : (TensorProduct.comm R I Q).toLinearMap.comp
+        ((N.subtype.lTensor I).comp (TensorProduct.comm R N I).toLinearMap)
+        = N.subtype.rTensor I :=
+      TensorProduct.ext' fun n i => by simp
+    rw [← hconj]
+    simp only [LinearMap.coe_comp, LinearEquiv.coe_coe]
+    exact (TensorProduct.comm R I Q).injective.comp
+      (hA3.comp (TensorProduct.comm R N I).injective)
+  have hcomp : Function.Injective ((N.subtype.rTensor R).comp (I.subtype.lTensor N)) := by
+    rw [hsquare, LinearMap.coe_comp]
+    exact h2.comp h1
+  rw [LinearMap.coe_comp] at hcomp
+  exact hcomp.of_comp
 
 end Purity
 
@@ -134,7 +167,31 @@ the canonical map `M ⊗ ker f → ker (f.lTensor M)` is bijective for every `M`
 theorem kerLTensorComparison_bijective
     [Module.Flat R Q] [Module.Flat R (Q ⧸ LinearMap.range f)] :
     Function.Bijective (kerLTensorComparison M f) := by
-  sorry
+  haveI him : Module.Flat R (LinearMap.range f) := Module.Flat.of_flat_quotient _
+  have hexact2 : Function.Exact (LinearMap.ker f).subtype f.rangeRestrict := by
+    rw [LinearMap.exact_iff, LinearMap.ker_rangeRestrict, Submodule.range_subtype]
+  have hkerinj : Function.Injective ((LinearMap.ker f).subtype.lTensor M) :=
+    LinearMap.lTensor_injective_of_exact_of_flat f.rangeRestrict
+      f.surjective_rangeRestrict _ (LinearMap.ker f).injective_subtype hexact2 M
+  constructor
+  · intro a b hab
+    exact hkerinj (congrArg Subtype.val hab)
+  · rintro ⟨z, hz⟩
+    rw [LinearMap.mem_ker] at hz
+    have hfact : f.lTensor M
+        = ((LinearMap.range f).subtype.lTensor M).comp (f.rangeRestrict.lTensor M) := by
+      rw [← LinearMap.lTensor_comp, LinearMap.subtype_comp_codRestrict]
+    have hsubinj : Function.Injective ((LinearMap.range f).subtype.lTensor M) :=
+      Module.Flat.lTensor_subtype_injective_of_flat_quotient M (LinearMap.range f)
+    have h0 : (f.rangeRestrict.lTensor M) z = 0 := by
+      apply hsubinj
+      rw [map_zero, ← LinearMap.comp_apply, ← hfact]
+      exact hz
+    have hex : Function.Exact ((LinearMap.ker f).subtype.lTensor M)
+        (f.rangeRestrict.lTensor M) :=
+      lTensor_exact M hexact2 f.surjective_rangeRestrict
+    obtain ⟨w, hw⟩ := (hex z).mp h0
+    exact ⟨w, Subtype.ext hw⟩
 
 end KerBaseChange
 
@@ -145,8 +202,8 @@ variable (f : P →ₗ[R] Q)
 /-- Over a noetherian ring, the kernel of a map out of a finite module is finite
 (GME Cor 1.10.5 bookkeeping; submodule of a noetherian module). -/
 theorem LinearMap.fg_ker_of_finite [IsNoetherianRing R] [Module.Finite R P] :
-    (LinearMap.ker f).FG := by
-  sorry
+    (LinearMap.ker f).FG :=
+  IsNoetherian.noetherian _
 
 /-- **The kernel is projective** (GME Corollary 1.10.5: "If `R¹f_*𝓛` is locally
 `O_S`-free, then `f_*𝓛` is also locally `O_S`-free"; cf. Mumford p. 49: "`K⁰` is
@@ -157,7 +214,26 @@ theorem Module.Projective.ker_of_flat_coker [IsNoetherianRing R]
     [Module.Finite R P] [Module.Projective R P]
     [Module.Finite R Q] [Module.Flat R Q] [Module.Flat R (Q ⧸ LinearMap.range f)] :
     Module.Projective R (LinearMap.ker f) := by
-  sorry
+  haveI him_flat : Module.Flat R (LinearMap.range f) := Module.Flat.of_flat_quotient _
+  haveI him_fin : Module.Finite R (LinearMap.range f) :=
+    Module.Finite.iff_fg.mpr (IsNoetherian.noetherian _)
+  haveI him_fp : Module.FinitePresentation R (LinearMap.range f) :=
+    Module.finitePresentation_of_finite R _
+  haveI him_proj : Module.Projective R (LinearMap.range f) :=
+    Module.Flat.projective_of_finitePresentation
+  obtain ⟨s, hs⟩ := Module.projective_lifting_property f.rangeRestrict LinearMap.id
+    f.surjective_rangeRestrict
+  have hfs : ∀ y : LinearMap.range f, f (s y) = y := fun y =>
+    congrArg Subtype.val (LinearMap.ext_iff.mp hs y)
+  refine Module.Projective.of_split (LinearMap.ker f).subtype
+    (LinearMap.codRestrict _ (LinearMap.id - s.comp f.rangeRestrict) fun x => ?_) ?_
+  · rw [LinearMap.mem_ker, LinearMap.sub_apply, map_sub, LinearMap.id_apply,
+      LinearMap.comp_apply, hfs (f.rangeRestrict x)]
+    exact sub_self _
+  · ext x
+    have hx0 : f.rangeRestrict (x : P) = 0 :=
+      Subtype.ext (LinearMap.mem_ker.mp x.2)
+    simp [LinearMap.codRestrict_apply, hx0]
 
 end KerFiniteProjective
 
@@ -183,7 +259,23 @@ locally free and `(f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"): for an `R`-algebra `A`
 theorem kerBaseChangeComparison_bijective
     [Module.Flat R Q] [Module.Flat R (Q ⧸ LinearMap.range f)] :
     Function.Bijective (kerBaseChangeComparison A f) := by
-  sorry
+  have hlt := kerLTensorComparison_bijective (M := A) f
+  constructor
+  · intro a b hab
+    have h1 : ((LinearMap.ker f).subtype.baseChange A) a
+        = ((LinearMap.ker f).subtype.baseChange A) b := congrArg Subtype.val hab
+    rw [LinearMap.baseChange_eq_ltensor] at h1
+    exact hlt.1 (Subtype.ext h1)
+  · rintro ⟨z, hz⟩
+    rw [LinearMap.mem_ker] at hz
+    have hz' : (f.lTensor A) z = 0 := by
+      rw [← LinearMap.baseChange_eq_ltensor]
+      exact hz
+    obtain ⟨w, hw⟩ := hlt.2 ⟨z, LinearMap.mem_ker.mpr hz'⟩
+    refine ⟨w, Subtype.ext ?_⟩
+    show ((LinearMap.ker f).subtype.baseChange A) w = z
+    rw [LinearMap.baseChange_eq_ltensor]
+    exact congrArg Subtype.val hw
 
 end BaseChangeAlgebra
 
