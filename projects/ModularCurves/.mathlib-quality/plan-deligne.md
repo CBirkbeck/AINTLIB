@@ -337,3 +337,55 @@ Coordinator (v10, p2): source gate LIFTED — close `deligne_operators` from Tat
   `∑ᵢ eⁱ(·) eᵢ = id` and `λ = pointConv φ` acting as `ptS`.
 
 Then `deligne_operators := ⟨u-as-unit, τ, lemma-3.8.2⟩`. Each piece is bounded; RR-terminates.
+
+---
+
+## LAYER B EXECUTION LOG (2026-07-08, p2) — Layer A DONE; bridge started
+
+**Layer A CLOSED + axiom-clean** (`ForMathlib/CartierDual.lean`): `deligne_pointConv_pow_finrank`
+(linear-monoid form) and now **`deligne_point_pow_eq_one`** — the *point-group* form
+`(toConv φ) ^ (finrank R A) = 1` in mathlib's convolution `CommGroup (WithConv (A →ₐ[R] B))`
+(antipode-inverse), obtained from the linear form via `AlgHom.toLinearMap_convPow`/`toLinearMap_convOne`
++ `toLinearMap`/`ofConv`/`toConv` injectivity. This is the **exact geometry-free consumable** the
+bridge needs (`n • [point] = 0` ⟺ `(toConv φ)^n = 1`). Axiom-clean `[propext, Classical.choice, Quot.sound]`.
+
+**Substrate audit (Explore, 2026-07-08) — ALL of Layer B is absent** (project + mathlib):
+- No group-object multiplication `m : D×_S D → D` from `IsSubgroup` (deliberately deferred,
+  `GroupScheme/Subgroup.lean:108-111` — only the functor-of-points `Prop`).
+- No affine-group-scheme ⇒ Hopf-algebra duality anywhere; `Mathlib/AlgebraicGeometry/Group/` is only
+  `Abelian.lean` + `Smooth.lean`. Must be hand-built.
+- No `D.subscheme` = `Spec`/`IsAffine`/`finrank ↔ Module.finrank` lemma (get affineness externally
+  via `isAffine_of_isAffineHom`, only after the base is affine).
+- **Free-vs-projective gap**: geometry gives `Module.Projective` (`projective_of_finitePresentation`);
+  Deligne needs `Module.Free` → must Zariski-localise the base to trivialise `A`.
+- **Reusable templates found**: `WeilPairing/EtaleDescent.lean` `torsionAlgebra` (affine group scheme →
+  finite algebra, over a field) + `torsionAlgebraPointsEquiv` (points ↔ alg-homs via `ΓSpec` adj +
+  `isoSpec`); `GroupScheme/MuN.lean` `muNPointsEquiv`/`_mul` (representable group law + points). Both
+  lack the Hopf/comultiplication and the group-law↔convolution identification — the genuinely new work.
+
+**Refined leaf decomposition (file `GroupScheme/DeligneOrder.lean`, imports {ExactOrder, CartierDual}):**
+- **L1** general box `smul_eq_zero_of_factors'` (arbitrary `S`, `T`-point `Q`) ⟶ **affine core**
+  `smul_eq_zero_of_factors_affine` (base `Spec R`, `Q : E.Section`). Reduce via base-change along `g`
+  (→ section: `Point.asSection`, `Point.baseChangeEquiv`, `IsSubgroup.baseChange` — all proven) then
+  cover `S` by affines + locality of morphism equality on the section base. *Routine but formal.*
+- **L2 ✅ DONE** — `subgroupAlgebra` (`Algebra R Γ(D.subscheme, ⊤)`) + `subgroupAlgebra_finite`
+  (`Module.Finite`), via `isAffine_of_isAffineHom` + the `torsionAlgebra` idiom. Green, no sorry.
+- **L3** (the absent bulk) — comultiplication `Δ : A →ₐ[R] A ⊗_R A` dual to `m : D×_S D → D` (Yoneda:
+  sum of the two universal `D×D`-points factors through `D` by `IsSubgroup`); counit dual to unit
+  section; antipode dual to inversion. Needs `Spec(A⊗_R A) ≅ D.subscheme ×_{Spec R} D.subscheme`
+  (product of affines). ⟹ `HopfAlgebra R A`.
+- **L4** commutative + cocommutative (`IsCocomm R A`) from commutativity of the curve group law.
+- **L5** `A` finite projective → localise `Spec R` over a free-trivialising cover, apply Deligne per
+  piece, glue (`N • Q = 0` local on `Spec R`).
+- **L6** points `Q ∈ D(Spec B)` ↔ `φ : A →ₐ[R] B` (`ΓSpec` adj, `isoSpec`); curve law = convolution
+  (dual to `Δ`); `N • Q ↔ (toConv φ)^N`, `0 ↔ 1`.
+- **L7** assemble: `deligne_point_pow_eq_one` ⟹ `(toConv φ)^N = 1` ⟹ `N • Q = 0`.
+
+**Final wiring** (end of development, resolves the import cycle): the box
+`RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors` in `ExactOrder.lean` is discharged by making
+`ExactOrder` import `DeligneOrder` (or relocating `IsSubgroup` to a shared low file) and calling
+`smul_eq_zero_of_factors'`. Deferred until the machinery is sorry-free.
+
+**Status**: skeleton green (2 intended sorries: affine core L3-L7, general box L1). Next: close L1
+(reduction), then grind the L3 Hopf core (the genuinely-absent infrastructure). Multi-session; each
+leaf bounded and in-area. Sub-tickets T-D5h(=L2✅,L3,L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).

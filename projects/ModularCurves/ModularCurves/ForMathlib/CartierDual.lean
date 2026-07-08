@@ -700,6 +700,24 @@ theorem deligne_pointConv_pow_finrank (φ : A →ₐ[R] B) [Module.Free R A] [Mo
     (pointConv φ) ^ (Module.finrank R A) = 1 :=
   deligne_pointConv_pow φ (Module.finrank_baseChange)
 
+/-- **(T-D5g, point-group form — the Layer-B consumable.)** Deligne's order theorem stated in
+mathlib's convolution *group* of points `WithConv (A →ₐ[R] B)` (a `CommGroup` for `A` commutative
+cocommutative, inverse via the antipode): a `B`-point `φ : A →ₐ[R] B` of a finite-free commutative
+cocommutative Hopf algebra satisfies `(toConv φ)^(finrank R A) = 1`. This is `n • [point] = 0` in
+the point group — the exact form the geometric bridge (`RelEffCartierDiv.IsSubgroup`, Layer B)
+consumes once it identifies the curve's group law on a subgroup divisor with convolution of points.
+Obtained from `deligne_pointConv_pow_finrank` by transporting along the injective forgetful
+`AlgHom → LinearMap` (mathlib's `AlgHom.toLinearMap_convPow`/`toLinearMap_convOne`). Mathlib-upstream
+candidate alongside the linear form. -/
+theorem deligne_point_pow_eq_one (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A]
+    [Nontrivial R] [Nontrivial (WithConv (A →ₗ[R] B))] :
+    (toConv φ : WithConv (A →ₐ[R] B)) ^ (Module.finrank R A) = 1 := by
+  apply WithConv.ofConv_injective
+  apply AlgHom.toLinearMap_injective
+  apply WithConv.toConv_injective
+  rw [AlgHom.toLinearMap_convPow, AlgHom.toLinearMap_convOne]
+  exact deligne_pointConv_pow_finrank φ
+
 end Commutator
 
 end ModularCurves.CartierDual
