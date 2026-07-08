@@ -504,18 +504,139 @@ private theorem injective_of_maxMinors_nonZeroDiv {S : Type*} [CommRing S] {n m 
       (Submodule.mem_annihilator_span_singleton x 1).mp (hsub (htop ▸ Submodule.mem_top))
     simpa using h1
 
-/-- **[BE backward core]** Stacks 00N1, (2)⟹(1) — the Peskine–Szpiro acyclicity lemma, restricted to
-the **deep interior**: spots `F_{i+1}` with a nonzero free both below and above (`rk (i+1) ≠ 0` and
-`rk (i+2) ≠ 0`).  The *top* interior spot (`rk (i+2) = 0`, where exactness is injectivity of the top
-differential) is fully discharged by `injective_of_maxMinors_nonZeroDiv` (McCoy) inside `be_backward`;
-this residual is only the deeper homology, where genuine acyclicity (not mere injectivity) is needed.
+/-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
+The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
 
-MATHLIB-ABSENT CONTENT: the hard acyclicity direction ("what makes a complex exact").  Classical
-proof: the Peskine–Szpiro acyclicity lemma — induction on the length `e`; if some homology
-`H_j ≠ 0`, take an associated prime `𝔭 ∈ Ass H_j` (so `depth (H_j)_𝔭 = 0`), and the grade `≥ j`
-condition on `I(φⱼ)` forces (after localising) a nonzerodivisor descent that kills `H_j`, a
-contradiction.  Needs the depth-of-a-SES inequalities / associated-prime descent absent from
-mathlib.  Stacks 00N1 (acyclicity lemma 0AVQ). -/
+For the Buchsbaum–Eisenbud free complex with grade conditions `hcond`, exact at every spot `> i`,
+and ANY prime `𝔮`: the homology `H = ker(φ i)/im(φ (i+1))` at spot `F_{i+1}` localised at `𝔮`
+either vanishes or has `depth_{S_𝔮} ≥ 1`.
+
+This is the acyclicity lemma **00N0** (`acyclicityLemma_hasDepthGE_homology`) applied over the local
+ring `S_𝔮`, *transported to the abstract localised homology* `(H)_𝔮`.  Its free-module depth
+hypothesis `depth(S_𝔮^{rk j}) ≥ j` (needed by 00N0, via `Module.hasDepthGE_pi_of_hasDepthGE`) is the
+**grade-via-primes bridge**: the grade conditions localise (`Ideal.gradeGE_localize`), and where the
+localised minor ideal is proper (`⊆ 𝔪(S_𝔮)`) of grade `≥ j` one gets `depth(S_𝔮) ≥ j` (a regular
+sequence in a proper ideal is a regular sequence in `𝔪`); this is exactly Stacks 00N1's
+"`(2)(b)` implies `depth(R) ≥ e`", whose full proof also handles the split (`= ⊤`) top differentials
+by the direct-sum splitting 00MW.  Everything *outside* this lemma in
+`be_backward_exact_of_habove` — the associated-prime selection and the `depth (H)_𝔮 = 0` from
+`𝔪(S_𝔮) ∈ Ass (H)_𝔮` — is discharged; only this remains.  Stacks 10.102.9 / 10.102.8. -/
+private theorem be_backward_localizedHomology_depth {S : Type*} [CommRing S] [IsLocalRing S]
+    [IsNoetherianRing S] (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hcond : ∀ i, 1 ≤ i → i ≤ e →
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
+    (i : ℕ) (habove : ∀ j, i < j → Function.Exact (φ (j + 1)) (φ j))
+    (𝔮 : Ideal S) [𝔮.IsPrime] :
+    Subsingleton (LocalizedModule 𝔮.primeCompl
+        (LinearMap.ker (φ i) ⧸
+          (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)) ∨
+      Module.HasDepthGE (Localization.AtPrime 𝔮)
+        (LocalizedModule 𝔮.primeCompl
+          (LinearMap.ker (φ i) ⧸
+            (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)) 1 :=
+  sorry
+
+/-- **[BE backward core, per-spot acyclicity step]** Stacks 00N1, (2)⟹(1), at a single interior
+spot, *given exactness at every higher spot* (`habove`).  This is the genuine acyclicity content:
+the complex, exact above `F_{i+1}`, is exact at `F_{i+1}` too.
+
+PROOF ROUTE (Stacks 00N1 `(2)⟹(1)`, via the acyclicity lemma 00N0 = `acyclicityLemma_hasDepthGE_homology`,
+NOT the stale "0AVQ / depth-invariant" route): write `H = ker(φ i)/im(φ (i+1))` for the homology at
+`F_{i+1}`.  If `H ≠ 0`, pick an associated prime `𝔮 ∈ Ass_S H`; localise at `𝔮` (flat, keeps the
+complex exact above `i` and keeps `H_𝔮 ≠ 0` with `𝔪(S_𝔮) ∈ Ass H_𝔮`, i.e. `depth H_𝔮 = 0`).  The
+acyclicity lemma 00N0 over `S_𝔮` — whose free-module depth hypothesis `depth(S_𝔮^{rk j}) ≥ j` is
+supplied by the grade conditions localised to `𝔮` (`Ideal.gradeGE_localize`), the **grade-via-primes
+depth bridge** (Stacks 00N1 last paragraph: `I(φⱼ) ⊆ 𝔪` proper of grade `≥ j` ⟹ `depth ≥ j`) — forces
+`depth H_𝔮 ≥ 1`, contradicting `depth H_𝔮 = 0`.  Hence `H = 0`, i.e. exactness at `F_{i+1}`. -/
+private theorem be_backward_exact_of_habove {S : Type*} [CommRing S] [IsLocalRing S]
+    [IsNoetherianRing S] (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hcond : ∀ i, 1 ≤ i → i ≤ e →
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
+    (i : ℕ) (habove : ∀ j, i < j → Function.Exact (φ (j + 1)) (φ j)) :
+    Function.Exact (φ (i + 1)) (φ i) := by
+  classical
+  rw [LinearMap.exact_iff]
+  refine le_antisymm ?_ (LinearMap.range_le_ker_iff.mpr (hcomplex i))
+  rw [← Submodule.comap_subtype_eq_top, ← Submodule.Quotient.subsingleton_iff]
+  -- The homology at `F_{i+1}`.
+  set H := (LinearMap.ker (φ i)) ⧸
+    (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype with hHdef
+  by_contra hns
+  rw [not_subsingleton_iff_nontrivial] at hns
+  haveI : Nontrivial H := hns
+  -- `H` is a finite `S`-module (subquotient of the finite free `F_{i+1}`).
+  haveI : IsNoetherian S (Fin (rk (i + 1)) → S) := inferInstance
+  haveI : Module.Finite S (LinearMap.ker (φ i)) := inferInstance
+  haveI : Module.Finite S H := inferInstance
+  -- Pick an associated prime `𝔮 ∈ Ass_S H` and localise there.
+  obtain ⟨𝔮, h𝔮⟩ := associatedPrimes.nonempty S H
+  haveI h𝔮p : 𝔮.IsPrime := h𝔮.isPrime
+  haveI : IsNoetherianRing (Localization.AtPrime 𝔮) :=
+    IsLocalization.isNoetherianRing 𝔮.primeCompl _ inferInstance
+  -- `H_𝔮 ≠ 0`, since `𝔮 ∈ Supp H` (`Ann H ≤ 𝔮`).
+  haveI hH𝔮nt : Nontrivial (LocalizedModule 𝔮.primeCompl H) := by
+    have hmem : (⟨𝔮, h𝔮p⟩ : PrimeSpectrum S) ∈ Module.support S H := by
+      rw [Module.mem_support_iff_of_finite]
+      have hle := (AssociatedPrimes.mem_iff.mp h𝔮).annihilator_le
+      rwa [Submodule.annihilator_top] at hle
+    exact Module.mem_support_iff.mp hmem
+  -- `𝔪(S_𝔮) ∈ Ass H_𝔮`, hence `depth H_𝔮 = 0`, i.e. `¬ HasDepthGE S_𝔮 H_𝔮 1`.
+  have hmaxAss :=
+    Module.associatedPrimes.mem_associatedPrimes_atPrime_of_mem_associatedPrimes (M := H) h𝔮
+  have hnodepth :
+      ¬ Module.HasDepthGE (Localization.AtPrime 𝔮) (LocalizedModule 𝔮.primeCompl H) 1 := by
+    rw [Module.hasDepthGE_one_iff_notMem_associatedPrimes]
+    exact fun h => h hmaxAss
+  -- The residual: `H_𝔮` vanishes or has depth `≥ 1`; both contradict the above.
+  rcases be_backward_localizedHomology_depth e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i habove 𝔮
+    with hsub | hdepth
+  · exact absurd hsub (not_subsingleton_iff_nontrivial.mpr hH𝔮nt)
+  · exact hnodepth hdepth
+
+/-- **[BE backward, all spots]** The backward direction at *every* spot, by strong downward induction
+on the spot index: exactness above `F_{i+1}` (the induction hypothesis, trivial once the free modules
+vanish) feeds `be_backward_exact_of_habove`. -/
+private theorem be_backward_exact_all {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
+    (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hcond : ∀ i, 1 ≤ i → i ≤ e →
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤) :
+    ∀ i, Function.Exact (φ (i + 1)) (φ i) := by
+  have key : ∀ n i, e - i = n → Function.Exact (φ (i + 1)) (φ i) := by
+    intro n
+    induction n using Nat.strong_induction_on with
+    | _ n ih =>
+      intro i hn
+      rcases Nat.lt_or_ge (i + 1) e with hsmall | hbig
+      · refine be_backward_exact_of_habove e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i
+          (fun j hj => ?_)
+        rcases Nat.lt_or_ge (j + 1) e with hjsmall | hjbig
+        · exact ih (e - j) (by omega) j rfl
+        · haveI : Subsingleton (Fin (rk (j + 1)) → S) :=
+            subsingleton_pi_fin_of_eq_zero (hrk (j + 1) hjbig)
+          exact exact_of_subsingleton_mid _ _
+      · haveI : Subsingleton (Fin (rk (i + 1)) → S) :=
+          subsingleton_pi_fin_of_eq_zero (hrk (i + 1) hbig)
+        exact exact_of_subsingleton_mid _ _
+  exact fun i => key (e - i) i rfl
+
+/-- **[BE backward core]** Stacks 00N1, (2)⟹(1) — the deep interior spots.  Immediate from
+`be_backward_exact_all` (which proves exactness at *all* spots); the `hi`/`htop` hypotheses marking
+the deep interior are not needed once the general statement is available. -/
 private theorem be_backward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
     (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
@@ -526,7 +647,8 @@ private theorem be_backward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoe
         (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
           LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
     (i : ℕ) (hi : rk (i + 1) ≠ 0) (htop : rk (i + 2) ≠ 0) :
-    Function.Exact (φ (i + 1)) (φ i) := sorry
+    Function.Exact (φ (i + 1)) (φ i) :=
+  be_backward_exact_all e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i
 
 /-- Forward direction, all indices: dispatches the trivial `rnk i = 0` conjunct (unit ideal) and the
 interior indices to `be_forward_core`. -/
