@@ -143,13 +143,12 @@ The reduced-complex core `exact_map_quotSMulTop_of_isSMulRegular` above gives ex
 `≥ 2` (the `i + 1 = j + 2` branch), transported here through
 `QuotSMulTop.equivQuotTensor` (`M/xM ≃ (R/xR) ⊗ M`) and `LinearMap.baseChange_eq_ltensor`.
 
-RESIDUAL (`i = 0`, the bottom spot `(R/xR) ⊗ F_1`): the statement as written is **false** there — the
-source (00MZ) is exact only at `(R/xR)^{nₑ}, …, (R/xR)^{n₂}`, i.e. it loses the bottom spot.
-Counterexample: `R = ℤ`, `x = 2`, complex `0 → ℤ →(·2)→ ℤ` (`rk 0 = rk 1 = 1`, `rk (·≥2) = 0`,
-`φ 0 = ·2`, `φ (·≥1) = 0`); it is exact at `F 1` (ker(·2) = 0) but the reduction `𝔽₂ →0→ 𝔽₂` is not
-exact at `𝔽₂`.  The consumer (`be_forward_core`'s induction on `e`) only needs the spots `≥ 2`, so
-this bottom spot is spurious; the statement should be shifted to `φ (i+2)/φ (i+1)` (or add
-surjectivity of `φ 0`). -/
+INDEXING (corrected 2026-07-08): the conclusion is stated at spots `≥ 2` — exactness at `(R/xR) ⊗ F_{i+2}`
+for all `i` — because 00MZ loses the bottom spot: the source is exact only at `(R/xR)^{nₑ}, …, (R/xR)^{n₂}`.
+The naïve `∀ i` form at `(φ (i+1))/(φ i)` is **false** at `i = 0` (the bottom spot `(R/xR) ⊗ F_1`) —
+counterexample: `R = ℤ`, `x = 2`, complex `0 → ℤ →(·2)→ ℤ`; exact at `F 1` (ker(·2) = 0) but its reduction
+`𝔽₂ →0→ 𝔽₂` is not exact at `𝔽₂`.  The consumer (`be_forward_core`'s induction on `e`) needs only spots
+`≥ 2`, which the shifted conclusion supplies. -/
 theorem exact_baseChange_quotient_of_isSMulRegular
     {R : Type u} [CommRing R] {rk : ℕ → ℕ}
     (φ : (i : ℕ) → (Fin (rk (i + 1)) → R) →ₗ[R] (Fin (rk i) → R))
@@ -157,18 +156,181 @@ theorem exact_baseChange_quotient_of_isSMulRegular
     (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
     (x : R) (hx : IsSMulRegular R x) :
     ∀ i, Function.Exact
-      ((φ (i + 1)).baseChange (R ⧸ Ideal.span {x}))
-      ((φ i).baseChange (R ⧸ Ideal.span {x})) := by
+      ((φ (i + 2)).baseChange (R ⧸ Ideal.span {x}))
+      ((φ (i + 1)).baseChange (R ⧸ Ideal.span {x})) := by
   intro i
-  cases i with
-  | zero =>
-    -- FALSE spot (see docstring): exactness of `(R/xR) ⊗ F_1` is not implied. Not used downstream.
-    sorry
-  | succ i' =>
-    have key := exact_map_quotSMulTop_of_isSMulRegular φ hcomplex hexact x hx i'
-    have nat1 := QuotSMulTop.equivQuotTensor_naturality x (φ (i' + 2))
-    have nat2 := QuotSMulTop.equivQuotTensor_naturality x (φ (i' + 1))
-    exact (Function.Exact.iff_of_ladder_linearEquiv nat1.symm nat2.symm).mpr key
+  have key := exact_map_quotSMulTop_of_isSMulRegular φ hcomplex hexact x hx i
+  have nat1 := QuotSMulTop.equivQuotTensor_naturality x (φ (i + 2))
+  have nat2 := QuotSMulTop.equivQuotTensor_naturality x (φ (i + 1))
+  exact (Function.Exact.iff_of_ladder_linearEquiv nat1.symm nat2.symm).mpr key
+
+/-! ### Support lemmas for [T-ACYC.00MYW] (the socle-splitting of 00MY + the rank/McCoy of 00MW). -/
+
+section IdealOfMinorsTopSupport
+
+variable {R : Type u} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
+
+open TensorProduct IsLocalRing
+
+/-- **Socle element (00MY input).**  `𝔪 ∈ Ass(R)` means `𝔪 = ann(s)` for some `s`: there is `s ≠ 0`
+with `m ∈ 𝔪 ⟺ m·s = 0`. -/
+private theorem socle_exists (hdepth0 : maximalIdeal R ∈ associatedPrimes R R) :
+    ∃ s : R, s ≠ 0 ∧ ∀ m : R, m ∈ maximalIdeal R ↔ m * s = 0 := by
+  rw [AssociatedPrimes.mem_iff, isAssociatedPrime_iff] at hdepth0
+  obtain ⟨hprime, s, hs⟩ := hdepth0
+  refine ⟨s, ?_, ?_⟩
+  · intro h; subst h
+    apply hprime.ne_top
+    rw [hs]; ext r; simp [Submodule.mem_colon_singleton]
+  · intro m
+    rw [hs, Submodule.mem_colon_singleton, Submodule.mem_bot, smul_eq_mul]
+
+omit [IsNoetherianRing R] in
+/-- For a finite free `P` and socle `s` (`𝔪 = ann s`), `s • v = 0 ⟹ v ∈ 𝔪P` (coordinatewise). -/
+private theorem mem_maximalIdeal_smul_top_of_smul_eq_zero
+    {P : Type u} [AddCommGroup P] [Module R P] [Module.Free R P] [Module.Finite R P]
+    (s : R) (hmem : ∀ m : R, m ∈ maximalIdeal R ↔ m * s = 0)
+    (v : P) (hv : s • v = 0) : v ∈ maximalIdeal R • (⊤ : Submodule R P) := by
+  classical
+  set b := Module.Free.chooseBasis R P with hb
+  have hmemi : ∀ i, b.repr v i ∈ maximalIdeal R := by
+    intro i
+    rw [hmem]
+    have h : b.repr (s • v) i = 0 := by rw [hv]; simp
+    rw [map_smul, Finsupp.smul_apply, smul_eq_mul] at h
+    rw [mul_comm]; exact h
+  have hsum : v = ∑ i, b.repr v i • b i := (b.sum_repr v).symm
+  rw [hsum]
+  exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem_smul (hmemi i) Submodule.mem_top
+
+omit [IsNoetherianRing R] in
+/-- **[Socle reduced-injectivity — 00MY heart].**  Over a depth-`0` local Noetherian ring, an
+injective `R`-linear map `ψ` of finite free modules stays injective after reduction to the residue
+field: `k ⊗ ψ` is injective (`k = ResidueField R`).  Proof: if `ψ v ∈ 𝔪Q` then `s·ψ v = 0 = ψ(s·v)`,
+so `s·v = 0` (`ψ` injective), so `v ∈ 𝔪P`. -/
+private theorem lTensor_residueField_injective_of_injective
+    {P Q : Type u} [AddCommGroup P] [Module R P] [Module.Free R P] [Module.Finite R P]
+    [AddCommGroup Q] [Module R Q] [Module.Free R Q] [Module.Finite R Q]
+    (s : R) (hmem : ∀ m : R, m ∈ maximalIdeal R ↔ m * s = 0)
+    (ψ : P →ₗ[R] Q) (hψ : Function.Injective ψ) :
+    Function.Injective (ψ.lTensor (ResidueField R)) := by
+  suffices h : Function.Injective (ψ.lTensor (R ⧸ maximalIdeal R)) by exact h
+  rw [injective_iff_map_eq_zero]
+  intro ξ hξ
+  obtain ⟨v, hv⟩ := Submodule.Quotient.mk_surjective _
+    (TensorProduct.quotTensorEquivQuotSMul P (maximalIdeal R) ξ)
+  have hξv : ξ = (1 : R ⧸ maximalIdeal R) ⊗ₜ[R] v := by
+    apply (TensorProduct.quotTensorEquivQuotSMul P (maximalIdeal R)).injective
+    rw [TensorProduct.quotTensorEquivQuotSMul_mk_one_tmul, ← hv]
+  subst hξv
+  rw [LinearMap.lTensor_tmul] at hξ
+  have hψv : ψ v ∈ maximalIdeal R • (⊤ : Submodule R Q) := by
+    have h := congrArg (TensorProduct.quotTensorEquivQuotSMul Q (maximalIdeal R)) hξ
+    rw [map_zero, TensorProduct.quotTensorEquivQuotSMul_mk_one_tmul,
+      Submodule.Quotient.mk_eq_zero] at h
+    exact h
+  have hsψv : s • ψ v = 0 := by
+    refine Submodule.smul_induction_on hψv (fun c hc x _ => ?_) (fun x y hx hy => ?_)
+    · rw [smul_smul, mul_comm, (hmem c).mp hc, zero_smul]
+    · rw [smul_add, hx, hy, add_zero]
+  have hsv : s • v = 0 := hψ (by rw [map_smul, hsψv, map_zero])
+  have hvmem : v ∈ maximalIdeal R • (⊤ : Submodule R P) :=
+    mem_maximalIdeal_smul_top_of_smul_eq_zero s hmem v hsv
+  rw [← LinearEquiv.map_eq_zero_iff (TensorProduct.quotTensorEquivQuotSMul P (maximalIdeal R)),
+    TensorProduct.quotTensorEquivQuotSMul_mk_one_tmul, Submodule.Quotient.mk_eq_zero]
+  exact hvmem
+
+omit [IsNoetherianRing R] in
+/-- **[Syzygy freeness + ranks — 00MY splitting / 00MW ranks].**  Over a depth-`0` local Noetherian
+ring, for the exact free complex each image `im(φ m)` is free of rank `rnk (m+1)`.  Descending
+induction on `m`: at the top the image is `0`; the step feeds the syzygy SES
+`0 → im(φ (m+1)) → F_{m+1} → im(φ m) → 0` to `Module.free_of_lTensor_residueField_injective`
+(reduced-injective inclusion by the socle lemma) for freeness, and to `splitSurjectiveEquiv`
+(projective ⟹ split) for the rank additivity, closed against `hrnk` by `omega`. -/
+private theorem syzygy_free_finrank {rk rnk : ℕ → ℕ} (e : ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → R) →ₗ[R] (Fin (rk i) → R))
+    (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
+    (s : R) (hmem : ∀ m : R, m ∈ maximalIdeal R ↔ m * s = 0) :
+    ∀ m, Module.Free R (LinearMap.range (φ m)) ∧
+      Module.finrank R (LinearMap.range (φ m)) = rnk (m + 1) := by
+  have main : ∀ k m, e ≤ m + 1 + k →
+      Module.Free R (LinearMap.range (φ m)) ∧
+        Module.finrank R (LinearMap.range (φ m)) = rnk (m + 1) := by
+    intro k
+    induction k with
+    | zero =>
+      intro m hm
+      have hrk0 : rk (m + 1) = 0 := hrk (m + 1) (by omega)
+      haveI : Subsingleton (Fin (rk (m + 1)) → R) := by
+        haveI : IsEmpty (Fin (rk (m + 1))) := by rw [hrk0]; infer_instance
+        exact ⟨fun a b => funext fun x => isEmptyElim x⟩
+      have hbot : LinearMap.range (φ m) = ⊥ := by
+        rw [LinearMap.range_eq_bot]
+        apply LinearMap.ext; intro v; rw [show v = 0 from Subsingleton.elim _ _]; simp
+      rw [hbot]
+      refine ⟨Module.Free.of_subsingleton R _, ?_⟩
+      rw [finrank_bot, hrnk_top (m + 1) (by omega)]
+    | succ k ih =>
+      intro m hm
+      by_cases hbase : e ≤ m + 1
+      · have hrk0 : rk (m + 1) = 0 := hrk (m + 1) hbase
+        haveI : Subsingleton (Fin (rk (m + 1)) → R) := by
+          haveI : IsEmpty (Fin (rk (m + 1))) := by rw [hrk0]; infer_instance
+          exact ⟨fun a b => funext fun x => isEmptyElim x⟩
+        have hbot : LinearMap.range (φ m) = ⊥ := by
+          rw [LinearMap.range_eq_bot]
+          apply LinearMap.ext; intro v; rw [show v = 0 from Subsingleton.elim _ _]; simp
+        rw [hbot]
+        exact ⟨Module.Free.of_subsingleton R _, by rw [finrank_bot, hrnk_top (m + 1) hbase]⟩
+      · have hlt : m + 1 < e := by omega
+        obtain ⟨hfree_next, hrank_next⟩ := ih (m + 1) (by omega)
+        have hker : LinearMap.ker (φ m) = LinearMap.range (φ (m + 1)) :=
+          LinearMap.exact_iff.mp (hexact m)
+        set g := (φ m).rangeRestrict with hg
+        have hgsurj : Function.Surjective g := LinearMap.surjective_rangeRestrict _
+        set f := (LinearMap.range (φ (m + 1))).subtype with hf
+        have hExact : Function.Exact f g := by
+          rw [LinearMap.exact_iff, hg, LinearMap.ker_rangeRestrict, hker, hf,
+            Submodule.range_subtype]
+        haveI : Module.Free R (LinearMap.range (φ (m + 1))) := hfree_next
+        have hfinj : Function.Injective (f.lTensor (ResidueField R)) :=
+          lTensor_residueField_injective_of_injective s hmem f (Submodule.subtype_injective _)
+        haveI hfreeKm : Module.Free R (LinearMap.range (φ m)) :=
+          Module.free_of_lTensor_residueField_injective f g hgsurj hExact hfinj
+        refine ⟨hfreeKm, ?_⟩
+        obtain ⟨l, hl⟩ := g.exists_rightInverse_of_surjective (LinearMap.range_eq_top.2 hgsurj)
+        let E := (hExact.splitSurjectiveEquiv (Submodule.subtype_injective _) ⟨l, hl⟩).1
+        have hFrank : Module.finrank R (Fin (rk (m + 1)) → R) =
+            Module.finrank R (LinearMap.range (φ (m + 1))) +
+              Module.finrank R (LinearMap.range (φ m)) := by
+          rw [E.finrank_eq, Module.finrank_prod]
+        simp only [Module.finrank_pi, Fintype.card_fin, hrank_next] at hFrank
+        have hrnk_eq := hrnk (m + 1) (by omega) hlt
+        omega
+  intro m
+  exact main e m (by omega)
+
+omit [IsNoetherianRing R] in
+/-- **[McCoy rank bridge — E1].**  The rank of the residue-field reduction of the standard-bases
+matrix of `φ` equals the residue-field dimension of the range of the base-changed map
+`k ⊗ φ`.  (`toMatrix_baseChange` + `Matrix.rank_eq_finrank_range_toLin`.) -/
+private theorem rank_map_residue_eq_finrank_range_baseChange {a b : ℕ}
+    (φ : (Fin a → R) →ₗ[R] (Fin b → R)) :
+    ((LinearMap.toMatrix (Pi.basisFun R (Fin a)) (Pi.basisFun R (Fin b)) φ).map
+        (residue R)).rank
+      = Module.finrank (ResidueField R)
+          (LinearMap.range (φ.baseChange (ResidueField R))) := by
+  rw [← IsLocalRing.ResidueField.algebraMap_eq,
+    ← LinearMap.toMatrix_baseChange (ResidueField R) φ (Pi.basisFun R (Fin a))
+      (Pi.basisFun R (Fin b)),
+    Matrix.rank_eq_finrank_range_toLin _
+      (Algebra.TensorProduct.basis (ResidueField R) (Pi.basisFun R (Fin b)))
+      (Algebra.TensorProduct.basis (ResidueField R) (Pi.basisFun R (Fin a))),
+    Matrix.toLin_toMatrix]
+
+end IdealOfMinorsTopSupport
 
 /-! ## [T-ACYC.00MY+00MW] Depth-0 splitting ⟹ minor ideal `= ⊤` — Stacks 00MY+00MW (10.102.3/6)
 
@@ -182,9 +344,17 @@ Composed: over a depth-`0` Noetherian local ring, an exact free complex has ever
 `I(φᵢ) = R`.  This is the fact `be_forward_core` establishes at each associated prime `𝔮 ∈ Ass(R)`
 (after localising), giving `I(φᵢ) ⊄ 𝔮`, the input to the prime-avoidance nonzerodivisor. -/
 
+open TensorProduct IsLocalRing in
 /-- **[T-ACYC.00MY+00MW] Stacks 10.102.3 + 10.102.6.**  Over a Noetherian local ring of depth `0`
 (`𝔪 ∈ Ass(R)`), an exact finite free complex is a direct sum of trivial complexes, so its interior
-minor ideal is the unit ideal: `I(φᵢ) = ⊤` (Lean `φ (i-1)` = Stacks `φᵢ`, size `rnk i`). -/
+minor ideal is the unit ideal: `I(φᵢ) = ⊤` (Lean `φ (i-1)` = Stacks `φᵢ`, size `rnk i`).
+
+Proof (00MY + 00MW): pick a socle element `s` (`𝔪 = ann s`, from `𝔪 ∈ Ass R`); the socle forces every
+injective map of finite frees to stay injective mod `𝔪`, so a descending induction splits off free
+syzygies (`syzygy_free_finrank`): `im(φ (i-1))` is free of rank `rnk i`.  Since `φ (i-1)` factors as
+a surjection onto that free image followed by a (reduced-injective) inclusion, the residue-field
+rank of `k ⊗ φ (i-1)` is exactly `rnk i`; McCoy (`idealOfMinors_le_ker_iff_rank_lt`) then rules out
+`I ≤ 𝔪`, so `I = ⊤`. -/
 theorem idealOfMinors_eq_top_of_exact_of_isAssociatedPrime
     {R : Type u} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
     (hdepth0 : IsLocalRing.maximalIdeal R ∈ associatedPrimes R R)
@@ -196,6 +366,33 @@ theorem idealOfMinors_eq_top_of_exact_of_isAssociatedPrime
     (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
     (i : ℕ) (hi1 : 1 ≤ i) (hie : i < e) :
     LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := by
-  sorry
+  obtain ⟨s, -, hmem⟩ := socle_exists hdepth0
+  obtain ⟨j, rfl⟩ : ∃ j, i = j + 1 := ⟨i - 1, by omega⟩
+  obtain ⟨hfree, hrank_eq⟩ := syzygy_free_finrank e hrk hrnk_top hrnk φ hexact s hmem j
+  haveI := hfree
+  -- E2: the residue-field rank of `k ⊗ φ j` is `rnk (j+1)` (free image of that rank).
+  have hinj : Function.Injective
+      ((LinearMap.range (φ j)).subtype.baseChange (ResidueField R)) :=
+    lTensor_residueField_injective_of_injective s hmem _ (Submodule.subtype_injective _)
+  have hsurj : Function.Surjective ((φ j).rangeRestrict.baseChange (ResidueField R)) :=
+    LinearMap.lTensor_surjective (ResidueField R) (LinearMap.surjective_rangeRestrict _)
+  have hbc : (φ j).baseChange (ResidueField R)
+      = ((LinearMap.range (φ j)).subtype.baseChange (ResidueField R)) ∘ₗ
+        ((φ j).rangeRestrict.baseChange (ResidueField R)) := by
+    rw [← LinearMap.baseChange_comp]; congr 1
+  have hrange : LinearMap.range ((φ j).baseChange (ResidueField R))
+      = LinearMap.range ((LinearMap.range (φ j)).subtype.baseChange (ResidueField R)) := by
+    rw [hbc, LinearMap.range_comp, LinearMap.range_eq_top.mpr hsurj, Submodule.map_top]
+  have hE2 : Module.finrank (ResidueField R)
+      (LinearMap.range ((φ j).baseChange (ResidueField R))) = rnk (j + 1) := by
+    rw [hrange, LinearMap.finrank_range_of_inj hinj, Module.finrank_baseChange, hrank_eq]
+  -- McCoy: if `I ≤ 𝔪` then the reduced rank is `< rnk (j+1)`, contradicting E1 = E2 = rnk (j+1).
+  by_contra hne
+  have hle : LinearMap.idealOfMinors (rnk (j + 1)) (φ j) ≤ maximalIdeal R :=
+    IsLocalRing.le_maximalIdeal hne
+  rw [LinearMap.idealOfMinors_eq, ← IsLocalRing.ker_residue,
+    Matrix.idealOfMinors_le_ker_iff_rank_lt,
+    rank_map_residue_eq_finrank_range_baseChange, hE2] at hle
+  exact lt_irrefl _ hle
 
 end
