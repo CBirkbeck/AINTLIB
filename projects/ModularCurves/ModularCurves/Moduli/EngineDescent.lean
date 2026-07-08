@@ -252,7 +252,7 @@ theorem isPullback_chart [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x)
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
     (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
     (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
@@ -281,7 +281,7 @@ theorem isPullback_quotientπ [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x)
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
     (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
     (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
@@ -293,7 +293,7 @@ theorem isPullback_quotientπ [Finite G] [IsAffine X]
     (σE.iSup_quotientChart_eq_top VE hVEs hVEa) fun i => ?_
   have hW : σE.quotientπ VE hVEs hVEa hVEmem ⁻¹ᵁ σE.quotientChart VE hVEs hVEa i = VE i :=
     σE.quotientπ_preimage_quotientChart VE hVEs hVEa hVEmem i
-  refine (isPullback_chart hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree π' hπ' i).of_iso
+  refine (isPullback_chart hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree π' hπ' i).of_iso
     ((C.E).isoOfEq hW).symm (Iso.refl _) (Iso.refl _) (Iso.refl _) ?_ ?_ (by simp) (by simp)
   · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom,
       σE.morphismRestrict_quotientπ VE hVEs hVEa hVEmem i, ← Category.assoc,
@@ -362,7 +362,7 @@ theorem locallyWeierstrass_quotientπ [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x)
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
     (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
     (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
@@ -403,7 +403,7 @@ theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x)
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
       t ≫ σ.hom γ = t → IsEmpty T)
     (horbit : ∀ e : C.E, ∃ U : (C.E).Opens, IsAffineOpen U ∧
@@ -418,7 +418,7 @@ theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
   obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
     exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
   -- the descended local Weierstrass model, and proper/smooth from it
-  have hlw := locallyWeierstrass_quotientπ hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree
+  have hlw := locallyWeierstrass_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree
     π' zero' hzπ'
   haveI hproper : IsProper π' := isProper_of_locallyWeierstrass hlw
   haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
@@ -427,7 +427,7 @@ theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
   refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ'
             smooth := hsmooth, proper := hproper, localModel := hlw },
     σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
-  · exact isPullback_quotientπ hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree π' hπ'
+  · exact isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree π' hπ'
   · exact hzero'.symm
 
 end RouteA
