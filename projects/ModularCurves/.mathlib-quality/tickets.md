@@ -10039,3 +10039,32 @@ beastmode absent a redirect.
     Status: in_progress · Execution order A1 → B → A2.
 - Consumer chain: [GR-*] ⟶ wave-3 `grassmannianScheme` + T-points ⟶ NISOG [L15]
   `exists_nIsogSpace` (KM 6.5.1 ambient) ⟶ [L27] (M6). Zero overlap with live lanes.
+
+## Amendments v10.48 (2026-07-08, coordinator): ★★★ T-W7.1b DONE — THE COMPARISON THEOREM IS PROVEN; cascade gates FLIP
+
+- **MILESTONE ABSORBED (beastmode-A, commits 6f531139→7a81d093→7b527d7b)**: the faith wall
+  fell to the def-level interface refactor EXACTLY as chartered (the AdicSpaces recipe, not
+  local attributes): `coordRingToZSection` (the fixed e-independent chart conjugator —
+  rewriting the interface never materializes the giant term) → S1 became a 4-line proof →
+  M-appLE/M-recon scheme reconstruction → `pointedIso_exists_variableChange` assembled.
+  **Comparison.lean is SORRY-FREE**; all four leaves (b3x/b3y/b5/main) carry only
+  {propext, Classical.choice, Quot.sound}. T-W7.1b → DONE on the board.
+- **GATES THAT FLIP NOW**:
+  (1) **fable-P4's engine `localModel` leaf is UNBLOCKED** (it waited on T-W7.1b verbatim)
+  — the KM 4.7 engine's last gated leaf is open mid-session; FP4 consume immediately.
+  (2) **[Y1-ATLAS] iii/v OPEN** (they cited exactly the comparison lemmas just proven) —
+  P3b3's STREAM-Y1 big act is now fully ungated.
+  (3) **T-W7.12's residual = 0c-ii + 0h ONLY** (1a ✓, 1b ✓).
+  (4) T-E-OMEGA-R1 unlocked but stays DEMOTED/on-demand (v10.36).
+  (5) PIC0's `map_id` request (3-liner on A's private transport machinery, v10.42b) is
+  dispatchable at A's next session start.
+- **STAND-DOWN FLAG (P3b3, immediate)**: your sentinel shows a subagent still attempting
+  T-W7.1b's b5 injectivity — that leaf (`projModelVCIso_injective`) is PROVEN and
+  axiom-clean in the completed T-W7.1b. Stop the subagent; stay on STREAM-Y1, where
+  [Y1-ATLAS] iii/v just opened for you.
+- **beastmode-A next-session queue** (session closed PHASE-8, sentinel removed, charter in
+  CHARTER-A.md): (1) the `map_id` quick favor for PIC0 (3 lines, your machinery); (2) **0h
+  on the banked route the moment c5β board-signals 0c-ii** (the standing interrupt); then
+  the endgame (T-W7.12 → T-W7.36 with c5β). If 0h hasn't fired: take [STREAM-GH]'s first
+  wave IF fable-P4's B2 repoint has landed by then (GH queue rule, v10.45), else stage the
+  remaining PR-draft files (internal) and stand by.
