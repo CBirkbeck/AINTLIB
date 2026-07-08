@@ -195,11 +195,11 @@ private theorem be_forward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoet
     (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
       LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := sorry
 
+open Matrix in
 /-- **[McCoy annihilation — Cramer's rule].**  If `M *ᵥ x = 0` then every `m × m` minor of the
 `n × m` matrix `M` (`m` = number of columns) annihilates `x`.  For a bijective column selection this
 is `adjugate B * B = det B • 1` applied to `x ∘ ci`; a repeated column gives `det = 0`.  This is the
 computational heart of the acyclicity base case. -/
-open Matrix in
 private theorem det_submatrix_smul_eq_zero {S : Type*} [CommRing S] {n m : ℕ}
     (M : Matrix (Fin n) (Fin m) S) (x : Fin m → S) (hx : M *ᵥ x = 0)
     (ri : Fin m → Fin n) (ci : Fin m → Fin m) :
@@ -227,11 +227,11 @@ private theorem det_submatrix_smul_eq_zero {S : Type*} [CommRing S] {n m : ℕ}
       det_zero_of_column_eq hne (fun k => by simp [Matrix.submatrix_apply, hab])
     rw [hdet0, zero_smul]
 
+open Matrix in
 /-- **[McCoy injectivity — the length-1 acyclicity base case].**  `φ : Sᵐ → Sⁿ` is injective as soon
 as its ideal of maximal (`m × m`) column minors contains a nonzerodivisor, or is the whole ring.
 This is Stacks 00N1 for a complex of length 1, and it discharges the *top* exactness spot
 (= injectivity of the top differential) of the backward direction in `be_backward` below. -/
-open Matrix in
 private theorem injective_of_maxMinors_nonZeroDiv {S : Type*} [CommRing S] {n m : ℕ}
     (φ : (Fin m → S) →ₗ[S] (Fin n → S))
     (hcond : (∃ r ∈ LinearMap.idealOfMinors m φ, IsSMulRegular S r) ∨

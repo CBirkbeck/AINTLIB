@@ -1601,6 +1601,84 @@ lemma app_app_res_of_comp_eq_id {X Y : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ X)
   refine (hz (𝟙 X) hfg hVU).trans ?_
   rfl
 
+/-- Chart transports are compatible with restriction. -/
+lemma pointedIsoChartTransport_res {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W') {V V' : (projModel W).Opens}
+    (hV' : V' ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) (hVV' : V ≤ V')
+    (b' : AdjoinRoot (infChartCubic W')) :
+    (((projModel W).presheaf.map (homOfLE hVV').op).hom)
+      (pointedIsoChartTransport e hV' b') =
+    pointedIsoChartTransport e (hVV'.trans hV') b' := by
+  have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+    ((projModel W).presheaf.map_comp (homOfLE hV').op (homOfLE hVV').op)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+  refine hfuse.symm.trans ?_
+  exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+    (Subsingleton.elim _ _)
+
+/-- **Refinement with an invertible transported section unit**: every section prime admits a
+basic open inside the transported `Y'`-chart, avoiding the prime, on which the transported
+`U'` is a unit. -/
+lemma exists_basicOpen_transport_unit {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    ∃ (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))),
+      chartYSectionsRingEquiv W r ∉ P ∧
+      IsUnit (pointedIsoChartTransport e hr (sectionUnitElem W')) := by
+  have hp1 : chartPointOf W P ∈ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) :=
+    chartPointOf_mem_chartY W P
+  have hpe : chartPointOf W P ∈ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) :=
+    pointedIso_chartPointOf_mem_chartY e hez P ht
+  obtain ⟨r₁, hr₁le, hpr₁⟩ := (Proj.isAffineOpen_basicOpen
+    (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).exists_basicOpen_le
+    ⟨chartPointOf W P, hpe⟩ hp1
+  have hpU : chartPointOf W P ∈ (projModel W).basicOpen
+      (pointedIsoChartTransport e hr₁le (sectionUnitElem W')) := by
+    refine chartPointOf_mem_basicOpen_transport e hez hr₁le P ht hpr₁ _ ?_
+    rw [infChartAug_sectionUnitElem W']
+    exact isUnit_one
+  obtain ⟨r₂, hr₂le, hpr₂⟩ := (Proj.isAffineOpen_basicOpen
+    (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).exists_basicOpen_le
+    ⟨chartPointOf W P, hpU⟩ hp1
+  have hr₂le' : (projModel W).basicOpen r₂ ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) :=
+    le_trans (hr₂le.trans ((projModel W).basicOpen_le _)) hr₁le
+  refine ⟨r₂, hr₂le', (chartPointOf_mem_basicOpen_iff W P r₂).mp hpr₂, ?_⟩
+  have hres : pointedIsoChartTransport e hr₂le' (sectionUnitElem W') =
+      (((projModel W).presheaf.map (homOfLE hr₂le).op).hom)
+        ((((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+          (pointedIsoChartTransport e hr₁le (sectionUnitElem W')))).op).hom)
+          (pointedIsoChartTransport e hr₁le (sectionUnitElem W'))) := by
+    have h1 := pointedIsoChartTransport_res e hr₁le
+      (((projModel W).basicOpen_le (pointedIsoChartTransport e hr₁le
+        (sectionUnitElem W')))) (sectionUnitElem W')
+    have h2 := pointedIsoChartTransport_res e
+      ((((projModel W).basicOpen_le (pointedIsoChartTransport e hr₁le
+        (sectionUnitElem W')))).trans hr₁le) hr₂le (sectionUnitElem W')
+    refine ?_
+    rw [h1, h2]
+  rw [hres]
+  refine IsUnit.map _ ?_
+  exact AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen
+    (X := (projModel W).toLocallyRingedSpace.toRingedSpace)
+    (pointedIsoChartTransport e hr₁le (sectionUnitElem W'))
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
