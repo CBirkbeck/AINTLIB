@@ -6298,8 +6298,11 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     (`φ i`→`φ (i-1)`, machine-refuted sorry-free: `hrnk`+`hrnk_top` force `F_e=0` so `idealOfMinors(rnk(e-1))(φ(e-1))=⊥`,
     RHS false ∀ complex w/ rk(e-1)≥1; witness 0→ℚ→id→ℚ). FIXED 9f677b4e (matches Stacks 00N1). RESUMED [a89a32ed] on the
     now-TRUE statement for the ACTUAL BE.3 acyclicity proof. BE.1(McCoy)=T-FIT done; BE.2(⟹)+BE.3(⟸ Peskine–Szpiro induction).
-  - **[T-REES] IN PROGRESS** [a709a155] — close Grade.lean's `gradeGE_or_top_iff_forall_subsingleton_localizedExt`
-    (Rees 00LW grade⟺Ext-vanishing + degree-≥1 Ext-localisation; both confirmed mathlib-absent).
+  - **[T-REES] REES HALF DONE** [a709a155] — the classical Rees theorem (grade⟺Ext-vanishing over S_𝔮) PROVEN in full
+    (7 privates: k=1 boundary via `IsSMulRegular.subsingleton_linearMap_iff`; dimension shift via `smulShortComplex`
+    long-exact Ext; Rees induction), committed via sibling sweep. `gradeGE_localize` axiom-clean. Residual isolated to ONE
+    fact — **Ext-localization for higher Ext** `localizedModule_ext_subsingleton_iff` ((Extⁱ_S(S/I,S))_𝔮 ≅ Extⁱ_{S_𝔮}(...)),
+    mathlib-absent (degree-0 only). RESUMED to close it (finite free res + Hom-loc + localization-exact; bounded).
   - **GATED** (in BuchsbaumEisenbud.lean, dispatch after T-BE): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
