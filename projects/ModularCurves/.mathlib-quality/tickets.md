@@ -1993,6 +1993,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   Prerequisite landed: **[A711-UNIV]** — `IsFreeAlgebraAction`/`fixedPointsBaseChange` had
   `R A : Type u`, so `R = ℤ` (what the scheme side uses) was ill-typed; generalised to
   `(R : Type v) (A : Type u)` in `InvariantBaseChange.lean` + `InvariantTorsor.lean`.
+- **★★ [A711-DESC-gen] CLOSED (fable-P4, 2026-07-08, `ForMathlib/GaloisDescentModule.lean`,
+  axiom-clean)** — **Galois descent of semilinear modules**, the ring-level core of [a3-ii]:
+  for a free `G`-action on `A` (KM A7.1.1) and *any* `A`-module `M` with a semilinear `G`-action
+  (`g • (a • m) = (g•a) • (g•m)`), the map `A ⊗_{Aᴳ} Mᴳ → M`, `a ⊗ m ↦ a • m`, is **bijective**
+  (`descentMul_bijective`). Inverse `m ↦ ∑ᵢ aᵢ ⊗ (∑_g g • (bᵢ • m))`; injectivity is
+  `galoisCoords_dual`, surjectivity is `∑ᵢ aᵢ (g•bᵢ) = δ_{g,1}` applied to `∑_g g•m`.
+  *Fourth* use of the Galois coordinates. Mathlib has no faithfully-flat module descent.
+  Applied to `M = Γ(W)` for a `G`-stable affine open `W ⊆ E`, this says `Γ(W) ≅ Γ(W)ᴳ ⊗_{Aᴳ} A`,
+  i.e. **`W ≅ (W/G) ×_{X/G} X`** — exactly the cartesianness [a3-ii] asserts. What remains of
+  [a3-ii] is purely the geometric packaging (chart-wise ⟹ global `IsPullback`).
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 

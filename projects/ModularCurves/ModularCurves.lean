@@ -58,3 +58,4 @@ import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.Moduli.MellWeierstrass
 import ModularCurves.Moduli.EngineDescent
 import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.ForMathlib.GaloisDescentModule
