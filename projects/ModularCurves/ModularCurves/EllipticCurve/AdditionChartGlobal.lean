@@ -136,6 +136,14 @@ instance instIsOpenImmersionSpecMapTransAlgHom :
   rw [specMap_transAlgHom_eq]
   infer_instance
 
+lemma specMap_transAlgHom_opensRange :
+    (Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom)).opensRange =
+      specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (transFst W i j i' * transSnd W i j j') := by
+  simp only [specMap_transAlgHom_eq, Scheme.Hom.opensRange_comp_of_isIso,
+    Scheme.Opens.opensRange_ι]
+
+
 /-- The overlap of the `(i,j)` and `(i',j')` chart-products, as an open subscheme of `E ×_R E`.
 It is the image of `Spec transRing`; the map exhibiting it is an open immersion, being
 `Spec` of a localization followed by two open immersions. -/
@@ -148,6 +156,27 @@ noncomputable def transι :
 instance instIsOpenImmersionTransι : IsOpenImmersion (transι W i j i' j') := by
   rw [transι]
   infer_instance
+
+/-- `pullback.fst`/`.snd` cut `range(pieceι)` into the two chart ranges (`PullbackCarrier.range_map`). -/
+lemma pieceι_opensRange :
+    (pieceι W i j).opensRange =
+      pullback.fst (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W i).opensRange ⊓
+        pullback.snd (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W j).opensRange := by
+  apply TopologicalSpace.Opens.ext
+  show Set.range (pieceι W i j).base = _
+  rw [pieceι, Scheme.Pullback.range_map]
+  rfl
+
+/-- The overlap open, `range(transι)`, is `D(τ)` pushed into the `(i,j)` chart-product. -/
+lemma transι_opensRange :
+    (transι W i j i' j').opensRange =
+      pieceι W i j ''ᵁ ((chartPieceIso W i j).hom ⁻¹ᵁ
+        specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (transFst W i j i' * transSnd W i j j')) := by
+  show (Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j).opensRange = _
+  rw [Scheme.Hom.opensRange_comp, specMap_transAlgHom_opensRange, Scheme.Hom.comp_image,
+    Scheme.Hom.inv_image]
 
 /-- **(the overlap is symmetric)** Read through the `(i',j')` chart-product instead, the same
 open subscheme is obtained — this is `specMap_transHom_pieceι` (a468579e). -/
