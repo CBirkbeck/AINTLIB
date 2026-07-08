@@ -101,6 +101,27 @@ theorem endTrace_spec (f : E.asOver ⟶ E.asOver) :
     letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
     f * E.endDual f = E.mulBy (E.endTrace f) := sorry
 
+/-- **(T-END0d pin — KM 2.6.2.2 proof, polarization)** The defining polarization of the trace as
+the cross term of `deg` at the identity: `deg(1 + f) = 1 + deg f + tr f` (`1 = 𝟙 E.asOver`, `+` is
+the `Hom.commGroup` operation `*`). KM (verbatim, proof of Cor 2.6.2.2): *"deg(1+f) = 1 + deg(f) +
+(f + f^t)"*, with `f + f^t = [tr f]`. This is the bilinear-form engine of the T-G3b expansion. -/
+theorem endDeg_one_add (f : E.asOver ⟶ E.asOver) :
+    letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+    E.endDeg (𝟙 E.asOver * f) = 1 + E.endDeg f + E.endTrace f := sorry
+
+/-- **(T-END0c pin — KM 2.6.1.1, `deg` multiplicative)** The degree scales quadratically under
+post-composition by `[n]`: `deg(g ∘ [n]) = n² · deg g`. KM (verbatim, Cor 2.6.1.1): *"deg is
+multiplicative"* together with the displayed *"deg([N]) = N²"* — here `deg(g ≫ [n]) = deg g · deg [n]
+= deg g · n²`. -/
+theorem endDeg_comp_mulBy (n : ℤ) (g : E.asOver ⟶ E.asOver) :
+    E.endDeg (g ≫ E.mulBy n) = n ^ 2 * E.endDeg g := sorry
+
+/-- **(T-END0d pin — KM 2.6.2, `tr` linear)** The trace scales linearly under post-composition by
+`[n]`: `tr(g ∘ [n]) = n · tr g`. KM (verbatim, Thm 2.6.2): *"(f+g)^t = f^t + g^t"* (trace additive),
+with `g ≫ [n] = [n] ∘ g = n • g` in `End(E/S)`, so `tr(n • g) = n · tr g`. -/
+theorem endTrace_comp_mulBy (n : ℤ) (g : E.asOver ⟶ E.asOver) :
+    E.endTrace (g ≫ E.mulBy n) = n * E.endTrace g := sorry
+
 /-- **(T-G3b — KM 2.6.3 / 2.7.2 proof)** The degree quadratic expansion
 `deg(1 + g∘[N]) = 1 + N·tr g + N²·deg g`. Here `1 = 𝟙 E.asOver` (identity endomorphism), `+` is
 the pointwise `Hom.commGroup` operation `*`, and `g∘[N] = g ≫ [N]`. KM (verbatim, proof of Cor
@@ -108,7 +129,10 @@ the pointwise `Hom.commGroup` operation `*`, and `g∘[N] = g ≫ [N]`. KM (verb
 theorem endDeg_one_add_mulBy_comp (n : ℤ) (g : E.asOver ⟶ E.asOver) :
     letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
     E.endDeg (𝟙 E.asOver * (g ≫ E.mulBy n)) =
-      1 + n * E.endTrace g + n ^ 2 * E.endDeg g := sorry
+      1 + n * E.endTrace g + n ^ 2 * E.endDeg g := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  rw [E.endDeg_one_add (g ≫ E.mulBy n), E.endDeg_comp_mulBy n g, E.endTrace_comp_mulBy n g]
+  ring
 
 /-- **(T-G3c — KM 2.6.3(2))** The discriminant / Hasse–Cauchy–Schwarz bound `(tr g)² ≤ 4·deg g`.
 KM (verbatim, Thm 2.6.3(2)): *"(trace(f))² ≤ 4 deg(f)"*, proof *"deg(n − mf) ≥ 0."* Fibrewise via
