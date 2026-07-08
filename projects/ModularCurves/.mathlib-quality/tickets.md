@@ -1750,6 +1750,24 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
 - **Do not** re-derive the *scheme*-level quotient: `SchemeAction.quotient` +
   `existsUnique_quotientπ_lift` (T-Q5) are proven and sorry-free; this ticket is the
   *algebra*-level torsor/étale input that turns that quotient into a **torsor**.
+- **PROGRESS (fable-P4, 2026-07-08)**:
+  - First act discharged: read `Mathlib/RingTheory/Invariant/Galois.lean` end-to-end — it is
+    *number-theoretic* Galois (fields, integral closures, decomposition/inertia), **not** CHR
+    ring-Galois. No `A ⊗_{Aᴳ} A ≅ ∏_G A`, no étaleness. ⟹ **route (α) is dead; route (β)**
+    (prove CHR in ForMathlib) is the plan. Statement gate is already satisfied: the in-file
+    `IsFreeAlgebraAction` is KM A7.1.1's freeness *verbatim* (quote in the decl), so we prove
+    a source-anchored statement with our own Lean-checked proof — no memory-sourced maths.
+  - **STEP 1 LANDED, axiom-clean**: `chr_of_isFreeAlgebraAction` (InvariantTorsor.lean) —
+    KM-freeness at `R' := A ⧸ 𝔭` gives the CHR pointwise condition
+    `∀ 𝔭 prime, ∀ g ≠ 1, ∃ a, g • a − a ∉ 𝔭`. This is the exact hypothesis of CHR Thm 1.3.
+  - **Remaining plan** (each a leaf; est. 300–600 lines total): (2) from CHR-pointwise build
+    the *separability idempotent* / Galois-descent datum: for each `g ≠ 1` and each prime,
+    localize to get `∑ᵢ xᵢ · g(yᵢ) = δ_{g,1}` (compactness of `Spec Aᴳ`); (3)
+    `torsorMul_bijective` from (2) (the standard `A ⊗_{Aᴳ} A → ∏_G A` inverse built from the
+    Galois coordinates); (4) `Algebra.Etale.of_isFreeAlgebraAction` = unramified (from the
+    idempotent) + flat (from (3), `∏_G A` faithfully flat descent); (5) A7.1.2 by base change.
+  - If (2) proves harder than budgeted, **route (γ)**: OWNER ACTION — acquire CHR (Trans. AMS
+    52 (1965) 15–33) or SGA III Exp. V into `refs/`; the RR-only rule forbids assuming it.
 
 ### [T-E-OMEGA] the invariant differential `ω_{E/S}` — GAP TICKET (cut 2026-07-08, fable-P4)
 - **Status**: open, unclaimed · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
