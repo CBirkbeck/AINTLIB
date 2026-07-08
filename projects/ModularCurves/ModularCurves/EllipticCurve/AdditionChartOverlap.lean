@@ -97,6 +97,18 @@ lemma awayPairLeft_algebraMap (a b c : A) :
       algebraMap A (Localization.Away (a * b)) c :=
   IsLocalization.Away.awayToAwayLeft_eq b a c
 
+@[simp]
+lemma awayPairRight_toRingHom (a b : A) :
+    (awayPairRight R a b).toRingHom =
+      IsLocalization.Away.awayToAwayRight (S := Localization.Away a) a b :=
+  rfl
+
+@[simp]
+lemma awayPairLeft_toRingHom (a b : A) :
+    (awayPairLeft R a b).toRingHom =
+      IsLocalization.Away.awayToAwayLeft (S := Localization.Away b) b a :=
+  rfl
+
 end Away
 
 section Naturality

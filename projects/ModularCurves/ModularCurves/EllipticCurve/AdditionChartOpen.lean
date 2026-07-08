@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.AdditionChartCover
+import ModularCurves.EllipticCurve.AdditionChartOverlap
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
@@ -34,26 +35,26 @@ noncomputable def blOpenZPiece :
 /-- The three `D(t_k)` cover the law-2 regularity open, by construction. -/
 lemma blOpenYPiece_eq_iSup :
     blOpenYPiece W i j =
-      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawTwoTriple W i j k) := by
+      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k) := by
   rw [blOpenYPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
 
 /-- The three `D(s_k)` cover the law-1 regularity open, by construction. -/
 lemma blOpenZPiece_eq_iSup :
     blOpenZPiece W i j =
-      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawOneTriple W i j k) := by
+      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k) := by
   rw [blOpenZPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
 
 /-- The three `D(t_k)` as opens of the `(i,j)` piece — the cover of `blOpenYPiece`. -/
 noncomputable def blOpenYPieceFamily (k : Fin 3) :
     (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
-  (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawTwoTriple W i j k)
+  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)
 
 /-- The three `D(s_k)` as opens of the `(i,j)` piece — the cover of `blOpenZPiece`. -/
 noncomputable def blOpenZPieceFamily (k : Fin 3) :
     (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
-  (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawOneTriple W i j k)
+  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)
 
 lemma iSup_blOpenYPieceFamily : ⨆ k, blOpenYPieceFamily W i j k = blOpenYPiece W i j :=
   (blOpenYPiece_eq_iSup W i j).symm
@@ -82,7 +83,7 @@ variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
 noncomputable def addOnYOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
     (blOpenYPieceFamily W i j k).toScheme ⟶ projModel W :=
   morphismRestrict (chartPieceIso W i j).hom
-      (PrimeSpectrum.basicOpen (lawTwoTriple W i j k)) ≫
+      (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
     (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
       (lawTwoTriple W i j k)).inv ≫
     addOnYPieceMor W i j k hΔ
@@ -91,7 +92,7 @@ noncomputable def addOnYOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
 noncomputable def addOnZOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
     (blOpenZPieceFamily W i j k).toScheme ⟶ projModel W :=
   morphismRestrict (chartPieceIso W i j).hom
-      (PrimeSpectrum.basicOpen (lawOneTriple W i j k)) ≫
+      (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
     (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
       (lawOneTriple W i j k)).inv ≫
     addOnZPieceMor W i j k hΔ
@@ -103,8 +104,8 @@ coordinates are invertible, i.e. exactly the hypotheses of the cross-index crux
 lemma blOpenYPieceFamily_inf (k l : Fin 3) :
     blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l =
       (chartPieceIso W i j).hom ⁻¹ᵁ
-        PrimeSpectrum.basicOpen (lawTwoTriple W i j k * lawTwoTriple W i j l) := by
-  rw [blOpenYPieceFamily, blOpenYPieceFamily, PrimeSpectrum.basicOpen_mul]
+        specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k * lawTwoTriple W i j l) := by
+  rw [blOpenYPieceFamily, blOpenYPieceFamily, specBasicOpen_mul]
   rfl
 
 omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
@@ -112,9 +113,59 @@ omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
 lemma blOpenZPieceFamily_inf (k l : Fin 3) :
     blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l =
       (chartPieceIso W i j).hom ⁻¹ᵁ
-        PrimeSpectrum.basicOpen (lawOneTriple W i j k * lawOneTriple W i j l) := by
-  rw [blOpenZPieceFamily, blOpenZPieceFamily, PrimeSpectrum.basicOpen_mul]
+        specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k * lawOneTriple W i j l) := by
+  rw [blOpenZPieceFamily, blOpenZPieceFamily, specBasicOpen_mul]
   rfl
+
+section Agreement
+
+variable (hΔ : IsUnit W.Δ)
+
+/-- **(c4.2c)** The `k`-th and `l`-th pieces of `addOnY` agree on any open contained in both —
+necessarily the `D(t_k · t_l)` locus, where both coordinates are invertible.
+
+Stated with the overlap `Ω` as a parameter (plus the identifying equation `hΩ`) so that the
+`≤`-proofs stay irrelevant and no dependent rewriting is needed. After `subst hΩ` this is a bare
+application of the general transport lemma `homOfLE_morphismRestrict_agree` (ForMathlib), fed the
+ring-level `addOnYPieceMor_agree`.
+
+The transport lemma is stated over *variable* schemes on purpose: rewriting with
+`morphismRestrict_homOfLE` directly at this instantiation makes `whnf` unfold `Limits.pullback`,
+`MvPolynomial` and the quotient carrier of `biChartRing`, and no heartbeat budget survives that. -/
+lemma addOnYOnFamily_agree (k l : Fin 3) (hkl : l ≠ k)
+    (Ω : (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens)
+    (hk : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k))
+    (hl : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j l))
+    (hΩ : Ω = (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k * lawTwoTriple W i j l)) :
+    Scheme.homOfLE _ hk ≫ addOnYOnFamily W i j k hΔ =
+      Scheme.homOfLE _ hl ≫ addOnYOnFamily W i j l hΔ := by
+  subst hΩ
+  have hagree := addOnYPieceMor_agree W i j hΔ k l hkl
+  simp only [awayPairRight_toRingHom, awayPairLeft_toRingHom] at hagree
+  exact homOfLE_morphismRestrict_agree (CommRingCat.of (biChartRing W i j))
+    (chartPieceIso W i j).hom (lawTwoTriple W i j k) (lawTwoTriple W i j l) _ _ hagree
+
+/-- **(c4.2c)** The law-1 analogue of `addOnYOnFamily_agree`. -/
+lemma addOnZOnFamily_agree (k l : Fin 3) (hkl : l ≠ k)
+    (Ω : (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens)
+    (hk : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k))
+    (hl : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j l))
+    (hΩ : Ω = (chartPieceIso W i j).hom ⁻¹ᵁ
+      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k * lawOneTriple W i j l)) :
+    Scheme.homOfLE _ hk ≫ addOnZOnFamily W i j k hΔ =
+      Scheme.homOfLE _ hl ≫ addOnZOnFamily W i j l hΔ := by
+  subst hΩ
+  have hagree := addOnZPieceMor_agree W i j hΔ k l hkl
+  simp only [awayPairRight_toRingHom, awayPairLeft_toRingHom] at hagree
+  exact homOfLE_morphismRestrict_agree (CommRingCat.of (biChartRing W i j))
+    (chartPieceIso W i j).hom (lawOneTriple W i j k) (lawOneTriple W i j l) _ _ hagree
+
+end Agreement
 
 end Morphisms
 
