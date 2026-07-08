@@ -7457,3 +7457,31 @@ records why).*
   per v10.14 — `/develop --decompose` scoping of the KM Ch. 10 route, v10.8 discipline.
 - Also absorbed: A re-reboxed T-D6b with a sharper statement after their fresh-route attempt —
   the étale core remains the v10.10 stream's to discharge.
+
+## Amendments v10.21 (2026-07-08): T-IRR0 DONE — PR #5221 MERGED; the convergence finding; P3b3 → [T-B5D]+[T-DISC]
+
+- **P3b3 outran the directive**: T-IRR0 was already complete when the v10.20 release landed.
+  `/develop --decompose` delivered: `decomposition-km10.md` (KM Ch. 10 quotes pinned per leaf
+  — 10.1/10.2.5/10.6/10.8.2/10.9.1/10.9.2, PDF=print+11 confirmed independently),
+  `ModularCurve/IrreducibilityScoping.lean` (3456 jobs green, 3 intended shell sorries),
+  leaf tickets T-IRR1/2/3 (shell) + T-IRR-L2/L3/L5 (gap-streams).
+  **PR #5221 MERGED by coordinator** (light review: new-files + board only, no held files).
+- **HEADLINE FINDING (owner-relevant)**: KM Ch. 10's "algebraic route" is NOT analytic-free —
+  Cor. 10.9.2 (p. 303) proves connectedness by reducing to the geometric generic fibre and
+  then invoking the transcendental `M(𝒫)⊗ℂ ≅ ℍ/Γ̃`. Both routes bottom out at the SAME
+  statement (`Y⊗ℂ ≅ ℍ/Γ̃` connected). Consequence: the shell (L1/L4/MASTER — the reduction)
+  is buildable NOW; the core (L3 uniformisation + L2/L5) is **MAJOR-INFRA gated** on a
+  scheme-analytification functor (GAGA-adjacent, mathlib-absent) + the LeanModularForms
+  bridge — recorded as a FUTURE STREAM candidate, phase-3-aligned with the T-G* analytic
+  comparison. Not staffed now.
+- **Framing correction (v10.8 compliance)**: BB-IRR is NOT a "registered assumption" — it
+  remains a sorried STREAM TARGET whose discharge route is now planned (shell first; core
+  behind the named MAJOR-INFRA gaps), with every downstream use a tracked dependency edge
+  per the v3 de-black-boxing rule. Nothing here becomes permanent.
+- **P3b3 next claim: [T-B5D] + [T-DISC]** (v10.10) — sentinel sweep 2026-07-08T12:12 verified
+  the étale-bottleneck stream was NEVER staffed. It is the highest-value unstaffed item on
+  the board (reviewer work-order #4; T-D6b, T-D7-bridge and the T-D8-bridge box all funnel
+  to it; feeds the T-E7 Y₁(N) milestone). `/develop --decompose` first act per v10.8; file
+  discipline per v10.10 (new ForMathlib/bridge files only).
+- Queue note: **[T-Q2-proofs]** (v10.12, SGA III landed) remains the next unstaffed stream
+  after this — first worker to free takes it.
