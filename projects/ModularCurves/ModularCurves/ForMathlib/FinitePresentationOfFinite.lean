@@ -29,5 +29,6 @@ ring is of finite presentation as an algebra — no noetherian hypothesis (KM A7
 theorem Algebra.FinitePresentation.of_finite_of_projective
     (R A : Type*) [CommRing R] [CommRing A] [Algebra R A]
     [Module.Finite R A] [Module.Projective R A] :
-    Algebra.FinitePresentation R A := by
-  sorry
+    Algebra.FinitePresentation R A :=
+  haveI : Module.FinitePresentation R A := Module.finitePresentation_of_projective R A
+  Algebra.FinitePresentation.of_finitePresentation R A
