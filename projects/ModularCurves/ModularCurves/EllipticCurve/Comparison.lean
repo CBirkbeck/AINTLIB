@@ -86,16 +86,25 @@ lemma pointedIsoCoordEquiv_apply {W W' : WeierstrassCurve R}
           ((chartZRingEquiv W').symm x)))) :=
   rfl
 
-/-- **(T-W7.1b-faith, S1)** Equal coordinate isos have equal `pointedIsoΓ`. MATH CONFIRMED
-(the `pointedIsoCoordEquiv_apply` rfl above establishes the structural relationship). BLOCKED by
-the b1 chart-iso layer's REDUCIBILITY WALL: `chartZRingEquiv`, `basicOpenIsoAway`, `pointedIsoΓ`,
-`pointedIsoCoordEquiv` are all near Lean's term-size limit, so ANY proof-level manipulation
-(`rw`, injectivity, type-ascription) triggers `whnf`/`isDefEq` exhausting 200k heartbeats — even
-after `local irreducible`, because the chart isos in the wrappers still grind. FOUR routes tried
-(function-level, generic mid-cancel, small-goal rw, local-irreducible) — all wall. Closing needs
-b1-layer INFRASTRUCTURE: systematic irreducibility + a complete whnf-free interface (application /
-injectivity / cancellation lemmas) for the chart isos, done without breaking the merged
-b2/Comparison stack. A real sub-development, not a wire; recorded T-W7.1b-faith. -/
+-- v10.24(b): with the rfl interface (`pointedIsoCoordEquiv_apply`) proved above while the
+-- chart isos are reducible, seal ALL FOUR heavy b1 isos (+ the mathlib `basicOpenIsoAway`
+-- wrapper) `local irreducible`, so consumer proofs below never trigger `whnf`/`isDefEq` on
+-- the raw terms — the previous session's wall (only `pointedIsoCoordEquiv`/`pointedIsoΓ`
+-- sealed, wrappers still ground) is fixed by sealing the wrappers too.
+attribute [local irreducible] pointedIsoCoordEquiv pointedIsoΓ chartZRingEquiv
+  Proj.basicOpenIsoAway CategoryTheory.Iso.commRingCatIsoToRingEquiv
+
+/-- **(T-W7.1b-faith, S1)** Equal coordinate isos have equal `pointedIsoΓ`. REFINED FINDING
+(session 2, v10.24(b) attempt): sealing ALL heavy b1 isos `local irreducible` (above) DOES fix
+the generic-lemma steps — `hp` (chart-iso `symm_apply_apply`/`apply_symm_apply` cancellation)
+now compiles cheaply. But the wall PERSISTS on any `rw [pointedIsoCoordEquiv_apply]` / `change` /
+`.trans` that forces the elaborator's `isDefEq` on the heavy 4-fold-nested composite
+`chartZW(BOA.symm(pointedIsoΓ e (BOA'(chartZW'.symm ·))))` — because the terms are huge *as
+stated*, not merely when unfolded, so opacity doesn't shrink them. Only pure `rfl`
+(`pointedIsoCoordEquiv_apply`, kernel-checked once) survives. CONCLUSION: local attributes are
+insufficient; faith-infra needs DEFINITION-level irreducibility in `ModelVariableChange` + a
+rebuild of the b2 proofs that unfold these defs, replaced by interface lemmas — a systematic
+`/develop --decompose`-scale refactor. Boarded under T-W7.1b-faith-infra. -/
 lemma pointedIsoΓ_eq_of_coordEquiv {W W' : WeierstrassCurve R}
     (e e' : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
