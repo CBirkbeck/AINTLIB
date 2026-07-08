@@ -178,7 +178,42 @@ def mapFunctor (f : B →+* C) : MellWGroupoid B ⥤ MellWGroupoid C where
     show (h.1 * g.1).map f = h.1.map f * g.1.map f
     exact map_mul (VariableChange.mapHom f) h.1 g.1)
 
+@[simp] theorem eqToHom_val {W W' : MellWGroupoid B} (h : W = W') :
+    (eqToHom h).1 = 1 := by
+  subst h; rfl
+
+private theorem mapFunctor_id :
+    mapFunctor (RingHom.id B) = 𝟭 (MellWGroupoid B) := by
+  refine CategoryTheory.Functor.ext (fun W => congrArg mk (ellipticW.map_id W.pt)) ?_
+  intro W W' g
+  apply Subtype.ext
+  simp [VariableChange.map_id]
+
+private theorem mapFunctor_comp {D : Type*} [CommRing D] (f : B →+* C) (g : C →+* D) :
+    mapFunctor (g.comp f) = mapFunctor f ⋙ mapFunctor g := by
+  refine CategoryTheory.Functor.ext
+    (fun W => congrArg mk (ellipticW.map_comp f g W.pt).symm) ?_
+  intro W W' h
+  apply Subtype.ext
+  simp [VariableChange.map_map]
+
 end MellWGroupoid
+
+/-- **`M_ell^W` on coefficient rings**: the `[U/G]`-groupoid, as a `Cat`-valued functor
+on commutative rings. The scheme-level moduli functor is `Scheme.Γ ⋙ MellW`
+(`MellWScheme` below). Interface: the `@[simps]` projections. -/
+@[simps]
+def MellW : CommRingCat.{u} ⥤ Cat.{u, u} where
+  obj B := Cat.of (MellWGroupoid B)
+  map f := (MellWGroupoid.mapFunctor f.hom).toCatHom
+  map_id B := congrArg Functor.toCatHom MellWGroupoid.mapFunctor_id
+  map_comp f g := congrArg Functor.toCatHom (MellWGroupoid.mapFunctor_comp f.hom g.hom)
+
+/-- **The Weierstrass moduli stack functor `M_ell^W = [U/G]` on schemes** (T-W6's
+object): groupoid-valued via global sections. Contravariant: a morphism of schemes
+pulls Weierstrass data back along its `Γ`-map. -/
+def MellWScheme : Scheme.{u}ᵒᵖ ⥤ Cat.{u, u} :=
+  Scheme.Γ ⋙ MellW
 
 theorem ringHomOfEllipticW_ellipticWOfRingHom (φ : WeierstrassAtlasRing →+* B) :
     ringHomOfEllipticW (ellipticWOfRingHom φ) = φ := by
@@ -197,5 +232,14 @@ theorem ringHomOfEllipticW_ellipticWOfRingHom (φ : WeierstrassAtlasRing →+* B
         WeierstrassCurve.map, universalWeierstrass, Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons,
         Matrix.cons_val_three, Matrix.cons_val_four]
+
+/-- **The atlas dictionary, bundled** (T-W4's headline): ring maps out of the atlas
+ring — equivalently, by `Γ`–`Spec` adjunction, scheme maps into `U = weierstrassAtlas`
+— correspond exactly to Weierstrass curves with invertible discriminant. -/
+noncomputable def atlasDictionary : (WeierstrassAtlasRing →+* B) ≃ ellipticW B where
+  toFun := ellipticWOfRingHom
+  invFun := ringHomOfEllipticW
+  left_inv := ringHomOfEllipticW_ellipticWOfRingHom
+  right_inv := ellipticWOfRingHom_ringHomOfEllipticW
 
 end ModularCurves
