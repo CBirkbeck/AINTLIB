@@ -147,6 +147,36 @@ instance : (tateCurveLocOver R).IsElliptic :=
     exact IsLocalization.map_units (Localization.Away (tateCurveOver R).Δ)
       ⟨(tateCurveOver R).Δ, Submonoid.mem_powers _⟩
 
+/-- Δ of the universal Tate curve is divisible by `B³` (`B = X 1`): the Tate-normal discriminant
+factors as `Δ(A, B) = B³·(A⁴ − A³ + 8A²B − 36AB + 16B² + 27B)` (Loeffler Def 3.3.3). -/
+lemma tateB_cube_dvd_Δ :
+    ((MvPolynomial.X 1 : MvPolynomial (Fin 2) R)) ^ 3 ∣ (tateCurveOver R).Δ := by
+  refine ⟨-(MvPolynomial.X 0 ^ 2 + 4 * MvPolynomial.X 1) ^ 2 - 8 * MvPolynomial.X 0 ^ 3 +
+    9 * MvPolynomial.X 0 * (MvPolynomial.X 0 ^ 2 + 4 * MvPolynomial.X 1) - 27 * MvPolynomial.X 1, ?_⟩
+  simp only [tateCurveOver, tateCurve, WeierstrassCurve.map, WeierstrassCurve.Δ,
+    WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈,
+    MvPolynomial.map_X, map_zero]
+  ring
+
+/-- **The atlas marking is `≠ 0` in every fibre, ring level.** `B = a₃` is a unit of the atlas
+ring `R[A, B][Δ⁻¹]`: `B³ ∣ Δ` and `Δ` is inverted, so `B` is a unit. This is the `P ≠ 0` /
+`2P ≠ 0` / `3P ≠ 0` engine for `P₀ = (0, 0)`, since `ψ₂(0,0) = B` and `ψ₃(0,0) = b₈ = B³`. -/
+lemma isUnit_algebraMap_tateB :
+    IsUnit (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) := by
+  have hΔ : IsUnit (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (tateCurveOver R).Δ) :=
+    IsLocalization.Away.algebraMap_isUnit (tateCurveOver R).Δ
+  have h3 : IsUnit ((algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) ^ 3) := by
+    rw [← map_pow]
+    exact isUnit_of_dvd_unit ((algebraMap _ (tateRingOver R)).map_dvd (tateB_cube_dvd_Δ R)) hΔ
+  exact (isUnit_pow_iff (by norm_num)).mp h3
+
+/-- `a₃` of the atlas curve is a unit (`= B`, the atlas marking). -/
+lemma isUnit_tateA₃ : IsUnit (tateCurveLocOver R).a₃ := by
+  have h : (tateCurveLocOver R).a₃ =
+      algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1) := by
+    simp [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
+  rw [h]; exact isUnit_algebraMap_tateB R
+
 /-- The base of the marked Tate atlas: `𝒴 = Spec R[A, B][∆⁻¹]` (Loeffler's `Y`, Def 3.3.6). -/
 noncomputable def tateBase : Scheme.{u} :=
   Spec (CommRingCat.of (tateRingOver R))
