@@ -177,6 +177,54 @@ commutator, so `det` gives `λⁿ = 1`. Prop 3.8.1 (leaf T-D5e, itself resting o
 `sorry` here and proved in its sub-tickets. The assembly `deligne_pointConv_pow` (T-D5g) then
 combines it with `pow_eq_one_of_smul_one_eq_commutator`. -/
 
+/-! ### General right-multiplication lemmas (Hopf-free)
+
+The commutator computation of Prop 3.8.1 rests on two facts about right multiplication in a
+commutative `S`-algebra `M`, neither involving Hopf algebras:
+
+* conjugating `R_u` (right mult by a unit `u`) by an `S`-algebra automorphism `τ` gives
+  `R_{τ(u)}`, so `τ R_u τ⁻¹ R_{u}⁻¹ = R_{u⁻¹ · τ(u)}` (`mulRight_conj_mulRight_inv`);
+* over `M = S ⊗_R A`, right multiplication by `λ ⊗ 1` is the scalar `λ • id`
+  (`mulRight_tmul_one`). -/
+
+section RightMul
+
+variable {S : Type u} [CommRing S] {M : Type w} [CommRing M] [Algebra S M]
+
+/-- Conjugating right-multiplication `R_u` by an `S`-algebra automorphism `τ` and then
+composing with `R_{u⁻¹}` yields right-multiplication by `u⁻¹ · τ(u)`:
+`τ ∘ R_u ∘ τ⁻¹ ∘ R_{u⁻¹} = R_{u⁻¹ · τ(u)}`. Pure ring theory (`map_mul`, associativity). -/
+theorem mulRight_conj_mulRight_inv (τ : M ≃ₐ[S] M) (u : Mˣ) :
+    (τ.toLinearMap ∘ₗ LinearMap.mulRight S (↑u : M)) ∘ₗ
+        (τ.symm.toLinearMap ∘ₗ LinearMap.mulRight S (↑u⁻¹ : M))
+      = LinearMap.mulRight S ((↑u⁻¹ : M) * τ (↑u : M)) := by
+  ext y
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulRight_apply,
+    AlgEquiv.toLinearMap_apply, map_mul, AlgEquiv.apply_symm_apply]
+  ring
+
+end RightMul
+
+section RightMulTensor
+
+variable {R : Type u} [CommRing R] {S : Type u} [CommRing S] [Algebra R S]
+variable {A : Type v} [CommRing A] [Algebra R A]
+
+/-- Over `M = S ⊗_R A`, right multiplication by `λ ⊗ 1` is the scalar `λ • id_M`
+(`R_{λ⊗1} = λ • id`). This is the identification `ℓ = λ • Iₙ` of Tate §3.8 (p. 144). -/
+theorem mulRight_tmul_one (lam : S) :
+    LinearMap.mulRight S ((lam ⊗ₜ[R] 1 : S ⊗[R] A)) = lam • LinearMap.id := by
+  refine LinearMap.ext fun z => ?_
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul s a =>
+      simp only [LinearMap.mulRight_apply, Algebra.TensorProduct.tmul_mul_tmul, mul_one,
+        LinearMap.smul_apply, LinearMap.id_coe, id_eq, TensorProduct.smul_tmul', smul_eq_mul]
+      rw [mul_comm s lam]
+  | add z w hz hw => simp only [map_add, hz, hw]
+
+end RightMulTensor
+
 section Commutator
 
 variable {R : Type u} [CommRing R]
