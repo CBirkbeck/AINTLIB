@@ -7202,3 +7202,37 @@ leaf live in decomposition-pic-coh.md (quote-or-delete enforced).*
 GME (2.16)/(2.17) statements: cut AFTER T-PIC-GAP1 resolves. Semicontinuity ([Mum]
 Cor 1) and Hida's surjectivity clause: explicitly out of pin, not cut (decomposition
 records why).*
+
+## Amendments v10.15 (2026-07-08): p0 report absorbed — GO on T-G3b–e against the pins; T-END0a gate re-check; DS-END0 registered
+
+- **p0 report absorbed** (all three v10.2/v10.5 assignments closed):
+  (1) **T-D6b reboxed** per protocol (81689211) — `comap_mul` does NOT unblock it; the true
+  core is the absent étale layer (flf rank-N group scheme over a field, N invertible ⟹ finite
+  étale ⟹ N distinct points; BB-DIFF / the (3)⟺(4) discriminant criterion). **That is EXACTLY
+  the v10.10 stream [T-B5D]+[T-DISC]** — dependency edges recorded: the v10.10 worker is the
+  un-blocker for T-D6b, T-D7-bridge and the T-D8-bridge box. beastmode-A's immediate re-claim
+  (8e48acdd) + fresh route (33630479, "reduces to closed-in-étale-over-k̄ reduced") noted —
+  the v10.14 wire PREEMPTS it until #5220 closes.
+  (2) **T-KMQ DONE** — quote-debt ledger + reclassification banked; locator caveat for all
+  future KM cites: **PDF page = print page + 11**.
+  (3) **T-END0 first act DONE** (745cd328, 985d011d) — see the EOF leaf-ticket section.
+- **DECISION (owner-relayed): GO — execute T-G3b/c/d/e against the DS-END0 pins NOW.** This is
+  the DS-register pattern as designed: prove G3b (quadratic expansion), G3d (divisibility),
+  G3e (positive-definiteness) from the pins; G3c by IMPORT of HasseWeil
+  `hasse_bound`/degree-quadratic through the T-RED0 transfer. With
+  `gme_deg_trace_forces_zero` already PROVEN, `aut_hom_eq_id_of_fullLevel` then closes modulo
+  the registered data — rigidity lands for T-E10 / T-E9-rigid-half / T-H6 with the residual
+  concentrated exactly in T-END0a/b.
+- **T-END0a gate re-check (p0: do this FIRST)**: fable-P4's T-W7.7/T-W7b milestone left
+  Rigidity.lean sorry-free (GIT 6.1→6.6), and T-E4a-noeth consumes C3′
+  (`isMonHom_of_one_comp_eq'`) axiom-cleanly — so pointed-morphism-additivity IS proven over
+  locally-noetherian bases. If that is the T-G2 statement END0a rests on, the ring instance is
+  open NOW at loc-noeth generality: take the established future-proof pattern (T-E4a-noeth
+  precedent) — state `Ring (End E)` under `[IsLocallyNoetherian S]`, drop-in swap to
+  unrestricted when T-W7.8 lands. Park END0a only if the needed statement is verified-in-file
+  to be genuinely the unrestricted one.
+- **T-END0b's gate is a LIVE stream, not a deferral**: the Abel/Pic⁰ autoduality it rests on
+  is fable-PIC0's claimed T-PIC0+COH-1 stream (v10.11). Dependency edge recorded both ways —
+  fable-PIC0 should know T-END0b consumes their headline.
+- **DS-END0 registered** in plan.md's DATA-SORRY REGISTER (coordinator repair of the
+  same-commit rule — the skeleton commit predates the register entry).

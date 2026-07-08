@@ -97,6 +97,18 @@ those). Register (construction ticket in parentheses):
 | `projModelPointsEquiv` | EllipticCurve/PointsDictionary.lean | T-W7.0f (+ §2-P2 value-lemmas) |
 | `EllipticCurveGeom.negHom`, `.mulHom`, `.grpObj` | EllipticCurve/GroupLawDescent.lean | T-W7.12 / T-W7.36 |
 
+**DS-END0 block (added 2026-07-08, coordinator — repairing the same-commit rule for the
+T-END0 skeleton 745cd328):**
+
+| DS-END0 defs | File | Ticket |
+|---|---|---|
+| `endDeg`, `endDual`, `endTrace` | EllipticCurve/EndomorphismDegree.lean | T-END0b (deg/dual) / T-END0d (trace) |
+
+Pins (consumers may use ONLY these): `endDual_comp_self` (KM 2.6.1), `endDeg_mulBy`
+(KM 2.6.1.1), `endDual_mulBy` (KM 2.6.2.1), `endTrace_spec` (KM 2.6.2.2). Discharge route:
+Abel/Pic⁰ autoduality — a LIVE dependency on fable-PIC0's T-PIC0+COH-1 stream (tickets.md
+§v10.11) — + the HasseWeil anchors in decomposition-end0.md.
+
 Rule for future decompose passes: skeleton `def := sorry` decls MUST be added to this
 register in the same commit that creates them.
 
