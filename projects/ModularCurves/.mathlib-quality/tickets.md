@@ -9905,3 +9905,42 @@ IsColimit), + the algebra foundation (56a95f91, 623758cd, bee2bc05, 98cd93a1).*
 - mathlib pieces reused: `isPullback_SpecMap_of_isPushout`, `CommRingCat.isPushout_tensorProduct`,
   `IsKernelPair.toCoequalizer'`, `flat_and_surjective_SpecMap_iff`, `isRegularEpi_of_flat_of_surjective_of_isAffine`.
 - p0 continues per beastmode; crux (2) awaits the v10.38 scoping call, coordinator input welcome.
+
+## Amendments v10.47 (2026-07-08, coordinator): FP4 MILESTONE — route (a)'s mathematics DONE; c5β c4.3 ring layer complete
+
+- **★★ FP4 MILESTONE ABSORBED: the KM-4.7 engine's mathematics is finished** (all
+  axiom-clean): [A711-DESC] closed (bcba6062 — multiplicative Hilbert 90 at local base; the
+  full VariableChange cocycle (u,r,s,t) trivializes Zariski-locally); [a1] KM's θ(g) is a
+  free G-action on the universal curve (4a0ea042); [a2] **E/G EXISTS** (1ce03935 — the
+  D₊(X₁)/D₊(X₂) G-stable affine atlas; Stacks 01ZY / IsQuasiProjective confirmed absent
+  from mathlib AND unneeded); [a3-i] π'/zero' descend with zero' ≫ π' = 𝟙 (cf0b3231);
+  **[T-Q2-BRIDGE]** geometric freeness ⟹ IsFreeAlgebraAction on stable charts (a6c03b6c;
+  universe-freeing fix in InvariantTorsor/InvariantBaseChange) — every stable affine chart
+  is a finite G-torsor; **[A711-DESC-gen] Galois descent of SEMILINEAR modules**
+  (3ac52935/b4e69b53 — the Galois coordinates' fourth job; mathlib cannot do this),
+  packaged as `Algebra.IsPushout` so **KM's appeal to SGA I VIII 7.8 is now a pushout of
+  rings**. LEDGER: T-Q2-BRIDGE + semilinear descent + local Hilbert 90 flagged upstream-grade.
+- **Engine remainder = 3 routed sorries in Moduli/EngineDescent.lean, none new math**:
+  `isPullback_quotientπ` (glue chart pushouts; Zariski-local, X affine), 
+  `isProper_smooth_quotient` (descend along the finite étale surjection via the T-Q2
+  package), `exists_ellipticCurveGeom_quotient` (assembly — its **localModel leaf waits on
+  T-W7.1b**: recorded as the W7 endgame's FIFTH dependent cascade). The group law never
+  enters (toEllipticCurve upgrades post-T-W7).
+- **STALE-CLAIM CORRECTION (FP4, verify at pickup)**: "[A711-FP] the lone remaining sorry"
+  is superseded — **fable-FP discharged [A711-FP] and flipped the general-base étale
+  theorem (v10.44)**. Sync InvariantTorsor.lean's actual state before scaffolding around a
+  gap that may no longer exist; if the flip landed, the engine has NO general-base gap.
+- **c5β — c4.3 RING LAYER COMPLETE** (ac80a22d, db1ec632, d7bb1828), cheaper than predicted.
+  **Structural note of record**: every map in the construction is a `chartHomOfTriple` —
+  one universal property covers the chart-product legs, the transition, and all three law
+  pieces; the single crux `chartι_comp_specMap_chartAwayHom_eq` discharges EVERY
+  compatibility; *"there is no second crux, and there never was going to be one."* Sharper
+  lemma landed: `chartHomOfTriple_congr_of_smul` (scalar NOT assumed a unit — the witnesses
+  force it; the bidegree-(2,2) factor is never named, inverted, or transported — it
+  cancels). **v10.24(c) validated in the field**: both variable-scheme transports applied
+  verbatim one increment later. Two rw traps banked: `rw [mul_comm]` inside a
+  `Localization.Away (a*b)` context retypes the motive (the away element is a product);
+  `subst` on an index equation breaks the `OreLocalization.instOne` motive — rewrite the
+  ring ELEMENT, not the index. Remaining c4.3 = geometry only (Spec transRing intersection
+  via the chartPieceIso recipe; glueMorphisms over chartProductCover) → c4.4 → c4.5 →
+  0c-i closes → report at 0c-ii. No redirect.
