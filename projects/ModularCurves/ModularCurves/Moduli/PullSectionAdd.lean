@@ -99,7 +99,7 @@ lemma dict_transportSection_pullSection (P : Y.curve.Section) :
 /-- **(GME Cor 2.2.5 over a locally noetherian base)** The transport along the pointed
 comparison isomorphism is additive: the two independent group structures correspond, by
 the canonicity chain (`isMonHom_of_one_comp_eq'`, GIT Cor 6.4). -/
-lemma transportSection_add [IsLocallyNoetherian ↥X.base] (s s' : X.curve.Section) :
+lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section) :
     transportSection R f (s + s')
       = transportSection R f s + transportSection R f s' := by
   haveI : Smooth X.curve.π := SmoothOfRelativeDimension.smooth (n := 1) (f := X.curve.π)
@@ -166,7 +166,7 @@ lemma transportSection_add [IsLocallyNoetherian ↥X.base] (s s' : X.curve.Secti
 source base is locally noetherian: GME Cor 2.2.5 through the T-W7.7 canonicity chain.
 The unrestricted `pullSection_add` stays parked behind T-W7.8 (owner decision
 2026-07-08: `EllObj R` keeps arbitrary bases). -/
-theorem pullSection_add_of_isLocallyNoetherian [IsLocallyNoetherian ↥X.base]
+theorem pullSection_add_of_isLocallyNoetherian [IsLocallyNoetherian X.base]
     (P Q : Y.curve.Section) :
     EllHom.pullSection R f (P + Q)
       = EllHom.pullSection R f P + EllHom.pullSection R f Q := by

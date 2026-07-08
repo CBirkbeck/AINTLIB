@@ -126,8 +126,8 @@ theorem mul_pointConv_antipode_eq_one (φ : A →ₐ[R] B) :
       * (toConv (φ.toLinearMap ∘ₗ antipode R)) ((Coalgebra.ℛ R a).right i)
       = φ ((Coalgebra.ℛ R a).left i * antipode R ((Coalgebra.ℛ R a).right i)) :=
     fun i => by simp [pointConv, map_mul]
-  rw [Finset.sum_congr rfl fun i _ => hsum i, ← map_sum,
-    sum_mul_antipode_eq_algebraMap_counit (Coalgebra.ℛ R a), AlgHom.commutes]
+  simp only [hsum]
+  rw [← map_sum, sum_mul_antipode_eq_algebraMap_counit (Coalgebra.ℛ R a), AlgHom.commutes]
 
 /-- **(T-D5c — corollary.)** A `B`-point `φ` is a *unit* in `A'_B` (its convolution inverse
 being `φ ∘ S`). This is the statement that the points of `G` are group-like elements of `A'`,

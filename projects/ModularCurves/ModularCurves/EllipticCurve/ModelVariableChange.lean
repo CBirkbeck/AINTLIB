@@ -2796,6 +2796,65 @@ private lemma app_app_eqToHom_of_comp_eq_id {X Y : Scheme.{u}} (f : X ⟶ Y) (g 
   rw [hone, CategoryTheory.Functor.map_id]
   rfl
 
+/-- The chart transport of the inverse composes to the identity. -/
+private lemma pointedIsoΓ_symm_apply {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (z : ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
+    pointedIsoΓ e hez (pointedIsoΓ e.symm (pointedIso_hez_symm e hez) z) = z := by
+  have hΓ1 : pointedIsoΓ e.symm (pointedIso_hez_symm e hez) z =
+      (((projModel W').presheaf.map (eqToHom
+        (pointedIso_preimage_zChart e.symm (pointedIso_hez_symm e hez)).symm).op).hom)
+        ((e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).hom z) := by
+    refine (congrArg (fun ψ : _ →+* _ => ψ z)
+      (Iso.commRingCatIsoToRingEquiv_toRingHom
+        ((asIso (e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).trans
+          ((projModel W').presheaf.mapIso (eqToIso
+            (pointedIso_preimage_zChart e.symm
+              (pointedIso_hez_symm e hez)).symm).op)))).trans ?_
+    rw [Iso.trans_hom]
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply]
+    rfl
+  have hΓ2 : ∀ w : ↑Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))),
+      pointedIsoΓ e hez w =
+      (((projModel W).presheaf.map (eqToHom
+        (pointedIso_preimage_zChart e hez).symm).op).hom)
+        ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom w) := by
+    intro w
+    refine (congrArg (fun ψ : _ →+* _ => ψ w)
+      (Iso.commRingCatIsoToRingEquiv_toRingHom
+        ((asIso (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).trans
+          ((projModel W).presheaf.mapIso (eqToIso
+            (pointedIso_preimage_zChart e hez).symm).op)))).trans ?_
+    rw [Iso.trans_hom]
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply]
+    rfl
+  rw [hΓ1, hΓ2]
+  exact app_app_eqToHom_of_comp_eq_id e.hom e.inv e.hom_inv_id
+    (pointedIso_preimage_zChart e.symm (pointedIso_hez_symm e hez))
+    (pointedIso_preimage_zChart e hez) z
+
+/-- The coordinate transport of the inverse composes to the identity. -/
+lemma pointedIsoCoordEquiv_symm_apply {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (a : W.toAffine.CoordinateRing) :
+    pointedIsoCoordEquiv e heπ hez (pointedIsoCoordEquiv e.symm
+      (pointedIso_heπ_symm e heπ) (pointedIso_hez_symm e hez) a) = a := by
+  apply (chartZSectionsRingEquiv W).symm.injective
+  refine (pointedIsoCoordEquiv_sections e heπ hez _).trans ?_
+  refine (congrArg (pointedIsoΓ e hez)
+    (pointedIsoCoordEquiv_sections e.symm (pointedIso_heπ_symm e heπ)
+      (pointedIso_hez_symm e hez) a)).trans ?_
+  exact pointedIsoΓ_symm_apply e hez _
+
 /-- **Forward inclusion of the filtration transport**: the induced coordinate isomorphism
 maps the pole-order filtration into the pole-order filtration. -/
 lemma pointedIsoCoordEquiv_filtration_le {W W' : WeierstrassCurve R}
