@@ -1937,6 +1937,110 @@ lemma exists_basicOpen_root_mem_span_transport {W W' : WeierstrassCurve R}
     exact hr₀U.map _
   · exact mirror_span_aux e hr'le hrleE hrle' hmirror
 
+/-- **The division pack**: a basic open avoiding the prime on which all four division
+inputs hold — both section units invertible and `s` in the transported span. -/
+lemma exists_basicOpen_division_pack {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    ∃ (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+      (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))),
+      chartYSectionsRingEquiv W r ∉ P ∧
+      IsUnit (pointedIsoChartTransport e hr (sectionUnitElem W')) ∧
+      IsUnit ((((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+        ((chartYSectionsRingEquiv W).symm (sectionUnitElem W))) ∧
+      (((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom
+        ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W)))) ∈
+      Ideal.span {pointedIsoChartTransport e hr (AdjoinRoot.root (infChartCubic W')),
+        pointedIsoChartTransport e hr (infChartTElem W')} := by
+  obtain ⟨r₀, hr₀, hr₀P, hr₀U, hr₀span⟩ :=
+    exists_basicOpen_root_mem_span_transport e hez P ht
+  have hUP : sectionUnitElem W ∉ P := by
+    intro hU
+    have hker : sectionUnitElem W - 1 ∈ P := by
+      have h1 := sectionUnitElem_sub_one_mem W
+      have h2 : Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} ≤ P := by
+        rw [Ideal.span_le]
+        rintro x (rfl | rfl)
+        · exact root_mem_of_tel_mem W P ht
+        · exact ht
+      exact h2 h1
+    have hone : (1 : AdjoinRoot (infChartCubic W)) ∈ P := by
+      have := P.sub_mem hU hker
+      simpa using this
+    exact (inferInstance : P.IsPrime).ne_top
+      (Ideal.eq_top_of_isUnit_mem P hone isUnit_one)
+  have hpU : chartPointOf W P ∈ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) := by
+    rw [chartPointOf_mem_basicOpen_iff, RingEquiv.apply_symm_apply]
+    exact hUP
+  have hpr₀ : chartPointOf W P ∈ (projModel W).basicOpen r₀ :=
+    (chartPointOf_mem_basicOpen_iff W P r₀).mpr hr₀P
+  obtain ⟨r, hrle, hpr⟩ := (Proj.isAffineOpen_basicOpen
+    (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (mk_X_mem_quotientGrading_one W 1) one_pos).exists_basicOpen_le
+    ⟨chartPointOf W P, show chartPointOf W P ∈ (projModel W).basicOpen r₀ ⊓
+      (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm (sectionUnitElem W))
+      from ⟨hpr₀, hpU⟩⟩ (chartPointOf_mem_chartY W P)
+  have hrle₀ : (projModel W).basicOpen r ≤ (projModel W).basicOpen r₀ :=
+    hrle.trans inf_le_left
+  have hrleU : (projModel W).basicOpen r ≤ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) :=
+    hrle.trans inf_le_right
+  have hr' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) := hrle₀.trans hr₀
+  refine ⟨r, hr', (chartPointOf_mem_basicOpen_iff W P r).mp hpr, ?_, ?_, ?_⟩
+  · have hres := pointedIsoChartTransport_res e hr₀ hrle₀ (sectionUnitElem W')
+    rw [← hres]
+    exact hr₀U.map _
+  · have hunit0 : IsUnit ((((projModel W).presheaf.map (homOfLE
+        ((projModel W).basicOpen_le ((chartYSectionsRingEquiv W).symm
+          (sectionUnitElem W)))).op).hom)
+        ((chartYSectionsRingEquiv W).symm (sectionUnitElem W))) :=
+      AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen
+        (X := (projModel W).toLocallyRingedSpace.toRingedSpace)
+        ((chartYSectionsRingEquiv W).symm (sectionUnitElem W))
+    have hpush := hunit0.map (((projModel W).presheaf.map (homOfLE hrleU).op).hom)
+    have hstep := congrArg (fun φ => CommRingCat.Hom.hom φ
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)))
+      ((projModel W).presheaf.map_comp
+        (homOfLE ((projModel W).basicOpen_le
+          ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)))).op
+        (homOfLE hrleU).op)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hstep
+    have halign := congrArg (fun ψ => (CommRingCat.Hom.hom
+      ((projModel W).presheaf.map ψ))
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)))
+      (Subsingleton.elim ((homOfLE ((projModel W).basicOpen_le
+        ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)))).op ≫
+        (homOfLE hrleU).op)
+        ((homOfLE ((projModel W).basicOpen_le r)).op))
+    have hval := (hstep.symm.trans halign)
+    exact hval ▸ hpush
+  · have hpush := span_pair_map_mem
+      (((projModel W).presheaf.map (homOfLE hrle₀).op).hom) hr₀span
+    have hσ := pointedIsoChartTransport_res e hr₀ hrle₀
+      (AdjoinRoot.root (infChartCubic W'))
+    have hτ := pointedIsoChartTransport_res e hr₀ hrle₀ (infChartTElem W')
+    rw [hσ, hτ] at hpush
+    have hstep := congrArg (fun φ => CommRingCat.Hom.hom φ
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
+      ((projModel W).presheaf.map_comp
+        (homOfLE ((projModel W).basicOpen_le r₀)).op (homOfLE hrle₀).op)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hstep
+    have halign := congrArg (fun ψ => (CommRingCat.Hom.hom
+      ((projModel W).presheaf.map ψ))
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
+      (Subsingleton.elim ((homOfLE ((projModel W).basicOpen_le r₀)).op ≫
+        (homOfLE hrle₀).op) ((homOfLE ((projModel W).basicOpen_le r)).op))
+    exact mem_of_eq_of_mem (hstep.symm.trans halign).symm hpush
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
