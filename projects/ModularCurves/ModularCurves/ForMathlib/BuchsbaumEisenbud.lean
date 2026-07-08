@@ -572,6 +572,144 @@ private noncomputable def freeLocEquiv {S : Type*} [CommRing S] (q : Ideal S) [q
   IsLocalizedModule.iso q.primeCompl
     (LinearMap.pi fun k => (Algebra.linearMap S (Localization.AtPrime q)).comp (LinearMap.proj k))
 
+section LocalizedHomologyTransport
+
+open Submodule LinearMap IsLocalizedModule Matrix
+
+variable {R : Type*} [CommRing R] (p : Submonoid R)
+variable {F G P Fq Gq Pq : Type*}
+  [AddCommGroup F] [Module R F] [AddCommGroup G] [Module R G] [AddCommGroup P] [Module R P]
+  [AddCommGroup Fq] [Module R Fq] [Module (Localization p) Fq] [IsScalarTower R (Localization p) Fq]
+  [AddCommGroup Gq] [Module R Gq] [Module (Localization p) Gq] [IsScalarTower R (Localization p) Gq]
+  [AddCommGroup Pq] [Module R Pq] [Module (Localization p) Pq] [IsScalarTower R (Localization p) Pq]
+  (LF : F →ₗ[R] Fq) [IsLocalizedModule p LF]
+  (LG : G →ₗ[R] Gq) [IsLocalizedModule p LG]
+  (LP : P →ₗ[R] Pq) [IsLocalizedModule p LP]
+  (φi : F →ₗ[R] G) (φi1 : P →ₗ[R] F)
+  (ψi : Fq →ₗ[Localization p] Gq) (ψi1 : Pq →ₗ[Localization p] Fq)
+
+/-- **[Transport, abstract core — localisation commutes with homology].**  Two-term complexes
+`P --φi1--> F --φi--> G` (over `R`) and `Pq --ψi1--> Fq --ψi--> Gq` (over `Rₚ`) that are related by
+localisation maps `LF, LG, LP` intertwining `ψ` with `φ` (`hnat_i`, `hnat_i1`): the localisation of
+the `φ`-homology at `F` is the `ψ`-homology at `Fq`, as `Rₚ`-modules.  Assembled from the localised
+submodule API: `Submodule.toLocalizedQuotient'` (localisation of a quotient is a localisation),
+`LinearMap.localized'_range_eq_range_localizedMap` (localisation commutes with ranges) and
+`LinearMap.ker_localizedMap_eq_localized'_ker` (with kernels); the localised maps are `ψ` by the
+uniqueness `IsLocalizedModule.linearMap_ext`, and the `R`-linear equiv is upgraded to `Rₚ`-linear by
+`LinearEquiv.extendScalarsOfIsLocalization`. -/
+private noncomputable def localizedHomologyTransport
+    (hc : ∀ x, φi (φi1 x) = 0)
+    (hnat_i : ∀ x, ψi (LF x) = LG (φi x))
+    (hnat_i1 : ∀ x, ψi1 (LP x) = LF (φi1 x)) :
+    LocalizedModule p (ker φi ⧸ (range φi1).comap (ker φi).subtype)
+      ≃ₗ[Localization p] (ker ψi ⧸ (range ψi1).comap (ker ψi).subtype) := by
+  classical
+  have hmapi : IsLocalizedModule.map p LF LG φi = ψi.restrictScalars R := by
+    apply IsLocalizedModule.linearMap_ext p LF LG
+    ext x
+    simp only [LinearMap.coe_comp, Function.comp_apply, IsLocalizedModule.map_apply,
+      LinearMap.coe_restrictScalars]
+    exact (hnat_i x).symm
+  have hkerEq : (ker φi).localized' (Localization p) p LF = ker ψi := by
+    apply Submodule.restrictScalars_injective R
+    rw [← LinearMap.ker_localizedMap_eq_localized'_ker (Localization p) p LF LG φi, hmapi,
+      LinearMap.ker_restrictScalars]
+  have hmem : ∀ x, φi1 x ∈ ker φi := fun x => LinearMap.mem_ker.mpr (hc x)
+  have hcomp0 : ∀ y, ψi (ψi1 y) = 0 := by
+    have h0 : ((ψi ∘ₗ ψi1).restrictScalars R) = (0 : Pq →ₗ[R] Gq) := by
+      apply IsLocalizedModule.linearMap_ext p LP LG
+      ext v
+      simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.coe_restrictScalars,
+        LinearMap.zero_comp, LinearMap.zero_apply]
+      rw [hnat_i1, hnat_i, hc v, map_zero]
+    intro y
+    simpa using DFunLike.congr_fun h0 y
+  have hmem' : ∀ y, ψi1 y ∈ ker ψi := fun y => LinearMap.mem_ker.mpr (hcomp0 y)
+  set g := φi1.codRestrict (ker φi) hmem with hg
+  set g' := ψi1.codRestrict (ker ψi) hmem' with hg'
+  set e : (ker φi).localized' (Localization p) p LF ≃ₗ[Localization p] ker ψi :=
+    LinearEquiv.ofEq _ _ hkerEq with he
+  set Lker : (ker φi) →ₗ[R] (ker ψi) :=
+    (e.restrictScalars R) ∘ₗ Submodule.toLocalized' (Localization p) p LF (ker φi) with hLker
+  haveI : IsLocalizedModule p Lker := by
+    rw [hLker]; exact IsLocalizedModule.of_linearEquiv _ _ _
+  have Lker_coe : ∀ w : ker φi, (Lker w : Fq) = LF (w : F) := by
+    intro w
+    rw [hLker]
+    simp only [LinearMap.coe_comp, Function.comp_apply, LinearEquiv.restrictScalars_apply,
+      LinearEquiv.coe_coe, he, LinearEquiv.coe_ofEq_apply, Submodule.toLocalized',
+      Submodule.toLocalized₀]
+    rfl
+  have hmap_g : (IsLocalizedModule.map p LP Lker g).extendScalarsOfIsLocalization p (Localization p)
+      = g' := by
+    apply LinearMap.restrictScalars_injective R
+    rw [LinearMap.restrictScalars_extendScalarsOfIsLocalization]
+    apply IsLocalizedModule.linearMap_ext p LP Lker
+    ext v
+    simp only [LinearMap.coe_comp, Function.comp_apply, IsLocalizedModule.map_apply,
+      LinearMap.coe_restrictScalars, Lker_coe, hg, hg', LinearMap.codRestrict_apply]
+    exact (hnat_i1 v).symm
+  have hcrux : ((range φi1).comap (ker φi).subtype).localized' (Localization p) p Lker
+      = (range ψi1).comap (ker ψi).subtype := by
+    rw [← LinearMap.range_codRestrict (ker φi) φi1 hmem, ← hg,
+      LinearMap.localized'_range_eq_range_localizedMap (Localization p) p LP Lker g, hmap_g, hg',
+      LinearMap.range_codRestrict]
+  let π := Submodule.toLocalizedQuotient' (Localization p) p Lker
+    ((range φi1).comap (ker φi).subtype)
+  have e0 := IsLocalizedModule.iso p π
+  exact ((e0 ≪≫ₗ (Submodule.quotEquivOfEq _ _ hcrux).restrictScalars R).extendScalarsOfIsLocalization
+    p (Localization p))
+
+variable {S : Type*} [CommRing S]
+
+/-- Free localisation map `(Fin n → S) → (Fin n → S_𝔮)` (the map underlying `freeLocEquiv`). -/
+@[reducible] private noncomputable def freeLocMap (q : Ideal S) [q.IsPrime] (n : ℕ) :
+    (Fin n → S) →ₗ[S] (Fin n → Localization.AtPrime q) :=
+  LinearMap.pi fun k => (Algebra.linearMap S (Localization.AtPrime q)).comp (LinearMap.proj k)
+
+private lemma freeLocMap_apply (q : Ideal S) [q.IsPrime] (n : ℕ) (v : Fin n → S) (k : Fin n) :
+    freeLocMap q n v k = algebraMap S (Localization.AtPrime q) (v k) := rfl
+
+/-- `reduceMap` is the localised map: it intertwines the free localisation maps `freeLocMap`.  This
+is the naturality that turns the abstract `localizedHomologyTransport` into a statement about the
+concrete `reduceMap`-complex. -/
+private lemma reduceMap_freeLocMap_naturality {a b : ℕ} (q : Ideal S) [q.IsPrime]
+    (φ : (Fin a → S) →ₗ[S] (Fin b → S)) (v : Fin a → S) :
+    reduceMap (Localization.AtPrime q) φ (freeLocMap q a v) = freeLocMap q b (φ v) := by
+  funext l
+  rw [reduceMap_apply, freeLocMap_apply, show (φ v) = LinearMap.toMatrix' φ *ᵥ v from
+    (LinearMap.toMatrix'_mulVec φ v).symm]
+  rw [RingHom.map_mulVec (algebraMap S (Localization.AtPrime q)) (LinearMap.toMatrix' φ) v l]
+  rfl
+
+/-- **[Transport lemma — the localised homology is the `reduceMap`-homology].**  For the finite free
+complex `φ` and any prime `𝔮`, the abstract homology `(ker (φ i) / im (φ (i+1)))` localised at `𝔮` is
+`Localization.AtPrime 𝔮`-linearly isomorphic to the homology of the *localised* complex
+`ψ j = reduceMap (Localization.AtPrime 𝔮) (φ j)` at the same spot.  This is the make-or-break
+connective that lets the acyclicity wrapper `localAcyclicity_shift` (phrased over `reduceMap`) serve
+the abstract-localised residual of `be_backward_localizedHomology_depth`: transport `Subsingleton` /
+`HasDepthGE` across it. -/
+private noncomputable def be_localizedHomology_reduceMapEquiv (rk : ℕ → ℕ)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (i : ℕ) (𝔮 : Ideal S) [𝔮.IsPrime] :
+    LocalizedModule 𝔮.primeCompl
+        (LinearMap.ker (φ i) ⧸
+          (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)
+      ≃ₗ[Localization.AtPrime 𝔮]
+        (LinearMap.ker (reduceMap (Localization.AtPrime 𝔮) (φ i)) ⧸
+          (LinearMap.range (reduceMap (Localization.AtPrime 𝔮) (φ (i + 1)))).comap
+            (LinearMap.ker (reduceMap (Localization.AtPrime 𝔮) (φ i))).subtype) :=
+  localizedHomologyTransport 𝔮.primeCompl
+    (freeLocMap 𝔮 (rk (i + 1))) (freeLocMap 𝔮 (rk i)) (freeLocMap 𝔮 (rk (i + 2)))
+    (φ i) (φ (i + 1))
+    (reduceMap (Localization.AtPrime 𝔮) (φ i)) (reduceMap (Localization.AtPrime 𝔮) (φ (i + 1)))
+    (fun x => by rw [← LinearMap.comp_apply, hcomplex i, LinearMap.zero_apply])
+    (fun x => reduceMap_freeLocMap_naturality 𝔮 (φ i) x)
+    (fun x => reduceMap_freeLocMap_naturality 𝔮 (φ (i + 1)) x)
+
+end LocalizedHomologyTransport
+
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
 
