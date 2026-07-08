@@ -79,6 +79,28 @@ theorem Point.restrict_add {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q
     rfl
   rw [pointEquivOverHom_add, corr, corr, corr, pointEquivOverHom_add, MonObj.comp_mul]
 
+/-- Restriction of a point is additive, hence sends the zero point to the zero point. -/
+theorem Point.restrict_zero {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) :
+    Point.restrict E k (0 : E.Point g) = 0 := by
+  have h := Point.restrict_add E k (0 : E.Point g) 0
+  rw [add_zero] at h
+  exact (add_left_cancel (a := Point.restrict E k (0 : E.Point g)) (by rw [add_zero]; exact h)).symm
+
+open MonoidalCategory CartesianMonoidalCategory MonObj in
+/-- The underlying morphism of the zero point is the pulled-back zero section
+(`(0 : E.Point g).1 = g ≫ E.zero`); the group-object unit of `Hom.commGroup` unfolds to `E.zero`
+via the terminal map of `Over S`. Used to identify restrictions through the unit section. -/
+theorem point_zero_val {T : Scheme.{u}} (g : T ⟶ S) :
+    ((0 : E.Point g) : T ⟶ E.E) = g ≫ E.zero := by
+  have h0 : (0 : E.Point g) = (E.pointEquivOverHom g).symm
+      (Additive.toMul (0 : Additive (Over.mk g ⟶ E.asOver))) := rfl
+  rw [h0, toMul_zero]
+  show ((1 : Over.mk g ⟶ E.asOver)).left = g ≫ E.zero
+  rw [Hom.one_def, Over.comp_left, E.one_eq_zero]
+  have hw : (toUnit (Over.mk g)).left ≫ (𝟙_ (Over S)).hom = g :=
+    Over.w (toUnit (Over.mk g))
+  exact (Category.assoc _ _ _).symm.trans (congrArg (fun m ↦ m ≫ E.zero) hw)
+
 open MonoidalCategory CartesianMonoidalCategory MonObj in
 /-- **(Layer B, L4 infrastructure — the point-addition underlying-map spec.)** The underlying
 morphism of a sum of points is the cartesian lift of the two summands' morphisms into
@@ -284,6 +306,42 @@ noncomputable def subgroupInv : D.ideal.subscheme ⟶ D.ideal.subscheme :=
 theorem subgroupInv_subschemeι :
     E.subgroupInv hD ≫ D.ideal.subschemeι = (-(E.upt (D := D))).1 :=
   (E.exists_factor_inv hD).choose_spec
+
+/-- The unit section `e` is a section of the structure map over a general base `S`
+(`e ≫ (subschemeι ≫ π) = 𝟙 S`); the zero point lies over `𝟙 S`. -/
+theorem subgroupUnit_over :
+    E.subgroupUnit hD ≫ (D.ideal.subschemeι ≫ E.π) = 𝟙 S := by
+  rw [← Category.assoc, E.subgroupUnit_subschemeι hD]; exact (0 : E.Point (𝟙 S)).2
+
+/-- **(Layer B, L4 — left unit law of the group scheme.)** `(e ×_S id) ≫ m = id`, where
+`e ×_S id : D ⟶ D ×_S D` is the cartesian lift `⟨structMap ≫ e, id⟩`. Proven at the point level:
+the restriction of the universal sum `bipt₁ + bipt₂` along this lift is `0 + upt = upt` (`bipt₁`
+factors through the unit `e`, so restricts to the zero point via `point_zero_val`; `bipt₂` restricts
+to `upt`), and `upt.1 = subschemeι`. Dualizes to the left counit law of the coalgebra. -/
+theorem subgroupMul_unit_left :
+    pullback.lift ((D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD) (𝟙 _)
+        (by rw [Category.assoc, E.subgroupUnit_over hD, Category.comp_id, Category.id_comp])
+      ≫ E.subgroupMul hD = 𝟙 D.ideal.subscheme := by
+  set uL := pullback.lift ((D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD) (𝟙 _)
+    (by rw [Category.assoc, E.subgroupUnit_over hD, Category.comp_id, Category.id_comp]) with huL
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, E.subgroupMul_subschemeι hD,
+    Category.id_comp]
+  have hbase : uL ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+    show uL ≫ (pullback.fst _ _ ≫ _) = _
+    rw [← Category.assoc, huL, pullback.lift_fst, Category.assoc, E.subgroupUnit_over hD,
+      Category.comp_id]
+  have key : uL ≫ ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1
+      = (Point.restrict E uL ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D)))).1 := rfl
+  rw [key, Point.restrict_add]
+  have h1 : Point.restrict E uL (E.bipt₁ (D := D))
+      = (0 : E.Point (uL ≫ E.bimulBase (D := D))) := by
+    apply Subtype.ext
+    show uL ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = (0 : E.Point (uL ≫ E.bimulBase (D := D))).1
+    rw [E.point_zero_val, hbase, ← Category.assoc, huL, pullback.lift_fst, Category.assoc,
+      E.subgroupUnit_subschemeι hD, E.point_zero_val, Category.id_comp]
+  rw [h1, zero_add]
+  show uL ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = D.ideal.subschemeι
+  rw [← Category.assoc, huL, pullback.lift_snd, Category.id_comp]
 
 end GroupObject
 

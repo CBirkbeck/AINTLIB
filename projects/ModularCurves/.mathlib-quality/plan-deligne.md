@@ -607,3 +607,31 @@ Then dualize: IsCocomm ⟸ `subgroupMul_comm` + κ-intertwines-`TensorProduct.co
 + κ-injective (boarded κ-bij); coassoc/counit/antipode laws similarly through the Δ/ε/antipode pins.
 All the HopfAlgebra-instance Hopf laws rest on κ-bijectivity [T-D5h-κbij] — so **κ-bij is the true
 critical unblocker**; prioritise it (foundation `subgroupBiproduct_isAffine` already landed).
+
+**κ-BIJ + degree-BC DISCHARGED (2026-07-08, p2, axiom-clean, committed 5c295e2a/c7b55c1c).**
+- **`subgroupTensorCompare_bijective` [T-D5h-κbij] — DONE.** κ = ⟨Γ(fst),Γ(snd)⟩ is Γ of the scheme
+  iso `Spec(A⊗A) ≅ D×_R D` via transporting `pullbackSpecIso R A A` across `D.subscheme.isoSpec` on
+  each factor. Helper `subgroupSpecAlgebraMap_eq` (base-compat: `Spec.map(algebraMap R A) =
+  isoSpec.inv ≫ q` via `isoSpec_inv_naturality` + `isoSpec_Spec_inv` + `ofHom_hom`). Main: the iso
+  `ρ = asIso (pullback.map … isoSpec.inv isoSpec.inv (𝟙 _) e₁ e₁)` (`pullback.map_isIso`); then
+  `Spec.map κ = isoSpec.inv ≫ ρ.inv ≫ pullbackSpecIso.hom` proven by `pullback.hom_ext` (fst/snd)
+  matching `κ∘includeLeft/Right = Γ(fst)/Γ(snd)` via `lift_comp_includeLeft/Right` +
+  `pullbackSpecIso_inv_fst/snd`; bijectivity reflected through fully-faithful `Spec`
+  (`Spec.fullyFaithful.isIso_of_isIso_map` + `isIso_op_iff` + `ConcreteCategory.isIso_iff_bijective`).
+  Gotcha: `erw` (defeq) for `↑includeRight` vs `.toRingHom` and for `pullback.map ≫ fst` (abbrev→lift);
+  `← Category.assoc` before the `pullback.lift_fst/snd`. **⇒ `subgroupComul` (Δ) + pin now axiom-clean
+  too** (κ-bij was their sole leaf) — full comultiplication interface SOLID.
+- **`degree_baseChange_eq` [T-D5h-degBC] — DONE.** finrank base-change: base-changed structMap =
+  `inv toImage ≫ (pullback.snd D.subschemeι (pullback.fst π g) ≫ pullback.snd E.π g)`, the pasted
+  pullback (`IsPullback.paste_vert`) of `q` along `g`; `finrank_comp_left_of_isIso` +
+  `finrank_of_isPullback` give `= D.degree (g t) = N`. Term-mode `.trans` tail (finrank's instance
+  transparency wall on `rw`). ⇒ `smul_eq_zero_of_factors'` now rests ONLY on the section box.
+
+**DeligneOrder.lean: 4→2 sorries** — remaining: (1) affine core `smul_eq_zero_of_factors_affine`
+(the L3-Hopf + L5-free + L6-points↔conv + L7 mountain — the master leaf), (2) section box
+`smul_eq_zero_of_factors_section` (affine cover of S → affine core). Next: L3 Hopf structure —
+scheme group axioms (unit/inv/assoc via the `subgroupMul_comm` skeleton) → `Coalgebra` (coassoc needs
+a κ₃ triple-tensor transport `Spec(A⊗A⊗A) ≅ D×_R D×_R D`, same technique as κ-bij; counit laws via
+the ε pin) → `Bialgebra.mk'` (Δ/ε already AlgHoms ⟹ easy) → `HopfAlgebra` (antipode laws via the
+antipode pin) → `IsCocomm` (from `subgroupMul_comm`). Then L5 (localise Spec R to make A free) → L6 →
+affine core.
