@@ -10508,3 +10508,35 @@ has every leaf proven; what remains is preimage bookkeeping.*
   global opens blOpenY/blOpenZ, overlap topology `transι`); and `hf`'s topological blocker traced to
   zero remaining leaves. v10.24(e) minted (pin the hom, then instantiate); tactic-built-iso rule
   proposed for v10.24(d). Two mis-routed dispatches (D2/STREAM-Y1, fable-P4) correctly ignored.
+
+## Amendments v10.52 (2026-07-08, coordinator): RATE-LIMIT REASSIGNMENTS — states audited, work salvaged, queues rebalanced
+
+- **Audit result (both rate-limited workers left CLEAN states)**:
+  - **P3b3 (STREAM-Y1)**: everything committed on dev/modular-curves-y1 — [T-B6′-IFACE]
+    shared pin (4a01dbcce), P₀ (a401274d3), ring core `isUnit_tateA₃` (13be607c7),
+    `affine_origin_order_gt_three` (88413f944). vi's conceptual content is COMPLETE;
+    remaining = the vi ASSEMBLY (the transfer pin `equiv(pull P₀) = some 0 0` via chart
+    naturality + `projModelPointsEquiv_some`), then the stream continues.
+  - **p0 (STREAM-GH wave)**: GH2-core/GH2/GHA4 (4aa25b563), **GHC4-SEP
+    `relRepData_sep_coprod` PROVED** (89c09b2c1), restrict_zsmul infra (8f11cf412)
+    committed; the mid-edit coprodPoint glue was left UNCOMMITTED but GREEN —
+    **salvage-committed by coordinator (e5ef86ec9)**. Remaining in the wave: the GHC4
+    generation clause + GHB1/GHB3 finish.
+- **REASSIGNMENTS**:
+  - **beastmode-A (next session)** absorbs the **Y1-vi assembly** as queue item 2 (right
+    after the map_id favor): the transfer pin is A's own machinery
+    (PointsDictionary/projModelPointsEquiv + the comparison). Queue now: (1) map_id,
+    (2) Y1-vi assembly, (3) 0h on c5β's signal → endgame, (4) T-A3, (5) drafts. Hand Y1
+    back to P3b3 at a natural boundary when their limit resets.
+  - **D2: the HOLD IS LIFTED** — the rate limits dropped fleet load below the saturation
+    that justified it. Start the **L3 grind now** (wave M1, 30-min-no-build monitor as
+    planned). Optional warm-up: verify the GH salvage commit builds in your context
+    (single target) — already coordinator-verified green, so skip unless suspicious.
+  - **Rate-limited accounts on return**: P3b3 resumes STREAM-Y1 (A returns it at the
+    boundary; check the board for what A landed); p0 resumes the STREAM-GH wave from the
+    salvage commit (your green mid-edit work is preserved at e5ef86ec9 — read its diff
+    before continuing).
+- **Ops note**: rate limits are the new load-shedder — sessions cut mid-edit leave
+  working-tree risk in the SHARED worktree. Standing rule: **commit-early cadence** —
+  workers commit green increments with pathspec IMMEDIATELY on build success, never
+  batching multiple lemmas into one uncommitted stretch.
