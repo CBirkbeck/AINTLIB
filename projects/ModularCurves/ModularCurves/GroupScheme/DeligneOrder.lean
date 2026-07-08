@@ -236,12 +236,32 @@ noncomputable def subgroupCounit (hD : D.IsSubgroup E) :
         (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) = r
       rw [← CommRingCat.comp_apply, hcomp, CommRingCat.id_apply] }
 
+/-- The inversion `n` is a morphism over the base: `n ≫ (subschemeι ≫ π) = subschemeι ≫ π`
+(the negation of the universal point lies over the same base map). -/
+theorem subgroupInv_structMap (hD : D.IsSubgroup E) :
+    E.subgroupInv hD ≫ E.subgroupStructMap D = E.subgroupStructMap D := by
+  show E.subgroupInv hD ≫ (D.ideal.subschemeι ≫ E.π) = D.ideal.subschemeι ≫ E.π
+  rw [← Category.assoc, E.subgroupInv_subschemeι hD]
+  exact (-(E.upt (D := D))).2
+
 /-- **(Layer B, L3 — the antipode.)** `antipode : A →ₐ[R] A`, the Hopf-dual of the inversion
-`subgroupInv` (`n : D ⟶ D`). The antipode laws dualize the inverse laws of the group scheme. -/
+`subgroupInv` (`n : D ⟶ D`). Concretely `Γ(n)`; it is `R`-linear because `n` is a morphism over
+the base (`subgroupInv_structMap`). The antipode laws dualize the inverse laws of the group scheme. -/
 noncomputable def subgroupAntipode (hD : D.IsSubgroup E) :
     letI := E.subgroupAlgebra D
-    Γ(D.ideal.subscheme, ⊤) →ₐ[R] Γ(D.ideal.subscheme, ⊤) := by
-  sorry
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R] Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  { (E.subgroupInv hD).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop) ≫
+            (E.subgroupInv hD).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, E.subgroupInv_structMap hD]
+      show (E.subgroupInv hD).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
 
 end AffineHopf
 
