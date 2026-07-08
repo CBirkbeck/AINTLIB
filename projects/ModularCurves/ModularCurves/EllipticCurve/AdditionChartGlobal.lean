@@ -21,7 +21,7 @@ Each piece is transported into `E ×_R E` along `pieceι` (an open immersion) us
 former, and a `▸` transport across that equality would be gratuitous.
 -/
 
-open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits
+open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits HomogeneousLocalization
 
 namespace WeierstrassCurve.Projective
 
@@ -177,6 +177,36 @@ lemma transι_opensRange :
     (chartPieceIso W i j).inv ≫ pieceι W i j).opensRange = _
   rw [Scheme.Hom.opensRange_comp, specMap_transAlgHom_opensRange, Scheme.Hom.comp_image,
     Scheme.Hom.inv_image]
+
+/-- **(helper A, final leaf — fst)** The left tensor inclusion carries mathlib's transition element
+`isLocalizationElem X_i X_{i'}` to the repo's transition coordinate `transFst = X_{i'}/X_i`. Both
+name "the ratio `X_{i'}/X_i`"; the identification is `chartCoordEquiv_mk_X` (WeierstrassModel:791,
+already proven) composed with `awayTensorEquiv_symm_tmul_one` + `biChartRingTensorEquiv_mk_rename_inl`. -/
+lemma awayTensorEquiv_symm_isLocalizationElem_fst (hi' : i' ≠ i) :
+    (biChartRingAwayTensorEquiv W i j).symm
+        (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W i)
+          (mk_X_mem_quotientGrading_one W i') ⊗ₜ[R] 1) =
+      transFst W i j i' := by
+  rw [← chartCoordEquiv_mk_X W i ⟨i', hi'⟩,
+    show chartCoordEquiv W i (Ideal.Quotient.mk _ (X ⟨i', hi'⟩)) =
+      chartCoordAlgEquiv W i (Ideal.Quotient.mk _ (X ⟨i', hi'⟩)) from rfl,
+    awayTensorEquiv_symm_tmul_one, transFst, biChartPointFst, dif_neg hi',
+    ← rename_X (R := R) (Sum.inl : {k : Fin 3 // k ≠ i} → _) ⟨i', hi'⟩,
+    ← biChartRingTensorEquiv_mk_rename_inl W i j (X ⟨i', hi'⟩), AlgEquiv.symm_apply_apply]
+
+/-- **(helper A, final leaf — snd)** The right tensor inclusion carries `isLocalizationElem X_j X_{j'}`
+to `transSnd = X_{j'}/X_j`. -/
+lemma awayTensorEquiv_symm_isLocalizationElem_snd (hj' : j' ≠ j) :
+    (biChartRingAwayTensorEquiv W i j).symm
+        ((1 : chartAway W i) ⊗ₜ[R] Away.isLocalizationElem (mk_X_mem_quotientGrading_one W j)
+          (mk_X_mem_quotientGrading_one W j')) =
+      transSnd W i j j' := by
+  rw [← chartCoordEquiv_mk_X W j ⟨j', hj'⟩,
+    show chartCoordEquiv W j (Ideal.Quotient.mk _ (X ⟨j', hj'⟩)) =
+      chartCoordAlgEquiv W j (Ideal.Quotient.mk _ (X ⟨j', hj'⟩)) from rfl,
+    awayTensorEquiv_symm_one_tmul, transSnd, biChartPointSnd, dif_neg hj',
+    ← rename_X (R := R) (Sum.inr : {k : Fin 3 // k ≠ j} → _) ⟨j', hj'⟩,
+    ← biChartRingTensorEquiv_mk_rename_inr W i j (X ⟨j', hj'⟩), AlgEquiv.symm_apply_apply]
 
 /-- **(the overlap is symmetric)** Read through the `(i',j')` chart-product instead, the same
 open subscheme is obtained — this is `specMap_transHom_pieceι` (a468579e). -/
