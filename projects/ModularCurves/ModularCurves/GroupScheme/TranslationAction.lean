@@ -1,4 +1,4 @@
-import ModularCurves.GroupScheme.Subgroup
+import ModularCurves.GroupScheme.SubgroupQuotient
 
 /-!
 # The translation action of a finite locally free subgroup scheme
@@ -57,6 +57,20 @@ noncomputable def actionProj (G : FiniteLocallyFreeSubgroup E) :
     (Over.mk G.π) ⊗ E.asOver ⟶ E.asOver :=
   snd (Over.mk G.π) E.asOver
 
+/-- The translation action in **hom-group form**: `act = (pr_G ≫ ι) * pr_E`, where `*` is the
+pointwise group law on `Over S`-morphisms into the group object `E.asOver` (`Hom.commGroup`). This
+is the bridge from the monoidal spelling `(ι ⊗ 𝟙) ≫ μ` to the point-addition spelling used to match
+`IsInvariant`: on `T`-points, `act(t, x) = ι(t) + x`. -/
+theorem translationAction_eq_mul (G : FiniteLocallyFreeSubgroup E) :
+    letI : CommGroup ((Over.mk G.π) ⊗ E.asOver ⟶ E.asOver) := Hom.commGroup
+    G.translationAction
+      = (fst (Over.mk G.π) E.asOver ≫ G.ιOver) * snd (Over.mk G.π) E.asOver := by
+  letI : CommGroup ((Over.mk G.π) ⊗ E.asOver ⟶ E.asOver) := Hom.commGroup
+  have h : (G.ιOver ⊗ₘ 𝟙 E.asOver)
+      = lift (fst (Over.mk G.π) E.asOver ≫ G.ιOver) (snd (Over.mk G.π) E.asOver) := by
+    refine hom_ext _ _ ?_ ?_ <;> simp
+  rw [Hom.mul_def, translationAction, h]
+
 /-- The translation action is a morphism over `S`: `act ≫ E.π = (G ×_S E ⟶ S)`. Free from `Over`. -/
 @[reassoc]
 theorem translationAction_left_π (G : FiniteLocallyFreeSubgroup E) :
@@ -68,6 +82,34 @@ theorem translationAction_left_π (G : FiniteLocallyFreeSubgroup E) :
 theorem actionProj_left_π (G : FiniteLocallyFreeSubgroup E) :
     G.actionProj.left ≫ E.π = ((Over.mk G.π) ⊗ E.asOver).hom :=
   Over.w G.actionProj
+
+/-- **Forward bridge (`IsInvariant ⟹ coequalizes`).** If `f` is invariant under translation by `G`,
+then it coequalizes the two legs `act, pr_E : G ×_S E ⇉ E` at the scheme level:
+`act ≫ f = pr_E ≫ f`. This is the direction that lets an invariant `f` factor through the
+coequalizer `E/G` (the `quotient_lift` half of the interface). The proof feeds the *universal*
+`G`-point `pr_G` and `E`-point `pr_E` over the base `G ×_S E` into the functor-of-points
+`IsInvariant` condition: there `act` is exactly the point sum `pr_E + ι(pr_G)`
+(`translationAction_eq_mul` + commutativity) and `pr_E` is the projection. -/
+theorem IsInvariant.coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Scheme.{u}} {f : E.E ⟶ Y}
+    (hf : G.IsInvariant f) : G.translationAction.left ≫ f = G.actionProj.left ≫ f := by
+  letI : CommGroup (((Over.mk G.π) ⊗ E.asOver) ⟶ E.asOver) := Hom.commGroup
+  set g := ((Over.mk G.π) ⊗ E.asOver).hom with hg
+  -- the universal `E`-point `pr_E` and `G`-point `ι ∘ pr_G` over the base `G ×_S E`
+  let xUniv : E.Point g := (E.pointEquivOverHom g).symm (snd (Over.mk G.π) E.asOver)
+  let tUniv : E.Point g := (E.pointEquivOverHom g).symm (fst (Over.mk G.π) E.asOver ≫ G.ιOver)
+  have e1 : (E.pointEquivOverHom g) xUniv = snd (Over.mk G.π) E.asOver :=
+    (E.pointEquivOverHom g).apply_symm_apply _
+  have e2 : (E.pointEquivOverHom g) tUniv = fst (Over.mk G.π) E.asOver ≫ G.ιOver :=
+    (E.pointEquivOverHom g).apply_symm_apply _
+  have hx : xUniv.1 = G.actionProj.left := congrArg CommaMorphism.left e1
+  have htUniv1 : tUniv.1 = (fst (Over.mk G.π) E.asOver).left ≫ G.ι :=
+    congrArg CommaMorphism.left e2
+  have htUniv : tUniv ∈ G.pointSubgroup g := ⟨(fst (Over.mk G.π) E.asOver).left, htUniv1.symm⟩
+  have hkey := hf g xUniv tUniv htUniv
+  have hadd : (E.pointEquivOverHom g) (xUniv + tUniv) = G.translationAction := by
+    rw [E.pointEquivOverHom_add, e1, e2, mul_comm]; exact G.translationAction_eq_mul.symm
+  have hxt : (xUniv + tUniv).1 = G.translationAction.left := congrArg CommaMorphism.left hadd
+  rw [← hxt, ← hx]; exact hkey
 
 end FiniteLocallyFreeSubgroup
 
