@@ -10,6 +10,7 @@ as WIP `sorry`s per the ticket scope).
 import ModularCurves.ForMathlib.InvariantBaseChange
 import Mathlib.RingTheory.Etale.Basic
 import Mathlib.RingTheory.Smooth.Fiber
+import Mathlib.RingTheory.Finiteness.Nakayama
 
 /-!
 # Free actions and the étale-torsor theorem (Katz–Mazur A7.1.1/A7.1.2) — statements
@@ -281,6 +282,52 @@ theorem Module.Projective.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G 
   show (traceInvariants G R A (p.2 * x) : A) * p.1
       = p.1 * (traceInvariants G R A (p.2 * x) : A)
   ring
+
+/-- **(T-Q2-A711, step 11 — surjectivity of the trace; PROVEN)** For a free action of a
+finite group there is `c : A` with `tr(c) = 1`; hence `Aᴳ ↪ A` splits as `Aᴳ`-modules via
+`a ↦ tr(c · a)`.
+
+Proof: the image of `tr` is an ideal `I` of `Aᴳ`; the dual-basis identity at `x` shows
+`x = ∑ᵢ tr(bᵢ x) • aᵢ`, so `⊤ ≤ I • ⊤` as `Aᴳ`-submodules of `A` whenever `I ⊆ 𝔪`; since `A`
+is a *finite* `Aᴳ`-module (`Module.Finite.of_isFreeAlgebraAction`), Nakayama produces
+`r ≡ 1 mod 𝔪` with `r · A = 0`, so `r = 0` and `1 ∈ 𝔪` — contradiction. Hence `I = ⊤`.
+
+This is the input for **[A711-BC]** (KM A7.1.2): averaging by `c` retracts `A ⊗_R R'` onto
+its `G`-invariants inside the image of `Aᴳ ⊗_R R'`. -/
+theorem exists_traceInvariants_eq_one [Fintype G] (hfree : IsFreeAlgebraAction G R A) :
+    ∃ c : A, traceLinear G R A c = 1 := by
+  classical
+  haveI : Module.Finite (FixedPoints.subalgebra R A G) A :=
+    Module.Finite.of_isFreeAlgebraAction G R A hfree
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  have h1 : (1 : FixedPoints.subalgebra R A G) ∈ LinearMap.range (traceLinear G R A) := by
+    by_contra hnot
+    have hne : (LinearMap.range (traceLinear G R A) :
+        Submodule (FixedPoints.subalgebra R A G) (FixedPoints.subalgebra R A G)) ≠ ⊤ := by
+      intro hc; exact hnot (hc ▸ Submodule.mem_top)
+    obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal (LinearMap.range (traceLinear G R A)) hne
+    have hsub : (⊤ : Submodule (FixedPoints.subalgebra R A G) A)
+        ≤ m • (⊤ : Submodule (FixedPoints.subalgebra R A G) A) := by
+      intro x _
+      have hx : (∑ p ∈ S, (traceLinear G R A (p.2 * x)) • p.1) = x := by
+        refine Eq.trans ?_ (galoisCoords_dual G R A hS x)
+        refine Finset.sum_congr rfl fun p _ => ?_
+        show (traceInvariants G R A (p.2 * x) : A) * p.1
+            = p.1 * (traceInvariants G R A (p.2 * x) : A)
+        ring
+      rw [← hx]
+      refine Submodule.sum_mem _ fun p _ => ?_
+      exact Submodule.smul_mem_smul (hle ⟨p.2 * x, rfl⟩) Submodule.mem_top
+    obtain ⟨r, hr, hr0⟩ := Submodule.exists_sub_one_mem_and_smul_eq_zero_of_fg_of_le_smul
+      m ⊤ Module.Finite.fg_top hsub
+    have hzero : (r : A) = 0 := by
+      have hone := hr0 1 Submodule.mem_top
+      simpa [Algebra.smul_def] using hone
+    have hr' : r = 0 := Subtype.ext hzero
+    rw [hr', zero_sub] at hr
+    exact hm.ne_top (Ideal.eq_top_of_isUnit_mem m (by simpa using hr) isUnit_one.neg)
+  obtain ⟨c, hc⟩ := h1
+  exact ⟨c, hc⟩
 
 /-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
 invariants.
