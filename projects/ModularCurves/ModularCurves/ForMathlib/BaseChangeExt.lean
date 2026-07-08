@@ -3,20 +3,22 @@ import Mathlib
 open CategoryTheory Abelian Limits ModuleCat
 open scoped ModuleCat.Algebra
 
+universe u
+
 namespace ModuleCat.BaseChangeExt
 
-variable {S : Type} [CommRing S] (𝔪 : Submonoid S)
+variable {S : Type u} [CommRing S] (𝔪 : Submonoid S)
 
 /-! ### The localization functor is `S`-linear -/
 
 /-- The localization functor `ModuleCat S ⥤ ModuleCat (Localization 𝔪)` is `S`-linear. -/
-instance functorLinear : (ModuleCat.localizedModuleFunctor.{0} 𝔪).Linear S where
+instance functorLinear : (ModuleCat.localizedModuleFunctor.{u} 𝔪).Linear S where
   map_smul {M N} f s := by
     apply ModuleCat.hom_ext
-    rw [show s • (ModuleCat.localizedModuleFunctor.{0} 𝔪).map f
-        = (algebraMap S (Localization 𝔪) s) • (ModuleCat.localizedModuleFunctor.{0} 𝔪).map f
+    rw [show s • (ModuleCat.localizedModuleFunctor.{u} 𝔪).map f
+        = (algebraMap S (Localization 𝔪) s) • (ModuleCat.localizedModuleFunctor.{u} 𝔪).map f
         from ModuleCat.hom_ext rfl, ModuleCat.hom_smul,
-      show ModuleCat.Hom.hom ((ModuleCat.localizedModuleFunctor.{0} 𝔪).map (s • f))
+      show ModuleCat.Hom.hom ((ModuleCat.localizedModuleFunctor.{u} 𝔪).map (s • f))
         = IsLocalizedModule.mapExtendScalars 𝔪 (M.localizedModuleMkLinearMap 𝔪)
           (N.localizedModuleMkLinearMap 𝔪) (Localization 𝔪) (s • f.hom) from rfl,
       map_smul, ← IsScalarTower.algebraMap_smul (Localization 𝔪) s]
@@ -48,7 +50,7 @@ noncomputable def ringLocEquiv : LocalizedModule 𝔪 S ≃ₗ[Localization 𝔪
 
 /-- The localization of `S` (as an object of `ModuleCat`) is `Localization 𝔪`. -/
 noncomputable def ringObjIso :
-    (ModuleCat.localizedModuleFunctor.{0} 𝔪).obj (ModuleCat.of S S)
+    (ModuleCat.localizedModuleFunctor.{u} 𝔪).obj (ModuleCat.of S S)
       ≅ ModuleCat.of (Localization 𝔪) (Localization 𝔪) :=
   ((Shrink.linearEquiv (Localization 𝔪) (LocalizedModule 𝔪 S)).trans (ringLocEquiv 𝔪)).toModuleIso
 
@@ -76,7 +78,7 @@ lemma hmap (I : Ideal S) :
 /-- The localization of `S ⧸ I` is `Localization 𝔪 ⧸ I.map (algebraMap …)`.
 This is base change of a quotient module along the flat map `S → Localization 𝔪`. -/
 noncomputable def quotObjIso (I : Ideal S) :
-    (ModuleCat.localizedModuleFunctor.{0} 𝔪).obj (ModuleCat.of S (S ⧸ I))
+    (ModuleCat.localizedModuleFunctor.{u} 𝔪).obj (ModuleCat.of S (S ⧸ I))
       ≅ ModuleCat.of (Localization 𝔪)
         (Localization 𝔪 ⧸ I.map (algebraMap S (Localization 𝔪))) :=
   (((Shrink.linearEquiv (Localization 𝔪) (LocalizedModule 𝔪 (S ⧸ I))).trans
@@ -91,10 +93,10 @@ noncomputable def quotObjIso (I : Ideal S) :
 comparison map from `Ext_S(X, Y)` to `Ext_{L}(X_𝔪, Y_𝔪)` exhibits the latter as the localization
 of the former at `𝔪`. Proved by induction on `n`, generalizing `X`, using a projective
 presentation of `X` and the five lemma applied to the localized long exact sequence for Ext. -/
-lemma isLocalizedModule_mapExt [IsNoetherianRing S] (X Y : ModuleCat.{0} S)
+lemma isLocalizedModule_mapExt [IsNoetherianRing S] (X Y : ModuleCat.{u} S)
     [Module.Finite S X] (n : ℕ) :
     IsLocalizedModule 𝔪
-      ((ModuleCat.localizedModuleFunctor.{0} 𝔪).mapExtLinearMap S X Y n) :=
+      ((ModuleCat.localizedModuleFunctor.{u} 𝔪).mapExtLinearMap S X Y n) :=
   sorry
 
 end ModuleCat.BaseChangeExt
@@ -102,7 +104,7 @@ end ModuleCat.BaseChangeExt
 open ModuleCat.BaseChangeExt in
 /-- Flat base change for Ext: localizing the Ext module commutes with computing Ext over the
 localization. -/
-theorem localizedModule_ext_subsingleton_iff {S : Type} [CommRing S] [IsNoetherianRing S]
+theorem localizedModule_ext_subsingleton_iff {S : Type u} [CommRing S] [IsNoetherianRing S]
     (I : Ideal S) (q : PrimeSpectrum S) (i : ℕ) :
     Subsingleton (LocalizedModule q.asIdeal.primeCompl
         (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i))
@@ -112,12 +114,12 @@ theorem localizedModule_ext_subsingleton_iff {S : Type} [CommRing S] [IsNoetheri
           (ModuleCat.of (Localization q.asIdeal.primeCompl) (Localization q.asIdeal.primeCompl)) i) := by
   set 𝔪 := q.asIdeal.primeCompl with h𝔪
   haveI : IsLocalizedModule 𝔪
-      ((ModuleCat.localizedModuleFunctor.{0} 𝔪).mapExtLinearMap S
+      ((ModuleCat.localizedModuleFunctor.{u} 𝔪).mapExtLinearMap S
         (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i) :=
     isLocalizedModule_mapExt 𝔪 _ _ i
   -- localization of the Ext module identifies with Ext over the localization
   let e1 := IsLocalizedModule.iso 𝔪
-    ((ModuleCat.localizedModuleFunctor.{0} 𝔪).mapExtLinearMap S
+    ((ModuleCat.localizedModuleFunctor.{u} 𝔪).mapExtLinearMap S
       (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i)
   -- transport Ext along the object isomorphisms
   let e2 := extEquivOfIso (quotObjIso 𝔪 I) (ringObjIso 𝔪) i
