@@ -417,6 +417,37 @@ theorem subgroupMul_inv :
   show ((0 : E.Point (uV ≫ E.bimulBase (D := D)))).1 = (D.ideal.subschemeι ≫ E.π) ≫ E.zero
   rw [E.point_zero_val, hbase]
 
+/-- **(Layer B, L4 — right inverse axiom.)** `⟨id, n⟩ ≫ m = (subschemeι ≫ π) ≫ e`: the leg-swapped
+mirror of `subgroupMul_inv` (`upt + (-upt) = 0`). Dualizes to the right antipode law
+(`mul' ∘ (id ⊗ S) ∘ Δ = η ∘ ε`). -/
+theorem subgroupMul_inv' :
+    pullback.lift (𝟙 _) (E.subgroupInv hD)
+        (by rw [Category.id_comp]; exact (E.subgroupInv_over hD).symm)
+      ≫ E.subgroupMul hD = (D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD := by
+  set uV : D.ideal.subscheme ⟶ pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+    pullback.lift (𝟙 _) (E.subgroupInv hD)
+      (by rw [Category.id_comp]; exact (E.subgroupInv_over hD).symm) with huV
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, E.subgroupMul_subschemeι hD,
+    Category.assoc, E.subgroupUnit_subschemeι hD, E.point_zero_val, Category.id_comp]
+  have hbase : uV ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+    show uV ≫ (pullback.fst _ _ ≫ _) = _
+    rw [← Category.assoc, huV, pullback.lift_fst, Category.id_comp]
+  have key : uV ≫ ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1
+      = (Point.restrict E uV ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D)))).1 := rfl
+  rw [key, Point.restrict_add]
+  have hinv : Point.restrict E uV (E.bipt₂ (D := D))
+      = -(Point.restrict E uV (E.bipt₁ (D := D))) := by
+    apply Subtype.ext
+    rw [E.point_neg_val]
+    show uV ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι)
+      = (uV ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι)) ≫ E.mulByHom (-1)
+    rw [← Category.assoc, huV, pullback.lift_snd, E.subgroupInv_subschemeι hD, ← Category.assoc,
+      pullback.lift_fst, Category.id_comp, E.point_neg_val]
+    rfl
+  rw [hinv, add_neg_cancel]
+  show ((0 : E.Point (uV ≫ E.bimulBase (D := D)))).1 = (D.ideal.subschemeι ≫ E.π) ≫ E.zero
+  rw [E.point_zero_val, hbase]
+
 end GroupObject
 
 section AffineHopf
@@ -924,6 +955,174 @@ theorem subgroupCounit_lTensor_comul (hD : D.IsSubgroup E) (a : Γ(D.ideal.subsc
   rw [hmap] at happ
   apply (Algebra.TensorProduct.rid R R Γ(D.ideal.subscheme, ⊤)).injective
   rw [Algebra.TensorProduct.rid_tmul, one_smul]
+  exact happ
+
+/-- The `⟨n, id⟩` section `D ⟶ D ×_S D` (inversion on the left factor, identity on the right).
+Dualizing it gives the algebra hom witnessing the left (`rTensor`) antipode law. -/
+noncomputable def nLmap (hD : D.IsSubgroup E) : D.ideal.subscheme ⟶
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift (E.subgroupInv hD) (𝟙 _)
+    (by rw [Category.id_comp]; exact E.subgroupInv_over hD)
+
+theorem nLmap_bimulBase (hD : D.IsSubgroup E) :
+    E.nLmap hD ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+  show E.nLmap hD ≫ (pullback.fst _ _ ≫ _) = _
+  rw [← Category.assoc, nLmap, pullback.lift_fst, E.subgroupInv_over hD]
+
+/-- `nLmap.appTop` packaged as an `R`-algebra hom `Γ(D ×_S D) →ₐ Γ(D)`. -/
+noncomputable def nLAlg (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) →ₐ[R]
+      Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  { (E.nLmap hD).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop) ≫
+            (E.nLmap hD).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, E.nLmap_bimulBase hD]
+      show (E.nLmap hD).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- The left antipode law: `mul' ∘ (S ⊗ id) ∘ Δ = η ∘ ε`. Dualizes `nLmap ≫ m = e ∘ π`
+(`subgroupMul_inv`) through the `κ`-intertwine. -/
+theorem subgroupAntipode_rTensor_comul (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)) :
+    letI := E.subgroupAlgebra D
+    LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)
+        (LinearMap.rTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupAntipode hD).toLinearMap
+          (E.subgroupComul hD a))
+      = algebraMap R Γ(D.ideal.subscheme, ⊤) (E.subgroupCounit hD a) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  have key1 : ∀ b, E.nLAlg hD (E.subgroupProj₁ (D := D) b) = E.subgroupAntipode hD b := by
+    intro b
+    show (E.nLmap hD).appTop.hom ((pullback.fst (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show E.nLmap hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = E.subgroupInv hD from by rw [nLmap, pullback.lift_fst]]
+    rfl
+  have key2 : ∀ b, E.nLAlg hD (E.subgroupProj₂ (D := D) b) = b := by
+    intro b
+    show (E.nLmap hD).appTop.hom ((pullback.snd (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = b
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show E.nLmap hD ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = 𝟙 _ from by rw [nLmap, pullback.lift_snd], Scheme.Hom.id_appTop, CommRingCat.id_apply]
+  have intertwine : (LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)).comp
+        (LinearMap.rTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupAntipode hD).toLinearMap)
+      = ((E.nLAlg hD).toLinearMap).comp ((E.subgroupTensorCompare (D := D)).toLinearMap) := by
+    apply TensorProduct.ext'
+    intro x y
+    show LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)
+        (LinearMap.rTensor _ (E.subgroupAntipode hD).toLinearMap (x ⊗ₜ[R] y))
+      = E.nLAlg hD (E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y))
+    rw [LinearMap.rTensor_tmul, LinearMap.mul'_apply, subgroupTensorCompare,
+      Algebra.TensorProduct.lift_tmul, map_mul, key1, key2, AlgHom.toLinearMap_apply]
+  have happ := DFunLike.congr_fun intertwine (E.subgroupComul hD a)
+  rw [LinearMap.comp_apply, LinearMap.comp_apply, AlgHom.toLinearMap_apply,
+    AlgHom.toLinearMap_apply, subgroupTensorCompare_subgroupComul] at happ
+  have hunit : E.nLmap hD ≫ E.subgroupMul hD
+      = (D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD := E.subgroupMul_inv hD
+  have hcomul : E.nLAlg hD (E.subgroupComulHom hD a)
+      = algebraMap R Γ(D.ideal.subscheme, ⊤) (E.subgroupCounit hD a) := by
+    show (E.nLmap hD).appTop.hom ((E.subgroupMul hD).appTop.hom a) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop, hunit]
+    show ((E.subgroupUnit hD).appTop ≫ (D.ideal.subschemeι ≫ E.π).appTop).hom a = _
+    show ((E.subgroupUnit hD).appTop ≫ (E.subgroupStructMap D).appTop).hom a
+      = ((E.subgroupUnit hD).appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).hom
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom a
+    rw [Iso.hom_inv_id_assoc]
+  rw [hcomul] at happ
+  exact happ
+
+/-- The `⟨id, n⟩` section `D ⟶ D ×_S D` (identity on the left factor, inversion on the right).
+Dualizing it gives the algebra hom witnessing the right (`lTensor`) antipode law. -/
+noncomputable def nRmap (hD : D.IsSubgroup E) : D.ideal.subscheme ⟶
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift (𝟙 _) (E.subgroupInv hD)
+    (by rw [Category.id_comp]; exact (E.subgroupInv_over hD).symm)
+
+theorem nRmap_bimulBase (hD : D.IsSubgroup E) :
+    E.nRmap hD ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+  show E.nRmap hD ≫ (pullback.fst _ _ ≫ _) = _
+  rw [← Category.assoc, nRmap, pullback.lift_fst, Category.id_comp]
+
+/-- `nRmap.appTop` packaged as an `R`-algebra hom `Γ(D ×_S D) →ₐ Γ(D)`. -/
+noncomputable def nRAlg (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) →ₐ[R]
+      Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  { (E.nRmap hD).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop) ≫
+            (E.nRmap hD).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, E.nRmap_bimulBase hD]
+      show (E.nRmap hD).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- The right antipode law: `mul' ∘ (id ⊗ S) ∘ Δ = η ∘ ε`. Dualizes `nRmap ≫ m = e ∘ π`
+(`subgroupMul_inv'`) through the `κ`-intertwine. -/
+theorem subgroupAntipode_lTensor_comul (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)) :
+    letI := E.subgroupAlgebra D
+    LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)
+        (LinearMap.lTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupAntipode hD).toLinearMap
+          (E.subgroupComul hD a))
+      = algebraMap R Γ(D.ideal.subscheme, ⊤) (E.subgroupCounit hD a) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  have key1 : ∀ b, E.nRAlg hD (E.subgroupProj₁ (D := D) b) = b := by
+    intro b
+    show (E.nRmap hD).appTop.hom ((pullback.fst (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = b
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show E.nRmap hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = 𝟙 _ from by rw [nRmap, pullback.lift_fst], Scheme.Hom.id_appTop, CommRingCat.id_apply]
+  have key2 : ∀ b, E.nRAlg hD (E.subgroupProj₂ (D := D) b) = E.subgroupAntipode hD b := by
+    intro b
+    show (E.nRmap hD).appTop.hom ((pullback.snd (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show E.nRmap hD ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = E.subgroupInv hD from by rw [nRmap, pullback.lift_snd]]
+    rfl
+  have intertwine : (LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)).comp
+        (LinearMap.lTensor Γ(D.ideal.subscheme, ⊤) (E.subgroupAntipode hD).toLinearMap)
+      = ((E.nRAlg hD).toLinearMap).comp ((E.subgroupTensorCompare (D := D)).toLinearMap) := by
+    apply TensorProduct.ext'
+    intro x y
+    show LinearMap.mul' R Γ(D.ideal.subscheme, ⊤)
+        (LinearMap.lTensor _ (E.subgroupAntipode hD).toLinearMap (x ⊗ₜ[R] y))
+      = E.nRAlg hD (E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y))
+    rw [LinearMap.lTensor_tmul, LinearMap.mul'_apply, subgroupTensorCompare,
+      Algebra.TensorProduct.lift_tmul, map_mul, key1, key2, AlgHom.toLinearMap_apply]
+  have happ := DFunLike.congr_fun intertwine (E.subgroupComul hD a)
+  rw [LinearMap.comp_apply, LinearMap.comp_apply, AlgHom.toLinearMap_apply,
+    AlgHom.toLinearMap_apply, subgroupTensorCompare_subgroupComul] at happ
+  have hunit : E.nRmap hD ≫ E.subgroupMul hD
+      = (D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD := E.subgroupMul_inv' hD
+  have hcomul : E.nRAlg hD (E.subgroupComulHom hD a)
+      = algebraMap R Γ(D.ideal.subscheme, ⊤) (E.subgroupCounit hD a) := by
+    show (E.nRmap hD).appTop.hom ((E.subgroupMul hD).appTop.hom a) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop, hunit]
+    show ((E.subgroupUnit hD).appTop ≫ (D.ideal.subschemeι ≫ E.π).appTop).hom a = _
+    show ((E.subgroupUnit hD).appTop ≫ (E.subgroupStructMap D).appTop).hom a
+      = ((E.subgroupUnit hD).appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).hom
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom a
+    rw [Iso.hom_inv_id_assoc]
+  rw [hcomul] at happ
   exact happ
 
 end AffineHopf
