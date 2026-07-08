@@ -1,0 +1,55 @@
+import ModularCurves.EllipticCurve.AdditionChartMor
+
+/-!
+# The regularity open of an addition law on a chart-product (T-W7.0c-c5β, β3 cover)
+
+A projective triple `t : Fin 3 → A` is regular exactly where some coordinate is invertible: the
+open `regularityOpen t := ⨆ k, D(t k) ⊆ Spec A`. The three `D(t k)` cover it by construction,
+and `regularityOpen t = ⊤` precisely when the coordinates generate the unit ideal
+(`PrimeSpectrum.iSup_basicOpen_eq_top_iff`) — which for a Bosma–Lenstra law is FALSE on the whole
+chart-product (a single (2,2) law always has a nonempty exceptional divisor, B–L Thm 1) and is
+exactly why two laws are needed.
+
+For law 2 on the `(i,j)` chart-product this open is the piece's contribution to `blOpenY`; for
+law 1, to `blOpenZ`. Each `D(t k)` carries the morphism `addOn{Y,Z}PieceMor` (f1dd27ad); β4 glues
+them over `k` (via the six certified minors) and over `(i,j)` (dehomogenisation compatibility).
+
+`regularityOpen_law_ne_top_of_exceptional` records the sharp form of "one law never suffices":
+if the triple has a common zero (a point of the exceptional divisor), the open is not everything.
+-/
+
+open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
+
+namespace WeierstrassCurve.Projective
+
+variable {A : Type} [CommRing A]
+
+/-- The regularity open of a projective triple: where some coordinate is invertible. -/
+def regularityOpen (t : Fin 3 → A) : TopologicalSpace.Opens (PrimeSpectrum A) :=
+  ⨆ k, PrimeSpectrum.basicOpen (t k)
+
+lemma basicOpen_le_regularityOpen (t : Fin 3 → A) (k : Fin 3) :
+    PrimeSpectrum.basicOpen (t k) ≤ regularityOpen t :=
+  le_iSup (fun k => PrimeSpectrum.basicOpen (t k)) k
+
+/-- The three basic opens cover the regularity open, by construction. -/
+lemma iSup_basicOpen_eq_regularityOpen (t : Fin 3 → A) :
+    (⨆ k, PrimeSpectrum.basicOpen (t k)) = regularityOpen t := rfl
+
+/-- The regularity open is everything exactly when the coordinates generate the unit ideal. -/
+lemma regularityOpen_eq_top_iff (t : Fin 3 → A) :
+    regularityOpen t = ⊤ ↔ Ideal.span (Set.range t) = ⊤ :=
+  PrimeSpectrum.iSup_basicOpen_eq_top_iff
+
+/-- **The reason two laws are needed.** If the triple has a common zero — a point of its
+exceptional divisor, which every bidegree-`(2,2)` addition law has (B–L Thm 1) — then its
+regularity open is not the whole chart-product. -/
+lemma regularityOpen_ne_top_of_forall_mem (t : Fin 3 → A) (p : PrimeSpectrum A)
+    (hp : ∀ k, t k ∈ p.asIdeal) : regularityOpen t ≠ ⊤ := by
+  intro htop
+  rw [regularityOpen_eq_top_iff, Ideal.eq_top_iff_one] at htop
+  have hle : Ideal.span (Set.range t) ≤ p.asIdeal :=
+    Ideal.span_le.mpr (Set.range_subset_iff.mpr hp)
+  exact p.isPrime.ne_top ((Ideal.eq_top_iff_one _).mpr (hle htop))
+
+end WeierstrassCurve.Projective

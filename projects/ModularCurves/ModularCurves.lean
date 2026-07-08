@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.AdditionChartSpec
 import ModularCurves.EllipticCurve.AdditionChartHom
 import ModularCurves.EllipticCurve.AdditionChartAway
 import ModularCurves.EllipticCurve.AdditionChartMor
+import ModularCurves.EllipticCurve.AdditionChartCover
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.HomogeneousEval
