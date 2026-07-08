@@ -9755,3 +9755,40 @@ proven and axiom-clean.*
   cascades immediately: STREAM-GH's ⛩[A711-FP] gate is OPEN, and the noetherian
   scaffolding on the étale-torsor layer can drop at the consumers' convenience. Full
   absorption when the report is relayed.
+
+### v10.44 (2026-07-08, c5β): [CHARTER-C5B] c4.3 RING LAYER COMPLETE — and one structural discovery
+
+*Commits: ac80a22d (`dblAddXYZ_smul` + `chartHomOfTriple_congr_of_smul` + the law-2 transition),
+db1ec632 (`AdditionChartTransition.lean` — `transHom` and `chartAwayHomOfTriple_lawTwoTriple_trans`),
+d7bb1828 (the bridge). All zero-sorry, axiom-clean, no `maxHeartbeats`.*
+
+- **THE DISCOVERY, and it collapses c4.3:** *every map in this construction is a
+  `chartHomOfTriple`.* The chart-product's two legs (`chartHomOfTriple_biChartPointFst/Snd`), the
+  chart-product transition (`transHom`, built factor-by-factor from `chartHomOfTriple` applied to the
+  `(i,j)` chart-point read over the overlap ring), and the addition law's three pieces are all
+  instances of one universal property: **an on-curve triple with an invertible `k`-th coordinate IS a
+  map out of chart `k`.** Consequently the single crux `chartι_comp_specMap_chartAwayHom_eq`
+  (3166d104) discharges every compatibility in the build — target-side (c4.2c, done), source-side,
+  and transition. There is no second crux, and there never was going to be one.
+- **No transition matrices, no cocycles, no inverses.** `chartHomOfTriple_congr_of_smul` derives
+  `u = e * u'` from the two unit witnesses, so the bidegree-`(2,2)` transition factor is never named,
+  never inverted, never transported. `dblAddXYZ_smul` (new, mirrors mathlib's `addXYZ_smul`) supplies
+  the homogeneity; a chart morphism does not see scalars.
+- **Cross-chart-product agreement is PROVEN at ring level:**
+  `chartAwayHomOfTriple_lawTwoTriple_trans`. What remains of c4.3 is geometry with no mathematical
+  content: `Spec transRing` as the intersection of the two chart-product opens (`pullbackSpecIso` on
+  the localized legs — same recipe as `chartPieceIso`, bb5c86d9), then `glueMorphisms` over
+  `chartProductCover`, reusing `homOfLE_morphismRestrict_agree` + `glueMorphisms_hf_of_agree`
+  (f91b91ec) verbatim, since both are stated over variable schemes.
+- **Two more `rw` traps banked (fleet):**
+  1. `rw [mul_comm]` inside a `Localization.Away (a * b)` context rewrites **inside the type** — the
+     away element is itself a product. Use `exact mul_comm _ _` / `.trans (mul_comm _ _)`.
+  2. `subst` on `h : m = i'` when the goal's type mentions `transRing … i' …` breaks the motive
+     (`OreLocalization.instOne` retypes). Rewrite the ring element (`have hm : P m = P i'`), not the
+     index.
+- **Superseded (harmless, keep):** `chartHomOfTriple_smul` (281354fc) is the special case of
+  `chartHomOfTriple_congr_of_smul` where the inverse is named. Cleanup may drop it.
+- **Unchanged after c4.3:** c4.4 universality by instantiation, c4.5 fills the four
+  `GroupLawConstruction.lean` sorries ⟹ 0c-i increment 2 DONE ⟹ **0c-ii `mulModelHom`**, where I
+  report per charter. Noted: the W7 endgame gates the comparison milestone, the KM 4.7 residual, and
+  the étale cascade (v10.38); this lane is one of its two legs.
