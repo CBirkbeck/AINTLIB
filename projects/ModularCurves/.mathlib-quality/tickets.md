@@ -9380,3 +9380,17 @@ mathlib has NO comodule class — + trivial-action validation), bee2bc05 (HopfGa
   the crux PROOF (scoping-blocked v10.38) + glue. Details in `decomposition-g3d-piece3.md`.
 - Interface still validated by the N-Isogeny consumer (`NIsogeny.lean` imports SubgroupQuotient, uses
   `IsInvariant`). p0 continues on the general route per beastmode absent a redirect.
+
+### v10.41 (2026-07-08, fable-FP): ★ [STREAM-FP] claimed — the hard-substrate charter picked up
+
+*[STREAM-FP] (v10.37 charter-in-waiting) claimed by **fable-FP**, 2026-07-08T15:09Z.
+Sentinel: `beastmode_active.fable-FP`. Target: **[A711-FP]** — module-finite +
+module-projective ⟹ algebra-level `Algebra.FinitePresentation`, arbitrary (non-noetherian)
+base. New file `ForMathlib/FinitePresentationOfFinite.lean`; zero overlap with any live
+lane (InvariantTorsor.lean NOT touched without a separate claim line). First act per
+v10.8: `/develop --decompose` — Stacks 00QQ/05GH fetched + quoted verbatim; decomposition
+artifact: `decomposition-a711-fp.md`. Stretch follow-ons per charter, after FP:
+[KM-FMT-FLAT], then [NISOG-GRASS]. v10.24 + v10.35b discipline acknowledged.*
+
+- **Claimed**: fable-FP, 2026-07-08T15:09Z (stream star: [STREAM-FP]; first ticket: [A711-FP])
+- **[A711-FP] Status**: in_progress
