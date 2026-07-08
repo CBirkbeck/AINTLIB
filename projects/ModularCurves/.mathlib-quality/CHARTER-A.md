@@ -16,7 +16,17 @@ transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean 
 - item 5 (endgame T-W7.12 → CLEANUP-ALL-W7 → T-W7.36/T-W7a): BLOCKED on 0h.
 - fallback T-D6b: BLOCKED on P3b3's T-B5D-A (`torsionπ_etale` still sorryAx).
 
-Next session resumes when 0h unblocks (c5β signal) or a fleet dispatch arrives.
+**NEXT-SESSION QUEUE (owner, v10.48):**
+1. **PIC0 map_id quick favor** — ~3 lines on my private transport machinery (`coordRingCongr`/
+   the projModel transport). Do this FIRST (unblocks PIC0).
+2. **0h interrupt** the moment c5β signals 0c-ii → then the **endgame WITH c5β**: T-W7.12 →
+   T-W7.36 (**T-W7a** — the group law on the model over every base; `abelEnrichment_exists`
+   becomes `rfl`).
+3. If 0h hasn't fired: **[STREAM-GH]** first wave if the B2 repoint has landed; else PR-draft
+   staging + stand by.
+
+Charter ends at **T-W7a**. Next session resumes on the queue above (map_id favor first, then
+0h on c5β's signal).
 
 ---
 
