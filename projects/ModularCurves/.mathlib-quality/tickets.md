@@ -8088,3 +8088,32 @@ centres in place, session closed.)*
   - **fable-PIC0**: PRIORITY SIGNAL (no scope change) — T-G3c/T-G3e + all four DS-END0 pins
     now wait on their autoduality; the shortest path through their decomposition to the
     autoduality statement unblocks the most.
+
+## Amendments v10.28 (2026-07-08): beastmode-A queue drained — faith-infra spec SHARPENED (decisive); new claim [T-W8]
+
+- **faith-infra finding is DECISIVE (5th route)**: sealing ALL heavy b1 isos `local irreducible`
+  is provably insufficient — the generic-lemma steps compile cheaply, but any
+  `rw [pointedIsoCoordEquiv_apply]` / `change` / `.trans` still grinds isDefEq on the
+  4-fold-nested composite because the terms are HUGE AS STATED, not merely when unfolded; only
+  pure `rfl` survives. **[T-W7.1b-faith-infra] spec sharpened accordingly**: the fix is
+  definition-level irreducibility AT THE ModelVariableChange DEF SITE plus rebuilding b2's
+  unfolding proofs against the interface — an ATOMIC full-file refactor (a partial version
+  leaves a red build). It remains the designated fresh-full-budget-session first act
+  (beastmode-A's next session); the AdicSpaces recipe citation stands confirmed. WIP is green
+  (`_apply` + `ringEquiv_trans_mid_inj` = interface citizens 1–2; S1 sorried with the finding).
+- **W7 endgame ledger (from A's audit)**: **T-W7.1a DONE, axiom-clean** (review input ready).
+  **T-W7.0h** (`mulModelHom_vc`) correctly blocked on c5β's 0c-ii; **pre-committed to
+  beastmode-A** with route banked (`projModel_hom_ext_of_affine` + per-chart addOn
+  VC-equivariance) — A takes it the moment 0c-ii lands (interrupt-priority over other work).
+  1b pending faith-infra. 0c-ii = c5β (pre-approved, v10.27). T-D6b confirmed waiting on
+  P3b3's T-B5D-A (`torsionπ_etale` still carries sorryAx).
+- **NEW DISPATCH — beastmode-A claims [T-W8] (level spaces over U) THIS session**: its
+  D-stream incidence dependencies are NOW ALL SATISFIED by A's own T-D33 close (five centres +
+  `exists_exactOrderLocus_section`). Order: (1) **U_{Γ₁(N)}** — the exact-order locus over the
+  universal atlas, via `exists_exactOrderLocus_section` at the universal curve (A's freshest
+  lemma, purpose-built); (2) **U_{Γ(N)}** via `exists_fullLevelLocus`; (3) **U_{Γ₀(N)}** as far
+  as T-SG2's def-of-record reaches. FILE DISCIPLINE: new Moduli-level file; c5β's
+  GroupLawConstruction/AdditionChart files are off-limits; v10.24(b) — heavy level-space
+  definitions ship their opaque interface in the same increment. Feeds: T-E7/T-H
+  representability presentations. Interrupt order: 0h (on 0c-ii landing) > T-W8;
+  [T-W7.1b-faith-infra] stays the NEXT session's first act with full budget.
