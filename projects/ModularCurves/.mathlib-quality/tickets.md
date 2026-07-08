@@ -5213,6 +5213,14 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (intrinsic via section ideal); `F₂`/`F₃` freeness forces `x' ↦ αx+β`, `y' ↦ γy+δx+ε`,
     units; relations force `α³ = γ²`, `u := γ/α`; extend by `projModel_hom_ext_of_affine`.
     Leaf **L-1b** (prior-B2 fix-option-3, BB-RR-free). Shared-witness `∃` documented.
+  - **CLAIM (beastmode-P3b3, 2026-07-08)**: sub-leaves **b3x** (`pointedIsoCoordEquiv_coordX`),
+    **b3y** (`pointedIsoCoordEquiv_coordY`), **main** (`pointedIso_exists_variableChange`),
+    **b5** (`projModelVCIso_injective`). Work in NEW file
+    `EllipticCurve/ComparisonCoefficients.lean` as hypothesis-parameterized versions taking the
+    b2 conclusion `hfil` as an argument (b5 is hfil-independent). Isolated worktree
+    `../aintlib-mc-b3` (branch `dev/modular-curves-b3`), PR back to `dev/modular-curves` when
+    green. **NOT claiming b2** (`pointedIsoCoordEquiv_filtration`, in flight on beastmode-A) —
+    final wiring of the four sorries in ModelVariableChange.lean deferred until b2 flips done.
 
 - **[CLEANUP-MVC]** final `/cleanup` ModelVariableChange.lean. **Depends**: T-W7.1b.
 
