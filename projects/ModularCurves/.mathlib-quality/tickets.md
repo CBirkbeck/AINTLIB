@@ -6663,7 +6663,8 @@ PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
 ### v10.5 [T-END0] End(E/S)/degree layer from KM Ch. 2 — the G-lane resume trigger has FIRED
 - **Status**: open · **Assignee**: beastmode-P2 when T-D5e wraps (right of first refusal — it
-  closes their T-G3 box), else p0 after T-KMQ · **Type**: quote pass + skeleton + proofs ·
+  closes their T-G3 box), else p0 after T-KMQ · **Type**: `/develop --decompose` planning
+  (BINDING first act, v10.8) + execution ·
   **Depends on**: KM Ch. 2 (NOW in refs — this was the G-lane PHASE-8 resume trigger, verbatim:
   *"when the KM Ch.2 text lands in refs/ModularCurves/ (degree/dual-isogeny/Hasse)"*); GME
   §B8/§B9 transcriptions (`decomposition-gme2.md`); HasseWeil
@@ -6687,6 +6688,12 @@ source for the LAST BB-DELIGNE sorry: p2 is isolating T-D5e onto exactly Lemma 3
 (`deligne_operators`); their scoping note above records Mumford AV §14 as field-only and this
 chapter as the missing text. Until it lands, p2's isolation work stands as designed (the one
 sorry sits precisely on 3.8.2).
+- **RESOLVED 2026-07-08 (same day)** — the book is IN refs: `refs/ModularCurves/css-modular-forms-flt.pdf`
+  (+ source `.djvu`; TOC verified: **Chapter V, "Finite Flat Group Schemes", John Tate,
+  pp. 121–154**; the Lemma-3.8.x range sits in §3 "Finite flat group schemes; passage to
+  quotient", pp. 132–146). **Gate lifted for `deligne_operators`** under the standard rule:
+  READ the cited pages, quote them verbatim (page + §) in the decl/ticket, confirm the Lean
+  statement matches the quote — do NOT prove from memory.
 
 ### v10.7 Available-not-priority (idle-capacity overflow list)
 - **[T-D10-proof]** `isGammaZero_iff_fppf` — the KM 3.7.1 étale-descent argument is now readable
@@ -6697,3 +6704,16 @@ sorry sits precisely on 3.8.2).
 - **T-W7.8 route (ii)** (concrete Weierstrass-shape hom-existence descent, ~300–500 lines) —
   only on explicit owner override of the v9 F1′ LOW-priority call; default stays route (i)
   wait-for-mathlib (fable-P4's 2026-07-08 re-check verdict stands).
+
+### v10.8 OWNER DIRECTIVE (2026-07-08, binding): RR-ONLY reaffirmed + `/develop` is the planning vehicle
+- **The ONLY standing assumable is BB-RR** (Riemann–Roch, per the v3 RR-only register).
+  Everything else — including every stream this amendment opens — is a PROVE-IT target: no new
+  standing boxes; a sorry may exist only inside a stream whose plan terminates in a proof (or an
+  explicit owner-visible gap ticket per the DS-register rules).
+- **`/develop --decompose` is the BINDING first act** of each new stream, before any proof
+  execution: **T-C1-KM28** (assignee: H on resume), **T-E5-KM47** (fable-P4), **T-END0** (p2,
+  else p0). Deliverables per the skill: prose proof per top-level result, ordered lemma
+  decomposition, `:= by sorry` skeleton that `lake build`s clean, verbatim source quotes per
+  leaf + a Lean↔source match paragraph each, and the leaf tickets on this board.
+- Coordinator note: these `/develop` runs belong to the **assignees' sessions** (this worktree
+  hosts live builds; p2 holds right of first refusal on T-END0) — not to the coordinator pass.
