@@ -1,1 +1,1 @@
-FOCUS: T-KMQ DONE (ledger banked in tickets.md; 3 closed T-A2/B2/B7, rest reclassified non-KM-gated). NEXT: [T-END0] v10.5 — first act /develop --decompose on KM Ch.2 End(E/S)/deg (unless p2 claimed it)
+FOCUS: T-END0 /develop --decompose FIRST ACT — decomposition-end0.md + EndomorphismDegree.lean skeleton (builds clean 3074 jobs). Filing leaf tickets on board (tickets.md racing — retrying). NEXT: execution T-END0a ring → T-END0b deg/dual
