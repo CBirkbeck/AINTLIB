@@ -299,8 +299,62 @@ noncomputable def hOrbitSetoid {N : ℕ} [NeZero N]
     · rintro L L' L'' ⟨g, hg, rfl⟩ ⟨g', hg', rfl⟩
       exact ⟨g * g', H.mul_mem hg hg', by rw [E.glSmul_mul]⟩⟩
 
+/-- **(T-H2b, membership)** The naive full-level condition is stable under base change:
+killing transports through `pull_zsmul`/`asSection_zsmul`, and fibrewise generation
+transports through the additive base-change point dictionary `Point.baseChangeEquiv`
+(a geometric point of the base-changed curve is a geometric point of `E` over the
+composite). -/
+private lemma isNaiveFullLevel_pullAlong {T T' : Scheme.{u}} {E : EllipticCurve T}
+    {N : ℕ} [NeZero N] (σ : T' ⟶ T) {P Q : E.Section}
+    (h : E.IsNaiveFullLevel N P Q) :
+    (E.baseChange σ).IsNaiveFullLevel N
+      (Point.asSection E σ (Point.pull E σ P))
+      (Point.asSection E σ (Point.pull E σ Q)) := by
+  obtain ⟨⟨hP, hQ⟩, hgen⟩ := h
+  have hzero : Point.asSection E σ (0 : E.Point σ) = (0 : (E.baseChange σ).Section) := by
+    have h0 := Point.asSection_zsmul E σ 0 (0 : E.Point σ)
+    simpa using h0
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [← Point.asSection_zsmul, ← Point.pull_zsmul, hP, Point.pull_zero, hzero]
+  · rw [← Point.asSection_zsmul, ← Point.pull_zsmul, hQ, Point.pull_zero, hzero]
+  · intro k _ _ t x hx
+    have hdx : (N : ℤ) • Point.baseChangeEquiv E σ t x = 0 := by
+      rw [← map_zsmul (Point.baseChangeEquiv E σ t), hx, map_zero]
+    have hcompatP : Point.baseChangeEquiv E σ t
+        (Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ P)))
+        = Point.pull E (t ≫ σ) P := by
+      refine Subtype.ext ?_
+      exact (Category.assoc _ _ _).trans <|
+        (congrArg (t ≫ ·) (Point.asSection_val_fst E σ _)).trans <|
+        (Category.assoc _ _ _).symm
+    have hcompatQ : Point.baseChangeEquiv E σ t
+        (Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ Q)))
+        = Point.pull E (t ≫ σ) Q := by
+      refine Subtype.ext ?_
+      exact (Category.assoc _ _ _).trans <|
+        (congrArg (t ≫ ·) (Point.asSection_val_fst E σ _)).trans <|
+        (Category.assoc _ _ _).symm
+    have h1 := hgen k (t ≫ σ) (Point.baseChangeEquiv E σ t x) hdx
+    rw [← hcompatP, ← hcompatQ] at h1
+    have hKle : AddSubgroup.closure
+        ({Point.baseChangeEquiv E σ t
+            (Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ P))),
+          Point.baseChangeEquiv E σ t
+            (Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ Q)))} :
+          Set (E.Point (t ≫ σ)))
+        ≤ (AddSubgroup.closure
+            {Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ P)),
+             Point.pull (E.baseChange σ) t (Point.asSection E σ (Point.pull E σ Q))}).map
+          (Point.baseChangeEquiv E σ t).toAddMonoidHom := by
+      rw [AddSubgroup.closure_le]
+      rintro z (rfl | rfl)
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert _ _), rfl⟩
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl), rfl⟩
+    obtain ⟨y, hy, hyx⟩ := hKle h1
+    exact ((Point.baseChangeEquiv E σ t).injective hyx) ▸ hy
+
 /-- Pull a full level point back along a base morphism `σ : T' ⟶ T`: the level of the
-base-changed curve. (Membership Prop is `T-H2b`.) -/
+base-changed curve. -/
 noncomputable def FullLevelPt.pullAlong {T T' : Scheme.{u}} {E : EllipticCurve T}
     {N : ℕ} [NeZero N] (σ : T' ⟶ T) (L : E.FullLevelPt N) :
     (E.baseChange σ).FullLevelPt N :=
@@ -308,7 +362,7 @@ noncomputable def FullLevelPt.pullAlong {T T' : Scheme.{u}} {E : EllipticCurve T
       ⟨σ ≫ L.1.1.1, by rw [Category.assoc, L.1.1.2, Category.comp_id]⟩,
     EllipticCurve.Point.asSection E σ
       ⟨σ ≫ L.1.2.1, by rw [Category.assoc, L.1.2.2, Category.comp_id]⟩),
-    by sorry⟩
+    isNaiveFullLevel_pullAlong σ L.2⟩
 
 end EllipticCurve
 

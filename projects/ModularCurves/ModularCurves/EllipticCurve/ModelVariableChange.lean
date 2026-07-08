@@ -2449,6 +2449,54 @@ private lemma res_numerator_generic {X : Scheme.{u}} {U : X.Opens}
       (Subsingleton.elim _ _)
   exact (congrArg₂ (· * ·) rfl (hfuse (f ^ j))).symm.trans (hexp.trans (hfuse x₀))
 
+private lemma res_eq_pull_generic {X : Scheme.{u}} {U : X.Opens}
+    (hU : IsAffineOpen U) (f : Γ(X, U)) {y₁ y₂ : ↑Γ(X, U)}
+    (h : ((X.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom) y₁ =
+      ((X.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom) y₂) :
+    ∃ m : ℕ, f ^ m * y₁ = f ^ m * y₂ := by
+  haveI := hU.isLocalization_basicOpen f
+  have h' : (algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y₁ =
+      (algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y₂ := h
+  obtain ⟨⟨c, hc⟩, hcy⟩ := (IsLocalization.eq_iff_exists
+    (Submonoid.powers f) (↑Γ(X, X.basicOpen f))).mp h'
+  obtain ⟨m, hm⟩ := hc
+  refine ⟨m, ?_⟩
+  have hcy' : c * y₁ = c * y₂ := hcy
+  rw [← hm] at hcy'
+  exact hcy'
+
+private lemma unit_numerator_generic {A S : Type u} [CommRing A] [CommRing S]
+    [Algebra A S] (g : A) [IsLocalization.Away g S] (v : Sˣ) :
+    ∃ (v₀ : A) (k : ℕ), (↑v : S) * algebraMap A S (g ^ k) = algebraMap A S v₀ ∧
+      ∀ (P : Ideal A), P.IsPrime → g ∉ P → v₀ ∉ P := by
+  obtain ⟨⟨v₀, u⟩, hv₀⟩ := IsLocalization.surj (Submonoid.powers g) (↑v : S)
+  obtain ⟨k, hk⟩ := u.2
+  rw [← hk] at hv₀
+  obtain ⟨⟨w₀, u'⟩, hw₀⟩ := IsLocalization.surj (Submonoid.powers g) (↑v⁻¹ : S)
+  obtain ⟨l, hl⟩ := u'.2
+  rw [← hl] at hw₀
+  have hprod : algebraMap A S (v₀ * w₀) = algebraMap A S (g ^ k * g ^ l) := by
+    rw [map_mul, ← hv₀, ← hw₀, map_mul]
+    have hvv : (↑v : S) * ↑v⁻¹ = 1 := v.mul_inv
+    calc (↑v : S) * algebraMap A S (g ^ k) * ((↑v⁻¹ : S) * algebraMap A S (g ^ l))
+        = ((↑v : S) * ↑v⁻¹) * (algebraMap A S (g ^ k) * algebraMap A S (g ^ l)) := by
+          ring
+      _ = algebraMap A S (g ^ k) * algebraMap A S (g ^ l) := by rw [hvv, one_mul]
+  obtain ⟨⟨c, hc⟩, hcy⟩ := (IsLocalization.eq_iff_exists
+    (Submonoid.powers g) S).mp hprod
+  obtain ⟨m, hm⟩ := hc
+  have hcy' : c * (v₀ * w₀) = c * (g ^ k * g ^ l) := hcy
+  rw [← hm] at hcy'
+  refine ⟨v₀, k, hv₀, fun P hP hgP hv₀P => ?_⟩
+  have hmem : g ^ m * (g ^ k * g ^ l) ∈ P := by
+    rw [← hcy']
+    exact Ideal.mul_mem_left _ _ (Ideal.mul_mem_right _ _ hv₀P)
+  rcases hP.mem_or_mem hmem with h1 | h2
+  · exact hgP (hP.mem_of_pow_mem _ h1)
+  · rcases hP.mem_or_mem h2 with h3 | h4
+    · exact hgP (hP.mem_of_pow_mem _ h3)
+    · exact hgP (hP.mem_of_pow_mem _ h4)
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic

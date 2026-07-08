@@ -1,1 +1,1 @@
-FOCUS: T-W7.1b b3x — writing exists_coordX_image (Phi x in span{1,x} from hfil 2; unit via inverse expansion + coordXY_ext) in ComparisonCoefficients.lean
+FOCUS: T-W7.1b-main + T-W7.1b-b5 — ComparisonCoefficients.lean: build C:VariableChange from b3x/b3y (main core), read u,r,s,t off projModelVCIso for injectivity (b5 core). b3x/b3y cores DONE + committed 29cf027d.

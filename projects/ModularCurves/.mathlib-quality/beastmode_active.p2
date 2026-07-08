@@ -1,0 +1,1 @@
+FOCUS: BB-DELIGNE T-D5f — det kills commutator ⟹ λ^n=1 (Tate §3.8 determinant step). Writing ForMathlib/CartierDual.lean; proving the pure-matrix lemma first, then Cartier-dual layer.
