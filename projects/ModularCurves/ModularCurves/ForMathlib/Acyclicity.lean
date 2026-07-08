@@ -63,6 +63,33 @@ complex is already exact at `Mᵢ₊₁`, or its homology there has depth `≥ 1
 contrapositive-friendly form `be_backward_core` consumes: it rules out the depth-`≥ 1` disjunct by
 supporting the homology at `𝔪`, forcing exactness. -/
 
+/-- Depth is a linear-equivalence invariant: a regular sequence transports along `e : M ≃ₗ[R] N`
+(`LinearEquiv.isRegular_congr`), and membership in `𝔪` is unchanged.  Used to move `depth` across the
+degenerate syzygy isomorphisms (`M(j+1) ≅ range(φ j)` when `φ j` is injective, `↥⊤ ≅ M`, `M ⧸ ⊥ ≅ M`)
+that the "largest non-exact spot" bookkeeping produces. -/
+private theorem hasDepthGE_of_linearEquiv {R : Type u} [CommRing R] [IsLocalRing R]
+    {M N : Type u} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (e : M ≃ₗ[R] N) {k : ℕ} (h : Module.HasDepthGE R M k) : Module.HasDepthGE R N k := by
+  obtain ⟨rs, hlen, hreg, hmem⟩ := h
+  exact ⟨rs, hlen, (e.isRegular_congr rs).mp hreg, hmem⟩
+
+/-- A module of positive (indeed any) depth is nonzero: `HasDepthGE R M k` gives `HasDepthGE R M 0`
+by monotonicity, which is `Nontrivial M`.  This is how the syzygies `Kⱼ, Bᵢ` inherit the
+`Nontrivial` hypotheses the `00LX` short-exact-sequence inequalities require. -/
+private theorem hasDepthGE_nontrivial {R : Type u} [CommRing R] [IsLocalRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] {k : ℕ}
+    (h : Module.HasDepthGE R M k) : Nontrivial M :=
+  (Module.hasDepthGE_zero_iff R M).mp (Module.hasDepthGE_mono (R := R) h (Nat.zero_le _))
+
+/-- The tautological image short exact sequence `0 → ker ψ → A → range ψ → 0`: the inclusion of the
+kernel is exact with the surjection `ψ.rangeRestrict` onto the image.  This is the syzygy SES the
+acyclicity argument feeds to the depth inequalities at every spot. -/
+private theorem exact_ker_subtype_rangeRestrict {R : Type u} [CommRing R]
+    {A B : Type u} [AddCommGroup A] [Module R A] [AddCommGroup B] [Module R B]
+    (ψ : A →ₗ[R] B) :
+    Function.Exact (LinearMap.ker ψ).subtype ψ.rangeRestrict := by
+  rw [LinearMap.exact_iff, LinearMap.ker_rangeRestrict, Submodule.range_subtype]
+
 /-- **[T-ACYC.00N0] Stacks 00N0 (Lemma 10.102.8), the acyclicity lemma — the make-or-break leaf.**
 `M` a finite complex of finite modules over a Noetherian local ring with `depth(Mⱼ) ≥ j` for
 `j ≤ e` (and `Mⱼ = 0` for `j > e`); if the complex is exact at every spot `> i+1`, then it is exact
@@ -84,7 +111,117 @@ theorem acyclicityLemma_hasDepthGE_homology
       Module.HasDepthGE R
         (LinearMap.ker (φ i) ⧸ (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)
         1 := by
-  sorry
+  classical
+  -- The syzygy-depth tower.  For every spot `m` with `i+1 ≤ m` in the exact range (`m + d + 1 = e`),
+  -- either `depth (range φ m) ≥ m+1`, or the syzygy `range φ m` is zero.  Downward induction on the
+  -- distance `d` from the top `e-1`, pushing `depth (Mⱼ) ≥ j` down the SES `0 → ker φ m → M(m+1) →
+  -- range φ m → 0` with `00LX(2)` (`hasDepthGE_quotient_of_shortExact`); the two degenerate branches
+  -- (`ker φ m = 0` and `range φ m = 0`) are closed by the equivalence-invariance of depth.
+  have Qtower : ∀ d m, m + d + 1 = e → i + 1 ≤ m →
+      Module.HasDepthGE R (LinearMap.range (φ m)) (m + 1) ∨
+        Subsingleton (LinearMap.range (φ m)) := by
+    intro d
+    induction d with
+    | zero =>
+      intro m hm hlo
+      -- Top: `m + 1 = e`, so `range (φ (m+1)) = 0` and `ker (φ m) = 0`, giving `range φ m ≅ M(m+1)`.
+      left
+      haveI : Subsingleton (M (m + 1 + 1)) := hbdd (m + 1 + 1) (by omega)
+      have hφ0 : φ (m + 1) = 0 := by ext x; rw [Subsingleton.elim x 0]; simp
+      have hkm : LinearMap.ker (φ m) = LinearMap.range (φ (m + 1)) :=
+        LinearMap.exact_iff.mp (habove m (by omega))
+      have hkerbot : LinearMap.ker (φ m) = ⊥ := by rw [hkm, LinearMap.range_eq_bot.mpr hφ0]
+      have hinj : Function.Injective (φ m) := LinearMap.ker_eq_bot.mp hkerbot
+      exact hasDepthGE_of_linearEquiv (LinearEquiv.ofInjective (φ m) hinj)
+        (hdepth (m + 1) (by omega))
+    | succ d ih =>
+      intro m hm hlo
+      have hMdepth : Module.HasDepthGE R (M (m + 1)) (m + 1) := hdepth (m + 1) (by omega)
+      haveI : Nontrivial (M (m + 1)) := hasDepthGE_nontrivial hMdepth
+      have hkm : LinearMap.ker (φ m) = LinearMap.range (φ (m + 1)) :=
+        LinearMap.exact_iff.mp (habove m (by omega))
+      rcases ih (m + 1) (by omega) (by omega) with hd | hs
+      · -- `depth (range φ (m+1)) ≥ m+2`, i.e. `depth (ker φ m) ≥ m+2`; feed `00LX(2)`.
+        have hAdepth : Module.HasDepthGE R (LinearMap.ker (φ m)) (m + 1 + 1) := by
+          rw [hkm]; exact hd
+        haveI : Nontrivial (LinearMap.ker (φ m)) := hasDepthGE_nontrivial hAdepth
+        rcases subsingleton_or_nontrivial (LinearMap.range (φ m)) with hCs | hCn
+        · right; exact hCs
+        · left
+          haveI := hCn
+          exact Module.hasDepthGE_quotient_of_shortExact (R := R)
+            (f := (LinearMap.ker (φ m)).subtype) (g := (φ m).rangeRestrict)
+            (hf := Submodule.subtype_injective _) (hfg := exact_ker_subtype_rangeRestrict (φ m))
+            (hg := LinearMap.surjective_rangeRestrict _) (hB := hMdepth) (hA := hAdepth)
+      · -- `range (φ (m+1)) = 0 = ker (φ m)`, so `φ m` injective and `range φ m ≅ M(m+1)`.
+        left
+        rw [← hkm] at hs
+        have hinj : Function.Injective (φ m) :=
+          LinearMap.ker_eq_bot.mp (Submodule.subsingleton_iff_eq_bot.mp hs)
+        exact hasDepthGE_of_linearEquiv (LinearEquiv.ofInjective (φ m) hinj) hMdepth
+  -- Split on whether the homology at spot `i+1` is trivial.
+  rcases subsingleton_or_nontrivial
+      (LinearMap.ker (φ i) ⧸ (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)
+      with hH | hH
+  · -- Trivial homology ⟹ `ker (φ i) ≤ range (φ (i+1))`, i.e. the complex is exact at `M(i+1)`.
+    left
+    rw [Submodule.Quotient.subsingleton_iff, Submodule.comap_subtype_eq_top] at hH
+    rw [LinearMap.exact_iff]
+    exact le_antisymm hH (LinearMap.range_le_ker_iff.mpr (hcomplex i))
+  · -- Nontrivial homology ⟹ `depth H ≥ 1`.
+    right
+    haveI := hH
+    haveI hKiNontrivial : Nontrivial (LinearMap.ker (φ i)) :=
+      (Submodule.mkQ_surjective
+        ((LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype)).nontrivial
+    have hMdepth : Module.HasDepthGE R (M (i + 1)) (i + 1) := hdepth (i + 1) hie
+    haveI : Nontrivial (M (i + 1)) := hasDepthGE_nontrivial hMdepth
+    -- `depth (ker φ i) ≥ 1` via `00LX(3)` on `0 → ker φ i → M(i+1) → range φ i → 0` (`k = 0`),
+    -- with the degenerate `range φ i = 0` branch giving `ker φ i ≅ M(i+1)` directly.
+    have hKi : Module.HasDepthGE R (LinearMap.ker (φ i)) 1 := by
+      rcases subsingleton_or_nontrivial (LinearMap.range (φ i)) with hs | hn
+      · have hφ0 : φ i = 0 :=
+          LinearMap.range_eq_bot.mp (Submodule.subsingleton_iff_eq_bot.mp hs)
+        have hkt : LinearMap.ker (φ i) = ⊤ := LinearMap.ker_eq_top.mpr hφ0
+        have hd : Module.HasDepthGE R (LinearMap.ker (φ i)) (i + 1) := by
+          rw [hkt]; exact hasDepthGE_of_linearEquiv Submodule.topEquiv.symm hMdepth
+        exact Module.hasDepthGE_mono (R := R) hd (by omega)
+      · haveI := hn
+        have hCdepth : Module.HasDepthGE R (LinearMap.range (φ i)) 0 :=
+          (Module.hasDepthGE_zero_iff R _).mpr hn
+        have hMdepth1 : Module.HasDepthGE R (M (i + 1)) 1 :=
+          Module.hasDepthGE_mono (R := R) hMdepth (by omega)
+        exact Module.hasDepthGE_sub_of_shortExact (R := R)
+          (f := (LinearMap.ker (φ i)).subtype) (g := (φ i).rangeRestrict)
+          (hf := Submodule.subtype_injective _) (hfg := exact_ker_subtype_rangeRestrict (φ i))
+          (hg := LinearMap.surjective_rangeRestrict _) (hB := hMdepth1) (hC := hCdepth)
+    -- `depth (range φ (i+1)) ≥ 2`, or the image `range φ (i+1)` is zero.
+    have hBidepth : Module.HasDepthGE R (LinearMap.range (φ (i + 1))) 2 ∨
+        Subsingleton (LinearMap.range (φ (i + 1))) := by
+      rcases Nat.lt_or_ge (i + 1) e with he | he
+      · rcases Qtower (e - 1 - (i + 1)) (i + 1) (by omega) le_rfl with hd | hs
+        · exact Or.inl (Module.hasDepthGE_mono (R := R) hd (by omega))
+        · exact Or.inr hs
+      · right
+        haveI : Subsingleton (M (i + 1 + 1)) := hbdd (i + 1 + 1) (by omega)
+        have hφ0 : φ (i + 1) = 0 := by ext x; rw [Subsingleton.elim x 0]; simp
+        rw [LinearMap.range_eq_bot.mpr hφ0]; infer_instance
+    -- Assemble `H = ker (φ i) / range (φ (i+1))` via `00LX(2)` on `0 → range φ(i+1) → ker φ i → H → 0`.
+    rcases hBidepth with hBd | hBs
+    · haveI : Nontrivial (LinearMap.range (φ (i + 1))) := hasDepthGE_nontrivial hBd
+      have hBK : LinearMap.range (φ (i + 1)) ≤ LinearMap.ker (φ i) :=
+        LinearMap.range_le_ker_iff.mpr (hcomplex i)
+      refine Module.hasDepthGE_quotient_of_shortExact (R := R)
+        (f := Submodule.inclusion hBK)
+        (g := ((LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype).mkQ)
+        (hf := Submodule.inclusion_injective hBK) (hfg := ?_)
+        (hg := Submodule.mkQ_surjective _) (hB := hKi) (hA := hBd)
+      rw [LinearMap.exact_iff, Submodule.ker_mkQ, Submodule.range_inclusion]
+    · -- `range φ (i+1) = 0`, so the homology `H ≅ ker φ i`.
+      have hcomapbot :
+          (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype = ⊥ := by
+        rw [Submodule.subsingleton_iff_eq_bot.mp hBs, Submodule.comap_bot, Submodule.ker_subtype]
+      exact hasDepthGE_of_linearEquiv (Submodule.quotEquivOfEqBot _ hcomapbot).symm hKi
 
 /-! ## [T-ACYC.00MZ] Exactness modulo a nonzerodivisor — Stacks 00MZ (Lemma 10.102.7)
 
