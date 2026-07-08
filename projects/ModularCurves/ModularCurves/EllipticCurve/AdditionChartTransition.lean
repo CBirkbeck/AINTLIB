@@ -246,4 +246,50 @@ theorem chartAwayHomOfTriple_lawTwoTriple_trans (k : Fin 3) (u u' : transRing W 
 
 end
 
+section Inclusions
+
+lemma biChartPointFst_self : biChartPointFst W i j i * 1 = 1 := by
+  rw [biChartPointFst, dif_pos rfl, one_mul]
+
+lemma biChartPointSnd_self : biChartPointSnd W i j j * 1 = 1 := by
+  rw [biChartPointSnd, dif_pos rfl, one_mul]
+
+/-- **(the bridge to the geometry)** The left inclusion `affineChartRing W i → biChartRing W i j`
+— the ring map underlying `pullback.fst` of the `(i,j)` chart-product — is the chart morphism of the
+first tautological point.
+
+This is what lets the crux `chartι_comp_specMap_chartAwayHom_eq` discharge the SOURCE-side chart
+compatibility, exactly as it discharges the target side: both legs of the chart-product, and both
+legs of the transition, are `chartHomOfTriple`s of on-curve triples. -/
+lemma chartHomOfTriple_biChartPointFst :
+    chartHomOfTriple W i (biChartPointFst W i j) 1 (biChartPointFst_self W i j)
+        (equation_biChartPointFst W i j) =
+      (biChartRingTensorEquiv W i j).symm.toAlgHom.comp
+        (Algebra.TensorProduct.includeLeft (S := R)) := by
+  refine Ideal.Quotient.algHom_ext R (MvPolynomial.algHom_ext fun m => ?_)
+  show chartHomOfTriple W i (biChartPointFst W i j) 1 (biChartPointFst_self W i j)
+      (equation_biChartPointFst W i j) (Ideal.Quotient.mk _ (X m)) =
+    (biChartRingTensorEquiv W i j).symm (Ideal.Quotient.mk _ (X m) ⊗ₜ[R] 1)
+  rw [chartHomOfTriple_coord, mul_one]
+  refine ((biChartRingTensorEquiv W i j).symm_apply_eq).mpr ?_ |>.symm
+  rw [biChartPointFst, dif_neg m.2, ← rename_X (R := R) (Sum.inl : {k : Fin 3 // k ≠ i} → _) m,
+    biChartRingTensorEquiv_mk_rename_inl]
+
+/-- The second-factor analogue of `chartHomOfTriple_biChartPointFst`. -/
+lemma chartHomOfTriple_biChartPointSnd :
+    chartHomOfTriple W j (biChartPointSnd W i j) 1 (biChartPointSnd_self W i j)
+        (equation_biChartPointSnd W i j) =
+      (biChartRingTensorEquiv W i j).symm.toAlgHom.comp
+        (Algebra.TensorProduct.includeRight (R := R)) := by
+  refine Ideal.Quotient.algHom_ext R (MvPolynomial.algHom_ext fun m => ?_)
+  show chartHomOfTriple W j (biChartPointSnd W i j) 1 (biChartPointSnd_self W i j)
+      (equation_biChartPointSnd W i j) (Ideal.Quotient.mk _ (X m)) =
+    (biChartRingTensorEquiv W i j).symm (1 ⊗ₜ[R] Ideal.Quotient.mk _ (X m))
+  rw [chartHomOfTriple_coord, mul_one]
+  refine ((biChartRingTensorEquiv W i j).symm_apply_eq).mpr ?_ |>.symm
+  rw [biChartPointSnd, dif_neg m.2, ← rename_X (R := R) (Sum.inr : {k : Fin 3 // k ≠ j} → _) m,
+    biChartRingTensorEquiv_mk_rename_inr]
+
+end Inclusions
+
 end WeierstrassCurve.Projective
