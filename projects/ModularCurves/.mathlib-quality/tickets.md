@@ -9364,6 +9364,13 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   nothing (first real removal N=8).
 - **First act**: [Y1-EASY] + [Y1-B1] in parallel, then [Y1-ATLAS] i/ii/vi. **REPORT** when
   those land: T-E7 status vs gates before opening Y1-D/E.
+- **Claimed**: NEW-Y1, 2026-07-08T22:15Z (fresh account, v10.53 reassignment — P3b3
+  rate-limited, reclaims at a natural boundary). Status: in_progress. First act: the
+  **[Y1-vi] assembly** — the transfer pin `equiv(pull P₀) = some 0 0` (chart naturality +
+  `projModelPointsEquiv_some`), wiring the committed pieces ([T-B6′-IFACE]
+  `geomFibrePointAddEquiv`, `tateMarkedPoint`, `isUnit_tateA₃`, `affine_origin_order_gt_three`)
+  into `tateMarkedPoint_nowhereGeomOrderLEThree`. Then remaining [Y1-EASY], [Y1-ATLAS] iii/v
+  (T-W7.1b done), [Y1-D]/[Y1-E] per gates. Single-target builds, commit-early cadence.
 
 ### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
 - `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
