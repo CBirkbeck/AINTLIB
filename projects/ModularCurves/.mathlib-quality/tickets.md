@@ -6179,7 +6179,7 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[CLEANUP-W7-FINAL]** `/cleanup-all` on all T-W7 files (the Phase-III close-out).
   **Depends**: T-W7.7, T-W7.36 (and T-W7.8 if/when it lands).
 
-- **[T-W8] `level-spaces-over-U`**. **CLAIMED beastmode-A 2026-07-08 (v10.28): new Moduli/LevelSpaces.lean; U_{Γ₁(N)} via exists_exactOrderLocus, U_{Γ(N)} via exists_fullLevelLocus, U_{Γ₀(N)} per T-SG2; v10.24(b) opaque interface per def.**
+- **[T-W8] `level-spaces-over-U`** — **DONE (beastmode-A 2026-07-08), Moduli/LevelSpaces.lean.** Parametric over `E : EllipticCurve S` (universal instantiation follows the universal `EllipticCurve`). `levelSpaceΓ₁` (closed in `E[N]`, exact-order locus via `exists_exactOrderLocus`) + `_spec` universal property — AXIOM-CLEAN. `levelSpaceΓ` (closed in `E[N] ×_S E[N]`, Drinfeld full-level via `exists_fullLevelLocus`) + `_spec` — inherits `sorryAx` transitively from `exists_fullLevelLocus`'s upstream boxes (not new). `levelStructureΓ₀ := GammaZeroStructure` (T-SG2 def-of-record) — Γ₀ is structure-not-predicate (no torsion-point locus; representability = separate SG3 GATE), documented as far as T-SG2 reaches. Each heavy def ships its opaque interface (immersion + `_spec`) per v10.24(b). Registered in root. Feeds T-E7 / H-stream representability presentations.
 - **[T-W8] `level-spaces-over-U`**. `U_{Γ(N)} = {W + (P,Q) Drinfeld full level N}`,
   `U_{Γ₁(N)} = {W + P exact order N}`, `U_{Γ₀(N)} = {W + cyclic rank-N subgroup}`, as
   schemes/subfunctors over `U` cut out by the D-stream Cartier incidence loci; the quotient
