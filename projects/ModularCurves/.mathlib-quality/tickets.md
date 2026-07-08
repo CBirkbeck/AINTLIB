@@ -7485,3 +7485,23 @@ records why).*
   discipline per v10.10 (new ForMathlib/bridge files only).
 - Queue note: **[T-Q2-proofs]** (v10.12, SGA III landed) remains the next unstaffed stream
   after this — first worker to free takes it.
+
+## Amendments v10.22 (2026-07-08): c5β sequencing correction ACCEPTED + β3 ring half done
+
+- **Sequencing correction (c5β, accepted)**: the v10.18 endgame pointer UNDER-COUNTED —
+  T-W7.12's outstanding dependencies are **0c-ii / 0h / 1a AND STILL 1b**, since
+  `pointedIso_exists_variableChange` carries its sorry until [T-W7.1b-faith] (beastmode-A,
+  v10.20) lands. The W7 endgame review fires when BOTH c5β's ticket finishes AND faith lands,
+  and counts 1b until then. (v10.18's "reduce to 0c-ii/0h/1a" is superseded on this point.)
+- **β3 checkpoint (d7bda67d, zero sorries, axiom-clean)**: `addOnYPieceHom` /
+  `addOnZPieceHom : chartAway W k →ₐ[R] Localization.Away (triple k)` — the k-th chart
+  morphisms of both addition laws on the (i,j) chart-product, via `chartAwayHomOfTriple`
+  instantiated at the localization. Both hypotheses FREE: on-curve =
+  `equation_lawTwoTriple_of_isDomain` (β2b), invertibility = the localization's `invSelf`.
+  **Antidote banked**: `.toProjective` blocks the syntactic rewrite of
+  `WeierstrassCurve.map_map` — apply the curve equality with `▸`.
+- **State**: every ingredient of `addOnZ`/`addOnY` now exists at RING level over any Jacobson
+  domain with Δ a unit (universal atlas included). Remaining in β3 is purely geometric
+  (Spec + `Proj.awayι` to scheme morphisms; the three t_k-basicOpens cover the (i,j) piece),
+  then β4's gluing via the six certified minors → the four GroupLawConstruction.lean sorries
+  fill. c5β continues, sentinel up, no redirect.
