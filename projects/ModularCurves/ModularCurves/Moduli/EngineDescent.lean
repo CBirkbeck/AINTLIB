@@ -120,6 +120,25 @@ theorem exists_isStableOpen_isAffineOpen_of_orbit [Finite G]
   obtain ⟨U, hU, horb⟩ := horbit e
   exact σE.exists_isStableOpen_isAffineOpen hU e horb
 
+/-- **([a3-ii] semilinearity, PROVEN)** The comparison ring map `C.π.appLE U W : Γ(X, U) → Γ(E, W)`
+is `G`-equivariant: `g • (φ a) = φ (g • a)`, where the two actions are the `gammaMulSemiringAction`s
+on the stable affine opens `U ⊆ X` and `W ⊆ E`.
+
+This is exactly `appLE`-functoriality applied to the equivariance square `IsCurveAction.π_equivariant`
+(`σE.hom g ≫ C.π = C.π ≫ σ.hom g`). It is what makes `Γ(E, W)` a *semilinear* `Γ(X,U)[G]`-module, the
+hypothesis `hslC` of `MulSemiringAction.isPushout_fixedPoints`. -/
+theorem appLE_π_equivariant (hact : IsCurveAction σ C σE)
+    {U : X.Opens} (hU : σ.IsStableOpen U) {W : (C.E).Opens} (hW : σE.IsStableOpen W)
+    (h : W ≤ C.π ⁻¹ᵁ U) (g : G) :
+    C.π.appLE U W h ≫ (σE.hom g).appLE W W (hW.le_preimage g) =
+      (σ.hom g).appLE U U (hU.le_preimage g) ≫ C.π.appLE U W h := by
+  have key : ∀ {m m' : C.E ⟶ X} (_ : m = m') (e : W ≤ m ⁻¹ᵁ U) (e' : W ≤ m' ⁻¹ᵁ U),
+      m.appLE U W e = m'.appLE U W e' := by
+    rintro m m' rfl e e'; rfl
+  rw [Scheme.Hom.appLE_comp_appLE (σE.hom g) C.π U W W,
+    Scheme.Hom.appLE_comp_appLE C.π (σ.hom g) U U W]
+  exact key (hact.π_equivariant g) _ _
+
 /-! ### The two charts (leaves `[a2-α]`, `[a2-β]`) — PROVEN for a globally-modelled curve -/
 
 attribute [local instance] MvPolynomial.gradedAlgebra
