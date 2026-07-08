@@ -362,6 +362,111 @@ theorem exists_sub_smul_eq_of_isCocycle [Fintype G] (hfree : IsFreeAlgebraAction
   rw [hgd]
   ring
 
+/-! ### [A711-DESC] Galois descent of twisted modules (route (a), step a5-ii)
+
+For a `1`-cocycle `w : G → Aˣ` (`w(gh) = w(g) · g•w(h)`), the **twisted invariants**
+`M_w = {a : A | ∀ g, g • a = w(g) · a}` form an `Aᴳ`-submodule of `A`. When the class of `w`
+is locally trivial, a generator of `M_w` is a unit `d` with `w(g) = (g•d)·d⁻¹`, which is
+exactly what trivializes the `u`-part of a `VariableChange` cocycle and hence descends the
+Weierstrass model (see `[T-E5c-ROUTE-A]` on the board). The Galois coordinates do the work
+a third time: `ρ(x) = ∑_g w(g)⁻¹ · (g • x)` retracts `A` onto `M_w`. -/
+
+/-- Cocycle bookkeeping: `h • w(g)⁻¹ = w(hg)⁻¹ · w(h)`. -/
+theorem smul_cocycle_inv (w : G → Aˣ)
+    (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) (g h : G) :
+    h • (((w g)⁻¹ : Aˣ) : A) = (((w (h * g))⁻¹ : Aˣ) : A) * (w h : A) := by
+  have hmul : (h • (((w g)⁻¹ : Aˣ) : A)) * (w (h * g) : A) = (w h : A) := by
+    rw [hw h g, ← mul_assoc]
+    rw [show (h • (((w g)⁻¹ : Aˣ) : A)) * (w h : A)
+        = (w h : A) * (h • (((w g)⁻¹ : Aˣ) : A)) by ring]
+    rw [mul_assoc, ← smul_mul' h]
+    rw [show ((((w g)⁻¹ : Aˣ) : A) * (w g : A)) = 1 from (w g).inv_mul]
+    rw [smul_one, mul_one]
+  have hc := congrArg (fun z => z * ((((w (h * g))⁻¹ : Aˣ)) : A)) hmul
+  simp only [mul_assoc] at hc
+  rw [(w (h * g)).mul_inv, mul_one] at hc
+  rw [hc]; ring
+
+/-- The `w`-twisted invariants, an `Aᴳ`-submodule of `A`. -/
+def twistedInvariants (w : G → Aˣ) : Submodule (FixedPoints.subalgebra R A G) A where
+  carrier := {a : A | ∀ g : G, g • a = (w g : A) * a}
+  zero_mem' := by intro g; simp
+  add_mem' := by
+    intro a b ha hb g
+    rw [smul_add, ha g, hb g, mul_add]
+  smul_mem' := by
+    intro b a ha g
+    show g • ((b : A) * a) = (w g : A) * ((b : A) * a)
+    rw [smul_mul', b.2 g, ha g]
+    ring
+
+/-- The twisted average `ρ(x) = ∑_g w(g)⁻¹ · (g • x)` lands in the twisted invariants. -/
+theorem twistedAvg_mem [Fintype G] (w : G → Aˣ)
+    (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) (x : A) :
+    (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x) ∈ twistedInvariants G R A w := by
+  intro h
+  rw [Finset.smul_sum, show (w h : A) * (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x)
+      = ∑ g : G, (w h : A) * ((((w g)⁻¹ : Aˣ) : A) * g • x) from Finset.mul_sum ..]
+  have hterm : ∀ g : G, h • ((((w g)⁻¹ : Aˣ) : A) * g • x)
+      = (w h : A) * ((((w (h * g))⁻¹ : Aˣ) : A) * (h * g) • x) := by
+    intro g
+    rw [smul_mul', smul_cocycle_inv (G := G) (A := A) w hw g h, ← mul_smul]
+    ring
+  simp only [hterm]
+  exact Fintype.sum_bijective (h * ·) (Group.mulLeft_bijective h)
+    (fun g => (w h : A) * ((((w (h * g))⁻¹ : Aˣ) : A) * (h * g) • x))
+    (fun k => (w h : A) * ((((w k)⁻¹ : Aˣ) : A) * k • x)) (fun _ => rfl)
+
+/-- The twisted average as an `Aᴳ`-linear map `A → M_w`. -/
+noncomputable def twistedAvg [Fintype G] (w : G → Aˣ)
+    (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
+    A →ₗ[FixedPoints.subalgebra R A G] twistedInvariants G R A w where
+  toFun x := ⟨∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x, twistedAvg_mem G R A w hw x⟩
+  map_add' x y := by
+    ext
+    show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (x + y))
+      = (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x) + ∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • y
+    simp [smul_add, mul_add, Finset.sum_add_distrib]
+  map_smul' b x := by
+    ext
+    show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • ((b : A) * x))
+      = (b : A) * ∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [smul_mul', b.2 g]
+    ring
+
+/-- **(A711-DESC, the retraction)** With `tr(c) = 1`, the twisted average retracts `A` onto
+`M_w` along `m ↦ c · m`: for `m ∈ M_w`, `ρ(c · m) = m`.
+
+`ρ(c·m) = ∑_g w(g)⁻¹ (g•c)(g•m) = ∑_g w(g)⁻¹ (g•c) w(g) m = tr(c)·m = m`. Hence `M_w` is a
+**direct summand of `A`** as an `Aᴳ`-module — in particular finitely generated (and
+projective, since `A` is). -/
+theorem twistedAvg_smul_eq [Fintype G] (w : G → Aˣ)
+    (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A))
+    (c : A) (hc : (∑ g : G, g • c) = 1) (m : twistedInvariants G R A w) :
+    twistedAvg G R A w hw (c * (m : A)) = m := by
+  ext
+  show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (c * (m : A))) = (m : A)
+  have hterm : ∀ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (c * (m : A)) = (g • c) * (m : A) := by
+    intro g
+    rw [smul_mul', m.2 g]
+    rw [show (((w g)⁻¹ : Aˣ) : A) * ((g • c) * ((w g : A) * (m : A)))
+        = (g • c) * ((((w g)⁻¹ : Aˣ) : A) * (w g : A)) * (m : A) by ring,
+      (w g).inv_mul, mul_one]
+  simp only [hterm, ← Finset.sum_mul, hc, one_mul]
+
+/-- **(A711-DESC)** The twisted invariants are a finite `Aᴳ`-module (a quotient of `A`). -/
+theorem twistedInvariants_finite [Fintype G] (hfree : IsFreeAlgebraAction G R A)
+    (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
+    Module.Finite (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) := by
+  haveI : Module.Finite (FixedPoints.subalgebra R A G) A :=
+    Module.Finite.of_isFreeAlgebraAction G R A hfree
+  obtain ⟨c, hc⟩ := exists_traceInvariants_eq_one G R A hfree
+  have hc' : (∑ g : G, g • c) = 1 := congrArg Subtype.val hc
+  refine Module.Finite.of_surjective (twistedAvg G R A w hw) fun m => ?_
+  exact ⟨c * (m : A), twistedAvg_smul_eq G R A w hw c hc' m⟩
+
 /-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
 invariants.
 
