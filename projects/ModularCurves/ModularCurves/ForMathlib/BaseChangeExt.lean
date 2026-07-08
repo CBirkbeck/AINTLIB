@@ -32,11 +32,11 @@ noncomputable def extEquivOfIso {C : Type*} [Category C] [Abelian C] [HasExt C]
   invFun g := (Ext.mk₀ eX.hom).comp (g.comp (Ext.mk₀ eY.inv) (add_zero n)) (zero_add n)
   left_inv f := by
     simp only [Ext.comp_assoc_of_second_deg_zero, Ext.comp_assoc_of_third_deg_zero,
-      Ext.mk₀_comp_mk₀, Ext.mk₀_comp_mk₀_assoc, Iso.hom_inv_id, Iso.inv_hom_id,
+      Ext.mk₀_comp_mk₀, Ext.mk₀_comp_mk₀_assoc, Iso.hom_inv_id,
       Ext.mk₀_id_comp, Ext.comp_mk₀_id]
   right_inv g := by
     simp only [Ext.comp_assoc_of_second_deg_zero, Ext.comp_assoc_of_third_deg_zero,
-      Ext.mk₀_comp_mk₀, Ext.mk₀_comp_mk₀_assoc, Iso.hom_inv_id, Iso.inv_hom_id,
+      Ext.mk₀_comp_mk₀, Ext.mk₀_comp_mk₀_assoc, Iso.inv_hom_id,
       Ext.mk₀_id_comp, Ext.comp_mk₀_id]
 
 /-! ### Object isomorphisms: localizing `S` and `S ⧸ I` -/
@@ -52,13 +52,38 @@ noncomputable def ringObjIso :
       ≅ ModuleCat.of (Localization 𝔪) (Localization 𝔪) :=
   ((Shrink.linearEquiv (Localization 𝔪) (LocalizedModule 𝔪 S)).trans (ringLocEquiv 𝔪)).toModuleIso
 
+/-- `ringLocEquiv` sends `mkLinearMap x` to `algebraMap x`. -/
+lemma ringLocEquiv_mkLinearMap (x : S) :
+    (ringLocEquiv 𝔪) (LocalizedModule.mkLinearMap 𝔪 S x)
+      = algebraMap S (Localization 𝔪) x := by
+  rw [LocalizedModule.mkLinearMap_apply, ringLocEquiv]
+  simp [IsLocalizedModule.iso_mk_one]
+
+/-- Under `ringLocEquiv`, the localized submodule `I.localized 𝔪` corresponds to the extended
+ideal `I.map (algebraMap S (Localization 𝔪))`. -/
+lemma hmap (I : Ideal S) :
+    Submodule.map (ringLocEquiv 𝔪).toLinearMap (I.localized 𝔪)
+      = I.map (algebraMap S (Localization 𝔪)) := by
+  rw [Submodule.localized, Submodule.localized'_eq_span, Submodule.map_span,
+    ← Set.image_comp, Ideal.map, ← Ideal.submodule_span_eq]
+  congr 1
+  ext y
+  simp only [Set.mem_image, Function.comp_apply, LinearEquiv.coe_coe]
+  constructor
+  · rintro ⟨x, hx, rfl⟩; exact ⟨x, hx, (ringLocEquiv_mkLinearMap 𝔪 x).symm⟩
+  · rintro ⟨x, hx, rfl⟩; exact ⟨x, hx, ringLocEquiv_mkLinearMap 𝔪 x⟩
+
 /-- The localization of `S ⧸ I` is `Localization 𝔪 ⧸ I.map (algebraMap …)`.
 This is base change of a quotient module along the flat map `S → Localization 𝔪`. -/
 noncomputable def quotObjIso (I : Ideal S) :
     (ModuleCat.localizedModuleFunctor.{0} 𝔪).obj (ModuleCat.of S (S ⧸ I))
       ≅ ModuleCat.of (Localization 𝔪)
         (Localization 𝔪 ⧸ I.map (algebraMap S (Localization 𝔪))) :=
-  sorry
+  (((Shrink.linearEquiv (Localization 𝔪) (LocalizedModule 𝔪 (S ⧸ I))).trans
+    ((LinearEquiv.extendScalarsOfIsLocalization 𝔪 (Localization 𝔪)
+      (IsLocalizedModule.iso 𝔪 (I.toLocalizedQuotient 𝔪))).trans
+      (Submodule.Quotient.equiv (I.localized 𝔪)
+        (I.map (algebraMap S (Localization 𝔪))) (ringLocEquiv 𝔪) (hmap 𝔪 I))))).toModuleIso
 
 /-! ### Flat base change for `Ext` (the analytic core) -/
 
