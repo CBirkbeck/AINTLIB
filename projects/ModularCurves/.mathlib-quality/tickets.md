@@ -5575,14 +5575,21 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       mismatch is the repo's `ForMathlib/AwayCongr.lean` (`awayCongr`).
     · Both sides factor through `awayι` at `X k * X l` once the two chart morphisms are seen to
       come from a COMMON map `Away 𝒜 (X k * X l) → S`.
-    · **GAP**: `HomogeneousLocalization.awayMap` exists (HomogeneousLocalization.lean:820) with
-      `val_awayMap`/`val_awayMap_mk` computation lemmas, but NOTHING identifies it as a
-      localization map. **Route 1 (preferred, ForMathlib + upstream candidate)**: prove
-      `IsLocalization.Away (Away.mk (g/f)) (Away 𝒜 (f*g))` — the content is
-      `a/(fg)^n = (a/f^{2n}) · (g/f)^{-n}` for `f,g` of degree 1 — then `IsLocalization.Away.lift`
-      supplies the common map and `IsLocalization.lift_comp` both factorizations. Est. 60–120
-      lines. **Route 2**: build the common map by hand from a `chartCoordEquiv`-style presentation
-      of `Away 𝒜 (X k * X l)` and check the two factorizations on generators.
+    · **CORRECTION 2026-07-08T13:20Z (coordinator-P1): the "MATHLIB GAP" I boarded above is FALSE
+      — retracted.** Mathlib HAS the localization statement:
+      **`HomogeneousLocalization.Away.isLocalization_mul`** (HomogeneousLocalization.lean:883):
+      `letI := (awayMap 𝒜 hg hx).toAlgebra; IsLocalization.Away (Away.isLocalizationElem hf hg)
+      (Away 𝒜 x)` for `x = f * g`, `hd : d ≠ 0`, with
+      `Away.isLocalizationElem hf hg = Away.mk 𝒜 hf e (g ^ d)` (`= g/f` when `d = e = 1`, our case).
+      My grep pattern (`IsLocalization.*awayMap`) missed it because the statement names neither;
+      the `isLocalization` section had to be READ. Lesson for the fleet: grep for the *section*,
+      not only the *name*.
+    · **Route 1 (now: assemble, don't build)**: `Away.isLocalization_mul` + `IsLocalization.Away.lift`
+      of `chartAwayHomOfTriple W k …` (its value at `isLocalizationElem` is `t l * u`, a unit since
+      `t l` and `u` are) gives the common map `ψ : Away 𝒜 (X k * X l) → S` with
+      `ψ ∘ awayMap = hom_k` (`IsLocalization.lift_comp`). The `l`-side needs the mirror
+      (`awayCongr` for `X l * X k = X k * X l`) plus the uniqueness half of `IsLocalization.lift`
+      to identify `ψ` with the `l`-side lift. Est. 100–200 lines, all assembly.
   - **Gates**: c5β's β4(c) → the four `GroupLawConstruction.lean` sorries → 0c-i increment 2 →
     0c-ii (pre-approved, v10.27) → 0h. i.e. this single theorem now gates the whole W7 endgame
     on the c5β side.
@@ -8316,3 +8323,14 @@ FAST-BOARD). The pinned COH-1 criterion package (GME 1.10.4 / Cor 1.10.5 / p. 82
   first sub-ticket when those start.
 - **Next**: fable-PIC0 continues to **[T-PIC1a]** (isInvertible_unit).
   - **[T-PIC1a] Claimed**: fable-PIC0, 2026-07-08 (in the same session) · **Status**: in_progress
+
+- **[T-PIC1a-FIN]** (sub-ticket of T-PIC1a, spawned 2026-07-08 by fable-PIC0; Tier A2)
+  `instance : (Opens.map f).Final` for `f : C(X, Y)` — NEW `ForMathlib/OpensMapFinal.lean`.
+  Statement: the preimage functor `Opens.map f : Opens Y ⥤ Opens X` is final. Sketch:
+  `Functor.Final` unfolds to `IsConnected (StructuredArrow U (Opens.map f))` per U;
+  nonempty via `⊤` (`U ≤ f⁻¹⊤`); connected via `zigzag_isConnected` — any V₁, V₂ zig-zag
+  through `V₁ ⊓ V₂` (`f⁻¹` preserves binary meets), triangles free (preorder homs are
+  subsingletons). Mathlib: StructuredArrow.mk/homMk, homOfLE, zigzag_isConnected,
+  Relation.ReflTransGen. Consumer: `pullbackObjUnitToUnit` IsIso instance
+  (PullbackFree.lean needs `[F.Final]`) → T-PIC1a/T-PIC1d. Upstream candidate
+  (topology/category glue). Parent: T-PIC1a · **Claimed**: fable-PIC0 · Status: in_progress
