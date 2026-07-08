@@ -2114,6 +2114,46 @@ lemma exists_basicOpen_transport_root_unit_mul {W W' : WeierstrassCurve R}
     (RingEquiv_map_mem_nonZeroDivisors (chartYSectionsRingEquiv W).symm
       (infChart_root_mem_nonZeroDivisors W))
 
+private lemma witness_V_le_chartYPreimage {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) :
+    (projModel W).basicOpen r ⊓ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ≤
+    e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) := inf_le_left.trans hr
+
+private lemma witness_V_le_overlapPreimage {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) :
+    (projModel W).basicOpen r ⊓ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ≤
+    e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) := by
+  intro x hx
+  have h1 : e.hom.base x ∈ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) := (inf_le_left.trans hr) hx
+  have h2 : x ∈ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) :=
+    basicOpen_tSection_le_chartZ hx.2
+  have h3 : e.hom.base x ∈ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)) := by
+    have := pointedIso_preimage_zChart e hez
+    rw [← this] at h2
+    exact h2
+  show e.hom.base x ∈ Proj.basicOpen (quotientGrading (projIdeal W'))
+    ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
+  rw [Proj.basicOpen_mul]
+  exact ⟨h1, h3⟩
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
