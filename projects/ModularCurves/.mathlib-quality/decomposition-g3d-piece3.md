@@ -57,9 +57,31 @@ common `pr_E` leg + `cancel_mono ιOver` + `hom_ext`; `ιOver` mono from `IsClos
 The action is free ⟹ the groupoid `G ×_S E ⇉ E` is an equivalence relation (the input to 3a's
 effective-quotient existence) ⟹ the degree count `deg[N] = N² = rank E[N]` in `E/E[N] ≅ E`.
 
+## The construction reduces to a SINGLE deep crux (isRegularEpi refinement)
+mathlib's `isRegularEpi_of_flat_of_surjective_of_isAffine` (`EffectiveEpi.lean`, `@[stacks 023Q]`)
+says a **flat + surjective** map of affine schemes is a **regular epi = the coequalizer of its kernel
+pair**. Apply it to the affine-local chart `Spec B → Spec B^{coG}`:
+1. **`equalizer_val_comp` / `specMap_comp_specEqualizerπ` — DONE** (`ForMathlib/SpecEqualizer.lean`,
+   axiom-clean): `Spec B → Spec(eq f g)` is a cofork of `Spec f, Spec g`. The affine local quotient
+   *object* + cofork leg exist.
+2. **kernel pair of `Spec B → Spec B^{coG}` `≅` `G ×_S Spec B`** — from freeness (`actPair_mono`, DONE)
+   + the co-invariants structure; identifies the regular-epi's kernel pair with the local groupoid.
+   Tractable once the affine chart is set up.
+3. **THE CRUX — `B` is faithfully flat over `B^{coG}`** (`Spec B → Spec B^{coG}` flat + surjective).
+   Then `023Q` gives the affine-local `IsColimit` **for free**, and `exists_unique_lift_of_isColimit`
+   discharges the pins. This is the one genuinely hard, multi-week, mathlib-absent piece: it is the
+   **torsor / Hopf-Galois property** "`E` is a `G`-torsor over `E/G`" (a free finite-locally-free action
+   is faithfully flat onto its quotient). No shortcut; needs descent/torsor theory built from scratch.
+4. **glue** the affine charts (`SchemeQuotient` `GlueData`); needs a `G`-stable affine cover
+   (`E` projective ⟹ finite orbits in affine opens).
+
+So: **everything is proven or tractable EXCEPT one crux — faithful flatness of `B` over `B^{coG}`
+(the torsor property) — plus the glue.** That crux is the multi-week core.
+
 ## Status / next
-Route DECIDED. Freeness DONE. **Next leaf: 3a-i, the Hopf-comodule co-invariants affine quotient** —
-pure algebra, the mathlib gap, self-contained, upstreamable; build as a new `ForMathlib` file mirroring
-`FixedPoints.subalgebra`/`AffineQuotient` for co-invariants. Then 3a-ii/iii/iv. Multi-session
-(p2-stack-scale); decompose 3a-i into leaves (comodule structure → coinvariants subalgebra → affine
-universal property) when started.
+Route DECIDED. Freeness DONE. Affine cofork DONE (`SpecEqualizer.lean`). The construction is now
+pinned down to the **single deep crux (step 3: `B` faithfully flat over `B^{coG}`, the torsor
+property)** + the glue. Both multi-week / mathlib-gap-filling; the crux needs finite-flat-group-scheme
+torsor/descent theory from scratch. **Scoping decision boarded (v10.38): commit the multi-week general
+Hopf-Galois crux, or take the linchpin-gated E[N] étale shortcut (T-Q5 + descent) for the rigidity
+consumer.** Coordinator input welcome; p0 proceeds on the general crux per beastmode absent a redirect.
