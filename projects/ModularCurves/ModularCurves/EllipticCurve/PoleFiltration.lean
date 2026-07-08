@@ -2376,11 +2376,11 @@ lemma overlapSectionsEquiv_res_chartZ (W : WeierstrassCurve R)
 /-- A `t`-cleared overlap relation in the localization becomes a sections relation on the
 chart overlap. -/
 lemma overlap_sections_equation_of_loc (W : WeierstrassCurve R)
-    (a : W.toAffine.CoordinateRing) (b : AdjoinRoot (infChartCubic W)) (j : ℕ)
+    (a : W.toAffine.CoordinateRing) (b d : AdjoinRoot (infChartCubic W)) (j : ℕ)
     (h : algebraMap (AdjoinRoot (infChartCubic W))
         (Localization.Away (infChartTElem W)) b =
       overlapMap W a * algebraMap (AdjoinRoot (infChartCubic W))
-        (Localization.Away (infChartTElem W)) (infChartTElem W) ^ j) :
+        (Localization.Away (infChartTElem W)) d ^ j) :
     ((projModel W).presheaf.map (homOfLE
       (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
@@ -2397,7 +2397,7 @@ lemma overlap_sections_equation_of_loc (W : WeierstrassCurve R)
       (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
           (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
-      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ^ j := by
+      ((chartYSectionsRingEquiv W).symm d) ^ j := by
   have hY : ∀ b₀ : AdjoinRoot (infChartCubic W),
       ((projModel W).presheaf.map (homOfLE
         (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
@@ -2421,7 +2421,7 @@ lemma overlap_sections_equation_of_loc (W : WeierstrassCurve R)
       RingEquiv.apply_symm_apply]
   have hfin := congrArg (overlapSectionsEquiv W).symm h
   rw [map_mul, map_pow] at hfin
-  rw [hY b, hY (infChartTElem W), hZ]
+  rw [hY b, hY d, hZ]
   exact hfin
 
 /-- The two chart transports of a global section agree in the overlap localization. -/

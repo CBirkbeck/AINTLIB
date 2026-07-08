@@ -1042,12 +1042,12 @@ lemma pointedIso_overlap_sections_equation {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
     (hez : projModelZero W ≫ e.hom = projModelZero W')
-    (a' : W'.toAffine.CoordinateRing) (b' : AdjoinRoot (infChartCubic W')) (j : ℕ)
+    (a' : W'.toAffine.CoordinateRing) (b' d' : AdjoinRoot (infChartCubic W')) (j : ℕ)
     (h : algebraMap (AdjoinRoot (infChartCubic W'))
         (Localization.Away (infChartTElem W')) b' =
       overlapMap W' a' *
         algebraMap (AdjoinRoot (infChartCubic W'))
-          (Localization.Away (infChartTElem W')) (infChartTElem W') ^ j) :
+          (Localization.Away (infChartTElem W')) d' ^ j) :
     ((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom
       ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
@@ -1057,8 +1057,8 @@ lemma pointedIso_overlap_sections_equation {W W' : WeierstrassCurve R}
     (((projModel W).presheaf.map (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom
       ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
-        ((chartYSectionsRingEquiv W').symm (infChartTElem W')))) ^ j := by
-  have h1 := overlap_sections_equation_of_loc W' a' b' j h
+        ((chartYSectionsRingEquiv W').symm d'))) ^ j := by
+  have h1 := overlap_sections_equation_of_loc W' a' b' d' j h
   have h2 := congrArg ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
     ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
       (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom) h1
@@ -1154,7 +1154,7 @@ lemma pointedIso_overlap_sections_equation {W W' : WeierstrassCurve R}
     exact c1.trans (c2.trans (hfuse.symm.trans (c4.trans hnatZ.symm)))
   exact ((hnatY ((chartYSectionsRingEquiv W').symm b')).symm).trans
     (h2.trans (congrArg₂ (· * ·) hΦ.symm
-      (congrArg (· ^ j) (hnatY ((chartYSectionsRingEquiv W').symm (infChartTElem W'))))))
+      (congrArg (· ^ j) (hnatY ((chartYSectionsRingEquiv W').symm d')))))
 
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
