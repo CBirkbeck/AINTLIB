@@ -5378,6 +5378,37 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     (intrinsic via section ideal); `F₂`/`F₃` freeness forces `x' ↦ αx+β`, `y' ↦ γy+δx+ε`,
     units; relations force `α³ = γ²`, `u := γ/α`; extend by `projModel_hom_ext_of_affine`.
     Leaf **L-1b** (prior-B2 fix-option-3, BB-RR-free). Shared-witness `∃` documented.
+  - **CLAIM (beastmode-P3b3, 2026-07-08)**: sub-leaves **b3x** (`pointedIsoCoordEquiv_coordX`),
+    **b3y** (`pointedIsoCoordEquiv_coordY`), **main** (`pointedIso_exists_variableChange`),
+    **b5** (`projModelVCIso_injective`). Work in NEW file
+    `EllipticCurve/ComparisonCoefficients.lean` as hypothesis-parameterized versions taking the
+    b2 conclusion `hfil` as an argument (b5 is hfil-independent). Isolated worktree
+    `../aintlib-mc-b3` (branch `dev/modular-curves-b3`), PR back to `dev/modular-curves` when
+    green. **NOT claiming b2** (`pointedIsoCoordEquiv_filtration`, in flight on beastmode-A) —
+    final wiring of the four sorries in ModelVariableChange.lean deferred until b2 flips done.
+  - **PROGRESS (beastmode-P3b3, 2026-07-08)**: **b3x/b3y DONE** — `exists_coordX_image`,
+    `exists_coordY_image` cores + general-base wrappers `exists_coordX_image_of_filtration`,
+    `exists_coordY_image_of_filtration` (subsingleton split), axiom-clean (`ComparisonCoefficients.lean`,
+    commits 29cf027d + a39be9b7). **main-alg DONE** — `exists_variableChange_of_filtration`: builds
+    `C : VariableChange R` with `C•W'=W` + coordinate relations, via `six_ext` (R[X]-basis
+    coefficient extraction) + `α³=γ²` ⇒ `u:=γ/α` + `variableChange_aᵢ` unit-cancellation
+    certificates, axiom-clean (commit cb948d3d). **BRIDGE DONE** (was a *missing* sub-lemma, not
+    "b1 proven" as the sketch assumed) — NEW file `ComparisonBridge.lean`: `bridge_coordX`/
+    `bridge_coordY` compute `pointedIsoCoordEquiv (projModelVCIso C W)` explicitly (= the
+    `x↦u²x'+r, y↦u³y'+su²x'+t` affine variable change) via `pointedIsoCoordEquiv_sections` +
+    `Away.map (vcGradedHom)` + `chartZRingEquiv_x/_y` + AwayCongr transport, axiom-clean (commit
+    809f4616). **b5 DONE** — NEW file `ComparisonInjective.lean`: `projModelVCIso_injective'`
+    (hfil-independent) from the bridge + `coordXY_ext` + unit arithmetic (`IsUnit.mul_left_inj`
+    cancels `↑u²`), axiom-clean (commit 67c9feab). The eqToHom-transport of `pointedIsoCoordEquiv`
+    across the curve equality is proven poison-free by `transport_general` stated with the two
+    models as FREE variables (so `subst` collapses the equality) + `coordRingCongr_refl_apply`
+    applied to an OPAQUE element via `rw` (NOT `simp` — simp's congruence motive whnf's the huge
+    carrier = the kernel timeout) + `pointedIsoCoordEquiv_congr` on the now-opaque isos; the
+    theorem instantiates the concrete isos by pure function application, so nothing large is
+    re-checked. **ALL FOUR SECOND-HALF LEAVES (b3x/b3y/main/b5) DONE, axiom-clean, in PR #5220.**
+    Final wiring of the four ModelVariableChange.lean sorries deferred until b2
+    (`pointedIsoCoordEquiv_filtration`, beastmode-A) lands — `projModelVCIso_injective` is then a
+    one-line `exact projModelVCIso_injective' …`; the other three need b2's `hfil`.
 
 - **[CLEANUP-MVC]** final `/cleanup` ModelVariableChange.lean. **Depends**: T-W7.1b.
 
