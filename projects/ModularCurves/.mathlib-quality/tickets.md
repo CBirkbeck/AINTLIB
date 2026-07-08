@@ -7129,3 +7129,76 @@ cut.*
   **[T-IRR0]** (v10.10 runner-up 2, the last unstaffed stream) — `/develop --decompose` scoping
   of the KM Ch. 10 algebraic route to geometric irreducibility (now readable) vs the analytic
   route; v10.8 discipline binding. New files only.
+
+### v10.11.1 (2026-07-08, fable-PIC0): T-PIC0+COH-1 decompose DONE — leaf tickets
+
+*`/develop --decompose` complete: `decomposition-pic-coh.md` (verbatim GME/Mumford
+quotes + attack blocks per leaf, gate 1–7 status inside), skeleton green:
+`ForMathlib/BaseChangeKerCoker.lean` (8 sorried leaves, defs implemented, mathlib-only
+imports) + `Picard/InvertibleSheaf.lean` (4 sorried leaves; monoidal-instance bridge
+landed). Route of record: Mumford §5 K-complex module core (Hida's own §1.10.4 proof
+needs EGA III 3.2.1 + 4.1.5 = absent/B3-scale/COH-3-lane; Hida himself cites [ALG]
+III.12.10 = the K-complex machine). Čech/R^if_* instantiation explicitly deferred to
+the owned mathlib lane. Statements are the skeleton contract; sketches + sources per
+leaf live in decomposition-pic-coh.md (quote-or-delete enforced).*
+
+**COH-1 leaves** — File: `ModularCurves/ForMathlib/BaseChangeKerCoker.lean` (work order):
+- **[T-COH1-A3]** purity: `Module.Flat.lTensor_subtype_injective_of_flat_quotient`
+  (flat quotient ⟹ submodule inclusion pure). Deps: none. THE workhorse.
+  Sketch: free presentation of M + 3×3 chase, Tor-free, inside
+  `TensorProduct/RightExactness` API; five-method search first (G2) — closest misses
+  logged (Flat/Basic `lTensor_exact` is the other-variable statement).
+  - **Claimed**: fable-PIC0, 2026-07-08T12:00Z · **Status**: in_progress
+- **[T-COH1-A3b]** `Module.Flat.of_flat_quotient` (N ⊆ Q, Q flat, Q/N flat ⟹ N flat).
+  Deps: T-COH1-A3. Sketch: ideal criterion (`Module.Flat.iff_rTensor_injective'`) +
+  A3-chase; decomposition has the 3-step diagram. · **Status**: open
+- **[T-COH1-A4]** `kerLTensorComparison_bijective` (coker flat ⟹ T⁰ base change).
+  Deps: A3, A3b. Sketch: prose steps 3–4 of decomposition (two SES purity
+  applications + right-exactness bookkeeping). · **Status**: open
+- **[T-COH1-A1]** `range_lTensor_range_subtype` (T¹ base change / range identity).
+  Deps: none · Parallel: yes. Sketch: antisymm; generators m ⊗ f p both ways;
+  `TensorProduct.tensorQuotientEquiv` composition note in file docstring. · **Status**: open
+- **[T-COH1-A2]** `Module.subsingleton_of_forall_field_tensor_subsingleton` (f.g. +
+  all R-field fibres vanish ⟹ zero; ℚ/ℤ counterexample sans f.g. in docstring).
+  Deps: none · Parallel: yes. Sketch: `Module.support_eq_empty_iff` + NAK bridge at
+  κ(𝔭) (`Submodule.eq_bot_of_le_smul_of_le_jacobson_bot` route or
+  FreeLocus rankAtStalk route — pick at proof time). · **Status**: open
+- **[T-COH1-A5a]** `LinearMap.fg_ker_of_finite` (noeth: ker of map out of finite is
+  FG). Deps: none · Parallel: yes. Golf-sized (`IsNoetherian` submodule). · **Status**: open
+- **[T-COH1-A5b]** `Module.Projective.ker_of_flat_coker` (Cor 1.10.5 module form).
+  Deps: A3b, A5a. Sketch: im d finite+flat ⟹ fp (noeth) ⟹ projective
+  (`Module.Flat.projective_of_finitePresentation` ✓ pin-verified) ⟹ split SES ⟹ ker
+  summand of finite projective P. · **Status**: open
+- **[T-COH1-A6]** `kerBaseChangeComparison_bijective` (A-linear fibre identification,
+  the (2.15)/(2.17) consumer shape). Deps: A4. Sketch: A4 + `AlgebraTensorModule`
+  bridging (`LinearMap.baseChange` vs `lTensor` restriction of scalars). · **Status**: open
+- **[CLEANUP-PC1]** /cleanup BaseChangeKerCoker.lean — after A3+A3b+A4 · **[CLEANUP-PC2]**
+  after A1+A2+A5a · **[CLEANUP-PC3]** final, after A5b+A6. · **Status**: open (cadence)
+
+**T-PIC0 stage-P1 leaves** — File: `ModularCurves/Picard/InvertibleSheaf.lean`:
+- **[T-PIC1a]** `isInvertible_unit`. Deps: none. Sketch: cover {⊤}, `(⊤).ι` pullback of
+  unit ≅ unit (`pullbackObjUnitToUnit` — finality of `Opens.map` via lattice-meet
+  zig-zag if instance missing, 15-line fallback). · **Status**: open
+- **[T-PIC1c]** `exists_tensorObj_unit_iso` (M ⊗ 𝒪 ≅ M). Deps: none. Sketch: presheaf
+  right-unitor + sheafification counit iso on sheaves (adjunction from
+  Modules/Sheaf.lean); NO GAP-1 content. · **Status**: open
+- **[T-PIC1d]** `IsInvertible.pullback`. Deps: none. Sketch: preimage cover +
+  `Modules.pullbackComp` + unit-pullback iso; `morphismRestrict_ι` square. · **Status**: open
+- **[T-PIC1b]** `IsInvertible.tensorObj`. Deps: **T-PIC-GAP1** (BLOCKED — the only
+  gap-gated sorry in the skeleton). · **Status**: blocked
+- **[T-PIC-GAP1]** (scoping) GAP-1: sheafification ⊗-compatibility / restriction-
+  commutes-with-sheafification on the Zariski site. FIRST ACT: ecosystem check of the
+  Riou lane (Sites/Monoidal.lean pattern → PresheafOfModules W.IsMonoidal analogue;
+  mathlib4 open PRs) — build ONLY if unowned; then own /develop pass (3 candidate
+  routes recorded in decomposition-pic-coh.md). Blocks T-PIC1b + all of stage P2
+  (Pic group, (2.16)/(2.17)). · **Status**: open
+- **[T-PIC-DEG0]** (scoping) fibre degree: audit HasseWeil divisor/degree anchor
+  (ecosystem survey §3: ClassGroup/Pic⁰ machinery exists there); cut statements for
+  deg of an invertible sheaf on fibres. Consumer: Pic^ν / (2.16). · **Status**: open
+- **[CLEANUP-PIC1]** /cleanup InvertibleSheaf.lean after T-PIC1a+c+d ·
+  **[CLEANUP-PIC2]** final (post-P1b when unblocked). · **Status**: open (cadence)
+
+*Stage P2 (Pic group via Skeleton-units pattern of mathlib PicardGroup.lean) and the
+GME (2.16)/(2.17) statements: cut AFTER T-PIC-GAP1 resolves. Semicontinuity ([Mum]
+Cor 1) and Hida's surjectivity clause: explicitly out of pin, not cut (decomposition
+records why).*
