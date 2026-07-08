@@ -1,4 +1,5 @@
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # Groupoid-valued moduli (expert-review addition, Q7)
@@ -96,11 +97,26 @@ GATE: `End(E/S)`, `deg`, the dual isogeny (§B8) and the Hasse bound (§B9) are 
 under the project's binding do-not-formalize-from-memory gate (tickets.md §"Do-not-formalize-
 from-memory gate"); stated from the quotes in `.mathlib-quality/decomposition-gme2.md` §B8/§B9,
 closed when the KM text lands. Sub-tickets T-G3b–T-G3e (board). -/
-theorem aut_hom_eq_id_of_fullLevel (N : ℕ) [NeZero N] (hN : 3 ≤ N)
+theorem aut_hom_eq_id_of_fullLevel [IsLocallyNoetherian S] (N : ℕ) [NeZero N] (hN : 3 ≤ N)
     (hinv : NIsInvertible S N) (E : EllipticCurve S) (P Q : E.Section)
     (hPQ : E.IsNaiveFullLevel N P Q) (e : E ≅ E)
     (hP : P.1 ≫ e.hom.hom = P.1) (hQ : Q.1 ≫ e.hom.hom = Q.1) :
-    e.hom.hom = 𝟙 E.E := by sorry
+    e.hom.hom = 𝟙 E.E := by
+  -- Package the underlying automorphism as an `Over S`-endomorphism `ε` of `E`.
+  let ε : E.asOver ⟶ E.asOver := Over.homMk e.hom.hom e.hom.over_w
+  -- BRIDGE 1 (deg of an automorphism = 1; KM 2.7.1). Spec of `endDeg`; awaits the `endDeg` data
+  -- (T-END0b, fable-PIC0's Pic⁰ lane) — `ε` is an iso (`e` is), and `deg` is multiplicative with
+  -- `deg 𝟙 = 1`, `deg ≥ 0`, forcing `deg ε = 1`.
+  have hdeg : E.endDeg ε = 1 := sorry
+  -- BRIDGE 2 (level structure → torsion fixing). `ε` fixes `P, Q` (`hP`, `hQ`); by T-G2 rigidity
+  -- (`ε` pointed ⟹ additive) and `P, Q` generating `E[N] = ker[N]` fibrewise (`hPQ`,
+  -- `IsNaiveFullLevel`), `ε` fixes the whole `N`-torsion subscheme.
+  have hfix : E.torsionι N ≫ ε.left = E.torsionι N := sorry
+  -- The arithmetic-geometric heart (KM 2.7.2(1)): a degree-1 endo fixing `E[N]` (`N ≥ 3`) is `𝟙`.
+  have hone : ε = 𝟙 E.asOver := E.aut_endo_eq_one N (by exact_mod_cast hN) ε hdeg hfix
+  -- Descend `ε = 𝟙 E.asOver` to the underlying scheme morphism `e.hom.hom = 𝟙 E.E`
+  -- (`ε.left = e.hom.hom` and `(𝟙 E.asOver).left = 𝟙 E.E` both by `rfl`).
+  exact congrArg CommaMorphism.left hone
 
 /-- **(T-G3 = rigidification bridge; GME 2.6.4 Aut-computation, p. 151)**
 For `N ≥ 3` and `N` invertible, an **automorphism** of an elliptic curve over `S`
@@ -118,7 +134,7 @@ PROOF (2026-07-07): the iso/categorical layer is trivial plumbing — `HomOver.e
 the `hom` field (`over_w`/`zero_w` are `Prop`) and `(Iso.refl E).hom.hom = 𝟙 E.E` by `rfl`,
 so `e = Iso.refl E` reduces to the scheme-morphism equation `aut_hom_eq_id_of_fullLevel`
 (the GME 2.6.4 core; see its docstring for the gated reduction through `gme_deg_trace_forces_zero`). -/
-theorem aut_trivial_of_fullLevel (N : ℕ) [NeZero N] (hN : 3 ≤ N)
+theorem aut_trivial_of_fullLevel [IsLocallyNoetherian S] (N : ℕ) [NeZero N] (hN : 3 ≤ N)
     (hinv : NIsInvertible S N) (E : EllipticCurve S) (P Q : E.Section)
     (hPQ : E.IsNaiveFullLevel N P Q) (e : E ≅ E)
     (hP : P.1 ≫ e.hom.hom = P.1) (hQ : Q.1 ≫ e.hom.hom = Q.1) :
