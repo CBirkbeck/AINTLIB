@@ -4258,9 +4258,10 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
   `Over.monObjMkPullbackSnd_mul_left_fst` + grp-alias (NEW ForMathlib/OverPullbackMul.lean,
   own commit) and `Point.baseChangeEquiv` + `baseChangeEquiv_apply_coe` (GroupLaw.lean,
   `#print axioms` clean, downstream green).
-  **SWEEP INCIDENT #5 (2026-07-08)**: the GroupLaw.lean insert was swept into
-  beastmode-A's `cc856bcb` (their commit picked up my working-tree edits — shared
-  worktree). Content is in and green; attribution note for the coordinator. ·
+  **SWEEP INCIDENTS #5 + #6 (2026-07-08)**: the GroupLaw.lean insert was swept into
+  beastmode-A's `cc856bcb`, and the GammaH.lean consumer discharge into their `472d6a36`
+  (their commits picked up my working-tree edits — shared worktree). Content is in and
+  green both times; attribution notes for the coordinator. ·
   **Claimed**: fable-P4, 2026-07-08T08:45Z · **File**:
   EllipticCurve/GroupLaw.lean (next to `Point.asSection`) · **Depends**: none (all
   ingredients landed) · **Type**: def (≃+) + 2 compat lemmas + consumer discharge
