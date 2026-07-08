@@ -1399,6 +1399,13 @@ private lemma aug_pow_kill_of_res_eq_zero (W : WeierstrassCurve R)
   rw [hcancelA, hcancelG] at hR
   exact hR
 
+private lemma span_pair_map_mem {A B : Type u} [CommRing A] [CommRing B]
+    (φ : A →+* B) {x a b : A} (h : x ∈ Ideal.span {a, b}) :
+    φ x ∈ Ideal.span {φ a, φ b} := by
+  obtain ⟨c, d, hcd⟩ := Ideal.mem_span_pair.mp h
+  refine Ideal.mem_span_pair.mpr ⟨φ c, φ d, ?_⟩
+  rw [← map_mul, ← map_mul, ← map_add, hcd]
+
 private lemma mem_of_eq_of_mem {S : Type u} [CommRing S] {I : Ideal S} {a b : S}
     (h : a = b) (hb : b ∈ I) : a ∈ I := h ▸ hb
 
