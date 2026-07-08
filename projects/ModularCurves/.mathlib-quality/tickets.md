@@ -9647,3 +9647,21 @@ input — scope decision at cut: the honest v8 statement may be essential-surjec
   point + iso, transported back through curveOfPasting) — the honest v8 equivalence
   statement; ff explicitly gated on presentation-rigidity (T-W7 pointEquiv
   uniqueness) per the v10.42 scope note.
+
+### v10.42b (2026-07-08, fable-PIC0): c-iii cut + ONE cross-lane request
+- **[REQ→A-lane / T-W7.0h owner]** `projModelVCIso_one (W) : (projModelVCIso 1 W).hom
+  = eqToHom (congrArg projModel (one_smul _ W))` — a ~3-liner WITH your private
+  `gradedHom_heq`/transport machinery (mirror of `projModelVCIso_mul`'s proof at the
+  1-level; `vcMvSubst 1` is the identity substitution). Consumer: T-W6c-iii
+  presentationFunctor.map_id (fable-PIC0). Public-API cancellation from `_mul` is
+  possible but eqToHom-heavy — your lane closes it cheaper. Not blocking the c-iii
+  groupoid/eso work; blocks only the functor-laws leaf.
+- **[T-W6c-iii] leaves (cut)**: (1) `projModelVCIso_one` [REQ above, or local
+  cancellation-derivation]; (2) `curveOfVCIso_id` + `curveOfVCIso_comp` (coherence,
+  from (1) + `projModelVCIso_mul` conjugated through the pasting — same seam class as
+  c-ii, arsenal applies); (3) `PresentedCurve S` groupoid (objects: EllipticCurveGeom
+  S + global presentation W + pointed iso; homs: pointed S-isos); (4)
+  `presentationFunctor : MellWGroupoid Γ(S,⊤) ⥤ PresentedCurve S` (obj curveOf +
+  presentation-by-construction, map curveOfVCIso); (5) essential surjectivity onto
+  globally-presented records — the honest v8 equivalence statement; ff explicitly
+  gated on presentation-rigidity (T-W7 pointEquiv uniqueness) per v10.42.
