@@ -219,13 +219,34 @@ needs quasiprojectiveness and finiteness of G here.)" — our patching datum is 
 unique descent of the invariant `f`. -/
 theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_of_isAffineHom
     {G : Type*} [Group G] [Finite G]
-    {Z S : Scheme.{u}} (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
+    {Z S : Scheme.{u}} [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
+    (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
     (hover : ∀ γ : G, σ.hom γ ≫ f = f) :
     ∃ (Z₀ : Scheme.{u}) (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S), π ≫ f₀ = f ∧
       (∀ γ : G, σ.hom γ ≫ π = π) ∧
       ∀ {Y : Scheme.{u}} (F : Z ⟶ Y), (∀ γ : G, σ.hom γ ≫ F = F) →
         ∃! q : Z₀ ⟶ Y, π ≫ q = F := by
-  sorry
+  -- The `IsAffineHom`-preimage atlas: an affine open of `S` around each `f x`, pulled back.
+  have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
+    obtain ⟨W, hW, hmem, -⟩ :=
+      exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
+    exact ⟨W, hW, hmem⟩
+  choose US hUS_aff hUS_mem using hcov
+  -- Each `f ⁻¹ᵁ (US x)` is `σ`-stable (immediate from `hover`) and affine (`f` affine).
+  have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := by
+    intro x g
+    show (σ.hom g ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x
+    rw [hover g]
+  have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
+  have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
+  -- `f₀` is the unique descent of the invariant `f` along the quotient projection.
+  obtain ⟨f₀, hf₀, -⟩ :=
+    σ.existsUnique_quotientπ_lift (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem f hover
+  refine ⟨σ.quotient (fun x => f ⁻¹ᵁ US x) hVs hVa,
+    σ.quotientπ (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem, f₀, hf₀,
+    fun γ => σ.hom_quotientπ (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem γ, ?_⟩
+  intro Y F hF
+  exact σ.existsUnique_quotientπ_lift (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem F hF
 
 /-- **[GHB4] (KM 7.1.3(2),(4) — gate [A711-FP])** — verbatim: "If G operates freely on
 𝒫 … 𝒫_{E/S} is an etale G-torsor over (𝒫/G)_{E/S}"; "(4) The morphism 𝒫 → 𝒫/G is
@@ -387,7 +408,16 @@ closed immersion (`subschemeι`) into `E[N] ×_S E[N]`, which is finite over `S`
 (`torsionπ_isFinite`, T-B4 registered box, + base-change/composition stability).
 No invertibility needed. -/
 theorem levelSpaceΓπ_isFinite (N : ℕ) [NeZero N] : IsFinite (levelSpaceΓπ E N) := by
-  sorry
+  show IsFinite (levelSpaceΓι E N ≫
+    pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+  have hι : IsFinite (levelSpaceΓι E N) := by
+    have h : IsClosedImmersion (levelSpaceΓι E N) :=
+      inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+    infer_instance
+  have hπ : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  have hfst : IsFinite (pullback.fst (E.torsionπ N) (E.torsionπ N)) :=
+    MorphismProperty.pullback_fst _ _ hπ
+  infer_instance
 
 /-- **[GHA3] (THE WEIL-PAIRING LEAF — gate [DS4/T-C1], CHARTER-P2)** For `N`
 invertible, `U_{Γ(N)} → S` is étale. Loeffler (verbatim): "it is an open subscheme of

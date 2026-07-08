@@ -1,15 +1,13 @@
-FOCUS: [T-G3d-infra] Piece 3 — FULL ROUTE-INDEPENDENT REDUCTION COMPLETE + axiom-clean.
-isColimit_of_isHopfGalois PROVED (HopfGaloisQuotient.lean): IsHopfGalois ρ ⟹ affine-local IsColimit,
-via isRegularEpi_specEqualizerπ (023Q half 1, faithfullyFlat) + isKernelPair_specEqualizerπ (023Q half
-2: tensor pushout → Spec kernel pair, transported along galoisEquiv) + IsKernelPair.toCoequalizer'.
-The ENTIRE abstract Hopf-Galois → coequalizer chain is done (5 new ForMathlib files this session:
-ComoduleCoinvariants, Coaction, HopfGalois, SpecEqualizer, HopfGaloisQuotient). Composed with
-exists_unique_lift_of_isColimit + isInvariant_iff_coequalizes ⟹ SubgroupQuotient pins per affine chart.
-REMAINING (all need E-geometry, connecting abstract ρ/B⊗A to the curve):
-  (1) ρ = translation co-action [3a-ii E-geometry: O(G×ₛSpecB)≅B⊗A on a G-stable chart]
-  (2) IsHopfGalois(translation co-action) [crux PROOF, scoping-blocked v10.38: general vs E[N] shortcut]
-  (3) glue [3a-iii/iv: G-stable affine cover + SchemeQuotient GlueData; consumes 1+2]
-NEXT candidate: 3a-ii (co-action = act^# on affine chart) OR the geometry setup for the G-stable cover.
-Both need E's affine charts — deep geometry. Crux (2) scoping-blocked; glue (3) consumes crux.
-CONSTRAINTS: p2 Layer-B files READ-ONLY (their sentinel live); new files only; HEAD-guard + pathspec commits;
-#print axioms verify. NIsogeny/EngineDescent/AdditionChartOverlap/SchemeActionFree = concurrent workers', don't touch.
+FOCUS: [STREAM-GH] first wave (coordinator v10.50) — Γ_H relative representability via KM 7.1.2/7.1.3
+quotient problem. Skeleton Moduli/GammaHRepresentability.lean (23 sorries). Draining route-independent
+NOW-lane leaves in dep order: GHA2 (levelSpaceΓπ_isFinite) → GHB1 (RelRepData.exists_equivariant) →
+GHB3 (exists_quotient_over_base) → GH2 (gammaFullNaive_freeAction) → GHA4 (gammaFullNaive_relRepData)
+→ GHC4 (gammaHNaiveProblem_not_relativelyRepresentable, the F1 B2-refutation record).
+DEPS (all PROVEN in-repo, route-independent, NO B2-repoint wait): SchemeAction.quotient/existsUnique_
+quotientπ_lift (SchemeQuotient.lean T-Q5), RelRepData/TorsorData/simulRepresentableBy (QuotientProblem.
+lean T-Q6), torsorMul_bijective_of_isFreeAlgebraAction + Module.Finite/Projective.of_isFreeAlgebraAction
+(InvariantTorsor.lean, fable-FP READ-ONLY).
+[T-G3d-infra] DONE last session (6 axiom-clean ForMathlib files; crux = boarded coordinator decision v10.43/50).
+CONSTRAINTS: new files only (edit GammaHRepresentability.lean, my stream file); Held GammaH.lean/
+Representability.lean/InvariantTorsor.lean READ-ONLY (all bridges in the stream file); p2/fable-FP
+files READ-ONLY; HEAD-guard + pathspec commits; grep -nE "error[:(]" + #print axioms verify each.
