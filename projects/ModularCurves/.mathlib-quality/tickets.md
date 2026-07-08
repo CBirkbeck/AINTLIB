@@ -7236,3 +7236,46 @@ records why).*
   fable-PIC0 should know T-END0b consumes their headline.
 - **DS-END0 registered** in plan.md's DATA-SORRY REGISTER (coordinator repair of the
   same-commit rule — the skeleton commit predates the register entry).
+
+## Amendments v10.16 (2026-07-08): D2 checkpoint — 00N0 CLOSED; B–E endgame is assembly; follow-on pointer
+
+- **D2 report absorbed** (their own board commit f0a9123f): route A's make-or-break — **00N0,
+  the Peskine–Szpiro acyclicity lemma — is CLOSED, axiom-clean**. All of: minor-ideal/McCoy ✓,
+  Rees + flat-base-change-for-Ext (grade-locus openness) ✓, full depth API ✓, 00MZ + 00MYW ✓,
+  00N0 ✓. Remaining for `buchsbaumEisenbud_acyclic`: `be_forward_core` (delegate running) +
+  `be_backward_core` (unblocked by 00N0; dispatches when BuchsbaumEisenbud.lean frees). Then
+  pure assembly: T-DEVISSAGE/T-ME/T-MI/T-REDUCEP in parallel, T-RB (all three inputs ready),
+  T-FINAL — retiring `flatLocus_spreads_of_flat` → `isOpen_flatLocus` → 00R6 → FLAT1 →
+  **entire Drinfeld D-chain axiom-clean**. No redirect; the lane stays do-not-disturb.
+- **Follow-on pointer (D2: flag before claiming, after T-FINAL)**: the local-criterion toolbox
+  this chain built (00MH ✓, 00RB/00MI via T-RB, B–E) covers most of what **BB-FLAT** — the
+  fibrewise flatness criterion (EGA IV 11.3.10) behind **T-B4/T-B4x (KM 2.3.1, E[N] rank
+  N²)** — still needs. That box is unowned and on the Y₁(N) path: the natural next claim.
+- **Ops caution (fleet at full load, ~10 workers on this machine)**: delegates treat exit 143
+  as OOM-not-failure; build single targets; the evidence-merge pattern applies.
+- **Upstreaming note**: when the chain closes, D2 lists the mathlib-PR candidates from the
+  ForMathlib output (FittingIdeals, BaseChangeExt, LocalCriterion, GenericFlatness,
+  HilbertSyzygy, FiniteFreeResolution, Depth, Acyclicity) on the board for the future
+  upstreaming lane.
+
+## Amendments v10.17 (2026-07-08): c5β checkpoint — β2b headline banked; GO on the β1 scheme half
+
+- **c5β report absorbed**: BOTH Bosma–Lenstra laws now provably land on the curve on every
+  chart-product of the cover (`equation_lawTwoTriple_of_isDomain` /
+  `equation_lawOneTriple_of_isDomain`), over any Jacobson domain with Δ a unit — which the
+  universal atlas is. That is the complete certificate-free on-curve input for
+  `addOnZ`/`addOnY`. Yesterday's "β1 must carry reducedness" finding is **RETRACTED**
+  (superseded): the Y-chart fell to monic descent — `AdjoinRoot.isDomain_of_monic_of_map` +
+  `HomogeneousLocalization.isDomain_away` (`ForMathlib/MonicQuotientDescent.lean`, both
+  **UPSTREAM CANDIDATES** — added to the upstreaming list alongside D2's and fable-P4's).
+  β1 algebra core DONE: `biChartRingTensorEquiv` via direct `AlgEquiv.ofAlgHom` (bypassing
+  the ideal-image chase that made the ladder iterate five times).
+- **GO (owner-relayed): c5β takes the β1 scheme half next.** The two boarded obstacles + fixes
+  stand as the route: (i) explicit LOCAL `[Algebra R S]` instance for `pullbackSpecIso` where
+  `awayι_projModelπ` factors through the degree-0 part via `gradeZeroRingEquiv`; (ii) upgrade
+  `chartCoordEquiv` to an `AlgEquiv` (`chartCoordAlgEquiv`) — build it ONCE here, β3 consumes
+  it too. Est. 150–250 lines; it is the single iso that unblocks BOTH β3 and β4.
+- **DS-register note (clarifying c5β's caution)**: the register is not frozen — v10.8 requires
+  any data-sorry to be REGISTERED with pins + a discharge plan terminating in a proof. For an
+  iso of this size, building it directly (as c5β chose) is the better call; the register path
+  is for genuinely-gated data only. The discipline shown here is the model.
