@@ -1269,6 +1269,147 @@ theorem subgroupTripleCompare_injective (hD : D.IsSubgroup E) :
     (pairTensorCompare_bijective (E.subgroupStructMap D) (E.bimulBase (D := D))).injective
   exact hpair.comp (E.subgroupIdTensorCompare_injective hD)
 
+/-! ### The `baseGate` dualization gateway
+
+Each triple-multiplication map `w : P₃ ⟶ P₂` over the base pulls functions back to `Γ(w) : Γ(P₂) →
+Γ(P₃)`; packaged as an `R`-algebra hom (`baseGate`), it collapses `κ (Δ a)` to `Γ(w ≫ m) a` (via the
+`Δ`-pin) and `κ (x ⊗ y)` to `Γ(w ≫ fst₂) x · Γ(w ≫ snd₂) y`. These two facts turn the scheme
+identity `subgroupMul_assoc` into `Coalgebra.coassoc`. -/
+
+/-- Gateway: `Γ(w)` packaged as an `R`-algebra hom `Γ(D ×ₛ D) →ₐ Γ(P₃)`, for any `w : P₃ ⟶ P₂`
+whose base agrees (`w ≫ bimulBase = pairBase = base P₃`). -/
+noncomputable def baseGate (hD : D.IsSubgroup E)
+    (w : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+        pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    (hw : w ≫ E.bimulBase (D := D)
+      = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))) :
+    letI := E.biproductAlgebra (D := D)
+    letI := E.tripleAlgebra (D := D)
+    Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) →ₐ[R]
+      Γ(pullback (E.subgroupStructMap D) (E.bimulBase (D := D)), ⊤) :=
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  { w.appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop) ≫ w.appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+              (pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, hw]
+      show w.appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+          (pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- `baseGate w (Γ(m) a) = Γ(w ≫ m) a`. -/
+theorem baseGate_comul (hD : D.IsSubgroup E)
+    (w : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+        pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    (hw : w ≫ E.bimulBase (D := D)
+      = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    letI := E.tripleAlgebra (D := D)
+    ∀ (a : Γ(D.ideal.subscheme, ⊤)),
+      E.baseGate hD w hw (E.subgroupComulHom hD a) = (w ≫ E.subgroupMul hD).appTop.hom a := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  intro a
+  show w.appTop.hom ((E.subgroupMul hD).appTop.hom a) = _
+  rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+
+/-- `baseGate w (κ (x ⊗ y)) = Γ(w ≫ fst₂) x · Γ(w ≫ snd₂) y`. -/
+theorem baseGate_kappa_tmul (hD : D.IsSubgroup E)
+    (w : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+        pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    (hw : w ≫ E.bimulBase (D := D)
+      = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    letI := E.tripleAlgebra (D := D)
+    ∀ (x y : Γ(D.ideal.subscheme, ⊤)),
+      E.baseGate hD w hw (E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y))
+        = (w ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom x
+          * (w ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  intro x y
+  have h1 : E.baseGate hD w hw (E.subgroupProj₁ (D := D) x)
+      = (w ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom x := by
+    show w.appTop.hom ((pullback.fst (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).appTop.hom x) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+  have h2 : E.baseGate hD w hw (E.subgroupProj₂ (D := D) y)
+      = (w ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+    show w.appTop.hom ((pullback.snd (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).appTop.hom y) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+  rw [subgroupTensorCompare, Algebra.TensorProduct.lift_tmul, map_mul, h1, h2]
+
+/-! ### The three triple-multiplication maps `P₃ ⟶ P₂` and their base compatibility
+
+`vmap = ⟨fst₃, snd₃ ≫ m⟩`, `umap = ⟨fst₃, snd₃ ≫ fst₂⟩`, `vmap' = ⟨umap ≫ m, snd₃ ≫ snd₂⟩` — the
+right- and left-associated triple products, with `subgroupMul_assoc : vmap' ≫ m = vmap ≫ m`. Each is
+a `baseGate` map (`w ≫ bimulBase = pairBase`), established below. -/
+
+theorem vmap_fst (hD : D.IsSubgroup E) :
+    E.vmap hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) := pullback.lift_fst _ _ _
+
+theorem vmap_snd (hD : D.IsSubgroup E) :
+    E.vmap hD ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupMul hD :=
+  pullback.lift_snd _ _ _
+
+theorem umap_fst :
+    E.umap (D := D) ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) := pullback.lift_fst _ _ _
+
+theorem umap_snd :
+    E.umap (D := D) ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+        ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift_snd _ _ _
+
+theorem vmap'_fst (hD : D.IsSubgroup E) :
+    E.vmap' hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = E.umap (D := D) ≫ E.subgroupMul hD := pullback.lift_fst _ _ _
+
+theorem vmap'_snd (hD : D.IsSubgroup E) :
+    E.vmap' hD ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+      = pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+        ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift_snd _ _ _
+
+theorem vmap_base (hD : D.IsSubgroup E) :
+    E.vmap hD ≫ E.bimulBase (D := D) = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D)) := by
+  have h1 : E.vmap hD ≫ E.bimulBase (D := D)
+      = (E.vmap hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+        ≫ E.subgroupStructMap D := by
+    rw [Category.assoc, ← E.bimulBase_eq_fst_structMap]
+  rw [h1, E.vmap_fst hD]
+
+theorem umap_base :
+    E.umap (D := D) ≫ E.bimulBase (D := D)
+      = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D)) := by
+  have h1 : E.umap (D := D) ≫ E.bimulBase (D := D)
+      = (E.umap (D := D) ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+        ≫ E.subgroupStructMap D := by
+    rw [Category.assoc, ← E.bimulBase_eq_fst_structMap]
+  rw [h1, E.umap_fst]
+
+theorem vmap'_base (hD : D.IsSubgroup E) :
+    E.vmap' hD ≫ E.bimulBase (D := D)
+      = pairBase (E.subgroupStructMap D) (E.bimulBase (D := D)) := by
+  have h1 : E.vmap' hD ≫ E.bimulBase (D := D)
+      = (E.vmap' hD ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+        ≫ E.subgroupStructMap D := by
+    rw [Category.assoc, ← E.bimulBase_eq_fst_structMap]
+  rw [h1, E.vmap'_fst hD, Category.assoc, E.subgroupMul_structMap hD, E.umap_base]
+
 /-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
 `subgroupUnit` (`e : S ⟶ D`). Concretely `ε = Γ(e)` followed by `Γ(Spec R, ⊤) ≅ R`; it is
 `R`-linear because `e` is a section of the structure map (`subgroupUnit_structMap`). Counit laws
