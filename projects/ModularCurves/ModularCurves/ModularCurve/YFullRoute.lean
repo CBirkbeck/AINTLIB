@@ -153,7 +153,14 @@ an affine morphism: closed immersion (affine) into `E[N] ×_S E[N]`, which is fi
 (hence affine) over `S` by `torsionπ_isFinite` (PROVEN) and base-change/composition
 stability. Provable now — no gates. -/
 theorem isAffineHom_fullLevelSpaceStruct : IsAffineHom (fullLevelSpaceStruct X N) := by
-  sorry
+  show IsAffineHom (levelSpaceΓι X.curve N ≫
+    pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
+  have hι : IsClosedImmersion (levelSpaceΓι X.curve N) :=
+    inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
+    MorphismProperty.pullback_fst _ _ hπ
+  infer_instance
 
 /-- **([YF-FIN] = the finiteness half of KM 3.6.0 / 5.1.1 for `[Γ(N)]`)** The
 Γ(N)-presentation is finite over the base: KM 3.6.0 (p. 102) *"Each of these functors is
@@ -161,7 +168,16 @@ represented by a finite S-scheme"*; KM 5.1.1 (p. 129) *"Each is finite and flat 
 (Ell)"* (the Γ(N) case, `N` invertible). Closed immersion ≫ finite ≫ finite. Provable
 now — no gates. -/
 theorem isFinite_fullLevelSpaceStruct : IsFinite (fullLevelSpaceStruct X N) := by
-  sorry
+  show IsFinite (levelSpaceΓι X.curve N ≫
+    pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
+  have hι : IsFinite (levelSpaceΓι X.curve N) := by
+    have h : IsClosedImmersion (levelSpaceΓι X.curve N) :=
+      inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+    infer_instance
+  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
+    MorphismProperty.pullback_fst _ _ hπ
+  infer_instance
 
 end Presentation
 
@@ -194,6 +210,209 @@ theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
 
 /-! ### The points dictionary: factorizations through `U_{Γ(N)}` are level structures -/
 
+section Dictionary
+
+variable {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZero N] {T : Scheme.{u}}
+
+private theorem dict_base₂ (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    h ≫ levelSpaceΓι E N ≫
+      pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g := by
+  rw [← pullback.condition]; exact hh
+
+/-- The first tautological torsion point carried by a factorization through `U_{Γ(N)}`. -/
+private noncomputable def dictPoint₁ (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) : E.Point g :=
+  ⟨h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    simp only [Category.assoc, EllipticCurve.torsionι_π]; exact hh⟩
+
+/-- The second tautological torsion point. -/
+private noncomputable def dictPoint₂ (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) : E.Point g :=
+  ⟨h ≫ levelSpaceΓι E N ≫
+      pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    simp only [Category.assoc, EllipticCurve.torsionι_π]; exact dict_base₂ E N h g hh⟩
+
+private theorem dictPoint₁_killed (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    (dictPoint₁ E N h g hh).1 ≫ E.mulByHom N = g ≫ E.zero := by
+  have hcond : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero := pullback.condition
+  have hbase := congrArg (· ≫ E.zero) hh
+  simp only [Category.assoc] at hbase
+  show (h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N =
+    g ≫ E.zero
+  simp only [Category.assoc, hcond]
+  exact hbase
+
+private theorem dictPoint₂_killed (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    (dictPoint₂ E N h g hh).1 ≫ E.mulByHom N = g ≫ E.zero := by
+  have hcond : E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero := pullback.condition
+  have hbase := congrArg (· ≫ E.zero) (dict_base₂ E N h g hh)
+  simp only [Category.assoc] at hbase
+  show (h ≫ levelSpaceΓι E N ≫
+      pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N =
+    g ≫ E.zero
+  simp only [Category.assoc, hcond]
+  exact hbase
+
+/-- Morphisms into `E[N]` agree once they agree into `E` and over `S` (the kernel
+pullback's ext principle, stated at the `torsionι`/`torsionπ` spelling so rewriting
+never crosses the `torsion` definitional fold). -/
+private theorem torsion_hom_ext {W : Scheme.{u}} {a b : W ⟶ E.torsion N}
+    (h1 : a ≫ E.torsionι N = b ≫ E.torsionι N)
+    (h2 : a ≫ E.torsionπ N = b ≫ E.torsionπ N) : a = b :=
+  pullback.hom_ext h1 h2
+
+private theorem dict_leg₁ (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    h ≫ levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) =
+      E.pointToTorsion (dictPoint₁ E N h g hh) (dictPoint₁_killed E N h g hh) := by
+  refine torsion_hom_ext E N ?_ ?_
+  · rw [EllipticCurve.pointToTorsion_torsionι]
+    exact (Category.assoc _ _ _).trans (congrArg (h ≫ ·) (Category.assoc _ _ _))
+  · rw [EllipticCurve.pointToTorsion_torsionπ]
+    exact ((Category.assoc _ _ _).trans
+      (congrArg (h ≫ ·) (Category.assoc _ _ _))).trans hh
+
+private theorem dict_leg₂ (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    h ≫ levelSpaceΓι E N ≫ pullback.snd (E.torsionπ N) (E.torsionπ N) =
+      E.pointToTorsion (dictPoint₂ E N h g hh) (dictPoint₂_killed E N h g hh) := by
+  refine torsion_hom_ext E N ?_ ?_
+  · rw [EllipticCurve.pointToTorsion_torsionι]
+    exact (Category.assoc _ _ _).trans (congrArg (h ≫ ·) (Category.assoc _ _ _))
+  · rw [EllipticCurve.pointToTorsion_torsionπ]
+    exact ((Category.assoc _ _ _).trans
+      (congrArg (h ≫ ·) (Category.assoc _ _ _))).trans (dict_base₂ E N h g hh)
+
+/-- Every factorization is the lift of its own tautological pair — the pin of
+[YF-EQV-D] holds unconditionally at every `h`, which is what determines the pinned
+equivalence uniquely ([YF-NAT]). -/
+private theorem dict_lift_eq (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) :
+    h ≫ levelSpaceΓι E N =
+      pullback.lift
+        (E.pointToTorsion (dictPoint₁ E N h g hh) (dictPoint₁_killed E N h g hh))
+        (E.pointToTorsion (dictPoint₂ E N h g hh) (dictPoint₂_killed E N h g hh))
+        (by simp) := by
+  apply pullback.hom_ext
+  · rw [Category.assoc, pullback.lift_fst]
+    exact dict_leg₁ E N h g hh
+  · rw [Category.assoc, pullback.lift_snd]
+    exact dict_leg₂ E N h g hh
+
+/-- A section of the base-changed curve, as a point of `E` over `g`. -/
+private noncomputable def secToPoint (g : T ⟶ S) (P' : (E.baseChange g).Section) : E.Point g :=
+  ⟨P'.1 ≫ pullback.fst E.π g,
+    (Category.assoc _ _ _).trans <|
+      (congrArg (P'.1 ≫ ·) pullback.condition).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ g) P'.2).trans (Category.id_comp g)⟩
+
+private theorem asSection_secToPoint (g : T ⟶ S) (P' : (E.baseChange g).Section) :
+    EllipticCurve.Point.asSection E g (secToPoint E g P') = P' := by
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · exact EllipticCurve.Point.asSection_val_fst E g (secToPoint E g P')
+  · exact (EllipticCurve.Point.asSection_val_snd E g (secToPoint E g P')).trans P'.2.symm
+
+private theorem asSection_injective (g : T ⟶ S) :
+    Function.Injective (EllipticCurve.Point.asSection E g) := fun P₁ P₂ h =>
+  Subtype.ext <|
+    (EllipticCurve.Point.asSection_val_fst E g P₁).symm.trans <|
+      (congrArg (fun s : (E.baseChange g).Point (𝟙 T) => s.1 ≫ pullback.fst E.π g) h).trans
+        (EllipticCurve.Point.asSection_val_fst E g P₂)
+
+/-- A factorization satisfying the pin equation extracts exactly the pinned pair. -/
+private theorem dictPoint₁_of_lift (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g)
+    (P Q : E.Point g) (hP : P.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hQ : Q.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hlift : h ≫ levelSpaceΓι E N =
+      pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ) (by simp)) :
+    dictPoint₁ E N h g hh = P :=
+  Subtype.ext <|
+    (Category.assoc _ _ _).symm.trans <|
+      (congrArg (· ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N)
+          hlift).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ E.torsionι N) (pullback.lift_fst _ _ _)).trans
+            (EllipticCurve.pointToTorsion_torsionι _ _ _)
+
+private theorem dictPoint₁_restrict {T' : Scheme.{u}} (h : T ⟶ levelSpaceΓ E N)
+    (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) (k : T' ⟶ T)
+    (hh' : (k ≫ h) ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = k ≫ g) :
+    dictPoint₁ E N (k ≫ h) (k ≫ g) hh' = EllipticCurve.Point.restrict E k (dictPoint₁ E N h g hh) :=
+  Subtype.ext (Category.assoc _ _ _)
+
+private theorem dictPoint₂_restrict {T' : Scheme.{u}} (h : T ⟶ levelSpaceΓ E N)
+    (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g) (k : T' ⟶ T)
+    (hh' : (k ≫ h) ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = k ≫ g) :
+    dictPoint₂ E N (k ≫ h) (k ≫ g) hh' = EllipticCurve.Point.restrict E k (dictPoint₂ E N h g hh) :=
+  Subtype.ext (Category.assoc _ _ _)
+
+private theorem dictPoint₂_of_lift (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
+    (hh : h ≫ levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N = g)
+    (P Q : E.Point g) (hP : P.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hQ : Q.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hlift : h ≫ levelSpaceΓι E N =
+      pullback.lift (E.pointToTorsion P hP) (E.pointToTorsion Q hQ) (by simp)) :
+    dictPoint₂ E N h g hh = Q :=
+  Subtype.ext <|
+    (Category.assoc _ _ _).symm.trans <|
+      (congrArg (· ≫ pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N)
+          hlift).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ E.torsionι N) (pullback.lift_snd _ _ _)).trans
+            (EllipticCurve.pointToTorsion_torsionι _ _ _)
+
+/-- Section-pullback along the base-change comparison morphism restricts the point:
+the naturality bridge between the moduli functor's `map` (`EllHom.pullSection`) and
+the dictionary's tautological pairs (`Point.restrict`). -/
+private theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
+    EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g P) =
+      EllipticCurve.Point.asSection X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P) := by
+  have htop : (X.pullbackAlongMap g k).top ≫ pullback.fst X.curve.π g =
+      pullback.fst X.curve.π (k ≫ g) := by
+    show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+      Limits.pullback.fst X.curve.π (k ≫ g)
+    rw [Limits.pullback.lift_fst, Category.comp_id]
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
+      (EllipticCurve.Point.asSection_val_fst X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ pullback.fst X.curve.π g)
+      ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
+    exact (Category.assoc _ _ _).trans
+      (congrArg (k ≫ ·) (EllipticCurve.Point.asSection_val_fst X.curve g P))
+  · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
+      (EllipticCurve.Point.asSection X.curve g P)).2.trans
+      (EllipticCurve.Point.asSection_val_snd X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+
+end Dictionary
+
 /-- **([YF-EQV-D], the Drinfeld points dictionary; KM 3.1 + T-D18)** Factorizations of
 `g : T ⟶ X.base` through the Γ(N)-presentation biject with Drinfeld full level-`N`
 structures on the base-changed curve, PINNED to the tautological correspondence: the
@@ -215,7 +434,82 @@ theorem exists_pointsEquiv_drinfeld (X : EllObj R) (N : ℕ) [NeZero N]
             (by simp) →
         (e h).1 = (EllipticCurve.Point.asSection X.curve g P,
           EllipticCurve.Point.asSection X.curve g Q) := by
-  sorry
+  have hbase : ∀ h : { h : T ⟶ fullLevelSpace X N // h ≫ fullLevelSpaceStruct X N = g },
+      h.1 ≫ levelSpaceΓι X.curve N ≫
+        pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N = g :=
+    fun h => h.2
+  let toFun : { h : T ⟶ fullLevelSpace X N // h ≫ fullLevelSpaceStruct X N = g } →
+      (gammaFullDrinfeldProblem R N).obj (Opposite.op (X.pullbackAlong g)) :=
+    fun h =>
+      ⟨(EllipticCurve.Point.asSection X.curve g (dictPoint₁ X.curve N h.1 g (hbase h)),
+        EllipticCurve.Point.asSection X.curve g (dictPoint₂ X.curve N h.1 g (hbase h))),
+        (levelSpaceΓ_spec X.curve N g _ _ (dictPoint₁_killed X.curve N h.1 g (hbase h))
+            (dictPoint₂_killed X.curve N h.1 g (hbase h))).mp
+          ⟨h.1, dict_lift_eq X.curve N h.1 g (hbase h)⟩⟩
+  have hinj : Function.Injective toFun := by
+    intro h₁ h₂ heq
+    have hd₁ : dictPoint₁ X.curve N h₁.1 g (hbase h₁) = dictPoint₁ X.curve N h₂.1 g (hbase h₂) :=
+      asSection_injective X.curve g (congrArg (fun z => z.1.1) heq)
+    have hd₂ : dictPoint₂ X.curve N h₁.1 g (hbase h₁) = dictPoint₂ X.curve N h₂.1 g (hbase h₂) :=
+      asSection_injective X.curve g (congrArg (fun z => z.1.2) heq)
+    have hptt₁ : X.curve.pointToTorsion (dictPoint₁ X.curve N h₁.1 g (hbase h₁))
+        (dictPoint₁_killed X.curve N h₁.1 g (hbase h₁)) =
+          X.curve.pointToTorsion (dictPoint₁ X.curve N h₂.1 g (hbase h₂))
+            (dictPoint₁_killed X.curve N h₂.1 g (hbase h₂)) :=
+      torsion_hom_ext X.curve N
+        ((EllipticCurve.pointToTorsion_torsionι _ _ _).trans
+          ((congrArg Subtype.val hd₁).trans
+            (EllipticCurve.pointToTorsion_torsionι _ _ _).symm))
+        ((EllipticCurve.pointToTorsion_torsionπ _ _ _).trans
+          (EllipticCurve.pointToTorsion_torsionπ _ _ _).symm)
+    have hptt₂ : X.curve.pointToTorsion (dictPoint₂ X.curve N h₁.1 g (hbase h₁))
+        (dictPoint₂_killed X.curve N h₁.1 g (hbase h₁)) =
+          X.curve.pointToTorsion (dictPoint₂ X.curve N h₂.1 g (hbase h₂))
+            (dictPoint₂_killed X.curve N h₂.1 g (hbase h₂)) :=
+      torsion_hom_ext X.curve N
+        ((EllipticCurve.pointToTorsion_torsionι _ _ _).trans
+          ((congrArg Subtype.val hd₂).trans
+            (EllipticCurve.pointToTorsion_torsionι _ _ _).symm))
+        ((EllipticCurve.pointToTorsion_torsionπ _ _ _).trans
+          (EllipticCurve.pointToTorsion_torsionπ _ _ _).symm)
+    have hι : h₁.1 ≫ levelSpaceΓι X.curve N = h₂.1 ≫ levelSpaceΓι X.curve N :=
+      (dict_lift_eq X.curve N h₁.1 g (hbase h₁)).trans <|
+        (pullback.hom_ext
+          ((pullback.lift_fst _ _ _).trans (hptt₁.trans (pullback.lift_fst _ _ _).symm))
+          ((pullback.lift_snd _ _ _).trans (hptt₂.trans (pullback.lift_snd _ _ _).symm))).trans
+          (dict_lift_eq X.curve N h₂.1 g (hbase h₂)).symm
+    have hmono : Mono (levelSpaceΓι X.curve N) := by
+      have h : IsClosedImmersion (levelSpaceΓι X.curve N) :=
+        inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+      infer_instance
+    exact Subtype.ext ((cancel_mono (levelSpaceΓι X.curve N)).mp hι)
+  have hsurj : Function.Surjective toFun := by
+    rintro ⟨⟨P', Q'⟩, hb⟩
+    have hPs := asSection_secToPoint X.curve g P'
+    have hQs := asSection_secToPoint X.curve g Q'
+    have hP : (secToPoint X.curve g P').1 ≫ X.curve.mulByHom N = g ≫ X.curve.zero :=
+      (point_killed_iff X.curve N g _).mpr (by rw [hPs]; exact hb.1.1)
+    have hQ : (secToPoint X.curve g Q').1 ≫ X.curve.mulByHom N = g ≫ X.curve.zero :=
+      (point_killed_iff X.curve N g _).mpr (by rw [hQs]; exact hb.1.2)
+    obtain ⟨h, hu⟩ := (levelSpaceΓ_spec X.curve N g _ _ hP hQ).mpr
+      (by rw [hPs, hQs]; exact hb)
+    have hstruct : h ≫ levelSpaceΓι X.curve N ≫
+        pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N = g := by
+      rw [← Category.assoc, hu, pullback.lift_fst_assoc,
+        EllipticCurve.pointToTorsion_torsionπ]
+    refine ⟨⟨h, hstruct⟩, Subtype.ext (Prod.ext ?_ ?_)⟩
+    · exact (congrArg (EllipticCurve.Point.asSection X.curve g)
+        (dictPoint₁_of_lift X.curve N h g (hbase ⟨h, hstruct⟩) _ _ hP hQ hu)).trans hPs
+    · exact (congrArg (EllipticCurve.Point.asSection X.curve g)
+        (dictPoint₂_of_lift X.curve N h g (hbase ⟨h, hstruct⟩) _ _ hP hQ hu)).trans hQs
+  refine ⟨Equiv.ofBijective toFun ⟨hinj, hsurj⟩, ?_⟩
+  intro P Q hP hQ h hlift
+  show (toFun h).1 = _
+  exact Prod.ext
+    (congrArg (EllipticCurve.Point.asSection X.curve g)
+      (dictPoint₁_of_lift X.curve N h.1 g (hbase h) P Q hP hQ hlift))
+    (congrArg (EllipticCurve.Point.asSection X.curve g)
+      (dictPoint₂_of_lift X.curve N h.1 g (hbase h) P Q hP hQ hlift))
 
 /-- **([YF-EQV-N], the naive points dictionary; KM 3.7 / 1.4.4 register change)** The
 Drinfeld dictionary composed with the T-D8 bridge (`isFullLevel_iff_naive`, GATE:
@@ -261,7 +555,57 @@ theorem exists_pointsEquiv_family (X : EllObj R) (N : ℕ) [NeZero N]
         (h : { h : T ⟶ fullLevelSpace X N // h ≫ fullLevelSpaceStruct X N = g }),
         eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
           (gammaFullNaiveProblem R N).map (X.pullbackAlongMap g k).op (eqv g h) := by
-  sorry
+  refine ⟨fun {T} g => (exists_pointsEquiv_naive R X N hinv g).choose, ?_⟩
+  intro T T' g k h
+  have hbase : ∀ {W : Scheme.{u}} (w : W ⟶ X.base)
+      (a : { a : W ⟶ fullLevelSpace X N // a ≫ fullLevelSpaceStruct X N = w }),
+      a.1 ≫ levelSpaceΓι X.curve N ≫
+        pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N = w :=
+    fun _ a => a.2
+  -- the chosen equivalence is pinned at every element (dict_lift_eq): its value at `h`
+  -- over `g`, and at the restricted element over `k ≫ g`, are the tautological pairs
+  have hG := (exists_pointsEquiv_naive R X N hinv g).choose_spec
+    (dictPoint₁ X.curve N h.1 g (hbase g h)) (dictPoint₂ X.curve N h.1 g (hbase g h))
+    (dictPoint₁_killed X.curve N h.1 g (hbase g h))
+    (dictPoint₂_killed X.curve N h.1 g (hbase g h)) h
+    (dict_lift_eq X.curve N h.1 g (hbase g h))
+  have hT := (exists_pointsEquiv_naive R X N hinv (k ≫ g)).choose_spec
+    (dictPoint₁ X.curve N (k ≫ h.1) (k ≫ g)
+      (hbase (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩))
+    (dictPoint₂ X.curve N (k ≫ h.1) (k ≫ g)
+      (hbase (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩))
+    (dictPoint₁_killed X.curve N (k ≫ h.1) (k ≫ g) _)
+    (dictPoint₂_killed X.curve N (k ≫ h.1) (k ≫ g) _)
+    ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩
+    (dict_lift_eq X.curve N (k ≫ h.1) (k ≫ g) _)
+  -- naturality: restrict-compat of the extraction + pullSection ↔ restrict
+  have c1 : EllipticCurve.Point.asSection X.curve (k ≫ g)
+      (dictPoint₁ X.curve N (k ≫ h.1) (k ≫ g)
+        (hbase (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩)) =
+      EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g (dictPoint₁ X.curve N h.1 g (hbase g h))) :=
+    (congrArg (EllipticCurve.Point.asSection X.curve (k ≫ g))
+      (dictPoint₁_restrict X.curve N h.1 g (hbase g h) k _)).trans
+      (pullSection_asSection X g k (dictPoint₁ X.curve N h.1 g (hbase g h))).symm
+  have c2 : EllipticCurve.Point.asSection X.curve (k ≫ g)
+      (dictPoint₂ X.curve N (k ≫ h.1) (k ≫ g)
+        (hbase (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩)) =
+      EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g (dictPoint₂ X.curve N h.1 g (hbase g h))) :=
+    (congrArg (EllipticCurve.Point.asSection X.curve (k ≫ g))
+      (dictPoint₂_restrict X.curve N h.1 g (hbase g h) k _)).trans
+      (pullSection_asSection X g k (dictPoint₂ X.curve N h.1 g (hbase g h))).symm
+  -- the functor's map, evaluated through the pin at h
+  have hRHS : ((gammaFullNaiveProblem R N).map (X.pullbackAlongMap g k).op
+      ((exists_pointsEquiv_naive R X N hinv g).choose h)).1 =
+      (EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g (dictPoint₁ X.curve N h.1 g (hbase g h))),
+       EllHom.pullSection R (X.pullbackAlongMap g k)
+        (EllipticCurve.Point.asSection X.curve g (dictPoint₂ X.curve N h.1 g (hbase g h)))) :=
+    Prod.ext
+      (congrArg (EllHom.pullSection R (X.pullbackAlongMap g k)) (congrArg Prod.fst hG))
+      (congrArg (EllHom.pullSection R (X.pullbackAlongMap g k)) (congrArg Prod.snd hG))
+  exact Subtype.ext (hT.trans ((Prod.ext c1 c2).trans hRHS.symm))
 
 /-! ### The two engine inputs: `AffineOverEll` and `Rigid` -/
 
