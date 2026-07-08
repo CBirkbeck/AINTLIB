@@ -78,10 +78,36 @@ pair**. Apply it to the affine-local chart `Spec B → Spec B^{coG}`:
 So: **everything is proven or tractable EXCEPT one crux — faithful flatness of `B` over `B^{coG}`
 (the torsor property) — plus the glue.** That crux is the multi-week core.
 
+## Route-independent ALGEBRA FOUNDATION — LANDED (2026-07-08, axiom-clean)
+The crux is no longer prose — it is a **named Lean predicate** `IsHopfGalois ρ`. The whole
+route-independent algebra layer is built (4 new `ForMathlib/` files, all axiom-clean), so both the
+general finite-flat route and the E[N] étale shortcut now aim at the *same* stated target:
+- **`ComoduleCoinvariants.lean`** — `coinvariants ρ := AlgHom.equalizer ρ includeLeft`
+  (`= B^{coρ}`), `mem_coinvariants`, `coinvariants_coaction` (`ρ s = s ⊗ 1` for `s ∈ S`). The
+  mathlib-gap object (mathlib has only representation-coinvariants).
+- **`Coaction.lean`** — `IsCoaction ρ` (counitality + coassociativity, the comodule-algebra axioms;
+  mathlib has NO comodule class), element forms, `isCoaction_includeLeft` + `coinvariants_includeLeft = ⊤`
+  (trivial-action validation).
+- **`HopfGalois.lean`** — `canonicalGaloisMap ρ : B ⊗_S B →ₐ[S] B ⊗_R A`, `b ⊗ b' ↦ (b⊗1)·ρ(b')`
+  (built as `Algebra.TensorProduct.lift` of `ρ`, `includeLeft` viewed over `S` — `ρ`'s `S`-linearity
+  IS `coinvariants_coaction`); `canonicalGaloisMap_tmul`; **`IsHopfGalois ρ`** = `β` bijective +
+  `FaithfullyFlat S B` (THE crux, stated); `IsHopfGalois.galoisEquiv` (the `B⊗_S B ≃ B⊗_R A` iso,
+  the kernel-pair input).
+
+**Reduction chain now fully mapped:** `IsHopfGalois ρ` ⟹ (023Q: `FaithfullyFlat` gives flat+surjective
+`Spec B → Spec S`; `galoisEquiv` identifies the kernel pair with the groupoid) ⟹ affine-local
+`IsColimit` of the `SpecEqualizer` cofork ⟹ (via `exists_unique_lift_of_isColimit` +
+`isInvariant_iff_coequalizes`) the six `SubgroupQuotient` pins.
+
 ## Status / next
-Route DECIDED. Freeness DONE. Affine cofork DONE (`SpecEqualizer.lean`). The construction is now
-pinned down to the **single deep crux (step 3: `B` faithfully flat over `B^{coG}`, the torsor
-property)** + the glue. Both multi-week / mathlib-gap-filling; the crux needs finite-flat-group-scheme
-torsor/descent theory from scratch. **Scoping decision boarded (v10.38): commit the multi-week general
-Hopf-Galois crux, or take the linchpin-gated E[N] étale shortcut (T-Q5 + descent) for the rigidity
-consumer.** Coordinator input welcome; p0 proceeds on the general crux per beastmode absent a redirect.
+Route DECIDED. Freeness DONE. Affine cofork DONE. **Route-independent algebra foundation DONE —
+the crux is now the named predicate `IsHopfGalois`.** Two obligations remain, both multi-week:
+1. **`isColimit_of_isHopfGalois` (the 023Q application, route-INDEPENDENT)** — `(h : IsHopfGalois ρ)
+   → IsColimit (SpecEqualizer cofork)`. Unconditional in `h`; scheme-theoretic (faithfully-flat ⟹
+   Spec surjective; `Spec.map` flat from module-flat; `isRegularEpi_of_flat_of_surjective_of_isAffine`;
+   kernel-pair = groupoid via `galoisEquiv`). Provable now; **next build target**.
+2. **`IsHopfGalois (translation co-action)` (the crux PROOF, route-DEPENDENT, scoping-blocked)** —
+   finite-flat-group-scheme torsor theory (general) vs. E[N] étale descent (shortcut). **Scoping
+   decision boarded v10.38**; coordinator input welcome; p0 proceeds on the general crux per beastmode
+   absent a redirect.
+Plus the glue (G-stable cover + `SchemeQuotient` `GlueData`).

@@ -9360,3 +9360,23 @@ its held milestone — final discharge is one `exact` by the file holder).
   explicit instances) is the proven pattern — three walls fell to it this arc.
 - NOTE (cadence): CLEANUP-PIC1 (InvertibleSheaf) and a CLEANUP ticket for
   MellWeierstrass.lean queue after the c-i/c-ii/c-iii proof wave per the cadence rule.
+
+### v10.41-p0 (2026-07-08, p0): [T-G3d-infra] Piece 3 — CRUX NOW A NAMED PREDICATE; route-independent algebra foundation COMPLETE
+
+*Milestone. The T-G3d-infra quotient crux is no longer prose — it is the stated Lean predicate
+`IsHopfGalois ρ`. The entire route-independent ALGEBRA layer is built + axiom-clean (4 new
+`ForMathlib/` files this session): commits 56a95f91 (ComoduleCoinvariants: `coinvariants B^{coρ}` —
+mathlib-gap, only rep-coinvariants existed), 623758cd (Coaction: `IsCoaction` comodule axioms —
+mathlib has NO comodule class — + trivial-action validation), bee2bc05 (HopfGalois:
+`canonicalGaloisMap β` + `IsHopfGalois` = crux stated), 98cd93a1 (`galoisEquiv`, kernel-pair input).*
+
+- **What this buys:** both the general finite-flat route AND the E[N] étale shortcut now aim at the
+  SAME named target `IsHopfGalois (translation co-action)`. The scoping decision (v10.38) is now purely
+  about the crux *proof*; the *statement* + all supporting algebra is route-independent and DONE.
+- **Reduction chain fully mapped:** `IsHopfGalois ρ` ⟹ (023Q + `galoisEquiv` kernel-pair id) ⟹ affine
+  `IsColimit` (SpecEqualizer cofork) ⟹ (`exists_unique_lift_of_isColimit` + `isInvariant_iff_coequalizes`)
+  ⟹ six SubgroupQuotient pins.
+- **NEXT (route-independent, unconditional):** `isColimit_of_isHopfGalois` — the 023Q application. Then
+  the crux PROOF (scoping-blocked v10.38) + glue. Details in `decomposition-g3d-piece3.md`.
+- Interface still validated by the N-Isogeny consumer (`NIsogeny.lean` imports SubgroupQuotient, uses
+  `IsInvariant`). p0 continues on the general route per beastmode absent a redirect.

@@ -1,1 +1,11 @@
-FOCUS: T-END0 EXECUTION — endMonHom PROVEN axiom-clean (END0a additivity foundation, pointed-endo-is-monoid-hom via isMonHom_of_one_comp_eq under [IsLocallyNoetherian S]). NEXT: endPostcomp_mul (a*b)≫f=(a≫f)*(b≫f) corollary → ring algebra → T-G3b deg quadratic from pins. Edges: END0b<-fable-PIC0 T-PIC0/COH-1; END0a<-T-G2(=isMonHom, done).
+FOCUS: [T-G3d-infra] Piece 3 — route-independent ALGEBRA FOUNDATION of the crux COMPLETE + axiom-clean.
+Landed this session (4 new ForMathlib files): ComoduleCoinvariants (coinvariants B^{coρ}), Coaction
+(IsCoaction axioms, mathlib-gap comodule structure), HopfGalois (canonicalGaloisMap β + IsHopfGalois
+predicate = THE CRUX now NAMED + galoisEquiv). Plus earlier: full IsInvariant⟺coequalizer bridge,
+exists_unique_lift_of_isColimit, actPair+freeness, SpecEqualizer affine cofork.
+NEXT: isColimit_of_isHopfGalois (023Q application, route-INDEPENDENT, unconditional in h:IsHopfGalois):
+faithfully-flat⟹Spec surjective + Spec.map flat from module-flat + isRegularEpi_of_flat_of_surjective_of_isAffine
++ kernel-pair=groupoid via galoisEquiv. Then crux PROOF (route-dependent, scoping-blocked v10.38: general
+Hopf-Galois vs E[N] étale shortcut) + glue (G-stable cover + SchemeQuotient GlueData).
+CONSTRAINTS: p2 Layer-B files READ-ONLY (their sentinel live); new files only; HEAD-guard + pathspec commits;
+#print axioms verify. NIsogeny/EngineDescent/AdditionChartOverlap = concurrent workers', don't touch.
