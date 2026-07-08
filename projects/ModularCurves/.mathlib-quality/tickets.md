@@ -10369,3 +10369,39 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
 - **Acks**: D2 (L6 ↔ p0/p2 edge noted both sides; bridge-don't-wait is right; hold stands).
   beastmode-A (queue collapse correctly self-administered; T-A3 addition above is the one
   change).
+
+### v10.46 (2026-07-08, c5β): [CHARTER-C5B] c4.3 assembly — global opens DONE; hf reduction pinned
+
+*Commits: 4aa1f9af (`blOpenY`/`blOpenZ` + covers + four piece morphisms), 91249030 (the overlap
+`transι` as an open subscheme, symmetric via `transι_eq`). Zero-sorry, axiom-clean. Fourth
+concrete-ring trap → v10.24(e) "pin the hom, then instantiate."*
+
+- **`blOpenY` / `blOpenZ` now EXIST** on `E ×_R E` — the literal objects `GroupLawConstruction.lean`
+  762/769 have carried as sorries. Indexed by the four `{Y,Z}²` chart-products (the domain pairs;
+  covering because `[1:0:0]` misses the curve), literal indices so the domain instances fire.
+- **The remaining c4.3 step is ONE obligation — `glueMorphisms`' `hf`** — and its reduction is now
+  fully pinned (skeleton typechecks, scratch). Route, three helpers:
+  1. **Helper A (topological, the blocker):**
+     `blOpenYImage ij ⊓ blOpenYImage i'j' ≤ (transι W i j i' j').opensRange`.
+     Reduces to `(pieceι ij).opensRange ⊓ (pieceι i'j').opensRange ≤ (transι).opensRange`, i.e. the
+     two chart-products of `E ×_R E` overlap exactly where the transition coords are invertible.
+     `range(transι) = pieceι ''ᵁ (chartPieceIso.hom ⁻¹ᵁ specBasicOpen τ)` (`τ = transFst·transSnd`,
+     via `specMap_transAlgHom_eq` + `specBasicOpenIsoAway`); the intersection side via
+     `PullbackCarrier.range_fst/snd` + `Proj.opensRange_awayι` (each `range(chartι i)` is a Proj
+     `basicOpen`, and `basicOpen ⊓ basicOpen = basicOpen (·*·)`). Mathlib's Proper.lean `e₂` iso
+     (two Proj charts overlap = `Spec(Away(X_i·X_j))`) is the model-level precedent.
+  2. **Helper B (factor):** with `κ := IsOpenImmersion.lift (transι) O.ι (Helper A)` (`lift_fac`:
+     `κ ≫ transι = O.ι`), show `homOfLE ≫ addOnYOnImage ij = κ ≫ Ψ` on the overlap, `Ψ` on
+     `transι ⁻¹ᵁ O ⊆ Spec transRing` = law-2 regularity locus.
+  3. **Helper C (the crux, symmetric):** `Ψ` is the same read through `ij` or `i'j'` — piece-level
+     it is `chartι_specMap_lawTwoTriple_cross` (25799fea), assembled over the D(image tₖ) cover.
+  Then `glueMorphisms_hf_of_agree` (f91b91ec) → `addOnY`/`addOnZ`; rule-3 interface same commit.
+- **Confirmed API in hand:** `IsOpenImmersion.lift` + `lift_fac` (OpenImmersion.lean:684/689),
+  `PullbackCarrier.range_fst/snd` (:323/332), `Hom.opensRange_comp`,
+  `Hom.image_preimage_eq_opensRange_inf`, `Proj.opensRange_awayι` (ProjectiveSpectrum/Basic:196).
+- **After hf:** `addOn_agree` (`chartHomOfTriple_lawOne_eq_lawTwo`, 1279497b), `blOpen_cover`
+  (regularity opens cover — `regularityOpen_ne_top_of_forall_mem`), `mulModelHom` glue; then c4.4
+  universality by instantiation, c4.5 fills GLC. 0c-i closes ⟹ 0c-ii report.
+- **This session's yield (one run):** c4.2c fully closed AND the entire c4.3 mathematical core —
+  transition, geometric overlap, cross-chart agreement, global opens. The scheme-topology of `hf` is
+  the next focused unit.
