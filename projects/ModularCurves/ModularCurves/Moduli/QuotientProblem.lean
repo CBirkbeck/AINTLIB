@@ -517,6 +517,25 @@ def autBase (X : EllObj R) : Aut X →* Aut X.base where
 theorem autBase_apply_hom (X : EllObj R) (e : Aut X) :
     (X.autBase e).hom = e.hom.baseHom := rfl
 
+/-- **([a1], total-space projection)** Total-space projection of `Ell/R`-automorphisms: an
+automorphism of an `Ell/R`-object restricts to an automorphism of the total space of its
+curve. This is the map that turns KM's cocycle `θ(g) : g*(E, α_univ) ≅ (E, α_univ)`
+(KM p. 113) into an honest `G`-action **on the universal curve `E`** — the observation on
+which route (a) of `[T-E5c-ROUTE-A]` rests: the curve descended along the torsor is `E/G`,
+so no effective descent of projective schemes (SGA I Exp. VIII 7.8) is needed. -/
+def autTotal (X : EllObj R) : Aut X →* Aut X.curve.E where
+  toFun e :=
+    { hom := e.hom.top
+      inv := e.inv.top
+      hom_inv_id := congrArg EllHom.top e.hom_inv_id
+      inv_hom_id := congrArg EllHom.top e.inv_hom_id }
+  map_one' := rfl
+  map_mul' _ _ := rfl
+
+@[simp]
+theorem autTotal_apply_hom (X : EllObj R) (e : Aut X) :
+    (X.autTotal e).hom = e.hom.top := rfl
+
 end EllObj
 
 namespace ModuliProblem
@@ -535,6 +554,44 @@ noncomputable def simulSchemeAction (P Q : ModuliProblem R) {G : Type*} [Group G
     AlgebraicGeometry.SchemeAction G XM.base :=
   AlgebraicGeometry.SchemeAction.ofAut
     ((XM.autBase.comp rM.autMulHom).comp ((P.simulAutSnd Q).comp φ))
+
+/-- **([a1], the `G`-action on the universal curve)** The same KM 4.7 action, on the *total
+space* of the universal curve over the representing object of `(𝒫,δ)`.
+
+KM (p. 113) produces, for each `g ∈ G`, a canonical isomorphism `θ(g)` of the pulled-back
+curve; because every `Ell/R`-morphism carries its top map (`EllHom.top`) functorially, the
+monoid homomorphism `g ↦ rM.autMulHom (g · β_univ)` already *is* an action on `E`. -/
+noncomputable def simulSchemeActionTotal (P Q : ModuliProblem R) {G : Type*} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM) :
+    AlgebraicGeometry.SchemeAction G XM.curve.E :=
+  AlgebraicGeometry.SchemeAction.ofAut
+    ((XM.autTotal.comp rM.autMulHom).comp ((P.simulAutSnd Q).comp φ))
+
+/-- **([a1], `π` is equivariant)** The structure morphism of the universal curve intertwines
+the action on `E` with the action on the base — the cartesian-square axiom `EllHom.isPullback`
+read as equivariance. -/
+theorem simulSchemeActionTotal_π (P Q : ModuliProblem R) {G : Type*} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
+    (P.simulSchemeActionTotal Q φ rM).hom γ ≫ XM.curve.π =
+      XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ := by
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
+
+/-- **([a1], the zero section is equivariant)** -/
+theorem simulSchemeActionTotal_zero (P Q : ModuliProblem R) {G : Type*} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
+    XM.curve.zero ≫ (P.simulSchemeActionTotal Q φ rM).hom γ =
+      (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero := by
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
+
+/-- **([a1], each `γ` acts cartesianly)** Every `γ ∈ G` acts on `E` by an isomorphism whose
+square over the base action is **cartesian**. Equivalently: `E` is the pullback of itself
+along `σ_base γ`. This is what makes `E → E/G` a `G`-torsor over `X → X/G` in `[a3]`. -/
+theorem simulSchemeActionTotal_isPullback (P Q : ModuliProblem R) {G : Type*} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
+    IsPullback ((P.simulSchemeActionTotal Q φ rM).hom γ) XM.curve.π XM.curve.π
+      ((P.simulSchemeAction Q φ rM).hom γ) := by
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
 
 section Engine
 
@@ -745,6 +802,24 @@ theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
     · rw [Category.assoc, Limits.pullback.lift_snd, Category.assoc,
         Limits.pullback.lift_snd]
   exact isEmpty_of_commSq_sigmaι_of_ne ⟨hpt⟩ hγ
+
+/-- **([a1], the action on the universal curve is free)** If `𝒫` is rigid and `δ` is a
+finite étale `G`-torsor rigidifier, then `G` acts **freely on the total space of the
+universal curve** `E` over `𝕸(𝒫,δ)`: no `γ ≠ 1` fixes a `T`-point of `E` over a nonempty
+`T`.
+
+Immediate from freeness on the base (`simulSchemeAction_free_of_rigid`) and equivariance of
+`π` (`simulSchemeActionTotal_π`): a `γ`-fixed `T`-point `t` of `E` projects to a `γ`-fixed
+`T`-point `t ≫ π` of the base. -/
+theorem simulSchemeActionTotal_free_of_rigid (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.Rigid) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.curve.E)
+    (hfix : t ≫ (P.simulSchemeActionTotal Q φ rM).hom γ = t) :
+    IsEmpty T := by
+  refine simulSchemeAction_free_of_rigid P Q φ rM hrig htors γ hγ T (t ≫ XM.curve.π) ?_
+  rw [Category.assoc, ← simulSchemeActionTotal_π, ← Category.assoc, hfix]
 
 /-- **The Katz–Mazur 4.7 engine** (SCHOLIE 4.7.0, axiomatized claim, KM p. 112:
 "We claim that over `ℤ[1/N]`, `𝒫` is represented by the affine `ℤ[1/N]`-scheme

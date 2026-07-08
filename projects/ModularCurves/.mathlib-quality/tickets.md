@@ -1919,20 +1919,33 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
       modules, from the Galois coordinates' third use.* Mathlib's missing faithfully-flat
       descent of `Module.Finite`/`Module.Projective` is sidestepped entirely (the averaging
       retraction replaces it).
-      **Remaining leaf [A711-DESC-loc]** (unclaimed, ~100–150 ln): `M_w` is projective
-      (mathlib has no `Projective.of_split`/`of_retract`; build via `projective_def'` through
-      `A`'s dual basis, or via `Finsupp.mapDomain` of `A`'s splitting along `ρ`), hence
-      locally free; localizing `Spec Aᴳ` at a prime, a generator `d` of `M_w` is forced by
-      `twistedMul_bijective` to be a **unit** of `A`, giving `g • d = w(g)·d` — the cocycle is
-      locally a coboundary. **This is the last mathematical step of a5-ii.**
+      **★★ [A711-DESC] CLOSED (fable-P4, 2026-07-08, `bcba6062`, axiom-clean).** The last leaf
+      [A711-DESC-loc] landed in two steps:
+      (i) `Module.Projective.of_retract` (ForMathlib gap-filler — mathlib has `of_basis`/`of_free`
+      but **no** `of_split`/`of_retract`) ⟹ `twistedInvariants_projective` (`M_w` is a retract of
+      `A` along `m ↦ c·m` / `twistedAvg`, using `exists_traceInvariants_eq_one`);
+      (ii) **`exists_unit_smul_eq_of_isLocalRing`**: with `Aᴳ` **local**, `M_w` is f.g. projective
+      ⟹ flat ⟹ **free** (`Module.free_of_flat_of_isLocalRing`); `twistedMul_bijective` forces
+      **rank 1** (two basis vectors `eᵢ,eⱼ` give the kernel element `(eⱼ)⊗eᵢ − (eᵢ)⊗eⱼ`,
+      contradicting independence of `b.baseChange A`; rank 0 contradicts surjectivity onto `1`);
+      surjectivity writes `1 = a·d`, so the generator `d` is a **unit** of `A`, and `d ∈ M_w`
+      gives `g • d = w(g)·d`. **The `u`-cocycle is Zariski-locally a coboundary.**
+      With (a5-i) `exists_sub_smul_eq_of_isCocycle` this discharges **a5-ii in full**: the whole
+      `VariableChange` cocycle `(u,r,s,t)` trivializes locally on `Spec Aᴳ`, i.e. `E/G` has a
+      Weierstrass model Zariski-locally on the base — exactly `localModel`'s requirement.
 - **Cost comparison (the point of the verdict)**: gate 2 was *"effective descent for projective
   schemes, absent from mathlib, B3-scale"* — with a **circular** alternative through T-E9. It is
   now *"[a1]–[a4] on proven AINTLIB engines + [A711-DESC], a bounded 250–400-line algebra
   development we can write today"*, **plus a dependency on T-W7.1b** (already in flight,
   beastmode-A/P3b3) for (a5). **No RR, no ω, no algebraic spaces.** T-E-OMEGA is *not* needed for
   the engine (it stays needed for T-E14's Legendre half, unchanged).
-- **Status**: scoped; [A711-DESC] cut and claimed by fable-P4; [a1]–[a4] boarded, unclaimed,
-  each takeable independently. The engine (T-E5c) assembles once [A711-DESC] + T-W7.1b land.
+- **Status (2026-07-08, fable-P4)**: **[A711-DESC] CLOSED** (`bcba6062`) and **[A711-BC] CLOSED**
+  (`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` = KM A7.1.2). Gate 1 (A7.1.1) is
+  closed modulo the tracked general-base gap [A711-FP] (noetherian base: `Algebra.Etale` is
+  PROVEN, `Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing`).
+  Remaining for the engine: **[a1]–[a4]** (boarded, unclaimed, each takeable independently) and
+  the residual dependency **T-W7.1b** (beastmode-A/P3b3) feeding (a5). fable-P4 now works
+  [a1]→[a4] in order; (a5) assembles once T-W7.1b lands.
 
 ### [T-Q6e GATE AUDIT] (fable-P4, 2026-07-08 — requested by v10.27 item (3)) — STAND BY, do not claim
 - **Gate 1 (T-Q2 / KM A7.1.1)**: torsor part **PROVEN**, finiteness **PROVEN**, unramified
