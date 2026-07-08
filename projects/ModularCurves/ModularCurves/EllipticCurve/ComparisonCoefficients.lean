@@ -188,4 +188,133 @@ lemma exists_coordY_image_of_filtration {W W' : WeierstrassCurve R}
     exact ⟨1, 0, 0, isUnit_one, Subsingleton.elim _ _⟩
   · exact exists_coordY_image Φ hfil
 
+open Polynomial
+
+private lemma hAX (W : WeierstrassCurve R) :
+    algebraMap (R[X]) W.toAffine.CoordinateRing Polynomial.X = coordX W := rfl
+
+private lemma hAC (W : WeierstrassCurve R) (a : R) :
+    algebraMap (R[X]) W.toAffine.CoordinateRing (Polynomial.C a)
+      = algebraMap R W.toAffine.CoordinateRing a := by
+  rw [IsScalarTower.algebraMap_apply R (Polynomial R) W.toAffine.CoordinateRing,
+    Polynomial.algebraMap_eq]
+
+private lemma six_ext {W : WeierstrassCurve R} [Nontrivial R]
+    {c₀ c₁ c₂ c₃ d₀ d₁ c₀' c₁' c₂' c₃' d₀' d₁' : R}
+    (h : algebraMap R W.toAffine.CoordinateRing c₀ + algebraMap R _ c₁ * coordX W
+          + algebraMap R _ c₂ * coordX W ^ 2 + algebraMap R _ c₃ * coordX W ^ 3
+          + algebraMap R _ d₀ * coordY W + algebraMap R _ d₁ * (coordX W * coordY W)
+        = algebraMap R _ c₀' + algebraMap R _ c₁' * coordX W
+          + algebraMap R _ c₂' * coordX W ^ 2 + algebraMap R _ c₃' * coordX W ^ 3
+          + algebraMap R _ d₀' * coordY W + algebraMap R _ d₁' * (coordX W * coordY W)) :
+    c₀ = c₀' ∧ c₁ = c₁' ∧ c₂ = c₂' ∧ c₃ = c₃' ∧ d₀ = d₀' ∧ d₁ = d₁' := by
+  have hzero : (Polynomial.C (c₀ - c₀') + Polynomial.C (c₁ - c₁') * Polynomial.X
+        + Polynomial.C (c₂ - c₂') * Polynomial.X ^ 2 + Polynomial.C (c₃ - c₃') * Polynomial.X ^ 3)
+        • (1 : W.toAffine.CoordinateRing)
+      + (Polynomial.C (d₀ - d₀') + Polynomial.C (d₁ - d₁') * Polynomial.X) • coordY W = 0 := by
+    simp only [Algebra.smul_def, map_add, map_mul, map_pow, hAX, hAC, map_sub, mul_one]
+    linear_combination h
+  obtain ⟨hp, hq⟩ := WeierstrassCurve.Affine.CoordinateRing.smul_basis_eq_zero
+    (W' := W.toAffine) hzero
+  have hp0 := congrArg (fun p => Polynomial.coeff p 0) hp
+  have hp1 := congrArg (fun p => Polynomial.coeff p 1) hp
+  have hp2 := congrArg (fun p => Polynomial.coeff p 2) hp
+  have hp3 := congrArg (fun p => Polynomial.coeff p 3) hp
+  have hq0 := congrArg (fun p => Polynomial.coeff p 0) hq
+  have hq1 := congrArg (fun p => Polynomial.coeff p 1) hq
+  simp only [Polynomial.coeff_add, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow,
+    Polynomial.coeff_C, Polynomial.coeff_X, Polynomial.coeff_zero] at hp0 hp1 hp2 hp3 hq0 hq1
+  norm_num at hp0 hp1 hp2 hp3 hq0 hq1
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
+    [(rw [← sub_eq_zero]; exact hp0); (rw [← sub_eq_zero]; exact hp1);
+     (rw [← sub_eq_zero]; exact hp2); (rw [← sub_eq_zero]; exact hp3);
+     (rw [← sub_eq_zero]; exact hq0); (rw [← sub_eq_zero]; exact hq1)]
+
+lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
+    (Φ : W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing)
+    (hfil : ∀ n, Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' n)
+      = poleOrderFiltration W n) :
+    ∃ C : VariableChange R, C • W' = W ∧
+      Φ (coordX W') = algebraMap R _ ((↑C.u : R) ^ 2) * coordX W + algebraMap R _ C.r ∧
+      Φ (coordY W') = algebraMap R _ ((↑C.u : R) ^ 3) * coordY W
+        + algebraMap R _ (C.s * (↑C.u : R) ^ 2) * coordX W + algebraMap R _ C.t := by
+  rcases subsingleton_or_nontrivial R with hs | hn
+  · refine ⟨1, ?_, ?_, ?_⟩
+    · ext <;> exact Subsingleton.elim _ _
+    · have := subsingleton_coordinateRing W; exact Subsingleton.elim _ _
+    · have := subsingleton_coordinateRing W; exact Subsingleton.elim _ _
+  · obtain ⟨α, β, hα, hx⟩ := exists_coordX_image Φ hfil
+    obtain ⟨γ, δ, ε, hγ, hy⟩ := exists_coordY_image Φ hfil
+    have hM := congrArg Φ (coordY_mul_coordY W')
+    simp only [map_mul, map_add, map_sub, map_pow, AlgEquiv.commutes] at hM
+    rw [hx, hy] at hM
+    have hinput :
+        algebraMap R W.toAffine.CoordinateRing (γ ^ 2 * W.toAffine.a₆ + ε ^ 2)
+          + algebraMap R _ (γ ^ 2 * W.toAffine.a₄ + 2 * δ * ε) * coordX W
+          + algebraMap R _ (γ ^ 2 * W.toAffine.a₂ + δ ^ 2) * coordX W ^ 2
+          + algebraMap R _ (γ ^ 2) * coordX W ^ 3
+          + algebraMap R _ (2 * γ * ε - γ ^ 2 * W.toAffine.a₃) * coordY W
+          + algebraMap R _ (2 * γ * δ - γ ^ 2 * W.toAffine.a₁) * (coordX W * coordY W)
+        = algebraMap R _ (β ^ 3 + W'.toAffine.a₂ * β ^ 2 + W'.toAffine.a₄ * β + W'.toAffine.a₆
+              - W'.toAffine.a₁ * β * ε - W'.toAffine.a₃ * ε)
+          + algebraMap R _ (3 * α * β ^ 2 + 2 * W'.toAffine.a₂ * α * β + W'.toAffine.a₄ * α
+              - W'.toAffine.a₁ * (α * ε + β * δ) - W'.toAffine.a₃ * δ) * coordX W
+          + algebraMap R _ (3 * α ^ 2 * β + W'.toAffine.a₂ * α ^ 2 - W'.toAffine.a₁ * α * δ)
+              * coordX W ^ 2
+          + algebraMap R _ (α ^ 3) * coordX W ^ 3
+          + algebraMap R _ (-(W'.toAffine.a₁ * β * γ) - W'.toAffine.a₃ * γ) * coordY W
+          + algebraMap R _ (-(W'.toAffine.a₁ * α * γ)) * (coordX W * coordY W) := by
+      simp only [map_add, map_mul, map_pow, map_sub, map_neg, map_ofNat]
+      linear_combination hM
+        - (algebraMap R W.toAffine.CoordinateRing γ) ^ 2 * coordY_mul_coordY W
+    obtain ⟨e_x0, e_x1, e_x2, e_x3, e_y, e_xy⟩ := six_ext hinput
+    obtain ⟨uα, hαs⟩ := hα
+    obtain ⟨uγ, hγs⟩ := hγ
+    set u : Rˣ := uγ * uα⁻¹ with hu_def
+    have hu_val : (↑u : R) = γ * (↑uα⁻¹ : R) := by rw [hu_def, Units.val_mul, hγs]
+    have hvα : α * (↑uα⁻¹ : R) = 1 := by rw [← hαs]; exact uα.mul_inv
+    have hu2 : (↑u : R) ^ 2 = α := by
+      rw [hu_val]
+      linear_combination (↑uα⁻¹ : R) ^ 2 * e_x3 + α * (α * (↑uα⁻¹ : R) + 1) * hvα
+    have hu3 : (↑u : R) ^ 3 = γ := by
+      rw [hu_val]
+      linear_combination γ * (↑uα⁻¹ : R) ^ 3 * e_x3
+        + γ * ((α * (↑uα⁻¹ : R)) ^ 2 + α * (↑uα⁻¹ : R) + 1) * hvα
+    simp only [← hu2, ← hu3] at e_x0 e_x1 e_x2 e_y e_xy
+    have h6 : IsUnit ((↑u : R) ^ 6) := by
+      rw [← Units.val_pow_eq_pow_val]; exact (u ^ 6).isUnit
+    refine ⟨⟨u, β, δ * (↑u⁻¹ : R) ^ 2, ε⟩, ?_, ?_, ?_⟩
+    · ext
+      · rw [variableChange_a₁]
+        dsimp only
+        refine h6.mul_right_inj.mp ?_
+        linear_combination e_xy
+          + (2*(↑u:R)^5*(↑u⁻¹:R)^2*δ + (↑u:R)^5*W'.toAffine.a₁ + 2*(↑u:R)^4*(↑u⁻¹:R)*δ + 2*(↑u:R)^3*δ) * u.mul_inv
+      · rw [variableChange_a₂]
+        dsimp only
+        refine h6.mul_right_inj.mp ?_
+        linear_combination -e_x2
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*δ^2 - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*δ + (↑u:R)^5*(↑u⁻¹:R)*W'.toAffine.a₂ + 3*(↑u:R)^5*(↑u⁻¹:R)*β - (↑u:R)^4*(↑u⁻¹:R)^4*δ^2 - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*δ + (↑u:R)^4*W'.toAffine.a₂ + 3*(↑u:R)^4*β - (↑u:R)^3*(↑u⁻¹:R)^3*δ^2 - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*δ - (↑u:R)^2*(↑u⁻¹:R)^2*δ^2 - (↑u:R)^2*W'.toAffine.a₁*δ - (↑u:R)*(↑u⁻¹:R)*δ^2 - δ^2) * u.mul_inv
+      · rw [variableChange_a₃]
+        dsimp only
+        refine h6.mul_right_inj.mp ?_
+        linear_combination e_y
+          + ((↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₁*β + (↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₃ + 2*(↑u:R)^5*(↑u⁻¹:R)^2*ε + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₁*β + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₃ + 2*(↑u:R)^4*(↑u⁻¹:R)*ε + (↑u:R)^3*W'.toAffine.a₁*β + (↑u:R)^3*W'.toAffine.a₃ + 2*(↑u:R)^3*ε) * u.mul_inv
+      · rw [variableChange_a₄]
+        dsimp only
+        refine h6.mul_right_inj.mp ?_
+        linear_combination -e_x1
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*δ - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*δ - 2*(↑u:R)^5*(↑u⁻¹:R)^5*δ*ε - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*ε + 2*(↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₂*β + (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₄ + 3*(↑u:R)^5*(↑u⁻¹:R)^3*β^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*δ - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*δ - 2*(↑u:R)^4*(↑u⁻¹:R)^4*δ*ε - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₂*β + (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₄ + 3*(↑u:R)^4*(↑u⁻¹:R)^2*β^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*δ - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*δ - 2*(↑u:R)^3*(↑u⁻¹:R)^3*δ*ε - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*ε + 2*(↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₂*β + (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₄ + 3*(↑u:R)^3*(↑u⁻¹:R)*β^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*δ - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*δ - 2*(↑u:R)^2*(↑u⁻¹:R)^2*δ*ε - (↑u:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^2*W'.toAffine.a₂*β + (↑u:R)^2*W'.toAffine.a₄ + 3*(↑u:R)^2*β^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*δ - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*δ - 2*(↑u:R)*(↑u⁻¹:R)*δ*ε - W'.toAffine.a₁*β*δ - W'.toAffine.a₃*δ - 2*δ*ε) * u.mul_inv
+      · rw [variableChange_a₆]
+        dsimp only
+        refine h6.mul_right_inj.mp ?_
+        linear_combination -e_x0
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₂*β^2 - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₄*β + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₆ + (↑u:R)^5*(↑u⁻¹:R)^5*β^3 - (↑u:R)^5*(↑u⁻¹:R)^5*ε^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₂*β^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₄*β + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₆ + (↑u:R)^4*(↑u⁻¹:R)^4*β^3 - (↑u:R)^4*(↑u⁻¹:R)^4*ε^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₂*β^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₄*β + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₆ + (↑u:R)^3*(↑u⁻¹:R)^3*β^3 - (↑u:R)^3*(↑u⁻¹:R)^3*ε^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₂*β^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₄*β + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₆ + (↑u:R)^2*(↑u⁻¹:R)^2*β^3 - (↑u:R)^2*(↑u⁻¹:R)^2*ε^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₂*β^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₄*β + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₆ + (↑u:R)*(↑u⁻¹:R)*β^3 - (↑u:R)*(↑u⁻¹:R)*ε^2 - W'.toAffine.a₁*β*ε + W'.toAffine.a₂*β^2 - W'.toAffine.a₃*ε + W'.toAffine.a₄*β + W'.toAffine.a₆ + β^3 - ε^2) * u.mul_inv
+    · dsimp only
+      rw [hx, hu2]
+    · dsimp only
+      rw [hy, hu3,
+        show δ * (↑u⁻¹ : R) ^ 2 * (↑u : R) ^ 2 = δ from by
+          rw [mul_assoc, pow_mul_pow_eq_one 2 u.inv_mul, mul_one]]
+
 end ModularCurves
