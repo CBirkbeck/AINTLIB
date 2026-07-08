@@ -38,6 +38,7 @@ import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.HomogeneousEval
+import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
