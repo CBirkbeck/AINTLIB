@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.Representability
+import ModularCurves.EllipticCurve.TorsionFibre
 import Mathlib.NumberTheory.Divisors
 
 /-!
@@ -79,7 +80,9 @@ that admits `Y₁(N)`-classified pairs into the Tate atlas. Loeffler Def 3.3.6 (
 `a ∈ {1,2,3}`, using `a < N` from `a ≤ 3 < 4 ≤ N`. Pure logic; no geometry. -/
 theorem IsNaiveGammaOne.nowhereGeomOrderLEThree {E : EllipticCurve S} {P : E.Section}
     {N : ℕ} [NeZero N] (hN : 4 ≤ N) (h : E.IsNaiveGammaOne N P) :
-    E.NowhereGeomOrderLEThree P := by sorry
+    E.NowhereGeomOrderLEThree P := by
+  intro k _ _ t a ha0 ha3
+  exact (h.2 k t).2 a ha0 (by omega)
 
 end EllipticCurve
 
@@ -90,7 +93,17 @@ end EllipticCurve
 multiples from vanishing. Discharge: `addOrderOf` divisibility / Bézout; mathlib group theory. -/
 theorem exists_properDivisor_smul_eq_zero {G : Type u} [AddCommGroup G] {x : G} {N a : ℕ}
     (hNx : (N : ℤ) • x = 0) (ha0 : 0 < a) (haN : a < N) (hax : (a : ℤ) • x = 0) :
-    ∃ d ∈ N.properDivisors, 0 < d ∧ (d : ℤ) • x = 0 := by sorry
+    ∃ d ∈ N.properDivisors, 0 < d ∧ (d : ℤ) • x = 0 := by
+  refine ⟨Nat.gcd a N, ?_, Nat.gcd_pos_iff.mpr (Or.inl ha0), ?_⟩
+  · exact Nat.mem_properDivisors.mpr
+      ⟨Nat.gcd_dvd_right a N, lt_of_le_of_lt (Nat.gcd_le_left N ha0) haN⟩
+  · have hax' : a • x = 0 := by exact_mod_cast hax
+    have hNx' : N • x = 0 := by exact_mod_cast hNx
+    have hg : Nat.gcd a N • x = 0 :=
+      addOrderOf_dvd_iff_nsmul_eq_zero.mp
+        (Nat.dvd_gcd (addOrderOf_dvd_iff_nsmul_eq_zero.mpr hax')
+          (addOrderOf_dvd_iff_nsmul_eq_zero.mpr hNx'))
+    exact_mod_cast hg
 
 /-! ### B. The marked Tate atlas (Loeffler Def 3.3.3 + Prop 3.3.4 + Cor 3.3.5, pp. 13–14)
 
@@ -142,6 +155,13 @@ noncomputable def tateStructMap : tateBase R ⟶ Spec R :=
   Spec.map (CommRingCat.ofHom
     ((algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)).comp MvPolynomial.C))
 
+/-- Generic form of the T-W5a `crux_test` (`Moduli/WeierstrassAtlas.lean`): on an affine scheme
+the top-chart `isoSpec.hom` composed with the scheme's own `isoSpec.inv` is the top inclusion. -/
+theorem isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv {X : Scheme.{u}} [IsAffine X]
+    (h : IsAffineOpen (⊤ : X.Opens)) :
+    h.isoSpec.hom ≫ X.isoSpec.inv = (⊤ : X.Opens).ι := by
+  rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
+
 /-- **(Y1-B1, generalising the proven `universalCurve_localModel`)** The projective model of any
 elliptic Weierstrass curve over a ring is locally Weierstrass — the whole affine base, on the
 single chart `⊤`, witnesses it. The T-W5a proof in `Moduli/WeierstrassAtlas.lean` is this
@@ -150,7 +170,61 @@ Source: Loeffler Prop 3.3.2 (trivially, for a global Weierstrass model); KM 2.2.
 theorem projModel_locallyWeierstrass {A : Type u} [CommRing A] (W : WeierstrassCurve A)
     [W.IsElliptic] :
     LocallyWeierstrass (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) := by
-  sorry
+  intro s
+  letI : Algebra A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)) :=
+    (Scheme.ΓSpecIso (.of A)).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (Spec (CommRingCat.of A)).Opens).ι := by
+    rw [← Scheme.topIso_hom]; infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom
+      (algebraMap A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))))) := by
+    have : CommRingCat.ofHom (algebraMap A
+        ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))) =
+        (Scheme.ΓSpecIso (.of A)).inv := rfl
+    rw [this]; infer_instance
+  have hφ_eq : Spec.map (CommRingCat.ofHom (algebraMap A
+      ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))) =
+      (Spec (CommRingCat.of A)).isoSpec.inv :=
+    (Scheme.isoSpec_Spec_inv (.of A)).symm
+  refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial,
+    W.map (algebraMap A _), inferInstance,
+    asIso (pullback.fst (projModelπ W) (⊤ : (Spec (CommRingCat.of A)).Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
+        (algebraMap A
+          ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))))))).symm ≪≫
+      (isPullback_projModelBaseChange W).isoPullback.symm,
+    ?c1, ?c2⟩
+  have hcrux : ∀ (h : (⊤ : (Spec (CommRingCat.of A)).Opens) ∈
+        (Spec (CommRingCat.of A)).affineOpens),
+      (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))))
+      = (⊤ : (Spec (CommRingCat.of A)).Opens).ι :=
+    fun h => hφ_eq ▸ isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv h
+  case c1 =>
+    rw [← cancel_mono (Spec.map (CommRingCat.ofHom (algebraMap A
+        ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))))]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      IsPullback.isoPullback_inv_snd]
+    conv_rhs => erw [hcrux]
+    erw [← pullback.condition, IsIso.inv_hom_id_assoc]
+    exact pullback.condition
+  case c2 =>
+    have hcrux2 : (isAffineOpen_top (Spec (CommRingCat.of A))).isoSpec.inv ≫
+        (⊤ : (Spec (CommRingCat.of A)).Opens).ι = Spec.map (CommRingCat.ofHom (algebraMap
+          A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))) :=
+      hφ_eq ▸ (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
+    have hcrux2' : ∀ {Z : Scheme.{u}} (g : Spec (CommRingCat.of A) ⟶ Z),
+        (isAffineOpen_top (Spec (CommRingCat.of A))).isoSpec.inv ≫
+          (⊤ : (Spec (CommRingCat.of A)).Opens).ι ≫ g
+          = Spec.map (CommRingCat.ofHom (algebraMap A
+            ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))) ≫ g :=
+      fun g => by rw [← Category.assoc]; exact congrArg (· ≫ g) hcrux2
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc]
+    rw [pullback.lift_fst_assoc]
+    simp only [Category.assoc]
+    conv_lhs => erw [hcrux2']
+    erw [← reassoc_of% projModelZero_baseChange W,
+      ← (isPullback_projModelBaseChange W).isoPullback_hom_fst_assoc,
+      IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
 
 /-- The universal Tate curve over the atlas, as a geometric record: the projective model of
 `tateCurveLocOver R`, with its smoothness, properness and local-model witnesses. -/
@@ -259,7 +333,12 @@ noncomputable def killedLocusπ (d : ℕ) : E.killedLocus P d ⟶ S :=
 Def 3.3.6): the zero section of the separated `E/S` is a closed immersion (as in
 `torsionι_isClosedImmersion`, T-B3), and closed immersions pull back. -/
 theorem killedLocusπ_isClosedImmersion (d : ℕ) :
-    IsClosedImmersion (E.killedLocusπ P d) := by sorry
+    IsClosedImmersion (E.killedLocusπ P d) := by
+  have h1 : IsClosedImmersion (E.zero ≫ E.π) := by
+    rw [E.zero_π]
+    infer_instance
+  have h2 : IsClosedImmersion E.zero := IsClosedImmersion.of_comp (f := E.zero) (g := E.π)
+  exact MorphismProperty.pullback_fst _ _ h2
 
 /-- **(Y1-C2)** The universal property of the killed locus: a base change `t : T ⟶ S` factors
 through `Y_d` iff the pulled-back section is killed by `d`. This is the scheme-theoretic
@@ -269,7 +348,33 @@ Discharge: pullback universal property + `point_smul_eq_comp_mulBy` + `Point.pul
 the factoring `h` is unique since closed immersions are monomorphisms. -/
 theorem killedLocus_spec (d : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
     (∃ h : T ⟶ E.killedLocus P d, h ≫ E.killedLocusπ P d = t) ↔
-      (d : ℤ) • Point.pull E t P = 0 := by sorry
+      (d : ℤ) • Point.pull E t P = 0 := by
+  rw [E.smul_eq_zero_iff_comp_mulByHom t d (Point.pull E t P)]
+  have hpull : (Point.pull E t P : T ⟶ E.E) = t ≫ P.1 := rfl
+  have hf : (((d : ℤ) • P : E.Section).1) = P.1 ≫ E.mulByHom (d : ℤ) :=
+    E.point_smul_eq_comp_mulBy (𝟙 S) d P
+  have hsecf : (((d : ℤ) • P : E.Section).1) ≫ E.π = 𝟙 S := ((d : ℤ) • P : E.Section).2
+  have hfs : pullback.fst (((d : ℤ) • P : E.Section).1) E.zero
+      = pullback.snd (((d : ℤ) • P : E.Section).1) E.zero := by
+    have hc := pullback.condition (f := ((d : ℤ) • P : E.Section).1) (g := E.zero)
+    calc pullback.fst (((d : ℤ) • P : E.Section).1) E.zero
+        = pullback.fst _ _ ≫ ((((d : ℤ) • P : E.Section).1) ≫ E.π) := by
+          rw [hsecf, Category.comp_id]
+      _ = (pullback.fst _ _ ≫ ((d : ℤ) • P : E.Section).1) ≫ E.π := by rw [Category.assoc]
+      _ = (pullback.snd _ _ ≫ E.zero) ≫ E.π := by rw [hc]
+      _ = pullback.snd _ _ ≫ (E.zero ≫ E.π) := by rw [Category.assoc]
+      _ = pullback.snd _ _ := by rw [E.zero_π, Category.comp_id]
+  rw [hpull, Category.assoc, ← hf]
+  constructor
+  · rintro ⟨h, rfl⟩
+    have hcond : E.killedLocusπ P d ≫ ((d : ℤ) • P : E.Section).1
+        = pullback.snd (((d : ℤ) • P : E.Section).1) E.zero ≫ E.zero :=
+      pullback.condition
+    have hfs' : E.killedLocusπ P d = pullback.snd (((d : ℤ) • P : E.Section).1) E.zero := hfs
+    rw [Category.assoc, hcond, ← hfs']
+    exact (Category.assoc h (E.killedLocusπ P d) E.zero).symm
+  · intro hcond
+    exact ⟨pullback.lift t t hcond, pullback.lift_fst _ _ _⟩
 
 /-- **(Y1-C3, the range/residue dictionary)** A point `x` of the base lies in the killed locus
 iff the section dies on the residue-field fibre at `x`. Loeffler removes the `Y_d` as *loci*
@@ -308,7 +413,12 @@ def yOneSet : Set ((tateUniversal R).killedLocus (tatePoint R) N) :=
 
 /-- **(Y1-C5)** `Y₁(N)` is open in `Y_N`: each removed `Y_d` has closed image (closed
 immersion), the union is finite, and we take the complement of its preimage. -/
-theorem yOneSet_isOpen : IsOpen (yOneSet R N) := by sorry
+theorem yOneSet_isOpen : IsOpen (yOneSet R N) := by
+  rw [yOneSet, isOpen_compl_iff]
+  refine isClosed_biUnion_finset fun d _ => ?_
+  refine IsClosed.preimage ((tateUniversal R).killedLocusπ (tatePoint R) N).continuous ?_
+  exact ((tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) d)
+    |>.isClosedEmbedding.isClosed_range
 
 /-- `Y₁(N)` as an open subscheme of the killed locus `Y_N` (Loeffler Def 3.3.6). -/
 noncomputable def yOneOpens : ((tateUniversal R).killedLocus (tatePoint R) N).Opens :=
@@ -441,7 +551,29 @@ general `R` finite *presentation* is the right form, and it is what mathlib's
 `RingHom.Smooth` consumes. -/
 theorem yOneStructMap_locallyOfFinitePresentation [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R)) :
-    LocallyOfFinitePresentation (yOneStructMap R N) := by sorry
+    LocallyOfFinitePresentation (yOneStructMap R N) := by
+  -- The zero section is lfp: `zero ≫ π = 𝟙` is lfp and `π` is (smooth ⟹) of finite type.
+  haveI hsm : Smooth (tateUniversal R).π := SmoothOfRelativeDimension.smooth (n := 1) _
+  haveI hzero : LocallyOfFinitePresentation (tateUniversal R).zero := by
+    have h : LocallyOfFinitePresentation ((tateUniversal R).zero ≫ (tateUniversal R).π) := by
+      rw [(tateUniversal R).zero_π]; infer_instance
+    exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
+  -- `Y_N ⟶ 𝒴` is the base change of the zero section, hence lfp.
+  haveI hkl : LocallyOfFinitePresentation ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+    MorphismProperty.pullback_fst _ _ hzero
+  -- `Y₁(N) ⟶ Y_N` is an open immersion, hence lfp.
+  haveI hι : LocallyOfFinitePresentation (yOneOpens R N).ι := inferInstance
+  -- `𝒴 ⟶ Spec R` is `Spec` of `R → R[A,B] → R[A,B][Δ⁻¹]` — polynomial then localization away, fp.
+  haveI hstr : LocallyOfFinitePresentation (tateStructMap R) := by
+    apply (LocallyOfFinitePresentation.SpecMap_iff _).mpr
+    rw [CommRingCat.hom_ofHom]
+    refine RingHom.FinitePresentation.comp ?_ ?_
+    · rw [RingHom.finitePresentation_algebraMap]
+      exact IsLocalization.Away.finitePresentation (tateCurveOver R).Δ
+    · rw [← MvPolynomial.algebraMap_eq, RingHom.finitePresentation_algebraMap]
+      infer_instance
+  exact MorphismProperty.comp_mem _ _ _
+    (MorphismProperty.comp_mem _ _ _ hι hkl) hstr
 
 /-- **(Y1-E5, the infinitesimal lifting core — Loeffler Thm 3.4.4's proof body; gate
 [BB-DIFF])** Points of `Y₁(N)` lift along nilpotent thickenings of affines over `R`:
