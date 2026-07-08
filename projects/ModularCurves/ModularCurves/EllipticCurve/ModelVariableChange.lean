@@ -2497,6 +2497,55 @@ private lemma unit_numerator_generic {A S : Type u} [CommRing A] [CommRing S]
     · exact hgP (hP.mem_of_pow_mem _ h3)
     · exact hgP (hP.mem_of_pow_mem _ h4)
 
+private lemma res_algebraMap_fuse_generic {X : Scheme.{u}} {U : X.Opens}
+    (f : Γ(X, U)) {V : X.Opens} (hV : V ≤ X.basicOpen f) (hVU : V ≤ U)
+    (y : ↑Γ(X, U)) :
+    ((X.presheaf.map (homOfLE hV).op).hom)
+      ((algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y) =
+    ((X.presheaf.map (homOfLE hVU).op).hom) y := by
+  have h0 : (algebraMap (↑Γ(X, U)) (↑Γ(X, X.basicOpen f))) y =
+      ((X.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom) y := rfl
+  rw [h0]
+  have hc := congrArg (fun φ => CommRingCat.Hom.hom φ y)
+    ((X.presheaf.map_comp (homOfLE (X.basicOpen_le f)).op (homOfLE hV).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+  refine hc.trans ?_
+  exact congrArg (fun ψ => (CommRingCat.Hom.hom (X.presheaf.map ψ)) y)
+    (Subsingleton.elim _ _)
+
+private lemma witness_combine_generic {A C : Type u} [CommRing A] [CommRing C]
+    (φ : A →+* C) (T Troot vC : C) (rtA rA sA bΦA u₀ v₀ : A) (n K j k : ℕ)
+    (hEQ : T * (φ rtA) ^ K = φ bΦA * Troot ^ n)
+    (hα : Troot = vC * φ sA)
+    (hu₀ : T * φ (rA ^ j) = φ u₀)
+    (hv₀ : vC * φ (rA ^ k) = φ v₀) :
+    φ (u₀ * rtA ^ K * rA ^ (n * k)) = φ (bΦA * sA ^ n * v₀ ^ n * rA ^ j) := by
+  have h1 : T * (φ rtA) ^ K * φ (rA ^ j) * φ (rA ^ (n * k)) =
+      φ bΦA * (vC * φ sA) ^ n * φ (rA ^ j) * φ (rA ^ (n * k)) := by
+    rw [← hα]
+    calc T * (φ rtA) ^ K * φ (rA ^ j) * φ (rA ^ (n * k))
+        = (T * (φ rtA) ^ K) * φ (rA ^ j) * φ (rA ^ (n * k)) := by ring
+      _ = (φ bΦA * Troot ^ n) * φ (rA ^ j) * φ (rA ^ (n * k)) := by rw [hEQ]
+      _ = _ := by ring
+  have hLHS : T * (φ rtA) ^ K * φ (rA ^ j) * φ (rA ^ (n * k)) =
+      φ (u₀ * rtA ^ K * rA ^ (n * k)) := by
+    calc T * (φ rtA) ^ K * φ (rA ^ j) * φ (rA ^ (n * k))
+        = (T * φ (rA ^ j)) * (φ rtA) ^ K * φ (rA ^ (n * k)) := by ring
+      _ = φ u₀ * (φ rtA) ^ K * φ (rA ^ (n * k)) := by rw [hu₀]
+      _ = _ := by rw [← map_pow, ← map_mul, ← map_mul]
+  have hRHS : φ bΦA * (vC * φ sA) ^ n * φ (rA ^ j) * φ (rA ^ (n * k)) =
+      φ (bΦA * sA ^ n * v₀ ^ n * rA ^ j) := by
+    have hvn : vC ^ n * φ (rA ^ (n * k)) = φ (v₀ ^ n) := by
+      calc vC ^ n * φ (rA ^ (n * k)) = (vC * φ (rA ^ k)) ^ n := by
+            rw [mul_pow, ← map_pow, ← pow_mul, Nat.mul_comm k n]
+        _ = (φ v₀) ^ n := by rw [hv₀]
+        _ = φ (v₀ ^ n) := (map_pow φ v₀ n).symm
+    calc φ bΦA * (vC * φ sA) ^ n * φ (rA ^ j) * φ (rA ^ (n * k))
+        = φ bΦA * (φ sA) ^ n * (vC ^ n * φ (rA ^ (n * k))) * φ (rA ^ j) := by ring
+      _ = φ bΦA * (φ sA) ^ n * φ (v₀ ^ n) * φ (rA ^ j) := by rw [hvn]
+      _ = _ := by rw [← map_pow, ← map_mul, ← map_mul, ← map_mul]
+  exact hLHS.symm.trans (h1.trans hRHS)
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
