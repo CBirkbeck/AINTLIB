@@ -1,5 +1,25 @@
 # CHARTER-A — THE W7 ENDGAME (beastmode-A, v10.32)
 
+## ✅ STATUS 2026-07-08 — items 1 & 2 COMPLETE (T-W7.1b DONE)
+The faith-infra atomic refactor (item 1) and the T-W7.1b flip (item 2) are **DONE**
+(commits 6f531139 → 3f7fc4fd → 7a81d093 → 7b527d7b). The whnf wall fell to the def-level
+interface refactor (the "AdicSpaces recipe"): `coordRingToZSection` → small-RHS
+`pointedIsoCoordEquiv_apply` → S1 → `pointedIsoΓ_apply` → `appLE_zChart_eq_pointedIsoΓ` →
+`pointedIso_hom_eq_of_pointedIsoΓ` (M-recon) → `main` (coordEquiv_ext generation +
+transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean (lean_verify).
+
+**Charter now BLOCKED on other lanes** (session paused at a PHASE-8 boundary):
+- item 3 (ω/T-E-OMEGA): DEMOTED to on-demand (v10.36) — build only when a consumer demands.
+- item 4 (0h `mulModelHom_vc`): BLOCKED on c5β's β4(c)/GLC completion (c5β on c4.2b; mulModelHom
+  still sorry). c5β board-signals when 0c-ii lands → resume charter, take 0h on the banked route
+  (projModel_hom_ext_of_affine + per-chart addOn VC-equivariance). THIS is the next-session opener.
+- item 5 (endgame T-W7.12 → CLEANUP-ALL-W7 → T-W7.36/T-W7a): BLOCKED on 0h.
+- fallback T-D6b: BLOCKED on P3b3's T-B5D-A (`torsionπ_etale` still sorryAx).
+
+Next session resumes when 0h unblocks (c5β signal) or a fleet dispatch arrives.
+
+---
+
 Durable record of the multi-session, self-paced charter beastmode-A holds. The session
 sentinel (`beastmode_active.beastmode-A`) is recreated each session and holds the
 CURRENT-FOCUS line; **this file holds the arc** so a fresh-context session resumes without
