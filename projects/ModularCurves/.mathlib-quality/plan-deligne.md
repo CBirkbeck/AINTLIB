@@ -200,3 +200,41 @@ Parallel capacity: T-D5a and T-D5f and T-D5h start immediately (3 workers).
    book p. 144, not reconstructed).
 3. **A1 upstreamability**: the dual Hopf algebra is a clean mathlib-upstream target; build it
    in `ForMathlib/` with full API regardless.
+
+---
+
+## T-D5e-core decomposition (`deligne_operators` — the single remaining Layer-A leaf)
+
+**Status (2026-07-08):** All of Deligne's Layer A is proved + axiom-clean and committed EXCEPT
+the one Hopf leaf `deligne_operators` in `ForMathlib/CartierDual.lean`. Everything downstream
+(`exists_commutator_eq_pointConv_smul_one` = Prop 3.8.1, `deligne_pointConv_pow` = T-D5g,
+`deligne_pointConv_pow_finrank`) is proved *modulo* it via the axiom-clean assembly lemmas
+`pow_eq_one_of_smul_id_eq_commutator`, `mulRight_conj_mulRight_inv`, `mulRight_tmul_one`.
+
+**The leaf statement** (`M = S ⊗_R A`, `S = A'_B = WithConv (A →ₗ[R] B)`, `λ = pointConv φ`):
+```
+deligne_operators : ∃ (u : Mˣ) (τ : M ≃ₐ[S] M), τ (↑u) = ↑u * (pointConv φ ⊗ₜ[R] 1)
+```
+This is Tate's **Lemma 3.8.2** specialised to `φ = τ_λ` (CSS §3.8, book p. 144).
+
+**mathlib grounding found:**
+* `LinearAlgebra/Contraction.lean`: `dualTensorHom R M N : Dual R M ⊗[R] N →ₗ (M →ₗ N)`;
+  `dualTensorHomEquivOfBasis b : Dual R A ⊗[R] A ≃ₗ (A →ₗ A)` (finite free) — the iso
+  `A' ⊗ A ≅ End_R A`. The **coevaluation** `u_R := (dualTensorHomEquivOfBasis b).symm id ∈ A'⊗_R A`.
+* `LinearAlgebra/Coevaluation.lean`: `coevaluation` (field version; for general R use the above).
+* Base change: `M = A'_B ⊗_R A = A'_B ⊗_B A_B` (since `A'_B ⊗_B (B ⊗_R A) = A'_B ⊗_R A`); Prop 3.8.1
+  is Tate's base-changed-from-R statement ("the same holds for λ ∈ G(B)").
+
+**Sub-tickets (source-faithful, to build next):**
+* **T-D5e-u**: the coevaluation `u ∈ M` is a *unit* of the tensor-algebra `M` (it is the group-like
+  `id ∈ G(A)` ⊂ `A'_A`, so `IsGroupLikeElem`/antipode gives its inverse — NOT via the End iso, which
+  is only R-linear not a ring map). Needs `M`'s group-like structure or a direct inverse.
+* **T-D5e-τ**: `τ_λ : A_B → A_B` right-translation `= (λ ⊗ id) ∘ Δ` (λ the B-point), an S-algebra
+  automorphism (λ group-like, Δ alg-hom; inverse via antipode); then `τ = id_{A'_B} ⊗_B τ_λ` on
+  `M = A'_B ⊗_B A_B`.
+* **T-D5e-3.8.2**: `τ(u) = u · (λ⊗1)` — Tate's Lemma 3.8.2: both sides are the element of `A'⊗A`
+  corresponding to `τ_λ` (resp. its transpose `R_λ`) under `A'⊗A ≅ End_R A ≅ End_R A'`; the
+  transpose of `τ_λ` (transpose of right-mult-by-λ) IS right-mult-by-λ on `A'`, giving `u·(λ⊗1)`.
+
+This is a genuine multi-session dual-basis / base-change build; the leaf is precisely isolated so
+the rest of Deligne's theorem stands on it and nothing else.
