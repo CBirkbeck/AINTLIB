@@ -126,6 +126,47 @@ noncomputable def _root_.AlgebraicGeometry.Scheme.IdealSheafData.idealMonoidHom
       Ideal.one_eq_top]
   map_mul' I J := Scheme.IdealSheafData.ideal_mul I J
 
+/-- **(T-D6a-ii, L3 — KM 1.4.4 (1)⟹(2) divisor side)** The order divisor is natural in
+the base: base-changing `[P] + ⋯ + [NP]` along `t : T ⟶ S` gives the order divisor of
+the pulled section on the base-changed curve. -/
+theorem Section.orderDivisor_baseChange (P : E.Section) (N : ℕ) {T : Scheme.{u}}
+    (t : T ⟶ S) :
+    (P.orderDivisor E N).baseChange t =
+      Section.orderDivisor (E.baseChange t)
+        (Point.asSection E t (Point.pull E t P)) N := by
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π :=
+    ⟨inferInstance, E.smooth⟩
+  have hpos' : IsSeparated (E.baseChange t).π ∧
+      SmoothOfRelativeDimension 1 (E.baseChange t).π :=
+    ⟨inferInstance, (E.baseChange t).smooth⟩
+  apply RelEffCartierDiv.ext
+  have hL : ((P.orderDivisor E N).baseChange t).ideal =
+      (∏ a : Fin N, Scheme.Hom.ker
+        (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1).comap
+        (Limits.pullback.fst E.π t) := by
+    rw [RelEffCartierDiv.baseChange_ideal]
+    congr 1
+    rw [Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  have hR : (Section.orderDivisor (E.baseChange t)
+      (Point.asSection E t (Point.pull E t P)) N).ideal =
+      ∏ a : Fin N, Scheme.Hom.ker
+        (((((a : ℕ) : ℤ) + 1) • Point.asSection E t (Point.pull E t P) :
+          (E.baseChange t).Point (𝟙 T))).1 := by
+    rw [Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos']
+  rw [hL, hR, Scheme.IdealSheafData.comap_prod]
+  refine Finset.prod_congr rfl fun a _ => ?_
+  have hsec : ((((a : ℕ) : ℤ) + 1) • Point.asSection E t (Point.pull E t P) :
+      (E.baseChange t).Point (𝟙 T)) =
+      Point.asSection E t (Point.pull E t ((((a : ℕ) : ℤ) + 1) • P)) :=
+    ((Point.asSection_zsmul E t (((a : ℕ) : ℤ) + 1) (Point.pull E t P)).symm).trans
+      (congrArg (Point.asSection E t)
+        (Point.pull_zsmul E t ((((a : ℕ) : ℤ) + 1)) P).symm)
+  have hker := RelEffCartierDiv.ker_sectionBaseChange
+    (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1
+    (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).2 t
+  exact ((congrArg (fun Q : (E.baseChange t).Point (𝟙 T) =>
+    Scheme.Hom.ker Q.1) hsec).trans hker).symm
+
 /-- **(T-D5 = KM 1.4.2)** Exact order `N` implies `N • P = 0`. Black box BB-DELIGNE: a
 finite locally free commutative group scheme of rank `N` is killed by `N` (KM cite
 [Oort–Tate]). -/
@@ -177,9 +218,15 @@ finite étale, hence consists of `N` distinct points, which by the divisor equal
 `G = Σ [aP]` are exactly the multiples — so no proper multiple vanishes. KM
 (verbatim): *"G is automatically finite etale over k of rank N. Therefore as a
 Cartier divisor in C_k, G consists of a uniquely determined set of N distinct
-points."* Discharge: fibre étale theory (discriminant bridge, T-D6c-adjacent) +
-the base-change formation compat (T-D6a machinery: `comap_mul`,
-`ker_sectionBaseChange`). -/
+points."* Discharge route (re-assessed 2026-07-08, p0): the base-change linchpin
+`comap_mul` is now PROVEN (`ForMathlib/IdealSheafComapMul.lean`, T-D6a-i,
+sorry-free over arbitrary schemes), but two layers still gate this box —
+(a) the base-change *assembly* identifying `(orderDivisor P N).baseChange t` with
+`orderDivisor (pull P) N` over `E ×_S k` = T-D6a-ii (in progress, beastmode-A's tail);
+(b) the genuinely-absent étale core — a finite locally free rank-`N` group scheme over
+a field with `N` invertible is finite étale (BB-DIFF / the flf-discriminant criterion,
+KM (3)⟺(4)), and finite étale over an algebraically closed `k` yields `N` distinct
+reduced geometric points. Not a leaf; returned to `state: open`. -/
 theorem Section.HasExactOrder.pull_nsmul_ne_zero {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) (h : P.HasExactOrder E N)
     (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S)
