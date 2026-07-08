@@ -5082,6 +5082,28 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     NEXT: β1 = `Spec (biChartRing W i j) ≅` chart-product open (via `pullbackSpecIso` +
     `chartCoordEquiv` + a tensor presentation of `biChartRing`; mathlib has
     `Algebra.TensorProduct.quotIdealMapEquivTensorQuot` / `MvPolynomial.sumAlgEquiv`).
+  - **β2b CLOSED** (coordinator-P1, 2026-07-08T10:52Z; 5b1f8da2 + 7c9ddc07, zero sorries,
+    axiom-clean). The Y-chart DID fall to algebra — cheaper than the β1 route I flagged, so
+    β1 no longer has to carry reducedness (it remains the right next step for β3, and its
+    scheme-integrality argument stays available as an independent cross-check).
+    · NEW ForMathlib (`MonicQuotientDescent.lean`, upstream candidates):
+      `Polynomial.dvd_of_monic_of_map_dvd_map`; `AdjoinRoot.mapRingHom(_mk/_injective)` +
+      `AdjoinRoot.isDomain_of_monic_of_map` (abstract form of the hand-rolled descent mathlib
+      uses for `Affine.CoordinateRing`); `HomogeneousLocalization.isDomain_away` (the
+      `IsDomain` sibling of `Proj.isReduced_away`).
+    · `isDomain_affineChartRing_of_field` — over a field, EVERY chart ring is a domain
+      (chartCoordEquiv + isDomain_away + `mk_X_ne_zero`).
+    · `instIsDomainAffineChartRingY` — the Y-chart over ANY domain, by monic descent along
+      `R[t] → Frac R[t]` through P3's `infChartQuotEquiv`/`infChartCubic_monic`
+      (+ new `infChartCubic_map`). Z-chart: mathlib's `CoordinateRing` instance.
+    · `instIsDomainBiChartRing{YY,YZ,ZY,ZZ}` — all four products of the COVERING charts
+      (`chartY_sup_chartZ_eq_top`), via the ladder.
+    · **`equation_lawTwoTriple_of_isDomain` / `equation_lawOneTriple_of_isDomain`** — BOTH
+      B–L laws land on the curve on all four covering chart-products, over every Jacobson
+      domain with Δ a unit (atlas qualifies). Corollaries `_zz`, `_yy`.
+    NEXT (β1/β3): `Spec (biChartRing W i j)` ≅ the (i,j) chart-product open of the pullback
+    (`pullbackSpecIso` + `chartCoordEquiv`); then the per-(i,j,k) ring homs
+    `X_m/X_k ↦ triple_m/triple_k`, well-defined by the theorems above.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
@@ -6828,9 +6850,10 @@ union of n(Γ) sections … n(Γ) = #(Hom Surj((Z/NZ)², Z/NZ)/±Γ)."*
   the v9 "keep marginal workers on the core Y₁(N)/Y(N) path" directive.
 
 ### v10.5 [T-END0] End(E/S)/degree layer from KM Ch. 2 — the G-lane resume trigger has FIRED
-- **Status**: open · **Assignee**: beastmode-P2 when T-D5e wraps (right of first refusal — it
-  closes their T-G3 box), else p0 after T-KMQ · **Type**: `/develop --decompose` planning
-  (BINDING first act, v10.8) + execution ·
+- **Status**: CLAIMED p0 2026-07-08 (p2 still on BB-DELIGNE T-D5e `deligne_operators`, NOT freed
+  → right-of-first-refusal not exercised); `/develop --decompose` first act IN PROGRESS ·
+  **Assignee**: p0 (was: beastmode-P2 when T-D5e wraps — right of first refusal — else p0 after
+  T-KMQ) · **Type**: `/develop --decompose` planning (BINDING first act, v10.8) + execution ·
   **Depends on**: KM Ch. 2 (NOW in refs — this was the G-lane PHASE-8 resume trigger, verbatim:
   *"when the KM Ch.2 text lands in refs/ModularCurves/ (degree/dual-isogeny/Hasse)"*); GME
   §B8/§B9 transcriptions (`decomposition-gme2.md`); HasseWeil
