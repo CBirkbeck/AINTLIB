@@ -282,6 +282,18 @@ theorem smul_eq_zero_of_factors_section {D : RelEffCartierDiv E.π} (hD : D.IsSu
     (N : ℤ) • Q = 0 := by
   sorry
 
+/-- **(Layer B, L1 — the relative degree is base-change invariant.)** BOARDED `[T-D5h-degBC]`.
+The degree (fibre `finrank` of the finite flat structure map `D.subscheme ⟶ S`) is stable under
+base change: constant degree `N` on `S` gives constant degree `N` on any `T`. This is the
+`finrank`-base-change fact for the finite locally free module, applied fibrewise
+(`Module.finrank_baseChange` at the affine-local level; the fibre of `D.baseChange g` over `t`
+is that of `D` over `g t`, base-changed to `κ(t)`). Sole genuinely-absent input to the L1
+reduction below; everything else (factoring transport, `asSection` descent) is proven. -/
+theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
+    (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (t : T) :
+    (D.baseChange g).degree t = N := by
+  sorry
+
 /-- **(Layer B, L1 + assembly — the box.)** Deligne's order theorem in the project's
 subgroup-divisor encoding, over an arbitrary base `S` and for an arbitrary `T`-point `Q`
 (the statement of `RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors`,
@@ -293,7 +305,33 @@ theorem smul_eq_zero_of_factors' {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup 
     [NeZero N] (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (Q : E.Point g)
     (hQ : ∃ h : T ⟶ D.ideal.subscheme, h ≫ D.ideal.subschemeι = Q.1) :
     (N : ℤ) • Q = 0 := by
-  sorry
+  -- Base-change along `g : T ⟶ S`. `Q` becomes the section `asSection Q` of `E ×_S T / T`, `D`
+  -- becomes the subgroup divisor `D.baseChange g` (`IsSubgroup.baseChange`) of constant degree `N`
+  -- (`degree_baseChange_eq`), and `asSection Q` factors through it (`exists_factor_comap_iff` +
+  -- `asSection_val_fst`). The section box kills it; `asSection`, injective and `zsmul`-linear,
+  -- descends the vanishing back to `Q`.
+  have hfac : ∃ h : T ⟶ (D.baseChange g).ideal.subscheme,
+      h ≫ (D.baseChange g).ideal.subschemeι = (Point.asSection E g Q).1 := by
+    rw [RelEffCartierDiv.baseChange_ideal]
+    refine (AlgebraicGeometry.Scheme.IdealSheafData.exists_factor_comap_iff D.ideal
+      (Limits.pullback.fst E.π g) (Point.asSection E g Q).1).mpr ?_
+    obtain ⟨h, hh⟩ := hQ
+    exact ⟨h, hh.trans (Point.asSection_val_fst E g Q).symm⟩
+  have hbc : (N : ℤ) • Point.asSection E g Q = 0 :=
+    smul_eq_zero_of_factors_section (E.baseChange g)
+      (RelEffCartierDiv.IsSubgroup.baseChange E hD g)
+      (fun t => degree_baseChange_eq E hdeg g t) (Point.asSection E g Q) hfac
+  -- `asSection` is injective and intertwines `zsmul`, and sends `0` to `0`.
+  have hzero : Point.asSection E g (0 : E.Point g) = 0 := by
+    have h := Point.asSection_zsmul E g 0 (0 : E.Point g)
+    rwa [zero_zsmul, zero_zsmul] at h
+  have hinj : Function.Injective (Point.asSection E g) := by
+    intro P P' hPP'
+    apply Subtype.ext
+    have h := congrArg
+      (fun s : (E.baseChange g).Point (𝟙 T) => s.1 ≫ Limits.pullback.fst E.π g) hPP'
+    simpa only [Point.asSection_val_fst] using h
+  exact hinj (by rw [Point.asSection_zsmul, hbc, hzero])
 
 end GeneralBase
 

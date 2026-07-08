@@ -455,3 +455,29 @@ affine base (`Γ`-functor + `pullbackSpecIso` + `isoSpec`) → `HopfAlgebra R A`
 localise-to-free (L5, `projective_of_finitePresentation` gives PROJ) → points↔convolution (L6) →
 assemble (L7); plus the L1 reduction (general → affine). Sub-tickets T-D5h(=L2✅, L3-data✅,
 axioms/Δ/Hopf/L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).
+
+---
+
+**L1 general→section reduction LANDED (2026-07-08, p2)** — `smul_eq_zero_of_factors'` (the box shape
+of `RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors`, arbitrary base `S` + arbitrary `T`-point
+`Q`) is now a **real proof** reducing to `smul_eq_zero_of_factors_section` (section box) — no longer
+sorried. `#print axioms` = `[propext, sorryAx, Classical.choice, Quot.sound]` (sorryAx only from the
+two consumed leaves). The reduction (all axiom-clean):
+- **factoring transport** — `asSection Q` factors through `(D.baseChange g).ideal.subscheme` iff `Q`
+  factors through `D.ideal.subscheme`: `baseChange_ideal` + `IdealSheafData.exists_factor_comap_iff`
+  + `Point.asSection_val_fst` (term-mode `.trans`, NOT `rw` — the `(E.baseChange g).E` vs
+  `pullback E.π g` defeq is not syntactic; `rw`/`simp` hit the semireducibility wall, exactly the
+  trap flagged in `asSection`'s docstring). Divisor subgroup-ness base-changes via
+  `RelEffCartierDiv.IsSubgroup.baseChange`.
+- **asSection descent** — `Point.asSection E g` is injective (`Subtype.ext` + `asSection_val_fst` on
+  the fst-leg) and sends `0↦0` (from `asSection_zsmul` at `n=0` + `zero_zsmul`), and intertwines
+  `zsmul` (`asSection_zsmul`); so `(N:ℤ) • asSection Q = 0 ⟹ (N:ℤ) • Q = 0`.
+- **boarded leaf `[T-D5h-degBC]`** — `degree_baseChange_eq`: relative degree (fibre finrank of the
+  finite flat structure map) is base-change invariant. Sole genuinely-absent input; sorried with
+  recipe (`Module.finrank_baseChange` fibrewise). Everything else in L1 is proven.
+
+Remaining DeligneOrder.lean sorries (4): affine core (`smul_eq_zero_of_factors_affine`), Δ
+(`subgroupComul`, boarded T-D5h-Δ), section box (`smul_eq_zero_of_factors_section`, needs affine
+cover of `S`), degree (`degree_baseChange_eq`, boarded T-D5h-degBC). Next p2: section box→affine
+core (cover `S` by affine opens + locality of the `S ⟶ E.E` equation), then the Hopf/Δ/L5/L6/L7
+chain feeding the affine core.
