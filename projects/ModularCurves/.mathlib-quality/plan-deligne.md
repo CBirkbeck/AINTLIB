@@ -481,3 +481,38 @@ Remaining DeligneOrder.lean sorries (4): affine core (`smul_eq_zero_of_factors_a
 cover of `S`), degree (`degree_baseChange_eq`, boarded T-D5h-degBC). Next p2: section box→affine
 core (cover `S` by affine opens + locality of the `S ⟶ E.E` equation), then the Hopf/Δ/L5/L6/L7
 chain feeding the affine core.
+
+---
+
+**Δ (comultiplication) BUILT (2026-07-08, p2)** — `subgroupComul` is now a **real definition**, not a
+sorry: `Δ = κ⁻¹ ∘ Γ(m)`, with the full supporting κ machinery landed axiom-clean and the opaque
+interface shipped in the same increment (coordinator v10.24(b)). The pieces (all in AffineHopf,
+`variable {R} (E) {D}`):
+- `biproductAlgebra` — `R`-algebra on `Γ(D ×_{Spec R} D, ⊤)` via `bimulBase` (mirrors
+  `subgroupAlgebra`). ✅ axiom-clean.
+- `bimulBase_eq_fst_structMap` / `_snd_structMap` — `bimulBase = fst/snd ≫ structMap` (the second
+  via `pullback.condition`). ✅
+- `subgroupProj₁` / `subgroupProj₂ : A →ₐ[R] Γ(D×_R D)` — `Γ(fst)` / `Γ(snd)`, `R`-linear by the
+  `bimulBase_eq_*` facts (antipode-style `commutes'` collapsing the appTop composition via
+  `Scheme.Hom.comp_appTop`). ✅ axiom-clean.
+- `subgroupTensorCompare` (κ) `: A ⊗_R A →ₐ[R] Γ(D×_R D)` = `Algebra.TensorProduct.lift proj₁ proj₂
+  Commute.all`. ✅ axiom-clean.
+- `subgroupMul_structMap` — `m ≫ structMap = bimulBase` (from `subgroupMul_subschemeι` + the
+  bipt-sum's Point property). ✅
+- `subgroupComulHom` (Γ(m)) `: A →ₐ[R] Γ(D×_R D)` — `R`-linear by `subgroupMul_structMap`. ✅
+- `subgroupComul` (Δ) `:= (AlgEquiv.ofBijective κ hbij).symm.toAlgHom.comp Γ(m)`. Rests only on the
+  ONE boarded leaf below (`sorryAx` only). Marked `attribute [irreducible]`.
+- **PIN** `subgroupTensorCompare_subgroupComul : κ (Δ a) = Γ(m) a` (via `AlgEquiv.apply_symm_apply`)
+  — the v10.24(b) opaque interface; downstream (Hopf axioms, L6) uses ONLY this, never unfolds Δ.
+
+Sole remaining Δ leaf: **`subgroupTensorCompare_bijective` `[T-D5h-κbij]`** (BOARDED) — κ is bijective,
+i.e. `pullbackSpecIso` (`Γ(Spec S ×_{Spec R} Spec T) ≅ S ⊗_R T`) transported across
+`D.subscheme.isoSpec` on each affine factor. This is the ONLY genuinely-heavy scheme-iso step in the
+whole Δ construction; everything else is elementary. `#print axioms`: κ machinery = the standard
+three; Δ + pin = standard three + `sorryAx` (no stray axioms).
+
+DeligneOrder.lean sorries now (4): affine core, κ-bijectivity ([T-D5h-κbij]), section box, degree
+([T-D5h-degBC]). Coordinator item (1)=Δ effectively DONE. Next unblocked p2 work: item (2) Hopf
+axioms (`Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`) from Δ/ε/antipode via the pins —
+these need only the pin + the group-object scheme equations, NOT κ-bijectivity, so they are
+unblocked now.

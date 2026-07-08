@@ -196,15 +196,160 @@ section AffineHopf
 variable {R : Type u} [CommRing R] (E : EllipticCurve (Spec (CommRingCat.of R)))
   {D : RelEffCartierDiv E.π}
 
+/-- The `R`-algebra structure on `Γ(D ×_{Spec R} D, ⊤)` induced by the base map `bimulBase`
+(mirrors `subgroupAlgebra`). The tensor comparison `A ⊗_R A ≅ Γ(D ×_R D)` below is an `R`-algebra
+iso for this structure; it is the coordinate-ring incarnation of `pullbackSpecIso`. -/
+noncomputable def biproductAlgebra :
+    Algebra R Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom.toAlgebra
+
+/-- `bimulBase` is the first projection followed by the structure map (by definition, up to
+associativity). -/
+theorem bimulBase_eq_fst_structMap :
+    E.bimulBase (D := D) =
+      Limits.pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫
+        E.subgroupStructMap D :=
+  (Category.assoc _ _ _).symm
+
+/-- `bimulBase` is also the second projection followed by the structure map (pullback condition). -/
+theorem bimulBase_eq_snd_structMap :
+    E.bimulBase (D := D) =
+      Limits.pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫
+        E.subgroupStructMap D := by
+  rw [bimulBase_eq_fst_structMap]
+  exact Limits.pullback.condition
+
+/-- The first coordinate projection `A →ₐ[R] Γ(D ×_R D)`, i.e. `Γ(pullback.fst)`. It is an
+`R`-algebra map because `fst ≫ structMap = bimulBase` (`bimulBase_eq_fst_structMap`). -/
+noncomputable def subgroupProj₁ :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R]
+      Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  { (Limits.pullback.fst (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop) ≫
+            (Limits.pullback.fst (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, ← bimulBase_eq_fst_structMap]
+      show (Limits.pullback.fst (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π)).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- The second coordinate projection `A →ₐ[R] Γ(D ×_R D)`, i.e. `Γ(pullback.snd)`. -/
+noncomputable def subgroupProj₂ :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R]
+      Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  { (Limits.pullback.snd (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop) ≫
+            (Limits.pullback.snd (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, ← bimulBase_eq_snd_structMap]
+      show (Limits.pullback.snd (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π)).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- The tensor comparison `κ : A ⊗_R A →ₐ[R] Γ(D ×_R D)`, `κ = ⟨Γ(fst), Γ(snd)⟩` — the
+coordinate-ring incarnation of the canonical map `Spec Γ(D ×_R D) ⟶ Spec A ×_{Spec R} Spec A`. It
+is an isomorphism (`pullbackSpecIso` transported across `D.subscheme.isoSpec` on each factor); its
+inverse composed with `Γ(m)` is the comultiplication. -/
+noncomputable def subgroupTensorCompare :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    TensorProduct R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) →ₐ[R]
+      Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  Algebra.TensorProduct.lift (E.subgroupProj₁ (D := D)) (E.subgroupProj₂ (D := D))
+    (fun _ _ => Commute.all _ _)
+
+/-- **BOARDED `[T-D5h-κbij]`.** The tensor comparison `κ` is bijective — the sole genuinely-heavy
+input to `Δ`. This is `pullbackSpecIso` (`Γ(Spec S ×_{Spec R} Spec T) ≅ S ⊗_R T`) transported
+across `D.subscheme.isoSpec` on each factor (both factors affine: `D.subscheme` is finite over
+`Spec R`). Once landed, `Δ = κ⁻¹ ∘ Γ(m)`, its `_apply` characterisation, and the Hopf axioms all
+follow mechanically. -/
+theorem subgroupTensorCompare_bijective :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Function.Bijective (E.subgroupTensorCompare (D := D)) := by
+  sorry
+
+/-- The multiplication is a morphism over the base: `m ≫ structMap = bimulBase` (dualizing to the
+`R`-linearity of `Γ(m)`). -/
+theorem subgroupMul_structMap (hD : D.IsSubgroup E) :
+    E.subgroupMul hD ≫ E.subgroupStructMap D = E.bimulBase (D := D) := by
+  show E.subgroupMul hD ≫ (D.ideal.subschemeι ≫ E.π) = E.bimulBase (D := D)
+  rw [← Category.assoc, E.subgroupMul_subschemeι hD]
+  exact ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).2
+
+/-- `Γ(m) : A →ₐ[R] Γ(D ×_R D)`, the algebra map underlying the comultiplication (before the tensor
+identification). `R`-linear because `m` is a morphism over the base (`subgroupMul_structMap`). -/
+noncomputable def subgroupComulHom (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R]
+      Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  { (E.subgroupMul hD).appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop) ≫
+            (E.subgroupMul hD).appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, E.subgroupMul_structMap hD]
+      show (E.subgroupMul hD).appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
 /-- **(Layer B, L3 — the comultiplication.)** `Δ = m^♯ : A →ₐ[R] A ⊗_R A`, the Hopf-dual of the
-group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: pull back regular
-functions along `m`, landing in `Γ(D ×_{Spec R} D) ≅ A ⊗_R A` (via `Scheme.isoSpec` +
-`AlgebraicGeometry.pullbackSpecIso`). Coassociativity dualizes associativity of `m`. -/
+group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: `Δ = κ⁻¹ ∘ Γ(m)`,
+where `Γ(m)` pulls regular functions back along `m` into `Γ(D ×_{Spec R} D)` and `κ⁻¹` identifies
+that with `A ⊗_R A` (`subgroupTensorCompare`). Coassociativity dualizes associativity of `m`. -/
 noncomputable def subgroupComul (hD : D.IsSubgroup E) :
     letI := E.subgroupAlgebra D
     Γ(D.ideal.subscheme, ⊤) →ₐ[R]
-      TensorProduct R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) := by
-  sorry
+      TensorProduct R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  (AlgEquiv.ofBijective (E.subgroupTensorCompare (D := D))
+      (E.subgroupTensorCompare_bijective (D := D))).symm.toAlgHom.comp (E.subgroupComulHom hD)
+
+/-- **The comultiplication interface pin (v10.24(b) opaque interface).** `κ (Δ a) = Γ(m) a`: `Δ` is
+characterised by pushing forward through the tensor comparison `κ` to `Γ(m)`. Downstream (Hopf
+axioms, L6 points↔convolution) consumes only this pin; `subgroupComul` is then marked `irreducible`
+so its heavy `κ⁻¹` core is never unfolded — dodging the whnf/kernel-poison wall that scheme-iso
+definitions trigger (the T-W7.1b lesson). -/
+theorem subgroupTensorCompare_subgroupComul (hD : D.IsSubgroup E)
+    (a : Γ(D.ideal.subscheme, ⊤)) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    E.subgroupTensorCompare (D := D) (E.subgroupComul hD a) = E.subgroupComulHom hD a := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  exact AlgEquiv.apply_symm_apply
+    (AlgEquiv.ofBijective (E.subgroupTensorCompare (D := D))
+      (E.subgroupTensorCompare_bijective (D := D))) (E.subgroupComulHom hD a)
+
+attribute [irreducible] subgroupComul
 
 /-- The unit section `e` is a section of the structure map: `e ≫ (subschemeι ≫ π) = 𝟙 S`
 (the zero point lies over the identity of the base). -/
