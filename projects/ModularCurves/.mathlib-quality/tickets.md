@@ -5478,8 +5478,13 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     these discharge T-W7.8 directly (likely a thin wrapper). DISTINCT from the D-lane's
     T-NOETH (fp-flat algebra/object descent, not morphism-equality) — same foundation,
     no file overlap.
-  - **Status**: blocked (source transcription first) · **Depends**: T-W7.7 · **Type**:
-    infra + theorem.
+  - **Status**: in-progress (the dispatched RE-CHECK) · **Claimed**: fable-P4,
+    2026-07-08T08:14Z (owner go-ahead) · **Depends**: T-W7.7 (**DONE** 2026-07-08 —
+    gate open) · **Type**: infra + theorem.
+  - **Re-check scope note**: the EGA-transcription gate applies to formalizing 8.8.2
+    OURSELVES; if mathlib's `SpreadingOut`/`AffineTransitionLimit` lemmas are consumed
+    as-is, we cite their statements (mathlib is the source). Deliverable: verdict
+    thin-wrapper vs real-object-descent-gap, then execute or leaf-split accordingly.
 
 - **[CLEANUP-W7-FINAL]** `/cleanup-all` on all T-W7 files (the Phase-III close-out).
   **Depends**: T-W7.7, T-W7.36 (and T-W7.8 if/when it lands).
