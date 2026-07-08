@@ -397,7 +397,26 @@ is now PROVEN in `DeligneOrder.lean`: `bipt₁`/`bipt₂` (the two universal poi
 "IsSubgroup → group object → Hopf" route — everything downstream (Δ = m^♯, Hopf axioms, convolution)
 now rests on a proven foundation.
 
-Next (downstream of the validated crux): `Δ : A →ₐ[R] A ⊗_R A` from `m^♯` over the affine base
-(needs `Γ(D×_R D) ≅ A ⊗_R A`) → Hopf axioms (L4) → localise-to-free (L5) → points↔convolution (L6) →
-assemble (L7); plus the L1 reduction (general → affine). Multi-session; each leaf bounded and
-in-area. Sub-tickets T-D5h(=L2✅, L3-crux✅, Δ/Hopf/L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).
+**Group-object DATA COMPLETE ✅** — added `subgroupUnit` (e : S ⟶ D.subscheme, from `0 ∈ D(S)`),
+`subgroupInv` (n : D.subscheme ⟶ D.subscheme, from `-upt ∈ D(D)`), `upt` (universal point), all with
+`_subschemeι` defining equations. The full group-scheme structure (m, e, n) on `D.subscheme` from
+`IsSubgroup` is now proven.
+
+**Dualization dependency CONFIRMED PRESENT ✅** — `AlgebraicGeometry.pullbackSpecIso R S T`
+(`Mathlib/AlgebraicGeometry/Pullbacks.lean:719`): `pullback (Spec.map algᵣₛ) (Spec.map algᵣₜ) ≅
+Spec (S ⊗[R] T)`, with `pullbackSpecIso_inv_fst/snd`/`hom_fst` projection lemmas. So over the affine
+base, `Γ(D ×_{Spec R} D) ≅ A ⊗_R A` (via `Scheme.isoSpec` transport of `D.subscheme ≅ Spec A`), and
+`Δ = Γ(m)` lands in `A ⊗_R A` as required. The dualization route is grounded.
+
+**⟹ THE ENTIRE LAYER B ROUTE IS VALIDATED END-TO-END** — group-object-from-`IsSubgroup` proven
+(the deferred/absent piece); dualization iso present; Deligne consumable present
+(`deligne_point_pow_eq_one`); points-equiv templates present (`torsionAlgebraPointsEquiv`,
+`muNPointsEquiv`). No genuinely-absent multi-week infra remains — the rest is bounded formal build.
+
+Next (downstream of the validated route): group AXIOMS as scheme equations (m assoc, unit/inv laws,
+via the mono `subschemeι` + curve group axioms on pullback products; `pullback.lift`/`.map` for the
+product morphisms) → dualize m/e/n to `Δ : A →ₐ[R] A ⊗_R A`, `ε : A →ₐ[R] R`, antipode over the
+affine base (`Γ`-functor + `pullbackSpecIso` + `isoSpec`) → `HopfAlgebra R A` + `IsCocomm` (L4) →
+localise-to-free (L5, `projective_of_finitePresentation` gives PROJ) → points↔convolution (L6) →
+assemble (L7); plus the L1 reduction (general → affine). Sub-tickets T-D5h(=L2✅, L3-data✅,
+axioms/Δ/Hopf/L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).
