@@ -7900,3 +7900,58 @@ an isogeny-quotient + finite-étale-descent infra ticket for the geometry remain
   layer: heavy definitions ship their opaque interface in the same increment.
 - Session tally for the record (P3b3): #5220 merged, #5221 merged, #5222 merged — three
   scoping/proving arcs in one day, each on the board with quotes.
+
+## Amendments v10.27 (2026-07-08): CONSOLIDATED FLEET DISPATCH — five reports absorbed, two owner decisions, extended queues
+
+*(Note: p0's frontier-handoff section above also carries the number "v10.26" — it is treated as
+v10.26b; numbering continues here. Reports absorbed: c5β β4(a) 389c933f — minors consumed,
+`lawOneTriple_mul_lawTwoTriple` 9-line close; fable-P4 tri-part — KM 4.7 quote pass + LOAD-BEARING
+statement mismatch, T-E12–14 unstatable → [T-E-OMEGA] cut, Q-lane state corrected (T-Q5 already
+done), [T-Q2-A711] claimed + step 1 `chr_of_isFreeAlgebraAction` axiom-clean; p2 — Layer A CLOSED
+incl. `deligne_operators` from the Tate text, Layer B L2/L3-crux/counit/antipode proven; p0 —
+T-END0 terminal: box WIRED to `aut_endo_eq_one`, T-G3b proven vs pins, frontier = [T-G3h-hfix] +
+[T-G3d]; beastmode-A — T-D33 DONE incl. new `exists_exactOrderLocus_section`, all five incidence
+centres in place, session closed.)*
+
+- **DECISION 1 (owner-delegated): T-E5 affineness — option (a) APPROVED.** Add affine-over-Ell to
+  the ⇐ direction ONLY. Execute via the B2 protocol: `b2_log.jsonl` entry; the statement edit
+  lands in the SAME commit as the KM SCHOLIE (4.7.0) verbatim quote in the docstring; the
+  unrestricted form is recorded as a documented non-goal with the Gabber A.4.1.3 evidence (not
+  silently deleted). The ⇒-direction Isom-scheme gap is recorded as **[T-E5-ISOM]** (gap ticket,
+  not built now). Grounds: KM's own SCHOLIE carries affineness and uses it 3× (pp. 112/113/114);
+  Loeffler 3.7.4 omits it but his quotient input (3.6.1) is quasiprojective-only — neither
+  source proves the unrestricted statement; every downstream consumer is affine étale over Ell.
+- **DECISION 2: [T-E-OMEGA] is FUNDED now** (level-4 detour REJECTED, per fable-P4's own
+  recommendation). Three consumers make ω structural: the KM 4.6.2 bootstrap ℤ[1/2]-half
+  (T-E12–14), T-A4's re-frozen torsor form (the ω_{E/S} Hodge/conormal trivialization, v9.4),
+  and the modular-forms stream. Route: line bundle glued from the Weierstrass atlas, basis
+  `dx/(2y+a₁x+a₃)`, transition `u`; cocycle ALREADY PROVEN (`projModelVCIso_mul`). DS-register
+  the data in the same commit; v10.24(b): ω ships with its opaque interface.
+- **CORRECTION (fable-P4)**: route (γ)'s escape is ALREADY OPEN — SGA III Exp. V is in refs
+  (`refs/ModularCurves/sga3-1.pdf`, v10.12, Exposé V verified in vol. 1). CHR (Mem. AMS 52,
+  1965) stays an OPTIONAL owner acquisition.
+- **EXTENDED QUEUES (the user relays one consolidated block; per-worker essence):**
+  - **c5β**: β4(b) transport through chartPieceIso → β4(c) glue with opaque interface in the
+    same commit (rule-3 commitment) → fill the four GroupLawConstruction sorries, flip 0c-i
+    inc. 2 → **PRE-APPROVED: claim 0c-ii (mulModelHom) directly** against the new interface →
+    audit + board 0h/1a status for the endgame review (1b counts until faith-infra).
+  - **fable-P4**: B2 + affineness amendment → T-E5 leaves a–f (instantiate
+    `representable_of_rigid_of_torsor` twice, never re-derive) → T-E-OMEGA build → T-Q2-A711
+    step 2 with SGA III Exp. V open; decompose rather than grind (v10.24).
+  - **p2**: Δ (subgroupComul; v10.24(b) — heavy def ships interface) → Hopf axioms →
+    HopfAlgebra + IsCocomm → L5/L6/L7 → L1 reductions → wire `smul_eq_zero_of_factors` →
+    **the FALLS-SWEEP**: consumer axiom-sweep (T-D5, T-D9, T-H2a/glSmul, HasExactOrder chain),
+    flip modulo-BB-DELIGNE notes, board-flip BB-DELIGNE → DISCHARGED → next claim from the
+    then-current queue.
+  - **p0-fresh**: [T-G3h-hfix] (the box's last bridge; theirs by context; on landing announce
+    the rigidity milestone modulo PIC0 data) → [T-G3d] with `/develop --decompose` first act,
+    CHECKING p2's fresh SchemeQuotient/subgroup-divisor machinery for reuse before building →
+    fallback: only what fable-P4 releases from the A7 plan.
+  - **beastmode-A-fresh**: [T-W7.1b-faith-infra] first act → close faith + main, flip
+    T-W7.1b → DONE → join the W7 endgame review (audit/claim 0h or 1a) → fallback:
+    T-D7-bridge re-check when T-B5D-A lands.
+  - **P3b3**: unchanged (T-B5D-A → T-B6′ → T-DISC); heads-up to check p2's L2/L3 subgroup
+    group-object layer before building torsion-side group structure; coordinate via board.
+  - **fable-PIC0**: PRIORITY SIGNAL (no scope change) — T-G3c/T-G3e + all four DS-END0 pins
+    now wait on their autoduality; the shortest path through their decomposition to the
+    autoduality statement unblocks the most.
