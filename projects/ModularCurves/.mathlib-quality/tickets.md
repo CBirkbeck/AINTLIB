@@ -8334,3 +8334,71 @@ FAST-BOARD). The pinned COH-1 criterion package (GME 1.10.4 / Cor 1.10.5 / p. 82
   Relation.ReflTransGen. Consumer: `pullbackObjUnitToUnit` IsIso instance
   (PullbackFree.lean needs `[F.Final]`) → T-PIC1a/T-PIC1d. Upstream candidate
   (topology/category glue). Parent: T-PIC1a · **Claimed**: fable-PIC0 · Status: in_progress
+
+## Amendments v10.31 (2026-07-08): p0 / [T-G3d-infra] — interface LANDED; construction decomposed into 4 pieces
+
+*p0 executing the v10.29 dispatch (build the quotient-by-finite-locally-free-subgroup-scheme layer on
+p2's glue-data pattern; new files only; v10.24(b) opaque interface same increment). Beastmode continues.*
+
+- **[T-G3d-infra] — INTERFACE LANDED (commit 1c4d37e1).** New file
+  `GroupScheme/SubgroupQuotient.lean` (added to root `ModularCurves.lean`). The categorical-quotient
+  opaque interface for `E/G` (`G : FiniteLocallyFreeSubgroup E`):
+  - **`FiniteLocallyFreeSubgroup.IsInvariant f`** — the functor-of-points descent condition
+    (`f(x+t) = f(x)` for every `G`-point `t ∈ G.pointSubgroup g`), reusing p2's `pointSubgroup`.
+    PROVEN: `IsInvariant.comp` (post-composition preserves invariance).
+  - **DS-data** `quotient` / `quotientS` / `quotientπ` = `E/G`, its `⟶ S`, the quotient isogeny.
+  - **Pins** `quotientπ_over`, `quotientπ_isInvariant`, **`quotient_lift`** (the universal property:
+    every invariant `f` factors uniquely through `π`).
+  - PROVEN from the pins: **`quotientπ_hom_ext`** (`π` is epi). Build green; `IsInvariant.comp` +
+    interface elaborate axiom-clean, the pin-consumers carry only transitive sorryAx.
+- **Construction decomposed** (`.mathlib-quality/decomposition-g3d-infra.md`, the `/develop` refinement
+  the dispatch sanctioned). FOUR pieces: **(1)** interface [DONE]; **(2)** affine co-invariant quotient
+  `Spec(B^{coG})` via the **translation co-action** `ρ : O_E → O_E ⊗ O_G` — SELF-BUILDABLE (dual to
+  `act = (ι ×ₛ 𝟙) ≫ addE`; **NOT** p2's Hopf `subgroupComul`, which is the *coalgebra* `O_G → O_G⊗O_G`,
+  a different map — so this piece does **not** wait on p2's in-progress Layer B), mirror p2's
+  `AffineQuotient` for a comodule; **(3)** glue on p2's `SchemeQuotient` glue-data skeleton (discharges
+  the pins; p2-stack-scale, multi-session); **(4)** the `[N]`-iso consumer `E/E[N] ≅ E` — the factored
+  `q : E/E[N] ⟶ E` via `quotient_lift` on `[N]` (whose `E[N]`-invariance is `[N](x+t)=[N]x`) is landable
+  now against the interface; the iso-half is degree-facts-gated (`deg[N]=N²=rank E[N]`) and boards as
+  **[T-G3d-Niso]** if it walls.
+- **NOT gated on the E[N]-finite-étale linchpin**: the construction takes `G.finite`/`.flat`/`.lfp` as
+  input fields; only the *torsion instance* `torsionSubgroup N` gates them on BB-QF/BB-FLAT (P3b3+D2).
+- **p0 continues (beastmode)** to Piece 4's factored map (validates the interface end-to-end + advances
+  the T-G3d leaf feeding `aut_endo_eq_one` → the rigidity box), decomposing/boarding the iso-half if it
+  walls on degree facts.
+
+## Amendments v10.31 (2026-07-08): A7.1.1 torsor half PROVEN (CHR route) — gate 1 half-open; T-E-OMEGA ⟸ 1b edge; B2 executed
+
+- **[T-Q2-A711] torsor part PROVEN, axiom-clean (fable-P4)**:
+  `torsorMul_bijective_of_isFreeAlgebraAction` — free finite-group action ⟹
+  `A ⊗_{Aᴳ} A ≅ ∏_G A` (Spec A a G-torsor over Spec Aᴳ), the theorem KM defers to SGA III
+  Exp. V Thm 4.1 ("rather delicate"). Original signature preserved (no rule-5 change).
+  Chain: `chr_of_isFreeAlgebraAction` → `span_displacement_eq_top` →
+  `exists_torsorMul_eq_zero_one` (separating w_g) → `exists_galoisCoords` (separability
+  idempotent e = ∏(1−w_g); torsorMul-as-algebra-hom makes e's image the indicator of 1) →
+  `galoisInv` (two-sided inverse; left via TensorProduct.induction_on + invariant trace).
+  **ROUTE CHANGE RATIFIED**: SGA's proof needs semi-local reduction + Lemme 4.2 + ff
+  residue enlargement — mathlib has no `IsSemilocalRing`; the Chase–Harrison–Rosenberg
+  argument reaches the same content with none of it. Leaves A711-L1…L4 RETIRED-AS-RECORD
+  (SGA quotes stay as statement anchors — the source gate's purpose). **CHR acquisition
+  (optional owner action, v10.27) is now MOOT — dropped.**
+- **Flag narrowed**: the rank-|G| statement-gap worry does NOT touch the torsor part (no
+  finiteness of A over Aᴳ used); it survives only for `Module.Finite.of_isFreeAlgebraAction`
+  + `Algebra.Etale.of_isFreeAlgebraAction` — if it proves a genuine statement gap there,
+  B2 protocol, never force.
+- **B2 executed (one commit)**: `b2_log.jsonl` entry; `AffineOverEll`; `representable_iff`
+  now KM SCHOLIE (4.7.0) verbatim + quote; unrestricted form = documented non-goal citing
+  Gabber A.4.1.3; [T-E5-ISOM] boarded-not-built. **BONUS: T-E5a `rigid_of_representable`
+  PROVEN** — the amendment closes the ⇒ half with NO Isom-scheme. T-E5 leaves: a ✓,
+  b superseded, c/d/e/f gated (T-Q6e + T-E14/T-E15).
+- **T-E-OMEGA: walled → boarded per v10.24, with self-correction** — the atlas transitions
+  are T-W7.1b's COMPARISON, not `projModelVCIso_mul` (that's the fixed-ring cocycle). Routes:
+  **R1 atlas-glue (⟸ 1b)** — recommended; R2 conormal (1b-free, more new infra). RELEASED,
+  claimable the moment 1b flips. **NEW EDGE: T-E-OMEGA-R1 ⟸ T-W7.1b ⟸ [T-W7.1b-faith-infra]**
+  — beastmode-A's next-session refactor now unblocks main + 1b + the ω line bundle + the
+  ℤ[1/2] bootstrap (T-E12–14). Stakes raised; noted for A's next-session context.
+- **fable-P4 GO (stated chain ratified)**: (1) `Algebra.Etale.of_isFreeAlgebraAction`
+  (unramified from e; flat/finite from the torsor iso + ff descent along Aᴳ → A) →
+  (2) A7.1.2 as corollary → **gate 1 fully open** → (3) RE-AUDIT T-Q6e's second gate
+  (stream-DESC `levelledCurve_descent_of_torsor`) honestly before claiming — if open, take
+  **T-Q6e = T-E5c (the KM 4.7 engine)**; if not, board the gate state and stand by.
