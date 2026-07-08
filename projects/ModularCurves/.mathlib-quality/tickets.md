@@ -8262,3 +8262,57 @@ named gate each; the hfix interface is landed in code.*
   PRs — publishing to mathlib is an OWNER action**; the ledger is the deliverable.
 - **Interrupt order (A)**: 0h (the moment c5β lands 0c-ii; route banked) > triage;
   [T-W7.1b-faith-infra] owns the NEXT session with full budget, unchanged.
+
+### v10.11.2 (2026-07-08, fable-PIC0): COH-1 MODULE CORE COMPLETE — all leaves done, cleaned, axiom-clean
+
+*Commits: 530a6708 (skeleton+board), f5d9647a (all 8 proofs), 3cb19e02 (full /cleanup).
+`ForMathlib/BaseChangeKerCoker.lean`: 190 lines, 8 declarations, zero sorries, axioms =
+propext/Classical.choice/Quot.sound on every decl, module elaborates <0.7s (buzz
+FAST-BOARD). The pinned COH-1 criterion package (GME 1.10.4 / Cor 1.10.5 / p. 82 /
+(2.15)-fibre identification, module form) is fully proven.*
+
+- **[T-COH1-A3]** done (fable-PIC0, 12:00Z → 12:20Z) — G2 search win: mathlib
+  `LinearMap.lTensor_injective_of_exact_of_flat` (Flat/Equalizer.lean, missed by the
+  decompose-time grep) discharges purity as a 2-line application. Decomposition's
+  "not found in the pin" note corrected.
+- **[T-COH1-A3b]** done — `Module.Flat.of_flat_quotient`; final form 4 lines via
+  `iff_rTensor_injective'` + purity (cleanup killed the comm-conjugation). NOT in
+  mathlib (five-method verified); prime `/mathlibable` candidate.
+- **[T-COH1-A4]** done — `kerLTensorComparison(_coe/_bijective)`; flat-coker kernel
+  base change; genuinely absent from mathlib (`tensorKerEquiv` needs flat M;
+  `kerLTensorEquivOfSurjective` needs surjective f). Upstream note: contribute as API
+  for mathlib's `LinearMap.tensorKer`.
+- **[T-COH1-A1]** done, **RESOLVED-BY-MATHLIB** — statement is byte-for-byte
+  `LinearMap.lTensor_range` (RightExactness.lean); + `TensorProduct.tensorQuotientEquiv`
+  gives the full T¹ base-change equiv. Project decl deleted at cleanup (0 call sites);
+  module docstring records the mathlib recipe for future consumers.
+- **[T-COH1-A2]** done — `Module.subsingleton_of_forall_field_tensor_subsingleton`
+  (3-line term proof over support/residue-field API; ℚ/ℤ counterexample for the
+  finiteness hypothesis in the docstring).
+- **[T-COH1-A5a]** done, **RESOLVED-BY-MATHLIB-IDIOM** — `IsNoetherian.noetherian _`
+  one-call wrapper; deleted at cleanup (mathlib inlines the idiom; 0 call sites).
+- **[T-COH1-A5b]** done — `Module.Projective.ker_of_flat_coker` (8 lines via
+  `Exact.split_tfae`; Cor 1.10.5 module form). Follow-up note: `[Module.Finite R Q]`
+  is now vestigial (Finite.range instance suffices) — future dev-ticket restatement.
+- **[T-COH1-A6]** done — `kerBaseChangeComparison(_coe/_bijective)`; the A-linear
+  (2.15)/(2.17) fibre-identification shape; proof-by-defeq (baseChange ≡ lTensor) with
+  in-file fragility note + fallback route.
+- **[CLEANUP-PC1/PC2/PC3]** done in one full-file `/cleanup` pass (3cb19e02): 11
+  sequential per-decl workers, all hard gates green, all phase checklists all-✓;
+  Phase 5a deletions above; 5b rename `_apply_coe → _coe`; 6.5 simplify
+  ISSUES-FOUND-AND-FIXED (dead import, dead section, tensorKer@S:=A record-as-kept,
+  defeq-fragility NB) + gates re-run; 6.6 buzz FAST-BOARD.
+- **Future API notes (banked, no tickets yet)**: cokerBaseChangeEquiv (T¹ twin of A6 —
+  the most consumer-visible gap when A6/A7 chains land); bundled kerBaseChangeEquiv
+  (LinearEquiv form); rTensor purity twin; residue-field-only hypothesis form of A2.
+  Upstream-PR sweep for the whole file at PR time (`/mathlibable` per decl).
+- **COH-1 stream state**: module core COMPLETE. Remaining COH-1 scope = the geometric
+  K-complex instantiation (Čech on the 2-chart cover ↔ R^i f_*), deferred BY DESIGN to
+  the owned mathlib COH-3 lane (decomposition-pic-coh.md route section). No current
+  consumer blocked (A6/A7 chains not yet stated).
+- **Banked for T-PIC1a/d**: mathlib's `pullbackObjUnitToUnit` iso needs the site
+  functor `Final`; no `(Opens.map f.base).Final` instance exists in the pin — small
+  lattice zig-zag ForMathlib lemma (comma cats nonempty via ⊤, connected via ⊓) is the
+  first sub-ticket when those start.
+- **Next**: fable-PIC0 continues to **[T-PIC1a]** (isInvertible_unit).
+  - **[T-PIC1a] Claimed**: fable-PIC0, 2026-07-08 (in the same session) · **Status**: in_progress
