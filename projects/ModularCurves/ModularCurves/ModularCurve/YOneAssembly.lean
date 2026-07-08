@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.Representability
+import ModularCurves.Moduli.GammaH
 import ModularCurves.EllipticCurve.TorsionFibre
 import Mathlib.NumberTheory.Divisors
 
@@ -376,27 +377,70 @@ theorem killedLocus_spec (d : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
   · intro hcond
     exact ⟨pullback.lift t t hcond, pullback.lift_fst _ _ _⟩
 
-/-- **(Y1-C3, the range/residue dictionary)** A point `x` of the base lies in the killed locus
-iff the section dies on the residue-field fibre at `x`. Loeffler removes the `Y_d` as *loci*
-(sets), while the naive functor speaks of fibres; this is the bridge's first half.
-Discharge: `killedLocus_spec` at `t = S.fromSpecResidueField x`; for the forward direction the
-closed subscheme receives the (reduced) residue point through its ideal, cf. the closed-immersion
-residue-field isomorphism. -/
-theorem mem_killedLocus_range_iff (d : ℕ) (x : S) :
-    x ∈ Set.range (E.killedLocusπ P d).base ↔
-      (d : ℤ) • Point.pull E (S.fromSpecResidueField x) P = 0 := by sorry
-
 /-- **(Y1-C4, geometric-point/residue-point bridge)** Vanishing of a pulled section along any
-field-valued point is detected at the residue field of its image: `Spec k → Spec κ(x)` is
-faithfully flat, so pulling points back along it is injective. This converts Loeffler's
-set-theoretic removal of `Y_d` into the geometric-fibre quantifier of `IsNaiveGammaOne`
-(all `k` algebraically closed, all `Spec k ⟶ S`). Discharge: field-point factorisation through
-the residue field + `Flat.epi_of_flat_of_surjective` (Stacks 02VW, in mathlib) + `Point.pull`
-functoriality. -/
+field-valued point is detected at the residue field of its image: the field-valued point factors
+through `Spec κ(x)`, and `Spec` of a field embedding is an epimorphism, so pulling points back
+along it is injective. This converts Loeffler's set-theoretic removal of `Y_d` into the
+geometric-fibre quantifier of `IsNaiveGammaOne` (all `k` algebraically closed, all `Spec k ⟶ S`).
+Discharge: `descResidueField_stalkClosedPointTo_fromSpecResidueField` factorisation +
+`Scheme.hom_ext_of_comp_specMap_field` (field-embedding epi) + `point_smul_eq_comp_mulBy`. -/
 theorem pull_smul_eq_zero_iff_residue (a : ℤ) {k : Type u} [Field k]
     (t : Spec (CommRingCat.of k) ⟶ S) (x : S) (hx : x ∈ Set.range t.base) :
     a • Point.pull E t P = 0 ↔
-      a • Point.pull E (S.fromSpecResidueField x) P = 0 := by sorry
+      a • Point.pull E (S.fromSpecResidueField x) P = 0 := by
+  haveI : Subsingleton ↥(Spec (CommRingCat.of k)) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum k))
+  have key : ∀ {T : Scheme.{u}} (τ : T ⟶ S),
+      (a • Point.pull E τ P = 0) ↔ ((τ ≫ P.1) ≫ E.mulByHom a = τ ≫ E.zero) := by
+    intro T τ
+    rw [Subtype.ext_iff, E.point_smul_eq_comp_mulBy τ a (Point.pull E τ P), E.point_zero_val τ]
+    exact Iff.rfl
+  obtain ⟨p, hp⟩ := hx
+  have hxeq : x = t (IsLocalRing.closedPoint k) := by
+    rw [← hp]; exact congrArg _ (Subsingleton.elim p _)
+  have hfac := Scheme.descResidueField_stalkClosedPointTo_fromSpecResidueField k S t
+  rw [hxeq]
+  set g := Spec.map (S.descResidueField (Scheme.stalkClosedPointTo t)) with hg
+  set s := S.fromSpecResidueField (t (IsLocalRing.closedPoint k)) with hs
+  rw [key t, key s]
+  constructor
+  · intro h
+    rw [← hfac] at h
+    simp only [Category.assoc] at h ⊢
+    exact Scheme.hom_ext_of_comp_specMap_field
+      (S.descResidueField (Scheme.stalkClosedPointTo t)).hom _ _
+      (by rw [CommRingCat.ofHom_hom, ← hg]; exact h)
+  · intro h
+    rw [← hfac]
+    simp only [Category.assoc] at h ⊢
+    rw [h]
+
+/-- **(Y1-C3, the range/residue dictionary)** A point `x` of the base lies in the killed locus
+iff the section dies on the residue-field fibre at `x`. Loeffler removes the `Y_d` as *loci*
+(sets), while the naive functor speaks of fibres; this is the bridge's first half.
+Discharge: `killedLocus_spec` at `t = S.fromSpecResidueField x` (⟸) and, for the forward
+direction, a residue point over a chosen preimage `x'` fed through `pull_smul_eq_zero_iff_residue`
+(Y1-C4). -/
+theorem mem_killedLocus_range_iff (d : ℕ) (x : S) :
+    x ∈ Set.range (E.killedLocusπ P d).base ↔
+      (d : ℤ) • Point.pull E (S.fromSpecResidueField x) P = 0 := by
+  constructor
+  · rintro ⟨x', hx'⟩
+    have hτz : (d : ℤ) • Point.pull E
+        ((E.killedLocus P d).fromSpecResidueField x' ≫ E.killedLocusπ P d) P = 0 :=
+      (E.killedLocus_spec P d _).mp ⟨(E.killedLocus P d).fromSpecResidueField x', rfl⟩
+    have hxrange : x ∈ Set.range
+        ((E.killedLocus P d).fromSpecResidueField x' ≫ E.killedLocusπ P d).base := by
+      refine ⟨IsLocalRing.closedPoint _, ?_⟩
+      show (E.killedLocusπ P d) (((E.killedLocus P d).fromSpecResidueField x')
+        (IsLocalRing.closedPoint _)) = x
+      rw [Scheme.fromSpecResidueField_apply]; exact hx'
+    exact (E.pull_smul_eq_zero_iff_residue P (d : ℤ) _ x hxrange).mp hτz
+  · intro hz
+    obtain ⟨hlift, hh⟩ := (E.killedLocus_spec P d (S.fromSpecResidueField x)).mpr hz
+    refine ⟨hlift (IsLocalRing.closedPoint _), ?_⟩
+    show (E.killedLocusπ P d) (hlift (IsLocalRing.closedPoint _)) = x
+    rw [← Scheme.Hom.comp_apply, hh, Scheme.fromSpecResidueField_apply]
 
 end EllipticCurve
 
