@@ -132,6 +132,129 @@ grade `≥ i`.  (Writing `(φ i)` here is FALSE: `hrnk`+`hrnk_top` force `F_e = 
 of the zero module and `idealOfMinors (rnk(e-1)) (φ(e-1))` would be `⊥`, making the RHS false for
 every complex with `rk(e-1) ≥ 1`.) -/
 
+/-! ### Proof of `buchsbaumEisenbud_acyclic`, decomposed into `private` lemmas.
+
+`buchsbaumEisenbud_acyclic` is assembled below as `⟨be_forward, be_backward⟩`.  Each direction
+splits into a fully-proven *trivial* part (handled here) and one *interior analytic core*
+(`be_forward_core` / `be_backward_core`), each of which is the genuinely mathlib-absent
+depth/acyclicity content of Stacks 00N1 (see their docstrings; no `depth`/Auslander–Buchsbaum/
+Peskine–Szpiro exists in mathlib). Structural helpers and the regular-element recipe are proven. -/
+
+/-- A pair of maps through a subsingleton middle module is exact. -/
+private theorem exact_of_subsingleton_mid {R M N P : Type*} [CommRing R]
+    [AddCommGroup M] [AddCommGroup N] [AddCommGroup P] [Module R M] [Module R N] [Module R P]
+    [Subsingleton N] (f : M →ₗ[R] N) (g : N →ₗ[R] P) : Function.Exact f g := by
+  intro y
+  have : y = 0 := Subsingleton.elim _ _
+  subst this
+  exact iff_of_true (map_zero g) ⟨0, map_zero f⟩
+
+/-- A free module `Fin n → S` with `n = 0` is a subsingleton (the zero module). -/
+private theorem subsingleton_pi_fin_of_eq_zero {S : Type*} [CommRing S] {n : ℕ} (h : n = 0) :
+    Subsingleton (Fin n → S) := by
+  haveI : IsEmpty (Fin n) := by rw [h]; infer_instance
+  exact ⟨fun a b => funext fun x => isEmptyElim x⟩
+
+/-- **Regular element in a non-avoided ideal** (prime avoidance against the associated primes).
+If `I` is contained in no associated prime of a finite module `M`, then `I` contains an
+`M`-regular element (a nonzerodivisor on `M`).  This is the tool that turns a `grade`/`depth`
+hypothesis into an actual regular element for the two analytic cores below. -/
+private theorem exists_isSMulRegular_of_forall_not_le_associatedPrimes {S : Type*} [CommRing S]
+    [IsNoetherianRing S] {M : Type*} [AddCommGroup M] [Module S M] [Module.Finite S M]
+    (I : Ideal S) (h : ∀ p ∈ associatedPrimes S M, ¬ (I : Set S) ⊆ p) :
+    ∃ x ∈ I, IsSMulRegular M x := by
+  have hfin : (associatedPrimes S M).Finite := associatedPrimes.finite S M
+  have hnot : ¬ ((I : Set S) ⊆ ⋃ p ∈ associatedPrimes S M, (p : Set S)) := by
+    rw [Ideal.subset_union_prime_finite hfin ⊥ ⊥
+      (fun p hp _ _ => (AssociatedPrimes.mem_iff.mp hp).isPrime)]
+    rintro ⟨p, hp, hle⟩
+    exact h p hp hle
+  rw [Set.not_subset] at hnot
+  obtain ⟨x, hxI, hxnot⟩ := hnot
+  refine ⟨x, hxI, ?_⟩
+  rw [biUnion_associatedPrimes_eq_compl_regular S M] at hxnot
+  simpa using hxnot
+
+/-- **[BE forward core]** Stacks 00N1, (1)⟹(2)(b), interior indices.  If the finite free complex is
+exact (at every `F_{j+1}`) then for each interior index `1 ≤ i < e` the minor ideal
+`I_{rnk i}(φ_{i-1})` (Stacks `I(φᵢ)`) is either the unit ideal or has grade `≥ i`.
+
+MATHLIB-ABSENT CONTENT: the "exactness ⟹ depth of the minor ideals" half.  Classical proof:
+`grade(I(φᵢ)) ≥ i ⟺ I(φᵢ) ⊄ 𝔭` for every `𝔭` with `depth R_𝔭 < i`; and at such `𝔭` the localised
+resolution shortens past index `i` (`pd (M_𝔭) ≤ depth R_𝔭 < i` by Auslander–Buchsbaum), so
+`(φᵢ)_𝔭` splits and `I(φᵢ)_𝔭 = R_𝔭`.  Needs `depth` + Auslander–Buchsbaum — both absent from mathlib
+(no `Module.depth`; `RingTheory/Regular/Depth.lean` is a deprecated stub).  Stacks 00N1 / 0AVR. -/
+private theorem be_forward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
+    (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
+    (i : ℕ) (hi1 : 1 ≤ i) (hie : i < e) :
+    (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+      LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := sorry
+
+/-- **[BE backward core]** Stacks 00N1, (2)⟹(1) — the Peskine–Szpiro acyclicity lemma, interior
+indices.  If for every `1 ≤ i ≤ e` the minor ideal `I_{rnk i}(φ_{i-1})` is the unit ideal or has
+grade `≥ i`, then the complex is exact at every interior `F_{i+1}` (`rk (i+1) ≠ 0`).
+
+MATHLIB-ABSENT CONTENT: the hard acyclicity direction ("what makes a complex exact").  Classical
+proof: the Peskine–Szpiro acyclicity lemma — induction on the length `e`; if some homology
+`H_j ≠ 0`, take an associated prime `𝔭 ∈ Ass H_j` (so `depth (H_j)_𝔭 = 0`), and the grade `≥ j`
+condition on `I(φⱼ)` forces (after localising) a nonzerodivisor descent that kills `H_j`, a
+contradiction.  Needs the depth-of-a-SES inequalities / associated-prime descent absent from
+mathlib.  Stacks 00N1 (acyclicity lemma 0AVQ). -/
+private theorem be_backward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
+    (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hcond : ∀ i, 1 ≤ i → i ≤ e →
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
+    (i : ℕ) (hi : rk (i + 1) ≠ 0) :
+    Function.Exact (φ (i + 1)) (φ i) := sorry
+
+/-- Forward direction, all indices: dispatches the trivial `rnk i = 0` conjunct (unit ideal) and the
+interior indices to `be_forward_core`. -/
+private theorem be_forward {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
+    (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
+    (i : ℕ) (hi1 : 1 ≤ i) (hie : i ≤ e) :
+    (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+      LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := by
+  by_cases h0 : rnk i = 0
+  · right
+    rw [h0, LinearMap.idealOfMinors_eq, Matrix.idealOfMinors_zero]
+  · have hlt : i < e := by
+      by_contra hge
+      exact h0 (hrnk_top i (not_lt.mp hge))
+    exact be_forward_core e rk rnk hrk hrnk_top hrnk φ hcomplex hexact i hi1 hlt
+
+/-- Backward direction, all indices: dispatches the trivial spots (`rk (i+1) = 0`, subsingleton
+middle module) and the interior spots to `be_backward_core`. -/
+private theorem be_backward {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
+    (e : ℕ) (rk rnk : ℕ → ℕ)
+    (hrk : ∀ i, e ≤ i → rk i = 0) (hrnk_top : ∀ i, e ≤ i → rnk i = 0)
+    (hrnk : ∀ i, 1 ≤ i → i < e → rnk i + rnk (i + 1) = rk i)
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
+    (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
+    (hcond : ∀ i, 1 ≤ i → i ≤ e →
+        (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
+    (i : ℕ) :
+    Function.Exact (φ (i + 1)) (φ i) := by
+  by_cases h0 : rk (i + 1) = 0
+  · haveI : Subsingleton (Fin (rk (i + 1)) → S) := subsingleton_pi_fin_of_eq_zero h0
+    exact exact_of_subsingleton_mid _ _
+  · exact be_backward_core e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i h0
+
 /-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form (Lean `φ (i-1)` = Stacks `φᵢ`). -/
 theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
@@ -143,8 +266,9 @@ theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNo
     (∀ i, Function.Exact (φ (i + 1)) (φ i)) ↔
       (∀ i, 1 ≤ i → i ≤ e →
         (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
-          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤) := by
-  sorry
+          LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤) :=
+  ⟨fun hexact i hi1 hie => be_forward e rk rnk hrk hrnk_top hrnk φ hcomplex hexact i hi1 hie,
+   fun hcond i => be_backward e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i⟩
 
 /-! ## [T-RB] 00RB (Lemma 10.129.3): openness of the fibre-exact locus
 

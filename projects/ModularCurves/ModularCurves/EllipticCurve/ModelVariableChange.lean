@@ -1251,6 +1251,70 @@ lemma pointedIso_zero_val_chartYSection {W W' : WeierstrassCurve R}
     (appLE_le_rfl_apply e ((chartYSectionsRingEquiv W').symm b'))
   exact (h2.symm.trans h1).trans (projModelZero_appLE_chartYSection W' b')
 
+private lemma map_appLE_val {X Y : Scheme.{u}} (f : X ⟶ Y) {U U' : Y.Opens}
+    {V : X.Opens} (i : U' ≤ U) (e : V ≤ f ⁻¹ᵁ U') (e' : V ≤ f ⁻¹ᵁ U) (x : Γ(Y, U)) :
+    ((f.appLE U' V e).hom) ((Y.presheaf.map (homOfLE i).op).hom x) =
+      ((f.appLE U V e').hom) x := by
+  have h := congrArg (fun φ => CommRingCat.Hom.hom φ x)
+    (Scheme.Hom.map_appLE f e (homOfLE i).op)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+  exact h
+
+private lemma appLE_map_val {X Y : Scheme.{u}} (f : X ⟶ Y) {U : Y.Opens}
+    {V V' : X.Opens} (e : V ≤ f ⁻¹ᵁ U) (i : V' ≤ V) (e' : V' ≤ f ⁻¹ᵁ U) (x : Γ(Y, U)) :
+    ((X.presheaf.map (homOfLE i).op).hom) ((f.appLE U V e).hom x) =
+      ((f.appLE U V' e').hom) x := by
+  have h := congrArg (fun φ => CommRingCat.Hom.hom φ x)
+    (Scheme.Hom.appLE_map f e (homOfLE i).op)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+  exact h
+
+/-- The localized zero-pullback of a `Y`-chart function on a basic open is the restricted
+augmentation. -/
+lemma zero_appLE_basicOpen_chartYSection (W : WeierstrassCurve R)
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) (b : AdjoinRoot (infChartCubic W)) :
+    (((projModelZero W).appLE ((projModel W).basicOpen r)
+        ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl).hom)
+      (((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom
+        ((chartYSectionsRingEquiv W).symm b)) =
+    (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom (infChartAug W b)) := by
+  refine (map_appLE_val (projModelZero W) ((projModel W).basicOpen_le r) le_rfl
+    (le_top.trans (le_of_eq (projModelZero_preimage_yChart W).symm))
+    ((chartYSectionsRingEquiv W).symm b)).trans ?_
+  refine ((appLE_map_val (projModelZero W)
+    (le_of_eq (projModelZero_preimage_yChart W).symm) le_top
+    (le_top.trans (le_of_eq (projModelZero_preimage_yChart W).symm))
+    ((chartYSectionsRingEquiv W).symm b)).symm).trans ?_
+  exact congrArg (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+    (projModelZero_appLE_chartYSection W b)
+
+/-- The localized zero-pullback of a transported chart function on a basic open is the
+restricted source augmentation. -/
+lemma pointedIso_zero_appLE_basicOpen {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    {V : (projModel W).Opens} (hV : V ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (b' : AdjoinRoot (infChartCubic W')) :
+    (((projModelZero W).appLE V ((projModelZero W) ⁻¹ᵁ V) le_rfl).hom)
+      (pointedIsoChartTransport e hV b') =
+    (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+      (((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom (infChartAug W' b')) := by
+  refine (map_appLE_val (projModelZero W) hV le_rfl
+    (le_top.trans (zero_le_preimage_pointedPreimage e hez))
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b'))).trans ?_
+  refine ((appLE_map_val (projModelZero W)
+    (zero_le_preimage_pointedPreimage e hez) le_top
+    (le_top.trans (zero_le_preimage_pointedPreimage e hez))
+    ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b'))).symm).trans ?_
+  exact congrArg (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
+    (pointedIso_zero_val_chartYSection e hez b')
+
 /-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
 ring isomorphism preserves the pole-order filtration. NOT free: the landed
 `poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the

@@ -46,11 +46,18 @@ adjusted here rather than in a consumer.)
   CLOSED support).  We use the Ext-support route: the whole grade-or-unit locus is the complement
   of the finitely many closed supports `Supp Extⁱ_S(S/I, S)` (`i < k`), hence open.  The annihilator
   packaging (`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`, taking `J i := Ann_S Extⁱ_S(S/I, S)`
-  and reducing via `Module.support_eq_zeroLocus` / `Module.notMem_support_iff`) and the openness
-  scaffolding (`isOpen_gradeGE_locus`) are proved in full.  The single `sorry` is now the tight
-  pointwise residual `gradeGE_or_top_iff_forall_subsingleton_localizedExt`: the Rees/00LW ideal-grade
-  characterisation (Stacks 00LW/0AUJ) composed with the localisation-compatibility of `Ext`, both
-  genuinely absent from mathlib at this pin.
+  and reducing via `Module.support_eq_zeroLocus` / `Module.notMem_support_iff`), the openness
+  scaffolding (`isOpen_gradeGE_locus`), and the pointwise characterisation
+  `gradeGE_or_top_iff_forall_subsingleton_localizedExt` are all proved in full.  That pointwise
+  characterisation is assembled from two classical facts:
+  * the **Rees / Stacks 00LW ideal-grade theorem** over the local ring `S_𝔮`
+    (`gradeGE_or_top_iff_forall_subsingleton_ext_local`) — **proved here in full** by the classical
+    Rees induction (`Ext⁰ ≅ Hom` boundary + the covariant long exact `Ext`-sequence dimension shift),
+    and
+  * the **`Ext`-localisation compatibility** `(Extⁱ_S(S/I,S))_𝔮 ≅ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`
+    (`localizedModule_ext_subsingleton_iff`) — the SINGLE remaining `sorry`, the one genuinely
+    mathlib-absent classical fact (flat base change for higher `Ext`; degree `0` is in mathlib but
+    higher degrees are not).
 
 See `projects/ModularCurves/.mathlib-quality/decomposition-buchsbaum-eisenbud.md` [T-GRADE].
 -/
@@ -375,6 +382,3 @@ theorem isOpen_gradeGE_locus {S : Type*} [CommRing S] [IsNoetherianRing S] (I : 
   exact isOpen_iInter_of_finite fun i => (isClosed_zeroLocus _).isOpen_compl
 
 end
-
--- TEMP axiom probe (to be removed)
-#print axioms isOpen_gradeGE_locus
