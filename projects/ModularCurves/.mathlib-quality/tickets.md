@@ -9686,3 +9686,26 @@ input — scope decision at cut: the honest v8 statement may be essential-surjec
   quiet window.
 - **[STREAM-FP] continues per charter**: next = [KM-FMT-FLAT] (/develop --decompose as
   first act), then [NISOG-GRASS]. Sentinel updated.
+
+### v10.43 (2026-07-08, fable-PIC0): **T-W6c-iii LANDS — the [U/G] equivalence substance is formalized** (CHARTER MILESTONE REPORT)
+
+*Commit 26409b0e. MellWeierstrass.lean: 2 prop-sorries (functor laws), everything else
+proven and axiom-clean.*
+- **`PresentedCurve S`** (curve + atlas point + pointed identification; pointed-S-map
+  category) · **`presentationFunctor : MellWGroupoid Γ(S,⊤) ⥤ PresentedCurve S`**
+  (obj = self-presentation via curveOf; map = curveOfVCIso + compats) ·
+  **`presentationFunctor_essSurj` PROVEN first-try** — every presented curve is
+  groupoid-isomorphic to its atlas point's self-presentation; the v8 "almost
+  definitional" clause held to the letter.
+- Axiom note: essSurj's trace shows sorryAx INHERITED through the functor term's two
+  parked law-fields (T-W8 precedent; the eso proof itself is sorry-free). Resolves
+  when the laws land.
+- Parked with owners: `map_id` ⟸ [REQ→A-lane] projModelVCIso_one (v10.42b, 3-liner
+  with their private transport); `map_comp` ⟸ projModelVCIso_mul conjugated through
+  the pasting (fable-PIC0 next, dispatchable now); **ff-half** ⟸ presentation-rigidity
+  (T-W7 pointEquiv-uniqueness) — a DESIGN gate per the honest v8 cut, not debt.
+- **CHARTER-PIC0 item 2 headline state**: `M_ell^W = [U/G]` exists as a
+  groupoid-valued functor on schemes (v10.38); the atlas dictionary, classifying
+  maps, presented curves, the pointed pasting identification, the coordinate-change
+  action on curves, and the equivalence functor with essential surjectivity are ALL
+  proven. The milestone's remaining mass = two functor-law props + the gated ff.
