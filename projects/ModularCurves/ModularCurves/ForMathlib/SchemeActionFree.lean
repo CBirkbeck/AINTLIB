@@ -5,6 +5,8 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.SchemeQuotient
 import ModularCurves.ForMathlib.InvariantTorsor
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
 
 /-!
 # Geometric freeness ⟹ algebraic freeness (the T-Q2 bridge)
@@ -100,6 +102,56 @@ theorem torsorMul_bijective_of_free [Finite G] {U : X.Opens} (hU : σ.IsStableOp
   letI := σ.gammaMulSemiringAction hU
   exact torsorMul_bijective_of_isFreeAlgebraAction G ℤ _
     (σ.isFreeAlgebraAction_of_free hU hUa hfree)
+
+section Quotient
+
+variable [Finite G] [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+  (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+  (hVmem : ∀ x, x ∈ V x)
+  (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+    t ≫ σ.hom γ = t → IsEmpty T)
+
+include hfree in
+/-- **(T-Q2, geometric)** For a **free** action, the quotient projection `X ⟶ X/G` is a **finite**
+morphism.
+
+`IsFinite` is Zariski-local at the target, the quotient charts cover `X/G`, and over the `x`-th
+chart the projection *is* `V x ⟶ Spec Γ(X, V x)ᴳ` (`morphismRestrict_quotientπ`), i.e. `Spec` of
+`Γ(X,V x)ᴳ ↪ Γ(X,V x)`, which is module-finite by `finite_gamma_of_free` (KM A7.1.1). -/
+theorem isFinite_quotientπ : IsFinite (σ.quotientπ V hVs hVa hVmem) := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @IsFinite) (σ.quotientChart V hVs hVa)
+    (σ.iSup_quotientChart_eq_top V hVs hVa) fun x => ?_
+  rw [morphismRestrict_quotientπ σ V hVs hVa hVmem x,
+    MorphismProperty.cancel_left_of_respectsIso (P := @IsFinite),
+    MorphismProperty.cancel_right_of_respectsIso (P := @IsFinite),
+    localQuotientπ_eq σ (hVs x) (hVa x),
+    MorphismProperty.cancel_left_of_respectsIso (P := @IsFinite)]
+  letI := σ.gammaMulSemiringAction (hVs x)
+  haveI := σ.finite_gamma_of_free (hVs x) (hVa x) hfree
+  rw [invariantsπ, IsFinite.SpecMap_iff]
+  exact RingHom.finite_algebraMap.mpr inferInstance
+
+include hfree in
+/-- **(T-Q2, geometric)** For a **free** action, the quotient projection `X ⟶ X/G` is **étale**.
+
+Same local-to-global argument, with `Algebra.Etale.of_isFreeAlgebraAction` (KM A7.1.1, general
+base — the [A711-FP] gap having been closed) at the chart level. -/
+theorem etale_quotientπ : Etale (σ.quotientπ V hVs hVa hVmem) := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @Etale) (σ.quotientChart V hVs hVa)
+    (σ.iSup_quotientChart_eq_top V hVs hVa) fun x => ?_
+  rw [morphismRestrict_quotientπ σ V hVs hVa hVmem x,
+    MorphismProperty.cancel_left_of_respectsIso (P := @Etale),
+    MorphismProperty.cancel_right_of_respectsIso (P := @Etale),
+    localQuotientπ_eq σ (hVs x) (hVa x),
+    MorphismProperty.cancel_left_of_respectsIso (P := @Etale)]
+  letI := σ.gammaMulSemiringAction (hVs x)
+  haveI : Algebra.Etale (FixedPoints.subalgebra ℤ (↑Γ(X, V x)) G) ↑Γ(X, V x) :=
+    Algebra.Etale.of_isFreeAlgebraAction G ℤ _
+      (σ.isFreeAlgebraAction_of_free (hVs x) (hVa x) hfree)
+  rw [invariantsπ, HasRingHomProperty.Spec_iff (P := @Etale)]
+  exact RingHom.etale_algebraMap.mpr inferInstance
+
+end Quotient
 
 end SchemeAction
 

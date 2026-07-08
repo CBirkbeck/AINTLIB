@@ -202,6 +202,10 @@ theorem resLE_isoSpec_hom {V : X.Opens} (hV : σ.IsStableOpen V)
   rw [hof, Iso.inv_comp_eq, ← Category.assoc, hsq, Category.assoc,
     Iso.hom_inv_id, Category.comp_id]
 
+theorem localQuotientπ_eq {V : X.Opens} (hV : σ.IsStableOpen V) (hVa : IsAffineOpen V) :
+    letI := σ.gammaMulSemiringAction hV
+    σ.localQuotientπ hV hVa = hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ := rfl
+
 private theorem localQuotientπ_def {V : X.Opens} (hV : σ.IsStableOpen V)
     (hVa : IsAffineOpen V) :
     letI := σ.gammaMulSemiringAction hV
@@ -560,6 +564,35 @@ private theorem range_windowHom (hWV : W ≤ V) (hVa : IsAffineOpen V) :
   congr 1
   have h70 := Scheme.opensRange_homOfLE (X := X) hWV
   exact congrArg (fun t : (V : Scheme.{u}).Opens => (t : Set (V : Scheme.{u}))) h70
+
+/-- **Saturation, at the level of points**: a point of the local quotient of `V` lies in the
+image open carved out by a smaller *stable* open `W` exactly when its preimage lies in `W`.
+
+This is the point-set heart of "the quotient charts pull back to the atlas charts": the fibres of
+`invariantsπ` are the `G`-orbits (`invariantsπ_apply_eq_iff`) and `W` is `G`-stable
+(`specSMul_mem_range_windowHom`), so an orbit meets `W` iff it lies in `W`. -/
+private theorem localQuotientπ_mem_imageOpens_iff (hWV : W ≤ V) (hVa : IsAffineOpen V)
+    (hW : σ.IsStableOpen W) (hV : σ.IsStableOpen V) (w : (V : Scheme.{u})) :
+    σ.localQuotientπ hV hVa w ∈ (imageOpens σ hWV hVa hW hV : Set (σ.localQuotient hV)) ↔
+      w ∈ (V.ι ⁻¹ᵁ W : (V : Scheme.{u}).Opens) := by
+  letI := σ.gammaMulSemiringAction hV
+  have hπ : σ.localQuotientπ hV hVa w = invariantsπ G ↑Γ(X, V) ℤ (hVa.isoSpec.hom w) := by
+    rw [localQuotientπ_def, Scheme.Hom.comp_apply]
+  constructor
+  · rintro ⟨t, ht, hteq⟩
+    rw [hπ] at hteq
+    obtain ⟨g, hg⟩ := (invariantsπ_apply_eq_iff G ↑Γ(X, V) ℤ t (hVa.isoSpec.hom w)).mp hteq
+    have hmem : hVa.isoSpec.hom w ∈ Set.range ⇑(windowHom (X := X) hWV hVa) := by
+      rw [← hg]
+      exact specSMul_mem_range_windowHom σ hWV hVa hW hV g t ht
+    rw [range_windowHom (X := X) hWV hVa] at hmem
+    obtain ⟨v, hv, hveq⟩ := hmem
+    have hvw : v = w := hVa.isoSpec.hom.isOpenEmbedding.injective hveq
+    exact hvw ▸ hv
+  · intro hw
+    refine ⟨hVa.isoSpec.hom w, ?_, hπ.symm⟩
+    rw [range_windowHom (X := X) hWV hVa]
+    exact ⟨w, hw, rfl⟩
 
 omit [Finite G] in
 /-- Windows intersect as expected (β2b, window level). -/
@@ -1017,6 +1050,187 @@ theorem exists_quotientπ_lift {Y : Scheme.{u}} (F : X ⟶ Y)
     rw [← Category.assoc, opensι_quotientπ σ V hVs hVa hVmem x', Category.assoc,
       hι, hqx x']
   exact (atlasCover V hVmem).hom_ext _ _ fun x => hfac x
+
+/-- The open image of the `i`-th piece of a glue data. -/
+private noncomputable def chartOpens (D : Scheme.GlueData.{u}) (i : D.J) : D.glued.Opens :=
+  (D.ι i).opensRange
+
+private theorem mem_chartOpens_iff (D : Scheme.GlueData.{u}) (i : D.J) (q : D.glued) :
+    q ∈ chartOpens D i ↔ ∃ p, D.ι i p = q := Iff.rfl
+
+private theorem isAffineOpen_chartOpens (D : Scheme.GlueData.{u}) (i : D.J)
+    [IsAffine (D.U i)] : IsAffineOpen (chartOpens D i) :=
+  isAffineOpen_opensRange (D.ι i)
+
+/-- **The `x`-th chart of the quotient**: the open image of the local quotient
+`Spec Γ(X, V x)ᴳ` inside `X/G`. -/
+noncomputable def quotientChart (x : X) : (σ.quotient V hVs hVa).Opens :=
+  chartOpens (quotientGlueData σ V hVs hVa) x
+
+theorem mem_quotientChart_iff (x : X) (q : σ.quotient V hVs hVa) :
+    q ∈ σ.quotientChart V hVs hVa x ↔
+      ∃ p, (quotientGlueData σ V hVs hVa).ι x p = q :=
+  mem_chartOpens_iff _ _ _
+
+/-- The quotient charts are affine — they are copies of `Spec Γ(X, V x)ᴳ`. -/
+theorem isAffineOpen_quotientChart (x : X) :
+    IsAffineOpen (σ.quotientChart V hVs hVa x) :=
+  isAffineOpen_chartOpens (quotientGlueData σ V hVs hVa) x
+
+/-- The quotient charts cover `X/G`. -/
+theorem iSup_quotientChart_eq_top :
+    ⨆ x : X, σ.quotientChart V hVs hVa x = ⊤ := by
+  refine TopologicalSpace.Opens.ext (Set.eq_univ_of_forall fun q => ?_)
+  obtain ⟨x, p, rfl⟩ := (quotientGlueData σ V hVs hVa).ι_jointly_surjective q
+  rw [TopologicalSpace.Opens.coe_iSup]
+  exact Set.mem_iUnion.mpr ⟨x, (σ.mem_quotientChart_iff V hVs hVa x _).mpr ⟨p, rfl⟩⟩
+
+/-- The quotient projection, computed on a chart. -/
+theorem quotientπ_apply_ι (x : X) (w : (V x : Scheme.{u})) :
+    σ.quotientπ V hVs hVa hVmem ((V x).ι w) =
+      (quotientGlueData σ V hVs hVa).ι x (σ.localQuotientπ (hVs x) (hVa x) w) := by
+  rw [← Scheme.Hom.comp_apply, opensι_quotientπ σ V hVs hVa hVmem x, Scheme.Hom.comp_apply]
+
+/-- **The charts pull back to the atlas** (T-Q5d contract, part 5): the preimage of the `x`-th
+quotient chart under `X ⟶ X/G` is exactly the stable affine open `V x`.
+
+This is what makes the quotient *local on the base*: over the chart `Spec Γ(X,V x)ᴳ`, the map
+`X ⟶ X/G` restricts to the affine map `V x ⟶ Spec Γ(X,V x)ᴳ`. The `⊆` direction is where
+stability of the atlas is used, through `localQuotientπ_mem_imageOpens_iff` (the fibres of
+`invariantsπ` are the `G`-orbits, and `V x` is `G`-stable, so an orbit meets `V x` iff it lies
+in `V x`). -/
+theorem quotientπ_preimage_quotientChart (x : X) :
+    σ.quotientπ V hVs hVa hVmem ⁻¹ᵁ σ.quotientChart V hVs hVa x = V x := by
+  refine TopologicalSpace.Opens.ext (Set.ext fun e => ⟨fun he => ?_, fun he => ?_⟩)
+  · obtain ⟨q, hq⟩ := (σ.mem_quotientChart_iff V hVs hVa x _).mp he
+    have hπe : σ.quotientπ V hVs hVa hVmem e =
+        (quotientGlueData σ V hVs hVa).ι e
+          (σ.localQuotientπ (hVs e) (hVa e) ⟨e, hVmem e⟩) :=
+      quotientπ_apply_ι σ V hVs hVa hVmem e ⟨e, hVmem e⟩
+    rw [hπe] at hq
+    obtain ⟨z, -, hz2⟩ :=
+      ((quotientGlueData σ V hVs hVa).ι_eq_iff x e q
+        (σ.localQuotientπ (hVs e) (hVa e) ⟨e, hVmem e⟩)).mp hq
+    have hmem : σ.localQuotientπ (hVs e) (hVa e) ⟨e, hVmem e⟩ ∈
+        Set.range ⇑(σ.localQuotientMap ((hVs e).inf (hVs x)) ((hVa e).inf (hVa x))
+          (hVs e) (hVa e) inf_le_left) := ⟨_, hz2⟩
+    rw [range_localQuotientMap σ inf_le_left (hVa e) ((hVs e).inf (hVs x))
+      ((hVa e).inf (hVa x)) (hVs e)] at hmem
+    exact ((localQuotientπ_mem_imageOpens_iff σ inf_le_left (hVa e)
+      ((hVs e).inf (hVs x)) (hVs e) ⟨e, hVmem e⟩).mp hmem).2
+  · exact (σ.mem_quotientChart_iff V hVs hVa x _).mpr
+      ⟨σ.localQuotientπ (hVs x) (hVa x) ⟨e, he⟩,
+        (quotientπ_apply_ι σ V hVs hVa hVmem x ⟨e, he⟩).symm⟩
+
+/-- **The quotient projection is surjective.** -/
+theorem quotientπ_surjective :
+    Function.Surjective ⇑(σ.quotientπ V hVs hVa hVmem) := by
+  intro q
+  obtain ⟨x, p, rfl⟩ := (quotientGlueData σ V hVs hVa).ι_jointly_surjective q
+  obtain ⟨w, rfl⟩ := localQuotientπ_surjective σ (hVs x) (hVa x) p
+  exact ⟨(V x).ι w, quotientπ_apply_ι σ V hVs hVa hVmem x w⟩
+
+private theorem isIso_ι_of_chartOpens_eq_top (D : Scheme.GlueData.{u}) (i : D.J)
+    (h : chartOpens D i = ⊤) : IsIso (D.ι i) :=
+  isIso_of_isOpenImmersion_of_opensRange_eq_top _ h
+
+include hVmem in
+/-- A chart of the whole space is a chart of the whole quotient. -/
+theorem quotientChart_eq_top (x : X) (hx : V x = ⊤) :
+    σ.quotientChart V hVs hVa x = ⊤ := by
+  refine TopologicalSpace.Opens.ext (Set.eq_univ_of_forall fun q => ?_)
+  obtain ⟨e, rfl⟩ := σ.quotientπ_surjective V hVs hVa hVmem q
+  have he : e ∈ σ.quotientπ V hVs hVa hVmem ⁻¹ᵁ σ.quotientChart V hVs hVa x := by
+    rw [quotientπ_preimage_quotientChart σ V hVs hVa hVmem x, hx]
+    trivial
+  exact he
+
+include hVmem in
+/-- **The quotient of an affine scheme is affine** (T-Q3): if some atlas member is all of `X`
+— e.g. the constant `⊤` atlas of an affine `X` — then `X/G ≅ Spec Γ(X, ⊤)ᴳ`. -/
+theorem isIso_quotientGlueData_ι (x : X) (hx : V x = ⊤) :
+    IsIso ((quotientGlueData σ V hVs hVa).ι x) :=
+  isIso_ι_of_chartOpens_eq_top (quotientGlueData σ V hVs hVa) x
+    (σ.quotientChart_eq_top V hVs hVa hVmem x hx)
+
+include hVmem in
+theorem isAffine_quotient (x : X) (hx : V x = ⊤) :
+    IsAffine (σ.quotient V hVs hVa) := by
+  haveI := σ.isIso_quotientGlueData_ι V hVs hVa hVmem x hx
+  exact (IsAffine.iff_of_isIso ((quotientGlueData σ V hVs hVa).ι x)).mp inferInstance
+
+/-- The `i`-th piece of a glue data is isomorphic to its open image. -/
+private noncomputable def glueChartIso (D : Scheme.GlueData.{u}) (i : D.J) :
+    D.U i ≅ (chartOpens D i : Scheme.{u}) :=
+  IsOpenImmersion.isoOfRangeEq (D.ι i) (chartOpens D i).ι
+    (Scheme.Opens.range_ι (chartOpens D i)).symm
+
+private theorem glueChartIso_hom_ι (D : Scheme.GlueData.{u}) (i : D.J) :
+    (glueChartIso D i).hom ≫ (chartOpens D i).ι = D.ι i :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+/-- The local quotient `Spec Γ(X, V x)ᴳ` *is* the `x`-th chart of `X/G`. -/
+noncomputable def quotientChartIso (x : X) :
+    σ.localQuotient (hVs x) ≅ (σ.quotientChart V hVs hVa x : Scheme.{u}) :=
+  glueChartIso (quotientGlueData σ V hVs hVa) x
+
+include hVmem in
+theorem localQuotientπ_quotientChartIso (x : X) :
+    σ.localQuotientπ (hVs x) (hVa x) ≫ (σ.quotientChartIso V hVs hVa x).hom ≫
+        (σ.quotientChart V hVs hVa x).ι =
+      (V x).ι ≫ σ.quotientπ V hVs hVa hVmem := by
+  show σ.localQuotientπ (hVs x) (hVa x) ≫
+      (glueChartIso (quotientGlueData σ V hVs hVa) x).hom ≫
+        (chartOpens (quotientGlueData σ V hVs hVa) x).ι = _
+  rw [glueChartIso_hom_ι (quotientGlueData σ V hVs hVa) x,
+    opensι_quotientπ σ V hVs hVa hVmem x]
+
+include hVmem in
+/-- **The atlas square is cartesian**: over the chart `Spec Γ(X, V x)ᴳ ⊆ X/G`, the quotient
+projection `X ⟶ X/G` *is* the local quotient `V x ⟶ Spec Γ(X, V x)ᴳ`.
+
+This is the local-to-global engine for the quotient: any property of `X ⟶ X/G` that is
+Zariski-local at the target can be checked on the local quotients, where it is a statement about
+`Aᴳ ↪ A` (finiteness, étaleness, the torsor property — the T-Q2 package). -/
+theorem isPullback_quotientπ_quotientChart (x : X) :
+    IsPullback ((V x).ι)
+      (σ.localQuotientπ (hVs x) (hVa x) ≫ (σ.quotientChartIso V hVs hVa x).hom)
+      (σ.quotientπ V hVs hVa hVmem) (σ.quotientChart V hVs hVa x).ι := by
+  have hW : σ.quotientπ V hVs hVa hVmem ⁻¹ᵁ σ.quotientChart V hVs hVa x = V x :=
+    quotientπ_preimage_quotientChart σ V hVs hVa hVmem x
+  have h := isPullback_morphismRestrict (σ.quotientπ V hVs hVa hVmem)
+    (σ.quotientChart V hVs hVa x)
+  refine h.flip.of_iso (X.isoOfEq hW) (Iso.refl X) (Iso.refl _) (Iso.refl _)
+    (by simp) ?_ (by simp) (by simp)
+  rw [Iso.refl_hom, Category.comp_id,
+    ← cancel_mono (σ.quotientChart V hVs hVa x).ι, morphismRestrict_ι, Category.assoc,
+    Category.assoc, localQuotientπ_quotientChartIso σ V hVs hVa hVmem x, ← Category.assoc,
+    Scheme.isoOfEq_hom_ι]
+
+include hVmem in
+/-- The restriction of the quotient projection over the `x`-th chart *is* the local quotient. -/
+theorem morphismRestrict_quotientπ (x : X) :
+    σ.quotientπ V hVs hVa hVmem ∣_ σ.quotientChart V hVs hVa x =
+      (X.isoOfEq (quotientπ_preimage_quotientChart σ V hVs hVa hVmem x)).hom ≫
+        σ.localQuotientπ (hVs x) (hVa x) ≫ (σ.quotientChartIso V hVs hVa x).hom := by
+  rw [← cancel_mono (σ.quotientChart V hVs hVa x).ι, morphismRestrict_ι, Category.assoc,
+    Category.assoc, localQuotientπ_quotientChartIso σ V hVs hVa hVmem x, ← Category.assoc,
+    Scheme.isoOfEq_hom_ι]
+
+include hVmem in
+/-- **The quotient projection is an affine morphism** (T-Q5d contract, part 6). Over the chart
+`Spec Γ(X, V x)ᴳ` the projection restricts to `V x ⟶ Spec Γ(X, V x)ᴳ`, an affine scheme over an
+affine scheme; the charts cover `X/G`, and `IsAffineHom` is Zariski-local at the target. -/
+instance isAffineHom_quotientπ : IsAffineHom (σ.quotientπ V hVs hVa hVmem) := by
+  refine isAffineHom_of_forall_exists_isAffineOpen _ fun q => ?_
+  obtain ⟨e, rfl⟩ := σ.quotientπ_surjective V hVs hVa hVmem q
+  refine ⟨σ.quotientChart V hVs hVa e, ?_, σ.isAffineOpen_quotientChart V hVs hVa e, ?_⟩
+  · have : e ∈ σ.quotientπ V hVs hVa hVmem ⁻¹ᵁ σ.quotientChart V hVs hVa e := by
+      rw [quotientπ_preimage_quotientChart σ V hVs hVa hVmem e]
+      exact hVmem e
+    exact this
+  · rw [quotientπ_preimage_quotientChart σ V hVs hVa hVmem e]
+    exact hVa e
 
 /-- **The universal property of the quotient** (T-Q5d contract, part 4):
 `quotientπ` is the categorical quotient of `X` by `G` — every invariant morphism

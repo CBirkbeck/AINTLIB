@@ -2014,6 +2014,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `isPullback_SpecMap_of_isPushout` chart-by-chart, (iii) glue — `IsPullback` is Zariski-local at
   the target (`IsZariskiLocalAtTarget`), and the `E`-atlas can be taken subordinate to `X`'s
   because in route (a) `X` is **affine**, so its atlas is the constant `⊤`.
+- **★★ [a4]'s input CLOSED + [a3-ii]'s local-to-global engine built (fable-P4, 2026-07-08)**:
+  * `SchemeQuotient.lean` (T-Q5d parts 5–7, axiom-clean): `quotientChart` / `isAffineOpen_quotientChart`
+    / `iSup_quotientChart_eq_top` / **`quotientπ_preimage_quotientChart`** (`quotientπ⁻¹(chart x) = V x`,
+    whose point-set core is "the fibres of `invariantsπ` are the orbits, and `V x` is stable") /
+    `quotientπ_surjective` / **`isAffine_quotient`** (= **T-Q3**, the affine quotient, now a corollary) /
+    `quotientChartIso` / **`isPullback_quotientπ_quotientChart`** + `morphismRestrict_quotientπ`
+    (over the chart, `X → X/G` *is* `V x → Spec Γ(X,V x)ᴳ`) / `isAffineHom_quotientπ`.
+  * `SchemeActionFree.lean` (axiom-clean): **`isFinite_quotientπ`** and **`etale_quotientπ`** —
+    for a free action, `X ⟶ X/G` is **finite and étale**. Both by Zariski-local-at-target on the
+    chart cover, reduced to `Aᴳ ↪ A` via `finite_gamma_of_free` and
+    `Algebra.Etale.of_isFreeAlgebraAction` (general base; [A711-FP] confirmed CLOSED by fable-FP).
+  Together with `quotientπ_surjective` this is KM A7.1.1 *geometrically*: **`X → X/G` is a finite
+  étale surjection.** That is [a4]'s descent cover.
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 
