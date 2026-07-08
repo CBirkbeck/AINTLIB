@@ -4100,6 +4100,24 @@ lemma ker_infChartAug (W : WeierstrassCurve R) :
       rw [smul_eq_mul, map_mul, hg, mul_zero]
 
 
+/-- Every prime containing `t` contains the root: `s³ = t(U - a₂s²)`. -/
+lemma root_mem_of_tel_mem (W : WeierstrassCurve R)
+    (P : Ideal (AdjoinRoot (infChartCubic W))) [P.IsPrime]
+    (ht : infChartTElem W ∈ P) :
+    AdjoinRoot.root (infChartCubic W) ∈ P := by
+  have hcube : AdjoinRoot.root (infChartCubic W) ^ 3 =
+      algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X *
+        (sectionUnitElem W -
+        algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.C W.a₂) *
+          AdjoinRoot.root (infChartCubic W) ^ 2) := by
+    have h := tel_mul_sectionUnitElem W
+    rw [map_mul, show infChartTElem W = algebraMap (Polynomial R)
+      (AdjoinRoot (infChartCubic W)) Polynomial.X from rfl] at h
+    linear_combination -h
+  refine (Ideal.IsPrime.pow_mem_iff_mem inferInstance 3 (by omega)).mp ?_
+  rw [hcube]
+  exact Ideal.mul_mem_right _ _ ht
+
 /-- The section unit has augmentation `1`. -/
 lemma infChartAug_sectionUnitElem (W : WeierstrassCurve R) :
     infChartAug W (sectionUnitElem W) = 1 := by
