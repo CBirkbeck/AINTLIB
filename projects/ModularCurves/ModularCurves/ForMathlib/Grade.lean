@@ -44,10 +44,13 @@ adjusted here rather than in a consumer.)
 * Strategic alternative — `grade(I,S) ≥ k ⟺ Extⁱ_S(S/I,S) = 0 ∀ i < k` (Stacks 00LW/0AUJ), making
   `{𝔮 : grade_𝔮 ≥ k}` OPEN via `Module.support_eq_zeroLocus` (each `Extⁱ` is a finite module with
   CLOSED support).  We use the Ext-support route: the whole grade-or-unit locus is the complement
-  of the finitely many closed supports `Supp Extⁱ_S(S/I, S)` (`i < k`), hence open.  The single
-  large sub-development left as `sorry` is the Rees/00LW bridge that identifies that locus with the
-  Ext-support complement (`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`); the openness scaffolding
-  around it is proved.
+  of the finitely many closed supports `Supp Extⁱ_S(S/I, S)` (`i < k`), hence open.  The annihilator
+  packaging (`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`, taking `J i := Ann_S Extⁱ_S(S/I, S)`
+  and reducing via `Module.support_eq_zeroLocus` / `Module.notMem_support_iff`) and the openness
+  scaffolding (`isOpen_gradeGE_locus`) are proved in full.  The single `sorry` is now the tight
+  pointwise residual `gradeGE_or_top_iff_forall_subsingleton_localizedExt`: the Rees/00LW ideal-grade
+  characterisation (Stacks 00LW/0AUJ) composed with the localisation-compatibility of `Ext`, both
+  genuinely absent from mathlib at this pin.
 
 See `projects/ModularCurves/.mathlib-quality/decomposition-buchsbaum-eisenbud.md` [T-GRADE].
 -/
@@ -55,7 +58,7 @@ import Mathlib
 
 noncomputable section
 
-open RingTheory.Sequence PrimeSpectrum
+open RingTheory.Sequence PrimeSpectrum CategoryTheory Abelian
 
 /-- grade of `I` in `S` is `≥ k`: `I` contains an `S`-regular sequence of length `k` (Stacks
 00LE/00LF). -/
@@ -104,19 +107,45 @@ theorem Ideal.gradeGE_localize {S : Type*} [CommRing S] [IsNoetherianRing S]
     rw [key]
     exact (Ne.symm hbot)
 
-/-- ISOLATED SUB-DEVELOPMENT (Rees / Stacks 00LW ideal form + Ext–localisation compatibility).
+/-- ISOLATED RESIDUAL — the sole `sorry` in the file (Rees / Stacks 00LW ideal-grade form composed
+with the localisation-compatibility of `Ext`).
 
-The grade-`≥ k`-or-unit locus of `I` is the complement of a finite union of Zariski-closed sets.
-Morally the closed sets are the supports `Supp Extⁱ_S(S/I, S)` (`i < k`): by the ideal form of the
-Rees/00LW characterisation `grade(I_𝔮, S_𝔮) ≥ k ⟺ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮) = 0 ∀ i < k`,
-together with the localisation compatibility of `Ext` for finite modules over a Noetherian ring
-(`Ext^i(S/I, S)_𝔮 ≅ Ext^i_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`), and the fact that when `I ⊄ 𝔮` (i.e.
-`I·S_𝔮 = S_𝔮`) the module `S/I` localises to `0` so all `Extⁱ` vanish — which is precisely the
-unit-ideal disjunct.  Each `Extⁱ_S(S/I, S)` is a finite `S`-module (`S` Noetherian, `S/I` finite),
-so its support `= zeroLocus (annihilator)` is closed (`Module.support_eq_zeroLocus`); we phrase the
-family directly as the annihilator ideals `J i`.
+For a prime `𝔮`, the extended ideal `I·S_𝔮` has grade `≥ k` **or** is the unit ideal *iff* every
+`Ext`-module `Extⁱ_S(S/I, S)` (`i < k`) vanishes after localising at `𝔮`.  This is the pointwise
+form of the identity "grade-or-unit locus `=` complement of the Ext-supports"; the openness argument
+(`isOpen_gradeGE_locus`) needs exactly this, and the topological/annihilator packaging around it
+(`gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`, below) is proved in full from it.
 
-This is the sole `sorry` in the file.  The openness of the complement (below) is proved from it. -/
+Two genuinely mathlib-absent facts compose to give it (both confirmed absent at this mathlib pin —
+`RingTheory/Regular` has no `grade`/`depth`, `RingTheory/Regular/Depth.lean` is a deprecated stub,
+and `Ext`-localisation exists only in degree `0` as `Module.FinitePresentation.linearEquivMap`):
+
+* **Rees / Stacks 00LW (ideal-grade form)** over the LOCAL ring `S_𝔮`:
+  `grade(I_𝔮, S_𝔮) ≥ k ⟺ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮) = 0 ∀ i < k`.  Stacks 00LW is the
+  maximal-ideal/depth form (`depth M = min { i | Extⁱ(R/𝔪, M) ≠ 0 }`); the ideal-grade
+  generalisation is standard (Stacks 0AUJ; Bruns–Herzog, *Cohen–Macaulay Rings*, 1.2.10;
+  Matsumura, *Commutative Ring Theory*, Thm 16.7).  In the unit case `I_𝔮 = S_𝔮` we have
+  `S_𝔮/I_𝔮 = 0`, so every `Ext` vanishes — this is precisely the `∨ … = ⊤` disjunct.
+* **`Ext`-localisation compatibility** (finite modules over a Noetherian ring):
+  `Extⁱ_S(S/I, S)_𝔮 ≅ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`, whence
+  `Subsingleton (Extⁱ_S(S/I,S)_𝔮) ⟺ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮) = 0`.  (Only the degree-`0` Hom
+  case is in mathlib; higher degrees would be developed via flat base change,
+  `Abelian.Ext.mapExactFunctor` being the natural map to prove an iso.) -/
+private theorem gradeGE_or_top_iff_forall_subsingleton_localizedExt {S : Type*} [CommRing S]
+    [IsNoetherianRing S] (I : Ideal S) (k : ℕ) (q : PrimeSpectrum S) :
+    ((I.map (algebraMap S (Localization q.asIdeal.primeCompl))).gradeGE k ∨
+        I.map (algebraMap S (Localization q.asIdeal.primeCompl)) = ⊤)
+      ↔ ∀ i : Fin k, Subsingleton (LocalizedModule q.asIdeal.primeCompl
+          (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i)) := by
+  sorry
+
+/-- The grade-`≥ k`-or-unit locus of `I` is the complement of the finite family of Zariski-closed
+supports `Supp Extⁱ_S(S/I, S)` (`i < k`), phrased directly through the annihilator ideals
+`J i := Ann_S Extⁱ_S(S/I, S)`.  Each `Extⁱ_S(S/I, S)` is a finite `S`-module (`S` Noetherian, `S/I`
+finite, `ModuleCat.finite_ext`), so `Supp = zeroLocus (annihilator)` (`Module.support_eq_zeroLocus`)
+and `𝔮 ∉ Supp ⟺ Extⁱ_𝔮 = 0` (`Module.notMem_support_iff`); the pointwise grade/unit ⟺ Ext-vanishing
+equivalence is the isolated residual `gradeGE_or_top_iff_forall_subsingleton_localizedExt` above.
+The openness of the complement (`isOpen_gradeGE_locus`, below) is proved from this identity. -/
 theorem gradeGE_or_top_locus_eq_iInter_compl_zeroLocus {S : Type*} [CommRing S]
     [IsNoetherianRing S] (I : Ideal S) (k : ℕ) :
     ∃ J : Fin k → Ideal S,
@@ -124,7 +153,13 @@ theorem gradeGE_or_top_locus_eq_iInter_compl_zeroLocus {S : Type*} [CommRing S]
           (I.map (algebraMap S (Localization q.asIdeal.primeCompl))).gradeGE k ∨
             I.map (algebraMap S (Localization q.asIdeal.primeCompl)) = ⊤}
         = ⋂ i, (zeroLocus (J i : Set S))ᶜ := by
-  sorry
+  classical
+  refine ⟨fun i => Module.annihilator S (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i), ?_⟩
+  ext q
+  simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_compl_iff]
+  rw [gradeGE_or_top_iff_forall_subsingleton_localizedExt I k q]
+  refine forall_congr' fun i => ?_
+  rw [← Module.support_eq_zeroLocus, Module.notMem_support_iff]
 
 /-- [T-GRADE.open] Openness of the grade locus: `{𝔮 : grade(I_𝔮) ≥ k or I_𝔮 = ⊤}` is OPEN.  Via Ext
 this is the complement of `⋃_{i<k} Supp Extⁱ_S(S/I,S)` (each closed by `Module.support_eq_zeroLocus`,
