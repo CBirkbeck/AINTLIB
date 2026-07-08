@@ -10219,3 +10219,28 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
   [YF-QSM]/[YF-GEOM] (engine/FP4), all charter-owned. fable-PIC0 pivots to the queued
   cadence work: CLEANUP-PIC1 (InvertibleSheaf.lean) now; MellWeierstrass cleanup after
   A's map_id favor closes the file (still 1 sorry). GAP-1 watch unchanged.
+
+### v10.44d (2026-07-08, fable-FP): ★ [NISOG-GRASS] WAVE 1 COMPLETE — the chart algebra is PROVEN sorry-free
+
+- **Wave 1 DONE (fable-FP, 2026-07-08T15:55Z → 19:30Z)**: `ForMathlib/GrassmannianChart.lean`
+  is **sorry-free**, all decls `#print axioms` = [propext, Classical.choice, Quot.sound]:
+  · **[GR-A0]** `IsChartAt` + `coordMap`/`coordMap_single` (the mathlib-TODO chart predicate);
+  · **[GR-A1]** `chartEquivRetraction` (+ `chartToRetraction`/`retractionToChart`/
+    `bijective_mkQ_comp_coordMap`/`retraction_comp_coordMap`) — chart members ≃ retractions
+    of `x`, `N = ker φ`;
+  · **[GR-B]** `retractionEquivMatrix` — retractions ≃ the complementary matrix block
+    (`Basis.constr` + `Equiv.ofInjective` complement-indexing), the 𝔸^{k(n−k)} datum;
+  · **[GR-A2]** `isChartAt_map` — `Grassmannian.map f` preserves charts (proof: postcompose
+    with `baseChangeMkQEquiv`; key square vs `LinearMap.baseChange CA ∘ piScalarRight⁻¹`
+    checked on `Pi.basisFun`; bijectivity via `LinearEquiv.baseChange` + `piScalarRight`).
+- **⚠ FLEET-REUSABLE ELABORATION FINDING** (lean4:proof-repair subagent, banked in the
+  artifact): unfolding `baseChangeMkQ` AND `baseChangeMkQEquiv` in the SAME simp pass
+  desyncs the dependent quotient-type instances (`Submodule.Quotient.addCommMonoid
+  (baseChangeMkQ …).ker` vs the delta-expanded copy) — simp then silently makes ZERO
+  progress. Fix pattern: separately-typed `have`s (`harg`/`hbase`/`hval`), each unfolding
+  only ONE of the dependent pair; the equiv-evaluation step is the `rfl`-lemma
+  `quotKerEquivOfSurjective_apply_mk` applied as a TERM, immune to congruence rewriting.
+- **Wave 2 boundary reached** (per the artifact's v10.24(b) decision): next = [GR-B2]
+  (chart subfunctor ≅ affine-space functor, naturality of GR-B in the algebra), [GR-C]
+  (Zariski-local covering, 089T step 5), [GR-D] (openness of the chart locus, 089T
+  step 4). Signatures to be pinned against the now-proven wave-1 interface.

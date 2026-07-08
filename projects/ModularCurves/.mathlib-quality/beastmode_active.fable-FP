@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] wave 1 — PHASE 4 PROVE [GR-A1] chartEquivRetraction (GrassmannianChart.lean:53). Then GR-B, GR-A2.
+FOCUS: [NISOG-GRASS] — WAVE 1 DONE (GrassmannianChart.lean sorry-free, axiom-clean). Now wave-2 boundary: pin [GR-B2]/[GR-C]/[GR-D] signatures + skeleton.
