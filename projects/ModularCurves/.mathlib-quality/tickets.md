@@ -5213,6 +5213,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     Engineering note for whoever continues: state `hstep`/`hscale` as explicit `have`s with the
     beta-redex shape before `rw` — unifying the homogeneity lemma against a beta-reduced goal
     whnf-blows-up (200k heartbeats) on these terms.
+  - **β3 DONE** (coordinator-P1, 2026-07-08T11:24Z; d7bda67d + f1dd27ad + 7ba4314e; all
+    zero-sorry, axiom-clean; `AdditionChartAway/Mor/Cover.lean`):
+    · `addOnYPieceHom` / `addOnZPieceHom` — ring level, `chartAway W k →ₐ[R]
+      Localization.Away (law{Two,One}Triple W i j k)`. BOTH hypotheses arrive free: on-curve =
+      β2b's `equation_law*Triple_of_isDomain`; invertibility = the localization's `invSelf`.
+    · `addOnYPieceMor` / `addOnZPieceMor` — SCHEME level, `Spec (Localization.Away t_k) ⟶
+      projModel W`, with over-R specs `pieceMor ≫ projModelπ = Spec.map (algebraMap R _)`
+      (free from β1's `chartι_projModelπ` + `AlgHom.comp_algebraMap`).
+    · `regularityOpen t := ⨆ k, D(t k)` + `regularityOpen_eq_top_iff` +
+      **`regularityOpen_ne_top_of_forall_mem`** — the formal statement of *why two laws are
+      needed*: a triple with a common zero (an exceptional-divisor point, which every (2,2) law
+      has by B–L Thm 1) does not cover the chart-product. Law 2's regularityOpen on the (i,j)
+      piece IS that piece's contribution to `blOpenY`; law 1's, to `blOpenZ`.
+    ANTIDOTE (banked): `.toProjective` blocks the syntactic `rw [WeierstrassCurve.map_map]` —
+    apply the curve equality with `▸` instead (`equation_awayTriple`).
+    NEXT = **β4**: (a) the k-pieces agree on `D(t_k) ⊓ D(t_l)` — this is where the six certified
+    minors (dba3aa8c) finally get consumed; (b) the (i,j)-pieces agree (dehomogenisation
+    compat); (c) assemble `blOpenY`/`blOpenZ` + `addOnY`/`addOnZ`, then the four
+    `GroupLawConstruction.lean` sorries. Will FLAG before claiming 0c-ii (per v10.18/v10.22).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
