@@ -6,6 +6,14 @@ CURRENT-FOCUS line; **this file holds the arc** so a fresh-context session resum
 re-deriving it from the board. Full charter also on the board (`tickets.md`, Amendments
 v10.32 + the faith-infra / 0h / endgame boxes).
 
+## Strategic context (v10.36 — owner directive of record)
+**MODULAR CURVES ASAP.** The goal is the **representability theorems** (Y₁(N), Y(N), Γ_H as
+representing objects of the moduli problems). Modular forms are shelved; four representability
+planning streams are decomposing now (v10.37 charters-in-waiting). faith-infra → **T-W7.1b is
+on the critical path**: fable-P4's KM 4.7 engine (route (a), E/G descent — no SGA VIII 7.8, no
+algebraic spaces, no ω) is explicitly waiting on the 1b flip, so 1b is now doubly load-bearing.
+ω is OFF the critical path (demoted — arc item 4).
+
 ## Reporting contract (binding)
 Report to owner ONLY on: milestones (1b flip, W7a), genuine post-decomposition walls, B2
 events, or charter completion. Everything else → the board. Decompose-don't-grind is
@@ -22,20 +30,27 @@ persistence.
    red.** The "AdicSpaces recipe" (def-level irreducible + interface-before-proofs).
 2. Close `pointedIsoΓ_eq_of_coordEquiv` (S1) + `pointedIso_exists_variableChange` (main) in
    `Comparison.lean`; axiom sweep; **flip T-W7.1b → DONE** (MILESTONE — report to owner;
-   drops 1b from T-W7.12, unlocks ω).
-3. Claim **T-E-OMEGA route R1**: the ω line bundle glued from the atlas with my comparison
-   as transition data; DS-register in the same commit; opaque interface per v10.24(b).
-4. **0h interrupt (STANDING, interrupt-priority):** the moment c5β lands **0c-ii**
-   (`mulModelHom`, currently sorry at GroupLawConstruction.lean:806, c5β's file — do NOT
-   touch), take **`mulModelHom_vc`** (T-W7.0h) on the banked route:
-   `projModel_hom_ext_of_affine` (reduce to Z-chart agreement) + per-chart addOn
-   VC-equivariance. Then return to the charter.
-5. **Endgame** (all four deps green: main+1b, 0c-ii, 0h, 1a): assemble JOINTLY with c5β,
-   split via the board — T-W7.12 (glued negHom/mulHom) → CLEANUP-ALL-W7 → **T-W7.36**
-   (**T-W7a MILESTONE** — report; retires `abelEnrichment_exists`).
-6. **Standby tail whenever blocked:** stage PR-draft files for READY upstream candidates.
-   **DONE 2026-07-08** — `#1-#4` + README in `pr-drafts/` (commit 98c39995). #5/#7 = owner-
-   input, #6 (D2) = defer to D2 verify-pass. Tail now exhausted.
+   drops 1b from T-W7.12). **Doubly load-bearing (v10.36):** fable-P4's KM 4.7 engine is
+   explicitly waiting on this flip — it is now on the critical path to representability, not
+   just the W7 endgame. This is the highest-value act after faith-infra.
+3. **0h + the W7 endgame.** **0h interrupt (STANDING, interrupt-priority):** trigger corrected
+   per v10.36 — fires off **c5β's β4(c) / GroupLawConstruction completion**, NOT "0c-ii
+   landing" (that handover timing was stale: c5β's projGlueLift_eq + the crux are already
+   proven, so 0h now reads one step earlier). Take **`mulModelHom_vc`** (T-W7.0h) on the
+   banked route: `projModel_hom_ext_of_affine` (reduce to Z-chart agreement) + per-chart
+   addOn VC-equivariance. `mulModelHom` lives in c5β's GroupLawConstruction.lean — do NOT
+   touch until β4(c) lands. Then the **endgame** (deps green: main+1b, 0h, 1a) — assemble
+   JOINTLY with c5β, split via the board: T-W7.12 (glued negHom/mulHom) → CLEANUP-ALL-W7 →
+   **T-W7.36** (**T-W7a MILESTONE** — report; retires `abelEnrichment_exists`).
+4. **ω (T-E-OMEGA) — DEMOTED to last / on-demand (v10.36).** The KM 4.7 engine no longer
+   needs ω (route (a) collapses descent to E/G via T-Q5's quotient — no ω). Only **T-E14's
+   Legendre half** and **T-A4** still consume it. Build ω (route R1: line bundle glued from
+   the atlas, my comparison as transition data; DS-register same commit; opaque interface
+   v10.24(b)) **only when a consumer demands it** — do not pre-build it.
+5. **Standby tail whenever blocked:** stage PR-draft files for READY upstream candidates.
+   **DONE 2026-07-08** — `#1-#4` + README in `pr-drafts/` (commit 98c39995; internal per
+   v10.35b — build them, publish nothing). #5/#7 = owner-input, #6 (D2) = defer to a D2
+   verify-pass. Tail now exhausted.
 
 **Charter ends when the group law on the model exists over every base.**
 
