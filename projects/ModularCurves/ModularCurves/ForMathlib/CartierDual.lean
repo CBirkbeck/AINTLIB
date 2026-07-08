@@ -1,6 +1,9 @@
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.LinearAlgebra.Determinant
 import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.HopfAlgebra.Convolution
 import Mathlib.RingTheory.HopfAlgebra.GroupLike
 
@@ -39,7 +42,7 @@ API; the operator/commutator package (**T-D5d/e**, Prop 3.8.1) and the final ass
 See `.mathlib-quality/plan-deligne.md` for the full ticket board and verbatim source quotes.
 -/
 
-open scoped Matrix
+open scoped Matrix TensorProduct
 open HopfAlgebra Coalgebra WithConv
 
 namespace ModularCurves.CartierDual
@@ -87,6 +90,33 @@ theorem pow_eq_one_of_smul_one_eq_commutator {S : Type u} [CommRing S] {n : ℕ}
         ring
     _ = 1 * 1 := by rw [det_val_mul_det_val_inv, det_val_mul_det_val_inv]
     _ = 1 := by ring
+
+/-- **(T-D5f′ — determinant step, endomorphism form.)** The same as
+`pow_eq_one_of_smul_one_eq_commutator` but phrased with `LinearMap.det` on a free finite module
+`M` (rank `n`), which is the form the geometric operators `τ, ρ, ℓ` of §3.8 naturally take: if
+`λ • id_M` is a commutator `P Q P⁻¹ Q⁻¹` of `S`-linear automorphisms of `M`, then `λⁿ = 1`.
+
+Proof: `LinearMap.det` is a monoid hom killing commutators over the commutative ring `S`, and
+`det(λ • id_M) = λ^(finrank M) = λⁿ` (`LinearMap.det_smul`, `LinearMap.det_id`). -/
+theorem pow_eq_one_of_smul_id_eq_commutator {S : Type u} [CommRing S]
+    {M : Type w} [AddCommGroup M] [Module S M] [Module.Free S M] [Module.Finite S M]
+    {n : ℕ} (hn : Module.finrank S M = n) (lam : S)
+    (P Q : (M →ₗ[S] M)ˣ)
+    (h : lam • (LinearMap.id : M →ₗ[S] M) = ↑(P * Q * P⁻¹ * Q⁻¹)) :
+    lam ^ n = 1 := by
+  have key := congrArg LinearMap.det h
+  rw [LinearMap.det_smul, LinearMap.det_id, mul_one, hn] at key
+  rw [key]
+  have hP : LinearMap.det (↑P : M →ₗ[S] M) * LinearMap.det (↑P⁻¹ : M →ₗ[S] M) = 1 := by
+    rw [← map_mul, Units.mul_inv, map_one]
+  have hQ : LinearMap.det (↑Q : M →ₗ[S] M) * LinearMap.det (↑Q⁻¹ : M →ₗ[S] M) = 1 := by
+    rw [← map_mul, Units.mul_inv, map_one]
+  simp only [Units.val_mul, map_mul]
+  calc LinearMap.det (↑P : M →ₗ[S] M) * LinearMap.det (↑Q : M →ₗ[S] M)
+          * LinearMap.det (↑P⁻¹ : M →ₗ[S] M) * LinearMap.det (↑Q⁻¹ : M →ₗ[S] M)
+      = (LinearMap.det (↑P : M →ₗ[S] M) * LinearMap.det (↑P⁻¹ : M →ₗ[S] M))
+          * (LinearMap.det (↑Q : M →ₗ[S] M) * LinearMap.det (↑Q⁻¹ : M →ₗ[S] M)) := by ring
+    _ = 1 := by rw [hP, hQ]; ring
 
 /-! ## The Cartier dual algebra and points as group-like elements
 
@@ -154,33 +184,56 @@ variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
 variable {B : Type w} [CommRing B] [Algebra R B]
 
 /-- **(T-D5e — Proposition 3.8.1, Tate §3.8 p. 144.)** On the free rank-`n` left-`A'`-module
-`A' ⊗_R A`, with `τ = id ⊗ τ_λ`, `ρ =` right mult by `id`, `ℓ =` right mult by `λ ⊗ 1`, one has
-`τ ρ τ⁻¹ ρ⁻¹ = ℓ`, and `ℓ` is the scalar operator `λ • Iₙ`. Consequently `λ • Iₙ` is a
-commutator in `GLₙ(A'_B)`.
+`M := A'_B ⊗_R A`, the scalar map `λ • id_M` — which is right multiplication by `λ ⊗ 1` — is the
+commutator `τ ρ τ⁻¹ ρ⁻¹`, where `ρ` is right multiplication by the coevaluation unit `u = 𝟙 ∈ M`
+and `τ = id_{A'} ⊗ τ_λ` is the ring automorphism of `M` induced by right translation `τ_λ` on `A`.
+The key relation (Lemma 3.8.2 with `φ = τ_λ`) is `τ(u) = u · (λ ⊗ 1)`, whence for a ring
+automorphism `τ`, `τ ρ τ⁻¹ = R_{τ(u)}` and `R_{τ(u)} ρ⁻¹ = R_{u⁻¹ · τ(u)} = R_{λ⊗1} = λ • id`.
 
-Stated in the concrete form the determinant step consumes: over the commutative ring
-`S := A'_B = WithConv (A →ₗ[R] B)` there exist `P Q ∈ GLₙ(S)` with
-`(pointConv φ) • Iₙ = P Q P⁻¹ Q⁻¹`. Proof deferred to sub-tickets (the `τ_λ`/`ρ`/`ℓ`
-construction of T-D5d and the commutator computation of Prop 3.8.1). -/
+Stated in the form the determinant step (`pow_eq_one_of_smul_id_eq_commutator`) consumes: over
+`S := A'_B = WithConv (A →ₗ[R] B)` and the free `S`-module `M = S ⊗_R A`, there exist units
+`P Q` of `End_S M` (i.e. `S`-linear automorphisms of `M`) with `λ • id_M = P Q P⁻¹ Q⁻¹`. Proof
+deferred to the sub-tickets T-D5e1–e5 (tensor module, `τ_λ`, right-mult operators, Lemma 3.8.2,
+commutator identity). -/
 theorem exists_commutator_eq_pointConv_smul_one (φ : A →ₐ[R] B)
-    {n : ℕ} (hn : Module.finrank R A = n) [Module.Free R A] [Module.Finite R A] :
-    ∃ P Q : (Matrix (Fin n) (Fin n) (WithConv (A →ₗ[R] B)))ˣ,
-      (pointConv φ) • (1 : Matrix (Fin n) (Fin n) (WithConv (A →ₗ[R] B)))
+    [Module.Free R A] [Module.Finite R A] :
+    ∃ P Q : (WithConv (A →ₗ[R] B) ⊗[R] A →ₗ[WithConv (A →ₗ[R] B)]
+              WithConv (A →ₗ[R] B) ⊗[R] A)ˣ,
+      pointConv φ • (LinearMap.id : WithConv (A →ₗ[R] B) ⊗[R] A →ₗ[WithConv (A →ₗ[R] B)]
+              WithConv (A →ₗ[R] B) ⊗[R] A)
         = ↑(P * Q * P⁻¹ * Q⁻¹) := by
   sorry
 
 /-- **(T-D5g — Deligne's order theorem, group-like form; Tate §3.8 pp. 144–145.)** For a
-cocommutative Hopf algebra `A` finite free of rank `n` over `R`, any `B`-point `φ : A →ₐ[R] B`
-satisfies `(pointConv φ)^n = 1` — the `n`-fold convolution power is the trivial point.
-Equivalently `n • Q = 0`: Deligne's theorem that a commutative finite flat group scheme is
-killed by its order. Assembled from the commutator `λ Iₙ = P Q P⁻¹ Q⁻¹` (Prop 3.8.1,
-`exists_commutator_eq_pointConv_smul_one`) and the determinant step (T-D5f,
-`pow_eq_one_of_smul_one_eq_commutator`). -/
-theorem deligne_pointConv_pow (φ : A →ₐ[R] B)
-    {n : ℕ} (hn : Module.finrank R A = n) [Module.Free R A] [Module.Finite R A] :
+cocommutative Hopf algebra `A` finite free over `R`, any `B`-point `φ : A →ₐ[R] B` satisfies
+`(pointConv φ)^n = 1`, where `n` is the `S`-rank of `M = S ⊗_R A` (`S := A'_B`) — which for a
+nontrivial base equals the order `finrank R A` of `G`. Equivalently `n • Q = 0`: Deligne's
+theorem that a commutative finite flat group scheme is killed by its order. Assembled from the
+commutator `λ • id_M = P Q P⁻¹ Q⁻¹` (Prop 3.8.1, `exists_commutator_eq_pointConv_smul_one`) and
+the determinant step (`pow_eq_one_of_smul_id_eq_commutator`).
+
+The rank `n` is taken as `finrank S (S ⊗_R A)` (supplied by the caller) rather than reduced to
+`finrank R A`: the reduction `finrank S (S ⊗_R A) = finrank R A` needs `StrongRankCondition` on
+both rings (i.e. a nontrivial base), which the geometric consumer (Layer B) provides in context.
+See `deligne_pointConv_pow_finrank` for that reduced form. -/
+theorem deligne_pointConv_pow (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A]
+    {n : ℕ}
+    (hn : Module.finrank (WithConv (A →ₗ[R] B)) (WithConv (A →ₗ[R] B) ⊗[R] A) = n) :
     (pointConv φ) ^ n = 1 := by
-  obtain ⟨P, Q, hPQ⟩ := exists_commutator_eq_pointConv_smul_one φ hn
-  exact pow_eq_one_of_smul_one_eq_commutator (pointConv φ) P Q hPQ
+  obtain ⟨P, Q, hPQ⟩ := exists_commutator_eq_pointConv_smul_one φ
+  haveI : Module.Finite (WithConv (A →ₗ[R] B)) (WithConv (A →ₗ[R] B) ⊗[R] A) :=
+    Module.Finite.of_basis ((Module.Free.chooseBasis R A).baseChange _)
+  exact pow_eq_one_of_smul_id_eq_commutator hn (pointConv φ) P Q hPQ
+
+/-- **(T-D5g, reduced form.)** For a *nontrivial* base ring `R` (so `finrank` is well-behaved),
+Deligne's theorem reads `(pointConv φ)^(finrank R A) = 1`: the point is killed by the order
+`finrank R A` of `G`. Uses `Module.finrank_baseChange` (`finrank S (S ⊗_R A) = finrank R A`),
+which requires `StrongRankCondition R` — supplied here by `[Nontrivial R]` via
+`commRing_strongRankCondition`. -/
+theorem deligne_pointConv_pow_finrank (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A]
+    [Nontrivial R] [Nontrivial (WithConv (A →ₗ[R] B))] :
+    (pointConv φ) ^ (Module.finrank R A) = 1 :=
+  deligne_pointConv_pow φ (Module.finrank_baseChange)
 
 end Commutator
 
