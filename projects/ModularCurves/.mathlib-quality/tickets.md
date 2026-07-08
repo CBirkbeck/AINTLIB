@@ -6282,10 +6282,20 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
   syzygy-freeness ≠ fibre-EXACTNESS. Flatness needs the local criterion of flatness (00MK) + fibre-exact-locus openness (00RB/00MI),
   classically via Buchsbaum-Eisenbud (00N1). None of 00MK/00RB/00MI/00N1 (nor Module.depth/Auslander-Buchsbaum/dévissage) in mathlib.
   DEV1a (HilbertSyzygy) is now ORPHANED from the D-chain (still a valid standalone result); DEV1b likewise.
-- **OWNER DECISION (2026-07-08): ROUTE A FUNDED** (Buchsbaum–Eisenbud / local flatness criterion). Source-faithful
-  B-E decomposition delegate dispatched → `decomposition-buchsbaum-eisenbud.md` + `ForMathlib/BuchsbaumEisenbud.lean`
-  skeleton; T-BE* tickets to follow. Steer: grade/depth via Ext (`grade≥k ⟺ Extⁱ(R/I,R)=0 ∀i<k`) makes "grade≥k" open
-  (Ext-modules have closed support) — may make 00RB openness lean, avoiding the full 00N1 minor-ideal combinatorics.
+- **OWNER DECISION (2026-07-08): ROUTE A FUNDED** (Buchsbaum–Eisenbud / local flatness criterion). Full source-faithful
+  tree in `decomposition-buchsbaum-eisenbud.md`; skeleton `ForMathlib/BuchsbaumEisenbud.lean` (d70a8209). Verdict: full
+  00N1 REQUIRED (Ext-support only handles the depth-openness sub-step, mathlib already has it via of_flat_of_isBaseChange).
+- **B-E EXECUTION STATUS (2026-07-08, beastmode-D2):**
+  - **[T-FIT] DONE, AXIOM-CLEAN** — `ForMathlib/FittingIdeals.lean` (split from skeleton, committed via sibling sweep 266479a6).
+    Full minor-ideal API: `LinearMap/Matrix.idealOfMinors`, antitone, base-change `idealOfMinors_map`, McCoy over a field
+    `idealOfMinors_eq_bot_iff_rank_lt`, locus bridge `idealOfMinors_le_ker_iff_rank_lt`, hard McCoy `exists_det_submatrix_ne_zero_of_le_rank`
+    (delegate PROVED it — no residual). All 14 decls [propext,Classical.choice,Quot.sound].
+  - **[T-GRADE] DONE-modulo-[T-GRADE-REES]** — `ForMathlib/Grade.lean`. `gradeGE_localize` AXIOM-CLEAN. **STATEMENT FIX**: both
+    conclusions carry `∨ (I.map…)=⊤` (mathlib IsRegular needs S/(rs)≠0 so gradeGE can't hold for ⊤; counterexample S=k[x],I=(x)
+    localise→field k(x)); this IS the Stacks 10.129.2 disjunction + exactly what buchsbaumEisenbud_acyclic consumes. `isOpen_gradeGE_locus`
+    modulo one isolated Rees/Ext bridge `gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`. [T-GRADE-REES] dispatched to close it.
+  - **[T-BE] IN PROGRESS (make-or-break)** — `buchsbaumEisenbud_acyclic` dispatched [a89a32ed]. BE.1(McCoy)=T-FIT done; BE.2(⟹)+BE.3(⟸ acyclicity induction, the hard core).
+  - **GATED** (in BuchsbaumEisenbud.lean, dispatch after T-BE): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
   (B) route (ii): flat locus CONSTRUCTIBLE via generic flatness GF5 (needs GFDatum/051R) + Noeth induction, then open via 00I0
