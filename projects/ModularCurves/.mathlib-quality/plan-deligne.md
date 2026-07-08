@@ -172,10 +172,13 @@ Files: `ModularCurves/ForMathlib/CartierDual.lean` (Layer A),
 - **[T-D5d] operators + transpose identity** (A3a, Lemma 3.8.2) — `τ_λ`, `ρ` on `A'_B ⊗ A_B`;
   `(id⊗φ)(id) = (id⊗φ')(id)`. Depends: T-D5b.
 - **[T-D5e] commutator relation** (A3b, Prop 3.8.1) — `λ·I_n` is a commutator in `GL_n(A'_B)`.
-  Depends: T-D5d.
+  Depends: T-D5d. **✅ DONE (2026-07-08, axiom-clean).** The one Hopf leaf `deligne_operators`
+  (= Tate Lemma 3.8.2) closed from the text, RR-only; Prop 3.8.1 = `exists_commutator_eq_pointConv_smul_one`.
 - **[T-D5f] det kills commutator ⟹ `λ^n=1`** (A4) — `Matrix.det_mul`; `det(λI_n)=λ^n`.
-  Depends: none (parallel).
+  Depends: none (parallel). **✅ DONE (`pow_eq_one_of_smul_id_eq_commutator`).**
 - **[T-D5g] `deligne_grouplike_pow_order`** (A-assembly) — `⟨T-D5e, T-D5f⟩`. Depends: T-D5e, T-D5f, T-D5c.
+  **✅ DONE (2026-07-08, axiom-clean): `deligne_pointConv_pow` + `deligne_pointConv_pow_finrank`.
+  ALL of Layer A now depends only on [propext, Classical.choice, Quot.sound].**
 - **[CLEANUP-D5-2]** final `/cleanup` CartierDual.lean. Depends: T-D5g.
 - **[T-D5h] subgroup divisor is affine Hopf algebra** (B1) — `D.subscheme = Spec A_D`, rank `N`.
   Depends: none. File: DeligneOrder.
@@ -203,9 +206,29 @@ Parallel capacity: T-D5a and T-D5f and T-D5h start immediately (3 workers).
 
 ---
 
-## T-D5e-core decomposition (`deligne_operators` — the single remaining Layer-A leaf)
+## T-D5e-core decomposition (`deligne_operators` — the single remaining Layer-A leaf) — ✅ CLOSED 2026-07-08
 
-**Status (2026-07-08):** All of Deligne's Layer A is proved + axiom-clean and committed EXCEPT
+**RESOLVED (2026-07-08, axiom-clean, coordinator-directed close-from-text, RR-only).** `deligne_operators`
+is proved; all of Deligne's Layer A now depends only on `[propext, Classical.choice, Quot.sound]`
+(verified `#print axioms` on `deligne_operators`, `coev_relation`, `translationEquiv`, `psiAlgEquiv`,
+`deligne_pointConv_pow`, `deligne_pointConv_pow_finrank`). The winning route (all in the new
+`DeligneLeaf` section of `ForMathlib/CartierDual.lean`) — cleaner than the recorded plan below:
+- **`psiAlgEquiv`**: the comparison R-algebra iso `M = A'_B ⊗_R A ≅ A'_{B⊗A}` (from
+  `rTensorHomEquivHomRTensor`, A finite free, + a hand-proved convolution-multiplicativity `map_mul`).
+  It converts every step below into honest convolution maps `A → B⊗A`, no explicit dual basis in the algebra.
+- **`translationEquiv` (T-D5e-τ)**: τ = right translation as a genuine `A'_B`-algebra **automorphism**;
+  inverse `translationEndo(φ∘S)`, both compositions = id by monoid algebra in the *commutative*
+  convolution ring (`leftPointConv_mul_antipode`, antipode = convolution inverse — NO nested Sweedler,
+  the plumbing-chain worry below dissolved).
+- **`coev` + `coev_relation` (T-D5e-u, 3.8.2)**: `u = ∑ eᵢ'⊗eᵢ` is a unit because `psiAlgEquiv u =
+  pointConv includeRight` (universal point, `isUnit_pointConv`) — so `u`'s unit-ness needed NO explicit
+  dual-basis inverse, contra the "delicate piece" note below. Lemma 3.8.2 `τ(u)=u·(λ⊗1)` becomes, under
+  `Ψ`, cocommutativity `∑φ(a₁)⊗a₂ = ∑φ(a₂)⊗a₁` (`comm_comul`) — the generator formula
+  `psiAlgEquiv_translationEndo_tmul` keeps it basis-free (x enters only via `f(x)`).
+
+The historical decomposition notes below are kept for provenance.
+
+**Status (2026-07-08, historical):** All of Deligne's Layer A is proved + axiom-clean and committed EXCEPT
 the one Hopf leaf `deligne_operators` in `ForMathlib/CartierDual.lean`. Everything downstream
 (`exists_commutator_eq_pointConv_smul_one` = Prop 3.8.1, `deligne_pointConv_pow` = T-D5g,
 `deligne_pointConv_pow_finrank`) is proved *modulo* it via the axiom-clean assembly lemmas
