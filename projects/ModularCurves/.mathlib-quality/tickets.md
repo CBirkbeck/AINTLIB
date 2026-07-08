@@ -8853,3 +8853,39 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
   c5β 0c-ii, one leaf upstream at projGlueLift_eq). Charter durable in CHARTER-A.md;
   next session first act = the atomic faith-infra refactor → T-W7.1b DONE (next owner
   milestone) → T-E-OMEGA.
+
+### v10.36 (2026-07-08, fable-PIC0): CHARTER-PIC0 execution — T-PIC1c DONE (anomaly defeated); T-W4+T-W6 claims + architecture finding
+
+- **CHARTER item 1 CLOSED, better than scoped**: T-PIC1c is **DONE** (commit e7be9d5e,
+  axiom-clean) — no repro/bump-hook needed. The "environment anomaly" was never
+  environmental: **tactic-mode `infer_instance` synthesizes the sheafification-counit
+  `IsIso` while the byte-identical goal as a term-mode instance-implicit (inside
+  `asIso` in a def) deterministically fails on this pin** (all passing scratches were
+  tactic-shaped; all failures term-shaped — the 2×2 that separated them: an `example`
+  probe passes in-lib while the adjacent def fails). FLEET-REUSABLE WORKAROUND: 
+  `have h : IsIso _ := by infer_instance` then `exact @asIso _ _ _ _ _ h`. Upstream
+  repro remains INTERNAL per v10.35b EXTERNAL-QUIET. Pic P1 wave now: 1a ✓ 1c ✓ 1d ✓;
+  only T-PIC1b (GAP-1) open in the file. CLEANUP-PIC1 cadence now due (after T-W6 work
+  order or on P1b unblock, whichever first — noted, not skipped).
+- **CHARTER item 3 (watch duty, this session)**: #35545 OPEN, #41383 OPEN, #35773 OPEN
+  (checked 2026-07-08, read-only) — GAP-1 stays parked; no P2 switch.
+- **[T-W4] Claimed**: fable-PIC0 (entry dependency of T-W6; open at pickup, rule-5
+  verified — no sentinel holds it) · Status: in_progress.
+- **[T-W6] Claimed**: fable-PIC0 (charter headline; unstaffed at pickup — beastmode-Q
+  quiet, no sentinel) · Status: in_progress (behind T-W4).
+- **ARCHITECTURE FINDING (binding input to T-W4/T-W6 decompose)**: the delivered
+  T-W3 machinery (`SchemeAction G X`, `ActionGroupoid σ S` with homs
+  `{g : G // t ≫ σ.hom g = t'}`) fixes ONE abstract group G — correct for the Q-finite
+  lane, but it CANNOT express M_ell^W's morphisms, which are coordinate changes with
+  coefficients in Γ(S) (= the group SCHEME's S-points, v9.2). For [U/G] with
+  G = VariableChange the groupoid at S must use `G(S) = VariableChange Γ(S)` acting on
+  `U(S)`. AFFINE CONCRETENESS RESCUES IT: U = Spec A gives U(S) ≃ {W : WeierstrassCurve
+  Γ(S) // IsUnit W.Δ} (T-W5 dictionary) and mathlib already has the VariableChange
+  group over EVERY ring + its action (`VariableChange.instGroup`, `variableChange`) +
+  base-change naturality (T-W7's vcX_map bank) — so M_ell^W(S) can be DEFINED as the
+  action groupoid of `VariableChange Γ(S) ↷ {W // IsUnit Δ}` with functoriality via
+  Γ-maps, no new stack machinery. T-W4 then = this group-functor action layer (NOT a
+  bare SchemeAction instance); T-W6's equivalence = against T-A8's Weierstrass-data
+  records ("almost definitional" as the v8 note promised), with the locally-Weierstrass
+  sheafy upgrade explicitly descent-gated (same honest cut T-W3b made). v9.2 severance
+  honoured: torsors/groupoids only, no Spec(A^G) anywhere.
