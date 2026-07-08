@@ -16,17 +16,21 @@ transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean 
 - item 5 (endgame T-W7.12 → CLEANUP-ALL-W7 → T-W7.36/T-W7a): BLOCKED on 0h.
 - fallback T-D6b: BLOCKED on P3b3's T-B5D-A (`torsionπ_etale` still sorryAx).
 
-**NEXT-SESSION QUEUE (owner, v10.48):**
+**NEXT-SESSION QUEUE (owner, v10.48 + T-A3 addition):**
 1. **PIC0 map_id quick favor** — ~3 lines on my private transport machinery (`coordRingCongr`/
-   the projModel transport). Do this FIRST (unblocks PIC0).
+   the projModel transport). Do FIRST (unblocks PIC0).
 2. **0h interrupt** the moment c5β signals 0c-ii → then the **endgame WITH c5β**: T-W7.12 →
    T-W7.36 (**T-W7a** — the group law on the model over every base; `abelEnrichment_exists`
    becomes `rfl`).
-3. If 0h hasn't fired: **[STREAM-GH]** first wave if the B2 repoint has landed; else PR-draft
-   staging + stand by.
+3. **T-A3** (model smooth ⟺ Δ unit) — my lane's original chartwise tickets, now **LOAD-BEARING**:
+   fable-P4's engine (smooth half) AND Y₁(N)'s smoothness leg both consume it. Claim if 0h
+   hasn't fired (or after the endgame).
+4. **Drafts / standby.** NOTE: [STREAM-GH] is **no longer mine** — p0/beastmode-B claimed the
+   first wave (GHB1/GHB3/GHA2/GHA4/GH2/GHC4) per v10.50.
 
-Charter ends at **T-W7a**. Next session resumes on the queue above (map_id favor first, then
-0h on c5β's signal).
+Rebase note (P3b3-relevant, confirmed): T-W7.1b lives on **dev/modular-curves** (my branch),
+NOT `main` (the integration branch). Charter ends at **T-W7a**. Next session resumes on the
+queue above.
 
 ---
 
