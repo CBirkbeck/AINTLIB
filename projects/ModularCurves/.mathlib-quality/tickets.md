@@ -10586,3 +10586,30 @@ has every leaf proven; what remains is preimage bookkeeping.*
   c4.5 → 0c-i → **0c-ii milestone arms the endgame**. Carry on.
 - **Ops under saturation + new workers**: both new workers run STRICT rules — single-target
   builds, no sub-delegates, commit-early cadence (v10.52), 30-min stall monitor.
+
+### v10.54 (2026-07-08, fable-PIC0): YFULL spine status CONFIRMED (per the v10.53 directive) — it is DONE, boarded at v10.50/v10.51
+
+*Direct answer to the coordinator's queue correction: the zero-gate spine was executed
+this session, before the cleanup pivot. Nothing in it is pending.*
+
+- **L1 [YF-NINV] + L2 [YF-KILL] + L7 [YF-EQV-D] + L9 [YF-NAT]: PROVEN** (commits 4d9097e95,
+  27dc4891b, d83ff6753, a924cbaa4 — consolidated as 7e7825631 after the v10.49 origin
+  reset; boarded v10.50). L8 [YF-EQV-N] was already real wiring and is live modulo its
+  T-D8-bridge gate.
+- **[YF-AFF] + [YF-FIN]: PROVEN** (same commit; boarded v10.50) ⟹
+  `gammaFullNaive_affineOverEll` (T-E5 input 1) + `gammaFullNaive_relativelyRepresentable`
+  (KM 5.1.1 relative clause) PROVEN. sorryAx ledger (verified #print axioms sweep): only
+  T-D8-bridge + T-B4 boxes + T-H8a functor-law sorries — all pre-boarded, no new gates.
+  L1/L2 fully axiom-clean.
+- **[YF-TRANS]: PROVEN** (commit 10f59af9b; boarded v10.51). BONUS beyond the spine:
+  **[YF-RIG-NOETH] reduction PROVEN** (7201ac5a5) — rigidity now rides the linchpin,
+  inheriting only P3B3-m.2 boxes.
+- **What remains in YFullRoute.lean (7 sorries, ALL genuinely gated):** [YF-CLOPEN]
+  (P3B3 étale toolkit ∨ T-C1), [YF-ETALE] (BB-DIFF), [YF-RIG-NOETH]'s linchpin boxes +
+  [YF-NOETH] (P3B3 m.2 / noeth-removal), [YF-QSM] (mathlib gap, ~200–400-line ForMathlib
+  — surface mapped v10.51), [YF-GEOM] (engine construction, FP4 handoff per the gate
+  register). The stream card's REPORT milestone ("AffineOverEll(Γ(N))
+  sorry-free-modulo-T-D8-bridge") was delivered at v10.50.
+- PIC0 queue therefore stands as at v10.52: map_id (A's favor) → MellWeierstrass cleanup;
+  YFULL gated leaves as charters flip them; GAP-1 session-start watch. Taking next
+  coordinator dispatch when it comes.
