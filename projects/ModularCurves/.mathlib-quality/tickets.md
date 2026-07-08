@@ -7089,6 +7089,29 @@ sorry sits precisely on 3.8.2).
   Re-check T-B7's étale-spec state at pickup. Same `/develop` discipline.
 - **FILE DISCIPLINE**: new ForMathlib/bridge files only — `GroupLawConstruction.lean`,
   `Torsion.lean` and the W7 files are held by active workers.
+- **DONE (`/develop --decompose`, T-B5D-scoping, 2026-07-08)**: full decomposition in
+  `.mathlib-quality/decomposition-km2.3-b5d.md`; buildable `:= by sorry` skeleton (3074 jobs green)
+  in NEW `EllipticCurve/MulByHomUnramified.lean`. **Route = KM §2.3 (verbatim quotes pinned) +
+  beastmode-B route (c), non-circular, HasseWeil-anchored.** KM Cor 2.3.2: `[N]` is an f.p.p.f
+  `E[N]`-torsor ⟹ reduce `[N]`-unramified to `E[N]/S`-unramified. KM 2.3.1 proof: fibres via "tangent
+  map at origin = mult by N" — the field-level invariant-differential math is **already in HasseWeil**
+  (`OmegaPullbackCoeff`/`InvariantDifferential`/`card_kernel_eq_degree_of_separable`/`mulByInt_degree`/
+  `TorsionGeneralN`, all verified present), NOT mathlib. Split: **L-A** (self-contained core, build
+  first) + **L-BC** (= L-B HasseWeil fibres via non-circular T-B6′ + L-C/T-DISC criterion). MASTER
+  assembly is `sorry`-free (composition type-checks). MODERATE-MAJOR but **genuinely dischargeable**
+  (supersedes the "invariant-differential infeasible" read). BB-DIFF stays a sorried target with this
+  now-planned route (v10.8 RR-only, nothing permanent).
+- **[T-B5D-A]** (leaf L-A, BUILD FIRST) `formallyUnramified_mulByHom_of_torsionπ`
+  (`MulByHomUnramified.lean`): `FormallyUnramified (torsionπ N) → FormallyUnramified (mulByHom N)`
+  via the `E[N]`-torsor / group infinitesimal-lifting (KM 2.3.2). **Self-contained, route-independent,
+  collides with no lane** — the recommended first `/beastmode` claim. decomposition-km2.3-b5d.md §L-A.
+- **[T-B6′]** (leaf L-B) NON-CIRCULAR scheme-fibre ↔ HasseWeil `WeierstrassCurve k̄` comparison:
+  geometric fibres `E[N]_{k̄}` étale from HasseWeil field-level `[N]`-separability (template
+  `WeilPairing/GaloisEquivariance.lean`). Replaces the current circular T-B6. MODERATE.
+  decomposition-km2.3-b5d.md §L-B.
+- **[T-DISC]** (leaf L-C, refined) the "finite + geometric fibres unramified ⟹ unramified" criterion
+  (⟺ discriminant a unit), ForMathlib substrate; closes `formallyUnramified_torsionπ` (L-BC) with
+  T-B6′. Consumers T-D6c/T-D7-bridge. decomposition-km2.3-b5d.md §L-C.
 - **Runner-up big streams for ADDITIONAL fresh workers** (priority order):
   (1) **T-PIC0 + COH-1** — Pic of a scheme + GME 1.10.4 cohomology-and-base-change;
   owner-sanctioned parallel de-black-boxing (2026-07-05 directive), T-PIC0 explicitly
