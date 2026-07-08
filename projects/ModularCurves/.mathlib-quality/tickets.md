@@ -8118,7 +8118,7 @@ centres in place, session closed.)*
   representability presentations. Interrupt order: 0h (on 0c-ii landing) > T-W8;
   [T-W7.1b-faith-infra] stays the NEXT session's first act with full budget.
 
-## Amendments v10.28 (2026-07-08): p0 / T-END0 — G3 geometry frontier decomposed; hfix interface LANDED
+## Amendments v10.28b (2026-07-08): p0 / T-END0 — G3 geometry frontier decomposed; hfix interface LANDED
 
 *p0 working the coordinator v10.27 queue (top-to-bottom, decompose walls per v10.24). Both geometry
 items diagnosed exhaustively (`.mathlib-quality/decomposition-g3-geometry.md`) and reduced to a single
