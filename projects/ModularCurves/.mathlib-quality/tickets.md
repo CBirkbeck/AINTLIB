@@ -9487,7 +9487,11 @@ f91b91ec (glue + rule-3 interface).*
   statement, NEW `ForMathlib/FinitePresentationOfFinite.lean` (skeleton LANDED green,
   1831 jobs, sorry'd; root-module registration deliberately deferred — root carries p0's
   in-flight import line, sweep hazard; file enters the graph transitively at [FP-B]).
-  - **Claimed**: fable-FP, 2026-07-08T15:09Z · Status: in_progress
+  - **Claimed**: fable-FP, 2026-07-08T15:09Z · Status: **done (fable-FP, 2026-07-08T15:09Z
+    → 2026-07-08T15:19Z)** — sorry-free, `#print axioms` = [propext, Classical.choice,
+    Quot.sound] (zero sorryAx, zero registered deps). **★ [A711-FP] DISCHARGED**: proof =
+    `Module.finitePresentation_of_projective` + `of_finitePresentation` per the finding;
+    KM's "rather delicate" caveat is a 2-line assembly over the 2026 pin.
 - **[FP-B]** the consumer flip: discharge the ONE sorry `Algebra.Etale.of_isFreeAlgebraAction`
   (InvariantTorsor.lean:728) by mirroring the proven noetherian twin (lines 1012–1025)
   with `of_finiteType.mp` → [FP-A] and the `[IsNoetherianRing]` scaffold dropped.
@@ -9495,3 +9499,40 @@ f91b91ec (glue + rule-3 interface).*
   focus is EngineDescent [a2]): one import + one proof body + docstring status paragraph;
   signature untouched. Statement-freeze honored.
   - **Claimed**: fable-FP, 2026-07-08T15:09Z · Status: in_progress (after [FP-A])
+
+### v10.43 (2026-07-08, c5β): [CHARTER-C5B] c4.3 geometry — executable plan (ring core landed)
+
+*Ring core done + committed (281354fc): `chartHomOfTriple_smul` / `chartAwayHomOfTriple_smul` —
+a chart hom is invariant under unit rescaling of the triple, since it sees only the ratios
+`t m / t k`. That is the ONLY new mathematics c4.3 needs; the rest is the c4.2c pattern, one level up.*
+
+**The shape of the remaining work (no search required — every input named):**
+
+1. `biChartRing W i j` localized at a product of chart coordinates presents the overlap of two
+   chart-products: `D(x_i) × D(x_j)` ∩ `D(x_{i'}) × D(x_{j'})` = `D(x_i x_{i'}) × D(x_j x_{j'})`.
+   Build this exactly as `chartPieceIso` (bb5c86d9) was built — `pullbackSpecIso` on the two legs —
+   but with `chartAway` replaced by its further localization. Mathlib input:
+   `HomogeneousLocalization.Away.isLocalization_mul` (HomogeneousLocalization.lean:883), already used
+   in `AdditionChartProj.lean` for the target side; here it is the SOURCE side.
+
+2. On that overlap ring, the two law-2 triples are proportional, not equal. The scalar is the
+   bidegree-`(2,2)` transition factor `(x_i/x_{i'})² (x_j/x_{j'})²`, and the proportionality is
+   `dblAdd{X,Y,Z}_smul` (dba3aa8c) — which is exactly the statement that the law is bidegree (2,2).
+   Feed it to `chartAwayHomOfTriple_smul` (281354fc).
+
+3. Then the agreement is `pieceMorOfTriple_agree`'s sibling and glues by the SAME two general
+   lemmas, which are already stated over variable schemes and therefore reusable verbatim:
+   `homOfLE_morphismRestrict_agree` and `glueMorphisms_hf_of_agree` (f91b91ec, ForMathlib).
+
+4. `blOpenY W := ⨆ p : Fin 3 × Fin 3, (chartProductCover W).f p ''ᵁ blOpenYPiece W p.1 p.2`, and
+   `addOnY` = `glueMorphisms` of the `addOnYOnSup` (f91b91ec) transported along the piece images.
+   `blOpenZ` / `addOnZ` identically. These four are `GroupLawConstruction.lean:762,769,776,782`.
+
+**Two standing warnings for whoever executes it (earned this session, 971d26da):**
+- Never write `(PrimeSpectrum.basicOpen f : (Spec A).Opens)` at a concrete `A` — use `specBasicOpen`.
+- Never `rw [morphismRestrict_homOfLE]` at a concrete pullback scheme. State the step for variable
+  `X Y : Scheme`, prove it there, instantiate by application. No `maxHeartbeats`, ever.
+
+**After c4.3:** c4.4 universality by instantiation (`classifyRingHom` + `isPullback_projModelBaseChange`,
+both proven), c4.5 fills the four sorries ⟹ 0c-i increment 2 DONE ⟹ **0c-ii `mulModelHom`**
+(pre-approved; board-signal it, it fires beastmode-A's 0h interrupt).
