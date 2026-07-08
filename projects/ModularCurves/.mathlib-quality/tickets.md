@@ -19,6 +19,11 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    shows only `propext`/`Classical.choice`/`Quot.sound` + `sorryAx` inherited from
    *registered* dependencies (list them in the closing note); **no `set_option
    maxHeartbeats` anywhere** (needing one ⟹ file a `/decompose-proof` ticket instead).
+   **⚡ Slowdown ⟹ decompose (owner policy 2026-07-08, §v10.24, BINDING)**: elaboration
+   crawling or timing out means split NOW — proofs into private helpers immediately; heavy
+   (chart-iso-scale) definitions ship their opaque interface (`_apply` / injectivity /
+   cancellation lemmas + `irreducible`) in the SAME increment, and consumers never touch
+   the raw term. The slowdown is the signal; four walled routes is far past it.
 4. **⚡ KM SOURCE GATE LIFTED 2026-07-08** — the full Katz–Mazur text is now in
    `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`. ⧗KM tickets are **dispatchable and
    may be CLOSED** (don't idle "waiting for KM"). When you close one, READ the cited KM pages and
@@ -7744,3 +7749,27 @@ proofs more." Elevated to binding policy, in the two forms the evidence supports
   flagged heaviest-yet), P3b3's B5D ψ_N bridge, the End(E/S) ring-layer resume, fable-PIC0's
   Pic layer, D2's B–E assembly. Workers: when you feel elaboration slow down, STOP and split —
   the slowdown IS the signal, and four walled routes is far past it.
+
+## Amendments v10.25 (2026-07-08): c5β — β3 CLOSED; the two-law necessity is now a theorem; into β4
+
+- **β3 DONE** (three commits, zero-sorry, axiom-clean): `addOnYPieceMor` / `addOnZPieceMor`
+  are honest R-scheme morphisms `Spec (Localization.Away t_k) ⟶ projModel W` — the over-R
+  structure came FREE via β1's `chartι_projModelπ` + `AlgHom.comp_algebraMap` (β1's
+  build-once decision paying for the second time).
+- **The two-law architecture is now a library theorem, not a docstring**:
+  `regularityOpen t := ⨆ k, D(t_k)` (where a projective triple has an invertible
+  coordinate; = ⊤ iff the coordinates generate the unit ideal) +
+  `regularityOpen_ne_top_of_forall_mem` — a triple with a common zero (an
+  exceptional-divisor point, which EVERY bidegree-(2,2) law has by Bosma–Lenstra Thm 1)
+  does not cover the chart-product. Law 2's regularity open on the (i,j) piece contributes
+  to `blOpenY`; law 1's to `blOpenZ`.
+- **β4 (remaining, no redirect)**: (a) glue the k-pieces on `D(t_k) ⊓ D(t_l)` via the SIX
+  CERTIFIED MINORS — proved in the ticket's very first commit (dba3aa8c) and consumed at
+  last: gluing = projective proportionality = exactly the minors' statement; (b) glue the
+  (i,j)-pieces via dehomogenization compatibility; (c) assemble `blOpenY`/`blOpenZ` +
+  `addOnY`/`addOnZ` → the four GroupLawConstruction.lean sorries fill → **0c-i increment 2
+  CLOSES**. c5β flags before claiming 0c-ii (endgame sequencing per v10.18/v10.22 — 1b
+  counts until [T-W7.1b-faith-infra] lands).
+- **Policy placement (owner request)**: the v10.24 slowdown⟹decompose rule is now ALSO in
+  the Standing-rules header (rule 3, top of this file) and plan.md's cleanup-cadence
+  section — every board read sees it; no per-worker broadcast required.

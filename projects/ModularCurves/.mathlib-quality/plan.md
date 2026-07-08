@@ -237,6 +237,10 @@ per-file cleanup; `[CLEANUP-ALL-n]` before each milestone (T-E2, T-E7, T-E9, T-F
 file a `/decompose-proof` ticket instead); re-verify the DATA-SORRY register (no new
 data-sorries outside it); `#print axioms` on the file's theorems (only
 `propext`/`Classical.choice`/`Quot.sound` + the registered `sorryAx` while WIP).**
+**v10.24 extension (owner, 2026-07-08): slowdown ⟹ decompose** — a crawling proof is split
+into private helpers immediately; a heavy (chart-iso-scale) definition ships its opaque
+interface (`_apply`/injectivity/cancellation + `irreducible`) in the same increment;
+consumers never touch raw terms. (Retro-fit precedent: tickets.md [T-W7.1b-faith-infra].)
 
 ## Constraints & risks
 
