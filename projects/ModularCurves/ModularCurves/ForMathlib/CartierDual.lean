@@ -567,6 +567,34 @@ lemma psiAlgEquiv_pointConv_tmul_one (φ : A →ₐ[R] B) :
     AlgHom.toLinearMap_apply, AlgHom.toLinearMap_apply, AlgHom.comp_apply,
     Algebra.TensorProduct.includeLeft_apply]
 
+/-- **(T-D5e-core — Tate's Lemma 3.8.2, `τ(u) = u · (λ ⊗ 1)`.)** The sole remaining ingredient of
+Deligne's proof. After applying the comparison iso `Ψ` (injective) it becomes the cocommutativity
+identity `∑ φ(a₍₁₎) ⊗ a₍₂₎ = ∑ φ(a₍₂₎) ⊗ a₍₁₎` (`comm_comul`): both sides are
+`(φ ⊗ id)(Δ a)` since `Δ` is cocommutative. -/
+lemma coev_relation (φ : A →ₐ[R] B) :
+    translationEndo φ coev = coev * (pointConv φ ⊗ₜ[R] (1 : A)) := by
+  have key : psiAlgEquiv (translationEndo φ coev)
+      = psiAlgEquiv (coev * (pointConv φ ⊗ₜ[R] (1 : A))) := by
+    rw [psiAlgEquiv_translationEndo_coev, map_mul, psiAlgEquiv_coev, psiAlgEquiv_pointConv_tmul_one]
+    apply WithConv.ext
+    ext a
+    rw [ofConv_pointConv, AlgHom.toLinearMap_apply, rightTranslationAlgHom_apply φ a (ℛ R a),
+      (ℛ R a).convMul_apply]
+    simp only [ofConv_pointConv, AlgHom.toLinearMap_apply, Algebra.TensorProduct.includeRight_apply,
+      AlgHom.comp_apply, Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.tmul_mul_tmul,
+      one_mul, mul_one]
+    have e1 : (∑ i ∈ (ℛ R a).index, φ ((ℛ R a).left i) ⊗ₜ[R] (ℛ R a).right i)
+        = TensorProduct.map φ.toLinearMap LinearMap.id (Coalgebra.comul a) := by
+      rw [← (ℛ R a).eq, map_sum]
+      exact Finset.sum_congr rfl fun i _ => by rw [TensorProduct.map_tmul]; rfl
+    have e2 : (∑ i ∈ (ℛ R a).index, φ ((ℛ R a).right i) ⊗ₜ[R] (ℛ R a).left i)
+        = TensorProduct.map φ.toLinearMap LinearMap.id (Coalgebra.comul a) := by
+      rw [← comm_comul R a, ← (ℛ R a).eq, map_sum, map_sum]
+      exact Finset.sum_congr rfl fun i _ => by
+        rw [TensorProduct.comm_tmul, TensorProduct.map_tmul]; rfl
+    rw [e1, e2]
+  exact psiAlgEquiv.injective key
+
 end DeligneLeaf
 
 /-- **(Hopf core of Prop 3.8.1 = Lemma 3.8.2, Tate §3.8 p. 144 — SORRIED sub-ticket T-D5e-core.)**
@@ -577,15 +605,24 @@ is a unit `u` of the ring `M = A'_B ⊗_R A` — the **coevaluation element** `�
 `τ(u) = u · (λ ⊗ 1)`. This last equation is Tate's **Lemma 3.8.2** specialised to `φ = τ_λ`
 ("`(id_{A'} ⊗ φ)(id) = (id_A ⊗ φ')(id)`"), the sole remaining ingredient of Deligne's proof.
 
-This is the genuinely Hopf-algebraic leaf: constructing `u` (coevaluation, needing the finite-free
-dual basis), `τ_λ` (right translation), and verifying `τ(u) = u·(λ⊗1)` via the dual-basis/Sweedler
-identity. Split into T-D5e-core-{u,τ,3.8.2} for the build. -/
+Proof (T-D5e-core, sorry-free): `u` is the coevaluation `coev = ∑ᵢ eᵢ' ⊗ eᵢ` — a **unit** because
+the comparison iso `Ψ = psiAlgEquiv : M ≅ A'_{B⊗A}` carries it to the universal point
+`pointConv (includeRight)`, which `isUnit_pointConv` shows invertible; `τ = translationEquiv φ` is
+the right-translation automorphism; and `τ(u) = u · (λ ⊗ 1)` is `coev_relation`, which under `Ψ`
+becomes cocommutativity `∑ φ(a₍₁₎) ⊗ a₍₂₎ = ∑ φ(a₍₂₎) ⊗ a₍₁₎`. All pieces live in the
+`DeligneLeaf` section above. -/
 theorem deligne_operators (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A] :
     ∃ (u : (WithConv (A →ₗ[R] B) ⊗[R] A)ˣ)
       (τ : WithConv (A →ₗ[R] B) ⊗[R] A ≃ₐ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A),
       τ (↑u : WithConv (A →ₗ[R] B) ⊗[R] A)
         = (↑u : WithConv (A →ₗ[R] B) ⊗[R] A) * (pointConv φ ⊗ₜ[R] (1 : A)) := by
-  sorry
+  have hu : IsUnit (coev (R := R) (A := A) (B := B)) := by
+    have h := (isUnit_pointConv (Algebra.TensorProduct.includeRight : A →ₐ[R] B ⊗[R] A)).map
+      (psiAlgEquiv (R := R) (A := A) (B := B)).symm
+    rwa [← psiAlgEquiv_coev (R := R) (A := A) (B := B), AlgEquiv.symm_apply_apply] at h
+  refine ⟨hu.unit, translationEquiv φ, ?_⟩
+  rw [hu.unit_spec, translationEquiv_apply]
+  exact coev_relation φ
 
 /-- **(T-D5e — Proposition 3.8.1, Tate §3.8 p. 144.)** On the free rank-`n` left-`A'`-module
 `M := A'_B ⊗_R A`, the scalar map `λ • id_M` — which is right multiplication by `λ ⊗ 1` — is the
