@@ -9136,3 +9136,17 @@ shapes definitionally aligned).
   (essential surjectivity onto GLOBALLY-presented curves; locally-Weierstrass upgrade
   descent-gated per v10.36). Universe note: the classifying layer is `Scheme.{0}`
   (the atlas is concrete universe-0); MellWScheme stays `u`-polymorphic.
+
+### v10.39b (2026-07-08, fable-PIC0): T-W6 3(c) route survey — all inputs verified present
+- Morphism-level route (surveyed in-files, all VERIFIED to exist): (1)
+  `isPullback_projModelBaseChange` (T-A8a's engine): `projModel (W.map φ)` is the
+  pullback of `projModel W` along `Spec φ`; (2) pullback-pasting isos (mathlib) split
+  `classify W = toSpecΓ ≫ Spec.map (ringHomOfEllipticW W)`; (3) the roundtrip
+  `ellipticWOfRingHom_ringHomOfEllipticW` identifies the middle fibre with
+  `projModel W.1` over `Spec Γ(S,⊤)`; (4) **`projModelVCIso C W` + `projModelVCIso_π`
+  + `projModelVCIso_zero`** (ModelVariableChange.lean, T-W7.0h — the POINTED
+  over-base variable-change chart iso, complete). Chain: `curveOf W ≅ pullback
+  (projModelπ W.1) toSpecΓ`, vc-iso base-changes pointedly, conclude `curveOf (C•W)
+  ≅ curveOf W` pointed over `S`. Known risk: the T-W5a "term-▸ crux + erw
+  poison-bypass" transparency walls live exactly at these comparison seams — v10.24(a)
+  applies (split on slowdown).
