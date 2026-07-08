@@ -9402,3 +9402,24 @@ artifact: `decomposition-a711-fp.md`. Stretch follow-ons per charter, after FP:
 
 - **Claimed**: fable-FP, 2026-07-08T15:09Z (stream star: [STREAM-FP]; first ticket: [A711-FP])
 - **[A711-FP] Status**: in_progress
+
+### v10.41 (2026-07-08, fable-PIC0): **[T-W6c-i] DONE** — the pasting identification is fully pointed
+
+*Commit 340850c0; MellWeierstrass.lean sorry-free (again), axiom-clean throughout.*
+- `curveOfPasting` + `_snd` + `_zero` all PROVEN: `curveOf W ≅ pullback (projModelπ W.1)
+  toSpecΓ`, over `S` and matching zero sections. The zero-leg (the forecast c2-analogue)
+  fell in one continuous seam-by-seam pass: `curveOfMiddle_zero` via isoPullback
+  projections + `@projModelZero_baseChange` (explicit toAlgebra) + show-respell; the
+  `hz` lift-characterization via erw'd pasting `inv_fst`/`inv_fst_snd` + the
+  `lift_snd_assoc` reassoc-variant (T-W3c gotcha, verbatim useful).
+- SEAM ARSENAL (validated ×6 this arc, for the c-ii/c-iii worker): (1) hoist every
+  equality to a top-level private lemma; (2) @-explicit instances (letI-fvars are
+  invisible to rw AND to lemma-side instance synthesis); (3) erw exactly at
+  spelling-drift seams (universalCurveπ↔projModelπ uWL, classify↔composite,
+  algebraMap↔φ); (4) rw-with-explicit-argument when the lemma has an explicit
+  proof-arg (side-goal otherwise); (5) reassoc/_assoc variants instead of ← assoc;
+  (6) term-mode `(Category.comp_id _).trans ...` when simp chokes on
+  instances-poisoned 𝟙-objects.
+- **NEXT ([T-W6c-ii], open, fable-PIC0 continues)**: `curveOfVCIso : curveOf W ≅
+  curveOf (C • W)` pointed over S — pullback.map of `projModelVCIso`/`_π`/`_zero`
+  along toSpecΓ, conjugated by curveOfPasting (+ its two compats). Then c-iii.
