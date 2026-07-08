@@ -10432,3 +10432,41 @@ concrete-ring trap → v10.24(e) "pin the hom, then instantiate."*
 - **This session's yield (one run):** c4.2c fully closed AND the entire c4.3 mathematical core —
   transition, geometric overlap, cross-chart agreement, global opens. The scheme-topology of `hf` is
   the next focused unit.
+
+### v10.52 (2026-07-08, fable-PIC0): CLEANUP-PIC1 DONE (full /cleanup on InvertibleSheaf.lean) — T-PIC1c dossier refined, GAP-1 route sharpened
+
+*Commit a0dff5321. The queued cadence ticket (v10.40) executed in full: 11-phase /cleanup,
+9 sequential per-decl workers (all hard gates pass), 4-reviewer simplify pass (1 fix),
+buzz FAST BOARD (<100ms/decl). 131→127 lines; GAP-1 sorry + docstring untouched; build
+green throughout; the muNRingGen_pow rename queue entry (another session's, MuN.lean)
+left queued — out of this ticket's file scope.*
+
+- **T-PIC1c dossier updates (bank these):** (a) RE-CONFIRMED on pin 11b908e5cdd9: per-app
+  `asIso (…counit.app M)` still fails IsIso synthesis in instance-implicit position.
+  (b) REFINEMENT: the failure is specifically **instance-implicit ARGUMENT position**
+  (application-time synthesis) — `have h : IsIso … := inferInstance` in TERM mode also
+  succeeds; "term-vs-tactic" was the wrong cut. (c) **NEW BANKED ANTIDOTE (preferred over
+  the have/@asIso pattern where an ambient whole-object instance exists):** take `asIso`
+  of the WHOLE natural transformation and `.app` it — `(asIso (…adjunction…).counit).app M`
+  (mathlib's own idiom, Sheaf/Colimits.lean:37) hits the instance head directly and
+  sidesteps the per-app derivation entirely. The 2 other in-project have/@asIso workaround
+  sites can likely simplify the same way when their owners next touch them. (d) Sharper
+  clothing datum (pullbackUnitIso probe): instance SYNTHESIS fails across the
+  X.Modules/SheafOfModules wrapper even where field-wise defeq/UNIFICATION succeeds —
+  the field-by-field iso repackage is load-bearing exactly at synthesis sites, removable
+  at pure-unification sites (nonempty_tensorObj_unit_iso's was removed).
+- **GAP-1 route sharpening (decomposition-pic-coh.md addendum):** mathlib still has NO
+  monoidal structure on SheafOfModules (5-method verified ×3 workers). The two nearest
+  transports both fail as-is: `CategoryTheory.Sheaf.monoidalCategory` needs a FIXED
+  monoidal target (module fibers vary); Day reflection (`Monoidal.Reflective`) needs
+  `MonoidalClosed (PresheafOfModules _)` — mathlib has `SymmetricCategory` there but NO
+  closedness. Building that closedness is a candidate GAP-1 route (vs tracking Riou).
+- **Rename applied (5b):** `exists_tensorObj_unit_iso` → `nonempty_tensorObj_unit_iso`
+  (mathlib Nonempty-conclusion convention; zero external call sites). Historical board
+  mentions of the old name stand as records.
+- **Upstream candidates recorded (EXTERNAL-QUIET — internal list only):** the
+  MonoidalCategoryStruct bridging instance (beside mathlib's Scheme.PresheafOfModules);
+  a SheafOfModules-level named counit iso; IsInvertible as the missing rank-1 refinement
+  of IsLocallyFree (fills mathlib's own PicardGroup.lean TODO); Opens.map_final
+  (confirmed absent from mathlib). MellWeierstrass cleanup stays queued until A's map_id
+  favor closes the file.
