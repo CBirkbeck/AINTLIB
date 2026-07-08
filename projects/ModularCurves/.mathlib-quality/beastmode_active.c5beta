@@ -1,0 +1,1 @@
+FOCUS: T-W7.0c-c5beta beta1 — tensor core DONE (fc670a51). NEXT: scheme half — pullbackSpecIso + Scheme.Pullback.openCoverOfLeftRight to identify Spec(biChartRing W i j) with the (i,j) chart-product open of pullback (projModelpi W) (projModelpi W). Then beta3 per-(i,j,k) ring homs.
