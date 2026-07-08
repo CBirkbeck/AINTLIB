@@ -2001,8 +2001,19 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   `galoisCoords_dual`, surjectivity is `∑ᵢ aᵢ (g•bᵢ) = δ_{g,1}` applied to `∑_g g•m`.
   *Fourth* use of the Galois coordinates. Mathlib has no faithfully-flat module descent.
   Applied to `M = Γ(W)` for a `G`-stable affine open `W ⊆ E`, this says `Γ(W) ≅ Γ(W)ᴳ ⊗_{Aᴳ} A`,
-  i.e. **`W ≅ (W/G) ×_{X/G} X`** — exactly the cartesianness [a3-ii] asserts. What remains of
-  [a3-ii] is purely the geometric packaging (chart-wise ⟹ global `IsPullback`).
+  i.e. **`W ≅ (W/G) ×_{X/G} X`** — exactly the cartesianness [a3-ii] asserts.
+  Packaged for mathlib's scheme-side consumer:
+  * `isBaseChange_semilinearInvariants` — `Mᴳ ↪ M` exhibits `M` as the base change of `Mᴳ`
+    along `Aᴳ → A` (mathlib `IsBaseChange`);
+  * **`isPushout_fixedPoints`** — for a `G`-equivariant `A`-algebra `C`, the square
+    `Aᴳ → A`, `Aᴳ → Cᴳ`, `→ C` is an `Algebra.IsPushout`. Mathlib's
+    `AlgebraicGeometry.isPullback_SpecMap_of_isPushout` turns this into the **cartesian square
+    `Spec C ≅ Spec A ×_{Spec Aᴳ} Spec Cᴳ`**. So `[a3-ii]` holds *at chart level, verbatim*.
+  **What remains of [a3-ii] is purely the geometric packaging**: (i) identify each stable affine
+  chart's `localQuotient` with `Spec Γ(W)ᴳ` (already `localQuotient`'s definition), (ii) apply
+  `isPullback_SpecMap_of_isPushout` chart-by-chart, (iii) glue — `IsPullback` is Zariski-local at
+  the target (`IsZariskiLocalAtTarget`), and the `E`-atlas can be taken subordinate to `X`'s
+  because in route (a) `X` is **affine**, so its atlas is the constant `⊤`.
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 

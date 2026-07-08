@@ -193,6 +193,50 @@ theorem descentMul_bijective (hfree : IsFreeAlgebraAction G R A) :
         exact absurd (Finset.mem_univ (1 : G)) hc
     rw [Finset.sum_congr rfl fun g _ => hcol g, hone]
 
+/-- **Galois descent as a base change**: `Mᴳ ↪ M` exhibits `M` as the base change of `Mᴳ` along
+`Aᴳ → A`. This is the form mathlib's `Algebra.IsPushout` / `isPullback_SpecMap_of_isPushout`
+consume, i.e. the form in which `[a3-ii]`'s cartesian square is produced. -/
+theorem isBaseChange_semilinearInvariants (hfree : IsFreeAlgebraAction G R A) :
+    IsBaseChange A (semilinearInvariants G R A M hsl).subtype := by
+  have hmap : (TensorProduct.lift
+      (((Algebra.linearMap A (Module.End A
+        (↥(semilinearInvariants G R A M hsl) →ₗ[FixedPoints.subalgebra R A G] M))).flip
+          (semilinearInvariants G R A M hsl).subtype).restrictScalars
+            (FixedPoints.subalgebra R A G))) = descentMul G R A M hsl := by
+    refine TensorProduct.ext' fun a m => ?_
+    rfl
+  show Function.Bijective _
+  rw [hmap]
+  exact descentMul_bijective G R A M hsl hfree
+
 end Fintype
+
+section AlgebraCase
+
+variable (C : Type u) [CommRing C] [Algebra A C] [MulSemiringAction G C]
+  [SMulCommClass G (FixedPoints.subalgebra R A G) C] [Fintype G] [DecidableEq G]
+
+/-- **Galois descent, algebra form**: for a free `G`-action on `A` and a `G`-equivariant
+`A`-algebra `C`, the square
+
+    Aᴳ ──▶ A
+    │      │
+    ▼      ▼
+    Cᴳ ──▶ C
+
+is a **pushout** of commutative rings, i.e. `C ≅ A ⊗_{Aᴳ} Cᴳ`.
+
+Applying `Spec` (mathlib's `isPullback_SpecMap_of_isPushout`) turns this into the cartesian
+square `Spec C ≅ Spec A ×_{Spec Aᴳ} Spec Cᴳ` — with `C = Γ(W)` for a `G`-stable affine open `W`
+of the universal curve and `A = Γ(X)`, that is exactly `W ≅ X ×_{X/G} (W/G)`: **leaf `[a3-ii]`
+at chart level**, with no appeal to SGA I Exp. VIII 7.8. -/
+theorem isPushout_fixedPoints
+    (hslC : ∀ (g : G) (a : A) (c : C), g • (a • c) = (g • a) • (g • c))
+    (hfree : IsFreeAlgebraAction G R A) :
+    Algebra.IsPushout (FixedPoints.subalgebra R A G) A
+      (FixedPoints.subalgebra (FixedPoints.subalgebra R A G) C G) C :=
+  ⟨isBaseChange_semilinearInvariants G R A C hslC hfree⟩
+
+end AlgebraCase
 
 end MulSemiringAction
