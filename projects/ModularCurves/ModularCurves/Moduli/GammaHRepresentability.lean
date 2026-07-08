@@ -711,6 +711,48 @@ theorem EllipticCurve.Point.restrict_zsmul {S : Scheme.{u}} (E : EllipticCurve S
   map_zsmul (AddMonoidHom.mk' (EllipticCurve.Point.restrict E k)
     (EllipticCurve.Point.restrict_add E k)) n P
 
+/-- Glue a `Bool`-family of sections of `X.curve` into a `T`-point over `g`, where
+`T = ∐Bool` and `g` restricts to `𝟙` on each summand (the section-level content of
+the coproduct-glue that produces the second, distinct global orbit in the GHC4
+refutation). -/
+noncomputable def coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) : X.curve.Point g :=
+  ⟨Sigma.desc (fun b => (s b).1), by
+    refine Sigma.hom_ext _ _ (fun b => ?_)
+    rw [← Category.assoc, Sigma.ι_desc, (s b).2, hg b]⟩
+
+lemma coprodPoint_ι {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) (b : Bool) :
+    Sigma.ι (fun _ : Bool => X.base) b ≫ (coprodPoint X g hg s).1 = (s b).1 := by
+  simp only [coprodPoint, Sigma.ι_desc]
+
+open EllipticCurve in
+/-- The glued point is killed by `N` when each component section is (the killing half
+of the coproduct-glue's `IsNaiveFullLevel`). -/
+lemma coprodPoint_nsmul_eq_zero {R : CommRingCat.{u}} (X : EllObj R) (N : ℕ)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) (hs : ∀ b, (N : ℤ) • s b = 0) :
+    (N : ℤ) • coprodPoint X g hg s = 0 := by
+  refine Subtype.ext (Sigma.hom_ext _ _ (fun b => ?_))
+  have hL : Sigma.ι (fun _ : Bool => X.base) b ≫ ((N : ℤ) • coprodPoint X g hg s).1
+      = (s b).1 ≫ X.curve.mulByHom N := by
+    rw [point_smul_eq_comp_mulBy, ← Category.assoc, coprodPoint_ι]
+  have hR0 : Point.restrict X.curve (Sigma.ι (fun _ : Bool => X.base) b)
+      (0 : X.curve.Point g) = 0 := Point.restrict_zero X.curve _
+  have hRcoe : Sigma.ι (fun _ : Bool => X.base) b ≫ (0 : X.curve.Point g).1
+      = (0 : X.curve.Point (Sigma.ι (fun _ : Bool => X.base) b ≫ g)).1 :=
+    congrArg Subtype.val hR0
+  rw [hL, hRcoe]
+  have hsz : ((N : ℤ) • s b).1 = (s b).1 ≫ X.curve.mulByHom N :=
+    point_smul_eq_comp_mulBy X.curve _ N (s b)
+  rw [← hsz, hs b]
+  exact (congrArg (fun h : X.base ⟶ X.base => (0 : X.curve.Point h).1) (hg b)).symm
+
 /-- **[GHC4-SEP] (the separated-presheaf half of the refutation)** A relative
 representation datum separates a global value of the represented functor by its
 restrictions to the two components of a `Bool`-coproduct base: the injectivity core
