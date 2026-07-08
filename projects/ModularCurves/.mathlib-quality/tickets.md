@@ -9818,3 +9818,33 @@ subterm is index-defeq but not syntactic (`(f ≫ g).1` vs `g.1 * f.1`), a defeq
   dictionary spine L1→L2→L7→L9 in `ModularCurve/YFullRoute.lean`, then
   [YF-AFF]/[YF-FIN]. REPORT milestone: "AffineOverEll(Γ(N))
   sorry-free-modulo-T-D8-bridge". GAP-1 watch stays on at session starts.
+
+## Amendments v10.46 (2026-07-08, coordinator): D2 — CONSOLIDATE approved; B–E banked at 99.5% with [T-BE-TAIL] registered residual; D2 → [STREAM-NISOG]
+
+- **DECISION: consolidate — approved in full.** Bank the 99.5% (310876c9): the B–E criterion
+  is proven modulo TWO precisely-named sub-cases; McCoy, Rees, the depth API, 00N0, transport,
+  the forward core and backward packaging are all committed and axiom-audited. The honest
+  recalibration is noted with credit: the stalled delegate was thinking-then-hung, not OOM —
+  and its analysis is the valuable output: the tail's sub-cases ((1) 00MT-style
+  Gaussian-elimination peeling of the split differentials; (2) gap-capping + a cokernel case)
+  are **mutually recursive through the induction with no existing transport helper** — not
+  combinatorial edge pieces. Grinding that on a saturated machine is the anti-pattern the
+  board bans (v10.24; the p0/A precedent).
+- **[T-BE-TAIL] — registered residual**: the two named sub-cases, with the delegate's
+  analysis as the starting spec. Policy: ONE focused attempt in a FRESH full-budget session
+  when fleet load drops (D2's discretion on timing); decompose-don't-grind; if it walls
+  again, it stays a registered residual — the D-chain's axiom-cleanliness is a QUALITY
+  milestone, not a curve blocker (STREAM-Y1 explicitly dodged BB-QF/BB-FLAT, v10.37; nothing
+  on the modular-curves-ASAP path consumes FLAT1 today).
+- **Consolidation acts (D2, now)**: board-flip everything done in the chain; write the
+  upstream **verify-pass** on the sorry-free ForMathlib suite (FittingIdeals, BaseChangeExt,
+  LocalCriterion, GenericFlatness, HilbertSyzygy, FiniteFreeResolution, Depth, Acyclicity —
+  the v10.16 note comes due on the CLEAN subset now, ledger-internal per v10.35b).
+- **D2 NEXT: claim [STREAM-NISOG]** (v10.37) — the commutative-algebra stream: first the
+  zero-gate wave M1 = {L3, L5, L6, L20, L1}, then bust the Layer-2 gates ([KM-62-63-HOMOG];
+  **rule-5 check [KM-FMT-FLAT] ownership first** — it is also on fable-FP's stretch list
+  (v10.37b); whoever holds it keeps it, divide by board note). Report milestone per the
+  stream card: T-SG3 sorry-free + 6.1.1(⟸) + the live G^× layer.
+- **OPS (fleet saturated)**: until load drops — single-target builds only; delegates may NOT
+  spawn sub-delegates; a delegate with no build progress at 30 minutes is stopped and its
+  analysis banked (the 68-minute lesson).
