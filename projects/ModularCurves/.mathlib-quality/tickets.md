@@ -7370,3 +7370,36 @@ records why).*
   dissolved the diamond that blocked 6 direct attempts) and T-H2b's
   `Over.monObjMkPullbackSnd_mul_left_fst` / `Point.baseChangeEquiv` spellings — start from
   those patterns, not from scratch.
+
+## Amendments v10.20 (2026-07-08): #5220 MERGED, 3/4 leaves wired — [T-W7.1b-faith] cut and assigned to beastmode-A; P3b3 released to T-IRR0
+
+- **Wire report absorbed (beastmode-A)**: PR #5220 MERGED to dev/modular-curves, consumer
+  verified, nothing broke. Import topology forced a clean relocation: the four ticketed
+  leaves moved verbatim into a NEW capstone `EllipticCurve/Comparison.lean` above the stack
+  (registered in root) — `ModelVariableChange.lean` is now SORRY-FREE. Discharged axiom-clean
+  ([propext, Classical.choice, Quot.sound]): `pointedIsoCoordEquiv_coordX`/`_coordY`
+  (← `exists_coord{X,Y}_image_of_filtration`, hfil := `pointedIsoCoordEquiv_filtration`) and
+  `projModelVCIso_injective` (← `projModelVCIso_injective'`). Leaf sorry-count 4 → 1.
+  **T-W7.1b correctly NOT flipped** — `main` still carries its sorry; T-W7.12's 1b dep stays.
+- **Form-mismatch finding (real, recorded)**: `pointedIso_exists_variableChange` concludes in
+  MODEL-MORPHISM form (`e.hom = eqToHom ≫ (projModelVCIso C ...)`) while the PR's main-alg
+  delivers the COORDINATE-EQUATION form (∃ C, C•W'=W ∧ Φx'=u²x+r ∧ …). Bridging needs
+  **faithfulness: `pointedIsoCoordEquiv` injective on morphisms** — not in the PR, and always
+  integrator-side scope (the coordinate form WAS the agreed main-alg deliverable; no defect
+  on P3b3's side).
+- **NEW SUB-TICKET [T-W7.1b-faith]** (the last leaf): beastmode-A's scoped reduction is the
+  route of record — coordEquiv-equal → cancel the fixed chart isos (b1 definition) →
+  pointedIsoΓ-equal → cancel presheaf → `e.hom.app`-equal → the crux scheme-level step
+  (chartZ_W ≫ e.hom factors through the Z'-chart, pinned by that app; Spec faithful;
+  `hom_ext_of_affine`) + computing `pointedIsoCoordEquiv` of the eqToHom-transported
+  `projModelVCIso` via `bridge_coordX/Y`. Bounded cancellation lemmas + one
+  scheme-faithfulness step.
+- **ASSIGNMENT: beastmode-A takes T-W7.1b-faith NOW.** Rationale: A scoped the reduction and
+  owns the b1/b2 (`pointedIsoCoordEquiv`) layer it sits on, and closing the W7 bottleneck's
+  last comparison leaf outranks T-D33. On landing: discharge `main`, full-file axiom sweep,
+  flip **T-W7.1b → DONE** (comparison milestone; T-W7.12's 1b dep flips ✓). T-D33 stays A's
+  queued follow-on (then T-IRR0 fallback is RETIRED from A's list — it goes to P3b3).
+- **P3b3 RELEASED from wire standby** (feedback = clean, no defect): proceed to **[T-IRR0]**
+  per v10.14 — `/develop --decompose` scoping of the KM Ch. 10 route, v10.8 discipline.
+- Also absorbed: A re-reboxed T-D6b with a sharper statement after their fresh-route attempt —
+  the étale core remains the v10.10 stream's to discharge.
