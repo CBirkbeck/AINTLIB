@@ -32,6 +32,7 @@ import ModularCurves.EllipticCurve.AdditionChartAgree
 import ModularCurves.EllipticCurve.AdditionChartGlue
 import ModularCurves.EllipticCurve.AdditionChartProj
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.MonicQuotientDescent
