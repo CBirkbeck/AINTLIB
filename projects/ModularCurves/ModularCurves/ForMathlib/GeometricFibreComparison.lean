@@ -84,4 +84,39 @@ omit [(W.baseChange k).IsElliptic] in
 
 end EllipticCurve
 
+/-- On a Tate-normal-form curve over a field (`a₄ = 0`, `a₂` and `a₃` units) the marked affine
+point `(0, 0)` is nowhere of order `1`, `2`, or `3`: every `a • (0, 0)` with `1 ≤ a ≤ 3` is a
+genuine affine point, never the identity. (`ψ₂(0,0) = a₃`, `ψ₃(0,0) = b₈ = a₂a₃²`; `(0,0)` fails to
+be 2-torsion since `0 ≠ negY(0,0) = -a₃`, and `3•(0,0)` has distinct `x`-coordinate `-a₂ ≠ 0`.) This
+is the affine core of the atlas leaf `NowhereGeomOrderLEThree (tateMarkedPoint)` (Y1-vi), transferred
+to fibres through `EllipticCurve.geomFibrePointAddEquiv`. -/
+lemma affine_origin_order_gt_three {k : Type u} [Field k] [DecidableEq k]
+    (W : WeierstrassCurve k) [W.IsElliptic] (h4 : W.a₄ = 0)
+    (hB2 : IsUnit W.a₂) (hB3 : IsUnit W.a₃)
+    (hns : W.toAffine.Nonsingular 0 0) (a : ℕ) (ha0 : 0 < a) (ha3 : a ≤ 3) :
+    (a : ℤ) • (WeierstrassCurve.Affine.Point.some 0 0 hns) ≠ 0 := by
+  have hne : ¬((0 : k) = 0 ∧ (0 : k) = W.toAffine.negY 0 0) := by
+    rintro ⟨-, h⟩
+    apply hB3.ne_zero
+    rw [WeierstrassCurve.Affine.negY, show W.toAffine.a₃ = W.a₃ from rfl,
+      show W.toAffine.a₁ = W.a₁ from rfl] at h
+    linear_combination h
+  interval_cases a
+  · show (1 : ℤ) • _ ≠ 0
+    rw [one_zsmul]
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hns
+  · show (2 : ℤ) • _ ≠ 0
+    rw [two_zsmul, WeierstrassCurve.Affine.Point.add_some hne]
+    exact WeierstrassCurve.Affine.Point.some_ne_zero _
+  · have hℓ : W.toAffine.slope 0 0 0 0 = 0 := by
+      rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (fun h => hne ⟨rfl, h⟩)]
+      simp [h4]
+    have hx2 : W.toAffine.addX 0 0 (W.toAffine.slope 0 0 0 0) = -W.a₂ := by
+      rw [hℓ, WeierstrassCurve.Affine.addX]; ring
+    show (3 : ℤ) • _ ≠ 0
+    rw [show (3 : ℤ) = 2 + 1 by ring, add_zsmul, two_zsmul, one_zsmul,
+      WeierstrassCurve.Affine.Point.add_some hne]
+    rw [WeierstrassCurve.Affine.Point.add_of_X_ne (by rw [hx2]; simpa using hB2.ne_zero)]
+    exact WeierstrassCurve.Affine.Point.some_ne_zero _
+
 end ModularCurves
