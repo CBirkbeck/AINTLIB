@@ -5701,6 +5701,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `Mathlib/AlgebraicGeometry/AffineScheme.lean`, next to `Spec_basicOpen`.
     NEXT: c4.2b (the three-`D(t_k)` OpenCover of `blOpenYPiece`) then c4.2c (`glueMorphisms`;
     agreement = the proven crux 3166d104).
+  - **c4.2b DONE** (coordinator-P1, 2026-07-08T14:48Z, d0407867, `AdditionChartOpen.lean`, zero
+    sorries, axiom-clean): `blOpen{Y,Z}PieceFamily` (the three `D(t_k)` as opens of the piece),
+    `iSup_blOpen{Y,Z}PieceFamily`, and **`blOpen{Y,Z}PieceCover`** via mathlib's
+    `Scheme.Opens.iSupOpenCover` (Restrict.lean:329).
+    **SELF-CORRECTION #2 (same failure mode as the `Away.isLocalization_mul` retraction)**: I began
+    a ForMathlib `Scheme.openCoverOfOpens` believing mathlib lacked the opens-family cover. It has
+    it — `Scheme.Opens.iSupOpenCover`, in `Restrict.lean`, not in `Cover/*.lean` where I grepped.
+    File deleted before commit. **Fleet antidote (reinforced): grep the NEIGHBOURHOOD, not the
+    name — the constructor you want often lives in the file about the *object*, not the file about
+    the *concept*.** Two false gap-claims in one ticket; the retraction discipline caught both.
   - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
     against the code, not the board:
     · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
