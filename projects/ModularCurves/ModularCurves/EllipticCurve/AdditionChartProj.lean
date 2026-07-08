@@ -153,7 +153,29 @@ lemma chartAwayHomOfTriple_awayMk (k : Fin 3) (t : Fin 3 → S) (u : S) (hu : t 
           ((quotientGradingHom (projIdeal W)) b)
           (by simp only [smul_eq_mul, mul_one]; exact mk_mem_quotientGrading (projIdeal W) hb)) =
       MvPolynomial.aeval t b * u ^ n := by
-  sorry
+  have hmem : b ∈ MvPolynomial.homogeneousSubmodule (Fin 3) R (n • 1) := by simpa using hb
+  have hsymm : (chartCoordAlgEquiv W k).symm
+      (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n
+        ((quotientGradingHom (projIdeal W)) b)
+        (by simp only [smul_eq_mul, mul_one]; exact mk_mem_quotientGrading (projIdeal W) hb)) =
+      Ideal.Quotient.mk _ (MvPolynomial.dehomogenizeAux R k b) := by
+    apply (chartCoordAlgEquiv W k).injective
+    rw [AlgEquiv.apply_symm_apply]
+    symm
+    show chartCoordEquiv W k (Ideal.Quotient.mk _ (MvPolynomial.dehomogenizeAux R k b)) = _
+    rw [chartCoordEquiv_mk, MvPolynomial.homogenizeAt_dehomogenizeAux R k hmem, Away.map_mk]
+  show chartHomOfTriple W k t u hu ht ((chartCoordAlgEquiv W k).symm _) = _
+  rw [hsymm, chartHomOfTriple_mk]
+  have hw : (fun m : Fin 3 => u * t m) k = 1 := by
+    show u * t k = 1
+    rw [mul_comm]
+    exact hu
+  have hstep := aeval_dehomogenizeAux_of_apply_eq_one (S := S) k (fun m : Fin 3 => u * t m) hw b
+  have hscale := ((MvPolynomial.mem_homogeneousSubmodule _ _).mp hb).aeval_mul_left (S := S) t u
+  have hfun : (fun m : {m : Fin 3 // m ≠ k} => t (m : Fin 3) * u) =
+      (fun m : {m : Fin 3 // m ≠ k} => (fun p : Fin 3 => u * t p) (m : Fin 3)) :=
+    funext fun m => mul_comm _ _
+  rw [hfun, hstep, hscale, mul_comm]
 
 open HomogeneousLocalization in
 /-- **The last ring-level step.** The two lifts — built from the `k`-chart and the `l`-chart of the
