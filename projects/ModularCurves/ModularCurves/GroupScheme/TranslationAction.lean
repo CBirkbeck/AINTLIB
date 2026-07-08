@@ -170,6 +170,35 @@ theorem actPair_snd (G : FiniteLocallyFreeSubgroup E) :
     G.actPair ≫ snd E.asOver E.asOver = G.actionProj :=
   lift_snd _ _
 
+/-- The inclusion `ιOver : G ⟶ E` is a monomorphism (it is a closed immersion). -/
+instance ιOver_mono (G : FiniteLocallyFreeSubgroup E) : Mono G.ιOver := by
+  haveI : Mono G.ι := inferInstance
+  refine ⟨fun {Z} a b h => Over.OverMorphism.ext ?_⟩
+  have h' : a.left ≫ G.ι = b.left ≫ G.ι := congrArg CommaMorphism.left h
+  exact (cancel_mono G.ι).mp h'
+
+/-- **Freeness of the translation action.** `actPair = ⟨act, pr_E⟩ : G ×_S E ⟶ E ×_S E` is a
+monomorphism: from `(x + ι t, x)` one recovers `x` (second component) and then `ι t` (hence `t`,
+`ι` mono) — so `G` acts freely. This makes the finite-locally-free groupoid `G ×_S E ⇉ E` an
+equivalence relation, the input to the effective-quotient existence (Piece 3) and the degree count
+`deg[N] = N² = rank E[N]` in `E/E[N] ≅ E` (`[T-G3d-Niso]`). -/
+instance actPair_mono (G : FiniteLocallyFreeSubgroup E) : Mono G.actPair := by
+  refine ⟨fun {Z} a b h => ?_⟩
+  letI : CommGroup (Z ⟶ E.asOver) := Hom.commGroup
+  have hsnd : a ≫ snd (Over.mk G.π) E.asOver = b ≫ snd (Over.mk G.π) E.asOver := by
+    have h2 := congrArg (· ≫ snd E.asOver E.asOver) h
+    rwa [Category.assoc, Category.assoc, G.actPair_snd] at h2
+  have hact : a ≫ G.translationAction = b ≫ G.translationAction := by
+    have h2 := congrArg (· ≫ fst E.asOver E.asOver) h
+    rwa [Category.assoc, Category.assoc, G.actPair_fst] at h2
+  rw [G.translationAction_eq_mul, MonObj.comp_mul, MonObj.comp_mul, Hom.mul_def, Hom.mul_def,
+    hsnd] at hact
+  have hfstι : a ≫ (fst (Over.mk G.π) E.asOver ≫ G.ιOver)
+      = b ≫ (fst (Over.mk G.π) E.asOver ≫ G.ιOver) :=
+    GrpObj.lift_left_mul_ext _ hact
+  rw [← Category.assoc, ← Category.assoc] at hfstι
+  refine hom_ext _ _ ((cancel_mono G.ιOver).mp hfstι) hsnd
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
