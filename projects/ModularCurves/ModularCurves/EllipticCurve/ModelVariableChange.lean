@@ -1561,6 +1561,20 @@ lemma pointedIsoChartTransport_mem_span_of_aug_eq_zero {W W' : WeierstrassCurve 
   exact transport_mem_span_aux W r _ b₀ k hb₀
     (aug_pow_kill_of_res_eq_zero W r _ hzres)
 
+/-- **(T-W7.1b-b2 + the INTRINSIC-FILTRATION BRIDGE, coordinator §2)** The induced affine
+ring isomorphism preserves the pole-order filtration. NOT free: the landed
+`poleOrderFiltration` is a monomial span (coordinate-dependent); this leaf carries the
+intrinsic (section-ideal/overlap-order) characterization inside its proof — it GATES all of
+1b. DESIGN-DERIVED (audit A1 b2). -/
+theorem pointedIsoCoordEquiv_filtration {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') (n : ℕ) :
+    Submodule.map (pointedIsoCoordEquiv e heπ hez).toLinearEquiv.toLinearMap
+        (poleOrderFiltration W' n) =
+      poleOrderFiltration W n := by
+  sorry
+
 /-- **(T-W7.1b-b3x, coordinator §2)** Coefficient extraction, `x`-side: `Φ(x') = αx + β`
 with `α` a unit (from `F₂`-preservation + the freeness of `{1, x}`). Shared-witness
 `∃`-bundle (α, β and the unitness travel together into b3y/the relation-matching). -/
