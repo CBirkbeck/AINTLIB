@@ -19,9 +19,13 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    shows only `propext`/`Classical.choice`/`Quot.sound` + `sorryAx` inherited from
    *registered* dependencies (list them in the closing note); **no `set_option
    maxHeartbeats` anywhere** (needing one ⟹ file a `/decompose-proof` ticket instead).
-4. PENDING-SOURCE(KM) tickets (marked ⧗KM) may be *worked for statements and
-   non-KM-sourced lemmas* but not closed until the full KM text lands and the verbatim
-   quote-gate in `decomposition.md` is satisfied.
+4. **⚡ KM SOURCE GATE LIFTED 2026-07-08** — the full Katz–Mazur text is now in
+   `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`. ⧗KM tickets are **dispatchable and
+   may be CLOSED** (don't idle "waiting for KM"). When you close one, READ the cited KM pages and
+   quote them verbatim (page + section) in the decl/ticket; do NOT prove from memory. A ⧗KM ticket
+   may still be blocked by a *non-KM* gate (deferred T-A6 Abel dictionary, T-Q2/SGA-III, D2's
+   flatness/depth domain) — re-check its other `Depends on:`. See the "Katz–Mazur source gate —
+   LIFTED" section below for the binding wording.
 5. **Claim protocol (multi-worker, added 2026-07-06)** — several workers share this
    worktree/branch; the board is the lock. To claim a ticket: add a
    `- **Claimed**: <worker-handle>, <ISO-UTC>` line, set `Status: in_progress`, and
@@ -53,6 +57,10 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
    alone is not reaching it. ESCALATED TO OWNER: the beastmode-A session needs the
    pathspec-commit instruction pasted directly into it (and/or a pre-commit guard).
    No build damage (file not yet root-imported at 552a037c; HEAD corrected via 217f7aba).
+   **SEVENTH SWEEP (2026-07-08T09:12Z, coordinator-P1)**: `a4756384` (beastmode-A b2-γ)
+   swept P1's in-flight `AdditionChartLadder.lean` mid-iteration. HEAD corrected via
+   `cfae244c`. Count now 7 (see also #6 at 98f06d8c, logged by fable-P4). Owner action
+   still pending: paste the pathspec-commit instruction into the beastmode-A session.
 
 ## Summary
 - Work tickets: 24 · Cleanup tickets: 11 · Milestones: T-E2, T-E7, T-E9, T-F4
@@ -2802,11 +2810,25 @@ All in `LevelStructure/Incidence.lean` unless noted; statements in skeleton.
   finite flatness, `Γ₀(p)`-regularity with auxiliary level — statements to be cut
   when full KM lands (all on the do-not-formalize-from-memory list).
 
-### Do-not-formalize-from-memory gate (v2, binding)
-KM 2.3, 2.8, 4.7, 5–7, 8–10, 12–13: tickets touching these may *state* from
-[Loe]/[Hida] quotes but may not close, nor may proofs be reconstructed "from
-standard knowledge", until the full KM text is in `refs/ModularCurves/` and the
-decomposition quote-gate passes.
+### Katz–Mazur source gate — ⚡ LIFTED 2026-07-08 ⚡ (was: do-not-formalize-from-memory)
+**The full Katz–Mazur text has LANDED**: `refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`
+(local-only, gitignored). The gate condition ("until the full KM text is in `refs/ModularCurves/`")
+is now MET, so the do-not-formalize-from-memory block on KM 2.3, 2.8, 4.7, 5–7, 8–10, 12–13 is
+**LIFTED**. **Every ⧗KM ticket is now dispatchable and MAY BE CLOSED** — do NOT leave them idle
+"waiting for KM"; the wait is over. (A ⧗KM ticket may still be blocked by a *different*,
+non-KM gate — e.g. the deferred T-A6 Abel/canonicity dictionary, T-Q2 = SGA III, or D2's
+flatness/depth domain — so re-check each ticket's OTHER `Depends on:` before claiming; but the KM
+gate itself no longer blocks anything.)
+
+**New binding requirement (replaces the from-memory prohibition, keeps source-faithfulness):**
+when formalizing a ⧗KM result, first READ the cited pages in the PDF, then cite the statement
+**verbatim (page + KM section number) from the actual text** in the decl docstring / ticket, and
+confirm the Lean statement matches that quote. Do NOT reconstruct "from standard knowledge". The
+`⧗KM` marker now means "cite the real text", not "blocked".
+
+(Original gate, for the record: KM 2.3/2.8/4.7/5–7/8–10/12–13 could be *stated* from [Loe]/[Hida]
+quotes but not closed until the full KM text was in `refs/ModularCurves/` and the decomposition
+quote-gate passed. That condition is now satisfied.)
 
 ### Cleanup cadence (v2 recount)
 Work tickets: 24 (v1) − 1 (pointAddCommGroup absorbed) + 11 (D0) + 3 (SG) + 7 (Q)
@@ -5029,6 +5051,17 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `chartY_sup_chartZ_eq_top` [P3's b3, landed]) · β1 Spec-identification (`pullbackSpecIso`
     + `chartCoordEquiv` + tensor↔4-variable-quotient iso) · β3 per-(i,j,k) ring homs ·
     β4 gluing.
+  - **Progress** (coordinator-P1, 2026-07-08T09:12Z): **β2b LADDER DONE** (cfae244c,
+    `AdditionChartLadder.lean`, zero sorries, axiom-clean) — `biChartRingEquiv :
+    biChartRing W i j ≃ₐ[R] affineChartRing (W ⊗ chartRing_j) i` (three-step quotient
+    transport; `quotientEquivQuotientMvPolynomial_symm_mk` proven as a missing-mathlib
+    helper, upstream candidate) + `isDomain_biChartRing` (chart-product domain-ness
+    REDUCED to single charts over enlarged bases) + Jacobson instances confirmed
+    AUTOMATIC (`MvPolynomial.isJacobsonRing` Finite-ι + quotient; inferInstance test).
+    β2b's remaining leaf is now exactly ONE statement: `IsDomain (affineChartRing W i)`
+    for `i ∈ {1,2}` over a domain base (AdjoinRoot-monic freeness + field case via
+    ProjIntegral + `IsIntegral.component_integral`, or reuse of PoleFiltration b1's
+    `infChartQuotEquiv` machinery for the Y-chart).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
