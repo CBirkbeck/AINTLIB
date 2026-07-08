@@ -101,6 +101,14 @@ theorem point_zero_val {T : Scheme.{u}} (g : T ⟶ S) :
     Over.w (toUnit (Over.mk g))
   exact (Category.assoc _ _ _).symm.trans (congrArg (fun m ↦ m ≫ E.zero) hw)
 
+/-- The underlying morphism of the negation of a point is composition with `[-1]`
+(`(-P).1 = P.1 ≫ mulByHom (-1)`); specialises `point_smul_eq_comp_mulBy` at `-1`. Used to identify
+restrictions through the inversion morphism. -/
+theorem point_neg_val {T : Scheme.{u}} {g : T ⟶ S} (P : E.Point g) :
+    ((-P : E.Point g) : T ⟶ E.E) = (P : T ⟶ E.E) ≫ E.mulByHom (-1) := by
+  have h := E.point_smul_eq_comp_mulBy g (-1) P
+  rwa [neg_one_zsmul] at h
+
 open MonoidalCategory CartesianMonoidalCategory MonObj in
 /-- **(Layer B, L4 infrastructure — the point-addition underlying-map spec.)** The underlying
 morphism of a sum of points is the cartesian lift of the two summands' morphisms into
@@ -342,6 +350,72 @@ theorem subgroupMul_unit_left :
   rw [h1, zero_add]
   show uL ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = D.ideal.subschemeι
   rw [← Category.assoc, huL, pullback.lift_snd, Category.id_comp]
+
+/-- **(Layer B, L4 — right unit law of the group scheme.)** `(id ×_S e) ≫ m = id`. Mirror of
+`subgroupMul_unit_left` (`bipt₂` factors through the unit, restricting to `0`; `bipt₁` restricts to
+`upt`). Dualizes to the right counit law of the coalgebra. -/
+theorem subgroupMul_unit_right :
+    pullback.lift (𝟙 _) ((D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD)
+        (by rw [Category.id_comp, Category.assoc, E.subgroupUnit_over hD, Category.comp_id])
+      ≫ E.subgroupMul hD = 𝟙 D.ideal.subscheme := by
+  set uR := pullback.lift (𝟙 _) ((D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD)
+    (by rw [Category.id_comp, Category.assoc, E.subgroupUnit_over hD, Category.comp_id]) with huR
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, E.subgroupMul_subschemeι hD,
+    Category.id_comp]
+  have hbase : uR ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+    show uR ≫ (pullback.fst _ _ ≫ _) = _
+    rw [← Category.assoc, huR, pullback.lift_fst, Category.id_comp]
+  have key : uR ≫ ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1
+      = (Point.restrict E uR ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D)))).1 := rfl
+  rw [key, Point.restrict_add]
+  have h2 : Point.restrict E uR (E.bipt₂ (D := D))
+      = (0 : E.Point (uR ≫ E.bimulBase (D := D))) := by
+    apply Subtype.ext
+    show uR ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = (0 : E.Point (uR ≫ E.bimulBase (D := D))).1
+    rw [E.point_zero_val, hbase, ← Category.assoc, huR, pullback.lift_snd, Category.assoc,
+      E.subgroupUnit_subschemeι hD, E.point_zero_val, Category.id_comp]
+  rw [h2, add_zero]
+  show uR ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = D.ideal.subschemeι
+  rw [← Category.assoc, huR, pullback.lift_fst, Category.id_comp]
+
+/-- The inversion `n` is a morphism over the base for a general `S`
+(`n ≫ (subschemeι ≫ π) = subschemeι ≫ π`); `-upt` lies over the same base map as `upt`. -/
+theorem subgroupInv_over :
+    E.subgroupInv hD ≫ (D.ideal.subschemeι ≫ E.π) = D.ideal.subschemeι ≫ E.π := by
+  rw [← Category.assoc, E.subgroupInv_subschemeι hD]; exact (-(E.upt (D := D))).2
+
+/-- **(Layer B, L4 — inverse law of the group scheme.)** `⟨n, id⟩ ≫ m = structMap ≫ e`, the
+"multiply by the inverse gives the unit" law. Proven at the point level: the restriction of
+`bipt₁ + bipt₂` along `⟨n, id⟩` is `(-upt) + upt = 0` (`bipt₁` restricts through `n` to `-upt`
+via `subgroupInv_subschemeι` + `point_neg_val`, `bipt₂` to `upt`; `neg_add_cancel`), and
+`0.1 = structMap ≫ E.zero`. Dualizes to the antipode law of the Hopf algebra. -/
+theorem subgroupMul_inv :
+    pullback.lift (E.subgroupInv hD) (𝟙 _)
+        (by rw [Category.id_comp]; exact E.subgroupInv_over hD)
+      ≫ E.subgroupMul hD = (D.ideal.subschemeι ≫ E.π) ≫ E.subgroupUnit hD := by
+  set uV : D.ideal.subscheme ⟶ pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+    pullback.lift (E.subgroupInv hD) (𝟙 _)
+      (by rw [Category.id_comp]; exact E.subgroupInv_over hD) with huV
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, E.subgroupMul_subschemeι hD,
+    Category.assoc, E.subgroupUnit_subschemeι hD, E.point_zero_val, Category.id_comp]
+  have hbase : uV ≫ E.bimulBase (D := D) = D.ideal.subschemeι ≫ E.π := by
+    show uV ≫ (pullback.fst _ _ ≫ _) = _
+    rw [← Category.assoc, huV, pullback.lift_fst, E.subgroupInv_over hD]
+  have key : uV ≫ ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1
+      = (Point.restrict E uV ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D)))).1 := rfl
+  rw [key, Point.restrict_add]
+  have hinv : Point.restrict E uV (E.bipt₁ (D := D))
+      = -(Point.restrict E uV (E.bipt₂ (D := D))) := by
+    apply Subtype.ext
+    rw [E.point_neg_val]
+    show uV ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι)
+      = (uV ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι)) ≫ E.mulByHom (-1)
+    rw [← Category.assoc, huV, pullback.lift_fst, E.subgroupInv_subschemeι hD, ← Category.assoc,
+      pullback.lift_snd, Category.id_comp, E.point_neg_val]
+    rfl
+  rw [hinv, neg_add_cancel]
+  show ((0 : E.Point (uV ≫ E.bimulBase (D := D)))).1 = (D.ideal.subschemeι ≫ E.π) ≫ E.zero
+  rw [E.point_zero_val, hbase]
 
 end GroupObject
 
