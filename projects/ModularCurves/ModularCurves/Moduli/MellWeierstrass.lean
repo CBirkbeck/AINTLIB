@@ -267,4 +267,64 @@ noncomputable def curveOf {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤)) :
   proper := MorphismProperty.pullback_snd _ _ inferInstance
   localModel := universalEllipticCurve.localModel.baseChange (classify W)
 
+section CurveOfPasting
+
+variable {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤))
+
+/-- **(T-W6c-i)** The presented curve is the pullback of `W`'s own projective model
+along `S ⟶ Spec Γ(S,⊤)`: paste the classifying composite, identify the middle fibre by
+`isPullback_projModelBaseChange`, and rewrite along the dictionary round-trip. -/
+private theorem eqToHom_projModelπ {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (h : V = V') :
+    eqToHom (congrArg (projModel ·) h) ≫ projModelπ V' = projModelπ V := by
+  subst h; simp
+
+private theorem uWL_map_ringHomOf :
+    universalWeierstrassLoc.map
+      (@algebraMap _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)) = W.1 := by
+  rw [RingHom.algebraMap_toAlgebra]
+  exact congrArg Subtype.val (ellipticWOfRingHom_ringHomOfEllipticW W)
+
+/-- The middle-fibre identification: the fibre of the universal curve over
+`Spec Γ(S,⊤)` is `W`'s own projective model. -/
+private noncomputable def curveOfMiddle :
+    pullback universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)))
+      ≅ projModel W.1 :=
+  (@isPullback_projModelBaseChange _ _ _ _ (ringHomOfEllipticW W).toAlgebra
+      universalWeierstrassLoc).isoPullback.symm ≪≫
+    eqToIso (congrArg (projModel ·) (uWL_map_ringHomOf W))
+
+private theorem curveOfMiddle_π :
+    (curveOfMiddle W).hom ≫ projModelπ W.1 =
+      pullback.snd universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) := by
+  simp only [curveOfMiddle, Iso.trans_hom, Iso.symm_hom, eqToIso.hom, Category.assoc]
+  rw [eqToHom_projModelπ (uWL_map_ringHomOf W)]
+  exact (@isPullback_projModelBaseChange _ _ _ _ (ringHomOfEllipticW W).toAlgebra
+    universalWeierstrassLoc).isoPullback_inv_snd
+
+noncomputable def curveOfPasting :
+    (curveOf W).E ≅ pullback (projModelπ W.1) S.toSpecΓ := by
+  refine (pullbackLeftPullbackSndIso universalCurveπ
+      (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) S.toSpecΓ).symm ≪≫ ?_
+  have hmapiso : IsIso (pullback.map
+      (pullback.snd universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))))
+      S.toSpecΓ (projModelπ W.1) S.toSpecΓ
+      (curveOfMiddle W).hom (𝟙 S) (𝟙 _)
+      (by rw [Category.comp_id, curveOfMiddle_π]) (by simp)) := by
+    infer_instance
+  exact @asIso _ _ _ _ _ hmapiso
+
+/-- The pasting identification is a morphism over `S`. -/
+theorem curveOfPasting_snd :
+    (curveOfPasting W).hom ≫ pullback.snd (projModelπ W.1) S.toSpecΓ = (curveOf W).π := by
+  sorry
+
+/-- The pasting identification matches the zero sections. -/
+theorem curveOfPasting_zero :
+    (curveOf W).zero ≫ (curveOfPasting W).hom =
+      pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
+        (by rw [Category.assoc, projModelZero_projModelπ]; exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
+  sorry
+
+end CurveOfPasting
+
 end ModularCurves
