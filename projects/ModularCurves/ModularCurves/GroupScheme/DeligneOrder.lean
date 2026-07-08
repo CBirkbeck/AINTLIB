@@ -893,6 +893,88 @@ theorem subgroupTensorCompare_subgroupComul (hD : D.IsSubgroup E)
 
 attribute [irreducible] subgroupComul
 
+/-- `swap ≫ bimulBase = bimulBase` (the exchange automorphism preserves the base). -/
+theorem swap_bimulBase :
+    (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
+        ≫ E.bimulBase (D := D) = E.bimulBase (D := D) := by
+  show _ ≫ (pullback.fst _ _ ≫ _) = _
+  rw [← Category.assoc, Limits.pullbackSymmetry_hom_comp_fst, E.bimulBase_eq_snd_structMap]
+
+/-- `Γ(swap)` packaged as an `R`-algebra automorphism of `Γ(D ×_R D)`. -/
+noncomputable def swapAlg (hD : D.IsSubgroup E) :
+    letI := E.biproductAlgebra (D := D)
+    Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) →ₐ[R]
+      Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
+  letI := E.biproductAlgebra (D := D)
+  { (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop) ≫
+            (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).hom.appTop =
+            (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop := by
+        rw [Category.assoc, ← Scheme.Hom.comp_appTop, E.swap_bimulBase]
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+          (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r) =
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom r
+      rw [← CommRingCat.comp_apply, hcomp] }
+
+/-- **(Layer B, cocommutativity.)** `comm ∘ Δ = Δ`: the comultiplication is cocommutative, dualizing
+`swap ≫ m = m` (`subgroupMul_comm`). Gives `IsCocomm R A`. -/
+theorem subgroupComul_comm (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)) :
+    letI := E.subgroupAlgebra D
+    Algebra.TensorProduct.comm R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤)
+        (E.subgroupComul hD a) = E.subgroupComul hD a := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  -- κ ∘ comm = swapAlg ∘ κ
+  have hproj₁ : ∀ b, E.swapAlg hD (E.subgroupProj₁ (D := D) b) = E.subgroupProj₂ (D := D) b := by
+    intro b
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+        ((pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
+        ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) from
+          Limits.pullbackSymmetry_hom_comp_fst _ _]
+    rfl
+  have hproj₂ : ∀ b, E.swapAlg hD (E.subgroupProj₂ (D := D) b) = E.subgroupProj₁ (D := D) b := by
+    intro b
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+        ((pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
+        ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        = pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) from
+          Limits.pullbackSymmetry_hom_comp_snd _ _]
+    rfl
+  have intertwine : (E.subgroupTensorCompare (D := D)).comp
+        (Algebra.TensorProduct.comm R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤)).toAlgHom
+      = (E.swapAlg hD).comp (E.subgroupTensorCompare (D := D)) := by
+    apply Algebra.TensorProduct.ext'
+    intro x y
+    show E.subgroupTensorCompare (D := D) (y ⊗ₜ[R] x)
+      = E.swapAlg hD (E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y))
+    rw [subgroupTensorCompare, Algebra.TensorProduct.lift_tmul, Algebra.TensorProduct.lift_tmul,
+      map_mul, hproj₁, hproj₂, mul_comm]
+  -- swapAlg fixes Γ(m)a (from subgroupMul_comm)
+  have hswap : E.swapAlg hD (E.subgroupComulHom hD a) = E.subgroupComulHom hD a := by
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+        ((E.subgroupMul hD).appTop.hom a) = _
+    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
+      show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
+          ≫ E.subgroupMul hD = E.subgroupMul hD from E.subgroupMul_comm hD]
+    rfl
+  have happ := DFunLike.congr_fun intertwine (E.subgroupComul hD a)
+  rw [AlgHom.comp_apply, AlgHom.comp_apply, subgroupTensorCompare_subgroupComul, hswap] at happ
+  -- happ : κ(comm(Δa)) = subgroupComulHom a
+  apply (E.subgroupTensorCompare_bijective (D := D)).injective
+  rw [subgroupTensorCompare_subgroupComul]
+  exact happ
+
+
 /-- The unit section `e` is a section of the structure map: `e ≫ (subschemeι ≫ π) = 𝟙 S`
 (the zero point lies over the identity of the base). -/
 theorem subgroupUnit_structMap (hD : D.IsSubgroup E) :
