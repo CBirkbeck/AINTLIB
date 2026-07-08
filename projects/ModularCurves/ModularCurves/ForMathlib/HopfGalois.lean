@@ -87,4 +87,22 @@ structure IsHopfGalois (ρ : B →ₐ[R] B ⊗[R] A) : Prop where
   /-- `B` is faithfully flat over its co-invariants `S = B^{coρ}`. -/
   faithfullyFlat : Module.FaithfullyFlat (coinvariants ρ) B
 
+namespace IsHopfGalois
+
+variable {ρ : B →ₐ[R] B ⊗[R] A}
+
+/-- The **Galois isomorphism** `B ⊗_S B ≃ B ⊗_R A` packaged from the bijective canonical Galois map.
+This is the algebra dual of the groupoid iso `Spec B ×_{Spec S} Spec B ≅ G ×_S Spec B` (the action is
+an equivalence relation); on `Spec` it identifies the kernel pair of the quotient map with the
+translation groupoid, the input to the `@[stacks 023Q]` coequalizer. -/
+noncomputable def galoisEquiv (h : IsHopfGalois ρ) :
+    (B ⊗[coinvariants ρ] B) ≃ₐ[coinvariants ρ] (B ⊗[R] A) :=
+  AlgEquiv.ofBijective (canonicalGaloisMap ρ) h.galois
+
+@[simp]
+theorem galoisEquiv_tmul (h : IsHopfGalois ρ) (b b' : B) :
+    h.galoisEquiv (b ⊗ₜ[coinvariants ρ] b') = (b ⊗ₜ[R] 1) * ρ b' := rfl
+
+end IsHopfGalois
+
 end ModularCurves
