@@ -2834,6 +2834,21 @@ DS-register unchanged; `#print axioms` audit.
   `↑g·↑g⁻¹ = 1`; new helpers `zsmul_eq_of_intCast_eq`, `recover_combo`; `glSmul_one`,
   `glSmul_mul`, `hOrbitSetoid` now also axiom-clean). Commit 6d851016.
 - **[T-H3]** `gammaHNaiveProblem` functor laws + orbit-compat of pullback.
+  - **GATE DIAGNOSIS (fable-P4, 2026-07-08 survey)**: the remaining `map`-membership +
+    orbit-compat sorries (GammaH:384/385) — and likewise Γ₁/Γ(N) naive
+    (Representability:214/229) and the Drinfeld pair (GammaH:997/1011) — ALL funnel
+    through `EllHom.pullSection_add` (T-E4a, Representability:207, sorried), whose own
+    docstring records the edge: it consumes `abelEnrichment_unique` (GME 2.2.5: pointed
+    iso onto a pullback ⟹ group iso). STATUS OF THE GATE: half-open — T-W7b (DONE,
+    2026-07-08) supplies canonicity over LOCALLY NOETHERIAN bases, and C3′
+    (`isMonHom_of_one_comp_eq'`) IS GME 2.2.5 in that regime; but `EllObj R` bases are
+    arbitrary `R`-schemes, so full generality = the T-W7.8 gap (blocked-on-mathlib,
+    hom-existence descent). **OWNER DECISION REQUESTED**: (a) restrict `EllObj R` to
+    locally noetherian bases (Loeffler/KM lose nothing on the Y(N) path; all
+    representing objects are finite type over `Spec R`) ⟹ the whole cluster discharges
+    NOW via the C-chain; or (b) keep arbitrary bases and park the cluster behind
+    T-W7.8. Meanwhile-dispatchable either way: `pullSection_add` under
+    `[IsLocallyNoetherian X.base]` as a standalone (comparison-iso + C3′, ~150 lines).
 - **[T-H4]** `gammaHNaive_relativelyRepresentable` (Loeffler 3.8.2; Weil-pairing open
   locus for H = 1, quotient for general H). Depends: T-C0/T-C1, stream Q, T-D18.
 - **[T-H5]** `gammaHNaive_rigid_iff` (Loeffler 3.8.3, torsion-free preimage in SL₂(ℤ)).
