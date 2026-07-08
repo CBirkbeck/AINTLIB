@@ -6495,8 +6495,11 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     Route COLLAPSED (3 adversarial corrections): **(A) acyclicity lemma is Stacks 00N0 NOT 0AVQ** (0AVQ=torsion-free, mis-cited);
     **(B) Auslander–Buchsbaum NOT needed** by either core (00N1 forward runs via assoc-primes+nzd+00MZ, no pd/AB); **(C) depth⟺Ext heart
     = `Grade.rees_core` ALREADY PROVEN for general M**. Minimal API: HasDepthGE + 00LW(=rees_core) + 00LX ses1/2/3 (Ext-LES) + 00LD + depth-free.
-    ~1100-1600 NEW LOC, no AB/Tor. RUNNING: [a729e952] Depth.lean full API (ses2/3 load-bearing), [a18c2d20] Acyclicity 00MZ+00MYW (forward, no depth dep).
-    NEXT: 00N0 (make-or-break acyclicity, funnels through ses2/3) after Depth lands. Then close be_forward_core + be_backward_core.
+    ~1100-1600 NEW LOC, no AB/Tor. **DONE AXIOM-CLEAN: Depth.lean (d6bec711, all 8 leaves incl. ses2/3 via Ext-LES),
+    Acyclicity.lean (67322a63 00MZ+00MYW [00MZ over-claim fixed: spots≥2], 81c4aa7e 00N0 make-or-break — the Peskine-Szpiro
+    acyclicity lemma, closed via syzygy descent + disjunctive depth≥m+1∨Subsingleton invariant).** THREE skeleton stmt bugs
+    caught by counterexample this arc (T-BE off-by-one, T-GRADE unit-ideal, 00MZ bottom-spot). RUNNING: [a6df153d] be_forward_core.
+    NEXT (after be_forward_core): be_backward_core (consumes 00N0) → both B-E cores DONE → buchsbaumEisenbud_acyclic clean → T-RB + bookkeeping → T-FINAL.
   - **GATED** (BuchsbaumEisenbud.lean, split for parallel when core-closing): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
