@@ -5535,6 +5535,35 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       beastmode-A's faith-infra). 1a is already discharged. The endgame gate is therefore
       c5β-completion ∧ faith-infra, with 0h a short follow-on rather than a parallel stream.
 
+- **[T-W7.0c-c5β-projglue]** cross-index chart compatibility — `chartι_comp_specMap_chartAwayHom_eq`
+  (`EllipticCurve/AdditionChartProj.lean`, stated + sorried 81e925db).
+  - **Status**: in_progress · **Claimed**: coordinator-P1, 2026-07-08T13:05Z (spawned per
+    beastmode Tier-A from c5β's β4(c)) · **Type**: 1 theorem + 1 ForMathlib lemma
+  - **Statement**: a projective triple on the curve, regular at indices `k` and `l`, defines the
+    SAME morphism to the model through either chart. (Equivalently: a triple defines a morphism
+    to `Proj`, chart-independently — the original plan's `toProjOfBihomTriple`.)
+  - **Why this is all that remains of β4**: β4(b) (1279497b) proved the two-LAW agreement, and
+    `isUnit_of_minor` showed the two laws are then regular at the SAME index — so no cross-index
+    comparison between the laws is needed. Only the single-triple cross-index case survives, where
+    the two chart morphisms land in different chart rings and the ratio argument does not apply.
+  - **Route + MATHLIB GAP (verified at the pin, 2026-07-08)**:
+    · mathlib HAS the square `Proj.SpecMap_awayMap_awayι` (ProjectiveSpectrum/Basic.lean:248):
+      `Spec.map (awayMap 𝒜 g_deg hx) ≫ awayι 𝒜 f = awayι 𝒜 (f*g)`; the `X l * X k` vs `X k * X l`
+      mismatch is the repo's `ForMathlib/AwayCongr.lean` (`awayCongr`).
+    · Both sides factor through `awayι` at `X k * X l` once the two chart morphisms are seen to
+      come from a COMMON map `Away 𝒜 (X k * X l) → S`.
+    · **GAP**: `HomogeneousLocalization.awayMap` exists (HomogeneousLocalization.lean:820) with
+      `val_awayMap`/`val_awayMap_mk` computation lemmas, but NOTHING identifies it as a
+      localization map. **Route 1 (preferred, ForMathlib + upstream candidate)**: prove
+      `IsLocalization.Away (Away.mk (g/f)) (Away 𝒜 (f*g))` — the content is
+      `a/(fg)^n = (a/f^{2n}) · (g/f)^{-n}` for `f,g` of degree 1 — then `IsLocalization.Away.lift`
+      supplies the common map and `IsLocalization.lift_comp` both factorizations. Est. 60–120
+      lines. **Route 2**: build the common map by hand from a `chartCoordEquiv`-style presentation
+      of `Away 𝒜 (X k * X l)` and check the two factorizations on generators.
+  - **Gates**: c5β's β4(c) → the four `GroupLawConstruction.lean` sorries → 0c-i increment 2 →
+    0c-ii (pre-approved, v10.27) → 0h. i.e. this single theorem now gates the whole W7 endgame
+    on the c5β side.
+
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
 
