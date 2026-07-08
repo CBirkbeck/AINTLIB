@@ -7427,6 +7427,7 @@ records why).*
   `hom_ext_of_affine`) + computing `pointedIsoCoordEquiv` of the eqToHom-transported
   `projModelVCIso` via `bridge_coordX/Y`. Bounded cancellation lemmas + one
   scheme-faithfulness step.
+- **CLAIMED beastmode-A 2026-07-08T~ (in_progress): T-W7.1b-faith — writing the faithfulness bridge in Comparison.lean.**
 - **ASSIGNMENT: beastmode-A takes T-W7.1b-faith NOW.** Rationale: A scoped the reduction and
   owns the b1/b2 (`pointedIsoCoordEquiv`) layer it sits on, and closing the W7 bottleneck's
   last comparison leaf outranks T-D33. On landing: discharge `main`, full-file axiom sweep,
