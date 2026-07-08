@@ -240,6 +240,47 @@ theorem Module.Finite.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A)
   exact Submodule.smul_mem _ _ (Submodule.subset_span (Finset.mem_coe.mpr
     (Finset.mem_image.mpr ⟨p, hp, rfl⟩)))
 
+/-- The `G`-trace as an `Aᴳ`-linear map `A → Aᴳ` (the bundled form of `traceInvariants`). -/
+noncomputable def traceLinear [Fintype G] :
+    A →ₗ[FixedPoints.subalgebra R A G] FixedPoints.subalgebra R A G where
+  toFun a := traceInvariants G R A a
+  map_add' a b := by
+    ext
+    show (∑ g : G, g • (a + b)) = (∑ g : G, g • a) + ∑ g : G, g • b
+    simp [Finset.sum_add_distrib, smul_add]
+  map_smul' c a := by
+    ext
+    show (∑ g : G, g • ((c : A) * a)) = (c : A) * ∑ g : G, g • a
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [smul_mul', c.2 g]
+
+/-- **(T-Q2-A711, step 9 — projectivity; PROVEN)** For a free action of a finite group, `A`
+is a projective `Aᴳ`-module: `galoisCoords_dual` *is* a dual basis, so
+`x ↦ ∑ᵢ single aᵢ (tr(bᵢ·x))` splits the canonical surjection `(A →₀ Aᴳ) ↠ A`.
+
+Together with `Module.Finite.of_isFreeAlgebraAction` this says `A` is **finitely generated
+projective** over `Aᴳ` (hence flat, hence faithfully flat) — the module-theoretic content of
+KM A7.1.1 / SGA III Exp. V Thm 4.1, obtained without either source's machinery. It is also
+the input for the remaining `Algebra.FinitePresentation` gap ([A711-FP], see below). -/
+theorem Module.Projective.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
+    Module.Projective (FixedPoints.subalgebra R A G) A := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  rw [Module.projective_def']
+  refine ⟨∑ p ∈ S, (Finsupp.lsingle p.1).comp
+      (traceLinear G R A ∘ₗ (LinearMap.mulLeft (FixedPoints.subalgebra R A G) p.2)), ?_⟩
+  ext x
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply,
+    LinearMap.coe_sum, Finset.sum_apply, map_sum, Finsupp.lsingle_apply,
+    Finsupp.linearCombination_single, id_eq, LinearMap.mulLeft_apply]
+  refine Eq.trans ?_ (galoisCoords_dual G R A hS x)
+  refine Finset.sum_congr rfl fun p _ => ?_
+  show (traceInvariants G R A (p.2 * x) : A) * p.1
+      = p.1 * (traceInvariants G R A (p.2 * x) : A)
+  ring
+
 /-- **KM A7.1.1, étaleness part** (statement; proof: SGA III Exp. V Thm 4.1;
 "In the absence of noetherian hypotheses, this is rather delicate"): for a free
 action, `A` is étale over the invariants.
