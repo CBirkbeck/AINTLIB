@@ -132,6 +132,54 @@ theorem ellipticWOfRingHom_ringHomOfEllipticW (W : ellipticW B) :
   rw [h]
   exact universalWeierstrass_map_specializeAt W.1
 
+/-- The Weierstrass moduli groupoid `[U/G](B)`: objects are atlas points (Weierstrass
+curves with unit discriminant), morphisms `W ⟶ W'` are coordinate changes carrying `W`
+to `W'`. This is the action groupoid of `G(B) = VariableChange B` on `U(B)`,
+v9.2-severance-faithfully (the group's `B`-points, not a fixed abstract group). -/
+def MellWGroupoid (B : Type*) [CommRing B] : Type _ := ellipticW B
+
+namespace MellWGroupoid
+
+/-- Interpret an atlas point as an object of the moduli groupoid. -/
+def mk (W : ellipticW B) : MellWGroupoid B := W
+
+/-- The underlying atlas point. -/
+def pt (W : MellWGroupoid B) : ellipticW B := W
+
+@[simp] theorem pt_mk (W : ellipticW B) : pt (mk W) = W := rfl
+
+instance : Groupoid (MellWGroupoid B) where
+  Hom W W' := {C' : VariableChange B // C' • W.pt = W'.pt}
+  id W := ⟨1, one_smul _ _⟩
+  comp f g := ⟨g.1 * f.1, by rw [mul_smul, f.2, g.2]⟩
+  id_comp f := Subtype.ext (mul_one _)
+  comp_id f := Subtype.ext (one_mul _)
+  assoc f g h := Subtype.ext (mul_assoc _ _ _).symm
+  inv f := ⟨f.1⁻¹, inv_smul_eq_iff.mpr f.2.symm⟩
+  inv_comp f := Subtype.ext (mul_inv_cancel _)
+  comp_inv f := Subtype.ext (inv_mul_cancel _)
+
+@[simp] theorem comp_val {W W' W'' : MellWGroupoid B} (f : W ⟶ W') (g : W' ⟶ W'') :
+    (f ≫ g).1 = g.1 * f.1 :=
+  rfl
+
+@[simp] theorem id_val (W : MellWGroupoid B) : (𝟙 W : W ⟶ W).1 = 1 :=
+  rfl
+
+/-- Base change of the moduli groupoid along a ring map, as a functor. -/
+@[simps]
+def mapFunctor (f : B →+* C) : MellWGroupoid B ⥤ MellWGroupoid C where
+  obj W := mk (W.pt.map f)
+  map {W W'} g := ⟨g.1.map f, by
+    show g.1.map f • W.pt.map f = W'.pt.map f
+    rw [← ellipticW.map_smul, g.2]⟩
+  map_id W := Subtype.ext (map_one (VariableChange.mapHom f))
+  map_comp g h := Subtype.ext (by
+    show (h.1 * g.1).map f = h.1.map f * g.1.map f
+    exact map_mul (VariableChange.mapHom f) h.1 g.1)
+
+end MellWGroupoid
+
 theorem ringHomOfEllipticW_ellipticWOfRingHom (φ : WeierstrassAtlasRing →+* B) :
     ringHomOfEllipticW (ellipticWOfRingHom φ) = φ := by
   apply IsLocalization.ringHom_ext (Submonoid.powers universalWeierstrass.Δ)
