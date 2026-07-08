@@ -5593,6 +5593,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   - **Gates**: c5β's β4(c) → the four `GroupLawConstruction.lean` sorries → 0c-i increment 2 →
     0c-ii (pre-approved, v10.27) → 0h. i.e. this single theorem now gates the whole W7 endgame
     on the c5β side.
+  - **PROGRESS 2026-07-08T13:45Z (coordinator-P1) — THE GEOMETRY IS DONE.** Commits c5cbd10b,
+    81ec59ee, 06fe47ab, 494a2fa9, + leaf skeleton. `chartι_comp_specMap_chartAwayHom_eq` (the
+    crux) is **PROVEN** modulo one ring-level lemma:
+    · `chartAwayHomOfTriple_isLocalizationElem` / `isUnit_…` — the chart morphism sends the
+      transition element `X l / X k` to the unit `t l * u`.
+    · `projGlueLift` — the COMMON MAP `ψ : Away 𝒜 x →+* S`, via `IsLocalization.Away.lift` on
+      mathlib's `Away.isLocalization_mul`. Sorry-free.
+    · `specMap_projGlueLift_awayι` — the k-side factorization, via `lift_comp` +
+      `Proj.SpecMap_awayMap_awayι`. Sorry-free.
+    · **Key structural move**: generalizing `projGlueLift`/`specMap_…` to take the product
+      element `x` with `hx : x = X k * X l` explicitly makes the k-side (`hx := rfl`) and the
+      l-side (`hx := mul_comm`) land in the SAME `Away 𝒜 x` and the SAME `awayι x` (the degree
+      argument is a Prop ⟹ definitional proof irrelevance). **This removes the `awayCongr`
+      transport entirely** — the `X l * X k` vs `X k * X l` mismatch never arises.
+    · Remaining: `projGlueLift_eq` (the two lifts agree), reduced by `IsLocalization.lift_unique`
+      to leaf 1 = **`chartAwayHomOfTriple_awayMk`**: `chartAwayHomOfTriple (Away.mk 𝒜 hf n [b]) =
+      aeval t b * u ^ n` — "the chart morphism is evaluation at the triple, normalized by the
+      invertible coordinate". Declaration started; route in its docstring (`chartCoordEquiv_mk`
+      + the proven `aeval_dehomogenizeAux_of_apply_eq_one`).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
