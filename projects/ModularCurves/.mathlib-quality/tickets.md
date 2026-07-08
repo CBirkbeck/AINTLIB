@@ -1547,7 +1547,7 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   (section-ker-compat is FREE via `ker_fst_of_isClosedImmersion`).
 
 ### [T-D6a-ii] orderDivisor base-change naturality (standalone; gated on mulBy compat)
-- **Status**: in_progress — CORE COMPAT DONE (beastmode-A 2026-07-07T08:30Z:
+- **Status**: DONE — axiom-clean (beastmode-A 2026-07-08, commit 8f17a574): L3 `Section.orderDivisor_baseChange` (order divisor natural in base) + L4 `RelEffCartierDiv.IsSubgroup.baseChange` (subgroup-divisors base-change stable, via `Point.baseChangeEquiv` + NEW ForMathlib `exists_factor_comap_iff` comapIso factoring dictionary, commit e890e777) + headline `Section.HasExactOrder.baseChange` (KM 1.4.4 (1)⟹(2) exact-order preservation). All `#print axioms` = [propext, Classical.choice, Quot.sound]. Earlier progress: (beastmode-A 2026-07-07T08:30Z:
   `mulBy_baseChange` PROVED — `(E.baseChange g).mulBy n = (Over.pullback g).map
   (E.mulBy n)`, via the NEW ForMathlib lemma `Functor.map_zpow'` (zpow companion of
   mathlib `Functor.map_inv'`; the `open scoped CategoryTheory.Obj` inside it resolves
