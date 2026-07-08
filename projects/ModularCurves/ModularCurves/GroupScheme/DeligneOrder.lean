@@ -540,6 +540,21 @@ noncomputable def pairTensorCompare :
     ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
   Algebra.TensorProduct.lift (pairProj₁ qX qY) (pairProj₂ qX qY) (fun _ _ => Commute.all _ _)
 
+/-- `pairTensorCompare qX qY (a ⊗ b) = Γ(fst) a · Γ(snd) b`. -/
+theorem pairTensorCompare_tmul :
+    letI := schemeAlg (R := R) qX
+    letI := schemeAlg (R := R) qY
+    letI : Algebra R Γ(pullback qX qY, ⊤) :=
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+    ∀ (a : Γ(X, ⊤)) (b : Γ(Y, ⊤)),
+      pairTensorCompare qX qY (a ⊗ₜ[R] b) = pairProj₁ qX qY a * pairProj₂ qX qY b := by
+  letI := schemeAlg (R := R) qX
+  letI := schemeAlg (R := R) qY
+  letI : Algebra R Γ(pullback qX qY, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (pairBase qX qY).appTop).hom.toAlgebra
+  intro a b
+  exact Algebra.TensorProduct.lift_tmul _ _ _ _ _
+
 /-- **(Layer B, reusable comparison.)** The pair comparison `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is bijective:
 it becomes an iso after `Spec`, via `pullbackSpecIso` and `isoSpec`, reflected back through the fully
 faithful `Spec`. -/
@@ -1409,6 +1424,91 @@ theorem vmap'_base (hD : D.IsSubgroup E) :
         ≫ E.subgroupStructMap D := by
     rw [Category.assoc, ← E.bimulBase_eq_fst_structMap]
   rw [h1, E.vmap'_fst hD, Category.assoc, E.subgroupMul_structMap hD, E.umap_base]
+
+/-! ### `κ` and `κ₃` on pure tensors, and the `hZ` assoc-factoring lemma -/
+
+/-- `κ (x ⊗ y) = proj₁ x · proj₂ y`. -/
+theorem subgroupTensorCompare_tmul (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.biproductAlgebra (D := D)
+    ∀ (x y : Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y)
+        = E.subgroupProj₁ (D := D) x * E.subgroupProj₂ (D := D) y := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  intro x y
+  exact Algebra.TensorProduct.lift_tmul _ _ _ _ _
+
+/-- `κ₃ (a ⊗ b) = Γ(fst₃) a · Γ(snd₃) (κ b)`. -/
+theorem subgroupTripleCompare_tmul (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    ∀ (a : Γ(D.ideal.subscheme, ⊤))
+      (b : Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupTripleCompare hD (a ⊗ₜ[R] b)
+        = (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom a
+          * (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+              (E.subgroupTensorCompare (D := D) b) := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  intro a b
+  have h1 : E.subgroupTripleCompare hD (a ⊗ₜ[R] b)
+      = pairTensorCompare (E.subgroupStructMap D) (E.bimulBase (D := D))
+          (E.subgroupIdTensorCompare hD (a ⊗ₜ[R] b)) := rfl
+  rw [h1, E.subgroupIdTensorCompare_tmul hD]
+  exact pairTensorCompare_tmul (E.subgroupStructMap D) (E.bimulBase (D := D)) a
+    (E.subgroupTensorCompare (D := D) b)
+
+/-- **hZ (assoc factoring).** `κ₃ (assoc (z ⊗ y)) = baseGate umap (κ z) · Γ(snd₃ ≫ snd₂) y`. Linear
+in `z`; this is what lets the inner `Δ` collapse (over `umap`) happen inside the `LEFT` `ext'`. -/
+theorem subgroupTripleCompare_assoc_tmul (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.tripleAlgebra (D := D)
+    ∀ (y : Γ(D.ideal.subscheme, ⊤))
+      (z : Γ(D.ideal.subscheme, ⊤) ⊗[R] Γ(D.ideal.subscheme, ⊤)),
+      E.subgroupTripleCompare hD ((TensorProduct.assoc R _ _ _) (z ⊗ₜ[R] y))
+        = E.baseGate hD (E.umap (D := D)) E.umap_base (E.subgroupTensorCompare (D := D) z)
+          * (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+              ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+  letI := E.subgroupAlgebra D
+  letI := E.biproductAlgebra (D := D)
+  letI := E.tripleAlgebra (D := D)
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) :=
+    E.subgroupBiproduct_isAffine (D := D)
+  intro y z
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | add z1 z2 h1 h2 =>
+    simp only [TensorProduct.add_tmul, map_add, add_mul, h1, h2]
+  | tmul p q =>
+    have hpq : (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+          (E.subgroupProj₁ (D := D) q)
+        = (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+            ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom q := by
+      show (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+        ((pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom q) = _
+      rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+    have hpy : (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+          (E.subgroupProj₂ (D := D) y)
+        = (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+            ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+      show (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop.hom
+        ((pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y) = _
+      rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop]
+    rw [TensorProduct.assoc_tmul]
+    rw [E.subgroupTripleCompare_tmul hD]
+    rw [E.baseGate_kappa_tmul hD (E.umap (D := D)) E.umap_base]
+    simp only [E.umap_fst, E.umap_snd]
+    rw [E.subgroupTensorCompare_tmul hD]
+    simp only [map_mul, hpq, hpy]
+    ring
 
 /-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
 `subgroupUnit` (`e : S ⟶ D`). Concretely `ε = Γ(e)` followed by `Γ(Spec R, ⊤) ≅ R`; it is
