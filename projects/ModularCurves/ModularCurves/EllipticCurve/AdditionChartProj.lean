@@ -194,7 +194,69 @@ lemma projGlueLift_eq (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
       (quotientGradingHom (projIdeal W)) (MvPolynomial.X k)) :
     projGlueLift W k l hkl t u v hu hv ht x hx =
       projGlueLift W l k (Ne.symm hkl) t v u hv hu ht x hx' := by
-  sorry
+  letI : Algebra (chartAway W k) (Away (quotientGrading (projIdeal W)) x) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx).toAlgebra
+  haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l) hx one_ne_zero
+  refine IsLocalization.lift_unique _ fun a => ?_
+  -- write `a = c / (X k)^n` with `c` the class of a degree-`n` homogeneous `b`
+  obtain ⟨n, c, hc, rfl⟩ := Away.mk_surjective (quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W k) a
+  obtain ⟨b, hb, hbc⟩ := Submodule.mem_map.mp hc
+  have hbc' : (quotientGradingHom (projIdeal W)) b = c := hbc
+  -- the ring identity in `Away 𝒜 x` : (c / X k ^ n) * (X k ^ 2 / x) ^ n = c / X l ^ n
+  have hid : (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx)
+        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n _ hc) *
+      ((awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
+        (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W l)
+          (mk_X_mem_quotientGrading_one W k))) ^ n =
+      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
+        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) n _ hc) := by
+    apply HomogeneousLocalization.val_injective
+    rw [val_mul, val_pow, awayMap_mk, awayMap_mk, awayMap_mk,
+      Away.val_mk, Away.val_mk, Away.val_mk, Localization.mk_pow, Localization.mk_mul,
+      Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+    refine ⟨1, ?_⟩
+    subst hx
+    push_cast
+    ring
+  letI : Algebra (chartAway W l) (Away (quotientGrading (projIdeal W)) x) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx').toAlgebra
+  haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W l) (mk_X_mem_quotientGrading_one W k) hx' one_ne_zero
+  have hb' : b ∈ MvPolynomial.homogeneousSubmodule (Fin 3) R n := by simpa using hb
+  have hinv : (t k * v) * (u * t l) = 1 := by
+    have : (t k * v) * (u * t l) = (t k * u) * (t l * v) := by ring
+    rw [this, hu, hv, one_mul]
+  -- apply ψ_l to the ring identity
+  have hpsi := congrArg (projGlueLift W l k (Ne.symm hkl) t v u hv hu ht x hx') hid
+  rw [map_mul, map_pow] at hpsi
+  have hliftl : ∀ z, (projGlueLift W l k (Ne.symm hkl) t v u hv hu ht x hx')
+      ((awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx') z) =
+      chartAwayHomOfTriple W l t v hv ht z := fun z =>
+    RingHom.congr_fun (IsLocalization.Away.lift_comp
+      (S := Away (quotientGrading (projIdeal W)) x) _
+      (isUnit_chartAwayHomOfTriple_isLocalizationElem W l k (Ne.symm hkl) t v u hv hu ht)) z
+  have hvalmk : chartAwayHomOfTriple W l t v hv ht
+      (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) n c hc) =
+      MvPolynomial.aeval t b * v ^ n :=
+    hbc' ▸ chartAwayHomOfTriple_awayMk W l t v hv ht n b hb'
+  rw [hliftl, hliftl, hvalmk,
+    chartAwayHomOfTriple_isLocalizationElem W l k (Ne.symm hkl) t v hv ht] at hpsi
+  rw [RingHom.algebraMap_toAlgebra]
+  have hvalk : chartAwayHomOfTriple W k t u hu ht
+      (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n c hc) =
+      MvPolynomial.aeval t b * u ^ n :=
+    hbc' ▸ chartAwayHomOfTriple_awayMk W k t u hu ht n b hb'
+  show _ = chartAwayHomOfTriple W k t u hu ht _
+  rw [hvalk]
+  have h1 : _ * (u * t l) ^ n = _ * (u * t l) ^ n :=
+    congrArg (fun z : S => z * (u * t l) ^ n) hpsi
+  rw [mul_assoc, ← mul_pow, hinv, one_pow, mul_one] at h1
+  rw [h1]
+  have h2 : MvPolynomial.aeval t b * v ^ n * (u * t l) ^ n =
+      MvPolynomial.aeval t b * u ^ n * (t l * v) ^ n := by rw [mul_pow]; ring
+  rw [h2, hv, one_pow, mul_one]
 
 open HomogeneousLocalization in
 /-- **(c4.2, the last crux of c5β)** A projective triple on the curve, regular at two indices,
