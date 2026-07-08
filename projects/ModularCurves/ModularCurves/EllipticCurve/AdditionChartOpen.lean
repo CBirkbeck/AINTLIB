@@ -44,4 +44,31 @@ lemma blOpenZPiece_eq_iSup :
   rw [blOpenZPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
 
+/-- The three `D(t_k)` as opens of the `(i,j)` piece — the cover of `blOpenYPiece`. -/
+noncomputable def blOpenYPieceFamily (k : Fin 3) :
+    (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
+  (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawTwoTriple W i j k)
+
+/-- The three `D(s_k)` as opens of the `(i,j)` piece — the cover of `blOpenZPiece`. -/
+noncomputable def blOpenZPieceFamily (k : Fin 3) :
+    (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
+  (chartPieceIso W i j).hom ⁻¹ᵁ PrimeSpectrum.basicOpen (lawOneTriple W i j k)
+
+lemma iSup_blOpenYPieceFamily : ⨆ k, blOpenYPieceFamily W i j k = blOpenYPiece W i j :=
+  (blOpenYPiece_eq_iSup W i j).symm
+
+lemma iSup_blOpenZPieceFamily : ⨆ k, blOpenZPieceFamily W i j k = blOpenZPiece W i j :=
+  (blOpenZPiece_eq_iSup W i j).symm
+
+/-- **(c4.2b)** The open cover of `blOpenYPiece` by the three `D(t_k)`, via mathlib's
+`Scheme.Opens.iSupOpenCover` transported along `iSup_blOpenYPieceFamily`. -/
+noncomputable def blOpenYPieceCover :
+    (blOpenYPiece W i j).toScheme.OpenCover :=
+  (iSup_blOpenYPieceFamily W i j) ▸ Scheme.Opens.iSupOpenCover (blOpenYPieceFamily W i j)
+
+/-- **(c4.2b)** The open cover of `blOpenZPiece` by the three `D(s_k)`. -/
+noncomputable def blOpenZPieceCover :
+    (blOpenZPiece W i j).toScheme.OpenCover :=
+  (iSup_blOpenZPieceFamily W i j) ▸ Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)
+
 end WeierstrassCurve.Projective
