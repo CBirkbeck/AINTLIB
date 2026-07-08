@@ -9150,3 +9150,22 @@ shapes definitionally aligned).
   ≅ curveOf W` pointed over `S`. Known risk: the T-W5a "term-▸ crux + erw
   poison-bypass" transparency walls live exactly at these comparison seams — v10.24(a)
   applies (split on slowdown).
+
+### v10.39c (2026-07-08, fable-PIC0): T-W6 3(c) sub-tickets cut (Tier A5 split)
+- DESIGN NOTE: single-pullback redefinition of curveOf REJECTED (would need a general
+  `projModel_localModel` = re-fighting T-W5a's 60-line erw battle for elegance only;
+  the committed curveOf's localModel came free via T-A8a baseChange). 3(c) works with
+  the committed form via the v10.39b pasting chain.
+- **[T-W6c-i]** `curveOf` ≅ pullback of `projModel W.1` along `toSpecΓ` (pointed,
+  over S): pasting iso for the composite classify + `isPullback_projModelBaseChange`
+  at `φ.toAlgebra` + the dictionary roundtrip. DISCIPLINE (T-W5a fix-path note,
+  binding): every seam = its own top-level private lemma with explicit `@inv`/instance
+  args; v10.24(a) split-on-slowdown. Parent: T-W6 · Claimed: fable-PIC0.
+- **[T-W6c-ii]** `curveOfVCIso : curveOf W ≅ curveOf (C • W)` pointed over S — the
+  pullback-map of `projModelVCIso`/`_π`/`_zero` along toSpecΓ, conjugated by (i).
+  Parent: T-W6 · open (fable-PIC0 next).
+- **[T-W6c-iii]** the presented-curves record groupoid + `presentationFunctor` from
+  `MellWGroupoid Γ(S,⊤)` (obj := curveOf, map := (ii)) + full faithfulness +
+  essential surjectivity onto globally-Weierstrass-presented records = **the T-W6
+  equivalence theorem** (honest cut; locally-Weierstrass sheafy upgrade
+  descent-gated). Parent: T-W6 · open.
