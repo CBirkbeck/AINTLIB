@@ -1990,6 +1990,57 @@ theorem subgroupAntipode_lTensor_comul (hD : D.IsSubgroup E) (a : Γ(D.ideal.sub
   rw [hcomul] at happ
   exact happ
 
+/-- **(Layer B, L3 — the coalgebra.)** `A = Γ(D.subscheme, ⊤)` as an `R`-coalgebra: comultiplication
+`Δ = subgroupComul`, counit `ε = subgroupCounit`; coassociativity (`subgroupComul_coassoc`) and the
+two counit laws (`subgroupCounit_rTensor/lTensor_comul`) are the dualized group-scheme axioms. -/
+@[reducible] noncomputable def subgroupCoalgebra (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    Coalgebra R Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  { comul := (E.subgroupComul hD).toLinearMap
+    counit := (E.subgroupCounit hD).toLinearMap
+    coassoc := LinearMap.ext fun a => E.subgroupComul_coassoc hD a
+    rTensor_counit_comp_comul := LinearMap.ext fun a => E.subgroupCounit_rTensor_comul hD a
+    lTensor_counit_comp_comul := LinearMap.ext fun a => E.subgroupCounit_lTensor_comul hD a }
+
+/-- **(Layer B, L3 — the bialgebra.)** `Δ` and `ε` are algebra homs (`subgroupComul`/`subgroupCounit`
+are `AlgHom`s over `subgroupAlgebra`), so `A` is an `R`-bialgebra. -/
+@[reducible] noncomputable def subgroupBialgebra (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    Bialgebra R Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.subgroupCoalgebra hD
+  Bialgebra.mk' R Γ(D.ideal.subscheme, ⊤)
+    (map_one (E.subgroupCounit hD))
+    (fun {a b} => map_mul (E.subgroupCounit hD) a b)
+    (map_one (E.subgroupComul hD))
+    (fun {a b} => map_mul (E.subgroupComul hD) a b)
+
+/-- **(Layer B, L3 — the Hopf algebra.)** Antipode `S = subgroupAntipode`, dual to inversion; the two
+antipode axioms are the dualized inverse laws (`subgroupAntipode_rTensor/lTensor_comul`). `A` is a
+commutative `R`-Hopf algebra — the coordinate Hopf algebra `A_D` of Deligne's argument. -/
+@[reducible] noncomputable def subgroupHopfAlgebra (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    HopfAlgebra R Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.subgroupBialgebra hD
+  { antipode := (E.subgroupAntipode hD).toLinearMap
+    mul_antipode_rTensor_comul :=
+      LinearMap.ext fun a => E.subgroupAntipode_rTensor_comul hD a
+    mul_antipode_lTensor_comul :=
+      LinearMap.ext fun a => E.subgroupAntipode_lTensor_comul hD a }
+
+/-- **(Layer B, L3 — cocommutativity.)** `A` is cocommutative (`comm ∘ Δ = Δ`, `subgroupComul_comm`),
+dualizing the commutativity of the elliptic-curve group law. Gives `IsCocomm R A`, the last
+hypothesis Deligne's order theorem (`deligne_point_pow_eq_one`) needs on `A`. -/
+theorem subgroupIsCocomm (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    letI := E.subgroupCoalgebra hD
+    Coalgebra.IsCocomm R Γ(D.ideal.subscheme, ⊤) :=
+  letI := E.subgroupAlgebra D
+  letI := E.subgroupCoalgebra hD
+  { comm_comp_comul := LinearMap.ext fun a => E.subgroupComul_comm hD a }
+
 end AffineHopf
 
 section GeneralBase
