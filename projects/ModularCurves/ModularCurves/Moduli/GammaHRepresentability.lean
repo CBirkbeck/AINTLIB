@@ -700,6 +700,41 @@ theorem gammaHNaive_toQuotient (N : ℕ) [NeZero N]
           (θ.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
   sorry
 
+/-- **[GHC4-SEP] (the separated-presheaf half of the refutation)** A relative
+representation datum separates a global value of the represented functor by its
+restrictions to the two components of a `Bool`-coproduct base: the injectivity core
+of the sheaf condition, packaged from `RelRepData`'s naturality clause (`d.nat`), the
+representing bijection's injectivity, and `Sigma.hom_ext`. Axiom-clean; the reusable
+engine of `gammaHNaiveProblem_not_relativelyRepresentable`. -/
+theorem relRepData_sep_coprod {Q : ModuliProblem R} {X : EllObj R}
+    (d : ModuliProblem.RelRepData Q X)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (a b : Q.obj (Opposite.op (X.pullbackAlong g)))
+    (hres : ∀ i : Bool,
+      Q.map (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op a
+        = Q.map (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op b) :
+    a = b := by
+  set va := (d.eqv g).symm a with hva
+  set vb := (d.eqv g).symm b with hvb
+  have hvae : d.eqv g va = a := (d.eqv g).apply_symm_apply a
+  have hvbe : d.eqv g vb = b := (d.eqv g).apply_symm_apply b
+  have hcol : ∀ i : Bool,
+      Sigma.ι (fun _ : Bool => X.base) i ≫ va.1
+        = Sigma.ι (fun _ : Bool => X.base) i ≫ vb.1 := by
+    intro i
+    have hna := d.nat g (Sigma.ι (fun _ : Bool => X.base) i) va
+    have hnb := d.nat g (Sigma.ι (fun _ : Bool => X.base) i) vb
+    rw [hvae] at hna
+    rw [hvbe] at hnb
+    have heq : d.eqv (Sigma.ι (fun _ : Bool => X.base) i ≫ g)
+          ⟨Sigma.ι (fun _ : Bool => X.base) i ≫ va.1, by rw [Category.assoc, va.2]⟩
+        = d.eqv (Sigma.ι (fun _ : Bool => X.base) i ≫ g)
+          ⟨Sigma.ι (fun _ : Bool => X.base) i ≫ vb.1, by rw [Category.assoc, vb.2]⟩ := by
+      rw [hna, hnb, hres i]
+    exact congrArg Subtype.val ((d.eqv _).injective heq)
+  have hv : va.1 = vb.1 := Sigma.hom_ext _ _ hcol
+  rw [← hvae, ← hvbe, Subtype.ext hv]
+
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
