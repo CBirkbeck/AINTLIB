@@ -10,6 +10,7 @@ import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.GroupScheme.DeligneOrder
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -699,6 +700,16 @@ theorem gammaHNaive_toQuotient (N : ℕ) [NeZero N]
         Function.Bijective
           (θ.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
   sorry
+
+/-- Restriction of a point is `ℤ`-linear, derived from additivity (`restrict_add`)
+via `map_zsmul`. Companion to `Point.restrict_add`/`restrict_zero`
+(`GroupScheme/DeligneOrder.lean`); needed by the coproduct-glue construction of the
+`gammaHNaiveProblem` refutation. -/
+theorem EllipticCurve.Point.restrict_zsmul {S : Scheme.{u}} (E : EllipticCurve S)
+    {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (n : ℤ) (P : E.Point g) :
+    EllipticCurve.Point.restrict E k (n • P) = n • EllipticCurve.Point.restrict E k P :=
+  map_zsmul (AddMonoidHom.mk' (EllipticCurve.Point.restrict E k)
+    (EllipticCurve.Point.restrict_add E k)) n P
 
 /-- **[GHC4-SEP] (the separated-presheaf half of the refutation)** A relative
 representation datum separates a global value of the represented functor by its
