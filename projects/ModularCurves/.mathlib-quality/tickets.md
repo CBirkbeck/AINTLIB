@@ -8247,7 +8247,7 @@ named gate each; the hfix interface is landed in code.*
   deprioritized per v9 work-order #7). Universal instantiation follows automatically once a
   universal `EllipticCurve` record exists — i.e. T-W7.36-gated; noted, not dispatchable.
   These are the representability presentations T-E7 and the H-stream consume.
-- **CLAIMED beastmode-A 2026-07-08 (v10.30): building .mathlib-quality/upstream-ledger.md — verify each candidate vs current mathlib, rank, name target file, stage PR drafts. No external PRs.**
+- **T-UPSTREAM-TRIAGE DELIVERED (beastmode-A 2026-07-08): `.mathlib-quality/upstream-ledger.md`.** Ranked + mathlib-verified: #1 `Functor.map_zpow'` (sibling of existing `Functor.map_inv'`, target Grp.lean — cleanest), #2 `AdjoinRoot.isDomain_of_monic_of_map` (shortens the CoordinateRing domain instance, Point.lean:194), #3 `IdealSheafData.comap_mul`/`comapMonoidHom`/`comap_prod` (completes comap API), #4 `exists_factor_comap_iff` — all four READY with PR drafts + target files. #5 `OverPullbackMul` (fable-P4) + #7 P3b3 bridge = owner-input. #6 D2 homological suite: **B-E acyclicity + Hilbert syzygy VERIFIED absent from mathlib (genuine gaps)** but D2 mid-construction — defer to a D2 verify-pass on finished lemmas. NO external PRs (owner action). Interruptible; 0h preempts.
 - **NEW: [T-UPSTREAM-TRIAGE] — beastmode-A, this session, interruptible.** The board has
   accumulated flagged upstream candidates all day with no triage: c5β's
   `AdjoinRoot.isDomain_of_monic_of_map` (strongest — shortens an existing mathlib proof) +
