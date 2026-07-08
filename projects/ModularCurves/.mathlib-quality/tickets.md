@@ -8889,3 +8889,48 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
   records ("almost definitional" as the v8 note promised), with the locally-Weierstrass
   sheafy upgrade explicitly descent-gated (same honest cut T-W3b made). v9.2 severance
   honoured: torsors/groupoids only, no Spec(A^G) anywhere.
+
+## Amendments v10.36 (2026-07-08): route (a) DISSOLVES gate 2; ω DEMOTED (modular-curves-ASAP directive); c5β β4(c) decomposition approved
+
+- **OWNER DIRECTIVE (binding): modular curves ASAP; modular forms SHELVED.** The goal of
+  record: construct the modular curves as representing objects of the elliptic-curve moduli
+  problems (Y₁(N), Y(N), Γ_H). Four representability decompose workers are in flight
+  (STREAM-Y1 / YFULL / GH / NISOG → boarded as v10.37 on return); the forms stream (MF)
+  planning was STOPPED mid-read, no artifacts.
+- **fable-P4 — ROUTE (a) WORKS; the engine's gate 2 is DISSOLVED.** KM's descent step is a
+  G-action cocycle lifting the base action, so the descended curve is simply **E/G — exactly
+  T-Q5's `SchemeAction.quotient`** (proven, sorry-free; E projective over affine X meets the
+  stable-affine-cover hypothesis; E ≅ (E/G) ×_{X/G} X since both maps are G-torsors). NO SGA
+  I VIII 7.8, no algebraic spaces, no RR, **no ω**. Real cost isolated: localModel on the
+  quotient — additive part PROVEN today (`exists_sub_smul_eq_of_isCocycle`, additive Hilbert
+  90 from trace surjectivity); multiplicative part = **[A711-DESC]** (Galois descent of
+  modules along A/Aᴳ via the Galois coordinates; mathlib-absent; 250–400 ll; CLAIMED by
+  fable-P4). Residual dependency: T-W7.1b (CHARTER-A, in flight). ALSO:
+  `Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing` DONE axiom-clean via Stacks
+  08WD — **[A711-SM] DISSOLVED outright**; [A711-FP] is the sole general-base gap (drop-in
+  scaffold). `exists_traceInvariants_eq_one` (trace surjectivity) PROVEN → [A711-BC]
+  reduces to averaging. Engine path: [A711-DESC] → [A711-BC] → T-E5c. +2 ledger candidates
+  (trace surjectivity; additive Hilbert 90 — both mathlib-absent).
+- **ω / T-E-OMEGA DEMOTED** (consequence of route (a) + the owner directive): no longer on
+  the engine path; stays funded ONLY for its Y-path consumers (T-E14's Legendre half, T-A4),
+  executed on-demand. **CHARTER-A AMENDED**: item 3 (ω) moves to LAST/on-demand; A's order
+  is now faith-infra → T-W7.1b flip → 0h + endgame (T-W7.12/T-W7.36) → ω only when a
+  consumer demands it.
+- **c5β — handover correction RATIFIED + β4(c) decomposition APPROVED.** The A-handover's
+  "c5β one leaf upstream on projGlueLift" was stale: `projGlueLift_eq` + the crux were
+  proven at 13:54Z (3166d104); AdditionChartProj.lean is sorry-free — **the 0h interrupt
+  sequencing reads from β4(c)/GLC completion, one step earlier**. β4(c) is NOT straight
+  assembly: the four GLC contracts are over arbitrary `[W.IsElliptic]` while the proven
+  stack carries `[IsDomain]+[IsJacobsonRing]` — the **universality-by-instantiation** step
+  (construct over the atlas; transport along `classifyRingHom` + 
+  `isPullback_projModelBaseChange`, both proven) is the right route and exactly what the
+  v10.24 reporting contract exists to surface. **c4.1–c4.5 approved as boarded**
+  (opens-over-atlas → glue pieces → rule-3 interface same-commit → transport → fill GLC);
+  execute c4.1. +2 ledger candidates (`IsHomogeneous.eval₂_mul_left`/`aeval_mul_left`;
+  `quotientEquivQuotientMvPolynomial_symm_mk`) — noted for the ledger, drafts stay internal.
+- **p2 checkpoint absorbed**: `point_add_eq_lift` + `subgroupMul_comm` landed; **antidote
+  banked**: rw/simp fail on Over-tensor `.left` compositions (instance-transparency wall) →
+  pure term-mode `congrArg`/`.trans` with projfst/projsnd helpers. [T-D5h-κbij] RATIFIED as
+  the critical unblocker (all Hopf-instance laws rest on it). Continuing toward Milestone 1.
+- beastmode-A acknowledgment logged; CHARTER-A next-session opener unchanged except the ω
+  demotion above.
