@@ -71,19 +71,35 @@ def IsInvertible (M : X.Modules) : Prop :=
   ∃ (ι : Type u) (U : ι → X.Opens), iSup U = ⊤ ∧
     ∀ i, Nonempty ((Modules.pullback (U i).ι).obj M ≅ unitObj ↑(U i))
 
+/-- Pullback of the structure sheaf along any morphism of schemes is the structure
+sheaf (mathlib's `pullbackObjUnitToUnit` isomorphism, available because the
+opens-preimage site functor is final — `Opens.map_final`; repackaged across the
+`X.Modules` category-instance wrapper). -/
+noncomputable def pullbackUnitIso (f : Y ⟶ X) :
+    (Modules.pullback f).obj (unitObj X) ≅ unitObj Y :=
+  let e : (SheafOfModules.pullback (Scheme.Hom.toRingCatSheafHom f)).obj
+      (SheafOfModules.unit X.ringCatSheaf) ≅ SheafOfModules.unit Y.ringCatSheaf :=
+    asIso (SheafOfModules.pullbackObjUnitToUnit (Scheme.Hom.toRingCatSheafHom f))
+  ⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩
+
 /-- The structure sheaf is an invertible `𝒪ₓ`-module. -/
-theorem isInvertible_unit : IsInvertible (unitObj X) := by
-  refine ⟨PUnit, fun _ => ⊤, iSup_const, fun _ => ?_⟩
-  have e : (SheafOfModules.pullback
-        (Scheme.Hom.toRingCatSheafHom (⊤ : X.Opens).ι)).obj
-      (SheafOfModules.unit X.ringCatSheaf)
-      ≅ SheafOfModules.unit (↑(⊤ : X.Opens) : Scheme.{u}).ringCatSheaf :=
-    asIso (SheafOfModules.pullbackObjUnitToUnit
-      (Scheme.Hom.toRingCatSheafHom (⊤ : X.Opens).ι))
-  exact ⟨⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩⟩
+theorem isInvertible_unit : IsInvertible (unitObj X) :=
+  ⟨PUnit, fun _ => ⊤, iSup_const, fun _ => ⟨pullbackUnitIso (⊤ : X.Opens).ι⟩⟩
 
 /-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
-sheafification of a sheaf being itself; no GAP-1 content). -/
+sheafification of a sheaf being itself; no GAP-1 content).
+
+KNOWN ROUTE (blocked by a build-environment anomaly, 2026-07-08): compose the presheaf
+right unitor `(sheafification _).mapIso (ρ_ M.val)` with `asIso ((PresheafOfModules.
+sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).counit.app M)` — the counit is an
+isomorphism on sheaves (mathlib instance, Sheafification.lean). Every piece of this
+chain elaborates, and the whole proof compiles under `lake env lean` on a file with
+byte-identical imports/options/namespace — but under the project build (and on this
+file) the `IsIso` instance family for the sheafification adjunction fails to
+synthesize, including mathlib's own inlined instance proof via
+`toSheaf_map_sheafificationAdjunction_counit_app` + iso-reflection (8 distinct attempts
+logged on the board, v10.11.3). Retest after the next mathlib bump; fallback: construct
+the inverse explicitly from the adjunction unit + triangle identities. -/
 theorem exists_tensorObj_unit_iso (M : X.Modules) :
     Nonempty (tensorObj M (unitObj X) ≅ M) := by
   sorry
@@ -93,7 +109,13 @@ a trivializing cover of `Y` (GME p. 108: "If `g : T' → T` is an `S`-morphism, 
 `g_E = 1_E ×_S g : E_{T'} → E_T`. This induces `Pic^ν(g)(𝓛) = g_E^*(𝓛)`"). -/
 theorem IsInvertible.pullback {M : X.Modules} (hM : IsInvertible M) (f : Y ⟶ X) :
     IsInvertible ((Modules.pullback f).obj M) := by
-  sorry
+  obtain ⟨ι, U, hU, htriv⟩ := hM
+  refine ⟨ι, fun i => f ⁻¹ᵁ U i, f.iSup_preimage_eq_top hU, fun i => ?_⟩
+  obtain ⟨e⟩ := htriv i
+  exact ⟨((Modules.pullbackComp (f ⁻¹ᵁ U i).ι f).app M).trans <|
+    (eqToIso (by rw [← morphismRestrict_ι])).trans <|
+      ((Modules.pullbackComp (f ∣_ U i) (U i).ι).symm.app M).trans <|
+        ((Modules.pullback (f ∣_ U i)).mapIso e).trans (pullbackUnitIso (f ∣_ U i))⟩
 
 /-- The tensor product of invertible `𝒪ₓ`-modules is invertible (GME p. 108: `Pic(E_T)`
 is "the group of isomorphism classes of all invertible sheaves"). **GAP-1-gated**: the
