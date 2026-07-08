@@ -748,6 +748,29 @@ noncomputable def pointedIsoΓ {W W' : WeierstrassCurve R}
     ((projModel W).presheaf.mapIso
       (eqToIso (pointedIso_preimage_zChart e hez).symm).op)).commRingCatIsoToRingEquiv
 
+/-- `pointedIsoΓ` applied to a section: `e.hom.app` on the `Z`-chart followed by the presheaf
+restriction along the preimage-equality. The element-level characterization used to relate
+`pointedIsoΓ` to `appLE` without unfolding the equivalence. -/
+lemma pointedIsoΓ_apply {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (w : ↑Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))) :
+    pointedIsoΓ e hez w =
+      (((projModel W).presheaf.map (eqToHom
+        (pointedIso_preimage_zChart e hez).symm).op).hom)
+        ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))).hom w) := by
+  refine (congrArg (fun ψ : _ →+* _ => ψ w)
+    (Iso.commRingCatIsoToRingEquiv_toRingHom
+      ((asIso (e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))))).trans
+        ((projModel W).presheaf.mapIso (eqToIso
+          (pointedIso_preimage_zChart e hez).symm).op)))).trans ?_
+  rw [Iso.trans_hom]
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply]
+  rfl
+
 /-- The transport of the restricted structure section along a pointed isomorphism. -/
 lemma pointedIsoΓ_structure_section {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
@@ -887,6 +910,34 @@ noncomputable def pointedIsoCoordEquiv {W W' : WeierstrassCurve R}
             (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv).symm.trans
             (chartZRingEquiv W)))))
     (fun r => pointedIsoCoord_algebraMap e heπ hez r)
+
+/-- The fixed `R`-algebra chart identification `CoordinateRing W ≃+* Γ(projModel W, Z-chart)`
+(via `chartZRingEquiv` and the `X₂`-basic-open localization iso). Independent of any pointed
+isomorphism: it is the fixed conjugator through which `pointedIsoCoordEquiv` factors, so the
+induced-map interface (`pointedIsoCoordEquiv_apply`) never exposes the four-fold chart
+composite — that giant term stays sealed inside this single named equivalence. -/
+noncomputable def coordRingToZSection (W : WeierstrassCurve R) :
+    W.toAffine.CoordinateRing ≃+*
+      Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
+  (chartZRingEquiv W).symm.trans
+    (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv
+
+/-- **Whnf-free interface for `pointedIsoCoordEquiv`.** The induced coordinate isomorphism,
+applied to a point, factors as the fixed chart identifications `coordRingToZSection` around
+the `Γ`-level pointed map `pointedIsoΓ`. Proved by `rfl` while the chart isos are reducible;
+this is the only unfolding the downstream faithfulness proofs need, and its RHS is small (the
+four-fold chart composite stays sealed inside `coordRingToZSection`). -/
+lemma pointedIsoCoordEquiv_apply {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (x : W'.toAffine.CoordinateRing) :
+    pointedIsoCoordEquiv e heπ hez x =
+      (coordRingToZSection W).symm (pointedIsoΓ e hez (coordRingToZSection W' x)) :=
+  rfl
 
 /-- The chart point of a prime containing `t` lies on the zero section. -/
 lemma chartPointOf_mem_range_zero {W : WeierstrassCurve R}

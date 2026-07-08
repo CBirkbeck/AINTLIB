@@ -68,43 +68,14 @@ lemma ringEquiv_trans_mid_inj {A B C D : Type u} [CommRing A] [CommRing B] [Comm
   simp only [RingEquiv.trans_apply] at this
   exact r.injective this
 
-/-- Application form of the coordinate iso: `pointedIsoΓ e` wrapped in the fixed chart
-bijections, at a point. `rfl` at the FUNCTION level (`toFun`/`trans_apply` are structural
-projections — the heavy composite is never unfolded by the kernel). -/
-lemma pointedIsoCoordEquiv_apply {W W' : WeierstrassCurve R}
-    (e : projModel W ≅ projModel W')
-    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
-    (hez : projModelZero W ≫ e.hom = projModelZero W')
-    (x : W'.toAffine.CoordinateRing) :
-    pointedIsoCoordEquiv e heπ hez x =
-      chartZRingEquiv W ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv.symm
-        (pointedIsoΓ e hez ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W'))
-      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))
-      (mk_X_mem_quotientGrading_one W' 2) one_pos).commRingCatIsoToRingEquiv
-          ((chartZRingEquiv W').symm x)))) :=
-  rfl
-
--- v10.24(b): with the rfl interface (`pointedIsoCoordEquiv_apply`) proved above while the
--- chart isos are reducible, seal ALL FOUR heavy b1 isos (+ the mathlib `basicOpenIsoAway`
--- wrapper) `local irreducible`, so consumer proofs below never trigger `whnf`/`isDefEq` on
--- the raw terms — the previous session's wall (only `pointedIsoCoordEquiv`/`pointedIsoΓ`
--- sealed, wrappers still ground) is fixed by sealing the wrappers too.
-attribute [local irreducible] pointedIsoCoordEquiv pointedIsoΓ chartZRingEquiv
-  Proj.basicOpenIsoAway CategoryTheory.Iso.commRingCatIsoToRingEquiv
-
-/-- **(T-W7.1b-faith, S1)** Equal coordinate isos have equal `pointedIsoΓ`. REFINED FINDING
-(session 2, v10.24(b) attempt): sealing ALL heavy b1 isos `local irreducible` (above) DOES fix
-the generic-lemma steps — `hp` (chart-iso `symm_apply_apply`/`apply_symm_apply` cancellation)
-now compiles cheaply. But the wall PERSISTS on any `rw [pointedIsoCoordEquiv_apply]` / `change` /
-`.trans` that forces the elaborator's `isDefEq` on the heavy 4-fold-nested composite
-`chartZW(BOA.symm(pointedIsoΓ e (BOA'(chartZW'.symm ·))))` — because the terms are huge *as
-stated*, not merely when unfolded, so opacity doesn't shrink them. Only pure `rfl`
-(`pointedIsoCoordEquiv_apply`, kernel-checked once) survives. CONCLUSION: local attributes are
-insufficient; faith-infra needs DEFINITION-level irreducibility in `ModelVariableChange` + a
-rebuild of the b2 proofs that unfold these defs, replaced by interface lemmas — a systematic
-`/develop --decompose`-scale refactor. Boarded under T-W7.1b-faith-infra. -/
+/-- **(T-W7.1b-faith, S1)** Equal coordinate isos have equal `pointedIsoΓ`. RESOLVED
+(faith-infra, def-level refactor): the fixed chart conjugator `coordRingToZSection`
+(`ModelVariableChange`) exposes the whnf-free interface `pointedIsoCoordEquiv_apply` with a
+*small* RHS — the four-fold composite stays sealed inside `coordRingToZSection`, so
+rewriting the interface never triggers the previous `isDefEq` blow-up. `pointedIsoCoordEquiv`
+factors as `(coordRingToZSection W).symm ∘ pointedIsoΓ e ∘ coordRingToZSection W'` with the
+two fixed chart identifications; cancelling them (they are bijections) reads `pointedIsoΓ` off
+`pointedIsoCoordEquiv` pointwise. -/
 lemma pointedIsoΓ_eq_of_coordEquiv {W W' : WeierstrassCurve R}
     (e e' : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
@@ -113,6 +84,46 @@ lemma pointedIsoΓ_eq_of_coordEquiv {W W' : WeierstrassCurve R}
     (hez' : projModelZero W ≫ e'.hom = projModelZero W')
     (hc : pointedIsoCoordEquiv e heπ hez = pointedIsoCoordEquiv e' heπ' hez') :
     pointedIsoΓ e hez = pointedIsoΓ e' hez' := by
+  refine RingEquiv.ext fun y => ?_
+  have hkey := DFunLike.congr_fun hc ((coordRingToZSection W').symm y)
+  rw [pointedIsoCoordEquiv_apply, pointedIsoCoordEquiv_apply,
+    RingEquiv.apply_symm_apply] at hkey
+  exact (coordRingToZSection W).symm.injective hkey
+
+/-- **(T-W7.1b-faith, appLE bridge)** The `appLE` of a pointed iso from the target `Z`-chart to
+the source `Z`-chart (both `X₂`-basic-opens) is exactly `pointedIsoΓ` as a ring map: both unfold
+to `e.hom.app(Z') ≫ (restriction along the preimage-equality)`, and the two restriction arrows
+agree because morphisms in `Opens` are unique. -/
+lemma appLE_zChart_eq_pointedIsoΓ {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    e.hom.appLE
+        (Proj.basicOpen (quotientGrading (projIdeal W'))
+          ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))
+        (Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+        (pointedIso_preimage_zChart e hez).ge =
+      CommRingCat.ofHom (pointedIsoΓ e hez).toRingHom := by
+  apply CommRingCat.hom_ext
+  ext w
+  rw [CommRingCat.hom_ofHom]
+  rw [show (pointedIsoΓ e hez).toRingHom w = pointedIsoΓ e hez w from rfl, pointedIsoΓ_apply,
+    Scheme.Hom.appLE]
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply]
+  congr 1
+
+/-- **(T-W7.1b-faith, reconstruction)** Two pointed isomorphisms of projective models with the
+same induced `Γ`-level map on the `Z`-chart have equal underlying morphism. Reduces to agreement
+on the `Z`-chart cover via `projModel_hom_ext_of_affine`; the `Z`-chart restriction of a pointed
+iso is `Spec` of (a chart-transport of) `pointedIsoΓ`, so equal `pointedIsoΓ` forces equal
+restrictions. -/
+lemma pointedIso_hom_eq_of_pointedIsoΓ {W W' : WeierstrassCurve R}
+    (e e' : projModel W ≅ projModel W')
+    (hez : projModelZero W ≫ e.hom = projModelZero W')
+    (hez' : projModelZero W ≫ e'.hom = projModelZero W')
+    (hΓ : pointedIsoΓ e hez = pointedIsoΓ e' hez') :
+    e.hom = e'.hom := by
+  refine projModel_hom_ext_of_affine W (Z := projModel W') ?_
   sorry
 
 /-- **(T-W7.1b, main — the comparison theorem)** Every isomorphism of projective Weierstrass
@@ -129,6 +140,9 @@ theorem pointedIso_exists_variableChange (W W' : WeierstrassCurve R)
     (hez : projModelZero W ≫ e.hom = projModelZero W') :
     ∃ C : VariableChange R, ∃ hW : C • W' = W,
       e.hom = eqToHom (by rw [← hW]) ≫ (projModelVCIso C W').hom := by
+  obtain ⟨C, hW, hx, hy⟩ := exists_variableChange_of_filtration
+    (pointedIsoCoordEquiv e heπ hez) (fun n => pointedIsoCoordEquiv_filtration e heπ hez n)
+  refine ⟨C, hW, ?_⟩
   sorry
 
 /-- **(T-W7.1b, uniqueness — faithfulness of the model action)** The variable change inducing
