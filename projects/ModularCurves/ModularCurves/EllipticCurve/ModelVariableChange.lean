@@ -2272,6 +2272,41 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
   exact congrArg₂ (· * ·) hZ (congrArg (· ^ n)
     (hY (AdjoinRoot.root (infChartCubic W'))))
 
+/-- Overlap-dictionary values restrict from the overlap to the division open as `Y`-chart
+restrictions. -/
+private lemma witness_res_dictY {W : WeierstrassCurve R}
+    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
+    (hVle : (projModel W).basicOpen r ⊓ (projModel W).basicOpen
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ≤
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+    (b : AdjoinRoot (infChartCubic W)) :
+    (((projModel W).presheaf.map (homOfLE hVle).op).hom)
+      ((overlapSectionsEquiv W).symm (algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) b)) =
+    (((projModel W).presheaf.map (homOfLE ((inf_le_left.trans
+      ((projModel W).basicOpen_le r)) : (projModel W).basicOpen r ⊓
+        (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm
+          (infChartTElem W)) ≤ _)).op).hom)
+      ((chartYSectionsRingEquiv W).symm b) := by
+  have hd := res_chartYSection_eq_symm_algebraMap W b
+  have hres := congrArg (((projModel W).presheaf.map (homOfLE hVle).op).hom) hd.symm
+  refine hres.trans ?_
+  have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((chartYSectionsRingEquiv W).symm b))
+    (((projModel W).presheaf.map_comp
+      (homOfLE (Proj.basicOpen_mono _
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op
+      (homOfLE hVle).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+  refine hfuse.trans ?_
+  exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+    ((chartYSectionsRingEquiv W).symm b)) (Subsingleton.elim _ _)
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic
