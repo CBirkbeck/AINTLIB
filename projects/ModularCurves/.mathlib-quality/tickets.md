@@ -6295,10 +6295,15 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     conclusions carry `∨ (I.map…)=⊤` (mathlib IsRegular needs S/(rs)≠0 so gradeGE can't hold for ⊤; counterexample S=k[x],I=(x)
     localise→field k(x)); this IS the Stacks 10.129.2 disjunction + exactly what buchsbaumEisenbud_acyclic consumes. `isOpen_gradeGE_locus`
     modulo one isolated Rees/Ext bridge `gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`. [T-GRADE-REES] dispatched to close it.
-  - **[T-BE] IN PROGRESS (make-or-break)** — `buchsbaumEisenbud_acyclic`. FIRST PASS found the STATEMENT off-by-one
-    (`φ i`→`φ (i-1)`, machine-refuted sorry-free: `hrnk`+`hrnk_top` force `F_e=0` so `idealOfMinors(rnk(e-1))(φ(e-1))=⊥`,
-    RHS false ∀ complex w/ rk(e-1)≥1; witness 0→ℚ→id→ℚ). FIXED 9f677b4e (matches Stacks 00N1). RESUMED [a89a32ed] on the
-    now-TRUE statement for the ACTUAL BE.3 acyclicity proof. BE.1(McCoy)=T-FIT done; BE.2(⟹)+BE.3(⟸ Peskine–Szpiro induction).
+  - **[T-BE] MAKE-OR-BREAK RESOLVED** — `buchsbaumEisenbud_acyclic` PROVEN over two named cores (own sorry GONE, `⟨be_forward,be_backward⟩`).
+    First pass found+machine-refuted the statement off-by-one (`φ i`→`φ(i-1)`, FIXED 9f677b4e). Second pass: assembled the iff,
+    **PROVED the McCoy base case of BE.3** (`det_submatrix_smul_eq_zero` + `injective_of_maxMinors_nonZeroDiv`) and wired it in
+    (discharges the top exactness spot), + all trivial cases + dispatchers + regular-element/prime-avoidance recipe.
+    **Residual = TWO precisely-documented depth cores** (BuchsbaumEisenbud.lean, committed via sibling sweep):
+    - `be_forward_core` (L187): exact ⟹ grade conditions. Needs **Auslander–Buchsbaum + grade-via-primes** (Stacks 00N1 (1)⟹(2)(b)).
+    - `be_backward_core` (L272, deep interior rk(i+1)≠0∧rk(i+2)≠0): conditions ⟹ exact. Needs **Peskine–Szpiro acyclicity** (00N1 (2)⟹(1), 0AVQ).
+    These need the **depth-theory layer** route A explicitly funded ("Module.depth + Auslander–Buchsbaum from scratch") — the genuine
+    frontier, now cleanly isolated. Foundations present: grade/regular-seq (Grade.lean), grade⟺Ext (T-REES Rees), McCoy (T-FIT). → [T-DEPTH] planning.
   - **[T-REES] REES HALF DONE** [a709a155] — the classical Rees theorem (grade⟺Ext-vanishing over S_𝔮) PROVEN in full
     (7 privates: k=1 boundary via `IsSMulRegular.subsingleton_linearMap_iff`; dimension shift via `smulShortComplex`
     long-exact Ext; Rees induction), committed via sibling sweep. `gradeGE_localize` axiom-clean. Residual isolated to ONE
