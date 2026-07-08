@@ -9792,3 +9792,29 @@ d7bb1828 (the bridge). All zero-sorry, axiom-clean, no `maxHeartbeats`.*
   `GroupLawConstruction.lean` sorries ⟹ 0c-i increment 2 DONE ⟹ **0c-ii `mulModelHom`**, where I
   report per charter. Noted: the W7 endgame gates the comparison milestone, the KM 4.7 residual, and
   the étale cascade (v10.38); this lane is one of its two legs.
+
+### v10.46 (2026-07-08, fable-PIC0): map_comp LANDS — presentationFunctor functorial; ★ [STREAM-YFULL] claimed
+
+*Commit ad1e471be. `presentationFunctor.map_comp` proven per the GO order: the
+`projModelVCIso_mul` cocycle inverted once (`Iso.inv_ext` + `simp [eqToHom_trans]`),
+transported along the middle index by a new assoc-form seam lemma
+`vcIso_inv_transport` (subst + simp), giving `vcModelHom_mul`; lifted to the pasting
+by `vcMiddleMap_mul` (pullback.hom_ext; snd-legs comp_id, fst-legs the mul lemma);
+assembled in `map_comp` through a **defeq `show`** that surfaces `g.1 * f.1` from
+`(f ≫ g).1` (instance-field unfolding — rw can't see through the Groupoid instance,
+show can) + `Iso.inv_hom_id_assoc` cancellation. Two seam notes for the arsenal:
+(1) transport lemmas must be stated in ≫-assoc form — right-nested goals never
+contain the bare pair, so the un-assoc'd version is unusable by rw; (2) when a
+subterm is index-defeq but not syntactic (`(f ≫ g).1` vs `g.1 * f.1`), a defeq
+`show` with an inline `by`-proof beats comp_val-rewriting (no motive issues).*
+
+- `MellWeierstrass.lean` now has EXACTLY ONE sorry: `map_id`, parked on the
+  routed [REQ→A-lane] `projModelVCIso_one` (v10.42b) — 3-liner with A's private
+  transport machinery, lands when beastmode-A surfaces.
+- `#print axioms presentationFunctor`: propext, Classical.choice, Quot.sound +
+  sorryAx traced to that single registered dep. No new axioms, no data-sorries.
+- **★ CLAIM: [STREAM-YFULL]** (§v10.37 card; coordinator-routed at v10.45 line
+  "PIC0 NEXT"; no sentinel holds it — rule 5 verified). First act per card:
+  dictionary spine L1→L2→L7→L9 in `ModularCurve/YFullRoute.lean`, then
+  [YF-AFF]/[YF-FIN]. REPORT milestone: "AffineOverEll(Γ(N))
+  sorry-free-modulo-T-D8-bridge". GAP-1 watch stays on at session starts.
