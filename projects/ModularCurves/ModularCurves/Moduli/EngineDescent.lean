@@ -195,6 +195,94 @@ theorem exists_isStableOpen_isAffineOpen_of_globalModel [Finite G]
 
 /-! ### The route-(a) descent theorem (leaves `[a3]`–`[a5]`) -/
 
+/-- **([a3-i], PROVEN)** The structure morphism and the zero section descend to the quotient,
+and remain a section: `E/G ⟶ X/G` and `X/G ⟶ E/G` with `zero' ≫ π' = 𝟙`.
+
+Both are instances of the universal property `existsUnique_quotientπ_lift` (T-Q5, proven): the
+composites `E → X → X/G` and `X → E → E/G` are `G`-invariant by `IsCurveAction.π_equivariant`
+resp. `IsCurveAction.zero_equivariant` together with `hom_quotientπ`. That `zero'` is a section
+of `π'` is then uniqueness of descent (`quotientπ_hom_ext`) applied to `C.zero_π`.
+
+No new theory: the geometric content of the KM engine's descent step is already discharged by
+the quotient's universal property. What remains of `[a3]` is the *cartesianness* of the square,
+and of `[a4]`/`[a5]` the descent of `proper`/`smooth`/`localModel`. -/
+theorem exists_quotient_π_zero [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e) :
+    ∃ (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+      (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa),
+      σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem ∧
+        σ.quotientπ V hVs hVa hVmem ≫ zero' =
+          C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem ∧
+        zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa) := by
+  obtain ⟨π', hπ', -⟩ := σE.existsUnique_quotientπ_lift VE hVEs hVEa hVEmem
+    (C.π ≫ σ.quotientπ V hVs hVa hVmem) (fun γ => by
+      rw [← Category.assoc, hact.π_equivariant γ, Category.assoc, σ.hom_quotientπ])
+  obtain ⟨zero', hzero', -⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem
+    (C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) (fun γ => by
+      rw [← Category.assoc, ← hact.zero_equivariant γ, Category.assoc, σE.hom_quotientπ])
+  refine ⟨π', zero', hπ', hzero', ?_⟩
+  refine σ.quotientπ_hom_ext V hVs hVa hVmem _ _ ?_
+  rw [Category.comp_id, ← Category.assoc, hzero', Category.assoc, hπ', ← Category.assoc,
+    C.zero_π, Category.id_comp]
+
+
+
+/-- **([a3-ii], the square is cartesian)** `E ≅ (E/G) ×_{X/G} X`.
+
+Plan (terminating in a proof): both horizontal maps are `G`-torsors, and the comparison
+`E ⟶ (E/G) ×_{X/G} X` is a `G`-equivariant map of `G`-torsors over `E/G`, hence an
+isomorphism. Formally, work Zariski-locally on `E/G`: on a stable affine chart `W ⊆ E` the map
+`W ⟶ Spec Γ(W)ᴳ` is a torsor by `torsorMul_bijective_of_isFreeAlgebraAction` (T-Q2, PROVEN),
+whose algebraic freeness hypothesis is supplied by `isFreeAlgebraAction_of_free_schemeAction`
+(the bridge from geometric freeness on `T`-points, `simulSchemeActionTotal_free_of_rigid`);
+likewise on `X`. Then `Γ(W) ⊗_{Γ(W)ᴳ} Γ(V)ᴳ ≅ Γ(W) ⊗_{Γ(V)} Γ(V)` chart-by-chart, and the
+comparison is an isomorphism on an open cover.
+
+This is the *only* place route (a) uses the torsor property of `T-Q2`; it replaces KM's appeal
+to SGA I Exp. VIII 7.8. -/
+theorem isPullback_quotientπ [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (hπ' : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem) :
+    IsPullback (σE.quotientπ VE hVEs hVEa hVEmem) C.π π' (σ.quotientπ V hVs hVa hVmem) := by
+  sorry
+
+/-- **([a4], properness and smoothness descend)** `π' : E/G ⟶ X/G` is proper and smooth of
+relative dimension `1`.
+
+Plan (terminating in a proof): `q : X ⟶ X/G` is a **finite étale surjection** — finite by
+`Module.Finite.of_isFreeAlgebraAction`, étale by
+`Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing` (general base = the tracked gap
+[A711-FP]), surjective because it is a torsor — hence an fppf cover. `IsProper` and
+`SmoothOfRelativeDimension 1` are fppf-local at the target, and `π' ×_{X/G} X ≅ π` by
+`[a3-ii]`, which is proper and smooth by hypothesis. -/
+theorem isProper_smooth_quotient [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (hπ' : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem) :
+    IsProper π' ∧ SmoothOfRelativeDimension 1 π' := by
+  sorry
+
 /-- **([a3]–[a5], the route-(a) descent theorem)** Let `G` act freely on an affine scheme `X`
 with a `G`-stable affine atlas, and let the action lift to a geometric elliptic curve
 `C/X` (an `IsCurveAction`) with an orbit-in-affine-open chart datum. Then the quotient
