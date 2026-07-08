@@ -565,6 +565,13 @@ private theorem localAcyclicity_shift {L : Type*} [CommRing L] [IsLocalRing L] [
     (fun k hk => habove (i + k) (by omega))
   simpa using key
 
+/-- **[Piece 2 sub-lemma — free-module localisation iso].**  `(Fin n → S)_𝔮 ≅ (Fin n → S_𝔮)`, i.e.
+localisation commutes with finite products (`IsLocalizedModule.pi` + `IsLocalizedModule.iso`). -/
+private noncomputable def freeLocEquiv {S : Type*} [CommRing S] (q : Ideal S) [q.IsPrime] (n : ℕ) :
+    LocalizedModule q.primeCompl (Fin n → S) ≃ₗ[S] (Fin n → Localization.AtPrime q) :=
+  IsLocalizedModule.iso q.primeCompl
+    (LinearMap.pi fun k => (Algebra.linearMap S (Localization.AtPrime q)).comp (LinearMap.proj k))
+
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
 
