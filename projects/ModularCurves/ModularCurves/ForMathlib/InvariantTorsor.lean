@@ -467,6 +467,44 @@ theorem twistedInvariants_finite [Fintype G] (hfree : IsFreeAlgebraAction G R A)
   refine Module.Finite.of_surjective (twistedAvg G R A w hw) fun m => ?_
   exact ⟨c * (m : A), twistedAvg_smul_eq G R A w hw c hc' m⟩
 
+/-- **(ForMathlib gap-filler)** A retract of a projective module is projective. Mathlib has
+`Module.Projective.of_basis` and `of_free` but no `of_split`/`of_retract` (2026-07-08). -/
+theorem Module.Projective.of_retract {B : Type u} [CommRing B] {A' M' : Type u}
+    [AddCommGroup A'] [Module B A'] [AddCommGroup M'] [Module B M'] [Module.Projective B A']
+    (j : M' →ₗ[B] A') (ρ : A' →ₗ[B] M') (h : ∀ m, ρ (j m) = m) : Module.Projective B M' := by
+  classical
+  rw [Module.projective_def'] at *
+  obtain ⟨sA, hsA⟩ := ‹∃ s : A' →ₗ[B] A' →₀ B, Finsupp.linearCombination B id ∘ₗ s = .id›
+  refine ⟨(Finsupp.lmapDomain B B (ρ : A' → M')).comp (sA.comp j), ?_⟩
+  ext m
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply]
+  rw [Finsupp.lmapDomain_apply, Finsupp.linearCombination_mapDomain]
+  have h1 : (Finsupp.linearCombination B ((id : M' → M') ∘ (ρ : A' → M'))) (sA (j m))
+      = ρ ((Finsupp.linearCombination B id) (sA (j m))) := by
+    rw [Finsupp.linearCombination_apply, Finsupp.linearCombination_apply, map_finsuppSum]
+    simp [Finsupp.sum]
+  rw [h1]
+  have h2 := congrArg (fun f => f (j m)) hsA
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply] at h2
+  rw [h2, h m]
+
+/-- **(A711-DESC)** The twisted invariants are a **projective** `Aᴳ`-module: they are a
+retract of `A` (which is projective by `Module.Projective.of_isFreeAlgebraAction`) along
+`m ↦ c · m` and the twisted average. -/
+theorem twistedInvariants_projective [Fintype G] (hfree : IsFreeAlgebraAction G R A)
+    (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
+    Module.Projective (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) := by
+  haveI : Module.Projective (FixedPoints.subalgebra R A G) A :=
+    Module.Projective.of_isFreeAlgebraAction G R A hfree
+  obtain ⟨c, hc⟩ := exists_traceInvariants_eq_one G R A hfree
+  have hc' : (∑ g : G, g • c) = 1 := congrArg Subtype.val hc
+  refine Module.Projective.of_retract
+    ((LinearMap.mulLeft (FixedPoints.subalgebra R A G) c).comp
+      (twistedInvariants G R A w).subtype)
+    (twistedAvg G R A w hw) fun m => ?_
+  show twistedAvg G R A w hw (c * (m : A)) = m
+  exact twistedAvg_smul_eq G R A w hw c hc' m
+
 /-- A `1`-cocycle is normalised: `w(1) = 1`. -/
 theorem cocycle_one (w : G → Aˣ)
     (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) : ((w 1 : A)) = 1 := by
