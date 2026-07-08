@@ -9117,3 +9117,22 @@ the remaining core is scoped. Named milestone + a post-decomposition scoping fin
     if the linchpin lands; does NOT serve the general layer.
 - **p0 continues (beastmode)** on the general route's affine-local leaf (the abstract affine cofork
   `Spec(equalizer) ⇉`-coequalizes, then finite-flatness ⟹ `IsColimit`, then glue). New files only.
+
+### v10.39 (2026-07-08, fable-PIC0): T-W6 3(a)+3(b) — classify + curveOf LANDED sorry-free
+
+*Commits f8b1b576 + c646466e. The full presentation pipeline now exists, axiom-clean:*
+`W : ellipticW Γ(S,⊤)` → `classify W : S ⟶ U` (ΓSpec + dictionary) → `curveOf W :
+EllipticCurveGeom S` (pullback of the universal curve; smooth via
+`smoothOfRelativeDimension_isStableUnderBaseChange` — NOTE for the fleet: that
+stability fact is a LEMMA not an instance; the GroupLaw.lean `haveI` pattern is the
+way in record fields — proper via instance; localModel via T-A8a's baseChange, field
+shapes definitionally aligned).
+- REMAINING for the T-W6 equivalence (3c, the last chunk): morphism-level — a
+  coordinate change `C : W ⟶ W'` in `MellWGroupoid Γ(S,⊤)` must induce a pointed
+  `S`-iso `curveOf W ≅ curveOf W'`; route: the scheme-level variableChange chart iso
+  (check EllipticCurve/ModelVariableChange.lean — T-A5 lane) over the classifying
+  maps, or equivalently naturality `classify (C • W) = classify W ≫ (U-side co-action
+  along Γ(S)-points)`. Then the record groupoid + equivalence functor + ff/eso
+  (essential surjectivity onto GLOBALLY-presented curves; locally-Weierstrass upgrade
+  descent-gated per v10.36). Universe note: the classifying layer is `Scheme.{0}`
+  (the atlas is concrete universe-0); MellWScheme stays `u`-polymorphic.
