@@ -165,6 +165,53 @@ universe w
 
 variable {A B : Type w} [CommRing A] [Algebra R A] [CommRing B] [Algebra R B]
 
+/-- **[GR-C2]** A surjection from a rank-`k` free module onto a finite projective module
+of constant `rankAtStalk` `k` is bijective — the kernel is a finitely generated projective
+direct summand of stalkwise rank `0`, hence zero (Stacks 089T step (4)'s dimension
+argument, module form). -/
+theorem bijective_of_surjective_of_rankAtStalk {Q : Type v} [AddCommGroup Q] [Module R Q]
+    [Module.Finite R Q] [Module.Projective R Q]
+    (hrank : ∀ p, rankAtStalk (R := R) Q p = k)
+    (ψ : (Fin k → R) →ₗ[R] Q) (hsurj : Function.Surjective ψ) :
+    Function.Bijective ψ := by
+  sorry
+
+section Covering
+
+open TensorProduct
+
+universe w'
+
+variable {A : Type w'} [CommRing A] [Algebra R A]
+
+/-- **[GR-C1]** Nakayama covering, surjectivity half (Stacks 089T step (5)): every
+Grassmannian element over `A` admits, near any prime `p`, a coordinate `k`-subset whose
+chart composite becomes surjective after inverting some `f ∉ p` — the images of the
+standard basis generate the quotient, a rank-`k` sub-selection spans at the residue
+field, and the finitely generated cokernel of that selection dies on a basic open. -/
+theorem exists_localizationAway_surjective (n : ℕ)
+    (N : G(k, A ⊗[R] (Fin n → R); A)) (p : Ideal A) [p.IsPrime] :
+    ∃ (ι : Fin k ↪ Fin n) (f : A), f ∉ p ∧
+      Function.Surjective
+        ((N.map (IsScalarTower.toAlgHom R A (Localization.Away f))).toSubmodule.mkQ ∘ₗ
+          coordMap (fun i =>
+            (1 : Localization.Away f) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))) := by
+  sorry
+
+/-- **[GR-C]** Zariski-local covering by coordinate charts (Stacks 089T step (5)): every
+Grassmannian element over `A` lies, after inverting some `f` outside any given prime, in
+the chart of a coordinate `k`-subset. Assembly of [GR-C1] (surjectivity on a basic open)
+and [GR-C2] (equal-rank surjective ⟹ bijective). -/
+theorem exists_isChartAt_localizationAway (n : ℕ)
+    (N : G(k, A ⊗[R] (Fin n → R); A)) (p : Ideal A) [p.IsPrime] :
+    ∃ (ι : Fin k ↪ Fin n) (f : A), f ∉ p ∧
+      IsChartAt (fun i =>
+          (1 : Localization.Away f) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
+        (N.map (IsScalarTower.toAlgHom R A (Localization.Away f))) := by
+  sorry
+
+end Covering
+
 /-- **[GR-A2]** Base change preserves charts: if `N` lies in the chart at
 `1 ⊗ₜ x` over `A`, then `Grassmannian.map f` of `N` lies in the chart at `1 ⊗ₜ x` over
 `B` (Stacks 089T step (4), base-change stability of the subfunctors). -/

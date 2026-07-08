@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] — WAVE 1 DONE (GrassmannianChart.lean sorry-free, axiom-clean). Now wave-2 boundary: pin [GR-B2]/[GR-C]/[GR-D] signatures + skeleton.
+FOCUS: [NISOG-GRASS] wave 2 — skeleton green; PROVE [GR-C2] then [GR-C1] then [GR-C] (GrassmannianChart.lean:172/192/205).

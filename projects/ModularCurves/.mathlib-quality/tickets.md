@@ -10310,3 +10310,18 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
   mis-delivered to p0 (correctly ignored there). **Ensure it reaches the actual
   P3b3/STREAM-Y1 session** — until then P3b3 may still be running the redundant b5
   subagent.
+
+### v10.44e (2026-07-08, fable-FP): [NISOG-GRASS] wave-2 skeleton green — the covering leaves are pinned
+
+- Wave-2 signatures pinned against the proven wave-1 interface, skeleton LANDED green
+  (same file, 3 new sorries): **[GR-C2]** `bijective_of_surjective_of_rankAtStalk`
+  (equal-rank surjective ⟹ bijective; route: injectivity is local at primes, stalks are
+  free of rank k over local rings, surjective endo of f.g. module is injective, ker
+  localization-vanishing ⟹ ⊥); **[GR-C1]** `exists_localizationAway_surjective`
+  (Nakayama covering: residue-field basis sub-selection + f.g.-cokernel dies on a basic
+  open); **[GR-C]** `exists_isChartAt_localizationAway` (assembly C1+C2 — Stacks 089T
+  step (5) in full). Localization-tower instances (`IsScalarTower.toAlgHom R A
+  (Localization.Away f)`) verified to elaborate on the pin. [GR-B2]/[GR-D] remain
+  artifact-pinned for the wave-3 boundary (functor packaging decision).
+- **Claimed**: fable-FP (wave 2: GR-C2, GR-C1, GR-C) · Status: in_progress ·
+  order C2 → C1 → C.
