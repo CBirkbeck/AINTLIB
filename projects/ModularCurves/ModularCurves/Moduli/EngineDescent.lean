@@ -333,4 +333,34 @@ theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
 
 end RouteA
 
+/-! ### The seam: KM's action *is* a `RouteA.IsCurveAction` -/
+
+namespace ModuliProblem
+
+variable {R : CommRingCat.{u}}
+
+/-- **([a1] ⟹ route (a)'s hypotheses)** The KM 4.7 action of `G` on the universal curve over
+`𝕸(𝒫,δ)` satisfies the three axioms of `RouteA.IsCurveAction`. This is the seam between
+`Moduli/QuotientProblem.lean` (the engine) and this file (the descent): everything route (a)
+needs of the KM cocycle is already proven in `[a1]`. -/
+theorem isCurveAction_simulSchemeActionTotal (P Q : ModuliProblem R) {G : Type u} [Group G]
+    (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) :
+    RouteA.IsCurveAction (P.simulSchemeAction Q φ rM) XM.curve.toEllipticCurveGeom
+      (P.simulSchemeActionTotal Q φ rM) where
+  π_equivariant := P.simulSchemeActionTotal_π Q φ rM
+  zero_equivariant := P.simulSchemeActionTotal_zero Q φ rM
+  cartesian := P.simulSchemeActionTotal_isPullback Q φ rM
+
+/-- **([a1] ⟹ route (a)'s freeness hypothesis)** For a rigid `𝒫` with a finite étale
+`G`-torsor rigidifier `δ`, the KM action on the base of `𝕸(𝒫,δ)` is free in the shape
+`exists_ellipticCurveGeom_quotient` consumes. -/
+theorem free_simulSchemeAction (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
+    (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.Rigid) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X)) :
+    ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ XM.base),
+      t ≫ (P.simulSchemeAction Q φ rM).hom γ = t → IsEmpty T :=
+  fun γ hγ T t ht => P.simulSchemeAction_free_of_rigid Q φ rM hrig htors γ hγ T t ht
+
+end ModuliProblem
+
 end ModularCurves
