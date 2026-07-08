@@ -4923,7 +4923,31 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   (2,2)-triple generates the unit ideal on an open of `E_U ×_U E_U`, it defines a morphism
   to `ℙ²_U`; c5α's vanishing factors it through the closed subscheme `projModel W`
   (`ProjClosedImmersion` API). This is the actual content of `addOnZ`/`addOnY`
-  (GLC:252–274). **Depends**: c5α · Est. 200–400 lines.
+  (GLC:252–274). **Depends**: c5α (DONE) · Est. 200–400 lines.
+  - **Status**: in_progress · **Claimed**: coordinator-P1, 2026-07-08T08:40Z ·
+    **Execution decomposition** (cut at claim; tool names verified at the pin):
+    - **β1** chart-product cover: cover `pullback (projModelπ W) (projModelπ W)` by the 9
+      products of the `Proj.awayι` charts via `Scheme.Pullback.openCoverOfLeftRight` +
+      `pullbackSpecIso` (Γ of the (i,j)-product ≅ chartRing i ⊗_R chartRing j, using the
+      repo `chartQuotientEquiv`/`chartCoordEquiv` presentations).
+    - **β2** dehomogenized triple + vanishing: the law-2 triple dehomogenized in the
+      (i,j)-product ring (`dehomogenizeAux` kit, `ProjectiveSpaceChart.lean`); its curve
+      equation vanishes by `equation_dblAddXYZ_of_isJacobsonRing` (c5α) — instances:
+      IsReduced from 0e integrality via `IsIntegral.component_integral`; IsJacobsonRing
+      from f.t.-over-ℤ (`isJacobsonRing_MvPolynomial_fin` + quotient through the
+      chart presentations); Δ unit via `algebraMap`.
+    - **β3** per-(i,j,k) affine piece: ring hom chartRing k →+* Localization.Away
+      (triple_k on the (i,j)-product) by X_m/X_k ↦ triple_m/triple_k; well-defined into
+      the quotient BY β2's vanishing; gives Spec-level maps into the k-chart of projModel.
+    - **β4** glue: k-pieces agree on overlaps (the six dba3aa8c minors, localized);
+      chart-product pieces agree (dehomogenization compatibility); glue via
+      `Scheme.Cover.glueMorphisms` / open-cover ext.
+    - **β5** package: `blOpenY := ` the triple's nonvanishing open; `addOnY := ` the glued
+      morphism; `addOnY ≫ projModelπ = π-product` spec. Mirror for law 1 (`blOpenZ`,
+      `addOnZ` — mathlib's addXYZ triple, same template; its on-curve input is
+      equation_addXYZ via the SAME c5α theorem applied to law 1... requires the analogous
+      field-level fact for addXYZ, which is `(nonsingular_add).left` + `add_of_not_equiv`
+      — add `equation_addXYZ_of_isJacobsonRing` alongside, reusing the c5α engine).
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
