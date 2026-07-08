@@ -2047,6 +2047,33 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   **`isProper_of_locallyWeierstrass` PROVEN, axiom-clean** (`IsProper` is Zariski-local at the target;
   over each affine chart the morphism is `projModelπ W` up to iso, proper by `projModelπ_isProper`).
   The smooth half is the same argument once `SmoothOfRelativeDimension 1 (projModelπ W)` lands (T-A3).
+- **★★★ ENGINE GEOMETRIC CORE ASSEMBLED (fable-P4, 2026-07-08)** — `exists_ellipticCurveGeom_quotient`
+  is a **sorry-free assembly** (`#print axioms`: propext, Classical.choice, Quot.sound, sorryAx —
+  the sorryAx *only* via the 3 isolated leaves below, none in the assembly proof term). It takes the
+  route-(a) hypotheses (free lift of a free action to a geometric elliptic curve `C/X`, `X` affine,
+  orbit-in-affine chart datum) and produces `∃ C' : EllipticCurveGeom (X/G), ∃ q : E → C'.E`,
+  cartesian over `X → X/G` and compatible with zero sections — **precisely an `EllHom`, which is what
+  the KM engine consumes.** It consumes:
+  * `exists_quotient_π_zero` (PROVEN) — descended `π'`, `zero'`, `zero'≫π'=𝟙`;
+  * `isPullback_quotientπ` (PROVEN mod `isPullback_chart`) — the cartesian square;
+  * `isProper_of_locallyWeierstrass` (PROVEN) — `proper` from the local model;
+  * `smoothOfRelativeDimension_of_locallyWeierstrass` (LEAF, T-A3) — `smooth` from the local model;
+  * `locallyWeierstrass_quotientπ` (LEAF, [a5]) — the descended Weierstrass model.
+  **The three residual leaves are all isolated affine/model computations, none gating the others:**
+  1. **`isPullback_chart`** — `W ≅ (W/G) ×_{X/G} X` for a stable affine `W ⊆ E`. Purely affine;
+     transport `isPullback_Spec_fixedPoints` (PROVEN) along `isoSpec`/`quotientChartIso`.
+     *Simplification banked*: `FixedPoints.subalgebra Aᴳ C G` and `FixedPoints.subalgebra ℤ C G` have
+     **defeq `toSubring`** (`rfl`), so the fixed-points-base match is free; `invariantsπ G B ℤ =
+     Spec.map (algebraMap …)` by `rfl`; `Scheme.isoSpec_hom_naturality` supplies the map-matching.
+  2. **`locallyWeierstrass_quotientπ`** ([a5]) — the descended Weierstrass model. **Ungated now**:
+     T-W7.1b (`pointedIso_exists_variableChange`) is DONE; additive Hilbert 90 + `exists_unit_smul_eq_of_isLocalRing`
+     both PROVEN. Only the assembly of the VariableChange-cocycle trivialization remains.
+  3. **`smoothOfRelativeDimension_of_locallyWeierstrass`** — general leaf, reduces to **T-A3**
+     (`SmoothOfRelativeDimension 1 (projModelπ W)`, owner beastmode-A) by the same Zariski-local
+     argument as `isProper_of_locallyWeierstrass` (PROVEN).
+  *NB the full KM engine `representable_of_rigid_of_torsor` (QuotientProblem.lean) needs, on top of
+  this geometric core, the moduli-functor layer (α_univ descent + the representability bijection) —
+  a separate stream; the geometric ⇐-curve is what THIS closes.*
 - **Note**: the quotient only has to be an `EllipticCurveGeom` — the group law is supplied by
   `EllipticCurveGeom.toEllipticCurve` (T-W7, beastmode-A). Route (a) never touches `grp`.
 

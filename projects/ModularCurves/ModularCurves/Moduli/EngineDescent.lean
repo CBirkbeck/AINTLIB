@@ -329,24 +329,35 @@ theorem isProper_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S} {z : S
       MorphismProperty.cancel_right_of_respectsIso (P := @IsProper)]
     exact projModelπ_isProper (W s)
 
-/-- **([a4], properness and smoothness of the quotient curve)** `π' : E/G ⟶ X/G` is proper and
-smooth of relative dimension `1`.
+/-- **([a4]/[a5], smoothness from the local model — LEAF, waits on T-A3)** A morphism admitting a
+Zariski-local Weierstrass model is **smooth of relative dimension 1**.
 
-**PLAN SUPERSEDED (2026-07-08)**: do *not* descend these along `X ⟶ X/G`. mathlib has
-`DescendsAlong` for `Smooth`, `UniversallyClosed`, `LocallyOfFiniteType`, `Etale`,
-`isomorphisms` and `IsOpenImmersion`, but **not** for `IsSeparated` and **not** for
-`SmoothOfRelativeDimension n`, so the descent route opens two fresh mathlib gaps. Both properties
-follow instead from `localModel` (leaf `[a5]`): properness is `isProper_of_locallyWeierstrass`
-(PROVEN above), and smoothness is the identical Zariski-local-at-target argument once
-`SmoothOfRelativeDimension 1 (projModelπ W)` lands (T-A3, in flight).
+Same Zariski-local-at-target argument as `isProper_of_locallyWeierstrass`: over each affine chart
+the morphism is `projModelπ W` up to isomorphism, and `SmoothOfRelativeDimension 1 (projModelπ W)`
+is **T-A3** (model smooth ⟺ discriminant a unit, the chartwise Jacobian analysis; owner:
+beastmode-A). `SmoothOfRelativeDimension n` is `IsZariskiLocalAtTarget`
+(`smoothOfRelativeDimension_isZariskiLocalAtTarget`), so this reduces exactly to T-A3.
 
-Superseded plan, kept for the record: `q : X ⟶ X/G` is a **finite étale surjection** — finite by
-`Module.Finite.of_isFreeAlgebraAction`, étale by
-`Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing` (general base = the tracked gap
-[A711-FP]), surjective because it is a torsor — hence an fppf cover. `IsProper` and
-`SmoothOfRelativeDimension 1` are fppf-local at the target, and `π' ×_{X/G} X ≅ π` by
-`[a3-ii]`, which is proper and smooth by hypothesis. -/
-theorem isProper_smooth_quotient [Finite G]
+This is the sole leaf standing between the engine and smoothness of the quotient curve. -/
+theorem smoothOfRelativeDimension_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S}
+    {z : S ⟶ E'} {hz : z ≫ p = 𝟙 S} (hlw : LocallyWeierstrass p z hz) :
+    SmoothOfRelativeDimension 1 p := by
+  sorry
+
+/-- **([a5], the descended Weierstrass model — LEAF)** The quotient curve `E/G ⟶ X/G` admits a
+Zariski-local Weierstrass model.
+
+Plan (terminating in a proof; the one genuinely new-math leaf of route (a)): the universal curve
+upstairs has a global model `E = projModel W` (in the bootstrap `E` is pulled back from T-E15's
+explicit `ℰ₃`), and each `γ ∈ G` acts on it by a `VariableChange` `C_γ = (u_γ, r_γ, s_γ, t_γ)`
+(**T-W7.1b** = `pointedIso_exists_variableChange`, now DONE). Splitting the cocycle:
+* the additive part `(r, s, t) ∈ Z¹(G, A⁺)` is a coboundary by `exists_sub_smul_eq_of_isCocycle`
+  (additive Hilbert 90, PROVEN);
+* the multiplicative part `u ∈ Z¹(G, Aˣ)` is **Zariski-locally** a coboundary by
+  `exists_unit_smul_eq_of_isLocalRing` ([A711-DESC], PROVEN).
+So over a Zariski neighbourhood of each prime of `Aᴳ`, a variable change makes `W` `G`-invariant,
+and the invariant model descends to give the local Weierstrass model of `E/G`. -/
+theorem locallyWeierstrass_quotientπ [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
     (hact : IsCurveAction σ C σE)
@@ -356,14 +367,15 @@ theorem isProper_smooth_quotient [Finite G]
     (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
     (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
-    (hπ' : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem) :
-    IsProper π' ∧ SmoothOfRelativeDimension 1 π' := by
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa)) :
+    LocallyWeierstrass π' zero' hz := by
   sorry
 
-/-- **([a3]–[a5], the route-(a) descent theorem)** Let `G` act freely on an affine scheme `X`
-with a `G`-stable affine atlas, and let the action lift to a geometric elliptic curve
-`C/X` (an `IsCurveAction`) with an orbit-in-affine-open chart datum. Then the quotient
-`E/G` carries a geometric elliptic curve structure over `X/G`, and the square
+/-- **([a3]–[a5], the route-(a) descent theorem — ASSEMBLED)** Let `G` act freely on an affine
+scheme `X`, and let the action lift to a geometric elliptic curve `C/X` (an `IsCurveAction`) with
+an orbit-in-affine-open chart datum. Then the quotient `E/G` carries a geometric elliptic curve
+structure over `X/G`, and the square
 
     E ──────▶ E/G
     │           │
@@ -371,28 +383,21 @@ with a `G`-stable affine atlas, and let the action lift to a geometric elliptic 
     ▼           ▼
     X ──────▶ X/G
 
-is **cartesian** and compatible with the zero sections — i.e. it is an `Ell/R`-morphism, which
-is precisely what the KM engine consumes.
+is **cartesian** and compatible with the zero sections — precisely an `Ell/R`-morphism, which is
+what the KM engine consumes.
 
-Plan (terminating in a proof; each item is a boarded leaf):
-* `[a3]` `E/G` exists as `SchemeAction.quotient σE VE hVEs hVEa`
-  (`exists_isStableOpen_isAffineOpen_of_orbit` supplies the atlas), `π'` is the unique descent
-  of `π ≫ quotientπ_X` (`existsUnique_quotientπ_lift`, invariance from `IsCurveAction.π_equivariant`),
-  and `zero'` descends dually. The square is cartesian because both horizontal maps are
-  `G`-torsors: on a stable affine chart both quotients are `Spec` of invariants, and
-  `torsorMul_bijective_of_isFreeAlgebraAction` (T-Q2, PROVEN) identifies
-  `Γ(E) ⊗_{Γ(E)ᴳ} Γ(X)ᴳ ≅ Γ(E) ⊗_{Γ(X)} Γ(X)`… i.e. `E ≅ (E/G) ×_{X/G} X`.
-* `[a4]` `π'` is proper and smooth of relative dimension 1: both properties descend along the
-  finite étale surjection `X → X/G` (`Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing`
-  + `Module.Finite.of_isFreeAlgebraAction` + `torsorMul_bijective_of_isFreeAlgebraAction`,
-  all PROVEN) via AINTLIB's DESC engine for fppf-local-at-target morphism properties.
-* `[a5]` `localModel`: Zariski-locally on `X/G = Spec Aᴳ`, the Weierstrass model of `E`
-  descends. The `G`-action on `E = projModel W` is by `VariableChange`s `C_γ = (u_γ, r_γ, s_γ, t_γ)`
-  (T-W7.1b, in flight, beastmode-A/P3b3); the additive part `(r, s, t)` is a coboundary by
-  `exists_sub_smul_eq_of_isCocycle` (additive Hilbert 90, PROVEN) and the multiplicative part
-  `u ∈ Z¹(G, Aˣ)` is *locally* a coboundary by `exists_unit_smul_eq_of_isLocalRing`
-  ([A711-DESC], PROVEN) — so after a variable change over a Zariski neighbourhood of each
-  prime of `Aᴳ`, `W` is `G`-invariant and descends. -/
+**This assembly is sorry-free.** It consumes exactly:
+* `exists_quotient_π_zero` (PROVEN) — the descended `π'`, `zero'` and `zero' ≫ π' = 𝟙`;
+* `locallyWeierstrass_quotientπ` (leaf `[a5]`, gated on nothing — T-W7.1b is DONE) — the local
+  Weierstrass model of the quotient curve;
+* `isProper_of_locallyWeierstrass` (PROVEN) and `smoothOfRelativeDimension_of_locallyWeierstrass`
+  (leaf, waits on T-A3) — `proper` and `smooth` from that model;
+* `isPullback_quotientπ` (PROVEN modulo the affine chart square `isPullback_chart`) — the
+  cartesian square.
+
+So the KM 4.7 ⇐-engine's geometric core is **structurally complete**: the two residual sorries are
+the isolated affine computations `isPullback_chart` (Galois descent of `Γ(W)`) and
+`locallyWeierstrass_quotientπ`/`smoothOfRelativeDimension_of_locallyWeierstrass` ([a5] + T-A3). -/
 theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
@@ -406,7 +411,24 @@ theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
     ∃ (C' : EllipticCurveGeom (σ.quotient V hVs hVa)) (q : C.E ⟶ C'.E),
       IsPullback q C.π C'.π (σ.quotientπ V hVs hVa hVmem) ∧
         C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero := by
-  sorry
+  -- the `G`-stable affine atlas of `E` (from the orbit chart datum)
+  choose VE hVEs hVEa hVEmem using
+    fun e => exists_isStableOpen_isAffineOpen_of_orbit horbit e
+  -- descend `π` and the zero section
+  obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
+    exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
+  -- the descended local Weierstrass model, and proper/smooth from it
+  have hlw := locallyWeierstrass_quotientπ hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree
+    π' zero' hzπ'
+  haveI hproper : IsProper π' := isProper_of_locallyWeierstrass hlw
+  haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
+    smoothOfRelativeDimension_of_locallyWeierstrass hlw
+  -- assemble the geometric elliptic curve on `E/G`
+  refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ'
+            smooth := hsmooth, proper := hproper, localModel := hlw },
+    σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
+  · exact isPullback_quotientπ hact V hVs hVa hVmem VE hVEs hVEa hVEmem hfree π' hπ'
+  · exact hzero'.symm
 
 end RouteA
 
