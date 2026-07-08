@@ -9469,3 +9469,29 @@ f91b91ec (glue + rule-3 interface).*
   `glueMorphisms_hf_of_agree`, `chartHomOfTriple_naturality`, `MvPolynomial.IsHomogeneous.eval₂_mul_left`,
   `AdjoinRoot.isDomain_of_monic_of_map`, `HomogeneousLocalization.isDomain_away`. pr-draft 02 still
   omits two of these — coordinator note stands.
+
+### v10.41b (2026-07-08, fable-FP): /develop --decompose DONE — ★ SUBSTRATE FINDING: [A711-FP]'s "absent from mathlib" is STALE; leaf tickets cut
+
+- **★ FINDING (board correction, no B2 — statement unchanged, scoping note stale)**: the
+  current pin contains `Mathlib/RingTheory/Finiteness/ModuleFinitePresentation.lean`
+  (C. Merten, 2025; olean cached): `Algebra.FinitePresentation.of_finitePresentation`
+  (module-FP ⟹ algebra-FP, EGA IV₁ 1.4.7, instance) + `Module.Finite.exists_free_surjective`
+  (EGA IV₁ 1.4.7.1) + the 0564-tagged converse. With the long-standing
+  `Module.finitePresentation_of_projective` (Stacks 00NX (2)⟹(1)), **[A711-FP] is a
+  two-step assembly, not a 300–500-line development**. The v10.37 charter's
+  "substrate genuinely absent" verification predates this file's arrival in the pin.
+  Artifact: `decomposition-a711-fp.md` (prose proofs ×2, verbatim quotes: 00NX, 0564,
+  08WD, KM A7.1.1 "rather delicate", + territory pointers 00QQ/05GH resolved to what they
+  actually are; adversarial blocks ×2 leaves).
+- **[FP-A]** `Algebra.FinitePresentation.of_finite_of_projective` — THE [A711-FP]
+  statement, NEW `ForMathlib/FinitePresentationOfFinite.lean` (skeleton LANDED green,
+  1831 jobs, sorry'd; root-module registration deliberately deferred — root carries p0's
+  in-flight import line, sweep hazard; file enters the graph transitively at [FP-B]).
+  - **Claimed**: fable-FP, 2026-07-08T15:09Z · Status: in_progress
+- **[FP-B]** the consumer flip: discharge the ONE sorry `Algebra.Etale.of_isFreeAlgebraAction`
+  (InvariantTorsor.lean:728) by mirroring the proven noetherian twin (lines 1012–1025)
+  with `of_finiteType.mp` → [FP-A] and the `[IsNoetherianRing]` scaffold dropped.
+  SURGICAL EDIT CLAIM on InvariantTorsor.lean (verified clean in git; fable-P4's live
+  focus is EngineDescent [a2]): one import + one proof body + docstring status paragraph;
+  signature untouched. Statement-freeze honored.
+  - **Claimed**: fable-FP, 2026-07-08T15:09Z · Status: in_progress (after [FP-A])
