@@ -5655,6 +5655,25 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
       + `Proj.awayMap` before building.
     · **c4.3** glue over `(i,j)` (dehomogenisation compatibility) · **c4.4** assemble
       `addOnY`/`addOnZ` + ship the rule-3 opaque interface in the same commit.
+  - **c4.1 DONE** (coordinator-P1, 2026-07-08T14:15Z, 1d1811b3, `AdditionChartOpen.lean`, zero
+    sorries, axiom-clean): `blOpenYPiece`/`blOpenZPiece` — the regularity opens on each `(i,j)`
+    chart-product piece, transported through `chartPieceIso`; `blOpen*Piece_eq_iSup` exhibits
+    each as the sup of the three `D(t_k)` preimages (`TopologicalSpace.Opens.map_iSup`).
+  - **c4.2 DECOMPOSITION (tools verified at the pin, 2026-07-08T14:20Z)** — glue the k-pieces on
+    one chart-product piece:
+    · **c4.2a** identify each `D(t_k) ⊆ Spec (biChartRing W i j)` with `Spec (Localization.Away
+      (t_k))`: mathlib's `AlgebraicGeometry.isLocalization_basicOpen` (AffineScheme.lean:663) gives
+      `IsLocalization.Away f Γ(X, X.basicOpen f)`, so the basic open's `isoSpec` composes with the
+      localization uniqueness iso. This is what turns β3's `addOn{Y,Z}PieceMor` (which are stated
+      on `Spec (Localization.Away t_k)`) into morphisms defined on `D(t_k)` as an open subscheme.
+    · **c4.2b** build the `OpenCover` of `blOpenYPiece` by the three `D(t_k)`
+      (`blOpenYPiece_eq_iSup` + `Scheme.Spec_basicOpen` affineness).
+    · **c4.2c** `Scheme.OpenCover.glueMorphisms` on that cover: the pairwise-agreement obligation
+      is exactly `chartι_comp_specMap_chartAwayHom_eq` (3166d104), transported through c4.2a.
+    · **c4.2d** the two laws' glued morphisms agree on `blOpenYPiece ⊓ blOpenZPiece`
+      (`chartHomOfTriple_lawOne_eq_lawTwo`, β4(b)) — this is `addOn_agree` (c3) at piece level.
+    All four inputs are proven; c4.2 is assembly. `Cover/Directed.lean:216`'s
+    `glueMorphismsOfLocallyDirected` is a fallback if the plain cover's agreement shape fights.
   - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
     against the code, not the board:
     · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
