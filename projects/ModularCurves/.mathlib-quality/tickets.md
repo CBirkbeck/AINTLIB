@@ -7637,3 +7637,36 @@ records why).*
   (Spec + `Proj.awayι` to scheme morphisms; the three t_k-basicOpens cover the (i,j) piece),
   then β4's gluing via the six certified minors → the four GroupLawConstruction.lean sorries
   fill. c5β continues, sentinel up, no redirect.
+
+## Amendments v10.23 (2026-07-08): T-W7.1b-faith → definitive wall finding; [T-W7.1b-faith-infra] cut; beastmode-A proceeds to T-D33
+
+- **Definitive finding absorbed (beastmode-A)**: the faithfulness MATH IS CONFIRMED
+  (`pointedIsoCoordEquiv_apply` — the function-level structural bridge — and
+  `ringEquiv_trans_mid_inj` — generic mid-cancellation — both compile; S1's logic
+  elaborates), but the proof CANNOT CLOSE: the b1 chart-iso layer (`chartZRingEquiv`,
+  `basicOpenIsoAway`, `pointedIsoΓ`, `pointedIsoCoordEquiv`) sits at Lean's term-size limit —
+  ANY proof-level manipulation (rw, injectivity application, even type ascription) exhausts
+  200k heartbeats in whnf/isDefEq; only function-level `rfl` is cheap. FOUR routes walled:
+  (1) function-level simp + injectivity → kernel timeout; (2) generic mid-cancel via
+  `.toRingEquiv` → rfl on the reconstructed toRingEquiv kernel-times-out; (3) small-goal rw
+  against the `_apply` interface → whnf timeout; (4) `attribute [local irreducible]` on the
+  b1 defs → the chart isos inside the wrappers still grind. State: Comparison.lean GREEN
+  (S1 + main sorried, obstacle fully documented in-file; the two interface lemmas salvaged);
+  all committed + pushed. Milestone standing unchanged: 3/4 leaves merged axiom-clean,
+  ModelVariableChange.lean sorry-free.
+- **NEW SUB-TICKET [T-W7.1b-faith-infra]** — b1-layer reducibility engineering: systematic
+  DEFINITION-LEVEL irreducibility + a complete whnf-free interface (application /
+  injectivity / cancellation lemmas) for the four chart isos, engineered to not break the
+  merged b2/Comparison stack. beastmode-A's scoping is the starting spec; the salvaged
+  `_apply` + mid-cancel lemmas are its first two citizens. **FRESH-SESSION work by design**
+  (the v10.19 lesson, re-affirmed: whnf walls fall to fresh context + decomposition, never
+  tail-of-session persistence — four walled routes IS the stop signal). Default owner:
+  beastmode-A's NEXT session; optional joint ownership with P3b3 at a natural boundary —
+  P3b3 is NOT pulled off [T-B5D]+[T-DISC] (reviewer #4) for this. Ecosystem recipe pointer:
+  the AdicSpaces fleet beat the same wall shape with def-level irreducible + opaque
+  interface built BEFORE the proofs + direct instance heads — same family as A's scoping.
+- **Schedule note**: 1b has slack — the W7 endgame review (v10.22) also waits on c5β's
+  0c-chain (0c-ii not started). faith-infra must land before THAT review, not before T-D33.
+- **DECISION: beastmode-A proceeds NOW to [T-D33]** (subgroup-divisor locus over U; deps
+  T-D14 ✓ / T-D15 ✓; their `IsSubgroup.baseChange` from T-D6a-ii is the freshest context on
+  the board). Queue after: T-W7.1b-faith-infra as the next session's first act.
