@@ -1802,8 +1802,31 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     `torsorMul_bijective_of_isFreeAlgebraAction`**; its proof opens *"Il suffit de montrer que,
     pour tout idéal premier `𝔭` de `B`, l'homomorphisme `A_{0𝔭} ⊗_{B_𝔭} A_{0𝔭} ⟶ A_{1𝔭}` … est
     bijectif."* Route (β) is therefore source-anchored end to end — **no memory-sourced maths**.
-  - **DECOMPOSED (rule 3; effort exceeded this turn's budget — boarded, not ground):** the
-    Lean leaves follow SGA's proof line by line:
+  - **★ TORSOR PART PROVEN (fable-P4, 2026-07-08; `#print axioms` clean; ORIGINAL signature
+    kept — no rule-5 statement change).** `torsorMul_bijective_of_isFreeAlgebraAction` is
+    DONE. Route: **CHR, not SGA.** Landed chain, all axiom-clean, in `InvariantTorsor.lean`:
+    `chr_of_isFreeAlgebraAction` → `span_displacement_eq_top` (for `g ≠ 1` the ideal of
+    displacements `g•a − a` is `(1)`) → `exists_torsorMul_eq_zero_one` (the separating
+    `w_g`) → `exists_galoisCoords` (the **separability idempotent** `e = ∏_{g≠1}(1 − w_g)`;
+    `torsorMul` is an *algebra* hom into the product ring, so evaluation is a ring hom, and
+    `TensorProduct.exists_finset` reads off `∑ᵢ aᵢ·(g•bᵢ) = δ_{g,1}`) → `galoisInv`, the
+    explicit two-sided inverse (left inverse via `TensorProduct.induction_on`; on `u ⊗ v` the
+    inner sum is `tr(u·bᵢ)·v` with the trace **invariant** — `traceInvariants` — so it
+    crosses the tensor and the coordinate identity fires again).
+  - **THE SGA LEAVES A711-L1…L4 ARE NOT NEEDED FOR THE TORSOR PART** — no semi-local
+    reduction, no Lemme 4.2, no faithfully-flat residue-field enlargement (mathlib has **no**
+    `IsSemilocalRing`, so the SGA route would have required inventing that theory first).
+    They are retired; kept below only as the record of what SGA does.
+  - **★ FLAG RESOLVED (partly)**: the earlier "finite locally free of rank |G| may be a
+    statement gap" worry does **not** touch the torsor part — the proof above uses **no**
+    finiteness of `A` over `Aᴳ`. The flag survives only for `Module.Finite.of_isFreeAlgebraAction`
+    and `Algebra.Etale.of_isFreeAlgebraAction` (both still sorried, both genuinely need it).
+  - **Remaining in this ticket**: `Algebra.Etale.of_isFreeAlgebraAction` (unramified = the
+    idempotent `e` splits the multiplication, now available; flat/finite from the torsor
+    isomorphism + faithfully flat descent along `Aᴳ → A`) and A7.1.2
+    `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` (base change of a trivialized
+    torsor — now a corollary). Gate 1 of the KM 4.7 engine (T-Q6e = T-E5c) is **half-open**.
+  - *(retired, for the record)* the SGA leaves, mirroring its proof:
     · **[A711-L1]** localize at a prime `𝔭 ⊆ B = Aᴳ`; show `A_𝔭` is **semi-local** (its maximal
       ideals are the `δ₁⁻¹(𝔫)`, at most `|G|` of them) — consumes the landed
       `chr_of_isFreeAlgebraAction` at every prime.
