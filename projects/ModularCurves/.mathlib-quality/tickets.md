@@ -5104,6 +5104,19 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     NEXT (β1/β3): `Spec (biChartRing W i j)` ≅ the (i,j) chart-product open of the pullback
     (`pullbackSpecIso` + `chartCoordEquiv`); then the per-(i,j,k) ring homs
     `X_m/X_k ↦ triple_m/triple_k`, well-defined by the theorems above.
+  - **β1 ALGEBRA CORE DONE** (coordinator-P1, 2026-07-08T10:31Z, fc670a51,
+    `AdditionChartTensor.lean`, zero sorries, axiom-clean): `biChartRingTensorEquiv :
+    biChartRing W i j ≃ₐ[R] affineChartRing W i ⊗[R] affineChartRing W j`, built directly by
+    `AlgEquiv.ofAlgHom` (forward `aeval` on the two generator families; backward
+    `Algebra.TensorProduct.lift` of the rename-and-quotient maps) — NOT by chasing extended
+    ideals through `quotientTensorEquiv` (fewer moving parts; that chase is what made the
+    ladder iterate). Key lemmas `toTensorAux_rename_inl/_inr` (⟹ simp lemmas
+    `biChartRingTensorEquiv_mk_rename_inl/_inr`) are why the two curve relations die.
+    REMAINING for β1: the scheme half — `Scheme.Pullback.openCoverOfLeftRight` over the
+    `modelChartCover` + `pullbackSpecIso` gives `Γ` of the (i,j) chart-product open of
+    `pullback (projModelπ W) (projModelπ W)` as `chartRing i ⊗[R] chartRing j`; compose with
+    `biChartRingTensorEquiv.symm` + `chartCoordEquiv` to land the triples and their on-curve
+    theorems on that `Γ`. Then β3.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
