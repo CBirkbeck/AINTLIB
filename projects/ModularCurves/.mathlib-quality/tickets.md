@@ -8582,3 +8582,43 @@ p2's glue-data pattern; new files only; v10.24(b) opaque interface same incremen
    (report): the KM-2.8 decompose lands; report again at DS4 discharge.**
 - Standing: v10.24 binding; pathspec commits; sentinel current; everything else to the
   board, not the owner relay.
+
+### v10.11.3 (2026-07-08, fable-PIC0): P1 wave — T-PIC1a/T-PIC1a-FIN/T-PIC1d DONE; T-PIC1c anomaly dossier
+
+*Commits: 54481060 (T-PIC1a + OpensMapFinal), 5ac6652b (T-PIC1d + banked T-PIC1c).
+All proven decls axiom-clean (standard 3).*
+
+- **[T-PIC1a]** done — `isInvertible_unit` (cover {⊤} + `pullbackUnitIso`).
+- **[T-PIC1a-FIN]** done — NEW `ForMathlib/OpensMapFinal.lean`:
+  `(Opens.map f).Final` for any TopCat morphism (zig-zag through ⊓, nonempty via ⊤;
+  ~15 lines, first-try). Unlocks mathlib's `pullbackObjUnitToUnit` IsIso for scheme
+  site functors. Strong upstream candidate.
+- **[T-PIC1d]** done — `IsInvertible.pullback`: preimage cover
+  (`Hom.iSup_preimage_eq_top`) + `Modules.pullbackComp` both ways + `eqToIso` along
+  `morphismRestrict_ι` + `mapIso` + `pullbackUnitIso` (extracted as reusable API — also
+  golfs T-PIC1a to a one-liner).
+- **[T-PIC1c]** in_progress, **BLOCKED-ON-ENV-ANOMALY** (not math): the full route is
+  known and each piece elaborates — presheaf right unitor mapped through sheafification
+  + counit-iso (`sheafificationAdjunction`, counit IsIso is a mathlib instance). The
+  ANOMALY: that IsIso instance family (packaged instance, `NatIso.isIso_app_of_isIso`
+  chain, explicit instance decl, and even mathlib's own inlined proof via
+  `toSheaf_map_sheafificationAdjunction_counit_app` + iso-reflection) **fails to
+  synthesize when compiled as part of this file/lib, but succeeds under `lake env
+  lean` on a byte-equivalent file** (same imports incl. OpensMapFinal, same namespace,
+  same variables, and with the lakefile options autoImplicit=false/
+  relaxedAutoImplicit=false/maxSynthPendingDepth=3 set explicitly — verified twice).
+  maxSynthPendingDepth 4 does NOT fix it; setup.json options match the repro exactly;
+  `isModule: false` both ways. 8 attempts logged. HYPOTHESIS: Lean v4.32.0-rc1
+  module-system edge (instance visibility through .olean.private under lake's --setup
+  path?) — worth a minimal repro + upstream report if it survives the next daily bump.
+  ROUTES on unblock: (1) the asIso chain as written in the docstring; (2) explicit
+  inverse from the adjunction unit + triangle identities (no instance search);
+  (3) if the bump fixes it, plain `asIso`. Statement untouched.
+- **Session note for the fleet**: the anomaly may affect ANY use of
+  `PresheafOfModules.sheafificationAdjunction`-adjacent instances inside this lib —
+  if a worker hits "failed to synthesize IsIso (...counit...)", link here (v10.11.3).
+- **Stream state after this wave**: COH-1 module core COMPLETE (v10.11.2). Pic stage
+  P1: unit ✓, pullback-stability ✓, tensor-unit blocked-on-anomaly, tensor-closure
+  gap-gated (T-PIC-GAP1). Next dispatchable: **[T-PIC-GAP1]** scoping (ecosystem check
+  first), **[T-PIC-DEG0]** scoping (HasseWeil degree-anchor audit). CLEANUP-PIC1
+  (cadence) fires after the P1 proof wave completes (P1c pending unblock).
