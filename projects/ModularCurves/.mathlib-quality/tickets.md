@@ -6146,10 +6146,20 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
   iso-invariant for free), `pointedIsoCoordEquiv_coordX`/`_coordY` (b3, several hundred
   lines, shared-witness ∃-bundles documented). Source status: DESIGN-DERIVED (decomposition.md
   addendum) — no verbatim KM/formulaire quote available (image-only scans).
-  - **Status**: in_progress · **Claimed**: beastmode-A, 2026-07-07T12:55Z ·
+  - **Status**: **DONE** (beastmode-A 2026-07-08, commit 7a81d093) · **Claimed**: beastmode-A, 2026-07-07T12:55Z ·
     **Depends**: T-W7.0i-a (done), T-W7.0i-b (**DONE** beastmode-A 2026-07-07 —
     PoleFiltration.lean is sorry-free incl. `locallyWeierstrass_pushforward_O_eq_O`),
     T-W7.mvc (**DONE** 2026-07-07 lane-P5) · **Type**: def + 5 theorems
+  - **DONE 2026-07-08 (beastmode-A)** — Comparison.lean sorry-free; all four leaves axiom-clean
+    (`lean_verify`: only propext/Classical.choice/Quot.sound). The faith wall fell to the
+    **def-level interface refactor** (charter faith-infra), NOT local attributes: fixed chart
+    conjugator `coordRingToZSection` → small-RHS `pointedIsoCoordEquiv_apply` (giant composite
+    sealed inside the named iso) → S1 `pointedIsoΓ_eq_of_coordEquiv` (4-line ext+rw+injective) →
+    `pointedIsoΓ_apply` + `appLE_zChart_eq_pointedIsoΓ` (M-appLE) → scheme reconstruction
+    `pointedIso_hom_eq_of_pointedIsoΓ` (M-recon: hom_ext → awayι/fromSpec + SpecMap_appLE_fromSpec
+    + iso-cancel) → main via `coordEquiv_ext` generation + `transport_general`/`bridge_coordX/Y`.
+    **Drops the 1b dependency from T-W7.12 and unblocks T-E-OMEGA** (though ω is demoted to
+    on-demand per v10.36). fable-P4's KM 4.7 engine (which was waiting on this flip) unblocked.
   - **Blocker note (P5, 2026-07-07)**: T-W7.mvc unblocked, but b2 `pointedIsoCoordEquiv_filtration`
     (the intrinsic-filtration bridge) GATES all 6 leaves and needs the pole-filtration theory
     from T-W7.0i-b (stream-W, beastmode-A's lane — DON'T cross). `projModelVCIso_injective` is

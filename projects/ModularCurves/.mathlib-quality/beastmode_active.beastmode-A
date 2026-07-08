@@ -1,3 +1,12 @@
-FOCUS: CHARTER-A item 1 faith-infra. DONE + committed(6f531139): coordRingToZSection, pointedIsoCoordEquiv_apply, S1, pointedIsoΓ_apply, M-appLE. JUST INSERTED: M-chart (pointedIso_hom_eq_of_pointedIsoΓ) — subagent-verified clean block (openCover_f→awayι, SpecMap_appLE_fromSpec, Proj_fromSpec_awayToSection_awayι, inv-cancel). Building to confirm M-recon.
-ONLY REMAINING: main (pointedIso_exists_variableChange) + M0 (coordEquiv_ext). Full draft in scratchpad/main-draft.lean. Plan: e':=eqToIso(congrArg projModel hW.symm)≪≫VCIso C W'; heπ'/hez' via projModelVCIso_π/_zero+eqToHom transport (cases hW / eqToHom lemmas); hcoord via coordEquiv_ext(M0) + transport_general hW.symm + bridge_coordX/Y + coordRingCongr; hΓ via S1; e.hom=e'.hom via M-recon; rw he'hom. M0 via exists_smul_basis_eq + of=aeval coordX (aeval_algHom_apply) + hX,hY. Tools verified: transport_general(ComparisonInjective:85), coordRingCongr_*, bridge_coordX/Y, Polynomial.aeval_algHom_apply, AdjoinRoot.algebraMap_eq.
-THEN: build green, #print axioms sweep (all 4 comparison leaves + main), remove sorries, flip T-W7.1b DONE (MILESTONE→owner).
+CHARTER-A MILESTONE ACHIEVED: T-W7.1b DONE (2026-07-08, commits 6f531139→7a81d093). The faith wall fell to the def-level interface refactor; comparison theorem complete, all 4 leaves axiom-clean.
+
+Faith-infra chain (all axiom-clean): coordRingToZSection + pointedIsoCoordEquiv_apply(small) → S1 pointedIsoΓ_eq_of_coordEquiv → pointedIsoΓ_apply + appLE_zChart_eq_pointedIsoΓ → pointedIso_hom_eq_of_pointedIsoΓ (M-recon) → main pointedIso_exists_variableChange (coordEquiv_ext generation + transport_general/bridge). Board T-W7.1b flipped DONE.
+
+CHARTER STATE post-milestone:
+- item 2 (T-W7.1b DONE) ✓ COMPLETE.
+- item 3 (ω/T-E-OMEGA): DEMOTED to on-demand (v10.36) — skip unless a consumer demands.
+- item 4 (0h mulModelHom_vc): BLOCKED on c5β's β4(c)/GLC completion (c5β on c4.2b, upstream; mulModelHom still sorry, GLC 20 sorries). c5β will board-signal when 0c-ii lands → then I take 0h (banked route: projModel_hom_ext_of_affine + per-chart addOn VC-equivariance).
+- item 5 (endgame T-W7.12/T-W7.36): BLOCKED on 0h.
+- Fallback: re-check reboxed T-D6b when P3b3's T-B5D-A lands.
+
+NEXT: report T-W7.1b milestone to owner. Then — charter work is BLOCKED on c5β (0h) / demoted (ω); assess standby-tail / session-end. Multi-session charter continues when 0h unblocks.
