@@ -10470,3 +10470,41 @@ left queued — out of this ticket's file scope.*
   of IsLocallyFree (fills mathlib's own PicardGroup.lean TODO); Opens.map_final
   (confirmed absent from mathlib). MellWeierstrass cleanup stays queued until A's map_id
   favor closes the file.
+
+### v10.47 (2026-07-08, c5β): [CHARTER-C5B] c4.3 hf — helper A reduced to mechanical assembly, ALL leaves proven
+
+*Commits this run: 9778a08c (pieceι/transι/specMap opensRange), b38c7b0b (isLocalizationElem ↔
+transFst/transSnd — the final leaf). Zero-sorry, axiom-clean. The topological blocker of `hf` now
+has every leaf proven; what remains is preimage bookkeeping.*
+
+- **Helper A** — `blOpenYImage ij ⊓ blOpenYImage i'j' ≤ range(transι)` — reduces (all steps named):
+  - `blOpenYImage ≤ range(pieceι)` (`image_mono` + `image_top_eq_opensRange`), so suffices the
+    Y/Z-independent **A0**: `range(pieceι ij) ⊓ range(pieceι i'j') ≤ range(transι)`.
+  - `range(pieceι)` = `fst⁻¹ᵁ range(chartι i) ⊓ snd⁻¹ᵁ range(chartι j)`  [`pieceι_opensRange` ✓]
+  - `range(transι)` = `pieceι ''ᵁ (chartPieceIso.hom⁻¹ᵁ specBasicOpen τ)`  [`transι_opensRange` ✓]
+  - Pull A0 back along `pieceι ij` (open immersion): LHS ≤ range(pieceι ij), so via
+    `image_le_image_iff` + `preimage_image_eq` + `preimage_opensRange` it becomes
+    **A1'**: `pieceι ij ⁻¹ᵁ range(pieceι i'j') ≤ chartPieceIso.hom⁻¹ᵁ specBasicOpen τ`.
+  - `pieceι ij ⁻¹ᵁ (fst⁻¹ᵁ Ri' ⊓ snd⁻¹ᵁ Rj')` = (via `comp_preimage` + `pieceι_fst`/`pieceι_snd`)
+    `fst_src⁻¹ᵁ (chartι i ⁻¹ᵁ Ri') ⊓ snd_src⁻¹ᵁ (chartι j ⁻¹ᵁ Rj')`.
+  - `specBasicOpen τ = specBasicOpen transFst ⊓ specBasicOpen transSnd` [`specBasicOpen_mul`], and
+    `chartPieceIso.hom⁻¹ᵁ` distributes; so by `inf_le_inf` it's two independent sides.
+  - **fst side**: `chartι i ⁻¹ᵁ Ri' = PrimeSpectrum.basicOpen(isLocalizationElem X_i X_i')`
+    [`opensRange_awayι` + `Proj.awayι_preimage_basicOpen`]; `fst_src = chartPieceIso.hom ≫ Spec.map ρ`
+    [`chartPieceIso_inv_fst`, ρ = `AwayTensorEquiv.symm ∘ includeLeft`]; `Spec.map ρ ⁻¹ᵁ basicOpen α
+    = basicOpen(ρ α)` [`PrimeSpectrum.comap_basicOpen`]; `ρ(isLocalizationElem) = transFst`
+    [`awayTensorEquiv_symm_isLocalizationElem_fst` ✓, needs i'≠i; i'=i ⟹ transFst=1 ⟹ RHS ⊤, trivial].
+    snd side symmetric. **No leaf remains — pure assembly (~80-120 lines, one i'=i / j'=j case split).**
+- **Then helper B** (factor): `κ := IsOpenImmersion.lift transι O.ι (helper A)`, `κ ≫ transι = O.ι`
+  [`lift_fac`]; show `homOfLE ≫ addOnYOnImage ij = κ ≫ Ψ` on the overlap.
+- **Helper C** (crux symmetry): `Ψ` same via ij or i'j', piece-level = `chartι_specMap_lawTwoTriple_cross`
+  (25799fea), assembled over the D(image tₖ) cover of `transι⁻¹ᵁ O`.
+- **Then** `glueMorphisms_hf_of_agree` (f91b91ec) → `addOnY`/`addOnZ` (+ rule-3 interface, same commit),
+  then `blOpen_cover` (regularity opens cover — `regularityOpen_ne_top_of_forall_mem`), `addOn_agree`
+  (`chartHomOfTriple_lawOne_eq_lawTwo` 1279497b), `mulModelHom` glue; c4.4 universality by
+  instantiation, c4.5 fills GLC. **0c-i closes ⟹ 0c-ii report** (fires beastmode-A's 0h interrupt).
+- **This session's total (one run, ~15 commits):** c4.2c FULLY closed (both B–L laws are scheme
+  morphisms); the ENTIRE c4.3 mathematical core (transition, geometric overlap, cross-chart agreement,
+  global opens blOpenY/blOpenZ, overlap topology `transι`); and `hf`'s topological blocker traced to
+  zero remaining leaves. v10.24(e) minted (pin the hom, then instantiate); tactic-built-iso rule
+  proposed for v10.24(d). Two mis-routed dispatches (D2/STREAM-Y1, fable-P4) correctly ignored.
