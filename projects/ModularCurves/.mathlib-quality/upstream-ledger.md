@@ -124,13 +124,16 @@ Ranking summary (verified candidates, strongest first):
 - **Candidate files** (D2's commutative-algebra/homological territory; exact 8 to be confirmed by D2):
   `Acyclicity.lean`, `BuchsbaumEisenbud.lean`, `HilbertSyzygy.lean`, `Depth.lean`, `FinrankExact.lean`,
   `FiniteFreeResolution.lean`, `FittingIdeals.lean`, `FinitePresentationCancel.lean`.
-- **Assessment**: several are HIGH-VALUE gap-fills (Buchsbaum–Eisenbud acyclicity criterion, Hilbert
-  syzygy theorem — both classical, plausibly absent or partial in mathlib). BUT each needs a dedicated
-  per-lemma mathlib verification pass in the homological area, and D2 holds the context on which are
-  genuinely upstream-ready vs project-specialized. **RECOMMENDATION**: a separate D2-owned verification
-  sub-pass; this ledger flags them as high-potential but does not stage drafts without D2's list +
-  per-lemma search (BuchsbaumEisenbud.lean's own header already flags its hard direction as
-  "irreducibly" hard — likely a genuine mathlib gap).
+- **Verified (this pass)**: **Buchsbaum–Eisenbud acyclicity** and **Hilbert syzygy** are BOTH ABSENT
+  from current mathlib (`grep` of all of `Mathlib/` — empty). These are genuine, high-value classical
+  gaps. **HOWEVER**: D2's B-E is **actively mid-construction** (recent commits: homology-localization
+  transport, `freeLocEquiv`, "B-E backward residual" pieces — the backward direction is not finished),
+  so `BuchsbaumEisenbud.lean`/`Acyclicity.lean` are **NOT upstream-ready** — they carry live sorries /
+  in-flight scaffolding. **RECOMMENDATION**: defer #6 until D2 completes B-E, then a dedicated D2-owned
+  verify-pass on the finished, sorry-free lemmas (the gap is real and worth upstreaming — B-E acyclicity
+  and Hilbert syzygy would both be new to mathlib — but staging drafts now is premature). The lower-level
+  helpers in the suite (`FinrankExact`, `Depth`, `FiniteFreeResolution`, `FittingIdeals`) may have
+  sorry-free, independently-upstreamable pieces; a per-file `#print axioms` scan by D2 identifies them.
 
 ## 7. P3b3 bridge pieces — NO CLEAR CANDIDATE
 
