@@ -322,6 +322,45 @@ theorem curveOfPasting_snd :
   exact (pullbackLeftPullbackSndIso_hom_snd universalCurveπ
     (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) S.toSpecΓ).symm
 
+private theorem eqToHom_projModelZero {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (h : V = V') :
+    projModelZero V ≫ eqToHom (congrArg (projModel ·) h) = projModelZero V' := by
+  subst h; simp
+
+private theorem zliftComm :
+    (classify W ≫ universalCurveZero) ≫ universalCurveπ =
+      S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)) := by
+  rw [Category.assoc, universalCurveZero_π, Category.comp_id]; rfl
+
+/-- The middle-fibre identification matches zero sections: the universal zero section,
+pulled back to `S`'s fibre, is `W`'s own `projModelZero`. -/
+private theorem curveOfMiddle_zero :
+    pullback.lift (classify W ≫ universalCurveZero) S.toSpecΓ (zliftComm W) ≫
+        (curveOfMiddle W).hom = S.toSpecΓ ≫ projModelZero W.1 := by
+  have key : pullback.lift (classify W ≫ universalCurveZero) S.toSpecΓ (zliftComm W) ≫
+      (@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
+        universalWeierstrassLoc).isoPullback.inv
+      = S.toSpecΓ ≫ projModelZero (universalWeierstrassLoc.map
+          (@algebraMap _ _ _ _ ((ringHomOfEllipticW W).toAlgebra))) := by
+    rw [Iso.comp_inv_eq]
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc]
+      erw [(@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
+          universalWeierstrassLoc).isoPullback_hom_fst]
+      rw [pullback.lift_fst]
+      erw [@projModelZero_baseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
+        universalWeierstrassLoc]
+      show _ = S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)) ≫
+        projModelZero universalWeierstrassLoc
+      rw [← Category.assoc]
+      rfl
+    · rw [Category.assoc, Category.assoc]
+      erw [(@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
+          universalWeierstrassLoc).isoPullback_hom_snd]
+      rw [pullback.lift_snd, projModelZero_projModelπ]
+      exact (Category.comp_id _).symm
+  simp only [curveOfMiddle, Iso.trans_hom, eqToIso.hom, Iso.symm_hom, ← Category.assoc]
+  rw [key, Category.assoc, eqToHom_projModelZero (uWL_map_ringHomOf W)]
+
 /-- The pasting identification matches the zero sections.
 
 ROUTE (decomposed per v10.24(a), board v10.40): `pullback.hom_ext`; the `snd`-leg is
@@ -333,8 +372,29 @@ of the atlas file's T-W5a case-c2 battle, one seam-lemma per step. -/
 theorem curveOfPasting_zero :
     (curveOf W).zero ≫ (curveOfPasting W).hom =
       pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
-        (by rw [Category.assoc, projModelZero_projModelπ]; exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
-  sorry
+        (by rw [Category.assoc, projModelZero_projModelπ]
+            exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
+  have hz : (curveOf W).zero ≫ (pullbackLeftPullbackSndIso universalCurveπ
+      (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) S.toSpecΓ).inv ≫
+      pullback.fst (pullback.snd universalCurveπ
+        (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)))) S.toSpecΓ
+      = pullback.lift (classify W ≫ universalCurveZero) S.toSpecΓ (zliftComm W) := by
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc]
+      erw [pullbackLeftPullbackSndIso_inv_fst]
+      rw [pullback.lift_fst]
+      exact pullback.lift_fst _ _ _
+    · rw [Category.assoc, Category.assoc]
+      erw [pullbackLeftPullbackSndIso_inv_fst_snd]
+      rw [pullback.lift_snd]
+      erw [pullback.lift_snd_assoc]
+      rw [Category.id_comp]
+  apply pullback.hom_ext
+  · simp only [curveOfPasting, Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc,
+      pullback.lift_fst]
+    rw [reassoc_of% hz, curveOfMiddle_zero]
+  · rw [Category.assoc, curveOfPasting_snd, pullback.lift_snd]
+    exact (curveOf W).zero_π
 
 end CurveOfPasting
 
