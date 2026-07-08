@@ -86,23 +86,26 @@ noncomputable def pullbackUnitIso (f : Y ⟶ X) :
 theorem isInvertible_unit : IsInvertible (unitObj X) :=
   ⟨PUnit, fun _ => ⊤, iSup_const, fun _ => ⟨pullbackUnitIso (⊤ : X.Opens).ι⟩⟩
 
-/-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
-sheafification of a sheaf being itself; no GAP-1 content).
+/-- Sheafification of the presheaf underlying a sheaf of modules is the sheaf itself
+(the counit of the sheafification adjunction, an isomorphism on sheaves). Stated over
+`SheafOfModules X.ringCatSheaf` (definitionally `X.Modules`): the `≅`-type must
+elaborate with the `SheafOfModules` category instance for the mathlib counit-iso
+instance to be found — the `X.Modules` category wrapper puts the goal in
+instance-clothing the counit instances don't match (board v10.11.3/v10.35 dossier). -/
+noncomputable def sheafifyValIso (M : SheafOfModules X.ringCatSheaf) :
+    (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj M.val ≅ M := by
+  have h : IsIso ((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).counit.app M) := by infer_instance
+  exact @asIso _ _ _ _ _ h
 
-KNOWN ROUTE (blocked by a build-environment anomaly, 2026-07-08): compose the presheaf
-right unitor `(sheafification _).mapIso (ρ_ M.val)` with `asIso ((PresheafOfModules.
-sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).counit.app M)` — the counit is an
-isomorphism on sheaves (mathlib instance, Sheafification.lean). Every piece of this
-chain elaborates, and the whole proof compiles under `lake env lean` on a file with
-byte-identical imports/options/namespace — but under the project build (and on this
-file) the `IsIso` instance family for the sheafification adjunction fails to
-synthesize, including mathlib's own inlined instance proof via
-`toSheaf_map_sheafificationAdjunction_counit_app` + iso-reflection (8 distinct attempts
-logged on the board, v10.11.3). Retest after the next mathlib bump; fallback: construct
-the inverse explicitly from the adjunction unit + triangle identities. -/
+/-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
+sheafification of a sheaf being itself; no GAP-1 content). -/
 theorem exists_tensorObj_unit_iso (M : X.Modules) :
     Nonempty (tensorObj M (unitObj X) ≅ M) := by
-  sorry
+  have e : (tensorObj M (unitObj X) : SheafOfModules X.ringCatSheaf) ≅ M :=
+    ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso
+      (MonoidalCategoryStruct.rightUnitor M.val)).trans (sheafifyValIso M)
+  exact ⟨⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩⟩
 
 /-- Invertibility is stable under pullback: a trivializing cover of `X` pulls back to
 a trivializing cover of `Y` (GME p. 108: "If `g : T' → T` is an `S`-morphism, we have
