@@ -10183,3 +10183,39 @@ delivered, with the precise box ledger below.*
   CHARTER-P3B3/FP4 milestones flip them ([Y1-ATLAS]-style: v10.48 shows the cascade is
   live). v10.48(5) noted: map_id's REQ is dispatchable at A's next start — MellWeierstrass
   will close to 0 sorries without further PIC0 action.
+
+### v10.51 (2026-07-08, fable-PIC0): [STREAM-YFULL] second wave — [YF-TRANS] + [YF-RIG-NOETH] PROVEN; [YF-QSM] mathlib surface mapped
+
+*Commits 10f59af9b + 7201ac5a5, green. The stream's provable-now set is now DRAINED:
+every remaining sorry in YFullRoute.lean is charter-gated.*
+
+- **[YF-TRANS] PROVEN** (`smooth_affine_of_representableBy`): `RepresentableBy.uniqueUpToIso`
+  + baseHom-iso (congrArg on the roundtrips) + `base_w` +
+  `MorphismProperty.cancel_left_of_respectsIso` for `@Smooth`/`@IsAffineHom`. The KM p.111
+  "unique isomorphism" transport: ONE smooth-affine representing object makes ALL of them so.
+- **[YF-RIG-NOETH] reduction PROVEN** (`gammaFullNaive_rigid_of_locallyNoetherian`): the
+  moduli fixed-point statement now REDUCES to the linchpin `aut_trivial_of_fullLevel`
+  exactly as the artifact sketched (pullSection lift-fst extraction → HomOver repackage →
+  linchpin → EllHom.ext). Inherits ONLY the linchpin's boxes (P3B3 m.2). When P3B3's
+  milestone 2 lands, this leaf goes axiom-clean with zero further work here.
+- **[YF-QSM] research verdict (banked, leaf stays sorried):** mathlib NOW HAS fpqc
+  base-descent of smoothness (`Morphisms/LocalFlatDescent.lean`:
+  `DescendsAlong @Smooth (@Surjective ⊓ @Flat ⊓ @QuasiCompact)`, via
+  `RingHom.Smooth.codescendsAlong_faithfullyFlat` in `RingTheory/Etale/Descent.lean`) but
+  has NO source-locality: `HasOfPrecompProperty @Smooth _` does not exist (only
+  `@Surjective` has a HasOfPrecompProperty instance, UnderlyingMap.lean:91). The leaf
+  ("smooth is fppf-local on the source", Stacks 036U) is therefore a genuine ~200–400-line
+  ForMathlib development: reduce to affine charts, finite-affine-cover trick over a qc
+  target chart (V affine ⟹ finitely many U_i cover; B → ∏Γ(U_i) is faithfully flat étale),
+  then a ring-level "C→A smooth + B→A faithfully flat lfp ⟹ C→B smooth" descent lemma
+  (absent from mathlib; needs ff-descent of flat + fp + formally-smooth). NOTE for the
+  consumer: [YF-GEOM] is CHARTER-FP4-gated anyway, and KM's actual π is FINITE étale
+  (affine, qc) — if the engine's object comes with the finite-torsor structure, a weaker
+  finite-étale QSM suffices and the coproduct-cover trick shortens the development.
+  Recommend: leave for the [YF-GEOM] discharge session (FP4 handoff per the gate
+  register) or a dedicated ForMathlib charter if smoothness-descent gains a second consumer.
+- **Stream state:** remaining sorries = [YF-CLOPEN] (P3B3 étale toolkit ∨ T-C1),
+  [YF-ETALE] (BB-DIFF), [YF-NOETH] (L13; route α = noeth-free degree boxes),
+  [YF-QSM]/[YF-GEOM] (engine/FP4), all charter-owned. fable-PIC0 pivots to the queued
+  cadence work: CLEANUP-PIC1 (InvertibleSheaf.lean) now; MellWeierstrass cleanup after
+  A's map_id favor closes the file (still 1 sorry). GAP-1 watch unchanged.
