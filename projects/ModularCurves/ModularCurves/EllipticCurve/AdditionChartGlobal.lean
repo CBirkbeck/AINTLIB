@@ -105,4 +105,58 @@ noncomputable def addOnZFamily : ∀ p : Fin 2 × Fin 2, (blOpenZFamily W p).toS
 
 end Morphisms
 
+section Overlap
+
+variable (i j i' j' : Fin 3)
+
+/-- `Spec` of the localization map into the overlap ring IS the basic-open immersion `D(τ) ↪ Spec B`,
+where `τ = transFst · transSnd` is the product of the two transition coordinates.
+
+`transRing` is by definition `Localization.Away τ` over `biChartRing W i j`, and `transAlgHom` is by
+definition its structure map — so this is `specBasicOpenIsoAway_hom_ι` (1a917a1e) read backwards. -/
+lemma transAlgHom_toRingHom :
+    CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom =
+      CommRingCat.ofHom (algebraMap (CommRingCat.of (biChartRing W i j))
+        (Localization.Away (transFst W i j i' * transSnd W i j j'))) :=
+  rfl
+
+lemma specMap_transAlgHom_eq :
+    Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom) =
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+          (transFst W i j i' * transSnd W i j j')).hom ≫
+        (specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (transFst W i j i' * transSnd W i j j')).ι := by
+  rw [transAlgHom_toRingHom]
+  exact (specBasicOpenIsoAway_hom_ι (CommRingCat.of (biChartRing W i j))
+    (transFst W i j i' * transSnd W i j j')).symm
+
+/-- Hence the overlap sits inside the `(i,j)` chart-product as an open subscheme. -/
+instance instIsOpenImmersionSpecMapTransAlgHom :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom)) := by
+  rw [specMap_transAlgHom_eq]
+  infer_instance
+
+/-- The overlap of the `(i,j)` and `(i',j')` chart-products, as an open subscheme of `E ×_R E`.
+It is the image of `Spec transRing`; the map exhibiting it is an open immersion, being
+`Spec` of a localization followed by two open immersions. -/
+noncomputable def transι :
+    Spec (CommRingCat.of (transRing W i j i' j')) ⟶
+      pullback (projModelπ W) (projModelπ W) :=
+  Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j
+
+instance instIsOpenImmersionTransι : IsOpenImmersion (transι W i j i' j') := by
+  rw [transι]
+  infer_instance
+
+/-- **(the overlap is symmetric)** Read through the `(i',j')` chart-product instead, the same
+open subscheme is obtained — this is `specMap_transHom_pieceι` (a468579e). -/
+lemma transι_eq :
+    transι W i j i' j' =
+      Spec.map (CommRingCat.ofHom (transHom W i j i' j').toRingHom) ≫
+        (chartPieceIso W i' j').inv ≫ pieceι W i' j' :=
+  (specMap_transHom_pieceι W i j i' j').symm
+
+end Overlap
+
 end WeierstrassCurve.Projective
