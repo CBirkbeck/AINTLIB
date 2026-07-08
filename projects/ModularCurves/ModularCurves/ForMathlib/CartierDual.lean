@@ -377,6 +377,10 @@ lemma translationEndo_tmul (φ : A →ₐ[R] B) (s : WithConv (A →ₗ[R] B)) (
   rw [translationEndo, Algebra.TensorProduct.lift_tmul, Algebra.ofId_apply,
     Algebra.TensorProduct.algebraMap_apply, Algebra.algebraMap_self_apply]
 
+lemma translationEndo_one_tmul (φ : A →ₐ[R] B) (a : A) :
+    translationEndo φ (1 ⊗ₜ[R] a) = translationTarget φ a := by
+  rw [translationEndo_tmul, ← Algebra.TensorProduct.one_def, one_mul]
+
 /-- `translationTarget φ a = ∑ ptS φ(a₍₁₎) ⊗ a₍₂₎` in any Sweedler representation of `a`. -/
 lemma translationTarget_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*} (repr : Coalgebra.Repr R a ι) :
     translationTarget φ a = ∑ i ∈ repr.index, pointAlgHom φ (repr.left i) ⊗ₜ[R] repr.right i := by
@@ -411,6 +415,59 @@ lemma pointConv_translationTarget_eq (φ : A →ₐ[R] B) :
   simp only [ofConv_pointConv, pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
     leftPointHom_apply, Algebra.TensorProduct.includeRight_apply,
     Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
+
+/-- `leftPointHom (φ ∘ S) = leftPointHom φ ∘ S` (the antipode passes through the point). -/
+lemma leftPointHom_comp_antipode (φ : A →ₐ[R] B) :
+    leftPointHom (φ.comp (antipodeAlgHom R A)) = (leftPointHom φ).comp (antipodeAlgHom R A) := by
+  ext a
+  simp only [leftPointHom_apply, AlgHom.comp_apply, pointAlgHom, AlgHom.comp_apply]
+
+/-- **(T-D5e-τ inverse.)** `Pφ ⋆ Pφ' = 1` in `A'_M` (`φ' = φ ∘ S`): the antipode gives the
+convolution inverse of the left-point (`mul_pointConv_antipode_eq_one`). -/
+lemma leftPointConv_mul_antipode (φ : A →ₐ[R] B) :
+    pointConv (leftPointHom φ) * pointConv (leftPointHom (φ.comp (antipodeAlgHom R A))) = 1 := by
+  have h : pointConv (leftPointHom (φ.comp (antipodeAlgHom R A)))
+      = toConv ((leftPointHom φ).toLinearMap ∘ₗ antipode R) := by
+    rw [leftPointHom_comp_antipode, pointConv, AlgHom.comp_toLinearMap, toLinearMap_antipodeAlgHom]
+  rw [h]
+  exact mul_pointConv_antipode_eq_one (leftPointHom φ)
+
+/-- **(T-D5e-τ crux.)** `translationEndo φ (translationTarget ψ a) = 1 ⊗ a` whenever the left-points
+of `ψ` and `φ` are convolution-inverse (`Pψ ⋆ Pφ = 1`). Both antipode compositions of the
+right-translation reduce to this. -/
+lemma translationEndo_translationTarget_of_mul_eq_one (φ ψ : A →ₐ[R] B)
+    (h : pointConv (leftPointHom ψ) * pointConv (leftPointHom φ) = 1) (a : A) :
+    translationEndo φ (translationTarget ψ a) = 1 ⊗ₜ[R] a := by
+  rw [translationEndo_translationTarget_conv φ ψ a, pointConv_translationTarget_eq φ,
+    ← mul_assoc, h, one_mul]
+  show (pointConv (Algebra.TensorProduct.includeRight :
+    A →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A)) a = 1 ⊗ₜ[R] a
+  rw [pointConv]
+  simp only [WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+    Algebra.TensorProduct.includeRight_apply]
+
+/-- **(T-D5e-τ — the right-translation automorphism.)** `τ = translationEndo φ` promoted to an
+`A'_B`-algebra automorphism of `M = A'_B ⊗_R A`, with inverse `translationEndo (φ ∘ S)`. Both
+compositions reduce (via `Algebra.TensorProduct.ext` and `translationEndo_tmul`) to the crux
+`translationEndo _ (translationTarget _ a) = 1 ⊗ a`. -/
+noncomputable def translationEquiv (φ : A →ₐ[R] B) :
+    WithConv (A →ₗ[R] B) ⊗[R] A ≃ₐ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A :=
+  AlgEquiv.ofAlgHom (translationEndo φ) (translationEndo (φ.comp (antipodeAlgHom R A)))
+    (by
+      refine Algebra.TensorProduct.ext (Subsingleton.elim _ _) (AlgHom.ext fun a => ?_)
+      show translationEndo _ (translationEndo _ (1 ⊗ₜ[R] a)) = 1 ⊗ₜ[R] a
+      rw [translationEndo_one_tmul]
+      exact translationEndo_translationTarget_of_mul_eq_one φ (φ.comp (antipodeAlgHom R A))
+        (by rw [mul_comm]; exact leftPointConv_mul_antipode φ) a)
+    (by
+      refine Algebra.TensorProduct.ext (Subsingleton.elim _ _) (AlgHom.ext fun a => ?_)
+      show translationEndo _ (translationEndo _ (1 ⊗ₜ[R] a)) = 1 ⊗ₜ[R] a
+      rw [translationEndo_one_tmul]
+      exact translationEndo_translationTarget_of_mul_eq_one (φ.comp (antipodeAlgHom R A)) φ
+        (leftPointConv_mul_antipode φ) a)
+
+@[simp] lemma translationEquiv_apply (φ : A →ₐ[R] B) (m : WithConv (A →ₗ[R] B) ⊗[R] A) :
+    translationEquiv φ m = translationEndo φ m := rfl
 
 end DeligneLeaf
 
