@@ -7829,3 +7829,45 @@ proofs more." Elevated to binding policy, in the two forms the evidence supports
 - **Policy placement (owner request)**: the v10.24 slowdown⟹decompose rule is now ALSO in
   the Standing-rules header (rule 3, top of this file) and plan.md's cleanup-cadence
   section — every board read sees it; no per-worker broadcast required.
+
+## Amendments v10.26 (2026-07-08): p0 / T-END0 — ring-layer heart PROVEN, box WIRED, frontier decomposed
+
+*p0 resume execution (dev/modular-curves). The whole arithmetic-geometric heart of KM 2.7.2(1)
+rigidity is now proven in `End(E/S)`-language and the top-level box is wired to it; the remaining
+frontier is either fable-PIC0's DS-data lane or absent foundational-AG infra. Per v10.24 (slowdown⟹
+decompose) the heavy remainder is handed off as scoped sub-tickets, not ground through.*
+
+**PROVEN this session (`EllipticCurve/EndomorphismDegree.lean`, `Moduli/Groupoid.lean`):**
+- `endPostcomp_mul` — right-distributivity `(a·b)≫f = (a≫f)·(a≫f)` for pointed `f`, via
+  `IsMonHom.monoidHom.map_mul` (IsMonHom built from `hη` + `endMonHom`). **AXIOM-CLEAN.**
+- `mulBy_pointed` (`η≫[n]=η`), `mulBy_one` (`[1]=𝟙`) — **AXIOM-CLEAN** (`GrpObj.comp_zpow`/`zpow_one`).
+- `gme_deg_trace_forces_zero` — MOVED from Groupoid to EndomorphismDegree (its pure-ℤ home). **AXIOM-CLEAN.**
+- `T-G3b` `endDeg_one_add_mulBy_comp` — `deg(1+g[N]) = 1+N·tr g+N²·deg g`, `rw[pins]+ring`.
+- `endDeg_one` (`deg 𝟙=1`), `endDeg_eq_one_of_isIso` (**deg of an automorphism = 1**) — from pins.
+- `aut_endo_eq_one` — **the KM 2.7.2(1) heart**: a deg-1 endo fixing `E[N]` (`N≥3`) is `𝟙`. Wires
+  T-G3d→T-G3b→gme→T-G3e→`mulBy_pointed`. Own proof valid; sorryAx from registered leaves/pins only.
+- **BOX `aut_hom_eq_id_of_fullLevel` WIRED** to `aut_endo_eq_one` (+`[IsLocallyNoetherian S]`, no code
+  consumers, drop-in-swap at T-W7.8); **hdeg bridge DISCHARGED** (ε shown `IsIso` from `e`,
+  `endDeg_eq_one_of_isIso`). `aut_trivial_of_fullLevel` proven modulo the box.
+- Dedup: GammaH's `mulBy_one` removed (now imported from EndomorphismDegree).
+
+**Registered DS-pins (fable-PIC0's END0b/c/d construction — NOT p0's; consumer edges recorded):**
+`endDeg`/`endDual`/`endTrace` data + `endDual_comp_self`, `endDeg_mulBy`, `endDeg_nonneg`,
+`endDual_mulBy`, `endTrace_spec`, `endDeg_one_add`, `endDeg_comp`, `endDeg_comp_mulBy`,
+`endTrace_comp_mulBy`. All KM-sourced (2.5–2.6). Dischargeable once fable-PIC0's Pic⁰ lands.
+
+**REMAINING FRONTIER (decomposed, all blocked on absent infra / cross-lane):**
+- **[T-G3h-hfix]** the box's LAST bridge `torsionι N ≫ ε.left = torsionι N` (level→torsion). Needs
+  finite-étale descent of morphisms: `E[N]/S` finite étale (`N` invertible) + geometric-point
+  agreement ⟹ scheme-morphism equality. `IsNaiveFullLevel` is stated over geometric points, so this
+  is genuinely the étale-descent bridge, not cheap. Foundational-AG scale; likely overlaps the
+  LevelStructure/Torsion lane.
+- **[T-G3d]** `exists_eq_one_add_mulBy_comp_of_fixesTorsion` (ε fixes `E[N]` ⟹ `ε=1+g[N]`). Needs the
+  isogeny-quotient universal property (`E/E[N] ≅ E` via `[N]`; a map killing `ker[N]` factors through
+  `[N]`) — ABSENT from Torsion.lean (`torsionι`/`pointToTorsion` don't give it). Published-scale.
+- **T-G3c / T-G3e** — specs of the `endDeg`/`endTrace` DATA (Hasse bound fibre-transfer; positive-
+  definiteness): blocked on fable-PIC0's END0b construction, same as the pins.
+
+**Status:** p0's leaf-lane work dischargeable against registered pins + current infra is COMPLETE. The
+box reduces to a single named geometry bridge (hfix). Handing off; awaiting fable-PIC0 (DS-data) and/or
+an isogeny-quotient + finite-étale-descent infra ticket for the geometry remainder.
