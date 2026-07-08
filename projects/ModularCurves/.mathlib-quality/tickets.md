@@ -9076,3 +9076,37 @@ v10.36 group-functor architecture (v9.2-faithful: `G(S)`-points, torsor-free, no
   pullback of the universal curve + elliptic-structure transport (T-W5/T-A8a inputs);
   (c) the record groupoid of Weierstrass-presented curves + the equivalence functor.
   Locally-Weierstrass sheafy upgrade stays descent-gated (v10.36 honest cut).
+
+## Amendments v10.38 (2026-07-08): p0 / [T-G3d-infra] MILESTONE — construction REDUCED to "build Q as coequalizer"; core is Hopf-Galois-scale (scoping note)
+
+*p0 self-pacing the [T-G3d-infra] arc. All route-independent infrastructure is DONE and axiom-clean;
+the remaining core is scoped. Named milestone + a post-decomposition scoping finding → board.*
+
+- **MILESTONE — the entire construction is reduced to ONE obligation.** `exists_unique_lift_of_isColimit`
+  (`TranslationAction.lean`, axiom-clean): if `π : E ⟶ Q` is a colimit cofork of `act, pr_E`, then every
+  `G`-invariant `f` factors uniquely through `π` — exactly `SubgroupQuotient.quotient_lift`. With
+  `IsInvariant.of_coequalizes` (⟹ `quotientπ_isInvariant`), **the six pins reduce to: build `Q` with
+  `π` a coequalizer of `act, pr_E`.** Everything else is proven.
+- **All route-independent [T-G3d-infra] infra DONE, axiom-clean (this session, 7 commits)**: interface
+  (Piece 1); `translationAction`/`actionProj` + `translationAction_eq_mul`; the full bridge
+  `isInvariant_iff_coequalizes` (both directions); factored map `E/E[N] ⟶ E` (`torsionQuotientToSelf`,
+  Piece 4) + `[N]`'s `E[N]`-invariance; `actPair` + **freeness** (`actPair_mono`); the pins-from-
+  coequalizer connector. `deg[N]=N²=rank E[N]` unblocked for `[T-G3d-Niso]`.
+- **The remaining core is Hopf-Galois-scale (recon-confirmed scoping finding).** Building `Q` = the
+  affine co-invariants quotient + glue. The co-invariants *subalgebra* is a mathlib one-liner
+  (`AlgHom.equalizer ρ includeLeft`), BUT **`B` finite-locally-free over `B^{coG}`** (the Hopf-Galois
+  descent making `Spec B → Spec B^{coG}` an effective epi / local coequalizer) + comodule co-invariants
+  theory are **entirely absent from mathlib** — a multi-week formalization (affine case of SGA 3's
+  finite-flat-group-scheme quotient). No clean small algebra leaf remains (the algebra primitive is
+  mathlib; the work is the descent + glue geometry).
+- **SCOPING NOTE (coordinator input welcome, not a stop).** Two routes to `Q`:
+  - **(general, planned)** the Hopf-Galois affine co-invariants quotient + glue on `SchemeQuotient`'s
+    `GlueData` — multi-week, mathlib-gap-filling, serves ALL consumers (incl. the possibly-non-étale
+    `Γ₀` path). p0 proceeds on this per beastmode (planned approach, not failed).
+  - **(E[N]-specific shortcut)** for the rigidity consumer `E/E[N]` (N invertible ⟹ `E[N]` étale),
+    trivialize `E[N]` étale-locally to a constant `(ℤ/N)²`, apply the PROVEN constant-group `T-Q5`
+    (`SchemeAction.quotient`), and étale-descend — reuses proven machinery but is GATED on the
+    E[N]-finite-étale linchpin (P3b3+D2) + needs étale descent of the quotient. Cheaper for rigidity
+    if the linchpin lands; does NOT serve the general layer.
+- **p0 continues (beastmode)** on the general route's affine-local leaf (the abstract affine cofork
+  `Spec(equalizer) ⇉`-coequalizes, then finite-flatness ⟹ `IsColimit`, then glue). New files only.
