@@ -788,6 +788,51 @@ theorem relRepData_sep_coprod {Q : ModuliProblem R} {X : EllObj R}
   have hv : va.1 = vb.1 := Sigma.hom_ext _ _ hcol
   rw [← hvae, ← hvbe, Subtype.ext hv]
 
+/-- A morphism from `Spec` of a field into a `Bool`-indexed scheme coproduct factors
+through one of the two summands: the coproduct's space is the disjoint union of the
+summands (`sigmaMk`) and `Spec k` has a single point, so its image lands in one
+summand's (open) range and `IsOpenImmersion.lift` produces the factorisation. -/
+private lemma spec_factors_coprod {k : Type u} [Field k] (Y : Bool → Scheme.{u})
+    (t : Spec (CommRingCat.of k) ⟶ ∐ Y) :
+    ∃ (b : Bool) (s : Spec (CommRingCat.of k) ⟶ Y b), s ≫ Sigma.ι Y b = t := by
+  obtain ⟨b, y, hby⟩ := (sigmaOpenCover Y).exists_eq (t.base default)
+  haveI : IsOpenImmersion (Sigma.ι Y b) := (sigmaOpenCover Y).map_prop b
+  have hsub : Set.range t.base ⊆ Set.range (Sigma.ι Y b).base := by
+    rintro _ ⟨z, rfl⟩
+    rw [Subsingleton.elim z default]
+    exact ⟨y, hby⟩
+  exact ⟨b, IsOpenImmersion.lift (Sigma.ι Y b) t hsub,
+    IsOpenImmersion.lift_fac (Sigma.ι Y b) t hsub⟩
+
+open EllipticCurve in
+/-- `EllHom.pullSection` along the base-change comparison morphism `pullbackAlongMap g k`
+restricts the represented point: `pullSection (pullbackAlongMap g k) (asSection g P)
+= asSection (k ≫ g) (P.restrict k)`. (Re-statement of the identically-named private
+lemma of `ModularCurve/YFullRoute.lean`, needed here for the coproduct-glue restriction
+identity `coprodFullLevel_restrict`.) -/
+private theorem pullSection_asSection_aux {R : CommRingCat.{u}} (X : EllObj R)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
+    EllHom.pullSection R (X.pullbackAlongMap g k) (Point.asSection X.curve g P) =
+      Point.asSection X.curve (k ≫ g) (Point.restrict X.curve k P) := by
+  have htop : (X.pullbackAlongMap g k).top ≫ pullback.fst X.curve.π g =
+      pullback.fst X.curve.π (k ≫ g) := by
+    show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+      Limits.pullback.fst X.curve.π (k ≫ g)
+    rw [Limits.pullback.lift_fst, Category.comp_id]
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
+        (Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
+      (Point.asSection_val_fst X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ pullback.fst X.curve.π g)
+      ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
+    exact (Category.assoc _ _ _).trans
+      (congrArg (k ≫ ·) (Point.asSection_val_fst X.curve g P))
+  · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
+      (Point.asSection X.curve g P)).2.trans
+      (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
+
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
