@@ -9182,3 +9182,127 @@ shapes definitionally aligned).
   essential surjectivity onto globally-Weierstrass-presented records = **the T-W6
   equivalence theorem** (honest cut; locally-Weierstrass sheafy upgrade
   descent-gated). Parent: T-W6 · open.
+
+## Amendments v10.37 (2026-07-08): THE REPRESENTABILITY STREAMS — four /develop skeletons LANDED (all green); B2-GH approved; ranked charters-in-waiting
+
+*Coordinator /develop pass per the owner's modular-curves-ASAP directive. Four parallel
+--decompose workers each read the full source proofs, wrote compiling `:= by sorry` skeletons
+(joint build verified: 3167 jobs GREEN), decomposition docs with verbatim quotes + ≥3 attacks
+per leaf, and named-gate registers. The forms stream (MF) was stopped unstarted. PRIORITY
+RANKING (distance to a modular curve): **STREAM-Y1 > STREAM-YFULL > STREAM-GH > STREAM-NISOG.**
+Skeletons + docs committed in this batch; root registrations already in HEAD via sibling
+sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this commit.*
+
+- **⚠ B2 EVENT #2 — APPROVED (owner-delegated): the held T-H4 (GammaH.lean:432) and T-H6
+  (:460) are FALSE for every H ≠ ⊥** — `gammaHNaiveProblem` (global H-orbits) is not a
+  Zariski sheaf: over `T ⊔ T` the classes `[(L,L)] ≠ [(L,γL)]` restrict equally (free
+  H-action); a counting variant kills the étale conjunct. Supersedes levels-stack's T-H4
+  "[FALSITY] TRUE" verdict. Sources concur it is a transcription slip (Loeffler 3.8.1 pins
+  P_H on k̄ only; his §3.6 "neither injective nor surjective"; KM DEFINES P_H as the 7.1.2
+  quotient problem). **FIX (assigned to fable-P4 as GammaH.lean holder, folded into
+  CHARTER-FP4)**: b2_log.jsonl entry; repoint T-H4/T-H6 at the KM-7.1.2 quotient problem
+  (corrected statements staged in GammaHRepresentability.lean) in the same commit as the KM
+  quotes; keep `gammaHNaive_relativelyRepresentable_bot` (H = ⊥ salvage, staged) and prove
+  the refutation `gammaHNaiveProblem_not_relativelyRepresentable` (provable NOW) to lock the
+  counterexample into the library.
+- **T-E9 dep-line CORRECTION**: "depends on T-C1" is superseded — rel-rep rides the PROVEN
+  `levelSpaceΓ` + T-D8; the open half is [YF-CLOPEN] with a Weil-pairing-FREE route (KM 3.7.1
+  étale constancy). The Weil pairing (CHARTER-P2 phase 2) matters for DS4 itself, NOT for the
+  modular curves.
+
+### [STREAM-Y1] the Y₁(N) assembly — T-E7 leaf plan (skeleton GREEN; TOP PRIORITY)
+- `gammaOneNaive_representable` (T-E7 MILESTONE) via Loeffler 3.3.6 + 3.4.4, mirrored in NEW
+  `ModularCurve/YOneAssembly.lean` (19 sorried leaves; MASTER bridge term-assembled,
+  statement identical to held T-E7 — closes by one `exact`). Artifact:
+  `decomposition-y1-assembly.md`. Held files untouched.
+- **Architecture (adjudicated)**: arbitrary `R` with `IsUnit (N:R)`; loci cut NAIVE-native —
+  **T-E7 no longer depends on T-D6**; torsion lifting through the affine chart — **no
+  BB-QF/BB-FLAT**; affineness via the clopen split; rigidity inside the atlas (T-E1).
+- **Leaves**: [Y1-EASY] ×8 (~190 LOC, mathlib/project-discharged, independent, UNBLOCKED) ·
+  [Y1-B1] `projModel_locallyWeierstrass` (generalise proven T-W5a; UNBLOCKED ~80 LOC) ·
+  [Y1-ATLAS] `exists_tatePoint` (Cor 3.3.5 scheme-level; 6-item subtree ~620 LOC; i/ii/vi
+  startable NOW, iii/v gated [T-W7]=CHARTER-A) · [Y1-D] representability assembly (D2 gated
+  [T-E4-family] — coordinate: one transport proof closes D2 AND the held map-memberships) ·
+  [Y1-E] geometry half (E1/E5 gated [BB-DIFF]=CHARTER-P3B3) · [Y1-F] transport (~45 LOC).
+- **Findings**: Loeffler 3.4.3 upgraded to `Algebra.FormallySmooth` (adjudicated in artifact);
+  his "E[N] smooth" remark is a source slip (mirrored via `torsionπ_etale`); N=4..6 remove
+  nothing (first real removal N=8).
+- **First act**: [Y1-EASY] + [Y1-B1] in parallel, then [Y1-ATLAS] i/ii/vi. **REPORT** when
+  those land: T-E7 status vs gates before opening Y1-D/E.
+
+### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
+- `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
+  proof: rigidity 2.7.2 + rel-rep 3.7.1 + engine), NOT a second direct construction — route
+  A's exclusive gates are active charters' milestones (CHARTER-FP4 engine; CHARTER-A
+  T-W7.1b), while route B stacks on the DEFERRED [T-A6b] Abel/Pic⁰ box and still needs the
+  rigidity chain. NEW `ModularCurve/YFullRoute.lean` (13 sorried leaves + 5 wirings + 2
+  defs); bridge byte-mirrors held T-E9. Artifact: `decomposition-yfull-route.md`.
+- **Leaves**: provable-now = [YF-NINV], [YF-KILL], [YF-AFF], [YF-FIN], [YF-EQV-D], [YF-NAT],
+  [YF-TRANS]. Gated: [YF-EQV-N]←T-D8-bridge, [YF-ETALE]←BB-DIFF, [YF-RIG-NOETH]←linchpin
+  (all CHARTER-P3B3); NEW gates [YF-NOETH] (likely free once degree boxes are KM-style),
+  [YF-CLOPEN] (routes α=T-C1 / β=étale-constancy), [YF-GEOM] (KM 4.7.1 computation —
+  handoff CHARTER-FP4; [YF-QSM] helper parked in-file).
+- **Reuse**: the ℰ₃ presentation IS the T-E15b shape (CHARTER-FP4 consumes
+  `YFull.fullLevelSpace`, don't re-derive); the family = the T-H4/H6 general-H template;
+  [YF-FIN]/[YF-ETALE] = KM 5.1.1's Γ(N) clauses.
+- **First act**: dictionary spine L1→L2→L7→L9, then [YF-AFF]/[YF-FIN]. **REPORT**:
+  "AffineOverEll(Γ(N)) sorry-free-modulo-T-D8-bridge".
+
+### [STREAM-GH] Γ_H representability (T-H4→T-H6) — /develop landed; carries the B2 above
+- NEW `Moduli/GammaHRepresentability.lean` (25 decls, 21 sorried; 4 real:
+  `FreeAction`, `EquivariantRelRepData`, `QuotientProblemData` (KM 7.1.2/7.1.3 bundle),
+  `levelSpaceΓπ`). Artifact: `decomposition-gammah-route.md` (KM 7.1.1–7.1.3 + 3.7.1 +
+  4.7.1/2 read from PDF).
+- **Shape (mirrors Loeffler 3.8.2)**: P0 vocabulary + DS-GH1 `gammaHAut` (⛩T-E4a loc-noeth
+  in-hand) · PART A H=1 on the PROVEN `levelSpaceΓ`: π finite NOW; étale = the ONE
+  Weil-pairing leaf ⛩DS4/T-C1 (CHARTER-P2) · PART B generic KM 7.1.3: quotient + descent NOW
+  on T-Q5 (torsor iso doing its fourth job); π étale ⛩[A711-FP] (noeth version PROVEN);
+  base-change ⛩[A711-BC] · PART C: corrected T-H4/T-H6 via amended T-E5 ⛩engine;
+  [GH-SMOOTH] deliberately deferred.
+- **13/21 leaves takeable NOW** — first wave GHB1/GHB3/GHA2/GHA4/GH2/GHC4 (C4 = the B2
+  refutation evidence). New cuts: [GH-RIGID-XFER] (T-H5 should aim at the transfer's
+  preferred side), [GH-SMOOTH], [GH-DESC-GAP].
+- **First act**: the first wave + the B2 execution handshake with fable-P4.
+
+### [STREAM-NISOG] cyclic N-isogenies + cyclicity-as-closed-condition (KM Ch. 6)
+- NEW `GroupScheme/NIsogeny.lean` (805 ll, 52 decls: 29 sorried leaves + 2 DS-data + 21
+  ALREADY sorry-free incl. all pins). Artifact: `decomposition-nisog.md` (KM print 152–185
+  read in full). KM's Useful Lemma 6.7.3 = the project's proven `exists_incidenceLocusEQ`
+  (T-D15) — no new lemma minted.
+- **Layers**: L1 scheme-of-generators G^× · L2 Main Thm 6.1.1 (easy dir mathlib-verified;
+  hard dir ⛩[KM-62-63-HOMOG], [KM-FMT-FLAT]) · L3 **T-SG3** flattening + fibre dichotomy +
+  `exists_cyclicityLocus` (the T-SG3 statement now exists in code) · L4 [N-Isog] structure
+  (Oort–Tate containment PROVED via BB-DELIGNE; nIsogSpace ⛩[NISOG-GRASS]) · L5 standard
+  cyclic subgroups (partition identity dischargeable now) · L6 E → E/C (DS-NISOG-1/2 + 10
+  pins; all E/C data cites [T-G3D-INFRA] — p0's stream) · L7 factorization theory.
+- **First act**: [L3] `exists_generatorLocus` (dischargeable NOW from T-D15/T-D33) → wave
+  M1 = {L3, L5, L6, L20, L1}, ZERO external gates. **REPORT**: T-SG3 sorry-free +
+  6.1.1(⟸) + live G^× layer.
+
+### Dispatch rule for these four streams
+Each is a **charter-in-waiting**: assign whole streams to freed accounts (Y1 first). Every
+stream has a zero-gate first wave, so no worker idles on gates; gated leaves discharge
+automatically as CHARTER-A/P3B3/FP4 milestones land. v10.24 + rule-3 discipline binding
+throughout; held files are bridged, never edited (each stream's bridge lemma byte-mirrors
+its held milestone — final discharge is one `exact` by the file holder).
+
+### [STREAM-FP] the hard-substrate charter (for one strong worker, fully isolated)
+- **The problem**: **[A711-FP]** — a module-finite, module-projective algebra over an
+  arbitrary (NON-noetherian) commutative ring is of algebra-level **finite presentation**.
+  This is the exact content of KM's warning *"in the absence of noetherian hypotheses, this
+  is rather delicate"*, and fable-P4 verified the substrate is genuinely absent from mathlib
+  (no constructor at all for FP-from-module-finite). Sources to work from: Stacks 00QQ /
+  05GH territory (fetch + transcribe; quote verbatim per leaf; /develop --decompose first
+  act per v10.8).
+- **Why it's worth a strong worker**: it is the ONE gap standing between the proven
+  étale-torsor layer and its full-generality form — discharging it removes the noetherian
+  scaffold from `Algebra.Etale.of_isFreeAlgebraAction` and everything downstream (the Γ_H
+  étale layer, KM 7.1.3(2)), and it is publishable-grade commutative algebra with zero file
+  overlap with any charter (new `ForMathlib/FinitePresentationOfFinite.lean`).
+- **Stretch follow-ons in the same charter** (order at the worker's discretion after FP):
+  (i) **[KM-FMT-FLAT]** — the finite-flat-module-theory gate, STREAM-NISOG's most-shared
+  gate; (ii) **[NISOG-GRASS]** — a relative Grassmannian scheme (mathlib-absent; feeds
+  `exists_nIsogSpace`); both ForMathlib-flavoured, both isolated.
+- **Discipline**: v10.8 (/develop first act, verbatim Stacks quotes) + v10.24
+  (decompose-don't-grind; opaque interfaces) + v10.35b (everything internal). **REPORT
+  MILESTONE**: [A711-FP] discharged — the general-base étale theorem flips the same day.

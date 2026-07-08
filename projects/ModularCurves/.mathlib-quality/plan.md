@@ -109,6 +109,17 @@ Pins (consumers may use ONLY these): `endDual_comp_self` (KM 2.6.1), `endDeg_mul
 Abel/Pic⁰ autoduality — a LIVE dependency on fable-PIC0's T-PIC0+COH-1 stream (tickets.md
 §v10.11) — + the HasseWeil anchors in decomposition-end0.md.
 
+**DS-GH1 + DS-NISOG block (added 2026-07-08, coordinator, same commit as the v10.37
+skeletons):**
+
+| DS defs | File | Ticket |
+|---|---|---|
+| DS-GH1: `gammaHAut` (+ spec) | Moduli/GammaHRepresentability.lean | STREAM-GH P0 (GH1) |
+| DS-NISOG-1: `quotientCurve` · DS-NISOG-2: `quotientHom` | GroupScheme/NIsogeny.lean | STREAM-NISOG L6 (constructions cite [T-G3D-INFRA]) |
+
+Pins shipped in the skeletons (incl. `pointMap_eq_zero_iff` = Ker π = G); base-change pins
+recorded as construction-ticket obligations. Consumers use pins only, per the standing rule.
+
 Rule for future decompose passes: skeleton `def := sorry` decls MUST be added to this
 register in the same commit that creates them.
 
