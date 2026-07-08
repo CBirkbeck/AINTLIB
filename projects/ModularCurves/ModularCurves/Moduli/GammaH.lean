@@ -483,11 +483,8 @@ theorem EllipticCurve.mulBy_comp_mulBy (E : EllipticCurve S) (m n : ℤ) :
   rw [GrpObj.comp_zpow, Category.comp_id]
   exact (zpow_mul (𝟙 E.asOver) m n).symm
 
-/-- **(T-H7a)** `[1]` is the identity of `E.asOver`. -/
-theorem EllipticCurve.mulBy_one (E : EllipticCurve S) : E.mulBy 1 = 𝟙 E.asOver := by
-  letI : Group (E.asOver ⟶ E.asOver) := Hom.group
-  show (𝟙 E.asOver) ^ (1 : ℤ) = 𝟙 E.asOver
-  exact zpow_one _
+-- **(T-H7a)** `mulBy_one` (`[1] = 𝟙 E.asOver`) moved to `EllipticCurve/EndomorphismDegree.lean`
+-- (its natural low home, next to the other `mulBy`/degree algebra); available here by import.
 
 /-- **(T-H7a)** Scheme-level composition law for the multiplication morphisms. -/
 theorem EllipticCurve.mulByHom_comp_mulByHom (E : EllipticCurve S) (m n : ℤ) :
