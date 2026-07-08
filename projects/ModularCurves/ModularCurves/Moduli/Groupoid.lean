@@ -70,37 +70,11 @@ def IsoClasses (S : Scheme.{u}) : Type (u + 1) :=
     ⟨fun _ => ⟨Iso.refl _⟩, fun ⟨e⟩ => ⟨e.symm⟩, fun ⟨e⟩ ⟨e'⟩ => ⟨e ≪≫ e'⟩⟩⟩ :
       Setoid (EllipticCurve S))
 
-/-- **(T-G3a — engine core; GME 2.6.4 arithmetic, p. 151)** The purely number-theoretic
-heart of the automorphism-rigidity computation, abstracted from the elliptic-curve setup so
-it is proved and reused independently of the (still-to-be-built) endomorphism-degree
-infrastructure (`End(E/S)`, dual isogeny, Hasse bound — sub-tickets `T-G3b`–`T-G3e`).
-
-Reading `d = deg g ≥ 0`, `t = tr g = ⟨1, g⟩` (the polar/trace form of the degree quadratic
-form), `n = N ≥ 3`: GME's chain "`1 = deg ε = 1 + n·tr g + n²·deg g`" for an automorphism
-`ε = 1 + n·g` gives the linear relation `hlin` (`n·t + n²·d = 0`), and the Hasse /
-Cauchy–Schwarz discriminant bound `⟨1,g⟩² ≤ 4·deg g` gives `hbound` (`t² ≤ 4·d`). Together
-with `n ≥ 3` these force `deg g = 0`, whence (by positive-definiteness of `deg`, supplied by
-the caller) `g = 0` and `ε = 1`.
-
-This is the step that makes `N ≥ 3` the sharp threshold: cancelling `n` gives `t = -n·d`, so
-`n²·d² ≤ 4·d`, i.e. `d·(n²·d - 4) ≤ 0`; the only non-negative integer solution once `n² ≥ 9`
-is `d = 0` (a positive `d ≥ 1` gives `n²·d - 4 ≥ 5 > 0`). Reused by `T-H5`. -/
-theorem gme_deg_trace_forces_zero {n t d : ℤ} (hn : 3 ≤ n) (hd : 0 ≤ d)
-    (hlin : n * t + n ^ 2 * d = 0) (hbound : t ^ 2 ≤ 4 * d) : d = 0 := by
-  have hn0 : (0 : ℤ) < n := by linarith
-  -- Cancel `n` from the linear relation: `t = -(n·d)`.
-  have ht : t + n * d = 0 := by
-    have key : n * (t + n * d) = 0 := by linear_combination hlin
-    exact (mul_eq_zero.mp key).resolve_left (ne_of_gt hn0)
-  have htd : t = -(n * d) := by linarith
-  -- Feed `t = -(n·d)` into the discriminant bound: `n²·d² ≤ 4·d`.
-  have hb2 : n ^ 2 * d ^ 2 ≤ 4 * d := by
-    have h := hbound; rw [htd] at h; nlinarith [h]
-  -- `n ≥ 3` and `d ≥ 0` (integer) force `d = 0`.
-  by_contra hne
-  have hd1 : 1 ≤ d := by omega
-  nlinarith [hb2, mul_nonneg (by linarith : (0 : ℤ) ≤ n - 3) (by linarith : (0 : ℤ) ≤ n + 3),
-    mul_nonneg hd (sub_nonneg.mpr hd1), hd1, sq_nonneg d]
+-- **(T-G3a — engine core)** `gme_deg_trace_forces_zero` moved to
+-- `EllipticCurve/EndomorphismDegree.lean` (its natural home: the pure ℤ-arithmetic core of the
+-- degree computation), where it is consumed by `aut_endo_eq_one` — the End(E/S)-language assembly
+-- of the whole rigidity computation. Close this box by importing that file and applying it through
+-- the pointed/automorphism/level-structure bridges.
 
 /-- **(T-G3 core box — GME 2.6.4 scheme-morphism content; KM Ch. 2, do-not-formalize-from-
 memory gate)** The geometric heart of `aut_trivial_of_fullLevel`, separated from the trivial

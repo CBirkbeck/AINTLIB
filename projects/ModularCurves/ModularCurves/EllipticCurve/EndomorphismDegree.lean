@@ -84,6 +84,16 @@ theorem endPostcomp_mul [IsLocallyNoetherian S] (a b f : E.asOver ⟶ E.asOver)
   haveI : IsMonHom f := { one_hom := hη, mul_hom := endMonHom E f hη }
   exact map_mul (IsMonHom.monoidHom f E.asOver) a b
 
+/-- The multiplication-by-`n` isogeny `[n]` is **pointed**: `η ≫ [n] = η` (it fixes the zero
+section, `n • 0 = 0`). Since `[n] = (𝟙)^n` in the hom-group, pre-composition by `η` commutes with
+the group power (`GrpObj.comp_zpow`), and `η` is the unit of the group `𝟙_ ⟶ E.asOver`, so
+`η ≫ (𝟙)^n = (η ≫ 𝟙)^n = η^n = η`. Feeds `IsMonHom (E.mulBy n)` and the final `ε = 𝟙` step. -/
+theorem mulBy_pointed (n : ℤ) : η[E.asOver] ≫ E.mulBy n = η[E.asOver] := by
+  have hη1 : η[E.asOver] = (1 : 𝟙_ (Over S) ⟶ E.asOver) := by
+    rw [Hom.one_def]; simp
+  simp only [EllipticCurve.mulBy]
+  rw [GrpObj.comp_zpow, Category.comp_id, hη1, one_zpow]
+
 /-- **(T-END0b pin — KM 2.6.1)** The defining identity of the degree: `f^t ∘ f = [deg f]`. -/
 theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :
     E.endDual f ≫ f = E.mulBy (E.endDeg f) := sorry
@@ -91,6 +101,11 @@ theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :
 /-- **(T-END0c — KM 2.6.1.1)** `deg [N] = N²` (KM: *"deg([N]) = N²"*, displayed in the proof of
 Cor 2.6.1.1). Fibre anchor: HasseWeil `mulByInt_degree` (BB-DEG) via T-B6. -/
 theorem endDeg_mulBy (n : ℤ) : E.endDeg (E.mulBy n) = n ^ 2 := sorry
+
+/-- **(T-END0b pin — KM 2.6.1)** The degree is non-negative: `0 ≤ deg f` (KM 2.6.1 defines
+`deg f = N ≥ 0` for an isogeny of degree `N`, and `deg 0 = 0`). Supplies the `0 ≤ d` hypothesis of
+`gme_deg_trace_forces_zero` in the rigidity computation. -/
+theorem endDeg_nonneg (f : E.asOver ⟶ E.asOver) : 0 ≤ E.endDeg f := sorry
 
 /-- **(KM 2.6.2.1)** The transpose of `[N]` is `[N]` itself: `[N]^t = [N]`. -/
 theorem endDual_mulBy (n : ℤ) : E.endDual (E.mulBy n) = E.mulBy n := sorry
@@ -155,6 +170,63 @@ theorem exists_eq_one_add_mulBy_comp_of_fixesTorsion (N : ℕ) [NeZero N]
     (ε : E.asOver ⟶ E.asOver) (hfix : E.torsionι N ≫ ε.left = E.torsionι N) :
     letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
     ∃ g : E.asOver ⟶ E.asOver, ε = 𝟙 E.asOver * (g ≫ E.mulBy (N : ℤ)) := sorry
+
+/-- **(T-G3a — engine core; GME 2.6.4 arithmetic, p. 151)** The purely number-theoretic heart of
+the automorphism-rigidity computation, abstracted from the elliptic-curve setup so it is proved and
+reused independently of the endomorphism-degree infrastructure.
+
+Reading `d = deg g ≥ 0`, `t = tr g` (the polar/trace form of the degree quadratic form), `n = N ≥ 3`:
+GME's chain "`1 = deg ε = 1 + n·tr g + n²·deg g`" for an automorphism `ε = 1 + n·g` gives the linear
+relation `hlin` (`n·t + n²·d = 0`), and the Hasse / Cauchy–Schwarz discriminant bound `t² ≤ 4·d`
+gives `hbound`. Together with `n ≥ 3` these force `deg g = 0`, whence (by positive-definiteness of
+`deg`, supplied by the caller) `g = 0` and `ε = 1`. This is the step that makes `N ≥ 3` the sharp
+threshold: cancelling `n` gives `t = -n·d`, so `n²·d² ≤ 4·d`, i.e. `d·(n²·d - 4) ≤ 0`; the only
+non-negative integer solution once `n² ≥ 9` is `d = 0`. Reused by `T-H5`. -/
+theorem gme_deg_trace_forces_zero {n t d : ℤ} (hn : 3 ≤ n) (hd : 0 ≤ d)
+    (hlin : n * t + n ^ 2 * d = 0) (hbound : t ^ 2 ≤ 4 * d) : d = 0 := by
+  have hn0 : (0 : ℤ) < n := by linarith
+  -- Cancel `n` from the linear relation: `t = -(n·d)`.
+  have ht : t + n * d = 0 := by
+    have key : n * (t + n * d) = 0 := by linear_combination hlin
+    exact (mul_eq_zero.mp key).resolve_left (ne_of_gt hn0)
+  have htd : t = -(n * d) := by linarith
+  -- Feed `t = -(n·d)` into the discriminant bound: `n²·d² ≤ 4·d`.
+  have hb2 : n ^ 2 * d ^ 2 ≤ 4 * d := by
+    have h := hbound; rw [htd] at h; nlinarith [h]
+  -- `n ≥ 3` and `d ≥ 0` (integer) force `d = 0`.
+  by_contra hne
+  have hd1 : 1 ≤ d := by omega
+  nlinarith [hb2, mul_nonneg (by linarith : (0 : ℤ) ≤ n - 3) (by linarith : (0 : ℤ) ≤ n + 3),
+    mul_nonneg hd (sub_nonneg.mpr hd1), hd1, sq_nonneg d]
+
+/-- **(T-G3 core — KM 2.7.2(1), the arithmetic-geometric heart of rigidity)** An endomorphism `ε`
+of `E/S` that has **degree `1`** (i.e. is an automorphism) and **fixes the `N`-torsion** `E[N]`
+(`N ≥ 3`) is the identity `𝟙 E.asOver`. This is the whole `deg`/Hasse computation of KM's rigidity
+corollary, assembled in `End(E/S)`-language from the leaves: T-G3d factors `ε = 1 + g∘[N]`; T-G3b
+expands `deg ε = 1 + N·tr g + N²·deg g`, so `deg ε = 1` forces the linear relation `N·tr g +
+N²·deg g = 0`; with `deg g ≥ 0` (`endDeg_nonneg`), the Hasse bound `tr(g)² ≤ 4·deg g` (T-G3c) and
+`N ≥ 3`, the proven `gme_deg_trace_forces_zero` yields `deg g = 0`; positive-definiteness (T-G3e)
+gives `g = [0]`, and `[0] ∘ [N] = [0]` (via `mulBy_pointed`) collapses `ε = 1 + [0] = 𝟙`. The
+scheme-morphism form `aut_hom_eq_id_of_fullLevel` (`Moduli/Groupoid.lean`) applies this through the
+pointed/automorphism/level-structure bridges. KM (verbatim, Cor 2.7.2(1)): *"If N ≥ 3, then
+ε = id."* -/
+theorem aut_endo_eq_one [IsLocallyNoetherian S] (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (ε : E.asOver ⟶ E.asOver) (hdeg : E.endDeg ε = 1)
+    (hfix : E.torsionι N ≫ ε.left = E.torsionι N) :
+    ε = 𝟙 E.asOver := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  obtain ⟨g, hg⟩ := E.exists_eq_one_add_mulBy_comp_of_fixesTorsion N ε hfix
+  have hexp := E.endDeg_one_add_mulBy_comp (N : ℤ) g
+  rw [← hg, hdeg] at hexp
+  have hlin : (N : ℤ) * E.endTrace g + (N : ℤ) ^ 2 * E.endDeg g = 0 := by linarith
+  have hdz : E.endDeg g = 0 :=
+    gme_deg_trace_forces_zero hN (E.endDeg_nonneg g) hlin (E.endTrace_sq_le g)
+  have hg0 : g = E.mulBy 0 := E.eq_zero_of_endDeg_eq_zero g hdz
+  have h0 : E.mulBy (0 : ℤ) = (1 : E.asOver ⟶ E.asOver) := by
+    simp only [EllipticCurve.mulBy, zpow_zero]
+  have h1c : (1 : E.asOver ⟶ E.asOver) ≫ E.mulBy (N : ℤ) = 1 := by
+    rw [Hom.one_def, Category.assoc, E.mulBy_pointed]
+  rw [hg, hg0, h0, h1c, _root_.mul_one]
 
 end EllipticCurve
 
