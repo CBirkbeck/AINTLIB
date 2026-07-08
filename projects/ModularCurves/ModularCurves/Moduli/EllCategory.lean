@@ -170,10 +170,45 @@ def Rigid (P : ModuliProblem R) : Prop :=
     ∀ a : P.obj (Opposite.op X), P.map e.hom.op a ≠ a
 
 /-- **(T-E5 = Loeffler Thm 3.7.4 = KM 4.7)** A moduli problem is representable iff it is
-relatively representable and rigid. (⇐ is the hard direction: bootstrap through naive
-level 3 over `ℤ[1/3]` and the Legendre problem over `ℤ[1/2]`, take quotients by the finite
-group actions, and glue over `ℤ[1/6]` — Loeffler's proof sketch; KM Ch. 4 + explicit
-constructions. Requires quotients by finite groups: workstream E blocks on `T-E6`.) -/
+relatively representable and rigid.
+
+**Source of record** (quote pass, T-E5-KM47, 2026-07-08; full verbatim in
+`.mathlib-quality/km47-source-quotes.md`).
+
+*Katz–Mazur, SCHOLIE (4.7.0), book p. 111*, verbatim:
+> "Let `𝒫` be relatively representable **and affine over** (Ell); then a necessary and
+> sufficient condition that `𝒫` be representable is that `𝒫` be rigid."
+
+*Loeffler, Theorem 3.7.4 (p. 18)*, verbatim:
+> "(Katz–Mazur) `P` is representable if and only if it is relatively representable and
+> rigid."
+
+**Lean ↔ source match.** `ModuliProblem R = (EllObj R)ᵒᵖ ⥤ Type u` is KM's "moduli problem
+on (Ell/R)" (Loe Def 3.7.1(2)); `Representable` is KM's "`𝒫` is representable" — the functor
+on `Ell/R`, *not* KM's `𝒫̃` on `Sch/R` (which our formalization does not have, and which by
+Gabber's counterexample KM (A.4.1.3) is a strictly weaker notion); `RelativelyRepresentable`
+is KM 4.2 / Loe 3.7.1(3) (our naturality clause is KM's implicit one); `Rigid` is KM 4.4 /
+Loe Def 3.7.3 verbatim. **The statement below is therefore Loeffler's 3.7.4 verbatim.**
+
+**⚠️ STATEMENT MISMATCH — flagged, deliberately not fixed** (T-E5 owner decision; dispatch
+v10.4 "statement mismatch ⟹ flag, don't fix"). KM's SCHOLIE carries an "affine over (Ell)"
+hypothesis that this statement lacks, and it is **load-bearing twice** in KM's own proof:
+p. 112 "Because `𝕸(δ)` is affine, and `𝒫` is affine over (Ell), the scheme `𝕸(𝒫, δ)` is
+affine over `𝕸(δ)`, hence absolutely affine"; p. 113 "Because `𝕸(𝒫, δ)` is affine, the
+quotient `𝕸(𝒫, δ)/G` exists" — and a third time at p. 114, where α_univ descends "because
+`𝒫` is relatively affine". Without such a hypothesis the free quotient of a scheme by a
+finite group need not be a scheme (only an algebraic space); Loeffler's own quotient input
+(Prop 3.6.1) is stated only for **quasiprojective** `X`, so even his sketch's "take
+invariants" step tacitly assumes what 3.7.4 omits. Recommended resolution: add
+affine-over-`Ell` to the ⇐ direction only (every downstream consumer — KM 4.7.1/4.7.2,
+Loe 3.8.2, T-E7/T-E9/T-H4/T-H6 — is affine and étale over `Ell`).
+
+**Decomposition** (T-E5a–T-E5e on the board; bootstrap objects T-E12–T-E15):
+`⇒` splits as rigidity (KM 4.4, free) and relative representability (needs the Isom-scheme
+of the universal curve — own leaf, not free); `⇐` is the KM engine of p. 112 applied twice,
+with `(N, δ, G) = (2, Legendre, GL₂(ℤ/2) × {±1})` and `(3, naive level 3, GL₂(𝔽₃))`, then
+"recollement" over `ℤ[1/6]`. The engine itself is `representable_of_rigid_of_torsor`
+(`Moduli/QuotientProblem.lean`, T-Q6e). -/
 theorem representable_iff (P : ModuliProblem R) :
     P.Representable ↔ P.RelativelyRepresentable ∧ P.Rigid := by sorry
 
