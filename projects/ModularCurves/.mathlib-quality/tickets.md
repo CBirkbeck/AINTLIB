@@ -6294,7 +6294,12 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     conclusions carry `∨ (I.map…)=⊤` (mathlib IsRegular needs S/(rs)≠0 so gradeGE can't hold for ⊤; counterexample S=k[x],I=(x)
     localise→field k(x)); this IS the Stacks 10.129.2 disjunction + exactly what buchsbaumEisenbud_acyclic consumes. `isOpen_gradeGE_locus`
     modulo one isolated Rees/Ext bridge `gradeGE_or_top_locus_eq_iInter_compl_zeroLocus`. [T-GRADE-REES] dispatched to close it.
-  - **[T-BE] IN PROGRESS (make-or-break)** — `buchsbaumEisenbud_acyclic` dispatched [a89a32ed]. BE.1(McCoy)=T-FIT done; BE.2(⟹)+BE.3(⟸ acyclicity induction, the hard core).
+  - **[T-BE] IN PROGRESS (make-or-break)** — `buchsbaumEisenbud_acyclic`. FIRST PASS found the STATEMENT off-by-one
+    (`φ i`→`φ (i-1)`, machine-refuted sorry-free: `hrnk`+`hrnk_top` force `F_e=0` so `idealOfMinors(rnk(e-1))(φ(e-1))=⊥`,
+    RHS false ∀ complex w/ rk(e-1)≥1; witness 0→ℚ→id→ℚ). FIXED 9f677b4e (matches Stacks 00N1). RESUMED [a89a32ed] on the
+    now-TRUE statement for the ACTUAL BE.3 acyclicity proof. BE.1(McCoy)=T-FIT done; BE.2(⟹)+BE.3(⟸ Peskine–Szpiro induction).
+  - **[T-REES] IN PROGRESS** [a709a155] — close Grade.lean's `gradeGE_or_top_iff_forall_subsingleton_localizedExt`
+    (Rees 00LW grade⟺Ext-vanishing + degree-≥1 Ext-localisation; both confirmed mathlib-absent).
   - **GATED** (in BuchsbaumEisenbud.lean, dispatch after T-BE): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
