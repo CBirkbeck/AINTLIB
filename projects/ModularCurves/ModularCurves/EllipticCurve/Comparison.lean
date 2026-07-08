@@ -124,7 +124,32 @@ lemma pointedIso_hom_eq_of_pointedIsoΓ {W W' : WeierstrassCurve R}
     (hΓ : pointedIsoΓ e hez = pointedIsoΓ e' hez') :
     e.hom = e'.hom := by
   refine projModel_hom_ext_of_affine W (Z := projModel W') ?_
-  sorry
+  rw [Scheme.AffineOpenCover.openCover_f]
+  have hUZ' : IsAffineOpen (Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 2))) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W' 2) one_pos
+  have happLE : e.hom.appLE _ _ (pointedIso_preimage_zChart e hez).ge =
+      e'.hom.appLE _ _ (pointedIso_preimage_zChart e' hez').ge := by
+    rw [appLE_zChart_eq_pointedIsoΓ e hez, appLE_zChart_eq_pointedIsoΓ e' hez', hΓ]
+  have hKEY : (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).fromSpec ≫ e.hom =
+      (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).fromSpec ≫ e'.hom := by
+    rw [← IsAffineOpen.SpecMap_appLE_fromSpec e.hom hUZ' _ (pointedIso_preimage_zChart e hez).ge,
+        ← IsAffineOpen.SpecMap_appLE_fromSpec e'.hom hUZ' _ (pointedIso_preimage_zChart e' hez').ge,
+        happLE]
+  rw [Proj_fromSpec_awayToSection_awayι _ _ (mk_X_mem_quotientGrading_one W 2) one_pos] at hKEY
+  haveI : IsIso (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
+    inferInstanceAs (IsIso (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+  have h2 := congrArg (fun t => inv (Spec.map (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) ≫ t) hKEY
+  simp only [Category.assoc, IsIso.inv_hom_id_assoc] at h2
+  exact h2
 
 /-- **(T-W7.1b, main — the comparison theorem)** Every isomorphism of projective Weierstrass
 models over a ring `R` that respects the structure morphisms and the points at infinity is
