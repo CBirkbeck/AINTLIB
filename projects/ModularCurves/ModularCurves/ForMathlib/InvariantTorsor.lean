@@ -329,6 +329,39 @@ theorem exists_traceInvariants_eq_one [Fintype G] (hfree : IsFreeAlgebraAction G
   obtain ⟨c, hc⟩ := h1
   exact ⟨c, hc⟩
 
+/-- **(Additive Hilbert 90; PROVEN)** For a free action of a finite group, every additive
+`1`-cocycle `a : G → A` (i.e. `a(gh) = a(g) + g • a(h)`) is a coboundary: `a(g) = d − g • d`
+for `d = ∑_h a(h) · (h • c)` with `tr(c) = 1`. In other words `H¹(G, A⁺) = 0`.
+
+`(g • d) = ∑_h (a(gh) − a(g))·(gh • c) = d − a(g)·tr(c) = d − a(g)`.
+
+This is the additive half of the descent obstruction for Weierstrass models: the `(r, s, t)`
+part of a `VariableChange`-valued cocycle is always trivializable. (The multiplicative `u`
+part is *not* — its obstruction is an invertible module, see [T-E5c-ROUTE-A] on the board.) -/
+theorem exists_sub_smul_eq_of_isCocycle [Fintype G] (hfree : IsFreeAlgebraAction G R A)
+    (a : G → A) (hcocycle : ∀ g h : G, a (g * h) = a g + g • a h) :
+    ∃ d : A, ∀ g : G, a g = d - g • d := by
+  classical
+  obtain ⟨c, hc⟩ := exists_traceInvariants_eq_one G R A hfree
+  have hc' : (∑ g : G, g • c) = 1 := congrArg Subtype.val hc
+  refine ⟨∑ h : G, a h * (h • c), fun g => ?_⟩
+  have hgd : g • (∑ h : G, a h * (h • c)) = (∑ h : G, a h * (h • c)) - a g := by
+    rw [Finset.smul_sum]
+    have hterm : ∀ h : G, g • (a h * (h • c)) = (a (g * h) - a g) * ((g * h) • c) := by
+      intro h
+      rw [smul_mul', ← mul_smul, hcocycle g h]
+      ring_nf
+    simp only [hterm, sub_mul]
+    rw [Finset.sum_sub_distrib]
+    congr 1
+    · exact Fintype.sum_bijective (g * ·) (Group.mulLeft_bijective g) _ _ (fun _ => rfl)
+    · rw [← Finset.mul_sum]
+      have hre : (∑ h : G, (g * h) • c) = ∑ h : G, h • c :=
+        Fintype.sum_bijective (g * ·) (Group.mulLeft_bijective g) _ _ (fun _ => rfl)
+      rw [hre, hc', mul_one]
+  rw [hgd]
+  ring
+
 /-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
 invariants.
 
