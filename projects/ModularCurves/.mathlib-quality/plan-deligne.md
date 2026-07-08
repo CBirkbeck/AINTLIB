@@ -516,3 +516,34 @@ DeligneOrder.lean sorries now (4): affine core, κ-bijectivity ([T-D5h-κbij]), 
 axioms (`Coalgebra`/`Bialgebra`/`HopfAlgebra R A` + `IsCocomm`) from Δ/ε/antipode via the pins —
 these need only the pin + the group-object scheme equations, NOT κ-bijectivity, so they are
 unblocked now.
+
+---
+
+**κ-bijectivity [T-D5h-κbij] — foundation landed (2026-07-08, p2)**: `subgroupBiproduct_isAffine`
+(`IsAffine (D ×_{Spec R} D)`, axiom-clean) — `D.subscheme` finite⟹affine over `Spec R`, so
+`pullback.fst` is affine (`MorphismProperty.pullback_fst`) and the fibre product of affines over an
+affine base is affine (`isAffine_of_isAffineHom`). This is what makes `Γ(D×_R D)` a genuine
+coordinate ring and κ an iso. **Remaining κ crux** (still the sole heavy scheme-iso step of Δ):
+show κ = `TensorProduct.lift Γ(fst) Γ(snd)` agrees with the `pullbackSpecIso`-transport iso
+`D×_R D ≅ Spec(A ⊗_R A)` — i.e. on generators `κ(a⊗1)=Γ(fst)(a)`, `κ(1⊗a)=Γ(snd)(a)` match the
+transport (built from `D.subscheme.isoSpec` on each factor + `pullbackSpecIso R A A` +
+`arrowIsoSpecΓOfIsAffine`), whence κ is `Γ` of an iso, hence bijective. Bounded but fiddly
+(isoSpec naturality + ΓSpec compatibility on the two tensor factors).
+
+**Other boarded infra leaves surfaced this session:**
+- **degree-BC [T-D5h-degBC]** `degree_baseChange_eq`: `Scheme.Hom.finrank_pullback_snd` EXISTS
+  (`(pullback.snd f g).finrank y = f.finrank (g y)` for `[Flat f][IsFinite f]`), so the only gap is
+  relating `(D.baseChange g).subschemeι ≫ (E.baseChange g).π` to `pullback.snd (subschemeι ≫ π) g`
+  up to a source iso (comapIso chase; `finrank_comp_left_of_isIso` absorbs the iso). Bounded diagram
+  lemma.
+- **restrict_add** (NEW, needed for the L3/L4 Hopf LAWS): `Point.restrict` (GroupLaw.lean:144,
+  `⟨k ≫ P.1, _⟩`) has NO additivity lemma. The scheme group axioms (m assoc/comm, unit, inverse —
+  which dualize to the Coalgebra/Bialgebra/HopfAlgebra laws + IsCocomm) are proven by post-composing
+  with the mono `subschemeι` and reducing to `E.Point` group identities transported along
+  swap/reassoc pullback maps — every such transport needs `(P+Q).restrict k = P.restrict k +
+  Q.restrict k`. Prove it first (from the group-object law on the pullback), then the scheme axioms,
+  then dualize via the Δ/ε/antipode pins. This is the bulk of remaining L4.
+
+Layer B status: L1 general→section ✅, Δ (comul) ✅ (κ-bij boarded), ε ✅, antipode ✅, group-object
+data (m/e/n) ✅, D×_R D affine ✅. Remaining: κ-bij crux, Hopf LAWS (via restrict_add), L5/L6/L7,
+affine core, section→affine cover, degree-BC. All bounded; no genuinely-absent multi-week infra.

@@ -203,6 +203,20 @@ noncomputable def biproductAlgebra :
     Algebra R Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
   ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom.toAlgebra
 
+/-- **(Layer B, κ-bijectivity foundation.)** `D ×_{Spec R} D` is affine: `D.subscheme` is finite —
+hence affine — over `Spec R`, so both projections are affine morphisms and the fibre product of
+affines over an affine base is affine. This is what makes `Γ(D ×_R D)` a genuine coordinate ring and
+`κ : A ⊗_R A → Γ(D ×_R D)` an isomorphism (`pullbackSpecIso`). -/
+theorem subgroupBiproduct_isAffine :
+    IsAffine (pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)) := by
+  haveI : IsFinite (E.subgroupStructMap D) := D.finite
+  haveI : IsAffine D.ideal.subscheme := isAffine_of_isAffineHom (E.subgroupStructMap D)
+  haveI : IsAffineHom (Limits.pullback.fst (D.ideal.subschemeι ≫ E.π)
+      (D.ideal.subschemeι ≫ E.π)) :=
+    MorphismProperty.pullback_fst _ _ inferInstance
+  exact isAffine_of_isAffineHom
+    (Limits.pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+
 /-- `bimulBase` is the first projection followed by the structure map (by definition, up to
 associativity). -/
 theorem bimulBase_eq_fst_structMap :
