@@ -120,14 +120,14 @@ i.e. `λ_φ · (λ_φ ∘ S) = 1` in `A'_B`. (Tate p. 144: "λ is group-like iff
 `A'` and the map `λ : A → R` is multiplicative … invertible iff `λ(1) = 1`.") -/
 theorem mul_pointConv_antipode_eq_one (φ : A →ₐ[R] B) :
     pointConv φ * toConv (φ.toLinearMap ∘ₗ antipode R) = 1 := by
-  refine ofConv_injective (LinearMap.ext fun a => ?_)
-  rw [(Coalgebra.ℛ R a).convMul_apply, LinearMap.convOne_apply]
-  have hsum : ∀ i, (pointConv φ) ((Coalgebra.ℛ R a).left i)
-      * (toConv (φ.toLinearMap ∘ₗ antipode R)) ((Coalgebra.ℛ R a).right i)
-      = φ ((Coalgebra.ℛ R a).left i * antipode R ((Coalgebra.ℛ R a).right i)) :=
+  ext a
+  rw [(ℛ R a).convMul_apply, LinearMap.convOne_apply]
+  have hsum : ∀ i, (pointConv φ) ((ℛ R a).left i)
+      * (toConv (φ.toLinearMap ∘ₗ antipode R)) ((ℛ R a).right i)
+      = φ ((ℛ R a).left i * antipode R ((ℛ R a).right i)) :=
     fun i => by simp [pointConv, map_mul]
   simp only [hsum]
-  rw [← map_sum φ, sum_mul_antipode_eq_algebraMap_counit (Coalgebra.ℛ R a), AlgHom.commutes]
+  rw [← map_sum φ, sum_mul_antipode_eq_algebraMap_counit (ℛ R a), AlgHom.commutes]
 
 /-- **(T-D5c — corollary.)** A `B`-point `φ` is a *unit* in `A'_B` (its convolution inverse
 being `φ ∘ S`). This is the statement that the points of `G` are group-like elements of `A'`,
