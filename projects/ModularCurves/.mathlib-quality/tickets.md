@@ -9010,3 +9010,24 @@ on all key decls. Per the v10.36 group-functor architecture (v9.2-severance-fait
     route 3b stays GATED (SGA-III/ample per T-E10).
 - **Next leaf**: 3a-i, the Hopf-comodule co-invariants (new `ForMathlib` file mirroring
   `FixedPoints.subalgebra` for co-invariants). p2-stack-scale; multi-session. p0 continues.
+
+### v10.38 (2026-07-08, fable-PIC0): **T-W6 MILESTONE INCREMENT — `M_ell^W` EXISTS as a functor**
+
+*Commits 90eb9ef4 + 32bd54de (Moduli/MellWeierstrass.lean, root-registered, zero sorries,
+axiom-clean).* **`MellWScheme : Schemeᵒᵖ ⥤ Cat := Scheme.Γ ⋙ MellW` — the Weierstrass
+moduli stack `[U/G]` is now a groupoid-valued functor on schemes**, built exactly per the
+v10.36 group-functor architecture (v9.2-faithful: `G(S)`-points, torsor-free, no
+`Spec(A^G)` anywhere):
+- `MellWGroupoid B` = action groupoid of `VariableChange B ↷ ellipticW B`; Groupoid
+  instance term-mode (`inv_smul_eq_iff`); interface `comp_val`/`id_val`/`eqToHom_val`.
+- `mapFunctor` (base change) with strict coherence `mapFunctor_id`/`_comp`
+  (CategoryTheory.Functor.ext + the T-W3 gotcha bank: toCatHom + congrArg — reused
+  verbatim, zero friction).
+- **`atlasDictionary : (WeierstrassAtlasRing →+* B) ≃ ellipticW B`** bundled (both
+  round-trips proven — `IsLocalization.lift_comp` + `MvPolynomial.ringHom_ext` +
+  `fin_cases`+simp on the five coefficients).
+- REMAINING for the T-W6 equivalence theorem (in_progress): (a) classifying maps
+  `S ⟶ weierstrassAtlas` from `ellipticW Γ(S,⊤)` via ΓSpec adjunction; (b) `curveOf` =
+  pullback of the universal curve + elliptic-structure transport (T-W5/T-A8a inputs);
+  (c) the record groupoid of Weierstrass-presented curves + the equivalence functor.
+  Locally-Weierstrass sheafy upgrade stays descent-gated (v10.36 honest cut).
