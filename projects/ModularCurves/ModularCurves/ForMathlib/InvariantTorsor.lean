@@ -9,6 +9,7 @@ as WIP `sorry`s per the ticket scope).
 -/
 import ModularCurves.ForMathlib.InvariantBaseChange
 import Mathlib.RingTheory.Etale.Basic
+import Mathlib.RingTheory.Smooth.Fiber
 
 /-!
 # Free actions and the étale-torsor theorem (Katz–Mazur A7.1.1/A7.1.2) — statements
@@ -281,18 +282,17 @@ theorem Module.Projective.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G 
       = p.1 * (traceInvariants G R A (p.2 * x) : A)
   ring
 
-/-- **KM A7.1.1, étaleness part** (statement; proof: SGA III Exp. V Thm 4.1;
-"In the absence of noetherian hypotheses, this is rather delicate"): for a free
-action, `A` is étale over the invariants.
+/-- **KM A7.1.1, étaleness part, general base** — for a free action, `A` is étale over the
+invariants.
 
-**Status (fable-P4, 2026-07-08).** `Algebra.Etale = FormallyEtale + FinitePresentation`.
-Formal unramifiedness is now **PROVEN**
-(`Algebra.FormallyUnramified.of_isFreeAlgebraAction`), and `Module.Finite` +
-`Module.Projective` (dual basis) are available. What remains is
-(i) `Algebra.FormallySmooth` and (ii) `Algebra.FinitePresentation` — **mathlib has no
-constructor deriving algebra-level finite presentation from a module-finite projective
-algebra over a non-noetherian base** (verified). See the board (T-Q2-A711) for the two
-routes. WIP `sorry`, plan attached, NOT forced. -/
+**Status (fable-P4, 2026-07-08).** PROVEN over a noetherian invariant ring:
+`Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing`. The general statement is blocked
+on **exactly one** mathlib gap, tracked as **[A711-FP]**: there is no constructor giving
+*algebra-level* `Algebra.FinitePresentation` from a **module-finite projective** algebra over
+a **non-noetherian** base (Stacks 00QQ/05GH). Everything else is unconditional
+(`FormallyUnramified`, `Module.Finite`, `Module.Projective` ⟹ `Module.Flat`), and mathlib's
+`Algebra.Etale.of_formallyUnramified_of_flat` (Stacks 08WD) assembles them. NOT a B2 — the
+statement is true; only the substrate is missing. Sorry retained with the plan attached. -/
 theorem Algebra.Etale.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
     Algebra.Etale (FixedPoints.subalgebra R A G) A := by
   sorry
@@ -489,3 +489,38 @@ theorem Algebra.FormallyUnramified.of_isFreeAlgebraAction (hfree : IsFreeAlgebra
   have hb : b ∈ (⊥ : Submodule A (Ω[A⁄B])) := htop ▸ Submodule.mem_top
   rw [Submodule.mem_bot] at ha hb
   rw [ha, hb]
+
+/-- **(T-Q2-A711, step 10 — KM A7.1.1, étaleness over a noetherian invariant ring; PROVEN)**
+For a free action of a finite group with `Aᴳ` noetherian, `A` is étale over `Aᴳ`.
+
+All three inputs of mathlib's `Algebra.Etale.of_formallyUnramified_of_flat`
+(Stacks 08WD (3)⟹(1)) are now in hand:
+* `FormallyUnramified` — `Algebra.FormallyUnramified.of_isFreeAlgebraAction` (separability
+  idempotent, no hypotheses);
+* `Module.Flat` — from `Module.Projective.of_isFreeAlgebraAction` (dual basis), again with
+  no hypotheses;
+* `Algebra.FinitePresentation` — the *only* place noetherianity is used: `Module.Finite`
+  gives `Algebra.FiniteType`, and over a noetherian base finite type = finite presentation
+  (`Algebra.FinitePresentation.of_finiteType`).
+
+The `[IsNoetherianRing …]` hypothesis is a **drop-in scaffold** (the T-E4a-noeth precedent,
+owner-authorized 2026-07-08): every consumer in the `Y(N)` pipeline has noetherian invariant
+rings. Removing it is exactly the tracked gap **[A711-FP]** — algebra-level finite
+presentation of a module-finite projective algebra over a non-noetherian base (Stacks
+00QQ/05GH), which is what KM means by *"in the absence of noetherian hypotheses, this is
+rather delicate."* Note **[A711-SM] dissolved**: mathlib derives `Smooth` from
+unramified + flat + finitely presented, so "separable ⟹ formally smooth" is never needed. -/
+theorem Algebra.Etale.of_isFreeAlgebraAction_of_isNoetherianRing
+    [IsNoetherianRing (FixedPoints.subalgebra R A G)] (hfree : IsFreeAlgebraAction G R A) :
+    Algebra.Etale (FixedPoints.subalgebra R A G) A := by
+  haveI : Module.Finite (FixedPoints.subalgebra R A G) A :=
+    Module.Finite.of_isFreeAlgebraAction G R A hfree
+  haveI : Module.Projective (FixedPoints.subalgebra R A G) A :=
+    Module.Projective.of_isFreeAlgebraAction G R A hfree
+  haveI : Module.Flat (FixedPoints.subalgebra R A G) A := Module.Flat.of_projective
+  haveI : Algebra.FiniteType (FixedPoints.subalgebra R A G) A := inferInstance
+  haveI : Algebra.FinitePresentation (FixedPoints.subalgebra R A G) A :=
+    (Algebra.FinitePresentation.of_finiteType).mp inferInstance
+  haveI : Algebra.FormallyUnramified (FixedPoints.subalgebra R A G) A :=
+    Algebra.FormallyUnramified.of_isFreeAlgebraAction G R A hfree
+  exact Algebra.Etale.of_formallyUnramified_of_flat
