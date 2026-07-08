@@ -1671,8 +1671,15 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   and `gammaFullNaiveProblem` `map_id/map_comp/map`-membership sorries ·
   **Depends on**: T-E3 · **Type**: lemmas.
 
-### [T-E5] representable ⟺ rel. representable + rigid (KM 4.7) — DECOMPOSED 2026-07-08
-- **Status**: open (decomposed; leaves below) · **File**: Moduli/EllCategory.lean ·
+### [T-E5] representable ⟺ rel. representable + rigid (KM 4.7) — DECOMPOSED + B2-AMENDED
+- **Status**: open; **⇒ direction DONE**, ⇐ gated. **B2 AMENDMENT EXECUTED 2026-07-08**
+  (owner-approved option (a), v10.27 DECISION 1): `representable_iff` now takes
+  `(hP : P.AffineOverEll)` and is **KM SCHOLIE (4.7.0) verbatim**; `b2_log.jsonl` entry
+  written; the verbatim quote landed in the docstring **in the same commit as the statement
+  edit**; the unrestricted form is a **documented non-goal** in the docstring citing KM
+  A.4.1.2 + Gabber A.4.1.3 (not deleted). New: `def AffineOverEll` +
+  `AffineOverEll.relativelyRepresentable` + `rigid_of_representable` (T-E5a, axiom-clean).
+  The file's single remaining `sorry` is the ⇐ direction. · **File**: Moduli/EllCategory.lean ·
   `representable_iff` · **Depends on**: T-E5a–T-E5e · **Type**: theorem (hard) ·
   **Sources**: [KM] SCHOLIE 4.7.0 + engine p. 112 + Appendix A.4 (**READ 2026-07-08,
   verbatim in `.mathlib-quality/km47-source-quotes.md`; docstring carries the quotes**);
@@ -1698,13 +1705,32 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     (c) keep the general statement ⟹ algebraic spaces ⟹ **out of scope** (absent from
         mathlib).
 - **Leaves** (Tier A5 split; each single-conclusion):
-  - **[T-E5a]** `representable ⟹ rigid` — KM 4.4, [Loe] Exercise (1). Free-ish: a fixed
-    point of `Aut(E/S)` on `P(E/S)` contradicts the universal property's uniqueness clause.
-  - **[T-E5b]** `representable ⟹ relatively representable` — **NOT free** (KM leaves it
-    implicit in 4.3; Loeffler asserts it inside 3.7.4). Needs the `Isom`-scheme of the
-    universal curve: `T ↦ 𝒫(E_T/T) ≅ Hom_{Ell}(E_T/T, E_univ/𝕸(𝒫))`, to be exhibited as an
-    `S`-scheme. Own gap ticket if the `Isom`-scheme is missing (it is: mathlib has no
-    `Isom`-scheme for elliptic curves).
+  - **[T-E5a]** `representable ⟹ rigid` — **DONE** (fable-P4, 2026-07-08; `#print axioms`
+    clean): `rigid_of_representable` (EllCategory.lean). A fixed point of an automorphism
+    over the identity base forces `e.top = 𝟙` by `IsPullback.hom_ext` applied to the
+    **cartesian** square of the classifying morphism `u = homEquiv.symm a`. The square is
+    indispensable — `[-1]` *is* a nontrivial automorphism over `𝟙_base`; it is the existence
+    of `a` (hence of `u`) that kills it. KM p. 111: *"any representable problem is
+    automatically rigid"*.
+  - **[T-E5b]** `representable ⟹ relatively representable` — **NOT NEEDED for
+    `representable_iff`** after the B2 amendment: `AffineOverEll.relativelyRepresentable`
+    supplies it from the hypothesis. See **[T-E5-ISOM]** for the hypothesis-free form
+    (boarded, **not built**, per dispatch v10.27).
+
+### [T-E5-ISOM] `representable ⟹ relatively representable`, hypothesis-free (BOARDED, NOT BUILT)
+- **Status**: open, **not to be built** without an owner dispatch (v10.27: *"Record the
+  ⇒-direction Isom-scheme gap as [T-E5-ISOM] — don't build it"*) · **Type**: theorem + infra
+- **Statement**: `P.Representable → P.RelativelyRepresentable`, with **no** affineness.
+- **Why it is not free**: with `(E_univ/𝕸(𝒫), α_univ)` representing `𝒫`, relative
+  representability at `E/S` asks for an `S`-scheme representing
+  `T ↦ 𝒫(E_T/T) ≅ Hom_{Ell/R}(E_T/T, E_univ/𝕸(𝒫))`. An `Ell/R`-morphism is a *cartesian
+  square + zero-compatibility*, so the functor is the **`Isom`-scheme**
+  `Isom_{S ×  𝕸(𝒫)}(E ×  𝕸(𝒫), S × E_univ)` (pointed isomorphisms of elliptic curves),
+  which must be exhibited as a scheme (it is affine of finite type, unramified). **mathlib has
+  no `Isom`-scheme for elliptic curves or for polarized abelian schemes** (verified
+  2026-07-08). KM leaves this implicit in 4.3; Loeffler asserts it inside 3.7.4.
+- **Consumers**: none in the current `Y(N)` path (`representable_iff` no longer needs it).
+  Cut only if a consumer appears.
   - **[T-E5c]** the KM engine, `ℤ[1/N]`-half — **already exists** as
     `representable_of_rigid_of_torsor` (Moduli/QuotientProblem.lean, sorried = **T-Q6e**).
     T-E5 must not re-derive it; it must *instantiate* it twice.
