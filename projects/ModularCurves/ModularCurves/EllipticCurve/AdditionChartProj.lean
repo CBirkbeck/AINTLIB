@@ -42,7 +42,10 @@ and the same on the `l` side; `Proj.SpecMap_awayMap_awayι` pushes both composit
 at `X k * X l`, with `awayCongr` absorbing `X l * X k = X k * X l`.
 -/
 
-open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
+open MvPolynomial ModularCurves HomogeneousIdeal HomogeneousLocalization
+open AlgebraicGeometry CategoryTheory
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace WeierstrassCurve.Projective
 
@@ -78,6 +81,37 @@ lemma isUnit_chartAwayHomOfTriple_isLocalizationElem (k l : Fin 3) (hkl : l ≠ 
         (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l))) := by
   rw [chartAwayHomOfTriple_isLocalizationElem W k l hkl t u hu ht]
   exact (IsUnit.of_mul_eq_one _ hv).mul (IsUnit.of_mul_eq_one_right _ hu)
+
+open HomogeneousLocalization in
+/-- The `k`-side factorization: the chart morphism of a triple factors through the overlap chart
+`Away 𝒜 (X k * X l)`, via `IsLocalization.Away.lift` on the presentation supplied by
+`Away.isLocalization_mul`. -/
+noncomputable def projGlueLift (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
+    (hu : t k * u = 1) (hv : t l * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t) :
+    letI : Algebra (chartAway W k)
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+            (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))) :=
+      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
+        (rfl : _ = _ * _)).toAlgebra
+    Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X l)) →+* S := by
+  letI : Algebra (chartAway W k)
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l)
+      (rfl : _ = _ * _)).toAlgebra
+  haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l)
+    (rfl : _ = _ * _) one_ne_zero
+  exact IsLocalization.Away.lift
+    (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W k)
+      (mk_X_mem_quotientGrading_one W l))
+    (g := (chartAwayHomOfTriple W k t u hu ht).toRingHom)
+    (isUnit_chartAwayHomOfTriple_isLocalizationElem W k l hkl t u v hu hv ht)
 
 /-- **(c4.2, the last crux of c5β)** A projective triple on the curve, regular at two indices,
 defines the same morphism to the model through either chart. Equivalently: the triple defines a
