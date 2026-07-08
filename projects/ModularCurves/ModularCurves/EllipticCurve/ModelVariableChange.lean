@@ -2765,6 +2765,37 @@ lemma pointedIso_exists_witness {W W' : WeierstrassCurve R}
     refine hgoal.trans ?_
     rw [hcfold]
 
+/-- **(ForMathlib-grade)** Sections round-trip along a split pair through `eqToHom`
+transports: if `f ≫ g = 𝟙` then the two conjugated pullbacks compose to the identity. -/
+private lemma app_app_eqToHom_of_comp_eq_id {X Y : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ X)
+    (hfg : f ≫ g = 𝟙 X) {U : X.Opens} {V : Y.Opens}
+    (hgU : g ⁻¹ᵁ U = V) (hfV : f ⁻¹ᵁ V = U) (z : ↑Γ(X, U)) :
+    ((X.presheaf.map (eqToHom hfV.symm).op).hom)
+      ((f.app V).hom (((Y.presheaf.map (eqToHom hgU.symm).op).hom)
+        ((g.app U).hom z))) = z := by
+  have hUle : U ≤ f ⁻¹ᵁ (g ⁻¹ᵁ U) := by
+    rw [hgU, hfV]
+  have hnat := congrArg (fun φ => CommRingCat.Hom.hom φ ((g.app U).hom z))
+    (Scheme.Hom.naturality f ((eqToHom hgU.symm).op))
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
+  refine (congrArg ((X.presheaf.map (eqToHom hfV.symm).op).hom) hnat).trans ?_
+  have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((f.app (g ⁻¹ᵁ U)).hom ((g.app U).hom z)))
+    ((X.presheaf.map_comp ((TopologicalSpace.Opens.map f.base).map
+      (eqToHom hgU.symm)).op (eqToHom hfV.symm).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+  refine hfuse.trans ?_
+  have halign := congrArg (fun ψ => (CommRingCat.Hom.hom (X.presheaf.map ψ))
+    ((f.app (g ⁻¹ᵁ U)).hom ((g.app U).hom z)))
+    (Subsingleton.elim (((TopologicalSpace.Opens.map f.base).map
+      (eqToHom hgU.symm)).op ≫ (eqToHom hfV.symm).op) ((homOfLE hUle).op))
+  refine halign.trans ?_
+  refine (app_app_res_of_comp_eq_id f g hfg U hUle le_rfl z).trans ?_
+  have hone : (homOfLE (le_rfl : U ≤ U)).op = 𝟙 (Opposite.op U) :=
+    Subsingleton.elim _ _
+  rw [hone, CategoryTheory.Functor.map_id]
+  rfl
+
 /-- **Forward inclusion of the filtration transport**: the induced coordinate isomorphism
 maps the pole-order filtration into the pole-order filtration. -/
 lemma pointedIsoCoordEquiv_filtration_le {W W' : WeierstrassCurve R}
