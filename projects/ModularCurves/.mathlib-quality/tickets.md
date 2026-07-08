@@ -9881,6 +9881,20 @@ subterm is index-defeq but not syntactic (`(f ≫ g).1` vs `g.1 * f.1`), a defeq
   spawn sub-delegates; a delegate with no build progress at 30 minutes is stopped and its
   analysis banked (the 68-minute lesson).
 
+### ★ D2 CLAIMS [STREAM-NISOG] (2026-07-08, beastmode-D2) — consolidation done, pivoting
+- **Consolidation acts DONE**: board-flip (07ed83752, ★ ROUTE A CONSOLIDATED 99.5%); upstream verify-pass complete.
+  **Verify-pass CORRECTION**: the v10.46 list named GenericFlatness, but it is NOT sorry-free (GFDatum residual) — so the
+  CLEAN v10.16 upstream subset is **8 files** (FittingIdeals, HilbertSyzygy, FiniteFreeResolution, BaseChangeExt, Depth,
+  LocalCriterion, Grade, Acyclicity), all confirmed sorry-free + axiom-clean, NOT GenericFlatness/FlatLocus/NoethApprox/BuchsbaumEisenbud/CartierDivisor.
+- **Rule-5 [KM-FMT-FLAT] ownership check**: it is fable-FP's charter stretch-follow-on (i) and declared next (v10.37b / §STREAM-FP
+  line ~9395; "STREAM-FP continues: next = KM-FMT-FLAT"). **fable-FP KEEPS it.** D2 does NOT take KM-FMT-FLAT; STREAM-NISOG's
+  L2-hard-direction (KM-FMT-FLAT-gated) is bridged/waits on fable-FP. **D2 takes**: wave M1 = {L3, L5, L6, L20, L1} (zero-gate) +
+  Layer-2 [KM-62-63-HOMOG] (pure comm-alg, D2 skill set).
+- **FIRST ACT: [L3] `exists_generatorLocus`** in `GroupScheme/NIsogeny.lean` — dischargeable NOW off the proven T-D15
+  (`exists_incidenceLocusEQ` = KM 6.7.3) / T-D33 machinery. Then the rest of wave M1. Milestone target: T-SG3 sorry-free +
+  6.1.1(⟸) + the live scheme-of-generators G^× layer ("cyclicity is a closed condition", the Γ₀ moduli foundation).
+- Ops honored: single-target builds, no sub-delegate spawning, 30-min-no-build-progress → stop+bank.
+
 ### v10.44b (2026-07-08, fable-FP): ★ [STREAM-FP] stretch (i) — [KM-FMT-FLAT] reduction engine PROVEN in full ([FMT-0]); gates [FMT-1/2/3] registered
 
 - **Scoping verdict** (artifact: `decomposition-fmt-flat.md`): [KM-FMT-FLAT] = (a) a
