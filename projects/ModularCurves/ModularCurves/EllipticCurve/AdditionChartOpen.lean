@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.AdditionChartCover
+import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # The regularity opens on a chart-product piece (T-W7.0c-c5β, c4.1)
@@ -70,5 +71,31 @@ noncomputable def blOpenYPieceCover :
 noncomputable def blOpenZPieceCover :
     (blOpenZPiece W i j).toScheme.OpenCover :=
   (iSup_blOpenZPieceFamily W i j) ▸ Scheme.Opens.iSupOpenCover (blOpenZPieceFamily W i j)
+
+section Morphisms
+
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+/-- **(c4.2c, per-piece)** The `k`-th piece of `addOnY`, as a morphism out of the open
+`D(t_k)` of the chart-product piece: restrict `chartPieceIso` to the basic open, undo
+`specBasicOpenIsoAway`, then apply β3's `addOnYPieceMor`. -/
+noncomputable def addOnYOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
+    (blOpenYPieceFamily W i j k).toScheme ⟶ projModel W :=
+  morphismRestrict (chartPieceIso W i j).hom
+      (PrimeSpectrum.basicOpen (lawTwoTriple W i j k)) ≫
+    (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+      (lawTwoTriple W i j k)).inv ≫
+    addOnYPieceMor W i j k hΔ
+
+/-- **(c4.2c, per-piece)** The `k`-th piece of `addOnZ` (mathlib's addition law). -/
+noncomputable def addOnZOnFamily (k : Fin 3) (hΔ : IsUnit W.Δ) :
+    (blOpenZPieceFamily W i j k).toScheme ⟶ projModel W :=
+  morphismRestrict (chartPieceIso W i j).hom
+      (PrimeSpectrum.basicOpen (lawOneTriple W i j k)) ≫
+    (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+      (lawOneTriple W i j k)).inv ≫
+    addOnZPieceMor W i j k hΔ
+
+end Morphisms
 
 end WeierstrassCurve.Projective
