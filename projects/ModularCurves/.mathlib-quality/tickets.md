@@ -7670,3 +7670,23 @@ records why).*
 - **DECISION: beastmode-A proceeds NOW to [T-D33]** (subgroup-divisor locus over U; deps
   T-D14 ✓ / T-D15 ✓; their `IsSubgroup.baseChange` from T-D6a-ii is the freshest context on
   the board). Queue after: T-W7.1b-faith-infra as the next session's first act.
+
+## Amendments v10.24 (2026-07-08): OWNER POLICY — slowdown ⟹ decompose (BINDING, all lanes)
+
+*Owner directive (2026-07-08): "if we are hitting slowdowns that means we need to break up
+proofs more." Elevated to binding policy, in the two forms the evidence supports:*
+
+- **(a) Proof-level**: any proof that times out or crawls is split into private helper lemmas
+  IMMEDIATELY — never ground through, never `set_option maxHeartbeats` (already banned by the
+  cleanup cadence; a proof needing it is a proof needing decomposition). Precedent: c5β's
+  >150-line proof → 3 private lemmas, zero heartbeat bumps, green.
+- **(b) Definition-level** (the T-W7.1b-faith lesson): any definition of chart-iso scale ships
+  **in the same increment** as its opaque interface — `_apply` / injectivity / cancellation
+  lemmas, with `irreducible` set so consumers only ever touch the interface, never the raw
+  term. A heavy definition without an interface is technical debt that lands on the NEXT
+  ticket: b1 was built interface-free and its bill came due one ticket later as a four-route
+  whnf wall ([T-W7.1b-faith-infra] is the retro-fit).
+- **Prospective application to every live heavy layer**: c5β's β3-geometric/β4 gluing (already
+  flagged heaviest-yet), P3b3's B5D ψ_N bridge, the End(E/S) ring-layer resume, fable-PIC0's
+  Pic layer, D2's B–E assembly. Workers: when you feel elaboration slow down, STOP and split —
+  the slowdown IS the signal, and four walled routes is far past it.
