@@ -5417,6 +5417,41 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `irreducible` — with consumers (0c-ii's `mulModelHom`, 0c-iii's specs) never touching the raw
     glued term. Recorded now so the increment is planned around it, not retrofitted; b1's bill
     (`T-W7.1b-faith-infra`) is the counterexample.
+  - **β4(b) DONE** (coordinator-P1, 2026-07-08T12:50Z, 1279497b, `AdditionChartGlue.lean`,
+    zero sorries; `isUnit_of_minor` needs NO axioms): **the two laws glue.**
+    · `ratio_eq_of_minor` — minors force the RATIOS to agree (`s m * v = t m * u`) with no
+      cancellation and no unit inverse; the `s = c • t` scalar I expected to need is unnecessary.
+    · `isUnit_of_minor` — on `D(t k) ⊓ D(s l)`, `s k` is automatically a unit, so both triples
+      are regular at the SAME index there ⟹ **no cross-index gluing between the two laws.**
+    · `chartHomOfTriple_congr` + **`chartHomOfTriple_lawOne_eq_lawTwo`** = `addOn_agree` (c3) at
+      ring level.
+  - **β4(c) DECOMPOSITION + THE REMAINING CRUX** (boarded per v10.27 "decompose and move on"):
+    · **c4.1** `blOpenY`/`blOpenZ` as `(pullback π π).Opens`: transport `regularityOpen`
+      (7ba4314e) through `chartPieceIso` (bb5c86d9) and the cover map's
+      `IsOpenImmersion.opensFunctor` (mathlib, OpenImmersion.lean:88); `blOpen := ⨆_{(i,j)} image`.
+    · **c4.2 — THE CRUX (same-law, cross-index)**: β4(b) settles the *two-law* agreement, which
+      looked like the hard part; what remains is that ONE law's pieces at indices `k` and `l`
+      agree on `D(t k) ⊓ D(t l)`. These land in DIFFERENT chart rings (`chartAway k` vs
+      `chartAway l`), so the ratio argument does not apply — this is Proj's chart-compatibility,
+      i.e. the universal property "a triple generating the unit ideal on an open defines a
+      morphism to Proj" (the original plan's `toProjOfBihomTriple`). Check `ForMathlib/AwayCongr.lean`
+      + `Proj.awayMap` before building.
+    · **c4.3** glue over `(i,j)` (dehomogenisation compatibility) · **c4.4** assemble
+      `addOnY`/`addOnZ` + ship the rule-3 opaque interface in the same commit.
+  - **ENDGAME AUDIT (v10.27 item 5, coordinator-P1 2026-07-08T12:55Z)** — 0h and 1a, verified
+    against the code, not the board:
+    · **T-W7.1a: genuinely DONE.** `WeierstrassAtlasBundle.lean` is **sorry-free**; board status
+      `done` is accurate (retro-legalized rule-5 incident aside).
+    · **T-W7.mvc: genuinely DONE.** `ModelVariableChange.lean` has **0 sorries**; all five decls
+      (`projModelVCIso` + `_π`/`_map`/`_mul`/`_zero`) axiom-clean.
+    · **T-W7.0h: blocked ONLY on 0c-ii.** Board lists `Depends: T-W7.0c-ii, T-W7.mvc,
+      CLEANUP-GLC-2`; mvc is now DONE and CLEANUP-GLC-2 is a cleanup, not math. Its target
+      `mulModelHom_vc` (GroupLawConstruction.lean:940) is stated and sorried, and its proof route
+      (field-points ext over the universal VC-base + the proven affine cocycle) has no other gate.
+      **So 0h unblocks the moment 0c-ii lands — i.e. on my queue item (4).**
+    · **Net for T-W7.12**: dependencies reduce to **0c-ii → 0h (both mine)** plus **1b** (until
+      beastmode-A's faith-infra). 1a is already discharged. The endgame gate is therefore
+      c5β-completion ∧ faith-infra, with 0h a short follow-on rather than a parallel stream.
 
 - **[CLEANUP-GLC-1]** `/cleanup` GroupLawConstruction.lean. **Depends**: T-W7.0c-i (3rd proof
   ticket on file). Blocks later GLC tickets.
