@@ -8001,6 +8001,10 @@ an isogeny-quotient + finite-étale-descent infra ticket for the geometry remain
 
 ## Amendments v10.27 (2026-07-08): CONSOLIDATED FLEET DISPATCH — five reports absorbed, two owner decisions, extended queues
 
+### beastmode-A W7-endgame-review audit (2026-07-08): 0h/1a status
+- **T-W7.1a — DONE, axiom-clean** (lane P5; `EllipticCurveGeom.atlas`/`classifyRingHom`/etc., WeierstrassAtlasBundle.lean; all 5 decls [propext, Classical.choice, Quot.sound]). Review input READY.
+- **T-W7.0h (`mulModelHom_vc`) — BLOCKED on 0c-ii, correctly.** Statement present (GroupLawConstruction.lean:940, VC-equivariance of the glued `mulModelHom` under `projModelVCIso`); proof is `sorry` because it needs `mulModelHom`'s per-chart glue behavior (0c-ii, c5β's chain — not started). It IS comparison-spine (my `projModelVCIso`/`projModelVCIso_π`), so it is beastmode-A's natural claim the moment c5β lands 0c-ii: route = `projModel_hom_ext_of_affine` (reduce to Z-chart agreement) + the per-chart addOn VC-equivariance. NOT claimable now; NOT touched (c5β's active file, 20 sorries). Endgame review should treat 0h as gated behind 0c-ii, with A pre-committed to it.
+
 *(Note: p0's frontier-handoff section above also carries the number "v10.26" — it is treated as
 v10.26b; numbering continues here. Reports absorbed: c5β β4(a) 389c933f — minors consumed,
 `lawOneTriple_mul_lawTwoTriple` 9-line close; fable-P4 tri-part — KM 4.7 quote pass + LOAD-BEARING
