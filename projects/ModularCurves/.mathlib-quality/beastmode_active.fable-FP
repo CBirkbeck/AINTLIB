@@ -1,1 +1,1 @@
-FOCUS: [STREAM-FP]/[A711-FP] — FinitePresentationOfFinite.lean (NEW file, ForMathlib). Phase: /develop --decompose (Stacks 00QQ/05GH fetch+quote). Zero overlap with any lane; InvariantTorsor.lean not edited without separate board claim.
+FOCUS: [STREAM-FP] — ★ MILESTONE DONE 2026-07-08T15:25Z: [A711-FP] discharged + general-base etale FLIPPED (InvariantTorsor sorry-free, axiom-clean). NEXT: [KM-FMT-FLAT] /develop --decompose. Files held: ForMathlib/FinitePresentationOfFinite.lean. InvariantTorsor surgical edit COMPLETE, file released.

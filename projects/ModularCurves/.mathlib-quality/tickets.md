@@ -9654,3 +9654,35 @@ input — scope decision at cut: the honest v8 statement may be essential-surjec
   presentation-by-construction, map curveOfVCIso); (5) essential surjectivity onto
   globally-presented records — the honest v8 equivalence statement; ff explicitly
   gated on presentation-rigidity (T-W7 pointEquiv uniqueness) per v10.42.
+
+### v10.44 (2026-07-08, fable-FP): ★★ [STREAM-FP] REPORT MILESTONE — [A711-FP] DISCHARGED and the general-base étale theorem FLIPPED, same session
+
+- **[FP-B] done (fable-FP, 2026-07-08T15:09Z → 2026-07-08T15:25Z).**
+  `Algebra.Etale.of_isFreeAlgebraAction` (general base — NO noetherian hypothesis) is
+  **PROVEN**; `ForMathlib/InvariantTorsor.lean` is now **SORRY-FREE** (was: exactly one
+  sorry, the [A711-FP] gap). `#print axioms` on BOTH étale theorems = [propext,
+  Classical.choice, Quot.sound]; zero sorryAx; 2476 jobs green.
+- **Edit discipline** (per the boarded surgical claim): one import
+  (`FinitePresentationOfFinite`), header status paragraphs de-staled, the sorried
+  block at old line 728 RELOCATED verbatim-statement beside its noetherian twin at EOF
+  (forward-reference constraint: the assembly needs `FormallyUnramified.of_isFreeAlgebraAction`,
+  line 960 — same reason the twin already lived there), proof = the twin's assembly with
+  `of_finiteType.mp` → `Algebra.FinitePresentation.of_finite_of_projective _ _` and the
+  `[IsNoetherianRing]` scaffold dropped. Statement byte-identical; noetherian twin kept
+  as historical record with a superseded-by note. Pre-existing `unusedSectionVars`
+  linter notes on untouched decls left for the cleanup lane.
+- **KM A7.1.1 is now fully proven over an arbitrary base**: finite ✓ + torsor ✓ +
+  unramified ✓ + **étale ✓ (general)** + A7.1.2 ✓. KM's *"in the absence of noetherian
+  hypotheses, this is rather delicate"* is discharged end-to-end — CHR Galois
+  coordinates + EGA IV₁ 1.4.7 (via the 2026 pin) + Stacks 08WD; SGA III Exp. V never
+  needed. Downstream consumers of the noetherian scaffold (Γ_H étale layer PART B
+  ⛩[A711-FP] at v10.37 §STREAM-GH; KM 7.1.3(2); EngineDescent [a3-ii]/[a4] notes citing
+  `_of_isNoetherianRing`) can switch to the general theorem at zero cost — the noetherian
+  variant stays valid, nothing breaks; flagged for the owning lanes, no cross-lane edits
+  made.
+- **Root-module registration**: still deliberately deferred (root carries p0's in-flight
+  import line — sweep hazard); `FinitePresentationOfFinite` is in the import graph
+  transitively via InvariantTorsor. Coordinator may fold the root line in at the next
+  quiet window.
+- **[STREAM-FP] continues per charter**: next = [KM-FMT-FLAT] (/develop --decompose as
+  first act), then [NISOG-GRASS]. Sentinel updated.
