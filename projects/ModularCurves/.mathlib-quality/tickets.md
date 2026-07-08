@@ -1795,8 +1795,9 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   - If (2) proves harder than budgeted, **route (γ)**: OWNER ACTION — acquire CHR (Trans. AMS
     52 (1965) 15–33) or SGA III Exp. V into `refs/`; the RR-only rule forbids assuming it.
 
-### [T-E-OMEGA] the invariant differential `ω_{E/S}` — GAP TICKET (cut 2026-07-08, fable-P4)
-- **Status**: open, unclaimed · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
+### [T-E-OMEGA] the invariant differential `ω_{E/S}` — FUNDED (v10.27), **BLOCKED-ON-T-W7.1b**
+- **Status**: funded, decomposed (R1/R2 below), **blocked on T-W7.1b**; released to the board
+  — claimable the moment 1b flips DONE · **Claimed**: — · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
   **Blocks**: T-E12, T-E13, T-E14 ⟹ T-E5e ⟹ T-E5f ⟹ **the `ℤ[1/2]`-half of KM 4.7** ·
   **Type**: def + 3 lemmas (a bounded sub-stream, not a leaf)
 - **The gap (verified 2026-07-08, fable-P4)**: KM's Legendre problem (4.6.2, verbatim)
@@ -1804,17 +1805,41 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   mathlib** (`Mathlib/AlgebraicGeometry`, 45 files: no `Ω¹`, no cotangent complex, no
   relative differentials for schemes) **nor in this repo** (every `omega` hit is the
   tactic). This is *not* a data-sorry: no decl was emitted (see `Moduli/Bootstrap.lean`).
-- **Plan terminating in a proof** (per v10.8 RR-only): do **not** wait for scheme-level
-  `Ω¹`. Our `EllipticCurveGeom` is *locally Weierstrass* (T-A8), so define `ω_{E/S}` as the
-  line bundle glued from the atlas with the classical local basis
-  `dx / (2y + a₁x + a₃)`, whose transition under a variable change `(u, r, s, t)` is
-  multiplication by `u` — **the cocycle is already proven**: `T-W7.1a` (atlas +
-  `classifyRingHom`) and `T-W7.mvc` (`projModelVCIso` + `_mul`, the cocycle identity,
-  axiom-clean). Steps: (i) `def invDiffLineBundle` via `Scheme.Cover.glueMorphisms`-style
-  gluing over the atlas (or as an invertible sheaf given by the `u`-cocycle); (ii)
-  `invertible` + rank 1; (iii) `basis_iff_unit`; (iv) base-change compatibility
-  (mirror `LocallyWeierstrass.baseChange`). Est. 400–700 lines. **Sources**: KM 2.2 / 4.6.2;
-  GME 2.2.
+- **FUNDED 2026-07-08 (v10.27 DECISION 2, level-4 detour rejected). WALL FOUND on first act;
+  decomposed + boarded per standing rule 3 — fable-P4, 2026-07-08.**
+- **THE WALL (correcting my own 2026-07-08 plan)**: I wrote "the cocycle is already proven:
+  T-W7.1a + T-W7.mvc". **That is wrong.** `projModelVCIso_mul` (T-W7.mvc) is the cocycle for
+  `VariableChange`s *over a fixed ring* — it does **not** produce the transition between two
+  atlas charts. The atlas (`EllipticCurveGeom.atlas`) indexes charts by points of `S` with
+  *independently chosen* `(U_s, W_s, e_s)`; on an overlap `U_s ∩ U_t` the two pointed isos
+  `e_s, e_t` give a pointed iso of the two projModels, and turning **that** into a
+  `VariableChange C_{st}` (whence the transition unit `u_{st}`) is exactly
+  **`pointedIso_exists_variableChange` = T-W7.1b**, which is *in flight* (beastmode-A +
+  P3b3, closing this dispatch). ⟹ **route R1 is gated on T-W7.1b, not free.**
+- **SUBSTRATE SCAN (fable-P4, 2026-07-08)**: mathlib has `AlgebraicGeometry/Modules/{Presheaf,
+  Sheaf,Tilde}.lean` with `Scheme.Modules := SheafOfModules X.ringCatSheaf` (usable target
+  type), `Mul X.IdealSheafData` (so `I²` exists) and `Scheme.Hom.ker` (so `I_zero` exists).
+  There is **no** invertible-sheaf/line-bundle predicate, **no** `Ω¹`, and **no**
+  glue-sheaves-of-modules API.
+- **TWO ROUTES, decomposed:**
+  - **R1 (dispatch's route; atlas-glued)** — `ω1` transition cocycle `u_{st}` from T-W7.1b +
+    `projModelVCIso_mul`; `ω2` the glued `Scheme.Modules` object + `IsInvertible`; `ω3`
+    `basis ↔ global unit` (the `Gm`-torsor form, = T-A4's trivialization); `ω4` base change;
+    `ω5` the `{±1}`-action + Legendre unblock (T-E14). **Gate**: T-W7.1b. **Est.** 400–700 ln.
+  - **R2 (conormal; `1b`-free)** — `ω_{E/S} := zero^* (I/I²)` with `I = (E.zero).ker`. Needs:
+    the quotient `I/I²` as a `Scheme.Modules` object (new infra; `Mul IdealSheafData` gives
+    `I²` but not the quotient module), pullback of `Scheme.Modules` along `zero`, then
+    invertibility from the Weierstrass local basis. **Gate**: none — but **more new infra**
+    than R1 (est. 600–900 ln), and it still needs the Weierstrass computation to exhibit the
+    basis `dx/(2y + a₁x + a₃)`.
+  - **RECOMMENDATION (fable-P4)**: **R1, sequenced after T-W7.1b**, which lands this dispatch
+    (beastmode-A queue item 2). R1 then reuses the proven `projModelVCIso_mul` for the cocycle
+    identity, and `ω3` *is* T-A4's torsor form — one construction, three consumers, as the
+    owner intended. Until 1b flips DONE, T-E-OMEGA is **BLOCKED-ON-1b, not workable**;
+    fable-P4 does not hold it (released to the board so it can be claimed the moment 1b lands).
+- **DS-register**: nothing to register — **no decl was emitted**, hence no data-sorry (the
+  same discipline as `Moduli/Bootstrap.lean`). The DS entry is due with `ω2`.
+- **Sources**: KM 2.2 / 4.6.2; GME 2.2.
 - **ALTERNATIVE that dodges `ω` entirely (recorded, owner's call)**: KM's engine needs *some*
   `δ` over `ℤ[1/2]` satisfying axioms 1–2. Take `δ = ` **naive level 4**, `G = GL₂(ℤ/4)`
   (`E[4]` is finite étale when `2` is invertible; bases of `E[4]` form a `GL₂(ℤ/4)`-torsor;
