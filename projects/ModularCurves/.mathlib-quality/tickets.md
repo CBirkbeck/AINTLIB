@@ -1903,7 +1903,22 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
       equivalence for semilinear `G`-modules. **Not in mathlib** (`Flat/FaithfullyFlat/Descent.lean`
       only descends *ring-hom properties*; `RingTheory/PicardGroup.lean` has no descent), **but
       it is routine from our Galois coordinates** — the same `∑ᵢ aᵢ ⊗ bᵢ` that gave the torsor
-      iso gives the descent equivalence. Est. 250–400 lines. Cut as **[A711-DESC]**.
+      iso gives the descent equivalence. Cut as **[A711-DESC]**.
+      **★ [A711-DESC] MOSTLY LANDED (fable-P4, 2026-07-08, all axiom-clean)**:
+      `smul_cocycle_inv` · `twistedInvariants` (`M_w = {a | ∀ g, g•a = w(g)·a}`) ·
+      `twistedAvg` (`ρ(x) = ∑_g w(g)⁻¹·(g•x)`, `Aᴳ`-linear) · **`twistedAvg_smul_eq`**
+      (`ρ(c·m) = m` — `M_w` is a *direct summand* of `A`) · `twistedInvariants_finite` ·
+      `cocycle_one` · **`twistedMul_bijective`**: `A ⊗_{Aᴳ} M_w ≅ A` by multiplication, i.e.
+      **`M_w` is an invertible `Aᴳ`-module trivialised by `A`** — *Galois descent of rank-one
+      modules, from the Galois coordinates' third use.* Mathlib's missing faithfully-flat
+      descent of `Module.Finite`/`Module.Projective` is sidestepped entirely (the averaging
+      retraction replaces it).
+      **Remaining leaf [A711-DESC-loc]** (unclaimed, ~100–150 ln): `M_w` is projective
+      (mathlib has no `Projective.of_split`/`of_retract`; build via `projective_def'` through
+      `A`'s dual basis, or via `Finsupp.mapDomain` of `A`'s splitting along `ρ`), hence
+      locally free; localizing `Spec Aᴳ` at a prime, a generator `d` of `M_w` is forced by
+      `twistedMul_bijective` to be a **unit** of `A`, giving `g • d = w(g)·d` — the cocycle is
+      locally a coboundary. **This is the last mathematical step of a5-ii.**
 - **Cost comparison (the point of the verdict)**: gate 2 was *"effective descent for projective
   schemes, absent from mathlib, B3-scale"* — with a **circular** alternative through T-E9. It is
   now *"[a1]–[a4] on proven AINTLIB engines + [A711-DESC], a bounded 250–400-line algebra
