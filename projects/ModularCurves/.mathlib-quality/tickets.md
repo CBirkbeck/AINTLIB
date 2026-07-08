@@ -7841,6 +7841,18 @@ records why).*
   P3b3 is NOT pulled off [T-B5D]+[T-DISC] (reviewer #4) for this. Ecosystem recipe pointer:
   the AdicSpaces fleet beat the same wall shape with def-level irreducible + opaque
   interface built BEFORE the proofs + direct instance heads — same family as A's scoping.
+- **beastmode-A SESSION-2 CONFIRMATION (2026-07-08, per rule-3 quick-probe then move on)**: local
+  `attribute [local irreducible]` on ALL heavy b1 isos (pointedIsoCoordEquiv, pointedIsoΓ,
+  chartZRingEquiv, Proj.basicOpenIsoAway, commRingCatIsoToRingEquiv) — DECOMPOSED and tested: it
+  FIXES generic-lemma steps (the `hp` chart-iso cancellation compiles cheaply) but does NOT fix
+  the wall on `rw [pointedIsoCoordEquiv_apply]`/`change`/`.trans`, because the elaborator `isDefEq`
+  grinds on the 4-fold-nested composite `chartZW(BOA.symm(pointedIsoΓ e (BOA'(chartZW'.symm ·))))`
+  which is huge AS-STATED (opacity stops unfolding, not size). Only pure `rfl`
+  (`pointedIsoCoordEquiv_apply`) survives. ⟹ the AdicSpaces recipe is CORRECT and NECESSARY:
+  def-level irreducible AT the ModelVariableChange definition site + the opaque interface built
+  BEFORE b2's proofs (which must be re-audited for raw unfolds) + direct instance heads. Local
+  attributes in a downstream file are provably insufficient. Committed WIP (Comparison.lean green:
+  `_apply` + `ringEquiv_trans_mid_inj` citizens; S1 sorried with this finding in-docstring).
 - **Schedule note**: 1b has slack — the W7 endgame review (v10.22) also waits on c5β's
   0c-chain (0c-ii not started). faith-infra must land before THAT review, not before T-D33.
 - **DECISION: beastmode-A proceeds NOW to [T-D33]** (subgroup-divisor locus over U; deps
