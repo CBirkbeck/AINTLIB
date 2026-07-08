@@ -111,6 +111,45 @@ theorem IsInvariant.coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Scheme.{u
   have hxt : (xUniv + tUniv).1 = G.translationAction.left := congrArg CommaMorphism.left hadd
   rw [← hxt, ← hx]; exact hkey
 
+/-- **Backward bridge (`coequalizes ⟹ IsInvariant`).** If `f` coequalizes the two legs
+`act, pr_E : G ×_S E ⇉ E` at the scheme level, then it is invariant under translation by `G`. This
+is the direction that makes the quotient isogeny `π : E ⟶ E/G` (which coequalizes them by
+construction) `G`-invariant (`quotientπ_isInvariant`). For each `T`-point `x` and `G`-point
+`t = ι ∘ h`, precompose the coequalizer identity by the pair `(h, x) : T ⟶ G ×_S E`: there `act`
+pulls back to the point sum `x + t` and `pr_E` to `x`. -/
+theorem IsInvariant.of_coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Scheme.{u}}
+    {f : E.E ⟶ Y} (hcoeq : G.translationAction.left ≫ f = G.actionProj.left ≫ f) :
+    G.IsInvariant f := by
+  intro T gg x t ht
+  obtain ⟨h, hh⟩ := ht
+  letI : CommGroup ((Over.mk gg) ⟶ E.asOver) := Hom.commGroup
+  have hgπ : h ≫ G.π = gg := by rw [← G.ι_π, ← Category.assoc, hh]; exact t.2
+  let kOver : Over.mk gg ⟶ (Over.mk G.π) ⊗ E.asOver :=
+    lift (Over.homMk h hgπ) (E.pointEquivOverHom gg x)
+  have hkxO : kOver ≫ (snd (Over.mk G.π) E.asOver) = E.pointEquivOverHom gg x := lift_snd _ _
+  have hfst : kOver ≫ (fst (Over.mk G.π) E.asOver ≫ G.ιOver) = E.pointEquivOverHom gg t := by
+    rw [← Category.assoc, lift_fst]
+    refine Over.OverMorphism.ext ?_
+    show h ≫ G.ι = t.1
+    exact hh
+  have hktO : kOver ≫ G.translationAction = E.pointEquivOverHom gg (x + t) := by
+    rw [E.pointEquivOverHom_add, G.translationAction_eq_mul, MonObj.comp_mul, hfst, hkxO]
+    exact mul_comm _ _
+  have hkx : kOver.left ≫ G.actionProj.left = x.1 := congrArg CommaMorphism.left hkxO
+  have hkt : kOver.left ≫ G.translationAction.left = (x + t).1 := congrArg CommaMorphism.left hktO
+  have key := congrArg (kOver.left ≫ ·) hcoeq
+  rw [← Category.assoc, ← Category.assoc, hkt, hkx] at key
+  exact key
+
+/-- **The bridge, as an iff.** A morphism out of `E` is `G`-invariant (functor-of-points) exactly
+when it coequalizes the two legs `act, pr_E : G ×_S E ⇉ E` (scheme level). So `E/G` — the
+coequalizer of `act, pr_E` — carries precisely the universal property `SubgroupQuotient` states via
+`IsInvariant`. -/
+theorem isInvariant_iff_coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Scheme.{u}}
+    (f : E.E ⟶ Y) :
+    G.IsInvariant f ↔ G.translationAction.left ≫ f = G.actionProj.left ≫ f :=
+  ⟨IsInvariant.coequalizes, IsInvariant.of_coequalizes⟩
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
