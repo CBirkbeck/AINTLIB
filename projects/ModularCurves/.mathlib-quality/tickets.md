@@ -8802,3 +8802,13 @@ milestone reached; construction sharpened; continuing into Piece 3 per beastmode
   do not comment, ping, or offer contributions.
 - Standing rule for all workers: anything outward-facing is an owner action, and the
   owner has said NOT YET.
+
+### v10.35c (2026-07-08): CHARTER-A item 6 done — session end ratified
+
+- beastmode-A: 4 mathlib-ready PR drafts + README staged INTERNALLY at
+  `.mathlib-quality/pr-drafts/` (submission order: #1 first; #2 splits; external
+  submission stays owner-gated per v10.35b). Session ended correctly: every remaining
+  charter item is gated (faith-infra = next-session-full-budget by design; 0h waits on
+  c5β 0c-ii, one leaf upstream at projGlueLift_eq). Charter durable in CHARTER-A.md;
+  next session first act = the atomic faith-infra refactor → T-W7.1b DONE (next owner
+  milestone) → T-E-OMEGA.
