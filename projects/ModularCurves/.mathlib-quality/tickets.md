@@ -5232,10 +5232,18 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
     `bridge_coordY` compute `pointedIsoCoordEquiv (projModelVCIso C W)` explicitly (= the
     `x↦u²x'+r, y↦u³y'+su²x'+t` affine variable change) via `pointedIsoCoordEquiv_sections` +
     `Away.map (vcGradedHom)` + `chartZRingEquiv_x/_y` + AwayCongr transport, axiom-clean (commit
-    809f4616). **b5 IN PROGRESS** — `projModelVCIso_injective'` from the bridge + coordinate
-    comparison + unit arithmetic; the eqToHom-transport of `pointedIsoCoordEquiv` across the curve
-    equality is the remaining step (section-level, to dodge the AlgEquiv-equality kernel poison).
-    Final wiring of the four ModelVariableChange.lean sorries still deferred until b2 lands.
+    809f4616). **b5 DONE** — NEW file `ComparisonInjective.lean`: `projModelVCIso_injective'`
+    (hfil-independent) from the bridge + `coordXY_ext` + unit arithmetic (`IsUnit.mul_left_inj`
+    cancels `↑u²`), axiom-clean (commit 67c9feab). The eqToHom-transport of `pointedIsoCoordEquiv`
+    across the curve equality is proven poison-free by `transport_general` stated with the two
+    models as FREE variables (so `subst` collapses the equality) + `coordRingCongr_refl_apply`
+    applied to an OPAQUE element via `rw` (NOT `simp` — simp's congruence motive whnf's the huge
+    carrier = the kernel timeout) + `pointedIsoCoordEquiv_congr` on the now-opaque isos; the
+    theorem instantiates the concrete isos by pure function application, so nothing large is
+    re-checked. **ALL FOUR SECOND-HALF LEAVES (b3x/b3y/main/b5) DONE, axiom-clean, in PR #5220.**
+    Final wiring of the four ModelVariableChange.lean sorries deferred until b2
+    (`pointedIsoCoordEquiv_filtration`, beastmode-A) lands — `projModelVCIso_injective` is then a
+    one-line `exact projModelVCIso_injective' …`; the other three need b2's `hfil`.
 
 - **[CLEANUP-MVC]** final `/cleanup` ModelVariableChange.lean. **Depends**: T-W7.1b.
 
