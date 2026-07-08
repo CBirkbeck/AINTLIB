@@ -313,7 +313,6 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
     pointBaseChangeFun E σ t (x + y)
       = pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y := by
   refine Subtype.ext ?_
-  -- both sides through the `Over`-hom groups
   have hx : (x + y).1
       = (lift ((E.baseChange σ).pointEquivOverHom t x)
           ((E.baseChange σ).pointEquivOverHom t y)).left
@@ -326,32 +325,55 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
         ≫ (μ[E.asOver]).left :=
     (congrArg CommaMorphism.left (E.pointEquivOverHom_add (t ≫ σ) _ _)).trans
       (Over.comp_left _ _ _ _ _)
+  -- projections of the two lifted pairs
+  have hbx : (lift ((E.baseChange σ).pointEquivOverHom t x)
+        ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) = x.1 :=
+    (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (lift_fst _ _))
+  have hby : (lift ((E.baseChange σ).pointEquivOverHom t x)
+        ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) = y.1 :=
+    (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (lift_snd _ _))
+  have hSx : (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
+        (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
+        ≫ pullback.fst E.π E.π = x.1 ≫ pullback.fst E.π σ :=
+    (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (lift_fst _ _))
+  have hSy : (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
+        (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
+        ≫ pullback.snd E.π E.π = y.1 ≫ pullback.fst E.π σ :=
+    (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (lift_snd _ _))
   -- the lifted pairs agree after the comparison morphism of the intertwining lemma
   have hlift : (lift ((E.baseChange σ).pointEquivOverHom t x)
         ((E.baseChange σ).pointEquivOverHom t y)).left
         ≫ pullback.lift
           (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
           (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
-          (by
-            simp only [Over.mk_hom, Category.assoc]
-            rw [pullback.condition (f := E.π) (g := σ), ← Category.assoc,
-              pullback.condition (f := pullback.snd E.π σ) (g := pullback.snd E.π σ),
-              Category.assoc])
+          ((Category.assoc _ _ _).trans <|
+            (congrArg (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
+              pullback.condition).trans <|
+            (Category.assoc _ _ _).symm.trans <|
+            (congrArg (· ≫ σ) pullback.condition).trans <|
+            (Category.assoc _ _ _).trans <|
+            (congrArg (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
+              pullback.condition.symm).trans <|
+            (Category.assoc _ _ _).symm)
       = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
-          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left := by
-    apply Over.tensorObj_ext
-    · exact (Category.assoc _ _ _).trans <|
-        (congrArg (_ ≫ ·) (pullback.lift_fst _ _ _)).trans <|
+          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left :=
+    Over.tensorObj_ext (S := E.asOver) (T := E.asOver) _ _
+      ((Category.assoc _ _ _).trans <|
+        (congrArg ((lift ((E.baseChange σ).pointEquivOverHom t x)
+            ((E.baseChange σ).pointEquivOverHom t y)).left ≫ ·)
+          (pullback.lift_fst _ _ _)).trans <|
         (Category.assoc _ _ _).symm.trans <|
-        (congrArg (· ≫ pullback.fst E.π σ)
-          ((congrArg CommaMorphism.left (lift_fst _ _)).trans (Over.homMk_left _))).trans <|
-        ((congrArg CommaMorphism.left (lift_fst _ _)).trans (Over.homMk_left _)).symm
-    · exact (Category.assoc _ _ _).trans <|
-        (congrArg (_ ≫ ·) (pullback.lift_snd _ _ _)).trans <|
+        (congrArg (· ≫ pullback.fst E.π σ) hbx).trans <|
+        hSx.symm)
+      ((Category.assoc _ _ _).trans <|
+        (congrArg ((lift ((E.baseChange σ).pointEquivOverHom t x)
+            ((E.baseChange σ).pointEquivOverHom t y)).left ≫ ·)
+          (pullback.lift_snd _ _ _)).trans <|
         (Category.assoc _ _ _).symm.trans <|
-        (congrArg (· ≫ pullback.fst E.π σ)
-          ((congrArg CommaMorphism.left (lift_snd _ _)).trans (Over.homMk_left _))).trans <|
-        ((congrArg CommaMorphism.left (lift_snd _ _)).trans (Over.homMk_left _)).symm
+        (congrArg (· ≫ pullback.fst E.π σ) hby).trans <|
+        hSy.symm)
   show (x + y).1 ≫ pullback.fst E.π σ = _
   rw [hR]
   exact (congrArg (· ≫ pullback.fst E.π σ) hx).trans <|

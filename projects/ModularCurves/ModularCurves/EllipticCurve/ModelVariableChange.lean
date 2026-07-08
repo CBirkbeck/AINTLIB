@@ -2372,6 +2372,50 @@ private lemma witness_eq_V' {W W' : WeierstrassCurve R}
   refine (hrearr _ _ _).trans ?_
   exact congrArg₂ (· * ·) (hclear.trans hdictB) rfl
 
+private lemma witness_res_unit_root {W W' : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W')
+    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
+    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (v : (↑Γ(projModel W, (projModel W).basicOpen r))ˣ)
+    (hv : pointedIsoChartTransport e hr (AdjoinRoot.root (infChartCubic W')) =
+      ↑v * ((((projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le r)).op).hom)
+        ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))) :
+    pointedIsoChartTransport e
+        ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+          (infChartTElem W))).le.trans (witness_V_le_chartYPreimage e hr))
+        (AdjoinRoot.root (infChartCubic W')) =
+    (((projModel W).presheaf.map (homOfLE ((Scheme.basicOpen_mul (projModel W) r
+        ((chartYSectionsRingEquiv W).symm (infChartTElem W))).le.trans
+        inf_le_left)).op).hom) ↑v *
+    (((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le
+        (r * (chartYSectionsRingEquiv W).symm (infChartTElem W)))).op).hom)
+      ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))) := by
+  have hres := pointedIsoChartTransport_res e hr
+    ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+      (infChartTElem W))).le.trans inf_le_left)
+    (AdjoinRoot.root (infChartCubic W'))
+  refine hres.symm.trans ?_
+  refine (congrArg (((projModel W).presheaf.map (homOfLE
+    ((Scheme.basicOpen_mul (projModel W) r ((chartYSectionsRingEquiv W).symm
+      (infChartTElem W))).le.trans inf_le_left)).op).hom) hv).trans ?_
+  refine (map_mul _ _ _).trans ?_
+  refine congrArg₂ (· * ·) rfl ?_
+  have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
+    ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
+    (((projModel W).presheaf.map_comp
+      (homOfLE ((projModel W).basicOpen_le r)).op
+      (homOfLE ((Scheme.basicOpen_mul (projModel W) r
+        ((chartYSectionsRingEquiv W).symm (infChartTElem W))).le.trans
+        inf_le_left)).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
+  refine hfuse.trans ?_
+  exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
+    ((chartYSectionsRingEquiv W).symm (AdjoinRoot.root (infChartCubic W))))
+    (Subsingleton.elim _ _)
+
 /-- **The per-prime witness** (b2 endgame): given the transported criterion data on `W'`,
 every maximal containing `t` admits a `c ∉ P` making the `W`-criterion element locally
 integral. The proof restricts the transported overlap equation to the division-pack basic

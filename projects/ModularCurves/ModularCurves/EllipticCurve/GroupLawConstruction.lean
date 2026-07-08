@@ -878,8 +878,10 @@ theorem mulOver_left : (mulOver W).left = mulModelHom W := by
 morphism is the structure map of the monoidal unit followed by the zero section; the `Over`
 compatibility is `zero ≫ π = 𝟙` (`projModelZero_projModelπ`). -/
 noncomputable def oneOver : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W :=
-  Over.homMk ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W)
-    (by rw [Category.assoc, projModelZero_projModelπ, Category.comp_id])
+  Over.homMk ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W) <| by
+    show ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W) ≫ projModelπ W =
+      (𝟙_ (Over (Spec (CommRingCat.of R)))).hom
+    rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]
 
 /-- **(T-W7.0g-one-left)** The underlying morphism of the unit is the zero section
 (precomposed with the structure map of the monoidal unit). -/
