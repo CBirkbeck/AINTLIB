@@ -8335,7 +8335,10 @@ FAST-BOARD). The pinned COH-1 criterion package (GME 1.10.4 / Cor 1.10.5 / p. 82
   (PullbackFree.lean needs `[F.Final]`) → T-PIC1a/T-PIC1d. Upstream candidate
   (topology/category glue). Parent: T-PIC1a · **Claimed**: fable-PIC0 · Status: in_progress
 
-## Amendments v10.31 (2026-07-08): p0 / [T-G3d-infra] — interface LANDED; construction decomposed into 4 pieces
+## Amendments v10.31b (2026-07-08): p0 / [T-G3d-infra] — interface LANDED; construction decomposed into 4 pieces
+<!-- renumbered v10.31→v10.31b: fable-P4's concurrent commit 36a235bf swept this append together
+     with their own v10.31 (the `git add tickets.md` clobber); letter-suffix per the v10.28b convention. -->
+
 
 *p0 executing the v10.29 dispatch (build the quotient-by-finite-locally-free-subgroup-scheme layer on
 p2's glue-data pattern; new files only; v10.24(b) opaque interface same increment). Beastmode continues.*

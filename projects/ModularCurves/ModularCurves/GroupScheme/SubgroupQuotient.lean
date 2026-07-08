@@ -91,6 +91,47 @@ theorem quotientπ_hom_ext (G : FiniteLocallyFreeSubgroup E) {Y : Scheme.{u}}
 
 end FiniteLocallyFreeSubgroup
 
+/-! ### The leading example: `E/E[N]` and the factored `[N]`
+
+The quotient isogeny `π : E ⟶ E/E[N]` receives `[N] : E ⟶ E`: since `[N]` kills `E[N]`, it is
+invariant under translation by `E[N]`, so it factors uniquely as `π ≫ q` with `q : E/E[N] ⟶ E`.
+That `q` is an isomorphism — `E/E[N] ≅ E`, the content of KM 2.7's `[N]`-isogeny picture — is the
+degree-fact half (`deg[N] = N² = rank E[N]`), tracked separately as `T-G3d-Niso`; the factored map
+itself lands here against the interface. -/
+
+variable (E) in
+/-- **(T-G3d)** `[N] : E ⟶ E` is invariant under translation by the `N`-torsion subgroup scheme
+`E[N]`: for a `T`-point `x` and an `N`-torsion `T`-point `t`, `[N](x + t) = [N]x + [N]t = [N]x`,
+because `t ∈ E[N]` means exactly `N • t = 0`. -/
+theorem mulByHom_torsionSubgroup_isInvariant (N : ℕ) [NeZero N] :
+    (E.torsionSubgroup N).IsInvariant (E.mulByHom (N : ℤ)) := by
+  intro T g x t ht
+  rw [E.torsionSubgroup_pointSubgroup, Submodule.mem_toAddSubgroup,
+    Submodule.mem_torsionBy_iff] at ht
+  have h1 : ((N : ℤ) • (x + t) : E.Point g).1 = (x + t).1 ≫ E.mulByHom (N : ℤ) :=
+    E.point_smul_eq_comp_mulBy g (N : ℤ) (x + t)
+  have h2 : ((N : ℤ) • x : E.Point g).1 = x.1 ≫ E.mulByHom (N : ℤ) :=
+    E.point_smul_eq_comp_mulBy g (N : ℤ) x
+  rw [← h1, ← h2, smul_add, ht, add_zero]
+
+variable (E) in
+/-- **(T-G3d, factored map)** The map `E/E[N] ⟶ E` through which `[N] : E ⟶ E` factors: the
+unique lift of the `E[N]`-invariant `[N]` across the quotient isogeny `π : E ⟶ E/E[N]`
+(`quotient_lift` applied to `mulByHom_torsionSubgroup_isInvariant`). `E/E[N] ≅ E` — that this
+map is an isomorphism — is `T-G3d-Niso` (degree facts). -/
+noncomputable def torsionQuotientToSelf (N : ℕ) [NeZero N] :
+    (E.torsionSubgroup N).quotient ⟶ E.E :=
+  ((E.torsionSubgroup N).quotient_lift (E.mulByHom (N : ℤ))
+    (E.mulByHom_torsionSubgroup_isInvariant N)).choose
+
+variable (E) in
+/-- The factored map recovers `[N]`: `π ≫ (E/E[N] ⟶ E) = [N]`. This is the defining property of
+`torsionQuotientToSelf`; `quotientπ_hom_ext` makes it the *unique* such map. -/
+theorem torsionQuotientπ_comp_toSelf (N : ℕ) [NeZero N] :
+    (E.torsionSubgroup N).quotientπ ≫ E.torsionQuotientToSelf N = E.mulByHom (N : ℤ) :=
+  ((E.torsionSubgroup N).quotient_lift (E.mulByHom (N : ℤ))
+    (E.mulByHom_torsionSubgroup_isInvariant N)).choose_spec.1
+
 end EllipticCurve
 
 end ModularCurves
