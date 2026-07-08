@@ -5017,8 +5017,16 @@ stack-packaging (T-E8). Tickets are lane-tagged for the streams that own the rel
 - **[T-W7.0g]** the group axioms over every ring — `mulOver`/`oneOver`/`invOver` (+`_left`
   pins), `mulOver_assoc`, `oneOver_mulOver`, `mulOver_oneOver`, `mulOver_comm`,
   `invOver_mulOver` (GroupLawConstruction.lean:≈200–253).
-  - **Status**: blocked · **Depends**: T-W7.0c-iii, T-W7.0e, T-W7.0a · **Type**: 3 defs +
-    8 lemmas
+  - **Status**: partially done (inv/identity half) · **Claimed**: beastmode-B (lane P0),
+    2026-07-08. **DONE (axiom-clean, in HEAD)**: `invOver` (`= Over.homMk (negModelHom W)
+    negModelHom_π`), `invOver_left` (`rfl`), `oneOver` (`= Over.homMk ((𝟙_).hom ≫ projModelZero W)`
+    via `projModelZero_projModelπ`; obligation needs a `show` to reduce `(modelOver W).hom →
+    projModelπ W` — the `modelOver` abbrev stays folded under `instances` transparency so a bare
+    `rw` misses it), `oneOver_left` (`rfl`). These build ONLY on the finished P0 pieces
+    (`negModelHom`/`_π`, `projModelZero_projModelπ`), independent of the blocked mul side.
+    **STILL BLOCKED** (needs `mulModelHom` from 0c-ii/iii): `mulOver`, `mulOver_left`,
+    `mulOver_assoc`, `oneOver_mulOver`, `mulOver_oneOver`, `mulOver_comm`, `invOver_mulOver`.
+    · **Depends**: T-W7.0c-iii, T-W7.0e, T-W7.0a · **Type**: 3 defs + 8 lemmas
   - Sketch: universal case by `hom_ext_of_forall_specPoint` + reducedness instances +
     specPoints lemmas + mathlib `Point.instAddCommGroup` over `κ`; general `R` by
     instantiating `mulModelHom_map` along `classifyRingHom` (+ one-liner unit/inv
