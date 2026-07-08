@@ -89,30 +89,6 @@ theorem subgroupAlgebra_finite :
       ((E.subgroupStructMap D).finite_app ⊤ (isAffineOpen_top _))
   exact h
 
-/-- **(Layer B, L3 — the comultiplication.)** `Δ = m^♯ : A →ₐ[R] A ⊗_R A`, the Hopf-dual of the
-group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: pull back regular
-functions along `m`, landing in `Γ(D ×_{Spec R} D) ≅ A ⊗_R A` (via `Scheme.isoSpec` +
-`AlgebraicGeometry.pullbackSpecIso`). Coassociativity dualizes associativity of `m`. -/
-noncomputable def subgroupComul (hD : D.IsSubgroup E) :
-    letI := E.subgroupAlgebra D
-    Γ(D.ideal.subscheme, ⊤) →ₐ[R]
-      TensorProduct R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) := by
-  sorry
-
-/-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
-`subgroupUnit` (`e : S ⟶ D`). Counit laws dualize the unit laws of the group scheme. -/
-noncomputable def subgroupCounit (hD : D.IsSubgroup E) :
-    letI := E.subgroupAlgebra D
-    Γ(D.ideal.subscheme, ⊤) →ₐ[R] R := by
-  sorry
-
-/-- **(Layer B, L3 — the antipode.)** `antipode : A →ₐ[R] A`, the Hopf-dual of the inversion
-`subgroupInv` (`n : D ⟶ D`). The antipode laws dualize the inverse laws of the group scheme. -/
-noncomputable def subgroupAntipode (hD : D.IsSubgroup E) :
-    letI := E.subgroupAlgebra D
-    Γ(D.ideal.subscheme, ⊤) →ₐ[R] Γ(D.ideal.subscheme, ⊤) := by
-  sorry
-
 /-- **(Layer B, affine core.)** The box `smul_eq_zero_of_factors` over an *affine* base
 `Spec R`, with the point taken as a section `Q : E.Section`: a subgroup divisor `D` of constant
 degree `N` kills every section factoring through it. This is where Deligne's abstract theorem
@@ -214,6 +190,60 @@ theorem subgroupInv_subschemeι :
   (E.exists_factor_inv hD).choose_spec
 
 end GroupObject
+
+section AffineHopf
+
+variable {R : Type u} [CommRing R] (E : EllipticCurve (Spec (CommRingCat.of R)))
+  {D : RelEffCartierDiv E.π}
+
+/-- **(Layer B, L3 — the comultiplication.)** `Δ = m^♯ : A →ₐ[R] A ⊗_R A`, the Hopf-dual of the
+group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: pull back regular
+functions along `m`, landing in `Γ(D ×_{Spec R} D) ≅ A ⊗_R A` (via `Scheme.isoSpec` +
+`AlgebraicGeometry.pullbackSpecIso`). Coassociativity dualizes associativity of `m`. -/
+noncomputable def subgroupComul (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R]
+      TensorProduct R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) := by
+  sorry
+
+/-- The unit section `e` is a section of the structure map: `e ≫ (subschemeι ≫ π) = 𝟙 S`
+(the zero point lies over the identity of the base). -/
+theorem subgroupUnit_structMap (hD : D.IsSubgroup E) :
+    E.subgroupUnit hD ≫ E.subgroupStructMap D = 𝟙 (Spec (CommRingCat.of R)) := by
+  show E.subgroupUnit hD ≫ (D.ideal.subschemeι ≫ E.π) = 𝟙 _
+  rw [← Category.assoc, E.subgroupUnit_subschemeι hD]
+  exact (0 : E.Point (𝟙 (Spec (CommRingCat.of R)))).2
+
+/-- **(Layer B, L3 — the counit.)** `ε : A →ₐ[R] R`, the Hopf-dual of the unit section
+`subgroupUnit` (`e : S ⟶ D`). Concretely `ε = Γ(e)` followed by `Γ(Spec R, ⊤) ≅ R`; it is
+`R`-linear because `e` is a section of the structure map (`subgroupUnit_structMap`). Counit laws
+dualize the unit laws of the group scheme. -/
+noncomputable def subgroupCounit (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R] R :=
+  letI := E.subgroupAlgebra D
+  { ((E.subgroupUnit hD).appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).hom).hom with
+    commutes' := fun r => by
+      have hcomp :
+          ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop) ≫
+            ((E.subgroupUnit hD).appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).hom) =
+            𝟙 (CommRingCat.of R) := by
+        rw [Category.assoc, ← Category.assoc (E.subgroupStructMap D).appTop,
+          ← Scheme.Hom.comp_appTop,
+          show E.subgroupUnit hD ≫ E.subgroupStructMap D = 𝟙 _ from E.subgroupUnit_structMap hD]
+        simp
+      show ((E.subgroupUnit hD).appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of R)).hom).hom
+        (((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.subgroupStructMap D).appTop).hom r) = r
+      rw [← CommRingCat.comp_apply, hcomp, CommRingCat.id_apply] }
+
+/-- **(Layer B, L3 — the antipode.)** `antipode : A →ₐ[R] A`, the Hopf-dual of the inversion
+`subgroupInv` (`n : D ⟶ D`). The antipode laws dualize the inverse laws of the group scheme. -/
+noncomputable def subgroupAntipode (hD : D.IsSubgroup E) :
+    letI := E.subgroupAlgebra D
+    Γ(D.ideal.subscheme, ⊤) →ₐ[R] Γ(D.ideal.subscheme, ⊤) := by
+  sorry
+
+end AffineHopf
 
 section GeneralBase
 
