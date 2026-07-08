@@ -195,6 +195,19 @@ section GeneralBase
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
+/-- **(Layer B, L1 intermediate — section over a general base.)** The box for a *section*
+`Q : E.Section` over an arbitrary base `S` (not yet assumed affine). Reduces to the affine core
+`smul_eq_zero_of_factors_affine` by covering `S` with affine opens and using locality of morphism
+equality on `S` (`(N : ℤ) • Q = 0 ↔ (N • Q).1 = 0.1 : S ⟶ E.E`, checkable on an affine cover; each
+restriction is handled by the affine core after `Scheme.isoSpec`). The general box
+`smul_eq_zero_of_factors'` in turn reduces to *this* by base-changing along `g : T ⟶ S`
+(`Point.asSection`, `RelEffCartierDiv.IsSubgroup.baseChange`). -/
+theorem smul_eq_zero_of_factors_section {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) {N : ℕ}
+    [NeZero N] (hdeg : ∀ s : S, D.degree s = N) (Q : E.Section)
+    (hQ : ∃ h : S ⟶ D.ideal.subscheme, h ≫ D.ideal.subschemeι = Q.1) :
+    (N : ℤ) • Q = 0 := by
+  sorry
+
 /-- **(Layer B, L1 + assembly — the box.)** Deligne's order theorem in the project's
 subgroup-divisor encoding, over an arbitrary base `S` and for an arbitrary `T`-point `Q`
 (the statement of `RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors`,
