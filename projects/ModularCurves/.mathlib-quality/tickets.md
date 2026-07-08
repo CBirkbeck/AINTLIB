@@ -6295,7 +6295,7 @@ Do NOT re-staff N≤2 non-rigidity (T-H7) — v9.4.
   **Depends**: T-A8 · **Type**: structure + equivalence theorem · **Sources**: reviewer v9.
   Distinct from the DONE universal atlas `Moduli/WeierstrassAtlas.lean` (that is the universal
   U; this is the per-curve local-Weierstrass witness data).
-- **[T-D33] `subgroup-divisor-locus`** (Q — incidence-centre completion). **CLAIMED beastmode-A 2026-07-08 (v10.23): assessing vs already-done `exists_subgroupLocus`/`exists_exactOrderLocus`; adding the section-level exact-order locus (L3/L4 consumer).** The closed locus where
+- **[T-D33] `subgroup-divisor-locus`** — **DONE, axiom-clean (beastmode-A 2026-07-08).** The literal deliverable (representability of `RelEffCartierDiv.IsSubgroup` as a closed subscheme) is `exists_subgroupLocus` (T-D16, KM 1.3.7, already proven; #print axioms [propext, Classical.choice, Quot.sound]); the E[N]-universal Γ₁ form is `exists_exactOrderLocus` (T-D17, proven). ADDED the missing section-level cut `exists_exactOrderLocus_section` (Incidence.lean): closed `Z ⊆ S` universal for 'section `P` has exact order `N`', the direct Γ₁-exact-order-over-base condition for a given section — via `exists_subgroupLocus` at `Σₐ[aP]` + `orderDivisor_baseChange` (T-D6a-ii L3). Axiom-clean. Incidence-centre completion: all five centres now exist (incidenceLE=T-D14, incidenceEQ=T-D15, subgroupLocus=T-D16, exactOrderLocus=T-D17+section-form, A-repr=T-D21). The closed locus where
   a relative effective Cartier divisor `D` is a **subgroup divisor** (representability of
   `RelEffCartierDiv.IsSubgroup` as a closed subscheme). Needed to cut out the Γ₁ exact-order
   condition over U. **Lane**: D · **Depends**: T-D14/T-D15 · **Type**: representability theorem ·
