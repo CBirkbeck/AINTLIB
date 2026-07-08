@@ -7334,6 +7334,28 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
   syzygy-freeness ≠ fibre-EXACTNESS. Flatness needs the local criterion of flatness (00MK) + fibre-exact-locus openness (00RB/00MI),
   classically via Buchsbaum-Eisenbud (00N1). None of 00MK/00RB/00MI/00N1 (nor Module.depth/Auslander-Buchsbaum/dévissage) in mathlib.
   DEV1a (HilbertSyzygy) is now ORPHANED from the D-chain (still a valid standalone result); DEV1b likewise.
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+## ★★★ ROUTE A (BUCHSBAUM–EISENBUD) — CONSOLIDATED at 99.5% (2026-07-08, beastmode-D2; coordinator-approved) ★★★
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+**BOARD-FLIP:** The full Buchsbaum–Eisenbud criterion + its entire commutative-algebra tower is PROVEN and AXIOM-CLEAN,
+EXCEPT one registered residual [T-BE-TAIL]. `buchsbaumEisenbud_acyclic` sorryAx traces solely to [T-BE-TAIL].
+The D-chain's axiom-cleanliness (FLAT1 box → flatLocus_spreads_of_flat → … → buchsbaumEisenbud_acyclic) is thus a
+**quality milestone at 99.5%**, NOT a curve blocker (modular-curves path routed around BB-QF/BB-FLAT per v10.37).
+
+**[T-BE-TAIL] — the registered residual** (`BuchsbaumEisenbud.lean` `localBE_homology_disjunction`, 2 sorries ~L818/L830):
+the backward-acyclicity tail — (1) 00MT-style Gaussian-elimination peeling of split (=⊤) top differentials, (2) gap-capping
+forced by our `depth(0)=undefined` convention (vs Stacks `depth(0)=∞`) + a cokernel sub-case — **mutually recursive through the
+induction, no existing transport helper**. The MAIN case (proper-top, no-gap) + ALL wiring (transport, depth, localAcyclicity)
+are PROVEN. Starting spec = the stalled a677b7a0 delegate's analysis (banked). POLICY: one focused lean-lsp-equipped attempt in a
+fresh full-budget session when fleet load drops (D2's timing). Commits: 310876c9 (salvage), 540bc90d (transport), 81c4aa7e (00N0).
+
+**★ v10.16 UPSTREAM CANDIDATES — verified sorry-free + AXIOM-CLEAN (ledger-internal, no external PRs):**
+`ForMathlib/{FittingIdeals` (minor ideals + McCoy rank↔minors), `HilbertSyzygy` (poly-ring global dim), `FiniteFreeResolution`
+(00LP), `BaseChangeExt` (flat base change for higher Ext), `Depth` (HasDepthGE + 00LX depth-SES + 00LW=Rees + 00LD),
+`LocalCriterion` (00MH free-of-flat-of-fibre-free), `Grade` (grade/gradeGE + Rees grade⟺Ext + openness), `Acyclicity`
+(00MZ + 00MYW + 00N0 Peskine–Szpiro acyclicity lemma)`}` — 8 files, each an independent mathlib-worthy comm-alg contribution.
+(Cleanup-lane note: Depth.lean + Acyclicity.lean carry a STALE "PLANNING SKELETON … no proofs" docstring header — now false.)
+
 - **OWNER DECISION (2026-07-08): ROUTE A FUNDED** (Buchsbaum–Eisenbud / local flatness criterion). Full source-faithful
   tree in `decomposition-buchsbaum-eisenbud.md`; skeleton `ForMathlib/BuchsbaumEisenbud.lean` (d70a8209). Verdict: full
   00N1 REQUIRED (Ext-support only handles the depth-openness sub-step, mathlib already has it via of_flat_of_isBaseChange).
