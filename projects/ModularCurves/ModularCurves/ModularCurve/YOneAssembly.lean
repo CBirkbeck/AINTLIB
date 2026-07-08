@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.ForMathlib.GeometricFibreComparison
 import Mathlib.NumberTheory.Divisors
 
 /-!
@@ -177,6 +178,21 @@ lemma isUnit_tateA₃ : IsUnit (tateCurveLocOver R).a₃ := by
     simp [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
   rw [h]; exact isUnit_algebraMap_tateB R
 
+/-- `a₂` of the atlas curve is a unit (`= B`; Tate normal form `a₂ = a₃`, both the atlas marking). -/
+lemma isUnit_tateA₂ : IsUnit (tateCurveLocOver R).a₂ := by
+  have h : (tateCurveLocOver R).a₂ =
+      algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1) := by
+    simp [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
+  rw [h]; exact isUnit_algebraMap_tateB R
+
+/-- `a₄` of the atlas curve vanishes (Loeffler's Tate form `Y² + AXY + BY = X³ + BX²`). -/
+lemma tateA₄_eq_zero : (tateCurveLocOver R).a₄ = 0 := by
+  simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
+
+/-- `a₆` of the atlas curve vanishes (so the marked point `(0, 0)` lies on the curve). -/
+lemma tateA₆_eq_zero : (tateCurveLocOver R).a₆ = 0 := by
+  simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
+
 /-- The base of the marked Tate atlas: `𝒴 = Spec R[A, B][∆⁻¹]` (Loeffler's `Y`, Def 3.3.6). -/
 noncomputable def tateBase : Scheme.{u} :=
   Spec (CommRingCat.of (tateRingOver R))
@@ -321,6 +337,11 @@ private lemma eqToHom_toGeom_π {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom 
     eqToHom (congrArg EllipticCurveGeom.E h).symm ≫ G₁.π = G₂.π := by
   subst h; simp
 
+/-- Transport compatibility, `hπ`-orientation: `G₁.π = eqToHom (E-bridge) ≫ G₂.π`. -/
+private lemma eqToHom_toGeom_π' {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom S} (h : G₁ = G₂) :
+    G₁.π = eqToHom (congrArg EllipticCurveGeom.E h) ≫ G₂.π := by
+  subst h; simp
+
 /-- The total space of `tateUniversal` is the projective atlas model (through the bridge). -/
 lemma tateUniversal_E_eq : (tateUniversal R).E = projModel (tateCurveLocOver R) :=
   congrArg EllipticCurveGeom.E (tateUniversal_geom R)
@@ -330,6 +351,13 @@ lemma tateUniversal_eqToHom_π :
     eqToHom (tateUniversal_E_eq R).symm ≫ (tateUniversal R).π
       = projModelπ (tateCurveLocOver R) :=
   eqToHom_toGeom_π (tateUniversal_geom R)
+
+/-- The atlas `π` written with the bridge on the *other* side (the `hπ` datum of
+`geomFibrePointAddEquiv`/`pointSpecPointsEquiv`): `π = eqToHom hE ≫ projModelπ`. -/
+lemma tateUniversal_π_eq :
+    (tateUniversal R).π
+      = eqToHom (tateUniversal_E_eq R) ≫ projModelπ (tateCurveLocOver R) :=
+  eqToHom_toGeom_π' (tateUniversal_geom R)
 
 /-- **The marked point `P₀ = (0,0)`** of the universal Tate curve `tateUniversal R`, transported
 from the projective-model chart construction across the `tateUniversal_geom` bridge. This is the
