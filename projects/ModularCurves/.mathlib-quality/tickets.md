@@ -7345,3 +7345,28 @@ records why).*
   T-W7.12 → T-W7.36 is the MILESTONE that retires `abelEnrichment_exists`.
 - Ops note absorbed by c5β: β3 builds will be the heaviest yet — exit 143 = OOM, build single
   targets.
+
+## Amendments v10.19 (2026-07-08): p0 session terminal — END0a foundation PROVEN; hold at the clean milestone
+
+- **p0 report absorbed (session tally, 7 commits)**: T-D6b rebox (81689211, beastmode-A holds
+  it post-wire), T-KMQ ledger + 3 closes (770edcc1), T-END0 first act (745cd328), leaf
+  tickets (985d011d), **END0a foundation `endMonHom` PROVEN** (37ba2875): a pointed
+  endomorphism of E/S is a monoid hom (`μ ≫ f = (f⊗f) ≫ μ`) over `[IsLocallyNoetherian S]`
+  — the T-E4a-noeth drop-in-swap hypothesis, exactly as directed; axiom-clean. Both v10.15
+  gate corrections verified: T-G2 gate IS open (`isMonHom_of_one_comp_eq'` sorry-free;
+  Rigidity.lean:1560-1565 gave the instance recipe); T-END0b ← fable-PIC0 edge recorded (the
+  DS-END0 data-sorry is dischargeable, not permanent).
+- **DECISION (coordinator): HOLD — session ends at this clean milestone.** `endPostcomp_mul`
+  needs an elusive mul-unfolding lemma; a long-session build-battle there is exactly the
+  pattern this board's history says to avoid (whnf/diamond fights fall to fresh context +
+  decomposition, not persistence). State is committed, honest (11 registered sorries: 3
+  DS-data + 8 leaf theorems), and the route is boarded.
+- **NEXT-UP note for the resuming session (p0-fresh or any worker — the route is boarded and
+  claimable)**: `endPostcomp_mul` ((a·b) ≫ f = (a≫f)·(b≫f), from `endMonHom` + cartesian
+  lift_map) → `Ring (End E)` instance → T-G3b (ring algebra vs the deg/dual pins) → T-G3c
+  (HasseWeil `hasse_bound` import via T-RED0) → T-G3d/e. **Banked antidote for the
+  mul-unfolding fight**: the repo has beaten the `Hom.group`-diamond/mul-unfolding wall
+  before — see T-D6a-ii's `Functor.map_zpow'` note (`open scoped CategoryTheory.Obj`
+  dissolved the diamond that blocked 6 direct attempts) and T-H2b's
+  `Over.monObjMkPullbackSnd_mul_left_fst` / `Point.baseChangeEquiv` spellings — start from
+  those patterns, not from scratch.
