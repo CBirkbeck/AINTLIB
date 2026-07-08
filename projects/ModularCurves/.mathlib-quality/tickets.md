@@ -6739,3 +6739,38 @@ sorry sits precisely on 3.8.2).
   ⟹ fibrewise-elliptic comparison), T-H7b-i (point separation along field extensions), and the
   **T-W7.7/T-W7b canonicity milestone** (Rigidity.lean sorry-free, GIT 6.1→6.6 end-to-end) — the
   input that made T-E4a-noeth possible.
+
+### v10.10 NEW STREAM for a fresh worker (2026-07-08): the invertible-N étale bottleneck — [T-B5D] + [T-DISC]
+- **Why now**: reviewer v9 work-order **#4** ("discharge the invertible-N torsion/étale
+  bottleneck — BB-DIFF or its local substitute — BEFORE BB-DELIGNE") has been UNSTAFFED since
+  beastmode-B's T-B5z claim release (v9.3). Consumers: T-B5 ([N] étale ⟹ E[N] finite étale) →
+  the T-B6-consuming fibre chain → the T-D8-bridge box → **T-E7 Y₁(N) MILESTONE**; also
+  T-D6c / T-D7-bridge (KM 1.4.4 (3)⟺(4)) and T-B7's étale spec.
+- **[T-B5D] BB-DIFF discharge, commissioned as its own multi-session stream** (exactly per
+  beastmode-B's recommendation in the v9.3 T-B5z finding): target
+  `mulByHom_formallyUnramified` (the BB-DIFF sorry). Route of record = the
+  **ψ_N-separability bridge**, the most self-contained mathlib-aligned route per the banked
+  finding: `FormallyUnramified` reduces to `Subsingleton Ω[coordinateRing⁄base]` via
+  `HasRingHomProperty.Spec_iff` + `Algebra.formallyUnramified_iff`; the reusable partial
+  `FormallyUnramified (torsionπ N) → FormallyUnramified (mulByHom N)` (group
+  infinitesimal-lifting) is banked self-contained/buildable — a good first landing.
+  beastmode-B's fuller route analysis lived at `scratchpad/tb5z_architecture.md` and may be
+  session-ephemeral — if absent, the v9.3 finding IS the spec. **Do NOT re-litigate the mapped
+  dead ends** (no invariant differential in mathlib; categorical-[N] ⟷ chart-[N] comparison is
+  T-W7 scope). **First act (binding, v10.8): `/develop --decompose`** — sources ([Sil], [KM] 2.3)
+  pinned with verbatim quotes at decompose time, never from memory.
+- **[T-DISC] flf ⟺ discriminant étale criterion** (beastmode-P2's banked substrate piece, see
+  "KM-text gate: evidence-based re-assessment" above): the general "finite locally free
+  morphism is étale ⟺ all geometric fibres étale (⟺ discriminant a unit)" layer, as
+  ForMathlib. Substrate, not a ticket-closer — but it is what T-D6c/T-D7-bridge sit on.
+  Re-check T-B7's étale-spec state at pickup. Same `/develop` discipline.
+- **FILE DISCIPLINE**: new ForMathlib/bridge files only — `GroupLawConstruction.lean`,
+  `Torsion.lean` and the W7 files are held by active workers.
+- **Runner-up big streams for ADDITIONAL fresh workers** (priority order):
+  (1) **T-PIC0 + COH-1** — Pic of a scheme + GME 1.10.4 cohomology-and-base-change;
+  owner-sanctioned parallel de-black-boxing (2026-07-05 directive), T-PIC0 explicitly
+  unclaimed; COH-3 = coordinate with the mathlib lane (#36345/#36218), don't build.
+  (2) **T-IRR0** — the KM Ch. 10 algebraic route to geometric irreducibility is NOW readable
+  (gate lifted); late-phase but owner-directed to plan in parallel.
+  (3) **T-Q2 proofs** (A7.1.1/A7.1.2, InvariantTorsor.lean) — OWNER ACTION first: add SGA III
+  Exp. V to `refs/ModularCurves/` (the named proof source).
