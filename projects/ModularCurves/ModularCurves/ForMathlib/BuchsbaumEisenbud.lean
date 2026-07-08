@@ -504,6 +504,23 @@ private theorem injective_of_maxMinors_nonZeroDiv {S : Type*} [CommRing S] {n m 
       (Submodule.mem_annihilator_span_singleton x 1).mp (hsub (htop ▸ Submodule.mem_top))
     simpa using h1
 
+/-- **[Piece 3, proper-ideal core — grade⟹depth localised].**  If an ideal `I ⊆ S` has grade `≥ k`
+and `I ⊆ 𝔮` for a prime `𝔮`, then `depth(S_𝔮) ≥ k`.  Localising the length-`k` regular sequence
+(`Ideal.gradeGE_localize`) it stays a regular sequence in `I·S_𝔮 ⊆ 𝔪(S_𝔮)` (the unit-ideal disjunct
+is excluded because `I ⊆ 𝔮`), i.e. a regular sequence witnessing `HasDepthGE S_𝔮 S_𝔮 k`.  This is
+"a regular sequence in a proper ideal of a local ring lies in `𝔪`", the non-split half of Stacks
+00N1's `depth(R) ≥ e`. -/
+private theorem hasDepthGE_localization_of_gradeGE {S : Type*} [CommRing S] [IsNoetherianRing S]
+    (I : Ideal S) (k : ℕ) (hI : I.gradeGE k) (q : Ideal S) [q.IsPrime] (hIq : I ≤ q) :
+    Module.HasDepthGE (Localization.AtPrime q) (Localization.AtPrime q) k := by
+  have hle : I.map (algebraMap S (Localization.AtPrime q)) ≤
+      IsLocalRing.maximalIdeal (Localization.AtPrime q) := by
+    rw [← Localization.AtPrime.map_eq_maximalIdeal]; exact Ideal.map_mono hIq
+  rcases Ideal.gradeGE_localize I q.primeCompl k hI with hg | htop
+  · obtain ⟨rs, hlen, hreg, hmem⟩ := hg
+    exact ⟨rs, hlen, hreg, fun x hx => hle (hmem x hx)⟩
+  · exact absurd (top_le_iff.mp (htop ▸ hle)) (IsLocalRing.maximalIdeal.isMaximal _).ne_top
+
 /-- **00N0 wrapper — single-block case.**  For a finite free complex over a local Noetherian ring
 that is a *single block* `[0, e)` (`rk j ≠ 0` exactly for `j < e`) with `depth L ≥ e - 1` (the top
 index), the acyclicity lemma applies verbatim at any interior spot `i`: exact at `F_{i+1}`, or its
@@ -525,6 +542,28 @@ private theorem localAcyclicity_block {L : Type*} [CommRing L] [IsLocalRing L] [
     exact ⟨fun a b => funext fun x => isEmptyElim x⟩
   · exact Module.hasDepthGE_pi_of_hasDepthGE L (Nat.pos_of_ne_zero (hnz j (by omega))) j
       (Module.hasDepthGE_mono L hdepthL (by omega))
+
+/-- **[Piece 1, no-gap shift].**  Reduces the interior spot `i` to spot `0` by re-indexing
+`k ↦ i + k`: since `i + (k+1) ≡ (i+k)+1` and `i + 0 ≡ i` *definitionally*, the shifted complex
+`k ↦ φ (i+k)` needs no casts and its spot-`0` homology is *definitionally* the spot-`i` homology of
+`φ`.  If the block above `i` reaches the top with no gap (`rk j ≠ 0` for `i ≤ j < e`) and
+`depth L ≥ e - i - 1`, `localAcyclicity_block` applies to the shift. -/
+private theorem localAcyclicity_shift {L : Type*} [CommRing L] [IsLocalRing L] [IsNoetherianRing L]
+    (e : ℕ) (rk : ℕ → ℕ) (hrk : ∀ j, e ≤ j → rk j = 0)
+    (φ : (j : ℕ) → (Fin (rk (j + 1)) → L) →ₗ[L] (Fin (rk j) → L))
+    (hcomplex : ∀ j, (φ j) ∘ₗ (φ (j + 1)) = 0)
+    (i : ℕ) (hie : i + 1 < e)
+    (hnz : ∀ j, i ≤ j → j < e → rk j ≠ 0)
+    (hdepthL : Module.HasDepthGE L L (e - i - 1))
+    (habove : ∀ j, i < j → Function.Exact (φ (j + 1)) (φ j)) :
+    Function.Exact (φ (i + 1)) (φ i) ∨
+      Module.HasDepthGE L (LinearMap.ker (φ i) ⧸
+        (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype) 1 := by
+  have key := localAcyclicity_block (L := L) (e - i) (fun k => rk (i + k))
+    (fun k hk => hrk (i + k) (by omega)) (fun k hk => hnz (i + k) (by omega) (by omega))
+    (fun k => φ (i + k)) (fun k => hcomplex (i + k)) hdepthL 0 (by omega)
+    (fun k hk => habove (i + k) (by omega))
+  simpa using key
 
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
