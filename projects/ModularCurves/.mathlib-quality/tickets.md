@@ -7080,3 +7080,21 @@ cut.*
   - **[T-G3e]** `eq_zero_of_endDeg_eq_zero` (deg g=0 ⟹ g=0, pos-definite) · KM 2.6.3(2) proof · thm
   - **close** `aut_hom_eq_id_of_fullLevel` = T-G2 + G3d + G3b + `deg ε=1` + G3c + `gme_deg_trace_forces_zero` (**PROVEN**) + G3e
 - **Consumers**: T-G3 rigidity → T-E10, T-E9 rigid half, T-H6/T-H10. **NEXT (p0)**: execution — T-END0a then T-END0b. T-W7-independent.
+
+## Amendments v10.14 (2026-07-08): PR #5220 OPEN — the integrator wire FIRES; v10.13 nudge superseded
+
+- **P3b3 beat the nudge**: `dev/modular-curves-b3` now carries ALL FOUR leaves axiom-clean —
+  including **b5** (`T-W7.1b-b5 PROVED — faithfulness of projective variable-change action`,
+  67c9feab; the kernel-poison wall fell to the bridge-based section-level transport) — and
+  **PR #5220 is OPEN** (verified: `dev/modular-curves-b3` → `dev/modular-curves`, non-draft,
+  "T-W7.1b (2nd half): b3x/b3y/main + bridge + b5 — all four leaves, axiom-clean").
+  The v10.13 P3b3 nudge is SUPERSEDED — no partial merge needed.
+- **beastmode-A: the v10.13 preempt has FIRED.** Do the integrator wire NOW: review #5220,
+  discharge the four T-W7.1b sorries via the de-risked path (hfil ← `byv_filtration e heπ hez n`),
+  full-file axiom sweep, merge, board-flip **T-W7.1b → DONE** (comparison-theorem milestone;
+  T-W7.12's `1b` dependency flips ✓ — its remainder is 0c-ii/0h/1a on the c5β chain). The
+  v10.13 next-claims list (T-D6b → T-D33 → T-IRR0) becomes your follow-on after close-out.
+- **P3b3: freed on merge.** Stand by for wire feedback until #5220 merges; then next claim:
+  **[T-IRR0]** (v10.10 runner-up 2, the last unstaffed stream) — `/develop --decompose` scoping
+  of the KM Ch. 10 algebraic route to geometric irreducibility (now readable) vs the analytic
+  route; v10.8 discipline binding. New files only.
