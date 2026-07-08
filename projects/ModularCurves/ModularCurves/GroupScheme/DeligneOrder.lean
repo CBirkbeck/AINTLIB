@@ -663,6 +663,184 @@ theorem subgroupMul_structMap (hD : D.IsSubgroup E) :
   rw [← Category.assoc, E.subgroupMul_subschemeι hD]
   exact ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).2
 
+/- **(Layer B, L4 — scheme associativity toward coassoc.)** Triple-pullback multiplication maps
+`v`, `v'` (right/left associated) and `subgroupMul_assoc : v' ≫ m = v ≫ m`, with `Point` base-transport
+helpers to invoke `add_assoc` across the reassociation. Dualizes to `Coalgebra.coassoc`. -/
+/-- base-congruence for points: transport preserves the underlying morphism. -/
+theorem Point.base_congr {T : Scheme.{u}} {g g' : T ⟶ Spec (CommRingCat.of R)} (h : g = g')
+    (P : E.Point g) : (h ▸ P : E.Point g').1 = P.1 := by subst h; rfl
+
+/-- base transport is additive. -/
+theorem Point.base_congr_add {T : Scheme.{u}} {g g' : T ⟶ Spec (CommRingCat.of R)} (h : g = g')
+    (P Q : E.Point g) : (h ▸ (P + Q) : E.Point g') = (h ▸ P) + (h ▸ Q) := by subst h; rfl
+
+/-- Transported restriction of a universal point is identified by its underlying morphism. -/
+theorem Point.restrictT_eq {T T' : Scheme.{u}} {g : T ⟶ Spec (CommRingCat.of R)} {k : T' ⟶ T}
+    {g' : T' ⟶ Spec (CommRingCat.of R)} (h : k ≫ g = g') (P : E.Point g) (Q : E.Point g')
+    (hPQ : k ≫ P.1 = Q.1) : (h ▸ Point.restrict E k P : E.Point g') = Q :=
+  Subtype.ext ((Point.base_congr (E := E) h (Point.restrict E k P)).trans hPQ)
+
+-- v : P₃ → P₂,  ⟨fst₃, snd₃ ≫ m⟩
+noncomputable def vmap (hD : D.IsSubgroup E) : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)))
+    (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupMul hD)
+    (by
+      rw [Category.assoc, E.subgroupMul_structMap hD]
+      exact pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)))
+
+-- u : P₃ → P₂,  ⟨fst₃, snd₃ ≫ fst₂⟩
+noncomputable def umap : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)))
+    (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+      pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    (by
+      rw [Category.assoc, ← Category.assoc (pullback.fst _ _), ← E.bimulBase_eq_fst_structMap]
+      exact pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)))
+
+-- v' : P₃ → P₂,  ⟨u ≫ m, snd₃ ≫ snd₂⟩
+noncomputable def vmap' (hD : D.IsSubgroup E) : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
+  pullback.lift (E.umap (D := D) ≫ E.subgroupMul hD)
+    (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+      pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    (by
+      have e1 : (E.umap (D := D) ≫ E.subgroupMul hD) ≫ (D.ideal.subschemeι ≫ E.π)
+          = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D := by
+        rw [Category.assoc, E.subgroupMul_structMap hD]
+        show E.umap (D := D) ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π)
+            (D.ideal.subschemeι ≫ E.π) ≫ (D.ideal.subschemeι ≫ E.π)) = _
+        rw [← Category.assoc, umap, pullback.lift_fst]
+      have e2 : (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+            pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+            ≫ (D.ideal.subschemeι ≫ E.π)
+          = pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.bimulBase (D := D) := by
+        simp only [Category.assoc]; rw [← E.bimulBase_eq_snd_structMap]
+      rw [e1, e2]
+      exact pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)))
+
+/-- Transported restriction of the universal sum splits as a sum of the identified points. -/
+theorem Point.restrictT_add_eq {T' : Scheme.{u}}
+    (k : T' ⟶ pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
+    {g' : T' ⟶ Spec (CommRingCat.of R)} (h : k ≫ E.bimulBase (D := D) = g')
+    (P Q : E.Point g') (hP : k ≫ (E.bipt₁ (D := D)).1 = P.1)
+    (hQ : k ≫ (E.bipt₂ (D := D)).1 = Q.1) :
+    (h ▸ Point.restrict E k (E.bipt₁ (D := D) + E.bipt₂ (D := D)) : E.Point g') = P + Q := by
+  rw [Point.restrict_add, Point.base_congr_add,
+    Point.restrictT_eq (E := E) h (E.bipt₁ (D := D)) P hP,
+    Point.restrictT_eq (E := E) h (E.bipt₂ (D := D)) Q hQ]
+
+noncomputable def tpt₁ :
+    E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D) :=
+  ⟨pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ D.ideal.subschemeι, by
+    rw [Category.assoc]⟩
+
+noncomputable def tpt₂ :
+    E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D) :=
+  ⟨pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+      pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫ D.ideal.subschemeι, by
+    rw [pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)),
+      E.bimulBase_eq_fst_structMap]
+    simp only [Category.assoc]⟩
+
+noncomputable def tpt₃ :
+    E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D) :=
+  ⟨pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+      pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ≫ D.ideal.subschemeι, by
+    rw [pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)),
+      E.bimulBase_eq_snd_structMap]
+    simp only [Category.assoc]⟩
+
+/-- **(Layer B, L4 — associativity of the group-scheme multiplication.)** `(m ×ₛ id) ≫ m` and
+`(id ×ₛ m) ≫ m` agree (over the triple pullback `D ×ₛ D ×ₛ D`); dualizes to coassociativity. -/
+theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
+    E.vmap' hD ≫ E.subgroupMul hD = E.vmap hD ≫ E.subgroupMul hD := by
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, Category.assoc,
+    E.subgroupMul_subschemeι hD]
+  have hv : E.vmap hD ≫ E.bimulBase (D := D)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D := by
+    show E.vmap hD ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        ≫ (D.ideal.subschemeι ≫ E.π)) = _
+    rw [← Category.assoc, vmap, pullback.lift_fst]
+  have hu : E.umap (D := D) ≫ E.bimulBase (D := D)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D := by
+    show E.umap (D := D) ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        ≫ (D.ideal.subschemeι ≫ E.π)) = _
+    rw [← Category.assoc, umap, pullback.lift_fst]
+  have hv' : E.vmap' hD ≫ E.bimulBase (D := D)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D := by
+    show E.vmap' hD ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        ≫ (D.ideal.subschemeι ≫ E.π)) = _
+    rw [← Category.assoc, vmap', pullback.lift_fst, Category.assoc, E.subgroupMul_structMap hD]
+    show E.umap (D := D) ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)
+        ≫ (D.ideal.subschemeι ≫ E.π)) = _
+    rw [← Category.assoc, umap, pullback.lift_fst]
+  have hs : pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.bimulBase (D := D)
+      = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D :=
+    (pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D))).symm
+  -- inner: tpt₂ + tpt₃
+  have Es : (hs ▸ Point.restrict E (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)))
+      (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+      = E.tpt₂ + E.tpt₃ :=
+    Point.restrictT_add_eq E _ hs E.tpt₂ E.tpt₃
+      (by show _ ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _; rw [tpt₂])
+      (by show _ ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = _; rw [tpt₃])
+  -- inner: tpt₁ + tpt₂
+  have Eu : (hu ▸ Point.restrict E (E.umap (D := D))
+      (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+      = E.tpt₁ + E.tpt₂ :=
+    Point.restrictT_add_eq E _ hu E.tpt₁ E.tpt₂
+      (by
+        show E.umap (D := D) ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, umap, pullback.lift_fst, tpt₁])
+      (by
+        show E.umap (D := D) ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, umap, pullback.lift_snd, tpt₂]; simp only [Category.assoc])
+  -- v: tpt₁ + (tpt₂ + tpt₃)
+  have Ev : (hv ▸ Point.restrict E (E.vmap hD)
+      (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+      = E.tpt₁ + (E.tpt₂ + E.tpt₃) :=
+    Point.restrictT_add_eq E _ hv E.tpt₁ (E.tpt₂ + E.tpt₃)
+      (by
+        show E.vmap hD ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, vmap, pullback.lift_fst, tpt₁])
+      (by
+        have hR : (E.tpt₂ + E.tpt₃).1 = pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
+            ≫ (E.bipt₁ (D := D) + E.bipt₂ (D := D)).1 := by
+          rw [← Es]; exact Point.base_congr (E := E) hs _
+        rw [hR]
+        show E.vmap hD ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, vmap, pullback.lift_snd, Category.assoc, E.subgroupMul_subschemeι hD])
+  -- v': (tpt₁ + tpt₂) + tpt₃
+  have Ev' : (hv' ▸ Point.restrict E (E.vmap' hD)
+      (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+      = (E.tpt₁ + E.tpt₂) + E.tpt₃ :=
+    Point.restrictT_add_eq E _ hv' (E.tpt₁ + E.tpt₂) E.tpt₃
+      (by
+        have hR : (E.tpt₁ + E.tpt₂).1 = E.umap (D := D)
+            ≫ (E.bipt₁ (D := D) + E.bipt₂ (D := D)).1 := by
+          rw [← Eu]; exact Point.base_congr (E := E) hu _
+        rw [hR]
+        show E.vmap' hD ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, vmap', pullback.lift_fst, Category.assoc, E.subgroupMul_subschemeι hD])
+      (by
+        show E.vmap' hD ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = _
+        rw [← Category.assoc, vmap', pullback.lift_snd, tpt₃]; simp only [Category.assoc])
+  -- assemble
+  have key : (hv' ▸ Point.restrict E (E.vmap' hD) (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
+        E.Point _)
+      = hv ▸ Point.restrict E (E.vmap hD) (E.bipt₁ (D := D) + E.bipt₂ (D := D)) := by
+    rw [Ev, Ev', add_assoc]
+  have hgoal := congrArg Subtype.val key
+  rw [Point.base_congr, Point.base_congr] at hgoal
+  exact hgoal
+
+
 /-- `Γ(m) : A →ₐ[R] Γ(D ×_R D)`, the algebra map underlying the comultiplication (before the tensor
 identification). `R`-linear because `m` is a morphism over the base (`subgroupMul_structMap`). -/
 noncomputable def subgroupComulHom (hD : D.IsSubgroup E) :
