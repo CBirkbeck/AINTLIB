@@ -112,6 +112,24 @@ noncomputable def chartAwayHomOfTriple (k : Fin 3) (t : Fin 3 → S) (u : S) (hu
     chartAway W k →ₐ[R] S :=
   (chartHomOfTriple W k t u hu ht).comp (chartCoordAlgEquiv W k).symm.toAlgHom
 
+/-- **(naturality of the chart hom in the target ring)** The chart morphism of a triple commutes
+with base change of the target: pushing the triple along `φ : S →+* S'` and taking the chart hom
+is the same as taking the chart hom and post-composing with `φ`.
+
+This is what identifies the restriction of a piece morphism to a smaller basic open with the chart
+hom of the same triple over the smaller localization (c4.2c). -/
+lemma chartHomOfTriple_naturality {S' : Type} [CommRing S'] [Algebra R S'] (φ : S →ₐ[R] S')
+    (k : Fin 3) (t : Fin 3 → S) (u : S) (hu : t k * u = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hu' : φ (t k) * φ u = 1)
+    (ht' : (W.map (algebraMap R S')).toProjective.Equation (fun m => φ (t m))) :
+    (chartHomOfTriple W k (fun m => φ (t m)) (φ u) hu' ht' : affineChartRing W k →ₐ[R] S') =
+      (φ.comp (chartHomOfTriple W k t u hu ht)) := by
+  refine Ideal.Quotient.algHom_ext R (MvPolynomial.algHom_ext fun m => ?_)
+  show chartHomOfTriple W k (fun m => φ (t m)) (φ u) hu' ht' (Ideal.Quotient.mk _ (X m)) =
+    φ (chartHomOfTriple W k t u hu ht (Ideal.Quotient.mk _ (X m)))
+  rw [chartHomOfTriple_coord, chartHomOfTriple_coord, map_mul]
+
 end Dehomogenize
 
 end WeierstrassCurve.Projective
