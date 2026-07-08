@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
@@ -35,7 +36,7 @@ records (T-A8) build on this layer in the same file, next increment. Decompositi
 notes: board v10.36; v10.24(b) interfaces accompany each heavy definition as it lands.
 -/
 
-open AlgebraicGeometry CategoryTheory WeierstrassCurve
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits WeierstrassCurve
 
 namespace ModularCurves
 
@@ -248,5 +249,22 @@ pulled back along `classify W` is the curve presented by `W` (T-W6 tail). -/
 noncomputable def classify {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤)) :
     S ⟶ weierstrassAtlas :=
   S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))
+
+/-- **The curve presented by an atlas point** (T-W6): the universal elliptic curve
+pulled back along the classifying map — an elliptic curve over `S` in the
+definition-of-record sense (T-A8), with all structure transported by base change. -/
+noncomputable def curveOf {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤)) :
+    EllipticCurveGeom S where
+  E := pullback universalCurveπ (classify W)
+  π := pullback.snd universalCurveπ (classify W)
+  zero := pullback.lift (classify W ≫ universalCurveZero) (𝟙 S)
+    (by rw [Category.assoc, universalCurveZero_π, Category.comp_id, Category.id_comp])
+  zero_π := pullback.lift_snd _ _ _
+  smooth := by
+    have : MorphismProperty.IsStableUnderBaseChange (@SmoothOfRelativeDimension 1) :=
+      AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
+    exact MorphismProperty.pullback_snd _ _ universalCurve_smooth
+  proper := MorphismProperty.pullback_snd _ _ inferInstance
+  localModel := universalEllipticCurve.localModel.baseChange (classify W)
 
 end ModularCurves
