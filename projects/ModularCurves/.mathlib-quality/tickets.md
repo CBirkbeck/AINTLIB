@@ -4251,7 +4251,10 @@ claim — whoever lands it keeps it; H-lane will not touch that block until it l
 - **Generality**: mulBy lemmas for all `m n : ℤ` (upstream-shaped); negIso minimal.
 
 ### [T-H2b] the additive base-change point dictionary (LEAF, cut by fable-P4 2026-07-08)
-- **Status**: **CORE DONE** (fable-P4 2026-07-08; consumer discharge in progress):
+- **Status**: **DONE** (fable-P4 2026-07-08, incl. the consumer:
+  `FullLevelPt.pullAlong` membership discharged — `isNaiveFullLevel_pullAlong`, naive
+  full level is stable under base change, `#print axioms` clean, GammaH 10→9 sorries).
+  Prior progress note:
   `Over.monObjMkPullbackSnd_mul_left_fst` + grp-alias (NEW ForMathlib/OverPullbackMul.lean,
   own commit) and `Point.baseChangeEquiv` + `baseChangeEquiv_apply_coe` (GroupLaw.lean,
   `#print axioms` clean, downstream green).
