@@ -37,6 +37,7 @@ import ModularCurves.EllipticCurve.AdditionChartProj
 import ModularCurves.EllipticCurve.AdditionChartOpen
 import ModularCurves.EllipticCurve.AdditionChartOverlap
 import ModularCurves.EllipticCurve.AdditionChartTransition
+import ModularCurves.EllipticCurve.AdditionChartGlobal
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.GammaHRepresentability
