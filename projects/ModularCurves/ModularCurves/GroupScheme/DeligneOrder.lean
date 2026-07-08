@@ -104,6 +104,54 @@ theorem smul_eq_zero_of_factors_affine {N : ℕ} [NeZero N] (hD : D.IsSubgroup E
 
 end AffineBase
 
+section GroupObject
+
+variable {S : Scheme.{u}} (E : EllipticCurve S) {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E)
+
+/-- The base structure map `D ×_S D ⟶ S` of the self-product of the divisor's total space. -/
+noncomputable abbrev bimulBase :
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ⟶ S :=
+  pullback.fst _ _ ≫ D.ideal.subschemeι ≫ E.π
+
+/-- The first universal point of `D ×_S D`: the first projection, viewed as a point of `E`
+factoring through `D`. -/
+noncomputable def bipt₁ : E.Point (E.bimulBase (D := D)) :=
+  ⟨pullback.fst _ _ ≫ D.ideal.subschemeι, by rw [Category.assoc]⟩
+
+/-- The second universal point of `D ×_S D`: the second projection, viewed as a point of `E`
+factoring through `D`. -/
+noncomputable def bipt₂ : E.Point (E.bimulBase (D := D)) :=
+  ⟨pullback.snd _ _ ≫ D.ideal.subschemeι, by
+    rw [Category.assoc]; exact (pullback.condition).symm⟩
+
+include hD
+
+/-- **(Layer B, L3 core — the group-scheme multiplication exists.)** The sum `bipt₁ + bipt₂` of the
+two universal points of `D ×_S D`, taken in the curve group `E.Point (bimulBase)`, factors through
+`D` — because both summands factor through `D` and `D(T)` is a subgroup (`IsSubgroup`). This is the
+Yoneda input for the multiplication morphism `m : D ×_S D ⟶ D`. -/
+theorem exists_factor_bimul :
+    ∃ m : pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ⟶ D.ideal.subscheme,
+      m ≫ D.ideal.subschemeι = ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1 := by
+  obtain ⟨H, hH⟩ := hD (E.bimulBase (D := D))
+  exact (hH _).mp (H.add_mem ((hH _).mpr ⟨pullback.fst _ _, rfl⟩)
+    ((hH _).mpr ⟨pullback.snd _ _, rfl⟩))
+
+/-- **(Layer B, L3 core.)** The multiplication morphism `m : D ×_S D ⟶ D.subscheme` of the group
+scheme structure on `D.subscheme` induced by `IsSubgroup` (the restriction of the curve group law).
+Well-defined up to the mono `subschemeι`; its Hopf-dual `Δ = m^♯` is the comultiplication. -/
+noncomputable def subgroupMul :
+    pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) ⟶ D.ideal.subscheme :=
+  (E.exists_factor_bimul hD).choose
+
+/-- The defining property of `subgroupMul`: composing with `subschemeι` recovers the curve sum of
+the two universal points. -/
+theorem subgroupMul_subschemeι :
+    E.subgroupMul hD ≫ D.ideal.subschemeι = ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).1 :=
+  (E.exists_factor_bimul hD).choose_spec
+
+end GroupObject
+
 section GeneralBase
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)

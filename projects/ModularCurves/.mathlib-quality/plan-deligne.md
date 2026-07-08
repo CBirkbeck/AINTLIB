@@ -386,6 +386,18 @@ bridge needs (`n • [point] = 0` ⟺ `(toConv φ)^n = 1`). Axiom-clean `[propex
 `ExactOrder` import `DeligneOrder` (or relocating `IsSubgroup` to a shared low file) and calling
 `smul_eq_zero_of_factors'`. Deferred until the machinery is sorry-free.
 
-**Status**: skeleton green (2 intended sorries: affine core L3-L7, general box L1). Next: close L1
-(reduction), then grind the L3 Hopf core (the genuinely-absent infrastructure). Multi-session; each
-leaf bounded and in-area. Sub-tickets T-D5h(=L2✅,L3,L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).
+**Status**: skeleton green (2 intended sorries: affine core L3-L7, general box L1).
+
+**L3 CRUX DE-RISKED ✅ (2026-07-08)** — the group-scheme multiplication `m : D ×_S D ⟶ D.subscheme`
+from `IsSubgroup` (the piece *deliberately deferred* in `Subgroup.lean` and *absent* from mathlib)
+is now PROVEN in `DeligneOrder.lean`: `bipt₁`/`bipt₂` (the two universal points of `D ×_S D`),
+`exists_factor_bimul` (their curve-sum factors through `D`, by `IsSubgroup` at the universal point +
+`AddSubgroup.add_mem`), `subgroupMul` (= `m`, extracted; well-defined by the mono `subschemeι`),
+`subgroupMul_subschemeι` (defining eqn `m ≫ subschemeι = (bipt₁+bipt₂).1`). This validates the entire
+"IsSubgroup → group object → Hopf" route — everything downstream (Δ = m^♯, Hopf axioms, convolution)
+now rests on a proven foundation.
+
+Next (downstream of the validated crux): `Δ : A →ₐ[R] A ⊗_R A` from `m^♯` over the affine base
+(needs `Γ(D×_R D) ≅ A ⊗_R A`) → Hopf axioms (L4) → localise-to-free (L5) → points↔convolution (L6) →
+assemble (L7); plus the L1 reduction (general → affine). Multi-session; each leaf bounded and
+in-area. Sub-tickets T-D5h(=L2✅, L3-crux✅, Δ/Hopf/L4), T-D5i(=L6), T-D5j(=L7), T-D5k(=L1+box).
