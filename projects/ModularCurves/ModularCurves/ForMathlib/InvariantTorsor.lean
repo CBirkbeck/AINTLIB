@@ -225,10 +225,11 @@ three has a mathlib substrate — there is no `IsSemilocalRing`). No finiteness 
 `galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
 sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
 `(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
-theorem torsorMul_bijective_of_isFreeAlgebraAction [Fintype G] [DecidableEq G]
+theorem torsorMul_bijective_of_isFreeAlgebraAction
     (hfree : IsFreeAlgebraAction G R A) :
     Function.Bijective (MulSemiringAction.torsorMul G R A) := by
   classical
+  haveI : Fintype G := Fintype.ofFinite G
   obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
   -- `galoisInv S` is a right inverse
   have hright : ∀ x : G → A,
