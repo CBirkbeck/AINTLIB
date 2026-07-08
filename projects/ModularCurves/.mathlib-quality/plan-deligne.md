@@ -290,3 +290,27 @@ needing its own proof (none automatic). Concrete findings:
 **Order to build:** `ofConv_smul` transfer lemma → `IsScalarTower R B S` → `ptS` → `g` → `τ` (lift) →
 `τ` inverse → `u` + `u⁻¹` (dual basis) → Lemma 3.8.2 → close `deligne_operators`. Multi-session but
 each link is bounded and in-area (no absent multi-week mathlib theory strictly required).
+
+### T-D5e-τ chain 1-4 DONE; remaining 3 pieces with Sweedler proofs (2026-07-08, coordinator-directed close-from-text)
+
+Coordinator (v10, p2): source gate LIFTED — close `deligne_operators` from Tate css §3.8 pp.143-145
+(verbatim quotes in docstring, no memory), RR-only (must prove). Chain links landed + axiom-clean:
+`instIsScalarTowerWithConv`, `pointAlgHom`, `translationTarget`, `translationEndo`. VERIFIED faithful:
+`translationEndo φ (s⊗a) = ∑ (s·ptS(a₁))⊗a₂` IS the base-changed `id_{A'}⊗τ_λ` (Tate p.144;
+`λ(f₁)·μ = μ·ptS(f₁)`). Remaining, each a bounded Sweedler/dual-basis lemma:
+
+* **τ auto-ness** — inverse point `φ' := φ.comp (HopfAlgebra.antipodeAlgHom R A) : A →ₐ[R] B` (antipode
+  is an algHom for commutative A). Then `translationEndo φ ∘ translationEndo φ' = id`: on a generator
+  `1⊗a`, compose → (coassoc) `∑ ptS_φ(a₁)·ptS_φ'(a₂) ⊗ a₃ = ∑ (φ⋆φ')(a₁)·1 ⊗ a₂`; `φ⋆φ'=ε`
+  (convolution inverse, `∑φ(a₁)φ'(a₂)=ε(a)`) collapses to `1⊗∑ε(a₁)a₂ = 1⊗a` (counit). Build via
+  `Algebra.TensorProduct.lift` uniqueness (agree on `1⊗a` generators) + `Coalgebra.Repr` Sweedler.
+  Then `τ := AlgEquiv.ofAlgHom (translationEndo φ) (translationEndo φ') _ _`.
+* **u (coevaluation) + unit** — `u := ∑ᵢ ιₘ(b.coord i) ⊗ b i ∈ M`, `b := Module.Free.chooseBasis R A`,
+  `ιₘ : Dual R A → S`, `a' ↦ toConv (Algebra.linearMap R B ∘ₗ a')`. Inverse `u⁻¹ := ∑ᵢ ιₘ(b.coord i)⊗S(b i)`
+  (antipode-twist); `u·u⁻¹=1` by dual-basis `∑ᵢ b.coord i (x) • b i = x` + antipode identity.
+* **Lemma 3.8.2** `τ(u)=u·(λ⊗1)` — `translationEndo φ (∑ᵢ ιₘ(eⁱ)⊗eᵢ) = ∑ᵢ∑ ιₘ(eⁱ)·ptS(eᵢ₁)⊗eᵢ₂`;
+  `u·(λ⊗1) = ∑ᵢ (ιₘ(eⁱ)·λ)⊗eᵢ`; equal by the dual-basis/Sweedler identity (Tate's "bit of linear
+  algebra left to the reader", p.144). Key: `∑ᵢ ιₘ(eⁱ)·ptS(eᵢ₁) ⊗ eᵢ₂ = ∑ᵢ ιₘ(eⁱ)·λ ⊗ eᵢ` via
+  `∑ᵢ eⁱ(·) eᵢ = id` and `λ = pointConv φ` acting as `ptS`.
+
+Then `deligne_operators := ⟨u-as-unit, τ, lemma-3.8.2⟩`. Each piece is bounded; RR-terminates.
