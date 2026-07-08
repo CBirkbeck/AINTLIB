@@ -238,3 +238,33 @@ This is Tate's **Lemma 3.8.2** specialised to `φ = τ_λ` (CSS §3.8, book p. 1
 
 This is a genuine multi-session dual-basis / base-change build; the leaf is precisely isolated so
 the rest of Deligne's theorem stands on it and nothing else.
+
+### T-D5e-core refinement (2026-07-08, after landing rightTranslationAlgHom)
+
+Two findings that de-risk the remaining leaf:
+
+1. **`τ` (T-D5e-τ) is UNBLOCKED — no dual-Hopf antipode needed.** `τ`'s inverse is right-translation
+   by `λ⁻¹`, and `λ⁻¹` is the convolution inverse of the point, `= φ ∘ antipode_A` — which is
+   `A`'s antipode (present in mathlib) via the already-proved `isUnit_pointConv` /
+   `mul_pointConv_antipode_eq_one`. So `τ : M ≃ₐ[S] M` needs only `A`'s Hopf structure, NOT the
+   Cartier-dual Hopf structure. Concrete construction chain (all algebra homs):
+   ```
+   τ := (absorb B into S) ∘ Algebra.TensorProduct.map (AlgHom.id R S) (rightTranslationAlgHom φ)
+        -- S ⊗_R A --(id ⊗ (a↦∑φ(a₁)⊗a₂))--> S ⊗_R (B ⊗_R A) --(S⊗B→S via B-alg mult)--> S ⊗_R A
+   ```
+   `absorb`: `S ⊗_R (B ⊗_R A) ≅ (S ⊗_R B) ⊗_R A → S ⊗_R A` using `S` a `B`-algebra
+   (`s ⊗ b ↦ s·algebraMap B S b`). Its inverse uses `rightTranslationAlgHom (φ∘S_A-conv-inverse)`.
+
+2. **`u`'s unit-ness (T-D5e-u) is the ONE genuinely delicate piece.** `u = ∑ eⁱ⊗eᵢ` (coevaluation,
+   via `dualTensorHomEquivOfBasis.symm id`) must be a unit of the *tensor-algebra* `A'⊗A` (whose ring
+   structure is `A'`-convolution ⊗ `A`-mult, NOT `End`). Abstractly this is "u is group-like in the
+   Cartier-dual Hopf algebra `A'_A`" — needs the dual-Hopf antipode mathlib lacks. BUT it should be
+   closable by a DIRECT dual-basis computation exhibiting `u⁻¹` explicitly and verifying `u·u⁻¹ = 1`
+   via the antipode identity `∑ eⁱ·(S eⱼ-twist)... = ε`, without the abstract structure. This is the
+   Sweedler/dual-basis calculation to design source-faithfully next.
+
+3. **Lemma 3.8.2** (`τ(u) = u·(λ⊗1)`) then follows from the dual-basis form of `u` + `τ`'s action.
+
+Net: the leaf is in-reach (no genuinely-absent multi-week infra strictly required — `u`'s inverse is
+an explicit dual-basis element), just a laborious dual-basis/base-change build. `τ` first (unblocked),
+then `u`+inverse (dual-basis), then 3.8.2.
