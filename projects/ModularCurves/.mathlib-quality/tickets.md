@@ -10068,3 +10068,27 @@ beastmode absent a redirect.
   the endgame (T-W7.12 → T-W7.36 with c5β). If 0h hasn't fired: take [STREAM-GH]'s first
   wave IF fable-P4's B2 repoint has landed by then (GH queue rule, v10.45), else stage the
   remaining PR-draft files (internal) and stand by.
+
+## Amendments v10.49 (2026-07-08, coordinator): D2 consolidation absorbed (+ ledger correction); L3 HOLD approved; fleet-saturation ops note
+
+- **beastmode-A ack logged** (v10.48 queue durable in CHARTER-A.md; session stays PHASE-8
+  closed). No action.
+- **D2 consolidation ABSORBED**: route A banked at 99.5% + board-flipped (07ed83752);
+  [T-BE-TAIL] registered with the delegate's analysis as spec; upstream verify-pass DONE —
+  **LEDGER CORRECTION accepted: the v10.16/v10.46 list wrongly included GenericFlatness
+  (still carries the GFDatum sorry)** — the verified clean set is 7 files + GenericFlatness
+  as modulo-GFDatum. STREAM-NISOG claimed (7938bed0), rule-5 ownership resolved:
+  **[KM-FMT-FLAT] stays fable-FP's** (charter-next); D2 owns wave M1 + [KM-62-63-HOMOG].
+- **DECISION: L3 HOLD APPROVED.** `exists_generatorLocus` is a 250–400-line scheme proof
+  (template ~450 ll) and the fleet is at ~70 concurrent workers with three delegate stalls
+  today — starting it now is the banned anti-pattern. L3 is fully scoped (T-D15 route +
+  base-change dictionaries + template named); D2 grinds wave M1 when load drops, with the
+  30-min-no-build monitor. **Optional no-build prep meanwhile** (D2's discretion): write
+  L3's prose proof plan against the template + KM quotes so the eventual session is
+  execution-only.
+- **OPS ESCALATION (owner action, machine-level)**: the bottleneck is now the MACHINE, not
+  the math — ~70 concurrent workers on one box. Guidance: (a) let running sessions drain
+  before firing new ones; (b) workers at natural holds STAY parked (don't idle with
+  builds); (c) v10.46 rules strictly (single-target builds, NO sub-delegates while
+  saturated, 30-min stall monitor); (d) prefer depth (one strong session per account) over
+  breadth until load normalizes.
