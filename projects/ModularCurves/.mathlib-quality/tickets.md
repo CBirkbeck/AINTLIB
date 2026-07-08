@@ -6408,9 +6408,12 @@ delegates assumed (proj-dim theory + AffineTransitionLimit). Order: DEV1a→DEV1
     (B) Rees grade⟺Ext-vanishing over S_𝔮 (Grade.lean ReesLocal); (A) **flat base change for higher Ext** — NEW
     `ForMathlib/BaseChangeExt.lean` (~379 lines, `isLocalizedModule_mapExt` by induction, n+1 five-lemma dévissage on the
     localized Ext LES; beat a Localization instance-diamond without maxHeartbeats). SECOND of T-RB's 3 inputs done (McCoy✓ grade-openness✓).
-  - **[T-DEPTH] planning IN PROGRESS** [a828b81c] — depth-theory layer for the 2 B-E cores (Module.depth + Auslander-Buchsbaum
-    + Peskine-Szpiro) → `decomposition-depth.md` + `Depth.lean`/`Acyclicity.lean` skeleton. Foundations present: grade/regular-seq,
-    grade⟺Ext (Rees), McCoy, assoc-prime recipe (in BuchsbaumEisenbud.lean). USER CHOSE CONTINUE (2026-07-08).
+  - **[T-DEPTH] DECOMPOSED — TRACTABLE, no wall** (`decomposition-depth.md`, skeleton Depth.lean+Acyclicity.lean committed via sibling sweep).
+    Route COLLAPSED (3 adversarial corrections): **(A) acyclicity lemma is Stacks 00N0 NOT 0AVQ** (0AVQ=torsion-free, mis-cited);
+    **(B) Auslander–Buchsbaum NOT needed** by either core (00N1 forward runs via assoc-primes+nzd+00MZ, no pd/AB); **(C) depth⟺Ext heart
+    = `Grade.rees_core` ALREADY PROVEN for general M**. Minimal API: HasDepthGE + 00LW(=rees_core) + 00LX ses1/2/3 (Ext-LES) + 00LD + depth-free.
+    ~1100-1600 NEW LOC, no AB/Tor. RUNNING: [a729e952] Depth.lean full API (ses2/3 load-bearing), [a18c2d20] Acyclicity 00MZ+00MYW (forward, no depth dep).
+    NEXT: 00N0 (make-or-break acyclicity, funnels through ses2/3) after Depth lands. Then close be_forward_core + be_backward_core.
   - **GATED** (BuchsbaumEisenbud.lean, split for parallel when core-closing): T-DEVISSAGE/T-ME/T-MI/T-REDUCEP (Tor-free), T-RB (⟸ T-BE+T-FIT+T-GRADE), T-FINAL.
 - **ROUTE OPTIONS for `flatLocus_spreads_of_flat`** (each multi-week — A chosen):
   (A) develop 00MK local flatness criterion + 00RB fibre-exact openness / 00N1 Buchsbaum-Eisenbud (most general/reusable, largest);
