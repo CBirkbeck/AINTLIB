@@ -70,6 +70,26 @@ noncomputable def canonicalGaloisMap (ρ : B →ₐ[R] B ⊗[R] A) :
 theorem canonicalGaloisMap_tmul (ρ : B →ₐ[R] B ⊗[R] A) (b b' : B) :
     canonicalGaloisMap ρ (b ⊗ₜ[coinvariants ρ] b') = (b ⊗ₜ[R] 1) * ρ b' := rfl
 
+/-- `β ∘ (b ↦ b ⊗ 1) = (b ↦ b ⊗ 1)`: the canonical Galois map sends the left inclusion of `B ⊗_S B`
+to the left inclusion of `B ⊗_R A`. On `Spec` this identifies one kernel-pair projection with the
+`SpecEqualizer` cofork's `Spec includeLeft` leg. -/
+theorem canonicalGaloisMap_comp_includeLeft (ρ : B →ₐ[R] B ⊗[R] A) :
+    (canonicalGaloisMap ρ).comp Algebra.TensorProduct.includeLeft
+      = includeLeftOverCoinvariants ρ := by
+  ext b
+  show canonicalGaloisMap ρ (b ⊗ₜ[coinvariants ρ] 1) = b ⊗ₜ[R] 1
+  rw [canonicalGaloisMap_tmul, map_one, mul_one]
+
+/-- `β ∘ (b ↦ 1 ⊗ b) = ρ`: the canonical Galois map sends the right inclusion of `B ⊗_S B` to the
+co-action `ρ`. On `Spec` this identifies the other kernel-pair projection with the `SpecEqualizer`
+cofork's `Spec ρ` leg. -/
+theorem canonicalGaloisMap_comp_includeRight (ρ : B →ₐ[R] B ⊗[R] A) :
+    (canonicalGaloisMap ρ).comp Algebra.TensorProduct.includeRight
+      = coactionOverCoinvariants ρ := by
+  ext b
+  show canonicalGaloisMap ρ ((1 : B) ⊗ₜ[coinvariants ρ] b) = ρ b
+  rw [canonicalGaloisMap_tmul, ← Algebra.TensorProduct.one_def, one_mul]
+
 /-- The **Hopf-Galois / torsor property** of a co-action `ρ`, the precise form of the `T-G3d-infra`
 Piece 3 crux. Both conditions are needed to realise `Spec B → Spec B^{coρ}` as the affine coequalizer
 of the translation groupoid via `@[stacks 023Q]`:
