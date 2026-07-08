@@ -4,6 +4,7 @@ import ModularCurves.EllipticCurve.Basic
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.GroupScheme.MuN
+import ModularCurves.GroupScheme.NIsogeny
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.GroupScheme.TranslationAction
 import ModularCurves.LevelStructure.CartierDivisor
@@ -36,7 +37,9 @@ import ModularCurves.EllipticCurve.AdditionChartProj
 import ModularCurves.EllipticCurve.AdditionChartOpen
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.SpecBasicOpenAway
@@ -45,6 +48,7 @@ import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.SpecEqualizer
+import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.Moduli.MellWeierstrass
