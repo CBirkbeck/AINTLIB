@@ -2177,22 +2177,27 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
       overlapMap W' f' * algebraMap (AdjoinRoot (infChartCubic W'))
         (Localization.Away (infChartTElem W'))
         (AdjoinRoot.root (infChartCubic W')) ^ n)
-    {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
-    (hr : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) :
-    pointedIsoChartTransport e (witness_V_le_chartYPreimage e hr) b'' =
-    (((projModel W).presheaf.map (homOfLE (witness_V_le_overlapW e)).op).hom)
+    {V : (projModel W).Opens}
+    (hVE : V ≤ e.hom ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W'))
+      ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W')) (MvPolynomial.X 2)))
+    (hVY : V ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))
+    (hVover : V ≤ Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :
+    pointedIsoChartTransport e hVY b'' =
+    (((projModel W).presheaf.map (homOfLE hVover).op).hom)
       ((overlapSectionsEquiv W).symm
         (overlapMap W (pointedIsoCoordEquiv e heπ hez f'))) *
-    (pointedIsoChartTransport e (witness_V_le_chartYPreimage e hr)
+    (pointedIsoChartTransport e hVY
       (AdjoinRoot.root (infChartCubic W'))) ^ n := by
   have htr := pointedIso_overlap_sections_equation e heπ hez f' b''
     (AdjoinRoot.root (infChartCubic W')) n hb''
   have hres := congrArg (((projModel W).presheaf.map
-    (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom) htr
+    (homOfLE hVE).op).hom) htr
   have hexp := (map_mul (((projModel W).presheaf.map
-      (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom)
+      (homOfLE hVE).op).hom)
       ((((projModel W).presheaf.map
         (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom)
         ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez f')))
@@ -2202,12 +2207,12 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm
           (AdjoinRoot.root (infChartCubic W'))))) ^ n)).trans
     (congrArg ((((projModel W).presheaf.map
-      (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom)
+      (homOfLE hVE).op).hom)
       (((projModel W).presheaf.map
         (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom
         ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez f'))) * ·)
       (map_pow (((projModel W).presheaf.map
-        (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom)
+        (homOfLE hVE).op).hom)
         ((((projModel W).presheaf.map
           (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom)
           ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
@@ -2215,28 +2220,28 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
             (AdjoinRoot.root (infChartCubic W'))))) n))
   have hY : ∀ b₀ : AdjoinRoot (infChartCubic W'),
       (((projModel W).presheaf.map
-        (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom)
+        (homOfLE hVE).op).hom)
         ((((projModel W).presheaf.map
           (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom)
           ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b₀))) =
-      pointedIsoChartTransport e (witness_V_le_chartYPreimage e hr) b₀ := by
+      pointedIsoChartTransport e hVY b₀ := by
     intro b₀
     exact pointedIsoChartTransport_res e (overlapPreimage_le_chartYPreimage e)
-      (witness_V_le_overlapPreimage e hez hr) b₀
+      hVE b₀
   have hZ : (((projModel W).presheaf.map
-      (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).hom)
+      (homOfLE hVE).op).hom)
       ((((projModel W).presheaf.map
         (homOfLE (overlapPreimage_le_chartZ e hez)).op).hom)
         ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez f'))) =
-      (((projModel W).presheaf.map (homOfLE (witness_V_le_overlapW e (r := r))).op).hom)
+      (((projModel W).presheaf.map (homOfLE hVover).op).hom)
         ((overlapSectionsEquiv W).symm
           (overlapMap W (pointedIsoCoordEquiv e heπ hez f'))) := by
     have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
       ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez f')))
       (((projModel W).presheaf.map_comp
         (homOfLE (overlapPreimage_le_chartZ e hez)).op
-        (homOfLE (witness_V_le_overlapPreimage e hez hr)).op).symm)
+        (homOfLE hVE).op).symm)
     simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
     refine hfuse.trans ?_
     have hsplit := congrArg (fun φ => CommRingCat.Hom.hom φ
@@ -2248,25 +2253,25 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
             (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
           ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
             ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op
-        (homOfLE (witness_V_le_overlapW e (r := r))).op)
+        (homOfLE hVover).op)
     simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hsplit
     have halign := congrArg (fun ψ => (CommRingCat.Hom.hom
       ((projModel W).presheaf.map ψ))
       ((chartZSectionsRingEquiv W).symm (pointedIsoCoordEquiv e heπ hez f')))
       (Subsingleton.elim
         ((homOfLE (overlapPreimage_le_chartZ e hez)).op ≫
-          (homOfLE (witness_V_le_overlapPreimage e hez hr)).op)
+          (homOfLE hVE).op)
         ((homOfLE (Proj.basicOpen_mono _
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
             (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
           ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
             ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩)).op ≫
-          (homOfLE (witness_V_le_overlapW e (r := r))).op))
+          (homOfLE hVover).op))
     refine halign.trans ?_
     refine hsplit.trans ?_
     exact congrArg (((projModel W).presheaf.map
-      (homOfLE (witness_V_le_overlapW e (r := r))).op).hom)
+      (homOfLE hVover).op).hom)
       (res_chartZSection_eq_symm_overlapMap W (pointedIsoCoordEquiv e heπ hez f'))
   refine ((hY b'').symm.trans (hres.trans (hexp.trans ?_)))
   exact congrArg₂ (· * ·) hZ (congrArg (· ^ n)
@@ -2275,21 +2280,17 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
 /-- Overlap-dictionary values restrict from the overlap to the division open as `Y`-chart
 restrictions. -/
 private lemma witness_res_dictY {W : WeierstrassCurve R}
-    (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
-    (hVle : (projModel W).basicOpen r ⊓ (projModel W).basicOpen
-      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ≤
-      Proj.basicOpen (quotientGrading (projIdeal W))
+    {V : (projModel W).Opens}
+    (hVle : V ≤ Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
           (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+    (hVU : V ≤ (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
     (b : AdjoinRoot (infChartCubic W)) :
     (((projModel W).presheaf.map (homOfLE hVle).op).hom)
       ((overlapSectionsEquiv W).symm (algebraMap (AdjoinRoot (infChartCubic W))
         (Localization.Away (infChartTElem W)) b)) =
-    (((projModel W).presheaf.map (homOfLE ((inf_le_left.trans
-      ((projModel W).basicOpen_le r)) : (projModel W).basicOpen r ⊓
-        (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm
-          (infChartTElem W)) ≤ _)).op).hom)
+    (((projModel W).presheaf.map (homOfLE hVU).op).hom)
       ((chartYSectionsRingEquiv W).symm b) := by
   have hd := res_chartYSection_eq_symm_algebraMap W b
   have hres := congrArg (((projModel W).presheaf.map (homOfLE hVle).op).hom) hd.symm
