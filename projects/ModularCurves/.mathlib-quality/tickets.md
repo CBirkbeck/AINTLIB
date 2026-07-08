@@ -9335,3 +9335,28 @@ its held milestone — final discharge is one `exact` by the file holder).
 - **Discipline**: v10.8 (/develop first act, verbatim Stacks quotes) + v10.24
   (decompose-don't-grind; opaque interfaces) + v10.35b (everything internal). **REPORT
   MILESTONE**: [A711-FP] discharged — the general-base étale theorem flips the same day.
+
+### v10.40 (2026-07-08, fable-PIC0): CHARTER-PIC0 session scorecard — T-W4 DONE, M_ell^W functor LANDED, c-i 5/6
+
+*Commits this charter-arc: e7be9d5e (T-PIC1c DONE), a6d5dcea (claims+finding), 7eb3e20b
+(T-W4 action layer), 8c04d6ce (T-W4 DONE: full dictionary), 90eb9ef4 (MellWGroupoid),
+32bd54de (**MellWScheme : Schemeᵒᵖ ⥤ Cat — the [U/G] functor EXISTS**), f8b1b576
+(classify), c646466e (curveOf), c4a7df3e (curveOfPasting core), 6e051a5e
+(curveOfPasting_snd). All green, axiom-clean, zero data-sorries.*
+
+- **Charter item 1 ✅ CLOSED-SOLVED** (v10.36): T-PIC1c proven; anomaly = term-vs-tactic
+  instance-synthesis divergence; workaround pattern banked (used again TWICE this arc:
+  smooth-field haveI, @asIso-with-named-instance).
+- **Charter item 3 ✅ this session**: #35545/#41383/#35773 all still OPEN (read-only,
+  EXTERNAL-QUIET honoured). No P2 switch.
+- **Charter item 2 🔶 well past half**: T-W4 DONE; the M_ell^W functor is DEFINED
+  (milestone-grade in itself); presentation pipeline classify→curveOf→curveOfPasting
+  proven through the snd-compat. REMAINING to the equivalence milestone: (a)
+  `curveOfPasting_zero` — 4 leaves, route in its docstring (inv_fst projections +
+  curveOfMiddle_zero via isoPullback + projModelZero_baseChange; T-W5a-c2 analogue);
+  (b) [T-W6c-ii] curveOfVCIso (pointed transport of projModelVCIso/_π/_zero along
+  toSpecΓ over the pasting); (c) [T-W6c-iii] record groupoid + equivalence functor +
+  ff/eso. Every input verified to exist; seam-discipline (top-level private lemmas,
+  explicit instances) is the proven pattern — three walls fell to it this arc.
+- NOTE (cadence): CLEANUP-PIC1 (InvertibleSheaf) and a CLEANUP ticket for
+  MellWeierstrass.lean queue after the c-i/c-ii/c-iii proof wave per the cadence rule.
