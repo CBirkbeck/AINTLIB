@@ -504,6 +504,28 @@ private theorem injective_of_maxMinors_nonZeroDiv {S : Type*} [CommRing S] {n m 
       (Submodule.mem_annihilator_span_singleton x 1).mp (hsub (htop ▸ Submodule.mem_top))
     simpa using h1
 
+/-- **00N0 wrapper — single-block case.**  For a finite free complex over a local Noetherian ring
+that is a *single block* `[0, e)` (`rk j ≠ 0` exactly for `j < e`) with `depth L ≥ e - 1` (the top
+index), the acyclicity lemma applies verbatim at any interior spot `i`: exact at `F_{i+1}`, or its
+homology has depth `≥ 1`.  Directly `acyclicityLemma_hasDepthGE_homology` with `M j = L^{rk j}`
+(depth of the free `L^{rk j}` is `depth L ≥ j`, `Module.hasDepthGE_pi_of_hasDepthGE`). -/
+private theorem localAcyclicity_block {L : Type*} [CommRing L] [IsLocalRing L] [IsNoetherianRing L]
+    (e : ℕ) (rk : ℕ → ℕ) (hrk : ∀ j, e ≤ j → rk j = 0) (hnz : ∀ j, j < e → rk j ≠ 0)
+    (φ : (j : ℕ) → (Fin (rk (j + 1)) → L) →ₗ[L] (Fin (rk j) → L))
+    (hcomplex : ∀ j, (φ j) ∘ₗ (φ (j + 1)) = 0)
+    (hdepthL : Module.HasDepthGE L L (e - 1))
+    (i : ℕ) (hie : i + 1 < e)
+    (habove : ∀ j, i < j → Function.Exact (φ (j + 1)) (φ j)) :
+    Function.Exact (φ (i + 1)) (φ i) ∨
+      Module.HasDepthGE L (LinearMap.ker (φ i) ⧸
+        (LinearMap.range (φ (i + 1))).comap (LinearMap.ker (φ i)).subtype) 1 := by
+  refine acyclicityLemma_hasDepthGE_homology (fun j => Fin (rk j) → L) φ hcomplex (e - 1)
+    (fun j hj => ?_) (fun j hj => ?_) i (by omega) habove
+  · haveI : IsEmpty (Fin (rk j)) := by rw [hrk j (by omega)]; infer_instance
+    exact ⟨fun a b => funext fun x => isEmptyElim x⟩
+  · exact Module.hasDepthGE_pi_of_hasDepthGE L (Nat.pos_of_ne_zero (hnz j (by omega))) j
+      (Module.hasDepthGE_mono L hdepthL (by omega))
+
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
 
