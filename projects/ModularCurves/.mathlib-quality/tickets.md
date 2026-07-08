@@ -1873,6 +1873,46 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     needs the sequence **split** over `R` — the splitting comes from the separability
     idempotent / averaging. Est. 150–250 lines. Cut as **[A711-BC]**, unclaimed.
 
+### [T-E5c-ROUTE-A] the ⇐-curve WITHOUT SGA I VIII 7.8 — scoping VERDICT (fable-P4, 2026-07-08)
+- **CHARTER-FP4 item (1). VERDICT: route (a) WORKS — SGA I VIII 7.8 is dodged entirely.** The
+  engine's second gate does **not** need effective descent of projective schemes. It needs the
+  *quotient of the universal curve by `G`*, which AINTLIB already owns.
+- **Why**: KM descends `(E, α_univ)` along the torsor `π_univ : X → X/G` (`X = 𝕸(𝒫,δ)`, affine).
+  But the cocycle `θ(g) : g*(E, α_univ) ≅ (E, α_univ)` is exactly a **`G`-action on `E`** lifting
+  the `G`-action on `X`. The descended curve is then `E/G`, and `E ≅ (E/G) ×_{X/G} X` because
+  both maps are `G`-torsors. **`SchemeAction.quotient` + `existsUnique_quotientπ_lift` (T-Q5,
+  proven, sorry-free) is the whole engine** — no SGA, no algebraic spaces, no B3 object descent.
+- **Decomposition (each single-conclusion; the only new theory is (a5-ii))**:
+  - **[a1]** the `G`-action on `E` from `θ` (`G →* Aut E` over the base action). Free, since
+    `𝒫` is rigid. *(No new infra; the cocycle property is KM p. 113, already banked verbatim.)*
+  - **[a2]** `E/G` exists: `E` is projective over the affine `X`, so every orbit lies in an
+    affine open ⟹ T-Q5b's `exists_isStableOpen_isAffineOpen` applies ⟹ `SchemeAction.quotient`.
+  - **[a3]** the square `E ≅ (E/G) ×_{X/G} X` is cartesian (torsor over torsor).
+  - **[a4]** `π`, the zero section, properness and smoothness descend (morphism-level; our
+    DESC engine `descend_hom_of_effectiveEpi` + fppf-local-at-target `MorphismProperty`s).
+  - **[a5]** **`localModel`** — the one real cost. Upstairs `E = projModel W` *globally* (in the
+    bootstrap, `E` is pulled back from T-E15's explicit `ℰ₃`), and each `g` acts by a
+    `VariableChange` `C_g` (⟸ **T-W7.1b**, in flight). Splitting `C_g = (u_g, r_g, s_g, t_g)`:
+    - **(a5-i) the additive part is FREE — already PROVEN today**:
+      `exists_sub_smul_eq_of_isCocycle` (**additive Hilbert 90**, `H¹(G, A⁺) = 0`, from trace
+      surjectivity `exists_traceInvariants_eq_one`). So `(r, s, t)` always trivializes.
+    - **(a5-ii) the multiplicative part `u_g ∈ Z¹(G, A^×)`** does *not* vanish globally; its
+      class is an **invertible `Aᴳ`-module** (twisted invariants), which is Zariski-locally
+      free — exactly what `localModel` needs, since `localModel` is Zariski-local on `X/G`.
+      Requires **Galois descent of modules along `A/Aᴳ`**: `N ↦ N^G`, `M ↦ A ⊗_{Aᴳ} M`, an
+      equivalence for semilinear `G`-modules. **Not in mathlib** (`Flat/FaithfullyFlat/Descent.lean`
+      only descends *ring-hom properties*; `RingTheory/PicardGroup.lean` has no descent), **but
+      it is routine from our Galois coordinates** — the same `∑ᵢ aᵢ ⊗ bᵢ` that gave the torsor
+      iso gives the descent equivalence. Est. 250–400 lines. Cut as **[A711-DESC]**.
+- **Cost comparison (the point of the verdict)**: gate 2 was *"effective descent for projective
+  schemes, absent from mathlib, B3-scale"* — with a **circular** alternative through T-E9. It is
+  now *"[a1]–[a4] on proven AINTLIB engines + [A711-DESC], a bounded 250–400-line algebra
+  development we can write today"*, **plus a dependency on T-W7.1b** (already in flight,
+  beastmode-A/P3b3) for (a5). **No RR, no ω, no algebraic spaces.** T-E-OMEGA is *not* needed for
+  the engine (it stays needed for T-E14's Legendre half, unchanged).
+- **Status**: scoped; [A711-DESC] cut and claimed by fable-P4; [a1]–[a4] boarded, unclaimed,
+  each takeable independently. The engine (T-E5c) assembles once [A711-DESC] + T-W7.1b land.
+
 ### [T-Q6e GATE AUDIT] (fable-P4, 2026-07-08 — requested by v10.27 item (3)) — STAND BY, do not claim
 - **Gate 1 (T-Q2 / KM A7.1.1)**: torsor part **PROVEN**, finiteness **PROVEN**, unramified
   **PROVEN**; only `Algebra.Etale` (mathlib gap [A711-SM] + [A711-FP]) and A7.1.2 remain.
@@ -1888,7 +1928,8 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   descent for projective schemes and for affine morphisms**. AINTLIB's DESC engine covers
   *morphism* descent (`descend_hom_of_effectiveEpi`, proven); **object** descent for schemes
   is absent from mathlib.
-- **VERDICT**: T-Q6e (= T-E5c) is **not takeable**; A7.1.1 was necessary but is not
+- **VERDICT (SUPERSEDED 2026-07-08 by [T-E5c-ROUTE-A] above — route (a) dissolves this gate;
+  the finding below stands as the record of the *descent-based* route)**: T-Q6e (= T-E5c) is **not takeable**; A7.1.1 was necessary but is not
   sufficient. fable-P4 **stands by** rather than reaching, per dispatch. The structural
   consequence for the coordinator: **T-E5's ⇐ direction is gated behind mathlib-absent
   effective descent of projective schemes, independently of A7.1.1** — the same wall the
