@@ -189,7 +189,7 @@ commutative `S`-algebra `M`, neither involving Hopf algebras:
 
 section RightMul
 
-variable {S : Type u} [CommRing S] {M : Type w} [CommRing M] [Algebra S M]
+variable {S : Type*} [CommRing S] {M : Type*} [CommRing M] [Algebra S M]
 
 /-- Conjugating right-multiplication `R_u` by an `S`-algebra automorphism `τ` and then
 composing with `R_{u⁻¹}` yields right-multiplication by `u⁻¹ · τ(u)`:
@@ -207,8 +207,8 @@ end RightMul
 
 section RightMulTensor
 
-variable {R : Type u} [CommRing R] {S : Type u} [CommRing S] [Algebra R S]
-variable {A : Type v} [CommRing A] [Algebra R A]
+variable {R : Type*} [CommRing R] {S : Type*} [CommRing S] [Algebra R S]
+variable {A : Type*} [CommRing A] [Algebra R A]
 
 /-- Over `M = S ⊗_R A`, right multiplication by `λ ⊗ 1` is the scalar `λ • id_M`
 (`R_{λ⊗1} = λ • id`). This is the identification `ℓ = λ • Iₙ` of Tate §3.8 (p. 144). -/
@@ -231,6 +231,24 @@ variable {R : Type u} [CommRing R]
 variable {A : Type v} [CommRing A] [HopfAlgebra R A] [IsCocomm R A]
 variable {B : Type w} [CommRing B] [Algebra R B]
 
+/-- **(Hopf core of Prop 3.8.1 = Lemma 3.8.2, Tate §3.8 p. 144 — SORRIED sub-ticket T-D5e-core.)**
+The operators underlying Deligne's commutator: for a `B`-point `φ` (with `λ = pointConv φ`), there
+is a unit `u` of the ring `M = A'_B ⊗_R A` — the **coevaluation element** `∑ eᵢ' ⊗ eᵢ`, i.e.
+`id ∈ G(A)` under `A' ⊗ A ≅ End_R A` — and an `A'_B`-algebra automorphism `τ` of `M` — namely
+`id_{A'} ⊗ τ_λ`, from the right-translation automorphism `τ_λ = (λ ⊗ id) ∘ Δ` on `A` — satisfying
+`τ(u) = u · (λ ⊗ 1)`. This last equation is Tate's **Lemma 3.8.2** specialised to `φ = τ_λ`
+("`(id_{A'} ⊗ φ)(id) = (id_A ⊗ φ')(id)`"), the sole remaining ingredient of Deligne's proof.
+
+This is the genuinely Hopf-algebraic leaf: constructing `u` (coevaluation, needing the finite-free
+dual basis), `τ_λ` (right translation), and verifying `τ(u) = u·(λ⊗1)` via the dual-basis/Sweedler
+identity. Split into T-D5e-core-{u,τ,3.8.2} for the build. -/
+theorem deligne_operators (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A] :
+    ∃ (u : (WithConv (A →ₗ[R] B) ⊗[R] A)ˣ)
+      (τ : WithConv (A →ₗ[R] B) ⊗[R] A ≃ₐ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A),
+      τ (↑u : WithConv (A →ₗ[R] B) ⊗[R] A)
+        = (↑u : WithConv (A →ₗ[R] B) ⊗[R] A) * (pointConv φ ⊗ₜ[R] (1 : A)) := by
+  sorry
+
 /-- **(T-D5e — Proposition 3.8.1, Tate §3.8 p. 144.)** On the free rank-`n` left-`A'`-module
 `M := A'_B ⊗_R A`, the scalar map `λ • id_M` — which is right multiplication by `λ ⊗ 1` — is the
 commutator `τ ρ τ⁻¹ ρ⁻¹`, where `ρ` is right multiplication by the coevaluation unit `u = 𝟙 ∈ M`
@@ -250,7 +268,31 @@ theorem exists_commutator_eq_pointConv_smul_one (φ : A →ₐ[R] B)
       pointConv φ • (LinearMap.id : WithConv (A →ₗ[R] B) ⊗[R] A →ₗ[WithConv (A →ₗ[R] B)]
               WithConv (A →ₗ[R] B) ⊗[R] A)
         = ↑(P * Q * P⁻¹ * Q⁻¹) := by
-  sorry
+  obtain ⟨u, τ, hτu⟩ := deligne_operators φ
+  -- `P` = the automorphism `τ`; `Q` = right multiplication `ρ = R_u` by the unit `u`.
+  let P : (WithConv (A →ₗ[R] B) ⊗[R] A →ₗ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A)ˣ :=
+    { val := τ.toLinearMap, inv := τ.symm.toLinearMap,
+      val_inv := LinearMap.ext fun y => by simp [Module.End.mul_eq_comp]
+      inv_val := LinearMap.ext fun y => by simp [Module.End.mul_eq_comp] }
+  let Q : (WithConv (A →ₗ[R] B) ⊗[R] A →ₗ[WithConv (A →ₗ[R] B)] WithConv (A →ₗ[R] B) ⊗[R] A)ˣ :=
+    { val := LinearMap.mulRight (WithConv (A →ₗ[R] B)) (↑u)
+      inv := LinearMap.mulRight (WithConv (A →ₗ[R] B)) (↑u⁻¹)
+      val_inv := LinearMap.ext fun y => by
+        simp [Module.End.mul_eq_comp, LinearMap.mulRight_apply, mul_assoc]
+      inv_val := LinearMap.ext fun y => by
+        simp [Module.End.mul_eq_comp, LinearMap.mulRight_apply, mul_assoc] }
+  refine ⟨P, Q, ?_⟩
+  have hP : (↑P : _ →ₗ[_] _) = τ.toLinearMap := rfl
+  have hPi : (↑P⁻¹ : _ →ₗ[_] _) = τ.symm.toLinearMap := rfl
+  have hQ : (↑Q : _ →ₗ[_] _)
+      = LinearMap.mulRight (WithConv (A →ₗ[R] B)) (↑u : WithConv (A →ₗ[R] B) ⊗[R] A) := rfl
+  have hQi : (↑Q⁻¹ : _ →ₗ[_] _)
+      = LinearMap.mulRight (WithConv (A →ₗ[R] B)) (↑u⁻¹ : WithConv (A →ₗ[R] B) ⊗[R] A) := rfl
+  -- `λ • id = τ ∘ R_u ∘ τ⁻¹ ∘ R_{u⁻¹} = R_{u⁻¹ · τ u} = R_{λ⊗1} = λ • id`.
+  rw [Units.val_mul, Units.val_mul, Units.val_mul, hP, hQ, hPi, hQi,
+    Module.End.mul_eq_comp, Module.End.mul_eq_comp, Module.End.mul_eq_comp,
+    LinearMap.comp_assoc, mulRight_conj_mulRight_inv τ u, hτu, ← mul_assoc,
+    Units.inv_mul, one_mul, mulRight_tmul_one]
 
 /-- **(T-D5g — Deligne's order theorem, group-like form; Tate §3.8 pp. 144–145.)** For a
 cocommutative Hopf algebra `A` finite free over `R`, any `B`-point `φ : A →ₐ[R] B` satisfies
