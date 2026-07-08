@@ -494,4 +494,64 @@ theorem curveOfVCIso_zero (hC : C' • W = W') :
 
 end VCTransport
 
+section PresentedCurves
+
+variable (S : Scheme.{0})
+
+/-- A **Weierstrass-presented elliptic curve** over `S`: an elliptic curve in the
+definition-of-record sense (T-A8) together with a global Weierstrass presentation —
+an atlas point and a pointed identification with the curve it presents. -/
+structure PresentedCurve where
+  /-- The underlying elliptic curve over `S`. -/
+  curve : EllipticCurveGeom S
+  /-- The presenting atlas point. -/
+  W : ellipticW ↑Γ(S, ⊤)
+  /-- The identification with the presented curve. -/
+  pres : curve.E ≅ (curveOf W).E
+  pres_π : pres.hom ≫ (curveOf W).π = curve.π
+  pres_zero : curve.zero ≫ pres.hom = (curveOf W).zero
+
+variable {S}
+
+instance : Category (PresentedCurve S) where
+  Hom E₁ E₂ := {f : E₁.curve.E ⟶ E₂.curve.E //
+    f ≫ E₂.curve.π = E₁.curve.π ∧ E₁.curve.zero ≫ f = E₂.curve.zero}
+  id E := ⟨𝟙 _, Category.id_comp _, Category.comp_id _⟩
+  comp f g := ⟨f.1 ≫ g.1,
+    by rw [Category.assoc, g.2.1, f.2.1],
+    by rw [← Category.assoc, f.2.2, g.2.2]⟩
+  id_comp f := Subtype.ext (Category.id_comp _)
+  comp_id f := Subtype.ext (Category.comp_id _)
+  assoc f g h := Subtype.ext (Category.assoc _ _ _)
+
+/-- **(T-W6c-iii) The presentation functor**: the `[U/G]`-groupoid maps to
+Weierstrass-presented elliptic curves — objects present themselves via `curveOf`,
+morphisms act by `curveOfVCIso`. Functor laws are parked on the `projModelVCIso_one`
+cross-lane request (board v10.42b) and the `_mul`-conjugation. -/
+noncomputable def presentationFunctor :
+    MellWGroupoid ↑Γ(S, ⊤) ⥤ PresentedCurve S where
+  obj W := ⟨curveOf W.pt, W.pt, Iso.refl _, Category.id_comp _, Category.comp_id _⟩
+  map {W W'} g := ⟨(curveOfVCIso g.1 g.2).hom, curveOfVCIso_π g.1 g.2,
+    curveOfVCIso_zero g.1 g.2⟩
+  map_id W := by
+    sorry
+  map_comp f g := by
+    sorry
+
+/-- **(T-W6c-iii, essential surjectivity — the "almost definitional" half of the v8
+equivalence)**: every Weierstrass-presented curve is isomorphic, in the groupoid of
+presented curves, to the self-presentation of its own atlas point. -/
+theorem presentationFunctor_essSurj (E : PresentedCurve S) :
+    Nonempty ((presentationFunctor.obj (MellWGroupoid.mk E.W)) ≅ E) := by
+  refine ⟨⟨⟨E.pres.inv, ?_, ?_⟩, ⟨E.pres.hom, E.pres_π, E.pres_zero⟩, ?_, ?_⟩⟩
+  · rw [Iso.inv_comp_eq]
+    exact E.pres_π.symm
+  · show (curveOf E.W).zero ≫ E.pres.inv = E.curve.zero
+    rw [Iso.comp_inv_eq]
+    exact E.pres_zero.symm
+  · exact Subtype.ext E.pres.inv_hom_id
+  · exact Subtype.ext E.pres.hom_inv_id
+
+end PresentedCurves
+
 end ModularCurves
