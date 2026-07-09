@@ -197,3 +197,15 @@ lemma spec_map_comp_congr {A B D E : CommRingCat} {X : Scheme}
     (rest : Spec A ⟶ X) (h : a ≫ b = a' ≫ b') :
     Spec.map b ≫ Spec.map a ≫ rest = Spec.map b' ≫ Spec.map a' ≫ rest := by
   rw [← Spec.map_comp_assoc, ← Spec.map_comp_assoc, h]
+
+/-- An open immersion's image functor preserves binary intersections. (`f ''ᵁ` is injective with
+`f ⁻¹ᵁ` as a partial inverse, so it respects `⊓`.) Upstream candidate. -/
+lemma Scheme.Hom.image_inf {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f] (U V : X.Opens) :
+    f ''ᵁ (U ⊓ V) = f ''ᵁ U ⊓ f ''ᵁ V := by
+  calc f ''ᵁ (U ⊓ V)
+      = f ''ᵁ (f ⁻¹ᵁ (f ''ᵁ U) ⊓ f ⁻¹ᵁ (f ''ᵁ V)) := by
+        rw [Scheme.Hom.preimage_image_eq, Scheme.Hom.preimage_image_eq]
+    _ = f ''ᵁ (f ⁻¹ᵁ (f ''ᵁ U ⊓ f ''ᵁ V)) := by rw [Scheme.Hom.preimage_inf]
+    _ = f.opensRange ⊓ (f ''ᵁ U ⊓ f ''ᵁ V) := Scheme.Hom.image_preimage_eq_opensRange_inf _ _
+    _ = f ''ᵁ U ⊓ f ''ᵁ V :=
+        inf_eq_right.mpr (le_trans inf_le_left (Scheme.Hom.image_le_opensRange f U))

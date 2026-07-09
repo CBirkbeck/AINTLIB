@@ -95,6 +95,19 @@ lemma blOpenZImage_inf_eq_iSup (i j i' j' : Fin 3) :
         (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' p.2) := by
   rw [blOpenZImage_eq_iSup, blOpenZImage_eq_iSup, iSup_inf_iSup]
 
+/-- **(c3, the two-law overlap image is same-index)** On a single chart-product `(i,j)`, the overlap of
+the two laws' regularity images is covered by the SAME-index pieces `pieceι ''ᵁ D(lawTwo_k · lawOne_k)`.
+The image (`Scheme.Hom.image_inf` on `pieceι`) of the piece-level `blOpenYPiece_inf_blOpenZPiece_eq_iSup`.
+This is the geometry the same-chart `addOn_agree` reduces over. -/
+lemma blOpenZImage_inf_blOpenYImage_eq_iSup (i j : Fin 3) :
+    blOpenZImage W i j ⊓ blOpenYImage W i j =
+      ⨆ k, pieceι W i j ''ᵁ ((chartPieceIso W i j).hom ⁻¹ᵁ
+        specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k * lawOneTriple W i j k)) := by
+  rw [blOpenZImage, blOpenYImage, iSup_blOpenZPieceFamily, iSup_blOpenYPieceFamily,
+    ← Scheme.Hom.image_inf, inf_comm (blOpenZPiece W i j),
+    blOpenYPiece_inf_blOpenZPiece_eq_iSup, Scheme.Hom.image_iSup]
+
 /-- The cover of `blOpenY` by the four chart-products' regularity opens. -/
 noncomputable def blOpenYCover : (blOpenY W).toScheme.OpenCover :=
   Scheme.Opens.iSupOpenCover (blOpenYFamily W)
