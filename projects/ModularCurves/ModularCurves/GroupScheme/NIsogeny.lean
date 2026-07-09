@@ -1000,7 +1000,44 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
       (Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ∧
         ∀ q : PrimeSpectrum Γ(X, ⊤),
           Module.rankAtStalk (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) q = n)) := by
-  sorry
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI : IsAffine (↑U.1 : Scheme.{u}) := U.2
+  haveI : IsAffine (↑(f ⁻¹ᵁ U.1) : Scheme.{u}) := U.2.preimage f
+  -- (A) the geometric identification: the pullback is the Spec of a tensor product,
+  -- with the second projection matching the `Spec.map` of the left inclusion
+  letI := ((f ∣_ U.1).appTop.hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  obtain ⟨eP, heP⟩ : ∃ e : pullback f (x' ≫ U.1.ι) ≅
+      Spec (.of (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))),
+      pullback.snd f (x' ≫ U.1.ι) = e.hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        ≫ X.isoSpec.inv := by
+    sorry
+  -- (B) flatness transports through the identification to the ring side
+  have hflat_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) ↔
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
+    sorry
+  -- (C) the rank function transports likewise
+  have hrank_iff : (∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
+      ∀ q : PrimeSpectrum Γ(X, ⊤),
+        Module.rankAtStalk (R := Γ(X, ⊤))
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q = n := by
+    sorry
+  -- (D) the ring-side module is the section-side module
+  have eM : (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
+      ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) := by
+    sorry
+  rw [hflat_iff, hrank_iff]
+  constructor
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv eM.symm, fun q => by
+      rw [Module.rankAtStalk_eq_of_equiv eM.symm]; exact h2 q⟩
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv eM, fun q => by
+      rw [Module.rankAtStalk_eq_of_equiv eM]; exact h2 q⟩
 
 end LocallyFreeRankLocusBridge
 
