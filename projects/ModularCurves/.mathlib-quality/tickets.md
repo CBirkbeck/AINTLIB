@@ -10793,3 +10793,19 @@ lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
   hom rebuild. Bar: own proofs complete, zero fresh sorries, inherited `sorryAx` listed +
   attributed per decl (designed trail: `tateEllObj`/`tateUniversal` = gate [T-A6b]; T-W7
   comparison inputs as pinned). Single-target builds, commit-early + push each green increment.
+
+## Amendments v10.102-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] B2-ii order dictionary LANDED
+
+Added the fibrewise-order ⟹ unit dictionary in `YOneAtlasClassify.lean`:
+`two_zsmul_some_eq_zero_of_ψ₂_eq_zero` (field, ψ₂-vanishing ⟹ 2-torsion),
+`three_zsmul_some_eq_zero_of_Ψ₃_eq_zero` (field, Ψ₃-vanishing ⟹ 3-torsion given 2P ≠ 0; via the
+project `Ψ₃_eval_X` bridge + doubling formula), and the master criterion
+`nowhereOrderLEThree_of_forall_geom`: if no `a • (x̄, ȳ)` (`0 < a ≤ 3`) dies at any algebraically
+closed geometric point of `Spec A`, then `NowhereOrderLEThree W x y` — the T-E1 input. These are
+the converses of the vendored `twiceNeZero_of_isUnit`/`thriceNeZero_of_isUnit` plus the
+maximal-ideal globalisation (Loeffler Prop 3.3.4 hypothesis, p. 13).
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs); atlas
+file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length scan
+clean. `#print axioms` for all three new declarations lists only
+`[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` — pure algebra, no gates).

@@ -961,4 +961,165 @@ theorem atlasLocal_projModelVCIso_injective (C₁ C₂ : WeierstrassCurve.Variab
 
 end PointedComparison
 
+section OrderDictionary
+
+/-! ### B2-ii ring core: the fibrewise-order ⟹ unit dictionary
+
+Loeffler Prop 3.3.4's hypothesis *"`P, 2P, 3P ≠ 0` in any fibre"* (p. 13) enters T-E1
+(`exists_unique_variableChange_isTateNormal`) as the unit condition `NowhereOrderLEThree`.
+This section proves the bridge: over a field, vanishing of `ψ₂` at an affine point forces
+`2P = 0`, and vanishing of `Ψ₃` forces `3P = 0` once `2P ≠ 0` — the converses of the vendored
+`twiceNeZero_of_isUnit` / `thriceNeZero_of_isUnit` (`ForMathlib/TateNormalForm.lean`).  Hence a
+point none of whose multiples `a • P` (`0 < a ≤ 3`) dies at any geometric point of `Spec A` has
+its `ψ₂ψ₃`-value outside every maximal ideal of `A`, i.e. a unit. -/
+
+variable {F : Type u} [Field F] [DecidableEq F]
+
+/-- Over a field, vanishing of `ψ₂` at an affine point makes it `2`-torsion: `y = negY x y`,
+so the point equals its own negative.  Converse of `Affine.Point.twiceNeZero_of_isUnit`. -/
+lemma two_zsmul_some_eq_zero_of_ψ₂_eq_zero {W : WeierstrassCurve F} {x y : F}
+    (hns : W.toAffine.Nonsingular x y) (h2 : W.ψ₂.evalEval x y = 0) :
+    (2 : ℤ) • (WeierstrassCurve.Affine.Point.some x y hns) = 0 := by
+  have hy : y = W.toAffine.negY x y := by
+    rw [WeierstrassCurve.ψ₂, WeierstrassCurve.Affine.evalEval_polynomialY] at h2
+    rw [WeierstrassCurve.Affine.negY]
+    linear_combination h2
+  rw [two_zsmul]
+  exact WeierstrassCurve.Affine.Point.add_self_of_Y_eq hy
+
+/-- Over a field, vanishing of the `3`-division polynomial at a non-`2`-torsion affine point
+makes it `3`-torsion: the doubling formula gives `x(2P) = x`, so `2P = ±P`, and `2P = P` is
+excluded.  Converse of `Affine.Point.thriceNeZero_of_isUnit`. -/
+lemma three_zsmul_some_eq_zero_of_Ψ₃_eq_zero {W : WeierstrassCurve F} {x y : F}
+    (hns : W.toAffine.Nonsingular x y) (hy2 : y ≠ W.toAffine.negY x y)
+    (h3 : W.Ψ₃.eval x = 0) :
+    (3 : ℤ) • (WeierstrassCurve.Affine.Point.some x y hns) = 0 := by
+  haveI : (WeierstrassCurve.Affine.Point.some x y hns).NeZero :=
+    ⟨WeierstrassCurve.Affine.Point.some_ne_zero hns⟩
+  -- the `ThriceNeZero` quantity vanishes (project bridge `Ψ₃_eval_X`)
+  have hkey := (WeierstrassCurve.Affine.Point.some x y hns).Ψ₃_eval_X
+  simp only [WeierstrassCurve.Affine.Point.X_some, WeierstrassCurve.Affine.Point.Y_some,
+    WeierstrassCurve.Affine.Point.pX, WeierstrassCurve.Affine.Point.pY, h3] at hkey
+  -- the `pY`-value is nonzero
+  have hd : y - W.toAffine.negY x y ≠ 0 := sub_ne_zero_of_ne hy2
+  have hdval : y - W.toAffine.negY x y = 2 * y + W.a₁ * x + W.a₃ := by
+    rw [WeierstrassCurve.Affine.negY]; ring
+  -- the doubling formula fixes the `x`-coordinate
+  have hslope : W.toAffine.slope x x y y =
+      (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄ - W.a₁ * y) / (2 * y + W.a₁ * x + W.a₃) := by
+    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hy2, hdval]
+  rw [hdval] at hd
+  have hℓ : (2 * y + W.a₁ * x + W.a₃) * W.toAffine.slope x x y y
+      = 3 * x ^ 2 + 2 * W.a₂ * x + W.a₄ - W.a₁ * y := by
+    rw [hslope]
+    field_simp
+  have hx2 : W.toAffine.addX x x (W.toAffine.slope x x y y) = x := by
+    have hgoal : (2 * y + W.a₁ * x + W.a₃) ^ 2 *
+        W.toAffine.addX x x (W.toAffine.slope x x y y)
+        = (2 * y + W.a₁ * x + W.a₃) ^ 2 * x := by
+      rw [WeierstrassCurve.Affine.addX]
+      linear_combination ((2 * y + W.a₁ * x + W.a₃) * W.toAffine.slope x x y y
+        + (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄ - W.a₁ * y)
+        + W.a₁ * (2 * y + W.a₁ * x + W.a₃)) * hℓ + hkey
+    exact mul_left_cancel₀ (pow_ne_zero 2 hd) hgoal
+  -- `2P` in coordinates
+  have hdup := WeierstrassCurve.Affine.Point.add_self_of_Y_ne (h₁ := hns) hy2
+  -- `x(2P) = x(P)` forces `2P = ±P`
+  have hcases := WeierstrassCurve.Affine.Point.X_eq_iff
+    (h₁ := WeierstrassCurve.Affine.nonsingular_add hns hns
+      (fun hxy => hy2 hxy.right)) (h₂ := hns) |>.mp hx2
+  have h3P : (3 : ℤ) • WeierstrassCurve.Affine.Point.some x y hns =
+      (WeierstrassCurve.Affine.Point.some x y hns +
+        WeierstrassCurve.Affine.Point.some x y hns) +
+        WeierstrassCurve.Affine.Point.some x y hns := by
+    rw [show (3 : ℤ) = 2 + 1 by norm_num, add_zsmul, two_zsmul, one_zsmul]
+  rw [h3P, hdup]
+  rcases hcases with hPP | hPneg
+  · -- `2P = P` forces `P = 0`, impossible for an affine point
+    exfalso
+    have h0 : WeierstrassCurve.Affine.Point.some x y hns = 0 := by
+      have hcancel := hdup.trans hPP
+      rwa [add_eq_left] at hcancel
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hns h0
+  · rw [hPneg]
+    exact neg_add_cancel _
+
+variable {A : Type u} [CommRing A]
+
+/-- **(B2-ii, the order ⟹ unit criterion)** If no multiple `a • P` (`0 < a ≤ 3`) of the affine
+point `(x, y)` of the elliptic `W/A` vanishes at any geometric point of `Spec A`, then the
+`ψ₂ψ₃`-value at `(x, y)` is a unit — i.e. `NowhereOrderLEThree W x y`, the input of T-E1.
+A non-unit lies in a maximal ideal `m`; over `k := AlgebraicClosure (A ⧸ m)` the product of the
+division-polynomial values vanishes, so `2 • P` or `3 • P` dies there by the two converses
+above. -/
+theorem nowhereOrderLEThree_of_forall_geom (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y)
+    (h : ∀ (k : Type u) [Field k] [DecidableEq k] [IsAlgClosed k] [Algebra A k]
+      (hns : (W.baseChange k).toAffine.Nonsingular (algebraMap A k x) (algebraMap A k y)),
+      ∀ a : ℕ, 0 < a → a ≤ 3 →
+        (a : ℤ) • (WeierstrassCurve.Affine.Point.some (algebraMap A k x)
+          (algebraMap A k y) hns) ≠ 0) :
+    NowhereOrderLEThree W x y := by
+  classical
+  rw [NowhereOrderLEThree]
+  by_contra hunit
+  obtain ⟨m, hmax, hm⟩ := Ideal.exists_le_maximal _ (mt Ideal.span_singleton_eq_top.mp hunit)
+  haveI := hmax
+  letI : Field (A ⧸ m) := Ideal.Quotient.field m
+  letI k : Type u := AlgebraicClosure (A ⧸ m)
+  letI : Algebra A k := ((algebraMap (A ⧸ m) k).comp (Ideal.Quotient.mk m)).toAlgebra
+  have halg : (algebraMap A k) = (algebraMap (A ⧸ m) k).comp (Ideal.Quotient.mk m) := rfl
+  -- the product of division-polynomial values dies in `k`
+  have hv : algebraMap A k ((W.Ψ 2).evalEval x y * (W.Ψ 3).evalEval x y) = 0 := by
+    rw [halg, RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem.mpr
+      (Ideal.span_le.mp hm (Set.mem_singleton _)), map_zero]
+  -- fibre instances and the fibre point
+  haveI : (W.baseChange k).IsElliptic :=
+    inferInstanceAs ((W.map (algebraMap A k)).IsElliptic)
+  have hEk : (W.baseChange k).toAffine.Equation (algebraMap A k x) (algebraMap A k y) := by
+    rw [WeierstrassCurve.Affine.equation_iff] at hxy
+    have hxy' := congrArg (algebraMap A k) hxy
+    simp only [map_add, map_mul, map_pow] at hxy'
+    rw [WeierstrassCurve.Affine.equation_iff]
+    simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
+      WeierstrassCurve.toAffine]
+    linear_combination hxy'
+  have hns : (W.baseChange k).toAffine.Nonsingular (algebraMap A k x) (algebraMap A k y) :=
+    (WeierstrassCurve.Affine.equation_iff_nonsingular).mp hEk
+  -- the two division-polynomial values over `k`
+  have hψ₂k : (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) =
+      algebraMap A k ((W.Ψ 2).evalEval x y) := by
+    rw [WeierstrassCurve.Ψ_two, WeierstrassCurve.ψ₂, WeierstrassCurve.ψ₂,
+      WeierstrassCurve.Affine.evalEval_polynomialY,
+      WeierstrassCurve.Affine.evalEval_polynomialY]
+    simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃,
+      WeierstrassCurve.toAffine, map_add, map_mul, map_ofNat]
+  have hΨ₃k : (W.baseChange k).Ψ₃.eval (algebraMap A k x) =
+      algebraMap A k ((W.Ψ 3).evalEval x y) := by
+    rw [WeierstrassCurve.Ψ_three, Polynomial.evalEval_C, WeierstrassCurve.baseChange,
+      WeierstrassCurve.map_Ψ₃, Polynomial.eval_map, Polynomial.eval₂_at_apply]
+  -- the vanishing product splits
+  have hprod : (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) *
+      (W.baseChange k).Ψ₃.eval (algebraMap A k x) = 0 := by
+    rw [hψ₂k, hΨ₃k, ← map_mul]
+    exact hv
+  rcases mul_eq_zero.mp hprod with h2 | h3
+  · exact h k hns 2 two_pos (by norm_num)
+      (by exact_mod_cast two_zsmul_some_eq_zero_of_ψ₂_eq_zero hns h2)
+  · by_cases h2 : (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) = 0
+    · exact h k hns 2 two_pos (by norm_num)
+        (by exact_mod_cast two_zsmul_some_eq_zero_of_ψ₂_eq_zero hns h2)
+    · have hy2 : algebraMap A k y ≠
+          (W.baseChange k).toAffine.negY (algebraMap A k x) (algebraMap A k y) := by
+        intro hy
+        apply h2
+        rw [WeierstrassCurve.ψ₂, WeierstrassCurve.Affine.evalEval_polynomialY]
+        rw [WeierstrassCurve.Affine.negY] at hy
+        linear_combination hy
+      exact h k hns 3 three_pos (by norm_num)
+        (by exact_mod_cast three_zsmul_some_eq_zero_of_Ψ₃_eq_zero hns hy2 h3)
+
+end OrderDictionary
+
 end ModularCurves
