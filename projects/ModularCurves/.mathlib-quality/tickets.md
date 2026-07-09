@@ -12632,3 +12632,11 @@ Nullstellensatz hinge. Next c2 sub-lemma = the field-case cover (per-prime non-v
 over [IsDomain R][IsJacobsonRing R], GLC wants general-R/[W.IsElliptic] → base-change transport from
 the universal ring is the c4.5 mechanism) → mulModelHom → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12
 → T-W7a. addOn_agree DONE un-gates the mulModelHom glue.
+
+## Amendments v10.91 (2026-07-09, coordinator): NEW-ATLAS rate-limited at a clean pushed boundary — NEW-ATLAS-2 chartered to finish the classifying clause
+
+- NEW-ATLAS's state is fully banked (through 98fab3c8f on origin/dev/modular-curves-y1-atlas;
+  worktree aintlib-mc-atlas clean). Remaining deliverable = the classifying clause proper
+  (exists_tatePoint's ∀-part) + the ONE completion PR. **NEW-ATLAS-2** (fresh account)
+  inherits the charter; full handover in inbox/NEW-ATLAS-2.md (+ owner relay). NEW-ATLAS
+  reclaims at a boundary on return per the standard rule.
