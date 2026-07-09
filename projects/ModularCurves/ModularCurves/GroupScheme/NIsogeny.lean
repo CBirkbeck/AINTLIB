@@ -735,8 +735,91 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
           RingHom.comp_apply]
         exact IsLocalization.map_units _ ⟨algebraMap R A g, Submonoid.mem_powers _⟩
       rwa [(hu.pow (K' + k)).mul_right_eq_zero] at h0
-    -- Step 2+3: the condition holds over each `A[1/b t]`, and glues over the cover
-    sorry
+    -- Step 2: the condition holds over each `A[1/b t]` (patch interface + step 1)
+    have hPt : ∀ t : T,
+        Module.Flat (Localization.Away (algebraMap R A (gfun (pf t))))
+          ((Localization.Away (algebraMap R A (gfun (pf t)))) ⊗[R] M) ∧
+        ∀ q : PrimeSpectrum (Localization.Away (algebraMap R A (gfun (pf t)))),
+          Module.rankAtStalk
+            ((Localization.Away (algebraMap R A (gfun (pf t)))) ⊗[R] M) q = n := by
+      intro t
+      set g := gfun (pf t) with hgdef
+      set b := algebraMap R A g with hbdef
+      letI : Algebra (Localization.Away g) (Localization.Away b) :=
+        (Localization.awayMap (algebraMap R A) g).toAlgebra
+      haveI : IsScalarTower R (Localization.Away g) (Localization.Away b) := by
+        refine IsScalarTower.of_algebraMap_eq' ?_
+        rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R A
+          (Localization.Away b)]
+        exact (IsLocalization.map_comp _).symm
+      refine (locallyFreeRankLocusAux_patch_iff (αfun (pf t)) (πfun (pf t))
+        (hπsurj (pf t)) (hexact (pf t))).mpr ?_
+      show (J (pf t)).map _ = ⊥
+      rw [RingHom.algebraMap_toAlgebra]
+      exact hJA t
+    -- the images of the subcover generate the unit ideal of `A`
+    have hTA : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t))) = ⊤ := by
+      have h1' : (1 : A) ∈ Ideal.map (algebraMap R A) (Ideal.span (↑T : Set R)) := by
+        simpa using Ideal.mem_map_of_mem (algebraMap R A) h1T
+      rw [Ideal.map_span] at h1'
+      have hset : (algebraMap R A) '' ↑T
+          = Set.range fun t : T => algebraMap R A (gfun (pf t)) := by
+        ext x
+        simp only [Set.mem_image, Set.mem_range]
+        constructor
+        · rintro ⟨y, hy, rfl⟩
+          refine ⟨⟨y, hy⟩, ?_⟩
+          show algebraMap R A (gfun (pf ⟨y, hy⟩)) = algebraMap R A y
+          rw [hpf ⟨y, hy⟩]
+        · rintro ⟨t, rfl⟩
+          refine ⟨gfun (pf t), ?_, rfl⟩
+          rw [hpf t]
+          exact t.2
+      rw [hset] at h1'
+      exact (Ideal.eq_top_iff_one _).mpr h1'
+    -- Step 3a: flatness glues over the cover
+    haveI hflatA : Module.Flat A (A ⊗[R] M) := by
+      refine Module.flat_of_localized_span A (A ⊗[R] M) _ hTA ?_
+      intro r
+      obtain ⟨t, ht⟩ := r.2
+      rw [← ht]
+      set b := algebraMap R A (gfun (pf t)) with hbdef
+      haveI hf1 : Module.Flat (Localization.Away b) ((Localization.Away b) ⊗[R] M) :=
+        (hPt t).1
+      haveI : Module.Flat (Localization.Away b)
+          ((Localization.Away b) ⊗[A] (A ⊗[R] M)) :=
+        Module.Flat.of_linearEquiv (TensorProduct.AlgebraTensorModule.cancelBaseChange
+          R A (Localization.Away b) (Localization.Away b) M)
+      haveI : Module.Flat A (Localization.Away b) :=
+        IsLocalization.flat _ (Submonoid.powers b)
+      haveI : Module.Flat A ((Localization.Away b) ⊗[A] (A ⊗[R] M)) :=
+        Module.Flat.trans A (Localization.Away b) _
+      exact Module.Flat.of_linearEquiv
+        ((LocalizedModule.equivTensorProduct (Submonoid.powers b)
+          (A ⊗[R] M)).restrictScalars A)
+    refine ⟨hflatA, fun q => ?_⟩
+    -- Step 3b: the rank at any prime is computed on a patch containing it
+    have hexists : ∃ t : T, algebraMap R A (gfun (pf t)) ∉ q.asIdeal := by
+      by_contra h
+      push_neg at h
+      have hle : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t)))
+          ≤ q.asIdeal := Ideal.span_le.mpr (by rintro _ ⟨t, rfl⟩; exact h t)
+      rw [hTA] at hle
+      exact q.2.ne_top (top_le_iff.mp hle)
+    obtain ⟨t, hqt⟩ := hexists
+    set b := algebraMap R A (gfun (pf t)) with hbdef
+    have hrange : q ∈ Set.range (PrimeSpectrum.comap
+        (algebraMap A (Localization.Away b))) := by
+      rw [PrimeSpectrum.localization_away_comap_range (Localization.Away b) b]
+      exact hqt
+    obtain ⟨q', hq'⟩ := hrange
+    have hbase := Module.rankAtStalk_baseChange (R := A) (M := A ⊗[R] M)
+      (S := Localization.Away b) q'
+    rw [hq'] at hbase
+    rw [← hbase, Module.rankAtStalk_eq_of_equiv
+      (TensorProduct.AlgebraTensorModule.cancelBaseChange R A (Localization.Away b)
+        (Localization.Away b) M)]
+    exact (hPt t).2 q'
 
 end LocallyFreeRankLocusAux
 
