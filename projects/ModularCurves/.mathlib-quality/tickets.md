@@ -12958,3 +12958,28 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   instances when Milestone 1 lands (checked at each session start), hypothesis-wired
   meanwhile. No gate anywhere on the critical path.
 - Next: Wave A execution ([HG-A1] first).
+
+### v10.94a (2026-07-09, c5β): ★★★ c4.5 GLC-WIRE LANDED — GLC.mulModelHom is REAL over every ring (sorries 20→10)
+
+The dispatched GLC wiring is DONE through the definitional layer, in one continuous run:
+
+1. **mulModelHom_projModelπ** (Global, 27bf4c1ad): the full π-compat propagation, piece →
+   OnImage (Ω-form) → family → addOnZ/addOnY → glue → mulModelHom ≫ π = fst ≫ π. Engineering
+   note boarded: in-context rw on ι/homOfLE composites whnf-explodes; hoist each collapse as a
+   standalone lemma + assemble by .trans/congrArg — ~7s per level.
+2. **Universe sweep** (12da30593): the whole AdditionChart tree Type → Type* (11 files; S/A pinned
+   to R's u in Spec-level files; 3 inline binders; chartAway/transRing ascriptions). Dissolves the
+   u≟0 wall that burned 200k heartbeats on pullbackMap ≫ mulModelHom. No external importers.
+3. **AdditionBaseChange.lean** (145e8771d): ULift atlas (WeierstrassAtlasRingU + instances +
+   universalWeierstrassLocU + classifyRingHomU + classifying property); the subst-proven
+   isPullback_projModelBaseChangeOf square (eqToHom quarantined inside projModelBaseChangeOf);
+   **mulModelHomBC** = the universal-property lift of (bc-product) ≫ mulModelHom_U, with
+   lift_fst = the naturality seed, lift_snd = mulModelHom_π for free.
+4. **GLC fill** (00c9bfa96): blOpenZ/blOpenY (:= Global's), mulModelHom (:= mulModelHomBC at the
+   classifying map), addOnZ/addOnY (:= ι-restrictions ⟹ ι-specs are rfl), blOpen_cover (:= c2),
+   addOn_agree (:= restrict_inf_agree — trivial by construction), mulModelHom_π (:= lift_snd).
+   ALL AXIOM-CLEAN, zero inherited sorryAx. T-W7.0c c1–c4 + T-W7.0d COMPLETE.
+
+**Remaining on the chain:** mulModelHom_map (GLC:~865, naturality — next, via lift-uniqueness
+pullback.hom_ext on the U-square) → mulModelHom_specPoints (c6) → group axioms → 0c-i → 0c-ii
+(BOARD-SIGNAL armed) → 0h → T-W7.12 → T-W7a.
