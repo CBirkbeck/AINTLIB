@@ -1501,6 +1501,167 @@ lemma isoImage_specBasicOpen_pieceGenι (g : biChartRing W i j) :
   exact isoImage_inv_morphismRestrict_ι (pieceι W i j) (chartPieceIso W i j)
     (specBasicOpen (CommRingCat.of (biChartRing W i j)) g)
 
+noncomputable abbrev crossPiece (k : Fin 3) : (pullback (projModelπ W) (projModelπ W)).Opens :=
+  pieceι W i j ''ᵁ ((chartPieceIso W i j).hom ⁻¹ᵁ
+    specBasicOpen (CommRingCat.of (biChartRing W i j))
+      (lawTwoTriple W i j k * lawOneTriple W i j k))
+
+noncomputable def crossPieceIso (k : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away
+        (lawTwoTriple W i j k * lawOneTriple W i j k))) ≅ (crossPiece W i j k).toScheme :=
+  (asIso ((Scheme.Hom.isoImage (pieceι W i j)
+        ((chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k * lawOneTriple W i j k))).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k * lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+        (lawTwoTriple W i j k * lawOneTriple W i j k)).inv)).symm
+
+lemma crossPieceIso_hom_ι (k : Fin 3) :
+    (crossPieceIso W i j k).hom ≫ (crossPiece W i j k).ι =
+      Spec.map (CommRingCat.ofHom (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k * lawOneTriple W i j k)))) ≫
+        (chartPieceIso W i j).inv ≫ pieceι W i j := by
+  rw [← pieceGenι_eq, crossPieceIso, Iso.symm_hom, asIso_inv, IsIso.inv_comp_eq]
+  exact (isoImage_specBasicOpen_pieceGenι W i j
+    (lawTwoTriple W i j k * lawOneTriple W i j k)).symm
+
+/-- crossPieceIso ≫ ι, Y-side: = Spec(awayPairRight) ≫ pieceAwayι(lawTwo_k). -/
+lemma crossPieceIso_hom_ι_awayPairRight (k : Fin 3) :
+    (crossPieceIso W i j k).hom ≫ (crossPiece W i j k).ι =
+      Spec.map (CommRingCat.ofHom
+        (awayPairRight R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        pieceAwayι W i j k := by
+  rw [crossPieceIso_hom_ι, pieceAwayι_eq, ← Spec.map_comp_assoc, ← CommRingCat.ofHom_comp]
+  congr 3
+  exact (RingHom.ext fun c => (awayPairRight_algebraMap R _ _ c).symm)
+
+/-- crossPieceIso ≫ ι, Z-side: = Spec(awayPairLeft) ≫ pieceGenι(lawOne_k). -/
+lemma crossPieceIso_hom_ι_awayPairLeft (k : Fin 3) :
+    (crossPieceIso W i j k).hom ≫ (crossPiece W i j k).ι =
+      Spec.map (CommRingCat.ofHom
+        (awayPairLeft R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        pieceGenι W i j (lawOneTriple W i j k) := by
+  rw [crossPieceIso_hom_ι, pieceGenι_eq, ← Spec.map_comp_assoc, ← CommRingCat.ofHom_comp]
+  congr 3
+  exact (RingHom.ext fun c => (awayPairLeft_algebraMap R _ _ c).symm)
+/-- crossPiece ≤ the k-th Y-piece image (D(lawTwo_k·lawOne_k) ⊆ D(lawTwo_k)). -/
+lemma crossPiece_le_blOpenYPieceImage (k : Fin 3) :
+    crossPiece W i j k ≤ pieceι W i j ''ᵁ blOpenYPieceFamily W i j k := by
+  show pieceι W i j ''ᵁ _ ≤ pieceι W i j ''ᵁ blOpenYPieceFamily W i j k
+  rw [blOpenYPieceFamily]; gcongr; exact specBasicOpen_mul_le_left _ _ _
+
+/-- crossPiece ≤ the k-th Z-piece image (D(lawTwo_k·lawOne_k) ⊆ D(lawOne_k)). -/
+lemma crossPiece_le_blOpenZPieceImage (k : Fin 3) :
+    crossPiece W i j k ≤ pieceι W i j ''ᵁ blOpenZPieceFamily W i j k := by
+  show pieceι W i j ''ᵁ _ ≤ pieceι W i j ''ᵁ blOpenZPieceFamily W i j k
+  rw [blOpenZPieceFamily]; gcongr; exact specBasicOpen_mul_le_right _ _ _
+
+@[reassoc]
+lemma crossHom_sigma_awayPairRight (k : Fin 3) :
+    (crossPieceIso W i j k).hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (crossPiece_le_blOpenYPieceImage W i j k) ≫
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).inv =
+    Spec.map (CommRingCat.ofHom
+      (awayPairRight R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).inv ≫
+      pieceAwayι W i j k = (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι := by
+    rw [← isoImage_specBasicOpen_pieceAwayι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceAwayι W i j k)]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact crossPieceIso_hom_ι_awayPairRight W i j k
+
+@[reassoc]
+lemma crossHom_sigma_awayPairLeft (k : Fin 3) :
+    (crossPieceIso W i j k).hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (crossPiece_le_blOpenZPieceImage W i j k) ≫
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv =
+    Spec.map (CommRingCat.ofHom
+      (awayPairLeft R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv ≫
+      pieceGenι W i j (lawOneTriple W i j k) = (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι := by
+    simp only [blOpenZPieceFamily]
+    rw [← isoImage_specBasicOpen_pieceGenι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceGenι W i j (lawOneTriple W i j k))]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact crossPieceIso_hom_ι_awayPairLeft W i j k
+
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+/-- **(c3, per-crossPiece agreement)** On the overlap piece `crossPiece k = D(lawTwo_k·lawOne_k)`, the
+Z-law and Y-law image morphisms agree. Precompose with the affine iso `crossPieceIso` (cancel_epi); L1
+turns each into `σ ≫ pieceMor`, the σ-cancels turn `crossPieceIso.hom ≫ σ` into `Spec(awayPair)`, and
+`addOnYPieceMor_eq_addOnZPieceMor` identifies them. Fully term-mode. -/
+lemma crossPiece_addOn_agree (hΔ : IsUnit W.Δ) (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((crossPiece_le_blOpenZPieceImage W i j k).trans
+          ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((crossPiece_le_blOpenYPieceImage W i j k).trans
+          ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))) ≫
+        addOnYOnImage W hΔ i j := by
+  have eZ : (crossPieceIso W i j k).hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((crossPiece_le_blOpenZPieceImage W i j k).trans
+          ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      Spec.map (CommRingCat.ofHom
+        (awayPairLeft R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        addOnZPieceMor W i j k hΔ :=
+    (congrArg ((crossPieceIso W i j k).hom ≫ ·)
+        (homOfLE_addOnZOnImage_eq W i j hΔ k (crossPiece W i j k)
+          (crossPiece_le_blOpenZPieceImage W i j k))).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnZPieceMor W i j k hΔ) (crossHom_sigma_awayPairLeft W i j k)))
+  have eY : (crossPieceIso W i j k).hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((crossPiece_le_blOpenYPieceImage W i j k).trans
+          ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))) ≫
+        addOnYOnImage W hΔ i j =
+      Spec.map (CommRingCat.ofHom
+        (awayPairRight R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        addOnYPieceMor W i j k hΔ :=
+    (congrArg ((crossPieceIso W i j k).hom ≫ ·)
+        (homOfLE_addOnYOnImage_eq W i j hΔ k (crossPiece W i j k)
+          (crossPiece_le_blOpenYPieceImage W i j k))).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnYPieceMor W i j k hΔ) (crossHom_sigma_awayPairRight W i j k)))
+  exact (cancel_epi (crossPieceIso W i j k).hom).mp
+    (eZ.trans (((addOnYPieceMor_eq_addOnZPieceMor W i j hΔ k).symm).trans eY.symm))
+
+
+/-- **(c3, same-chart addOn_agree)** On a single chart-product `(i,j)`, the Z-law and Y-law image
+morphisms agree on their whole overlap `blOpenZImage ⊓ blOpenYImage`. Cover.hom_ext over the crossPiece
+cover (`blOpenZImage_inf_blOpenYImage_eq_iSup`) → `crossPiece_addOn_agree`. -/
+lemma addOnZOnImage_eq_addOnYOnImage (hΔ : IsUnit W.Δ)
+    (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenZImage W i j) (hl : Ω ≤ blOpenYImage W i j)
+    (hΩ : Ω = ⨆ k, crossPiece W i j k) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnYOnImage W hΔ i j := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun k : Fin 3 => crossPiece W i j k)) _ _ (fun k => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover (fun k : Fin 3 => crossPiece W i j k)).f k =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun k : Fin 3 => crossPiece W i j k) k) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ k) hk (addOnZOnImage W hΔ i j)).trans
+    ((crossPiece_addOn_agree W i j hΔ k).trans
+      (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ k) hl (addOnYOnImage W hΔ i j)).symm)
+
 end OverlapCrossLaw
 
 end WeierstrassCurve.Projective
