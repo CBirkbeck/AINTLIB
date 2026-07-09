@@ -9436,7 +9436,25 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   Key elaboration fix: state the `.1`-level bridges as `have`s where `iso.hom`'s codomain is
   *inferred* as `(baseChange).E` (matching `zero_curveIsoPullback`), dodging the `pullback … =
   (baseChange).E` syntactic mismatch. Reused my own D1 `zsmul_pull_baseChange_asSection_iff`.
-- **[Y1-D3] SCOPED + DE-RISKED, NOT STARTED (NEW-Y1, v10.85 — credits-tight boundary)**:
+- **★ [Y1-D3] DONE (NEW-Y1, v10.87, `f16ae3bc8` pushed) — T-E7 REPRESENTABILITY HALF PROVEN.**
+  `yOne_representableBy` = `Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N))`
+  fully proven. **The crux collapsed**: `yOneEllObj = tateEllObj.pullbackAlong yOneBase`
+  *definitionally*, so the EllHom-rebuild is the pre-proven `EllObj.homPullbackAlongEquiv`
+  (QuotientProblem.lean) — `(Y ⟶ yOneEllObj) ≃ {(g, factorisation) // h ≫ yOneBase = g.baseHom}`; no
+  manual `pullback.lift`/`of_right`/`zero_w` (my hand-rolled `yOneToTate`/`yOneLift` were deleted,
+  superseded). `homEquiv = homPullbackAlongEquiv.trans (Equiv.ofBijective classifier)`: `ofBijective`
+  gives the round-trip laws free — inj via `tatePoint_classifies` uniqueness + `cancel_mono (yOneBase)`
+  (yOneBase mono = openImm ι ≫ closedImm killedLocusπ), surj via the atlas ∃ + bridge ∃. **bridge**
+  (D2 + D1): `Y.curve.IsNaiveGammaOne N (pullSection g tatePoint) ↔ g.baseHom factors through Y₁(N)`
+  = `isNaiveGammaOne_pullSection_iff.trans (factors_yOne_iff).symm`. Naturality (`homEquiv_comp`) via
+  `Category.assoc` + `EllHom.pullSection_comp`. Elaboration fix: `e2` must be `let` (not `have`) so its
+  `ofBijective` toFun reduces for the defeq `show` in naturality. `#print axioms` =
+  `[propext, sorryAx, Classical.choice, Quot.sound]`; `sorryAx` inherited only from the atlas
+  classifier `tatePoint_classifies` (← `exists_tatePoint`, NEW-ATLAS's registered pin) and D2's route-a
+  primitive — **both designed, no fresh sorry**. **STREAM-Y1 D-track (D1+D2+D3) complete.** Parking per
+  v10.87 ("after D3: park until the NEW-ATLAS PR or T-W7a"). Remaining YOneAssembly sorries are the
+  E-track (E1/E2/E3/E5/E6 affine+smooth, gate BB-DIFF) + exists_tatePoint (atlas) — not D-track.
+- **[Y1-D3] plan (superseded by DONE above; kept for provenance) — scoped v10.85**:
   `yOne_representableBy` = `Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N))`.
   All deps on-branch (`tatePoint_classifies` [atlas-sorried, inherited], D1 `factors_yOne_iff`
   [proven], D2 [proven], `EllHom.pullSection_comp`, `gammaOneNaiveProblem` [map-sorried, inherited]).
