@@ -92,4 +92,25 @@ theorem chartAwayHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
   congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
     (chartHomOfTriple_lawOne_eq_lawTwo W i j k u v φ t s hts hss hu hv ht hs)
 
+/-- **(β4(b), general form)** Two triples `s`, `t` in `S`, regular at index `k` (witnesses `v`, `u`),
+whose `2×2` minors vanish (`s m * t k = s k * t m` for all `m`), induce the same chart morphism. The
+minor hypothesis is exactly what `ratio_eq_of_minor` needs; `chartHomOfTriple_lawOne_eq_lawTwo` is the
+`lawOne`/`lawTwo` instance. -/
+theorem chartHomOfTriple_cross_eq (k : Fin 3) (u v : S) (t s : Fin 3 → S)
+    (hmin : ∀ m, s m * t k = s k * t m) (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartHomOfTriple W k s v hv hs = chartHomOfTriple W k t u hu ht :=
+  chartHomOfTriple_congr W k t s u v hu hv ht hs
+    fun m => ratio_eq_of_minor t s u v k m hu hv (hmin m)
+
+/-- The `chartAway` form of `chartHomOfTriple_cross_eq`. -/
+theorem chartAwayHomOfTriple_cross_eq (k : Fin 3) (u v : S) (t s : Fin 3 → S)
+    (hmin : ∀ m, s m * t k = s k * t m) (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartAwayHomOfTriple W k s v hv hs = chartAwayHomOfTriple W k t u hu ht :=
+  congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
+    (chartHomOfTriple_cross_eq W k u v t s hmin hu hv ht hs)
+
 end WeierstrassCurve.Projective

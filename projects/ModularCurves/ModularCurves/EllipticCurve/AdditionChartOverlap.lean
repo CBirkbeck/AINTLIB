@@ -333,6 +333,86 @@ theorem pieceMorOfTriple_agree (t : Fin 3 → A)
   rw [hk, hl]
   exact chartι_comp_specMap_chartAwayHom_eq W k l hkl _ _ _ hTk hTl hTeq
 
+/-- **(c3, general per-piece cross-triple agreement)** Two on-curve triples `t`, `s` in an
+`R`-algebra `A` with vanishing `2×2` minors (`s m * t k = s k * t m`) — their `k`-th piece
+morphisms agree over the common regular locus `D(t k · s k)`. SAME index `k` (`isUnit_of_minor`),
+so — unlike the within-law `pieceMorOfTriple_agree` — no cross-index crux is needed: both localise
+to `chartAwayHomOfTriple k`, which agree by `chartAwayHomOfTriple_cross_eq`. -/
+theorem pieceMorOfTriple_cross_agree (t s : Fin 3 → A)
+    (ht : (W.map (algebraMap R A)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R A)).toProjective.Equation s) (k : Fin 3)
+    (hmin : ∀ m, s m * t k = s k * t m) :
+    Spec.map (CommRingCat.ofHom (awayPairRight R (t k) (s k)).toRingHom) ≫
+        pieceMorOfTriple W t ht k =
+      Spec.map (CommRingCat.ofHom (awayPairLeft R (t k) (s k)).toRingHom) ≫
+        pieceMorOfTriple W s hs k := by
+  have hTeqt : (W.map (algebraMap R (Localization.Away (t k * s k)))).toProjective.Equation
+      (fun m => algebraMap A (Localization.Away (t k * s k)) (t m)) := equation_mapTriple W t ht
+  have hTeqs : (W.map (algebraMap R (Localization.Away (t k * s k)))).toProjective.Equation
+      (fun m => algebraMap A (Localization.Away (t k * s k)) (s m)) := equation_mapTriple W s hs
+  have hTk : algebraMap A (Localization.Away (t k * s k)) (t k) *
+      awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k)) = 1 := by
+    rw [← awayPairRight_algebraMap R (t k) (s k) (t k), ← map_mul,
+      IsLocalization.Away.mul_invSelf, map_one]
+  have hSk : algebraMap A (Localization.Away (t k * s k)) (s k) *
+      awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)) = 1 := by
+    rw [← awayPairLeft_algebraMap R (t k) (s k) (s k), ← map_mul,
+      IsLocalization.Away.mul_invSelf, map_one]
+  have halgt : (awayPairRight R (t k) (s k)).comp
+      (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k)) (t m))
+        (IsLocalization.Away.invSelf (t k)) (IsLocalization.Away.mul_invSelf _)
+        (equation_mapTriple W t ht)) =
+      chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (t m))
+        (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k))) hTk hTeqt := by
+    rw [← chartAwayHomOfTriple_naturality W (awayPairRight R (t k) (s k)) k
+      (fun m => algebraMap A (Localization.Away (t k)) (t m))
+      (IsLocalization.Away.invSelf (t k)) (IsLocalization.Away.mul_invSelf _)
+      (equation_mapTriple W t ht)
+      (by rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one])
+      (by simpa only [awayPairRight_algebraMap] using hTeqt)]
+    exact chartAwayHomOfTriple_congr W k _ _ _
+      (funext fun m => awayPairRight_algebraMap R (t k) (s k) (t m)) _ _ hTk hTeqt
+  have halgs : (awayPairLeft R (t k) (s k)).comp
+      (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (s k)) (s m))
+        (IsLocalization.Away.invSelf (s k)) (IsLocalization.Away.mul_invSelf _)
+        (equation_mapTriple W s hs)) =
+      chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (s m))
+        (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k))) hSk hTeqs := by
+    rw [← chartAwayHomOfTriple_naturality W (awayPairLeft R (t k) (s k)) k
+      (fun m => algebraMap A (Localization.Away (s k)) (s m))
+      (IsLocalization.Away.invSelf (s k)) (IsLocalization.Away.mul_invSelf _)
+      (equation_mapTriple W s hs)
+      (by rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one])
+      (by simpa only [awayPairLeft_algebraMap] using hTeqs)]
+    exact chartAwayHomOfTriple_congr W k _ _ _
+      (funext fun m => awayPairLeft_algebraMap R (t k) (s k) (s m)) _ _ hSk hTeqs
+  have hkt : Spec.map (CommRingCat.ofHom (awayPairRight R (t k) (s k)).toRingHom) ≫
+      pieceMorOfTriple W t ht k =
+      Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (t m))
+          (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k)))
+          hTk hTeqt).toRingHom) ≫ chartι W k := by
+    rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    congr 2
+    exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halgt)
+  have hks : Spec.map (CommRingCat.ofHom (awayPairLeft R (t k) (s k)).toRingHom) ≫
+      pieceMorOfTriple W s hs k =
+      Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (s m))
+          (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)))
+          hSk hTeqs).toRingHom) ≫ chartι W k := by
+    rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    congr 2
+    exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halgs)
+  rw [hkt, hks]
+  exact congrArg (fun f : chartAway W k →ₐ[R] _ => Spec.map (CommRingCat.ofHom f.toRingHom) ≫ chartι W k)
+    (chartAwayHomOfTriple_cross_eq W k
+      (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k)))
+      (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)))
+      (fun m => algebraMap A (Localization.Away (t k * s k)) (t m))
+      (fun m => algebraMap A (Localization.Away (t k * s k)) (s m))
+      (fun m => by rw [← map_mul, hmin m, map_mul]) hTk hSk hTeqt hTeqs).symm
+
 section BosmaLenstra
 
 variable (i j : Fin 3) [IsJacobsonRing R] [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ)
@@ -370,6 +450,22 @@ theorem addOnZPieceMor_agree (k l : Fin 3) (hkl : l ≠ k) :
         addOnZPieceMor W i j l hΔ := by
   rw [addOnZPieceMor_eq, addOnZPieceMor_eq]
   exact pieceMorOfTriple_agree W _ _ k l hkl
+
+/-- **(c3, per-piece cross-law agreement)** On `D(lawTwo_k · lawOne_k)`, the k-th law-2 piece and the
+k-th law-1 piece of the two Bosma–Lenstra laws agree. `pieceMorOfTriple_cross_agree` at the two triples,
+fed the certified minors `lawOneTriple_mul_lawTwoTriple`. -/
+theorem addOnYPieceMor_eq_addOnZPieceMor (k : Fin 3) :
+    Spec.map (CommRingCat.ofHom
+        (awayPairRight R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        addOnYPieceMor W i j k hΔ =
+      Spec.map (CommRingCat.ofHom
+        (awayPairLeft R (lawTwoTriple W i j k) (lawOneTriple W i j k)).toRingHom) ≫
+        addOnZPieceMor W i j k hΔ := by
+  rw [addOnYPieceMor_eq, addOnZPieceMor_eq]
+  exact pieceMorOfTriple_cross_agree W (lawTwoTriple W i j) (lawOneTriple W i j)
+    (equation_lawTwoTriple_of_isDomain W i j hΔ)
+    (equation_lawOneTriple_of_isDomain W i j hΔ) k
+    (fun m => lawOneTriple_mul_lawTwoTriple W i j m k)
 
 end BosmaLenstra
 
