@@ -1069,7 +1069,10 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
   -- (B) flatness transports through the identification to the ring side
   have hflat_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) ↔
       Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
-    sorry
+    rw [heP, ← Category.assoc, MorphismProperty.cancel_right_of_respectsIso (P := @Flat),
+      MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
+      HasRingHomProperty.Spec_iff (P := @Flat), CommRingCat.hom_ofHom,
+      RingHom.flat_algebraMap_iff]
   -- (C) the rank function transports likewise
   have hrank_iff : (∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
       ∀ q : PrimeSpectrum Γ(X, ⊤),
