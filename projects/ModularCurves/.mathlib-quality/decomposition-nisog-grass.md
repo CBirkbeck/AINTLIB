@@ -186,6 +186,18 @@ mathlib `Scheme.GlueData` (CategoryTheory.GlueData fields J/U/V/f/t/t_id/t'/t_fa
   reduced to ring-level composites, closed by [GR-E4]'s inverse-pair + [GR-F3] +
   `IsLocalization.ringHom_ext`² on the double localizations. No tensor-algebra of Aways
   needed anywhere (all maps built by universal properties, never by explicit tensors).
+- **t'-leg refinement (2026-07-10, post-F3)**: with `D := Away(det ιι') ⊗[ChartRing ι]
+  Away(det ιι'')` (the `pullbackSpecIso` presentation), set `base₁ : ChartRing ι' →+* D
+  := includeLeftRingHom ∘ ringHom ι ι'`. Then: leg from `Away(det ι'ι)` :=
+  `Away.lift base₁` at `det ι'ι` — unit by [GR-F1] `isUnit_ringHom_det` mapped along
+  includeLeft; leg from `Away(det ι'ι'')` := `Away.lift base₁` at `det ι'ι''` — unit by
+  [GR-F3] `isUnit_map_ringHom_det_triple` with `g := includeLeftRingHom`, whose `hg`
+  (embedded `det ιι''` is a unit in D) holds by the BASE-ELEMENT SLIDE:
+  `algebraMap(d'') ⊗ₜ 1 = 1 ⊗ₜ algebraMap(d'')` in `S ⊗[A] T` for `d'' ∈ A`, and the
+  right side is `includeRight` of a unit of `Away(det ιι'')`. The two legs share `base₁`
+  so `Algebra.TensorProduct.lift`-compatibility over `ChartRing ι'` is definitional
+  (commutativity of images is trivial in the commutative D). t'-scheme :=
+  `(pullbackSpecIso ι-side).hom ≫ Spec.map (ofHom t'ring) ≫ (pullbackSpecIso ι'-side).inv`.
 
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
