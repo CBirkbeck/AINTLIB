@@ -854,8 +854,10 @@ noncomputable def yOneOpens : ((tateUniversal R).killedLocus (tatePoint R) N).Op
   ⟨yOneSet R N, yOneSet_isOpen R N⟩
 
 /-- **The scheme `Y₁(N)` over `R`** (Loeffler Def 3.3.6: for `R = ℤ[1/N]` this is
-`Y₁(N)_{ℤ[1/N]}`; general `R` with `N` invertible is the same construction over `R`). -/
-noncomputable def yOne : Scheme.{u} :=
+`Y₁(N)_{ℤ[1/N]}`; general `R` with `N` invertible is the same construction over `R`).
+Reducible so `yOne R N` unifies with `↑(yOneOpens R N)` (the open-immersion domain) without a
+`whnf`, mirroring `@[reducible] tateBase` (v10.72(b)). -/
+@[reducible] noncomputable def yOne : Scheme.{u} :=
   (yOneOpens R N).toScheme
 
 /-- The locally closed inclusion `Y₁(N) ⟶ 𝒴` into the Tate atlas: open into `Y_N`, closed
@@ -878,6 +880,28 @@ noncomputable def yOneEllObj : EllObj R where
   curve := (tateUniversal R).baseChange (yOneBase R N)
 
 /-! ### D. Representability (Loeffler Def 3.3.6: "By construction, this represents the functor") -/
+
+/-- **(Y1-D1, open-factoring split)** A morphism `t : T ⟶ 𝒴` factors through `Y₁(N)` iff it
+factors through the closed `Y_N` by a morphism whose topological image lands in the open
+`yOneSet`. Forward: precompose with the open immersion `yOneOpens.ι` (its range is `yOneSet`);
+backward: `IsOpenImmersion.lift`. -/
+theorem factors_yOne_iff_exists_range {T : Scheme.{u}} (t : T ⟶ tateBase R) :
+    (∃ h : T ⟶ yOne R N, h ≫ yOneBase R N = t) ↔
+      ∃ g : T ⟶ (tateUniversal R).killedLocus (tatePoint R) N,
+        g ≫ (tateUniversal R).killedLocusπ (tatePoint R) N = t ∧
+          Set.range g.base ⊆ yOneSet R N := by
+  have hr : Set.range (yOneOpens R N).ι.base = yOneSet R N := Scheme.Opens.range_ι _
+  constructor
+  · rintro ⟨h, hh⟩
+    refine ⟨h ≫ (yOneOpens R N).ι, ?_, ?_⟩
+    · rw [Category.assoc]; exact hh
+    · rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
+      exact (Set.image_subset_range _ _).trans hr.le
+  · rintro ⟨g, hg, hrange⟩
+    refine ⟨IsOpenImmersion.lift (yOneOpens R N).ι g (hr ▸ hrange), ?_⟩
+    show IsOpenImmersion.lift (yOneOpens R N).ι g (hr ▸ hrange) ≫
+      ((yOneOpens R N).ι ≫ (tateUniversal R).killedLocusπ (tatePoint R) N) = t
+    rw [← Category.assoc, IsOpenImmersion.lift_fac]; exact hg
 
 /-- **(Y1-D1, the locus ↔ functor comparison — the "by construction" core)** A morphism
 `t : T ⟶ 𝒴` factors through `Y₁(N)` iff the pulled-back marked point is a naive `Γ₁(N)`
