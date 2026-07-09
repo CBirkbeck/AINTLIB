@@ -13431,3 +13431,20 @@ defused with explicit `IsZariskiLocalAtTarget.restrict` haveI's, per the no-bump
   boundary-report option.
 - **NEXT session (NEW-GH)**: [02KM] assembly on the located route; then the
   MellWeierstrass cadence cleanup (tail). [02KL-CORE] routing = coordinator's call.
+
+### v10.94g (2026-07-10, c5β): [C6-e5] formula bridge PINNED — mathlib does the affine case algebra
+
+Scouted+pinned for the assembly: `Projective.toAffine_add [DecidableEq F] (hP)(hQ) : toAffine W
+(W.add P Q) = toAffine W P + toAffine W Q` (Projective/Point.lean:487 — ALL affine/slope/Z=0 cases
+done in mathlib) + `add_of_equiv/add_of_not_equiv` (add = dblXYZ / addXYZ by P≈Q) + `toAffine_smul`
++ `toAffineAddEquiv`. Case-bridge inside e5: Z-case triple = addXYZ Pk Qk with ψ witnessing the
+k-coordinate invertible ⟹ triple ≠ 0 ⟹ ¬Pk≈Qk forced (addXYZ_self' = 0), so triple = add;
+Y-case triple = dblAddXYZ: P≈Q → u²•dblXYZ = u²•add (dblAddXYZ_smul_left + dblAddXYZ_self);
+¬≈ → ∝ addXYZ = add via the certified minors + exists_eq_smul_of_cross_eq_zero (the
+equation_dblAddXYZ proof shape in AdditionLawField). Dictionary side: the descended coordinates
+(d2) are exactly toAffine-of-the-triple ratios at k=2; k≠2 chart cases reduce by the chartPointOfHom
+_factors_iff nonvanishing transfer or the same-point-different-chart dictionary lemmas
+(projModelPointsEquivEll's InZChart split — off-Z means the sum is the infinity point 0).
+Remaining: write mulModelHom_specPoints_atlas (over uWLU, all tools above), then the GLC fill via
+e1/e3/e4/e4a transport + the P,Q-input coordinate identification (d4b at the lift-point's fst/snd
+through the immersion equations).
