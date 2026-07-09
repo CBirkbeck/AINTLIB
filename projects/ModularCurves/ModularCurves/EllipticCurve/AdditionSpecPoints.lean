@@ -48,4 +48,16 @@ theorem specPoint_mulModelHom_of_blOpenY (W : WeierstrassCurve R) [W.IsElliptic]
     {h : Spec (CommRingCat.of K) ⟶ (blOpenY W).toScheme} (hh : h ≫ (blOpenY W).ι = g) :
     g ≫ mulModelHom W = h ≫ addOnY W := by
   rw [← hh, Category.assoc, blOpenY_ι_mulModelHom]
+/-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
+multiplication IS the glued two-law multiplication. -/
+theorem mulModelHom_universalWeierstrassLocU :
+    mulModelHom universalWeierstrassLocU.{u} =
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ := by
+  rw [mulModelHom]
+  rw [mulModelHomBC_congr (classifyRingHomU universalWeierstrassLocU.{u})
+    (RingHom.id _) classifyRingHomU_universalWeierstrassLocU
+    universalWeierstrassLocU universalWeierstrassLocU.isUnit_Δ
+    universalWeierstrassLocU (universalWeierstrassLocU_map_classifyRingHomU _) rfl]
+  exact mulModelHomBC_id universalWeierstrassLocU universalWeierstrassLocU.isUnit_Δ
 end ModularCurves

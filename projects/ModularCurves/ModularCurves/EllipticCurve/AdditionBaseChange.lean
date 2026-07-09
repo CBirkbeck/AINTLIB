@@ -294,6 +294,98 @@ theorem mulModelHomBC_map (G : U →+* R) (f : R →+* R') (W₀ : WeierstrassCu
       mulModelHomBC_projModelπ_assoc, pullback.lift_fst_assoc]
 end BaseChangeFunctoriality
 
+section IdCollapse
+
+/-- The universal curve classifies itself by the identity. -/
+theorem classifyRingHom_universalWeierstrassLoc :
+    classifyRingHom universalWeierstrassLoc = RingHom.id WeierstrassAtlasRing := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers universalWeierstrass.Δ)
+  have h1 : (classifyRingHom universalWeierstrassLoc).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing) =
+      classifyCoeffHom universalWeierstrassLoc := by
+    simp only [classifyRingHom, IsLocalization.Away.lift_comp]
+  rw [h1, RingHom.id_comp]
+  apply MvPolynomial.ringHom_ext
+  · intro n
+    simp [classifyCoeffHom]
+  · intro i
+    fin_cases i <;>
+      simp [classifyCoeffHom, universalWeierstrassLoc, universalWeierstrass,
+        map_a₁, map_a₂, map_a₃, map_a₄, map_a₆]
+
+variable {R : Type u} [CommRing R]
+
+/-- Base change along the identity is the identity (`Proj.map_id` through the graded quotient). -/
+theorem projModelBaseChange_id (W : WeierstrassCurve R) :
+    projModelBaseChange (RingHom.id R) W = 𝟙 (projModel W) := by
+  have bmk : ∀ p : MvPolynomial (Fin 3) R,
+      baseChangeGradedHom (RingHom.id R) W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (W.map (RingHom.id R))).toIdeal
+            (MvPolynomial.map (RingHom.id R) p) :=
+    fun p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded (RingHom.id R)) (projIdeal W)
+      (projIdeal (W.map (RingHom.id R))) (projIdeal_le_comap (RingHom.id R) W) p
+  have hgraded : baseChangeGradedHom (RingHom.id R) W = GradedRingHom.id _ := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (RingHom.id R) W (Ideal.Quotient.mk _ a) = Ideal.Quotient.mk _ a
+    rw [bmk]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_id a)
+  rw [projModelBaseChange]
+  refine Eq.trans ?_ Proj.map_id
+  congr 1
+/-- [C6-U3a] The ULift universal curve classifies itself by the identity. -/
+theorem classifyRingHomU_universalWeierstrassLocU :
+    classifyRingHomU universalWeierstrassLocU.{u} = RingHom.id (WeierstrassAtlasRingU.{u}) := by
+  suffices h : (classifyRingHomU universalWeierstrassLocU.{u}).comp
+      (ULift.ringEquiv (R := WeierstrassAtlasRing)).symm.toRingHom =
+      (RingHom.id (WeierstrassAtlasRingU.{u})).comp
+        (ULift.ringEquiv (R := WeierstrassAtlasRing)).symm.toRingHom by
+    refine RingHom.ext fun x => ?_
+    have hx := RingHom.congr_fun h (ULift.ringEquiv x)
+    simpa using hx
+  apply IsLocalization.ringHom_ext (Submonoid.powers universalWeierstrass.Δ)
+  have hcoe : (classifyRingHom universalWeierstrassLocU.{u}).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing) =
+      classifyCoeffHom universalWeierstrassLocU.{u} := by
+    simp only [classifyRingHom, IsLocalization.Away.lift_comp]
+  refine MvPolynomial.ringHom_ext (fun n => ?_) (fun i => ?_)
+  · simp [classifyRingHomU, RingHom.comp_apply]
+  · have hx := RingHom.congr_fun hcoe (MvPolynomial.X i)
+    rw [RingHom.comp_apply] at hx
+    simp only [classifyRingHomU, RingHom.comp_apply, RingHom.id_apply,
+      RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, RingEquiv.apply_symm_apply]
+    rw [hx]
+    fin_cases i <;>
+      simp [classifyCoeffHom, universalWeierstrassLocU, universalWeierstrassLoc,
+        universalWeierstrass, map_a₁, map_a₂, map_a₃, map_a₄, map_a₆]
+
+theorem projModelBaseChangeOf_id (W : WeierstrassCurve R) :
+    projModelBaseChangeOf (RingHom.id R) W W rfl = 𝟙 (projModel W) := by
+  rw [projModelBaseChangeOf]
+  exact (Category.id_comp _).trans (projModelBaseChange_id W)
+
+/-- The fibre-square base-change map at the identity is the identity. -/
+theorem pullbackMapBaseChangeOf_id (W : WeierstrassCurve R) :
+    pullbackMapBaseChangeOf (RingHom.id R) W W rfl = 𝟙 _ := by
+  apply pullback.hom_ext
+  · rw [pullbackMapBaseChangeOf, pullback.lift_fst, Category.id_comp,
+      projModelBaseChangeOf_id, Category.comp_id]
+  · rw [pullbackMapBaseChangeOf, pullback.lift_snd, Category.id_comp,
+      projModelBaseChangeOf_id, Category.comp_id]
+
+/-- At the identity, the base-change lift IS the two-law multiplication (lift uniqueness). -/
+theorem mulModelHomBC_id (W : WeierstrassCurve R) [IsDomain R] [IsJacobsonRing R]
+    (hΔ : IsUnit W.Δ) :
+    mulModelHomBC (RingHom.id R) W hΔ W rfl = WeierstrassCurve.Projective.mulModelHom W hΔ := by
+  apply (isPullback_projModelBaseChangeOf (RingHom.id R) W W rfl).hom_ext
+  · rw [mulModelHomBC_baseChange, pullbackMapBaseChangeOf_id, Category.id_comp,
+      projModelBaseChangeOf_id, Category.comp_id]
+  · rw [mulModelHomBC_projModelπ]
+    exact (WeierstrassCurve.Projective.mulModelHom_projModelπ W hΔ).symm
+
+end IdCollapse
+
+
 end ClassifyNaturality
 
 end BaseChangeOf
