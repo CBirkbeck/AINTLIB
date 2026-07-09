@@ -12097,3 +12097,51 @@ general form is not harder to state and Route D handles it.) `nonempty_pullback_
 docstring corrected to Route D (statement byte-identical). **Build order when execution resumes:
 (I) → (C) → ~20-line assembly.** DS-END0 two-route note unchanged (this leaf is pure
 module-pullback compat; does not touch p2's Cartier-duality lane).
+
+### v10.77 (2026-07-09, c5β): ★★★ [C4-HF-ASSEMBLY] hf-GLUE COMPLETE — BOTH B–L laws are now sorry-free scheme morphisms
+
+*The wall is gone and the assembly is DONE.* /buzz cleared the `specMap_psiFst_pieceAwayι` isDefEq
+timeout (root cause: reducible `abbrev`s `biChartRing`/`transRing` let isDefEq unfold the composite
+`Algebra biChartRing (Away g)` — `inferInstance ↦ 2534`), then L1→L5 landed for BOTH laws.
+
+**`addOnY` (commit 8daf12089) and `addOnZ` (commit 62edceb0e)** :
+`(blOpenY/Z W).toScheme ⟶ projModel W`, glued from the four chart pieces via
+`blOpenY/ZCover.glueMorphisms … (glueMorphisms_hf_of_agree … addOnY/ZFamily_agree)`. **Both
+`#print axioms`-clean** ([propext, Classical.choice, Quot.sound]). Build green (2959 jobs).
+
+**The session's commits (10):**
+- `461d79ca1` /buzz fix: `spec_map_comp_congr` (variable-ring barrier, ForMathlib) +
+  `psiFst_toRingHom_comp'` (`.trans` through the middle ring) → `specMap_psiFst_pieceAwayι` timeout→4.8k hb.
+- `23f54e5f6` L3 bridge: `w.hom ≫ ι = Spec(ψ_ij) ≫ σ` (two affine factorizations agree).
+- `9f1de8bbe` ψ_i'j' (psiSnd) + its σ-identification.
+- `612285ec3` L4: `specMap_psiFst_addOnYPieceMor_cross` (THE cross-chart ψ-agreement; decomposed into
+  clean-context sub-lemmas + `equation_mapTriple_algHom`; the general crux
+  `chartι_comp_specMap_chartAwayHom_smul_eq` + proportionality).
+- `35944284a` L5a: σ-cancel (via pieceAwayι mono) + `overlapPiece_addOnYOnImage_agree` (per-overlap,
+  fully term-mode so no rw motive touches the tower).
+- `8daf12089` L5 COMPLETE (Y): `addOnYOnImage_agree` (Cover.hom_ext over `blOpenYImage_inf_eq_iSup`
+  + `homOfLE_homOfLE_assoc`) → `addOnYFamily_agree` (16 fin_cases) → **`addOnY`**.
+- `62edceb0e` Z-MIRROR: 36-lemma `section OverlapZ` (lawOne/blOpenZ), structurally identical → **`addOnZ`**.
+
+**Engineering discipline that made it work (for the record / reuse):** the concrete triple-localization
+tower `S = Away(transAlgHom(lawTwo)·transHom(lawTwo'))` whnf-explodes under any `rw` motive check. Three
+patterns dissolve every wall: (a) **variable-ring barrier** lemmas (`spec_map_comp_congr`,
+`equation_mapTriple_algHom`) — stated over abstract rings, instantiated by structural match, isDefEq
+never sees `S`; (b) **route through the middle ring** `transRing` (element-level `algebraMap_biChartRing_eq`
+via `congrFun`/`.trans`, never the composite `algebraMap biChartRing S`); (c) **decompose into
+clean-context lemmas** — accumulating S-typed `have`s in one proof context explodes, so each hypothesis
+is its own lemma and the assembly body has an empty local context.
+
+**REMAINING to 0c-i (three items, none is hf-glue):**
+1. **[c4.5 wiring] — STRUCTURAL, FLAG (per v10.18/v10.22).** `Global.addOnY/addOnZ/blOpenY/blOpenZ` are
+   the real defs; `GroupLawConstruction.lean` still carries sorry *stubs* of the same names (it does NOT
+   import Global). Wiring = GLC imports Global + deletes its 4 stubs. Contained (no file references
+   `Projective.addOnY/blOpenY/mulModelHom` by name outside Global+GLC) BUT adds Global's heavy import to
+   GLC → transitively to ModelVariableChange / GroupLawDescent / MulByHomUnramified. **Coordinator: approve
+   the import direction before the wire.**
+2. **[c2] `blOpen_cover`** `blOpenZ ⊔ blOpenY = ⊤` — NEW MATH (B–L Thm 2 coverage: the two exceptional
+   divisors are fibrewise disjoint). Provable in Global against the real `blOpenY/Z`. Own dev sub-ticket.
+3. **[c3] `addOn_agree`** the two laws agree on `blOpenZ ⊓ blOpenY` — NEW MATH (the bidegree-(2,2)×(2,2)
+   §5 polynomial identity over ℤ[a₁..a₆], `linear_combination` + precomputed cofactors, NO maxHeartbeats).
+   Own dev sub-ticket.
+Then `mulModelHom` (glue on the two-open cover) + c4.4 spec ⟹ 0c-i ⟹ 0c-ii (endgame arm).
