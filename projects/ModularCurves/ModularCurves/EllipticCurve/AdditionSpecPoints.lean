@@ -514,6 +514,75 @@ lemma ringHom_lawTwoTriple {K : Type u} [CommRing K] (χ : biChartRing W i j →
 
 end TripleIdentification
 
+section ChartNaturality
+
+open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- [C6-c'0] `Proj.awayι` transported across an element equality (`eqToHom` quarantine). -/
+theorem Proj_awayι_congr {σ : Type*} {A : Type u} [CommRing A] [SetLike σ A]
+    [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] {m : ℕ} (hm : 0 < m)
+    (f g : A) (h : f = g) (hf : f ∈ 𝒜 m) (hg : g ∈ 𝒜 m) :
+    Proj.awayι 𝒜 f hf hm =
+      eqToHom (by rw [h]) ≫ Proj.awayι 𝒜 g hg hm := by
+  subst h
+  rw [eqToHom_refl, Category.id_comp]
+
+variable {U : Type u} [CommRing U] {R : Type u} [CommRing R]
+
+/-- The graded `Away`-map of the base change at the `i`-th chart generator. -/
+noncomputable def bcChartAwayMap (f : U →+* R) (W₀ : WeierstrassCurve U) (i : Fin 3) :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W₀))
+        ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)) →+*
+      HomogeneousLocalization.Away (quotientGrading (projIdeal (W₀.map f)))
+        (baseChangeGradedHom f W₀ ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i))) :=
+  HomogeneousLocalization.Away.map (baseChangeGradedHom f W₀)
+    ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i))
+
+/-- [C6-c'1] The literal chart-restriction of the base change (`awayι_comp_map` instantiated). -/
+theorem awayι_image_comp_projModelBaseChange (f : U →+* R) (W₀ : WeierstrassCurve U)
+    (i : Fin 3) :
+    Proj.awayι (quotientGrading (projIdeal (W₀.map f)))
+        (baseChangeGradedHom f W₀ ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)))
+        ((baseChangeGradedHom f W₀).2 (mk_X_mem_quotientGrading_one W₀ i)) one_pos ≫
+        projModelBaseChange f W₀ =
+      Spec.map (CommRingCat.ofHom (bcChartAwayMap f W₀ i)) ≫ chartι W₀ i :=
+  Proj.awayι_comp_map (baseChangeGradedHom f W₀) (baseChangeGradedHom_irrelevant_le f W₀)
+    one_pos _ (mk_X_mem_quotientGrading_one W₀ i)
+
+variable {U : Type u} [CommRing U]
+
+/-- The chart generator's image under the base change is the mapped chart generator. -/
+lemma baseChangeGradedHom_chartGen (f : U →+* R) (W₀ : WeierstrassCurve U) (i : Fin 3) :
+    baseChangeGradedHom f W₀ ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)) =
+      (quotientGradingHom (projIdeal (W₀.map f))) (MvPolynomial.X i) := by
+  have h := HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded f) (projIdeal W₀)
+    (projIdeal (W₀.map f)) (projIdeal_le_comap f W₀) (MvPolynomial.X i)
+  rw [quotientGradingHom_apply, quotientGradingHom_apply]
+  rw [show baseChangeGradedHom f W₀ = quotientGradingMap (mvMapGraded f) (projIdeal W₀)
+    (projIdeal (W₀.map f)) (projIdeal_le_comap f W₀) from rfl]
+  rw [h]
+  congr 1
+  exact MvPolynomial.map_X f i
+
+/-- [C6-c'2] The mapped chart immersion through the base change: `eqToHom`-quarantined form. -/
+theorem chartι_map_comp_projModelBaseChange (f : U →+* R) (W₀ : WeierstrassCurve U) (i : Fin 3) :
+    chartι (W₀.map f) i ≫ projModelBaseChange f W₀ =
+      eqToHom (by rw [baseChangeGradedHom_chartGen f W₀ i]) ≫
+        Spec.map (CommRingCat.ofHom (bcChartAwayMap f W₀ i)) ≫ chartι W₀ i := by
+  have hcongr := Proj_awayι_congr (quotientGrading (projIdeal (W₀.map f))) one_pos
+    ((quotientGradingHom (projIdeal (W₀.map f))) (MvPolynomial.X i))
+    (baseChangeGradedHom f W₀ ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)))
+    (baseChangeGradedHom_chartGen f W₀ i).symm
+    (mk_X_mem_quotientGrading_one (W₀.map f) i)
+    ((baseChangeGradedHom f W₀).2 (mk_X_mem_quotientGrading_one W₀ i))
+  show Proj.awayι _ _ (mk_X_mem_quotientGrading_one (W₀.map f) i) one_pos ≫
+      projModelBaseChange f W₀ = _
+  rw [hcongr, Category.assoc, awayι_image_comp_projModelBaseChange]
+
+end ChartNaturality
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
