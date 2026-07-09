@@ -123,7 +123,33 @@ Module core: `Module.Flat.of_comp_of_faithfullyFlat` above (pointwise over affin
 charts, a flat cover of a local ring is faithfully flat). WIP leaf of [YF-QSM]. -/
 theorem Flat.of_precomp_of_surjective (π : X ⟶ Y) (f : Y ⟶ Z) [Flat π]
     (hπ : Function.Surjective π.base) (h : Flat (π ≫ f)) : Flat f := by
-  sorry
+  refine Flat.of_stalkMap f fun y => ?_
+  obtain ⟨x, rfl⟩ := hπ y
+  have h1 : ((π ≫ f).stalkMap x).hom.Flat := Flat.stalkMap (π ≫ f) x
+  have h2 : (π.stalkMap x).hom.Flat := Flat.stalkMap π x
+  have hcomp : (π ≫ f).stalkMap x = f.stalkMap (π.base x) ≫ π.stalkMap x :=
+    Scheme.Hom.stalkMap_comp π f x
+  letI : Algebra ↑(Z.presheaf.stalk (f.base (π.base x))) ↑(Y.presheaf.stalk (π.base x)) :=
+    (f.stalkMap (π.base x)).hom.toAlgebra
+  letI : Algebra ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x) :=
+    (π.stalkMap x).hom.toAlgebra
+  letI : Algebra ↑(Z.presheaf.stalk (f.base (π.base x))) ↑(X.presheaf.stalk x) :=
+    ((π ≫ f).stalkMap x).hom.toAlgebra
+  haveI : IsScalarTower ↑(Z.presheaf.stalk (f.base (π.base x)))
+      ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      show ((π ≫ f).stalkMap x).hom =
+        ((π.stalkMap x).hom).comp ((f.stalkMap (π.base x)).hom)
+      rw [hcomp]
+      rfl)
+  haveI : Module.Flat ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x) := h2
+  haveI : IsLocalHom (algebraMap ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x)) :=
+    inferInstanceAs (IsLocalHom (π.stalkMap x).hom)
+  haveI : Module.FaithfullyFlat ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x) :=
+    Module.FaithfullyFlat.of_flat_of_isLocalHom
+  haveI : Module.Flat ↑(Z.presheaf.stalk (f.base (π.base x))) ↑(X.presheaf.stalk x) := h1
+  exact Module.Flat.of_comp_of_faithfullyFlat ↑(Z.presheaf.stalk (f.base (π.base x)))
+    ↑(Y.presheaf.stalk (π.base x)) ↑(X.presheaf.stalk x)
 
 /-- **(Stacks 02KM, smooth column, étale case — the [YF-QSM] target)** Smoothness
 descends along a surjective étale precomposition: if `π : X ⟶ Y` is étale and
