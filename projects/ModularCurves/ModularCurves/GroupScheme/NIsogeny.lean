@@ -1144,6 +1144,31 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
         Scheme.Hom.resLE_app_top]
       simp only [Scheme.Hom.app_eq_appLE, Category.assoc]
       rw [Iso.inv_hom_id, Category.comp_id]
+    have hsq' : ∀ u, (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom
+        (((f ∣_ U.1).appTop).hom u)
+        = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u) := fun u =>
+      congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom u) hsq
+    -- the canonical scalar towers on the two tensor products suffice; test the
+    -- transported algebra maps on the carrying identity
+    have hcarry : ∀ u : Γ(↑U.1, ⊤),
+        (1 : Γ(X, ⊤)) ⊗ₜ[Γ(S, U.1)] (f.app U.1).hom ((Scheme.Opens.topIso U.1).hom.hom u)
+          = ((x'.appTop).hom u) ⊗ₜ[Γ(S, U.1)] (1 : Γ(W, f ⁻¹ᵁ U.1)) := by
+      intro u
+      have h2 := congrArg
+        (fun g : Γ(S, U.1) →+* (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) =>
+          g (((Scheme.Opens.topIso U.1).hom).hom u))
+        (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
+          (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
+      simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
+        Algebra.TensorProduct.includeRight_apply] at h2
+      have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
+          (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
+        congr 1
+        exact congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
+          (Scheme.Opens.topIso U.1).hom_inv_id
+      rw [← h3]
+      exact h2.symm
     sorry
   constructor
   · rintro ⟨h1, h2⟩
