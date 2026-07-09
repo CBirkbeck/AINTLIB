@@ -11299,3 +11299,39 @@ on `Moduli/GammaHRepresentability.lean` (my stream file only): 95f277ffd (GHC2),
   (sheafification (𝟙 _)) W_mod (sheafifyValIso-unit)` ⟹ monoidal `SheafOfModules` +
   monoidal sheafification (a type-synonym landing; Pic consumes the synonym or we
   transport). Payoff unchanged: GAP-1 kernel + P1b + P2 coherences.
+
+### v10.51 (2026-07-09, c5β): RUN END — [C4-HF-ASSEMBLY] queued as next session's first act (full budget)
+
+*Run ended by coordinator directive (parallels p0/A). Green tree, every leaf proven, precise assembly
+plan. No grinding tonight. This run's ledger: c4.2c closed; entire c4.3 core; helpers A/B/C substance;
+five v10.24 surfaces cleared; ~24 axiom-clean commits solo.*
+
+**[C4-HF-ASSEMBLY]** — Status: todo. Owner: c5β. Full-budget fresh session, commit-early per lemma
+(they are separable). Discharges `hf` ⟹ `addOnY`/`addOnZ` ⟹ 0c-i ⟹ 0c-ii ⟹ straight run to T-W7a.
+
+The triple-localization tower is now explicit — `biChartRing → transRing (Away τ) → Away(piece
+coords)`. The five separable lemmas, every input committed:
+1. **Image-piece affine iso** — `A_k := pieceι ''ᵁ (blOpenYPieceFamily ij k) ≅ Spec(Away(lawTwoTriple
+   ij k))`, from `specBasicOpenIsoAway` ≫ (chartPieceIso.inv restricted) ≫ (pieceι isoImage).
+2. **Triple-localization** — `transRing` localized at `lawTwoTriple ij k · lawTwoTriple i'j' k'`,
+   where BOTH piece coords are units (so the crux's invertibility hypotheses hold); the piece overlap
+   `A_k ⊓ B_k'` is `Spec` of it.
+3. **σ-factorization** — the `isoImage.inv ≫ morphismRestrict chartPieceIso.hom ≫
+   specBasicOpenIsoAway.inv` chain (from `addOnYOnImage_piece` + `addOnYOnFamily` unfold) equals
+   `w ≫ Spec.map(localization ring map)`, `w : A_k ⊓ B_k' → Spec transRing` = `IsOpenImmersion.lift
+   transι _ (blOpenYImage_inf_le_transι)` restricted.
+4. **Per-piece agreement** — precompose the crux `chartι_comp_specMap_chartAwayHom_smul_eq` (final
+   form, 25799fea) with `w`; `specMap_comp_pieceMorOfTriple` (088e46ad) puts both sides in
+   `chartAwayHomOfTriple(image triple) ≫ chartι` form; triples proportional by `transHom`
+   (transHom_lawTwoTriple_eq_smul). Key insight: NO piece-affine hypothesis needed — w-precomposition
+   suffices.
+5. **Assemble** — `Scheme.Cover.hom_ext` over `blOpenYImage_inf_eq_iSup` (5da7f060) ⟹
+   `addOnYOnImage_agree (i j i' j')`; dispatch p,q ∈ {Y,Z}²; `glueMorphisms_hf_of_agree` (f91b91ec)
+   ⟹ **addOnY/addOnZ** (+ rule-3 interface, same commit). Then `blOpen_cover`, `addOn_agree`,
+   `mulModelHom`; c4.4 universality, c4.5 fills GLC.
+
+Committed bridge inventory (all axiom-clean, in repo): helper A `blOpenYImage_inf_le_transι`
+(ec7e3a56); helper B `homOfLE_isoImage_inv_iSup` (ForMathlib) + `addOnYOnImage_piece` (45afd358);
+helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_inf_eq_iSup`
+(088e46ad/5da7f060); crux `chartι_specMap_lawTwoTriple_cross` + `_smul_eq` (25799fea);
+`specMap_transHom_pieceι` (a468579e).
