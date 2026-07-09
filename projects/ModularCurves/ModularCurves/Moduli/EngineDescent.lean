@@ -308,6 +308,38 @@ theorem hom_isoSpec_toRingHom [IsAffine X] (σ : SchemeAction G X) (g : G) :
       = X.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g)) := by
   rw [ofHom_toRingHom_eq_appTop, Scheme.isoSpec_hom_naturality]
 
+/-- **([a5-P2′], cartesian leg)** The transported action `(σE.transport φ).hom g` on
+`projModel W₀` is cartesian over `Spec (toRingHom g)`: `IsPullback.of_iso` of
+`IsCurveAction.cartesian g` along `φ`/`isoSpec`, base-matched by `hom_isoSpec_toRingHom`. -/
+theorem isPullback_transport_globalModel [IsAffine X] (hact : IsCurveAction σ C σE)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hπ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom) (g : G) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    IsPullback ((σE.transport φ).hom g) (projModelπ W₀) (projModelπ W₀)
+      (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g))) := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  refine (hact.cartesian g).of_iso φ φ X.isoSpec X.isoSpec ?_ hπ.symm hπ.symm ?_
+  · rw [SchemeAction.transport_hom, Iso.hom_inv_id_assoc]
+  · exact hom_isoSpec_toRingHom σ g
+
+/-- **([a5-P2′], zero leg)** The transported action is zero-equivariant over
+`Spec (toRingHom g)`. -/
+theorem projModelZero_transport_globalModel [IsAffine X] (hact : IsCurveAction σ C σE)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hzero : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) (g : G) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    projModelZero W₀ ≫ (σE.transport φ).hom g
+      = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g))
+          ≫ projModelZero W₀ := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  have hz' : projModelZero W₀ = X.isoSpec.inv ≫ C.zero ≫ φ.hom := by
+    rw [hzero, Iso.inv_hom_id_assoc]
+  rw [hz', SchemeAction.transport_hom]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  rw [reassoc_of% (hact.zero_equivariant g), hzero,
+    reassoc_of% (hom_isoSpec_toRingHom σ g)]
+  simp only [Iso.inv_hom_id_assoc]
+
 /-- **([a5-P2′], the GLOBAL-MODEL transport)** If the curve carries a global Weierstrass model
 `φ : C.E ≅ projModel W₀` over the affine base (`W₀` over `Γ(X,⊤)`), compatible with `π` and the
 zero sections, then the geometric `G`-action transports to the raw action family on `projModel W₀`
@@ -328,19 +360,9 @@ theorem curveAction_actionFamily_of_globalModel [IsAffine X]
         = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g))
             ≫ projModelZero W₀) := by
   letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
-  refine ⟨(σE.transport φ).hom, (σE.transport φ).hom_mul, fun g => ?_, fun g => ?_⟩
-  · -- cartesian, by iso-transport of `hact.cartesian g`
-    refine (hact.cartesian g).of_iso φ φ X.isoSpec X.isoSpec ?_ hπ.symm hπ.symm ?_
-    · rw [SchemeAction.transport_hom, Iso.hom_inv_id_assoc]
-    · exact hom_isoSpec_toRingHom σ g
-  · -- zero-equivariance, by the chart zero-compat + geometric zero-equivariance + base-matching
-    have hz' : projModelZero W₀ = X.isoSpec.inv ≫ C.zero ≫ φ.hom := by
-      rw [hzero, Iso.inv_hom_id_assoc]
-    rw [hz', SchemeAction.transport_hom]
-    simp only [Category.assoc, Iso.hom_inv_id_assoc]
-    rw [reassoc_of% (hact.zero_equivariant g), hzero,
-      reassoc_of% (hom_isoSpec_toRingHom σ g)]
-    simp only [Iso.inv_hom_id_assoc]
+  exact ⟨(σE.transport φ).hom, (σE.transport φ).hom_mul,
+    fun g => isPullback_transport_globalModel hact W₀ φ hπ g,
+    fun g => projModelZero_transport_globalModel hact W₀ φ hzero g⟩
 
 open WeierstrassCurve in
 /-- **([a5-ii∘P2′], the cocycle from a global model)** `IsCurveAction` + a compatible global
@@ -359,6 +381,27 @@ theorem exists_cocycle_of_globalModel [IsAffine X]
   obtain ⟨act, hmul, hcart, hz⟩ :=
     curveAction_actionFamily_of_globalModel hact W₀ φ hπ hzero
   exact isVCocycle_of_curveActionFamily W₀ act hmul hcart hz
+
+open WeierstrassCurve in
+/-- **([a5-ii∘P2′], primed)** The cocycle from a global model, with the `hΨ` link against the
+concrete transported action `(σE.transport φ).hom` — the form the fppf-comparison's
+`G`-invariance consumes. -/
+theorem exists_cocycle_of_globalModel' [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hπ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom)
+    (hzero : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∃ (Cvc : G → VariableChange ↑Γ(X, ⊤))
+      (hCvc : ∀ g, Cvc g • (W₀.map (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g)) = W₀),
+      IsVCocycle Cvc ∧
+      ∀ g, (projModelVCIso (Cvc g) (W₀.map (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g))).hom
+          ≫ projModelBaseChange (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g) W₀
+        = eqToHom (congrArg projModel (hCvc g)) ≫ (σE.transport φ).hom g := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  exact isVCocycle_of_curveActionFamily' W₀ (σE.transport φ).hom (σE.transport φ).hom_mul
+    (fun g => isPullback_transport_globalModel hact W₀ φ hπ g)
+    (fun g => projModelZero_transport_globalModel hact W₀ φ hzero g)
 
 /-! ### The route-(a) descent theorem (leaves `[a3]`–`[a5]`) -/
 
