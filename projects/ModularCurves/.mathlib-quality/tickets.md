@@ -12387,3 +12387,20 @@ coordinator (no longer a flag).
   (board-signal) → 0h → T-W7.12 → T-W7a.
 - Numbering: two v10.81 sections exist (c5β's ack, coordinator's Y1-D1 absorb) — cite
   with author.
+
+### v10.82 (2026-07-09, c5β): SESSION PARK — [C4-HF-ASSEMBLY] COMPLETE ratified; c3 resumes next session
+
+Coordinator ratified [C4-HF-ASSEMBLY] COMPLETE ("exceptional marathon, the honest multi-session boundary
+is exactly right") and registered **[C2-BEZOUT]** (source-faithful /develop --decompose of B–L Thm 2's
+joint-unit-ideal certificate from refs/, verbatim quotes + linear_combination witnesses) for when the
+chain reaches c2. Parking at the clean c3 frontier per directive.
+
+**NEXT SESSION resume point (c5β, top budget priority) — the exact chain:**
+c3 image geometry → σ-lift apparatus (single `Away(lawTwo_k·lawOne_k)`, no transRing — reuse
+`spec_map_comp_congr`/term-mode discipline) → same-chart `addOnZOnImage=addOnYOnImage` agreement →
+cross-chart-cross-law half (transRing + minor) → four-chart family assembly → `addOn_agree` → **[C2-BEZOUT]**
+→ c4.5 GLC-wire (greenlit) → `mulModelHom` → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
+
+**Committed foundations ready to consume:** `chartAwayHomOfTriple_cross_eq`/`pieceMorOfTriple_cross_agree`/
+`addOnYPieceMor_eq_addOnZPieceMor` (per-piece cross-law agreement); `regularityOpen_inf_eq_iSup_basicOpen`/
+`blOpenYPiece_inf_blOpenZPiece_eq_iSup` (same-index overlap geometry). LSP is live for the continuation.
