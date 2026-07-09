@@ -20,7 +20,7 @@ open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j k : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j k : Fin 3)
 variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
 
 /-- **(β3)** The `k`-th piece of `addOnY`: a morphism from the locus where the law-2 triple's

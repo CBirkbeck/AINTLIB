@@ -29,7 +29,7 @@ open MvPolynomial ModularCurves TensorProduct AlgebraicGeometry CategoryTheory
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j i' j' : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j i' j' : Fin 3)
 
 /-- The transition coordinate of the first factor: `X_{i'}/X_i`, read in the `(i,j)` chart. -/
 noncomputable def transFst : biChartRing W i j := biChartPointFst W i j i'
@@ -38,7 +38,7 @@ noncomputable def transFst : biChartRing W i j := biChartPointFst W i j i'
 noncomputable def transSnd : biChartRing W i j := biChartPointSnd W i j j'
 
 /-- The coordinate ring of the overlap of the `(i,j)` and `(i',j')` chart-products. -/
-noncomputable abbrev transRing : Type :=
+noncomputable abbrev transRing : Type _ :=
   Localization.Away (transFst W i j i' * transSnd W i j j')
 
 section

@@ -20,7 +20,7 @@ open AlgebraicGeometry CategoryTheory ModularCurves
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
 
 /-- The regularity open of the second Bosma–Lenstra law on the `(i,j)` chart-product piece. -/
 noncomputable def blOpenYPiece :

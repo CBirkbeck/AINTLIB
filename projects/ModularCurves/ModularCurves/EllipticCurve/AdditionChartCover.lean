@@ -22,7 +22,7 @@ open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 
 namespace WeierstrassCurve.Projective
 
-variable {A : Type} [CommRing A]
+variable {A : Type*} [CommRing A]
 
 /-- The regularity open of a projective triple: where some coordinate is invertible. -/
 def regularityOpen (t : Fin 3 → A) : TopologicalSpace.Opens (PrimeSpectrum A) :=

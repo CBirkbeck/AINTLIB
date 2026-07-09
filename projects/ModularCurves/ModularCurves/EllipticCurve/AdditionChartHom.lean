@@ -35,11 +35,11 @@ open MvPolynomial ModularCurves
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
 
 section Dehomogenize
 
-variable {S : Type} [CommRing S] [Algebra R S]
+variable {S : Type*} [CommRing S] [Algebra R S]
 
 /-- Evaluating the dehomogenisation of `p` at `k` on a vector whose `k`-th entry is `1` agrees
 with evaluating `p` itself on that vector. -/
@@ -118,7 +118,7 @@ is the same as taking the chart hom and post-composing with `φ`.
 
 This is what identifies the restriction of a piece morphism to a smaller basic open with the chart
 hom of the same triple over the smaller localization (c4.2c). -/
-lemma chartHomOfTriple_naturality {S' : Type} [CommRing S'] [Algebra R S'] (φ : S →ₐ[R] S')
+lemma chartHomOfTriple_naturality {S' : Type*} [CommRing S'] [Algebra R S'] (φ : S →ₐ[R] S')
     (k : Fin 3) (t : Fin 3 → S) (u : S) (hu : t k * u = 1)
     (ht : (W.map (algebraMap R S)).toProjective.Equation t)
     (hu' : φ (t k) * φ u = 1)

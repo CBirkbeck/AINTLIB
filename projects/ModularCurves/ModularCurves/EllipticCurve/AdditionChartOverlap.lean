@@ -34,12 +34,14 @@ open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
-variable {A : Type} [CommRing A] [Algebra R A]
+universe u
+
+variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+variable {A : Type u} [CommRing A] [Algebra R A]
 
 section MapTriple
 
-variable {S : Type} [CommRing S] [Algebra A S] [Algebra R S] [IsScalarTower R A S]
+variable {S : Type u} [CommRing S] [Algebra A S] [Algebra R S] [IsScalarTower R A S]
 
 /-- An on-curve triple stays on the curve in any `A`-algebra. -/
 lemma equation_mapTriple (t : Fin 3 → A)
@@ -114,7 +116,7 @@ end Away
 
 section Naturality
 
-variable {S S' : Type} [CommRing S] [Algebra R S] [CommRing S'] [Algebra R S']
+variable {S S' : Type u} [CommRing S] [Algebra R S] [CommRing S'] [Algebra R S']
 
 /-- `chartHomOfTriple_naturality`, transported through `chartCoordAlgEquiv`. -/
 lemma chartAwayHomOfTriple_naturality (φ : S →ₐ[R] S') (k : Fin 3) (t : Fin 3 → S) (u : S)
@@ -216,7 +218,7 @@ model.
 This subsumes both agreements of the construction. Taking `e = 1` gives the within-chart-product
 agreement of c4.2c (`pieceMorOfTriple_agree`); taking `e` the bidegree-`(2,2)` transition factor
 gives the cross-chart-product agreement of c4.3. Neither needs `e` to be a unit: `hu'` forces it. -/
-theorem chartι_comp_specMap_chartAwayHom_smul_eq {S : Type} [CommRing S] [Algebra R S]
+theorem chartι_comp_specMap_chartAwayHom_smul_eq {S : Type u} [CommRing S] [Algebra R S]
     (k l : Fin 3) (t t' : Fin 3 → S) (u u' e : S) (hsmul : ∀ m, t' m = e * t m)
     (hu : t k * u = 1) (hu' : t' l * u' = 1)
     (ht : (W.map (algebraMap R S)).toProjective.Equation t)
@@ -238,7 +240,7 @@ theorem chartι_comp_specMap_chartAwayHom_smul_eq {S : Type} [CommRing S] [Algeb
 the chart morphism of the pushed-forward triple — naturality of `chartAwayHomOfTriple`. This is the
 bridge from `pieceMorOfTriple` to the cross-chart crux: over the overlap ring both readings become
 `chartAwayHomOfTriple(image triple) ≫ chartι`. -/
-lemma specMap_comp_pieceMorOfTriple {S : Type} [CommRing S] [Algebra R S]
+lemma specMap_comp_pieceMorOfTriple {S : Type u} [CommRing S] [Algebra R S]
     (t : Fin 3 → A) (ht : (W.map (algebraMap R A)).toProjective.Equation t) (k : Fin 3)
     (ψ : Localization.Away (t k) →ₐ[R] S)
     (hψ : ψ (algebraMap A (Localization.Away (t k)) (t k)) *

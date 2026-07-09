@@ -24,8 +24,8 @@ open MvPolynomial
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
-variable {S : Type} [CommRing S] [Algebra R S]
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+variable {S : Type*} [CommRing S] [Algebra R S]
 
 /-- **(β4(b))** Vanishing minors force the ratios to agree: if `t k` and `s k` are invertible
 (witnesses `u`, `v`) and `s m * t k = s k * t m`, then `s m * v = t m * u`. -/

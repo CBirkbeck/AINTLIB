@@ -28,7 +28,7 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
 
 /-- `D(1) = ⊤`. -/
 lemma specBasicOpen_one (A : CommRingCat) : specBasicOpen A 1 = ⊤ :=
@@ -727,7 +727,7 @@ lemma overlapPieceIso_hom_ι_eq_specMap_psiSnd (k k' : Fin 3) :
 generalisation of `equation_mapTriple` (which is the `algebraMap` special case). Used to carry the
 law-2 triple into `transRing` along `transHom` (which is *not* the canonical scalar-tower map, so
 `equation_mapTriple` doesn't directly apply). -/
-lemma equation_mapTriple_algHom {A B : Type} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
+lemma equation_mapTriple_algHom {A B : Type*} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
     (f : A →ₐ[R] B) (t : Fin 3 → A) (ht : (W.map (algebraMap R A)).toProjective.Equation t) :
     (W.map (algebraMap R B)).toProjective.Equation (fun m => f (t m)) := by
   have h := ht.map f.toRingHom
