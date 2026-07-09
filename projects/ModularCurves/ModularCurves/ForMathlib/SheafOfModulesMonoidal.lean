@@ -200,6 +200,54 @@ theorem tensorHom_precomp_injective (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       erw [map_add, map_add]
       rw [hs, ht]
 
+section Glue
+
+variable (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+  [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)]
+  [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)]
+  {P : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
+  (hP : Presheaf.IsSheaf J P.presheaf) (χ : M₁ ⊗ N₁ ⟶ P)
+
+include hP in
+/-- Any two preimage-pairs of the same sections give the same `χ`-value: locally the
+pairs agree (local injectivity), so the values agree locally, so they agree
+(separatedness). The workhorse of the [W-MONO-glue] construction. -/
+private lemma chi_app_congr {V : C} (a a' : M₁.obj (Opposite.op V))
+    (b b' : N₁.obj (Opposite.op V))
+    (hfa : f.app (Opposite.op V) a = f.app (Opposite.op V) a')
+    (hgb : g.app (Opposite.op V) b = g.app (Opposite.op V) b') :
+    χ.app (Opposite.op V) (a ⊗ₜ b) = χ.app (Opposite.op V) (a' ⊗ₜ b') := by
+  have hfa' : ((toPresheaf _).map f).app (Opposite.op V) a =
+      ((toPresheaf _).map f).app (Opposite.op V) a' := hfa
+  have hgb' : ((toPresheaf _).map g).app (Opposite.op V) b =
+      ((toPresheaf _).map g).app (Opposite.op V) b' := hgb
+  apply hP.isSeparated _ _ (J.intersection_covering
+    (Presheaf.equalizerSieve_mem J ((toPresheaf _).map f) a a' hfa')
+    (Presheaf.equalizerSieve_mem J ((toPresheaf _).map g) b b' hgb'))
+  rintro W q ⟨hqa, hqb⟩
+  have hnat : ∀ x : ((M₁ ⊗ N₁).obj (Opposite.op V) : Type u),
+      P.presheaf.map q.op (χ.app (Opposite.op V) x) =
+        χ.app (Opposite.op W) ((M₁ ⊗ N₁).map q.op x) :=
+    fun x => (CategoryTheory.congr_fun (χ.naturality q.op) x).symm
+  erw [hnat, hnat]
+  congr 1
+  erw [Monoidal.tensorObj_map_tmul, Monoidal.tensorObj_map_tmul]
+  have hqa' : M₁.map q.op a = M₁.map q.op a' := hqa
+  have hqb' : N₁.map q.op b = N₁.map q.op b' := hqb
+  rw [hqa', hqb']
+
+/-- The defining property of the glued pairing section at `(m, n)`: it restricts to
+the `χ`-value of every local preimage-pair. -/
+private def IsPairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : N₂.obj U)
+    (s : P.obj U) : Prop :=
+  ∀ ⦃V : C⦄ (p : V ⟶ U.unop) (a : M₁.obj (Opposite.op V)) (b : N₁.obj (Opposite.op V)),
+    f.app (Opposite.op V) a = M₂.map p.op m → g.app (Opposite.op V) b = N₂.map p.op n →
+    P.map p.op s = χ.app (Opposite.op V) (a ⊗ₜ b)
+
+end Glue
+
 end Tensor
 
 end PresheafOfModules
