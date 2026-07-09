@@ -12600,3 +12600,35 @@ Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT]
 - **GO**: the classifying clause proper (exists_tatePoint's ∀-part) is now the direct
   target — the equiv machinery + gluing handles + normalisation independence are all in
   place. PR at subtree completion as chartered.
+
+### v10.90a (2026-07-09, c5β): ★★ [c3] addOn_agree COMPLETE — the two Bosma–Lenstra laws AGREE; c2 [C2-BEZOUT] opened
+
+Resumed the c3 frontier and drove it to completion, then opened c2.
+
+**★★ [c3] addOn_agree COMPLETE (c207a4ccf) — THE two-law agreement.** Both image-level halves
+(same-chart `addOnZOnImage_eq_addOnYOnImage`, cross-chart-cross-law `addOnZOnImage_eq_addOnYOnImage_cross`)
+now assembled into the scheme-level `addOn_agree` on `blOpenZ ⊓ blOpenY`. New `FamilyAssembly` section
+in AdditionChartGlobal:
+- `homOfLE_le_addOnZ`/`homOfLE_le_addOnY` — glueMorphisms restrictions (`addOn{Z,Y}` on the p-th
+  chart-product image = `addOn{Z,Y}Family p`), via `Scheme.Cover.ι_glueMorphisms`.
+- `addOnZFamily_eq_addOnYFamily` — the pairwise CROSS-LAW family agreement. Discovery: the cross
+  lemma subsumes the same-chart diagonal (transRing degenerates to biChartRing at i'=i,j'=j), so all
+  16 `fin_cases` (p,q) discharge to `addOnZOnImage_eq_addOnYOnImage_cross` uniformly — one lemma, no
+  `first`/diagonal split.
+- `addOn_agree` — Cover.hom_ext over the (p,q) family refinement; each piece reduces (homOfLE_le_addOnZ/Y
+  + term-mode eZ/eY with proof-irrel `rfl` close) to the family agreement. This is EXACTLY what
+  `mulModelHom`'s two-open (`blOpenZ ⊔ blOpenY = ⊤`) glue consumes.
+All axiom-clean [propext, Classical.choice, Quot.sound]; build green (2959 jobs).
+
+**[c2] [C2-BEZOUT] opened (3814e19c7).** `regularityOpen_sup_eq_top_iff` (Cover.lean): the joint cover
+↔ joint-unit-ideal — `regularityOpen t ⊔ regularityOpen s = ⊤ ↔ span(range t ∪ range s) = ⊤`. Reduces
+`blOpenZ ⊔ blOpenY = ⊤` to the per-chart `span(range lawOne ∪ range lawTwo) = ⊤`. **Key finding from
+the P1 CAS README:** that span=⊤ is NOT a giant Bezout transcription — it's the point-level case-split
+(README §Covering, l.55–57): at every prime either P≉Q (`addU_ne_zero_of_Y_ne` → law-1 coord nonzero)
+or P≈Q (`dblZ_ne_zero_of_Y_ne` → law-2 coord nonzero). [IsJacobsonRing R] in Global is precisely the
+Nullstellensatz hinge. Next c2 sub-lemma = the field-case cover (per-prime non-vanishing → span=⊤).
+
+**Chain status:** c3 DONE → **c2 (field-case cover, IN PROGRESS)** → c4.5 GLC-wire (note: Global is
+over [IsDomain R][IsJacobsonRing R], GLC wants general-R/[W.IsElliptic] → base-change transport from
+the universal ring is the c4.5 mechanism) → mulModelHom → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12
+→ T-W7a. addOn_agree DONE un-gates the mulModelHom glue.
