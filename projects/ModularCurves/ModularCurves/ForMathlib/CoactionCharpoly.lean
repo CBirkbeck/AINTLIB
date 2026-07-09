@@ -467,4 +467,139 @@ theorem mulMatrix_mul (u v : B ⊗[R] A) :
 
 end MulMatrix
 
+/-! ### The conjugation identity (★) -/
+
+section Star
+
+variable {B : Type*} [CommRing B] [Algebra R B]
+
+/-- The reassociated comultiplication `δ̃ : B⊗A → (B⊗A)⊗A`, an algebra map. -/
+noncomputable def deltaTilde : (B ⊗[R] A) →ₐ[R] (B ⊗[R] A) ⊗[R] A :=
+  (Algebra.TensorProduct.assoc R R R B A A).symm.toAlgHom.comp
+    (Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.comulAlgHom R A))
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- The coassociativity bridge: on the image of the co-action, `δ̃` is `ρ ⊗ id`. -/
+theorem deltaTilde_comp_coaction (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) :
+    (deltaTilde R A).comp ρ
+      = (Algebra.TensorProduct.map ρ (AlgHom.id R A)).comp ρ := by
+  rw [deltaTilde, AlgHom.comp_assoc, ← hρ.coassoc, ← AlgHom.comp_assoc,
+    ← AlgHom.comp_assoc]
+  rw [show ((Algebra.TensorProduct.assoc R R R B A A).symm.toAlgHom.comp
+      (Algebra.TensorProduct.assoc R R R B A A).toAlgHom)
+      = AlgHom.id R ((B ⊗[R] A) ⊗[R] A) from by
+    ext <;> rfl]
+  rw [AlgHom.id_comp]
+
+/-- `δ̃` of the right inclusion, expanded along the right-slot Δ-matrix. -/
+theorem deltaTilde_one_tmul (j : hopfBasisIndex R A) :
+    deltaTilde R A ((1 : B) ⊗ₜ[R] (hopfBasis R A) j)
+      = ∑ p, ((1 : B) ⊗ₜ[R] comulMatrixR R A p j) ⊗ₜ[R] (hopfBasis R A) p := by
+  rw [deltaTilde, AlgHom.comp_apply]
+  rw [show (Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.comulAlgHom R A))
+      ((1 : B) ⊗ₜ[R] (hopfBasis R A) j)
+      = (1 : B) ⊗ₜ[R] Coalgebra.comul (R := R) ((hopfBasis R A) j) from by
+    rw [Algebra.TensorProduct.map_tmul, map_one]
+    rfl]
+  rw [comul_hopfBasis', TensorProduct.tmul_sum, map_sum]
+  refine Finset.sum_congr rfl fun p _ => ?_
+  show (Algebra.TensorProduct.assoc R R R B A A).symm
+      ((1 : B) ⊗ₜ[R] (comulMatrixR R A p j ⊗ₜ[R] (hopfBasis R A) p))
+      = ((1 : B) ⊗ₜ[R] comulMatrixR R A p j) ⊗ₜ[R] (hopfBasis R A) p
+  simp
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- `δ̃` of a left-inclusion scalar is the ambient left-inclusion scalar. -/
+theorem deltaTilde_tmul_one (b : B) :
+    deltaTilde R A (b ⊗ₜ[R] (1 : A))
+      = (b ⊗ₜ[R] (1 : A)) ⊗ₜ[R] (1 : A) := by
+  rw [deltaTilde, AlgHom.comp_apply]
+  rw [show (Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.comulAlgHom R A))
+      (b ⊗ₜ[R] (1 : A)) = b ⊗ₜ[R] ((1 : A) ⊗ₜ[R] (1 : A)) from by
+    rw [Algebra.TensorProduct.map_tmul]
+    rw [show (Bialgebra.comulAlgHom R A) (1 : A) = (1 : A) ⊗ₜ[R] (1 : A) from by
+      rw [map_one, Algebra.TensorProduct.one_def]]
+    rfl]
+  show (Algebra.TensorProduct.assoc R R R B A A).symm
+      (b ⊗ₜ[R] ((1 : A) ⊗ₜ[R] (1 : A)))
+      = (b ⊗ₜ[R] (1 : A)) ⊗ₜ[R] (1 : A)
+  simp
+
+/-- **The conjugation identity (★)**: for a co-action `ρ` and `f : B`, with
+`M := mulMatrix (ρ f)` and `Θ := (comulMatrixR).map includeRight`,
+`M.map ρ * Θ = Θ * M.map includeLeft` in matrices over `B ⊗[R] A`. -/
+theorem mulMatrix_map_coaction_conj (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B) :
+    (mulMatrix R A (ρ f)).map ρ
+        * (comulMatrixR R A).map (Algebra.TensorProduct.includeRight (R := R) (A := B))
+      = (comulMatrixR R A).map (Algebra.TensorProduct.includeRight (R := R) (A := B))
+        * (mulMatrix R A (ρ f)).map (Algebra.TensorProduct.includeLeft (S := R)) := by
+  classical
+  set M := mulMatrix R A (ρ f) with hM
+  -- we prove the (i, j) entry equality for every i j by comparing last-slot coefficients
+  ext i j
+  have hLHS : ∀ j, deltaTilde R A ((ρ f) * (1 : B) ⊗ₜ[R] (hopfBasis R A) j)
+      = ∑ q, (∑ p, ρ (M q p) * ((1 : B) ⊗ₜ[R] comulMatrixR R A p j))
+          ⊗ₜ[R] (hopfBasis R A) q := by
+    intro j
+    rw [map_mul, show deltaTilde R A (ρ f)
+        = (Algebra.TensorProduct.map ρ (AlgHom.id R A)) (ρ f) from
+      AlgHom.congr_fun (deltaTilde_comp_coaction R A ρ hρ) f, deltaTilde_one_tmul,
+      Finset.mul_sum]
+    have hterm : ∀ p, (Algebra.TensorProduct.map ρ (AlgHom.id R A)) (ρ f)
+        * (((1 : B) ⊗ₜ[R] comulMatrixR R A p j) ⊗ₜ[R] (hopfBasis R A) p)
+        = ∑ q, (ρ (M q p) * ((1 : B) ⊗ₜ[R] comulMatrixR R A p j))
+            ⊗ₜ[R] (hopfBasis R A) q := by
+      intro p
+      have hsmul : (((1 : B) ⊗ₜ[R] comulMatrixR R A p j) ⊗ₜ[R] (hopfBasis R A) p)
+          = ((1 : B) ⊗ₜ[R] comulMatrixR R A p j)
+            • ((1 : B ⊗[R] A) ⊗ₜ[R] (hopfBasis R A) p) := by
+        rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+      rw [hsmul, mul_smul_comm]
+      rw [show (Algebra.TensorProduct.map ρ (AlgHom.id R A)) (ρ f)
+          * ((1 : B ⊗[R] A) ⊗ₜ[R] (hopfBasis R A) p)
+          = ∑ q, mulMatrix R A ((Algebra.TensorProduct.map ρ (AlgHom.id R A)) (ρ f)) q p
+              ⊗ₜ[R] (hopfBasis R A) q from mul_one_tmul_hopfBasis R A _ p]
+      rw [mulMatrix_map, Finset.smul_sum]
+      refine Finset.sum_congr rfl fun q _ => ?_
+      rw [Matrix.map_apply, TensorProduct.smul_tmul', smul_eq_mul, mul_comm]
+    rw [Finset.sum_congr rfl fun p _ => hterm p, Finset.sum_comm]
+    exact Finset.sum_congr rfl fun q _ => (TensorProduct.sum_tmul _ _ _).symm
+  have hRHS : deltaTilde R A (∑ k, M k j ⊗ₜ[R] (hopfBasis R A) k)
+      = ∑ q, (∑ k, ((1 : B) ⊗ₜ[R] comulMatrixR R A q k) * (M k j ⊗ₜ[R] (1 : A)))
+          ⊗ₜ[R] (hopfBasis R A) q := by
+    rw [map_sum]
+    have hterm : ∀ k, deltaTilde R A (M k j ⊗ₜ[R] (hopfBasis R A) k)
+        = ∑ q, ((M k j ⊗ₜ[R] (1 : A)) * ((1 : B) ⊗ₜ[R] comulMatrixR R A q k))
+            ⊗ₜ[R] (hopfBasis R A) q := by
+      intro k
+      rw [show (M k j ⊗ₜ[R] (hopfBasis R A) k)
+          = (M k j ⊗ₜ[R] (1 : A)) * ((1 : B) ⊗ₜ[R] (hopfBasis R A) k) from by
+        rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul], map_mul,
+        deltaTilde_tmul_one, deltaTilde_one_tmul, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun q _ => ?_
+      rw [show ((M k j ⊗ₜ[R] (1 : A)) ⊗ₜ[R] (1 : A))
+          * (((1 : B) ⊗ₜ[R] comulMatrixR R A q k) ⊗ₜ[R] (hopfBasis R A) q)
+          = ((M k j ⊗ₜ[R] (1 : A)) * ((1 : B) ⊗ₜ[R] comulMatrixR R A q k))
+            ⊗ₜ[R] ((1 : A) * (hopfBasis R A) q) from
+        Algebra.TensorProduct.tmul_mul_tmul _ _ _ _, one_mul]
+    rw [Finset.sum_congr rfl fun k _ => hterm k, Finset.sum_comm]
+    exact Finset.sum_congr rfl fun q _ => by
+      rw [← TensorProduct.sum_tmul]
+      congr 1
+      exact Finset.sum_congr rfl fun k _ => mul_comm _ _
+  have hcombined := (hLHS j).symm.trans
+    ((congrArg (deltaTilde R A) (mul_one_tmul_hopfBasis R A (ρ f) j)).trans hRHS)
+  have hcoef := congrFun (sum_tmul_injective' R A hcombined) i
+  rw [Matrix.mul_apply, Matrix.mul_apply]
+  calc ∑ p, (M.map ρ) i p
+        * (comulMatrixR R A).map (Algebra.TensorProduct.includeRight (R := R) (A := B)) p j
+      = ∑ p, ρ (M i p) * ((1 : B) ⊗ₜ[R] comulMatrixR R A p j) :=
+        Finset.sum_congr rfl fun p _ => by rw [Matrix.map_apply, Matrix.map_apply]; rfl
+    _ = ∑ k, ((1 : B) ⊗ₜ[R] comulMatrixR R A i k) * (M k j ⊗ₜ[R] (1 : A)) := hcoef
+    _ = ∑ k, (comulMatrixR R A).map (Algebra.TensorProduct.includeRight (R := R) (A := B)) i k
+          * (M.map (Algebra.TensorProduct.includeLeft (S := R))) k j :=
+        Finset.sum_congr rfl fun k _ => by rw [Matrix.map_apply, Matrix.map_apply]; rfl
+
+end Star
+
 end ModularCurves
