@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.FieldTheory.Fixed
+import ModularCurves.ForMathlib.InvariantTorsor
 
 /-!
 # Descent of a `G`-invariant Weierstrass curve to the fixed subring
@@ -121,5 +122,32 @@ noncomputable instance : MulDistribMulAction G (VariableChange A) where
   smul_one := vcSMul_one
 
 @[simp] theorem vcSMul_smul_def (g : G) (C : VariableChange A) : g • C = vcSMul g C := rfl
+
+/-! ### The cocycle and its `u`-part trivialization ([a5-iii], step 1) -/
+
+/-- A `1`-cocycle for the `G`-action on `VariableChange A`: `C (gh) = C g · (g • C h)`.
+This is the shape of the `VariableChange`-valued datum produced by the `G`-action on the
+universal curve's Weierstrass model (`pointedIso_exists_variableChange`, T-W7.1b). -/
+def IsVCocycle (C : G → VariableChange A) : Prop :=
+  ∀ g h : G, C (g * h) = C g * g • C h
+
+/-- **([a5-iii], step 1 — the `u`-part trivializes)** For a free action with `Aᴳ` local, the
+`u`-component of a `VariableChange` cocycle is a coboundary: there is a unit `d : Aˣ` with
+`g • d = (C g).u · d` for all `g`.
+
+The `u`-part `g ↦ (C g).u` is a multiplicative `1`-cocycle in `Aˣ` (`IsVCocycle` ⟹
+`(C (gh)).u = (C g).u · g • (C h).u`), so this is exactly `exists_unit_smul_eq_of_isLocalRing`
+([A711-DESC], PROVEN). Conjugating `C` by `(d, 0, 0, 0)` reduces to the case `u = 1`, where the
+remaining `(r, s, t)`-cocycle is trivialized by the additive Hilbert 90
+`exists_sub_smul_eq_of_isCocycle`. -/
+theorem exists_unit_u_of_isVCocycle [Fintype G] [DecidableEq G] [Nontrivial A]
+    [IsLocalRing (FixedPoints.subalgebra ℤ A G)]
+    (hfree : IsFreeAlgebraAction G ℤ A) {C : G → VariableChange A} (hC : IsVCocycle C) :
+    ∃ d : Aˣ, ∀ g : G, g • (d : A) = ((C g).u : A) * (d : A) := by
+  refine exists_unit_smul_eq_of_isLocalRing G ℤ A hfree (fun g => (C g).u) ?_
+  intro g h
+  have h1 := congrArg WeierstrassCurve.VariableChange.u (hC g h)
+  simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u] at h1
+  rw [h1, Units.val_mul, uSMul_coe]
 
 end WeierstrassCurve
