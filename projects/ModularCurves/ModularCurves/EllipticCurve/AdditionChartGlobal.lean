@@ -686,6 +686,118 @@ lemma overlapPieceIso_hom_ι_eq_specMap_psiSnd (k k' : Fin 3) :
   (overlapPieceIso_hom_ι W i j i' j' k k').trans
     (specMap_psiSnd_pieceAwayι W i j i' j' k k').symm
 
+/-- An on-curve triple pushed along any `R`-algebra map stays on the curve — the `AlgHom`
+generalisation of `equation_mapTriple` (which is the `algebraMap` special case). Used to carry the
+law-2 triple into `transRing` along `transHom` (which is *not* the canonical scalar-tower map, so
+`equation_mapTriple` doesn't directly apply). -/
+lemma equation_mapTriple_algHom {A B : Type} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
+    (f : A →ₐ[R] B) (t : Fin 3 → A) (ht : (W.map (algebraMap R A)).toProjective.Equation t) :
+    (W.map (algebraMap R B)).toProjective.Equation (fun m => f (t m)) := by
+  have h := ht.map f.toRingHom
+  have hmap : (W.map (algebraMap R A)).map f.toRingHom = W.map (algebraMap R B) := by
+    rw [WeierstrassCurve.map_map]; exact congrArg W.map f.comp_algebraMap
+  exact hmap ▸ h
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_ij pushed triple)** ψ_ij carries the `(i,j)` law-2 triple to
+`algebraMap transRing S ∘ (transAlgHom ∘ lawTwoTriple ij)` — the `(i,j)` reading of the addition
+triple over `S`. Element-level tower step (`algebraMap_biChartRing_eq` via `congrFun`, term-mode so it
+never whnf-explodes), keeping the composite `algebraMap biChartRing S` out of the goal. -/
+lemma psiFst_algebraMap_lawTwoTriple (k k' m : Fin 3) :
+    psiFst W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k)) (lawTwoTriple W i j m)) =
+      algebraMap (transRing W i j i' j') _ (transAlgHom W i j i' j' (lawTwoTriple W i j m)) := by
+  rw [psiFst_algebraMap]
+  exact congrFun (congrArg DFunLike.coe (algebraMap_biChartRing_eq W i j i' j' _))
+    (lawTwoTriple W i j m)
+
+/-- The `k`-th coordinate of the ψ_ij-pushed triple is invertible with the pushed `invSelf`. -/
+lemma psiFst_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiFst W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k)) (lawTwoTriple W i j k)) *
+      psiFst W i j i' j' k k' (IsLocalization.Away.invSelf (lawTwoTriple W i j k)) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+/-- The `k'`-th coordinate of the ψ_i'j'-pushed triple is invertible with the pushed `invSelf`. -/
+lemma psiSnd_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiSnd W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' k')) *
+      psiSnd W i j i' j' k k' (IsLocalization.Away.invSelf (lawTwoTriple W i' j' k')) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+/-- **([C4-HF-ASSEMBLY] L4, proportionality over S)** The two pushed triples are proportional: the
+ψ_i'j' triple is `(cd)²`-times the ψ_ij triple over `S`, the bidegree-`(2,2)` transition factor pushed
+from `transRing` (`transHom_lawTwoTriple_eq_smul`). Term-mode `.trans` chain (all middles are
+`algebraMap transRing S …`, never the composite), so it stays off the concrete tower. This is the crux's
+`hsmul` hypothesis. -/
+lemma psiSnd_algebraMap_lawTwoTriple_eq_smul (k k' m : Fin 3) :
+    psiSnd W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' m)) =
+      algebraMap (transRing W i j i' j') _
+        ((transInvFst W i j i' j' * transInvSnd W i j i' j') ^ 2) *
+      psiFst W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k)) (lawTwoTriple W i j m)) :=
+  (psiSnd_algebraMap W i j i' j' k k' (lawTwoTriple W i' j' m)).trans
+    ((congrArg (algebraMap (transRing W i j i' j') _)
+        (transHom_lawTwoTriple_eq_smul W i j i' j' m)).trans
+      ((map_mul _ _ _).trans
+        (congrArg (algebraMap (transRing W i j i' j') _
+            ((transInvFst W i j i' j' * transInvSnd W i j i' j') ^ 2) * ·)
+          (psiFst_algebraMap_lawTwoTriple W i j i' j' k k' m).symm)))
+
+variable [IsJacobsonRing R]
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_ij triple on-curve)** The ψ_ij-pushed law-2 triple satisfies the model
+equation over `S`. Routed through `transRing` (via `transAlgHom`, the canonical tower map — cheap
+`[Algebra transRing S]`), never the composite `[Algebra biChartRing S]`. -/
+lemma equation_psiFst_lawTwoTriple [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiFst W i j i' j' k k' (algebraMap (biChartRing W i j)
+          (Localization.Away (lawTwoTriple W i j k)) (lawTwoTriple W i j m))) := by
+  rw [funext (psiFst_algebraMap_lawTwoTriple W i j i' j' k k')]
+  exact equation_mapTriple W (fun m => transAlgHom W i j i' j' (lawTwoTriple W i j m))
+    (equation_mapTriple_algHom W (transAlgHom W i j i' j') (lawTwoTriple W i j)
+      (equation_lawTwoTriple_of_isDomain W i j hΔ))
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_i'j' triple on-curve)** The ψ_i'j'-pushed law-2 triple satisfies the
+model equation over `S`, routed through `transRing` via `transHom` (`equation_mapTriple_algHom`). -/
+lemma equation_psiSnd_lawTwoTriple [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiSnd W i j i' j' k k' (algebraMap (biChartRing W i' j')
+          (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' m))) := by
+  rw [funext (fun m => psiSnd_algebraMap W i j i' j' k k' (lawTwoTriple W i' j' m))]
+  exact equation_mapTriple W (fun m => transHom W i j i' j' (lawTwoTriple W i' j' m))
+    (equation_mapTriple_algHom W (transHom W i j i' j') (lawTwoTriple W i' j')
+      (equation_lawTwoTriple_of_isDomain W i' j' hΔ))
+
+/-- **([C4-HF-ASSEMBLY] L4, THE cross-chart ψ-agreement)** Over `Spec S`, the `(i,j,k)` and
+`(i',j',k')` law-2 piece morphisms agree after pulling back along `Spec(ψ_ij)`, `Spec(ψ_i'j')`. Both
+sides go to `chartAwayHomOfTriple`-form via `specMap_comp_pieceMorOfTriple`, and the general crux
+`chartι_comp_specMap_chartAwayHom_smul_eq` closes them using the proportionality of the two pushed
+triples. Term-mode `.trans` chain with syntactically-shared `chartAwayHomOfTriple` middles — the
+decomposition into clean-context sub-lemmas is what keeps `isDefEq` off the concrete tower. -/
+lemma specMap_psiFst_addOnYPieceMor_cross [IsDomain (biChartRing W i j)]
+    [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFst W i j i' j' k k').toRingHom) ≫ addOnYPieceMor W i j k hΔ =
+      Spec.map (CommRingCat.ofHom (psiSnd W i j i' j' k k').toRingHom) ≫
+        addOnYPieceMor W i' j' k' hΔ := by
+  rw [addOnYPieceMor_eq, addOnYPieceMor_eq]
+  exact (specMap_comp_pieceMorOfTriple W (lawTwoTriple W i j)
+      (equation_lawTwoTriple_of_isDomain W i j hΔ) k (psiFst W i j i' j' k k')
+      (psiFst_algebraMap_mul_invSelf W i j i' j' k k')
+      (equation_psiFst_lawTwoTriple W i j i' j' hΔ k k')).trans
+    (((chartι_comp_specMap_chartAwayHom_smul_eq W k k' _ _ _ _ _
+        (psiSnd_algebraMap_lawTwoTriple_eq_smul W i j i' j' k k')
+        (psiFst_algebraMap_mul_invSelf W i j i' j' k k')
+        (psiSnd_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiFst_lawTwoTriple W i j i' j' hΔ k k')
+        (equation_psiSnd_lawTwoTriple W i j i' j' hΔ k k')).symm).trans
+      (specMap_comp_pieceMorOfTriple W (lawTwoTriple W i' j')
+        (equation_lawTwoTriple_of_isDomain W i' j' hΔ) k' (psiSnd W i j i' j' k k')
+        (psiSnd_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiSnd_lawTwoTriple W i j i' j' hΔ k k')).symm)
+
 end Overlap
 
 end WeierstrassCurve.Projective
