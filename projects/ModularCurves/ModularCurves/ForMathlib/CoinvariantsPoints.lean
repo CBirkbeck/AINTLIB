@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.CoactionCharpoly
+import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
 
 /-!
@@ -38,5 +39,27 @@ theorem exists_prime_over_coinvariants (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCo
       (Subtype.val_injective)]
     exact bot_le)
   exact ⟨q, hq, hcomap⟩
+
+section PowerWitness
+
+variable (ρ : B →ₐ[R] B ⊗[R] A)
+variable (C'' : Type*) [CommRing C''] [Algebra R C'']
+variable [Algebra (coinvariants ρ) C''] [IsScalarTower R (coinvariants ρ) C'']
+
+/-- The invariant charpoly is the `r`-th power of `X − f`: if `f` is a co-invariant of the
+base-changed co-action, its multiplication matrix is the scalar `f`, so the charpoly is
+`(X − f)^r`. -/
+theorem coactionCharpoly_of_mem_coinvariants (f : C'' ⊗[coinvariants ρ] B)
+    (hf : f ∈ coinvariants (coactionBaseChange R A ρ C'')) :
+    coactionCharpoly R A (coactionBaseChange R A ρ C'') f
+      = (Polynomial.X - Polynomial.C f) ^ Fintype.card (hopfBasisIndex R A) := by
+  classical
+  rw [mem_coinvariants] at hf
+  rw [coactionCharpoly, hf, show ((f ⊗ₜ[R] (1 : A)) :
+      (C'' ⊗[coinvariants ρ] B) ⊗[R] A) = f ⊗ₜ[R] (1 : A) from rfl,
+    mulMatrix_includeLeft, Matrix.charpoly_diagonal]
+  rw [Finset.prod_const, Finset.card_univ]
+
+end PowerWitness
 
 end ModularCurves
