@@ -1889,6 +1889,27 @@ commits built against the *committed* (clean) ModelVariableChange, and `ForMathl
 (my [a5] work) is independent and green. The owning sibling should commit the `one_*` lemmas (or their
 fix) to unbreak the downstream build. fable-P4 will not touch the sibling's file.
 
+### ★★★ [a5] ALGEBRAIC PIPELINE COMPLETE (fable-P4, 2026-07-09) — engine = pure geometry now
+Every **algebraic** ingredient of `locallyWeierstrass_quotientπ` is proven, axiom-clean, in
+`ForMathlib/WeierstrassInvariant.lean`:
+* `exists_coboundary` — local `H¹(G, VariableChange A) = 0` (four-layer solvable induction).
+* **`exists_invariant_descent`** — the payoff: for a free action (`Aᴳ` local) and `W₀ : WeierstrassCurve A`
+  with a `VariableChange`-cocycle `G`-action (`C_g • (g•W₀) = W₀`), there is `E` and a
+  `WeierstrassCurve Aᴳ` `W₁` with `W₁.map (Aᴳ↪A) = E⁻¹•W₀` — the **Weierstrass model of `E/G` over
+  `X/G = Spec Aᴳ`**. `E⁻¹•W₀` is `G`-invariant (mathlib `map_variableChange` + the cocycle relation),
+  descended by `descendFixed`. Supporting: `vcSMul_eq_map` (`vcSMul g = VariableChange.map g`), the
+  `MulDistribMulAction G (VariableChange A)`, `IsVCocycle`.
+**Remaining = the geometric stitch only** (T-W7 interface; proven-lemma assembly):
+* **[a5-ii]** extract the cocycle from the geometric action: `σE.hom g` cartesian over the g-twisted
+  base (`IsCurveAction.cartesian`) + `isPullback_projModelBaseChange` ⟹ pointed iso
+  `projModel W₀ ≅ projModel (g•W₀)` ⟹ `pointedIso_exists_variableChange` gives `C_g`; cocycle-ness +
+  the `C_g•(g•W₀)=W₀` hypothesis of `exists_invariant_descent` from the action homomorphism.
+* **[a5-iv geom]** the descent iso: `projModel W₁ ×_{X/G} X ≅ projModel (W₁.map) = projModel (E⁻¹•W₀)
+  ≅ projModel W₀ = E ≅ (E/G) ×_{X/G} X` (`isPullback_projModelBaseChange` + `projModelVCIso E⁻¹` +
+  `isPullback_quotientπ`), descended along the fppf cover `X → X/G` ⟹ `pullback π' U.ι ≅ projModel W₁`.
+* **localization/spreading**: `exists_invariant_descent` needs `Aᴳ` local; for `LocallyWeierstrass`'s
+  `∀ s : Spec Aᴳ` localize at each prime and spread the coboundary to a Zariski nbhd.
+
 ### ★★ [a5-iii] COMPLETE + [a5] geometric stitch scoped (fable-P4, 2026-07-09)
 **[a5-iii] fully closed, axiom-clean** (`ForMathlib/WeierstrassInvariant.lean`): `exists_coboundary` —
 for a free action with `Aᴳ` local, **every `VariableChange` cocycle is a coboundary** (local
