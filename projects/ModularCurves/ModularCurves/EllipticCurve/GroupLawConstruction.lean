@@ -861,8 +861,14 @@ theorem mulModelHom_map {R' : Type u} [CommRing R'] (f : R →+* R')
           (projModelBaseChange f W) (projModelBaseChange f W)
           (Spec.map (CommRingCat.ofHom f))
           (projModelBaseChange_π f W).symm (projModelBaseChange_π f W).symm ≫
-        mulModelHom W := by
-  sorry
+        mulModelHom W :=
+  (congrArg (· ≫ projModelBaseChange f W)
+    (mulModelHomBC_congr (classifyRingHomU (W.map f)) (f.comp (classifyRingHomU W))
+      (classifyRingHomU_map f W) universalWeierstrassLocU universalWeierstrassLocU.isUnit_Δ
+      (W.map f) (universalWeierstrassLocU_map_classifyRingHomU (W.map f))
+      (by rw [← WeierstrassCurve.map_map, universalWeierstrassLocU_map_classifyRingHomU W]))).trans
+    (mulModelHomBC_map (classifyRingHomU W) f universalWeierstrassLocU
+      universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W))
 
 /-! ## Lane P1 (join with P0/P2): the group axioms at the `Over (Spec R)` level -/
 

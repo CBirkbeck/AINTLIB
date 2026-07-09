@@ -13019,3 +13019,12 @@ projModelBaseChangeOf_congr / mulModelHomBC_congr across ring-hom equalities (pr
 Then GLC.mulModelHom_map := the A1-congr rewrite (classifyRingHomU (W.map f) = f.comp (classifyRingHomU W))
 + mulModelHomBC_map at G := classifyRingHomU W. After that: mulModelHom_specPoints (c6) → group
 axioms → 0c-i → 0c-ii (BOARD-SIGNAL) → 0h → T-W7.12 → T-W7a.
+
+### v10.94c (2026-07-09, c5β): ★★★ mulModelHom_map DONE — c4.5 is FULLY COMPLETE (GLC sorries 10→9)
+
+The naturality landed exactly per the v10.94b architecture: GLC.mulModelHom_map :=
+congrArg(mulModelHomBC_congr at A1) .trans (mulModelHomBC_map at G := classifyRingHomU W).
+Axiom-clean. The ENTIRE T-W7.0c c1-c4 + c4.5 + T-W7.0d + nat layer is now proven — the
+Bosma-Lenstra two-law multiplication is a scheme morphism over every ring with full base-change
+naturality. Next: mulModelHom_specPoints (c6, the dictionary spec) → group axioms → 0c-i →
+0c-ii (BOARD-SIGNAL — three cascades armed) → 0h → T-W7.12 → T-W7a.
