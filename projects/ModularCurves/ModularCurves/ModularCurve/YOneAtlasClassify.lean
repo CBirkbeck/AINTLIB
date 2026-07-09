@@ -618,6 +618,28 @@ theorem EllObj.tatePullbackAlong_hom_ext (Y : EllObj R)
   apply (EllObj.homPullbackAlongEquiv (tateEllObj R) baseMap Y).injective
   exact Subtype.ext (Prod.ext hproj hbase)
 
+@[simp]
+theorem EllObj.tateClassifyingHomOfPullbackMap_toPullbackAlong {Y : EllObj R}
+    (f : Y ⟶ tateEllObj R) :
+    EllObj.tateClassifyingHomOfPullbackMap R Y f.baseHom (EllObj.toPullbackAlong f) = f := by
+  exact EllObj.toPullbackAlong_pullbackAlongπ f
+
+theorem EllObj.toPullbackAlong_tateClassifyingHomOfPullbackMap {Y : EllObj R}
+    (baseMap : Y.base ⟶ tateBase R)
+    (v : Y ⟶ (tateEllObj R).pullbackAlong baseMap) :
+    EllObj.toPullbackAlong (EllObj.tateClassifyingHomOfPullbackMap R Y baseMap v) ≫
+      (tateEllObj R).pullbackAlongMap baseMap v.baseHom = v :=
+  EllObj.toPullbackAlong_pullbackAlongMap v
+
+theorem EllObj.tateClassifyingHomOfPullbackMap_pullSection {Y : EllObj R}
+    (baseMap : Y.base ⟶ tateBase R)
+    (v : Y ⟶ (tateEllObj R).pullbackAlong baseMap)
+    (P₀ : (tateUniversal R).Section) :
+    EllHom.pullSection R (EllObj.tateClassifyingHomOfPullbackMap R Y baseMap v) P₀ =
+      EllHom.pullSection R v
+        (EllHom.pullSection R ((tateEllObj R).pullbackAlongπ baseMap) P₀) :=
+  EllHom.pullSection_comp R v ((tateEllObj R).pullbackAlongπ baseMap) P₀
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)

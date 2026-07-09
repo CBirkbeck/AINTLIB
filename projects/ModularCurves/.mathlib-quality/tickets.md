@@ -10699,6 +10699,24 @@ inherited `sorryAx` is attributed to the intended Tate-object trail, matching
 lists only `[propext, Classical.choice, Quot.sound]`, so the quotient-problem reuse API adds no new
 gate.
 
+## Amendments v10.100-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] pullback classifier round trips LANDED
+
+Added the Tate-specialised round-trip API for the v10.89 `pullbackAlong` reuse path:
+`EllObj.tateClassifyingHomOfPullbackMap_toPullbackAlong`,
+`EllObj.toPullbackAlong_tateClassifyingHomOfPullbackMap`, and
+`EllObj.tateClassifyingHomOfPullbackMap_pullSection`. These let the downstream
+classifying-square proof move between a morphism into `tateEllObj` and the corresponding
+morphism into `(tateEllObj R).pullbackAlong baseMap`, and rewrite the pulled marked section
+by `EllHom.pullSection_comp`, without hand-rebuilding `EllHom` fields.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green; line-length scan clean. `#print axioms` for
+the three new declarations lists `[propext, sorryAx, Classical.choice, Quot.sound]`; the inherited
+`sorryAx` is again only the intended Tate-object trail (`tateEllObj`, gate **[T-A6b]**).
+`#print axioms EllObj.toPullbackAlong_pullbackAlongπ`,
+`EllObj.toPullbackAlong_pullbackAlongMap`, and `EllHom.pullSection_comp` lists only
+`[propext, Classical.choice, Quot.sound]`, so this round-trip layer adds no new gate.
+
 ## Amendments v10.97-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `EllHom` constructor path LANDED
 
 Added `EllObj.tateBaseMapOfOpenCover_ext`, the generic constructor
