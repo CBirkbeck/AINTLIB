@@ -470,6 +470,18 @@ theorem specMap_chartAwayHom_transPointSnd_eq :
 noncomputable def transAlgHom : biChartRing W i j →ₐ[R] transRing W i j i' j' :=
   IsScalarTower.toAlgHom R _ _
 
+/-- Tower factorization of the structure map through `transAlgHom`, for any further localization of
+`transRing`. Proved at the definition site: the `transAlgHom.toRingHom = algebraMap` step is `rfl`
+here (in the light context), but whnf-explodes downstream once the concrete triple-localization is in
+scope (v10.24), so it is captured once as a lemma. -/
+lemma algebraMap_biChartRing_eq (g : transRing W i j i' j') :
+    algebraMap (biChartRing W i j) (Localization.Away g) =
+      (algebraMap (transRing W i j i' j') (Localization.Away g)).comp
+        (transAlgHom W i j i' j').toRingHom := by
+  rw [show (transAlgHom W i j i' j').toRingHom =
+    algebraMap (biChartRing W i j) (transRing W i j i' j') from rfl]
+  exact IsScalarTower.algebraMap_eq (biChartRing W i j) (transRing W i j i' j') (Localization.Away g)
+
 lemma transAlgHom_comp_chartAwayHomOfTriple_fst :
     (transAlgHom W i j i' j').comp (chartAwayHomOfTriple W i (biChartPointFst W i j) 1
         (biChartPointFst_self W i j) (equation_biChartPointFst W i j)) =
