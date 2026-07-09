@@ -1013,7 +1013,59 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
       pullback.snd f (x' ≫ U.1.ι) = e.hom ≫ Spec.map (CommRingCat.ofHom
         (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
         ≫ X.isoSpec.inv := by
-    sorry
+    -- paste the restriction square onto the `x'`-square
+    have hbig : IsPullback
+        (pullback.fst (f ∣_ U.1) x' ≫ (f ⁻¹ᵁ U.1).ι)
+        (pullback.snd (f ∣_ U.1) x') f (x' ≫ U.1.ι) :=
+      (IsPullback.of_hasPullback (f ∣_ U.1) x').paste_horiz
+        (isPullback_morphismRestrict f U.1).flip
+    -- conjugate both legs of the small pullback to `Spec` maps
+    have hsq₁ : x' ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+        = X.isoSpec.hom ≫ Spec.map (x'.appTop) :=
+      (Scheme.isoSpec_hom_naturality x').symm
+    have hsq₂ : (f ∣_ U.1) ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+        = (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom ≫ Spec.map ((f ∣_ U.1).appTop) :=
+      (Scheme.isoSpec_hom_naturality (f ∣_ U.1)).symm
+    let m : pullback x' (f ∣_ U.1) ⟶
+        pullback (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) :=
+      pullback.map _ _ _ _ X.isoSpec.hom (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+        (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂
+    haveI : IsIso m := by
+      show IsIso (pullback.map _ _ _ _ X.isoSpec.hom
+        (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+        (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂)
+      infer_instance
+    refine ⟨hbig.isoPullback.symm ≪≫ pullbackSymmetry (f ∣_ U.1) x' ≪≫ asIso m ≪≫
+      pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤), ?_⟩
+    have h₁ : pullback.snd f (x' ≫ U.1.ι)
+        = hbig.isoPullback.inv ≫ pullback.snd (f ∣_ U.1) x' := by
+      rw [Iso.eq_inv_comp, hbig.isoPullback_hom_snd]
+    have h₂ : pullback.snd (f ∣_ U.1) x'
+        = (pullbackSymmetry (f ∣_ U.1) x').hom ≫ pullback.fst x' (f ∣_ U.1) :=
+      (pullbackSymmetry_hom_comp_fst _ _).symm
+    have h₃ : pullback.fst x' (f ∣_ U.1)
+        = m ≫ pullback.fst
+            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+          ≫ X.isoSpec.inv := by
+      have hm : m ≫ pullback.fst
+            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+          = pullback.fst x' (f ∣_ U.1) ≫ X.isoSpec.hom := pullback.lift_fst _ _ _
+      rw [← Category.assoc, hm, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have h₄ : pullback.fst
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        = (pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)).hom
+          ≫ Spec.map (CommRingCat.ofHom
+            (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) := by
+      rw [← pullbackSpecIso_inv_fst', Iso.hom_inv_id_assoc]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+    slice_rhs 4 5 => rw [← h₄]
+    slice_rhs 3 5 => rw [← h₃]
+    slice_rhs 2 3 => rw [← h₂]
+    slice_rhs 1 2 => rw [← h₁]
   -- (B) flatness transports through the identification to the ring side
   have hflat_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) ↔
       Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
