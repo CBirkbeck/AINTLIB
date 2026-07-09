@@ -11392,3 +11392,27 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   axiom-clean blocks); engine sorryAx now flows through exactly TWO leaves: [a5] (FP4,
   continuing u→1 reduction) + T-A3 (now A′s). Stale attribution in their report corrected:
   T-A3 was pool, now A′s by adjudication.
+
+### v10.69 (2026-07-09, fable-PIC0): [GAP1-W-MONO] pieces 1–2 PROVEN (registration + bridge); broadcast absorbed
+
+*Commit 191f5146d, green, zero sorries so far in SheafOfModulesMonoidal.lean.*
+
+- **Proven, axiom-clean:** `sheafificationW` (the localizing class);
+  `sheafificationW_isLocalization` at α = 𝟙 (Adjunction.isLocalization; forget ⋙
+  restrictScalars(𝟙) FF by composition); `sheafificationW_iff_isLocallyBijective`
+  (both directions ride the Iso.refl compatibility with the AddCommGrp sheafification:
+  J.W_iff + W.isLocallyInjective/Surjective one way, W_of_isLocallyBijective +
+  toSheaf.ReflectsIsomorphisms the other). The localization scaffold for monoidal
+  SheafOfModules is UP; what remains is exactly the leaf.
+- **Broadcast absorbed:** T-A3 → beastmode-A (adjudicated, home lane); the three
+  SmoothDescent staged leaves + the MellWeierstrass cadence cleanup → NEW-GH (primary)
+  — PIC0 stands clear of both. NOTE for NEW-GH's MellW cleanup pass: beastmode-A's
+  PUBLIC `projModelVCIso_one` (ModelVariableChange.lean) landed after my map_id close —
+  MellWeierstrass's private cocycle lemmas (`vcIso_congrC/W`, `projModelVCIso_one_hom`)
+  can likely be simplified to consume it; flag for the cleanup's mathlib/project-search
+  step.
+- **Next (this lane):** the [GAP1-W-MONO] leaf itself — `IsLocallySurjective.tensorHom`
+  at sections (TensorProduct.induction_on + imageSieve intersections), then the
+  locally-injective half (stalkwise/filtered; decompose on fork), then the
+  LocalizedMonoidal instantiation (only once the leaf is sorry-free — a sorried
+  IsMonoidal instance would poison the monoidal DATA with sorryAx).
