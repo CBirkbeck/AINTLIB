@@ -177,4 +177,26 @@ end Quotient
 
 end SchemeAction
 
+
+variable {G : Type u} [Group G] {B : Type u} [CommRing B] [MulSemiringAction G B]
+
+/-- **The invariants morphism of a free action is an fppf cover**: `Spec B ⟶ Spec Bᴳ` is
+surjective, flat and quasi-compact (indeed finite locally free). Abstracts the body of
+`epi_localQuotientπ` for reuse in the `[a5-P-fppf]` comparison
+(`isIso_of_isPullback_of_fppf`). -/
+theorem fppf_invariantsπ [Finite G] (hfree : IsFreeAlgebraAction G ℤ B) :
+    Surjective (invariantsπ G B ℤ) ∧ Flat (invariantsπ G B ℤ)
+      ∧ QuasiCompact (invariantsπ G B ℤ) := by
+  haveI : Module.Finite (FixedPoints.subalgebra ℤ B G) B :=
+    Module.Finite.of_isFreeAlgebraAction G ℤ _ hfree
+  haveI : Module.Projective (FixedPoints.subalgebra ℤ B G) B :=
+    Module.Projective.of_isFreeAlgebraAction G ℤ _ hfree
+  haveI : Module.Flat (FixedPoints.subalgebra ℤ B G) B := Module.Flat.of_projective
+  refine ⟨⟨invariantsπ_surjective G B ℤ⟩, ?_, ?_⟩
+  · rw [invariantsπ, AlgebraicGeometry.Flat.SpecMap_iff, CommRingCat.hom_ofHom,
+      RingHom.flat_algebraMap_iff]
+    infer_instance
+  · rw [invariantsπ]
+    infer_instance
+
 end AlgebraicGeometry
