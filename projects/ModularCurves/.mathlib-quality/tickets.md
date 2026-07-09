@@ -13093,3 +13093,34 @@ use-with-lake-as-final-gate. Docstrings of both files updated to the landed stat
 tensorObj/unit/coherences (LocalizedMonoidal from GAP1-W-MONO); the INVERSE needs duals — ⚠ v10.36
 two-route edge: p2's Cartier-duality lane — **board coordination required before building any dual**
 (never build duality twice). Will scope P2's non-dual pieces first.
+
+## Amendments v10.96 (fable-PIC0) — Pic coherence layer landed; P2 /develop fork banked
+
+**Landed (post-v10.95, all axiom-clean [propext, Classical.choice, Quot.sound]):**
+`sheafificationW_unit_app` (scheme-side unit-is-W, reusable), `nonempty_sheafify_tensor_left/right_collapse`,
+`nonempty_tensorObj_assoc` ((M⊗N)⊗P ≅ M⊗(N⊗P)), `nonempty_tensorObj_comm` (M⊗N ≅ N⊗M; SymmetricCategory
+registered on X.PresheafOfModules). With P1's unit-tensor + P1b's tensor-invertibility, **every
+coherence a hand-rolled Pic monoid needs is now proved**. Elaboration recipe banked in the commit
+(530fa32e6): inferInstanceAs-bridges to the sheaf.obj⋙forget₂ spelling for sheafificationW_tensorHom's
+instance-args; CategoryTheory.Functor.map_id (namespace!); respectTransparency set_options.
+
+**P2-proper = the chartered /develop pass. THE DESIGN FORK to adjudicate (banked for the pass):**
+- **(A) Instance route:** [GAP1-W-MONO] is sorry-free ⟹ the v10.8 no-sorried-monoidal-DATA discipline
+  no longer blocks registering `MonoidalCategory X.Modules` from `LocalizedMonoidal` (the payoff
+  theorem sheafOfModules_monoidalCategory_nonempty holds; LocalizedMonoidal is a type synonym for the
+  target category, so the instance is registrable on the SheafOfModules carrier). Then
+  `Pic X := (Shrink (Skeleton X.Modules))ˣ`-style rides mathlib's `CommRing.Pic` pattern
+  (RingTheory/PicardGroup.lean, Junyan Xu) — monoid structure INSTANCE-LEVEL, coherences free.
+  Questions for the pass: LocalizedMonoidal-⊗ vs our tensorObj (≅, likely not defeq — comparison
+  lemma needed); universe/Shrink hygiene; whether the instance registration causes diamond risk with
+  future mathlib (Riou lane will eventually ship its own — ecosystem re-check #35545/#41383/#35773
+  FIRST per the standing watch duty).
+- **(B) Hand-rolled route:** Pic on iso-classes of the IsInvertible subtype, monoid from the landed
+  Nonempty-coherences. No instance risk, no LocalizedMonoidal dependence; more glue code; duals still
+  needed for inverses either way.
+- **Inverse/dual in BOTH routes = the v10.36 two-route edge with p2's Cartier-duality lane (route (b),
+  currently deferred per v10.94). BOARD COORDINATION before building any dual — never build duality twice.**
+
+**Session boundary (v10.94 bounded-sessions hygiene):** [PIC-P1b-MONO] consumer-case COMPLETE +
+coherence layer landed + LSP validated = this session's delivery. Next session first act: the P2
+/develop pass on fork (A)/(B) (ecosystem check first), then build. Sentinel updated.
