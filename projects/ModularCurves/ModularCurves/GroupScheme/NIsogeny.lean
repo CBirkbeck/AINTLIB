@@ -92,6 +92,17 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
       (π : (Fin n → Localization.Away g) →ₗ[Localization.Away g]
         (Localization.Away g ⊗[R] M)),
       Function.Surjective π ∧ Function.Exact α π := by
+  classical
+  -- (i) `n` elements of `M` spanning the stalk at `p` (fibre-basis lift + Nakayama)
+  obtain ⟨x, hx⟩ : ∃ x : Fin n → M, Subsingleton (LocalizedModule p.asIdeal.primeCompl
+      (M ⧸ Submodule.span R (Set.range x))) := by
+    sorry
+  -- (ii) the spanning descends to a basic open `D(g)`
+  haveI := hx
+  obtain ⟨g, hgp, hgsub⟩ := LocalizedModule.exists_subsingleton_away
+    (M := M ⧸ Submodule.span R (Set.range x)) p.asIdeal
+  refine ⟨g, hgp, ?_⟩
+  -- (iii) assemble: the induced surjection onto `R_g ⊗ M` and its f.g. kernel
   sorry
 
 /-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
