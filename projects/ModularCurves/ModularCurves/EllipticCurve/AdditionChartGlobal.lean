@@ -570,6 +570,39 @@ lemma psiFst_toRingHom_comp (k k' : Fin 3) :
           transHom W i j i' j' (lawTwoTriple W i' j' k'))) :=
   RingHom.ext (psiFst_algebraMap W i j i' j' k k')
 
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij tower factorization)** ψ_ij restricted to `biChartRing`, routed
+through the *middle* ring `transRing` — `= (algebraMap transRing S).comp transAlgHom`, the tower
+map read as "localize `transRing`, then pull back along `transAlgHom`". The middle term of the
+`.trans` is `algebraMap biChartRing S`, syntactically shared by both halves so `Eq.trans` closes
+it without ever unfolding the concrete triple-localization (contrast: `rw [algebraMap_biChartRing_eq]`
+on a goal already carrying `algebraMap biChartRing S` explodes `isDefEq`). This is the form the
+`Spec.map` identification consumes, keeping `algebraMap biChartRing S` out of the scheme goal. -/
+lemma psiFst_toRingHom_comp' (k k' : Fin 3) :
+    (psiFst W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transAlgHom W i j i' j').toRingHom :=
+  (psiFst_toRingHom_comp W i j i' j' k k').trans
+    (algebraMap_biChartRing_eq W i j i' j' _)
+
+/-- **([C4-HF-ASSEMBLY] L3, the ψ_ij–σ identification)** `Spec(ψ_ij) ≫ pieceAwayι = Spec(transRing→S) ≫
+transι`: the piece immersion `σ = pieceAwayι` precomposed with `Spec(ψ_ij)` is the triple-localization
+immersion `transι` precomposed with `Spec` of the localization `transRing → S`. Both sides reduce,
+via the definitions of `pieceAwayι`/`transι` and functoriality of `Spec`, to
+`Spec(ofHom ((algebraMap transRing S).comp transAlgHom)) ≫ (chartPieceIso).inv ≫ pieceι`; the shared
+tail and the base identity `psiFst_toRingHom_comp'` are packaged by `spec_map_comp_congr` (the
+variable-ring barrier), which keeps `isDefEq` off the concrete tower — under 5k heartbeats. -/
+lemma specMap_psiFst_pieceAwayι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFst W i j i' j' k k').toRingHom) ≫ pieceAwayι W i j k =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceAwayι_eq, transι]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiFst_toRingHom_comp'])
+
 end Overlap
 
 end WeierstrassCurve.Projective

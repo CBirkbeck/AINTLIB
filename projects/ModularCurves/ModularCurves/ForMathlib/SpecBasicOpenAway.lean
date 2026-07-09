@@ -183,3 +183,17 @@ lemma isoImage_inv_morphismRestrict_ι {X Y Z : Scheme} (p : X ⟶ Z) [IsOpenImm
       (p ''ᵁ (e.hom ⁻¹ᵁ U)).ι := by
   rw [morphismRestrict_ι_assoc, ← Category.assoc _ e.inv, Iso.hom_inv_id, Category.id_comp,
     Scheme.Hom.isoImage_inv_ι]
+
+/-- Two `Spec.map`-factorizations that agree on the composite base map agree as morphisms.
+
+The barrier around the composite (v10.24): stated over **variable** rings `A B D E`, the only unfold
+the elaborator sees is the trivial `Spec.map (a ≫ b) = Spec.map b ≫ Spec.map a`. Instantiated at a
+concrete localization tower (`E` a triple `Localization.Away`), the conclusion still matches by
+structure — `Spec.map ?b ≫ Spec.map ?a ≫ ?rest` — so `isDefEq` never unfolds `E`. Combining the two
+`Spec.map`s *at the concrete tower* instead (`rw [← Spec.map_comp_assoc]` on the goal) forces a defeq
+through `E` and blows the heartbeat budget; routing through this lemma keeps it under 5k. -/
+lemma spec_map_comp_congr {A B D E : CommRingCat} {X : Scheme}
+    (a : A ⟶ B) (b : B ⟶ E) (a' : A ⟶ D) (b' : D ⟶ E)
+    (rest : Spec A ⟶ X) (h : a ≫ b = a' ≫ b') :
+    Spec.map b ≫ Spec.map a ≫ rest = Spec.map b' ≫ Spec.map a' ≫ rest := by
+  rw [← Spec.map_comp_assoc, ← Spec.map_comp_assoc, h]
