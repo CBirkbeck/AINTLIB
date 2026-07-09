@@ -373,7 +373,23 @@ with no noetherian hypothesis: primary route chart-local (`Aᴳ` is a `B`-module
 summand of the finite `B`-module `A` via the PROVEN projectivity layer; étale via
 summand-flatness + unramified quotient), fallback route by descent along the
 faithfully flat finite `π` (check mathlib property-descent coverage at execution; if
-absent, cut [GH-DESC-GAP]). -/
+absent, cut [GH-DESC-GAP]).
+
+**[GH-DESC-GAP] CONFIRMED (gap-check, NEW-GH 2026-07-09).** This *abstract* statement —
+descend the SECOND factor `f₀` of `π ≫ f₀` along the surjective finite-étale source-cover
+`π` — is NOT provided by the current mathlib pin. What exists: `IsFinite.of_comp` /
+`Etale.of_comp` and `HasOfPostcompProperty @IsFinite @IsSeparated` / `@Etale @Etale` cancel
+the FIRST factor (wrong factor here); the `MorphismProperty.DescendsAlong _ (@Surjective ⊓
+@Flat ⊓ @QuasiCompact)` instances are BASE-CHANGE descent (covers of the base `S`, not the
+source-cover `π`) and cover only `UniversallyClosed/Open/Injective`, `isomorphisms`,
+`IsOpenImmersion`, `Surjective` — not `@IsFinite`/`@Etale`. No `HasOfPrecompProperty` and no
+fppf source-descent for finite/étale. Discharging this abstractly = a from-scratch
+ForMathlib fppf/finite-locally-free descent development (`ForMathlib/FiniteEtaleDescent.lean`),
+which is out of scope for a "NOW" leaf (v10.24: decompose-don't-grind). **Intended
+discharge for the Y(N) pipeline is the PRIMARY chart-local route above** — provable in the
+GHB4/GHB7 quotient context where `Aᴳ ⊆ A` is a projective (hence flat, direct-summand)
+`B`-submodule of the finite `B`-module `A`; it does NOT need this abstract lemma. Left
+gated pending either. -/
 theorem _root_.AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective
     {Z Z₀ S : Scheme.{u}}
     (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S) [IsFinite π] [Etale π] [Surjective π]
