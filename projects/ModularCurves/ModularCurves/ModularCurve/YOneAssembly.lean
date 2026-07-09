@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.PullSectionCanonicity
+import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.ForMathlib.GeometricFibreComparison
@@ -1082,16 +1083,6 @@ theorem isNaiveGammaOne_pullSection_iff [NeZero N] {X Y : EllObj R} (f : X ⟶ Y
     exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
       fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
 
-/-- The locally-closed inclusion `Y₁(N) ↪ 𝒴` as an `Ell/R`-morphism `yOneEllObj ⟶ tateEllObj`:
-base map `yOneBase`, curve map the base-change projection `pullback.fst`. The Cartesian square is
-the defining base-change square of `yOneEllObj.curve = tateUniversal ×_{𝒴} Y₁(N)`. -/
-noncomputable def yOneToTate [NeZero N] : yOneEllObj R N ⟶ tateEllObj R where
-  baseHom := yOneBase R N
-  base_w := rfl
-  top := Limits.pullback.fst (tateUniversal R).π (yOneBase R N)
-  isPullback := IsPullback.of_hasPullback (tateUniversal R).π (yOneBase R N)
-  zero_w := Limits.pullback.lift_fst _ _ _
-
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
 `Ell/R`-morphisms `Y ⟶ Y₁(N)-object` correspond to naive `Γ₁(N)` structures on `Y.curve`,
@@ -1101,7 +1092,51 @@ reflexivity); backward via `tatePoint_classifies` (through Y1-A2, `N ≥ 4`) fol
 naturality by `EllHom.pullSection_comp` (proven, held file). -/
 theorem yOne_representableBy [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N)) := by
-  sorry
+  classical
+  haveI : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+    (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
+  haveI : Mono (yOneBase R N) := by
+    show Mono ((yOneOpens R N).ι ≫ (tateUniversal R).killedLocusπ (tatePoint R) N)
+    infer_instance
+  -- **The D2 + D1 bridge**: for `g : Y ⟶ 𝒴`, the pulled marked section is naive `Γ₁(N)` on
+  -- `Y.curve` iff `g`'s base map factors through `Y₁(N)`.
+  have bridge : ∀ {Y : EllObj R} (g : Y ⟶ tateEllObj R),
+      Y.curve.IsNaiveGammaOne N (EllHom.pullSection R g (tatePoint R)) ↔
+        ∃ h : Y.base ⟶ yOne R N, h ≫ yOneBase R N = g.baseHom := fun {Y} g =>
+    (isNaiveGammaOne_pullSection_iff R N g (tatePoint R)).trans
+      (factors_yOne_iff R N hN hinv g.baseHom).symm
+  -- **`e2`**: pairs `(g, factorisation)` ≃ naive `Γ₁(N)` sections, via the atlas classifier
+  -- (`tatePoint_classifies`); bijective by classifier-uniqueness (+ `yOneBase` mono) and the
+  -- two existentials. `Equiv.ofBijective` supplies the round-trip laws.
+  let e2 : ∀ X : EllObj R,
+      {p : (X ⟶ tateEllObj R) × (X.base ⟶ yOne R N) // p.2 ≫ yOneBase R N = p.1.baseHom} ≃
+        {P : X.curve.Section // X.curve.IsNaiveGammaOne N P} := fun X =>
+    Equiv.ofBijective
+      (fun p => ⟨EllHom.pullSection R p.1.1 (tatePoint R), (bridge p.1.1).mpr ⟨p.1.2, p.2⟩⟩)
+      ⟨fun p₁ p₂ hp => by
+          obtain ⟨⟨g₁, h₁⟩, hgh₁⟩ := p₁
+          obtain ⟨⟨g₂, h₂⟩, hgh₂⟩ := p₂
+          simp only [Subtype.mk.injEq] at hp
+          have hcl := tatePoint_classifies R X (EllHom.pullSection R g₁ (tatePoint R))
+            (((bridge g₁).mpr ⟨h₁, hgh₁⟩).nowhereGeomOrderLEThree hN)
+          have hg : g₁ = g₂ := hcl.unique rfl hp.symm
+          have hh : h₁ = h₂ := by
+            apply (cancel_mono (yOneBase R N)).mp
+            rw [hgh₁, hgh₂, hg]
+          subst hg; subst hh; rfl,
+        fun P => by
+          obtain ⟨P, hP⟩ := P
+          obtain ⟨g, hg, -⟩ := tatePoint_classifies R X P (hP.nowhereGeomOrderLEThree hN)
+          obtain ⟨h, hh⟩ := (bridge g).mp (by rw [hg]; exact hP)
+          exact ⟨⟨(g, h), hh⟩, Subtype.ext hg⟩⟩
+  refine ⟨{ homEquiv := fun {X} =>
+              (EllObj.homPullbackAlongEquiv (tateEllObj R) (yOneBase R N) X).trans (e2 X)
+            homEquiv_comp := fun {X X'} f v => ?_ }⟩
+  refine Subtype.ext ?_
+  show EllHom.pullSection R ((f ≫ v) ≫ (tateEllObj R).pullbackAlongπ (yOneBase R N)) (tatePoint R)
+    = EllHom.pullSection R f
+        (EllHom.pullSection R (v ≫ (tateEllObj R).pullbackAlongπ (yOneBase R N)) (tatePoint R))
+  rw [Category.assoc, EllHom.pullSection_comp]
 
 /-! ### E. Geometry of `Y₁(N)`: affine and smooth (Loeffler Thm 3.4.4, p. 15)
 
