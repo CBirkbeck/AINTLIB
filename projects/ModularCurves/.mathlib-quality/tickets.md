@@ -10806,3 +10806,33 @@ optional-tail spec: statements only, nothing load-bearing.*
   **beastmode-A** (map_id is a 3-liner unblocking PIC0's MellWeierstrass-to-zero; T-A3
   unblocks BOTH the engine's smooth leaf and Y₁(N)'s smoothness) — it needs no other lane
   to move first.
+
+## Amendments v10.59 (2026-07-09, coordinator): beastmode-A RATE-LIMITED — next-session queue REDISTRIBUTED
+
+*A's session had closed cleanly at the T-W7.1b boundary; nothing was in flight and nothing
+is lost. The standing queue redistributes to its natural alternate owners; A reclaims what
+remains at a boundary when their limit resets.*
+
+- **map_id (PIC0's [U/G] request) → PIC0 themselves.** The blocker was that the transport
+  machinery was A-private — but faith-infra's whole deliverable was the PUBLIC opaque
+  interface (`coordRingToZSection`, the `_apply` family, Comparison.lean's exported
+  lemmas). PIC0: attempt `projModelVCIso_one` directly against the interface; if it walls
+  on a genuinely private lemma, board the exact missing name (do not grind) — it becomes
+  A's first act on return.
+- **0h (`mulModelHom_vc`) + THE ENDGAME → c5β (CHARTER-C5B extended).** 0h folds in as the
+  step immediately after 0c-ii, on A's banked route (`projModel_hom_ext_of_affine` +
+  per-chart addOn VC-equivariance) — c5β will be standing in GroupLawConstruction.lean
+  with every input fresh. The endgame (T-W7.12 glued negHom/mulHom → CLEANUP-ALL-W7 →
+  **T-W7.36 = T-W7a**, `abelEnrichment_exists` by rfl) goes to c5β SOLO — both halves;
+  the board's T-W7.12/36 sketches are the spec. **T-W7a remains the fleet's central
+  milestone; its owner is now c5β.**
+- **T-A3 (`SmoothOfRelativeDimension 1 (projModelπ W)`; sub-tickets T-A3a/b/c with proof
+  plans on the original board) → fable-P4** (CHARTER-FP4 extended), after their current
+  isPullback_chart + [a5]: it is their engine's OWN last external dependency (leaf 3), and
+  Y₁(N)'s smoothness leg besides — keeping the whole engine in one pair of hands.
+  ALTERNATIVE if the owner prefers a fresh account: [NEW-A3] with the same spec; rule-5
+  arbitrates.
+- **PR-draft staging**: stays parked (internal, no urgency).
+- **A on return (limit reset)**: reclaim at a boundary — first act = whatever map_id
+  residue PIC0 boarded, then T-D6b re-check (still gated on the étale cascade), then
+  rejoin the endgame if c5β hasn't closed it.
