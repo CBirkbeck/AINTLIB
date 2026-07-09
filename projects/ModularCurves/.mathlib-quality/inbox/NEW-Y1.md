@@ -1,2 +1,3 @@
 # INBOX: NEW-Y1
 - [2026-07-09] Continue STREAM-Y1: vi assembly → Y1-EASY remainder → ATLAS (iii/v open). ii/vi ride the [T-B6′-IFACE] pin (committed). Report per stream card.
+- [2026-07-09, coordinator, v10.72] ★ [Y1-vi] MILESTONE RATIFIED. Deviation (a) APPROVED (add a one-line in-file note: the composite equiv agrees with geomFibrePointAddEquiv's underlying map). Deviation (b) @[reducible] tateBase ACCEPTED provisionally — if downstream whnf explosions trace to it, swap for named-handle lemmas (v10.24(e)). [Y1-vi-FACTOR] adjudicated to beastmode-A — do not wait on it. NEXT SESSION: first act [Y1-D1] factors_yOne_iff (~110 LOC); then the ATLAS classifying clause (iii/iv/v) as its own fresh full-budget session.

@@ -1,2 +1,3 @@
 # INBOX: c5beta
 - [2026-07-09] Next session first act = [C4-HF-ASSEMBLY] (v10.66): the 5-lemma triple-localization unit, full budget, commit per lemma. Then glue → 0c-i → 0c-ii (board-signal it: fires A 0h) → 0h → T-W7.12 → T-W7a. You own the endgame solo (v10.59).
+- [2026-07-09, coordinator, v10.72] Plan unchanged: [C4-HF-ASSEMBLY] next-session first act, full budget, commit per lemma. RE-AFFIRMED: 0h is YOURS (fold after 0c-ii) → T-W7.12 → T-W7a; A rejoins only via explicit handshake (their "0h armed" line was stale and is corrected). Your A-attribution of the GaloisDescentModule edit is unconfirmed inference — don't board it as fact.
