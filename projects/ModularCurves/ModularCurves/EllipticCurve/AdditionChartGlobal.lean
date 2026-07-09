@@ -505,6 +505,30 @@ lemma pieceAwayι_eq (k : Fin 3) :
         (chartPieceIso W i j).inv ≫ pieceι W i j := by
   rw [pieceAwayι, ← Category.assoc, specBasicOpenIsoAway_hom_ι]
 
+/-- **(π-compat, piece foundation)** The `k`-th law-2 regularity piece embeds into `E ×_R E` as an
+`R`-scheme: `pieceAwayι ≫ fst ≫ projModelπ = Spec.map (algebraMap R (Away …))`. The left projection
+(`pieceι_fst`, `chartPieceIso_inv_fst`, `chartι_projModelπ`) collapses to the piece's `R`-algebra
+structure; the ring identity is `includeLeftRingHom_comp_algebraMap` + `AlgEquiv.commutes` (the
+chart-product tensor equiv is `R`-linear) + the `R`-`biChartRing`-`Away` scalar tower. This matches
+`addOnYPieceMor_projModelπ`, so it is the base case of the `mulModelHom_π` propagation. -/
+lemma pieceAwayι_fst_projModelπ (k : Fin 3) :
+    pieceAwayι W i j k ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap R (Localization.Away (lawTwoTriple W i j k)))) := by
+  rw [pieceAwayι_eq]
+  simp only [Category.assoc]
+  slice_lhs 3 4 => rw [pieceι_fst]
+  slice_lhs 4 5 => rw [chartι_projModelπ]
+  slice_lhs 2 3 => rw [chartPieceIso_inv_fst]
+  rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  ext r
+  show (algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
+      ((biChartRingAwayTensorEquiv W i j).symm
+        (algebraMap R (TensorProduct R (chartAway W i) (chartAway W j)) r)) =
+    algebraMap R (Localization.Away (lawTwoTriple W i j k)) r
+  rw [AlgEquiv.commutes, ← IsScalarTower.algebraMap_apply]
+
 /-- The overlap piece `P := A_k ⊓ B_k'` of two law-2 regularity image pieces. -/
 noncomputable abbrev overlapPiece (k k' : Fin 3) :
     (pullback (projModelπ W) (projModelπ W)).Opens :=
