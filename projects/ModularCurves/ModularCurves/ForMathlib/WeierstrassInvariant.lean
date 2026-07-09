@@ -205,4 +205,38 @@ theorem s_isCocycle_of_u_one {C : G → VariableChange A} (hC : IsVCocycle C)
     rw [uSMul_coe, hu h, Units.val_one, smul_one]
   rw [hu1, one_mul]
 
+/-- `g • (1, 0, σ, 0) = (1, 0, g • σ, 0)`. -/
+theorem vcSMul_mk_s (g : G) (σ : A) :
+    (g • (⟨1,0,σ,0⟩ : VariableChange A)) = ⟨1, 0, g • σ, 0⟩ := by
+  apply VariableChange.ext
+  · apply Units.ext; simp [vcSMul_smul_def, vcSMul, uSMul_coe, smul_one]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+  · simp [vcSMul_smul_def, vcSMul]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+
+/-- The `s`-component of conjugating a `u = 1` element `C g` by `(1, 0, σ, 0)`. -/
+theorem conj_s_component (σ : A) {C : G → VariableChange A} (hu : ∀ g, (C g).u = 1) (g : G) :
+    ((⟨1,0,σ,0⟩ : VariableChange A) * C g * (g • (⟨1,0,σ,0⟩ : VariableChange A))⁻¹).s
+      = σ + (C g).s - g • σ := by
+  rw [vcSMul_mk_s]
+  simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, Units.val_one,
+    inv_one, mul_one, one_mul]
+  ring
+
+/-- **([a5-iii], step 3 — kill `s`)** A `u = 1` `VariableChange` cocycle is cohomologous to one with
+`u = 1` *and* `s = 0`: conjugate by `(1, 0, -d, 0)`, where `d` is the additive Hilbert 90 witness for
+the `s`-cocycle (`(C g).s = d - g•d`). The residual cocycle now lives in the `(r, t)` subgroup. -/
+theorem exists_conj_s_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
+    {C : G → VariableChange A} (hC : IsVCocycle C) (hu : ∀ g, (C g).u = 1) :
+    ∃ D : VariableChange A, IsVCocycle (fun g => D * C g * (g • D)⁻¹) ∧
+      (∀ g, (D * C g * (g • D)⁻¹).u = 1) ∧ (∀ g, (D * C g * (g • D)⁻¹).s = 0) := by
+  obtain ⟨d, hd⟩ := exists_sub_smul_eq_of_isCocycle G ℤ A hfree (fun g => (C g).s)
+    (s_isCocycle_of_u_one hC hu)
+  refine ⟨⟨1, 0, -d, 0⟩, isVCocycle_conj _ hC, fun g => ?_, fun g => ?_⟩
+  · rw [vcSMul_mk_s]
+    simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, Units.val_one, inv_one,
+      mul_one, one_mul]
+  · rw [conj_s_component (-d) hu g, hd g, smul_neg]
+    ring
+
 end WeierstrassCurve

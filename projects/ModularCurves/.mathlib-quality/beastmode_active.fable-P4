@@ -1,1 +1,1 @@
-FOCUS: [a5-iii] steps 1-3 LANDED (u->1 reduction + s-cocycle, 7 axiom-clean blocks). NEXT: conjugate to kill s (exists_sub_smul_eq_of_isCocycle -> sigma, conjugate by (1,0,sigma,0)), then r, then t (nilpotent twist); assemble D with C_g = (g.D).D^-1; then a5-i/ii/iv geometric stitch. Tree green.
+FOCUS: [a5-iii] s-layer DONE (exists_conj_s_zero: u=1 cocycle -> u=1,s=0, axiom-clean). NEXT: r-layer (analogous, conj by (1,r0,0,0) via Hilbert 90 on r-cocycle), then t-layer (nilpotent twist r.(g.s)), assemble coboundary D; then a5-i/ii/iv geometric stitch.
