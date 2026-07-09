@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.FieldTheory.Fixed
 
 /-!
@@ -59,5 +60,66 @@ theorem descendFixed_isElliptic [Nontrivial A] (W : WeierstrassCurve A) (h₁ h�
     (W.descendFixed h₁ h₂ h₃ h₄ h₆ (G := G)).IsElliptic := by
   rw [isElliptic_iff]
   exact hΔ
+
+/-! ### The `G`-action on `VariableChange A` ([a5-iii] foundation)
+
+For the descent of the quotient curve's Weierstrass model, the `G`-action on the universal curve's
+model is expressed (via `pointedIso_exists_variableChange`, T-W7.1b) as a `1`-cocycle valued in the
+group `VariableChange A`. The base action of `G` on `A` induces a coefficientwise action on
+`VariableChange A` **by group automorphisms** — this is what makes "cocycle" meaningful and is the
+foundation of the trivialization ([a5-iii]): the `u`-part is a multiplicative cocycle
+(`exists_unit_smul_eq_of_isLocalRing`), the `(r,s,t)`-part additive (`exists_sub_smul_eq_of_isCocycle`).
+-/
+
+/-- The `G`-action on a unit of `A`, through the induced ring automorphism. -/
+noncomputable def uSMul (g : G) (u : Aˣ) : Aˣ :=
+  Units.map (MulSemiringAction.toRingHom G A g).toMonoidHom u
+
+@[simp] theorem uSMul_coe (g : G) (u : Aˣ) : ((uSMul g u : Aˣ) : A) = g • (u : A) := rfl
+
+/-- The coefficientwise `G`-action on `VariableChange A`. -/
+noncomputable def vcSMul (g : G) (C : VariableChange A) : VariableChange A where
+  u := uSMul g C.u
+  r := g • C.r
+  s := g • C.s
+  t := g • C.t
+
+@[simp] theorem vcSMul_u (g : G) (C : VariableChange A) : (vcSMul g C).u = uSMul g C.u := rfl
+@[simp] theorem vcSMul_r (g : G) (C : VariableChange A) : (vcSMul g C).r = g • C.r := rfl
+@[simp] theorem vcSMul_s (g : G) (C : VariableChange A) : (vcSMul g C).s = g • C.s := rfl
+@[simp] theorem vcSMul_t (g : G) (C : VariableChange A) : (vcSMul g C).t = g • C.t := rfl
+
+/-- The action distributes over the `VariableChange` group law: `G` acts by group homomorphisms. -/
+theorem vcSMul_mul (g : G) (C C' : VariableChange A) :
+    vcSMul g (C * C') = vcSMul g C * vcSMul g C' := by
+  have hp : ∀ (u : Aˣ) (n : ℕ), g • ((u : A) ^ n) = ((uSMul g u : Aˣ) : A) ^ n := by
+    intro u n; rw [uSMul_coe]; exact (map_pow (MulSemiringAction.toRingHom G A g) _ _)
+  simp only [vcSMul, VariableChange.mul_def, VariableChange.mk.injEq]
+  refine ⟨by ext; simp [smul_mul'], ?_, ?_, ?_⟩
+  · rw [smul_add, smul_mul', hp, uSMul_coe]
+  · rw [smul_add, smul_mul', uSMul_coe]
+  · rw [smul_add, smul_add, smul_mul', smul_mul', smul_mul', hp, hp, uSMul_coe]
+
+@[simp] theorem vcSMul_one (g : G) : vcSMul g (1 : VariableChange A) = 1 := by
+  simp only [vcSMul, VariableChange.one_def, smul_zero]
+  ext <;> simp [uSMul]
+
+/-- `VariableChange A` carries a `MulDistribMulAction` of `G`: the base action acts by group
+automorphisms of the admissible-change-of-variables group. -/
+noncomputable instance : MulDistribMulAction G (VariableChange A) where
+  smul := vcSMul
+  one_smul C := by
+    show vcSMul 1 C = C
+    cases C; simp only [vcSMul, one_smul, VariableChange.mk.injEq, and_true, true_and]
+    ext; simp [uSMul]
+  mul_smul g h C := by
+    show vcSMul (g * h) C = vcSMul g (vcSMul h C)
+    cases C
+    simp only [vcSMul, mul_smul, VariableChange.mk.injEq, and_true, true_and]
+    ext; simp [uSMul, mul_smul]
+  smul_mul g := vcSMul_mul g
+  smul_one := vcSMul_one
+
+@[simp] theorem vcSMul_smul_def (g : G) (C : VariableChange A) : g • C = vcSMul g C := rfl
 
 end WeierstrassCurve
