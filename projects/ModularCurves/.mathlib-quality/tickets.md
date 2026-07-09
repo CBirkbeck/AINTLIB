@@ -12857,3 +12857,26 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   ⟹ **[GR-G]** T-points ⟹ NISOG [L15]. Hygiene per broadcast: single-target builds,
   commit-early+push, no side quests. [OWNER-FLW] boundary noted — nothing here touches
   locally-Weierstrass.
+
+## Amendments v10.95 (2026-07-09, coordinator): [NEW-HOPF] CHARTERED — the Hopf-Galois quotient crux (the Γ₀(N) enabler), for a fresh strong worker
+
+- **★ [CHARTER-HOPF] (fresh account, NEW-HOPF)**: prove **`IsHopfGalois` for the
+  translation co-action** — the ONE remaining obligation of p0's [T-G3d-infra]
+  reduction (v10.41-p0/v10.42-p0: IsHopfGalois ⟹ affine IsColimit ⟹ all six
+  SubgroupQuotient pins; everything else PROVEN). Scope, per
+  `decomposition-g3d-piece3.md`: (1) **3a-ii** — identify the translation co-action
+  `ρ` on a G-stable affine chart (`O(G ×_S Spec B) ≅ B ⊗ A` + the co-action square);
+  (2) **the crux** — `Bijective (canonicalGaloisMap)` + `FaithfullyFlat B^{coρ} B` for
+  finite locally-free subgroup schemes (the affine case of SGA 3's quotient theorem;
+  mathlib-ABSENT; consume p2's Hopf-on-subgroup-divisor layer — subgroupComul/ε/
+  antipode + HopfAlgebra, Milestone-1-imminent — as instances, v10.50 edge); (3) glue
+  on the G-stable cover via SchemeQuotient's GlueData, discharging the six pins.
+  **Payoff: E/C exists for finite flat C ⟹ NISOG L6 opens ⟹ the Γ₀(N) moduli
+  foundation.** Constant-group results (fable-FP's InvariantTorsor) are the proven
+  model — the v10.50 no-bridge ruling stands: build comodule-native, cite parallels,
+  don't unify formulations.
+- **Boundaries (rule 5)**: p0's files (TranslationAction, HopfGalois, Coaction,
+  ComoduleCoinvariants) are the SUBSTRATE — extend in NEW files
+  (`ForMathlib/HopfGaloisTranslation.lean` etc.); p0 reclaims or pairs at a boundary
+  on return (board handshake). p2's files READ-ONLY (consume their pins). Zero overlap
+  with every live lane. Full charter: inbox/NEW-HOPF.md.
