@@ -223,3 +223,36 @@ cartesian squares (twisted-algebra `letI` diamonds) but by **matrix conjugation*
   `∑ includeLeft(Pᵢ)·(ρf)^i = 0`; coefficients coinvariant ⟹ `= ρ(∑Pᵢf^i) = ρ(P(f))`;
   `ρ` injective from counitality (retraction `rid∘(id⊗ε)`) ⟹ `P(f) = 0` — monic degree-r
   integrality of every `f : B` over `coinvariants ρ`. No twisted instances anywhere.
+
+## [HG-B2] the conjugation identity — precise derivation (banked mid-build)
+
+Status: Δ-matrix machine LANDED (comulMatrix T, εT = δ, ΔT = matrix-comul, T·S(T) =
+S(T)·T = 1, isUnit). Remaining chain (each its own increment):
+
+1. **Right-slot mirror**: `rightCoeff`/`comulMatrixR` (T̃ᵢⱼ := right-slot expansion,
+   `Δ(eⱼ) = ∑ₚ T̃ₚⱼ ⊗ eₚ`) + mirrored identities via `rTensor_counit_comp_comul` and the
+   other coassoc grouping ⟹ `isUnit (comulMatrixR)`. Same proof skeletons.
+2. **Multiplication matrix**: `mulMatrix u ∈ Mat_r(B)` of `lmul u` on `E = B⊗A`, basis
+   `vⱼ = 1⊗eⱼ`: `u·vⱼ = ∑ᵢ (mulMatrix u)ᵢⱼ ⊗ eᵢ`. Transport lemma: for an R-algebra map
+   `φ : B → B''`: `mulMatrix ((φ ⊗ id_A) u) = φ(mulMatrix u)` entrywise (apply φ̂ to the
+   defining expansion; φ̂ fixes `1⊗eⱼ`).
+3. **The (★) identity**: in `D = (B⊗A)⊗[R]A` with B' := B⊗A acting on the first two slots
+   and last-slot basis `w'ₚ = (1⊗1)⊗eₚ`: apply `δ := id_B⊗Δ` (equivalently
+   `assoc∘(ρ⊗id_A)`, by IsCoaction.coassoc) to the defining expansion of
+   `M := mulMatrix (ρ f)`:
+   - LHS: `δ(ρf)·δ(vⱼ)`; `δ(vⱼ) = ∑ₚ Θₚⱼ • w'ₚ` with `Θₚⱼ := 1_B ⊗ T̃ₚⱼ ∈ B'`;
+     `(ρ⊗id)(ρf)·w'ₚ = ∑ᵢ ρ(Mᵢₚ) • w'ᵢ` (transport lemma at φ = ρ, coassoc);
+     ⟹ LHS = `∑ᵢ (∑ₚ ρ(Mᵢₚ)·Θₚⱼ) • w'ᵢ`.
+   - RHS: `δ(∑ᵢ Mᵢⱼ⊗eᵢ) = ∑ᵢ Mᵢⱼ ⊗ Δ(eᵢ) = ∑ₚ (∑ᵢ Θₚᵢ·ι(Mᵢⱼ)) • w'ₚ` (right-slot
+     expansion of Δ(eᵢ)).
+   - last-slot coefficient injectivity (the generic extractor at M := B⊗A) ⟹
+     **`ρ(M)·Θ = Θ·ι(M)` in Mat_r(B⊗A)** (★), where `Θ = (comulMatrixR).map (1⊗·)` is a
+     unit (step 1 + Matrix map of a unit along a ring hom).
+4. **Invariance + integrality**: (★) ⟹ `ρ(M) = Θ·ι(M)·Θ⁻¹` ⟹ `charpoly (ρ M) =
+   charpoly (ι M)` (det-conjugation, explicit two-sided inverse) ⟹ with
+   `Matrix.charpoly_map`: `map ρ (charpoly M) = map ι (charpoly M)` ⟹ every coefficient
+   ∈ `coinvariants ρ`. Then CH (`Matrix.aeval_self_charpoly` on M / or the eval₂ form) at
+   `f`: `eval₂ ι (ρf) P = 0` ⟹ (coefficients coinvariant: ι(Pᵢ) = ρ(Pᵢ)) `ρ(P(f)) = 0`
+   ⟹ (ρ injective via counit retraction `rid∘(id⊗ε)∘ρ = id`) `P(f) = 0`: **every f : B
+   is integral of monic degree r over coinvariants ρ** = the 03BJ deliverable
+   `isIntegral_coinvariants`.
