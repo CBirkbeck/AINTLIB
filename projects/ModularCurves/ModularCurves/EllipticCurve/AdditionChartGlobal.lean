@@ -1664,4 +1664,24 @@ lemma addOnZOnImage_eq_addOnYOnImage (hΔ : IsUnit W.Δ)
 
 end OverlapCrossLaw
 
+section OverlapCrossChart
+
+variable (i j i' j' : Fin 3)
+
+/-- **(c3, cross-chart-cross-law overlap geometry)** The `transι`-preimage of the overlap where the
+`(i,j)` Z-law k-th piece meets the `(i',j')` Y-law k'-th piece is the single basic open at
+`transAlgHom(lawOne ijk) · transHom(lawTwo i'j'k')` — the cross-law analogue of
+`transι_preimage_piece_inf`. This is the locus the cross-chart-cross-law `addOn_agree` reduces over
+(and where the transRing tower — hence the isDefEq walls — recurs). -/
+lemma transι_preimage_crossPiece_inf (k k' : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ ((pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ⊓
+        (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k')) =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')) := by
+  rw [Scheme.Hom.preimage_inf, transι_preimage_blOpenZImage_piece,
+    transι_preimage_blOpenYImage_piece', specBasicOpen_mul]
+
+end OverlapCrossChart
+
 end WeierstrassCurve.Projective
