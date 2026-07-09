@@ -83,3 +83,18 @@ feeds `isVCocycle_of_curveActionFamily`. Remaining a5-P2 is engine-specific glue
 final `hcore` chain (projModelVCIso_mul + projModelVCIso_map_hom + hβ + hΨ g/h + hmul) in progress;
 targeted hint sent. On completion → land it + `exists_descended_model_of_curveActionFamily`
 (the algebraic+cocycle spine capstone).
+
+## Update 3 — cocycle hh: down to ONE eqToHom-coherence sub-goal
+`isVCocycle_of_curveActionFamily` proof is structurally complete (choose + hW + hΨ + hβ + hVC +
+hCurveOuter + cancel_mono assembly all correct). The single remaining sub-goal is the `hcore` inner
+step: `(projModelVCIso (C g * g•C h) Wgh).hom ≫ β_gh = eqToHom ≫ act (g*h)`, reduced (via
+projModelVCIso_mul + hβ) to `(projModelVCIso (g•C h) Wgh).hom ≫ β_g^{Wh} ≫ β_h = eqToHom ≫ β_g ≫ act h`.
+The ingredients — `projModelVCIso_map_hom (toRingHom g) (C h) Wh` (the middle), `hΨ h`, `hC h`, then
+`hΨ g` + `hmul` for the outer — are ALL present and correct. The ONLY obstacle is an eqToHom SYNTACTIC
+mismatch: `rw [← projModelVCIso_map_hom …]` won't fire because the goal's leading `eqToHom` (from
+`projModelVCIso_mul`'s `by rw [mul_smul]`) differs syntactically from map_hom's (`by rw
+[map_variableChange]`), though they are defeq (proof-irrelevant). Robust fixes to try:
+`set Wg/Wh/Wgh` at proof top; or compose via `reassoc_of%` after `simp only [Category.assoc]` with
+BOTH eqToHoms normalized; or prove the inner `key` with matching eqToHom by construction; or a single
+`simp only [projModelVCIso_map_hom, hΨ, hC, hmul, eqToHom_trans, eqToHom_refl, Category.assoc,
+Category.id_comp, Category.comp_id]` after projModelVCIso_mul. Background agent iterating on it.
