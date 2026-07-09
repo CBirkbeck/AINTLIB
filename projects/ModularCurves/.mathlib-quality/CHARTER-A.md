@@ -1,5 +1,33 @@
 # CHARTER-A — THE W7 ENDGAME (beastmode-A, v10.32)
 
+## ⏸ STATUS 2026-07-09 — [Y1-D2] transport DISCHARGED + route-a banked; PARKED (coordinator v10.83)
+
+Coordinator pivot (v10.82): from "build all of route-a" → "discharge only the [T-E4-family]
+transport gating [Y1-D2] (standalone lemmas + holder wiring note)." **DELIVERED + RATIFIED (v10.83).**
+
+- **`Moduli/PullSectionCanonicity.lean`** (commit `7dac70553`): the *structural fact of record* — the
+  whole T-E4 family (unrestricted `pullSection_add`, the Γ₁/Γ(N) map-memberships, Y1-D2
+  `isNaiveGammaOne_pullSection_iff`) inherits `[IsLocallyNoetherian]` through a **single** call to
+  `isMonHom_of_one_comp_eq'` inside `transportSection_add`. Extracted the noetherian-free algebra as
+  `transportSection_add_of_isMonHom` (**AXIOM-CLEAN** — lean_verify) + arbitrary-base
+  `pullSection_add_of_finitePresentation`/`_zsmul` (only `sorryAx` = the one primitive) + holder wiring
+  note (docstring). **T-E4 family collapsed to ONE primitive: `isMonHom_of_one_comp_eq'_of_finitePresentation`.**
+- **route-a** (`EllipticCurve/RigiditySpreadingOut.lean`, commit `590984cce`): green skeleton +
+  6-leaf source-faithful decomposition. mathlib has ~80% (AffineTransitionLimit.lean); the one gap =
+  property-descent along limits (Stacks 081D, absent). **BANKED as the fallback** to land the primitive.
+
+**⏸ PARKED at this clean boundary (coordinator directive v10.83). Route-a banked, NOT abandoned.**
+
+**▶ RETURN TRIGGER: `T-W7a` lands (c5β's endgame) → the T-E4-family FALLS-SWEEP:**
+  1. route-(c) wiring: connect `isMonHom_of_one_comp_eq'_of_finitePresentation` to the landed T-W7a
+     canonicity (or supply the group-hom equation by construction);
+  2. the holder wiring (Representability `pullSection_add`:207 + the 2 map-memberships → the FP lemmas;
+     NEW-Y1 assembles Y1-D2 in YOneAssembly.lean per the docstring note);
+  3. Y1-D2, YFULL AFF/FIN, GH1 all go **axiom-clean** in that sweep.
+  Fallback if route-c slips: finish route-a (leaf board = tasks; L4c property-descent is the bulk).
+
+---
+
 ## ✅ STATUS 2026-07-08 — items 1 & 2 COMPLETE (T-W7.1b DONE)
 The faith-infra atomic refactor (item 1) and the T-W7.1b flip (item 2) are **DONE**
 (commits 6f531139 → 3f7fc4fd → 7a81d093 → 7b527d7b). The whnf wall fell to the def-level
