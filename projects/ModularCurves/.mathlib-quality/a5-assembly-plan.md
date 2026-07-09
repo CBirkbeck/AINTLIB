@@ -65,3 +65,21 @@ starred) landed + lake-verified.** Goal: `LocallyWeierstrass π' zero' hz` for t
 Integrate the agent's `hh` → land `isVCocycle_of_curveActionFamily` + `exists_descended_model_of_curveActionFamily`.
 That completes the **entire algebraic + cocycle spine** of KM 4.7 ⇐ (axiom-clean). The geometric
 transport/localization/fppf/package (a5-P2..P6) is the honest next arc.
+
+## Update 2 — transport helpers LANDED (SchemeQuotient.lean, lake-verified)
+`SchemeAction.transport` (iso conjugation), `SchemeAction.restrict` (→ U.toScheme via resLE),
+`SchemeAction.pullbackChartAction` (induced action on `pullback π U.ι` via `pullback.map` of the
+`π`-equivariant square). These are ALL the reusable transport infrastructure. The a5-P2 composite is
+`(σE.pullbackChartAction hπ hU).transport chartIso : SchemeAction G (projModel W₀)` — its `hom g`
+feeds `isVCocycle_of_curveActionFamily`. Remaining a5-P2 is engine-specific glue (no new helpers):
+- **hcart/hzero** for the transported action: transport `IsCurveAction.cartesian`/`zero_equivariant`
+  through `chartIso` (mathlib `IsPullback` iso-invariance) + the chart π-compat `heπ`.
+- **base-map matching**: the transported base map = `Spec (gammaMulSemiringAction.toRingHom g)` via
+  `resLE_isoSpec_hom` / `specSMul_isoSpec_inv` (SchemeQuotient.lean) — so `R := Γ(X,Ũ)` with its
+  `gammaMulSemiringAction` is the `MulSemiringAction G R` the cocycle lemma needs.
+
+## Cocycle status
+`isVCocycle_of_curveActionFamily` (hh): bg agent one sorry from done — hΨ/hβ/hVC/hCurveOuter set up,
+final `hcore` chain (projModelVCIso_mul + projModelVCIso_map_hom + hβ + hΨ g/h + hmul) in progress;
+targeted hint sent. On completion → land it + `exists_descended_model_of_curveActionFamily`
+(the algebraic+cocycle spine capstone).
