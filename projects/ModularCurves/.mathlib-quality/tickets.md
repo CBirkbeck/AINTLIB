@@ -12145,3 +12145,30 @@ is its own lemma and the assembly body has an empty local context.
    §5 polynomial identity over ℤ[a₁..a₆], `linear_combination` + precomputed cofactors, NO maxHeartbeats).
    Own dev sub-ticket.
 Then `mulModelHom` (glue on the two-open cover) + c4.4 spec ⟹ 0c-i ⟹ 0c-ii (endgame arm).
+
+### v10.78 (2026-07-09, c5β): [c3] kicked off — cross-law Away-agreement landed; the scheme lift is the frontier
+
+*Commit 399014256.* `chartAwayHomOfTriple_lawOne_eq_lawTwo` (AdditionChartGlue): at index `k` where
+BOTH B–L laws are regular they induce the SAME `chartAway W k`-algebra map — the `Away`-chart form of
+`chartHomOfTriple_lawOne_eq_lawTwo`, axiom-clean. This is the ring-level input the scheme-level
+`addOn_agree` consumes on each same-index overlap piece `D(lawTwo_k · lawOne_k)`.
+
+**c3 continuation plan (the scheme lift of `addOn_agree`, all Global-side — no c4.5 flag needed):**
+1. `addOnYPieceMor_eq_addOnZPieceMor` (the per-piece cross-law agreement): mirror
+   `pieceMorOfTriple_agree` (Overlap:269) but **cross-law, SAME index k** — *simpler*, no cross-index
+   crux: both localize to `chartAwayHomOfTriple k` over `Away(lawTwo_k·lawOne_k)`, which agree by the new
+   `chartAwayHomOfTriple_lawOne_eq_lawTwo`; final step is `congrArg (Spec.map(ofHom ·) ≫ chartι k)`.
+   Uses `addOnYPieceMor_eq`/`addOnZPieceMor_eq` + `chartAwayHomOfTriple_naturality` + the awayPair API.
+2. cross-law overlap geometry: `blOpenZImage(i,j) ⊓ blOpenYImage(i,j)` covered by the same-index
+   `D(lawTwo_k·lawOne_k)` pieces (`isUnit_of_minor`: on the overlap `s_k` is auto-invertible, so both
+   laws are regular *at the same index* — "the overlap is covered by the same-index pieces").
+3. ψ-lifts / `w`-affine identification for `D(lawTwo_k·lawOne_k)` (mirror the psiFst/overlapPieceIso
+   apparatus but same-chart cross-law), σ-cancel, per-piece agreement, `Cover.hom_ext` → the scheme
+   `addOn_agree` for `blOpenZ ⊓ blOpenY` (across the four charts via the family, like `addOnYFamily_agree`).
+This is a fresh session-scale apparatus (~cross-chart-sized), but strictly EASIER (same-index, no
+transRing tower — the locus is a single `Away(lawTwo_k·lawOne_k)` of `biChartRing`, not the triple
+localization; the isDefEq walls that dominated the hf-glue do NOT recur here).
+
+**Still to 0c-i after c3:** [c2] `blOpen_cover` (BLOCKED — the B–L Thm 2 joint-unit-ideal Bezout
+certificate `span(range lawOne ∪ range lawTwo) = ⊤` is NOT formalized; needs the paper's explicit
+cofactors, a transcription sub-ticket) · [c4.5] the GLC wiring FLAG (coordinator). Then `mulModelHom`.
