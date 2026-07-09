@@ -36,11 +36,17 @@ open-and-everything — i.e. our **`FlatLocus.flatLocus_spreads_of_flat` (00RC/0
   point, `E_s̄` is a smooth curve = 1-dim regular, `[N]` finite ⟹ flat). The `E[N](k̄) ≅ (ℤ/N)²` structure is
   **already proved over fields** in `HasseWeil/.../NTorsion/TorsionGeneralN.lean` (Silverman III.6.4). Locator:
   KM 2.3.1 "Hasse `deg[N]=N²` on fibres". ~bridged from HasseWeil via T-B6 (P3b3's fibre-comparison) — SHARED edge.
-- **[BBF-A2] flat-locus openness over the (fp) base**: `flatLocus R S M` open + spreads (00RB) — **= the
-  D-chain result, at 99.5% modulo [T-BE-TAIL]**. This is the load-bearing dependency.
+- **[BBF-A2] flat-locus openness over the (fp) base**: `flatLocus R S M` open + spreads (00RB) — the
+  D-chain result. **STATUS CORRECTED 2026-07-09**: NOT "99.5% done". The B-E *component* lemmas
+  (FittingIdeals/McCoy, Grade/Rees, Depth API, 00N0 Peskine–Szpiro) ARE axiom-clean; but the *assembly*
+  above them is skeletal — the B-E criterion is gated on **[T-BE-TAIL]** (2 mutually-recursive tail
+  sub-cases: 00MW split-top peeling + interior-gap truncation, both dependent-type complex surgery,
+  `BuchsbaumEisenbud.lean:846,858`), and the whole flat-locus layer (00ME `:118`, 00MI `:1156`, 00RB
+  `:1138`, T-REDUCEP `:1176`, T-FINAL `:1200`) is still `sorry`. This is the load-bearing dependency.
 - **[BBF-A3] assembly (00MI)**: fibre-flat + flat-locus-open ⟹ flat everywhere. `coker_flat_of_specialFibreExact`
-  (Acyclicity/00MI, AXIOM-CLEAN, done) + `flat_of_flatLocus_univ` (NoethApprox, done). Then base-change to
-  general `S` if the openness is stated over an fp/noeth stage (NOETH-approx, done).
+  is **STILL A SORRY** (`BuchsbaumEisenbud.lean:1156` — my earlier "axiom-clean, done" was WRONG). Its
+  hypothesis predicate `SpecialFibreExact` is now authored (2026-07-09), but the 00MI proof itself
+  (induction from 00ME) is unproven. `flat_of_flatLocus_univ` (NoethApprox) + base-change are the easy tail.
 - **GATE**: [BBF-A2] = [T-BE-TAIL] (the flat-locus openness bottoms out at B–E, D2's 99.5% residual). When
   T-BE-TAIL lands ⟹ FlatLocus axiom-clean ⟹ BB-FLAT-Route-A discharges. **This closes the loop: BB-FLAT is
   the intended downstream consumer of the entire B–E development.** LOC after T-BE-TAIL: ~150–300 (assembly +
@@ -62,11 +68,16 @@ Run over the UNIVERSAL Weierstrass base `Spec ℤ[a₁,…,a₆][Δ⁻¹]` (regu
   work — a SEPARATE large gate. Not the path while Route A's dependency (T-BE-TAIL) is D2's own near-done residual.
 
 ## 4. RECOMMENDATION + STATUS
-**Route A (flat-locus / fibrewise, D2's toolbox) is the path.** BB-FLAT is precisely the intended downstream
-consumer of the B–E / flat-locus D-chain: closing [T-BE-TAIL] ⟹ FlatLocus axiom-clean ⟹ BB-FLAT-A discharges
-in ~150–300 LOC of assembly over the (already-proven) 00MH/00MI/00RB/NOETH machinery + the fibrewise input
-(HasseWeil/T-B6, a P3b3-shared edge). **So BB-FLAT is TRANSITIVELY GATED ON [T-BE-TAIL]** — the same residual —
-not a new independent gate. Route B (miracle flatness) is a separate large mathlib-absent (CM) development; skip.
+**Route A (flat-locus / fibrewise, D2's toolbox) is still the path**, but the gate is BIGGER than a single
+residual (corrected 2026-07-09 after auditing the actual `sorry` inventory). BB-FLAT is the intended downstream
+consumer of the B–E / flat-locus D-chain, but discharging it needs the WHOLE flat-locus assembly layer, not just
+[T-BE-TAIL]: closing [T-BE-TAIL] makes only the **B-E criterion** (`buchsbaumEisenbud_acyclic`) axiom-clean;
+`FlatLocus` openness additionally needs **00ME** (`:118`), **00MI** (`:1156`), **00RB** (`:1138`), **T-REDUCEP**
+(`:1176`), **T-FINAL** (`:1200`) — all presently `sorry`, several substantial (00ME is the local flatness
+criterion; 00MI/00RB are the fibrewise-criterion cores). So BB-FLAT is gated on **[T-BE-TAIL] + the flat-locus
+assembly chain** — a multi-session frontier, not "150–300 LOC". Route B (miracle flatness) is a separate large
+mathlib-absent (CM) development; skip. Progress 2026-07-09: 00HM (T-DEVISSAGE) proven axiom-clean; the two
+fibre-exactness predicates (`SpecialFibreExact`/`FibreExactAt`) authored — the layer can now at least be stated.
 - **BLOCKER TODAY**: [T-BE-TAIL] (fleet-saturation-held) + the fibrewise bridge (T-B6, P3b3, dormant 3d).
 - **WHEN UNBLOCKED**: bridge `mulByHom_flat` in a D2 ForMathlib file (import Torsion.lean, prove the `Flat`
   statement via Route A), holder (stream-B) wires it into Torsion.lean:147 with one `exact`. Do NOT edit the held file.
