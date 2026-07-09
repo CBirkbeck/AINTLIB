@@ -11898,3 +11898,37 @@ precomposition bijection along f ⊗ₘ g into sheaf-underlying targets is PROVE
   (f ⊗ₘ g) via iso-detection-by-Yoneda + sheafificationHomEquiv naturality against the
   two halves; the isLocallyInjective corollary (free via the bridge); IsMonoidal via
   mk'; the LocalizedMonoidal instantiation. Next increment.
+
+### v10.75 (2026-07-09, c5β): [C4-HF-ASSEMBLY] — L3 affine identification DONE (w built); ψ_ij is the next unit
+
+*Session commits (11): c8fbeafe L1, fc55593c L2a/b, 2afd034f L2c, f753779a L3a+ForMathlib general,
+ee1e7a63 L3b1, 585012a3 overlapPieceIso(w)+w-transι identity. All zero-sorry, axiom-clean. Assembly
+~70% — the entire geometric scaffolding is built.*
+
+**Done (the geometric spine):**
+- **L1** image morphism on a piece = `σ ≫ addOnYPieceMor k`.
+- **L2a/b/c** `transι⁻¹ᵁ (A_k ⊓ B_k') = specBasicOpen(g)`, `g = transAlgHom(lawTwoTriple ij k) ·
+  transHom(lawTwoTriple i'j' k')`.
+- **L3a** `pieceAwayι` + `σ ≫ pieceAwayι = A_k.ι` (ForMathlib `isoImage_inv_morphismRestrict_ι`).
+- **L3b1** `pieceAwayι = Spec.map(algebraMap biChartRing → Away) ≫ chartPieceIso.inv ≫ pieceι`.
+- **L3 (w)** `overlapPieceIso : Spec S ≅ P` (S = `Away transRing g`) + `overlapPieceIso_hom_ι`:
+  `w.hom ≫ P.ι = Spec.map(transRing→S) ≫ transι`. The overlap piece is now an affine `Spec`.
+
+**Remaining, precisely scoped:**
+- **ψ_ij** `Localization.Away(lawTwoTriple ij k) →ₐ[R] S`, the localization lift. Ingredients CONFIRMED:
+  the tower instances `Algebra R S`, `Algebra biChartRing S`, `IsScalarTower R biChartRing S` all EXIST;
+  `isUnit_algebraMap_biChartRing_lawTwoTriple` (algebraMap of the piece coord is a unit in S) proves via
+  `IsScalarTower.algebraMap_apply` + `IsLocalization.Away.isUnit_of_dvd`. FRICTIONS to handle next
+  session: `IsLocalization.Away.lift` mis-infers its source localization — pass `(S := Localization.Away
+  (lawTwoTriple ij k))` explicitly; and the `AlgHom.mk'` R-linearity proof whnf-explodes on the concrete
+  localization (v10.24) — abstract it (prove `lift (algebraMap R _ y) = algebraMap R _ y` as a standalone
+  `have` over the ring, or find `IsLocalization.liftₐ`).
+- **Spec.map identification** `w.hom ≫ σ = Spec.map(ψ_ij)` via: `Spec.map(ψ_ij) ≫ pieceAwayι = w.hom ≫ P.ι`
+  (from ψ_ij's base property + `overlapPieceIso_hom_ι` + L3b1, cancelling the shared `chartPieceIso.inv ≫
+  pieceι` tail — `pieceAwayι` is a mono) then `σ ≫ pieceAwayι = P.ι` (L3a) ⟹ cancel `pieceAwayι`.
+- **L4** precompose the general crux `chartι_comp_specMap_chartAwayHom_smul_eq` (over S, piece coords
+  units) with `w.hom`; `specMap_comp_pieceMorOfTriple` (088e46ad) → `chartAwayHomOfTriple` form; triples
+  proportional by `transHom_lawTwoTriple_eq_smul` (db1ec632); cancel `w.hom` (iso).
+- **L5** `Scheme.Cover.hom_ext` over `blOpenYImage_inf_eq_iSup` (5da7f060) ⟹ `addOnYOnImage_agree`;
+  dispatch p,q ∈ {Y,Z}²; `glueMorphisms_hf_of_agree` (f91b91ec) ⟹ **addOnY/addOnZ** (+ rule-3 interface).
+  Z-side mirrors. Then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4, c4.5. 0c-i ⟹ 0c-ii.
