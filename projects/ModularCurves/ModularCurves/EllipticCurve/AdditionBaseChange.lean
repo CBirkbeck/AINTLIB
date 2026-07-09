@@ -25,6 +25,8 @@ over every ring (T-W7.0c·c4 + T-W7.0d), with `mulModelHom_map` following from l
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 
+attribute [local instance] MvPolynomial.gradedAlgebra
+
 universe u
 
 namespace ModularCurves
@@ -183,6 +185,46 @@ theorem classifyRingHomU_map (f : R →+* R') (W : WeierstrassCurve R)
     [W.IsElliptic] [(W.map f).IsElliptic] :
     classifyRingHomU (W.map f) = f.comp (classifyRingHomU W) := by
   rw [classifyRingHomU, classifyRingHomU, classifyRingHom_map f W, RingHom.comp_assoc]
+
+section BaseChangeFunctoriality
+
+variable {U R R' : Type u} [CommRing U] [CommRing R] [CommRing R']
+
+/-- (A2 core) Three-ring functoriality of the projective-model base change. -/
+theorem projModelBaseChange_comp' (F : R →+* R') (G : U →+* R) (W : WeierstrassCurve U) :
+    projModelBaseChange (F.comp G) W
+      = projModelBaseChange F (W.map G) ≫ projModelBaseChange G W := by
+  have bmk₁ : ∀ p : MvPolynomial (Fin 3) U,
+      baseChangeGradedHom (F.comp G) W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (W.map (F.comp G))).toIdeal
+            (MvPolynomial.map (F.comp G) p) :=
+    fun p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded (F.comp G)) (projIdeal W)
+      (projIdeal (W.map (F.comp G))) (projIdeal_le_comap (F.comp G) W) p
+  have bmk₂ : ∀ p : MvPolynomial (Fin 3) U,
+      baseChangeGradedHom G W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (W.map G)).toIdeal (MvPolynomial.map G p) :=
+    fun p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded G) (projIdeal W)
+      (projIdeal (W.map G)) (projIdeal_le_comap G W) p
+  have bmk₃ : ∀ p : MvPolynomial (Fin 3) R,
+      baseChangeGradedHom F (W.map G) (Ideal.Quotient.mk (projIdeal (W.map G)).toIdeal p)
+        = Ideal.Quotient.mk (projIdeal ((W.map G).map F)).toIdeal (MvPolynomial.map F p) :=
+    fun p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded F) (projIdeal (W.map G))
+      (projIdeal ((W.map G).map F)) (projIdeal_le_comap F (W.map G)) p
+  have hgraded : baseChangeGradedHom (F.comp G) W
+      = (baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W) := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (F.comp G) W (Ideal.Quotient.mk _ a)
+      = baseChangeGradedHom F (W.map G) (baseChangeGradedHom G W (Ideal.Quotient.mk _ a))
+    rw [bmk₁, bmk₂, bmk₃]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_map G F a).symm
+  have key := Proj.map_comp (baseChangeGradedHom G W) (baseChangeGradedHom F (W.map G))
+    (baseChangeGradedHom_irrelevant_le G W) (baseChangeGradedHom_irrelevant_le F (W.map G))
+  refine Eq.trans ?_ key
+  show Proj.map (baseChangeGradedHom (F.comp G) W) (baseChangeGradedHom_irrelevant_le (F.comp G) W)
+    = Proj.map ((baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W)) _
+  congr 1
+end BaseChangeFunctoriality
 
 end ClassifyNaturality
 
