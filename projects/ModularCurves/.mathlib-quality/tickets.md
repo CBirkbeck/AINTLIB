@@ -10679,3 +10679,15 @@ handle available after the sheaf-gluing step.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.95-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] normalising-overlap independence LANDED
+
+Added `tateRingOverAlgLiftOfTateNormal_eq_of_variableChanges` and
+`tateBaseSpecMapOfTateNormal_eq_of_variableChanges` in `YOneAtlasClassify.lean`. These package the
+B2-iv overlap fact in the affine layer: any two variable changes that put the same pointed chart
+into Tate normal form with the same `(r,t) = (x,y)` induce the same Tate-atlas algebra map, hence
+the same affine map `Spec A -> tateBase R`.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
