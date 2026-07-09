@@ -50,6 +50,49 @@ theorem tateRingOverLift_X_one (α β : A)
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
   simp [tateRingOverLift]
 
+/-- Two `R`-algebra maps out of the relative Tate atlas ring agree once they agree on the
+two Tate coordinates.  This is the ring-level overlap uniqueness used by the scheme-level
+gluing step for maps into `tateBase R`. -/
+theorem tateRingOver_algHom_ext (φ ψ : tateRingOver R →ₐ[R] A)
+    (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) =
+      ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)))
+    (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) =
+      ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1))) :
+    φ = ψ := by
+  apply AlgHom.ext
+  intro x
+  have hφψ : (φ : tateRingOver R →+* A) = (ψ : tateRingOver R →+* A) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (tateCurveOver R).Δ)
+    apply MvPolynomial.ringHom_ext
+    · intro r
+      change φ (algebraMap R (tateRingOver R) r) = ψ (algebraMap R (tateRingOver R) r)
+      rw [φ.commutes, ψ.commutes]
+    · intro i
+      fin_cases i
+      · simpa using h0
+      · simpa using h1
+  exact RingHom.congr_fun hφψ x
+
+/-- The relative Tate-ring lift is the unique `R`-algebra map with the prescribed Tate
+coordinates.  This packages the affine uniqueness clause needed before gluing the local
+`α, β` sections. -/
+theorem tateRingOver_algHom_eq_lift (φ : tateRingOver R →ₐ[R] A) (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α)
+    (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β) :
+    (φ : tateRingOver R →+* A) = tateRingOverLift R α β hΔ := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers (tateCurveOver R).Δ)
+  apply MvPolynomial.ringHom_ext
+  · intro r
+    change φ (algebraMap R (tateRingOver R) r) =
+      tateRingOverLift R α β hΔ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+        (MvPolynomial.C r))
+    rw [φ.commutes]
+    simp [tateRingOverLift]
+  · intro i
+    fin_cases i <;> simp [h0, h1, tateRingOverLift]
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
