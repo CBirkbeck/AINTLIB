@@ -124,3 +124,46 @@ semilocal global model, two spreads); (3) a5-P-fppf (`of_isPullback_of_descendsA
 `descendsAlong_isomorphisms_surjective_inf_flat_inf_quasicompact` — verified to compose — +
 `isPullback_quotientπ` + `projModel_descentIso`); (4) setup (`exists_mem_basicOpen_subset_of_stable`);
 (5) top-level `locallyWeierstrass_quotientπ` assembly. Full architecture above.
+
+## ============ UN-PARKED v10.94 — PHASE A IN FLIGHT ============
+**Architecture of record:** Phase A = `locallyWeierstrass_quotientπ_of_globalModel` (the engine's
+application supplies `φ : C.E ≅ projModel W₀` globally — the same hypothesis `exists_charts_of_globalModel`
+already consumes; Hesse/Legendre models exist for the intended aux levels). Cleanly outside
+[OWNER-FLW] (we never touch the fibrewise ⟷ LW comparison; strictly Weierstrass-model-side; noted
+in EngineDescent's section docstring). The chartless boarded leaf consumes the FLW pin on landing
+(fibrewise-ness of the quotient is easy from the cartesian square; the pin upgrades it) — cite,
+never duplicate.
+
+**Landed this arc (all lake-verified, committed):**
+- `isStableOpen_top`, `ofHom_toRingHom_eq_appTop`, `hom_isoSpec_toRingHom` (base-matching),
+  `isPullback_transport_globalModel`, `projModelZero_transport_globalModel`,
+  `curveAction_actionFamily_of_globalModel`, `exists_cocycle_of_globalModel(')` — the a5-P2′
+  global transport chained into the capstone, hΨ exposed against the concrete transport (944a2f96d,
+  93628076c).
+- `isVCocycle_of_curveActionFamily'` — capstone now exposes the hΨ link (needed: VariableChange
+  stabilizers are nontrivial, so the link is not derivable downstream).
+- `isIso_of_isPullback_of_fppf` (PullbackLocalAtTarget) + `fppf_invariantsπ` (SchemeActionFree) —
+  the [a5-P-fppf] core (11ef2e0e4, cb31fae2a).
+- `isUnit_subring_of_isUnit` + `isElliptic_of_map_isElliptic` (WeierstrassInvariant) — ellipticity
+  descends (fixed-unit trick, no integrality).
+
+**Interface decisions (binding):**
+- The descent output MUST expose the coboundary identity `Cvc g = E * (g•E)⁻¹` (invariance of the
+  comparison needs it; not derivable — stabilizers).
+- STATEMENT FIX owed to the boarded [a5] leaf: `locallyWeierstrass_quotientπ` lacks the
+  `hπ'c`/`hzero'c` compatibilities linking (π',zero') to the descended maps — false as stated for
+  an arbitrary section-pair. Phase-A variant carries them; fix the leaf + call-site when closing.
+
+**In flight (4 parallel agent blocks):**
+- W1 localized descent + spread (+ coboundary exposure) — the a5-P-loc algebra.
+- W2 `exists_quotientπ_lift_of_isOpenImmersion` (+ `epi_pullback_snd_quotientπ`) — restricted
+  morphism descent, gluing `exists_invariantsπ_lift_of_isOpenImmersion` chart-wise.
+- W5a `exists_quotientIsoSpec_top` — X/G ≅ Spec Γ(X,⊤)ᴳ compatibly with quotientπ (eqToHom
+  ring-bridge along hVtop).
+- W3 `descentComparison` (+ π/zero legs + G-invariance) — the abstract comparison; invariance via
+  hE-collapse `Cvc g * (g•E⁻¹)⁻¹ = E`.
+
+**Mine (after agents):** W4 (descended cmp's base change = the iso composite; cancel-epi +
+isIso_of_isPullback_of_fppf), W5b (U' := qiso⁻¹(D(a)), Γ(X/G,U') ≅ (Aᴳ)_a via IsLocalization
+uniqueness), W6 (top-level assembly; skeleton typechecks with all interfaces pinned —
+tmp/toplevel.lean).
