@@ -180,6 +180,107 @@ lemma ringHomAway_algebraMap (q : ChartRing R ι') :
       = ringHom (R := R) ι ι' q :=
   IsLocalization.Away.lift_eq _ (isUnit_ringHom_det ι ι') q
 
+/-- The transition image of ANY reverse-chart column, uniformly: `ringHom` sends the
+ι'-column of `j` to `(matrixAway ι ι')⁻¹` applied to the embedded ι-column of `j`. The
+variable case is definitional; the delta case is the inverse-column identity. -/
+lemma ringHom_comp_column (j : Fin n) :
+    (fun i₁ => ringHom (R := R) ι ι' (column ι' j i₁))
+      = (matrixAway (R := R) ι ι')⁻¹ *ᵥ
+        (fun i₁ => algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+          (column ι j i₁)) := by
+  classical
+  by_cases hj : j ∈ Set.range ι'
+  · obtain ⟨i₀, rfl⟩ := hj
+    have hcol : (fun i₁ => algebraMap (ChartRing R ι)
+        (Localization.Away (det (R := R) ι ι')) (column ι (ι' i₀) i₁))
+        = matrixAway (R := R) ι ι' *ᵥ Pi.single i₀ 1 := by
+      rw [mulVec_single_one]
+      funext l
+      rw [matrixAway_apply]
+    rw [hcol, Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ (isUnit_det_matrixAway ι ι'),
+      Matrix.one_mulVec]
+    funext i₁
+    rw [congrFun (column_mem ι' i₀) i₁, Pi.single_apply, Pi.single_apply,
+      apply_ite (ringHom (R := R) ι ι'), map_one, map_zero]
+  · funext i₁
+    rw [congrFun (column_notMem ι' hj) i₁, ringHom, eval₂Hom_X']
+
+/-- Cancellation transport: the `ringHomAway`-image of the ι'-side solution vector is
+the embedded ι-column — the pointwise heart of the inverse-pair identity. -/
+private lemma ringHomAway_solution_column (j : Fin n) :
+    (fun i => ringHomAway (R := R) ι ι'
+      (((matrixAway (R := R) ι' ι)⁻¹ *ᵥ
+        fun l => algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι))
+          (column ι' j l)) i))
+      = fun i => algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+          (column ι j i) := by
+  have hdet := isUnit_det_matrixAway (R := R) ι ι'
+  have hinj : ∀ v w : Fin k → Localization.Away (det (R := R) ι ι'),
+      (matrixAway (R := R) ι ι')⁻¹ *ᵥ v = (matrixAway (R := R) ι ι')⁻¹ *ᵥ w → v = w := by
+    intro v w hvw
+    have h2 := congrArg (fun u => matrixAway (R := R) ι ι' *ᵥ u) hvw
+    simpa [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hdet,
+      Matrix.one_mulVec] using h2
+  have hmapF : (matrixAway (R := R) ι' ι).map ⇑(ringHomAway (R := R) ι ι')
+      = (matrixAway (R := R) ι ι')⁻¹ := by
+    have hAM : ⇑(ringHomAway (R := R) ι ι') ∘
+        ⇑(algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι)))
+        = ⇑(ringHom (R := R) ι ι') :=
+      funext fun q => ringHomAway_algebraMap ι ι' q
+    rw [matrixAway, Matrix.map_map, hAM]
+    exact map_ringHom_matrix ι ι'
+  set z : Fin k → Localization.Away (det (R := R) ι' ι) :=
+    (matrixAway (R := R) ι' ι)⁻¹ *ᵥ
+      fun l => algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι))
+        (column ι' j l) with hz
+  have hMz : matrixAway (R := R) ι' ι *ᵥ z
+      = fun l => algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι))
+          (column ι' j l) := by
+    rw [hz, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ (isUnit_det_matrixAway ι' ι),
+      Matrix.one_mulVec]
+  refine hinj _ _ ?_
+  conv_lhs => rw [← hmapF]
+  funext i
+  calc ((matrixAway (R := R) ι' ι).map ⇑(ringHomAway (R := R) ι ι') *ᵥ
+        fun l => ringHomAway (R := R) ι ι' (z l)) i
+      = ringHomAway (R := R) ι ι' ((matrixAway (R := R) ι' ι *ᵥ z) i) :=
+        (RingHom.map_mulVec _ _ _ i).symm
+    _ = ringHomAway (R := R) ι ι'
+          (algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι))
+            (column ι' j i)) := by rw [hMz]
+    _ = ringHom (R := R) ι ι' (column ι' j i) := ringHomAway_algebraMap ι ι' _
+    _ = ((matrixAway (R := R) ι ι')⁻¹ *ᵥ
+          fun i₁ => algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+            (column ι j i₁)) i := congrFun (ringHom_comp_column ι ι' j) i
+
+/-- **[GR-E4]** The two chart transitions are mutually inverse on the overlap rings —
+the `Scheme.GlueData` inverse-pair condition at ring level. -/
+theorem ringHomAway_comp_ringHomAway :
+    (ringHomAway (R := R) ι ι').comp (ringHomAway ι' ι)
+      = RingHom.id (Localization.Away (det (R := R) ι ι')) := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (det (R := R) ι ι')) ?_
+  refine MvPolynomial.ringHom_ext (fun a => ?_) (fun p => ?_)
+  · rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+      ringHomAway_algebraMap]
+    rw [show ringHom (R := R) ι' ι (C a)
+        = algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι)) (C a) from
+      eval₂Hom_C _ _ a]
+    rw [ringHomAway_algebraMap]
+    rw [show ringHom (R := R) ι ι' (C a)
+        = algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι')) (C a) from
+      eval₂Hom_C _ _ a]
+    rfl
+  · obtain ⟨⟨j, hj⟩, i⟩ := p
+    rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+      ringHomAway_algebraMap]
+    rw [show ringHom (R := R) ι' ι (X (⟨j, hj⟩, i))
+        = ((matrixAway (R := R) ι' ι)⁻¹ *ᵥ
+            fun l => algebraMap (ChartRing R ι') (Localization.Away (det (R := R) ι' ι))
+              (column ι' j l)) i from by rw [ringHom, eval₂Hom_X']]
+    rw [congrFun (ringHomAway_solution_column ι ι' j) i,
+      congrFun (column_notMem ι hj) i]
+    rfl
+
 end Transition
 
 end Module.Grassmannian

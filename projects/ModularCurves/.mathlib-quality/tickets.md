@@ -13232,3 +13232,17 @@ lake build green, axioms = {propext, Classical.choice, Quot.sound} via `lake env
   sentinel-charted with mathlib bridge-points pinned). Wave M1: L3✓ L6✓ L20✓ L1-final.
   Continue as charted — the T-SG3 "cyclicity is a closed condition" foundation is one
   assembly from done.
+
+### v10.95c (2026-07-09, fable-FP): ★ [GR-E4] inverse-pair PROVEN — the chart transitions are mutually inverse
+
+- `GrassmannianTransition.lean` still sorry-free, axiom-clean, downstream green:
+  **`ringHom_comp_column`** (the MASTER identity: `ringHom`-image of any ι'-column =
+  `(matrixAway)⁻¹ *ᵥ` embedded ι-column — uniform over the delta/variable dichotomy) ·
+  `ringHomAway_solution_column` (cancellation transport through the mapped matrix, via
+  `hinj` + `map_map` + [GR-F1]) · **`ringHomAway_comp_ringHomAway`**:
+  `(ringHomAway ι ι') ∘ (ringHomAway ι' ι) = id` — the GlueData inverse-pair condition
+  at ring level (`IsLocalization.ringHom_ext` → `MvPolynomial.ringHom_ext` → the master
+  identity; both composite orders follow by ι↔ι' symmetry).
+- REMAINING wave-3: triple cocycle on double-localizations (t'_comp) → [GR-D]
+  Spec/basicOpen open-immersion plumbing → [GR-F] `Scheme.GlueData` assembly → [GR-G]
+  T-points ⟹ NISOG [L15].
