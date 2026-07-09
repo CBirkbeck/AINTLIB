@@ -151,6 +151,28 @@ theorem etale_quotientπ : Etale (σ.quotientπ V hVs hVa hVmem) := by
   rw [invariantsπ, HasRingHomProperty.Spec_iff (P := @Etale)]
   exact RingHom.etale_algebraMap.mpr inferInstance
 
+/-- **(T-Q2, geometric)** For a **free** action, `localQuotientπ : ↥U ⟶ Spec Γ(X,U)ᴳ` is an
+**epimorphism** — it is an fppf cover (finite étale surjection = flat + surjective). Used to
+cancel `localQuotientπ` when identifying the descended structure map with the invariant quotient
+map on a chart (`[a3-ii]`). -/
+theorem epi_localQuotientπ {U : X.Opens} (hU : σ.IsStableOpen U) (hUa : IsAffineOpen U)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    Epi (σ.localQuotientπ hU hUa) := by
+  letI := σ.gammaMulSemiringAction hU
+  haveI : Module.Finite (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) :=
+    Module.Finite.of_isFreeAlgebraAction G ℤ _ (σ.isFreeAlgebraAction_of_free hU hUa hfree)
+  haveI : Module.Projective (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) :=
+    Module.Projective.of_isFreeAlgebraAction G ℤ _ (σ.isFreeAlgebraAction_of_free hU hUa hfree)
+  haveI : Module.Flat (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) := Module.Flat.of_projective
+  haveI : Flat (invariantsπ G (↑Γ(X, U)) ℤ) := by
+    rw [invariantsπ, AlgebraicGeometry.Flat.SpecMap_iff, CommRingCat.hom_ofHom,
+      RingHom.flat_algebraMap_iff]
+    infer_instance
+  haveI : Surjective (invariantsπ G (↑Γ(X, U)) ℤ) := ⟨invariantsπ_surjective G _ ℤ⟩
+  haveI : Epi (invariantsπ G (↑Γ(X, U)) ℤ) := AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
+  rw [SchemeAction.localQuotientπ_eq]
+  infer_instance
+
 end Quotient
 
 end SchemeAction

@@ -2065,8 +2065,17 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
   * `isProper_of_locallyWeierstrass` (PROVEN) — `proper` from the local model;
   * `smoothOfRelativeDimension_of_locallyWeierstrass` (LEAF, T-A3) — `smooth` from the local model;
   * `locallyWeierstrass_quotientπ` (LEAF, [a5]) — the descended Weierstrass model.
-  **The three residual leaves are all isolated affine/model computations, none gating the others:**
-  1. **`isPullback_chart`** — `W ≅ (W/G) ×_{X/G} X` for a stable affine `W ⊆ E`. **AFFINE CORE PROVEN**
+  **Engine residual leaves — now TWO (isPullback_chart CLOSED 2026-07-09):**
+  1. **`isPullback_chart` — ★★ FULLY CLOSED (fable-P4, 2026-07-09, axiom-clean); `isPullback_quotientπ`
+     is now axiom-clean too, so `[a3-ii]` is DONE.** The whole-`X` connection was assembled from the
+     affine core `isPullback_localQuotientπ` via `IsPullback.of_iso` with four corner isos (`chartIso`
+     on the E-quotient corner; `Scheme.isoOfEq ≪≫ Scheme.topIso` on the two `⊤`-open X corners). The
+     four commuting squares: `resLE_comp_ι` (the `C.π` leg), `localQuotientπ_quotientChartIso` ×2 (the
+     X-side identity, PROVEN), and the E-side `π'`↔`q'` match by **epi-cancelling `localQuotientπ`** —
+     new reusable lemma **`epi_localQuotientπ`** (`localQuotientπ` is an fppf cover: finite étale
+     surjection = `Flat` + `Surjective`, `Flat.epi_of_flat_of_surjective`), then `hπ'` + the two
+     `localQuotientπ_quotientChartIso`. `σE`-freeness derived inline from `σ`-freeness + `π_equivariant`.
+     — *superseded plan text below (affine core):* 
      (fable-P4, 2026-07-08, axiom-clean): `isPullback_localQuotientπ` — for a free `σ` on stable affine
      `U ⊆ X` and `W ⊆ E` with `W ≤ C.π⁻¹U`, the invariant-quotient square
      `↥W → W/G`, `C.π.resLE`, `↥U → U/G` is **cartesian**. Proof = `isPullback_Spec_fixedPoints.flip`

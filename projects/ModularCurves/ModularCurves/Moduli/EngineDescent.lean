@@ -348,7 +348,53 @@ theorem isPullback_chart [Finite G] [IsAffine X]
       ((VE i).ι ≫ C.π)
       ((σE.quotientChart VE hVEs hVEa i).ι ≫ π')
       (σ.quotientπ V hVs hVa hVmem) := by
-  sorry
+  classical
+  set x₀ : ↥X := C.π.base i with hx₀
+  have hle : VE i ≤ C.π ⁻¹ᵁ V x₀ := by rw [hVtop x₀]; exact le_top
+  -- the affine core square (∃ induced quotient map q')
+  obtain ⟨q', hcore⟩ :=
+    isPullback_localQuotientπ hact (hVs x₀) (hVa x₀) (hVEs i) (hVEa i) hle hfree
+  -- σE is free too (from σ free + π-equivariance)
+  have hfreeE : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ C.E),
+      t ≫ σE.hom γ = t → IsEmpty T := by
+    intro γ hγ T t ht
+    refine hfree γ hγ T (t ≫ C.π) ?_
+    rw [Category.assoc, ← hact.π_equivariant γ, ← Category.assoc, ht]
+  -- corner isos
+  set e₃ := Scheme.isoOfEq X (hVtop x₀) ≪≫ Scheme.topIso X with he₃
+  set e₄ := σ.quotientChartIso V hVs hVa x₀ ≪≫
+      (Scheme.isoOfEq (σ.quotient V hVs hVa)
+          (σ.quotientChart_eq_top V hVs hVa hVmem x₀ (hVtop x₀)) ≪≫
+        Scheme.topIso (σ.quotient V hVs hVa)) with he₄
+  -- e₃.hom = (V x₀).ι
+  have he₃hom : e₃.hom = (V x₀).ι := by
+    simp only [he₃, Iso.trans_hom, Scheme.topIso_hom, Scheme.isoOfEq_hom_ι]
+  -- e₄.hom = chartIso_X.hom ≫ chart_X.ι
+  have he₄hom : e₄.hom = (σ.quotientChartIso V hVs hVa x₀).hom ≫
+      (σ.quotientChart V hVs hVa x₀).ι := by
+    simp only [he₄, Iso.trans_hom, Category.assoc, Scheme.topIso_hom, Scheme.isoOfEq_hom_ι]
+  -- assemble by transport of the affine core
+  refine hcore.of_iso (Iso.refl _) (σE.quotientChartIso VE hVEs hVEa i) e₃ e₄ ?_ ?_ ?_ ?_
+  · rw [Iso.refl_hom, Category.id_comp]
+  · rw [Iso.refl_hom, Category.id_comp, he₃hom]
+    exact Scheme.Hom.resLE_comp_ι C.π hle
+  · -- commf: q' ≫ e₄.hom = chartIso_W.hom ≫ (chart_W.ι ≫ π'), by epi-cancelling localQuotientπ_W
+    haveI : Epi (σE.localQuotientπ (hVEs i) (hVEa i)) :=
+      σE.epi_localQuotientπ (hVEs i) (hVEa i) hfreeE
+    have hL : σE.localQuotientπ (hVEs i) (hVEa i) ≫ q' ≫ e₄.hom =
+        (VE i).ι ≫ C.π ≫ σ.quotientπ V hVs hVa hVmem := by
+      rw [← Category.assoc, hcore.w, Category.assoc, he₄hom,
+        σ.localQuotientπ_quotientChartIso V hVs hVa hVmem x₀, ← Category.assoc,
+        Scheme.Hom.resLE_comp_ι C.π hle, Category.assoc]
+    have hR : σE.localQuotientπ (hVEs i) (hVEa i) ≫ (σE.quotientChartIso VE hVEs hVEa i).hom ≫
+        (σE.quotientChart VE hVEs hVEa i).ι ≫ π' =
+        (VE i).ι ≫ C.π ≫ σ.quotientπ V hVs hVa hVmem := by
+      rw [← Category.assoc (σE.quotientChartIso VE hVEs hVEa i).hom, ← Category.assoc,
+        σE.localQuotientπ_quotientChartIso VE hVEs hVEa hVEmem i, Category.assoc, hπ']
+    rw [← cancel_epi (σE.localQuotientπ (hVEs i) (hVEa i)), hL, hR]
+  · -- commg: localQuotientπ_U ≫ e₄.hom = e₃.hom ≫ quotientπ_X
+    rw [he₄hom, he₃hom]
+    exact σ.localQuotientπ_quotientChartIso V hVs hVa hVmem x₀
 
 /-- **([a3-ii], the square is cartesian)** `E ≅ (E/G) ×_{X/G} X`.
 
