@@ -10680,6 +10680,25 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; a
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
 
+## Amendments v10.99-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] pullback classifier reuse LANDED
+
+Imported `ModularCurves.Moduli.QuotientProblem` and specialised the coordinator v10.89 reuse pointer
+to the Tate object. Added `EllObj.tateClassifyingHomOfPullbackMap` with its base component lemmas,
+plus `EllObj.tatePullbackAlong_hom_ext`, the Tate-object form of `EllObj.homPullbackAlongEquiv`.
+This gives the constructor path a direct `pullbackAlong` rebuild/extensionality handle for the
+classifying-square shape, instead of a manual `EllHom` field rebuild.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green; line-length scan clean. `#print axioms` for
+`EllObj.tateClassifyingHomOfPullbackMap`,
+`EllObj.tateClassifyingHomOfPullbackMap_baseHom`,
+`EllObj.tateClassifyingHomOfPullbackMap_baseHom_of_base_id`, and
+`EllObj.tatePullbackAlong_hom_ext` lists `[propext, sorryAx, Classical.choice, Quot.sound]`; the
+inherited `sorryAx` is attributed to the intended Tate-object trail, matching
+`#print axioms tateEllObj` (gate **[T-A6b]**). `#print axioms EllObj.homPullbackAlongEquiv` itself
+lists only `[propext, Classical.choice, Quot.sound]`, so the quotient-problem reuse API adds no new
+gate.
+
 ## Amendments v10.97-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `EllHom` constructor path LANDED
 
 Added `EllObj.tateBaseMapOfOpenCover_ext`, the generic constructor
