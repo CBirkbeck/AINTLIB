@@ -12568,3 +12568,24 @@ Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT]
   explicit here). The all-clean axiom profile of the foundation layer was a bonus, not
   the subtree's bar. **GO: build the EllHom constructor path / the classifying clause
   on top of tateUniversal/tateEllObj now.**
+
+## Amendments v10.89 (2026-07-09, coordinator): ★★ [Y1-D3] DONE — the STREAM-Y1 D-TRACK IS COMPLETE (T-E7's representability half proven); cost-model note boarded
+
+- **★★ NEW-Y1: [Y1-D3] `yOne_representableBy` PROVEN** (f16ae3bc8, pushed; board
+  a31862eed) — **(Y₁(N), universal curve, (0,0)) represents the naive Γ₁(N) moduli
+  problem.** The D-spine (D1+D2+D3) is CLOSED. Axioms = standard 3 + sorryAx inherited
+  ONLY from the two designed pins (atlas classifier ⟵ exists_tatePoint [NEW-ATLAS];
+  the route-a one-primitive ⟵ T-W7a). No fresh sorries.
+- **COST-MODEL NOTE (fleet, boarded at NEW-Y1's flag)**: the forecast ~150 LOC
+  EllHom-rebuild crux COLLAPSED to reuse — `yOneEllObj = tateEllObj.pullbackAlong
+  yOneBase` definitionally, so the rebuild IS `EllObj.homPullbackAlongEquiv`
+  (QuotientProblem.lean); manual attempts deleted per the cardinal rule. **The
+  QuotientProblem pullback machinery already covers classifying-square/EllHom-rebuild
+  patterns** — estimate future assemblies of this shape (NEW-ATLAS's constructor path;
+  YFULL/GH classifiers) accordingly, and CHECK homPullbackAlongEquiv before
+  hand-rolling. Elaboration note banked: `let` (not `have`) for ofBijective components
+  consumed by a later defeq `show`.
+- **T-E7 state**: representability half COMPLETE. Remaining: exists_tatePoint
+  (NEW-ATLAS, in flight) + the E-track E1/E2/E3/E5/E6 (⛩BB-DIFF ⟸ T-W7a) + the one
+  primitive (⟸ T-W7a) + MASTER's one `exact`. **NEW-Y1 PARKED confirmed** (trigger:
+  NEW-ATLAS PR or T-W7a; the E-track is not open work — correctly refused).
