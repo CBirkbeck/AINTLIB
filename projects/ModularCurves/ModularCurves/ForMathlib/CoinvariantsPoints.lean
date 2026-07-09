@@ -310,6 +310,16 @@ theorem isUnit_of_forall_algHom_ne_zero [IsAlgClosed k] {X : Type*} [CommRing X]
   show e.symm (Ideal.Quotient.mk m u) = 0
   rw [show Ideal.Quotient.mk m u = 0 from Ideal.Quotient.eq_zero_iff_mem.mpr hum, map_zero]
 
+/-- Step (iii)+(iv) of the orbit argument, fused: for a non-unit `f`, the determinant of
+the multiplication matrix of `ρ(f)` — the norm — is not a unit either, since the matrix
+representation and the co-action both reflect units. -/
+theorem not_isUnit_det_mulMatrix_coaction {ρ : B →ₐ[R] B ⊗[R] A} (hρ : IsCoaction ρ)
+    {f : B} (hf : ¬ IsUnit f) :
+    ¬ IsUnit (mulMatrix R A (ρ f)).det := by
+  intro hdet
+  exact hf (isUnit_of_isUnit_coaction R A hρ
+    (isUnit_of_isUnit_mulMatrix R A ((Matrix.isUnit_iff_isUnit_det _).mpr hdet)))
+
 end Orbit
 
 end ModularCurves
