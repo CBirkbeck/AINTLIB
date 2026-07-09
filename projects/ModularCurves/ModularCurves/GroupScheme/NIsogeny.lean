@@ -147,6 +147,20 @@ theorem divisorTautPoint_restrict (D : RelEffCartierDiv E.π) {T : Scheme.{u}} (
   show h ≫ D.ideal.subschemeι = P.1
   exact hcomp
 
+/-- The `HasExactOrder` half of `IsDivisorGenerator` follows from the order-divisor–ideal equality
+when `D` is a subgroup: equal ideals give equal divisors (`RelEffCartierDiv.ext`), and a subgroup
+divisor stays a subgroup after base change (`IsSubgroup.baseChange`). This is ATTACK note (2): the
+`orderDivisor = D` incidence forces exact order *because* `D` is a subgroup. -/
+theorem hasExactOrder_of_orderDivisor_ideal_eq (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
+    (hD : D.IsSubgroup E) {T : Scheme.{u}} (t : T ⟶ S) (P : (E.baseChange t).Section)
+    (heq : (P.orderDivisor (E.baseChange t) N).ideal = (D.baseChange t).ideal) :
+    P.HasExactOrder (E.baseChange t) N := by
+  have h : P.orderDivisor (E.baseChange t) N = D.baseChange t := RelEffCartierDiv.ext heq
+  have hsub : (D.baseChange t).IsSubgroup (E.baseChange t) :=
+    RelEffCartierDiv.IsSubgroup.baseChange E hD t
+  rw [← h] at hsub
+  exact hsub
+
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
 generator of `D`": for a `T`-point `P` of `E` lying on `D` (witnessed by the factorisation
@@ -169,6 +183,8 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     (D.baseChange (D.ideal.subschemeι ≫ E.π))
   refine ⟨Z, fun T t P h hcomp => ?_⟩
   refine Iff.trans (hZ h) ?_
+  rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
+    ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
   sorry
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
