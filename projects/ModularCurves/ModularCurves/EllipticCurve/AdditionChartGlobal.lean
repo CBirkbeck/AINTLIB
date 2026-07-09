@@ -443,6 +443,18 @@ lemma transι_preimage_blOpenYImage_piece' (k' : Fin 3) :
     Iso.inv_hom_id, Scheme.Hom.id_preimage]
   exact SpecMap_preimage_basicOpen _ _
 
+/-- **([C4-HF-ASSEMBLY] L2c)** The preimage under `transι` of the overlap piece `A_k ⊓ B_k'` is the
+single basic open of `Spec transRing` at the product of the two transported piece coordinates — the
+affine identification of the overlap piece with the triple-localization locus. -/
+lemma transι_preimage_piece_inf (k k' : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ ((pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) ⊓
+        (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k')) =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')) := by
+  rw [Scheme.Hom.preimage_inf, transι_preimage_blOpenYImage_piece,
+    transι_preimage_blOpenYImage_piece', specBasicOpen_mul]
+
 end Overlap
 
 end WeierstrassCurve.Projective
