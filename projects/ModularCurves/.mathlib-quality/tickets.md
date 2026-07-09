@@ -12511,3 +12511,25 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
   and the same for tickets.md (pipe to `tail -200` for recent Amendments). Reports
   still go to YOUR branch's board copy (merges reconcile); dispatches remain canonical
   on dev/modular-curves only.
+
+### v10.83c (2026-07-09, c5β): [c3] SAME-CHART addOn_agree COMPLETE — resumed session, strong progress
+
+Resumed CHARTER-C5B (v10.82). Landed the entire same-chart half of c3:
+- image geometry: `Scheme.Hom.image_inf` (ForMathlib) + `blOpenZImage_inf_blOpenYImage_eq_iSup` (ad5e66682).
+- `pieceGenι` — general piece immersion for any generator (b4bfb4647).
+- **section OverlapCrossLaw** (62f173511): crossPiece/crossPieceIso(+hom_ι) + the two affine identities +
+  σ-cancels (crossHom_sigma_awayPairRight/Left) + `crossPiece_addOn_agree` (per-piece Z=Y) +
+  **`addOnZOnImage_eq_addOnYOnImage`** (same-chart agreement, Cover.hom_ext). ALL axiom-clean; the
+  single-Away locus means NO isDefEq walls (contrast the hf-glue).
+
+**Remaining c3 (cross-chart-cross-law + assembly):**
+1. `blOpenZImage(i,j) ⊓ blOpenYImage(i',j')`, (i,j)≠(i',j'): Z-law chart (i,j) vs Y-law chart (i',j').
+   The overlap sits in the transRing transition, so the tower + isDefEq walls RECUR — mirror the hf-glue
+   L3–L5 (overlapPieceIso/ψ-lifts/L4-crux/σ-cancel/Cover.hom_ext) with triples `transAlgHom(lawOne ijk)`
+   and `transHom(lawTwo i'j'k')`. Proportionality = COMBINED: `transHom(lawTwo i'j' m) = e0·transAlgHom(
+   lawTwo ij m)` [transHom_lawTwoTriple_eq_smul] composed with the transAlgHom-pushed minor
+   `transAlgHom(lawTwo_m·lawOne_n)=transAlgHom(lawTwo_n·lawOne_m)` [lawOneTriple_mul_lawTwoTriple] — both
+   satisfy the crux `chartι_comp_specMap_chartAwayHom_smul_eq`. Reuse spec_map_comp_congr/term-mode/
+   clean-context discipline (the walls are already solved).
+2. four-chart family assembly (same+cross pieces via Cover.hom_ext) → `addOn_agree`.
+Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT] (blocked on the certificate).
