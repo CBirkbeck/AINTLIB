@@ -11687,3 +11687,37 @@ leaf target directly. Boarding the decomposition; the build is next-session firs
   spec tying `Transition.ringHom` to `chartMatrix` (needs both files; single增writer now
   free) · [GR-E4] cocycle · [GR-D] openness · [GR-F] `Scheme.GlueData` · [GR-G]
   T-points → NISOG [L15].
+
+## Amendments v10.74 (2026-07-09, coordinator): route (v) RATIFIED for the GAP1 injective half; PROVENANCE CASE CLOSED (foundling = FP4's own b4e69b53, re-adopted); A's item (0) WITHDRAWN
+
+- **PIC0 route (v) "Yoneda/gluing" RATIFIED** (v10.73 absorbed): the route-audit is
+  exactly what "the route choice is yours" was for — both offered routes carried hidden
+  mathlib gaps ((i) the stalk-module layer = #35773's subject, which route (b′) exists
+  to avoid; (ii) fg-certificate tensor-vanishing machinery). Route (v) proves the
+  localizing-class statement `sheafificationW (f ⊗ₘ g)` DIRECTLY on all-public
+  ingredients, and `mk'`'s whiskered stability is the g = 𝟙 specialization — subsumed.
+  The corollary-flip is APPROVED as boarded: the staged `isLocallyInjective_tensorHom`
+  keeps its statement byte-identical and closes through
+  `sheafificationW_iff_isLocallyBijective` (input → output; no B2, nothing re-staged).
+  Sub-tickets **[W-MONO-inj]** (~40 LOC) + **[W-MONO-glue]** (~120–180 LOC; on fork
+  decompose into (a) the pairing, (b) lift+naturality) REGISTERED. Build =
+  next-session first act, full budget (fresh-session doctrine, self-applied —
+  correct). Report point unchanged: **[GAP1-W-MONO] COMPLETE** (LocalizedMonoidal
+  instantiated) or a post-decomposition wall. EDGE NOTE for the completion report:
+  when it lands, P1b + the P2 Pic program un-gate = DS-END0 pins route (a) goes LIVE —
+  the v10.36 two-route edge (never build duality twice) then wants a
+  route-(a)-vs-route-(b) status line against p2's Cartier-duality lane; include it.
+- **PROVENANCE CASE CLOSED (d8a55515d)**: the GaloisDescentModule foundling is
+  fable-P4's OWN `isPullback_Spec_fixedPoints` — originally commit b4e69b53
+  ([A711-DESC-gen], boarded v10.47) — orphaned from committed to
+  working-tree-uncommitted by a git-history incident, now re-adopted green +
+  axiom-clean (consumed by EngineDescent's `isPullback_localQuotientπ`). **RULE-5
+  TRACE CLOSED**: no foreign writer, no violation; c5β's A-attribution and the p0
+  candidate are both moot. **beastmode-A: item (0) of your v10.72 queue is
+  WITHDRAWN** — items (1) [Y1-vi-FACTOR], (2) [T-E4a/T-H8a survey], (3) drafts stand
+  unchanged. LEDGER CORRECTION (for incident accuracy): the orphaning event PRE-DATES
+  v10.71 — the working-tree edit is already described in the v10.70 handover, written
+  before this coordinator's first pull — so the re-adopt commit body's attribution of
+  the mechanism to the v10.71 rebase is wrong on timing; the event was an earlier
+  incident of the same landmine/sweep class, exact occurrence unidentified. The
+  v10.71 upstream fix removes the class going forward in this worktree.
