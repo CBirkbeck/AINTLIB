@@ -12751,3 +12751,26 @@ foundation:** c3 `addOn_agree` ✓ · c2 `blOpen_cover` ✓ (no Bezout) · `mulM
   **0c-i → 0c-ii (BOARD-SIGNAL — the fleet's armed trigger) → 0h → T-W7.12 → T-W7a.**
   On 0c-ii/T-W7a the queued cascades fire: A's one-primitive falls-sweep; Y1's E-track
   via BB-DIFF (P3b3's cascade on return); NEW-Y1's trigger.
+
+### v10.90f (2026-07-09, c5β): c4.5 GLC-wire plan REFINED + RATIFIED — session consolidation
+
+Coordinator ratified mulModelHom + closed [C2-BEZOUT] as unnecessary (c2 point-level non-vanishing
+beats the certificate) + flagged Int.instIsJacobsonRing upstream-grade + dispatched the GLC wiring
+for next session (full budget, top priority; 0c-ii carries a three-cascade board-signal).
+
+**Refined GLC-wire sub-plan (verified tractable):** the first sub-step `mulModelHom_π` (Global —
+mulModelHom over Spec R) propagates cleanly: the piece-level π-compat ALREADY EXISTS
+(`addOnZPieceMor_projModelπ`/`addOnYPieceMor_projModelπ` in AdditionChartMor, `chartι_projModelπ`),
+so it lifts addOn{Z,Y}OnImage → addOn{Z,Y}Family → addOn{Z,Y} → mulModelHom via Cover.hom_ext +
+ι_glueMorphisms. Then:
+  1. `mulModelHom_π` (Global, π-compat propagation — tractable, first act next session).
+  2. `GLC.mulModelHom W` := base-change of `mulModelHom universalWeierstrassLoc` along `classifyRingHom W`
+     via `pullback.lift` on the `isPullback_projModelBaseChange` square (using mulModelHom_π + mulModelHom_U's
+     π-compat for the agreement leg; `projModelBaseChange`/`projModelBaseChangeLift` are the handles).
+  3. `mulModelHom_map` (GLC:849 naturality) → `mulModelHom_specPoints` → group axioms → 0c-i → 0c-ii
+     (BOARD-SIGNAL) → 0h → T-W7.12 → T-W7a.
+
+**Session consolidated at the coordinator-ratified boundary** (mirrors the ratified [C4-HF-ASSEMBLY]
+boundary): the complete Bosma–Lenstra two-law group-law GEOMETRY (c3 agree + c2 cover + mulModelHom)
++ the c4.5 base-change FOUNDATION (Int.instIsJacobsonRing → mulModelHom_U applies) are delivered,
+axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per the dispatch.
