@@ -94,4 +94,64 @@ instance sheafificationW_isLocalization :
 
 end Reflective
 
+section Tensor
+
+variable {S : Cᵒᵖ ⥤ CommRingCat.{u}}
+  {M₁ M₂ N₁ N₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
+
+/-- The locally-surjective half of the [GAP1-W-MONO] tensor-stability leaf: the tensor
+product of locally surjective morphisms of presheaves of modules is locally surjective.
+Sections of the tensor presheaf are finite sums of simple tensors; each factor is
+locally hit, and the finitely many image sieves intersect to a covering sieve. -/
+lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+    [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
+    [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)] :
+    Presheaf.IsLocallySurjective J ((toPresheaf _).map (f ⊗ₘ g)) := by
+  constructor
+  intro U t
+  induction t using TensorProduct.induction_on with
+  | zero =>
+      refine J.superset_covering (fun V p _ => ⟨0, ?_⟩) (J.top_mem U)
+      show (f ⊗ₘ g).app (Opposite.op V) 0 = (M₂ ⊗ N₂).map p.op 0
+      erw [map_zero]
+  | tmul m n =>
+      refine J.superset_covering ?_ (J.intersection_covering
+        (Presheaf.imageSieve_mem J ((toPresheaf _).map f) m)
+        (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n))
+      rintro V p ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
+      refine ⟨a ⊗ₜ b, ?_⟩
+      have ha' : f.app (Opposite.op V) a = M₂.map p.op m := ha
+      have hb' : g.app (Opposite.op V) b = N₂.map p.op n := hb
+      show (f ⊗ₘ g).app (Opposite.op V) (a ⊗ₜ b) = (M₂ ⊗ N₂).map p.op (m ⊗ₜ n)
+      erw [Monoidal.tensorHom_app, ModuleCat.MonoidalCategory.tensorHom_tmul,
+        Monoidal.tensorObj_map_tmul]
+      rw [ha', hb']
+      rfl
+  | add t₁ t₂ h₁ h₂ =>
+      refine J.superset_covering ?_ (J.intersection_covering h₁ h₂)
+      rintro V p ⟨⟨x₁, hx₁⟩, ⟨x₂, hx₂⟩⟩
+      refine ⟨x₁ + x₂, ?_⟩
+      have hx₁' : (f ⊗ₘ g).app (Opposite.op V) x₁ = (M₂ ⊗ N₂).map p.op t₁ := hx₁
+      have hx₂' : (f ⊗ₘ g).app (Opposite.op V) x₂ = (M₂ ⊗ N₂).map p.op t₂ := hx₂
+      show (f ⊗ₘ g).app (Opposite.op V) (x₁ + x₂) = (M₂ ⊗ N₂).map p.op (t₁ + t₂)
+      erw [map_add, map_add]
+      rw [hx₁', hx₂']
+      rfl
+
+/-- The locally-injective half of the [GAP1-W-MONO] tensor-stability leaf — for
+LOCALLY BIJECTIVE `f` and `g` (bijectivity, not mere injectivity, is essential: the
+tensor product is not left exact, but stalks of locally bijective maps are
+isomorphisms and isomorphisms tensor to isomorphisms — no flatness). Stalkwise/
+filtered-colimit argument; registered WIP (board v10.69; decompose on fork per
+v10.24). -/
+lemma isLocallyInjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+    [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
+    [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
+    [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)]
+    [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)] :
+    Presheaf.IsLocallyInjective J ((toPresheaf _).map (f ⊗ₘ g)) := by
+  sorry
+
+end Tensor
+
 end PresheafOfModules
