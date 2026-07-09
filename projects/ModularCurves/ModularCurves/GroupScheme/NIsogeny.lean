@@ -107,7 +107,64 @@ private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [Co
     (Module.Flat A (A ⊗[R] M) ∧
         ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
       ∀ (i : Fin m) (j : Fin n), algebraMap R A (α (Pi.single i 1) j) = 0 := by
-  sorry
+  -- The base-changed presentation is exact (right-exactness of `A ⊗ -`).
+  have hexA : Function.Exact (α.baseChange A) (π.baseChange A) := by
+    have h1 : Function.Exact (α.lTensor A) (π.lTensor A) := lTensor_exact A hexact hπ
+    rwa [show (⇑(α.baseChange A) : A ⊗[R] (Fin m → R) → A ⊗[R] (Fin n → R))
+        = ⇑(α.lTensor A) from rfl,
+      show (⇑(π.baseChange A) : A ⊗[R] (Fin n → R) → A ⊗[R] M) = ⇑(π.lTensor A) from rfl]
+  have hsurjA : Function.Surjective (π.baseChange A) := by
+    have := LinearMap.lTensor_surjective A hπ
+    rwa [show (⇑(π.baseChange A) : A ⊗[R] (Fin n → R) → A ⊗[R] M) = ⇑(π.lTensor A) from rfl]
+  constructor
+  · -- flat + constant rank `n` ⟹ the presentation matrix dies in `A`
+    rintro ⟨hflat, hrank⟩
+    sorry
+  · -- entries die ⟹ `A ⊗ M ≅ Aⁿ`
+    intro hent
+    -- the base-changed matrix vanishes
+    have hα0 : α.baseChange A = 0 := by
+      apply LinearMap.restrictScalars_injective R
+      apply TensorProduct.ext'
+      intro a v
+      simp only [LinearMap.coe_restrictScalars, LinearMap.baseChange_tmul,
+        LinearMap.zero_apply]
+      have hv : α v = ∑ i : Fin m, v i • α (Pi.single i 1) := by
+        have hsingle : ∀ i : Fin m, (fun j => if i = j then (1 : R) else 0)
+            = Pi.single i 1 := fun i => by
+          funext j
+          simp [Pi.single_apply, eq_comm]
+        conv_lhs => rw [pi_eq_sum_univ v, map_sum]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [map_smul, hsingle i]
+      rw [hv, TensorProduct.tmul_sum]
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [TensorProduct.tmul_smul]
+      suffices h : a ⊗ₜ[R] (α (Pi.single i 1)) = (0 : A ⊗[R] (Fin n → R)) by
+        rw [h, smul_zero]
+      apply (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv.injective
+      rw [map_zero]
+      have hrfl : (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv
+          (a ⊗ₜ[R] (α (Pi.single i 1))) = fun j => α (Pi.single i 1) j • a := rfl
+      rw [hrfl]
+      funext j
+      rw [Algebra.smul_def, hent i j, zero_mul]
+      rfl
+    -- hence the base-changed surjection is an isomorphism onto `A ⊗ M`
+    have hker : LinearMap.ker (π.baseChange A) = ⊥ := by
+      rw [LinearMap.exact_iff.mp hexA, hα0, LinearMap.range_zero]
+    let e1 : (A ⊗[R] (Fin n → R)) ≃ₗ[A] A ⊗[R] M :=
+      LinearEquiv.ofBijective (π.baseChange A) ⟨LinearMap.ker_eq_bot.mp hker, hsurjA⟩
+    let e2 : (Fin n → A) ≃ₗ[A] A ⊗[R] M :=
+      (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv.symm.trans e1
+    constructor
+    · exact Module.Flat.of_linearEquiv e2.symm
+    · intro p
+      haveI : Nontrivial A := ⟨0, 1, fun h01 =>
+        (Ideal.ne_top_iff_one _).mp p.2.ne_top (h01 ▸ p.asIdeal.zero_mem)⟩
+      rw [Module.rankAtStalk_eq_of_equiv e2.symm, Module.rankAtStalk_eq_finrank_of_free,
+        Module.finrank_fin_fun]
+      rfl
 
 /-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
 the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
