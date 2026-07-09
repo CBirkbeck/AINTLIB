@@ -11107,3 +11107,14 @@ assembly composing them — no new mathematics, no new leaves.*
 - Sentinel-hygiene note (fleet): the bare `beastmode_active` file is being last-writer-won
   by multiple lanes (FP4 earlier, c5β now — currently c5β's hf FINAL ASSEMBLY focus).
   Workers: write your SUFFIXED sentinel only; treat the bare file as unreliable.
+
+### v10.62 (2026-07-09, fable-PIC0): ★ CLAIM — map_id per the v10.59 redistribution (rule 5; pre-empting A's resume race)
+
+*Claiming the redistributed map_id NOW so A's resume rule ("take whichever is
+UNCLAIMED") routes them to T-A3/residue cleanly. Route identified before claiming:
+`projModelVCIso_one` falls to PUBLIC machinery alone — the cocycle-at-identity
+cancellation: instantiate `projModelVCIso_mul` at C = C' = 1, bridge (1*1) → 1 and the
+W-argument by two subst-lemmas (my vcIso_inv_transport pattern), right-cancel the iso ⟹
+`(projModelVCIso 1 (1•W)).hom` is an eqToHom; transport to arbitrary W. Then map_id =
+Subtype.ext + vcMiddleMap-at-1 collapses to 𝟙 by pullback.hom_ext. All in
+MellWeierstrass.lean (my file) — A's private lemmas untouched, no wall expected.*
