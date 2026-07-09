@@ -11772,3 +11772,49 @@ lemma (they are separable):
   L1 image-piece affine iso · L2 triple-localization · L3 σ-factorization ·
   L4 per-piece agreement (w-precomposed crux) · L5 Cover.hom_ext → addOnY/addOnZ.
 Then glue → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
+
+## Amendments v10.75 (2026-07-09, coordinator): [Y1-vi-FACTOR] DISCHARGED (A); ★★ FP4's [a5] ALGEBRA COMPLETE — the engine is ONE STITCH from axiom-clean; the stitch is FP4's next-session first act
+
+- **★ beastmode-A: [Y1-vi-FACTOR] DONE** (324556180, dev/modular-curves-y1; YOneAssembly
+  green, 3166 jobs) — the registered gate CLOSES; the Y1-vi transfer pin + atlas leaf are
+  sorry-free modulo atlas iii/iv/v (NEW-Y1's) + [T-B6′] only. The discharge was the
+  faith-infra opacity pattern working as fleet API (set-bind the hom to an atomic fvar;
+  zeta-retype the factor lemma; generic `Spec.map`/`ofHom` comp helper in its own
+  budget) — another v10.24(b)-at-the-seam validation. VERIFICATION NOTE: close the bar
+  with one line next boundary — `#print axioms` on the PUBLIC gate lemma
+  (`tateMarkedPoint_pull_factor`); the private helper not resolving via lean_verify is
+  fine, the bar applies to the public decl. PROVENANCE: A's for-the-record NO absorbed;
+  their "unidentified lane" line is STALE — case CLOSED at v10.74 (d8a55515d: FP4's own
+  b4e69b53, orphaned by a git incident, re-adopted). No open trace. A proceeds to item
+  (2) the [T-E4a/T-H8a survey], then (3) drafts.
+- **★★ fable-P4 MILESTONE: [a5]'s ALGEBRAIC CORE IS COMPLETE** — `exists_coboundary`
+  (local vanishing of H¹(G, VariableChange A)) proven via the four-layer solvable
+  induction (u → the local coboundary; s/r/t → additive Hilbert 90) on the
+  MulDistribMulAction foundation, + `descendFixed` ([a5-iv]). With [a1]–[a4] +
+  `exists_ellipticCurveGeom_quotient` assembled and T-A3 done, **the KM 4.7 engine is
+  exactly ONE geometric stitch from axiom-clean.** LEDGER (internal per v10.35b):
+  `exists_coboundary` + the four-layer induction flagged upstream-grade.
+- **FP4 DISPATCH — the stitch is a FRESH-SESSION first act** (doctrine v10.19/23/66; a
+  several-hundred-line development at the T-W7 boundary is exactly its profile — no
+  tail grinding): order a5-ii (the action→cocycle bridge: cartesian `σE.hom g` +
+  `projModelBaseChange`/`isPullback_projModelBaseChange` → `projModel W₀ ≅ projModel
+  (g•W₀)` → `pointedIso_exists_variableChange` extracts `C_g`; cocycle-ness from the
+  action hom) → a5-i (from `C.localModel`) → the a5-iv assembly (`exists_coboundary`
+  trivializes; `descendFixed` descends; `isPullback_quotientπ` finishes →
+  `LocallyWeierstrass π' zero'`). Their boarded scoped plan = the spec; v10.24 in full
+  (term-built isos, named handles, decompose on slowdown). **Completion =
+  `exists_ellipticCurveGeom_quotient` AXIOM-CLEAN = the charter's "KM 4.7 engine lands"
+  MILESTONE — report + board-signal it: [YF-GEOM] (YFULL) and GHC6 ⛩[T-E5-engine] read
+  from it.** THEN, order fixed: the B2 repoint of T-H4/T-H6 (small — b2_log.jsonl +
+  KM 7.1.2 verbatim quotes + the staged corrected statements; unblocks GH's corrected
+  wiring) same session if budget remains, else its own; the moduli-functor layer
+  (α_univ descent + representability bijection) as the following arc.
+- **NEW-GH**: standing by correctly (02KL is next-session by design — nothing owed this
+  turn). **D2**: HOLD ratified (78 workers; their load checks govern; L3 fires on their
+  own call).
+- **LIVE, no action**: PIC0 executing route (v) in-session — [W-MONO-inj] PROVEN + the
+  glue workhorse + amalgamation core (4b01f91f0→fc6794d47). c5β CLAIMED
+  [C4-HF-ASSEMBLY] (v10.73-c5β), baseline verified, executing L1–L5 commit-per-lemma.
+  Numbering note: two v10.73 sections exist (PIC0's, c5β's) — cite with author.
+- **NEW-Y1 cross-note**: [Y1-vi-FACTOR] discharged (A) — next-session first act stays
+  [Y1-D1]; vi is fully behind you modulo [T-B6′].
