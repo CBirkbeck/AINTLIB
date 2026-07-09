@@ -10941,3 +10941,76 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 clean. `#print axioms` for `tateNormalVariableChange_mul`, `zChartEval_coords_of_pointedIso`,
 `projTateMap_eq_of_pointedIso`: `[propext, Classical.choice, Quot.sound]` only (no inherited
 `sorryAx` anywhere in the engine).
+
+## Amendments v10.109-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] PARKED at the model/scheme boundary — handoff recipe
+
+**Status**: in_progress → **parked** (NEW-ATLAS-2, context-bounded session end; branch clean,
+all increments v10.101–v10.108 pushed through `b9f017648`). The **model-level engine is
+COMPLETE and sorryAx-free**; the remaining work is exclusively `Ell/R`-side assembly. Board
+claim stands for NEW-ATLAS(-2) to resume; the recipe below is the de-risked plan.
+
+**What is proven (this session, `YOneAtlasClassify.lean`, all
+`[propext, Classical.choice, Quot.sound]` only):**
+- B2-ii order dictionary: `two/three_zsmul_some_eq_zero_of_ψ₂/Ψ₃_eq_zero`,
+  `nowhereOrderLEThree_of_forall_geom` (maximal-ideal globalisation → T-E1 input).
+- B2-i extraction: `inZChart_of_forall_ne_zero`, `zChartHom` (+ factoring pin
+  `Spec_map_zChartHom_awayι`, uniqueness `zChartHom_unique`), `zChartEval` (+ `_algebraMap`,
+  `_equation`, `_equation_self`, `_coordX/Y` read-offs), extensionality `coordRingHom_ext` +
+  `specPoint_ext_of_zChartEval`, naturality `specPointComp`/`specPointBaseChange`/
+  `specPointPointedIso` (InZChart + eval-compat for each).
+- Marked-chart ENGINE: base `tateRingOverAlgLiftOfPoint_eq_of_pointedIso` /
+  `tateBaseSpecMapOfPoint_eq_of_pointedIso`; core `tateNormalVariableChange_mul`,
+  `zChartEval_coords_of_pointedIso`; top `projTateMap_eq_of_pointedIso`.
+- The classifying model morphism: `projTateMap` + `_π` + `_isPullback` + `_zero` +
+  `_marking` (marking lands on `tateP0mor` = the atlas `(0,0)`; `tateP0SpecPoint` +
+  `tateP0mor_fac` + `zChartEval_tateP0SpecPoint_coordX/Y = 0`).
+
+**Remaining recipe (the ∀-clause; consume the above + the landed v10.84–v10.100 handles):**
+1. *Chart packaging + fibre bridges* (the only step consuming gates): for `Y : EllObj R`,
+   `P`, `hP : NowhereGeomOrderLEThree P`, and an affine `V` with `localModel`-chart
+   `(W, e : pullback π V.ι ≅ projModel W)` (LocallyWeierstrass, Basic.lean:143): the section
+   `P|_V` becomes `g : SpecPoints (projModel W) _ Γ(V)` via `e` + `V.isoSpec`;
+   (a) `InZChart W g` from `inZChart_of_forall_ne_zero` — its ≠-hypothesis from `hP` at
+   `a = 1` pushed to `AlgebraicClosure k` (compose `t` with `Spec.map` of the closure;
+   equality of composites would transport to a killed pull);
+   (b) `hord` from `nowhereOrderLEThree_of_forall_geom` — its hypothesis from `hP` at
+   `a = 2, 3` through the chain: `a • pull t P ≠ 0` ⟶ `pullSection (Y.pullbackAlongπ t)`
+   (additive: `pullSection_add_of_isLocallyNoetherian`, `Spec k` loc. noeth.;
+   `AddMonoidHom.mk'` + `map_zsmul` for ℤ-smul; `dict_transportSection_pullSection` +
+   `Point.baseChangeEquiv` for the value) ⟶ an `EllipticCurve (Spec k)` record `E''` :=
+   `(abelEnrichment_exists ⟨projModel W_k, …⟩).choose` **[T-A6b]** with grp transported via
+   `isMonHom_of_one_comp_eq'` (PROVEN, PullSectionAdd pattern) along the pasted pointed iso
+   `pullback E.π t ≅ projModel (W.map (Γ(V) → k))` (paste `e` with
+   `isPullback_projModelBaseChange`, T-A8a shape) ⟶ `geomFibrePointAddEquiv` **[T-B6′]** ⟶
+   mathlib affine points, value pinned by `projModelPointsEquiv_some` with coordinates =
+   `zChartEval`-composites (`zChartEval_specPointComp` along `Γ(V) → k`).
+2. *Local data*: `g_V := V.isoSpec.hom ≫ tateBaseSpecMapOfPoint R W x y hxy hord` (base);
+   `top_V := (chart-iso e) ≫ projTateMap ≫ eqToHom (tateUniversal_E_eq R).symm` on
+   `π ⁻¹(V)` (top). Overlap agreement on affines `V'' ⊆ V ∩ V'`: restrict both charts
+   (T-A8a shrink along the open immersion: `W ↦ W.map (res)`, chart iso restricted via
+   pullback pasting; restriction-compat of the canonical maps by `tateRingOver_algHom_ext` +
+   `tateNormalVariableChange`-uniqueness under `map`), then apply
+   `tateBaseSpecMapOfPoint_eq_of_pointedIso` (base) and `projTateMap_eq_of_pointedIso` (top)
+   to the two restricted charts (`ε` := the composite of the two restricted chart isos;
+   `hsec` from both being `P|_V''`).
+3. *Gluing*: base via `EllObj.tateBaseMapOfOpenCover` (+ `_base_w`, landed v10.96); top via
+   `Scheme.Cover.glueMorphisms` on the `π ⁻¹(V)`-cover of `Y.curve.E`; `IsPullback` of the
+   glued square: comparison morphism into `pullback ((tateUniversal R).π) u` is an iso —
+   locally an iso over each `V` (from `projTateMap_isPullback` pasted with the chart square)
+   + `MorphismProperty.isomorphisms Scheme` is local at the target; `zero_w` and
+   `pullSection = P` (equational form `P.1 ≫ top = u ≫ P₀.1`, with
+   `tateMarkedPoint = tateP0mor ≫ eqToHom`) checked cover-locally from `projTateMap_zero` /
+   `projTateMap_marking`.
+4. *Uniqueness*: for any `f` with `pullSection f P₀ = P`: per chart `V`, `V.ι ≫ f.baseHom`
+   is affine, `φ_f := Spec.preimage`; paste `f.isPullback` (restricted) with the
+   `tateUniversal`-bridge and `isPullback_projModelBaseChange` to exhibit a SECOND marked
+   chart on `V` with marking `(0,0)` (its `g` is `P|_V`-transported; its `hord` transports
+   along `specPointComp`); ENGINE(a)/(b) then pin `V.ι ≫ f.baseHom = g_V` and the `f.top`
+   restriction; conclude by `Scheme.Cover.hom_ext` on both covers and close with
+   `EllObj.tateClassifyingHom_existsUnique_of_components` (landed v10.98).
+5. *Final*: state the clause exactly as `exists_tatePoint`'s ∀-part (`∀ (Y) (P), … → ∃! f,
+   EllHom.pullSection R f (tateMarkedPoint R) = P`); integration into `YOneAssembly.lean` is
+   the one-line `refine`+`exact` at PR time. Attribution at completion: the clause's
+   `#print axioms` will list `sorryAx` exactly through `tateEllObj`/`tateUniversal`
+   (**[T-A6b]**) and `geomFibrePointAddEquiv.map_add'` (**[T-B6′]**) — the designed trail;
+   everything in this file remains sorry-free.
