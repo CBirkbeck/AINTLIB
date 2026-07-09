@@ -373,6 +373,94 @@ theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X) (P Q : X.Preshea
           (PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj Q)) := by
   sorry
 
+section Collapse
+
+/-- The symmetric monoidal structure on `X.PresheafOfModules` (same transport as the
+monoidal instances in `Picard/InvertibleSheaf.lean`), providing the braiding `β_` for the
+commutativity of the sheafified tensor. -/
+noncomputable instance (X : Scheme.{u}) : SymmetricCategory X.PresheafOfModules :=
+  inferInstanceAs (SymmetricCategory
+    (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+variable (X) in
+/-- The sheafification unit of any presheaf of modules on a scheme is inverted by
+sheafification (its underlying map is `toSheafify`, a `J.W`-member). Scheme-side workhorse
+for the collapse lemmas below. -/
+theorem sheafificationW_unit_app (A : X.PresheafOfModules) :
+    PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app A) := by
+  rw [PresheafOfModules.sheafificationW_iff_isLocallyBijective,
+    PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
+  exact ⟨(GrothendieckTopology.W_toSheafify _ _).isLocallyInjective,
+    (GrothendieckTopology.W_toSheafify _ _).isLocallySurjective⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Left collapse**: re-sheafifying the left tensor factor changes nothing,
+`sh(A ⊗ B) ≅ sh(sh(A).val ⊗ B)`. Input to the Picard-group associativity/unit laws. -/
+theorem nonempty_sheafify_tensor_left_collapse (A B : X.PresheafOfModules) :
+    Nonempty ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj (A ⊗ B) ≅
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj
+        (((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj A).val ⊗ B)) := by
+  haveI : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      (𝟙 X.ringCatSheaf.obj) := inferInstanceAs (Presheaf.IsLocallyInjective _
+        (𝟙 (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+  haveI : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      (𝟙 X.ringCatSheaf.obj) := inferInstanceAs (Presheaf.IsLocallySurjective _
+        (𝟙 (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+  have hstab := PresheafOfModules.sheafificationW_tensorHom (𝟙 X.ringCatSheaf.obj)
+    ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app A) (𝟙 B)
+    (sheafificationW_unit_app X A)
+    (by rw [PresheafOfModules.sheafificationW_iff, CategoryTheory.Functor.map_id]; infer_instance)
+  rw [PresheafOfModules.sheafificationW_iff] at hstab
+  exact ⟨@asIso _ _ _ _ _ hstab⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Right collapse**: re-sheafifying the right tensor factor changes nothing,
+`sh(A ⊗ B) ≅ sh(A ⊗ sh(B).val)`. Input to the Picard-group associativity/unit laws. -/
+theorem nonempty_sheafify_tensor_right_collapse (A B : X.PresheafOfModules) :
+    Nonempty ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj (A ⊗ B) ≅
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj
+        (A ⊗ ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj B).val)) := by
+  haveI : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      (𝟙 X.ringCatSheaf.obj) := inferInstanceAs (Presheaf.IsLocallyInjective _
+        (𝟙 (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+  haveI : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      (𝟙 X.ringCatSheaf.obj) := inferInstanceAs (Presheaf.IsLocallySurjective _
+        (𝟙 (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+  have hstab := PresheafOfModules.sheafificationW_tensorHom (𝟙 X.ringCatSheaf.obj)
+    (𝟙 A) ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app B)
+    (by rw [PresheafOfModules.sheafificationW_iff, CategoryTheory.Functor.map_id]; infer_instance)
+    (sheafificationW_unit_app X B)
+  rw [PresheafOfModules.sheafificationW_iff] at hstab
+  exact ⟨@asIso _ _ _ _ _ hstab⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Associativity of the sheafified tensor**, `(M ⊗ N) ⊗ P ≅ M ⊗ (N ⊗ P)` — GME p. 108's
+implicit group-law coherence, now gap-free: collapse both re-sheafifications and transport
+the presheaf associator. Input to the Picard-group multiplication. -/
+theorem nonempty_tensorObj_assoc (M N P : X.Modules) :
+    Nonempty (tensorObj (tensorObj M N) P ≅ tensorObj M (tensorObj N P)) := by
+  obtain ⟨eL⟩ := nonempty_sheafify_tensor_left_collapse (M.val ⊗ N.val) P.val
+  obtain ⟨eR⟩ := nonempty_sheafify_tensor_right_collapse M.val (N.val ⊗ P.val)
+  exact ⟨eL.symm ≪≫
+    (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso (α_ M.val N.val P.val) ≪≫
+    eR⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Commutativity of the sheafified tensor**, `M ⊗ N ≅ N ⊗ M` (the presheaf braiding,
+sheafified). Input to the Picard group's commutativity. -/
+theorem nonempty_tensorObj_comm (M N : X.Modules) :
+    Nonempty (tensorObj M N ≅ tensorObj N M) :=
+  ⟨(PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso (β_ M.val N.val)⟩
+
+end Collapse
+
 /-- The tensor product of invertible `𝒪ₓ`-modules is invertible (GME p. 108: `Pic(E_T)`
 is "the group of isomorphism classes of all invertible sheaves"). On the common refinement
 `{U i ⊓ V j}` of the two trivializing covers both factors are trivial, so — using that
