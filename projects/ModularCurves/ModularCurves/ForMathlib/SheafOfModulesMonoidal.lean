@@ -462,6 +462,72 @@ private lemma pairingSection_smul_left {U : Cᵒᵖ}
         ((pom_map_comp M₂ q p (r • m)).trans
           ((congrArg (M₂.map q.op) ha.symm).trans (pom_napp_map f q a).symm))))
 
+include hP in
+private lemma pairingSection_add_right {U : Cᵒᵖ} (m : M₂.obj U) (n n' : N₂.obj U) :
+    pairingSection f g hP χ m (n + n') =
+      pairingSection f g hP χ m n + pairingSection f g hP χ m n' := by
+  refine (isPairingSection_unique hP χ (pairingSection_spec f g hP χ m (n + n')) ?_)
+  intro V p a b ha hb
+  apply hP.isSeparated _ _ (J.intersection_covering
+    (J.pullback_stable p (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n))
+    (J.pullback_stable p (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n')))
+  rintro W q ⟨hq₁, hq₂⟩
+  obtain ⟨b₁, hb₁'⟩ : ∃ b₁ : ↑(N₁.obj (Opposite.op W)),
+      g.app (Opposite.op W) b₁ = N₂.map (q ≫ p).op n := hq₁
+  obtain ⟨b₂, hb₂'⟩ : ∃ b₂ : ↑(N₁.obj (Opposite.op W)),
+      g.app (Opposite.op W) b₂ = N₂.map (q ≫ p).op n' := hq₂
+  have haW : f.app (Opposite.op W) (M₁.map q.op a) = M₂.map (q ≫ p).op m := by
+    rw [pom_napp_map f q a, ha, ← pom_map_comp]
+  have hL : P.presheaf.map q.op (P.map p.op (pairingSection f g hP χ m n +
+      pairingSection f g hP χ m n')) =
+      χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ (b₁ + b₂)) := by
+    show P.map q.op (P.map p.op (pairingSection f g hP χ m n +
+      pairingSection f g hP χ m n')) = _
+    rw [← pom_map_comp]
+    erw [map_add]
+    rw [pairingSection_spec f g hP χ m n (q ≫ p) (M₁.map q.op a) b₁ haW hb₁',
+      pairingSection_spec f g hP χ m n' (q ≫ p) (M₁.map q.op a) b₂ haW hb₂']
+    exact ((χ.app (Opposite.op W)).hom.map_add _ _).symm.trans
+      (congrArg (χ.app (Opposite.op W)) (TensorProduct.tmul_add _ b₁ b₂).symm)
+  rw [hL, chi_value χ q a b]
+  refine chi_app_congr f g hP χ _ _ _ _ rfl ?_
+  exact (map_add ((g.app (Opposite.op W)).hom) b₁ b₂).trans
+    ((congrArg₂ (· + ·) hb₁' hb₂').trans
+      ((map_add ((N₂.presheaf.map (q ≫ p).op).hom) n n').symm.trans
+        ((pom_map_comp N₂ q p (n + n')).trans
+          ((congrArg (N₂.map q.op) hb.symm).trans (pom_napp_map g q b).symm))))
+
+include hP in
+private lemma pairingSection_smul_right {U : Cᵒᵖ}
+    (r : ↑((S ⋙ forget₂ CommRingCat RingCat).obj U)) (m : M₂.obj U) (n : N₂.obj U) :
+    pairingSection f g hP χ m (r • n) = r • pairingSection f g hP χ m n := by
+  refine (isPairingSection_unique hP χ (pairingSection_spec f g hP χ m (r • n)) ?_)
+  intro V p a b ha hb
+  apply hP.isSeparated _ _
+    (J.pullback_stable p (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n))
+  intro W q hq₀
+  obtain ⟨b₀, hb₀'⟩ : ∃ b₀ : ↑(N₁.obj (Opposite.op W)),
+      g.app (Opposite.op W) b₀ = N₂.map (q ≫ p).op n := hq₀
+  have haW : f.app (Opposite.op W) (M₁.map q.op a) = M₂.map (q ≫ p).op m := by
+    rw [pom_napp_map f q a, ha, ← pom_map_comp]
+  set r' : ↑((S ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op W)) :=
+    ((S ⋙ forget₂ CommRingCat RingCat).map (Opposite.op (q ≫ p))).hom r with hr'
+  have hL : P.presheaf.map q.op (P.map p.op (r • pairingSection f g hP χ m n)) =
+      χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ (r' • b₀)) := by
+    show P.map q.op (P.map p.op (r • pairingSection f g hP χ m n)) = _
+    rw [← pom_map_comp]
+    erw [P.map_smul]
+    rw [pairingSection_spec f g hP χ m n (q ≫ p) (M₁.map q.op a) b₀ haW hb₀']
+    exact ((χ.app (Opposite.op W)).hom.map_smul r' _).symm.trans
+      (congrArg (χ.app (Opposite.op W)) (TensorProduct.tmul_smul r' _ b₀).symm)
+  rw [hL, chi_value χ q a b]
+  refine chi_app_congr f g hP χ _ _ _ _ rfl ?_
+  exact (map_smul ((g.app (Opposite.op W)).hom) r' b₀).trans
+    ((congrArg (r' • ·) hb₀').trans
+      ((N₂.map_smul (q ≫ p).op r n).symm.trans
+        ((pom_map_comp N₂ q p (r • n)).trans
+          ((congrArg (N₂.map q.op) hb.symm).trans (pom_napp_map g q b).symm))))
+
 end Glue
 
 end PresheafOfModules
