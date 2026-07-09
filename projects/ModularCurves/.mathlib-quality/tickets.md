@@ -11014,3 +11014,38 @@ claim stands for NEW-ATLAS(-2) to resume; the recipe below is the de-risked plan
    `#print axioms` will list `sorryAx` exactly through `tateEllObj`/`tateUniversal`
    (**[T-A6b]**) and `geomFibrePointAddEquiv.map_add'` (**[T-B6′]**) — the designed trail;
    everything in this file remains sorry-free.
+
+## Amendments v10.110-ATLAS (2026-07-10, NEW-ATLAS-2): [Y1-ATLAS] T5 COMPLETE — chart packaging + both fibre bridges LANDED
+
+Recipe step 1 of v10.109 is done in `YOneAtlasClassify.lean`:
+- `MarkedChartData` (bundled `localModel` chart) with `exists_mem`, `restrictSection`,
+  `pt` (the section as a `Γ(U)`-point of the chart model), `geomPt`;
+  `EllipticCurve.zeroPoint_eq_zero` (the group-zero bridge, unwinding `pointAddCommGroup` +
+  `one_eq_zero`).
+- **B1 bridge** `pt_inZChart` (axiom-CLEAN): a nowhere-small-order section lies in the
+  `Z`-chart of every marked chart (`a = 1` at the algebraic closure + the
+  `specPoint_eq_zero_of_not_inZ` dichotomy through `pull_eq_zero_of_pt_eq_zero`).
+- Fibre substrate: `pullbackChartIso` (+`_hom_bc`, `_hom_π`, `_zero`,
+  `inZChart_of_comp_baseChange` — the cartesian chart-square lift), `sectionMapIso`
+  (+`_injective`, `_add` — GME 2.2.5 for a raw pointed iso via `isMonHom_of_one_comp_eq'`,
+  axiom-CLEAN), `EllipticCurve.pointCongr`, `affinePointCongr`, `zChartEval_congr`,
+  `chartSolution_zero/one_eq_eval` (chart-solution ↔ `zChartEval` read-offs).
+- Fibre geometry per chart: `fibreMap`/`fibreTop` squares, `fibreChartIso`,
+  `fibre_zero_comp`, `fibreSection` (+`_coe`, `_comp_bc` — the value chase onto
+  `specPt ≫ pt`, all axiom-CLEAN).
+- Fibre enrichment: `fibreGeom`, `fibreCurve` := `abelEnrichment_exists`-choose
+  (**[T-A6b]**) with `_geom/_E_eq/_π_eq/_zero_eq` pins, `fibreCurveIso` (+`_π`, `_zero`).
+- **B2 bridge** `pt_hord`: `NowhereOrderLEThree` of the chart coordinates from
+  `NowhereGeomOrderLEThree`, through the additive chain
+  `pull τ P → baseChangeEquiv → sectionMapIso(fibreCurveIso) → pointCongr →`
+  `geomFibrePointAddEquiv` (**[T-B6′]**) `→ .some (ψ x, ψ y)` (value pinned by
+  `projModelPointsEquiv_some` + the `specPointBaseChange`/`specPointComp` eval-transport).
+  `#print axioms pt_hord = [propext, sorryAx, Classical.choice, Quot.sound]` — the `sorryAx`
+  enters EXACTLY through the two designed trails `abelEnrichment_exists` [T-A6b] and
+  `geomFibrePointAddEquiv.map_add'` [T-B6′]; `pt_inZChart`, `fibreSection_comp_bc`,
+  `sectionMapIso_add` are `[propext, Classical.choice, Quot.sound]` only.
+
+Verification: `lake build` green (3179 jobs); no `sorry`/`admit`/`maxHeartbeats`;
+`git diff --check` green; line-length + linter clean. Remaining: recipe steps 2–5 (local
+classifying data per chart = compose the landed `projTateMap` with the chart data; overlap
+agreement via the T4 ENGINE; cover gluing via v10.96–100 handles; uniqueness; ∃!-wiring).
