@@ -52,6 +52,12 @@ noncomputable instance (X : Scheme.{u}) : MonoidalCategoryStruct X.PresheafOfMod
   inferInstanceAs (MonoidalCategoryStruct
     (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
 
+/-- The full monoidal category structure on `X.PresheafOfModules` (same transport as the
+struct instance above), needed to transport isomorphisms through the tensor. -/
+noncomputable instance (X : Scheme.{u}) : MonoidalCategory X.PresheafOfModules :=
+  inferInstanceAs (MonoidalCategory
+    (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+
 variable (X) in
 /-- The structure sheaf as the unit `𝒪ₓ`-module. -/
 noncomputable def unitObj : X.Modules := SheafOfModules.unit X.ringCatSheaf
@@ -116,12 +122,65 @@ theorem IsInvertible.pullback {M : X.Modules} (hM : IsInvertible M) (f : Y ⟶ X
     (Modules.pullbackComp (f ∣_ U i) (U i).ι).symm.app M ≪≫
     (Modules.pullback (f ∣_ U i)).mapIso e ≪≫ pullbackUnitIso (f ∣_ U i)⟩
 
+/-- The sheafified tensor respects isomorphisms in each variable (functoriality of the
+presheaf tensor followed by `sheafification`). GAP-1-free. -/
+noncomputable def tensorObjCongr {M M' N N' : X.Modules} (eM : M ≅ M') (eN : N ≅ N') :
+    tensorObj M N ≅ tensorObj M' N' :=
+  (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso
+    (Functor.mapIso (SheafOfModules.forget X.ringCatSheaf) eM ⊗ᵢ
+      Functor.mapIso (SheafOfModules.forget X.ringCatSheaf) eN)
+
+/-- A trivialization of `P` on an open `U` restricts to a trivialization on any smaller
+open `W ≤ U`: pull the `U`-trivialization back along the inclusion `W ↪ U` and use that
+pullback preserves the structure sheaf. `W.ι` factors as `X.homOfLE e ≫ U.ι`, so
+`pullbackComp`/`pullbackCongr` reduce the `W`-pullback to a pullback of the trivial
+`U`-pullback. GAP-1-free. -/
+noncomputable def restrictTrivialization {P : X.Modules} {U W : X.Opens} (e : W ≤ U)
+    (eP : (Modules.pullback U.ι).obj P ≅ unitObj ↑U) :
+    (Modules.pullback W.ι).obj P ≅ unitObj ↑W :=
+  (Modules.pullbackCongr (X.homOfLE_ι e).symm).app P ≪≫
+    ((Modules.pullbackComp (X.homOfLE e) U.ι).app P).symm ≪≫
+    (Modules.pullback (X.homOfLE e)).mapIso eP ≪≫
+    pullbackUnitIso (X.homOfLE e)
+
+/-- **(GAP-1 downstream core)** Pullback commutes with the sheafified tensor: for any
+morphism of schemes `f`, `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. This is the *strong monoidality of
+the pullback functor* `Modules.pullback f` with respect to the sheafified tensor `tensorObj`
+— the last GAP-1 content, isolated to this single `Nonempty`-iso (Prop, so no `sorryAx` in
+any monoidal DATA; the v10.8 discipline). Route: the pushforward `f_*` is (lax) monoidal —
+mathlib has `PresheafOfModules.pushforward₀OfCommRingCat.Monoidal` at the presheaf level —
+so its left adjoint `f^*` is oplax monoidal, and here strongly monoidal (base change of
+modules `⊗_R S` commutes with tensor, and `sheafification` is monoidal by
+`SheafOfModulesMonoidal.sheafificationW_isMonoidal`, this stream's GAP1-W-MONO leaf). The
+missing mathlib infrastructure is the doctrinal-adjunction/mates transfer of a lax-monoidal
+structure to a left adjoint (`Mathlib.CategoryTheory.Monoidal.Mates` is absent). Registered
+sub-development [PIC-P1b-MONO]. -/
+theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
+    Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
+      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
+  sorry
+
 /-- The tensor product of invertible `𝒪ₓ`-modules is invertible (GME p. 108: `Pic(E_T)`
-is "the group of isomorphism classes of all invertible sheaves"). **GAP-1-gated**: the
-proof needs restriction-to-opens to commute with the sheafified tensor; see the
-decomposition artifact. -/
+is "the group of isomorphism classes of all invertible sheaves"). On the common refinement
+`{U i ⊓ V j}` of the two trivializing covers both factors are trivial, so — using that
+pullback commutes with the sheafified tensor (`nonempty_pullback_tensorObj`) — the tensor
+restricts to `𝒪 ⊗ 𝒪 ≅ 𝒪` there. Assembly complete; the one GAP-1 input is the pullback-tensor
+compatibility. -/
 theorem IsInvertible.tensorObj {M N : X.Modules}
     (hM : IsInvertible M) (hN : IsInvertible N) : IsInvertible (tensorObj M N) := by
-  sorry
+  obtain ⟨ιM, U, hU, htrivM⟩ := hM
+  obtain ⟨ιN, V, hV, htrivN⟩ := hN
+  refine ⟨ιM × ιN, fun p => U p.1 ⊓ V p.2, ?_, fun p => ?_⟩
+  · apply le_antisymm le_top
+    rw [← hU]
+    refine iSup_le fun i => ?_
+    rw [← inf_top_eq (U i), ← hV, inf_iSup_eq]
+    exact iSup_le fun j => le_iSup (fun p : ιM × ιN => U p.1 ⊓ V p.2) (i, j)
+  · obtain ⟨eM⟩ := htrivM p.1
+    obtain ⟨eN⟩ := htrivN p.2
+    obtain ⟨eT⟩ := nonempty_tensorObj_unit_iso (unitObj ↑(U p.1 ⊓ V p.2))
+    obtain ⟨ePb⟩ := nonempty_pullback_tensorObj (U p.1 ⊓ V p.2).ι M N
+    exact ⟨ePb ≪≫ tensorObjCongr (restrictTrivialization inf_le_left eM)
+      (restrictTrivialization inf_le_right eN) ≪≫ eT⟩
 
 end AlgebraicGeometry.Scheme.Modules
