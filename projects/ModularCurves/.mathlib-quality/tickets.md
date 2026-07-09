@@ -10680,6 +10680,26 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; a
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
 
+## Amendments v10.97-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `EllHom` constructor path LANDED
+
+Added `EllObj.tateBaseMapOfOpenCover_ext`, the generic constructor
+`EllObj.tateClassifyingHom` with its base/top/ext lemmas, plus the global-coefficient and
+open-cover specialisations `EllObj.tateClassifyingHomOfGlobalCoeffs` and
+`EllObj.tateClassifyingHomOfOpenCover` with their component and extensionality lemmas. This is the
+scheme-level `Ell/R` packaging layer for B2-iv/v: once the Tate-base map, glued total-space map,
+cartesian square, and zero compatibility are produced by the chart-isomorphism gluing step, the
+data now forms the classifying morphism `Y ⟶ tateEllObj R`, and uniqueness reduces to equality of
+the glued base and top components.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green; line-length scan clean. `#print axioms`:
+`EllObj.tateBaseMapOfOpenCover_ext` lists only `[propext, Classical.choice, Quot.sound]`. The
+`EllObj.tateClassifyingHom*` constructors, component lemmas, and ext lemmas list
+`[propext, sorryAx, Classical.choice, Quot.sound]`; the inherited `sorryAx` is attributed to
+the intended Tate-object trail, matching `#print axioms tateUniversal` and
+`#print axioms tateEllObj`, hence gate **[T-A6b]** (`abelEnrichment_exists`) and no fresh atlas
+sorry.
+
 ## Amendments v10.95-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] normalising-overlap independence LANDED
 
 Added `tateRingOverAlgLiftOfTateNormal_eq_of_variableChanges` and
