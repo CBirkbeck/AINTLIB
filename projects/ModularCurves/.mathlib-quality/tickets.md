@@ -12195,3 +12195,24 @@ cofactors, a transcription sub-ticket) · [c4.5] the GLC wiring FLAG (coordinato
   geometry is the transRing one, not a single `Away`.
 The same-chart part is a bounded finish; the cross-chart part is a fresh apparatus. Both reuse the
 committed foundations. c2 (Bezout) and c4.5 (flag) unchanged.
+
+### v10.80 (2026-07-09, c5β): [c3] foundations landed — cross-law agreement + overlap geometry (4 lemmas)
+
+The c3 (`addOn_agree`) foundation is now in place, all axiom-clean & committed:
+- `chartHomOfTriple_cross_eq`, `chartAwayHomOfTriple_cross_eq` (Glue, `399014256`/`dfba298d0`) — the
+  general two-laws-glue chart agreement (minor hypothesis).
+- `pieceMorOfTriple_cross_agree` (Overlap, `dfba298d0`) — per-piece scheme agreement over `D(t_k·s_k)`,
+  SAME index (no cross-index crux); `addOnYPieceMor_eq_addOnZPieceMor` its B–L instantiation.
+- `regularityOpen_inf_eq_iSup_basicOpen` (Cover, `9bed45b71`) — the overlap `regularityOpen t ⊓
+  regularityOpen s = ⨆ k basicOpen(t_k·s_k)` is same-index (point-level minor argument).
+
+**Remaining c3 apparatus (for continuation — all Global-side, no flag):**
+- (a) SCHEME same-chart: lift `regularityOpen_inf_eq_iSup_basicOpen` through `chartPieceIso` preimage →
+  `blOpenYPiece ⊓ blOpenZPiece = ⨆ k D(lawTwo_k·lawOne_k)`; push into `E×_R E`; then a σ-lift/w-affine
+  identification for the single `Away(lawTwo_k·lawOne_k)` (SIMPLER than the hf-glue — no transRing tower)
+  + `Cover.hom_ext` + `addOnYPieceMor_eq_addOnZPieceMor` → the same-chart `addOnZOnImage(i,j)` vs
+  `addOnYOnImage(i,j)` agreement on their overlap.
+- (b) SCHEME cross-chart (`(i,j)≠(i',j')`): `blOpenZImage(i,j) ⊓ blOpenYImage(i',j')` — needs the
+  transRing transition apparatus (the hf-glue machinery) COMBINED with the minor identity. The harder half.
+- (c) assemble (a)+(b) across the four-charts family → `addOn_agree`, then `mulModelHom` (two-open glue).
+c2 (`blOpen_cover`, blocked on Bezout certificate) and c4.5 (GLC wiring flag) unchanged.
