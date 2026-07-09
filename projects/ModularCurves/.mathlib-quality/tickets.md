@@ -10691,3 +10691,15 @@ the same affine map `Spec A -> tateBase R`.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.96-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] open-cover base gluing handle LANDED
+
+Added `EllObj.tateBaseMapOfOpenCover`, `EllObj.ι_tateBaseMapOfOpenCover`, and
+`EllObj.tateBaseMapOfOpenCover_base_w` in `YOneAtlasClassify.lean`. These provide the B2-iv
+scheme-level base component: compatible local maps to `tateBase R` glue along an open cover of
+`Y.base`, and if the local maps lie over `Spec R`, the glued map satisfies the `Ell/R` base
+equation against `Y.structMap`.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
