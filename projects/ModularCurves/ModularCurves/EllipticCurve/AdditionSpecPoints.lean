@@ -9,6 +9,7 @@ the multiplication restricts to the corresponding Bosma–Lenstra law.
 -/
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
+open scoped TensorProduct
 
 universe u
 
@@ -339,6 +340,79 @@ theorem specPoint_addOnYOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
     exact (Category.assoc _ _ _).trans (congrArg (h₂ ≫ ·) (mR_isoAway_pieceAwayι W i j k))
 
 end StrengthenedDescent
+
+section TensorLegs
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) (i j : Fin 3)
+
+/-- [C6-d4a, left] The left tensor leg carries the chart coordinate to the first tautological
+point's coordinate. -/
+lemma tensorLeftLeg_chartCoord (m : {l : Fin 3 // l ≠ i}) :
+    ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeLeftRingHom
+          (A := chartAway W i) (B := chartAway W j)))
+      (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X m))) =
+      biChartPointFst W i j m := by
+  rw [RingHom.comp_apply]
+  show (biChartRingAwayTensorEquiv W i j).symm
+      ((chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X m))) ⊗ₜ[R] 1) = _
+  rw [biChartRingAwayTensorEquiv]
+  show (biChartRingTensorEquiv W i j).symm
+      ((Algebra.TensorProduct.congr (chartCoordAlgEquiv W i) (chartCoordAlgEquiv W j)).symm
+        ((chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X m))) ⊗ₜ[R] 1)) = _
+  have hcongr : (Algebra.TensorProduct.congr (chartCoordAlgEquiv W i)
+        (chartCoordAlgEquiv W j)).symm
+      ((chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X m))) ⊗ₜ[R] 1) =
+      (Ideal.Quotient.mk _ (MvPolynomial.X m)) ⊗ₜ[R] (1 : affineChartRing W j) := by
+    rw [Algebra.TensorProduct.congr_symm_apply, Algebra.TensorProduct.map_tmul, map_one]
+    congr 1
+    exact (chartCoordEquiv W i).symm_apply_apply _
+  rw [hcongr]
+  have hten : (biChartRingTensorEquiv W i j)
+      (Ideal.Quotient.mk _ (rename Sum.inl (MvPolynomial.X m))) =
+      (Ideal.Quotient.mk _ (MvPolynomial.X m) : affineChartRing W i) ⊗ₜ[R]
+        (1 : affineChartRing W j) :=
+    biChartRingTensorEquiv_mk_rename_inl W i j _
+  rw [← hten, AlgEquiv.symm_apply_apply, rename_X]
+  rw [biChartPointFst, dif_neg m.2]
+
+/-- [C6-d4a, right] The right tensor leg carries the chart coordinate to the second tautological
+point's coordinate. -/
+lemma tensorRightLeg_chartCoord (m : {l : Fin 3 // l ≠ j}) :
+    ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeRight
+          (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)
+      (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X m))) =
+      biChartPointSnd W i j m := by
+  rw [RingHom.comp_apply]
+  show (biChartRingAwayTensorEquiv W i j).symm
+      ((1 : chartAway W i) ⊗ₜ[R] (chartCoordEquiv W j (Ideal.Quotient.mk _
+        (MvPolynomial.X m)))) = _
+  rw [biChartRingAwayTensorEquiv]
+  show (biChartRingTensorEquiv W i j).symm
+      ((Algebra.TensorProduct.congr (chartCoordAlgEquiv W i) (chartCoordAlgEquiv W j)).symm
+        ((1 : chartAway W i) ⊗ₜ[R]
+          (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X m))))) = _
+  have hcongr : (Algebra.TensorProduct.congr (chartCoordAlgEquiv W i)
+        (chartCoordAlgEquiv W j)).symm
+      ((1 : chartAway W i) ⊗ₜ[R]
+        (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X m)))) =
+      (1 : affineChartRing W i) ⊗ₜ[R] (Ideal.Quotient.mk _ (MvPolynomial.X m)) := by
+    rw [Algebra.TensorProduct.congr_symm_apply, Algebra.TensorProduct.map_tmul, map_one]
+    congr 1
+    exact (chartCoordEquiv W j).symm_apply_apply _
+  rw [hcongr]
+  have hten : (biChartRingTensorEquiv W i j)
+      (Ideal.Quotient.mk _ (rename Sum.inr (MvPolynomial.X m))) =
+      (1 : affineChartRing W i) ⊗ₜ[R]
+        (Ideal.Quotient.mk _ (MvPolynomial.X m) : affineChartRing W j) :=
+    biChartRingTensorEquiv_mk_rename_inr W i j _
+  rw [← hten, AlgEquiv.symm_apply_apply, rename_X]
+  rw [biChartPointSnd, dif_neg m.2]
+
+end TensorLegs
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
