@@ -920,7 +920,55 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
       ((tateUniversal R).baseChange t).IsNaiveGammaOne N
         (EllipticCurve.Point.asSection (tateUniversal R) t
           (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))) := by
-  sorry
+  rw [factors_yOne_iff_exists_range]
+  constructor
+  · rintro ⟨g, hg, hrange⟩
+    have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
+      ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mp ⟨g, hg⟩
+    have hc1 : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t
+        (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)) = 0 :=
+      ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mpr hkill
+    refine ⟨hc1, fun k _ _ τ => ⟨?_, ?_⟩⟩
+    · -- clause 2a: the fibrewise `N`-kill is the section `N`-kill pulled along `τ`
+      rw [← EllipticCurve.Point.pull_zsmul, hc1, EllipticCurve.Point.pull_zero]
+    · -- clause 2b: no proper multiple `a < N` kills the fibre
+      intro a ha0 haN hbad
+      rw [(tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ] at hbad
+      have hkillτ : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)
+          = 0 := by
+        rw [(tateUniversal R).smul_eq_zero_iff_comp_mulByHom (τ ≫ t) N]
+        have hk := ((tateUniversal R).smul_eq_zero_iff_comp_mulByHom t N
+          (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))).mp hkill
+        have h1 : (EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)).1
+            = τ ≫ (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)).1 := by
+          show (τ ≫ t) ≫ (tatePoint R).1 = τ ≫ t ≫ (tatePoint R).1
+          rw [Category.assoc]
+        rw [h1, Category.assoc, hk, Category.assoc]
+      obtain ⟨d, hdmem, hd0, hdkill⟩ :=
+        exists_properDivisor_smul_eq_zero hkillτ ha0 haN hbad
+      rw [Nat.mem_properDivisors] at hdmem
+      by_cases hd3 : d ≤ 3
+      · exact tatePoint_nowhereGeomOrderLEThree R k (τ ≫ t) d hd0 hd3 hdkill
+      · push_neg at hd3
+        set cp := IsLocalRing.closedPoint k with hcp
+        have hxres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
+            ((tateBase R).fromSpecResidueField ((τ ≫ t).base cp)) (tatePoint R) = 0 :=
+          ((tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
+            ((τ ≫ t).base cp) ⟨cp, rfl⟩).mp hdkill
+        have hxmem : (τ ≫ t).base cp ∈
+            Set.range ((tateUniversal R).killedLocusπ (tatePoint R) d).base :=
+          ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d ((τ ≫ t).base cp)).mpr hxres
+        have hy : g.base (τ.base cp) ∈ yOneSet R N := hrange ⟨τ.base cp, rfl⟩
+        rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂] at hy
+        push_neg at hy
+        refine hy d (by rw [Finset.mem_filter, Nat.mem_properDivisors]
+                        exact ⟨⟨hdmem.1, hdmem.2⟩, hd3⟩) ?_
+        have hgt : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base (τ.base cp))
+            = (τ ≫ t).base cp := by
+          rw [← Scheme.Hom.comp_apply, hg, Scheme.Hom.comp_apply]
+        rw [Set.mem_preimage, hgt]
+        exact hxmem
+  · sorry
 
 /-- **(Y1-D2, naive-structure transport along `Ell/R`-morphisms)** For an `Ell/R`-morphism
 `f : X ⟶ Y` and a section `Q` of `Y.curve`, the pulled section `pullSection f Q` is naive-`Γ₁(N)`
