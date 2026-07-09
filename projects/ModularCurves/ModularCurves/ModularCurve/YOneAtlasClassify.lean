@@ -2542,8 +2542,8 @@ noncomputable def pt (P : Y.curve.Section) :
 theorem pt_coe (P : Y.curve.Section) :
     (D.pt P).1 = D.U.2.isoSpec.inv ≫ D.restrictSection P ≫ D.e.hom := rfl
 
-/-- The geometric point of the base attached to a field point of the chart ring. -/
-noncomputable def geomPt {k : Type u} [Field k]
+/-- The geometric point of the base attached to a point of the chart ring. -/
+noncomputable def geomPt {k : Type u} [CommRing k]
     (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D.U.1))) :
     Spec (CommRingCat.of k) ⟶ Y.base :=
   t ≫ D.U.2.isoSpec.inv ≫ D.U.1.ι
@@ -2769,5 +2769,187 @@ theorem EllipticCurve.pointCongr_coe {T : Scheme.{u}} {g₁ g₂ : T ⟶ S} (h :
 end PointCongr
 
 end FibreBridges
+
+section FibreGeometry
+
+/-! ### The fibre chart of a marked chart at a geometric point (recipe step 1(b))
+
+At a field point `Spec k ⟶ Spec Γ(U)` of a marked chart, the fibre of `Y.curve` is
+presented as the model of `W.map (algebraMap Γ(U) k)` (pasting the chart trivialisation
+with the base-change square), and enriched to a working record through **[T-A6b]**
+(`abelEnrichment_exists`). -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  (k : Type u) [CommRing k] [Algebra ↑Γ(Y.base, D.U.1) k]
+
+/-- The `Spec` point of the chart ring. -/
+noncomputable abbrev specPt : Spec (CommRingCat.of k) ⟶
+    Spec (CommRingCat.of ↑Γ(Y.base, D.U.1)) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D.U.1) k))
+
+/-- The comparison from the fibre pullback to the chart pullback. -/
+noncomputable def fibreMap :
+    pullback Y.curve.π (D.geomPt (D.specPt k)) ⟶ pullback Y.curve.π D.U.1.ι :=
+  pullback.map Y.curve.π (D.geomPt (D.specPt k)) Y.curve.π D.U.1.ι (𝟙 _)
+    (D.specPt k ≫ D.U.2.isoSpec.inv) (𝟙 _) (by simp)
+    (by rw [Category.comp_id, geomPt, Category.assoc])
+
+/-- The comparison square over the chart inclusion is cartesian. -/
+theorem fibreMap_isPullback :
+    IsPullback (D.fibreMap k) (pullback.snd Y.curve.π (D.geomPt (D.specPt k)))
+      (pullback.snd Y.curve.π D.U.1.ι) (D.specPt k ≫ D.U.2.isoSpec.inv) := by
+  have hbig := IsPullback.of_hasPullback Y.curve.π (D.geomPt (D.specPt k))
+  have hfst : D.fibreMap k ≫ pullback.fst Y.curve.π D.U.1.ι =
+      pullback.fst Y.curve.π (D.geomPt (D.specPt k)) := by
+    rw [fibreMap, pullback.lift_fst, Category.comp_id]
+  rw [← hfst] at hbig
+  refine IsPullback.of_right hbig ?_ (IsPullback.of_hasPullback Y.curve.π D.U.1.ι)
+  rw [fibreMap, pullback.lift_snd]
+
+/-- The fibre presented over the chart model. -/
+noncomputable def fibreTop :
+    pullback Y.curve.π (D.geomPt (D.specPt k)) ⟶ projModel D.W :=
+  D.fibreMap k ≫ D.e.hom
+
+/-- The fibre square over the chart model is cartesian. -/
+theorem fibreTop_isPullback :
+    IsPullback (D.fibreTop k) (pullback.snd Y.curve.π (D.geomPt (D.specPt k)))
+      (projModelπ D.W) (D.specPt k) := by
+  have hpaste := (D.fibreMap_isPullback k).paste_horiz
+    (IsPullback.of_horiz_isIso ⟨D.heπ⟩)
+  have hbase : (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.U.2.isoSpec.hom = D.specPt k := by
+    rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  rw [hbase] at hpaste
+  exact hpaste
+
+/-- The fibre of the curve as the model of the base-changed chart curve. -/
+noncomputable def fibreChartIso :
+    pullback Y.curve.π (D.geomPt (D.specPt k)) ≅
+      projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) :=
+  pullbackChartIso D.W (D.fibreTop_isPullback k)
+
+/-- The zero section of the fibre curve, in chart coordinates. -/
+theorem fibre_zero_comp :
+    (Y.curve.baseChange (D.geomPt (D.specPt k))).zero ≫ (D.fibreChartIso k).hom =
+      projModelZero (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) := by
+  refine pullbackChartIso_zero D.W (D.fibreTop_isPullback k) _ ?_ ?_
+  · exact pullback.lift_snd _ _ _
+  · show pullback.lift ((D.geomPt (D.specPt k)) ≫ Y.curve.zero) (𝟙 _) _ ≫
+      D.fibreMap k ≫ D.e.hom = _
+    have hzmap : pullback.lift ((D.geomPt (D.specPt k)) ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+        D.fibreMap k =
+        (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+          (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, fibreMap, pullback.lift_fst, ← Category.assoc,
+          pullback.lift_fst, Category.assoc, Category.comp_id, Category.assoc,
+          pullback.lift_fst, geomPt]
+        simp only [Category.assoc]
+      · rw [Category.assoc, fibreMap, pullback.lift_snd, ← Category.assoc,
+          pullback.lift_snd, Category.assoc, pullback.lift_snd, Category.id_comp,
+          Category.comp_id]
+    have hzU : pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+        D.e.hom = D.U.2.isoSpec.hom ≫ projModelZero D.W := by
+      rw [← Iso.inv_comp_eq]
+      exact D.hez
+    rw [← Category.assoc, hzmap, Category.assoc, hzU, Category.assoc,
+      Iso.inv_hom_id_assoc]
+
+/-- The pulled section, as a section of the fibre curve. -/
+noncomputable def fibreSection (P : Y.curve.Section) :
+    (Y.curve.baseChange (D.geomPt (D.specPt k))).Section :=
+  (EllipticCurve.Point.baseChangeEquiv Y.curve (D.geomPt (D.specPt k)) (𝟙 _)).symm
+    (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))).symm
+      (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P))
+
+/-- The underlying morphism of the fibre section. -/
+theorem fibreSection_coe (P : Y.curve.Section) :
+    (D.fibreSection k P).1 = pullback.lift ((D.geomPt (D.specPt k)) ≫ P.1) (𝟙 _)
+      (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp]) := by
+  have happ2 : EllipticCurve.Point.baseChangeEquiv Y.curve (D.geomPt (D.specPt k)) (𝟙 _)
+      (D.fibreSection k P) = Y.curve.pointCongr (Category.id_comp _).symm
+      (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P) := by
+    rw [fibreSection]
+    exact AddEquiv.apply_symm_apply _ _
+  have h1 := EllipticCurve.Point.baseChangeEquiv_apply_coe Y.curve
+    (D.geomPt (D.specPt k)) (𝟙 _) (D.fibreSection k P)
+  rw [happ2, EllipticCurve.pointCongr_coe] at h1
+  refine pullback.hom_ext ?_ ?_
+  · rw [pullback.lift_fst]
+    exact h1.symm
+  · rw [pullback.lift_snd]
+    exact (D.fibreSection k P).2
+
+/-- **The value chase**: the fibre section, read through the fibre chart and the base-change
+morphism, is the chart point composed at the geometric point. -/
+theorem fibreSection_comp_bc (P : Y.curve.Section) :
+    (D.fibreSection k P).1 ≫ (D.fibreChartIso k).hom ≫
+      projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
+      D.specPt k ≫ (D.pt P).1 := by
+  have hbc := pullbackChartIso_hom_bc D.W (D.fibreTop_isPullback k)
+  have h2 := congrArg (fun m => (D.fibreSection k P).1 ≫ m) hbc
+  refine Eq.trans (h2 : _ = _) ?_
+  show (D.fibreSection k P).1 ≫ D.fibreMap k ≫ D.e.hom = _
+  have hlift : (D.fibreSection k P).1 ≫ D.fibreMap k =
+      (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.restrictSection P := by
+    have hmf : D.fibreMap k ≫ pullback.fst Y.curve.π D.U.1.ι =
+        pullback.fst Y.curve.π (D.geomPt (D.specPt k)) ≫ 𝟙 Y.curve.E :=
+      pullback.lift_fst _ _ _
+    have hms : D.fibreMap k ≫ pullback.snd Y.curve.π D.U.1.ι =
+        pullback.snd Y.curve.π (D.geomPt (D.specPt k)) ≫
+          (D.specPt k ≫ D.U.2.isoSpec.inv) :=
+      pullback.lift_snd _ _ _
+    have hfs1 : (D.fibreSection k P).1 ≫ pullback.fst Y.curve.π (D.geomPt (D.specPt k)) =
+        D.geomPt (D.specPt k) ≫ P.1 :=
+      (congrArg (· ≫ pullback.fst Y.curve.π (D.geomPt (D.specPt k)))
+        (D.fibreSection_coe k P)).trans (pullback.lift_fst _ _ _)
+    have hfs2 : (D.fibreSection k P).1 ≫ pullback.snd Y.curve.π (D.geomPt (D.specPt k)) =
+        𝟙 _ := (D.fibreSection k P).2
+    have hres1 : D.restrictSection P ≫ pullback.fst Y.curve.π D.U.1.ι =
+        D.U.1.ι ≫ P.1 := pullback.lift_fst _ _ _
+    have hres2 : D.restrictSection P ≫ pullback.snd Y.curve.π D.U.1.ι = 𝟙 _ :=
+      pullback.lift_snd _ _ _
+    refine pullback.hom_ext ?_ ?_
+    · calc ((D.fibreSection k P).1 ≫ D.fibreMap k) ≫ pullback.fst Y.curve.π D.U.1.ι
+          = (D.fibreSection k P).1 ≫ D.fibreMap k ≫ pullback.fst Y.curve.π D.U.1.ι :=
+            Category.assoc _ _ _
+        _ = (D.fibreSection k P).1 ≫ pullback.fst Y.curve.π (D.geomPt (D.specPt k)) ≫
+              𝟙 Y.curve.E := congrArg ((D.fibreSection k P).1 ≫ ·) hmf
+        _ = ((D.fibreSection k P).1 ≫ pullback.fst Y.curve.π (D.geomPt (D.specPt k))) ≫
+              𝟙 Y.curve.E := (Category.assoc _ _ _).symm
+        _ = (D.geomPt (D.specPt k) ≫ P.1) ≫ 𝟙 Y.curve.E := congrArg (· ≫ 𝟙 _) hfs1
+        _ = D.geomPt (D.specPt k) ≫ P.1 := Category.comp_id _
+        _ = (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.U.1.ι ≫ P.1 := by
+            rw [geomPt]
+            simp only [Category.assoc]
+        _ = (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.restrictSection P ≫
+              pullback.fst Y.curve.π D.U.1.ι := by rw [← hres1]
+        _ = ((D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.restrictSection P) ≫
+              pullback.fst Y.curve.π D.U.1.ι := (Category.assoc _ _ _).symm
+    · calc ((D.fibreSection k P).1 ≫ D.fibreMap k) ≫ pullback.snd Y.curve.π D.U.1.ι
+          = (D.fibreSection k P).1 ≫ D.fibreMap k ≫ pullback.snd Y.curve.π D.U.1.ι :=
+            Category.assoc _ _ _
+        _ = (D.fibreSection k P).1 ≫ pullback.snd Y.curve.π (D.geomPt (D.specPt k)) ≫
+              (D.specPt k ≫ D.U.2.isoSpec.inv) := congrArg ((D.fibreSection k P).1 ≫ ·) hms
+        _ = ((D.fibreSection k P).1 ≫ pullback.snd Y.curve.π (D.geomPt (D.specPt k))) ≫
+              (D.specPt k ≫ D.U.2.isoSpec.inv) := (Category.assoc _ _ _).symm
+        _ = 𝟙 _ ≫ (D.specPt k ≫ D.U.2.isoSpec.inv) :=
+            congrArg (· ≫ (D.specPt k ≫ D.U.2.isoSpec.inv)) hfs2
+        _ = D.specPt k ≫ D.U.2.isoSpec.inv := Category.id_comp _
+        _ = (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ 𝟙 _ := (Category.comp_id _).symm
+        _ = (D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.restrictSection P ≫
+              pullback.snd Y.curve.π D.U.1.ι := by rw [← hres2]
+        _ = ((D.specPt k ≫ D.U.2.isoSpec.inv) ≫ D.restrictSection P) ≫
+              pullback.snd Y.curve.π D.U.1.ι := (Category.assoc _ _ _).symm
+  rw [← Category.assoc, hlift, pt_coe]
+  simp only [Category.assoc]
+
+end MarkedChartData
+
+end FibreGeometry
 
 end ModularCurves
