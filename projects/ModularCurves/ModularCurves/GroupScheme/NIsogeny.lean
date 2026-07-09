@@ -143,7 +143,32 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
     -- fibre of the quotient vanishes, hence the stalk at `p` vanishes (support of a f.g. module)
     have hfib : Subsingleton (p.asIdeal.ResidueField ⊗[R]
         (M ⧸ Submodule.span R (Set.range x))) := by
-      sorry
+      set q := (Submodule.span R (Set.range x)).mkQ with hq
+      have hqsurj : Function.Surjective (q.baseChange p.asIdeal.ResidueField) := by
+        have := LinearMap.lTensor_surjective p.asIdeal.ResidueField
+          (Submodule.mkQ_surjective (Submodule.span R (Set.range x)))
+        rwa [show (⇑(q.baseChange p.asIdeal.ResidueField)) = ⇑(q.lTensor _) from rfl]
+      have hker : ∀ w : p.asIdeal.ResidueField ⊗[R] M,
+          q.baseChange p.asIdeal.ResidueField w = 0 := by
+        intro w
+        have hw : w ∈ Submodule.span p.asIdeal.ResidueField
+            (Set.range fun i => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] x i) := by
+          rw [hxspan]; trivial
+        refine Submodule.span_induction ?_ ?_ ?_ ?_ hw
+        · rintro _ ⟨i, rfl⟩
+          rw [LinearMap.baseChange_tmul,
+            show q (x i) = 0 from (Submodule.Quotient.mk_eq_zero _).mpr
+              (Submodule.subset_span ⟨i, rfl⟩),
+            TensorProduct.tmul_zero]
+        · exact map_zero _
+        · intro y z _ _ hy hz
+          rw [map_add, hy, hz, add_zero]
+        · intro c y _ hy
+          rw [map_smul, hy, smul_zero]
+      refine ⟨fun z₁ z₂ => ?_⟩
+      obtain ⟨w₁, rfl⟩ := hqsurj z₁
+      obtain ⟨w₂, rfl⟩ := hqsurj z₂
+      rw [hker w₁, hker w₂]
     rw [← not_nontrivial_iff_subsingleton] at hfib ⊢
     intro hnt
     exact hfib ((Module.mem_support_iff_nontrivial_residueField_tensorProduct p).mp
