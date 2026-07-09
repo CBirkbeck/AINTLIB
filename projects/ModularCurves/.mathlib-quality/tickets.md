@@ -10870,3 +10870,27 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
 `#print axioms` for the key new declarations lists only `[propext, Classical.choice,
 Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.106-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] base-change chart transport + normalised marking LANDED
+
+Added in `YOneAtlasClassify.lean`: the base-change chart-point transport
+(`Spec_map_awayCongr_awayι` public replica, `awayCongr_baseChangeMap_isLocalizationElem`,
+`specPointBaseChange` + `awayι_projModelBaseChange` (the chart square of
+`projModelBaseChange`, via `isPullback_projModelBaseChange_chart` + `awayCongr`),
+`inZChart_specPointBaseChange`, `zChartHom_specPointBaseChange`,
+`zChartEval_specPointBaseChange_coordX/Y` — evaluations unchanged under base change); the
+pointed-iso point transport (`specPointPointedIso`, `inZChart_specPointPointedIso` via the
+T3 chart square); and the T-E1 normalising layer for a marked chart:
+`tateCurveLocOver_map_marked`, `tateNormalIso` (+ `_hom`, `_π`, `_zero`, `_zero_inv`,
+`eqToHom_projModelπ/Zero`), `markedPointNormalised` (+ `_sec`, `_inZChart`) and
+**`markedPointNormalised_coords`**: the normalised marking has coordinates `(0,0)` — the
+u-unit cancellation after the T3 transport/bridge computation. Also
+`zChartEval_equation_self` (properly-typed `Equation` restatement over the base ring itself)
+now feeds every `Equation`-proof slot (fixes simp-instantiation fragility; the earlier
+`set`-fvar in the coords proof blocked `coordRingCongr` simp matching and was removed —
+elaboration-stall dodges per v10.24).
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs); no
+`sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
+`#print axioms` for the key new declarations lists only `[propext, Classical.choice,
+Quot.sound]` (no inherited `sorryAx`).
