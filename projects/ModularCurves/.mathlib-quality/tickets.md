@@ -9371,6 +9371,30 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   `geomFibrePointAddEquiv`, `tateMarkedPoint`, `isUnit_tateA₃`, `affine_origin_order_gt_three`)
   into `tateMarkedPoint_nowhereGeomOrderLEThree`. Then remaining [Y1-EASY], [Y1-ATLAS] iii/v
   (T-W7.1b done), [Y1-D]/[Y1-E] per gates. Single-target builds, commit-early cadence.
+- **★ [Y1-vi] MILESTONE (NEW-Y1, 2026-07-09T09:01Z, commits 72d3b9f31 + fb7a399b4)** —
+  `tateMarkedPoint_nowhereGeomOrderLEThree` PROVEN (`#print axioms` = propext/Classical.choice/
+  Quot.sound + `sorryAx`, the latter only via the two named gates below). Wired into
+  `exists_tatePoint`'s **first conjunct** (`refine ⟨tateMarkedPoint R, …, ?_⟩`); the ∀-classifying
+  clause (subtree iii/iv/v) stays the remaining atlas `sorry`. `lake build … YOneAssembly` GREEN.
+  Fully axiom-clean supporting API landed: `isUnit_tateA₂`, `tateA₄/tateA₆_eq_zero`,
+  `tateUniversal_π_eq`, `baseChange_{tateA₄,tateA₆}_eq_zero`/`baseChange_isUnit_tateA₂/₃`/
+  `baseChange_nonsingular_zero`, `tateP0_chartCoord_eq_zero`, `tateP0mor_factor`,
+  `tateMarkedPoint_pull_fst`. Enablers (file-wide, benefit later leaves): `attribute [local
+  instance] MvPolynomial.gradedAlgebra`, `@[reducible] tateBase`, `import GroupLawConstruction`.
+  - **NEW GATE [Y1-vi-FACTOR]** — the ONE new `sorry` (`tateMarkedPoint_pull_factor`, the transfer
+    pin's chart-factorisation step): a *minimal* `Spec.map_comp`/`awayι` identity whose closing
+    `isDefEq` on `Spec.map (ofHom φ_B.1)` over the **localization ring** `tateRingOver R`
+    `whnf`-explodes past `maxHeartbeats` (the "concrete-module whnf-explosion", cf. the elaboration-
+    stall reference). Heartbeat bump forbidden; already a minimal identity so plain decomposition is
+    exhausted. **Discharge route recorded in-file**: `irreducible` wrapper for `φ_B` so `isDefEq`
+    treats it atomically, OR `Spec`-functoriality lemmas keyed off the chart equiv. Bounded, local.
+  - **Consumed gate [T-B6′]** — `geomFibrePointAddEquiv.map_add'` (shared pin, as planned).
+  - **Deviations from the plan (adjudicate)**: (a) transfer pin stated via
+    `projModelPointsEquiv ∘ pointSpecPointsEquiv` (NOT `geomFibrePointAddEquiv` directly) so its
+    statement needs no `(W.baseChange k).IsElliptic`; the group iso enters only in the vi lemma via
+    `geomFibrePointAddEquiv_apply`. (b) `@[reducible] tateBase` was required so `tateUniversal`'s base
+    `tateBase R` unifies with the `Spec (of _)` the atlas API is spelled over without a `whnf` blowup
+    — flag if this reducibility perturbs other leaves. Next: [Y1-EASY] leaves, [Y1-ATLAS] iii/v.
 
 ### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
 - `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
