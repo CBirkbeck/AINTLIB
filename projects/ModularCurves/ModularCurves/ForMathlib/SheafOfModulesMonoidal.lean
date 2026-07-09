@@ -200,9 +200,19 @@ theorem tensorHom_precomp_injective (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       erw [map_add, map_add]
       rw [hs, ht]
 
+end Tensor
+
 section Glue
 
-variable (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+/- The gluing construction is stated over a small site (`C : Type u`, `Category.{u}`,
+modules in `.{u}`) so that the Type-level amalgamation bridge
+(`isSheaf_iff_isSheaf_forget`, which needs `forget` to land in `Type (max v₁ u₁)`)
+applies — exactly the shape of GAP-1's consumer, the small Zariski site of a scheme. -/
+
+variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
+  {S : Cᵒᵖ ⥤ CommRingCat.{u}}
+  {M₁ M₂ N₁ N₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
+  (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
   [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
   [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
   [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)]
@@ -246,8 +256,104 @@ private def IsPairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : N₂.obj U)
     f.app (Opposite.op V) a = M₂.map p.op m → g.app (Opposite.op V) b = N₂.map p.op n →
     P.map p.op s = χ.app (Opposite.op V) (a ⊗ₜ b)
 
-end Glue
+include hP in
+/-- Existence and uniqueness of the glued pairing section: amalgamate the `χ`-values
+of chosen local preimage-pairs over the intersection of the two image sieves
+(compatibility and the defining property both reduce to `chi_app_congr`). -/
+private lemma existsUnique_isPairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : N₂.obj U) :
+    ∃! s : P.obj U, IsPairingSection f g χ m n s := by
+  have hT : Presieve.IsSheaf J (P.presheaf ⋙ forget AddCommGrpCat) :=
+    (isSheaf_iff_isSheaf_of_type _ _).mp
+      ((Presheaf.isSheaf_iff_isSheaf_forget J P.presheaf (forget _)).mp hP)
+  have hSv : (Presheaf.imageSieve ((toPresheaf _).map f) m ⊓
+      Presheaf.imageSieve ((toPresheaf _).map g) n) ∈ J U.unop :=
+    J.intersection_covering
+      (Presheaf.imageSieve_mem J ((toPresheaf _).map f) m)
+      (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n)
+  set Sv := Presheaf.imageSieve ((toPresheaf _).map f) m ⊓
+      Presheaf.imageSieve ((toPresheaf _).map g) n with hSvdef
+  -- the choice family of χ-values
+  set x : Presieve.FamilyOfElements (P.presheaf ⋙ forget AddCommGrpCat) Sv.arrows :=
+    fun V p hp => χ.app (Opposite.op V) (hp.1.choose ⊗ₜ hp.2.choose) with hxdef
+  have hchoice : ∀ {V : C} (p : V ⟶ U.unop) (hp : Sv.arrows p),
+      f.app (Opposite.op V) hp.1.choose = M₂.map p.op m ∧
+        g.app (Opposite.op V) hp.2.choose = N₂.map p.op n :=
+    fun p hp => ⟨hp.1.choose_spec, hp.2.choose_spec⟩
+  -- naturality helper at Type level
+  have hnat : ∀ {V W : C} (q : W ⟶ V) (t : (M₁ ⊗ N₁).obj (Opposite.op V)),
+      P.presheaf.map q.op (χ.app (Opposite.op V) t) =
+        χ.app (Opposite.op W) ((M₁ ⊗ N₁).map q.op t) :=
+    fun q t => (CategoryTheory.congr_fun (χ.naturality q.op) t).symm
+  -- restriction of a preimage-pair is a preimage-pair
+  have hres : ∀ {V W : C} (q : W ⟶ V) (p : V ⟶ U.unop)
+      (a : M₁.obj (Opposite.op V)) (b : N₁.obj (Opposite.op V))
+      (ha : f.app (Opposite.op V) a = M₂.map p.op m)
+      (hb : g.app (Opposite.op V) b = N₂.map p.op n),
+      f.app (Opposite.op W) (M₁.map q.op a) = M₂.map (q ≫ p).op m ∧
+        g.app (Opposite.op W) (N₁.map q.op b) = N₂.map (q ≫ p).op n := by
+    intro V W q p a b ha hb
+    constructor
+    · have h1 : f.app (Opposite.op W) (M₁.map q.op a) =
+          M₂.map q.op (f.app (Opposite.op V) a) :=
+        (CategoryTheory.congr_fun (f.naturality q.op) a)
+      rw [h1, ha]
+      exact (show M₂.presheaf.map (q ≫ p).op m =
+          M₂.presheaf.map q.op (M₂.presheaf.map p.op m) by
+        rw [op_comp, M₂.presheaf.map_comp]
+        rfl).symm
+    · have h1 : g.app (Opposite.op W) (N₁.map q.op b) =
+          N₂.map q.op (g.app (Opposite.op V) b) :=
+        (CategoryTheory.congr_fun (g.naturality q.op) b)
+      rw [h1, hb]
+      exact (show N₂.presheaf.map (q ≫ p).op n =
+          N₂.presheaf.map q.op (N₂.presheaf.map p.op n) by
+        rw [op_comp, N₂.presheaf.map_comp]
+        rfl).symm
+  -- value of χ on restricted pairs, as needed below
+  have hvalue : ∀ {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
+      (b : N₁.obj (Opposite.op V)),
+      P.presheaf.map q.op (χ.app (Opposite.op V) (a ⊗ₜ b)) =
+        χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ N₁.map q.op b) := by
+    intro V W q a b
+    rw [hnat]
+    exact congrArg (χ.app (Opposite.op W)) (by erw [Monoidal.tensorObj_map_tmul]; rfl)
+  -- compatibility of the choice family
+  have hx : x.Compatible := by
+    intro V₁ V₂ W g₁ g₂ p₁ p₂ h₁ h₂ hcomm
+    rw [hxdef]
+    dsimp only
+    erw [hvalue, hvalue]
+    have hp₁ := hchoice p₁ h₁
+    have hp₂ := hchoice p₂ h₂
+    have hr₁ := hres g₁ p₁ _ _ hp₁.1 hp₁.2
+    have hr₂ := hres g₂ p₂ _ _ hp₂.1 hp₂.2
+    exact chi_app_congr f g hP χ _ _ _ _
+      (hr₁.1.trans (by rw [hcomm]; exact hr₂.1.symm))
+      (hr₁.2.trans (by rw [hcomm]; exact hr₂.2.symm))
+  -- the amalgam
+  refine ⟨(hT Sv hSv).amalgamate x hx, ?_, ?_⟩
+  · intro V p a b ha hb
+    apply hP.isSeparated _ _ (J.pullback_stable p hSv)
+    intro W q hq
+    have hglue := (hT Sv hSv).valid_glue hx (q ≫ p) hq
+    have hcomp : P.presheaf.map q.op (P.presheaf.map p.op ((hT Sv hSv).amalgamate x hx)) =
+        P.presheaf.map (q ≫ p).op ((hT Sv hSv).amalgamate x hx) := by
+      rw [op_comp, P.presheaf.map_comp]
+      rfl
+    erw [hcomp, hglue, hxdef]
+    dsimp only
+    erw [hvalue]
+    have hc := hchoice (q ≫ p) hq
+    have hr := hres q p a b ha hb
+    exact chi_app_congr f g hP χ _ _ _ _ (hc.1.trans hr.1.symm) (hc.2.trans hr.2.symm)
+  · intro s hs
+    apply hP.isSeparated _ _ hSv
+    intro V p hp
+    have hc := hchoice p hp
+    have h1 := hs p _ _ hc.1 hc.2
+    have h2 := (hT Sv hSv).valid_glue hx p hp
+    erw [h1, h2, hxdef]
 
-end Tensor
+end Glue
 
 end PresheafOfModules
