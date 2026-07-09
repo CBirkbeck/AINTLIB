@@ -13476,3 +13476,39 @@ through the immersion equations).
   {chartScheme, overlapScheme, overlapι+instances, overlapTransition(+self/comp),
   tPrimeScheme(+fac), cocycle} — then the glued Grassmannian scheme exists and [GR-G]
   T-points open.
+
+### v10.99 (2026-07-10, NEW-HOPF): ★★ [CHARTER-HOPF] M3 — [HG-B1] + [HG-B2] COMPLETE: the shear automorphism and the integrality theorem (Stacks 03BH+03BJ, comodule form)
+
+*Charter milestone M3 (first hard leaf), one session after M2. All lake-green, axiom-clean
+via `lake env lean` (the LSP `lean_verify` sorryAx on freshly-edited regions is a stale-
+snapshot artifact — ground truth is the CLI check; boarded in v10.98 notes).*
+
+- **[HG-B1] `CoactionShear.lean` DONE**: `coactionShearEquiv` — the shear automorphism
+  Φ of B⊗A (Φ∘includeLeft = ρ) with antipode inverse Ψ; both inverse laws proven as pure
+  AlgHom-composite chains (coassoc enters verbatim in IsCoaction's stored form; the two
+  Hopf antipode axioms derived in AlgHom form `mulAntipode(Right)_comp_comulAlgHom`;
+  the Ξ = Φ∘(id⊗S) mirror handles Φ∘Ψ). Zero Sweedler sums.
+- **[HG-B2] `CoactionCharpoly.lean` DONE — the 03BH/03BJ engine** (banked-derivation
+  execution, 7 green increments):
+  (1) the Δ-matrices: left- and right-slot expansions T, T̃ of Δ along a basis of A, the
+  matrix-coalgebra identities (εT = δ, ΔT = matrix-comul, mirrored for T̃), and
+  **T·S(T) = S(T)·T = 1** (entrywise antipode inverse) via `Coalgebra.Repr` + the Hopf
+  axioms — `isUnit_comulMatrix(R)`;
+  (2) `mulMatrix` — the faithful matrix representation of B⊗A in the basis 1⊗eⱼ
+  (expansion, φ-transport, multiplicativity, ring-hom packaging `mulMatrixHom`,
+  reconstruction-faithfulness);
+  (3) **the (★) conjugation identity** `mulMatrix_map_coaction_conj`:
+  `M.map ρ * Θ = Θ * M.map ι` (δ̃-bridge = coassoc; Θ = includeRight-image of T̃);
+  (4) `Matrix.charpoly_eq_of_conj` (ForMathlib bonus) ⟹ **03BH**
+  `coactionCharpoly_coeff_mem` (coefficients coinvariant) ⟹ CH-scalar bridge
+  (`hom_eval₂` through `mulMatrixHom` + `Matrix.aeval_self_charpoly`) + the counit
+  retraction σ (σ∘ρ = id = σ∘ι — no ρ-injectivity needed) + `Polynomial.lifts` ⟹
+  **03BJ `isIntegral_coinvariants`**: every f : B is integral (monic, via
+  `coactionCharpoly`) over `coinvariants ρ`, for any co-action of a finite free
+  commutative Hopf algebra. Nontrivial-B not assumed (subsingleton branch).
+- **Design vindication**: the Δ-matrix route eliminated every twisted instance the
+  Stacks norm-base-change formulation would have needed; all module structures canonical
+  throughout both files.
+- **NEXT**: [HG-B3] coinvariants-vs-flat-base-change (03BK, mostly mathlib
+  Flat/Equalizer) → [HG-B4] the k̄-orbit theorem (03BL, second hard leaf) → [HG-B5]
+  descent bootstrap (03C8) → [HG-B6] = IsHopfGalois (M5).
