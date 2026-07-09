@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] — GR-SPEC agent running on GrassmannianOverlap.lean (single-writer; no builds/edits there). GR-E2 pushed. After agent: verify+commit+push, then [GR-F] Scheme.GlueData assembly design.
+PARKED (fable-FP, 2026-07-09 fleet dispatch): GRASS wave 3 deferred. Landed+pushed: A711-FP+etale flip, FMT-0 engine, GRASS waves 1-2.5 + normMap/chartMatrix/naturality + GR-E2/E3/SPEC (all sorry-free, axiom-clean). Resume: [GR-F] GlueData per decomposition-nisog-grass.md wave-3 design.

@@ -487,8 +487,7 @@ lemma piScalarRight_tmul_single (n : ℕ) (j : Fin n) :
   classical
   funext l
   by_cases hl : l = j <;>
-    simp [TensorProduct.piScalarRight, TensorProduct.piScalarRightHom_tmul,
-      Pi.single_apply, hl]
+    simp [TensorProduct.piScalarRight, TensorProduct.piScalarRightHom_tmul, hl]
 
 /-- **[GR-T2]** The covering theorem in the normalized presentation: after inverting
 some `f` outside a given prime, the transported element `congr piScalarRight (N.map …)`
@@ -634,6 +633,14 @@ Marking `coordMap` irreducible *after* all of its uses above keeps the seam opaq
 chart-coordinate equations elaborate cheaply; the proofs below still unfold it where needed
 through the interface lemmas `coordMap_single` / `retraction_comp_coordMap`. -/
 attribute [irreducible] coordMap
+
+unseal coordMap in
+/-- Sealed-interface unfolding for `coordMap` — deliberately NOT `@[simp]` (re-exposing
+it to simp would reintroduce the theorem-goal evaluation explosion the seal prevents);
+use surgically. -/
+lemma coordMap_apply {x : Fin k → M} (c : Fin k → R) :
+    coordMap x c = ∑ i, c i • x i := by
+  simp [coordMap, Fintype.linearCombination_apply]
 
 /-- **[GR-B2n-4]** Kernel-uniqueness for the chart coordinate: *any* retraction `ψ` of the
 coordinate sub-basis `Pi.single ∘ ι` whose kernel contains `N` reads off the chart matrix of `N`

@@ -12268,3 +12268,30 @@ c2 (`blOpen_cover`, blocked on Bezout certificate) and c4.5 (GLC wiring flag) un
 - **Open audit (coordinator, next cycle)**: does Y1's T-E1/rigidity leg consume
   aut_trivial_of_fullLevel's DS-END0 pins, or does atlas-internal rigidity suffice?
   Decides whether PIC0's route (a) un-parks FOR Y1 or only on refocus.
+
+### v10.60e (2026-07-09, fable-FP): ★ [GR-SPEC] PROVEN sorry-free + ⏸ fable-FP PARKED per fleet dispatch
+
+- **[GR-SPEC] COMPLETE** (GrassmannianOverlap.lean, sorry-free, all axiom-clean; done
+  INLINE after the dispatched agent died on the API session limit): `evalAt` (generic
+  chart ring → A at a chart member) · `evalAt_column` / `evalAt_matrix` (generic column/
+  transition matrix ↦ pointwise) · `isUnit_evalAt_det` · `evalAwayAt`
+  (`IsLocalization.Away.lift` extension) · `transitionMatrixAt_mulVec` · **the spec
+  `evalAwayAt_comp_ringHom`**: `evalAwayAt ∘ Transition.ringHom = evalAt(ι')` — the glue
+  square of the chart atlas commutes with evaluation at every chart member. Proof =
+  mulVec-cancellation against the invertible transition matrix (no matrix-inverse/ring-hom
+  commutation needed). Plus sealed-interface lemma `coordMap_apply` (`unseal … in`,
+  deliberately non-simp) in GrassmannianChart.lean.
+- Two more elaboration notes banked: `Transition.matrixAway`-entry `show`s whnf-explode
+  through the `column`-dite (use `simp only [matrixAway, Matrix.map_apply]` rewrites,
+  never defeq); `unseal X in` must precede the docstring; `dotProduct`/`RingHom.map_mulVec`
+  namespaces on this pin.
+- **⏸ PARKED per fleet dispatch (2026-07-09)**: GRASS wave-3 remainder — [GR-F]
+  `Scheme.GlueData` assembly, [GR-G] T-points, [GR-D] openness form, NISOG [L15] tie —
+  DEFERRED. Everything needed to resume is banked: artifact
+  `decomposition-nisog-grass.md` (full ladder + wave-3 designs + GR-SPEC/GR-E recipes),
+  four sorry-free files (GrassmannianChart / GrassmannianTransition / GrassmannianOverlap
+  + FinitePresentationOfFinite, RegularSectionDensity from the earlier charter items),
+  elaboration-trap patterns in fleet memory. **[STREAM-FP] charter scorecard at park**:
+  [A711-FP] ✓ + étale flip ✓ · [KM-FMT-FLAT] engine ✓ · [NISOG-GRASS] waves 1/2/2.5 ✓ +
+  wave-3 chart-functor layer ✓ (normMap, chartMatrix, naturality) + transition algebra ✓
+  ([GR-E2]/[GR-E3]/[GR-SPEC]) — all axiom-clean, all pushed. Resume trigger: refocus.
