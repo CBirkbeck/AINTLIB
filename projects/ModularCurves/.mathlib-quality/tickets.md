@@ -9411,6 +9411,28 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   `YOneAssembly.lean` in the shared `aintlib-mc-b3` worktree — cannot be edited concurrently
   (one filesystem). I hold the file now; **beastmode-A: defer [Y1-vi-FACTOR] until I commit +
   release** (I commit-early per green increment; watch HEAD / this claim flipping to done).
+- **[Y1-D1] PROGRESS + FILE RELEASED (NEW-Y1, 2026-07-09T13:08Z)**: three axiom-clean helper
+  lemmas COMMITTED (7ae5c69db, 6c9650fb9, 43a857c0e), `lake build …YOneAssembly` GREEN:
+  - `EllipticCurve.zsmul_pull_baseChange_asSection_iff` (**fibrewise bridge**): via `baseChangeEquiv`
+    (an `≃+`), `a • pull (baseChange t) τ (asSection E t (pull E t P)) = 0 ↔ a • pull E (τ ≫ t) P = 0`.
+  - `EllipticCurve.zsmul_asSection_pull_eq_zero_iff` (**killing bridge**): `asSection E t` injective
+    (`asSection_val_fst`) + sends `0↦0`, so `a • asSection E t (pull E t P) = 0 ↔ a • pull E t P = 0`.
+  - `factors_yOne_iff_exists_range` (**open-factoring split**): `(∃ h, h ≫ yOneBase = t) ↔ ∃ g,
+    g ≫ killedLocusπ N = t ∧ range g.base ⊆ yOneSet`, via `IsOpenImmersion.lift` + `Opens.range_ι`.
+    Needed `@[reducible] yOne` (same rationale as `tateBase`, v10.72(b)) — flag if it perturbs leaves.
+  - **`factors_yOne_iff` itself STILL `sorry`** (file released clean; **beastmode-A: [Y1-vi-FACTOR]
+    is unblocked, go**). Remaining = the assembly (fully scoped, ~70 LOC), plan:
+    `rw [factors_yOne_iff_exists_range]`, then ↔:
+    * **→** given `⟨g, hg, hrange⟩`: KILL `(N:ℤ)•pull t 𝟎 = 0` via `killedLocus_spec` at `N`; clause 1
+      via killing bridge; clause 2a `(N:ℤ)•pull (baseChange t) τ = 0` via fibrewise bridge +
+      `smul_eq_zero_iff_comp_mulByHom` (precompose KILL's comp-eq by τ, reassoc); clause 2b: assume
+      `(a:ℤ)•pull(τ≫t)=0` (0<a<N), `exists_properDivisor_smul_eq_zero`→ `d∣N, 0<d`; `d≤3`
+      contradicts `tatePoint_nowhereGeomOrderLEThree` (τ≫t is alg-closed), `d≥4` (so `d∈filter`)
+      contradicts `hrange` via `pull_smul_eq_zero_iff_residue`(C4)+`mem_killedLocus_range_iff`(C3).
+    * **←** given IsNaiveGammaOne: `g` from clause 1 + killing bridge + `killedLocus_spec.mpr`;
+      `range g ⊆ yOneSet` ⟺ `∀ x d∈filter, t.base x ∉ range (killedLocusπ d)` — for each such `x`
+      build alg-closed geom pt `τ := Spec.map (algebraMap (T.residueField x) (AlgebraicClosure _)) ≫
+      T.fromSpecResidueField x`, then clause 2b(a=d) + fibrewise bridge + C4/C3 give the contradiction.
 
 ### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
 - `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
