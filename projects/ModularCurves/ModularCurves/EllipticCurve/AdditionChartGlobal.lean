@@ -481,6 +481,16 @@ lemma isoImage_specBasicOpen_pieceAwayι (k : Fin 3) :
   exact isoImage_inv_morphismRestrict_ι (pieceι W i j) (chartPieceIso W i j)
     (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k))
 
+/-- **([C4-HF-ASSEMBLY] L3b1)** `pieceAwayι` in `Spec.map` form: the localization map into
+`Away(lawTwoTriple ij k)` followed by the chart-product identification and the piece immersion — the
+same shape as `transι`, localizing at a single piece coordinate instead of the transition product. -/
+lemma pieceAwayι_eq (k : Fin 3) :
+    pieceAwayι W i j k =
+      Spec.map (CommRingCat.ofHom (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k)))) ≫
+        (chartPieceIso W i j).inv ≫ pieceι W i j := by
+  rw [pieceAwayι, ← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
 end Overlap
 
 end WeierstrassCurve.Projective
