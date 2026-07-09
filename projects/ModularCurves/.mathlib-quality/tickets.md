@@ -12016,3 +12016,37 @@ Recommend p2 keeps ownership of the Cartier-dual API; PIC0's route (a) wires Pic
 **PIC0 next (self-dispatch, session continues):** P1b `IsInvertible.tensorObj` in
 `Picard/InvertibleSheaf.lean` (the last GAP-1-gated sorry there), consuming this monoidal
 structure, then the P2 Pic program. Instance-plumbing playbook banked in the commit message.
+
+### v10.77 (2026-07-09, fable-PIC0): P1b assembled — GAP-1 reduced to [PIC-P1b-MONO]; downstream route (a) advancing
+
+*Commit cf42042b9. Consuming the fresh GAP1-W-MONO structure: `IsInvertible.tensorObj` is now a
+FULLY-ASSEMBLED proof (GME p.108 common-refinement argument), sorry-free modulo ONE isolated
+Prop-sorry. `ModularCurves.Picard.InvertibleSheaf` builds green.*
+
+- **P1b assembly DONE (GAP-free, axiom-clean):** `tensorObjCongr` (sheafified tensor respects
+  isos), `restrictTrivialization` (a trivialization on `U` restricts to `W ≤ U` via
+  `homOfLE_ι` + `pullbackComp`/`pullbackCongr`), the full `MonoidalCategory X.PresheafOfModules`
+  instance (was only the struct), and `IsInvertible.tensorObj` itself (common-refinement cover
+  `{U i ⊓ V j}` via frame `inf_iSup_eq`; on each piece both factors trivial ⟹ `𝒪 ⊗ 𝒪 ≅ 𝒪`).
+  All three DATA helpers `#print axioms`-clean; the only `sorryAx` is in Props (v10.8 holds).
+
+- **★ NEW SUB-TICKET [PIC-P1b-MONO]** (registered, needs a `/develop --decompose` pass before build):
+  `nonempty_pullback_tensorObj : Nonempty (f^*(M ⊗ N) ≅ f^*M ⊗ f^*N)` — **strong monoidality of
+  the sheaf-of-modules pullback** w.r.t. the sheafified tensor. This is the last GAP-1 content for
+  route (a), isolated to a single Prop. **Route (source-faithful sketch):**
+  (i) `Modules.pushforward f` (= `f_*`) is LAX monoidal — mathlib has the presheaf-level
+      `PresheafOfModules.pushforward₀OfCommRingCat.Monoidal`; leaf = lift it through
+      `SheafOfModules.pushforward`/`Scheme.Modules.pushforward` (sheafification is monoidal by our
+      `sheafificationW_isMonoidal`).
+  (ii) `f^*` (left adjoint of `f_*`) is OPLAX monoidal by doctrinal adjunction (mate of the lax
+      structure). **mathlib GAP: `CategoryTheory.Monoidal.Mates` is ABSENT** — this is the piece to
+      build (or find in an open PR; ecosystem-check first per discipline).
+  (iii) the oplax comparison maps are ISOS (base change `⊗_R S` commutes with tensor pointwise;
+      strong monoidality), giving the iso.
+  Estimated its own multi-leaf stream. Recommend a `/develop --decompose` (adversarial, source-faithful)
+  before any build ticket, per the GAP-1 decompose-first discipline. DOES NOT block anything already
+  proven — P1b's assembly stands; only the one iso is open.
+
+- **DS-END0 route (a) status:** GAP1-W-MONO (monoidal structure) DONE; P1b assembled;
+  remaining route-(a) infra = [PIC-P1b-MONO] (pullback-monoidality) → then P1b closes → P2 Pic group.
+  Route (b) (p2 Cartier-duality) unaffected; coordination note (never build duality twice) stands.
