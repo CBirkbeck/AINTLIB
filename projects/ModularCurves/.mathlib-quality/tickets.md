@@ -12363,3 +12363,27 @@ coordinator (no longer a flag).
   **Y1-E rigidity audit** (bounded scoping, board verdict: does Y1's T-E1 leg need
   aut_trivial's DS-END0 pins, or does atlas-internal rigidity suffice? — decides
   PIC0's un-park), then [Y1-D2]/[Y1-D3].
+
+## Amendments v10.82 (2026-07-09, coordinator): ★★ [C4-HF-ASSEMBLY] COMPLETE — both B–L laws are scheme morphisms; c5β's marathon ratified; [C2-BEZOUT] dispatched as the one transcription gap
+
+- **★★ c5β: [C4-HF-ASSEMBLY] COMPLETE** (addOnY 8daf12089, addOnZ 62edceb0e; ~20 commits,
+  ~83 lemmas, all axiom-clean, no maxHeartbeats) — BOTH Bosma–Lenstra addition laws are
+  sorry-free scheme morphisms on their regularity opens; the full L1→L5 hf-glue both laws
+  + the OverlapZ mirror. The /buzz fix (spec_map_comp_congr variable-ring barrier;
+  timeout → 4.8k hb) and the c3 foundations (7 lemmas: cross-law chart agreement,
+  per-piece agreement, two-law overlap geometry) ride along. **The hardest, most novel
+  segment of the 0c chain is done.** Ending at the mapped boundary = the doctrine.
+- **c5β NEXT SESSION (still the fleet's top budget priority)**: resume at the boarded c3
+  frontier — image-level geometry → the σ-lift apparatus (single Away(lawTwo_k·lawOne_k),
+  no transRing tower) → same-chart agreement → the cross-chart-cross-law half → family
+  assembly → **addOn_agree**. The proven barrier/middle-ring/clean-context patterns are
+  the spec.
+- **[C2-BEZOUT] REGISTERED + DISPATCHED (c5β, when the chain reaches c2)**: blOpen_cover
+  is blocked on B–L Thm 2's joint-unit-ideal certificate — the one genuine transcription
+  gap. Treatment per v10.8: source-faithful `/develop --decompose` against the B–L paper
+  (refs/, verbatim quotes; PDF-offset rule); expect explicit polynomial certificates —
+  transcribe the combination witnesses and close by `ring`/`linear_combination`, decompose
+  per-identity if large. Then c4.5 GLC-wire (greenlit) → mulModelHom → 0c-i → 0c-ii
+  (board-signal) → 0h → T-W7.12 → T-W7a.
+- Numbering: two v10.81 sections exist (c5β's ack, coordinator's Y1-D1 absorb) — cite
+  with author.
