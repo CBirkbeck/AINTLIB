@@ -13525,3 +13525,20 @@ Proof: by_cases φ(z-coordElem) = 0 — ≠0 → chartPointOfHom_factors_iff giv
 toAffine_of_Z_eq_zero. Then e5c = descent + d2-readout (sum's φ-triple = χ∘lawTriple) + e5a/e5b
 (triple = c•add) + toAffine_smul + toAffine_add + dictionary_eq_toAffine on P,Q (their chart forms
 from the d4b immersion equations). GLC fill afterwards via e1/e3/e4/e4a transport.
+
+### v10.100 (2026-07-10, NEW-HOPF): ★ [CHARTER-HOPF] — [HG-B3] COMPLETE (03BK, the base-change layer); B-track 3/6 done
+
+- **[HG-B3] `CoinvariantsBaseChange.lean` DONE, axiom-clean**: `coactionBaseChange`
+  (the co-action base-changed along C := coinvariants ρ → C', via ρ's C-linearity +
+  the heterobasic `Algebra.TensorProduct.assoc`); **03BK(3)**
+  `mem_coinvariants_coactionBaseChange_iff` (flat C→C' ⟹ coinvariants upstairs = the
+  C'-scalars; `AlgHom.tensorEqualizerEquiv` element-chase); `isCoaction_coactionBaseChange`
+  (counit + coassoc transport — the coassoc via a graft-transport map reducing both legs
+  to `hρ.coassoc_apply`; zero Sweedler sums again).
+- **B6 input win**: `Algebra.IsIntegral.tensorProduct` EXISTS in mathlib — per-prime
+  integrality upstairs is free from 03BJ; banked in the decomposition doc.
+- **B-track state**: B1 shear ✓ B2 charpoly/integrality (03BH+03BJ) ✓ B3 base change
+  (03BK) ✓. NEXT: [HG-B4] the k̄-points orbit theorem (03BL — the second hard leaf;
+  verbatim Stacks proof in the recon capture; unit-det helpers verified present) →
+  [HG-B5] descent bootstrap (03C8; consumes A1 Amitsur + B1 shear) → [HG-B6] 03BM
+  assembly = IsHopfGalois (M5). Then wave C (E-geometry).
