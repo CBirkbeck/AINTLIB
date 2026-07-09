@@ -846,6 +846,69 @@ open scoped Pointwise
 variable {G : Type u} [Group G] {X : Scheme.{u}} {C : EllipticCurveGeom X}
   {σ : SchemeAction G X} {σE : SchemeAction G C.E}
 
+/-- **([a5-W6], the per-point chart — ABSTRACT)** The `LocallyWeierstrass` chart package at a
+point `s` of `Spec Aᴳ`, over an abstract ring `A` (all instances opaque — no `whnf` grind).
+The geometry (the quotient cover `qE`, the model `φA`, the action family, the restricted
+morphism-descent and the fppf data) is threaded as explicit hypotheses; the engine discharges
+them over `Γ(X,⊤)` once. -/
+theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
+    [Fintype G] [DecidableEq G]
+    -- the descended family over Spec Aᴳ
+    {Qe : Scheme.{u}}
+    (π'' : Qe ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)))
+    (zero'' : Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)) ⟶ Qe)
+    (hz'' : zero'' ≫ π'' = 𝟙 _)
+    -- the total space, its cover of the quotient, and the model
+    {EE : Scheme.{u}} (qE : EE ⟶ Qe) (πE : EE ⟶ Spec (CommRingCat.of A))
+    (zeroE : Spec (CommRingCat.of A) ⟶ EE)
+    (hsq : IsPullback qE πE π'' (invariantsπ G A ℤ))
+    (hzeroSq : invariantsπ G A ℤ ≫ zero'' = zeroE ≫ qE)
+    (W₀A : WeierstrassCurve A) (hW₀A : W₀A.IsElliptic)
+    (φA : EE ≅ projModel W₀A)
+    (hπφA : φA.hom ≫ projModelπ W₀A = πE)
+    (hzeroφA : zeroE ≫ φA.hom = projModelZero W₀A)
+    -- the action family and its cocycle
+    (act : G → (projModel W₀A ⟶ projModel W₀A))
+    (hEact : ∀ g, (φA.hom ≫ act g ≫ φA.inv) ≫ qE = qE)
+    (Cvc : G → VariableChange A)
+    (hCvc : ∀ g, Cvc g • (W₀A.map (MulSemiringAction.toRingHom G A g)) = W₀A)
+    (hcoc : IsVCocycle Cvc)
+    (hΨ : ∀ g, (projModelVCIso (Cvc g) (W₀A.map (MulSemiringAction.toRingHom G A g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G A g) W₀A
+      = eqToHom (congrArg projModel (hCvc g)) ≫ act g)
+    -- the restricted morphism-descent and epi property of the cover
+    (hlift : ∀ {Q' Y : Scheme.{u}} (j : Q' ⟶ Qe) [IsOpenImmersion j]
+      (f : pullback qE j ⟶ Y),
+      (∀ g, pullback.map qE j qE j (φA.hom ≫ act g ≫ φA.inv) (𝟙 Q') (𝟙 _)
+          (by rw [Category.comp_id, hEact g]) (by simp) ≫ f = f) →
+      ∃ q : Q' ⟶ Y, pullback.snd qE j ≫ q = f)
+    (hepi : ∀ {Q' : Scheme.{u}} (j : Q' ⟶ Qe) [IsOpenImmersion j],
+      Epi (pullback.snd qE j))
+    -- the fppf data of the invariants cover
+    (hfsur : Surjective (invariantsπ G A ℤ)) (hffl : Flat (invariantsπ G A ℤ))
+    (hfqc : QuasiCompact (invariantsπ G A ℤ))
+    -- the freeness (for the localized fixed-point identifications)
+    (hfreeA : IsFreeAlgebraAction G ℤ A)
+    -- the point and the descended local model
+    (s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))))
+    (a : FixedPoints.subring A G) (hap : a ∉ s.asIdeal)
+    (W₁ : WeierstrassCurve (Localization.Away a))
+    (E : VariableChange (Localization.Away ((a : A))))
+    (hW₁ : W₁.map (fixedAwayMap a)
+      = E⁻¹ • (W₀A.map (algebraMap A (Localization.Away ((a : A))))))
+    (hcob : ∀ g : G, (Cvc g).map (algebraMap A (Localization.Away ((a : A))))
+      = E * (E.map (MulSemiringAction.awayHom (fun g' => a.2 g') g))⁻¹) :
+    ∃ (U : (Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))).affineOpens)
+      (_ : s ∈ U.1) (W : WeierstrassCurve ↑Γ(Spec (CommRingCat.of
+        (FixedPoints.subalgebra ℤ A G)), U.1)),
+      W.IsElliptic ∧
+      ∃ e : pullback π'' U.1.ι ≅ projModel W,
+        e.hom ≫ projModelπ W = pullback.snd π'' U.1.ι ≫ U.2.isoSpec.hom ∧
+        (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+            (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ e.hom =
+          projModelZero W := by
+  sorry
+
 /-- Abstract reduction: `LocallyWeierstrass` transports along an iso of the base (with the total
 space fixed). Stated over opaque schemes so the application never unfolds the heavy quotient/Spec
 objects. -/
