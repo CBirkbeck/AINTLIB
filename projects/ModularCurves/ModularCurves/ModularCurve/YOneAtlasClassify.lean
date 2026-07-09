@@ -529,6 +529,57 @@ theorem EllObj.tateClassifyingHomOfOpenCover_ext (Y : EllObj R)
       EllObj.tateClassifyingHomOfOpenCover R Y 𝒰 g' hcompat' hover' top' isPullback' zero_w' :=
   EllHom.ext (EllObj.tateBaseMapOfOpenCover_ext R Y 𝒰 g g' hcompat hcompat' hg) htop
 
+@[reassoc (attr := simp)]
+theorem EllObj.tateClassifyingHom_pullSection_top (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero)
+    (P₀ : (tateUniversal R).Section) :
+    (EllHom.pullSection R
+      (EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w) P₀).1 ≫ top =
+        baseMap ≫ P₀.1 := by
+  let f := EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w
+  exact f.isPullback.lift_fst _ _ _
+
+theorem EllObj.tateClassifyingHom_pullSection_eq (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero)
+    (P₀ : (tateUniversal R).Section) (P : Y.curve.Section)
+    (hP : P.1 ≫ top = baseMap ≫ P₀.1) :
+    EllHom.pullSection R
+      (EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w) P₀ = P := by
+  let f := EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w
+  refine Subtype.ext ?_
+  refine f.isPullback.hom_ext ?_ ?_
+  · have htop : (EllHom.pullSection R f P₀).1 ≫ f.top = f.baseHom ≫ P₀.1 :=
+      f.isPullback.lift_fst _ _ _
+    exact htop.trans (by simpa [f, tateEllObj] using hP.symm)
+  · rw [(EllHom.pullSection R f P₀).2, P.2]
+
+theorem EllObj.tateClassifyingHom_existsUnique_of_components (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero)
+    (P₀ : (tateUniversal R).Section) (P : Y.curve.Section)
+    (hP : P.1 ≫ top = baseMap ≫ P₀.1)
+    (huniq : ∀ f : Y ⟶ tateEllObj R, EllHom.pullSection R f P₀ = P →
+      f.baseHom = baseMap ∧ f.top = top) :
+    ∃! f : Y ⟶ tateEllObj R, EllHom.pullSection R f P₀ = P := by
+  let f₀ := EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w
+  refine ⟨f₀, ?_, ?_⟩
+  · exact EllObj.tateClassifyingHom_pullSection_eq R Y baseMap base_w top isPullback
+      zero_w P₀ P hP
+  · intro f hf
+    rcases huniq f hf with ⟨hbase, htop⟩
+    exact EllHom.ext hbase htop
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
