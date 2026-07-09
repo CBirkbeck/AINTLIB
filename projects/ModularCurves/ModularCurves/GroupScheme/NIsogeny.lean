@@ -119,7 +119,109 @@ private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [Co
   constructor
   · -- flat + constant rank `n` ⟹ the presentation matrix dies in `A`
     rintro ⟨hflat, hrank⟩
-    sorry
+    haveI := hflat
+    -- `M`, hence `A ⊗ M`, is finitely presented; so the kernel `K` of `πₐ` is f.g.
+    haveI hMfp : Module.FinitePresentation R M := by
+      refine Module.finitePresentation_of_surjective π hπ ?_
+      rw [LinearMap.exact_iff.mp hexact, LinearMap.range_eq_map]
+      exact Module.Finite.fg_top.map α
+    haveI : Module.Projective A (A ⊗[R] M) := Module.Flat.projective_of_finitePresentation
+    obtain ⟨s, hs⟩ := Module.projective_lifting_property (π.baseChange A)
+      LinearMap.id hsurjA
+    have hs' : ∀ y : A ⊗[R] M, (π.baseChange A) (s y) = y := fun y =>
+      congrArg (fun g : A ⊗[R] M →ₗ[A] A ⊗[R] M => g y) hs
+    have hsinj : Function.Injective s := fun y₁ y₂ h => by
+      rw [← hs' y₁, ← hs' y₂, h]
+    -- the section splits the free module as `range s ⊕ K`
+    set K := LinearMap.ker (π.baseChange A) with hK
+    let pr : (A ⊗[R] (Fin n → R)) →ₗ[A] LinearMap.range s :=
+      (s ∘ₗ π.baseChange A).codRestrict (LinearMap.range s) fun x => ⟨_, rfl⟩
+    have hproj : ∀ x : LinearMap.range s, pr x = x := by
+      rintro ⟨_, y, rfl⟩
+      exact Subtype.ext (by simp [pr, hs' y])
+    have hkerpr : LinearMap.ker pr = K := by
+      ext x
+      simp only [LinearMap.mem_ker, hK]
+      constructor
+      · intro h
+        have := congrArg Subtype.val h
+        simp only [LinearMap.codRestrict_apply, pr, LinearMap.coe_comp,
+          Function.comp_apply, ZeroMemClass.coe_zero] at this
+        have h2 := congrArg (π.baseChange A) this
+        rwa [hs', map_zero] at h2
+      · intro h
+        refine Subtype.ext ?_
+        simp [pr, h]
+    have hcompl : IsCompl (LinearMap.range s) K := by
+      rw [← hkerpr]
+      exact LinearMap.isCompl_of_proj hproj
+    -- rank bookkeeping: `n = n + rankAtStalk K`, so `K` has rank `0` everywhere
+    haveI hKfin : Module.Finite A K := by
+      rw [Module.Finite.iff_fg]
+      exact Module.FinitePresentation.fg_ker (π.baseChange A) hsurjA
+    haveI hKflat : Module.Flat A K := by
+      have : Module.Projective A K := by
+        refine .of_split (LinearMap.ker (π.baseChange A)).subtype
+          ((LinearMap.id - s ∘ₗ π.baseChange A).codRestrict _ fun x => by
+            rw [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,
+              LinearMap.coe_comp, Function.comp_apply, map_sub, hs', sub_self]) ?_
+        ext x
+        simp [LinearMap.mem_ker.mp x.2]
+      exact Module.Flat.of_projective
+    haveI : Module.Finite A (LinearMap.range s) :=
+      Module.Finite.equiv (LinearEquiv.ofInjective s hsinj)
+    haveI : Module.Flat A (LinearMap.range s) :=
+      Module.Flat.of_linearEquiv (LinearEquiv.ofInjective s hsinj).symm
+    have hKrank : Module.rankAtStalk (R := A) K = 0 := by
+      have e3 : (LinearMap.range s × K) ≃ₗ[A] (A ⊗[R] (Fin n → R)) :=
+        Submodule.prodEquivOfIsCompl _ _ hcompl
+      have h1 : Module.rankAtStalk (R := A) (LinearMap.range s × K)
+          = Module.rankAtStalk (A ⊗[R] (Fin n → R)) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv e3]
+      rw [Module.rankAtStalk_prod] at h1
+      have h2 : Module.rankAtStalk (R := A) (LinearMap.range s)
+          = Module.rankAtStalk (A ⊗[R] M) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv (LinearEquiv.ofInjective s hsinj).symm]
+      have h3 : Module.rankAtStalk (A ⊗[R] (Fin n → R))
+          = Module.rankAtStalk (R := A) (Fin n → A) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv
+          (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv]
+      funext p
+      have h4 := congrFun h1 p
+      have h5 := congrFun h2 p
+      have h3p := congrFun h3 p
+      haveI : Nontrivial A := ⟨0, 1, fun h01 =>
+        (Ideal.ne_top_iff_one _).mp p.2.ne_top (h01 ▸ p.asIdeal.zero_mem)⟩
+      have h6 : Module.rankAtStalk (R := A) (Fin n → A) p = n := by
+        rw [Module.rankAtStalk_eq_finrank_of_free, Module.finrank_fin_fun]
+        rfl
+      simp only [Pi.add_apply] at h4
+      rw [h5, hrank p, h3p, h6] at h4
+      simp only [Pi.zero_apply]
+      omega
+    -- hence `K = ⊥`, so the base-changed matrix vanishes, giving the entries
+    have hKbot : K = ⊥ := by
+      have := Module.rankAtStalk_eq_zero_iff_subsingleton.mp hKrank
+      exact Submodule.eq_bot_of_subsingleton
+    have hα0 : α.baseChange A = 0 := by
+      have hle : LinearMap.range (α.baseChange A) ≤ K := by
+        rw [hK, LinearMap.exact_iff.mp hexA]
+      rw [hKbot, le_bot_iff, LinearMap.range_eq_bot] at hle
+      exact hle
+    intro i j
+    have h7 : (α.baseChange A) (1 ⊗ₜ[R] Pi.single i 1) = 0 := by rw [hα0]; rfl
+    rw [LinearMap.baseChange_tmul] at h7
+    have h8 := congrArg
+      (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv h7
+    rw [map_zero] at h8
+    have h9 : (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv
+        ((1 : A) ⊗ₜ[R] (α (Pi.single i 1))) = fun j => α (Pi.single i 1) j • (1 : A) := rfl
+    rw [h9] at h8
+    have h10 := congrFun h8 j
+    rwa [Algebra.smul_def, mul_one] at h10
   · -- entries die ⟹ `A ⊗ M ≅ Aⁿ`
     intro hent
     -- the base-changed matrix vanishes
