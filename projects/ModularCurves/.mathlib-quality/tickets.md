@@ -10568,3 +10568,15 @@ form of Loeffler's gluing sentence: uniqueness on overlaps makes the local `α�
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new lemmas lists
 only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.86-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] affine `Spec` handles LANDED
+
+Bundled the relative Tate lift as the `R`-algebra map `tateRingOverAlgLift`, added its coordinate
+simp lemmas, and introduced the affine scheme handles `tateBaseSpecMap`,
+`tateBaseSpecMapOfCoeffs`, and `tateBaseSpecMap_ext`. This lifts the previous ring-level overlap
+uniqueness to the actual `Spec A ⟶ tateBase R` interface consumed by the scheme-level gluing gate,
+while staying in the dedicated atlas file.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).

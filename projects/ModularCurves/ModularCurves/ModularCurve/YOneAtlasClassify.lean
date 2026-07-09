@@ -50,6 +50,34 @@ theorem tateRingOverLift_X_one (α β : A)
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
   simp [tateRingOverLift]
 
+/-- The relative Tate-ring lift bundled as an `R`-algebra map.  This is the form naturally
+used by affine maps over `Spec R`. -/
+noncomputable def tateRingOverAlgLift (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOver R →ₐ[R] A where
+  toRingHom := tateRingOverLift R α β hΔ
+  commutes' r := by
+    change tateRingOverLift R α β hΔ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+      (MvPolynomial.C r)) = algebraMap R A r
+    simp [tateRingOverLift]
+
+@[simp]
+theorem tateRingOverAlgLift_X_zero (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOverAlgLift R α β hΔ
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α := by
+  simp [tateRingOverAlgLift]
+
+@[simp]
+theorem tateRingOverAlgLift_X_one (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOverAlgLift R α β hΔ
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
+  simp [tateRingOverAlgLift]
+
 /-- Two `R`-algebra maps out of the relative Tate atlas ring agree once they agree on the
 two Tate coordinates.  This is the ring-level overlap uniqueness used by the scheme-level
 gluing step for maps into `tateBase R`. -/
@@ -92,6 +120,40 @@ theorem tateRingOver_algHom_eq_lift (φ : tateRingOver R →ₐ[R] A) (α β : A
     simp [tateRingOverLift]
   · intro i
     fin_cases i <;> simp [h0, h1, tateRingOverLift]
+
+/-- The algebra-map version of `tateRingOver_algHom_eq_lift`. -/
+theorem tateRingOver_algHom_eq_algLift (φ : tateRingOver R →ₐ[R] A) (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α)
+    (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β) :
+    φ = tateRingOverAlgLift R α β hΔ := by
+  apply tateRingOver_algHom_ext
+  · simp [tateRingOverAlgLift, h0]
+  · simp [tateRingOverAlgLift, h1]
+
+/-- The affine scheme map to the relative Tate atlas induced by an `R`-algebra map out of
+the atlas ring. -/
+noncomputable def tateBaseSpecMap (φ : tateRingOver R →ₐ[R] A) :
+    Spec (CommRingCat.of A) ⟶ tateBase R :=
+  Spec.map (CommRingCat.ofHom (φ : tateRingOver R →+* A))
+
+/-- The affine scheme map to `tateBase R` classified by the coefficients `(α, β)`. -/
+noncomputable def tateBaseSpecMapOfCoeffs (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    Spec (CommRingCat.of A) ⟶ tateBase R :=
+  tateBaseSpecMap R (tateRingOverAlgLift R α β hΔ)
+
+/-- Equality of affine maps into the Tate atlas is reduced to equality of the two Tate
+coordinates.  This is the `Spec`-level handle consumed by the scheme gluing gate. -/
+theorem tateBaseSpecMap_ext (φ ψ : tateRingOver R →ₐ[R] A)
+    (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) =
+      ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)))
+    (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) =
+      ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1))) :
+    tateBaseSpecMap R φ = tateBaseSpecMap R ψ := by
+  rw [tateRingOver_algHom_ext R φ ψ h0 h1]
 
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
