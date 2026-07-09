@@ -12793,3 +12793,53 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   origin/dev/modular-curves-y1 → ONE PR → #print axioms board.** Owner: NEW-ATLAS-2
   continues, or NEW-ATLAS reclaims on return — rule-5 handshake, whoever fires first;
   the claim + sentinel stand meanwhile.
+
+## Amendments v10.94 (2026-07-09, coordinator): ★ OWNER DIRECTIVE — FULL CAPACITY RESTORED; general modular-curves push resumes (Y1 > YFULL > GH > NISOG); [OWNER-FLW] reserved; ALL LANES UN-PARKED with orders
+
+- **OWNER DIRECTIVE**: capacity is back — the v10.80 credit-frugal clause RELAXES (keep
+  the hygiene: bounded sessions, single-target builds, no waste). Scope widens from
+  Y1-only back to the standing goal: **Y₁(N) AND Y(N) AND Γ_H** — priority ranking
+  Y1 > YFULL > GH > NISOG (v10.37) restored in full.
+- **★ [OWNER-FLW] RESERVED (rule 5, external claim)**: an OWNER-RUN worker (outside the
+  fleet) is proving **the fibrewise ⟷ locally-Weierstrass equivalence** (the
+  descent-gated locally-Weierstrass upgrade cut honestly at v10.36/v10.39, and its
+  fibrewise-elliptic comparison). FLEET-BINDING: no lane claims, builds, or duplicates
+  this — consume it as an external pin when it lands. Adjacent lanes (FP4 [a5],
+  PIC0 M_ell^W eso-upgrade, [YF-GEOM]) cite the pin, never re-derive. Owner-worker:
+  post a claim line + the exact Lean statement(s) on this board at start so the
+  boundary is precise.
+- **LANE ORDERS (all un-parked; triggers unchanged where armed)**:
+  - **c5β (top)**: GLC wiring → 0c-i → **0c-ii (board-signal)** → 0h → T-W7.12 → T-W7a.
+  - **NEW-ATLAS-2 (or NEW-ATLAS, rule-5)**: the v10.109-ATLAS assembly → exists_tatePoint
+    ∀-part → rebase → ONE PR → axioms board.
+  - **NEW-Y1**: on the atlas PR — integrate + one-`exact` wire into exists_tatePoint +
+    MASTER prep; on T-W7a — E-track opens (via P3b3's BB-DIFF cascade).
+  - **fable-P4 — UN-PARKED, the v10.75 stitch dispatch RESTORED**: a5-ii → a5-i → a5-iv
+    → engine AXIOM-CLEAN (MILESTONE + board-signal: [YF-GEOM] + GHC6 flip) → the owed
+    **B2 repoint of T-H4/T-H6** (unblocks GH wiring) → the moduli-functor layer.
+    Rule-5 note: check [OWNER-FLW]'s boundary before any locallyWeierstrass-adjacent
+    lemma; consume, don't duplicate.
+  - **PIC0 — UN-PARKED**: resume [PIC-P1b-MONO] per the banked v10.78 decompose → the
+    P2 Pic program → DS-END0 route (a) (the two-route edge with p2 stands: never build
+    duality twice). The M_ell^W locally-Weierstrass eso-upgrade is [OWNER-FLW]'s — off
+    limits, consume as pin.
+  - **NEW-GH — UN-PARKED**: [02KL] per the banked recipe → [02KM] (= [YF-QSM] closes,
+    un-gating YFULL) → MellWeierstrass cadence cleanup (with the golf note).
+  - **fable-FP — UN-PARKED**: [NISOG-GRASS] wave 3 (GR-E2 spec → E4 cocycle → D
+    openness → F GlueData → G T-points ⟹ NISOG [L15]).
+  - **D2 — UN-PARKED**: STREAM-NISOG wave M1 rest {L5, L6, L20, L1} + [KM-62-63-HOMOG];
+    the delegates-only saturation rule (v10.80 item 4) stands.
+  - **p2**: Milestone 1 (BB-DELIGNE discharge + falls-sweep) then **phase 2
+    [T-C1-KM28] UN-DEFERRED** — the Weil-pairing backend gates GHA3/DS4's étale
+    conjuncts and YFULL's CLOPEN route α.
+  - **beastmode-A**: armed on T-W7a (falls-sweep: one-primitive route (c) + T-E4
+    family + holder wiring). Meanwhile: PR-draft staging + extend the T-E4a survey to
+    the full T-H8a inventory (scoping, no held-file edits). c5β MAY invite A into the
+    endgame via explicit board handshake (v10.59 solo rule relaxes only that way).
+  - **p0 (return)**: first gate-flipped GH leaf, or the [T-G3d-infra] crux via p2's
+    Hopf layer (v10.50 ruling stands). **P3b3 (return)**: the étale cascade on T-W7a —
+    BB-DIFF → hfix → rigidity-modulo-pins; highest-value return in the fleet.
+- **The gate map for the general push** (why these orders): YFULL's four gates =
+  {CLOPEN ⟵ p2-phase-2 ∨ P3b3-étale; ETALE ⟵ BB-DIFF; QSM ⟵ NEW-GH 02KL/KM; GEOM ⟵
+  FP4 engine}. GH's gates = {DS4/T-C1 ⟵ p2; A711-BC + T-E5-engine ⟵ FP4; T-E4a ⟵
+  A (landed, modulo primitive); B2-repoint ⟵ FP4}. Everything else funnels to T-W7a.
