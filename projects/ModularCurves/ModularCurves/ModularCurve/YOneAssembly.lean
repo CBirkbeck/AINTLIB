@@ -968,7 +968,40 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
           rw [← Scheme.Hom.comp_apply, hg, Scheme.Hom.comp_apply]
         rw [Set.mem_preimage, hgt]
         exact hxmem
-  · sorry
+  · rintro ⟨hc1, hfib⟩
+    have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
+      ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mp hc1
+    obtain ⟨g, hg⟩ := ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mpr hkill
+    refine ⟨g, hg, ?_⟩
+    rintro _ ⟨x, rfl⟩
+    rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂]
+    rintro ⟨d, hd_filter, hmem⟩
+    rw [Set.mem_preimage] at hmem
+    rw [Finset.mem_filter, Nat.mem_properDivisors] at hd_filter
+    obtain ⟨⟨hdN, hdlt⟩, hd4⟩ := hd_filter
+    have hgtx : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base x) = t.base x := by
+      rw [← Scheme.Hom.comp_apply, hg]
+    rw [hgtx] at hmem
+    have hres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
+        ((tateBase R).fromSpecResidueField (t.base x)) (tatePoint R) = 0 :=
+      ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d (t.base x)).mp hmem
+    set k := AlgebraicClosure (T.residueField x) with hk
+    haveI : Subsingleton (Spec (CommRingCat.of k)) :=
+      inferInstanceAs (Subsingleton (PrimeSpectrum k))
+    set τ : Spec (CommRingCat.of k) ⟶ T :=
+      Spec.map (CommRingCat.ofHom (algebraMap (T.residueField x) k)) ≫ T.fromSpecResidueField x
+      with hτ
+    have himg : (τ ≫ t).base (IsLocalRing.closedPoint k) = t.base x := by
+      rw [Scheme.Hom.comp_apply]
+      congr 1
+      rw [hτ, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+    have hτkill : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R) = 0 := by
+      rw [(tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
+        ((τ ≫ t).base (IsLocalRing.closedPoint k)) ⟨IsLocalRing.closedPoint k, rfl⟩, himg]
+      exact hres
+    have hne := (hfib k τ).2 d (by omega) hdlt
+    exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
+      hτkill)
 
 /-- **(Y1-D2, naive-structure transport along `Ell/R`-morphisms)** For an `Ell/R`-morphism
 `f : X ⟶ Y` and a section `Q` of `Y.curve`, the pulled section `pullSection f Q` is naive-`Γ₁(N)`
