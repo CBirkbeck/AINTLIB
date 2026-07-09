@@ -1734,6 +1734,180 @@ lemma transHom_lawTwo_mul_transAlgHom_lawOne (k m : Fin 3) :
   rw [mul_comm (lawTwoTriple W i j m), mul_comm (lawTwoTriple W i j k),
     lawOneTriple_mul_lawTwoTriple]
 
+lemma isUnit_algebraMap_biChartRing_lawOneTriple_cross (k k' : Fin 3) :
+    IsUnit ((algebraMap (biChartRing W i j)
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))
+      (lawOneTriple W i j k)) := by
+  rw [IsScalarTower.algebraMap_apply (biChartRing W i j) (transRing W i j i' j')
+    (Localization.Away _)]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawOneTriple W i j k) * transHom W i j i' j' (lawTwoTriple W i' j' k'))
+    ⟨transHom W i j i' j' (lawTwoTriple W i' j' k'), rfl⟩
+
+noncomputable def psiFstCross (k k' : Fin 3) :
+    Localization.Away (lawOneTriple W i j k) →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+    (lawOneTriple W i j k) (isUnit_algebraMap_biChartRing_lawOneTriple_cross W i j i' j' k k')
+
+@[simp]
+lemma psiFstCross_algebraMap (k k' : Fin 3) (x : biChartRing W i j) :
+    psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j) _ x) =
+      algebraMap (biChartRing W i j) _ x :=
+  IsLocalization.Away.lift_eq (lawOneTriple W i j k)
+    (isUnit_algebraMap_biChartRing_lawOneTriple_cross W i j i' j' k k') x
+
+lemma psiFstCross_toRingHom_comp' (k k' : Fin 3) :
+    (psiFstCross W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transAlgHom W i j i' j').toRingHom :=
+  (RingHom.ext (psiFstCross_algebraMap W i j i' j' k k')).trans
+    (algebraMap_biChartRing_eq W i j i' j' _)
+
+lemma isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross (k k' : Fin 3) :
+    IsUnit (((IsScalarTower.toAlgHom R (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transHom W i j i' j')) (lawTwoTriple W i' j' k')) := by
+  rw [AlgHom.comp_apply]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawOneTriple W i j k) * transHom W i j i' j' (lawTwoTriple W i' j' k'))
+    ⟨transAlgHom W i j i' j' (lawOneTriple W i j k), mul_comm _ _⟩
+
+noncomputable def psiSndCross (k k' : Fin 3) :
+    Localization.Away (lawTwoTriple W i' j' k') →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom
+    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (lawTwoTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross W i j i' j' k k')
+
+@[simp]
+lemma psiSndCross_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
+    psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
+  IsLocalization.Away.liftAlgHom_algebraMap _ (lawTwoTriple W i' j' k')
+    (isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross W i j i' j' k k') x
+
+lemma psiSndCross_toRingHom_comp' (k k' : Fin 3) :
+    (psiSndCross W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i' j') (Localization.Away (lawTwoTriple W i' j' k'))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transHom W i j i' j').toRingHom :=
+  RingHom.ext (psiSndCross_algebraMap W i j i' j' k k')
+
+
+lemma psiFstCross_algebraMap_lawOneTriple (k k' m : Fin 3) :
+    psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m)) =
+      algebraMap (transRing W i j i' j') _ (transAlgHom W i j i' j' (lawOneTriple W i j m)) := by
+  rw [psiFstCross_algebraMap]
+  exact congrFun (congrArg DFunLike.coe (algebraMap_biChartRing_eq W i j i' j' _))
+    (lawOneTriple W i j m)
+
+lemma psiFstCross_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j k)) *
+      psiFstCross W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i j k)) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+lemma psiSndCross_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' k')) *
+      psiSndCross W i j i' j' k k' (IsLocalization.Away.invSelf (lawTwoTriple W i' j' k')) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+/-- The proportionality (crux hsmul): the Y-triple over S' is `(t'_k · invSelf(t_k))`-times the Z-triple.
+Derived from the pushed cross-minor `transHom_lawTwo_mul_transAlgHom_lawOne` and `t_k · invSelf = 1`. -/
+lemma psiSndCross_eq_smul (k k' m : Fin 3) :
+    psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' m)) =
+      (psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+          (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' k)) *
+        psiFstCross W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i j k))) *
+      psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m)) := by
+  have hmin : psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' m)) *
+      psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j k)) =
+      psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' k)) *
+      psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m)) :=
+    (congr_arg₂ (· * ·) (psiSndCross_algebraMap W i j i' j' k k' (lawTwoTriple W i' j' m))
+        (psiFstCross_algebraMap_lawOneTriple W i j i' j' k k' k)).trans
+      (((map_mul (algebraMap (transRing W i j i' j') _) _ _).symm.trans
+          ((congrArg (algebraMap (transRing W i j i' j') _)
+              (transHom_lawTwo_mul_transAlgHom_lawOne W i j i' j' k m)).trans
+            (map_mul (algebraMap (transRing W i j i' j') _) _ _))).trans
+        (congr_arg₂ (· * ·) (psiSndCross_algebraMap W i j i' j' k k' (lawTwoTriple W i' j' k)).symm
+          (psiFstCross_algebraMap_lawOneTriple W i j i' j' k k' m).symm))
+  have hu := psiFstCross_algebraMap_mul_invSelf W i j i' j' k k'
+  calc psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j') _ (lawTwoTriple W i' j' m))
+      = psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j') _ (lawTwoTriple W i' j' m)) *
+        (psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j) _ (lawOneTriple W i j k)) *
+          psiFstCross W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i j k))) := by
+        rw [hu, mul_one]
+    _ = (psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j') _ (lawTwoTriple W i' j' m)) *
+          psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j) _ (lawOneTriple W i j k))) *
+        psiFstCross W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i j k)) := by ring
+    _ = _ := by rw [hmin]; ring
+
+
+variable [IsJacobsonRing R]
+
+lemma equation_psiFstCross_lawOneTriple [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiFstCross W i j i' j' k k' (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m))) := by
+  rw [funext (psiFstCross_algebraMap_lawOneTriple W i j i' j' k k')]
+  exact equation_mapTriple W (fun m => transAlgHom W i j i' j' (lawOneTriple W i j m))
+    (equation_mapTriple_algHom W (transAlgHom W i j i' j') (lawOneTriple W i j)
+      (equation_lawOneTriple_of_isDomain W i j hΔ))
+
+lemma equation_psiSndCross_lawTwoTriple [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j')
+          (Localization.Away (lawTwoTriple W i' j' k')) (lawTwoTriple W i' j' m))) := by
+  rw [funext (fun m => psiSndCross_algebraMap W i j i' j' k k' (lawTwoTriple W i' j' m))]
+  exact equation_mapTriple W (fun m => transHom W i j i' j' (lawTwoTriple W i' j' m))
+    (equation_mapTriple_algHom W (transHom W i j i' j') (lawTwoTriple W i' j')
+      (equation_lawTwoTriple_of_isDomain W i' j' hΔ))
+
+/-- **(c3, L4 cross-chart-cross-law ψ-agreement)** Over S', the (i,j)-Z piece morphism and the
+(i',j')-Y piece morphism agree after pullback along Spec(ψ). specMap_comp_pieceMorOfTriple both sides +
+the crux (via the smul e = t'_k · invSelf, from the transRing cross-minor). -/
+lemma specMap_psiFstCross_addOnZPieceMor_cross [IsDomain (biChartRing W i j)]
+    [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFstCross W i j i' j' k k').toRingHom) ≫ addOnZPieceMor W i j k hΔ =
+      Spec.map (CommRingCat.ofHom (psiSndCross W i j i' j' k k').toRingHom) ≫
+        addOnYPieceMor W i' j' k' hΔ := by
+  rw [addOnZPieceMor_eq, addOnYPieceMor_eq]
+  exact (specMap_comp_pieceMorOfTriple W (lawOneTriple W i j)
+      (equation_lawOneTriple_of_isDomain W i j hΔ) k (psiFstCross W i j i' j' k k')
+      (psiFstCross_algebraMap_mul_invSelf W i j i' j' k k')
+      (equation_psiFstCross_lawOneTriple W i j i' j' hΔ k k')).trans
+    (((chartι_comp_specMap_chartAwayHom_smul_eq W k k' _ _ _ _ _
+        (psiSndCross_eq_smul W i j i' j' k k')
+        (psiFstCross_algebraMap_mul_invSelf W i j i' j' k k')
+        (psiSndCross_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiFstCross_lawOneTriple W i j i' j' hΔ k k')
+        (equation_psiSndCross_lawTwoTriple W i j i' j' hΔ k k')).symm).trans
+      (specMap_comp_pieceMorOfTriple W (lawTwoTriple W i' j')
+        (equation_lawTwoTriple_of_isDomain W i' j' hΔ) k' (psiSndCross W i j i' j' k k')
+        (psiSndCross_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiSndCross_lawTwoTriple W i j i' j' hΔ k k')).symm)
+
 end OverlapCrossChart
 
 end WeierstrassCurve.Projective
