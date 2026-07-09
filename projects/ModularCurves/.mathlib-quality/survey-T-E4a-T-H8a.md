@@ -46,23 +46,40 @@ addition has *no direct underlying-morphism formula* (can't `pullback.hom_ext` a
   `pullSection∘asSection` formula — generalising that to *every* `Section` (via `Section ≅ Point over 𝟙`)
   reduces `pullSection_add` to `pull_add` + `asSection_add` (both NEW-GH-provided/provable).
 
-**Verdict:** the pattern is the right *strategy* but not a *drop-in*. `pullSection_add` is a focused
-~30–50-line transport development (route (b): the `Section ≅ Point` bridge + `pull_add`/`asSection_add`),
-NOT a one-line mirror. Its profile — a Section-layer transport lemma at the EllObj boundary — matches
-the fresh-full-budget-session doctrine; grinding it at a session tail risks the wrong reduction.
+## ⚠ CORRECTED VERDICT (after reading `PullSectionAdd.lean` + the board) — the linchpin is T-W7.8-PARKED, not landable
 
-## Recommendation / wiring note (for the holder of Representability.lean)
+The `asSection_add`/`baseChangeEquiv` transport pattern is **already implemented**:
+`pullSection_add_of_isLocallyNoetherian` (`PullSectionAdd.lean:169`) proves exactly #1 via
+`transportSection_injective` + `transportSection_add` + `Point.baseChangeEquiv` + `Point.pull_add`
++ the `dict_transportSection_pullSection` bridge — i.e. route (b), realised. **BUT it carries
+`[IsLocallyNoetherian X.base]`** (`transportSection_add` :102 needs it).
 
-1. **Land `EllHom.pullSection_add` first** (route (b)): prove the general bridge
-   `pullSection f P = asSection_of_pull (pointOfSection P)` (Section↔Point over 𝟙), then
-   `pullSection_add := by rw [bridge, bridge, bridge, pull_add, asSection_add]`. Standalone, in a
-   beastmode-A ForMathlib/Moduli helper file; holder replaces `:207 sorry` with it.
-2. #2/#3 memberships: with #1 landed, `IsNaiveGammaOne`/`IsNaiveFullLevel` preservation under
-   `pullSection` follows from order/generation being read off the (now-linear) pulled section.
-3. This clears the `pullSection`-branch of the sorryAx inheritance (YFULL AFF/FIN, GH1). The
-   *vi-gate* inheritance I traced separately (`tateMarkedPoint_pull_fst` → `tateUniversal`/
-   `tateMarkedPoint`/`pointSpecPointsEquiv`) is a **different** upstream chain — [T-B6′] territory,
-   not this survey.
+The **unrestricted** `pullSection_add` (`Representability.lean:207`) is **deliberately PARKED behind
+T-W7.8** — its own docstring (`PullSectionAdd.lean:165-168`) says so, and the board confirms
+(`tickets.md:3496-3507`): T-W7.8 = arbitrary-`R`-scheme generality via EGA IV §8 spreading-out, a
+**blocked-on-mathlib gap**; **OWNER DECIDED 2026-07-08: keep arbitrary bases, functor-law sorries stay
+parked behind T-W7.8; "when T-W7.8 lands, swapping [them] in."**
 
-Owner-input requested: land route (b) now in a fresh focused block, or defer to the holder? The
-Section↔Point bridge is the crux and wants a clean-budget pass.
+**So there is NO standalone lemma for me to land** — the pattern is done (noetherian branch); the
+arbitrary-base branch (#1 unrestricted → #2/#3 via `pullSection_zsmul`) is scope-blocked on a mathlib
+gap by explicit owner decision. This is a "verify-before-grind" catch: the v10.75 framing (land
+standalone lemmas discharging the T-E4-family) predates / lost track of the 2026-07-08 T-W7.8 parking
+decision — like the map_id and T-A3 moot re-dispatches.
+
+## Recommendation
+
+1. **Do NOT re-attempt unrestricted `pullSection_add`** — it is owner-parked behind the T-W7.8 mathlib
+   gap, not a provable held sorry. The sorryAx inheritance poisoning YFULL AFF/FIN + GH1 (and the
+   Γ₁/Γ(N) functor maps) is fundamentally T-W7.8-gated; it clears when T-W7.8 lands, not before.
+2. **Consumers whose base IS locally noetherian** can be re-wired NOW to
+   `pullSection_add_of_isLocallyNoetherian` (`PullSectionAdd.lean:169`) — the noetherian branch is
+   axiom-clean. Worth checking whether YFULL AFF/FIN / GH1 fibres are noetherian (they often are over a
+   noetherian `R`); if so, that re-wire clears their inheritance without T-W7.8. This is a holder task
+   (their files), a wiring note not a new lemma.
+3. The **vi-gate** inheritance I traced separately (`tateMarkedPoint_pull_fst` → `tateUniversal`/
+   `tateMarkedPoint`/`pointSpecPointsEquiv`) is a **different** upstream chain — [T-B6′] territory, not
+   the T-W7.8/pullSection branch.
+
+**Net:** the survey's target is not a landable lemma but a scope-parked gap (T-W7.8, owner-decided).
+Standing down on it per "wall ⟹ board forensics + stand down." The one actionable follow-up is the
+noetherian-rewire check for the specific poisoned consumers — a holder decision, flagged here.
