@@ -16,6 +16,26 @@ namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 
+/-- [C6-a'] A field-valued point of an `iSup`-of-opens subscheme factors through one of the
+members: the unique point of `Spec K` lies in some member, and the member inclusion is an open
+immersion. -/
+theorem specPoint_factors_iSup {X : Scheme.{u}} {ι : Type*} (U : ι → X.Opens)
+    (K : Type u) [Field K] (g : Spec (CommRingCat.of K) ⟶ (⨆ i, U i).toScheme) :
+    ∃ (i : ι) (h : Spec (CommRingCat.of K) ⟶ (U i).toScheme),
+      h ≫ X.homOfLE (le_iSup U i) = g := by
+  have hmem : (⨆ i, U i).ι.base (g.base default) ∈ (⨆ i, U i : X.Opens) := by
+    have h1 : (⨆ i, U i).ι.base (g.base default) ∈ Set.range (⨆ i, U i).ι.base := ⟨_, rfl⟩
+    rwa [Scheme.Opens.range_ι] at h1
+  obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
+  refine ⟨i, IsOpenImmersion.lift (X.homOfLE (le_iSup U i)) g ?_, IsOpenImmersion.lift_fac _ _ _⟩
+  rw [Set.range_unique (f := g.base)]
+  refine Set.singleton_subset_iff.mpr ?_
+  have hor : (X.homOfLE (le_iSup U i)).opensRange =
+      (⨆ j, U j).ι ⁻¹ᵁ (U i) := Scheme.opensRange_homOfLE _
+  have : g.base default ∈ (X.homOfLE (le_iSup U i)).opensRange := by
+    rw [hor]
+    exact hi
+  exact this
 /-- [C6-a] A field-valued point of `E ×_R E` factors through `blOpenZ` or `blOpenY`. -/
 theorem specPoint_factors_blOpenZ_or_blOpenY (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K]
