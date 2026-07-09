@@ -229,4 +229,101 @@ private theorem maximalIdeal_smul_fibre (n : Ideal S)
       zero_mul, TensorProduct.zero_tmul]
   | add x y ihx ihy => rw [smul_add, ihx, ihy, add_zero]
 
+/-- **The general-position induction of Stacks 03C1**: for each `t ≤ r` there is a family
+of `t` elements of `N` whose images in every fibre `(S⧸nⱼ) ⊗ M` are linearly independent.
+The step escapes the `t`-dimensional spans in all fibres simultaneously via
+`exists_one_tmul_baseChange_ne_zero`. -/
+private theorem exists_fibre_independent {s : ℕ} (n : Fin s → Ideal S)
+    (hnmax : ∀ j, (n j).IsMaximal)
+    (hmn : ∀ j, (IsLocalRing.maximalIdeal R).map (algebraMap R S) ≤ n j)
+    (N : Submodule R M) (hN : Submodule.span S (N : Set M) = ⊤) {r : ℕ}
+    (hr : Module.finrank S M = r) :
+    ∀ t : ℕ, t ≤ r → ∃ y : Fin t → M, (∀ i, y i ∈ N) ∧
+      ∀ j, LinearIndependent (S ⧸ n j) (fun i => fibreEval (M := M) (n j) (y i)) := by
+  intro t
+  induction t with
+  | zero =>
+    exact fun _ => ⟨Fin.elim0, fun i => i.elim0, fun j => linearIndependent_empty_type⟩
+  | succ t ih =>
+    intro ht
+    obtain ⟨y, hyN, hyind⟩ := ih (Nat.le_of_succ_le ht)
+    -- the current spans in each fibre, and the quotient targets
+    let W : ∀ j, Submodule (S ⧸ n j) ((S ⧸ n j) ⊗[S] M) := fun j =>
+      Submodule.span (S ⧸ n j) (Set.range (fun i => fibreEval (M := M) (n j) (y i)))
+    let T : Fin s → Type _ := fun j =>
+      ((S ⧸ n j) ⊗[S] M) ⧸ ((W j).restrictScalars S)
+    let h : ∀ j, N →ₗ[R] T j := fun j =>
+      ((((W j).restrictScalars S).mkQ.restrictScalars R).comp
+        ((fibreEval (M := M) (n j)).restrictScalars R)).comp N.subtype
+    -- each fibre span is proper (else t independent vectors would be a basis, so r = t),
+    -- giving an element of N escaping it
+    have hWproper : ∀ j, ∃ z ∈ N, fibreEval (M := M) (n j) z ∉ W j := by
+      intro j
+      by_contra hcon
+      push Not at hcon
+      have hle : (⊤ : Submodule (S ⧸ n j) ((S ⧸ n j) ⊗[S] M)) ≤ W j := by
+        rw [← span_fibreEval_eq_top (n j) N hN]
+        rw [Submodule.span_le]
+        rintro - ⟨z, hz, rfl⟩
+        exact hcon z hz
+      haveI : Nontrivial (S ⧸ n j) := Ideal.Quotient.nontrivial_iff.mpr (hnmax j).ne_top
+      have hbasis := Module.Basis.mk (hyind j) hle
+      have hcard := Module.finrank_eq_card_basis hbasis
+      rw [finrank_fibre (M := M) (n j) hr, Fintype.card_fin] at hcard
+      omega
+    -- the maps into the quotients by the spans are nonzero after residue base change
+    have hne : ∀ j, LinearMap.baseChange (ResidueField R) (h j) ≠ 0 := by
+      intro j
+      obtain ⟨z, hzN, hzW⟩ := hWproper j
+      have hz0 : h j ⟨z, hzN⟩ ≠ 0 := by
+        intro h0
+        exact hzW (by
+          have := (Submodule.Quotient.mk_eq_zero ((W j).restrictScalars S)).mp h0
+          exact this)
+      have hkill : IsLocalRing.maximalIdeal R • (⊤ : Submodule R (T j)) = ⊥ := by
+        rw [eq_bot_iff]
+        refine Submodule.smul_le.mpr fun c hc x _ => ?_
+        obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ x
+        rw [Submodule.mem_bot, ← Submodule.Quotient.mk_smul,
+          maximalIdeal_smul_fibre (n j) (hmn j) hc v, Submodule.Quotient.mk_zero]
+      intro hzero
+      refine one_tmul_ne_zero_of_smul_top_eq_bot hkill hz0 ?_
+      rw [show ((1 : ResidueField R) ⊗ₜ[R] (h j ⟨z, hzN⟩) : ResidueField R ⊗[R] T j)
+          = LinearMap.baseChange (ResidueField R) (h j) (1 ⊗ₜ[R] ⟨z, hzN⟩) from
+        (LinearMap.baseChange_tmul _ _ _).symm, hzero, LinearMap.zero_apply]
+    -- escape all fibres at once
+    obtain ⟨z, hz⟩ := exists_one_tmul_baseChange_ne_zero h hne
+    have hzW : ∀ j, fibreEval (M := M) (n j) (z : M) ∉ W j := by
+      intro j hmem
+      refine hz j ?_
+      rw [LinearMap.baseChange_tmul,
+        show h j z = 0 from (Submodule.Quotient.mk_eq_zero _).mpr hmem,
+        TensorProduct.tmul_zero]
+    -- extend the family
+    refine ⟨Fin.cons (z : M) y, fun i => ?_, fun j => ?_⟩
+    · refine Fin.cases ?_ (fun i' => ?_) i
+      · rw [Fin.cons_zero]; exact z.2
+      · rw [Fin.cons_succ]; exact hyN i'
+    · have hcomp : (fun i => fibreEval (M := M) (n j)
+            ((Fin.cons (z : M) y : Fin (t + 1) → M) i))
+          = Fin.cons (fibreEval (M := M) (n j) (z : M))
+              (fun i => fibreEval (M := M) (n j) (y i)) := by
+        funext i
+        refine Fin.cases ?_ (fun i' => ?_) i
+        · rw [Fin.cons_zero, Fin.cons_zero]
+        · rw [Fin.cons_succ, Fin.cons_succ]
+      rw [hcomp]
+      refine LinearIndependent.finCons' _ _ (hyind j) ?_
+      intro c w hw hsum
+      by_contra hc0
+      obtain ⟨b, hb⟩ := Ideal.Quotient.exists_inv hc0
+      refine hzW j ?_
+      have hx : c • fibreEval (M := M) (n j) (z : M) = -w :=
+        eq_neg_of_add_eq_zero_left hsum
+      have hbc : fibreEval (M := M) (n j) (z : M)
+          = b • (c • fibreEval (M := M) (n j) (z : M)) := by
+        rw [smul_smul, show b * c = 1 from (mul_comm c b) ▸ hb, one_smul]
+      rw [hbc, hx]
+      exact Submodule.smul_mem _ b (Submodule.neg_mem _ hw)
+
 end Semilocal
