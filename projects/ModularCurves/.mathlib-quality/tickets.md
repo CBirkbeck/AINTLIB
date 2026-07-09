@@ -10937,3 +10937,18 @@ vendoring.*
   matrix form pointwise. Probes preserved in the session scratchpad.
 - The agent leftover carrying a forbidden `set_option maxHeartbeats 2000000` was
   REVERTED (rule 3); its diagnosis (whnf explosion) confirmed and re-derived cleanly.
+
+### v10.60b (2026-07-09, fable-FP): [NISOG-GRASS] [GR-E] transition design pinned; naturality attack dispatched fresh-context
+
+- **[GR-E] pinned in the artifact** (decomposition-nisog-grass.md, committed 6cec940d6):
+  `chartTransitionMatrix` (delta/matrix column dichotomy) → overlap criterion
+  `IsChartAt(ι') ↔ IsUnit T.det` ([GR-E2], `Matrix.isUnit_iff_isUnit_det` route) →
+  generic-matrix ring transition `MvPolynomial → Localization.Away transitionDet`
+  ([GR-E3], the [GR-F] glue datum) → cocycle ([GR-E4], pointwise-first +
+  `IsLocalization` ext). Execution in NEW `ForMathlib/GrassmannianTransition.lean`
+  (single-writer discipline: GrassmannianChart.lean owned by the running naturality
+  attack). [GR-E3/E4]'s ring layer is Grassmannian-free — independently dispatchable.
+- [GR-B2n-4] naturality: fresh-context deep-filler dispatched with the v10.60 forensics
+  + three structural routes (interface-lemma + global irreducible / retraction-level
+  kernel-uniqueness restatement / quarantine + deliver uniqueness lemma alone).
+- Elaboration-trap patterns (5 modes) banked to persistent fleet memory.
