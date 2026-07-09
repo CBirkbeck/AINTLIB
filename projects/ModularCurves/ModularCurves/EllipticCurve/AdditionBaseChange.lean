@@ -153,6 +153,39 @@ lemma restrict_inf_agree {X Y : Scheme} (M : X ⟶ Y) (U V : X.Opens) :
       X.homOfLE (inf_le_right : U ⊓ V ≤ V) ≫ V.ι ≫ M := by
   rw [← Category.assoc, Scheme.homOfLE_ι, ← Category.assoc, Scheme.homOfLE_ι]
 
+section ClassifyNaturality
+
+variable {R : Type u} [CommRing R] {R' : Type u} [CommRing R']
+
+/-- **(c4.5 nat, A1)** Classifying maps are natural: the classifying map of a base-changed curve
+is the composite. Two maps out of the Δ-localized universal ring agreeing on the `aᵢ` generators
+agree (`IsLocalization.ringHom_ext` + `MvPolynomial.ringHom_ext`). -/
+theorem classifyRingHom_map (f : R →+* R') (W : WeierstrassCurve R)
+    [W.IsElliptic] [(W.map f).IsElliptic] :
+    classifyRingHom (W.map f) = f.comp (classifyRingHom W) := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers universalWeierstrass.Δ)
+  have h1 : (classifyRingHom (W.map f)).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing) = classifyCoeffHom (W.map f) := by
+    simp only [classifyRingHom, IsLocalization.Away.lift_comp]
+  have h2 : (classifyRingHom W).comp
+      (algebraMap (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing) = classifyCoeffHom W := by
+    simp only [classifyRingHom, IsLocalization.Away.lift_comp]
+  rw [h1, RingHom.comp_assoc, h2]
+  apply MvPolynomial.ringHom_ext
+  · intro n
+    simp [classifyCoeffHom]
+  · intro i
+    fin_cases i <;>
+      simp [classifyCoeffHom, map_a₁, map_a₂, map_a₃, map_a₄, map_a₆]
+
+/-- The universe-`u` form of `classifyRingHom_map`. -/
+theorem classifyRingHomU_map (f : R →+* R') (W : WeierstrassCurve R)
+    [W.IsElliptic] [(W.map f).IsElliptic] :
+    classifyRingHomU (W.map f) = f.comp (classifyRingHomU W) := by
+  rw [classifyRingHomU, classifyRingHomU, classifyRingHom_map f W, RingHom.comp_assoc]
+
+end ClassifyNaturality
+
 end BaseChangeOf
 
 end ModularCurves
