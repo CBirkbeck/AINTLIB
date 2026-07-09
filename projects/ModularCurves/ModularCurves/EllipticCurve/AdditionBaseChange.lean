@@ -133,6 +133,7 @@ noncomputable def mulModelHomBC (f : U →+* R) (W₀ : WeierstrassCurve U)
     (pullbackMap_mulModelHom_agree f W₀ hΔ₀ W h)
 
 /-- The lift restricts to `mulModelHom_U` through the base-change product. -/
+@[reassoc]
 lemma mulModelHomBC_baseChange (f : U →+* R) (W₀ : WeierstrassCurve U)
     [IsDomain U] [IsJacobsonRing U] (hΔ₀ : IsUnit W₀.Δ)
     (W : WeierstrassCurve R) (h : W₀.map f = W) :
@@ -141,6 +142,7 @@ lemma mulModelHomBC_baseChange (f : U →+* R) (W₀ : WeierstrassCurve U)
   (isPullback_projModelBaseChangeOf f W₀ W h).lift_fst _ _ _
 
 /-- The lift is over `Spec R` — `mulModelHom_π` for the base-changed multiplication. -/
+@[reassoc]
 lemma mulModelHomBC_projModelπ (f : U →+* R) (W₀ : WeierstrassCurve U)
     [IsDomain U] [IsJacobsonRing U] (hΔ₀ : IsUnit W₀.Δ)
     (W : WeierstrassCurve R) (h : W₀.map f = W) :
@@ -235,6 +237,61 @@ theorem projModelBaseChangeOf_comp (F : R →+* R') (G : U →+* R) (W₀ : Weie
   rw [projModelBaseChangeOf, projModelBaseChangeOf, projModelBaseChangeOf]
   simp only [eqToHom_refl, Category.id_comp]
   exact projModelBaseChange_comp' F G W₀
+/-- Transport across an equality of classifying homs (proofs are irrelevant). -/
+theorem mulModelHomBC_congr (f₁ f₂ : U →+* R) (hf : f₁ = f₂) (W₀ : WeierstrassCurve U)
+    [IsDomain U] [IsJacobsonRing U] (hΔ₀ : IsUnit W₀.Δ)
+    (W : WeierstrassCurve R) (h₁ : W₀.map f₁ = W) (h₂ : W₀.map f₂ = W) :
+    mulModelHomBC f₁ W₀ hΔ₀ W h₁ = mulModelHomBC f₂ W₀ hΔ₀ W h₂ := by
+  subst hf; rfl
+
+/-- The transported base change at `h := rfl` is the plain base change. -/
+theorem projModelBaseChangeOf_rfl (f : U →+* R) (W₀ : WeierstrassCurve U) :
+    projModelBaseChangeOf f W₀ (W₀.map f) rfl = projModelBaseChange f W₀ := by
+  rw [projModelBaseChangeOf]
+  simp
+
+/-- `projModelBaseChange f W ≫ bcOf G = bcOf (f.comp G)` — the composite collapse. -/
+theorem projModelBaseChange_comp_projModelBaseChangeOf (G : U →+* R) (f : R →+* R')
+    (W₀ : WeierstrassCurve U) (W : WeierstrassCurve R) (h : W₀.map G = W) :
+    projModelBaseChange f W ≫ projModelBaseChangeOf G W₀ W h =
+      projModelBaseChangeOf (f.comp G) W₀ (W.map f)
+        (by rw [← WeierstrassCurve.map_map, h]) := by
+  rw [projModelBaseChangeOf_comp f G W₀ W h (W.map f) rfl, projModelBaseChangeOf_rfl]
+
+/-- The base-change fibre-square maps compose. -/
+@[reassoc]
+theorem pullbackMapBaseChangeOf_comp (G : U →+* R) (f : R →+* R')
+    (W₀ : WeierstrassCurve U) (W : WeierstrassCurve R) (h : W₀.map G = W) :
+    pullback.map (projModelπ (W.map f)) (projModelπ (W.map f)) (projModelπ W) (projModelπ W)
+        (projModelBaseChange f W) (projModelBaseChange f W) (Spec.map (CommRingCat.ofHom f))
+        (projModelBaseChange_π f W).symm (projModelBaseChange_π f W).symm ≫
+      pullbackMapBaseChangeOf G W₀ W h =
+    pullbackMapBaseChangeOf (f.comp G) W₀ (W.map f)
+      (by rw [← WeierstrassCurve.map_map, h]) := by
+  apply pullback.hom_ext
+  · simp only [pullbackMapBaseChangeOf, Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc,
+      projModelBaseChange_comp_projModelBaseChangeOf G f W₀ W h]
+  · simp only [pullbackMapBaseChangeOf, Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc,
+      projModelBaseChange_comp_projModelBaseChangeOf G f W₀ W h]
+
+/-- **(c4.5 nat, BC level)** Base-change naturality of the lifted multiplication, classify-free. -/
+theorem mulModelHomBC_map (G : U →+* R) (f : R →+* R') (W₀ : WeierstrassCurve U)
+    [IsDomain U] [IsJacobsonRing U] (hΔ₀ : IsUnit W₀.Δ)
+    (W : WeierstrassCurve R) (h : W₀.map G = W) :
+    mulModelHomBC (f.comp G) W₀ hΔ₀ (W.map f)
+        (by rw [← WeierstrassCurve.map_map, h]) ≫ projModelBaseChange f W =
+      pullback.map (projModelπ (W.map f)) (projModelπ (W.map f)) (projModelπ W) (projModelπ W)
+          (projModelBaseChange f W) (projModelBaseChange f W) (Spec.map (CommRingCat.ofHom f))
+          (projModelBaseChange_π f W).symm (projModelBaseChange_π f W).symm ≫
+        mulModelHomBC G W₀ hΔ₀ W h := by
+  apply (isPullback_projModelBaseChangeOf G W₀ W h).hom_ext
+  · -- fst-leg: both collapse to (pbmap of f.comp G) ≫ mulModelHom_U
+    simp only [Category.assoc, projModelBaseChange_comp_projModelBaseChangeOf G f W₀ W h,
+      mulModelHomBC_baseChange, mulModelHomBC_baseChange_assoc,
+      pullbackMapBaseChangeOf_comp G f W₀ W h, pullbackMapBaseChangeOf_comp_assoc G f W₀ W h]
+  · -- snd-leg: both collapse to fst ≫ π ≫ Spec f
+    simp only [Category.assoc, projModelBaseChange_π, mulModelHomBC_projModelπ,
+      mulModelHomBC_projModelπ_assoc, pullback.lift_fst_assoc]
 end BaseChangeFunctoriality
 
 end ClassifyNaturality
