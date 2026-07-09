@@ -1,6 +1,8 @@
 import ModularCurves.ForMathlib.Coaction
 import Mathlib.RingTheory.HopfAlgebra.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+import Mathlib.RingTheory.IntegralClosure.IsIntegral.Basic
+import Mathlib.Algebra.Polynomial.Lifts
 
 /-!
 # The comultiplication matrix of a finite free Hopf algebra
@@ -676,6 +678,136 @@ theorem coactionCharpoly_coeff_mem (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoacti
     (k : ℕ) : (coactionCharpoly R A ρ f).coeff k ∈ coinvariants ρ := by
   have h := congrArg (fun q => Polynomial.coeff q k) (map_coactionCharpoly R A ρ hρ f)
   simpa [Polynomial.coeff_map, mem_coinvariants] using h
+
+/-- The multiplication-matrix map, packaged as a ring homomorphism — the (faithful) matrix
+representation of `B ⊗[R] A` acting on itself in the basis `1 ⊗ eⱼ`. -/
+noncomputable def mulMatrixHom :
+    (B ⊗[R] A) →+* Matrix (hopfBasisIndex R A) (hopfBasisIndex R A) B where
+  toFun := mulMatrix R A
+  map_one' := by
+    classical
+    have h := mulMatrix_includeLeft R A (B := B) 1
+    rw [show ((1 : B) ⊗ₜ[R] (1 : A)) = (1 : B ⊗[R] A) from
+      (Algebra.TensorProduct.one_def).symm] at h
+    exact h.trans Matrix.diagonal_one
+  map_mul' := mulMatrix_mul R A
+  map_zero' := by
+    ext i j
+    show rightCoeff R A i ((0 : B ⊗[R] A) * _) = 0
+    rw [zero_mul, map_zero]
+  map_add' := fun u v => by
+    ext i j
+    show rightCoeff R A i ((u + v) * _) = _
+    rw [add_mul, map_add]
+    rfl
+
+/-- The matrix representation is faithful: `mulMatrix u = 0` forces `u = 0`
+(reconstruct `u = u·1` from the expansions over a basis decomposition of `1`). -/
+theorem eq_zero_of_mulMatrix_eq_zero {u : B ⊗[R] A} (h : mulMatrix R A u = 0) :
+    u = 0 := by
+  classical
+  have hu : u = u * ((1 : B) ⊗ₜ[R] (1 : A)) := by
+    rw [← Algebra.TensorProduct.one_def, mul_one]
+  have hone : ((1 : B) ⊗ₜ[R] (1 : A) : B ⊗[R] A)
+      = ∑ j, (hopfBasis R A).coord j 1 • ((1 : B) ⊗ₜ[R] (hopfBasis R A) j) := by
+    have h1A : (1 : A) = ∑ j, (hopfBasis R A).coord j 1 • (hopfBasis R A) j := by
+      simp only [Module.Basis.coord_apply]
+      exact ((hopfBasis R A).sum_repr 1).symm
+    calc ((1 : B) ⊗ₜ[R] (1 : A) : B ⊗[R] A)
+        = (1 : B) ⊗ₜ[R] (∑ j, (hopfBasis R A).coord j 1 • (hopfBasis R A) j) := by
+          rw [← h1A]
+      _ = ∑ j, (hopfBasis R A).coord j 1 • ((1 : B) ⊗ₜ[R] (hopfBasis R A) j) := by
+          rw [TensorProduct.tmul_sum]
+          exact Finset.sum_congr rfl fun j _ => TensorProduct.tmul_smul _ _ _
+  rw [hu, hone, Finset.mul_sum]
+  refine Finset.sum_eq_zero fun j _ => ?_
+  rw [mul_smul_comm, mul_one_tmul_hopfBasis, h]
+  simp
+
+/-- **Cayley–Hamilton, scalar form**: the co-action charpoly, evaluated through the left
+inclusion at `ρ(f)`, vanishes — `∑ᵢ (Pᵢ ⊗ 1)·ρ(f)^i = 0`. -/
+theorem eval₂_includeLeft_coactionCharpoly (ρ : B →ₐ[R] B ⊗[R] A) (f : B) :
+    Polynomial.eval₂ (Algebra.TensorProduct.includeLeft (S := R)).toRingHom (ρ f)
+      (coactionCharpoly R A ρ f) = 0 := by
+  classical
+  refine eq_zero_of_mulMatrix_eq_zero R A ?_
+  have h := Polynomial.hom_eval₂ (coactionCharpoly R A ρ f)
+    (Algebra.TensorProduct.includeLeft (S := R)).toRingHom (mulMatrixHom R A) (ρ f)
+  rw [show (mulMatrixHom R A).comp
+      (Algebra.TensorProduct.includeLeft (S := R)).toRingHom
+      = algebraMap B (Matrix (hopfBasisIndex R A) (hopfBasisIndex R A) B) from by
+    refine RingHom.ext fun b => ?_
+    show mulMatrix R A (b ⊗ₜ[R] (1 : A)) = _
+    rw [mulMatrix_includeLeft, Matrix.algebraMap_eq_diagonal]
+    rfl] at h
+  show (mulMatrixHom R A) (Polynomial.eval₂
+      (Algebra.TensorProduct.includeLeft (S := R)).toRingHom (ρ f)
+      (coactionCharpoly R A ρ f)) = 0
+  rw [h]
+  show Polynomial.aeval (mulMatrixHom R A (ρ f)) (coactionCharpoly R A ρ f) = 0
+  rw [show mulMatrixHom R A (ρ f) = mulMatrix R A (ρ f) from rfl, coactionCharpoly]
+  exact Matrix.aeval_self_charpoly _
+
+/-- The counit retraction `σ : B ⊗[R] A → B`, `b ⊗ a ↦ ε(a)·b` — a left inverse of both
+the inclusion and (by counitality) the co-action. -/
+noncomputable def counitRetraction : (B ⊗[R] A) →ₐ[R] B :=
+  (Algebra.TensorProduct.rid R R B).toAlgHom.comp
+    (Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.counitAlgHom R A))
+
+omit [Module.Free R A] [Module.Finite R A] in
+theorem counitRetraction_comp_coaction (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) :
+    (counitRetraction R A).comp ρ = AlgHom.id R B := by
+  rw [counitRetraction, AlgHom.comp_assoc]
+  exact hρ.counit
+
+omit [Module.Free R A] [Module.Finite R A] in
+theorem counitRetraction_comp_includeLeft :
+    (counitRetraction R A).comp (Algebra.TensorProduct.includeLeft (S := R))
+      = AlgHom.id R B := by
+  ext b
+  show (Algebra.TensorProduct.rid R R B)
+      ((Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.counitAlgHom R A))
+        (b ⊗ₜ[R] 1)) = b
+  rw [Algebra.TensorProduct.map_tmul, map_one, Algebra.TensorProduct.rid_tmul, one_smul]
+  rfl
+
+/-- **03BJ, comodule form — the integrality theorem**: every element of `B` is integral
+over the co-invariants of a co-action of a finite free Hopf algebra, via the monic
+co-action charpoly. -/
+theorem isIntegral_coinvariants (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B) :
+    IsIntegral (coinvariants ρ) f := by
+  classical
+  rcases subsingleton_or_nontrivial B with hB | hB
+  · exact ⟨Polynomial.X, Polynomial.monic_X, Subsingleton.elim _ _⟩
+  -- the charpoly annihilates f in B, via the counit retraction
+  have hev : (coactionCharpoly R A ρ f).eval f = 0 := by
+    have h := congrArg (counitRetraction R A) (eval₂_includeLeft_coactionCharpoly R A ρ f)
+    rw [map_zero] at h
+    rw [← h, show (counitRetraction R A) (Polynomial.eval₂
+        (Algebra.TensorProduct.includeLeft (S := R)).toRingHom (ρ f)
+        (coactionCharpoly R A ρ f))
+      = Polynomial.eval₂ ((counitRetraction R A).toRingHom.comp
+          (Algebra.TensorProduct.includeLeft (S := R)).toRingHom)
+        ((counitRetraction R A) (ρ f)) (coactionCharpoly R A ρ f) from
+      Polynomial.hom_eval₂ _ _ _ _]
+    rw [show (counitRetraction R A).toRingHom.comp
+        (Algebra.TensorProduct.includeLeft (S := R)).toRingHom = RingHom.id B from by
+      have := counitRetraction_comp_includeLeft R A (B := B)
+      exact congrArg AlgHom.toRingHom this,
+      show (counitRetraction R A) (ρ f) = f from
+        AlgHom.congr_fun (counitRetraction_comp_coaction R A ρ hρ) f,
+      Polynomial.eval₂_id]
+  -- lift the charpoly to the co-invariants
+  have hlift : coactionCharpoly R A ρ f
+      ∈ Polynomial.lifts (algebraMap (coinvariants ρ) B) := by
+    rw [Polynomial.lifts_iff_coeff_lifts]
+    intro n
+    exact ⟨⟨_, coactionCharpoly_coeff_mem R A ρ hρ f n⟩, rfl⟩
+  obtain ⟨q, hq_map, _, hq_monic⟩ :=
+    Polynomial.lifts_and_degree_eq_and_monic hlift (coactionCharpoly_monic R A ρ f)
+  exact ⟨q, hq_monic, by
+    rw [Polynomial.eval₂_eq_eval_map, hq_map]
+    exact hev⟩
 
 end Integrality
 
