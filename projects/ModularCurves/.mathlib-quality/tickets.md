@@ -10781,3 +10781,15 @@ equation against `Y.structMap`.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.101-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] final clause CLAIMED
+
+- **Claimed**: NEW-ATLAS-2, 2026-07-09T15:56:20Z. Status: in_progress. Takeover of NEW-ATLAS's
+  charter per coordinator v10.91 inbox (NEW-ATLAS rate-limited at the pushed boundary 98fab3c8f;
+  reclaims at a boundary on return). Target: the classifying clause proper — `exists_tatePoint`'s
+  ∀-part — as a standalone theorem in `ModularCurve/YOneAtlasClassify.lean`, per
+  `decomposition-y1-assembly.md` [Y1-B2] iii/iv/v, built on the landed v10.84–v10.100 apparatus.
+  Reuse-first: `EllObj.homPullbackAlongEquiv` + the Tate round-trip API before any hand-rolled
+  hom rebuild. Bar: own proofs complete, zero fresh sorries, inherited `sorryAx` listed +
+  attributed per decl (designed trail: `tateEllObj`/`tateUniversal` = gate [T-A6b]; T-W7
+  comparison inputs as pinned). Single-target builds, commit-early + push each green increment.
