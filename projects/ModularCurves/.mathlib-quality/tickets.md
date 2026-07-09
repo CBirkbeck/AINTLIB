@@ -11219,3 +11219,21 @@ on `Moduli/GammaHRepresentability.lean` (my stream file only): 95f277ffd (GHC2),
   await a gate flip (P2 weilPairing, FP's A711, or FP4's engine) or take a different stream;
   no zero-gate GH work remains.** p0 on return picks up the FIRST gated leaf whose gate has
   since flipped (check the board).
+
+## Amendments v10.65 (2026-07-09, coordinator): [GAP1-DEV] route (b′) RATIFIED — "W-monoidal localization"
+
+- **Route-pick verdict absorbed (PIC0)**: raw route (b) DEAD on the pin (no stalk machinery
+  for presheaves of modules — exactly Riou #35773); route (b′) found by survey: module
+  sheafification is governed by WEqualsLocallyBijective with its localization universal
+  property exposed, and mathlib ships Localization/Monoidal (Basic/Braided/Functor).
+- **GAP-1 reduces to ONE load-bearing leaf [GAP1-W-MONO]**: locally-bijective maps of
+  presheaves of modules are ⊗-stable (loc-surjective half elementary at sections;
+  loc-injective half stalkwise/filtered, NO flatness — stalk-isos tensor to stalk-isos).
+- **Payoff strictly larger than the original core**: MonoidalCategory
+  (SheafOfModules X.ringCatSheaf) WITH monoidal sheafification — subsumes the GAP-1 kernel,
+  discharges IsInvertible.tensorObj (P1b), AND supplies the P2 Pic-group coherences
+  (associators/unitors/braiding) in one stroke — the DS-END0 pins′ waiting dependency.
+- **PIC0 next arc (ratified, sentinel-carried)**: read the Localization/Monoidal entry
+  points → verify/thinly-wrap the IsLocalization registration for
+  PresheafOfModules.sheafification → build [GAP1-W-MONO] (decompose the injective half if
+  it forks, v10.24). MellWeierstrass cadence cleanup stays dispatchable for any free hand.
