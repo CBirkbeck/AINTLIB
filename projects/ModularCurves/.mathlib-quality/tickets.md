@@ -10603,3 +10603,15 @@ piece needed before turning the coefficient map into the top component of an `El
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for all three declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.89-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `Ell/R` base component handle LANDED
+
+Added `EllObj.structAlgebra`, `EllObj.structAlgebra_algebraMap`,
+`EllObj.toSpecΓ_algebraMap_eq_structMap`, and `tateBaseMapOfGlobalCoeffs_base_w` in the dedicated
+atlas file. These identify the `Γ(Y.base)` algebra induced by an `Ell/R` object and prove that the
+global Tate coefficient map has exactly the `base_w` equation required for a morphism
+`Y ⟶ tateEllObj R`.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for all four declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).

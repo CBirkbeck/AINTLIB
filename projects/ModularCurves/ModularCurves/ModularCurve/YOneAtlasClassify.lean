@@ -211,6 +211,47 @@ theorem tateBaseMapOfGlobalCoeffs_tateStructMap (α β : Γ(S, ⊤))
   unfold tateBaseMapOfGlobalCoeffs
   rw [Category.assoc, tateBaseSpecMapOfCoeffs_tateStructMap]
 
+/-- The `R`-algebra on global functions induced by an object of `Ell/R`. -/
+@[reducible]
+noncomputable def EllObj.structAlgebra (Y : EllObj R) : Algebra R Γ(Y.base, ⊤) :=
+  ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop).hom.toAlgebra
+
+theorem EllObj.structAlgebra_algebraMap (Y : EllObj R) :
+    letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+    algebraMap R Γ(Y.base, ⊤) =
+      ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop).hom := by
+  rfl
+
+/-- If the global-functions `R`-algebra is the one induced by an object of `Ell/R`,
+the corresponding `ΓSpec` structure map is exactly the object's structure morphism. -/
+theorem EllObj.toSpecΓ_algebraMap_eq_structMap (Y : EllObj R)
+    [Algebra R Γ(Y.base, ⊤)]
+    (halg : algebraMap R Γ(Y.base, ⊤) =
+      ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop).hom) :
+    Y.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (algebraMap R Γ(Y.base, ⊤))) =
+      Y.structMap := by
+  rw [halg]
+  change Y.base.toSpecΓ ≫ Spec.map ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop) =
+    Y.structMap
+  rw [Spec.map_comp]
+  rw [← Category.assoc]
+  rw [← Scheme.toSpecΓ_naturality Y.structMap]
+  rw [Category.assoc, toSpecΓ_SpecMap_ΓSpecIso_inv, Category.comp_id]
+
+/-- The global coefficient map gives the correct base component for an `Ell/R` morphism
+when the global-functions algebra comes from the source object's structure map. -/
+theorem tateBaseMapOfGlobalCoeffs_base_w (Y : EllObj R)
+    [Algebra R Γ(Y.base, ⊤)]
+    (halg : algebraMap R Γ(Y.base, ⊤) =
+      ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop).hom)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
+      (algebraMap R Γ(Y.base, ⊤))
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateBaseMapOfGlobalCoeffs R Y.base α β hΔ ≫ tateStructMap R = Y.structMap := by
+  rw [tateBaseMapOfGlobalCoeffs_tateStructMap]
+  exact EllObj.toSpecΓ_algebraMap_eq_structMap R Y halg
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
