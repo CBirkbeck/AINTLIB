@@ -263,25 +263,24 @@ of `IsCurveAction` transported to the chart) yields a `VariableChange`-valued co
 the cocycle identity is faithfulness of the model action (`projModelVCIso_injective`) applied to the
 geometric multiplicativity (`hmul` + `projModelVCIso_mul`/`_map_hom` + `projModelBaseChange_comp`,
 with the base changes cancellable because `toRingHom g` is an automorphism). -/
-theorem isVCocycle_of_curveActionFamily {G : Type u} [Group G] [MulSemiringAction G R]
+theorem isVCocycle_of_curveActionFamily' {G : Type u} [Group G] [MulSemiringAction G R]
     (W₀ : WeierstrassCurve R) (act : G → (projModel W₀ ⟶ projModel W₀))
     (hmul : ∀ g h, act (g * h) = act g ≫ act h)
     (hcart : ∀ g, IsPullback (act g) (projModelπ W₀) (projModelπ W₀)
       (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g))))
     (hzero : ∀ g, projModelZero W₀ ≫ act g
       = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g)) ≫ projModelZero W₀) :
-    ∃ C : G → VariableChange R, IsVCocycle C ∧
-      ∀ g, C g • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀ := by
+    ∃ (C : G → VariableChange R)
+      (hC : ∀ g, C g • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀),
+      IsVCocycle C ∧
+      ∀ x, (projModelVCIso (C x) (W₀.map (MulSemiringAction.toRingHom G R x))).hom
+          ≫ projModelBaseChange (MulSemiringAction.toRingHom G R x) W₀
+        = eqToHom (congrArg projModel (hC x)) ≫ act x := by
   choose C hC hiso using fun g => pointedIso_exists_variableChange W₀
     (W₀.map (MulSemiringAction.toRingHom G R g))
     ((hcart g).isoIsPullback _ _ (isPullback_projModelBaseChange_hom _ W₀))
     (cartesianIso_hom_π _ W₀ (hcart g))
     (cartesianIso_hom_zero _ W₀ (hcart g) (hzero g))
-  refine ⟨C, fun g h => ?_, hC⟩
-  have hW : C (g * h) • (W₀.map (MulSemiringAction.toRingHom G R (g * h)))
-      = (C g * g • C h) • (W₀.map (MulSemiringAction.toRingHom G R (g * h))) := by
-    rw [hC (g * h)]; exact (vc_mul_smul_eq W₀ hC g h).symm
-  refine projModelVCIso_injective _ _ _ hW ?_
   have hΨ : ∀ x : G, (projModelVCIso (C x) (W₀.map (MulSemiringAction.toRingHom G R x))).hom
       ≫ projModelBaseChange (MulSemiringAction.toRingHom G R x) W₀
       = eqToHom (congrArg projModel (hC x)) ≫ act x := by
@@ -289,6 +288,11 @@ theorem isVCocycle_of_curveActionFamily {G : Type u} [Group G] [MulSemiringActio
     have hfst := (hcart x).isoIsPullback_hom_fst _ _ (isPullback_projModelBaseChange_hom _ W₀)
     rw [hiso x, Category.assoc] at hfst
     rw [← hfst, ← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
+  refine ⟨C, hC, fun g h => ?_, hΨ⟩
+  have hW : C (g * h) • (W₀.map (MulSemiringAction.toRingHom G R (g * h)))
+      = (C g * g • C h) • (W₀.map (MulSemiringAction.toRingHom G R (g * h))) := by
+    rw [hC (g * h)]; exact (vc_mul_smul_eq W₀ hC g h).symm
+  refine projModelVCIso_injective _ _ _ hW ?_
   have hcore : (projModelVCIso (C g * g • C h)
         (W₀.map (MulSemiringAction.toRingHom G R (g * h)))).hom
       ≫ projModelBaseChange (MulSemiringAction.toRingHom G R (g * h)) W₀
@@ -320,6 +324,23 @@ theorem isVCocycle_of_curveActionFamily {G : Type u} [Group G] [MulSemiringActio
   haveI := isIso_projModelBaseChange (MulSemiringAction.toRingHom G R (g * h)) W₀
   refine (cancel_mono (projModelBaseChange (MulSemiringAction.toRingHom G R (g * h)) W₀)).mp ?_
   rw [Category.assoc, hcore, hΨ (g * h), ← Category.assoc, eqToHom_trans]
+
+open scoped Pointwise in
+/-- **([a5-ii], the cocycle — geometric half)** The un-primed form: a geometric `G`-action on
+`projModel W₀` yields a `VariableChange` cocycle with `C g • (g•W₀) = W₀`. (The primed variant
+also exposes the `hΨ` link `VCIso (C g) ≫ β_g = eqToHom ≫ act g` used by the fppf-comparison's
+`G`-invariance.) -/
+theorem isVCocycle_of_curveActionFamily {G : Type u} [Group G] [MulSemiringAction G R]
+    (W₀ : WeierstrassCurve R) (act : G → (projModel W₀ ⟶ projModel W₀))
+    (hmul : ∀ g h, act (g * h) = act g ≫ act h)
+    (hcart : ∀ g, IsPullback (act g) (projModelπ W₀) (projModelπ W₀)
+      (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g))))
+    (hzero : ∀ g, projModelZero W₀ ≫ act g
+      = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g)) ≫ projModelZero W₀) :
+    ∃ C : G → VariableChange R, IsVCocycle C ∧
+      ∀ g, C g • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀ := by
+  obtain ⟨C, hC, hcoc, -⟩ := isVCocycle_of_curveActionFamily' W₀ act hmul hcart hzero
+  exact ⟨C, hcoc, hC⟩
 
 open scoped Pointwise in
 /-- **([a5], the local descent — cocycle + algebra assembled)** Given the geometric `G`-action on
