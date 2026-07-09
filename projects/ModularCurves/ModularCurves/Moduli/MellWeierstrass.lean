@@ -477,6 +477,36 @@ private theorem vcIso_inv_transport {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (e :
           eqToHom (congrArg (projModel ·) (congrArg (C'' • ·) e)) ≫ k := by
   subst e; simp
 
+private theorem vcIso_congrC {D D' : VariableChange ↑Γ(S, ⊤)} (h : D = D')
+    (V : WeierstrassCurve ↑Γ(S, ⊤)) :
+    (projModelVCIso D V).hom =
+      eqToHom (congrArg (fun c => projModel (c • V)) h) ≫ (projModelVCIso D' V).hom := by
+  subst h; simp
+
+private theorem vcIso_congrW (D : VariableChange ↑Γ(S, ⊤))
+    {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (h : V = V') :
+    (projModelVCIso D V).hom =
+      eqToHom (congrArg (fun w => projModel (D • w)) h) ≫ (projModelVCIso D V').hom ≫
+        eqToHom (congrArg projModel h.symm) := by
+  subst h; simp
+
+/-- The coordinate-change model iso at the identity is the identity transport — proven
+from the PUBLIC cocycle `projModelVCIso_mul` alone (instantiate at `1, 1`, right-cancel
+the iso), per the v10.59 dispatch; no private transport machinery consumed. -/
+private theorem projModelVCIso_one_hom (V : WeierstrassCurve ↑Γ(S, ⊤)) :
+    (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) V).hom =
+      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) V)) := by
+  have hmul := projModelVCIso_mul (1 : VariableChange ↑Γ(S, ⊤)) 1 V
+  have h1 := (vcIso_congrC (one_mul (1 : VariableChange ↑Γ(S, ⊤))) V).symm.trans hmul
+  have h2 := congrArg (· ≫ (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) V).inv) h1
+  simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id] at h2
+  have h3 := congrArg
+    (eqToHom (congrArg projModel (mul_smul (1 : VariableChange ↑Γ(S, ⊤)) 1 V).symm) ≫ ·) h2
+  simp only [eqToHom_trans, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp] at h3
+  rw [vcIso_congrW (1 : VariableChange ↑Γ(S, ⊤))
+    (one_smul (VariableChange ↑Γ(S, ⊤)) V).symm, ← h3]
+  simp [eqToHom_trans]
+
 private theorem vcModelHom_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
     (Cf Cg : VariableChange ↑Γ(S, ⊤)) (hf : Cf • W = W') (hg : Cg • W' = W'')
     (h : (Cg * Cf) • W = W'') :
@@ -500,6 +530,28 @@ private theorem vcMiddleMap_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
   · simp only [vcMiddleMap, Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc]
     rw [vcModelHom_mul Cf Cg hf hg h]
   · simp only [vcMiddleMap, Category.assoc, pullback.lift_snd, Category.comp_id]
+
+private theorem vcModelHom_one {W : ellipticW ↑Γ(S, ⊤)}
+    (hC : (1 : VariableChange ↑Γ(S, ⊤)) • W = W) :
+    vcModelHom 1 hC = 𝟙 (projModel W.1) := by
+  rw [vcModelHom]
+  have hinv : (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) W.1).inv =
+      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) W.1)).symm := by
+    apply Iso.inv_ext
+    rw [projModelVCIso_one_hom]
+    simp [eqToHom_trans]
+  rw [hinv]
+  simp [eqToHom_trans]
+
+private theorem vcMiddleMap_one {W : ellipticW ↑Γ(S, ⊤)}
+    (hC : (1 : VariableChange ↑Γ(S, ⊤)) • W = W) :
+    vcMiddleMap 1 hC = 𝟙 (pullback (projModelπ W.1) S.toSpecΓ) := by
+  apply pullback.hom_ext
+  · simp only [vcMiddleMap, Category.assoc, pullback.lift_fst, Category.id_comp]
+    rw [vcModelHom_one]
+    simp
+  · simp only [vcMiddleMap, Category.assoc, pullback.lift_snd, Category.id_comp,
+      Category.comp_id]
 
 /-- **(T-W6c-ii)** A coordinate change carrying `W` to `W'` induces an isomorphism of
 the presented curves. -/
@@ -565,7 +617,12 @@ noncomputable def presentationFunctor :
   map {W W'} g := ⟨(curveOfVCIso g.1 g.2).hom, curveOfVCIso_π g.1 g.2,
     curveOfVCIso_zero g.1 g.2⟩
   map_id W := by
-    sorry
+    apply Subtype.ext
+    show (curveOfVCIso (1 : VariableChange ↑Γ(S, ⊤)) (one_smul _ W.pt)).hom =
+      𝟙 (curveOf W.pt).E
+    simp only [curveOfVCIso, Iso.trans_hom, Iso.symm_hom, vcMiddleIso, asIso_hom]
+    rw [vcMiddleMap_one]
+    simp
   map_comp f g := by
     apply Subtype.ext
     show (curveOfVCIso (g.1 * f.1) (by rw [mul_smul, f.2, g.2])).hom =
