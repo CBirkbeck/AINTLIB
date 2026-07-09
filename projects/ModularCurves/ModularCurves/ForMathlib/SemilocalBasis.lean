@@ -2,6 +2,8 @@ import Mathlib.RingTheory.Nakayama
 import Mathlib.RingTheory.FiniteType
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.LinearAlgebra.TensorProduct.Quotient
+import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.GroupTheory.CosetCover
 
 /-!
@@ -90,3 +92,68 @@ theorem Submodule.eq_bot_of_forall_le_smul_of_prod_le_jacobson (Q : Submodule S 
     (hprod Finset.univ) hjac
 
 end Nakayama
+
+section Avoidance
+
+open IsLocalRing TensorProduct
+
+variable {R : Type*} [CommRing R] [IsLocalRing R]
+
+/-- Every element of `κ ⊗[R] N'` for the residue field `κ` is a pure tensor `1 ⊗ z`:
+residue-field scalars lift to `R` (`residue_surjective`), so they can be pushed across the
+tensor. -/
+theorem exists_one_tmul_eq_residueField {N' : Type*} [AddCommGroup N'] [Module R N']
+    (x : ResidueField R ⊗[R] N') : ∃ z : N', (1 : ResidueField R) ⊗ₜ[R] z = x := by
+  induction x with
+  | zero => exact ⟨0, TensorProduct.tmul_zero _ _⟩
+  | tmul c z =>
+    obtain ⟨r, rfl⟩ := residue_surjective (R := R) c
+    exact ⟨r • z, by simp [TensorProduct.smul_tmul', Algebra.smul_def]⟩
+  | add x y ihx ihy =>
+    obtain ⟨zx, hzx⟩ := ihx
+    obtain ⟨zy, hzy⟩ := ihy
+    exact ⟨zx + zy, by rw [TensorProduct.tmul_add, hzx, hzy]⟩
+
+/-- If the maximal ideal kills `T`, then `1 ⊗ t ≠ 0` in `κ ⊗[R] T` for `t ≠ 0`: under
+`quotTensorEquivQuotSMul` the element `1 ⊗ t` is the class of `t` mod `m•T = ⊥`. -/
+theorem one_tmul_ne_zero_of_smul_top_eq_bot {T : Type*} [AddCommGroup T] [Module R T]
+    (hmT : maximalIdeal R • (⊤ : Submodule R T) = ⊥) {t : T} (ht : t ≠ 0) :
+    (1 : ResidueField R) ⊗ₜ[R] t ≠ (0 : ResidueField R ⊗[R] T) := by
+  intro h0
+  have h1 : quotTensorEquivQuotSMul T (maximalIdeal R)
+      ((Ideal.Quotient.mk (maximalIdeal R) 1) ⊗ₜ[R] t) = 0 := by
+    rw [show (Ideal.Quotient.mk (maximalIdeal R) 1) = (1 : R ⧸ maximalIdeal R) from map_one _]
+    exact h0 ▸ map_zero _
+  rw [quotTensorEquivQuotSMul_mk_tmul, one_smul, Submodule.Quotient.mk_eq_zero, hmT] at h1
+  exact ht h1
+
+/-- **The simultaneous-escape step of Stacks 03C1**: over a local ring with infinite
+residue field, given finitely many linear maps out of `N'` whose residue base changes are
+all nonzero, some single element `1 ⊗ z` escapes every kernel — a vector space over an
+infinite field is not a finite union of proper subspaces
+(`Subspace.exists_eq_top_of_iUnion_eq_univ`), and every element of `κ ⊗ N'` is of the form
+`1 ⊗ z` (`exists_one_tmul_eq_residueField`). -/
+theorem exists_one_tmul_baseChange_ne_zero [Infinite (ResidueField R)]
+    {N' : Type*} [AddCommGroup N'] [Module R N'] {s : ℕ}
+    {T : Fin s → Type*} [∀ j, AddCommGroup (T j)] [∀ j, Module R (T j)]
+    (h : ∀ j, N' →ₗ[R] T j)
+    (hne : ∀ j, LinearMap.baseChange (ResidueField R) (h j) ≠ 0) :
+    ∃ z : N', ∀ j,
+      LinearMap.baseChange (ResidueField R) (h j) (1 ⊗ₜ[R] z) ≠ 0 := by
+  classical
+  by_contra hcon
+  push Not at hcon
+  have hcover : ⋃ j, ((LinearMap.ker ((h j).baseChange (ResidueField R)) :
+      Submodule (ResidueField R) (ResidueField R ⊗[R] N')) :
+      Set (ResidueField R ⊗[R] N')) = Set.univ := by
+    rw [Set.eq_univ_iff_forall]
+    intro x
+    obtain ⟨z, hz⟩ := exists_one_tmul_eq_residueField x
+    obtain ⟨j, hj⟩ := hcon z
+    exact Set.mem_iUnion.mpr ⟨j, by
+      rw [SetLike.mem_coe, LinearMap.mem_ker, ← hz]
+      exact hj⟩
+  obtain ⟨j, hj⟩ := Subspace.exists_eq_top_of_iUnion_eq_univ hcover
+  exact hne j (LinearMap.ker_eq_top.mp hj)
+
+end Avoidance
