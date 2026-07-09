@@ -11158,3 +11158,31 @@ the anticipated private-machinery wall never materialized.*
 - **PIC0 continues per the ratified sequence**: [GAP1-DEV] route-pick (route (b) stalkwise
   lead) → the sheafify-tensor core → `IsInvertible.tensorObj` → the P2 Pic program
   (DS-END0 consumers waiting).
+
+### v10.64 (2026-07-09, fable-PIC0): [GAP1-DEV] ROUTE-PICK VERDICT — route (b′) "W-monoidal localization" (one load-bearing leaf)
+
+*The dedicated route-pick pass the decomposition artifact required (v10.11), executed
+per the ratified sequence. Survey findings and the verdict:*
+
+- **Survey:** the pin has NO stalk machinery for PresheafOfModules (PR #35773's subject —
+  raw route (b) would have to build it). BUT the module sheafification is governed by
+  `J.WEqualsLocallyBijective AddCommGrpCat` (Presheaf/Sheafification.lean:37), its
+  localization universal property is already exposed (`homEquivOfIsLocallyBijective`,
+  Sheaf.lean:222), and mathlib has a general **`CategoryTheory/Localization/Monoidal/`
+  directory** plus `Sites/Monoidal.lean`'s pattern (`(J.W).IsMonoidal` ⟹ sheaf category
+  monoidal with monoidal sheafification — fixed-target only, but the LOCALIZATION layer
+  underneath is general).
+- **VERDICT — route (b′):** prove ONE leaf, [GAP1-W-MONO]: *the sheafification-inverted
+  class of presheaf-of-modules maps (locally bijective on underlying presheaves) is
+  ⊗-stable* (f loc-bij ⟹ f ⊗ 𝟙 loc-bij; loc-surjective part elementary at sections;
+  loc-injective part = the filtered/stalkwise argument — iso-stalks tensor to iso-stalks,
+  NO flatness needed since stalk f is iso). Then the localization-monoidal machinery
+  hands us `MonoidalCategory (SheafOfModules X.ringCatSheaf)` WITH monoidal
+  sheafification — which subsumes GAP-1's kernel identity, gives
+  `IsInvertible.tensorObj` (P1b), AND supplies the P2 group law's
+  associator/unitor/braiding coherences in one stroke (strictly more than the bespoke
+  core lemma). Est. 100–200 LOC for the leaf + registration plumbing.
+- **Next-arc first acts:** (i) read `Localization/Monoidal/` entry points; (ii) verify
+  or thinly wrap the `IsLocalization` registration for `PresheafOfModules.sheafification`
+  at its W; (iii) build [GAP1-W-MONO] (v10.24: decompose the loc-injective half if it
+  forks). Routes (a)/(c-post-bump) remain fallbacks on the record.
