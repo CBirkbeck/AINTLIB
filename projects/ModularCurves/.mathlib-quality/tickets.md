@@ -9422,6 +9422,23 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   Y1's T-E1 leg need DS-END0 pins or does atlas-internal rigidity suffice?), then [Y1-D2]/[Y1-D3]
   (import A's standalone [T-E4-family] lemma; don't wait on held-file wiring). ⚠ upstream still unset
   (v10.72 hazard); do NOT `git pull` here until coordinator fixes tracking.
+- **[Y1-D2] SYNCED + SCOPED (NEW-Y1, v10.84)**: coordinator's cherry-picks (`741832aa4` — A's
+  `Moduli/PullSectionCanonicity.lean` transport + `EllipticCurve/RigiditySpreadingOut.lean`) are in
+  my tree (HEAD `741832aa4`, in sync with origin); D1/vi work intact, tree clean, 16 skeleton sorries.
+  **D2 (`isNaiveGammaOne_pullSection_iff`) execution plan** — transport `IsNaiveGammaOne` across the
+  group-iso `transportSection` (`X.curve.Section → (Y.curve.baseChange f.baseHom).Section`):
+  * **killing** `(N:ℤ)•pullSection f Q = 0 ↔ (N:ℤ)•asSection(pull f.baseHom Q) = 0`: READY — via
+    `dict_transportSection_pullSection` + `transportSection_injective` + `pullSection_{add,zsmul}_of_
+    finitePresentation` (all in A's file, sorry-free modulo route (a)).
+  * **fibrewise RHS** `(a:ℤ)•pull_{baseChange} τ (asSection(pull f.baseHom Q)) = 0 ↔ (a:ℤ)•pull_{Y.
+    curve} (τ≫f.baseHom) Q = 0`: READY — **reuse my own `zsmul_pull_baseChange_asSection_iff`** (D1
+    fibrewise bridge, axiom-clean).
+  * **fibrewise LHS** `(a:ℤ)•pull_{X.curve} τ (pullSection f Q) = 0 ↔ (a:ℤ)•pull_{Y.curve} (τ≫f.
+    baseHom) Q = 0`: the ONE new piece — a `transportSection`/`Point.pull` compatibility from
+    `curveIsoPullback` (Over-iso ⟹ commutes with pull-along-τ). ~25 LOC sub-lemma; then D2 assembles.
+  Then **[Y1-D3] `yOne_representableBy`** (~160 LOC) consumes D1+D2+the atlas pins. Both are the next
+  focused session's work (~90+160 LOC); everything is unblocked and de-risked, no gates left but the
+  atlas classifying subtree (NEW-ATLAS) which D3 imports by PR. Parking at this clean synced boundary.
 - **★ [Y1-E RIGIDITY AUDIT] VERDICT (NEW-Y1, 2026-07-09, v10.83 first act — scoping only):
   ATLAS-INTERNAL RIGIDITY SUFFICES. Y1's T-E1 leg does NOT need the DS-END0 pins → PIC0 stays
   PARKED for Y1 (on the rigidity account).** Grounds (verified against code, not just §2ε):
