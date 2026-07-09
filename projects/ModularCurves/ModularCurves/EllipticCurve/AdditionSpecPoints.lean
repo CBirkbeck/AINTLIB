@@ -698,6 +698,41 @@ theorem lift_pullbackMap_eq_lift
 
 end AtlasPush
 
+section AtlasFormula
+
+open WeierstrassCurve.Projective
+
+variable {K : Type u} [Field K] [DecidableEq K]
+
+/-- [C6-e5a, Z] With the k-th law-1 coordinate a unit, the images are NOT projectively
+equivalent, so the law-1 triple IS mathlib's `add`. -/
+lemma descended_lawOne_eq_add (i j : Fin 3) (k : Fin 3)
+    (χ : biChartRing universalWeierstrassLocU.{u} i j →+* K)
+    (hunit : IsUnit (χ (lawOneTriple universalWeierstrassLocU.{u} i j k))) :
+    χ ∘ lawOneTriple universalWeierstrassLocU.{u} i j =
+      ((universalWeierstrassLocU.{u}.map
+          (algebraMap WeierstrassAtlasRingU.{u} (biChartRing universalWeierstrassLocU.{u} i j))
+        ).toProjective.map χ).add
+        (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+        (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) := by
+  rw [ringHom_lawOneTriple universalWeierstrassLocU.{u} i j χ]
+  rw [WeierstrassCurve.Projective.add_of_not_equiv]
+  intro heq
+  rcases heq with ⟨u, hu⟩
+  have hzero : ((universalWeierstrassLocU.{u}.map (algebraMap _ _)).toProjective.map χ).addXYZ
+      ((u : K) • (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j))
+      (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) = 0 := by
+    rw [WeierstrassCurve.Projective.addXYZ_smul_left,
+      WeierstrassCurve.Projective.addXYZ_self', smul_zero]
+  have hu' : (⇑χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j : Fin 3 → K) =
+      (u : K) • (⇑χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) := hu.symm
+  have hk := congrFun (ringHom_lawOneTriple universalWeierstrassLocU.{u} i j χ) k
+  rw [hu', hzero] at hk
+  simp only [Function.comp_apply, Pi.zero_apply] at hk
+  exact hunit.ne_zero hk
+
+end AtlasFormula
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
