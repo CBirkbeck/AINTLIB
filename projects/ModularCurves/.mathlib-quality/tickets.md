@@ -13124,3 +13124,36 @@ instance-args; CategoryTheory.Functor.map_id (namespace!); respectTransparency s
 **Session boundary (v10.94 bounded-sessions hygiene):** [PIC-P1b-MONO] consumer-case COMPLETE +
 coherence layer landed + LSP validated = this session's delivery. Next session first act: the P2
 /develop pass on fork (A)/(B) (ecosystem check first), then build. Sentinel updated.
+
+## Amendments v10.97 (fable-PIC0) — ★★ P2 HEADLINE: `Scheme.Pic` LANDS with CommGroup, axiom-clean
+
+**Fork (A) adjudicated and built** (ecosystem re-checked first: current mathlib still has no
+SheafOfModules monoidal — no duplication; `CategoryTheory.Sites.Monoidal` = the constant-coefficient
+packaging precedent). New file `Picard/Pic.lean`, all axiom-clean [propext, Classical.choice, Quot.sound]:
+
+- `PresheafOfModules.sheafOfModulesMonoidalCategory` + `…SymmetricCategory` — **the GAP1-W-MONO
+  payoff de-`Nonempty`'d into DATA**: `MonoidalCategory (SheafOfModules ⟨S⋙forget₂,hS⟩)` via
+  `LocalizedMonoidal` (a type synonym for the target category) + our `sheafificationW_isLocalization`
+  / `sheafificationW_isMonoidal`; braiding via `Localization/Monoidal/Braided.lean`. Legitimate now —
+  the leaf is sorry-free, so the v10.8 discipline is SATISFIED, not bypassed. Packaged as `def`s (not
+  global instances), per mathlib's own `Sheaf.monoidalCategory` precedent — merge-safe against a
+  future upstream instance.
+- `Scheme.Modules.monoidalCategory` / `…symmetricCategory` — scheme-side transport (the
+  `ringCatSheaf.cond` structure-eta crossing works directly).
+- **`AlgebraicGeometry.Scheme.Pic (X) := (Skeleton X.Modules)ˣ`** (letI-activated) **+
+  `CommGroup (Pic X)`** — mathlib's `CommRing.Pic` pattern (`Monoidal.Skeleton` monoid + units).
+  Zero new math: units are definitionally ⊗-invertible classes. No `Shrink` yet (smallness of the
+  units-skeleton = ring-case-style encoding, follow-up polish).
+
+**Two follow-ups registered (P2 continues):**
+- **[PIC-P2-CMP]** `IsInvertible M ↔ IsUnit [M]` — the GME (2.17)-comparison. Its → direction
+  CONSTRUCTS THE DUAL sheaf ⚠ v10.36 two-route edge: BOARD COORDINATION with p2's Cartier lane
+  before building (never build duality twice). The ← direction (unit ⟹ cover-trivial) is
+  Zariski-local-freeness — independent, buildable.
+- **[PIC-P1b-MONO]-general becomes LOAD-BEARING for Pic functoriality**: `Pic(f) : Pic X → Pic Y`,
+  `[M] ↦ [f^*M]`, is a monoid hom only via `f^*(M⊗N) ≅ f^*M ⊗ f^*N` at GENERAL `f` (GME (2.16)'s
+  `Pic_{E/S}(T) = Pic(E_T)/f_T^*Pic(T)` pulls back along structure morphisms, not open immersions).
+  The registered general-`f` residual is therefore the next real math gate for the (2.16) functor —
+  route: the banked D-PresPB′ oplax-lift plan (decomposition-pullback-monoidal.md) or a
+  LocalizedMonoidal-level monoidal-functor transport of pullback (new option now that the monoidal
+  category is data — evaluate at the next /develop touch).
