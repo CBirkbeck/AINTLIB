@@ -10990,3 +10990,50 @@ vendoring.*
   candidate (survey mathlib's stalk-functor + Presheaf.IsLocallyBijective + enough-points
   surface for PresheafOfModules on the Zariski site), route (c-post-bump) as fallback.
   Then the GAP-1 core lemma, then `IsInvertible.tensorObj` (P1b) and the P2 program.
+
+### v10.55 (2026-07-09, NEW-GH): **[GHC4] PROVED** — the F1 refutation is now a Lean theorem; STREAM-GH first wave COMPLETE
+
+*New worker on the [STREAM-GH] first wave (p0 rate-limited; held until they reclaim at a
+boundary). Picked up from the salvage commit e5ef86ec9. On return, p0 resumes from tip
+0eba74540. Main shared worktree, `dev/modular-curves`, `Moduli/GammaHRepresentability.lean`
+only (no held files touched; GammaH.lean/Representability.lean/InvariantTorsor.lean read,
+never edited). Rule-5 claim honored; single-target builds; commit-early cadence (6 green
+commits). Sentinel unchanged.*
+
+- **★ [GHC4] `gammaHNaiveProblem_not_relativelyRepresentable` PROVED** (commit 0eba74540)
+  — the adversarial finding **F1** is now a Lean theorem: for `H ≠ ⊥`, the naive
+  global-orbit problem `gammaHNaiveProblem R N H` is NOT relatively representable. This is
+  the **B2 refutation evidence** the stream was carrying. Axiom profile `[propext,
+  sorryAx, Classical.choice, Quot.sound]` — `sorryAx` inherited ONLY through the naive
+  problem's own `gammaHNaiveProblem.map` well-definedness sorries (T-H3) + `pullSection_add`
+  (T-E4a); GHC4's own proof term is gate-free, adds no new axioms (as the decomposition
+  predicted: "NOW, real work, gate-free").
+- **Route as boarded** (decomposition-gammah-route.md §GHC4): over `T = X.base ⨿ X.base`
+  the glued classes `[(L,L)]` and `[(L,γ·L)]` (`γ ∈ H`, `γ ≠ 1`) restrict equally to both
+  `Bool`-summands (`γ ∈ H ⟹ [γ·L] = [L]`) yet are globally distinct (freeness: restrict
+  the orbit relation to `false` ⟹ `h = 1`; to `true` ⟹ `γ = 1`, both via the proven
+  `glSmul_eq_one_of_eq_self` [GH2-core]), contradicting the proven separation lemma
+  `relRepData_sep_coprod` [GHC4-SEP]. The refutation is **non-vacuous** — it takes the
+  witness `(X, L)` as hypothesis exactly as the skeleton stated.
+- **Infra minted this session (all sorry-free, 5 commits before GHC4):** `spec_factors_coprod`
+  (a `Spec` field factors through one `Bool`-coproduct summand — `sigmaOpenCover` +
+  `IsOpenImmersion.lift`); `pullSection_asSection_aux` (re-stated from YFullRoute's private
+  lemma); `coprodFullLevel` (the second-orbit glue: killing via `coprodPoint_nsmul_eq_zero`,
+  fibrewise generation via point-factoring + the summand's own clause, mirroring
+  `isNaiveFullLevel_pullAlong`); `Point.asSection_add` (**mathlib-gap-adjacent**: addition
+  of points has no direct underlying-morphism formula, proven by transport through the
+  additive `baseChangeEquiv` + `baseChangeEquiv_asSection` — a reusable pattern for the
+  section-additivity walls flagged around `asSection_zsmul`); `asSection_injective`,
+  `pullSection_zsmul`, `restrict_coprodPoint`, `pullAlong_glSmul`, `pullSection_glSmul_fst/snd`,
+  `coprodFullLevel_restrict(_fst/_snd)`.
+- **FIRST WAVE STATUS (GHB1/GHB3/GHA2/GHA4/GH2/GHC4):** all landed. GHB1
+  (`RelRepData.exists_equivariant`) and GHB3 (`exists_quotient_of_isAffineHom`) were already
+  PROVED by p0 (commits ab97b2074 / 24a5ae551) before the cutoff — the v10.52/53 "GHB1/GHB3
+  finish" line was stale; nothing left there. GHA2/GH2 proved (p0, 4aa25b563); GHA4 proved
+  modulo its étale conjunct's [DS4/T-C1] gate via GHA3. **The first wave's zero-gate content
+  is exhausted.**
+- **NEXT (NOW-lane, decomposition order steps 5–6, unclaimed):** [GHC2] the `⊥`-bridge
+  (discharges the held `gammaHNaive_relativelyRepresentable` at `H = ⊥` via
+  `relativelyRepresentable_of_iso` + `gammaHNaive_bot` + GHA4 — LOC 80, NOW given GHA4);
+  [GHB6] `isFinite_etale_of_comp_of_finite_etale_surjective` (NOW modulo the [GH-DESC-GAP]
+  check). Then the gated PART B assembly (GHB4/5/7 ⛩[A711-FP]/[A711-BC]) and GHC1/GHC3.
