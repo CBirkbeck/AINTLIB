@@ -936,4 +936,517 @@ noncomputable def addOnY (hΔ : IsUnit W.Δ) : (blOpenY W).toScheme ⟶ projMode
 
 end Overlap
 
+section OverlapZ
+
+variable (i j i' j' : Fin 3)
+
+lemma transι_preimage_blOpenZImage_piece (k : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transAlgHom W i j i' j' (lawOneTriple W i j k)) := by
+  show (Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j) ⁻¹ᵁ _ = _
+  rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage, Scheme.Hom.preimage_image_eq,
+    blOpenZPieceFamily,
+    ← Scheme.Hom.comp_preimage (chartPieceIso W i j).inv (chartPieceIso W i j).hom,
+    Iso.inv_hom_id, Scheme.Hom.id_preimage]
+  exact SpecMap_preimage_basicOpen _ _
+
+/-- **([C4-HF-ASSEMBLY] L2b)** Via the `(i',j')` factorization (`transι_eq`), the preimage of the
+`(i',j')` k'-th image piece is the basic open where `transHom(lawOneTriple i'j' k')` is invertible. -/
+lemma transι_preimage_blOpenZImage_piece' (k' : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' k') =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transHom W i j i' j' (lawOneTriple W i' j' k')) := by
+  rw [transι_eq]
+  show (Spec.map (CommRingCat.ofHom (transHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i' j').inv ≫ pieceι W i' j') ⁻¹ᵁ _ = _
+  rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage, Scheme.Hom.preimage_image_eq,
+    blOpenZPieceFamily,
+    ← Scheme.Hom.comp_preimage (chartPieceIso W i' j').inv (chartPieceIso W i' j').hom,
+    Iso.inv_hom_id, Scheme.Hom.id_preimage]
+  exact SpecMap_preimage_basicOpen _ _
+
+/-- **([C4-HF-ASSEMBLY] L2c)** The preimage under `transι` of the overlap piece `A_k ⊓ B_k'` is the
+single basic open of `Spec transRing` at the product of the two transported piece coordinates — the
+affine identification of the overlap piece with the triple-localization locus. -/
+lemma transι_preimage_pieceZ_inf (k k' : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ ((pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ⊓
+        (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' k')) =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k')) := by
+  rw [Scheme.Hom.preimage_inf, transι_preimage_blOpenZImage_piece,
+    transι_preimage_blOpenZImage_piece', specBasicOpen_mul]
+
+/-- **([C4-HF-ASSEMBLY] L3)** The affine immersion of the k-th image piece:
+`Spec(Away(lawOneTriple ij k)) → E ×_R E`. -/
+noncomputable def pieceAwayZι (k : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away (lawOneTriple W i j k))) ⟶
+      pullback (projModelπ W) (projModelπ W) :=
+  (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).hom ≫
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).ι ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j
+
+/-- **([C4-HF-ASSEMBLY] L3, the σ-immersion identity)** The `isoImage/morphismRestrict/
+specBasicOpenIsoAway.inv` chain out of `A_k` (the `σ` of L1), followed by `pieceAwayZι`, is exactly
+`A_k.ι`. So `σ` is the section identifying `A_k` with `Spec(Away(lawOneTriple ij k))`, and
+`pieceAwayZι` its immersion into `E ×_R E`. Instantiates the variable-scheme
+`isoImage_inv_morphismRestrict_ι`. -/
+lemma isoImage_specBasicOpen_pieceAwayZι (k : Fin 3) :
+    ((Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+        (lawOneTriple W i j k)).inv) ≫ pieceAwayZι W i j k =
+      (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι := by
+  rw [pieceAwayZι]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  exact isoImage_inv_morphismRestrict_ι (pieceι W i j) (chartPieceIso W i j)
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k))
+
+/-- **([C4-HF-ASSEMBLY] L3b1)** `pieceAwayZι` in `Spec.map` form: the localization map into
+`Away(lawOneTriple ij k)` followed by the chart-product identification and the piece immersion — the
+same shape as `transι`, localizing at a single piece coordinate instead of the transition product. -/
+lemma pieceAwayZι_eq (k : Fin 3) :
+    pieceAwayZι W i j k =
+      Spec.map (CommRingCat.ofHom (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)))) ≫
+        (chartPieceIso W i j).inv ≫ pieceι W i j := by
+  rw [pieceAwayZι, ← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
+/-- The overlap piece `P := A_k ⊓ B_k'` of two law-2 regularity image pieces. -/
+noncomputable abbrev overlapPieceZ (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).Opens :=
+  (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ⊓
+    (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' k')
+
+/-- **([C4-HF-ASSEMBLY] L3, the affine identification)** `Spec(Away transRing g) ≅ P`, where
+`g = transAlgHom(lawOneTriple ij k) · transHom(lawOneTriple i'j' k')`. Built from `specBasicOpenIsoAway`,
+the preimage computation `transι_preimage_pieceZ_inf` (L2c), and `transι.isoImage` (P ≤ range transι
+by helper A). This is `w`: it makes the overlap piece an affine `Spec`, where every morphism out of it
+is `Spec.map`. -/
+noncomputable def overlapPieceZIso (k k' : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away
+        (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k')))) ≅
+      (overlapPieceZ W i j i' j' k k').toScheme :=
+  specBasicOpenIsoAway (CommRingCat.of (transRing W i j i' j'))
+      (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawOneTriple W i' j' k')) ≪≫
+    ((Spec (CommRingCat.of (transRing W i j i' j'))).isoOfEq
+      (transι_preimage_pieceZ_inf W i j i' j' k k').symm) ≪≫
+    Scheme.Hom.isoImage (transι W i j i' j') (transι W i j i' j' ⁻¹ᵁ overlapPieceZ W i j i' j' k k') ≪≫
+    (pullback (projModelπ W) (projModelπ W)).isoOfEq (by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, inf_eq_right]
+      exact (inf_le_inf ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))
+        ((pieceι W i' j').image_mono (le_iSup (blOpenZPieceFamily W i' j') k'))).trans
+        (blOpenZImage_inf_le_transι W i j i' j'))
+
+/-- **([C4-HF-ASSEMBLY] L3, w-transι identity)** The affine identification, composed with the piece
+inclusion into `E ×_R E`, is `Spec` of the localization `transRing → S` followed by `transι`. -/
+lemma overlapPieceZIso_hom_ι (k k' : Fin 3) :
+    (overlapPieceZIso W i j i' j' k k').hom ≫ (overlapPieceZ W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [overlapPieceZIso]
+  simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom_ι, Scheme.isoOfEq_hom_ι_assoc,
+    Scheme.Hom.isoImage_hom_ι]
+  rw [← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
+lemma isUnit_algebraMap_biChartRing_lawOneTriple (k k' : Fin 3) :
+    IsUnit ((algebraMap (biChartRing W i j)
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k'))))
+      (lawOneTriple W i j k)) := by
+  rw [IsScalarTower.algebraMap_apply (biChartRing W i j) (transRing W i j i' j')
+    (Localization.Away _)]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawOneTriple W i j k) * transHom W i j i' j' (lawOneTriple W i' j' k'))
+    ⟨transHom W i j i' j' (lawOneTriple W i' j' k'), rfl⟩
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij)** The localization lift `Away(lawOneTriple ij k) →ₐ[R] S` into the
+triple-localization, agreeing with the tower map `biChartRing → S` on the base. -/
+noncomputable def psiFstZ (k k' : Fin 3) :
+    Localization.Away (lawOneTriple W i j k) →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawOneTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+    (lawOneTriple W i j k) (isUnit_algebraMap_biChartRing_lawOneTriple W i j i' j' k k')
+
+@[simp]
+lemma psiFstZ_algebraMap (k k' : Fin 3) (x : biChartRing W i j) :
+    psiFstZ W i j i' j' k k' (algebraMap (biChartRing W i j) _ x) =
+      algebraMap (biChartRing W i j) _ x :=
+  IsLocalization.Away.lift_eq (lawOneTriple W i j k)
+    (isUnit_algebraMap_biChartRing_lawOneTriple W i j i' j' k k') x
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij ring identity)** ψ_ij restricted to `biChartRing` is the tower map
+`biChartRing → S` — a whnf-safe `RingHom.ext` (the RHS is `algebraMap biChartRing S`, no composition,
+so it never forces the concrete triple-localization). -/
+lemma psiFstZ_toRingHom_comp (k k' : Fin 3) :
+    (psiFstZ W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))) =
+      algebraMap (biChartRing W i j)
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k'))) :=
+  RingHom.ext (psiFstZ_algebraMap W i j i' j' k k')
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij tower factorization)** ψ_ij restricted to `biChartRing`, routed
+through the *middle* ring `transRing` — `= (algebraMap transRing S).comp transAlgHom`, the tower
+map read as "localize `transRing`, then pull back along `transAlgHom`". The middle term of the
+`.trans` is `algebraMap biChartRing S`, syntactically shared by both halves so `Eq.trans` closes
+it without ever unfolding the concrete triple-localization (contrast: `rw [algebraMap_biChartRing_eq]`
+on a goal already carrying `algebraMap biChartRing S` explodes `isDefEq`). This is the form the
+`Spec.map` identification consumes, keeping `algebraMap biChartRing S` out of the scheme goal. -/
+lemma psiFstZ_toRingHom_comp' (k k' : Fin 3) :
+    (psiFstZ W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k')))).comp
+        (transAlgHom W i j i' j').toRingHom :=
+  (psiFstZ_toRingHom_comp W i j i' j' k k').trans
+    (algebraMap_biChartRing_eq W i j i' j' _)
+
+/-- **([C4-HF-ASSEMBLY] L3, the ψ_ij–σ identification)** `Spec(ψ_ij) ≫ pieceAwayZι = Spec(transRing→S) ≫
+transι`: the piece immersion `σ = pieceAwayZι` precomposed with `Spec(ψ_ij)` is the triple-localization
+immersion `transι` precomposed with `Spec` of the localization `transRing → S`. Both sides reduce,
+via the definitions of `pieceAwayZι`/`transι` and functoriality of `Spec`, to
+`Spec(ofHom ((algebraMap transRing S).comp transAlgHom)) ≫ (chartPieceIso).inv ≫ pieceι`; the shared
+tail and the base identity `psiFstZ_toRingHom_comp'` are packaged by `spec_map_comp_congr` (the
+variable-ring barrier), which keeps `isDefEq` off the concrete tower — under 5k heartbeats. -/
+lemma specMap_psiFstZ_pieceAwayZι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFstZ W i j i' j' k k').toRingHom) ≫ pieceAwayZι W i j k =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceAwayZι_eq, transι]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiFstZ_toRingHom_comp'])
+
+/-- **([C4-HF-ASSEMBLY] L3, w ≫ ι = Spec(ψ_ij) ≫ σ)** The two affine factorizations of the overlap
+immersion agree: the affine identification `w = overlapPieceZIso` (`P ≅ Spec S`) into `E ×_R E` equals
+`Spec(ψ_ij)` followed by the k-th piece immersion `σ = pieceAwayZι`. Both routes share the value
+`Spec(transRing → S) ≫ transι` — `w` by `overlapPieceZIso_hom_ι`, the ψ_ij route by
+`specMap_psiFstZ_pieceAwayZι` — so this is their transitive glue. This is the identity L4/L5 precompose
+against `w.hom` and cancel (`w` an iso). -/
+lemma overlapPieceZIso_hom_ι_eq_specMap_psiFstZ (k k' : Fin 3) :
+    (overlapPieceZIso W i j i' j' k k').hom ≫ (overlapPieceZ W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiFstZ W i j i' j' k k').toRingHom) ≫ pieceAwayZι W i j k :=
+  (overlapPieceZIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiFstZ_pieceAwayZι W i j i' j' k k').symm
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' unit)** The second transition coordinate `transHom(lawOneTriple
+i'j' k')` maps to a unit in `S`: it is the second factor of the localization generator, hence divides
+it. The `(i',j')`-side analogue of `isUnit_algebraMap_biChartRing_lawOneTriple`, but stated directly
+over `transRing` (no `biChartRing → transRing` rewrite — the map is `transHom`, not the canonical
+tower map). -/
+lemma isUnit_algebraMap_transRing_transHom_lawOneTriple (k k' : Fin 3) :
+    IsUnit (((IsScalarTower.toAlgHom R (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k')))).comp
+        (transHom W i j i' j')) (lawOneTriple W i' j' k')) := by
+  rw [AlgHom.comp_apply]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawOneTriple W i j k) * transHom W i j i' j' (lawOneTriple W i' j' k'))
+    ⟨transAlgHom W i j i' j' (lawOneTriple W i j k), mul_comm _ _⟩
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j')** The `(i',j')`-side localization lift `Away(lawOneTriple i'j' k')
+→ₐ[R] S`. Unlike `ψ_ij = psiFstZ`, its base map is built *explicitly* through the middle ring —
+`(algebraMap transRing S).comp transHom` — since `transHom` (not the canonical scalar tower) carries
+`biChartRing(i'j')` into `transRing`. Consequently its base identity `psiSndZ_toRingHom_comp'` is direct
+(no `.trans` bridge, no composite `algebraMap biChartRing(i'j') S` instance). -/
+noncomputable def psiSndZ (k k' : Fin 3) :
+    Localization.Away (lawOneTriple W i' j' k') →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawOneTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom
+    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (lawOneTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawOneTriple W i j i' j' k k')
+
+@[simp]
+lemma psiSndZ_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
+    psiSndZ W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
+  IsLocalization.Away.liftAlgHom_algebraMap _ (lawOneTriple W i' j' k')
+    (isUnit_algebraMap_transRing_transHom_lawOneTriple W i j i' j' k k') x
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' tower factorization)** ψ_i'j' restricted to `biChartRing(i'j')` is
+`(algebraMap transRing S).comp transHom` — direct from `liftAlgHom_algebraMap` (the base map already IS
+this composite), no whnf hazard. -/
+lemma psiSndZ_toRingHom_comp' (k k' : Fin 3) :
+    (psiSndZ W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i' j') (Localization.Away (lawOneTriple W i' j' k'))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k')))).comp
+        (transHom W i j i' j').toRingHom :=
+  RingHom.ext (psiSndZ_algebraMap W i j i' j' k k')
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j'–σ identification)** `Spec(ψ_i'j') ≫ pieceAwayZι(i'j'k') =
+Spec(transRing→S) ≫ transι`: the `(i',j')`-piece immersion precomposed with `Spec(ψ_i'j')` is the
+triple-localization immersion, reading `transι` through the `(i',j')` chart-product (`transι_eq`, the
+`transHom` form). The psiSndZ mirror of `specMap_psiFstZ_pieceAwayZι`, again packaged by the variable-ring
+barrier `spec_map_comp_congr` so `isDefEq` never touches the concrete tower. -/
+lemma specMap_psiSndZ_pieceAwayZι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiSndZ W i j i' j' k k').toRingHom) ≫ pieceAwayZι W i' j' k' =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawOneTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceAwayZι_eq, transι_eq]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiSndZ_toRingHom_comp'])
+
+/-- **([C4-HF-ASSEMBLY] L3, w.hom ≫ ι = Spec(ψ_i'j') ≫ σ')** The `(i',j')`-side reading of the overlap
+immersion: `w` into `E ×_R E` equals `Spec(ψ_i'j')` followed by the `(i',j')`-piece immersion. The
+psiSndZ mirror of `overlapPieceZIso_hom_ι_eq_specMap_psiFstZ`, sharing the same value
+`Spec(transRing → S) ≫ transι`. Together the two give the cross-chart glue. -/
+lemma overlapPieceZIso_hom_ι_eq_specMap_psiSndZ (k k' : Fin 3) :
+    (overlapPieceZIso W i j i' j' k k').hom ≫ (overlapPieceZ W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiSndZ W i j i' j' k k').toRingHom) ≫ pieceAwayZι W i' j' k' :=
+  (overlapPieceZIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiSndZ_pieceAwayZι W i j i' j' k k').symm
+
+
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_ij pushed triple)** ψ_ij carries the `(i,j)` law-2 triple to
+`algebraMap transRing S ∘ (transAlgHom ∘ lawOneTriple ij)` — the `(i,j)` reading of the addition
+triple over `S`. Element-level tower step (`algebraMap_biChartRing_eq` via `congrFun`, term-mode so it
+never whnf-explodes), keeping the composite `algebraMap biChartRing S` out of the goal. -/
+lemma psiFstZ_algebraMap_lawOneTriple (k k' m : Fin 3) :
+    psiFstZ W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m)) =
+      algebraMap (transRing W i j i' j') _ (transAlgHom W i j i' j' (lawOneTriple W i j m)) := by
+  rw [psiFstZ_algebraMap]
+  exact congrFun (congrArg DFunLike.coe (algebraMap_biChartRing_eq W i j i' j' _))
+    (lawOneTriple W i j m)
+
+/-- The `k`-th coordinate of the ψ_ij-pushed triple is invertible with the pushed `invSelf`. -/
+lemma psiFstZ_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiFstZ W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j k)) *
+      psiFstZ W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i j k)) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+/-- The `k'`-th coordinate of the ψ_i'j'-pushed triple is invertible with the pushed `invSelf`. -/
+lemma psiSndZ_algebraMap_mul_invSelf (k k' : Fin 3) :
+    psiSndZ W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawOneTriple W i' j' k')) (lawOneTriple W i' j' k')) *
+      psiSndZ W i j i' j' k k' (IsLocalization.Away.invSelf (lawOneTriple W i' j' k')) = 1 := by
+  rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+
+/-- **([C4-HF-ASSEMBLY] L4, proportionality over S)** The two pushed triples are proportional: the
+ψ_i'j' triple is `(cd)²`-times the ψ_ij triple over `S`, the bidegree-`(2,2)` transition factor pushed
+from `transRing` (`transHom_lawOneTriple_eq_smul`). Term-mode `.trans` chain (all middles are
+`algebraMap transRing S …`, never the composite), so it stays off the concrete tower. This is the crux's
+`hsmul` hypothesis. -/
+lemma psiSndZ_algebraMap_lawOneTriple_eq_smul (k k' m : Fin 3) :
+    psiSndZ W i j i' j' k k' (algebraMap (biChartRing W i' j')
+        (Localization.Away (lawOneTriple W i' j' k')) (lawOneTriple W i' j' m)) =
+      algebraMap (transRing W i j i' j') _
+        ((transInvFst W i j i' j' * transInvSnd W i j i' j') ^ 2) *
+      psiFstZ W i j i' j' k k' (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m)) :=
+  (psiSndZ_algebraMap W i j i' j' k k' (lawOneTriple W i' j' m)).trans
+    ((congrArg (algebraMap (transRing W i j i' j') _)
+        (transHom_lawOneTriple_eq_smul W i j i' j' m)).trans
+      ((map_mul _ _ _).trans
+        (congrArg (algebraMap (transRing W i j i' j') _
+            ((transInvFst W i j i' j' * transInvSnd W i j i' j') ^ 2) * ·)
+          (psiFstZ_algebraMap_lawOneTriple W i j i' j' k k' m).symm)))
+
+variable [IsJacobsonRing R]
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_ij triple on-curve)** The ψ_ij-pushed law-2 triple satisfies the model
+equation over `S`. Routed through `transRing` (via `transAlgHom`, the canonical tower map — cheap
+`[Algebra transRing S]`), never the composite `[Algebra biChartRing S]`. -/
+lemma equation_psiFstZ_lawOneTriple [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawOneTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiFstZ W i j i' j' k k' (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)) (lawOneTriple W i j m))) := by
+  rw [funext (psiFstZ_algebraMap_lawOneTriple W i j i' j' k k')]
+  exact equation_mapTriple W (fun m => transAlgHom W i j i' j' (lawOneTriple W i j m))
+    (equation_mapTriple_algHom W (transAlgHom W i j i' j') (lawOneTriple W i j)
+      (equation_lawOneTriple_of_isDomain W i j hΔ))
+
+/-- **([C4-HF-ASSEMBLY] L4, ψ_i'j' triple on-curve)** The ψ_i'j'-pushed law-2 triple satisfies the
+model equation over `S`, routed through `transRing` via `transHom` (`equation_mapTriple_algHom`). -/
+lemma equation_psiSndZ_lawOneTriple [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (W.map (algebraMap R (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawOneTriple W i' j' k'))))).toProjective.Equation
+        (fun m => psiSndZ W i j i' j' k k' (algebraMap (biChartRing W i' j')
+          (Localization.Away (lawOneTriple W i' j' k')) (lawOneTriple W i' j' m))) := by
+  rw [funext (fun m => psiSndZ_algebraMap W i j i' j' k k' (lawOneTriple W i' j' m))]
+  exact equation_mapTriple W (fun m => transHom W i j i' j' (lawOneTriple W i' j' m))
+    (equation_mapTriple_algHom W (transHom W i j i' j') (lawOneTriple W i' j')
+      (equation_lawOneTriple_of_isDomain W i' j' hΔ))
+
+/-- **([C4-HF-ASSEMBLY] L4, THE cross-chart ψ-agreement)** Over `Spec S`, the `(i,j,k)` and
+`(i',j',k')` law-2 piece morphisms agree after pulling back along `Spec(ψ_ij)`, `Spec(ψ_i'j')`. Both
+sides go to `chartAwayHomOfTriple`-form via `specMap_comp_pieceMorOfTriple`, and the general crux
+`chartι_comp_specMap_chartAwayHom_smul_eq` closes them using the proportionality of the two pushed
+triples. Term-mode `.trans` chain with syntactically-shared `chartAwayHomOfTriple` middles — the
+decomposition into clean-context sub-lemmas is what keeps `isDefEq` off the concrete tower. -/
+lemma specMap_psiFstZ_addOnZPieceMor_cross [IsDomain (biChartRing W i j)]
+    [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFstZ W i j i' j' k k').toRingHom) ≫ addOnZPieceMor W i j k hΔ =
+      Spec.map (CommRingCat.ofHom (psiSndZ W i j i' j' k k').toRingHom) ≫
+        addOnZPieceMor W i' j' k' hΔ := by
+  rw [addOnZPieceMor_eq, addOnZPieceMor_eq]
+  exact (specMap_comp_pieceMorOfTriple W (lawOneTriple W i j)
+      (equation_lawOneTriple_of_isDomain W i j hΔ) k (psiFstZ W i j i' j' k k')
+      (psiFstZ_algebraMap_mul_invSelf W i j i' j' k k')
+      (equation_psiFstZ_lawOneTriple W i j i' j' hΔ k k')).trans
+    (((chartι_comp_specMap_chartAwayHom_smul_eq W k k' _ _ _ _ _
+        (psiSndZ_algebraMap_lawOneTriple_eq_smul W i j i' j' k k')
+        (psiFstZ_algebraMap_mul_invSelf W i j i' j' k k')
+        (psiSndZ_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiFstZ_lawOneTriple W i j i' j' hΔ k k')
+        (equation_psiSndZ_lawOneTriple W i j i' j' hΔ k k')).symm).trans
+      (specMap_comp_pieceMorOfTriple W (lawOneTriple W i' j')
+        (equation_lawOneTriple_of_isDomain W i' j' hΔ) k' (psiSndZ W i j i' j' k k')
+        (psiSndZ_algebraMap_mul_invSelf W i j i' j' k k')
+        (equation_psiSndZ_lawOneTriple W i j i' j' hΔ k k')).symm)
+
+/-- The `k`-th piece immersion `pieceAwayZι` is an open immersion (hence mono): a composite of the
+`specBasicOpenIsoAway` iso, the basic-open immersion, the chart-product iso, and `pieceι`. -/
+instance instIsOpenImmersionPieceAwayZι (k : Fin 3) : IsOpenImmersion (pieceAwayZι W i j k) := by
+  rw [pieceAwayZι]; infer_instance
+
+omit [IsJacobsonRing R] in
+/-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i,j) side)** `w.hom` followed by the `(i,j)` L1 prefactor `σ`
+(the `homOfLE / isoImage.inv / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in
+`Spec(Away(lawOneTriple ij k))`) equals `Spec(ψ_ij)`. Cancelled against the `pieceAwayZι` mono: both
+composed with `pieceAwayZι` give `w.hom ≫ overlapPieceZ.ι` (via the σ-immersion identity
+`isoImage_specBasicOpen_pieceAwayZι` and `Scheme.homOfLE_ι`), which is `Spec(ψ_ij) ≫ pieceAwayZι` by L3.
+This turns L1's image-level prefactor into `Spec(ψ_ij)` once precomposed with `w`. -/
+@[reassoc]
+lemma w_homOfLE_sigma_psiFstZ (k k' : Fin 3) :
+    (overlapPieceZIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : overlapPieceZ W i j i' j' k k' ≤
+          pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ≫
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv =
+    Spec.map (CommRingCat.ofHom (psiFstZ W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv ≫
+      pieceAwayZι W i j k = (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι := by
+    rw [← isoImage_specBasicOpen_pieceAwayZι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceAwayZι W i j k)]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact overlapPieceZIso_hom_ι_eq_specMap_psiFstZ W i j i' j' k k'
+
+omit [IsJacobsonRing R] in
+/-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i',j') side)** The psiSndZ mirror of `w_homOfLE_sigma_psiFstZ`. -/
+@[reassoc]
+lemma w_homOfLE_sigma_psiSndZ (k k' : Fin 3) :
+    (overlapPieceZIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right : overlapPieceZ W i j i' j' k k' ≤
+          pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' k') ≫
+      (Scheme.Hom.isoImage (pieceι W i' j') (blOpenZPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawOneTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawOneTriple W i' j' k')).inv =
+    Spec.map (CommRingCat.ofHom (psiSndZ W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i' j') (blOpenZPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawOneTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawOneTriple W i' j' k')).inv ≫
+      pieceAwayZι W i' j' k' = (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' k').ι := by
+    rw [← isoImage_specBasicOpen_pieceAwayZι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceAwayZι W i' j' k')]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact overlapPieceZIso_hom_ι_eq_specMap_psiSndZ W i j i' j' k k'
+
+/-- **([C4-HF-ASSEMBLY] L5, per-overlap chart agreement)** On the overlap piece `A_k ⊓ B_k'`, the
+`(i,j)` and `(i',j')` image-level law-2 morphisms agree. Proved by precomposing with the affine
+identification `w` (an iso, cancelled via `cancel_epi`): L1 turns each side into `σ ≫ addOnZPieceMor`,
+the σ-cancels turn `w.hom ≫ σ` into `Spec(ψ)`, and L4 identifies the two `Spec(ψ) ≫ addOnZPieceMor`.
+Fully term-mode (`congrArg`/`.trans`) so no `rw` motive ever touches the concrete tower `S`. -/
+lemma overlapPieceZ_addOnZOnImage_agree [IsDomain (biChartRing W i j)]
+    [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenZPieceFamily W i' j') k'))) ≫
+        addOnZOnImage W hΔ i' j' := by
+  have eL : (overlapPieceZIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      Spec.map (CommRingCat.ofHom (psiFstZ W i j i' j' k k').toRingHom) ≫ addOnZPieceMor W i j k hΔ :=
+    (congrArg ((overlapPieceZIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnZOnImage_eq W i j hΔ k (overlapPieceZ W i j i' j' k k') inf_le_left)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnZPieceMor W i j k hΔ) (w_homOfLE_sigma_psiFstZ W i j i' j' k k')))
+  have eR : (overlapPieceZIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenZPieceFamily W i' j') k'))) ≫
+        addOnZOnImage W hΔ i' j' =
+      Spec.map (CommRingCat.ofHom (psiSndZ W i j i' j' k k').toRingHom) ≫ addOnZPieceMor W i' j' k' hΔ :=
+    (congrArg ((overlapPieceZIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnZOnImage_eq W i' j' hΔ k' (overlapPieceZ W i j i' j' k k') inf_le_right)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnZPieceMor W i' j' k' hΔ) (w_homOfLE_sigma_psiSndZ W i j i' j' k k')))
+  exact (cancel_epi (overlapPieceZIso W i j i' j' k k').hom).mp
+    (eL.trans ((specMap_psiFstZ_addOnZPieceMor_cross W i j i' j' hΔ k k').trans eR.symm))
+
+/-- **([C4-HF-ASSEMBLY] L5, full cross-chart agreement)** The `(i,j)` and `(i',j')` image-level law-2
+morphisms agree on their entire overlap `blOpenZImage(i,j) ⊓ blOpenZImage(i',j')`. The overlap is
+covered by the `(k,k')` overlap pieces (`blOpenZImage_inf_eq_iSup`), so `Scheme.Cover.hom_ext` reduces
+to the per-piece agreement `overlapPieceZ_addOnZOnImage_agree`; the two nested `homOfLE`s of the cover
+inclusion and the overlap inclusion collapse via `Scheme.homOfLE_homOfLE_assoc`. Stated with the
+overlap `Ω` as a parameter (`subst`) so the cover lands on it directly, no dependent rewriting. -/
+lemma addOnZOnImage_agree [IsDomain (biChartRing W i j)] [IsDomain (biChartRing W i' j')]
+    (hΔ : IsUnit W.Δ) (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenZImage W i j) (hl : Ω ≤ blOpenZImage W i' j')
+    (hΩ : Ω = ⨆ p : Fin 3 × Fin 3, overlapPieceZ W i j i' j' p.1 p.2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnZOnImage W hΔ i' j' := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun p : Fin 3 × Fin 3 => overlapPieceZ W i j i' j' p.1 p.2)) _ _ (fun p => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun p : Fin 3 × Fin 3 => overlapPieceZ W i j i' j' p.1 p.2)).f p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun p : Fin 3 × Fin 3 => overlapPieceZ W i j i' j' p.1 p.2) p) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hk (addOnZOnImage W hΔ i j)).trans
+    ((overlapPieceZ_addOnZOnImage_agree W i j i' j' hΔ p.1 p.2).trans
+      (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hl (addOnZOnImage W hΔ i' j')).symm)
+
+variable [IsDomain R]
+
+/-- **([C4-HF-ASSEMBLY] L5, the four-chart pairwise agreement)** The `hf` obligation of
+`glueMorphisms` for the `blOpenZFamily` cover: any two of the four chart-product law-2 morphisms agree
+on their overlap. The 16 cases (`fin_cases`) each reduce to `addOnZOnImage_agree` for the corresponding
+chart pair (diagonal included — same-chart agreement is the same statement). -/
+lemma addOnZFamily_agree (hΔ : IsUnit W.Δ) (p q : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : blOpenZFamily W p ⊓ blOpenZFamily W q ≤ blOpenZFamily W p) ≫
+        addOnZFamily W hΔ p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnZFamily W hΔ q := by
+  obtain ⟨p1, p2⟩ := p; obtain ⟨q1, q2⟩ := q
+  fin_cases p1 <;> fin_cases p2 <;> fin_cases q1 <;> fin_cases q2 <;>
+    exact addOnZOnImage_agree W _ _ _ _ hΔ _ inf_le_left inf_le_right
+      (blOpenZImage_inf_eq_iSup W _ _ _ _)
+
+/-- **([C4-HF-ASSEMBLY] L5, addOnZ — the second Bosma–Lenstra law as a morphism)** The `Y = 0`
+addition law glued into a single scheme morphism on its whole regularity open `blOpenZ = ⨆ blOpenZFamily`.
+`glueMorphisms` on the four-chart cover, with the pairwise agreement `addOnZFamily_agree` packaged by
+`glueMorphisms_hf_of_agree`. This is the geometric assembly of T-W7.0c-i (Y-law). -/
+noncomputable def addOnZ (hΔ : IsUnit W.Δ) : (blOpenZ W).toScheme ⟶ projModel W :=
+  (blOpenZCover W).glueMorphisms (addOnZFamily W hΔ)
+    (glueMorphisms_hf_of_agree (blOpenZFamily W) (addOnZFamily W hΔ) (addOnZFamily_agree W hΔ))
+
+end OverlapZ
+
 end WeierstrassCurve.Projective
