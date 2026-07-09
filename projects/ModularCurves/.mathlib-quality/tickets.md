@@ -12983,3 +12983,23 @@ The dispatched GLC wiring is DONE through the definitional layer, in one continu
 **Remaining on the chain:** mulModelHom_map (GLC:~865, naturality — next, via lift-uniqueness
 pullback.hom_ext on the U-square) → mulModelHom_specPoints (c6) → group axioms → 0c-i → 0c-ii
 (BOARD-SIGNAL armed) → 0h → T-W7.12 → T-W7a.
+
+### v10.97b (2026-07-09, NEW-HOPF): [CHARTER-HOPF] Wave A — 3/4 leaves green same-session (A1 Amitsur, A2 fp-descent, A3 ∞-residue gadget)
+
+- Landed axiom-clean (commits e7896a9bc, ef3dca1ed, 96b20720a): **[HG-A1]**
+  `FaithfullyFlatEqualizer` (Amitsur equalizer, `AlgHom.equalizer includeLeft includeRight
+  = ⊥`); **[HG-A2]** `FaithfullyFlatFiniteDescent` (Stacks 03C4: ff descent of
+  `Module.Finite` + `Module.FinitePresentation`); **[HG-A3]** `FlatLocalInfiniteResidue`
+  (Stacks 03C3: `LocalPolynomialExtension C = C[X]` at `m·C[X]`, ff local, `Infinite
+  (ResidueField _)` — note: mathlib's OreLocalization already carries the `Algebra C`
+  instance; custom instances would diamond, none added).
+- **[HG-A4] scoped tighter at the boundary** (next session's first act, = M2 on landing):
+  the finite-union-of-proper-subspaces avoidance is mathlib-native
+  (`Subspace.exists_eq_top_of_iUnion_eq_univ`, CosetCover) — so A4 = (i) Nakayama basis
+  criterion (I ≤ jacobson, r generators of free-rank-r lift to a basis; Orzech
+  `injective_of_surjective_endomorphism` for the basis half), (ii) CRT semisimple
+  reduction (`Ideal.quotientInfRingEquivPiQuotient` on the finitely many maximals) +
+  general-position induction, (iii) the 03C1 assembly. Consumer shape pinned in
+  decomposition-hopf-crux.md §skeleton step 6.
+- Session close at the clean boundary per v10.19; no walls, no gates hit; p2 edge still
+  soft (their Milestone 1 not yet landed — checked at claim time).
