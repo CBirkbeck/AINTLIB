@@ -1082,6 +1082,16 @@ theorem isNaiveGammaOne_pullSection_iff [NeZero N] {X Y : EllObj R} (f : X ⟶ Y
     exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
       fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
 
+/-- The locally-closed inclusion `Y₁(N) ↪ 𝒴` as an `Ell/R`-morphism `yOneEllObj ⟶ tateEllObj`:
+base map `yOneBase`, curve map the base-change projection `pullback.fst`. The Cartesian square is
+the defining base-change square of `yOneEllObj.curve = tateUniversal ×_{𝒴} Y₁(N)`. -/
+noncomputable def yOneToTate [NeZero N] : yOneEllObj R N ⟶ tateEllObj R where
+  baseHom := yOneBase R N
+  base_w := rfl
+  top := Limits.pullback.fst (tateUniversal R).π (yOneBase R N)
+  isPullback := IsPullback.of_hasPullback (tateUniversal R).π (yOneBase R N)
+  zero_w := Limits.pullback.lift_fst _ _ _
+
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
 `Ell/R`-morphisms `Y ⟶ Y₁(N)-object` correspond to naive `Γ₁(N)` structures on `Y.curve`,
