@@ -1682,6 +1682,44 @@ lemma transι_preimage_crossPiece_inf (k k' : Fin 3) :
   rw [Scheme.Hom.preimage_inf, transι_preimage_blOpenZImage_piece,
     transι_preimage_blOpenYImage_piece', specBasicOpen_mul]
 
+lemma blOpenZImage_inf_blOpenYImage_le_transι :
+    blOpenZImage W i j ⊓ blOpenYImage W i' j' ≤ (transι W i j i' j').opensRange :=
+  le_trans (inf_le_inf (blOpenZImage_le_range W i j) (blOpenYImage_le_range W i' j'))
+    (pieceι_range_inf_le_transι W i j i' j')
+
+noncomputable abbrev crossOverlapPiece (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).Opens :=
+  (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ⊓
+    (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k')
+
+noncomputable def crossOverlapPieceIso (k k' : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away
+        (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))) ≅
+      (crossOverlapPiece W i j i' j' k k').toScheme :=
+  specBasicOpenIsoAway (CommRingCat.of (transRing W i j i' j'))
+      (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) ≪≫
+    ((Spec (CommRingCat.of (transRing W i j i' j'))).isoOfEq
+      (transι_preimage_crossPiece_inf W i j i' j' k k').symm) ≪≫
+    Scheme.Hom.isoImage (transι W i j i' j')
+      (transι W i j i' j' ⁻¹ᵁ crossOverlapPiece W i j i' j' k k') ≪≫
+    (pullback (projModelπ W) (projModelπ W)).isoOfEq (by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, inf_eq_right]
+      exact (inf_le_inf ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))
+        ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))).trans
+        (blOpenZImage_inf_blOpenYImage_le_transι W i j i' j'))
+
+lemma crossOverlapPieceIso_hom_ι (k k' : Fin 3) :
+    (crossOverlapPieceIso W i j i' j' k k').hom ≫ (crossOverlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [crossOverlapPieceIso]
+  simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom_ι, Scheme.isoOfEq_hom_ι_assoc,
+    Scheme.Hom.isoImage_hom_ι]
+  rw [← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
 end OverlapCrossChart
 
 end WeierstrassCurve.Projective
