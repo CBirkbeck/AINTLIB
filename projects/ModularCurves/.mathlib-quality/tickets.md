@@ -13342,3 +13342,19 @@ For P Q : SpecPoints (projModel W) K, g := pullback.lift P.1 Q.1 ≫ mulModelHom
    (InZChart both + P≈Q via blOpenY / else blOpenZ / infinity cases via projModelPointsEquiv_zero
    + specPoint_eq_zero_of_not_inZ).
 All tools exist and are pushed; step 5's Affine-side case algebra is the main volume.
+
+### v10.95g (2026-07-10, fable-FP): tPrime opening PROVEN — both t'-leg unit conditions discharged
+
+- `GrassmannianGlueData.lean` (sorry-free, axiom-clean): `doubleRing` (the
+  `pullbackSpecIso` presentation of the double overlap) · `tPrimeBase`
+  (`includeLeftRingHom ∘ ringHom ι ι'`) · **`isUnit_tPrimeBase_det_left`** ([GR-F1]
+  mapped along includeLeft) · **`isUnit_tPrimeBase_det_right`** ([GR-F3]'s abstract
+  condition + the base-element slide `a ⊗ₜ 1 = 1 ⊗ₜ b` via
+  `algebraMap_apply`/`algebraMap_apply'` + `includeRight`). Pin notes: the localization
+  semiring instance-path diamond needs a type ASCRIPTION on `includeLeftRingHom`;
+  the tensor right-algebra is NOT a global instance — route through `includeRight`.
+- NEXT (the t'-assembly): the two `Away.lift`s of `tPrimeBase` at the proven units →
+  `Algebra.TensorProduct.lift` (or direct RingHom out of the ι'-side tensor via
+  `Algebra.TensorProduct.ext`-style) → `tPrimeRing : doubleRing ι' ι'' ι →+*
+  doubleRing ι ι' ι''` → Spec + `pullbackSpecIso` conjugation → the `Scheme.GlueData`
+  structure with t_fac/cocycle by `pullback.hom_ext` reducing to the ring layer.

@@ -64,4 +64,59 @@ lemma overlapTransition_comp (ι ι' : Fin k ↪ Fin n) :
   rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, Transition.ringHomAway_comp_ringHomAway,
     CommRingCat.ofHom_id, Spec.map_id]
 
+section TPrime
+
+open TensorProduct
+
+variable (ι ι' ι'' : Fin k ↪ Fin n)
+
+/-- The double-overlap coordinate ring `D(ι; ι', ι'')`: the `pullbackSpecIso`
+presentation of `D(det ι ι') ∩ D(det ι ι'')` inside the ι-chart. -/
+noncomputable abbrev doubleRing : Type u :=
+  Localization.Away (Transition.det (R := R) ι ι') ⊗[ChartRing R ι]
+    Localization.Away (Transition.det (R := R) ι ι'')
+
+/-- The base leg of the `t'`-map: `ChartRing ι'` into the ι-side double ring, through
+the forward transition. -/
+noncomputable def tPrimeBase : ChartRing R ι' →+* doubleRing R ι ι' ι'' :=
+  Algebra.TensorProduct.includeLeftRingHom.comp (Transition.ringHom (R := R) ι ι')
+
+/-- The reverse determinant is a unit under the base leg ([GR-F1] mapped along
+`includeLeft`). -/
+lemma isUnit_tPrimeBase_det_left :
+    IsUnit (tPrimeBase R ι ι' ι'' (Transition.det (R := R) ι' ι)) := by
+  rw [tPrimeBase, RingHom.comp_apply]
+  exact (Transition.isUnit_ringHom_det ι ι').map _
+
+/-- The third-chart determinant is a unit under the base leg — [GR-F3]'s abstract unit
+condition discharged by the base-element slide `d ⊗ₜ 1 = 1 ⊗ₜ d`. -/
+lemma isUnit_tPrimeBase_det_right :
+    IsUnit (tPrimeBase R ι ι' ι'' (Transition.det (R := R) ι' ι'')) := by
+  rw [tPrimeBase, RingHom.comp_apply]
+  refine Transition.isUnit_map_ringHom_det_triple ι ι' ι''
+    (Algebra.TensorProduct.includeLeftRingHom :
+      Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'') ?_
+  have hslide : (Algebra.TensorProduct.includeLeftRingHom :
+      Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+      (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι'))
+        (Transition.det (R := R) ι ι''))
+      = Algebra.TensorProduct.includeRight
+          (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι''))
+            (Transition.det (R := R) ι ι'')) := by
+    rw [Algebra.TensorProduct.includeRight_apply]
+    rw [show (Algebra.TensorProduct.includeLeftRingHom :
+        Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+        (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι'))
+          (Transition.det (R := R) ι ι''))
+        = algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι'))
+            (Transition.det (R := R) ι ι'') ⊗ₜ 1 from rfl]
+    rw [← Algebra.TensorProduct.algebraMap_apply,
+      Algebra.TensorProduct.algebraMap_apply']
+  rw [hslide]
+  exact (IsLocalization.Away.algebraMap_isUnit
+    (Transition.det (R := R) ι ι'')).map _
+
+end TPrime
+
 end Module.Grassmannian
