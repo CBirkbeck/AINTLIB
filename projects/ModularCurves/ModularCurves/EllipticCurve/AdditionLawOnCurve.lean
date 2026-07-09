@@ -280,6 +280,24 @@ theorem equation_addXYZ_of_isJacobsonRing (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → 
   exact map_polynomial_eval_addXYZ_eq_zero
     ((Ideal.Quotient.maximal_ideal_iff_isField_quotient m).mp hm) (Ideal.Quotient.mk m) hΔ hP hQ
 
+omit [IsReduced A] [IsJacobsonRing A] in
+/-- **(T-W7.0c·c2, field-case non-vanishing along a ring hom)** The `φ`-parametrised form of
+`addXYZ_ne_zero_or_dblAddXYZ_ne_zero`: for a ring hom `φ : A → K` into a field with `φ∘P`, `φ∘Q`
+nonzero and `Δ` a unit, one of `φ∘(addXYZ P Q)`, `φ∘(dblAddXYZ P Q)` is a nonzero triple. This is
+the residue-field layer of the two-law cover; instantiated at each maximal ideal of a chart-product
+ring it yields the joint-unit-ideal. Mirrors `map_polynomial_eval_addXYZ_eq_zero`. -/
+lemma map_addXYZ_ne_zero_or_map_dblAddXYZ_ne_zero {K : Type*} [CommRing K] (hK : IsField K)
+    (φ : A →+* K) (hΔ : IsUnit W'.Δ) {P Q : Fin 3 → A}
+    (hP : W'.Equation P) (hQ : W'.Equation Q) (hP0 : φ ∘ P ≠ 0) (hQ0 : φ ∘ Q ≠ 0) :
+    φ ∘ W'.addXYZ P Q ≠ 0 ∨ φ ∘ W'.dblAddXYZ P Q ≠ 0 := by
+  letI := hK.toField
+  haveI : (W'.map φ).IsElliptic := ⟨by rw [map_Δ]; exact hΔ.map φ⟩
+  have hns1 := nonsingular_of_equation_of_ne_zero (W := W'.map φ) (hP.map φ) hP0
+  have hns2 := nonsingular_of_equation_of_ne_zero (W := W'.map φ) (hQ.map φ) hQ0
+  rcases addXYZ_ne_zero_or_dblAddXYZ_ne_zero hns1 hns2 with h | h
+  · left; rwa [map_addXYZ] at h
+  · right; rwa [map_dblAddXYZ] at h
+
 end AddXYZMain
 
 end WeierstrassCurve.Projective
