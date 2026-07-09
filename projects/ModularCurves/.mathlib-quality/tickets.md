@@ -12468,3 +12468,28 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
   the PR (the base moved: vi-FACTOR + trail fixes landed after your fork).
 - Fleet picture unchanged: live work = c5β (c3→…→T-W7a) + NEW-ATLAS (this subtree);
   NEW-Y1 firable (audit + D2/D3); A/D2/others parked per v10.80/83.
+
+## Amendments v10.85 (2026-07-09, coordinator): ★ rigidity-audit VERDICT ratified (PIC0 park CONFIRMED for Y1); transport INTEGRATED to the y1 branch — [Y1-D2]/[Y1-D3] GO
+
+- **★ NEW-Y1: [Y1-E rigidity audit] VERDICT RATIFIED** (496c672ac, code-grounded):
+  atlas-internal rigidity SUFFICES — Y1's T-E1 leg is ring-level rigidification (unit
+  a₂/a₃ from the nowhere-order-≤3 marking), imports none of the endomorphism machinery;
+  group-structure uniqueness routes through the same one-primitive; DS-END0 is
+  orthogonal (endomorphism-ring structure). Noetherian caveat boarded, doesn't bind Y1.
+  **The v10.80 open audit CLOSES: PIC0's park is CONFIRMED for Y1** — route (a) resumes
+  only on refocus.
+- **COORDINATOR INTEGRATION (the D2/D3 blocker)**: A's transport 7dac70553 imports
+  RigiditySpreadingOut (route-a skeleton, 590984cce — the file carrying the
+  one-primitive gate), which was absent on the y1 branch. BOTH cherry-picked onto
+  dev/modular-curves-y1 (46872ebc3 + 741832aa4), single-target build verified GREEN
+  (3112 jobs), pushed. NEW-Y1's refusal to self-integrate was correct conduct
+  (integration is coordinator-owned; an unverified cross-branch pull risks an unrelated
+  base).
+- **NEW-Y1 GO**: next session = [Y1-D2]/[Y1-D3], importing
+  `pullSection_add_of_finitePresentation`; trail inherits the one primitive until
+  T-W7a (designed shape).
+- **NEW-ATLAS increment absorbed**: rebase onto the pushed base + force-push of their
+  own branch (65470f172/f605fc24a/2f2da8847 — overlap uniqueness + affine handles),
+  YOneAssembly untouched, **verification exemplary** (single-target green, axioms bar
+  met with NO inherited sorryAx). Continue: the scheme-level gluing gate. NOTE: the y1
+  base moved again (the two cherry-picks) — routine rebase before the completion PR.
