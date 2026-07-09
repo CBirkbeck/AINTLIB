@@ -13280,3 +13280,21 @@ Spec.map(χ-leg) ≫ chartι) — plus the public chartHomEquiv_eq_of_specMap in
   two applications of `ringHom_comp_column`) → then the Spec-level assembly
   ([GR-D] open-immersion instances + `pullbackSpecIso` plumbing + `pullback.lift`/
   `hom_ext` per the pinned architecture) → [GR-G] T-points.
+
+### v10.95e (2026-07-10, fable-FP): ★ [GR-F3] PROVEN — the triple-overlap identities; GlueData RING LAYER COMPLETE
+
+- `GrassmannianTransition.lean` (sorry-free, axiom-clean): **`map_ringHom_matrix_triple`**
+  — `(matrix ι' ι'').map (ringHom ι ι') = (matrixAway ι ι')⁻¹ * (embedded matrix ι ι'')`
+  (column-by-column from the master identity) · **`ringHom_det_triple`** — the image of
+  `det ι' ι''` factors as unit × embedded `det ι ι''` · **`isUnit_map_ringHom_det_triple`**
+  — under ANY ring map making the embedded `det ι ι''` a unit, the composite-transition
+  determinant is a unit: the existence condition for the GlueData `t'`-legs, stated
+  abstractly so it applies verbatim to whatever double-localization presentation the
+  Spec-level assembly picks.
+- **★ The GlueData ring layer is COMPLETE**: t-maps (`ringHomAway`) ✓ · `t_id`
+  (`ringHomAway_self`) ✓ · inverse-pair (`ringHomAway_comp_ringHomAway`) ✓ ·
+  triple-overlap condition ([GR-F3]) ✓. What remains for [NISOG-GRASS] is purely
+  Spec-level: [GR-D] open-immersion instances + basicOpen identification ·
+  [GR-F] the `Scheme.GlueData` structure (pullback.lift t' per the pinned architecture;
+  cocycle via `pullback.hom_ext` + `IsLocalization.ringHom_ext`² reducing to the ring
+  layer) · [GR-G] T-points ⟹ NISOG [L15].

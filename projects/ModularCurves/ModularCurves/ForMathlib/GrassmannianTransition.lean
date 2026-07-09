@@ -316,6 +316,51 @@ theorem ringHomAway_self :
   rw [RingHom.comp_apply, RingHom.comp_apply, ringHomAway_algebraMap, ringHom_self,
     RingHom.id_apply]
 
+section Triple
+
+variable (ι'' : Fin k ↪ Fin n)
+
+/-- **[GR-F3]** The composite-transition matrix identity: the `ringHom ι ι'`-image of
+the ι'→ι'' transition matrix factors as `(matrixAway ι ι')⁻¹ *` (embedded ι→ι''
+matrix) — column-by-column, two applications of the master column identity. -/
+lemma map_ringHom_matrix_triple :
+    (matrix (R := R) ι' ι'').map ⇑(ringHom (R := R) ι ι')
+      = (matrixAway (R := R) ι ι')⁻¹ *
+        (matrix (R := R) ι ι'').map
+          (algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))) := by
+  funext i₁ i₂
+  rw [Matrix.map_apply, matrix_apply, Matrix.mul_apply]
+  have hcol := congrFun (ringHom_comp_column (R := R) ι ι' (ι'' i₂)) i₁
+  rw [hcol]
+  simp [Matrix.mulVec, dotProduct, Matrix.map_apply, matrix_apply]
+
+/-- **[GR-F3]** Determinant factorization of the composite transition: the
+`ringHom ι ι'`-image of `det ι' ι''` is (a unit) × (the embedded `det ι ι''`) — so it
+becomes a unit exactly where `det ι ι''` does, i.e. on the triple overlap. -/
+lemma ringHom_det_triple :
+    ringHom (R := R) ι ι' (det (R := R) ι' ι'')
+      = ((matrixAway (R := R) ι ι')⁻¹).det *
+        algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+          (det (R := R) ι ι'') := by
+  have hd : det (R := R) ι' ι'' = (matrix (R := R) ι' ι'').det := rfl
+  have hd' : det (R := R) ι ι'' = (matrix (R := R) ι ι'').det := rfl
+  rw [hd, hd', RingHom.map_det, RingHom.mapMatrix_apply, map_ringHom_matrix_triple,
+    Matrix.det_mul, RingHom.map_det, RingHom.mapMatrix_apply]
+
+/-- **[GR-F3]** The unit form: on any ring where the embedded `det ι ι''` becomes a
+unit, so does the `ringHom ι ι'`-image of `det ι' ι''` — the existence condition for
+the GlueData `t'`-legs on the triple overlap. -/
+lemma isUnit_map_ringHom_det_triple {S : Type u} [CommRing S]
+    (g : Localization.Away (det (R := R) ι ι') →+* S)
+    (hg : IsUnit (g (algebraMap (ChartRing R ι)
+      (Localization.Away (det (R := R) ι ι')) (det (R := R) ι ι'')))) :
+    IsUnit (g (ringHom (R := R) ι ι' (det (R := R) ι' ι''))) := by
+  rw [ringHom_det_triple, map_mul]
+  exact ((Matrix.isUnit_det_of_left_inverse
+    (Matrix.mul_nonsing_inv _ (isUnit_det_matrixAway ι ι'))).map g).mul hg
+
+end Triple
+
 end Transition
 
 end Module.Grassmannian
