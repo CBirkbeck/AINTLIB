@@ -16,7 +16,14 @@ transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean 
 - item 5 (endgame T-W7.12 → CLEANUP-ALL-W7 → T-W7.36/T-W7a): BLOCKED on 0h.
 - fallback T-D6b: BLOCKED on P3b3's T-B5D-A (`torsionπ_etale` still sorryAx).
 
-**NEXT-SESSION QUEUE (owner, v10.48 + T-A3 addition):**
+**RESUME 2026-07-09 OUTCOME (board-first):** map_id (`projModelVCIso_one`) DELIVERED axiom-clean
+(commit 4f8d2c1b8) but **MOOT** — PIC0 already closed [U/G] map_id via the (1,1)-`_mul` route;
+kept as named API gain. **T-A3 also MOOT — already DONE**: `projModel_smooth` axiom-clean at
+`WeierstrassModel.lean:1764` since 2026-07-06 (verified). Both dispatched items were pre-completed;
+the redistribution churn lost track. **LESSON REINFORCED: board-first, always** — verify a ticket's
+code state before working it. Remaining live item: **0h** (c5β signal, not fired) + endgame handshake.
+
+**NEXT-SESSION QUEUE (owner, v10.48 + T-A3 addition — MOSTLY MOOT now, see RESUME note above):**
 1. **PIC0 map_id quick favor** — ~3 lines on my private transport machinery (`coordRingCongr`/
    the projModel transport). Do FIRST (unblocks PIC0).
 2. **0h interrupt** the moment c5β signals 0c-ii → then the **endgame WITH c5β**: T-W7.12 →
