@@ -419,6 +419,51 @@ private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [Co
         Module.finrank_fin_fun]
       rfl
 
+/-- **[L1-d0, cancel-base-change stability]** The rank-`n` local-freeness condition read
+through an intermediate algebra `R'` agrees with the condition over `R` (the
+`B ⊗[R'] (R' ⊗[R] M) ≅ B ⊗[R] M` cancellation, transporting flatness and stalk ranks). -/
+private theorem locallyFreeRankLocusAux_cond_cancel {R R' B : Type u} [CommRing R]
+    [CommRing R'] [CommRing B] [Algebra R R'] [Algebra R' B] [Algebra R B]
+    [IsScalarTower R R' B] {M : Type u} [AddCommGroup M] [Module R M] {n : ℕ} :
+    (Module.Flat B (B ⊗[R'] (R' ⊗[R] M)) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R'] (R' ⊗[R] M)) p = n) ↔
+      (Module.Flat B (B ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R] M) p = n) := by
+  have e : (B ⊗[R'] (R' ⊗[R] M)) ≃ₗ[B] B ⊗[R] M :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R R' B B M
+  constructor
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv e.symm, fun p => by
+      rw [Module.rankAtStalk_eq_of_equiv e.symm]
+      exact h2 p⟩
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv e, fun p => by
+      rw [Module.rankAtStalk_eq_of_equiv e]
+      exact h2 p⟩
+
+/-- **[L1-d1, the patch interface]** Over a patch ring `R'` carrying an `n`-generator
+presentation of `R' ⊗ M`, the rank-`n` condition for any `R'`-algebra `B` is the vanishing
+in `B` of the entries ideal of the presentation ([L1-b] + [L1-d0]). -/
+private theorem locallyFreeRankLocusAux_patch_iff {R R' B : Type u} [CommRing R]
+    [CommRing R'] [CommRing B] [Algebra R R'] [Algebra R' B] [Algebra R B]
+    [IsScalarTower R R' B] {M : Type u} [AddCommGroup M] [Module R M] {n m : ℕ}
+    (α : (Fin m → R') →ₗ[R'] (Fin n → R'))
+    (π : (Fin n → R') →ₗ[R'] (R' ⊗[R] M)) (hπ : Function.Surjective π)
+    (hexact : Function.Exact α π) :
+    (Module.Flat B (B ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R] M) p = n) ↔
+      (Ideal.span (Set.range fun ij : Fin m × Fin n =>
+        α (Pi.single ij.1 1) ij.2)).map (algebraMap R' B) = ⊥ := by
+  rw [← locallyFreeRankLocusAux_cond_cancel (R := R) (R' := R'),
+    locallyFreeRankLocusAux_core_iff α π hπ hexact, Ideal.map_span, Submodule.span_eq_bot]
+  constructor
+  · rintro h _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+    exact h i j
+  · intro h i j
+    exact h _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+
 /-- **[L1-d, the affine universal ideal]** Over an affine base, the "finite locally free of
 rank `n`" condition on base changes of `M` is cut out by a single ideal: combining the local
 `n`-generator presentations ([L1-a], on a finite basic-open cover extracted by
@@ -433,7 +478,29 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
       (Module.Flat A (A ⊗[R] M) ∧
           ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
         I.map (algebraMap R A) = ⊥ := by
-  sorry
+  classical
+  -- per-prime local `n`-generator presentations ([L1-a])
+  choose gfun hgp mfun αfun πfun hπsurj hexact using
+    fun p : PrimeSpectrum R => locallyFreeRankLocusAux_exists_presentation hb p
+  -- the chosen `g`s generate the unit ideal
+  have hunit : Ideal.span (Set.range gfun) = ⊤ := by
+    by_contra h
+    obtain ⟨P, hP, hle⟩ := Ideal.exists_le_maximal _ h
+    exact hgp ⟨P, hP.isPrime⟩ (hle (Ideal.subset_span ⟨⟨P, hP.isPrime⟩, rfl⟩))
+  -- a finite subfamily already generates the unit ideal
+  obtain ⟨T, hT, h1T⟩ := Submodule.mem_span_finite_of_mem_span
+    (hunit ▸ Submodule.mem_top : (1 : R) ∈ Ideal.span (Set.range gfun))
+  choose pf hpf using fun t : T => hT t.2
+  -- the per-patch entries ideals and their common refinement
+  let J : (p : PrimeSpectrum R) → Ideal (Localization.Away (gfun p)) := fun p =>
+    Ideal.span (Set.range fun ij : Fin (mfun p) × Fin n =>
+      (αfun p) (Pi.single ij.1 1) ij.2)
+  refine ⟨⨅ t : T, (J (pf t)).comap (algebraMap R (Localization.Away (gfun (pf t)))),
+    fun A cA aA => ⟨fun hP => ?_, fun hI => ?_⟩⟩
+  · -- the condition kills the glued ideal
+    sorry
+  · -- the glued ideal's vanishing forces the condition
+    sorry
 
 /-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
 the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
