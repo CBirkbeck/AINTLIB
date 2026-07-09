@@ -371,4 +371,100 @@ theorem isUnit_comulMatrixR : IsUnit (comulMatrixR R A) :=
   ⟨⟨comulMatrixR R A, (comulMatrixR R A).map (HopfAlgebra.antipode R),
     comulMatrixR_mul_antipodeMatrixR R A, antipodeMatrixR_mul_comulMatrixR R A⟩, rfl⟩
 
+/-! ### The multiplication matrix on `B ⊗ A` -/
+
+section MulMatrix
+
+variable {B : Type*} [CommRing B] [Algebra R B]
+
+/-- **The multiplication matrix** of `u : B ⊗[R] A` in the `B`-basis `1 ⊗ eⱼ`:
+`u·(1 ⊗ eⱼ) = ∑ᵢ Mᵢⱼ ⊗ eᵢ` (`mul_one_tmul_hopfBasis`). -/
+noncomputable def mulMatrix (u : B ⊗[R] A) :
+    Matrix (hopfBasisIndex R A) (hopfBasisIndex R A) B :=
+  fun i j => rightCoeff R A i (u * (1 : B) ⊗ₜ[R] (hopfBasis R A) j)
+
+/-- The defining expansion of the multiplication matrix. -/
+theorem mul_one_tmul_hopfBasis (u : B ⊗[R] A) (j : hopfBasisIndex R A) :
+    u * (1 : B) ⊗ₜ[R] (hopfBasis R A) j
+      = ∑ i, mulMatrix R A u i j ⊗ₜ[R] (hopfBasis R A) i :=
+  (sum_rightCoeff_tmul R A _).symm
+
+/-- **Transport of the multiplication matrix along an algebra map** `φ : B → B''`:
+the matrix of `(φ ⊗ id)(u)` is the entrywise `φ`-image of the matrix of `u`. -/
+theorem mulMatrix_map {B'' : Type*} [CommRing B''] [Algebra R B''] (φ : B →ₐ[R] B'')
+    (u : B ⊗[R] A) :
+    mulMatrix R A ((Algebra.TensorProduct.map φ (AlgHom.id R A)) u)
+      = (mulMatrix R A u).map φ := by
+  classical
+  ext i j
+  have hexp := congrArg (Algebra.TensorProduct.map φ (AlgHom.id R A))
+    (mul_one_tmul_hopfBasis R A u j)
+  rw [map_mul, map_sum] at hexp
+  rw [show (Algebra.TensorProduct.map φ (AlgHom.id R A)) ((1 : B) ⊗ₜ[R] (hopfBasis R A) j)
+      = (1 : B'') ⊗ₜ[R] (hopfBasis R A) j from by
+    rw [Algebra.TensorProduct.map_tmul, map_one, AlgHom.coe_id, id_eq]] at hexp
+  rw [Finset.sum_congr rfl (fun k _ => show (Algebra.TensorProduct.map φ (AlgHom.id R A))
+      (mulMatrix R A u k j ⊗ₜ[R] (hopfBasis R A) k)
+      = φ (mulMatrix R A u k j) ⊗ₜ[R] (hopfBasis R A) k from by
+    rw [Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq])] at hexp
+  rw [show mulMatrix R A ((Algebra.TensorProduct.map φ (AlgHom.id R A)) u) i j
+      = rightCoeff R A i ((Algebra.TensorProduct.map φ (AlgHom.id R A)) u
+        * (1 : B'') ⊗ₜ[R] (hopfBasis R A) j) from rfl, hexp, rightCoeff_sum_tmul]
+  rfl
+
+omit [Module.Finite R A] in
+/-- `rightCoeff` commutes with the left `B`-action on `B ⊗[R] A`. -/
+theorem rightCoeff_smul (i : hopfBasisIndex R A) (b : B) (x : B ⊗[R] A) :
+    rightCoeff R A i (b • x) = b * rightCoeff R A i x := by
+  induction x with
+  | zero => simp
+  | tmul m a =>
+    rw [TensorProduct.smul_tmul', rightCoeff_tmul, rightCoeff_tmul, smul_eq_mul,
+      Algebra.mul_smul_comm]
+  | add x y ihx ihy => rw [smul_add, map_add, map_add, ihx, ihy, mul_add]
+
+omit [Module.Finite R A] in
+/-- The multiplication matrix of the left inclusion is scalar: `mulMatrix (b ⊗ 1) = b•1`. -/
+theorem mulMatrix_includeLeft (b : B) :
+    mulMatrix R A (b ⊗ₜ[R] (1 : A)) = Matrix.diagonal (fun _ => b) := by
+  classical
+  ext i j
+  rw [show mulMatrix R A (b ⊗ₜ[R] (1 : A)) i j
+      = rightCoeff R A i ((b ⊗ₜ[R] (1 : A)) * (1 : B) ⊗ₜ[R] (hopfBasis R A) j) from rfl]
+  rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul, rightCoeff_tmul,
+    Module.Basis.coord_apply, Module.Basis.repr_self, Matrix.diagonal_apply]
+  rw [Finsupp.single_apply]
+  by_cases h : i = j
+  · simp [h]
+  · simp [h, Ne.symm h]
+
+/-- Multiplicativity of the multiplication matrix: `mulMatrix (u·v) = mulMatrix u * mulMatrix v`. -/
+theorem mulMatrix_mul (u v : B ⊗[R] A) :
+    mulMatrix R A (u * v) = mulMatrix R A u * mulMatrix R A v := by
+  classical
+  ext i j
+  have hexp : (u * v) * (1 : B) ⊗ₜ[R] (hopfBasis R A) j
+      = ∑ k, mulMatrix R A v k j • (u * (1 : B) ⊗ₜ[R] (hopfBasis R A) k) := by
+    calc (u * v) * (1 : B) ⊗ₜ[R] (hopfBasis R A) j
+        = u * (v * (1 : B) ⊗ₜ[R] (hopfBasis R A) j) := by ring
+      _ = u * (∑ k, mulMatrix R A v k j ⊗ₜ[R] (hopfBasis R A) k) := by
+          rw [mul_one_tmul_hopfBasis]
+      _ = ∑ k, u * (mulMatrix R A v k j ⊗ₜ[R] (hopfBasis R A) k) := by
+          rw [Finset.mul_sum]
+      _ = ∑ k, mulMatrix R A v k j • (u * (1 : B) ⊗ₜ[R] (hopfBasis R A) k) := by
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [show mulMatrix R A v k j ⊗ₜ[R] (hopfBasis R A) k
+              = mulMatrix R A v k j • ((1 : B) ⊗ₜ[R] (hopfBasis R A) k) from by
+            rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one], mul_smul_comm]
+  rw [show mulMatrix R A (u * v) i j
+      = rightCoeff R A i ((u * v) * (1 : B) ⊗ₜ[R] (hopfBasis R A) j) from rfl, hexp,
+    map_sum, Matrix.mul_apply]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [rightCoeff_smul]
+  show mulMatrix R A v k j * mulMatrix R A u i k
+      = mulMatrix R A u i k * mulMatrix R A v k j
+  ring
+
+end MulMatrix
+
 end ModularCurves
