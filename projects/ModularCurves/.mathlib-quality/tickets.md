@@ -13463,3 +13463,16 @@ through the immersion equations).
   `RingHomClass` coe (match by ascription, not `.toRingHom`).
 - REMAINING: the `cocycle` condition (pullback.hom_ext + the ring layer — last hard
   condition) → the `Scheme.GlueData` structure → glued scheme → [GR-G] T-points.
+
+### v10.95j (2026-07-10, fable-FP): cocycle skeleton pinned + fresh-context attack dispatched
+
+- `tPrimeRing_cocycle` (the LAST glue condition) stated + committed (`fac9d5492`);
+  deep-filler dispatched with the complete chase recipe: TensorProduct.ringHom_ext →
+  IsLocalization/MvPolynomial ext-cascade → the GENERALIZED mulVec-cancellation
+  transport (`map_ringHom_solution`, generalizing the private
+  `ringHomAway_solution_column`) → triple telescope via `map_ringHom_matrix_triple` +
+  uniqueness-cancellation fallback. All seven banked elaboration traps included in the
+  brief. On its landing: the `Scheme.GlueData` structure assembles from
+  {chartScheme, overlapScheme, overlapι+instances, overlapTransition(+self/comp),
+  tPrimeScheme(+fac), cocycle} — then the glued Grassmannian scheme exists and [GR-G]
+  T-points open.
