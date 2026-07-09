@@ -9405,12 +9405,12 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   establish the remote y1 branch + correct tracking** (note: worktree dir is `-b3`; `origin/dev/
   modular-curves-b3` exists — naming intent unclear, didn't push/guess). beastmode-A enters this
   worktree for [Y1-vi-FACTOR]: do NOT `git pull` until tracking is fixed.
-- **Claimed [Y1-D1] `factors_yOne_iff`**: NEW-Y1, 2026-07-09T09:46Z (operator go-ahead to take the
-  file first). Status: in_progress. Owns `factors_yOne_iff` + D1 helper lemmas in
-  `YOneAssembly.lean`. ⚠ **Same-file with [Y1-vi-FACTOR] (A)**: both leaves live in
-  `YOneAssembly.lean` in the shared `aintlib-mc-b3` worktree — cannot be edited concurrently
-  (one filesystem). I hold the file now; **beastmode-A: defer [Y1-vi-FACTOR] until I commit +
-  release** (I commit-early per green increment; watch HEAD / this claim flipping to done).
+- **Claimed [Y1-D1] `factors_yOne_iff`**: NEW-Y1, 2026-07-09T09:46Z. Status: **★ DONE** (NEW-Y1,
+  2026-07-09, commit 6077910e5). `factors_yOne_iff` PROVEN, both directions, `lake build` GREEN;
+  `#print axioms` = propext/Classical.choice/Quot.sound + `sorryAx` (the latter inherited from
+  `tatePoint`, i.e. the atlas classifying subtree + `[Y1-vi-FACTOR]`, NOT from D1's own proof).
+  Owns `factors_yOne_iff` + D1 helpers in `YOneAssembly.lean`. (v10.73 confirms the file is mine;
+  NEW-ATLAS does the classifying subtree on their own branch/file, PR integration.)
 - **[Y1-D1] PROGRESS + FILE RELEASED (NEW-Y1, 2026-07-09T13:08Z)**: three axiom-clean helper
   lemmas COMMITTED (7ae5c69db, 6c9650fb9, 43a857c0e), `lake build …YOneAssembly` GREEN:
   - `EllipticCurve.zsmul_pull_baseChange_asSection_iff` (**fibrewise bridge**): via `baseChangeEquiv`
@@ -9420,9 +9420,8 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   - `factors_yOne_iff_exists_range` (**open-factoring split**): `(∃ h, h ≫ yOneBase = t) ↔ ∃ g,
     g ≫ killedLocusπ N = t ∧ range g.base ⊆ yOneSet`, via `IsOpenImmersion.lift` + `Opens.range_ι`.
     Needed `@[reducible] yOne` (same rationale as `tateBase`, v10.72(b)) — flag if it perturbs leaves.
-  - **`factors_yOne_iff` itself STILL `sorry`** (file released clean; **beastmode-A: [Y1-vi-FACTOR]
-    is unblocked, go**). Remaining = the assembly (fully scoped, ~70 LOC), plan:
-    `rw [factors_yOne_iff_exists_range]`, then ↔:
+  - **`factors_yOne_iff` PROVEN** (commit 6077910e5) via the assembly below — the plan executed
+    verbatim, ~85 LOC. `rw [factors_yOne_iff_exists_range]`, then ↔:
     * **→** given `⟨g, hg, hrange⟩`: KILL `(N:ℤ)•pull t 𝟎 = 0` via `killedLocus_spec` at `N`; clause 1
       via killing bridge; clause 2a `(N:ℤ)•pull (baseChange t) τ = 0` via fibrewise bridge +
       `smul_eq_zero_iff_comp_mulByHom` (precompose KILL's comp-eq by τ, reassoc); clause 2b: assume
