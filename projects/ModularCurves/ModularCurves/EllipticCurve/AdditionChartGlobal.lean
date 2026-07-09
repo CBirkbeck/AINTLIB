@@ -1908,6 +1908,144 @@ lemma specMap_psiFstCross_addOnZPieceMor_cross [IsDomain (biChartRing W i j)]
         (psiSndCross_algebraMap_mul_invSelf W i j i' j' k k')
         (equation_psiSndCross_lawTwoTriple W i j i' j' hΔ k k')).symm)
 
+lemma specMap_psiFstCross_pieceGenι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiFstCross W i j i' j' k k').toRingHom) ≫
+        pieceGenι W i j (lawOneTriple W i j k) =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceGenι_eq, transι]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiFstCross_toRingHom_comp'])
+
+lemma specMap_psiSndCross_pieceGenι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiSndCross W i j i' j' k k').toRingHom) ≫
+        pieceGenι W i' j' (lawTwoTriple W i' j' k') =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceGenι_eq, transι_eq]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiSndCross_toRingHom_comp'])
+
+lemma crossOverlapPieceIso_hom_ι_eq_specMap_psiFstCross (k k' : Fin 3) :
+    (crossOverlapPieceIso W i j i' j' k k').hom ≫ (crossOverlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiFstCross W i j i' j' k k').toRingHom) ≫
+        pieceGenι W i j (lawOneTriple W i j k) :=
+  (crossOverlapPieceIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiFstCross_pieceGenι W i j i' j' k k').symm
+
+lemma crossOverlapPieceIso_hom_ι_eq_specMap_psiSndCross (k k' : Fin 3) :
+    (crossOverlapPieceIso W i j i' j' k k').hom ≫ (crossOverlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiSndCross W i j i' j' k k').toRingHom) ≫
+        pieceGenι W i' j' (lawTwoTriple W i' j' k') :=
+  (crossOverlapPieceIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiSndCross_pieceGenι W i j i' j' k k').symm
+
+
+@[reassoc]
+lemma crossW_homOfLE_sigma_psiFstCross (k k' : Fin 3) :
+    (crossOverlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : crossOverlapPiece W i j i' j' k k' ≤
+          pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) ≫
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv =
+    Spec.map (CommRingCat.ofHom (psiFstCross W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv ≫
+      pieceGenι W i j (lawOneTriple W i j k) = (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι := by
+    simp only [blOpenZPieceFamily]
+    rw [← isoImage_specBasicOpen_pieceGenι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceGenι W i j (lawOneTriple W i j k))]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact crossOverlapPieceIso_hom_ι_eq_specMap_psiFstCross W i j i' j' k k'
+
+@[reassoc]
+lemma crossW_homOfLE_sigma_psiSndCross (k k' : Fin 3) :
+    (crossOverlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right : crossOverlapPiece W i j i' j' k k' ≤
+          pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k') ≫
+      (Scheme.Hom.isoImage (pieceι W i' j') (blOpenYPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')).inv =
+    Spec.map (CommRingCat.ofHom (psiSndCross W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i' j') (blOpenYPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')).inv ≫
+      pieceGenι W i' j' (lawTwoTriple W i' j' k') =
+      (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k').ι := by
+    simp only [blOpenYPieceFamily]
+    rw [← isoImage_specBasicOpen_pieceGenι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceGenι W i' j' (lawTwoTriple W i' j' k'))]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact crossOverlapPieceIso_hom_ι_eq_specMap_psiSndCross W i j i' j' k k'
+
+
+/-- The cross-chart-cross-law overlap decomposed into the (k,k') cross pieces. -/
+lemma blOpenZImage_inf_blOpenYImage_eq_iSup_cross :
+    blOpenZImage W i j ⊓ blOpenYImage W i' j' =
+      ⨆ p : Fin 3 × Fin 3, crossOverlapPiece W i j i' j' p.1 p.2 := by
+  rw [blOpenZImage_eq_iSup, blOpenYImage_eq_iSup, iSup_inf_iSup]
+
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)] [IsDomain (biChartRing W i' j')]
+
+/-- **(c3, per cross-piece agreement)** On the cross overlap piece, the (i,j)-Z and (i',j')-Y image
+morphisms agree. cancel_epi crossOverlapPieceIso + L1 + σ-cancels + L4. -/
+lemma crossOverlapPiece_addOn_agree (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))) ≫
+        addOnYOnImage W hΔ i' j' := by
+  have eZ : (crossOverlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      Spec.map (CommRingCat.ofHom (psiFstCross W i j i' j' k k').toRingHom) ≫ addOnZPieceMor W i j k hΔ :=
+    (congrArg ((crossOverlapPieceIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnZOnImage_eq W i j hΔ k (crossOverlapPiece W i j i' j' k k') inf_le_left)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnZPieceMor W i j k hΔ) (crossW_homOfLE_sigma_psiFstCross W i j i' j' k k')))
+  have eY : (crossOverlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))) ≫
+        addOnYOnImage W hΔ i' j' =
+      Spec.map (CommRingCat.ofHom (psiSndCross W i j i' j' k k').toRingHom) ≫
+        addOnYPieceMor W i' j' k' hΔ :=
+    (congrArg ((crossOverlapPieceIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnYOnImage_eq W i' j' hΔ k' (crossOverlapPiece W i j i' j' k k') inf_le_right)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnYPieceMor W i' j' k' hΔ) (crossW_homOfLE_sigma_psiSndCross W i j i' j' k k')))
+  exact (cancel_epi (crossOverlapPieceIso W i j i' j' k k').hom).mp
+    (eZ.trans ((specMap_psiFstCross_addOnZPieceMor_cross W i j i' j' hΔ k k').trans eY.symm))
+
+/-- **(c3, cross-chart-cross-law addOn_agree)** addOnZOnImage(i,j) = addOnYOnImage(i',j') on their
+overlap. Cover.hom_ext over the cross-piece cover → crossOverlapPiece_addOn_agree. -/
+lemma addOnZOnImage_eq_addOnYOnImage_cross (hΔ : IsUnit W.Δ)
+    (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenZImage W i j) (hl : Ω ≤ blOpenYImage W i' j')
+    (hΩ : Ω = ⨆ p : Fin 3 × Fin 3, crossOverlapPiece W i j i' j' p.1 p.2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnYOnImage W hΔ i' j' := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun p : Fin 3 × Fin 3 => crossOverlapPiece W i j i' j' p.1 p.2)) _ _ (fun p => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun p : Fin 3 × Fin 3 => crossOverlapPiece W i j i' j' p.1 p.2)).f p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun p : Fin 3 × Fin 3 => crossOverlapPiece W i j i' j' p.1 p.2) p) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hk (addOnZOnImage W hΔ i j)).trans
+    ((crossOverlapPiece_addOn_agree W i j i' j' hΔ p.1 p.2).trans
+      (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hl (addOnYOnImage W hΔ i' j')).symm)
+
 end OverlapCrossChart
 
 end WeierstrassCurve.Projective
