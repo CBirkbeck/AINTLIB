@@ -9427,6 +9427,16 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   quotes; keep `gammaHNaive_relativelyRepresentable_bot` (H = ⊥ salvage, staged) and prove
   the refutation `gammaHNaiveProblem_not_relativelyRepresentable` (provable NOW) to lock the
   counterexample into the library.
+  **★ B2 REPOINT DONE (fable-P4, 2026-07-09):** b2_log.jsonl entries for **T-H4** and **T-H6** written
+  (with the counterexample + the KM-7.1.2 repoint); **KM 7.1.1/7.1.2/7.1.3 verbatim quotes** recorded in
+  `.mathlib-quality/km-71-quotient-quotes.md` (the quotient problem `𝒫/G` pinned by (Q1)+(Q2), THM
+  7.1.3 = rel-rep + affine + finite + étale-torsor-if-free); corrected statements **staged** in
+  `GammaHRepresentability.lean` (`gammaH_relativelyRepresentable`, `gammaHNaive_toQuotient`,
+  `gammaH_representable_of_rigid` [engine-gated], `gammaHNaive_relativelyRepresentable_bot` [PROVEN]);
+  refutation `gammaHNaiveProblem_not_relativelyRepresentable` **proven** (own proof sorry-free; residual
+  `sorryAx` via gated `FullLevelPt`/`glSmul` helpers — follow-up to make the counterexample fully
+  axiom-clean). This unblocks GH. The naive `GammaH.lean` statements stay (theorem_statement_protected)
+  as documented non-goals.
 - **T-E9 dep-line CORRECTION**: "depends on T-C1" is superseded — rel-rep rides the PROVEN
   `levelSpaceΓ` + T-D8; the open half is [YF-CLOPEN] with a Weil-pairing-FREE route (KM 3.7.1
   étale constancy). The Weil pairing (CHARTER-P2 phase 2) matters for DS4 itself, NOT for the
