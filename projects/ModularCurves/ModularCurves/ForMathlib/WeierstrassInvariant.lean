@@ -160,4 +160,33 @@ theorem isVCocycle_conj (D : VariableChange A) {C : G → VariableChange A} (hC 
   simp only [hC g h, mul_smul g h D, smul_mul', smul_inv']
   group
 
+/-- `g • (d, 0, 0, 0) = (g • d, 0, 0, 0)`. -/
+theorem vcSMul_mk_zero (g : G) (d : Aˣ) :
+    (g • (⟨d, 0, 0, 0⟩ : VariableChange A)) = ⟨uSMul g d, 0, 0, 0⟩ :=
+  VariableChange.ext rfl (smul_zero g) (smul_zero g) (smul_zero g)
+
+/-- The `u`-part of the conjugate of `C g` by `(d, 0, 0, 0)` is `1`, when `d` witnesses the
+`u`-coboundary `uSMul g d = (C g).u · d`. -/
+theorem conj_u_one (d : Aˣ) {C : G → VariableChange A}
+    (hd : ∀ g : G, uSMul g d = (C g).u * d) (g : G) :
+    ((⟨d,0,0,0⟩ : VariableChange A) * C g * (g • (⟨d,0,0,0⟩ : VariableChange A))⁻¹).u = 1 := by
+  rw [vcSMul_mk_zero]
+  show d * (C g).u * (uSMul g d)⁻¹ = 1
+  rw [hd g]
+  exact mul_inv_eq_one.mpr (mul_comm d (C g).u)
+
+/-- **([a5-iii], step 2 — reduce to `u = 1`)** For a free action with `Aᴳ` local, every
+`VariableChange` cocycle is cohomologous to one with `u`-component identically `1`: conjugate by
+`(d, 0, 0, 0)` where `d` is the unit from `exists_unit_u_of_isVCocycle`. The residual cocycle lives
+in the `(r, s, t)` translation subgroup, to be trivialized by the additive Hilbert 90. -/
+theorem exists_conj_u_one [Fintype G] [DecidableEq G] [Nontrivial A]
+    [IsLocalRing (FixedPoints.subalgebra ℤ A G)] (hfree : IsFreeAlgebraAction G ℤ A)
+    {C : G → VariableChange A} (hC : IsVCocycle C) :
+    ∃ D : VariableChange A, IsVCocycle (fun g => D * C g * (g • D)⁻¹) ∧
+      ∀ g : G, (D * C g * (g • D)⁻¹).u = 1 := by
+  obtain ⟨d, hd'⟩ := exists_unit_u_of_isVCocycle hfree hC
+  have hd : ∀ g : G, uSMul g d = (C g).u * d := by
+    intro g; apply Units.ext; rw [uSMul_coe, Units.val_mul]; exact hd' g
+  exact ⟨⟨d, 0, 0, 0⟩, isVCocycle_conj _ hC, conj_u_one d hd⟩
+
 end WeierstrassCurve
