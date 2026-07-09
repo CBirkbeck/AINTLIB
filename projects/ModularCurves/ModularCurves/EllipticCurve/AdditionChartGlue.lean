@@ -76,4 +76,20 @@ theorem chartHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
   rw [hss, hss, hts, hts, ← map_mul, ← map_mul]
   exact congrArg φ (lawOneTriple_mul_lawTwoTriple W i j m k)
 
+/-- **(β4(b), the two laws glue — `Away`-chart form)** The `chartAway` presentation of
+`chartHomOfTriple_lawOne_eq_lawTwo`: wherever both laws are regular at index `k`, they induce the same
+`chartAway W k`-algebra map. Post-composing the `chartHomOfTriple` agreement with `chartCoordAlgEquiv⁻¹`
+(the presentation `Proj.awayι` consumes). This is the ring-level input the scheme-level `addOn_agree`
+(the two Bosma–Lenstra laws agree on `blOpenZ ⊓ blOpenY`) consumes on each same-index overlap piece. -/
+theorem chartAwayHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
+    (φ : biChartRing W i j →+* S)
+    (t s : Fin 3 → S) (hts : ∀ m, t m = φ (lawTwoTriple W i j m))
+    (hss : ∀ m, s m = φ (lawOneTriple W i j m))
+    (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartAwayHomOfTriple W k s v hv hs = chartAwayHomOfTriple W k t u hu ht :=
+  congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
+    (chartHomOfTriple_lawOne_eq_lawTwo W i j k u v φ t s hts hss hu hv ht hs)
+
 end WeierstrassCurve.Projective
