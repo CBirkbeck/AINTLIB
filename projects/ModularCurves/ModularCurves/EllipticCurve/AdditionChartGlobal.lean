@@ -69,6 +69,16 @@ noncomputable def blOpenY : (pullback (projModelπ W) (projModelπ W)).Opens :=
 noncomputable def blOpenZ : (pullback (projModelπ W) (projModelπ W)).Opens :=
   ⨆ p, blOpenZFamily W p
 
+/-- `blOpenYImage` is the union of the images of its regularity pieces (`image_iSup`). -/
+lemma blOpenYImage_eq_iSup (i j : Fin 3) :
+    blOpenYImage W i j = ⨆ k, pieceι W i j ''ᵁ blOpenYPieceFamily W i j k := by
+  rw [blOpenYImage, Scheme.Hom.image_iSup]
+
+/-- The law-1 analogue of `blOpenYImage_eq_iSup`. -/
+lemma blOpenZImage_eq_iSup (i j : Fin 3) :
+    blOpenZImage W i j = ⨆ k, pieceι W i j ''ᵁ blOpenZPieceFamily W i j k := by
+  rw [blOpenZImage, Scheme.Hom.image_iSup]
+
 /-- The cover of `blOpenY` by the four chart-products' regularity opens. -/
 noncomputable def blOpenYCover : (blOpenY W).toScheme.OpenCover :=
   Scheme.Opens.iSupOpenCover (blOpenYFamily W)

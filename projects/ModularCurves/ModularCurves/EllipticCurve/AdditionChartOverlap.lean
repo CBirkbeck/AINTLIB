@@ -209,6 +209,53 @@ lemma chartAwayHomOfTriple_dblAddXYZ_smul (k : Fin 3) (P Q : Fin 3 → S) (c d u
   chartAwayHomOfTriple_congr_of_smul W k _ _ u u' ((c * d) ^ 2)
     (fun m => by rw [dblAddXYZ_smul]; rfl) hu hu' ht ht'
 
+/-- **(the crux, in its final form)** Two on-curve triples that are PROPORTIONAL, each with an
+invertible coordinate — at possibly different indices `k` and `l` — define the same morphism to the
+model.
+
+This subsumes both agreements of the construction. Taking `e = 1` gives the within-chart-product
+agreement of c4.2c (`pieceMorOfTriple_agree`); taking `e` the bidegree-`(2,2)` transition factor
+gives the cross-chart-product agreement of c4.3. Neither needs `e` to be a unit: `hu'` forces it. -/
+theorem chartι_comp_specMap_chartAwayHom_smul_eq {S : Type} [CommRing S] [Algebra R S]
+    (k l : Fin 3) (t t' : Fin 3 → S) (u u' e : S) (hsmul : ∀ m, t' m = e * t m)
+    (hu : t k * u = 1) (hu' : t' l * u' = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (ht' : (W.map (algebraMap R S)).toProjective.Equation t') :
+    Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W l t' u' hu' ht').toRingHom) ≫ chartι W l =
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k t u hu ht).toRingHom) ≫ chartι W k := by
+  have hv : t l * (e * u') = 1 := by
+    rw [show t l * (e * u') = (e * t l) * u' by ring, ← hsmul l]; exact hu'
+  rw [show chartAwayHomOfTriple W l t' u' hu' ht' = chartAwayHomOfTriple W l t (e * u') hv ht from
+    chartAwayHomOfTriple_congr_of_smul W l t t' (e * u') u' e hsmul hv hu' ht ht']
+  rcases eq_or_ne l k with rfl | hlk
+  · congr 2
+    exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom
+      (chartAwayHomOfTriple_congr_of_smul W l t t u (e * u') 1
+        (fun m => (one_mul _).symm) hu hv ht ht))
+  · exact (chartι_comp_specMap_chartAwayHom_eq W k l hlk t u (e * u') hu hv ht).symm
+
+/-- Composing `pieceMorOfTriple` with a further `R`-algebra map `ψ` out of the localization gives
+the chart morphism of the pushed-forward triple — naturality of `chartAwayHomOfTriple`. This is the
+bridge from `pieceMorOfTriple` to the cross-chart crux: over the overlap ring both readings become
+`chartAwayHomOfTriple(image triple) ≫ chartι`. -/
+lemma specMap_comp_pieceMorOfTriple {S : Type} [CommRing S] [Algebra R S]
+    (t : Fin 3 → A) (ht : (W.map (algebraMap R A)).toProjective.Equation t) (k : Fin 3)
+    (ψ : Localization.Away (t k) →ₐ[R] S)
+    (hψ : ψ (algebraMap A (Localization.Away (t k)) (t k)) *
+      ψ (IsLocalization.Away.invSelf (t k)) = 1)
+    (ht' : (W.map (algebraMap R S)).toProjective.Equation
+      (fun m => ψ (algebraMap A (Localization.Away (t k)) (t m)))) :
+    Spec.map (CommRingCat.ofHom ψ.toRingHom) ≫ pieceMorOfTriple W t ht k =
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k
+        (fun m => ψ (algebraMap A (Localization.Away (t k)) (t m)))
+        (ψ (IsLocalization.Away.invSelf (t k))) hψ ht').toRingHom) ≫ chartι W k := by
+  rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  refine congrArg (· ≫ chartι W k) (congrArg Spec.map (congrArg CommRingCat.ofHom ?_))
+  exact congrArg AlgHom.toRingHom (chartAwayHomOfTriple_naturality W ψ k
+    (fun m => algebraMap A (Localization.Away (t k)) (t m))
+    (IsLocalization.Away.invSelf (t k)) (IsLocalization.Away.mul_invSelf _)
+    (equation_mapTriple W t ht) hψ ht').symm
+
 end Naturality
 
 /-- **(c4.2c, the agreement)** The `k`-th and `l`-th piece morphisms of an on-curve triple agree
