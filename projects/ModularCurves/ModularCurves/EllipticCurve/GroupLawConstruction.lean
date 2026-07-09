@@ -881,11 +881,11 @@ noncomputable abbrev modelOver (W : WeierstrassCurve R) : Over (Spec (CommRingCa
 /-- **(T-W7.0g-mul)** The multiplication as an `Over`-morphism from the cartesian tensor
 (whose underlying scheme is the fibre product). -/
 noncomputable def mulOver : modelOver W ⊗ modelOver W ⟶ modelOver W :=
-  sorry
+  Over.homMk (mulModelHom W) (mulModelHom_π W)
 
 /-- **(T-W7.0g-mul-left)** The underlying scheme morphism of `mulOver` is `mulModelHom`. -/
-theorem mulOver_left : (mulOver W).left = mulModelHom W := by
-  sorry
+theorem mulOver_left : (mulOver W).left = mulModelHom W :=
+  rfl
 
 /-- **(T-W7.0g-one)** The unit as an `Over`-morphism, via the zero section. Its underlying
 morphism is the structure map of the monoidal unit followed by the zero section; the `Over`
