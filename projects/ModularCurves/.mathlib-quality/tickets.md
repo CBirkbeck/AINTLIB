@@ -12216,3 +12216,55 @@ The c3 (`addOn_agree`) foundation is now in place, all axiom-clean & committed:
   transRing transition apparatus (the hf-glue machinery) COMBINED with the minor identity. The harder half.
 - (c) assemble (a)+(b) across the four-charts family → `addOn_agree`, then `mulModelHom` (two-open glue).
 c2 (`blOpen_cover`, blocked on Bezout certificate) and c4.5 (GLC wiring flag) unchanged.
+
+## Amendments v10.80 (2026-07-09, coordinator): ★ OWNER DIRECTIVE — Y1-FIRST + CREDIT-FRUGAL (binding); LSP root cause FIXED fleet-wide; lane orders; NEW-ATLAS worker chartered
+
+- **OWNER DIRECTIVE (binding until lifted): finish Y₁(N) before the general streams; credits
+  are tight.** Active budget goes to T-E7's critical path ONLY. All sessions: bounded, no
+  side-quests, stop at clean boundaries, prefer direct proving over delegate fan-outs, use
+  the now-live LSP (goal-guided repair beats build-cycle probing in credits AND time).
+- **Absorbed since v10.75**: ★★★ PIC0 [GAP1-W-MONO] COMPLETE (monoidal SheafOfModules,
+  sorry-free + axiom-clean; P1b reduced to [PIC-P1b-MONO], decompose banked v10.78) —
+  headline delivery, durable. ★★★ c5β hf-GLUE COMPLETE (both B–L laws are sorry-free
+  scheme morphisms; [c3] advancing, v10.77–79). A [02KL] recipe doc banked (f7855cef6).
+- **LSP FLEET FIX — real root cause**: the USER-scope lean-lsp entry was typo'd
+  (`lean-lsp-mcpp`) = dead on EVERY worktree; D2's local add covered the main worktree
+  only. FIXED at user scope (verified Connected) — all worktrees on this machine now have
+  lean_goal etc. Other machines: `claude mcp add lean-lsp -s user -- uvx lean-lsp-mcp`.
+  Credit to D2 for the catch (v10.76-D2 report items absorbed below).
+- **D2's four items**: (1) LSP — handled above. (2) B–E ledger correction ACCEPTED with
+  credit: the tower's ASSEMBLY layer is skeletal — [T-BE-TAIL] RESCOPED to the full set
+  {2 tail sub-cases, 00ME, 00MI, 00RB, T-REDUCEP, T-FINAL}; stays registered-residual,
+  quality-milestone-not-curve-blocker; 00HM + the authored fibre-exactness predicates
+  banked. (3) **GREENLIT**: de-privatise the Incidence.lean naturality generals
+  (visibility-only, statements untouched, docstring naming the consumer NIsogeny-L3,
+  pathspec-commit) + the ~25-line L3 close. (4) **OPS RECALIBRATION RATIFIED**:
+  saturation holds now apply to DELEGATE/sub-agent work ONLY; direct main-session coding
+  proceeds at any load; the 30-min stall monitor stays for delegates.
+- **LANE ORDERS (Y1-first)**:
+  - **c5β — fleet's top budget priority, unchanged**: [c3] → mulModelHom → c4.4/c4.5 →
+    0c-i → 0c-ii → 0h → T-W7.12 → **T-W7a**, which un-gates T-B6′ ⟹ BB-DIFF ⟹ Y1-E.
+  - **NEW-Y1**: next session = [Y1-D1] (~110 LOC); YOneAssembly.lean stays yours
+    (single-writer). NEW-ATLAS (below) takes the classifying subtree in a separate
+    branch+file — coordinate at boundaries via PR, not shared edits.
+  - **NEW-ATLAS (new worker CHARTERED — package in inbox/NEW-ATLAS.md)**: [Y1-ATLAS]
+    iii/iv/v (the exists_tatePoint classifying clause, Loeffler Cor 3.3.5) in a NEW file
+    on branch dev/modular-curves-y1-atlas (own worktree aintlib-mc-atlas).
+  - **beastmode-A**: item (2) SHARPENED to Y1's need — discharge the [T-E4-family]
+    transport gating [Y1-D2] (standalone lemmas + holder wiring note); the broad T-H8a
+    sweep + PR-draft staging are DEFERRED.
+  - **p2**: continue ONLY to Milestone 1 (BB-DELIGNE DISCHARGED — plausibly on Y1's
+    axiom trail via the ExactOrder chain), then PARK (phase 2 Weil pairing deferred).
+  - **PIC0**: PARK — the monoidal delivery is complete; [PIC-P1b-MONO]/P2/DS-END0
+    route (a) resumes when the Y1-E rigidity audit confirms the pins are needed (or on
+    refocus). Superb close.
+  - **fable-P4**: PARK at the clean boundary — the v10.75 stitch dispatch is DEFERRED
+    (the engine serves Y(N)/Γ_H, not Y1). All banked; fires on refocus.
+  - **NEW-GH**: PARK — 02KL/02KM deferred (recipe banked). **fable-FP**: PARK at
+    boundary — GRASS wave 3 deferred. **D2**: land L3 (it is ~25 lines from done +
+    greenlit visibility edits), then PARK. **p0 (return)**: PARK unless a Y1-path item
+    is open. **P3b3 (return)**: the étale cascade IS Y1 work — resume trigger unchanged
+    (T-B6′ dischargeable ⟸ T-W7a); highest-value return in the fleet.
+- **Open audit (coordinator, next cycle)**: does Y1's T-E1/rigidity leg consume
+  aut_trivial_of_fullLevel's DS-END0 pins, or does atlas-internal rigidity suffice?
+  Decides whether PIC0's route (a) un-parks FOR Y1 or only on refocus.
