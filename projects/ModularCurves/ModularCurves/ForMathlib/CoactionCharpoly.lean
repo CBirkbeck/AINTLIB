@@ -201,4 +201,93 @@ theorem isUnit_comulMatrix : IsUnit (comulMatrix R A) :=
   ⟨⟨comulMatrix R A, (comulMatrix R A).map (HopfAlgebra.antipode R),
     comulMatrix_mul_antipodeMatrix R A, antipodeMatrix_mul_comulMatrix R A⟩, rfl⟩
 
+/-! ### The right-slot mirror -/
+
+section RightCoeff
+
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+/-- Extract the `i`-th basis coefficient of the *second* tensor factor: the linear map
+`M ⊗[R] A → M` sending `m ⊗ x ↦ (eᵢ-coefficient of x) • m`. -/
+noncomputable def rightCoeff (i : hopfBasisIndex R A) : M ⊗[R] A →ₗ[R] M :=
+  (TensorProduct.rid R M).toLinearMap.comp
+    (LinearMap.lTensor M ((hopfBasis R A).coord i))
+
+omit [Module.Finite R A] in
+@[simp]
+theorem rightCoeff_tmul (i : hopfBasisIndex R A) (m : M) (x : A) :
+    rightCoeff R A i (m ⊗ₜ[R] x) = (hopfBasis R A).coord i x • m := by
+  simp [rightCoeff]
+
+/-- Every element of `M ⊗[R] A` is the sum of its right coefficients tensor basis
+vectors. -/
+theorem sum_rightCoeff_tmul (x : M ⊗[R] A) :
+    ∑ i, rightCoeff R A i x ⊗ₜ[R] (hopfBasis R A) i = x := by
+  classical
+  induction x with
+  | zero => simp
+  | tmul m a =>
+    calc ∑ i, rightCoeff R A i (m ⊗ₜ[R] a) ⊗ₜ[R] (hopfBasis R A) i
+        = ∑ i, m ⊗ₜ[R] ((hopfBasis R A).coord i a • (hopfBasis R A) i) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [rightCoeff_tmul, TensorProduct.smul_tmul, TensorProduct.tmul_smul]
+    _ = m ⊗ₜ[R] (∑ i, (hopfBasis R A).coord i a • (hopfBasis R A) i) := by
+          rw [TensorProduct.tmul_sum]
+    _ = m ⊗ₜ[R] a := by
+          congr 1
+          simp only [Module.Basis.coord_apply]
+          exact (hopfBasis R A).sum_repr a
+  | add x y ihx ihy =>
+    simp only [map_add, TensorProduct.add_tmul]
+    rw [Finset.sum_add_distrib, ihx, ihy]
+
+/-- Right coefficients of a basis-indexed sum of pure tensors. -/
+theorem rightCoeff_sum_tmul (x : hopfBasisIndex R A → M) (k : hopfBasisIndex R A) :
+    rightCoeff R A k (∑ i, x i ⊗ₜ[R] (hopfBasis R A) i) = x k := by
+  classical
+  rw [map_sum]
+  simp [Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply]
+
+/-- Basis-indexed sums of pure tensors are determined by their right coefficients. -/
+theorem sum_tmul_injective' {x y : hopfBasisIndex R A → M}
+    (h : ∑ i, x i ⊗ₜ[R] (hopfBasis R A) i = ∑ i, y i ⊗ₜ[R] (hopfBasis R A) i) :
+    x = y := by
+  funext k
+  rw [← rightCoeff_sum_tmul R A x k, h, rightCoeff_sum_tmul R A y k]
+
+end RightCoeff
+
+/-- **The right-slot Δ-matrix**: `T̃ᵢⱼ` is the `eᵢ`-right-coefficient of `Δ(eⱼ)`, so that
+`Δ(eⱼ) = ∑ᵢ T̃ᵢⱼ ⊗ eᵢ` (`comul_hopfBasis'`). -/
+noncomputable def comulMatrixR : Matrix (hopfBasisIndex R A) (hopfBasisIndex R A) A :=
+  fun i j => rightCoeff R A i (Coalgebra.comul ((hopfBasis R A) j))
+
+/-- The defining expansion of the right-slot Δ-matrix. -/
+theorem comul_hopfBasis' (j : hopfBasisIndex R A) :
+    Coalgebra.comul ((hopfBasis R A) j)
+      = ∑ i, comulMatrixR R A i j ⊗ₜ[R] (hopfBasis R A) i :=
+  (sum_rightCoeff_tmul R A _).symm
+
+/-- **Counit identity of the right-slot Δ-matrix**: `ε(T̃ᵢⱼ) = δᵢⱼ`. -/
+theorem counit_comulMatrixR (i j : hopfBasisIndex R A) :
+    Coalgebra.counit (R := R) (comulMatrixR R A i j) = if i = j then (1 : R) else 0 := by
+  classical
+  have hlaw := congr($(Coalgebra.rTensor_counit_comp_comul (R := R) (A := A))
+    ((hopfBasis R A) j))
+  rw [LinearMap.comp_apply, comul_hopfBasis', map_sum] at hlaw
+  have hexp : (∑ k, (LinearMap.rTensor A (Coalgebra.counit (R := R)))
+      (comulMatrixR R A k j ⊗ₜ[R] (hopfBasis R A) k))
+      = ∑ k, Coalgebra.counit (R := R) (comulMatrixR R A k j)
+          ⊗ₜ[R] (hopfBasis R A) k :=
+    Finset.sum_congr rfl fun k _ => LinearMap.rTensor_tmul _ _ _ _
+  rw [hexp] at hlaw
+  have hone : (∑ k, (if k = j then (1 : R) else 0) ⊗ₜ[R] (hopfBasis R A) k)
+      = ((TensorProduct.mk R R A) 1) ((hopfBasis R A) j) := by
+    rw [Finset.sum_congr rfl fun k _ =>
+      TensorProduct.ite_tmul (1 : R) ((hopfBasis R A) k) (k = j)]
+    rw [Finset.sum_ite_eq' Finset.univ j (fun k => (1 : R) ⊗ₜ[R] (hopfBasis R A) k)]
+    simp
+  rw [← hone] at hlaw
+  exact congrFun (sum_tmul_injective' R A hlaw) i
+
 end ModularCurves
