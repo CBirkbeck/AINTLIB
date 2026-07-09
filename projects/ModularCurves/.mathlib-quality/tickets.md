@@ -2085,9 +2085,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
      **`appLE_π_equivariant`** (the semilinearity, from `appLE_comp_appLE` + `π_equivariant`).
      *Remaining*: connect this local-quotient square to `isPullback_chart`'s whole-`X`/`quotientπ_X`
      form — with `U = ⊤` (`hVtop`), `U.ι` is iso and the `X`-chart is all of `X/G`; mechanical.
-  2. **`locallyWeierstrass_quotientπ`** ([a5]) — the descended Weierstrass model. **Ungated now**:
-     T-W7.1b (`pointedIso_exists_variableChange`) is DONE; additive Hilbert 90 + `exists_unit_smul_eq_of_isLocalRing`
-     both PROVEN. Only the assembly of the VariableChange-cocycle trivialization remains.
+  2. **`locallyWeierstrass_quotientπ`** ([a5]) — descended Weierstrass model of `E/G` over `X/G`.
+     **Last fully-mine engine leaf; ungated** (T-W7.1b DONE; additive Hilbert 90 +
+     `exists_unit_smul_eq_of_isLocalRing` PROVEN). Fresh development at the boundary of the
+     geometric-descent lane and the T-W7 Weierstrass-model stream — **DECOMPOSED (fable-P4, 2026-07-09)**:
+     [a5-i] local projModel presentation of `E` from `C.localModel`; [a5-ii] the `G`-action on `W₀` as a
+     `VariableChange` cocycle via `pointedIso_exists_variableChange` (T-W7.1b); [a5-iii] the cocycle
+     trivializes Zariski-locally on `Spec Aᴳ` (additive Hilbert 90 for `(r,s,t)` + local coboundary for
+     `u`, both PROVEN); [a5-iv] descend the `G`-invariant `W₀` to `X/G` via `isPullback_quotientπ`
+     (PROVEN this session) + ff-descent of the model iso. Each sub-leaf is real work; natural
+     collaboration with the T-W7 stream that owns the `VariableChange`↔`projModel` machinery.
   3. **`smoothOfRelativeDimension_of_locallyWeierstrass`** — general leaf, reduces to **T-A3**
      (`SmoothOfRelativeDimension 1 (projModelπ W)`, owner beastmode-A) by the same Zariski-local
      argument as `isProper_of_locallyWeierstrass` (PROVEN).
