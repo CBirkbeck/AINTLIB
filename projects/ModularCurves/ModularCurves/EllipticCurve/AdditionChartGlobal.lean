@@ -603,6 +603,18 @@ lemma specMap_psiFst_pieceAwayι (k k' : Fin 3) :
   exact spec_map_comp_congr _ _ _ _ _
     (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiFst_toRingHom_comp'])
 
+/-- **([C4-HF-ASSEMBLY] L3, w ≫ ι = Spec(ψ_ij) ≫ σ)** The two affine factorizations of the overlap
+immersion agree: the affine identification `w = overlapPieceIso` (`P ≅ Spec S`) into `E ×_R E` equals
+`Spec(ψ_ij)` followed by the k-th piece immersion `σ = pieceAwayι`. Both routes share the value
+`Spec(transRing → S) ≫ transι` — `w` by `overlapPieceIso_hom_ι`, the ψ_ij route by
+`specMap_psiFst_pieceAwayι` — so this is their transitive glue. This is the identity L4/L5 precompose
+against `w.hom` and cancel (`w` an iso). -/
+lemma overlapPieceIso_hom_ι_eq_specMap_psiFst (k k' : Fin 3) :
+    (overlapPieceIso W i j i' j' k k').hom ≫ (overlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiFst W i j i' j' k k').toRingHom) ≫ pieceAwayι W i j k :=
+  (overlapPieceIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiFst_pieceAwayι W i j i' j' k k').symm
+
 end Overlap
 
 end WeierstrassCurve.Projective
