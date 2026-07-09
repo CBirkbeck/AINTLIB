@@ -9841,7 +9841,11 @@ proven and axiom-clean.*
   parked law-fields (T-W8 precedent; the eso proof itself is sorry-free). Resolves
   when the laws land.
 - Parked with owners: `map_id` ⟸ [REQ→A-lane] projModelVCIso_one (v10.42b, 3-liner
-  with their private transport); `map_comp` ⟸ projModelVCIso_mul conjugated through
+  with their private transport) — **✅ DELIVERED beastmode-A 2026-07-09, commit 4f8d2c1b8,
+  axiom-clean.** `projModelVCIso_one (W) : (projModelVCIso 1 W).hom = eqToHom (by rw [one_smul])`
+  in `ModelVariableChange.lean` (sibling of `projModelVCIso_mul`; + helpers `vcMvSubst_one`,
+  `aeval_vcMvSubst_one`). **→ PIC0: wire into `presentationFunctor.map_id`** (curveOfVCIso 1 = 𝟙
+  via the pasting), closing MellWeierstrass's last sorry. `map_comp` ⟸ projModelVCIso_mul conjugated through
   the pasting (fable-PIC0 next, dispatchable now); **ff-half** ⟸ presentation-rigidity
   (T-W7 pointEquiv-uniqueness) — a DESIGN gate per the honest v8 cut, not debt.
 - **CHARTER-PIC0 item 2 headline state**: `M_ell^W = [U/G]` exists as a
@@ -11362,3 +11366,29 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   locally-bijective bridge → the ⊗-stability leaf (decompose the injective half if it
   forks) → the LocalizedMonoidal instantiation. One delivery = GAP-1 kernel +
   IsInvertible.tensorObj + the P2 coherences.
+
+## Amendments v10.68 (2026-07-09, coordinator): A RESUMED (out-of-sync but productive); T-A3 ADJUDICATED → beastmode-A; NEW-GH → SmoothDescent leaves
+
+- **beastmode-A resumed WITHOUT reading v10.59/61/64 first** and executed their stale queue
+  item 1: `projModelVCIso_one` PROVEN axiom-clean in ModelVariableChange.lean (sibling of
+  `_mul`; via projMap_transport_heq + vcMvSubst_one + Proj.map_id). **The PIC0 hand-off is
+  MOOT** — PIC0 closed [U/G] map_id via the (1,1)-instantiated `_mul` route DAYS-in-fleet-
+  time ago and MellWeierstrass is at ZERO sorries (v10.63/64). The duplication is small and
+  the lemma is REAL API GAIN (the named `_one` the file lacked); PIC0 MAY optionally golf
+  their (1,1) workaround onto it during any later cleanup — not urgent. **Process note**:
+  the resume-without-board-sync is exactly what the v10.61 reconciliation was written to
+  prevent — A: board FIRST, always. (The transient VariableChange.one_* tree breakage FP4
+  flagged was this mid-edit; RESOLVED — tree clean.)
+- **T-A3 ADJUDICATION (supersedes v10.67 for NEW-GH): T-A3 → beastmode-A.** Grounds: lane
+  ownership (A-lane, their original T-A3a/b/c tickets), resumed and free, and prevents a
+  three-way rule-5 race (A vs NEW-GH vs FP4-queued). A: claim on the board, then T-A3a →
+  T-A3b → T-A3c per the original bodies. 0h stays c5β-signal-armed as your interrupt.
+- **NEW-GH REDIRECT: the fallback is now primary** — the three staged SmoothDescent leaves
+  (02KL-lfp / 29.26.13-scheme-flat / 02KM-smooth; locators in-file), then the
+  MellWeierstrass cadence cleanup. Completing SmoothDescent un-gates YFULL′s QSM consumer.
+- **fable-P4 consolidated absorb**: the engine geometric core is COMPLETE ([a1][a2][a3-ii]
+  [a4] + ~20 reusable lemmas); **[a5] FOUNDED** (WeierstrassInvariant.lean: descendFixed,
+  MulDistribMulAction, IsVCocycle, exists_unit_u_of_isVCocycle, isVCocycle_conj — five
+  axiom-clean blocks); engine sorryAx now flows through exactly TWO leaves: [a5] (FP4,
+  continuing u→1 reduction) + T-A3 (now A′s). Stale attribution in their report corrected:
+  T-A3 was pool, now A′s by adjudication.
