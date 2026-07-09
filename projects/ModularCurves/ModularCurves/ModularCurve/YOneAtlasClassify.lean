@@ -1122,4 +1122,198 @@ theorem nowhereOrderLEThree_of_forall_geom (W : WeierstrassCurve A) [W.IsEllipti
 
 end OrderDictionary
 
+section ZChartSection
+
+/-! ### B2-i: fibrewise-nonzero points land in the `Z`-chart, with affine coordinates
+
+Loeffler's affine-point extraction (Prop 3.3.4 proof, p. 13): a point of the projective model
+that is not the point at infinity in any fibre factors through the `Z`-chart, where it is a
+ring homomorphism out of the chart ring — equivalently, out of mathlib's affine coordinate
+ring.  Its images of `coordX`/`coordY` are the affine coordinates, and they satisfy the
+Weierstrass equation.  The chart-ring homomorphism is pinned by the factoring equation
+`Spec.map (zChartHom) ≫ awayι = g`, from which all naturality statements follow by
+faithfulness of `Spec`. -/
+
+variable {A : Type u} [CommRing A] {K : Type u} [CommRing K] [Algebra A K]
+
+/-- A field-valued point of `Spec K` composed with a `K`-point of the model is either in the
+`Z`-chart or the zero point; if it is never the zero point, the whole `K`-point factors
+through the `Z`-chart. -/
+theorem inZChart_of_forall_ne_zero (W : WeierstrassCurve A)
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (h : ∀ (k : Type u) [Field k] (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of K)),
+      t ≫ g.1 ≠ (t ≫ Spec.map (CommRingCat.ofHom (algebraMap A K))) ≫ projModelZero W) :
+    InZChart W g := by
+  have hmem : ∀ p : Spec (CommRingCat.of K), g.1.base p ∈
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) := by
+    intro p
+    by_contra hp
+    set t := (Spec (CommRingCat.of K)).fromSpecResidueField p with ht
+    letI : Algebra A ((Spec (CommRingCat.of K)).residueField p) :=
+      ((Spec.preimage (t ≫ Spec.map (CommRingCat.ofHom (algebraMap A K)))).hom).toAlgebra
+    have htA : Spec.map (CommRingCat.ofHom
+        (algebraMap A ((Spec (CommRingCat.of K)).residueField p))) =
+        t ≫ Spec.map (CommRingCat.ofHom (algebraMap A K)) := by
+      show Spec.map (CommRingCat.ofHom (Spec.preimage _).hom) = _
+      rw [CommRingCat.ofHom_hom, Spec.map_preimage]
+    have hgk : (t ≫ g.1) ≫ projModelπ W = Spec.map (CommRingCat.ofHom
+        (algebraMap A ((Spec (CommRingCat.of K)).residueField p))) := by
+      rw [Category.assoc, g.2, htA]
+    have hnotin : ¬ InZChart W
+        (⟨t ≫ g.1, hgk⟩ : SpecPoints (projModel W) (projModelπ W)
+          ((Spec (CommRingCat.of K)).residueField p)) := by
+      rintro ⟨h', hfac⟩
+      apply hp
+      have himg : g.1.base p = (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).base (h'.base default) := by
+        have hc := congrArg (fun m => m.base default) hfac
+        simp only [ht, Scheme.Hom.comp_apply] at hc
+        have hpt : ((Spec (CommRingCat.of K)).fromSpecResidueField p).base default = p :=
+          Scheme.fromSpecResidueField_apply p default
+        exact (congrArg (fun q => g.1.base q) hpt).symm.trans hc.symm
+      rw [himg]
+      have h2 : (Proj.awayι (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).base (h'.base default) ∈
+          (Proj.awayι (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange :=
+        Scheme.Hom.mem_opensRange.mpr ⟨h'.base default, rfl⟩
+      rwa [Proj.opensRange_awayι] at h2
+    have hzero : t ≫ g.1 = Spec.map (CommRingCat.ofHom
+        (algebraMap A ((Spec (CommRingCat.of K)).residueField p))) ≫ projModelZero W :=
+      specPoint_eq_zero_of_not_inZ W _ _ hnotin
+    apply h ((Spec (CommRingCat.of K)).residueField p) t
+    calc t ≫ g.1 = Spec.map (CommRingCat.ofHom
+          (algebraMap A ((Spec (CommRingCat.of K)).residueField p))) ≫ projModelZero W :=
+        hzero
+      _ = (t ≫ Spec.map (CommRingCat.ofHom (algebraMap A K))) ≫ projModelZero W := by
+        rw [htA]
+  refine ⟨IsOpenImmersion.lift (Proj.awayι (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos) g.1 ?_, IsOpenImmersion.lift_fac _ _ _⟩
+  rintro _ ⟨p, rfl⟩
+  have := hmem p
+  rw [← Proj.opensRange_awayι _ _ (mk_X_mem_quotientGrading_one W 2) one_pos] at this
+  obtain ⟨q, hq⟩ := Scheme.Hom.mem_opensRange.mp this
+  exact ⟨q, hq⟩
+
+variable (W : WeierstrassCurve A)
+
+/-- The chart-ring homomorphism attached to a `Z`-chart `K`-point of the model. -/
+noncomputable def zChartHom (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) :
+    HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* K :=
+  (chartHomEquiv W 2 K ⟨g, hZ⟩).1
+
+/-- The chart-ring homomorphism is `A`-compatible. -/
+theorem zChartHom_compat (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) :
+    (zChartHom W g hZ).comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+      ((gradeZeroRingEquiv W) : A →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap A K :=
+  (chartHomEquiv W 2 K ⟨g, hZ⟩).2
+
+/-- **The factoring equation**: `Spec` of the chart-ring homomorphism, composed with the
+chart inclusion, is the original point.  Everything else about `zChartHom` follows from this
+by faithfulness of `Spec` and monicity of the chart inclusion. -/
+theorem Spec_map_zChartHom_awayι (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) :
+    Spec.map (CommRingCat.ofHom (zChartHom W g hZ)) ≫
+      Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 := by
+  show _ = (⟨g, hZ⟩ : { g : SpecPoints (projModel W) (projModelπ W) K // InZChart W g }).1.1
+  exact congrArg (fun z => z.1.1) ((chartHomEquiv W 2 K).symm_apply_apply ⟨g, hZ⟩)
+
+/-- The chart-ring homomorphism is the unique one satisfying the factoring equation. -/
+theorem zChartHom_unique (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g)
+    (χ : HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* K)
+    (hχ : Spec.map (CommRingCat.ofHom χ) ≫
+      Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos = g.1) :
+    χ = zChartHom W g hZ := by
+  have hmono := hχ.trans (Spec_map_zChartHom_awayι W g hZ).symm
+  rw [cancel_mono] at hmono
+  have := Spec.map_injective hmono
+  exact congrArg CommRingCat.Hom.hom this
+
+/-- The evaluation homomorphism out of the affine coordinate ring attached to a `Z`-chart
+point: `coordX ↦ x`, `coordY ↦ y`. -/
+noncomputable def zChartEval (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) : W.toAffine.CoordinateRing →+* K :=
+  (zChartHom W g hZ).comp ((chartZRingEquiv W).symm :
+    W.toAffine.CoordinateRing →+* HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+
+/-- The evaluation homomorphism is `A`-algebra compatible. -/
+theorem zChartEval_algebraMap (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) (r : A) :
+    zChartEval W g hZ (algebraMap A W.toAffine.CoordinateRing r) = algebraMap A K r := by
+  have h1 : (chartZRingEquiv W).symm (algebraMap A W.toAffine.CoordinateRing r) =
+      (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) r) := by
+    rw [← chartZRingEquiv_fromZero W r, RingEquiv.symm_apply_apply]
+  show (zChartHom W g hZ) ((chartZRingEquiv W).symm
+    (algebraMap A W.toAffine.CoordinateRing r)) = algebraMap A K r
+  rw [h1]
+  exact RingHom.congr_fun (zChartHom_compat W g hZ) r
+
+/-- The coordinates extracted from a `Z`-chart point satisfy the Weierstrass equation of the
+base-changed curve. -/
+theorem zChartEval_equation (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) :
+    (W.baseChange K).toAffine.Equation
+      (zChartEval W g hZ (coordX W)) (zChartEval W g hZ (coordY W)) := by
+  have hker : zChartEval W g hZ
+      (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine W.toAffine.polynomial) = 0 := by
+    rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine W.toAffine.polynomial =
+      0 from AdjoinRoot.mk_self, map_zero]
+  have hofC : ∀ a : A, zChartEval W g hZ
+      (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C (Polynomial.C a)))
+      = algebraMap A K a := by
+    intro a
+    rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+        (Polynomial.C (Polynomial.C a)) =
+        algebraMap A W.toAffine.CoordinateRing a from by
+      rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C (Polynomial.C a)) =
+          AdjoinRoot.of W.toAffine.polynomial (Polynomial.C a) from rfl,
+        ← AdjoinRoot.algebraMap_eq, ← Polynomial.algebraMap_eq,
+        ← IsScalarTower.algebraMap_apply]]
+    exact zChartEval_algebraMap W g hZ a
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
+    WeierstrassCurve.toAffine]
+  have hexp : zChartEval W g hZ (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+      W.toAffine.polynomial) =
+      zChartEval W g hZ (coordY W) ^ 2
+        + algebraMap A K W.a₁ * zChartEval W g hZ (coordX W) * zChartEval W g hZ (coordY W)
+        + algebraMap A K W.a₃ * zChartEval W g hZ (coordY W)
+        - (zChartEval W g hZ (coordX W) ^ 3
+          + algebraMap A K W.a₂ * zChartEval W g hZ (coordX W) ^ 2
+          + algebraMap A K W.a₄ * zChartEval W g hZ (coordX W)
+          + algebraMap A K W.a₆) := by
+    simp only [WeierstrassCurve.Affine.polynomial, map_add, map_sub, map_mul, map_pow]
+    rw [show (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine) Polynomial.X =
+      coordY W from rfl]
+    rw [show (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine) (Polynomial.C Polynomial.X)
+      = coordX W from rfl]
+    simp only [hofC]
+    ring
+  rw [hker] at hexp
+  linear_combination -hexp
+
+end ZChartSection
+
 end ModularCurves

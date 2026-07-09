@@ -10809,3 +10809,22 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length scan
 clean. `#print axioms` for all three new declarations lists only
 `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` — pure algebra, no gates).
+
+## Amendments v10.103-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] B2-i Z-chart extraction LANDED
+
+Added the affine-point extraction layer in `YOneAtlasClassify.lean`:
+`inZChart_of_forall_ne_zero` (a `K`-point of `projModel W` whose field-valued composites are
+never the zero point factors through the `Z`-chart — residue-field points + the
+`specPoint_eq_zero_of_not_inZ` dichotomy + `IsOpenImmersion.lift`), the chart-ring
+homomorphism `zChartHom` with its A-compatibility `zChartHom_compat`, the **factoring pin**
+`Spec_map_zChartHom_awayι` (`Spec.map (zChartHom) ≫ awayι = g`) and its uniqueness converse
+`zChartHom_unique` (via `Spec` faithfulness + monic chart inclusion), and the coordinate
+evaluation `zChartEval : CoordinateRing W →+* K` with `zChartEval_algebraMap` and
+`zChartEval_equation` (the extracted coordinates satisfy the base-changed Weierstrass
+equation, via the `AdjoinRoot` relation). This is Loeffler's Prop 3.3.4 affine-point
+extraction (B2-i), phrased so every later naturality reduces to `zChartHom_unique`.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs);
+atlas file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green;
+line-length scan clean. `#print axioms` for the five key new declarations lists only
+`[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
