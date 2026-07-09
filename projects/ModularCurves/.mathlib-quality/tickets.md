@@ -12552,3 +12552,19 @@ Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT]
 - **T-E7 remaining after D3**: the atlas subtree (NEW-ATLAS, in flight) + the E-section
   (⛩BB-DIFF ⟸ T-W7a) + the one primitive (⟸ T-W7a) + MASTER's one `exact`. Y₁(N) is
   now visibly finite.
+
+## Amendments v10.88 (2026-07-09, coordinator): NEW-ATLAS increments 4–6 absorbed; ★ BOUNDARY CORRECTION — inherited sorryAx is the designed shape, proceed INTO the classifying clause
+
+- **NEW-ATLAS absorbed** (63c478875/9925cd3f9/4d9d0dcb5, pushed): EllObj global base-map
+  package, normalising-overlap independence, open-cover Tate-base gluing handle — all
+  axiom-clean, verification bar met. The foundation/gluing layer is essentially built.
+- **★ BOUNDARY CORRECTION (binding for the subtree)**: NEW-ATLAS held back from the
+  EllHom constructor path because tateUniversal/tateEllObj inherit sorryAx. That
+  restraint is now WRONG for the charter: the classifying clause iii/iv/v NECESSARILY
+  consumes those objects — their inherited sorryAx (the named atlas/vi-era gates) is the
+  DESIGNED trail shape, exactly like NEW-Y1's D1/D2 inheriting the one primitive. The
+  bar is: OWN proofs complete, zero FRESH sorries, inherited sorryAx LISTED and
+  ATTRIBUTED per decl (v10.84's "necessary not sufficient" line said this; made
+  explicit here). The all-clean axiom profile of the foundation layer was a bonus, not
+  the subtree's bar. **GO: build the EllHom constructor path / the classifying clause
+  on top of tateUniversal/tateEllObj now.**
