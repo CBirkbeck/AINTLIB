@@ -279,6 +279,87 @@ theorem exists_isStableOpen_isAffineOpen_of_globalModel [Finite G]
   exact exists_isStableOpen_isAffineOpen_of_orbit
     (fun e' => orbit_mem_isAffineOpen_of_charts hact h0 h1 hz0 hz1 e') e
 
+/-! ### [a5-P2′] The global-model transport: `IsCurveAction` ⇝ the `VariableChange` cocycle
+
+Rule-5 note ([OWNER-FLW], v10.94): these lemmas stay strictly on the Weierstrass-model side —
+they transport a *given* global model along the action; the fibrewise ⟷ locally-Weierstrass
+comparison is owner-reserved and never used or duplicated here. -/
+
+/-- The whole space is a stable open. -/
+theorem isStableOpen_top (σ : SchemeAction G X) : σ.IsStableOpen (⊤ : X.Opens) :=
+  fun _ => rfl
+
+/-- The global-sections action, as `Spec.map` data: `toRingHom` of `gammaMulSemiringAction ⊤` is
+the `appTop` of the geometric action. -/
+theorem ofHom_toRingHom_eq_appTop [IsAffine X] (σ : SchemeAction G X) (g : G) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g) = (σ.hom g).appTop := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  ext s
+  show ((σ.hom g).appLE ⊤ ⊤ ((isStableOpen_top σ).le_preimage g)).hom s
+    = ((σ.hom g).app ⊤).hom s
+  exact congrArg (fun h => CommRingCat.Hom.hom h s) (Scheme.Hom.appLE_eq_app (σ.hom g))
+
+/-- Base-matching over the whole affine: under `X ≅ Spec Γ(X,⊤)`, the geometric action `σ.hom g`
+is `Spec` of the global-sections action. -/
+theorem hom_isoSpec_toRingHom [IsAffine X] (σ : SchemeAction G X) (g : G) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    σ.hom g ≫ X.isoSpec.hom
+      = X.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g)) := by
+  rw [ofHom_toRingHom_eq_appTop, Scheme.isoSpec_hom_naturality]
+
+/-- **([a5-P2′], the GLOBAL-MODEL transport)** If the curve carries a global Weierstrass model
+`φ : C.E ≅ projModel W₀` over the affine base (`W₀` over `Γ(X,⊤)`), compatible with `π` and the
+zero sections, then the geometric `G`-action transports to the raw action family on `projModel W₀`
+that `isVCocycle_of_curveActionFamily` consumes: `act g = φ⁻¹ ≫ σE g ≫ φ`, multiplicative,
+cartesian over `Spec (toRingHom g)` (`IsPullback.of_iso` of `IsCurveAction.cartesian` along
+`φ`/`isoSpec`, base-matched by `hom_isoSpec_toRingHom`), and zero-equivariant. -/
+theorem curveAction_actionFamily_of_globalModel [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hπ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom)
+    (hzero : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∃ act : G → (projModel W₀ ⟶ projModel W₀),
+      (∀ g h, act (g * h) = act g ≫ act h) ∧
+      (∀ g, IsPullback (act g) (projModelπ W₀) (projModelπ W₀)
+        (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g)))) ∧
+      (∀ g, projModelZero W₀ ≫ act g
+        = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G Γ(X, ⊤) g))
+            ≫ projModelZero W₀) := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  refine ⟨(σE.transport φ).hom, (σE.transport φ).hom_mul, fun g => ?_, fun g => ?_⟩
+  · -- cartesian, by iso-transport of `hact.cartesian g`
+    refine (hact.cartesian g).of_iso φ φ X.isoSpec X.isoSpec ?_ hπ.symm hπ.symm ?_
+    · rw [SchemeAction.transport_hom, Iso.hom_inv_id_assoc]
+    · exact hom_isoSpec_toRingHom σ g
+  · -- zero-equivariance, by the chart zero-compat + geometric zero-equivariance + base-matching
+    have hz' : projModelZero W₀ = X.isoSpec.inv ≫ C.zero ≫ φ.hom := by
+      rw [hzero, Iso.inv_hom_id_assoc]
+    rw [hz', SchemeAction.transport_hom]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [reassoc_of% (hact.zero_equivariant g), hzero,
+      reassoc_of% (hom_isoSpec_toRingHom σ g)]
+    simp only [Iso.inv_hom_id_assoc]
+
+open WeierstrassCurve in
+/-- **([a5-ii∘P2′], the cocycle from a global model)** `IsCurveAction` + a compatible global
+Weierstrass model over the affine base yield the `VariableChange` cocycle over `Γ(X,⊤)` that
+`exists_invariant_descent` consumes. Chains the global transport into
+`isVCocycle_of_curveActionFamily` (the a5-ii capstone). -/
+theorem exists_cocycle_of_globalModel [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hπ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom)
+    (hzero : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∃ Cvc : G → VariableChange Γ(X, ⊤), IsVCocycle Cvc ∧
+      ∀ g, Cvc g • (W₀.map (MulSemiringAction.toRingHom G Γ(X, ⊤) g)) = W₀ := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  obtain ⟨act, hmul, hcart, hz⟩ :=
+    curveAction_actionFamily_of_globalModel hact W₀ φ hπ hzero
+  exact isVCocycle_of_curveActionFamily W₀ act hmul hcart hz
+
 /-! ### The route-(a) descent theorem (leaves `[a3]`–`[a5]`) -/
 
 /-- **([a3-i], PROVEN)** The structure morphism and the zero section descend to the quotient,
