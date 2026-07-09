@@ -224,6 +224,17 @@ theorem projModelBaseChange_comp' (F : R →+* R') (G : U →+* R) (W : Weierstr
   show Proj.map (baseChangeGradedHom (F.comp G) W) (baseChangeGradedHom_irrelevant_le (F.comp G) W)
     = Proj.map ((baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W)) _
   congr 1
+/-- (A2 assembly) The transported base-change morphism is functorial: along a composite it factors
+through the intermediate curve. -/
+theorem projModelBaseChangeOf_comp (F : R →+* R') (G : U →+* R) (W₀ : WeierstrassCurve U)
+    (W : WeierstrassCurve R) (h : W₀.map G = W) (W' : WeierstrassCurve R') (h' : W.map F = W') :
+    projModelBaseChangeOf (F.comp G) W₀ W'
+        (by rw [← WeierstrassCurve.map_map, h, h']) =
+      projModelBaseChangeOf F W W' h' ≫ projModelBaseChangeOf G W₀ W h := by
+  subst h h'
+  rw [projModelBaseChangeOf, projModelBaseChangeOf, projModelBaseChangeOf]
+  simp only [eqToHom_refl, Category.id_comp]
+  exact projModelBaseChange_comp' F G W₀
 end BaseChangeFunctoriality
 
 end ClassifyNaturality
