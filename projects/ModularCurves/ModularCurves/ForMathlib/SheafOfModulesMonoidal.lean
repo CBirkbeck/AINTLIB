@@ -622,4 +622,66 @@ theorem tensorHom_precomp_surjective :
 
 end Glue
 
+section Assembly
+
+/- The assembly of the [GAP1-W-MONO] leaf: the two precomposition halves proven in the
+`Glue`/`Tensor` sections give, via the sheafification adjunction and iso-detection by
+coyoneda-bijectivity, that `sheafificationW` is closed under `⊗ₘ` — hence monoidal. The
+site is the small one (`C : Type u`, `Category.{u}`) inherited from `Glue`, so the
+precomposition lemmas apply. -/
+
+variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
+  {S : Cᵒᵖ ⥤ CommRingCat.{u}} {R : Sheaf J RingCat.{u}}
+  (α : (S ⋙ forget₂ CommRingCat RingCat) ⟶ R.obj)
+  [Presheaf.IsLocallyInjective J α] [Presheaf.IsLocallySurjective J α]
+  [J.WEqualsLocallyBijective AddCommGrpCat.{u}] [HasWeakSheafify J AddCommGrpCat.{u}]
+  {M₁ M₂ N₁ N₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
+
+/-- **([GAP1-W-MONO], the leaf)** The class of morphisms inverted by sheafification of
+modules is closed under tensor product. Proof: `sheafificationW`-membership is local
+bijectivity (the bridge), so `f`, `g` locally bijective make precomposition with
+`f ⊗ₘ g` a bijection on morphisms into every sheaf-underlying target
+(`tensorHom_precomp_injective`/`_surjective`); transporting that bijection across the
+sheafification adjunction `homEquiv` (naturality-left) and detecting isomorphisms by
+coyoneda-bijectivity shows `(sheafification α).map (f ⊗ₘ g)` is an isomorphism. No
+flatness and no stalks — the topos-theoretic replacement for the pointwise argument. -/
+theorem sheafificationW_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+    (hf : sheafificationW.{u} α f) (hg : sheafificationW.{u} α g) :
+    sheafificationW.{u} α (f ⊗ₘ g) := by
+  obtain ⟨hfi, hfs⟩ := (sheafificationW_iff_isLocallyBijective α f).mp hf
+  obtain ⟨hgi, hgs⟩ := (sheafificationW_iff_isLocallyBijective α g).mp hg
+  haveI := hfi; haveI := hfs; haveI := hgi; haveI := hgs
+  rw [sheafificationW_iff]
+  apply isIso_of_coyoneda_map_bijective
+  intro Y
+  have hP : Presheaf.IsSheaf J
+      ((SheafOfModules.forget R ⋙ restrictScalars α).obj Y).presheaf := Y.isSheaf
+  have hΨ : Function.Bijective (fun (ψ : M₂ ⊗ N₂ ⟶
+      (SheafOfModules.forget R ⋙ restrictScalars α).obj Y) => (f ⊗ₘ g) ≫ ψ) :=
+    ⟨tensorHom_precomp_injective f g hP, tensorHom_precomp_surjective f g hP⟩
+  have hconj : (fun (x : (sheafification.{u} α).obj (M₂ ⊗ N₂) ⟶ Y) =>
+      (sheafification.{u} α).map (f ⊗ₘ g) ≫ x) =
+      ⇑((sheafificationAdjunction α).homEquiv (M₁ ⊗ N₁) Y).symm ∘
+        (fun ψ => (f ⊗ₘ g) ≫ ψ) ∘
+          ⇑((sheafificationAdjunction α).homEquiv (M₂ ⊗ N₂) Y) := by
+    funext x
+    simp only [Function.comp_apply, Equiv.eq_symm_apply]
+    exact (sheafificationAdjunction α).homEquiv_naturality_left (f ⊗ₘ g) x
+  rw [hconj]
+  exact ((sheafificationAdjunction α).homEquiv (M₁ ⊗ N₁) Y).symm.bijective.comp
+    (hΨ.comp ((sheafificationAdjunction α).homEquiv (M₂ ⊗ N₂) Y).bijective)
+
+instance sheafificationW_isMultiplicative : (sheafificationW.{u} α).IsMultiplicative :=
+  inferInstanceAs
+    ((MorphismProperty.isomorphisms _).inverseImage (sheafification.{u} α)).IsMultiplicative
+
+/-- **([GAP1-W-MONO])** The localizing class `sheafificationW` is monoidal: multiplicative
+(registration) and closed under `⊗ₘ` (`sheafificationW_tensorHom`). This is the sole
+hypothesis, beyond the localization registration, that `LocalizedMonoidal` needs to hand
+`SheafOfModules` its monoidal structure. -/
+instance sheafificationW_isMonoidal : (sheafificationW.{u} α).IsMonoidal :=
+  MorphismProperty.IsMonoidal.mk' _ fun f g hf hg => sheafificationW_tensorHom α f g hf hg
+
+end Assembly
+
 end PresheafOfModules
