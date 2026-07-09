@@ -287,6 +287,38 @@ theorem EllObj.tateBaseMapOfGlobalCoeffs_ext (Y : EllObj R)
   letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
   exact ModularCurves.tateBaseMapOfGlobalCoeffs_ext R Y.base α β α' β' hΔ hΔ' hα hβ
 
+/-- Glue local maps to the Tate atlas base along an open cover of an `Ell/R` object. -/
+noncomputable def EllObj.tateBaseMapOfOpenCover (Y : EllObj R) (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j) :
+    Y.base ⟶ tateBase R :=
+  𝒰.glueMorphisms g hcompat
+
+@[reassoc (attr := simp)]
+theorem EllObj.ι_tateBaseMapOfOpenCover (Y : EllObj R) (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (i : 𝒰.I₀) :
+    𝒰.f i ≫ EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat = g i :=
+  Scheme.Cover.ι_glueMorphisms 𝒰 g hcompat i
+
+/-- If each local Tate-atlas base map lies over `Spec R`, then so does the glued map. -/
+@[simp]
+theorem EllObj.tateBaseMapOfOpenCover_base_w (Y : EllObj R) (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hover : ∀ i : 𝒰.I₀, g i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap) :
+    EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat ≫ tateStructMap R = Y.structMap := by
+  apply Scheme.Cover.hom_ext 𝒰
+  intro i
+  rw [← Category.assoc, EllObj.ι_tateBaseMapOfOpenCover, hover]
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
