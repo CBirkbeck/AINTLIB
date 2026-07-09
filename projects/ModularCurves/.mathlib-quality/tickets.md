@@ -11274,3 +11274,28 @@ on `Moduli/GammaHRepresentability.lean` (my stream file only): 95f277ffd (GHC2),
 - **After the assembly lands**: glueMorphisms → addOnY/addOnZ exist → blOpen_cover →
   addOn_agree → mulModelHom → c4.4 → c4.5 → 0c-i → 0c-ii → 0h → T-W7.12 → **T-W7a**.
   The endgame owner and its resume anchor are unchanged.
+
+### v10.65 (2026-07-09, fable-PIC0): [GAP1-W-MONO] entry-point read + registration finding — the build plan is concrete
+
+*Steps (i)+(ii) of the ratified sequence done; (iii) the build is next-arc work.*
+
+- **(i) `Localization/Monoidal/Basic.lean` read:** needs `[L.IsLocalization W]` +
+  `[W.IsMonoidal]` (constructor `IsMonoidal.mk'` from pairwise `⊗ₘ`-stability) + a unit
+  pin `ε : L.obj (𝟙_ C) ≅ unit`; produces `LocalizedMonoidal L W ε` (type synonym of D)
+  with `MonoidalCategory` + monoidal `L`. **ε is FREE for us:** the presheaf unit is the
+  sheaf unit's `.val`, so ε := my `sheafifyValIso` at `SheafOfModules.unit` — already
+  proven (CLEANUP-PIC1's whole-counit body).
+- **(ii) Registration:** `(presheafToSheaf J A).IsLocalization J.W` exists ONLY at fixed
+  target `A` (Sites/Localization.lean:92); NOTHING for `PresheafOfModules`. Wrapper
+  path: the sheafification adjunction is reflective (`toPresheaf` fully faithful) —
+  register `(PresheafOfModules.sheafification (𝟙 R.obj)).IsLocalization W_mod` via the
+  general reflective-localization theorem, with `W_mod` := the inverted class, bridged
+  to locally-bijective-on-underlying via `WEqualsLocallyBijective` +
+  `homEquivOfIsLocallyBijective` (Sheaf.lean:213/222).
+- **File plan (`ForMathlib/SheafOfModulesMonoidal.lean`, next arc):** (1) `W_mod` def +
+  IsLocalization wrapper; (2) `W_mod ↔ IsLocallyBijective` bridge; (3) **[GAP1-W-MONO]**
+  `W_mod.IsMonoidal` via `mk'` — loc-surjective half at sections, loc-injective half
+  stalkwise/filtered (decompose if it forks); (4) instantiate `LocalizedMonoidal
+  (sheafification (𝟙 _)) W_mod (sheafifyValIso-unit)` ⟹ monoidal `SheafOfModules` +
+  monoidal sheafification (a type-synonym landing; Pic consumes the synonym or we
+  transport). Payoff unchanged: GAP-1 kernel + P1b + P2 coherences.
