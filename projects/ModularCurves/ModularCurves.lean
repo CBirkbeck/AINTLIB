@@ -57,6 +57,7 @@ import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.ForMathlib.HopfGaloisQuotient
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.ForMathlib.OpensMapFinal
+import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.Moduli.MellWStack
 import ModularCurves.Moduli.MellWeierstrass
