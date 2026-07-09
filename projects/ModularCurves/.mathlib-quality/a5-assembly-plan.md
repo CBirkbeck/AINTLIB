@@ -98,3 +98,29 @@ mismatch: `rw [← projModelVCIso_map_hom …]` won't fire because the goal's le
 BOTH eqToHoms normalized; or prove the inner `key` with matching eqToHom by construction; or a single
 `simp only [projModelVCIso_map_hom, hΨ, hC, hmul, eqToHom_trans, eqToHom_refl, Category.assoc,
 Category.id_comp, Category.comp_id]` after projModelVCIso_mul. Background agent iterating on it.
+
+## ============ PARKED (coordinator v10.8x dispatch, fable-P4) ============
+Parked at clean boundary per fleet reprioritization to Y₁(N). The KM 4.7 engine serves Y(N)/Γ_H,
+off the current critical path; the stitch resumes first on refocus. Nothing lost.
+
+**BANKED, LANDED, AXIOM-CLEAN (committed):** the entire algebraic + cocycle spine of KM 4.7 ⇐ —
+`exists_coboundary` → `exists_invariant_descent`; a5-ii pointed iso; `isVCocycle_of_curveActionFamily`
++ `exists_descended_model_of_curveActionFamily` (`[propext, Classical.choice, Quot.sound]`, NO
+maxHeartbeats); `projModelBaseChange_comp`; the 3 `SchemeAction` transport helpers
+(`transport`/`restrict`/`pullbackChartAction`, in SchemeQuotient.lean); EngineDescent imports the
+capstone. Commit `194995f0b` is the capstone.
+
+**BANKED, VERIFIED-BUT-UNLANDED (a5-banked/):**
+- `curveAction_actionFamily-verified-statement.lean` — the a5-P2 transport lemma STATEMENT + `hmul`
+  proven (hcart/hzero were `sorry`, agent was mid-proof). `TRANSPORT_SPEC.md` = the full hcart/hzero
+  strategy (IsPullback.of_iso + resLE_isoSpec_hom; specSMul = Spec.map(ofHom toRingHom) defeq).
+- `curveAction_actionFamily-agent-wip.lean` — the transport agent's in-progress hcart/hzero.
+- `LOCALIZE_SPEC.md` + `localize-agent-wip.lean` — the a5-P-loc (invariant AtPrime localization +
+  local descent + coefficient spread) strategy + agent WIP.
+
+**ON REFOCUS — resume order:** (1) finish a5-P2 transport (hcart/hzero, banked statement + spec);
+(2) a5-P-loc localized descent+spread (banked spec — needs AtPrime invariant-localization infra,
+semilocal global model, two spreads); (3) a5-P-fppf (`of_isPullback_of_descendsAlong` +
+`descendsAlong_isomorphisms_surjective_inf_flat_inf_quasicompact` — verified to compose — +
+`isPullback_quotientπ` + `projModel_descentIso`); (4) setup (`exists_mem_basicOpen_subset_of_stable`);
+(5) top-level `locallyWeierstrass_quotientπ` assembly. Full architecture above.
