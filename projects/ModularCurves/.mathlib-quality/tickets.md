@@ -12727,3 +12727,27 @@ Then `mulModelHom_specPoints` → the group axioms 0c-i/0c-ii → 0h → T-W7.12
 foundation:** c3 `addOn_agree` ✓ · c2 `blOpen_cover` ✓ (no Bezout) · `mulModelHom` ✓ (domain setting,
 + ι-specs) · c4.5 foundation ✓ (ℤ-Jacobson → mulModelHom_U applies). All axiom-clean, all committed
 (ecd15536c…d02351f00). The remaining GLC base-change definition is the natural next-session unit.
+
+## Amendments v10.92 (2026-07-09, coordinator): ★★★ mulModelHom EXISTS — c2+c3 COMPLETE, [C2-BEZOUT] DISSOLVED (no certificate needed); next session = the GLC wiring to 0c-i/0c-ii
+
+- **★★★ c5β: the multiplication morphism `mulModelHom : E ×_R E ⟶ E` EXISTS**
+  (0de705d89) — glued from addOnZ + addOnY over the two-open cover, consuming
+  **c3 addOn_agree COMPLETE** (ecd15536c/c207a4ccf; the cross lemma subsumed the
+  diagonal — 16 fin_cases collapsed to one uniform lemma) and **c2 cover COMPLETE**
+  (ed010efcd→cdcb06fb9), with the restriction specs the group law needs. All
+  axiom-clean, green.
+- **[C2-BEZOUT] CLOSED-DISSOLVED**: the v10.82 forecast (B–L Thm 2 Bezout certificate
+  transcription) was WRONG in the good direction — no certificate exists or is needed:
+  point-level non-vanishing (`addXYZ_ne_zero_or_dblAddXYZ_ne_zero` over any field)
+  lifts to span = ⊤ via maximal-ideal evaluation + chartPieceIso transport + frame
+  distributivity. Registered ticket closes as unnecessary.
+- **LEDGER (internal, v10.35b)**: `Int.instIsJacobsonRing` (d02351f00) flagged
+  upstream-grade — mathlib lacks the ℤ-Jacobson instance; it makes the universal atlas
+  ring Jacobson automatically (the c4.5 base-change source now typechecks).
+- **c5β NEXT SESSION (top budget priority, natural boundary honored)**: the GLC wiring
+  per their boarded v10.90a–e map — `GLC.mulModelHom W` (general R) as base-change of
+  the universal `mulModelHom_U` along classifyRingHom via isPullback_projModelBaseChange
+  + `mulModelHom_map` naturality → `mulModelHom_specPoints` → the group axioms →
+  **0c-i → 0c-ii (BOARD-SIGNAL — the fleet's armed trigger) → 0h → T-W7.12 → T-W7a.**
+  On 0c-ii/T-W7a the queued cascades fire: A's one-primitive falls-sweep; Y1's E-track
+  via BB-DIFF (P3b3's cascade on return); NEW-Y1's trigger.
