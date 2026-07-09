@@ -2601,4 +2601,173 @@ end MarkedChartData
 
 end ChartPackaging
 
+section FibreBridges
+
+open MonoidalCategory CartesianMonoidalCategory MonObj
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
+
+/-! ### The geometric-fibre bridges (v10.109 recipe, step 1, [T-A6b]/[T-B6′] trails)
+
+A cartesian square over `Spec` of a ring map presents its source as the model of the mapped
+curve (`pullbackChartIso`); a pointed isomorphism of elliptic-curve records over a locally
+noetherian base transports sections additively (`sectionMapIso_add`, the GME 2.2.5 argument
+of `PullSectionAdd` for a raw pointed iso). -/
+
+section PullbackChartIso
+
+variable {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] (W : WeierstrassCurve A)
+  {F : Scheme.{u}} {q : F ⟶ Spec (CommRingCat.of B)} {top : F ⟶ projModel W}
+
+variable (hsq : IsPullback top q (projModelπ W)
+  (Spec.map (CommRingCat.ofHom (algebraMap A B))))
+
+/-- A cartesian square over `Spec` of the algebra map presents its source as the model of
+the base-changed curve. -/
+noncomputable def pullbackChartIso : F ≅ projModel (W.map (algebraMap A B)) :=
+  hsq.isoIsPullback _ _ (isPullback_projModelBaseChange W)
+
+@[reassoc (attr := simp)]
+theorem pullbackChartIso_hom_bc :
+    (pullbackChartIso W hsq).hom ≫ projModelBaseChange (algebraMap A B) W = top :=
+  hsq.isoIsPullback_hom_fst _ _ (isPullback_projModelBaseChange W)
+
+@[reassoc (attr := simp)]
+theorem pullbackChartIso_hom_π :
+    (pullbackChartIso W hsq).hom ≫ projModelπ (W.map (algebraMap A B)) = q :=
+  hsq.isoIsPullback_hom_snd _ _ (isPullback_projModelBaseChange W)
+
+/-- The chart iso is pointed, given the zero-compatibility of the square. -/
+theorem pullbackChartIso_zero (zF : Spec (CommRingCat.of B) ⟶ F)
+    (hzq : zF ≫ q = 𝟙 _)
+    (hztop : zF ≫ top =
+      Spec.map (CommRingCat.ofHom (algebraMap A B)) ≫ projModelZero W) :
+    zF ≫ (pullbackChartIso W hsq).hom = projModelZero (W.map (algebraMap A B)) := by
+  refine (isPullback_projModelBaseChange W).hom_ext ?_ ?_
+  · rw [Category.assoc, pullbackChartIso_hom_bc, hztop]
+    exact (projModelZero_baseChange W).symm
+  · rw [Category.assoc, pullbackChartIso_hom_π, hzq, projModelZero_projModelπ]
+
+/-- A point of the source whose `bc`-composite factors through the `Z`-chart of `W` lies in
+the `Z`-chart of the base-changed model (the chart square is cartesian). -/
+theorem inZChart_of_comp_baseChange {K : Type u} [CommRing K] [Algebra B K]
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K)
+    (h₀ : Spec (CommRingCat.of K) ⟶ Spec (CommRingCat.of
+      (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))
+    (hfac : h₀ ≫ Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos =
+      g.1 ≫ projModelBaseChange (algebraMap A B) W) :
+    InZChart (W.map (algebraMap A B)) g := by
+  have hsq2 := isPullback_projModelBaseChange_chart (R' := B) W 2
+  refine ⟨hsq2.lift h₀ g.1 hfac ≫ Spec.map (CommRingCat.ofHom
+    (awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+      (baseChangeGradedHom_mk_X W 2).symm).toRingHom), ?_⟩
+  have hcongr := Spec_map_awayCongr_awayι
+    (quotientGrading (projIdeal (W.map (algebraMap A B))))
+    (baseChangeGradedHom_mk_X W 2).symm
+    (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2)
+  rw [Category.assoc, hcongr]
+  exact hsq2.lift_snd h₀ g.1 hfac
+
+end PullbackChartIso
+
+section SectionIso
+
+variable {T : Scheme.{u}} (E₁ E₂ : EllipticCurve T)
+  (iso : E₁.E ≅ E₂.E) (hπ : iso.hom ≫ E₂.π = E₁.π)
+
+/-- Transport of sections along a pointed isomorphism of elliptic curves over the same
+base. -/
+noncomputable def sectionMapIso (s : E₁.Section) : E₂.Section :=
+  ⟨s.1 ≫ iso.hom, by rw [Category.assoc, hπ, s.2]⟩
+
+theorem sectionMapIso_injective : Function.Injective (sectionMapIso E₁ E₂ iso hπ) := by
+  intro s s' h
+  refine Subtype.ext ?_
+  have h1 : s.1 ≫ iso.hom = s'.1 ≫ iso.hom := congrArg Subtype.val h
+  simpa using congrArg (· ≫ iso.inv) h1
+
+variable (hz : E₁.zero ≫ iso.hom = E₂.zero)
+
+include hz in
+/-- **(GME Cor 2.2.5 for a raw pointed iso, over a locally noetherian base)** The section
+transport along a pointed isomorphism is additive (`isMonHom_of_one_comp_eq'`, the
+`PullSectionAdd` argument). -/
+theorem sectionMapIso_add [IsLocallyNoetherian T] (s s' : E₁.Section) :
+    sectionMapIso E₁ E₂ iso hπ (s + s') =
+      sectionMapIso E₁ E₂ iso hπ s + sectionMapIso E₁ E₂ iso hπ s' := by
+  haveI : Smooth E₁.π := SmoothOfRelativeDimension.smooth (n := 1) (f := E₁.π)
+  haveI hP : IsProper E₁.asOver.hom := inferInstanceAs (IsProper E₁.π)
+  haveI hFl : Flat E₁.asOver.hom := inferInstanceAs (Flat E₁.π)
+  haveI hSep : IsSeparated E₂.asOver.hom := inferInstanceAs (IsSeparated E₂.π)
+  let f : E₁.asOver ⟶ E₂.asOver := Over.homMk iso.hom hπ
+  have hη : η[E₁.asOver] ≫ f = η[E₂.asOver] := by
+    apply Over.OverMorphism.ext
+    show (η[E₁.asOver] : _ ⟶ E₁.asOver).left ≫ iso.hom = _
+    exact (congrArg (· ≫ iso.hom) E₁.one_eq_zero).trans <|
+      (Category.assoc _ _ _).trans <|
+      (congrArg ((𝟙_ (Over T)).hom ≫ ·) hz).trans E₂.one_eq_zero.symm
+  have h64 := @isMonHom_of_one_comp_eq' T _ E₁.asOver E₂.asOver _ _ hP hFl
+    E₁.toEllipticCurveGeom.universallyOConnected hSep f hη
+  have h64l : (μ[E₁.asOver]).left ≫ iso.hom
+      = (MonoidalCategory.tensorHom f f).left ≫ (μ[E₂.asOver]).left :=
+    ((Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left h64)).trans
+      (Over.comp_left _ _ _ _ _)
+  have hcs : E₁.pointEquivOverHom (𝟙 T) s ≫ f
+      = E₂.pointEquivOverHom (𝟙 T) (sectionMapIso E₁ E₂ iso hπ s) :=
+    Over.OverMorphism.ext rfl
+  have hcs' : E₁.pointEquivOverHom (𝟙 T) s' ≫ f
+      = E₂.pointEquivOverHom (𝟙 T) (sectionMapIso E₁ E₂ iso hπ s') :=
+    Over.OverMorphism.ext rfl
+  refine Subtype.ext ?_
+  have hx : (s + s').1
+      = (lift (E₁.pointEquivOverHom (𝟙 T) s) (E₁.pointEquivOverHom (𝟙 T) s')).left
+        ≫ (μ[E₁.asOver]).left :=
+    (congrArg CommaMorphism.left (E₁.pointEquivOverHom_add (𝟙 T) s s')).trans
+      (Over.comp_left _ _ _ _ _)
+  have hR : (sectionMapIso E₁ E₂ iso hπ s + sectionMapIso E₁ E₂ iso hπ s').1
+      = (lift (E₂.pointEquivOverHom (𝟙 T) (sectionMapIso E₁ E₂ iso hπ s))
+          (E₂.pointEquivOverHom (𝟙 T) (sectionMapIso E₁ E₂ iso hπ s'))).left
+        ≫ (μ[E₂.asOver]).left :=
+    (congrArg CommaMorphism.left (E₂.pointEquivOverHom_add (𝟙 T) _ _)).trans
+      (Over.comp_left _ _ _ _ _)
+  show (s + s').1 ≫ iso.hom = _
+  rw [hR]
+  exact (congrArg (· ≫ iso.hom) hx).trans <|
+    (Category.assoc _ _ _).trans <|
+    (congrArg ((lift (E₁.pointEquivOverHom (𝟙 T) s)
+        (E₁.pointEquivOverHom (𝟙 T) s')).left ≫ ·) h64l).trans <|
+    (Category.assoc _ _ _).symm.trans <|
+    (congrArg (· ≫ (μ[E₂.asOver]).left)
+      ((Over.comp_left _ _ _ _ _).symm.trans
+        (congrArg CommaMorphism.left
+          ((lift_map _ _ _ _).trans
+            (congrArg₂ lift hcs hcs')))))
+
+/-- The additive bundle of the section transport. -/
+noncomputable def sectionMapIsoHom [IsLocallyNoetherian T] : E₁.Section →+ E₂.Section :=
+  AddMonoidHom.mk' (sectionMapIso E₁ E₂ iso hπ) (sectionMapIso_add E₁ E₂ iso hπ hz)
+
+end SectionIso
+
+section PointCongr
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- Points over equal base morphisms, additively. -/
+noncomputable def EllipticCurve.pointCongr {T : Scheme.{u}} {g₁ g₂ : T ⟶ S} (h : g₁ = g₂) :
+    E.Point g₁ ≃+ E.Point g₂ := h ▸ AddEquiv.refl _
+
+@[simp]
+theorem EllipticCurve.pointCongr_coe {T : Scheme.{u}} {g₁ g₂ : T ⟶ S} (h : g₁ = g₂)
+    (P : E.Point g₁) : (E.pointCongr h P).1 = P.1 := by subst h; rfl
+
+end PointCongr
+
+end FibreBridges
+
 end ModularCurves
