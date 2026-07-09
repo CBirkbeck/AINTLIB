@@ -9411,6 +9411,17 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   `tatePoint`, i.e. the atlas classifying subtree + `[Y1-vi-FACTOR]`, NOT from D1's own proof).
   Owns `factors_yOne_iff` + D1 helpers in `YOneAssembly.lean`. (v10.73 confirms the file is mine;
   NEW-ATLAS does the classifying subtree on their own branch/file, PR integration.)
+- **v10.74 CONFIRM (NEW-Y1)**: A's `324556180` ([Y1-vi-FACTOR] DONE, `tateMarkedPoint_pull_factor`
+  proven) **is an ancestor of my HEAD** and the proof is live in my tree (`git merge-base
+  --is-ancestor` = 0; lemma body is a real proof, no `sorry`). It entered via the shared worktree
+  before my D1 session, so my D1 build already consumed it. **My earlier "vi-FACTOR pending / file
+  released for A" trail notes below are STALE** — [Y1-vi-FACTOR] was already done. The only remaining
+  `sorryAx` in the Y1 chain is the atlas classifying clause (`exists_tatePoint`'s ∀-part = NEW-ATLAS,
+  branch `dev/modular-curves-y1-atlas`). **Parking** at this clean boundary per v10.74; next session
+  (on A's [T-E4-family] land or the NEW-ATLAS PR): first act = Y1-E rigidity audit (scoping — does
+  Y1's T-E1 leg need DS-END0 pins or does atlas-internal rigidity suffice?), then [Y1-D2]/[Y1-D3]
+  (import A's standalone [T-E4-family] lemma; don't wait on held-file wiring). ⚠ upstream still unset
+  (v10.72 hazard); do NOT `git pull` here until coordinator fixes tracking.
 - **[Y1-D1] PROGRESS + FILE RELEASED (NEW-Y1, 2026-07-09T13:08Z)**: three axiom-clean helper
   lemmas COMMITTED (7ae5c69db, 6c9650fb9, 43a857c0e), `lake build …YOneAssembly` GREEN:
   - `EllipticCurve.zsmul_pull_baseChange_asSection_iff` (**fibrewise bridge**): via `baseChangeEquiv`
