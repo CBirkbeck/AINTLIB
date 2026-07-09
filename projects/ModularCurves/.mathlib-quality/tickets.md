@@ -11659,3 +11659,31 @@ leaf target directly. Boarding the decomposition; the build is next-session firs
 - **Then:** `IsMonoidal` via `mk'` + the bridge, `LocalizedMonoidal` instantiation,
   report [GAP1-W-MONO] COMPLETE (P1b/P2 un-gate). Upstream-check global item done
   (`...origin/dev/modular-curves` ✓).
+
+### v10.60c (2026-07-09, fable-FP): ★ [GR-B2n] COMPLETE (naturality PROVEN) + [GR-E3] generic transition layer LANDED sorry-free
+
+- **[GR-B2n-4] `chartMatrix_normMap` PROVEN in the DIRECT contract shape** (fresh-context
+  deep-filler + fable-FP verification; GrassmannianChart.lean sorry-free, both new decls
+  axiom-clean): naturality = build the B-side retraction `ψf = piScalarRight ∘
+  (chart⁻¹).baseChange ∘ baseChangeMkQ ∘ piScalarRight⁻¹` (kernel containment automatic
+  since it factors through `baseChangeMkQ`), then the new reusable workhorse
+  **`chartMatrix_eq_of_retraction`** (any retraction of the chart tuple killing
+  `N.toSubmodule` computes `chartMatrix`, via `Submodule.liftQ` descent) closes it.
+- **⚠ FORENSICS CORRECTED (fleet-critical, memory updated)**: the v10.60 "normMap
+  poisons unification" read was a RED HERRING. `set_option diagnostics true` showed the
+  real culprit: theorem-goal elaboration whnf-EVALUATES `coordMap =
+  Fintype.linearCombination` on concrete `Fin` pi types (533k DFunLike.coe / 888k
+  Fin.val / 444k decEq reductions). Terms are fine; equation GOALS explode. FIX:
+  `attribute [irreducible] coordMap` after all proof-level uses — v10.24(b) applied to
+  the SEAM def, not the outer composite. Diagnose with diagnostics before blaming the
+  outermost symbol.
+- **[GR-E3] generic transition layer LANDED sorry-free** (NEW
+  `ForMathlib/GrassmannianTransition.lean`, deliberately Grassmannian-free): `ChartRing`
+  (the 𝔸^{k(n−k)} coordinate ring) · `Transition.column` (+ computation lemmas) ·
+  `Transition.matrix` / `.det` (the gluing denominator) · `matrixAway` +
+  `isUnit_det_matrixAway` · **`Transition.ringHom : ChartRing ι' →+* (ChartRing ι)[1/det]`**
+  — THE [GR-F] glue datum (generic ι'-variable ↦ `T⁻¹ ·ᵥ` ι-column). All axiom-clean.
+- **Remaining for [NISOG-GRASS]**: [GR-E2] pointwise overlap criterion + the
+  spec tying `Transition.ringHom` to `chartMatrix` (needs both files; single增writer now
+  free) · [GR-E4] cocycle · [GR-D] openness · [GR-F] `Scheme.GlueData` · [GR-G]
+  T-points → NISOG [L15].

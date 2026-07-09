@@ -626,6 +626,149 @@ noncomputable def chartMatrix {A' : Type w''} [CommRing A'] (n : ℕ) (ι : Fin 
       (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A'))) h).symm
     (N.toSubmodule.mkQ (Pi.single j.1 1))
 
+/- `coordMap` unfolds to `Fintype.linearCombination`; while it is reducible, `whnf`/`isDefEq`
+evaluates the coordinate combination (`Pi.single`/`Fin`-decidability) every time a
+`chartMatrix … = …` equation is elaborated — which blows past the heartbeat limit, since
+`chartMatrix` reduces to a `LinearEquiv.ofBijective … |>.symm` applied to such a combination.
+Marking `coordMap` irreducible *after* all of its uses above keeps the seam opaque, so
+chart-coordinate equations elaborate cheaply; the proofs below still unfold it where needed
+through the interface lemmas `coordMap_single` / `retraction_comp_coordMap`. -/
+attribute [irreducible] coordMap
+
+/-- **[GR-B2n-4]** Kernel-uniqueness for the chart coordinate: *any* retraction `ψ` of the
+coordinate sub-basis `Pi.single ∘ ι` whose kernel contains `N` reads off the chart matrix of `N`
+on the complementary coordinate vectors. This is the workhorse behind naturality (and wave-3
+gluing): a chart member's coordinate does not depend on which retraction realises it. -/
+theorem chartMatrix_eq_of_retraction {A' : Type w''} [CommRing A'] (n : ℕ) (ι : Fin k ↪ Fin n)
+    (N : G(k, (Fin n → A'); A')) (h : IsChartAt (fun i => Pi.single (ι i) (1 : A')) N)
+    (ψ : (Fin n → A') →ₗ[A'] (Fin k → A'))
+    (hψ1 : ∀ i, ψ (Pi.single (ι i) 1) = Pi.single i 1)
+    (hψ2 : N.toSubmodule ≤ LinearMap.ker ψ) :
+    chartMatrix n ι N h = fun j => ψ (Pi.single j.1 1) := by
+  funext j
+  unfold chartMatrix
+  set E := LinearEquiv.ofBijective
+    (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A'))) h with hE
+  have hbar : ∀ c, Submodule.liftQ N.toSubmodule ψ hψ2 (E c) = c := by
+    intro c
+    have hEc : E c = N.toSubmodule.mkQ (coordMap (fun i => Pi.single (ι i) (1 : A')) c) := by
+      rw [hE, LinearEquiv.ofBijective_apply, LinearMap.comp_apply]
+    rw [hEc, Submodule.mkQ_apply, Submodule.liftQ_apply, retraction_comp_coordMap _ hψ1]
+  have key := hbar (E.symm (N.toSubmodule.mkQ (Pi.single j.1 1)))
+  rw [LinearEquiv.apply_symm_apply] at key
+  rw [← key]
+  exact N.toSubmodule.liftQ_apply ψ (Pi.single j.1 1)
+
+/-- **[GR-B2n-4]** Naturality of the chart coordinate under `normMap`: the chart matrix of
+`normMap f N` is the entrywise-`f` image of the chart matrix of `N`. The retraction realising
+`normMap f N` is the base change of the one realising `N` (transported through `piScalarRight`),
+so its kernel is `(normMap f N).toSubmodule` by construction and its values are the `f`-images of
+`N`'s coordinates; `chartMatrix_eq_of_retraction` then identifies it with `chartMatrix`. -/
+theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
+    (N : G(k, (Fin n → A); A)) (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    chartMatrix n ι (normMap n f N) (isChartAt_normMap n ι f N h)
+      = fun j i => f (chartMatrix n ι N h j i) := by
+  classical
+  letI : Algebra A B := f.toAlgebra
+  letI : IsScalarTower R A B :=
+    IsScalarTower.of_algebraMap_eq' (IsScalarTower.algebraMap_eq R A B)
+  set qA := TensorProduct.piScalarRight R A A (Fin n) with hqA
+  set qB := TensorProduct.piScalarRight R B B (Fin n) with hqB
+  set sk := TensorProduct.piScalarRight A B B (Fin k) with hsk
+  set P : G(k, A ⊗[R] (Fin n → R); A) := congr qA.symm N with hP_def
+  have htuple : (⇑qA.symm ∘ fun i => Pi.single (ι i) (1 : A))
+      = fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R) := by
+    funext i
+    exact TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 (ι i)
+  have hP : IsChartAt (fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R)) P := by
+    rw [← htuple]; exact (isChartAt_congr qA.symm _ N).mpr h
+  set E_At := LinearEquiv.ofBijective
+    (P.toSubmodule.mkQ ∘ₗ coordMap (fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))) hP
+    with hE_At
+  set chartEA := LinearEquiv.ofBijective
+    (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A))) h with hchartEA
+  set ψf : (Fin n → B) →ₗ[B] (Fin k → B) :=
+    sk.toLinearMap ∘ₗ E_At.symm.toLinearMap.baseChange B ∘ₗ
+      baseChangeMkQ B P.toSubmodule ∘ₗ qB.symm.toLinearMap with hψf
+  -- application lemma for the `A`-side chart equivalence
+  have hchartEA_apply : ∀ x, chartEA x
+      = N.toSubmodule.mkQ (coordMap (fun i => Pi.single (ι i) (1 : A)) x) := by
+    intro x; rw [hchartEA, LinearEquiv.ofBijective_apply, LinearMap.comp_apply]
+  -- `sk (1 ⊗ₜ v)` is the entrywise-`f` image of `v`
+  have hsk_val : ∀ v : Fin k → A, sk ((1 : B) ⊗ₜ[A] v) = fun l => f (v l) := by
+    intro v; funext l
+    rw [hsk, TensorProduct.piScalarRight_apply, TensorProduct.piScalarRightHom_tmul]
+    show (v l) • (1 : B) = f (v l)
+    rw [Algebra.smul_def, mul_one]
+    rfl
+  -- the value of `ψf` on a coordinate vector, through the base-change square
+  have hbcmkq : ∀ (m : Fin n → R), baseChangeMkQ B P.toSubmodule ((1 : B) ⊗ₜ[R] m)
+      = (1 : B) ⊗ₜ[A] P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] m) := by
+    intro m; simp [baseChangeMkQ]
+  have hchain : ∀ (j : Fin n), ψf (Pi.single j 1)
+      = sk ((1 : B) ⊗ₜ[A]
+          E_At.symm (P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] (Pi.single j 1 : Fin n → R)))) := by
+    intro j
+    rw [hψf]
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
+    rw [TensorProduct.piScalarRight_symm_single, hbcmkq, LinearMap.baseChange_tmul]
+    rfl
+  -- the tensor chart tuple is the `qA.symm`-transport of the coordinate combination
+  have hcoordP : coordMap (fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
+      = qA.symm.toLinearMap ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A)) := by
+    refine (Pi.basisFun A (Fin k)).ext fun i => ?_
+    rw [Pi.basisFun_apply, coordMap_single, LinearMap.comp_apply, coordMap_single]
+    exact (TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 (ι i)).symm
+  -- reading off a coordinate commutes with the `congr qA.symm` transport
+  have hconn : ∀ (m : Fin n → A), E_At.symm (P.toSubmodule.mkQ (qA.symm m))
+      = chartEA.symm (N.toSubmodule.mkQ m) := by
+    intro m
+    rw [LinearEquiv.symm_apply_eq, hE_At, LinearEquiv.ofBijective_apply, LinearMap.comp_apply,
+      hcoordP, LinearMap.comp_apply, Submodule.mkQ_apply, Submodule.mkQ_apply,
+      Submodule.Quotient.eq]
+    simp only [LinearEquiv.coe_coe]
+    rw [← map_sub, hP_def, congr_toSubmodule]
+    apply Submodule.mem_map_of_mem
+    refine (Submodule.Quotient.mk_eq_zero N.toSubmodule).mp ?_
+    rw [← Submodule.mkQ_apply, map_sub, ← hchartEA_apply, LinearEquiv.apply_symm_apply, sub_self]
+  -- `ψf` is a retraction of the coordinate sub-basis (`hψ1`)
+  have hR : ∀ i, ψf (Pi.single (ι i) 1) = Pi.single i 1 := by
+    intro i
+    rw [hchain (ι i)]
+    have hEs : E_At.symm (P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R)))
+        = Pi.single i 1 := by
+      rw [← TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 (ι i), hconn,
+        LinearEquiv.symm_apply_eq, hchartEA_apply, coordMap_single]
+    rw [hEs, hsk_val]
+    funext l; simp [Pi.single_apply, apply_ite f]
+  -- `ψf` reads off the entrywise-`f` image of `N`'s coordinates
+  have hV : ∀ j : {j : Fin n // j ∉ Set.range ι},
+      ψf (Pi.single j.1 1) = fun l => f (chartMatrix n ι N h j l) := by
+    intro j
+    rw [hchain j.1]
+    have hval : E_At.symm (P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] (Pi.single j.1 1 : Fin n → R)))
+        = chartMatrix n ι N h j := by
+      rw [← TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 j.1, hconn]
+      show chartEA.symm (N.toSubmodule.mkQ (Pi.single j.1 1)) = _
+      unfold chartMatrix
+      rfl
+    rw [hval, hsk_val]
+  -- `ψf` factors through `baseChangeMkQ`, so its kernel contains `(normMap f N).toSubmodule` (`hψ2`)
+  have hK : (normMap n f N).toSubmodule ≤ LinearMap.ker ψf := by
+    have hnm : (normMap n f N).toSubmodule
+        = Submodule.map qB.toLinearMap (baseChangeMkQ B P.toSubmodule).ker := by
+      show (congr qB (P.map f)).toSubmodule = _
+      rw [congr_toSubmodule, map_toSubmodule f P]
+    rw [hnm, Submodule.map_le_iff_le_comap]
+    intro z hz
+    rw [Submodule.mem_comap, LinearMap.mem_ker, hψf]
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_coe, LinearEquiv.symm_apply_apply]
+    rw [LinearMap.mem_ker.mp hz, map_zero, map_zero]
+  refine (chartMatrix_eq_of_retraction n ι (normMap n f N)
+    (isChartAt_normMap n ι f N h) ψf hR hK).trans ?_
+  funext j
+  exact hV j
+
 end NormalizedFunctor
 
 end Module.Grassmannian
