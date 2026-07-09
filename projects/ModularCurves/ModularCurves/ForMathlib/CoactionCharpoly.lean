@@ -290,4 +290,85 @@ theorem counit_comulMatrixR (i j : hopfBasisIndex R A) :
   rw [← hone] at hlaw
   exact congrFun (sum_tmul_injective' R A hlaw) i
 
+/-- **Matrix-comultiplication identity of the right-slot Δ-matrix**:
+`Δ(T̃ᵢⱼ) = ∑ₖ T̃ₖⱼ ⊗ T̃ᵢₖ` — coassociativity along the basis, mirrored. -/
+theorem comul_comulMatrixR (i j : hopfBasisIndex R A) :
+    Coalgebra.comul (R := R) (comulMatrixR R A i j)
+      = ∑ k, comulMatrixR R A k j ⊗ₜ[R] comulMatrixR R A i k := by
+  classical
+  have hlaw := congr($(Coalgebra.coassoc (R := R) (A := A)) ((hopfBasis R A) j))
+  have hlaw2 := congrArg (TensorProduct.assoc R A A A).symm hlaw
+  rw [LinearMap.comp_apply, LinearEquiv.coe_coe, LinearEquiv.symm_apply_apply] at hlaw2
+  have hlhs : (LinearMap.rTensor A (Coalgebra.comul (R := R)) ∘ₗ
+        (Coalgebra.comul (R := R))) ((hopfBasis R A) j)
+      = ∑ k, Coalgebra.comul (R := R) (comulMatrixR R A k j) ⊗ₜ[R] (hopfBasis R A) k := by
+    rw [LinearMap.comp_apply, comul_hopfBasis', map_sum]
+    exact Finset.sum_congr rfl fun k _ => LinearMap.rTensor_tmul _ _ _ _
+  have hR : ∀ p, (TensorProduct.assoc R A A A).symm
+      ((LinearMap.lTensor A (Coalgebra.comul (R := R)))
+        (comulMatrixR R A p j ⊗ₜ[R] (hopfBasis R A) p))
+      = ∑ q, (comulMatrixR R A p j ⊗ₜ[R] comulMatrixR R A q p)
+          ⊗ₜ[R] (hopfBasis R A) q := by
+    intro p
+    rw [LinearMap.lTensor_tmul, comul_hopfBasis', TensorProduct.tmul_sum, map_sum]
+    exact Finset.sum_congr rfl fun q _ => by
+      rw [show (TensorProduct.assoc R A A A).symm
+          (comulMatrixR R A p j ⊗ₜ[R] (comulMatrixR R A q p ⊗ₜ[R] (hopfBasis R A) q))
+          = (comulMatrixR R A p j ⊗ₜ[R] comulMatrixR R A q p) ⊗ₜ[R] (hopfBasis R A) q from
+        TensorProduct.assoc_symm_tmul _ _ _]
+  have hrhs : (TensorProduct.assoc R A A A).symm
+      ((LinearMap.lTensor A (Coalgebra.comul (R := R)) ∘ₗ
+        (Coalgebra.comul (R := R))) ((hopfBasis R A) j))
+      = ∑ q, (∑ p, comulMatrixR R A p j ⊗ₜ[R] comulMatrixR R A q p)
+          ⊗ₜ[R] (hopfBasis R A) q := by
+    rw [LinearMap.comp_apply, comul_hopfBasis', map_sum, map_sum]
+    refine (Finset.sum_congr rfl fun p _ => hR p).trans ?_
+    refine (Finset.sum_comm).trans ?_
+    exact Finset.sum_congr rfl fun q _ => (TensorProduct.sum_tmul _ _ _).symm
+  have hcombined := (hlhs.symm.trans hlaw2).trans hrhs
+  exact congrFun (sum_tmul_injective' R A hcombined) i
+
+/-- The mirrored matrix-comultiplication identity packaged as a `Coalgebra.Repr`. -/
+noncomputable def comulMatrixRRepr (i j : hopfBasisIndex R A) :
+    Coalgebra.Repr R (comulMatrixR R A i j) (hopfBasisIndex R A) where
+  index := Finset.univ
+  left := fun k => comulMatrixR R A k j
+  right := fun k => comulMatrixR R A i k
+  eq := (comul_comulMatrixR R A i j).symm
+
+/-- The entrywise antipode inverts the right-slot Δ-matrix from the right:
+`T̃ * T̃.map S = 1`. -/
+theorem comulMatrixR_mul_antipodeMatrixR :
+    comulMatrixR R A * (comulMatrixR R A).map (HopfAlgebra.antipode R) = 1 := by
+  classical
+  ext i j
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  have h := HopfAlgebra.sum_antipode_mul_eq_algebraMap_counit (comulMatrixRRepr R A i j)
+  rw [counit_comulMatrixR] at h
+  rw [Finset.sum_congr rfl fun p _ => show comulMatrixR R A i p *
+      (comulMatrixR R A).map (HopfAlgebra.antipode R) p j
+      = HopfAlgebra.antipode R (comulMatrixR R A p j) * comulMatrixR R A i p from by
+    rw [Matrix.map_apply, mul_comm]]
+  simpa [comulMatrixRRepr, apply_ite (algebraMap R A)] using h
+
+/-- The entrywise antipode inverts the right-slot Δ-matrix from the left:
+`T̃.map S * T̃ = 1`. -/
+theorem antipodeMatrixR_mul_comulMatrixR :
+    (comulMatrixR R A).map (HopfAlgebra.antipode R) * comulMatrixR R A = 1 := by
+  classical
+  ext i j
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  have h := HopfAlgebra.sum_mul_antipode_eq_algebraMap_counit (comulMatrixRRepr R A i j)
+  rw [counit_comulMatrixR] at h
+  rw [Finset.sum_congr rfl fun p _ => show (comulMatrixR R A).map
+      (HopfAlgebra.antipode R) i p * comulMatrixR R A p j
+      = comulMatrixR R A p j * HopfAlgebra.antipode R (comulMatrixR R A i p) from by
+    rw [Matrix.map_apply, mul_comm]]
+  simpa [comulMatrixRRepr, apply_ite (algebraMap R A)] using h
+
+/-- The right-slot Δ-matrix is a unit. -/
+theorem isUnit_comulMatrixR : IsUnit (comulMatrixR R A) :=
+  ⟨⟨comulMatrixR R A, (comulMatrixR R A).map (HopfAlgebra.antipode R),
+    comulMatrixR_mul_antipodeMatrixR R A, antipodeMatrixR_mul_comulMatrixR R A⟩, rfl⟩
+
 end ModularCurves
