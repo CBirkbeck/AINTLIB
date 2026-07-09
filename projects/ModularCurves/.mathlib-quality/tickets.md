@@ -13512,3 +13512,16 @@ snapshot artifact — ground truth is the CLI check; boarded in v10.98 notes).*
 - **NEXT**: [HG-B3] coinvariants-vs-flat-base-change (03BK, mostly mathlib
   Flat/Equalizer) → [HG-B4] the k̄-orbit theorem (03BL, second hard leaf) → [HG-B5]
   descent bootstrap (03C8) → [HG-B6] = IsHopfGalois (M5).
+
+### v10.94h (2026-07-10, c5β): [C6-e5c] target banked (9abbda0c1) + THE KEYSTONE identified
+
+mulModelHom_specPoints_atlas is a compiling sorry-target with the proof plan in its docstring.
+**Keystone lemma [e5c-key] `dictionary_eq_toAffine`** (subsumes the InZChart case-split): for a
+K-point x = Spec.map φ ≫ chartι uWLU k (any chart k), projModelPointsEquiv uWLU K ⟨x,hx⟩ =
+Projective.toAffine W_K (φ-triple) where φ-triple m := φ(Away.isLocalizationElem k m) (k-coord = 1).
+Proof: by_cases φ(z-coordElem) = 0 — ≠0 → chartPointOfHom_factors_iff gives the Z-chart factoring
+→ projModelPointsEquiv_some + toAffine_of_Z_ne_zero (ratios match); =0 → no Z-factoring
+(factors_iff mpr-reverse) → specPoint_eq_zero_of_not_inZ + projModelPointsEquiv_zero +
+toAffine_of_Z_eq_zero. Then e5c = descent + d2-readout (sum's φ-triple = χ∘lawTriple) + e5a/e5b
+(triple = c•add) + toAffine_smul + toAffine_add + dictionary_eq_toAffine on P,Q (their chart forms
+from the d4b immersion equations). GLC fill afterwards via e1/e3/e4/e4a transport.
