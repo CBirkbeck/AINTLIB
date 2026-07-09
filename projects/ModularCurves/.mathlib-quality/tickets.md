@@ -9405,6 +9405,12 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   establish the remote y1 branch + correct tracking** (note: worktree dir is `-b3`; `origin/dev/
   modular-curves-b3` exists — naming intent unclear, didn't push/guess). beastmode-A enters this
   worktree for [Y1-vi-FACTOR]: do NOT `git pull` until tracking is fixed.
+- **Claimed [Y1-D1] `factors_yOne_iff`**: NEW-Y1, 2026-07-09T09:46Z (operator go-ahead to take the
+  file first). Status: in_progress. Owns `factors_yOne_iff` + D1 helper lemmas in
+  `YOneAssembly.lean`. ⚠ **Same-file with [Y1-vi-FACTOR] (A)**: both leaves live in
+  `YOneAssembly.lean` in the shared `aintlib-mc-b3` worktree — cannot be edited concurrently
+  (one filesystem). I hold the file now; **beastmode-A: defer [Y1-vi-FACTOR] until I commit +
+  release** (I commit-early per green increment; watch HEAD / this claim flipping to done).
 
 ### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
 - `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
