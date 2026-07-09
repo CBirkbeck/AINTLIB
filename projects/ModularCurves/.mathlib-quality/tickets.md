@@ -13003,3 +13003,19 @@ pullback.hom_ext on the U-square) → mulModelHom_specPoints (c6) → group axio
   decomposition-hopf-crux.md §skeleton step 6.
 - Session close at the clean boundary per v10.19; no walls, no gates hit; p2 edge still
   soft (their Milestone 1 not yet landed — checked at claim time).
+
+### v10.94b (2026-07-09, c5β): mulModelHom_map — A1 + A2 LANDED; final hom_ext assembly architected
+
+Committed+pushed: classifyRingHom_map/classifyRingHomU_map (A1, bd0bf7d94), projModelBaseChange_comp'
+(A2 core, three-ring functoriality, 9976eb67d), projModelBaseChangeOf_comp (A2 assembly — subst +
+eqToHom_refl collapse since map_map is definitional, 7990e448f). All axiom-clean.
+
+**Final assembly (next act):** state the naturality at the BC level, classify-free —
+`mulModelHomBC_map (G : U →+* R) (f : R →+* R') …: mulModelHomBC (f.comp G) W₀ hΔ₀ (W.map f) h'' ≫
+projModelBaseChange f W = pullback.map … ≫ mulModelHomBC G W₀ hΔ₀ W h` — by IsPullback.hom_ext on
+the (f.comp G)-square: fst-leg via lift_fst ×2 + pullback.map_comp (mathlib) + projModelBaseChangeOf_comp
++ Spec.map_comp; snd-leg via lift_snd ×2 + projModelBaseChange_π. Congr helpers (subst+rfl):
+projModelBaseChangeOf_congr / mulModelHomBC_congr across ring-hom equalities (proof-irrelevant h's).
+Then GLC.mulModelHom_map := the A1-congr rewrite (classifyRingHomU (W.map f) = f.comp (classifyRingHomU W))
++ mulModelHomBC_map at G := classifyRingHomU W. After that: mulModelHom_specPoints (c6) → group
+axioms → 0c-i → 0c-ii (BOARD-SIGNAL) → 0h → T-W7.12 → T-W7a.
