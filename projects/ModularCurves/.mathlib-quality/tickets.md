@@ -12050,3 +12050,50 @@ Prop-sorry. `ModularCurves.Picard.InvertibleSheaf` builds green.*
 - **DS-END0 route (a) status:** GAP1-W-MONO (monoidal structure) DONE; P1b assembled;
   remaining route-(a) infra = [PIC-P1b-MONO] (pullback-monoidality) → then P1b closes → P2 Pic group.
   Route (b) (p2 Cartier-duality) unaffected; coordination note (never build duality twice) stands.
+
+## Amendments v10.78 (fable-PIC0) — `/develop --decompose` for [PIC-P1b-MONO], adversarial
+
+Ran the decompose pass (planning-only, no tickets). Artifact:
+`.mathlib-quality/decomposition-pullback-monoidal.md`; skeleton
+`ForMathlib/PullbackTensorMonoidal.lean` (builds clean, 2 leaf sorries). Two prior board claims
+were **refuted by the adversarial pass** and are corrected here:
+
+- **CORRECTION 1 (v10.77 step ii was WRONG):** `CategoryTheory.Monoidal.Mates` is **NOT absent** —
+  mathlib has `Adjunction.leftAdjointOplaxMonoidal` (Monoidal/Functor.lean:1026),
+  `rightAdjointLaxMonoidal` (:908), and `mateEquiv` (Bicategory/Adjunction/Mate.lean). The
+  doctrinal-adjunction transfer is available. So route M (mates) is **not** blocked by missing
+  mates infra.
+- **Route M is instead blocked by a DIFFERENT gap:** there is **no `SheafOfModules/Monoidal.lean`
+  in mathlib** — the sheaf-level tensor is this project's bespoke `tensorObj`, so there is no
+  `MonoidalCategory (SheafOfModules R)` for `leftAdjointOplaxMonoidal` to consume. Building it
+  first IS the group-law layer [PIC-P1b-MONO] gates → circular. **Route M REJECTED.**
+
+**Route D chosen** (direct, sheaf-level, via mathlib's own pullback decomposition):
+`Scheme.Modules.pullback f = SheafOfModules.pullback f.toRingCatSheafHom` (Sheaf.lean:182), so
+`SheafOfModules.pullbackIso` (PullbackContinuous.lean:106) and `sheafificationCompPullback` (:118)
+apply verbatim. Four leaves + glue:
+- **L** `sheafificationCompPullback` @ `M.val⊗N.val` — mathlib, HAVE. `f^*(M⊗N) ≅ sh_Y(f^*ᵖ(P⊗Q))`.
+- **R** `pullbackIso` @ M,N + `.val` — mathlib, HAVE. `f^*M⊗f^*N ≅ sh_Y((sh_Y f^*ᵖP).val ⊗ (sh_Y f^*ᵖQ).val)`.
+- **I = D-Idem** — our GAP1-W-MONO repackaged: `sheafificationW_tensorHom` + units loc-bij ⟹
+  `sh(sh(A).val ⊗ sh(B).val) ≅ sh(A⊗B)`. NEW leaf 1. (Sub-anchor: "sheafification unit is locally
+  bijective" — standard, exact mathlib lemma name to be found at build.)
+- **C = D-PresPB′** — NEW leaf 2, the one genuine build.
+
+- **CORRECTION 2 / KEY ADVERSARIAL FINDING:** the *natural* first decomposition — "the **presheaf**
+  pullback `f^*ᵖ` is strong monoidal" — is **FALSE for general `f`**. `PresheafOfModules.pullback φ
+  := (pushforward φ).leftAdjoint` (Pullback.lean:44) hides an inverse-image **left Kan extension
+  along the site functor**, which does NOT commute with the presheaf tensor (they agree only on
+  stalks). The predecessor leaf was rejected and **refined** to the *sheafified* comparison
+  **C: `sh_Y(f^*ᵖ(P⊗Q)) ≅ sh_Y(f^*ᵖP ⊗ f^*ᵖQ)`** — TRUE for general `f` because the comparison is a
+  stalkwise iso ⟹ locally bijective ⟹ inverted by `sh_Y` (same `sheafificationW` tech as D-Idem).
+  Its labour: lift `restrictScalars.LaxMonoidal` to `PresheafOfModules.pushforward` then transport
+  via `leftAdjointOplaxMonoidal` to get the oplax `δ` (model: `pushforward₀OfCommRingCat.Monoidal`).
+
+**Feasibility: FEASIBLE.** 2 leaves mathlib-verbatim, 1 our-already-built (D-Idem), 1 new bounded
+build (D-PresPB′, ~60–120 lines, mechanical pointwise lift). **No statement change** to
+`nonempty_pullback_tensorObj` needed — general `f` is provable as decomposed. (Sole consumer
+`IsInvertible.tensorObj` uses only open immersions `W.ι`, which would make C trivial, but the
+general form is not harder to state and Route D handles it.) `nonempty_pullback_tensorObj`
+docstring corrected to Route D (statement byte-identical). **Build order when execution resumes:
+(I) → (C) → ~20-line assembly.** DS-END0 two-route note unchanged (this leaf is pure
+module-pullback compat; does not touch p2's Cartier-duality lane).

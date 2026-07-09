@@ -147,13 +147,18 @@ noncomputable def restrictTrivialization {P : X.Modules} {U W : X.Opens} (e : W 
 morphism of schemes `f`, `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. This is the *strong monoidality of
 the pullback functor* `Modules.pullback f` with respect to the sheafified tensor `tensorObj`
 — the last GAP-1 content, isolated to this single `Nonempty`-iso (Prop, so no `sorryAx` in
-any monoidal DATA; the v10.8 discipline). Route: the pushforward `f_*` is (lax) monoidal —
-mathlib has `PresheafOfModules.pushforward₀OfCommRingCat.Monoidal` at the presheaf level —
-so its left adjoint `f^*` is oplax monoidal, and here strongly monoidal (base change of
-modules `⊗_R S` commutes with tensor, and `sheafification` is monoidal by
-`SheafOfModulesMonoidal.sheafificationW_isMonoidal`, this stream's GAP1-W-MONO leaf). The
-missing mathlib infrastructure is the doctrinal-adjunction/mates transfer of a lax-monoidal
-structure to a left adjoint (`Mathlib.CategoryTheory.Monoidal.Mates` is absent). Registered
+any monoidal DATA; the v10.8 discipline). Route D (adversarial decomposition:
+`.mathlib-quality/decomposition-pullback-monoidal.md`, skeleton
+`ForMathlib/PullbackTensorMonoidal.lean`): assemble at the sheaf level from mathlib's
+`SheafOfModules.sheafificationCompPullback` and `pullbackIso` (which express `f^*` through the
+presheaf pullback `f^*ᵖ` and sheafification), this stream's GAP1-W-MONO leaf
+`sheafificationW_tensorHom` (collapsing the double sheafification), and the sheafified
+pullback–tensor comparison `sh(f^*ᵖ(P⊗Q)) ≅ sh(f^*ᵖP ⊗ f^*ᵖQ)`. That comparison is only a
+*stalkwise* iso — the presheaf pullback is NOT strong monoidal for general `f` (its
+inverse-image left Kan extension does not commute with the presheaf tensor), but it is locally
+bijective, hence inverted by sheafification. (Route M — mates via
+`Adjunction.leftAdjointOplaxMonoidal`, which *does* exist in mathlib — is blocked instead by
+the absence of a `MonoidalCategory (SheafOfModules R)`, the layer this leaf gates.) Registered
 sub-development [PIC-P1b-MONO]. -/
 theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
     Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
