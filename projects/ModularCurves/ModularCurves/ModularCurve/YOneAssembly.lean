@@ -790,6 +790,25 @@ theorem mem_killedLocus_range_iff (d : ℕ) (x : S) :
     show (E.killedLocusπ P d) (hlift (IsLocalRing.closedPoint _)) = x
     rw [← Scheme.Hom.comp_apply, hh, Scheme.fromSpecResidueField_apply]
 
+/-- **(Y1-D1 bridge, fibrewise)** Pulling the base-changed marked section `asSection E t (pull t P)`
+back along a geometric point `τ : Spec k ⟶ T` is, under the `baseChange` point iso, pulling `P`
+along `τ ≫ t`; so its `a`-torsion is detected on the fibre over `τ ≫ t`. -/
+theorem zsmul_pull_baseChange_asSection_iff {T : Scheme.{u}} (t : T ⟶ S) {k : Type u} [Field k]
+    (τ : Spec (CommRingCat.of k) ⟶ T) (a : ℤ) :
+    a • Point.pull (E.baseChange t) τ (Point.asSection E t (Point.pull E t P)) = 0
+      ↔ a • Point.pull E (τ ≫ t) P = 0 := by
+  have hbeq : Point.baseChangeEquiv E t τ
+      (Point.pull (E.baseChange t) τ (Point.asSection E t (Point.pull E t P)))
+      = Point.pull E (τ ≫ t) P := by
+    apply Subtype.ext
+    rw [Point.baseChangeEquiv_apply_coe]
+    show (τ ≫ (Point.asSection E t (Point.pull E t P)).1) ≫ pullback.fst E.π t
+      = (τ ≫ t) ≫ P.1
+    rw [Category.assoc, Point.asSection_val_fst]
+    show τ ≫ t ≫ P.1 = (τ ≫ t) ≫ P.1
+    rw [Category.assoc]
+  rw [← (Point.baseChangeEquiv E t τ).map_eq_zero_iff, map_zsmul, hbeq]
+
 end EllipticCurve
 
 variable (N : ℕ)
