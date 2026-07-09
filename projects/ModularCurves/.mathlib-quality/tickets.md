@@ -13391,3 +13391,43 @@ coordinate transport prepared.
   bridge (addX/addY_of_Z_ne_zero, dblAddXYZ_self + AdditionLawField smul lemmas, Affine.Point.add
   cases) ⟹ mulModelHom_specPoints. Fills GLC's c6 sorry; then the group axioms consume it via
   hom_ext_of_forall_specPoint (0c-i, 0c-ii BOARD-SIGNAL).
+
+### v10.96 (2026-07-10, NEW-GH): ★ [02KL] scheme-level reduction PROVEN — lfp source-descent lands modulo ONE named ring gate [02KL-CORE]; recipe hole caught + fixed
+
+*Per the v10.94 un-park ([02KL] full budget). Commit 5ca151de3 on
+`ForMathlib/SmoothDescent.lean`. Axiom profile of the theorem: `[propext, sorryAx,
+Classical.choice, Quot.sound]` — sorryAx flows ONLY through [02KL-CORE]. Downstream
+consumer (YFullRoute) rebuilt green. Zero heartbeat bumps (the one TC timeout was
+defused with explicit `IsZariskiLocalAtTarget.restrict` haveI's, per the no-bumps rule).*
+
+- **RECIPE HOLE CAUGHT (adversarial self-check before building)**: the banked v10.75
+  recipe's step 5 cited `RingHom.FinitePresentation.codescendsAlong_faithfullyFlat` as
+  the affine core — WRONG SHAPE: mathlib's `CodescendsAlong` is the PUSHOUT (base-change)
+  form (`Q(R → R')` ff + `P(R' → R' ⊗[R] S)` ⟹ `P(R → S)`); 02KL's affine core is
+  composite-REFLECTION (`R → S → T`, `χ : S → T` ff+FP, `R → T` FP ⟹ `R → S` FP =
+  Stacks 02KG+02KH). Full audit: the source form is absent from the pin in every guise
+  (Finiteness/Descent.lean is all pushout-form; `of_restrict_scalars_finitePresentation`
+  cancels the wrong factor; no `HasOfPrecompProperty`; `SpreadingOut.lean` is
+  morphisms/points, not flatness-through-filtered-systems). The classical proof needs
+  EGA IV 8.10.5/11.2.6 spreading-out. **[02KL-CORE] REGISTERED** (sorried, full gap
+  audit in its docstring): `RingHom.FinitePresentation.of_comp_of_faithfullyFlat` —
+  hard-substrate profile, same shape-class as [A711-FP] (candidate for fable-FP's lane
+  or a dedicated session with the subalgebra-colimit + spreading-out toolbox).
+- **The PROVEN wrapper** (`LocallyOfFinitePresentation.of_precomp_of_surjective`,
+  Stacks 02KL): wlog cascade to affine Z then affine Y (the FinitePresentationCancel
+  pattern — cleaner than the banked resLE route, no appLE/appTop bridge needed);
+  `UniversallyOpen.of_flat` + `elim_finite_subcover` extract finitely many affine opens
+  of X with π-images covering the quasi-compact Y; their coproduct is an affine
+  (`IsAffine (∐ g)`, finite) flat lfp surjective cover (`IsZariskiLocalAtSource.sigmaDesc`);
+  affine case = `Flat.flat_and_surjective_iff_faithfullyFlat_of_isAffine` +
+  `HasRingHomProperty.iff_of_isAffine` + the core.
+- **SmoothDescent status ([YF-QSM] chain)**: flat leg (29.26.13) PROVEN (pre-existing);
+  lfp leg (02KL) PROVEN modulo [02KL-CORE]; smooth leg (02KM) OPEN — route now fully
+  located: f lfp by 02KL + f flat by the flat leg + formal smoothness via
+  `Algebra.FormallySmooth.iff_subsingleton_and_projective` (H¹Cotangent + Ω-projectivity),
+  transported along the formally étale stalk maps (`RingTheory/Etale/Kaehler`) with
+  ff module descent (flatness in-repo `FaithfullyFlatFiniteDescent` + mathlib
+  Finiteness/Descent) — 4–5 API surfaces, its own session per the dispatch's
+  boundary-report option.
+- **NEXT session (NEW-GH)**: [02KM] assembly on the located route; then the
+  MellWeierstrass cadence cleanup (tail). [02KL-CORE] routing = coordinator's call.
