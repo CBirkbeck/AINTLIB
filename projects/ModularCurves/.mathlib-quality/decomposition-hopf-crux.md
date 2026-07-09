@@ -256,3 +256,16 @@ S(T)·T = 1, isUnit). Remaining chain (each its own increment):
    ⟹ (ρ injective via counit retraction `rid∘(id⊗ε)∘ρ = id`) `P(f) = 0`: **every f : B
    is integral of monic degree r over coinvariants ρ** = the 03BJ deliverable
    `isIntegral_coinvariants`.
+
+## [HG-B6] input inventory update (post-B3-core)
+
+- `Algebra.IsIntegral.tensorProduct : Algebra.IsIntegral C B → Algebra.IsIntegral C' (C' ⊗[C] B)`
+  EXISTS in mathlib — so per-prime integrality of the base-changed situation is FREE from
+  03BJ (`isIntegral_coinvariants` packaged as `Algebra.IsIntegral C B` via the tower) and
+  needs NO base-changed co-action for the integrality leg. The base-changed co-action
+  (`coactionBaseChange`, B3) is still consumed by the 03C1-application and the 03C8
+  bootstrap upstairs.
+- B3 status: `coactionBaseChange` + 03BK(3) (`mem_coinvariants_coactionBaseChange_iff`,
+  flat) + counit transport LANDED. Remaining: coassoc transport (pentagon-style auxes
+  through `baseChangeAssoc` — do ext-two-legs on B′ = C′-leg + B-leg, then per-leg pure-
+  tensor inductions), then package `IsCoaction (coactionBaseChange …)`.
