@@ -10851,3 +10851,22 @@ atlas file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` gr
 line-length scan clean; no linter warnings in the file. `#print axioms` for the four key new
 declarations lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` —
 T-W7 and T-E1 are proven inputs).
+
+## Amendments v10.105-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] chart naturality + atlas marking coords LANDED
+
+Added in `YOneAtlasClassify.lean`: ring-map naturality of `Z`-chart points (`specPointComp`,
+`inZChart_specPointComp`, `zChartHom_specPointComp`, `zChartEval_specPointComp` — all by the
+`zChartHom_unique` mono trick), the coordinate read-offs `zChartEval_coordX`/`_coordY`
+(evaluation = chart hom at `X₀/X₂`, `X₁/X₂` via `chartZRingEquiv_x/y`), the extensionality
+`coordRingHom_ext` (`{1, y}`-basis argument via `exists_smul_basis_eq`) and
+`specPoint_ext_of_zChartEval` (a `Z`-chart point is determined by its two coordinate
+evaluations), and the atlas marking as a chart point: `tateP0SpecPoint`, `tateP0mor_fac`
+(public replay of the `[Y1-vi]` factorisation through `chartHomEquiv_symm_coe`),
+`tateP0SpecPoint_inZChart`, `zChartHom_tateP0SpecPoint`, and
+`zChartEval_tateP0SpecPoint_coordX/Y = 0`. Elaboration-stall dodges: heavy `←`-rewrites over
+the localization ring replaced by `DFunLike.congr_arg` + `Eq.trans` chains (v10.24).
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs); no
+`sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
+`#print axioms` for the key new declarations lists only `[propext, Classical.choice,
+Quot.sound]` (no inherited `sorryAx`).
