@@ -615,6 +615,77 @@ lemma overlapPieceIso_hom_ι_eq_specMap_psiFst (k k' : Fin 3) :
   (overlapPieceIso_hom_ι W i j i' j' k k').trans
     (specMap_psiFst_pieceAwayι W i j i' j' k k').symm
 
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' unit)** The second transition coordinate `transHom(lawTwoTriple
+i'j' k')` maps to a unit in `S`: it is the second factor of the localization generator, hence divides
+it. The `(i',j')`-side analogue of `isUnit_algebraMap_biChartRing_lawTwoTriple`, but stated directly
+over `transRing` (no `biChartRing → transRing` rewrite — the map is `transHom`, not the canonical
+tower map). -/
+lemma isUnit_algebraMap_transRing_transHom_lawTwoTriple (k k' : Fin 3) :
+    IsUnit (((IsScalarTower.toAlgHom R (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transHom W i j i' j')) (lawTwoTriple W i' j' k')) := by
+  rw [AlgHom.comp_apply]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawTwoTriple W i j k) * transHom W i j i' j' (lawTwoTriple W i' j' k'))
+    ⟨transAlgHom W i j i' j' (lawTwoTriple W i j k), mul_comm _ _⟩
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j')** The `(i',j')`-side localization lift `Away(lawTwoTriple i'j' k')
+→ₐ[R] S`. Unlike `ψ_ij = psiFst`, its base map is built *explicitly* through the middle ring —
+`(algebraMap transRing S).comp transHom` — since `transHom` (not the canonical scalar tower) carries
+`biChartRing(i'j')` into `transRing`. Consequently its base identity `psiSnd_toRingHom_comp'` is direct
+(no `.trans` bridge, no composite `algebraMap biChartRing(i'j') S` instance). -/
+noncomputable def psiSnd (k k' : Fin 3) :
+    Localization.Away (lawTwoTriple W i' j' k') →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom
+    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (lawTwoTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawTwoTriple W i j i' j' k k')
+
+@[simp]
+lemma psiSnd_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
+    psiSnd W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
+  IsLocalization.Away.liftAlgHom_algebraMap _ (lawTwoTriple W i' j' k')
+    (isUnit_algebraMap_transRing_transHom_lawTwoTriple W i j i' j' k k') x
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' tower factorization)** ψ_i'j' restricted to `biChartRing(i'j')` is
+`(algebraMap transRing S).comp transHom` — direct from `liftAlgHom_algebraMap` (the base map already IS
+this composite), no whnf hazard. -/
+lemma psiSnd_toRingHom_comp' (k k' : Fin 3) :
+    (psiSnd W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i' j') (Localization.Away (lawTwoTriple W i' j' k'))) =
+      (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))).comp
+        (transHom W i j i' j').toRingHom :=
+  RingHom.ext (psiSnd_algebraMap W i j i' j' k k')
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_i'j'–σ identification)** `Spec(ψ_i'j') ≫ pieceAwayι(i'j'k') =
+Spec(transRing→S) ≫ transι`: the `(i',j')`-piece immersion precomposed with `Spec(ψ_i'j')` is the
+triple-localization immersion, reading `transι` through the `(i',j')` chart-product (`transι_eq`, the
+`transHom` form). The psiSnd mirror of `specMap_psiFst_pieceAwayι`, again packaged by the variable-ring
+barrier `spec_map_comp_congr` so `isDefEq` never touches the concrete tower. -/
+lemma specMap_psiSnd_pieceAwayι (k k' : Fin 3) :
+    Spec.map (CommRingCat.ofHom (psiSnd W i j i' j' k k').toRingHom) ≫ pieceAwayι W i' j' k' =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [pieceAwayι_eq, transι_eq]
+  exact spec_map_comp_congr _ _ _ _ _
+    (by rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, psiSnd_toRingHom_comp'])
+
+/-- **([C4-HF-ASSEMBLY] L3, w.hom ≫ ι = Spec(ψ_i'j') ≫ σ')** The `(i',j')`-side reading of the overlap
+immersion: `w` into `E ×_R E` equals `Spec(ψ_i'j')` followed by the `(i',j')`-piece immersion. The
+psiSnd mirror of `overlapPieceIso_hom_ι_eq_specMap_psiFst`, sharing the same value
+`Spec(transRing → S) ≫ transι`. Together the two give the cross-chart glue. -/
+lemma overlapPieceIso_hom_ι_eq_specMap_psiSnd (k k' : Fin 3) :
+    (overlapPieceIso W i j i' j' k k').hom ≫ (overlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (psiSnd W i j i' j' k k').toRingHom) ≫ pieceAwayι W i' j' k' :=
+  (overlapPieceIso_hom_ι W i j i' j' k k').trans
+    (specMap_psiSnd_pieceAwayι W i j i' j' k k').symm
+
 end Overlap
 
 end WeierstrassCurve.Projective
