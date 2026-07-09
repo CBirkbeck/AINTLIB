@@ -162,6 +162,48 @@ lemma addOnZOnImage_piece (i j : Fin 3) [IsDomain (biChartRing W i j)] (k : Fin 
     (addOnZOnSup W i j hΔ)).trans ?_
   exact congrArg (_ ≫ ·) (ι_addOnZOnSup W i j hΔ k)
 
+omit [IsDomain R] in
+/-- **([C4-HF-ASSEMBLY] L1)** On any open `P` inside the k-th image piece,
+`homOfLE ≫ addOnYOnImage ij` factors as `σ ≫ addOnYPieceMor ij k`, where the prefactor `σ` is the
+`isoImage / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in `Spec(Away(lawTwoTriple ij k))`.
+This is the entry point that turns the image-level morphism into the `pieceMorOfTriple` form the crux
+consumes. Uses only `addOnYOnImage_piece`'s own `isoImage`, so there is no second-copy cancellation. -/
+lemma homOfLE_addOnYOnImage_eq (i j : Fin 3) [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ)
+    (k : Fin 3) (P : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hP : P ≤ pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (hP.trans ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))) ≫
+        addOnYOnImage W hΔ i j =
+      ((pullback (projModelπ W) (projModelπ W)).homOfLE hP ≫
+        (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+        morphismRestrict (chartPieceIso W i j).hom
+          (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+        (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k)).inv) ≫ addOnYPieceMor W i j k hΔ := by
+  rw [← Scheme.homOfLE_homOfLE _ hP
+      ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k)),
+    Category.assoc, addOnYOnImage_piece, addOnYOnFamily]
+  simp only [Category.assoc]
+
+omit [IsDomain R] in
+/-- **([C4-HF-ASSEMBLY] L1, law 1)** -/
+lemma homOfLE_addOnZOnImage_eq (i j : Fin 3) [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ)
+    (k : Fin 3) (P : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hP : P ≤ pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (hP.trans ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k))) ≫
+        addOnZOnImage W hΔ i j =
+      ((pullback (projModelπ W) (projModelπ W)).homOfLE hP ≫
+        (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+        morphismRestrict (chartPieceIso W i j).hom
+          (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+        (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+          (lawOneTriple W i j k)).inv) ≫ addOnZPieceMor W i j k hΔ := by
+  rw [← Scheme.homOfLE_homOfLE _ hP
+      ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k)),
+    Category.assoc, addOnZOnImage_piece, addOnZOnFamily]
+  simp only [Category.assoc]
+
 end Morphisms
 
 section Overlap
