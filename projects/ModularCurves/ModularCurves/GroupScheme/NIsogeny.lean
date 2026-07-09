@@ -136,7 +136,16 @@ over `B` by construction of the base map `π_B = subschemeι ≫ E.π`.  T-D15 c
 against the pulled-back `D`; a `T`-point `P` on `D` (via `h : T ⟶ B`) is exactly this taut point
 pulled along `h`. -/
 noncomputable def divisorTautPoint (D : RelEffCartierDiv E.π) :
-    E.Point (D.ideal.subschemeι ≫ E.π) := sorry
+    E.Point (D.ideal.subschemeι ≫ E.π) :=
+  ⟨D.ideal.subschemeι, rfl⟩
+
+/-- Restricting the tautological point along a `T`-point `h : T ⟶ D.ideal.subscheme` of the base
+recovers the original point `P`, when `h` witnesses `P` lying on `D` (`h ≫ subschemeι = P.1`). -/
+theorem divisorTautPoint_restrict (D : RelEffCartierDiv E.π) {T : Scheme.{u}} (t : T ⟶ S)
+    (P : E.Point t) (h : T ⟶ D.ideal.subscheme) (hcomp : h ≫ D.ideal.subschemeι = P.1) :
+    (Point.restrict E h (E.divisorTautPoint D) : T ⟶ E.E) = (P : T ⟶ E.E) := by
+  show h ≫ D.ideal.subschemeι = P.1
+  exact hcomp
 
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
