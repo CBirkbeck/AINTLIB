@@ -10952,3 +10952,32 @@ vendoring.*
   + three structural routes (interface-lemma + global irreducible / retraction-level
   kernel-uniqueness restatement / quarantine + deliver uniqueness lemma alone).
 - Elaboration-trap patterns (5 modes) banked to persistent fleet memory.
+
+### v10.60 (2026-07-09, fable-PIC0): [GAP1-VENDOR] port attempt — PR #35545 does NOT port to this pin; route (b) recommended instead
+
+*Four adaptation rounds, root cause isolated and documented; no red files left in tree
+(the port attempt is parked outside the build).*
+
+- **Port findings (banked):** PR #35545 is itself WIP upstream (one `sorry` in its
+  `Linear` instance's `comp_smul`, closable — my fix compiled that field) and STOPS at
+  the internal-hom OBJECT: the tensor-hom adjunction and `MonoidalClosed` are unbuilt
+  upstream. More decisively: the PR predates this pin's ConcreteCategory-era API and its
+  instance-resolution behavior — on our pin the composite clothing
+  `((Over.forget U.unop).op ⋙ R ⋙ forget₂ …).obj V` does not fold for tactic
+  rewrites/synthesis (the session's recurring instance-clothing seam), and bridge
+  instances create two-instance mismatches. A faithful port = a from-scratch restatement
+  in pin-native spellings, NOT a copy. Post-daily-bump the drift shrinks; the PR
+  snapshot + my 4-round adaptation are preserved for that moment.
+- **The sharper realization:** the internal hom is only needed by the Day-reflection
+  ROUTE (c-variant) to GAP-1. GAP-1's actual kernel (decomposition-pic-coh.md, binding):
+  `sheafify ((sheafify Q) ⊗ P) ≅ sheafify (Q ⊗ P)` + restriction-to-opens compatibility.
+  **Route (b) — stalks + filtered-colimit ⊗-commutation — needs NONE of the vendored
+  file** and is pin-native: sheafification preserves stalks; stalk of presheaf-⊗ = ⊗ of
+  stalks; locally-bijective = stalkwise-iso on the Zariski site. The owner directive
+  (don't wait upstream) is honored by BUILDING route (b) ourselves, not by porting a
+  stale WIP file the route doesn't need.
+- **[GAP1-DEV] (next PIC0 act):** the dedicated GAP-1 /develop route-pick pass the
+  artifact always required, now unblocked by the owner directive — route (b) as lead
+  candidate (survey mathlib's stalk-functor + Presheaf.IsLocallyBijective + enough-points
+  surface for PresheafOfModules on the Zariski site), route (c-post-bump) as fallback.
+  Then the GAP-1 core lemma, then `IsInvertible.tensorObj` (P1b) and the P2 program.
