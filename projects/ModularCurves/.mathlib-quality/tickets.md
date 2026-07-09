@@ -10700,6 +10700,27 @@ the intended Tate-object trail, matching `#print axioms tateUniversal` and
 `#print axioms tateEllObj`, hence gate **[T-A6b]** (`abelEnrichment_exists`) and no fresh atlas
 sorry.
 
+## Amendments v10.98-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `pullSection` classifying clause handle LANDED
+
+Added `EllObj.tateClassifyingHom_pullSection_top`,
+`EllObj.tateClassifyingHom_pullSection_eq`, and
+`EllObj.tateClassifyingHom_existsUnique_of_components` in `YOneAtlasClassify.lean`. These close the
+final logical packaging step of B2-v: the constructed `Ell/R` morphism pulls the universal section
+back along the specified cartesian square, equality with the source marking follows from the top
+component equation, and the desired `∃! f, EllHom.pullSection R f P₀ = P` follows once the
+chartwise T-E1/T-W7 uniqueness step has identified the base and top components of any competing
+morphism.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green; line-length scan clean. `#print axioms` for
+the three new declarations lists `[propext, sorryAx, Classical.choice, Quot.sound]`; the inherited
+`sorryAx` is attributed to the same Tate-object trail as above (`tateUniversal`/`tateEllObj`, gate
+**[T-A6b]**). `#print axioms EllHom.pullSection` itself lists only
+`[propext, Classical.choice, Quot.sound]`, so this increment adds no pullSection-side gate. Commit
+boundary re-read picked up coordinator v10.89; `EllObj.homPullbackAlongEquiv` is the required reuse
+API for the next pullbackAlong-shaped classifying-square rebuild, while this increment only packages
+the already-constructed morphism's `pullSection`/`∃!` logic.
+
 ## Amendments v10.95-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] normalising-overlap independence LANDED
 
 Added `tateRingOverAlgLiftOfTateNormal_eq_of_variableChanges` and
