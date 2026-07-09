@@ -901,6 +901,62 @@ noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X 
     obtain ⟨y, hy, hyx⟩ := hKle h1
     exact ((Point.baseChangeEquiv X.curve g t).injective hyx) ▸ hy
 
+/-- `EllHom.pullSection` is `ℤ`-linear (derived from `pullSection_add` via `map_zsmul`).
+Companion to `EllHom.pullSection_add`. -/
+theorem EllHom.pullSection_zsmul {R : CommRingCat.{u}} {X Y : EllObj R} (f : X ⟶ Y)
+    (n : ℤ) (P : Y.curve.Section) :
+    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f) (EllHom.pullSection_add R f)) n P
+
+open EllipticCurve in
+/-- `baseChangeEquiv` undoes `asSection`: `e (asSection g R) = R.restrict (𝟙)`. The
+section `asSection E g R` is the pullback-lift of `R` and its image under the base-change
+comparison is `R` itself (reindexed along `𝟙 ≫ g`). -/
+lemma baseChangeEquiv_asSection {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (R : E.Point g) :
+    Point.baseChangeEquiv E g (𝟙 T) (Point.asSection E g R) = Point.restrict E (𝟙 T) R := by
+  refine Subtype.ext ?_
+  rw [Point.baseChangeEquiv_apply_coe, Point.asSection_val_fst]
+  show R.1 = 𝟙 T ≫ R.1
+  rw [Category.id_comp]
+
+open EllipticCurve in
+/-- `Point.asSection` is additive. Proven by transporting through the additive
+`baseChangeEquiv` (whose inverse `asSection` is, up to the `𝟙 ≫ g` reindex handled by
+`baseChangeEquiv_asSection`) and `Point.restrict_add`. Addition of points has no direct
+underlying-morphism formula, so the transport route replaces a `pullback.hom_ext`. -/
+theorem Point.asSection_add {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (P Q : E.Point g) :
+    Point.asSection E g (P + Q) = Point.asSection E g P + Point.asSection E g Q := by
+  apply (Point.baseChangeEquiv E g (𝟙 T)).injective
+  rw [map_add, baseChangeEquiv_asSection, baseChangeEquiv_asSection, baseChangeEquiv_asSection,
+    Point.restrict_add]
+
+open EllipticCurve in
+/-- `Point.asSection E g` is injective (compose with the first pullback projection). -/
+lemma asSection_injective {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) : Function.Injective (Point.asSection E g) := by
+  intro P Q h
+  refine Subtype.ext ?_
+  have h1 : (Point.asSection E g P).1 ≫ pullback.fst E.π g
+      = (Point.asSection E g Q).1 ≫ pullback.fst E.π g :=
+    congrArg (· ≫ pullback.fst E.π g) (congrArg Subtype.val h)
+  rwa [Point.asSection_val_fst, Point.asSection_val_fst] at h1
+
+open EllipticCurve in
+/-- Restricting the coproduct-glued point to a `Bool`-summand recovers the summand's
+section, as a point over `Sigma.ι i ≫ g` (`coprodPoint_ι` + `hg`). -/
+lemma restrict_coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (sf : Bool → X.curve.Section) (i : Bool) :
+    Point.restrict X.curve (Sigma.ι (fun _ : Bool => X.base) i) (coprodPoint X g hg sf)
+      = Point.pull X.curve (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (sf i) := by
+  refine Subtype.ext ?_
+  show Sigma.ι (fun _ : Bool => X.base) i ≫ (coprodPoint X g hg sf).1
+    = (Sigma.ι (fun _ : Bool => X.base) i ≫ g) ≫ (sf i).1
+  rw [coprodPoint_ι, hg i, Category.id_comp]
+
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
