@@ -414,6 +414,81 @@ lemma tensorRightLeg_chartCoord (m : {l : Fin 3 // l ≠ j}) :
 
 end TensorLegs
 
+section PieceProjections
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) (i j : Fin 3)
+
+/-- [C6-d4b, Z-fst] Through the piece immersion, the first projection is the chart point of the
+composite ring map through the left tensor leg. -/
+lemma specMap_pieceAwayZι_fst {K : Type u} [CommRing K] (k : Fin 3)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K) :
+    Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k ≫
+        pullback.fst (projModelπ W) (projModelπ W) =
+      Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeLeftRingHom
+              (A := chartAway W i) (B := chartAway W j)))))) ≫ chartι W i := by
+  rw [pieceAwayZι_eq]
+  simp only [Category.assoc]
+  rw [pieceι_fst]
+  rw [← Category.assoc (chartPieceIso W i j).inv, chartPieceIso_inv_fst]
+  simp only [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+/-- [C6-d4b, Z-snd] Through the piece immersion, the second projection is the chart point of the
+composite ring map through the right tensor leg. -/
+lemma specMap_pieceAwayZι_snd {K : Type u} [CommRing K] (k : Fin 3)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K) :
+    Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k ≫
+        pullback.snd (projModelπ W) (projModelπ W) =
+      Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeRight
+              (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)))) ≫ chartι W j := by
+  rw [pieceAwayZι_eq]
+  simp only [Category.assoc]
+  rw [pieceι_snd]
+  rw [← Category.assoc (chartPieceIso W i j).inv, chartPieceIso_inv_snd]
+  simp only [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
+/-- [C6-d4b, Y-fst] Through the piece immersion, the first projection is the chart point of the
+composite ring map through the left tensor leg. -/
+lemma specMap_pieceAwayι_fst {K : Type u} [CommRing K] (k : Fin 3)
+    (ψ : Localization.Away (lawTwoTriple W i j k) →+* K) :
+    Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k ≫
+        pullback.fst (projModelπ W) (projModelπ W) =
+      Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeLeftRingHom
+              (A := chartAway W i) (B := chartAway W j)))))) ≫ chartι W i := by
+  rw [pieceAwayι_eq]
+  simp only [Category.assoc]
+  rw [pieceι_fst]
+  rw [← Category.assoc (chartPieceIso W i j).inv, chartPieceIso_inv_fst]
+  simp only [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
+/-- [C6-d4b, Y-snd] Through the piece immersion, the second projection is the chart point of the
+composite ring map through the right tensor leg. -/
+lemma specMap_pieceAwayι_snd {K : Type u} [CommRing K] (k : Fin 3)
+    (ψ : Localization.Away (lawTwoTriple W i j k) →+* K) :
+    Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k ≫
+        pullback.snd (projModelπ W) (projModelπ W) =
+      Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeRight
+              (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)))) ≫ chartι W j := by
+  rw [pieceAwayι_eq]
+  simp only [Category.assoc]
+  rw [pieceι_snd]
+  rw [← Category.assoc (chartPieceIso W i j).inv, chartPieceIso_inv_snd]
+  simp only [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
+end PieceProjections
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
