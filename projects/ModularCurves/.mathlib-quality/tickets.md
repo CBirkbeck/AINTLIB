@@ -11451,3 +11451,14 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   WAITS until the ⊗-stability leaf is sorry-free — a sorried IsMonoidal would push sorryAx
   into the monoidal data itself. Remaining: the loc-surjective half (sections-level), the
   loc-injective half (stalkwise/filtered, decompose on fork), then instantiate.
+
+## Amendments v10.70 (2026-07-09, coordinator): COORDINATOR HANDOVER — see COORDINATOR-HANDOVER.md
+
+- The outgoing coordinator is at its limit. **`.mathlib-quality/COORDINATOR-HANDOVER.md`**
+  is the complete transfer: goal, protocols (inbox v10.69, charter v10.32, append
+  discipline), binding policies (v10.8/v10.24a-e/v10.35b/v10.46/v10.52, B2, DS-register,
+  rule 5, fresh-session doctrine), the full fleet roster with charter states, the
+  dependency picture, and the open items (the GaloisDescentModule working-tree question,
+  FP4′s owed B2 repoint, c5β′s C4-HF-ASSEMBLY session).
+- The incoming coordinator assumes owner-delegated authority per that document. Workers:
+  nothing changes for you — inboxes and the board remain the channel.
