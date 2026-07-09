@@ -239,6 +239,52 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
         Iso.inv_hom_id]
       exact (projModelZero_projModelπ _).symm
 
+/-- `LocallyWeierstrass` respects isomorphisms of the total space over the same base: transport
+the chart isos through the induced pullback comparison (`IsPullback.of_iso` + `isoIsPullback`). -/
+theorem LocallyWeierstrass.of_iso_over {E₁ E₂ S : Scheme.{u}}
+    {π₁ : E₁ ⟶ S} {z₁ : S ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S}
+    {π₂ : E₂ ⟶ S} {z₂ : S ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S}
+    (h : LocallyWeierstrass π₁ z₁ hz₁) (e : E₂ ≅ E₁)
+    (hπ : e.hom ≫ π₁ = π₂) (hzc : z₂ ≫ e.hom = z₁) :
+    LocallyWeierstrass π₂ z₂ hz₂ := by
+  intro s
+  obtain ⟨U, hsU, W, hell, e₁, heπ, hez⟩ := h s
+  have hP₂ : IsPullback (pullback.fst π₂ U.1.ι ≫ e.hom) (pullback.snd π₂ U.1.ι) π₁ U.1.ι := by
+    refine (IsPullback.of_hasPullback π₂ U.1.ι).of_iso (Iso.refl _) e (Iso.refl _) (Iso.refl _)
+      ?_ ?_ ?_ ?_
+    · rw [Iso.refl_hom, Category.id_comp]
+    · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+    · rw [Iso.refl_hom, Category.comp_id, hπ]
+    · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+  set eP : pullback π₂ U.1.ι ≅ pullback π₁ U.1.ι :=
+    hP₂.isoIsPullback _ _ (IsPullback.of_hasPullback π₁ U.1.ι) with heP
+  refine ⟨U, hsU, W, hell, eP ≪≫ e₁, ?_, ?_⟩
+  · rw [Iso.trans_hom, Category.assoc, heπ, ← Category.assoc, heP,
+      IsPullback.isoIsPullback_hom_snd]
+  · rw [← hez, Iso.trans_hom, ← Category.assoc]
+    congr 1
+    rw [Category.assoc, cancel_epi (U.2.isoSpec.inv)]
+    apply pullback.hom_ext
+    · rw [Category.assoc, IsPullback.isoIsPullback_hom_fst, pullback.lift_fst_assoc,
+        pullback.lift_fst, Category.assoc, hzc]
+    · rw [Category.assoc, IsPullback.isoIsPullback_hom_snd, pullback.lift_snd, pullback.lift_snd]
+
+/-- `LocallyWeierstrass` respects isomorphisms of the whole triple (total space AND base):
+base-change along `eS.hom` (`LocallyWeierstrass.baseChange`) + the canonical iso
+`E₂ ≅ pullback π₁ eS.hom` (`of_horiz_isIso`) + `of_iso_over`. Used to transport the quotient
+curve's local model from `Spec Γ(X,⊤)ᴳ` back to `X/G` in `[a5]`. -/
+theorem LocallyWeierstrass.of_iso {E₁ S₁ E₂ S₂ : Scheme.{u}}
+    {π₁ : E₁ ⟶ S₁} {z₁ : S₁ ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S₁}
+    {π₂ : E₂ ⟶ S₂} {z₂ : S₂ ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S₂}
+    (h : LocallyWeierstrass π₁ z₁ hz₁) (eE : E₂ ≅ E₁) (eS : S₂ ≅ S₁)
+    (hπc : eE.hom ≫ π₁ = π₂ ≫ eS.hom) (hzc : eS.hom ≫ z₁ = z₂ ≫ eE.hom) :
+    LocallyWeierstrass π₂ z₂ hz₂ := by
+  have hsq : IsPullback eE.hom π₂ π₁ eS.hom := IsPullback.of_horiz_isIso ⟨hπc⟩
+  refine (h.baseChange eS.hom).of_iso_over hsq.isoPullback hsq.isoPullback_hom_snd ?_
+  apply pullback.hom_ext
+  · rw [Category.assoc, hsq.isoPullback_hom_fst, pullback.lift_fst, ← hzc]
+  · rw [Category.assoc, hsq.isoPullback_hom_snd, pullback.lift_snd, hz₂]
+
 /-- On the spectrum of a ring, the canonical map from the residue field at a point is
 `Spec` of the ring-level residue composite. -/
 lemma Spec_fromSpecResidueField_eq (R : Type u) [CommRing R] (p : ↥(Spec (CommRingCat.of R))) :
