@@ -1316,4 +1316,257 @@ theorem zChartEval_equation (g : SpecPoints (projModel W) (projModelπ W) K)
 
 end ZChartSection
 
+section MarkedChartComparison
+
+/-! ### B2-iii/iv engine (base): two marked charts induce the same atlas map
+
+Loeffler's *"Since `αᵢ, βᵢ` are unique, they must agree on `Uᵢ ∩ Uⱼ`"* (Prop 3.3.4,
+p. 14).  A pointed isomorphism of projective models carrying one `Z`-chart point to another
+is a variable change (T-W7); composing with the T-E1 normalising change of the source and
+comparing with T-E1 **uniqueness** on the target forces the two Tate normal forms — hence
+the two atlas algebra maps — to coincide. -/
+
+variable {A : Type u} [CommRing A]
+
+/-- The `Z`-chart ring morphism (in `CommRingCat`) induced by a pointed isomorphism of
+projective models: `pointedIsoΓ` conjugated by the two `basicOpenIsoAway`
+identifications. -/
+noncomputable def pointedIsoAwayHom {W₁ W₂ : WeierstrassCurve A}
+    (ε : projModel W₁ ≅ projModel W₂)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂) :
+    CommRingCat.of (HomogeneousLocalization.Away (quotientGrading (projIdeal W₂))
+      ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))) ⟶
+    CommRingCat.of (HomogeneousLocalization.Away (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))) :=
+  (Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
+      ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₂ 2) one_pos).hom ≫
+    CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom ≫
+    (Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv
+
+/-- **The chart square of a pointed isomorphism**: `Spec` of the induced chart-ring morphism
+intertwines the two chart inclusions with `ε`. -/
+theorem Spec_map_pointedIsoAwayHom_awayι {W₁ W₂ : WeierstrassCurve A}
+    (ε : projModel W₁ ≅ projModel W₂)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂) :
+    Spec.map (pointedIsoAwayHom ε hez) ≫
+      Proj.awayι (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos =
+    Proj.awayι (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₁ 2) one_pos ≫ ε.hom := by
+  have h1 := IsAffineOpen.SpecMap_appLE_fromSpec ε.hom
+    (Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W₂ 2) one_pos)
+    (Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W₁ 2) one_pos)
+    (pointedIso_preimage_zChart ε hez).ge
+  rw [appLE_zChart_eq_pointedIsoΓ ε hez,
+    Proj_fromSpec_awayToSection_awayι (quotientGrading (projIdeal W₂))
+      ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₂ 2) one_pos,
+    Proj_fromSpec_awayToSection_awayι (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₁ 2) one_pos] at h1
+  have hats : ∀ (W : WeierstrassCurve A), Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).hom := fun _ => rfl
+  rw [hats, hats] at h1
+  -- re-ascribe `h1` so every proof argument is spelled as in the goal
+  have h2 : Spec.map (CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom) ≫
+      Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos).hom) ≫
+      Proj.awayι (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos =
+      (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos).hom) ≫
+      Proj.awayι (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos) ≫ ε.hom := h1
+  have hexp : Spec.map (pointedIsoAwayHom ε hez) =
+      Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫
+      Spec.map (CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom) ≫
+      Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos).hom) := by
+    show Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos).hom ≫
+      CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom ≫
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) = _
+    rw [Spec.map_comp, Spec.map_comp, Category.assoc]
+    rfl
+  rw [hexp, Category.assoc, Category.assoc]
+  have h3 := congrArg (fun m => Spec.map ((Proj.basicOpenIsoAway
+    (quotientGrading (projIdeal W₁)) ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫ m) h2
+  have h4 : Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫
+      ((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos).hom) ≫
+      Proj.awayι (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos) ≫ ε.hom) =
+      Proj.awayι (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos ≫ ε.hom := by
+    rw [← Category.assoc, ← Category.assoc, ← Spec.map_comp, Iso.hom_inv_id, Spec.map_id,
+      Category.id_comp]
+  exact h3.trans h4
+
+variable {K : Type u} [CommRing K] [Algebra A K]
+
+/-- Transport of the chart evaluation along a pointed isomorphism of models carrying one
+`Z`-chart point to another: evaluation on the target is evaluation on the source after the
+induced coordinate-ring isomorphism. -/
+theorem zChartEval_pointedIso {W₁ W₂ : WeierstrassCurve A}
+    (ε : projModel W₁ ≅ projModel W₂)
+    (heπ : ε.hom ≫ projModelπ W₂ = projModelπ W₁)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂)
+    (g₁ : SpecPoints (projModel W₁) (projModelπ W₁) K)
+    (g₂ : SpecPoints (projModel W₂) (projModelπ W₂) K)
+    (hZ₁ : InZChart W₁ g₁) (hZ₂ : InZChart W₂ g₂)
+    (hsec : g₁.1 ≫ ε.hom = g₂.1) (a : W₂.toAffine.CoordinateRing) :
+    zChartEval W₂ g₂ hZ₂ a =
+      zChartEval W₁ g₁ hZ₁ (pointedIsoCoordEquiv ε heπ hez a) := by
+  have hχmor : Spec.map (pointedIsoAwayHom ε hez ≫
+      CommRingCat.ofHom (zChartHom W₁ g₁ hZ₁)) ≫
+      Proj.awayι (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos = g₂.1 := by
+    rw [Spec.map_comp, Category.assoc, Spec_map_pointedIsoAwayHom_awayι ε hez,
+      ← Category.assoc, Spec_map_zChartHom_awayι, hsec]
+  have hhom := (zChartHom_unique W₂ g₂ hZ₂
+    ((pointedIsoAwayHom ε hez ≫ CommRingCat.ofHom (zChartHom W₁ g₁ hZ₁)).hom)
+    (by rw [CommRingCat.ofHom_hom]; exact hχmor)).symm
+  show zChartHom W₂ g₂ hZ₂ ((chartZRingEquiv W₂).symm a) = _
+  rw [hhom]
+  show zChartHom W₁ g₁ hZ₁ ((pointedIsoAwayHom ε hez).hom ((chartZRingEquiv W₂).symm a)) =
+    zChartHom W₁ g₁ hZ₁ ((chartZRingEquiv W₁).symm (pointedIsoCoordEquiv ε heπ hez a))
+  congr 1
+  have hsec' := pointedIsoCoordEquiv_sections ε heπ hez a
+  simp only [chartZSectionsRingEquiv, RingEquiv.symm_trans_apply, RingEquiv.symm_symm]
+    at hsec'
+  have hkey := congrArg ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+      ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W₁ 2) one_pos).commRingCatIsoToRingEquiv).symm hsec'
+  rw [RingEquiv.symm_apply_apply] at hkey
+  have happ : ∀ z, (pointedIsoAwayHom ε hez).hom z =
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
+        ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₁ 2) one_pos).commRingCatIsoToRingEquiv).symm
+      (pointedIsoΓ ε hez ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
+        ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W₂ 2) one_pos).commRingCatIsoToRingEquiv z)) :=
+    fun _ => rfl
+  exact (happ _).trans hkey.symm
+
+/-- **(ENGINE, base half — Loeffler's overlap uniqueness)** Two elliptic marked `Z`-chart
+data over the same ring, linked by a pointed isomorphism of the models carrying the first
+marking to the second, induce the **same** Tate-atlas algebra map: the T-W7 variable change
+composed with the source's T-E1 normalisation is a normalisation of the target, so T-E1
+uniqueness forces the two Tate normal forms to agree. -/
+theorem tateRingOverAlgLiftOfPoint_eq_of_pointedIso (R : CommRingCat.{u}) [Algebra R A]
+    (W₁ W₂ : WeierstrassCurve A) [W₁.IsElliptic] [W₂.IsElliptic]
+    (ε : projModel W₁ ≅ projModel W₂)
+    (heπ : ε.hom ≫ projModelπ W₂ = projModelπ W₁)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂)
+    (g₁ : SpecPoints (projModel W₁) (projModelπ W₁) A)
+    (g₂ : SpecPoints (projModel W₂) (projModelπ W₂) A)
+    (hZ₁ : InZChart W₁ g₁) (hZ₂ : InZChart W₂ g₂)
+    (hsec : g₁.1 ≫ ε.hom = g₂.1)
+    (hord₁ : NowhereOrderLEThree W₁
+      (zChartEval W₁ g₁ hZ₁ (coordX W₁)) (zChartEval W₁ g₁ hZ₁ (coordY W₁)))
+    (hord₂ : NowhereOrderLEThree W₂
+      (zChartEval W₂ g₂ hZ₂ (coordX W₂)) (zChartEval W₂ g₂ hZ₂ (coordY W₂))) :
+    tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
+      tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
+  obtain ⟨C, hC, hεhom⟩ := pointedIso_exists_variableChange W₁ W₂ ε heπ hez
+  -- the marking coordinates transform by the variable change
+  have hx : zChartEval W₂ g₂ hZ₂ (coordX W₂) =
+      (C.u : A) ^ 2 * zChartEval W₁ g₁ hZ₁ (coordX W₁) + C.r := by
+    have h := zChartEval_pointedIso ε heπ hez g₁ g₂ hZ₁ hZ₂ hsec (coordX W₂)
+    rw [transport_general hC.symm ε (projModelVCIso C W₂) heπ hez (projModelVCIso_π C W₂)
+      (projModelVCIso_zero C W₂) hεhom (coordX W₂), bridge_coordX] at h
+    simp only [map_add, coordRingCongr_algebraMap_mul_coordX, coordRingCongr_algebraMap] at h
+    rw [h]
+    simp only [map_mul, zChartEval_algebraMap, Algebra.algebraMap_self_apply]
+  have hy : zChartEval W₂ g₂ hZ₂ (coordY W₂) =
+      (C.u : A) ^ 3 * zChartEval W₁ g₁ hZ₁ (coordY W₁) +
+        C.s * (C.u : A) ^ 2 * zChartEval W₁ g₁ hZ₁ (coordX W₁) + C.t := by
+    have h := zChartEval_pointedIso ε heπ hez g₁ g₂ hZ₁ hZ₂ hsec (coordY W₂)
+    rw [transport_general hC.symm ε (projModelVCIso C W₂) heπ hez (projModelVCIso_π C W₂)
+      (projModelVCIso_zero C W₂) hεhom (coordY W₂), bridge_coordY] at h
+    simp only [map_add, coordRingCongr_algebraMap_mul_coordY,
+      coordRingCongr_algebraMap_mul_coordX, coordRingCongr_algebraMap] at h
+    rw [h]
+    simp only [map_mul, zChartEval_algebraMap, Algebra.algebraMap_self_apply]
+  -- the composite normalising change and T-E1 uniqueness
+  have hD : (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ * C) •
+      W₂ =
+      (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁) • W₁ := by
+    rw [mul_smul, hC]
+  have hDC₂ : tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ * C =
+      tateNormalVariableChange W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
+    refine tateNormalVariableChange_unique W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ _
+      ⟨?_, ?_, ?_⟩
+    · rw [hD]
+      exact tateNormalVariableChange_isTateNormal W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁
+    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁).r *
+        (C.u : A) ^ 2 + C.r = _
+      rw [tateNormalVariableChange_r, hx]
+      ring
+    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁).t *
+        (C.u : A) ^ 3 + (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁)
+          hord₁).r * C.s * (C.u : A) ^ 2 + C.t = _
+      rw [tateNormalVariableChange_t, tateNormalVariableChange_r, hy]
+      ring
+  have hcurves : (tateNormalVariableChange W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂) • W₂ =
+      (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁) • W₁ := by
+    rw [← hDC₂]
+    exact hD
+  -- the two atlas algebra maps agree on the coordinates
+  apply tateRingOver_algHom_ext
+  · rw [tateRingOverAlgLiftOfPoint_X_zero, tateRingOverAlgLiftOfPoint_X_zero]
+    exact (congrArg WeierstrassCurve.a₁ hcurves).symm
+  · rw [tateRingOverAlgLiftOfPoint_X_one, tateRingOverAlgLiftOfPoint_X_one]
+    exact (congrArg WeierstrassCurve.a₂ hcurves).symm
+
+/-- The affine `Spec`-level form of the engine: the two pointed charts induce the same
+affine map to the Tate atlas. -/
+theorem tateBaseSpecMapOfPoint_eq_of_pointedIso (R : CommRingCat.{u}) [Algebra R A]
+    (W₁ W₂ : WeierstrassCurve A) [W₁.IsElliptic] [W₂.IsElliptic]
+    (ε : projModel W₁ ≅ projModel W₂)
+    (heπ : ε.hom ≫ projModelπ W₂ = projModelπ W₁)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂)
+    (g₁ : SpecPoints (projModel W₁) (projModelπ W₁) A)
+    (g₂ : SpecPoints (projModel W₂) (projModelπ W₂) A)
+    (hZ₁ : InZChart W₁ g₁) (hZ₂ : InZChart W₂ g₂)
+    (hsec : g₁.1 ≫ ε.hom = g₂.1)
+    (hord₁ : NowhereOrderLEThree W₁
+      (zChartEval W₁ g₁ hZ₁ (coordX W₁)) (zChartEval W₁ g₁ hZ₁ (coordY W₁)))
+    (hord₂ : NowhereOrderLEThree W₂
+      (zChartEval W₂ g₂ hZ₂ (coordX W₂)) (zChartEval W₂ g₂ hZ₂ (coordY W₂))) :
+    tateBaseSpecMapOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
+      tateBaseSpecMapOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
+  unfold tateBaseSpecMapOfPoint
+  rw [show tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
+    tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ from
+    tateRingOverAlgLiftOfPoint_eq_of_pointedIso R W₁ W₂ ε heπ hez g₁ g₂ hZ₁ hZ₂ hsec
+      hord₁ hord₂]
+
+end MarkedChartComparison
+
 end ModularCurves
