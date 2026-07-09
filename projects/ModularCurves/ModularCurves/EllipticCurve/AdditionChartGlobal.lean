@@ -491,6 +491,46 @@ lemma pieceAwayι_eq (k : Fin 3) :
         (chartPieceIso W i j).inv ≫ pieceι W i j := by
   rw [pieceAwayι, ← Category.assoc, specBasicOpenIsoAway_hom_ι]
 
+/-- The overlap piece `P := A_k ⊓ B_k'` of two law-2 regularity image pieces. -/
+noncomputable abbrev overlapPiece (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).Opens :=
+  (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) ⊓
+    (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k')
+
+/-- **([C4-HF-ASSEMBLY] L3, the affine identification)** `Spec(Away transRing g) ≅ P`, where
+`g = transAlgHom(lawTwoTriple ij k) · transHom(lawTwoTriple i'j' k')`. Built from `specBasicOpenIsoAway`,
+the preimage computation `transι_preimage_piece_inf` (L2c), and `transι.isoImage` (P ≤ range transι
+by helper A). This is `w`: it makes the overlap piece an affine `Spec`, where every morphism out of it
+is `Spec.map`. -/
+noncomputable def overlapPieceIso (k k' : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away
+        (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k')))) ≅
+      (overlapPiece W i j i' j' k k').toScheme :=
+  specBasicOpenIsoAway (CommRingCat.of (transRing W i j i' j'))
+      (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) ≪≫
+    ((Spec (CommRingCat.of (transRing W i j i' j'))).isoOfEq
+      (transι_preimage_piece_inf W i j i' j' k k').symm) ≪≫
+    Scheme.Hom.isoImage (transι W i j i' j') (transι W i j i' j' ⁻¹ᵁ overlapPiece W i j i' j' k k') ≪≫
+    (pullback (projModelπ W) (projModelπ W)).isoOfEq (by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, inf_eq_right]
+      exact (inf_le_inf ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))
+        ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))).trans
+        (blOpenYImage_inf_le_transι W i j i' j'))
+
+/-- **([C4-HF-ASSEMBLY] L3, w-transι identity)** The affine identification, composed with the piece
+inclusion into `E ×_R E`, is `Spec` of the localization `transRing → S` followed by `transι`. -/
+lemma overlapPieceIso_hom_ι (k k' : Fin 3) :
+    (overlapPieceIso W i j i' j' k k').hom ≫ (overlapPiece W i j i' j' k k').ι =
+      Spec.map (CommRingCat.ofHom (algebraMap (transRing W i j i' j')
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))) ≫ transι W i j i' j' := by
+  rw [overlapPieceIso]
+  simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom_ι, Scheme.isoOfEq_hom_ι_assoc,
+    Scheme.Hom.isoImage_hom_ι]
+  rw [← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
 end Overlap
 
 end WeierstrassCurve.Projective
