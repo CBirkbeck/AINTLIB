@@ -41,6 +41,20 @@ lemma regularityOpen_eq_top_iff (t : Fin 3 → A) :
     regularityOpen t = ⊤ ↔ Ideal.span (Set.range t) = ⊤ :=
   PrimeSpectrum.iSup_basicOpen_eq_top_iff
 
+/-- **(c2 core, joint cover ↔ joint-unit-ideal)** The two regularity opens of triples `t`, `s` cover
+`Spec A` exactly when the six coordinates *jointly* generate the unit ideal. The two-law analogue of
+`regularityOpen_eq_top_iff` — the ⊔ of the two `⨆ basicOpen` families is a single `⨆` over `t ⊕ s`.
+This is what reduces `blOpenZ ⊔ blOpenY = ⊤` (the two Bosma–Lenstra laws cover `E × E`, T-W7.0c·c2)
+to `span (range lawOneTriple ∪ range lawTwoTriple) = ⊤` per chart-product. -/
+lemma regularityOpen_sup_eq_top_iff (t s : Fin 3 → A) :
+    regularityOpen t ⊔ regularityOpen s = ⊤ ↔
+      Ideal.span (Set.range t ∪ Set.range s) = ⊤ := by
+  have h : regularityOpen t ⊔ regularityOpen s = ⨆ x : Fin 3 ⊕ Fin 3,
+      PrimeSpectrum.basicOpen (Sum.elim t s x) := by
+    rw [regularityOpen, regularityOpen, iSup_sum]
+    simp only [Sum.elim_inl, Sum.elim_inr]
+  rw [h, PrimeSpectrum.iSup_basicOpen_eq_top_iff, Set.Sum.elim_range]
+
 /-- **The reason two laws are needed.** If the triple has a common zero — a point of its
 exceptional divisor, which every bidegree-`(2,2)` addition law has (B–L Thm 1) — then its
 regularity open is not the whole chart-product. -/
