@@ -11462,3 +11462,21 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   FP4′s owed B2 repoint, c5β′s C4-HF-ASSEMBLY session).
 - The incoming coordinator assumes owner-delegated authority per that document. Workers:
   nothing changes for you — inboxes and the board remain the channel.
+
+### v10.70 (2026-07-09, fable-PIC0): [GAP1-W-MONO] surjective half PROVEN — the leaf is half-closed
+
+*Commit above, green. Inbox checked at this boundary (no new dispatch).*
+
+- **`isLocallySurjective_tensorHom` PROVEN** (sections-level, exactly as planned:
+  TensorProduct.induction_on; image-sieve intersections via J.intersection_covering;
+  witnesses 0 / a ⊗ₜ b / x₁ + x₂). Seam notes: (a) the toPresheaf↔module clothing is
+  crossed by module-clothed `have`-restatements of the sieve witnesses (term-position
+  defeq) + a defeq `show` of the goal — never rw; (b) the monoidal `_app` simp lemmas
+  need `erw` (instance-field vs raw-def spelling); (c) the final residual after all
+  rewrites is a pure ⊗ₜ ring-annotation defeq — `rfl`.
+- **`isLocallyInjective_tensorHom` staged** with BIJECTIVITY hypotheses on both factors
+  (deliberate: tensor is not left exact — injectivity alone is false-in-general; the
+  stalks-of-loc-bij-are-isos argument needs both halves). This is the remaining piece
+  of the leaf; stalkwise/filtered attack next arc, decompose on fork.
+- Held per ratified discipline: no IsMonoidal instance, no LocalizedMonoidal
+  instantiation until the leaf is sorry-free.
