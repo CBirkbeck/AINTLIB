@@ -586,6 +586,34 @@ theorem projModelVCIso_map {R' : Type u} [CommRing R'] [Algebra R R']
   exact (mk_heq e.symm _).trans
     (heq_of_eq (congrArg _ (map_aeval_vcMvSubst (algebraMap R R') C a)))
 
+/-- The identity variable-change substitution is the identity family `X`. -/
+lemma vcMvSubst_one : vcMvSubst (1 : VariableChange R) = MvPolynomial.X := by
+  funext i
+  fin_cases i <;>
+    simp [vcMvSubst, WeierstrassCurve.VariableChange.one_def, Units.val_one, one_pow, one_smul,
+      zero_smul, add_zero]
+
+/-- `aeval` at the identity variable-change substitution is the identity. -/
+lemma aeval_vcMvSubst_one (p : MvPolynomial (Fin 3) R) :
+    MvPolynomial.aeval (vcMvSubst (1 : VariableChange R)) p = p := by
+  rw [vcMvSubst_one, MvPolynomial.aeval_X_left, AlgHom.id_apply]
+
+/-- **(map_id support, [REQ→A-lane])** The identity variable change induces the identity model
+isomorphism (the `_one` cocycle law, sibling of `projModelVCIso_mul`): `projModelVCIso 1 W` is
+`eqToHom` of `1 • W = W`. -/
+theorem projModelVCIso_one (W : WeierstrassCurve R) :
+    (projModelVCIso (1 : VariableChange R) W).hom = eqToHom (by rw [one_smul]) := by
+  have e : W = (1 : VariableChange R) • W := (one_smul _ W).symm
+  rw [show (projModelVCIso 1 W).hom
+        = Proj.map (vcGradedHom 1 W) (vcGradedHom_irrelevant_le 1 W) from rfl,
+    projMap_transport_heq W e (vcGradedHom 1 W) (vcGradedHom_irrelevant_le 1 W)
+      (GradedRingHom.id (quotientGrading (projIdeal W))) (le_of_eq (by simp))
+      (gradedHom_heq W e.symm _ _ (fun x => by
+        obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+        rw [vcGradedHom, quotientGradingMap_mk]
+        exact (mk_heq e.symm _).trans (heq_of_eq (congrArg _ (aeval_vcMvSubst_one a)))))]
+  rw [Proj.map_id, Category.comp_id]
+
 /-- **Substitution cocycle**: the group product of variable changes composes the substitutions. -/
 lemma vcMvSubst_mul (C C' : VariableChange R) (i : Fin 3) :
     vcMvSubst (C * C') i = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' i) := by
