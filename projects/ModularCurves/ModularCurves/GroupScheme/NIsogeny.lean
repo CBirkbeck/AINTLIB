@@ -643,6 +643,99 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
         (algebraMap R A r)) := hann (hpow ▸ Submodule.mem_top)
     simpa [LinearMap.toSpanSingleton_apply] using h1ann
   · -- the glued ideal's vanishing forces the condition
+    have hIle : ∀ r ∈ (⨅ t : T, (J (pf t)).comap
+        (algebraMap R (Localization.Away (gfun (pf t))))), algebraMap R A r = 0 := by
+      intro r hr
+      have h1 := Ideal.mem_map_of_mem (algebraMap R A) hr
+      rw [hI] at h1
+      exact Ideal.mem_bot.mp h1
+    -- Step 1: each patch ideal dies after inverting the image of its `g` (saturation)
+    have hJA : ∀ t : T, (J (pf t)).map
+        (Localization.awayMap (algebraMap R A) (gfun (pf t))) = ⊥ := by
+      intro t
+      show (Ideal.span _).map _ = ⊥
+      rw [Ideal.map_span, Submodule.span_eq_bot]
+      rintro _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+      set g := gfun (pf t) with hgdef
+      set e := (αfun (pf t)) (Pi.single i 1) j with hedef
+      have he : e ∈ J (pf t) := Ideal.subset_span ⟨⟨i, j⟩, rfl⟩
+      -- clear the denominator of `e`
+      obtain ⟨⟨r₀, s⟩, hr₀⟩ := IsLocalization.surj (Submonoid.powers g) e
+      obtain ⟨k, hk⟩ := s.2
+      -- a power of `g` pushes `r₀` into every patch ideal
+      have hq : ∀ q : T, ∃ kq : ℕ, algebraMap R (Localization.Away (gfun (pf q)))
+          (g ^ kq * r₀) ∈ J (pf q) := by
+        intro q
+        set gq := gfun (pf q) with hgq
+        set S' := Localization.Away (algebraMap R (Localization.Away gq) g) with hS'
+        letI : Algebra (Localization.Away g) S' :=
+          (Localization.awayMap (algebraMap R (Localization.Away gq)) g).toAlgebra
+        haveI : IsScalarTower R (Localization.Away g) S' := by
+          refine IsScalarTower.of_algebraMap_eq' ?_
+          rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R
+            (Localization.Away gq) S']
+          exact (IsLocalization.map_comp _).symm
+        have hagree := locallyFreeRankLocusAux_agree (R := R) (S := S')
+          (αfun (pf t)) (πfun (pf t)) (hπsurj (pf t)) (hexact (pf t))
+          (αfun (pf q)) (πfun (pf q)) (hπsurj (pf q)) (hexact (pf q))
+        have hmem : algebraMap (Localization.Away gq) S'
+            (algebraMap R (Localization.Away gq) r₀)
+            ∈ (J (pf q)).map (algebraMap (Localization.Away gq) S') := by
+          rw [← hagree]
+          have h1 : algebraMap (Localization.Away gq) S'
+              (algebraMap R (Localization.Away gq) r₀)
+              = algebraMap (Localization.Away g) S'
+                (algebraMap R (Localization.Away g) r₀) := by
+            rw [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+          rw [h1, ← hr₀, map_mul]
+          exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ he)
+        obtain ⟨kq, hkq⟩ := locallyFreeRankLocusAux_away_clear _ _ hmem
+        refine ⟨kq, ?_⟩
+        rwa [map_mul, map_pow]
+      choose kq hkq using hq
+      set K' := Finset.univ.sup kq with hK'
+      -- `g^K' * r₀` lies in the glued ideal, hence dies in `A`
+      have hrI : algebraMap R A (g ^ K' * r₀) = 0 := by
+        refine hIle _ ((Submodule.mem_iInf _).mpr fun q => Ideal.mem_comap.mpr ?_)
+        have hsplit : g ^ K' * r₀ = g ^ (K' - kq q) * (g ^ kq q * r₀) := by
+          rw [← mul_assoc, ← pow_add, Nat.sub_add_cancel (Finset.le_sup (Finset.mem_univ q))]
+        rw [hsplit, map_mul]
+        exact Ideal.mul_mem_left _ _ (hkq q)
+      -- transport to `A[1/b]` and cancel the invertible powers of `g`
+      have h0 : Localization.awayMap (algebraMap R A) g
+          (algebraMap R (Localization.Away g) (g ^ K' * r₀)) = 0 := by
+        rw [← RingHom.comp_apply,
+          show (Localization.awayMap (algebraMap R A) g).comp
+              (algebraMap R (Localization.Away g))
+            = (algebraMap A (Localization.Away (algebraMap R A g))).comp (algebraMap R A)
+            from IsLocalization.map_comp _,
+          RingHom.comp_apply, hrI, map_zero]
+      have hexp : algebraMap R (Localization.Away g) (g ^ K' * r₀)
+          = algebraMap R (Localization.Away g) g ^ (K' + k) * e := by
+        have hs' : algebraMap R (Localization.Away g) (g ^ k)
+            = algebraMap R (Localization.Away g) ↑s := by rw [← hk]
+        calc algebraMap R (Localization.Away g) (g ^ K' * r₀)
+            = algebraMap R (Localization.Away g) (g ^ K')
+                * algebraMap R (Localization.Away g) r₀ := map_mul _ _ _
+          _ = algebraMap R (Localization.Away g) (g ^ K')
+                * (e * algebraMap R (Localization.Away g) ↑s) := by rw [← hr₀]
+          _ = algebraMap R (Localization.Away g) (g ^ K')
+                * (e * algebraMap R (Localization.Away g) (g ^ k)) := by rw [hs']
+          _ = algebraMap R (Localization.Away g) g ^ (K' + k) * e := by
+              rw [map_pow, map_pow, pow_add]
+              ring
+      rw [hexp, map_mul, map_pow] at h0
+      have hu : IsUnit (Localization.awayMap (algebraMap R A) g
+          (algebraMap R (Localization.Away g) g)) := by
+        rw [← RingHom.comp_apply,
+          show (Localization.awayMap (algebraMap R A) g).comp
+              (algebraMap R (Localization.Away g))
+            = (algebraMap A (Localization.Away (algebraMap R A g))).comp (algebraMap R A)
+            from IsLocalization.map_comp _,
+          RingHom.comp_apply]
+        exact IsLocalization.map_units _ ⟨algebraMap R A g, Submonoid.mem_powers _⟩
+      rwa [(hu.pow (K' + k)).mul_right_eq_zero] at h0
+    -- Step 2+3: the condition holds over each `A[1/b t]`, and glues over the cover
     sorry
 
 end LocallyFreeRankLocusAux
