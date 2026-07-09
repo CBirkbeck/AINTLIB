@@ -12172,3 +12172,26 @@ localization; the isDefEq walls that dominated the hf-glue do NOT recur here).
 **Still to 0c-i after c3:** [c2] `blOpen_cover` (BLOCKED — the B–L Thm 2 joint-unit-ideal Bezout
 certificate `span(range lawOne ∪ range lawTwo) = ⊤` is NOT formalized; needs the paper's explicit
 cofactors, a transcription sub-ticket) · [c4.5] the GLC wiring FLAG (coordinator). Then `mulModelHom`.
+
+### v10.79 (2026-07-09, c5β): [c3] per-piece cross-law agreement DONE; scope note on the full overlap
+
+*Commit dfba298d0.* The scheme-level heart of `addOn_agree`, per overlap piece, is proven axiom-clean:
+- `chartHomOfTriple_cross_eq` / `chartAwayHomOfTriple_cross_eq` (Glue) — the general (minor-hypothesis)
+  form of the two-laws-glue chart agreement.
+- `pieceMorOfTriple_cross_agree` (Overlap) — two on-curve triples with vanishing 2×2 minors: their k-th
+  piece morphisms agree over `D(t k · s k)`. SAME index k, so NO cross-index crux (simpler than the
+  within-law `pieceMorOfTriple_agree`).
+- `addOnYPieceMor_eq_addOnZPieceMor` — the B–L instantiation (fed `lawOneTriple_mul_lawTwoTriple`).
+
+**SCOPE NOTE (important for whoever finishes c3):** `addOn_agree` is `homOfLE(blOpenZ⊓blOpenY ≤ blOpenZ)
+≫ addOnZ = homOfLE(…≤ blOpenY) ≫ addOnY`. The overlap `blOpenZ ⊓ blOpenY = ⨆_{p,q} blOpenZImage(chart p)
+⊓ blOpenYImage(chart q)` has TWO kinds of pieces:
+- **same chart (p=q):** `blOpenZImage(i,j) ⊓ blOpenYImage(i,j)`, covered by the same-index
+  `D(lawTwo_k·lawOne_k)` pieces — handled by the per-piece agreement above (needs only the σ-lift/
+  Cover.hom_ext wrapper, NO transRing tower — the locus is a single `Away` of `biChartRing`).
+- **cross chart (p≠q):** `blOpenZImage(i,j) ⊓ blOpenYImage(i',j')` — this is cross-chart AND cross-law,
+  so it needs the transRing transition apparatus (like the hf-glue) COMBINED with the minor identity.
+  This is the harder remaining part; the per-piece cross-law foundation feeds it but the overlap
+  geometry is the transRing one, not a single `Away`.
+The same-chart part is a bounded finish; the cross-chart part is a fresh apparatus. Both reuse the
+committed foundations. c2 (Bezout) and c4.5 (flag) unchanged.
