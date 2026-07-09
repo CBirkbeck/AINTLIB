@@ -10653,3 +10653,17 @@ the pointed chart map.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.93-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] normalising-change independence LANDED
+
+Added
+`tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange` and
+`tateBaseSpecMapOfTateNormal_eq_tateBaseSpecMapOfPoint_of_variableChange` in
+`YOneAtlasClassify.lean`. These package T-E1 uniqueness in the form needed on overlaps: any
+variable change that normalises the same pointed chart with the same `(r,t)` produces the same
+Tate-atlas algebra map, hence the same affine map `Spec A -> tateBase R`, as the chosen local
+normalisation.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).

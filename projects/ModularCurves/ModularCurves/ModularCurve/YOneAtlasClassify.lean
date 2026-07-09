@@ -470,6 +470,33 @@ theorem tateBaseSpecMap_eq_tateBaseSpecMapOfPoint
     ((tateNormalVariableChange W x y hxy hord) • W)
     (tateNormalVariableChange_isTateNormal W x y hxy hord) h0 h1
 
+/-- Any variable change that puts the same pointed chart in Tate normal form induces the
+same atlas algebra map as the chosen T-E1 normalisation. -/
+theorem tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange
+    (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (C : WeierstrassCurve.VariableChange A)
+    (hC : (C • W).IsTateNormal ∧ C.r = x ∧ C.t = y) :
+    tateRingOverAlgLiftOfTateNormal R (C • W) hC.1 =
+      tateRingOverAlgLiftOfPoint R W x y hxy hord := by
+  have hCeq := tateNormalVariableChange_unique W x y hxy hord C hC
+  apply tateRingOver_algHom_ext
+  · simp [tateRingOverAlgLiftOfPoint, hCeq]
+  · simp [tateRingOverAlgLiftOfPoint, hCeq]
+
+/-- Any variable change that puts the same pointed chart in Tate normal form induces the
+same affine Tate-atlas map as the chosen T-E1 normalisation. -/
+theorem tateBaseSpecMapOfTateNormal_eq_tateBaseSpecMapOfPoint_of_variableChange
+    (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (C : WeierstrassCurve.VariableChange A)
+    (hC : (C • W).IsTateNormal ∧ C.r = x ∧ C.t = y) :
+    tateBaseSpecMapOfTateNormal R (C • W) hC.1 =
+      tateBaseSpecMapOfPoint R W x y hxy hord := by
+  unfold tateBaseSpecMapOfTateNormal tateBaseSpecMapOfPoint
+  rw [tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange R
+    W x y hxy hord C hC]
+
 /-- The local atlas map classifies the T-E1 normal form of the pointed chart. -/
 theorem tateCurveLocOver_map_tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
     (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
