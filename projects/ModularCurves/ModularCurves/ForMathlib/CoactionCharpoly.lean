@@ -167,4 +167,38 @@ theorem comul_comulMatrix (i j : hopfBasisIndex R A) :
   have hcombined := (hlhs.symm.trans hlaw).trans hrhs2
   exact (congrFun (sum_tmul_injective R A hcombined) i).symm
 
+/-- The matrix-comultiplication identity packaged as a `Coalgebra.Repr` of `Δ(Tᵢⱼ)`. -/
+noncomputable def comulMatrixRepr (i j : hopfBasisIndex R A) :
+    Coalgebra.Repr R (comulMatrix R A i j) (hopfBasisIndex R A) where
+  index := Finset.univ
+  left := fun k => comulMatrix R A i k
+  right := fun k => comulMatrix R A k j
+  eq := (comul_comulMatrix R A i j).symm
+
+/-- **The entrywise antipode inverts the Δ-matrix from the left**: `T.map S * T = 1`. -/
+theorem antipodeMatrix_mul_comulMatrix :
+    (comulMatrix R A).map (HopfAlgebra.antipode R) * comulMatrix R A = 1 := by
+  classical
+  ext i j
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  have h := HopfAlgebra.sum_antipode_mul_eq_algebraMap_counit (comulMatrixRepr R A i j)
+  rw [counit_comulMatrix] at h
+  simpa [Matrix.map_apply, apply_ite (algebraMap R A), comulMatrixRepr] using h
+
+/-- **The entrywise antipode inverts the Δ-matrix from the right**: `T * T.map S = 1`. -/
+theorem comulMatrix_mul_antipodeMatrix :
+    comulMatrix R A * (comulMatrix R A).map (HopfAlgebra.antipode R) = 1 := by
+  classical
+  ext i j
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  have h := HopfAlgebra.sum_mul_antipode_eq_algebraMap_counit (comulMatrixRepr R A i j)
+  rw [counit_comulMatrix] at h
+  simpa [Matrix.map_apply, apply_ite (algebraMap R A), comulMatrixRepr] using h
+
+/-- The Δ-matrix is a unit of the matrix ring, with explicit inverse the entrywise
+antipode. -/
+theorem isUnit_comulMatrix : IsUnit (comulMatrix R A) :=
+  ⟨⟨comulMatrix R A, (comulMatrix R A).map (HopfAlgebra.antipode R),
+    comulMatrix_mul_antipodeMatrix R A, antipodeMatrix_mul_comulMatrix R A⟩, rfl⟩
+
 end ModularCurves
