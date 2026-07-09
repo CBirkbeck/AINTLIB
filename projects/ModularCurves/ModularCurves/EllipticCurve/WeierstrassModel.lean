@@ -1923,6 +1923,34 @@ noncomputable def projModelBaseChangeLift (W : WeierstrassCurve R) :
   Limits.pullback.lift (projModelBaseChange f W) (projModelπ (W.map f))
     (projModelBaseChange_π f W)
 
+/-- **Functoriality of the projective-model base change.** Base change along a composite factors as
+the two base changes: `projModelBaseChange (F.comp G) W = projModelBaseChange F (W.map G) ≫
+projModelBaseChange G W` (note `(W.map G).map F = W.map (F.comp G)` definitionally). This is
+`Proj.map_comp` applied to the graded base-change homomorphisms, whose composite equals
+`baseChangeGradedHom (F.comp G) W` by `MvPolynomial.map_map`. -/
+theorem projModelBaseChange_comp (F G : R →+* R) (W : WeierstrassCurve R) :
+    projModelBaseChange (F.comp G) W
+      = projModelBaseChange F (W.map G) ≫ projModelBaseChange G W := by
+  have bmk : ∀ (φ : R →+* R) (W' : WeierstrassCurve R) (p : MvPolynomial (Fin 3) R),
+      baseChangeGradedHom φ W' (Ideal.Quotient.mk (projIdeal W').toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (W'.map φ)).toIdeal (MvPolynomial.map φ p) :=
+    fun φ W' p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded φ) (projIdeal W')
+      (projIdeal (W'.map φ)) (projIdeal_le_comap φ W') p
+  have hgraded : baseChangeGradedHom (F.comp G) W
+      = (baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W) := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (F.comp G) W (Ideal.Quotient.mk _ a)
+      = baseChangeGradedHom F (W.map G) (baseChangeGradedHom G W (Ideal.Quotient.mk _ a))
+    rw [bmk, bmk, bmk]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_map G F a).symm
+  have key := Proj.map_comp (baseChangeGradedHom G W) (baseChangeGradedHom F (W.map G))
+    (baseChangeGradedHom_irrelevant_le G W) (baseChangeGradedHom_irrelevant_le F (W.map G))
+  refine Eq.trans ?_ key
+  show Proj.map (baseChangeGradedHom (F.comp G) W) (baseChangeGradedHom_irrelevant_le (F.comp G) W)
+    = Proj.map ((baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W)) _
+  congr 1
+
 section TensorComparison
 
 open scoped TensorProduct

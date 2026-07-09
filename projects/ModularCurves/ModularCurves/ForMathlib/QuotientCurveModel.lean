@@ -96,6 +96,73 @@ theorem cartesianIso_hom_π (g : R →+* R) (W : WeierstrassCurve R)
   hcart.isoIsPullback_hom_snd _ _ (isPullback_projModelBaseChange_hom g W)
 
 open scoped Pointwise in
+/-- Base-change of the section at infinity along a ring **automorphism** `g` — the automorphism
+form of `projModelZero_baseChange` (T-A5b zero-leg) via `RingHom.toAlgebra g`. -/
+theorem projModelZero_baseChange_hom (g : R →+* R) (W : WeierstrassCurve R) :
+    projModelZero (W.map g) ≫ projModelBaseChange g W =
+      Spec.map (CommRingCat.ofHom g) ≫ projModelZero W := by
+  letI : Algebra R R := g.toAlgebra
+  have h := projModelZero_baseChange (R := R) (R' := R) W
+  have he : (algebraMap R R : R →+* R) = g := g.algebraMap_toAlgebra
+  rw [he] at h
+  exact h
+
+/-- **([a5-ii], the pointed iso is pointed)** If the cartesian action `act` is also
+*zero-equivariant* (`projModelZero W ≫ act = Spec (g) ≫ projModelZero W`, the geometric
+`IsCurveAction.zero_equivariant`), then the induced iso `projModel W ≅ projModel (W.map g)` carries
+the section at infinity of `W` to that of `W.map g`. Proof: pullback uniqueness against
+`isPullback_projModelBaseChange_hom`, checking both legs — the `projModelBaseChange` leg via
+`projModelZero_baseChange_hom` + zero-equivariance, the `π` leg via `cartesianIso_hom_π` +
+`projModelZero_projModelπ`. -/
+theorem cartesianIso_hom_zero (g : R →+* R) (W : WeierstrassCurve R)
+    {act : projModel W ⟶ projModel W}
+    (hcart : IsPullback act (projModelπ W) (projModelπ W) (Spec.map (CommRingCat.ofHom g)))
+    (hzero : projModelZero W ≫ act = Spec.map (CommRingCat.ofHom g) ≫ projModelZero W) :
+    projModelZero W ≫ (hcart.isoIsPullback _ _ (isPullback_projModelBaseChange_hom g W)).hom
+      = projModelZero (W.map g) := by
+  apply (isPullback_projModelBaseChange_hom g W).hom_ext
+  · rw [Category.assoc, hcart.isoIsPullback_hom_fst _ _ (isPullback_projModelBaseChange_hom g W),
+      hzero, projModelZero_baseChange_hom]
+  · rw [Category.assoc, cartesianIso_hom_π, projModelZero_projModelπ, projModelZero_projModelπ]
+
+/-! ### Cocycle-ness infrastructure — base-change automorphism forms -/
+
+/-- Automorphism form of `projModelVCIso_map` (base-change naturality of the change-of-variables
+iso), via `RingHom.toAlgebra g`. Backbone of the cocycle identity: it commutes a `projModelVCIso`
+past a `projModelBaseChange`. -/
+theorem projModelVCIso_map_hom (g : R →+* R) (C : VariableChange R) (W : WeierstrassCurve R) :
+    projModelBaseChange g (C • W) ≫ (projModelVCIso C W).hom =
+      eqToHom (by rw [map_variableChange]) ≫
+        (projModelVCIso (C.map g) (W.map g)).hom ≫ projModelBaseChange g W := by
+  letI : Algebra R R := g.toAlgebra
+  have h := projModelVCIso_map (R' := R) C W
+  have he : (algebraMap R R : R →+* R) = g := g.algebraMap_toAlgebra
+  rw [he] at h
+  exact h
+
+/-- Base change of `projModel` along a hom whose `Spec` map is an isomorphism is itself an
+isomorphism — the `fst` leg of the pullback square `isPullback_projModelBaseChange_hom` over the
+iso base `Spec (g)`. For a group action `g = MulSemiringAction.toRingHom G R γ` this always applies
+(`isIso_specMap_toRingHom`), making every `projModelBaseChange (toRingHom γ)` cancellable. -/
+theorem isIso_projModelBaseChange (g : R →+* R) [IsIso (Spec.map (CommRingCat.ofHom g))]
+    (W : WeierstrassCurve R) : IsIso (projModelBaseChange g W) := by
+  have hP := isPullback_projModelBaseChange_hom g W
+  rw [← hP.isoPullback_hom_fst]
+  infer_instance
+
+/-- `Spec` of the ring automorphism `MulSemiringAction.toRingHom G R γ` is an isomorphism (its
+inverse is `Spec` of `toRingHom G R γ⁻¹`), since `γ` is a group element. -/
+instance isIso_specMap_toRingHom {G : Type u} [Group G] [MulSemiringAction G R] (g : G) :
+    IsIso (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g))) := by
+  have h1 : (MulSemiringAction.toRingHom G R g).comp (MulSemiringAction.toRingHom G R g⁻¹)
+      = RingHom.id R := by ext a; simp [MulSemiringAction.toRingHom, ← mul_smul]
+  have h2 : (MulSemiringAction.toRingHom G R g⁻¹).comp (MulSemiringAction.toRingHom G R g)
+      = RingHom.id R := by ext a; simp [MulSemiringAction.toRingHom, ← mul_smul]
+  refine ⟨Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g⁻¹)), ?_, ?_⟩ <;>
+    rw [← Spec.map_comp, ← CommRingCat.ofHom_comp] <;>
+    simp [h1, h2]
+
+open scoped Pointwise in
 /-- **([a5-ii], per-`g` extraction)** A *pointed* iso `projModel W₀ ≅ projModel (g•W₀)` yields the
 `VariableChange` `C_g` with `C_g • (g•W₀) = W₀` (`pointedIso_exists_variableChange`, T-W7.1b). -/
 theorem exists_vc_of_pointedIso {G : Type u} [Group G] [MulSemiringAction G R]
@@ -108,5 +175,25 @@ theorem exists_vc_of_pointedIso {G : Type u} [Group G] [MulSemiringAction G R]
   obtain ⟨C, hC, _⟩ := pointedIso_exists_variableChange W₀
     (W₀.map (MulSemiringAction.toRingHom G R g)) e heπ hez
   exact ⟨C, hC⟩
+
+open scoped Pointwise in
+/-- **([a5-ii], per-`g` extraction from the geometric action — the assembled form)** Given the
+geometric `G`-action on `projModel W₀` (a cartesian, `π`- and zero-equivariant square over
+`Spec (g)`, i.e. the data of `IsCurveAction` at `g`), extract the `VariableChange` `C_g` with
+`C_g • (g•W₀) = W₀`. Feeds the cocycle `C : G → VariableChange R` that `exists_invariant_descent`
+consumes. Assembles `cartesianIso_hom_π` (π-leg) and `cartesianIso_hom_zero` (zero-leg) into the
+pointed iso, then `pointedIso_exists_variableChange` (T-W7.1b). -/
+theorem exists_vc_of_curveAction {G : Type u} [Group G] [MulSemiringAction G R]
+    (W₀ : WeierstrassCurve R) (g : G)
+    {act : projModel W₀ ⟶ projModel W₀}
+    (hcart : IsPullback act (projModelπ W₀) (projModelπ W₀)
+      (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g))))
+    (hzero : projModelZero W₀ ≫ act =
+      Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g)) ≫ projModelZero W₀) :
+    ∃ C : VariableChange R, C • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀ :=
+  exists_vc_of_pointedIso W₀ g
+    (hcart.isoIsPullback _ _ (isPullback_projModelBaseChange_hom _ W₀))
+    (cartesianIso_hom_π _ W₀ hcart)
+    (cartesianIso_hom_zero _ W₀ hcart hzero)
 
 end ModularCurves

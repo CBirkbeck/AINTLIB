@@ -131,6 +131,16 @@ universal curve's Weierstrass model (`pointedIso_exists_variableChange`, T-W7.1b
 def IsVCocycle (C : G → VariableChange A) : Prop :=
   ∀ g h : G, C (g * h) = C g * g • C h
 
+/-- Base change of a Weierstrass curve along the ring hom of a product `g * h` factors as the two
+single base changes (functoriality of `map` + multiplicativity of `MulSemiringAction.toRingHom`):
+`W.map (toRingHom (g*h)) = (W.map (toRingHom h)).map (toRingHom g)`, i.e. `(gh)•W = g•(h•W)`. -/
+theorem map_toRingHom_mul (W : WeierstrassCurve A) (g h : G) :
+    W.map (MulSemiringAction.toRingHom G A (g * h))
+      = (W.map (MulSemiringAction.toRingHom G A h)).map (MulSemiringAction.toRingHom G A g) := by
+  rw [map_map]
+  congr 1
+  ext a; simp [MulSemiringAction.toRingHom, mul_smul]
+
 /-- **([a5-iii], step 1 — the `u`-part trivializes)** For a free action with `Aᴳ` local, the
 `u`-component of a `VariableChange` cocycle is a coboundary: there is a unit `d : Aˣ` with
 `g • d = (C g).u · d` for all `g`.
@@ -349,6 +359,18 @@ theorem vcSMul_eq_map (g : G) (C : VariableChange A) :
   apply VariableChange.ext
   · apply Units.ext; rfl
   all_goals rfl
+
+/-- **([a5-iii], the cocycle candidate is action-compatible)** If `C` is action-compatible
+(`C g • (g•W₀) = W₀`), then the cocycle candidate `C g * g • C h` sends `(gh)•W₀` to `W₀` as well —
+the *cardinality* half of the cocycle identity `C (gh) = C g * g • C h`. Both `C (gh)` and
+`C g * g • C h` carry `(gh)•W₀` to `W₀`; faithfulness of the model action
+(`projModelVCIso_injective`) upgrades this to the identity itself (the geometric half). Chains
+`mul_smul`, `map_toRingHom_mul`, `map_variableChange` and the two action-compatibilities. -/
+theorem vc_mul_smul_eq (W₀ : WeierstrassCurve A) {C : G → VariableChange A}
+    (hact : ∀ g, C g • (W₀.map (MulSemiringAction.toRingHom G A g)) = W₀) (g h : G) :
+    (C g * g • C h) • (W₀.map (MulSemiringAction.toRingHom G A (g * h))) = W₀ := by
+  rw [mul_smul, map_toRingHom_mul, vcSMul_smul_def, vcSMul_eq_map, map_variableChange, hact h,
+    hact g]
 
 /-- **([a5-iv] algebraic core — the descended model)** Let `G` act freely on `A` with `Aᴳ` local,
 and let `W₀ : WeierstrassCurve A` carry a `VariableChange`-cocycle `G`-action, i.e. `C : G →
