@@ -10592,3 +10592,14 @@ of the two global coefficients.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both declarations lists
 only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.88-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] structure-map compatibility LANDED
+
+Added `tateBaseSpecMap_tateStructMap`, `tateBaseSpecMapOfCoeffs_tateStructMap`, and
+`tateBaseMapOfGlobalCoeffs_tateStructMap` in the dedicated atlas file. These record that the
+affine and global coefficient-classifying maps land over `Spec R`, which is the next packaging
+piece needed before turning the coefficient map into the top component of an `Ell/R` morphism.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for all three declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
