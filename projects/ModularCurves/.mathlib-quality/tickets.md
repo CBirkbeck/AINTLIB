@@ -10641,3 +10641,15 @@ coefficient-uniqueness handle needed by B2-iii/iv.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.92-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] pointed chart uniqueness LANDED
+
+Added `tateRingOverAlgLiftOfPoint_X_zero`, `tateRingOverAlgLiftOfPoint_X_one`, and
+`tateBaseSpecMap_eq_tateBaseSpecMapOfPoint` in `YOneAtlasClassify.lean`. This gives the
+pointed T-E1 chart the same coefficient-extensional `Spec A -> tateBase R` interface as the
+Tate-normal chart: any affine atlas map with the normalised `(a_1, a_2)` coefficients is exactly
+the pointed chart map.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
