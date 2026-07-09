@@ -13267,3 +13267,16 @@ Spec.map(χ-leg) ≫ chartι) — plus the public chartHomEquiv_eq_of_specMap in
 3. [C6-e] assembly mirroring negModelHom_specPoints: case split (InZChart both / diagonal / infinity),
    coordinates via d2+d4+d5, the mathlib formula bridge (addX_of_Z_ne_zero family, dblAddXYZ_self,
    Projective↔Affine Point equivalence) to Point.add.
+
+### v10.95d (2026-07-09, fable-FP): [GR-F-tid] PROVEN — self-transition is the identity; GlueData ring layer nearly complete
+
+- `GrassmannianTransition.lean` (sorry-free, axiom-clean): `matrix_self = 1` ·
+  `det_self = 1` · `ringHom_self = algebraMap` · **`ringHomAway_self = RingHom.id`** —
+  the `Scheme.GlueData` `t_id` condition at ring level (validates the `V(ι,ι) ≅ U ι`
+  design: the self-overlap denominator is 1).
+- **GlueData ring-layer scoreboard**: t-maps (`ringHomAway`) ✓ · t_id ✓ · inverse-pair ✓
+  · REMAINING: **[GR-F3]** the composite-matrix identity on double localizations (the
+  t'-leg `Away (det ι' ι'') →+* D(ι; ι', ι'')` — recipe pinned in the artifact:
+  two applications of `ringHom_comp_column`) → then the Spec-level assembly
+  ([GR-D] open-immersion instances + `pullbackSpecIso` plumbing + `pullback.lift`/
+  `hom_ext` per the pinned architecture) → [GR-G] T-points.

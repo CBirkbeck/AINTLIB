@@ -281,6 +281,41 @@ theorem ringHomAway_comp_ringHomAway :
       congrFun (column_notMem ι hj) i]
     rfl
 
+/-- The self-transition matrix is the identity: every ι-column at an ι-index is a delta
+column. -/
+lemma matrix_self : matrix (R := R) ι ι = 1 := by
+  funext i₁ i₂
+  rw [matrix_apply, congrFun (column_mem ι i₂) i₁, Matrix.one_apply, Pi.single_apply]
+
+lemma det_self : det (R := R) ι ι = 1 := by
+  have hd : det (R := R) ι ι = (matrix (R := R) ι ι).det := rfl
+  rw [hd, matrix_self, Matrix.det_one]
+
+/-- **[GR-F-tid]** The self-transition ring map is the localization embedding. -/
+lemma ringHom_self :
+    ringHom (R := R) ι ι
+      = algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι)) := by
+  refine MvPolynomial.ringHom_ext (fun a => eval₂Hom_C _ _ a) (fun p => ?_)
+  obtain ⟨⟨j, hj⟩, i⟩ := p
+  rw [ringHom, eval₂Hom_X']
+  have h1 : matrixAway (R := R) ι ι = 1 := by
+    have hm : matrixAway (R := R) ι ι
+        = (matrix (R := R) ι ι).map
+            (algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι))) := rfl
+    rw [hm, matrix_self]
+    exact Matrix.map_one _ (map_zero _) (map_one _)
+  rw [h1, inv_one, Matrix.one_mulVec, congrFun (column_notMem ι hj) i]
+
+/-- **[GR-F-tid]** The self-transition on the overlap ring is the identity — the
+`Scheme.GlueData` `t_id` condition at ring level. -/
+theorem ringHomAway_self :
+    ringHomAway (R := R) ι ι
+      = RingHom.id (Localization.Away (det (R := R) ι ι)) := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (det (R := R) ι ι)) ?_
+  refine RingHom.ext fun q => ?_
+  rw [RingHom.comp_apply, RingHom.comp_apply, ringHomAway_algebraMap, ringHom_self,
+    RingHom.id_apply]
+
 end Transition
 
 end Module.Grassmannian
