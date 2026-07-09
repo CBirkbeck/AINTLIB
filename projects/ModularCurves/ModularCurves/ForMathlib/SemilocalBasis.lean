@@ -4,7 +4,9 @@ import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.TensorProduct.Quotient
 import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.RingTheory.TensorProduct.Finite
 import Mathlib.GroupTheory.CosetCover
 
 /-!
@@ -325,5 +327,101 @@ private theorem exists_fibre_independent {s : ℕ} (n : Fin s → Ideal S)
         rw [smul_smul, show b * c = 1 from (mul_comm c b) ▸ hb, one_smul]
       rw [hbc, hx]
       exact Submodule.smul_mem _ b (Submodule.neg_mem _ hw)
+
+omit [IsLocalRing R] [Infinite (ResidueField R)] [Nontrivial S] [Algebra R S] [Module R M]
+  [IsScalarTower R S M] [Module.Free S M] [Module.Finite S M] in
+/-- An element evaluates to zero in the fibre at `n` iff it lies in `n•M`: transport the
+kernel of `M → M ⧸ n•M` along `quotTensorEquivQuotSMul`. -/
+private theorem fibreEval_eq_zero_iff (n : Ideal S) (x : M) :
+    fibreEval (M := M) n x = 0 ↔ x ∈ n • (⊤ : Submodule S M) := by
+  have hev : quotTensorEquivQuotSMul M n (fibreEval (M := M) n x)
+      = Submodule.Quotient.mk x := by
+    rw [fibreEval_apply, show (1 : S ⧸ n) = Ideal.Quotient.mk n 1 from (map_one _).symm,
+      quotTensorEquivQuotSMul_mk_tmul, one_smul]
+  rw [← Submodule.Quotient.mk_eq_zero (n • (⊤ : Submodule S M)) (x := x), ← hev,
+    map_eq_zero_iff _ (quotTensorEquivQuotSMul M n).injective]
+
+/-- **Selecting a basis from a generating submodule over a semi-local ring**
+(Stacks 03C1, tag `algebra-lemma-semi-local-module-basis-in-submodule`): `R` local with
+infinite residue field, `S` an `R`-algebra whose maximal ideals are exactly the finitely
+many `n j`, each containing `m·S`, and `M` finite free over `S` of rank `r`. If the
+`R`-submodule `N` generates `M` over `S`, then `N` contains an `S`-basis of `M`. -/
+theorem Submodule.exists_basis_mem_of_span_eq_top {s : ℕ} (n : Fin s → Ideal S)
+    (hnmax : ∀ j, (n j).IsMaximal)
+    (hnall : ∀ P : Ideal S, P.IsMaximal → ∃ j, n j = P)
+    (hmn : ∀ j, (IsLocalRing.maximalIdeal R).map (algebraMap R S) ≤ n j)
+    {r : ℕ} (hr : Module.finrank S M = r)
+    (N : Submodule R M) (hN : Submodule.span S (N : Set M) = ⊤) :
+    ∃ y : Fin r → M, (∀ i, y i ∈ N) ∧
+      ∃ b : Module.Basis (Fin r) S M, ∀ i, b i = y i := by
+  classical
+  obtain ⟨y, hyN, hyind⟩ :=
+    exists_fibre_independent n hnmax hmn N hN hr r le_rfl
+  -- the selected family spans each fibre
+  have hfibrespan : ∀ j, Submodule.span (S ⧸ n j)
+      (Set.range (fun i => fibreEval (M := M) (n j) (y i))) = ⊤ := by
+    intro j
+    haveI : Nontrivial (S ⧸ n j) := Ideal.Quotient.nontrivial_iff.mpr (hnmax j).ne_top
+    letI : Field (S ⧸ n j) := Ideal.Quotient.field (n j)
+    haveI : FiniteDimensional (S ⧸ n j) ((S ⧸ n j) ⊗[S] M) :=
+      Module.Finite.base_change S (S ⧸ n j) M
+    refine (hyind j).span_eq_top_of_card_eq_finrank' ?_
+    rw [Fintype.card_fin, finrank_fibre (M := M) (n j) hr]
+  -- hence P := span y is full modulo each nⱼ•M
+  set P : Submodule S M := Submodule.span S (Set.range y) with hP
+  have hPfull : ∀ j, P ⊔ (n j • (⊤ : Submodule S M)) = ⊤ := by
+    intro j
+    rw [eq_top_iff]
+    rintro x -
+    have hx : fibreEval (M := M) (n j) x ∈ Submodule.span (S ⧸ n j)
+        (Set.range (fun i => fibreEval (M := M) (n j) (y i))) := by
+      rw [hfibrespan j]; exact Submodule.mem_top
+    rw [Submodule.mem_span_range_iff_exists_fun] at hx
+    obtain ⟨c, hc⟩ := hx
+    choose cS hcS using fun i => Ideal.Quotient.mk_surjective (I := n j) (c i)
+    have hker : fibreEval (M := M) (n j) (x - ∑ i, cS i • y i) = 0 := by
+      rw [map_sub, map_sum]
+      have hterm : ∀ i, fibreEval (M := M) (n j) (cS i • y i)
+          = c i • fibreEval (M := M) (n j) (y i) := by
+        intro i
+        rw [LinearMap.map_smul,
+          ← algebraMap_smul (S ⧸ n j) (cS i) (fibreEval (M := M) (n j) (y i)),
+          Ideal.Quotient.algebraMap_eq, hcS i]
+      rw [Finset.sum_congr rfl fun i _ => hterm i, hc, sub_self]
+    rw [fibreEval_eq_zero_iff] at hker
+    have hsum : (∑ i, cS i • y i) ∈ P :=
+      Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _
+        (Submodule.subset_span ⟨i, rfl⟩)
+    have : x = (∑ i, cS i • y i) + (x - ∑ i, cS i • y i) := by abel
+    rw [this]
+    exact Submodule.add_mem _ (Submodule.mem_sup_left hsum) (Submodule.mem_sup_right hker)
+  -- family Nakayama on M ⧸ P forces P = ⊤
+  have hPtop : P = ⊤ := by
+    haveI : Module.Finite S (M ⧸ P) :=
+      Module.Finite.of_surjective P.mkQ (Submodule.Quotient.mk_surjective P)
+    have hquot : ∀ j, (⊤ : Submodule S (M ⧸ P)) ≤ n j • (⊤ : Submodule S (M ⧸ P)) := by
+      intro j
+      have hmap := congrArg (Submodule.map P.mkQ) (hPfull j)
+      rw [Submodule.map_sup, Submodule.map_smul'', Submodule.map_top,
+        Submodule.range_mkQ, show Submodule.map P.mkQ P = ⊥ by
+          rw [eq_bot_iff]
+          rintro - ⟨p, hp, rfl⟩
+          rw [Submodule.mem_bot, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+          exact hp] at hmap
+      rw [bot_sup_eq] at hmap
+      exact le_of_eq hmap.symm
+    have hbot := Submodule.eq_bot_of_forall_le_smul_of_prod_le_jacobson
+      (⊤ : Submodule S (M ⧸ P)) Module.Finite.fg_top n hquot
+      (by
+        rw [Ideal.jacobson]
+        refine le_sInf fun J hJ => ?_
+        obtain ⟨j, rfl⟩ := hnall J hJ.2
+        exact le_trans Ideal.prod_le_inf (Finset.inf_le (Finset.mem_univ j)))
+    rw [eq_top_iff]
+    intro x _
+    have : P.mkQ x ∈ (⊥ : Submodule S (M ⧸ P)) := hbot ▸ Submodule.mem_top
+    rwa [Submodule.mem_bot, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at this
+  exact ⟨y, hyN, basisOfSpanRangeEqTop hr (hP ▸ hPtop),
+    fun i => basisOfSpanRangeEqTop_apply hr (hP ▸ hPtop) i⟩
 
 end Semilocal
