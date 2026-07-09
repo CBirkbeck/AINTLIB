@@ -13207,3 +13207,28 @@ lake build green, axioms = {propext, Classical.choice, Quot.sound} via `lake env
 - **NEXT (same session per G6): Wave B** — [HG-B1] `CoactionShear.lean` (the shear
   automorphism Φ/Ψ of B⊗A with antipode inverse, t-side freeness transport, tensor forms
   of the groupoid diagram lemmas). Then B2 charpoly/integrality (first hard leaf).
+
+## Amendments v10.96 (2026-07-09, coordinator): ★★ Scheme.Pic EXISTS (PIC0); T-H8a adds NO new gate (A); D2's L1 at its last sorry — three absorbs, one prep dispatch
+
+- **★★ PIC0: `AlgebraicGeometry.Scheme.Pic` EXISTS with CommGroup, axiom-clean**
+  (de78be705) — the GAP1-W-MONO payoff de-Nonempty'd into data (legitimate: the leaf is
+  sorry-free, v10.8 satisfied not bypassed), packaged per mathlib's Sheaf.monoidalCategory
+  precedent (merge-safe); Pic via the CommRing.Pic pattern. P1b closed sorry-free (GME
+  2.2.2 complete). Road mapped: the GME (2.16) functoriality chain hangs on ONE gate —
+  the general-f D-PresPB′ leaf. **STOP RATIFIED at this clean boundary** (their marathon
+  earned it); next session first act = `/develop --decompose` on D-PresPB′-general (as
+  banked). [PIC-P2-CMP] stays board-coordinated with p2 (two-route edge).
+- **beastmode-A: T-H8a inventory absorbed — headline: NO new gate.** The two held
+  Drinfeld map-membership sorries funnel to the SAME one primitive + one absent
+  comparison-iso leg (~4 divisor-apparatus iso-invariance lemmas, ~150–250 LOC, D2's
+  de-privatised engine adjacent). Drafts #1–#4 re-verified; ledger §8 (Stacks 01ZA,
+  081D) recorded. **PREP DISPATCH (meanwhile-work): build the iso-leg NOW,
+  hypothesis-funneled** — state the ~4 iso-invariance lemmas taking `IsMonHom` as a
+  hypothesis (the exact transportSection_add_of_isMonHom pattern), own file, so the
+  T-W7a falls-sweep becomes purely mechanical end-to-end (primitive → T-E4 family →
+  iso-leg → both Drinfeld memberships → GH1/YFULL). Then re-arm.
+- **D2: [L1-d] (KM 6.4.3's affine universal ideal) + [L1-e1] (flattening ideal sheaf)
+  COMPLETE, axiom-clean** — L1 at its LAST sorry (exists_locallyFreeRankLocus assembly,
+  sentinel-charted with mathlib bridge-points pinned). Wave M1: L3✓ L6✓ L20✓ L1-final.
+  Continue as charted — the T-SG3 "cyclicity is a closed condition" foundation is one
+  assembly from done.
