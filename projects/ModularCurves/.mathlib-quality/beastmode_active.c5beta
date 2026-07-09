@@ -1,1 +1,1 @@
-FOCUS: CHARTER-C5B c2 [C2-BEZOUT] — joint cover↔joint-unit-ideal DONE; next field-case cover (span=⊤ via no-common-zero + mathlib non-vanishing)
+FOCUS: CHARTER-C5B c2 [C2-BEZOUT] COMPLETE (blOpenZ⊔blOpenY=⊤); next c4.5 GLC-wire (opens+cover direct; morphisms need base-change)

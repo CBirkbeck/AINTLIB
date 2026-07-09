@@ -12640,3 +12640,25 @@ the universal ring is the c4.5 mechanism) → mulModelHom → 0c-i → 0c-ii (bo
   (exists_tatePoint's ∀-part) + the ONE completion PR. **NEW-ATLAS-2** (fresh account)
   inherits the charter; full handover in inbox/NEW-ATLAS-2.md (+ owner relay). NEW-ATLAS
   reclaims at a boundary on return per the standard rule.
+
+### v10.90b (2026-07-09, c5β): ★★ [c2] [C2-BEZOUT] COMPLETE — blOpenZ ⊔ blOpenY = ⊤, NO Bezout certificate
+
+The coordinator's "one genuine transcription gap ... blocked on B–L Thm 2's Bezout witnesses" is
+discharged — and it needed **no certificate**. `blOpenZ_sup_blOpenY_eq_top` (Global): the two
+Bosma–Lenstra regularity opens cover `E ×_R E`, over any base with `Δ` a unit. Path (all axiom-clean,
+committed):
+- `addXYZ_ne_zero_or_dblAddXYZ_ne_zero` (Field): the point-level non-vanishing — over any field,
+  nonsingular P,Q ⟹ addXYZ P Q ≠ 0 (P≉Q, `nonsingular_add`) OR dblAddXYZ P Q ≠ 0 (P≈Q,
+  `u²•dblXYZ Q`). Falls out of the existing `equation_dblAddXYZ` machinery.
+- `span_lawOneTriple_union_lawTwoTriple_eq_top` (ChartDomain): per-chart joint-unit-ideal, via
+  maximal-ideal evaluation + the field-case (tautological points map to nonzero, coord i/j = 1).
+- `regularityOpen_sup_eq_top_iff` (Cover) + `blOpenZPieceSup…`/`blOpenZImage_sup_blOpenYImage…`
+  (Global): transport span=⊤ through `chartPieceIso` to the chart images.
+- `blOpenZ_sup_blOpenY_eq_top`: the 4 charts cover E×E (`chartY_sup_chartZ_eq_top` + frame distrib)
+  and each is covered by the two laws.
+
+So [C2-BEZOUT] is NOT a Bezout transcription at all — the P1 CAS cofactor files are unneeded for the
+cover (they remain the source-of-record for the §5 polynomials). **c3 ✓ and c2 ✓ — both halves of the
+Bosma–Lenstra two-law geometry (agree + cover) are DONE over [IsDomain][IsJacobsonRing].** Next:
+`mulModelHom` (glue addOnZ+addOnY on the two-open cover, over the universal/domain setting) →
+c4.5 base-change transport to general R (the classifying-map naturality) → 0c-i → 0c-ii → 0h → T-W7a.
