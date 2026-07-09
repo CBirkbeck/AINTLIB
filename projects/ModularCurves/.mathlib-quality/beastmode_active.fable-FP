@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] wave 3 — tPrimeRing DONE (rfl tmul-spec). FINAL BLOCK: Spec-level t-prime conjugation + Scheme.GlueData structure + t_fac/cocycle + [GR-G].
+FOCUS: [NISOG-GRASS] wave 3 FINAL BLOCK — t_fac PROVEN. LAST hard condition: cocycle (hom_ext + ring layer), then the GlueData structure + glued scheme.

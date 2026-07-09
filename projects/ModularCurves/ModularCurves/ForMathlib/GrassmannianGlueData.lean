@@ -20,7 +20,7 @@ universe u
 
 namespace Module.Grassmannian
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
 variable (R : Type u) [CommRing R] {k n : ℕ}
 
@@ -153,6 +153,80 @@ lemma tPrimeRing_tmul (x : Localization.Away (Transition.det (R := R) ι' ι''))
     (y : Localization.Away (Transition.det (R := R) ι' ι)) :
     tPrimeRing R ι ι' ι'' (x ⊗ₜ y)
       = tPrimeLegRight R ι ι' ι'' x * tPrimeLegLeft R ι ι' ι'' y := rfl
+
+/-- The left t'-leg is the transition followed by the left inclusion — the ring-level
+`t_fac` identity. -/
+lemma tPrimeLegLeft_eq :
+    tPrimeLegLeft R ι ι' ι''
+      = (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'').comp
+        (Transition.ringHomAway (R := R) ι ι') := by
+  refine IsLocalization.ringHom_ext
+    (Submonoid.powers (Transition.det (R := R) ι' ι)) ?_
+  refine RingHom.ext fun q => ?_
+  rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+    Transition.ringHomAway_algebraMap]
+  exact IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_left R ι ι' ι'') q
+
+/-- **[GR-F t']** The t'-morphism of the chart atlas: conjugate `Spec` of `tPrimeRing`
+by the `pullbackSpecIso` presentations. -/
+noncomputable def tPrimeScheme :
+    pullback (overlapι R ι ι') (overlapι R ι ι'')
+      ⟶ pullback (overlapι R ι' ι'') (overlapι R ι' ι) :=
+  (pullbackSpecIso (ChartRing R ι) _ _).hom ≫
+    Spec.map (CommRingCat.ofHom (tPrimeRing R ι ι' ι'')) ≫
+      (pullbackSpecIso (ChartRing R ι') _ _).inv
+
+/-- The `t_fac` law of the atlas glue data. -/
+lemma tPrimeScheme_fac :
+    tPrimeScheme R ι ι' ι'' ≫ pullback.snd (overlapι R ι' ι'') (overlapι R ι' ι)
+      = pullback.fst (overlapι R ι ι') (overlapι R ι ι'') ≫
+          overlapTransition R ι ι' := by
+  show (pullbackSpecIso (ChartRing R ι)
+        (Localization.Away (Transition.det (R := R) ι ι'))
+        (Localization.Away (Transition.det (R := R) ι ι''))).hom ≫
+      Spec.map (CommRingCat.ofHom (tPrimeRing R ι ι' ι'')) ≫
+        (pullbackSpecIso (ChartRing R ι')
+          (Localization.Away (Transition.det (R := R) ι' ι''))
+          (Localization.Away (Transition.det (R := R) ι' ι))).inv ≫
+          pullback.snd
+            (Spec.map (CommRingCat.ofHom (algebraMap (ChartRing R ι')
+              (Localization.Away (Transition.det (R := R) ι' ι'')))))
+            (Spec.map (CommRingCat.ofHom (algebraMap (ChartRing R ι')
+              (Localization.Away (Transition.det (R := R) ι' ι)))))
+    = pullback.fst
+        (Spec.map (CommRingCat.ofHom (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')))))
+        (Spec.map (CommRingCat.ofHom (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι''))))) ≫
+        Spec.map (CommRingCat.ofHom (Transition.ringHomAway (R := R) ι ι'))
+  rw [pullbackSpecIso_inv_snd, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  rw [show (tPrimeRing R ι ι' ι'').comp
+        ((Algebra.TensorProduct.includeRight :
+          Localization.Away (Transition.det (R := R) ι' ι) →ₐ[ChartRing R ι']
+            doubleRing R ι' ι'' ι) :
+          Localization.Away (Transition.det (R := R) ι' ι) →+* doubleRing R ι' ι'' ι)
+      = tPrimeLegLeft R ι ι' ι'' from by
+    refine RingHom.ext fun y => ?_
+    rw [RingHom.comp_apply]
+    rw [show (((Algebra.TensorProduct.includeRight :
+        Localization.Away (Transition.det (R := R) ι' ι) →ₐ[ChartRing R ι']
+          doubleRing R ι' ι'' ι) :
+        Localization.Away (Transition.det (R := R) ι' ι) →+* doubleRing R ι' ι'' ι) y :
+        doubleRing R ι' ι'' ι)
+        = (1 : Localization.Away (Transition.det (R := R) ι' ι'')) ⊗ₜ y from rfl]
+    rw [tPrimeRing_tmul, map_one, one_mul]]
+  rw [tPrimeLegLeft_eq]
+  have hsplit : (CommRingCat.ofHom
+      ((Algebra.TensorProduct.includeLeftRingHom :
+        Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'').comp
+        (Transition.ringHomAway (R := R) ι ι')) :
+        CommRingCat.of (Localization.Away (Transition.det (R := R) ι' ι)) ⟶
+          CommRingCat.of (doubleRing R ι ι' ι''))
+      = CommRingCat.ofHom (Transition.ringHomAway (R := R) ι ι') ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'') := rfl
+  rw [hsplit, Spec.map_comp, pullbackSpecIso_hom_fst_assoc]
 
 end TPrime
 

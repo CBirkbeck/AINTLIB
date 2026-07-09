@@ -13448,3 +13448,18 @@ _factors_iff nonvanishing transfer or the same-point-different-chart dictionary 
 Remaining: write mulModelHom_specPoints_atlas (over uWLU, all tools above), then the GLC fill via
 e1/e3/e4/e4a transport + the P,Q-input coordinate identification (d4b at the lift-point's fst/snd
 through the immersion equations).
+
+### v10.95i (2026-07-10, fable-FP): ★ tPrimeScheme + t_fac PROVEN — one condition from the glue
+
+- `GrassmannianGlueData.lean` (sorry-free, axiom-clean): `tPrimeLegLeft_eq` (the
+  ring-level t_fac: `legLeft = includeLeft ∘ ringHomAway`, by `ringHom_ext` +
+  `lift_eq`) · **`tPrimeScheme`** (the t'-morphism: `pullbackSpecIso`-conjugated
+  `Spec tPrimeRing`) · **`tPrimeScheme_fac`** (the GlueData `t_fac` law — proof via
+  `show`-at-raw-Spec + `pullbackSpecIso_inv_snd`/`hom_fst_assoc` + the rfl-have
+  arrow-split trick; the composite-through-includeRight collapses by `tPrimeRing_tmul`).
+- Pin notes: `ofHom_comp` over-fires into pullback indices (localization algebraMap
+  unifies as `.comp` reducibly) — use fully-ascribed `rfl`-haves at the arrow level;
+  AlgHom coercions in mathlib's `pullbackSpecIso_inv_snd` are the generic
+  `RingHomClass` coe (match by ascription, not `.toRingHom`).
+- REMAINING: the `cocycle` condition (pullback.hom_ext + the ring layer — last hard
+  condition) → the `Scheme.GlueData` structure → glued scheme → [GR-G] T-points.
