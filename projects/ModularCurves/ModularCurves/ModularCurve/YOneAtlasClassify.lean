@@ -2952,4 +2952,273 @@ end MarkedChartData
 
 end FibreGeometry
 
+section FibreEnrichment
+
+/-! ### The fibre working record and the order bridge ([T-A6b] + [T-B6′] trails) -/
+
+/-- `eqToHom` transport of the structure morphism along a geometric-record equality. -/
+theorem eqToGeom_π' {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom S} (h : G₁ = G₂) :
+    G₁.π = eqToHom (congrArg EllipticCurveGeom.E h) ≫ G₂.π := by
+  subst h; simp
+
+/-- `eqToHom` transport of the zero section along a geometric-record equality. -/
+theorem eqToGeom_zero' {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom S} (h : G₁ = G₂) :
+    G₁.zero = G₂.zero ≫ eqToHom (congrArg EllipticCurveGeom.E h).symm := by
+  subst h; simp
+
+/-- Affine points over equal curves, additively. -/
+noncomputable def affinePointCongr {k : Type u} [Field k] [DecidableEq k]
+    {V₁ V₂ : WeierstrassCurve k} (h : V₁ = V₂) :
+    V₁.toAffine.Point ≃+ V₂.toAffine.Point := h ▸ AddEquiv.refl _
+
+theorem affinePointCongr_some {k : Type u} [Field k] [DecidableEq k]
+    {V₁ V₂ : WeierstrassCurve k} (h : V₁ = V₂) (x y : k)
+    (hns : V₁.toAffine.Nonsingular x y) :
+    affinePointCongr h (WeierstrassCurve.Affine.Point.some x y hns) =
+      WeierstrassCurve.Affine.Point.some x y (h ▸ hns) := by subst h; rfl
+
+/-- Chart evaluation only depends on the point. -/
+theorem zChartEval_congr {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    {K : Type u} [CommRing K] [Algebra A K]
+    {g g' : SpecPoints (projModel W) (projModelπ W) K} (h : g = g')
+    (hZ : InZChart W g) (hZ' : InZChart W g') (a : W.toAffine.CoordinateRing) :
+    zChartEval W g hZ a = zChartEval W g' hZ' a := by subst h; rfl
+
+/-- The chart-solution coordinates are the chart-ring homomorphism at the chart
+coordinates (`coord_val`, over any ring). -/
+theorem chartSolution_val {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    {K : Type u} [CommRing K] [Algebra A K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g)
+    (j : {j : Fin 3 // j ≠ 2}) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 j =
+      zChartHom W g hZ (chartCoordEquiv W 2
+        (Ideal.Quotient.mk _ (MvPolynomial.X j))) := rfl
+
+/-- The chart-solution `x`-coordinate is the `coordX`-evaluation. -/
+theorem chartSolution_zero_eq_eval {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    {K : Type u} [CommRing K] [Algebra A K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨0, by decide⟩ =
+      zChartEval W g hZ (coordX W) := by
+  rw [chartSolution_val, zChartEval_coordX]
+  exact DFunLike.congr_arg (zChartHom W g hZ)
+    (chartCoordEquiv_mk_X W 2 ⟨0, by decide⟩)
+
+/-- The chart-solution `y`-coordinate is the `coordY`-evaluation. -/
+theorem chartSolution_one_eq_eval {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    {K : Type u} [CommRing K] [Algebra A K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨1, by decide⟩ =
+      zChartEval W g hZ (coordY W) := by
+  rw [chartSolution_val, zChartEval_coordY]
+  exact DFunLike.congr_arg (zChartHom W g hZ)
+    (chartCoordEquiv_mk_X W 2 ⟨1, by decide⟩)
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  (k : Type u) [CommRing k] [Algebra ↑Γ(Y.base, D.U.1) k]
+
+instance : (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).IsElliptic :=
+  inferInstanceAs ((D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).IsElliptic)
+
+/-- The geometric record of the fibre model. -/
+noncomputable def fibreGeom : EllipticCurveGeom (Spec (CommRingCat.of k)) where
+  E := projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+  π := projModelπ _
+  zero := projModelZero _
+  zero_π := projModelZero_projModelπ _
+  smooth := projModel_smooth _
+  proper := projModelπ_isProper _
+  localModel := projModel_locallyWeierstrass _
+
+/-- **[T-A6b]** The fibre working record, through `abelEnrichment_exists`. -/
+noncomputable def fibreCurve : EllipticCurve (Spec (CommRingCat.of k)) :=
+  (EllipticCurve.abelEnrichment_exists (D.fibreGeom k)).choose
+
+/-- **Opaque interface** for the fibre record: its geometry is the fibre model. -/
+theorem fibreCurve_geom : (D.fibreCurve k).toEllipticCurveGeom = D.fibreGeom k :=
+  (EllipticCurve.abelEnrichment_exists (D.fibreGeom k)).choose_spec
+
+theorem fibreCurve_E_eq : (D.fibreCurve k).E =
+    projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) :=
+  congrArg EllipticCurveGeom.E (D.fibreCurve_geom k)
+
+theorem fibreCurve_π_eq : (D.fibreCurve k).π = eqToHom (D.fibreCurve_E_eq k) ≫
+    projModelπ (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) :=
+  eqToGeom_π' (D.fibreCurve_geom k)
+
+theorem fibreCurve_zero_eq : (D.fibreCurve k).zero =
+    projModelZero (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) ≫
+      eqToHom (D.fibreCurve_E_eq k).symm :=
+  eqToGeom_zero' (D.fibreCurve_geom k)
+
+/-- The pointed comparison from the curve fibre onto the fibre record's total space. -/
+noncomputable def fibreCurveIso :
+    (Y.curve.baseChange (D.geomPt (D.specPt k))).E ≅ (D.fibreCurve k).E :=
+  D.fibreChartIso k ≪≫ eqToIso (D.fibreCurve_E_eq k).symm
+
+theorem fibreCurveIso_π : (D.fibreCurveIso k).hom ≫ (D.fibreCurve k).π =
+    (Y.curve.baseChange (D.geomPt (D.specPt k))).π := by
+  rw [fibreCurveIso, Iso.trans_hom, eqToIso.hom, D.fibreCurve_π_eq k]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  exact pullbackChartIso_hom_π D.W (D.fibreTop_isPullback k)
+
+theorem fibreCurveIso_zero :
+    (Y.curve.baseChange (D.geomPt (D.specPt k))).zero ≫ (D.fibreCurveIso k).hom =
+      (D.fibreCurve k).zero := by
+  rw [fibreCurveIso, Iso.trans_hom, eqToIso.hom, D.fibreCurve_zero_eq k, ← Category.assoc]
+  exact congrArg (· ≫ eqToHom (D.fibreCurve_E_eq k).symm) (D.fibre_zero_comp k)
+
+/-- **(B2-ii fibre bridge, [T-A6b] + [T-B6′])** A nowhere-small-order section satisfies the
+T-E1 order hypothesis in every marked chart: a dying small multiple of the chart coordinates
+at a geometric point would transport, through the fibre record and the geometric-fibre group
+comparison, to a dying small multiple of the pulled section. -/
+theorem pt_hord (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    NowhereOrderLEThree D.W
+      (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W))
+      (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) := by
+  classical
+  refine nowhereOrderLEThree_of_forall_geom D.W _ _
+    (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) ?_
+  intro k _ _ _ _ hns a ha0 ha3 hcontra
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := inferInstance
+  -- the transported section and its image point of the fibre model
+  set s₁ : (D.fibreCurve k).Section :=
+    sectionMapIso _ (D.fibreCurve k) (D.fibreCurveIso k) (D.fibreCurveIso_π k)
+      (D.fibreSection k P) with hs₁
+  have hgeom : (𝟙 (Spec (CommRingCat.of k))) = EllipticCurve.geomPoint k k := by
+    rw [EllipticCurve.geomPoint, Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id]
+  set sk : (D.fibreCurve k).Point (EllipticCurve.geomPoint k k) :=
+    (D.fibreCurve k).pointCongr hgeom s₁ with hsk
+  -- its model point
+  set gfin : SpecPoints (projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))
+      (projModelπ (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) k :=
+    EllipticCurve.pointSpecPointsEquiv (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+      (D.fibreCurve k) (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) k sk with hgfin
+  have hgfin1 : gfin.1 = (D.fibreSection k P).1 ≫ (D.fibreChartIso k).hom := by
+    show (sk.1 ≫ eqToHom (D.fibreCurve_E_eq k)) = _
+    rw [hsk, EllipticCurve.pointCongr_coe, hs₁]
+    show ((D.fibreSection k P).1 ≫ (D.fibreCurveIso k).hom) ≫ _ = _
+    rw [fibreCurveIso, Iso.trans_hom, eqToIso.hom]
+    simp only [Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+  -- the model point composed to the chart model is the chart point at the geometric point
+  have hcomp : gfin.1 ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
+      D.specPt k ≫ (D.pt P).1 := by
+    rw [hgfin1, Category.assoc]
+    exact D.fibreSection_comp_bc k P
+  -- membership in the Z-chart and the coordinate evaluations
+  have hψcomp : (algebraMap ↑Γ(Y.base, D.U.1) k).comp
+      (algebraMap ↑Γ(Y.base, D.U.1) ↑Γ(Y.base, D.U.1)) = algebraMap ↑Γ(Y.base, D.U.1) k := by
+    rw [Algebra.algebraMap_self, RingHom.comp_id]
+  have hZfin : InZChart (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) gfin := by
+    refine inZChart_of_comp_baseChange D.W gfin
+      (Spec.map (CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+        (zChartHom D.W (D.pt P) (D.pt_inZChart P hP))))) ?_
+    rw [show CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+        (zChartHom D.W (D.pt P) (D.pt_inZChart P hP))) =
+        CommRingCat.ofHom (zChartHom D.W (D.pt P) (D.pt_inZChart P hP)) ≫
+          CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D.U.1) k) from
+      CommRingCat.ofHom_comp _ _]
+    rw [Spec.map_comp, Category.assoc, Spec_map_zChartHom_awayι, hcomp]
+  have hbcpt : specPointBaseChange D.W gfin =
+      specPointComp D.W (D.pt P) (algebraMap ↑Γ(Y.base, D.U.1) k) hψcomp := by
+    refine Subtype.ext ?_
+    show gfin.1 ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W = _
+    rw [hcomp]
+    rfl
+  have hevalX : zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) gfin hZfin
+      (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+      algebraMap ↑Γ(Y.base, D.U.1) k
+        (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) := by
+    rw [← zChartEval_specPointBaseChange_coordX D.W gfin hZfin,
+      zChartEval_congr D.W hbcpt (inZChart_specPointBaseChange D.W gfin hZfin)
+        (inZChart_specPointComp D.W (D.pt P) (D.pt_inZChart P hP) _ hψcomp),
+      zChartEval_specPointComp]
+  have hevalY : zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) gfin hZfin
+      (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+      algebraMap ↑Γ(Y.base, D.U.1) k
+        (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) := by
+    rw [← zChartEval_specPointBaseChange_coordY D.W gfin hZfin,
+      zChartEval_congr D.W hbcpt (inZChart_specPointBaseChange D.W gfin hZfin)
+        (inZChart_specPointComp D.W (D.pt P) (D.pt_inZChart P hP) _ hψcomp),
+      zChartEval_specPointComp]
+  -- the base-changed curve over `k` is the mapped curve
+  have hWk : (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).baseChange k =
+      D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k) := by
+    show (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).map (algebraMap k k) = _
+    rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
+  have hns2 : ((D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).baseChange k).toAffine.Nonsingular
+      (algebraMap ↑Γ(Y.base, D.U.1) k
+        (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)))
+      (algebraMap ↑Γ(Y.base, D.U.1) k
+        (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W))) := hWk.symm ▸ hns
+  -- the image of the transported point is the marked affine point
+  have hval : EllipticCurve.geomFibrePointAddEquiv
+      (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibreCurve k)
+      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) k sk =
+      WeierstrassCurve.Affine.Point.some _ _ hns2 := by
+    rw [EllipticCurve.geomFibrePointAddEquiv_apply]
+    exact projModelPointsEquiv_some _ k gfin hZfin _ _ hns2
+      (hevalX.symm.trans (chartSolution_zero_eq_eval _ gfin hZfin).symm)
+      (hevalY.symm.trans (chartSolution_one_eq_eval _ gfin hZfin).symm)
+  -- transport the contradiction hypothesis backwards through the additive chain
+  have hcontra2 : (a : ℤ) • (WeierstrassCurve.Affine.Point.some _ _ hns2) = 0 :=
+    (congrArg ((a : ℤ) • ·) (affinePointCongr_some hWk.symm _ _ hns).symm).trans
+      ((map_zsmul (affinePointCongr hWk.symm) (a : ℤ) _).symm.trans
+        ((congrArg (affinePointCongr hWk.symm) hcontra).trans
+          (map_zero (affinePointCongr hWk.symm))))
+  have hsk0 : (a : ℤ) • sk = 0 := by
+    refine (EllipticCurve.geomFibrePointAddEquiv
+      (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibreCurve k)
+      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) k).injective ?_
+    refine (map_zsmul _ (a : ℤ) sk).trans (Eq.trans ?_ (map_zero _).symm)
+    exact (congrArg ((a : ℤ) • ·) hval).trans hcontra2
+  have hs₁0 : (a : ℤ) • s₁ = 0 := by
+    refine ((D.fibreCurve k).pointCongr hgeom).injective ?_
+    refine (map_zsmul _ (a : ℤ) s₁).trans (Eq.trans ?_ (map_zero _).symm)
+    rw [← hsk]
+    exact hsk0
+  have hfs0 : (a : ℤ) • D.fibreSection k P = 0 := by
+    refine sectionMapIso_injective (Y.curve.baseChange (D.geomPt (D.specPt k)))
+      (D.fibreCurve k) (D.fibreCurveIso k) (D.fibreCurveIso_π k) ?_
+    have hzs := map_zsmul (sectionMapIsoHom (Y.curve.baseChange (D.geomPt (D.specPt k)))
+      (D.fibreCurve k) (D.fibreCurveIso k) (D.fibreCurveIso_π k) (D.fibreCurveIso_zero k))
+      (a : ℤ) (D.fibreSection k P)
+    have hz0 := map_zero (sectionMapIsoHom (Y.curve.baseChange (D.geomPt (D.specPt k)))
+      (D.fibreCurve k) (D.fibreCurveIso k) (D.fibreCurveIso_π k) (D.fibreCurveIso_zero k))
+    exact hzs.trans (hs₁0.trans hz0.symm)
+  have happ2 : EllipticCurve.Point.baseChangeEquiv Y.curve (D.geomPt (D.specPt k)) (𝟙 _)
+      (D.fibreSection k P) = Y.curve.pointCongr (Category.id_comp _).symm
+      (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P) := by
+    rw [fibreSection]
+    exact AddEquiv.apply_symm_apply _ _
+  have hpc0 : (a : ℤ) • Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))).symm
+      (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P) = 0 :=
+    ((congrArg ((a : ℤ) • ·) happ2).symm.trans
+      ((map_zsmul (EllipticCurve.Point.baseChangeEquiv Y.curve
+        (D.geomPt (D.specPt k)) (𝟙 _)) (a : ℤ) (D.fibreSection k P)).symm.trans
+        ((congrArg (EllipticCurve.Point.baseChangeEquiv Y.curve
+          (D.geomPt (D.specPt k)) (𝟙 _)) hfs0).trans
+          (map_zero (EllipticCurve.Point.baseChangeEquiv Y.curve
+            (D.geomPt (D.specPt k)) (𝟙 _))))))
+  have hpull0 : (a : ℤ) • EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P = 0 := by
+    have h2 := (map_zsmul (Y.curve.pointCongr
+      (Category.id_comp (D.geomPt (D.specPt k)))) (a : ℤ) _).symm.trans
+      ((congrArg (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k)))) hpc0).trans
+        (map_zero (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))))))
+    have h3 : Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k)))
+        (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))).symm
+          (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P)) =
+        EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P := by
+      refine Subtype.ext ?_
+      rw [EllipticCurve.pointCongr_coe, EllipticCurve.pointCongr_coe]
+    rw [← h3]
+    exact h2
+  exact hP k (D.geomPt (D.specPt k)) a ha0 ha3 hpull0
+
+end MarkedChartData
+
+end FibreEnrichment
+
 end ModularCurves
