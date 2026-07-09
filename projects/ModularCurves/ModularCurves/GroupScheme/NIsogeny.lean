@@ -185,21 +185,23 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
   refine Iff.trans (hZ h) ?_
   rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
     ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
-  -- REMAINING (coherence): the goal is now an ideal equality of the two base-changed divisors'
-  -- comaps ↔ `IsDivisorGenerator N D t (asSection E t P)`.  Two identities close it (each ~an
-  -- aux lemma, cf. the proven twin `exists_fullLevelLocus`'s `fullLevelLocusAux_P1/P2`):
-  --   (I1) `(orderDivisor (E.baseChange π_B) (asSection taut) N).baseChange h`.ideal, via
-  --        `Section.orderDivisor_baseChange` (base `E.baseChange π_B`, along `h`) +
-  --        `divisorTautPoint_restrict` (taut pulled along `h` = P), matched to
-  --        `(orderDivisor (E.baseChange t) (asSection E t P) N).ideal` across the double-base-change
-  --        iso (`baseChange_baseChange_ideal` supplies the `pullbackLeftPullbackSndIso` comap).
-  --   (I2) `(D.baseChange π_B).baseChange h`.ideal = `(D.baseChange t).ideal.comap iso`, directly by
-  --        `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` : `h ≫ subschemeι = P.1`,
-  --        `P.1 ≫ E.π = t`).
-  -- Then `IsDivisorGenerator = HasExactOrder ∧ (I1.ideal = I2.ideal)`, and the iff is
-  -- `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
-  -- Needs LSP goal-inspection to align the pullback-iso comaps (the value-level engine is the
-  -- model's `exactOrderLocusAux_ker_comap_eq`, Incidence.lean).
+  -- REMAINING (coherence) — PRECISELY SCOPED via LSP 2026-07-09.  After
+  --   `rw [← baseChange_ideal, ← baseChange_ideal, Section.orderDivisor_baseChange]` the goal is
+  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut))) N).ideal
+  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t P)`,
+  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange h`
+  --   versus one over `E.baseChange t` — the two total spaces are iso (not equal) via
+  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY engine:
+  --     • D side: `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` + `P.1 ≫ E.π = t`).
+  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` → `Finset.prod_congr`
+  --       → per-factor `exactOrderLocusAux_ker_comap_eq` with the sections matched by
+  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `fullLevelLocusAux_P1/P2` pattern.
+  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
+  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985 +snd,
+  --   `exactOrderLocusAux_val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
+  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH: expose the
+  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.  A
+  --   cross-file API change worth flagging to the coordinator; not an inline close.
   sorry
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
