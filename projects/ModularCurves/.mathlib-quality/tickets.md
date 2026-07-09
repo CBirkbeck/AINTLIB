@@ -11186,3 +11186,36 @@ per the ratified sequence. Survey findings and the verdict:*
   or thinly wrap the `IsLocalization` registration for `PresheafOfModules.sheafification`
   at its W; (iii) build [GAP1-W-MONO] (v10.24: decompose the loc-injective half if it
   forks). Routes (a)/(c-post-bump) remain fallbacks on the record.
+
+### v10.65 (2026-07-09, NEW-GH): [GHC2] PROVED (⊥-bridge) + [GH-DESC-GAP] CONFIRMED — STREAM-GH zero-gate frontier EXHAUSTED
+
+*Per the v10.61 directive ("continue — GHC2 then GHB6 modulo the gap-check"). Two commits
+on `Moduli/GammaHRepresentability.lean` (my stream file only): 95f277ffd (GHC2), 221618810
+(GHB6 gap verdict). p0 reclaims from tip 221618810 at a boundary.*
+
+- **[GHC2] `gammaHNaive_relativelyRepresentable_bot` PROVED** (95f277ffd) — the held
+  `gammaHNaive_relativelyRepresentable`'s full conclusion at `H = ⊥`, the ONE `H` where it
+  holds (dovetails with GHC4 refuting all `H ≠ ⊥`; together they fully characterise the held
+  statement's truth). Minted generic `ModuliProblem.relativelyRepresentable_of_iso`
+  (transport `RelativelyRepresentable` across a functor iso — reuse `(Z,f)`, post-compose the
+  classifying bijections with `Iso.app` components, naturality by `NatTrans.naturality_apply
+  e.inv`); applied to `gammaHNaive_bot`'s iso + GHA4. Own term gate-free; étale conjunct
+  inherits GHA3's [DS4/T-C1] via GHA4.
+- **[GH-DESC-GAP] CONFIRMED — the gap is REAL** (221618810; verdict in GHB6's docstring). The
+  *abstract* `isFinite_etale_of_comp_of_finite_etale_surjective` (descend the SECOND factor
+  `f₀` of `π ≫ f₀` along the surjective finite-étale source-cover `π`) is **absent from the
+  pin**: `IsFinite.of_comp`/`Etale.of_comp` + `HasOfPostcompProperty @IsFinite @IsSeparated`/
+  `@Etale @Etale` cancel the FIRST factor; `DescendsAlong _ (@Surjective⊓@Flat⊓@QuasiCompact)`
+  is base-change descent, instantiated only for UC/UO/UI/iso/OpenImmersion/Surjective (not
+  finite/étale); no `HasOfPrecompProperty`, no fppf source-descent. **Recommendation: do NOT
+  discharge GHB6 abstractly** (= a from-scratch `ForMathlib/FiniteEtaleDescent.lean`, out of
+  scope per v10.24). The Y(N) pipeline's intended route is the PRIMARY chart-local one in
+  GHB4/GHB7 (`Aᴳ ⊆ A` projective/flat summand), which never invokes this abstract lemma.
+- **★ STREAM-GH ZERO-GATE FRONTIER EXHAUSTED.** All NOW-lane leaves are done or gap-parked:
+  first wave (GHB1/GHB3/GHA2/GHA4/GH2/GHC4) + GHC2 landed; GHB6 = confirmed gap. Everything
+  remaining waits on an external milestone: GHA3/GHC-étale ⛩[DS4/T-C1] (CHARTER-P2); GHB4/5/7
+  ⛩[A711-FP]/[A711-BC] (STREAM-FP/InvariantTorsor); GHB1's naturality gate GH1 ⛩[T-E4a];
+  GHC1/GHC3/GHC5 wait on the GHB7 assembly; GHC6 ⛩[T-E5-engine]. **A free hand here should
+  await a gate flip (P2 weilPairing, FP's A711, or FP4's engine) or take a different stream;
+  no zero-gate GH work remains.** p0 on return picks up the FIRST gated leaf whose gate has
+  since flipped (check the board).
