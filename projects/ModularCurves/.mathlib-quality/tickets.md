@@ -13179,3 +13179,31 @@ layer done, 5 ι-leaves + D-Idem, all axiom-clean) · Pic coherence layer (assoc
 ★★ `Scheme.Pic` + CommGroup (P2 headline) · LSP re-validated live (fleet memory updated) ·
 2 registered residuals (general-f Props), 2 registered follow-ups ([PIC-P2-CMP] duality-edge-flagged,
 [PIC-P2-FUNC]). All pushed through de78be705.
+
+### v10.98 (2026-07-09, NEW-HOPF): ★ [CHARTER-HOPF] M2 — WAVE A COMPLETE; all four mathlib-gap leaves green + axiom-clean
+
+*Charter milestone M2. The route-independent algebra gaps of the Stacks-39.23 plan are
+closed: [HG-A1] Amitsur equalizer, [HG-A2] ff descent of Module.Finite/FinitePresentation
+(03C4), [HG-A3] ∞-residue flat local extension (03C3), [HG-A4] semi-local basis selection
+(03C1) — `Submodule.exists_basis_mem_of_span_eq_top`, `SemilocalBasis.lean`, single-target
+lake build green, axioms = {propext, Classical.choice, Quot.sound} via `lake env lean`.*
+
+- **[HG-A4] proof shape (departures from Stacks, both simplifications)**: (i) NO CRT /
+  product-of-fields — per-maximal fibres `(S⧸nⱼ)⊗[S]M` + a finite-family Nakayama
+  (`eq_bot_of_forall_le_smul_of_prod_le_jacobson`, product trick `∏nⱼ ≤ jacobson ⊥`);
+  (ii) the general-position induction is FIELD-INSTANCE-FREE: `LinearIndependent.finCons'`
+  (ring version) + `Ideal.Quotient.exists_inv` replace `fin_cons` [DivisionRing], so no
+  `letI Field (S⧸n)` ever meets an instance-argument position. Independence⟹basis via
+  Orzech (`basisOfSpanRangeEqTop`).
+- **Lean-ops findings (fleet-relevant, v10.24-grade)**: (a) `Subspace`/DivisionRing search
+  over a RAW quotient `R ⧸ maximalIdeal R` = 200k-heartbeat whnf storm; stating over
+  `IsLocalRing.ResidueField R` (curated `fast_instance%` Field) is the cure — avoidance
+  lemma restated there, matching [HG-A3]'s `Infinite (ResidueField _)` output exactly.
+  (b) a `haveI : Field (R⧸m)` SHADOW-diamonds against signature-elaborated CommRing-path
+  Module instances (`Ideal.Quotient.semiring` vs `DivisionRing.toSemiring` refusal) —
+  never haveI a competing structure mid-proof. (c) `lean_verify`'s sorryAx on a
+  just-edited region can be a stale LSP snapshot — `lake env lean` #print axioms is the
+  ground truth (this session's scare was clean).
+- **NEXT (same session per G6): Wave B** — [HG-B1] `CoactionShear.lean` (the shear
+  automorphism Φ/Ψ of B⊗A with antipode inverse, t-side freeness transport, tensor forms
+  of the groupoid diagram lemmas). Then B2 charpoly/integrality (first hard leaf).
