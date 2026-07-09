@@ -718,3 +718,118 @@ theorem free_simulSchemeAction (P Q : ModuliProblem R) {G : Type u} [Group G] [F
 end ModuliProblem
 
 end ModularCurves
+
+/-! ### [a5-W5a] The quotient identification under a `⊤`-atlas (generic `SchemeAction` layer) -/
+
+namespace AlgebraicGeometry.SchemeAction
+variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
+
+/-- Transport of the fixed subalgebra along a `G`-equivariant ring equivalence. -/
+private def fixedPointsCongr {A B : Type u} [CommRing A] [CommRing B]
+    [MulSemiringAction G A] [MulSemiringAction G B]
+    (e : A ≃+* B) (he : ∀ (g : G) (a : A), e (g • a) = g • e a) :
+    FixedPoints.subalgebra ℤ A G ≃+* FixedPoints.subalgebra ℤ B G where
+  toFun a := ⟨e a.1, fun g => by rw [← he g a.1, a.2 g]⟩
+  invFun b := ⟨e.symm b.1, fun g => e.injective (by
+    rw [he g (e.symm b.1), e.apply_symm_apply]; exact b.2 g)⟩
+  left_inv a := Subtype.ext (e.symm_apply_apply a.1)
+  right_inv b := Subtype.ext (e.apply_symm_apply b.1)
+  map_mul' a b := Subtype.ext (map_mul e a.1 b.1)
+  map_add' a b := Subtype.ext (map_add e a.1 b.1)
+
+/-- The restriction map along `W ≤ U` between stable opens is `G`-equivariant for the
+section-ring actions (`appLE` naturality). -/
+private theorem gamma_res_smul {U W : X.Opens} (hU : σ.IsStableOpen U)
+    (hW : σ.IsStableOpen W) (hWU : W ≤ U) (g : G) (s : ↑Γ(X, U)) :
+    letI := σ.gammaMulSemiringAction hU
+    letI := σ.gammaMulSemiringAction hW
+    (X.presheaf.map (homOfLE hWU).op).hom (g • s)
+      = g • (X.presheaf.map (homOfLE hWU).op).hom s := by
+  letI := σ.gammaMulSemiringAction hU
+  letI := σ.gammaMulSemiringAction hW
+  have hcomp : (σ.hom g).appLE U U (hU.le_preimage g) ≫ X.presheaf.map (homOfLE hWU).op
+      = X.presheaf.map (homOfLE hWU).op ≫ (σ.hom g).appLE W W (hW.le_preimage g) := by
+    rw [Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
+  show (X.presheaf.map (homOfLE hWU).op).hom
+      (((σ.hom g).appLE U U (hU.le_preimage g)).hom s)
+    = ((σ.hom g).appLE W W (hW.le_preimage g)).hom ((X.presheaf.map (homOfLE hWU).op).hom s)
+  exact congrArg (fun f : Γ(X, U) ⟶ Γ(X, W) => f.hom s) hcomp
+
+/-- **([a5-W5a], the quotient identification)** Under a `⊤`-atlas (`hVtop`), the scheme quotient
+is `Spec` of the global invariants, compatibly with the quotient projection. -/
+theorem exists_quotientIsoSpec_top [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤) (x₀ : X) :
+    letI := σ.gammaMulSemiringAction (ModularCurves.RouteA.isStableOpen_top σ)
+    ∃ qiso : σ.quotient V hVs hVa ≅
+        Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G)),
+      σ.quotientπ V hVs hVa hVmem ≫ qiso.hom
+        = X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
+  letI := σ.gammaMulSemiringAction (ModularCurves.RouteA.isStableOpen_top σ)
+  letI := σ.gammaMulSemiringAction (hVs x₀)
+  have hle : V x₀ ≤ ⊤ := le_top
+  -- (1) the `G`-invariant global morphism descends through the quotient
+  have hFinv : ∀ g : G, σ.hom g ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ
+      = X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := fun g => by
+    rw [← Category.assoc, ModularCurves.RouteA.hom_isoSpec_toRingHom σ g, Category.assoc,
+      show Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g))
+          = specSMul g from rfl,
+      specSMul_invariantsπ]
+  obtain ⟨q, hq⟩ := σ.exists_quotientπ_lift V hVs hVa hVmem
+    (X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ) hFinv
+  -- (2) the restriction `Γ(X,⊤) ⟶ Γ(X, V x₀)` is a `G`-equivariant ring isomorphism
+  haveI : IsIso (homOfLE hle) := ⟨eqToHom (hVtop x₀).symm, rfl, rfl⟩
+  let eρ : ↑Γ(X, ⊤) ≃+* ↑Γ(X, V x₀) :=
+    (asIso (X.presheaf.map (homOfLE hle).op)).commRingCatIsoToRingEquiv
+  have heρ : ∀ (g : G) (s : ↑Γ(X, ⊤)), eρ (g • s) = g • eρ s := fun g s =>
+    σ.gamma_res_smul (ModularCurves.RouteA.isStableOpen_top σ) (hVs x₀) hle g s
+  -- (3) the induced iso of fixed rings and its `Spec`-square against the invariants maps
+  let eG : FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G ≃+* FixedPoints.subalgebra ℤ ↑Γ(X, V x₀) G :=
+    fixedPointsCongr eρ heρ
+  have hring : CommRingCat.ofHom eG.toRingHom
+        ≫ CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(X, V x₀) G) ↑Γ(X, V x₀))
+      = CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G) ↑Γ(X, ⊤))
+        ≫ X.presheaf.map (homOfLE hle).op := by
+    ext a
+    rfl
+  have hsq : invariantsπ G ↑Γ(X, V x₀) ℤ ≫ Spec.map (CommRingCat.ofHom eG.toRingHom)
+      = Spec.map (X.presheaf.map (homOfLE hle).op) ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
+    show Spec.map _ ≫ Spec.map _ = Spec.map _ ≫ Spec.map _
+    rw [← Spec.map_comp, ← Spec.map_comp, hring]
+  -- (4) the geometric bridge between the two affine identifications
+  have hbridge : (hVa x₀).isoSpec.hom ≫ Spec.map (X.presheaf.map (homOfLE hle).op)
+      = (V x₀).ι ≫ X.isoSpec.hom := by
+    rw [← cancel_mono X.isoSpec.inv, Category.assoc, Category.assoc, Iso.hom_inv_id,
+      Category.comp_id, ← IsAffineOpen.fromSpec_top,
+      IsAffineOpen.map_fromSpec _ (hVa x₀) ((homOfLE hle).op),
+      IsAffineOpen.isoSpec_hom_fromSpec]
+  -- (5) the chart inclusion `κ` is an isomorphism (the `⊤`-chart is the whole quotient) …
+  haveI hι : IsIso (σ.quotientChart V hVs hVa x₀).ι :=
+    isIso_of_isOpenImmersion_of_opensRange_eq_top _
+      (by rw [Scheme.Opens.opensRange_ι, σ.quotientChart_eq_top V hVs hVa hVmem x₀ (hVtop x₀)])
+  -- (6) … and `κ ≫ q` is `Spec` of the fixed-ring iso, so `q` is an isomorphism
+  have hLQ : σ.localQuotientπ (hVs x₀) (hVa x₀)
+      ≫ ((σ.quotientChartIso V hVs hVa x₀).hom ≫ (σ.quotientChart V hVs hVa x₀).ι) ≫ q
+      = (hVa x₀).isoSpec.hom ≫ Spec.map (X.presheaf.map (homOfLE hle).op)
+        ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
+    rw [← Category.assoc, σ.localQuotientπ_quotientChartIso V hVs hVa hVmem x₀,
+      Category.assoc, hq, ← Category.assoc, ← hbridge, Category.assoc]
+  have hκq : ((σ.quotientChartIso V hVs hVa x₀).hom ≫ (σ.quotientChart V hVs hVa x₀).ι) ≫ q
+      = Spec.map (CommRingCat.ofHom eG.toRingHom) := by
+    refine invariantsπ_hom_ext G ↑Γ(X, V x₀) ℤ _ _ ?_
+    rw [hsq, ← cancel_epi (hVa x₀).isoSpec.hom, ← Category.assoc,
+      ← σ.localQuotientπ_eq (hVs x₀) (hVa x₀)]
+    exact hLQ
+  haveI : IsIso (CommRingCat.ofHom eG.toRingHom) :=
+    ⟨CommRingCat.ofHom eG.symm.toRingHom,
+      by ext a; exact congrArg Subtype.val (eG.symm_apply_apply a),
+      by ext a; exact congrArg Subtype.val (eG.apply_symm_apply a)⟩
+  haveI : IsIso (((σ.quotientChartIso V hVs hVa x₀).hom
+      ≫ (σ.quotientChart V hVs hVa x₀).ι) ≫ q) := by
+    rw [hκq]; infer_instance
+  haveI : IsIso q := IsIso.of_isIso_comp_left
+    ((σ.quotientChartIso V hVs hVa x₀).hom ≫ (σ.quotientChart V hVs hVa x₀).ι) q
+  exact ⟨asIso q, hq⟩
+
+end AlgebraicGeometry.SchemeAction
