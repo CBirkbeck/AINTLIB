@@ -13028,3 +13028,25 @@ Axiom-clean. The ENTIRE T-W7.0c c1-c4 + c4.5 + T-W7.0d + nat layer is now proven
 Bosma-Lenstra two-law multiplication is a scheme morphism over every ring with full base-change
 naturality. Next: mulModelHom_specPoints (c6, the dictionary spec) → group axioms → 0c-i →
 0c-ii (BOARD-SIGNAL — three cascades armed) → 0h → T-W7.12 → T-W7a.
+
+### [C6-SPECPOINTS] c6 decomposition (c5β, /develop-inline per beastmode A2) — mulModelHom_specPoints
+
+- **Status**: in_progress (c5β). **Parent**: GLC mulModelHom_specPoints (line ~841). **File**: new
+  ModularCurves/EllipticCurve/AdditionSpecPoints.lean (+ GLC fill at the end).
+- **Plan** (negModelHom_specPoints is the shape template; naturality mulModelHom_map is the reducer):
+  - **[C6-a] point-cover**: a K-point g of `pullback (π W) (π W)` factors through `blOpenZ` or
+    `blOpenY`. Sketch: Spec K (field) has a unique point; its image lies in `blOpenZ ⊔ blOpenY = ⊤`
+    (blOpen_cover) hence in one of them; `IsOpenImmersion.lift` on `(blOpen_).ι` (range condition =
+    singleton membership). Statement via `∃ h, h ≫ (blOpen_ W).ι = g.1`.
+  - **[C6-b] restriction-evaluation**: given the C6-a factorisation `g.1 = h ≫ ι`,
+    `g.1 ≫ mulModelHom W = h ≫ addOn_ W` (rfl-level from blOpen__ι_mulModelHom).
+  - **[C6-c] field-case reduction**: by naturality `mulModelHom_map` at `f := algebraMap R K`, the
+    spec for W over R follows from the spec for `W.map (algebraMap R K)` over the FIELD K (the
+    dictionary is defined through the K-base-change; audit-A6 universality-by-instantiation).
+  - **[C6-d] field-case computation**: over K, the point through addOnZ/addOnY evaluates to
+    `addXYZ`/`dblAddXYZ` on representative triples — mathlib's `Projective.Point.add` is DEFINED by
+    these formulas; transfer via mathlib's Projective↔Affine point equivalence + our
+    AdditionLawField correspondences (`dblAddXYZ_self`, cross-law minors).
+  - **[C6-e] assembly**: case split (both-in-Z-chart generic / diagonal via blOpenY / infinity cases
+    via projModelPointsEquiv_zero) mirroring negModelHom_specPoints' structure.
+- **Progress**: 2026-07-09 registered; starting C6-a.
