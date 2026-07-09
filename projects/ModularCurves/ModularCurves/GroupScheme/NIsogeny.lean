@@ -179,7 +179,71 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
     (M := M ⧸ Submodule.span R (Set.range x)) p.asIdeal
   refine ⟨g, hgp, ?_⟩
   -- (iii) assemble: the induced surjection onto `R_g ⊗ M` and its f.g. kernel
-  sorry
+  haveI := hgsub
+  haveI hsub2 : Subsingleton ((Localization.Away g) ⊗[R]
+      (M ⧸ Submodule.span R (Set.range x))) :=
+    (LocalizedModule.equivTensorProduct (Submonoid.powers g)
+      (M ⧸ Submodule.span R (Set.range x))).symm.toEquiv.subsingleton
+  -- the simple tensors `1 ⊗ x i` span `R_g ⊗ M`
+  have hspanRg : Submodule.span (Localization.Away g)
+      (Set.range fun i => (1 : Localization.Away g) ⊗ₜ[R] x i) = ⊤ := by
+    have key : ∀ s ∈ Submodule.span R (Set.range x), ∀ c : Localization.Away g,
+        c ⊗ₜ[R] s ∈ Submodule.span (Localization.Away g)
+          (Set.range fun i => (1 : Localization.Away g) ⊗ₜ[R] x i) := by
+      intro s hs
+      refine Submodule.span_induction ?_ ?_ ?_ ?_ hs
+      · rintro _ ⟨i, rfl⟩ c
+        rw [show c ⊗ₜ[R] x i = c • ((1 : Localization.Away g) ⊗ₜ[R] x i) by
+          rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
+        exact Submodule.smul_mem _ c (Submodule.subset_span ⟨i, rfl⟩)
+      · intro c
+        rw [TensorProduct.tmul_zero]
+        exact Submodule.zero_mem _
+      · intro y z _ _ hy hz c
+        rw [TensorProduct.tmul_add]
+        exact Submodule.add_mem _ (hy c) (hz c)
+      · intro r y _ hy c
+        rw [TensorProduct.tmul_smul]
+        exact Submodule.smul_of_tower_mem _ r (hy c)
+    haveI : Subsingleton (((Localization.Away g) ⊗[R] M) ⧸
+        (LinearMap.range (TensorProduct.map
+          (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+          (Submodule.span R (Set.range x)).subtype))) :=
+      (TensorProduct.tensorQuotientEquiv (Localization.Away g)
+        (Submodule.span R (Set.range x))).symm.toEquiv.subsingleton
+    have htop : LinearMap.range (TensorProduct.map
+        (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+        (Submodule.span R (Set.range x)).subtype) = ⊤ :=
+      eq_top_iff.mpr fun z _ => (Submodule.Quotient.mk_eq_zero _).mp
+        (Subsingleton.elim _ 0)
+    refine eq_top_iff.mpr fun z _ => ?_
+    have hz : z ∈ LinearMap.range (TensorProduct.map
+        (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+        (Submodule.span R (Set.range x)).subtype) := htop ▸ Submodule.mem_top
+    obtain ⟨w, rfl⟩ := hz
+    induction w with
+    | zero =>
+      rw [map_zero]
+      exact Submodule.zero_mem _
+    | tmul c s =>
+      obtain ⟨s, hs⟩ := s
+      simp only [TensorProduct.map_tmul, LinearMap.id_coe, id_eq, Submodule.coe_subtype]
+      exact key s hs c
+    | add w₁ w₂ h₁ h₂ =>
+      rw [map_add]
+      exact Submodule.add_mem _ (h₁ Submodule.mem_top) (h₂ Submodule.mem_top)
+  -- the presentation: `π` sends `e_i ↦ 1 ⊗ x i`; `α` enumerates a finite kernel basis
+  have hπ' : Function.Surjective (Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i)) := by
+    rw [← LinearMap.range_eq_top, Fintype.range_linearCombination, hspanRg]
+  have hkfg : (LinearMap.ker (Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i))).FG :=
+    Module.FinitePresentation.fg_ker _ hπ'
+  obtain ⟨m, k, hk⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hkfg
+  refine ⟨m, Fintype.linearCombination (Localization.Away g) k,
+    Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i), hπ', ?_⟩
+  rw [LinearMap.exact_iff, Fintype.range_linearCombination, hk]
 
 /-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
 the base change `A ⊗ M` is finite locally free of rank `n` (flat with all stalk ranks `n`)
