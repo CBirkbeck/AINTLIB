@@ -117,6 +117,36 @@ coordinate tuples `fun i => Pi.single (ι i) 1`, matrices are
 seam. Leaves: **[GR-B2n]** = `normMap` + `isChartAt_normMap` + `chartMatrix` +
 `chartMatrix_normMap` (naturality: entrywise `f`).
 
+**[GR-E] transition design (pinned 2026-07-09T08:30Z, against the proven wave-1/2.5
+interface; execution in NEW `ForMathlib/GrassmannianTransition.lean` to keep the chart
+file single-writer)**:
+- Setting: `ι ι' : Fin k ↪ Fin n`; `N` in the ι-chart with retraction `φ` (the
+  `chartMatrix` data). The ι'-tuple's images under `φ` assemble the **transition
+  matrix** `T : Matrix (Fin k) (Fin k) A`, `T i₁ i₂ := φ (Pi.single (ι' i₂) 1) i₁` —
+  entries are `chartMatrix`-entries when `ι' i₂ ∉ range ι` and Kronecker deltas when
+  `ι' i₂ = ι i` (the retraction condition pins those columns).
+- **[GR-E1]** `chartTransitionMatrix` (def, from `chartMatrix` + the dichotomy on
+  `ι' i₂ ∈ range ι`) + its two computation lemmas (delta-column / matrix-column).
+- **[GR-E2]** the overlap criterion: `IsChartAt (ι'-tuple) N ↔ IsUnit (chartTransitionMatrix …).det`
+  — proof: quotient-composite₂ = (Matrix.toLin' T) ≫ composite₁-iso, so bijective ⟺ `T`
+  invertible ⟺ `IsUnit T.det` (`Matrix.isUnit_iff_isUnit_det` / `LinearMap.isUnit_det…`;
+  the factorization is a `Basis.ext` check on singles via `retraction_comp_coordMap`).
+- **[GR-E3]** coordinate transition: over the overlap, the ι'-matrix of `N` =
+  (adjugate/det-inverse formula) in the ι-matrix — extracted as the RING-map statement
+  `MvPolynomial ({j ∉ range ι'} × Fin k) R →+* Localization.Away (transitionDet ι ι')`
+  on the generic matrix ring (`transitionDet ι ι' := (chartTransitionMatrix of the
+  generic matrix).det : MvPolynomial ({j ∉ range ι} × Fin k) R`), with the spec lemma
+  tying it to [GR-E2]'s pointwise transition. This is the glue datum for [GR-F].
+- **[GR-E4]** cocycle on triple overlaps (localized ring maps compose per the pointwise
+  spec — prove POINTWISE first via chartMatrix-uniqueness, lift by `IsLocalization`
+  epi-ness/`ringHom_ext`).
+- Attack notes: (1) all statements at a GENERIC element `N` with hypotheses `IsChartAt`
+  — never applied to `normMap`-terms (memory: normMap-poisoning); (2) matrix-vs-function
+  seams via `Matrix.toLin'`/`Matrix.mulVec` with `Pi.basisFun`-ext everywhere; (3) the
+  generic-matrix ring statements are pure `MvPolynomial`/`Matrix` algebra — zero
+  Grassmannian dependence — so [GR-E3/E4]'s ring layer is dispatchable independently of
+  [GR-E1/E2].
+
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
   the relevant minor determinant; cocycle identity) — the det/adjugate algebra.
