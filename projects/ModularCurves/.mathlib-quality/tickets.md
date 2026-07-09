@@ -10667,3 +10667,15 @@ normalisation.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.94-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] `EllObj` global base-map package LANDED
+
+Added `EllObj.tateBaseMapOfGlobalCoeffs`, `EllObj.tateBaseMapOfGlobalCoeffs_base_w`, and
+`EllObj.tateBaseMapOfGlobalCoeffs_ext` in `YOneAtlasClassify.lean`. These repackage the global
+coefficient-classifying map with the source object's canonical `Γ(Y.base)` `R`-algebra, proving the
+structure-map equation in the exact `EllHom.base_w` shape and keeping the coefficient-extensionality
+handle available after the sheaf-gluing step.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; atlas file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the three new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).

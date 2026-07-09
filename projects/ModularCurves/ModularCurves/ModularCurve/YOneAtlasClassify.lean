@@ -252,6 +252,41 @@ theorem tateBaseMapOfGlobalCoeffs_base_w (Y : EllObj R)
   rw [tateBaseMapOfGlobalCoeffs_tateStructMap]
   exact EllObj.toSpecΓ_algebraMap_eq_structMap R Y halg
 
+/-- The base map to the Tate atlas attached to global coefficients on an object over `Spec R`. -/
+noncomputable def EllObj.tateBaseMapOfGlobalCoeffs (Y : EllObj R)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    Y.base ⟶ tateBase R := by
+  letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+  exact ModularCurves.tateBaseMapOfGlobalCoeffs R Y.base α β hΔ
+
+@[simp]
+theorem EllObj.tateBaseMapOfGlobalCoeffs_base_w (Y : EllObj R)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ tateStructMap R = Y.structMap := by
+  letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+  exact ModularCurves.tateBaseMapOfGlobalCoeffs_base_w R Y
+    (EllObj.structAlgebra_algebraMap R Y) α β hΔ
+
+theorem EllObj.tateBaseMapOfGlobalCoeffs_ext (Y : EllObj R)
+    (α β α' β' : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (hΔ' : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+    (hα : α = α') (hβ : β = β') :
+    EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α' β' hΔ' := by
+  letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+  exact ModularCurves.tateBaseMapOfGlobalCoeffs_ext R Y.base α β α' β' hΔ hΔ' hα hβ
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
