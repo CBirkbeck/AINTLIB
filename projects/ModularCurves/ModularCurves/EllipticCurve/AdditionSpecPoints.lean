@@ -68,6 +68,91 @@ theorem specPoint_mulModelHom_of_blOpenY (W : WeierstrassCurve R) [W.IsElliptic]
     {h : Spec (CommRingCat.of K) ⟶ (blOpenY W).toScheme} (hh : h ≫ (blOpenY W).ι = g) :
     g ≫ mulModelHom W = h ≫ addOnY W := by
   rw [← hh, Category.assoc, blOpenY_ι_mulModelHom]
+
+section Descent
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) [IsDomain R] [IsJacobsonRing R]
+
+/-- [C6-d1a, Z] Family-level descent: a field point through `addOnZ` evaluates through some
+chart-product family member. -/
+theorem specPoint_addOnZ_family (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
+    (h : Spec (CommRingCat.of K) ⟶ (WeierstrassCurve.Projective.blOpenZ W).toScheme) :
+    ∃ (p : Fin 2 × Fin 2) (h₁ : Spec (CommRingCat.of K) ⟶ (blOpenZFamily W p).toScheme),
+      h ≫ WeierstrassCurve.Projective.addOnZ W hΔ = h₁ ≫ addOnZFamily W hΔ p := by
+  obtain ⟨p, h₁, hh₁⟩ := specPoint_factors_iSup (blOpenZFamily W) K h
+  exact ⟨p, h₁, (congrArg (· ≫ WeierstrassCurve.Projective.addOnZ W hΔ) hh₁.symm).trans
+    ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (homOfLE_le_addOnZ W hΔ p)))⟩
+
+variable (i j : Fin 3) [IsDomain (biChartRing W i j)]
+
+/-- [C6-d1b, Z] Within-chart descent: a field point through `addOnZOnImage` evaluates through
+some affine law-1 piece — where it is a ring map. -/
+theorem specPoint_addOnZOnImage_factors (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
+    (h : Spec (CommRingCat.of K) ⟶ (blOpenZImage W i j).toScheme) :
+    ∃ (k : Fin 3) (ψ : Localization.Away (lawOneTriple W i j k) →+* K),
+      h ≫ addOnZOnImage W hΔ i j = Spec.map (CommRingCat.ofHom ψ) ≫ addOnZPieceMor W i j k hΔ := by
+  -- move to the chart-product side through isoImage, then descend the k-pieces
+  obtain ⟨k, h₂, hh₂⟩ := specPoint_factors_iSup (blOpenZPieceFamily W i j) K
+    (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenZPieceFamily W i j k)).inv)
+  refine ⟨k, CommRingCat.Hom.hom (Spec.preimage (h₂ ≫ morphismRestrict (chartPieceIso W i j).hom
+      (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
+    (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).inv)), ?_⟩
+  rw [CommRingCat.ofHom_hom, Spec.map_preimage]
+  -- LHS: h ≫ (isoImage.inv ≫ addOnZOnSup) = (h ≫ isoImage.inv) ≫ addOnZOnSup = ...
+  have e₁ : h ≫ addOnZOnImage W hΔ i j =
+      (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenZPieceFamily W i j k)).inv) ≫
+        addOnZOnSup W i j hΔ := by
+    rw [addOnZOnImage, Category.assoc]
+  have e₂ : (h ≫ (Scheme.Hom.isoImage (pieceι W i j)
+        (⨆ k, blOpenZPieceFamily W i j k)).inv) ≫ addOnZOnSup W i j hΔ =
+      h₂ ≫ addOnZOnFamily W i j k hΔ :=
+    (congrArg (· ≫ addOnZOnSup W i j hΔ) hh₂.symm).trans
+      ((Category.assoc _ _ _).trans (congrArg (h₂ ≫ ·) (ι_addOnZOnSup W i j hΔ k)))
+  rw [e₁, e₂, addOnZOnFamily]
+  simp only [Category.assoc]
+
+/-- [C6-d1a, Y] Family-level descent: a field point through `addOnY` evaluates through some
+chart-product family member. -/
+theorem specPoint_addOnY_family (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
+    (h : Spec (CommRingCat.of K) ⟶ (WeierstrassCurve.Projective.blOpenY W).toScheme) :
+    ∃ (p : Fin 2 × Fin 2) (h₁ : Spec (CommRingCat.of K) ⟶ (blOpenYFamily W p).toScheme),
+      h ≫ WeierstrassCurve.Projective.addOnY W hΔ = h₁ ≫ addOnYFamily W hΔ p := by
+  obtain ⟨p, h₁, hh₁⟩ := specPoint_factors_iSup (blOpenYFamily W) K h
+  exact ⟨p, h₁, (congrArg (· ≫ WeierstrassCurve.Projective.addOnY W hΔ) hh₁.symm).trans
+    ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (homOfLE_le_addOnY W hΔ p)))⟩
+
+variable (i j : Fin 3) [IsDomain (biChartRing W i j)]
+
+/-- [C6-d1b, Y] Within-chart descent: a field point through `addOnYOnImage` evaluates through
+some affine law-2 piece — where it is a ring map. -/
+theorem specPoint_addOnYOnImage_factors (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
+    (h : Spec (CommRingCat.of K) ⟶ (blOpenYImage W i j).toScheme) :
+    ∃ (k : Fin 3) (ψ : Localization.Away (lawTwoTriple W i j k) →+* K),
+      h ≫ addOnYOnImage W hΔ i j = Spec.map (CommRingCat.ofHom ψ) ≫ addOnYPieceMor W i j k hΔ := by
+  -- move to the chart-product side through isoImage, then descend the k-pieces
+  obtain ⟨k, h₂, hh₂⟩ := specPoint_factors_iSup (blOpenYPieceFamily W i j) K
+    (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenYPieceFamily W i j k)).inv)
+  refine ⟨k, CommRingCat.Hom.hom (Spec.preimage (h₂ ≫ morphismRestrict (chartPieceIso W i j).hom
+      (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+    (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).inv)), ?_⟩
+  rw [CommRingCat.ofHom_hom, Spec.map_preimage]
+  -- LHS: h ≫ (isoImage.inv ≫ addOnYOnSup) = (h ≫ isoImage.inv) ≫ addOnYOnSup = ...
+  have e₁ : h ≫ addOnYOnImage W hΔ i j =
+      (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenYPieceFamily W i j k)).inv) ≫
+        addOnYOnSup W i j hΔ := by
+    rw [addOnYOnImage, Category.assoc]
+  have e₂ : (h ≫ (Scheme.Hom.isoImage (pieceι W i j)
+        (⨆ k, blOpenYPieceFamily W i j k)).inv) ≫ addOnYOnSup W i j hΔ =
+      h₂ ≫ addOnYOnFamily W i j k hΔ :=
+    (congrArg (· ≫ addOnYOnSup W i j hΔ) hh₂.symm).trans
+      ((Category.assoc _ _ _).trans (congrArg (h₂ ≫ ·) (ι_addOnYOnSup W i j hΔ k)))
+  rw [e₁, e₂, addOnYOnFamily]
+  simp only [Category.assoc]
+
+end Descent
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
