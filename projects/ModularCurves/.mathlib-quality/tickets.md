@@ -13050,3 +13050,46 @@ naturality. Next: mulModelHom_specPoints (c6, the dictionary spec) → group axi
   - **[C6-e] assembly**: case split (both-in-Z-chart generic / diagonal via blOpenY / infinity cases
     via projModelPointsEquiv_zero) mirroring negModelHom_specPoints' structure.
 - **Progress**: 2026-07-09 registered; starting C6-a.
+
+## Amendments v10.95 (fable-PIC0) — ★ [PIC-P1b-MONO] CONSUMER CASE COMPLETE: P1b sorry-free, GME 2.2.2 tensor-invertibility LANDS
+
+Resumed per the v10.94 un-park, built the banked decompose. **Route refinement (producer
+discretion, replan-and-continue):** the consumer `IsInvertible.tensorObj` uses pullback-tensor
+compatibility ONLY at open immersions `W.ι`, so leaf (C) was executed at open-immersion
+generality (bounded, elementary, no stalk-API gap) instead of general `f` (projection-formula
+content). All landed, **all axiom-clean [propext, Classical.choice, Quot.sound]**:
+
+- **(I) D-Idem** `PresheafOfModules.nonempty_sheafify_tensor_idem` — `sh(A⊗B) ≅ sh(sh(A).val ⊗ sh(B).val)`
+  via GAP1-W-MONO's `sheafificationW_tensorHom` + `W_toSheafify`. (The v10.79-banked plumbing residual
+  resolved: literal `⟨S⋙forget₂,hS⟩`, general-lemma rws, `@asIso _ _ _ _ _ hstab`.)
+- **ι-CORE** `ModuleCat.restrictScalarsTensorIso` — restriction of scalars along a bijective ring hom
+  is strongly monoidal at objects (`TensorProduct.equivOfCompatibleSMul`; scalar-tower letI-chain;
+  the `AddEquiv.toLinearEquiv (M:=)(M₂:=)` idiom for the semireducible `RestrictScalars.obj'`).
+- **ι-PF⊗** `PresheafOfModules.restrictScalarsTensorObjIso` + `pushforwardTensorIso` — presheaf
+  pushforward along componentwise-iso ring comparison is strongly monoidal at objects; factored
+  through mathlib's `pushforward₀OfCommRingCat.Monoidal` (μIso = Iso.refl) to kill an F.op-reindex
+  whnf blowup; `F.op ⋙ (R ⋙ forget₂)` association everywhere (the pushforward-friendly spelling).
+- **ι-LOCBIJ** `functorPullback_opensFunctor_mem` + `isLocallyInjective/Surjective_whiskerLeft_opensFunctor`
+  — Zariski sieve transfer for open immersions (V := f⁻¹W; image_preimage_le + downward_closed +
+  Subsingleton.elim on Opens-homs).
+- **ι-MAIN** `Scheme.Modules.nonempty_pullback_tensorObj_of_isOpenImmersion` — the full chain
+  restrictFunctorIsoPullback → sheafifyValIso → W-collapse of the X-side unit (ι-LOCBIJ) →
+  sh.mapIso(pushforwardTensorIso) → e5a-Iso.refl + e5b-tensorObjCongr (the fused e5 blew the whnf
+  budget; split passes).
+- **★ `IsInvertible.tensorObj` MOVED** (statement byte-identical) from `Picard/InvertibleSheaf.lean`
+  to `ForMathlib/PullbackTensorMonoidal.lean`, proof repointed to the ι-lemma ⟹ **sorry-free**.
+  P1's GME 2.2.2 invertibility layer is now fully gap-free: unit ✓ pullback-stability ✓
+  unit-tensor ✓ tensor-stability ✓.
+
+**Registered residual ([PIC-P1b-MONO]-general, gates NOTHING):** the general-`f` Props
+`nonempty_pullback_tensorObj` (InvertibleSheaf:165) and `nonempty_sheafify_presheafPullback_tensor`
+(PullbackTensorMonoidal:368) stay sorried — genuine projection-formula content, PR-able later.
+
+**Ops:** lean-lsp MCP validated live in this worktree (servers on v4.32.0-rc1, no olean corruption
+after probes; the v10.94 D2 fix confirmed) — fleet memory updated from ban to
+use-with-lake-as-final-gate. Docstrings of both files updated to the landed state.
+
+**Next (P2 Pic program, per v10.94):** Pic as the group of iso-classes — monoid structure from
+tensorObj/unit/coherences (LocalizedMonoidal from GAP1-W-MONO); the INVERSE needs duals — ⚠ v10.36
+two-route edge: p2's Cartier-duality lane — **board coordination required before building any dual**
+(never build duality twice). Will scope P2's non-dual pieces first.

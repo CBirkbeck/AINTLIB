@@ -11,39 +11,46 @@ import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.Picard.InvertibleSheaf
 
 /-!
-# Strong monoidality of the sheaf-of-modules pullback — decomposition skeleton
+# Pullback of sheaves of modules and the sheafified tensor — [PIC-P1b-MONO]
 
-`/develop --decompose` skeleton for the AINTLIB ModularCurves stream leaf **[PIC-P1b-MONO]**
-(board v10.77): the strong monoidality of the sheaf-of-modules pullback,
-`f^*(M ⊗ N) ≅ f^* M ⊗ f^* N`, which gates `nonempty_pullback_tensorObj` in
-`ModularCurves/Picard/InvertibleSheaf.lean` (and, downstream, the whole Pic group law).
+The AINTLIB ModularCurves stream leaf **[PIC-P1b-MONO]**: compatibility of the
+sheaf-of-modules pullback with the sheafified tensor, `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`.
 
-**Route D (direct)** — chosen adversarially over route M (mates on a `SheafOfModules`
-monoidal category, which is *out*: mathlib has no `SheafOfModules/Monoidal.lean`; the
-sheaf-level tensor `tensorObj := sheafify(M.val ⊗ N.val)` is this project's own
-construction, so there is no `MonoidalCategory (SheafOfModules R)` for
-`leftAdjointOplaxMonoidal` to consume without first building the entire group-law layer
-this leaf gates). Route D assembles, at the sheaf level:
+## Main results (all sorry-free, axiom-clean)
 
-* `SheafOfModules.sheafificationCompPullback` (mathlib): `sh_S ⋙ f^* ≅ f^*ᵖ ⋙ sh_R`,
-  applied at `M.val ⊗ N.val`, gives `f^*(M ⊗ N) ≅ sh_R(f^*ᵖ(M.val ⊗ N.val))`.
-* `SheafOfModules.pullbackIso` (mathlib): `f^* ≅ forget ⋙ f^*ᵖ ⋙ sh_R`, giving
-  `(f^* M).val ≅ (sh_R(f^*ᵖ M.val)).val`, so
-  `f^* M ⊗ f^* N ≅ sh_R((sh_R(f^*ᵖ M.val)).val ⊗ (sh_R(f^*ᵖ N.val)).val)`.
-* `nonempty_sheafify_tensor_idem` below (**this project's GAP1-W-MONO leaf**): collapses
-  the double sheafification, `sh_R(sh_R(A).val ⊗ sh_R(B).val) ≅ sh_R(A ⊗ B)`.
-* `nonempty_sheafify_presheafPullback_tensor` below (**the one genuinely new leaf, D-PresPB′**):
-  `sh_R(f^*ᵖ(P ⊗ Q)) ≅ sh_R(f^*ᵖ P ⊗ f^*ᵖ Q)` — the presheaf pullback commutes with the
-  tensor *after sheafification*. NOTE (adversarial): the presheaf pullback is **not** strong
-  monoidal for general `f` at the presheaf level (`pullback φ := (pushforward φ).leftAdjoint`
-  hides an inverse-image left-Kan-extension along the site functor, which does not commute
-  with the presheaf tensor); the comparison map is only a *stalkwise* iso, hence *locally
-  bijective*, hence inverted by `sh_R`. So the sheafified form here is the correct true
-  statement, provable by the same `sheafificationW`-membership technology as D-Idem.
+* `Scheme.Modules.nonempty_pullback_tensorObj_of_isOpenImmersion`: the **open-immersion**
+  case, in full — pullback along `f : Y ⟶ X` open immersion commutes with `tensorObj`.
+  This is the case the invertibility layer consumes (trivializing covers restrict along
+  open inclusions), so with it:
+* `Scheme.Modules.IsInvertible.tensorObj` (moved here from `Picard/InvertibleSheaf.lean`,
+  statement unchanged): the tensor product of invertible `𝒪ₓ`-modules is invertible —
+  GME 2.2.2, previously GAP-1-gated, now sorry-free.
 
-Both new leaves stated `sorry` (skeleton only — no tickets; see
-`.mathlib-quality/decomposition-pullback-monoidal.md`). The top assembly target
-`nonempty_pullback_tensorObj` already lives (sorried) in `Picard/InvertibleSheaf.lean`.
+The ι-route ingredients, each of independent (mathlib-PR-able) interest:
+
+* `ModuleCat.restrictScalarsTensorIso` (**ι-CORE**): restriction of scalars along a
+  bijective ring hom is strongly monoidal at objects (`TensorProduct.equivOfCompatibleSMul`,
+  both directions `x ⊗ₜ y ↦ x ⊗ₜ y`).
+* `PresheafOfModules.restrictScalarsTensorObjIso` / `pushforwardTensorIso` (**ι-PF⊗**):
+  the presheaf-of-modules pushforward along a componentwise-iso ring comparison is strongly
+  monoidal at objects (reindexing half = mathlib's `pushforward₀OfCommRingCat.Monoidal`).
+* `functorPullback_opensFunctor_mem` + `isLocallyInjective/Surjective_whiskerLeft_opensFunctor`
+  (**ι-LOCBIJ**): restriction along an open immersion preserves local bijectivity
+  (Zariski sieve transfer).
+* `PresheafOfModules.nonempty_sheafify_tensor_idem` (**D-Idem**): the sheafification
+  collapses its own double-tensor, `sh(A ⊗ B) ≅ sh(sh(A).val ⊗ sh(B).val)` — from this
+  stream's GAP1-W-MONO leaf `sheafificationW_tensorHom`.
+
+## Registered residual (general `f`)
+
+`nonempty_sheafify_presheafPullback_tensor` below and `nonempty_pullback_tensorObj` in
+`Picard/InvertibleSheaf.lean` state the general-`f` forms; both remain `sorry`
+([PIC-P1b-MONO]-general, gating nothing). NOTE (adversarial, from the decompose): the
+presheaf pullback is **not** strong monoidal for general `f` at the presheaf level
+(`pullback φ := (pushforward φ).leftAdjoint` hides an inverse-image left Kan extension);
+only the *sheafified* comparison is an iso (stalkwise, hence locally bijective). Route
+notes, verbatim source quotes and attack logs:
+`.mathlib-quality/decomposition-pullback-monoidal.md`.
 -/
 
 universe v₁ v₂ u₁ u₂ u
@@ -365,5 +372,28 @@ theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X) (P Q : X.Preshea
         ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj P ⊗
           (PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj Q)) := by
   sorry
+
+/-- The tensor product of invertible `𝒪ₓ`-modules is invertible (GME p. 108: `Pic(E_T)`
+is "the group of isomorphism classes of all invertible sheaves"). On the common refinement
+`{U i ⊓ V j}` of the two trivializing covers both factors are trivial, so — using that
+pullback along the (open-immersion) inclusions commutes with the sheafified tensor
+(`nonempty_pullback_tensorObj_of_isOpenImmersion`) — the tensor restricts to `𝒪 ⊗ 𝒪 ≅ 𝒪`
+there. Sorry-free: the GME 2.2.2 tensor-invertibility, previously gated by GAP-1. -/
+theorem IsInvertible.tensorObj {M N : X.Modules}
+    (hM : IsInvertible M) (hN : IsInvertible N) : IsInvertible (tensorObj M N) := by
+  obtain ⟨ιM, U, hU, htrivM⟩ := hM
+  obtain ⟨ιN, V, hV, htrivN⟩ := hN
+  refine ⟨ιM × ιN, fun p => U p.1 ⊓ V p.2, ?_, fun p => ?_⟩
+  · apply le_antisymm le_top
+    rw [← hU]
+    refine iSup_le fun i => ?_
+    rw [← inf_top_eq (U i), ← hV, inf_iSup_eq]
+    exact iSup_le fun j => le_iSup (fun p : ιM × ιN => U p.1 ⊓ V p.2) (i, j)
+  · obtain ⟨eM⟩ := htrivM p.1
+    obtain ⟨eN⟩ := htrivN p.2
+    obtain ⟨eT⟩ := nonempty_tensorObj_unit_iso (unitObj ↑(U p.1 ⊓ V p.2))
+    obtain ⟨ePb⟩ := nonempty_pullback_tensorObj_of_isOpenImmersion (U p.1 ⊓ V p.2).ι M N
+    exact ⟨ePb ≪≫ tensorObjCongr (restrictTrivialization inf_le_left eM)
+      (restrictTrivialization inf_le_right eN) ≪≫ eT⟩
 
 end AlgebraicGeometry.Scheme.Modules

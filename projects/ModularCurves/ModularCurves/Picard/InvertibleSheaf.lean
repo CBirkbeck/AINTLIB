@@ -21,16 +21,18 @@ mathlib's `X.Modules = SheafOfModules X.ringCatSheaf`.
   sheafification functor; their composite is the classical `𝓛 ⊗_{𝒪ₓ} 𝓛'`).
 * `Scheme.Modules.IsInvertible M`: `M` is trivialized by some open cover — "the
   formation of an invertible sheaf is local" (GME p. 109, proof of (2.17)).
-* `isInvertible_unit`, `IsInvertible.pullback`, `nonempty_tensorObj_unit_iso`,
-  `IsInvertible.tensorObj`: the unit is invertible; invertibility is stable under
-  pullback along any morphism of schemes and under tensor product; tensoring with the
-  unit is trivial.
+* `isInvertible_unit`, `IsInvertible.pullback`, `nonempty_tensorObj_unit_iso`: the unit
+  is invertible; invertibility is stable under pullback along any morphism of schemes;
+  tensoring with the unit is trivial. (`IsInvertible.tensorObj` — stability under tensor
+  product — lives in `ForMathlib/PullbackTensorMonoidal.lean`, proved sorry-free through
+  the open-immersion pullback–tensor compatibility.)
 
 The Picard group `Pic X` (iso classes of invertibles under `tensorObj`, GME (2.16))
-and the fibre degree are staged behind this file; the group law's coherence isos
-rest on the sheafification ⊗-compatibility gap **GAP-1** recorded in
-`.mathlib-quality/decomposition-pic-coh.md`, which gates `IsInvertible.tensorObj`
-below and the future group structure. Everything else here is gap-free.
+and the fibre degree are staged behind this file. The only remaining GAP-1 residual is
+the general-`f` form of `nonempty_pullback_tensorObj` below (registered
+[PIC-P1b-MONO]-general): its open-immersion case is proved in
+`ForMathlib/PullbackTensorMonoidal.lean` and is all the invertibility layer consumes,
+so nothing here is gated by it. Everything else here is gap-free.
 
 Decomposition, verbatim source quotes and adversarial attack logs:
 `.mathlib-quality/decomposition-pic-coh.md` (stream v10.11, worker fable-PIC0).
@@ -164,28 +166,5 @@ theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
     Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
       tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
   sorry
-
-/-- The tensor product of invertible `𝒪ₓ`-modules is invertible (GME p. 108: `Pic(E_T)`
-is "the group of isomorphism classes of all invertible sheaves"). On the common refinement
-`{U i ⊓ V j}` of the two trivializing covers both factors are trivial, so — using that
-pullback commutes with the sheafified tensor (`nonempty_pullback_tensorObj`) — the tensor
-restricts to `𝒪 ⊗ 𝒪 ≅ 𝒪` there. Assembly complete; the one GAP-1 input is the pullback-tensor
-compatibility. -/
-theorem IsInvertible.tensorObj {M N : X.Modules}
-    (hM : IsInvertible M) (hN : IsInvertible N) : IsInvertible (tensorObj M N) := by
-  obtain ⟨ιM, U, hU, htrivM⟩ := hM
-  obtain ⟨ιN, V, hV, htrivN⟩ := hN
-  refine ⟨ιM × ιN, fun p => U p.1 ⊓ V p.2, ?_, fun p => ?_⟩
-  · apply le_antisymm le_top
-    rw [← hU]
-    refine iSup_le fun i => ?_
-    rw [← inf_top_eq (U i), ← hV, inf_iSup_eq]
-    exact iSup_le fun j => le_iSup (fun p : ιM × ιN => U p.1 ⊓ V p.2) (i, j)
-  · obtain ⟨eM⟩ := htrivM p.1
-    obtain ⟨eN⟩ := htrivN p.2
-    obtain ⟨eT⟩ := nonempty_tensorObj_unit_iso (unitObj ↑(U p.1 ⊓ V p.2))
-    obtain ⟨ePb⟩ := nonempty_pullback_tensorObj (U p.1 ⊓ V p.2).ι M N
-    exact ⟨ePb ≪≫ tensorObjCongr (restrictTrivialization inf_le_left eM)
-      (restrictTrivialization inf_le_right eN) ≪≫ eT⟩
 
 end AlgebraicGeometry.Scheme.Modules
