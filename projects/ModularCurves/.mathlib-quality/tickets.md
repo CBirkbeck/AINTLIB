@@ -10873,3 +10873,38 @@ vendoring.*
   InvertibleSheaf sorry) and the P2 Pic-group program. #41383/#35773 NOT pulled unless
   the chain demands them.
 - Watch-state items unchanged otherwise (map_id via A; QSM leaves 02KL/02KM staged).
+
+### v10.49 (2026-07-09, c5β): [CHARTER-C5B] c4.3 hf — HELPER B (per-piece bridge) done
+
+*Commit this run: 45afd358. Zero-sorry, axiom-clean, no `maxHeartbeats`. Helper A (topological, v10.48)
++ helper B (the bridge) are both done; only helper C (cross-chart agreement) remains before addOnY/Z.*
+
+- **`homOfLE_isoImage_inv_iSup`** (ForMathlib, variable schemes — ForMathlib candidate): restricting
+  `(f.isoImage (⨆ U)).inv ≫ g` to the k-th image piece is `(f.isoImage (U k)).inv ≫ (iSupOpenCover U).f k ≫ g`.
+- **`addOnYOnImage_piece` / `addOnZOnImage_piece`**: on the k-th image piece, the image-morphism is
+  `addOnYOnFamily k` read through `pieceι.isoImage`. Both one-line via the general lemma + `ι_addOnYOnSup`.
+- **v10.24 win, recorded:** the isoImage naturality (`isoImage_hom_homOfLE`) blew whnf on the concrete
+  `Proj` chart-product inline; stated at variable schemes it became a bare `.trans`. Fifth surface of
+  the rule — the barrier goes around the LEMMA.
+- **Helper C — the last piece, scoped:** prove `addOnYOnImage_agree (i j i' j')`:
+    `homOfLE (O ≤ blOpenYImage ij) ≫ addOnYOnImage ij = homOfLE (O ≤ blOpenYImage i'j') ≫ addOnYOnImage i'j'`
+  on `O = blOpenYImage ij ⊓ blOpenYImage i'j'`. Route (parallels c4.2c's `addOnYOnFamily_agree`, one
+  level up):
+  1. Cover `O` by `O_{k} = (pieceι ''ᵁ blOpenYPieceFamily ij k) ⊓ blOpenYImage i'j'` (image_iSup on
+     blOpenYImage ij), and dually by the i'j' k'-pieces; refine to `O_{k,k'}`.
+  2. On `O_{k,k'}`, `addOnYOnImage_piece` (45afd358) rewrites BOTH sides to
+     `isoImage.inv ≫ addOnYOnFamily · k` — then unwind `addOnYOnFamily k = morphismRestrict
+     chartPieceIso.hom (D t_k) ≫ specBasicOpenIsoAway.inv ≫ addOnYPieceMor ij k`, and
+     `addOnYPieceMor ij k = pieceMorOfTriple (lawTwoTriple ij) k = Spec.map(chartAwayHomOfTriple …) ≫
+     chartι k` (`addOnYPieceMor_eq`, 01f3b9e4).
+  3. Both readings are `chartAwayHomOfTriple(triple) ≫ chartι` of triples proportional via `transHom`
+     — agree by `chartι_comp_specMap_chartAwayHom_smul_eq` (the final-form crux, 25799fea), exactly as
+     `chartι_specMap_lawTwoTriple_cross` (25799fea) packages it. Use `blOpenYImage_inf_le_transι`
+     (ec7e3a56) + `IsOpenImmersion.lift` for the overlap→transRing factor, mirroring c4.2c's
+     `homOfLE_morphismRestrict_agree` / `glueMorphisms_hf_of_agree` (both variable-scheme, reusable).
+  4. `Scheme.Cover.hom_ext` over the `O_{k,k'}` cover ⟹ `addOnYOnImage_agree`; then
+     `glueMorphisms_hf_of_agree` on `blOpenYCover` ⟹ **addOnY** (+ rule-3 interface, same commit).
+  Estimate ~200-300 lines, all on proven tools; no new leaves. Then `blOpen_cover`, `addOn_agree`,
+  `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
+- **This run:** helper A (topological blocker) AND helper B (bridge) — the two hardest identified
+  obstructions of `hf`. Helper C is the assembly that consumes them.
