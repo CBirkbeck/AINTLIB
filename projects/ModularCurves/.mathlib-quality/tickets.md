@@ -9422,6 +9422,31 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   Y1's T-E1 leg need DS-END0 pins or does atlas-internal rigidity suffice?), then [Y1-D2]/[Y1-D3]
   (import A's standalone [T-E4-family] lemma; don't wait on held-file wiring). ⚠ upstream still unset
   (v10.72 hazard); do NOT `git pull` here until coordinator fixes tracking.
+- **★ [Y1-E RIGIDITY AUDIT] VERDICT (NEW-Y1, 2026-07-09, v10.83 first act — scoping only):
+  ATLAS-INTERNAL RIGIDITY SUFFICES. Y1's T-E1 leg does NOT need the DS-END0 pins → PIC0 stays
+  PARKED for Y1 (on the rigidity account).** Grounds (verified against code, not just §2ε):
+  1. The atlas ∃!-classification's uniqueness (`exists_tatePoint`, decomposition B2-v/§2ε) rests on
+     **T-E1** `exists_unique_variableChange_isTateNormal` applied chartwise + `hom_ext` (separated
+     model). T-E1 (`Moduli/Representability.lean:67`) is **ring-level** — `WeierstrassCurve R`,
+     variable changes, `IsTateNormal`, division polys `Ψ₂/Ψ₃`; the nowhere-order-≤3 marking makes
+     `a₂,a₃` units and *that* rigidifies (Loeffler's "unique isomorphism", Prop 3.3.4). No
+     `Aut(E,P_{≥4})=1` (KM 2.7.x) computation anywhere.
+  2. `Moduli/Representability.lean` imports **no** `EndomorphismDegree`/`Rigidity`/DS-END0 — T-E1 is
+     self-contained ring algebra, works over arbitrary `R` (no noetherian, no endomorphism data).
+  3. Where a *group*-structure uniqueness is needed (D2's canonicity transport), it routes through
+     `abelEnrichment_unique*` → `isMonHom_of_one_comp_eq'` (one-primitive Hopf/monoid-hom rigidity via
+     connectedness/properness/flatness/separatedness). `EllipticCurve/Rigidity.lean` uses **no**
+     `EndomorphismDegree`/deg/dual (grep-empty). DS-END0 (deg/dual/trace, KM 2.5/2.6) is the
+     endomorphism-ring structure (Hasse/dual-isogeny) — orthogonal to Y₁(N) rigidity.
+  4. Caveat boarded: `abelEnrichment_unique_of_isLocallyNoetherian` needs `[IsLocallyNoetherian S]`;
+     `tateBase R` over arbitrary `R` need not be noetherian — but Y1's atlas ∃! uses **T-E1 chartwise
+     + hom_ext**, not `abelEnrichment_unique` directly, so the noetherian hypothesis does **not** bind
+     Y1. (If a future atlas-classification proof *does* invoke `abelEnrichment_unique`, the
+     connected/noetherian variants would then matter — flag at that point, not now.)
+  **Consequence for the fleet**: PIC0's DS-END0 pins are NOT on Y₁(N)'s critical path; PIC0 need not
+  un-park for Y1. Next: [Y1-D2]/[Y1-D3] once A's transport `7dac70553` (`Moduli/PullSectionCanonicity.
+  lean`, `pullSection_add_of_finitePresentation`) propagates to `origin/dev/modular-curves-y1` (not
+  there yet — it's on A's line; awaiting the coordinator's integration or a safe `pull`).
 - **[Y1-D1] PROGRESS + FILE RELEASED (NEW-Y1, 2026-07-09T13:08Z)**: three axiom-clean helper
   lemmas COMMITTED (7ae5c69db, 6c9650fb9, 43a857c0e), `lake build …YOneAssembly` GREEN:
   - `EllipticCurve.zsmul_pull_baseChange_asSection_iff` (**fibrewise bridge**): via `baseChangeEquiv`
