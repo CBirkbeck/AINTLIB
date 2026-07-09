@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.AdditionChartOpen
 import ModularCurves.EllipticCurve.AdditionChartTransition
+import ModularCurves.ForMathlib.AwayLiftAlgHom
 
 /-!
 # The two Bosma–Lenstra laws on `E ×_R E` (T-W7.0c-c5β, c4.3 assembly)
@@ -530,6 +531,33 @@ lemma overlapPieceIso_hom_ι (k k' : Fin 3) :
   simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom_ι, Scheme.isoOfEq_hom_ι_assoc,
     Scheme.Hom.isoImage_hom_ι]
   rw [← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
+lemma isUnit_algebraMap_biChartRing_lawTwoTriple (k k' : Fin 3) :
+    IsUnit ((algebraMap (biChartRing W i j)
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))))
+      (lawTwoTriple W i j k)) := by
+  rw [IsScalarTower.algebraMap_apply (biChartRing W i j) (transRing W i j i' j')
+    (Localization.Away _)]
+  exact IsLocalization.Away.isUnit_of_dvd
+    (transAlgHom W i j i' j' (lawTwoTriple W i j k) * transHom W i j i' j' (lawTwoTriple W i' j' k'))
+    ⟨transHom W i j i' j' (lawTwoTriple W i' j' k'), rfl⟩
+
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij)** The localization lift `Away(lawTwoTriple ij k) →ₐ[R] S` into the
+triple-localization, agreeing with the tower map `biChartRing → S` on the base. -/
+noncomputable def psiFst (k k' : Fin 3) :
+    Localization.Away (lawTwoTriple W i j k) →ₐ[R]
+      Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+        transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
+  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+    (lawTwoTriple W i j k) (isUnit_algebraMap_biChartRing_lawTwoTriple W i j i' j' k k')
+
+@[simp]
+lemma psiFst_algebraMap (k k' : Fin 3) (x : biChartRing W i j) :
+    psiFst W i j i' j' k k' (algebraMap (biChartRing W i j) _ x) =
+      algebraMap (biChartRing W i j) _ x :=
+  IsLocalization.Away.lift_eq (lawTwoTriple W i j k)
+    (isUnit_algebraMap_biChartRing_lawTwoTriple W i j i' j' k k') x
 
 end Overlap
 
