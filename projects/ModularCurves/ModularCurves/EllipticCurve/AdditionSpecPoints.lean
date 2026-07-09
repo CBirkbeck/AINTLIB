@@ -489,6 +489,31 @@ lemma specMap_pieceAwayι_snd {K : Type u} [CommRing K] (k : Fin 3)
 
 end PieceProjections
 
+section TripleIdentification
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) (i j : Fin 3)
+
+/-- [C6-d5, law 1] A ring map out of the chart-product ring carries the law-1 triple to
+mathlib's `addXYZ` of the images of the tautological points. -/
+lemma ringHom_lawOneTriple {K : Type u} [CommRing K] (χ : biChartRing W i j →+* K) :
+    χ ∘ lawOneTriple W i j =
+      ((W.map (algebraMap R (biChartRing W i j))).toProjective.map χ).addXYZ
+        (χ ∘ biChartPointFst W i j) (χ ∘ biChartPointSnd W i j) := by
+  rw [lawOneTriple]
+  exact (map_addXYZ χ _ _).symm
+
+/-- [C6-d5, law 2] Mirror for the law-2 triple (`dblAddXYZ`). -/
+lemma ringHom_lawTwoTriple {K : Type u} [CommRing K] (χ : biChartRing W i j →+* K) :
+    χ ∘ lawTwoTriple W i j =
+      ((W.map (algebraMap R (biChartRing W i j))).toProjective.map χ).dblAddXYZ
+        (χ ∘ biChartPointFst W i j) (χ ∘ biChartPointSnd W i j) := by
+  rw [lawTwoTriple]
+  exact (map_dblAddXYZ χ _ _).symm
+
+end TripleIdentification
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
