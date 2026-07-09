@@ -166,6 +166,27 @@ proof). [GR-E4]'s cocycle then LIVES inside [GR-F]'s `Scheme.GlueData` t-composi
 condition, verified pointwise through [GR-SPEC] — no standalone generic-ring cocycle
 statement needed (design decision; kills the triple-localization bookkeeping).
 
+**[GR-F] GlueData architecture (pinned 2026-07-09T23:00Z, after the E4 inverse-pair)**:
+mathlib `Scheme.GlueData` (CategoryTheory.GlueData fields J/U/V/f/t/t_id/t'/t_fac/cocycle):
+- `J := Fin k ↪ Fin n` · `U ι := Spec (ChartRing R ι)` · `V (ι,ι') := Spec (Away (det ι ι'))`
+  — note `matrix ι ι = 1` so `det ι ι = 1` and `V(ι,ι) ≅ U ι` as required;
+- `f ι ι' := Spec.map (algebraMap …)` — open immersion by the `IsOpenImmersion`-of-
+  localization instance;
+- `t ι ι' := Spec.map (ringHomAway ι ι')` (contravariance puts my `Away(det ι'ι) →+*
+  Away(det ιι')` in the right direction); `t_id` ⟸ **[GR-F-tid]** `ringHomAway ι ι = id`
+  (matrix ι ι = 1 ⟹ ringHom ι ι = algebraMap ⟹ lift = id by `IsLocalization` ext);
+- `t' i j k := pullback.lift` of the two legs; `pullback (f i j) (f i k)` ≅ Spec of the
+  double localization (`pullbackSpecIso`); **the crux [GR-F3]**: the leg
+  `P(ι;ι',ι'') ⟶ V(ι',ι'')` needs the ring map `Away (det ι' ι'') →+* D(ι;ι',ι'')`
+  (double localization) — exists because the `ringHom ι ι''`-image of `det ι' ι''`
+  becomes a unit once `det ι ι'` is ALSO inverted: the generic composite-matrix identity
+  `(matrix ι' ι'').map (into-double) = Minv(ιι')-image * matrixAway(ιι'')-image`-form
+  (proof by the master column identity `ringHom_comp_column`, two applications);
+- `t_fac` by `pullback.lift_snd/fst`; `cocycle` by `pullback.hom_ext` + both projections
+  reduced to ring-level composites, closed by [GR-E4]'s inverse-pair + [GR-F3] +
+  `IsLocalization.ringHom_ext`² on the double localizations. No tensor-algebra of Aways
+  needed anywhere (all maps built by universal properties, never by explicit tensors).
+
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
   the relevant minor determinant; cocycle identity) — the det/adjugate algebra.
