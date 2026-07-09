@@ -130,6 +130,14 @@ theorem isGammaZeroFppf_iff_generator (N : ℕ) [NeZero N] (D : RelEffCartierDiv
 -- schemes are covered: the discharge route (`exists_incidenceLocusEQ` on the tautological
 -- point over `D` + `orderDivisor_baseChange`) is universal over arbitrary `T ⟶ S`, never
 -- through geometric points — the `ℚ̄[ε]` trap recorded at `IsNaiveGammaOne` does not bite.
+/-- The tautological `B`-point of `E` on the subgroup divisor `D`, where `B = D.ideal.subscheme`:
+its underlying morphism is the closed immersion `D ↪ E` (`D.ideal.subschemeι`), a section of `E.π`
+over `B` by construction of the base map `π_B = subschemeι ≫ E.π`.  T-D15 compares its order divisor
+against the pulled-back `D`; a `T`-point `P` on `D` (via `h : T ⟶ B`) is exactly this taut point
+pulled along `h`. -/
+noncomputable def divisorTautPoint (D : RelEffCartierDiv E.π) :
+    E.Point (D.ideal.subschemeι ≫ E.π) := sorry
+
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
 generator of `D`": for a `T`-point `P` of `E` lying on `D` (witnessed by the factorisation
@@ -145,6 +153,13 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
         (h : T ⟶ D.ideal.subscheme), h ≫ D.ideal.subschemeι = P.1 →
         ((∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = h) ↔
           E.IsDivisorGenerator N D t (Point.asSection E t P)) := by
+  obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
+    (E.baseChange (D.ideal.subschemeι ≫ E.π)).smooth
+    (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
+      (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N)
+    (D.baseChange (D.ideal.subschemeι ≫ E.π))
+  refine ⟨Z, fun T t P h hcomp => ?_⟩
+  refine Iff.trans (hZ h) ?_
   sorry
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
