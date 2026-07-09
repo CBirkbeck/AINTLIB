@@ -823,6 +823,62 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
 
 end LocallyFreeRankLocusAux
 
+section LocallyFreeRankLocusSheaf
+
+open scoped TensorProduct
+
+variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
+
+/-- The pushforward section module of a finite lfp morphism over an affine open is a
+finitely presented module (the [L1-e] instance package, following the `vanishingLocus`
+pattern). -/
+private theorem locallyFreeRankLocusSheaf_fp (U : S.affineOpens) :
+    letI := ((f.app U.1).hom).toAlgebra
+    Module.FinitePresentation Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := by
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI : Module.Finite Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := f.finite_app U.1 U.2
+  haveI hfp : RingHom.FinitePresentation (f.appLE U.1 (f ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation f ‹_› U
+      ⟨f ⁻¹ᵁ U.1, U.2.preimage f⟩ le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfp
+  haveI : Algebra.FinitePresentation Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := hfp
+  exact Module.FinitePresentation.of_finite_of_finitePresentation _ _
+
+/-- **[L1-e1]** The flattening ideal sheaf of KM 6.4.3: on each affine open it is the
+affine universal ideal ([L1-d]) of the pushforward module. `map_ideal_basicOpen` holds
+because both sides carry the same universal property ([L1-c] uniqueness). -/
+private noncomputable def locallyFreeRankLocusSheaf (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K)
+      (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n) : S.IdealSheafData where
+  ideal U :=
+    letI := ((f.app U.1).hom).toAlgebra
+    haveI := locallyFreeRankLocusSheaf_fp f U
+    (locallyFreeRankLocusAux_exists_ideal (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose
+  map_ideal_basicOpen U g := by
+    sorry
+
+/-- The defining property of the flattening ideal sheaf on an affine open: an algebra
+kills it iff the base-changed pushforward module is finite locally free of rank `n`. -/
+private theorem locallyFreeRankLocusSheaf_spec (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K)
+      (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n)
+    (U : S.affineOpens) (A : Type u) (cA : CommRing A) (aA : Algebra Γ(S, U.1) A) :
+    letI := ((f.app U.1).hom).toAlgebra
+    ((Module.Flat A (A ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ∧
+        ∀ p : PrimeSpectrum A,
+          Module.rankAtStalk (A ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) p = n) ↔
+      ((locallyFreeRankLocusSheaf f n hb).ideal U).map (algebraMap Γ(S, U.1) A) = ⊥) := by
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI := locallyFreeRankLocusSheaf_fp f U
+  exact (locallyFreeRankLocusAux_exists_ideal (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n)
+    (hb U)).choose_spec A cA aA
+
+end LocallyFreeRankLocusSheaf
+
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
