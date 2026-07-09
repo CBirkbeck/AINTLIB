@@ -277,4 +277,70 @@ theorem exists_conj_r_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
       inv_one, mul_one, one_mul, mul_zero, zero_mul, add_zero, zero_add]
     rw [hd g, smul_neg]; ring
 
+/-- `g • (1, 0, 0, τ) = (1, 0, 0, g • τ)`. -/
+theorem vcSMul_mk_t (g : G) (τ : A) :
+    (g • (⟨1,0,0,τ⟩ : VariableChange A)) = ⟨1, 0, 0, g • τ⟩ := by
+  apply VariableChange.ext
+  · apply Units.ext; simp [vcSMul_smul_def, vcSMul, uSMul_coe, smul_one]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+  · simp [vcSMul_smul_def, vcSMul]
+
+/-- With `r = s = 0` the `t`-component of a `u = 1` cocycle is a *central* additive cocycle. -/
+theorem t_isCocycle {C : G → VariableChange A} (hC : IsVCocycle C)
+    (hu : ∀ g, (C g).u = 1) (hs : ∀ g, (C g).s = 0) (hr : ∀ g, (C g).r = 0) (g h : G) :
+    (C (g * h)).t = (C g).t + g • (C h).t := by
+  have h1 := congrArg WeierstrassCurve.VariableChange.t (hC g h)
+  simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u, vcSMul_r, vcSMul_s, vcSMul_t,
+    hr g, hu h] at h1
+  rw [h1]
+  simp only [uSMul_coe, hu h, Units.val_one, smul_one, one_pow, mul_one, smul_zero, mul_zero,
+    zero_mul, add_zero, zero_add]
+
+/-- **([a5-iii], step 5 — kill `t`)** With `u = 1, r = s = 0` the `t`-cocycle is killed by conjugating
+with `(1, 0, 0, -d)`, leaving the trivial cocycle `1`. -/
+theorem exists_conj_t_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
+    {C : G → VariableChange A} (hC : IsVCocycle C) (hu : ∀ g, (C g).u = 1)
+    (hs : ∀ g, (C g).s = 0) (hr : ∀ g, (C g).r = 0) :
+    ∃ D : VariableChange A, ∀ g, D * C g * (g • D)⁻¹ = 1 := by
+  obtain ⟨d, hd⟩ := exists_sub_smul_eq_of_isCocycle G ℤ A hfree (fun g => (C g).t)
+    (t_isCocycle hC hu hs hr)
+  refine ⟨⟨1, 0, 0, -d⟩, fun g => ?_⟩
+  rw [vcSMul_mk_t]
+  apply VariableChange.ext
+  · apply Units.ext
+    simp [VariableChange.mul_def, VariableChange.inv_def, VariableChange.one_def, hu g]
+  · simp [VariableChange.mul_def, VariableChange.inv_def, VariableChange.one_def, hu g, hr g]
+  · simp [VariableChange.mul_def, VariableChange.inv_def, VariableChange.one_def, hu g, hs g]
+  · simp only [VariableChange.mul_def, VariableChange.inv_def, VariableChange.one_def, hu g,
+      hr g, hs g, Units.val_one, mul_one, one_mul, one_pow, mul_zero, zero_mul, add_zero, zero_add]
+    rw [hd g, smul_neg]; ring
+
+/-- **([a5-iii] COMPLETE — local vanishing of `H¹(G, VariableChange A)`)** For a free action with
+`Aᴳ` local, every `VariableChange` cocycle is a **coboundary**: there is `E : VariableChange A` with
+`C g = E * (g • E)⁻¹` for all `g`. Chain the four layer-trivializations
+`exists_conj_u_one → exists_conj_s_zero → exists_conj_r_zero → exists_conj_t_zero`; the composite
+conjugator `D = Dₜ·Dᵣ·D_s·D_u` satisfies `D · C g · (g•D)⁻¹ = 1`, i.e. `C g = D⁻¹ · (g•D) = E · (g•E)⁻¹`
+with `E = D⁻¹`.
+
+Geometrically: the `VariableChange` cocycle of the `G`-action on the universal curve's Weierstrass
+model `W₀` is trivialized by a single `E`, so `E⁻¹ • W₀` is `G`-invariant and descends to the model
+of `E/G` over `X/G = Spec Aᴳ` (`descendFixed`). This is the heart of `[a5]`. -/
+theorem exists_coboundary [Fintype G] [DecidableEq G] [Nontrivial A]
+    [IsLocalRing (FixedPoints.subalgebra ℤ A G)] (hfree : IsFreeAlgebraAction G ℤ A)
+    {C : G → VariableChange A} (hC : IsVCocycle C) :
+    ∃ E : VariableChange A, ∀ g : G, C g = E * (g • E)⁻¹ := by
+  obtain ⟨Du, hCu_coc, hCu⟩ := exists_conj_u_one hfree hC
+  obtain ⟨Ds, hCs_coc, hCs_u, hCs⟩ := exists_conj_s_zero hfree hCu_coc hCu
+  obtain ⟨Dr, hCr_coc, hCr_u, hCr_s, hCr⟩ := exists_conj_r_zero hfree hCs_coc hCs_u hCs
+  obtain ⟨Dt, hDt⟩ := exists_conj_t_zero hfree hCr_coc hCr_u hCr_s hCr
+  refine ⟨(Dt * Dr * Ds * Du)⁻¹, fun g => ?_⟩
+  have hflat : (Dt * Dr * Ds * Du) * C g * (g • (Dt * Dr * Ds * Du))⁻¹ = 1 := by
+    have := hDt g
+    simp only [smul_mul', smul_inv', mul_inv_rev, mul_assoc] at this ⊢
+    convert this using 3 <;> group
+  have h2 : (Dt * Dr * Ds * Du) * C g = g • (Dt * Dr * Ds * Du) := mul_inv_eq_one.mp hflat
+  rw [smul_inv', inv_inv]
+  exact eq_inv_mul_iff_mul_eq.mpr h2
+
 end WeierstrassCurve
