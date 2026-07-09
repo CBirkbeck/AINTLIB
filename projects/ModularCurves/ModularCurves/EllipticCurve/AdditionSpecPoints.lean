@@ -581,6 +581,21 @@ theorem chartι_map_comp_projModelBaseChange (f : U →+* R) (W₀ : Weierstrass
       projModelBaseChange f W₀ = _
   rw [hcongr, Category.assoc, awayι_image_comp_projModelBaseChange]
 
+
+/-- [C6-e4a] `bcChartAwayMap` carries the chart coordinate elements to the image coordinates. -/
+lemma bcChartAwayMap_isLocalizationElem (f : U →+* R) (W₀ : WeierstrassCurve U) (i m : Fin 3) :
+    bcChartAwayMap f W₀ i (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W₀ i) (mk_X_mem_quotientGrading_one W₀ m)) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        ((baseChangeGradedHom f W₀).2 (mk_X_mem_quotientGrading_one W₀ i))
+        ((baseChangeGradedHom f W₀).2 (mk_X_mem_quotientGrading_one W₀ m)) := by
+  rw [bcChartAwayMap]
+  simp only [HomogeneousLocalization.Away.isLocalizationElem,
+    HomogeneousLocalization.Away.map_mk]
+  congr 1
+  rw [pow_one, pow_one]
+  rfl
+
 end ChartNaturality
 
 section AtlasPush
