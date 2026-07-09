@@ -398,6 +398,47 @@ noncomputable def tateRingOverAlgLiftOfPoint (W : WeierstrassCurve A) [W.IsEllip
   tateRingOverAlgLiftOfTateNormal R ((tateNormalVariableChange W x y hxy hord) • W)
     (tateNormalVariableChange_isTateNormal W x y hxy hord)
 
+/-- The affine Tate-atlas map attached to a Tate-normal Weierstrass curve. -/
+noncomputable def tateBaseSpecMapOfTateNormal (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) : Spec (CommRingCat.of A) ⟶ tateBase R :=
+  tateBaseSpecMap R (tateRingOverAlgLiftOfTateNormal R W hW)
+
+/-- The affine Tate-atlas map attached to a pointed Weierstrass chart after T-E1
+normalisation. -/
+noncomputable def tateBaseSpecMapOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    Spec (CommRingCat.of A) ⟶ tateBase R :=
+  tateBaseSpecMap R (tateRingOverAlgLiftOfPoint R W x y hxy hord)
+
+/-- The Tate-normal affine chart map lies over `Spec R`. -/
+theorem tateBaseSpecMapOfTateNormal_tateStructMap (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) :
+    tateBaseSpecMapOfTateNormal R W hW ≫ tateStructMap R =
+      Spec.map (CommRingCat.ofHom (algebraMap R A)) :=
+  tateBaseSpecMap_tateStructMap R (tateRingOverAlgLiftOfTateNormal R W hW)
+
+/-- The pointed affine chart map lies over `Spec R`. -/
+theorem tateBaseSpecMapOfPoint_tateStructMap (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    tateBaseSpecMapOfPoint R W x y hxy hord ≫ tateStructMap R =
+      Spec.map (CommRingCat.ofHom (algebraMap R A)) :=
+  tateBaseSpecMap_tateStructMap R (tateRingOverAlgLiftOfPoint R W x y hxy hord)
+
+/-- A map to the affine Tate atlas is the Tate-normal chart map once it has the same
+Tate coefficients. -/
+theorem tateBaseSpecMap_eq_tateBaseSpecMapOfTateNormal
+    (φ : tateRingOver R →ₐ[R] A) (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal)
+    (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) =
+      W.a₁)
+    (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) =
+      W.a₂) :
+    tateBaseSpecMap R φ = tateBaseSpecMapOfTateNormal R W hW := by
+  unfold tateBaseSpecMapOfTateNormal
+  apply tateBaseSpecMap_ext
+  · simpa [tateRingOverAlgLiftOfTateNormal] using h0
+  · simpa [tateRingOverAlgLiftOfTateNormal] using h1
+
 /-- The local atlas map classifies the T-E1 normal form of the pointed chart. -/
 theorem tateCurveLocOver_map_tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
     (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :

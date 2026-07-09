@@ -10581,6 +10581,19 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; n
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
 
+## Amendments v10.91-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] affine chart maps LANDED
+
+Added the per-chart affine Tate-atlas maps in `YOneAtlasClassify.lean`:
+`tateBaseSpecMapOfTateNormal`, `tateBaseSpecMapOfPoint`,
+`tateBaseSpecMapOfTateNormal_tateStructMap`, `tateBaseSpecMapOfPoint_tateStructMap`, and
+`tateBaseSpecMap_eq_tateBaseSpecMapOfTateNormal`. These expose the T-E1 normalisation output as
+actual affine maps `Spec A -> tateBase R`, with the `Spec R` compatibility and
+coefficient-uniqueness handle needed by B2-iii/iv.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
 ## Amendments v10.87-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] global coefficient map handle LANDED
 
 Added `tateBaseMapOfGlobalCoeffs` and `tateBaseMapOfGlobalCoeffs_ext` in the dedicated atlas file.
