@@ -343,4 +343,47 @@ theorem exists_coboundary [Fintype G] [DecidableEq G] [Nontrivial A]
   rw [smul_inv', inv_inv]
   exact eq_inv_mul_iff_mul_eq.mpr h2
 
+/-- `vcSMul g` is `VariableChange.map` along the ring automorphism `g`. -/
+theorem vcSMul_eq_map (g : G) (C : VariableChange A) :
+    vcSMul g C = C.map (MulSemiringAction.toRingHom G A g) := by
+  apply VariableChange.ext
+  · apply Units.ext; rfl
+  all_goals rfl
+
+/-- **([a5-iv] algebraic core — the descended model)** Let `G` act freely on `A` with `Aᴳ` local,
+and let `W₀ : WeierstrassCurve A` carry a `VariableChange`-cocycle `G`-action, i.e. `C : G →
+VariableChange A` a cocycle with `C_g • (g • W₀) = W₀` for all `g` (here `g • W₀ = W₀.map g` is the
+coefficientwise action). Then there is `E : VariableChange A` and a `WeierstrassCurve Aᴳ` `W₁` with
+`W₁.map (Aᴳ ↪ A) = E⁻¹ • W₀`.
+
+`E` comes from `exists_coboundary` (`C_g = E·(g•E)⁻¹`); `E⁻¹ • W₀` is then `G`-invariant
+(`g • (E⁻¹•W₀) = (g•E)⁻¹•(g•W₀) = E⁻¹•W₀`, using `map_variableChange` and the cocycle relation), so its
+coefficients lie in `Aᴳ` and `descendFixed` produces `W₁`.
+
+Geometrically: `W₀` is the (global) Weierstrass model of the universal curve `E`, the cocycle is the
+`G`-action's change-of-variables datum (`a5-ii`), and `W₁` is the Weierstrass model of the quotient
+curve `E/G` over `X/G = Spec Aᴳ`. Together with `isPullback_projModelBaseChange`, `projModelVCIso` and
+`isPullback_quotientπ` this yields the `LocallyWeierstrass` iso — the remaining geometric `a5-iv`. -/
+theorem exists_invariant_descent [Fintype G] [DecidableEq G] [Nontrivial A]
+    [IsLocalRing (FixedPoints.subalgebra ℤ A G)] (hfree : IsFreeAlgebraAction G ℤ A)
+    (W₀ : WeierstrassCurve A) {C : G → VariableChange A} (hC : IsVCocycle C)
+    (haction : ∀ g : G, C g • (W₀.map (MulSemiringAction.toRingHom G A g)) = W₀) :
+    ∃ (E : VariableChange A) (W₁ : WeierstrassCurve (FixedPoints.subring A G)),
+      W₁.map (algebraMap (FixedPoints.subring A G) A) = E⁻¹ • W₀ := by
+  obtain ⟨E, hE⟩ := exists_coboundary hfree hC
+  have hinv : ∀ g : G,
+      (E⁻¹ • W₀).map (MulSemiringAction.toRingHom G A g) = E⁻¹ • W₀ := by
+    intro g
+    rw [← WeierstrassCurve.map_variableChange, ← vcSMul_eq_map, ← vcSMul_smul_def, smul_inv']
+    have h1 := haction g
+    rw [hE g, mul_smul] at h1
+    rw [← inv_smul_smul E ((g • E)⁻¹ • (W₀.map (MulSemiringAction.toRingHom G A g))), h1]
+  refine ⟨E, (E⁻¹ • W₀).descendFixed (fun g => ?_) (fun g => ?_) (fun g => ?_) (fun g => ?_)
+      (fun g => ?_), (E⁻¹ • W₀).descendFixed_map _ _ _ _ _⟩
+  · exact congrArg WeierstrassCurve.a₁ (hinv g)
+  · exact congrArg WeierstrassCurve.a₂ (hinv g)
+  · exact congrArg WeierstrassCurve.a₃ (hinv g)
+  · exact congrArg WeierstrassCurve.a₄ (hinv g)
+  · exact congrArg WeierstrassCurve.a₆ (hinv g)
+
 end WeierstrassCurve

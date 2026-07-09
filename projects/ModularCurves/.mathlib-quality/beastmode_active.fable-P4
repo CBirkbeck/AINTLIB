@@ -1,4 +1,1 @@
-STATE (fable-P4, end 2026-07-09): DIRECTED SAME-SESSION TASKS COMPLETE.
-- [a5-iii] algebraic core DONE (exists_coboundary, H^1(G,VariableChange A) local vanishing, axiom-clean; ratified upstream-grade).
-- B2 repoint T-H4/T-H6 DONE (b2_log + KM 7.1.2 quotes + staged statements + refutation; unblocks GH).
-DEFERRED BY COORDINATOR (v10.75) to next session: [a5] geometric stitch (a5-ii action->cocycle bridge -> a5-i -> a5-iv assembly = exists_ellipticCurveGeom_quotient axiom-clean = engine lands), then moduli-functor layer. FOLLOW-UP: make gammaHNaiveProblem_not_relativelyRepresentable fully axiom-clean (residual sorryAx via gated FullLevelPt/glSmul).
+FOCUS: [a5] algebraic pipeline COMPLETE (exists_invariant_descent: VariableChange-cocycle action -> descended W1 over A^G, axiom-clean). NEXT: geometric a5-iv (relate projModel W1 to E/G via isPullback_projModelBaseChange + projModelVCIso + isPullback_quotientpi -> LocallyWeierstrass iso) + a5-ii (cocycle from geometric action). Then assemble locallyWeierstrass_quotientpi.
