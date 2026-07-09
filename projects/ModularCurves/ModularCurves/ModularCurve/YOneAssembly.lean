@@ -495,7 +495,15 @@ private lemma tateMarkedPoint_pull_factor (R : CommRingCat.{u}) (k : Type u) [Fi
 pulled marked point `P₀ = (0, 0)` is the affine origin `some 0 0`. Assembled from the setup lemmas
 above (each own budget): `g` factors through the `Z`-chart via `(algebraMap) ∘ φ_B`, so its chart
 coordinates are the `algebraMap`-images of `tateP0sol = (0, 0)` — read off by
-`projModelPointsEquiv_some`. -/
+`projModelPointsEquiv_some`.
+
+Stated on the composite `projModelPointsEquiv ∘ pointSpecPointsEquiv` (v10.72 deviation (a),
+APPROVED): this composite **is** the underlying map of the `[T-B6′]` group iso
+`geomFibrePointAddEquiv` — definitionally, by `geomFibrePointAddEquiv_apply` (its `toEquiv` is
+exactly `(pointSpecPointsEquiv …).trans (projModelPointsEquiv …)`). Phrasing it this way keeps the
+statement free of a `(tateCurveLocOver R).baseChange k).IsElliptic` obligation; the group structure
+(and hence `[T-B6′]`) enters only in `tateMarkedPoint_nowhereGeomOrderLEThree`, which rewrites the
+goal through `geomFibrePointAddEquiv_apply` before invoking this pin. -/
 theorem projModelPointsEquiv_pull_tateMarkedPoint (k : Type u) [Field k]
     [Algebra (tateRingOver R) k] [DecidableEq k]
     (hns : ((tateCurveLocOver R).baseChange k).toAffine.Nonsingular 0 0) :
