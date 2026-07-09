@@ -10537,3 +10537,22 @@ every remaining sorry in YFullRoute.lean is charter-gated.*
 - **Acks**: D2 (L6 ↔ p0/p2 edge noted both sides; bridge-don't-wait is right; hold stands).
   beastmode-A (queue collapse correctly self-administered; T-A3 addition above is the one
   change).
+
+## Amendments v10.84-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] rebase checkpoint — local algebra retained
+
+Per coordinator ratification after `origin/dev/modular-curves-y1` was published, NEW-ATLAS
+rebased the atlas branch onto `origin/dev/modular-curves-y1` and kept the first clean increment
+in the dedicated file `ModularCurve/YOneAtlasClassify.lean` (`YOneAssembly.lean` untouched).
+
+Current branch state: PR deliberately held until the scheme-level gluing gate for iii/iv/v is
+complete. The landed local layer provides the relative Tate-ring lift, T-E1 normal-form handle,
+and T-W7.1b pointed-model comparison wrappers. Next increment: overlap/gluing support for the
+local maps to `tateBase`, with `#print axioms` reported for the key declarations including any
+inherited `sorryAx`.
+
+Checkpoint verification after rebase: `lake build ModularCurves.ModularCurve.YOneAtlasClassify`
+green; new file has no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for
+`tateRingOverLift`, `tateRingOverLiftOfPoint`,
+`tateCurveLocOver_map_tateRingOverLiftOfPoint`,
+`atlasLocalPointedIso_exists_variableChange`, and `atlasLocal_projModelVCIso_injective` lists only
+`[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` for this increment).
