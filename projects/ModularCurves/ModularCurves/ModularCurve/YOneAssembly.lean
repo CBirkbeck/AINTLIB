@@ -1039,7 +1039,48 @@ theorem isNaiveGammaOne_pullSection_iff [NeZero N] {X Y : EllObj R} (f : X ⟶ Y
       (Y.curve.baseChange f.baseHom).IsNaiveGammaOne N
         (EllipticCurve.Point.asSection Y.curve f.baseHom
           (EllipticCurve.Point.pull Y.curve f.baseHom Q)) := by
-  sorry
+  -- `transportSection` (along `f`'s cartesian comparison iso) as an additive hom — additivity is
+  -- A's `T-E4-family` primitive (`transportSection_add_of_finitePresentation`), the "prove once".
+  set Φ : X.curve.Section →+ (Y.curve.baseChange f.baseHom).Section :=
+    AddMonoidHom.mk' (EllHom.transportSection R f)
+      (EllHom.transportSection_add_of_finitePresentation R f) with hΦ
+  have hinj : Function.Injective Φ := EllHom.transportSection_injective R f
+  have hΦ0 : ∀ y, Φ y = 0 ↔ y = 0 := fun y => by rw [← map_zero Φ]; exact hinj.eq_iff
+  -- dictionary: the transport of the pulled section IS the base-changed pulled point-section.
+  have hdict : Φ (EllHom.pullSection R f Q)
+      = EllipticCurve.Point.asSection Y.curve f.baseHom (EllipticCurve.Point.pull Y.curve f.baseHom Q) := by
+    refine Subtype.ext ?_
+    show (EllHom.transportSection R f (EllHom.pullSection R f Q)).1 = _
+    rw [EllHom.transportSection_pullSection]
+    rfl
+  -- section-level killing transports through the injective additive hom.
+  have killing_iff : ((N : ℤ) • EllHom.pullSection R f Q = 0) ↔
+      ((N : ℤ) • EllipticCurve.Point.asSection Y.curve f.baseHom
+        (EllipticCurve.Point.pull Y.curve f.baseHom Q) = 0) := by
+    rw [← hdict, ← map_zsmul Φ, hΦ0]
+  -- fibrewise, any integer scalar: pull ∘ (a • ·) then iso-cancel (`pull_transportSection_eq_zero_iff`).
+  have hbridge : ∀ (a : ℤ) {k : Type u} [Field k] (t : Spec (CommRingCat.of k) ⟶ X.base),
+      (a • EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q) = 0 ↔
+        a • EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
+          (EllipticCurve.Point.asSection Y.curve f.baseHom
+            (EllipticCurve.Point.pull Y.curve f.baseHom Q)) = 0) := by
+    intro a k _ t
+    rw [← EllipticCurve.Point.pull_zsmul, ← EllipticCurve.Point.pull_zsmul,
+      pull_transportSection_eq_zero_iff (R := R) (f := f) (τ := t)
+        (w := a • EllHom.pullSection R f Q),
+      show EllHom.transportSection R f (a • EllHom.pullSection R f Q)
+        = a • Φ (EllHom.pullSection R f Q) from map_zsmul Φ a _, hdict]
+  constructor
+  · rintro ⟨hkill, hfib⟩
+    refine ⟨killing_iff.mp hkill, ?_⟩
+    intro k _ _ t
+    exact ⟨(hbridge (N : ℤ) t).mp (hfib k t).1,
+      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mp ((hfib k t).2 a ha haN)⟩
+  · rintro ⟨hkill, hfib⟩
+    refine ⟨killing_iff.mpr hkill, ?_⟩
+    intro k _ _ t
+    exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
+      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
 
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
