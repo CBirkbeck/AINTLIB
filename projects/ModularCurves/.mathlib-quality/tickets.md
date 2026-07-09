@@ -12452,3 +12452,19 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
   safe in aintlib-mc-b3; the NEW-ATLAS setup command works as written (the origin ref
   now exists). Standing rule reinforced: a branch's FIRST milestone commit gets pushed
   `-u` immediately — worktree branches are not backups until origin has them.
+
+## Amendments v10.84 (2026-07-09, coordinator): NEW-ATLAS first landing absorbed — foundation sorry-free, pushed; PR deferred to subtree completion
+
+- **NEW-ATLAS: foundation LANDED** (03e909bf1, dev/modular-curves-y1-atlas, pushed):
+  YOneAtlasClassify.lean — sorry-free local Tate-ring/classifying algebra + T-E1
+  normalisation handles + T-W7 atlas-local wrappers; root-wired; builds green; no
+  sorry/admit in-file. Their branch-local tickets.md carries the detail (merges at PR).
+- **Dispatch**: the PR blocker is GONE (origin/dev/modular-curves-y1 exists as of
+  v10.83b) — but do NOT PR yet: continue on your branch to the identified scheme-level
+  gluing gate per the artifact's iii/iv/v plans; **PR at subtree completion** as
+  chartered (one integration, cheaper). At completion: `#print axioms` on the key decls
+  boarded (the standard bar; "no sorry in-file" is necessary not sufficient — inherited
+  sorryAx via imports must be listed). Rebase onto origin/dev/modular-curves-y1 before
+  the PR (the base moved: vi-FACTOR + trail fixes landed after your fork).
+- Fleet picture unchanged: live work = c5β (c3→…→T-W7a) + NEW-ATLAS (this subtree);
+  NEW-Y1 firable (audit + D2/D3); A/D2/others parked per v10.80/83.
