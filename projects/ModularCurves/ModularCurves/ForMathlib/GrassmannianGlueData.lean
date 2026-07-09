@@ -117,6 +117,43 @@ lemma isUnit_tPrimeBase_det_right :
   exact (IsLocalization.Away.algebraMap_isUnit
     (Transition.det (R := R) ι ι'')).map _
 
+/-- The right t'-leg: `Away (det ι' ι'') →+* D(ι; ι', ι'')`, the `Away.lift` of the
+base leg at the [GR-F3] unit. -/
+noncomputable def tPrimeLegRight :
+    Localization.Away (Transition.det (R := R) ι' ι'') →+* doubleRing R ι ι' ι'' :=
+  IsLocalization.Away.lift (Transition.det (R := R) ι' ι'')
+    (isUnit_tPrimeBase_det_right R ι ι' ι'')
+
+/-- The left t'-leg: `Away (det ι' ι) →+* D(ι; ι', ι'')`, the `Away.lift` of the base
+leg at the [GR-F1] unit. -/
+noncomputable def tPrimeLegLeft :
+    Localization.Away (Transition.det (R := R) ι' ι) →+* doubleRing R ι ι' ι'' :=
+  IsLocalization.Away.lift (Transition.det (R := R) ι' ι)
+    (isUnit_tPrimeBase_det_left R ι ι' ι'')
+
+/-- **[GR-F t']** The t'-map at ring level: out of the ι'-side double ring into the
+ι-side one, `x ⊗ₜ y ↦ legRight x * legLeft y`. -/
+noncomputable def tPrimeRing :
+    doubleRing R ι' ι'' ι →+* doubleRing R ι ι' ι'' :=
+  letI : Algebra (ChartRing R ι') (doubleRing R ι ι' ι'') :=
+    (tPrimeBase R ι ι' ι'').toAlgebra
+  (Algebra.TensorProduct.productMap
+    ({ tPrimeLegRight R ι ι' ι'' with
+        commutes' := fun c =>
+          IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι ι' ι'') c } :
+      Localization.Away (Transition.det (R := R) ι' ι'') →ₐ[ChartRing R ι']
+        doubleRing R ι ι' ι'')
+    ({ tPrimeLegLeft R ι ι' ι'' with
+        commutes' := fun c =>
+          IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_left R ι ι' ι'') c } :
+      Localization.Away (Transition.det (R := R) ι' ι) →ₐ[ChartRing R ι']
+        doubleRing R ι ι' ι'')).toRingHom
+
+lemma tPrimeRing_tmul (x : Localization.Away (Transition.det (R := R) ι' ι''))
+    (y : Localization.Away (Transition.det (R := R) ι' ι)) :
+    tPrimeRing R ι ι' ι'' (x ⊗ₜ y)
+      = tPrimeLegRight R ι ι' ι'' x * tPrimeLegLeft R ι ι' ι'' y := rfl
+
 end TPrime
 
 end Module.Grassmannian

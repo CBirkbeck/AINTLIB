@@ -13358,3 +13358,16 @@ All tools exist and are pushed; step 5's Affine-side case algebra is the main vo
   `Algebra.TensorProduct.ext`-style) → `tPrimeRing : doubleRing ι' ι'' ι →+*
   doubleRing ι ι' ι''` → Spec + `pullbackSpecIso` conjugation → the `Scheme.GlueData`
   structure with t_fac/cocycle by `pullback.hom_ext` reducing to the ring layer.
+
+### v10.95h (2026-07-10, fable-FP): ★ tPrimeRing LANDED — the t'-map exists at ring level
+
+- `GrassmannianGlueData.lean` (sorry-free, axiom-clean): `tPrimeLegRight`/`tPrimeLegLeft`
+  (the two `Away.lift`s of `tPrimeBase` at the F3/F1 units) · **`tPrimeRing :
+  doubleRing ι' ι'' ι →+* doubleRing ι ι' ι''`** via `Algebra.TensorProduct.productMap`
+  of the two legs (AlgHom-ified by `lift_eq`-commutes over the `tPrimeBase.toAlgebra`
+  letI) · `tPrimeRing_tmul` spec — **by `rfl`**.
+- The `Scheme.GlueData` assembly now has every ring-level ingredient. FINAL BLOCK:
+  Spec-level t' := `pullbackSpecIso`-conjugated `Spec.map tPrimeRing`; the GlueData
+  structure; `t_fac`/`cocycle` via `pullback.hom_ext` + `IsLocalization.ringHom_ext`² +
+  `Algebra.TensorProduct.ext` reducing to the ring layer; then [GR-G] T-points ⟹
+  NISOG [L15].

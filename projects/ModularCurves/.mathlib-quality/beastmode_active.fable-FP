@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] wave 3 — tPrime unit conditions PROVEN. NEXT: the two Away.lifts + TensorProduct.lift = tPrimeRing, then Spec conjugation + GlueData structure.
+FOCUS: [NISOG-GRASS] wave 3 — tPrimeRing DONE (rfl tmul-spec). FINAL BLOCK: Spec-level t-prime conjugation + Scheme.GlueData structure + t_fac/cocycle + [GR-G].
