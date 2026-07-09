@@ -189,4 +189,20 @@ theorem exists_conj_u_one [Fintype G] [DecidableEq G] [Nontrivial A]
     intro g; apply Units.ext; rw [uSMul_coe, Units.val_mul]; exact hd' g
   exact ⟨⟨d, 0, 0, 0⟩, isVCocycle_conj _ hC, conj_u_one d hd⟩
 
+/-- **([a5-iii], step 3 — the `s`-layer is additive)** For a cocycle with `u`-component identically
+`1`, the `s`-component is an additive `1`-cocycle `s(gh) = s(g) + g • s(h)` — so
+`exists_sub_smul_eq_of_isCocycle` (additive Hilbert 90, PROVEN) yields `σ` with `(C g).s = σ − g•σ`,
+and conjugating by `(1, 0, σ, 0)` kills it (preserving `u = 1`). The `r`- and `t`-layers follow the
+same pattern (the `t`-cocycle carries the nilpotent twist `r·(g•s')`, handled after `r`, `s` are
+trivialized), completing the trivialization of the residual `(r,s,t)`-cocycle. -/
+theorem s_isCocycle_of_u_one {C : G → VariableChange A} (hC : IsVCocycle C)
+    (hu : ∀ g, (C g).u = 1) (g h : G) :
+    (C (g * h)).s = (C g).s + g • (C h).s := by
+  have h1 := congrArg WeierstrassCurve.VariableChange.s (hC g h)
+  simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u, vcSMul_s] at h1
+  rw [h1]
+  have hu1 : ((uSMul g (C h).u : Aˣ) : A) = 1 := by
+    rw [uSMul_coe, hu h, Units.val_one, smul_one]
+  rw [hu1, one_mul]
+
 end WeierstrassCurve
