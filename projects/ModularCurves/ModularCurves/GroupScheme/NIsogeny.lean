@@ -1027,8 +1027,25 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
     sorry
   refine ⟨locallyFreeRankLocusSheaf f n hb', fun T t => ?_⟩
   rw [ModularCurves.exists_factor_subschemeι_iff]
-  -- [L1-e3] the factoring locus is exactly the flat-of-rank-`n` locus
-  sorry
+  -- [L1-e3] the factoring locus is exactly the flat-of-rank-`n` locus.
+  -- The kernel is the largest ideal sheaf under the componentwise kernels (`ofIdeals` gci):
+  have hker_iff : (locallyFreeRankLocusSheaf f n hb') ≤ t.ker ↔
+      ∀ U : S.affineOpens, (locallyFreeRankLocusSheaf f n hb').ideal U ≤
+        RingHom.ker (t.app U.1).hom :=
+    (Scheme.IdealSheafData.gci.gc _ _).symm
+  rw [hker_iff]
+  -- per-chart geometric condition (through the bridge [L1-e0] + the affine spec)
+  constructor
+  · -- vanishing on every affine of `S` ⟹ the geometric condition
+    intro hle
+    sorry
+  · -- the geometric condition ⟹ vanishing (elementwise, via `zero_of_zero_cover`)
+    rintro ⟨hflat, hrank⟩
+    intro U
+    intro z hz
+    rw [RingHom.mem_ker]
+    -- the restriction of `t.app U z` to every affine chart `V ⊆ t⁻¹U` vanishes
+    sorry
 
 namespace EllipticCurve
 
