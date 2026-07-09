@@ -652,7 +652,122 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
       ∏ d ∈ N.divisors.attach,
         letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
         (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal := by
-  sorry
+  classical
+  have hN : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+  -- Integer multiples of `P₀` only depend on the residue mod `N` (this is where `hkill` enters).
+  have hsmul : ∀ {m m' : ℕ}, (m : ZMod N) = (m' : ZMod N) → (m : ℤ) • P₀ = (m' : ℤ) • P₀ := by
+    intro m m' h
+    obtain ⟨k, hk⟩ := (Nat.modEq_iff_dvd).mp ((ZMod.natCast_eq_natCast_iff m m' N).mp h)
+    have hm : (m : ℤ) = (m' : ℤ) + N * (-k) := by linarith
+    rw [hm, add_smul, mul_comm, mul_smul, hkill, smul_zero, add_zero]
+  -- The kernel-of-multiple function on residues.
+  set K : ZMod N → E.E.IdealSheafData :=
+    fun x => Scheme.Hom.ker (((x.val : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E) with hK
+  -- The additive-order-of-residue map into the divisors of `N`.
+  set ord : ZMod N → ℕ := fun x => N / Nat.gcd x.val N with hord
+  have hord_mem : ∀ x : ZMod N, ord x ∈ N.divisors := fun x =>
+    Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right x.val N), hN.ne'⟩
+  -- Step 1: the LHS is the product of `K` over all residues.
+  have hLHS : (P₀.orderDivisor E N).ideal = ∏ x : ZMod N, K x := by
+    rw [Section.orderDivisor, fullLevelLocusAux_sectionsDivisor_ideal]
+    refine Fintype.prod_bijective (fun a : Fin N => (((a : ℕ) + 1 : ℕ) : ZMod N)) ?_ _ _
+      fun a => ?_
+    · rw [Fintype.bijective_iff_injective_and_card]
+      refine ⟨fun a b hab => ?_, by simp [ZMod.card]⟩
+      have h1 := (ZMod.natCast_eq_natCast_iff _ _ _).mp hab
+      have h2 : (a : ℕ) ≡ (b : ℕ) [MOD N] := Nat.ModEq.add_right_cancel' 1 h1
+      exact Fin.ext (by rwa [Nat.ModEq, Nat.mod_eq_of_lt a.2, Nat.mod_eq_of_lt b.2] at h2)
+    · have h1 : (((a : ℕ) : ℤ) + 1) • P₀
+          = ((((((a : ℕ) + 1 : ℕ) : ZMod N)).val : ℤ) • P₀ : E.Point (𝟙 S)) := by
+        rw [show ((a : ℕ) : ℤ) + 1 = (((a : ℕ) + 1 : ℕ) : ℤ) by push_cast; ring]
+        exact hsmul (by simp)
+      simp only [hK]
+      exact congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) h1
+  -- Step 2: the RHS is the double product of `K` over divisors and units.
+  have hRHS : (∏ d ∈ N.divisors.attach,
+        letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
+        (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal)
+      = ∏ d ∈ N.divisors, ∏ x ∈ Finset.univ.filter (fun x : ZMod N => ord x = d), K x := by
+    -- (a) each prime-order divisor unfolds to a product of kernels over the totatives of `d`
+    -- (the instance-free enumeration `b ∈ range d, gcd(b,d) = 1`).
+    trans ∏ d ∈ N.divisors.attach,
+        ∏ b ∈ (Finset.range d.1).filter (fun b => Nat.Coprime b d.1),
+          Scheme.Hom.ker ((((b * (N / d.1) : ℕ) : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E)
+    · refine Finset.prod_congr rfl fun d _ => ?_
+      letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
+      show (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal = _
+      rw [primeOrderDivisor, fullLevelLocusAux_sectionsDivisor_ideal,
+        Equiv.prod_comp (Fintype.equivFinOfCardEq
+          (ZMod.card_units_eq_totient d.1)).symm
+          (fun u : (ZMod d.1)ˣ =>
+            Scheme.Hom.ker ((((((u : ZMod d.1)).val : ℤ) • ((((N / d.1 : ℕ) : ℤ)) • P₀) :
+              E.Point (𝟙 S))) : S ⟶ E.E))]
+      refine Finset.prod_bij (fun (u : (ZMod d.1)ˣ) _ => (u : ZMod d.1).val)
+        (fun u _ => Finset.mem_filter.mpr
+          ⟨Finset.mem_range.mpr (ZMod.val_lt _), ZMod.val_coe_unit_coprime u⟩)
+        (fun u₁ _ u₂ _ h => Units.ext (ZMod.val_injective _ h))
+        (fun b hb => ?_) (fun u _ => ?_)
+      · obtain ⟨hbr, hbc⟩ := Finset.mem_filter.mp hb
+        refine ⟨ZMod.unitOfCoprime b hbc, Finset.mem_univ _, ?_⟩
+        rw [ZMod.coe_unitOfCoprime, ZMod.val_natCast,
+          Nat.mod_eq_of_lt (Finset.mem_range.mp hbr)]
+      · refine congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) ?_
+        rw [smul_smul]
+        norm_cast
+    rw [Finset.prod_attach N.divisors
+      (fun d => ∏ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        Scheme.Hom.ker ((((b * (N / d) : ℕ) : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E))]
+    -- (b) per divisor, the totatives scaled by `N/d` enumerate exactly the residues of
+    -- additive order `d`.
+    refine Finset.prod_congr rfl fun d hd => ?_
+    have hdvd : d ∣ N := (Nat.mem_divisors.mp hd).1
+    have hd0 : 0 < d := Nat.pos_of_mem_divisors hd
+    have hNd0 : 0 < N / d := Nat.div_pos (Nat.le_of_dvd hN hdvd) hd0
+    have hmul : d * (N / d) = N := Nat.mul_div_cancel' hdvd
+    have hlt : ∀ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        b * (N / d) < N := fun b hb => by
+      calc b * (N / d) < d * (N / d) :=
+            (Nat.mul_lt_mul_right hNd0).mpr (Finset.mem_range.mp (Finset.mem_filter.mp hb).1)
+        _ = N := hmul
+    have hval : ∀ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        (((b * (N / d) : ℕ) : ZMod N)).val = b * (N / d) := fun b hb => by
+      rw [ZMod.val_natCast, Nat.mod_eq_of_lt (hlt b hb)]
+    refine Finset.prod_bij
+      (fun b _ => (((b * (N / d) : ℕ) : ZMod N)))
+      (fun b hb => ?_) (fun b₁ hb₁ b₂ hb₂ h => ?_) (fun x hx => ?_) (fun b hb => ?_)
+    · -- lands in the order-`d` fiber
+      refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
+      show N / Nat.gcd ((((b * (N / d) : ℕ) : ZMod N)).val) N = d
+      have hbc := (Finset.mem_filter.mp hb).2
+      have hgcd : Nat.gcd (b * (N / d)) N = N / d := by
+        have h1 : Nat.gcd (b * (N / d)) (d * (N / d)) = N / d := by
+          rw [Nat.gcd_mul_right, Nat.coprime_iff_gcd_eq_one.mp hbc, one_mul]
+        rwa [hmul] at h1
+      rw [hval b hb, hgcd, Nat.div_div_self hdvd hN.ne']
+    · -- injective
+      have hv := congrArg ZMod.val h
+      rw [hval b₁ hb₁, hval b₂ hb₂] at hv
+      exact Nat.eq_of_mul_eq_mul_right hNd0 hv
+    · -- surjective onto the fiber
+      have hx' : N / Nat.gcd x.val N = d := (Finset.mem_filter.mp hx).2
+      have hg_dvd : Nat.gcd x.val N ∣ N := Nat.gcd_dvd_right _ _
+      have hg : Nat.gcd x.val N = N / d := by
+        rw [← hx', Nat.div_div_self hg_dvd hN.ne']
+      have hb_lt : x.val / Nat.gcd x.val N < d := by
+        conv_rhs => rw [← hx']
+        exact Nat.div_lt_div_of_lt_of_dvd hg_dvd (ZMod.val_lt x)
+      have hcop : Nat.Coprime (x.val / Nat.gcd x.val N) d := by
+        have := Nat.coprime_div_gcd_div_gcd (Nat.gcd_pos_of_pos_right x.val hN)
+        rwa [hx'] at this
+      refine ⟨x.val / Nat.gcd x.val N, Finset.mem_filter.mpr
+        ⟨Finset.mem_range.mpr hb_lt, hcop⟩, ?_⟩
+      rw [← hg, Nat.div_mul_cancel (Nat.gcd_dvd_left x.val N)]
+      exact ZMod.natCast_rightInverse x
+    · -- term match
+      simp only [hK]
+      refine congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) ?_
+      rw [hval b hb]
+  rw [hLHS, hRHS, Finset.prod_fiberwise_of_maps_to (fun x _ => hord_mem x) K]
 
 end EllipticCurve
 
