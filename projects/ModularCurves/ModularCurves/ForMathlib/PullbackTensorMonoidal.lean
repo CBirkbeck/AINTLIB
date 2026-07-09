@@ -185,7 +185,7 @@ section PushforwardTensor
 variable {C : Type u₁} [Category.{v₁} C] {D : Type u₂} [Category.{v₂} D]
   {F : C ⥤ D} {R : Dᵒᵖ ⥤ CommRingCat.{u}} {S : Cᵒᵖ ⥤ CommRingCat.{u}}
   (φ : S ⋙ forget₂ CommRingCat RingCat ⟶
-    (F.op ⋙ R) ⋙ forget₂ CommRingCat RingCat)
+    F.op ⋙ (R ⋙ forget₂ CommRingCat RingCat))
   [∀ X : Cᵒᵖ, IsIso (φ.app X)]
 
 set_option backward.defeqAttrib.useBackward true in
@@ -201,7 +201,7 @@ noncomputable def pushforwardTensorIso
     (P Q : PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat RingCat)) :
     (pushforward.{u} φ).obj P ⊗ (pushforward.{u} φ).obj Q ≅
       (pushforward.{u} φ).obj (P ⊗ Q) :=
-  restrictScalarsTensorObjIso φ
+  restrictScalarsTensorObjIso (T₁ := S) (T₂ := F.op ⋙ R) φ
       ((pushforward₀OfCommRingCat F R).obj P) ((pushforward₀OfCommRingCat F R).obj Q) ≪≫
     (restrictScalars φ).mapIso
       (Functor.Monoidal.μIso (pushforward₀OfCommRingCat F R) P Q)
@@ -264,6 +264,91 @@ end AlgebraicGeometry
 namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X Y : Scheme.{u}}
+
+/-- The ring comparison of restriction along an open immersion `f : Y ⟶ X`, as a raw
+morphism of `RingCat`-valued presheaves on `Y.Opens` — the `whiskerRight` of the `appIso`
+inverses, exactly the morphism `Scheme.Modules.restrictFunctor` pushes forward along. -/
+noncomputable def restrictRingHom (f : Y ⟶ X) [IsOpenImmersion f] :
+    Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat ⟶
+      f.opensFunctor.op ⋙ (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) where
+  app U := (forget₂ CommRingCat RingCat).map (f.appIso U.unop).inv
+  naturality {U V} i :=
+    ((forget₂ CommRingCat RingCat).map_comp _ _).symm.trans
+      ((congrArg (fun g => (forget₂ CommRingCat RingCat).map g)
+        (f.appIso_inv_naturality i)).trans
+        ((forget₂ CommRingCat RingCat).map_comp _ _))
+
+instance (f : Y ⟶ X) [IsOpenImmersion f] (U : (Y.Opens)ᵒᵖ) :
+    IsIso ((restrictRingHom f).app U) :=
+  inferInstanceAs (IsIso ((forget₂ CommRingCat RingCat).map ((f.appIso U.unop).inv)))
+
+/-- **[PIC-P1b-MONO], leaf ι-MAIN.** Pullback along an *open immersion* commutes with the
+sheafified tensor: `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. Route: identify `f^*` with sectionwise
+restriction (`restrictFunctorIsoPullback`), un-sheafify (`sheafifyValIso`), collapse the
+inner `X`-side sheafification (its unit is locally bijective; restriction preserves local
+bijectivity by `isLocallyInjective/Surjective_whiskerLeft_opensFunctor`, so the `Y`-side
+sheafification inverts the restricted unit), and interchange restriction with the presheaf
+tensor (`pushforwardTensorIso`, sectionwise `x ⊗ₜ y ↦ x ⊗ₜ y`). -/
+theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImmersion f]
+    (M N : X.Modules) :
+    Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
+      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
+  have hmem : PresheafOfModules.sheafificationW (𝟙 Y.ringCatSheaf.obj)
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val))) := by
+    rw [PresheafOfModules.sheafificationW_iff_isLocallyBijective]
+    haveI hi : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+        ((PresheafOfModules.toPresheaf _).map
+          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+            (M.val ⊗ N.val))) := by
+      rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
+      exact (GrothendieckTopology.W_toSheafify _ _).isLocallyInjective
+    haveI hs : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+        ((PresheafOfModules.toPresheaf _).map
+          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+            (M.val ⊗ N.val))) := by
+      rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
+      exact (GrothendieckTopology.W_toSheafify _ _).isLocallySurjective
+    exact ⟨isLocallyInjective_whiskerLeft_opensFunctor f
+        ((PresheafOfModules.toPresheaf _).map
+          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+            (M.val ⊗ N.val))),
+      isLocallySurjective_whiskerLeft_opensFunctor f
+        ((PresheafOfModules.toPresheaf _).map
+          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+            (M.val ⊗ N.val)))⟩
+  rw [PresheafOfModules.sheafificationW_iff] at hmem
+  have e1 : (Modules.pullback f).obj (tensorObj M N) ≅
+      (restrictFunctor f).obj (tensorObj M N) :=
+    (restrictFunctorIsoPullback f).symm.app (tensorObj M N)
+  have e2 : (restrictFunctor f).obj (tensorObj M N) ≅
+      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        (((restrictFunctor f).obj (tensorObj M N)).val) :=
+    (sheafifyValIso _).symm
+  have e3 : (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        (((restrictFunctor f).obj (tensorObj M N)).val) ≅
+      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj (M.val ⊗ N.val)) :=
+    (@asIso _ _ _ _ _ hmem).symm
+  have e4 : (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj (M.val ⊗ N.val)) ≅
+      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj M.val ⊗
+          (PresheafOfModules.pushforward (restrictRingHom f)).obj N.val) :=
+    ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).mapIso
+      (PresheafOfModules.pushforwardTensorIso (restrictRingHom f) M.val N.val)).symm
+  have e5a : (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj M.val ⊗
+          (PresheafOfModules.pushforward (restrictRingHom f)).obj N.val) ≅
+      tensorObj ((restrictFunctor f).obj M) ((restrictFunctor f).obj N) :=
+    Iso.refl _
+  have e5b : tensorObj ((restrictFunctor f).obj M) ((restrictFunctor f).obj N) ≅
+      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N) :=
+    tensorObjCongr ((restrictFunctorIsoPullback f).app M)
+      ((restrictFunctorIsoPullback f).app N)
+  exact ⟨e1 ≪≫ e2 ≪≫ e3 ≪≫ e4 ≪≫ e5a ≪≫ e5b⟩
+
 
 /-- **[PIC-P1b-MONO], leaf D-PresPB′ — the one genuinely new leaf (refined, general `f`).**
 The presheaf pullback commutes with the presheaf tensor *after sheafification*:
