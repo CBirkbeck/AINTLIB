@@ -239,4 +239,42 @@ theorem exists_conj_s_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
   · rw [conj_s_component (-d) hu g, hd g, smul_neg]
     ring
 
+/-- `g • (1, ρ, 0, 0) = (1, g • ρ, 0, 0)`. -/
+theorem vcSMul_mk_r (g : G) (ρ : A) :
+    (g • (⟨1,ρ,0,0⟩ : VariableChange A)) = ⟨1, g • ρ, 0, 0⟩ := by
+  apply VariableChange.ext
+  · apply Units.ext; simp [vcSMul_smul_def, vcSMul, uSMul_coe, smul_one]
+  · simp [vcSMul_smul_def, vcSMul]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+  · simp [vcSMul_smul_def, vcSMul, smul_zero]
+
+/-- **([a5-iii], step 4 — kill `r`)** With `s = 0` the `r`-component of a `u = 1` cocycle is an
+additive cocycle (the nilpotent twist `r·s'` vanishes), so conjugating by `(1, -d, 0, 0)`
+(`d` the Hilbert 90 witness for the `r`-cocycle) kills `r` while preserving `u = 1` and `s = 0`.
+The residual cocycle lives in the central `t`-subgroup. -/
+theorem exists_conj_r_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
+    {C : G → VariableChange A} (hC : IsVCocycle C) (hu : ∀ g, (C g).u = 1)
+    (hs : ∀ g, (C g).s = 0) :
+    ∃ D : VariableChange A, IsVCocycle (fun g => D * C g * (g • D)⁻¹) ∧
+      (∀ g, (D * C g * (g • D)⁻¹).u = 1) ∧ (∀ g, (D * C g * (g • D)⁻¹).s = 0) ∧
+      (∀ g, (D * C g * (g • D)⁻¹).r = 0) := by
+  have hrc : ∀ g h : G, (C (g * h)).r = (C g).r + g • (C h).r := by
+    intro g h
+    have h1 := congrArg WeierstrassCurve.VariableChange.r (hC g h)
+    simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u, vcSMul_r] at h1
+    rw [h1]
+    have : ((uSMul g (C h).u : Aˣ) : A) = 1 := by rw [uSMul_coe, hu h, Units.val_one, smul_one]
+    rw [this]; ring
+  obtain ⟨d, hd⟩ := exists_sub_smul_eq_of_isCocycle G ℤ A hfree (fun g => (C g).r) hrc
+  refine ⟨⟨1, -d, 0, 0⟩, isVCocycle_conj _ hC, fun g => ?_, fun g => ?_, fun g => ?_⟩
+  · rw [vcSMul_mk_r]
+    simp [VariableChange.mul_def, VariableChange.inv_def, hu g]
+  · rw [vcSMul_mk_r]
+    simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, hs g, Units.val_one,
+      inv_one, mul_one, one_mul, mul_zero, zero_mul, add_zero, zero_add, neg_zero]
+  · rw [vcSMul_mk_r]
+    simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, hs g, Units.val_one,
+      inv_one, mul_one, one_mul, mul_zero, zero_mul, add_zero, zero_add]
+    rw [hd g, smul_neg]; ring
+
 end WeierstrassCurve
