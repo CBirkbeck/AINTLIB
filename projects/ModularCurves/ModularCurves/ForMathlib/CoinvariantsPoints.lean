@@ -2,6 +2,7 @@ import ModularCurves.ForMathlib.CoactionCharpoly
 import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
 import Mathlib.FieldTheory.Minpoly.Field
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.LinearAlgebra.Determinant
 
 /-!
@@ -278,6 +279,36 @@ theorem exists_mem_ker_notMem_ker {X : Type*} [CommRing X] [Algebra k X]
   have heq : RingHom.ker χ₀.toRingHom = RingHom.ker χ.toRingHom :=
     hmax₀.eq_of_le (RingHom.ker_isPrime _).ne_top hle
   exact hS (by rwa [algHom_ext_of_ker_eq heq])
+
+/-- Over an algebraically closed field, an element of a finite algebra that no `k`-point
+kills is a unit: otherwise it lies in a maximal ideal, whose residue field is `k` itself by
+integrality and algebraic closedness. -/
+theorem isUnit_of_forall_algHom_ne_zero [IsAlgClosed k] {X : Type*} [CommRing X]
+    [Algebra k X] [Module.Finite k X] (u : X)
+    (h : ∀ χ : X →ₐ[k] k, χ u ≠ 0) : IsUnit u := by
+  classical
+  by_contra hu
+  obtain ⟨m, hm, hum⟩ := exists_max_ideal_of_mem_nonunits hu
+  haveI : m.IsMaximal := hm
+  haveI : Field (X ⧸ m) := Ideal.Quotient.field m
+  haveI : Algebra.IsIntegral k (X ⧸ m) := by
+    haveI : Module.Finite k (X ⧸ m) :=
+      Module.Finite.of_surjective (Ideal.Quotient.mkₐ k m).toLinearMap
+        Ideal.Quotient.mk_surjective
+    exact Algebra.IsIntegral.of_finite k (X ⧸ m)
+  have hbij : Function.Bijective (algebraMap k (X ⧸ m)) :=
+    IsAlgClosed.algebraMap_bijective_of_isIntegral
+  let e : k ≃+* (X ⧸ m) := RingEquiv.ofBijective (algebraMap k (X ⧸ m)) hbij
+  let χ : X →ₐ[k] k :=
+    { toRingHom := (e.symm : (X ⧸ m) →+* k).comp (Ideal.Quotient.mk m)
+      commutes' := fun c => by
+        show e.symm (Ideal.Quotient.mk m (algebraMap k X c)) = c
+        rw [show Ideal.Quotient.mk m (algebraMap k X c) = algebraMap k (X ⧸ m) c from
+          (IsScalarTower.algebraMap_apply k X (X ⧸ m) c).symm]
+        exact e.symm_apply_apply c }
+  refine h χ ?_
+  show e.symm (Ideal.Quotient.mk m u) = 0
+  rw [show Ideal.Quotient.mk m u = 0 from Ideal.Quotient.eq_zero_iff_mem.mpr hum, map_zero]
 
 end Orbit
 
