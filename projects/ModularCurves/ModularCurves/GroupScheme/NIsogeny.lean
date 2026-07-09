@@ -419,6 +419,22 @@ private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [Co
         Module.finrank_fin_fun]
       rfl
 
+/-- **[L1-d, the affine universal ideal]** Over an affine base, the "finite locally free of
+rank `n`" condition on base changes of `M` is cut out by a single ideal: combining the local
+`n`-generator presentations ([L1-a], on a finite basic-open cover extracted by
+quasi-compactness), the entries-ideal characterisation over each patch ([L1-b]), and the
+quasi-coherent gluing of the patch ideals (agreement on overlaps by uniqueness [L1-c]).
+This is the affine heart of KM 6.4.3's flattening locus. -/
+private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] [Module.FinitePresentation R M] {n : ℕ}
+    (hb : ∀ (K : Type u) (_ : Field K) (_ : Algebra R K),
+      Module.finrank K (K ⊗[R] M) ≤ n) :
+    ∃ I : Ideal R, ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      (Module.Flat A (A ⊗[R] M) ∧
+          ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
+        I.map (algebraMap R A) = ⊥ := by
+  sorry
+
 /-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
 the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
 presentation ideals into the canonical ideal sheaf (`map_ideal_basicOpen` holds because
