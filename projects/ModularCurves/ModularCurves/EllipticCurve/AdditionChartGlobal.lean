@@ -455,6 +455,32 @@ lemma transι_preimage_piece_inf (k k' : Fin 3) :
   rw [Scheme.Hom.preimage_inf, transι_preimage_blOpenYImage_piece,
     transι_preimage_blOpenYImage_piece', specBasicOpen_mul]
 
+/-- **([C4-HF-ASSEMBLY] L3)** The affine immersion of the k-th image piece:
+`Spec(Away(lawTwoTriple ij k)) → E ×_R E`. -/
+noncomputable def pieceAwayι (k : Fin 3) :
+    Spec (CommRingCat.of (Localization.Away (lawTwoTriple W i j k))) ⟶
+      pullback (projModelπ W) (projModelπ W) :=
+  (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).hom ≫
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).ι ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j
+
+/-- **([C4-HF-ASSEMBLY] L3, the σ-immersion identity)** The `isoImage/morphismRestrict/
+specBasicOpenIsoAway.inv` chain out of `A_k` (the `σ` of L1), followed by `pieceAwayι`, is exactly
+`A_k.ι`. So `σ` is the section identifying `A_k` with `Spec(Away(lawTwoTriple ij k))`, and
+`pieceAwayι` its immersion into `E ×_R E`. Instantiates the variable-scheme
+`isoImage_inv_morphismRestrict_ι`. -/
+lemma isoImage_specBasicOpen_pieceAwayι (k : Fin 3) :
+    ((Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j))
+        (lawTwoTriple W i j k)).inv) ≫ pieceAwayι W i j k =
+      (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι := by
+  rw [pieceAwayι]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  exact isoImage_inv_morphismRestrict_ι (pieceι W i j) (chartPieceIso W i j)
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k))
+
 end Overlap
 
 end WeierstrassCurve.Projective

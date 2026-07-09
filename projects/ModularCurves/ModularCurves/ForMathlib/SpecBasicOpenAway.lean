@@ -172,3 +172,14 @@ lemma homOfLE_isoImage_inv_iSup {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f]
     Scheme.Hom.isoImage_hom_homOfLE f (U k) (⨆ i, U i) (le_iSup U k), Category.assoc,
     Iso.hom_inv_id_assoc]
   rfl
+
+/-- **(variable-scheme σ-immersion identity)** For an open immersion `p : X ⟶ Z`, an iso `e : X ≅ Y`
+and an open `U : Y.Opens`, the chain `isoImage.inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p` collapses to
+the image inclusion `(p ''ᵁ (e.hom ⁻¹ᵁ U)).ι`. Stated over variable schemes so instantiation at a
+concrete `Proj` chart-product never drives `whnf` into the pullback carrier (v10.24). -/
+lemma isoImage_inv_morphismRestrict_ι {X Y Z : Scheme} (p : X ⟶ Z) [IsOpenImmersion p]
+    (e : X ≅ Y) (U : Y.Opens) :
+    (p.isoImage (e.hom ⁻¹ᵁ U)).inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p =
+      (p ''ᵁ (e.hom ⁻¹ᵁ U)).ι := by
+  rw [morphismRestrict_ι_assoc, ← Category.assoc _ e.inv, Iso.hom_inv_id, Category.id_comp,
+    Scheme.Hom.isoImage_inv_ι]
