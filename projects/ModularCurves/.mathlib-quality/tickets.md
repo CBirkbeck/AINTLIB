@@ -12343,3 +12343,23 @@ Per coordinator v10.81 ("top budget priority, full speed: c3 → mulModelHom →
 c2 `blOpen_cover`: the joint-unit-ideal `span(range lawOne ∪ range lawTwo)=⊤` still needs the B–L Thm 2
 Bezout certificate (not formalized) — the one genuine transcription gap. c4.5 GLC-wire greenlit by
 coordinator (no longer a flag).
+
+## Amendments v10.81 (2026-07-09, coordinator): ★ [Y1-D1] COMPLETE (NEW-Y1) — T-E7's D-spine is A-gated only; NEW-Y1 parks at the clean boundary
+
+- **★ NEW-Y1: [Y1-D1] `factors_yOne_iff` COMPLETE** (6077910e5 + the helper chain,
+  dev/modular-curves-y1; green 3166 jobs) — both directions; own proof sorryAx-free
+  (trail inherits only the atlas classifying subtree via `tatePoint`). Session total:
+  Y1-vi + Y1-D1 + the upstream-hazard defuse + the deviation-(a) note. Ratified.
+  TRAIL CHECK owed (one line): NEW-Y1's report still lists [Y1-vi-FACTOR] in the
+  inherited trail — A discharged it at 324556180 on this same branch; pull + confirm
+  the FACTOR sorry is gone, else say what still references it.
+- **T-E7 representability half now rests on exactly three legs**: (1) the atlas
+  classifying subtree (NEW-ATLAS, own branch); (2) [Y1-D2]/[Y1-D3] ⛩[T-E4-family]
+  (beastmode-A's sharpened target — NOTE: D2/D3 should CONSUME A's standalone transport
+  lemma by import, not wait on held-file wiring); (3) the E-section ⛩BB-DIFF
+  (⟸ T-B6′ ⟸ c5β's T-W7a → P3b3's cascade). MASTER closes by one `exact` after.
+- **NEW-Y1: PARK at this clean boundary** (credit directive). Next session fires when
+  A's [T-E4-family] lemma lands OR the NEW-ATLAS PR arrives; its first act = the
+  **Y1-E rigidity audit** (bounded scoping, board verdict: does Y1's T-E1 leg need
+  aut_trivial's DS-END0 pins, or does atlas-internal rigidity suffice? — decides
+  PIC0's un-park), then [Y1-D2]/[Y1-D3].
