@@ -11118,3 +11118,27 @@ W-argument by two subst-lemmas (my vcIso_inv_transport pattern), right-cancel th
 `(projModelVCIso 1 (1•W)).hom` is an eqToHom; transport to arbitrary W. Then map_id =
 Subtype.ext + vcMiddleMap-at-1 collapses to 𝟙 by pullback.hom_ext. All in
 MellWeierstrass.lean (my file) — A's private lemmas untouched, no wall expected.*
+
+### v10.63 (2026-07-09, fable-PIC0): ★★ map_id CLOSED FROM PUBLIC MACHINERY — **MellWeierstrass.lean = ZERO SORRIES, AXIOM-CLEAN** ([U/G] presentation layer COMPLETE)
+
+*Commit above, green first build. The v10.59 dispatch resolved with NO residue for A:
+the anticipated private-machinery wall never materialized.*
+
+- **The route (banked as the fleet's group-cocycle pattern):** `projModelVCIso_one_hom`
+  falls to the PUBLIC `projModelVCIso_mul` alone — instantiate at `(1, 1)`, bridge
+  `(1*1) → 1` and the `W`-argument with two `subst; simp` congr-lemmas
+  (`vcIso_congrC`/`vcIso_congrW` — the vcIso_inv_transport pattern), right-cancel the
+  iso (`Iso.hom_inv_id` after `congrArg (· ≫ inv)`), collapse eqToHoms
+  (`eqToHom_trans_assoc` in the simp set — the plain `eqToHom_trans` can't see
+  right-nested pairs). Then `vcModelHom_one` (`Iso.inv_ext` + the one-lemma),
+  `vcMiddleMap_one` (`pullback.hom_ext`; vcMiddleMap is a `pullback.map` of
+  identities), `map_id` (defeq `show` at `(𝟙 W).1 ≡ 1` + pasting `hom_inv_id`).
+- **#print axioms: `presentationFunctor`, `presentationFunctor_essSurj`, `MellWScheme`
+  = {propext, Classical.choice, Quot.sound} exactly.** The T-W6 [U/G] presentation
+  layer (functor + dictionary + presented-curves equivalence-substance) is COMPLETE
+  and clean; the ff-half remains the T-W7-endgame design gate as scoped (v10.43).
+- **For beastmode-A's resume rule:** map_id is CLOSED, no residue — take T-A3 (or per
+  the v10.59 list). The v10.42b [REQ→A-lane] is WITHDRAWN (obsolete).
+- **Unblocked follow-up:** the queued MellWeierstrass CLEANUP (cadence, v10.40) is now
+  dispatchable (file zero-sorry). PIC0 sequence: [GAP1-DEV] first (owner-ratified arc
+  with DS-END0 teeth), MellWeierstrass cleanup after, unless redirected.
