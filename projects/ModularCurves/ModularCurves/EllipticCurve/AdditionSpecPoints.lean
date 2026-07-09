@@ -731,6 +731,97 @@ lemma descended_lawOne_eq_add (i j : Fin 3) (k : Fin 3)
   simp only [Function.comp_apply, Pi.zero_apply] at hk
   exact hunit.ne_zero hk
 
+
+/-- [C6-e5b, Y] The law-2 triple is `add` up to a unit square: on the diagonal it is
+`u² • dblXYZ = u² • add`; off it the certified minors make it proportional to `addXYZ = add`. -/
+lemma descended_lawTwo_smul_add (i j : Fin 3)
+    [IsDomain (biChartRing universalWeierstrassLocU.{u} i j)] (k : Fin 3)
+    (χ : biChartRing universalWeierstrassLocU.{u} i j →+* K)
+    (hunit : IsUnit (χ (lawTwoTriple universalWeierstrassLocU.{u} i j k))) :
+    ∃ c : K, c ≠ 0 ∧
+      χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j =
+        c • ((universalWeierstrassLocU.{u}.map
+            (algebraMap WeierstrassAtlasRingU.{u}
+              (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map χ).add
+          (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) := by
+  classical
+  set WK := (universalWeierstrassLocU.{u}.map
+    (algebraMap WeierstrassAtlasRingU.{u}
+      (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map χ with hWK
+  have hP : WK.Equation (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) :=
+    (equation_biChartPointFst universalWeierstrassLocU.{u} i j).map χ
+  have hQ : WK.Equation (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) :=
+    (equation_biChartPointSnd universalWeierstrassLocU.{u} i j).map χ
+  have hlaw2 := ringHom_lawTwoTriple universalWeierstrassLocU.{u} i j χ
+  by_cases hPQ : (⇑χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j : Fin 3 → K) ≈
+      (⇑χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j)
+  · rcases hPQ with ⟨c₀, hc₀⟩
+    have hc₀' : (⇑χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j : Fin 3 → K) =
+        (c₀ : K) • (⇑χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) := hc₀.symm
+    refine ⟨((c₀ : K)⁻¹) ^ 2, by simp [c₀.ne_zero], ?_⟩
+    rw [hlaw2, hc₀', WeierstrassCurve.Projective.dblAddXYZ_smul_left,
+      WeierstrassCurve.Projective.dblAddXYZ_self hQ,
+      WeierstrassCurve.Projective.add_of_equiv (by exact ⟨c₀, rfl⟩),
+      WeierstrassCurve.Projective.dblXYZ_smul, smul_smul]
+    congr 1
+    field_simp
+  · have hadd := WeierstrassCurve.Projective.add_of_not_equiv (W' := WK) hPQ
+    have hNS : WK.Nonsingular (WK.add
+        (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+        (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j)) := by
+      haveI : WK.IsElliptic := by
+        constructor
+        rw [map_Δ, map_Δ]
+        exact (universalWeierstrassLocU.{u}.isUnit_Δ.map _).map _
+      refine WeierstrassCurve.Projective.nonsingular_add
+        (WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hP ?_)
+        (WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hQ ?_)
+      · intro h0
+        have h1 : χ (biChartPointFst universalWeierstrassLocU.{u} i j i) = 0 := congrFun h0 i
+        rw [show biChartPointFst universalWeierstrassLocU.{u} i j i = 1 from dif_pos rfl,
+          map_one] at h1
+        exact one_ne_zero h1
+      · intro h0
+        have h1 : χ (biChartPointSnd universalWeierstrassLocU.{u} i j j) = 0 := congrFun h0 j
+        rw [show biChartPointSnd universalWeierstrassLocU.{u} i j j = 1 from dif_pos rfl,
+          map_one] at h1
+        exact one_ne_zero h1
+    rw [hadd] at hNS
+    have h01 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 0 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 1 =
+        (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 1 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 0 := by
+      rw [hlaw2]
+      simp only [WeierstrassCurve.Projective.dblAddXYZ_x, WeierstrassCurve.Projective.dblAddXYZ_y,
+        WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons]
+      linear_combination -(WeierstrassCurve.Projective.addX_mul_dblAddY (W' := WK) hP hQ)
+    have h02 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 0 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 = (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 0 := by
+      rw [hlaw2]
+      simp only [WeierstrassCurve.Projective.dblAddXYZ_x, WeierstrassCurve.Projective.dblAddXYZ_z,
+        WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_two,
+        Matrix.tail_cons, Matrix.head_cons]
+      linear_combination -(WeierstrassCurve.Projective.addX_mul_dblAddZ (W' := WK) hP hQ)
+    have h12 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 1 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 = (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 1 := by
+      rw [hlaw2]
+      simp only [WeierstrassCurve.Projective.dblAddXYZ_y, WeierstrassCurve.Projective.dblAddXYZ_z,
+        WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
+      linear_combination -(WeierstrassCurve.Projective.addY_mul_dblAddZ (W' := WK) hP hQ)
+    obtain ⟨c, hc⟩ := exists_eq_smul_of_cross_eq_zero hNS.ne_zero h01 h02 h12
+    have hc0 : c ≠ 0 := by
+      rintro rfl
+      rw [zero_smul] at hc
+      have hk := congrFun hc k
+      simp only [Pi.zero_apply] at hk
+      exact hunit.ne_zero hk
+    refine ⟨c, hc0, ?_⟩
+    rw [hc, hadd]
+
+
 end AtlasFormula
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
