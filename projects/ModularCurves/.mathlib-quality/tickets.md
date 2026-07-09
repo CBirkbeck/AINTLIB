@@ -1889,6 +1889,29 @@ commits built against the *committed* (clean) ModelVariableChange, and `ForMathl
 (my [a5] work) is independent and green. The owning sibling should commit the `one_*` lemmas (or their
 fix) to unbreak the downstream build. fable-P4 will not touch the sibling's file.
 
+### ★★ [a5-iii] COMPLETE + [a5] geometric stitch scoped (fable-P4, 2026-07-09)
+**[a5-iii] fully closed, axiom-clean** (`ForMathlib/WeierstrassInvariant.lean`): `exists_coboundary` —
+for a free action with `Aᴳ` local, **every `VariableChange` cocycle is a coboundary** (local
+`H¹(G, VariableChange A) = 0`). Four-layer induction through the solvable change-of-variables group:
+`exists_conj_u_one` (u; my local coboundary) → `exists_conj_s_zero` (s; additive Hilbert 90) →
+`exists_conj_r_zero` (r; twist vanishes once s=0) → `exists_conj_t_zero` (central t); composite
+`D = Dₜ·Dᵣ·D_s·D_u` gives `C_g = E·(g•E)⁻¹`, `E = D⁻¹`. Plus the `MulDistribMulAction` foundation,
+`IsVCocycle`, and `descendFixed` ([a5-iv] coefficient descent) — all axiom-clean.
+**Engine status**: with T-A3 DONE (v10.72) and [a5-iii]/[a5-iv] done,
+`exists_ellipticCurveGeom_quotient` is **one geometric-stitch from axiom-clean**.
+**Remaining = the geometric stitch (the T-W7 interface)**:
+* **[a5-i]** `E` locally `projModel W₀` — direct from `C.localModel`.
+* **[a5-ii]** the `G`-action → the `VariableChange` cocycle: `σE.hom g` over the *g-twisted base*
+  relates `projModel W₀` to `projModel (g·W₀)`; `pointedIso_exists_variableChange` (T-W7.1b,
+  `Comparison.lean`) extracts `C_g`, cocycle-ness from the action homomorphism. **This is the
+  base-change + pointed-iso connector — genuine projModel-scheme geometry (T-W7 machinery).**
+* **[a5-iv]** assemble `LocallyWeierstrass π' zero'`: `exists_coboundary` (DONE) trivializes `C`,
+  `descendFixed` (DONE) descends `E⁻¹•W₀` to `Γ(X/G,U)`, `isPullback_quotientπ` (DONE) supplies
+  `pullback π' U.ι ≅ projModel(descended)`.
+*Scoping note*: the abstract `IsCurveAction` form needs [a5-i]/[a5-ii] to stitch local presentations;
+if the engine's consumer supplies `E` as a **global** `projModel` (the bootstrap does — pulled from
+T-E15's ℰ₃), [a5-i] is trivial and [a5-ii] simplifies to one base-change pointed-iso extraction.
+
 ### [T-E5c-ROUTE-A] the ⇐-curve WITHOUT SGA I VIII 7.8 — scoping VERDICT (fable-P4, 2026-07-08)
 - **CHARTER-FP4 item (1). VERDICT: route (a) WORKS — SGA I VIII 7.8 is dodged entirely.** The
   engine's second gate does **not** need effective descent of projective schemes. It needs the
