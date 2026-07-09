@@ -138,20 +138,6 @@ lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       rw [hx₁', hx₂']
       rfl
 
-/-- The locally-injective half of the [GAP1-W-MONO] tensor-stability leaf — for
-LOCALLY BIJECTIVE `f` and `g` (bijectivity, not mere injectivity, is essential: the
-tensor product is not left exact, but stalks of locally bijective maps are
-isomorphisms and isomorphisms tensor to isomorphisms — no flatness). Stalkwise/
-filtered-colimit argument; registered WIP (board v10.69; decompose on fork per
-v10.24). -/
-lemma isLocallyInjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
-    [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
-    [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
-    [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)]
-    [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)] :
-    Presheaf.IsLocallyInjective J ((toPresheaf _).map (f ⊗ₘ g)) := by
-  sorry
-
 /-- **([W-MONO-inj])** Precomposition with the tensor of locally surjective morphisms
 is injective on morphisms into a presheaf of modules whose underlying presheaf is a
 sheaf: two maps out of the tensor agreeing after `f ⊗ₘ g` agree on simple tensors
@@ -671,6 +657,24 @@ theorem sheafificationW_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
   exact ((sheafificationAdjunction α).homEquiv (M₁ ⊗ N₁) Y).symm.bijective.comp
     (hΨ.comp ((sheafificationAdjunction α).homEquiv (M₂ ⊗ N₂) Y).bijective)
 
+/-- **([GAP1-W-MONO], corollary — the original loc-injective claim)** The tensor product of
+morphisms inverted by sheafification is locally injective on underlying presheaves. This was
+the staged stalkwise leaf; it now follows *free* from `sheafificationW_tensorHom` through the
+local-bijectivity bridge, with the sheafification datum `α` standing in for the stalks a
+general site lacks: `f`, `g` locally bijective (i.e. `sheafificationW α`-members) ⟹
+`sheafificationW α (f ⊗ₘ g)` ⟹ its underlying presheaf map is locally bijective, in
+particular locally injective. (The bare statement over an arbitrary presheaf of commutative
+rings, with only local-bijectivity instances and no `α`, is not closable — the sheafification
+adjunction is the topos-theoretic replacement for a pointwise/stalkwise argument — so this
+carries `α` and the `sheafificationW` hypotheses rather than the byte-identical staged
+signature; obtain those hypotheses from local-bijectivity via
+`sheafificationW_iff_isLocallyBijective`.) -/
+lemma isLocallyInjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
+    (hf : sheafificationW α f) (hg : sheafificationW α g) :
+    Presheaf.IsLocallyInjective J ((toPresheaf _).map (f ⊗ₘ g)) :=
+  ((sheafificationW_iff_isLocallyBijective α (f ⊗ₘ g)).mp
+    (sheafificationW_tensorHom α f g hf hg)).1
+
 instance sheafificationW_isMultiplicative : (sheafificationW.{u} α).IsMultiplicative :=
   inferInstanceAs
     ((MorphismProperty.isomorphisms _).inverseImage (sheafification.{u} α)).IsMultiplicative
@@ -683,5 +687,55 @@ instance sheafificationW_isMonoidal : (sheafificationW.{u} α).IsMonoidal :=
   MorphismProperty.IsMonoidal.mk' _ fun f g hf hg => sheafificationW_tensorHom α f g hf hg
 
 end Assembly
+
+section Instantiation
+
+/- The payoff: feeding the localization registration and the monoidal class into mathlib's
+`LocalizedMonoidal` to obtain the monoidal category structure on sheaves of modules over a
+sheaf of commutative rings. We take `α = 𝟙` (the reflective case, where
+`sheafificationW_isLocalization` applies) and package the ring sheaf so that its underlying
+presheaf is *syntactically* `S ⋙ forget₂`, keeping mathlib's monoidal instance on
+`PresheafOfModules (S ⋙ forget₂ _ _)` in view. -/
+
+variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
+  [J.WEqualsLocallyBijective AddCommGrpCat.{u}] [HasWeakSheafify J AddCommGrpCat.{u}]
+  (S : Cᵒᵖ ⥤ CommRingCat.{u})
+  (hS : Presheaf.IsSheaf J (S ⋙ forget₂ CommRingCat RingCat))
+
+/-- The reflective localization registration, specialised to the ring sheaf underlying a
+sheaf of commutative rings (with `R'` spelled literally so type-class resolution matches it
+directly, rather than having to invert the `.obj` projection). Delegates to
+`sheafificationW_isLocalization`. -/
+instance instSheafificationW_isLocalization_commRingSheaf :
+    (sheafification.{u}
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).IsLocalization
+      (sheafificationW.{u}
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)) :=
+  sheafificationW_isLocalization _
+
+/-- The monoidality of the localizing class, specialised to the same ring sheaf (again with
+`R'` spelled literally for direct resolution). Delegates to `sheafificationW_isMonoidal`
+(this file's leaf). -/
+instance instSheafificationW_isMonoidal_commRingSheaf :
+    (sheafificationW.{u}
+      (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).IsMonoidal :=
+  sheafificationW_isMonoidal _
+
+/-- **([GAP1-W-MONO] — the payoff)** The `LocalizedMonoidal` instantiation resolves: fed the
+two registrations above (the reflective localization and the monoidality of the localizing
+class — this file's leaf), mathlib's `LocalizedMonoidal` equips the localization of
+presheaves of modules over a sheaf of commutative rings with a `MonoidalCategory` structure.
+That localized category is definitionally `SheafOfModules ⟨S ⋙ forget₂ _ _, hS⟩` — so sheaves
+of modules over a sheaf of commutative rings form a monoidal category, monoidally under
+sheafification. This is the GAP-1 payoff; downstream consumers name the localized category
+and read off the tensor product, unit, and Pic coherences. -/
+theorem sheafOfModules_monoidalCategory_nonempty : Nonempty (MonoidalCategory
+    (LocalizedMonoidal
+      (sheafification.{u} (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+      (sheafificationW.{u} (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+      (Iso.refl _))) :=
+  ⟨inferInstance⟩
+
+end Instantiation
 
 end PresheafOfModules
