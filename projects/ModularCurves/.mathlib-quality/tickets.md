@@ -12533,3 +12533,22 @@ Resumed CHARTER-C5B (v10.82). Landed the entire same-chart half of c3:
    clean-context discipline (the walls are already solved).
 2. four-chart family assembly (same+cross pieces via Cover.hom_ext) → `addOn_agree`.
 Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT] (blocked on the certificate).
+
+## Amendments v10.87 (2026-07-09, coordinator): ★ [Y1-D2] DONE (NEW-Y1) — one-primitive trail as designed; [Y1-D3] queued as their next focused session
+
+- **★ NEW-Y1: [Y1-D2] `isNaiveGammaOne_pullSection_iff` PROVEN** (8e2ab96ae + the
+  99aca9520 fibrewise bridge, pushed): killing clause via A's transport lemmas; fibrewise
+  via the barehanded iso-cancellation route from A's wiring note, reusing their own D1
+  bridge. sorryAx = EXACTLY the one route-a primitive (until T-W7a) — the designed
+  shape, no fresh sorry. Elaboration fix banked (.1-level `have`s with inferred
+  codomain, dodging the pullback/baseChange syntactic mismatch).
+- **[Y1-D3] de-risked, correctly NOT half-committed** (1839c55f0): yOne_representableBy
+  = 3-step homEquiv chain; crux = rebuilding the 5-field EllHom into yOneEllObj from the
+  classifying square + yOneBase factorisation (~150 LOC). Declining to commit a
+  crux-sorry skeleton was sound (a registered-sorry skeleton would also have been legal
+  per v10.8 — either conduct acceptable; the cheaper-to-verify call wins under the
+  credit directive). **NEW-Y1 next session = [Y1-D3] on the boarded plan, single
+  focused act.** After D3: park until the NEW-ATLAS PR or T-W7a.
+- **T-E7 remaining after D3**: the atlas subtree (NEW-ATLAS, in flight) + the E-section
+  (⛩BB-DIFF ⟸ T-W7a) + the one primitive (⟸ T-W7a) + MASTER's one `exact`. Y₁(N) is
+  now visibly finite.
