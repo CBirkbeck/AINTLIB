@@ -113,4 +113,57 @@ noncomputable def coactionUnshear (ρ : B →ₐ[R] B ⊗[R] A) : (B ⊗[R] A) �
     (Algebra.TensorProduct.assoc R R R B A A).toAlgHom).comp
     (Algebra.TensorProduct.map ρ (AlgHom.id R A))
 
+section InverseLaws
+
+variable (ρ : B →ₐ[R] B ⊗[R] A)
+
+/-- The associator sends the left inclusion of `(B ⊗ A) ⊗ A` to `id ⊗ includeLeft`. -/
+private theorem assoc_toAlgHom_comp_includeLeft :
+    (Algebra.TensorProduct.assoc R R R B A A).toAlgHom.comp
+        (Algebra.TensorProduct.includeLeft (S := R))
+      = Algebra.TensorProduct.map (AlgHom.id R B)
+          (Algebra.TensorProduct.includeLeft (S := R)) := by
+  ext
+  · rfl
+  · rfl
+
+/-- The counit key: tensoring with `unit ∘ ε` on the right is the left inclusion after the
+counitality contraction. -/
+private theorem map_ofId_counit_eq :
+    Algebra.TensorProduct.map (AlgHom.id R B)
+        ((Algebra.ofId R A).comp (Bialgebra.counitAlgHom R A))
+      = (Algebra.TensorProduct.includeLeft (S := R)).comp
+          ((Algebra.TensorProduct.rid R R B).toAlgHom.comp
+            (Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.counitAlgHom R A))) := by
+  refine Algebra.TensorProduct.ext ?_ ?_
+  · ext b
+    simp
+  · ext a
+    show (1 : B) ⊗ₜ[R] algebraMap R A (Bialgebra.counitAlgHom R A a)
+        = (Algebra.TensorProduct.rid R R B) ((1 : B) ⊗ₜ[R] (Bialgebra.counitAlgHom R A a))
+          ⊗ₜ[R] (1 : A)
+    rw [Algebra.TensorProduct.rid_tmul, Algebra.algebraMap_eq_smul_one,
+      TensorProduct.tmul_smul, TensorProduct.smul_tmul']
+
+/-- **The inverse shear undoes the co-action**: `Ψ ∘ ρ = includeLeft`, i.e.
+`b₍₀₎ ⊗ S(b₍₀₎₍₁₎)·b₍₁₎ = b ⊗ 1`. The chain: coassociativity turns `assoc ∘ (ρ⊗id) ∘ ρ`
+into `(id ⊗ Δ) ∘ ρ`, the antipode axiom collapses `mulAntipode ∘ Δ` to `unit ∘ ε`, and
+counitality contracts the rest. -/
+theorem coactionUnshear_comp_coaction (hρ : IsCoaction ρ) :
+    (coactionUnshear ρ).comp ρ = Algebra.TensorProduct.includeLeft := by
+  rw [coactionUnshear, AlgHom.comp_assoc, AlgHom.comp_assoc, hρ.coassoc,
+    ← AlgHom.comp_assoc, ← Algebra.TensorProduct.map_comp, AlgHom.comp_id,
+    mulAntipode_comp_comulAlgHom, map_ofId_counit_eq, AlgHom.comp_assoc,
+    AlgHom.comp_assoc, hρ.counit, AlgHom.comp_id]
+
+/-- The inverse shear fixes the right inclusion. -/
+theorem coactionUnshear_comp_includeRight :
+    (coactionUnshear ρ).comp Algebra.TensorProduct.includeRight
+      = Algebra.TensorProduct.includeRight := by
+  ext a
+  show coactionUnshear ρ ((1 : B) ⊗ₜ[R] a) = (1 : B) ⊗ₜ[R] a
+  simp [coactionUnshear, Algebra.TensorProduct.one_def]
+
+end InverseLaws
+
 end ModularCurves
