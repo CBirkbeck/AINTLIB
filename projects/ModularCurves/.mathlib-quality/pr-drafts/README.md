@@ -9,6 +9,10 @@ Ranking and verification: see `../upstream-ledger.md` (the T-UPSTREAM-TRIAGE del
 Every candidate below was checked against *current* mathlib (searched, not assumed) and is
 axiom-clean in-project.
 
+**Re-verified 2026-07-09** (v10.94 staging pass): all four drafts compile clean standalone
+(`lake env lean`, exit 0 each) on the current toolchain/mathlib pin — no bump rot. Ledger
+gains §8 (two confirmed mathlib gaps from the route-a survey; future candidates, not staged).
+
 | File | Lemma(s) | Target mathlib file | Class |
 |------|----------|---------------------|-------|
 | `01-Functor-map_zpow.lean` | `Functor.map_zpow'` | `CategoryTheory/Monoidal/Cartesian/Grp.lean` | sibling of `map_inv'` |

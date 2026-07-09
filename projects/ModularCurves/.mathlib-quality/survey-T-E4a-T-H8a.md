@@ -83,3 +83,95 @@ decision — like the map_id and T-A3 moot re-dispatches.
 **Net:** the survey's target is not a landable lemma but a scope-parked gap (T-W7.8, owner-decided).
 Standing down on it per "wall ⟹ board forensics + stand down." The one actionable follow-up is the
 noetherian-rewire check for the specific poisoned consumers — a holder decision, flagged here.
+
+---
+
+# PART 2 — the full [T-H8a] inventory (v10.94 dispatch; scoping only, NO held-file edits)
+
+*Extension 2026-07-09 (post-[Y1-D2] discharge). Supersedes Part 1's verdict where noted: the T-E4
+linchpin is no longer "T-W7.8-parked" — it is **collapsed to the one primitive**
+`isMonHom_of_one_comp_eq'_of_finitePresentation` (`Moduli/PullSectionCanonicity.lean`, 7dac70553),
+which lands at T-W7a (route c) or via the banked route (a).*
+
+## What T-H8a is (code-verified)
+
+**[T-H8a] = the Drinfeld problems' functor laws** (board :3519). Exactly TWO held sorries, both in
+`Moduli/GammaH.lean` (GH-lane held file), both `map`-field **memberships** (the `map_id`/`map_comp`
+laws are already proven via `pullSection_id`/`_comp`, same pattern as the naive problems):
+
+| # | Sorry | Line | Predicate to transport |
+|---|-------|------|------------------------|
+| 1 | `gammaFullDrinfeldProblem.map` membership | `GammaH.lean:994` | `IsFullLevel N` under `pullSection` |
+| 2 | `gammaOneDrinfeldProblem.map` membership | `GammaH.lean:1008` | `IsGammaOne N` (= `HasExactOrder`) under `pullSection` |
+
+NOT T-H8a: `gammaFullDrinfeld_representable` (:1033) / `gammaOneDrinfeld_representable` (:1046) are
+T-H8/T-H9 (representability, `hinv`-hypothesised after the 2026-07-06 adversarial fixes).
+
+⚠ Scope note: the Drinfeld problems are deliberately over **arbitrary `R`** (no `N`-invertibility —
+"at primes dividing `N` it is the correct object", :987). The memberships as stated must transport
+without `hinv`. The T-D8/T-D9 naive-bridges do NOT discharge them (see Route N-INV below).
+
+## Predicate anatomy → transport requirements
+
+- **`IsGammaOne N P := (P.orderDivisor E N).IsSubgroup E`** (`ExactOrder.lean:104`), with
+  `orderDivisor = sectionsDivisor E.π (fun a : Fin N => ((a:ℤ)+1) • P)` (:97) — ℤ-multiples of `P`
+  (group data) + a Cartier-divisor subgroup condition.
+- **`IsFullLevel N P Q`** (`LevelStructure/Basic.lean:100`) = killing clauses
+  `(N:ℤ)•P = 0 ∧ (N:ℤ)•Q = 0` **∧** divisor equality
+  `(sectionsDivisor E.π (fun i : Fin (N²) => (i%N:ℤ)•P + (i/N:ℤ)•Q)).ideal = E.torsionIdeal N`.
+
+`pullSection` factors (T-E4a Part-1 dictionary, all proven): across the **pointed comparison iso**
+`curveIsoPullback : X.curve.E ≅ pullback Y.curve.π f.baseHom` composed with the **base-change leg**
+`Y.curve → Y.curve.baseChange f.baseHom`. So each membership transports in two legs.
+
+## Inventory: what EXISTS (all proven, file:line-verified)
+
+**Leg 1 — base change (COMPLETE, nothing to build):**
+- `Section.HasExactOrder.baseChange` (`ExactOrder.lean:188`, T-D6a-ii headline) — exact order is
+  preserved by base change, via `orderDivisor_baseChange` + `RelEffCartierDiv.IsSubgroup.baseChange`
+  (`ExactOrder.lean:174`).
+- `RelEffCartierDiv.baseChange` + `baseChange_ideal` (`CartierDivisor.lean:1644/1653`) — the
+  divisor/ideal side. `torsion_baseChange_isPullback` (`TorsionFibre.lean:243`) — `torsionIdeal`.
+- `degree_baseChange_eq` (`DeligneOrder.lean:2070`), `generatorSpace_baseChange` (`NIsogeny.lean:278`).
+
+**Group-algebra content (COMPLETE via [Y1-D2] discharge):**
+- Killing clauses + the ℤ-linear combinations `(i%N)•P + (i/N)•Q` inside `sectionsDivisor` transport
+  by `pullSection_add_of_finitePresentation` + `pullSection_zsmul_of_finitePresentation`
+  (`PullSectionCanonicity.lean`) — **the same one primitive, no new gate**.
+
+**Drinfeld ↔ naive bridges (proven, `NIsInvertible` only):**
+- `isGammaOne_iff_naive` (T-D9, `Basic.lean:143`), `isFullLevel_iff_naive` (T-D8, `Basic.lean:130`).
+
+## Inventory: what is ABSENT (the genuine T-H8a gap)
+
+**Leg 2 — the comparison-iso leg.** Grep-verified absent: NO iso-invariance API for the divisor
+apparatus (`sectionsDivisor`/`orderDivisor` under an iso of curves, `torsionIdeal` under an iso,
+`IsSubgroup` under a group iso). ~4 lemmas + 2 membership assemblies, est. 150–250 LOC:
+1. `sectionsDivisor` under the comparison iso (ideal transport along an iso of schemes over the
+   same base — near-mechanical from `RelEffCartierDiv` API);
+2. `torsionIdeal` under a **pointed group iso** (needs `mulByHom` intertwining — a consequence of
+   the group-iso property, i.e. **the one primitive again**);
+3. `IsSubgroup` under a pointed group iso (mirrors the proven `IsSubgroup.baseChange`);
+4. `HasExactOrder` under a pointed group iso (assembles 1+3, mirrors `HasExactOrder.baseChange`).
+Adjacency note: D2's de-privatised `Incidence.lean` helpers (the KM Ch.6 order-divisor-locus engine,
+deliberate shared API per v10.85) are the natural toolbox for 1–3.
+
+## Routes (holder = GH lane; coordination per attack-1, no duplication)
+
+- **Route FULL (the genuine discharge, arbitrary `R`):** leg 1 (exists) + leg 2 (the 4 iso-lemmas
+  above) + the group-algebra funnel (exists). **Gate: the SAME one primitive** — leg 2's items 2–4
+  consume the group-iso property of `curveIsoPullbackOver` exactly as `transportSection_add` does.
+  Nothing else gates it. Post-T-W7a this is bounded holder work (or falls-sweep work in my lane if
+  dispatched — the 4 lemmas are standalone-stageable in my own file).
+- **Route N-INV (short, consumer-scoped — does NOT discharge the held sorries):** for consumers with
+  `IsUnit (N:R)` (both T-H8/T-H9 do), Drinfeld membership ↔ naive membership (T-D8/T-D9) + the naive
+  transport ([Y1-D2] lemmas). Cannot close the held `map` fields (arbitrary `R`, statement-protected)
+  — flag ONLY as the wiring shortcut for `hinv`-carrying consumers.
+
+## Verdict
+
+**T-H8a adds NO new gate.** Same funnel: everything either exists (leg 1, bridges, group algebra) or
+is bounded post-primitive work (leg 2, ~4 iso-invariance lemmas). The falls-sweep order at T-W7a:
+(1) wire the primitive (route c) → (2) T-E4 family (Y1-D2, YFULL AFF/FIN, GH1) goes clean → (3) the
+T-H8a iso-leg lemmas → (4) both Drinfeld memberships close. The held sorries stay held (GH lane);
+this inventory + the [Y1-D2] wiring note are the coordination artifacts.
