@@ -621,6 +621,41 @@ theorem specMap_chartι_comp_baseChange (f : U →+* R) (W₀ : WeierstrassCurve
   simp only [← Category.assoc, ← Spec.map_comp]
   rw [← CommRingCat.ofHom_hom (eqToHom e), ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
 
+
+section ChartPointTriple
+
+open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- The `φ`-triple of a chart point: the dictionary-side coordinates of `Spec.map φ ≫ chartι k`. -/
+noncomputable def chartPointTriple (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] (φ : chartAway W k →+* K) : Fin 3 → K := fun m =>
+  φ (HomogeneousLocalization.Away.isLocalizationElem
+    (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m))
+
+lemma chartPointTriple_self (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] (φ : chartAway W k →+* K) :
+    chartPointTriple W k φ k = φ (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W k)) := rfl
+
+/-- The k-th coordinate of the φ-triple is 1. -/
+lemma chartPointTriple_self_eq_one (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] (φ : chartAway W k →+* K) :
+    chartPointTriple W k φ k = 1 := by
+  rw [chartPointTriple]
+  have h1 : (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W k) :
+        chartAway W k) = 1 := by
+    apply HomogeneousLocalization.val_injective
+    rw [HomogeneousLocalization.Away.val_mk, HomogeneousLocalization.val_one]
+    exact Localization.mk_self
+      (⟨(quotientGradingHom (projIdeal W)) (MvPolynomial.X k) ^ 1, ⟨1, rfl⟩⟩ :
+        Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k)))
+  rw [h1, map_one]
+
+end ChartPointTriple
+
 end ChartNaturality
 
 section AtlasPush
