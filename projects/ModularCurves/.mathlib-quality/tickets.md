@@ -11416,3 +11416,28 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   locally-injective half (stalkwise/filtered; decompose on fork), then the
   LocalizedMonoidal instantiation (only once the leaf is sorry-free — a sorried
   IsMonoidal instance would poison the monoidal DATA with sorryAx).
+
+## Amendments v10.69 (2026-07-09, coordinator): ★ THE INBOX PROTOCOL (BINDING) + GAP1 scaffold absorbed
+
+- **THE INBOX PROTOCOL — dispatches now flow through git, not the owner relay.** Streams
+  are already file-separate; the relay burden was dispatches/corrections traveling by
+  owner copy-paste. Binding rules, all workers:
+  1. `.mathlib-quality/inbox/<worker>.md` is YOUR inbox — the coordinator writes
+     dispatches, redirects, corrections, adjudications there (committed + pushed).
+  2. **Session start = pull, read YOUR inbox, read Amendments since your last mark —
+     THEN claim/work** (the v10.68 near-race was a resume that skipped this).
+  3. **Every commit boundary = re-pull + re-read your inbox.**
+  4. Reports stay board-ward (your own sections); the coordinator polls on activation.
+     The owner relays NO routine traffic in either direction.
+  5. Rule-5 unchanged: claim on the board BEFORE touching files; adjudications land in
+     inboxes. Owner′s remaining roles: session lifecycle, rate limits, owner decisions
+     (B2/funding/scope/external). All 11 inboxes seeded this commit.
+- **PIC0: [GAP1-W-MONO] scaffold UP (4d67f18d8), zero sorries**: `sheafificationW` (the
+  localizing class), `sheafificationW_isLocalization` (registration exactly as thin as
+  hoped — Adjunction.isLocalization on the reflective adjunction), and
+  `sheafificationW_iff_isLocallyBijective` (the membership bridge, both directions).
+  Lanes kept clear (T-A3 = A′s; SmoothDescent + cleanup = NEW-GH′s; cross-lane golf note
+  routed to NEW-GH′s inbox). **Discipline ratified**: the LocalizedMonoidal instantiation
+  WAITS until the ⊗-stability leaf is sorry-free — a sorried IsMonoidal would push sorryAx
+  into the monoidal data itself. Remaining: the loc-surjective half (sections-level), the
+  loc-injective half (stalkwise/filtered, decompose on fork), then instantiate.
