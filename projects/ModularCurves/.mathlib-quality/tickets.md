@@ -12662,3 +12662,24 @@ cover (they remain the source-of-record for the §5 polynomials). **c3 ✓ and c
 Bosma–Lenstra two-law geometry (agree + cover) are DONE over [IsDomain][IsJacobsonRing].** Next:
 `mulModelHom` (glue addOnZ+addOnY on the two-open cover, over the universal/domain setting) →
 c4.5 base-change transport to general R (the classifying-map naturality) → 0c-i → 0c-ii → 0h → T-W7a.
+
+### v10.90c (2026-07-09, c5β): ★★★ mulModelHom COMPLETE — the BL two-law group law geometry is ASSEMBLED
+
+`mulModelHom` (Global, `[IsDomain][IsJacobsonRing]`): the multiplication morphism `E ×_R E ⟶ E`,
+glued from `addOnZ` + `addOnY` on the two-open cover, consuming ALL of c2 (cover) + c3 (agree).
+New `MulModel` section: `blCoverFam`/`blCoverMor` (Bool two-open cover), `blCoverMor_agree` (hf =
+addOn_agree off-diagonal), `iSup_blCoverFam_eq_top`, `mulModelHom` (topIso.inv ≫ homOfLE ≫
+glueMorphisms), and `blOpenZ_ι_mulModelHom`/`blOpenY_ι_mulModelHom` (restricts to each law — the
+specs the group law consumes). All axiom-clean, build green (2959 jobs).
+
+**SESSION SUMMARY (c5β):** c3 `addOn_agree` ✓ (both halves + family assembly) → c2 `blOpen_cover` ✓
+(no Bezout — point-level non-vanishing) → `mulModelHom` ✓. The ENTIRE Bosma–Lenstra two-law
+group-law geometry is now assembled over the universal/domain setting. Committed: ecd15536c (cross
+addOn_agree), c207a4ccf (addOn_agree), 3814e19c7 + 1be812889 + cdcb06fb9 (c2), 0de705d89 (mulModelHom).
+
+**NEXT — c4.5 base-change transport (the last impedance-match):** Global's `mulModelHom`/`addOnZ`/
+`addOnY`/`addOn_agree` are over `[IsDomain R][IsJacobsonRing R]`; GLC's want general `R`/`[W.IsElliptic]`.
+The opens (`blOpenZ`/`blOpenY`) and cover (`blOpen_cover`) are general-`R` and wire DIRECTLY; only the
+morphisms need the universal-ring → `R` classifying-map naturality (`mulModelHom_map`). This is a fresh
+architectural stream (universal atlas + base-change of `mulModelHom`); a natural next-session boundary,
+mirroring the ratified [C4-HF-ASSEMBLY] boundary. Then 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
