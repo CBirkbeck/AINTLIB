@@ -1,4 +1,5 @@
 import ModularCurves.ModularCurve.YOneAssembly
+import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.EllipticCurve.Comparison
 
 /-!
@@ -579,6 +580,43 @@ theorem EllObj.tateClassifyingHom_existsUnique_of_components (Y : EllObj R)
   · intro f hf
     rcases huniq f hf with ⟨hbase, htop⟩
     exact EllHom.ext hbase htop
+
+/-- The Tate classifying morphism in the tautological pullback shape.  This is the
+`QuotientProblem`/`pullbackAlong` reuse path flagged in v10.89. -/
+noncomputable def EllObj.tateClassifyingHomOfPullbackMap (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (v : Y ⟶ (tateEllObj R).pullbackAlong baseMap) :
+    Y ⟶ tateEllObj R :=
+  v ≫ (tateEllObj R).pullbackAlongπ baseMap
+
+@[simp]
+theorem EllObj.tateClassifyingHomOfPullbackMap_baseHom (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (v : Y ⟶ (tateEllObj R).pullbackAlong baseMap) :
+    (EllObj.tateClassifyingHomOfPullbackMap R Y baseMap v).baseHom =
+      v.baseHom ≫ baseMap :=
+  rfl
+
+theorem EllObj.tateClassifyingHomOfPullbackMap_baseHom_of_base_id (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (v : Y ⟶ (tateEllObj R).pullbackAlong baseMap)
+    (hv : v.baseHom = 𝟙 Y.base) :
+    (EllObj.tateClassifyingHomOfPullbackMap R Y baseMap v).baseHom = baseMap := by
+  rw [EllObj.tateClassifyingHomOfPullbackMap_baseHom, hv]
+  change 𝟙 Y.base ≫ baseMap = baseMap
+  exact Category.id_comp baseMap
+
+/-- Compare maps into the Tate pullback by projecting to `tateEllObj` and comparing
+their base maps.  This is `EllObj.homPullbackAlongEquiv` specialised to the Tate object. -/
+theorem EllObj.tatePullbackAlong_hom_ext (Y : EllObj R)
+    (baseMap : Y.base ⟶ tateBase R)
+    (v v' : Y ⟶ (tateEllObj R).pullbackAlong baseMap)
+    (hproj : v ≫ (tateEllObj R).pullbackAlongπ baseMap =
+      v' ≫ (tateEllObj R).pullbackAlongπ baseMap)
+    (hbase : v.baseHom = v'.baseHom) :
+    v = v' := by
+  apply (EllObj.homPullbackAlongEquiv (tateEllObj R) baseMap Y).injective
+  exact Subtype.ext (Prod.ext hproj hbase)
 
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
