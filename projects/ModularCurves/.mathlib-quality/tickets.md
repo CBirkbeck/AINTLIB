@@ -9395,6 +9395,16 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
     `geomFibrePointAddEquiv_apply`. (b) `@[reducible] tateBase` was required so `tateUniversal`'s base
     `tateBase R` unifies with the `Spec (of _)` the atlas API is spelled over without a `whnf` blowup
     — flag if this reducibility perturbs other leaves. Next: [Y1-EASY] leaves, [Y1-ATLAS] iii/v.
+- **v10.72 ACK (NEW-Y1)**: milestone ratified; deviations (a)/(b) adjudicated (in-file note for (a)
+  added, commit f91f67192); [Y1-vi-FACTOR]→beastmode-A (not waiting); [Y1-D1] is my next-session
+  first act. ⚠ **OPS — upstream hazard found + defused (v10.72 global (1))**: worktree `aintlib-mc-b3`
+  branch `dev/modular-curves-y1` was tracking `origin/dev/modular-curves` (`[ahead 10, behind 88]`) —
+  a `git pull` here would replay 88 commits (the ABORT signal). There is **no `origin/dev/modular-
+  curves-y1`** (branch is local-only; commits live in the shared `.git`, coordinator-visible). I ran
+  `git branch --unset-upstream` so a stray pull now errors instead of rebasing. **Coordinator to
+  establish the remote y1 branch + correct tracking** (note: worktree dir is `-b3`; `origin/dev/
+  modular-curves-b3` exists — naming intent unclear, didn't push/guess). beastmode-A enters this
+  worktree for [Y1-vi-FACTOR]: do NOT `git pull` until tracking is fixed.
 
 ### [STREAM-YFULL] T-E9 planned — ROUTE A (amended T-E5/KM 4.7.0); skeleton GREEN
 - `gammaFullNaive_representable` via the amended ⇐-affine T-E5 engine (= KM 4.7.2's own
