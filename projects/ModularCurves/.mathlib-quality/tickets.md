@@ -12843,3 +12843,17 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   {CLOPEN ⟵ p2-phase-2 ∨ P3b3-étale; ETALE ⟵ BB-DIFF; QSM ⟵ NEW-GH 02KL/KM; GEOM ⟵
   FP4 engine}. GH's gates = {DS4/T-C1 ⟵ p2; A711-BC + T-E5-engine ⟵ FP4; T-E4a ⟵
   A (landed, modulo primitive); B2-repoint ⟵ FP4}. Everything else funnels to T-W7a.
+
+### v10.95 (2026-07-09, fable-FP): ▶ UN-PARKED per v10.94 — [NISOG-GRASS] wave 3 resumes
+
+- Dispatch-note: the queue's first item (GR-E2 pointwise spec) landed pre-park
+  (v10.60d/e, `adc0c9f6a`: `isChartAt_iff_isUnit_det` + the full [GR-SPEC] block incl.
+  `evalAwayAt_comp_ringHom`). Resuming at the next real item.
+- **Wave-3 execution order (claimed, fable-FP)**: **[GR-F1]** the reverse-transition
+  identity `(matrix ι' ι).map (ringHom ι ι') = (matrixAway ι ι')⁻¹` + det-unit ⟹
+  **[GR-F2]** `ringHomAway : Away(det ι' ι) →+* Away(det ι ι')` (the GlueData t-map,
+  ring level) ⟹ **[GR-E4]** inverse-pair + triple cocycle (generic, mulVec-cancellation
+  toolkit) ⟹ **[GR-D]** Spec-level basicOpen immersions ⟹ **[GR-F]** `Scheme.GlueData`
+  ⟹ **[GR-G]** T-points ⟹ NISOG [L15]. Hygiene per broadcast: single-target builds,
+  commit-early+push, no side quests. [OWNER-FLW] boundary noted — nothing here touches
+  locally-Weierstrass.
