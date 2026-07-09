@@ -10894,3 +10894,21 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
 `#print axioms` for the key new declarations lists only `[propext, Classical.choice,
 Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.107-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] projTateMap — the classifying model morphism LANDED
+
+Added in `YOneAtlasClassify.lean` the classifying model morphism of a marked chart:
+`projTateMap := (tateNormalIso).inv ≫ projModelBaseChange (atlas algebra map)`, with
+`projTateMap_π` (lies over `tateBaseSpecMapOfPoint`), `projTateMap_isPullback` (paste of the
+normalising-iso square with `isPullback_projModelBaseChange`), `projTateMap_zero` (pointed via
+`tateNormalIso_zero_inv` + `projModelZero_baseChange`), and **`projTateMap_marking`**
+(`g ≫ projTateMap = tateBaseSpecMapOfPoint ≫ tateP0mor` — by `specPoint_ext_of_zChartEval`
+against the two `(0,0)`-computations: `markedPointNormalised_coords` through the base-change
+transport, and `zChartEval_tateP0SpecPoint_coordX/Y` through ring-map naturality). This is
+Loeffler Prop 3.3.4's *"(E, P) ≅ (E(α,β), (0,0))"* per chart, at scheme level: the model-side
+classifying data (cartesian + pointed + marking) is now complete for a single chart.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs); no
+`sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
+`#print axioms` for `projTateMap_isPullback`, `projTateMap_zero`, `projTateMap_marking`:
+`[propext, Classical.choice, Quot.sound]` only (no inherited `sorryAx`).
