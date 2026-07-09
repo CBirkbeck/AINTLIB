@@ -835,3 +835,71 @@ theorem exists_quotientIsoSpec_top [Finite G] [IsAffine X]
   exact ⟨asIso q, hq⟩
 
 end AlgebraicGeometry.SchemeAction
+
+/-! ### [a5-W6] The final assembly (Phase A): the quotient's local Weierstrass model -/
+
+namespace ModularCurves.RouteA
+
+open WeierstrassCurve
+open scoped Pointwise
+
+variable {G : Type u} [Group G] {X : Scheme.{u}} {C : EllipticCurveGeom X}
+  {σ : SchemeAction G X} {σE : SchemeAction G C.E}
+
+/-- Abstract reduction: `LocallyWeierstrass` transports along an iso of the base (with the total
+space fixed). Stated over opaque schemes so the application never unfolds the heavy quotient/Spec
+objects. -/
+private theorem lw_of_baseIso {Q S T : Scheme.{u}} (π' : Q ⟶ S) (zero' : S ⟶ Q)
+    (hz : zero' ≫ π' = 𝟙 S) (qiso : S ≅ T)
+    (hspec : LocallyWeierstrass (π' ≫ qiso.hom) (qiso.inv ≫ zero')
+      (by rw [Category.assoc, ← Category.assoc zero', hz, Category.id_comp, Iso.inv_hom_id])) :
+    LocallyWeierstrass π' zero' hz := by
+  refine hspec.of_iso (Iso.refl _) qiso ?_ ?_
+  · rw [Iso.refl_hom, Category.id_comp]
+  · rw [Iso.refl_hom, Category.comp_id, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀) (hW₀ : W₀.IsElliptic)
+    (hπφ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom)
+    (hzeroφ : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
+    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
+      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
+    LocallyWeierstrass π' zero' hz := by
+  classical
+  cases nonempty_fintype G
+  rcases isEmpty_or_nonempty (↥X) with hX | hX
+  · intro s
+    obtain ⟨x, -⟩ := σ.quotientπ_surjective V hVs hVa hVmem s
+    exact (hX.false x).elim
+  obtain ⟨x₀⟩ := hX
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  obtain ⟨qiso, hqiso⟩ := σ.exists_quotientIsoSpec_top V hVs hVa hVmem hVtop x₀
+  have hz'' : (qiso.inv ≫ zero') ≫ (π' ≫ qiso.hom) = 𝟙 _ := by
+    rw [Category.assoc, ← Category.assoc zero', hz, Category.id_comp, Iso.inv_hom_id]
+  -- the cocycle + freeness over Γ(X,⊤)
+  have hfreeA : IsFreeAlgebraAction G ℤ ↑Γ(X, ⊤) :=
+    σ.isFreeAlgebraAction_of_free (isStableOpen_top σ) (isAffineOpen_top X) hfreeX
+  obtain ⟨Cvc, hCvc, hcoc, hΨ⟩ := exists_cocycle_of_globalModel' hact W₀ φ hπφ hzeroφ
+  -- the Spec-side local model
+  have hspec : LocallyWeierstrass (π' ≫ qiso.hom) (qiso.inv ≫ zero') hz'' := by
+    intro s
+    set p : Ideal (FixedPoints.subring ↑Γ(X, ⊤) G) := s.asIdeal with hpdef
+    haveI hpP : p.IsPrime := s.isPrime
+    obtain ⟨a, hap, W₁, E, hW₁, hcob⟩ := exists_away_invariant_descent hfreeA W₀ hcoc hCvc p
+    sorry
+  exact lw_of_baseIso π' zero' hz qiso hspec
+
+end ModularCurves.RouteA
