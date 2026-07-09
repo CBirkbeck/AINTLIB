@@ -13157,3 +13157,25 @@ packaging precedent). New file `Picard/Pic.lean`, all axiom-clean [propext, Clas
   route: the banked D-PresPB′ oplax-lift plan (decomposition-pullback-monoidal.md) or a
   LocalizedMonoidal-level monoidal-functor transport of pullback (new option now that the monoidal
   category is data — evaluate at the next /develop touch).
+
+## Amendments v10.98 (fable-PIC0) — Pic-functoriality chain fully mapped; ONE math gate; session boundary
+
+**Probe result (Localization/Monoidal/Functor.lean):** `functorMonoidalOfComp` — for a monoidal
+localization `L : C ⥤ D` and `F : D ⥤ E` with `L ⋙ F` monoidal, `F` is monoidal. Applied to
+F := `Modules.pullback f` (both sides now monoidal via v10.97's LocalizedMonoidal-data), L := sh_X,
+with `sheafificationCompPullback` identifying `L ⋙ F ≅ f^*ᵖ ⋙ sh_Y`: the needed monoidality of the
+composite is EXACTLY D-PresPB′ (`sh_Y(f^*ᵖ(P⊗Q)) ≅ sh_Y(f^*ᵖP ⊗ f^*ᵖQ)`, general `f`) — no shortcut
+(consistent with the v10.78 adversarial finding), but the PAYOFF-PATH is now crisp:
+
+**[PIC-P2-FUNC] banked chain:** D-PresPB′ (general-f, the one math gate — route: presheaf-pushforward
+lax-lift + `leftAdjointOplaxMonoidal` δ + W-membership; known gap = stalk API for the abstract
+presheaf pullback, the reason for the ι-detour) ⟹ `functorMonoidalOfComp` ⟹
+`(Modules.pullback f).Monoidal` with ALL coherences ⟹ `Skeleton.monoidHom` ⟹
+`Pic(f) : Pic X →* Pic Y` ⟹ GME (2.16) `Pic_{E/S}` functor. Next /develop pass = decompose
+D-PresPB′-general properly (the stalk-API sub-tree is the crux to size).
+
+**Session totals (this marathon):** [PIC-P1b-MONO] consumer COMPLETE (P1b sorry-free = GME 2.2.2
+layer done, 5 ι-leaves + D-Idem, all axiom-clean) · Pic coherence layer (assoc/comm/collapses) ·
+★★ `Scheme.Pic` + CommGroup (P2 headline) · LSP re-validated live (fleet memory updated) ·
+2 registered residuals (general-f Props), 2 registered follow-ups ([PIC-P2-CMP] duality-edge-flagged,
+[PIC-P2-FUNC]). All pushed through de78be705.
