@@ -413,6 +413,36 @@ lemma blOpenZImage_inf_le_transι :
   le_trans (inf_le_inf (blOpenZImage_le_range W i j) (blOpenZImage_le_range W i' j'))
     (pieceι_range_inf_le_transι W i j i' j')
 
+/-- **([C4-HF-ASSEMBLY] L2a)** The preimage under `transι` (via the `(i,j)` factorization) of the
+`(i,j)` k-th image piece is the basic open of `Spec transRing` where the transported piece
+coordinate is invertible. -/
+lemma transι_preimage_blOpenYImage_piece (k : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transAlgHom W i j i' j' (lawTwoTriple W i j k)) := by
+  show (Spec.map (CommRingCat.ofHom (transAlgHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j) ⁻¹ᵁ _ = _
+  rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage, Scheme.Hom.preimage_image_eq,
+    blOpenYPieceFamily,
+    ← Scheme.Hom.comp_preimage (chartPieceIso W i j).inv (chartPieceIso W i j).hom,
+    Iso.inv_hom_id, Scheme.Hom.id_preimage]
+  exact SpecMap_preimage_basicOpen _ _
+
+/-- **([C4-HF-ASSEMBLY] L2b)** Via the `(i',j')` factorization (`transι_eq`), the preimage of the
+`(i',j')` k'-th image piece is the basic open where `transHom(lawTwoTriple i'j' k')` is invertible. -/
+lemma transι_preimage_blOpenYImage_piece' (k' : Fin 3) :
+    transι W i j i' j' ⁻¹ᵁ (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k') =
+      specBasicOpen (CommRingCat.of (transRing W i j i' j'))
+        (transHom W i j i' j' (lawTwoTriple W i' j' k')) := by
+  rw [transι_eq]
+  show (Spec.map (CommRingCat.ofHom (transHom W i j i' j').toRingHom) ≫
+    (chartPieceIso W i' j').inv ≫ pieceι W i' j') ⁻¹ᵁ _ = _
+  rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage, Scheme.Hom.preimage_image_eq,
+    blOpenYPieceFamily,
+    ← Scheme.Hom.comp_preimage (chartPieceIso W i' j').inv (chartPieceIso W i' j').hom,
+    Iso.inv_hom_id, Scheme.Hom.id_preimage]
+  exact SpecMap_preimage_basicOpen _ _
+
 end Overlap
 
 end WeierstrassCurve.Projective
