@@ -464,6 +464,15 @@ private lemma tateMarkedPoint_pull_fst (R : CommRingCat.{u}) (k : Type u) [Field
       = EllipticCurve.geomPoint (tateRingOver R) k ≫ tateP0mor R
   rw [Category.assoc, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
 
+/-- Generic `Spec.map`/`ofHom` composition-associativity fold, in its **own** heartbeat budget so
+the `whnf`-heavy chart-hom `φ` of `[Y1-vi-FACTOR]` is never unfolded during the fold (the fvar `φ`
+is passed opaquely; this lemma only ever sees generic ring homs). -/
+private lemma spec_map_ofHom_comp_awayι {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    (f : A →+* B) (g : B →+* C) {X : Scheme.{u}} (ι : Spec (CommRingCat.of A) ⟶ X) :
+    Spec.map (CommRingCat.ofHom (g.comp f)) ≫ ι
+      = Spec.map (CommRingCat.ofHom g) ≫ Spec.map (CommRingCat.ofHom f) ≫ ι := by
+  rw [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
 /-- **(Y1-vi setup)** The pulled marked point factors through the `Z`-chart via the base change
 `(algebraMap) ∘ φ_B` of `tateP0mor`'s chart hom.
 
@@ -488,8 +497,16 @@ private lemma tateMarkedPoint_pull_factor (R : CommRingCat.{u}) (k : Type u) [Fi
       (EllipticCurve.pointSpecPointsEquiv (tateCurveLocOver R) (tateUniversal R)
       (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
       (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
-        (tateMarkedPoint R))).1 :=
-  sorry
+        (tateMarkedPoint R))).1 := by
+  set φ := ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1
+    with hφ
+  have htp : tateP0mor R = Spec.map (CommRingCat.ofHom φ) ≫
+      Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos := tateP0mor_factor R
+  rw [tateMarkedPoint_pull_fst R k, htp]
+  simp only [EllipticCurve.geomPoint]
+  exact spec_map_ofHom_comp_awayι φ (algebraMap (tateRingOver R) k) _
 
 /-- **[Y1-vi], transfer pin (chart naturality).** Over any fibre field `k`, the affine image of the
 pulled marked point `P₀ = (0, 0)` is the affine origin `some 0 0`. Assembled from the setup lemmas
