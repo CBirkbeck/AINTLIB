@@ -559,6 +559,17 @@ lemma psiFst_algebraMap (k k' : Fin 3) (x : biChartRing W i j) :
   IsLocalization.Away.lift_eq (lawTwoTriple W i j k)
     (isUnit_algebraMap_biChartRing_lawTwoTriple W i j i' j' k k') x
 
+/-- **([C4-HF-ASSEMBLY] L3, ψ_ij ring identity)** ψ_ij restricted to `biChartRing` is the tower map
+`biChartRing → S` — a whnf-safe `RingHom.ext` (the RHS is `algebraMap biChartRing S`, no composition,
+so it never forces the concrete triple-localization). -/
+lemma psiFst_toRingHom_comp (k k' : Fin 3) :
+    (psiFst W i j i' j' k k').toRingHom.comp
+        (algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))) =
+      algebraMap (biChartRing W i j)
+        (Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
+          transHom W i j i' j' (lawTwoTriple W i' j' k'))) :=
+  RingHom.ext (psiFst_algebraMap W i j i' j' k k')
+
 end Overlap
 
 end WeierstrassCurve.Projective
