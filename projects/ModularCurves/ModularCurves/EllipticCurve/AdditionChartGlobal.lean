@@ -2312,4 +2312,302 @@ theorem blOpenY_ι_mulModelHom (hΔ : IsUnit W.Δ) :
 
 end MulModel
 
+/-! ## π-compatibility: the two-law glue is over `Spec R` (c4.5 first act) -/
+
+section
+
+variable (i j : Fin 3)
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+/-- Per-piece: the k-th image piece of addOnYOnImage is over R, matching the piece's fst-structure. -/
+lemma addOnYOnImage_piece_projModelπ (hΔ : IsUnit W.Δ) (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k)) ≫
+        addOnYOnImage W hΔ i j ≫ projModelπ W =
+      (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, addOnYOnImage_piece, addOnYOnFamily]
+  simp only [Category.assoc]
+  rw [addOnYPieceMor_projModelπ, ← isoImage_specBasicOpen_pieceAwayι]
+  simp only [Category.assoc]
+  exact congrArg (_ ≫ ·) (congrArg (_ ≫ ·) (congrArg (_ ≫ ·)
+    (pieceAwayι_fst_projModelπ W i j k).symm))
+end
+
+section
+
+variable (i j : Fin 3)
+
+/-- Z-side base case: the k-th law-1 piece embeds as an R-scheme. -/
+lemma pieceAwayZι_fst_projModelπ (k : Fin 3) :
+    pieceAwayZι W i j k ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap R (Localization.Away (lawOneTriple W i j k)))) := by
+  rw [pieceAwayZι_eq]
+  simp only [Category.assoc]
+  slice_lhs 3 4 => rw [pieceι_fst]
+  slice_lhs 4 5 => rw [chartι_projModelπ]
+  slice_lhs 2 3 => rw [chartPieceIso_inv_fst]
+  rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  ext r
+  show (algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
+      ((biChartRingAwayTensorEquiv W i j).symm
+        (algebraMap R (TensorProduct R (chartAway W i) (chartAway W j)) r)) =
+    algebraMap R (Localization.Away (lawOneTriple W i j k)) r
+  rw [AlgEquiv.commutes, ← IsScalarTower.algebraMap_apply]
+end
+
+section
+
+variable (i j : Fin 3)
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+/-- Z-side per-piece π-compat. -/
+lemma addOnZOnImage_piece_projModelπ (hΔ : IsUnit W.Δ) (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k)) ≫
+        addOnZOnImage W hΔ i j ≫ projModelπ W =
+      (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, addOnZOnImage_piece, addOnZOnFamily]
+  simp only [Category.assoc]
+  rw [addOnZPieceMor_projModelπ, ← isoImage_specBasicOpen_pieceAwayZι]
+  simp only [Category.assoc]
+  exact congrArg (_ ≫ ·) (congrArg (_ ≫ ·) (congrArg (_ ≫ ·)
+    (pieceAwayZι_fst_projModelπ W i j k).symm))
+end
+
+section
+
+variable (i j : Fin 3)
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
+/-- homOfLE into the piece-⨆ composed with ι-fst-π collapses to the piece's ι-fst-π. -/
+lemma homOfLE_iSup_pieceImage_ι_fst_projModelπ (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun k => pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) k) ≫
+        (⨆ k, pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+/-- Ω-form π-compat for addOnYOnImage: over the piece cover, the law-2 image morphism is over R. -/
+lemma homOfLE_addOnYOnImage_projModelπ (hΔ : IsUnit W.Δ)
+    (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenYImage W i j)
+    (hΩ : Ω = ⨆ k, pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnYOnImage W hΔ i j ≫ projModelπ W =
+      Ω.ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun k => pieceι W i j ''ᵁ blOpenYPieceFamily W i j k)) _ _ (fun k => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun k => pieceι W i j ''ᵁ blOpenYPieceFamily W i j k)).f k =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun k => pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) k) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ k) hk
+      (addOnYOnImage W hΔ i j ≫ projModelπ W)).trans
+    ((addOnYOnImage_piece_projModelπ W i j hΔ k).trans
+      (homOfLE_iSup_pieceImage_ι_fst_projModelπ W i j k).symm)
+end
+
+section
+
+variable (i j : Fin 3)
+
+/-- Z-mirror of the hoisted collapse lemma. -/
+lemma homOfLE_iSup_pieceImageZ_ι_fst_projModelπ (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun k => pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) k) ≫
+        (⨆ k, pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (pieceι W i j ''ᵁ blOpenZPieceFamily W i j k).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
+
+/-- Z-side Ω-form π-compat. -/
+lemma homOfLE_addOnZOnImage_projModelπ (hΔ : IsUnit W.Δ)
+    (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenZImage W i j)
+    (hΩ : Ω = ⨆ k, pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZOnImage W hΔ i j ≫ projModelπ W =
+      Ω.ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun k => pieceι W i j ''ᵁ blOpenZPieceFamily W i j k)) _ _ (fun k => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun k => pieceι W i j ''ᵁ blOpenZPieceFamily W i j k)).f k =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun k => pieceι W i j ''ᵁ blOpenZPieceFamily W i j k) k) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ k) hk
+      (addOnZOnImage W hΔ i j ≫ projModelπ W)).trans
+    ((addOnZOnImage_piece_projModelπ W i j hΔ k).trans
+      (homOfLE_iSup_pieceImageZ_ι_fst_projModelπ W i j k).symm)
+end
+
+section
+
+variable [IsDomain R] [IsJacobsonRing R]
+
+omit [IsDomain R] in
+/-- Bare OnImage π-compat, Y-side (Ω := blOpenYImage itself via homOfLE_rfl + id_comp). -/
+lemma addOnYOnImage_projModelπ (hΔ : IsUnit W.Δ) (i j : Fin 3) [IsDomain (biChartRing W i j)] :
+    addOnYOnImage W hΔ i j ≫ projModelπ W =
+      (blOpenYImage W i j).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
+  (Category.id_comp _).symm.trans
+    ((congrArg (· ≫ addOnYOnImage W hΔ i j ≫ projModelπ W)
+      (Scheme.homOfLE_rfl _ _)).symm.trans
+    (homOfLE_addOnYOnImage_projModelπ W i j hΔ _ le_rfl (blOpenYImage_eq_iSup W i j)))
+
+omit [IsDomain R] in
+/-- Bare OnImage π-compat, Z-side. -/
+lemma addOnZOnImage_projModelπ (hΔ : IsUnit W.Δ) (i j : Fin 3) [IsDomain (biChartRing W i j)] :
+    addOnZOnImage W hΔ i j ≫ projModelπ W =
+      (blOpenZImage W i j).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
+  (Category.id_comp _).symm.trans
+    ((congrArg (· ≫ addOnZOnImage W hΔ i j ≫ projModelπ W)
+      (Scheme.homOfLE_rfl _ _)).symm.trans
+    (homOfLE_addOnZOnImage_projModelπ W i j hΔ _ le_rfl (blOpenZImage_eq_iSup W i j)))
+
+/-- Family-level π-compat, Z-side: 4 fin_cases to the bare OnImage form. -/
+lemma addOnZFamily_projModelπ (hΔ : IsUnit W.Δ) (p : Fin 2 × Fin 2) :
+    addOnZFamily W hΔ p ≫ projModelπ W =
+      (blOpenZFamily W p).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  obtain ⟨p1, p2⟩ := p
+  fin_cases p1 <;> fin_cases p2 <;> exact addOnZOnImage_projModelπ W hΔ _ _
+
+/-- Family-level π-compat, Y-side. -/
+lemma addOnYFamily_projModelπ (hΔ : IsUnit W.Δ) (p : Fin 2 × Fin 2) :
+    addOnYFamily W hΔ p ≫ projModelπ W =
+      (blOpenYFamily W p).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  obtain ⟨p1, p2⟩ := p
+  fin_cases p1 <;> fin_cases p2 <;> exact addOnYOnImage_projModelπ W hΔ _ _
+end
+
+section
+
+
+/-- Family-sup ι-collapse, Z-side (no instance baggage). -/
+lemma homOfLE_iSup_blOpenZFamily_ι_fst_projModelπ (p : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenZFamily W) p) ≫
+        (⨆ p, blOpenZFamily W p).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (blOpenZFamily W p).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+/-- Family-sup ι-collapse, Y-side. -/
+lemma homOfLE_iSup_blOpenYFamily_ι_fst_projModelπ (p : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenYFamily W) p) ≫
+        (⨆ p, blOpenYFamily W p).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (blOpenYFamily W p).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+variable [IsDomain R] [IsJacobsonRing R]
+
+/-- **(π-compat, Z-law)** `addOnZ` is a morphism over `Spec R`. -/
+lemma addOnZ_projModelπ (hΔ : IsUnit W.Δ) :
+    addOnZ W hΔ ≫ projModelπ W =
+      (blOpenZ W).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover (blOpenZFamily W)) _ _ (fun p => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover (blOpenZFamily W)).f p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenZFamily W) p) := rfl
+  rw [hf]
+  exact ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ projModelπ W) (homOfLE_le_addOnZ W hΔ p)).trans
+        (addOnZFamily_projModelπ W hΔ p))).trans
+    (homOfLE_iSup_blOpenZFamily_ι_fst_projModelπ W p).symm
+
+/-- **(π-compat, Y-law)** `addOnY` is a morphism over `Spec R`. -/
+lemma addOnY_projModelπ (hΔ : IsUnit W.Δ) :
+    addOnY W hΔ ≫ projModelπ W =
+      (blOpenY W).ι ≫ pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover (blOpenYFamily W)) _ _ (fun p => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover (blOpenYFamily W)).f p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenYFamily W) p) := rfl
+  rw [hf]
+  exact ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ projModelπ W) (homOfLE_le_addOnY W hΔ p)).trans
+        (addOnYFamily_projModelπ W hΔ p))).trans
+    (homOfLE_iSup_blOpenYFamily_ι_fst_projModelπ W p).symm
+end
+
+section
+
+
+/-- blCover-sup ι-collapse. -/
+lemma homOfLE_iSup_blCoverFam_ι_fst_projModelπ [IsDomain R] [IsJacobsonRing R] (b : Bool) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) b) ≫
+        (⨆ b, blCoverFam W b).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (blCoverFam W b).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+variable [IsDomain R] [IsJacobsonRing R]
+
+/-- Glue-level π-compat: the glued two-law morphism is over R on the ⨆ of the two-open cover. -/
+lemma glueMorphisms_blCover_projModelπ (hΔ : IsUnit W.Δ) :
+    (Scheme.Opens.iSupOpenCover (blCoverFam W)).glueMorphisms (blCoverMor W hΔ)
+        (glueMorphisms_hf_of_agree (blCoverFam W) (blCoverMor W hΔ) (blCoverMor_agree W hΔ)) ≫
+        projModelπ W =
+      (⨆ b, blCoverFam W b).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover (blCoverFam W)) _ _ (fun b => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover (blCoverFam W)).f b =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) b) := rfl
+  have hglue : (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) b) ≫
+      (Scheme.Opens.iSupOpenCover (blCoverFam W)).glueMorphisms (blCoverMor W hΔ)
+        (glueMorphisms_hf_of_agree (blCoverFam W) (blCoverMor W hΔ) (blCoverMor_agree W hΔ)) =
+      blCoverMor W hΔ b :=
+    Scheme.Cover.ι_glueMorphisms (Scheme.Opens.iSupOpenCover (blCoverFam W)) (blCoverMor W hΔ) _ b
+  rw [hf]
+  refine ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ projModelπ W) hglue).trans ?_)).trans
+    (homOfLE_iSup_blCoverFam_ι_fst_projModelπ W b).symm
+  cases b
+  · exact addOnY_projModelπ W hΔ
+  · exact addOnZ_projModelπ W hΔ
+
+/-- Collapse: homOfLE(⊤≤⨆) ≫ ⨆.ι ≫ fst ≫ π = ⊤.ι ≫ fst ≫ π. -/
+lemma homOfLE_top_blCover_ι_fst_projModelπ (hΔ : IsUnit W.Δ) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (iSup_blCoverFam_eq_top W hΔ).ge ≫
+        (⨆ b, blCoverFam W b).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      (⊤ : (pullback (projModelπ W) (projModelπ W)).Opens).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.homOfLE_ι]
+
+omit [IsDomain R] [IsJacobsonRing R] in
+/-- Collapse: topIso.inv ≫ ⊤.ι ≫ fst ≫ π = fst ≫ π. -/
+lemma topIso_inv_top_ι_fst_projModelπ :
+    (pullback (projModelπ W) (projModelπ W)).topIso.inv ≫
+        (⊤ : (pullback (projModelπ W) (projModelπ W)).Opens).ι ≫
+        pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [← Category.assoc, Scheme.toIso_inv_ι, Category.id_comp]
+
+/-- **(T-W7.0d over the domain setting)** `mulModelHom` is a morphism over `Spec R`:
+`mulModelHom ≫ projModelπ = pullback.fst ≫ projModelπ`. The π-compat of the whole two-law glue —
+propagated from the piece level (`pieceAwayι_fst_projModelπ`) through every glue stage. This is the
+agreement leg the c4.5 base-change `pullback.lift` needs. -/
+theorem mulModelHom_projModelπ (hΔ : IsUnit W.Δ) :
+    mulModelHom W hΔ ≫ projModelπ W =
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
+  rw [mulModelHom]
+  simp only [Category.assoc]
+  rw [glueMorphisms_blCover_projModelπ W hΔ]
+  exact (congrArg ((pullback (projModelπ W) (projModelπ W)).topIso.inv ≫ ·)
+    (homOfLE_top_blCover_ι_fst_projModelπ W hΔ)).trans (topIso_inv_top_ι_fst_projModelπ W)
+end
+
 end WeierstrassCurve.Projective
