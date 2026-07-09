@@ -75,23 +75,25 @@ theorem nonempty_sheafify_tensor_idem
                 (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).obj A).val ⊗
             ((sheafification
                 (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).obj B).val)) := by
-  -- PARKED (v10.79, coordinator refocus to Y1). Proof plan is sound and mostly assembled; the
-  -- residual is pure v10.36 instance-clothing plumbing (banked for resume):
-  --   * hunit := ⟨η_A, η_B⟩ ∈ sheafificationW via either
-  --       (a) counit route: `isIso_of_comp_hom_eq_id _ (sheafificationAdjunction _).left_triangle_components`
-  --           — needs `IsIso (sheafificationAdjunction (𝟙 R'.obj)).counit`, which fails to synthesize
-  --           because R cannot be inferred from `𝟙 R'.obj` (`set R'` hides the `⟨_,hS⟩` head; spell it
-  --           literally per the SheafOfModulesMonoidal Instantiation antidote), or
-  --       (b) toSheafify route: `sheafificationW_iff_isLocallyBijective` +
-  --           `toPresheaf_map_sheafificationAdjunction_unit_app` reduces to
-  --           `IsLocallyInjective/Surjective J (toSheafify J M.presheaf)` — needs
-  --           `[J.HasSheafCompose (forget AddCommGrpCat)]` + `[J.PreservesSheafification (forget AddCommGrpCat)]`
-  --           in the variable block (add them; the scheme site supplies them).
-  --   * then `sheafificationW_tensorHom (𝟙 R'.obj) η_A η_B (hunit A) (hunit B)` (α=𝟙 loc-bij of the
-  --     identity resolves cleanly here via `[IsIso (𝟙 _)]`), `rw [sheafificationW_iff] at ·`, `asIso`.
-  -- The α=𝟙 loc-inj/surj and the sheafificationW R-inference already work in this abstract setting
-  -- (only the counit / toSheafify anchors above remain). Resume: pick route (a) with literal `⟨_,hS⟩`.
-  sorry
+  have hunit : ∀ (M : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)),
+      sheafificationW
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)
+        ((sheafificationAdjunction
+          (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).unit.app M) := by
+    intro M
+    rw [sheafificationW_iff_isLocallyBijective,
+      toPresheaf_map_sheafificationAdjunction_unit_app]
+    exact ⟨(J.W_toSheafify M.presheaf).isLocallyInjective,
+      (J.W_toSheafify M.presheaf).isLocallySurjective⟩
+  have hstab := sheafificationW_tensorHom
+    (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)
+    ((sheafificationAdjunction
+      (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).unit.app A)
+    ((sheafificationAdjunction
+      (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).unit.app B)
+    (hunit A) (hunit B)
+  rw [sheafificationW_iff] at hstab
+  exact ⟨@asIso _ _ _ _ _ hstab⟩
 
 end PresheafOfModules
 
