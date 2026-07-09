@@ -12404,3 +12404,42 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
 **Committed foundations ready to consume:** `chartAwayHomOfTriple_cross_eq`/`pieceMorOfTriple_cross_agree`/
 `addOnYPieceMor_eq_addOnZPieceMor` (per-piece cross-law agreement); `regularityOpen_inf_eq_iSup_basicOpen`/
 `blOpenYPiece_inf_blOpenZPiece_eq_iSup` (same-index overlap geometry). LSP is live for the continuation.
+
+## Amendments v10.83 (2026-07-09, coordinator): ★ [T-E4-family] transport DISCHARGED (A) — Y1-D2's gate funnels to T-W7a; ★ NISOG L3 LANDED (D2); y1 upstream fixed; A + D2 PARK
+
+- **★ beastmode-A: [T-E4-family] DISCHARGED as dispatched** (7dac70553, NEW
+  Moduli/PullSectionCanonicity.lean — standalone lemmas + holder wiring note). Structural
+  find of record: the ENTIRE T-E4 family (pullSection_add, Γ₁/Γ(N) map-memberships,
+  Y1-D2's iff) inherits [IsLocallyNoetherian] through ONE call — now extracted as
+  `transportSection_add_of_isMonHom` (axiom-clean funnel) + arbitrary-base
+  `pullSection_add/zsmul_of_finitePresentation` whose only sorryAx is the single
+  primitive **`isMonHom_of_one_comp_eq'_of_finitePresentation`**, which lands via
+  **route (c) = c5β's T-W7a** (already the top priority) or route (a) = A's banked
+  skeleton (590984cce, parked fallback). NET: T-E4 family + YFULL AFF/FIN + GH1 go
+  axiom-clean the moment T-W7a lands, with only mechanical holder wiring. The
+  sharpening vindicated. **A PARKS at this clean boundary** (credit directive; route-a
+  execution is weeks-scale and unnecessary if route-c holds). A's return trigger:
+  T-W7a lands → route-(c) wiring + the family falls-sweep.
+- **NEW-Y1 TRIGGER MET**: A's transport is landed — [Y1-D2]/[Y1-D3] are workable NOW by
+  importing `pullSection_add_of_finitePresentation` (own proofs complete; trail inherits
+  the one primitive until T-W7a — the designed gate shape). Next NEW-Y1 session = the
+  Y1-E rigidity audit, then D2/D3, as queued. Their [Y1-vi-FACTOR] confirmation +
+  stale-trail correction (da926be33) absorbed; **the ONLY remaining sorryAx in the Y₁(N)
+  chain from their leaves is the atlas classifying clause (NEW-ATLAS's)**.
+- **★ D2: [STREAM-NISOG L3] LANDED axiom-clean** (e63d5c839) — `exists_generatorLocus`
+  (KM 6.1 scheme of generators G^×) + the generator-space API transitively clean;
+  Incidence.lean stays sorry-free. **CLEANUP-LANE NOTE (binding)**: the 10 de-privatised
+  Incidence.lean helpers (exactOrderLocusAux_ker_comap_eq, subgroupLocusAux_val, the
+  fullLevelLocusAux family, sectionsDivisor_ideal, …) are DELIBERATE shared API — the
+  reusable order-divisor-locus engine for KM Ch.6 — not unexplained publics; do not
+  re-privatise. LSP-decisiveness datum logged (comap-iso alignment intractable
+  build-only, fell in a handful of lean_goal steps). **D2 PARKS** per directive;
+  residuals unchanged ([T-BE-TAIL], 00ME).
+- **OPS: the y1 worktree's upstream is now FIXED too** (dev/modular-curves-y1 →
+  origin/dev/modular-curves-y1; it was unset — NEW-Y1 correctly refused to pull
+  through it). Plain `git pull --rebase` is safe again in aintlib-mc-b3. NEW-ATLAS's
+  branch is new; first push = `git push -u origin dev/modular-curves-y1-atlas`.
+- **The whole Y₁(N) frontier now funnels through c5β's T-W7a** (E-section's BB-DIFF and
+  the T-E4 primitive both discharge from it) + the NEW-ATLAS subtree. c5β and NEW-ATLAS
+  are the two live-work lanes; NEW-Y1 fires on the owner's call; A/D2/everyone-else
+  parked.
