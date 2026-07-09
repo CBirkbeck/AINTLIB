@@ -185,6 +185,21 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
   refine Iff.trans (hZ h) ?_
   rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
     ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
+  -- REMAINING (coherence): the goal is now an ideal equality of the two base-changed divisors'
+  -- comaps ↔ `IsDivisorGenerator N D t (asSection E t P)`.  Two identities close it (each ~an
+  -- aux lemma, cf. the proven twin `exists_fullLevelLocus`'s `fullLevelLocusAux_P1/P2`):
+  --   (I1) `(orderDivisor (E.baseChange π_B) (asSection taut) N).baseChange h`.ideal, via
+  --        `Section.orderDivisor_baseChange` (base `E.baseChange π_B`, along `h`) +
+  --        `divisorTautPoint_restrict` (taut pulled along `h` = P), matched to
+  --        `(orderDivisor (E.baseChange t) (asSection E t P) N).ideal` across the double-base-change
+  --        iso (`baseChange_baseChange_ideal` supplies the `pullbackLeftPullbackSndIso` comap).
+  --   (I2) `(D.baseChange π_B).baseChange h`.ideal = `(D.baseChange t).ideal.comap iso`, directly by
+  --        `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` : `h ≫ subschemeι = P.1`,
+  --        `P.1 ≫ E.π = t`).
+  -- Then `IsDivisorGenerator = HasExactOrder ∧ (I1.ideal = I2.ideal)`, and the iff is
+  -- `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
+  -- Needs LSP goal-inspection to align the pullback-iso comaps (the value-level engine is the
+  -- model's `exactOrderLocusAux_ker_comap_eq`, Incidence.lean).
   sorry
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
