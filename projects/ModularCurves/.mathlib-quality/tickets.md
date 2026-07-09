@@ -11828,3 +11828,35 @@ Then glue → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
   Numbering note: two v10.73 sections exist (PIC0's, c5β's) — cite with author.
 - **NEW-Y1 cross-note**: [Y1-vi-FACTOR] discharged (A) — next-session first act stays
   [Y1-D1]; vi is fully behind you modulo [T-B6′].
+
+### v10.74 (2026-07-09, c5β): [C4-HF-ASSEMBLY] — L1 through L3a committed (6 lemmas), σ-immersion identity proven
+
+*Session commits: c8fbeafe (L1), fc55593c (L2a/b), 2afd034f (L2c), f753779a (L3a + ForMathlib general
+lemma). All zero-sorry, axiom-clean, no `maxHeartbeats`. The assembly is now over half built.*
+
+**Done:**
+- **L1** `homOfLE_addOnYOnImage_eq` / `_addOnZOnImage_eq` — image morphism on a piece = `σ ≫ addOnYPieceMor k`,
+  where `σ` = `isoImage.inv ≫ (chartPieceIso.hom ∣_ specBasicOpen) ≫ specBasicOpenIsoAway.inv`.
+- **L2a/b/c** `transι_preimage_blOpenYImage_piece(')` + `transι_preimage_piece_inf` —
+  `transι⁻¹ᵁ (A_k ⊓ B_k') = specBasicOpen(transAlgHom(lawTwoTriple ij k) · transHom(lawTwoTriple i'j' k'))`.
+  The overlap piece IS the triple-localization locus of `Spec transRing`.
+- **L3a** `pieceAwayι` (`Spec(Away(lawTwoTriple ij k)) → E×E`) + `isoImage_specBasicOpen_pieceAwayι`:
+  `σ ≫ pieceAwayι = A_k.ι`. So `σ` identifies `A_k ≅ Spec(Away(lawTwoTriple ij k))`.
+  Cleared a v10.24 wall (abbrev `specBasicOpen` + concrete `Proj` scheme made `morphismRestrict_ι`
+  whnf-explode / abbrev-mismatch) with a variable-scheme ForMathlib lemma `isoImage_inv_morphismRestrict_ι`.
+
+**Remaining (L3-tail → L4 → L5), precisely scoped:**
+- **L3-tail** the coherence: `w : P ≅ Spec S` (S = `Away transRing g`, via `transι` lift + L2c +
+  `specBasicOpenIsoAway`), and `w.hom ≫ σ = Spec.map(ψ_ij)`. Route: `pieceAwayι = Spec.map(algebraMap) ≫
+  chartPieceIso.inv ≫ pieceι` (`specBasicOpenIsoAway_hom_ι`); `σ ≫ pieceAwayι = P.ι` (L3a + homOfLE);
+  `w.hom ≫ P.ι = Spec.map(transRing→S) ≫ transι`; cancel the shared `chartPieceIso.inv ≫ pieceι` tail
+  (mono) ⟹ ring identity ⟹ `ψ_ij` is the localization `Away(lawTwoTriple ij k) → S`. `w.hom ≫ σ` is a
+  map between affine Specs, hence `Spec.map` (Γ-Spec / `Spec.map_preimage`).
+- **L4** precompose the crux `chartι_comp_specMap_chartAwayHom_smul_eq` (over S, both piece coords units)
+  with `w.hom`: `specMap_comp_pieceMorOfTriple` (088e46ad) puts both `w.hom ≫ side` in
+  `chartAwayHomOfTriple(image triple) ≫ chartι` form; triples proportional by `transHom_lawTwoTriple_eq_smul`
+  (db1ec632). Cancel `w.hom` (iso) ⟹ per-piece agreement.
+- **L5** `Scheme.Cover.hom_ext` over `blOpenYImage_inf_eq_iSup` (5da7f060) ⟹ `addOnYOnImage_agree`;
+  dispatch p,q ∈ {Y,Z}²; `glueMorphisms_hf_of_agree` (f91b91ec) ⟹ **addOnY/addOnZ** (+ rule-3 interface).
+  Then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
+- Z-side mirrors the Y-side lemmas once the Y chain closes.
