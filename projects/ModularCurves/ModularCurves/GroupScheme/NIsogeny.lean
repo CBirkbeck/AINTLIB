@@ -857,7 +857,106 @@ private noncomputable def locallyFreeRankLocusSheaf (n : ℕ)
     haveI := locallyFreeRankLocusSheaf_fp f U
     (locallyFreeRankLocusAux_exists_ideal (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose
   map_ideal_basicOpen U g := by
-    sorry
+    classical
+    -- instance battery (verbatim `vanishingLocus` pattern, all in `basicOpen` spelling)
+    letI := ((f.app U.1).hom).toAlgebra
+    letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le g).op).hom).toAlgebra
+    letI := ((W.presheaf.map (homOfLE
+      (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx)).op).hom).toAlgebra
+    letI := ((f.appLE U.1 (f ⁻¹ᵁ S.basicOpen g)
+      (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx)).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(S, S.basicOpen g) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI : IsScalarTower Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI := locallyFreeRankLocusSheaf_fp f U
+    -- the `.1`-spelled givens at the basic open, re-keyed by defeq ascription
+    haveI hfpV : letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+        Module.FinitePresentation Γ(S, S.basicOpen g) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      locallyFreeRankLocusSheaf_fp f (S.affineBasicOpen g)
+    have hbV : ∀ (K : Type u) (_ : Field K) (_ : Algebra Γ(S, S.basicOpen g) K),
+        letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+        Module.finrank K (K ⊗[Γ(S, S.basicOpen g)] Γ(W, f ⁻¹ᵁ S.basicOpen g)) ≤ n :=
+      hb (S.affineBasicOpen g)
+    -- quasi-coherence: the pushforward sections localize
+    haveI hSloc : IsLocalization.Away g Γ(S, S.basicOpen g) :=
+      U.2.isLocalization_basicOpen g
+    haveI hWloc := (U.2.preimage f).isLocalization_of_eq_basicOpen
+      (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) g)
+      (homOfLE (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx))
+      (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
+    haveI : IsLocalizedModule (Submonoid.powers g)
+        (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)
+          Γ(W, f ⁻¹ᵁ S.basicOpen g)).toLinearMap := by
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U.1))
+          Γ(W, f ⁻¹ᵁ U.1) (Submonoid.powers g)) Γ(W, f ⁻¹ᵁ S.basicOpen g) := by
+        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U.1)) Γ(W, f ⁻¹ᵁ U.1)
+            (Submonoid.powers g) = Submonoid.powers
+              (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) g) from
+          Submonoid.map_powers _ g]
+        exact hWloc
+      infer_instance
+    have ebc := (IsLocalizedModule.isBaseChange (Submonoid.powers g)
+      Γ(S, S.basicOpen g)
+      (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)
+        Γ(W, f ⁻¹ᵁ S.basicOpen g)).toLinearMap).equiv
+    -- both sides are the universal ideal over `Γ(S, bo g)`: equal by uniqueness [L1-c]
+    show Ideal.map _ ((locallyFreeRankLocusAux_exists_ideal
+      (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose)
+      = (locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ S.basicOpen g)) (n := n) hbV).choose
+    refine locallyFreeRankLocusAux_unique fun B cB aB => ?_
+    letI : Algebra Γ(S, U.1) B := ((algebraMap Γ(S, S.basicOpen g) B).comp
+      (algebraMap Γ(S, U.1) Γ(S, S.basicOpen g))).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(S, S.basicOpen g) B :=
+      IsScalarTower.of_algebraMap_eq' (by rw [RingHom.algebraMap_toAlgebra])
+    have etrans : (B ⊗[Γ(S, S.basicOpen g)] Γ(W, f ⁻¹ᵁ S.basicOpen g))
+        ≃ₗ[B] B ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) :=
+      (TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl B B)
+        ebc.symm).trans
+        (TensorProduct.AlgebraTensorModule.cancelBaseChange Γ(S, U.1)
+          Γ(S, S.basicOpen g) B B Γ(W, f ⁻¹ᵁ U.1))
+    have hL : (Ideal.map (CommRingCat.Hom.hom (S.presheaf.map (homOfLE
+          (S.basicOpen_le g)).op))
+          ((locallyFreeRankLocusAux_exists_ideal
+            (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose)).map (algebraMap _ B) = ⊥
+        ↔ ((locallyFreeRankLocusAux_exists_ideal
+            (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose).map
+            (algebraMap Γ(S, U.1) B) = ⊥ := by
+      rw [Ideal.map_map]
+      constructor
+      · intro h
+        rwa [show (algebraMap Γ(S, S.basicOpen g) B).comp
+          (CommRingCat.Hom.hom (S.presheaf.map (homOfLE (S.basicOpen_le g)).op))
+          = algebraMap Γ(S, U.1) B from rfl] at h
+      · intro h
+        rwa [show (algebraMap Γ(S, S.basicOpen g) B).comp
+          (CommRingCat.Hom.hom (S.presheaf.map (homOfLE (S.basicOpen_le g)).op))
+          = algebraMap Γ(S, U.1) B from rfl]
+    refine hL.trans (Iff.trans ((locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose_spec B cB
+          inferInstance).symm
+      (Iff.trans ?_ ((locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ S.basicOpen g)) (n := n) hbV).choose_spec B cB aB)))
+    constructor
+    · rintro ⟨h1, h2⟩
+      haveI := h1
+      exact ⟨Module.Flat.of_linearEquiv etrans, fun p => by
+        rw [Module.rankAtStalk_eq_of_equiv etrans]; exact h2 p⟩
+    · rintro ⟨h1, h2⟩
+      haveI := h1
+      exact ⟨Module.Flat.of_linearEquiv etrans.symm, fun p => by
+        rw [Module.rankAtStalk_eq_of_equiv etrans.symm]; exact h2 p⟩
 
 /-- The defining property of the flattening ideal sheaf on an affine open: an algebra
 kills it iff the base-changed pushforward module is finite locally free of rank `n`. -/
