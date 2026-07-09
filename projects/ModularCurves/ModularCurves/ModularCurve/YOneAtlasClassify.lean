@@ -262,6 +262,15 @@ theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
         (fun i : Fin 2 => if i = 0 then α else β)) := by
   simp [tateCurveLocOver, tateRingOverLift, WeierstrassCurve.map_map]
 
+/-- The algebra-map version of `tateCurveLocOver_map_tateRingOverLift`. -/
+theorem tateCurveLocOver_map_tateRingOverAlgLift (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    (tateCurveLocOver R).map (tateRingOverAlgLift R α β hΔ) =
+      (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+        (fun i : Fin 2 => if i = 0 then α else β)) :=
+  tateCurveLocOver_map_tateRingOverLift R α β hΔ
+
 /-- A Tate-normal curve over an `R`-algebra is exactly the specialization of `tateCurveOver R`
 at its coefficients `a₁` and `a₂`. -/
 theorem tateCurveOver_map_tateNormal_coeffs (W : WeierstrassCurve A)
@@ -274,6 +283,13 @@ theorem tateCurveOver_map_tateNormal_coeffs (W : WeierstrassCurve A)
 noncomputable def tateRingOverLiftOfTateNormal (W : WeierstrassCurve A) [W.IsElliptic]
     (hW : W.IsTateNormal) : tateRingOver R →+* A :=
   tateRingOverLift R W.a₁ W.a₂ (by
+    rw [tateCurveOver_map_tateNormal_coeffs R W hW]
+    exact WeierstrassCurve.isUnit_Δ W)
+
+/-- The atlas `R`-algebra map attached to an elliptic Tate-normal Weierstrass curve. -/
+noncomputable def tateRingOverAlgLiftOfTateNormal (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) : tateRingOver R →ₐ[R] A :=
+  tateRingOverAlgLift R W.a₁ W.a₂ (by
     rw [tateCurveOver_map_tateNormal_coeffs R W hW]
     exact WeierstrassCurve.isUnit_Δ W)
 
@@ -291,6 +307,20 @@ theorem tateRingOverLiftOfTateNormal_X_one (W : WeierstrassCurve A) [W.IsEllipti
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = W.a₂ := by
   simp [tateRingOverLiftOfTateNormal]
 
+@[simp]
+theorem tateRingOverAlgLiftOfTateNormal_X_zero (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) :
+    tateRingOverAlgLiftOfTateNormal R W hW
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = W.a₁ := by
+  simp [tateRingOverAlgLiftOfTateNormal]
+
+@[simp]
+theorem tateRingOverAlgLiftOfTateNormal_X_one (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) :
+    tateRingOverAlgLiftOfTateNormal R W hW
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = W.a₂ := by
+  simp [tateRingOverAlgLiftOfTateNormal]
+
 /-- Specialising the universal Tate curve by the map attached to a Tate-normal curve recovers
 that curve. -/
 theorem tateCurveLocOver_map_tateRingOverLiftOfTateNormal (W : WeierstrassCurve A)
@@ -305,6 +335,14 @@ theorem tateCurveLocOver_map_tateRingOverLiftOfTateNormal (W : WeierstrassCurve 
         MvPolynomial.eval₂Hom (algebraMap R A)
           (fun i : Fin 2 => if i = 0 then W.a₁ else W.a₂) by
     simp [tateRingOverLiftOfTateNormal, tateRingOverLift]]
+  exact tateCurveOver_map_tateNormal_coeffs R W hW
+
+/-- The algebra-map version of `tateCurveLocOver_map_tateRingOverLiftOfTateNormal`. -/
+theorem tateCurveLocOver_map_tateRingOverAlgLiftOfTateNormal (W : WeierstrassCurve A)
+    [W.IsElliptic] (hW : W.IsTateNormal) :
+    (tateCurveLocOver R).map (tateRingOverAlgLiftOfTateNormal R W hW) = W := by
+  unfold tateRingOverAlgLiftOfTateNormal
+  rw [tateCurveLocOver_map_tateRingOverAlgLift]
   exact tateCurveOver_map_tateNormal_coeffs R W hW
 
 end RelativeTateRing
@@ -353,12 +391,29 @@ noncomputable def tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic
   tateRingOverLiftOfTateNormal R ((tateNormalVariableChange W x y hxy hord) • W)
     (tateNormalVariableChange_isTateNormal W x y hxy hord)
 
+/-- The local Tate atlas `R`-algebra map produced from a pointed Weierstrass chart. -/
+noncomputable def tateRingOverAlgLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    tateRingOver R →ₐ[R] A :=
+  tateRingOverAlgLiftOfTateNormal R ((tateNormalVariableChange W x y hxy hord) • W)
+    (tateNormalVariableChange_isTateNormal W x y hxy hord)
+
 /-- The local atlas map classifies the T-E1 normal form of the pointed chart. -/
 theorem tateCurveLocOver_map_tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
     (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
     (tateCurveLocOver R).map (tateRingOverLiftOfPoint R W x y hxy hord) =
       (tateNormalVariableChange W x y hxy hord) • W :=
   tateCurveLocOver_map_tateRingOverLiftOfTateNormal R
+    ((tateNormalVariableChange W x y hxy hord) • W)
+    (tateNormalVariableChange_isTateNormal W x y hxy hord)
+
+/-- The algebra-map version of `tateCurveLocOver_map_tateRingOverLiftOfPoint`. -/
+theorem tateCurveLocOver_map_tateRingOverAlgLiftOfPoint (W : WeierstrassCurve A)
+    [W.IsElliptic] (x y : A) (hxy : W.toAffine.Equation x y)
+    (hord : NowhereOrderLEThree W x y) :
+    (tateCurveLocOver R).map (tateRingOverAlgLiftOfPoint R W x y hxy hord) =
+      (tateNormalVariableChange W x y hxy hord) • W :=
+  tateCurveLocOver_map_tateRingOverAlgLiftOfTateNormal R
     ((tateNormalVariableChange W x y hxy hord) • W)
     (tateNormalVariableChange_isTateNormal W x y hxy hord)
 
