@@ -11735,3 +11735,17 @@ leaf target directly. Boarding the decomposition; the build is next-session firs
   functor layer (normMap + chartMatrix naturality) ✓; generic transition ring layer
   ([GR-E3]) ✓. REMAINING: ringHom↔chartMatrix spec · [GR-E4] cocycle · [GR-F]
   `Scheme.GlueData` assembly · [GR-G] T-points → NISOG [L15].
+
+
+### v10.73 (2026-07-09, c5β): [C4-HF-ASSEMBLY] CLAIMED — resuming per v10.72 coordinator directive
+
+**Claimed**: c5β, 2026-07-09T00:00Z
+**[C4-HF-ASSEMBLY] Status**: in_progress
+
+Resuming CHARTER-C5B at [C4-HF-ASSEMBLY] per the v10.72 broadcast. Baseline verified: upstream
+`origin/dev/modular-curves`, AdditionChartGlobal green (2958 jobs), all c4.3 leaves committed +
+reachable (recovery 155e2f54e intact). Executing the 5-lemma triple-localization unit, commit per
+lemma (they are separable):
+  L1 image-piece affine iso · L2 triple-localization · L3 σ-factorization ·
+  L4 per-piece agreement (w-precomposed crux) · L5 Cover.hom_ext → addOnY/addOnZ.
+Then glue → 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
