@@ -12683,3 +12683,28 @@ The opens (`blOpenZ`/`blOpenY`) and cover (`blOpen_cover`) are general-`R` and w
 morphisms need the universal-ring → `R` classifying-map naturality (`mulModelHom_map`). This is a fresh
 architectural stream (universal atlas + base-change of `mulModelHom`); a natural next-session boundary,
 mirroring the ratified [C4-HF-ASSEMBLY] boundary. Then 0c-i → 0c-ii (board-signal) → 0h → T-W7.12 → T-W7a.
+
+### v10.90d (2026-07-09, c5β): c4.5 base-change SCOPED — [JACOBSON-Z] is the concrete first blocker
+
+Assessed the c4.5 base-change path end-to-end. **Good news:** the universal atlas is fully built —
+`universalWeierstrassLoc` (over `WeierstrassAtlasRing = Localization.Away(Δ)` on `MvPolynomial (Fin 5) ℤ`)
+and `classifyRingHom W : universalWeierstrassLoc.map (classifyRingHom W) = W` (WeierstrassAtlasBundle),
+plus `projModelBaseChange`/`isPullback_projModelBaseChange`. My `mulModelHom` applies at the universal
+ring **modulo two instance gaps**, verified by scratch:
+- `IsDomain WeierstrassAtlasRing` ✓ (already upstream).
+- **`IsJacobsonRing WeierstrassAtlasRing` ✗** — blocked on `IsJacobsonRing ℤ`, which mathlib does NOT
+  provide (`import Mathlib` + `exact?` both fail). This is **[JACOBSON-Z]**, a ForMathlib prerequisite:
+  ℤ is Jacobson (Dedekind domain / PID with infinitely many maximals: every prime is `(0)` or `(p)`,
+  `(0).jacobson = ⋂(p) = ⊥`). Sketch: `isJacobsonRing_iff_prime_eq` + the ℤ prime structure. Then
+  `isJacobsonRing_MvPolynomial_fin` → `isJacobsonRing_localization` give the universal ring.
+- `IsElliptic universalWeierstrassLoc` — Δ is a unit in `Away(Δ)`; small.
+
+**c4.5 decomposition (the fresh stream):** [JACOBSON-Z] (ℤ Jacobson, ForMathlib) → universal-ring
+instances → `mulModelHom_U := mulModelHom universalWeierstrassLoc` → **base-change definition** of
+`GLC.mulModelHom W` via the `isPullback_projModelBaseChange` square along `classifyRingHom W` →
+`mulModelHom_map` (GLC:849, naturality) → then the group axioms consume `mulModelHom_specPoints`.
+The opens (`blOpenZ`/`blOpenY`) and cover (`blOpen_cover`) are general-`R` and wire directly.
+
+**This is a natural multi-session boundary, mirroring the ratified [C4-HF-ASSEMBLY] one.** Session
+delivered the complete two-law group-law GEOMETRY (c3 agree + c2 cover + mulModelHom); c4.5 is the
+distinct base-change/transport stream, cleanly scoped with [JACOBSON-Z] as the concrete first act.
