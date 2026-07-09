@@ -978,6 +978,7 @@ private theorem locallyFreeRankLocusSheaf_spec (n : ℕ)
 
 end LocallyFreeRankLocusSheaf
 
+open scoped TensorProduct in
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
@@ -992,6 +993,15 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (Flat (pullback.snd f t) ∧ ∀ x : T, (pullback.snd f t).finrank x = n) := by
+  classical
+  -- [L1-e2] the scheme-level fibre dichotomy gives the per-affine module bound
+  have hb' : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K) (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n := by
+    sorry
+  refine ⟨locallyFreeRankLocusSheaf f n hb', fun T t => ?_⟩
+  rw [ModularCurves.exists_factor_subschemeι_iff]
+  -- [L1-e3] the factoring locus is exactly the flat-of-rank-`n` locus
   sorry
 
 namespace EllipticCurve
