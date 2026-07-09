@@ -2199,4 +2199,93 @@ theorem blOpenZ_sup_blOpenY_eq_top (hΔ : IsUnit W.Δ) : blOpenZ W ⊔ blOpenY W
         · rw [← pieceι_opensRange]
           exact hle 2 2 (le_iSup (blOpenZFamily W) (1, 1)) (le_iSup (blOpenYFamily W) (1, 1))
 
+section MulModel
+
+variable [IsDomain R] [IsJacobsonRing R]
+
+/-- The two-open cover `{blOpenZ, blOpenY}` of `E ×_R E`, as a `Bool`-indexed family. -/
+noncomputable def blCoverFam : Bool → (pullback (projModelπ W) (projModelπ W)).Opens :=
+  fun b => cond b (blOpenZ W) (blOpenY W)
+
+/-- The two Bosma–Lenstra addition morphisms, indexed to match `blCoverFam`. -/
+noncomputable def blCoverMor (hΔ : IsUnit W.Δ) :
+    ∀ b, (blCoverFam W b).toScheme ⟶ projModel W
+  | true => addOnZ W hΔ
+  | false => addOnY W hΔ
+
+/-- The two laws agree pairwise on the two-open cover — the `hf` obligation. The off-diagonal
+`Bool` cases are `addOn_agree` (and its symmetry), with `Ω = blOpenZ ⊓ blOpenY` decomposed by
+`iSup_inf_iSup`; the diagonal cases are `rfl`. -/
+lemma blCoverMor_agree (hΔ : IsUnit W.Δ) (k l : Bool) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : blCoverFam W k ⊓ blCoverFam W l ≤ blCoverFam W k) ≫ blCoverMor W hΔ k =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ blCoverMor W hΔ l := by
+  have hΩ : blOpenZ W ⊓ blOpenY W = ⨆ pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2),
+      blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2 := by
+    rw [blOpenZ, blOpenY, iSup_inf_iSup]
+  have hΩ' : blOpenY W ⊓ blOpenZ W = ⨆ pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2),
+      blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2 := by
+    rw [inf_comm, blOpenZ, blOpenY, iSup_inf_iSup]
+  cases k <;> cases l
+  · rfl
+  · exact (addOn_agree W hΔ _ inf_le_right inf_le_left hΩ').symm
+  · exact addOn_agree W hΔ _ inf_le_left inf_le_right hΩ
+  · rfl
+
+/-- The two-open cover is everything: `⨆ blCoverFam = blOpenZ ⊔ blOpenY = ⊤`. -/
+lemma iSup_blCoverFam_eq_top (hΔ : IsUnit W.Δ) : ⨆ b, blCoverFam W b = ⊤ := by
+  rw [iSup_bool_eq]
+  show blOpenZ W ⊔ blOpenY W = ⊤
+  exact blOpenZ_sup_blOpenY_eq_top W hΔ
+
+/-- **(T-W7.0c·c4, THE multiplication morphism over a Jacobson domain)** The addition morphism on
+the projective Weierstrass model `E ×_R E ⟶ E`, glued from the two Bosma–Lenstra laws on the
+two-open cover `blOpenZ ⊔ blOpenY = ⊤` (`glueMorphisms` + the top iso). Both `addOnZ`/`addOnY` and
+their agreement `addOn_agree` are consumed here. Over the universal atlas `ℤ[a₁..a₆][Δ⁻¹]`
+(a Jacobson domain) this is the source that base-change transports to every ring (c4.5). -/
+noncomputable def mulModelHom (hΔ : IsUnit W.Δ) :
+    pullback (projModelπ W) (projModelπ W) ⟶ projModel W :=
+  (pullback (projModelπ W) (projModelπ W)).topIso.inv ≫
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (iSup_blCoverFam_eq_top W hΔ).ge ≫
+    (Scheme.Opens.iSupOpenCover (blCoverFam W)).glueMorphisms (blCoverMor W hΔ)
+      (glueMorphisms_hf_of_agree (blCoverFam W) (blCoverMor W hΔ) (blCoverMor_agree W hΔ))
+
+/-- `blOpenZ.ι ≫ topIso.inv ≫ homOfLE` collapses to the cover inclusion of the `blOpenZ` piece. -/
+@[reassoc]
+lemma ι_topIso_inv_homOfLE_true (hΔ : IsUnit W.Δ) :
+    (blOpenZ W).ι ≫ (pullback (projModelπ W) (projModelπ W)).topIso.inv ≫
+        (pullback (projModelπ W) (projModelπ W)).homOfLE (iSup_blCoverFam_eq_top W hΔ).ge =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) true) := by
+  have h2 : (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) true) ≫
+      (⨆ b, blCoverFam W b).ι = (blOpenZ W).ι := Scheme.homOfLE_ι _ _
+  rw [← cancel_mono (⨆ b, blCoverFam W b).ι, Category.assoc, Category.assoc, Scheme.homOfLE_ι,
+    Scheme.toIso_inv_ι, Category.comp_id]
+  exact h2.symm
+
+/-- `blOpenY.ι ≫ topIso.inv ≫ homOfLE` collapses to the cover inclusion of the `blOpenY` piece. -/
+@[reassoc]
+lemma ι_topIso_inv_homOfLE_false (hΔ : IsUnit W.Δ) :
+    (blOpenY W).ι ≫ (pullback (projModelπ W) (projModelπ W)).topIso.inv ≫
+        (pullback (projModelπ W) (projModelπ W)).homOfLE (iSup_blCoverFam_eq_top W hΔ).ge =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) false) := by
+  have h2 : (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blCoverFam W) false) ≫
+      (⨆ b, blCoverFam W b).ι = (blOpenY W).ι := Scheme.homOfLE_ι _ _
+  rw [← cancel_mono (⨆ b, blCoverFam W b).ι, Category.assoc, Category.assoc, Scheme.homOfLE_ι,
+    Scheme.toIso_inv_ι, Category.comp_id]
+  exact h2.symm
+
+/-- **(T-W7.0c·c4-Z-spec)** `mulModelHom` restricts to the `Z`-law on `blOpenZ`. -/
+theorem blOpenZ_ι_mulModelHom (hΔ : IsUnit W.Δ) :
+    (blOpenZ W).ι ≫ mulModelHom W hΔ = addOnZ W hΔ := by
+  rw [mulModelHom, ι_topIso_inv_homOfLE_true_assoc W hΔ]
+  exact (Scheme.Opens.iSupOpenCover (blCoverFam W)).ι_glueMorphisms _ _ true
+
+/-- **(T-W7.0c·c4-Y-spec)** `mulModelHom` restricts to the `Y`-law on `blOpenY`. -/
+theorem blOpenY_ι_mulModelHom (hΔ : IsUnit W.Δ) :
+    (blOpenY W).ι ≫ mulModelHom W hΔ = addOnY W hΔ := by
+  rw [mulModelHom, ι_topIso_inv_homOfLE_false_assoc W hΔ]
+  exact (Scheme.Opens.iSupOpenCover (blCoverFam W)).ι_glueMorphisms _ _ false
+
+end MulModel
+
 end WeierstrassCurve.Projective
