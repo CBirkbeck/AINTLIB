@@ -127,13 +127,23 @@ A finite homological complex of finite free `S`-modules `⋯ → F₂ →(φ 1)�
 (`𝔭 = 𝔮 ∩ R`) localised at `𝔮` is exact.  Packaged predicate. -/
 def FibreExactAt (R : Type*) [CommRing R] {S : Type*} [CommRing S] [Algebra R S] {rk : ℕ → ℕ}
     (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
-    (q : PrimeSpectrum S) : Prop := sorry
+    (q : PrimeSpectrum S) : Prop :=
+  ∀ j, Function.Exact
+    ((φ (j + 1)).baseChange (Localization.AtPrime q.asIdeal ⧸
+      (q.asIdeal.comap (algebraMap R S)).map
+        ((algebraMap S (Localization.AtPrime q.asIdeal)).comp (algebraMap R S))))
+    ((φ j).baseChange (Localization.AtPrime q.asIdeal ⧸
+      (q.asIdeal.comap (algebraMap R S)).map
+        ((algebraMap S (Localization.AtPrime q.asIdeal)).comp (algebraMap R S))))
 
 /-- Special-fibre complex `F_•/𝔪F_•` (mod the maximal ideal of a LOCAL `R`) is exact.  Hypothesis of
 00MI. -/
 def SpecialFibreExact (R : Type*) [CommRing R] [IsLocalRing R] {S : Type*} [CommRing S]
     [Algebra R S] {rk : ℕ → ℕ}
-    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S)) : Prop := sorry
+    (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S)) : Prop :=
+  ∀ j, Function.Exact
+    ((φ (j + 1)).baseChange (S ⧸ (IsLocalRing.maximalIdeal R).map (algebraMap R S)))
+    ((φ j).baseChange (S ⧸ (IsLocalRing.maximalIdeal R).map (algebraMap R S)))
 
 /-! ## [T-BE] 00N1 (Proposition 10.102.9): the Buchsbaum–Eisenbud acyclicity criterion — MAKE-OR-BREAK
 
