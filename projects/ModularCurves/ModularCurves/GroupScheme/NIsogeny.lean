@@ -984,6 +984,143 @@ open scoped TensorProduct
 
 variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
 
+/-- The section-ring identification behind the chart bridge, sealed behind its own
+constant (the construction is let-heavy; consumers only need existence). -/
+private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) :
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := ((f.app U.1).hom).toAlgebra
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    Nonempty ((Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
+      ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) := by
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  letI := ((f.app U.1).hom).toAlgebra
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  refine ⟨?_⟩
+  -- the restriction/topIso square
+  have hsq : (f ∣_ U.1).appTop ≫ (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom
+      = (Scheme.Opens.topIso U.1).hom ≫ f.app U.1 := by
+    rw [← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop,
+      Scheme.Hom.resLE_app_top]
+    simp only [Scheme.Hom.app_eq_appLE, Category.assoc]
+    rw [Iso.inv_hom_id, Category.comp_id]
+  have hsq' : ∀ u, (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom
+      (((f ∣_ U.1).appTop).hom u)
+      = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u) := fun u =>
+    congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom u) hsq
+  -- the canonical scalar towers on the two tensor products suffice; test the
+  -- transported algebra maps on the carrying identity
+  have hcarry : ∀ u : Γ(↑U.1, ⊤),
+      (1 : Γ(X, ⊤)) ⊗ₜ[Γ(S, U.1)] (f.app U.1).hom ((Scheme.Opens.topIso U.1).hom.hom u)
+        = ((x'.appTop).hom u) ⊗ₜ[Γ(S, U.1)] (1 : Γ(W, f ⁻¹ᵁ U.1)) := by
+    intro u
+    have h2 := congrArg
+      (fun g : Γ(S, U.1) →+* (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) =>
+        g (((Scheme.Opens.topIso U.1).hom).hom u))
+      (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
+        (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
+    simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
+      Algebra.TensorProduct.includeRight_apply] at h2
+    have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
+        (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
+      congr 1
+      exact congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
+        (Scheme.Opens.topIso U.1).hom_inv_id
+    rw [← h3]
+    exact h2.symm
+  -- ring-carrier algebra structures (no tensor-side letI: canonical actions rule there)
+  letI : Algebra Γ(S, U.1) Γ(↑U.1, ⊤) :=
+    (((Scheme.Opens.topIso U.1).inv).hom).toAlgebra
+  haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(X, ⊤) :=
+    IsScalarTower.of_algebraMap_eq' rfl
+  letI : Algebra Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    (((f ∣_ U.1).appTop).hom.comp (((Scheme.Opens.topIso U.1).inv).hom)).toAlgebra
+  haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    IsScalarTower.of_algebraMap_eq' rfl
+  -- the algebra map of the patch matches the section-side one through the topIsos
+  have halg : ∀ s : Γ(S, U.1),
+      algebraMap Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) s
+        = (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom ((f.app U.1).hom s) := by
+    intro s
+    have h1 : (f.app U.1).hom s
+        = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom
+          (((Scheme.Opens.topIso U.1).inv).hom s)) := by
+      congr 1
+      exact (congrArg (fun g : Γ(S, U.1) ⟶ Γ(S, U.1) => g.hom s)
+        (Scheme.Opens.topIso U.1).inv_hom_id).symm
+    rw [h1, ← hsq' (((Scheme.Opens.topIso U.1).inv).hom s)]
+    have h2 : ∀ y, ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom)
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom) y) = y := fun y =>
+      congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
+        (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
+    rw [h2]
+    rfl
+  -- the middle base change collapses onto the restricted sections
+  -- the middle base change collapses onto the restricted sections
+  let ℓ : Γ(W, f ⁻¹ᵁ U.1) →ₗ[Γ(S, U.1)] Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    { toFun := ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv).hom
+      map_add' := fun _ _ => map_add _ _ _
+      map_smul' := fun s y => by
+        simp only [RingHom.id_apply]
+        rw [Algebra.smul_def, map_mul,
+          show (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)) s = (f.app U.1).hom s from rfl,
+          ← halg s, ← Algebra.smul_def] }
+  have hℓ : ∀ y, ℓ y = ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv).hom y := fun _ => rfl
+  have hui : ∀ u : Γ(↑U.1, ⊤),
+      algebraMap Γ(S, U.1) Γ(↑U.1, ⊤) (((Scheme.Opens.topIso U.1).hom).hom u) = u :=
+    fun u => congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
+      (Scheme.Opens.topIso U.1).hom_inv_id
+  let inv₁ : Γ(↑(f ⁻¹ᵁ U.1), ⊤) →ₗ[Γ(↑U.1, ⊤)]
+      (Γ(↑U.1, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+    { toFun := fun y => (1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)
+      map_add' := fun _ _ => by rw [map_add, TensorProduct.tmul_add]
+      map_smul' := fun u y => by
+        simp only [RingHom.id_apply]
+        have h1 : u • y = ((f ∣_ U.1).appTop).hom u * y := rfl
+        rw [h1, map_mul, hsq' u]
+        have h2 : (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y) = _ := rfl
+        rw [show (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u)
+            * (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)
+          = (((Scheme.Opens.topIso U.1).hom).hom u)
+            • (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y) from
+          (Algebra.smul_def _ _).symm]
+        rw [TensorProduct.tmul_smul, TensorProduct.smul_tmul',
+          Algebra.smul_def, mul_one, hui u, TensorProduct.smul_tmul',
+          Algebra.smul_def, mul_one, Algebra.algebraMap_self, RingHom.id_apply] }
+  have e₁ : (Γ(↑U.1, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≃ₗ[Γ(↑U.1, ⊤)]
+      Γ(↑(f ⁻¹ᵁ U.1), ⊤) := by
+    refine LinearEquiv.ofLinear (LinearMap.liftBaseChange _ ℓ) inv₁ ?_ ?_
+    · refine LinearMap.ext fun y => ?_
+      show LinearMap.liftBaseChange _ ℓ ((1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)) = y
+      rw [LinearMap.liftBaseChange_tmul, one_smul, hℓ]
+      exact congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
+        (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
+    · refine LinearMap.ext fun z => ?_
+      induction z with
+      | zero => simp
+      | tmul u m =>
+        show inv₁ (LinearMap.liftBaseChange _ ℓ (u ⊗ₜ m)) = u ⊗ₜ m
+        rw [LinearMap.liftBaseChange_tmul, map_smul]
+        have h4 : ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom (ℓ m) = m :=
+          congrArg (fun g : Γ(W, f ⁻¹ᵁ U.1) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom m)
+            (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv_hom_id
+        show u • ((1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+          ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom (ℓ m)) = u ⊗ₜ m
+        rw [h4, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+      | add z₁ z₂ h₁ h₂ =>
+        show inv₁ (LinearMap.liftBaseChange _ ℓ (z₁ + z₂)) = z₁ + z₂
+        rw [map_add, map_add]
+        exact congrArg₂ (· + ·) h₁ h₂
+  exact ((TensorProduct.AlgebraTensorModule.cancelBaseChange Γ(S, U.1) Γ(↑U.1, ⊤)
+      Γ(X, ⊤) Γ(X, ⊤) Γ(W, f ⁻¹ᵁ U.1)).symm.trans
+    (TensorProduct.AlgebraTensorModule.congr
+      (LinearEquiv.refl Γ(X, ⊤) Γ(X, ⊤)) e₁)).symm
+
 /-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
 affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
 the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
@@ -1134,92 +1271,27 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
       rw [hpt p, Scheme.Hom.finrank_SpecMap_eq_finrank hφfin hφflat,
         CommRingCat.hom_ofHom, RingHom.finrank_algebraMap]
       exact h _
-  -- (D) the ring-side module is the section-side module
-  have eM : (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
-      ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) := by
-    -- the restriction/topIso square
-    have hsq : (f ∣_ U.1).appTop ≫ (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom
-        = (Scheme.Opens.topIso U.1).hom ≫ f.app U.1 := by
-      rw [← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop,
-        Scheme.Hom.resLE_app_top]
-      simp only [Scheme.Hom.app_eq_appLE, Category.assoc]
-      rw [Iso.inv_hom_id, Category.comp_id]
-    have hsq' : ∀ u, (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom
-        (((f ∣_ U.1).appTop).hom u)
-        = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u) := fun u =>
-      congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom u) hsq
-    -- the canonical scalar towers on the two tensor products suffice; test the
-    -- transported algebra maps on the carrying identity
-    have hcarry : ∀ u : Γ(↑U.1, ⊤),
-        (1 : Γ(X, ⊤)) ⊗ₜ[Γ(S, U.1)] (f.app U.1).hom ((Scheme.Opens.topIso U.1).hom.hom u)
-          = ((x'.appTop).hom u) ⊗ₜ[Γ(S, U.1)] (1 : Γ(W, f ⁻¹ᵁ U.1)) := by
-      intro u
-      have h2 := congrArg
-        (fun g : Γ(S, U.1) →+* (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) =>
-          g (((Scheme.Opens.topIso U.1).hom).hom u))
-        (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
-          (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
-      simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
-        Algebra.TensorProduct.includeRight_apply] at h2
-      have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
-          (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
-        rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
-        congr 1
-        exact congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
-          (Scheme.Opens.topIso U.1).hom_inv_id
-      rw [← h3]
-      exact h2.symm
-    -- ring-carrier algebra structures (no tensor-side letI: canonical actions rule there)
-    letI : Algebra Γ(S, U.1) Γ(↑U.1, ⊤) :=
-      (((Scheme.Opens.topIso U.1).inv).hom).toAlgebra
-    haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(X, ⊤) :=
-      IsScalarTower.of_algebraMap_eq' rfl
-    letI : Algebra Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
-      (((f ∣_ U.1).appTop).hom.comp (((Scheme.Opens.topIso U.1).inv).hom)).toAlgebra
-    haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
-      IsScalarTower.of_algebraMap_eq' rfl
-    -- the algebra map of the patch matches the section-side one through the topIsos
-    have halg : ∀ s : Γ(S, U.1),
-        algebraMap Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) s
-          = (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom ((f.app U.1).hom s) := by
-      intro s
-      have h1 : (f.app U.1).hom s
-          = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom
-            (((Scheme.Opens.topIso U.1).inv).hom s)) := by
-        congr 1
-        exact (congrArg (fun g : Γ(S, U.1) ⟶ Γ(S, U.1) => g.hom s)
-          (Scheme.Opens.topIso U.1).inv_hom_id).symm
-      rw [h1, ← hsq' (((Scheme.Opens.topIso U.1).inv).hom s)]
-      have h2 : ∀ y, ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom)
-          (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom) y) = y := fun y =>
-        congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
-          (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
-      rw [h2]
-      rfl
-    -- the middle base change collapses onto the restricted sections
-    -- the middle base change collapses onto the restricted sections:
-    -- fwd := LinearMap.liftBaseChange of (topIso f⁻¹U).inv (Γ(S,U)-linear by halg);
-    -- inv := y ↦ 1 ⊗ topIso.hom y (Γ↑U-linear by hsq' + the tmul-scalar shift);
-    -- inverses by ext + induction_on. Then eM := (cancelBaseChange).symm ≪≫
-    -- AlgebraTensorModule.congr (refl Γ(X)) e₁, symmetrized.
-    sorry
+  -- (D) the ring-side module is the section-side module (sealed construction)
+  obtain ⟨eM⟩ := locallyFreeRankLocus_sections_equiv f U x'
+  -- transports across `eM`, elaborated once
+  have hrk := Module.rankAtStalk_eq_of_equiv eM
+  have hfl₁ : Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) →
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) := fun h => by
+    haveI := h
+    exact Module.Flat.of_linearEquiv eM.symm
+  have hfl₂ : Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) →
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := fun h => by
+    haveI := h
+    exact Module.Flat.of_linearEquiv eM
   constructor
   · rintro ⟨h1, h2⟩
-    have hmf := hflat_iff.mp h1
-    haveI := hmf
-    refine ⟨Module.Flat.of_linearEquiv eM.symm, fun q => ?_⟩
-    rw [Module.rankAtStalk_eq_of_equiv eM.symm]
+    refine ⟨hfl₁ (hflat_iff.mp h1), fun q => ?_⟩
+    rw [← congrFun hrk q]
     exact (hrank_iff h1).mp h2 q
   · rintro ⟨h1, h2⟩
-    have hgf : Flat (pullback.snd f (x' ≫ U.1.ι)) := by
-      refine hflat_iff.mpr ?_
-      haveI := h1
-      exact Module.Flat.of_linearEquiv eM
+    have hgf : Flat (pullback.snd f (x' ≫ U.1.ι)) := hflat_iff.mpr (hfl₂ h1)
     refine ⟨hgf, (hrank_iff hgf).mpr fun q => ?_⟩
-    rw [show Module.rankAtStalk (R := Γ(X, ⊤))
-        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q
-      = Module.rankAtStalk (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) q from by
-        rw [Module.rankAtStalk_eq_of_equiv eM]]
+    rw [congrFun hrk q]
     exact h2 q
 
 end LocallyFreeRankLocusBridge
