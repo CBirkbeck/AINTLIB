@@ -319,6 +319,216 @@ theorem EllObj.tateBaseMapOfOpenCover_base_w (Y : EllObj R) (𝒰 : Y.base.OpenC
   intro i
   rw [← Category.assoc, EllObj.ι_tateBaseMapOfOpenCover, hover]
 
+theorem EllObj.tateBaseMapOfOpenCover_ext (Y : EllObj R) (𝒰 : Y.base.OpenCover)
+    (g g' : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hcompat' : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g' i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g' j)
+    (hg : ∀ i : 𝒰.I₀, g i = g' i) :
+    EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g' hcompat' := by
+  apply Scheme.Cover.hom_ext 𝒰
+  intro i
+  rw [EllObj.ι_tateBaseMapOfOpenCover, EllObj.ι_tateBaseMapOfOpenCover, hg i]
+
+/-- Build an `Ell/R` morphism into the Tate object from a base map to the Tate atlas and
+the cartesian map from the source curve to the universal Tate curve. -/
+noncomputable def EllObj.tateClassifyingHom (Y : EllObj R) (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero) :
+    Y ⟶ tateEllObj R where
+  baseHom := baseMap
+  base_w := by
+    simpa [tateEllObj] using base_w
+  top := top
+  isPullback := by
+    simpa [tateEllObj] using isPullback
+  zero_w := by
+    simpa [tateEllObj] using zero_w
+
+@[simp]
+theorem EllObj.tateClassifyingHom_baseHom (Y : EllObj R) (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w).baseHom =
+      baseMap :=
+  rfl
+
+@[simp]
+theorem EllObj.tateClassifyingHom_top (Y : EllObj R) (baseMap : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w).top = top :=
+  rfl
+
+theorem EllObj.tateClassifyingHom_ext (Y : EllObj R)
+    (baseMap baseMap' : Y.base ⟶ tateBase R)
+    (base_w : baseMap ≫ tateStructMap R = Y.structMap)
+    (base_w' : baseMap' ≫ tateStructMap R = Y.structMap)
+    (top top' : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π baseMap)
+    (zero_w : Y.curve.zero ≫ top = baseMap ≫ (tateUniversal R).zero)
+    (isPullback' : IsPullback top' Y.curve.π (tateUniversal R).π baseMap')
+    (zero_w' : Y.curve.zero ≫ top' = baseMap' ≫ (tateUniversal R).zero)
+    (hbase : baseMap = baseMap') (htop : top = top') :
+    EllObj.tateClassifyingHom R Y baseMap base_w top isPullback zero_w =
+      EllObj.tateClassifyingHom R Y baseMap' base_w' top' isPullback' zero_w' :=
+  EllHom.ext hbase htop
+
+/-- The classifying morphism into `tateEllObj` after the local Tate coefficients have
+glued to global sections on the source base. -/
+noncomputable def EllObj.tateClassifyingHomOfGlobalCoeffs (Y : EllObj R)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ (tateUniversal R).zero) :
+    Y ⟶ tateEllObj R :=
+  EllObj.tateClassifyingHom R Y (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ)
+    (EllObj.tateBaseMapOfGlobalCoeffs_base_w R Y α β hΔ) top isPullback zero_w
+
+@[simp]
+theorem EllObj.tateClassifyingHomOfGlobalCoeffs_baseHom (Y : EllObj R)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHomOfGlobalCoeffs R Y α β hΔ top isPullback zero_w).baseHom =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ :=
+  rfl
+
+@[simp]
+theorem EllObj.tateClassifyingHomOfGlobalCoeffs_top (Y : EllObj R)
+    (α β : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHomOfGlobalCoeffs R Y α β hΔ top isPullback zero_w).top =
+      top :=
+  rfl
+
+theorem EllObj.tateClassifyingHomOfGlobalCoeffs_ext (Y : EllObj R)
+    (α β α' β' : Γ(Y.base, ⊤))
+    (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (hΔ' : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
+      IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
+        (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+    (top top' : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ (tateUniversal R).zero)
+    (isPullback' : IsPullback top' Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfGlobalCoeffs R Y α' β' hΔ'))
+    (zero_w' : Y.curve.zero ≫ top' =
+      EllObj.tateBaseMapOfGlobalCoeffs R Y α' β' hΔ' ≫ (tateUniversal R).zero)
+    (hα : α = α') (hβ : β = β') (htop : top = top') :
+    EllObj.tateClassifyingHomOfGlobalCoeffs R Y α β hΔ top isPullback zero_w =
+      EllObj.tateClassifyingHomOfGlobalCoeffs R Y α' β' hΔ' top' isPullback' zero_w' :=
+  EllHom.ext (EllObj.tateBaseMapOfGlobalCoeffs_ext R Y α β α' β' hΔ hΔ' hα hβ) htop
+
+/-- The classifying morphism into `tateEllObj` from a Tate-base map glued over an open
+cover of the source base. -/
+noncomputable def EllObj.tateClassifyingHomOfOpenCover (Y : EllObj R)
+    (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hover : ∀ i : 𝒰.I₀, g i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat ≫ (tateUniversal R).zero) :
+    Y ⟶ tateEllObj R :=
+  EllObj.tateClassifyingHom R Y (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat)
+    (EllObj.tateBaseMapOfOpenCover_base_w R Y 𝒰 g hcompat hover) top isPullback zero_w
+
+@[simp]
+theorem EllObj.tateClassifyingHomOfOpenCover_baseHom (Y : EllObj R)
+    (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hover : ∀ i : 𝒰.I₀, g i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHomOfOpenCover R Y 𝒰 g hcompat hover top isPullback zero_w).baseHom =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat :=
+  rfl
+
+@[simp]
+theorem EllObj.tateClassifyingHomOfOpenCover_top (Y : EllObj R)
+    (𝒰 : Y.base.OpenCover)
+    (g : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hover : ∀ i : 𝒰.I₀, g i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap)
+    (top : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat ≫ (tateUniversal R).zero) :
+    (EllObj.tateClassifyingHomOfOpenCover R Y 𝒰 g hcompat hover top isPullback zero_w).top =
+      top :=
+  rfl
+
+theorem EllObj.tateClassifyingHomOfOpenCover_ext (Y : EllObj R)
+    (𝒰 : Y.base.OpenCover)
+    (g g' : ∀ i : 𝒰.I₀, 𝒰.X i ⟶ tateBase R)
+    (hcompat : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g j)
+    (hcompat' : ∀ i j : 𝒰.I₀,
+      pullback.fst (𝒰.f i) (𝒰.f j) ≫ g' i =
+        pullback.snd (𝒰.f i) (𝒰.f j) ≫ g' j)
+    (hover : ∀ i : 𝒰.I₀, g i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap)
+    (hover' : ∀ i : 𝒰.I₀, g' i ≫ tateStructMap R = 𝒰.f i ≫ Y.structMap)
+    (top top' : Y.curve.E ⟶ (tateUniversal R).E)
+    (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat))
+    (zero_w : Y.curve.zero ≫ top =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g hcompat ≫ (tateUniversal R).zero)
+    (isPullback' : IsPullback top' Y.curve.π (tateUniversal R).π
+      (EllObj.tateBaseMapOfOpenCover R Y 𝒰 g' hcompat'))
+    (zero_w' : Y.curve.zero ≫ top' =
+      EllObj.tateBaseMapOfOpenCover R Y 𝒰 g' hcompat' ≫ (tateUniversal R).zero)
+    (hg : ∀ i : 𝒰.I₀, g i = g' i) (htop : top = top') :
+    EllObj.tateClassifyingHomOfOpenCover R Y 𝒰 g hcompat hover top isPullback zero_w =
+      EllObj.tateClassifyingHomOfOpenCover R Y 𝒰 g' hcompat' hover' top' isPullback' zero_w' :=
+  EllHom.ext (EllObj.tateBaseMapOfOpenCover_ext R Y 𝒰 g g' hcompat hcompat' hg) htop
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
