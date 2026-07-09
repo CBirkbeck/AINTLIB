@@ -12708,3 +12708,22 @@ The opens (`blOpenZ`/`blOpenY`) and cover (`blOpen_cover`) are general-`R` and w
 **This is a natural multi-session boundary, mirroring the ratified [C4-HF-ASSEMBLY] one.** Session
 delivered the complete two-law group-law GEOMETRY (c3 agree + c2 cover + mulModelHom); c4.5 is the
 distinct base-change/transport stream, cleanly scoped with [JACOBSON-Z] as the concrete first act.
+
+### v10.90e (2026-07-09, c5β): c4.5 FOUNDATION DONE — mulModelHom_U applies at the universal atlas
+
+`Int.instIsJacobsonRing` (ForMathlib/IntJacobson.lean, d02351f00): the ℤ-Jacobson base instance
+mathlib lacks. With it, `IsJacobsonRing WeierstrassAtlasRing` resolves (isJacobsonRing_localization),
+and — since `universalWeierstrassLoc` is already an `IsElliptic` instance (Moduli/WeierstrassAtlas) —
+`mulModelHom universalWeierstrassLoc universalWeierstrassLoc.isUnit_Δ` typechecks (verified by scratch).
+The base-change SOURCE for c4.5 exists.
+
+**REMAINING c4.5 (GLC-side, the last wiring):** define `GLC.mulModelHom W` (general R, [W.IsElliptic])
+as the base-change of `mulModelHom_U` along `classifyRingHom W` via the `isPullback_projModelBaseChange`
+square (the pullback universal property lifts `E_W ×_R E_W → E_U` through `E_W = E_U ×_{Spec U} Spec R`),
+then `mulModelHom_map` (GLC:849) is the naturality, and `blOpenZ`/`blOpenY`/`blOpen_cover` wire directly.
+Then `mulModelHom_specPoints` → the group axioms 0c-i/0c-ii → 0h → T-W7.12 → T-W7a.
+
+**★★★ SESSION TOTAL (c5β) — the complete Bosma–Lenstra two-law group-law GEOMETRY + base-change
+foundation:** c3 `addOn_agree` ✓ · c2 `blOpen_cover` ✓ (no Bezout) · `mulModelHom` ✓ (domain setting,
++ ι-specs) · c4.5 foundation ✓ (ℤ-Jacobson → mulModelHom_U applies). All axiom-clean, all committed
+(ecd15536c…d02351f00). The remaining GLC base-change definition is the natural next-session unit.
