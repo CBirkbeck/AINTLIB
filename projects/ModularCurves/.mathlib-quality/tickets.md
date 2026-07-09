@@ -13371,3 +13371,23 @@ All tools exist and are pushed; step 5's Affine-side case algebra is the main vo
   structure; `t_fac`/`cocycle` via `pullback.hom_ext` + `IsLocalization.ringHom_ext`² +
   `Algebra.TensorProduct.ext` reducing to the ring layer; then [GR-G] T-points ⟹
   NISOG [L15].
+
+### v10.94f (2026-07-10, c5β): [C6-e] plumbing e1–e4a LANDED — only e4-readout + e5-case-algebra remain
+
+Landed+pushed since v10.94e: [C6-e1] lift_mulModelHom_comp_baseChangeOf, [C6-e2] lift_pullbackMap_
+fst/snd, [C6-e3] lift_pullbackMap_eq_lift (the pushed pair-point IS the atlas lift), [C6-e4a]
+bcChartAwayMap_isLocalizationElem (the graded Away-map carries chart coordinates). The general-R
+multiplication point is now literally the atlas-side two-law evaluation of the pushed pair, with
+coordinate transport prepared.
+
+**Remaining (exactly two units):**
+- [C6-e4] readout transport: for a W-side chart point x = Spec.map φ ≫ chartι W 2, the pushed
+  x ≫ bcOf reads out over uWLU as φ∘(ring-eqToHom)∘bcChartAwayMap (via chartι_map_comp_
+  projModelBaseChange + eqToHom_map Spec + chartHomEquiv_eq_of_specMap), so W-side dictionary
+  coordinates = atlas-side coordinates through e4a. Both directions needed (P,Q inputs and the
+  sum output).
+- [C6-e5] the final assembly (v10.94e step 5): case analysis mirroring negModelHom_specPoints +
+  descent over uWLU (specPoint_addOn{Z,Y}OnImage_factors') + readouts (d2/d4/d5) + mathlib formula
+  bridge (addX/addY_of_Z_ne_zero, dblAddXYZ_self + AdditionLawField smul lemmas, Affine.Point.add
+  cases) ⟹ mulModelHom_specPoints. Fills GLC's c6 sorry; then the group axioms consume it via
+  hom_ext_of_forall_specPoint (0c-i, 0c-ii BOARD-SIGNAL).
