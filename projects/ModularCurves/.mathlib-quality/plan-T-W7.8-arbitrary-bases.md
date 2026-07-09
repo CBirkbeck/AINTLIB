@@ -118,3 +118,32 @@ mathlib — (c) is blocked on the in-fleet W7 endgame (c5β), (b) on a bounded c
 re-proof. The owner's 2026-07-08 parking decision (keep arbitrary bases) is consistent with
 waiting for route (c) to fall out of the endgame. **The single highest-value action is to confirm
 route (c) once `mulModelHom` lands — likely turning a "months of spreading-out" into "a corollary."**
+
+## UPDATE 2026-07-09 — route (a) is TRACTABLE (owner-directed build; my "months-scale" was STALE)
+
+Owner (v-fork) directed **build route (a)** now. Two ground-truth surveys (mathlib state +
+Stacks chain) overturn this plan's central "months-scale / absent from mathlib" claim — it
+**pre-dated the daily bump** that landed `Mathlib/AlgebraicGeometry/AffineTransitionLimit.lean`
+(inverse limits of schemes w/ affine transition maps, "following EGA IV 8 / Stacks 01YT").
+
+**Crux pinned (code-verified):** the noetherian hypothesis is removable from
+`isMonHom_of_one_comp_eq'` (`Rigidity.lean:1443`); its conclusion is an **equality of two
+`S`-morphisms `A ⊗ A ⟶ G` into a separated target** — the most spreading-out-friendly shape.
+The whole `rigidity` chain's only noetherian use is Krull (`iInf_pow_eq_bot`); everything else
+is Hom-group algebra.
+
+**Reduction (skeleton = `EllipticCurve/RigiditySpreadingOut.lean`, GREEN, sorry-only):**
+target `isMonHom_of_one_comp_eq'_of_finitePresentation` (drop `[IsLocallyNoetherian S]`, add
+`[LocallyOfFinitePresentation A.hom] [LocallyOfFinitePresentation G.hom]`). Leaves: **L1**
+affine-local reduction (equality is local on `S`; `Gₐ ↪ G` open immersion — sidesteps the hard
+qcqs Stacks 01ZA) → **L2** base-change the GrpObj config (mathlib `Over.pullback` monoidal +
+project `Over.grpObjMkPullbackSnd`) → **L3** affine approx `Spec R = lim Spec Rⱼ`, `Rⱼ` finite-
+type-ℤ (`Spec` preserves limits + `Subalgebra.iSupLift`) → **L4a** descend objects/morphisms
+(mathlib `exists_hom_hom_comp_eq_comp` `@[stacks 01ZC]`, `exists_π_app_comp_eq…`) → **L4c**
+descend PROPERTIES (proper/flat/separated/lfp/O-conn; Stacks 081D) → **L5** apply noetherian
+`isMonHom` at stage → **L6** base-change equality back (free).
+
+**The one mathlib-absent piece = L4c (property-descent along limits, Stacks 081D/081E/01ZP/01ZQ).**
+Genuinely-reusable upstream infra; **labor, not a research unknown** (the limit API + ring-colimit
+foundation support it). Net revised scope: **weeks-scale, not months**; the affine-local reduction
+is what shrinks it (no Thomason–Trobaugh qcqs approximation needed). Leaf board = tasks #9–#14.
