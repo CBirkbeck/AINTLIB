@@ -1073,26 +1073,89 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
       MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
       HasRingHomProperty.Spec_iff (P := @Flat), CommRingCat.hom_ofHom,
       RingHom.flat_algebraMap_iff]
-  -- (C) the rank function transports likewise
-  have hrank_iff : (∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
+  -- (C) given flatness, the rank function transports likewise
+  have hrank_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) →
+      ((∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
       ∀ q : PrimeSpectrum Γ(X, ⊤),
         Module.rankAtStalk (R := Γ(X, ⊤))
-          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q = n := by
-    sorry
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q = n) := by
+    intro hfl
+    -- the tensor is a finite module, so the `Spec` leg is a finite flat morphism
+    haveI : IsFinite (f ∣_ U.1) := inferInstance
+    haveI : Module.Finite Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) := (f ∣_ U.1).finite_appTop
+    haveI hMfin : Module.Finite Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) :=
+      Module.Finite.base_change _ _ _
+    have hφfin : (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))).hom.Finite := by
+      rw [CommRingCat.hom_ofHom]
+      exact RingHom.finite_algebraMap.mpr hMfin
+    have hφflat : (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))).hom.Flat := by
+      rw [CommRingCat.hom_ofHom, RingHom.flat_algebraMap_iff]
+      exact hflat_iff.mp hfl
+    -- the composed map's rank equals the `Spec` map's rank at the transported point
+    have hpt : ∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p
+        = (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))).finrank (X.isoSpec.hom p) := by
+      intro p
+      rw [heP]
+      haveI hflSM : Flat (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv) := by
+        rw [MorphismProperty.cancel_right_of_respectsIso (P := @Flat)]
+        rw [heP, ← Category.assoc,
+          MorphismProperty.cancel_right_of_respectsIso (P := @Flat),
+          MorphismProperty.cancel_left_of_respectsIso (P := @Flat)] at hfl
+        exact hfl
+      haveI hfinSM : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv) := by
+        haveI : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))) :=
+          (IsFinite.SpecMap_iff _).mpr hφfin
+        infer_instance
+      have hsq : IsPullback (𝟙 _)
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv)
+          X.isoSpec.inv :=
+        IsPullback.of_horiz_isIso ⟨by simp⟩
+      rw [Scheme.Hom.finrank_comp_left_of_isIso]
+      have := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsq (X.isoSpec.hom p)
+      rw [show X.isoSpec.inv (X.isoSpec.hom p) = p by simp] at this
+      rw [← this]
+    constructor
+    · intro h q
+      have hq := hpt (X.isoSpec.inv q)
+      rw [show X.isoSpec.hom (X.isoSpec.inv q) = q by simp] at hq
+      rw [← h (X.isoSpec.inv q), hq, Scheme.Hom.finrank_SpecMap_eq_finrank hφfin hφflat,
+        CommRingCat.hom_ofHom, RingHom.finrank_algebraMap]
+    · intro h p
+      rw [hpt p, Scheme.Hom.finrank_SpecMap_eq_finrank hφfin hφflat,
+        CommRingCat.hom_ofHom, RingHom.finrank_algebraMap]
+      exact h _
   -- (D) the ring-side module is the section-side module
   have eM : (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
       ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) := by
     sorry
-  rw [hflat_iff, hrank_iff]
   constructor
   · rintro ⟨h1, h2⟩
-    haveI := h1
-    exact ⟨Module.Flat.of_linearEquiv eM.symm, fun q => by
-      rw [Module.rankAtStalk_eq_of_equiv eM.symm]; exact h2 q⟩
+    have hmf := hflat_iff.mp h1
+    haveI := hmf
+    refine ⟨Module.Flat.of_linearEquiv eM.symm, fun q => ?_⟩
+    rw [Module.rankAtStalk_eq_of_equiv eM.symm]
+    exact (hrank_iff h1).mp h2 q
   · rintro ⟨h1, h2⟩
-    haveI := h1
-    exact ⟨Module.Flat.of_linearEquiv eM, fun q => by
-      rw [Module.rankAtStalk_eq_of_equiv eM]; exact h2 q⟩
+    have hgf : Flat (pullback.snd f (x' ≫ U.1.ι)) := by
+      refine hflat_iff.mpr ?_
+      haveI := h1
+      exact Module.Flat.of_linearEquiv eM
+    refine ⟨hgf, (hrank_iff hgf).mpr fun q => ?_⟩
+    rw [show Module.rankAtStalk (R := Γ(X, ⊤))
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q
+      = Module.rankAtStalk (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) q from by
+        rw [Module.rankAtStalk_eq_of_equiv eM]]
+    exact h2 q
 
 end LocallyFreeRankLocusBridge
 
