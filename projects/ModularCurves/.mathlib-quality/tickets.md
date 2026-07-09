@@ -12295,3 +12295,27 @@ c2 (`blOpen_cover`, blocked on Bezout certificate) and c4.5 (GLC wiring flag) un
   [A711-FP] ✓ + étale flip ✓ · [KM-FMT-FLAT] engine ✓ · [NISOG-GRASS] waves 1/2/2.5 ✓ +
   wave-3 chart-functor layer ✓ (normMap, chartMatrix, naturality) + transition algebra ✓
   ([GR-E2]/[GR-E3]/[GR-SPEC]) — all axiom-clean, all pushed. Resume trigger: refocus.
+
+## Amendments v10.79 (fable-PIC0) — [PIC-P1b-MONO] PARKED on coordinator refocus; D-Idem plumbing banked
+
+Coordinator dispatch (2026-07-09): [GAP1-W-MONO] COMPLETE is the ratified headline; PIC0 **parks**
+([PIC-P1b-MONO]/P2/DS-END0 deferred; resume when the Y1-E rigidity audit demands the pins or on
+refocus). Decompose (v10.78) banked. Before parking I began the build and got most of leaf (I)
+**D-Idem** assembled, then hit a pure **v10.36 instance-clothing wall** (no math gap). Banked:
+
+- **Skeleton `ForMathlib/PullbackTensorMonoidal.lean` builds green** (2 leaf sorries + the
+  `nonempty_pullback_tensorObj` sorry). D-Idem **restated abstractly** over `⟨S ⋙ forget₂, hS⟩ :
+  Sheaf J RingCat` (the reflective α=𝟙 setting mirroring `SheafOfModulesMonoidal`'s Instantiation —
+  the **PR-able form**, an improvement over the original scheme-form statement).
+- **D-Idem proof plan (verified sound; banked as a comment in the file):** `η_A, η_B ∈
+  sheafificationW` (units) ⟹ `sheafificationW_tensorHom` ⟹ `asIso`. The α=𝟙 loc-inj/surj and the
+  `sheafificationW` R-inference **already resolve** in the abstract setting. Two remaining anchors
+  are pure plumbing: **(a)** counit route `isIso_of_comp_hom_eq_id _ left_triangle_components` needs
+  `IsIso (sheafificationAdjunction (𝟙 R'.obj)).counit`, which fails to synthesise because R can't be
+  inferred from `𝟙 R'.obj` when R' is a `set`-local → **spell `⟨_,hS⟩` literally** (v10.36 antidote);
+  **(b)** toSheafify route needs `[J.HasSheafCompose (forget AddCommGrpCat)]` +
+  `[J.PreservesSheafification (forget AddCommGrpCat)]` in the block. Resume = route (a), literal `⟨_,hS⟩`.
+- Scheme-form failed for the related reason `X.ringCatSheaf : TopCat.Sheaf` won't reduce to
+  `Sheaf J RingCat` at instance transparency (blocks `sheafificationW_tensorHom` R-unification) — hence
+  the abstract restatement; the **assembly** re-crosses this scheme seam (instantiate abstract leaves
+  at `X.sheaf.obj`/`X.ringCatSheaf`; use `sheafifyValIso`-style nudges). Nothing regressed. PIC0 idle.
