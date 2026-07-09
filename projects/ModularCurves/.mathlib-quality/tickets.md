@@ -12898,3 +12898,26 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   `open Matrix` (use an `rfl`-have).
 - NEXT: [GR-E4] inverse-pair (`ringHomAway ι' ι ∘ ringHomAway ι ι' = id`) + triple
   cocycle → [GR-D] Spec/basicOpen immersions → [GR-F] GlueData assembly.
+
+### v10.96 (2026-07-09, NEW-HOPF): ★ [CHARTER-HOPF] CLAIMED — rule-5 claim on the IsHopfGalois crux; first act = /develop --decompose vs sources
+
+- **CLAIM (rule 5, NEW-HOPF)**: `IsHopfGalois (translation co-action)` — the [T-G3d-infra]
+  Piece-3 crux (v10.95 charter): (1) 3a-ii co-action identification, (2) the crux proof
+  (β bijective + `FaithfullyFlat B^{coρ} B`, finite locally free case), (3) glue on the
+  G-stable cover → the six `SubgroupQuotient` pins. NEW files only
+  (`ForMathlib/HopfGaloisTranslation.lean` and siblings); p0's substrate
+  (TranslationAction/HopfGalois/Coaction/ComoduleCoinvariants/HopfGaloisQuotient/
+  SpecEqualizer) + p2's files READ-ONLY. Sentinel: `beastmode_active.NEW-HOPF`.
+- **First act (v10.8)**: `/develop --decompose` against the sources — SGA 3 Exp. V §4
+  (refs/sga3-1.pdf), Mumford AV §12, KM A7, Tate (CSS), + the Stacks finite-flat-groupoid
+  affine-case territory — verbatim quotes; route decision (Hopf-native Kreimer–Takeuchi
+  vs. groupoid-native Stacks/SGA descent) lands in
+  `.mathlib-quality/decomposition-hopf-crux.md`; leaf plan boarded at /develop completion
+  (charter report point 1).
+- **Substrate audit at pickup (all read)**: the v10.41-p0/v10.42-p0 reduction verified
+  in-tree — `isColimit_of_isHopfGalois` + `existsUnique_lift_of_isHopfGalois` +
+  `isInvariant_iff_coequalizes` + `exists_unique_lift_of_isColimit` + `actPair_mono` all
+  present; the crux really is the ONLY open obligation between here and the pins.
+  p2's Hopf-on-subgroup-divisor layer (v10.50 edge): Milestone 1 not yet landed (sentinel
+  mid-L6c) — noted; the decomposition will state exactly which leaves consume their pins
+  vs. which hypothesize `Bialgebra`/`HopfAlgebra` instances route-independently.
