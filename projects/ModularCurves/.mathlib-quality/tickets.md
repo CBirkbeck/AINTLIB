@@ -11480,3 +11480,65 @@ helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_i
   of the leaf; stalkwise/filtered attack next arc, decompose on fork.
 - Held per ratified discipline: no IsMonoidal instance, no LocalizedMonoidal
   instantiation until the leaf is sorry-free.
+
+## Amendments v10.71 (2026-07-09, coordinator): NEW COORDINATOR ONLINE — working-tree provenance dispatches (GaloisDescentModule / GrassmannianTransition / _ScratchProbe); poll clean, no redirects
+
+*Incoming coordinator per the v10.70 handover (COORDINATOR-HANDOVER.md read in full +
+Amendments v10.32→v10.70). Owner-delegated authority assumed. This section: a defused
+git landmine (all workers READ THIS), the handover's open item 1 resolved into inbox
+dispatches, standard poll absorbed. No charter changes.*
+
+- **⚠ NINTH SWEEP-CLASS INCIDENT — DEFUSED, root cause FIXED: this worktree's branch
+  upstream was `origin/main`, not `origin/dev/modular-curves`.** Consequence: the
+  prescribed `git pull --rebase --autostash` (v10.69 protocol, handover append
+  discipline) did NOT sync with the dev branch — it silently began rebasing the ENTIRE
+  1235-commit dev history onto latest origin/main (mid-everything, all SHAs rewritten,
+  push would have required force). Caught at the ahead-count; RECOVERED with zero loss:
+  reset to the origin tip (e8bbc0786; ModularCurves trees verified content-identical
+  before reset), every sibling working-tree edit preserved, the two foreign-project
+  files the rebase had touched restored. **FIX APPLIED: `git branch --set-upstream-to=
+  origin/dev/modular-curves dev/modular-curves`** — plain `git pull --rebase` is now
+  safe again in this worktree. Note the trigger condition existed since the worktree was
+  created: it fires the first pull after origin/main MOVES (i.e., after every daily
+  bump). Workers in OTHER worktrees: verify your upstream once
+  (`git status -sb` should say `...origin/dev/<your-branch>`), and treat any
+  pull that starts replaying hundreds of commits as an ABORT signal
+  (`git rebase --abort`), not something to push through.
+- **GaloisDescentModule.lean working-tree edit — PROVENANCE QUESTION → FP4's inbox.** The
+  uncommitted ~40 lines add `isPullback_Spec_fixedPoints` ([a3-ii] chart-level geometric
+  Galois-descent square: `Spec C ≅ Spec A ×_{Spec Aᴳ} Spec Cᴳ`; assembles the proven
+  `isPushout_fixedPoints` + `CommRingCat.isPushout_of_isPushout` +
+  `isPullback_SpecMap_of_isPushout`; adds imports Pullbacks/Ring.Constructions). mtime
+  forensics INCONCLUSIVE — the file's 10:07:41 stamp is shared to the second with three
+  sentinel files, i.e. an autostash/pop reset, not a write time. FP4 (file holder,
+  subject-matter owner): confirm own-WIP (→ verify green + commit-early per v10.52,
+  pathspec) or disclaim (→ coordinator runs the rule-5 trace; candidates then: p0's
+  pre-dark session, A's v10.68 out-of-sync resume). UNTIL ANSWERED: nobody but FP4
+  commits, edits, or reverts that file's working-tree state.
+- **GrassmannianTransition.lean — commit-early nudge → fable-FP's inbox.** The file is
+  fable-FP's own [GR-E3] work (header attribution + sentinel "next: GR-E1/E2 skeleton in
+  NEW GrassmannianTransition.lean"; mtime 09:24:40, right after their sentinel update).
+  It is UNTRACKED — strictly more exposed than the v10.60 reset-wipe (untracked files have
+  no reflog; a wipe is unrecoverable). Commit + push the skeleton at the next boundary
+  (sorried skeletons are normal landings; v10.52).
+- **_ScratchProbe.lean — NOT stray; handover item AMENDED.** The handover marked it
+  "stray, delete-after-confirming" — confirmed LIVE instead: it is the [GR-B2n-4]
+  naturality attack's probe (`chartMatrix_normMap`, the v10.60b fresh-context dispatch),
+  actively written at 10:10:55, two minutes before this poll. DO NOT DELETE. fable-FP:
+  when the agent reports, bank the findings and remove the probe from the source tree —
+  probes belong in the session scratchpad, not ForMathlib/ (one root-registration sweep
+  from entering the build).
+- **Poll absorbed (no reports due; all lanes on charter; no redirects):** FP4 [a5-iii]
+  steps 1–3 landed (u→1 reduction + s-cocycle, 7 axiom-clean blocks; conjugation to kill
+  s → r → t next; tree green). PIC0 at the loc-injective half of [GAP1-W-MONO]
+  (surjective half proven, v10.70). p2's sentinel shows the affine core moving (L6c crux
+  `dualPt_mul` + `sum_fac` proven in scratch; `dualPt_unit`/`dualPt_injective` next) —
+  progressing toward Milestone 1; report at milestone per charter. c5β between runs
+  ([C4-HF-ASSEMBLY] armed as next session's first act, v10.66). D2 holding on own load
+  checks (correct per v10.49/53). fable-FP wave 3: naturality agent running on
+  GrassmannianChart.lean — single-writer discipline honored fleet-wide (no builds or
+  edits of that file until it reports).
+- **Sentinel hygiene (minor):** the c5beta sentinel is two arcs stale in BOTH its
+  committed and working-tree copies (still reads c4.2b) — c5β's live state is
+  board-carried (v10.66 + v10.51-c5β), and board-wins-over-sentinels covers it. c5β:
+  refresh the sentinel at next session start.
