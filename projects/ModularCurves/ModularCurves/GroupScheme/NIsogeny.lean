@@ -72,6 +72,61 @@ ForMathlib refinement recorded in the artifact ([NISOG-L12]). -/
 -- constant fibre rank on points), so the RHS must carry `Flat` — KM's "locally free" says
 -- both. Proof route (KM p. 163–164): local presentation `(O_U)^m →α (O_U)^n → 𝓕|U → 0`
 -- with `W ∩ U = V(coefficients of α)`; converse by the splitting `β` and Cramer.
+section LocallyFreeRankLocusAux
+
+open scoped TensorProduct
+
+/-- **[L1-a, the local `n`-generator presentation]** A finitely presented module whose
+field-fibre dimensions are everywhere `≤ n` admits, near every prime, a presentation by
+`n` generators (Nakayama lift of a fibre spanning set + finite-type shrink). This is the
+"further localizing on `S`, we may suppose" step of KM p. 163. -/
+private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] [Module.FinitePresentation R M] {n : ℕ}
+    (hb : ∀ (K : Type u) (_ : Field K) (f : R →+* K),
+      letI := f.toAlgebra
+      Module.finrank K (K ⊗[R] M) ≤ n)
+    (p : PrimeSpectrum R) :
+    ∃ g : R, g ∉ p.asIdeal ∧ ∃ (m : ℕ)
+      (α : (Fin m → Localization.Away g) →ₗ[Localization.Away g]
+        (Fin n → Localization.Away g))
+      (π : (Fin n → Localization.Away g) →ₗ[Localization.Away g]
+        (Localization.Away g ⊗[R] M)),
+      Function.Surjective π ∧ Function.Exact α π := by
+  sorry
+
+/-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
+the base change `A ⊗ M` is finite locally free of rank `n` (flat with all stalk ranks `n`)
+iff every matrix entry of `α` dies in `A`. Forward: flat + finite ⟹ free stalks; the
+surjection `A^n ↠ A ⊗ M` has finitely generated kernel (fp) which vanishes fibrewise by
+rank count, hence vanishes (Nakayama at every prime), so `α ⊗ A = 0` by right-exactness.
+Backward: `α ⊗ A = 0` makes `A ⊗ M ≅ A^n`. KM p. 163: `W ∩ U = V(coefficients of α)`. -/
+private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] {m n : ℕ} (α : (Fin m → R) →ₗ[R] (Fin n → R))
+    {M : Type u} [AddCommGroup M] [Module R M] (π : (Fin n → R) →ₗ[R] M)
+    (hπ : Function.Surjective π) (hexact : Function.Exact α π) :
+    (Module.Flat A (A ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
+      ∀ (i : Fin m) (j : Fin n), algebraMap R A (α (Pi.single i 1) j) = 0 := by
+  sorry
+
+/-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
+the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
+presentation ideals into the canonical ideal sheaf (`map_ideal_basicOpen` holds because
+both sides represent the same functor over the localized algebras). -/
+private theorem locallyFreeRankLocusAux_unique {R : Type u} [CommRing R] {I J : Ideal R}
+    (h : ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I.map (algebraMap R A) = ⊥ ↔ J.map (algebraMap R A) = ⊥) : I = J := by
+  have key : ∀ (I' J' : Ideal R), (∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I'.map (algebraMap R A) = ⊥ ↔ J'.map (algebraMap R A) = ⊥) → J' ≤ I' := by
+    intro I' J' h'
+    have h1 : I'.map (algebraMap R (R ⧸ I')) = ⊥ := by
+      rw [Ideal.Quotient.algebraMap_eq, Ideal.map_quotient_self]
+    have h2 := (h' (R ⧸ I') inferInstance inferInstance).mp h1
+    rwa [Ideal.Quotient.algebraMap_eq, Ideal.map_eq_bot_iff_le_ker, Ideal.mk_ker] at h2
+  exact le_antisymm (key J I fun A cA aA => (h A cA aA).symm) (key I J h)
+
+end LocallyFreeRankLocusAux
+
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
