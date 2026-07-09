@@ -408,4 +408,39 @@ theorem exists_invariant_descent [Fintype G] [DecidableEq G] [Nontrivial A]
   · exact congrArg WeierstrassCurve.a₄ (hinv g)
   · exact congrArg WeierstrassCurve.a₆ (hinv g)
 
+
+/-- A `G`-fixed element that is a unit in `A` is a unit in the fixed subring: its inverse is
+automatically fixed (`g • x⁻¹ = (g • x)⁻¹`). No integrality or finiteness needed. -/
+theorem isUnit_subring_of_isUnit {x : FixedPoints.subring A G}
+    (h : IsUnit (x : A)) : IsUnit x := by
+  obtain ⟨u, hu⟩ := h
+  have hfix : ∀ g : G, g • (↑u⁻¹ : A) = ↑u⁻¹ := by
+    intro g
+    have h₁ : (g • (↑u⁻¹ : A)) * (↑u : A) = 1 := by
+      have := congrArg (g • ·) u.inv_mul
+      simpa [smul_mul', hu, x.2 g] using this
+    calc g • (↑u⁻¹ : A) = (g • (↑u⁻¹ : A)) * ((↑u : A) * ↑u⁻¹) := by
+          rw [u.mul_inv, mul_one]
+      _ = ((g • (↑u⁻¹ : A)) * ↑u) * ↑u⁻¹ := by ring
+      _ = ↑u⁻¹ := by rw [h₁, one_mul]
+  refine IsUnit.of_mul_eq_one ⟨↑u⁻¹, fun g => hfix g⟩ ?_
+  ext
+  push_cast
+  rw [← hu, u.mul_inv]
+
+open scoped Pointwise in
+/-- **Ellipticity descends**: the invariant model produced by `exists_invariant_descent` is
+elliptic whenever `W₀` is — its discriminant is a fixed element mapping to the unit
+`Δ(E⁻¹ • W₀) = (E.u⁻¹)¹² • Δ(W₀)` of `A`, hence a unit of the fixed subring
+(`isUnit_subring_of_isUnit`). -/
+theorem isElliptic_of_map_isElliptic {W₁ : WeierstrassCurve (FixedPoints.subring A G)}
+    {W : WeierstrassCurve A} (hmap : W₁.map (algebraMap (FixedPoints.subring A G) A) = W)
+    (hW : W.IsElliptic) : W₁.IsElliptic := by
+  rw [WeierstrassCurve.isElliptic_iff] at hW ⊢
+  refine isUnit_subring_of_isUnit ?_
+  have : (algebraMap (FixedPoints.subring A G) A) W₁.Δ = W.Δ := by
+    rw [← hmap, WeierstrassCurve.map_Δ]
+  rw [show (W₁.Δ : A) = (algebraMap (FixedPoints.subring A G) A) W₁.Δ from rfl, this]
+  exact hW
+
 end WeierstrassCurve
