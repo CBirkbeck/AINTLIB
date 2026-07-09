@@ -11247,3 +11247,30 @@ on `Moduli/GammaHRepresentability.lean` (my stream file only): 95f277ffd (GHC2),
   points → verify/thinly-wrap the IsLocalization registration for
   PresheafOfModules.sheafification → build [GAP1-W-MONO] (decompose the injective half if
   it forks, v10.24). MellWeierstrass cadence cleanup stays dispatchable for any free hand.
+
+## Amendments v10.66 (2026-07-09, coordinator): c5β run ends at the clean boundary — [C4-HF-ASSEMBLY] is the next session′s first act
+
+- **Run ledger absorbed (~24 axiom-clean commits, one continuous solo push)**: c4.2c fully
+  closed (both B–L laws are scheme morphisms on their regularity opens); the ENTIRE c4.3
+  mathematical core (transition, geometric overlap, cross-chart agreement, blOpenY/blOpenZ,
+  transι); Helper A (the topological blocker); Helper B (homOfLE_isoImage_inv_iSup, to
+  ForMathlib); Helper C infrastructure (specMap_comp_pieceMorOfTriple + the full O-cover
+  decomposition, committed green); FIVE v10.24 surfaces cleared by policy.
+- **The refined hf structure is now EXPLICIT (the spec for the assembly)**: per-piece
+  agreement on A_k ⊓ B_k′ reduces by precomposing the crux with a common w to Spec
+  transRing; the crux needs the piece coordinate invertible, which holds only after a
+  further localization at lawTwoTriple ij k · lawTwoTriple i′j′ k′ — so the honest shape is
+  the TRIPLE-LOCALIZATION TOWER biChartRing → transRing (Away τ) → Away(piece coords), plus
+  the σ-factorization identifying isoImage/morphismRestrict/specBasicOpenIsoAway with
+  w ≫ Spec.map(localization). **~5 delicate lemmas**: affine identification of the image
+  pieces; the triple localization; the σ-factorization; the crux precomposition; the
+  Cover.hom_ext close.
+- **DECISION: the run ends HERE — no tail grinding.** [C4-HF-ASSEMBLY] (the 5-lemma unit
+  above) is c5β′s NEXT session′s first act with full budget, per the v10.19/v10.23
+  precedent (fresh context on an explicit plan is where these fall in one pass; faith-infra
+  proved it). The refusal to fabricate or rush scheme-plumbing into a green tree is the
+  reporting contract working — a green tree with every leaf proven and a precise plan
+  BEATS a broken tree with half a glue.
+- **After the assembly lands**: glueMorphisms → addOnY/addOnZ exist → blOpen_cover →
+  addOn_agree → mulModelHom → c4.4 → c4.5 → 0c-i → 0c-ii → 0h → T-W7.12 → **T-W7a**.
+  The endgame owner and its resume anchor are unchanged.
