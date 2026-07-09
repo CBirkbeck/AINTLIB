@@ -361,4 +361,187 @@ theorem exists_descended_model_of_curveActionFamily
   obtain ⟨C, hCoc, hact⟩ := isVCocycle_of_curveActionFamily W₀ act hmul hcart hzero
   exact exists_invariant_descent hfree W₀ hCoc hact
 
+
+/-! ### [a5-W3] The descent comparison and its `G`-invariance -/
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+variable {G : Type u} [Group G] [MulSemiringAction G R]
+
+/-! ### Private transport / functoriality helpers -/
+
+/-- Mixed-ring functoriality of the projective-model base change: base change along a composite
+`F.comp φ` factors as the two base changes. (The endomorphism form `projModelBaseChange_comp`
+lives in `WeierstrassModel.lean`; this is the same proof for three different rings, which the
+graded machinery supports verbatim.) -/
+private theorem projModelBaseChange_comp' {S₀ S₁ S₂ : Type u} [CommRing S₀] [CommRing S₁]
+    [CommRing S₂] (F : S₁ →+* S₂) (φ : S₀ →+* S₁) (W : WeierstrassCurve S₀) :
+    projModelBaseChange (F.comp φ) W
+      = projModelBaseChange F (W.map φ) ≫ projModelBaseChange φ W := by
+  have bmk : ∀ {T T' : Type u} [CommRing T] [CommRing T'] (ψ : T →+* T')
+      (V : WeierstrassCurve T) (p : MvPolynomial (Fin 3) T),
+      baseChangeGradedHom ψ V (Ideal.Quotient.mk (projIdeal V).toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (V.map ψ)).toIdeal (MvPolynomial.map ψ p) :=
+    fun ψ V p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded ψ) (projIdeal V)
+      (projIdeal (V.map ψ)) (projIdeal_le_comap ψ V) p
+  have hgraded : baseChangeGradedHom (F.comp φ) W
+      = (baseChangeGradedHom F (W.map φ)).comp (baseChangeGradedHom φ W) := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (F.comp φ) W (Ideal.Quotient.mk _ a)
+      = baseChangeGradedHom F (W.map φ) (baseChangeGradedHom φ W (Ideal.Quotient.mk _ a))
+    rw [bmk, bmk, bmk]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_map φ F a).symm
+  have key := Proj.map_comp (baseChangeGradedHom φ W) (baseChangeGradedHom F (W.map φ))
+    (baseChangeGradedHom_irrelevant_le φ W) (baseChangeGradedHom_irrelevant_le F (W.map φ))
+  refine Eq.trans ?_ key
+  show Proj.map (baseChangeGradedHom (F.comp φ) W)
+      (baseChangeGradedHom_irrelevant_le (F.comp φ) W)
+    = Proj.map ((baseChangeGradedHom F (W.map φ)).comp (baseChangeGradedHom φ W)) _
+  congr 1
+
+/-- Transport of `(projModelVCIso C V).hom` along an equality of variable changes. -/
+private theorem projModelVCIso_congr {C1 C2 : VariableChange R} (hC : C1 = C2)
+    (V : WeierstrassCurve R) :
+    (projModelVCIso C1 V).hom
+      = eqToHom (congrArg projModel (by rw [hC])) ≫ (projModelVCIso C2 V).hom := by
+  subst hC; simp
+
+/-- Transport of `(projModelVCIso C V).inv` along an equality of variable changes. -/
+private theorem projModelVCIso_inv_congr {C1 C2 : VariableChange R} (hC : C1 = C2)
+    (V : WeierstrassCurve R) :
+    (projModelVCIso C1 V).inv
+      = (projModelVCIso C2 V).inv ≫ eqToHom (congrArg projModel (by rw [hC])) := by
+  subst hC; simp
+
+/-- The change-of-variables iso of `E` based at `E⁻¹ • W` is the inverse of the one of `E⁻¹`
+based at `W` (up to the transport `E • (E⁻¹ • W) = W`) — the geometric form of `(E⁻¹)⁻¹ = E`,
+via `projModelVCIso_mul` and `projModelVCIso_one`. -/
+private theorem projModelVCIso_hom_inv_smul (E : VariableChange R) (W : WeierstrassCurve R) :
+    (projModelVCIso E (E⁻¹ • W)).hom
+      = eqToHom (congrArg projModel (smul_inv_smul E W)) ≫ (projModelVCIso E⁻¹ W).inv := by
+  have hone : ((E * E⁻¹) • W) = W := by rw [mul_inv_cancel, one_smul]
+  have h1 : (projModelVCIso (E * E⁻¹) W).hom = eqToHom (congrArg projModel hone) := by
+    rw [projModelVCIso_congr (mul_inv_cancel E) W, projModelVCIso_one, eqToHom_trans]
+  rw [Iso.eq_comp_inv]
+  rw [← cancel_epi (eqToHom (congrArg projModel (mul_smul E E⁻¹ W)))]
+  rw [← projModelVCIso_mul E E⁻¹ W, h1, eqToHom_trans]
+
+/-- The comparison morphism of the descent: `projModel W₀ ⟶ projModel W₁` over `Spec (R₀ → R)`. -/
+noncomputable def descentComparison (W₀ : WeierstrassCurve R) (W₁ : WeierstrassCurve R₀)
+    (E : VariableChange R) (hW₁ : W₁.map (algebraMap R₀ R) = E⁻¹ • W₀) :
+    projModel W₀ ⟶ projModel W₁ :=
+  (projModelVCIso E⁻¹ W₀).inv ≫ eqToHom (congrArg projModel hW₁.symm)
+    ≫ projModelBaseChange (algebraMap R₀ R) W₁
+
+/-- π-compatibility of the comparison. -/
+theorem descentComparison_π (W₀ : WeierstrassCurve R) (W₁ : WeierstrassCurve R₀)
+    (E : VariableChange R) (hW₁ : W₁.map (algebraMap R₀ R) = E⁻¹ • W₀) :
+    descentComparison W₀ W₁ E hW₁ ≫ projModelπ W₁
+      = projModelπ W₀ ≫ Spec.map (CommRingCat.ofHom (algebraMap R₀ R)) := by
+  have transπ : ∀ {W W' : WeierstrassCurve R} (h : W = W'),
+      eqToHom (congrArg projModel h) ≫ projModelπ W' = projModelπ W := by
+    rintro W W' rfl; simp
+  rw [descentComparison, Category.assoc, Category.assoc, projModelBaseChange_π,
+    reassoc_of% (transπ hW₁.symm), Iso.inv_comp_eq,
+    reassoc_of% (projModelVCIso_π E⁻¹ W₀)]
+
+/-- zero-compatibility of the comparison. -/
+theorem descentComparison_zero (W₀ : WeierstrassCurve R) (W₁ : WeierstrassCurve R₀)
+    (E : VariableChange R) (hW₁ : W₁.map (algebraMap R₀ R) = E⁻¹ • W₀) :
+    projModelZero W₀ ≫ descentComparison W₀ W₁ E hW₁
+      = Spec.map (CommRingCat.ofHom (algebraMap R₀ R)) ≫ projModelZero W₁ := by
+  have transz : ∀ {W W' : WeierstrassCurve R} (h : W = W'),
+      projModelZero W ≫ eqToHom (congrArg projModel h) = projModelZero W' := by
+    rintro W W' rfl; simp
+  rw [descentComparison, ← Category.assoc,
+    show projModelZero W₀ ≫ (projModelVCIso E⁻¹ W₀).inv = projModelZero (E⁻¹ • W₀) from by
+      rw [Iso.comp_inv_eq, projModelVCIso_zero],
+    reassoc_of% (transz hW₁.symm), projModelZero_baseChange]
+
+/-- **([a5-W3], G-invariance of the comparison)** With the coboundary identity, the comparison
+coequalizes the action: `act g ≫ ψ = ψ`. -/
+theorem descentComparison_invariant (W₀ : WeierstrassCurve R) (W₁ : WeierstrassCurve R₀)
+    (E : VariableChange R) (hW₁ : W₁.map (algebraMap R₀ R) = E⁻¹ • W₀)
+    (Cvc : G → VariableChange R)
+    (hCvc : ∀ g, Cvc g • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀)
+    (hE : ∀ g, Cvc g = E * (g • E)⁻¹)
+    (hR₀ : ∀ (g : G) (r₀ : R₀), g • (algebraMap R₀ R r₀) = algebraMap R₀ R r₀)
+    (act : G → (projModel W₀ ⟶ projModel W₀))
+    (hΨ : ∀ g, (projModelVCIso (Cvc g) (W₀.map (MulSemiringAction.toRingHom G R g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G R g) W₀
+      = eqToHom (congrArg projModel (hCvc g)) ≫ act g)
+    (g : G) :
+    act g ≫ descentComparison W₀ W₁ E hW₁ = descentComparison W₀ W₁ E hW₁ := by
+  -- ring-level: `τ_g ∘ algebraMap = algebraMap` (the subring is `G`-invariant)
+  have htau : (MulSemiringAction.toRingHom G R g).comp (algebraMap R₀ R) = algebraMap R₀ R := by
+    ext r₀
+    exact hR₀ g r₀
+  -- variable-change level: `E⁻¹.map τ_g = (g • E)⁻¹`
+  have hF : E⁻¹.map (MulSemiringAction.toRingHom G R g) = (g • E)⁻¹ := by
+    rw [← vcSMul_eq_map, ← vcSMul_smul_def, smul_inv']
+  -- curve level: `(g•E)⁻¹ • (g•W₀) = E⁻¹ • W₀` (from the coboundary identity)
+  have hFW : (g • E)⁻¹ • (W₀.map (MulSemiringAction.toRingHom G R g)) = E⁻¹ • W₀ :=
+    eq_inv_smul_iff.mpr (by rw [← mul_smul, ← hE g]; exact hCvc g)
+  -- curve level: base change of `W₁.map algebraMap` along `τ_g` is itself
+  have hWa : (W₁.map (algebraMap R₀ R)).map (MulSemiringAction.toRingHom G R g)
+      = W₁.map (algebraMap R₀ R) := by
+    rw [WeierstrassCurve.map_map, htau]
+  have hmv : (E⁻¹.map (MulSemiringAction.toRingHom G R g))
+        • (W₀.map (MulSemiringAction.toRingHom G R g))
+      = (E⁻¹ • W₀).map (MulSemiringAction.toRingHom G R g) := by
+    rw [map_variableChange]
+  have hc : (E⁻¹.map (MulSemiringAction.toRingHom G R g))
+        • (W₀.map (MulSemiringAction.toRingHom G R g))
+      = W₁.map (algebraMap R₀ R) := by
+    rw [hF, hFW, hW₁]
+  -- Step A: commute `β_g` past `(projModelVCIso E⁻¹ W₀).inv`
+  have hA : projModelBaseChange (MulSemiringAction.toRingHom G R g) W₀
+        ≫ (projModelVCIso E⁻¹ W₀).inv
+      = (projModelVCIso (E⁻¹.map (MulSemiringAction.toRingHom G R g))
+            (W₀.map (MulSemiringAction.toRingHom G R g))).inv
+        ≫ eqToHom (congrArg projModel hmv)
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G R g) (E⁻¹ • W₀) := by
+    rw [Iso.comp_inv_eq]
+    simp only [Category.assoc]
+    rw [projModelVCIso_map_hom]
+    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Iso.inv_hom_id_assoc]
+  -- Step C: the two base changes compose to a transported single one (`τ_g ∘ alg = alg`)
+  have hC2 : projModelBaseChange (MulSemiringAction.toRingHom G R g) (W₁.map (algebraMap R₀ R))
+        ≫ projModelBaseChange (algebraMap R₀ R) W₁
+      = eqToHom (congrArg projModel hWa) ≫ projModelBaseChange (algebraMap R₀ R) W₁ := by
+    rw [← projModelBaseChange_comp']
+    have hbc : ∀ {f f' : R₀ →+* R} (p : f = f'),
+        projModelBaseChange f W₁ = eqToHom (by rw [p]) ≫ projModelBaseChange f' W₁ := by
+      intro f f' p; subst p; simp
+    exact hbc htau
+  -- Step B: the variable-change isos collapse via the coboundary identity
+  have hι : (projModelVCIso E⁻¹ W₀).inv
+      = eqToHom (congrArg projModel (smul_inv_smul E W₀).symm)
+        ≫ (projModelVCIso E (E⁻¹ • W₀)).hom := by
+    rw [projModelVCIso_hom_inv_smul E W₀, ← Category.assoc, eqToHom_trans, eqToHom_refl,
+      Category.id_comp]
+  have hB : (projModelVCIso (Cvc g) (W₀.map (MulSemiringAction.toRingHom G R g))).hom
+        ≫ (projModelVCIso (E⁻¹.map (MulSemiringAction.toRingHom G R g))
+            (W₀.map (MulSemiringAction.toRingHom G R g))).inv
+        ≫ eqToHom (congrArg projModel hc)
+      = eqToHom (congrArg projModel (hCvc g))
+        ≫ (projModelVCIso E⁻¹ W₀).inv ≫ eqToHom (congrArg projModel hW₁.symm) := by
+    rw [projModelVCIso_congr (hE g), projModelVCIso_mul E ((g • E)⁻¹),
+      projModelVCIso_inv_congr hF]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc, eqToHom_trans, eqToHom_trans_assoc]
+    rw [projModelVCIso_natEq rfl (hFW.trans hW₁.symm), hι]
+    simp only [Category.assoc, eqToHom_trans_assoc]
+    rw [projModelVCIso_natEq rfl hW₁.symm]
+    simp only [eqToHom_trans_assoc]
+  -- Assemble: reduce `act g ≫ ψ = ψ` to Steps A, C, B via `hΨ g`
+  rw [descentComparison]
+  rw [← cancel_epi (eqToHom (congrArg projModel (hCvc g))), ← Category.assoc, ← hΨ g]
+  simp only [Category.assoc]
+  rw [reassoc_of% hA,
+    reassoc_of% (projModelBaseChange_natEq (MulSemiringAction.toRingHom G R g) hW₁.symm),
+    hC2]
+  simp only [eqToHom_trans_assoc]
+  rw [reassoc_of% hB]
+
 end ModularCurves
