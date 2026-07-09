@@ -12880,3 +12880,21 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   (`ForMathlib/HopfGaloisTranslation.lean` etc.); p0 reclaims or pairs at a boundary
   on return (board handshake). p2's files READ-ONLY (consume their pins). Zero overlap
   with every live lane. Full charter: inbox/NEW-HOPF.md.
+
+### v10.95b (2026-07-09, fable-FP): ★ [GR-F1]+[GR-F2] PROVEN — the transition maps are mutually inverse; the GlueData t-map exists at ring level
+
+- `GrassmannianTransition.lean` extended, still **sorry-free, axiom-clean** (downstream
+  Overlap re-verified green): entry lemmas `matrix_apply`/`matrixAway_apply` +
+  delta-column helpers · **[GR-F1] `map_ringHom_matrix`**:
+  `(matrix ι' ι).map (ringHom ι ι') = (matrixAway ι ι')⁻¹` — the generic
+  "coordinate changes are mutually inverse on the overlap" (proof: delta-case via
+  inverse-column identity `M⁻¹ *ᵥ e_{i₂} = e_{i₀}` from `M`'s delta columns; variable
+  case is `eval₂Hom_X'` + `M⁻¹`-column direct) · `isUnit_ringHom_det` (image of the
+  REVERSE determinant is a unit — via `isUnit_det_of_left_inverse`) · **[GR-F2]
+  `ringHomAway : Away(det ι'ι) →+* Away(det ιι')`** + its `algebraMap`-spec — THE
+  `Scheme.GlueData` t-map at ring level.
+- Pin note: this pin's `Matrix.mulVec_single` normalizes to `MulOpposite.op r • M.col j`
+  — normalized once via private `mulVec_single_one`; `det` is ambiguous under
+  `open Matrix` (use an `rfl`-have).
+- NEXT: [GR-E4] inverse-pair (`ringHomAway ι' ι ∘ ringHomAway ι ι' = id`) + triple
+  cocycle → [GR-D] Spec/basicOpen immersions → [GR-F] GlueData assembly.

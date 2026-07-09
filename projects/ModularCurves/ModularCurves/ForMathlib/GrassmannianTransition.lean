@@ -99,6 +99,87 @@ noncomputable def ringHom :
       fun i₁ => algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
         (column ι p.1.1 i₁)) p.2)
 
+@[simp] lemma matrix_apply (i₁ i₂ : Fin k) :
+    matrix (R := R) ι ι' i₁ i₂ = column ι (ι' i₂) i₁ := rfl
+
+private lemma mulVec_single_one {S : Type u} [CommRing S]
+    (M : Matrix (Fin k) (Fin k) S) (j : Fin k) :
+    M *ᵥ Pi.single j 1 = fun i => M i j := by
+  funext i
+  rw [Matrix.mulVec_single]
+  simp
+
+@[simp] lemma matrixAway_apply (i₁ i₂ : Fin k) :
+    matrixAway (R := R) ι ι' i₁ i₂
+      = algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+          (column ι (ι' i₂) i₁) := rfl
+
+/-- The image of a delta column under the coefficient embedding is a delta column. -/
+private lemma algebraMap_comp_single (i₂ : Fin k) :
+    (fun i₁ => algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))
+        (column ι (ι i₂) i₁))
+      = Pi.single i₂ 1 := by
+  funext l
+  rw [congrFun (column_mem ι i₂) l, Pi.single_apply, Pi.single_apply,
+    apply_ite (algebraMap (ChartRing R ι) (Localization.Away (det (R := R) ι ι'))),
+    map_one, map_zero]
+
+/-- The localized forward transition matrix has delta columns at indices hit by `ι`. -/
+private lemma matrixAway_mulVec_single {i₀ i₂ : Fin k} (hcol : ι' i₀ = ι i₂) :
+    matrixAway (R := R) ι ι' *ᵥ Pi.single i₀ 1 = Pi.single i₂ 1 := by
+  rw [mulVec_single_one]
+  funext i₁
+  rw [matrixAway_apply, hcol]
+  exact congrFun (algebraMap_comp_single ι ι' i₂) i₁
+
+private lemma nonsing_inv_matrixAway_mulVec_single {i₀ i₂ : Fin k} (hcol : ι' i₀ = ι i₂) :
+    (matrixAway (R := R) ι ι')⁻¹ *ᵥ Pi.single i₂ 1 = Pi.single i₀ 1 := by
+  rw [← matrixAway_mulVec_single ι ι' hcol, Matrix.mulVec_mulVec,
+    Matrix.nonsing_inv_mul _ (isUnit_det_matrixAway ι ι'), Matrix.one_mulVec]
+
+/-- **[GR-F1]** The transition ring map carries the *reverse* transition matrix to the
+inverse of the (localized) forward one — the generic content of "the coordinate changes
+are mutually inverse on the overlap". -/
+lemma map_ringHom_matrix :
+    (matrix ι' ι).map ⇑(ringHom (R := R) ι ι') = (matrixAway (R := R) ι ι')⁻¹ := by
+  classical
+  funext i₁ i₂
+  rw [Matrix.map_apply, matrix_apply]
+  have hR : (matrixAway (R := R) ι ι')⁻¹ i₁ i₂
+      = ((matrixAway (R := R) ι ι')⁻¹ *ᵥ Pi.single i₂ 1) i₁ := by
+    rw [mulVec_single_one]
+  by_cases hj : ι i₂ ∈ Set.range ι'
+  · obtain ⟨i₀, hi₀⟩ := hj
+    rw [← hi₀, congrFun (column_mem ι' i₀) i₁, hR,
+      nonsing_inv_matrixAway_mulVec_single ι ι' hi₀, Pi.single_apply, Pi.single_apply]
+    split <;> simp
+  · rw [congrFun (column_notMem ι' hj) i₁, ringHom, eval₂Hom_X']
+    rw [show (fun l => algebraMap (ChartRing R ι)
+          (Localization.Away (det (R := R) ι ι')) (column ι (ι i₂) l))
+        = Pi.single i₂ 1 from algebraMap_comp_single ι ι' i₂,
+      hR]
+
+/-- **[GR-F1]** The transition map sends the reverse transition determinant to a unit —
+so it extends over the reverse overlap localization. -/
+lemma isUnit_ringHom_det :
+    IsUnit (ringHom (R := R) ι ι' (det (R := R) ι' ι)) := by
+  have hd : det (R := R) ι' ι = (matrix ι' ι).det := rfl
+  rw [hd, RingHom.map_det, RingHom.mapMatrix_apply, map_ringHom_matrix]
+  exact Matrix.isUnit_det_of_left_inverse
+    (Matrix.mul_nonsing_inv _ (isUnit_det_matrixAway ι ι'))
+
+/-- **[GR-F2]** The chart transition on overlap rings — the `Scheme.GlueData` gluing map
+at ring level: `(ChartRing ι')[1/det ι'ι] → (ChartRing ι)[1/det ιι']`. -/
+noncomputable def ringHomAway :
+    Localization.Away (det (R := R) ι' ι) →+* Localization.Away (det (R := R) ι ι') :=
+  IsLocalization.Away.lift (det (R := R) ι' ι) (isUnit_ringHom_det ι ι')
+
+lemma ringHomAway_algebraMap (q : ChartRing R ι') :
+    ringHomAway ι ι' (algebraMap (ChartRing R ι')
+        (Localization.Away (det (R := R) ι' ι)) q)
+      = ringHom (R := R) ι ι' q :=
+  IsLocalization.Away.lift_eq _ (isUnit_ringHom_det ι ι') q
+
 end Transition
 
 end Module.Grassmannian
