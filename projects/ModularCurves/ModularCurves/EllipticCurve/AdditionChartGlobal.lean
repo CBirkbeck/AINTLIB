@@ -79,6 +79,21 @@ lemma blOpenZImage_eq_iSup (i j : Fin 3) :
     blOpenZImage W i j = ⨆ k, pieceι W i j ''ᵁ blOpenZPieceFamily W i j k := by
   rw [blOpenZImage, Scheme.Hom.image_iSup]
 
+/-- The overlap of two law-2 regularity images is covered by the `(k,k')` piece-image overlaps
+(`image_iSup` on each factor + `iSup_inf_iSup`). -/
+lemma blOpenYImage_inf_eq_iSup (i j i' j' : Fin 3) :
+    blOpenYImage W i j ⊓ blOpenYImage W i' j' =
+      ⨆ p : Fin 3 × Fin 3, (pieceι W i j ''ᵁ blOpenYPieceFamily W i j p.1) ⊓
+        (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' p.2) := by
+  rw [blOpenYImage_eq_iSup, blOpenYImage_eq_iSup, iSup_inf_iSup]
+
+/-- The law-1 analogue of `blOpenYImage_inf_eq_iSup`. -/
+lemma blOpenZImage_inf_eq_iSup (i j i' j' : Fin 3) :
+    blOpenZImage W i j ⊓ blOpenZImage W i' j' =
+      ⨆ p : Fin 3 × Fin 3, (pieceι W i j ''ᵁ blOpenZPieceFamily W i j p.1) ⊓
+        (pieceι W i' j' ''ᵁ blOpenZPieceFamily W i' j' p.2) := by
+  rw [blOpenZImage_eq_iSup, blOpenZImage_eq_iSup, iSup_inf_iSup]
+
 /-- The cover of `blOpenY` by the four chart-products' regularity opens. -/
 noncomputable def blOpenYCover : (blOpenY W).toScheme.OpenCover :=
   Scheme.Opens.iSupOpenCover (blOpenYFamily W)
