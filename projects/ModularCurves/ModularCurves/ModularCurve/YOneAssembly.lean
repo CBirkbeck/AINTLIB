@@ -809,6 +809,24 @@ theorem zsmul_pull_baseChange_asSection_iff {T : Scheme.{u}} (t : T ⟶ S) {k : 
     rw [Category.assoc]
   rw [← (Point.baseChangeEquiv E t τ).map_eq_zero_iff, map_zsmul, hbeq]
 
+/-- **(Y1-D1 bridge, killing)** The base-changed marked section is `a`-killed iff the pulled point
+is: `asSection E t` is injective (`asSection_val_fst`) and sends `0` to `0` (`asSection_zsmul` at
+`0`), so it reflects and preserves vanishing. -/
+theorem zsmul_asSection_pull_eq_zero_iff {T : Scheme.{u}} (t : T ⟶ S) (a : ℤ) :
+    a • Point.asSection E t (Point.pull E t P) = 0 ↔ a • Point.pull E t P = 0 := by
+  rw [← Point.asSection_zsmul]
+  have hinj : Function.Injective (Point.asSection E t) := by
+    intro X Y hXY
+    have h : (Point.asSection E t X).1 = (Point.asSection E t Y).1 := congrArg Subtype.val hXY
+    refine Subtype.ext ?_
+    rw [← Point.asSection_val_fst E t X, ← Point.asSection_val_fst E t Y, h]
+  have hzero : Point.asSection E t (0 : E.Point t) = 0 := by
+    have h0 := Point.asSection_zsmul E t 0 (Point.pull E t P)
+    rw [zero_zsmul, zero_zsmul] at h0; exact h0
+  constructor
+  · intro h; exact hinj (h.trans hzero.symm)
+  · intro h; rw [h]; exact hzero
+
 end EllipticCurve
 
 variable (N : ℕ)
