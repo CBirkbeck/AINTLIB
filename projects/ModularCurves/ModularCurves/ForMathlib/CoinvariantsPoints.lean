@@ -60,6 +60,110 @@ theorem coactionCharpoly_of_mem_coinvariants (f : C'' ⊗[coinvariants ρ] B)
     mulMatrix_includeLeft, Matrix.charpoly_diagonal]
   rw [Finset.prod_const, Finset.card_univ]
 
+variable {D : Type*} [CommRing D] [Algebra R D]
+variable [Algebra (coinvariants ρ) D] [IsScalarTower R (coinvariants ρ) D]
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- Naturality of the base-changed co-action in the base: for a `C`-algebra map
+`π : D → C''`, the co-actions intertwine through `π ⊗ id`. -/
+theorem coactionBaseChange_naturality (π : D →ₐ[coinvariants ρ] C'')
+    (x : D ⊗[coinvariants ρ] B) :
+    coactionBaseChange R A ρ C''
+        ((Algebra.TensorProduct.map π (AlgHom.id (coinvariants ρ) B)) x)
+      = (Algebra.TensorProduct.map
+          ((Algebra.TensorProduct.map π (AlgHom.id (coinvariants ρ) B)).restrictScalars R)
+          (AlgHom.id R A))
+          (coactionBaseChange R A ρ D x) := by
+  induction x with
+  | zero => simp
+  | tmul d b =>
+    rw [Algebra.TensorProduct.map_tmul]
+    rw [show (AlgHom.id (coinvariants ρ) B) b = b from rfl,
+      coactionBaseChange_tmul, coactionBaseChange_tmul]
+    induction ρ b with
+    | zero => simp [TensorProduct.tmul_zero]
+    | tmul b₀ a =>
+      rw [show (baseChangeAssoc R A ρ C'').symm
+          (π d ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
+          = (π d ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
+        Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _,
+        show (baseChangeAssoc R A ρ D).symm (d ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
+          = (d ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
+        Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _,
+        Algebra.TensorProduct.map_tmul]
+      rfl
+    | add z w ihz ihw =>
+      conv_rhs => rw [TensorProduct.tmul_add, map_add, map_add]
+      rw [TensorProduct.tmul_add, map_add, ihz, ihw]
+  | add x y ihx ihy =>
+    conv_rhs => rw [map_add, map_add]
+    rw [map_add, map_add, ihx, ihy]
+
+/-- **The power witness (Stacks 03BK(2)(a), constant-coefficient form)**: for any
+base change `C''` of the co-invariants and any co-invariant `f` upstairs,
+`f^r` lies in the image of `C''` — lift along a flat polynomial cover, where the charpoly
+coefficients are honest scalars, and map down to the expansion of `(X − f)^r`. -/
+theorem pow_card_mem_range_algebraMap_of_mem_coinvariants (hρ : IsCoaction ρ)
+    (f : C'' ⊗[coinvariants ρ] B)
+    (hf : f ∈ coinvariants (coactionBaseChange R A ρ C'')) :
+    ∃ c'' : C'', algebraMap C'' (C'' ⊗[coinvariants ρ] B) c''
+      = f ^ Fintype.card (hopfBasisIndex R A) := by
+  classical
+  let π : MvPolynomial C'' (coinvariants ρ) →ₐ[coinvariants ρ] C'' :=
+    MvPolynomial.aeval id
+  have hπsurj : Function.Surjective π := fun c'' =>
+    ⟨MvPolynomial.X c'', by simp [π]⟩
+  let πB := Algebra.TensorProduct.map π (AlgHom.id (coinvariants ρ) B)
+  have hπBsurj : Function.Surjective πB :=
+    Algebra.TensorProduct.map_surjective π (AlgHom.id (coinvariants ρ) B) hπsurj
+      Function.surjective_id
+  obtain ⟨g, hg⟩ := hπBsurj f
+  -- the charpoly upstairs has scalar coefficients (flat cover: 03BK(3))
+  have hcoeffD : ∀ k, ∃ d : MvPolynomial C'' (coinvariants ρ),
+      algebraMap (MvPolynomial C'' (coinvariants ρ))
+        (MvPolynomial C'' (coinvariants ρ) ⊗[coinvariants ρ] B) d
+      = (coactionCharpoly R A
+          (coactionBaseChange R A ρ (MvPolynomial C'' (coinvariants ρ))) g).coeff k := by
+    intro k
+    have hmem := coactionCharpoly_coeff_mem R A
+      (coactionBaseChange R A ρ (MvPolynomial C'' (coinvariants ρ)))
+      (isCoaction_coactionBaseChange R A ρ (MvPolynomial C'' (coinvariants ρ)) hρ) g k
+    obtain ⟨d, hd⟩ := (mem_coinvariants_coactionBaseChange_iff R A ρ
+      (MvPolynomial C'' (coinvariants ρ)) _).mp hmem
+    exact ⟨d, by rw [← hd]; rfl⟩
+  -- transport the charpoly down along πB
+  have htransport : coactionCharpoly R A (coactionBaseChange R A ρ C'') f
+      = (coactionCharpoly R A
+          (coactionBaseChange R A ρ (MvPolynomial C'' (coinvariants ρ))) g).map
+          (πB.restrictScalars R).toRingHom := by
+    rw [coactionCharpoly, coactionCharpoly, ← Matrix.charpoly_map]
+    congr 1
+    rw [← hg, coactionBaseChange_naturality R A ρ C'' π g]
+    exact mulMatrix_map R A ((πB.restrictScalars R)) _
+  -- conclude: the constant coefficient of (X − f)^r is in the image
+  have hpow := coactionCharpoly_of_mem_coinvariants R A ρ C'' f hf
+  obtain ⟨d₀, hd₀⟩ := hcoeffD 0
+  refine ⟨(-1) ^ Fintype.card (hopfBasisIndex R A) * π d₀, ?_⟩
+  have hcoeff0 : (coactionCharpoly R A (coactionBaseChange R A ρ C'') f).coeff 0
+      = algebraMap C'' (C'' ⊗[coinvariants ρ] B) (π d₀) := by
+    rw [htransport, Polynomial.coeff_map, ← hd₀]
+    show πB (algebraMap (MvPolynomial C'' (coinvariants ρ))
+      (MvPolynomial C'' (coinvariants ρ) ⊗[coinvariants ρ] B) d₀) = _
+    rw [show algebraMap (MvPolynomial C'' (coinvariants ρ))
+        (MvPolynomial C'' (coinvariants ρ) ⊗[coinvariants ρ] B) d₀
+        = d₀ ⊗ₜ[coinvariants ρ] (1 : B) from rfl,
+      show πB (d₀ ⊗ₜ[coinvariants ρ] (1 : B))
+        = π d₀ ⊗ₜ[coinvariants ρ] ((AlgHom.id (coinvariants ρ) B) (1 : B)) from
+      Algebra.TensorProduct.map_tmul _ _ _ _, map_one]
+    rfl
+  have hval : (coactionCharpoly R A (coactionBaseChange R A ρ C'') f).coeff 0
+      = (-1) ^ Fintype.card (hopfBasisIndex R A)
+        * f ^ Fintype.card (hopfBasisIndex R A) := by
+    rw [hpow, Polynomial.coeff_zero_eq_eval_zero, Polynomial.eval_pow,
+      Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, zero_sub, neg_pow]
+  rw [map_mul, map_pow, map_neg, map_one, ← hcoeff0, hval, ← mul_assoc, ← mul_pow,
+    neg_mul_neg, one_mul, one_pow, one_mul]
+
 end PowerWitness
 
 end ModularCurves
