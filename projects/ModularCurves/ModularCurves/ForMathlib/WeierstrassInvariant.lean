@@ -150,4 +150,14 @@ theorem exists_unit_u_of_isVCocycle [Fintype G] [DecidableEq G] [Nontrivial A]
   simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u] at h1
   rw [h1, Units.val_mul, uSMul_coe]
 
+/-- Conjugating a `VariableChange` cocycle by a constant `D` yields a cocycle (same cohomology
+class): `[a5-iii] step 2` conjugates by `(d,0,0,0)` — with `d` from `exists_unit_u_of_isVCocycle` —
+to reduce to the `u = 1` case, where the residual `(r,s,t)`-cocycle is trivialized by the additive
+Hilbert 90 `exists_sub_smul_eq_of_isCocycle` (PROVEN). -/
+theorem isVCocycle_conj (D : VariableChange A) {C : G → VariableChange A} (hC : IsVCocycle C) :
+    IsVCocycle (fun g => D * C g * (g • D)⁻¹) := by
+  intro g h
+  simp only [hC g h, mul_smul g h D, smul_mul', smul_inv']
+  group
+
 end WeierstrassCurve
