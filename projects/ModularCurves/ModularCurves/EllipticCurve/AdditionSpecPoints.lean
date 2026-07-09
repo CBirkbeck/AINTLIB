@@ -822,6 +822,29 @@ lemma descended_lawTwo_smul_add (i j : Fin 3)
     rw [hc, hadd]
 
 
+
+/-- **[C6-e5c] The atlas-level specPoints spec** (the c6 core): over the ULift universal atlas the
+glued two-law multiplication computes the group law of the dictionary. Proof plan (v10.94f/g):
+case split via specPoint_factors_blOpenZ_or_blOpenY; per case descend by
+specPoint_addOn{Z,Y}OnImage_factors' + read out by addOn{Z,Y}PieceHom_coord/tensor legs/piece
+projections; identify the triple with `add` by descended_lawOne_eq_add / descended_lawTwo_smul_add;
+finish with toAffine_add + toAffine_smul + projModelPointsEquiv_some/_zero. -/
+theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u}) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K
+        ⟨pullback.lift P.1 Q.1 w ≫
+            WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ, by
+          rw [Category.assoc, WeierstrassCurve.Projective.mulModelHom_projModelπ,
+            ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  sorry
+
 end AtlasFormula
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
