@@ -1,6 +1,7 @@
 import ModularCurves.ForMathlib.CoactionCharpoly
 import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
+import Mathlib.FieldTheory.Minpoly.Field
 
 /-!
 # Points of the co-invariants: surjectivity
@@ -165,5 +166,39 @@ theorem pow_card_mem_range_algebraMap_of_mem_coinvariants (hρ : IsCoaction ρ)
     neg_mul_neg, one_mul, one_pow, one_mul]
 
 end PowerWitness
+
+section Orbit
+
+variable {k : Type*} [Field k] [Algebra R k]
+
+omit [Module.Free R A] in
+/-- The `k`-points of `B ⊗ A` lying over a fixed point `a₁` of `B` (through the left
+inclusion) are finite: they biject into the `k`-points of the finite `k`-algebra
+`k ⊗[B, a₁] (B ⊗ A)`. -/
+theorem finite_setOf_comp_includeLeft_eq (a₁ : B →ₐ[R] k) :
+    {χ : (B ⊗[R] A) →ₐ[R] k |
+      χ.comp (Algebra.TensorProduct.includeLeft (S := R)) = a₁}.Finite := by
+  classical
+  letI : Algebra B k := a₁.toRingHom.toAlgebra
+  haveI : Module.Finite B (B ⊗[R] A) := Module.Finite.base_change R B A
+  haveI : FiniteDimensional k (k ⊗[B] (B ⊗[R] A)) := Module.Finite.base_change B k _
+  haveI : Fintype ((k ⊗[B] (B ⊗[R] A)) →ₐ[k] k) := minpoly.AlgHom.fintype _ _ _
+  set Φ : {χ : (B ⊗[R] A) →ₐ[R] k |
+      χ.comp (Algebra.TensorProduct.includeLeft (S := R)) = a₁} →
+      ((k ⊗[B] (B ⊗[R] A)) →ₐ[k] k) := fun χ =>
+    Algebra.TensorProduct.lift (AlgHom.id k k)
+      { toRingHom := (χ : (B ⊗[R] A) →ₐ[R] k).toRingHom
+        commutes' := fun b => by
+          have := AlgHom.congr_fun χ.2 b
+          exact this }
+      (fun _ _ => Commute.all _ _) with hΦ
+  have hΦinj : Function.Injective Φ := by
+    intro χ₁ χ₂ h
+    refine Subtype.ext (AlgHom.ext fun x => ?_)
+    have h1 := AlgHom.congr_fun h ((1 : k) ⊗ₜ[B] x)
+    simpa [hΦ, Algebra.TensorProduct.lift_tmul] using h1
+  exact Set.finite_coe_iff.mp (Finite.of_injective Φ hΦinj)
+
+end Orbit
 
 end ModularCurves
