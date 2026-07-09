@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.EllipticCurve.AdditionBaseChange
 import ModularCurves.ForMathlib.ProjToSpecZero
 import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
 import ModularCurves.ForMathlib.ProjMapScaling
@@ -759,35 +760,39 @@ locus `P₁ ≠ P₂` (B–L Thm 2 at the line `Z = 0`: exceptional ⟺ `P₁ �
 Source: B–L Thm 2 + "lines y = 0, z = 0" (quotes file). -/
 noncomputable def blOpenZ (W : WeierstrassCurve R) :
     (pullback (projModelπ W) (projModelπ W)).Opens :=
-  sorry
+  WeierstrassCurve.Projective.blOpenZ W
 
 /-- **(T-W7.0c·c1-Y, the open)** The regularity open of the `Y = 0` addition law: over every
 field, the locus `P₁ − P₂ ∉ E ∩ {Y = 0}` (contains the diagonal and the infinity loci since
 `O ∉ {Y=0}`). Source: B–L Thm 2 at the line `Y = 0`. -/
 noncomputable def blOpenY (W : WeierstrassCurve R) :
     (pullback (projModelπ W) (projModelπ W)).Opens :=
-  sorry
+  WeierstrassCurve.Projective.blOpenY W
 
 /-- **(T-W7.0c·c1-Z, the morphism)** The `Z = 0` addition law as a morphism on its
 regularity open: the explicit bidegree-(2,2) polynomial triple of B–L §5. Source: B–L §5
 (transcribe from the PDF at implementation; CAS-verify each polynomial first). -/
 noncomputable def addOnZ (W : WeierstrassCurve R) [W.IsElliptic] :
     (blOpenZ W).toScheme ⟶ projModel W :=
-  sorry
+  (blOpenZ W).ι ≫
+    mulModelHomBC (classifyRingHomU W) universalWeierstrassLocU
+      universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
 
 /-- **(T-W7.0c·c1-Y, the morphism)** The `Y = 0` addition law as a morphism on its
 regularity open. Source: B–L §5. -/
 noncomputable def addOnY (W : WeierstrassCurve R) [W.IsElliptic] :
     (blOpenY W).toScheme ⟶ projModel W :=
-  sorry
+  (blOpenY W).ι ≫
+    mulModelHomBC (classifyRingHomU W) universalWeierstrassLocU
+      universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
 
 /-- **(T-W7.0c·c2)** The two regularity opens cover the product: the exceptional divisors
 are disjoint over every field (their common zero would be a point with `P₁ − P₂ = O` and
 `P₁ − P₂ ∈ {Y = 0}`, but `O ∉ {Y = 0}`), and coverage is a fibrewise/topological statement.
 Source: B–L Thm 2 + p. 230–231 ("any two distinct lines … intersect outside E(k)"). -/
 theorem blOpen_cover (W : WeierstrassCurve R) [W.IsElliptic] :
-    blOpenZ W ⊔ blOpenY W = ⊤ := by
-  sorry
+    blOpenZ W ⊔ blOpenY W = ⊤ :=
+  WeierstrassCurve.Projective.blOpenZ_sup_blOpenY_eq_top W W.isUnit_Δ
 
 /-- **(T-W7.0c·c3)** The two laws agree on the overlap: a polynomial identity modulo the two
 curve relations, bidegree-(2,2)-by-(2,2), over `ℤ[a₁,…,a₆]` — discharged by
@@ -796,8 +801,8 @@ Source: B–L Thm 2 (both laws compute the group law where defined, so they agre
 the scheme-level identity is the §5 polynomial identity). -/
 theorem addOn_agree (W : WeierstrassCurve R) [W.IsElliptic] :
     (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_left ≫ addOnZ W =
-      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnY W := by
-  sorry
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnY W :=
+  restrict_inf_agree _ (blOpenZ W) (blOpenY W)
 
 /-- **(T-W7.0c·c4)** THE multiplication morphism on the projective Weierstrass model, glued
 from the two Bosma–Lenstra addition laws. Source: B–L Thm 1 (two laws suffice — and are
@@ -805,17 +810,18 @@ necessary: no single law is total); glue via `Scheme.Cover.glueMorphisms`-style 
 the two-open cover. -/
 noncomputable def mulModelHom (W : WeierstrassCurve R) [W.IsElliptic] :
     pullback (projModelπ W) (projModelπ W) ⟶ projModel W :=
-  sorry
+  mulModelHomBC (classifyRingHomU W) universalWeierstrassLocU
+    universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
 
 /-- **(T-W7.0c·c4-Z-spec)** `mulModelHom` restricts to the `Z`-law on its open. -/
 theorem blOpenZ_ι_mulModelHom (W : WeierstrassCurve R) [W.IsElliptic] :
-    (blOpenZ W).ι ≫ mulModelHom W = addOnZ W := by
-  sorry
+    (blOpenZ W).ι ≫ mulModelHom W = addOnZ W :=
+  rfl
 
 /-- **(T-W7.0c·c4-Y-spec)** `mulModelHom` restricts to the `Y`-law on its open. -/
 theorem blOpenY_ι_mulModelHom (W : WeierstrassCurve R) [W.IsElliptic] :
-    (blOpenY W).ι ≫ mulModelHom W = addOnY W := by
-  sorry
+    (blOpenY W).ι ≫ mulModelHom W = addOnY W :=
+  rfl
 
 /-- **(T-W7.0d)** Multiplication is a morphism over `Spec R`. Source: the B–L triples are
 bihomogeneous with coefficients in `R` — the composite to `Spec R` is the structure map on
@@ -823,8 +829,9 @@ each piece. -/
 @[reassoc]
 theorem mulModelHom_π (W : WeierstrassCurve R) [W.IsElliptic] :
     mulModelHom W ≫ projModelπ W =
-      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W := by
-  sorry
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
+  mulModelHomBC_projModelπ (classifyRingHomU W) universalWeierstrassLocU
+    universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
 
 /-- **(T-W7.0c·c6, the spec)** On field points, `mulModelHom` is mathlib's `Point.add`
 through the dictionary — for EVERY pair (the B–L laws compute the chord–tangent sum wherever

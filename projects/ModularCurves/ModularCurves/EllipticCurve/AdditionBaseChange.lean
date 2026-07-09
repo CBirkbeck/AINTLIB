@@ -146,6 +146,13 @@ lemma mulModelHomBC_projModelπ (f : U →+* R) (W₀ : WeierstrassCurve U)
       pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
   (isPullback_projModelBaseChangeOf f W₀ W h).lift_snd _ _ _
 
+/-- Restrictions of one morphism to two opens agree on the intersection — the trivial form of
+`addOn_agree` once both laws are (definitionally) restrictions of the same `mulModelHom`. -/
+lemma restrict_inf_agree {X Y : Scheme} (M : X ⟶ Y) (U V : X.Opens) :
+    X.homOfLE (inf_le_left : U ⊓ V ≤ U) ≫ U.ι ≫ M =
+      X.homOfLE (inf_le_right : U ⊓ V ≤ V) ≫ V.ι ≫ M := by
+  rw [← Category.assoc, Scheme.homOfLE_ι, ← Category.assoc, Scheme.homOfLE_ι]
+
 end BaseChangeOf
 
 end ModularCurves
