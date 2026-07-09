@@ -464,6 +464,76 @@ private theorem locallyFreeRankLocusAux_patch_iff {R R' B : Type u} [CommRing R]
   · intro h i j
     exact h _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
 
+/-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
+the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
+presentation ideals into the canonical ideal sheaf (`map_ideal_basicOpen` holds because
+both sides represent the same functor over the localized algebras). -/
+private theorem locallyFreeRankLocusAux_unique {R : Type u} [CommRing R] {I J : Ideal R}
+    (h : ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I.map (algebraMap R A) = ⊥ ↔ J.map (algebraMap R A) = ⊥) : I = J := by
+  have key : ∀ (I' J' : Ideal R), (∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I'.map (algebraMap R A) = ⊥ ↔ J'.map (algebraMap R A) = ⊥) → J' ≤ I' := by
+    intro I' J' h'
+    have h1 : I'.map (algebraMap R (R ⧸ I')) = ⊥ := by
+      rw [Ideal.Quotient.algebraMap_eq, Ideal.map_quotient_self]
+    have h2 := (h' (R ⧸ I') inferInstance inferInstance).mp h1
+    rwa [Ideal.Quotient.algebraMap_eq, Ideal.map_eq_bot_iff_le_ker, Ideal.mk_ker] at h2
+  exact le_antisymm (key J I fun A cA aA => (h A cA aA).symm) (key I J h)
+
+/-- **[L1-d2, away-clearing]** Membership in the extension of an ideal along
+`R' → R'[1/b]` is, up to a power of `b`, membership in the ideal itself. -/
+private theorem locallyFreeRankLocusAux_away_clear {R' : Type u} [CommRing R']
+    (J : Ideal R') (b : R') {y : R'}
+    (hy : algebraMap R' (Localization.Away b) y
+      ∈ J.map (algebraMap R' (Localization.Away b))) :
+    ∃ k : ℕ, b ^ k * y ∈ J := by
+  obtain ⟨⟨⟨j, hj⟩, s⟩, hjs⟩ :=
+    (IsLocalization.mem_map_algebraMap_iff (Submonoid.powers b) _).mp hy
+  obtain ⟨k, hk⟩ := s.2
+  rw [← hk, ← map_mul, ← sub_eq_zero, ← map_sub] at hjs
+  obtain ⟨c, hc⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers b) _ _).mp hjs
+  obtain ⟨k', hk'⟩ := c.2
+  rw [← hk'] at hc
+  refine ⟨k' + k, ?_⟩
+  have hbky : b ^ (k' + k) * y = b ^ k' * j := by linear_combination hc
+  rw [hbky]
+  exact J.mul_mem_left _ hj
+
+/-- **[L1-d3, overlap agreement]** Two patch rings mapping to a common further algebra `S`
+cut out the same extended entries ideal: both extensions represent the same condition over
+`S`-algebras ([L1-d1]), so they agree by uniqueness ([L1-c]). -/
+private theorem locallyFreeRankLocusAux_agree {R R₁ R₂ S : Type u} [CommRing R]
+    [CommRing R₁] [CommRing R₂] [CommRing S] [Algebra R R₁] [Algebra R R₂] [Algebra R₁ S]
+    [Algebra R₂ S] [Algebra R S] [IsScalarTower R R₁ S] [IsScalarTower R R₂ S]
+    {M : Type u} [AddCommGroup M] [Module R M] {n m₁ m₂ : ℕ}
+    (α₁ : (Fin m₁ → R₁) →ₗ[R₁] (Fin n → R₁))
+    (π₁ : (Fin n → R₁) →ₗ[R₁] (R₁ ⊗[R] M)) (hπ₁ : Function.Surjective π₁)
+    (hex₁ : Function.Exact α₁ π₁)
+    (α₂ : (Fin m₂ → R₂) →ₗ[R₂] (Fin n → R₂))
+    (π₂ : (Fin n → R₂) →ₗ[R₂] (R₂ ⊗[R] M)) (hπ₂ : Function.Surjective π₂)
+    (hex₂ : Function.Exact α₂ π₂) :
+    (Ideal.span (Set.range fun ij : Fin m₁ × Fin n =>
+        α₁ (Pi.single ij.1 1) ij.2)).map (algebraMap R₁ S)
+      = (Ideal.span (Set.range fun ij : Fin m₂ × Fin n =>
+        α₂ (Pi.single ij.1 1) ij.2)).map (algebraMap R₂ S) := by
+  refine locallyFreeRankLocusAux_unique fun B cB aB => ?_
+  letI : Algebra R₁ B := ((algebraMap S B).comp (algebraMap R₁ S)).toAlgebra
+  letI : Algebra R₂ B := ((algebraMap S B).comp (algebraMap R₂ S)).toAlgebra
+  letI : Algebra R B := ((algebraMap S B).comp (algebraMap R S)).toAlgebra
+  haveI : IsScalarTower R R₁ B := IsScalarTower.of_algebraMap_eq' (by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+      RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq R R₁ S])
+  haveI : IsScalarTower R R₂ B := IsScalarTower.of_algebraMap_eq' (by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+      RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq R R₂ S])
+  rw [Ideal.map_map, Ideal.map_map,
+    show (algebraMap S B).comp (algebraMap R₁ S) = algebraMap R₁ B from
+      (RingHom.algebraMap_toAlgebra _).symm,
+    show (algebraMap S B).comp (algebraMap R₂ S) = algebraMap R₂ B from
+      (RingHom.algebraMap_toAlgebra _).symm,
+    ← locallyFreeRankLocusAux_patch_iff α₁ π₁ hπ₁ hex₁,
+    ← locallyFreeRankLocusAux_patch_iff α₂ π₂ hπ₂ hex₂]
+
 /-- **[L1-d, the affine universal ideal]** Over an affine base, the "finite locally free of
 rank `n`" condition on base changes of `M` is cut out by a single ideal: combining the local
 `n`-generator presentations ([L1-a], on a finite basic-open cover extracted by
@@ -574,22 +644,6 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
     simpa [LinearMap.toSpanSingleton_apply] using h1ann
   · -- the glued ideal's vanishing forces the condition
     sorry
-
-/-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
-the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
-presentation ideals into the canonical ideal sheaf (`map_ideal_basicOpen` holds because
-both sides represent the same functor over the localized algebras). -/
-private theorem locallyFreeRankLocusAux_unique {R : Type u} [CommRing R] {I J : Ideal R}
-    (h : ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
-      I.map (algebraMap R A) = ⊥ ↔ J.map (algebraMap R A) = ⊥) : I = J := by
-  have key : ∀ (I' J' : Ideal R), (∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
-      I'.map (algebraMap R A) = ⊥ ↔ J'.map (algebraMap R A) = ⊥) → J' ≤ I' := by
-    intro I' J' h'
-    have h1 : I'.map (algebraMap R (R ⧸ I')) = ⊥ := by
-      rw [Ideal.Quotient.algebraMap_eq, Ideal.map_quotient_self]
-    have h2 := (h' (R ⧸ I') inferInstance inferInstance).mp h1
-    rwa [Ideal.Quotient.algebraMap_eq, Ideal.map_eq_bot_iff_le_ker, Ideal.mk_ker] at h2
-  exact le_antisymm (key J I fun A cA aA => (h A cA aA).symm) (key I J h)
 
 end LocallyFreeRankLocusAux
 
