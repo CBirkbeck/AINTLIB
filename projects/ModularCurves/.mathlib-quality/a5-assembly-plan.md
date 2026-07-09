@@ -167,3 +167,23 @@ never duplicate.
 isIso_of_isPullback_of_fppf), W5b (U' := qiso⁻¹(D(a)), Γ(X/G,U') ≅ (Aᴳ)_a via IsLocalization
 uniqueness), W6 (top-level assembly; skeleton typechecks with all interfaces pinned —
 tmp/toplevel.lean).
+
+## W6 final route map (over Spec Aᴳ, via LocallyWeierstrass.of_iso — LANDED e873780bb)
+Transport the LW goal along qiso (of_iso with eE = refl, eS = qiso; π'' := π' ≫ qiso.hom,
+z'' := qiso.inv ≫ zero'). At a prime p of Aᴳ:
+1. W1(p) ⟹ a ∉ p, W₁/(Aᴳ)_a, E', hW₁, coboundary.
+2. Chart U := D(a); `IsLocalization.Away a Γ(Spec Aᴳ, D(a))` is a MATHLIB INSTANCE
+   (AffineScheme.lean:645); W₁' := W₁.map (IsLocalization.algEquiv …).toRingHom;
+   projModel-transport along ring equiv = isIso_projModelBaseChange.
+3. Chart iso: `pullback (π'≫qiso.hom) (D a).ι ≅ (π'≫qiso.hom)⁻¹ᵁ(D a)` (mathlib
+   pullbackRestrictIsoRestrict) ≪≫ asIso cmp, where cmp := W2-lift (j := that open's ι into E/G,
+   Y := projModel W₁', f := the composite [restricted-quotient-square iso] ≫ [φ-restricted] ≫
+   [projModel-basicOpen-restriction ≅ base change to A_a: isPullback_projModelBaseChange +
+   D(f) ≅ Spec R_f] ≫ [descentComparison (W3)] ≫ [algEquiv transport]; invariance of f = W3's
+   descentComparison_invariant + equivariance of the identification legs).
+4. cmp iso (W4): restricted quotient square (paste isPullback_morphismRestrict around
+   isPullback_quotientπ) + `pullback.snd ≫ cmp = f` (W2's compat) + f iso + cancel-epi ⟹ the
+   base-changed square exhibits cmp's base change as an iso ⟹ isIso_of_isPullback_of_fppf
+   (fppf leg: fppf_invariantsπ localized / base-change stability).
+5. heπ/hez: descentComparison_π/_zero (W3 legs) threaded through the identifications; ellipticity:
+   isElliptic_of_map_isElliptic + IsUnit-transport along the equivs.
