@@ -10836,3 +10836,19 @@ remains at a boundary when their limit resets.*
 - **A on return (limit reset)**: reclaim at a boundary — first act = whatever map_id
   residue PIC0 boarded, then T-D6b re-check (still gated on the étale cascade), then
   rejoin the endgame if c5β hasn't closed it.
+
+### v10.58 (2026-07-09, fable-PIC0): [YF-QSM] leaf 2/4 — the scheme-level flat cancellation is PROVEN; session-start watch clean
+
+*Commit above. Watch duties first: #35545/#41383/#35773 all still OPEN (no P2 switch);
+A's projModelVCIso_one not yet landed (MellWeierstrass still 1 sorry — map_id waits).
+Being a free hand, took the next QSM staged leaf per v10.56's workable-by-any-hand mark.*
+
+- **`Flat.of_precomp_of_surjective` PROVEN, axiom-clean** (Stacks 29.26.13 scheme form):
+  stalkwise (`Flat.iff_flat_stalkMap` machinery) + `Scheme.Hom.stalkMap_comp` + the
+  stalk map is a flat LOCAL hom hence faithfully flat
+  (`Module.FaithfullyFlat.of_flat_of_isLocalHom`) + yesterday's module core. Seam note:
+  the IsScalarTower across three `toAlgebra` clothings goes through a defeq `show`
+  (algebraMap ≡ the stalkMap hom), never rw-on-algebraMap (first-occurrence roulette).
+- SmoothDescent state: **2/4 proven** (module flat core + scheme flat), remaining =
+  02KL-lfp (needs the fp sorites over a ff fp cover — genuinely new algebra) and the
+  02KM smooth target (needs 02KL + the formally-étale pointwise transfer).
