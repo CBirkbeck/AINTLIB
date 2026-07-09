@@ -1,1 +1,4 @@
-FOCUS: [a5-iii] COMPLETE (exists_coboundary: every VariableChange cocycle is a coboundary locally, axiom-clean). NEXT: a5-i (local projModel from C.localModel) + a5-ii (G-action -> VariableChange cocycle via pointedIso_exists_variableChange) + a5-iv stitch (E^-1.W0 G-invariant -> descendFixed -> pullback pi U =~ projModel), assembling locallyWeierstrass_quotientpi.
+STATE (fable-P4, end 2026-07-09): DIRECTED SAME-SESSION TASKS COMPLETE.
+- [a5-iii] algebraic core DONE (exists_coboundary, H^1(G,VariableChange A) local vanishing, axiom-clean; ratified upstream-grade).
+- B2 repoint T-H4/T-H6 DONE (b2_log + KM 7.1.2 quotes + staged statements + refutation; unblocks GH).
+DEFERRED BY COORDINATOR (v10.75) to next session: [a5] geometric stitch (a5-ii action->cocycle bridge -> a5-i -> a5-iv assembly = exists_ellipticCurveGeom_quotient axiom-clean = engine lands), then moduli-functor layer. FOLLOW-UP: make gammaHNaiveProblem_not_relativelyRepresentable fully axiom-clean (residual sorryAx via gated FullLevelPt/glSmul).
