@@ -10615,3 +10615,16 @@ global Tate coefficient map has exactly the `base_w` equation required for a mor
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for all four declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.90-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] algebra-map local lifts LANDED
+
+Added algebra-map versions of the local Tate classification maps in `YOneAtlasClassify.lean`:
+`tateCurveLocOver_map_tateRingOverAlgLift`, `tateRingOverAlgLiftOfTateNormal`,
+`tateRingOverAlgLiftOfTateNormal_X_zero`, `tateRingOverAlgLiftOfTateNormal_X_one`,
+`tateCurveLocOver_map_tateRingOverAlgLiftOfTateNormal`, `tateRingOverAlgLiftOfPoint`, and
+`tateCurveLocOver_map_tateRingOverAlgLiftOfPoint`. These keep the T-E1 local normalisation output
+in the `tateRingOver R →ₐ[R] A` form used by the affine `Spec`/gluing API.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
+lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
