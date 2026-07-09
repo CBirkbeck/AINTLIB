@@ -202,7 +202,47 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
   --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH: expose the
   --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.  A
   --   cross-file API change worth flagging to the coordinator; not an inline close.
-  sorry
+  have hct : h ≫ (D.ideal.subschemeι ≫ E.π) = t := by
+    rw [← Category.assoc, hcomp]; exact P.2
+  refine Iff.trans (fullLevelLocusAux_comap_iff hct _ _) ?_
+  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (fullLevelLocusAux_theta hct)
+      = (D.baseChange t).ideal := by
+    rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
+      fullLevelLocusAux_theta_fst, ← RelEffCartierDiv.baseChange_ideal]
+  have hP1 : (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
+        (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N).ideal.comap
+        (fullLevelLocusAux_theta hct)
+      = (Section.orderDivisor (E.baseChange t) (Point.asSection E t P) N).ideal := by
+    simp only [Section.orderDivisor]
+    rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal,
+      Scheme.IdealSheafData.comap_prod]
+    refine Finset.prod_congr rfl fun a _ => ?_
+    have hm_a : h ≫ (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+          ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π)
+            (E.divisorTautPoint D)) ≫ pullback.fst E.π (D.ideal.subschemeι ≫ E.π))
+        = subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
+          ≫ pullback.fst E.π t := by
+      rw [exactOrderLocusAux_val_smul_asSection_fst, exactOrderLocusAux_val_smul_asSection_fst,
+        ← Category.assoc]
+      exact congrArg (· ≫ E.mulByHom (((a : ℕ) : ℤ) + 1)) hcomp
+    have key := exactOrderLocusAux_ker_comap_eq
+      (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+        ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)))
+      (subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
+      (exactOrderLocusAux_val_isClosedImmersion E _ _)
+      (exactOrderLocusAux_val_isClosedImmersion E t _)
+      (subgroupLocusAux_val_snd E _ _)
+      (subgroupLocusAux_val_snd E t _)
+      hm_a
+      (fullLevelLocusAux_theta hct) (𝟙 (pullback E.π t))
+      (fullLevelLocusAux_theta_snd hct) (Category.id_comp _)
+      (by rw [Category.id_comp, fullLevelLocusAux_theta_fst])
+    rw [Scheme.IdealSheafData.comap_id] at key
+    exact key
+  refine Iff.trans (Iff.of_eq (congrArg₂ Eq hP1 hP2)) ?_
+  simp only [EllipticCurve.IsDivisorGenerator]
+  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb, hb⟩,
+    fun hh => hh.2⟩
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
 the total space of the generator locus. Real `Classical.choose` definition — the `sorry`

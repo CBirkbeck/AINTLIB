@@ -982,10 +982,10 @@ All statements below are spelled at the raw `pullback E.π t` types, never at
 spelling by definitional `exact`-casts. -/
 
 /-- The value of a point of the base-changed curve, typed at the raw pullback. -/
-private def subgroupLocusAux_val {T T' : Scheme.{u}} (E : EllipticCurve S) (t : T ⟶ S)
+def subgroupLocusAux_val {T T' : Scheme.{u}} (E : EllipticCurve S) (t : T ⟶ S)
     {g : T' ⟶ T} (P : (E.baseChange t).Point g) : T' ⟶ pullback E.π t := P.1
 
-private theorem subgroupLocusAux_val_snd {T T' : Scheme.{u}} (E : EllipticCurve S)
+theorem subgroupLocusAux_val_snd {T T' : Scheme.{u}} (E : EllipticCurve S)
     (t : T ⟶ S) {g : T' ⟶ T} (P : (E.baseChange t).Point g) :
     subgroupLocusAux_val E t P ≫ pullback.snd E.π t = g := P.2
 
@@ -1580,7 +1580,7 @@ private theorem exactOrderLocusAux_ker_eq_of_comp {X Y₁ Y₂ : Scheme.{u}} (f�
 `z, w` over `T'` with matched first legs, the pulled-back kernels agree. This is the
 value-level engine identifying the base-changed universal order/level divisors with
 their `t`-level counterparts (KM 1.6.2–1.6.5 bookkeeping). -/
-private theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π : C ⟶ S'}
+theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (W : B ⟶ pullback π b) (V : T ⟶ pullback π t)
     (hWc : IsClosedImmersion W) (hVc : IsClosedImmersion V)
     (hWsnd : W ≫ pullback.snd π b = 𝟙 B) (hVsnd : V ≫ pullback.snd π t = 𝟙 T)
@@ -1627,7 +1627,7 @@ private theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π :
     (pullback.lift_fst _ _ _) (pullback.lift_fst _ _ _)
 
 /-- Sections of the base-changed curve are closed immersions (raw spelling). -/
-private theorem exactOrderLocusAux_val_isClosedImmersion {T : Scheme.{u}}
+theorem exactOrderLocusAux_val_isClosedImmersion {T : Scheme.{u}}
     (E : EllipticCurve S) (t : T ⟶ S) (R : (E.baseChange t).Point (𝟙 T)) :
     IsClosedImmersion (subgroupLocusAux_val E t R) := by
   haveI : IsSeparated (pullback.snd E.π t) :=
@@ -1668,7 +1668,7 @@ private theorem exactOrderLocusAux_val_smul_fst {T T' : Scheme.{u}} (E : Ellipti
         (Category.assoc _ _ _).symm
 
 /-- The first leg of a scalar multiple of `asSection`: `(m • asSection P) ≫ fst = P ≫ [m]`. -/
-private theorem exactOrderLocusAux_val_smul_asSection_fst {T : Scheme.{u}}
+theorem exactOrderLocusAux_val_smul_asSection_fst {T : Scheme.{u}}
     (E : EllipticCurve S) (t : T ⟶ S) (m : ℤ) (P : E.Point t) :
     subgroupLocusAux_val E t (m • EllipticCurve.Point.asSection E t P) ≫
       pullback.fst E.π t = P.1 ≫ E.mulByHom m := by
@@ -2347,7 +2347,7 @@ private noncomputable def fullLevelLocusAux_u₂ (E : EllipticCurve S) (N : ℕ)
     exact pullback.condition.symm⟩
 
 /-- The generic `sectionsDivisor`-ideal unfolding. -/
-private theorem fullLevelLocusAux_sectionsDivisor_ideal {Y : Scheme.{u}}
+theorem fullLevelLocusAux_sectionsDivisor_ideal {Y : Scheme.{u}}
     (F : EllipticCurve Y) {n : ℕ} (P : Fin n → F.Point (𝟙 Y)) :
     (RelEffCartierDiv.sectionsDivisor F.π P).ideal =
       ∏ i : Fin n, Scheme.Hom.ker (P i).1 := by
@@ -2428,18 +2428,18 @@ private theorem fullLevelLocusAux_match {T : Scheme.{u}} (E : EllipticCurve S) (
     hcompP hcompQ).symm
 
 /-- The comparison morphism `E ×_S T ⟶ E ×_S B` over a factorization `c ≫ b = t`. -/
-private noncomputable def fullLevelLocusAux_theta {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+noncomputable def fullLevelLocusAux_theta {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     pullback π t ⟶ pullback π b :=
   pullback.lift (pullback.fst π t) (pullback.snd π t ≫ c)
     (by rw [pullback.condition, ← hct, Category.assoc])
 
-private theorem fullLevelLocusAux_theta_fst {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_theta_fst {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     fullLevelLocusAux_theta hct ≫ pullback.fst π b = pullback.fst π t :=
   pullback.lift_fst _ _ _
 
-private theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     fullLevelLocusAux_theta hct ≫ pullback.snd π b = pullback.snd π t ≫ c :=
   pullback.lift_snd _ _ _
@@ -2447,7 +2447,7 @@ private theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ 
 /-- **The comap-transport along the pasting comparison**: equality of preimage ideals
 along the base-change projection of `C ×_{S'} B` over `c` is equality of preimages
 along `θ` on `C ×_{S'} T`. -/
-private theorem fullLevelLocusAux_comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t)
     (A B' : (pullback π b).IdealSheafData) :
     A.comap (pullback.fst (pullback.snd π b) c) =
