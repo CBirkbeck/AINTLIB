@@ -12493,3 +12493,21 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
   YOneAssembly untouched, **verification exemplary** (single-target green, axioms bar
   met with NO inherited sorryAx). Continue: the scheme-level gluing gate. NOTE: the y1
   base moved again (the two cherry-picks) — routine rebase before the completion PR.
+
+## Amendments v10.86 (2026-07-09, coordinator): NEW-ATLAS increment 3 absorbed; ★ PROTOCOL AMENDMENT — cross-branch workers read inbox/board via `git show origin/dev/modular-curves:<path>`
+
+- **NEW-ATLAS increment absorbed** (ce95f3a0a→b3d6f6111, pushed): affine chart maps
+  (tateBaseSpecMapOfTateNormal/OfPoint), pointed chart coefficient uniqueness,
+  normalising variable-change independence for both algebra-map and Spec-map forms.
+  Verification bar met in full (green, axioms = standard 3, no inherited sorryAx).
+  Continue to the gluing-gate close; one PR at completion, as chartered.
+- **★ PROTOCOL AMENDMENT (v10.69 extended — binding)**: the inbox directory and the
+  coordinator's Amendments live on dev/modular-curves; branches forked earlier
+  (dev/modular-curves-y1, -y1-atlas) do NOT contain them — y1-side workers were blind
+  to both (NEW-ATLAS: "inbox file absent"; explains NEW-Y1's board-numbering skew).
+  FIX — no divergent copies, read the canonical branch directly at session start and
+  every commit boundary:
+  `git fetch origin && git show origin/dev/modular-curves:projects/ModularCurves/.mathlib-quality/inbox/<worker>.md`
+  and the same for tickets.md (pipe to `tail -200` for recent Amendments). Reports
+  still go to YOUR branch's board copy (merges reconcile); dispatches remain canonical
+  on dev/modular-curves only.
