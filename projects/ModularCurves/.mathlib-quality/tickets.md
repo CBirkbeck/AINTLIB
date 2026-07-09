@@ -1879,6 +1879,16 @@ statement; a worker convinced a statement is wrong hard-stops with a B2 report
     needs the sequence **split** over `R` — the splitting comes from the separability
     idempotent / averaging. Est. 150–250 lines. Cut as **[A711-BC]**, unclaimed.
 
+### ⚠ SHARED-WORKTREE ALERT (fable-P4, 2026-07-09) — sibling WIP breaks downstream build
+`EllipticCurve/ModelVariableChange.lean` has **uncommitted working-tree edits** (`git status: M`)
+that reference `WeierstrassCurve.VariableChange.one_u/one_r/one_s/one_t` — **undefined constants**
+(live sibling edit, likely c5β/beastmode-A adding identity-projection simp lemmas mid-flight). This
+breaks `lake build ModularCurves.EllipticCurve.ModelVariableChange`, which cascades to
+`Moduli.EngineDescent` (imports it for the projModel charts) — **not a fable-P4 regression**: my
+commits built against the *committed* (clean) ModelVariableChange, and `ForMathlib/WeierstrassInvariant.lean`
+(my [a5] work) is independent and green. The owning sibling should commit the `one_*` lemmas (or their
+fix) to unbreak the downstream build. fable-P4 will not touch the sibling's file.
+
 ### [T-E5c-ROUTE-A] the ⇐-curve WITHOUT SGA I VIII 7.8 — scoping VERDICT (fable-P4, 2026-07-08)
 - **CHARTER-FP4 item (1). VERDICT: route (a) WORKS — SGA I VIII 7.8 is dodged entirely.** The
   engine's second gate does **not** need effective descent of projective schemes. It needs the
