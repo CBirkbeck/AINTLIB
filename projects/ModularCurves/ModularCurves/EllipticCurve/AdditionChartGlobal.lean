@@ -798,6 +798,94 @@ lemma specMap_psiFst_addOnYPieceMor_cross [IsDomain (biChartRing W i j)]
         (psiSnd_algebraMap_mul_invSelf W i j i' j' k k')
         (equation_psiSnd_lawTwoTriple W i j i' j' hΔ k k')).symm)
 
+/-- The `k`-th piece immersion `pieceAwayι` is an open immersion (hence mono): a composite of the
+`specBasicOpenIsoAway` iso, the basic-open immersion, the chart-product iso, and `pieceι`. -/
+instance instIsOpenImmersionPieceAwayι (k : Fin 3) : IsOpenImmersion (pieceAwayι W i j k) := by
+  rw [pieceAwayι]; infer_instance
+
+omit [IsJacobsonRing R] in
+/-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i,j) side)** `w.hom` followed by the `(i,j)` L1 prefactor `σ`
+(the `homOfLE / isoImage.inv / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in
+`Spec(Away(lawTwoTriple ij k))`) equals `Spec(ψ_ij)`. Cancelled against the `pieceAwayι` mono: both
+composed with `pieceAwayι` give `w.hom ≫ overlapPiece.ι` (via the σ-immersion identity
+`isoImage_specBasicOpen_pieceAwayι` and `Scheme.homOfLE_ι`), which is `Spec(ψ_ij) ≫ pieceAwayι` by L3.
+This turns L1's image-level prefactor into `Spec(ψ_ij)` once precomposed with `w`. -/
+@[reassoc]
+lemma w_homOfLE_sigma_psiFst (k k' : Fin 3) :
+    (overlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : overlapPiece W i j i' j' k k' ≤
+          pieceι W i j ''ᵁ blOpenYPieceFamily W i j k) ≫
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).inv =
+    Spec.map (CommRingCat.ofHom (psiFst W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).inv ≫
+      pieceAwayι W i j k = (pieceι W i j ''ᵁ blOpenYPieceFamily W i j k).ι := by
+    rw [← isoImage_specBasicOpen_pieceAwayι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceAwayι W i j k)]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact overlapPieceIso_hom_ι_eq_specMap_psiFst W i j i' j' k k'
+
+omit [IsJacobsonRing R] in
+/-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i',j') side)** The psiSnd mirror of `w_homOfLE_sigma_psiFst`. -/
+@[reassoc]
+lemma w_homOfLE_sigma_psiSnd (k k' : Fin 3) :
+    (overlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right : overlapPiece W i j i' j' k k' ≤
+          pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k') ≫
+      (Scheme.Hom.isoImage (pieceι W i' j') (blOpenYPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')).inv =
+    Spec.map (CommRingCat.ofHom (psiSnd W i j i' j' k k').toRingHom) := by
+  have h6 : (Scheme.Hom.isoImage (pieceι W i' j') (blOpenYPieceFamily W i' j' k')).inv ≫
+      morphismRestrict (chartPieceIso W i' j').hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i' j')) (lawTwoTriple W i' j' k')).inv ≫
+      pieceAwayι W i' j' k' = (pieceι W i' j' ''ᵁ blOpenYPieceFamily W i' j' k').ι := by
+    rw [← isoImage_specBasicOpen_pieceAwayι]; simp only [Category.assoc]
+  rw [← cancel_mono (pieceAwayι W i' j' k')]; simp only [Category.assoc, h6]
+  rw [Scheme.homOfLE_ι]; exact overlapPieceIso_hom_ι_eq_specMap_psiSnd W i j i' j' k k'
+
+/-- **([C4-HF-ASSEMBLY] L5, per-overlap chart agreement)** On the overlap piece `A_k ⊓ B_k'`, the
+`(i,j)` and `(i',j')` image-level law-2 morphisms agree. Proved by precomposing with the affine
+identification `w` (an iso, cancelled via `cancel_epi`): L1 turns each side into `σ ≫ addOnYPieceMor`,
+the σ-cancels turn `w.hom ≫ σ` into `Spec(ψ)`, and L4 identifies the two `Spec(ψ) ≫ addOnYPieceMor`.
+Fully term-mode (`congrArg`/`.trans`) so no `rw` motive ever touches the concrete tower `S`. -/
+lemma overlapPiece_addOnYOnImage_agree [IsDomain (biChartRing W i j)]
+    [IsDomain (biChartRing W i' j')] (hΔ : IsUnit W.Δ) (k k' : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))) ≫
+        addOnYOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))) ≫
+        addOnYOnImage W hΔ i' j' := by
+  have eL : (overlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left.trans ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k))) ≫
+        addOnYOnImage W hΔ i j =
+      Spec.map (CommRingCat.ofHom (psiFst W i j i' j' k k').toRingHom) ≫ addOnYPieceMor W i j k hΔ :=
+    (congrArg ((overlapPieceIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnYOnImage_eq W i j hΔ k (overlapPiece W i j i' j' k k') inf_le_left)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnYPieceMor W i j k hΔ) (w_homOfLE_sigma_psiFst W i j i' j' k k')))
+  have eR : (overlapPieceIso W i j i' j' k k').hom ≫
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_right.trans ((pieceι W i' j').image_mono (le_iSup (blOpenYPieceFamily W i' j') k'))) ≫
+        addOnYOnImage W hΔ i' j' =
+      Spec.map (CommRingCat.ofHom (psiSnd W i j i' j' k k').toRingHom) ≫ addOnYPieceMor W i' j' k' hΔ :=
+    (congrArg ((overlapPieceIso W i j i' j' k k').hom ≫ ·)
+        (homOfLE_addOnYOnImage_eq W i' j' hΔ k' (overlapPiece W i j i' j' k k') inf_le_right)).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ addOnYPieceMor W i' j' k' hΔ) (w_homOfLE_sigma_psiSnd W i j i' j' k k')))
+  exact (cancel_epi (overlapPieceIso W i j i' j' k k').hom).mp
+    (eL.trans ((specMap_psiFst_addOnYPieceMor_cross W i j i' j' hΔ k k').trans eR.symm))
+
 end Overlap
 
 end WeierstrassCurve.Projective
