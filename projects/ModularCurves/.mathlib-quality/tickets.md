@@ -10828,3 +10828,26 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 atlas file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green;
 line-length scan clean. `#print axioms` for the five key new declarations lists only
 `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.104-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] marked-chart comparison ENGINE (base) LANDED
+
+Added the B2-iii/iv comparison engine in `YOneAtlasClassify.lean`:
+`pointedIsoAwayHom` (the `Z`-chart ring morphism of a pointed model iso, `pointedIsoΓ`
+conjugated by `basicOpenIsoAway`), `Spec_map_pointedIsoAwayHom_awayι` (its chart square —
+via `SpecMap_appLE_fromSpec` + `appLE_zChart_eq_pointedIsoΓ` + `Proj_fromSpec_awayToSection_awayι`),
+`zChartEval_pointedIso` (chart evaluation transports along `pointedIsoCoordEquiv`; proof by the
+`zChartHom_unique` mono trick), and the ENGINE
+`tateRingOverAlgLiftOfPoint_eq_of_pointedIso` / `tateBaseSpecMapOfPoint_eq_of_pointedIso`:
+two elliptic marked charts linked by a pointed iso carrying marking to marking induce the SAME
+Tate-atlas algebra/`Spec` map. Proof: T-W7 (`pointedIso_exists_variableChange`) gives the
+variable change; `transport_general` + `bridge_coordX/Y` give the coordinate transform; the
+composite with the source's T-E1 normalisation is a normalisation of the target with the right
+`(r,t)` (the `VariableChange` mul formulas match the bridge exactly), so T-E1 **uniqueness**
+(`tateNormalVariableChange_unique`) forces equal Tate normal forms; `tateRingOver_algHom_ext`
+closes. This is Loeffler's "local uniqueness" clause (Prop 3.3.4, p. 14) at scheme level.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs);
+atlas file has no `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green;
+line-length scan clean; no linter warnings in the file. `#print axioms` for the four key new
+declarations lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` —
+T-W7 and T-E1 are proven inputs).
