@@ -151,4 +151,51 @@ theorem mem_coinvariants_coactionBaseChange_iff [Module.Flat (coinvariants ρ) C
         = (c' ⊗ₜ[coinvariants ρ] (1 : B)) ⊗ₜ[R] (1 : A) from
       Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
 
+section IsCoactionTransport
+
+/-- Auxiliary contraction: the counit leg computed through the associator. -/
+private theorem rid_map_counit_baseChangeAssoc_symm (c' : C') (z : B ⊗[R] A) :
+    (Algebra.TensorProduct.rid R R (C' ⊗[coinvariants ρ] B))
+      ((Algebra.TensorProduct.map (AlgHom.id R (C' ⊗[coinvariants ρ] B))
+        (Bialgebra.counitAlgHom R A))
+        ((baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] z)))
+      = c' ⊗ₜ[coinvariants ρ]
+          ((Algebra.TensorProduct.rid R R B)
+            ((Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.counitAlgHom R A)) z)) := by
+  induction z with
+  | zero => simp [TensorProduct.tmul_zero]
+  | tmul b a =>
+    rw [show (baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] (b ⊗ₜ[R] a))
+        = (c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] a from
+      Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
+    rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul,
+      Algebra.TensorProduct.rid_tmul, Algebra.TensorProduct.rid_tmul]
+    rw [AlgHom.coe_id, id_eq, AlgHom.coe_id, id_eq, TensorProduct.tmul_smul]
+  | add z w ihz ihw =>
+    rw [TensorProduct.tmul_add, map_add, map_add, map_add, ihz, ihw, map_add, map_add,
+      TensorProduct.tmul_add]
+
+/-- The counit law transports to the base change. -/
+theorem coactionBaseChange_counit (hρ : IsCoaction ρ) :
+    (Algebra.TensorProduct.rid R R (C' ⊗[coinvariants ρ] B)).toAlgHom.comp
+      ((Algebra.TensorProduct.map (AlgHom.id R (C' ⊗[coinvariants ρ] B))
+        (Bialgebra.counitAlgHom R A)).comp (coactionBaseChange R A ρ C'))
+      = AlgHom.id R (C' ⊗[coinvariants ρ] B) := by
+  refine AlgHom.ext fun x => ?_
+  induction x with
+  | zero => simp
+  | tmul c' b =>
+    show (Algebra.TensorProduct.rid R R (C' ⊗[coinvariants ρ] B))
+        ((Algebra.TensorProduct.map (AlgHom.id R (C' ⊗[coinvariants ρ] B))
+          (Bialgebra.counitAlgHom R A))
+          ((baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] ρ b)))
+      = c' ⊗ₜ[coinvariants ρ] b
+    rw [rid_map_counit_baseChangeAssoc_symm, hρ.counit_apply]
+  | add x y ihx ihy =>
+    simp only [AlgHom.comp_apply] at ihx ihy ⊢
+    rw [map_add, map_add, map_add, ihx, ihy]
+    simp
+
+end IsCoactionTransport
+
 end ModularCurves
