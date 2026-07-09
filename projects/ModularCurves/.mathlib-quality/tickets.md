@@ -12443,3 +12443,12 @@ cross-chart-cross-law half (transRing + minor) → four-chart family assembly �
   the T-E4 primitive both discharge from it) + the NEW-ATLAS subtree. c5β and NEW-ATLAS
   are the two live-work lanes; NEW-Y1 fires on the owner's call; A/D2/everyone-else
   parked.
+
+### v10.83b (2026-07-09, coordinator): ERRATUM + FIX — dev/modular-curves-y1 had NEVER been pushed
+- The v10.83 ops line ("y1 upstream fixed") was PREMATURE — the set-upstream failed:
+  `origin/dev/modular-curves-y1` did not exist. ALL Y1 work (vi, D1, vi-FACTOR, the
+  atlas infra) lived only on this machine — v10.60-class exposure with no origin copy.
+- **FIXED NOW**: the branch is PUSHED with `-u` (upstream set; verified). Plain pull is
+  safe in aintlib-mc-b3; the NEW-ATLAS setup command works as written (the origin ref
+  now exists). Standing rule reinforced: a branch's FIRST milestone commit gets pushed
+  `-u` immediately — worktree branches are not backups until origin has them.
