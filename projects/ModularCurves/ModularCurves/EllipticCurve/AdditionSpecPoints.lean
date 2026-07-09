@@ -596,6 +596,31 @@ lemma bcChartAwayMap_isLocalizationElem (f : U →+* R) (W₀ : WeierstrassCurve
   rw [pow_one, pow_one]
   rfl
 
+
+/-- [C6-e4, scheme level] A W-side chart point pushed through the base change is the atlas-side
+chart point of the composed ring map (`Spec.map_eqToHom` collapses the transport). -/
+theorem specMap_chartι_comp_baseChange (f : U →+* R) (W₀ : WeierstrassCurve U) (i : Fin 3)
+    {K : Type u} [CommRing K] (φ : chartAway (W₀.map f) i →+* K)
+    (e : CommRingCat.of (HomogeneousLocalization.Away
+        (quotientGrading (projIdeal (W₀.map f)))
+        (baseChangeGradedHom f W₀
+          ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)))) =
+      CommRingCat.of (chartAway (W₀.map f) i)) :
+    (Spec.map (CommRingCat.ofHom φ) ≫ chartι (W₀.map f) i) ≫ projModelBaseChange f W₀ =
+      Spec.map (CommRingCat.ofHom ((φ.comp
+          (CommRingCat.Hom.hom (eqToHom e))).comp (bcChartAwayMap f W₀ i))) ≫
+        chartι W₀ i := by
+  rw [Category.assoc, chartι_map_comp_projModelBaseChange f W₀ i]
+  rw [show (eqToHom (by rw [baseChangeGradedHom_chartGen f W₀ i]) :
+      Spec (CommRingCat.of (chartAway (W₀.map f) i)) ⟶
+        Spec (CommRingCat.of (HomogeneousLocalization.Away
+          (quotientGrading (projIdeal (W₀.map f)))
+          (baseChangeGradedHom f W₀
+            ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X i)))))) =
+    Spec.map (eqToHom e) from by rw [Spec.map_eqToHom]]
+  simp only [← Category.assoc, ← Spec.map_comp]
+  rw [← CommRingCat.ofHom_hom (eqToHom e), ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+
 end ChartNaturality
 
 section AtlasPush
