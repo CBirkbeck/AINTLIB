@@ -52,4 +52,30 @@ lemma regularityOpen_ne_top_of_forall_mem (t : Fin 3 → A) (p : PrimeSpectrum A
     Ideal.span_le.mpr (Set.range_subset_iff.mpr hp)
   exact p.isPrime.ne_top ((Ideal.eq_top_iff_one _).mpr (hle htop))
 
+/-- **(c3, the cross-law overlap is same-index)** For two triples `t`, `s` with vanishing `2×2` minors
+(`s m * t n = s n * t m`), the overlap of their regularity opens is covered by the **same-index** loci
+`D(t k · s k)`. The `⊇` half is `basicOpen_mul`; the `⊆` half is the minor argument: a prime `p` avoiding
+`t k` and `s l` also avoids `s k` (since `s k · t l = s l · t k ∉ p`), hence avoids `t k · s k`. This is
+why `addOn_agree` reduces to the same-index piece agreement (`isUnit_of_minor` at the point level). -/
+lemma regularityOpen_inf_eq_iSup_basicOpen (t s : Fin 3 → A)
+    (hmin : ∀ m n, s m * t n = s n * t m) :
+    regularityOpen t ⊓ regularityOpen s =
+      ⨆ k, PrimeSpectrum.basicOpen (t k * s k) := by
+  apply le_antisymm
+  · rintro p ⟨hpt, hps⟩
+    obtain ⟨k, hk⟩ := TopologicalSpace.Opens.mem_iSup.mp hpt
+    obtain ⟨l, hl⟩ := TopologicalSpace.Opens.mem_iSup.mp hps
+    rw [PrimeSpectrum.mem_basicOpen] at hk hl
+    rw [TopologicalSpace.Opens.mem_iSup]
+    refine ⟨k, ?_⟩
+    rw [PrimeSpectrum.mem_basicOpen]
+    have hlk : s l * t k ∈ p.asIdeal.primeCompl := mul_mem hl hk
+    rw [← hmin k l] at hlk
+    have hsk : s k ∈ p.asIdeal.primeCompl := fun h => hlk (Ideal.mul_mem_right _ _ h)
+    exact mul_mem hk hsk
+  · refine iSup_le fun k => ?_
+    rw [PrimeSpectrum.basicOpen_mul]
+    exact le_inf (le_trans inf_le_left (basicOpen_le_regularityOpen t k))
+      (le_trans inf_le_right (basicOpen_le_regularityOpen s k))
+
 end WeierstrassCurve.Projective
