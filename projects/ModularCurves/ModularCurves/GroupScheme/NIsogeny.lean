@@ -311,7 +311,20 @@ theorem isGammaZeroFppf_of_generatorSpace_finiteLocallyFree (N : ℕ) [NeZero N]
     (hlfp : LocallyOfFinitePresentation (E.generatorSpaceπ N D hD))
     (hrank : ∀ s : S, (E.generatorSpaceπ N D hD).finrank s = N.totient) :
     E.IsGammaZeroFppf N D := by
-  sorry
+  refine ⟨hD, hdeg, E.generatorSpace N D hD, E.generatorSpaceπ N D hD, ?_, hflat, hlfp, ?_⟩
+  · -- `D^× ⟶ S` is surjective: rank `φ(N) ≥ 1` everywhere.
+    have hsurj : Surjective (E.generatorSpaceπ N D hD) := by
+      rw [← Scheme.Hom.one_le_finrank_iff_surjective]
+      intro s
+      rw [hrank s]
+      exact Nat.totient_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne N))
+    exact hsurj.surj
+  · -- The tautological point of `D` over `D^×` is a generator (`generatorSpace_spec` at the
+    -- identity factorisation of `generatorSpaceι`).
+    have hgen := E.generatorSpace_spec N D hD (E.generatorSpaceπ N D hD)
+      ⟨E.generatorSpaceι N D hD ≫ D.ideal.subschemeι, Category.assoc _ _ _⟩
+      (E.generatorSpaceι N D hD) rfl
+    exact ⟨_, hgen.mp ⟨𝟙 _, Category.id_comp _⟩⟩
 
 /-- **(KM 6.1.1(1), "only if" — the hard direction; GATE [KM-62-63-HOMOG])** If `D` is
 cyclic then `D^×` is finite locally free over `S` of rank `φ(N)`. KM's proof (print
