@@ -1137,6 +1137,13 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
   -- (D) the ring-side module is the section-side module
   have eM : (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
       ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) := by
+    -- the restriction/topIso square
+    have hsq : (f ∣_ U.1).appTop ≫ (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom
+        = (Scheme.Opens.topIso U.1).hom ≫ f.app U.1 := by
+      rw [← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop,
+        Scheme.Hom.resLE_app_top]
+      simp only [Scheme.Hom.app_eq_appLE, Category.assoc]
+      rw [Iso.inv_hom_id, Category.comp_id]
     sorry
   constructor
   · rintro ⟨h1, h2⟩
