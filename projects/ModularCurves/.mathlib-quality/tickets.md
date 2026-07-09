@@ -10908,3 +10908,32 @@ vendoring.*
   `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
 - **This run:** helper A (topological blocker) AND helper B (bridge) — the two hardest identified
   obstructions of `hf`. Helper C is the assembly that consumes them.
+
+### v10.60 (2026-07-09, fable-FP): ⚠ RESET INCIDENT + RECOVERY; [NISOG-GRASS] waves 1–2.5 re-landed + [GR-B2n] partial
+
+- **⚠ EIGHTH SWEEP-CLASS INCIDENT (new mode: reset-wipe)**: reflog shows
+  `reset: moving to origin/dev/modular-curves` at 2026-07-08T23:35:46+0100 — 2.5 min
+  after fable-FP's local commit c67e63596 — by a sibling session syncing to origin. My
+  two unpushed commits (9918115e0 wave-2 proofs, c67e63596 wave-2.5) were dropped from
+  the branch tip; board sections survived via coordinator absorb, but
+  `GrassmannianChart.lean` regressed to the wave-2 skeleton at HEAD. **RECOVERED** from
+  the orphaned commit objects (`git show c67e63596:… >`), rebuilt green, re-landed in
+  this commit. RULE PROPOSAL for the coordinator: sibling sync must be
+  `pull --rebase` (never `reset --hard origin`), and/or milestone commits get pushed
+  promptly — local-only commits on the shared branch are one sibling-sync away from
+  silent deletion. fable-FP now pushes after each milestone commit.
+- **[GR-B2n] status (wave 3 opening)**: **PROVEN + axiom-clean**: `normMap` (the
+  normalized functor map, tensor-free seam), `isChartAt_normMap` (charts preserved),
+  `chartMatrix` (chart coordinate, explicit-composite form). **OPEN**: [GR-B2n-4]
+  `chartMatrix_normMap` (entrywise-`f` naturality) — blocked on a GENUINE ELABORATION
+  PATHOLOGY, forensics for the next fresh-context attack:
+  (i) routing via `retractionEquivMatrix`/`chartToRetraction` subtype: whnf explosion
+  (2M insufficient, per the cut-off proof-repair agent); (ii) `ofBijective _` placeholder
+  in `chartMatrix`: whnf 200k — fixed by the explicit composite; (iii) ANY statement
+  mentioning `chartMatrix … (normMap n f N) …` or even `N' = normMap n f N`: whnf/isDefEq
+  200k, `[local irreducible] normMap` does NOT fix it (shifts whnf→isDefEq). Next
+  attacks: quarantined minimal repro; `structure`-bundle the charted element; or state
+  naturality at the retraction level with the kernel-uniqueness argument and derive the
+  matrix form pointwise. Probes preserved in the session scratchpad.
+- The agent leftover carrying a forbidden `set_option maxHeartbeats 2000000` was
+  REVERTED (rule 3); its diagnosis (whnf explosion) confirmed and re-derived cleanly.

@@ -96,6 +96,27 @@ interface is proven; v10.24 opaque-interface decision recorded)**:
   IsChartAt holds at p}` is open — surjectivity locus of a map onto a finite projective
   module (cokernel-vanishing openness, Nakayama).
 
+**Wave 2.5 — presentation normalization (pinned at the wave-3 boundary, 2026-07-08T22:30Z;
+kills the `A ⊗[R] (Fin n → R)` vs `(Fin n → A)` friction for the entire glue phase)**:
+- **[GR-T1]** `Grassmannian.congr (e : M ≃ₗ[R] M') : G(k, M; R) ≃ G(k, M'; R)` — transport
+  of Grassmannian elements along a module equivalence (submodule `Submodule.map`, quotient
+  instances via the induced quotient equivalence), with `IsChartAt`-compatibility
+  (`isChartAt_congr : IsChartAt x N ↔ IsChartAt (e ∘ x) (congr e N)`). Upstream-shaped
+  (mathlib's Grassmannian file has no congr).
+- **[GR-T2]** the pi-normalization at `e := piScalarRight`: chart-compatible passage
+  `G(k, A ⊗[R] (Fin n → R); A) ≃ G(k, (Fin n → A); A)` matching the wave-1 matrix leaf's
+  presentation; the covering theorem [GR-C] transports along it.
+
+**Wave-3 packaging decision (2026-07-08T22:35Z, binding for the glue phase)**: all wave-3
+work happens in the NORMALIZED presentation `G(k, (Fin n → A); A)` — the functor map is
+`normMap (f : A →ₐ[R] B) := congr (piScalarRight …) ∘ map f ∘ congr (piScalarRight …).symm`
+(equivalently: transport mathlib's `Grassmannian.map` once along [GR-T2]); charts are the
+coordinate tuples `fun i => Pi.single (ι i) 1`, matrices are
+`chartMatrix : {j // j ∉ Set.range ι} → Fin k → A` via wave-1's
+`chartEquivRetraction ≫ retractionEquivMatrix`. Tensors never appear downstream of this
+seam. Leaves: **[GR-B2n]** = `normMap` + `isChartAt_normMap` + `chartMatrix` +
+`chartMatrix_normMap` (naturality: entrywise `f`).
+
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
   the relevant minor determinant; cocycle identity) — the det/adjugate algebra.
