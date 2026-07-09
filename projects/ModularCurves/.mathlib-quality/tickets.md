@@ -9422,6 +9422,35 @@ sweeps. New DS rows (DS-GH1, DS-NISOG-1/2) added to plan.md's register in this c
   Y1's T-E1 leg need DS-END0 pins or does atlas-internal rigidity suffice?), then [Y1-D2]/[Y1-D3]
   (import A's standalone [T-E4-family] lemma; don't wait on held-file wiring). ⚠ upstream still unset
   (v10.72 hazard); do NOT `git pull` here until coordinator fixes tracking.
+- **★ [Y1-D2] DONE (NEW-Y1, v10.85, `8e2ab96ae` pushed)**: `isNaiveGammaOne_pullSection_iff`
+  PROVEN. `IsNaiveGammaOne` transports across the group-iso `transportSection` clause-by-clause
+  (both curves share base `X.base`): **killing** via `transportSection` injective + additive-hom
+  (`map_zsmul`/`hΦ0`) + `hdict` (`transportSection (pullSection f Q) = asSection (pull f.baseHom Q)`,
+  from `transportSection_pullSection` + `asSection_coe`); **fibrewise** via a new `~22`-LOC bridge
+  `pull_transportSection_eq_zero_iff` (`99aca9520`) — pure **iso-cancellation** on `curveIsoPullback`
+  (`(transportSection w).1 = w.1 ≫ iso.hom`, `(baseChange).zero = zero ≫ iso.hom`, `iso.hom` mono),
+  the "barehanded" route of A's wiring note, then `pull_zsmul` + `hdict`. `#print axioms` =
+  `[propext, sorryAx, Classical.choice, Quot.sound]`; the lone `sorryAx` is the inherited route-a
+  primitive (via A's `transportSection_add_of_finitePresentation` → `isMonHom_…_of_finitePresentation`,
+  sorried until T-W7a) — **the designed "inherits the one primitive" shape**, no fresh sorry.
+  Key elaboration fix: state the `.1`-level bridges as `have`s where `iso.hom`'s codomain is
+  *inferred* as `(baseChange).E` (matching `zero_curveIsoPullback`), dodging the `pullback … =
+  (baseChange).E` syntactic mismatch. Reused my own D1 `zsmul_pull_baseChange_asSection_iff`.
+- **[Y1-D3] SCOPED + DE-RISKED, NOT STARTED (NEW-Y1, v10.85 — credits-tight boundary)**:
+  `yOne_representableBy` = `Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N))`.
+  All deps on-branch (`tatePoint_classifies` [atlas-sorried, inherited], D1 `factors_yOne_iff`
+  [proven], D2 [proven], `EllHom.pullSection_comp`, `gammaOneNaiveProblem` [map-sorried, inherited]).
+  **`homEquiv : (Y ⟶ yOneEllObj) ≃ {P : Y.curve.Section // IsNaiveGammaOne N P}` 3-step chain:**
+  (1) `(Y ⟶ yOneEllObj) ≃ {g : Y ⟶ tateEllObj // g.baseHom factors through yOne}` — **the CRUX**:
+  rebuild the full 5-field `EllHom` (baseHom/base_w/top/isPullback/zero_w) into the locally-closed
+  `yOneEllObj` (curve `= tateUniversal.baseChange yOneBase`) from a `tateEllObj` classifying square
+  + a `yOneBase`-factorisation, via base-change transitivity of the Cartesian square (`yOneBase` is
+  mono ⟹ factor unique). (2) via `tatePoint_classifies` (g ↔ P, N≥4>3 ⟹ `NowhereGeomOrderLEThree`)
+  + D1 (base-factorisation ⟺ `IsNaiveGammaOne`, through D2's `asSection` form). (3) drop the
+  redundant `NowhereGeomOrderLEThree` conjunct (implied by `IsNaiveGammaOne`, N≥4). Naturality
+  (`homEquiv_comp`) via `EllHom.pullSection_comp`. ~150 LOC; crux (1) is real categorical plumbing —
+  a fresh focused session. A skeleton would need a NON-inherited sorry at (1) ⟹ violates the
+  done-bar, so NOT committed half-done. **Parking here** per "stop at the D2/D3 boundary, credits tight".
 - **[Y1-D2] SYNCED + SCOPED (NEW-Y1, v10.84)**: coordinator's cherry-picks (`741832aa4` — A's
   `Moduli/PullSectionCanonicity.lean` transport + `EllipticCurve/RigiditySpreadingOut.lean`) are in
   my tree (HEAD `741832aa4`, in sync with origin); D1/vi work intact, tree clean, 16 skeleton sorries.
