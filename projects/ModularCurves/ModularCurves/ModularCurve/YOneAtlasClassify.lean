@@ -155,6 +155,34 @@ theorem tateBaseSpecMap_ext (φ ψ : tateRingOver R →ₐ[R] A)
     tateBaseSpecMap R φ = tateBaseSpecMap R ψ := by
   rw [tateRingOver_algHom_ext R φ ψ h0 h1]
 
+variable (S : Scheme.{u}) [Algebra R Γ(S, ⊤)]
+
+/-- The global classifying map to the Tate atlas attached to global Tate coefficients
+`α, β ∈ Γ(S, O_S)`.  This is the `S.toSpecΓ` form of the map produced after the local
+coefficients glue in Loeffler's proof. -/
+noncomputable def tateBaseMapOfGlobalCoeffs (α β : Γ(S, ⊤))
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    S ⟶ tateBase R :=
+  S.toSpecΓ ≫ tateBaseSpecMapOfCoeffs R α β hΔ
+
+/-- Global maps to the Tate atlas built from global coefficients are equal once the two
+global Tate coefficients are equal.  This packages the last affine uniqueness check after
+the sheaf-gluing step for `α` and `β`. -/
+theorem tateBaseMapOfGlobalCoeffs_ext (α β α' β' : Γ(S, ⊤))
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+    (hΔ' : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
+      (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+    (hα : α = α') (hβ : β = β') :
+    tateBaseMapOfGlobalCoeffs R S α β hΔ =
+      tateBaseMapOfGlobalCoeffs R S α' β' hΔ' := by
+  unfold tateBaseMapOfGlobalCoeffs tateBaseSpecMapOfCoeffs
+  rw [tateBaseSpecMap_ext R (tateRingOverAlgLift R α β hΔ)
+    (tateRingOverAlgLift R α' β' hΔ')]
+  · simp [tateRingOverAlgLift, hα]
+  · simp [tateRingOverAlgLift, hβ]
+
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)

@@ -10580,3 +10580,15 @@ while staying in the dedicated atlas file.
 Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
 no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for the new declarations
 lists only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
+
+## Amendments v10.87-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] global coefficient map handle LANDED
+
+Added `tateBaseMapOfGlobalCoeffs` and `tateBaseMapOfGlobalCoeffs_ext` in the dedicated atlas file.
+These package the post-sheaf-gluing object from B2-iv: once the local Tate coefficients glue to
+global `α, β ∈ Γ(S, O_S)`, the induced global map is
+`S.toSpecΓ ≫ Spec.map (R[A,B,Δ⁻¹] → Γ(S, O_S))`, and equality of such maps is reduced to equality
+of the two global coefficients.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both declarations lists
+only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
