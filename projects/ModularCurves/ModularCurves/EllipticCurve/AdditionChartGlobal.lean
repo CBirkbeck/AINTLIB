@@ -23,9 +23,15 @@ former, and a `▸` transport across that equality would be gratuitous.
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits HomogeneousLocalization
 
+attribute [local instance] MvPolynomial.gradedAlgebra
+
 namespace WeierstrassCurve.Projective
 
 variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
+
+/-- `D(1) = ⊤`. -/
+lemma specBasicOpen_one (A : CommRingCat) : specBasicOpen A 1 = ⊤ :=
+  PrimeSpectrum.basicOpen_one
 
 section Opens
 
@@ -102,6 +108,34 @@ noncomputable def addOnZFamily : ∀ p : Fin 2 × Fin 2, (blOpenZFamily W p).toS
   | (0, 1) => addOnZOnImage W hΔ 1 2
   | (1, 0) => addOnZOnImage W hΔ 2 1
   | (1, 1) => addOnZOnImage W hΔ 2 2
+
+omit [IsDomain R] in
+/-- **(bridge, law 2)** On the `k`-th image piece, `addOnYOnImage` is `addOnYOnFamily k` read through
+`pieceι.isoImage` — the general `homOfLE_isoImage_inv_iSup` (ForMathlib) at `pieceι`, plus the
+interface `ι_addOnYOnSup`. -/
+lemma addOnYOnImage_piece (i j : Fin 3) [IsDomain (biChartRing W i j)] (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((pieceι W i j).image_mono (le_iSup (blOpenYPieceFamily W i j) k)) ≫
+        addOnYOnImage W hΔ i j =
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenYPieceFamily W i j k)).inv ≫
+        addOnYOnFamily W i j k hΔ := by
+  rw [addOnYOnImage]
+  refine (homOfLE_isoImage_inv_iSup (pieceι W i j) (blOpenYPieceFamily W i j) k
+    (addOnYOnSup W i j hΔ)).trans ?_
+  exact congrArg (_ ≫ ·) (ι_addOnYOnSup W i j hΔ k)
+
+omit [IsDomain R] in
+/-- **(bridge, law 1)** -/
+lemma addOnZOnImage_piece (i j : Fin 3) [IsDomain (biChartRing W i j)] (k : Fin 3) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        ((pieceι W i j).image_mono (le_iSup (blOpenZPieceFamily W i j) k)) ≫
+        addOnZOnImage W hΔ i j =
+      (Scheme.Hom.isoImage (pieceι W i j) (blOpenZPieceFamily W i j k)).inv ≫
+        addOnZOnFamily W i j k hΔ := by
+  rw [addOnZOnImage]
+  refine (homOfLE_isoImage_inv_iSup (pieceι W i j) (blOpenZPieceFamily W i j) k
+    (addOnZOnSup W i j hΔ)).trans ?_
+  exact congrArg (_ ≫ ·) (ι_addOnZOnSup W i j hΔ k)
 
 end Morphisms
 
@@ -215,6 +249,102 @@ lemma transι_eq :
       Spec.map (CommRingCat.ofHom (transHom W i j i' j').toRingHom) ≫
         (chartPieceIso W i' j').inv ≫ pieceι W i' j' :=
   (specMap_transHom_pieceι W i j i' j').symm
+
+private lemma fst_side (hi' : i' ≠ i) :
+    pieceι W i j ⁻¹ᵁ (pullback.fst (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W i').opensRange) ≤
+      (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (transFst W i j i') := by
+  have hfst := (Iso.inv_comp_eq (chartPieceIso W i j)).mp (chartPieceIso_inv_fst W i j)
+  rw [← Scheme.Hom.comp_preimage, pieceι_fst, Scheme.Hom.comp_preimage, hfst,
+    Scheme.Hom.comp_preimage]
+  refine Scheme.Hom.preimage_mono _ ?_
+  rw [Proj.opensRange_awayι,
+    Proj.awayι_preimage_basicOpen (𝒜 := (projIdeal W).quotientGrading)
+      (f_deg := mk_X_mem_quotientGrading_one W i) (hm := one_pos)
+      (g_deg := mk_X_mem_quotientGrading_one W i') (hm' := one_pos),
+    SpecMap_preimage_basicOpen]
+  apply le_of_eq; congr 1
+  rw [show (CommRingCat.ofHom ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+      (Algebra.TensorProduct.includeLeftRingHom (A := chartAway W i) (B := chartAway W j)))).hom
+      (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W i)
+        (mk_X_mem_quotientGrading_one W i')) =
+      (biChartRingAwayTensorEquiv W i j).symm
+        (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W i)
+          (mk_X_mem_quotientGrading_one W i') ⊗ₜ[R] 1) from rfl,
+    awayTensorEquiv_symm_isLocalizationElem_fst W i j i' hi']
+
+private lemma snd_side (hj' : j' ≠ j) :
+    pieceι W i j ⁻¹ᵁ (pullback.snd (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W j').opensRange) ≤
+      (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (transSnd W i j j') := by
+  have hsnd := (Iso.inv_comp_eq (chartPieceIso W i j)).mp (chartPieceIso_inv_snd W i j)
+  rw [← Scheme.Hom.comp_preimage, pieceι_snd, Scheme.Hom.comp_preimage, hsnd,
+    Scheme.Hom.comp_preimage]
+  refine Scheme.Hom.preimage_mono _ ?_
+  rw [Proj.opensRange_awayι,
+    Proj.awayι_preimage_basicOpen (𝒜 := (projIdeal W).quotientGrading)
+      (f_deg := mk_X_mem_quotientGrading_one W j) (hm := one_pos)
+      (g_deg := mk_X_mem_quotientGrading_one W j') (hm' := one_pos),
+    SpecMap_preimage_basicOpen]
+  apply le_of_eq; congr 1
+  rw [show (CommRingCat.ofHom ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+      (Algebra.TensorProduct.includeRight (R := R) (A := chartAway W i)
+        (B := chartAway W j)).toRingHom)).hom
+      (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W j)
+        (mk_X_mem_quotientGrading_one W j')) =
+      (biChartRingAwayTensorEquiv W i j).symm
+        ((1 : chartAway W i) ⊗ₜ[R] Away.isLocalizationElem (mk_X_mem_quotientGrading_one W j)
+          (mk_X_mem_quotientGrading_one W j')) from rfl,
+    awayTensorEquiv_symm_isLocalizationElem_snd W i j j' hj']
+
+private lemma fstLe :
+    pieceι W i j ⁻¹ᵁ (pullback.fst (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W i').opensRange) ≤
+      (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (transFst W i j i') := by
+  obtain rfl | hi' := eq_or_ne i' i
+  · rw [transFst, biChartPointFst, dif_pos rfl, specBasicOpen_one, Scheme.Hom.preimage_top]
+    exact le_top
+  · exact fst_side W i j i' hi'
+
+private lemma sndLe :
+    pieceι W i j ⁻¹ᵁ (pullback.snd (projModelπ W) (projModelπ W) ⁻¹ᵁ (chartι W j').opensRange) ≤
+      (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (transSnd W i j j') := by
+  obtain rfl | hj' := eq_or_ne j' j
+  · rw [transSnd, biChartPointSnd, dif_pos rfl, specBasicOpen_one, Scheme.Hom.preimage_top]
+    exact le_top
+  · exact snd_side W i j j' hj'
+
+/-- **(helper A, A0)** The two chart-products of `E ×_R E` overlap exactly within the transition
+locus: their images meet inside `range(transι)`. Every leaf proven — this is the assembly. -/
+lemma pieceι_range_inf_le_transι :
+    (pieceι W i j).opensRange ⊓ (pieceι W i' j').opensRange ≤
+      (transι W i j i' j').opensRange := by
+  rw [transι_opensRange, ← Scheme.Hom.image_preimage_eq_opensRange_inf,
+    Scheme.Hom.image_le_image_iff, pieceι_opensRange W i' j', specBasicOpen_mul]
+  simp only [Scheme.Hom.preimage_inf]
+  exact inf_le_inf (fstLe W i j i') (sndLe W i j j')
+
+lemma blOpenYImage_le_range : blOpenYImage W i j ≤ (pieceι W i j).opensRange := by
+  rw [blOpenYImage, ← Scheme.Hom.image_top_eq_opensRange]
+  exact Scheme.Hom.image_mono _ le_top
+
+lemma blOpenZImage_le_range : blOpenZImage W i j ≤ (pieceι W i j).opensRange := by
+  rw [blOpenZImage, ← Scheme.Hom.image_top_eq_opensRange]
+  exact Scheme.Hom.image_mono _ le_top
+
+/-- **(helper A — law 2)** The overlap of two chart-products' law-2 regularity images lies inside
+`range(transι)` — the containment `IsOpenImmersion.lift` needs to factor `hf` through the transition. -/
+lemma blOpenYImage_inf_le_transι :
+    blOpenYImage W i j ⊓ blOpenYImage W i' j' ≤ (transι W i j i' j').opensRange :=
+  le_trans (inf_le_inf (blOpenYImage_le_range W i j) (blOpenYImage_le_range W i' j'))
+    (pieceι_range_inf_le_transι W i j i' j')
+
+/-- **(helper A — law 1)** -/
+lemma blOpenZImage_inf_le_transι :
+    blOpenZImage W i j ⊓ blOpenZImage W i' j' ≤ (transι W i j i' j').opensRange :=
+  le_trans (inf_le_inf (blOpenZImage_le_range W i j) (blOpenZImage_le_range W i' j'))
+    (pieceι_range_inf_le_transι W i j i' j')
 
 end Overlap
 

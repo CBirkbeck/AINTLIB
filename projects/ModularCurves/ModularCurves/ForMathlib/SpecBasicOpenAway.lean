@@ -157,3 +157,18 @@ lemma glueMorphisms_hf_of_agree {X : Scheme} {J : Type*} (U : J → X.Opens) {Y 
   rw [← cancel_epi hP.isoPullback.hom, IsPullback.isoPullback_hom_fst_assoc,
     IsPullback.isoPullback_hom_snd_assoc]
   exact h x y
+
+/-- **(variable-scheme bridge)** For an open immersion `f`, restricting `(f.isoImage (⨆ U)).inv ≫ g`
+to the `k`-th image piece gives `(f.isoImage (U k)).inv` composed with the `k`-th cover inclusion.
+
+Stated over variable schemes on purpose: instantiated at a concrete `Proj` chart-product, the
+`isoImage` naturality rewrites (`isoImage_hom_homOfLE`) drive `whnf` into the pullback carrier and
+blow the heartbeat budget. As a general lemma it is applied, never unfolded (v10.24). -/
+lemma homOfLE_isoImage_inv_iSup {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f] {J : Type*}
+    (U : J → X.Opens) (k : J) {Z : Scheme} (g : (⨆ i, U i).toScheme ⟶ Z) :
+    Y.homOfLE (f.image_mono (le_iSup U k)) ≫ (f.isoImage (⨆ i, U i)).inv ≫ g =
+      (f.isoImage (U k)).inv ≫ (Scheme.Opens.iSupOpenCover U).f k ≫ g := by
+  rw [← cancel_epi (f.isoImage (U k)).hom, Iso.hom_inv_id_assoc, ← Category.assoc,
+    Scheme.Hom.isoImage_hom_homOfLE f (U k) (⨆ i, U i) (le_iSup U k), Category.assoc,
+    Iso.hom_inv_id_assoc]
+  rfl
