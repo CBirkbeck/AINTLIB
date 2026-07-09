@@ -498,7 +498,80 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
   refine ⟨⨅ t : T, (J (pf t)).comap (algebraMap R (Localization.Away (gfun (pf t)))),
     fun A cA aA => ⟨fun hP => ?_, fun hI => ?_⟩⟩
   · -- the condition kills the glued ideal
-    sorry
+    rw [Ideal.map_eq_bot_iff_le_ker]
+    intro r hr
+    rw [RingHom.mem_ker]
+    -- for each patch, the image of `r` in `A` dies after inverting `b t := algebraMap (g t)`
+    have hloc : ∀ t : T, ∃ k : ℕ,
+        algebraMap R A (gfun (pf t)) ^ k * algebraMap R A r = 0 := by
+      intro t
+      set g := gfun (pf t) with hg
+      set b := algebraMap R A g with hb
+      letI algRg : Algebra (Localization.Away g) (Localization.Away b) :=
+        (Localization.awayMap (algebraMap R A) g).toAlgebra
+      haveI : IsScalarTower R (Localization.Away g) (Localization.Away b) := by
+        refine IsScalarTower.of_algebraMap_eq' ?_
+        rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R A
+          (Localization.Away b)]
+        exact (IsLocalization.map_comp _).symm
+      -- the condition localizes from `A` to `A_t`
+      obtain ⟨hflat, hrank⟩ := hP
+      haveI := hflat
+      have e : (Localization.Away b) ⊗[R] M ≃ₗ[Localization.Away b]
+          (Localization.Away b) ⊗[A] (A ⊗[R] M) :=
+        (TensorProduct.AlgebraTensorModule.cancelBaseChange R A
+          (Localization.Away b) (Localization.Away b) M).symm
+      have hPt : Module.Flat (Localization.Away b) ((Localization.Away b) ⊗[R] M) ∧
+          ∀ q : PrimeSpectrum (Localization.Away b),
+            Module.rankAtStalk ((Localization.Away b) ⊗[R] M) q = n := by
+        refine ⟨Module.Flat.of_linearEquiv e, fun q => ?_⟩
+        rw [Module.rankAtStalk_eq_of_equiv e, Module.rankAtStalk_baseChange]
+        exact hrank _
+      -- hence the entries ideal dies over `A_t`, so `r`'s image there is `0`
+      have hJt := (locallyFreeRankLocusAux_patch_iff (αfun (pf t)) (πfun (pf t))
+        (hπsurj (pf t)) (hexact (pf t))).mp hPt
+      have hr_t : algebraMap R (Localization.Away g) r ∈ J (pf t) :=
+        Ideal.mem_comap.mp ((Submodule.mem_iInf _).mp hr t)
+      have hzero : algebraMap A (Localization.Away b) (algebraMap R A r) = 0 := by
+        rw [← IsScalarTower.algebraMap_apply R A (Localization.Away b),
+          IsScalarTower.algebraMap_apply R (Localization.Away g) (Localization.Away b),
+          ← Ideal.mem_bot, ← hJt]
+        exact Ideal.mem_map_of_mem _ hr_t
+      obtain ⟨⟨s, hs⟩, hsk⟩ :=
+        (IsLocalization.map_eq_zero_iff (Submonoid.powers b) _ _).mp hzero
+      obtain ⟨k, rfl⟩ := hs
+      exact ⟨k, hsk⟩
+    choose kfun hkfun using hloc
+    -- a single power `K` works for every patch
+    set K := Finset.univ.sup kfun with hK
+    have hbig : ∀ t : T, algebraMap R A (gfun (pf t)) ^ K * algebraMap R A r = 0 := by
+      intro t
+      have hle : kfun t ≤ K := Finset.le_sup (Finset.mem_univ t)
+      calc algebraMap R A (gfun (pf t)) ^ K * algebraMap R A r
+          = algebraMap R A (gfun (pf t)) ^ (K - kfun t) *
+              (algebraMap R A (gfun (pf t)) ^ kfun t * algebraMap R A r) := by
+            rw [← mul_assoc, ← pow_add, Nat.sub_add_cancel hle]
+        _ = 0 := by rw [hkfun t, mul_zero]
+    -- the images of the finite subcover still generate the unit ideal in `A`
+    have hTA : Ideal.span ((algebraMap R A) '' ↑T) = ⊤ := by
+      refine (Ideal.eq_top_iff_one _).mpr ?_
+      have h1' : (1 : A) ∈ Ideal.map (algebraMap R A) (Ideal.span (↑T : Set R)) := by
+        simpa using Ideal.mem_map_of_mem (algebraMap R A) h1T
+      rwa [Ideal.map_span] at h1'
+    -- conclude by the annihilator-ideal trick with the `K`-th powers
+    have hpow := Ideal.span_pow_eq_top _ hTA K
+    have hann : Ideal.span ((fun x => x ^ K) '' ((algebraMap R A) '' ↑T)) ≤
+        LinearMap.ker (LinearMap.toSpanSingleton A A (algebraMap R A r)) := by
+      rw [Ideal.span_le]
+      rintro _ ⟨_, ⟨y, hy, rfl⟩, rfl⟩
+      obtain ⟨t', ht'⟩ := hT hy
+      have hyt : y = gfun (pf ⟨y, hy⟩) := (hpf ⟨y, hy⟩).symm ▸ rfl
+      rw [SetLike.mem_coe, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply,
+        smul_eq_mul, hyt]
+      exact hbig ⟨y, hy⟩
+    have h1ann : (1 : A) ∈ LinearMap.ker (LinearMap.toSpanSingleton A A
+        (algebraMap R A r)) := hann (hpow ▸ Submodule.mem_top)
+    simpa [LinearMap.toSpanSingleton_apply] using h1ann
   · -- the glued ideal's vanishing forces the condition
     sorry
 
