@@ -978,6 +978,32 @@ private theorem locallyFreeRankLocusSheaf_spec (n : ℕ)
 
 end LocallyFreeRankLocusSheaf
 
+section LocallyFreeRankLocusBridge
+
+open scoped TensorProduct
+
+variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
+
+/-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
+affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
+the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
+is the single point where geometry meets the affine theory: `f` finite makes the pullback
+affine, `iff_of_isAffine` reads flatness on global sections, `IsAffine.finrank` reads the
+rank function through `Spec`, and the pasting `pullback f (x' ≫ ι) ≅ pullback (f ∣_ U) x'`
+plus `pullbackSpecIso` compute the global sections as the tensor product. -/
+private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) (n : ℕ) :
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := ((f.app U.1).hom).toAlgebra
+    ((Flat (pullback.snd f (x' ≫ U.1.ι)) ∧
+        ∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
+      (Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ∧
+        ∀ q : PrimeSpectrum Γ(X, ⊤),
+          Module.rankAtStalk (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) q = n)) := by
+  sorry
+
+end LocallyFreeRankLocusBridge
+
 open scoped TensorProduct in
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
