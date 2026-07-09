@@ -199,3 +199,27 @@ shear; revisit only if a leaf walls.
 4. **p2 dependency** is soft (hypothesis-parametric until their Milestone 1) — no gate.
 5. 03BL(2)'s Stacks proof has two "future reference" holes — closed above (norm-unit facts);
    if a third hole appears in formalization, board it before grinding (v10.24).
+
+## [HG-B2] design refinement (NEW-HOPF, post-B1): the Δ-matrix conjugation route
+
+The 03BH coefficient-invariance is formalized NOT by norm-base-change through the
+cartesian squares (twisted-algebra `letI` diamonds) but by **matrix conjugation**:
+
+- Fix an R-basis `e` of A (rank r). `E := B⊗A` has B-basis `1⊗eⱼ`; mult-by-`ρ(f)` has
+  matrix `M(f) ∈ Mat_r(B)`; `P = charpoly (M(f))` (`Matrix.charpoly`, bridged to
+  `LinearMap.charpoly` via `charpoly_toMatrix`).
+- **The Δ-matrix**: `Δ(eⱼ) = ∑ᵢ eᵢ ⊗ Tᵢⱼ`, `T ∈ Mat_r(A)`. Basis-expansion of
+  coassoc/counit gives the matrix-coalgebra identities `Δ(Tᵢⱼ) = ∑ₖ Tᵢₖ⊗Tₖⱼ`,
+  `ε(Tᵢⱼ) = δᵢⱼ`; the antipode axiom then gives **`T·S(T) = 1 = S(T)·T`** (entrywise S) —
+  `T ∈ GL_r(A ⊆ B⊗A)`.
+- **The conjugation identity**: applying `id_B⊗Δ` to the defining expansion of `M(f)` and
+  re-expanding via coassociativity yields `ρ(M(f)) = T⁻¹ · (M(f)⊗1) · T` (orientation to
+  be fixed in-proof) in `Mat_r(B⊗A)`.
+- Charpoly is conjugation-invariant and commutes with `Polynomial.map` of entrywise ring
+  maps (`Matrix.charpoly_map`), so `map ρ P = charpoly ρ(M(f)) = charpoly (M(f)⊗1) =
+  map includeLeft P` — i.e. every coefficient lies in `coinvariants ρ`. **Hopf (antipode)
+  IS used** (T-invertibility); freeness of A over R is the only other input.
+- Integrality (03BJ) then: CH (`aeval_self_charpoly`) evaluated at 1 gives
+  `∑ includeLeft(Pᵢ)·(ρf)^i = 0`; coefficients coinvariant ⟹ `= ρ(∑Pᵢf^i) = ρ(P(f))`;
+  `ρ` injective from counitality (retraction `rid∘(id⊗ε)`) ⟹ `P(f) = 0` — monic degree-r
+  integrality of every `f : B` over `coinvariants ρ`. No twisted instances anywhere.
