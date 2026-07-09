@@ -1720,6 +1720,20 @@ lemma crossOverlapPieceIso_hom_ι (k k' : Fin 3) :
     Scheme.Hom.isoImage_hom_ι]
   rw [← Category.assoc, specBasicOpenIsoAway_hom_ι]
 
+/-- The cross-chart-cross-law minor over transRing: the two triples transAlgHom(lawOne ij) and
+transHom(lawTwo i'j') have vanishing 2×2 minors. Combines transHom_lawTwoTriple_eq_smul (cross-chart)
+with the transAlgHom-pushed cross-law minor lawOneTriple_mul_lawTwoTriple. -/
+lemma transHom_lawTwo_mul_transAlgHom_lawOne (k m : Fin 3) :
+    transHom W i j i' j' (lawTwoTriple W i' j' m) *
+        transAlgHom W i j i' j' (lawOneTriple W i j k) =
+      transHom W i j i' j' (lawTwoTriple W i' j' k) *
+        transAlgHom W i j i' j' (lawOneTriple W i j m) := by
+  rw [transHom_lawTwoTriple_eq_smul, transHom_lawTwoTriple_eq_smul,
+    mul_assoc, mul_assoc, ← map_mul, ← map_mul]
+  congr 2
+  rw [mul_comm (lawTwoTriple W i j m), mul_comm (lawTwoTriple W i j k),
+    lawOneTriple_mul_lawTwoTriple]
+
 end OverlapCrossChart
 
 end WeierstrassCurve.Projective
