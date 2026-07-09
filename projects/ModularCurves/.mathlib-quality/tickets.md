@@ -10912,3 +10912,32 @@ Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3
 `sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter clean.
 `#print axioms` for `projTateMap_isPullback`, `projTateMap_zero`, `projTateMap_marking`:
 `[propext, Classical.choice, Quot.sound]` only (no inherited `sorryAx`).
+
+## Amendments v10.108-ATLAS (2026-07-09, NEW-ATLAS-2): [Y1-ATLAS] ENGINE (top half) LANDED — the model-level engine is COMPLETE
+
+Added in `YOneAtlasClassify.lean`: the ENGINE-core extraction
+`tateNormalVariableChange_mul` (composite of a T-W7 change with the source's T-E1
+normalisation IS the target's, by T-E1 uniqueness — parametrised by the coordinate-transform)
+and `zChartEval_coords_of_pointedIso` (the transform in the change's components); ENGINE(a)
+refactored to consume them. Then the eqToHom transports (`eqToIso_projModelπ/Zero`,
+`zChartEval_eqToHom_point`, `eqToHom_projModelBaseChange`) and **ENGINE (top half)**
+`projTateMap_eq_of_pointedIso`: `ε.hom ≫ projTateMap₂ = projTateMap₁` for any pointed iso
+carrying marking to marking. Proof design (NO extra rigidity computation): the canonical
+comparison `χ := θ₁⁻¹ ≫ eqToIso ≫ θ₂` (θᵢ the normalising isos, eqToIso along ENGINE(a)'s
+map equality) also carries marking to marking (via the `(0,0)`-coordinate extensionality of
+the transported normalised points), so the T-W7 changes of `ε` and `χ` BOTH compose with the
+source normalisation to the target normalisation, hence are EQUAL by group cancellation
+(`mul_left_cancel`), hence `ε.hom = χ.hom`, and the classifying morphisms agree.
+
+The complete ring/model-level engine for the classifying clause is now proven: chart
+extraction (T2), order dictionary (T1), base comparison (T3/ENGINE(a)), classifying morphism
+with cartesian square + zero + marking (v10.106-107), and top comparison (this increment).
+Remaining for `exists_tatePoint`'s ∀-part: the `Ell/R`-side assembly only (chart packaging
+over affine opens of `Y.base`, geometric-fibre bridges through [T-B6′]/[T-A6b], cover
+gluing via the landed v10.96-100 handles, and the ∃!-wiring).
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green (3179 jobs); no
+`sorry`/`admit`/`axiom`/`maxHeartbeats`; `git diff --check` green; line-length + linter
+clean. `#print axioms` for `tateNormalVariableChange_mul`, `zChartEval_coords_of_pointedIso`,
+`projTateMap_eq_of_pointedIso`: `[propext, Classical.choice, Quot.sound]` only (no inherited
+`sorryAx` anywhere in the engine).
