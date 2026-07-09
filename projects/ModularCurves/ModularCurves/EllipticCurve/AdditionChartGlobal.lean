@@ -1462,4 +1462,45 @@ noncomputable def addOnZ (hΔ : IsUnit W.Δ) : (blOpenZ W).toScheme ⟶ projMode
 
 end OverlapZ
 
+section OverlapCrossLaw
+
+variable (i j : Fin 3)
+
+/-- **(c3, general piece immersion)** `Spec(Away g) ↪ E ×_R E` for ANY generator `g : biChartRing`,
+generalising `pieceAwayι` (which is the case `g = lawTwoTriple ij k`). The same-chart cross-law overlap
+piece is this at `g = lawTwoTriple ij k · lawOneTriple ij k`. -/
+noncomputable def pieceGenι (g : biChartRing W i j) :
+    Spec (CommRingCat.of (Localization.Away g)) ⟶ pullback (projModelπ W) (projModelπ W) :=
+  (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) g).hom ≫
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) g).ι ≫
+    (chartPieceIso W i j).inv ≫ pieceι W i j
+
+instance instIsOpenImmersionPieceGenι (g : biChartRing W i j) :
+    IsOpenImmersion (pieceGenι W i j g) := by rw [pieceGenι]; infer_instance
+
+/-- `pieceGenι` in `Spec.map` form (as `pieceAwayι_eq`). -/
+lemma pieceGenι_eq (g : biChartRing W i j) :
+    pieceGenι W i j g =
+      Spec.map (CommRingCat.ofHom (algebraMap (biChartRing W i j) (Localization.Away g))) ≫
+        (chartPieceIso W i j).inv ≫ pieceι W i j := by
+  rw [pieceGenι, ← Category.assoc, specBasicOpenIsoAway_hom_ι]
+
+/-- The `σ`-immersion identity for `pieceGenι` (as `isoImage_specBasicOpen_pieceAwayι`): the
+`isoImage / morphismRestrict / specBasicOpenIsoAway.inv` chain out of the image piece, followed by
+`pieceGenι`, is the image inclusion. -/
+lemma isoImage_specBasicOpen_pieceGenι (g : biChartRing W i j) :
+    ((Scheme.Hom.isoImage (pieceι W i j)
+        ((chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) g)).inv ≫
+      morphismRestrict (chartPieceIso W i j).hom
+        (specBasicOpen (CommRingCat.of (biChartRing W i j)) g) ≫
+      (specBasicOpenIsoAway (CommRingCat.of (biChartRing W i j)) g).inv) ≫ pieceGenι W i j g =
+      (pieceι W i j ''ᵁ ((chartPieceIso W i j).hom ⁻¹ᵁ
+        specBasicOpen (CommRingCat.of (biChartRing W i j)) g)).ι := by
+  rw [pieceGenι]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  exact isoImage_inv_morphismRestrict_ι (pieceι W i j) (chartPieceIso W i j)
+    (specBasicOpen (CommRingCat.of (biChartRing W i j)) g)
+
+end OverlapCrossLaw
+
 end WeierstrassCurve.Projective
