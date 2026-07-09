@@ -10852,3 +10852,24 @@ Being a free hand, took the next QSM staged leaf per v10.56's workable-by-any-ha
 - SmoothDescent state: **2/4 proven** (module flat core + scheme flat), remaining =
   02KL-lfp (needs the fp sorites over a ff fp cover — genuinely new algebra) and the
   02KM smooth target (needs 02KL + the formally-étale pointwise transfer).
+
+### v10.59 (2026-07-09, fable-PIC0): ★ OWNER REDIRECT — GAP-1 watch RETIRED; vendor the Riou infrastructure instead ([GAP1-VENDOR])
+
+*Owner directive (verbatim intent): do not wait for the mathlib PRs to merge — "just copy
+over what we need." The CHARTER-PIC0 item-3 passive watch is closed; P2 is un-gated by
+vendoring.*
+
+- **[GAP1-VENDOR] (fable-PIC0, active now):** vendor mathlib PR **#35545** (joelriou,
+  "the internal hom for presheaves of modules" — ONE new 134-line file
+  `Presheaf/InternalHom.lean` + 6 lines to `Presheaf/Pushforward.lean`, head 56cee610b845)
+  into `ForMathlib/` with attribution (Apache 2.0, Authors line keeps Riou), adapted to
+  our pin. That supplies the `MonoidalClosed`-side ingredient the v10.52 route map
+  identified as THE missing piece: mathlib already has `PresheafOfModules.monoidal
+  Category` + `SymmetricCategory` + Day reflection (`Monoidal/Braided/Reflection.lean`)
+  + the reflective sheafification adjunction — internal hom was the gap. Chain:
+  vendored internal hom ⟹ MonoidalClosed (PresheafOfModules) ⟹ Day reflection at
+  sheafificationAdjunction ⟹ monoidal structure on SheafOfModules with monoidal
+  sheafification ⟹ GAP-1's ⊗-compat isos ⟹ `IsInvertible.tensorObj` (the one
+  InvertibleSheaf sorry) and the P2 Pic-group program. #41383/#35773 NOT pulled unless
+  the chain demands them.
+- Watch-state items unchanged otherwise (map_id via A; QSM leaves 02KL/02KM staged).
