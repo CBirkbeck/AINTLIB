@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.ForMathlib.WeierstrassInvariant
 
 /-!
@@ -67,5 +68,45 @@ theorem projModel_descentIso_hom_snd (W₀ : WeierstrassCurve R) (W₁ : Weierst
   rw [projModel_descentIso, Iso.trans_hom, Iso.trans_hom, Category.assoc, Category.assoc,
     IsPullback.isoPullback_hom_snd, eqToIso.hom, transπ hW₁.symm, Iso.symm_hom,
     ← projModelVCIso_π, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
+/-! ### a5-ii — the `VariableChange` cocycle from the geometric action -/
+
+open scoped Pointwise in
+/-- Base change of `projModel` along a ring **automorphism** `g` (the `G`-action) is a pullback —
+the `algebraMap`-form `isPullback_projModelBaseChange` applied through `RingHom.toAlgebra g`. -/
+theorem isPullback_projModelBaseChange_hom (g : R →+* R) (W : WeierstrassCurve R) :
+    IsPullback (projModelBaseChange g W) (projModelπ (W.map g)) (projModelπ W)
+      (Spec.map (CommRingCat.ofHom g)) := by
+  letI : Algebra R R := g.toAlgebra
+  have h := isPullback_projModelBaseChange (R := R) (R' := R) W
+  have he : (algebraMap R R : R →+* R) = g := g.algebraMap_toAlgebra
+  rw [he] at h
+  convert h using 2 <;> rw [he]
+
+/-- **([a5-ii], the pointed iso)** If `g` acts on `projModel W` by a *cartesian* square over
+`Spec (g)` (the geometric `G`-action, `IsCurveAction.cartesian`), then — since base change along `g`
+is also cartesian over `Spec (g)` (`isPullback_projModelBaseChange_hom`) — the two pullbacks give a
+canonical iso `projModel W ≅ projModel (W.map g)` respecting `π` (`isoIsPullback_hom_snd`). This is
+the pointed iso `pointedIso_exists_variableChange` turns into the cocycle value `C_g`. -/
+theorem cartesianIso_hom_π (g : R →+* R) (W : WeierstrassCurve R)
+    {act : projModel W ⟶ projModel W}
+    (hcart : IsPullback act (projModelπ W) (projModelπ W) (Spec.map (CommRingCat.ofHom g))) :
+    (hcart.isoIsPullback _ _ (isPullback_projModelBaseChange_hom g W)).hom ≫
+        projModelπ (W.map g) = projModelπ W :=
+  hcart.isoIsPullback_hom_snd _ _ (isPullback_projModelBaseChange_hom g W)
+
+open scoped Pointwise in
+/-- **([a5-ii], per-`g` extraction)** A *pointed* iso `projModel W₀ ≅ projModel (g•W₀)` yields the
+`VariableChange` `C_g` with `C_g • (g•W₀) = W₀` (`pointedIso_exists_variableChange`, T-W7.1b). -/
+theorem exists_vc_of_pointedIso {G : Type u} [Group G] [MulSemiringAction G R]
+    (W₀ : WeierstrassCurve R) (g : G)
+    (e : projModel W₀ ≅ projModel (W₀.map (MulSemiringAction.toRingHom G R g)))
+    (heπ : e.hom ≫ projModelπ (W₀.map (MulSemiringAction.toRingHom G R g)) = projModelπ W₀)
+    (hez : projModelZero W₀ ≫ e.hom
+      = projModelZero (W₀.map (MulSemiringAction.toRingHom G R g))) :
+    ∃ C : VariableChange R, C • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀ := by
+  obtain ⟨C, hC, _⟩ := pointedIso_exists_variableChange W₀
+    (W₀.map (MulSemiringAction.toRingHom G R g)) e heπ hez
+  exact ⟨C, hC⟩
 
 end ModularCurves
