@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] — GR-E2 overlap criterion PROVEN (GrassmannianOverlap.lean). NEXT: GR-E4 cocycle + ringHom-chartMatrix spec, then GR-F glue data.
+FOCUS: [NISOG-GRASS] — GR-SPEC agent running on GrassmannianOverlap.lean (single-writer; no builds/edits there). GR-E2 pushed. After agent: verify+commit+push, then [GR-F] Scheme.GlueData assembly design.

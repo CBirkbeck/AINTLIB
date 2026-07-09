@@ -147,6 +147,25 @@ file single-writer)**:
   Grassmannian dependence — so [GR-E3/E4]'s ring layer is dispatchable independently of
   [GR-E1/E2].
 
+**[GR-SPEC] the ringHom↔chartMatrix bridge (pinned 2026-07-09T09:40Z; the last algebra
+before [GR-F])**: for `N` in both charts (`h : IsChartAt ι`, `h' : IsChartAt ι'` over
+`A`): (i) `evalAt h : ChartRing R ι →+* A` := `aeval (p ↦ chartMatrix n ι N h p.1 p.2)`
+(precisely: the `MvPolynomial.aeval`/`eval₂Hom` at the chart matrix); (ii) bridge lemma
+`evalAt_matrix : (Transition.matrix ι ι').map (evalAt h) = transitionMatrixAt ι ι' N h`
+(entrywise: `column`-dichotomy vs the pointwise retraction values — delta columns match
+by the retraction property, variable columns by `aeval_X`); (iii) hence
+`IsUnit (evalAt h (Transition.det ι ι'))` from [GR-E2]+h' (`RingHom.map_det` transport);
+(iv) `evalAwayAt h h' : Localization.Away (Transition.det ι ι') →+* A` :=
+`IsLocalization.Away.lift` of (iii); (v) **the SPEC**:
+`(evalAwayAt h h').comp (Transition.ringHom ι ι') = evalAt h'` — two ring maps out of
+`MvPolynomial`, ext on generators (`MvPolynomial.ringHom_ext`); at `X (j', i')` the
+claim is `(transitionMatrixAt⁻¹ *ᵥ pointwise-column j') i' = chartMatrix n ι' N h' j' i'`
+— prove via `chartMatrix_eq_of_retraction` (the composite `toLin' T⁻¹ ∘ (ι-retraction)`
+is a retraction of the ι'-tuple killing `N.toSubmodule`; same shape as the naturality
+proof). [GR-E4]'s cocycle then LIVES inside [GR-F]'s `Scheme.GlueData` t-composition
+condition, verified pointwise through [GR-SPEC] — no standalone generic-ring cocycle
+statement needed (design decision; kills the triple-localization bookkeeping).
+
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
   the relevant minor determinant; cocycle identity) — the det/adjugate algebra.
