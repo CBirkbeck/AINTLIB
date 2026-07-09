@@ -2048,4 +2048,83 @@ lemma addOnZOnImage_eq_addOnYOnImage_cross (hΔ : IsUnit W.Δ)
 
 end OverlapCrossChart
 
+section FamilyAssembly
+
+variable [IsDomain R] [IsJacobsonRing R] (hΔ : IsUnit W.Δ)
+
+/-- **(c3, glueMorphisms restriction — Z)** `addOnZ` restricted to the `p`-th chart-product image is
+`addOnZFamily p`: `homOfLE (blOpenZFamily p ≤ blOpenZ) ≫ addOnZ = addOnZFamily p`. Immediate from
+`Scheme.Cover.ι_glueMorphisms` on the four-chart cover `addOnZ` glues over. -/
+lemma homOfLE_le_addOnZ (p : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenZFamily W) p) ≫ addOnZ W hΔ =
+      addOnZFamily W hΔ p := by
+  rw [addOnZ]
+  exact Scheme.Cover.ι_glueMorphisms (Scheme.Opens.iSupOpenCover (blOpenZFamily W))
+    (addOnZFamily W hΔ) _ p
+
+/-- **(c3, glueMorphisms restriction — Y)** `addOnY` restricted to the `q`-th chart-product image is
+`addOnYFamily q`. Mirror of `homOfLE_le_addOnZ`. -/
+lemma homOfLE_le_addOnY (q : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenYFamily W) q) ≫ addOnY W hΔ =
+      addOnYFamily W hΔ q := by
+  rw [addOnY]
+  exact Scheme.Cover.ι_glueMorphisms (Scheme.Opens.iSupOpenCover (blOpenYFamily W))
+    (addOnYFamily W hΔ) _ q
+
+/-- **(c3, the pairwise cross-law family agreement)** On `blOpenZFamily p ⊓ blOpenYFamily q` the `p`-th
+law-1 (Z) morphism and the `q`-th law-2 (Y) morphism agree. The 16 `fin_cases` each discharge to
+`addOnZOnImage_eq_addOnYOnImage_cross` — the cross-chart-cross-law image agreement, which subsumes the
+same-chart diagonal (`transRing` degenerates to `biChartRing` there, so the cross apparatus applies
+uniformly). This is the two-law analogue of `addOnZFamily_agree`/`addOnYFamily_agree`. -/
+lemma addOnZFamily_eq_addOnYFamily (p q : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : blOpenZFamily W p ⊓ blOpenYFamily W q ≤ blOpenZFamily W p) ≫
+        addOnZFamily W hΔ p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnYFamily W hΔ q := by
+  obtain ⟨p1, p2⟩ := p; obtain ⟨q1, q2⟩ := q
+  fin_cases p1 <;> fin_cases p2 <;> fin_cases q1 <;> fin_cases q2 <;>
+    exact addOnZOnImage_eq_addOnYOnImage_cross W _ _ _ _ hΔ _ inf_le_left inf_le_right
+      (blOpenZImage_inf_blOpenYImage_eq_iSup_cross W _ _ _ _)
+
+/-- **(c3, addOn_agree — THE two-law agreement)** The two Bosma–Lenstra addition morphisms — law 1
+(`addOnZ`, regular on `blOpenZ`) and law 2 (`addOnY`, regular on `blOpenY`) — agree on the overlap
+`blOpenZ ⊓ blOpenY` of their regularity opens. `Scheme.Cover.hom_ext` over the `(p,q)` family
+refinement `⨆ blOpenZFamily p ⊓ blOpenYFamily q`; each cover piece reduces via the glueMorphisms
+restrictions `homOfLE_le_addOnZ/Y` to the pairwise family agreement `addOnZFamily_eq_addOnYFamily`.
+This is the compatibility `mulModelHom`'s two-open (`blOpenZ ⊔ blOpenY = ⊤`) glue consumes. -/
+lemma addOn_agree (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenZ W) (hl : Ω ≤ blOpenY W)
+    (hΩ : Ω = ⨆ pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2),
+      blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZ W hΔ =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnY W hΔ := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2) =>
+      blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2)) _ _ (fun pq => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2) =>
+        blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2)).f pq =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2) =>
+          blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2) pq) := rfl
+  have eZ : (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2) =>
+          blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2) pq) ≫
+        (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnZ W hΔ =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_left ≫ addOnZFamily W hΔ pq.1 := by
+    rw [Scheme.homOfLE_homOfLE_assoc, ← homOfLE_le_addOnZ W hΔ pq.1, Scheme.homOfLE_homOfLE_assoc]
+    rfl
+  have eY : (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun pq : (Fin 2 × Fin 2) × (Fin 2 × Fin 2) =>
+          blOpenZFamily W pq.1 ⊓ blOpenYFamily W pq.2) pq) ≫
+        (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnY W hΔ =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnYFamily W hΔ pq.2 := by
+    rw [Scheme.homOfLE_homOfLE_assoc, ← homOfLE_le_addOnY W hΔ pq.2, Scheme.homOfLE_homOfLE_assoc]
+    rfl
+  rw [hf]
+  exact eZ.trans ((addOnZFamily_eq_addOnYFamily W hΔ pq.1 pq.2).trans eY.symm)
+
+end FamilyAssembly
+
 end WeierstrassCurve.Projective
