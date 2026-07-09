@@ -2150,4 +2150,115 @@ theorem markedPointNormalised_coords :
 
 end ProjTateMap
 
+section ProjTateMapAssembly
+
+/-! ### The classifying model morphism: cartesian, pointed, marking-compatible -/
+
+variable {A : Type u} [CommRing A] (R : CommRingCat.{u}) [Algebra R A]
+  (W : WeierstrassCurve A) [W.IsElliptic]
+  (g : SpecPoints (projModel W) (projModelπ W) A) (hZ : InZChart W g)
+  (hord : NowhereOrderLEThree W
+    (zChartEval W g hZ (coordX W)) (zChartEval W g hZ (coordY W)))
+
+/-- The classifying morphism of a marked chart into the universal Tate model. -/
+noncomputable def projTateMap : projModel W ⟶ projModel (tateCurveLocOver R) :=
+  (tateNormalIso R W g hZ hord).inv ≫
+    projModelBaseChange
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A) (tateCurveLocOver R)
+
+/-- The inverse normalising iso respects the structure morphisms. -/
+theorem tateNormalIso_inv_π :
+    (tateNormalIso R W g hZ hord).inv ≫ projModelπ ((tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)) = projModelπ W := by
+  rw [← tateNormalIso_π R W g hZ hord, Iso.inv_hom_id_assoc]
+
+/-- The classifying morphism lies over the affine atlas map. -/
+theorem projTateMap_π :
+    projTateMap R W g hZ hord ≫ projModelπ (tateCurveLocOver R) =
+      projModelπ W ≫
+        tateBaseSpecMapOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord := by
+  show ((tateNormalIso R W g hZ hord).inv ≫ _) ≫ _ = _
+  rw [Category.assoc, projModelBaseChange_π, ← Category.assoc, tateNormalIso_inv_π]
+  rfl
+
+/-- The classifying square is cartesian. -/
+theorem projTateMap_isPullback :
+    IsPullback (projTateMap R W g hZ hord) (projModelπ W) (projModelπ (tateCurveLocOver R))
+      (tateBaseSpecMapOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord) := by
+  letI : Algebra (tateRingOver R) A :=
+    ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+      tateRingOver R →ₐ[R] A) : tateRingOver R →+* A).toAlgebra
+  have sq2 : IsPullback
+      (projModelBaseChange
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A) (tateCurveLocOver R))
+      (projModelπ ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)))
+      (projModelπ (tateCurveLocOver R))
+      (tateBaseSpecMapOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord) :=
+    isPullback_projModelBaseChange (tateCurveLocOver R)
+  have sq1 : IsPullback ((tateNormalIso R W g hZ hord).inv) (projModelπ W)
+      (projModelπ ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)))
+      (𝟙 (Spec (CommRingCat.of A))) :=
+    IsPullback.of_horiz_isIso ⟨by
+      rw [Category.comp_id]
+      exact tateNormalIso_inv_π R W g hZ hord⟩
+  have hpaste := sq1.paste_horiz sq2
+  rw [Category.id_comp] at hpaste
+  exact hpaste
+
+/-- The classifying morphism is pointed. -/
+theorem projTateMap_zero :
+    projModelZero W ≫ projTateMap R W g hZ hord =
+      tateBaseSpecMapOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord ≫
+        projModelZero (tateCurveLocOver R) := by
+  letI : Algebra (tateRingOver R) A :=
+    ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+      tateRingOver R →ₐ[R] A) : tateRingOver R →+* A).toAlgebra
+  show projModelZero W ≫ (tateNormalIso R W g hZ hord).inv ≫ _ = _
+  rw [← Category.assoc, tateNormalIso_zero_inv R W g hZ hord]
+  exact projModelZero_baseChange (tateCurveLocOver R)
+
+/-- **The marking compatibility**: the classifying morphism carries the chart marking to
+the atlas marking `(0,0)`. -/
+theorem projTateMap_marking :
+    g.1 ≫ projTateMap R W g hZ hord =
+      tateBaseSpecMapOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord ≫
+        tateP0mor R := by
+  letI : Algebra (tateRingOver R) A :=
+    ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+      tateRingOver R →ₐ[R] A) : tateRingOver R →+* A).toAlgebra
+  have hψ : ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+      tateRingOver R →ₐ[R] A) : tateRingOver R →+* A).comp
+      (algebraMap (tateRingOver R) (tateRingOver R)) = algebraMap (tateRingOver R) A := by
+    rw [Algebra.algebraMap_self, RingHom.comp_id]
+    rfl
+  refine Eq.trans ?_ (congrArg Subtype.val (specPoint_ext_of_zChartEval (tateCurveLocOver R)
+    (specPointBaseChange (tateCurveLocOver R) (markedPointNormalised R W g hZ hord))
+    (specPointComp (tateCurveLocOver R) (tateP0SpecPoint R) _ hψ)
+    (inZChart_specPointBaseChange (tateCurveLocOver R)
+      (markedPointNormalised R W g hZ hord) (markedPointNormalised_inZChart R W g hZ hord))
+    (inZChart_specPointComp (tateCurveLocOver R) (tateP0SpecPoint R)
+      (tateP0SpecPoint_inZChart R) _ hψ)
+    (by
+      rw [zChartEval_specPointBaseChange_coordX, zChartEval_specPointComp,
+        zChartEval_tateP0SpecPoint_coordX, map_zero]
+      · exact (markedPointNormalised_coords R W g hZ hord).1
+      · exact tateP0SpecPoint_inZChart R)
+    (by
+      rw [zChartEval_specPointBaseChange_coordY, zChartEval_specPointComp,
+        zChartEval_tateP0SpecPoint_coordY, map_zero]
+      · exact (markedPointNormalised_coords R W g hZ hord).2
+      · exact tateP0SpecPoint_inZChart R)))
+  show g.1 ≫ (tateNormalIso R W g hZ hord).inv ≫ _ = _
+  rw [← Category.assoc]
+  rfl
+
+end ProjTateMapAssembly
+
 end ModularCurves
