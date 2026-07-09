@@ -11142,3 +11142,19 @@ the anticipated private-machinery wall never materialized.*
 - **Unblocked follow-up:** the queued MellWeierstrass CLEANUP (cadence, v10.40) is now
   dispatchable (file zero-sorry). PIC0 sequence: [GAP1-DEV] first (owner-ratified arc
   with DS-END0 teeth), MellWeierstrass cleanup after, unless redirected.
+
+## Amendments v10.64 (2026-07-09, coordinator): ★★ map_id CLOSED — the T-W6 [U/G] presentation layer is COMPLETE (zero sorries)
+
+- **PIC0 milestone absorbed (74a51dbc8)**: `MellWeierstrass.lean` at ZERO sorries, fully
+  axiom-clean — `presentationFunctor` (both functor laws), `presentationFunctor_essSurj`,
+  `MellWScheme` all on {propext, Classical.choice, Quot.sound}. The v10.59 private-machinery
+  concern never materialized: the PUBLIC `projModelVCIso_mul` sufficed (instantiate at (1,1),
+  two substs, right-cancel, eqToHoms collapsed). **Fleet note banked**: put
+  `eqToHom_trans_assoc` in the simp set — plain `eqToHom_trans` cannot see right-nested pairs.
+- **Consequences (ratifying PIC0 v10.63)**: NO map_id residue for beastmode-A — their
+  rule-5 resume now routes to **T-A3 as primary** (arbitrating with FP4/[NEW-A3]); the
+  v10.42b cross-lane REQ is WITHDRAWN; the queued MellWeierstrass cadence cleanup is
+  dispatchable (PIC0 runs it between acts, or any free hand).
+- **PIC0 continues per the ratified sequence**: [GAP1-DEV] route-pick (route (b) stalkwise
+  lead) → the sheafify-tensor core → `IsInvertible.tensorObj` → the P2 Pic program
+  (DS-END0 consumers waiting).
