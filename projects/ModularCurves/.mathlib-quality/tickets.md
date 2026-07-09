@@ -12921,3 +12921,40 @@ axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per t
   p2's Hopf-on-subgroup-divisor layer (v10.50 edge): Milestone 1 not yet landed (sentinel
   mid-L6c) — noted; the decomposition will state exactly which leaves consume their pins
   vs. which hypothesize `Bialgebra`/`HopfAlgebra` instances route-independently.
+
+### v10.97 (2026-07-09, NEW-HOPF): ★ [CHARTER-HOPF] M1 — /develop --decompose DONE; route DECIDED (Stacks 39.23, comodule-native); 14 leaves cut
+
+*Charter report point 1. Full decomposition: `.mathlib-quality/decomposition-hopf-crux.md`
+(sources + verbatim quotes + dictionary + mathlib inventory + leaf plan + risks).*
+
+- **ROUTE DECIDED**: formalize **Stacks 39.23 "Finite flat groupoids, affine case"
+  (03BE), Proposition 03BM** — the affine case of SGA 3 V 4.1, complete + non-noetherian +
+  ring-theoretic; §39.23 source captured verbatim during recon. **Comodule-native** per the
+  v10.50 no-bridge ruling: every lemma stated at (s,t) = (includeLeft, ρ), C = coinvariants ρ;
+  the groupoid axioms are IsCoaction + HopfAlgebra (antipode = the shear inverse).
+  REJECTED: Kreimer–Takeuchi/Morita (3 infra projects incl. integrals theory), CHR
+  coordinates (no separability idempotent for non-étale G — the constant-group route
+  provably does not generalize), SGA-literal (semi-local Lemme 4.2), E[N]-étale shortcut
+  (doesn't serve Γ₀(N)).
+- **mathlib inventory (verified in-tree)**: the heavy machinery EXISTS — ff descent of
+  inj/surj/bij + flatness, Flat/Equalizer (invariants vs flat base change = 03BK(3)),
+  flat+fp⟹projective, charpoly + CH + charpoly_baseChange, isUnit_iff_isUnit_det,
+  IsClosedImmersion.iff_isFinite_and_mono, lying-over, of_comap_surjective. SIX gaps, all
+  small/medium + upstreamable: Amitsur equalizer; ff descent of Module.Finite/fp; flat
+  local ∞-residue-field extension; semi-local basis selection (03C1); charpoly-coefficient
+  invariance (03BH, the novel translation); the k̄-orbit theorem (03BL(2), Stacks' two
+  "future reference" holes closed via unit-det linear algebra).
+- **Design pins**: (a) hypothesize `[Module.Free R A]` + finrank r at the abstract layer —
+  03BI rank-decomposition VACUOUS; the C4 glue shrinks charts to make O(G) free anyway.
+  (b) v10.24(e): only the left-factor module structure on B⊗A is an instance; all t-side
+  structure through the term-built shear iso Φ (antipode inverse) — never a second instance.
+- **LEAVES** (14): Wave A gaps [HG-A1..A4] (parallel-safe) → Wave B core [HG-B1 shear,
+  B2 charpoly/integrality ★, B3 invariants-base-change, B4 points ★, B5 descent-bootstrap ★
+  (the Lean-treacherous one), B6 = `isHopfGalois_of_surjective_galoisPrecursor` — THE
+  theorem] → Wave C application [C1 co-action 3a-ii ∥ C2 freeness⟹surjectivity, C3 stable
+  cover (reuses B2 norms), C4 glue + six pins]. Milestones M2–M7 boarded in the doc;
+  headline = M5 (abstract theorem), completion = M7.
+- **p2 edge is SOFT**: abstract layer is [HopfAlgebra]-parametric; C1 consumes p2's
+  instances when Milestone 1 lands (checked at each session start), hypothesis-wired
+  meanwhile. No gate anywhere on the critical path.
+- Next: Wave A execution ([HG-A1] first).
