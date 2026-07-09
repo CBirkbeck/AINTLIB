@@ -153,6 +153,64 @@ theorem specPoint_addOnYOnImage_factors (hΔ : IsUnit W.Δ) {K : Type u} [Field 
 
 end Descent
 
+
+section Readout
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) [IsDomain R] [IsJacobsonRing R]
+variable (i j : Fin 3) [IsDomain (biChartRing W i j)]
+
+/-- [C6-d2, Z] Coordinate readout of a descended point: the total ring map evaluates the chart
+coordinates to `ψ`-images of the law-1 ratios. Uniform in the chart index `k`. -/
+lemma addOnZPieceHom_coord (hΔ : IsUnit W.Δ) {K : Type u} [Field K] [Algebra R K]
+    (k : Fin 3) (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (m : {l : Fin 3 // l ≠ k}) :
+    (ψ.comp (addOnZPieceHom W i j k hΔ).toRingHom)
+        (chartCoordEquiv W k (Ideal.Quotient.mk _ (MvPolynomial.X m))) =
+      ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
+          (lawOneTriple W i j m) *
+        IsLocalization.Away.invSelf (lawOneTriple W i j k)) := by
+  rw [RingHom.comp_apply]
+  congr 1
+  unfold addOnZPieceHom chartAwayHomOfTriple
+  have hround : (chartCoordAlgEquiv W k).symm (chartCoordEquiv W k (Ideal.Quotient.mk _
+      (MvPolynomial.X m))) = Ideal.Quotient.mk _ (MvPolynomial.X m) :=
+    (chartCoordEquiv W k).symm_apply_apply _
+  show (chartHomOfTriple W k (awayTriple W i j k (lawOneTriple W i j))
+      (IsLocalization.Away.invSelf (lawOneTriple W i j k)) (awayTriple_mul_invSelf W i j k _)
+      (equation_awayTriple W i j k _ (equation_lawOneTriple_of_isDomain W i j hΔ)))
+      ((chartCoordAlgEquiv W k).symm ((chartCoordEquiv W k)
+        (Ideal.Quotient.mk _ (MvPolynomial.X m)))) = _
+  rw [hround, chartHomOfTriple_coord]
+  rfl
+
+/-- [C6-d2, Y] Coordinate readout of a descended point: the total ring map evaluates the chart
+coordinates to `ψ`-images of the law-2 ratios. Uniform in the chart index `k`. -/
+lemma addOnYPieceHom_coord (hΔ : IsUnit W.Δ) {K : Type u} [Field K] [Algebra R K]
+    (k : Fin 3) (ψ : Localization.Away (lawTwoTriple W i j k) →+* K)
+    (m : {l : Fin 3 // l ≠ k}) :
+    (ψ.comp (addOnYPieceHom W i j k hΔ).toRingHom)
+        (chartCoordEquiv W k (Ideal.Quotient.mk _ (MvPolynomial.X m))) =
+      ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
+          (lawTwoTriple W i j m) *
+        IsLocalization.Away.invSelf (lawTwoTriple W i j k)) := by
+  rw [RingHom.comp_apply]
+  congr 1
+  unfold addOnYPieceHom chartAwayHomOfTriple
+  have hround : (chartCoordAlgEquiv W k).symm (chartCoordEquiv W k (Ideal.Quotient.mk _
+      (MvPolynomial.X m))) = Ideal.Quotient.mk _ (MvPolynomial.X m) :=
+    (chartCoordEquiv W k).symm_apply_apply _
+  show (chartHomOfTriple W k (awayTriple W i j k (lawTwoTriple W i j))
+      (IsLocalization.Away.invSelf (lawTwoTriple W i j k)) (awayTriple_mul_invSelf W i j k _)
+      (equation_awayTriple W i j k _ (equation_lawTwoTriple_of_isDomain W i j hΔ)))
+      ((chartCoordAlgEquiv W k).symm ((chartCoordEquiv W k)
+        (Ideal.Quotient.mk _ (MvPolynomial.X m)))) = _
+  rw [hround, chartHomOfTriple_coord]
+  rfl
+
+end Readout
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
