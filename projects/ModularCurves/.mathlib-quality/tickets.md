@@ -12589,3 +12589,14 @@ Then c4.5 (greenlit) → `mulModelHom` → 0c-i; c2 `blOpen_cover` = [C2-BEZOUT]
   (NEW-ATLAS, in flight) + the E-track E1/E2/E3/E5/E6 (⛩BB-DIFF ⟸ T-W7a) + the one
   primitive (⟸ T-W7a) + MASTER's one `exact`. **NEW-Y1 PARKED confirmed** (trigger:
   NEW-ATLAS PR or T-W7a; the E-track is not open work — correctly refused).
+
+## Amendments v10.90 (2026-07-09, coordinator): NEW-ATLAS — Tate-specialized round-trip API landed (boundary correction applied); GO on the classifying clause proper
+
+- **NEW-ATLAS absorbed** (98fab3c8f, pushed): `tateClassifyingHomOfPullbackMap` round-trip
+  API (both directions + pullSection compat), built ON tateEllObj per the v10.88
+  correction — inherited sorryAx attributed (tateEllObj / [T-A6b]), reused deps clean,
+  bar met. The v10.89 homPullbackAlongEquiv pointer was consumed same-hour: the
+  round-trips ride the reused toPullbackAlong machinery, not hand-rolls.
+- **GO**: the classifying clause proper (exists_tatePoint's ∀-part) is now the direct
+  target — the equiv machinery + gluing handles + normalisation independence are all in
+  place. PR at subtree completion as chartered.
