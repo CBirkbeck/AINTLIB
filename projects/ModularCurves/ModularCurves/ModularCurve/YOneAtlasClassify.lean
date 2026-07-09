@@ -155,6 +155,24 @@ theorem tateBaseSpecMap_ext (φ ψ : tateRingOver R →ₐ[R] A)
     tateBaseSpecMap R φ = tateBaseSpecMap R ψ := by
   rw [tateRingOver_algHom_ext R φ ψ h0 h1]
 
+/-- The affine map induced by an `R`-algebra map out of the Tate atlas ring lies over
+`Spec R`. -/
+theorem tateBaseSpecMap_tateStructMap (φ : tateRingOver R →ₐ[R] A) :
+    tateBaseSpecMap R φ ≫ tateStructMap R =
+      Spec.map (CommRingCat.ofHom (algebraMap R A)) := by
+  unfold tateBaseSpecMap tateStructMap
+  rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  congr 1
+  exact CommRingCat.hom_ext (RingHom.ext fun r => φ.commutes r)
+
+/-- The affine coefficient-classifying map to the Tate atlas lies over `Spec R`. -/
+theorem tateBaseSpecMapOfCoeffs_tateStructMap (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateBaseSpecMapOfCoeffs R α β hΔ ≫ tateStructMap R =
+      Spec.map (CommRingCat.ofHom (algebraMap R A)) :=
+  tateBaseSpecMap_tateStructMap R (tateRingOverAlgLift R α β hΔ)
+
 variable (S : Scheme.{u}) [Algebra R Γ(S, ⊤)]
 
 /-- The global classifying map to the Tate atlas attached to global Tate coefficients
@@ -182,6 +200,16 @@ theorem tateBaseMapOfGlobalCoeffs_ext (α β α' β' : Γ(S, ⊤))
     (tateRingOverAlgLift R α' β' hΔ')]
   · simp [tateRingOverAlgLift, hα]
   · simp [tateRingOverAlgLift, hβ]
+
+/-- The global coefficient map to the Tate atlas is compatible with the structure map to
+`Spec R`. -/
+theorem tateBaseMapOfGlobalCoeffs_tateStructMap (α β : Γ(S, ⊤))
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateBaseMapOfGlobalCoeffs R S α β hΔ ≫ tateStructMap R =
+      S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (algebraMap R Γ(S, ⊤))) := by
+  unfold tateBaseMapOfGlobalCoeffs
+  rw [Category.assoc, tateBaseSpecMapOfCoeffs_tateStructMap]
 
 /-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
 with coefficients `(α, β)`. -/
