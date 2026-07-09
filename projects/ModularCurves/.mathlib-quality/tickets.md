@@ -12774,3 +12774,22 @@ so it lifts addOn{Z,Y}OnImage → addOn{Z,Y}Family → addOn{Z,Y} → mulModelHo
 boundary): the complete Bosma–Lenstra two-law group-law GEOMETRY (c3 agree + c2 cover + mulModelHom)
 + the c4.5 base-change FOUNDATION (Int.instIsJacobsonRing → mulModelHom_U applies) are delivered,
 axiom-clean, committed (ecd15536c…d02351f00). GLC wiring is next session per the dispatch.
+
+## Amendments v10.93 (2026-07-09, coordinator): ★★ [Y1-ATLAS] classifying ENGINE COMPLETE (NEW-ATLAS-2, zero sorryAx) — final assembly is pure plumbing per the banked recipe
+
+- **★★ NEW-ATLAS-2 absorbed** (8 increments to 7b0793841, ~1,490 LOC, pushed): the full
+  ring/model-level engine for the classifying clause — B2-ii order dictionary
+  (ψ₂/Ψ₃ converses + nowhereOrderLEThree_of_forall_geom, T-E1's exact input), B2-i chart
+  extraction (Z-chart factoring pinned by one equation + uniqueness converse), the
+  comparison ENGINE both halves (pointed-iso ⟹ same Tate-atlas map; naturality with NO
+  separate rigidity computation — group cancellation through the two normalisations),
+  and projTateMap (cartesian, pointed, marking-to-(0,0)). **ZERO sorryAx in the entire
+  engine** — the designed [T-A6b]/[T-B6′] trails enter only at the remaining
+  fibre-bridge step. Loeffler 3.3.4/3.3.5's substance now exists at scheme level.
+- **Remaining = Ell/R-side assembly ONLY** (chart packaging over Y.base, the designed
+  fibre bridges, cover gluing through the landed handles, ∃!-wiring), fully recipe'd at
+  v10.109-ATLAS (their branch board) — no open design questions. **DISPATCH: next
+  session on that recipe → exists_tatePoint ∀-part DONE → rebase onto
+  origin/dev/modular-curves-y1 → ONE PR → #print axioms board.** Owner: NEW-ATLAS-2
+  continues, or NEW-ATLAS reclaims on return — rule-5 handshake, whoever fires first;
+  the claim + sentinel stand meanwhile.
