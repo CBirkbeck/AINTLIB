@@ -583,6 +583,58 @@ theorem chartι_map_comp_projModelBaseChange (f : U →+* R) (W₀ : Weierstrass
 
 end ChartNaturality
 
+section AtlasPush
+
+open WeierstrassCurve.Projective
+
+variable (W : WeierstrassCurve R) [W.IsElliptic]
+variable {K : Type u} [Field K] [Algebra R K]
+
+/-- [C6-e1] The multiplication point pushed to the atlas: through the base change, the K-point of
+`mulModelHom W` is the atlas-side two-law evaluation of the pushed pair. -/
+theorem lift_mulModelHom_comp_baseChangeOf
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W) :
+    (pullback.lift P.1 Q.1 w ≫ mulModelHom W) ≫
+        projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W) =
+      (pullback.lift P.1 Q.1 w ≫
+          pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+            (universalWeierstrassLocU_map_classifyRingHomU W)) ≫
+        WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU
+          universalWeierstrassLocU.isUnit_Δ := by
+  rw [mulModelHom]
+  simp only [Category.assoc]
+  rw [mulModelHomBC_baseChange]
+
+/-- [C6-e2, fst] The pushed pair's first projection is `P` pushed to the atlas. -/
+theorem lift_pullbackMap_fst
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W) :
+    (pullback.lift P.1 Q.1 w ≫
+        pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W)) ≫
+        pullback.fst (projModelπ universalWeierstrassLocU) (projModelπ universalWeierstrassLocU) =
+      P.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+        (universalWeierstrassLocU_map_classifyRingHomU W) := by
+  rw [pullbackMapBaseChangeOf]
+  simp only [Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc]
+
+/-- [C6-e2, snd] Mirror. -/
+theorem lift_pullbackMap_snd
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W) :
+    (pullback.lift P.1 Q.1 w ≫
+        pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W)) ≫
+        pullback.snd (projModelπ universalWeierstrassLocU) (projModelπ universalWeierstrassLocU) =
+      Q.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+        (universalWeierstrassLocU_map_classifyRingHomU W) := by
+  rw [pullbackMapBaseChangeOf]
+  simp only [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc]
+
+end AtlasPush
+
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
 multiplication IS the glued two-law multiplication. -/
 theorem mulModelHom_universalWeierstrassLocU :
