@@ -665,6 +665,21 @@ theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
     Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) := by
   sorry
 
+/-- Relative representability transports across a functor isomorphism of moduli problems:
+the representing datum `(Z, f)` is reused and the classifying bijections are post-composed
+with the iso's components; the naturality clause carries by naturality of `e.inv`. -/
+theorem ModuliProblem.relativelyRepresentable_of_iso {R : CommRingCat.{u}}
+    {P Q : ModuliProblem R} (e : P ≅ Q)
+    (hQ : Q.RelativelyRepresentable) : P.RelativelyRepresentable := by
+  intro X
+  obtain ⟨Z, f, eqv, nat⟩ := hQ X
+  refine ⟨Z, f, fun {T} g =>
+    (eqv g).trans (e.app (Opposite.op (X.pullbackAlong g))).toEquiv.symm, ?_⟩
+  intro T T' g k h
+  simp only [Equiv.trans_apply]
+  rw [nat]
+  exact NatTrans.naturality_apply e.inv (X.pullbackAlongMap g k).op (eqv g h)
+
 /-- **[GHC2] (bridge — the held T-H4 statement IS true at `H = ⊥`, and this discharges
 it there)** The full conclusion of the held `gammaHNaive_relativelyRepresentable`
 specialised to `H = ⊥`: `⊥`-orbits are singletons (`gammaHNaive_bot`, held file,
@@ -678,7 +693,14 @@ theorem gammaHNaive_relativelyRepresentable_bot (N : ℕ) [NeZero N]
         ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
           ({ h : T ⟶ Z // h ≫ f = g } ≃
             (gammaHNaiveProblem R N ⊥).obj (Opposite.op (X.pullbackAlong g))) := by
-  sorry
+  obtain ⟨e⟩ := gammaHNaive_bot R N
+  have hQ : (gammaFullNaiveProblem R N).RelativelyRepresentable :=
+    (ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData _).mpr
+      (fun Y => ⟨(gammaFullNaive_relRepData R N hinv Y).choose⟩)
+  refine ⟨ModuliProblem.relativelyRepresentable_of_iso e hQ, fun X => ?_⟩
+  obtain ⟨d, hfin, het⟩ := gammaFullNaive_relRepData R N hinv X
+  exact ⟨d.Z, d.f, hfin, het, fun {T} g => ⟨(d.eqv g).trans
+    (e.app (Opposite.op (X.pullbackAlong g))).toEquiv.symm⟩⟩
 
 /-- **[GHC3] (bridge = Loeffler Fact 3.8.1 as a theorem)** The naive orbit problem
 maps to the quotient problem — `pkg.proj` descends through the global-orbit quotient
