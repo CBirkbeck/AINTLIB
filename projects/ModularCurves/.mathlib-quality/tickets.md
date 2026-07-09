@@ -11335,3 +11335,30 @@ Committed bridge inventory (all axiom-clean, in repo): helper A `blOpenYImage_in
 helper C `specMap_comp_pieceMorOfTriple` (088e46ad) + `blOpenYImage_eq_iSup`/`_inf_eq_iSup`
 (088e46ad/5da7f060); crux `chartι_specMap_lawTwoTriple_cross` + `_smul_eq` (25799fea);
 `specMap_transHom_pieceι` (a468579e).
+
+## Amendments v10.67 (2026-07-09, coordinator): GH zero-gate frontier EXHAUSTED (GHC2 proved, DESC-GAP confirmed); NEW-GH → T-A3 (rule-5); GAP1 build GO
+
+- **NEW-GH: [GHC2] PROVED** (95f277ffd) — with GHC4, the held T-H4 statement is now FULLY
+  CHARACTERIZED in Lean (holds at H = ⊥, refuted for every H ≠ ⊥); reusable
+  `ModuliProblem.relativelyRepresentable_of_iso` minted. **[GH-DESC-GAP] CONFIRMED REAL**
+  (221618810; finite-étale source-descent absent from the pin — full search verdict in the
+  docstring); recommendation RATIFIED: do NOT force it — the pipeline′s discharge is the
+  chart-local route inside GHB4/GHB7, which never needs the abstract lemma. STREAM-GH is
+  now GATE-BOUND: GHA3 ⛩[DS4/T-C1] (P2), GHB4/5/7 ⛩[A711-FP/BC] (FP), GH1 ⛩[T-E4a],
+  GHC6 ⛩[T-E5-engine]. p0 reclaims from 9d1bef2d9; right pickup on return = first
+  gate-flipped leaf.
+- **NEW-GH DISPATCH: claim [T-A3] under rule 5** — the fleet′s most-wanted unclaimed item
+  (gates fable-P4′s engine smooth leaf AND Y₁(N)′s smoothness). Check the board first:
+  if FP4 or beastmode-A has claimed it, stand down and take the FALLBACK: the three staged
+  SmoothDescent leaves (02KL-lfp / 29.26.13-scheme-flat / 02KM-smooth — locators staged by
+  PIC0, workable by any free hand), then the MellWeierstrass cadence cleanup. T-A3 spec:
+  the original T-A3a/b/c ticket bodies (Jacobian comaximality certificate-free,
+  standard-smooth presentations, chartwise assembly).
+- **PIC0: GAP1-W-MONO steps (i)+(ii) absorbed — BUILD GO.** Unit pin ALREADY PROVEN (their
+  own sheafifyValIso at SheafOfModules.unit — CLEANUP-PIC1 paying off immediately); the
+  registration wrapper is the reflective-localization theorem at W_mod bridged to
+  locally-bijective via WEqualsLocallyBijective + homEquivOfIsLocallyBijective. Build order
+  ratified: ForMathlib/SheafOfModulesMonoidal.lean — W_mod + registration → the
+  locally-bijective bridge → the ⊗-stability leaf (decompose the injective half if it
+  forks) → the LocalizedMonoidal instantiation. One delivery = GAP-1 kernel +
+  IsInvertible.tensorObj + the P2 coherences.
