@@ -1314,6 +1314,15 @@ theorem zChartEval_equation (g : SpecPoints (projModel W) (projModelπ W) K)
   rw [hker] at hexp
   linear_combination -hexp
 
+/-- The coordinates satisfy the Weierstrass equation of `W` itself when the point lives over
+the base ring (`W.baseChange A = W` up to definitional unfolding; this restatement keeps every
+downstream `Equation`-proof slot properly typed). -/
+theorem zChartEval_equation_self {A' : Type u} [CommRing A'] (W' : WeierstrassCurve A')
+    (g : SpecPoints (projModel W') (projModelπ W') A') (hZ : InZChart W' g) :
+    W'.toAffine.Equation
+      (zChartEval W' g hZ (coordX W')) (zChartEval W' g hZ (coordY W')) :=
+  zChartEval_equation W' g hZ
+
 end ZChartSection
 
 section MarkedChartComparison
@@ -1491,8 +1500,8 @@ theorem tateRingOverAlgLiftOfPoint_eq_of_pointedIso (R : CommRingCat.{u}) [Algeb
       (zChartEval W₁ g₁ hZ₁ (coordX W₁)) (zChartEval W₁ g₁ hZ₁ (coordY W₁)))
     (hord₂ : NowhereOrderLEThree W₂
       (zChartEval W₂ g₂ hZ₂ (coordX W₂)) (zChartEval W₂ g₂ hZ₂ (coordY W₂))) :
-    tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
-      tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
+    tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ =
+      tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ := by
   obtain ⟨C, hC, hεhom⟩ := pointedIso_exists_variableChange W₁ W₂ ε heπ hez
   -- the marking coordinates transform by the variable change
   have hx : zChartEval W₂ g₂ hZ₂ (coordX W₂) =
@@ -1514,27 +1523,27 @@ theorem tateRingOverAlgLiftOfPoint_eq_of_pointedIso (R : CommRingCat.{u}) [Algeb
     rw [h]
     simp only [map_mul, zChartEval_algebraMap, Algebra.algebraMap_self_apply]
   -- the composite normalising change and T-E1 uniqueness
-  have hD : (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ * C) •
+  have hD : (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ * C) •
       W₂ =
-      (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁) • W₁ := by
+      (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁) • W₁ := by
     rw [mul_smul, hC]
-  have hDC₂ : tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ * C =
-      tateNormalVariableChange W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
-    refine tateNormalVariableChange_unique W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ _
+  have hDC₂ : tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ * C =
+      tateNormalVariableChange W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ := by
+    refine tateNormalVariableChange_unique W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ _
       ⟨?_, ?_, ?_⟩
     · rw [hD]
-      exact tateNormalVariableChange_isTateNormal W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁
-    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁).r *
+      exact tateNormalVariableChange_isTateNormal W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁
+    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁).r *
         (C.u : A) ^ 2 + C.r = _
       rw [tateNormalVariableChange_r, hx]
       ring
-    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁).t *
-        (C.u : A) ^ 3 + (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁)
+    · show (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁).t *
+        (C.u : A) ^ 3 + (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁)
           hord₁).r * C.s * (C.u : A) ^ 2 + C.t = _
       rw [tateNormalVariableChange_t, tateNormalVariableChange_r, hy]
       ring
-  have hcurves : (tateNormalVariableChange W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂) • W₂ =
-      (tateNormalVariableChange W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁) • W₁ := by
+  have hcurves : (tateNormalVariableChange W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂) • W₂ =
+      (tateNormalVariableChange W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁) • W₁ := by
     rw [← hDC₂]
     exact hD
   -- the two atlas algebra maps agree on the coordinates
@@ -1559,11 +1568,11 @@ theorem tateBaseSpecMapOfPoint_eq_of_pointedIso (R : CommRingCat.{u}) [Algebra R
       (zChartEval W₁ g₁ hZ₁ (coordX W₁)) (zChartEval W₁ g₁ hZ₁ (coordY W₁)))
     (hord₂ : NowhereOrderLEThree W₂
       (zChartEval W₂ g₂ hZ₂ (coordX W₂)) (zChartEval W₂ g₂ hZ₂ (coordY W₂))) :
-    tateBaseSpecMapOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
-      tateBaseSpecMapOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ := by
+    tateBaseSpecMapOfPoint R W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ =
+      tateBaseSpecMapOfPoint R W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ := by
   unfold tateBaseSpecMapOfPoint
-  rw [show tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation W₁ g₁ hZ₁) hord₁ =
-    tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation W₂ g₂ hZ₂) hord₂ from
+  rw [show tateRingOverAlgLiftOfPoint R W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ =
+    tateRingOverAlgLiftOfPoint R W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ from
     tateRingOverAlgLiftOfPoint_eq_of_pointedIso R W₁ W₂ ε heπ hez g₁ g₂ hZ₁ hZ₂ hsec
       hord₁ hord₂]
 
@@ -1778,5 +1787,367 @@ theorem zChartEval_tateP0SpecPoint_coordY :
   exact zChartHom_tateP0SpecPoint_isLocalizationElem R ⟨1, by decide⟩
 
 end TateMarkedChart
+
+section BaseChangeChart
+
+/-! ### `Z`-chart points along base change of the model
+
+The chart square of `projModelBaseChange` (`isPullback_projModelBaseChange_chart`) transports
+`Z`-chart points of the base-changed model to `Z`-chart points of the original, with the
+coordinate evaluations unchanged.  This is the mechanism producing the classifying `top` map's
+compatibility with the atlas marking. -/
+
+variable {A : Type u} [CommRing A]
+
+/-- `awayι` transports along an equality of the localized elements (public generic replica of
+the `awayι_awayCongr_local` pattern). -/
+theorem Spec_map_awayCongr_awayι {R₀ B : Type u} [CommRing R₀] [CommRing B] [Algebra R₀ B]
+    (𝒜 : ℕ → Submodule R₀ B) [GradedAlgebra 𝒜] {s t : B} (h : s = t)
+    (hs : s ∈ 𝒜 1) :
+    Spec.map (CommRingCat.ofHom (awayCongr (𝒜 := 𝒜) h).toRingHom) ≫
+      Proj.awayι 𝒜 s hs one_pos = Proj.awayι 𝒜 t (h ▸ hs) one_pos := by
+  subst h
+  rw [show (awayCongr (𝒜 := 𝒜) (rfl : s = s)).toRingHom = RingHom.id _ from by
+    rw [awayCongr_rfl]; rfl]
+  rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
+
+variable (W : WeierstrassCurve A) {B : Type u} [CommRing B] [Algebra A B]
+
+/-- The chart transport of `projModelBaseChange` on localization elements: `Xⱼ/X₂` maps to
+`Xⱼ/X₂`. -/
+theorem awayCongr_baseChangeMap_isLocalizationElem (j : Fin 3) :
+    awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+      (baseChangeGradedHom_mk_X W 2)
+      (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W j))) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2)
+        (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) j) := by
+  rw [show HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W j)
+      = HomogeneousLocalization.Away.mk (quotientGrading (projIdeal W))
+          (mk_X_mem_quotientGrading_one W 2) 1
+          (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) ^ 1)
+          (by rw [pow_one]; exact mk_X_mem_quotientGrading_one W j) from rfl]
+  rw [HomogeneousLocalization.Away.map_mk, awayCongr_mk]
+  apply HomogeneousLocalization.val_injective
+  rw [HomogeneousLocalization.Away.val_mk]
+  rw [show HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2)
+        (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) j)
+      = HomogeneousLocalization.Away.mk
+          (quotientGrading (projIdeal (W.map (algebraMap A B))))
+          (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2) 1
+          (((quotientGradingHom (projIdeal (W.map (algebraMap A B)))) (MvPolynomial.X j)) ^ 1)
+          (by rw [pow_one]
+              exact mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) j) from rfl]
+  rw [HomogeneousLocalization.Away.val_mk]
+  rw [map_pow, baseChangeGradedHom_mk_X]
+
+variable {K : Type u} [CommRing K] [Algebra B K] [Algebra A K] [IsScalarTower A B K]
+
+/-- Push a `Z`-chart point of the base-changed model down to the original model. -/
+noncomputable def specPointBaseChange
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K) :
+    SpecPoints (projModel W) (projModelπ W) K :=
+  ⟨g.1 ≫ projModelBaseChange (algebraMap A B) W, by
+    rw [Category.assoc, projModelBaseChange_π, ← Category.assoc, g.2, ← Spec.map_comp,
+      ← CommRingCat.ofHom_comp, ← IsScalarTower.algebraMap_eq]⟩
+
+/-- The chart square, assembled: the `Z`-chart inclusion of the base-changed model composed
+with `projModelBaseChange` factors through the `Z`-chart of the original model. -/
+theorem awayι_projModelBaseChange :
+    Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap A B))))
+      ((quotientGradingHom (projIdeal (W.map (algebraMap A B)))) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2) one_pos ≫
+      projModelBaseChange (algebraMap A B) W =
+    Spec.map (CommRingCat.ofHom
+      (((awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+          (baseChangeGradedHom_mk_X W 2)).toRingHom).comp
+        (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+    Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos := by
+  have hsq := (isPullback_projModelBaseChange_chart (R' := B) W 2).w
+  have hcongr : Spec.map (CommRingCat.ofHom
+      (awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+        (baseChangeGradedHom_mk_X W 2)).toRingHom) ≫
+      Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap A B))))
+        ((baseChangeGradedHom (algebraMap A B) W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))
+        ((baseChangeGradedHom (algebraMap A B) W).2
+          (mk_X_mem_quotientGrading_one W 2)) one_pos =
+      Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap A B))))
+        ((quotientGradingHom (projIdeal (W.map (algebraMap A B)))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (W.map (algebraMap A B)) 2) one_pos :=
+    Spec_map_awayCongr_awayι _ (baseChangeGradedHom_mk_X W 2) _
+  rw [← hcongr, Category.assoc, ← hsq, CommRingCat.ofHom_comp, Spec.map_comp,
+    Category.assoc]
+
+/-- Base change preserves the `Z`-chart. -/
+theorem inZChart_specPointBaseChange
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K)
+    (hZ : InZChart (W.map (algebraMap A B)) g) :
+    InZChart W (specPointBaseChange W g) := by
+  refine ⟨Spec.map (CommRingCat.ofHom (zChartHom (W.map (algebraMap A B)) g hZ)) ≫
+    Spec.map (CommRingCat.ofHom
+      (((awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+          (baseChangeGradedHom_mk_X W 2)).toRingHom).comp
+        (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))), ?_⟩
+  rw [Category.assoc, ← awayι_projModelBaseChange, ← Category.assoc,
+    Spec_map_zChartHom_awayι]
+  rfl
+
+/-- The chart-ring homomorphism of a base-changed point. -/
+theorem zChartHom_specPointBaseChange
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K)
+    (hZ : InZChart (W.map (algebraMap A B)) g) :
+    zChartHom W (specPointBaseChange W g) (inZChart_specPointBaseChange W g hZ) =
+      (zChartHom (W.map (algebraMap A B)) g hZ).comp
+        (((awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+            (baseChangeGradedHom_mk_X W 2)).toRingHom).comp
+          (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) := by
+  refine (zChartHom_unique W _ _ _ ?_).symm
+  rw [show CommRingCat.ofHom ((zChartHom (W.map (algebraMap A B)) g hZ).comp
+      (((awayCongr (𝒜 := quotientGrading (projIdeal (W.map (algebraMap A B))))
+          (baseChangeGradedHom_mk_X W 2)).toRingHom).comp
+        (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) =
+      CommRingCat.ofHom (((awayCongr (𝒜 := quotientGrading
+          (projIdeal (W.map (algebraMap A B)))) (baseChangeGradedHom_mk_X W 2)).toRingHom).comp
+        (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) ≫
+      CommRingCat.ofHom (zChartHom (W.map (algebraMap A B)) g hZ) from
+    CommRingCat.ofHom_comp _ _]
+  rw [Spec.map_comp, Category.assoc, ← awayι_projModelBaseChange, ← Category.assoc,
+    Spec_map_zChartHom_awayι]
+  rfl
+
+/-- Base change leaves the coordinate evaluations unchanged. -/
+theorem zChartEval_specPointBaseChange_coordX
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K)
+    (hZ : InZChart (W.map (algebraMap A B)) g) :
+    zChartEval W (specPointBaseChange W g) (inZChart_specPointBaseChange W g hZ)
+      (coordX W) = zChartEval (W.map (algebraMap A B)) g hZ
+        (coordX (W.map (algebraMap A B))) := by
+  rw [zChartEval_coordX, zChartEval_coordX, zChartHom_specPointBaseChange]
+  show zChartHom (W.map (algebraMap A B)) g hZ
+    (awayCongr (baseChangeGradedHom_mk_X W 2)
+      (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)))) = _
+  rw [awayCongr_baseChangeMap_isLocalizationElem W 0]
+
+/-- Base change leaves the coordinate evaluations unchanged (`y`-side). -/
+theorem zChartEval_specPointBaseChange_coordY
+    (g : SpecPoints (projModel (W.map (algebraMap A B)))
+      (projModelπ (W.map (algebraMap A B))) K)
+    (hZ : InZChart (W.map (algebraMap A B)) g) :
+    zChartEval W (specPointBaseChange W g) (inZChart_specPointBaseChange W g hZ)
+      (coordY W) = zChartEval (W.map (algebraMap A B)) g hZ
+        (coordY (W.map (algebraMap A B))) := by
+  rw [zChartEval_coordY, zChartEval_coordY, zChartHom_specPointBaseChange]
+  show zChartHom (W.map (algebraMap A B)) g hZ
+    (awayCongr (baseChangeGradedHom_mk_X W 2)
+      (HomogeneousLocalization.Away.map (baseChangeGradedHom (algebraMap A B) W)
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)))) = _
+  rw [awayCongr_baseChangeMap_isLocalizationElem W 1]
+
+end BaseChangeChart
+
+section ProjTateMap
+
+/-! ### The classifying model morphism of a marked chart (B2-iii at model level)
+
+For an elliptic marked chart `(W, g)` over an `R`-algebra `A`, T-E1 normalisation exhibits
+`W` as the specialisation of the universal Tate curve at the atlas algebra map, giving the
+canonical model morphism `projModel W ⟶ projModel (tateCurveLocOver R)` — cartesian over the
+affine atlas map, pointed, and carrying the marking to the atlas marking `(0,0)`. -/
+
+variable {A : Type u} [CommRing A]
+
+/-- Transport of a point along a pointed isomorphism of models. -/
+noncomputable def specPointPointedIso {W₁ W₂ : WeierstrassCurve A}
+    (ε : projModel W₁ ≅ projModel W₂)
+    (heπ : ε.hom ≫ projModelπ W₂ = projModelπ W₁)
+    {K : Type u} [CommRing K] [Algebra A K]
+    (g : SpecPoints (projModel W₁) (projModelπ W₁) K) :
+    SpecPoints (projModel W₂) (projModelπ W₂) K :=
+  ⟨g.1 ≫ ε.hom, by rw [Category.assoc, heπ, g.2]⟩
+
+/-- Pointed isomorphisms preserve the `Z`-chart. -/
+theorem inZChart_specPointPointedIso {W₁ W₂ : WeierstrassCurve A}
+    (ε : projModel W₁ ≅ projModel W₂)
+    (heπ : ε.hom ≫ projModelπ W₂ = projModelπ W₁)
+    (hez : projModelZero W₁ ≫ ε.hom = projModelZero W₂)
+    {K : Type u} [CommRing K] [Algebra A K]
+    (g : SpecPoints (projModel W₁) (projModelπ W₁) K) (hZ : InZChart W₁ g) :
+    InZChart W₂ (specPointPointedIso ε heπ g) := by
+  refine ⟨Spec.map (CommRingCat.ofHom (zChartHom W₁ g hZ)) ≫
+    Spec.map (pointedIsoAwayHom ε hez), ?_⟩
+  rw [Category.assoc, Spec_map_pointedIsoAwayHom_awayι ε hez, ← Category.assoc,
+    Spec_map_zChartHom_awayι]
+  rfl
+
+variable (R : CommRingCat.{u}) [Algebra R A] (W : WeierstrassCurve A) [W.IsElliptic]
+  (g : SpecPoints (projModel W) (projModelπ W) A) (hZ : InZChart W g)
+  (hord : NowhereOrderLEThree W
+    (zChartEval W g hZ (coordX W)) (zChartEval W g hZ (coordY W)))
+
+/-- The specialisation of the universal Tate curve at the marked chart's atlas map is the
+T-E1 normal form of the chart. -/
+theorem tateCurveLocOver_map_marked :
+    (tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A) =
+      (tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord) • W :=
+  tateCurveLocOver_map_tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord
+
+/-- The normalising pointed isomorphism from the specialised universal Tate model onto the
+chart's model. -/
+noncomputable def tateNormalIso :
+    projModel ((tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)) ≅ projModel W :=
+  eqToIso (congrArg projModel (tateCurveLocOver_map_marked R W g hZ hord)) ≪≫
+    projModelVCIso (tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord) W
+
+/-- The hom of the normalising isomorphism, in `transport_general` shape. -/
+theorem tateNormalIso_hom :
+    (tateNormalIso R W g hZ hord).hom =
+      eqToHom (congrArg projModel (tateCurveLocOver_map_marked R W g hZ hord)) ≫
+        (projModelVCIso
+          (tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord) W).hom := by
+  rw [tateNormalIso, Iso.trans_hom, eqToIso.hom]
+
+/-- `eqToHom` transport of the structure morphism along a curve equality. -/
+theorem eqToHom_projModelπ {V₁ V₂ : WeierstrassCurve A} (h : V₁ = V₂) :
+    eqToHom (congrArg projModel h) ≫ projModelπ V₂ = projModelπ V₁ := by
+  subst h; simp
+
+/-- `eqToHom` transport of the zero section along a curve equality. -/
+theorem eqToHom_projModelZero {V₁ V₂ : WeierstrassCurve A} (h : V₁ = V₂) :
+    projModelZero V₁ ≫ eqToHom (congrArg projModel h) = projModelZero V₂ := by
+  subst h; simp
+
+/-- The normalising isomorphism respects the structure morphisms. -/
+theorem tateNormalIso_π :
+    (tateNormalIso R W g hZ hord).hom ≫ projModelπ W =
+      projModelπ ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)) := by
+  rw [tateNormalIso_hom, Category.assoc, projModelVCIso_π,
+    eqToHom_projModelπ (tateCurveLocOver_map_marked R W g hZ hord)]
+
+/-- The normalising isomorphism respects the zero sections. -/
+theorem tateNormalIso_zero :
+    projModelZero ((tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)) ≫
+      (tateNormalIso R W g hZ hord).hom = projModelZero W := by
+  rw [tateNormalIso_hom, ← Category.assoc,
+    eqToHom_projModelZero (tateCurveLocOver_map_marked R W g hZ hord), projModelVCIso_zero]
+
+/-- The marked point, normalised into the specialised Tate model. -/
+noncomputable def markedPointNormalised :
+    SpecPoints (projModel ((tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)))
+      (projModelπ ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A))) A :=
+  specPointPointedIso (tateNormalIso R W g hZ hord).symm
+    (by rw [Iso.symm_hom, Iso.inv_comp_eq]; exact (tateNormalIso_π R W g hZ hord).symm) g
+
+/-- The normalised marked point returns to the marking through the normalising iso. -/
+theorem markedPointNormalised_sec :
+    (markedPointNormalised R W g hZ hord).1 ≫ (tateNormalIso R W g hZ hord).hom = g.1 := by
+  show (g.1 ≫ (tateNormalIso R W g hZ hord).inv) ≫ (tateNormalIso R W g hZ hord).hom = g.1
+  rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
+/-- The zero section respects the inverse normalising iso. -/
+theorem tateNormalIso_zero_inv :
+    projModelZero W ≫ (tateNormalIso R W g hZ hord).inv =
+      projModelZero ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A)) := by
+  rw [Iso.comp_inv_eq]
+  exact (tateNormalIso_zero R W g hZ hord).symm
+
+/-- The normalised marked point lies in the `Z`-chart. -/
+theorem markedPointNormalised_inZChart :
+    InZChart ((tateCurveLocOver R).map
+      ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+        tateRingOver R →ₐ[R] A) : tateRingOver R →+* A))
+      (markedPointNormalised R W g hZ hord) :=
+  inZChart_specPointPointedIso (tateNormalIso R W g hZ hord).symm
+    (by rw [Iso.symm_hom, Iso.inv_comp_eq]; exact (tateNormalIso_π R W g hZ hord).symm)
+    (by rw [Iso.symm_hom]; exact tateNormalIso_zero_inv R W g hZ hord) g hZ
+
+/-- The normalised marked point has coordinates `(0, 0)`. -/
+theorem markedPointNormalised_coords :
+    zChartEval _ (markedPointNormalised R W g hZ hord)
+      (markedPointNormalised_inZChart R W g hZ hord)
+      (coordX ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A))) = 0 ∧
+    zChartEval _ (markedPointNormalised R W g hZ hord)
+      (markedPointNormalised_inZChart R W g hZ hord)
+      (coordY ((tateCurveLocOver R).map
+        ((tateRingOverAlgLiftOfPoint R W _ _ (zChartEval_equation_self W g hZ) hord :
+          tateRingOver R →ₐ[R] A) : tateRingOver R →+* A))) = 0 := by
+  have heπ : (tateNormalIso R W g hZ hord).hom ≫ projModelπ W = projModelπ _ :=
+    tateNormalIso_π R W g hZ hord
+  have hez : projModelZero _ ≫ (tateNormalIso R W g hZ hord).hom = projModelZero W :=
+    tateNormalIso_zero R W g hZ hord
+  have hgsec : (markedPointNormalised R W g hZ hord).1 ≫
+      (tateNormalIso R W g hZ hord).hom = g.1 := markedPointNormalised_sec R W g hZ hord
+  have hX := zChartEval_pointedIso (tateNormalIso R W g hZ hord) heπ hez
+    (markedPointNormalised R W g hZ hord) g
+    (markedPointNormalised_inZChart R W g hZ hord) hZ hgsec (coordX W)
+  have hY := zChartEval_pointedIso (tateNormalIso R W g hZ hord) heπ hez
+    (markedPointNormalised R W g hZ hord) g
+    (markedPointNormalised_inZChart R W g hZ hord) hZ hgsec (coordY W)
+  rw [transport_general (tateCurveLocOver_map_marked R W g hZ hord) _
+    (projModelVCIso (tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord) W)
+    heπ hez (projModelVCIso_π _ W) (projModelVCIso_zero _ W)
+    (tateNormalIso_hom R W g hZ hord) (coordX W), bridge_coordX] at hX
+  rw [transport_general (tateCurveLocOver_map_marked R W g hZ hord) _
+    (projModelVCIso (tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord) W)
+    heπ hez (projModelVCIso_π _ W) (projModelVCIso_zero _ W)
+    (tateNormalIso_hom R W g hZ hord) (coordY W), bridge_coordY] at hY
+  simp only [map_add, coordRingCongr_algebraMap_mul_coordX,
+    coordRingCongr_algebraMap_mul_coordY, coordRingCongr_algebraMap] at hX hY
+  simp only [map_mul, zChartEval_algebraMap, Algebra.algebraMap_self_apply] at hX hY
+  rw [tateNormalVariableChange_r W _ _ (zChartEval_equation_self W g hZ) hord] at hX
+  rw [tateNormalVariableChange_t W _ _ (zChartEval_equation_self W g hZ) hord] at hY
+  have hXzero : zChartEval _ (markedPointNormalised R W g hZ hord)
+      (markedPointNormalised_inZChart R W g hZ hord) (coordX _) = 0 := by
+    have h2 : ((tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord).u
+        : A) ^ 2 * zChartEval _ (markedPointNormalised R W g hZ hord)
+        (markedPointNormalised_inZChart R W g hZ hord) (coordX _) = 0 := by
+      linear_combination -hX
+    exact ((Units.mul_right_eq_zero (_ ^ 2)).mp (by exact_mod_cast h2))
+  refine ⟨hXzero, ?_⟩
+  rw [hXzero] at hY
+  have h3 : ((tateNormalVariableChange W _ _ (zChartEval_equation_self W g hZ) hord).u
+      : A) ^ 3 * zChartEval _ (markedPointNormalised R W g hZ hord)
+      (markedPointNormalised_inZChart R W g hZ hord) (coordY _) = 0 := by
+    linear_combination -hY
+  exact ((Units.mul_right_eq_zero (_ ^ 3)).mp (by exact_mod_cast h3))
+
+end ProjTateMap
 
 end ModularCurves
