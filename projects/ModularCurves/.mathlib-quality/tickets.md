@@ -11044,3 +11044,35 @@ commits). Sentinel unchanged.*
   `relativelyRepresentable_of_iso` + `gammaHNaive_bot` + GHA4 — LOC 80, NOW given GHA4);
   [GHB6] `isFinite_etale_of_comp_of_finite_etale_surjective` (NOW modulo the [GH-DESC-GAP]
   check). Then the gated PART B assembly (GHB4/5/7 ⛩[A711-FP]/[A711-BC]) and GHC1/GHC3.
+
+### v10.50 (2026-07-09, c5β): [CHARTER-C5B] c4.3 hf — ALL of helper C's infrastructure committed
+
+*Commits this run past v10.49: 088e46ad (specMap_comp_pieceMorOfTriple + image-piece decomposition).
+Every reusable bridge of `hf` is now proven, axiom-clean, committed. What remains is the mechanical
+assembly composing them — no new mathematics, no new leaves.*
+
+- **The full bridge inventory for `hf` (all committed):**
+  - Helper A: `blOpenYImage_inf_le_transι` (ec7e3a56) — overlap ⊆ range(transι).
+  - Helper B: `homOfLE_isoImage_inv_iSup` (ForMathlib, 45afd358) + `addOnYOnImage_piece` — image
+    morphism on the k-piece = `addOnYOnFamily k` through `pieceι.isoImage`.
+  - Helper C bridges: `specMap_comp_pieceMorOfTriple` (088e46ad) — `pieceMorOfTriple` ∘ ψ =
+    `chartAwayHomOfTriple(ψ∘t) ≫ chartι`; `blOpenYImage_eq_iSup` (088e46ad) — the O-cover.
+  - The crux, assembled: `chartι_specMap_lawTwoTriple_cross` (25799fea) — the two law-2 readings
+    over transRing agree; `specMap_transHom_pieceι` (a468579e) — transι symmetric.
+- **The remaining assembly (mechanical, ~150-200 lines, boarded step-by-step):**
+  Prove `addOnYOnImage_agree (i j i' j')` on `O = blOpenYImage ij ⊓ blOpenYImage i'j'`:
+  1. Cover `O.toScheme` by `O.ι ⁻¹ᵁ ((pieceι ''ᵁ piece_ij k) ⊓ (pieceι' ''ᵁ piece_i'j' k'))`,
+     `(k,k') : Fin 3 × Fin 3` (`blOpenYImage_eq_iSup` + `iSup_inf_iSup`; ⨆ = ⊤ over O, ▸ like
+     blOpenYPieceCover).
+  2. On each, `addOnYOnImage_piece` rewrites both sides to `isoImage.inv ≫ addOnYOnFamily · k`; unwind
+     `addOnYOnFamily k = morphismRestrict ≫ specBasicOpenIsoAway.inv ≫ addOnYPieceMor` and
+     `addOnYPieceMor = pieceMorOfTriple (lawTwoTriple) k` (addOnYPieceMor_eq, 01f3b9e4).
+  3. Localize to transRing (transAlgHom/transHom); `specMap_comp_pieceMorOfTriple` puts both in
+     `chartAwayHomOfTriple(image triple) ≫ chartι` form; `chartι_specMap_lawTwoTriple_cross` closes it.
+  4. `Scheme.Cover.hom_ext` ⟹ `addOnYOnImage_agree`; case p,q ∈ {Y,Z}² dispatch;
+     `glueMorphisms_hf_of_agree` (f91b91ec) ⟹ **addOnY / addOnZ** (+ rule-3 interface, same commit).
+  Then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
+- **This session (one continuous run, ~22 axiom-clean commits):** c4.2c fully closed; the ENTIRE c4.3
+  mathematical core; helper A (topological blocker); helper B (isoImage bridge); helper C infra
+  (naturality bridge + cover). Five v10.24 surfaces recorded. Everything `hf` needs is proven; the
+  last mile is composition.
