@@ -886,6 +886,54 @@ lemma overlapPiece_addOnYOnImage_agree [IsDomain (biChartRing W i j)]
   exact (cancel_epi (overlapPieceIso W i j i' j' k k').hom).mp
     (eL.trans ((specMap_psiFst_addOnYPieceMor_cross W i j i' j' hΔ k k').trans eR.symm))
 
+/-- **([C4-HF-ASSEMBLY] L5, full cross-chart agreement)** The `(i,j)` and `(i',j')` image-level law-2
+morphisms agree on their entire overlap `blOpenYImage(i,j) ⊓ blOpenYImage(i',j')`. The overlap is
+covered by the `(k,k')` overlap pieces (`blOpenYImage_inf_eq_iSup`), so `Scheme.Cover.hom_ext` reduces
+to the per-piece agreement `overlapPiece_addOnYOnImage_agree`; the two nested `homOfLE`s of the cover
+inclusion and the overlap inclusion collapse via `Scheme.homOfLE_homOfLE_assoc`. Stated with the
+overlap `Ω` as a parameter (`subst`) so the cover lands on it directly, no dependent rewriting. -/
+lemma addOnYOnImage_agree [IsDomain (biChartRing W i j)] [IsDomain (biChartRing W i' j')]
+    (hΔ : IsUnit W.Δ) (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
+    (hk : Ω ≤ blOpenYImage W i j) (hl : Ω ≤ blOpenYImage W i' j')
+    (hΩ : Ω = ⨆ p : Fin 3 × Fin 3, overlapPiece W i j i' j' p.1 p.2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE hk ≫ addOnYOnImage W hΔ i j =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE hl ≫ addOnYOnImage W hΔ i' j' := by
+  subst hΩ
+  refine Scheme.Cover.hom_ext (Scheme.Opens.iSupOpenCover
+    (fun p : Fin 3 × Fin 3 => overlapPiece W i j i' j' p.1 p.2)) _ _ (fun p => ?_)
+  have hf : (Scheme.Opens.iSupOpenCover
+      (fun p : Fin 3 × Fin 3 => overlapPiece W i j i' j' p.1 p.2)).f p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (le_iSup (fun p : Fin 3 × Fin 3 => overlapPiece W i j i' j' p.1 p.2) p) := rfl
+  rw [hf]
+  exact (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hk (addOnYOnImage W hΔ i j)).trans
+    ((overlapPiece_addOnYOnImage_agree W i j i' j' hΔ p.1 p.2).trans
+      (Scheme.homOfLE_homOfLE_assoc _ (le_iSup _ p) hl (addOnYOnImage W hΔ i' j')).symm)
+
+variable [IsDomain R]
+
+/-- **([C4-HF-ASSEMBLY] L5, the four-chart pairwise agreement)** The `hf` obligation of
+`glueMorphisms` for the `blOpenYFamily` cover: any two of the four chart-product law-2 morphisms agree
+on their overlap. The 16 cases (`fin_cases`) each reduce to `addOnYOnImage_agree` for the corresponding
+chart pair (diagonal included — same-chart agreement is the same statement). -/
+lemma addOnYFamily_agree (hΔ : IsUnit W.Δ) (p q : Fin 2 × Fin 2) :
+    (pullback (projModelπ W) (projModelπ W)).homOfLE
+        (inf_le_left : blOpenYFamily W p ⊓ blOpenYFamily W q ≤ blOpenYFamily W p) ≫
+        addOnYFamily W hΔ p =
+      (pullback (projModelπ W) (projModelπ W)).homOfLE inf_le_right ≫ addOnYFamily W hΔ q := by
+  obtain ⟨p1, p2⟩ := p; obtain ⟨q1, q2⟩ := q
+  fin_cases p1 <;> fin_cases p2 <;> fin_cases q1 <;> fin_cases q2 <;>
+    exact addOnYOnImage_agree W _ _ _ _ hΔ _ inf_le_left inf_le_right
+      (blOpenYImage_inf_eq_iSup W _ _ _ _)
+
+/-- **([C4-HF-ASSEMBLY] L5, addOnY — the second Bosma–Lenstra law as a morphism)** The `Y = 0`
+addition law glued into a single scheme morphism on its whole regularity open `blOpenY = ⨆ blOpenYFamily`.
+`glueMorphisms` on the four-chart cover, with the pairwise agreement `addOnYFamily_agree` packaged by
+`glueMorphisms_hf_of_agree`. This is the geometric assembly of T-W7.0c-i (Y-law). -/
+noncomputable def addOnY (hΔ : IsUnit W.Δ) : (blOpenY W).toScheme ⟶ projModel W :=
+  (blOpenYCover W).glueMorphisms (addOnYFamily W hΔ)
+    (glueMorphisms_hf_of_agree (blOpenYFamily W) (addOnYFamily W hΔ) (addOnYFamily_agree W hΔ))
+
 end Overlap
 
 end WeierstrassCurve.Projective
