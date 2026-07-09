@@ -228,6 +228,16 @@ lemma tPrimeScheme_fac :
           Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'') := rfl
   rw [hsplit, Spec.map_comp, pullbackSpecIso_hom_fst_assoc]
 
+/-- **[GR-F cocycle, ring level]** The triple composite of t'-maps is the identity —
+the last glue condition. Reduction: `Algebra.TensorProduct.ringHom_ext` +
+`IsLocalization.ringHom_ext` + `MvPolynomial.ringHom_ext` to generator-values, closed
+by the generalized mulVec-cancellation transport through the three transitions. -/
+theorem tPrimeRing_cocycle :
+    (tPrimeRing R ι ι' ι'').comp
+        ((tPrimeRing R ι' ι'' ι).comp (tPrimeRing R ι'' ι ι'))
+      = RingHom.id (doubleRing R ι ι' ι'') := by
+  sorry
+
 end TPrime
 
 end Module.Grassmannian
