@@ -10776,3 +10776,33 @@ optional-tail spec: statements only, nothing load-bearing.*
 - PIC0 now in the dispatched watch state: map_id via A (→ MellWeierstrass zero-sorry +
   queued cleanup), YFULL gated leaves as P3B3/FP4/A milestones flip, [YF-QSM]'s three
   staged leaves workable by any free hand (v10.56), GAP-1 at session starts.
+
+## Amendments v10.58 (2026-07-09, coordinator): five-lane absorb — all charters on track, no redirects
+
+- **fable-P4**: `isPullback_localQuotientπ` (the [a3-ii] affine core — the geometric Galois
+  descent square, KM's SGA VIII 7.8 content) LANDED axiom-clean, exactly per recon (ring
+  descent + two corner isos; fixed-points bases defeq). Continuing on the isPullback_chart
+  connection; [a5] ungated; leaf 3 = T-A3 (A's queue).
+- **PIC0**: v10.55 fully delivered (dc7311bd4) — [YF-QSM] built as
+  `ForMathlib/SmoothDescent.lean` (Stacks 02KM/02KL/02K5 transcribed;
+  `Module.Flat.of_comp_of_faithfullyFlat` PROVEN; universe seam note banked; 3 staged
+  leaves with locators, workable by any free hand). **YFullRoute at 4 own-sorries**
+  (CLOPEN/ETALE/NOETH/GEOM; "seven" corrected). T-E8 statements done
+  (`mellWPseudofunctor` real; two IsStack claims registered). In watch state as boarded.
+- **c5β**: **Helper A DONE** — the glue's topological blocker
+  (`blOpen{Y,Z}Image_inf_le_transι`, overlap ⊆ range(transι)), proven by the boarded
+  assembly, no new math. THREE v10.24 traps cleared per policy and banked (term-built
+  `hfst` via `Iso.inv_comp_eq`; total side-lemma for the diagonal so the assembly is bare
+  `inf_le_inf`; `obtain rfl` inside the total lemma for scope-clean subst). Remaining:
+  helpers B (IsOpenImmersion.lift plumbing) + C (crux over the piece cover) — the LAST
+  scheme-plumbing before `addOnY`/`addOnZ` exist on E ×_R E → 0c-i → **0c-ii arms the
+  endgame**. Sentinel at B.
+- **beastmode-A**: resume plan self-sharpened correctly — map_id first, **T-A3 promotes
+  ahead of the 0h wait if c5β's signal is slow** (independent, own lane, two consumers).
+  Ratified.
+- **D2**: hold re-confirmed by ground check (still ~70 workers; the two new workers added
+  load). Standing by genuinely; resumes on own load check. Ratified.
+- **Coordinator note to owner**: the single highest-leverage session to fire next is
+  **beastmode-A** (map_id is a 3-liner unblocking PIC0's MellWeierstrass-to-zero; T-A3
+  unblocks BOTH the engine's smooth leaf and Y₁(N)'s smoothness) — it needs no other lane
+  to move first.
