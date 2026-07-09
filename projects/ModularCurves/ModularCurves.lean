@@ -66,3 +66,4 @@ import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.GaloisDescentModule
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.WeierstrassInvariant
+import ModularCurves.ForMathlib.QuotientCurveModel
