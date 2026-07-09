@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.GaloisDescentModule
+import ModularCurves.ForMathlib.QuotientCurveModel
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
