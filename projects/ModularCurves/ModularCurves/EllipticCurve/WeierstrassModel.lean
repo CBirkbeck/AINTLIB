@@ -786,6 +786,30 @@ noncomputable def chartHomEquiv (W : WeierstrassCurve R) (i : Fin 3)
         algebraMap R K } :=
   (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm
 
+/-- Value-characterisation of `chartHomEquiv`: a chart-factoring point that IS `Spec.map φ`
+followed by the chart immersion reads out as `φ`. Public wrapper around the private
+`chartPointOfHom` (the equiv's inverse). -/
+lemma chartHomEquiv_eq_of_specMap (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K]
+    (g : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 })
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K })
+    (hfac : Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos = g.1.1) :
+    chartHomEquiv W i K g = φ := by
+  have hpt : chartPointOfHom W i φ = g := Subtype.ext (Subtype.ext hfac)
+  rw [chartHomEquiv, ← hpt]
+  exact (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm_apply_apply φ
+
 /-- The chart coordinate `Xⱼ/Xᵢ` is mathlib's localization element for the pair
 `(Xᵢ, Xⱼ)`. -/
 lemma chartCoordEquiv_mk_X (W : WeierstrassCurve R) (i : Fin 3)
