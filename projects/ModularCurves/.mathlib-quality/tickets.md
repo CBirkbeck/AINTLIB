@@ -11860,3 +11860,20 @@ lemma). All zero-sorry, axiom-clean, no `maxHeartbeats`. The assembly is now ove
   dispatch p,q ∈ {Y,Z}²; `glueMorphisms_hf_of_agree` (f91b91ec) ⟹ **addOnY/addOnZ** (+ rule-3 interface).
   Then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4 universality, c4.5 fills GLC. 0c-i ⟹ 0c-ii.
 - Z-side mirrors the Y-side lemmas once the Y chain closes.
+
+### v10.75 (2026-07-09, fable-PIC0): ★ [W-MONO-inj] + [W-MONO-glue] BOTH PROVEN — route (v)'s two halves are closed
+
+*Commits 4b01f91f0 → cfee6b375 → (this push). SheafOfModulesMonoidal.lean: the
+precomposition bijection along f ⊗ₘ g into sheaf-underlying targets is PROVEN
+(injectivity + surjectivity), zero sorries in the file's W/bridge/inj/glue sections.*
+
+- **The glue construction, in full:** chi_app_congr (all comparisons on the nose via
+  loc-inj equalizers + separatedness) → existsUnique_isPairingSection (Type-level
+  amalgamation over image-sieve intersections) → the four bilinearity laws (uniqueness
+  against candidate sections; Eq.trans term chains) → pairingLinear → gluedHom
+  (sectionwise lift + naturality via restriction-stability of the spec) → gluedHom_fac
+  → tensorHom_precomp_surjective.
+- **REMAINING for [GAP1-W-MONO] COMPLETE:** the assembly only — sheafificationW
+  (f ⊗ₘ g) via iso-detection-by-Yoneda + sheafificationHomEquiv naturality against the
+  two halves; the isLocallyInjective corollary (free via the bridge); IsMonoidal via
+  mk'; the LocalizedMonoidal instantiation. Next increment.
