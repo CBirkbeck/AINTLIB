@@ -602,4 +602,81 @@ theorem mulMatrix_map_coaction_conj (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoact
 
 end Star
 
+/-! ### Invariance of the characteristic polynomial and integrality (03BH + 03BJ) -/
+
+section Integrality
+
+variable {B : Type*} [CommRing B] [Algebra R B]
+
+/-- Characteristic polynomials of matrices conjugate by an explicitly invertible matrix
+agree. -/
+theorem _root_.Matrix.charpoly_eq_of_conj {n : Type*} [Fintype n] [DecidableEq n]
+    {K : Type*} [CommRing K] {N₁ N₂ U V : Matrix n n K} (hUV : U * V = 1)
+    (hconj : N₁ * U = U * N₂) : N₁.charpoly = N₂.charpoly := by
+  classical
+  have hdet : (U.map Polynomial.C) * (V.map Polynomial.C) = 1 := by
+    rw [← Matrix.map_mul, hUV]
+    exact Matrix.map_one _ Polynomial.C_0 Polynomial.C_1
+  have hdetUV : (U.map Polynomial.C).det * (V.map Polynomial.C).det = 1 := by
+    rw [← Matrix.det_mul, hdet, Matrix.det_one]
+  have hcharm : Matrix.charmatrix N₁ * (U.map Polynomial.C)
+      = (U.map Polynomial.C) * Matrix.charmatrix N₂ := by
+    rw [Matrix.charmatrix, Matrix.charmatrix, sub_mul, mul_sub]
+    congr 1
+    · exact (Matrix.scalar_commute (Polynomial.X : Polynomial K)
+        (fun r => Commute.all _ r) (U.map Polynomial.C)).eq
+    · rw [show U.map ⇑Polynomial.C = Polynomial.C.mapMatrix U from
+        (RingHom.mapMatrix_apply _ _).symm, ← map_mul, ← map_mul, hconj]
+  have hdet2 : N₁.charmatrix.det
+      = ((U.map Polynomial.C) * (N₂.charmatrix * (V.map Polynomial.C))).det := by
+    have h := congrArg (fun W => Matrix.det (W * (V.map Polynomial.C))) hcharm
+    simpa [Matrix.mul_assoc, hdet] using h
+  calc N₁.charpoly
+      = (U.map Polynomial.C).det * (N₂.charmatrix.det * (V.map Polynomial.C).det) := by
+        rw [Matrix.charpoly, hdet2, Matrix.det_mul, Matrix.det_mul]
+    _ = N₂.charmatrix.det * ((U.map Polynomial.C).det * (V.map Polynomial.C).det) := by
+        ring
+    _ = N₂.charpoly := by rw [hdetUV, mul_one, Matrix.charpoly]
+
+/-- **The characteristic polynomial of the co-action** of `f : B`: the charpoly of the
+multiplication matrix of `ρ(f)` on `B ⊗[R] A`. Monic, with coinvariant coefficients
+(`coactionCharpoly_coeff_mem`). -/
+noncomputable def coactionCharpoly (ρ : B →ₐ[R] B ⊗[R] A) (f : B) : Polynomial B :=
+  (mulMatrix R A (ρ f)).charpoly
+
+theorem coactionCharpoly_monic (ρ : B →ₐ[R] B ⊗[R] A) (f : B) :
+    (coactionCharpoly R A ρ f).Monic :=
+  Matrix.charpoly_monic _
+
+/-- **03BH, comodule form**: the coefficients of the co-action charpoly are coinvariant —
+`map ρ P = map ι P` via the conjugation identity (★). -/
+theorem map_coactionCharpoly (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B) :
+    (coactionCharpoly R A ρ f).map ρ.toRingHom
+      = (coactionCharpoly R A ρ f).map
+          (Algebra.TensorProduct.includeLeft (S := R)).toRingHom := by
+  classical
+  rw [coactionCharpoly, ← Matrix.charpoly_map, ← Matrix.charpoly_map]
+  have hUV : (comulMatrixR R A).map
+        ⇑(Algebra.TensorProduct.includeRight (R := R) (A := B) (B := A))
+      * (comulMatrixR R A).map
+          (⇑(Algebra.TensorProduct.includeRight (R := R) (A := B) (B := A))
+            ∘ ⇑(HopfAlgebra.antipode R)) = 1 := by
+    have h := congrArg
+      ((Algebra.TensorProduct.includeRight (R := R) (A := B)
+        (B := A)).toRingHom.mapMatrix (m := hopfBasisIndex R A))
+      (comulMatrixR_mul_antipodeMatrixR R A)
+    have h1 : (Matrix.map (1 : Matrix (hopfBasisIndex R A) (hopfBasisIndex R A) A)
+        ⇑(Algebra.TensorProduct.includeRight (R := R) (A := B) (B := A))) = 1 :=
+      Matrix.map_one _ (map_zero _) (map_one _)
+    rw [← h1]
+    simpa [map_mul, RingHom.mapMatrix_apply] using h
+  exact Matrix.charpoly_eq_of_conj hUV (mulMatrix_map_coaction_conj R A ρ hρ f)
+
+theorem coactionCharpoly_coeff_mem (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B)
+    (k : ℕ) : (coactionCharpoly R A ρ f).coeff k ∈ coinvariants ρ := by
+  have h := congrArg (fun q => Polynomial.coeff q k) (map_coactionCharpoly R A ρ hρ f)
+  simpa [Polynomial.coeff_map, mem_coinvariants] using h
+
+end Integrality
+
 end ModularCurves
