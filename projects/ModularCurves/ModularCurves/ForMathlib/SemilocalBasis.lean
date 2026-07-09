@@ -3,6 +3,7 @@ import Mathlib.RingTheory.FiniteType
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.TensorProduct.Quotient
+import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.GroupTheory.CosetCover
 
@@ -157,3 +158,75 @@ theorem exists_one_tmul_baseChange_ne_zero [Infinite (ResidueField R)]
   exact hne j (LinearMap.ker_eq_top.mp hj)
 
 end Avoidance
+
+section Semilocal
+
+open IsLocalRing TensorProduct
+
+variable {R : Type*} [CommRing R] [IsLocalRing R] [Infinite (ResidueField R)]
+variable {S : Type*} [CommRing S] [Nontrivial S] [Algebra R S]
+variable {M : Type*} [AddCommGroup M] [Module S M] [Module R M] [IsScalarTower R S M]
+variable [Module.Free S M] [Module.Finite S M]
+
+/-- The evaluation of `M` in the fibre at a maximal ideal `n` of `S`, as an `S`-linear map
+`M →ₗ[S] (S⧸n) ⊗[S] M`. -/
+private noncomputable def fibreEval (n : Ideal S) : M →ₗ[S] (S ⧸ n) ⊗[S] M :=
+  TensorProduct.mk S (S ⧸ n) M 1
+
+omit [Nontrivial S] [Module.Free S M] [Module.Finite S M] in
+private theorem fibreEval_apply (n : Ideal S) (x : M) :
+    fibreEval (M := M) n x = (1 : S ⧸ n) ⊗ₜ[S] x := rfl
+
+/-- The fibre of a free module is free of the same rank. -/
+private theorem finrank_fibre (n : Ideal S) [Nontrivial (S ⧸ n)] {r : ℕ}
+    (hr : Module.finrank S M = r) :
+    Module.finrank (S ⧸ n) ((S ⧸ n) ⊗[S] M) = r := by
+  classical
+  have b := (Module.finBasis S M).reindex (finCongr hr)
+  rw [Module.finrank_eq_card_basis (b.baseChange (S ⧸ n)), Fintype.card_fin]
+
+omit [IsLocalRing R] [Infinite (ResidueField R)] [Nontrivial S] [Algebra R S]
+  [IsScalarTower R S M] [Module.Free S M] [Module.Finite S M] in
+/-- If `N` generates `M` over `S`, its fibre image spans the fibre. -/
+private theorem span_fibreEval_eq_top (n : Ideal S) (N : Submodule R M)
+    (hN : Submodule.span S (N : Set M) = ⊤) :
+    Submodule.span (S ⧸ n) (fibreEval (M := M) n '' (N : Set M)) = ⊤ := by
+  rw [eq_top_iff]
+  rintro x -
+  induction x with
+  | zero => exact Submodule.zero_mem _
+  | tmul c z =>
+    have hz : z ∈ Submodule.span S (N : Set M) := hN ▸ Submodule.mem_top
+    induction hz using Submodule.span_induction with
+    | mem w hw =>
+      have : (c ⊗ₜ[S] w : (S ⧸ n) ⊗[S] M) = c • fibreEval (M := M) n w := by
+        rw [fibreEval_apply, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+      rw [this]
+      exact Submodule.smul_mem _ c (Submodule.subset_span ⟨w, hw, rfl⟩)
+    | zero => rw [TensorProduct.tmul_zero]; exact Submodule.zero_mem _
+    | add u v _ _ ihu ihv =>
+      rw [TensorProduct.tmul_add]
+      exact Submodule.add_mem _ ihu ihv
+    | smul s u _ ihu =>
+      rw [TensorProduct.tmul_smul]
+      exact Submodule.smul_of_tower_mem _ s ihu
+  | add x y ihx ihy => exact Submodule.add_mem _ ihx ihy
+
+omit [Infinite (ResidueField R)] [Nontrivial S] [Module R M] [IsScalarTower R S M]
+  [Module.Free S M] [Module.Finite S M] in
+/-- The maximal ideal of `R` acts as zero on the fibre at `n` when `m·S ≤ n`: the scalar
+travels through `S → S⧸n`, where it dies. -/
+private theorem maximalIdeal_smul_fibre (n : Ideal S)
+    (hmn : (IsLocalRing.maximalIdeal R).map (algebraMap R S) ≤ n)
+    {c : R} (hc : c ∈ IsLocalRing.maximalIdeal R) (v : (S ⧸ n) ⊗[S] M) : c • v = 0 := by
+  induction v with
+  | zero => rw [smul_zero]
+  | tmul a m =>
+    rw [TensorProduct.smul_tmul', Algebra.smul_def,
+      IsScalarTower.algebraMap_apply R S (S ⧸ n),
+      show (algebraMap S (S ⧸ n)) (algebraMap R S c) = 0 from
+        Ideal.Quotient.eq_zero_iff_mem.mpr (hmn (Ideal.mem_map_of_mem _ hc)),
+      zero_mul, TensorProduct.zero_tmul]
+  | add x y ihx ihy => rw [smul_add, ihx, ihy, add_zero]
+
+end Semilocal
