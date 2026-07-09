@@ -2453,4 +2453,152 @@ theorem projTateMap_eq_of_pointedIso :
 
 end ProjTateMapComparison
 
+section ChartPackaging
+
+open MonoidalCategory CartesianMonoidalCategory MonObj
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
+
+/-! ### `Ell/R` chart packaging (v10.109 recipe, step 1)
+
+A `MarkedChartData` bundles one `LocallyWeierstrass` chart of `Y.curve`: an affine open
+`U`, an elliptic Weierstrass curve `W` over `Γ(U)`, and the pointed trivialisation `e`.
+The section `P` restricts to a `Z`-chart point of `projModel W` over `Γ(U)` whose
+coordinate evaluations satisfy the T-E1 hypotheses — the geometric-fibre clauses of
+`NowhereGeomOrderLEThree` transfer through the fibre bridges below. -/
+
+namespace EllipticCurve
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- The zero point is the group zero (unwinding the `pointAddCommGroup` transport and
+`one_eq_zero`). -/
+theorem zeroPoint_eq_zero {T : Scheme.{u}} (g : T ⟶ S) : E.zeroPoint g = 0 := by
+  letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+  refine Subtype.ext ?_
+  show g ≫ E.zero = ((0 : E.Point g) : T ⟶ E.E)
+  have h0 : ((0 : E.Point g) : T ⟶ E.E) =
+      (toUnit (Over.mk g) ≫ η[E.asOver]).left := rfl
+  rw [h0, Over.comp_left, E.one_eq_zero]
+  have hw : Over.Hom.left (toUnit (Over.mk g)) ≫ (𝟙_ (Over S)).hom = g :=
+    Over.w (toUnit (Over.mk g))
+  exact (congrArg (· ≫ E.zero) hw.symm).trans (Category.assoc _ _ _)
+
+end EllipticCurve
+
+variable (R : CommRingCat.{u})
+
+/-- One `LocallyWeierstrass` chart of the curve of an `Ell/R` object: an affine open of
+the base with a pointed Weierstrass trivialisation of the restricted curve. -/
+structure MarkedChartData (Y : EllObj R) where
+  /-- The affine open of the base. -/
+  U : Y.base.affineOpens
+  /-- The Weierstrass curve over the chart ring. -/
+  W : WeierstrassCurve ↑Γ(Y.base, U.1)
+  /-- The chart curve is elliptic. -/
+  hell : W.IsElliptic
+  /-- The pointed trivialisation. -/
+  e : pullback Y.curve.π U.1.ι ≅ projModel W
+  /-- Compatibility with the structure morphisms. -/
+  heπ : e.hom ≫ projModelπ W = pullback.snd Y.curve.π U.1.ι ≫ U.2.isoSpec.hom
+  /-- Compatibility with the zero sections. -/
+  hez : (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ Y.curve.zero) (𝟙 _)
+    (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp])) ≫ e.hom =
+    projModelZero W
+
+attribute [instance] MarkedChartData.hell
+
+variable {R}
+
+namespace MarkedChartData
+
+/-- Every point of the base lies in some marked chart (the `localModel` field). -/
+theorem exists_mem (Y : EllObj R) (s : ↥Y.base) :
+    ∃ D : MarkedChartData R Y, s ∈ D.U.1 := by
+  obtain ⟨U, hsU, W, hell, e, heπ, hez⟩ := Y.curve.localModel s
+  exact ⟨⟨U, W, hell, e, heπ, hez⟩, hsU⟩
+
+variable {Y : EllObj R} (D : MarkedChartData R Y)
+
+/-- The restriction of a section of `Y.curve` to the chart, as a section of the restricted
+curve. -/
+noncomputable def restrictSection (P : Y.curve.Section) :
+    D.U.1.toScheme ⟶ pullback Y.curve.π D.U.1.ι :=
+  pullback.lift (D.U.1.ι ≫ P.1) (𝟙 _)
+    (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp])
+
+/-- The section, read in the chart as a `Γ(U)`-point of the Weierstrass model. -/
+noncomputable def pt (P : Y.curve.Section) :
+    SpecPoints (projModel D.W) (projModelπ D.W) ↑Γ(Y.base, D.U.1) :=
+  ⟨D.U.2.isoSpec.inv ≫ D.restrictSection P ≫ D.e.hom, by
+    have hres : D.restrictSection P ≫ pullback.snd Y.curve.π D.U.1.ι = 𝟙 _ :=
+      pullback.lift_snd _ _ _
+    rw [Category.assoc, Category.assoc, D.heπ, ← Category.assoc (D.restrictSection P),
+      hres, Category.id_comp, Iso.inv_hom_id]
+    rw [Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id]⟩
+
+@[simp]
+theorem pt_coe (P : Y.curve.Section) :
+    (D.pt P).1 = D.U.2.isoSpec.inv ≫ D.restrictSection P ≫ D.e.hom := rfl
+
+/-- The geometric point of the base attached to a field point of the chart ring. -/
+noncomputable def geomPt {k : Type u} [Field k]
+    (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D.U.1))) :
+    Spec (CommRingCat.of k) ⟶ Y.base :=
+  t ≫ D.U.2.isoSpec.inv ≫ D.U.1.ι
+
+/-- **Unwinding**: if a field point of the chart hits the model's zero, the pulled section
+equals the pulled zero section on the base. -/
+theorem pull_eq_zero_of_pt_eq_zero (P : Y.curve.Section) {k : Type u} [Field k]
+    (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D.U.1)))
+    (heq : t ≫ (D.pt P).1 = t ≫ projModelZero D.W) :
+    EllipticCurve.Point.pull Y.curve (D.geomPt t) P = 0 := by
+  rw [pt_coe, D.hez.symm] at heq
+  have heq2 : (t ≫ D.U.2.isoSpec.inv ≫ D.restrictSection P) ≫ D.e.hom =
+      (t ≫ D.U.2.isoSpec.inv ≫ pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp])) ≫
+        D.e.hom := by
+    simpa only [Category.assoc] using heq
+  have heq3 := (cancel_mono D.e.hom).mp heq2
+  have heq4 := congrArg (fun m => m ≫ pullback.fst Y.curve.π D.U.1.ι) heq3
+  have hfst : D.restrictSection P ≫ pullback.fst Y.curve.π D.U.1.ι = D.U.1.ι ≫ P.1 :=
+    pullback.lift_fst _ _ _
+  have hfst0 : pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+      (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+      pullback.fst Y.curve.π D.U.1.ι = D.U.1.ι ≫ Y.curve.zero :=
+    pullback.lift_fst _ _ _
+  simp only [Category.assoc, hfst, hfst0] at heq4
+  rw [← Y.curve.zeroPoint_eq_zero (D.geomPt t)]
+  refine Subtype.ext ?_
+  show (D.geomPt t) ≫ P.1 = (D.geomPt t) ≫ Y.curve.zero
+  simpa only [geomPt, Category.assoc] using heq4
+
+/-- **(B1 fibre bridge)** A nowhere-small-order section lies in the `Z`-chart of every
+marked chart. -/
+theorem pt_inZChart (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) : InZChart D.W (D.pt P) := by
+  refine inZChart_of_forall_ne_zero D.W (D.pt P) ?_
+  intro k _ t heq
+  -- normalise the zero side and push to the algebraic closure
+  have hid : (t ≫ Spec.map (CommRingCat.ofHom
+      (algebraMap ↑Γ(Y.base, D.U.1) ↑Γ(Y.base, D.U.1)))) ≫ projModelZero D.W =
+      t ≫ projModelZero D.W := by
+    rw [Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id, Category.comp_id]
+  rw [hid] at heq
+  have heqb := congrArg
+    (fun m => Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ m) heq
+  simp only [← Category.assoc] at heqb
+  have h0 := D.pull_eq_zero_of_pt_eq_zero P
+    (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ t) heqb
+  have h1 := hP (AlgebraicClosure k)
+    (D.geomPt (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ t))
+    1 one_pos (by norm_num)
+  rw [Nat.cast_one, one_zsmul, h0] at h1
+  exact h1 rfl
+
+end MarkedChartData
+
+end ChartPackaging
+
 end ModularCurves
