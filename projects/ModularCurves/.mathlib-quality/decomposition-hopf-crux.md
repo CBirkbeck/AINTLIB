@@ -269,3 +269,38 @@ S(T)·T = 1, isUnit). Remaining chain (each its own increment):
   flat) + counit transport LANDED. Remaining: coassoc transport (pentagon-style auxes
   through `baseChangeAssoc` — do ext-two-legs on B′ = C′-leg + B-leg, then per-leg pure-
   tensor inductions), then package `IsCoaction (coactionBaseChange …)`.
+
+## [HG-B4] the k̄-orbit theorem — sharpened plan (all inputs LANDED)
+
+Landed in `CoinvariantsPoints.lean`: 03BL-surjectivity (lying-over), the invariant
+charpoly = (X−f)^r, `coactionBaseChange_naturality`, and **the power witness**
+`pow_card_mem_range_algebraMap_of_mem_coinvariants` (03BK(2)(a) constant-coefficient
+form via the MvPolynomial flat cover).
+
+The orbit core, reduced to landed machinery + elementary facts:
+**Statement**: k alg. closed field, C-algebra via c; a₀ a₁ : B →ₐ k with a₀|C = a₁|C ⟹
+∃ b : B⊗A →ₐ k, b∘ρ = a₀ ∧ b∘includeLeft = a₁.
+**Proof**: suppose not. Work in B_k := k ⊗[C] B with ρ_k := coactionBaseChange.
+(i) the k-points of B⊗A over a₁ (i.e. χ∘ι = ā₁-precomposites) = k-points of the finite
+k-algebra k⊗[B,a₁](B⊗A) ≅ k⊗[R?]A-twist — finitely many (finite k-algebra: finitely many
+maximals, residue k by alg-closedness); call their ρ-restrictions a₁',…,aₙ' ≠ a₀ (else b
+exists).
+(ii) prime avoidance (`Ideal.subset_union_prime`): f̃ ∈ ker(ā₀) ∖ ⋃ ker(āᵢ') in B_k
+(distinct maximals).
+(iii) g := coactionCharpoly-const-coeff = ±det (mulMatrix (ρ_k f̃)) ∈ coinvariants ρ_k
+(coeff-mem, B2).
+(iv) g is NOT a unit: else det unit ⟹ mulMatrix invertible ⟹ lmul(ρ_k f̃) surjective ⟹
+ρ_k f̃ unit ⟹ (counit retraction reflects units) f̃ unit — contra f̃ ∈ ker ā₀.
+(v) ā₁(g) ≠ 0: transport det along ā₁ (`mulMatrix_map` + `RingHom.map_det`); the image of
+ρ_k(f̃) in the artinian k-algebra k⊗A is non-vanishing at every maximal (the maximals =
+the χ's of (i); value at χ = aᵢ'(f̃) ≠ 0 by (ii)) ⟹ unit ⟹ det unit ⟹ ≠ 0.
+(vi) power witness: g^r = scalar c ∈ k; (v) ⟹ c ≠ 0 ⟹ c unit ⟹ g unit — contradicts
+(iv). ∎
+**Corollary (GAP-6, what 03BM consumes)**: C local ⟹ B_loc semi-local: maximals of B over
+m_C are pairwise related through k̄-points (the theorem at k := algebraic closure of the
+residue field) and each relation-class over a fixed maximal is bounded by the finite
+ι-fibre — finitely many maximals, m·B ⊆ rad.
+
+Elementary gaps to build alongside: finitely-many-k-points of a finite k-algebra
+(alg-closed residue fields); "outside all maximals ⟹ unit"; the χ-vs-bᵢ evaluation
+bookkeeping. All mathlib-adjacent.
