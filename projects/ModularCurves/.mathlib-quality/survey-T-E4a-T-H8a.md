@@ -142,19 +142,23 @@ without `hinv`. The T-D8/T-D9 naive-bridges do NOT discharge them (see Route N-I
 **Drinfeld ↔ naive bridges (proven, `NIsInvertible` only):**
 - `isGammaOne_iff_naive` (T-D9, `Basic.lean:143`), `isFullLevel_iff_naive` (T-D8, `Basic.lean:130`).
 
-## Inventory: what is ABSENT (the genuine T-H8a gap)
+## Inventory: what WAS absent — the iso-leg — now ✅ BUILT (2026-07-10, v10.94b dispatch)
 
-**Leg 2 — the comparison-iso leg.** Grep-verified absent: NO iso-invariance API for the divisor
-apparatus (`sectionsDivisor`/`orderDivisor` under an iso of curves, `torsionIdeal` under an iso,
-`IsSubgroup` under a group iso). ~4 lemmas + 2 membership assemblies, est. 150–250 LOC:
-1. `sectionsDivisor` under the comparison iso (ideal transport along an iso of schemes over the
-   same base — near-mechanical from `RelEffCartierDiv` API);
-2. `torsionIdeal` under a **pointed group iso** (needs `mulByHom` intertwining — a consequence of
-   the group-iso property, i.e. **the one primitive again**);
-3. `IsSubgroup` under a pointed group iso (mirrors the proven `IsSubgroup.baseChange`);
-4. `HasExactOrder` under a pointed group iso (assembles 1+3, mirrors `HasExactOrder.baseChange`).
-Adjacency note: D2's de-privatised `Incidence.lean` helpers (the KM Ch.6 order-divisor-locus engine,
-deliberate shared API per v10.85) are the natural toolbox for 1–3.
+**Leg 2 — the comparison-iso leg — DELIVERED, sorry-free + axiom-clean**, hypothesis-funneled
+(`hη`/`hμ` as hypotheses, the `transportSection_add_of_isMonHom` pattern):
+**`LevelStructure/IsoTransport.lean`**. Contents (all `lean_verify` clean —
+propext/Classical.choice/Quot.sound):
+1. Generic scheme lemmas: `IdealSheafData.map_hom_eq_comap_inv`, `Scheme.Hom.ker_comp_iso`,
+   `Scheme.Hom.ker_iso_comp` (mathlib-shaped; future PR-draft candidates).
+2. Postcomp algebra + intertwining: `one/mul/zpow_comp_monHom` (postcomposition with a pointed
+   mul-compatible morphism is a `Hom`-group hom), `mulBy_comp_monHom` (`[n]`-intertwining — both
+   sides are `e^n` in the Hom-group), `mulByHom_comp_monHom`, `zero_comp_monHom`.
+3. `pointAddEquiv : E.Point g ≃+ E'.Point g` at every `g : T ⟶ S` (`pointMapOfHom` + additivity).
+4. `sectionsDivisor_pointMap_ideal` — sections-divisor ideal transport (comap along the inverse).
+5. `torsionIdeal_eq_comap` — via the `pullback.map` comparison of the two torsion kernels.
+6. `RelEffCartierDiv.IsSubgroup.of_ideal_comap` (via `exists_factor_comap_iff`) +
+   `Section.HasExactOrder.pointMap` (the `IsGammaOne` iso-leg; needs only `hμ` — pointedness is
+   automatic for additive maps).
 
 ## Routes (holder = GH lane; coordination per attack-1, no duplication)
 
