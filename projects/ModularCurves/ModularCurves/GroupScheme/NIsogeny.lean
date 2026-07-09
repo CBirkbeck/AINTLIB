@@ -82,9 +82,7 @@ field-fibre dimensions are everywhere `≤ n` admits, near every prime, a presen
 "further localizing on `S`, we may suppose" step of KM p. 163. -/
 private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRing R]
     {M : Type u} [AddCommGroup M] [Module R M] [Module.FinitePresentation R M] {n : ℕ}
-    (hb : ∀ (K : Type u) (_ : Field K) (f : R →+* K),
-      letI := f.toAlgebra
-      Module.finrank K (K ⊗[R] M) ≤ n)
+    (hb : ∀ (K : Type u) (_ : Field K) (_ : Algebra R K), Module.finrank K (K ⊗[R] M) ≤ n)
     (p : PrimeSpectrum R) :
     ∃ g : R, g ∉ p.asIdeal ∧ ∃ (m : ℕ)
       (α : (Fin m → Localization.Away g) →ₗ[Localization.Away g]
@@ -100,7 +98,47 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
     obtain ⟨x, hxspan⟩ : ∃ x : Fin n → M,
         Submodule.span p.asIdeal.ResidueField
           (Set.range fun i => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] x i) = ⊤ := by
-      sorry
+      have hdim : Module.finrank p.asIdeal.ResidueField
+          (p.asIdeal.ResidueField ⊗[R] M) ≤ n := hb _ inferInstance inferInstance
+      -- the simple tensors `1 ⊗ m` span the fibre
+      have hspan : ⊤ ≤ Submodule.span p.asIdeal.ResidueField
+          (Set.range fun m : M => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) := by
+        rintro z -
+        induction z with
+        | zero => exact Submodule.zero_mem _
+        | tmul c m =>
+          rw [show c ⊗ₜ[R] m = c • ((1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) by
+            rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
+          exact Submodule.smul_mem _ c (Submodule.subset_span ⟨m, rfl⟩)
+        | add z₁ z₂ h₁ h₂ => exact Submodule.add_mem _ h₁ h₂
+      -- extract a basis of the fibre inside the simple tensors, and choose preimages
+      let b := Module.Basis.ofSpan hspan
+      haveI : Fintype ((linearIndepOn_empty p.asIdeal.ResidueField id).extend
+          (Set.empty_subset (Set.range fun m : M =>
+            (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))) :=
+        FiniteDimensional.fintypeBasisIndex b
+      have hsub := (linearIndepOn_empty p.asIdeal.ResidueField id).extend_subset
+        (Set.empty_subset (Set.range fun m : M =>
+          (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))
+      have hmem : ∀ i : ((linearIndepOn_empty p.asIdeal.ResidueField id).extend
+          (Set.empty_subset (Set.range fun m : M =>
+            (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))),
+          ∃ m : M, (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m
+            = (i : p.asIdeal.ResidueField ⊗[R] M) := fun i => hsub i.2
+      choose mfun hmfun using hmem
+      have hcard : Fintype.card _ ≤ n := (Module.finrank_eq_card_basis b) ▸ hdim
+      refine ⟨fun j => if h : (j : ℕ) < Fintype.card _
+        then mfun ((Fintype.equivFin _).symm ⟨j, h⟩) else 0, ?_⟩
+      rw [eq_top_iff, ← b.span_eq]
+      refine Submodule.span_le.mpr ?_
+      rintro z ⟨i, rfl⟩
+      have hj : ((Fin.castLE hcard ((Fintype.equivFin _) i)) : ℕ) < Fintype.card _ :=
+        ((Fintype.equivFin _) i).2
+      refine Submodule.subset_span ⟨Fin.castLE hcard ((Fintype.equivFin _) i), ?_⟩
+      have hidx : (⟨((Fin.castLE hcard ((Fintype.equivFin _) i)) : ℕ), hj⟩ :
+          Fin (Fintype.card _)) = (Fintype.equivFin _) i := Fin.ext rfl
+      simp only [dif_pos hj, hidx, Equiv.symm_apply_apply, hmfun i]
+      exact (Module.Basis.ofSpan_apply_self hspan i).symm
     refine ⟨x, ?_⟩
     -- fibre of the quotient vanishes, hence the stalk at `p` vanishes (support of a f.g. module)
     have hfib : Subsingleton (p.asIdeal.ResidueField ⊗[R]
