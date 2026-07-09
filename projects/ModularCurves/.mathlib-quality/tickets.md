@@ -13246,3 +13246,24 @@ lake build green, axioms = {propext, Classical.choice, Quot.sound} via `lake env
 - REMAINING wave-3: triple cocycle on double-localizations (t'_comp) → [GR-D]
   Spec/basicOpen open-immersion plumbing → [GR-F] `Scheme.GlueData` assembly → [GR-G]
   T-points ⟹ NISOG [L15].
+
+### v10.94d (2026-07-09, c5β): [C6-SPECPOINTS] evaluation layer — 7 sub-lemmas landed; refined map to the finish
+
+Landed + pushed (all axiom-clean, builds green): [C6-a] two-open factoring, [C6-a'] general
+iSup-factoring, [C6-b] restriction evaluation, [C6-U] THE ATLAS BRIDGE (GLC.mulModelHom@atlas =
+the glued two-law object; id-collapse layer + ULift self-classification underneath), [C6-d1/d3]
+two-stage strengthened descent (evaluation + immersion equations, both laws), [C6-d2] coordinate
+readout (descended coords = ψ(lawTriple·invSelf)), [C6-d4a] tensor-leg evaluations (legs ↦
+biChartPointFst/Snd), [C6-d4b] piece projections (Spec.map ψ ≫ pieceAway(Z)ι ≫ fst/snd =
+Spec.map(χ-leg) ≫ chartι) — plus the public chartHomEquiv_eq_of_specMap in WeierstrassModel.
+
+**Remaining to mulModelHom_specPoints (no deep math left, all mechanical):**
+1. [C6-d5] triple identification: χ∘lawOneTriple = (W.map χ-comp).addXYZ (χ∘Fst) (χ∘Snd) via
+   map_addXYZ (ring-level; mirrors equation_lawTwoTriple's route).
+2. [C6-c'] chart-level dictionary naturality along projModelBaseChange (chartHomEquiv of x over W
+   vs x ≫ bcOf over the atlas; both sides Spec.map on charts via Proj.awayι_comp_map +
+   chartHomEquiv_eq_of_specMap) — the transport that lets general-R evaluation ride the atlas
+   descent through mulModelHomBC_baseChange.
+3. [C6-e] assembly mirroring negModelHom_specPoints: case split (InZChart both / diagonal / infinity),
+   coordinates via d2+d4+d5, the mathlib formula bridge (addX_of_Z_ne_zero family, dblAddXYZ_self,
+   Projective↔Affine Point equivalence) to Point.add.
