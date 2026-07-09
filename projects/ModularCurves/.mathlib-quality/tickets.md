@@ -12319,3 +12319,27 @@ refocus). Decompose (v10.78) banked. Before parking I began the build and got mo
   `Sheaf J RingCat` at instance transparency (blocks `sheafificationW_tensorHom` R-unification) — hence
   the abstract restatement; the **assembly** re-crosses this scheme seam (instantiate abstract leaves
   at `X.sheaf.obj`/`X.ringCatSheaf`; use `sheafifyValIso`-style nudges). Nothing regressed. PIC0 idle.
+
+### v10.81 (2026-07-09, c5β): coordinator directive acknowledged — [c3] piece-overlap geometry landed; path mapped
+
+Per coordinator v10.81 ("top budget priority, full speed: c3 → mulModelHom → c4.4/c4.5 → 0c-i → 0c-ii →
+0h → T-W7.12 → T-W7a; no side quests; LSP live"): executing. This session delivered the ENTIRE hf-glue
+([C4-HF-ASSEMBLY] DONE — addOnY+addOnZ sorry-free) PLUS the c3 foundations. Landed this stretch:
+- `blOpenYPiece_inf_blOpenZPiece_eq_iSup` (Open, `a3a454447`) — the two-law overlap on a chart-product
+  piece is the same-index `⨆ k D(lawTwo_k·lawOne_k)` (pushes `regularityOpen_inf_eq_iSup_basicOpen`
+  through the `chartPieceIso` preimage; `congrArg` bridges the Spec/PrimeSpectrum Opens-lattice defeq).
+
+**Exact c3 remaining (for the continuation — all Global-side):**
+1. image-level: `blOpenZImage(i,j) ⊓ blOpenYImage(i,j) = ⨆ k pieceι ''ᵁ D(lawTwo_k·lawOne_k)` (pieceι
+   open-immersion image of the piece-overlap).
+2. σ-lift apparatus for the single `Away(lawTwo_k·lawOne_k)` locus (mirror hf-glue L3–L5 pieceAwayι/
+   overlapPieceIso/σ-cancel — but ONE `Away` of `biChartRing`, NO transRing tower, so the isDefEq walls
+   do NOT recur; use the same `spec_map_comp_congr`/term-mode discipline).
+3. `Cover.hom_ext` + `addOnYPieceMor_eq_addOnZPieceMor` → same-chart `addOnZOnImage(i,j)=addOnYOnImage(i,j)`
+   on overlap.
+4. cross-chart-cross-law (`(i,j)≠(i',j')`): the harder half — transRing transition apparatus COMBINED
+   with the minor identity.
+5. family assembly (four charts) → `addOn_agree`; then `mulModelHom` (two-open glue with `blOpen_cover`).
+c2 `blOpen_cover`: the joint-unit-ideal `span(range lawOne ∪ range lawTwo)=⊤` still needs the B–L Thm 2
+Bezout certificate (not formalized) — the one genuine transcription gap. c4.5 GLC-wire greenlit by
+coordinator (no longer a flag).
