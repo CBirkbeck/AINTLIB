@@ -244,6 +244,41 @@ theorem isUnit_of_isUnit_mulMatrix {u : B ⊗[R] A}
   rw [h1, hφ, LinearMap.mulLeft_apply] at hcomp
   simpa using hcomp
 
+/-- A `k`-algebra map to `k` is determined by its kernel: `x − χ(x)` always lies in it. -/
+theorem algHom_ext_of_ker_eq {X : Type*} [CommRing X] [Algebra k X]
+    {χ₁ χ₂ : X →ₐ[k] k} (h : RingHom.ker χ₁.toRingHom = RingHom.ker χ₂.toRingHom) :
+    χ₁ = χ₂ := by
+  refine AlgHom.ext fun x => ?_
+  have hmem : x - algebraMap k X (χ₁ x) ∈ RingHom.ker χ₁.toRingHom := by
+    simp [RingHom.mem_ker]
+  rw [h, RingHom.mem_ker] at hmem
+  have h2 : χ₂ x = χ₁ x := by simpa [sub_eq_zero] using hmem
+  exact h2.symm
+
+/-- **The avoidance step** of the orbit theorem: a `k`-point not among a finite set of
+`k`-points has a kernel element avoiding all their kernels (prime avoidance + kernels of
+`k`-points are maximal and determine the point). -/
+theorem exists_mem_ker_notMem_ker {X : Type*} [CommRing X] [Algebra k X]
+    (χ₀ : X →ₐ[k] k) (S : Finset (X →ₐ[k] k)) (hS : χ₀ ∉ S) :
+    ∃ f ∈ RingHom.ker χ₀.toRingHom, ∀ χ ∈ S, f ∉ RingHom.ker χ.toRingHom := by
+  classical
+  by_contra hcon
+  push Not at hcon
+  have hcover : (RingHom.ker χ₀.toRingHom : Set X)
+      ⊆ ⋃ χ ∈ (S : Set (X →ₐ[k] k)), (RingHom.ker χ.toRingHom : Set X) := by
+    intro f hf
+    obtain ⟨χ, hχS, hχ⟩ := hcon f hf
+    exact Set.mem_biUnion hχS hχ
+  obtain ⟨χ, hχS, hle⟩ := (Ideal.subset_union_prime χ₀ χ₀
+    (fun χ _ _ _ => RingHom.ker_isPrime _)).mp hcover
+  have hsurj₀ : Function.Surjective χ₀.toRingHom := fun c =>
+    ⟨algebraMap k X c, by simp⟩
+  have hmax₀ : (RingHom.ker χ₀.toRingHom).IsMaximal :=
+    RingHom.ker_isMaximal_of_surjective _ hsurj₀
+  have heq : RingHom.ker χ₀.toRingHom = RingHom.ker χ.toRingHom :=
+    hmax₀.eq_of_le (RingHom.ker_isPrime _).ne_top hle
+  exact hS (by rwa [algHom_ext_of_ker_eq heq])
+
 end Orbit
 
 end ModularCurves
