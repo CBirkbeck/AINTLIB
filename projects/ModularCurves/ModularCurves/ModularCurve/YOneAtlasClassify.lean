@@ -532,6 +532,36 @@ theorem tateBaseSpecMapOfTateNormal_eq_tateBaseSpecMapOfPoint_of_variableChange
   rw [tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange R
     W x y hxy hord C hC]
 
+/-- Any two normalising variable changes for the same pointed chart induce the same
+Tate-atlas algebra map. -/
+theorem tateRingOverAlgLiftOfTateNormal_eq_of_variableChanges
+    (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (C C' : WeierstrassCurve.VariableChange A)
+    (hC : (C • W).IsTateNormal ∧ C.r = x ∧ C.t = y)
+    (hC' : (C' • W).IsTateNormal ∧ C'.r = x ∧ C'.t = y) :
+    tateRingOverAlgLiftOfTateNormal R (C • W) hC.1 =
+      tateRingOverAlgLiftOfTateNormal R (C' • W) hC'.1 := by
+  rw [tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange R
+    W x y hxy hord C hC]
+  rw [tateRingOverAlgLiftOfTateNormal_eq_tateRingOverAlgLiftOfPoint_of_variableChange R
+    W x y hxy hord C' hC']
+
+/-- Any two normalising variable changes for the same pointed chart induce the same
+affine Tate-atlas map. -/
+theorem tateBaseSpecMapOfTateNormal_eq_of_variableChanges
+    (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (C C' : WeierstrassCurve.VariableChange A)
+    (hC : (C • W).IsTateNormal ∧ C.r = x ∧ C.t = y)
+    (hC' : (C' • W).IsTateNormal ∧ C'.r = x ∧ C'.t = y) :
+    tateBaseSpecMapOfTateNormal R (C • W) hC.1 =
+      tateBaseSpecMapOfTateNormal R (C' • W) hC'.1 := by
+  rw [tateBaseSpecMapOfTateNormal_eq_tateBaseSpecMapOfPoint_of_variableChange R
+    W x y hxy hord C hC]
+  rw [tateBaseSpecMapOfTateNormal_eq_tateBaseSpecMapOfPoint_of_variableChange R
+    W x y hxy hord C' hC']
+
 /-- The local atlas map classifies the T-E1 normal form of the pointed chart. -/
 theorem tateCurveLocOver_map_tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
     (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
