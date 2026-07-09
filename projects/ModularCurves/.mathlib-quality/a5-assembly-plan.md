@@ -44,3 +44,24 @@ starred) landed + lake-verified.** Goal: `LocallyWeierstrass π' zero' hz` for t
 - `SchemeAction`/`gammaMulSemiringAction`/`localQuotient` live in `AlgebraicGeometry` namespace
   (`ForMathlib/SchemeQuotient.lean`); not imported by QuotientCurveModel — the cocycle lemma takes the
   raw `act` family to stay decoupled.
+
+## Update — verified scratch artifacts (ready to land) + refined transport structure
+- **`exists_descended_model_of_curveActionFamily`** (cocycle→descent bridge): typechecks end-to-end
+  (`combine_ready.lean`) — lands the moment `isVCocycle_of_curveActionFamily` compiles.
+- **`SchemeAction.restrict`** (`restrict_ready.lean`, VERIFIED): restrict an action to a stable open
+  → `SchemeAction G U.toScheme`; `hom g = (σ.hom g).resLE U U (hU.le_preimage g)`; fields via
+  `resLE_comp_ι` + `cancel_mono U.ι`. Belongs in `SchemeQuotient.lean` (foundational — batch with
+  the transport to avoid repeated downstream rebuilds).
+- **Transport (a5-P2) refined**: the LocallyWeierstrass chart is `pullback C.π U.ι` (E over the base
+  open U ⊆ X, U σ-stable), NOT an open subscheme of E. So the induced action is via
+  `pullback.map (σE.hom g) ((σ.hom g).resLE U U _) …` using `IsCurveAction.π_equivariant`; then
+  transport through the chart iso `pullback C.π U.ι ≅ projModel W₀` to get the raw `act` family
+  (hmul from σE.hom_mul + pullback.map functoriality; hcart from `.cartesian`; hzero from
+  `.zero_equivariant`). Base action = `gammaMulSemiringAction hU` on `Γ(X,U)`; its `toRingHom g`
+  must match `Spec`-side of `(σ.hom g).resLE`/`isoSpec` (see `resLE_isoSpec_hom`,
+  `specSMul_isoSpec_inv` in SchemeQuotient.lean).
+
+## Session capstone target
+Integrate the agent's `hh` → land `isVCocycle_of_curveActionFamily` + `exists_descended_model_of_curveActionFamily`.
+That completes the **entire algebraic + cocycle spine** of KM 4.7 ⇐ (axiom-clean). The geometric
+transport/localization/fppf/package (a5-P2..P6) is the honest next arc.
