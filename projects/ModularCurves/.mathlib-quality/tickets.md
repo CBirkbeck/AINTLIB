@@ -10556,3 +10556,15 @@ green; new file has no `sorry`/`admit`/`axiom`; `git diff --check` green. `#prin
 `tateCurveLocOver_map_tateRingOverLiftOfPoint`,
 `atlasLocalPointedIso_exists_variableChange`, and `atlasLocal_projModelVCIso_injective` lists only
 `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx` for this increment).
+
+## Amendments v10.85-ATLAS (2026-07-09, NEW-ATLAS): [Y1-ATLAS] overlap uniqueness support LANDED
+
+Added the B2-iv affine overlap handles in `ModularCurve/YOneAtlasClassify.lean`:
+`tateRingOver_algHom_ext` and `tateRingOver_algHom_eq_lift`. These prove that two maps from the
+relative Tate atlas ring over `R` agree once the two Tate coordinates agree, and that the bundled
+relative lift is the unique `R`-algebra map with prescribed `(α, β)`. This is the ring-level
+form of Loeffler's gluing sentence: uniqueness on overlaps makes the local `αᵢ, βᵢ` agree.
+
+Verification: `lake build ModularCurves.ModularCurve.YOneAtlasClassify` green; new file still has
+no `sorry`/`admit`/`axiom`; `git diff --check` green. `#print axioms` for both new lemmas lists
+only `[propext, Classical.choice, Quot.sound]` (no inherited `sorryAx`).
