@@ -11721,3 +11721,17 @@ leaf target directly. Boarding the decomposition; the build is next-session firs
   the mechanism to the v10.71 rebase is wrong on timing; the event was an earlier
   incident of the same landmine/sweep class, exact occurrence unidentified. The
   v10.71 upstream fix removes the class going forward in this worktree.
+
+### v10.60d (2026-07-09, fable-FP): ★ [GR-E2] PROVEN — the chart-overlap criterion (089T step 4)
+
+- NEW `ForMathlib/GrassmannianOverlap.lean`, **sorry-free, axiom-clean**:
+  `transitionMatrixAt` (pointwise transition matrix of a chart member toward a second
+  chart) + **`isChartAt_iff_isUnit_det`** — a chart member at `ι` lies in the ι'-chart
+  iff its transition matrix is invertible: the overlap is `D(det T)`. Proof: the
+  ι'-composite factors as (ι-composite) ∘ `Matrix.toLin' T` (Basis.ext square), then
+  `Bijective ⟺ IsUnit(End) ⟺ IsUnit(matrix) ⟺ IsUnit det` via `Module.End.isUnit_iff` +
+  `Matrix.toLinAlgEquiv'` transport + `Matrix.isUnit_iff_isUnit_det`.
+- 089T scoreboard: (3) charts ✓ (4) base-change ✓ + overlap-criterion ✓ (5) covering ✓;
+  functor layer (normMap + chartMatrix naturality) ✓; generic transition ring layer
+  ([GR-E3]) ✓. REMAINING: ringHom↔chartMatrix spec · [GR-E4] cocycle · [GR-F]
+  `Scheme.GlueData` assembly · [GR-G] T-points → NISOG [L15].

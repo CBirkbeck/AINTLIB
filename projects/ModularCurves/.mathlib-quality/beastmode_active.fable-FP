@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] — GR-B2n COMPLETE (naturality proven, coordMap-irreducible fix); GR-E3 generic layer sorry-free (ringHom glue datum). NEXT: GR-E2 overlap criterion + ringHom↔chartMatrix spec, then GR-E4 cocycle, GR-F glue.
+FOCUS: [NISOG-GRASS] — GR-E2 overlap criterion PROVEN (GrassmannianOverlap.lean). NEXT: GR-E4 cocycle + ringHom-chartMatrix spec, then GR-F glue data.
