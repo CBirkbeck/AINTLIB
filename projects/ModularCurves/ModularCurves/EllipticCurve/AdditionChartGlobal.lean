@@ -2127,4 +2127,43 @@ lemma addOn_agree (Ω : (pullback (projModelπ W) (projModelπ W)).Opens)
 
 end FamilyAssembly
 
+section CoverAssembly
+
+variable (i j : Fin 3)
+
+/-- **(c2, the two laws cover the chart-product scheme)** The Z-law and Y-law regularity pieces
+cover the whole `(i,j)` chart-product `Spec biChartRing`. Each piece family is a `chartPieceIso`
+preimage of a `specBasicOpen`, so the `⊔` is `chartPieceIso.hom ⁻¹ᵁ` of the joint regularity open,
+which is `⊤` by the joint-unit-ideal `span_lawOneTriple_union_lawTwoTriple_eq_top` (via
+`regularityOpen_sup_eq_top_iff`). -/
+lemma blOpenZPieceSup_sup_blOpenYPieceSup_eq_top (hΔ : IsUnit W.Δ) :
+    (⨆ k, blOpenZPieceFamily W i j k) ⊔ (⨆ k, blOpenYPieceFamily W i j k) = ⊤ := by
+  have hZ : (⨆ k, blOpenZPieceFamily W i j k) = (chartPieceIso W i j).hom ⁻¹ᵁ
+      (⨆ k, specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) :=
+    ((chartPieceIso W i j).hom.preimage_iSup _).symm
+  have hY : (⨆ k, blOpenYPieceFamily W i j k) = (chartPieceIso W i j).hom ⁻¹ᵁ
+      (⨆ k, specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) :=
+    ((chartPieceIso W i j).hom.preimage_iSup _).symm
+  rw [hZ, hY, ← Scheme.Hom.preimage_sup,
+    show (⨆ k, specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ⊔
+        (⨆ k, specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) = ⊤ from
+      (regularityOpen_sup_eq_top_iff _ _).mpr (span_lawOneTriple_union_lawTwoTriple_eq_top W i j hΔ),
+    Scheme.Hom.preimage_top]
+
+/-- **(c2, per-chart cover)** On each `(i,j)` chart-product image the two Bosma–Lenstra laws'
+regularity opens cover the whole chart image `range pieceι`. `image` distributes over `⊔`
+(`Set.image_union`) and the pieces cover the source (`blOpenZPieceSup_sup_blOpenYPieceSup_eq_top`),
+so the image of `⊤` is `opensRange`. -/
+lemma blOpenZImage_sup_blOpenYImage_eq_opensRange (hΔ : IsUnit W.Δ) :
+    blOpenZImage W i j ⊔ blOpenYImage W i j = (pieceι W i j).opensRange := by
+  have himg : ∀ A B : (Limits.pullback (chartι W i ≫ projModelπ W)
+      (chartι W j ≫ projModelπ W)).Opens,
+      pieceι W i j ''ᵁ A ⊔ pieceι W i j ''ᵁ B = pieceι W i j ''ᵁ (A ⊔ B) := fun A B =>
+    TopologicalSpace.Opens.ext (by
+      simp only [Scheme.Hom.coe_image, TopologicalSpace.Opens.coe_sup, Set.image_union])
+  rw [blOpenZImage, blOpenYImage, himg, blOpenZPieceSup_sup_blOpenYPieceSup_eq_top W i j hΔ,
+    Scheme.Hom.image_top_eq_opensRange]
+
+end CoverAssembly
+
 end WeierstrassCurve.Projective
