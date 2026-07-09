@@ -11932,3 +11932,41 @@ ee1e7a63 L3b1, 585012a3 overlapPieceIso(w)+w-transι identity. All zero-sorry, a
 - **L5** `Scheme.Cover.hom_ext` over `blOpenYImage_inf_eq_iSup` (5da7f060) ⟹ `addOnYOnImage_agree`;
   dispatch p,q ∈ {Y,Z}²; `glueMorphisms_hf_of_agree` (f91b91ec) ⟹ **addOnY/addOnZ** (+ rule-3 interface).
   Z-side mirrors. Then `blOpen_cover`, `addOn_agree`, `mulModelHom`; c4.4, c4.5. 0c-i ⟹ 0c-ii.
+
+### v10.76 (2026-07-09, c5β): [C4-HF-ASSEMBLY] — ψ_ij built (13 lemmas, ~78%); the concrete-tower whnf wall isolated
+
+*Session commits (13): L1, L2a/b/c, L3a (+ForMathlib isoImage_inv_morphismRestrict_ι), L3b1,
+overlapPieceIso(w)+w-transι identity, ψ_ij (+ForMathlib IsLocalization.Away.liftAlgHom),
+psiFst_toRingHom_comp. All zero-sorry, axiom-clean. The entire geometric + algebraic scaffolding is
+built; blocked on ONE whnf wall.*
+
+**Done — everything except the final Spec.map plumbing:**
+- Geometric spine: L1 (image morphism = σ ≫ addOnYPieceMor), L2a/b/c (overlap = triple-loc locus),
+  L3a (σ ≫ pieceAwayι = A_k.ι), L3b1 (pieceAwayι Spec.map form), w = overlapPieceIso (P ≅ Spec S) +
+  w-transι identity (w.hom ≫ P.ι = Spec.map(transRing→S) ≫ transι).
+- Algebraic: **ψ_ij** = the localization lift `Away(lawTwoTriple ij k) →ₐ[R] S` (via new ForMathlib
+  `IsLocalization.Away.liftAlgHom`, variable-ring so it doesn't whnf-explode); `psiFst_toRingHom_comp`
+  (ψ_ij restricted to biChartRing = algebraMap biChartRing S — RHS a bare algebraMap, whnf-safe).
+
+**THE WALL (precisely isolated):** `specMap_psiFst_pieceAwayι` (`Spec.map(ψ_ij) ≫ pieceAwayι = w.hom ≫
+P.ι`) needs the tower step `algebraMap biChartRing S = (algebraMap transRing S).comp transAlgHom`, i.e.
+matching `algebraMap biChartRing transRing` with `transAlgHom.toRingHom`. This defeq is STRUCTURALLY
+TRIVIAL (transAlgHom := IsScalarTower.toAlgHom) and its `rfl` COMPILES at the AdditionChartTransition
+import level — but `isDefEq` WHNF-EXPLODES (200k) once the concrete triple-localization
+`Away transRing g` is in the elaboration context (Global). Every route tried: bare RingHom rfl, ofHom
+form, IsScalarTower.algebraMap_eq + ← transAlgHom_toRingHom (Global's ofHom lemma), unfold/simp/rw of
+transAlgHom — all explode on the `transRing`↔`Away(transFst·transSnd)` / `biChartRing`↔`↑(CommRingCat.of
+biChartRing)` defeqs in the heavy context.
+
+**Fix directions for next unit (pick one):** (a) make `transRing` and `S`/`Sr` genuine `def`s (not
+`abbrev`s) with `irreducible` + an explicit unfold lemma, so isDefEq never unfolds the localization
+carriers (the deepest fix — v10.24(e) "named handle"); (b) prove `specMap_psiFst_pieceAwayι` in a
+SEPARATE file importing only up to AdditionChartTransition + the ψ_ij defs (lighter context where the
+tower rfl compiles), then import it into Global; (c) hunt a mathlib `Spec.map`-of-scalar-tower lemma
+that factors `Spec.map (algebraMap A C)` through `T` without forming the ring comp.
+
+**After the wall:** `w.hom ≫ σ = Spec.map(ψ_ij)` (Spec.map identification + pieceAwayι mono), **L4**
+(precompose crux `chartι_comp_specMap_chartAwayHom_smul_eq` with w.hom; `specMap_comp_pieceMorOfTriple`
+→ chartAwayHomOfTriple form; `transHom_lawTwoTriple_eq_smul`; cancel w.hom iso), **L5** (`Cover.hom_ext`
+over `blOpenYImage_inf_eq_iSup` → `addOnYOnImage_agree` → `glueMorphisms_hf_of_agree` → addOnY/addOnZ).
+Z-side mirrors. Then blOpen_cover, addOn_agree, mulModelHom; c4.4, c4.5. 0c-i ⟹ 0c-ii.
