@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
+import ModularCurves.Moduli.PullSectionCanonicity
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.ForMathlib.GeometricFibreComparison
@@ -1002,6 +1003,27 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     have hne := (hfib k τ).2 d (by omega) hdlt
     exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
       hτkill)
+
+/-- **(Y1-D2 bridge)** A pulled section vanishes on the fibre over `τ` iff its `transportSection`
+(along the `Ell/R`-morphism's cartesian comparison iso `curveIsoPullback`) does — pure
+iso-cancellation on the total spaces (`curveIsoPullback` is an iso, hence mono). This is the
+"barehanded" fibrewise transport of the wiring note. -/
+private lemma pull_transportSection_eq_zero_iff {X Y : EllObj R} (f : X ⟶ Y) {k : Type u} [Field k]
+    (τ : Spec (CommRingCat.of k) ⟶ X.base) (w : X.curve.Section) :
+    EllipticCurve.Point.pull X.curve τ w = 0 ↔
+      EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ (EllHom.transportSection R f w) = 0 := by
+  -- `iso.hom`'s codomain is inferred as `(baseChange).E` from these equations, matching
+  -- `zero_curveIsoPullback` (avoiding the `pullback … = (baseChange).E` syntactic mismatch).
+  have key : (EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ
+        (EllHom.transportSection R f w)).1
+      = (EllipticCurve.Point.pull X.curve τ w).1 ≫ (EllHom.curveIsoPullback R f).hom :=
+    (Category.assoc _ _ _).symm
+  have keyzero : (0 : (Y.curve.baseChange f.baseHom).Point τ).1
+      = (0 : X.curve.Point τ).1 ≫ (EllHom.curveIsoPullback R f).hom := by
+    rw [EllipticCurve.point_zero_val, EllipticCurve.point_zero_val, Category.assoc]
+    exact congrArg (τ ≫ ·) (EllHom.zero_curveIsoPullback R f).symm
+  rw [Subtype.ext_iff, Subtype.ext_iff, key, keyzero]
+  exact (CategoryTheory.cancel_mono (EllHom.curveIsoPullback R f).hom).symm
 
 /-- **(Y1-D2, naive-structure transport along `Ell/R`-morphisms)** For an `Ell/R`-morphism
 `f : X ⟶ Y` and a section `Q` of `Y.curve`, the pulled section `pullSection f Q` is naive-`Γ₁(N)`
