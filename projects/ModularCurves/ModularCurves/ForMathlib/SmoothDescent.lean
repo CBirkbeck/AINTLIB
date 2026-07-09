@@ -5,6 +5,8 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+import Mathlib.AlgebraicGeometry.Limits
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 
 /-!
@@ -98,11 +100,133 @@ theorem Module.Flat.of_comp_of_faithfullyFlat
 
 end ModuleCore
 
+/-- **[02KL-CORE] (REGISTERED GATE — Stacks 02KG + 02KH, algebra form; the
+fppf-source-locality core).** Finite presentation reflects along a faithfully flat,
+finitely presented composite: if `χ : S →+* T` is faithfully flat and of finite
+presentation and `χ ∘ φ : R →+* T` is of finite presentation, then `φ : R →+* S` is of
+finite presentation.
+
+GAP AUDIT (2026-07-10, NEW-GH): absent from the pin in every form. Mathlib's
+`RingHom.FinitePresentation.codescendsAlong_faithfullyFlat`
+(`RingTheory/Finiteness/Descent.lean`) is the PUSHOUT (base-change) form — `Q(R → R')`
+faithfully flat and `P(R' → R' ⊗[R] S)` give `P(R → S)` — which cannot be instantiated to
+this composite-reflection shape (the faithfully flat leg here sits over `S`, not under
+`R`). `Algebra.FinitePresentation.of_restrict_scalars_finitePresentation` cancels the
+SECOND factor (given finite-type first factor) — the wrong factor. The classical proof
+(Stacks 02KG for finite type, upgraded to 02KH for finite presentation) descends the
+presentation to a finite-type subalgebra stage `S₀ ⊆ S` (possible since `χ` is FP:
+finitely many relation coefficients) and then needs flatness/surjectivity to spread out
+to a finite stage of the filtered system — EGA IV 8.10.5/11.2.6-style spreading-out that
+mathlib does not yet expose for this purpose (`Mathlib/AlgebraicGeometry/SpreadingOut.lean`
+is about spreading out morphisms/points, not flatness through ring-filtered systems).
+Profile: publishable-grade commutative algebra, zero file overlap — the same
+hard-substrate shape as [A711-FP]. Consumed by `LocallyOfFinitePresentation.
+of_precomp_of_surjective` (Stacks 02KL) below, whose scheme-level reduction is PROVEN
+modulo exactly this statement. -/
+theorem RingHom.FinitePresentation.of_comp_of_faithfullyFlat
+    {R S T : Type u} [CommRing R] [CommRing S] [CommRing T]
+    {φ : R →+* S} {χ : S →+* T} (hff : χ.FaithfullyFlat) (hfp : χ.FinitePresentation)
+    (h : (χ.comp φ).FinitePresentation) : φ.FinitePresentation := by
+  sorry
+
 namespace AlgebraicGeometry
 
-open CategoryTheory
+open CategoryTheory Limits
 
 variable {X Y Z : Scheme.{u}}
+
+/-- The affine case of Stacks 02KL: over affine `W`, `Y`, `Z`, a flat surjective lfp
+`q : W ⟶ Y` with `q ≫ f` lfp forces `f` lfp. `Γ(q)` is faithfully flat
+(`flat_and_surjective_iff_faithfullyFlat_of_isAffine`) and finitely presented, and
+`Γ(q ≫ f) = Γ(q) ∘ Γ(f)`, so the ring-level core [02KL-CORE] applies. -/
+private lemma lfp_of_precomp_of_isAffine {W Y Z : Scheme.{u}} [IsAffine W] [IsAffine Y]
+    [IsAffine Z] (q : W ⟶ Y) (f : Y ⟶ Z) [Flat q] [Surjective q]
+    [LocallyOfFinitePresentation q] (h : LocallyOfFinitePresentation (q ≫ f)) :
+    LocallyOfFinitePresentation f := by
+  have hff : (q.appTop).hom.FaithfullyFlat :=
+    (Flat.flat_and_surjective_iff_faithfullyFlat_of_isAffine q).mp ⟨‹_›, ‹_›⟩
+  have hfp : RingHom.FinitePresentation (q.appTop).hom :=
+    (HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation)).mp ‹_›
+  rw [HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation)] at h ⊢
+  rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp] at h
+  exact RingHom.FinitePresentation.of_comp_of_faithfullyFlat hff hfp h
+
+/-- Engine for Stacks 02KL, with the surjectivity hypothesis as an instance. The wlog
+cascade (mirroring `LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType`,
+`ForMathlib/FinitePresentationCancel.lean`) reduces to affine `Z` then affine `Y`; there,
+`π` is universally open (flat + lfp), `Y` is quasi-compact, so finitely many affine opens
+of `X` have `π`-images covering `Y`; their coproduct is an affine scheme flat, lfp and
+surjective over `Y`, and the affine case applies. -/
+private theorem lfp_of_precomp_aux {X Y Z : Scheme.{u}} (π : X ⟶ Y) (f : Y ⟶ Z)
+    [Flat π] [LocallyOfFinitePresentation π] [Surjective π]
+    (h : LocallyOfFinitePresentation (π ≫ f)) : LocallyOfFinitePresentation f := by
+  wlog hZ : IsAffine Z generalizing X Y Z
+  · rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top
+      (P := @LocallyOfFinitePresentation) _ (iSup_affineOpens_eq_top Z)]
+    intro U
+    have H := IsZariskiLocalAtTarget.restrict h U.1
+    rw [morphismRestrict_comp] at H
+    haveI hs1 : Surjective (π ∣_ f ⁻¹ᵁ U.1) :=
+      IsZariskiLocalAtTarget.restrict ‹Surjective π› (f ⁻¹ᵁ U.1)
+    haveI hf1 : Flat (π ∣_ f ⁻¹ᵁ U.1) :=
+      IsZariskiLocalAtTarget.restrict ‹Flat π› (f ⁻¹ᵁ U.1)
+    haveI hp1 : LocallyOfFinitePresentation (π ∣_ f ⁻¹ᵁ U.1) :=
+      IsZariskiLocalAtTarget.restrict ‹LocallyOfFinitePresentation π› (f ⁻¹ᵁ U.1)
+    exact this (π ∣_ f ⁻¹ᵁ U.1) (f ∣_ U.1) H inferInstance
+  wlog hY : IsAffine Y generalizing X Y
+  · rw [IsZariskiLocalAtSource.iff_of_iSup_eq_top
+      (P := @LocallyOfFinitePresentation) _ (iSup_affineOpens_eq_top Y)]
+    intro V
+    haveI hs2 : Surjective (π ∣_ V.1) := IsZariskiLocalAtTarget.restrict ‹Surjective π› V.1
+    haveI hf2 : Flat (π ∣_ V.1) := IsZariskiLocalAtTarget.restrict ‹Flat π› V.1
+    haveI hp2 : LocallyOfFinitePresentation (π ∣_ V.1) :=
+      IsZariskiLocalAtTarget.restrict ‹LocallyOfFinitePresentation π› V.1
+    refine this (π ∣_ V.1) (V.1.ι ≫ f) ?_ inferInstance
+    have hres : (π ∣_ V.1) ≫ V.1.ι ≫ f = (π ⁻¹ᵁ V.1).ι ≫ (π ≫ f) := by
+      rw [← Category.assoc, morphismRestrict_ι, Category.assoc]
+    rw [hres]
+    exact IsZariskiLocalAtSource.comp h _
+  haveI := hZ; haveI := hY
+  -- `π` is universally open (flat + lfp), so images of opens are open.
+  have hopen := π.isOpenMap
+  -- For each `y`, an affine open of `X` through a preimage of `y`.
+  have hchoice : ∀ y : Y, ∃ O : X.affineOpens, ∃ x, x ∈ O.1 ∧ π x = y := by
+    intro y
+    obtain ⟨x, hx⟩ := π.surjective y
+    obtain ⟨O, hO, hxO, -⟩ :=
+      exists_isAffineOpen_mem_and_subset (TopologicalSpace.Opens.mem_top x)
+    exact ⟨⟨O, hO⟩, x, hxO, hx⟩
+  choose O xO hxO hπxO using hchoice
+  -- Finitely many of the (open) images cover the quasi-compact `Y`.
+  obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover
+    (fun y : Y => π '' ((O y).1 : Set X)) (fun y => hopen _ (O y).1.2)
+    (fun y _ => Set.mem_iUnion.mpr ⟨y, ⟨xO y, hxO y, hπxO y⟩⟩)
+  -- The coproduct of the pieces: an affine flat lfp surjective cover of `Y`.
+  have (i : t) : IsAffine ((O i.1).1.toScheme) := (O i.1).2
+  set q : (∐ fun i : t => ((O i.1).1.toScheme)) ⟶ Y :=
+    Sigma.desc (fun i => (O i.1).1.ι ≫ π) with hq
+  haveI hFq : Flat q := IsZariskiLocalAtSource.sigmaDesc fun i =>
+    MorphismProperty.comp_mem _ _ _ inferInstance ‹Flat π›
+  haveI hPq : LocallyOfFinitePresentation q :=
+    IsZariskiLocalAtSource.sigmaDesc fun i => inferInstance
+  haveI hSq : Surjective q := by
+    constructor
+    intro y
+    have hyt := ht (Set.mem_univ y)
+    simp only [Set.mem_iUnion, exists_prop] at hyt
+    obtain ⟨i, hit, x, hxOi, hπx⟩ := hyt
+    refine ⟨(Sigma.ι (fun i : t => ((O i.1).1.toScheme)) ⟨i, hit⟩) ⟨x, hxOi⟩, ?_⟩
+    have hι : Sigma.ι (fun i : t => ((O i.1).1.toScheme)) ⟨i, hit⟩ ≫ q
+        = (O i).1.ι ≫ π := by rw [hq]; exact Sigma.ι_desc _ _
+    rw [← Scheme.Hom.comp_apply, hι, Scheme.Hom.comp_apply, Scheme.Opens.ι_apply]
+    exact hπx
+  have hqf : LocallyOfFinitePresentation (q ≫ f) := by
+    have hcomp : q ≫ f = Sigma.desc (fun i : t => (O i.1).1.ι ≫ (π ≫ f)) := by
+      refine Sigma.hom_ext _ _ fun i => ?_
+      rw [Sigma.ι_desc, hq, ← Category.assoc, Sigma.ι_desc, Category.assoc]
+    rw [hcomp]
+    exact IsZariskiLocalAtSource.sigmaDesc fun i => IsZariskiLocalAtSource.comp h _
+  exact lfp_of_precomp_of_isAffine q f hqf
 
 /-- **(Stacks 02KL = Descent 35.14.3; EGA IV 17.7.5 (i))** Locally-of-finite-presentation
 descends along a surjective, flat, locally-finitely-presented precomposition: if
@@ -111,7 +235,9 @@ Stacks proof route: reduce to affine `Z`, `Y` (lfp is Zariski-local on source an
 target); `π` flat lfp is open, `Y` quasi-compact, so finitely many affine opens
 `X_i ⊆ X` have `Y = ⋃ π(X_i)`; replace `X` by `⊔ X_i` (affine); conclude by the affine
 case Descent 35.14.1, whose algebra content is the finite-presentation sorites over a
-faithfully flat finitely-presented cover. WIP leaf of [YF-QSM].
+faithfully flat finitely-presented cover. **Scheme-level reduction PROVEN
+(2026-07-10, NEW-GH); sorryAx flows only through the registered ring-level gate
+[02KL-CORE]** (`RingHom.FinitePresentation.of_comp_of_faithfullyFlat` above).
 
 **EXECUTION-READY REDUCTION (NEW-GH, scoped v10.75 — next-session first act).** Confirmed:
 mathlib has NO precomp/source-descent shortcut (the `DescendsAlong _ (@Surjective ⊓ @Flat
@@ -135,8 +261,9 @@ the target — the wrong direction; no `HasOfPrecompProperty` for lfp). Recipe:
    `R→S` FP). ∎  The ~100-line work is step 2's finite-affine-subcover + coproduct. -/
 theorem LocallyOfFinitePresentation.of_precomp_of_surjective (π : X ⟶ Y) (f : Y ⟶ Z)
     [Flat π] [LocallyOfFinitePresentation π] (hπ : Function.Surjective π.base)
-    (h : LocallyOfFinitePresentation (π ≫ f)) : LocallyOfFinitePresentation f := by
-  sorry
+    (h : LocallyOfFinitePresentation (π ≫ f)) : LocallyOfFinitePresentation f :=
+  haveI : Surjective π := ⟨hπ⟩
+  lfp_of_precomp_aux π f h
 
 /-- **(Stacks 29.26.13, scheme form)** Flatness descends along a surjective flat
 precomposition: if `π ≫ f` is flat and `π` is surjective and flat, then `f` is flat.
