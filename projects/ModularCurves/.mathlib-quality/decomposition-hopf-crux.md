@@ -304,3 +304,30 @@ residue field) and each relation-class over a fixed maximal is bounded by the fi
 Elementary gaps to build alongside: finitely-many-k-points of a finite k-algebra
 (alg-closed residue fields); "outside all maximals ⟹ unit"; the χ-vs-bᵢ evaluation
 bookkeeping. All mathlib-adjacent.
+
+## [HG-B4] final assembly — interface pinned (all ingredients green as of this commit)
+
+**Statement (R-algebra-map form; no k-structure on B)**:
+`theorem exists_algHom_comp_eq [IsAlgClosed k] [Algebra R k] (hρ : IsCoaction ρ)
+  (a₀ a₁ : B →ₐ[R] k) (hagree : ∀ x ∈ coinvariants ρ, a₀ x = a₁ x) :
+  ∃ χ : (B ⊗[R] A) →ₐ[R] k, χ.comp ρ = a₀ ∧ χ.comp includeLeft = a₁`.
+Proof over the k-situation: `letI : Algebra (coinvariants ρ) k := (a₁-restricted).toAlgebra`
+(hagree makes a₀,a₁ the SAME C-structure); B_k := k⊗[C]B, ρ_k := coactionBaseChange;
+ā₀ ā₁ : B_k →ₐ[k] k the tensor-lifts. Contradiction pipeline (all LANDED):
+S := the (finite) k-points over ā₁ (`finite_setOf_comp_includeLeft_eq`); if no χ works, ā₀
+∉ ρ_k-restrictions of S; avoidance `exists_mem_ker_notMem_ker` gives f̃;
+g := det (mulMatrix (ρ_k f̃)): non-unit (`not_isUnit_det_mulMatrix_coaction`); ā₁(g) ≠ 0:
+`RingHom.map_det` + `mulMatrix_map` at φ := ā₁ gives det (mulMatrix_k u) for
+u := (map ā₁ id)(ρ_k f̃) ∈ k⊗A; u is a unit by `isUnit_of_forall_algHom_ne_zero` (each
+ψ-value = (ψ∘(map ā₁ id))∘ρ_k at f̃ = a member-of-S∘ρ_k-value ≠ 0 — the composite
+ψ∘(map ā₁ id) IS an S-member since its ι-restriction is ā₁); unit ⟹ det-unit ⟹ ≠ 0;
+POWER WITNESS: g^r = scalar c, ā₁-image ≠ 0 ⟹ c ≠ 0 ⟹ g unit — contradiction.
+NOTE: g ∈ coinvariants ρ_k via `coactionCharpoly_coeff_mem` at coeff 0 up to sign
+((−1)^r·det = coeff 0; adjust by the unit sign).
+
+**GAP-6 corollary** (what 03BM consumes): C' local (κ := residue, k := κ̄), B' = C'⊗[C]B
+flat base change, integral (Algebra.IsIntegral.tensorProduct): every maximal n of B' gives
+χ_n : B' →ₐ[R] k via `IsAlgClosed.lift` over κ extending the CANONICAL κ↪k (so all χ_n
+agree on C'-scalars = coinvariants ρ' by 03BK(3)); pairwise the orbit theorem connects
+them through the finite ā-fibre S ⟹ the kernel map n ↦ ker χ_n is finite-to-one into a
+finite set ⟹ **finitely many maximals; m·B' ⊆ rad** (all maximals over m by integrality).
