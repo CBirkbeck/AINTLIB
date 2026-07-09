@@ -210,6 +210,57 @@ end PushforwardTensor
 
 end PresheafOfModules
 
+namespace AlgebraicGeometry
+
+variable {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
+
+/-- **[PIC-P1b-MONO], leaf ι-LOCBIJ (sieve transfer).** For an open immersion `f`, the
+`opensFunctor`-pullback of a Zariski-covering sieve of `f ''ᵁ U` covers `U`: any point of `U`
+maps into some member `W` of the sieve, and `f ⁻¹ᵁ W ≤ U` witnesses coverage (its image lies
+in `W` by `image_preimage_le`, so the sieve's downward closure catches it; parallel maps of
+opens are equal by proof irrelevance). -/
+lemma functorPullback_opensFunctor_mem {U : X.Opens} (S : Sieve (f.opensFunctor.obj U))
+    (hS : S ∈ Opens.grothendieckTopology Y (f.opensFunctor.obj U)) :
+    S.functorPullback f.opensFunctor ∈ Opens.grothendieckTopology X U := by
+  intro x hx
+  obtain ⟨W, g, hg, hW⟩ := hS (f.base x) ⟨x, hx, rfl⟩
+  refine ⟨f ⁻¹ᵁ W, homOfLE ?_, ?_, hW⟩
+  · exact (Scheme.Hom.preimage_image_eq f U) ▸
+        (fun a ha => g.le ha : f ⁻¹ᵁ W ≤ f ⁻¹ᵁ (f ''ᵁ U))
+  · show S (f.opensFunctor.map _)
+    have h1 : f.opensFunctor.obj (f ⁻¹ᵁ W) ≤ W := Scheme.Hom.image_preimage_le f W
+    exact Subsingleton.elim (homOfLE h1 ≫ g) (f.opensFunctor.map _) ▸
+      S.downward_closed hg (homOfLE h1)
+
+/-- **[PIC-P1b-MONO], leaf ι-LOCBIJ (injective half).** Whiskering with the `opensFunctor`
+of an open immersion preserves local injectivity of morphisms of presheaves: the equalizer
+sieve of the whiskered map is the `functorPullback` of the equalizer sieve upstairs, which
+covers by the sieve transfer. -/
+lemma isLocallyInjective_whiskerLeft_opensFunctor
+    {A B : (Y.Opens)ᵒᵖ ⥤ AddCommGrpCat.{u}} (g : A ⟶ B)
+    [Presheaf.IsLocallyInjective (Opens.grothendieckTopology Y) g] :
+    Presheaf.IsLocallyInjective (Opens.grothendieckTopology X)
+      (Functor.whiskerLeft f.opensFunctor.op g) := by
+  constructor
+  intro U x y h
+  exact functorPullback_opensFunctor_mem f _
+    (Presheaf.equalizerSieve_mem (Opens.grothendieckTopology Y) g x y h)
+
+/-- **[PIC-P1b-MONO], leaf ι-LOCBIJ (surjective half).** Whiskering with the `opensFunctor`
+of an open immersion preserves local surjectivity: the image sieve of the whiskered map is
+the `functorPullback` of the image sieve upstairs. -/
+lemma isLocallySurjective_whiskerLeft_opensFunctor
+    {A B : (Y.Opens)ᵒᵖ ⥤ AddCommGrpCat.{u}} (g : A ⟶ B)
+    [Presheaf.IsLocallySurjective (Opens.grothendieckTopology Y) g] :
+    Presheaf.IsLocallySurjective (Opens.grothendieckTopology X)
+      (Functor.whiskerLeft f.opensFunctor.op g) := by
+  constructor
+  intro U t
+  exact functorPullback_opensFunctor_mem f _
+    (Presheaf.imageSieve_mem (Opens.grothendieckTopology Y) g t)
+
+end AlgebraicGeometry
+
 namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X Y : Scheme.{u}}
