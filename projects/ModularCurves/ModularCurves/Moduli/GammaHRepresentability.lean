@@ -1005,11 +1005,39 @@ lemma pullSection_glSmul_snd {R : CommRingCat.{u}} {X Y : EllObj R} (N : ℕ) [N
   rw [EllHom.pullSection_add, EllHom.pullSection_zsmul, EllHom.pullSection_zsmul]
 
 open EllipticCurve in
+/-- Section-level restriction identity (first section): pulling the coproduct glue back
+to summand `i` recovers `Lf i` pulled to the summand base. -/
+lemma coprodFullLevel_restrict_fst {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) (i : Bool) :
+    EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
+        (coprodFullLevel N X g hg Lf).1.1
+      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.1 := by
+  rw [show (coprodFullLevel N X g hg Lf).1.1
+        = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)) from rfl,
+    pullSection_asSection_aux, restrict_coprodPoint]
+  rfl
+
+open EllipticCurve in
+/-- Section-level restriction identity (second section). -/
+lemma coprodFullLevel_restrict_snd {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) (i : Bool) :
+    EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
+        (coprodFullLevel N X g hg Lf).1.2
+      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.2 := by
+  rw [show (coprodFullLevel N X g hg Lf).1.2
+        = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2)) from rfl,
+    pullSection_asSection_aux, restrict_coprodPoint]
+  rfl
+
+open EllipticCurve in
 /-- **[GHC4, the restriction identity]** The naive `Γ_H` problem's restriction of a
 coproduct-glued class to a `Bool`-summand `i` is the class of the summand's structure
 `Lf i`, pulled to the summand's base (`= pullAlong (Sigma.ι i ≫ g) (Lf i)`). Computes
-`gammaHNaiveProblem.map` on a `Quotient.mk` via `pullSection_asSection_aux` +
-`restrict_coprodPoint`. -/
+`gammaHNaiveProblem.map` on a `Quotient.mk` via the section-level identities. -/
 lemma coprodFullLevel_restrict {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) (X : EllObj R)
     (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
@@ -1019,23 +1047,12 @@ lemma coprodFullLevel_restrict {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
         (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op
         (Quotient.mk _ (coprodFullLevel N X g hg Lf))
       = Quotient.mk _
-          (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)) := by
-  have hfst : EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
-        (coprodFullLevel N X g hg Lf).1.1
-      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.1 := by
-    rw [show (coprodFullLevel N X g hg Lf).1.1
-          = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)) from rfl,
-      pullSection_asSection_aux, restrict_coprodPoint]
-    rfl
-  have hsnd : EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
-        (coprodFullLevel N X g hg Lf).1.2
-      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.2 := by
-    rw [show (coprodFullLevel N X g hg Lf).1.2
-          = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2)) from rfl,
-      pullSection_asSection_aux, restrict_coprodPoint]
-    rfl
-  exact congrArg (Quotient.mk _) (Subtype.ext (Prod.ext hfst hsnd))
+          (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)) :=
+  congrArg (Quotient.mk _)
+    (Subtype.ext (Prod.ext (coprodFullLevel_restrict_fst N X g hg Lf i)
+      (coprodFullLevel_restrict_snd N X g hg Lf i)))
 
+open EllipticCurve in
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
@@ -1055,7 +1072,75 @@ theorem gammaHNaiveProblem_not_relativelyRepresentable (N : ℕ) [NeZero N]
     (hinv : IsUnit (N : R)) (X : EllObj R) (hne : Nonempty X.base)
     (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
     ¬ (gammaHNaiveProblem R N H).RelativelyRepresentable := by
-  sorry
+  intro hrep
+  -- A nontrivial element `γ ∈ H`.
+  obtain ⟨γ, hγ⟩ := Subgroup.ne_bot_iff_exists_ne_one.mp hH
+  have hγH : (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) ∈ H := γ.2
+  have hγ1 : (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) ≠ 1 := fun h => hγ (Subtype.ext h)
+  -- The codiagonal `T = X.base ⨿ X.base → X.base`.
+  set g : (∐ fun _ : Bool => X.base) ⟶ X.base := Sigma.desc (fun _ => 𝟙 X.base) with hg_def
+  have hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base :=
+    fun b => by rw [hg_def]; exact Sigma.ι_desc _ _
+  -- The diagonal glue `(L, L)` and the twisted glue `(L, γ·L)`.
+  set LfA : Bool → X.curve.FullLevelPt N := fun _ => L with hLfA
+  set LfB : Bool → X.curve.FullLevelPt N :=
+    fun b => bif b then X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L else L
+    with hLfB
+  have hLfA_true : LfA true = L := rfl
+  have hLfA_false : LfA false = L := rfl
+  have hLfB_true : LfB true = X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L :=
+    rfl
+  have hLfB_false : LfB false = L := rfl
+  obtain ⟨d⟩ := (ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData
+    (gammaHNaiveProblem R N H)).mp hrep X
+  -- The two global classes restrict equally on both summands, hence are equal (separation).
+  have hsep : (Quotient.mk ((X.pullbackAlong g).curve.hOrbitSetoid H)
+        (coprodFullLevel N X g hg LfA))
+      = Quotient.mk _ (coprodFullLevel N X g hg LfB) := by
+    refine relRepData_sep_coprod R d g _ _ (fun i => ?_)
+    refine (coprodFullLevel_restrict N H X g hg LfA i).trans
+      (Eq.trans ?_ (coprodFullLevel_restrict N H X g hg LfB i).symm)
+    cases i with
+    | false => rw [hLfA_false, hLfB_false]
+    | true =>
+      rw [hLfA_true, hLfB_true]
+      exact Quotient.sound ⟨(γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)), hγH,
+        (pullAlong_glSmul N (Sigma.ι (fun _ : Bool => X.base) true ≫ g)
+          (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L).symm⟩
+  -- Unpack the orbit relation on the coproduct base.
+  obtain ⟨h, hhH, hhAB⟩ := Quotient.exact hsep
+  -- Restricting `glSmul h A = B` to the `false` summand (where `A`, `B` agree) forces `h = 1`.
+  have hh1 : h = 1 := by
+    refine glSmul_eq_one_of_eq_self N hinv (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
+      hne h (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g) L)
+      (Subtype.ext (Prod.ext ?_ ?_))
+    · have hf1 := congrArg (fun M => EllHom.pullSection R
+        (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) false)) M.1.1) hhAB
+      rw [pullSection_glSmul_fst, coprodFullLevel_restrict_fst, coprodFullLevel_restrict_snd,
+        coprodFullLevel_restrict_fst, hLfA_false, hLfB_false] at hf1
+      exact hf1
+    · have hf2 := congrArg (fun M => EllHom.pullSection R
+        (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) false)) M.1.2) hhAB
+      rw [pullSection_glSmul_snd, coprodFullLevel_restrict_fst, coprodFullLevel_restrict_snd,
+        coprodFullLevel_restrict_snd, hLfA_false, hLfB_false] at hf2
+      exact hf2
+  -- With `h = 1`, `A = B`; restricting to `true` forces `γ = 1`, a contradiction.
+  rw [hh1, EllipticCurve.glSmul_one] at hhAB
+  have ht1 := congrArg (fun M => EllHom.pullSection R
+    (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) true)) M.1.1) hhAB
+  have ht2 := congrArg (fun M => EllHom.pullSection R
+    (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) true)) M.1.2) hhAB
+  rw [coprodFullLevel_restrict_fst, coprodFullLevel_restrict_fst, hLfA_true, hLfB_true] at ht1
+  rw [coprodFullLevel_restrict_snd, coprodFullLevel_restrict_snd, hLfA_true, hLfB_true] at ht2
+  have hpull : FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g) L
+      = FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g)
+          (X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L) :=
+    Subtype.ext (Prod.ext ht1 ht2)
+  rw [pullAlong_glSmul] at hpull
+  exact hγ1 (glSmul_eq_one_of_eq_self N hinv
+    (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g)) hne
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g) L) hpull.symm)
 
 /-- **[GHC5] (KM 4.7.1's hypothesis shape: "affine and etale over (Ell)")** A quotient
 problem package is affine over `Ell`: finite morphisms are affine, so `relRep`
