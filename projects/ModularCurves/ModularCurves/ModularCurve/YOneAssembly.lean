@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.ForMathlib.GeometricFibreComparison
 import Mathlib.NumberTheory.Divisors
 
@@ -50,7 +51,9 @@ attack blocks, gate register and LOC grounding — in
 AINTLIB ModularCurves STREAM-Y1 (T-E7; planning-only skeleton, all leaves `sorry`).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -193,8 +196,11 @@ lemma tateA₄_eq_zero : (tateCurveLocOver R).a₄ = 0 := by
 lemma tateA₆_eq_zero : (tateCurveLocOver R).a₆ = 0 := by
   simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
 
-/-- The base of the marked Tate atlas: `𝒴 = Spec R[A, B][∆⁻¹]` (Loeffler's `Y`, Def 3.3.6). -/
-noncomputable def tateBase : Scheme.{u} :=
+/-- The base of the marked Tate atlas: `𝒴 = Spec R[A, B][∆⁻¹]` (Loeffler's `Y`, Def 3.3.6).
+Reducible so that unification aligns `tateBase R` with `Spec (CommRingCat.of (tateRingOver R))`
+without an expensive `whnf` (needed by the `pointSpecPointsEquiv`/`geomFibrePointAddEquiv` atlas
+leaves, whose ambient scheme is spelled `Spec (of _)`). -/
+@[reducible] noncomputable def tateBase : Scheme.{u} :=
   Spec (CommRingCat.of (tateRingOver R))
 
 /-- The structure morphism `𝒴 ⟶ Spec R` (Spec of `R → R[A,B] → R[A,B][∆⁻¹]`). -/
@@ -373,6 +379,200 @@ noncomputable def tateEllObj : EllObj R where
   structMap := tateStructMap R
   curve := tateUniversal R
 
+/-! #### [Y1-vi] The marked point is nowhere of order `≤ 3` (Loeffler p. 13 display)
+
+The atlas curve is Tate normal (`a₄ = 0`, `a₂` and `a₃` units), so its affine marked point `(0, 0)`
+is nowhere of order `1, 2, 3` — `affine_origin_order_gt_three`. Transferred to the scheme fibres
+through the group iso `geomFibrePointAddEquiv` and the *transfer pin* below (proved by chart
+naturality: the pulled `P₀` factors through the `Z`-chart via the base change of the chart hom
+defining `tateP0mor`, so its coordinates are the `algebraMap`-images of `tateP0sol = (0, 0)`). -/
+
+/-- Base change of the atlas curve to a fibre keeps `a₄ = 0`. -/
+lemma baseChange_tateA₄_eq_zero (k : Type u) [CommRing k] [Algebra (tateRingOver R) k] :
+    ((tateCurveLocOver R).baseChange k).a₄ = 0 := by
+  show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).a₄ = 0
+  rw [WeierstrassCurve.map_a₄, tateA₄_eq_zero R, map_zero]
+
+/-- Base change of the atlas curve to a fibre keeps `a₆ = 0`. -/
+lemma baseChange_tateA₆_eq_zero (k : Type u) [CommRing k] [Algebra (tateRingOver R) k] :
+    ((tateCurveLocOver R).baseChange k).a₆ = 0 := by
+  show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).a₆ = 0
+  rw [WeierstrassCurve.map_a₆, tateA₆_eq_zero R, map_zero]
+
+/-- Base change of the atlas curve to a fibre keeps `a₂` a unit. -/
+lemma baseChange_isUnit_tateA₂ (k : Type u) [CommRing k] [Algebra (tateRingOver R) k] :
+    IsUnit ((tateCurveLocOver R).baseChange k).a₂ := by
+  show IsUnit ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).a₂
+  rw [WeierstrassCurve.map_a₂]
+  exact (isUnit_tateA₂ R).map _
+
+/-- Base change of the atlas curve to a fibre keeps `a₃` a unit. -/
+lemma baseChange_isUnit_tateA₃ (k : Type u) [CommRing k] [Algebra (tateRingOver R) k] :
+    IsUnit ((tateCurveLocOver R).baseChange k).a₃ := by
+  show IsUnit ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).a₃
+  rw [WeierstrassCurve.map_a₃]
+  exact (isUnit_tateA₃ R).map _
+
+/-- The affine marked point `(0, 0)` is nonsingular on every fibre (`a₆ = 0`, `a₃` a unit). -/
+lemma baseChange_nonsingular_zero (k : Type u) [Field k] [Algebra (tateRingOver R) k] :
+    ((tateCurveLocOver R).baseChange k).toAffine.Nonsingular 0 0 := by
+  rw [WeierstrassCurve.Affine.nonsingular_zero]
+  exact ⟨baseChange_tateA₆_eq_zero R k, Or.inl (baseChange_isUnit_tateA₃ R k).ne_zero⟩
+
+/-- The chart-`X₂` coordinate of the atlas marked point `P₀`'s chart hom is `0`: the round-trip
+`chartSolutionsEquiv (chartSolutionsEquiv.symm (0,0)) = (0,0)`. Proved as a standalone lemma so the
+heavy `chartSolutionsEquiv` `whnf` (the `rfl` coordinate read-off) is spent here, not in the
+consuming atlas proof. -/
+private lemma tateP0_chartCoord_eq_zero (R : CommRingCat.{u}) (j : {j : Fin 3 // j ≠ 2}) :
+    ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1
+        (chartCoordEquiv (tateCurveLocOver R) 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) = 0 := by
+  have hrfl : ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm
+        (tateP0sol R)).1
+        (chartCoordEquiv (tateCurveLocOver R) 2 (Ideal.Quotient.mk _ (MvPolynomial.X j)))
+      = (chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)
+          ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R))).1 j :=
+    rfl
+  rw [hrfl, Equiv.apply_symm_apply]
+  rfl
+
+/-- **(Y1-vi setup)** `tateP0mor` factors through the `Z`-chart via its chart hom `φ_B`
+(= `chartSolutionsEquiv.symm (0,0)`). Standalone so the `chartHomEquiv` interface application sits
+in its own heartbeat budget (the chart machinery over the localization ring `tateRingOver R` is
+`whnf`-heavy). The `hdef` `rfl` matches by congruence on the shared `chartHomEquiv` head — cheap;
+`chartHomEquiv_symm_coe` is then chained as a *term* (`Eq.trans`), never `rw` (whose matching would
+`whnf`-explode the `ofBijective` equiv). -/
+private lemma tateP0mor_factor (R : CommRingCat.{u}) :
+    tateP0mor R = Spec.map (CommRingCat.ofHom ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1) ≫
+      Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos := by
+  have hdef : tateP0mor R
+      = ((chartHomEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R))).1.1 := rfl
+  exact hdef.trans (chartHomEquiv_symm_coe (tateCurveLocOver R) 2 ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)))
+
+/-- **(Y1-vi setup)** The pulled marked point's underlying model morphism is `geomPoint ≫ tateP0mor`
+(the two `eqToHom` bridges of `pointSpecPointsEquiv`/`tateMarkedPoint` cancel). -/
+private lemma tateMarkedPoint_pull_fst (R : CommRingCat.{u}) (k : Type u) [Field k]
+    [Algebra (tateRingOver R) k] :
+    (EllipticCurve.pointSpecPointsEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
+        (tateMarkedPoint R))).1
+      = EllipticCurve.geomPoint (tateRingOver R) k ≫ tateP0mor R := by
+  show (EllipticCurve.geomPoint (tateRingOver R) k ≫
+      (tateP0mor R ≫ eqToHom (tateUniversal_E_eq R).symm)) ≫ eqToHom (tateUniversal_E_eq R)
+      = EllipticCurve.geomPoint (tateRingOver R) k ≫ tateP0mor R
+  rw [Category.assoc, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+
+/-- **(Y1-vi setup)** The pulled marked point factors through the `Z`-chart via the base change
+`(algebraMap) ∘ φ_B` of `tateP0mor`'s chart hom.
+
+**GAP [Y1-vi-FACTOR]** — the *only* `sorry` in the vi assembly. The identity is a pure categorical
+computation: `pull P₀ = geomPoint ≫ tateP0mor` (`tateMarkedPoint_pull_fst`, PROVEN), and
+`tateP0mor = Spec.map (ofHom φ_B) ≫ awayι` (`tateP0mor_factor`, PROVEN); composing and folding
+`geomPoint = Spec.map (ofHom (algebraMap …))` through `CommRingCat.ofHom_comp` + `Spec.map_comp` +
+`Category.assoc` gives the claim. But the *closing* `isDefEq` on `Spec.map (ofHom φ_B.1)` — where
+`φ_B.1 = ((chartSolutionsEquiv …).symm (tateP0sol R)).1` over the localization ring `tateRingOver R`
+— `whnf`-explodes past `maxHeartbeats` (the "concrete-module whnf-explosion" pattern; the
+`chartSolutionsEquiv`/`chartHomEquiv` interface over a `Localization` base is `whnf`-heavy). Bumping
+heartbeats is forbidden; further decomposition does not help since this is already a minimal
+`Spec.map_comp` identity. Discharge route: an `irreducible` wrapper for `φ_B` (so `isDefEq` treats
+it atomically), or `Spec`-functoriality lemmas keyed to avoid unfolding the chart equiv. All other
+pieces of the transfer pin, `[Y1-vi]`, and the atlas leaf are `sorry`-free modulo this. -/
+private lemma tateMarkedPoint_pull_factor (R : CommRingCat.{u}) (k : Type u) [Field k]
+    [Algebra (tateRingOver R) k] :
+    Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
+      Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos =
+      (EllipticCurve.pointSpecPointsEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
+        (tateMarkedPoint R))).1 :=
+  sorry
+
+/-- **[Y1-vi], transfer pin (chart naturality).** Over any fibre field `k`, the affine image of the
+pulled marked point `P₀ = (0, 0)` is the affine origin `some 0 0`. Assembled from the setup lemmas
+above (each own budget): `g` factors through the `Z`-chart via `(algebraMap) ∘ φ_B`, so its chart
+coordinates are the `algebraMap`-images of `tateP0sol = (0, 0)` — read off by
+`projModelPointsEquiv_some`. -/
+theorem projModelPointsEquiv_pull_tateMarkedPoint (k : Type u) [Field k]
+    [Algebra (tateRingOver R) k] [DecidableEq k]
+    (hns : ((tateCurveLocOver R).baseChange k).toAffine.Nonsingular 0 0) :
+    projModelPointsEquiv (tateCurveLocOver R) k
+      (EllipticCurve.pointSpecPointsEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
+        (tateMarkedPoint R))) =
+      WeierstrassCurve.Affine.Point.some 0 0 hns := by
+  set g := EllipticCurve.pointSpecPointsEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
+        (tateMarkedPoint R)) with hgdef
+  have hfac : Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
+      Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos = g.1 := by
+    rw [hgdef]; exact tateMarkedPoint_pull_factor R k
+  have hZ : InZChart (tateCurveLocOver R) g :=
+    ⟨Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)), hfac⟩
+  have hφg : (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩).1
+      = (algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1 := by
+    have h1 : Spec.map (CommRingCat.ofHom (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩).1) ≫
+        Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos = g.1 := by
+      rw [← chartHomEquiv_symm_coe (tateCurveLocOver R) 2
+        (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩), Equiv.symm_apply_apply]
+    have hcancel := (cancel_mono (Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
+        ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos)).mp (h1.trans hfac.symm)
+    exact congrArg CommRingCat.Hom.hom (Spec.map_injective hcancel)
+  have hcoord : ∀ j : {j : Fin 3 // j ≠ 2},
+      (chartSolutionsEquiv (tateCurveLocOver R) 2 k
+        (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩)).1 j = 0 := by
+    intro j
+    rw [coord_val (tateCurveLocOver R) k g hZ j, hφg, RingHom.comp_apply,
+      tateP0_chartCoord_eq_zero R j, map_zero]
+  exact projModelPointsEquiv_some (tateCurveLocOver R) k g hZ 0 0 hns
+    (hcoord ⟨0, by decide⟩).symm (hcoord ⟨1, by decide⟩).symm
+
+/-- **[Y1-vi]** The marked point `P₀ = (0, 0)` of the universal Tate curve is nowhere of order
+`≤ 3` (Loeffler Prop 3.3.4 hypothesis / p. 13 display *"`P` does not have order 1, 2 or 3 in any
+fibre"*). This is the first conjunct of `exists_tatePoint` (the atlas leaf B2). Consumes the
+transfer pin `projModelPointsEquiv_pull_tateMarkedPoint` + `affine_origin_order_gt_three` through the
+`[T-B6′]` group iso `geomFibrePointAddEquiv` (whose `map_add'` carries the tracked T-B6 `sorry`). -/
+theorem tateMarkedPoint_nowhereGeomOrderLEThree :
+    (tateUniversal R).NowhereGeomOrderLEThree (tateMarkedPoint R) := by
+  intro k _ _ t a ha0 ha3
+  classical
+  letI : Algebra (tateRingOver R) k := (Spec.preimage
+    (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (tateRingOver R)))).hom.toAlgebra
+  have ht : t = EllipticCurve.geomPoint (tateRingOver R) k := by
+    show t = Spec.map (CommRingCat.ofHom (algebraMap (tateRingOver R) k))
+    rw [RingHom.algebraMap_toAlgebra, CommRingCat.ofHom_hom, Spec.map_preimage]
+  haveI : ((tateCurveLocOver R).baseChange k).IsElliptic :=
+    inferInstanceAs ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).IsElliptic
+  have hns := baseChange_nonsingular_zero R k
+  have htransfer : EllipticCurve.geomFibrePointAddEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
+        (tateMarkedPoint R)) = WeierstrassCurve.Affine.Point.some 0 0 hns := by
+    rw [EllipticCurve.geomFibrePointAddEquiv_apply]
+    exact projModelPointsEquiv_pull_tateMarkedPoint R k hns
+  rw [ht]
+  intro hzero
+  apply affine_origin_order_gt_three ((tateCurveLocOver R).baseChange k)
+    (baseChange_tateA₄_eq_zero R k) (baseChange_isUnit_tateA₂ R k) (baseChange_isUnit_tateA₃ R k)
+    hns a ha0 ha3
+  have key : (EllipticCurve.geomFibrePointAddEquiv (tateCurveLocOver R) (tateUniversal R)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k)
+      ((a : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
+        (EllipticCurve.geomPoint (tateRingOver R) k) (tateMarkedPoint R)) = 0 := by
+    rw [hzero]; exact map_zero _
+  rw [map_zsmul, htransfer] at key
+  exact key
+
 /-- **(Y1-B2 = L-ATLAS, the master atlas leaf — Loeffler Cor 3.3.5 at scheme level)** There is a
 marked point `P₀ = (0, 0)` of the universal Tate curve such that `(𝒴, E(A,B), P₀)` classifies:
 `P₀` is nowhere of order `≤ 3`, and every pair `(E/T, P)` in `Ell/R` with `P` nowhere of order
@@ -402,6 +602,11 @@ theorem exists_tatePoint :
       (tateUniversal R).NowhereGeomOrderLEThree P₀ ∧
       ∀ (Y : EllObj R) (P : Y.curve.Section), Y.curve.NowhereGeomOrderLEThree P →
         ∃! f : Y ⟶ tateEllObj R, EllHom.pullSection R f P₀ = P := by
+  -- Witness = `P₀ = (0,0)` (`tateMarkedPoint`); first conjunct is the vi leaf
+  -- `tateMarkedPoint_nowhereGeomOrderLEThree` (PROVEN modulo the `[Y1-vi-FACTOR]` + `[T-B6′]` gaps).
+  refine ⟨tateMarkedPoint R, tateMarkedPoint_nowhereGeomOrderLEThree R, ?_⟩
+  -- Classifying universal property (atlas subtree iii/iv/v): per-chart T-E1/T-E2 + [T-W7]
+  -- (comparison theorem landed v10.48) + sheaf gluing + top-component uniqueness. Remaining atlas work.
   sorry
 
 /-- The marked point `(0, 0)` of the universal Tate curve (Loeffler's `(0 : 0 : 1)`), extracted
