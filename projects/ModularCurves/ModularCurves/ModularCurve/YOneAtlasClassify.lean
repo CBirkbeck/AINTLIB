@@ -1,0 +1,190 @@
+import ModularCurves.ModularCurve.YOneAssembly
+import ModularCurves.EllipticCurve.Comparison
+
+/-!
+# The Y₁ Tate-atlas classifying clause: local algebra
+
+This file is the NEW-ATLAS workspace for the classifying part of `exists_tatePoint`
+(Loeffler Corollary 3.3.5).  It deliberately stays out of `YOneAssembly.lean`: the lemmas here
+package the proved ring-level Tate-normal-form result (T-E1), the relative Tate-ring map, and the
+proved pointed-model comparison theorem (T-W7.1b) in the shapes needed by the atlas gluing step.
+-/
+
+open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+universe u
+
+namespace ModularCurves
+
+section RelativeTateRing
+
+variable (R : CommRingCat.{u}) {A : Type u} [CommRing A] [Algebra R A]
+
+/-- The relative Tate-ring map attached to coefficients `(α, β)` over an `R`-algebra, provided
+the corresponding Tate-normal discriminant is a unit.  Scheme-theoretically, `Spec` of this map is
+the local map to the Tate atlas `tateBase R`. -/
+noncomputable def tateRingOverLift (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOver R →+* A :=
+  IsLocalization.Away.lift (tateCurveOver R).Δ
+    (g := MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))
+    (by simpa [WeierstrassCurve.map_Δ] using hΔ)
+
+@[simp]
+theorem tateRingOverLift_X_zero (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOverLift R α β hΔ
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α := by
+  simp [tateRingOverLift]
+
+@[simp]
+theorem tateRingOverLift_X_one (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    tateRingOverLift R α β hΔ
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
+  simp [tateRingOverLift]
+
+/-- Specialising the universal Tate curve by `tateRingOverLift` recovers the Tate-normal curve
+with coefficients `(α, β)`. -/
+theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
+    (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+    (tateCurveLocOver R).map (tateRingOverLift R α β hΔ) =
+      (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+        (fun i : Fin 2 => if i = 0 then α else β)) := by
+  simp [tateCurveLocOver, tateRingOverLift, WeierstrassCurve.map_map]
+
+/-- A Tate-normal curve over an `R`-algebra is exactly the specialization of `tateCurveOver R`
+at its coefficients `a₁` and `a₂`. -/
+theorem tateCurveOver_map_tateNormal_coeffs (W : WeierstrassCurve A)
+    (hW : W.IsTateNormal) :
+    (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
+      (fun i : Fin 2 => if i = 0 then W.a₁ else W.a₂)) = W := by
+  ext <;> simp [tateCurveOver, tateCurve, WeierstrassCurve.map, hW.1, hW.2.1, hW.2.2]
+
+/-- The atlas-ring map attached to an elliptic Tate-normal Weierstrass curve. -/
+noncomputable def tateRingOverLiftOfTateNormal (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) : tateRingOver R →+* A :=
+  tateRingOverLift R W.a₁ W.a₂ (by
+    rw [tateCurveOver_map_tateNormal_coeffs R W hW]
+    exact WeierstrassCurve.isUnit_Δ W)
+
+@[simp]
+theorem tateRingOverLiftOfTateNormal_X_zero (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) :
+    tateRingOverLiftOfTateNormal R W hW
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = W.a₁ := by
+  simp [tateRingOverLiftOfTateNormal]
+
+@[simp]
+theorem tateRingOverLiftOfTateNormal_X_one (W : WeierstrassCurve A) [W.IsElliptic]
+    (hW : W.IsTateNormal) :
+    tateRingOverLiftOfTateNormal R W hW
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = W.a₂ := by
+  simp [tateRingOverLiftOfTateNormal]
+
+/-- Specialising the universal Tate curve by the map attached to a Tate-normal curve recovers
+that curve. -/
+theorem tateCurveLocOver_map_tateRingOverLiftOfTateNormal (W : WeierstrassCurve A)
+    [W.IsElliptic] (hW : W.IsTateNormal) :
+    (tateCurveLocOver R).map (tateRingOverLiftOfTateNormal R W hW) = W := by
+  rw [tateCurveLocOver, WeierstrassCurve.map_map]
+  change (tateCurveOver R).map
+    ((tateRingOverLiftOfTateNormal R W hW).comp
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R))) = W
+  rw [show (tateRingOverLiftOfTateNormal R W hW).comp
+      (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)) =
+        MvPolynomial.eval₂Hom (algebraMap R A)
+          (fun i : Fin 2 => if i = 0 then W.a₁ else W.a₂) by
+    simp [tateRingOverLiftOfTateNormal, tateRingOverLift]]
+  exact tateCurveOver_map_tateNormal_coeffs R W hW
+
+end RelativeTateRing
+
+section LocalNormalisation
+
+variable {A : Type u} [CommRing A]
+
+/-- The T-E1 normalising variable change for a pointed affine chart of nowhere order `≤ 3`. -/
+noncomputable def tateNormalVariableChange (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    WeierstrassCurve.VariableChange A :=
+  (exists_unique_variableChange_isTateNormal W x y hxy hord).choose
+
+theorem tateNormalVariableChange_isTateNormal (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    ((tateNormalVariableChange W x y hxy hord) • W).IsTateNormal :=
+  (exists_unique_variableChange_isTateNormal W x y hxy hord).choose_spec.left.1
+
+@[simp]
+theorem tateNormalVariableChange_r (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    (tateNormalVariableChange W x y hxy hord).r = x :=
+  (exists_unique_variableChange_isTateNormal W x y hxy hord).choose_spec.left.2.1
+
+@[simp]
+theorem tateNormalVariableChange_t (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    (tateNormalVariableChange W x y hxy hord).t = y :=
+  (exists_unique_variableChange_isTateNormal W x y hxy hord).choose_spec.left.2.2
+
+theorem tateNormalVariableChange_unique (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (C : WeierstrassCurve.VariableChange A)
+    (hC : (C • W).IsTateNormal ∧ C.r = x ∧ C.t = y) :
+    C = tateNormalVariableChange W x y hxy hord :=
+  (exists_unique_variableChange_isTateNormal W x y hxy hord).choose_spec.right C hC
+
+variable (R : CommRingCat.{u}) [Algebra R A]
+
+/-- The local map to the Tate atlas produced from a Weierstrass chart and an affine point
+of nowhere order `≤ 3`: first apply T-E1, then use the relative Tate-ring lift. -/
+noncomputable def tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    tateRingOver R →+* A :=
+  tateRingOverLiftOfTateNormal R ((tateNormalVariableChange W x y hxy hord) • W)
+    (tateNormalVariableChange_isTateNormal W x y hxy hord)
+
+/-- The local atlas map classifies the T-E1 normal form of the pointed chart. -/
+theorem tateCurveLocOver_map_tateRingOverLiftOfPoint (W : WeierstrassCurve A) [W.IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y) :
+    (tateCurveLocOver R).map (tateRingOverLiftOfPoint R W x y hxy hord) =
+      (tateNormalVariableChange W x y hxy hord) • W :=
+  tateCurveLocOver_map_tateRingOverLiftOfTateNormal R
+    ((tateNormalVariableChange W x y hxy hord) • W)
+    (tateNormalVariableChange_isTateNormal W x y hxy hord)
+
+end LocalNormalisation
+
+section PointedComparison
+
+variable {A : Type u} [CommRing A]
+
+/-- Atlas-local form of T-W7.1b: a pointed isomorphism of projective Weierstrass models is
+induced by a variable change.  This is the comparison input for overlap agreement in the
+scheme-level classifying clause. -/
+theorem atlasLocalPointedIso_exists_variableChange (W W' : WeierstrassCurve A)
+    (e : projModel W ≅ projModel W')
+    (heπ : e.hom ≫ projModelπ W' = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W') :
+    ∃ C : WeierstrassCurve.VariableChange A, ∃ hW : C • W' = W,
+      e.hom = eqToHom (by rw [← hW]) ≫ (projModelVCIso C W').hom :=
+  pointedIso_exists_variableChange W W' e heπ hez
+
+/-- Atlas-local form of T-W7 faithfulness: the variable-change action on projective models is
+faithful once the induced pointed isomorphism is pinned. -/
+theorem atlasLocal_projModelVCIso_injective (C₁ C₂ : WeierstrassCurve.VariableChange A)
+    (W : WeierstrassCurve A) (hW : C₁ • W = C₂ • W)
+    (h : (projModelVCIso C₁ W).hom = eqToHom (by rw [hW]) ≫ (projModelVCIso C₂ W).hom) :
+    C₁ = C₂ :=
+  projModelVCIso_injective C₁ C₂ W hW h
+
+end PointedComparison
+
+end ModularCurves
