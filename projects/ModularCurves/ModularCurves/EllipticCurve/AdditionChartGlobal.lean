@@ -2166,4 +2166,37 @@ lemma blOpenZImage_sup_blOpenYImage_eq_opensRange (hΔ : IsUnit W.Δ) :
 
 end CoverAssembly
 
+/-- **(T-W7.0c·c2 [C2-BEZOUT], THE COVER — the two Bosma–Lenstra laws cover `E ×_R E`)** The
+regularity opens of the two laws cover the whole product, over any base with `Δ` a unit. This is the
+compatibility `mulModelHom`'s two-open glue needs (`blOpen_cover`). The four chart-products cover
+`E ×_R E` (`chartY_sup_chartZ_eq_top` on each factor, `pieceι_opensRange` = `fst⁻¹chart ⊓ snd⁻¹chart`,
+frame distributivity), and on each the two laws cover the chart image
+(`blOpenZImage_sup_blOpenYImage_eq_opensRange`). **No Bezout certificate**: the whole cover rests on
+the point-level non-vanishing `addXYZ_ne_zero_or_dblAddXYZ_ne_zero`. -/
+theorem blOpenZ_sup_blOpenY_eq_top (hΔ : IsUnit W.Δ) : blOpenZ W ⊔ blOpenY W = ⊤ := by
+  rw [eq_top_iff]
+  have hle : ∀ i j : Fin 3, blOpenZImage W i j ≤ blOpenZ W → blOpenYImage W i j ≤ blOpenY W →
+      (pieceι W i j).opensRange ≤ blOpenZ W ⊔ blOpenY W := fun i j hZ hY => by
+    rw [← blOpenZImage_sup_blOpenYImage_eq_opensRange W i j hΔ]
+    exact sup_le_sup hZ hY
+  have hcov : (chartι W 1).opensRange ⊔ (chartι W 2).opensRange = ⊤ := chartY_sup_chartZ_eq_top W
+  calc (⊤ : (pullback (projModelπ W) (projModelπ W)).Opens)
+      = pullback.fst (projModelπ W) (projModelπ W) ⁻¹ᵁ
+            ((chartι W 1).opensRange ⊔ (chartι W 2).opensRange) ⊓
+          pullback.snd (projModelπ W) (projModelπ W) ⁻¹ᵁ
+            ((chartι W 1).opensRange ⊔ (chartι W 2).opensRange) := by
+        rw [hcov]; simp
+    _ ≤ blOpenZ W ⊔ blOpenY W := by
+        rw [Scheme.Hom.preimage_sup, Scheme.Hom.preimage_sup, inf_sup_left, inf_sup_right,
+          inf_sup_right]
+        refine sup_le (sup_le ?_ ?_) (sup_le ?_ ?_)
+        · rw [← pieceι_opensRange]
+          exact hle 1 1 (le_iSup (blOpenZFamily W) (0, 0)) (le_iSup (blOpenYFamily W) (0, 0))
+        · rw [← pieceι_opensRange]
+          exact hle 2 1 (le_iSup (blOpenZFamily W) (1, 0)) (le_iSup (blOpenYFamily W) (1, 0))
+        · rw [← pieceι_opensRange]
+          exact hle 1 2 (le_iSup (blOpenZFamily W) (0, 1)) (le_iSup (blOpenYFamily W) (0, 1))
+        · rw [← pieceι_opensRange]
+          exact hle 2 2 (le_iSup (blOpenZFamily W) (1, 1)) (le_iSup (blOpenYFamily W) (1, 1))
+
 end WeierstrassCurve.Projective
