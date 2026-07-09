@@ -1169,6 +1169,39 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
           (Scheme.Opens.topIso U.1).hom_inv_id
       rw [← h3]
       exact h2.symm
+    -- ring-carrier algebra structures (no tensor-side letI: canonical actions rule there)
+    letI : Algebra Γ(S, U.1) Γ(↑U.1, ⊤) :=
+      (((Scheme.Opens.topIso U.1).inv).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(X, ⊤) :=
+      IsScalarTower.of_algebraMap_eq' rfl
+    letI : Algebra Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+      (((f ∣_ U.1).appTop).hom.comp (((Scheme.Opens.topIso U.1).inv).hom)).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+      IsScalarTower.of_algebraMap_eq' rfl
+    -- the algebra map of the patch matches the section-side one through the topIsos
+    have halg : ∀ s : Γ(S, U.1),
+        algebraMap Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) s
+          = (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom ((f.app U.1).hom s) := by
+      intro s
+      have h1 : (f.app U.1).hom s
+          = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom
+            (((Scheme.Opens.topIso U.1).inv).hom s)) := by
+        congr 1
+        exact (congrArg (fun g : Γ(S, U.1) ⟶ Γ(S, U.1) => g.hom s)
+          (Scheme.Opens.topIso U.1).inv_hom_id).symm
+      rw [h1, ← hsq' (((Scheme.Opens.topIso U.1).inv).hom s)]
+      have h2 : ∀ y, ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom)
+          (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom) y) = y := fun y =>
+        congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
+          (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
+      rw [h2]
+      rfl
+    -- the middle base change collapses onto the restricted sections
+    -- the middle base change collapses onto the restricted sections:
+    -- fwd := LinearMap.liftBaseChange of (topIso f⁻¹U).inv (Γ(S,U)-linear by halg);
+    -- inv := y ↦ 1 ⊗ topIso.hom y (Γ↑U-linear by hsq' + the tmul-scalar shift);
+    -- inverses by ext + induction_on. Then eM := (cancelBaseChange).symm ≪≫
+    -- AlgebraTensorModule.congr (refl Γ(X)) e₁, symmetrized.
     sorry
   constructor
   · rintro ⟨h1, h2⟩
