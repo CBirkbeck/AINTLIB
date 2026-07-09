@@ -13312,3 +13312,33 @@ Spec.map(χ-leg) ≫ chartι) — plus the public chartHomEquiv_eq_of_specMap in
   `Algebra.TensorProduct.lift` + `Away.lift` over [GR-F3]'s abstract unit condition;
   `pullbackSpecIso` transport) → the `Scheme.GlueData` structure → cocycle by
   `pullback.hom_ext` + ring layer → [GR-G] T-points ⟹ NISOG [L15].
+
+### v10.94e (2026-07-10, c5β): [C6] d5 + c' layers LANDED — only the [C6-e] assembly remains
+
+Landed+pushed since v10.94d: [C6-d5] ringHom_law{One,Two}Triple (triples ↦ addXYZ/dblAddXYZ of
+point images, via map_addXYZ/map_dblAddXYZ) and the full [C6-c'] chart-naturality layer
+(Proj_awayι_congr / bcChartAwayMap / awayι_image_comp_projModelBaseChange /
+baseChangeGradedHom_chartGen / chartι_map_comp_projModelBaseChange). Ledger note: the c'-walls
+were a missing `open HomogeneousIdeal`, not isDefEq.
+
+**[C6-e] REMAINING (the final assembly for mulModelHom_specPoints), exact plan:**
+For P Q : SpecPoints (projModel W) K, g := pullback.lift P.1 Q.1 ≫ mulModelHom W.
+1. Case split via specPoint_factors_blOpenZ_or_blOpenY on the lift-point (C6-a).
+2. Per case: specPoint_mulModelHom_of_blOpen{Z,Y} (C6-b) + GLC.addOn{Z,Y} = ι ≫ mulModelHomBC;
+   push to the atlas by mulModelHomBC_baseChange (x ≫ bcOf = pbmap-image ≫ mulModelHom_U through
+   the atlas bridge mulModelHom_universalWeierstrassLocU), descend by
+   specPoint_addOn{Z,Y}OnImage_factors' over uWLU (Jacobson domain ✓), giving ψ with evaluation +
+   immersion equations.
+3. Coordinates: addOn{Z,Y}PieceHom_coord (C6-d2) + tensor legs (C6-d4a) + piece projections
+   (C6-d4b) + ringHom_lawTriple (C6-d5) turn the atlas-side coordinates into
+   addXYZ/dblAddXYZ (χ∘Fst) (χ∘Snd); the fst/snd immersion equations identify χ∘Fst/χ∘Snd with
+   Pᵤ/Qᵤ := P.1/Q.1 ≫ bcOf coordinates (pullbackMapBaseChangeOf legs + lift_fst/snd).
+4. Transport dictionary values back from uWLU to W via chartι_map_comp_projModelBaseChange (c'2)
+   + chartHomEquiv_eq_of_specMap on both sides — the K-algebra structure on the atlas side is via
+   (classifyRingHomU W)∘algebraMap; the affine curves agree by map_map + the classifying property.
+5. Finish by projModelPointsEquiv_some/_zero + the mathlib formula bridge:
+   addX_of_Z_ne_zero/addY/dblXYZ_of_Z_ne_zero (Formula.lean) + Affine.Point.add cases +
+   AdditionLawField's dblAddXYZ_self/smul lemmas, mirroring negModelHom_specPoints's case shape
+   (InZChart both + P≈Q via blOpenY / else blOpenZ / infinity cases via projModelPointsEquiv_zero
+   + specPoint_eq_zero_of_not_inZ).
+All tools exist and are pushed; step 5's Affine-side case algebra is the main volume.
