@@ -633,6 +633,29 @@ theorem lift_pullbackMap_snd
   rw [pullbackMapBaseChangeOf]
   simp only [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc]
 
+
+/-- [C6-e3] The pushed pair-point is the atlas-side lift of the pushed points. -/
+theorem lift_pullbackMap_eq_lift
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (w' : (P.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+        (universalWeierstrassLocU_map_classifyRingHomU W)) ≫
+          projModelπ universalWeierstrassLocU =
+      (Q.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+        (universalWeierstrassLocU_map_classifyRingHomU W)) ≫
+          projModelπ universalWeierstrassLocU) :
+    pullback.lift P.1 Q.1 w ≫
+        pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W) =
+      pullback.lift
+        (P.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W))
+        (Q.1 ≫ projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU W
+          (universalWeierstrassLocU_map_classifyRingHomU W)) w' := by
+  apply pullback.hom_ext
+  · rw [lift_pullbackMap_fst W P Q w, pullback.lift_fst]
+  · rw [lift_pullbackMap_snd W P Q w, pullback.lift_snd]
+
 end AtlasPush
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
