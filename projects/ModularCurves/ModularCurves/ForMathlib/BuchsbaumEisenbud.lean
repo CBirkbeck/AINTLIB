@@ -78,7 +78,25 @@ theorem Module.Flat.of_shortExact_of_flat_flat {R A B C : Type*} [CommRing R]
     (f : A →ₗ[R] B) (g : B →ₗ[R] C) (hf : Function.Injective f)
     (hfg : Function.Exact f g) (hg : Function.Surjective g)
     [Module.Flat R B] [Module.Flat R C] : Module.Flat R A := by
-  sorry
+  rw [Module.Flat.iff_rTensor_preserves_injective_linearMap]
+  intro N N' _ _ _ _ L hL
+  -- `C` flat makes the SES `0 → A → B → C → 0` stay left-exact after `- ⊗ N`, i.e.
+  -- `f ⊗ 𝟙 N : N ⊗ A → N ⊗ B` is injective (Stacks 00HM's Tor₁(C,N) = 0 input).
+  have hcrux : Function.Injective (f.lTensor N) :=
+    LinearMap.lTensor_injective_of_exact_of_flat g hg f hf hfg N
+  -- `B` flat makes `L ⊗ 𝟙 B` injective.
+  have hRB : Function.Injective (L.rTensor B) :=
+    Module.Flat.rTensor_preserves_injective_linearMap L hL
+  -- `map L f` factors two ways; the first exhibits it as injective, the second as
+  -- `(𝟙 ⊗ f) ∘ (L ⊗ 𝟙 A)`, forcing `L ⊗ 𝟙 A` (the goal) injective.
+  have e1 : TensorProduct.map L f = (L.rTensor B) ∘ₗ (f.lTensor N) := by
+    ext n a; simp
+  have e2 : TensorProduct.map L f = (f.lTensor N') ∘ₗ (L.rTensor A) := by
+    ext n a; simp
+  have hmap : Function.Injective (TensorProduct.map L f) := e1 ▸ hRB.comp hcrux
+  rw [e2] at hmap
+  simp only [LinearMap.coe_comp] at hmap
+  exact hmap.of_comp
 
 /-! ## [T-ME] 00ME (Lemma 10.99.1): two-term local criterion (base case of 00MI)
 
