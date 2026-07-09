@@ -111,7 +111,28 @@ Stacks proof route: reduce to affine `Z`, `Y` (lfp is Zariski-local on source an
 target); `π` flat lfp is open, `Y` quasi-compact, so finitely many affine opens
 `X_i ⊆ X` have `Y = ⋃ π(X_i)`; replace `X` by `⊔ X_i` (affine); conclude by the affine
 case Descent 35.14.1, whose algebra content is the finite-presentation sorites over a
-faithfully flat finitely-presented cover. WIP leaf of [YF-QSM]. -/
+faithfully flat finitely-presented cover. WIP leaf of [YF-QSM].
+
+**EXECUTION-READY REDUCTION (NEW-GH, scoped v10.75 — next-session first act).** Confirmed:
+mathlib has NO precomp/source-descent shortcut (the `DescendsAlong _ (@Surjective ⊓ @Flat
+⊓ @QuasiCompact)` instances of `LocalFlatDescent.lean` are BASE-CHANGE descent — covers of
+the target — the wrong direction; no `HasOfPrecompProperty` for lfp). Recipe:
+1. `rw [HasRingHomProperty.iff_appLE (P := @LocallyOfFinitePresentation)]`; `rintro U V e`
+   with `U : Z.affineOpens`, `V : Y.affineOpens`, `e : V.1 ≤ f ⁻¹ᵁ U.1`. Goal:
+   `RingHom.FinitePresentation (f.appLE U.1 V.1 e).hom` — set `R := Γ(U)`, `S := Γ(V)`.
+2. Build ONE faithfully-flat FP affine `W ⟶ V` from `π`: over the affine `V`, `π` restricts
+   to a flat-lfp-surjective morphism; `π` is an open map (flat + lfp), so finitely many
+   affine opens `W_j ⊆ X` of `π⁻¹ᵁ V.1` have images covering the quasi-compact `V`; set
+   `W := ∐_{finite} W_j` (affine — `isAffineOpen_opensRange (Sigma.desc …)`, Limits.lean:668
+   pattern) with `T := Γ(W) = ∏ Γ(W_j)`.
+3. `S → T` is faithfully flat + FP: `flat_and_surjective_iff_faithfullyFlat_of_isAffine`
+   (Flat.lean:163) — each `W_j → V` flat FP, jointly surjective ⟹ `∐ W_j → V` faithfully
+   flat FP.
+4. `R → T` is FP: it is `R → S → T` `= (π ≫ f)`'s chart map, FP from `h`
+   (`Scheme.Hom.appLE_comp_appLE` bookkeeping).
+5. `R → S` FP by `RingHom.FinitePresentation.codescendsAlong_faithfullyFlat`
+   (RingTheory/Finiteness/Descent.lean:128: `R→S→T`, `S→T` faithfully flat, `R→T` FP ⟹
+   `R→S` FP). ∎  The ~100-line work is step 2's finite-affine-subcover + coproduct. -/
 theorem LocallyOfFinitePresentation.of_precomp_of_surjective (π : X ⟶ Y) (f : Y ⟶ Z)
     [Flat π] [LocallyOfFinitePresentation π] (hπ : Function.Surjective π.base)
     (h : LocallyOfFinitePresentation (π ≫ f)) : LocallyOfFinitePresentation f := by
