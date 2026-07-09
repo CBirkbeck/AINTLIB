@@ -13298,3 +13298,17 @@ Spec.map(χ-leg) ≫ chartι) — plus the public chartHomEquiv_eq_of_specMap in
   [GR-F] the `Scheme.GlueData` structure (pullback.lift t' per the pinned architecture;
   cocycle via `pullback.hom_ext` + `IsLocalization.ringHom_ext`² reducing to the ring
   layer) · [GR-G] T-points ⟹ NISOG [L15].
+
+### v10.95f (2026-07-10, fable-FP): [GR-D] + Spec-level opening LANDED — charts, overlaps, immersions, transitions all live as schemes
+
+- NEW `ForMathlib/GrassmannianGlueData.lean` (sorry-free, axiom-clean, 2433 jobs):
+  `chartScheme` / `overlapScheme` (Spec of chart ring / overlap localization) ·
+  **[GR-D]** `overlapι` with its `IsOpenImmersion` instance
+  (`IsOpenImmersion.of_isLocalization`) · `overlapTransition := Spec.map ringHomAway` ·
+  `overlapTransition_self` (t_id at Spec level) · `overlapTransition_comp` (the
+  transitions are mutually inverse as scheme maps). Pin note: Spec-level `rw`s need a
+  `show` at the raw `Spec (of …)` level first (def-wrappers block hom-typed patterns).
+- REMAINING for [GR-F]: the t'-legs (ring maps into the pullback tensor via
+  `Algebra.TensorProduct.lift` + `Away.lift` over [GR-F3]'s abstract unit condition;
+  `pullbackSpecIso` transport) → the `Scheme.GlueData` structure → cocycle by
+  `pullback.hom_ext` + ring layer → [GR-G] T-points ⟹ NISOG [L15].
