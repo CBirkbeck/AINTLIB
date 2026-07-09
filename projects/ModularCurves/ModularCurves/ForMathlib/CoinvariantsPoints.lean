@@ -2,6 +2,7 @@ import ModularCurves.ForMathlib.CoactionCharpoly
 import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
 import Mathlib.FieldTheory.Minpoly.Field
+import Mathlib.LinearAlgebra.Determinant
 
 /-!
 # Points of the co-invariants: surjectivity
@@ -198,6 +199,50 @@ theorem finite_setOf_comp_includeLeft_eq (a₁ : B →ₐ[R] k) :
     have h1 := AlgHom.congr_fun h ((1 : k) ⊗ₜ[B] x)
     simpa [hΦ, Algebra.TensorProduct.lift_tmul] using h1
   exact Set.finite_coe_iff.mp (Finite.of_injective Φ hΦinj)
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- The co-action reflects units: the counit retraction is a left inverse. -/
+theorem isUnit_of_isUnit_coaction {ρ : B →ₐ[R] B ⊗[R] A} (hρ : IsCoaction ρ) {f : B}
+    (h : IsUnit (ρ f)) : IsUnit f := by
+  have := h.map (counitRetraction R A)
+  rwa [show (counitRetraction R A) (ρ f) = f from
+    AlgHom.congr_fun (counitRetraction_comp_coaction R A ρ hρ) f] at this
+
+/-- The multiplication matrix is the matrix of left multiplication in the base-changed
+basis. -/
+theorem toMatrix_lmul_eq_mulMatrix (u : B ⊗[R] A) :
+    LinearMap.toMatrix ((hopfBasis R A).baseChange B) ((hopfBasis R A).baseChange B)
+        (LinearMap.mulLeft B u)
+      = mulMatrix R A u := by
+  classical
+  ext i j
+  rw [LinearMap.toMatrix_apply, Module.Basis.baseChange_apply, LinearMap.mulLeft_apply,
+    mul_one_tmul_hopfBasis R A u j, map_sum]
+  simp [Module.Basis.baseChange_repr_tmul, Module.Basis.repr_self, Finsupp.single_apply]
+
+/-- An invertible multiplication matrix makes the element a unit: the represented left
+multiplication is then invertible, so `1` has a preimage. -/
+theorem isUnit_of_isUnit_mulMatrix {u : B ⊗[R] A}
+    (h : IsUnit (mulMatrix R A u)) : IsUnit u := by
+  classical
+  haveI : Module.Free B (B ⊗[R] A) :=
+    Module.Free.of_basis ((hopfBasis R A).baseChange B)
+  haveI : Module.Finite B (B ⊗[R] A) :=
+    Module.Finite.of_basis ((hopfBasis R A).baseChange B)
+  have hdet : IsUnit (LinearMap.det (LinearMap.mulLeft B u)) := by
+    rw [← LinearMap.det_toMatrix ((hopfBasis R A).baseChange B),
+      toMatrix_lmul_eq_mulMatrix]
+    exact (Matrix.isUnit_iff_isUnit_det _).mp h
+  obtain ⟨φ, hφ⟩ := (LinearMap.isUnit_iff_isUnit_det _).mpr hdet
+  refine IsUnit.of_mul_eq_one
+    ((↑φ⁻¹ : B ⊗[R] A →ₗ[B] B ⊗[R] A) (1 : B ⊗[R] A)) ?_
+  have hcomp := congrFun (congrArg
+    (fun (ψ : B ⊗[R] A →ₗ[B] B ⊗[R] A) => (ψ : _ → _)) φ.mul_inv) (1 : B ⊗[R] A)
+  have h1 : ((↑φ * ↑φ⁻¹ : B ⊗[R] A →ₗ[B] B ⊗[R] A)) (1 : B ⊗[R] A)
+      = (↑φ : B ⊗[R] A →ₗ[B] B ⊗[R] A)
+          ((↑φ⁻¹ : B ⊗[R] A →ₗ[B] B ⊗[R] A) (1 : B ⊗[R] A)) := rfl
+  rw [h1, hφ, LinearMap.mulLeft_apply] at hcomp
+  simpa using hcomp
 
 end Orbit
 
