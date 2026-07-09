@@ -11970,3 +11970,49 @@ that factors `Spec.map (algebraMap A C)` through `T` without forming the ring co
 → chartAwayHomOfTriple form; `transHom_lawTwoTriple_eq_smul`; cancel w.hom iso), **L5** (`Cover.hom_ext`
 over `blOpenYImage_inf_eq_iSup` → `addOnYOnImage_agree` → `glueMorphisms_hf_of_agree` → addOnY/addOnZ).
 Z-side mirrors. Then blOpen_cover, addOn_agree, mulModelHom; c4.4, c4.5. 0c-i ⟹ 0c-ii.
+
+### v10.76 (2026-07-09, fable-PIC0): ★★★ [GAP1-W-MONO] COMPLETE — SheafOfModules monoidal, sorry-free + axiom-clean
+
+*Commits 7ad9d1113 (leaf) → 6745320f2 (assembly). `ModularCurves.ForMathlib.SheafOfModulesMonoidal`
+builds green, ZERO sorries; every deliverable depends only on [propext, Classical.choice, Quot.sound].*
+
+**The five deliverables (all verified `#print axioms`-clean):**
+- `sheafificationW_tensorHom` — the LEAF: the class inverted by module sheafification is
+  closed under `⊗ₘ`. Topos-theoretic, no flatness/no stalks: the two precomposition halves
+  (`tensorHom_precomp_injective/_surjective`) ⟹ precomp with `f ⊗ₘ g` bijects maps into every
+  sheaf target ⟹ transport across the sheafification adjunction `homEquiv` (naturality-left)
+  ⟹ coyoneda-bijectivity ⟹ `(sheafification α).map (f ⊗ₘ g)` is iso. `GY.presheaf` is a sheaf
+  via `restrictScalarsCompToPresheaf = Iso.refl` (defeq `Y.val.presheaf`), by `Y.isSheaf`.
+- `sheafificationW_isMultiplicative` + `sheafificationW_isMonoidal` — the localizing class is
+  monoidal (via `MorphismProperty.IsMonoidal.mk'`). **This is the object the v10.8 discipline
+  guards: axiom-clean, so NO sorryAx in the monoidal DATA.**
+- `isLocallyInjective_tensorHom` — the former staged stalkwise sorry, now PROVEN free via the
+  bridge. **Statement note (NOT byte-identical — producer refinement, no B2):** the bare form
+  (loc-bij instances, no `α`) is *not closable on a general site* — the coyoneda/adjunction
+  argument is the topos-theoretic replacement for the stalks, and it needs the sheafification
+  datum `α`. So the lemma carries `α` + `sheafificationW α f/g` hypotheses (obtain them from
+  loc-bijectivity via `sheafificationW_iff_isLocallyBijective`). The v10.74 "byte-identical"
+  expectation was optimistic; flagging for the record, the conclusion is unchanged.
+- `instSheafificationW_isLocalization_commRingSheaf` + `instSheafificationW_isMonoidal_commRingSheaf`
+  — the two registrations keyed to the ring sheaf underlying a sheaf of commutative rings.
+- `sheafOfModules_monoidalCategory_nonempty` — **the LocalizedMonoidal instantiation resolves**:
+  `MonoidalCategory (LocalizedMonoidal (sheafification (𝟙 R'.obj)) (sheafificationW (𝟙 R'.obj)) ε)`
+  is inhabited ⟹ `SheafOfModules` over a sheaf of commutative rings IS a monoidal category,
+  monoidally under sheafification. (Stated `Nonempty`-wrapped so the noncomputable monoidal DATA
+  isn't code-compiled; downstream names the localized category and reads off ⊗, unit, coherences.)
+
+**DS-END0 route-(a)-vs-route-(b) status line (v10.36 two-route edge — required by v10.74):**
+GAP-1 monoidal is now BUILT IN-REPO (not waiting on Riou's mathlib PRs). This **un-gates route
+(a)** at the infrastructure level: `SheafOfModules` has a monoidal structure, so the Pic-group
+tensor of invertible sheaves is now supported. Route (a) is NOT yet fully live — it still needs
+**P1b (`IsInvertible.tensorObj`, the last `InvertibleSheaf.lean` sorry)** then the **P2 Pic
+program** (Pic group + degree). Route (b) — p2's Cartier-duality / KM 2.6 lane + HasseWeil
+field-level dual isogenies — remains the ACTIVE duality construction. **Coordination (never build
+duality twice):** route (a) supplies the *monoidal/tensor* substrate (this ticket) and will
+supply Pic-as-a-group; route (b) supplies the *concrete Cartier dual / dual isogeny*. They meet
+at the duality pairing — route (a) should CONSUME route (b)'s Cartier dual, not re-derive it.
+Recommend p2 keeps ownership of the Cartier-dual API; PIC0's route (a) wires Pic⊗ + degree on top.
+
+**PIC0 next (self-dispatch, session continues):** P1b `IsInvertible.tensorObj` in
+`Picard/InvertibleSheaf.lean` (the last GAP-1-gated sorry there), consuming this monoidal
+structure, then the P2 Pic program. Instance-plumbing playbook banked in the commit message.
