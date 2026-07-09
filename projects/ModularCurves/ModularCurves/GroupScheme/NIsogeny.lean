@@ -96,7 +96,20 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
   -- (i) `n` elements of `M` spanning the stalk at `p` (fibre-basis lift + Nakayama)
   obtain ⟨x, hx⟩ : ∃ x : Fin n → M, Subsingleton (LocalizedModule p.asIdeal.primeCompl
       (M ⧸ Submodule.span R (Set.range x))) := by
-    sorry
+    -- `n` elements whose images span the residue fibre `κ(p) ⊗ M`
+    obtain ⟨x, hxspan⟩ : ∃ x : Fin n → M,
+        Submodule.span p.asIdeal.ResidueField
+          (Set.range fun i => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] x i) = ⊤ := by
+      sorry
+    refine ⟨x, ?_⟩
+    -- fibre of the quotient vanishes, hence the stalk at `p` vanishes (support of a f.g. module)
+    have hfib : Subsingleton (p.asIdeal.ResidueField ⊗[R]
+        (M ⧸ Submodule.span R (Set.range x))) := by
+      sorry
+    rw [← not_nontrivial_iff_subsingleton] at hfib ⊢
+    intro hnt
+    exact hfib ((Module.mem_support_iff_nontrivial_residueField_tensorProduct p).mp
+      (Module.mem_support_iff.mpr hnt))
   -- (ii) the spanning descends to a basic open `D(g)`
   haveI := hx
   obtain ⟨g, hgp, hgsub⟩ := LocalizedModule.exists_subsingleton_away
