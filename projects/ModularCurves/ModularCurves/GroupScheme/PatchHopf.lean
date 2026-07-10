@@ -59,6 +59,57 @@ noncomputable def groupPatchCounit : P.groupRing ⟶ P.baseRing :=
 noncomputable def groupPatchAntipode : P.groupRing ⟶ P.groupRing :=
   G.invHom.appLE P.groupOpen P.groupOpen P.le_preimage_groupOpen_invHom
 
+/-! ### The comultiplication -/
+
+/-- The `V`-level square `G|_V ×_V G|_V`. -/
+noncomputable abbrev groupSquare : Scheme.{u} :=
+  pullback (G.π.resLE P.V P.groupOpen le_rfl) (G.π.resLE P.V P.groupOpen le_rfl)
+
+/-- The `V`-level square maps into the `S`-level square. -/
+noncomputable def groupSquareToSquare :
+    P.groupSquare ⟶ (Over.mk G.π ⊗ Over.mk G.π).left :=
+  pullback.map _ _ G.π G.π P.groupOpen.ι P.groupOpen.ι P.V.ι
+    (Scheme.Hom.resLE_comp_ι _ _) (Scheme.Hom.resLE_comp_ι _ _)
+
+@[reassoc (attr := simp)]
+theorem groupSquareToSquare_fst :
+    P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left
+      = pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+          (G.π.resLE P.V P.groupOpen le_rfl) ≫ P.groupOpen.ι :=
+  pullback.lift_fst _ _ _
+
+/-- Multiplication, restricted to the `V`-level square. -/
+noncomputable def squareMul : P.groupSquare ⟶ G.G :=
+  P.groupSquareToSquare ≫ G.mulHom
+
+/-- The restricted multiplication lands in the group patch: its composite with the
+structure morphism factors through `V`. -/
+theorem top_le_preimage_groupOpen_squareMul :
+    (⊤ : P.groupSquare.Opens) ≤ P.squareMul ⁻¹ᵁ P.groupOpen := by
+  have hπ : P.squareMul ≫ G.π
+      = pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+          (G.π.resLE P.V P.groupOpen le_rfl)
+        ≫ G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι := by
+    rw [squareMul, Category.assoc, G.mulHom_π]
+    rw [show ((Over.mk G.π ⊗ Over.mk G.π).hom)
+        = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl]
+    rw [P.groupSquareToSquare_fst_assoc, Scheme.Hom.resLE_comp_ι]
+    exact Category.assoc _ _ _
+  rw [groupOpen, ← Scheme.Hom.comp_preimage, hπ]
+  rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage,
+    Scheme.Opens.ι_preimage_self]
+  exact le_top
+
+/-- **The comultiplication** `Δ : A ⟶ A ⊗[R] A`: sections restricted along the group
+multiplication, transported along the affine Künneth identification of the `V`-level
+square. -/
+noncomputable def groupPatchComul :
+    P.groupRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) :=
+  P.squareMul.appLE P.groupOpen ⊤ P.top_le_preimage_groupOpen_squareMul
+    ≫ (patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen
+        rfl rfl).inv.appTop
+    ≫ (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.groupRing))).hom
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
