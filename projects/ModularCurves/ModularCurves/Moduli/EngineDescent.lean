@@ -1646,6 +1646,41 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     rw [reassoc_of% hbmapinv, ← reassoc_of% hζpQ, hcmp, hfdef, reassoc_of% hζθ,
       reassoc_of% hzψ, hzν]
 
+/-- Opaque-shape zero-square transport. -/
+private theorem zeroSq_transport {Xs Qs EQ ET Ss Ss' : Scheme.{u}}
+    {qX : Xs ⟶ Qs} {z' : Qs ⟶ EQ} {cz : Xs ⟶ ET} {qE : ET ⟶ EQ}
+    {i : Xs ≅ Ss} {qiso : Qs ≅ Ss'} {ip : Ss ⟶ Ss'}
+    (hz'c : qX ≫ z' = cz ≫ qE) (hq : qX ≫ qiso.hom = i.hom ≫ ip) :
+    ip ≫ qiso.inv ≫ z' = (i.inv ≫ cz) ≫ qE := by
+  have hip : ip = i.inv ≫ qX ≫ qiso.hom := by rw [hq, Iso.inv_hom_id_assoc]
+  rw [hip]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc, hz'c]
+
+/-- Opaque-shape section transport along an iso. -/
+private theorem zero_transport {A B E P : Scheme.{u}} {i : A ≅ B} {cz : A ⟶ E}
+    {f : E ⟶ P} {pz : B ⟶ P} (h : cz ≫ f = i.hom ≫ pz) :
+    (i.inv ≫ cz) ≫ f = pz := by
+  rw [Category.assoc, h, Iso.inv_hom_id_assoc]
+
+/-- Opaque-shape conjugation coequalization. -/
+private theorem conj_coequalize {E P Q : Scheme.{u}} {e : E ≅ P} {sE : E ⟶ E} {q : E ⟶ Q}
+    (hsE : sE ≫ q = q) :
+    (e.hom ≫ (e.inv ≫ sE ≫ e.hom) ≫ e.inv) ≫ q = q := by
+  simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.hom_inv_id_assoc]
+  simpa using hsE
+
+/-- Abstract corner transport for pullback squares (opaque-schemes shape, so applications are
+first-order): compose the `snd`/`f` legs with corner isos. -/
+private theorem isPullback_transport_corner {P Xc Y Z Y' Z' : Scheme.{u}} {fst : P ⟶ Xc}
+    {snd : P ⟶ Y} {f : Xc ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g)
+    (eY : Y ≅ Y') (eZ : Z ≅ Z') {snd' : P ⟶ Y'} {f' : Xc ⟶ Z'} {g' : Y' ⟶ Z'}
+    (hsnd : snd ≫ eY.hom = snd') (hf : f ≫ eZ.hom = f') (hg : g ≫ eZ.hom = eY.hom ≫ g') :
+    IsPullback fst snd' f' g' := by
+  refine h.of_iso (Iso.refl _) (Iso.refl _) eY eZ ?_ ?_ ?_ hg
+  · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
+  · rw [Iso.refl_hom, Category.id_comp, hsnd]
+  · rw [Iso.refl_hom, Category.id_comp, hf]
+
 /-- Abstract reduction: `LocallyWeierstrass` transports along an iso of the base (with the total
 space fixed). Stated over opaque schemes so the application never unfolds the heavy quotient/Spec
 objects. -/
@@ -1657,6 +1692,74 @@ private theorem lw_of_baseIso {Q S T : Scheme.{u}} (π' : Q ⟶ S) (zero' : S �
   refine hspec.of_iso (Iso.refl _) qiso ?_ ?_
   · rw [Iso.refl_hom, Category.id_comp]
   · rw [Iso.refl_hom, Category.comp_id, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+
+variable (σ σE) in
+/-- Freeness of the lifted action, from freeness on the base (own heartbeat budget). -/
+private theorem discharge_freeE (hact : IsCurveAction σ C σE)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ C.E), t ≫ σE.hom γ = t → IsEmpty T := by
+  intro γ hγ T t ht
+  refine hfreeX γ hγ T (t ≫ C.π) ?_
+  rw [Category.assoc, ← hact.π_equivariant γ, ← Category.assoc, ht]
+
+/-- The conjugated transport action is coequalized by the quotient cover (own budget). -/
+private theorem discharge_hEact [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀) :
+    ∀ g, (φ.hom ≫ (σE.transport φ).hom g ≫ φ.inv)
+      ≫ σE.quotientπ VE hVEs hVEa hVEmem = σE.quotientπ VE hVEs hVEa hVEmem := by
+  intro g
+  rw [SchemeAction.transport_hom]
+  simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.hom_inv_id_assoc]
+  exact σE.hom_quotientπ VE hVEs hVEa hVEmem g
+
+/-- The restricted morphism-descent, in the conjugated-action shape (own budget). -/
+private theorem discharge_hlift [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfreeE : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ C.E),
+      t ≫ σE.hom γ = t → IsEmpty T)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀)
+    (hEact : ∀ g, (φ.hom ≫ (σE.transport φ).hom g ≫ φ.inv)
+      ≫ σE.quotientπ VE hVEs hVEa hVEmem = σE.quotientπ VE hVEs hVEa hVEmem) :
+    ∀ {Q' Y : Scheme.{u}} (j : Q' ⟶ σE.quotient VE hVEs hVEa)
+      [IsOpenImmersion j] (f : pullback (σE.quotientπ VE hVEs hVEa hVEmem) j ⟶ Y),
+      (∀ g, pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
+          (σE.quotientπ VE hVEs hVEa hVEmem) j
+          (φ.hom ≫ (σE.transport φ).hom g ≫ φ.inv) (𝟙 Q') (𝟙 _)
+          (by rw [Category.comp_id, hEact g]) (by simp) ≫ f = f) →
+      ∃ q : Q' ⟶ Y, pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j ≫ q = f := by
+  intro Q' Y j hj f hf
+  refine σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem hfreeE j f ?_
+  intro g
+  have hmap_eq : pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
+      (σE.quotientπ VE hVEs hVEa hVEmem) j (σE.hom g) (𝟙 Q') (𝟙 _)
+      (by rw [Category.comp_id, σE.hom_quotientπ]) (by simp)
+    = pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
+      (σE.quotientπ VE hVEs hVEa hVEmem) j
+      (φ.hom ≫ (σE.transport φ).hom g ≫ φ.inv) (𝟙 Q') (𝟙 _)
+      (by rw [Category.comp_id, hEact g]) (by simp) := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, SchemeAction.transport_hom,
+        Iso.hom_inv_id, Category.comp_id, Iso.hom_inv_id_assoc]
+    · simp only [Category.assoc, pullback.lift_snd]
+  rw [hmap_eq]
+  exact hf g
+
+/-- The restricted-cover epi property, in ∀-shape (own budget). -/
+private theorem discharge_hepi [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfreeE : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ C.E),
+      t ≫ σE.hom γ = t → IsEmpty T) :
+    ∀ {Q' : Scheme.{u}} (j : Q' ⟶ σE.quotient VE hVEs hVEa) [IsOpenImmersion j],
+      Epi (pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j) := by
+  intro Q' j hj
+  exact σE.epi_pullback_snd_quotientπ VE hVEs hVEa hVEmem hfreeE j
 
 set_option backward.isDefEq.respectTransparency false in
 theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
@@ -1694,12 +1797,28 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
     σ.isFreeAlgebraAction_of_free (isStableOpen_top σ) (isAffineOpen_top X) hfreeX
   obtain ⟨Cvc, hCvc, hcoc, hΨ⟩ := exists_cocycle_of_globalModel' hact W₀ φ hπφ hzeroφ
   -- the Spec-side local model
+  have hfreeE := discharge_freeE σ σE hact hfreeX
   have hspec : LocallyWeierstrass (π' ≫ qiso.hom) (qiso.inv ≫ zero') hz'' := by
     intro s
-    set p : Ideal (FixedPoints.subring ↑Γ(X, ⊤) G) := s.asIdeal with hpdef
-    haveI hpP : p.IsPrime := s.isPrime
-    obtain ⟨a, hap, W₁, E, hW₁, hcob⟩ := exists_away_invariant_descent hfreeA W₀ hcoc hCvc p
-    sorry
+    haveI := s.isPrime
+    obtain ⟨a, hap, W₁, E, hW₁, hcob⟩ :=
+      exists_away_invariant_descent hfreeA W₀ hcoc hCvc s.asIdeal
+    exact lw_chart_at (π' ≫ qiso.hom) (qiso.inv ≫ zero') hz''
+      (σE.quotientπ VE hVEs hVEa hVEmem) (C.π ≫ X.isoSpec.hom) (X.isoSpec.inv ≫ C.zero)
+      (isPullback_transport_corner
+        (isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfreeX π' hπ'c)
+        X.isoSpec qiso rfl rfl hqiso)
+      (zeroSq_transport hzero'c hqiso)
+      W₀ hW₀ φ hπφ (zero_transport hzeroφ) ((σE.transport φ).hom)
+      (discharge_hEact VE hVEs hVEa hVEmem W₀ φ)
+      Cvc hCvc hcoc hΨ
+      (discharge_hlift VE hVEs hVEa hVEmem hfreeE W₀ φ
+        (discharge_hEact VE hVEs hVEa hVEmem W₀ φ))
+      (discharge_hepi VE hVEs hVEa hVEmem hfreeE)
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).1
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.1
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.2
+      hfreeA s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
 
 end ModularCurves.RouteA
