@@ -1366,6 +1366,52 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
     rw [congrFun hrk q]
     exact h2 q
 
+/-- **[L1-e3, the per-chart condition]** For an affine chart `V ⊆ T` mapped into an affine
+chart `U ⊆ S` by `t`, the geometric rank-`n` local-freeness of `f` pulled back over `V` is
+exactly the vanishing in `Γ(T, V)` of the flattening ideal of `U` (composing the chart
+bridge with the universal ideal's specification; the interface is in `appLE`-form so both
+directions of the locus theorem consume it directly). -/
+private theorem locallyFreeRankLocus_chart_cond {T : Scheme.{u}} (t : T ⟶ S) (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K) (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n)
+    (U : S.affineOpens) (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1) :
+    (Flat (pullback.snd f (V.1.ι ≫ t)) ∧
+        ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n) ↔
+      ∀ z ∈ (locallyFreeRankLocusSheaf f n hb).ideal U, (t.appLE U.1 V.1 e).hom z = 0 := by
+  letI := ((f.app U.1).hom).toAlgebra
+  let x' : (↑V.1 : Scheme.{u}) ⟶ (↑U.1 : Scheme.{u}) := t.resLE U.1 V.1 e
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  haveI : IsAffine (↑V.1 : Scheme.{u}) := V.2
+  have h1 := locallyFreeRankLocus_chart_iff f U x' n
+  rw [show x' ≫ U.1.ι = V.1.ι ≫ t from Scheme.Hom.resLE_comp_ι t e] at h1
+  have h2 := locallyFreeRankLocusSheaf_spec f n hb U Γ(↑V.1, ⊤) inferInstance inferInstance
+  -- the chart algebra map is `appLE` conjugated by the top-sections isomorphism
+  have hkey : ∀ z : Γ(S, U.1), algebraMap Γ(S, U.1) Γ(↑V.1, ⊤) z =
+      ((Scheme.Opens.topIso V.1).inv.hom) ((t.appLE U.1 V.1 e).hom z) := by
+    intro z
+    show ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)) z = _
+    rw [RingHom.comp_apply,
+      show x'.appTop = (Scheme.Opens.topIso U.1).hom ≫ t.appLE U.1 V.1 e ≫
+        (Scheme.Opens.topIso V.1).inv from Scheme.Hom.resLE_app_top t e]
+    have hround : (Scheme.Opens.topIso U.1).hom.hom ((Scheme.Opens.topIso U.1).inv.hom z)
+        = z := by
+      have := congrArg (fun ψ : Γ(S, U.1) ⟶ Γ(S, U.1) => ψ.hom z)
+        (Scheme.Opens.topIso U.1).inv_hom_id
+      simpa using this
+    rw [CommRingCat.comp_apply, CommRingCat.comp_apply, hround]
+  have hinj : Function.Injective ((Scheme.Opens.topIso V.1).inv.hom) :=
+    (Scheme.Opens.topIso V.1).symm.commRingCatIsoToRingEquiv.injective
+  refine h1.trans (h2.trans ⟨fun hmap z hz => ?_, fun hvan => ?_⟩)
+  · have h0 : algebraMap Γ(S, U.1) Γ(↑V.1, ⊤) z ∈
+        ((locallyFreeRankLocusSheaf f n hb).ideal U).map
+          (algebraMap Γ(S, U.1) Γ(↑V.1, ⊤)) := Ideal.mem_map_of_mem _ hz
+    rw [hmap, Ideal.mem_bot, hkey] at h0
+    exact hinj (h0.trans (map_zero _).symm)
+  · rw [eq_bot_iff]
+    refine Ideal.map_le_iff_le_comap.mpr fun z hz => ?_
+    rw [Ideal.mem_comap, Ideal.mem_bot, hkey, hvan z hz, map_zero]
+
 end LocallyFreeRankLocusBridge
 
 open scoped TensorProduct in
