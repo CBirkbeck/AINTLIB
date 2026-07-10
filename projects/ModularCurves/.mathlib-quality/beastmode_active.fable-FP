@@ -1,1 +1,1 @@
-FOCUS: [02KL-CORE] — /develop --decompose FIRST ACT (RingHom.FinitePresentation.of_comp_of_faithfullyFlat, SmoothDescent.lean:127 gate; fetch 02KL + follow proof-refs for true algebra tags; artifact decomposition-02kl-core.md). GRASS gate OPEN + D2 signaled (v10.98a); [GR-G-ASM] residual boarded with recipe.
+FOCUS: [02KL-CORE] — /develop --decompose: substrate survey (mathlib CodescendsAlong/FP-colimit/ffl-equalizer) + source tags 10.168.1, 35.3.6-equalizer-form

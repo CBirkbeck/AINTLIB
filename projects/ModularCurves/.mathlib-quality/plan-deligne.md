@@ -635,3 +635,39 @@ a κ₃ triple-tensor transport `Spec(A⊗A⊗A) ≅ D×_R D×_R D`, same techni
 the ε pin) → `Bialgebra.mk'` (Δ/ε already AlgHoms ⟹ easy) → `HopfAlgebra` (antipode laws via the
 antipode pin) → `IsCocomm` (from `subgroupMul_comm`). Then L5 (localise Spec R to make A free) → L6 →
 affine core.
+
+**L3 SCHEME GROUP AXIOMS DONE (2026-07-08, p2, axiom-clean, committed 1a6e5ad3/80994bc8).**
+All via a uniform point-level skeleton (NO Over-tensor gymnastics — dodges `point_add_eq_lift`):
+`cancel_mono subschemeι` → `subgroupMul_subschemeι` → `key : uX ≫ (bipt₁+bipt₂).1 = (restrict uX
+(bipt₁+bipt₂)).1` (rfl) → `Point.restrict_add` → identify each `restrict uX biptᵢ` with `0`/`upt`/
+`-upt` **over the matching base `uX ≫ bimulBase`** (Subtype.ext at the `.1` level; use `hbase : uX ≫
+bimulBase = subschemeι≫π` to bridge the zero point's base) → close with the `AddCommGroup` law.
+- Helpers (PointRestrict): `point_zero_val` ((0).1 = g≫E.zero), `Point.restrict_zero`,
+  `point_neg_val` ((-P).1 = P.1 ≫ mulByHom(-1)).
+- `subgroupUnit_over`/`subgroupInv_over` (general-S section/over-base facts).
+- `subgroupMul_unit_left` `(e×id)≫m=id` (zero_add), `subgroupMul_unit_right` `(id×e)≫m=id`,
+  `subgroupMul_inv` `⟨n,id⟩≫m=structMap≫e` (neg_add_cancel).
+- GOTCHA: `set uX := pullback.lift …` needs a TYPE ASCRIPTION when not pinned by `≫ m` (else the
+  cospan legs are metavars → `sorry` in the pullback type). Compat proof: `rw [Category.id_comp];
+  exact …_over` (NOT `← Category.assoc`).
+Remaining scheme axiom: **associativity** `(m×id)≫m = (id×m)≫m` on the triple pullback (add_assoc on
+three universal points) — same skeleton, more bookkeeping. Only needed for coassoc.
+
+**DUALIZATION ROUTE (the L3 crux, next) — the reusable intertwining.** Each Hopf law = Γ-pullback of
+a scheme axiom via the gateway lemma:
+  **`κ-intertwine`**: for `f : W ⟶ D×_S D` a morphism *over S* (W affine), `f.appTop ∘ κ =
+  Algebra.TensorProduct.lift (Γ(f≫fst)) (Γ(f≫snd))` (both A-algebra homs A→Γ(W)). Proof:
+  `Algebra.TensorProduct.ext` — agree on includeLeft/Right, `f.appTop∘proj₁ = (f≫fst).appTop` by
+  `comp_appTop`; `proj₁ = fst.appTop` (subgroupProj₁ def). Needs `f over S ⟹ f.appTop is R-alg hom`
+  (the subgroupProj₁ packaging, generalised).
+Then:
+- **Left counit** `(ε⊗id)∘Δ = mk 1` (⟺ via `TensorProduct.lid` `lid∘(ε.rTensor)∘Δ = id`): apply
+  κ-intertwine with `f = uL = (e×id map)` — `uL.appTop∘κ = lift(Γ(uL≫fst),Γ(uL≫snd)) =
+  lift(Γ(structMap≫e), Γ(𝟙)) = lift(εA, id) = lid∘(ε⊗id)` (εA = algebraMap∘ε = (structMap≫e).appTop);
+  then `(lid∘(ε⊗id))(Δa) = uL.appTop(κ(Δa)) = uL.appTop(Γ(m)a)` [pin] `= (uL≫m).appTop(a)`
+  [comp_appTop] `= 𝟙.appTop(a) = a` [subgroupMul_unit_left]. Right counit: symmetric (uR, unit_right).
+- **Antipode laws**: κ-intertwine with `f = ⟨n,id⟩`/`⟨id,n⟩` + `subgroupMul_inv`.
+- **Coassoc**: needs κ₃ `Spec(A⊗A⊗A) ≅ D×_S D×_S D` (κ-bij technique iterated) + scheme-assoc.
+- **Bialgebra.mk'**: Δ, ε already AlgHoms ⟹ counit_one/comul_one/…_mul are `map_one`/`map_mul`.
+- **HopfAlgebra**: antipode = subgroupAntipode + the two antipode laws. **IsCocomm**: from
+  `subgroupMul_comm` + κ-intertwine on `swap`.
