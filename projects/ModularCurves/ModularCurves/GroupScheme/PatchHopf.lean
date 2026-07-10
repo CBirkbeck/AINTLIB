@@ -618,7 +618,34 @@ theorem counitLift'_comp_comulAlg :
     CommRingCat.hom_id, RingHom.id_apply] at h2
   exact h2
 
-/-! ### Towards coassociativity: the `⊤`-level presentation -/
+/-! ### Towards coassociativity: the `⊤`-level presentation
+
+We restate the Hopf structure with `R' := Γ(V.toScheme, ⊤)` and `A' := Γ(G|_V, ⊤)`, where
+the group structure maps dualise directly (as `appTop`, no `topIso` conjugation). The
+opens-level maps are recovered by conjugating with `topIso`. -/
+
+/-- The `⊤`-level base ring `R' = Γ(V.toScheme, ⊤)`. -/
+noncomputable abbrev baseRingTop : CommRingCat := Γ(P.V.toScheme, ⊤)
+
+/-- The `⊤`-level group ring `A' = Γ(G|_V.toScheme, ⊤)`. -/
+noncomputable abbrev groupRingTop : CommRingCat := Γ(P.groupOpen.toScheme, ⊤)
+
+/-- The structure map of the group patch, in the spelling used by `groupSquare`. -/
+noncomputable abbrev groupToBaseRes : P.groupOpen.toScheme ⟶ P.V.toScheme :=
+  G.π.resLE P.V P.groupOpen le_rfl
+
+/-- `R'` is `R` transported by `topIso`. -/
+noncomputable instance : Algebra P.baseRingTop P.groupRingTop :=
+  P.groupToBaseRes.appTop.hom.toAlgebra
+
+instance : IsAffine P.V.toScheme := P.hV
+instance : IsAffine P.groupOpen.toScheme := P.isAffineOpen_groupOpen
+
+/-! #### The `⊤`-level structure maps -/
+
+/-- The `⊤`-level counit `ε' : A' ⟶ R'`. -/
+noncomputable def counitTop : P.groupRingTop ⟶ P.baseRingTop :=
+  P.unitSection.appTop
 
 /-- The group square is affine (it is the `Spec` of `A ⊗[R] A`). -/
 theorem isAffine_groupSquare : IsAffine P.groupSquare := by
@@ -640,6 +667,16 @@ theorem squareMulRes_comp_ι : P.squareMulRes ≫ P.groupOpen.ι = P.squareMul :
   rw [squareMulRes, Category.assoc, Scheme.Hom.resLE_comp_ι]
   rw [show (⊤ : P.groupSquare.Opens).ι = P.groupSquare.topIso.hom from rfl,
     ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
+/-- The affine Künneth transport for the group square, `⊤`-level. -/
+noncomputable abbrev squareΓTop :
+    Γ(P.groupSquare, ⊤) ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
+  affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+
+/-- **The `⊤`-level comultiplication** `Δ' : A' ⟶ A' ⊗[R'] A'`. -/
+noncomputable def comulTop :
+    P.groupRingTop ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
+  P.squareMulRes.appTop ≫ P.squareΓTop
 
 end AffineChartPatch
 
