@@ -154,6 +154,38 @@ theorem esymm_mem_maximalIdeal [IsLocalRing A] {v : Multiset A}
   rw [Multiset.prod_cons]
   exact Ideal.mul_mem_right _ _ (hv y (Multiset.mem_of_le htv (Multiset.mem_cons_self y t')))
 
+/-- The coefficients of `∏_{r ∈ w} (X + C r)` are the elementary symmetric functions
+(Vieta, coefficient-indexed form). -/
+theorem coeff_prod_X_add_C (w : Multiset A) (i : ℕ) :
+    ((w.map fun r => X + C r).prod).coeff i =
+      if i ≤ Multiset.card w then w.esymm (Multiset.card w - i) else 0 := by
+  classical
+  rw [Multiset.prod_X_add_C_eq_sum_esymm, Polynomial.finsetSum_coeff]
+  by_cases hi : i ≤ Multiset.card w
+  · rw [if_pos hi, Finset.sum_eq_single (Multiset.card w - i)]
+    · rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, if_pos (by omega), mul_one]
+    · intro j hj hne
+      have hj' := Finset.mem_range.mp hj
+      rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, if_neg (by
+        intro heq
+        exact hne (by omega)), mul_zero]
+    · intro habs
+      exact absurd (Finset.mem_range.mpr (by omega)) habs
+  · rw [if_neg hi]
+    refine Finset.sum_eq_zero fun j hj => ?_
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, if_neg (by
+      have := Finset.mem_range.mp hj
+      omega), mul_zero]
+
+/-- A product of units is a unit (multiset form). -/
+theorem isUnit_multiset_prod {u : Multiset A} (hu : ∀ x ∈ u, IsUnit x) : IsUnit u.prod := by
+  induction u using Multiset.induction_on with
+  | empty => simpa using isUnit_one
+  | cons a t ih =>
+      rw [Multiset.prod_cons]
+      exact (hu a (Multiset.mem_cons_self a t)).mul
+        (ih fun x hx => hu x (Multiset.mem_cons_of_mem hx))
+
 /-- **(KM Lemma 6.3.5, coefficient core)** For `u` a multiset of units and `v` one of
 maximal-ideal elements, the `card u`-th elementary symmetric function of `u + v` is a
 unit: it is `∏ u` (a unit) plus terms each containing a maximal-ideal factor. Combined
@@ -163,8 +195,43 @@ theorem esymm_add_eq_unit_mul_pow [IsLocalRing A] {u v : Multiset A}
     (hu : ∀ x ∈ u, IsUnit x) (hv : ∀ x ∈ v, x ∈ IsLocalRing.maximalIdeal A) :
     IsUnit ((u + v).esymm (Multiset.card u)) := by
   classical
-  -- decompose the powerset-sum by the sub-multiset drawn from `u`
-  sorry
+  -- read the symmetric function off as the `X^(card v)` coefficient of the product
+  have hkey : (u + v).esymm (Multiset.card u) =
+      ((u.map fun r => X + C r).prod * (v.map fun r => X + C r).prod).coeff
+        (Multiset.card v) := by
+    rw [← Multiset.prod_add, ← Multiset.map_add, coeff_prod_X_add_C, Multiset.card_add,
+      if_pos (by omega)]
+    congr 1
+    omega
+  have hesymm0 : v.esymm 0 = 1 := by
+    simp [Multiset.esymm, Multiset.powersetCard_zero_left]
+  rw [hkey, Polynomial.coeff_mul]
+  -- split off the `(0, card v)` term, which is `∏ u`; the rest lies in the maximal ideal
+  have hmem : ((0 : ℕ), Multiset.card v) ∈ Finset.antidiagonal (Multiset.card v) := by
+    simp
+  rw [← Finset.add_sum_erase _ _ hmem,
+    show ((0 : ℕ), Multiset.card v).1 = 0 from rfl,
+    show ((0 : ℕ), Multiset.card v).2 = Multiset.card v from rfl,
+    coeff_prod_X_add_C, coeff_prod_X_add_C, if_pos (Nat.zero_le _), if_pos le_rfl,
+    Nat.sub_zero, Nat.sub_self, esymm_card_eq_prod, hesymm0, mul_one]
+  refine isUnit_add_of_mem_maximalIdeal (isUnit_multiset_prod hu) ?_
+  refine Submodule.sum_mem _ fun p hp => ?_
+  obtain ⟨hp_ne, hp_anti⟩ := Finset.mem_erase.mp hp
+  have hsum : p.1 + p.2 = Multiset.card v := Finset.mem_antidiagonal.mp hp_anti
+  rw [coeff_prod_X_add_C, coeff_prod_X_add_C]
+  by_cases hi : p.1 ≤ Multiset.card u
+  · rw [if_pos hi, if_pos (by omega : p.2 ≤ Multiset.card v)]
+    refine Ideal.mul_mem_left _ _ (esymm_mem_maximalIdeal hv ?_ (by omega))
+    -- `0 < card v - p.2`: otherwise `p = (0, card v)`, which was erased
+    rcases Nat.lt_or_ge p.2 (Multiset.card v) with hlt | hge
+    · omega
+    · exfalso
+      apply hp_ne
+      have h2 : p.2 = Multiset.card v := le_antisymm (by omega) hge
+      have h1 : p.1 = 0 := by omega
+      exact Prod.ext h1 h2
+  · rw [if_neg hi, zero_mul]
+    exact Submodule.zero_mem _
 
 /-! ## KM 6.3.2–6.3.3 — the serpent/Nakayama assembly (module form) -/
 
