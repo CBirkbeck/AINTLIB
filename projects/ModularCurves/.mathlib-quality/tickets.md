@@ -15730,3 +15730,35 @@ quotient hqinv/hqepi/hqlift). Sub-pieces:
 NOTE: the theorem carries sorryAx from BOTH gap#3 AND T-W7 (toEllipticCurve/grpObj, c5β) — closing
 gap#3 removes one gate; full axiom-cleanness also needs T-W7 (c5β active, of_map breakthrough).
 b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (single source of truth).
+
+## Amendments v10.134 (2026-07-10, coordinator): ✅ TREE-RED LIFTED — FP4 repair VERIFIED (d10e7fc87); NEW-CASCADE gate 1 CLEARED (T-G4 the sole remaining gate, first transport done); FP4's silver lining absorbed
+
+- **REPAIR VERIFIED AT SOURCE + TREE-RED LIFTED**: d10e7fc87 restores
+  `Moduli/Representability.lean` verbatim (spot-checked: `EllHom.pullSection` :148,
+  the pullSection functor laws, `gammaOneNaiveProblem` :212, the held MASTER :252 —
+  all back); B3 capstone relocated to `Moduli/QuotientRepresentability.lean` (+603);
+  root module import added; TorsorMap +57. FP4's verification = GammaH
+  (broken-consumer certificate) + restored file + relocated capstone + **the FULL ROOT
+  MODULE (3,766 jobs)** — the strongest certificate available; accepted. Full-tree
+  green claims are trustworthy again; merges consuming dev may resume.
+- **FP4 conduct RATIFIED**: prompt ownership of the misdiagnosis ("other lane" →
+  mine), repair executed exactly per order, one atomic pathspec commit. No fault
+  carried forward; the path-collision fleet reminder (v10.133) stands for everyone.
+- **FP4 silver lining absorbed**: during the repair the B3 curve cartesian square
+  CLOSED via new `isPullback_of_fppf_baseChange` (fppf descent of a cartesian square,
+  axiom-clean, TorsorMap.lean) — the relocated capstone now carries the full KM 4.7.0
+  chain (α-descent, δ-torsor descent, the P.map ∘ .op identity, fppf-injectivity,
+  curve square, rigidity uniqueness) down to **ONE real sorry**: `coreData_injective`,
+  traced to a genuine structural gap (CoreData exposes the categorical-quotient
+  property but not that q.baseHom is a finite étale G-torsor). Their [B3-g3a/g3b/g3c]
+  decomposition (geometric quotientπ-torsor iso from ring-level
+  torsorMul_bijective_of_free → CoreData fields → fibre-product/[B2b] proof) is
+  RATIFIED as the fix plan; on charter to resume gap #3 in the relocated file. Their
+  own gate summary confirmed: {B3-g3, T-W7 (c5β lane)} = the only items between here
+  and a fully axiom-clean KM 4.7.0 representability theorem.
+- **NEW-CASCADE: GATE 1 CLEARED.** The double gate reduces to the single original
+  gate: c5β's T-G4 board line. c5β sentinel at verification time: mulOver_oneOver
+  transport DONE (of_map/of_eq/named ported to GroupLawAxioms), building;
+  oneOver_mulOver derives via comm next, then assoc, inv (A's negModelHom_baseChange
+  in place). On the T-G4 line: NEW-CASCADE re-merges from `wip/y1-dev-merge-cascade`
+  + top-up + spine verify + straight into fill steps 2–4.
