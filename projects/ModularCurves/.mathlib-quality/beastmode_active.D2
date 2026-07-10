@@ -6,3 +6,7 @@ Route A (GC + candidate sheaf): define K := image-ideal-sheaf (per-affine (I.ide
 Then the target-lemma = evaluate K-formula at ⟨f⁻¹ᵁU, _⟩ (definitional).
 Route B (heavier): pullback-affine tensor-presentation (tensorQuotientEquiv) — only if A stalls.
 Note: QuasiCompact (pullback.fst f Iι) instance via IsClosedImmersion-base-change for ker_apply.
+[4c'-REVISION 2026-07-10]: image-formula stake REMOVED (unconsumed). Simpler route found:
+- [4b] D-ideal-fg-per-affine: sectionsDivisor.ideal = ∏ ker(section-values) (fullLevelLocusAux_sectionsDivisor_ideal); per-affine ∏-pointwise; each ker(P.1-app)-fg via Algebra.FinitePresentation.ker_fG_of_surjective (R := Γ(S,U); A := Γ(curve-total,⁻¹U) fp-algebra from lfp-composite; B fp; section-app surjective since section = closed immersion).
+- [4c] comap-fg: comap-of-∏ = ∏-of-comaps (project IdealSheafComapMul.comap_prod); comap-of-ker = ker-of-pullback-fst (mathlib ker_fst_of_isClosedImmersion, reversed); ker(fst.app)-fg via the SAME ker_fG_of_surjective with A := Γ(pullback-affine) = tensor-fp, B := Γ(D'-total)-fp.
+- [4b'-LOCALITY] still needed: IdealSheafData with fg on the preimage-cofinal affines ⟹ fg on ALL affines (for lfp_subschemeι_of_fg's ∀-binder): via map_ideal_basicOpen + Module.Finite.of_localizationSpan-style gluing; OR weaken lfp_subschemeι_of_fg to take fg on a cover (better: re-derive iff_appLE per (U,V,e) directly from cover-fg — the appLE-target factors through basic-opens).
