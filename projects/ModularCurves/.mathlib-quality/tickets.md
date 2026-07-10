@@ -11106,3 +11106,18 @@ NEXT (top-glue recipe, de-risked):
 
 Axioms: every new decl axiom-clean except the `pt_hord`-consumers (designed
 [T-A6b]/[T-B6′] trails, attributed in v10.110).
+
+## Amendments v10.112-ATLAS (2026-07-10, NEW-ATLAS-3): [Y1-ATLAS] CLAIMED — takeover, top-glue steps 2–5
+
+**Claim (rule-5)**: NEW-ATLAS-3 takes over the [Y1-ATLAS] charter from NEW-ATLAS-2 (both
+prior owners rate-limited; coordinator inbox NEW-ATLAS-3.md, v10.107). Sentinel
+`beastmode_active.NEW-ATLAS-3` set. Worktree `aintlib-mc-atlas`, branch
+`dev/modular-curves-y1-atlas` at `319170881` (v10.111 NEXT step 1,
+`projModelBaseChange_projTateMap` + `projTateMap_unfold`, already landed at tip).
+
+**Scope**: v10.111-ATLAS NEXT steps 2–5 — (2) fibre-restriction agreement of `topMap`
+across charts; (3) E-cover glue → `coverTopMap_compat` → `Scheme.Cover.glueMorphisms`;
+(4) IsPullback/zero_w/marking clauses + `EllObj.tateClassifyingHomOfOpenCover` +
+`pullSection = P`; (5) T7 uniqueness → `exists_tatePoint`'s ∀-part. Then rebase onto
+`origin/dev/modular-curves-y1`, ONE PR, board `#print axioms` with the designed
+[T-A6b]/[T-B6′] attribution.
