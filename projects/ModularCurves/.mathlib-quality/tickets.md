@@ -15643,3 +15643,33 @@ T-G4 completion boards. Sentinels updated (dev + y1 copies).
 - **Process note**: full-tree (or spine-target) verification now runs at every MERGE
   boundary as standard (NEW-CASCADE's practice generalised) — single-target green is a
   lane certificate, not a tree certificate.
+
+### v10.133 (2026-07-11, NEW-HOPF): ★ [CHARTER-HOPF] [HG-C1c-1c] — BOTH COUNIT LAWS PROVEN (task (a) of the v10.132 work order)
+
+*Zero sorries, axiom-clean; six atomic commits (v10.130 pathspec discipline).*
+
+- AlgHom packaging: `counitAlg`, `antipodeAlg`, `comulAlg` (`commutes'` = the proven
+  R-linearity, read elementwise).
+- The Γ-dualisation pattern, executed twice: `counitLiftΓ` (resp. `counitLiftΓ'`) :=
+  `inv squareΓ ≫ (left|right)UnitSection.appTop ≫ groupOpen.topIso.hom`; the transported
+  law `groupPatchComul ≫ counitLiftΓ = 𝟙` falls straight out of the *scheme* identity by
+  `appLE_comp_appLE` + `appLE_congr_hom` + `ι_appLE_top`. Then the two inclusions are
+  computed against the Γ-dual legs (`includeLeft/Right_comp_counitLiftΓ(')`), and
+  **`tensor_hom_ext`** identifies `counitLiftΓ` with the algebraic
+  `Algebra.TensorProduct.lift (ofId ∘ ε) id`. Result:
+  **`counitLift_comp_comulAlg`** and **`counitLift'_comp_comulAlg`** —
+  `(ε ⊗ id) ∘ Δ = id = (id ⊗ ε) ∘ Δ` in AlgHom form.
+- `rightUnitSection_comp_squareMul` (the mirror scheme law) landed **first try** — the
+  point-algebra route (ratified in v10.132) transfers verbatim.
+
+**Lean-ops**: (i) implicit `{e₁ e₂}` of `patchKunnethΓ`'s leg lemmas cannot be inferred in
+a bare `have` — pass `(e₁ := le_rfl) (e₂ := le_rfl)`. (ii) With `MonObj` open, `mul_one`
+and `one_mul` resolve to the *MonObj* versions (`X ◁ η ≫ μ`) — `_root_`-qualify (the
+registry entry recurs; now cited at three sites). (iii) `simpa … using h` fails where
+`simp only … at h; exact h` succeeds when the residual difference is a `CommRingCat.of ↑A`
+eta.
+
+**NEXT** (work order (b)–(e)): 1d coassoc — build the **triple Künneth** as a generic
+`PatchKunneth.lean` citizen (same Spec-leg-then-Γ-dual pattern); 1e antipode via
+`diagonal_SpecMap`; assemble `[HopfAlgebra R A]`; `IsCoaction chartCoaction`; then
+C1d → C3 → C4 ⟹ six pins ⟹ **BOARD-SIGNAL**.
