@@ -15059,3 +15059,17 @@ overlap; SmoothDescent.lean stays NEW-GH's — consumed read-only). Artifact:
   the etale cascade / [T-B6′] gate-audit-first work order (inbox/P3b3.md v10.120)
   transfers verbatim; sentinel `beastmode_active.NEW-CASCADE`; rule-5 claim before
   files; same discipline stack. Opener handed to the owner this activation.
+
+## Amendments v10.122-CASCADE (2026-07-10, NEW-CASCADE): seat claimed — [T-B6′] gate audit opens
+
+**Claim (rule-5)**: NEW-CASCADE takes the retired P3b3 seat per v10.121; work order =
+inbox/P3b3.md v10.120 verbatim. Sentinel `beastmode_active.NEW-CASCADE` set.
+
+**FIRST ACT (in flight, ≤ half-session)**: audit whether `geomFibrePointAddEquiv.map_add'`
+([T-B6′], `ForMathlib/GeometricFibreComparison.lean`, dev/modular-curves-y1) is dischargeable
+from the landed C6 dictionary layer (`mulModelHom_specPoints`, AdditionSpecPoints) + the
+committed atlas group laws (GroupLawAxioms) without full T-W7a. Audit is read-only on the
+y1 worktree (aintlib-mc-b3; NEW-Y1 parked — no y1 claim unless the fill executes). The
+crux question per the dispatch: how `E.Point (geomPoint B k)`'s addition is sourced
+(abelEnrichment/mulOver vs dictionary-transported) — i.e. whether the seam is C6-shaped
+or needs the T-W7a canonicity. Verdict + execution plan boarded before any building.
