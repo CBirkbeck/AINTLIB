@@ -847,6 +847,144 @@ theorem representable_of_rigid_of_torsor (P Q : ModuliProblem R)
     P.Representable := by
   sorry
 
+/-! ### [B1] α_univ-descent (KM 4.7.0, p. 114) -/
+
+/-- The chart-comparison morphism composed with the chart projection is the chart
+projection of the composite base map: `pullbackAlongMap g k ≫ π_g = π_{k ≫ g}`. -/
+private theorem pullbackAlongMap_pullbackAlongπ {R : CommRingCat.{u}} (X : EllObj R)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) :
+    X.pullbackAlongMap g k ≫ X.pullbackAlongπ g = X.pullbackAlongπ (k ≫ g) := by
+  refine EllHom.ext rfl ?_
+  show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+      (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+    Limits.pullback.fst X.curve.π (k ≫ g)
+  rw [Limits.pullback.lift_fst, Category.comp_id]
+
+/-- Presentation-independent naturality of a relative representation datum: transporting
+a chart value along *any* `Ell/R`-morphism `w` of charts which lies over `k` and commutes
+with the chart projections computes as precomposition of the classifying section by `k`. -/
+private theorem map_eqv {R : CommRingCat.{u}} {P : ModuliProblem R} {X₀ : EllObj R}
+    (d₀ : RelRepData P X₀) {T T' : Scheme.{u}}
+    {g : T ⟶ X₀.base} {g' : T' ⟶ X₀.base}
+    (w : X₀.pullbackAlong g' ⟶ X₀.pullbackAlong g) (k : T' ⟶ T)
+    (hbk : w.baseHom = k) (hk : k ≫ g = g')
+    (hwπ : w ≫ X₀.pullbackAlongπ g = X₀.pullbackAlongπ g')
+    (h : { h : T ⟶ d₀.Z // h ≫ d₀.f = g }) :
+    P.map w.op (d₀.eqv g h) =
+      d₀.eqv g' ⟨k ≫ h.1, by rw [Category.assoc, h.2, hk]⟩ := by
+  subst hk
+  have hw : w = X₀.pullbackAlongMap g k := by
+    apply (EllObj.homPullbackAlongEquiv X₀ g (X₀.pullbackAlong (k ≫ g))).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show w ≫ X₀.pullbackAlongπ g =
+        X₀.pullbackAlongMap g k ≫ X₀.pullbackAlongπ g
+      rw [hwπ, pullbackAlongMap_pullbackAlongπ]
+    · exact hbk
+  rw [hw]
+  exact (d₀.nat g k h).symm
+
+/-- **([B1], α_univ-descent — KM 4.7.0, p. 114)** A `G`-invariant `P`-class upstairs descends
+uniquely through an `Ell/R`-morphism `q` whose base has the quotient universal property. -/
+theorem existsUnique_alpha_descent {R : CommRingCat.{u}} {P : ModuliProblem R}
+    {XE X₀ : EllObj R} (q : XE ⟶ X₀) (d₀ : RelRepData P X₀)
+    {G : Type u} [Group G] (σ : SchemeAction G XE.base)
+    (actE : G → (XE ⟶ XE))
+    (hbase : ∀ γ, (actE γ).baseHom = σ.hom γ)
+    (hqcoeq : ∀ γ, actE γ ≫ q = q)
+    (hlift : ∀ {Y : Scheme.{u}} (F : XE.base ⟶ Y), (∀ γ, σ.hom γ ≫ F = F) →
+      ∃ F₀ : X₀.base ⟶ Y, q.baseHom ≫ F₀ = F)
+    (hepi : Epi q.baseHom)
+    (α : P.obj (Opposite.op XE)) (hinv : ∀ γ, P.map (actE γ).op α = α) :
+    ∃! α₀ : P.obj (Opposite.op X₀), P.map q.op α₀ = α := by
+  haveI := hepi
+  -- the inverse cartesian comparison collapses to the chart projection
+  have hqinv : (EllObj.isoPullbackAlong q).inv ≫ q = X₀.pullbackAlongπ q.baseHom := by
+    rw [Iso.inv_comp_eq]
+    exact (EllObj.toPullbackAlong_pullbackAlongπ q).symm
+  -- present α in the chart over b = q.baseHom as a section sα of d₀.f
+  obtain ⟨sα, hsα⟩ : ∃ s : { h : XE.base ⟶ d₀.Z // h ≫ d₀.f = q.baseHom },
+      d₀.eqv q.baseHom s = P.map (EllObj.isoPullbackAlong q).inv.op α :=
+    ⟨(d₀.eqv q.baseHom).symm _, (d₀.eqv q.baseHom).apply_symm_apply _⟩
+  -- G-invariance of the classifying section
+  have step2 : ∀ γ : G, σ.hom γ ≫ sα.1 = sα.1 := by
+    intro γ
+    have hσb : σ.hom γ ≫ q.baseHom = q.baseHom := by
+      rw [← hbase γ]
+      exact congrArg EllHom.baseHom (hqcoeq γ)
+    obtain ⟨wγ, hwγb, hwγπ, hwγinv⟩ :
+        ∃ wγ : X₀.pullbackAlong q.baseHom ⟶ X₀.pullbackAlong q.baseHom,
+          wγ.baseHom = σ.hom γ ∧
+            wγ ≫ X₀.pullbackAlongπ q.baseHom = X₀.pullbackAlongπ q.baseHom ∧
+              wγ ≫ (EllObj.isoPullbackAlong q).inv =
+                (EllObj.isoPullbackAlong q).inv ≫ actE γ := by
+      refine ⟨(EllObj.isoPullbackAlong q).inv ≫ actE γ ≫
+        (EllObj.isoPullbackAlong q).hom, ?_, ?_, ?_⟩
+      · show 𝟙 XE.base ≫ (actE γ).baseHom ≫ 𝟙 XE.base = σ.hom γ
+        rw [Category.id_comp, Category.comp_id]
+        exact hbase γ
+      · rw [Category.assoc, Category.assoc, EllObj.isoPullbackAlong_hom,
+          EllObj.toPullbackAlong_pullbackAlongπ, hqcoeq γ, hqinv]
+      · simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have hkey := map_eqv d₀ wγ (σ.hom γ) hwγb hσb hwγπ sα
+    rw [hsα, ← Functor.map_comp_apply, ← op_comp, hwγinv, op_comp,
+      Functor.map_comp_apply, hinv γ, ← hsα] at hkey
+    exact (congrArg Subtype.val ((d₀.eqv q.baseHom).injective hkey)).symm
+  -- descend the section through the quotient
+  obtain ⟨s₀, hs₀⟩ := hlift sα.1 step2
+  have hsec : s₀ ≫ d₀.f = 𝟙 X₀.base := by
+    rw [← cancel_epi q.baseHom, ← Category.assoc, hs₀, sα.2, Category.comp_id]
+  -- the identity-chart inclusion ι and the chart comparison w over b
+  obtain ⟨ι, w, hιπ, hwπ, hwb, hqιb⟩ :
+      ∃ (ι : X₀ ⟶ X₀.pullbackAlong (𝟙 X₀.base))
+        (w : X₀.pullbackAlong q.baseHom ⟶ X₀.pullbackAlong (𝟙 X₀.base)),
+        ι ≫ X₀.pullbackAlongπ (𝟙 X₀.base) = 𝟙 X₀ ∧
+          w ≫ X₀.pullbackAlongπ (𝟙 X₀.base) = X₀.pullbackAlongπ q.baseHom ∧
+            w.baseHom = q.baseHom ∧
+              (q ≫ ι).baseHom = ((EllObj.isoPullbackAlong q).hom ≫ w).baseHom := by
+    refine ⟨EllObj.homToPullbackAlong (𝟙 X₀) (𝟙 X₀.base) (Category.id_comp _),
+      EllObj.homToPullbackAlong (X₀.pullbackAlongπ q.baseHom) q.baseHom
+        (Category.comp_id _),
+      EllObj.homToPullbackAlong_pullbackAlongπ _ _ _,
+      EllObj.homToPullbackAlong_pullbackAlongπ _ _ _, rfl, ?_⟩
+    show q.baseHom ≫ 𝟙 X₀.base = 𝟙 XE.base ≫ q.baseHom
+    rw [Category.comp_id, Category.id_comp]
+  -- the descended chart value transports back to α's chart value over b
+  have hweqv : P.map w.op (d₀.eqv (𝟙 X₀.base) ⟨s₀, hsec⟩) =
+      P.map (EllObj.isoPullbackAlong q).inv.op α := by
+    rw [map_eqv d₀ w q.baseHom hwb (Category.comp_id q.baseHom) hwπ ⟨s₀, hsec⟩, ← hsα]
+    exact congrArg (d₀.eqv q.baseHom) (Subtype.ext hs₀)
+  -- q composed with the identity-chart inclusion factors through w
+  have hqι : q ≫ ι = (EllObj.isoPullbackAlong q).hom ≫ w := by
+    apply (EllObj.homPullbackAlongEquiv X₀ (𝟙 X₀.base) XE).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show (q ≫ ι) ≫ X₀.pullbackAlongπ (𝟙 X₀.base) =
+        ((EllObj.isoPullbackAlong q).hom ≫ w) ≫ X₀.pullbackAlongπ (𝟙 X₀.base)
+      rw [Category.assoc, Category.assoc, hιπ, hwπ, Category.comp_id,
+        EllObj.isoPullbackAlong_hom, EllObj.toPullbackAlong_pullbackAlongπ]
+    · exact hqιb
+  -- existence
+  have hexist : P.map q.op (P.map ι.op (d₀.eqv (𝟙 X₀.base) ⟨s₀, hsec⟩)) = α := by
+    rw [← Functor.map_comp_apply, ← op_comp, hqι, op_comp, Functor.map_comp_apply,
+      hweqv, ← Functor.map_comp_apply, ← op_comp, Iso.hom_inv_id, op_id,
+      Functor.map_id_apply]
+  refine ⟨P.map ι.op (d₀.eqv (𝟙 X₀.base) ⟨s₀, hsec⟩), hexist, fun β hβ => ?_⟩
+  -- uniqueness: any β pulling back to α has the same classifying section
+  obtain ⟨tβ, htβ⟩ : ∃ t : { h : X₀.base ⟶ d₀.Z // h ≫ d₀.f = 𝟙 X₀.base },
+      d₀.eqv (𝟙 X₀.base) t = P.map (X₀.pullbackAlongπ (𝟙 X₀.base)).op β :=
+    ⟨(d₀.eqv (𝟙 X₀.base)).symm _, (d₀.eqv (𝟙 X₀.base)).apply_symm_apply _⟩
+  have hkeyβ := map_eqv d₀ w q.baseHom hwb (Category.comp_id q.baseHom) hwπ tβ
+  rw [htβ, ← Functor.map_comp_apply, ← op_comp, hwπ, ← hqinv, op_comp,
+    Functor.map_comp_apply, hβ, ← hsα] at hkeyβ
+  have hts : tβ.1 = s₀ := by
+    refine (cancel_epi q.baseHom).mp ?_
+    exact ((congrArg Subtype.val
+      ((d₀.eqv q.baseHom).injective hkeyβ)).symm).trans hs₀.symm
+  have hval : P.map (X₀.pullbackAlongπ (𝟙 X₀.base)).op β =
+      d₀.eqv (𝟙 X₀.base) ⟨s₀, hsec⟩ := by
+    rw [← htβ]
+    exact congrArg (d₀.eqv (𝟙 X₀.base)) (Subtype.ext hts)
+  rw [← hval, ← Functor.map_comp_apply, ← op_comp, hιπ, op_id, Functor.map_id_apply]
+
 end Engine
 
 end ModuliProblem
