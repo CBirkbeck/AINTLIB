@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
+import ModularCurves.ForMathlib.FormallyUnramifiedFibre
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
@@ -155,6 +156,33 @@ field-level theory (`[N]` separable when `char k̄ ∤ N` via the invariant diff
 the **T-DISC** "finite + geometric fibres unramified ⟹ unramified" criterion. Source: KM Thm 2.3.1. -/
 theorem formallyUnramified_torsionπ (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.torsionπ N) := by sorry
+
+/-- **(L-BC funnel — hypothesis-funneled pre-wire, v10.123-CASCADE)** L-BC from its single
+remaining fibre input: once every residue-field fibre of `E[N] ⟶ S` is formally unramified,
+`E[N] ⟶ S` is formally unramified — T-DISC (`of_finite_fiberToSpecResidueField`) +
+`torsionπ_isFinite`.
+
+The `hfib` hypothesis is exactly the **[T-B6′]-shaped gate output** (board v10.123-CASCADE):
+at gate-fire it is produced from the group-compatible fibre dictionary
+(`geomFibrePointAddEquiv` with its `map_add'` filled + the `hz` zero-pin) transporting
+HasseWeil's field-level separability/torsion count (`mulByInt_isSeparable`,
+`torsion_genN_linearEquiv`) to the scheme fibres. Nothing else remains between this funnel
+and BB-DIFF. -/
+theorem formallyUnramified_torsionπ_of_fibres (N : ℕ) [NeZero N]
+    (hfib : ∀ y, FormallyUnramified ((E.torsionπ N).fiberToSpecResidueField y)) :
+    FormallyUnramified (E.torsionπ N) :=
+  haveI := E.torsionπ_isFinite N
+  FormallyUnramified.of_finite_fiberToSpecResidueField (f := E.torsionπ N) hfib
+
+/-- **(BB-DIFF MASTER, hypothesis-funneled form)** `[N]` is formally unramified given only
+the fibre input of the funnel — L-A ∘ the L-BC funnel. At gate-fire the `hfib` input
+discharges and `mulByHom_formallyUnramified` (Torsion.lean) closes through
+`mulByHom_formallyUnramified'`. -/
+theorem mulByHom_formallyUnramified_of_fibres (N : ℕ) [NeZero N]
+    (hfib : ∀ y, FormallyUnramified ((E.torsionπ N).fiberToSpecResidueField y)) :
+    FormallyUnramified (E.mulByHom N) :=
+  E.formallyUnramified_mulByHom_of_torsionπ N
+    (E.formallyUnramified_torsionπ_of_fibres N hfib)
 
 /-- **(T-B5D, MASTER — assembly)** BB-DIFF: `[N]` is formally unramified when `N` is invertible,
 assembled from L-A ∘ L-BC. Term-mode (no `sorry` of its own): discharging `formallyUnramified_torsionπ`
