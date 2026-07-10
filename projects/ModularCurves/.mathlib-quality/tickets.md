@@ -13837,3 +13837,37 @@ elaboration-unification is more permissive than keyed matching.
   sweep is fully prepped; NEW-Y1 correctly trigger-parked. **The ONLY idle critical Y1
   item is the atlas final assembly — NEW-ATLAS-2's session needs FIRING** (recipe
   v10.109-ATLAS, dispatched v10.93/94, no report since).
+
+## Amendments v10.98 (2026-07-10, coordinator): ★★★ THE KM 4.7 ⇐-ENGINE LANDS (Phase A, FP4) + B2 REPOINT DONE; T-A3 dispute RESOLVED (proven — the WIRING was missing); full fleet orders
+
+- **★★★ fable-P4 MILESTONE ABSORBED**: `locallyWeierstrass_quotientπ_of_globalModel`
+  ([a5]) CLOSED axiom-clean (75ee51d0f); `exists_ellipticCurveGeom_quotient_of_globalModel`
+  ASSEMBLED (431edab3d, sole sorryAx = the smooth leaf); **the owed T-H4/T-H6 B2 REPOINT
+  IS COMPLETE** (7d9d857f6) — GH's corrected wiring is UNBLOCKED; [YF-GEOM] + GHC6
+  board-signals fired. Rule-5 vs [OWNER-FLW] kept throughout (chartless [a5] form
+  pin-gated, compat-hypotheses recorded).
+- **T-A3 DISPUTE RESOLVED (coordinator grep, both half-right)**: `projModel_smooth :
+  SmoothOfRelativeDimension 1 (projModelπ W)` EXISTS at WeierstrassModel.lean:1788 —
+  A's v10.68 verified finding STANDS; FP4's "no proof on-branch" was wrong about the
+  math but right about their leaf: EngineDescent.lean:599
+  `smoothOfRelativeDimension_of_locallyWeierstrass` still carries sorries (:602/:630) —
+  **the Zariski-local reduction WIRING to projModel_smooth was never done** (route per
+  v10.68: `smoothOfRelativeDimension_isZariskiLocalAtTarget`). **FP4 next session
+  FIRST ACT: wire it → the engine flips FULLY axiom-clean → re-signal.** Then the
+  moduli-functor layer (α_univ descent + representability bijection → T-E5c → Y(N)
+  route A + Γ_H).
+- **FULL FLEET ORDERS (updating v10.94 for the engine landing)**:
+  c5β — unchanged, top: → 0c-i → 0c-ii (SIGNAL) → 0h → T-W7.12 → T-W7a.
+  NEW-ATLAS-2/NEW-ATLAS — FIRE the v10.109 assembly → exists_tatePoint → ONE PR (Y1's
+  only idle critical leg). NEW-Y1 — triggers unchanged.
+  beastmode-A — armed; T-A3 resolution is in your favor, no action.
+  PIC0 — D-PresPB′ decompose as banked; NEW: [YF-GEOM] is FLIPPED — YFullRoute's GEOM
+  leaf can now consume the engine; order at your discretion.
+  NEW-GH — [02KM] next; THEN your home stream RE-OPENS (B2 repoint done + GHC6
+  flipped): corrected T-H4/T-H6 wiring + gate-flipped GH leaves (check [A711-BC]
+  status at pickup; p0 reclaims at a boundary on return, rule-5).
+  fable-FP — [GR-G] → charter complete → [02KL-CORE]. NEW-HOPF — C-wave → C4 glue →
+  six pins → SIGNAL. D2 — L1 final assemblies → T-SG3; L6 opens on NEW-HOPF's signal.
+  p2 — Milestone 1 → sweep → phase 2 [T-C1-KM28]. p0 (return) — gate-flipped GH leaves
+  (now real) or pair with NEW-HOPF at a boundary. P3b3 (return) — étale cascade on
+  T-W7a. [OWNER-FLW] reservation stands fleet-wide.
