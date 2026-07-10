@@ -60,6 +60,14 @@ noncomputable def restrictedDomainIso (G : FiniteLocallyFreeSubgroup E) (U : E.E
     (G.actionProj.left ⁻¹ᵁ U).toScheme ≅ pullback G.actionProj.left U.ι :=
   (pullbackRestrictIsoRestrict G.actionProj.left U).symm
 
+/-- **The chart Künneth identification, scheme level** (`[HG-C1b]` leg 2): the domain of
+the restricted action is the fibre product `G ×_S U` (with `U` as an `S`-scheme via
+`U.ι ≫ E.π`). Composite of `restrictedDomainIso` with the vertical pasting of fibre
+products along the projection `G ×_S E → E`. -/
+noncomputable def chartPullbackIso (G : FiniteLocallyFreeSubgroup E) (U : E.E.Opens) :
+    (G.actionProj.left ⁻¹ᵁ U).toScheme ≅ pullback G.π (U.ι ≫ E.π) :=
+  G.restrictedDomainIso U ≪≫ pullbackLeftPullbackSndIso G.π E.π U.ι
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
