@@ -4067,7 +4067,7 @@ private lemma mkHeq {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e 
   subst e; rfl
 
 /-- **Model base changes compose** along ring maps. -/
-theorem projModelBaseChange_comp {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+theorem projModelBaseChange_comp_eqToHom {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
     (φ : A →+* B) (ψ : B →+* C) (W : WeierstrassCurve A) :
     projModelBaseChange ψ (W.map φ) ≫ projModelBaseChange φ W =
       eqToHom (congrArg projModel (WeierstrassCurve.map_map W φ ψ)) ≫
@@ -4095,7 +4095,7 @@ section TopNaturality
 
 `projTateMap` is natural under change of the chart ring: base-changing the model and
 classifying with the fibre point is the same as classifying and base-changing.  The
-derivation runs through `projModelVCIso_map` (T-W7.0h) and `projModelBaseChange_comp`. -/
+derivation runs through `projModelVCIso_map` (T-W7.0h) and `projModelBaseChange_comp_eqToHom`. -/
 
 /-- Congruence for the T-E1 normalisation in the marked point. -/
 theorem tateNormalVariableChange_congr {A : Type u} [CommRing A] (W : WeierstrassCurve A)
@@ -4221,7 +4221,7 @@ theorem projModelBaseChange_projTateMap
       eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m) hG1.symm)
     rw [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
   have hslide := projModelBaseChange_eqToHom (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))
-  have hcomp := projModelBaseChange_comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver R)
+  have hcomp := projModelBaseChange_comp_eqToHom ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver R)
   have hL' : (algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) = ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) := hL.symm
   have hbcL : projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) (tateCurveLocOver R) =
       eqToHom (show projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) = projModel ((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL']) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) :=
@@ -5109,40 +5109,10 @@ private lemma projModelVCIso_hom_congrW (C : WeierstrassCurve.VariableChange A)
   subst h
   rw [eqToHom_refl, eqToHom_refl, Category.id_comp, Category.comp_id]
 
-/-- The model isomorphism of the identity variable change is the canonical transport. -/
-theorem projModelVCIso_one (W : WeierstrassCurve A) :
-    (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom =
-      eqToHom (congrArg projModel (one_smul _ W)) := by
-  have hmul := projModelVCIso_mul (1 : WeierstrassCurve.VariableChange A) 1 W
-  have hC := projModelVCIso_hom_congrC
-    (show (1 : WeierstrassCurve.VariableChange A) * 1 = 1 from mul_one 1) W
-  have hW := projModelVCIso_hom_congrW (1 : WeierstrassCurve.VariableChange A)
-    (one_smul (WeierstrassCurve.VariableChange A) W)
-  rw [hC, hW] at hmul
-  -- hmul : e₀ ≫ h = e₁ ≫ (e₂ ≫ h ≫ e₃) ≫ h
-  simp only [Category.assoc, eqToHom_trans_assoc] at hmul
-  -- both prefix eqToHoms coincide by proof irrelevance; cancel them
-  have hmul2 := (cancel_epi (eqToHom (show projModel
-      (((1 : WeierstrassCurve.VariableChange A) * 1) • W) =
-      projModel ((1 : WeierstrassCurve.VariableChange A) • W) by rw [mul_one]))).mp hmul
-  -- hmul2 : h = h ≫ e₃ ≫ h
-  have hmul3 : (𝟙 (projModel ((1 : WeierstrassCurve.VariableChange A) • W)) ≫
-      (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom) =
-      ((projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom ≫
-        eqToHom (show projModel W =
-          projModel ((1 : WeierstrassCurve.VariableChange A) • W) by
-            rw [one_smul])) ≫
-        (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom := by
-    rw [Category.id_comp]
-    simpa only [Category.assoc] using hmul2
-  have hmul4 := (cancel_mono
-    (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom).mp hmul3
-  -- hmul4 : 𝟙 = h ≫ e₃
-  have := congrArg (fun m => m ≫ eqToHom (show
-      projModel ((1 : WeierstrassCurve.VariableChange A) • W) = projModel W by
-        rw [one_smul])) hmul4
-  simpa only [Category.id_comp, Category.assoc, eqToHom_trans, eqToHom_refl,
-    Category.comp_id] using this.symm
+/- `projModelVCIso_one` RELOCATED-BY-DEDUP (v10.118-Y1 merge): the identical statement now
+lives upstream in `EllipticCurve/ModelVariableChange.lean` (grown on dev during T-G4);
+this file's copy (proven 2026-07-10, NEW-ATLAS-3, via the `projModelVCIso_mul` cocycle at
+`C = C' = 1`) was deleted in favour of the imported one. Consumers below are unchanged. -/
 
 /-- The atlas curve coefficient `a₁` is the first universal coefficient. -/
 theorem tateCurveLocOver_a₁ (R : CommRingCat.{u}) :
