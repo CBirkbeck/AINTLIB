@@ -788,3 +788,33 @@ prove multi-session, the honest fallback is to HYPOTHESIS-WIRE `[HopfAlgebra R A
 C1d/C4 (the charter's soft-edge provision, as originally planned for p2's layer) and
 discharge the pins against it — the geometry (C2/C3/C4) does not depend on the Hopf
 axioms' proofs, only on their existence.
+
+## [HG-C1c-1d] coassoc: architectural finding (banked 2026-07-11)
+
+Building `affineKunneth` (⊤-level, `Γ(B,⊤)`-algebras = `appTop`) revealed the right shape:
+its legs and Γ-duals are **strictly simpler** than the opens-level ones (no `topIso`
+conjugation anywhere). For coassoc we need a TRIPLE identification
+`Γ(G|_V ×_V (G|_V ×_V G|_V), ⊤) ≅ A ⊗[R] (A ⊗[R] A)`, obtained by ITERATING
+`affineKunneth` with `Y := groupSquare` (affine, via `IsAffine.of_isIso` on
+`patchKunneth`). But iterating at the *opens* level would force a base-ring iso
+`Γ(S,V) ≅ Γ(V.toScheme,⊤)` inside the tensor product — mathlib's
+`Algebra.TensorProduct.congr` only handles a FIXED base ring, so that route needs
+`mapOfCompatible`-style plumbing.
+
+**DECISION** (banked; execute next): restate the patch Hopf structure at the ⊤-level:
+`R' := Γ(V.toScheme, ⊤)`, `A' := Γ(G|_V.toScheme, ⊤)`, with
+- `ε' := unitSection.appTop`,
+- `Δ' := squareMulRes.appTop ≫ affineKunnethΓ groupToBase groupToBase _ _`,
+- `S' := invSection.appTop`,
+where `squareMulRes : groupSquare ⟶ groupOpen.toScheme` is the corestriction of
+`squareMul` (exists: `top_le_preimage_groupOpen_squareMul` + `Scheme.topIso`).
+Every law already proven at scheme level (`unitSection_comp_groupToBase`,
+`left/rightUnitSection_comp_squareMul`, and, for coassoc, the restriction of
+`mulOver_assoc`) dualises with the SAME two-step pattern, now with no topIso terms.
+The old opens-level maps are recovered by conjugating with `topIso` (`ε = topIso.hom ≫ ε'
+≫ topIso.inv`-style) — record those as bridge lemmas so `chartCoaction`/M5 keep consuming
+`A = Γ(G, groupOpen)`.
+
+Cost estimate: ~1 session for the ⊤-level restatement + coassoc; the counit/antipode laws
+transfer mechanically (their scheme identities are already proven and are stated purely in
+terms of `unitSection`, `leftUnitSection`, `squareMul`).

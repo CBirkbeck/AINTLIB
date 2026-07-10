@@ -234,6 +234,38 @@ theorem algebraMap_comp_groupPatchComul :
     Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl]
   simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
+/-! ### Algebra-map packaging -/
+
+/-- The counit as an `R`-algebra map. -/
+noncomputable def counitAlg : P.groupRing →ₐ[P.baseRing] P.baseRing where
+  toRingHom := P.groupPatchCounit.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRing ⟶ P.baseRing => m.hom r)
+      P.algebraMap_comp_groupPatchCounit
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at h
+    exact h
+
+/-- The antipode as an `R`-algebra map. -/
+noncomputable def antipodeAlg : P.groupRing →ₐ[P.baseRing] P.groupRing where
+  toRingHom := P.groupPatchAntipode.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRing ⟶ P.groupRing => m.hom r)
+      P.algebraMap_comp_groupPatchAntipode
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+    exact h
+
+/-- The comultiplication as an `R`-algebra map. -/
+noncomputable def comulAlg :
+    P.groupRing →ₐ[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing) where
+  toRingHom := P.groupPatchComul.hom
+  commutes' := fun r => by
+    have h := congrArg
+      (fun m : P.baseRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing)
+        => m.hom r) P.algebraMap_comp_groupPatchComul
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+
 /-! ### The counit laws, scheme-side -/
 
 /-- The unit section, restricted to the patch. -/
@@ -317,6 +349,297 @@ theorem leftUnitSection_comp_squareMul :
   show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
   rw [← Category.assoc k, hk2]
   rfl
+
+/-! ### The counit law, `Γ`-side -/
+
+/-- `appTop` of the restricted unit section. -/
+theorem unitSection_appTop :
+    P.unitSection.appTop
+      = P.groupOpen.topIso.hom ≫ P.groupPatchCounit ≫ P.V.topIso.inv :=
+  Scheme.Hom.resLE_app_top (f := G.unitHom) (U := P.groupOpen) (V := P.V)
+    P.le_preimage_groupOpen_unitHom
+
+/-- `appTop` of the restricted structure map. -/
+theorem groupToBase_appTop :
+    (G.π.resLE P.V P.groupOpen le_rfl).appTop
+      = P.V.topIso.hom ≫ G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupOpen.topIso.inv :=
+  Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl
+
+/-- The Künneth transport for the group square. -/
+noncomputable abbrev squareΓ :
+    Γ(P.groupSquare, ⊤) ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) :=
+  patchKunnethΓ G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+
+/-- The `Γ`-dual of the left unit section. -/
+noncomputable def counitLiftΓ :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.leftUnitSection.appTop ≫ P.groupOpen.topIso.hom
+
+/-- **The counit law, `Γ`-side, in transported form**: `Δ` followed by the dual of the
+left unit section is the identity. -/
+theorem groupPatchComul_comp_counitLiftΓ :
+    P.groupPatchComul ≫ P.counitLiftΓ = 𝟙 P.groupRing := by
+  rw [groupPatchComul_eq, counitLiftΓ, Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp]
+  -- the `appLE`-composite of the scheme identity
+  rw [show P.leftUnitSection.appTop
+      = P.leftUnitSection.appLE ⊤ ⊤ le_top from (appLE_top_top _).symm]
+  rw [← Category.assoc, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom P.leftUnitSection_comp_squareMul P.groupOpen ⊤,
+    ι_appLE_top, Iso.inv_hom_id]
+
+/-- The right inclusion, composed with the dual of the left unit section, is the
+identity. -/
+theorem includeRight_comp_counitLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.counitLiftΓ = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ, ← hleg]
+  -- cancel the transport
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  -- the two `appTop`s compose to the scheme identity
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.leftUnitSection.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.leftUnitSection_snd,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
+/-- The left inclusion, composed with the dual of the left unit section, is the counit
+followed by the structure map. -/
+theorem includeLeft_comp_counitLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.counitLiftΓ
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  -- the two `appTop`s compose to the dual of `leftUnitSection ≫ fst`
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.leftUnitSection.appTop
+      = P.unitSection.appTop ≫ (G.π.resLE P.V P.groupOpen le_rfl).appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.leftUnitSection_fst, Scheme.Hom.comp_appTop]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  -- unwind the two restricted `appTop`s
+  rw [P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc]
+  rw [← Category.assoc P.V.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [← Category.assoc P.groupOpen.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.comp_id]
+
+/-- The algebraic counit lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ ε(a) • b`. -/
+noncomputable def counitLift :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift ((Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg)
+    (AlgHom.id P.baseRing P.groupRing) (fun _ _ => Commute.all _ _)
+
+/-- **The counit lift is the `Γ`-dual of the left unit section.** -/
+theorem counitLift_eq_counitLiftΓ :
+    CommRingCat.ofHom P.counitLift.toRingHom = P.counitLiftΓ := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [counitLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [counitLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The left counit law**: `(ε ⊗ id) ∘ Δ = id`, in `AlgHom` form. -/
+theorem counitLift_comp_comulAlg :
+    P.counitLift.comp P.comulAlg = AlgHom.id P.baseRing P.groupRing := by
+  have h := P.groupPatchComul_comp_counitLiftΓ
+  rw [← P.counitLift_eq_counitLiftΓ] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
+/-! ### The right counit law -/
+
+/-- The section `⟨𝟙, e ∘ structure⟩ : G|_V ⟶ G|_V ×_V G|_V`. -/
+noncomputable def rightUnitSection : P.groupOpen.toScheme ⟶ P.groupSquare :=
+  pullback.lift (𝟙 P.groupOpen.toScheme)
+    (G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection)
+    (by rw [Category.assoc, P.unitSection_comp_groupToBase, Category.comp_id,
+      Category.id_comp])
+
+@[reassoc (attr := simp)]
+theorem rightUnitSection_fst :
+    P.rightUnitSection ≫ pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = 𝟙 P.groupOpen.toScheme :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem rightUnitSection_snd :
+    P.rightUnitSection ≫ pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection :=
+  pullback.lift_snd _ _ _
+
+/-- **The right counit law, scheme side**. -/
+theorem rightUnitSection_comp_squareMul :
+    P.rightUnitSection ≫ P.squareMul = P.groupOpen.ι := by
+  rw [← cancel_mono G.ι, squareMul]
+  set k := P.rightUnitSection ≫ P.groupSquareToSquare with hk
+  rw [show (P.rightUnitSection ≫ P.groupSquareToSquare ≫ G.mulHom) ≫ G.ι
+      = k ≫ (G.mulHom ≫ G.ι) from by rw [hk]; simp only [Category.assoc]]
+  rw [G.mulHom_ι]
+  have hsum : k ≫ ((G.sqFstPoint + G.sqSndPoint : E.Point _) : _ ⟶ E.E)
+      = ((EllipticCurve.Point.restrict E k G.sqFstPoint
+          + EllipticCurve.Point.restrict E k G.sqSndPoint : E.Point _) : _ ⟶ E.E) := by
+    rw [← EllipticCurve.Point.restrict_add]
+    rfl
+  rw [hsum]
+  have hk1 : k ≫ (fst (Over.mk G.π) (Over.mk G.π)).left = P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_fst]
+    exact rightUnitSection_fst_assoc G P P.groupOpen.ι
+  have hk2 : k ≫ (snd (Over.mk G.π) (Over.mk G.π)).left
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection ≫ P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_snd]
+    exact rightUnitSection_snd_assoc G P P.groupOpen.ι
+  have hsnd : EllipticCurve.Point.restrict E k G.sqSndPoint = 0 := by
+    refine Subtype.ext ?_
+    show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+    rw [E.point_zero_val,
+      show ((Over.mk G.π ⊗ Over.mk G.π).hom)
+        = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl,
+      ← Category.assoc k, ← Category.assoc k, hk1, hk2]
+    rw [P.unitSection_comp_ι]
+    show ((G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι ≫ G.unitHom : _ ⟶ G.G) ≫ G.ι)
+      = (P.groupOpen.ι ≫ G.π) ≫ E.zero
+    rw [← Scheme.Hom.resLE_comp_ι G.π (le_rfl : P.groupOpen ≤ G.π ⁻¹ᵁ P.V)]
+    simp only [Category.assoc, G.unitHom_ι]
+  rw [hsnd, add_zero]
+  show k ≫ ((fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+  rw [← Category.assoc k, hk1]
+  rfl
+
+/-- The `Γ`-dual of the right unit section. -/
+noncomputable def counitLiftΓ' :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.rightUnitSection.appTop ≫ P.groupOpen.topIso.hom
+
+theorem groupPatchComul_comp_counitLiftΓ' :
+    P.groupPatchComul ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
+  rw [groupPatchComul_eq, counitLiftΓ', Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp]
+  rw [show P.rightUnitSection.appTop
+      = P.rightUnitSection.appLE ⊤ ⊤ le_top from (appLE_top_top _).symm]
+  rw [← Category.assoc, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom P.rightUnitSection_comp_squareMul P.groupOpen ⊤,
+    ι_appLE_top, Iso.inv_hom_id]
+
+theorem includeLeft_comp_counitLiftΓ' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ', ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.rightUnitSection.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.rightUnitSection_fst,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
+theorem includeRight_comp_counitLiftΓ' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.counitLiftΓ'
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ', ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.rightUnitSection.appTop
+      = P.unitSection.appTop ≫ (G.π.resLE P.V P.groupOpen le_rfl).appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.rightUnitSection_snd, Scheme.Hom.comp_appTop]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  rw [P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc]
+  rw [← Category.assoc P.V.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [← Category.assoc P.groupOpen.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.comp_id]
+
+/-- The algebraic right counit lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ a • ε(b)`. -/
+noncomputable def counitLift' :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift (AlgHom.id P.baseRing P.groupRing)
+    ((Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg)
+    (fun _ _ => Commute.all _ _)
+
+theorem counitLift'_eq_counitLiftΓ' :
+    CommRingCat.ofHom P.counitLift'.toRingHom = P.counitLiftΓ' := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftΓ']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift' G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [counitLift', Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftΓ']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift' G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [counitLift', Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The right counit law**: `(id ⊗ ε) ∘ Δ = id`, in `AlgHom` form. -/
+theorem counitLift'_comp_comulAlg :
+    P.counitLift'.comp P.comulAlg = AlgHom.id P.baseRing P.groupRing := by
+  have h := P.groupPatchComul_comp_counitLiftΓ'
+  rw [← P.counitLift'_eq_counitLiftΓ'] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
+/-! ### Towards coassociativity: the `⊤`-level presentation -/
+
+/-- The group square is affine (it is the `Spec` of `A ⊗[R] A`). -/
+theorem isAffine_groupSquare : IsAffine P.groupSquare := by
+  haveI : IsIso (patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen
+      P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl).hom :=
+    inferInstance
+  exact IsAffine.of_isIso (patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen
+    P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl).hom
+
+/-- The restricted multiplication, corestricted to the group patch:
+`G|_V ×_V G|_V ⟶ G|_V`. -/
+noncomputable def squareMulRes : P.groupSquare ⟶ P.groupOpen.toScheme :=
+  P.groupSquare.topIso.inv
+    ≫ P.squareMul.resLE P.groupOpen ⊤ P.top_le_preimage_groupOpen_squareMul
+
+/-- The corestricted multiplication recovers `squareMul` after including the patch. -/
+@[reassoc]
+theorem squareMulRes_comp_ι : P.squareMulRes ≫ P.groupOpen.ι = P.squareMul := by
+  rw [squareMulRes, Category.assoc, Scheme.Hom.resLE_comp_ι]
+  rw [show (⊤ : P.groupSquare.Opens).ι = P.groupSquare.topIso.hom from rfl,
+    ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
 end AffineChartPatch
 

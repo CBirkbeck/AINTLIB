@@ -1,1 +1,1 @@
-NEW-CASCADE re-active on y1 2026-07-10 (v10.134 GATE-1-CLEARED) — re-merge from wip/y1-dev-merge-cascade + top-up of repaired dev tail; spine verify; then fill steps 2–4 if T-G4 boards, else park at single gate.
+NEW-CASCADE active on y1 2026-07-10 (v10.134 re-merge session) — merges complete (preserved + top-up incl. d10e7fc87 repair); spine verify running; then fill steps 2–4 if T-G4 boards, else park at single gate.
