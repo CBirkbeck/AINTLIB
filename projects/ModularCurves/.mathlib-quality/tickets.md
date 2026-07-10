@@ -13693,3 +13693,24 @@ charts is an `IsCoaction` (consume p2's Hopf layer — CHECK BOARD for p2's Mile
 [HG-C2] freeness of translation ⟹ `Surjective galoisPrecursor` (actPair closed
 immersion); [HG-C3] G-stable affine cover of E; [HG-C4] glue + discharge the six
 SubgroupQuotient pins = CHARTER COMPLETE.
+
+### v10.104 (2026-07-10, NEW-HOPF): [CHARTER-HOPF] Wave C opened — interface + C2-core + C1a landed; full C-decomposition banked
+
+*Same session as M5. All green, zero sorries, axiom-clean.*
+
+- **`GroupScheme/HopfGaloisCharts.lean`** (C-interface): `StableAffineChartData R A B`
+  (coaction + IsCoaction + precursorSurjective per chart) + `.isHopfGalois` via M5 —
+  ALL Wave-C geometry funnels into this structure.
+- **`GroupScheme/ActPairImmersion.lean`** (C2-core): `shearAuto` — the shear
+  automorphism (y,x) ↦ (y+x, x) of E ×ₛ E (hom-group inverse laws, zero Sweedler) +
+  **`actPair_eq_shear`**: ⟨act, pr⟩ = (ι ⊗ 𝟙) ≫ shear. So the action-pair is a
+  closed immersion modulo one plumbing mile (two routes banked in the decomposition
+  appendix; `pullback.map`-abbrev instance-mismatch cautions logged).
+- **`GroupScheme/StableCharts.lean`** (C1a): `IsStableOpen G U` (pr⁻¹U ≤ act⁻¹U) +
+  `restrictedAction`/`restrictedProj` via `resLE`.
+- **Banked** (decomposition appendices): Wave-C pin-map; C3 cover strategy (stable
+  opens = complements of coset-unions of sections; degree-≥1 fibre-ampleness route);
+  C1 leaf plan C1a-d with verified mathlib API (resLE/appLE/pullbackSpecIso/ΓSpecIso).
+- **NEXT**: [C2-mile] IsClosedImmersion actPair.left (IsPullback.of_right route or
+  chart-level bypass); [C1b] chart Künneth + ρ_U; [C1c] IsCoaction ρ_U; [C1d] chart
+  data assembly; [C3] covers; [C4] glue = pins = CHARTER COMPLETE.
