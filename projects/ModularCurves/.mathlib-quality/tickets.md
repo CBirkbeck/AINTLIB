@@ -14162,3 +14162,28 @@ route A + Γ_H: `gammaH_representable_of_rigid` (GammaHRepresentability.lean, st
 instantiations with the Legendre/Hesse TorsorData + global models.
 
 Order of work: B1 (dispatched first) → B2a/B2b/B2c (parallelizable) → B2d → B0 → B3 → B4 → B5.
+
+## Amendments v10.107 (2026-07-10, coordinator): NEW-ATLAS-2 rate-limited at a clean pushed boundary — NEW-ATLAS-3 chartered to close [Y1-ATLAS]
+
+**Event (owner report)**: NEW-ATLAS-2 hit its rate limit. The boundary is CLEAN: worktree
+`aintlib-mc-atlas` tree clean, `dev/modular-curves-y1-atlas` pushed through `319170881`.
+**State beyond v10.93's engine-park** (branch board v10.110/111-ATLAS): **T5 COMPLETE**
+(Ell/R chart packaging + both fibre bridges; `pt_hord`'s sorryAx enters EXACTLY through
+the two designed trails [T-A6b]/[T-B6′], everything else axiom-clean); **T6 base GLUED**
+(`gluedBaseMap` + `ι_`/`_over` compat; overlap agreement via ENGINE(a)); the top-glue
+recipe is pinned at v10.111-ATLAS NEXT (5 steps), and **step 1 LANDED** as the tip
+commit: `projModelBaseChange_projTateMap` (+ `projTateMap_unfold`) — naturality of the
+classifying top map in the chart ring (YOneAtlasClassify.lean:4167; via
+`projModelVCIso_map` T-W7.0h + `projModelBaseChange_comp` +
+`tateRingOverLiftOfPoint_comp` + `tateNormalVariableChange_map`).
+**Dispatch**: NEW-ATLAS-3 chartered (inbox/NEW-ATLAS-3.md): REUSE the existing worktree;
+execute v10.111-ATLAS NEXT steps 2–5 (top fibre-restriction agreement via step 1 +
+ENGINE(b); E-cover glue via `Scheme.Cover.glueMorphisms`; IsPullback/zero/marking clauses
++ `EllObj.tateClassifyingHomOfOpenCover`; T7 uniqueness per v10.109-ATLAS) →
+`exists_tatePoint`'s ∀-part → rebase → ONE PR to dev/modular-curves-y1 → axioms board.
+Bar v10.88 unchanged; pure plumbing, no design questions open (the v10.93 ratification
+stands).
+**Rule-5 standing order**: NEW-ATLAS / NEW-ATLAS-2 on return reclaim ONLY by boundary
+handshake if -3 hasn't fired; otherwise stand down — one session finishes it.
+(Coordinator seat re-seated fresh this morning — the prior coordinator session
+rate-limited at 09:13; continuity = COORDINATOR-HANDOVER.md + board v10.94→v10.106.)
