@@ -1821,4 +1821,50 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
       hfreeA s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
 
+
+/-- **([a3]–[a5] ASSEMBLED, global-model form — the KM 4.7 ⇐-engine, Phase A)** Let `G` act
+freely on an affine `X`, lifted to a geometric elliptic curve `C/X` carrying a compatible global
+Weierstrass model `φ : C.E ≅ projModel W₀` (as the intended applications do — Hesse/Legendre).
+Then `E/G` carries a geometric elliptic curve structure over `X/G`, cartesian over `X → X/G` and
+compatible with the zero sections — precisely the `Ell/R`-morphism the KM engine consumes.
+The orbit-in-affine-open datum is *derived* from the global model
+(`exists_charts_of_globalModel`), and the local Weierstrass model of the quotient is
+`locallyWeierstrass_quotientπ_of_globalModel` ([a5], PROVEN). Smoothness routes through
+`smoothOfRelativeDimension_of_locallyWeierstrass` (T-A3, the one open leaf, owner beastmode-A). -/
+theorem exists_ellipticCurveGeom_quotient_of_globalModel [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (W₀ : WeierstrassCurve Γ(X, ⊤)) (φ : C.E ≅ projModel W₀) (hW₀ : W₀.IsElliptic)
+    (hπφ : φ.hom ≫ projModelπ W₀ = C.π ≫ X.isoSpec.hom)
+    (hzeroφ : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) :
+    ∃ (C' : EllipticCurveGeom (σ.quotient V hVs hVa)) (q : C.E ⟶ C'.E),
+      IsPullback q C.π C'.π (σ.quotientπ V hVs hVa hVmem) ∧
+        C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero := by
+  -- the `G`-stable affine atlas of `E`, derived from the global model
+  have horbit : ∀ e : C.E, ∃ U : (C.E).Opens, IsAffineOpen U ∧
+      ∀ γ : G, (σE.hom γ).base e ∈ U := by
+    obtain ⟨U₀, U₁, h0, h1, hz0, hz1⟩ := exists_charts_of_globalModel φ
+      (Scheme.homeoOfIso X.isoSpec).surjective hzeroφ
+    exact fun e => orbit_mem_isAffineOpen_of_charts hact h0 h1 hz0 hz1 e
+  choose VE hVEs hVEa hVEmem using
+    fun e => exists_isStableOpen_isAffineOpen_of_orbit horbit e
+  -- descend `π` and the zero section
+  obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
+    exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
+  -- the descended local Weierstrass model ([a5], PROVEN), and proper/smooth from it
+  have hlw := locallyWeierstrass_quotientπ_of_globalModel hact V hVs hVa hVmem hVtop
+    VE hVEs hVEa hVEmem hfreeX W₀ φ hW₀ hπφ hzeroφ π' zero' hzπ' hπ' hzero'
+  haveI hproper : IsProper π' := isProper_of_locallyWeierstrass hlw
+  haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
+    smoothOfRelativeDimension_of_locallyWeierstrass hlw
+  refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ',
+            smooth := hsmooth, proper := hproper, localModel := hlw },
+    σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
+  · exact isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfreeX π' hπ'
+  · exact hzero'.symm
+
 end ModularCurves.RouteA
