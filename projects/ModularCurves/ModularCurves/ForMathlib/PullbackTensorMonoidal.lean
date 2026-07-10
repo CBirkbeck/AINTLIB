@@ -357,21 +357,6 @@ theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImme
   exact ⟨e1 ≪≫ e2 ≪≫ e3 ≪≫ e4 ≪≫ e5a ≪≫ e5b⟩
 
 
-/-- **[PIC-P1b-MONO], leaf D-PresPB′ — the one genuinely new leaf (refined, general `f`).**
-The presheaf pullback commutes with the presheaf tensor *after sheafification*:
-`sh_Y(f^*ᵖ(P ⊗ Q)) ≅ sh_Y(f^*ᵖ P ⊗ f^*ᵖ Q)`, where `f^*ᵖ := PresheafOfModules.pullback
-f.toRingCatSheafHom.hom`. The un-sheafified comparison `f^*ᵖ(P⊗Q) → f^*ᵖP ⊗ f^*ᵖQ` (the
-oplax structure map of the pullback, whose lax partner comes from `restrictScalars`) is a
-*stalkwise* isomorphism — the stalk of an inverse image is the stalk at the image point and
-tensor commutes with stalks — hence locally bijective, hence inverted by `sh_Y`. This is the
-step that would be *false* if stated at the presheaf level for general `f`. `Nonempty`-wrapped. -/
-theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X) (P Q : X.PresheafOfModules) :
-    Nonempty ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj (P ⊗ Q)) ≅
-      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj P ⊗
-          (PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj Q)) := by
-  sorry
 
 section Collapse
 

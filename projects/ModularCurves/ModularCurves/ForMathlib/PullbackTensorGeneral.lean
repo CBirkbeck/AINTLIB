@@ -1283,6 +1283,35 @@ theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
     (_root_.PresheafOfModules.pullbackMonoidal f) :
     Nonempty ((Modules.pullback f).Monoidal))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[PIC-P1b-MONO], leaf D-PresPB′ (general `f`), relocated from
+`PullbackTensorMonoidal` and closed** (respelled at the `CommRingCat`-derived clothing of
+this file; the original `ringCatSheaf`-spelled statement is definitionally the same). The
+presheaf pullback commutes with the presheaf tensor *after sheafification* — in fact
+already before sheafification (`PresheafOfModules.pullbackMonoidal`): apply the
+sheafification to the (inverse of the) tensorator of the monoidal presheaf pullback. -/
+theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X)
+    (P Q : _root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :
+    Nonempty ((PresheafOfModules.sheafification.{u}
+        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+          Sheaf _ RingCat.{u}).obj)).obj
+        ((PresheafOfModules.pullback.{u}
+          (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj (P ⊗ Q)) ≅
+      (PresheafOfModules.sheafification.{u}
+        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+          Sheaf _ RingCat.{u}).obj)).obj
+        ((PresheafOfModules.pullback.{u}
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj P ⊗
+          (PresheafOfModules.pullback.{u}
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj Q)) := by
+  letI := _root_.PresheafOfModules.pullbackMonoidal f
+  exact ⟨(PresheafOfModules.sheafification.{u}
+      (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+        Sheaf _ RingCat.{u}).obj)).mapIso
+    (Functor.Monoidal.μIso (PresheafOfModules.pullback.{u}
+      (_root_.PresheafOfModules.schemeRingPresheafHom f)) P Q).symm⟩
+
 end AlgebraicGeometry.Scheme.Modules
 
 namespace AlgebraicGeometry.Scheme
