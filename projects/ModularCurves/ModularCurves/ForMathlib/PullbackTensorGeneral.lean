@@ -1351,17 +1351,32 @@ lemma Pic.map_val {X Y : Scheme.{u}} (f : Y ⟶ X) (u : Pic X) :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The skeleton maps of pullbacks compose (pure skeleton statement — no Picard group,
+no choice of monoidal structures). -/
+lemma mapSkeleton_pullback_comp {X Y Z : Scheme.{u}} (g : Z ⟶ Y) (f : Y ⟶ X)
+    (q : Skeleton X.Modules) :
+    (Modules.pullback (g ≫ f)).mapSkeleton.obj q =
+      (Modules.pullback g).mapSkeleton.obj ((Modules.pullback f).mapSkeleton.obj q) :=
+  Quotient.inductionOn q (fun M =>
+    ((Functor.mapSkeleton_obj_toSkeleton (Modules.pullback (g ≫ f)) M).trans
+      (Quotient.sound ⟨((Modules.pullbackComp (f := g) (g := f)).app M).symm⟩)).trans
+      ((Functor.mapSkeleton_obj_toSkeleton (Modules.pullback g)
+        ((Modules.pullback f).obj M)).symm.trans
+        (congrArg (Modules.pullback g).mapSkeleton.obj
+          (Functor.mapSkeleton_obj_toSkeleton (Modules.pullback f) M).symm)))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- The Picard functor preserves composition (contravariantly). -/
 theorem Pic.map_comp {X Y Z : Scheme.{u}} (g : Z ⟶ Y) (f : Y ⟶ X) :
     Pic.map (g ≫ f) = (Pic.map g).comp (Pic.map f) := by
   letI := Modules.monoidalCategory X
   letI := Modules.monoidalCategory Y
   letI := Modules.monoidalCategory Z
-  -- WIP (fable-PIC0, v10.125): the mapSkeleton-route works for `map_id`; here the
-  -- composite's double `.some`-unfold makes the elementwise defeq-check whnf-explode.
-  -- Route banked on the board: `Pic.map_val`-rewrites + `Quotient.inductionOn` +
-  -- `Modules.pullbackComp`-`Quotient.sound`; needs a whnf-tamed spelling
-  -- (`Skeletal.monoidHom`-level ext, or `mapSkeleton_obj_toSkeleton` mirrors).
-  sorry
+  refine MonoidHom.ext (fun u => Units.ext ?_)
+  show (Modules.pullback (g ≫ f)).mapSkeleton.obj u.val =
+    (Modules.pullback g).mapSkeleton.obj ((Pic.map f u).val)
+  rw [Pic.map_val]
+  exact mapSkeleton_pullback_comp g f u.val
 
 end AlgebraicGeometry.Scheme
