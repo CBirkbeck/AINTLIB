@@ -440,3 +440,55 @@ M5's interface consumed per chart: `isHopfGalois_of_surjective_galoisPrecursor R
 (hρ : IsCoaction ρ_U) (hsurj : Surjective (galoisPrecursor R A ρ_U))` with
 `[Module.Free R A] [Module.Finite R A]` from G finite-locally-free (free per chart after
 shrinking — or hypothesis-wire freeness and let C3 provide free charts).
+
+## Appendix: Wave C — pin-map + C3 cover strategy (banked 2026-07-10)
+
+**The six pins** (`GroupScheme/SubgroupQuotient.lean`): DATA `quotient`, `quotientS`,
+`quotientπ`; PROPS `quotientπ_over`, `quotientπ_isInvariant`, `quotient_lift`.
+`quotientπ_hom_ext` + the `[N]`-factorization layer are ALREADY proven against the pins.
+Discharge order: C3 cover → C1 per-chart coaction (fills `StableAffineChartData`) →
+C2 precursor-surjectivity → per-chart `isColimit_of_isHopfGalois` (p0, proven) →
+C4 GlueData assembly = the three DATA + three PROP pins.
+
+**C3 strategy (KM 3.7-style, sketched)**: `G ⊆ E` is itself an effective relative Cartier
+divisor (T-SG1 bridge `toRelEffCartierDiv` exists on the board). Stable opens: for any
+finite set of sections `x i : S → E`, the complement `E ∖ ⋃ᵢ (xᵢ + G)` is `G`-stable
+(translation permutes each coset `xᵢ + G`). Cover: affineness of `E ∖ (x + G)`: the
+divisor `x + G` has degree `N = rank G ≥ 1` ⟹ ample on fibres (genus-1: any degree ≥ 1
+divisor is ample) ⟹ complement affine (relative version needed — the KM-style
+`E ∖ D` affine for `D` fibrewise-ample relative effective Cartier). Coverage: need the
+cosets `xᵢ + G` to have empty common intersection — locally on `S` pick sections through
+distinct residue-field points; if `E(S)`-sections are scarce, fppf-localize the base
+(the pins are fppf-local?? NO — pins are global statements: the cover argument must work
+Zariski-locally on `S`; KM use: after Zariski-shrinking `S`, `E → S` has enough sections
+through any fibre-point avoiding a divisor — via smoothness (étale-local sections) +
+spreading. ALTERNATIVE cheaper: two charts suffice if `S` affine + a section `x₀` with
+`(x₀+G) ∩ G = ∅` — such `x₀` exists Zariski-locally by smoothness of `E∖G → S`
+(surjective smooth ⟹ étale-locally sections; Zariski on the base after finite-flat
+spreading...). Precise route to be fixed at C3-start; candidates: (a) KM 3.7 verbatim
+(refs/katz-mazur), (b) Deligne's trick via the group law: cover by `E∖G` and
+`translate-by-generic-2-torsion`, (c) fppf-descend the QUOTIENT construction itself
+(needs quotient-descent lemmas — heavier).
+
+**C1 bridge-shape** (`StableAffineChartData` producer): affine base patch `Spec R ⊆ S`,
+`G|_R = Spec A`, stable chart `U = Spec B`; the restricted action
+`G ×_R U → U` (from stability) dualizes: `ρ := ΓSpecIso ∘ Γ(act|) ∘ pullbackSpecIso⁻¹`;
+IsCoaction from the two action-diagrams under Γ (contravariant-functor chases);
+C2: `actPair|_U : G ×_R U → U ×_R U` closed immersion (finite + mono; mono from
+free translation: (t,x)↦(x+t,x) has the retraction-difference (y,x)↦(y−x,x)?! —
+actPair is an ISO onto `(x+G)-graph`?? NO — actPair (t,x) ↦ (x+t, x): INJECTIVE with
+left-inverse (y,x) ↦ (y−x, x) defined on the IMAGE — actually (y,x)↦(y−x,x) is defined
+on ALL of E×E and retracts actPair ⟹ actPair is a SPLIT MONO ✓✓ even a closed immersion
+via finite+mono; Γ-dual of split mono with finite... ⟹ precursor surjective needs
+Γ(actPair) surjective on the chart: closed immersion of affines ⟹ surjective ✓).
+NOTE: the retraction (y,x) ↦ (y−x, x) needs y−x ∈ G on the image — as a map E×E → E×E
+it retracts INTO G×E only on the image; the SPLIT-MONO statement: r ∘ actPair = id where
+r := (sub, pr₂) : E×E → E×E restricted... r∘actPair(t,x) = ((x+t)−x, x) = (t,x) ✓ BUT r
+lands in E×E not G×E — the retraction must corestrict: (x+t)−x = ι(t) factors through G
+⟹ r∘actPair = ι×id-section... the correct split-mono: actPair : G×E → E×E has
+`(sub, pr₂) ∘ actPair = (ι, id)-inclusion` — so actPair is mono because (ι,id) is ✓
+(ι closed immersion). Finite: G×E → E×E is finite (base change of finite ι?? actPair =
+(shear iso of E×E) ∘ (ι × id): the SHEAR (y,x)↦(y+x,x) is an AUTOMORPHISM of E×E and
+actPair = shear ∘ (ι ×ₛ id_E) ✓✓ ⟹ actPair = iso ∘ closed-immersion ⟹ CLOSED IMMERSION,
+free ✓ — C2 is EASY given the shear-automorphism of E ×ₛ E (group-scheme shear, mathlib
+`?`; buildable from μ, inv as an iso with explicit inverse (y,x)↦(y−x,x)).
