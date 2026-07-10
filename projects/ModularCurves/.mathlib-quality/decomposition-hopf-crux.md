@@ -627,3 +627,30 @@ pullback_{S}(X,Y) with X,Y→V: the map to V×_S V = V (open immersion mono ⟹ 
 ρ_U := `coactionToPullback ≫ kunnethIso.hom` — then C1c.
 Also needed: `Mono V.ι` (open immersion ⟹ mono ✓ OpenImmersion.lean:537) and the
 `pullbackIsPullbackOfCompMono`-family (Pullback/Mono.lean:150+) as alternates.
+
+## [HG-C1c] design (banked 2026-07-10, post-v10.106)
+
+**AlgHom-upgrade** of `coactionRing`: the R-linearity square. Obligation:
+`coactionRing ∘ (E.π.appLE V U hover) = (algebraMap R (A⊗[R]B))-as-CommRingCat`.
+Decompose along the chain: (i) `restrictedAction` is a V-morphism:
+`restrictedAction hstable ≫ chartToBase = (pr⁻¹U-to-V)` — from `Over.w
+translationAction` restricted (`resLE_comp_resLE`, Restrict.lean:783); (ii) each Künneth
+iso is V-compatible (they're built from V-level pullback data — the projections to V
+commute by `pullback.condition`/`lift`-computations); (iii) `pullbackSpecIso`-side: the
+algebraMap into A⊗B = includeLeft∘(algebraMap R A)-or-right — mathlib
+`pullbackSpecIso_inv_fst/snd` + `Spec.map`-functoriality give the base-compat. Assemble
+as: appTop-of-(everything over V) ⟹ the square. ALTERNATIVE cheaper route: define the
+ALGHOM directly as the appLE-composite in the category of V-SCHEMES?? — or: prove
+R-linearity ELEMENTWISE via the section-language (`Scheme.Hom.appLE_map`-naturality) —
+choose at write-time; the chain-over-V route is canonical.
+
+**IsCoaction**: counit — the identity-section `e : S → G` restricts to `V → G|_V`
+(group-over-S structure field; find its name in Subgroup.lean); `(id ⊗ ε)∘ρ = id`
+Γ-dualizes `act ∘ (e ×ₛ id_U) = id_U` (the action-unit law — from `MonObj.one_mul` of
+`E.asOver` + `ιOver`-compat: translation by 0 is the identity — p0 may already have
+`translationAction`-unit-lemmas; grep). coassoc — Γ-dual of
+`act∘(μ ×ₛ id) = act∘(id ×ₛ act)` (action-associativity from `MonObj.mul_assoc` +
+`ιOver`-multiplicativity `G.ιOver`-hom-of-groups — the Subgroup-structure's
+homomorphism field). Both need the Künneth-chain NATURALITY (the iso commutes with the
+G-side maps) — the heaviest chases; budget a full session; consider proving the two
+laws first at the SCHEME level (composites of restricted actions) and dualizing ONCE.
