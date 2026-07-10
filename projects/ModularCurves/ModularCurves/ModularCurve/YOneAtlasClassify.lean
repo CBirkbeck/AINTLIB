@@ -5014,4 +5014,71 @@ end MarkedChartData
 
 end GluedClauses
 
+section GluedHom
+
+/-! ### The classifying `Ell/R` morphism of the glued data (recipe step 4, assembly)
+
+The glued base and top maps assemble to an `Ell/R` morphism `Y ⟶ tateEllObj R` through
+the `tateUniversal ≟ tateGeom` bridge, and pulling the marked point back along it
+recovers the section — the existence half of the classifying clause. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+/-- The glued cartesian square, transported across the `tateUniversal` bridge. -/
+theorem gluedTopMapEll_isPullback (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    IsPullback (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm) Y.curve.π
+      ((tateUniversal R).π) (gluedBaseMap P hP) := by
+  have hsq : CommSq (eqToHom (tateUniversal_E_eq R).symm)
+      (projModelπ (tateCurveLocOver R)) ((tateUniversal R).π) (𝟙 (tateBase R)) :=
+    ⟨by rw [tateUniversal_eqToHom_π, Category.comp_id]⟩
+  have h := (gluedTopMap_isPullback P hP).paste_horiz (IsPullback.of_horiz_isIso hsq)
+  rw [Category.comp_id] at h
+  exact h
+
+/-- The glued pointedness, transported across the `tateUniversal` bridge. -/
+theorem gluedTopMapEll_zero (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    Y.curve.zero ≫ (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm) =
+      gluedBaseMap P hP ≫ (tateUniversal R).zero := by
+  have hz : (tateUniversal R).zero =
+      projModelZero (tateCurveLocOver R) ≫ eqToHom (tateUniversal_E_eq R).symm :=
+    eqToGeom_zero' (tateUniversal_geom R)
+  rw [hz, ← Category.assoc, gluedTopMap_zero P hP, Category.assoc]
+
+/-- **The classifying `Ell/R` morphism** of a nowhere-small-order section. -/
+noncomputable def gluedHom (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) : Y ⟶ tateEllObj R :=
+  EllObj.tateClassifyingHom R Y (gluedBaseMap P hP) (gluedBaseMap_over P hP)
+    (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm)
+    (gluedTopMapEll_isPullback P hP) (gluedTopMapEll_zero P hP)
+
+@[simp]
+theorem gluedHom_baseHom (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    (gluedHom P hP).baseHom = gluedBaseMap P hP := rfl
+
+@[simp]
+theorem gluedHom_top (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    (gluedHom P hP).top = gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm := rfl
+
+/-- **The existence half of the classifying clause**: pulling the marked point back along
+the glued classifying morphism recovers the section. -/
+theorem gluedHom_pullSection (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    EllHom.pullSection R (gluedHom P hP) (tateMarkedPoint R) = P := by
+  refine EllObj.tateClassifyingHom_pullSection_eq R Y (gluedBaseMap P hP)
+    (gluedBaseMap_over P hP) (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm)
+    (gluedTopMapEll_isPullback P hP) (gluedTopMapEll_zero P hP) (tateMarkedPoint R) P ?_
+  show P.1 ≫ gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm =
+    gluedBaseMap P hP ≫ (tateMarkedPoint R).1
+  have hm : (tateMarkedPoint R).1 = tateP0mor R ≫ eqToHom (tateUniversal_E_eq R).symm :=
+    rfl
+  rw [hm, ← Category.assoc, gluedTopMap_marking P hP, Category.assoc]
+
+end MarkedChartData
+
+end GluedHom
+
 end ModularCurves
