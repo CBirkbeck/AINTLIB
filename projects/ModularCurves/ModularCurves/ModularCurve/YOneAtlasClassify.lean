@@ -3394,4 +3394,158 @@ theorem tateBaseSpecMapOfPoint_congr (R : CommRingCat.{u}) [Algebra ↑R A]
 
 end TateAtlasNaturality
 
+section ChartAlgebra
+
+/-! ### The chart ring as an `R`-algebra and the over-`Spec R` compatibility -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+
+/-- The chart ring as an `R`-algebra through the structure morphism. -/
+noncomputable def chartAlgebra : Algebra ↑R ↑Γ(Y.base, D.U.1) :=
+  (((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appLE ⊤ D.U.1 (by simp)).hom).toAlgebra
+
+/-- The defining compatibility of `chartAlgebra` with the structure morphism. -/
+theorem chartAlgebra_compatible :
+    letI := D.chartAlgebra
+    D.U.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap := by
+  letI := D.chartAlgebra
+  have halg : CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1)) =
+      (Scheme.ΓSpecIso R).inv ≫ Y.structMap.appLE ⊤ D.U.1 (by simp) :=
+    CommRingCat.ofHom_hom _
+  have hfromTop : Spec.map ((Scheme.ΓSpecIso R).inv) =
+      (isAffineOpen_top (Spec R)).fromSpec := by
+    rw [IsAffineOpen.fromSpec_top, Scheme.isoSpec_Spec_inv]
+  have hbig := IsAffineOpen.SpecMap_appLE_fromSpec Y.structMap
+    (isAffineOpen_top (Spec R)) D.U.2 (by simp)
+  rw [halg, Spec.map_comp, hfromTop, hbig, ← Category.assoc,
+    IsAffineOpen.isoSpec_hom_fromSpec]
+
+/-- With the structure algebra on the chart ring, the local classifying base map lies
+over `Spec R` relative to the chart inclusion. -/
+theorem baseMap_over (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    [Algebra ↑R ↑Γ(Y.base, D.U.1)]
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap) :
+    D.baseMap P hP ≫ tateStructMap R = D.U.1.ι ≫ Y.structMap := by
+  rw [baseMap, Category.assoc, tateBaseSpecMapOfPoint_tateStructMap, halg]
+
+end MarkedChartData
+
+end ChartAlgebra
+
+section FibrePoint
+
+/-! ### The restricted section as a `Spec`-point of the fibre model (recipe step 3)
+
+Over any chart-ring algebra `k` (not just fields), the restricted section defines a point
+of the base-changed chart model lying in its `Z`-chart, with coordinate evaluations the
+algebra images of the chart-point evaluations.  This is the affine test-point interface
+for the overlap agreement of the local classifying maps. -/
+
+/-- Composing with the identity algebra map is the algebra map. -/
+theorem algebraMap_comp_algebraMap_self {A k : Type u} [CommRing A] [CommRing k]
+    [Algebra A k] :
+    (algebraMap A k).comp (algebraMap A A) = algebraMap A k := by
+  rw [Algebra.algebraMap_self, RingHom.comp_id]
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  (k : Type u) [CommRing k] [Algebra ↑Γ(Y.base, D.U.1) k]
+
+/-- The restricted section as a point of the fibre model. -/
+noncomputable def fibrePt (P : Y.curve.Section) :
+    SpecPoints (projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))
+      (projModelπ (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) k :=
+  ⟨(D.fibreSection k P).1 ≫ (D.fibreChartIso k).hom, by
+    have h1 : (D.fibreSection k P).1 ≫ ((D.fibreChartIso k).hom ≫
+        projModelπ (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        (D.fibreSection k P).1 ≫ pullback.snd Y.curve.π (D.geomPt (D.specPt k)) :=
+      congrArg ((D.fibreSection k P).1 ≫ ·)
+        (pullbackChartIso_hom_π D.W (D.fibreTop_isPullback k))
+    have h2 : Spec.map (CommRingCat.ofHom (algebraMap k k)) =
+        𝟙 (Spec (CommRingCat.of k)) := by
+      rw [Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id]
+    rw [Category.assoc, h2]
+    exact h1.trans (D.fibreSection k P).2⟩
+
+/-- The fibre point maps to the chart point at the algebra point (the value chase in
+`SpecPoints` form). -/
+theorem fibrePt_comp_bc (P : Y.curve.Section) :
+    (D.fibrePt k P).1 ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
+      D.specPt k ≫ (D.pt P).1 := by
+  show ((D.fibreSection k P).1 ≫ (D.fibreChartIso k).hom) ≫ _ = _
+  rw [Category.assoc]
+  exact D.fibreSection_comp_bc k P
+
+/-- The fibre point lies in the `Z`-chart. -/
+theorem fibrePt_inZChart (P : Y.curve.Section) (hZ : InZChart D.W (D.pt P)) :
+    InZChart (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) := by
+  refine inZChart_of_comp_baseChange D.W (D.fibrePt k P)
+    (Spec.map (CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+      (zChartHom D.W (D.pt P) hZ)))) ?_
+  rw [show CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+      (zChartHom D.W (D.pt P) hZ)) =
+      CommRingCat.ofHom (zChartHom D.W (D.pt P) hZ) ≫
+        CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D.U.1) k) from
+    CommRingCat.ofHom_comp _ _]
+  rw [Spec.map_comp, Category.assoc, Spec_map_zChartHom_awayι, fibrePt_comp_bc]
+
+/-- The base-changed fibre point is the composed chart point. -/
+theorem specPointBaseChange_fibrePt (P : Y.curve.Section) :
+    specPointBaseChange D.W (D.fibrePt k P) =
+      specPointComp D.W (D.pt P) (algebraMap ↑Γ(Y.base, D.U.1) k)
+        algebraMap_comp_algebraMap_self := by
+  refine Subtype.ext ?_
+  show (D.fibrePt k P).1 ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W = _
+  rw [fibrePt_comp_bc]
+  rfl
+
+/-- The fibre point evaluates to the algebra image of the chart evaluation (`x`-side). -/
+theorem zChartEval_fibrePt_coordX (P : Y.curve.Section) (hZ : InZChart D.W (D.pt P)) :
+    zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P)
+      (D.fibrePt_inZChart k P hZ) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+      algebraMap ↑Γ(Y.base, D.U.1) k (zChartEval D.W (D.pt P) hZ (coordX D.W)) := by
+  rw [← zChartEval_specPointBaseChange_coordX D.W (D.fibrePt k P)
+      (D.fibrePt_inZChart k P hZ),
+    zChartEval_congr D.W (D.specPointBaseChange_fibrePt k P)
+      (inZChart_specPointBaseChange D.W _ _)
+      (inZChart_specPointComp D.W (D.pt P) hZ _ _),
+    zChartEval_specPointComp]
+  exact D.fibrePt_inZChart k P hZ
+
+/-- The fibre point evaluates to the algebra image of the chart evaluation (`y`-side). -/
+theorem zChartEval_fibrePt_coordY (P : Y.curve.Section) (hZ : InZChart D.W (D.pt P)) :
+    zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P)
+      (D.fibrePt_inZChart k P hZ) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+      algebraMap ↑Γ(Y.base, D.U.1) k (zChartEval D.W (D.pt P) hZ (coordY D.W)) := by
+  rw [← zChartEval_specPointBaseChange_coordY D.W (D.fibrePt k P)
+      (D.fibrePt_inZChart k P hZ),
+    zChartEval_congr D.W (D.specPointBaseChange_fibrePt k P)
+      (inZChart_specPointBaseChange D.W _ _)
+      (inZChart_specPointComp D.W (D.pt P) hZ _ _),
+    zChartEval_specPointComp]
+  exact D.fibrePt_inZChart k P hZ
+
+/-- The fibre point inherits the nowhere-small-order condition. -/
+theorem fibrePt_hord (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    NowhereOrderLEThree (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+      (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P)
+        (D.fibrePt_inZChart k P (D.pt_inZChart P hP))
+        (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))))
+      (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P)
+        (D.fibrePt_inZChart k P (D.pt_inZChart P hP))
+        (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) := by
+  rw [D.zChartEval_fibrePt_coordX k P (D.pt_inZChart P hP),
+    D.zChartEval_fibrePt_coordY k P (D.pt_inZChart P hP)]
+  exact (D.pt_hord P hP).map (algebraMap ↑Γ(Y.base, D.U.1) k)
+
+end MarkedChartData
+
+end FibrePoint
+
 end ModularCurves
