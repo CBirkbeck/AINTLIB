@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.LevelStructure.ExactOrder
 
 /-!
@@ -47,6 +48,7 @@ noncomputable def geomPoint (B : Type u) [CommRing B] (k : Type u) [Field k] [Al
 variable {B : Type u} [CommRing B] (W : WeierstrassCurve B) [W.IsElliptic]
   (E : EllipticCurve (Spec (CommRingCat.of B))) (hE : E.E = projModel W)
   (hπ : E.π = eqToHom hE ≫ projModelπ W)
+  (hz : E.zero ≫ eqToHom hE = projModelZero W)
   (k : Type u) [Field k] [Algebra B k] [DecidableEq k] [(W.baseChange k).IsElliptic]
 
 /-- Ungated geometry: `E`-points over the tautological geometric point are exactly the
@@ -67,19 +69,42 @@ noncomputable def pointSpecPointsEquiv :
     show (g.1 ≫ eqToHom hE.symm) ≫ eqToHom hE = g.1
     simp [Category.assoc]
 
-/-- **[T-B6′-IFACE]** The geometric-fibre point comparison as a **group** isomorphism: the scheme
-fibre points `E.Point (geomPoint)` are `≃+` to the affine Weierstrass points
-`(W.baseChange k).toAffine.Point`. The underlying bijection is the proven
-`pointSpecPointsEquiv ≫ projModelPointsEquiv`; **only `map_add'` is the sorried T-B6 pin** (the
-fibrewise group-law intertwining, stream-B, discharged post-T-W7.36). -/
+/-- **[T-B6′-IFACE, FILLED]** The geometric-fibre point comparison as a **group**
+isomorphism: the scheme fibre points `E.Point (geomPoint)` are `≃+` to the affine
+Weierstrass points `(W.baseChange k).toAffine.Point`. The underlying bijection is the proven
+`pointSpecPointsEquiv ≫ projModelPointsEquiv`.
+
+`map_add'` (the fibrewise group-law intertwining, the T-B6 content) is by the
+v10.123-CASCADE route: the zero pin `hz` (B2 EVENT #3) makes `E`'s geometry equal to that of
+the mulOver-based model record `modelEllipticCurve W` (T-G4 laws, `ModelRecord.lean`), the
+rigidity driver `point_add_val_of_geom_eq` (through `Point.baseChangeEquiv` +
+`abelEnrichment_unique_of_isLocallyNoetherian` over the locally noetherian `Spec k`) forces
+the two additions to agree on `k`-points, and the C6 dictionary `mulModelHom_specPoints`
+computes the model addition as mathlib's affine `Point.add`. -/
 noncomputable def geomFibrePointAddEquiv :
     E.Point (geomPoint B k) ≃+ (W.baseChange k).toAffine.Point where
   toEquiv := (pointSpecPointsEquiv W E hE hπ k).trans (projModelPointsEquiv W k)
-  map_add' := sorry
+  map_add' P Q := by
+    haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := inferInstance
+    -- the geometry of `E` is the model geometry: hE/hπ/hz pin every data field
+    have hgeom : E.toEllipticCurveGeom = (modelEllipticCurve W).toEllipticCurveGeom :=
+      EllipticCurveGeom.ext_of_eqToHom hE hπ hz
+    -- the model-record images of `P` and `Q`
+    refine Eq.trans (congrArg (projModelPointsEquiv W k) (Subtype.ext ?_))
+      (mulModelHom_specPoints W k
+        (pointSpecPointsEquiv W E hE hπ k P) (pointSpecPointsEquiv W E hE hπ k Q))
+    show (P + Q).1 ≫ eqToHom hE = _
+    exact (point_add_val_of_geom_eq hgeom P Q
+        ⟨P.1 ≫ eqToHom hE,
+          (Category.assoc _ _ _).trans ((congrArg (P.1 ≫ ·) hπ.symm).trans P.2)⟩
+        ⟨Q.1 ≫ eqToHom hE,
+          (Category.assoc _ _ _).trans ((congrArg (Q.1 ≫ ·) hπ.symm).trans Q.2)⟩
+        hE rfl rfl).trans
+      (modelEllipticCurve_point_add_val W _ _)
 
 omit [(W.baseChange k).IsElliptic] in
 @[simp] lemma geomFibrePointAddEquiv_apply (P : E.Point (geomPoint B k)) :
-    geomFibrePointAddEquiv W E hE hπ k P =
+    geomFibrePointAddEquiv W E hE hπ hz k P =
       projModelPointsEquiv W k (pointSpecPointsEquiv W E hE hπ k P) := rfl
 
 end EllipticCurve

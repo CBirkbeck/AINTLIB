@@ -3053,6 +3053,12 @@ theorem fibreCurve_zero_eq : (D.fibreCurve k).zero =
       eqToHom (D.fibreCurve_E_eq k).symm :=
   eqToGeom_zero' (D.fibreCurve_geom k)
 
+/-- The zero pin of the fibre record (the `hz` hypothesis of `geomFibrePointAddEquiv`,
+B2 EVENT #3): the record's zero section is the model zero across `fibreCurve_E_eq`. -/
+theorem fibreCurve_hz : (D.fibreCurve k).zero ≫ eqToHom (D.fibreCurve_E_eq k) =
+    projModelZero (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) := by
+  rw [D.fibreCurve_zero_eq k, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+
 /-- The pointed comparison from the curve fibre onto the fibre record's total space. -/
 noncomputable def fibreCurveIso :
     (Y.curve.baseChange (D.geomPt (D.specPt k))).E ≅ (D.fibreCurve k).E :=
@@ -3156,7 +3162,7 @@ theorem pt_hord (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
   -- the image of the transported point is the marked affine point
   have hval : EllipticCurve.geomFibrePointAddEquiv
       (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibreCurve k)
-      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) k sk =
+      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) (D.fibreCurve_hz k) k sk =
       WeierstrassCurve.Affine.Point.some _ _ hns2 := by
     rw [EllipticCurve.geomFibrePointAddEquiv_apply]
     exact projModelPointsEquiv_some _ k gfin hZfin _ _ hns2
@@ -3171,7 +3177,7 @@ theorem pt_hord (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
   have hsk0 : (a : ℤ) • sk = 0 := by
     refine (EllipticCurve.geomFibrePointAddEquiv
       (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibreCurve k)
-      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) k).injective ?_
+      (D.fibreCurve_E_eq k) (D.fibreCurve_π_eq k) (D.fibreCurve_hz k) k).injective ?_
     refine (map_zsmul _ (a : ℤ) sk).trans (Eq.trans ?_ (map_zero _).symm)
     exact (congrArg ((a : ℤ) • ·) hval).trans hcontra2
   have hs₁0 : (a : ℤ) • s₁ = 0 := by
