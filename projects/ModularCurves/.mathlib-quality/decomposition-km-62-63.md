@@ -186,3 +186,23 @@ API presence is the second gating survey (HOMOG-5). Both are grep-answerable in 
 ## Source locators (KM print pages, read 2026-07-09)
 6.2.1 p.155–156 · 6.3.1 p.157 · 6.3.2 p.157–158 · 6.3.3 p.159 · 6.3.4 p.159–160 · 6.3.5 p.160–161 ·
 6.3.6 p.161–162 · §5.2 Axiomatic Regularity 5.2.1 (the analogue — read when grinding).
+
+## STATUS UPDATE (beastmode-D2, 2026-07-10)
+
+Source re-read verbatim (pdf 165–173) — decomposition CONFIRMED against KM pp. 154–162.
+**The §6.3 ring-theoretic cores are now PROVEN, axiom-clean**, in
+`ModularCurves/GroupScheme/HomogeneityLemmas.lean`:
+
+| Leaf | Lean name | Status |
+|---|---|---|
+| HOMOG-5 core (6.3.6) | `Homogeneity.isUnit_add_of_mem_maximalIdeal`, `Homogeneity.factor_unit_or_maximal` | ✅ axiom-clean |
+| HOMOG-4 core (6.3.4) | `Homogeneity.root_mul_injective` (det-free: `∏bᵢ` nonzerodivisor ⟹ mult-by-root injective on `AdjoinRoot`) | ✅ axiom-clean |
+| HOMOG-6 core (6.3.5) | `Homogeneity.coeff_prod_X_add_C` (Vieta, coefficient-indexed) + `Homogeneity.esymm_card_eq_prod` + `Homogeneity.esymm_mem_maximalIdeal` + `Homogeneity.esymm_add_eq_unit_mul_pow` | ✅ axiom-clean |
+| HOMOG-7 core (6.3.3) | `Homogeneity.ker_eq_bot_of_smul_regular` (element-level Nakayama chase; no abelian-category snake needed) | ✅ axiom-clean |
+| HOMOG-1/2/3/8 ([HOMOG-FRAME]) | (Ell)-moduli formalism, Reg-axioms, 5.2.1, presentations A/A₁/A₂, 5.1.1 (=[KM-FMT-FLAT]), 5.4 | ⛔ research gate (unchanged) |
+
+Feasibility answer to §3's make-or-break: the §5.2 machinery is NOT in-project; [HOMOG-FRAME]
+remains the gate for the two NIsogeny sorries. When it lands, condition (3) of 6.2.1 is
+discharge-ready on the proven leaf-library above (`P` regular-parameter ⟹ `∏[b](P)`
+nonzerodivisor feeds `root_mul_injective`; `pow_smul_esymm` + `esymm_add_eq_unit_mul_pow`
+give KM's `(unit)·P^{φ(pⁿ)}`; `ker_eq_bot_of_smul_regular` is 6.3.3 verbatim).
