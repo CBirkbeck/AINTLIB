@@ -28,20 +28,20 @@ mathlib (pin 11b908e5cdd9) has the fpqc **base**-descent of smoothness
 (`Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent`) but no source-locality:
 `MorphismProperty.HasOfPrecompProperty @Smooth _` does not exist, nor do the
 scheme-level right-cancellations for `Flat`/`LocallyOfFinitePresentation`. This file
-stages the decomposition with the Stacks locators; the module-theoretic core of the
-flatness leaf (29.26.13) is proven below, and the remaining leaves are registered
-work-in-progress (board: STREAM-YFULL [YF-QSM], v10.51/v10.55).
+proves all three scheme-level descents; the `sorryAx` inventory is exactly the two
+REGISTERED ring-level gates [02KL-CORE] and [02KM-CORE] below (board: STREAM-YFULL
+[YF-QSM], v10.51/v10.96).
 
 ## Main results
 
 * `Module.Flat.of_comp_of_faithfullyFlat`: for `C ⟶ B ⟶ A` with `A` faithfully flat
   over `B` and flat over `C`, the ring `B` is flat over `C` — the module core of
   Stacks 29.26.13 (also Stacks 05UT-adjacent).
-* `AlgebraicGeometry.Flat.of_precomp_of_surjective` (WIP): scheme form of 29.26.13.
-* `AlgebraicGeometry.LocallyOfFinitePresentation.of_precomp_of_surjective` (WIP):
-  Stacks 02KL.
-* `AlgebraicGeometry.Smooth.of_precomp_etale_of_surjective` (WIP): the target, Stacks
-  02KM at étale generality.
+* `AlgebraicGeometry.Flat.of_precomp_of_surjective` (PROVEN): scheme form of 29.26.13.
+* `AlgebraicGeometry.LocallyOfFinitePresentation.of_precomp_of_surjective` (PROVEN
+  modulo [02KL-CORE]): Stacks 02KL.
+* `AlgebraicGeometry.Smooth.of_precomp_etale_of_surjective` (PROVEN modulo
+  [02KL-CORE] + [02KM-CORE]): the target, Stacks 02KM at étale generality.
 -/
 
 universe u
