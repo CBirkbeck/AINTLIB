@@ -757,3 +757,34 @@ The coalgebra/bialgebra/Hopf axioms are then the Γ-duals of C1c-0's laws — ea
 match `pullbackSpecIso` for free). Instantiations: chart case `(G.π, E.π, groupOpen, U)`
 recovers `kunnethSpecIso`; Hopf case `(G.π, G.π, groupOpen, groupOpen)` gives the target
 of `comul`. Same `toSpecΓ`-iso + `toSpecΓ_SpecMap_appLE` proof as C1b's leg 4a.
+
+## [HG-C1c-1] Hopf-axiom leaf: measured decomposition (banked 2026-07-11)
+
+Transport tools now ALL in place (PatchKunneth.lean, generic + axiom-clean):
+`patchKunneth`, `patchKunneth_hom_comp_includeLeft/Right`, `patchKunneth_hom_base`,
+`IsAffineOpen.isIso_toSpecΓ`; plus `appLE_id`, `appLE_congr_hom` (PatchHopf).
+
+Landed: ε and S are R-linear (Γ-duals of `unitHom_π`, `invHom_π`, one `appLE_comp_appLE`
+each). Remaining, in cost order:
+- **(1b) Δ R-linear** — same shape as `appLE_comp_coactionRing`: Spec-side via
+  `patchKunneth_hom_base` + `squareMul ≫ π = fst ≫ resLE ≫ V.ι` (proven inside
+  `top_le_preimage_groupOpen_squareMul`; EXTRACT it as a named lemma first), then the
+  Γ-transfer (appTop + topIso/ΓSpecIso bookkeeping). ~1 measured route.
+- **(1c) counit laws** (2) — Γ-duals of `unitOver_mulOver_left` (+ a right unit law: PROVE
+  `unitOver_mulOver_right` first, or derive from `mulOver`-commutativity, which itself is
+  a one-liner by ι-cancellation + `_root_.mul_comm` in the hom-group).
+- **(1d) coassoc** — Γ-dual of `mulOver_assoc`. NEEDS a triple Künneth
+  `Spec (A ⊗ A ⊗ A) ≅ G|_V ×_V G|_V ×_V G|_V` and its three leg lemmas. Biggest piece;
+  budget its own route. Design: iterate `patchKunneth` (the square is affine — its
+  `IsAffineOpen`-ness is `pullback`-of-affines, i.e. `Spec` via the iso itself), then
+  `Algebra.TensorProduct.assoc` alignment.
+- **(1e) antipode axioms** — Γ-duals of `invOver_mulOver_left` (+ right). Needs the
+  ring-multiplication ↔ Spec-diagonal dictionary (`diagonal_SpecMap`, Pullbacks.lean:797)
+  since `mul_antipode_rTensor_comul` involves `Algebra.TensorProduct.lmul'`.
+
+STOP-LINE POLICY for this leaf: 3–4 measured iterations per sub-route, then ledger the
+state and move to the next sub-route (do NOT grind 1d/1e ahead of 1b/1c). If 1d or 1e
+prove multi-session, the honest fallback is to HYPOTHESIS-WIRE `[HopfAlgebra R A]` into
+C1d/C4 (the charter's soft-edge provision, as originally planned for p2's layer) and
+discharge the pins against it — the geometry (C2/C3/C4) does not depend on the Hopf
+axioms' proofs, only on their existence.
