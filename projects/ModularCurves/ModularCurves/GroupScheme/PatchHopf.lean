@@ -388,6 +388,29 @@ theorem groupPatchComul_comp_counitLiftΓ :
     appLE_congr_hom P.leftUnitSection_comp_squareMul P.groupOpen ⊤,
     ι_appLE_top, Iso.inv_hom_id]
 
+/-- The right inclusion, composed with the dual of the left unit section, is the
+identity. -/
+theorem includeRight_comp_counitLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.counitLiftΓ = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ, ← hleg]
+  -- cancel the transport
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  -- the two `appTop`s compose to the scheme identity
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.leftUnitSection.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.leftUnitSection_snd,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
