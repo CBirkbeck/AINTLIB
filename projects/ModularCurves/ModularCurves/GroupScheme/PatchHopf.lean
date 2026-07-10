@@ -72,6 +72,13 @@ noncomputable def groupSquareToSquare :
     (Scheme.Hom.resLE_comp_ι _ _) (Scheme.Hom.resLE_comp_ι _ _)
 
 @[reassoc (attr := simp)]
+theorem groupSquareToSquare_snd :
+    P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left
+      = pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+          (G.π.resLE P.V P.groupOpen le_rfl) ≫ P.groupOpen.ι :=
+  pullback.lift_snd _ _ _
+
+@[reassoc (attr := simp)]
 theorem groupSquareToSquare_fst :
     P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left
       = pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
@@ -246,6 +253,70 @@ theorem unitSection_comp_groupToBase :
 theorem unitSection_comp_ι :
     P.unitSection ≫ P.groupOpen.ι = P.V.ι ≫ G.unitHom :=
   Scheme.Hom.resLE_comp_ι _ _
+
+/-- The section `⟨e ∘ structure, 𝟙⟩ : G|_V ⟶ G|_V ×_V G|_V` of the left counit law. -/
+noncomputable def leftUnitSection : P.groupOpen.toScheme ⟶ P.groupSquare :=
+  pullback.lift (G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection)
+    (𝟙 P.groupOpen.toScheme)
+    (by rw [Category.assoc, P.unitSection_comp_groupToBase, Category.comp_id,
+      Category.id_comp])
+
+@[reassoc (attr := simp)]
+theorem leftUnitSection_fst :
+    P.leftUnitSection ≫ pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem leftUnitSection_snd :
+    P.leftUnitSection ≫ pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = 𝟙 P.groupOpen.toScheme :=
+  pullback.lift_snd _ _ _
+
+/-- **The counit law, scheme side**: acting by the unit section on the left is the
+identity — `⟨e ∘ structure, 𝟙⟩ ≫ μ = 𝟙` (as maps into `G`). Proved by `ι`-cancellation and
+point-algebra: the first component restricts to the zero point. -/
+theorem leftUnitSection_comp_squareMul :
+    P.leftUnitSection ≫ P.squareMul = P.groupOpen.ι := by
+  rw [← cancel_mono G.ι, squareMul]
+  set k := P.leftUnitSection ≫ P.groupSquareToSquare with hk
+  rw [show (P.leftUnitSection ≫ P.groupSquareToSquare ≫ G.mulHom) ≫ G.ι
+      = k ≫ (G.mulHom ≫ G.ι) from by rw [hk]; simp only [Category.assoc]]
+  rw [G.mulHom_ι]
+  -- restrict the point sum along `k`
+  have hsum : k ≫ ((G.sqFstPoint + G.sqSndPoint : E.Point _) : _ ⟶ E.E)
+      = ((EllipticCurve.Point.restrict E k G.sqFstPoint + EllipticCurve.Point.restrict E k G.sqSndPoint :
+          E.Point _) : _ ⟶ E.E) := by
+    rw [← EllipticCurve.Point.restrict_add]
+    rfl
+  rw [hsum]
+  -- the first restricted point is zero
+  have hk1 : k ≫ (fst (Over.mk G.π) (Over.mk G.π)).left
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection ≫ P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_fst]
+    exact leftUnitSection_fst_assoc G P P.groupOpen.ι
+  have hk2 : k ≫ (snd (Over.mk G.π) (Over.mk G.π)).left = P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_snd]
+    exact leftUnitSection_snd_assoc G P P.groupOpen.ι
+  have hfst : EllipticCurve.Point.restrict E k G.sqFstPoint = 0 := by
+    refine Subtype.ext ?_
+    show k ≫ ((fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+    rw [E.point_zero_val,
+      show ((Over.mk G.π ⊗ Over.mk G.π).hom)
+        = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl,
+      ← Category.assoc k, ← Category.assoc k, hk1]
+    rw [P.unitSection_comp_ι]
+    show ((G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι ≫ G.unitHom : _ ⟶ G.G) ≫ G.ι)
+      = ((G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι ≫ G.unitHom : _ ⟶ G.G) ≫ G.π)
+        ≫ E.zero
+    simp only [Category.assoc, G.unitHom_ι, G.unitHom_π, Category.id_comp]
+  rw [hfst, zero_add]
+  -- the second restricted point is the inclusion
+  show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+  rw [← Category.assoc k, hk2]
+  rfl
 
 end AffineChartPatch
 
