@@ -14501,3 +14501,58 @@ leaf forms `nonempty_freeTensorIsoGeneric` + `nonempty_freeYoneda_tensor_iso`(�
 closed from the proved one). Remaining sorries in the file: ONLY the packaging leaf (A) +
 the registered general-f Props. **Chain: B1 ✓ B2 ✓ G1 ✓ | G3 (presentation five-lemma) → A →
 Pic(f).**
+
+## Amendments v10.115 (2026-07-10, coordinator): ★★ PIC0 G1 COMPLETE (fresh-session call MOOT — the stop-line worked); G3 design-upgrade RATIFIED; ★ NEW-HOPF chartCoaction typed end-to-end; six-lane absorb; coordinator seat handed over
+
+**fable-PIC0 — ★★ [G1] COMPLETE, axiom-clean** (b2df80df7; their §v10.113 + §v10.114).
+The escalation the owner relayed ("awaiting fresh-session or reroute call") is **MOOT**:
+PIC0 closed [G1-NAT′] inside the v10.112 stop-line. The mechanism is the ruling worth
+keeping — the *term-mode run they were told to try* did not itself close the goal, but it
+**type-checked the per-element proof and thereby revealed the exact evaluated shapes**,
+after which attack (a) (`ext z` + evaluated-shape `show` + closed chain) went through.
+**BOARDED AS DOCTRINE (v10.115-a)**: when a tactic goal is drowned in clothing
+(`.toFun`-composites, `AddMonoidHom.mk'`-internals), run the term-mode proof *as a probe
+to learn goal shapes*, then return to tactics with a `show` of the evaluated form. This
+is a v10.24(a–e) companion, not a replacement. Also landed: `clothedFree_hom_ext`
+(fleet-recipe-grade — kills the kabstract-reframing poison behind both prior walls),
+`freeTensorDesc`, and the full IsIso assembly. The lattice miracle is proved end-to-end.
+**G3 DESIGN UPGRADE RATIFIED** (their §v10.114 + 532f51dd4): G3 is re-anchored on
+mathlib's construction-grain — `pushforwardCompCoyonedaFreeYonedaCorepresentableBy`
+(pullback-of-freeYoneda = freeYoneda-of-image, explicit homEquiv) +
+`isColimitFreeYonedaCoproductsCokernelCofork` (presentation as `IsColimit`) — so G3
+becomes [G3-pre] (δ-on-free-pairs generator chase) + a colimit comparison, and the
+hand-rolled presentation five-lemma is SUPERSEDED (deleted from the plan, not proved).
+Chain: B1 ✓ B2 ✓ **G1 ✓** → [G3-pre] → [G3] → A → **Pic(f)** (GME 2.16). The
+[OWNER-FLW]-integration retarget of G3/A onto the codex map-layer (v10.109 (ii)) still
+stands as the coordinator's merge call — nothing consumed meanwhile.
+
+**NEW-HOPF — ★ [HG-C1c-ii] COMPLETE** (their §v10.114): `appLE_comp_coactionRing` (the
+Γ-transfer: `resLE_app_top` + `toSpecΓ_appTop` + `ΓSpecIso_naturality`) ⟹
+`coactionAlgLeft` ⟹ **`chartCoaction : B →ₐ[R] B ⊗[R] A`** — the co-action map now has
+exactly the shape `IsCoaction`/M5 consume. New leaf banked + landed: **[HG-C1c-0]**
+`SubgroupGroupObject.lean` — the group-scheme structure maps (mul/unit/inv) on G
+extracted from the subgroup functor-of-points field by ι-mono choice+cancellation, with
+defining specs; consumers = the C1c diagrams and our own Hopf route on `groupRing`.
+Correct instinct (the diagrams need structure maps, not just the functor field) —
+RATIFIED, no re-scoping. Next per sentinel: Over-S lifts (`homMk`) + hom-group form of
+`mulHom_iota` + the `GrpObj` instance on `Over.mk G.π`, then the C1c diagrams
+(counit/coassoc, scheme-level-first), then C1d → C3 → C4 → pins → BOARD-SIGNAL.
+
+**Four-lane absorb (all on charter, no dispatch):**
+- **c5β**: [0c-i] executing — T-G1 instance pack + T-G3-comm landed; T-G3-assoc drafted,
+  iterating compile errors. Chain to T-W7a unchanged.
+- **fable-P4**: Phase B — B0+B1+B2a/b ALL LANDED axiom-clean; **B3 central assembly in
+  flight** (agent ab03fc23; `representable_of_rigid_of_torsor_of_globalModel`, KM 4.7.0).
+  Flagged sub-question: torsor-quotient morphism-descent (mathlib effective-epi search,
+  fallback banked). [B3] inherits the T-W7 `toEllipticCurve` sorryAx (c5β lane) —
+  accepted + flagged, correct. On landing: B4 (T-E5c) → **B5 (Y(N) + Γ_H)**.
+- **D2**: [L5] complete; [T-SG3-LFP] arc spawned (LFP-1..LFP-5, executing LFP-1).
+- **fable-FP**: [02KL-CORE] `/develop --decompose` running (substrate survey +
+  source tags 10.168.1, 35.3.6-equalizer-form) — first act of a new stream, per v10.8.
+- **[KM-62-63-HOMOG]**: all four ring-theoretic isolables (H1–H4) sorry-free;
+  HOMOG-FRAME remains the gate.
+
+**Seat**: coordinator handed over at this section (rate-limit/model change). The
+successor's brief is `COORDINATOR-HANDOVER.md`, rewritten at this commit; it supersedes
+the 2026-07-09 edition. Open owner-relays at handover: NEW-ATLAS-3 opener; the codex
+push+PR + cadence message; PIC0 opener (now: [G3-pre], not [G1-NAT′]).
