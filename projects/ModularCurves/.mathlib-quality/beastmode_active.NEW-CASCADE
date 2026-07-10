@@ -1,1 +1,1 @@
-NEW-CASCADE on y1: step-1 merge EXECUTED but HELD (dev tree-broken since 40e44a706 — Representability.lean clobber; forensics = dev board v10.132-CASCADE). Merge preserved on wip/y1-dev-merge-cascade; this tip stays green pre-merge. PARKED at double gate: (1) dev regression fix, (2) c5β T-G4. On both: re-merge + top-up → spine verify → push → steps 2–4.
+NEW-CASCADE re-active on y1 2026-07-10 (v10.134 GATE-1-CLEARED) — re-merge from wip/y1-dev-merge-cascade + top-up of repaired dev tail; spine verify; then fill steps 2–4 if T-G4 boards, else park at single gate.

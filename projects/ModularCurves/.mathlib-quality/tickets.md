@@ -11264,3 +11264,11 @@ deleted by name collision; forensics: dev board v10.132-CASCADE). The merge comm
 preserved intact on `wip/y1-dev-merge-cascade`; this branch's tip is deliberately held
 at the green pre-merge state. Re-merge is minutes once dev is fixed. Parked at the
 double gate (dev fix + c5β T-G4).
+
+## Amendments v10.118-Y1 (2026-07-10, NEW-CASCADE): re-claim — v10.134 gate-1-cleared re-merge
+
+**Claim (rule-5)**: NEW-CASCADE re-claims y1 (collision watch: NEW-Y1 still parked, no
+live sentinel). Executing: merge `wip/y1-dev-merge-cascade` (the preserved v10.116-Y1
+resolution) onto this tip, then top-up merge of `origin/dev/modular-curves` (now
+carrying the d10e7fc87 repair), board files append-only per the v10.116-Y1 precedent;
+spine verify (v10.132-CASCADE pass); push. Fill steps 2–4 iff c5β's T-G4 line boards.
