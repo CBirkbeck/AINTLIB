@@ -145,26 +145,5 @@ noncomputable def restrictTrivialization {P : X.Modules} {U W : X.Opens} (e : W 
     (Modules.pullback (X.homOfLE e)).mapIso eP ≪≫
     pullbackUnitIso (X.homOfLE e)
 
-/-- **(GAP-1 downstream core)** Pullback commutes with the sheafified tensor: for any
-morphism of schemes `f`, `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. This is the *strong monoidality of
-the pullback functor* `Modules.pullback f` with respect to the sheafified tensor `tensorObj`
-— the last GAP-1 content, isolated to this single `Nonempty`-iso (Prop, so no `sorryAx` in
-any monoidal DATA; the v10.8 discipline). Route D (adversarial decomposition:
-`.mathlib-quality/decomposition-pullback-monoidal.md`, skeleton
-`ForMathlib/PullbackTensorMonoidal.lean`): assemble at the sheaf level from mathlib's
-`SheafOfModules.sheafificationCompPullback` and `pullbackIso` (which express `f^*` through the
-presheaf pullback `f^*ᵖ` and sheafification), this stream's GAP1-W-MONO leaf
-`sheafificationW_tensorHom` (collapsing the double sheafification), and the sheafified
-pullback–tensor comparison `sh(f^*ᵖ(P⊗Q)) ≅ sh(f^*ᵖP ⊗ f^*ᵖQ)`. That comparison is only a
-*stalkwise* iso — the presheaf pullback is NOT strong monoidal for general `f` (its
-inverse-image left Kan extension does not commute with the presheaf tensor), but it is locally
-bijective, hence inverted by sheafification. (Route M — mates via
-`Adjunction.leftAdjointOplaxMonoidal`, which *does* exist in mathlib — is blocked instead by
-the absence of a `MonoidalCategory (SheafOfModules R)`, the layer this leaf gates.) Registered
-sub-development [PIC-P1b-MONO]. -/
-theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
-    Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
-      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
-  sorry
 
 end AlgebraicGeometry.Scheme.Modules
