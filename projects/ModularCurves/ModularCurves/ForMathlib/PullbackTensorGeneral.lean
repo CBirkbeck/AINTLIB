@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
+import Mathlib.CategoryTheory.Localization.Monoidal.Functor
 import Mathlib.LinearAlgebra.Finsupp.Pi
 import ModularCurves.Picard.Pic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
@@ -1169,6 +1170,92 @@ noncomputable def pullbackMonoidal :
 
 end SchemePullbackMonoidal
 
+section SheafDescent
+
+variable {C' D' : Type u} [SmallCategory C'] [SmallCategory D']
+  {J : GrothendieckTopology C'} {K : GrothendieckTopology D'}
+  [J.WEqualsLocallyBijective AddCommGrpCat.{u}] [HasWeakSheafify J AddCommGrpCat.{u}]
+  [K.WEqualsLocallyBijective AddCommGrpCat.{u}] [HasWeakSheafify K AddCommGrpCat.{u}]
+  {F : C' ⥤ D'} [F.IsContinuous J K]
+  (S : C'ᵒᵖ ⥤ CommRingCat.{u}) (hS : Presheaf.IsSheaf J (S ⋙ forget₂ CommRingCat RingCat))
+  (R : D'ᵒᵖ ⥤ CommRingCat.{u}) (hR : Presheaf.IsSheaf K (R ⋙ forget₂ CommRingCat RingCat))
+  (φ₀ : (S ⋙ forget₂ CommRingCat RingCat) ⟶
+    F.op ⋙ (R ⋙ forget₂ CommRingCat RingCat))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf A (descent).** If the presheaf-level pullback along `φ₀` is
+monoidal, then the sheaf-level pullback is monoidal for the localized monoidal structures:
+`functorMonoidalOfComp` along the sheafification localization, with the lifting supplied by
+mathlib's `sheafificationCompPullback`. -/
+theorem nonempty_sheafPullback_monoidal
+    (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
+    Nonempty ((SheafOfModules.pullback.{u}
+      (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
+        (F.sheafPushforwardContinuous RingCat.{u} J K).obj
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) := by
+  letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
+  letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
+  letI := hmono
+  letI : (Localization.Monoidal.toMonoidalCategory
+      (L := PresheafOfModules.sheafification.{u}
+        (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+      (W := PresheafOfModules.sheafificationW.{u}
+        (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+      (Iso.refl _)).Monoidal := inferInstance
+  haveI : Localization.Lifting
+      (Localization.Monoidal.toMonoidalCategory
+        (L := PresheafOfModules.sheafification.{u}
+          (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+        (W := PresheafOfModules.sheafificationW.{u}
+          (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+        (Iso.refl _))
+      (PresheafOfModules.sheafificationW.{u}
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+      (PresheafOfModules.pullback.{u} φ₀ ⋙
+        Localization.Monoidal.toMonoidalCategory
+          (L := PresheafOfModules.sheafification.{u}
+            (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+          (W := PresheafOfModules.sheafificationW.{u}
+            (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+          (Iso.refl _))
+      (SheafOfModules.pullback.{u}
+        (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
+          (F.sheafPushforwardContinuous RingCat.{u} J K).obj
+            ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)) :=
+    ⟨(SheafOfModules.sheafificationCompPullback.{u}
+      (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
+        (F.sheafPushforwardContinuous RingCat.{u} J K).obj
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩))⟩
+  exact ⟨(Localization.Monoidal.functorMonoidalOfComp
+    (Localization.Monoidal.toMonoidalCategory
+      (L := PresheafOfModules.sheafification.{u}
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+      (W := PresheafOfModules.sheafificationW.{u}
+        (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+      (Iso.refl _))
+    (PresheafOfModules.sheafificationW.{u}
+      (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+    (SheafOfModules.pullback.{u}
+      (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
+        (F.sheafPushforwardContinuous RingCat.{u} J K).obj
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩))
+    (PresheafOfModules.pullback.{u} φ₀ ⋙
+      Localization.Monoidal.toMonoidalCategory
+        (L := PresheafOfModules.sheafification.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (W := PresheafOfModules.sheafificationW.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (Iso.refl _)) :
+    (SheafOfModules.pullback.{u}
+      (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
+        (F.sheafPushforwardContinuous RingCat.{u} J K).obj
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal)⟩
+
+end SheafDescent
+
 end PresheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
@@ -1187,6 +1274,13 @@ theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
     letI := Modules.monoidalCategory X
     letI := Modules.monoidalCategory Y
     Nonempty ((Modules.pullback f).Monoidal) := by
-  sorry
+  letI := Modules.monoidalCategory X
+  letI := Modules.monoidalCategory Y
+  exact (_root_.PresheafOfModules.nonempty_sheafPullback_monoidal
+    (F := TopologicalSpace.Opens.map f.base)
+    X.sheaf.obj X.ringCatSheaf.cond Y.sheaf.obj Y.ringCatSheaf.cond
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+    (_root_.PresheafOfModules.pullbackMonoidal f) :
+    Nonempty ((Modules.pullback f).Monoidal))
 
 end AlgebraicGeometry.Scheme.Modules
