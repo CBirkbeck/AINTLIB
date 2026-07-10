@@ -6,7 +6,7 @@ universe u v₁ v₂ u₁ u₂
 
 namespace AlgebraicGeometry.Scheme.Modules
 
-variable {X : Scheme.{u}}
+variable {X Y : Scheme.{u}}
 
 theorem sheafOfModules_comp_app_apply
     {D : Type u} [Category.{u} D] {J : GrothendieckTopology D}
@@ -93,186 +93,186 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
-def imageOverFunctor (U : X.Opens) (W : U.toScheme.Opens) :
-    Over W ⥤ Over (U.ι ''ᵁ W) :=
-  Over.post U.ι.opensFunctor
+def imageOverFunctor (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    Over W ⥤ Over (j ''ᵁ W) :=
+  Over.post j.opensFunctor
 
-abbrev imageOver (U : X.Opens) (W : U.toScheme.Opens) (Z : Over W) :
-    Over (U.ι ''ᵁ W) :=
-  (imageOverFunctor U W).obj Z
+abbrev imageOver (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) (Z : Over W) :
+    Over (j ''ᵁ W) :=
+  (imageOverFunctor j W).obj Z
 
-example (M : X.Modules) (U : X.Opens) (W : U.toScheme.Opens)
+example (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
     (Z : Opposite (Over W))
-    (x : (((restrictFunctor U.ι).obj M).over W).val.obj Z) :
-    (M.over (U.ι ''ᵁ W)).val.obj (op (imageOver U W Z.unop)) :=
+    (x : (((restrictFunctor j).obj M).over W).val.obj Z) :
+    (M.over (j ''ᵁ W)).val.obj (op (imageOver j W Z.unop)) :=
   x
 
-noncomputable example (U : X.Opens) (W : U.toScheme.Opens) (Z : Opposite (Over W))
+noncomputable example (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) (Z : Opposite (Over W))
     (x : (_root_.SheafOfModules.unit
-      (X.ringCatSheaf.over (U.ι ''ᵁ W))).val.obj
-        (op (imageOver U W Z.unop))) :
-    (_root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W)).val.obj Z :=
-  (U.ι.appIso Z.unop.left).hom x
+      (Y.ringCatSheaf.over (j ''ᵁ W))).val.obj
+        (op (imageOver j W Z.unop))) :
+    (_root_.SheafOfModules.unit (X.ringCatSheaf.over W)).val.obj Z :=
+  (j.appIso Z.unop.left).hom x
 
-noncomputable def localDualRestrictApp (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
-      _root_.SheafOfModules.unit (X.ringCatSheaf.over (U.ι ''ᵁ W)))
+noncomputable def localDualRestrictApp (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
+      _root_.SheafOfModules.unit (Y.ringCatSheaf.over (j ''ᵁ W)))
     (Z : Opposite (Over W)) :
-    (((restrictFunctor U.ι).obj M).over W).val.presheaf.obj Z ⟶
+    (((restrictFunctor j).obj M).over W).val.presheaf.obj Z ⟶
       (_root_.SheafOfModules.unit
-        (U.toScheme.ringCatSheaf.over W)).val.presheaf.obj Z :=
+        (X.ringCatSheaf.over W)).val.presheaf.obj Z :=
   AddCommGrpCat.ofHom
-    { toFun := fun x ↦ (U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) x)
+    { toFun := fun x ↦ (j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) x)
       map_zero' := by
         calc
-          (U.ι.appIso Z.unop.left).hom
-              (alpha.val.app (op (imageOver U W Z.unop)) 0) =
-            (U.ι.appIso Z.unop.left).hom 0 :=
+          (j.appIso Z.unop.left).hom
+              (alpha.val.app (op (imageOver j W Z.unop)) 0) =
+            (j.appIso Z.unop.left).hom 0 :=
               congrArg _ (alpha.val.app
-                (op (imageOver U W Z.unop))).hom.map_zero
-          _ = 0 := (U.ι.appIso Z.unop.left).hom.hom.map_zero
+                (op (imageOver j W Z.unop))).hom.map_zero
+          _ = 0 := (j.appIso Z.unop.left).hom.hom.map_zero
       map_add' := by
         intro x y
         calc
-          (U.ι.appIso Z.unop.left).hom
-              (alpha.val.app (op (imageOver U W Z.unop)) (x + y)) =
-            (U.ι.appIso Z.unop.left).hom
-              (alpha.val.app (op (imageOver U W Z.unop)) x +
-                alpha.val.app (op (imageOver U W Z.unop)) y) :=
+          (j.appIso Z.unop.left).hom
+              (alpha.val.app (op (imageOver j W Z.unop)) (x + y)) =
+            (j.appIso Z.unop.left).hom
+              (alpha.val.app (op (imageOver j W Z.unop)) x +
+                alpha.val.app (op (imageOver j W Z.unop)) y) :=
               congrArg _ ((alpha.val.app
-                (op (imageOver U W Z.unop))).hom.map_add x y)
-          _ = (U.ι.appIso Z.unop.left).hom
-                (alpha.val.app (op (imageOver U W Z.unop)) x) +
-              (U.ι.appIso Z.unop.left).hom
-                (alpha.val.app (op (imageOver U W Z.unop)) y) :=
-            (U.ι.appIso Z.unop.left).hom.hom.map_add _ _ }
+                (op (imageOver j W Z.unop))).hom.map_add x y)
+          _ = (j.appIso Z.unop.left).hom
+                (alpha.val.app (op (imageOver j W Z.unop)) x) +
+              (j.appIso Z.unop.left).hom
+                (alpha.val.app (op (imageOver j W Z.unop)) y) :=
+            (j.appIso Z.unop.left).hom.hom.map_add _ _ }
 
-theorem localDualRestrictApp_naturality (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
-      _root_.SheafOfModules.unit (X.ringCatSheaf.over (U.ι ''ᵁ W)))
+theorem localDualRestrictApp_naturality (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
+      _root_.SheafOfModules.unit (Y.ringCatSheaf.over (j ''ᵁ W)))
     {Z Z' : Opposite (Over W)} (f : Z ⟶ Z') :
-    (((restrictFunctor U.ι).obj M).over W).val.presheaf.map f ≫
-        localDualRestrictApp M U W alpha Z' =
-      localDualRestrictApp M U W alpha Z ≫
+    (((restrictFunctor j).obj M).over W).val.presheaf.map f ≫
+        localDualRestrictApp M j W alpha Z' =
+      localDualRestrictApp M j W alpha Z ≫
         (_root_.SheafOfModules.unit
-          (U.toScheme.ringCatSheaf.over W)).val.presheaf.map f := by
+          (X.ringCatSheaf.over W)).val.presheaf.map f := by
   ext x
-  change (U.ι.appIso Z'.unop.left).hom
-      (alpha.val.app (op (imageOver U W Z'.unop))
-        (((M.restrict U.ι).over W).val.map f x)) =
+  change (j.appIso Z'.unop.left).hom
+      (alpha.val.app (op (imageOver j W Z'.unop))
+        (((M.restrict j).over W).val.map f x)) =
     ((_root_.SheafOfModules.unit
-      (U.toScheme.ringCatSheaf.over W)).val.map f)
-      ((U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) x))
+      (X.ringCatSheaf.over W)).val.map f)
+      ((j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) x))
   have hsource :
-      ((M.restrict U.ι).over W).val.map f x =
-        (M.over (U.ι ''ᵁ W)).val.map
-          ((imageOverFunctor U W).op.map f) x := rfl
+      ((M.restrict j).over W).val.map f x =
+        (M.over (j ''ᵁ W)).val.map
+          ((imageOverFunctor j W).op.map f) x := rfl
   have halpha := CategoryTheory.congr_fun
-    (alpha.val.naturality ((imageOverFunctor U W).op.map f)) x
+    (alpha.val.naturality ((imageOverFunctor j W).op.map f)) x
   have happ := CategoryTheory.congr_fun
-    (U.ι.appIso_hom_naturality f.unop.left.op)
-    (alpha.val.app (op (imageOver U W Z.unop)) x)
+    (j.appIso_hom_naturality f.unop.left.op)
+    (alpha.val.app (op (imageOver j W Z.unop)) x)
   calc
-    (U.ι.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z'.unop))
-          (((M.restrict U.ι).over W).val.map f x)) =
-      (U.ι.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z'.unop))
-          ((M.over (U.ι ''ᵁ W)).val.map
-            ((imageOverFunctor U W).op.map f) x)) :=
-      congrArg (fun y ↦ (U.ι.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z'.unop)) y)) hsource
-    _ = (U.ι.appIso Z'.unop.left).hom
+    (j.appIso Z'.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z'.unop))
+          (((M.restrict j).over W).val.map f x)) =
+      (j.appIso Z'.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z'.unop))
+          ((M.over (j ''ᵁ W)).val.map
+            ((imageOverFunctor j W).op.map f) x)) :=
+      congrArg (fun y ↦ (j.appIso Z'.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z'.unop)) y)) hsource
+    _ = (j.appIso Z'.unop.left).hom
         ((_root_.SheafOfModules.unit
-          (X.ringCatSheaf.over (U.ι ''ᵁ W))).val.map
-            ((imageOverFunctor U W).op.map f)
-              (alpha.val.app (op (imageOver U W Z.unop)) x)) := congrArg _ halpha
+          (Y.ringCatSheaf.over (j ''ᵁ W))).val.map
+            ((imageOverFunctor j W).op.map f)
+              (alpha.val.app (op (imageOver j W Z.unop)) x)) := congrArg _ halpha
     _ = ((_root_.SheafOfModules.unit
-        (U.toScheme.ringCatSheaf.over W)).val.map f)
-          ((U.ι.appIso Z.unop.left).hom
-            (alpha.val.app (op (imageOver U W Z.unop)) x)) := happ
+        (X.ringCatSheaf.over W)).val.map f)
+          ((j.appIso Z.unop.left).hom
+            (alpha.val.app (op (imageOver j W Z.unop)) x)) := happ
 
-theorem localDualRestrictApp_smul (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
-      _root_.SheafOfModules.unit (X.ringCatSheaf.over (U.ι ''ᵁ W)))
+theorem localDualRestrictApp_smul (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
+      _root_.SheafOfModules.unit (Y.ringCatSheaf.over (j ''ᵁ W)))
     (Z : Opposite (Over W))
-    (r : (U.toScheme.ringCatSheaf.over W).obj.obj Z)
-    (x : (((restrictFunctor U.ι).obj M).over W).val.obj Z) :
-    localDualRestrictApp M U W alpha Z (r • x) =
-      r • localDualRestrictApp M U W alpha Z x := by
-  let rU : Γ(U.toScheme, Z.unop.left) := r
-  let rX : (X.ringCatSheaf.over (U.ι ''ᵁ W)).obj.obj
-      (op (imageOver U W Z.unop)) :=
-    (U.ι.appIso Z.unop.left).inv rU
-  let xX : (M.over (U.ι ''ᵁ W)).val.obj
-      (op (imageOver U W Z.unop)) := x
-  let yX : (X.ringCatSheaf.over (U.ι ''ᵁ W)).obj.obj
-      (op (imageOver U W Z.unop)) :=
-    alpha.val.app (op (imageOver U W Z.unop)) xX
-  change (U.ι.appIso Z.unop.left).hom
-      (alpha.val.app (op (imageOver U W Z.unop)) (rX • xX)) =
-    rU • (U.ι.appIso Z.unop.left).hom
+    (r : (X.ringCatSheaf.over W).obj.obj Z)
+    (x : (((restrictFunctor j).obj M).over W).val.obj Z) :
+    localDualRestrictApp M j W alpha Z (r • x) =
+      r • localDualRestrictApp M j W alpha Z x := by
+  let rU : Γ(X, Z.unop.left) := r
+  let rX : (Y.ringCatSheaf.over (j ''ᵁ W)).obj.obj
+      (op (imageOver j W Z.unop)) :=
+    (j.appIso Z.unop.left).inv rU
+  let xX : (M.over (j ''ᵁ W)).val.obj
+      (op (imageOver j W Z.unop)) := x
+  let yX : (Y.ringCatSheaf.over (j ''ᵁ W)).obj.obj
+      (op (imageOver j W Z.unop)) :=
+    alpha.val.app (op (imageOver j W Z.unop)) xX
+  change (j.appIso Z.unop.left).hom
+      (alpha.val.app (op (imageOver j W Z.unop)) (rX • xX)) =
+    rU • (j.appIso Z.unop.left).hom
       yX
   calc
-    (U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) (rX • xX)) =
-      (U.ι.appIso Z.unop.left).hom
+    (j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) (rX • xX)) =
+      (j.appIso Z.unop.left).hom
         (rX • yX) :=
       congrArg _ ((alpha.val.app
-        (op (imageOver U W Z.unop))).hom.map_smul rX xX)
-    _ = rU • (U.ι.appIso Z.unop.left).hom yX := by
-      change (U.ι.appIso Z.unop.left).hom
+        (op (imageOver j W Z.unop))).hom.map_smul rX xX)
+    _ = rU • (j.appIso Z.unop.left).hom yX := by
+      change (j.appIso Z.unop.left).hom
           (rX * yX) =
-        rU * (U.ι.appIso Z.unop.left).hom yX
+        rU * (j.appIso Z.unop.left).hom yX
       calc
-        (U.ι.appIso Z.unop.left).hom (rX * yX) =
-            (U.ι.appIso Z.unop.left).hom rX *
-              (U.ι.appIso Z.unop.left).hom yX :=
-          (U.ι.appIso Z.unop.left).hom.hom.map_mul rX yX
-        _ = rU * (U.ι.appIso Z.unop.left).hom yX :=
-          congrArg (fun a ↦ a * (U.ι.appIso Z.unop.left).hom yX)
-            (Iso.inv_hom_id_apply (U.ι.appIso Z.unop.left) rU)
+        (j.appIso Z.unop.left).hom (rX * yX) =
+            (j.appIso Z.unop.left).hom rX *
+              (j.appIso Z.unop.left).hom yX :=
+          (j.appIso Z.unop.left).hom.hom.map_mul rX yX
+        _ = rU * (j.appIso Z.unop.left).hom yX :=
+          congrArg (fun a ↦ a * (j.appIso Z.unop.left).hom yX)
+            (Iso.inv_hom_id_apply (j.appIso Z.unop.left) rU)
 
-noncomputable def localDualRestrict (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
-      _root_.SheafOfModules.unit (X.ringCatSheaf.over (U.ι ''ᵁ W))) :
-    ((restrictFunctor U.ι).obj M).over W ⟶
-      _root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W) where
+noncomputable def localDualRestrict (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
+      _root_.SheafOfModules.unit (Y.ringCatSheaf.over (j ''ᵁ W))) :
+    ((restrictFunctor j).obj M).over W ⟶
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over W) where
   val := PresheafOfModules.homMk
-    { app := localDualRestrictApp M U W alpha
+    { app := localDualRestrictApp M j W alpha
       naturality := by
         intro Z Z' f
-        exact localDualRestrictApp_naturality M U W alpha f }
-    (localDualRestrictApp_smul M U W alpha)
+        exact localDualRestrictApp_naturality M j W alpha f }
+    (localDualRestrictApp_smul M j W alpha)
 
-theorem localDualRestrict_app_apply (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
-      _root_.SheafOfModules.unit (X.ringCatSheaf.over (U.ι ''ᵁ W)))
+theorem localDualRestrict_app_apply (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
+      _root_.SheafOfModules.unit (Y.ringCatSheaf.over (j ''ᵁ W)))
     (Z : Opposite (Over W))
-    (x : (((restrictFunctor U.ι).obj M).over W).val.obj Z) :
-    (localDualRestrict M U W alpha).val.app Z x =
-      (U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) x) :=
+    (x : (((restrictFunctor j).obj M).over W).val.obj Z) :
+    (localDualRestrict M j W alpha).val.app Z x =
+      (j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) x) :=
   rfl
 
-theorem localDualRestrict_dualRestrict (M : X.Modules) (U : X.Opens)
-    {V W : Opposite U.toScheme.Opens} (f : V ⟶ W)
-    (alpha : M.over (U.ι ''ᵁ V.unop) ⟶
+theorem localDualRestrict_dualRestrict (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    {V W : Opposite X.Opens} (f : V ⟶ W)
+    (alpha : M.over (j ''ᵁ V.unop) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ V.unop))) :
-    localDualRestrict M U W.unop
-        (ModularCurves.SheafOfModules.dualRestrict X.ringCatSheaf M
-          (U.ι.opensFunctor.op.map f) alpha) =
-      ModularCurves.SheafOfModules.dualRestrict U.toScheme.ringCatSheaf
-        ((restrictFunctor U.ι).obj M) f
-          (localDualRestrict M U V.unop alpha) := by
+        (Y.ringCatSheaf.over (j ''ᵁ V.unop))) :
+    localDualRestrict M j W.unop
+        (ModularCurves.SheafOfModules.dualRestrict Y.ringCatSheaf M
+          (j.opensFunctor.op.map f) alpha) =
+      ModularCurves.SheafOfModules.dualRestrict X.ringCatSheaf
+        ((restrictFunctor j).obj M) f
+          (localDualRestrict M j V.unop alpha) := by
   apply _root_.SheafOfModules.hom_ext
   apply PresheafOfModules.hom_ext
   intro Z
@@ -281,795 +281,800 @@ theorem localDualRestrict_dualRestrict (M : X.Modules) (U : X.Opens)
   intro x
   rfl
 
-theorem localDualRestrict_add (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha beta : M.over (U.ι ''ᵁ W) ⟶
+theorem localDualRestrict_add (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha beta : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W))) :
-    localDualRestrict M U W (alpha + beta) =
-      localDualRestrict M U W alpha + localDualRestrict M U W beta := by
+        (Y.ringCatSheaf.over (j ''ᵁ W))) :
+    localDualRestrict M j W (alpha + beta) =
+      localDualRestrict M j W alpha + localDualRestrict M j W beta := by
   apply _root_.SheafOfModules.hom_ext
   apply PresheafOfModules.hom_ext
   intro Z
   apply ModuleCat.hom_ext
   apply LinearMap.ext
   intro x
-  change (U.ι.appIso Z.unop.left).hom
-      ((alpha + beta).val.app (op (imageOver U W Z.unop)) x) =
-    (U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) x) +
-      (U.ι.appIso Z.unop.left).hom
-        (beta.val.app (op (imageOver U W Z.unop)) x)
+  change (j.appIso Z.unop.left).hom
+      ((alpha + beta).val.app (op (imageOver j W Z.unop)) x) =
+    (j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) x) +
+      (j.appIso Z.unop.left).hom
+        (beta.val.app (op (imageOver j W Z.unop)) x)
   calc
-    (U.ι.appIso Z.unop.left).hom
-        ((alpha + beta).val.app (op (imageOver U W Z.unop)) x) =
-      (U.ι.appIso Z.unop.left).hom
-        (alpha.val.app (op (imageOver U W Z.unop)) x +
-          beta.val.app (op (imageOver U W Z.unop)) x) := rfl
-    _ = (U.ι.appIso Z.unop.left).hom
-          (alpha.val.app (op (imageOver U W Z.unop)) x) +
-        (U.ι.appIso Z.unop.left).hom
-          (beta.val.app (op (imageOver U W Z.unop)) x) :=
-      (U.ι.appIso Z.unop.left).hom.hom.map_add _ _
+    (j.appIso Z.unop.left).hom
+        ((alpha + beta).val.app (op (imageOver j W Z.unop)) x) =
+      (j.appIso Z.unop.left).hom
+        (alpha.val.app (op (imageOver j W Z.unop)) x +
+          beta.val.app (op (imageOver j W Z.unop)) x) := rfl
+    _ = (j.appIso Z.unop.left).hom
+          (alpha.val.app (op (imageOver j W Z.unop)) x) +
+        (j.appIso Z.unop.left).hom
+          (beta.val.app (op (imageOver j W Z.unop)) x) :=
+      (j.appIso Z.unop.left).hom.hom.map_add _ _
 
-theorem localDualRestrict_smul (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens) (r : Γ(U.toScheme, W))
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localDualRestrict_smul (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) (r : Γ(X, W))
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W))) :
-    letI : Module (Γ(X, U.ι ''ᵁ W))
-        (M.over (U.ι ''ᵁ W) ⟶
+        (Y.ringCatSheaf.over (j ''ᵁ W))) :
+    letI : Module (Γ(Y, j ''ᵁ W))
+        (M.over (j ''ᵁ W) ⟶
           _root_.SheafOfModules.unit
-            (X.ringCatSheaf.over (U.ι ''ᵁ W))) :=
+            (Y.ringCatSheaf.over (j ''ᵁ W))) :=
       ModularCurves.SheafOfModules.dualSectionsModule
-        X.ringCatSheaf M (U.ι ''ᵁ W)
-    letI : Module (Γ(U.toScheme, W))
-        (((restrictFunctor U.ι).obj M).over W ⟶
+        Y.ringCatSheaf M (j ''ᵁ W)
+    letI : Module (Γ(X, W))
+        (((restrictFunctor j).obj M).over W ⟶
           _root_.SheafOfModules.unit
-            (U.toScheme.ringCatSheaf.over W)) :=
+            (X.ringCatSheaf.over W)) :=
       ModularCurves.SheafOfModules.dualSectionsModule
-        U.toScheme.ringCatSheaf ((restrictFunctor U.ι).obj M) W
-    localDualRestrict M U W ((U.ι.appIso W).inv r • alpha) =
-      r • localDualRestrict M U W alpha := by
-  letI : Module (Γ(X, U.ι ''ᵁ W))
-      (M.over (U.ι ''ᵁ W) ⟶
+        X.ringCatSheaf ((restrictFunctor j).obj M) W
+    localDualRestrict M j W ((j.appIso W).inv r • alpha) =
+      r • localDualRestrict M j W alpha := by
+  letI : Module (Γ(Y, j ''ᵁ W))
+      (M.over (j ''ᵁ W) ⟶
         _root_.SheafOfModules.unit
-          (X.ringCatSheaf.over (U.ι ''ᵁ W))) :=
+          (Y.ringCatSheaf.over (j ''ᵁ W))) :=
     ModularCurves.SheafOfModules.dualSectionsModule
-      X.ringCatSheaf M (U.ι ''ᵁ W)
-  letI : Module (Γ(U.toScheme, W))
-      (((restrictFunctor U.ι).obj M).over W ⟶
+      Y.ringCatSheaf M (j ''ᵁ W)
+  letI : Module (Γ(X, W))
+      (((restrictFunctor j).obj M).over W ⟶
         _root_.SheafOfModules.unit
-          (U.toScheme.ringCatSheaf.over W)) :=
+          (X.ringCatSheaf.over W)) :=
     ModularCurves.SheafOfModules.dualSectionsModule
-      U.toScheme.ringCatSheaf ((restrictFunctor U.ι).obj M) W
+      X.ringCatSheaf ((restrictFunctor j).obj M) W
   apply _root_.SheafOfModules.hom_ext
   apply PresheafOfModules.hom_ext
   intro Z
   apply ModuleCat.hom_ext
   apply LinearMap.ext
   intro x
-  let rX : Γ(X, U.ι ''ᵁ W) := (U.ι.appIso W).inv r
-  let yX : Γ(X, U.ι ''ᵁ Z.unop.left) :=
-    alpha.val.app (op (imageOver U W Z.unop)) x
-  let sX : Γ(X, U.ι ''ᵁ Z.unop.left) :=
-    X.presheaf.map (U.ι.opensFunctor.map Z.unop.hom).op rX
-  let sU : Γ(U.toScheme, Z.unop.left) :=
-    U.toScheme.presheaf.map Z.unop.hom.op r
-  change (U.ι.appIso Z.unop.left).hom (yX * sX) =
-    (U.ι.appIso Z.unop.left).hom yX * sU
-  have hs : (U.ι.appIso Z.unop.left).hom sX = sU := by
+  let rX : Γ(Y, j ''ᵁ W) := (j.appIso W).inv r
+  let yX : Γ(Y, j ''ᵁ Z.unop.left) :=
+    alpha.val.app (op (imageOver j W Z.unop)) x
+  let sX : Γ(Y, j ''ᵁ Z.unop.left) :=
+    Y.presheaf.map (j.opensFunctor.map Z.unop.hom).op rX
+  let sU : Γ(X, Z.unop.left) :=
+    X.presheaf.map Z.unop.hom.op r
+  change (j.appIso Z.unop.left).hom (yX * sX) =
+    (j.appIso Z.unop.left).hom yX * sU
+  have hs : (j.appIso Z.unop.left).hom sX = sU := by
     have hnat := CategoryTheory.congr_fun
-      (U.ι.appIso_hom_naturality Z.unop.hom.op) rX
+      (j.appIso_hom_naturality Z.unop.hom.op) rX
     have hnat' :
-        (U.ι.appIso Z.unop.left).hom sX =
-          U.toScheme.presheaf.map Z.unop.hom.op
-            ((U.ι.appIso W).hom rX) := by
+        (j.appIso Z.unop.left).hom sX =
+          X.presheaf.map Z.unop.hom.op
+            ((j.appIso W).hom rX) := by
       simpa only [sX, CommRingCat.comp_apply, Quiver.Hom.unop_op] using hnat
-    have hr : (U.ι.appIso W).hom rX = r :=
-      Iso.inv_hom_id_apply (U.ι.appIso W) r
+    have hr : (j.appIso W).hom rX = r :=
+      Iso.inv_hom_id_apply (j.appIso W) r
     exact hnat'.trans (congrArg
-      (U.toScheme.presheaf.map Z.unop.hom.op) hr)
+      (X.presheaf.map Z.unop.hom.op) hr)
   calc
-    (U.ι.appIso Z.unop.left).hom (yX * sX) =
-        (U.ι.appIso Z.unop.left).hom yX *
-          (U.ι.appIso Z.unop.left).hom sX :=
-      (U.ι.appIso Z.unop.left).hom.hom.map_mul yX sX
-    _ = (U.ι.appIso Z.unop.left).hom yX * sU :=
-      congrArg ((U.ι.appIso Z.unop.left).hom yX * ·) hs
+    (j.appIso Z.unop.left).hom (yX * sX) =
+        (j.appIso Z.unop.left).hom yX *
+          (j.appIso Z.unop.left).hom sX :=
+      (j.appIso Z.unop.left).hom.hom.map_mul yX sX
+    _ = (j.appIso Z.unop.left).hom yX * sU :=
+      congrArg ((j.appIso Z.unop.left).hom yX * ·) hs
 
-noncomputable def dualRestrictPresheafHom (M : X.Modules) (U : X.Opens) :
-    ((restrictFunctor U.ι).obj (dualObj M)).val ⟶
-      (dualObj ((restrictFunctor U.ι).obj M)).val where
+noncomputable def dualRestrictPresheafHom (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j] :
+    ((restrictFunctor j).obj (dualObj M)).val ⟶
+      (dualObj ((restrictFunctor j).obj M)).val where
   app W :=
     ModuleCat.homMk
       (AddCommGrpCat.ofHom (AddMonoidHom.mk'
-        (localDualRestrict M U W.unop)
-        (localDualRestrict_add M U W.unop)))
+        (localDualRestrict M j W.unop)
+        (localDualRestrict_add M j W.unop)))
       (by
         intro r
         ext alpha
-        exact (localDualRestrict_smul M U W.unop r alpha).symm)
+        exact (localDualRestrict_smul M j W.unop r alpha).symm)
   naturality := by
     intro V W f
     apply ModuleCat.hom_ext
     apply LinearMap.ext
     intro alpha
-    change localDualRestrict M U W.unop
-        (ModularCurves.SheafOfModules.dualRestrict X.ringCatSheaf M
-          (U.ι.opensFunctor.op.map f) alpha) =
-      ModularCurves.SheafOfModules.dualRestrict U.toScheme.ringCatSheaf
-        ((restrictFunctor U.ι).obj M) f
-          (localDualRestrict M U V.unop alpha)
-    exact localDualRestrict_dualRestrict M U f alpha
+    change localDualRestrict M j W.unop
+        (ModularCurves.SheafOfModules.dualRestrict Y.ringCatSheaf M
+          (j.opensFunctor.op.map f) alpha) =
+      ModularCurves.SheafOfModules.dualRestrict X.ringCatSheaf
+        ((restrictFunctor j).obj M) f
+          (localDualRestrict M j V.unop alpha)
+    exact localDualRestrict_dualRestrict M j f alpha
 
-noncomputable def dualRestrictHom (M : X.Modules) (U : X.Opens) :
-    (restrictFunctor U.ι).obj (dualObj M) ⟶
-      dualObj ((restrictFunctor U.ι).obj M) :=
-  ⟨dualRestrictPresheafHom M U⟩
+noncomputable def dualRestrictHom (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j] :
+    (restrictFunctor j).obj (dualObj M) ⟶
+      dualObj ((restrictFunctor j).obj M) :=
+  ⟨dualRestrictPresheafHom M j⟩
 
-noncomputable def restrictIsoHomInvCongr {X Y : Scheme.{u}} (e : X ≅ Y) :
-    restrictFunctor (𝟙 X) ≅ restrictFunctor (e.hom ≫ e.inv) :=
+noncomputable def restrictIsoHomInvCongr {A B : Scheme.{u}} (e : A ≅ B) :
+    restrictFunctor (𝟙 A) ≅ restrictFunctor (e.hom ≫ e.inv) :=
   restrictFunctorCongr e.hom_inv_id.symm
 
-noncomputable def restrictIsoInvHomCongr {X Y : Scheme.{u}} (e : X ≅ Y) :
-    restrictFunctor (e.inv ≫ e.hom) ≅ restrictFunctor (𝟙 Y) :=
+noncomputable def restrictIsoInvHomCongr {A B : Scheme.{u}} (e : A ≅ B) :
+    restrictFunctor (e.inv ≫ e.hom) ≅ restrictFunctor (𝟙 B) :=
   restrictFunctorCongr e.inv_hom_id
 
-noncomputable def restrictIsoEquiv {X Y : Scheme.{u}} (e : X ≅ Y) :
-    X.Modules ≌ Y.Modules := by
+noncomputable def restrictIsoEquiv {A B : Scheme.{u}} (e : A ≅ B) :
+    A.Modules ≌ B.Modules := by
   let F := restrictFunctor e.inv
   let G := restrictFunctor e.hom
-  let eta : 𝟭 X.Modules ≅ F ⋙ G :=
-    (restrictFunctorId (X := X)).symm ≪≫
+  let eta : 𝟭 A.Modules ≅ F ⋙ G :=
+    (restrictFunctorId (X := A)).symm ≪≫
       restrictIsoHomInvCongr e ≪≫
       restrictFunctorComp e.hom e.inv
-  let epsilon : G ⋙ F ≅ 𝟭 Y.Modules :=
+  let epsilon : G ⋙ F ≅ 𝟭 B.Modules :=
     (restrictFunctorComp e.inv e.hom).symm ≪≫
       restrictIsoInvHomCongr e ≪≫
-      restrictFunctorId (X := Y)
+      restrictFunctorId (X := B)
   letI : F.IsEquivalence := Functor.IsEquivalence.mk' G eta epsilon
   exact F.asEquivalence
 
-noncomputable def localEquiv (U : X.Opens) (W : U.toScheme.Opens) :
-    _root_.SheafOfModules (U.toScheme.ringCatSheaf.over W) ≌
-      _root_.SheafOfModules (X.ringCatSheaf.over (U.ι ''ᵁ W)) :=
+noncomputable def localEquiv (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    _root_.SheafOfModules (X.ringCatSheaf.over W) ≌
+      _root_.SheafOfModules (Y.ringCatSheaf.over (j ''ᵁ W)) :=
   (overEquiv W).trans
-    (restrictIsoEquiv (U.ι.isoImage W)) |>.trans
-      (overEquiv (U.ι ''ᵁ W)).symm
+    (restrictIsoEquiv (j.isoImage W)) |>.trans
+      (overEquiv (j ''ᵁ W)).symm
 
-noncomputable def localSchemeModuleIsoOverFunctor (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  (restrictFunctor (U.ι.isoImage W).inv).mapIso
-    ((overFunctorEquiv W).app ((restrictFunctor U.ι).obj M))
+noncomputable def localSchemeModuleIsoOverFunctor (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  (restrictFunctor (j.isoImage W).inv).mapIso
+    ((overFunctorEquiv W).app ((restrictFunctor j).obj M))
 
-noncomputable def localSchemeModuleIsoCompW (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  ((restrictFunctorComp (U.ι.isoImage W).inv W.ι).app
-    ((restrictFunctor U.ι).obj M)).symm
+noncomputable def localSchemeModuleIsoCompW (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  ((restrictFunctorComp (j.isoImage W).inv W.ι).app
+    ((restrictFunctor j).obj M)).symm
 
-noncomputable def localSchemeModuleIsoCompU (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  ((restrictFunctorComp ((U.ι.isoImage W).inv ≫ W.ι) U.ι).app M).symm
+noncomputable def localSchemeModuleIsoCompU (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  ((restrictFunctorComp ((j.isoImage W).inv ≫ W.ι) j).app M).symm
 
-theorem localSchemeModule_morphism_eq (U : X.Opens)
-    (W : U.toScheme.Opens) :
-    ((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι = (U.ι ''ᵁ W).ι := by
+theorem localSchemeModule_morphism_eq (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) :
+    ((j.isoImage W).inv ≫ W.ι) ≫ j = (j ''ᵁ W).ι := by
   simp
 
-noncomputable def localSchemeModuleIsoCongr (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  (restrictFunctorCongr (localSchemeModule_morphism_eq U W)).app M
+noncomputable def localSchemeModuleIsoCongr (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  (restrictFunctorCongr (localSchemeModule_morphism_eq j W)).app M
 
-noncomputable def localSchemeModuleIsoOverImage (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  ((overFunctorEquiv (U.ι ''ᵁ W)).app M).symm
+noncomputable def localSchemeModuleIsoOverImage (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  ((overFunctorEquiv (j ''ᵁ W)).app M).symm
 
-theorem localSchemeModuleIsoOverImage_inv_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (localSchemeModuleIsoOverImage M U W).inv.val.app V x = x := by
-  exact overFunctorEquiv_hom_app_apply (U.ι ''ᵁ W) M V x
+theorem localSchemeModuleIsoOverImage_inv_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (localSchemeModuleIsoOverImage M j W).inv.val.app V x = x := by
+  exact overFunctorEquiv_hom_app_apply (j ''ᵁ W) M V x
 
-theorem localSchemeModuleIsoOverFunctor_inv_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((restrictFunctor (U.ι.isoImage W).inv).obj
+theorem localSchemeModuleIsoOverFunctor_inv_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((restrictFunctor (j.isoImage W).inv).obj
       ((restrictFunctor W.ι).obj
-        ((restrictFunctor U.ι).obj M))).val.obj V) :
-    (localSchemeModuleIsoOverFunctor M U W).inv.val.app V x = x := by
+        ((restrictFunctor j).obj M))).val.obj V) :
+    (localSchemeModuleIsoOverFunctor M j W).inv.val.app V x = x := by
   dsimp only [localSchemeModuleIsoOverFunctor, Functor.mapIso_inv]
   erw [restrictFunctor_map_app_apply]
-  exact overFunctorEquiv_inv_app_apply W ((restrictFunctor U.ι).obj M)
-    ((U.ι.isoImage W).inv.opensFunctor.op.obj V) x
+  exact overFunctorEquiv_inv_app_apply W ((restrictFunctor j).obj M)
+    ((j.isoImage W).inv.opensFunctor.op.obj V) x
 
-noncomputable def localSchemeModuleIsoStage2 (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  localSchemeModuleIsoOverFunctor M U W ≪≫
-    localSchemeModuleIsoCompW M U W
+noncomputable def localSchemeModuleIsoStage2 (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  localSchemeModuleIsoOverFunctor M j W ≪≫
+    localSchemeModuleIsoCompW M j W
 
-theorem localSchemeModuleIsoStage2_inv (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :
-    (localSchemeModuleIsoStage2 M U W).inv =
-      (localSchemeModuleIsoCompW M U W).inv ≫
-        (localSchemeModuleIsoOverFunctor M U W).inv :=
+theorem localSchemeModuleIsoStage2_inv (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (localSchemeModuleIsoStage2 M j W).inv =
+      (localSchemeModuleIsoCompW M j W).inv ≫
+        (localSchemeModuleIsoOverFunctor M j W).inv :=
   rfl
 
-noncomputable def localSchemeModuleIsoStage3 (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  localSchemeModuleIsoStage2 M U W ≪≫
-    localSchemeModuleIsoCompU M U W
+noncomputable def localSchemeModuleIsoStage3 (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  localSchemeModuleIsoStage2 M j W ≪≫
+    localSchemeModuleIsoCompU M j W
 
-theorem localSchemeModuleIsoStage3_inv (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :
-    (localSchemeModuleIsoStage3 M U W).inv =
-      (localSchemeModuleIsoCompU M U W).inv ≫
-        (localSchemeModuleIsoStage2 M U W).inv :=
+theorem localSchemeModuleIsoStage3_inv (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (localSchemeModuleIsoStage3 M j W).inv =
+      (localSchemeModuleIsoCompU M j W).inv ≫
+        (localSchemeModuleIsoStage2 M j W).inv :=
   rfl
 
-noncomputable def localSchemeModuleIsoStage4 (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  localSchemeModuleIsoStage3 M U W ≪≫
-    localSchemeModuleIsoCongr M U W
+noncomputable def localSchemeModuleIsoStage4 (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  localSchemeModuleIsoStage3 M j W ≪≫
+    localSchemeModuleIsoCongr M j W
 
-theorem localSchemeModuleIsoStage4_inv (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :
-    (localSchemeModuleIsoStage4 M U W).inv =
-      (localSchemeModuleIsoCongr M U W).inv ≫
-        (localSchemeModuleIsoStage3 M U W).inv :=
+theorem localSchemeModuleIsoStage4_inv (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (localSchemeModuleIsoStage4 M j W).inv =
+      (localSchemeModuleIsoCongr M j W).inv ≫
+        (localSchemeModuleIsoStage3 M j W).inv :=
   rfl
 
-noncomputable def localSchemeModuleIsoStage5 (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  localSchemeModuleIsoStage4 M U W ≪≫
-    localSchemeModuleIsoOverImage M U W
+noncomputable def localSchemeModuleIsoStage5 (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  localSchemeModuleIsoStage4 M j W ≪≫
+    localSchemeModuleIsoOverImage M j W
 
-theorem localSchemeModuleIsoStage5_inv (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :
-    (localSchemeModuleIsoStage5 M U W).inv =
-      (localSchemeModuleIsoOverImage M U W).inv ≫
-        (localSchemeModuleIsoStage4 M U W).inv :=
+theorem localSchemeModuleIsoStage5_inv (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (localSchemeModuleIsoStage5 M j W).inv =
+      (localSchemeModuleIsoOverImage M j W).inv ≫
+        (localSchemeModuleIsoStage4 M j W).inv :=
   rfl
 
-noncomputable def localSchemeModuleIso (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens) :
-    (restrictFunctor (U.ι.isoImage W).inv).obj
-        ((overEquiv W).functor.obj (((restrictFunctor U.ι).obj M).over W)) ≅
-      (overEquiv (U.ι ''ᵁ W)).functor.obj (M.over (U.ι ''ᵁ W)) :=
-  localSchemeModuleIsoStage5 M U W
+noncomputable def localSchemeModuleIso (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) :
+    (restrictFunctor (j.isoImage W).inv).obj
+        ((overEquiv W).functor.obj (((restrictFunctor j).obj M).over W)) ≅
+      (overEquiv (j ''ᵁ W)).functor.obj (M.over (j ''ᵁ W)) :=
+  localSchemeModuleIsoStage5 M j W
 
-theorem overEquivalence_inverse_obj_left (T : X.Opens)
+theorem overEquivalence_inverse_obj_left (T : Y.Opens)
     (V : T.toScheme.Opens) :
     (T.overEquivalence.symm.functor.obj V).left = T.ι ''ᵁ V :=
   rfl
 
-theorem localSchemeModuleOpen_eq (U : X.Opens) (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    U.ι ''ᵁ
+theorem localSchemeModuleOpen_eq (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) :
+    j ''ᵁ
         (W.overEquivalence.symm.functor.obj
-          ((U.ι.isoImage W).inv.opensFunctor.obj V)).left =
-      ((U.ι ''ᵁ W).overEquivalence.symm.functor.obj V).left := by
+          ((j.isoImage W).inv.opensFunctor.obj V)).left =
+      ((j ''ᵁ W).overEquivalence.symm.functor.obj V).left := by
   rw [overEquivalence_inverse_obj_left,
     overEquivalence_inverse_obj_left]
   calc
-    U.ι ''ᵁ (W.ι ''ᵁ ((U.ι.isoImage W).inv ''ᵁ V)) =
-        (((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι) ''ᵁ V := by
+    j ''ᵁ (W.ι ''ᵁ ((j.isoImage W).inv ''ᵁ V)) =
+        (((j.isoImage W).inv ≫ W.ι) ≫ j) ''ᵁ V := by
       rw [Scheme.Hom.comp_image, Scheme.Hom.comp_image]
-    _ = (U.ι ''ᵁ W).ι ''ᵁ V := by
-      have hcomp : ((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι =
-          (U.ι ''ᵁ W).ι := by simp
+    _ = (j ''ᵁ W).ι ''ᵁ V := by
+      have hcomp : ((j.isoImage W).inv ≫ W.ι) ≫ j =
+          (j ''ᵁ W).ι := by simp
       apply TopologicalSpace.Opens.ext
       change Set.image
-          (fun x ↦ ((((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι) x)) V =
-        Set.image (fun x ↦ (U.ι ''ᵁ W).ι x) V
+          (fun x ↦ ((((j.isoImage W).inv ≫ W.ι) ≫ j) x)) V =
+        Set.image (fun x ↦ (j ''ᵁ W).ι x) V
       rw [hcomp]
 
-noncomputable abbrev localSchemeModuleSourceOverW (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) : Over W :=
+noncomputable abbrev localSchemeModuleSourceOverW (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) : Over W :=
   W.overEquivalence.symm.functor.obj
-    ((U.ι.isoImage W).inv.opensFunctor.obj V)
+    ((j.isoImage W).inv.opensFunctor.obj V)
 
-noncomputable abbrev localSchemeModuleSourceOver (U : X.Opens) (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) : Over (U.ι ''ᵁ W) :=
-  imageOver U W (localSchemeModuleSourceOverW U W V)
+noncomputable abbrev localSchemeModuleSourceOver (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) : Over (j ''ᵁ W) :=
+  imageOver j W (localSchemeModuleSourceOverW j W V)
 
-abbrev localSchemeModuleTargetOver (U : X.Opens) (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) : Over (U.ι ''ᵁ W) :=
-  (U.ι ''ᵁ W).overEquivalence.symm.functor.obj V
+abbrev localSchemeModuleTargetOver (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) : Over (j ''ᵁ W) :=
+  (j ''ᵁ W).overEquivalence.symm.functor.obj V
 
-noncomputable def localSchemeModuleOverIso (U : X.Opens)
-    (W : U.toScheme.Opens) (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    localSchemeModuleSourceOver U W V ≅
-      localSchemeModuleTargetOver U W V :=
-  Over.isoMk (eqToIso (localSchemeModuleOpen_eq U W V)) (by subsingleton)
+noncomputable def localSchemeModuleOverIso (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) (V : (j ''ᵁ W).toScheme.Opens) :
+    localSchemeModuleSourceOver j W V ≅
+      localSchemeModuleTargetOver j W V :=
+  Over.isoMk (eqToIso (localSchemeModuleOpen_eq j W V)) (by subsingleton)
 
-theorem localSchemeModuleOverIso_hom_left (U : X.Opens)
-    (W : U.toScheme.Opens) (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    (localSchemeModuleOverIso U W V).hom.left =
-      eqToHom (localSchemeModuleOpen_eq U W V) :=
+theorem localSchemeModuleOverIso_hom_left (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) (V : (j ''ᵁ W).toScheme.Opens) :
+    (localSchemeModuleOverIso j W V).hom.left =
+      eqToHom (localSchemeModuleOpen_eq j W V) :=
   rfl
 
-theorem localSchemeModuleOpen_eq_one (U : X.Opens) (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    (((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι) ''ᵁ V =
-      (U.ι ''ᵁ W).ι ''ᵁ V := by
+theorem localSchemeModuleOpen_eq_one (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) :
+    (((j.isoImage W).inv ≫ W.ι) ≫ j) ''ᵁ V =
+      (j ''ᵁ W).ι ''ᵁ V := by
   apply TopologicalSpace.Opens.ext
   change Set.image
-      (fun x ↦ ((((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι) x)) V =
-    Set.image (fun x ↦ (U.ι ''ᵁ W).ι x) V
+      (fun x ↦ ((((j.isoImage W).inv ≫ W.ι) ≫ j) x)) V =
+    Set.image (fun x ↦ (j ''ᵁ W).ι x) V
   rw [localSchemeModule_morphism_eq]
 
-theorem localSchemeModuleOpen_eq_two (U : X.Opens) (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    U.ι ''ᵁ (((U.ι.isoImage W).inv ≫ W.ι) ''ᵁ V) =
-      (U.ι ''ᵁ W).ι ''ᵁ V := by
+theorem localSchemeModuleOpen_eq_two (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) :
+    j ''ᵁ (((j.isoImage W).inv ≫ W.ι) ''ᵁ V) =
+      (j ''ᵁ W).ι ''ᵁ V := by
   calc
-    U.ι ''ᵁ (((U.ι.isoImage W).inv ≫ W.ι) ''ᵁ V) =
-        (((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι) ''ᵁ V :=
+    j ''ᵁ (((j.isoImage W).inv ≫ W.ι) ''ᵁ V) =
+        (((j.isoImage W).inv ≫ W.ι) ≫ j) ''ᵁ V :=
       (Scheme.Hom.comp_image
-        ((U.ι.isoImage W).inv ≫ W.ι) U.ι V).symm
-    _ = (U.ι ''ᵁ W).ι ''ᵁ V :=
-      localSchemeModuleOpen_eq_one U W V
+        ((j.isoImage W).inv ≫ W.ι) j V).symm
+    _ = (j ''ᵁ W).ι ''ᵁ V :=
+      localSchemeModuleOpen_eq_one j W V
 
-theorem localSchemeModuleCongr_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
+theorem localSchemeModuleCongr_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
     (((restrictFunctorCongr
-      (localSchemeModule_morphism_eq U W)).inv.app M).val.app V) x =
+      (localSchemeModule_morphism_eq j W)).inv.app M).val.app V) x =
       M.presheaf.map
-        (eqToHom (localSchemeModuleOpen_eq_one U W V.unop)).op x := by
+        (eqToHom (localSchemeModuleOpen_eq_one j W V.unop)).op x := by
   exact ConcreteCategory.congr_hom
     (restrictFunctorCongr_inv_app_app
-      (U := V.unop) (localSchemeModule_morphism_eq U W) M) x
+      (U := V.unop) (localSchemeModule_morphism_eq j W) M) x
 
-theorem localSchemeModuleCompU_component (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
+theorem localSchemeModuleCompU_component (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
     (x : ((restrictFunctor
-      (((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι)).obj M).val.obj V) :
+      (((j.isoImage W).inv ≫ W.ι) ≫ j)).obj M).val.obj V) :
     (((restrictFunctorComp
-      ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V) x =
+      ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V) x =
       M.presheaf.map
         (eqToHom (Scheme.Hom.comp_image
-          ((U.ι.isoImage W).inv ≫ W.ι) U.ι V.unop).symm).op x := by
+          ((j.isoImage W).inv ≫ W.ι) j V.unop).symm).op x := by
   exact ConcreteCategory.congr_hom
     (restrictFunctorComp_hom_app_app
-      (U := V.unop) ((U.ι.isoImage W).inv ≫ W.ι) U.ι M) x
+      (U := V.unop) ((j.isoImage W).inv ≫ W.ι) j M) x
 
-theorem localSchemeModuleCompU_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
+theorem localSchemeModuleCompU_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
     (((restrictFunctorComp
-      ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V)
+      ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V)
         (M.presheaf.map
-          (eqToHom (localSchemeModuleOpen_eq_one U W V.unop)).op x) =
+          (eqToHom (localSchemeModuleOpen_eq_one j W V.unop)).op x) =
       M.presheaf.map
-        (eqToHom (localSchemeModuleOpen_eq_two U W V.unop)).op x := by
+        (eqToHom (localSchemeModuleOpen_eq_two j W V.unop)).op x := by
   let a := M.presheaf.map
-    (eqToHom (localSchemeModuleOpen_eq_one U W V.unop)).op x
-  have h := localSchemeModuleCompU_component M U W V a
+    (eqToHom (localSchemeModuleOpen_eq_one j W V.unop)).op x
+  have h := localSchemeModuleCompU_component M j W V a
   refine h.trans ?_
   dsimp only [a]
   rw [← Functor.map_comp_apply, ← op_comp]
   rfl
 
-theorem localSchemeModuleOpen_eq_three_step (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens) :
-    U.ι ''ᵁ (W.ι ''ᵁ ((U.ι.isoImage W).inv ''ᵁ V)) =
-      U.ι ''ᵁ (((U.ι.isoImage W).inv ≫ W.ι) ''ᵁ V) :=
-  congrArg (fun T : U.toScheme.Opens ↦ U.ι ''ᵁ T)
-    (Scheme.Hom.comp_image (U.ι.isoImage W).inv W.ι V).symm
+theorem localSchemeModuleOpen_eq_three_step (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens) :
+    j ''ᵁ (W.ι ''ᵁ ((j.isoImage W).inv ''ᵁ V)) =
+      j ''ᵁ (((j.isoImage W).inv ≫ W.ι) ''ᵁ V) :=
+  congrArg (fun T : X.Opens ↦ j ''ᵁ T)
+    (Scheme.Hom.comp_image (j.isoImage W).inv W.ι V).symm
 
-theorem localSchemeModuleOpen_map_apply (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens)
-    (x : Γ(X, (U.ι ''ᵁ W).ι ''ᵁ V)) :
-    X.presheaf.map (eqToHom (localSchemeModuleOpen_eq U W V)).op x =
-      X.presheaf.map
-        (eqToHom (localSchemeModuleOpen_eq_three_step U W V)).op
-        (X.presheaf.map
+theorem localSchemeModuleOpen_map_apply (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens)
+    (x : Γ(Y, (j ''ᵁ W).ι ''ᵁ V)) :
+    Y.presheaf.map (eqToHom (localSchemeModuleOpen_eq j W V)).op x =
+      Y.presheaf.map
+        (eqToHom (localSchemeModuleOpen_eq_three_step j W V)).op
+        (Y.presheaf.map
           (eqToHom (Scheme.Hom.comp_image
-            ((U.ι.isoImage W).inv ≫ W.ι) U.ι V).symm).op
-          (X.presheaf.map
-            (eqToHom (localSchemeModuleOpen_eq_one U W V)).op x)) := by
+            ((j.isoImage W).inv ≫ W.ι) j V).symm).op
+          (Y.presheaf.map
+            (eqToHom (localSchemeModuleOpen_eq_one j W V)).op x)) := by
   rw [← Functor.map_comp_apply, ← op_comp,
     ← Functor.map_comp_apply, ← op_comp]
   rfl
 
-theorem localSchemeModuleCompW_component (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((restrictFunctor ((U.ι.isoImage W).inv ≫ W.ι)).obj
-      ((restrictFunctor U.ι).obj M)).val.obj V) :
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V) x =
-      ((restrictFunctor U.ι).obj M).presheaf.map
+theorem localSchemeModuleCompW_component (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((restrictFunctor ((j.isoImage W).inv ≫ W.ι)).obj
+      ((restrictFunctor j).obj M)).val.obj V) :
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V) x =
+      ((restrictFunctor j).obj M).presheaf.map
         (eqToHom (Scheme.Hom.comp_image
-          (U.ι.isoImage W).inv W.ι V.unop).symm).op x := by
+          (j.isoImage W).inv W.ι V.unop).symm).op x := by
   exact ConcreteCategory.congr_hom
     (restrictFunctorComp_hom_app_app
-      (U := V.unop) (U.ι.isoImage W).inv W.ι
-        ((restrictFunctor U.ι).obj M)) x
+      (U := V.unop) (j.isoImage W).inv W.ι
+        ((restrictFunctor j).obj M)) x
 
-theorem localSchemeModuleCompW_map_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((restrictFunctor ((U.ι.isoImage W).inv ≫ W.ι)).obj
-      ((restrictFunctor U.ι).obj M)).val.obj V) :
-    ((restrictFunctor U.ι).obj M).presheaf.map
+theorem localSchemeModuleCompW_map_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((restrictFunctor ((j.isoImage W).inv ≫ W.ι)).obj
+      ((restrictFunctor j).obj M)).val.obj V) :
+    ((restrictFunctor j).obj M).presheaf.map
         (eqToHom (Scheme.Hom.comp_image
-          (U.ι.isoImage W).inv W.ι V.unop).symm).op x =
+          (j.isoImage W).inv W.ι V.unop).symm).op x =
       M.presheaf.map
-        (eqToHom (localSchemeModuleOpen_eq_three_step U W V.unop)).op x := by
+        (eqToHom (localSchemeModuleOpen_eq_three_step j W V.unop)).op x := by
   rfl
 
-noncomputable def localSchemeModuleStageTwoValue (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    ((restrictFunctor ((U.ι.isoImage W).inv ≫ W.ι)).obj
-      ((restrictFunctor U.ι).obj M)).val.obj V :=
+noncomputable def localSchemeModuleStageTwoValue (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    ((restrictFunctor ((j.isoImage W).inv ≫ W.ι)).obj
+      ((restrictFunctor j).obj M)).val.obj V :=
   M.presheaf.map
-    (eqToHom (localSchemeModuleOpen_eq_two U W V.unop)).op x
+    (eqToHom (localSchemeModuleOpen_eq_two j W V.unop)).op x
 
-theorem localSchemeModuleCompW_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V)
-        (localSchemeModuleStageTwoValue M U W V x) =
-      (M.over (U.ι ''ᵁ W)).val.map
-        (localSchemeModuleOverIso U W V.unop).hom.op x := by
-  let a := localSchemeModuleStageTwoValue M U W V x
-  have hc := localSchemeModuleCompW_component M U W V a
-  have hm := localSchemeModuleCompW_map_apply M U W V a
+theorem localSchemeModuleCompW_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V)
+        (localSchemeModuleStageTwoValue M j W V x) =
+      (M.over (j ''ᵁ W)).val.map
+        (localSchemeModuleOverIso j W V.unop).hom.op x := by
+  let a := localSchemeModuleStageTwoValue M j W V x
+  have hc := localSchemeModuleCompW_component M j W V a
+  have hm := localSchemeModuleCompW_map_apply M j W V a
   refine hc.trans (hm.trans ?_)
   dsimp only [a, localSchemeModuleStageTwoValue]
   rw [← Functor.map_comp_apply, ← op_comp]
   rfl
 
-noncomputable def localSchemeModuleTransition (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens) :=
-  (restrictFunctorCongr (localSchemeModule_morphism_eq U W)).inv.app M ≫
-    (restrictFunctorComp ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M ≫
-      (restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-        ((restrictFunctor U.ι).obj M)
+noncomputable def localSchemeModuleTransition (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :=
+  (restrictFunctorCongr (localSchemeModule_morphism_eq j W)).inv.app M ≫
+    (restrictFunctorComp ((j.isoImage W).inv ≫ W.ι) j).hom.app M ≫
+      (restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+        ((restrictFunctor j).obj M)
 
-theorem localSchemeModuleTransition_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (localSchemeModuleTransition M U W).val.app V x =
-      (M.over (U.ι ''ᵁ W)).val.map
-        (localSchemeModuleOverIso U W V.unop).hom.op x := by
+theorem localSchemeModuleTransition_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (localSchemeModuleTransition M j W).val.app V x =
+      (M.over (j ''ᵁ W)).val.map
+        (localSchemeModuleOverIso j W V.unop).hom.op x := by
   dsimp only [localSchemeModuleTransition]
   erw [sheafOfModules_comp_app_apply]
   erw [sheafOfModules_comp_app_apply]
   let f1 := fun z ↦
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V)
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V)
       ((((restrictFunctorComp
-        ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V) z)
-  have h1 := localSchemeModuleCongr_app_apply M U W V x
+        ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V) z)
+  have h1 := localSchemeModuleCongr_app_apply M j W V x
   refine (congrArg f1 h1).trans ?_
   let f2 := fun z ↦
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V) z
-  have h2 := localSchemeModuleCompU_app_apply M U W V x
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V) z
+  have h2 := localSchemeModuleCompU_app_apply M j W V x
   refine (congrArg f2 h2).trans ?_
-  exact localSchemeModuleCompW_app_apply M U W V x
+  exact localSchemeModuleCompW_app_apply M j W V x
 
-theorem localSchemeModuleTransition_raw_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V
+theorem localSchemeModuleTransition_raw_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V
       (((restrictFunctorComp
-        ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V
+        ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V
         (((restrictFunctorCongr
-          (localSchemeModule_morphism_eq U W)).inv.app M).val.app V x))) =
-      (M.over (U.ι ''ᵁ W)).val.map
-        (localSchemeModuleOverIso U W V.unop).hom.op x := by
-  change (localSchemeModuleTransition M U W).val.app V x = _
-  exact localSchemeModuleTransition_app_apply M U W V x
+          (localSchemeModule_morphism_eq j W)).inv.app M).val.app V x))) =
+      (M.over (j ''ᵁ W)).val.map
+        (localSchemeModuleOverIso j W V.unop).hom.op x := by
+  change (localSchemeModuleTransition M j W).val.app V x = _
+  exact localSchemeModuleTransition_app_apply M j W V x
 
-theorem localSchemeUnitTransition_app_apply (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (V : (U.ι ''ᵁ W).toScheme.Opens)
+theorem localSchemeUnitTransition_app_apply (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (V : (j ''ᵁ W).toScheme.Opens)
     (x : (_root_.SheafOfModules.unit
-      (X.ringCatSheaf.over (U.ι ''ᵁ W))).val.obj
-        (op (localSchemeModuleTargetOver U W V))) :
-    ((U.ι.isoImage W).inv.appIso V).hom
-        ((U.ι.appIso (localSchemeModuleSourceOverW U W V).left).hom
+      (Y.ringCatSheaf.over (j ''ᵁ W))).val.obj
+        (op (localSchemeModuleTargetOver j W V))) :
+    ((j.isoImage W).inv.appIso V).hom
+        ((j.appIso (localSchemeModuleSourceOverW j W V).left).hom
           ((_root_.SheafOfModules.unit
-            (X.ringCatSheaf.over (U.ι ''ᵁ W))).val.map
-              (localSchemeModuleOverIso U W V).hom.op x)) = x := by
-  change ((U.ι.isoImage W).inv.appIso V).hom
-      ((U.ι.appIso (localSchemeModuleSourceOverW U W V).left).hom
-        (X.presheaf.map
-          (localSchemeModuleOverIso U W V).hom.left.op x)) = x
-  have hmap := localSchemeModuleOpen_map_apply U W V x
+            (Y.ringCatSheaf.over (j ''ᵁ W))).val.map
+              (localSchemeModuleOverIso j W V).hom.op x)) = x := by
+  change ((j.isoImage W).inv.appIso V).hom
+      ((j.appIso (localSchemeModuleSourceOverW j W V).left).hom
+        (Y.presheaf.map
+          (localSchemeModuleOverIso j W V).hom.left.op x)) = x
+  have hmap := localSchemeModuleOpen_map_apply j W V x
   have hmap' :
-      X.presheaf.map (localSchemeModuleOverIso U W V).hom.left.op x =
-        X.presheaf.map
-          (eqToHom (localSchemeModuleOpen_eq_three_step U W V)).op
-          (X.presheaf.map
+      Y.presheaf.map (localSchemeModuleOverIso j W V).hom.left.op x =
+        Y.presheaf.map
+          (eqToHom (localSchemeModuleOpen_eq_three_step j W V)).op
+          (Y.presheaf.map
             (eqToHom (Scheme.Hom.comp_image
-              ((U.ι.isoImage W).inv ≫ W.ι) U.ι V).symm).op
-          (X.presheaf.map
-              (eqToHom (localSchemeModuleOpen_eq_one U W V)).op x)) := by
+              ((j.isoImage W).inv ≫ W.ι) j V).symm).op
+          (Y.presheaf.map
+              (eqToHom (localSchemeModuleOpen_eq_one j W V)).op x)) := by
     rw [localSchemeModuleOverIso_hom_left]
     exact hmap
   refine (congrArg (fun z ↦
-    ((U.ι.isoImage W).inv.appIso V).hom
-      ((U.ι.appIso (localSchemeModuleSourceOverW U W V).left).hom z)) hmap').trans ?_
-  let x0 := X.presheaf.map
-    (eqToHom (localSchemeModuleOpen_eq_one U W V)).op x
-  let x1 := X.presheaf.map
+    ((j.isoImage W).inv.appIso V).hom
+      ((j.appIso (localSchemeModuleSourceOverW j W V).left).hom z)) hmap').trans ?_
+  let x0 := Y.presheaf.map
+    (eqToHom (localSchemeModuleOpen_eq_one j W V)).op x
+  let x1 := Y.presheaf.map
     (eqToHom (Scheme.Hom.comp_image
-      ((U.ι.isoImage W).inv ≫ W.ι) U.ι V).symm).op x0
+      ((j.isoImage W).inv ≫ W.ι) j V).symm).op x0
+  let z := Y.presheaf.map
+    (eqToHom (localSchemeModuleOpen_eq_three_step j W V)).op x1
+  let y1 := (j.appIso (((j.isoImage W).inv ≫ W.ι) ''ᵁ V)).hom x1
+  change ((j.isoImage W).inv.appIso V).hom
+      ((j.appIso (localSchemeModuleSourceOverW j W V).left).hom z) = x
+  let uMap := X.presheaf.map
+    (eqToHom (Scheme.Hom.comp_image
+      (j.isoImage W).inv W.ι V).symm).op y1
+  have hj :
+      (j.appIso (localSchemeModuleSourceOverW j W V).left).hom z = uMap := by
+    change (j.appIso (W.ι ''ᵁ ((j.isoImage W).inv ''ᵁ V))).hom
+      (Y.presheaf.map
+        (eqToHom (localSchemeModuleOpen_eq_three_step j W V)).op x1) =
+      X.presheaf.map
+        (eqToHom (Scheme.Hom.comp_image
+          (j.isoImage W).inv W.ι V).symm).op y1
+    have hnat := ConcreteCategory.congr_hom
+      (j.appIso_hom_naturality
+        (eqToHom (Scheme.Hom.comp_image
+          (j.isoImage W).inv W.ι V).symm).op) x1
+    have hm :
+        j.opensFunctor.map
+            ((eqToHom (Scheme.Hom.comp_image
+              (j.isoImage W).inv W.ι V).symm).op.unop) =
+          eqToHom (localSchemeModuleOpen_eq_three_step j W V) :=
+      Subsingleton.elim _ _
+    rw [hm] at hnat
+    simpa only [z, y1, uMap, CategoryTheory.comp_apply] using hnat
   have hab := comp_appIso_hom_apply
-    (U.ι.isoImage W).inv W.ι V x1
-  have hfull := comp_appIso_hom_apply
-    ((U.ι.isoImage W).inv ≫ W.ι) U.ι V x0
-  let z := X.presheaf.map
-    (eqToHom (localSchemeModuleOpen_eq_three_step U W V)).op x1
-  change ((U.ι.isoImage W).inv.appIso V).hom
-      ((U.ι.appIso (localSchemeModuleSourceOverW U W V).left).hom z) = x
-  have hUfinal :
-      (U.ι.appIso (localSchemeModuleSourceOverW U W V).left).hom z = z := by
-    rw [Scheme.Opens.ι_appIso]
-    rfl
-  refine (congrArg (fun t ↦
-    ((U.ι.isoImage W).inv.appIso V).hom t) hUfinal).trans ?_
-  let uMap := U.toScheme.presheaf.map
-    (eqToHom (Scheme.Hom.comp_image
-      (U.ι.isoImage W).inv W.ι V).symm).op x1
-  have huMap : uMap = z := by rfl
-  have hW : (W.ι.appIso ((U.ι.isoImage W).inv ''ᵁ V)).hom uMap = z := by
-    rw [Scheme.Opens.ι_appIso]
-    exact huMap
+    (j.isoImage W).inv W.ι V y1
   have hab' :
-      (((U.ι.isoImage W).inv ≫ W.ι).appIso V).hom x1 =
-        ((U.ι.isoImage W).inv.appIso V).hom z :=
-    hab.trans (congrArg (fun t ↦
-      ((U.ι.isoImage W).inv.appIso V).hom t) hW)
-  have hU :
-      (U.ι.appIso (((U.ι.isoImage W).inv ≫ W.ι) ''ᵁ V)).hom
-          (X.presheaf.map
-            (eqToHom (Scheme.Hom.comp_image
-              ((U.ι.isoImage W).inv ≫ W.ι) U.ι V).symm).op x0) = x1 := by
+      (((j.isoImage W).inv ≫ W.ι).appIso V).hom y1 =
+        ((j.isoImage W).inv.appIso V).hom
+          ((j.appIso (localSchemeModuleSourceOverW j W V).left).hom z) := by
+    refine hab.trans ?_
     rw [Scheme.Opens.ι_appIso]
-    rfl
+    exact congrArg (fun t ↦ ((j.isoImage W).inv.appIso V).hom t) hj.symm
+  have hfull := comp_appIso_hom_apply
+    ((j.isoImage W).inv ≫ W.ι) j V x0
   have hfull' :
-      (((((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι).appIso V).hom x0) =
-        (((U.ι.isoImage W).inv ≫ W.ι).appIso V).hom x1 :=
-    hfull.trans (congrArg (fun t ↦
-      (((U.ι.isoImage W).inv ≫ W.ι).appIso V).hom t) hU)
+      (((((j.isoImage W).inv ≫ W.ι) ≫ j).appIso V).hom x0) =
+        (((j.isoImage W).inv ≫ W.ι).appIso V).hom y1 := by
+    simpa only [x1, y1] using hfull
   refine hab'.symm.trans (hfull'.symm.trans ?_)
   have hcongr := appIso_congr_apply
-    (((U.ι.isoImage W).inv ≫ W.ι) ≫ U.ι)
-    (U.ι ''ᵁ W).ι (localSchemeModule_morphism_eq U W) V
-    (localSchemeModuleOpen_eq_one U W V) x
-  have hlast : ((U.ι ''ᵁ W).ι.appIso V).hom x = x := by
+    (((j.isoImage W).inv ≫ W.ι) ≫ j)
+    (j ''ᵁ W).ι (localSchemeModule_morphism_eq j W) V
+    (localSchemeModuleOpen_eq_one j W V) x
+  have hlast : ((j ''ᵁ W).ι.appIso V).hom x = x := by
     rw [Scheme.Opens.ι_appIso]
     rfl
   exact hcongr.trans hlast
 
-noncomputable def localModuleIso (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens) :
-    (localEquiv U W).functor.obj (((restrictFunctor U.ι).obj M).over W) ≅
-      M.over (U.ι ''ᵁ W) :=
-  (overEquiv (U.ι ''ᵁ W)).fullyFaithfulFunctor.preimageIso
-    ((overEquiv (U.ι ''ᵁ W)).counitIso.app
-        ((restrictFunctor (U.ι.isoImage W).inv).obj
-          ((overEquiv W).functor.obj (((restrictFunctor U.ι).obj M).over W))) ≪≫
-      localSchemeModuleIso M U W)
+noncomputable def localModuleIso (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) :
+    (localEquiv j W).functor.obj (((restrictFunctor j).obj M).over W) ≅
+      M.over (j ''ᵁ W) :=
+  (overEquiv (j ''ᵁ W)).fullyFaithfulFunctor.preimageIso
+    ((overEquiv (j ''ᵁ W)).counitIso.app
+        ((restrictFunctor (j.isoImage W).inv).obj
+          ((overEquiv W).functor.obj (((restrictFunctor j).obj M).over W))) ≪≫
+      localSchemeModuleIso M j W)
 
-noncomputable def localSchemeUnitIso (U : X.Opens) (W : U.toScheme.Opens) :
-    (restrictFunctor (U.ι.isoImage W).inv).obj
+noncomputable def localSchemeUnitIso (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (restrictFunctor (j.isoImage W).inv).obj
         ((overEquiv W).functor.obj
-          (_root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W))) ≅
-      (overEquiv (U.ι ''ᵁ W)).functor.obj
+          (_root_.SheafOfModules.unit (X.ringCatSheaf.over W))) ≅
+      (overEquiv (j ''ᵁ W)).functor.obj
         (_root_.SheafOfModules.unit
-          (X.ringCatSheaf.over (U.ι ''ᵁ W))) :=
-  restrictUnitIso (U.ι.isoImage W).inv
+          (Y.ringCatSheaf.over (j ''ᵁ W))) :=
+  restrictUnitIso (j.isoImage W).inv
 
-theorem localSchemeUnitIso_hom_app_apply (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((restrictFunctor (U.ι.isoImage W).inv).obj
+theorem localSchemeUnitIso_hom_app_apply (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((restrictFunctor (j.isoImage W).inv).obj
       ((overEquiv W).functor.obj
         (_root_.SheafOfModules.unit
-          (U.toScheme.ringCatSheaf.over W)))).val.obj V) :
-    (localSchemeUnitIso U W).hom.val.app V x =
-      ((U.ι.isoImage W).inv.appIso V.unop).hom x := by
+          (X.ringCatSheaf.over W)))).val.obj V) :
+    (localSchemeUnitIso j W).hom.val.app V x =
+      ((j.isoImage W).inv.appIso V.unop).hom x := by
   rfl
 
-noncomputable def localUnitIso (U : X.Opens) (W : U.toScheme.Opens) :
-    (localEquiv U W).functor.obj
-        (_root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W)) ≅
+noncomputable def localUnitIso (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens) :
+    (localEquiv j W).functor.obj
+        (_root_.SheafOfModules.unit (X.ringCatSheaf.over W)) ≅
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W)) :=
-  (overEquiv (U.ι ''ᵁ W)).fullyFaithfulFunctor.preimageIso
-    ((overEquiv (U.ι ''ᵁ W)).counitIso.app
-        ((restrictFunctor (U.ι.isoImage W).inv).obj
+        (Y.ringCatSheaf.over (j ''ᵁ W)) :=
+  (overEquiv (j ''ᵁ W)).fullyFaithfulFunctor.preimageIso
+    ((overEquiv (j ''ᵁ W)).counitIso.app
+        ((restrictFunctor (j.isoImage W).inv).obj
           ((overEquiv W).functor.obj
-            (_root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W)))) ≪≫
-      localSchemeUnitIso U W)
+            (_root_.SheafOfModules.unit (X.ringCatSheaf.over W)))) ≪≫
+      localSchemeUnitIso j W)
 
-noncomputable def localDualSectionsEquiv (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens) :
-    ((((restrictFunctor U.ι).obj M).over W ⟶
-        _root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W))) ≃
-      (M.over (U.ι ''ᵁ W) ⟶
+noncomputable def localDualSectionsEquiv (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) :
+    ((((restrictFunctor j).obj M).over W ⟶
+        _root_.SheafOfModules.unit (X.ringCatSheaf.over W))) ≃
+      (M.over (j ''ᵁ W) ⟶
         _root_.SheafOfModules.unit
-          (X.ringCatSheaf.over (U.ι ''ᵁ W))) :=
-  (localEquiv U W).fullyFaithfulFunctor.homEquiv.trans
-    (Iso.homCongr (localModuleIso M U W) (localUnitIso U W))
+          (Y.ringCatSheaf.over (j ''ᵁ W))) :=
+  (localEquiv j W).fullyFaithfulFunctor.homEquiv.trans
+    (Iso.homCongr (localModuleIso M j W) (localUnitIso j W))
 
-theorem localSchemeDualRestrict_restrict_app_apply (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localSchemeDualRestrict_restrict_app_apply (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W)))
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (y : ((restrictFunctor (U.ι.isoImage W).inv).obj
+        (Y.ringCatSheaf.over (j ''ᵁ W)))
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (y : ((restrictFunctor (j.isoImage W).inv).obj
       ((overEquiv W).functor.obj
-        (((restrictFunctor U.ι).obj M).over W))).val.obj V) :
-    (localSchemeUnitIso U W).hom.val.app V
-        (((restrictFunctor (U.ι.isoImage W).inv).map
+        (((restrictFunctor j).obj M).over W))).val.obj V) :
+    (localSchemeUnitIso j W).hom.val.app V
+        (((restrictFunctor (j.isoImage W).inv).map
           ((overEquiv W).functor.map
-            (localDualRestrict M U W alpha))).val.app V y) =
-      (localSchemeUnitIso U W).hom.val.app V
+            (localDualRestrict M j W alpha))).val.app V y) =
+      (localSchemeUnitIso j W).hom.val.app V
         (((overEquiv W).functor.map
-          (localDualRestrict M U W alpha)).val.app
-            ((U.ι.isoImage W).inv.opensFunctor.op.obj V) y) := by
-  exact congrArg (fun z ↦ (localSchemeUnitIso U W).hom.val.app V z)
-    (restrictFunctor_map_app_apply (U.ι.isoImage W).inv
-      ((overEquiv W).functor.map (localDualRestrict M U W alpha)) V y)
+          (localDualRestrict M j W alpha)).val.app
+            ((j.isoImage W).inv.opensFunctor.op.obj V) y) := by
+  exact congrArg (fun z ↦ (localSchemeUnitIso j W).hom.val.app V z)
+    (restrictFunctor_map_app_apply (j.isoImage W).inv
+      ((overEquiv W).functor.map (localDualRestrict M j W alpha)) V y)
 
-theorem localSchemeDualRestrict_value (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localSchemeDualRestrict_value (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W)))
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (localSchemeUnitIso U W).hom.val.app V
+        (Y.ringCatSheaf.over (j ''ᵁ W)))
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (localSchemeUnitIso j W).hom.val.app V
         (((overEquiv W).functor.map
-          (localDualRestrict M U W alpha)).val.app
-            ((U.ι.isoImage W).inv.opensFunctor.op.obj V)
-          (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-            ((restrictFunctor U.ι).obj M)).val.app V
+          (localDualRestrict M j W alpha)).val.app
+            ((j.isoImage W).inv.opensFunctor.op.obj V)
+          (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+            ((restrictFunctor j).obj M)).val.app V
             (((restrictFunctorComp
-              ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V
+              ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V
               (((restrictFunctorCongr
-                (localSchemeModule_morphism_eq U W)).inv.app M).val.app V x)))) =
-      ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x := by
+                (localSchemeModule_morphism_eq j W)).inv.app M).val.app V x)))) =
+      ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x := by
   let y :=
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V
       (((restrictFunctorComp
-        ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V
+        ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V
         (((restrictFunctorCongr
-          (localSchemeModule_morphism_eq U W)).inv.app M).val.app V x)))
-  let Z := (U.ι.isoImage W).inv.opensFunctor.op.obj V
-  let k := fun z ↦ (localSchemeUnitIso U W).hom.val.app V z
+          (localSchemeModule_morphism_eq j W)).inv.app M).val.app V x)))
+  let Z := (j.isoImage W).inv.opensFunctor.op.obj V
+  let k := fun z ↦ (localSchemeUnitIso j W).hom.val.app V z
   have hl := overEquiv_map_app_apply W
-    (localDualRestrict M U W alpha) Z y
-  have hr := overEquiv_map_app_apply (U.ι ''ᵁ W) alpha V x
+    (localDualRestrict M j W alpha) Z y
+  have hr := overEquiv_map_app_apply (j ''ᵁ W) alpha V x
   change k (((overEquiv W).functor.map
-    (localDualRestrict M U W alpha)).val.app Z y) = _
+    (localDualRestrict M j W alpha)).val.app Z y) = _
   calc
     k (((overEquiv W).functor.map
-        (localDualRestrict M U W alpha)).val.app Z y) =
-      k ((localDualRestrict M U W alpha).val.app
+        (localDualRestrict M j W alpha)).val.app Z y) =
+      k ((localDualRestrict M j W alpha).val.app
         (op (W.overEquivalence.symm.functor.obj Z.unop)) y) :=
       congrArg k hl
-    _ = ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x :=
+    _ = ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x :=
       by
         rw [hr]
         let Q := op (W.overEquivalence.symm.functor.obj Z.unop)
-        have hu := localSchemeUnitIso_hom_app_apply U W V
-          ((localDualRestrict M U W alpha).val.app Q y)
-        have hd := localDualRestrict_app_apply M U W alpha Q y
+        have hu := localSchemeUnitIso_hom_app_apply j W V
+          ((localDualRestrict M j W alpha).val.app Q y)
+        have hd := localDualRestrict_app_apply M j W alpha Q y
         refine hu.trans ?_
         refine (congrArg (fun z ↦
-          ((U.ι.isoImage W).inv.appIso V.unop).hom z) hd).trans ?_
-        let i := localSchemeModuleOverIso U W V.unop
-        have hy := localSchemeModuleTransition_raw_app_apply M U W V x
+          ((j.isoImage W).inv.appIso V.unop).hom z) hd).trans ?_
+        let i := localSchemeModuleOverIso j W V.unop
+        have hy := localSchemeModuleTransition_raw_app_apply M j W V x
         have ha := PresheafOfModules.naturality_apply alpha.val i.hom.op x
         have hyAlpha := congrArg
           (fun z ↦ alpha.val.app
-            (op (localSchemeModuleSourceOver U W V.unop)) z) hy
+            (op (localSchemeModuleSourceOver j W V.unop)) z) hy
         have hAlpha := hyAlpha.trans ha
         let f := fun z ↦
-          ((U.ι.isoImage W).inv.appIso V.unop).hom
-            ((U.ι.appIso Q.unop.left).hom z)
+          ((j.isoImage W).inv.appIso V.unop).hom
+            ((j.appIso Q.unop.left).hom z)
         refine (congrArg f hAlpha).trans ?_
-        exact localSchemeUnitTransition_app_apply U W V.unop _
+        exact localSchemeUnitTransition_app_apply j W V.unop _
 
-theorem localSchemeDualRestrict_raw (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localSchemeDualRestrict_raw (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W)))
-    (V : Opposite (U.ι ''ᵁ W).toScheme.Opens)
-    (x : ((overEquiv (U.ι ''ᵁ W)).functor.obj
-      (M.over (U.ι ''ᵁ W))).val.obj V) :
-    (localSchemeUnitIso U W).hom.val.app V
-        (((restrictFunctor (U.ι.isoImage W).inv).map
+        (Y.ringCatSheaf.over (j ''ᵁ W)))
+    (V : Opposite (j ''ᵁ W).toScheme.Opens)
+    (x : ((overEquiv (j ''ᵁ W)).functor.obj
+      (M.over (j ''ᵁ W))).val.obj V) :
+    (localSchemeUnitIso j W).hom.val.app V
+        (((restrictFunctor (j.isoImage W).inv).map
           ((overEquiv W).functor.map
-            (localDualRestrict M U W alpha))).val.app V
-          ((localSchemeModuleIsoOverFunctor M U W).inv.val.app V
-            (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-              ((restrictFunctor U.ι).obj M)).val.app V
+            (localDualRestrict M j W alpha))).val.app V
+          ((localSchemeModuleIsoOverFunctor M j W).inv.val.app V
+            (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+              ((restrictFunctor j).obj M)).val.app V
               (((restrictFunctorComp
-                ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V
+                ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V
                 (((restrictFunctorCongr
-                  (localSchemeModule_morphism_eq U W)).inv.app M).val.app V x))))) =
-      ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x := by
+                  (localSchemeModule_morphism_eq j W)).inv.app M).val.app V x))))) =
+      ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x := by
   let y :=
-    (((restrictFunctorComp (U.ι.isoImage W).inv W.ι).hom.app
-      ((restrictFunctor U.ι).obj M)).val.app V
+    (((restrictFunctorComp (j.isoImage W).inv W.ι).hom.app
+      ((restrictFunctor j).obj M)).val.app V
       (((restrictFunctorComp
-        ((U.ι.isoImage W).inv ≫ W.ι) U.ι).hom.app M).val.app V
+        ((j.isoImage W).inv ≫ W.ι) j).hom.app M).val.app V
         (((restrictFunctorCongr
-          (localSchemeModule_morphism_eq U W)).inv.app M).val.app V x)))
+          (localSchemeModule_morphism_eq j W)).inv.app M).val.app V x)))
   let k := fun z ↦
-    (localSchemeUnitIso U W).hom.val.app V
-      (((restrictFunctor (U.ι.isoImage W).inv).map
+    (localSchemeUnitIso j W).hom.val.app V
+      (((restrictFunctor (j.isoImage W).inv).map
         ((overEquiv W).functor.map
-          (localDualRestrict M U W alpha))).val.app V z)
-  have h0 := localSchemeModuleIsoOverFunctor_inv_app_apply M U W V y
+          (localDualRestrict M j W alpha))).val.app V z)
+  have h0 := localSchemeModuleIsoOverFunctor_inv_app_apply M j W V y
   calc
     _ = k y := congrArg k h0
-    _ = (localSchemeUnitIso U W).hom.val.app V
+    _ = (localSchemeUnitIso j W).hom.val.app V
         (((overEquiv W).functor.map
-          (localDualRestrict M U W alpha)).val.app
-            ((U.ι.isoImage W).inv.opensFunctor.op.obj V) y) :=
-      localSchemeDualRestrict_restrict_app_apply M U W alpha V y
-    _ = ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x :=
-      localSchemeDualRestrict_value M U W alpha V x
+          (localDualRestrict M j W alpha)).val.app
+            ((j.isoImage W).inv.opensFunctor.op.obj V) y) :=
+      localSchemeDualRestrict_restrict_app_apply M j W alpha V y
+    _ = ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x :=
+      localSchemeDualRestrict_value M j W alpha V x
 
-theorem localSchemeDualRestrict (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localSchemeDualRestrict (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W))) :
-    (localSchemeModuleIso M U W).inv ≫
-        (restrictFunctor (U.ι.isoImage W).inv).map
-          ((overEquiv W).functor.map (localDualRestrict M U W alpha)) ≫
-      (localSchemeUnitIso U W).hom =
-        (overEquiv (U.ι ''ᵁ W)).functor.map alpha := by
+        (Y.ringCatSheaf.over (j ''ᵁ W))) :
+    (localSchemeModuleIso M j W).inv ≫
+        (restrictFunctor (j.isoImage W).inv).map
+          ((overEquiv W).functor.map (localDualRestrict M j W alpha)) ≫
+      (localSchemeUnitIso j W).hom =
+        (overEquiv (j ''ᵁ W)).functor.map alpha := by
   apply (_root_.SheafOfModules.forget
-    (U.ι ''ᵁ W).toScheme.ringCatSheaf).map_injective
+    (j ''ᵁ W).toScheme.ringCatSheaf).map_injective
   apply PresheafOfModules.hom_ext
   intro V
   apply ModuleCat.hom_ext
   apply LinearMap.ext
   intro x
-  change ((localSchemeUnitIso U W).hom.val.app V)
-      (((restrictFunctor (U.ι.isoImage W).inv).map
-        ((overEquiv W).functor.map (localDualRestrict M U W alpha))).val.app V
-          ((localSchemeModuleIso M U W).inv.val.app V x)) =
-    ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x
+  change ((localSchemeUnitIso j W).hom.val.app V)
+      (((restrictFunctor (j.isoImage W).inv).map
+        ((overEquiv W).functor.map (localDualRestrict M j W alpha))).val.app V
+          ((localSchemeModuleIso M j W).inv.val.app V x)) =
+    ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x
   dsimp only [localSchemeModuleIso]
   rw [localSchemeModuleIsoStage5_inv]
   erw [sheafOfModules_comp_app_apply]
@@ -1079,108 +1084,108 @@ theorem localSchemeDualRestrict (M : X.Modules) (U : X.Opens)
   erw [sheafOfModules_comp_app_apply]
   rw [localSchemeModuleIsoStage2_inv]
   erw [sheafOfModules_comp_app_apply]
-  have hx0 := localSchemeModuleIsoOverImage_inv_app_apply M U W V x
+  have hx0 := localSchemeModuleIsoOverImage_inv_app_apply M j W V x
   let k0 := fun y ↦
-    (localSchemeUnitIso U W).hom.val.app V
-      (((restrictFunctor (U.ι.isoImage W).inv).map
-        ((overEquiv W).functor.map (localDualRestrict M U W alpha))).val.app V
-          ((localSchemeModuleIsoOverFunctor M U W).inv.val.app V
-            ((localSchemeModuleIsoCompW M U W).inv.val.app V
-              ((localSchemeModuleIsoCompU M U W).inv.val.app V
-                ((localSchemeModuleIsoCongr M U W).inv.val.app V y)))))
-  change k0 ((localSchemeModuleIsoOverImage M U W).inv.val.app V x) = _
+    (localSchemeUnitIso j W).hom.val.app V
+      (((restrictFunctor (j.isoImage W).inv).map
+        ((overEquiv W).functor.map (localDualRestrict M j W alpha))).val.app V
+          ((localSchemeModuleIsoOverFunctor M j W).inv.val.app V
+            ((localSchemeModuleIsoCompW M j W).inv.val.app V
+              ((localSchemeModuleIsoCompU M j W).inv.val.app V
+                ((localSchemeModuleIsoCongr M j W).inv.val.app V y)))))
+  change k0 ((localSchemeModuleIsoOverImage M j W).inv.val.app V x) = _
   calc
-    k0 ((localSchemeModuleIsoOverImage M U W).inv.val.app V x) = k0 x :=
+    k0 ((localSchemeModuleIsoOverImage M j W).inv.val.app V x) = k0 x :=
       congrArg k0 hx0
-    _ = ((overEquiv (U.ι ''ᵁ W)).functor.map alpha).val.app V x :=
-      localSchemeDualRestrict_raw M U W alpha V x
+    _ = ((overEquiv (j ''ᵁ W)).functor.map alpha).val.app V x :=
+      localSchemeDualRestrict_raw M j W alpha V x
 
-theorem localDualSectionsEquiv_localDualRestrict (M : X.Modules)
-    (U : X.Opens) (W : U.toScheme.Opens)
-    (alpha : M.over (U.ι ''ᵁ W) ⟶
+theorem localDualSectionsEquiv_localDualRestrict (M : Y.Modules)
+    (j : X ⟶ Y) [IsOpenImmersion j] (W : X.Opens)
+    (alpha : M.over (j ''ᵁ W) ⟶
       _root_.SheafOfModules.unit
-        (X.ringCatSheaf.over (U.ι ''ᵁ W))) :
-    localDualSectionsEquiv M U W (localDualRestrict M U W alpha) = alpha := by
-  change (localModuleIso M U W).inv ≫
-      (localEquiv U W).functor.map (localDualRestrict M U W alpha) ≫
-        (localUnitIso U W).hom = alpha
-  apply (overEquiv (U.ι ''ᵁ W)).functor.map_injective
+        (Y.ringCatSheaf.over (j ''ᵁ W))) :
+    localDualSectionsEquiv M j W (localDualRestrict M j W alpha) = alpha := by
+  change (localModuleIso M j W).inv ≫
+      (localEquiv j W).functor.map (localDualRestrict M j W alpha) ≫
+        (localUnitIso j W).hom = alpha
+  apply (overEquiv (j ''ᵁ W)).functor.map_injective
   simp only [Functor.map_comp, localModuleIso, localUnitIso,
     Functor.FullyFaithful.preimageIso_hom,
     Functor.FullyFaithful.preimageIso_inv,
     Functor.FullyFaithful.map_preimage, Iso.trans_hom, Iso.trans_inv]
-  let E := overEquiv (U.ι ''ᵁ W)
-  let A := (restrictFunctor (U.ι.isoImage W).inv).obj
-    ((overEquiv W).functor.obj (((restrictFunctor U.ι).obj M).over W))
-  let O := (restrictFunctor (U.ι.isoImage W).inv).obj
+  let E := overEquiv (j ''ᵁ W)
+  let A := (restrictFunctor (j.isoImage W).inv).obj
+    ((overEquiv W).functor.obj (((restrictFunctor j).obj M).over W))
+  let O := (restrictFunctor (j.isoImage W).inv).obj
     ((overEquiv W).functor.obj
-      (_root_.SheafOfModules.unit (U.toScheme.ringCatSheaf.over W)))
+      (_root_.SheafOfModules.unit (X.ringCatSheaf.over W)))
   let q : A ⟶ O :=
-    (restrictFunctor (U.ι.isoImage W).inv).map
-      ((overEquiv W).functor.map (localDualRestrict M U W alpha))
-  change ((localSchemeModuleIso M U W).inv ≫ (E.counitIso.app A).inv) ≫
+    (restrictFunctor (j.isoImage W).inv).map
+      ((overEquiv W).functor.map (localDualRestrict M j W alpha))
+  change ((localSchemeModuleIso M j W).inv ≫ (E.counitIso.app A).inv) ≫
       E.functor.map (E.inverse.map q) ≫ (E.counitIso.app O).hom ≫
-        (localSchemeUnitIso U W).hom = E.functor.map alpha
+        (localSchemeUnitIso j W).hom = E.functor.map alpha
   have hmid : (E.counitIso.app A).inv ≫
       E.functor.map (E.inverse.map q) ≫ (E.counitIso.app O).hom = q := by
     simpa only [Functor.id_obj] using
       equivalence_counitInv_map_inverse_comp_counit E q
   calc
-    ((localSchemeModuleIso M U W).inv ≫ (E.counitIso.app A).inv) ≫
+    ((localSchemeModuleIso M j W).inv ≫ (E.counitIso.app A).inv) ≫
           E.functor.map (E.inverse.map q) ≫ (E.counitIso.app O).hom ≫
-            (localSchemeUnitIso U W).hom =
-        (localSchemeModuleIso M U W).inv ≫
+            (localSchemeUnitIso j W).hom =
+        (localSchemeModuleIso M j W).inv ≫
           (((E.counitIso.app A).inv ≫ E.functor.map (E.inverse.map q) ≫
-            (E.counitIso.app O).hom) ≫ (localSchemeUnitIso U W).hom) := by
+            (E.counitIso.app O).hom) ≫ (localSchemeUnitIso j W).hom) := by
       simp only [Category.assoc]
-    _ = (localSchemeModuleIso M U W).inv ≫
-        (q ≫ (localSchemeUnitIso U W).hom) :=
-      congrArg (fun k ↦ (localSchemeModuleIso M U W).inv ≫
-        (k ≫ (localSchemeUnitIso U W).hom)) hmid
-    _ = E.functor.map alpha := localSchemeDualRestrict M U W alpha
+    _ = (localSchemeModuleIso M j W).inv ≫
+        (q ≫ (localSchemeUnitIso j W).hom) :=
+      congrArg (fun k ↦ (localSchemeModuleIso M j W).inv ≫
+        (k ≫ (localSchemeUnitIso j W).hom)) hmid
+    _ = E.functor.map alpha := localSchemeDualRestrict M j W alpha
 
-theorem localDualRestrict_bijective (M : X.Modules) (U : X.Opens)
-    (W : U.toScheme.Opens) : Function.Bijective (localDualRestrict M U W) := by
+theorem localDualRestrict_bijective (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : X.Opens) : Function.Bijective (localDualRestrict M j W) := by
   constructor
   · intro alpha beta h
-    have h' := congrArg (localDualSectionsEquiv M U W) h
+    have h' := congrArg (localDualSectionsEquiv M j W) h
     simpa only [localDualSectionsEquiv_localDualRestrict] using h'
   · intro beta
-    refine ⟨localDualSectionsEquiv M U W beta, ?_⟩
-    apply (localDualSectionsEquiv M U W).injective
+    refine ⟨localDualSectionsEquiv M j W beta, ?_⟩
+    apply (localDualSectionsEquiv M j W).injective
     rw [localDualSectionsEquiv_localDualRestrict]
 
-noncomputable def dualRestrictComponentIso (M : X.Modules) (U : X.Opens)
-    (W : Opposite U.toScheme.Opens) :
-    ((restrictFunctor U.ι).obj (dualObj M)).val.obj W ≅
-      (dualObj ((restrictFunctor U.ι).obj M)).val.obj W :=
+noncomputable def dualRestrictComponentIso (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : Opposite X.Opens) :
+    ((restrictFunctor j).obj (dualObj M)).val.obj W ≅
+      (dualObj ((restrictFunctor j).obj M)).val.obj W :=
   (LinearEquiv.ofBijective
-    ((dualRestrictPresheafHom M U).app W).hom
-    (localDualRestrict_bijective M U W.unop)).toModuleIso
+    ((dualRestrictPresheafHom M j).app W).hom
+    (localDualRestrict_bijective M j W.unop)).toModuleIso
 
-theorem dualRestrictComponentIso_hom (M : X.Modules) (U : X.Opens)
-    (W : Opposite U.toScheme.Opens) :
-    (dualRestrictComponentIso M U W).hom =
-      (dualRestrictPresheafHom M U).app W := by
+theorem dualRestrictComponentIso_hom (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
+    (W : Opposite X.Opens) :
+    (dualRestrictComponentIso M j W).hom =
+      (dualRestrictPresheafHom M j).app W := by
   apply ModuleCat.hom_ext
   apply LinearMap.ext
   intro x
   rfl
 
-noncomputable def dualRestrictPresheafIso (M : X.Modules) (U : X.Opens) :
-    ((restrictFunctor U.ι).obj (dualObj M)).val ≅
-      (dualObj ((restrictFunctor U.ι).obj M)).val :=
+noncomputable def dualRestrictPresheafIso (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j] :
+    ((restrictFunctor j).obj (dualObj M)).val ≅
+      (dualObj ((restrictFunctor j).obj M)).val :=
   PresheafOfModules.isoMk
-    (dualRestrictComponentIso M U)
+    (dualRestrictComponentIso M j)
     (fun {_ _} f ↦ by
       rw [dualRestrictComponentIso_hom, dualRestrictComponentIso_hom]
-      exact (dualRestrictPresheafHom M U).naturality f)
+      exact (dualRestrictPresheafHom M j).naturality f)
 
 /-- Restriction along an open immersion commutes with the sheaf dual. -/
-noncomputable def dualRestrictIso (M : X.Modules) (U : X.Opens) :
-    (restrictFunctor U.ι).obj (dualObj M) ≅
-      dualObj ((restrictFunctor U.ι).obj M) :=
-  (_root_.SheafOfModules.fullyFaithfulForget U.toScheme.ringCatSheaf).preimageIso
-    (dualRestrictPresheafIso M U)
+noncomputable def dualRestrictIso (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j] :
+    (restrictFunctor j).obj (dualObj M) ≅
+      dualObj ((restrictFunctor j).obj M) :=
+  (_root_.SheafOfModules.fullyFaithfulForget X.ringCatSheaf).preimageIso
+    (dualRestrictPresheafIso M j)
 
 end AlgebraicGeometry.Scheme.Modules
