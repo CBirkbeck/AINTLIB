@@ -249,6 +249,20 @@ theorem restrictedProj_comp_chartToBase :
     (W := P.V) P.hover).trans ?_
   simp only [G.actionProj_left_π, prOpenToBase]
 
+/-- The chart co-action as a single scheme morphism `Spec (A ⊗[R] B) ⟶ U` (the
+`Spec`-side composite of the whole Künneth chain with the restricted action). Its
+`appTop`, conjugated by the section isos, is `coactionRing`. -/
+noncomputable def chartCoactionSpec :
+    (Spec (.of (P.groupRing ⊗[P.baseRing] P.chartRing)) : Scheme) ⟶ P.U.toScheme :=
+  P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable
+
+/-- `coactionRing` is the `appTop` of the single scheme morphism, in the section isos. -/
+theorem coactionRing_eq_appTop :
+    P.coactionRing = P.U.topIso.inv ≫ P.chartCoactionSpec.appTop
+      ≫ (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.chartRing))).hom := by
+  rw [coactionRing, coactionToPullback, chartCoactionSpec]
+  simp only [Scheme.Hom.comp_appTop, Category.assoc]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
