@@ -14268,3 +14268,28 @@ Z-case: keystone both sides + e4 (pushed chart point reads through bcChartAwayMa
 compat + Ell_infinity both sides. Then GLC.mulModelHom_specPoints := e1/e3 (the pushed pair is
 the atlas lift; through the atlas bridge) + the atlas spec + D-NAT ×3. Then 0c-i → 0c-ii
 (BOARD-SIGNAL) → 0h → T-W7.12 → T-W7a.
+
+## Amendments v10.109 (fable-PIC0) — READ-FIRST gate satisfied: codex-branch reuse verdict
+
+**Diff-read done** (`codex/fibrewise-weierstrass-comparison-pre-rebase` vs merge-base dd9782e6e;
+the rebased tip lost the two monoidal commits — the pre-rebase ref carries them: ca22ffd12
+"unit-sided pullback tensor isomorphisms", ed4ab80a9 "pullback tensor comparison"; +808
+PullbackTensorMonoidal / +227 SheafOfModulesMonoidal).
+
+**VERDICT: ADAPT (partial consume; G1 disjoint — GO).** The branch contains (a) an independent
+duplicate of my landed B-chain (`restrictScalarsCommRing{Unit,TensorComponent,Tensor,LaxMonoidal}`,
+`pushforwardCommRingLaxMonoidal`, `pullbackCommRingOplaxMonoidal` — data-level, richer API than my
+Nonempty-forms — plus `restrictScalarsTensorIsoOfRingEquiv` ≈ my ι-CORE,
+`pushforwardTensorIsoOfIsIso` ≈ my ι-PF⊗, `sheafificationTensorSheafificationIso` ≈ my D-Idem);
+(b) **new value beyond my chain**: the global comparison map at tensorObj-level
+`pullbackTensorObjHom (f M N)` + `pullbackTensorObjHom_naturality` (note: carries a
+maxHeartbeats-4000000 raise — /buzz target at integration) + the **unit-sided iso theorems**
+(`pullbackTensorObjHom_unit_isIso`, `sheafifiedPresheafPullbackTensorHom_unit_left/right_isIso`,
+`sheafifiedPresheafPullbackUnitHom_isIso`); (c) **NOT present**: free-yoneda ⊗-machinery,
+presentation/five-lemma, the general-`f` iso — my G1/G3 mathematical content is DISJOINT.
+**Operational consequences:** (i) G1 GO per banked plan (disjoint); (ii) at [OWNER-FLW]
+integration, RETARGET G3/A's iso-ness onto their `pullbackTensorObjHom` (their map-layer replaces
+my A-packaging's map-derivation; their unit-sided isos are the unitality legs) and DEDUP the
+B-chain doubles (recommend: keep their data-level oplax def as canonical, graft my rfl-coherence
+proofs/transport-packaging where shorter — coordinator's merge call); (iii) until integration I
+consume nothing from the local branch (owner-reserved), so no import-dependency is created.
