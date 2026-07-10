@@ -14092,3 +14092,73 @@ chartPointTriple(+self=1) + equation_chartPointTriple.
 toAffine(χ∘Fst) + toAffine(χ∘Snd) = [keystone at φ_P := ψ∘algMap∘leftLeg via d4a/d4b legs]
 dictionary(Pᵤ) + dictionary(Qᵤ). Remaining plumbing: the ι-side compat chains (descent-h vs g)
 + the sum-point's R-compat + the smul-scalar bookkeeping; then the GLC fill.
+
+## PHASE B DECOMPOSITION (fable-P4, 2026-07-10; /develop --decompose of α_univ-descent + the bijection)
+Source of record: `.mathlib-quality/km-47-alpha-univ-quotes.md` (KM 4.7.0 proof, printed 113–116,
+verbatim). Anchor statement: `representable_of_rigid_of_torsor` (QuotientProblem.lean:840, T-Q6d.γ,
+sorry'd WIP) — its banked route is exactly Phase A's engine + the tickets below. Bridging dialect:
+the ModuliProblem/EllObj layer (QuotientProblem.lean: RelRepData, TorsorData, simulSchemeAction(Total),
+simul_representable, free_of_rigid — all PROVEN) ↔ the geometric RouteA layer (EngineDescent.lean:
+the engine, W5a `exists_quotientIsoSpec_top`, `exists_quotientπ_lift` T-Q5). The [a1] seam
+(`isCurveAction_simulSchemeActionTotal`, `free_simulSchemeAction`) is PROVEN.
+
+**[B0] T-B0-GLOBALMODEL — the global model transports to 𝕸(𝒫,δ).**
+Statement (shape): if `Q.RepresentableBy XQ` and `XQ.curve` carries a compatible global model
+`φQ : XQ.curve.E ≅ projModel W_Q` (hπ/hzero compats; supplied per-application: Legendre, Hesse),
+then the universal curve of `𝕸(𝒫.simul δ)` (= `simulRepresentableBy`'s EllObj) carries one too —
+`W₀ := W_Q.map (classifying appTop)`, via `isPullback_projModelBaseChange` + the simul-curve's
+pullback presentation. Sketch: the simul-EllObj's curve IS a pullback of `XQ.curve` (read
+`simulRepresentableBy`); compose φQ's base change with the pullback comparison
+(`IsPullback.isoIsPullback`); compats by the π/zero legs of both squares. Mathlib/AINTLIB:
+`isPullback_projModelBaseChange`, `projModelBaseChange_π`, `projModelZero_baseChange`,
+`IsPullback.isoIsPullback(_hom_fst/snd)`. Generality: any EllObj-pullback of a globally-modelled
+curve. Source: KM 4.7.0 setup (quotes §p.113); Phase-A launchpad interface.
+
+**[B1] T-B1-ALPHADESC — α_univ descends (THE dispatched first target).**
+Statement (shape): let `(C', q)` be Phase A's output (cartesian `IsPullback q C.π C'.π quotientπ`,
+zero-compat), `P` rel-rep (`RelRepData P` at the two EllObjs), and `α ∈ P.obj (op X_E)` a
+`G`-invariant class (∀ γ, the `simulSchemeActionTotal`-pullback of α equals α — the θ-tautology).
+Then `∃! α₀ ∈ P.obj (op X_{E₀})` with `P.map (q-EllHom).op α₀ = α`. Sketch (route (a) — replaces
+SGA I 1.2/1.7, per quotes §p.114): (i) present `α` as a section `sα : X ⟶ Z_P(X_E)` via
+`RelRepData.eqv` at `g = 𝟙`; (ii) rel-rep naturality along Phase A's cartesian square identifies
+`Z_P(X_E) ≅ pullback (Z_P(X_{E₀}) → X/G) quotientπ`-style (the base-change of the representing
+scheme — RelRepData.nat + `X.pullbackAlong`-functoriality); (iii) the composite
+`X → Z_P(X_E) → Z_P(X_{E₀})` is `G`-invariant (from α's invariance + TorsorData-free equivariance
+bookkeeping); (iv) descend by `exists_quotientπ_lift` (T-Q5) to `s₀ : X/G ⟶ Z_P(X_{E₀})`;
+section-property + pullback-identity by `quotientπ`-epi (`epi_pullback_snd_quotientπ`/T-Q5
+uniqueness); (v) `α₀ := eqv 𝟙 ⟨s₀,·⟩`; uniqueness from eqv-injectivity + epi. Generality: any
+rel-rep `P`, any finite free quotient with cartesian curve-square — NOT simul-specific.
+Source: quotes §p.114 ("because 𝒫 is relatively affine, α_univ descends").
+
+**[B2] T-B2-TORSORBIJ — the representability bijection (KM pp. 114–116).**
+Sub-leaves (per A5-splitting):
+* [B2a] T-B2a-CARTESIAN: a `G`-equivariant morphism of finite étale `G`-torsors over `f₀ : S → S'`
+  is cartesian (quotes §p.115 ¶1). Sketch: both torsors trivialize fppf-locally; the comparison
+  `δ_{E/S} → S ×_{S'} 𝕸` is a `G`-map of `G`-torsors ⟹ iso by [B2b]; or direct: the induced map
+  on the `∐_G`-presentations (TorsorData.torsor) + descent. AINTLIB: `TorsorData.torsor`,
+  `isIso_of_isPullback_of_fppf`, W2-machinery.
+* [B2b] T-B2b-TORSORISO: a `G`-equivariant `S`-morphism between finite étale `G`-torsors is an
+  isomorphism (quotes §p.116 ¶1). Sketch: the `∐_G Z ≅ Z ×_S Z` presentations + the map is a
+  pullback of `𝟙` fppf-locally; or: mono+epi via the torsor bijections. 
+* [B2c] T-B2c-RIGIDDESC: rigidity ⟹ iso-detection along the surjective étale `π` (quotes §p.115
+  a)): for rigid `P`, two `P`-objects over `S` isomorphic after `π*` (π finite étale surjective,
+  G-torsor) with the descent-compatibility are isomorphic over `S`. In rel-rep terms: sections of
+  `Z_P` agreeing after precomposition with an epi are equal — mostly `cancel_epi` + eqv-naturality.
+* [B2d] T-B2d-ASSEMBLY: existence a) + uniqueness b) of `f₀` per quotes §§pp.114–116, on the
+  TorsorData interface: `δ_{E/S} := (htors X).Z`, `f :=` the classifying map of
+  `(E ×_S δ_{E/S}, α, β_univ)` via `simul_representable`'s eqv; equivariance tautological;
+  quotient → `f₀`; a) via [B2c]; b) via the fiber-product `X`, [B2b], and `π`-epi.
+
+**[B3] T-B3-FILL — fill `representable_of_rigid_of_torsor`** from Phase A (engine +
+`exists_quotientIsoSpec_top` bridging the affine quotient) + [B0] + [B1] + [B2]. NOTE the engine's
+global-model hypothesis: T-Q6d.γ's statement has no model input — EITHER thread a
+`hmodel`-hypothesis through (statement strengthening, B2-protocol note: the applications all
+supply it) OR consume the [OWNER-FLW] pin when it lands for the model-free form. Decision at fill
+time; the honest default is the hmodel-variant `representable_of_rigid_of_torsor_of_globalModel`
+first (mirror of Phase A's variant pattern).
+
+**[B4] T-E5c — the amended `representable_iff`** consuming [B3]. **[B5] applications** — Y(N)
+route A + Γ_H: `gammaH_representable_of_rigid` (GammaHRepresentability.lean, staged) + the Y(N)
+instantiations with the Legendre/Hesse TorsorData + global models.
+
+Order of work: B1 (dispatched first) → B2a/B2b/B2c (parallelizable) → B2d → B0 → B3 → B4 → B5.
