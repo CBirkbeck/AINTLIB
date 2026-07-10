@@ -15138,3 +15138,38 @@ Agent extending to the 5 Over-level canonical axioms (`mulOver_*`) in GroupLawAx
 base-change naturality (pullback.map/lift commute with base change since all built from the same
 `projModelBaseChangeOf`). Requires removing GLC's 5 sorried statements (verified zero code refs) to free
 the names — the recommended option (a) from v10.112, executed on this frontier (reversible).
+
+### v10.120 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1a/b] — all three Hopf structure maps on `groupRing` are `R`-ALGEBRA maps
+
+*Zero sorries, axiom-clean. Two files advanced; no p0/p2 touches.*
+
+- **`PatchKunneth.lean`** (generic, reusable): added the **Γ-dual leg lemmas** —
+  `patchKunnethΓ` (section-level transport `Γ(pullback,⊤) ≅ A ⊗[R] B`) plus
+  `topIso_inv_{fst,snd}_appTop_patchKunnethΓ` (the two projections dualize to
+  `includeLeft`/`includeRight`), and `patchKunneth_hom_base`. The Γ-duals are proven by
+  `appTop`-ing the Spec-side legs, then `Scheme.ΓSpecIso_naturality` +
+  `Scheme.Opens.toSpecΓ_appTop` + `appTop`-functoriality (`K.hom.appTop ≫ K.inv.appTop =
+  (K.inv ≫ K.hom).appTop = 𝟙`).
+- **`PatchHopf.lean`**: `algebraMap_comp_groupPatchCounit` (Γ-dual of `unitHom_π`),
+  `algebraMap_comp_groupPatchAntipode` (of `invHom_π`), and — the real one —
+  **`algebraMap_comp_groupPatchComul`**: `Δ ∘ algebraMap = algebraMap`, i.e. `Δ` is
+  `R`-linear. Route: `algebraMap R (A⊗A) = includeLeft ∘ algebraMap R A`, then the
+  left-leg Γ-dual reduces the claim to the Γ-dual of the *proven* `squareMul_π`.
+  Support: `appLE_id`, `appLE_congr_hom` (transport `appLE` along an equality of
+  morphisms — the fix for "motive is not type correct" when the `≤`-proof mentions the
+  morphism), `appLE_top_top`, `ι_appLE_top` (`= topIso.inv`, by `ι_appLE` + `topIso_inv`
+  + `congr 1`).
+
+**Lean-ops** (registry): (i) `Scheme.Hom.appLE`'s `e : V ≤ f ⁻¹ᵁ U` mentions `f`, so
+`rw` on `f` inside it fails with "motive is not type correct" — use an
+`appLE_congr_hom`-style transport lemma (`subst h; rfl`). (ii) `appTop` is an abbrev for
+`app ⊤`: `rw [resLE_app_top]` will not key against a goal displaying `appTop` — supply
+the instance via a `show … from Scheme.Hom.resLE_app_top (f := …) (U := …) (V := …) e`.
+(iii) mathlib's `ι_appLE` is the escape hatch when `topIso`-vs-`appLE` identities hit the
+instance-transparency wall.
+
+**NEXT** (route 1c): AlgHom packaging (`Bialgebra`-shaped ε/Δ), then the counit laws as
+Γ-duals of `unitOver_mulOver_left` (+ a right unit law, one hom-group `mul_comm` away);
+then 1d coassoc (triple Künneth) and 1e antipode. Fallback per the banked stop-line
+policy: hypothesis-wire `[HopfAlgebra R A]` into C1d/C4 if 1d/1e go multi-session — the
+geometry does not depend on their proofs.
