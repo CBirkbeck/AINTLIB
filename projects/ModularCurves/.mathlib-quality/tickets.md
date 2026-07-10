@@ -13781,3 +13781,19 @@ elaboration-unification is more permissive than keyed matching.
   charts ⇄ retractions ⇄ matrices, covering, congr/pi-normalization, normMap +
   naturality, overlap criterion, evalAt-spec, transition ring layer (master column
   identity, inverse pair, triple identities), and the glued scheme.
+
+### v10.95m (2026-07-10, fable-FP): [GR-G] opened — the universal chart member exists; its chart matrix is the generic matrix
+
+- `GrassmannianChart.lean` (sorry-free, axiom-clean, downstream green):
+  `genericRetraction` (coordinate sub-basis ↦ standard basis, complement ↦ generic
+  variables) · **`universalChartMember`** — the tautological Grassmannian element over
+  the chart coordinate ring, `N_gen := ker (generic retraction)`, in its own chart ·
+  **`chartMatrix_universalChartMember`**: its chart matrix IS the generic matrix
+  `fun j i => X (j, i)` (one line from `chartMatrix_eq_of_retraction`).
+- This is [GR-G]'s seed: the affine T-point map `(chart member over A) ↦ (Spec A ⟶
+  grassmannianScheme)` factors as `evalAt`-pullback of `N_gen` through `glueData.ι`;
+  the inverse pulls `N_gen` back along chart-factorizations (covering theorem +
+  `glueData.openCover`). REMAINING [GR-G] body: `evalAt`-naturality of `normMap` vs
+  `universalChartMember` (the "pullback of the universal member is the member" lemma,
+  via `chartMatrix_normMap` + matrix-uniqueness), then the affine equivalence, then
+  `OpenCover.glueMorphisms` for general elements. All tools proven.

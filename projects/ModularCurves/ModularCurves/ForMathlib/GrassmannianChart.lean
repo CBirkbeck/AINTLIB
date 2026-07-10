@@ -778,4 +778,51 @@ theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
 
 end NormalizedFunctor
 
+section Universal
+
+open MvPolynomial
+
+variable (R)
+
+/-- The generic retraction over the chart coordinate ring: the coordinate sub-basis
+goes to the standard basis, the complementary coordinates to the generic matrix
+variables. -/
+noncomputable def genericRetraction (n : ℕ) (ι : Fin k ↪ Fin n) :
+    (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) →ₗ[MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R]
+      (Fin k → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) := by
+  classical
+  exact (Pi.basisFun (MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R)
+    (Fin n)).constr ℕ (fun j =>
+      if h : j ∈ Set.range ι then
+        Pi.single ((Equiv.ofInjective ι ι.injective).symm ⟨j, h⟩) 1
+      else fun i => X (⟨j, h⟩, i))
+
+lemma genericRetraction_single_mem (n : ℕ) (ι : Fin k ↪ Fin n) (i₀ : Fin k) :
+    genericRetraction R n ι (Pi.single (ι i₀) 1) = Pi.single i₀ 1 := by
+  classical
+  rw [genericRetraction, ← Pi.basisFun_apply, Basis.constr_basis, dif_pos ⟨i₀, rfl⟩]
+  congr 1
+  exact Equiv.ofInjective_symm_apply ι.injective i₀
+
+/-- **[GR-G seed]** The tautological (universal) chart member over the chart coordinate
+ring: the kernel of the generic retraction. Its chart matrix is the generic matrix. -/
+noncomputable def universalChartMember (n : ℕ) (ι : Fin k ↪ Fin n) :
+    {N : G(k, (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R);
+        MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) //
+      IsChartAt (fun i => Pi.single (ι i) 1) N} :=
+  retractionToChart _ ⟨genericRetraction R n ι,
+    fun i => genericRetraction_single_mem R n ι i⟩
+
+/-- The universal chart member's coordinate is the generic matrix. -/
+lemma chartMatrix_universalChartMember (n : ℕ) (ι : Fin k ↪ Fin n) :
+    chartMatrix n ι (universalChartMember R n ι).1 (universalChartMember R n ι).2
+      = fun j i => X (j, i) := by
+  classical
+  rw [chartMatrix_eq_of_retraction n ι _ _ (genericRetraction R n ι)
+    (fun i => genericRetraction_single_mem R n ι i) le_rfl]
+  funext j i
+  rw [genericRetraction, ← Pi.basisFun_apply, Basis.constr_basis, dif_neg j.2]
+
+end Universal
+
 end Module.Grassmannian

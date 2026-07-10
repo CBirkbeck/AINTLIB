@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] — ★ grassmannianScheme EXISTS (GR-F complete, all glue fields proven). REMAINING: [GR-G] T-points via glueData.openCover + the wave-1/2 chart theorems, then NISOG [L15].
+FOCUS: [NISOG-GRASS] [GR-G] — universal member DONE (chartMatrix = generic matrix). NEXT: pullback-of-universal lemma via chartMatrix_normMap, then the affine T-point equivalence.
