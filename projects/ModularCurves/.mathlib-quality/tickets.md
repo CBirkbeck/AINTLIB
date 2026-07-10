@@ -15047,3 +15047,15 @@ overlap; SmoothDescent.lean stays NEW-GH's — consumed read-only). Artifact:
   wart/congrArg2/erw-concrete method notes are accepted into the registry. On charter;
   the codex map-layer retarget note (v10.109(ii)) applies at A — their inbox v10.118
   entry already covers the boundary.
+
+## Amendments v10.121 (2026-07-10, coordinator): P3b3 account RETIRED (owner) — seat transferred to NEW-CASCADE (fresh account); v10.120 dispatch carries over verbatim
+
+- **P3b3 is retired** (owner confirmation — the account is no longer available). All
+  P3b3 return-reclaim clauses on the board are **VOID**. Pushed state is ground truth
+  and believed complete (T-W7.1b landed + consumed; b5da through 1a38dc29a with
+  T-B5D-A + T-DISC proven; PR #5223 open); anything unpushed on the retired account is
+  written off.
+- **NEW-CASCADE chartered** (inbox/NEW-CASCADE.md): fresh account takes the seat —
+  the etale cascade / [T-B6′] gate-audit-first work order (inbox/P3b3.md v10.120)
+  transfers verbatim; sentinel `beastmode_active.NEW-CASCADE`; rule-5 claim before
+  files; same discipline stack. Opener handed to the owner this activation.
