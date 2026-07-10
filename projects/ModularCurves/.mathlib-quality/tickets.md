@@ -11178,3 +11178,29 @@ direction: YOneAtlasClassify imports YOneAssembly; coordinator decides the restr
 
 **Handoff**: PR from `dev/modular-curves-y1-atlas` → `dev/modular-curves-y1` opened at
 completion. Sentinel `beastmode_active.NEW-ATLAS-3` cleared. [Y1-ATLAS] CLOSED.
+
+## Amendments v10.114-Y1 (2026-07-10, NEW-Y1): CLAIM — v10.117 integration (restructure + fill + MASTER prep); DEVIATION DECLARED on relocation scope
+
+**Claim (rule-5)**: NEW-Y1 executing the v10.117 dispatch on `dev/modular-curves-y1`
+(worktree aintlib-mc-b3, tip `09fb0421b` = PR #5225 merged). Sentinel
+`beastmode_active.NEW-Y1` set.
+
+**DEVIATION (declared before execution, v10.111 doctrine applied coherently)**: the
+dispatched relocation ("exists_tatePoint + the opaque trio, zero external consumers,
+relocation free") is INCOMPLETE as literally specified: `tatePoint` has **64 internal
+references in YOneAssembly itself** — the entire Y₁(N) construction
+(`yOneSet`…`gammaOneNaive_representable_assembly`, lines ~840–1286: yOne opens/base/
+structMap/EllObj, factors_yOne_iff [D1], isNaiveGammaOne_pullSection_iff [D2],
+yOne_representableBy [D3], the E-track skeletons, and the MASTER) consumes the def
+`tatePoint` in its statements. The coordinator's "zero external consumers" grep is
+correct for OTHER FILES only. Literal execution ⟹ ~30 broken declarations = the
+dispatch's own hard-stop condition. Resolution that preserves the dispatch's intent,
+bar, and doctrine with ZERO breakage: relocate to `ModularCurve/YOneTatePoint.lean`
+**statement-byte-identical**: (a) `exists_tatePoint` + the opaque trio (as dispatched;
+∀-clause filled by `tateMarkedPoint_classifies`, sorry DELETED), AND (b) the
+tatePoint-dependent tail (yOneSet → gammaOneNaive_representable_assembly) — which is
+also exactly where the dispatch's own "MASTER prep against the relocated interface"
+must live (the MASTER consumes D3+F1, both tatePoint-dependent). Generic sections
+(killedLocus machinery, all of YOneAssembly < line 600) STAY. Pointer comments at all
+old sites. Reversible (pure moves). Bar unchanged: single-target green + #print axioms
+exists_tatePoint = sorryAx via [T-A6b]+[T-B6′] only, boarded.
