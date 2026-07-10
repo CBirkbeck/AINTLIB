@@ -14680,3 +14680,4 @@ Then C1d (assembly against C2's closed immersion), C3, C4 ⟹ pins ⟹ **BOARD-S
   (charter completed by -3); their inbox reclaim clauses are VOID.
 - Standing reminder: beastmode-A's holder-look opener (v10.116) not yet fired — the
   codex PR #5224 merge still waits on A's verdict. Unrelated to the Y1 path.
+### CLAIM (rule 5, OWNER-FLW, 2026-07-10): prove `SheafOfModules.dualOverIso`, `Scheme.Modules.dualRestrictIso`, `sectionPoleSheafRestrictIso`, and `sectionPoleSheafPowerRestrictIso` (open-restriction base-change layer; no PIC0 G1/G3 overlap).
