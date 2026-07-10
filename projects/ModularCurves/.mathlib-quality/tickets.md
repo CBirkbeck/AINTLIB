@@ -15173,3 +15173,30 @@ instance-transparency wall.
 then 1d coassoc (triple Künneth) and 1e antipode. Fallback per the banked stop-line
 policy: hypothesis-wire `[HopfAlgebra R A]` into C1d/C4 if 1d/1e go multi-session — the
 geometry does not depend on their proofs.
+
+## Amendments v10.124-CASCADE (2026-07-10, NEW-CASCADE): prep branch COMPLETE — b5da rebased green, ★ PR #5223 MERGED, BB-DIFF MASTER pre-wired; PARKED at the named gate
+
+**Executed (dispatch ELSE-branch, all pushed):**
+- **dev/modular-curves-b5da rebased** onto current dev (820 commits absorbed, clean),
+  re-verified green in a fresh worktree (`aintlib-mc-cascade`): single targets
+  `NilpotentKerSpecMap` + `FormallyUnramifiedFibre` + `MulByHomUnramified`, 3,128 jobs.
+- **★ PR #5223 MERGED** (rebase-merge) into dev/modular-curves: **T-B5D-A** (L-A,
+  `formallyUnramified_mulByHom_of_torsionπ`, axiom-clean) + **T-DISC**
+  (`FormallyUnramified.of_finite_fiberToSpecResidueField` + algebra core, dual-use for
+  T-D6c/T-D7-bridge) + the `NilpotentKerSpecMap` mathlib-gap lemma are IN THE TREE.
+- **BB-DIFF MASTER pre-wired hypothesis-funneled** (`MulByHomUnramified.lean`, in the
+  merge): `formallyUnramified_torsionπ_of_fibres` — L-BC from its SINGLE remaining fibre
+  input (`hfib : ∀ y, FormallyUnramified ((torsionπ N).fiberToSpecResidueField y)`) via
+  T-DISC + the proven `torsionπ_isFinite`; `mulByHom_formallyUnramified_of_fibres` =
+  L-A ∘ funnel. `hfib` is exactly the [T-B6′]-shaped gate output (v10.123-CASCADE
+  verdict); the only code-sorry left in the file is L-BC itself, now one hypothesis away.
+
+**PARKED at the named gate — trigger: c5β boards T-G4** (atlas laws → general R ⊇ fields).
+On fire, the fill session (worktree aintlib-mc-b3, rule-5 claim; NEW-Y1 parked there):
+(0) merge dev → dev/modular-curves-y1 (the C6 layer is absent on y1 — v10.123 note);
+(1) mulOver-record packaging at fields (T-G4-at-k + `one_eq_zero` via the zero-section
+unit law); (2) the hz interface fix + `map_add'` fill in GeometricFibreComparison.lean
+(fibrewise route: `Point.baseChangeEquiv` → `abelEnrichment_unique_of_isLocallyNoetherian`
+[PROVEN, Rigidity.lean] → C6 `mulModelHom_specPoints`); (3) `hfib` discharge from the
+filled dictionary + HasseWeil separability; (4) the funnel closes L-BC → MASTER →
+`torsionπ_etale` → six Y1-E leaves open + [T-B6′] retires. Sentinel updated to PARKED.
