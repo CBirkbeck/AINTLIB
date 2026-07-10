@@ -359,6 +359,46 @@ theorem chartCoactionSpec_over :
     P.chartPullbackIso_inv_comp_prOpenToBase,
     Category.assoc, ← P.chartSpecIso_hom_base, Iso.inv_hom_id_assoc]
 
+/-- **`R`-linearity of the chart co-action** (`[HG-C1c-ii]` Γ-level): the co-action ring
+map commutes with the base-patch algebra structures — the `appTop` of the over-lemma,
+unwound through the section isomorphisms. -/
+theorem appLE_comp_coactionRing :
+    E.π.appLE P.V P.U P.hover ≫ P.coactionRing
+      = CommRingCat.ofHom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing)) := by
+  -- the appTop of the over-lemma
+  have hover := congrArg
+    (fun f : (Spec (.of (P.groupRing ⊗[P.baseRing] P.chartRing)) : Scheme)
+        ⟶ (Spec Γ(S, P.V) : Scheme) => Scheme.Hom.appTop f)
+    P.chartCoactionSpec_over
+  simp only [Scheme.Hom.comp_appTop] at hover
+  -- unfold toSpecΓ.appTop on the left of hover
+  rw [show P.V.toSpecΓ.appTop
+      = (Scheme.ΓSpecIso Γ(S, P.V)).hom ≫ P.V.topIso.inv from
+    Scheme.Opens.toSpecΓ_appTop P.V] at hover
+  -- pre-compose the inverse iso to isolate
+  have hover2 : P.V.topIso.inv ≫ P.chartToBase.appTop ≫ P.chartCoactionSpec.appTop
+      = (Scheme.ΓSpecIso Γ(S, P.V)).inv
+        ≫ (Spec.map (CommRingCat.ofHom
+            (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing)))).appTop := by
+    rw [← hover]
+    simp only [← Category.assoc, Iso.inv_hom_id]
+    simp only [Category.assoc, Category.id_comp]
+  -- the resLE appTop is the appLE, in the section isos
+  have hres : P.chartToBase.appTop
+      = P.V.topIso.hom ≫ E.π.appLE P.V P.U P.hover ≫ P.U.topIso.inv :=
+    Scheme.Hom.resLE_app_top (f := E.π) (U := P.V) (V := P.U) P.hover
+  -- assemble
+  rw [P.coactionRing_eq_appTop, ← Category.assoc, ← Category.assoc]
+  rw [show E.π.appLE P.V P.U P.hover ≫ P.U.topIso.inv
+      = P.V.topIso.inv ≫ P.chartToBase.appTop from by
+    rw [hres, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]]
+  rw [Category.assoc, Category.assoc, reassoc_of% hover2,
+    Scheme.ΓSpecIso_naturality]
+  rw [show (Scheme.ΓSpecIso (CommRingCat.of P.baseRing)).hom
+      = (Scheme.ΓSpecIso Γ(S, P.V)).hom from rfl]
+  rw [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
