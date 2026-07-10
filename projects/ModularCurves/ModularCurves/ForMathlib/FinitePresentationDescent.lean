@@ -1224,6 +1224,83 @@ theorem exists_algHom_factor_algebraMap {R A' W B' : Type u} [CommRing R] [CommR
   exact hsfun a
 
 
+open TensorProduct in
+/-- The colimit-level left square: the transported equivalence intertwines the left
+doubling with `includeLeft`. -/
+theorem eC_comp_doubleInl {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
+    [IsScalarTower R A B] (gen : κ → MvPolynomial σ (𝒮 i₀))
+    (eB : (MvPolynomial σ A ⧸ Ideal.span (Set.range fun j =>
+      MvPolynomial.map (u i₀).toRingHom (gen j))) ≃ₐ[A] B)
+    (hgw : (fun j => MvPolynomial.map (u i₀).toRingHom (concatGen gen gen j))
+      = concatGen (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+          (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) :
+    ((((Ideal.quotientEquivAlgOfEq A (congrArg (fun f => Ideal.span (Set.range f)) hgw)).trans
+        (concatEquiv _ _)).trans
+          (Algebra.TensorProduct.congr eB eB)).restrictScalars R).toAlgHom.comp
+      (doubleInl gen (u i₀))
+    = ((Algebra.TensorProduct.includeLeft : B →ₐ[A] B ⊗[A] B).restrictScalars R).comp
+        (eB.restrictScalars R).toAlgHom := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  simp only [AlgHom.comp_apply]
+  rw [doubleInl_mk]
+  show (Algebra.TensorProduct.congr eB eB) ((concatEquiv _ _)
+      ((Ideal.quotientEquivAlgOfEq A (congrArg (fun f => Ideal.span (Set.range f)) hgw))
+        (Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inl p))))
+    = (eB (Ideal.Quotient.mk _ p)) ⊗ₜ[A] 1
+  rw [Ideal.quotientEquivAlgOfEq_mk, ← concatInl_mk]
+  have hcoe : ∀ z, (concatEquiv (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+      (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) z
+      = concatToTensor (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+        (fun j => MvPolynomial.map (u i₀).toRingHom (gen j)) z := fun _ => rfl
+  rw [hcoe]
+  have h1 := AlgHom.congr_fun (concatToTensor_comp_concatInl
+    (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+    (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) (Ideal.Quotient.mk _ p)
+  simp only [AlgHom.comp_apply] at h1
+  rw [h1, Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.congr_apply,
+    Algebra.TensorProduct.map_tmul, map_one]
+  rfl
+
+open TensorProduct in
+/-- The colimit-level right square. -/
+theorem eC_comp_doubleInr {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
+    [IsScalarTower R A B] (gen : κ → MvPolynomial σ (𝒮 i₀))
+    (eB : (MvPolynomial σ A ⧸ Ideal.span (Set.range fun j =>
+      MvPolynomial.map (u i₀).toRingHom (gen j))) ≃ₐ[A] B)
+    (hgw : (fun j => MvPolynomial.map (u i₀).toRingHom (concatGen gen gen j))
+      = concatGen (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+          (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) :
+    ((((Ideal.quotientEquivAlgOfEq A (congrArg (fun f => Ideal.span (Set.range f)) hgw)).trans
+        (concatEquiv _ _)).trans
+          (Algebra.TensorProduct.congr eB eB)).restrictScalars R).toAlgHom.comp
+      (doubleInr gen (u i₀))
+    = ((Algebra.TensorProduct.includeRight : B →ₐ[A] B ⊗[A] B).restrictScalars R).comp
+        (eB.restrictScalars R).toAlgHom := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  simp only [AlgHom.comp_apply]
+  rw [doubleInr_mk]
+  show (Algebra.TensorProduct.congr eB eB) ((concatEquiv _ _)
+      ((Ideal.quotientEquivAlgOfEq A (congrArg (fun f => Ideal.span (Set.range f)) hgw))
+        (Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inr p))))
+    = 1 ⊗ₜ[A] (eB (Ideal.Quotient.mk _ p))
+  rw [Ideal.quotientEquivAlgOfEq_mk, ← concatInr_mk]
+  have hcoe : ∀ z, (concatEquiv (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+      (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) z
+      = concatToTensor (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+        (fun j => MvPolynomial.map (u i₀).toRingHom (gen j)) z := fun _ => rfl
+  rw [hcoe]
+  have h1 := AlgHom.congr_fun (concatToTensor_comp_concatInr
+    (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))
+    (fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) (Ideal.Quotient.mk _ p)
+  simp only [AlgHom.comp_apply] at h1
+  rw [h1, Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.congr_apply,
+    Algebra.TensorProduct.map_tmul, map_one]
+  rfl
+
 variable (t u) in
 /-- **[KL-5] endgame** (split off for elaboration-budget reasons): from a stage `P₂`
 carrying transported factorizations of `id_B` and `id_{B ⊗ B}` whose doubling squares
@@ -1403,15 +1480,15 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
   -- transports of the colimits to `B` and `B ⊗[A] B`
   obtain ⟨eB', heB'⟩ : ∃ e, e = eB.restrictScalars R := ⟨_, rfl⟩
   have HB := HB0.congr eB'
-  have eC : (MvPolynomial (Fin D.m ⊕ Fin D.m) A ⧸
+  obtain ⟨eC, heC⟩ : ∃ e : (MvPolynomial (Fin D.m ⊕ Fin D.m) A ⧸
       Ideal.span (Set.range fun j => MvPolynomial.map
         ((PresentationSystem.colimMap R A D.i₀).toRingHom) (concatGen D.g D.g j)))
-      ≃ₐ[R] (B ⊗[A] B) :=
-    (((Ideal.quotientEquivAlgOfEq A
+      ≃ₐ[R] (B ⊗[A] B),
+      e = (((Ideal.quotientEquivAlgOfEq A
         (congrArg (fun f => Ideal.span (Set.range f))
           (hgenw (PresentationSystem.colimMap R A D.i₀)))).trans
       (concatEquiv _ _)).trans
-        (Algebra.TensorProduct.congr eB eB)).restrictScalars R
+        (Algebra.TensorProduct.congr eB eB)).restrictScalars R := ⟨_, rfl⟩
   have HC := HC0.congr eC
   haveI : FinitePresentation R (B ⊗[A] B) := FinitePresentation.trans R B (B ⊗[A] B)
   -- factor the identities of `B` and `B ⊗[A] B` through stages
@@ -1427,11 +1504,13 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
   have hkeyL : eC.toAlgHom.comp
       (doubleInl D.g (PresentationSystem.colimMap R A D.i₀))
       = pLim.comp eB'.toAlgHom := by
-    sorry
+    rw [hpLim, heB', heC]
+    exact eC_comp_doubleInl D.g eB (hgenw (PresentationSystem.colimMap R A D.i₀))
   have hkeyR : eC.toAlgHom.comp
       (doubleInr D.g (PresentationSystem.colimMap R A D.i₀))
       = qLim.comp eB'.toAlgHom := by
-    sorry
+    rw [hqLim, heB', heC]
+    exact eC_comp_doubleInr D.g eB (hgenw (PresentationSystem.colimMap R A D.i₀))
   -- the stagewise squares
   have hsqL : ∀ P : {i // D.i₀ ≤ i},
       (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
