@@ -984,6 +984,77 @@ open scoped TensorProduct
 
 variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
 
+/-- The geometric identification behind the chart bridge: the pullback of `f` along an
+affine chart point is the `Spec` of the section tensor product, with the projection
+matching the `Spec` of the left inclusion (sealed; consumed by the bridge and by the
+emptiness transport). -/
+private theorem locallyFreeRankLocus_pullback_iso {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) :
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    ∃ e : pullback f (x' ≫ U.1.ι) ≅
+      Spec (.of (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))),
+      pullback.snd f (x' ≫ U.1.ι) = e.hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        ≫ X.isoSpec.inv := by
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  haveI : IsAffine (↑U.1 : Scheme.{u}) := U.2
+  haveI : IsAffine (↑(f ⁻¹ᵁ U.1) : Scheme.{u}) := U.2.preimage f
+  -- paste the restriction square onto the `x'`-square
+  have hbig : IsPullback
+      (pullback.fst (f ∣_ U.1) x' ≫ (f ⁻¹ᵁ U.1).ι)
+      (pullback.snd (f ∣_ U.1) x') f (x' ≫ U.1.ι) :=
+    (IsPullback.of_hasPullback (f ∣_ U.1) x').paste_horiz
+      (isPullback_morphismRestrict f U.1).flip
+  -- conjugate both legs of the small pullback to `Spec` maps
+  have hsq₁ : x' ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+      = X.isoSpec.hom ≫ Spec.map (x'.appTop) :=
+    (Scheme.isoSpec_hom_naturality x').symm
+  have hsq₂ : (f ∣_ U.1) ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+      = (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom ≫ Spec.map ((f ∣_ U.1).appTop) :=
+    (Scheme.isoSpec_hom_naturality (f ∣_ U.1)).symm
+  let m : pullback x' (f ∣_ U.1) ⟶
+      pullback (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) :=
+    pullback.map _ _ _ _ X.isoSpec.hom (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+      (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂
+  haveI : IsIso m := by
+    show IsIso (pullback.map _ _ _ _ X.isoSpec.hom
+      (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+      (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂)
+    infer_instance
+  refine ⟨hbig.isoPullback.symm ≪≫ pullbackSymmetry (f ∣_ U.1) x' ≪≫ asIso m ≪≫
+    pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤), ?_⟩
+  have h₁ : pullback.snd f (x' ≫ U.1.ι)
+      = hbig.isoPullback.inv ≫ pullback.snd (f ∣_ U.1) x' := by
+    rw [Iso.eq_inv_comp, hbig.isoPullback_hom_snd]
+  have h₂ : pullback.snd (f ∣_ U.1) x'
+      = (pullbackSymmetry (f ∣_ U.1) x').hom ≫ pullback.fst x' (f ∣_ U.1) :=
+    (pullbackSymmetry_hom_comp_fst _ _).symm
+  have h₃ : pullback.fst x' (f ∣_ U.1)
+      = m ≫ pullback.fst
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        ≫ X.isoSpec.inv := by
+    have hm : m ≫ pullback.fst
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        = pullback.fst x' (f ∣_ U.1) ≫ X.isoSpec.hom := pullback.lift_fst _ _ _
+    rw [← Category.assoc, hm, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  have h₄ : pullback.fst
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+      = (pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)).hom
+        ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) := by
+    rw [← pullbackSpecIso_inv_fst', Iso.hom_inv_id_assoc]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  slice_rhs 4 5 => rw [← h₄]
+  slice_rhs 3 5 => rw [← h₃]
+  slice_rhs 2 3 => rw [← h₂]
+  slice_rhs 1 2 => rw [← h₁]
+
 /-- The section-ring identification behind the chart bridge, sealed behind its own
 constant (the construction is let-heavy; consumers only need existence). -/
 private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X]
@@ -1121,6 +1192,65 @@ private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X
     (TensorProduct.AlgebraTensorModule.congr
       (LinearEquiv.refl Γ(X, ⊤) Γ(X, ⊤)) e₁)).symm
 
+/-- Semilinear span transport: a ring isomorphism `B ≃+* K` onto a field, intertwining the
+`R`-algebra maps, bounds the `K`-dimension of `K ⊗[R] M` by the cardinality of any
+`B`-spanning family of `B ⊗[R] M` (sealed; the fibre-size translation of the chart
+bridge — applied with `B` the sections of a `Spec K` chart point). -/
+private theorem locallyFreeRankLocus_finrank_le_of_span {R B K M : Type u} [CommRing R]
+    [CommRing B] [Field K] [Algebra R B] [Algebra R K] [AddCommGroup M] [Module R M]
+    (e : B ≃+* K) (he : ∀ r, e (algebraMap R B r) = algebraMap R K r)
+    (s : Finset (B ⊗[R] M)) (hs : Submodule.span B (s : Set (B ⊗[R] M)) = ⊤) :
+    Module.finrank K (K ⊗[R] M) ≤ s.card := by
+  classical
+  let eL : B ≃ₗ[R] K := (AlgEquiv.ofRingEquiv (f := e) he).toLinearEquiv
+  let Φ : (B ⊗[R] M) ≃ₗ[R] (K ⊗[R] M) := TensorProduct.congr eL (LinearEquiv.refl R M)
+  have hΦ : ∀ b : B, ∀ w : B ⊗[R] M, Φ (b • w) = e b • Φ w := by
+    intro b w
+    induction w with
+    | zero => simp
+    | tmul b₀ m =>
+        simp only [TensorProduct.smul_tmul', smul_eq_mul, Φ, TensorProduct.congr_tmul,
+          LinearEquiv.refl_apply]
+        rw [show eL (b * b₀) = e b * eL b₀ from map_mul e b b₀]
+    | add x y hx hy => rw [smul_add, map_add, hx, hy, map_add, smul_add]
+  have hspan : Submodule.span K ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M)) = ⊤ := by
+    rw [eq_top_iff]
+    rintro z -
+    have hz : Φ.symm z ∈ Submodule.span B (s : Set (B ⊗[R] M)) := hs ▸ Submodule.mem_top
+    have key : ∀ w ∈ Submodule.span B (s : Set (B ⊗[R] M)),
+        Φ w ∈ Submodule.span K ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M)) := by
+      intro w hw
+      induction hw using Submodule.span_induction with
+      | mem w hw =>
+          exact Submodule.subset_span
+            (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_coe.mp hw)))
+      | zero => rw [map_zero]; exact Submodule.zero_mem _
+      | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+      | smul b w _ hw => rw [hΦ]; exact Submodule.smul_mem _ _ hw
+    simpa using key _ hz
+  calc Module.finrank K (K ⊗[R] M)
+      = Module.finrank K (⊤ : Submodule K (K ⊗[R] M)) := (finrank_top _ _).symm
+    _ = Module.finrank K (Submodule.span K
+          ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))) := by rw [hspan]
+    _ ≤ (s.image ⇑Φ).card := by
+          simpa using finrank_span_le_card ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))
+    _ ≤ s.card := Finset.card_image_le
+
+/-- Emptiness transport for the chart bridge: if the pullback of `f` along an affine chart
+point is the empty scheme, the section tensor product is trivial (sealed; the empty branch
+of the fibre dichotomy). -/
+private theorem locallyFreeRankLocus_sections_subsingleton {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1)
+    (hE : IsEmpty (pullback f (x' ≫ U.1.ι) : Scheme.{u})) :
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    Subsingleton (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  obtain ⟨eP, -⟩ := locallyFreeRankLocus_pullback_iso f U x'
+  rw [← PrimeSpectrum.isEmpty_iff_subsingleton]
+  exact ⟨fun p => hE.false (eP.inv.base p)⟩
+
 /-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
 affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
 the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
@@ -1141,68 +1271,10 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
   letI := ((f.app U.1).hom).toAlgebra
   haveI : IsAffine (↑U.1 : Scheme.{u}) := U.2
   haveI : IsAffine (↑(f ⁻¹ᵁ U.1) : Scheme.{u}) := U.2.preimage f
-  -- (A) the geometric identification: the pullback is the Spec of a tensor product,
-  -- with the second projection matching the `Spec.map` of the left inclusion
-  letI := ((f ∣_ U.1).appTop.hom).toAlgebra
+  -- (A) the geometric identification (sealed)
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
   letI := ((x'.appTop).hom).toAlgebra
-  obtain ⟨eP, heP⟩ : ∃ e : pullback f (x' ≫ U.1.ι) ≅
-      Spec (.of (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))),
-      pullback.snd f (x' ≫ U.1.ι) = e.hom ≫ Spec.map (CommRingCat.ofHom
-        (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
-        ≫ X.isoSpec.inv := by
-    -- paste the restriction square onto the `x'`-square
-    have hbig : IsPullback
-        (pullback.fst (f ∣_ U.1) x' ≫ (f ⁻¹ᵁ U.1).ι)
-        (pullback.snd (f ∣_ U.1) x') f (x' ≫ U.1.ι) :=
-      (IsPullback.of_hasPullback (f ∣_ U.1) x').paste_horiz
-        (isPullback_morphismRestrict f U.1).flip
-    -- conjugate both legs of the small pullback to `Spec` maps
-    have hsq₁ : x' ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
-        = X.isoSpec.hom ≫ Spec.map (x'.appTop) :=
-      (Scheme.isoSpec_hom_naturality x').symm
-    have hsq₂ : (f ∣_ U.1) ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
-        = (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom ≫ Spec.map ((f ∣_ U.1).appTop) :=
-      (Scheme.isoSpec_hom_naturality (f ∣_ U.1)).symm
-    let m : pullback x' (f ∣_ U.1) ⟶
-        pullback (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
-          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) :=
-      pullback.map _ _ _ _ X.isoSpec.hom (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
-        (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂
-    haveI : IsIso m := by
-      show IsIso (pullback.map _ _ _ _ X.isoSpec.hom
-        (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
-        (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂)
-      infer_instance
-    refine ⟨hbig.isoPullback.symm ≪≫ pullbackSymmetry (f ∣_ U.1) x' ≪≫ asIso m ≪≫
-      pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤), ?_⟩
-    have h₁ : pullback.snd f (x' ≫ U.1.ι)
-        = hbig.isoPullback.inv ≫ pullback.snd (f ∣_ U.1) x' := by
-      rw [Iso.eq_inv_comp, hbig.isoPullback_hom_snd]
-    have h₂ : pullback.snd (f ∣_ U.1) x'
-        = (pullbackSymmetry (f ∣_ U.1) x').hom ≫ pullback.fst x' (f ∣_ U.1) :=
-      (pullbackSymmetry_hom_comp_fst _ _).symm
-    have h₃ : pullback.fst x' (f ∣_ U.1)
-        = m ≫ pullback.fst
-            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
-            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
-          ≫ X.isoSpec.inv := by
-      have hm : m ≫ pullback.fst
-            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
-            (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
-          = pullback.fst x' (f ∣_ U.1) ≫ X.isoSpec.hom := pullback.lift_fst _ _ _
-      rw [← Category.assoc, hm, Category.assoc, Iso.hom_inv_id, Category.comp_id]
-    have h₄ : pullback.fst
-          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
-          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
-        = (pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)).hom
-          ≫ Spec.map (CommRingCat.ofHom
-            (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) := by
-      rw [← pullbackSpecIso_inv_fst', Iso.hom_inv_id_assoc]
-    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
-    slice_rhs 4 5 => rw [← h₄]
-    slice_rhs 3 5 => rw [← h₃]
-    slice_rhs 2 3 => rw [← h₂]
-    slice_rhs 1 2 => rw [← h₁]
+  obtain ⟨eP, heP⟩ := locallyFreeRankLocus_pullback_iso f U x'
   -- (B) flatness transports through the identification to the ring side
   have hflat_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) ↔
       Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
