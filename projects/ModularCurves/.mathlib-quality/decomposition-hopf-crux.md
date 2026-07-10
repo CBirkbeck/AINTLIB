@@ -597,3 +597,15 @@ S-GROUP: η : S → G restricted to V lands in G|_V ✓) — the counit-diagram 
 on ANY stable U (the identity-translation is trivial); coassoc similarly needs the
 μ_G-restriction (G|_V is a V-group: p0's Subgroup-structure carries the group-object
 data — check field names at C1c-time).
+
+[HG-C1b] leg-3 second-half subtlety (banked): `pullback G.π (P.U.ι ≫ E.π)` is the
+S-LEVEL fibre product; to Spec-write it, first restrict the base: since both legs factor
+through the OPEN V ⊆ S (U over V by `hover`; use G|_V := π⁻¹V-restriction on the G-leg
+too — the U-leg factoring makes the G|_V-part carry the whole product), identify with
+the V-level product `pullback (G|_V → V) (U → V)` — the categorical fact "pullback over
+S of maps factoring through a mono/open V→S = pullback over V" (grep candidates:
+`pullbackRestrictIsoRestrict` applied twice, `IsPullback` + mono-cancellation, or
+`pullback.congrHom`-family; possibly cleanest via `IsOpenImmersion`-pullback pasting:
+pullback_{S}(X,Y) with X,Y→V: the map to V×_S V = V (open immersion mono ⟹ diagonal iso)
+...). THEN all three (V, U-over-V, G|_V-over-V) are affine ⟹ `IsAffineOpen.isoSpec`-write
++ `pullbackSpecIso` ⟹ Γ ≅ B ⊗[R] A. Watch the one-spelling rule throughout.
