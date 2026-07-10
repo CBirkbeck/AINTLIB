@@ -670,3 +670,34 @@ fst-leg ≫ Spec (R→A)). U-side compat is mathlib (`toSpecΓ_SpecMap_appLE`). 
 R-linearity = paste (scheme-square-appTop) with the two compats. Fallback if the chase
 swamps: prove R-linearity ELEMENTWISE on sections via `Scheme.Hom.appLE_map`-naturality
 (the composite of the ring maps applied to `algebraMap r` traced through the topIso's).
+
+## [HG-C1c-ii] over-lemma execution skeleton (banked 2026-07-11)
+
+TARGET: `chartCoactionSpec ≫ P.chartToBase ≫ P.V.toSpecΓ
+  = Spec.map (CommRingCat.ofHom (algebraMap ↑P.baseRing (↑P.groupRing ⊗ ↑P.chartRing)))`.
+Three bounded pieces:
+- **(L2)** `(G.chartPullbackIso P.U).inv ≫ P.prOpenToBase
+    = pullback.snd G.π (P.U.ι ≫ E.π) ≫ P.chartToBase` — chase the two constituent isos:
+  `restrictedDomainIso.inv` = `(pullbackRestrictIsoRestrict actionProj.left U).hom`
+  (symm-inv!) with its `hom_ι`-compat; the pasting `pullbackLeftPullbackSndIso`
+  `hom/inv_snd`-lemmas. NOTE prOpenToBase-def is resLE of the ⊗-obj-hom; relate via
+  `resLE`-uniqueness (`resLE`-maps agree iff compose-with-ι agree: cancel_mono U-side —
+  or `Scheme.Hom.resLE`-ext-lemma; alternatively prove both sides ≫ V.ι equal and use
+  `cancel_mono P.V.ι` — V.ι is a mono (open immersion) ✓ CLEANEST: all these maps-to-V
+  compare after ≫V.ι into S where everything is pullback.condition-algebra).
+- **(L3-hom)** `pullback.snd G.π (P.U.ι ≫ E.π) ≫ P.chartToBase ≫ P.V.toSpecΓ
+    = P.chartSpecIso.hom ≫ Spec.map (ofHom (algebraMap ...))` — chase hom-ward through
+  chartSpecIso = (congrHom.symm ≪≫ pasting.symm) ≪≫ (pullback.map-asIso) ≪≫
+  (kunnethToSpec ≪≫ pullbackSpecIso): snd-compats: congrHom-snd (simp),
+  pasting-inv-snd (`pullbackLeftPullbackSndIso_inv_snd`?), map≫snd = snd≫U.toSpecΓ
+  (lift_snd explicit), pullbackSpecIso-base: `pullbackSpecIso_inv_snd` gives
+  inv≫snd = Spec.map(ofHom includeRight); base-compat: algebraMap R (A⊗B) =
+  includeRight ∘ (algebraMap R B)?? — canonical: algebraMap R (A⊗B) r = 1⊗(algMap r) =
+  includeRight(algMap-B r) ✓ `Algebra.TensorProduct.algebraMap_def`-forms; combine with
+  `toSpecΓ_SpecMap_appLE` on the U-side (cTB-leg).
+- **Assembly**: substitute `restrictedAction_comp_chartToBase`, then (L2), then (L3-hom),
+  close with `Iso.inv_hom_id_assoc`. THEN: R-linearity of `coactionRing` via
+  `coactionRing_eq_appTop` + appTop-of-the-over-lemma + topIso/ΓSpecIso-bookkeeping
+  (`Scheme.ΓSpecIso_naturality`-family); package `coactionAlg : B →ₐ[R] A⊗[R]B`; the
+  comm-swap `Algebra.TensorProduct.comm` to `B ⊗[R] A`; then C1c-counit/coassoc
+  (scheme-level-first per previous bank), C1d assembly, C3, C4 → pins → BOARD-SIGNAL.
