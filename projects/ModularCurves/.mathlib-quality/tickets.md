@@ -14765,3 +14765,33 @@ merge-clear on semantic grounds.** The three items:
 **Recommendation:** merge-clear from the holder's seat — the PR builds *on* T-W7.1b and adds distinct
 subjects; no dedup/adapt required. Green-verify + axiom audit at merge time per v10.116 (taken as read).
 Re-armed on T-W7a / c5β handshake.
+
+### v10.116 (2026-07-10, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1] — the Hopf MAPS on `groupRing`; generic `patchKunneth` extracted
+
+*Two new files, zero sorries, axiom-clean.*
+
+- **`GroupScheme/PatchKunneth.lean`** — `patchKunneth`: for an affine base patch `V ⊆ S`
+  and affine opens `W₁ ⊆ X`, `W₂ ⊆ Y` over `V`,
+  `pullback (f.resLE V W₁ _) (g.resLE V W₂ _) ≅ Spec (Γ(X,W₁) ⊗[Γ(S,V)] Γ(Y,W₂))`,
+  under the hypothesis that the algebra structures ARE the `appLE` maps (which is what
+  makes `pullbackSpecIso`'s legs match). Plus `IsAffineOpen.isIso_toSpecΓ`. This
+  generalises C1b's chart Künneth and is reused for the group square.
+- **`GroupScheme/PatchHopf.lean`** — the three duals of C1c-0's structure maps:
+  `groupPatchCounit ε := unitHom.appLE` (preimage fact from `unitHom_π`),
+  `groupPatchAntipode := invHom.appLE` (from `invHom_π`), and
+  **`groupPatchComul Δ : A ⟶ A ⊗[R] A`** = sections along `mulHom` restricted to the
+  `V`-level square `G|_V ×_V G|_V`, transported by `patchKunneth`. The needed
+  `⊤ ≤ squareMul ⁻¹ᵁ G|_V` comes from `mulHom_π` + `ι_preimage_self`.
+
+**Lean-ops** (registry, recurrence of the C2 finding): the Over-monoidal chosen pullback
+and freshly-synthesized `HasPullback` give *syntactically different* `pullback.fst` terms
+— state helper lemmas in the **Over-monoidal spelling** (`(fst R S).left`, which is
+`pullback.fst _ _` by `rfl`) and rewrite through `Over.tensorObj_hom`; `simp only
+[Category.assoc]` can hit an instance-transparency wall there, so close with the explicit
+`Category.assoc _ _ _` term.
+
+**NEXT**: the Hopf/bialgebra AXIOMS on `A` (Γ-duals of `mulOver_assoc`,
+`unitOver_mulOver_left`, `invOver_mulOver_left` — Spec-side first, dualize once), giving
+`[HopfAlgebra R A]`; then `IsCoaction chartCoaction` from the two action diagrams
+(`translationAction_unit/assoc`, already proven); then C1d, C3, C4 ⟹ pins ⟹
+**BOARD-SIGNAL** (NISOG L6 + p0 pickup).
