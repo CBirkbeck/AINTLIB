@@ -1,21 +1,20 @@
 -- ============================================================================
--- T-G4 WIP: mulOver_oneOver via of_map — TIMEOUT SOLVED, hnat plumbing remains.
+-- T-G4 WIP v2: mulOver_oneOver via of_map — BOTH hard blockers CRACKED. 95% done.
 -- ============================================================================
--- BREAKTHROUGH: the of_map/of_eq pattern (prove at uWLU.map f, then subst) makes
--- projModelBaseChangeOf's eqToHom = eqToHom rfl (CHEAP) — NO whnf timeout (the
--- blocker that stopped the prior session). raw/hbc/hw1/hw2/X/isPullback ALL COMPILE.
---
--- SOLE REMAINING BLOCKER: `hnat` — the whisker-BC-naturality
---   (mo ◁ oneOver W).left ≫ pullbackMapBaseChangeOf = X ≫ (mo_U ◁ oneOver uWLU).left
--- reduces to needing `pullback.map ≫ pullback.fst = pullback.fst ≫ i₁`, which
--- RESISTED: simp only [pullback.lift_fst] (pullback.map abbrev head ≠ lift in discr tree),
--- full simp, explicit rw, dsimp [Over.mk] (leaves `Over.hom (CostructuredArrow.mk _)` — the
--- (Over.mk f).hom = f projection won't reduce for lift_fst matching), pullback.map_comp
--- (middle-cospan (mo).hom vs projModelπ spelling war). Assembly also needs `pullback.map ≫ fst`.
--- NEXT: find the right `pullback.map_fst`-style lemma/tactic, or prove hnat term-mode via
--- `Over.whiskerLeft_left_fst/snd` PROJECTIONS (simp-tagged, avoid CostructuredArrow) +
--- pullbackMapBaseChangeOf's fst/snd (rw [pullbackMapBaseChangeOf, pullback.lift_fst] inline).
--- Then of_eq (subst) + named (classifyRingHomU W). Same hnat-shape reused for assoc/inv.
+-- BREAKTHROUGH 1 (timeout): of_map/of_eq (prove at uWLU.map f, subst) ⟹ projModelBaseChangeOf's
+--   eqToHom = eqToHom rfl (CHEAP). NO whnf timeout. raw/hbc/hw1/hw2/X/isPullback COMPILE.
+-- BREAKTHROUGH 2 (map-fst): `pullback.map ≫ pullback.fst` reduces via
+--   `rw [pullback.map, pullback.lift_fst]` (rw unfolds the abbrev + crosses (mo).hom=projModelπ
+--   reducibly; `simp only [pullback.lift_fst]` does NOT — discrimination-tree keys on the abbrev
+--   head, not `lift`; adding `pullback.map` to the simp set unfolds but the whiskerLeft full-form
+--   forces `(Over.mk _).hom` which won't reduce). The 4 projection HAVES (pBCf/pBCs/pXf/pXs) below
+--   COMPILE using this tactic.
+-- SOLE REMAINING (tiny): the final `apply pullback.hom_ext` assembly can't rw/simp the haves into
+--   the goal `(mo◁oneOver).left ≫ pullbackMapBaseChangeOf ≫ fst` — a syntactic/proof-irrelevance
+--   match subtlety (pBCf's `... rfl ≫ fst` vs the goal's `... ⋯ ≫ fst`). FIX to try: `conv_lhs`
+--   to focus the `pullbackMapBaseChangeOf ≫ fst` subterm then rw the winning tactic inline; or
+--   restate the haves' pullback.fst with the goal's exact instance; or `rw [reassoc_of% pBCf]`.
+-- Then of_eq (subst) + named (classifyRingHomU W); SAME hnat-shape reused for oneOver(comm)/assoc/inv.
 -- ============================================================================
 
 import ModularCurves.EllipticCurve.GroupLawAxioms
@@ -74,7 +73,26 @@ theorem mulOver_oneOver_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
       pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
         (universalWeierstrassLocU.{u}.map f) rfl =
       X ≫ (modelOver universalWeierstrassLocU.{u} ◁ oneOver universalWeierstrassLocU.{u}).left := by
-    sorry
+    -- projection sub-facts via the winning `rw [pullback.map, pullback.lift_fst]`
+    have pBCf : pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) =
+        pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f)) (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫ projModelBaseChangeOf f universalWeierstrassLocU.{u} (universalWeierstrassLocU.{u}.map f) rfl := by
+      rw [pullbackMapBaseChangeOf, pullback.map, pullback.lift_fst]
+    have pBCs : pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) =
+        pullback.snd (projModelπ (universalWeierstrassLocU.{u}.map f)) (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫ projModelBaseChangeOf f universalWeierstrassLocU.{u} (universalWeierstrassLocU.{u}.map f) rfl := by
+      rw [pullbackMapBaseChangeOf, pullback.map, pullback.lift_snd]
+    have pXf : X ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (𝟙 (Spec (CommRingCat.of WeierstrassAtlasRingU.{u}))) =
+        pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f)) (𝟙 (Spec (CommRingCat.of R))) ≫ projModelBaseChangeOf f universalWeierstrassLocU.{u} (universalWeierstrassLocU.{u}.map f) rfl := by
+      rw [hXdef, pullback.map, pullback.lift_fst]
+    have pXs : X ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (𝟙 (Spec (CommRingCat.of WeierstrassAtlasRingU.{u}))) =
+        pullback.snd (projModelπ (universalWeierstrassLocU.{u}.map f)) (𝟙 (Spec (CommRingCat.of R))) ≫
+          Spec.map (CommRingCat.ofHom f) := by
+      rw [hXdef, pullback.map, pullback.lift_snd]
+    apply pullback.hom_ext <;>
+      simp only [Category.assoc, pBCf, pBCs, pXf, pXs, Over.whiskerLeft_left_fst,
+        Over.whiskerLeft_left_snd, Over.whiskerLeft_left_fst_assoc, Over.whiskerLeft_left_snd_assoc,
+        oneOver_left, Over.tensorUnit_hom, Category.id_comp, projModelZero_baseChangeOf]
   apply (isPullback_projModelBaseChangeOf f universalWeierstrassLocU.{u}
     (universalWeierstrassLocU.{u}.map f) rfl).hom_ext
   · rw [Category.assoc, hbc, ← Category.assoc, hnat, Category.assoc, raw, hXdef,
