@@ -68,3 +68,14 @@ e₂ is `mo.hom ≫ Spec.map f = projModelBaseChangeOf ≫ mo_U.hom` = `simp [mo
 Remaining: X_triple (`set` with e₁,e₂), hnatL (mirror mulOver_oneOver hnat, leg-1=hbc), hnatR
 (◁ whisker-BC + **associator-BC**: `pullback.hom_ext` + `Over.associator_hom_left_fst/_snd_fst/_snd_snd`
 against the base-change-map projections), fst assembly, snd-leg `Over.w`, then of_eq+named.
+
+## FINDING: hnatL (▷ whisker-BC) hits a `whnf` heartbeat timeout in the triple-tensor context
+The map_comp+congr pattern that worked for the units' hnat times out at `whnf` (200k) when the
+domain is the triple tensor `(mo⊗mo)⊗mo` (the tensor `⊗` structure maps force expensive whnf even
+before the associator). e₁,e₂ (the X_triple obligations) are both green standalone. Next-pass fix
+options (NO maxHeartbeats): (a) restructure hnatL to avoid whnf'ing the tensor `.hom` — pre-`simp
+only [Over.tensorObj_hom]` to expose the pullback structure before map_comp; (b) do the fst-leg
+directly by `pullback.hom_ext` on the codomain projModel rather than naming X_triple, reducing each
+leg with `lift_fst`/`map`-`erw` (avoids constructing the triple pullback.map that triggers the whnf);
+(c) prove hbc first as a top-level lemma so it isn't re-elaborated in the tensor context.
+Likely (b) is cleanest — sidesteps X_triple entirely.
