@@ -304,4 +304,61 @@ theorem existsUnique_descent_of_torsor {S Z Y : Scheme.{u}} {G : Type u} [Group 
   exact ⟨EffectiveEpi.desc f q h, EffectiveEpi.fac f q h,
     fun u hu => EffectiveEpi.uniq f q h u hu⟩
 
+
+/-! ### fppf descent of a cartesian square (KM 4.7.0 bijection, curve-square) -/
+
+/-- **fppf descent of a cartesian square**: a commuting square whose base change along an fppf
+cover `c` of the bottom-right is a pullback is itself a pullback. (The comparison to the pullback
+is iso after fppf base change, hence iso by `isIso_of_isPullback_of_fppf`.) -/
+theorem isPullback_of_fppf_baseChange {E B XE XB W : Scheme.{u}}
+    {πY : E ⟶ B} {vtop : E ⟶ XE} {πX : XE ⟶ XB} {f₀ : B ⟶ XB}
+    (hw : vtop ≫ πX = πY ≫ f₀)
+    (c : W ⟶ B) [Surjective c] [Flat c] [QuasiCompact c]
+    -- the base change of the square along `c` is a pullback:
+    (hbc : IsPullback (pullback.fst πY c ≫ vtop) (pullback.snd πY c)
+      πX (c ≫ f₀)) :
+    IsPullback vtop πY πX f₀ := by
+  obtain ⟨κ, hκ_fst, hκ_snd⟩ :
+      ∃ κ : E ⟶ pullback πX f₀,
+        κ ≫ pullback.fst πX f₀ = vtop ∧ κ ≫ pullback.snd πX f₀ = πY :=
+    ⟨pullback.lift vtop πY hw, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+  -- It suffices to show the comparison morphism `κ : E ⟶ X ×_{XB} B` is an isomorphism.
+  haveI : IsIso κ := by
+    -- The comparison morphism between the fppf base changes.
+    have hcomm : (pullback.fst πY c ≫ κ) ≫ pullback.snd πX f₀ = pullback.snd πY c ≫ c := by
+      rw [Category.assoc, hκ_snd]
+      exact pullback.condition
+    set fst : pullback πY c ⟶ pullback (pullback.snd πX f₀) c :=
+      pullback.lift (pullback.fst πY c ≫ κ) (pullback.snd πY c) hcomm with hfst_def
+    have fst_fst : fst ≫ pullback.fst (pullback.snd πX f₀) c = pullback.fst πY c ≫ κ := by
+      rw [hfst_def]; exact pullback.lift_fst _ _ _
+    have fst_snd : fst ≫ pullback.snd (pullback.snd πX f₀) c = pullback.snd πY c := by
+      rw [hfst_def]; exact pullback.lift_snd _ _ _
+    -- `fst` agrees with `hbc.isoPullback` through `pullbackLeftPullbackSndIso`, hence is an iso.
+    haveI : IsIso fst := by
+      have key : fst ≫ (pullbackLeftPullbackSndIso πX f₀ c).hom = hbc.isoPullback.hom := by
+        apply pullback.hom_ext
+        · rw [Category.assoc, pullbackLeftPullbackSndIso_hom_fst, hbc.isoPullback_hom_fst,
+            ← Category.assoc, fst_fst, Category.assoc, hκ_fst]
+        · rw [Category.assoc, pullbackLeftPullbackSndIso_hom_snd, hbc.isoPullback_hom_snd, fst_snd]
+      have hfst_eq : fst = hbc.isoPullback.hom ≫ (pullbackLeftPullbackSndIso πX f₀ c).inv := by
+        rw [← key, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+      rw [hfst_eq]; infer_instance
+    -- The fppf leg inherits surjectivity, flatness and quasi-compactness by base change.
+    haveI : Surjective (pullback.fst (pullback.snd πX f₀) c) :=
+      MorphismProperty.pullback_fst (P := @Surjective) (pullback.snd πX f₀) c inferInstance
+    haveI : Flat (pullback.fst (pullback.snd πX f₀) c) :=
+      MorphismProperty.pullback_fst (P := @Flat) (pullback.snd πX f₀) c inferInstance
+    haveI : QuasiCompact (pullback.fst (pullback.snd πX f₀) c) :=
+      MorphismProperty.pullback_fst (P := @QuasiCompact) (pullback.snd πX f₀) c inferInstance
+    -- The base change of the comparison square along `c` is a pullback (left-cancellation of the
+    -- standard pasting square).
+    have hsq : IsPullback fst (pullback.fst πY c) (pullback.fst (pullback.snd πX f₀) c) κ := by
+      refine IsPullback.of_right ?_ fst_fst
+        (IsPullback.of_hasPullback (pullback.snd πX f₀) c).flip
+      rw [fst_snd, hκ_snd]
+      exact (IsPullback.of_hasPullback πY c).flip
+    exact isIso_of_isPullback_of_fppf hsq
+  exact IsPullback.of_iso_pullback ⟨hw⟩ (asIso κ) hκ_fst hκ_snd
+
 end ModularCurves
