@@ -111,6 +111,15 @@ noncomputable instance : Algebra P.baseRing P.chartRing :=
 noncomputable instance : Algebra P.baseRing P.groupRing :=
   (G.π.appLE P.V P.groupOpen le_rfl).hom.toAlgebra
 
+/-- The chart co-action, into the sections of the fibre product (`[HG-C1b]` leg 3, first
+half): pull sections of the chart back along the restricted action, then transport to
+the fibre product `G ×_S U` along the Künneth identification. The remaining half is the
+affine identification `Γ(G ×_S U) ≅ B ⊗ A` over the patch. -/
+noncomputable def coactionToPullback :
+    P.chartRing ⟶ Γ(pullback G.π (P.U.ι ≫ E.π), ⊤) :=
+  P.U.topIso.inv ≫ (G.restrictedAction P.hstable).appTop
+    ≫ ((G.chartPullbackIso P.U).inv.appTop)
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
