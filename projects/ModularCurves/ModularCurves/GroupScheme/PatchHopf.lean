@@ -411,6 +411,32 @@ theorem includeRight_comp_counitLiftΓ :
     Iso.inv_hom_id]
   rfl
 
+/-- The left inclusion, composed with the dual of the left unit section, is the counit
+followed by the structure map. -/
+theorem includeLeft_comp_counitLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.counitLiftΓ
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  -- the two `appTop`s compose to the dual of `leftUnitSection ≫ fst`
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.leftUnitSection.appTop
+      = P.unitSection.appTop ≫ (G.π.resLE P.V P.groupOpen le_rfl).appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.leftUnitSection_fst, Scheme.Hom.comp_appTop]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  -- unwind the two restricted `appTop`s
+  rw [P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc]
+  rw [← Category.assoc P.V.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [← Category.assoc P.groupOpen.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.comp_id]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
