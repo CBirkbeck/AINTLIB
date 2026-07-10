@@ -4262,4 +4262,89 @@ end MarkedChartData
 
 end TopNaturality
 
+section TopRestriction
+
+/-! ### Fibre restriction and overlap agreement of the local classifying top maps
+(recipe step 2, top glue)
+
+Restricting a local classifying top map to the fibre over an affine test point computes
+the classifying map of the fibre model at the fibre point (`fibreMap_topMap`, through the
+step-1 naturality); the comparison ENGINE then forces the two fibre restrictions of the
+top maps of overlapping charts to agree (`fibreMap_topMap_agree`); the instance-free
+test-point form (`test_topMap_agree`) is the input to the `E`-cover gluing. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+section OneChart
+
+variable (D : MarkedChartData R Y) (k : Type u) [CommRing k]
+  [Algebra ↑Γ(Y.base, D.U.1) k] [Algebra ↑R ↑Γ(Y.base, D.U.1)] [Algebra ↑R k]
+
+/-- **Fibre restriction of the local classifying top map**: over an affine test point the
+top map computes the classifying map of the fibre model at the fibre point. -/
+theorem fibreMap_topMap
+    (htower : (algebraMap ↑Γ(Y.base, D.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D.U.1)) = algebraMap ↑R k)
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    D.fibreMap k ≫ D.topMap P hP =
+      (D.fibreChartIso k).hom ≫
+        projTateMap R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P)
+          (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (D.fibrePt_hord k P hP) := by
+  have hbc : (D.fibreChartIso k).hom ≫
+      projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
+      D.fibreMap k ≫ D.e.hom :=
+    pullbackChartIso_hom_bc D.W (D.fibreTop_isPullback k)
+  have h1 : D.fibreMap k ≫ D.topMap P hP =
+      ((D.fibreChartIso k).hom ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W) ≫
+        projTateMap R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP) := by
+    rw [hbc, topMap]
+    simp only [Category.assoc]
+  rw [h1, Category.assoc, projModelBaseChange_projTateMap D k htower P hP]
+
+end OneChart
+
+section TwoCharts
+
+variable (D₁ D₂ : MarkedChartData R Y) (k : Type u) [CommRing k]
+  [Algebra ↑Γ(Y.base, D₁.U.1) k] [Algebra ↑Γ(Y.base, D₂.U.1) k]
+  [Algebra ↑R ↑Γ(Y.base, D₁.U.1)] [Algebra ↑R ↑Γ(Y.base, D₂.U.1)] [Algebra ↑R k]
+
+/-- **Overlap agreement of the fibre restrictions of the local classifying top maps**,
+through the comparison ENGINE with `fibreModelIso`-data. -/
+theorem fibreMap_topMap_agree
+    (htower₁ : (algebraMap ↑Γ(Y.base, D₁.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) = algebraMap ↑R k)
+    (htower₂ : (algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) = algebraMap ↑R k)
+    (hgeom : D₁.geomPt (D₁.specPt k) = D₂.geomPt (D₂.specPt k))
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    D₁.fibreMap k ≫ D₁.topMap P hP =
+      (pullback.congrHom rfl hgeom).hom ≫ D₂.fibreMap k ≫ D₂.topMap P hP := by
+  rw [fibreMap_topMap D₁ k htower₁ P hP, fibreMap_topMap D₂ k htower₂ P hP]
+  have hengine : (fibreModelIso D₁ D₂ k hgeom).hom ≫
+      projTateMap R (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) (D₂.fibrePt k P)
+        (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP)) (D₂.fibrePt_hord k P hP) =
+      projTateMap R (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) (D₁.fibrePt k P)
+        (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP)) (D₁.fibrePt_hord k P hP) :=
+    projTateMap_eq_of_pointedIso R
+      (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k))
+      (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k))
+      (fibreModelIso D₁ D₂ k hgeom)
+      (fibreModelIso_π D₁ D₂ k hgeom) (fibreModelIso_zero D₁ D₂ k hgeom)
+      (D₁.fibrePt k P) (D₂.fibrePt k P)
+      (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP))
+      (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP))
+      (fibrePt_fibreModelIso D₁ D₂ k hgeom P)
+      (D₁.fibrePt_hord k P hP) (D₂.fibrePt_hord k P hP)
+  rw [← hengine, fibreModelIso]
+  simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.hom_inv_id_assoc]
+
+end TwoCharts
+
+end MarkedChartData
+
+end TopRestriction
+
 end ModularCurves
