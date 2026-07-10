@@ -343,6 +343,66 @@ instance isIso_affineKunnethΓ
         AlgebraicGeometry.Scheme.Hom.id_appTop]
   infer_instance
 
+/-- **The `Γ`-dual of the left leg**, affine version. -/
+theorem fst_appTop_affineKunnethΓ
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    (pullback.fst f g).appTop ≫ affineKunnethΓ f g h₁ h₂
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))) := by
+  set ιL := CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+    (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))) with hιL
+  have hleg := congrArg (fun m : pullback f g ⟶ (Spec Γ(X, ⊤) : Scheme) =>
+      Scheme.Hom.appTop m) (affineKunneth_hom_comp_includeLeft f g h₁ h₂)
+  simp only [Scheme.Hom.comp_appTop] at hleg
+  rw [show (Spec.map ιL).appTop
+      = (Scheme.ΓSpecIso Γ(X, ⊤)).hom ≫ ιL
+        ≫ (Scheme.ΓSpecIso (.of (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤)))).inv from by
+    rw [← Category.assoc, Iso.eq_comp_inv]
+    exact Scheme.ΓSpecIso_naturality ιL] at hleg
+  rw [show X.isoSpec.hom.appTop = (Scheme.ΓSpecIso Γ(X, ⊤)).hom from
+    Scheme.toSpecΓ_appTop X] at hleg
+  rw [affineKunnethΓ, ← Category.assoc]
+  rw [show (pullback.fst f g).appTop
+      = (Scheme.ΓSpecIso Γ(X, ⊤)).inv
+        ≫ (Scheme.ΓSpecIso Γ(X, ⊤)).hom ≫ (pullback.fst f g).appTop from by simp]
+  rw [Category.assoc, ← hleg]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Category.assoc ((affineKunneth f g h₁ h₂).hom.appTop),
+    ← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+    AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
+    Category.comp_id]
+
+/-- **The `Γ`-dual of the right leg**, affine version. -/
+theorem snd_appTop_affineKunnethΓ
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    (pullback.snd f g).appTop ≫ affineKunnethΓ f g h₁ h₂
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))).toRingHom := by
+  set ιR := CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+    (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))).toRingHom with hιR
+  have hleg := congrArg (fun m : pullback f g ⟶ (Spec Γ(Y, ⊤) : Scheme) =>
+      Scheme.Hom.appTop m) (affineKunneth_hom_comp_includeRight f g h₁ h₂)
+  simp only [Scheme.Hom.comp_appTop] at hleg
+  rw [show (Spec.map ιR).appTop
+      = (Scheme.ΓSpecIso Γ(Y, ⊤)).hom ≫ ιR
+        ≫ (Scheme.ΓSpecIso (.of (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤)))).inv from by
+    rw [← Category.assoc, Iso.eq_comp_inv]
+    exact Scheme.ΓSpecIso_naturality ιR] at hleg
+  rw [show Y.isoSpec.hom.appTop = (Scheme.ΓSpecIso Γ(Y, ⊤)).hom from
+    Scheme.toSpecΓ_appTop Y] at hleg
+  rw [affineKunnethΓ, ← Category.assoc]
+  rw [show (pullback.snd f g).appTop
+      = (Scheme.ΓSpecIso Γ(Y, ⊤)).inv
+        ≫ (Scheme.ΓSpecIso Γ(Y, ⊤)).hom ≫ (pullback.snd f g).appTop from by simp]
+  rw [Category.assoc, ← hleg]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Category.assoc ((affineKunneth f g h₁ h₂).hom.appTop),
+    ← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+    AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
+    Category.comp_id]
+
 end Affine
 
 end AlgebraicGeometry
