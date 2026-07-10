@@ -139,4 +139,61 @@ instance : IsReduced (pullback
       (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
     (projModelπ universalWeierstrassLocU.{u})) := inferInstance
 
+/-! ## T-G2/T-G3 — the atlas equations, by field-points extensionality + the c6 spec
+
+Every equation is proven on an arbitrary field-valued point `p` of the relevant fibre power:
+decompose `p` into its `SpecPoints` legs (the canonical algebra on `K` comes from
+`Spec.preimage` of the structure composite), evaluate both sides through the c6 spec
+`mulModelHom_specPoints` (and `negModelHom_specPoints` / `projModelPointsEquiv_zero`), apply
+the corresponding group law on `Affine.Point`, and close by injectivity of the dictionary. -/
+
+section AtlasEquations
+
+/-- **(T-G3-comm)** Commutativity of the two-law multiplication at the universe-`u` atlas:
+swapping the factors of `E ×_U E` does not change the product. -/
+theorem mulModelHom_comm_atlas :
+    (pullbackSymmetry (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})).hom ≫ (mulModelHom universalWeierstrassLocU.{u}) = (mulModelHom universalWeierstrassLocU.{u}) := by
+  classical
+  refine hom_ext_of_forall_specPoint fun K _ p => ?_
+  -- the canonical algebra on `K`, from the structure composite of the first leg
+  letI : Algebra WeierstrassAtlasRingU.{u} K :=
+    ((Spec.preimage (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u}))).hom).toAlgebra
+  have hσ : p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u}) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
+        Spec.preimage (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+          (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hπP : (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u}) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc]; exact hσ
+  have hπQ : (p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u}) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, ← pullback.condition, ← Category.assoc]; exact hπP
+  -- both sides at `p` are spec-shaped lifts
+  have hQP := mulModelHom_specPoints universalWeierstrassLocU.{u} K
+    ⟨p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}), hπQ⟩ ⟨p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}), hπP⟩
+  have hPQ := mulModelHom_specPoints universalWeierstrassLocU.{u} K
+    ⟨p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}), hπP⟩ ⟨p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}), hπQ⟩
+  have keyval := congrArg Subtype.val
+    ((projModelPointsEquiv universalWeierstrassLocU.{u} K).injective
+      (hQP.trans ((add_comm _ _).trans hPQ.symm)))
+  have hL : p ≫ ((pullbackSymmetry (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})).hom ≫ (mulModelHom universalWeierstrassLocU.{u})) =
+      pullback.lift (p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}))
+        (hπQ.trans hπP.symm) ≫ (mulModelHom universalWeierstrassLocU.{u}) := by
+    rw [← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · rw [Category.assoc, pullbackSymmetry_hom_comp_fst, pullback.lift_fst]
+    · rw [Category.assoc, pullbackSymmetry_hom_comp_snd, pullback.lift_snd]
+  have hR : p = pullback.lift (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) (p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}))
+      (hπP.trans hπQ.symm) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+    · rw [pullback.lift_snd]
+  exact hL.trans (keyval.trans (congrArg (· ≫ (mulModelHom universalWeierstrassLocU.{u})) hR.symm))
+
+end AtlasEquations
+
 end ModularCurves
