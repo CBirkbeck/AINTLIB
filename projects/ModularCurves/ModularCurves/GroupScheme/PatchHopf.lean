@@ -530,6 +530,94 @@ theorem rightUnitSection_comp_squareMul :
   rw [← Category.assoc k, hk1]
   rfl
 
+/-- The `Γ`-dual of the right unit section. -/
+noncomputable def counitLiftΓ' :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.rightUnitSection.appTop ≫ P.groupOpen.topIso.hom
+
+theorem groupPatchComul_comp_counitLiftΓ' :
+    P.groupPatchComul ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
+  rw [groupPatchComul_eq, counitLiftΓ', Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp]
+  rw [show P.rightUnitSection.appTop
+      = P.rightUnitSection.appLE ⊤ ⊤ le_top from (appLE_top_top _).symm]
+  rw [← Category.assoc, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom P.rightUnitSection_comp_squareMul P.groupOpen ⊤,
+    ι_appLE_top, Iso.inv_hom_id]
+
+theorem includeLeft_comp_counitLiftΓ' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ', ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.rightUnitSection.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.rightUnitSection_fst,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
+theorem includeRight_comp_counitLiftΓ' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.counitLiftΓ'
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [counitLiftΓ', ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.rightUnitSection.appTop
+      = P.unitSection.appTop ≫ (G.π.resLE P.V P.groupOpen le_rfl).appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.rightUnitSection_snd, Scheme.Hom.comp_appTop]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  rw [P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc]
+  rw [← Category.assoc P.V.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [← Category.assoc P.groupOpen.topIso.inv, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.comp_id]
+
+/-- The algebraic right counit lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ a • ε(b)`. -/
+noncomputable def counitLift' :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift (AlgHom.id P.baseRing P.groupRing)
+    ((Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg)
+    (fun _ _ => Commute.all _ _)
+
+theorem counitLift'_eq_counitLiftΓ' :
+    CommRingCat.ofHom P.counitLift'.toRingHom = P.counitLiftΓ' := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftΓ']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift' G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [counitLift', Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftΓ']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift' G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [counitLift', Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The right counit law**: `(id ⊗ ε) ∘ Δ = id`, in `AlgHom` form. -/
+theorem counitLift'_comp_comulAlg :
+    P.counitLift'.comp P.comulAlg = AlgHom.id P.baseRing P.groupRing := by
+  have h := P.groupPatchComul_comp_counitLiftΓ'
+  rw [← P.counitLift'_eq_counitLiftΓ'] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
