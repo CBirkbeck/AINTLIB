@@ -87,6 +87,32 @@ structure AffineChartPatch (G : FiniteLocallyFreeSubgroup E) where
   /-- The chart lies over the base patch. -/
   hover : U ≤ E.π ⁻¹ᵁ V
 
+namespace AffineChartPatch
+
+variable {G : FiniteLocallyFreeSubgroup E} (P : G.AffineChartPatch)
+
+/-- The base ring of the patch: sections over the affine base patch. -/
+noncomputable abbrev baseRing : CommRingCat := Γ(S, P.V)
+
+/-- The chart ring: sections over the stable affine chart. -/
+noncomputable abbrev chartRing : CommRingCat := Γ(E.E, P.U)
+
+/-- The group-patch open: the part of `G` lying over the base patch. -/
+noncomputable abbrev groupOpen : (G.G).Opens := G.π ⁻¹ᵁ P.V
+
+/-- The Hopf-side ring: sections of `G` over the base patch. -/
+noncomputable abbrev groupRing : CommRingCat := Γ(G.G, P.groupOpen)
+
+/-- The chart ring is an algebra over the base ring (restriction along `E.π`). -/
+noncomputable instance : Algebra P.baseRing P.chartRing :=
+  (E.π.appLE P.V P.U P.hover).hom.toAlgebra
+
+/-- The group ring is an algebra over the base ring (restriction along `G.π`). -/
+noncomputable instance : Algebra P.baseRing P.groupRing :=
+  (G.π.appLE P.V P.groupOpen le_rfl).hom.toAlgebra
+
+end AffineChartPatch
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
