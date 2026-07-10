@@ -701,3 +701,31 @@ Three bounded pieces:
   (`Scheme.ΓSpecIso_naturality`-family); package `coactionAlg : B →ₐ[R] A⊗[R]B`; the
   comm-swap `Algebra.TensorProduct.comm` to `B ⊗[R] A`; then C1c-counit/coassoc
   (scheme-level-first per previous bank), C1d assembly, C3, C4 → pins → BOARD-SIGNAL.
+
+## [HG-C1c-0] NEW LEAF: the group-scheme structure on G (banked 2026-07-10)
+
+DISCOVERY at C1c-start: p0's `FiniteLocallyFreeSubgroup` carries NO μ_G / unit / inverse
+as data — only the functor-of-points `subgroup` field (`∀ g, ∃ H : AddSubgroup (E.Point g),
+∀ P, P ∈ H ↔ ∃ h : T ⟶ G, h ≫ ι = P.1`) and `pointSubgroup` (carrier = the factoring set,
+`mem` is Iff.rfl). p2's Hopf layer (`DeligneOrder.subgroupHopfAlgebra`) is AFFINE-BASE-only
+(`E : EllipticCurve (Spec R)`) and RelEffCartierDiv-indexed — not directly our A.
+Both the counit and coassoc chases need the STRUCTURE MAPS. They are derivable, uniquely,
+by ι-mono cancellation:
+
+- `mulHom : G ×ₛ G ⟶ G` — apply `pointSubgroup.add_mem` to the two universal points
+  `pr₁ ≫ ι`, `pr₂ ≫ ι` of `T := (Over.mk G.π ⊗ Over.mk G.π).left` over S; `Classical.choose`
+  the factoring h. Spec: `mulHom ≫ ι = ((pr₁ ≫ ιOver) * (pr₂ ≫ ιOver)).left` (hom-group).
+- `unitHom : S ⟶ G` — `zero_mem'` at `g := 𝟙 S`; spec `unitHom ≫ ι = E.zero`.
+- `invHom : G ⟶ G` — `neg_mem'` at the universal point `ι` of `g := G.π`; spec
+  `invHom ≫ ι = (-(id-point)).1 = ι ≫ E.negHom`(-ish).
+- Over-S-ness: each spec-composite is over S, so `homMk` lifts them into `Over S`.
+- LAWS (assoc, unit, inv, comm) — all by `cancel_mono G.ι` + the corresponding law in
+  `E.Point`'s AddCommGroup (transported hom-group). Uniqueness of each structure map:
+  same cancellation. ⟹ `G` is a commutative group object in `Over S`, and `ιOver` is a
+  group-object hom.
+
+CONSUMERS: (a) the translation-action unit/assoc diagrams — hence C1c's counit/coassoc
+after Γ-dualization; (b) any future Hopf structure on `groupRing` (comul := Γ(mulHom)
+through the affine Künneth over the patch, counit := Γ(unitHom), antipode := Γ(invHom)) —
+this is our OWN route to `[HopfAlgebra R A]`, avoiding the p2-affine-base restriction, and
+it is NEW-file work (p0/p2 files untouched). File: `GroupScheme/SubgroupGroupObject.lean`.
