@@ -217,6 +217,38 @@ noncomputable def coactionRing :
   P.coactionToPullback ≫ P.chartSpecIso.inv.appTop
     ≫ (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.chartRing))).hom
 
+/-- The restricted-action domain lies over the base patch. -/
+theorem prOpen_le_preimage :
+    G.actionProj.left ⁻¹ᵁ P.U ≤ ((Over.mk G.π ⊗ E.asOver).hom) ⁻¹ᵁ P.V := by
+  rw [show (Over.mk G.π ⊗ E.asOver).hom = G.actionProj.left ≫ E.π from
+    (G.actionProj_left_π).symm, Scheme.Hom.comp_preimage]
+  exact Scheme.Hom.preimage_mono _ P.hover
+
+/-- The restricted-action domain, as a scheme over the base patch. -/
+noncomputable def prOpenToBase :
+    (G.actionProj.left ⁻¹ᵁ P.U).toScheme ⟶ P.V.toScheme :=
+  ((Over.mk G.π ⊗ E.asOver).hom).resLE P.V (G.actionProj.left ⁻¹ᵁ P.U)
+    P.prOpen_le_preimage
+
+/-- **The restricted action is a morphism over the base patch** (`[HG-C1c]` piece (i)):
+the source of the R-linearity square. -/
+theorem restrictedAction_comp_chartToBase :
+    G.restrictedAction P.hstable ≫ P.chartToBase = P.prOpenToBase := by
+  rw [restrictedAction, chartToBase]
+  refine (Scheme.Hom.resLE_comp_resLE (f := G.translationAction.left)
+    (U := P.U) (V := G.actionProj.left ⁻¹ᵁ P.U) (e := P.hstable) E.π
+    (W := P.V) P.hover).trans ?_
+  simp only [G.translationAction_left_π, prOpenToBase]
+
+/-- The restricted projection is likewise over the base patch. -/
+theorem restrictedProj_comp_chartToBase :
+    G.restrictedProj P.U ≫ P.chartToBase = P.prOpenToBase := by
+  rw [restrictedProj, chartToBase]
+  refine (Scheme.Hom.resLE_comp_resLE (f := G.actionProj.left)
+    (U := P.U) (V := G.actionProj.left ⁻¹ᵁ P.U) (e := le_rfl) E.π
+    (W := P.V) P.hover).trans ?_
+  simp only [G.actionProj_left_π, prOpenToBase]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
