@@ -136,6 +136,12 @@ theorem ι_appLE_top {X : Scheme.{u}} (U : X.Opens) :
   rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso_inv]
   congr 1
 
+/-- `resLE` transported along an equality of morphisms. -/
+theorem appLE_congr_hom_resLE {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
+    (W : X.Opens) {e : W ≤ f ⁻¹ᵁ U} :
+    f.resLE U W e = g.resLE U W (h ▸ e) := by
+  subst h; rfl
+
 /-- `appLE` transported along an equality of morphisms. -/
 theorem appLE_congr_hom {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
     (W : X.Opens) (e : W ≤ f ⁻¹ᵁ U) :
@@ -220,6 +226,26 @@ theorem algebraMap_comp_groupPatchComul :
       = P.V.topIso.hom ≫ G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupOpen.topIso.inv from
     Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl]
   simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
+/-! ### The counit laws, scheme-side -/
+
+/-- The unit section, restricted to the patch. -/
+noncomputable def unitSection : P.V.toScheme ⟶ P.groupOpen.toScheme :=
+  G.unitHom.resLE P.groupOpen P.V P.le_preimage_groupOpen_unitHom
+
+/-- The restricted unit section is a section of the restricted structure map. -/
+@[reassoc (attr := simp)]
+theorem unitSection_comp_groupToBase :
+    P.unitSection ≫ G.π.resLE P.V P.groupOpen le_rfl = 𝟙 P.V.toScheme := by
+  rw [unitSection, Scheme.Hom.resLE_comp_resLE,
+    appLE_congr_hom_resLE G.unitHom_π P.V P.V, Scheme.Hom.resLE_id,
+    Scheme.homOfLE_rfl]
+
+/-- The unit section, composed into `G`, is the zero section over the patch. -/
+@[reassoc]
+theorem unitSection_comp_ι :
+    P.unitSection ≫ P.groupOpen.ι = P.V.ι ≫ G.unitHom :=
+  Scheme.Hom.resLE_comp_ι _ _
 
 end AffineChartPatch
 
