@@ -263,6 +263,33 @@ theorem coactionRing_eq_appTop :
   rw [coactionRing, coactionToPullback, chartCoactionSpec]
   simp only [Scheme.Hom.comp_appTop, Category.assoc]
 
+/-- **(L2)**: the Künneth identification carries the patch structure map to the
+second-projection-side structure map — compared after the mono `V.ι`, where everything
+is `pullback.condition` algebra. -/
+theorem chartPullbackIso_inv_comp_prOpenToBase :
+    (G.chartPullbackIso P.U).inv ≫ P.prOpenToBase
+      = pullback.snd G.π (P.U.ι ≫ E.π) ≫ P.chartToBase := by
+  rw [← cancel_mono P.V.ι]
+  have h1 : (G.restrictedDomainIso P.U).inv ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι
+      = pullback.fst G.actionProj.left P.U.ι :=
+    pullbackRestrictIsoRestrict_hom_ι _ _
+  have h2 : pullback.fst G.actionProj.left P.U.ι ≫ (Over.mk G.π ⊗ E.asOver).hom
+      = pullback.snd G.actionProj.left P.U.ι ≫ P.U.ι ≫ E.π := by
+    rw [show (Over.mk G.π ⊗ E.asOver).hom = G.actionProj.left ≫ E.π from
+      (G.actionProj_left_π).symm, ← Category.assoc, pullback.condition]
+    exact Category.assoc _ _ _
+  have h3 : (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv
+        ≫ pullback.snd G.actionProj.left P.U.ι
+      = pullback.snd G.π (P.U.ι ≫ E.π) :=
+    pullbackLeftPullbackSndIso_inv_snd_snd _ _ _
+  rw [Category.assoc, Category.assoc, P.chartToBase_comp_ι,
+    show P.prOpenToBase ≫ P.V.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ (Over.mk G.π ⊗ E.asOver).hom from
+    Scheme.Hom.resLE_comp_ι _ _,
+    chartPullbackIso, Iso.trans_inv, Category.assoc,
+    reassoc_of% h1, h2]
+  exact (reassoc_of% h3) (P.U.ι ≫ E.π)
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
