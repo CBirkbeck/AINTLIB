@@ -133,6 +133,57 @@ theorem patchKunneth_hom_base
   rw [Category.assoc, h₁]
   exact congrArg _ (Scheme.Opens.toSpecΓ_SpecMap_appLE f V W₁ e₁)
 
+/-- The section-level transport across the Künneth identification:
+`Γ(pullback, ⊤) ≅ Γ(X,W₁) ⊗ Γ(Y,W₂)`. -/
+noncomputable def patchKunnethΓ
+    (hV : IsAffineOpen V) (hW₁ : IsAffineOpen W₁) (hW₂ : IsAffineOpen W₂)
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁)) = f.appLE V W₁ e₁)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂)) = g.appLE V W₂ e₂) :
+    Γ(pullback (f.resLE V W₁ e₁) (g.resLE V W₂ e₂), ⊤)
+      ⟶ CommRingCat.of (Γ(X, W₁) ⊗[Γ(S, V)] Γ(Y, W₂)) :=
+  (patchKunneth f g hV hW₁ hW₂ h₁ h₂).inv.appTop
+    ≫ (Scheme.ΓSpecIso (.of (Γ(X, W₁) ⊗[Γ(S, V)] Γ(Y, W₂)))).hom
+
+/-- **The `Γ`-dual of the left leg**: the first projection, transported, is the left
+inclusion into the tensor product. -/
+theorem topIso_inv_fst_appTop_patchKunnethΓ
+    (hV : IsAffineOpen V) (hW₁ : IsAffineOpen W₁) (hW₂ : IsAffineOpen W₂)
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁)) = f.appLE V W₁ e₁)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂)) = g.appLE V W₂ e₂) :
+    W₁.topIso.inv
+        ≫ (pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop
+        ≫ patchKunnethΓ f g hV hW₁ hW₂ h₁ h₂
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := Γ(S, V)) (A := Γ(X, W₁)) (B := Γ(Y, W₂))) := by
+  set K := patchKunneth f g hV hW₁ hW₂ h₁ h₂ with hK
+  set ιL := CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+    (R := Γ(S, V)) (A := Γ(X, W₁)) (B := Γ(Y, W₂))) with hιL
+  -- take `appTop` of the Spec-side leg lemma
+  have hleg := congrArg (fun m : pullback (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)
+      ⟶ (Spec Γ(X, W₁) : Scheme) => Scheme.Hom.appTop m)
+    (patchKunneth_hom_comp_includeLeft f g hV hW₁ hW₂ h₁ h₂)
+  simp only [Scheme.Hom.comp_appTop] at hleg
+  -- rewrite the two `appTop`s that have closed forms
+  rw [show (Spec.map ιL).appTop
+      = (Scheme.ΓSpecIso Γ(X, W₁)).hom ≫ ιL
+        ≫ (Scheme.ΓSpecIso (.of (Γ(X, W₁) ⊗[Γ(S, V)] Γ(Y, W₂)))).inv from by
+    rw [← Category.assoc, Iso.eq_comp_inv]
+    exact Scheme.ΓSpecIso_naturality ιL] at hleg
+  rw [Scheme.Opens.toSpecΓ_appTop] at hleg
+  -- cancel the leading `ΓSpecIso` and transport across `K`
+  rw [patchKunnethΓ, ← Category.assoc, ← Category.assoc]
+  rw [show W₁.topIso.inv ≫ (pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop
+      = (Scheme.ΓSpecIso Γ(X, W₁)).inv
+        ≫ ((Scheme.ΓSpecIso Γ(X, W₁)).hom ≫ W₁.topIso.inv)
+        ≫ (pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop from by
+    simp]
+  rw [Category.assoc, Category.assoc, ← hleg]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Category.assoc ((patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom.appTop),
+    ← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+    AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
+    Category.comp_id]
+
 end
 
 end AlgebraicGeometry
