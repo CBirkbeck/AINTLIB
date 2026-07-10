@@ -5377,6 +5377,153 @@ noncomputable def inducedChart : MarkedChartData R Y :=
 @[simp]
 theorem inducedChart_U : (D.inducedChart fb ftop hPB hzw).U = D.U := rfl
 
+variable (P : Y.curve.Section)
+
+/-- The section, read in the induced chart, with its honest model spelling. -/
+noncomputable def inducedPt :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    SpecPoints
+      (projModel ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))))
+      (projModelπ ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))))
+      ↑Γ(Y.base, D.U.1) :=
+  (D.inducedChart fb ftop hPB hzw).pt P
+
+/-- The induced point lies in the `Z`-chart. -/
+theorem inducedPt_inZChart (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    InZChart ((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      (D.inducedPt fb ftop hPB hzw P) :=
+  (D.inducedChart fb ftop hPB hzw).pt_inZChart P hP
+
+/-- **The induced point hits the atlas marking under base change** (the pulled-back
+marking equation, in chart coordinates). -/
+theorem inducedPt_comp_bc (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    (D.inducedPt fb ftop hPB hzw P).1 ≫
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R) =
+      D.classifyingSpecMap fb ≫ tateP0mor R := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  have hbc : (pullbackChartIso (tateCurveLocOver R)
+      (D.classifying_isPullback' fb ftop hPB)).hom ≫
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R) =
+      pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R) :=
+    pullbackChartIso_hom_bc (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB)
+  have hres : D.restrictSection P ≫ pullback.fst Y.curve.π D.U.1.ι =
+      D.U.1.ι ≫ P.1 := pullback.lift_fst _ _ _
+  have hm : (tateMarkedPoint R).1 = tateP0mor R ≫ eqToHom (tateUniversal_E_eq R).symm :=
+    rfl
+  show (D.U.2.isoSpec.inv ≫ D.restrictSection P ≫
+      (pullbackChartIso (tateCurveLocOver R)
+        (D.classifying_isPullback' fb ftop hPB)).hom) ≫
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R) =
+    D.classifyingSpecMap fb ≫ tateP0mor R
+  calc (D.U.2.isoSpec.inv ≫ D.restrictSection P ≫
+      (pullbackChartIso (tateCurveLocOver R)
+        (D.classifying_isPullback' fb ftop hPB)).hom) ≫
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R)
+      = D.U.2.isoSpec.inv ≫ D.restrictSection P ≫
+          ((pullbackChartIso (tateCurveLocOver R)
+            (D.classifying_isPullback' fb ftop hPB)).hom ≫
+            projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+              (tateCurveLocOver R)) := by simp only [Category.assoc]
+    _ = D.U.2.isoSpec.inv ≫ D.restrictSection P ≫
+          pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R) := by
+        rw [hbc]
+    _ = D.U.2.isoSpec.inv ≫ (D.restrictSection P ≫ pullback.fst Y.curve.π D.U.1.ι) ≫
+          ftop ≫ eqToHom (tateUniversal_E_eq R) := by simp only [Category.assoc]
+    _ = D.U.2.isoSpec.inv ≫ (D.U.1.ι ≫ P.1) ≫ ftop ≫
+          eqToHom (tateUniversal_E_eq R) := by rw [hres]
+    _ = D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ (P.1 ≫ ftop) ≫
+          eqToHom (tateUniversal_E_eq R) := by simp only [Category.assoc]
+    _ = D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ (fb ≫ (tateMarkedPoint R).1) ≫
+          eqToHom (tateUniversal_E_eq R) := by rw [hmark]
+    _ = (D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ fb) ≫ (tateMarkedPoint R).1 ≫
+          eqToHom (tateUniversal_E_eq R) := by simp only [Category.assoc]
+    _ = D.classifyingSpecMap fb ≫ tateP0mor R := by
+        rw [hm]
+        simp only [Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+        rfl
+
+/-- The base-changed induced point is the composed atlas marking. -/
+theorem specPointBaseChange_inducedPt (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    specPointBaseChange (tateCurveLocOver R) (D.inducedPt fb ftop hPB hzw P) =
+      specPointComp (tateCurveLocOver R) (tateP0SpecPoint R)
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        algebraMap_comp_algebraMap_self := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  have hof : CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) =
+      Spec.preimage (D.classifyingSpecMap fb) := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  refine Subtype.ext ?_
+  show (D.inducedPt fb ftop hPB hzw P).1 ≫
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R) =
+    Spec.map (CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))) ≫
+      (tateP0SpecPoint R).1
+  rw [D.inducedPt_comp_bc fb ftop hPB hzw P hmark, hof, Spec.map_preimage]
+  rfl
+
+/-- The induced point evaluates to `0` (`x`-side). -/
+theorem inducedPt_coordX (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    zChartEval ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+      (coordX ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))) = 0 := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  rw [← zChartEval_specPointBaseChange_coordX (tateCurveLocOver R)
+      (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP),
+    zChartEval_congr (tateCurveLocOver R)
+      (D.specPointBaseChange_inducedPt fb ftop hPB hzw P hmark)
+      (inZChart_specPointBaseChange (tateCurveLocOver R) _ _)
+      (inZChart_specPointComp (tateCurveLocOver R) (tateP0SpecPoint R)
+        (tateP0SpecPoint_inZChart R) _ _),
+    zChartEval_specPointComp, zChartEval_tateP0SpecPoint_coordX, map_zero]
+  · exact tateP0SpecPoint_inZChart R
+  · exact D.inducedPt_inZChart fb ftop hPB hzw P hP
+
+/-- The induced point evaluates to `0` (`y`-side). -/
+theorem inducedPt_coordY (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    zChartEval ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+      (coordY ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))) = 0 := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  rw [← zChartEval_specPointBaseChange_coordY (tateCurveLocOver R)
+      (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP),
+    zChartEval_congr (tateCurveLocOver R)
+      (D.specPointBaseChange_inducedPt fb ftop hPB hzw P hmark)
+      (inZChart_specPointBaseChange (tateCurveLocOver R) _ _)
+      (inZChart_specPointComp (tateCurveLocOver R) (tateP0SpecPoint R)
+        (tateP0SpecPoint_inZChart R) _ _),
+    zChartEval_specPointComp, zChartEval_tateP0SpecPoint_coordY, map_zero]
+  · exact tateP0SpecPoint_inZChart R
+  · exact D.inducedPt_inZChart fb ftop hPB hzw P hP
+
 end MarkedChartData
 
 end InducedChart
