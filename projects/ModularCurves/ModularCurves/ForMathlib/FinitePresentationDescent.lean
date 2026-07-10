@@ -4,6 +4,10 @@ import Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.RingTheory.FiniteStability
+import Mathlib.RingTheory.Spectrum.Prime.Chevalley
+import Mathlib.RingTheory.Spectrum.Prime.RingHom
+import Mathlib.RingTheory.Spectrum.Prime.Topology
+import Mathlib.Topology.Spectral.ConstructibleTopology
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.Tactic.Algebraize
 import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
@@ -450,6 +454,109 @@ noncomputable def presentedBaseChange :
     )
 
 end BaseChange
+
+
+/-! ### Patch-topology glue for [KL-4] -/
+
+section PatchTopology
+
+open Topology
+
+/-- Constructible subsets of a compact space are clopen in the constructible topology. -/
+theorem _root_.Topology.IsConstructible.isOpen_isClosed_constructibleTopology
+    {X : Type*} [TopologicalSpace X] [CompactSpace X] {s : Set X}
+    (hs : Topology.IsConstructible s) :
+    IsOpen[constructibleTopology X] s ∧ IsClosed[constructibleTopology X] s := by
+  induction hs using Topology.IsConstructible.empty_union_induction with
+  | open_retrocompact U hUopen hUcomp =>
+    have hUc : IsCompact U := by
+      simpa using hUcomp isCompact_univ isOpen_univ
+    have hmem : U ∈ constructibleTopologySubbasis X := Or.inl ⟨hUopen, hUc⟩
+    have hmem2 : Uᶜ ∈ constructibleTopologySubbasis X :=
+      Or.inr ⟨hUopen.isClosed_compl, by rwa [compl_compl]⟩
+    letI := constructibleTopology X
+    exact ⟨TopologicalSpace.isOpen_generateFrom_of_mem hmem,
+      ⟨TopologicalSpace.isOpen_generateFrom_of_mem hmem2⟩⟩
+  | union s hs t ht ihs iht =>
+    letI := constructibleTopology X
+    exact ⟨ihs.1.union iht.1, ihs.2.union iht.2⟩
+  | compl s hs ih =>
+    letI := constructibleTopology X
+    exact ⟨ih.2.isOpen_compl, ih.1.isClosed_compl⟩
+
+/-- The raw form of patch-compactness. -/
+theorem compactSpace_constructibleTopology {X : Type*} [TopologicalSpace X] [CompactSpace X]
+    [QuasiSober X] [PrespectralSpace X] [QuasiSeparatedSpace X] :
+    @CompactSpace X (constructibleTopology X) := by
+  haveI := compactSpace_withConstructibleTopology (X := X)
+  exact @Function.Surjective.compactSpace (WithConstructibleTopology X) X _
+    (constructibleTopology X) _ (WithTopology.continuous_ofTopology _) _
+    (fun x => ⟨WithTopology.toTopology _ x, rfl⟩)
+
+/-- The constructible topology on a prime spectrum is Hausdorff. -/
+theorem t2Space_constructibleTopology {R : Type*} [CommRing R] :
+    @T2Space (PrimeSpectrum R) (constructibleTopology (PrimeSpectrum R)) := by
+  refine @T2Space.mk _ (constructibleTopology _) fun p q hpq => ?_
+  have h0 : p.asIdeal ≠ q.asIdeal := fun h => hpq (PrimeSpectrum.ext h)
+  obtain ⟨f, hf⟩ : ∃ f, ¬(f ∈ p.asIdeal ↔ f ∈ q.asIdeal) := by
+    by_contra hc
+    push_neg at hc
+    exact h0 (SetLike.ext fun f => hc f)
+  have hbasic : IsOpen[constructibleTopology (PrimeSpectrum R)]
+      (PrimeSpectrum.basicOpen f : Set (PrimeSpectrum R)) :=
+    TopologicalSpace.isOpen_generateFrom_of_mem
+      (Or.inl ⟨(PrimeSpectrum.basicOpen f).2, PrimeSpectrum.isCompact_basicOpen f⟩)
+  have hzero : IsOpen[constructibleTopology (PrimeSpectrum R)]
+      (PrimeSpectrum.zeroLocus {f}) :=
+    TopologicalSpace.isOpen_generateFrom_of_mem
+      (Or.inr ⟨PrimeSpectrum.isClosed_zeroLocus {f}, by
+        rw [show (PrimeSpectrum.zeroLocus {f})ᶜ = (PrimeSpectrum.basicOpen f : Set _) by
+          rw [PrimeSpectrum.basicOpen_eq_zeroLocus_compl]]
+        exact PrimeSpectrum.isCompact_basicOpen f⟩)
+  have hdisj : Disjoint (PrimeSpectrum.zeroLocus {f})
+      (PrimeSpectrum.basicOpen f : Set (PrimeSpectrum R)) := by
+    rw [PrimeSpectrum.basicOpen_eq_zeroLocus_compl]
+    exact disjoint_compl_right
+  rw [iff_iff_implies_and_implies, not_and_or] at hf
+  rcases hf with hf | hf
+  · rw [_root_.not_imp] at hf
+    exact ⟨PrimeSpectrum.zeroLocus {f}, PrimeSpectrum.basicOpen f, hzero, hbasic,
+      by simpa using hf.1, by simpa using hf.2, hdisj⟩
+  · rw [_root_.not_imp] at hf
+    exact ⟨PrimeSpectrum.basicOpen f, PrimeSpectrum.zeroLocus {f}, hbasic, hzero,
+      by simpa using hf.2, by simpa using hf.1, hdisj.symm⟩
+
+/-- `Spec` of a ring map is continuous for the constructible topologies. -/
+theorem continuous_comap_constructibleTopology {R S : Type*} [CommRing R] [CommRing S]
+    (f : R →+* S) :
+    Continuous[constructibleTopology (PrimeSpectrum S), constructibleTopology (PrimeSpectrum R)]
+      (PrimeSpectrum.comap f) := by
+  classical
+  rw [show constructibleTopology (PrimeSpectrum R)
+    = TopologicalSpace.generateFrom (constructibleTopologySubbasis (PrimeSpectrum R)) from rfl,
+    continuous_generateFrom_iff]
+  rintro s (⟨hso, hsc⟩ | ⟨hscl, hscc⟩)
+  · obtain ⟨tf, htf⟩ := PrimeSpectrum.isCompact_isOpen_iff.1 ⟨hsc, hso⟩
+    have hpre : PrimeSpectrum.comap f ⁻¹' s
+        = (PrimeSpectrum.zeroLocus (f '' ↑tf))ᶜ := by
+      rw [← htf, Set.preimage_compl, PrimeSpectrum.preimage_comap_zeroLocus]
+    rw [hpre]
+    have hco : IsCompact ((PrimeSpectrum.zeroLocus (f '' ↑tf))ᶜ : Set (PrimeSpectrum S))
+        ∧ IsOpen ((PrimeSpectrum.zeroLocus (f '' ↑tf))ᶜ : Set (PrimeSpectrum S)) :=
+      PrimeSpectrum.isCompact_isOpen_iff.2 ⟨tf.image f, by rw [Finset.coe_image]⟩
+    exact TopologicalSpace.isOpen_generateFrom_of_mem (Or.inl ⟨hco.2, hco.1⟩)
+  · obtain ⟨tf, htf⟩ := PrimeSpectrum.isCompact_isOpen_iff.1 ⟨hscc, hscl.isOpen_compl⟩
+    have hpre : (PrimeSpectrum.comap f ⁻¹' s)ᶜ
+        = (PrimeSpectrum.zeroLocus (f '' ↑tf))ᶜ := by
+      rw [← Set.preimage_compl, ← htf, Set.preimage_compl,
+        PrimeSpectrum.preimage_comap_zeroLocus]
+    refine TopologicalSpace.isOpen_generateFrom_of_mem (Or.inr ⟨?_, ?_⟩)
+    · rw [← isOpen_compl_iff, hpre]
+      exact (PrimeSpectrum.isClosed_zeroLocus _).isOpen_compl
+    · rw [hpre]
+      exact (PrimeSpectrum.isCompact_isOpen_iff.2 ⟨tf.image f, by rw [Finset.coe_image]⟩).1
+
+end PatchTopology
 
 
 /-! ## [KL-2] Spreading out a finitely presented algebra over a filtered system -/
