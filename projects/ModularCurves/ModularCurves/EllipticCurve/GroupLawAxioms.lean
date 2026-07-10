@@ -26,8 +26,11 @@ reviewer round 1 §Q4/Q5; audit A5/A6.
 -/
 
 open MvPolynomial AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+  MonoidalCategory CartesianMonoidalCategory
 
 attribute [local instance] MvPolynomial.gradedAlgebra
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
 
 universe u
 
@@ -193,6 +196,18 @@ theorem mulModelHom_comm_atlas :
     · rw [pullback.lift_fst]
     · rw [pullback.lift_snd]
   exact hL.trans (keyval.trans (congrArg (· ≫ (mulModelHom universalWeierstrassLocU.{u})) hR.symm))
+
+/-- **(T-G3-assoc)** Associativity of the two-law multiplication at the universe-`u` atlas,
+at the `Over (Spec 𝕌)` level: evaluate on a field point of the fibre cube, reduce both
+sides to spec-shaped lifts, and apply `add_assoc` on `Affine.Point`. -/
+theorem mulOver_assoc_atlas :
+    (mulOver universalWeierstrassLocU.{u} ▷ modelOver universalWeierstrassLocU.{u}) ≫
+        mulOver universalWeierstrassLocU.{u} =
+      (α_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})
+          (modelOver universalWeierstrassLocU.{u})).hom ≫
+        (modelOver universalWeierstrassLocU.{u} ◁ mulOver universalWeierstrassLocU.{u}) ≫
+        mulOver universalWeierstrassLocU.{u} := by
+  sorry
 
 end AtlasEquations
 
