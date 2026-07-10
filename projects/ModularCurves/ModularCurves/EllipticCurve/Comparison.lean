@@ -229,4 +229,206 @@ theorem projModelVCIso_injective (C₁ C₂ : VariableChange R) (W : Weierstrass
     C₁ = C₂ :=
   projModelVCIso_injective' C₁ C₂ W hW h
 
+/-- The affine scheme's canonical `Spec` isomorphism agrees with the isomorphism attached
+to any proof that its top open is affine. -/
+private lemma isoSpec_hom_comp_isoSpec_inv_top (S : Scheme.{u}) [IsAffine S]
+    (h : IsAffineOpen (⊤ : S.Opens)) :
+    h.isoSpec.hom ≫ S.isoSpec.inv = (⊤ : S.Opens).ι := by
+  rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι,
+    Iso.hom_inv_id_assoc]
+
+/-- The projective model of an elliptic Weierstrass curve is locally Weierstrass. The
+whole affine base is one chart; the only bookkeeping identifies the global sections of
+`Spec A` with `A` and compares the resulting base change of the projective model. -/
+theorem locallyWeierstrass_projModel {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    [W.IsElliptic] :
+    LocallyWeierstrass (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) := by
+  intro s
+  let S := Spec (CommRingCat.of A)
+  letI : Algebra A ↑Γ(S, (⊤ : S.Opens)) :=
+    (Scheme.ΓSpecIso (.of A)).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : S.Opens).ι := by
+    rw [← Scheme.topIso_hom]
+    infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom
+      (algebraMap A ↑Γ(S, (⊤ : S.Opens))))) := by
+    have h : CommRingCat.ofHom (algebraMap A ↑Γ(S, (⊤ : S.Opens))) =
+        (Scheme.ΓSpecIso (.of A)).inv := rfl
+    rw [h]
+    infer_instance
+  have hφ : Spec.map (CommRingCat.ofHom (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) =
+      S.isoSpec.inv := (Scheme.isoSpec_Spec_inv (.of A)).symm
+  refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial,
+    W.map (algebraMap A ↑Γ(S, (⊤ : S.Opens))), inferInstance,
+    asIso (pullback.fst (projModelπ W) (⊤ : S.Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
+        (algebraMap A ↑Γ(S, (⊤ : S.Opens))))))).symm ≪≫
+      (isPullback_projModelBaseChange W).isoPullback.symm, ?_, ?_⟩
+  · have hcrux : ∀ (h : (⊤ : S.Opens) ∈ S.affineOpens),
+        (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) = (⊤ : S.Opens).ι := by
+      exact fun h => hφ ▸ isoSpec_hom_comp_isoSpec_inv_top S h
+    rw [← cancel_mono (Spec.map (CommRingCat.ofHom
+      (algebraMap A ↑Γ(S, (⊤ : S.Opens)))))]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      IsPullback.isoPullback_inv_snd]
+    conv_rhs => erw [hcrux]
+    erw [← pullback.condition, IsIso.inv_hom_id_assoc]
+    exact pullback.condition
+  · have hcrux : (isAffineOpen_top S).isoSpec.inv ≫ (⊤ : S.Opens).ι =
+        Spec.map (CommRingCat.ofHom (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) :=
+      hφ ▸ (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
+    have hcrux_assoc : ∀ {Z : Scheme.{u}} (g : S ⟶ Z),
+        (isAffineOpen_top S).isoSpec.inv ≫ (⊤ : S.Opens).ι ≫ g =
+          Spec.map (CommRingCat.ofHom
+            (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) ≫ g := fun g => by
+      rw [← Category.assoc]
+      exact congrArg (· ≫ g) hcrux
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc]
+    rw [pullback.lift_fst_assoc]
+    simp only [Category.assoc]
+    conv_lhs => erw [hcrux_assoc]
+    erw [← reassoc_of% projModelZero_baseChange W,
+      ← (isPullback_projModelBaseChange W).isoPullback_hom_fst_assoc,
+      IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
+
+/-- A Weierstrass model whose residue-field fibres are elliptic in the pointed-model
+sense already has unit discriminant over the base ring. Indeed, compare each base-changed
+model with the elliptic model supplied by `FibrewiseElliptic`; the pointed comparison theorem
+makes the isomorphism a variable change, so it preserves unit discriminant. A nonunit
+discriminant would vanish in the residue field of a maximal ideal, giving a contradiction. -/
+theorem isElliptic_of_fibrewiseElliptic_projModel (W : WeierstrassCurve R)
+    (h : FibrewiseElliptic (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W)) : W.IsElliptic := by
+  constructor
+  by_contra hΔ
+  obtain ⟨I, hI, hΔI⟩ := exists_max_ideal_of_mem_nonunits
+    (mem_nonunits_iff.mpr hΔ)
+  let p : Spec (CommRingCat.of R) := ⟨I, hI.isPrime⟩
+  obtain ⟨W', hW', e, heπ, hez⟩ := h p
+  letI : Algebra R ↑((Spec (CommRingCat.of R)).residueField p) :=
+    (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p).hom.toAlgebra
+  have hfib : IsPullback ((projModelπ W).fiberι p)
+      ((projModelπ W).fiberToSpecResidueField p) (projModelπ W)
+      (Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p)) :=
+    Spec_fromSpecResidueField_eq R p ▸ IsPullback.of_hasPullback (projModelπ W)
+      ((Spec (CommRingCat.of R)).fromSpecResidueField p)
+  have hbc : IsPullback
+      (projModelBaseChange (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p)) W)
+      (projModelπ (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))))
+      (projModelπ W)
+      (Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p)) := by
+    have hbc0 := isPullback_projModelBaseChange
+      (R' := ↑((Spec (CommRingCat.of R)).residueField p)) W
+    rwa [show CommRingCat.ofHom
+        (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p)) =
+      StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p from rfl] at hbc0
+  let em : (projModelπ W).fiber p ≅
+      projModel (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) :=
+    hfib.isoPullback ≪≫ hbc.isoPullback.symm
+  have emπ : em.hom ≫
+      projModelπ (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) =
+      (projModelπ W).fiberToSpecResidueField p := by
+    dsimp [em]
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+    rw [(Iso.inv_comp_eq _).mpr hbc.isoPullback_hom_snd.symm,
+      hfib.isoPullback_hom_snd]
+  have emz : sectionFiberPoint (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) p ≫ em.hom =
+      projModelZero (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) := by
+    dsimp [em]
+    rw [← cancel_mono hbc.isoPullback.hom]
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id,
+      Category.comp_id]
+    apply pullback.hom_ext
+    · simp only [Category.assoc]
+      rw [hfib.isoPullback_hom_fst, hbc.isoPullback_hom_fst, projModelZero_baseChange,
+        show CommRingCat.ofHom
+            (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p)) =
+          StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p from rfl]
+      simp only [sectionFiberPoint, Scheme.Hom.fiberι]
+      exact (pullback.lift_fst _ _ _).trans
+        (congrArg (· ≫ projModelZero W) (Spec_fromSpecResidueField_eq R p))
+    · simp only [Category.assoc]
+      rw [hfib.isoPullback_hom_snd, hbc.isoPullback_hom_snd]
+      simp only [sectionFiberPoint, Scheme.Hom.fiberToSpecResidueField,
+        projModelZero_projModelπ]
+      exact pullback.lift_snd _ _ _
+  let e' : projModel (W.map (algebraMap R
+      ↑((Spec (CommRingCat.of R)).residueField p))) ≅ projModel W' := em.symm ≪≫ e
+  have he'π : e'.hom ≫ projModelπ W' =
+      projModelπ (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) := by
+    simp only [e', Iso.trans_hom, Iso.symm_hom, Category.assoc]
+    rw [heπ, ← emπ, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  have emz_inv :
+      projModelZero (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) ≫
+        em.inv = sectionFiberPoint (projModelπ W) (projModelZero W)
+          (projModelZero_projModelπ W) p := by
+    rw [← cancel_mono em.hom, Category.assoc, Iso.inv_hom_id, Category.comp_id, emz]
+  have he'z :
+      projModelZero (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) ≫
+        e'.hom = projModelZero W' := by
+    simp only [e', Iso.trans_hom, Iso.symm_hom, ← Category.assoc]
+    rw [emz_inv, hez]
+  obtain ⟨C, hC, -⟩ := pointedIso_exists_variableChange
+    (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))) W' e' he'π he'z
+  letI : W'.IsElliptic := hW'
+  haveI : (C • W').IsElliptic := inferInstance
+  have hmapUnit : IsUnit
+      (W.map (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p))).Δ := by
+    rw [← hC]
+    exact (C • W').isUnit_Δ
+  have hmapUnit' : IsUnit
+      (algebraMap R ↑((Spec (CommRingCat.of R)).residueField p) W.Δ) := by
+    rw [← W.map_Δ]
+    exact hmapUnit
+  have hmapZero : algebraMap R ↑((Spec (CommRingCat.of R)).residueField p) W.Δ = 0 := by
+    change (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p) W.Δ = 0
+    have hcomp := Scheme.Spec.algebraMap_residueFieldIso_inv (CommRingCat.of R) p
+    have happ := congrArg (fun f => f W.Δ) hcomp
+    change (Scheme.Spec.residueFieldIso (CommRingCat.of R) p).inv
+        (algebraMap R p.asIdeal.ResidueField W.Δ) =
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+        (structurePresheafInCommRingCat R).germ ⊤ p trivial ≫
+        (Spec (CommRingCat.of R)).residue p) W.Δ at happ
+    rw [Ideal.algebraMap_residueField_eq_zero.mpr hΔI, map_zero] at happ
+    change (Spec (CommRingCat.of R)).residue p
+      ((structurePresheafInCommRingCat R).germ ⊤ p trivial
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).inv W.Δ)) = 0
+    exact happ.symm
+  exact hmapUnit'.ne_zero hmapZero
+
+/-- For a globally presented Weierstrass model, the fibrewise condition is equivalent to
+unit discriminant over the base ring. -/
+theorem fibrewiseElliptic_projModel_iff_isElliptic (W : WeierstrassCurve R) :
+    FibrewiseElliptic (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) ↔
+      W.IsElliptic := by
+  constructor
+  · exact isElliptic_of_fibrewiseElliptic_projModel W
+  · intro hW
+    letI : W.IsElliptic := hW
+    exact fibrewiseElliptic_projModel W
+
+/-- For a globally presented Weierstrass model, being locally Weierstrass is equivalent
+to unit discriminant. -/
+theorem locallyWeierstrass_projModel_iff_isElliptic (W : WeierstrassCurve R) :
+    LocallyWeierstrass (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) ↔
+      W.IsElliptic := by
+  constructor
+  · intro hW
+    exact isElliptic_of_fibrewiseElliptic_projModel W hW.fibrewiseElliptic
+  · intro hW
+    letI : W.IsElliptic := hW
+    exact locallyWeierstrass_projModel W
+
+/-- The full fibrewise/local comparison for a family already supplied with one global
+Weierstrass equation. The unresolved general comparison is precisely the construction
+of such an equation Zariski-locally from an abstract smooth proper family. -/
+theorem fibrewiseElliptic_iff_locallyWeierstrass_projModel (W : WeierstrassCurve R) :
+    FibrewiseElliptic (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) ↔
+      LocallyWeierstrass (projModelπ W) (projModelZero W)
+        (projModelZero_projModelπ W) :=
+  (fibrewiseElliptic_projModel_iff_isElliptic W).trans
+    (locallyWeierstrass_projModel_iff_isElliptic W).symm
+
 end ModularCurves

@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
 
@@ -737,8 +738,8 @@ If `π` is étale and surjective and `π ≫ f` is smooth, then `f` is smooth ("
 the total space a smooth curve). Self-contained ForMathlib-flavored helper for
 [YF-GEOM]'s discharge. -/
 theorem smooth_of_etale_surjective {X Y Z : Scheme.{u}} (π : X ⟶ Y) (f : Y ⟶ Z)
-    [Etale π] (hπ : Function.Surjective π.base) (h : Smooth (π ≫ f)) : Smooth f := by
-  sorry
+    [Etale π] (hπ : Function.Surjective π.base) (h : Smooth (π ≫ f)) : Smooth f :=
+  Smooth.of_precomp_etale_of_surjective π f hπ h
 
 /-- **([YF-GEOM] = KM Cor 4.7.1's geometric computation)** SOME representing object of
 `[Γ(N)]` has smooth affine base over `Spec R`. KM 4.7.1 (verbatim, p. 116): *"Any

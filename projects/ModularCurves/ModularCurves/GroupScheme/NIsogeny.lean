@@ -72,6 +72,1349 @@ ForMathlib refinement recorded in the artifact ([NISOG-L12]). -/
 -- constant fibre rank on points), so the RHS must carry `Flat` — KM's "locally free" says
 -- both. Proof route (KM p. 163–164): local presentation `(O_U)^m →α (O_U)^n → 𝓕|U → 0`
 -- with `W ∩ U = V(coefficients of α)`; converse by the splitting `β` and Cramer.
+section LocallyFreeRankLocusAux
+
+open scoped TensorProduct
+
+/-- **[L1-a, the local `n`-generator presentation]** A finitely presented module whose
+field-fibre dimensions are everywhere `≤ n` admits, near every prime, a presentation by
+`n` generators (Nakayama lift of a fibre spanning set + finite-type shrink). This is the
+"further localizing on `S`, we may suppose" step of KM p. 163. -/
+private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] [Module.FinitePresentation R M] {n : ℕ}
+    (hb : ∀ (K : Type u) (_ : Field K) (_ : Algebra R K), Module.finrank K (K ⊗[R] M) ≤ n)
+    (p : PrimeSpectrum R) :
+    ∃ g : R, g ∉ p.asIdeal ∧ ∃ (m : ℕ)
+      (α : (Fin m → Localization.Away g) →ₗ[Localization.Away g]
+        (Fin n → Localization.Away g))
+      (π : (Fin n → Localization.Away g) →ₗ[Localization.Away g]
+        (Localization.Away g ⊗[R] M)),
+      Function.Surjective π ∧ Function.Exact α π := by
+  classical
+  -- (i) `n` elements of `M` spanning the stalk at `p` (fibre-basis lift + Nakayama)
+  obtain ⟨x, hx⟩ : ∃ x : Fin n → M, Subsingleton (LocalizedModule p.asIdeal.primeCompl
+      (M ⧸ Submodule.span R (Set.range x))) := by
+    -- `n` elements whose images span the residue fibre `κ(p) ⊗ M`
+    obtain ⟨x, hxspan⟩ : ∃ x : Fin n → M,
+        Submodule.span p.asIdeal.ResidueField
+          (Set.range fun i => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] x i) = ⊤ := by
+      have hdim : Module.finrank p.asIdeal.ResidueField
+          (p.asIdeal.ResidueField ⊗[R] M) ≤ n := hb _ inferInstance inferInstance
+      -- the simple tensors `1 ⊗ m` span the fibre
+      have hspan : ⊤ ≤ Submodule.span p.asIdeal.ResidueField
+          (Set.range fun m : M => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) := by
+        rintro z -
+        induction z with
+        | zero => exact Submodule.zero_mem _
+        | tmul c m =>
+          rw [show c ⊗ₜ[R] m = c • ((1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) by
+            rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
+          exact Submodule.smul_mem _ c (Submodule.subset_span ⟨m, rfl⟩)
+        | add z₁ z₂ h₁ h₂ => exact Submodule.add_mem _ h₁ h₂
+      -- extract a basis of the fibre inside the simple tensors, and choose preimages
+      let b := Module.Basis.ofSpan hspan
+      haveI : Fintype ((linearIndepOn_empty p.asIdeal.ResidueField id).extend
+          (Set.empty_subset (Set.range fun m : M =>
+            (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))) :=
+        FiniteDimensional.fintypeBasisIndex b
+      have hsub := (linearIndepOn_empty p.asIdeal.ResidueField id).extend_subset
+        (Set.empty_subset (Set.range fun m : M =>
+          (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))
+      have hmem : ∀ i : ((linearIndepOn_empty p.asIdeal.ResidueField id).extend
+          (Set.empty_subset (Set.range fun m : M =>
+            (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m))),
+          ∃ m : M, (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m
+            = (i : p.asIdeal.ResidueField ⊗[R] M) := fun i => hsub i.2
+      choose mfun hmfun using hmem
+      have hcard : Fintype.card _ ≤ n := (Module.finrank_eq_card_basis b) ▸ hdim
+      refine ⟨fun j => if h : (j : ℕ) < Fintype.card _
+        then mfun ((Fintype.equivFin _).symm ⟨j, h⟩) else 0, ?_⟩
+      rw [eq_top_iff, ← b.span_eq]
+      refine Submodule.span_le.mpr ?_
+      rintro z ⟨i, rfl⟩
+      have hj : ((Fin.castLE hcard ((Fintype.equivFin _) i)) : ℕ) < Fintype.card _ :=
+        ((Fintype.equivFin _) i).2
+      refine Submodule.subset_span ⟨Fin.castLE hcard ((Fintype.equivFin _) i), ?_⟩
+      have hidx : (⟨((Fin.castLE hcard ((Fintype.equivFin _) i)) : ℕ), hj⟩ :
+          Fin (Fintype.card _)) = (Fintype.equivFin _) i := Fin.ext rfl
+      simp only [dif_pos hj, hidx, Equiv.symm_apply_apply, hmfun i]
+      exact (Module.Basis.ofSpan_apply_self hspan i).symm
+    refine ⟨x, ?_⟩
+    -- fibre of the quotient vanishes, hence the stalk at `p` vanishes (support of a f.g. module)
+    have hfib : Subsingleton (p.asIdeal.ResidueField ⊗[R]
+        (M ⧸ Submodule.span R (Set.range x))) := by
+      set q := (Submodule.span R (Set.range x)).mkQ with hq
+      have hqsurj : Function.Surjective (q.baseChange p.asIdeal.ResidueField) := by
+        have := LinearMap.lTensor_surjective p.asIdeal.ResidueField
+          (Submodule.mkQ_surjective (Submodule.span R (Set.range x)))
+        rwa [show (⇑(q.baseChange p.asIdeal.ResidueField)) = ⇑(q.lTensor _) from rfl]
+      have hker : ∀ w : p.asIdeal.ResidueField ⊗[R] M,
+          q.baseChange p.asIdeal.ResidueField w = 0 := by
+        intro w
+        have hw : w ∈ Submodule.span p.asIdeal.ResidueField
+            (Set.range fun i => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] x i) := by
+          rw [hxspan]; trivial
+        refine Submodule.span_induction ?_ ?_ ?_ ?_ hw
+        · rintro _ ⟨i, rfl⟩
+          rw [LinearMap.baseChange_tmul,
+            show q (x i) = 0 from (Submodule.Quotient.mk_eq_zero _).mpr
+              (Submodule.subset_span ⟨i, rfl⟩),
+            TensorProduct.tmul_zero]
+        · exact map_zero _
+        · intro y z _ _ hy hz
+          rw [map_add, hy, hz, add_zero]
+        · intro c y _ hy
+          rw [map_smul, hy, smul_zero]
+      refine ⟨fun z₁ z₂ => ?_⟩
+      obtain ⟨w₁, rfl⟩ := hqsurj z₁
+      obtain ⟨w₂, rfl⟩ := hqsurj z₂
+      rw [hker w₁, hker w₂]
+    rw [← not_nontrivial_iff_subsingleton] at hfib ⊢
+    intro hnt
+    exact hfib ((Module.mem_support_iff_nontrivial_residueField_tensorProduct p).mp
+      (Module.mem_support_iff.mpr hnt))
+  -- (ii) the spanning descends to a basic open `D(g)`
+  haveI := hx
+  obtain ⟨g, hgp, hgsub⟩ := LocalizedModule.exists_subsingleton_away
+    (M := M ⧸ Submodule.span R (Set.range x)) p.asIdeal
+  refine ⟨g, hgp, ?_⟩
+  -- (iii) assemble: the induced surjection onto `R_g ⊗ M` and its f.g. kernel
+  haveI := hgsub
+  haveI hsub2 : Subsingleton ((Localization.Away g) ⊗[R]
+      (M ⧸ Submodule.span R (Set.range x))) :=
+    (LocalizedModule.equivTensorProduct (Submonoid.powers g)
+      (M ⧸ Submodule.span R (Set.range x))).symm.toEquiv.subsingleton
+  -- the simple tensors `1 ⊗ x i` span `R_g ⊗ M`
+  have hspanRg : Submodule.span (Localization.Away g)
+      (Set.range fun i => (1 : Localization.Away g) ⊗ₜ[R] x i) = ⊤ := by
+    have key : ∀ s ∈ Submodule.span R (Set.range x), ∀ c : Localization.Away g,
+        c ⊗ₜ[R] s ∈ Submodule.span (Localization.Away g)
+          (Set.range fun i => (1 : Localization.Away g) ⊗ₜ[R] x i) := by
+      intro s hs
+      refine Submodule.span_induction ?_ ?_ ?_ ?_ hs
+      · rintro _ ⟨i, rfl⟩ c
+        rw [show c ⊗ₜ[R] x i = c • ((1 : Localization.Away g) ⊗ₜ[R] x i) by
+          rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
+        exact Submodule.smul_mem _ c (Submodule.subset_span ⟨i, rfl⟩)
+      · intro c
+        rw [TensorProduct.tmul_zero]
+        exact Submodule.zero_mem _
+      · intro y z _ _ hy hz c
+        rw [TensorProduct.tmul_add]
+        exact Submodule.add_mem _ (hy c) (hz c)
+      · intro r y _ hy c
+        rw [TensorProduct.tmul_smul]
+        exact Submodule.smul_of_tower_mem _ r (hy c)
+    haveI : Subsingleton (((Localization.Away g) ⊗[R] M) ⧸
+        (LinearMap.range (TensorProduct.map
+          (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+          (Submodule.span R (Set.range x)).subtype))) :=
+      (TensorProduct.tensorQuotientEquiv (Localization.Away g)
+        (Submodule.span R (Set.range x))).symm.toEquiv.subsingleton
+    have htop : LinearMap.range (TensorProduct.map
+        (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+        (Submodule.span R (Set.range x)).subtype) = ⊤ :=
+      eq_top_iff.mpr fun z _ => (Submodule.Quotient.mk_eq_zero _).mp
+        (Subsingleton.elim _ 0)
+    refine eq_top_iff.mpr fun z _ => ?_
+    have hz : z ∈ LinearMap.range (TensorProduct.map
+        (LinearMap.id : Localization.Away g →ₗ[R] Localization.Away g)
+        (Submodule.span R (Set.range x)).subtype) := htop ▸ Submodule.mem_top
+    obtain ⟨w, rfl⟩ := hz
+    induction w with
+    | zero =>
+      rw [map_zero]
+      exact Submodule.zero_mem _
+    | tmul c s =>
+      obtain ⟨s, hs⟩ := s
+      simp only [TensorProduct.map_tmul, LinearMap.id_coe, id_eq, Submodule.coe_subtype]
+      exact key s hs c
+    | add w₁ w₂ h₁ h₂ =>
+      rw [map_add]
+      exact Submodule.add_mem _ (h₁ Submodule.mem_top) (h₂ Submodule.mem_top)
+  -- the presentation: `π` sends `e_i ↦ 1 ⊗ x i`; `α` enumerates a finite kernel basis
+  have hπ' : Function.Surjective (Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i)) := by
+    rw [← LinearMap.range_eq_top, Fintype.range_linearCombination, hspanRg]
+  have hkfg : (LinearMap.ker (Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i))).FG :=
+    Module.FinitePresentation.fg_ker _ hπ'
+  obtain ⟨m, k, hk⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hkfg
+  refine ⟨m, Fintype.linearCombination (Localization.Away g) k,
+    Fintype.linearCombination (Localization.Away g)
+      (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i), hπ', ?_⟩
+  rw [LinearMap.exact_iff, Fintype.range_linearCombination, hk]
+
+/-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
+the base change `A ⊗ M` is finite locally free of rank `n` (flat with all stalk ranks `n`)
+iff every matrix entry of `α` dies in `A`. Forward: flat + finite ⟹ free stalks; the
+surjection `A^n ↠ A ⊗ M` has finitely generated kernel (fp) which vanishes fibrewise by
+rank count, hence vanishes (Nakayama at every prime), so `α ⊗ A = 0` by right-exactness.
+Backward: `α ⊗ A = 0` makes `A ⊗ M ≅ A^n`. KM p. 163: `W ∩ U = V(coefficients of α)`. -/
+private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] {m n : ℕ} (α : (Fin m → R) →ₗ[R] (Fin n → R))
+    {M : Type u} [AddCommGroup M] [Module R M] (π : (Fin n → R) →ₗ[R] M)
+    (hπ : Function.Surjective π) (hexact : Function.Exact α π) :
+    (Module.Flat A (A ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
+      ∀ (i : Fin m) (j : Fin n), algebraMap R A (α (Pi.single i 1) j) = 0 := by
+  -- The base-changed presentation is exact (right-exactness of `A ⊗ -`).
+  have hexA : Function.Exact (α.baseChange A) (π.baseChange A) := by
+    have h1 : Function.Exact (α.lTensor A) (π.lTensor A) := lTensor_exact A hexact hπ
+    rwa [show (⇑(α.baseChange A) : A ⊗[R] (Fin m → R) → A ⊗[R] (Fin n → R))
+        = ⇑(α.lTensor A) from rfl,
+      show (⇑(π.baseChange A) : A ⊗[R] (Fin n → R) → A ⊗[R] M) = ⇑(π.lTensor A) from rfl]
+  have hsurjA : Function.Surjective (π.baseChange A) := by
+    have := LinearMap.lTensor_surjective A hπ
+    rwa [show (⇑(π.baseChange A) : A ⊗[R] (Fin n → R) → A ⊗[R] M) = ⇑(π.lTensor A) from rfl]
+  constructor
+  · -- flat + constant rank `n` ⟹ the presentation matrix dies in `A`
+    rintro ⟨hflat, hrank⟩
+    haveI := hflat
+    -- `M`, hence `A ⊗ M`, is finitely presented; so the kernel `K` of `πₐ` is f.g.
+    haveI hMfp : Module.FinitePresentation R M := by
+      refine Module.finitePresentation_of_surjective π hπ ?_
+      rw [LinearMap.exact_iff.mp hexact, LinearMap.range_eq_map]
+      exact Module.Finite.fg_top.map α
+    haveI : Module.Projective A (A ⊗[R] M) := Module.Flat.projective_of_finitePresentation
+    obtain ⟨s, hs⟩ := Module.projective_lifting_property (π.baseChange A)
+      LinearMap.id hsurjA
+    have hs' : ∀ y : A ⊗[R] M, (π.baseChange A) (s y) = y := fun y =>
+      congrArg (fun g : A ⊗[R] M →ₗ[A] A ⊗[R] M => g y) hs
+    have hsinj : Function.Injective s := fun y₁ y₂ h => by
+      rw [← hs' y₁, ← hs' y₂, h]
+    -- the section splits the free module as `range s ⊕ K`
+    set K := LinearMap.ker (π.baseChange A) with hK
+    let pr : (A ⊗[R] (Fin n → R)) →ₗ[A] LinearMap.range s :=
+      (s ∘ₗ π.baseChange A).codRestrict (LinearMap.range s) fun x => ⟨_, rfl⟩
+    have hproj : ∀ x : LinearMap.range s, pr x = x := by
+      rintro ⟨_, y, rfl⟩
+      exact Subtype.ext (by simp [pr, hs' y])
+    have hkerpr : LinearMap.ker pr = K := by
+      ext x
+      simp only [LinearMap.mem_ker, hK]
+      constructor
+      · intro h
+        have := congrArg Subtype.val h
+        simp only [LinearMap.codRestrict_apply, pr, LinearMap.coe_comp,
+          Function.comp_apply, ZeroMemClass.coe_zero] at this
+        have h2 := congrArg (π.baseChange A) this
+        rwa [hs', map_zero] at h2
+      · intro h
+        refine Subtype.ext ?_
+        simp [pr, h]
+    have hcompl : IsCompl (LinearMap.range s) K := by
+      rw [← hkerpr]
+      exact LinearMap.isCompl_of_proj hproj
+    -- rank bookkeeping: `n = n + rankAtStalk K`, so `K` has rank `0` everywhere
+    haveI hKfin : Module.Finite A K := by
+      rw [Module.Finite.iff_fg]
+      exact Module.FinitePresentation.fg_ker (π.baseChange A) hsurjA
+    haveI hKflat : Module.Flat A K := by
+      have : Module.Projective A K := by
+        refine .of_split (LinearMap.ker (π.baseChange A)).subtype
+          ((LinearMap.id - s ∘ₗ π.baseChange A).codRestrict _ fun x => by
+            rw [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,
+              LinearMap.coe_comp, Function.comp_apply, map_sub, hs', sub_self]) ?_
+        ext x
+        simp [LinearMap.mem_ker.mp x.2]
+      exact Module.Flat.of_projective
+    haveI : Module.Finite A (LinearMap.range s) :=
+      Module.Finite.equiv (LinearEquiv.ofInjective s hsinj)
+    haveI : Module.Flat A (LinearMap.range s) :=
+      Module.Flat.of_linearEquiv (LinearEquiv.ofInjective s hsinj).symm
+    have hKrank : Module.rankAtStalk (R := A) K = 0 := by
+      have e3 : (LinearMap.range s × K) ≃ₗ[A] (A ⊗[R] (Fin n → R)) :=
+        Submodule.prodEquivOfIsCompl _ _ hcompl
+      have h1 : Module.rankAtStalk (R := A) (LinearMap.range s × K)
+          = Module.rankAtStalk (A ⊗[R] (Fin n → R)) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv e3]
+      rw [Module.rankAtStalk_prod] at h1
+      have h2 : Module.rankAtStalk (R := A) (LinearMap.range s)
+          = Module.rankAtStalk (A ⊗[R] M) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv (LinearEquiv.ofInjective s hsinj).symm]
+      have h3 : Module.rankAtStalk (A ⊗[R] (Fin n → R))
+          = Module.rankAtStalk (R := A) (Fin n → A) := by
+        ext p
+        rw [Module.rankAtStalk_eq_of_equiv
+          (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv]
+      funext p
+      have h4 := congrFun h1 p
+      have h5 := congrFun h2 p
+      have h3p := congrFun h3 p
+      haveI : Nontrivial A := ⟨0, 1, fun h01 =>
+        (Ideal.ne_top_iff_one _).mp p.2.ne_top (h01 ▸ p.asIdeal.zero_mem)⟩
+      have h6 : Module.rankAtStalk (R := A) (Fin n → A) p = n := by
+        rw [Module.rankAtStalk_eq_finrank_of_free, Module.finrank_fin_fun]
+        rfl
+      simp only [Pi.add_apply] at h4
+      rw [h5, hrank p, h3p, h6] at h4
+      simp only [Pi.zero_apply]
+      omega
+    -- hence `K = ⊥`, so the base-changed matrix vanishes, giving the entries
+    have hKbot : K = ⊥ := by
+      have := Module.rankAtStalk_eq_zero_iff_subsingleton.mp hKrank
+      exact Submodule.eq_bot_of_subsingleton
+    have hα0 : α.baseChange A = 0 := by
+      have hle : LinearMap.range (α.baseChange A) ≤ K := by
+        rw [hK, LinearMap.exact_iff.mp hexA]
+      rw [hKbot, le_bot_iff, LinearMap.range_eq_bot] at hle
+      exact hle
+    intro i j
+    have h7 : (α.baseChange A) (1 ⊗ₜ[R] Pi.single i 1) = 0 := by rw [hα0]; rfl
+    rw [LinearMap.baseChange_tmul] at h7
+    have h8 := congrArg
+      (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv h7
+    rw [map_zero] at h8
+    have h9 : (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv
+        ((1 : A) ⊗ₜ[R] (α (Pi.single i 1))) = fun j => α (Pi.single i 1) j • (1 : A) := rfl
+    rw [h9] at h8
+    have h10 := congrFun h8 j
+    rwa [Algebra.smul_def, mul_one] at h10
+  · -- entries die ⟹ `A ⊗ M ≅ Aⁿ`
+    intro hent
+    -- the base-changed matrix vanishes
+    have hα0 : α.baseChange A = 0 := by
+      apply LinearMap.restrictScalars_injective R
+      apply TensorProduct.ext'
+      intro a v
+      simp only [LinearMap.coe_restrictScalars, LinearMap.baseChange_tmul,
+        LinearMap.zero_apply]
+      have hv : α v = ∑ i : Fin m, v i • α (Pi.single i 1) := by
+        have hsingle : ∀ i : Fin m, (fun j => if i = j then (1 : R) else 0)
+            = Pi.single i 1 := fun i => by
+          funext j
+          simp [Pi.single_apply, eq_comm]
+        conv_lhs => rw [pi_eq_sum_univ v, map_sum]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [map_smul, hsingle i]
+      rw [hv, TensorProduct.tmul_sum]
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [TensorProduct.tmul_smul]
+      suffices h : a ⊗ₜ[R] (α (Pi.single i 1)) = (0 : A ⊗[R] (Fin n → R)) by
+        rw [h, smul_zero]
+      apply (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv.injective
+      rw [map_zero]
+      have hrfl : (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv
+          (a ⊗ₜ[R] (α (Pi.single i 1))) = fun j => α (Pi.single i 1) j • a := rfl
+      rw [hrfl]
+      funext j
+      rw [Algebra.smul_def, hent i j, zero_mul]
+      rfl
+    -- hence the base-changed surjection is an isomorphism onto `A ⊗ M`
+    have hker : LinearMap.ker (π.baseChange A) = ⊥ := by
+      rw [LinearMap.exact_iff.mp hexA, hα0, LinearMap.range_zero]
+    let e1 : (A ⊗[R] (Fin n → R)) ≃ₗ[A] A ⊗[R] M :=
+      LinearEquiv.ofBijective (π.baseChange A) ⟨LinearMap.ker_eq_bot.mp hker, hsurjA⟩
+    let e2 : (Fin n → A) ≃ₗ[A] A ⊗[R] M :=
+      (Algebra.TensorProduct.piScalarRight R A A (Fin n)).toLinearEquiv.symm.trans e1
+    constructor
+    · exact Module.Flat.of_linearEquiv e2.symm
+    · intro p
+      haveI : Nontrivial A := ⟨0, 1, fun h01 =>
+        (Ideal.ne_top_iff_one _).mp p.2.ne_top (h01 ▸ p.asIdeal.zero_mem)⟩
+      rw [Module.rankAtStalk_eq_of_equiv e2.symm, Module.rankAtStalk_eq_finrank_of_free,
+        Module.finrank_fin_fun]
+      rfl
+
+/-- **[L1-d0, cancel-base-change stability]** The rank-`n` local-freeness condition read
+through an intermediate algebra `R'` agrees with the condition over `R` (the
+`B ⊗[R'] (R' ⊗[R] M) ≅ B ⊗[R] M` cancellation, transporting flatness and stalk ranks). -/
+private theorem locallyFreeRankLocusAux_cond_cancel {R R' B : Type u} [CommRing R]
+    [CommRing R'] [CommRing B] [Algebra R R'] [Algebra R' B] [Algebra R B]
+    [IsScalarTower R R' B] {M : Type u} [AddCommGroup M] [Module R M] {n : ℕ} :
+    (Module.Flat B (B ⊗[R'] (R' ⊗[R] M)) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R'] (R' ⊗[R] M)) p = n) ↔
+      (Module.Flat B (B ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R] M) p = n) := by
+  have e : (B ⊗[R'] (R' ⊗[R] M)) ≃ₗ[B] B ⊗[R] M :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R R' B B M
+  constructor
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv e.symm, fun p => by
+      rw [Module.rankAtStalk_eq_of_equiv e.symm]
+      exact h2 p⟩
+  · rintro ⟨h1, h2⟩
+    haveI := h1
+    exact ⟨Module.Flat.of_linearEquiv e, fun p => by
+      rw [Module.rankAtStalk_eq_of_equiv e]
+      exact h2 p⟩
+
+/-- **[L1-d1, the patch interface]** Over a patch ring `R'` carrying an `n`-generator
+presentation of `R' ⊗ M`, the rank-`n` condition for any `R'`-algebra `B` is the vanishing
+in `B` of the entries ideal of the presentation ([L1-b] + [L1-d0]). -/
+private theorem locallyFreeRankLocusAux_patch_iff {R R' B : Type u} [CommRing R]
+    [CommRing R'] [CommRing B] [Algebra R R'] [Algebra R' B] [Algebra R B]
+    [IsScalarTower R R' B] {M : Type u} [AddCommGroup M] [Module R M] {n m : ℕ}
+    (α : (Fin m → R') →ₗ[R'] (Fin n → R'))
+    (π : (Fin n → R') →ₗ[R'] (R' ⊗[R] M)) (hπ : Function.Surjective π)
+    (hexact : Function.Exact α π) :
+    (Module.Flat B (B ⊗[R] M) ∧
+        ∀ p : PrimeSpectrum B, Module.rankAtStalk (B ⊗[R] M) p = n) ↔
+      (Ideal.span (Set.range fun ij : Fin m × Fin n =>
+        α (Pi.single ij.1 1) ij.2)).map (algebraMap R' B) = ⊥ := by
+  rw [← locallyFreeRankLocusAux_cond_cancel (R := R) (R' := R'),
+    locallyFreeRankLocusAux_core_iff α π hπ hexact, Ideal.map_span, Submodule.span_eq_bot]
+  constructor
+  · rintro h _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+    exact h i j
+  · intro h i j
+    exact h _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+
+/-- **[L1-c, uniqueness of the universal vanishing ideal]** Two ideals that die in exactly
+the same `R`-algebras are equal (test on `R/I` and `R/J`). This glues the locally-chosen
+presentation ideals into the canonical ideal sheaf (`map_ideal_basicOpen` holds because
+both sides represent the same functor over the localized algebras). -/
+private theorem locallyFreeRankLocusAux_unique {R : Type u} [CommRing R] {I J : Ideal R}
+    (h : ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I.map (algebraMap R A) = ⊥ ↔ J.map (algebraMap R A) = ⊥) : I = J := by
+  have key : ∀ (I' J' : Ideal R), (∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      I'.map (algebraMap R A) = ⊥ ↔ J'.map (algebraMap R A) = ⊥) → J' ≤ I' := by
+    intro I' J' h'
+    have h1 : I'.map (algebraMap R (R ⧸ I')) = ⊥ := by
+      rw [Ideal.Quotient.algebraMap_eq, Ideal.map_quotient_self]
+    have h2 := (h' (R ⧸ I') inferInstance inferInstance).mp h1
+    rwa [Ideal.Quotient.algebraMap_eq, Ideal.map_eq_bot_iff_le_ker, Ideal.mk_ker] at h2
+  exact le_antisymm (key J I fun A cA aA => (h A cA aA).symm) (key I J h)
+
+/-- **[L1-d2, away-clearing]** Membership in the extension of an ideal along
+`R' → R'[1/b]` is, up to a power of `b`, membership in the ideal itself. -/
+private theorem locallyFreeRankLocusAux_away_clear {R' : Type u} [CommRing R']
+    (J : Ideal R') (b : R') {y : R'}
+    (hy : algebraMap R' (Localization.Away b) y
+      ∈ J.map (algebraMap R' (Localization.Away b))) :
+    ∃ k : ℕ, b ^ k * y ∈ J := by
+  obtain ⟨⟨⟨j, hj⟩, s⟩, hjs⟩ :=
+    (IsLocalization.mem_map_algebraMap_iff (Submonoid.powers b) _).mp hy
+  obtain ⟨k, hk⟩ := s.2
+  rw [← hk, ← map_mul, ← sub_eq_zero, ← map_sub] at hjs
+  obtain ⟨c, hc⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers b) _ _).mp hjs
+  obtain ⟨k', hk'⟩ := c.2
+  rw [← hk'] at hc
+  refine ⟨k' + k, ?_⟩
+  have hbky : b ^ (k' + k) * y = b ^ k' * j := by linear_combination hc
+  rw [hbky]
+  exact J.mul_mem_left _ hj
+
+/-- **[L1-d3, overlap agreement]** Two patch rings mapping to a common further algebra `S`
+cut out the same extended entries ideal: both extensions represent the same condition over
+`S`-algebras ([L1-d1]), so they agree by uniqueness ([L1-c]). -/
+private theorem locallyFreeRankLocusAux_agree {R R₁ R₂ S : Type u} [CommRing R]
+    [CommRing R₁] [CommRing R₂] [CommRing S] [Algebra R R₁] [Algebra R R₂] [Algebra R₁ S]
+    [Algebra R₂ S] [Algebra R S] [IsScalarTower R R₁ S] [IsScalarTower R R₂ S]
+    {M : Type u} [AddCommGroup M] [Module R M] {n m₁ m₂ : ℕ}
+    (α₁ : (Fin m₁ → R₁) →ₗ[R₁] (Fin n → R₁))
+    (π₁ : (Fin n → R₁) →ₗ[R₁] (R₁ ⊗[R] M)) (hπ₁ : Function.Surjective π₁)
+    (hex₁ : Function.Exact α₁ π₁)
+    (α₂ : (Fin m₂ → R₂) →ₗ[R₂] (Fin n → R₂))
+    (π₂ : (Fin n → R₂) →ₗ[R₂] (R₂ ⊗[R] M)) (hπ₂ : Function.Surjective π₂)
+    (hex₂ : Function.Exact α₂ π₂) :
+    (Ideal.span (Set.range fun ij : Fin m₁ × Fin n =>
+        α₁ (Pi.single ij.1 1) ij.2)).map (algebraMap R₁ S)
+      = (Ideal.span (Set.range fun ij : Fin m₂ × Fin n =>
+        α₂ (Pi.single ij.1 1) ij.2)).map (algebraMap R₂ S) := by
+  refine locallyFreeRankLocusAux_unique fun B cB aB => ?_
+  letI : Algebra R₁ B := ((algebraMap S B).comp (algebraMap R₁ S)).toAlgebra
+  letI : Algebra R₂ B := ((algebraMap S B).comp (algebraMap R₂ S)).toAlgebra
+  letI : Algebra R B := ((algebraMap S B).comp (algebraMap R S)).toAlgebra
+  haveI : IsScalarTower R R₁ B := IsScalarTower.of_algebraMap_eq' (by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+      RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq R R₁ S])
+  haveI : IsScalarTower R R₂ B := IsScalarTower.of_algebraMap_eq' (by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+      RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq R R₂ S])
+  rw [Ideal.map_map, Ideal.map_map,
+    show (algebraMap S B).comp (algebraMap R₁ S) = algebraMap R₁ B from
+      (RingHom.algebraMap_toAlgebra _).symm,
+    show (algebraMap S B).comp (algebraMap R₂ S) = algebraMap R₂ B from
+      (RingHom.algebraMap_toAlgebra _).symm,
+    ← locallyFreeRankLocusAux_patch_iff α₁ π₁ hπ₁ hex₁,
+    ← locallyFreeRankLocusAux_patch_iff α₂ π₂ hπ₂ hex₂]
+
+/-- **[L1-d, the affine universal ideal]** Over an affine base, the "finite locally free of
+rank `n`" condition on base changes of `M` is cut out by a single ideal: combining the local
+`n`-generator presentations ([L1-a], on a finite basic-open cover extracted by
+quasi-compactness), the entries-ideal characterisation over each patch ([L1-b]), and the
+quasi-coherent gluing of the patch ideals (agreement on overlaps by uniqueness [L1-c]).
+This is the affine heart of KM 6.4.3's flattening locus. -/
+private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] [Module.FinitePresentation R M] {n : ℕ}
+    (hb : ∀ (K : Type u) (_ : Field K) (_ : Algebra R K),
+      Module.finrank K (K ⊗[R] M) ≤ n) :
+    ∃ I : Ideal R, ∀ (A : Type u) (_ : CommRing A) (_ : Algebra R A),
+      (Module.Flat A (A ⊗[R] M) ∧
+          ∀ p : PrimeSpectrum A, Module.rankAtStalk (A ⊗[R] M) p = n) ↔
+        I.map (algebraMap R A) = ⊥ := by
+  classical
+  -- per-prime local `n`-generator presentations ([L1-a])
+  choose gfun hgp mfun αfun πfun hπsurj hexact using
+    fun p : PrimeSpectrum R => locallyFreeRankLocusAux_exists_presentation hb p
+  -- the chosen `g`s generate the unit ideal
+  have hunit : Ideal.span (Set.range gfun) = ⊤ := by
+    by_contra h
+    obtain ⟨P, hP, hle⟩ := Ideal.exists_le_maximal _ h
+    exact hgp ⟨P, hP.isPrime⟩ (hle (Ideal.subset_span ⟨⟨P, hP.isPrime⟩, rfl⟩))
+  -- a finite subfamily already generates the unit ideal
+  obtain ⟨T, hT, h1T⟩ := Submodule.mem_span_finite_of_mem_span
+    (hunit ▸ Submodule.mem_top : (1 : R) ∈ Ideal.span (Set.range gfun))
+  choose pf hpf using fun t : T => hT t.2
+  -- the per-patch entries ideals and their common refinement
+  let J : (p : PrimeSpectrum R) → Ideal (Localization.Away (gfun p)) := fun p =>
+    Ideal.span (Set.range fun ij : Fin (mfun p) × Fin n =>
+      (αfun p) (Pi.single ij.1 1) ij.2)
+  refine ⟨⨅ t : T, (J (pf t)).comap (algebraMap R (Localization.Away (gfun (pf t)))),
+    fun A cA aA => ⟨fun hP => ?_, fun hI => ?_⟩⟩
+  · -- the condition kills the glued ideal
+    rw [Ideal.map_eq_bot_iff_le_ker]
+    intro r hr
+    rw [RingHom.mem_ker]
+    -- for each patch, the image of `r` in `A` dies after inverting `b t := algebraMap (g t)`
+    have hloc : ∀ t : T, ∃ k : ℕ,
+        algebraMap R A (gfun (pf t)) ^ k * algebraMap R A r = 0 := by
+      intro t
+      set g := gfun (pf t) with hg
+      set b := algebraMap R A g with hb
+      letI algRg : Algebra (Localization.Away g) (Localization.Away b) :=
+        (Localization.awayMap (algebraMap R A) g).toAlgebra
+      haveI : IsScalarTower R (Localization.Away g) (Localization.Away b) := by
+        refine IsScalarTower.of_algebraMap_eq' ?_
+        rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R A
+          (Localization.Away b)]
+        exact (IsLocalization.map_comp _).symm
+      -- the condition localizes from `A` to `A_t`
+      obtain ⟨hflat, hrank⟩ := hP
+      haveI := hflat
+      have e : (Localization.Away b) ⊗[R] M ≃ₗ[Localization.Away b]
+          (Localization.Away b) ⊗[A] (A ⊗[R] M) :=
+        (TensorProduct.AlgebraTensorModule.cancelBaseChange R A
+          (Localization.Away b) (Localization.Away b) M).symm
+      have hPt : Module.Flat (Localization.Away b) ((Localization.Away b) ⊗[R] M) ∧
+          ∀ q : PrimeSpectrum (Localization.Away b),
+            Module.rankAtStalk ((Localization.Away b) ⊗[R] M) q = n := by
+        refine ⟨Module.Flat.of_linearEquiv e, fun q => ?_⟩
+        rw [Module.rankAtStalk_eq_of_equiv e, Module.rankAtStalk_baseChange]
+        exact hrank _
+      -- hence the entries ideal dies over `A_t`, so `r`'s image there is `0`
+      have hJt := (locallyFreeRankLocusAux_patch_iff (αfun (pf t)) (πfun (pf t))
+        (hπsurj (pf t)) (hexact (pf t))).mp hPt
+      have hr_t : algebraMap R (Localization.Away g) r ∈ J (pf t) :=
+        Ideal.mem_comap.mp ((Submodule.mem_iInf _).mp hr t)
+      have hzero : algebraMap A (Localization.Away b) (algebraMap R A r) = 0 := by
+        rw [← IsScalarTower.algebraMap_apply R A (Localization.Away b),
+          IsScalarTower.algebraMap_apply R (Localization.Away g) (Localization.Away b),
+          ← Ideal.mem_bot, ← hJt]
+        exact Ideal.mem_map_of_mem _ hr_t
+      obtain ⟨⟨s, hs⟩, hsk⟩ :=
+        (IsLocalization.map_eq_zero_iff (Submonoid.powers b) _ _).mp hzero
+      obtain ⟨k, rfl⟩ := hs
+      exact ⟨k, hsk⟩
+    choose kfun hkfun using hloc
+    -- a single power `K` works for every patch
+    set K := Finset.univ.sup kfun with hK
+    have hbig : ∀ t : T, algebraMap R A (gfun (pf t)) ^ K * algebraMap R A r = 0 := by
+      intro t
+      have hle : kfun t ≤ K := Finset.le_sup (Finset.mem_univ t)
+      calc algebraMap R A (gfun (pf t)) ^ K * algebraMap R A r
+          = algebraMap R A (gfun (pf t)) ^ (K - kfun t) *
+              (algebraMap R A (gfun (pf t)) ^ kfun t * algebraMap R A r) := by
+            rw [← mul_assoc, ← pow_add, Nat.sub_add_cancel hle]
+        _ = 0 := by rw [hkfun t, mul_zero]
+    -- the images of the finite subcover still generate the unit ideal in `A`
+    have hTA : Ideal.span ((algebraMap R A) '' ↑T) = ⊤ := by
+      refine (Ideal.eq_top_iff_one _).mpr ?_
+      have h1' : (1 : A) ∈ Ideal.map (algebraMap R A) (Ideal.span (↑T : Set R)) := by
+        simpa using Ideal.mem_map_of_mem (algebraMap R A) h1T
+      rwa [Ideal.map_span] at h1'
+    -- conclude by the annihilator-ideal trick with the `K`-th powers
+    have hpow := Ideal.span_pow_eq_top _ hTA K
+    have hann : Ideal.span ((fun x => x ^ K) '' ((algebraMap R A) '' ↑T)) ≤
+        LinearMap.ker (LinearMap.toSpanSingleton A A (algebraMap R A r)) := by
+      rw [Ideal.span_le]
+      rintro _ ⟨_, ⟨y, hy, rfl⟩, rfl⟩
+      obtain ⟨t', ht'⟩ := hT hy
+      have hyt : y = gfun (pf ⟨y, hy⟩) := (hpf ⟨y, hy⟩).symm ▸ rfl
+      rw [SetLike.mem_coe, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply,
+        smul_eq_mul, hyt]
+      exact hbig ⟨y, hy⟩
+    have h1ann : (1 : A) ∈ LinearMap.ker (LinearMap.toSpanSingleton A A
+        (algebraMap R A r)) := hann (hpow ▸ Submodule.mem_top)
+    simpa [LinearMap.toSpanSingleton_apply] using h1ann
+  · -- the glued ideal's vanishing forces the condition
+    have hIle : ∀ r ∈ (⨅ t : T, (J (pf t)).comap
+        (algebraMap R (Localization.Away (gfun (pf t))))), algebraMap R A r = 0 := by
+      intro r hr
+      have h1 := Ideal.mem_map_of_mem (algebraMap R A) hr
+      rw [hI] at h1
+      exact Ideal.mem_bot.mp h1
+    -- Step 1: each patch ideal dies after inverting the image of its `g` (saturation)
+    have hJA : ∀ t : T, (J (pf t)).map
+        (Localization.awayMap (algebraMap R A) (gfun (pf t))) = ⊥ := by
+      intro t
+      show (Ideal.span _).map _ = ⊥
+      rw [Ideal.map_span, Submodule.span_eq_bot]
+      rintro _ ⟨_, ⟨⟨i, j⟩, rfl⟩, rfl⟩
+      set g := gfun (pf t) with hgdef
+      set e := (αfun (pf t)) (Pi.single i 1) j with hedef
+      have he : e ∈ J (pf t) := Ideal.subset_span ⟨⟨i, j⟩, rfl⟩
+      -- clear the denominator of `e`
+      obtain ⟨⟨r₀, s⟩, hr₀⟩ := IsLocalization.surj (Submonoid.powers g) e
+      obtain ⟨k, hk⟩ := s.2
+      -- a power of `g` pushes `r₀` into every patch ideal
+      have hq : ∀ q : T, ∃ kq : ℕ, algebraMap R (Localization.Away (gfun (pf q)))
+          (g ^ kq * r₀) ∈ J (pf q) := by
+        intro q
+        set gq := gfun (pf q) with hgq
+        set S' := Localization.Away (algebraMap R (Localization.Away gq) g) with hS'
+        letI : Algebra (Localization.Away g) S' :=
+          (Localization.awayMap (algebraMap R (Localization.Away gq)) g).toAlgebra
+        haveI : IsScalarTower R (Localization.Away g) S' := by
+          refine IsScalarTower.of_algebraMap_eq' ?_
+          rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R
+            (Localization.Away gq) S']
+          exact (IsLocalization.map_comp _).symm
+        have hagree := locallyFreeRankLocusAux_agree (R := R) (S := S')
+          (αfun (pf t)) (πfun (pf t)) (hπsurj (pf t)) (hexact (pf t))
+          (αfun (pf q)) (πfun (pf q)) (hπsurj (pf q)) (hexact (pf q))
+        have hmem : algebraMap (Localization.Away gq) S'
+            (algebraMap R (Localization.Away gq) r₀)
+            ∈ (J (pf q)).map (algebraMap (Localization.Away gq) S') := by
+          rw [← hagree]
+          have h1 : algebraMap (Localization.Away gq) S'
+              (algebraMap R (Localization.Away gq) r₀)
+              = algebraMap (Localization.Away g) S'
+                (algebraMap R (Localization.Away g) r₀) := by
+            rw [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+          rw [h1, ← hr₀, map_mul]
+          exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ he)
+        obtain ⟨kq, hkq⟩ := locallyFreeRankLocusAux_away_clear _ _ hmem
+        refine ⟨kq, ?_⟩
+        rwa [map_mul, map_pow]
+      choose kq hkq using hq
+      set K' := Finset.univ.sup kq with hK'
+      -- `g^K' * r₀` lies in the glued ideal, hence dies in `A`
+      have hrI : algebraMap R A (g ^ K' * r₀) = 0 := by
+        refine hIle _ ((Submodule.mem_iInf _).mpr fun q => Ideal.mem_comap.mpr ?_)
+        have hsplit : g ^ K' * r₀ = g ^ (K' - kq q) * (g ^ kq q * r₀) := by
+          rw [← mul_assoc, ← pow_add, Nat.sub_add_cancel (Finset.le_sup (Finset.mem_univ q))]
+        rw [hsplit, map_mul]
+        exact Ideal.mul_mem_left _ _ (hkq q)
+      -- transport to `A[1/b]` and cancel the invertible powers of `g`
+      have h0 : Localization.awayMap (algebraMap R A) g
+          (algebraMap R (Localization.Away g) (g ^ K' * r₀)) = 0 := by
+        rw [← RingHom.comp_apply,
+          show (Localization.awayMap (algebraMap R A) g).comp
+              (algebraMap R (Localization.Away g))
+            = (algebraMap A (Localization.Away (algebraMap R A g))).comp (algebraMap R A)
+            from IsLocalization.map_comp _,
+          RingHom.comp_apply, hrI, map_zero]
+      have hexp : algebraMap R (Localization.Away g) (g ^ K' * r₀)
+          = algebraMap R (Localization.Away g) g ^ (K' + k) * e := by
+        have hs' : algebraMap R (Localization.Away g) (g ^ k)
+            = algebraMap R (Localization.Away g) ↑s := by rw [← hk]
+        calc algebraMap R (Localization.Away g) (g ^ K' * r₀)
+            = algebraMap R (Localization.Away g) (g ^ K')
+                * algebraMap R (Localization.Away g) r₀ := map_mul _ _ _
+          _ = algebraMap R (Localization.Away g) (g ^ K')
+                * (e * algebraMap R (Localization.Away g) ↑s) := by rw [← hr₀]
+          _ = algebraMap R (Localization.Away g) (g ^ K')
+                * (e * algebraMap R (Localization.Away g) (g ^ k)) := by rw [hs']
+          _ = algebraMap R (Localization.Away g) g ^ (K' + k) * e := by
+              rw [map_pow, map_pow, pow_add]
+              ring
+      rw [hexp, map_mul, map_pow] at h0
+      have hu : IsUnit (Localization.awayMap (algebraMap R A) g
+          (algebraMap R (Localization.Away g) g)) := by
+        rw [← RingHom.comp_apply,
+          show (Localization.awayMap (algebraMap R A) g).comp
+              (algebraMap R (Localization.Away g))
+            = (algebraMap A (Localization.Away (algebraMap R A g))).comp (algebraMap R A)
+            from IsLocalization.map_comp _,
+          RingHom.comp_apply]
+        exact IsLocalization.map_units _ ⟨algebraMap R A g, Submonoid.mem_powers _⟩
+      rwa [(hu.pow (K' + k)).mul_right_eq_zero] at h0
+    -- Step 2: the condition holds over each `A[1/b t]` (patch interface + step 1)
+    have hPt : ∀ t : T,
+        Module.Flat (Localization.Away (algebraMap R A (gfun (pf t))))
+          ((Localization.Away (algebraMap R A (gfun (pf t)))) ⊗[R] M) ∧
+        ∀ q : PrimeSpectrum (Localization.Away (algebraMap R A (gfun (pf t)))),
+          Module.rankAtStalk
+            ((Localization.Away (algebraMap R A (gfun (pf t)))) ⊗[R] M) q = n := by
+      intro t
+      set g := gfun (pf t) with hgdef
+      set b := algebraMap R A g with hbdef
+      letI : Algebra (Localization.Away g) (Localization.Away b) :=
+        (Localization.awayMap (algebraMap R A) g).toAlgebra
+      haveI : IsScalarTower R (Localization.Away g) (Localization.Away b) := by
+        refine IsScalarTower.of_algebraMap_eq' ?_
+        rw [RingHom.algebraMap_toAlgebra, IsScalarTower.algebraMap_eq R A
+          (Localization.Away b)]
+        exact (IsLocalization.map_comp _).symm
+      refine (locallyFreeRankLocusAux_patch_iff (αfun (pf t)) (πfun (pf t))
+        (hπsurj (pf t)) (hexact (pf t))).mpr ?_
+      show (J (pf t)).map _ = ⊥
+      rw [RingHom.algebraMap_toAlgebra]
+      exact hJA t
+    -- the images of the subcover generate the unit ideal of `A`
+    have hTA : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t))) = ⊤ := by
+      have h1' : (1 : A) ∈ Ideal.map (algebraMap R A) (Ideal.span (↑T : Set R)) := by
+        simpa using Ideal.mem_map_of_mem (algebraMap R A) h1T
+      rw [Ideal.map_span] at h1'
+      have hset : (algebraMap R A) '' ↑T
+          = Set.range fun t : T => algebraMap R A (gfun (pf t)) := by
+        ext x
+        simp only [Set.mem_image, Set.mem_range]
+        constructor
+        · rintro ⟨y, hy, rfl⟩
+          refine ⟨⟨y, hy⟩, ?_⟩
+          show algebraMap R A (gfun (pf ⟨y, hy⟩)) = algebraMap R A y
+          rw [hpf ⟨y, hy⟩]
+        · rintro ⟨t, rfl⟩
+          refine ⟨gfun (pf t), ?_, rfl⟩
+          rw [hpf t]
+          exact t.2
+      rw [hset] at h1'
+      exact (Ideal.eq_top_iff_one _).mpr h1'
+    -- Step 3a: flatness glues over the cover
+    haveI hflatA : Module.Flat A (A ⊗[R] M) := by
+      refine Module.flat_of_localized_span A (A ⊗[R] M) _ hTA ?_
+      intro r
+      obtain ⟨t, ht⟩ := r.2
+      rw [← ht]
+      set b := algebraMap R A (gfun (pf t)) with hbdef
+      haveI hf1 : Module.Flat (Localization.Away b) ((Localization.Away b) ⊗[R] M) :=
+        (hPt t).1
+      haveI : Module.Flat (Localization.Away b)
+          ((Localization.Away b) ⊗[A] (A ⊗[R] M)) :=
+        Module.Flat.of_linearEquiv (TensorProduct.AlgebraTensorModule.cancelBaseChange
+          R A (Localization.Away b) (Localization.Away b) M)
+      haveI : Module.Flat A (Localization.Away b) :=
+        IsLocalization.flat _ (Submonoid.powers b)
+      haveI : Module.Flat A ((Localization.Away b) ⊗[A] (A ⊗[R] M)) :=
+        Module.Flat.trans A (Localization.Away b) _
+      exact Module.Flat.of_linearEquiv
+        ((LocalizedModule.equivTensorProduct (Submonoid.powers b)
+          (A ⊗[R] M)).restrictScalars A)
+    refine ⟨hflatA, fun q => ?_⟩
+    -- Step 3b: the rank at any prime is computed on a patch containing it
+    have hexists : ∃ t : T, algebraMap R A (gfun (pf t)) ∉ q.asIdeal := by
+      by_contra h
+      push_neg at h
+      have hle : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t)))
+          ≤ q.asIdeal := Ideal.span_le.mpr (by rintro _ ⟨t, rfl⟩; exact h t)
+      rw [hTA] at hle
+      exact q.2.ne_top (top_le_iff.mp hle)
+    obtain ⟨t, hqt⟩ := hexists
+    set b := algebraMap R A (gfun (pf t)) with hbdef
+    have hrange : q ∈ Set.range (PrimeSpectrum.comap
+        (algebraMap A (Localization.Away b))) := by
+      rw [PrimeSpectrum.localization_away_comap_range (Localization.Away b) b]
+      exact hqt
+    obtain ⟨q', hq'⟩ := hrange
+    have hbase := Module.rankAtStalk_baseChange (R := A) (M := A ⊗[R] M)
+      (S := Localization.Away b) q'
+    rw [hq'] at hbase
+    rw [← hbase, Module.rankAtStalk_eq_of_equiv
+      (TensorProduct.AlgebraTensorModule.cancelBaseChange R A (Localization.Away b)
+        (Localization.Away b) M)]
+    exact (hPt t).2 q'
+
+end LocallyFreeRankLocusAux
+
+section LocallyFreeRankLocusSheaf
+
+open scoped TensorProduct
+
+variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
+
+/-- The pushforward section module of a finite lfp morphism over an affine open is a
+finitely presented module (the [L1-e] instance package, following the `vanishingLocus`
+pattern). -/
+private theorem locallyFreeRankLocusSheaf_fp (U : S.affineOpens) :
+    letI := ((f.app U.1).hom).toAlgebra
+    Module.FinitePresentation Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := by
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI : Module.Finite Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := f.finite_app U.1 U.2
+  haveI hfp : RingHom.FinitePresentation (f.appLE U.1 (f ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation f ‹_› U
+      ⟨f ⁻¹ᵁ U.1, U.2.preimage f⟩ le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfp
+  haveI : Algebra.FinitePresentation Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := hfp
+  exact Module.FinitePresentation.of_finite_of_finitePresentation _ _
+
+/-- **[L1-e1]** The flattening ideal sheaf of KM 6.4.3: on each affine open it is the
+affine universal ideal ([L1-d]) of the pushforward module. `map_ideal_basicOpen` holds
+because both sides carry the same universal property ([L1-c] uniqueness). -/
+private noncomputable def locallyFreeRankLocusSheaf (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K)
+      (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n) : S.IdealSheafData where
+  ideal U :=
+    letI := ((f.app U.1).hom).toAlgebra
+    haveI := locallyFreeRankLocusSheaf_fp f U
+    (locallyFreeRankLocusAux_exists_ideal (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose
+  map_ideal_basicOpen U g := by
+    classical
+    -- instance battery (verbatim `vanishingLocus` pattern, all in `basicOpen` spelling)
+    letI := ((f.app U.1).hom).toAlgebra
+    letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le g).op).hom).toAlgebra
+    letI := ((W.presheaf.map (homOfLE
+      (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx)).op).hom).toAlgebra
+    letI := ((f.appLE U.1 (f ⁻¹ᵁ S.basicOpen g)
+      (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx)).hom).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(S, S.basicOpen g) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI : IsScalarTower Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      IsScalarTower.of_algebraMap_eq' (by
+        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+    haveI := locallyFreeRankLocusSheaf_fp f U
+    -- the `.1`-spelled givens at the basic open, re-keyed by defeq ascription
+    haveI hfpV : letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+        Module.FinitePresentation Γ(S, S.basicOpen g) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
+      locallyFreeRankLocusSheaf_fp f (S.affineBasicOpen g)
+    have hbV : ∀ (K : Type u) (_ : Field K) (_ : Algebra Γ(S, S.basicOpen g) K),
+        letI := ((f.app (S.basicOpen g)).hom).toAlgebra
+        Module.finrank K (K ⊗[Γ(S, S.basicOpen g)] Γ(W, f ⁻¹ᵁ S.basicOpen g)) ≤ n :=
+      hb (S.affineBasicOpen g)
+    -- quasi-coherence: the pushforward sections localize
+    haveI hSloc : IsLocalization.Away g Γ(S, S.basicOpen g) :=
+      U.2.isLocalization_basicOpen g
+    haveI hWloc := (U.2.preimage f).isLocalization_of_eq_basicOpen
+      (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) g)
+      (homOfLE (show f ⁻¹ᵁ S.basicOpen g ≤ f ⁻¹ᵁ U.1 from
+        fun _ hx => S.basicOpen_le g hx))
+      (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
+    haveI : IsLocalizedModule (Submonoid.powers g)
+        (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)
+          Γ(W, f ⁻¹ᵁ S.basicOpen g)).toLinearMap := by
+      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U.1))
+          Γ(W, f ⁻¹ᵁ U.1) (Submonoid.powers g)) Γ(W, f ⁻¹ᵁ S.basicOpen g) := by
+        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U.1)) Γ(W, f ⁻¹ᵁ U.1)
+            (Submonoid.powers g) = Submonoid.powers
+              (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) g) from
+          Submonoid.map_powers _ g]
+        exact hWloc
+      infer_instance
+    have ebc := (IsLocalizedModule.isBaseChange (Submonoid.powers g)
+      Γ(S, S.basicOpen g)
+      (IsScalarTower.toAlgHom Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)
+        Γ(W, f ⁻¹ᵁ S.basicOpen g)).toLinearMap).equiv
+    -- both sides are the universal ideal over `Γ(S, bo g)`: equal by uniqueness [L1-c]
+    show Ideal.map _ ((locallyFreeRankLocusAux_exists_ideal
+      (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose)
+      = (locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ S.basicOpen g)) (n := n) hbV).choose
+    refine locallyFreeRankLocusAux_unique fun B cB aB => ?_
+    letI : Algebra Γ(S, U.1) B := ((algebraMap Γ(S, S.basicOpen g) B).comp
+      (algebraMap Γ(S, U.1) Γ(S, S.basicOpen g))).toAlgebra
+    haveI : IsScalarTower Γ(S, U.1) Γ(S, S.basicOpen g) B :=
+      IsScalarTower.of_algebraMap_eq' (by rw [RingHom.algebraMap_toAlgebra])
+    have etrans : (B ⊗[Γ(S, S.basicOpen g)] Γ(W, f ⁻¹ᵁ S.basicOpen g))
+        ≃ₗ[B] B ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1) :=
+      (TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl B B)
+        ebc.symm).trans
+        (TensorProduct.AlgebraTensorModule.cancelBaseChange Γ(S, U.1)
+          Γ(S, S.basicOpen g) B B Γ(W, f ⁻¹ᵁ U.1))
+    have hL : (Ideal.map (CommRingCat.Hom.hom (S.presheaf.map (homOfLE
+          (S.basicOpen_le g)).op))
+          ((locallyFreeRankLocusAux_exists_ideal
+            (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose)).map (algebraMap _ B) = ⊥
+        ↔ ((locallyFreeRankLocusAux_exists_ideal
+            (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose).map
+            (algebraMap Γ(S, U.1) B) = ⊥ := by
+      rw [Ideal.map_map]
+      constructor
+      · intro h
+        rwa [show (algebraMap Γ(S, S.basicOpen g) B).comp
+          (CommRingCat.Hom.hom (S.presheaf.map (homOfLE (S.basicOpen_le g)).op))
+          = algebraMap Γ(S, U.1) B from rfl] at h
+      · intro h
+        rwa [show (algebraMap Γ(S, S.basicOpen g) B).comp
+          (CommRingCat.Hom.hom (S.presheaf.map (homOfLE (S.basicOpen_le g)).op))
+          = algebraMap Γ(S, U.1) B from rfl]
+    refine hL.trans (Iff.trans ((locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n) (hb U)).choose_spec B cB
+          inferInstance).symm
+      (Iff.trans ?_ ((locallyFreeRankLocusAux_exists_ideal
+        (M := Γ(W, f ⁻¹ᵁ S.basicOpen g)) (n := n) hbV).choose_spec B cB aB)))
+    constructor
+    · rintro ⟨h1, h2⟩
+      haveI := h1
+      exact ⟨Module.Flat.of_linearEquiv etrans, fun p => by
+        rw [Module.rankAtStalk_eq_of_equiv etrans]; exact h2 p⟩
+    · rintro ⟨h1, h2⟩
+      haveI := h1
+      exact ⟨Module.Flat.of_linearEquiv etrans.symm, fun p => by
+        rw [Module.rankAtStalk_eq_of_equiv etrans.symm]; exact h2 p⟩
+
+/-- The defining property of the flattening ideal sheaf on an affine open: an algebra
+kills it iff the base-changed pushforward module is finite locally free of rank `n`. -/
+private theorem locallyFreeRankLocusSheaf_spec (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K)
+      (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n)
+    (U : S.affineOpens) (A : Type u) (cA : CommRing A) (aA : Algebra Γ(S, U.1) A) :
+    letI := ((f.app U.1).hom).toAlgebra
+    ((Module.Flat A (A ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ∧
+        ∀ p : PrimeSpectrum A,
+          Module.rankAtStalk (A ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) p = n) ↔
+      ((locallyFreeRankLocusSheaf f n hb).ideal U).map (algebraMap Γ(S, U.1) A) = ⊥) := by
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI := locallyFreeRankLocusSheaf_fp f U
+  exact (locallyFreeRankLocusAux_exists_ideal (M := Γ(W, f ⁻¹ᵁ U.1)) (n := n)
+    (hb U)).choose_spec A cA aA
+
+end LocallyFreeRankLocusSheaf
+
+section LocallyFreeRankLocusBridge
+
+open scoped TensorProduct
+
+variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
+
+/-- The geometric identification behind the chart bridge: the pullback of `f` along an
+affine chart point is the `Spec` of the section tensor product, with the projection
+matching the `Spec` of the left inclusion (sealed; consumed by the bridge and by the
+emptiness transport). -/
+private theorem locallyFreeRankLocus_pullback_iso {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) :
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    ∃ e : pullback f (x' ≫ U.1.ι) ≅
+      Spec (.of (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))),
+      pullback.snd f (x' ≫ U.1.ι) = e.hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        ≫ X.isoSpec.inv := by
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  haveI : IsAffine (↑U.1 : Scheme.{u}) := U.2
+  haveI : IsAffine (↑(f ⁻¹ᵁ U.1) : Scheme.{u}) := U.2.preimage f
+  -- paste the restriction square onto the `x'`-square
+  have hbig : IsPullback
+      (pullback.fst (f ∣_ U.1) x' ≫ (f ⁻¹ᵁ U.1).ι)
+      (pullback.snd (f ∣_ U.1) x') f (x' ≫ U.1.ι) :=
+    (IsPullback.of_hasPullback (f ∣_ U.1) x').paste_horiz
+      (isPullback_morphismRestrict f U.1).flip
+  -- conjugate both legs of the small pullback to `Spec` maps
+  have hsq₁ : x' ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+      = X.isoSpec.hom ≫ Spec.map (x'.appTop) :=
+    (Scheme.isoSpec_hom_naturality x').symm
+  have hsq₂ : (f ∣_ U.1) ≫ (↑U.1 : Scheme.{u}).isoSpec.hom
+      = (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom ≫ Spec.map ((f ∣_ U.1).appTop) :=
+    (Scheme.isoSpec_hom_naturality (f ∣_ U.1)).symm
+  let m : pullback x' (f ∣_ U.1) ⟶
+      pullback (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) :=
+    pullback.map _ _ _ _ X.isoSpec.hom (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+      (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂
+  haveI : IsIso m := by
+    show IsIso (pullback.map _ _ _ _ X.isoSpec.hom
+      (↑(f ⁻¹ᵁ U.1) : Scheme.{u}).isoSpec.hom
+      (↑U.1 : Scheme.{u}).isoSpec.hom hsq₁ hsq₂)
+    infer_instance
+  refine ⟨hbig.isoPullback.symm ≪≫ pullbackSymmetry (f ∣_ U.1) x' ≪≫ asIso m ≪≫
+    pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤), ?_⟩
+  have h₁ : pullback.snd f (x' ≫ U.1.ι)
+      = hbig.isoPullback.inv ≫ pullback.snd (f ∣_ U.1) x' := by
+    rw [Iso.eq_inv_comp, hbig.isoPullback_hom_snd]
+  have h₂ : pullback.snd (f ∣_ U.1) x'
+      = (pullbackSymmetry (f ∣_ U.1) x').hom ≫ pullback.fst x' (f ∣_ U.1) :=
+    (pullbackSymmetry_hom_comp_fst _ _).symm
+  have h₃ : pullback.fst x' (f ∣_ U.1)
+      = m ≫ pullback.fst
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        ≫ X.isoSpec.inv := by
+    have hm : m ≫ pullback.fst
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+        = pullback.fst x' (f ∣_ U.1) ≫ X.isoSpec.hom := pullback.lift_fst _ _ _
+    rw [← Category.assoc, hm, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  have h₄ : pullback.fst
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(X, ⊤))))
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤))))
+      = (pullbackSpecIso Γ(↑U.1, ⊤) Γ(X, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤)).hom
+        ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) := by
+    rw [← pullbackSpecIso_inv_fst', Iso.hom_inv_id_assoc]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  slice_rhs 4 5 => rw [← h₄]
+  slice_rhs 3 5 => rw [← h₃]
+  slice_rhs 2 3 => rw [← h₂]
+  slice_rhs 1 2 => rw [← h₁]
+
+/-- The section-ring identification behind the chart bridge, sealed behind its own
+constant (the construction is let-heavy; consumers only need existence). -/
+private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) :
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := ((f.app U.1).hom).toAlgebra
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    Nonempty ((Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))
+      ≃ₗ[Γ(X, ⊤)] Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) := by
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  letI := ((f.app U.1).hom).toAlgebra
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  refine ⟨?_⟩
+  -- the restriction/topIso square
+  have hsq : (f ∣_ U.1).appTop ≫ (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom
+      = (Scheme.Opens.topIso U.1).hom ≫ f.app U.1 := by
+    rw [← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop,
+      Scheme.Hom.resLE_app_top]
+    simp only [Scheme.Hom.app_eq_appLE, Category.assoc]
+    rw [Iso.inv_hom_id, Category.comp_id]
+  have hsq' : ∀ u, (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom
+      (((f ∣_ U.1).appTop).hom u)
+      = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u) := fun u =>
+    congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom u) hsq
+  -- the canonical scalar towers on the two tensor products suffice; test the
+  -- transported algebra maps on the carrying identity
+  have hcarry : ∀ u : Γ(↑U.1, ⊤),
+      (1 : Γ(X, ⊤)) ⊗ₜ[Γ(S, U.1)] (f.app U.1).hom ((Scheme.Opens.topIso U.1).hom.hom u)
+        = ((x'.appTop).hom u) ⊗ₜ[Γ(S, U.1)] (1 : Γ(W, f ⁻¹ᵁ U.1)) := by
+    intro u
+    have h2 := congrArg
+      (fun g : Γ(S, U.1) →+* (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) =>
+        g (((Scheme.Opens.topIso U.1).hom).hom u))
+      (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
+        (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
+    simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
+      Algebra.TensorProduct.includeRight_apply] at h2
+    have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
+        (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
+      congr 1
+      exact congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
+        (Scheme.Opens.topIso U.1).hom_inv_id
+    rw [← h3]
+    exact h2.symm
+  -- ring-carrier algebra structures (no tensor-side letI: canonical actions rule there)
+  letI : Algebra Γ(S, U.1) Γ(↑U.1, ⊤) :=
+    (((Scheme.Opens.topIso U.1).inv).hom).toAlgebra
+  haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(X, ⊤) :=
+    IsScalarTower.of_algebraMap_eq' rfl
+  letI : Algebra Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    (((f ∣_ U.1).appTop).hom.comp (((Scheme.Opens.topIso U.1).inv).hom)).toAlgebra
+  haveI : IsScalarTower Γ(S, U.1) Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    IsScalarTower.of_algebraMap_eq' rfl
+  -- the algebra map of the patch matches the section-side one through the topIsos
+  have halg : ∀ s : Γ(S, U.1),
+      algebraMap Γ(S, U.1) Γ(↑(f ⁻¹ᵁ U.1), ⊤) s
+        = (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom ((f.app U.1).hom s) := by
+    intro s
+    have h1 : (f.app U.1).hom s
+        = (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom
+          (((Scheme.Opens.topIso U.1).inv).hom s)) := by
+      congr 1
+      exact (congrArg (fun g : Γ(S, U.1) ⟶ Γ(S, U.1) => g.hom s)
+        (Scheme.Opens.topIso U.1).inv_hom_id).symm
+    rw [h1, ← hsq' (((Scheme.Opens.topIso U.1).inv).hom s)]
+    have h2 : ∀ y, ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv.hom)
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom.hom) y) = y := fun y =>
+      congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
+        (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
+    rw [h2]
+    rfl
+  -- the middle base change collapses onto the restricted sections
+  -- the middle base change collapses onto the restricted sections
+  let ℓ : Γ(W, f ⁻¹ᵁ U.1) →ₗ[Γ(S, U.1)] Γ(↑(f ⁻¹ᵁ U.1), ⊤) :=
+    { toFun := ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv).hom
+      map_add' := fun _ _ => map_add _ _ _
+      map_smul' := fun s y => by
+        simp only [RingHom.id_apply]
+        rw [Algebra.smul_def, map_mul,
+          show (algebraMap Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1)) s = (f.app U.1).hom s from rfl,
+          ← halg s, ← Algebra.smul_def] }
+  have hℓ : ∀ y, ℓ y = ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv).hom y := fun _ => rfl
+  have hui : ∀ u : Γ(↑U.1, ⊤),
+      algebraMap Γ(S, U.1) Γ(↑U.1, ⊤) (((Scheme.Opens.topIso U.1).hom).hom u) = u :=
+    fun u => congrArg (fun g : Γ(↑U.1, ⊤) ⟶ Γ(↑U.1, ⊤) => g.hom u)
+      (Scheme.Opens.topIso U.1).hom_inv_id
+  let inv₁ : Γ(↑(f ⁻¹ᵁ U.1), ⊤) →ₗ[Γ(↑U.1, ⊤)]
+      (Γ(↑U.1, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+    { toFun := fun y => (1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)
+      map_add' := fun _ _ => by rw [map_add, TensorProduct.tmul_add]
+      map_smul' := fun u y => by
+        simp only [RingHom.id_apply]
+        have h1 : u • y = ((f ∣_ U.1).appTop).hom u * y := rfl
+        rw [h1, map_mul, hsq' u]
+        have h2 : (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y) = _ := rfl
+        rw [show (f.app U.1).hom (((Scheme.Opens.topIso U.1).hom).hom u)
+            * (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)
+          = (((Scheme.Opens.topIso U.1).hom).hom u)
+            • (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y) from
+          (Algebra.smul_def _ _).symm]
+        rw [TensorProduct.tmul_smul, TensorProduct.smul_tmul',
+          Algebra.smul_def, mul_one, hui u, TensorProduct.smul_tmul',
+          Algebra.smul_def, mul_one, Algebra.algebraMap_self, RingHom.id_apply] }
+  have e₁ : (Γ(↑U.1, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≃ₗ[Γ(↑U.1, ⊤)]
+      Γ(↑(f ⁻¹ᵁ U.1), ⊤) := by
+    refine LinearEquiv.ofLinear (LinearMap.liftBaseChange _ ℓ) inv₁ ?_ ?_
+    · refine LinearMap.ext fun y => ?_
+      show LinearMap.liftBaseChange _ ℓ ((1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+        (((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom y)) = y
+      rw [LinearMap.liftBaseChange_tmul, one_smul, hℓ]
+      exact congrArg (fun g : Γ(↑(f ⁻¹ᵁ U.1), ⊤) ⟶ Γ(↑(f ⁻¹ᵁ U.1), ⊤) => g.hom y)
+        (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
+    · refine LinearMap.ext fun z => ?_
+      induction z with
+      | zero => simp
+      | tmul u m =>
+        show inv₁ (LinearMap.liftBaseChange _ ℓ (u ⊗ₜ m)) = u ⊗ₜ m
+        rw [LinearMap.liftBaseChange_tmul, map_smul]
+        have h4 : ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom (ℓ m) = m :=
+          congrArg (fun g : Γ(W, f ⁻¹ᵁ U.1) ⟶ Γ(W, f ⁻¹ᵁ U.1) => g.hom m)
+            (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).inv_hom_id
+        show u • ((1 : Γ(↑U.1, ⊤)) ⊗ₜ[Γ(S, U.1)]
+          ((Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom).hom (ℓ m)) = u ⊗ₜ m
+        rw [h4, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+      | add z₁ z₂ h₁ h₂ =>
+        show inv₁ (LinearMap.liftBaseChange _ ℓ (z₁ + z₂)) = z₁ + z₂
+        rw [map_add, map_add]
+        exact congrArg₂ (· + ·) h₁ h₂
+  exact ((TensorProduct.AlgebraTensorModule.cancelBaseChange Γ(S, U.1) Γ(↑U.1, ⊤)
+      Γ(X, ⊤) Γ(X, ⊤) Γ(W, f ⁻¹ᵁ U.1)).symm.trans
+    (TensorProduct.AlgebraTensorModule.congr
+      (LinearEquiv.refl Γ(X, ⊤) Γ(X, ⊤)) e₁)).symm
+
+/-- Semilinear span transport: a ring isomorphism `B ≃+* K` onto a field, intertwining the
+`R`-algebra maps, bounds the `K`-dimension of `K ⊗[R] M` by the cardinality of any
+`B`-spanning family of `B ⊗[R] M` (sealed; the fibre-size translation of the chart
+bridge — applied with `B` the sections of a `Spec K` chart point). -/
+private theorem locallyFreeRankLocus_finrank_le_of_span {R B K M : Type u} [CommRing R]
+    [CommRing B] [Field K] [Algebra R B] [Algebra R K] [AddCommGroup M] [Module R M]
+    (e : B ≃+* K) (he : ∀ r, e (algebraMap R B r) = algebraMap R K r)
+    (s : Finset (B ⊗[R] M)) (hs : Submodule.span B (s : Set (B ⊗[R] M)) = ⊤) :
+    Module.finrank K (K ⊗[R] M) ≤ s.card := by
+  classical
+  let eL : B ≃ₗ[R] K := (AlgEquiv.ofRingEquiv (f := e) he).toLinearEquiv
+  let Φ : (B ⊗[R] M) ≃ₗ[R] (K ⊗[R] M) := TensorProduct.congr eL (LinearEquiv.refl R M)
+  have hΦ : ∀ b : B, ∀ w : B ⊗[R] M, Φ (b • w) = e b • Φ w := by
+    intro b w
+    induction w with
+    | zero => simp
+    | tmul b₀ m =>
+        simp only [TensorProduct.smul_tmul', smul_eq_mul, Φ, TensorProduct.congr_tmul,
+          LinearEquiv.refl_apply]
+        rw [show eL (b * b₀) = e b * eL b₀ from map_mul e b b₀]
+    | add x y hx hy => rw [smul_add, map_add, hx, hy, map_add, smul_add]
+  have hspan : Submodule.span K ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M)) = ⊤ := by
+    rw [eq_top_iff]
+    rintro z -
+    have hz : Φ.symm z ∈ Submodule.span B (s : Set (B ⊗[R] M)) := hs ▸ Submodule.mem_top
+    have key : ∀ w ∈ Submodule.span B (s : Set (B ⊗[R] M)),
+        Φ w ∈ Submodule.span K ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M)) := by
+      intro w hw
+      induction hw using Submodule.span_induction with
+      | mem w hw =>
+          exact Submodule.subset_span
+            (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_coe.mp hw)))
+      | zero => rw [map_zero]; exact Submodule.zero_mem _
+      | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+      | smul b w _ hw => rw [hΦ]; exact Submodule.smul_mem _ _ hw
+    simpa using key _ hz
+  calc Module.finrank K (K ⊗[R] M)
+      = Module.finrank K (⊤ : Submodule K (K ⊗[R] M)) := (finrank_top _ _).symm
+    _ = Module.finrank K (Submodule.span K
+          ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))) := by rw [hspan]
+    _ ≤ (s.image ⇑Φ).card := by
+          simpa using finrank_span_le_card ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))
+    _ ≤ s.card := Finset.card_image_le
+
+/-- Emptiness transport for the chart bridge: if the pullback of `f` along an affine chart
+point is the empty scheme, the section tensor product is trivial (sealed; the empty branch
+of the fibre dichotomy). -/
+private theorem locallyFreeRankLocus_sections_subsingleton {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1)
+    (hE : IsEmpty (pullback f (x' ≫ U.1.ι) : Scheme.{u})) :
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    Subsingleton (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  obtain ⟨eP, -⟩ := locallyFreeRankLocus_pullback_iso f U x'
+  rw [← PrimeSpectrum.isEmpty_iff_subsingleton]
+  exact ⟨fun p => hE.false (eP.inv.base p)⟩
+
+/-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
+affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
+the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
+is the single point where geometry meets the affine theory: `f` finite makes the pullback
+affine, `iff_of_isAffine` reads flatness on global sections, `IsAffine.finrank` reads the
+rank function through `Spec`, and the pasting `pullback f (x' ≫ ι) ≅ pullback (f ∣_ U) x'`
+plus `pullbackSpecIso` compute the global sections as the tensor product. -/
+private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
+    (U : S.affineOpens) (x' : X ⟶ ↑U.1) (n : ℕ) :
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := ((f.app U.1).hom).toAlgebra
+    ((Flat (pullback.snd f (x' ≫ U.1.ι)) ∧
+        ∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
+      (Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ∧
+        ∀ q : PrimeSpectrum Γ(X, ⊤),
+          Module.rankAtStalk (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) q = n)) := by
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  letI := ((f.app U.1).hom).toAlgebra
+  haveI : IsAffine (↑U.1 : Scheme.{u}) := U.2
+  haveI : IsAffine (↑(f ⁻¹ᵁ U.1) : Scheme.{u}) := U.2.preimage f
+  -- (A) the geometric identification (sealed)
+  letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+  letI := ((x'.appTop).hom).toAlgebra
+  obtain ⟨eP, heP⟩ := locallyFreeRankLocus_pullback_iso f U x'
+  -- (B) flatness transports through the identification to the ring side
+  have hflat_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) ↔
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := by
+    rw [heP, ← Category.assoc, MorphismProperty.cancel_right_of_respectsIso (P := @Flat),
+      MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
+      HasRingHomProperty.Spec_iff (P := @Flat), CommRingCat.hom_ofHom,
+      RingHom.flat_algebraMap_iff]
+  -- (C) given flatness, the rank function transports likewise
+  have hrank_iff : Flat (pullback.snd f (x' ≫ U.1.ι)) →
+      ((∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p = n) ↔
+      ∀ q : PrimeSpectrum Γ(X, ⊤),
+        Module.rankAtStalk (R := Γ(X, ⊤))
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) q = n) := by
+    intro hfl
+    -- the tensor is a finite module, so the `Spec` leg is a finite flat morphism
+    haveI : IsFinite (f ∣_ U.1) := inferInstance
+    haveI : Module.Finite Γ(↑U.1, ⊤) Γ(↑(f ⁻¹ᵁ U.1), ⊤) := (f ∣_ U.1).finite_appTop
+    haveI hMfin : Module.Finite Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) :=
+      Module.Finite.base_change _ _ _
+    have hφfin : (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))).hom.Finite := by
+      rw [CommRingCat.hom_ofHom]
+      exact RingHom.finite_algebraMap.mpr hMfin
+    have hφflat : (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+        (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))).hom.Flat := by
+      rw [CommRingCat.hom_ofHom, RingHom.flat_algebraMap_iff]
+      exact hflat_iff.mp hfl
+    -- the composed map's rank equals the `Spec` map's rank at the transported point
+    have hpt : ∀ p : X, (pullback.snd f (x' ≫ U.1.ι)).finrank p
+        = (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))).finrank (X.isoSpec.hom p) := by
+      intro p
+      rw [heP]
+      haveI hflSM : Flat (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv) := by
+        rw [MorphismProperty.cancel_right_of_respectsIso (P := @Flat)]
+        rw [heP, ← Category.assoc,
+          MorphismProperty.cancel_right_of_respectsIso (P := @Flat),
+          MorphismProperty.cancel_left_of_respectsIso (P := @Flat)] at hfl
+        exact hfl
+      haveI hfinSM : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv) := by
+        haveI : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))) :=
+          (IsFinite.SpecMap_iff _).mpr hφfin
+        infer_instance
+      have hsq : IsPullback (𝟙 _)
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))))
+          (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+            (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)))) ≫ X.isoSpec.inv)
+          X.isoSpec.inv :=
+        IsPullback.of_horiz_isIso ⟨by simp⟩
+      rw [Scheme.Hom.finrank_comp_left_of_isIso]
+      have := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsq (X.isoSpec.hom p)
+      rw [show X.isoSpec.inv (X.isoSpec.hom p) = p by simp] at this
+      rw [← this]
+    constructor
+    · intro h q
+      have hq := hpt (X.isoSpec.inv q)
+      rw [show X.isoSpec.hom (X.isoSpec.inv q) = q by simp] at hq
+      rw [← h (X.isoSpec.inv q), hq, Scheme.Hom.finrank_SpecMap_eq_finrank hφfin hφflat,
+        CommRingCat.hom_ofHom, RingHom.finrank_algebraMap]
+    · intro h p
+      rw [hpt p, Scheme.Hom.finrank_SpecMap_eq_finrank hφfin hφflat,
+        CommRingCat.hom_ofHom, RingHom.finrank_algebraMap]
+      exact h _
+  -- (D) the ring-side module is the section-side module (sealed construction)
+  obtain ⟨eM⟩ := locallyFreeRankLocus_sections_equiv f U x'
+  -- transports across `eM`, elaborated once
+  have hrk := Module.rankAtStalk_eq_of_equiv eM
+  have hfl₁ : Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) →
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) := fun h => by
+    haveI := h
+    exact Module.Flat.of_linearEquiv eM.symm
+  have hfl₂ : Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) →
+      Module.Flat Γ(X, ⊤) (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤)) := fun h => by
+    haveI := h
+    exact Module.Flat.of_linearEquiv eM
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨hfl₁ (hflat_iff.mp h1), fun q => ?_⟩
+    rw [← congrFun hrk q]
+    exact (hrank_iff h1).mp h2 q
+  · rintro ⟨h1, h2⟩
+    have hgf : Flat (pullback.snd f (x' ≫ U.1.ι)) := hflat_iff.mpr (hfl₂ h1)
+    refine ⟨hgf, (hrank_iff hgf).mpr fun q => ?_⟩
+    rw [congrFun hrk q]
+    exact h2 q
+
+/-- **[L1-e3, the per-chart condition]** For an affine chart `V ⊆ T` mapped into an affine
+chart `U ⊆ S` by `t`, the geometric rank-`n` local-freeness of `f` pulled back over `V` is
+exactly the vanishing in `Γ(T, V)` of the flattening ideal of `U` (composing the chart
+bridge with the universal ideal's specification; the interface is in `appLE`-form so both
+directions of the locus theorem consume it directly). -/
+private theorem locallyFreeRankLocus_chart_cond {T : Scheme.{u}} (t : T ⟶ S) (n : ℕ)
+    (hb : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K) (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n)
+    (U : S.affineOpens) (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1) :
+    (Flat (pullback.snd f (V.1.ι ≫ t)) ∧
+        ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n) ↔
+      ∀ z ∈ (locallyFreeRankLocusSheaf f n hb).ideal U, (t.appLE U.1 V.1 e).hom z = 0 := by
+  letI := ((f.app U.1).hom).toAlgebra
+  let x' : (↑V.1 : Scheme.{u}) ⟶ (↑U.1 : Scheme.{u}) := t.resLE U.1 V.1 e
+  letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+  haveI : IsAffine (↑V.1 : Scheme.{u}) := V.2
+  have h1 := locallyFreeRankLocus_chart_iff f U x' n
+  rw [show x' ≫ U.1.ι = V.1.ι ≫ t from Scheme.Hom.resLE_comp_ι t e] at h1
+  have h2 := locallyFreeRankLocusSheaf_spec f n hb U Γ(↑V.1, ⊤) inferInstance inferInstance
+  -- the chart algebra map is `appLE` conjugated by the top-sections isomorphism
+  have hkey : ∀ z : Γ(S, U.1), algebraMap Γ(S, U.1) Γ(↑V.1, ⊤) z =
+      ((Scheme.Opens.topIso V.1).inv.hom) ((t.appLE U.1 V.1 e).hom z) := by
+    intro z
+    show ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)) z = _
+    rw [RingHom.comp_apply,
+      show x'.appTop = (Scheme.Opens.topIso U.1).hom ≫ t.appLE U.1 V.1 e ≫
+        (Scheme.Opens.topIso V.1).inv from Scheme.Hom.resLE_app_top t e]
+    have hround : (Scheme.Opens.topIso U.1).hom.hom ((Scheme.Opens.topIso U.1).inv.hom z)
+        = z := by
+      have := congrArg (fun ψ : Γ(S, U.1) ⟶ Γ(S, U.1) => ψ.hom z)
+        (Scheme.Opens.topIso U.1).inv_hom_id
+      simpa using this
+    rw [CommRingCat.comp_apply, CommRingCat.comp_apply, hround]
+  have hinj : Function.Injective ((Scheme.Opens.topIso V.1).inv.hom) :=
+    (Scheme.Opens.topIso V.1).symm.commRingCatIsoToRingEquiv.injective
+  refine h1.trans (h2.trans ⟨fun hmap z hz => ?_, fun hvan => ?_⟩)
+  · have h0 : algebraMap Γ(S, U.1) Γ(↑V.1, ⊤) z ∈
+        ((locallyFreeRankLocusSheaf f n hb).ideal U).map
+          (algebraMap Γ(S, U.1) Γ(↑V.1, ⊤)) := Ideal.mem_map_of_mem _ hz
+    rw [hmap, Ideal.mem_bot, hkey] at h0
+    exact hinj (h0.trans (map_zero _).symm)
+  · rw [eq_bot_iff]
+    refine Ideal.map_le_iff_le_comap.mpr fun z hz => ?_
+    rw [Ideal.mem_comap, Ideal.mem_bot, hkey, hvan z hz, map_zero]
+
+end LocallyFreeRankLocusBridge
+
+open scoped TensorProduct in
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
@@ -86,7 +1429,179 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (Flat (pullback.snd f t) ∧ ∀ x : T, (pullback.snd f t).finrank x = n) := by
-  sorry
+  classical
+  -- [L1-e2] the scheme-level fibre dichotomy gives the per-affine module bound
+  have hb' : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K) (_ : Algebra Γ(S, U.1) K),
+      letI := ((f.app U.1).hom).toAlgebra
+      Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n := by
+    intro U K fK aK
+    letI := ((f.app U.1).hom).toAlgebra
+    haveI : Module.Finite Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := f.finite_app U.1 U.2
+    -- the chart point of `U` with residue field `K`
+    let x' : Spec (CommRingCat.of K) ⟶ ↑U.1 :=
+      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, U.1) K)) ≫ U.2.isoSpec.inv
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    -- the section ring of the chart point is `K` itself, compatibly over `Γ(S, U)`
+    let eK : Γ(Spec (CommRingCat.of K), ⊤) ≃+* K :=
+      (Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv
+    have hcomp : (Scheme.Opens.topIso U.1).inv ≫ x'.appTop ≫
+        (Scheme.ΓSpecIso (CommRingCat.of K)).hom =
+        CommRingCat.ofHom (algebraMap Γ(S, U.1) K) := by
+      show (Scheme.Opens.topIso U.1).inv ≫
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(S, U.1) K)) ≫ U.2.isoSpec.inv).appTop ≫ _ = _
+      rw [Scheme.Hom.comp_appTop, IsAffineOpen.isoSpec_inv_appTop, Category.assoc,
+        Category.assoc, Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+      exact (Scheme.ΓSpecIso Γ(S, U.1)).inv_hom_id_assoc
+        (CommRingCat.ofHom (algebraMap Γ(S, U.1) K))
+    have he : ∀ r : Γ(S, U.1),
+        eK (algebraMap Γ(S, U.1) Γ(Spec (CommRingCat.of K), ⊤) r) =
+          algebraMap Γ(S, U.1) K r := fun r =>
+      congrArg (fun ψ : Γ(S, U.1) ⟶ CommRingCat.of K => ψ.hom r) hcomp
+    -- fibre dichotomy at the chart point
+    rcases hb K (x' ≫ U.1.ι) with hE | ⟨hF, hR⟩
+    · -- empty fibre: the tensor is trivial, so the empty family spans
+      haveI := locallyFreeRankLocus_sections_subsingleton f U x' hE
+      obtain ⟨eM⟩ := locallyFreeRankLocus_sections_equiv f U x'
+      haveI : Subsingleton
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+        eM.symm.toEquiv.subsingleton
+      have h0 := locallyFreeRankLocus_finrank_le_of_span eK he
+        (∅ : Finset (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)))
+        (Subsingleton.elim _ _)
+      simpa using h0.trans (Nat.zero_le n)
+    · -- nonempty fibre: flat of rank `n`; read through the chart bridge
+      obtain ⟨hflatB, hrankB⟩ := (locallyFreeRankLocus_chart_iff f U x' n).mp ⟨hF, hR⟩
+      -- the section ring is a field via `eK`
+      have hBfield : IsField Γ(Spec (CommRingCat.of K), ⊤) :=
+        ⟨⟨eK.symm 0, eK.symm 1, fun h => zero_ne_one (α := K) (by simpa using congrArg eK h)⟩,
+          mul_comm, fun {a} ha => ⟨eK.symm (eK a)⁻¹, eK.injective (by
+            rw [map_mul, RingEquiv.apply_symm_apply, map_one, mul_inv_cancel₀
+              (fun h0 => ha (by simpa using congrArg eK.symm h0))])⟩⟩
+      letI := hBfield.toField
+      haveI : Module.Finite Γ(Spec (CommRingCat.of K), ⊤)
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+        Module.Finite.base_change _ _ _
+      -- constant rank `n` over the field means dimension `n`
+      have hn : Module.finrank Γ(Spec (CommRingCat.of K), ⊤)
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) = n := by
+        have h1 := congrFun (Module.rankAtStalk_eq_finrank_of_free
+          (R := Γ(Spec (CommRingCat.of K), ⊤))
+          (M := Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)))
+          ⟨⊥, Ideal.isPrime_bot⟩
+        rw [← hrankB ⟨⊥, Ideal.isPrime_bot⟩, h1, Pi.natCast_apply, Nat.cast_id]
+      -- a basis gives a spanning family of size `n`
+      let b := Module.finBasis Γ(Spec (CommRingCat.of K), ⊤)
+        (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1))
+      refine le_trans (locallyFreeRankLocus_finrank_le_of_span eK he
+        (Finset.univ.image ⇑b) ?_) ?_
+      · rw [Finset.coe_image, Finset.coe_univ, Set.image_univ]
+        exact b.span_eq
+      · exact le_trans Finset.card_image_le (by simp [hn])
+  refine ⟨locallyFreeRankLocusSheaf f n hb', fun T t => ?_⟩
+  rw [ModularCurves.exists_factor_subschemeι_iff]
+  -- [L1-e3] the factoring locus is exactly the flat-of-rank-`n` locus.
+  -- The kernel is the largest ideal sheaf under the componentwise kernels (`ofIdeals` gci):
+  have hker_iff : (locallyFreeRankLocusSheaf f n hb') ≤ t.ker ↔
+      ∀ U : S.affineOpens, (locallyFreeRankLocusSheaf f n hb').ideal U ≤
+        RingHom.ker (t.app U.1).hom :=
+    (Scheme.IdealSheafData.gci.gc _ _).symm
+  rw [hker_iff]
+  -- per-chart geometric condition (through the bridge [L1-e0] + the affine spec)
+  constructor
+  · -- vanishing on every affine of `S` ⟹ the geometric condition
+    intro hle
+    -- every chart satisfies the geometric condition, through the per-chart bridge
+    have hchart : ∀ (U : S.affineOpens) (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1),
+        Flat (pullback.snd f (V.1.ι ≫ t)) ∧
+          ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n := by
+      intro U V e
+      refine (locallyFreeRankLocus_chart_cond f t n hb' U V e).mpr fun z hz => ?_
+      have h0 : (t.app U.1).hom z = 0 := by
+        have h1 := hle U hz
+        rwa [RingHom.mem_ker] at h1
+      show ((t.app U.1 ≫ T.presheaf.map (homOfLE e).op).hom) z = 0
+      rw [CommRingCat.comp_apply, h0, map_zero]
+    -- an affine chart pair through every point of `T`
+    have hcover : ∀ x : T, ∃ (U : S.affineOpens) (V : T.affineOpens),
+        x ∈ V.1 ∧ V.1 ≤ t ⁻¹ᵁ U.1 := by
+      intro x
+      obtain ⟨U, hU, hxU, -⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        S.isBasis_affineOpens (show t.base x ∈ (⊤ : S.Opens) from trivial)
+      obtain ⟨V, hV, hxV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        T.isBasis_affineOpens (show x ∈ t ⁻¹ᵁ U from hxU)
+      exact ⟨⟨U, hU⟩, ⟨V, hV⟩, hxV, hVle⟩
+    choose Ux Vx hmem hVle using hcover
+    -- the pasted square: each chart pullback is the base change of `pullback.snd f t`
+    have hsq : ∀ x : T, IsPullback
+        (pullback.fst (pullback.snd f t) (Vx x).1.ι ≫ pullback.fst f t)
+        (pullback.snd (pullback.snd f t) (Vx x).1.ι) f ((Vx x).1.ι ≫ t) := fun x =>
+      (IsPullback.of_hasPullback (pullback.snd f t) (Vx x).1.ι).paste_horiz
+        (IsPullback.of_hasPullback f t)
+    have hVtop : (⨆ x : T, (Vx x).1) = ⊤ := by
+      rw [eq_top_iff]
+      exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hmem x⟩
+    -- flatness is Zariski-local on the target, and holds over each chart
+    haveI hflat : Flat (pullback.snd f t) := by
+      refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun x : T => (Vx x).1) hVtop fun x => ?_
+      have h1 := (isPullback_morphismRestrict (pullback.snd f t) (Vx x).1).flip
+      rw [← h1.isoPullback_hom_snd, ← (hsq x).isoPullback_hom_snd,
+        MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
+        MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+      exact (hchart (Ux x) (Vx x) (hVle x)).1
+    refine ⟨hflat, fun x => ?_⟩
+    -- the rank at `x` is computed on the chart through `x`
+    have hch := hchart (Ux x) (Vx x) (hVle x)
+    haveI := hch.1
+    have hrk := Scheme.Hom.finrank_of_isPullback _ _ _ _
+      (IsPullback.of_hasPullback (pullback.snd f t) (Vx x).1.ι) ⟨x, hmem x⟩
+    rw [show ((Vx x).1.ι ⟨x, hmem x⟩ : T) = x from rfl] at hrk
+    rw [← hrk, ← (hsq x).isoPullback_hom_snd, Scheme.Hom.finrank_comp_left_of_isIso]
+    exact hch.2 ⟨x, hmem x⟩
+  · -- the geometric condition ⟹ vanishing (elementwise, on an affine cover of `t ⁻¹ᵁ U`)
+    rintro ⟨hflat, hrank⟩
+    intro U z hz
+    rw [RingHom.mem_ker]
+    -- the restriction of `t.app U z` to every affine chart inside `t ⁻¹ᵁ U` vanishes
+    have hvan : ∀ (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1),
+        (T.presheaf.map (homOfLE e).op).hom ((t.app U.1).hom z) = 0 := by
+      intro V e
+      -- the chart pullback is the base change of `pullback.snd f t` along `V.ι`
+      have hsq : IsPullback (pullback.fst (pullback.snd f t) V.1.ι ≫ pullback.fst f t)
+          (pullback.snd (pullback.snd f t) V.1.ι) f (V.1.ι ≫ t) :=
+        (IsPullback.of_hasPullback (pullback.snd f t) V.1.ι).paste_horiz
+          (IsPullback.of_hasPullback f t)
+      have hsnd : pullback.snd f (V.1.ι ≫ t) =
+          hsq.isoPullback.inv ≫ pullback.snd (pullback.snd f t) V.1.ι :=
+        (Iso.eq_inv_comp _).mpr hsq.isoPullback_hom_snd
+      have hcflat : Flat (pullback.snd f (V.1.ι ≫ t)) := by
+        rw [hsnd, MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+        infer_instance
+      have hcrank : ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n := by
+        intro p
+        rw [hsnd, Scheme.Hom.finrank_comp_left_of_isIso,
+          Scheme.Hom.finrank_of_isPullback _ _ _ _
+            (IsPullback.of_hasPullback (pullback.snd f t) V.1.ι) p]
+        exact hrank _
+      have hz0 := (locallyFreeRankLocus_chart_cond f t n hb' U V e).mp ⟨hcflat, hcrank⟩ z hz
+      rwa [show t.appLE U.1 V.1 e = t.app U.1 ≫ T.presheaf.map (homOfLE e).op from rfl,
+        CommRingCat.comp_apply] at hz0
+    -- affine charts cover `t ⁻¹ᵁ U`; a section vanishing on all of them is zero
+    have hcover : ∀ p : {q : T // q ∈ t ⁻¹ᵁ U.1}, ∃ V : T.affineOpens,
+        p.1 ∈ V.1 ∧ V.1 ≤ t ⁻¹ᵁ U.1 := by
+      intro p
+      obtain ⟨V, hV, hpV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        T.isBasis_affineOpens p.2
+      exact ⟨⟨V, hV⟩, hpV, hVle⟩
+    choose Vc hmem hVle using hcover
+    refine T.sheaf.eq_of_locally_eq' (fun p => (Vc p).1) (t ⁻¹ᵁ U.1)
+      (fun p => homOfLE (hVle p)) (fun q hq => ?_) _ 0 (fun p => ?_)
+    · exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨q, hq⟩, hmem ⟨q, hq⟩⟩
+    · show (T.presheaf.map (homOfLE (hVle p)).op).hom ((t.app U.1).hom z)
+        = (T.presheaf.map (homOfLE (hVle p)).op).hom 0
+      rw [map_zero]
+      exact hvan (Vc p) (hVle p)
 
 namespace EllipticCurve
 
@@ -130,6 +1645,37 @@ theorem isGammaZeroFppf_iff_generator (N : ℕ) [NeZero N] (D : RelEffCartierDiv
 -- schemes are covered: the discharge route (`exists_incidenceLocusEQ` on the tautological
 -- point over `D` + `orderDivisor_baseChange`) is universal over arbitrary `T ⟶ S`, never
 -- through geometric points — the `ℚ̄[ε]` trap recorded at `IsNaiveGammaOne` does not bite.
+/-- The tautological `B`-point of `E` on the subgroup divisor `D`, where `B = D.ideal.subscheme`:
+its underlying morphism is the closed immersion `D ↪ E` (`D.ideal.subschemeι`), a section of `E.π`
+over `B` by construction of the base map `π_B = subschemeι ≫ E.π`.  T-D15 compares its order divisor
+against the pulled-back `D`; a `T`-point `P` on `D` (via `h : T ⟶ B`) is exactly this taut point
+pulled along `h`. -/
+noncomputable def divisorTautPoint (D : RelEffCartierDiv E.π) :
+    E.Point (D.ideal.subschemeι ≫ E.π) :=
+  ⟨D.ideal.subschemeι, rfl⟩
+
+/-- Restricting the tautological point along a `T`-point `h : T ⟶ D.ideal.subscheme` of the base
+recovers the original point `P`, when `h` witnesses `P` lying on `D` (`h ≫ subschemeι = P.1`). -/
+theorem divisorTautPoint_restrict (D : RelEffCartierDiv E.π) {T : Scheme.{u}} (t : T ⟶ S)
+    (P : E.Point t) (h : T ⟶ D.ideal.subscheme) (hcomp : h ≫ D.ideal.subschemeι = P.1) :
+    (Point.restrict E h (E.divisorTautPoint D) : T ⟶ E.E) = (P : T ⟶ E.E) := by
+  show h ≫ D.ideal.subschemeι = P.1
+  exact hcomp
+
+/-- The `HasExactOrder` half of `IsDivisorGenerator` follows from the order-divisor–ideal equality
+when `D` is a subgroup: equal ideals give equal divisors (`RelEffCartierDiv.ext`), and a subgroup
+divisor stays a subgroup after base change (`IsSubgroup.baseChange`). This is ATTACK note (2): the
+`orderDivisor = D` incidence forces exact order *because* `D` is a subgroup. -/
+theorem hasExactOrder_of_orderDivisor_ideal_eq (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
+    (hD : D.IsSubgroup E) {T : Scheme.{u}} (t : T ⟶ S) (P : (E.baseChange t).Section)
+    (heq : (P.orderDivisor (E.baseChange t) N).ideal = (D.baseChange t).ideal) :
+    P.HasExactOrder (E.baseChange t) N := by
+  have h : P.orderDivisor (E.baseChange t) N = D.baseChange t := RelEffCartierDiv.ext heq
+  have hsub : (D.baseChange t).IsSubgroup (E.baseChange t) :=
+    RelEffCartierDiv.IsSubgroup.baseChange E hD t
+  rw [← h] at hsub
+  exact hsub
+
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
 generator of `D`": for a `T`-point `P` of `E` lying on `D` (witnessed by the factorisation
@@ -145,7 +1691,73 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
         (h : T ⟶ D.ideal.subscheme), h ≫ D.ideal.subschemeι = P.1 →
         ((∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = h) ↔
           E.IsDivisorGenerator N D t (Point.asSection E t P)) := by
-  sorry
+  obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
+    (E.baseChange (D.ideal.subschemeι ≫ E.π)).smooth
+    (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
+      (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N)
+    (D.baseChange (D.ideal.subschemeι ≫ E.π))
+  refine ⟨Z, fun T t P h hcomp => ?_⟩
+  refine Iff.trans (hZ h) ?_
+  rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
+    ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
+  -- REMAINING (coherence) — PRECISELY SCOPED via LSP 2026-07-09.  After
+  --   `rw [← baseChange_ideal, ← baseChange_ideal, Section.orderDivisor_baseChange]` the goal is
+  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut))) N).ideal
+  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t P)`,
+  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange h`
+  --   versus one over `E.baseChange t` — the two total spaces are iso (not equal) via
+  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY engine:
+  --     • D side: `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` + `P.1 ≫ E.π = t`).
+  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` → `Finset.prod_congr`
+  --       → per-factor `exactOrderLocusAux_ker_comap_eq` with the sections matched by
+  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `fullLevelLocusAux_P1/P2` pattern.
+  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
+  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985 +snd,
+  --   `exactOrderLocusAux_val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
+  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH: expose the
+  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.  A
+  --   cross-file API change worth flagging to the coordinator; not an inline close.
+  have hct : h ≫ (D.ideal.subschemeι ≫ E.π) = t := by
+    rw [← Category.assoc, hcomp]; exact P.2
+  refine Iff.trans (fullLevelLocusAux_comap_iff hct _ _) ?_
+  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (fullLevelLocusAux_theta hct)
+      = (D.baseChange t).ideal := by
+    rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
+      fullLevelLocusAux_theta_fst, ← RelEffCartierDiv.baseChange_ideal]
+  have hP1 : (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
+        (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N).ideal.comap
+        (fullLevelLocusAux_theta hct)
+      = (Section.orderDivisor (E.baseChange t) (Point.asSection E t P) N).ideal := by
+    simp only [Section.orderDivisor]
+    rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal,
+      Scheme.IdealSheafData.comap_prod]
+    refine Finset.prod_congr rfl fun a _ => ?_
+    have hm_a : h ≫ (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+          ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π)
+            (E.divisorTautPoint D)) ≫ pullback.fst E.π (D.ideal.subschemeι ≫ E.π))
+        = subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
+          ≫ pullback.fst E.π t := by
+      rw [exactOrderLocusAux_val_smul_asSection_fst, exactOrderLocusAux_val_smul_asSection_fst,
+        ← Category.assoc]
+      exact congrArg (· ≫ E.mulByHom (((a : ℕ) : ℤ) + 1)) hcomp
+    have key := exactOrderLocusAux_ker_comap_eq
+      (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+        ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)))
+      (subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
+      (exactOrderLocusAux_val_isClosedImmersion E _ _)
+      (exactOrderLocusAux_val_isClosedImmersion E t _)
+      (subgroupLocusAux_val_snd E _ _)
+      (subgroupLocusAux_val_snd E t _)
+      hm_a
+      (fullLevelLocusAux_theta hct) (𝟙 (pullback E.π t))
+      (fullLevelLocusAux_theta_snd hct) (Category.id_comp _)
+      (by rw [Category.id_comp, fullLevelLocusAux_theta_fst])
+    rw [Scheme.IdealSheafData.comap_id] at key
+    exact key
+  refine Iff.trans (Iff.of_eq (congrArg₂ Eq hP1 hP2)) ?_
+  simp only [EllipticCurve.IsDivisorGenerator]
+  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb, hb⟩,
+    fun hh => hh.2⟩
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
 the total space of the generator locus. Real `Classical.choose` definition — the `sorry`
@@ -175,6 +1787,177 @@ theorem generatorSpace_spec (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
         E.IsDivisorGenerator N D t (Point.asSection E t P)) :=
   (E.exists_generatorLocus N D hD).choose_spec
 
+/-- Kernels of closed immersions transport along a postcomposed isomorphism (sealed;
+the per-factor step of the order-divisor pasting naturality). -/
+private theorem generatorSpace_baseChange_ker_comap {X Y Z : Scheme.{u}} (v : X ⟶ Y)
+    (e : Y ⟶ Z) [IsClosedImmersion v] [IsIso e] :
+    (Scheme.Hom.ker (v ≫ e)).comap e = v.ker := by
+  rw [← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (v ≫ e) e]
+  have h : IsPullback v (𝟙 X) e (v ≫ e) := IsPullback.of_vert_isIso ⟨by simp⟩
+  rw [show pullback.fst e (v ≫ e) = h.isoPullback.inv ≫ v from
+    (Iso.eq_inv_comp _).mpr h.isoPullback_hom_fst, Scheme.Hom.ker_comp_of_isIso]
+
+/-- Containment of the base-changed divisor ideal in a kernel is containment of the
+divisor ideal in the kernel of the `E`-projected value (sealed; both directions of the
+generator-scheme factoring transport). -/
+private theorem generatorSpace_baseChange_le_ker_iff (D : RelEffCartierDiv E.π)
+    {T Q : Scheme.{u}} (t : T ⟶ S) (v : Q ⟶ pullback E.π t) :
+    (D.baseChange t).ideal ≤ Scheme.Hom.ker v ↔
+      D.ideal ≤ Scheme.Hom.ker (v ≫ pullback.fst E.π t) := by
+  rw [RelEffCartierDiv.baseChange_ideal,
+    show Scheme.Hom.ker (v ≫ pullback.fst E.π t) =
+        (Scheme.Hom.ker v).map (pullback.fst E.π t) from by
+      rw [← Scheme.IdealSheafData.map_bot, ← Scheme.IdealSheafData.map_bot,
+        Scheme.IdealSheafData.map_comp],
+    Scheme.IdealSheafData.le_map_iff_comap_le]
+
+/-- The value of an integer multiple of the original point, pulled back through the
+pasting isomorphism, is the value of the multiple of the transported point (sealed; the
+morphism-level input to the order-divisor pasting naturality — stated with `ψ.inv` so the
+whole equation elaborates at the raw iterated-pullback spelling). -/
+private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (m : ℤ) :
+    subgroupLocusAux_val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
+        (pullbackLeftPullbackSndIso E.π t q).inv =
+      subgroupLocusAux_val (E.baseChange t) q
+        (m • EllipticCurve.Point.asSection (E.baseChange t) q P') := by
+  have hsmul' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q)
+        (pullback E.π t)
+        (subgroupLocusAux_val (E.baseChange t) q
+          (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
+        (pullback.fst (pullback.snd E.π t) q) =
+      (P'.1 : Q ⟶ pullback E.π t) ≫ (E.baseChange t).mulByHom m :=
+    exactOrderLocusAux_val_smul_asSection_fst (E.baseChange t) q m P'
+  have hval' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q) Q
+        (subgroupLocusAux_val (E.baseChange t) q
+          (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
+        (pullback.snd (pullback.snd E.π t) q) =
+      𝟙 Q :=
+    subgroupLocusAux_val_snd (E.baseChange t) q _
+  have hmul' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) E.E
+      ((E.baseChange t).mulByHom m) (pullback.fst E.π t) =
+      pullback.fst E.π t ≫ E.mulByHom m :=
+    EllipticCurve.mulByHom_baseChange_fst E t m
+  have hmulsnd' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) T
+      ((E.baseChange t).mulByHom m) (pullback.snd E.π t) = pullback.snd E.π t :=
+    EllipticCurve.mulByHom_baseChange_snd E t m
+  have hP'2 : @CategoryStruct.comp Scheme _ Q (pullback E.π t) T P'.1
+      (pullback.snd E.π t) = q := P'.2
+  have hPP'' : @CategoryStruct.comp Scheme _ Q (pullback E.π t) E.E P'.1
+      (pullback.fst E.π t) = P.1 := hPP'
+  have hkey₁ : @CategoryStruct.comp Scheme _ Q (pullback E.π t) E.E
+      (@CategoryStruct.comp Scheme _ Q (pullback E.π t) (pullback E.π t) P'.1
+        ((E.baseChange t).mulByHom m))
+      (pullback.fst E.π t) = P.1 ≫ E.mulByHom m := by
+    rw [Category.assoc, hmul', ← Category.assoc, hPP'']
+  have hkey₂ : @CategoryStruct.comp Scheme _ Q (pullback E.π t) T
+      (@CategoryStruct.comp Scheme _ Q (pullback E.π t) (pullback E.π t) P'.1
+        ((E.baseChange t).mulByHom m))
+      (pullback.snd E.π t) = q := by
+    rw [Category.assoc, hmulsnd', hP'2]
+  apply pullback.hom_ext
+  · -- the `pullback E.π t`-component: compare both `E`- and `T`-legs
+    rw [Category.assoc, hsmul']
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst,
+        exactOrderLocusAux_val_smul_asSection_fst E (q ≫ t) m P]
+      exact hkey₁.symm
+    · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst_snd,
+        ← Category.assoc, subgroupLocusAux_val_snd, Category.id_comp]
+      exact hkey₂.symm
+  · rw [Category.assoc, pullbackLeftPullbackSndIso_inv_snd_snd, hval',
+      subgroupLocusAux_val_snd]
+
+
+/-- Kernels of closed immersions transport along a precomposed inverse isomorphism, in
+comap form (sealed; the per-factor step of the order-divisor pasting naturality). -/
+private theorem generatorSpace_baseChange_ker_inv {X Y Z : Scheme.{u}} (v : X ⟶ Z)
+    (e : Y ≅ Z) [IsClosedImmersion v] :
+    Scheme.Hom.ker (v ≫ e.inv) = (Scheme.Hom.ker v).comap e.hom := by
+  haveI : IsClosedImmersion (v ≫ e.inv) := inferInstance
+  have h := generatorSpace_baseChange_ker_comap (v ≫ e.inv) e.hom
+  rw [Category.assoc, e.inv_hom_id, Category.comp_id] at h
+  exact h.symm
+
+/-- **The order-divisor pasting naturality**: the order divisor of the transported point
+over the iterated pullback is the comap along the pasting isomorphism of the order divisor
+of the original point over the composite pullback (sealed; the divisor-side half is
+`RelEffCartierDiv.baseChange_baseChange_ideal`). -/
+private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (N : ℕ) [NeZero N] :
+    (Section.orderDivisor ((E.baseChange t).baseChange q)
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') N).ideal =
+      @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+        (pullback E.π (q ≫ t))
+        (Section.orderDivisor (E.baseChange (q ≫ t))
+          (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal
+        (pullbackLeftPullbackSndIso E.π t q).hom := by
+  simp only [EllipticCurve.Section.orderDivisor]
+  rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal]
+  have hcp : @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+      (pullback E.π (q ≫ t))
+      ((∏ i : Fin N, Scheme.Hom.ker
+        ((((i : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P).1 :
+          Scheme.IdealSheafData (E.baseChange (q ≫ t)).E))
+      (pullbackLeftPullbackSndIso E.π t q).hom =
+      ∏ i : Fin N, @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+        (pullback E.π (q ≫ t))
+        (Scheme.Hom.ker ((((i : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P).1)
+        (pullbackLeftPullbackSndIso E.π t q).hom :=
+    Scheme.IdealSheafData.comap_prod _ _ _
+  rw [hcp]
+  refine Finset.prod_congr rfl fun a _ => ?_
+  haveI := exactOrderLocusAux_val_isClosedImmersion E (q ≫ t)
+    ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P)
+  have h1 := congrArg Scheme.Hom.ker
+    (generatorSpace_baseChange_val_comp E t q P P' hPP' (((a : ℕ) : ℤ) + 1))
+  have h2 := generatorSpace_baseChange_ker_inv
+    (subgroupLocusAux_val E (q ≫ t)
+      ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P))
+    (pullbackLeftPullbackSndIso E.π t q)
+  exact h1.symm.trans h2
+
+/-- **The `IsDivisorGenerator` composite-vs-iterated base-change bridge** (sealed): a point
+of `E` over `q ≫ t` generates `D` iff the corresponding point of `E ×_S T` over `q`
+generates `D ×_S T`. Both sides reduce to their order-divisor–ideal equalities
+(`hasExactOrder_of_orderDivisor_ideal_eq`), which correspond under comap along the pasting
+isomorphism. -/
+private theorem generatorSpace_baseChange_isDivisorGenerator_iff (N : ℕ) [NeZero N]
+    (D : RelEffCartierDiv E.π) (hD : D.IsSubgroup E) {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) :
+    (E.baseChange t).IsDivisorGenerator N (D.baseChange t) q
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') ↔
+      E.IsDivisorGenerator N D (q ≫ t) (EllipticCurve.Point.asSection E (q ≫ t) P) := by
+  have hDT : (D.baseChange t).IsSubgroup (E.baseChange t) :=
+    RelEffCartierDiv.IsSubgroup.baseChange E hD t
+  have h1 : (E.baseChange t).IsDivisorGenerator N (D.baseChange t) q
+      (EllipticCurve.Point.asSection (E.baseChange t) q P') ↔
+      (Section.orderDivisor ((E.baseChange t).baseChange q)
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') N).ideal =
+          ((D.baseChange t).baseChange q).ideal :=
+    ⟨fun hh => hh.2, fun hb => ⟨(E.baseChange t).hasExactOrder_of_orderDivisor_ideal_eq N
+      (D.baseChange t) hDT q _ hb, hb⟩⟩
+  have h2 : E.IsDivisorGenerator N D (q ≫ t)
+      (EllipticCurve.Point.asSection E (q ≫ t) P) ↔
+      (Section.orderDivisor (E.baseChange (q ≫ t))
+        (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal =
+          (D.baseChange (q ≫ t)).ideal :=
+    ⟨fun hh => hh.2, fun hb =>
+      ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD (q ≫ t) _ hb, hb⟩⟩
+  rw [h1, h2, generatorSpace_baseChange_orderDivisor_ideal E t q P P' hPP' N,
+    RelEffCartierDiv.baseChange_baseChange_ideal D t q]
+  constructor
+  · intro h
+    have h' := congrArg
+      (Scheme.IdealSheafData.comap · (pullbackLeftPullbackSndIso E.π t q).inv) h
+    simp only [← Scheme.IdealSheafData.comap_comp, Iso.inv_hom_id,
+      Scheme.IdealSheafData.comap_id] at h'
+    exact h'
+  · exact fun h => by rw [h]
+
 /-- **(KM 6.1, "formation commutes with arbitrary change of base")** The generator scheme
 of the base-changed divisor is the base change of the generator scheme. Dischargeable from
 the universal property (`generatorSpace_spec` on both sides + Yoneda); no new gates. -/
@@ -186,7 +1969,123 @@ theorem generatorSpace_baseChange (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.�
       e.hom ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t)
           (RelEffCartierDiv.IsSubgroup.baseChange E hD t) =
         pullback.snd (E.generatorSpaceπ N D hD) t := by
-  sorry
+  classical
+  set hD' := RelEffCartierDiv.IsSubgroup.baseChange E hD t with hhD'
+  -- tautological generator data over the fibre product (raw-valued aliases throughout)
+  set q₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ T :=
+    pullback.snd (E.generatorSpaceπ N D hD) t with hq₁
+  set k₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ E.generatorSpace N D hD :=
+    pullback.fst (E.generatorSpaceπ N D hD) t with hk₁
+  set h₁ := k₁ ≫ E.generatorSpaceι N D hD with hh₁
+  have hP₁π : (h₁ ≫ D.ideal.subschemeι) ≫ E.π = q₁ ≫ t := by
+    rw [hh₁, Category.assoc, Category.assoc]
+    exact pullback.condition
+  set P₁ : E.Point (q₁ ≫ t) := ⟨h₁ ≫ D.ideal.subschemeι, hP₁π⟩ with hP₁
+  have hgen₁ := (E.generatorSpace_spec N D hD (q₁ ≫ t) P₁ h₁ rfl).mp ⟨k₁, rfl⟩
+  set v₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ pullback E.π t :=
+    pullback.lift (h₁ ≫ D.ideal.subschemeι) q₁ hP₁π with hv₁
+  set P₁' : (E.baseChange t).Point q₁ := ⟨v₁, pullback.lift_snd _ _ _⟩ with hP₁'
+  have hPP₁' : P₁'.1 ≫ pullback.fst E.π t = P₁.1 := pullback.lift_fst _ _ _
+  have hgen₁' := (generatorSpace_baseChange_isDivisorGenerator_iff E N D hD t q₁
+    P₁ P₁' hPP₁').mpr hgen₁
+  have hker₁ : D.ideal ≤ Scheme.Hom.ker P₁.1 :=
+    (ModularCurves.exists_factor_subschemeι_iff _ _).mp ⟨h₁, rfl⟩
+  have hker₁' : (D.baseChange t).ideal ≤ Scheme.Hom.ker P₁'.1 :=
+    (generatorSpace_baseChange_le_ker_iff E D t P₁'.1).mpr
+      (le_of_le_of_eq hker₁ (congrArg Scheme.Hom.ker hPP₁').symm)
+  obtain ⟨h₁', hcomp₁'⟩ := (ModularCurves.exists_factor_subschemeι_iff
+    (@RelEffCartierDiv.ideal (E.baseChange t).E T (E.baseChange t).π (D.baseChange t))
+    P₁'.1).mpr hker₁'
+  obtain ⟨α, hα⟩ := ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' q₁
+    P₁' h₁' hcomp₁').mpr hgen₁'
+  -- tautological generator data over the base-changed generator scheme
+  set gπ' := (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD' with hgπ'
+  set gι' := (E.baseChange t).generatorSpaceι N (D.baseChange t) hD' with hgι'
+  set Dι' := (@RelEffCartierDiv.ideal (E.baseChange t).E T
+    (E.baseChange t).π (D.baseChange t)).subschemeι with hDι'
+  set v₂ : (E.baseChange t).generatorSpace N (D.baseChange t) hD' ⟶ pullback E.π t :=
+    @CategoryStruct.comp Scheme _ _ _ (pullback E.π t) gι' Dι' with hv₂
+  have hc₁ : h₁' ≫ Dι' = v₁ := hcomp₁'
+  have hc₁r : @CategoryStruct.comp Scheme _ _ _ (pullback E.π t) h₁' Dι' = v₁ := hcomp₁'
+  have hv₂snd : v₂ ≫ pullback.snd E.π t = gπ' := by
+    rw [hv₂, Category.assoc]; rfl
+  set P₂' : (E.baseChange t).Point gπ' := ⟨v₂, hv₂snd⟩ with hP₂'
+  have hgen₂' := ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' gπ'
+    P₂' gι' rfl).mp ⟨𝟙 _, Category.id_comp _⟩
+  have hP₂π : (v₂ ≫ pullback.fst E.π t) ≫ E.π = gπ' ≫ t := by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, hv₂snd]
+  set P₂ : E.Point (gπ' ≫ t) := ⟨v₂ ≫ pullback.fst E.π t, hP₂π⟩ with hP₂
+  have hgen₂ := (generatorSpace_baseChange_isDivisorGenerator_iff E N D hD t gπ'
+    P₂ P₂' rfl).mp hgen₂'
+  have hker₂' : (D.baseChange t).ideal ≤ Scheme.Hom.ker P₂'.1 :=
+    (ModularCurves.exists_factor_subschemeι_iff _ _).mp ⟨gι', rfl⟩
+  have hker₂ : D.ideal ≤ Scheme.Hom.ker P₂.1 :=
+    (generatorSpace_baseChange_le_ker_iff E D t P₂'.1).mp hker₂'
+  obtain ⟨h₂S, hcomp₂S⟩ := (ModularCurves.exists_factor_subschemeι_iff _ _).mpr hker₂
+  obtain ⟨k₂, hk₂⟩ := (E.generatorSpace_spec N D hD (gπ' ≫ t) P₂ h₂S hcomp₂S).mpr hgen₂
+  have hβw : k₂ ≫ E.generatorSpaceπ N D hD = gπ' ≫ t := by
+    show k₂ ≫ E.generatorSpaceι N D hD ≫ D.ideal.subschemeι ≫ E.π = gπ' ≫ t
+    rw [← Category.assoc, hk₂, ← Category.assoc, hcomp₂S]
+    exact hP₂π
+  set β : (E.baseChange t).generatorSpace N (D.baseChange t) hD' ⟶
+      pullback (E.generatorSpaceπ N D hD) t := pullback.lift k₂ gπ' hβw with hβ
+  -- monomorphism instances (through the `choose`-wrapping definitions)
+  haveI hm₁ : Mono (E.generatorSpaceι N D hD) :=
+    show Mono ((E.exists_generatorLocus N D hD).choose.subschemeι) from inferInstance
+  haveI hmD : Mono Dι' := by
+    rw [hDι']; infer_instance
+  haveI hm₂ : Mono ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD') :=
+    show Mono (((E.baseChange t).exists_generatorLocus N
+      (D.baseChange t) hD').choose.subschemeι) from inferInstance
+  -- α is compatible with the structure maps
+  have hαπ : α ≫ gπ' = q₁ := by
+    have h0 : α ≫ gπ' = ((α ≫ gι') ≫ Dι') ≫ pullback.snd E.π t := by
+      rw [Category.assoc, Category.assoc]; rfl
+    rw [h0, hα, hc₁]
+    exact pullback.lift_snd _ _ _
+  refine ⟨⟨α, β, ?_, ?_⟩, hαπ⟩
+  · -- α ≫ β = 𝟙: compare both projections of the fibre product
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.id_comp,
+        show β ≫ pullback.fst (E.generatorSpaceπ N D hD) t = k₂ from
+          pullback.lift_fst _ _ _, ← cancel_mono (E.generatorSpaceι N D hD),
+        ← cancel_mono D.ideal.subschemeι, Category.assoc, Category.assoc,
+        ← Category.assoc k₂, hk₂, hcomp₂S]
+      have hnat : α ≫ P₂'.1 = P₁'.1 := by
+        show α ≫ v₂ = v₁
+        rw [hv₂, ← Category.assoc, hα]
+        exact hc₁r
+      have hαv : α ≫ P₂.1 = P₁.1 := by
+        have h1 : α ≫ P₂.1 = (α ≫ P₂'.1) ≫ pullback.fst E.π t := by
+          rw [← Category.assoc]; rfl
+        rw [h1, hnat, hPP₁']
+      exact hαv
+    · rw [Category.assoc, Category.id_comp,
+        show β ≫ pullback.snd (E.generatorSpaceπ N D hD) t = gπ' from
+          pullback.lift_snd _ _ _]
+      exact hαπ
+  · -- β ≫ α = 𝟙: cancel the two closed immersions of the generator scheme
+    rw [← cancel_mono ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD'),
+      ← cancel_mono Dι', Category.id_comp, Category.assoc, Category.assoc,
+      ← Category.assoc α, ← hgι', hα, hc₁]
+    -- β ≫ v₁ = gι' ≫ Dι' (both the raw value of the tautological point)
+    apply pullback.hom_ext
+    · have hL : @CategoryStruct.comp Scheme _ _ (pullback E.π t) E.E (β ≫ v₁)
+          (pullback.fst E.π t) = v₂ ≫ pullback.fst E.π t := by
+        rw [Category.assoc,
+          show v₁ ≫ pullback.fst E.π t = h₁ ≫ D.ideal.subschemeι from
+            pullback.lift_fst _ _ _, hh₁,
+          show β ≫ (k₁ ≫ E.generatorSpaceι N D hD) ≫ D.ideal.subschemeι =
+            ((β ≫ k₁) ≫ E.generatorSpaceι N D hD) ≫ D.ideal.subschemeι from by
+              simp only [Category.assoc],
+          show β ≫ k₁ = k₂ from pullback.lift_fst _ _ _, hk₂, hcomp₂S]
+      exact hL
+    · have hLs : @CategoryStruct.comp Scheme _ _ (pullback E.π t) T (β ≫ v₁)
+          (pullback.snd E.π t) = gπ' := by
+        rw [Category.assoc,
+          show v₁ ≫ pullback.snd E.π t = q₁ from pullback.lift_snd _ _ _]
+        exact pullback.lift_snd _ _ _
+      exact hLs.trans hv₂snd.symm
 
 /-! ## §2 The Main Theorem on Cyclic Groups (KM 6.1.1)
 
@@ -214,7 +2113,20 @@ theorem isGammaZeroFppf_of_generatorSpace_finiteLocallyFree (N : ℕ) [NeZero N]
     (hlfp : LocallyOfFinitePresentation (E.generatorSpaceπ N D hD))
     (hrank : ∀ s : S, (E.generatorSpaceπ N D hD).finrank s = N.totient) :
     E.IsGammaZeroFppf N D := by
-  sorry
+  refine ⟨hD, hdeg, E.generatorSpace N D hD, E.generatorSpaceπ N D hD, ?_, hflat, hlfp, ?_⟩
+  · -- `D^× ⟶ S` is surjective: rank `φ(N) ≥ 1` everywhere.
+    have hsurj : Surjective (E.generatorSpaceπ N D hD) := by
+      rw [← Scheme.Hom.one_le_finrank_iff_surjective]
+      intro s
+      rw [hrank s]
+      exact Nat.totient_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne N))
+    exact hsurj.surj
+  · -- The tautological point of `D` over `D^×` is a generator (`generatorSpace_spec` at the
+    -- identity factorisation of `generatorSpaceι`).
+    have hgen := E.generatorSpace_spec N D hD (E.generatorSpaceπ N D hD)
+      ⟨E.generatorSpaceι N D hD ≫ D.ideal.subschemeι, Category.assoc _ _ _⟩
+      (E.generatorSpaceι N D hD) rfl
+    exact ⟨_, hgen.mp ⟨𝟙 _, Category.id_comp _⟩⟩
 
 /-- **(KM 6.1.1(1), "only if" — the hard direction; GATE [KM-62-63-HOMOG])** If `D` is
 cyclic then `D^×` is finite locally free over `S` of rank `φ(N)`. KM's proof (print
@@ -542,7 +2454,122 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
       ∏ d ∈ N.divisors.attach,
         letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
         (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal := by
-  sorry
+  classical
+  have hN : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+  -- Integer multiples of `P₀` only depend on the residue mod `N` (this is where `hkill` enters).
+  have hsmul : ∀ {m m' : ℕ}, (m : ZMod N) = (m' : ZMod N) → (m : ℤ) • P₀ = (m' : ℤ) • P₀ := by
+    intro m m' h
+    obtain ⟨k, hk⟩ := (Nat.modEq_iff_dvd).mp ((ZMod.natCast_eq_natCast_iff m m' N).mp h)
+    have hm : (m : ℤ) = (m' : ℤ) + N * (-k) := by linarith
+    rw [hm, add_smul, mul_comm, mul_smul, hkill, smul_zero, add_zero]
+  -- The kernel-of-multiple function on residues.
+  set K : ZMod N → E.E.IdealSheafData :=
+    fun x => Scheme.Hom.ker (((x.val : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E) with hK
+  -- The additive-order-of-residue map into the divisors of `N`.
+  set ord : ZMod N → ℕ := fun x => N / Nat.gcd x.val N with hord
+  have hord_mem : ∀ x : ZMod N, ord x ∈ N.divisors := fun x =>
+    Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right x.val N), hN.ne'⟩
+  -- Step 1: the LHS is the product of `K` over all residues.
+  have hLHS : (P₀.orderDivisor E N).ideal = ∏ x : ZMod N, K x := by
+    rw [Section.orderDivisor, fullLevelLocusAux_sectionsDivisor_ideal]
+    refine Fintype.prod_bijective (fun a : Fin N => (((a : ℕ) + 1 : ℕ) : ZMod N)) ?_ _ _
+      fun a => ?_
+    · rw [Fintype.bijective_iff_injective_and_card]
+      refine ⟨fun a b hab => ?_, by simp [ZMod.card]⟩
+      have h1 := (ZMod.natCast_eq_natCast_iff _ _ _).mp hab
+      have h2 : (a : ℕ) ≡ (b : ℕ) [MOD N] := Nat.ModEq.add_right_cancel' 1 h1
+      exact Fin.ext (by rwa [Nat.ModEq, Nat.mod_eq_of_lt a.2, Nat.mod_eq_of_lt b.2] at h2)
+    · have h1 : (((a : ℕ) : ℤ) + 1) • P₀
+          = ((((((a : ℕ) + 1 : ℕ) : ZMod N)).val : ℤ) • P₀ : E.Point (𝟙 S)) := by
+        rw [show ((a : ℕ) : ℤ) + 1 = (((a : ℕ) + 1 : ℕ) : ℤ) by push_cast; ring]
+        exact hsmul (by simp)
+      simp only [hK]
+      exact congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) h1
+  -- Step 2: the RHS is the double product of `K` over divisors and units.
+  have hRHS : (∏ d ∈ N.divisors.attach,
+        letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
+        (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal)
+      = ∏ d ∈ N.divisors, ∏ x ∈ Finset.univ.filter (fun x : ZMod N => ord x = d), K x := by
+    -- (a) each prime-order divisor unfolds to a product of kernels over the totatives of `d`
+    -- (the instance-free enumeration `b ∈ range d, gcd(b,d) = 1`).
+    trans ∏ d ∈ N.divisors.attach,
+        ∏ b ∈ (Finset.range d.1).filter (fun b => Nat.Coprime b d.1),
+          Scheme.Hom.ker ((((b * (N / d.1) : ℕ) : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E)
+    · refine Finset.prod_congr rfl fun d _ => ?_
+      letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
+      show (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal = _
+      rw [primeOrderDivisor, fullLevelLocusAux_sectionsDivisor_ideal,
+        Equiv.prod_comp (Fintype.equivFinOfCardEq
+          (ZMod.card_units_eq_totient d.1)).symm
+          (fun u : (ZMod d.1)ˣ =>
+            Scheme.Hom.ker ((((((u : ZMod d.1)).val : ℤ) • ((((N / d.1 : ℕ) : ℤ)) • P₀) :
+              E.Point (𝟙 S))) : S ⟶ E.E))]
+      refine Finset.prod_bij (fun (u : (ZMod d.1)ˣ) _ => (u : ZMod d.1).val)
+        (fun u _ => Finset.mem_filter.mpr
+          ⟨Finset.mem_range.mpr (ZMod.val_lt _), ZMod.val_coe_unit_coprime u⟩)
+        (fun u₁ _ u₂ _ h => Units.ext (ZMod.val_injective _ h))
+        (fun b hb => ?_) (fun u _ => ?_)
+      · obtain ⟨hbr, hbc⟩ := Finset.mem_filter.mp hb
+        refine ⟨ZMod.unitOfCoprime b hbc, Finset.mem_univ _, ?_⟩
+        rw [ZMod.coe_unitOfCoprime, ZMod.val_natCast,
+          Nat.mod_eq_of_lt (Finset.mem_range.mp hbr)]
+      · refine congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) ?_
+        rw [smul_smul]
+        norm_cast
+    rw [Finset.prod_attach N.divisors
+      (fun d => ∏ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        Scheme.Hom.ker ((((b * (N / d) : ℕ) : ℤ) • P₀ : E.Point (𝟙 S)) : S ⟶ E.E))]
+    -- (b) per divisor, the totatives scaled by `N/d` enumerate exactly the residues of
+    -- additive order `d`.
+    refine Finset.prod_congr rfl fun d hd => ?_
+    have hdvd : d ∣ N := (Nat.mem_divisors.mp hd).1
+    have hd0 : 0 < d := Nat.pos_of_mem_divisors hd
+    have hNd0 : 0 < N / d := Nat.div_pos (Nat.le_of_dvd hN hdvd) hd0
+    have hmul : d * (N / d) = N := Nat.mul_div_cancel' hdvd
+    have hlt : ∀ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        b * (N / d) < N := fun b hb => by
+      calc b * (N / d) < d * (N / d) :=
+            (Nat.mul_lt_mul_right hNd0).mpr (Finset.mem_range.mp (Finset.mem_filter.mp hb).1)
+        _ = N := hmul
+    have hval : ∀ b ∈ (Finset.range d).filter (fun b => Nat.Coprime b d),
+        (((b * (N / d) : ℕ) : ZMod N)).val = b * (N / d) := fun b hb => by
+      rw [ZMod.val_natCast, Nat.mod_eq_of_lt (hlt b hb)]
+    refine Finset.prod_bij
+      (fun b _ => (((b * (N / d) : ℕ) : ZMod N)))
+      (fun b hb => ?_) (fun b₁ hb₁ b₂ hb₂ h => ?_) (fun x hx => ?_) (fun b hb => ?_)
+    · -- lands in the order-`d` fiber
+      refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
+      show N / Nat.gcd ((((b * (N / d) : ℕ) : ZMod N)).val) N = d
+      have hbc := (Finset.mem_filter.mp hb).2
+      have hgcd : Nat.gcd (b * (N / d)) N = N / d := by
+        have h1 : Nat.gcd (b * (N / d)) (d * (N / d)) = N / d := by
+          rw [Nat.gcd_mul_right, Nat.coprime_iff_gcd_eq_one.mp hbc, one_mul]
+        rwa [hmul] at h1
+      rw [hval b hb, hgcd, Nat.div_div_self hdvd hN.ne']
+    · -- injective
+      have hv := congrArg ZMod.val h
+      rw [hval b₁ hb₁, hval b₂ hb₂] at hv
+      exact Nat.eq_of_mul_eq_mul_right hNd0 hv
+    · -- surjective onto the fiber
+      have hx' : N / Nat.gcd x.val N = d := (Finset.mem_filter.mp hx).2
+      have hg_dvd : Nat.gcd x.val N ∣ N := Nat.gcd_dvd_right _ _
+      have hg : Nat.gcd x.val N = N / d := by
+        rw [← hx', Nat.div_div_self hg_dvd hN.ne']
+      have hb_lt : x.val / Nat.gcd x.val N < d := by
+        conv_rhs => rw [← hx']
+        exact Nat.div_lt_div_of_lt_of_dvd hg_dvd (ZMod.val_lt x)
+      have hcop : Nat.Coprime (x.val / Nat.gcd x.val N) d := by
+        have := Nat.coprime_div_gcd_div_gcd (Nat.gcd_pos_of_pos_right x.val hN)
+        rwa [hx'] at this
+      refine ⟨x.val / Nat.gcd x.val N, Finset.mem_filter.mpr
+        ⟨Finset.mem_range.mpr hb_lt, hcop⟩, ?_⟩
+      rw [← hg, Nat.div_mul_cancel (Nat.gcd_dvd_left x.val N)]
+      exact ZMod.natCast_rightInverse x
+    · -- term match
+      simp only [hK]
+      refine congrArg (fun q : E.Point (𝟙 S) => Scheme.Hom.ker (q : S ⟶ E.E)) ?_
+      rw [hval b hb]
+  rw [hLHS, hRHS, Finset.prod_fiberwise_of_maps_to (fun x _ => hord_mem x) K]
 
 end EllipticCurve
 

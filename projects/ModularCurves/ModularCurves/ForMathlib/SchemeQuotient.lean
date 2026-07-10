@@ -85,6 +85,53 @@ theorem IsStableOpen.le_preimage {σ : SchemeAction G X} {U : X.Opens}
     (hU : σ.IsStableOpen U) (g : G) : U ≤ (σ.hom g) ⁻¹ᵁ U :=
   (hU g).ge
 
+/-- Transport an action along an isomorphism `e : Y ≅ Z` by conjugation. Used to move the induced
+action on a Weierstrass chart (`pullbackChartAction`) onto the projective model `projModel W`
+through the local-model iso. -/
+noncomputable def transport {Y Z : Scheme.{u}} (α : SchemeAction G Y) (e : Y ≅ Z) :
+    SchemeAction G Z where
+  hom g := e.inv ≫ α.hom g ≫ e.hom
+  hom_one := by rw [α.hom_one, Category.id_comp, e.inv_hom_id]
+  hom_mul g h := by rw [α.hom_mul]; simp only [Category.assoc, Iso.hom_inv_id_assoc]
+
+@[simp] theorem transport_hom {Y Z : Scheme.{u}} (α : SchemeAction G Y) (e : Y ≅ Z) (g : G) :
+    (α.transport e).hom g = e.inv ≫ α.hom g ≫ e.hom := rfl
+
+/-- Restrict an action to a stable open, as an action on the open subscheme `U.toScheme`;
+`hom g` is `(σ.hom g)` restricted via `resLE`. -/
+noncomputable def restrict {U : X.Opens} (hU : σ.IsStableOpen U) : SchemeAction G U.toScheme where
+  hom g := (σ.hom g).resLE U U (hU.le_preimage g)
+  hom_one := by
+    rw [← cancel_mono U.ι, Scheme.Hom.resLE_comp_ι, σ.hom_one, Category.comp_id, Category.id_comp]
+  hom_mul g h := by
+    rw [← cancel_mono U.ι, Category.assoc, Scheme.Hom.resLE_comp_ι, Scheme.Hom.resLE_comp_ι,
+      ← Category.assoc, Scheme.Hom.resLE_comp_ι, Category.assoc, σ.hom_mul]
+
+@[simp] theorem restrict_hom {U : X.Opens} (hU : σ.IsStableOpen U) (g : G) :
+    (σ.restrict hU).hom g = (σ.hom g).resLE U U (hU.le_preimage g) := rfl
+
+/-- The action induced on the base-open chart `pullback π U.ι` of a curve `π : E ⟶ X`, from a
+`π`-equivariant `G`-action (`σE` on `E` covering `σ` on `X`), via `pullback.map`. This is the raw
+action whose transport onto `projModel W` (`transport` through the local-model iso) feeds the
+`VariableChange` cocycle (`isVCocycle_of_curveActionFamily`). -/
+noncomputable def pullbackChartAction {E : Scheme.{u}} (σE : SchemeAction G E) {π : E ⟶ X}
+    (hπ : ∀ g, σE.hom g ≫ π = π ≫ σ.hom g) {U : X.Opens} (hU : σ.IsStableOpen U) :
+    SchemeAction G (Limits.pullback π U.ι) where
+  hom g := Limits.pullback.map π U.ι π U.ι (σE.hom g) ((σ.hom g).resLE U U (hU.le_preimage g))
+    (σ.hom g) (hπ g).symm (Scheme.Hom.resLE_comp_ι ..).symm
+  hom_one := by
+    apply Limits.pullback.hom_ext
+    · rw [Limits.pullback.lift_fst, σE.hom_one, Category.comp_id, Category.id_comp]
+    · rw [Limits.pullback.lift_snd, Category.id_comp, ← cancel_mono U.ι, Category.assoc,
+        Scheme.Hom.resLE_comp_ι, σ.hom_one, Category.comp_id]
+  hom_mul g h := by
+    apply Limits.pullback.hom_ext
+    · rw [Limits.pullback.lift_fst, Category.assoc, Limits.pullback.lift_fst, ← Category.assoc,
+        Limits.pullback.lift_fst, Category.assoc, σE.hom_mul]
+    · rw [Limits.pullback.lift_snd, Category.assoc, Limits.pullback.lift_snd, ← Category.assoc,
+        Limits.pullback.lift_snd, ← cancel_mono U.ι]
+      simp only [Category.assoc, Scheme.Hom.resLE_comp_ι, Scheme.Hom.resLE_comp_ι_assoc, σ.hom_mul]
+
 /-- The induced action on the sections over a `G`-stable open, through
 `Scheme.Hom.appLE` (no `eqToHom` transport). Over a stable *affine* open this is
 the bridge back to the affine quotient theory. Not an instance (it depends on the

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.IsIso
+import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
 import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
@@ -105,5 +106,25 @@ theorem isPullback_of_iSup_eq_top {A B C D : Scheme.{u}} {f : A ⟶ B} {g : A �
       infer_instance
     exact hloc
   exact IsPullback.of_iso_pullback hsq (asIso u) hu₁ hu₂
+
+end AlgebraicGeometry
+
+namespace AlgebraicGeometry
+
+open MorphismProperty in
+/-- **Isomorphisms descend along an fppf base change** (stacks 02L4, applied): if in a cartesian
+square the morphism `f` opposite `g` is surjective + flat + quasi-compact and the base-changed
+morphism `fst` is an isomorphism, then `g` is an isomorphism. This is the workhorse of the
+`[a5-P-fppf]` comparison: an iso after pulling back along the (finite étale, hence fppf) quotient
+cover is an iso downstairs. -/
+theorem isIso_of_isPullback_of_fppf {A X Y Z : Scheme.{u}} {fst : A ⟶ X} {snd : A ⟶ Y}
+    {f : X ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g)
+    [Surjective f] [Flat f] [QuasiCompact f] [IsIso fst] : IsIso g := by
+  have hg : (isomorphisms Scheme.{u}) g := by
+    refine MorphismProperty.of_isPullback_of_descendsAlong
+      (P := isomorphisms Scheme.{u}) (Q := @Surjective ⊓ @Flat ⊓ @QuasiCompact) h
+      ⟨⟨inferInstance, inferInstance⟩, inferInstance⟩ ?_
+    exact inferInstanceAs (IsIso fst)
+  exact hg
 
 end AlgebraicGeometry

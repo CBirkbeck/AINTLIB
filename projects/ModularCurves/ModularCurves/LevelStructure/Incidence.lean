@@ -139,6 +139,76 @@ theorem apply_mem_submoduleVanishingIdeal {J : Submodule R M} {g : M} (hg : g �
     (φ : Module.Dual R M) : φ g ∈ submoduleVanishingIdeal R M J :=
   sectionVanishingIdeal_le_submoduleVanishingIdeal hg (Ideal.subset_span ⟨φ, rfl⟩)
 
+/-- **([T-SG3-LFP-1])** Over a finite projective module, the vanishing ideal of a section
+is finitely generated: splitting `M` off a finite free module, it is the ideal of the
+(finitely many) free coordinates of the section. This is the finite-generation half of
+KM's "defined locally by finitely many equations". -/
+theorem sectionVanishingIdeal_fg [Module.Finite R M] [Module.Projective R M] (σ : M) :
+    (sectionVanishingIdeal R M σ).FG := by
+  classical
+  obtain ⟨n, p, hp⟩ := Module.Finite.exists_fin' R M
+  obtain ⟨s, hs⟩ := Module.projective_lifting_property p LinearMap.id hp
+  refine ⟨Finset.univ.image fun i : Fin n => s σ i, ?_⟩
+  apply le_antisymm
+  · refine Ideal.span_le.2 ?_
+    intro x hx
+    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hx)
+    exact Ideal.subset_span ⟨(LinearMap.proj i).comp s, rfl⟩
+  · refine Ideal.span_le.2 ?_
+    rintro _ ⟨φ, rfl⟩
+    show φ σ ∈ _
+    have hφ : φ σ = (φ.comp p) (s σ) := by
+      rw [LinearMap.comp_apply, show p (s σ) = σ from congrArg (· σ) hs]
+    have hexp : φ σ = ∑ i : Fin n, s σ i * (φ.comp p) fun j => if i = j then 1 else 0 := by
+      rw [hφ, LinearMap.pi_apply_eq_sum_univ (φ.comp p) (s σ)]
+      simp only [smul_eq_mul]
+    rw [hexp]
+    refine Ideal.sum_mem _ fun i _ => ?_
+    refine Ideal.mul_mem_right _ _ (Ideal.subset_span ?_)
+    exact Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_univ i))
+
+/-- **([T-SG3-LFP-2])** Over a finite projective module, the vanishing ideal of a
+finitely generated submodule is finitely generated: it is the (finite) supremum of the
+vanishing ideals of the generators. -/
+theorem submoduleVanishingIdeal_fg [Module.Finite R M] [Module.Projective R M]
+    {J : Submodule R M} (hJ : J.FG) : (submoduleVanishingIdeal R M J).FG := by
+  classical
+  obtain ⟨tset, htJ⟩ := hJ
+  have hsup : submoduleVanishingIdeal R M J =
+      tset.sup fun g => sectionVanishingIdeal R M g := by
+    have key : ∀ x ∈ Submodule.span R (tset : Set M), ∀ φ : Module.Dual R M,
+        φ x ∈ tset.sup fun g => sectionVanishingIdeal R M g := by
+      intro x hx
+      induction hx using Submodule.span_induction with
+      | mem y hy =>
+          exact fun φ => (Finset.le_sup (f := fun g => sectionVanishingIdeal R M g) hy)
+            (Ideal.subset_span ⟨φ, rfl⟩)
+      | zero => intro φ; simpa using Submodule.zero_mem _
+      | add y z _ _ hy hz =>
+          intro φ
+          rw [map_add]
+          exact Ideal.add_mem _ (hy φ) (hz φ)
+      | smul r y _ hy =>
+          intro φ
+          rw [map_smul, smul_eq_mul]
+          exact Ideal.mul_mem_left _ _ (hy φ)
+    apply le_antisymm
+    · refine iSup_le fun g => Ideal.span_le.2 ?_
+      rintro _ ⟨φ, rfl⟩
+      exact key g.1 (htJ ▸ g.2) φ
+    · refine Finset.sup_le fun g hg => ?_
+      exact sectionVanishingIdeal_le_submoduleVanishingIdeal
+        (htJ ▸ Submodule.subset_span hg)
+  rw [hsup]
+  clear hsup htJ
+  induction tset using Finset.induction_on with
+  | empty =>
+      rw [Finset.sup_empty]
+      exact Submodule.fg_bot
+  | insert a tset ha ih =>
+      rw [Finset.sup_insert]
+      exact Submodule.FG.sup (sectionVanishingIdeal_fg a) ih
+
 open IsLocalizedModule in
 /-- **(T-D14c-0, gluing keystone)** The vanishing ideal of a submodule commutes with
 localization when the ambient module is finitely presented (so that linear functionals
@@ -217,6 +287,38 @@ theorem localized'_restrictScalars_eq_restrictScalars_map
 
 end SubmoduleVanishing
 
+/-- **([T-SG3-LFP-3], cover form)** For the inclusion of a closed subscheme to be locally
+of finite presentation it suffices that its ideal sheaf is finitely generated on the
+members of a single affine cover: lfp is Zariski-local on the target, and over each
+affine member the inclusion is the `Spec` of a quotient by a finitely generated ideal —
+the converse packaging of KM's "defined locally by finitely many equations". -/
+theorem lfp_subschemeι_of_fg_cover {S : Scheme.{u}} {Z : S.IdealSheafData}
+    {ι : Type u} (U : ι → S.affineOpens) (hU : ⨆ i, (U i).1 = ⊤)
+    (h : ∀ i, (Z.ideal (U i)).FG) :
+    LocallyOfFinitePresentation Z.subschemeι := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun i => (U i).1) hU fun i => ?_
+  haveI : IsAffine (↑(U i).1 : Scheme.{u}) := (U i).2
+  haveI : IsAffine (↑(Z.subschemeι ⁻¹ᵁ (U i).1) : Scheme.{u}) :=
+    (U i).2.preimage Z.subschemeι
+  rw [HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation),
+    ← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop, Scheme.Hom.resLE_app_top,
+    CommRingCat.hom_comp, RingHom.finitePresentation_respectsIso.cancel_left_isIso,
+    CommRingCat.hom_comp, RingHom.finitePresentation_respectsIso.cancel_right_isIso,
+    ← Scheme.Hom.app_eq_appLE]
+  refine RingHom.FinitePresentation.of_surjective _
+    (Z.subschemeι.app_surjective _ (U i).2) ?_
+  have hker := Scheme.Hom.ker_apply Z.subschemeι (U i)
+  rw [Scheme.IdealSheafData.ker_subschemeι] at hker
+  rw [← hker]
+  exact h i
+
+/-- **([T-SG3-LFP-3])** A closed subscheme whose ideal sheaf is finitely generated on
+every affine is locally of finite presentation over the ambient scheme. -/
+theorem lfp_subschemeι_of_fg {S : Scheme.{u}} {Z : S.IdealSheafData}
+    (h : ∀ U : S.affineOpens, (Z.ideal U).FG) :
+    LocallyOfFinitePresentation Z.subschemeι :=
+  lfp_subschemeι_of_fg_cover (fun U => U) (iSup_affineOpens_eq_top S) h
+
 section VanishingLocus
 
 variable {W S : Scheme.{u}} (p : W ⟶ S) [IsFinite p] [Flat p]
@@ -230,6 +332,7 @@ def affinePreimage (U : S.affineOpens) : W.affineOpens :=
 /-- **(T-D14c-1)** The vanishing locus on `S` of an ideal sheaf `E` on a scheme `W`
 finite locally free over `S`: over an affine `U ⊆ S` it is the vanishing ideal of the
 sections of `E` inside the finite locally free `Γ(S, U)`-module `Γ(W, p⁻¹U)`. This is
+
 KM 1.3.4's locus of "simultaneous vanishing of the coordinates", in the basis-free
 form; its universal property is `vanishingLocus_le_ker_iff` (T-D14c-2). -/
 noncomputable def vanishingLocus : S.IdealSheafData where
@@ -808,6 +911,37 @@ theorem vanishingLocus_le_ker_iff {T : Scheme.{u}} (t : T ⟶ S) :
   exact ⟨fun h => vanishingLocusAux_le_ker_snd p E t h,
     fun h => vanishingLocusAux_le_tker p E t h⟩
 
+/-- **([T-SG3-LFP-4a])** The vanishing locus of an affine-locally finitely generated
+ideal sheaf on the source is itself affine-locally finitely generated — KM's "defined
+locally by finitely many equations" — hence locally of finite presentation over `S`. -/
+theorem vanishingLocus_subschemeι_lfp (hE : ∀ U : W.affineOpens, (E.ideal U).FG) :
+    LocallyOfFinitePresentation (vanishingLocus p E).subschemeι := by
+  refine lfp_subschemeι_of_fg fun U => ?_
+  show (letI := ((p.app U.1).hom).toAlgebra
+    submoduleVanishingIdeal Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
+      ((E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars Γ(S, U.1))).FG
+  letI := ((p.app U.1).hom).toAlgebra
+  haveI hfin : Module.Finite Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := p.finite_app U.1 U.2
+  haveI hfpR : RingHom.FinitePresentation (p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation p ‹_› U (affinePreimage p U) le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfpR
+  haveI : Algebra.FinitePresentation Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := hfpR
+  haveI hfpM : Module.FinitePresentation Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) :=
+    Module.FinitePresentation.of_finite_of_finitePresentation _ _
+  haveI hflatR : RingHom.Flat (p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @Flat p ‹_› U (affinePreimage p U) le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hflatR
+  haveI : Module.Flat Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := hflatR
+  haveI : Module.Projective Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) :=
+    Module.Flat.projective_of_finitePresentation
+  refine submoduleVanishingIdeal_fg ?_
+  haveI : Module.Finite Γ(W, p ⁻¹ᵁ U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
+    Module.Finite.iff_fg.mpr (hE _)
+  haveI : Module.Finite Γ(S, U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
+    Module.Finite.trans Γ(W, p ⁻¹ᵁ U.1) _
+  exact Module.Finite.iff_fg.mp
+    (inferInstanceAs (Module.Finite Γ(S, U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)))
+
 end VanishingLocus
 
 section Incidence
@@ -982,10 +1116,10 @@ All statements below are spelled at the raw `pullback E.π t` types, never at
 spelling by definitional `exact`-casts. -/
 
 /-- The value of a point of the base-changed curve, typed at the raw pullback. -/
-private def subgroupLocusAux_val {T T' : Scheme.{u}} (E : EllipticCurve S) (t : T ⟶ S)
+def subgroupLocusAux_val {T T' : Scheme.{u}} (E : EllipticCurve S) (t : T ⟶ S)
     {g : T' ⟶ T} (P : (E.baseChange t).Point g) : T' ⟶ pullback E.π t := P.1
 
-private theorem subgroupLocusAux_val_snd {T T' : Scheme.{u}} (E : EllipticCurve S)
+theorem subgroupLocusAux_val_snd {T T' : Scheme.{u}} (E : EllipticCurve S)
     (t : T ⟶ S) {g : T' ⟶ T} (P : (E.baseChange t).Point g) :
     subgroupLocusAux_val E t P ≫ pullback.snd E.π t = g := P.2
 
@@ -1580,7 +1714,7 @@ private theorem exactOrderLocusAux_ker_eq_of_comp {X Y₁ Y₂ : Scheme.{u}} (f�
 `z, w` over `T'` with matched first legs, the pulled-back kernels agree. This is the
 value-level engine identifying the base-changed universal order/level divisors with
 their `t`-level counterparts (KM 1.6.2–1.6.5 bookkeeping). -/
-private theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π : C ⟶ S'}
+theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (W : B ⟶ pullback π b) (V : T ⟶ pullback π t)
     (hWc : IsClosedImmersion W) (hVc : IsClosedImmersion V)
     (hWsnd : W ≫ pullback.snd π b = 𝟙 B) (hVsnd : V ≫ pullback.snd π t = 𝟙 T)
@@ -1627,7 +1761,7 @@ private theorem exactOrderLocusAux_ker_comap_eq {C S' B T T' : Scheme.{u}} {π :
     (pullback.lift_fst _ _ _) (pullback.lift_fst _ _ _)
 
 /-- Sections of the base-changed curve are closed immersions (raw spelling). -/
-private theorem exactOrderLocusAux_val_isClosedImmersion {T : Scheme.{u}}
+theorem exactOrderLocusAux_val_isClosedImmersion {T : Scheme.{u}}
     (E : EllipticCurve S) (t : T ⟶ S) (R : (E.baseChange t).Point (𝟙 T)) :
     IsClosedImmersion (subgroupLocusAux_val E t R) := by
   haveI : IsSeparated (pullback.snd E.π t) :=
@@ -1668,7 +1802,7 @@ private theorem exactOrderLocusAux_val_smul_fst {T T' : Scheme.{u}} (E : Ellipti
         (Category.assoc _ _ _).symm
 
 /-- The first leg of a scalar multiple of `asSection`: `(m • asSection P) ≫ fst = P ≫ [m]`. -/
-private theorem exactOrderLocusAux_val_smul_asSection_fst {T : Scheme.{u}}
+theorem exactOrderLocusAux_val_smul_asSection_fst {T : Scheme.{u}}
     (E : EllipticCurve S) (t : T ⟶ S) (m : ℤ) (P : E.Point t) :
     subgroupLocusAux_val E t (m • EllipticCurve.Point.asSection E t P) ≫
       pullback.fst E.π t = P.1 ≫ E.mulByHom m := by
@@ -2347,7 +2481,7 @@ private noncomputable def fullLevelLocusAux_u₂ (E : EllipticCurve S) (N : ℕ)
     exact pullback.condition.symm⟩
 
 /-- The generic `sectionsDivisor`-ideal unfolding. -/
-private theorem fullLevelLocusAux_sectionsDivisor_ideal {Y : Scheme.{u}}
+theorem fullLevelLocusAux_sectionsDivisor_ideal {Y : Scheme.{u}}
     (F : EllipticCurve Y) {n : ℕ} (P : Fin n → F.Point (𝟙 Y)) :
     (RelEffCartierDiv.sectionsDivisor F.π P).ideal =
       ∏ i : Fin n, Scheme.Hom.ker (P i).1 := by
@@ -2428,18 +2562,18 @@ private theorem fullLevelLocusAux_match {T : Scheme.{u}} (E : EllipticCurve S) (
     hcompP hcompQ).symm
 
 /-- The comparison morphism `E ×_S T ⟶ E ×_S B` over a factorization `c ≫ b = t`. -/
-private noncomputable def fullLevelLocusAux_theta {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+noncomputable def fullLevelLocusAux_theta {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     pullback π t ⟶ pullback π b :=
   pullback.lift (pullback.fst π t) (pullback.snd π t ≫ c)
     (by rw [pullback.condition, ← hct, Category.assoc])
 
-private theorem fullLevelLocusAux_theta_fst {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_theta_fst {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     fullLevelLocusAux_theta hct ≫ pullback.fst π b = pullback.fst π t :=
   pullback.lift_fst _ _ _
 
-private theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t) :
     fullLevelLocusAux_theta hct ≫ pullback.snd π b = pullback.snd π t ≫ c :=
   pullback.lift_snd _ _ _
@@ -2447,7 +2581,7 @@ private theorem fullLevelLocusAux_theta_snd {C S' B T : Scheme.{u}} {π : C ⟶ 
 /-- **The comap-transport along the pasting comparison**: equality of preimage ideals
 along the base-change projection of `C ×_{S'} B` over `c` is equality of preimages
 along `θ` on `C ×_{S'} T`. -/
-private theorem fullLevelLocusAux_comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
+theorem fullLevelLocusAux_comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
     {b : B ⟶ S'} {c : T ⟶ B} {t : T ⟶ S'} (hct : c ≫ b = t)
     (A B' : (pullback π b).IdealSheafData) :
     A.comap (pullback.fst (pullback.snd π b) c) =

@@ -142,9 +142,28 @@ Ranking summary (verified candidates, strongest first):
   project-specific coordinate-ring transport, not upstream-shaped. **OWNER-INPUT**: P3b3 to name any
   intended upstream piece; none identified by triage.
 
+## 8. Confirmed mathlib GAPS surfaced by the T-W7.8 route-a survey (future candidates, NOT staged)
+
+*Added 2026-07-09 (beastmode-A, route-a ground-truth survey — two independent agents, file:line
+verified against the pinned mathlib). Not code yet; recorded so future work lands upstream-shaped.*
+
+- **Absolute noetherian approximation (Stacks `01ZA`)** — "every qcqs scheme is a cofiltered limit
+  of finite-type-ℤ schemes with affine transitions". Confirmed ABSENT: `AffineTransitionLimit.lean`
+  cites 01YT in prose but claims only tags 01Z2–01Z6 + 01ZC (all *given-a-limit* lemmas); no
+  existence theorem. High-value, self-contained; the affine case (`Spec R = lim Spec Rⱼ`, `Rⱼ` the
+  finite-type-ℤ subalgebras) is a bounded first PR (foundations exist: `Subalgebra.coe_iSup_of_directed`,
+  `Algebra.FiniteType.isNoetherianRing`, `Ring/FinitePresentation.lean` colimit API, `Scheme.Spec`
+  preserves limits).
+- **Property-descent along cofiltered limits (Stacks `081D`/`081E`/`01ZP`/`01ZQ`/`04AI`)** — descending
+  {isomorphism, closed immersion, separated, flat, proper, étale, …} from the limit to a finite stage.
+  Confirmed ABSENT (`grep` of `Morphisms/` for `of_isLimit` forms: empty). This is route-a's L4c and
+  the natural big upstream contribution if route-a is ever completed (`RigiditySpreadingOut.lean`
+  skeleton, commit 590984cce, holds the consumer + decomposition).
+
 ---
 
 ### Next actions (owner)
 - Stage PRs #1–#4 (READY, verified) in priority order; #1 (`map_zpow'`) is the cleanest first.
 - Request fable-P4 (#5) and P3b3 (#7) owner-input; commission a D2 verification sub-pass (#6).
+- §8 gaps: no action now — they become PR-shaped only if route-a resumes (T-W7a fallback).
 - This triage is interruptible/droppable; 0h (on 0c-ii landing) preempts it.

@@ -786,6 +786,31 @@ noncomputable def chartHomEquiv (W : WeierstrassCurve R) (i : Fin 3)
         algebraMap R K } :=
   (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm
 
+/-- Value-characterisation of `chartHomEquiv`: a chart-factoring point that IS `Spec.map φ`
+followed by the chart immersion reads out as `φ`. Public wrapper around the private
+`chartPointOfHom` (the equiv's inverse). -/
+lemma chartHomEquiv_eq_of_specMap (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K]
+    (g : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 })
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K })
+    (hfac : Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos = g.1.1) :
+    chartHomEquiv W i K g = φ := by
+  have hpt : chartPointOfHom W i φ = g := Subtype.ext (Subtype.ext hfac)
+  rw [chartHomEquiv, ← hpt]
+  exact (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm_apply_apply φ
+
+
 /-- The chart coordinate `Xⱼ/Xᵢ` is mathlib's localization element for the pair
 `(Xᵢ, Xⱼ)`. -/
 lemma chartCoordEquiv_mk_X (W : WeierstrassCurve R) (i : Fin 3)
@@ -1206,9 +1231,34 @@ lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Alg
   rw [projModelZero_not_preimage_zChart] at hpre
   simpa using hpre
 
+/-- Membership of the `Z`-chart for a point presented on chart `i`: exactly when the transition
+coordinate `X₂/Xᵢ` has nonzero value. Public wrapper of `chartPointOfHom_factors_iff` at `j = 2`,
+restated against an explicit factoring. -/
+lemma inZChart_iff_of_specMap (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [Field K] [Algebra R K]
+    (φ : { φ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) →+* K //
+      φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))).comp
+        ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K })
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hg : Spec.map (CommRingCat.ofHom φ.1) ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W i) one_pos = g.1) :
+    InZChart W g ↔
+      φ.1 (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W 2)) ≠ 0 := by
+  have hpt : chartPointOfHom W i φ = ⟨g, ⟨Spec.map (CommRingCat.ofHom φ.1), hg⟩⟩ :=
+    Subtype.ext (Subtype.ext hg)
+  have hiff := chartPointOfHom_factors_iff W i 2 φ
+  rw [hpt] at hiff
+  exact hiff
+
 /-- **(T-W7.1b input)** The `Spec K`-point dichotomy, public form: a `K`-point of the model
 that does not factor through the `Z`-chart IS the zero section point (both equal the
 canonical infinity point). -/
+
 lemma specPoint_eq_zero_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K]
     [Algebra R K] (g : SpecPoints (projModel W) (projModelπ W) K)
     (hg : ¬ InZChart W g) :
@@ -1922,6 +1972,34 @@ noncomputable def projModelBaseChangeLift (W : WeierstrassCurve R) :
       Limits.pullback (projModelπ W) (Spec.map (CommRingCat.ofHom f)) :=
   Limits.pullback.lift (projModelBaseChange f W) (projModelπ (W.map f))
     (projModelBaseChange_π f W)
+
+/-- **Functoriality of the projective-model base change.** Base change along a composite factors as
+the two base changes: `projModelBaseChange (F.comp G) W = projModelBaseChange F (W.map G) ≫
+projModelBaseChange G W` (note `(W.map G).map F = W.map (F.comp G)` definitionally). This is
+`Proj.map_comp` applied to the graded base-change homomorphisms, whose composite equals
+`baseChangeGradedHom (F.comp G) W` by `MvPolynomial.map_map`. -/
+theorem projModelBaseChange_comp (F G : R →+* R) (W : WeierstrassCurve R) :
+    projModelBaseChange (F.comp G) W
+      = projModelBaseChange F (W.map G) ≫ projModelBaseChange G W := by
+  have bmk : ∀ (φ : R →+* R) (W' : WeierstrassCurve R) (p : MvPolynomial (Fin 3) R),
+      baseChangeGradedHom φ W' (Ideal.Quotient.mk (projIdeal W').toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (W'.map φ)).toIdeal (MvPolynomial.map φ p) :=
+    fun φ W' p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded φ) (projIdeal W')
+      (projIdeal (W'.map φ)) (projIdeal_le_comap φ W') p
+  have hgraded : baseChangeGradedHom (F.comp G) W
+      = (baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W) := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (F.comp G) W (Ideal.Quotient.mk _ a)
+      = baseChangeGradedHom F (W.map G) (baseChangeGradedHom G W (Ideal.Quotient.mk _ a))
+    rw [bmk, bmk, bmk]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_map G F a).symm
+  have key := Proj.map_comp (baseChangeGradedHom G W) (baseChangeGradedHom F (W.map G))
+    (baseChangeGradedHom_irrelevant_le G W) (baseChangeGradedHom_irrelevant_le F (W.map G))
+  refine Eq.trans ?_ key
+  show Proj.map (baseChangeGradedHom (F.comp G) W) (baseChangeGradedHom_irrelevant_le (F.comp G) W)
+    = Proj.map ((baseChangeGradedHom F (W.map G)).comp (baseChangeGradedHom G W)) _
+  congr 1
 
 section TensorComparison
 

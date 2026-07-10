@@ -179,4 +179,40 @@ theorem equation_lawTwoTriple_yy [IsDomain R] [IsJacobsonRing R] (hΔ : IsUnit W
     (W.map (algebraMap R (biChartRing W 1 1))).toProjective.Equation (lawTwoTriple W 1 1) :=
   equation_lawTwoTriple_of_isDomain W 1 1 hΔ
 
+/-- **(T-W7.0c·c2 [C2-BEZOUT], the per-chart joint-unit-ideal — the two laws cover)** The six
+coordinates of the two Bosma–Lenstra laws jointly generate the unit ideal of the `(i,j)`
+chart-product ring, over ANY base with `Δ` a unit (no domain/Jacobson needed). Were they in a
+proper ideal they would lie in a maximal `m`; over the residue field `κ(m)` the tautological points
+map to nonzero (coordinate `i`/`j` is `1`) on-curve points, so
+`map_addXYZ_ne_zero_or_map_dblAddXYZ_ne_zero` puts some coordinate `∉ m` — contradiction. Feeds
+`regularityOpen_sup_eq_top_iff` to give `regularityOpen lawOneTriple ⊔ regularityOpen lawTwoTriple =
+⊤`, the chart-local half of `blOpenZ ⊔ blOpenY = ⊤`. This is the "one genuine transcription gap"
+discharged WITHOUT a Bezout certificate — the point-level case split does it. -/
+theorem span_lawOneTriple_union_lawTwoTriple_eq_top (hΔ : IsUnit W.Δ) :
+    Ideal.span (Set.range (lawOneTriple W i j) ∪ Set.range (lawTwoTriple W i j)) = ⊤ := by
+  by_contra hne
+  obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal _ hne
+  letI : Field (biChartRing W i j ⧸ m) := Ideal.Quotient.field m
+  set φ : biChartRing W i j →+* (biChartRing W i j ⧸ m) := Ideal.Quotient.mk m with hφ
+  have hΔ' : IsUnit (W.map (algebraMap R (biChartRing W i j))).toProjective.Δ := by
+    rw [map_Δ]; exact hΔ.map _
+  have hP0 : φ ∘ biChartPointFst W i j ≠ 0 := by
+    intro hz
+    have h1 : φ (biChartPointFst W i j i) = 0 := congrFun hz i
+    rw [show biChartPointFst W i j i = 1 from dif_pos rfl, map_one] at h1
+    exact one_ne_zero h1
+  have hQ0 : φ ∘ biChartPointSnd W i j ≠ 0 := by
+    intro hz
+    have h1 : φ (biChartPointSnd W i j j) = 0 := congrFun hz j
+    rw [show biChartPointSnd W i j j = 1 from dif_pos rfl, map_one] at h1
+    exact one_ne_zero h1
+  have hzero : ∀ t : Fin 3 → biChartRing W i j,
+      Set.range t ⊆ Set.range (lawOneTriple W i j) ∪ Set.range (lawTwoTriple W i j) →
+      φ ∘ t = 0 := fun t hsub => funext fun k =>
+    (Ideal.Quotient.eq_zero_iff_mem).mpr (hle (Ideal.subset_span (hsub ⟨k, rfl⟩)))
+  rcases map_addXYZ_ne_zero_or_map_dblAddXYZ_ne_zero (Field.toIsField _) φ hΔ'
+    (equation_biChartPointFst W i j) (equation_biChartPointSnd W i j) hP0 hQ0 with h | h
+  · exact h (hzero _ Set.subset_union_left)
+  · exact h (hzero _ Set.subset_union_right)
+
 end WeierstrassCurve.Projective

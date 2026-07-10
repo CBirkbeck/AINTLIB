@@ -157,3 +157,55 @@ lemma glueMorphisms_hf_of_agree {X : Scheme} {J : Type*} (U : J → X.Opens) {Y 
   rw [← cancel_epi hP.isoPullback.hom, IsPullback.isoPullback_hom_fst_assoc,
     IsPullback.isoPullback_hom_snd_assoc]
   exact h x y
+
+/-- **(variable-scheme bridge)** For an open immersion `f`, restricting `(f.isoImage (⨆ U)).inv ≫ g`
+to the `k`-th image piece gives `(f.isoImage (U k)).inv` composed with the `k`-th cover inclusion.
+
+Stated over variable schemes on purpose: instantiated at a concrete `Proj` chart-product, the
+`isoImage` naturality rewrites (`isoImage_hom_homOfLE`) drive `whnf` into the pullback carrier and
+blow the heartbeat budget. As a general lemma it is applied, never unfolded (v10.24). -/
+lemma homOfLE_isoImage_inv_iSup {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f] {J : Type*}
+    (U : J → X.Opens) (k : J) {Z : Scheme} (g : (⨆ i, U i).toScheme ⟶ Z) :
+    Y.homOfLE (f.image_mono (le_iSup U k)) ≫ (f.isoImage (⨆ i, U i)).inv ≫ g =
+      (f.isoImage (U k)).inv ≫ (Scheme.Opens.iSupOpenCover U).f k ≫ g := by
+  rw [← cancel_epi (f.isoImage (U k)).hom, Iso.hom_inv_id_assoc, ← Category.assoc,
+    Scheme.Hom.isoImage_hom_homOfLE f (U k) (⨆ i, U i) (le_iSup U k), Category.assoc,
+    Iso.hom_inv_id_assoc]
+  rfl
+
+/-- **(variable-scheme σ-immersion identity)** For an open immersion `p : X ⟶ Z`, an iso `e : X ≅ Y`
+and an open `U : Y.Opens`, the chain `isoImage.inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p` collapses to
+the image inclusion `(p ''ᵁ (e.hom ⁻¹ᵁ U)).ι`. Stated over variable schemes so instantiation at a
+concrete `Proj` chart-product never drives `whnf` into the pullback carrier (v10.24). -/
+lemma isoImage_inv_morphismRestrict_ι {X Y Z : Scheme} (p : X ⟶ Z) [IsOpenImmersion p]
+    (e : X ≅ Y) (U : Y.Opens) :
+    (p.isoImage (e.hom ⁻¹ᵁ U)).inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p =
+      (p ''ᵁ (e.hom ⁻¹ᵁ U)).ι := by
+  rw [morphismRestrict_ι_assoc, ← Category.assoc _ e.inv, Iso.hom_inv_id, Category.id_comp,
+    Scheme.Hom.isoImage_inv_ι]
+
+/-- Two `Spec.map`-factorizations that agree on the composite base map agree as morphisms.
+
+The barrier around the composite (v10.24): stated over **variable** rings `A B D E`, the only unfold
+the elaborator sees is the trivial `Spec.map (a ≫ b) = Spec.map b ≫ Spec.map a`. Instantiated at a
+concrete localization tower (`E` a triple `Localization.Away`), the conclusion still matches by
+structure — `Spec.map ?b ≫ Spec.map ?a ≫ ?rest` — so `isDefEq` never unfolds `E`. Combining the two
+`Spec.map`s *at the concrete tower* instead (`rw [← Spec.map_comp_assoc]` on the goal) forces a defeq
+through `E` and blows the heartbeat budget; routing through this lemma keeps it under 5k. -/
+lemma spec_map_comp_congr {A B D E : CommRingCat} {X : Scheme}
+    (a : A ⟶ B) (b : B ⟶ E) (a' : A ⟶ D) (b' : D ⟶ E)
+    (rest : Spec A ⟶ X) (h : a ≫ b = a' ≫ b') :
+    Spec.map b ≫ Spec.map a ≫ rest = Spec.map b' ≫ Spec.map a' ≫ rest := by
+  rw [← Spec.map_comp_assoc, ← Spec.map_comp_assoc, h]
+
+/-- An open immersion's image functor preserves binary intersections. (`f ''ᵁ` is injective with
+`f ⁻¹ᵁ` as a partial inverse, so it respects `⊓`.) Upstream candidate. -/
+lemma Scheme.Hom.image_inf {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f] (U V : X.Opens) :
+    f ''ᵁ (U ⊓ V) = f ''ᵁ U ⊓ f ''ᵁ V := by
+  calc f ''ᵁ (U ⊓ V)
+      = f ''ᵁ (f ⁻¹ᵁ (f ''ᵁ U) ⊓ f ⁻¹ᵁ (f ''ᵁ V)) := by
+        rw [Scheme.Hom.preimage_image_eq, Scheme.Hom.preimage_image_eq]
+    _ = f ''ᵁ (f ⁻¹ᵁ (f ''ᵁ U ⊓ f ''ᵁ V)) := by rw [Scheme.Hom.preimage_inf]
+    _ = f.opensRange ⊓ (f ''ᵁ U ⊓ f ''ᵁ V) := Scheme.Hom.image_preimage_eq_opensRange_inf _ _
+    _ = f ''ᵁ U ⊓ f ''ᵁ V :=
+        inf_eq_right.mpr (le_trans inf_le_left (Scheme.Hom.image_le_opensRange f U))

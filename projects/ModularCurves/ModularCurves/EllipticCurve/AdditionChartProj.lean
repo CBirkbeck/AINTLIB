@@ -49,8 +49,10 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
-variable {S : Type} [CommRing S] [Algebra R S]
+universe u
+
+variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+variable {S : Type u} [CommRing S] [Algebra R S]
 
 /-- The chart morphism of a triple, evaluated at the transition element `X l / X k` of
 `Away.isLocalization_mul`, is the ratio `t l / t k`. This is the value that must be a unit for

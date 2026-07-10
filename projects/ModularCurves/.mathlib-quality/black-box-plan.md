@@ -99,19 +99,47 @@ and no packaged local-flatness criterion — see the corrected note below.)**
 - **Effort:** BOUNDED-to-MODERATE (framework exists; the `ω`-embedding reduction is real
   work). **Depends on** BB-COHBC-lite (existence of relatively-ample `ω` — see below).
 
-### BB-DIFF — `[N]` multiplies the invariant differential by `N`  ·  consumer T-B5y
-- **Statement (Loeffler 3.4.2(2) / KM 2.3.2):** `[N]^* ω = N · ω`; ⟹ `[N]` unramified when
-  `N` invertible.
-- **mathlib:** `Morphisms/FormallyUnramified.lean` exists; scheme-level relative
-  `Ω¹`/Kähler-differentials **sheaf** is thin (ring-level `RingTheory.Kaehler` is solid).
-- **Route:** (a) ring/affine-local: `Ω¹_{E/S}` via `RingTheory.Kaehler`; (b) translation-
-  invariance of `ω` (from the group law: `[m+1] = [m] + id` induction gives `[N]^*ω=Nω`);
-  (c) `N` unit ⟹ iso on cotangent ⟹ `FormallyUnramified`. The gap is the scheme-level
-  invariant-differential sheaf + its group-translation invariance.
-- **Sub-tickets:** T-BB-DIFF-0 (scope mathlib `Ω¹` sheafification state), T-BB-DIFF-1
-  (invariant differential as a trivialising section of `ω_{E/S}`), T-BB-DIFF-2
-  (`[N]^*ω = Nω` by group induction), T-BB-DIFF-3 (unramified from unit-on-cotangent).
-- **Effort:** MODERATE (needs the relative-Ω¹ sheaf API; check mathlib bump status first).
+### BB-DIFF — `[N]` formally unramified when `N` invertible  ·  consumer T-B5y  ·  **owner CHARTER-P3B3**
+- **Statement:** `mulByHom_formallyUnramified` (`Torsion.lean:228`): `NIsInvertible S N → FormallyUnramified (E.mulByHom N)`.
+- **ROUTE SUPERSEDED (2026-07-08):** the invariant-differential route (`[N]^*ω = Nω` via a scheme-level
+  relative-`Ω¹` sheaf + group-translation invariance) is a **mapped DEAD END** — mathlib has no scheme
+  `Ω¹` sheaf and this project won't build it. Replaced by the **`E[N]`-torsor route** (KM §2.3,
+  non-circular, HasseWeil-anchored): decomposition in `decomposition-km2.3-b5d.md`. MASTER =
+  `mulByHom_formallyUnramified'` = L-A ∘ L-BC (assembled, `EllipticCurve/MulByHomUnramified.lean`).
+- **STATUS:**
+  - **L-A DONE** — `formallyUnramified_mulByHom_of_torsionπ` (`FormallyUnramified (torsionπ N) →
+    FormallyUnramified (mulByHom N)`, via `E[N]`-torsor / `of_hom_ext`→`hom_ext`) **PROVED axiom-clean,
+    PR #5223** (branch `dev/modular-curves-b5da`).
+  - **L-BC TODO** = `formallyUnramified_torsionπ` (`torsionπ` unramified, non-circular) = **T-DISC ∘ L-B**:
+    - **T-DISC BANKING (2026-07-08)** — `AlgebraicGeometry.FormallyUnramified.of_finite_fiberToSpecResidueField`
+      (finite + all residue-field fibres unramified ⟹ unramified) in NEW
+      `ForMathlib/FormallyUnramifiedFibre.lean`. Algebra core
+      `Algebra.FormallyUnramified.of_forall_residueField_fiber` **PROVED axiom-clean** (no flatness:
+      `tensorKaehlerEquivBase` + `mem_support_iff_nontrivial_residueField_tensorProduct` Nakayama);
+      scheme wrapper mirrors `SmoothFiber.lean` (in progress). **DUAL-USE**: also discharges the
+      "finite-étale-iff-unramified-fibrewise" input of **T-D6c** ((3)⟺(4)) and **T-D7-bridge**
+      (`orderDivisor_etale_iff_geometric`).
+    - **L-B = T-B6′ = the WALL (stream-B's box).** Geometric fibres `E[N]_k̄` étale ⟸ a
+      **group-compatible scheme-fibre ↔ `WeierstrassCurve k̄` comparison** `E.baseChange t ≅ projModel W_k̄`
+      carrying scheme-`[N]`→Weierstrass-`[N]`. **Does not exist anywhere** (no `E.baseChange t ≅ projModel W`;
+      the group-compat leg is transitively gated on the *sorried* `abelEnrichment_exists`, GroupLaw.lean —
+      geometry→group-law extraction). This is the registered **T-B6 fibre-comparison box (stream-B / T-D8-bridge
+      "glued to T-B6")** — several-hundred-LOC, NOT a bounded charter leaf; owned by stream-B, not CHARTER-P3B3.
+      HasseWeil supplies the field-level content (`mulByInt_isSeparable`, `torsion_genN_linearEquiv`,
+      `mulByInt_degree` — all `Point`/function-field level, **nothing scheme-level**), so T-B6′ is purely the
+      transport bridge.
+- **UPSTREAM CANDIDATE (mathlib-gap filler, flag for a mathlib PR):**
+  `AlgebraicGeometry.isNilpotent_ker_SpecMap (φ : R ⟶ S) (RingHom.ker φ.hom ^ 2 = ⊥) :
+  IsNilpotent (Spec.map φ).ker` (`ForMathlib/NilpotentKerSpecMap.lean`) — the elim-side companion of
+  `FormallyUnramified.of_hom_ext` (which supplies ring-level `ker φ ^ 2 = ⊥`) for
+  `FormallyUnramified.hom_ext` (which asks for `IsNilpotent i.ker` on the scheme-theoretic
+  `Scheme.Hom.ker`). mathlib has no such lemma; genuinely general.
+- **Effort / verdict (2026-07-08, CHARTER-P3B3 decomposition):** L-A done; **T-DISC banking** (dual-use);
+  **L-B = T-B6′ is a WALL** — not a bounded leaf but stream-B's group-compatible fibre-comparison box, rooted
+  in the sorried `abelEnrichment_exists`. **Milestone 1 (BB-DIFF discharged) is BLOCKED on stream-B's T-B6.**
+  CHARTER-P3B3's max non-blocked contribution to the cascade = **L-A (PR #5223) + T-DISC (banking)**; L-BC then
+  closes as `L-A ∘ T-DISC ∘ (stream-B's T-B6)` the moment T-B6 lands. The whole charter étale cascade
+  (items 2–4: T-D6b flip, `torsionFixed_of_fixesLevel`, T-D8-bridge) likewise consumes the T-B6 landing.
 
 ---
 

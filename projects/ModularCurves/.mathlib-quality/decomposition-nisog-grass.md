@@ -96,6 +96,109 @@ interface is proven; v10.24 opaque-interface decision recorded)**:
   IsChartAt holds at p}` is open — surjectivity locus of a map onto a finite projective
   module (cokernel-vanishing openness, Nakayama).
 
+**Wave 2.5 — presentation normalization (pinned at the wave-3 boundary, 2026-07-08T22:30Z;
+kills the `A ⊗[R] (Fin n → R)` vs `(Fin n → A)` friction for the entire glue phase)**:
+- **[GR-T1]** `Grassmannian.congr (e : M ≃ₗ[R] M') : G(k, M; R) ≃ G(k, M'; R)` — transport
+  of Grassmannian elements along a module equivalence (submodule `Submodule.map`, quotient
+  instances via the induced quotient equivalence), with `IsChartAt`-compatibility
+  (`isChartAt_congr : IsChartAt x N ↔ IsChartAt (e ∘ x) (congr e N)`). Upstream-shaped
+  (mathlib's Grassmannian file has no congr).
+- **[GR-T2]** the pi-normalization at `e := piScalarRight`: chart-compatible passage
+  `G(k, A ⊗[R] (Fin n → R); A) ≃ G(k, (Fin n → A); A)` matching the wave-1 matrix leaf's
+  presentation; the covering theorem [GR-C] transports along it.
+
+**Wave-3 packaging decision (2026-07-08T22:35Z, binding for the glue phase)**: all wave-3
+work happens in the NORMALIZED presentation `G(k, (Fin n → A); A)` — the functor map is
+`normMap (f : A →ₐ[R] B) := congr (piScalarRight …) ∘ map f ∘ congr (piScalarRight …).symm`
+(equivalently: transport mathlib's `Grassmannian.map` once along [GR-T2]); charts are the
+coordinate tuples `fun i => Pi.single (ι i) 1`, matrices are
+`chartMatrix : {j // j ∉ Set.range ι} → Fin k → A` via wave-1's
+`chartEquivRetraction ≫ retractionEquivMatrix`. Tensors never appear downstream of this
+seam. Leaves: **[GR-B2n]** = `normMap` + `isChartAt_normMap` + `chartMatrix` +
+`chartMatrix_normMap` (naturality: entrywise `f`).
+
+**[GR-E] transition design (pinned 2026-07-09T08:30Z, against the proven wave-1/2.5
+interface; execution in NEW `ForMathlib/GrassmannianTransition.lean` to keep the chart
+file single-writer)**:
+- Setting: `ι ι' : Fin k ↪ Fin n`; `N` in the ι-chart with retraction `φ` (the
+  `chartMatrix` data). The ι'-tuple's images under `φ` assemble the **transition
+  matrix** `T : Matrix (Fin k) (Fin k) A`, `T i₁ i₂ := φ (Pi.single (ι' i₂) 1) i₁` —
+  entries are `chartMatrix`-entries when `ι' i₂ ∉ range ι` and Kronecker deltas when
+  `ι' i₂ = ι i` (the retraction condition pins those columns).
+- **[GR-E1]** `chartTransitionMatrix` (def, from `chartMatrix` + the dichotomy on
+  `ι' i₂ ∈ range ι`) + its two computation lemmas (delta-column / matrix-column).
+- **[GR-E2]** the overlap criterion: `IsChartAt (ι'-tuple) N ↔ IsUnit (chartTransitionMatrix …).det`
+  — proof: quotient-composite₂ = (Matrix.toLin' T) ≫ composite₁-iso, so bijective ⟺ `T`
+  invertible ⟺ `IsUnit T.det` (`Matrix.isUnit_iff_isUnit_det` / `LinearMap.isUnit_det…`;
+  the factorization is a `Basis.ext` check on singles via `retraction_comp_coordMap`).
+- **[GR-E3]** coordinate transition: over the overlap, the ι'-matrix of `N` =
+  (adjugate/det-inverse formula) in the ι-matrix — extracted as the RING-map statement
+  `MvPolynomial ({j ∉ range ι'} × Fin k) R →+* Localization.Away (transitionDet ι ι')`
+  on the generic matrix ring (`transitionDet ι ι' := (chartTransitionMatrix of the
+  generic matrix).det : MvPolynomial ({j ∉ range ι} × Fin k) R`), with the spec lemma
+  tying it to [GR-E2]'s pointwise transition. This is the glue datum for [GR-F].
+- **[GR-E4]** cocycle on triple overlaps (localized ring maps compose per the pointwise
+  spec — prove POINTWISE first via chartMatrix-uniqueness, lift by `IsLocalization`
+  epi-ness/`ringHom_ext`).
+- Attack notes: (1) all statements at a GENERIC element `N` with hypotheses `IsChartAt`
+  — never applied to `normMap`-terms (memory: normMap-poisoning); (2) matrix-vs-function
+  seams via `Matrix.toLin'`/`Matrix.mulVec` with `Pi.basisFun`-ext everywhere; (3) the
+  generic-matrix ring statements are pure `MvPolynomial`/`Matrix` algebra — zero
+  Grassmannian dependence — so [GR-E3/E4]'s ring layer is dispatchable independently of
+  [GR-E1/E2].
+
+**[GR-SPEC] the ringHom↔chartMatrix bridge (pinned 2026-07-09T09:40Z; the last algebra
+before [GR-F])**: for `N` in both charts (`h : IsChartAt ι`, `h' : IsChartAt ι'` over
+`A`): (i) `evalAt h : ChartRing R ι →+* A` := `aeval (p ↦ chartMatrix n ι N h p.1 p.2)`
+(precisely: the `MvPolynomial.aeval`/`eval₂Hom` at the chart matrix); (ii) bridge lemma
+`evalAt_matrix : (Transition.matrix ι ι').map (evalAt h) = transitionMatrixAt ι ι' N h`
+(entrywise: `column`-dichotomy vs the pointwise retraction values — delta columns match
+by the retraction property, variable columns by `aeval_X`); (iii) hence
+`IsUnit (evalAt h (Transition.det ι ι'))` from [GR-E2]+h' (`RingHom.map_det` transport);
+(iv) `evalAwayAt h h' : Localization.Away (Transition.det ι ι') →+* A` :=
+`IsLocalization.Away.lift` of (iii); (v) **the SPEC**:
+`(evalAwayAt h h').comp (Transition.ringHom ι ι') = evalAt h'` — two ring maps out of
+`MvPolynomial`, ext on generators (`MvPolynomial.ringHom_ext`); at `X (j', i')` the
+claim is `(transitionMatrixAt⁻¹ *ᵥ pointwise-column j') i' = chartMatrix n ι' N h' j' i'`
+— prove via `chartMatrix_eq_of_retraction` (the composite `toLin' T⁻¹ ∘ (ι-retraction)`
+is a retraction of the ι'-tuple killing `N.toSubmodule`; same shape as the naturality
+proof). [GR-E4]'s cocycle then LIVES inside [GR-F]'s `Scheme.GlueData` t-composition
+condition, verified pointwise through [GR-SPEC] — no standalone generic-ring cocycle
+statement needed (design decision; kills the triple-localization bookkeeping).
+
+**[GR-F] GlueData architecture (pinned 2026-07-09T23:00Z, after the E4 inverse-pair)**:
+mathlib `Scheme.GlueData` (CategoryTheory.GlueData fields J/U/V/f/t/t_id/t'/t_fac/cocycle):
+- `J := Fin k ↪ Fin n` · `U ι := Spec (ChartRing R ι)` · `V (ι,ι') := Spec (Away (det ι ι'))`
+  — note `matrix ι ι = 1` so `det ι ι = 1` and `V(ι,ι) ≅ U ι` as required;
+- `f ι ι' := Spec.map (algebraMap …)` — open immersion by the `IsOpenImmersion`-of-
+  localization instance;
+- `t ι ι' := Spec.map (ringHomAway ι ι')` (contravariance puts my `Away(det ι'ι) →+*
+  Away(det ιι')` in the right direction); `t_id` ⟸ **[GR-F-tid]** `ringHomAway ι ι = id`
+  (matrix ι ι = 1 ⟹ ringHom ι ι = algebraMap ⟹ lift = id by `IsLocalization` ext);
+- `t' i j k := pullback.lift` of the two legs; `pullback (f i j) (f i k)` ≅ Spec of the
+  double localization (`pullbackSpecIso`); **the crux [GR-F3]**: the leg
+  `P(ι;ι',ι'') ⟶ V(ι',ι'')` needs the ring map `Away (det ι' ι'') →+* D(ι;ι',ι'')`
+  (double localization) — exists because the `ringHom ι ι''`-image of `det ι' ι''`
+  becomes a unit once `det ι ι'` is ALSO inverted: the generic composite-matrix identity
+  `(matrix ι' ι'').map (into-double) = Minv(ιι')-image * matrixAway(ιι'')-image`-form
+  (proof by the master column identity `ringHom_comp_column`, two applications);
+- `t_fac` by `pullback.lift_snd/fst`; `cocycle` by `pullback.hom_ext` + both projections
+  reduced to ring-level composites, closed by [GR-E4]'s inverse-pair + [GR-F3] +
+  `IsLocalization.ringHom_ext`² on the double localizations. No tensor-algebra of Aways
+  needed anywhere (all maps built by universal properties, never by explicit tensors).
+- **t'-leg refinement (2026-07-10, post-F3)**: with `D := Away(det ιι') ⊗[ChartRing ι]
+  Away(det ιι'')` (the `pullbackSpecIso` presentation), set `base₁ : ChartRing ι' →+* D
+  := includeLeftRingHom ∘ ringHom ι ι'`. Then: leg from `Away(det ι'ι)` :=
+  `Away.lift base₁` at `det ι'ι` — unit by [GR-F1] `isUnit_ringHom_det` mapped along
+  includeLeft; leg from `Away(det ι'ι'')` := `Away.lift base₁` at `det ι'ι''` — unit by
+  [GR-F3] `isUnit_map_ringHom_det_triple` with `g := includeLeftRingHom`, whose `hg`
+  (embedded `det ιι''` is a unit in D) holds by the BASE-ELEMENT SLIDE:
+  `algebraMap(d'') ⊗ₜ 1 = 1 ⊗ₜ algebraMap(d'')` in `S ⊗[A] T` for `d'' ∈ A`, and the
+  right side is `includeRight` of a unit of `Away(det ιι'')`. The two legs share `base₁`
+  so `Algebra.TensorProduct.lift`-compatibility over `ChartRing ι'` is definitional
+  (commutativity of images is trivial in the commutative D). t'-scheme :=
+  `(pullbackSpecIso ι-side).hom ≫ Spec.map (ofHom t'ring) ≫ (pullbackSpecIso ι'-side).inv`.
+
 **Wave 3 — the scheme (glue) + T-points**:
 - **[GR-E]** transition data between coordinate charts on the matrix rings (localize at
   the relevant minor determinant; cocycle identity) — the det/adjugate algebra.

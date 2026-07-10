@@ -19,7 +19,7 @@ open MvPolynomial ModularCurves
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j k : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j k : Fin 3)
 
 /-- The image of a chart-product triple in the localization inverting its `k`-th coordinate. -/
 noncomputable def awayTriple (t : Fin 3 → biChartRing W i j) :

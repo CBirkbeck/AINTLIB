@@ -942,6 +942,17 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
       rw [show RingHom.ker σA₂ = RingHom.ker σ₂.hom from rfl, ← h1, hideal]
     exact ⟨⟨V₂, hV₂⟩, hcV₂, f, hideal, kerPrincipalAux_nzd σA₂ f hker₂⟩
 
+/-- The divisor of a section of a smooth separated relative curve is an effective
+Cartier divisor in the official local-principal-nonzerodivisor sense. This direct
+section-specific theorem avoids the general finite-flat-to-Cartier comparison and its
+noetherian-approximation/fibre-isolation boxes. -/
+theorem sectionDivisor_isOfficial (hsm : SmoothOfRelativeDimension 1 π)
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    IsOfficialCartier π (sectionDivisor π z hz).ideal := by
+  change IsOfficialCartier π (Scheme.Hom.ker z)
+  exact ⟨(sectionDivisor π z hz).flat,
+    exists_affineOpen_ker_principal_nonZeroDivisor π hsm z hz⟩
+
 end KerPrincipal
 
 /-! #### Register boxes (T-D3/T-D1): the divisor of a family of sections is finite locally
