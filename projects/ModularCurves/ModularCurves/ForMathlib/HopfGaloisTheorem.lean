@@ -383,6 +383,77 @@ theorem exists_shifted_basis_coactionBaseChange
   choose xf hxf using fun i => LinearMap.mem_range.mp (hyN i)
   exact ⟨xf, b, fun i => by rw [hb i, ← hxf i]; rfl⟩
 
+/-- A basis of the base-changed algebra over the base-changed co-invariants is already a
+basis over the scalars `C'`: the scalar map onto the co-invariants is bijective and the
+two scalar actions agree. -/
+noncomputable def basisOverScalarsOfBasisOverCoinvariants
+    [Module.Flat (coinvariants ρ) C'] {ι' : Type*} [Fintype ι']
+    (bx : Module.Basis ι' (coinvariants (coactionBaseChange R A ρ C'))
+      (C' ⊗[coinvariants ρ] B)) :
+    Module.Basis ι' C' (C' ⊗[coinvariants ρ] B) :=
+  Module.Basis.mk (v := bx)
+    (by
+      have hsmul : ∀ (c' : C') (v : C' ⊗[coinvariants ρ] B),
+          c' • v = (baseChangeCoinvariantsMap R A ρ C' c') • v := by
+        intro c' v
+        rw [Algebra.smul_def, Algebra.smul_def]
+        congr 1
+      have hπinj : Function.Injective (baseChangeCoinvariantsMap R A ρ C') := by
+        intro a b h
+        have := congrArg Subtype.val h
+        exact injective_tmul_one_of_flat R A ρ C' this
+      rw [Fintype.linearIndependent_iff]
+      intro g hg i
+      have h2 : ∑ j, (baseChangeCoinvariantsMap R A ρ C' (g j)) • bx j = 0 := by
+        rw [← hg]
+        exact Finset.sum_congr rfl (fun j _ => (hsmul (g j) (bx j)).symm)
+      have := Fintype.linearIndependent_iff.mp bx.linearIndependent
+        (fun j => baseChangeCoinvariantsMap R A ρ C' (g j)) h2 i
+      exact hπinj (by rw [this, map_zero]))
+    (by
+      have hsmul : ∀ (c' : C') (v : C' ⊗[coinvariants ρ] B),
+          c' • v = (baseChangeCoinvariantsMap R A ρ C' c') • v := by
+        intro c' v
+        rw [Algebra.smul_def, Algebra.smul_def]
+        congr 1
+      intro v _
+      have hexp : v = ∑ j, bx.repr v j • bx j := (bx.sum_repr v).symm
+      obtain ⟨g, hg⟩ := Classical.axiomOfChoice
+        (fun j => surjective_baseChangeCoinvariantsMap R A ρ C' (bx.repr v j))
+      rw [hexp]
+      refine Submodule.sum_mem _ (fun j _ => ?_)
+      rw [← hg j, ← hsmul (g j) (bx j)]
+      exact Submodule.smul_mem _ _ (Submodule.subset_span (Set.mem_range_self j)))
+
+@[simp]
+theorem basisOverScalarsOfBasisOverCoinvariants_apply
+    [Module.Flat (coinvariants ρ) C'] {ι' : Type*} [Fintype ι']
+    (bx : Module.Basis ι' (coinvariants (coactionBaseChange R A ρ C'))
+      (C' ⊗[coinvariants ρ] B)) (i : ι') :
+    basisOverScalarsOfBasisOverCoinvariants R A ρ C' bx i = bx i :=
+  Module.Basis.mk_apply _ _ _
+
+/-- **The per-prime Galois bijectivity**: over a flat local base change with infinite
+residue field, the generalized Galois product map of the base-changed co-action, with
+scalars the base ring `C'` itself, is bijective. -/
+theorem bijective_galoisProductMap_coactionBaseChange
+    [Module.Free R A] [Module.Finite R A]
+    [Module.Flat (coinvariants ρ) C'] [IsLocalRing C']
+    [Infinite (IsLocalRing.ResidueField C')]
+    (hρ : IsCoaction ρ) (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    Function.Bijective (galoisProductMap R A C' (coactionBaseChange R A ρ C')
+      (fun c' => (mem_coinvariants).mp
+        (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c'))) := by
+  classical
+  obtain ⟨x, hb, hx⟩ := exists_shifted_basis_coactionBaseChange R A ρ C' hρ hsurj
+  have hρ' : IsCoaction (coactionBaseChange R A ρ C') :=
+    isCoaction_coactionBaseChange R A ρ C' hρ
+  refine bijective_galoisProductMap_of_basis R A C' _ _ hb
+    (basisOverScalarsOfBasisOverCoinvariants R A ρ C'
+      (coinvariantsBasis (coactionBaseChange R A ρ C') hρ' hb x hx)) (fun i => ?_)
+  rw [basisOverScalarsOfBasisOverCoinvariants_apply, coinvariantsBasis_apply]
+  exact hx i
+
 end PerPrime
 
 end ModularCurves
