@@ -15673,3 +15673,31 @@ eta.
 `PatchKunneth.lean` citizen (same Spec-leg-then-Γ-dual pattern); 1e antipode via
 `diagonal_SpecMap`; assemble `[HopfAlgebra R A]`; `IsCoaction chartCoaction`; then
 C1d → C3 → C4 ⟹ six pins ⟹ **BOARD-SIGNAL**.
+
+### v10.134 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1d] — the generic `affineKunneth` citizen + the coassoc architecture
+
+*Zero sorries, axiom-clean; four atomic commits.*
+
+- **`PatchKunneth.lean`**: **`affineKunneth`** — the ⊤-level Künneth for two affine
+  schemes over an affine base (`X ×_B Y ≅ Spec (Γ(X) ⊗[Γ(B)] Γ(Y))` when the algebra
+  structures are the `appTop`s), with both `Spec` legs, `affineKunnethΓ`, `IsIso`, and
+  **both Γ-dual legs** (`fst/snd_appTop_affineKunnethΓ`). All first-try. This is the
+  citizen the work order asked for: it *iterates*, and its Γ-duals carry **no `topIso`
+  bookkeeping** (unlike the opens-level version).
+- **Architectural finding (banked)**: iterating at the *opens* level would force a
+  base-ring iso `Γ(S,V) ≅ Γ(V.toScheme,⊤)` inside the tensor product, and
+  `Algebra.TensorProduct.congr` only handles a fixed base. **Decision**: restate the patch
+  Hopf structure at the ⊤-level (`R' := Γ(V.toScheme,⊤)`, `A' := Γ(G|_V,⊤)`; `ε' :=
+  unitSection.appTop`, `Δ' := squareMulRes.appTop ≫ affineKunnethΓ`, `S' :=
+  invSection.appTop`), recovering the opens-level maps by `topIso`-conjugation. **Every
+  scheme identity already proven** (`unitSection_comp_groupToBase`,
+  `left/rightUnitSection_comp_squareMul`) is stated purely in terms of `unitSection`,
+  `leftUnitSection`, `squareMul` — so it transfers unchanged.
+- First bricks landed: **`isAffine_groupSquare`** (via `IsAffine.of_isIso` on
+  `patchKunneth` — the square is `Spec (A ⊗ A)`) and **`squareMulRes`** (the
+  corestricted multiplication `G|_V ×_V G|_V ⟶ G|_V`) with `squareMulRes_comp_ι`.
+
+**NEXT**: finish the ⊤-level restatement (Δ' via `affineKunnethΓ`, the counit laws
+transfer, then **coassoc** from the restricted `mulOver_assoc` through the *iterated*
+`affineKunneth`), then 1e antipode (`diagonal_SpecMap`), `[HopfAlgebra R A]`,
+`IsCoaction chartCoaction`, C1d → C3 → C4 ⟹ pins ⟹ **BOARD-SIGNAL**.
