@@ -13639,3 +13639,57 @@ global transport (P2′); fppf core + `fppf_invariantsπ`; ellipticity descent;
 morphism descent); W1 `WeierstrassInvariantLocal` (invariant localization + descent + spread +
 coboundary); W3 `descentComparison` (+ mixed-ring `projModelBaseChange_comp'`); `lw_chart_at`
 (the abstract per-point chart, 738 lines); the per-declaration-budget discharge architecture.
+
+### v10.103 (2026-07-10, NEW-HOPF): ★★★ [CHARTER-HOPF] M5 — THE HOPF–GALOIS THEOREM PROVEN (Stacks 03BM, comodule form; [HG-B6] complete)
+
+*The charter's headline milestone, same session as M4. `HopfGaloisTheorem.lean` (~800
+lines) lake-green, ZERO sorries, axiom-clean via `lake env lean`:*
+
+**`isHopfGalois_of_surjective_galoisPrecursor`**: for any co-action
+`ρ : B →ₐ[R] B⊗[R]A` of a finite free commutative Hopf algebra with
+`Surjective (galoisPrecursor R A ρ : B⊗[R]B → B⊗[R]A)` (the action-pair/closed-immersion
+input — rules out non-free actions), `IsHopfGalois ρ` holds: the canonical Galois map
+`B ⊗[coinvariants ρ] B → B⊗[R]A` is bijective AND `B` is faithfully flat over
+`coinvariants ρ`. This discharges the ONE remaining obligation of p0's [T-G3d-infra]
+reduction — E/C quotients ⟹ NISOG L6 ⟹ Γ₀(N) — pending only Wave C's geometric
+instantiation (translation co-action on G-stable charts).
+
+Assembly (b6-a..f, all this session):
+- **[B6-a]** `galoisProductMap`/`bijective_galoisProductMap_of_basis` — the 03C8 galois
+  half generalized to ANY scalar ring `C₀` with co-invariant image (leftAlgebra S-forms;
+  kills all C''-vs-C' juggling downstream).
+- **[B6-b]** flat-cover glues (final form after DS-HOPF-1): family-glues
+  `injective_of_forall_lTensor_localPolynomialExtension` +
+  `flat_of_forall_flat_localized` use ONLY Localization-canonical instances; per-prime
+  descent `flat_localized_of_flat_extension` takes the extension ABSTRACT.
+- **[B6-c]** per-prime instantiation: scalar map onto base-changed co-invariants
+  (surjective 03BK(3) + injective by flatness + local + Infinite-residue transport via
+  surjective local hom, ker = m'), span condition from `hsurj`
+  (`smul_coactionBaseChange_one_tmul`), 03C1-application
+  (`exists_shifted_basis_coactionBaseChange`: GAP-6 enumeration + m-feed + rank = rfl),
+  C''→C'-basis descent, per-prime Galois bijectivity.
+- **[B6-d]** the comparison square `injective_lTensor_canonicalGaloisMap`:
+  `lTensor C'` of the module-regime `canonicalGaloisLinear` realizes `galoisProductMap`
+  under `AlgebraTensorModule.assoc` + `cancelBaseChange`; `baseChangeEmbed` bridges the
+  co-action; `Subalgebra.moduleLeft` erased section-wide (one instance regime).
+- **[B6-e]** `flat_coinvariants` + `faithfullyFlat_coinvariants` (Spec-surjectivity from
+  lying-over + `of_comap_surjective`).
+- **[B6-f]** global injectivity (B6-d ∘ B6-b at `LocalPolynomialExtension`), surjectivity
+  via `collapseScalars` (γ∘collapse = precursor), assembly.
+
+**Lean-ops registry** (hard-won, for the fleet): (1) `Subalgebra.instSMulSubtypeMem` and
+`Subalgebra.moduleLeft` POISON instance search on subalgebra-scalars over deep towers
+(Localization∘Polynomial∘Localization) — erase locally (`attribute [-instance] ... in`).
+(2) AlgHom-derived `.toLinearMap` carries algebra-regime AddCommMonoid/Module keys that
+mismatch module-level ⊗ₜ-induction — hand-build module-regime LinearMaps
+(`canonicalGaloisLinear`). (3) Family-form (∀ P [max]) instance synthesis flakes where
+single-P works — split glues so expensive instances are consumed at single-P sites.
+(4) Ore-generic SMul keys vs `Algebra.toSMul` keys ARE cheap-defeq — mismatch errors
+with unassigned metavariables mean pass R/S/A explicitly, not that keys differ.
+(5) DS-HOPF-1 filed and RESOLVED same-session (split-glue architecture).
+
+**NEXT (Wave C = M6/M7, the last leg)**: [HG-C1] the translation co-action on G-stable
+charts is an `IsCoaction` (consume p2's Hopf layer — CHECK BOARD for p2's Milestone 1);
+[HG-C2] freeness of translation ⟹ `Surjective galoisPrecursor` (actPair closed
+immersion); [HG-C3] G-stable affine cover of E; [HG-C4] glue + discharge the six
+SubgroupQuotient pins = CHARTER COMPLETE.
