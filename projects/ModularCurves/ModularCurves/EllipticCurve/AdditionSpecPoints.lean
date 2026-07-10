@@ -764,6 +764,109 @@ lemma eq_chartAwayHomOfTriple_chartPointTriple (W : WeierstrassCurve R) (k : Fin
         chartAwayHomOfTriple_isLocalizationElem W k _ 1 hu hT m, mul_one]
     rfl
 
+
+/-- **[e5c-key] The dictionary reads any chart point as `toAffine` of its coordinate triple.** -/
+theorem dictionary_eq_toAffine (W : WeierstrassCurve R) [W.IsElliptic] (k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (φ : chartAway W k →+* K)
+    (hφ : φ.comp (algebraMap R (chartAway W k)) = algebraMap R K)
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hg : Spec.map (CommRingCat.ofHom φ) ≫ chartι W k = g.1) :
+    projModelPointsEquiv W K g =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        (chartPointTriple W k φ) := by
+  classical
+  have hT : (W.map (algebraMap R K)).toProjective.Equation (chartPointTriple W k φ) :=
+    equation_chartPointTriple W k φ hφ
+  haveI : ((W.map (algebraMap R K)).toProjective).IsElliptic := by
+    constructor
+    rw [map_Δ]
+    exact W.isUnit_Δ.map _
+  -- the φ-subtype (the grade-0 compat form is defeq to hφ via chartAway_algebraMap_apply)
+  have hφ' : φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+      (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R K := hφ
+  by_cases hz : chartPointTriple W k φ 2 = 0
+  · -- infinity branch
+    rw [WeierstrassCurve.Projective.Point.toAffine_of_Z_eq_zero hz]
+    have hiff := inZChart_iff_of_specMap W k ⟨φ, hφ'⟩ g hg
+    have hnotZ : ¬ InZChart W g := fun hin => (hiff.mp hin) hz
+    show projModelPointsEquivEll W ‹W.IsElliptic› K g = 0
+    exact projModelPointsEquivEll_infinity W ‹W.IsElliptic› K g hnotZ
+  · -- affine branch
+    have hne : chartPointTriple W k φ ≠ 0 := fun h0 => by
+      have := congrFun h0 k
+      rw [chartPointTriple_self_eq_one] at this
+      exact one_ne_zero this
+    have hNS : (W.map (algebraMap R K)).toProjective.Nonsingular (chartPointTriple W k φ) :=
+      WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hT hne
+    rw [WeierstrassCurve.Projective.Point.toAffine_of_Z_ne_zero hNS hz]
+    -- the chart-2 form of the point
+    have hu1 : chartPointTriple W k φ k * 1 = 1 := by
+      rw [chartPointTriple_self_eq_one, mul_one]
+    have hv : chartPointTriple W k φ 2 * (chartPointTriple W k φ 2)⁻¹ = 1 :=
+      mul_inv_cancel₀ hz
+    have hfac2 : Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTriple W 2 (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹
+          hv hT).toRingHom) ≫ chartι W 2 = g.1 := by
+      by_cases hk : k = 2
+      · subst hk
+        rw [← hg]
+        congr 2
+        have h1 : (chartPointTriple W 2 φ 2)⁻¹ = 1 := by
+          rw [chartPointTriple_self_eq_one, inv_one]
+        rw [show (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ)
+            (chartPointTriple W 2 φ 2)⁻¹ hv hT) =
+          (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ) 1 hu1 hT) from by
+            congr 1 <;> rw [h1]]
+        exact congrArg CommRingCat.ofHom (eq_chartAwayHomOfTriple_chartPointTriple W 2 φ hφ hu1 hT).symm
+      · rw [chartι_comp_specMap_chartAwayHom_eq W 2 k hk
+          (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹ 1 hv hu1 hT, ← hg]
+        congr 2
+        exact congrArg CommRingCat.ofHom (eq_chartAwayHomOfTriple_chartPointTriple W k φ hφ hu1 hT).symm
+    have hZ : InZChart W g :=
+      ⟨Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTriple W 2 (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹
+          hv hT).toRingHom), hfac2⟩
+    have hcompat₂ : (chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+        (chartPointTriple W k φ 2)⁻¹ hv hT).toRingHom.comp
+        ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+          ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+        algebraMap R K :=
+      (chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+        (chartPointTriple W k φ 2)⁻¹ hv hT).comp_algebraMap
+    have hread : chartHomEquiv W 2 K ⟨g, hZ⟩ =
+        ⟨(chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+          (chartPointTriple W k φ 2)⁻¹ hv hT).toRingHom, hcompat₂⟩ :=
+      chartHomEquiv_eq_of_specMap W 2 ⟨g, hZ⟩ _ hfac2
+    have hcoord : ∀ m : {j : Fin 3 // j ≠ 2},
+        (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 m =
+          chartPointTriple W k φ m / chartPointTriple W k φ 2 := by
+      intro m
+      rw [hread]
+      have hidiom : ((chartSolutionsEquiv W 2 K)
+          ⟨(chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+            (chartPointTriple W k φ 2)⁻¹ hv hT).toRingHom, hcompat₂⟩).1 =
+          fun m : {j : Fin 3 // j ≠ 2} =>
+            (chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+              (chartPointTriple W k φ 2)⁻¹ hv hT).toRingHom
+              (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X m))) := rfl
+      rw [hidiom]
+      show (chartAwayHomOfTriple W 2 (chartPointTriple W k φ)
+          (chartPointTriple W k φ 2)⁻¹ hv hT).toRingHom
+          (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X m))) = _
+      rw [chartCoordEquiv_mk_X, div_eq_mul_inv]
+      exact chartAwayHomOfTriple_isLocalizationElem W 2 _ _ hv hT m
+    refine (projModelPointsEquiv_some W K g hZ
+      (chartPointTriple W k φ 0 / chartPointTriple W k φ 2)
+      (chartPointTriple W k φ 1 / chartPointTriple W k φ 2)
+      ((WeierstrassCurve.Projective.nonsingular_of_Z_ne_zero hz).mp hNS)
+      (hcoord ⟨0, by decide⟩).symm (hcoord ⟨1, by decide⟩).symm).trans rfl
+
 end ChartPointTriple
 
 end ChartNaturality
