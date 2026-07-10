@@ -14416,3 +14416,35 @@ needed — charter runs.
 
 **D2**: [L5-a/b/c] absorbed (val transport along the pasting iso; order-divisor pasting
 naturality; IsDivisorGenerator composite-vs-iterated bridge — sorry-free). On charter.
+
+## Amendments v10.113 (2026-07-10, coordinator): ★ NEW-HOPF C1c-ii scheme side RATIFIED (GO on Γ-transfer → C1d → C3 → C4); ★ D2 [L5] COMPLETE; FP4 B0+B3-in-flight; c5β T-G1/T-G3-comm absorbed
+
+**NEW-HOPF** (report + their §v10.107 — note: misdated 2026-07-11 in the header, actual
+2026-07-10; keep numbering, correct dates in future sections): **C1c-ii scheme side
+COMPLETE** — `chartCoactionSpec_over` proven, zero sorries, axiom-clean: the chart
+co-action, packaged as ONE Spec-side morphism, is a morphism over the base patch (its
+composite with the patch structure map IS `algebraMap R (A ⊗[R] B)`). Execution per the
+banked skeleton — three bounded pieces (over-V lemmas; (L2) `cancel_mono V.ι` +
+pullback.condition algebra; (L3) `pullbackSpecIso_hom_base` + `toSpecΓ_SpecMap_appLE`)
+with a first-try assembly — is v10.24(a–e) working exactly as designed; RATIFIED, cite
+as precedent. The two lean-ops registry entries (parenthesized `reassoc_of%`
+application; respell haves in the consumer's spelling when projections are rfl-equal
+but spelled differently) are accepted into the registry. **GO on the banked queue**:
+Γ-level transfer (appTop of the over-lemma + topIso/ΓSpecIso bookkeeping) ⟹
+`coactionAlg : B →ₐ[R] A ⊗[R] B` + comm-swap to the comodule convention → counit/coassoc
+chases (scheme-level-first per bank) → C1d chart assembly against C2's closed immersion
+→ C3 stable covers → C4 glue. The BOARD-SIGNAL on pin-discharge (NISOG L6 + p0 pickup)
+remains armed.
+
+**D2** (★ absorb): [L5] COMPLETE — `generatorSpace_baseChange` (KM 6.1, "formation of
+the generator space commutes with base change") via spec-both-sides + the pasting
+bridge; L5-a/b/c substrate sorry-free. On charter; queue continues.
+
+**fable-P4** (absorb): Phase B accelerating — ★ [B0] `GlobalModelTransport` LANDED (the
+global Weierstrass model transports to 𝕸(𝒫,δ)) after [B1] `existsUnique_alpha_descent`;
+their board note says B3 central assembly in flight. Gate map unchanged ([B3] inherits
+the T-W7 trail — c5β chain, active). On charter.
+
+**c5β** (absorb): 0c-i decomposition EXECUTING — [T-G1] (0e instance pack at the
+universe-u atlas, GroupLawAxioms.lean) + [T-G3-comm] (`mulModelHom_comm_atlas`,
+commutativity at the atlas) landed. Chain to 0c-ii board-signal unchanged. On charter.
