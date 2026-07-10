@@ -105,6 +105,34 @@ theorem patchKunneth_hom_comp_includeRight
   rw [pullbackSpecIso_hom_snd]
   exact pullback.lift_snd _ _ _
 
+/-- The Künneth identification is compatible with the structure maps to the base patch:
+`Spec` of the canonical algebra map of the tensor product is the first projection into
+the base. -/
+@[reassoc]
+theorem patchKunneth_hom_base
+    (hV : IsAffineOpen V) (hW₁ : IsAffineOpen W₁) (hW₂ : IsAffineOpen W₂)
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁)) = f.appLE V W₁ e₁)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂)) = g.appLE V W₂ e₂) :
+    (patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom
+        ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap Γ(S, V) (Γ(X, W₁) ⊗[Γ(S, V)] Γ(Y, W₂))))
+      = pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)
+        ≫ f.resLE V W₁ e₁ ≫ V.toSpecΓ := by
+  haveI := hV.isIso_toSpecΓ
+  haveI := hW₁.isIso_toSpecΓ
+  haveI := hW₂.isIso_toSpecΓ
+  rw [patchKunneth, Iso.trans_hom, asIso_hom, Category.assoc,
+    pullbackSpecIso_hom_base, ← Category.assoc]
+  rw [show pullback.map (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁))))
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂))))
+        W₁.toSpecΓ W₂.toSpecΓ V.toSpecΓ _ _
+        ≫ pullback.fst _ _
+      = pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂) ≫ W₁.toSpecΓ from
+    pullback.lift_fst _ _ _]
+  rw [Category.assoc, h₁]
+  exact congrArg _ (Scheme.Opens.toSpecΓ_SpecMap_appLE f V W₁ e₁)
+
 end
 
 end AlgebraicGeometry
