@@ -14959,3 +14959,52 @@ YFullRoute green; zero heartbeat bumps.*
 - **NEXT (NEW-GH)**: MellWeierstrass cadence cleanup (tail, with PIC0's golf note); then
   the home GH stream re-opens ([A711-BC] status check at pickup; corrected T-H4/T-H6
   wiring on the repointed statements; GHC6's engine gate is flipped).
+
+### v10.99a (2026-07-10, fable-FP): [02KL-CORE] CLAIMED — /develop --decompose first act COMPLETE; architecture locked, skeleton landing
+
+*Per v10.98 routing. New campaign file: `ForMathlib/FinitePresentationDescent.lean` (zero
+overlap; SmoothDescent.lean stays NEW-GH's — consumed read-only). Artifact:
+`decomposition-02kl-core.md`.*
+
+- **Source of record corrected**: the gate `RingHom.FinitePresentation.of_comp_of_faithfullyFlat`
+  IS Stacks **02KK** (Descent, Lemma 35.14.1) verbatim; the docstring's "02KG + 02KH" are
+  mispointed (those are cohomology flat-base-change lemmas 30.5.1/30.5.2). Proof chain fetched
+  verbatim: 02KK ← 00QO (Algebra 10.127.3, FP⟺Hom-into-colimits factors) + 02JO (Algebra
+  10.168.1, spreading out flat+FP through filtered stages) + 01UA (surjectivity at a stage)
+  + 023M (Amitsur equalizer).
+- **NEW-GH docstring erratum (courtesy, no code impact)**: the v10.75 "EXECUTION-READY
+  REDUCTION" block's step 5 cites `RingHom.FinitePresentation.codescendsAlong_faithfullyFlat`
+  as if it closed the composite shape — verified against `RingHom.CodescendsAlong`
+  (RingHomProperties.lean:239): it is the PUSHOUT form (ffl leg under the common base;
+  `Q(algebraMap R R') → P(algebraMap R' (R'⊗[R]S)) → P(algebraMap R S)`), NOT composite
+  reflection. The file's earlier gap-audit paragraph is the correct one, and the Lean code
+  correctly routes through the gate — only that recipe block is stale. No 3-line exit exists.
+- **Substrate scoreboard (pin-verified)**: FREE — Amitsur equalizer (in-project
+  `Module.FaithfullyFlat.mem_range_algebraMap_iff_tmul_eq`, FaithfullyFlatEqualizer.lean);
+  stage-factoring + stage-agreement for FP/EssFT algebras into filtered colimits
+  (`RingHom.EssFiniteType.exists_eq_comp_ι_app_of_isColimit` /
+  `exists_comp_map_eq_of_isColimit`, Algebra/Category/Ring/FinitePresentation.lean —
+  Yang–Merten 2025); Chevalley (`PrimeSpectrum.isConstructible_range_comap`); patch-topology
+  compactness (`compactSpace_withConstructibleTopology`); Lazard equational criterion
+  (Flat/EquationalCriterion.lean); FP-cancellation (`of_comp_finiteType`); ffl base-change
+  descent of FP (Finiteness/Descent.lean — wrong shape for the gate but its `Ideal.FG`
+  machinery reusable). ABSENT (= the campaign, matching A's ledger §8): flat-spreading
+  (02JO(1)/(3)) and every composite-reflection form.
+- **Architecture locked ("ENDING-1", concrete systems — no CategoryTheory transport)**: the
+  equalizing of the stage map `A → B_λ` is inherited from `p∘χ = q∘χ` (definition of
+  `⊗[A]`) through finitely many commuting-square fixups on B- and C-maps (Yang–Merten
+  shapes) — **no factoring of maps out of A is ever needed**, so no FT-prestep and no
+  circularity. Leaves: [KL-0] retract-of-FP (generator trick `ker ρ = ({xᵢ - σρxᵢ})`);
+  [KL-1] canonical presentation system (index = Finset A × FG-subideals of ker aeval; FP
+  stages; bespoke `IsFilteredAlgColimit` predicate); [KL-2] FP-algebra spreading over a
+  system (presentation-coefficient descent; delivers stage presentations `B_i`, colim = B);
+  [KL-3] **flat-at-stage (THE BOSS**, Stacks 02JO(1)+(3) scoped) — ℤ-model reduction
+  re-instantiates [KL-1]+[KL-2] at R = ℤ (FT-ℤ stages noetherian, Hilbert ⟹ FP-ℤ), then
+  noetherian local criterion + flat-locus openness + quasicompact glue; sub-tickets at
+  reach; [KL-4] ffl-at-stage (patch topology: stage-images patch-closed via compact+T2,
+  `⋂ I_i ⊆ range(comap B)` by the 1≠0-at-stage fiber argument, Chevalley patch-open target,
+  directed compactness ⟹ eventual containment ⟹ Spec-surjectivity at stage); [KL-5]
+  assembly (id_B stage-section β, square fixups, ε := β∘χ lands in the stage equalizer =
+  𝒮_i by Amitsur at base 𝒮_i, section of u_i ⟹ A retract of FP stage ⟹ [KL-0]).
+- Estimated multi-session; commit-early cadence per hygiene; [KL-3] flagged as the deep
+  segment (EGA IV 11.2.6-class). All other leaves bounded with named substrate.
