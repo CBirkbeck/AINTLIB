@@ -207,7 +207,162 @@ theorem mulOver_assoc_atlas :
           (modelOver universalWeierstrassLocU.{u})).hom ≫
         (modelOver universalWeierstrassLocU.{u} ◁ mulOver universalWeierstrassLocU.{u}) ≫
         mulOver universalWeierstrassLocU.{u} := by
-  sorry
+  classical
+  apply Over.OverMorphism.ext
+  haveI hred : IsReduced (((modelOver universalWeierstrassLocU.{u} ⊗
+      modelOver universalWeierstrassLocU.{u}) ⊗ modelOver universalWeierstrassLocU.{u}).left) :=
+    inferInstanceAs (IsReduced (pullback
+      (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u})))
+  haveI hsep : ((modelOver universalWeierstrassLocU.{u}).left).IsSeparated :=
+    inferInstanceAs ((projModel universalWeierstrassLocU.{u}).IsSeparated)
+  refine hom_ext_of_forall_specPoint fun K _ p => ?_
+  -- three legs of the cube point (all projModelπ-spelled; defeq to the `.hom` tensor form)
+  letI : Algebra WeierstrassAtlasRingU.{u} K :=
+    ((Spec.preimage ((p ≫
+      pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u}) ≫
+      pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u}))).hom).toAlgebra
+  have hπ₁ : ((p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u}) ≫
+      pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u})) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
+        Spec.preimage ((p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u}) ≫
+          pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u})) :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hπ₂ : ((p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u}) ≫
+      pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u})) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [← hπ₁]
+    simp only [Category.assoc]
+    congr 2
+    exact pullback.condition.symm
+  have hπ₃ : ((p ≫ pullback.snd (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (projModelπ universalWeierstrassLocU.{u})) ≫ (projModelπ universalWeierstrassLocU.{u})) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [← hπ₁]
+    simp only [Category.assoc]
+    exact congrArg (p ≫ ·)
+      (pullback.condition (f := pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u})) (g := (projModelπ universalWeierstrassLocU.{u}))).symm
+  have hP₁₂ := mulModelHom_specPoints universalWeierstrassLocU.{u} K ⟨_, hπ₁⟩ ⟨_, hπ₂⟩
+  have hP₂₃ := mulModelHom_specPoints universalWeierstrassLocU.{u} K ⟨_, hπ₂⟩ ⟨_, hπ₃⟩
+  have hπ₁₂ : (pullback.lift _ _ ((hπ₁).trans (hπ₂).symm) ≫
+      mulModelHom universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u}) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, show mulModelHom universalWeierstrassLocU.{u} ≫ (projModelπ universalWeierstrassLocU.{u}) = _ from mulModelHom_π universalWeierstrassLocU.{u},
+      ← Category.assoc, pullback.lift_fst]
+    exact hπ₁
+  have hπ₂₃ : (pullback.lift _ _ ((hπ₂).trans (hπ₃).symm) ≫
+      mulModelHom universalWeierstrassLocU.{u}) ≫ (projModelπ universalWeierstrassLocU.{u}) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, show mulModelHom universalWeierstrassLocU.{u} ≫ (projModelπ universalWeierstrassLocU.{u}) = _ from mulModelHom_π universalWeierstrassLocU.{u},
+      ← Category.assoc, pullback.lift_fst]
+    exact hπ₂
+  have hL2 := mulModelHom_specPoints universalWeierstrassLocU.{u} K ⟨_, hπ₁₂⟩ ⟨_, hπ₃⟩
+  have hR2 := mulModelHom_specPoints universalWeierstrassLocU.{u} K ⟨_, hπ₁⟩ ⟨_, hπ₂₃⟩
+  have e2 : projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₁₂⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₁⟩ +
+      projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₂⟩ :=
+    (congrArg (projModelPointsEquiv universalWeierstrassLocU.{u} K) (Subtype.ext rfl)).trans hP₁₂
+  have e4 : projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₂₃⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₂⟩ +
+      projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₃⟩ :=
+    (congrArg (projModelPointsEquiv universalWeierstrassLocU.{u} K) (Subtype.ext rfl)).trans hP₂₃
+  have ebigL := hL2.trans
+    (congrArg (· + projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₃⟩) e2)
+  have ebigR := hR2.trans
+    (congrArg (projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨_, hπ₁⟩ + ·) e4)
+  have keyval : (pullback.lift _ _ ((hπ₁₂).trans (hπ₃).symm) ≫ mulModelHom universalWeierstrassLocU.{u}) =
+      (pullback.lift _ _ ((hπ₁).trans (hπ₂₃).symm) ≫ mulModelHom universalWeierstrassLocU.{u}) :=
+    congrArg Subtype.val
+      ((projModelPointsEquiv universalWeierstrassLocU.{u} K).injective
+        (ebigL.trans ((add_assoc _ _ _).trans ebigR.symm)))
+  -- outer first projection of the cube through the (mo⊗mo)-factor is the (f,g) input lift
+  have hp₁₂p :
+      p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u})
+              (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
+            (projModelπ universalWeierstrassLocU.{u}) =
+        pullback.lift
+          (p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u})
+                  (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
+                (projModelπ universalWeierstrassLocU.{u}) ≫
+            pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}))
+          (p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u})
+                  (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
+                (projModelπ universalWeierstrassLocU.{u}) ≫
+            pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}))
+          (hπ₁.trans hπ₂.symm) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, Category.assoc]
+    · rw [pullback.lift_snd, Category.assoc]
+  -- associator middle leg: p through α to the (g,h)-factor is the (g,h) input lift
+  have hq :
+      p ≫ (α_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})
+            (modelOver universalWeierstrassLocU.{u})).hom.left ≫
+          pullback.snd (projModelπ universalWeierstrassLocU.{u})
+            (pullback.fst (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}) ≫
+              projModelπ universalWeierstrassLocU.{u}) =
+        pullback.lift
+          (p ≫ pullback.fst (pullback.fst (projModelπ universalWeierstrassLocU.{u})
+                  (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
+                (projModelπ universalWeierstrassLocU.{u}) ≫
+            pullback.snd (projModelπ universalWeierstrassLocU.{u}) (projModelπ universalWeierstrassLocU.{u}))
+          (p ≫ pullback.snd (pullback.fst (projModelπ universalWeierstrassLocU.{u})
+                  (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u})
+                (projModelπ universalWeierstrassLocU.{u}))
+          (hπ₂.trans hπ₃.symm) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, Category.assoc, Category.assoc]
+      exact congrArg (p ≫ ·) (Over.associator_hom_left_snd_fst _ _ _)
+    · rw [pullback.lift_snd, Category.assoc, Category.assoc]
+      exact congrArg (p ≫ ·) (Over.associator_hom_left_snd_snd _ _ _)
+  have hL : p ≫ ((mulOver universalWeierstrassLocU.{u} ▷ modelOver universalWeierstrassLocU.{u}) ≫
+        mulOver universalWeierstrassLocU.{u}).left =
+      pullback.lift _ _ ((hπ₁₂).trans (hπ₃).symm) ≫ mulModelHom universalWeierstrassLocU.{u} := by
+    rw [Over.comp_left, mulOver_left, ← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerRight_left_fst (mulOver universalWeierstrassLocU.{u}))).trans
+          ((Category.assoc _ _ _).symm.trans
+            ((congrArg (· ≫ mulModelHom universalWeierstrassLocU.{u}) hp₁₂p).trans
+              (pullback.lift_fst _ _ _).symm)))
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerRight_left_snd (mulOver universalWeierstrassLocU.{u}))).trans
+          (pullback.lift_snd _ _ _).symm)
+  -- associator side, pre-`mul` lift identity
+  have hR0 : p ≫ ((α_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})
+        (modelOver universalWeierstrassLocU.{u})).hom.left ≫
+        (modelOver universalWeierstrassLocU.{u} ◁ mulOver universalWeierstrassLocU.{u}).left) =
+      pullback.lift _ _ ((hπ₁).trans (hπ₂₃).symm) := by
+    apply pullback.hom_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·)
+          ((Category.assoc _ _ _).trans
+            ((congrArg ((α_ (modelOver universalWeierstrassLocU.{u})
+                  (modelOver universalWeierstrassLocU.{u})
+                  (modelOver universalWeierstrassLocU.{u})).hom.left ≫ ·)
+                (Over.whiskerLeft_left_fst (mulOver universalWeierstrassLocU.{u}))).trans
+              (Over.associator_hom_left_fst _ _ _)))).trans
+          (pullback.lift_fst _ _ _).symm)
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·)
+            ((Category.assoc _ _ _).trans
+              (congrArg ((α_ (modelOver universalWeierstrassLocU.{u})
+                  (modelOver universalWeierstrassLocU.{u})
+                  (modelOver universalWeierstrassLocU.{u})).hom.left ≫ ·)
+                (Over.whiskerLeft_left_snd (mulOver universalWeierstrassLocU.{u}))))).trans
+          ((congrArg (p ≫ ·) (Category.assoc _ _ _).symm).trans
+            ((Category.assoc _ _ _).symm.trans
+              ((congrArg (· ≫ mulModelHom universalWeierstrassLocU.{u}) hq).trans
+                (pullback.lift_snd _ _ _).symm))))
+  have hR : p ≫ ((α_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})
+        (modelOver universalWeierstrassLocU.{u})).hom ≫
+        (modelOver universalWeierstrassLocU.{u} ◁ mulOver universalWeierstrassLocU.{u}) ≫
+        mulOver universalWeierstrassLocU.{u}).left =
+      pullback.lift _ _ ((hπ₁).trans (hπ₂₃).symm) ≫ mulModelHom universalWeierstrassLocU.{u} := by
+    rw [Over.comp_left, Over.comp_left, mulOver_left]
+    exact ((congrArg (p ≫ ·) (Category.assoc _ _ _).symm).trans (Category.assoc _ _ _).symm).trans
+      (congrArg (· ≫ mulModelHom universalWeierstrassLocU.{u}) hR0)
+  exact hL.trans (keyval.trans hR.symm)
 
 end AtlasEquations
 
