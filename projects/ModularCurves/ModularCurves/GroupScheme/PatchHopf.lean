@@ -469,6 +469,67 @@ theorem counitLift_comp_comulAlg :
     CommRingCat.hom_id, RingHom.id_apply] at h2
   exact h2
 
+/-! ### The right counit law -/
+
+/-- The section `⟨𝟙, e ∘ structure⟩ : G|_V ⟶ G|_V ×_V G|_V`. -/
+noncomputable def rightUnitSection : P.groupOpen.toScheme ⟶ P.groupSquare :=
+  pullback.lift (𝟙 P.groupOpen.toScheme)
+    (G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection)
+    (by rw [Category.assoc, P.unitSection_comp_groupToBase, Category.comp_id,
+      Category.id_comp])
+
+@[reassoc (attr := simp)]
+theorem rightUnitSection_fst :
+    P.rightUnitSection ≫ pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = 𝟙 P.groupOpen.toScheme :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem rightUnitSection_snd :
+    P.rightUnitSection ≫ pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection :=
+  pullback.lift_snd _ _ _
+
+/-- **The right counit law, scheme side**. -/
+theorem rightUnitSection_comp_squareMul :
+    P.rightUnitSection ≫ P.squareMul = P.groupOpen.ι := by
+  rw [← cancel_mono G.ι, squareMul]
+  set k := P.rightUnitSection ≫ P.groupSquareToSquare with hk
+  rw [show (P.rightUnitSection ≫ P.groupSquareToSquare ≫ G.mulHom) ≫ G.ι
+      = k ≫ (G.mulHom ≫ G.ι) from by rw [hk]; simp only [Category.assoc]]
+  rw [G.mulHom_ι]
+  have hsum : k ≫ ((G.sqFstPoint + G.sqSndPoint : E.Point _) : _ ⟶ E.E)
+      = ((EllipticCurve.Point.restrict E k G.sqFstPoint
+          + EllipticCurve.Point.restrict E k G.sqSndPoint : E.Point _) : _ ⟶ E.E) := by
+    rw [← EllipticCurve.Point.restrict_add]
+    rfl
+  rw [hsum]
+  have hk1 : k ≫ (fst (Over.mk G.π) (Over.mk G.π)).left = P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_fst]
+    exact rightUnitSection_fst_assoc G P P.groupOpen.ι
+  have hk2 : k ≫ (snd (Over.mk G.π) (Over.mk G.π)).left
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.unitSection ≫ P.groupOpen.ι := by
+    rw [hk, Category.assoc, P.groupSquareToSquare_snd]
+    exact rightUnitSection_snd_assoc G P P.groupOpen.ι
+  have hsnd : EllipticCurve.Point.restrict E k G.sqSndPoint = 0 := by
+    refine Subtype.ext ?_
+    show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+    rw [E.point_zero_val,
+      show ((Over.mk G.π ⊗ Over.mk G.π).hom)
+        = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl,
+      ← Category.assoc k, ← Category.assoc k, hk1, hk2]
+    rw [P.unitSection_comp_ι]
+    show ((G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι ≫ G.unitHom : _ ⟶ G.G) ≫ G.ι)
+      = (P.groupOpen.ι ≫ G.π) ≫ E.zero
+    rw [← Scheme.Hom.resLE_comp_ι G.π (le_rfl : P.groupOpen ≤ G.π ⁻¹ᵁ P.V)]
+    simp only [Category.assoc, G.unitHom_ι]
+  rw [hsnd, add_zero]
+  show k ≫ ((fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
+  rw [← Category.assoc k, hk1]
+  rfl
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
