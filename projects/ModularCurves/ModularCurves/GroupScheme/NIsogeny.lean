@@ -1870,6 +1870,94 @@ private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶
       subgroupLocusAux_val_snd]
 
 
+/-- Kernels of closed immersions transport along a precomposed inverse isomorphism, in
+comap form (sealed; the per-factor step of the order-divisor pasting naturality). -/
+private theorem generatorSpace_baseChange_ker_inv {X Y Z : Scheme.{u}} (v : X ⟶ Z)
+    (e : Y ≅ Z) [IsClosedImmersion v] :
+    Scheme.Hom.ker (v ≫ e.inv) = (Scheme.Hom.ker v).comap e.hom := by
+  haveI : IsClosedImmersion (v ≫ e.inv) := inferInstance
+  have h := generatorSpace_baseChange_ker_comap (v ≫ e.inv) e.hom
+  rw [Category.assoc, e.inv_hom_id, Category.comp_id] at h
+  exact h.symm
+
+/-- **The order-divisor pasting naturality**: the order divisor of the transported point
+over the iterated pullback is the comap along the pasting isomorphism of the order divisor
+of the original point over the composite pullback (sealed; the divisor-side half is
+`RelEffCartierDiv.baseChange_baseChange_ideal`). -/
+private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (N : ℕ) [NeZero N] :
+    (Section.orderDivisor ((E.baseChange t).baseChange q)
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') N).ideal =
+      @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+        (pullback E.π (q ≫ t))
+        (Section.orderDivisor (E.baseChange (q ≫ t))
+          (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal
+        (pullbackLeftPullbackSndIso E.π t q).hom := by
+  simp only [EllipticCurve.Section.orderDivisor]
+  rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal]
+  have hcp : @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+      (pullback E.π (q ≫ t))
+      ((∏ i : Fin N, Scheme.Hom.ker
+        ((((i : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P).1 :
+          Scheme.IdealSheafData (E.baseChange (q ≫ t)).E))
+      (pullbackLeftPullbackSndIso E.π t q).hom =
+      ∏ i : Fin N, @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
+        (pullback E.π (q ≫ t))
+        (Scheme.Hom.ker ((((i : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P).1)
+        (pullbackLeftPullbackSndIso E.π t q).hom :=
+    Scheme.IdealSheafData.comap_prod _ _ _
+  rw [hcp]
+  refine Finset.prod_congr rfl fun a _ => ?_
+  haveI := exactOrderLocusAux_val_isClosedImmersion E (q ≫ t)
+    ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P)
+  have h1 := congrArg Scheme.Hom.ker
+    (generatorSpace_baseChange_val_comp E t q P P' hPP' (((a : ℕ) : ℤ) + 1))
+  have h2 := generatorSpace_baseChange_ker_inv
+    (subgroupLocusAux_val E (q ≫ t)
+      ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P))
+    (pullbackLeftPullbackSndIso E.π t q)
+  exact h1.symm.trans h2
+
+/-- **The `IsDivisorGenerator` composite-vs-iterated base-change bridge** (sealed): a point
+of `E` over `q ≫ t` generates `D` iff the corresponding point of `E ×_S T` over `q`
+generates `D ×_S T`. Both sides reduce to their order-divisor–ideal equalities
+(`hasExactOrder_of_orderDivisor_ideal_eq`), which correspond under comap along the pasting
+isomorphism. -/
+private theorem generatorSpace_baseChange_isDivisorGenerator_iff (N : ℕ) [NeZero N]
+    (D : RelEffCartierDiv E.π) (hD : D.IsSubgroup E) {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) :
+    (E.baseChange t).IsDivisorGenerator N (D.baseChange t) q
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') ↔
+      E.IsDivisorGenerator N D (q ≫ t) (EllipticCurve.Point.asSection E (q ≫ t) P) := by
+  have hDT : (D.baseChange t).IsSubgroup (E.baseChange t) :=
+    RelEffCartierDiv.IsSubgroup.baseChange E hD t
+  have h1 : (E.baseChange t).IsDivisorGenerator N (D.baseChange t) q
+      (EllipticCurve.Point.asSection (E.baseChange t) q P') ↔
+      (Section.orderDivisor ((E.baseChange t).baseChange q)
+        (EllipticCurve.Point.asSection (E.baseChange t) q P') N).ideal =
+          ((D.baseChange t).baseChange q).ideal :=
+    ⟨fun hh => hh.2, fun hb => ⟨(E.baseChange t).hasExactOrder_of_orderDivisor_ideal_eq N
+      (D.baseChange t) hDT q _ hb, hb⟩⟩
+  have h2 : E.IsDivisorGenerator N D (q ≫ t)
+      (EllipticCurve.Point.asSection E (q ≫ t) P) ↔
+      (Section.orderDivisor (E.baseChange (q ≫ t))
+        (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal =
+          (D.baseChange (q ≫ t)).ideal :=
+    ⟨fun hh => hh.2, fun hb =>
+      ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD (q ≫ t) _ hb, hb⟩⟩
+  rw [h1, h2, generatorSpace_baseChange_orderDivisor_ideal E t q P P' hPP' N,
+    RelEffCartierDiv.baseChange_baseChange_ideal D t q]
+  constructor
+  · intro h
+    have h' := congrArg
+      (Scheme.IdealSheafData.comap · (pullbackLeftPullbackSndIso E.π t q).inv) h
+    simp only [← Scheme.IdealSheafData.comap_comp, Iso.inv_hom_id,
+      Scheme.IdealSheafData.comap_id] at h'
+    exact h'
+  · exact fun h => by rw [h]
+
 /-- **(KM 6.1, "formation commutes with arbitrary change of base")** The generator scheme
 of the base-changed divisor is the base change of the generator scheme. Dischargeable from
 the universal property (`generatorSpace_spec` on both sides + Yoneda); no new gates. -/
