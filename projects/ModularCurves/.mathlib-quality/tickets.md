@@ -14639,3 +14639,44 @@ Then C1d (assembly against C2's closed immersion), C3, C4 ⟹ pins ⟹ **BOARD-S
   Γ-dualize once through the Künneth chain); D2-L6 + p0-pickup stay armed on the signal.
   c5β 0c-ii signal pending ([T-G3-assoc] iterating). D2 running [T-SG3-LFP] (LFP-1/2/3
   landed same-hour). No B2 events; no adjudications required this pass.
+
+## Amendments v10.117 (2026-07-10, coordinator): ★★★ [Y1-ATLAS] CHARTER COMPLETE — tateMarkedPoint_classifies PROVEN; PR #5225 MERGED; restructure decided; NEW-Y1 integration dispatched — Y1's critical path is now c5β's chain
+
+- **★★★ NEW-ATLAS-3 delivered the charter**: `tateMarkedPoint_classifies` — for every
+  `Y : EllObj R` and every section `P` nowhere of geometric order ≤ 3,
+  `∃! f : Y ⟶ tateEllObj R, pullSection f (tateMarkedPoint R) = P` (Loeffler Cor 3.3.5 /
+  Prop 3.3.4 general case) — YOneAtlasClassify.lean (now 5,927 lines), ~1,680 new lines
+  over 11 green pushed increments, rebased clean onto a31862eed, 3,196-job build green,
+  ZERO sorries + ZERO maxHeartbeats in the file. **Bar v10.88 MET**: sorryAx enters
+  exactly through the two DESIGNED trails [T-A6b]/[T-B6′] (no new carriers);
+  `projModelVCIso_one`, `projTateMap_map_tate`, and the same-chart ENGINE corollaries
+  axiom-clean. Ratified highlights: `Cover.copy` re-presentation after `pullback₁`
+  field instance-poisoning (step 3); cartesianness = per-chart composite of two
+  canonical pullback isos + isomorphisms-Zariski-local-at-target (step 4); the
+  raw-component `inducedChart` + marking-transport-to-(0,0) + T-E1 base-uniqueness +
+  `projTateMap_map_tate` self-classification for the top (step 5) — with
+  `projModelVCIso_one` derived from the T-W7 cocycle at C = C′ = 1 by eqToHom-cancellation,
+  closing a gap MellWeierstrass had parked. Sentinel cleared; branch board closed with
+  attribution. EXEMPLARY charter execution — chartered v10.107, delivered same day.
+- **PR #5225 MERGED** (coordinator; rebase-merge, increment history preserved; branch
+  retained — the atlas worktree holds it): dev/modular-curves-y1 → **09fb0421b**.
+- **RESTRUCTURE DECIDED (the deferred one-liner's home)**: YOneAtlasClassify imports
+  YOneAssembly, so the fill lives DOWNSTREAM — new cap file
+  `ModularCurve/YOneTatePoint.lean` (imports YOneAtlasClassify); RELOCATE
+  statement-byte-identical `exists_tatePoint` + the opaque trio (`tatePoint`,
+  `tatePoint_nowhereGeomOrderLEThree`, `tatePoint_classifies`; grep-verified zero
+  external consumers); ∀-clause := `tateMarkedPoint_classifies`; pointer comments at
+  the old YOneAssembly sites (v10.111 relocation doctrine). **NEW-Y1's v10.89 trigger
+  is MET** — integration + MASTER-prep dispatch in inbox; opener with the owner.
+- **Y1 STATE (owner priority restated: Y1 ASAP)**: representability half (v10.89) ✓ +
+  classifying clause (this section) ✓. Remaining to Y₁(N): (1) the YOneTatePoint
+  integration one-liner + MASTER prep (NEW-Y1, firing); (2) retire [T-A6b] — flips to
+  `rfl` at T-W7a (c5β: [T-G3-assoc] iterating → T-G4/G5 → 0c-ii SIGNAL → 0h → T-W7.12 →
+  **T-W7a**); (3) retire [T-B6′] — P3b3's étale cascade, dischargeable ⟸ T-W7a
+  (opener pre-staged for that moment; PIC0's pins riding route G meanwhile); (4) MASTER
+  one-`exact`. **THE CRITICAL PATH IS c5β's CHAIN** — every other Y1 leg is an armed
+  consumer of it. No new walls anywhere on the path.
+- **Rule-5 closure**: NEW-ATLAS / NEW-ATLAS-2 stand down on [Y1-ATLAS] permanently
+  (charter completed by -3); their inbox reclaim clauses are VOID.
+- Standing reminder: beastmode-A's holder-look opener (v10.116) not yet fired — the
+  codex PR #5224 merge still waits on A's verdict. Unrelated to the Y1 path.
