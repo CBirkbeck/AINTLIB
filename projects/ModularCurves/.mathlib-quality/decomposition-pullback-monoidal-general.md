@@ -133,3 +133,25 @@ Recommended build order: B1 → B2 → G1 → G3 → G2/A.
 ## Next step
 Planning-only (no tickets). On build GO: work B1 first (the v10.95 elaboration recipes — literal
 spellings, `AddEquiv.toLinearEquiv` idiom, `respectTransparency` set_options — apply directly).
+
+## B1a build reconnaissance (banked 2026-07-10, two LSP-measured attempts)
+
+Attempted B1a with components := mathlib's `Functor.LaxMonoidal.ε/μ (ModuleCat.restrictScalars
+(ψ.app U).hom)`. FINDING: the `where`-fields elaborate (the pointwise defeq is accepted), but the
+NATURALITY goals then mix the presheaf-clothed types (`((rs ψ P ⊗ rs ψ Q).obj V`) with the raw
+ModuleCat-tensor spellings — "target not type-correct under instances transparency" — and neither
+`dsimp` nor `simp only [restrictScalars_μ_tmul]` can fire (the dsimp%-decorated lemmas need the
+raw spelling; the goal has the clothed one). Two measured failures; do NOT repeat this shape.
+
+**The winning pattern for next session (v10.95-proven):** build the components as OWN defs in the
+clothed types from the start —
+- μ-app := `ModuleCat.ofHom (X := ((restrictScalars ψ).obj P ⊗ (restrictScalars ψ).obj Q).obj U)
+  (Y := ((restrictScalars ψ).obj (P ⊗ Q)).obj U) (TensorProduct.mapOfCompatibleSMul …)-based`
+  linear map with the v10.95 compHom/tower `letI`-chain. NOTE: the LAX direction
+  (`M ⊗[R-down] N → M ⊗[S-up] N`, tmul↦tmul) needs `CompatibleSMul S-up R-down M N` only — the
+  down-action slides because it factors through ψ — **NO bijectivity hypothesis** (unlike the
+  v10.95 iso which needed it for the inverse). `mapOfCompatibleSMul_tmul` is rfl.
+- ε-app := the ring map `ψ.app U` as a hint-typed `ofHom` linear map (`RestrictScalars.map'`-style
+  `(X :=) (Y :=)` hints — the ChangeOfRings TODO-comment pattern).
+- Then all naturality/coherence proofs are `tensor_ext` + own-rfl-tmul-lemmas (the
+  restrictScalarsTensorIso_hom_tmul pattern that worked), never mathlib's dsimp%-forms.
