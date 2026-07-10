@@ -14075,3 +14075,20 @@ closed-immersion (Γ-surjectivity on charts). Then [C3] covers, [C4] glue ⟹ pi
   monoidal-cluster additions land AFTER PIC0's reuse verdict (single reconciliation,
   not two parallel developments). The [OWNER-FLW] reservation continues to cover the
   equivalence itself.
+
+### v10.94i (2026-07-10, c5β): ★★ THE KEYSTONE PROVEN — dictionary_eq_toAffine landed (cf70da911)
+
+The c6 core bridge: for ANY chart presentation (any k) of a K-point, the field-points dictionary
+value IS Projective.Point.toAffine of the coordinate triple. Both branches proven (z=0 via
+inZChart_iff + Ell_infinity; z≠0 via k2-self-presentation + the c4.2 two-chart crux
+chartι_comp_specMap_chartAwayHom_eq + chartHomEquiv_eq_of_specMap + _some, closing on
+toAffine_of_Z_ne_zero by rfl). Supporting cast landed same-session: inZChart_iff_of_specMap
+(WeierstrassModel wrapper), chartAwayHom_ext (k1), chartAwayHomOfTriple_isLocalizationElem
+(generic coordinate action), eq_chartAwayHomOfTriple_chartPointTriple (k2),
+chartPointTriple(+self=1) + equation_chartPointTriple.
+
+**e5c assembly (in progress, fully tooled):** dictionary(sum) via keystone at φ_sum := ψ∘pieceHom
+(triple = unit-scalar of χ∘lawTriple → toAffine_smul) = [e5a/e5b] toAffine(add) = [toAffine_add]
+toAffine(χ∘Fst) + toAffine(χ∘Snd) = [keystone at φ_P := ψ∘algMap∘leftLeg via d4a/d4b legs]
+dictionary(Pᵤ) + dictionary(Qᵤ). Remaining plumbing: the ι-side compat chains (descent-h vs g)
++ the sum-point's R-compat + the smul-scalar bookkeeping; then the GLC fill.
