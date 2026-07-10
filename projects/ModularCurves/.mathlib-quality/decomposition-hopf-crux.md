@@ -729,3 +729,31 @@ after Γ-dualization; (b) any future Hopf structure on `groupRing` (comul := Γ(
 through the affine Künneth over the patch, counit := Γ(unitHom), antipode := Γ(invHom)) —
 this is our OWN route to `[HopfAlgebra R A]`, avoiding the p2-affine-base restriction, and
 it is NEW-file work (p0/p2 files untouched). File: `GroupScheme/SubgroupGroupObject.lean`.
+
+## [HG-C1c-1] NEW LEAF: the Hopf algebra on `groupRing` (banked 2026-07-10)
+
+`IsCoaction ρ` needs `[Bialgebra R A]` — so before the two axioms can even be STATED for
+`chartCoaction`, `A = groupRing` must carry comul/counit (and, for M5, antipode). With
+[HG-C1c-0] done (`mulOver`/`unitOver`/`invOver` + laws) these are the Γ-duals:
+- `counit ε : A → R` := `unitHom.appLE groupOpen V _` (note `unitHom ≫ π = 𝟙 S`, so
+  `V ≤ unitHom ⁻¹ᵁ groupOpen` — the `le` is `le_of_eq` on preimages);
+- `comul Δ : A → A ⊗[R] A` := Γ(mulHom restricted) through the affine Künneth for the
+  square `G|_V ×_V G|_V`;
+- `antipode S : A → A` := `invHom.appLE groupOpen groupOpen _`.
+The coalgebra/bialgebra/Hopf axioms are then the Γ-duals of C1c-0's laws — each one
+`Spec`-side first (as with `chartCoactionSpec_over`), dualized once.
+
+**PREREQUISITE (this increment)**: generalize the chart Künneth. `StableCharts`'
+`kunnethToSpec`/`kunnethSpecIso` are already generic in shape but tied to
+`(G.π, E.π, groupOpen, U)`. Extract into `GroupScheme/PatchKunneth.lean`:
+
+  `affinePatchKunneth (hV : IsAffineOpen V) (f : X ⟶ S) (g : Y ⟶ S)
+     (W₁ : X.Opens) (hW₁ : IsAffineOpen W₁) (e₁ : W₁ ≤ f ⁻¹ᵁ V)
+     (W₂ : Y.Opens) (hW₂ : IsAffineOpen W₂) (e₂ : W₂ ≤ g ⁻¹ᵁ V) :
+     pullback (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)
+       ≅ Spec (.of (Γ(X,W₁) ⊗[Γ(S,V)] Γ(Y,W₂)))`
+
+(the algebra structures being the `appLE` maps — the rfl-alignment that made C1b's legs
+match `pullbackSpecIso` for free). Instantiations: chart case `(G.π, E.π, groupOpen, U)`
+recovers `kunnethSpecIso`; Hopf case `(G.π, G.π, groupOpen, groupOpen)` gives the target
+of `comul`. Same `toSpecΓ`-iso + `toSpecΓ_SpecMap_appLE` proof as C1b's leg 4a.
