@@ -14928,3 +14928,34 @@ mathematical content of 0c-i (the group law IS verified, at the atlas = the univ
   axiom-clean), G3-TC + G3-EXT closed (tensorLeft/Right preserve colimits pointwise;
   iso-at-colimit-point). With G1 ✓ and the closure ledger boarded, [G3] → A → Pic(f)
   is near. On charter.
+
+### v10.99 (2026-07-10, NEW-GH): ★★ [02KM] PROVEN modulo two named gates — SmoothDescent scheme layer COMPLETE; [YF-QSM] fully reduced
+
+*Per the v10.98 queue (inbox-fired). Commit e8b0fe39d. `ForMathlib/SmoothDescent.lean`
+sorryAx inventory = exactly {[02KL-CORE], [02KM-CORE]}; 02KM axiom profile standard;
+YFullRoute green; zero heartbeat bumps.*
+
+- **[02KM] `Smooth.of_precomp_etale_of_surjective` (Stacks 02KM) PROVEN** modulo the
+  gates: `f` lfp by 02KL; smoothness by the same wlog-cascade + finite-affine-étale-cover
+  engine as 02KL, closing at the ring level
+  (`RingHom.Smooth.of_comp_of_etale_of_faithfullyFlat`): `formallySmooth_iff` splits into
+  **(a) Ω-projectivity — PROVEN** (`tensorKaehlerEquivOfFormallyEtale` +
+  `Flat.of_flat_tensorProduct` ff-descent + `projective_of_finitePresentation`, mirroring
+  mathlib's own base-change form `Smooth.of_smooth_tensorProduct_of_faithfullyFlat`), and
+  **(b) the H¹-cotangent transfer = [02KM-CORE] REGISTERED**
+  (`Algebra.H1Cotangent.subsingleton_of_formallyEtale`: R→S→T tower, S→T formally étale +
+  ff, Subsingleton H¹Cot(R,T) ⟹ Subsingleton H¹Cot(R,S)). Gap audit in the docstring:
+  mathlib has the PRESENTATION-level transfer (`Extension.tensorH1CotangentOfFormallyEtale`)
+  and its LOCALIZATION instantiation only; the general étale case needs the
+  presentation-building replicated (standard-étale local structure) — upstream is visibly
+  heading there (`proof_wanted ...of_formallySmooth_tensorProduct_of_faithfullyFlat` in
+  `Etale/Descent.lean` is the adjacent open statement). [02KM-CORE] may well land upstream;
+  consume-on-bump is a live option.
+- **[YF-QSM] STATUS: the scheme-level mathematics is DONE.** All three SmoothDescent
+  descents (flat / lfp / smooth) are proven; what remains is pure commutative algebra in
+  two named, Stacks-tagged, zero-file-overlap gates — [02KL-CORE] (already routed to
+  fable-FP, v10.98) and [02KM-CORE] (same hard-substrate profile; natural companion for
+  the same lane, or consume-on-bump).
+- **NEXT (NEW-GH)**: MellWeierstrass cadence cleanup (tail, with PIC0's golf note); then
+  the home GH stream re-opens ([A711-BC] status check at pickup; corrected T-H4/T-H6
+  wiring on the repointed statements; GHC6's engine gate is flipped).
