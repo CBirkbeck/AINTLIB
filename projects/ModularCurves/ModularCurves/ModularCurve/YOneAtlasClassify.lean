@@ -4030,4 +4030,63 @@ end MarkedChartData
 
 end ExistenceGlue
 
+section BaseChangeComp
+
+/-! ### Composition of model base changes
+
+`projModelBaseChange` composes along ring maps, up to the canonical identification of the
+doubly-mapped curve.  Together with `projModelVCIso_map` (T-W7.0h) this yields the
+naturality of the local classifying top maps in the chart ring. -/
+
+private lemma projMapTransportHeq {A R' : Type u} [CommRing A] [CommRing R']
+    (W : WeierstrassCurve A)
+    {V V' : WeierstrassCurve R'} (e : V' = V)
+    (g : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V)))
+    (hg : (quotientGrading (projIdeal V))₊ ≤ ((quotientGrading (projIdeal W))₊).map g)
+    (g' : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V')))
+    (hg' : (quotientGrading (projIdeal V'))₊ ≤ ((quotientGrading (projIdeal W))₊).map g')
+    (hgg : HEq g g') :
+    Proj.map g hg = eqToHom (congrArg projModel e.symm) ≫ Proj.map g' hg' := by
+  subst e
+  obtain rfl := eq_of_heq hgg
+  simp
+
+private lemma gradedHomHeq {A R' : Type u} [CommRing A] [CommRing R']
+    (W : WeierstrassCurve A)
+    {V V' : WeierstrassCurve R'} (e : V = V')
+    (g : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V)))
+    (g' : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V')))
+    (h : ∀ x, HEq (g x) (g' x)) : HEq g g' := by
+  subst e
+  exact heq_of_eq (GradedRingHom.ext fun x => eq_of_heq (h x))
+
+private lemma mkHeq {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e : V = V')
+    (q : MvPolynomial (Fin 3) R') :
+    HEq (Ideal.Quotient.mk (projIdeal V).toIdeal q)
+      (Ideal.Quotient.mk (projIdeal V').toIdeal q) := by
+  subst e; rfl
+
+/-- **Model base changes compose** along ring maps. -/
+theorem projModelBaseChange_comp {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    (φ : A →+* B) (ψ : B →+* C) (W : WeierstrassCurve A) :
+    projModelBaseChange ψ (W.map φ) ≫ projModelBaseChange φ W =
+      eqToHom (congrArg projModel (WeierstrassCurve.map_map W φ ψ)) ≫
+        projModelBaseChange (ψ.comp φ) W := by
+  show Proj.map (baseChangeGradedHom ψ (W.map φ)) _ ≫ Proj.map (baseChangeGradedHom φ W) _ =
+    eqToHom _ ≫ Proj.map (baseChangeGradedHom (ψ.comp φ) W) _
+  rw [← Proj.map_comp]
+  refine projMapTransportHeq W (WeierstrassCurve.map_map W φ ψ).symm _ _ _ _
+    (gradedHomHeq W (WeierstrassCurve.map_map W φ ψ) _ _ fun x => ?_)
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  show HEq (baseChangeGradedHom ψ (W.map φ)
+      (baseChangeGradedHom φ W (Ideal.Quotient.mk _ a)))
+    (baseChangeGradedHom (ψ.comp φ) W (Ideal.Quotient.mk _ a))
+  rw [baseChangeGradedHom, baseChangeGradedHom, quotientGradingMap_mk, quotientGradingMap_mk,
+    baseChangeGradedHom, quotientGradingMap_mk]
+  refine (mkHeq (WeierstrassCurve.map_map W φ ψ) _).trans (heq_of_eq (congrArg _ ?_))
+  show (MvPolynomial.map ψ) ((MvPolynomial.map φ) a) = (MvPolynomial.map (ψ.comp φ)) a
+  exact MvPolynomial.map_map φ ψ a
+
+end BaseChangeComp
+
 end ModularCurves

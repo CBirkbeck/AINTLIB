@@ -11049,3 +11049,60 @@ Verification: `lake build` green (3179 jobs); no `sorry`/`admit`/`maxHeartbeats`
 `git diff --check` green; line-length + linter clean. Remaining: recipe steps 2–5 (local
 classifying data per chart = compose the landed `projTateMap` with the chart data; overlap
 agreement via the T4 ENGINE; cover gluing via v10.96–100 handles; uniqueness; ∃!-wiring).
+
+## Amendments v10.111-ATLAS (2026-07-10, NEW-ATLAS-2): [Y1-ATLAS] T6 existence — BASE GLUED; top-glue design pinned
+
+Landed (all green, pushed):
+- **Local classifying data** per chart: `baseMap` (= `isoSpec.hom ≫ tateBaseSpecMapOfPoint`),
+  `topMap` (= `e.hom ≫ projTateMap`), `topMap_isPullback` (pasted), `topMap_zero`,
+  `topMap_marking` (both `Spec`-side, inv-free).
+- **`TateAtlasNaturality`** (axiom-CLEAN): `IsTateNormal.map`, `NowhereOrderLEThree.map`,
+  `tateNormalVariableChange_map` (T-E1 unique-clause), `_smul_map`,
+  `tateRingOverLiftOfPoint_comp` (localization + MvPolynomial ext on X0/X1),
+  `tateBaseSpecMapOfPoint_naturality`, `_congr`.
+- **`chartAlgebra`** := `(ΓSpecIso R).inv ≫ structMap.appLE` + `chartAlgebra_compatible`
+  (via `SpecMap_appLE_fromSpec` + `fromSpec_top` + `isoSpec_Spec_inv`), `baseMap_over`.
+- **`fibrePt`** (restricted section as a `Z`-chart point of the fibre model over ANY chart
+  algebra k — the [CommRing k] fibre machinery pays off): `fibrePt_comp_bc`,
+  `fibrePt_inZChart`, `specPointBaseChange_fibrePt`, `zChartEval_fibrePt_coordX/Y`
+  (all axiom-CLEAN), `fibrePt_hord` (through pt_hord).
+- **Overlap agreement**: `fibreModelIso` (pointed comparison of the two fibre models over an
+  agreeing test point; `pullback.congrHom`-mediated, `_π`/`_zero`/`fibrePt_fibreModelIso`
+  axiom-CLEAN) → **ENGINE(a)** → `tateBaseSpecMapOfPoint_fibrePt_agree` →
+  `specPt_tateBaseSpecMapOfPoint_agree` (naturality + congr + ENGINE, calc-chained).
+- **The glue**: `test_baseMap_agree` (instance-packaged: `Spec.preimage`-algebras, tower
+  via `Spec.map_injective`), `chartAt`/`chartCover` (`Cover.mkOfCovers`),
+  `coverBaseMap_compat` (affine cover of the overlap + `cancel_epi (isoSpec V).inv`),
+  **`gluedBaseMap : Y.base ⟶ tateBase R`** + `ι_gluedBaseMap` + `gluedBaseMap_over`.
+- **`projModelBaseChange_comp`** (graded-HEq transport mirroring T-W7.0h's private
+  machinery, replicated): model base changes compose up to `eqToHom (map_map)`.
+
+NEXT (top-glue recipe, de-risked):
+1. `projTateMap_naturality` : `projModelBaseChange ψ W ≫ projTateMap R W (pt-data) =
+   projTateMap R (W.map ψ) (fibrePt-data)`. Derivation: unfold `tateNormalIso`
+   (= `eqToIso ≪≫ projModelVCIso`, CANONICAL); use **`projModelVCIso_map`** (T-W7.0h,
+   EXISTS at ModelVariableChange:564) to move `bc(ψ,W)` past `VCIso.inv`;
+   `projModelBaseChange_congr` (subst-trivial) to slide `eqToHom`s; then
+   `projModelBaseChange_comp` + `tateRingOverLiftOfPoint_comp` to merge the algLift legs;
+   close with `tateNormalVariableChange_map` (C_B = C_A.map ψ) + eqToHom fusion.
+   State it directly in `MarkedChartData`-form (g := D.pt P, g' := D.fibrePt k P) so
+   `zChartEval_fibrePt_coordX/Y` are the eval links — avoids dependent x,y-generalisation.
+2. Fibre-restriction of the top: `ι_f ≫ topMap = fibreChartIso.hom ≫ bc(ψ) ≫ projTateMap(pt)`
+   (= `pullbackChartIso_hom_bc` + def-chase), then by (1) + ENGINE(b)
+   `projTateMap_eq_of_pointedIso` (T4d) with `fibreModelIso`-data: the two topMap
+   fibre-restrictions agree.
+3. E-cover: `(chartCover Y).pullbackCover Y.curve.π`-style (pieces `pullback π ι_i` via fst);
+   overlap O^E ≅ pullback π (overlap-base) [pasting]; cover O^E by
+   `pullback π (m ∘ c_z)` (pull the affine cover of the base-overlap back along π);
+   morphism-ext over that cover + step 2 ⟹ `coverTopMap_compat`; glue via
+   `Scheme.Cover.glueMorphisms`; `ι_glue` equations.
+4. Clauses: IsPullback via `MorphismProperty.isomorphisms`-local-at-target on the
+   comparison into `pullback tateπ gluedBase` (per-piece iso by `topMap_isPullback` +
+   `ι_gluedBaseMap`); zero_w + pullSection-marking cover-locally (`topMap_zero`/`_marking`
+   + `Scheme.Cover.hom_ext`); assemble `EllObj.tateClassifyingHomOfOpenCover`;
+   `tateClassifyingHom_pullSection_eq` gives `pullSection = P`.
+5. T7 uniqueness per the v10.109 plan (f-induced charts + ENGINE pins + `Cover.hom_ext`
+   on both covers + `tateClassifyingHom_existsUnique_of_components`).
+
+Axioms: every new decl axiom-clean except the `pt_hord`-consumers (designed
+[T-A6b]/[T-B6′] trails, attributed in v10.110).
