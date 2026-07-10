@@ -437,6 +437,38 @@ theorem includeLeft_comp_counitLiftΓ :
   rw [← Category.assoc P.groupOpen.topIso.inv, Iso.inv_hom_id, Category.id_comp]
   rw [Category.comp_id]
 
+/-- The algebraic counit lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ ε(a) • b`. -/
+noncomputable def counitLift :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift ((Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg)
+    (AlgHom.id P.baseRing P.groupRing) (fun _ _ => Commute.all _ _)
+
+/-- **The counit lift is the `Γ`-dual of the left unit section.** -/
+theorem counitLift_eq_counitLiftΓ :
+    CommRingCat.ofHom P.counitLift.toRingHom = P.counitLiftΓ := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [counitLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLift G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [counitLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The left counit law**: `(ε ⊗ id) ∘ Δ = id`, in `AlgHom` form. -/
+theorem counitLift_comp_comulAlg :
+    P.counitLift.comp P.comulAlg = AlgHom.id P.baseRing P.groupRing := by
+  have h := P.groupPatchComul_comp_counitLiftΓ
+  rw [← P.counitLift_eq_counitLiftΓ] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
