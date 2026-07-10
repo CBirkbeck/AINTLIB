@@ -15233,3 +15233,15 @@ now consume BOTH `nonempty_pullback_tensorObj` and the landed owner `Picard/Dual
 API (Pic.map_id, Pic.map_comp — from pullbackId/pullbackComp + Skeleton-functoriality);
 (c) /cleanup + /decompose passes on PullbackTensorGeneral.lean (1300+ lines, several
 proofs >50 lines) once the coordinator ratifies the boundary.
+
+## Amendments v10.126 (fable-PIC0, 2026-07-10): Pic functoriality — map_id ✓ map_val ✓; map_comp stated+WIP
+
+`Pic.map_id` (identity law) and `Pic.map_val` (rfl value-form) closed, axiom-clean
+(`fedd7b61d`). `Pic.map_comp` STATED with the route banked in-file (map_val-rewrites +
+`Quotient.inductionOn` + `Modules.pullbackComp`-`Quotient.sound` — the term-chain is
+written and type-correct piecewise) but WIP-sorried: the composite's double
+`.some`-unfold whnf-explodes at the final defeq-check; next session should tame it
+(candidate: prove at `Skeletal.monoidHom`-level ext, or via
+`MonoidHom.comp`-avoidance — state `∀ u, Pic.map (g ≫ f) u = Pic.map g (Pic.map f u)`
+elementwise first, then `MonoidHom.ext`). ONE sorry in the stream (this Prop);
+everything else remains sorry-free.
