@@ -44,6 +44,7 @@ import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify
+import ModularCurves.ModularCurve.YOneTatePoint
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.SpecBasicOpenAway
