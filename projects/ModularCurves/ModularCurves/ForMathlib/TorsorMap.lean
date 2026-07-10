@@ -20,9 +20,11 @@ import Mathlib.AlgebraicGeometry.Sites.Fpqc
   `G`-map of torsors, hence an iso.
 
 * `existsUnique_descent_of_torsor` — a `G`-invariant morphism out of a `G`-torsor over an
-  **affine** base descends uniquely through it (the torsor realizes its base as the quotient):
+  **arbitrary** base descends uniquely through it (the torsor realizes its base as the quotient):
   the `torsorCompare` presentation reduces the kernel-pair coequalizing condition to invariance,
-  and mathlib's regular-epi `isRegularEpi_of_flat_of_surjective_of_isAffine` supplies the descent.
+  and a quasi-compact + surjective + flat morphism is an fpqc effective epimorphism.
+* `isIso_torsorCompare_pullback`, `isIso_sigmaDesc_of_isPullback`, `isIso_sigmaDesc_section` —
+  the base-change/trivialization helpers (also used by the KM 4.7.0 bijection's curve-level descent).
 
 These are the torsor facts of the KM 4.7.0 representability argument.
 -/
@@ -75,7 +77,7 @@ theorem pullbackTorsorAction_over {S S' W : Scheme.{u}} {G : Type u} [Group G]
 trivialization `κ : ∐_G Y ≅ Q`, a morphism `q : Q' ⟶ Q`, and a family `ι' γ : X ⟶ Q'` fitting in
 componentwise pullback squares over the components of `κ`, the induced comparison
 `∐_G X ⟶ Q'` is an isomorphism. -/
-private theorem isIso_sigmaDesc_of_isPullback {G : Type u} [Finite G] {X Y Q Q' : Scheme.{u}}
+theorem isIso_sigmaDesc_of_isPullback {G : Type u} [Finite G] {X Y Q Q' : Scheme.{u}}
     (κ : (∐ fun _ : G => Y) ⟶ Q) [IsIso κ] (q : Q' ⟶ Q) (v : X ⟶ Y) (ι' : G → (X ⟶ Q'))
     (h : ∀ γ : G, IsPullback (ι' γ) v q (Sigma.ι (fun _ : G => Y) γ ≫ κ)) :
     IsIso (Sigma.desc ι') := by
@@ -111,7 +113,7 @@ private theorem isIso_sigmaDesc_of_isPullback {G : Type u} [Finite G] {X Y Q Q' 
 
 /-- **Base change of a torsor is a torsor**: if `torsorCompare fW σW hWover` is an isomorphism,
 so is the torsor comparison of the pulled-back action on `pullback fW f₀ ⟶ S`. -/
-private theorem isIso_torsorCompare_pullback {S S' W : Scheme.{u}} {G : Type u} [Group G]
+theorem isIso_torsorCompare_pullback {S S' W : Scheme.{u}} {G : Type u} [Group G]
     [Finite G] {fW : W ⟶ S'} (σW : SchemeAction G W) (hWover : ∀ γ, σW.hom γ ≫ fW = fW)
     (hWtors : IsIso (torsorCompare fW σW hWover)) (f₀ : S ⟶ S') :
     IsIso (torsorCompare (pullback.snd fW f₀) (pullbackTorsorAction σW hWover f₀)
@@ -156,7 +158,7 @@ private theorem isIso_torsorCompare_pullback {S S' W : Scheme.{u}} {G : Type u} 
 
 /-- **A torsor with a section is trivial**: if `fP : P ⟶ Z` is a `G`-torsor and `s : Z ⟶ P` a
 section, then `(γ, z) ↦ γ·s(z)` is an isomorphism `∐_G Z ≅ P`. -/
-private theorem isIso_sigmaDesc_section {Z P : Scheme.{u}} {G : Type u} [Group G] [Finite G]
+theorem isIso_sigmaDesc_section {Z P : Scheme.{u}} {G : Type u} [Group G] [Finite G]
     {fP : P ⟶ Z} (σP : SchemeAction G P) (hPover : ∀ γ, σP.hom γ ≫ fP = fP)
     (hPtors : IsIso (torsorCompare fP σP hPover)) (s : Z ⟶ P) (hs : s ≫ fP = 𝟙 Z) :
     IsIso (Sigma.desc fun γ : G => s ≫ σP.hom γ) := by
