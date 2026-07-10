@@ -3,6 +3,9 @@ import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
 import Mathlib.FieldTheory.Minpoly.Field
 import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+import Mathlib.RingTheory.SimpleRing.Basic
 import Mathlib.LinearAlgebra.Determinant
 
 /-!
@@ -516,6 +519,127 @@ theorem exists_algHom_comp_eq [IsAlgClosed k] (ρ : B →ₐ[R] B ⊗[R] A) (hρ
   obtain ⟨n, hn⟩ := Nat.exists_eq_succ_of_ne_zero hcard
   rw [hn, pow_succ] at hgpow
   exact hgnu (isUnit_of_mul_isUnit_right hgpow)
+
+/-- **GAP-6 (semi-locality, Stacks 03BM's semi-local step)**: when the co-invariants form
+a local ring, `B` has only finitely many maximal ideals. Each maximal ideal is the kernel
+of a point into the algebraic closure of the residue field (`IsAlgClosed.lift` on the
+integral residue extension), all such points agree on the co-invariants (their
+restriction is the canonical residue map), so the orbit theorem confines them — hence the
+maximal ideals — to the finite fibre over any fixed one. -/
+theorem finite_setOf_isMaximal_of_isLocalRing (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ)
+    [IsLocalRing (coinvariants ρ)] :
+    {n : Ideal B | n.IsMaximal}.Finite := by
+  classical
+  haveI : Algebra.IsIntegral (coinvariants ρ) B :=
+    isIntegral_algebra_coinvariants R A ρ hρ
+  set κ := IsLocalRing.ResidueField (coinvariants ρ) with hκdef
+  -- the ambient algebraically closed field, as an R-algebra through the residue map
+  letI : Algebra R (AlgebraicClosure κ) :=
+    ((algebraMap κ (AlgebraicClosure κ)).comp
+      ((IsLocalRing.residue (coinvariants ρ)).comp
+        (algebraMap R (coinvariants ρ)))).toAlgebra
+  -- pointify each maximal ideal
+  have hpoint : ∀ n : Ideal B, n.IsMaximal →
+      ∃ χ : B →ₐ[R] AlgebraicClosure κ,
+        RingHom.ker χ.toRingHom = n ∧
+        ∀ (x : B) (hx : x ∈ coinvariants ρ), χ x
+          = algebraMap κ (AlgebraicClosure κ)
+              (IsLocalRing.residue (coinvariants ρ) ⟨x, hx⟩) := by
+    intro n hn
+    haveI := hn
+    have hcomap : IsLocalRing.maximalIdeal (coinvariants ρ)
+        = Ideal.comap (algebraMap (coinvariants ρ) B) n := by
+      haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+        (R := coinvariants ρ) (S := B) n
+      exact (IsLocalRing.eq_maximalIdeal inferInstance).symm
+    let q : κ →+* B ⧸ n :=
+      Ideal.quotientMap n (algebraMap (coinvariants ρ) B) (le_of_eq hcomap)
+    letI : Algebra κ (B ⧸ n) := q.toAlgebra
+    haveI hqint : Algebra.IsIntegral κ (B ⧸ n) := by
+      constructor
+      intro x
+      obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective x
+      obtain ⟨p, hpm, hpev⟩ := isIntegral_coinvariants R A ρ hρ b
+      refine ⟨p.map (IsLocalRing.residue (coinvariants ρ)), hpm.map _, ?_⟩
+      rw [Polynomial.eval₂_map]
+      rw [show (algebraMap κ (B ⧸ n)).comp (IsLocalRing.residue (coinvariants ρ))
+          = (Ideal.Quotient.mk n).comp (algebraMap (coinvariants ρ) B) from
+        Ideal.quotientMap_comp_mk (le_of_eq hcomap)]
+      rw [← Polynomial.hom_eval₂, hpev, map_zero]
+    haveI : Algebra.IsAlgebraic κ (B ⧸ n) := Algebra.IsIntegral.isAlgebraic
+    let ε : (B ⧸ n) →ₐ[κ] AlgebraicClosure κ := IsAlgClosed.lift
+    -- the point: ε after the quotient, R-linear through the residue tower
+    refine ⟨{ toRingHom := (ε.toRingHom.comp (Ideal.Quotient.mk n))
+              commutes' := fun r => ?_ }, ?_, ?_⟩
+    · show ε (Ideal.Quotient.mk n (algebraMap R B r)) = _
+      rw [show algebraMap R B r
+          = algebraMap (coinvariants ρ) B (algebraMap R (coinvariants ρ) r) from
+        (IsScalarTower.algebraMap_apply R (coinvariants ρ) B r)]
+      rw [show Ideal.Quotient.mk n
+            (algebraMap (coinvariants ρ) B (algebraMap R (coinvariants ρ) r))
+          = q (IsLocalRing.residue (coinvariants ρ) (algebraMap R (coinvariants ρ) r))
+        from (RingHom.congr_fun (Ideal.quotientMap_comp_mk (le_of_eq hcomap)) _).symm]
+      rw [show q (IsLocalRing.residue (coinvariants ρ) (algebraMap R (coinvariants ρ) r))
+          = algebraMap κ (B ⧸ n)
+              (IsLocalRing.residue (coinvariants ρ) (algebraMap R (coinvariants ρ) r))
+        from rfl]
+      rw [AlgHom.commutes]
+      rfl
+    · -- the kernel: contains n, is proper, and n is maximal
+      show RingHom.ker (ε.toRingHom.comp (Ideal.Quotient.mk n)) = n
+      have hle : n ≤ RingHom.ker (ε.toRingHom.comp (Ideal.Quotient.mk n)) := by
+        intro b hb
+        rw [RingHom.mem_ker, RingHom.comp_apply,
+          Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero]
+      exact (hn.eq_of_le (RingHom.ker_ne_top _) hle).symm
+    · -- the co-invariant restriction is canonical
+      intro x hx
+      show ε (Ideal.Quotient.mk n x) = _
+      have hstep : Ideal.Quotient.mk n x
+          = algebraMap κ (B ⧸ n) (IsLocalRing.residue (coinvariants ρ) ⟨x, hx⟩) :=
+        (RingHom.congr_fun (Ideal.quotientMap_comp_mk (le_of_eq hcomap))
+          (⟨x, hx⟩ : coinvariants ρ)).symm
+      rw [hstep, AlgHom.commutes]
+  -- if there is no maximal ideal, done; else fix one and confine the rest
+  by_cases hex : ∃ n₀ : Ideal B, n₀.IsMaximal
+  · obtain ⟨n₀, hn₀⟩ := hex
+    obtain ⟨χ₀, hχ₀ker, hχ₀c⟩ := hpoint n₀ hn₀
+    -- every maximal's point is confined: it factors through the finite fibre over χ₀
+    have hfin := finite_setOf_comp_includeLeft_eq R A (k := AlgebraicClosure κ) χ₀
+    -- the map n ↦ the connecting point Χ_n (choice), injective onto the fibre
+    have hconn : ∀ n : {n : Ideal B | n.IsMaximal},
+        ∃ Χ : (B ⊗[R] A) →ₐ[R] AlgebraicClosure κ,
+          Χ.comp (Algebra.TensorProduct.includeLeft (S := R)) = χ₀ ∧
+          RingHom.ker (Χ.comp ρ).toRingHom = (n : Ideal B) := by
+      rintro ⟨n, hn⟩
+      obtain ⟨χ, hχker, hχc⟩ := hpoint n hn
+      obtain ⟨Χ, hΧρ, hΧι⟩ := exists_algHom_comp_eq R A ρ hρ χ χ₀ (fun x hx => by
+        rw [hχc x hx, hχ₀c x hx])
+      refine ⟨Χ, hΧι, ?_⟩
+      rw [hΧρ]
+      exact hχker
+    choose Χmap hΧι hΧker using hconn
+    -- injectivity: the kernel of Χ∘ρ recovers n
+    have hinj : Function.Injective Χmap := by
+      intro n₁ n₂ h
+      refine Subtype.ext ?_
+      rw [← hΧker n₁, ← hΧker n₂, h]
+    -- Χmap lands in the finite fibre set over χ₀
+    have hrange : Set.range Χmap ⊆ {χ | χ.comp
+        (Algebra.TensorProduct.includeLeft (S := R)) = χ₀} := by
+      rintro - ⟨n, rfl⟩
+      exact hΧι n
+    haveI : Finite {χ : (B ⊗[R] A) →ₐ[R] AlgebraicClosure κ | χ.comp
+        (Algebra.TensorProduct.includeLeft (S := R)) = χ₀} := hfin.to_subtype
+    haveI : Finite (Set.range Χmap) := Set.Finite.to_subtype
+      (Set.Finite.subset hfin hrange)
+    haveI : Finite {n : Ideal B | n.IsMaximal} :=
+      Finite.of_injective
+        (fun n => (⟨Χmap n, ⟨n, rfl⟩⟩ : Set.range Χmap))
+        (fun a b h => hinj (congrArg Subtype.val h))
+    exact Set.toFinite _
+  · push Not at hex
+    refine Set.Finite.subset (Set.finite_empty) (fun n hn => (hex n hn).elim)
 
 end Orbit
 
