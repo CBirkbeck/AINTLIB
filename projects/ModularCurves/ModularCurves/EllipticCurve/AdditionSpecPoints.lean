@@ -881,6 +881,196 @@ lemma chartHom_compat_of_specPoint (W : WeierstrassCurve R) (k : Fin 3)
   have h2 := Spec.map_inj.mp hπ
   exact congrArg CommRingCat.Hom.hom h2
 
+
+section DictionaryOfPiece
+
+open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- [e5c-P] Through a law-1 piece presentation of the pair-point, `P`'s dictionary value is
+`toAffine` of the first tautological image. -/
+lemma dictionary_fst_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    projModelPointsEquiv W K P =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointFst W i j) := by
+  classical
+  set φP : chartAway W i →+* K := ψ.comp
+    ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeLeftRingHom
+          (A := chartAway W i) (B := chartAway W j)))) with hφPdef
+  have hP1 : Spec.map (CommRingCat.ofHom φP) ≫ chartι W i = P.1 := by
+    rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc,
+      specMap_pieceAwayZι_fst W i j k ψ]
+  have hπ : (Spec.map (CommRingCat.ofHom φP) ≫ chartι W i) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [hP1]
+    exact P.2
+  have hφP : φP.comp (algebraMap R (chartAway W i)) = algebraMap R K :=
+    chartHom_compat_of_specPoint W i φP hπ
+  rw [dictionary_eq_toAffine W i φP hφP P hP1]
+  congr 1
+  funext m
+  by_cases hm : m = i
+  · subst hm
+    rw [chartPointTriple_self_eq_one]
+    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointFst W m j m)
+    rw [show biChartPointFst W m j m = 1 from dif_pos rfl, map_one]
+  · show φP (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W m)) = _
+    rw [← chartCoordEquiv_mk_X W i ⟨m, hm⟩, hφPdef]
+    show ψ ((algebraMap _ _) (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeLeftRingHom
+          (A := chartAway W i) (B := chartAway W j)))
+      (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
+    rw [tensorLeftLeg_chartCoord W i j ⟨m, hm⟩]
+    rfl
+/-- [e5c-Q] Through a law-1 piece presentation of the pair-point, `Q`'s dictionary value is
+`toAffine` of the second tautological image. -/
+lemma dictionary_snd_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    projModelPointsEquiv W K Q =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointSnd W i j) := by
+  classical
+  set φQ : chartAway W j →+* K := ψ.comp
+    ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeRight
+          (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)) with hφQdef
+  have hQ1 : Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j = Q.1 := by
+    rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc,
+      specMap_pieceAwayZι_snd W i j k ψ]
+  have hπ : (Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [hQ1]
+    exact Q.2
+  have hφQ : φQ.comp (algebraMap R (chartAway W j)) = algebraMap R K :=
+    chartHom_compat_of_specPoint W j φQ hπ
+  rw [dictionary_eq_toAffine W j φQ hφQ Q hQ1]
+  congr 1
+  funext m
+  by_cases hm : m = j
+  · subst hm
+    rw [chartPointTriple_self_eq_one]
+    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointSnd W i m m)
+    rw [show biChartPointSnd W i m m = 1 from dif_pos rfl, map_one]
+  · show φQ (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W m)) = _
+    rw [← chartCoordEquiv_mk_X W j ⟨m, hm⟩, hφQdef]
+    show ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
+        (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+          (Algebra.TensorProduct.includeRight
+            (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)
+          (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
+    rw [tensorRightLeg_chartCoord W i j ⟨m, hm⟩]
+    rfl
+
+/-- [e5c-P,Y] Through a law-2 piece presentation of the pair-point, `P`'s dictionary value is
+`toAffine` of the first tautological image. -/
+lemma dictionary_fst_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawTwoTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k) :
+    projModelPointsEquiv W K P =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawTwoTriple W i j k)))) ∘ biChartPointFst W i j) := by
+  classical
+  set φP : chartAway W i →+* K := ψ.comp
+    ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
+      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeLeftRingHom
+          (A := chartAway W i) (B := chartAway W j)))) with hφPdef
+  have hP1 : Spec.map (CommRingCat.ofHom φP) ≫ chartι W i = P.1 := by
+    rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc,
+      specMap_pieceAwayι_fst W i j k ψ]
+  have hπ : (Spec.map (CommRingCat.ofHom φP) ≫ chartι W i) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [hP1]
+    exact P.2
+  have hφP : φP.comp (algebraMap R (chartAway W i)) = algebraMap R K :=
+    chartHom_compat_of_specPoint W i φP hπ
+  rw [dictionary_eq_toAffine W i φP hφP P hP1]
+  congr 1
+  funext m
+  by_cases hm : m = i
+  · subst hm
+    rw [chartPointTriple_self_eq_one]
+    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointFst W m j m)
+    rw [show biChartPointFst W m j m = 1 from dif_pos rfl, map_one]
+  · show φP (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W m)) = _
+    rw [← chartCoordEquiv_mk_X W i ⟨m, hm⟩, hφPdef]
+    show ψ ((algebraMap _ _) (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeLeftRingHom
+          (A := chartAway W i) (B := chartAway W j)))
+      (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
+    rw [tensorLeftLeg_chartCoord W i j ⟨m, hm⟩]
+    rfl
+/-- [e5c-Q,Y] Through a law-2 piece presentation of the pair-point, `Q`'s dictionary value is
+`toAffine` of the second tautological image. -/
+lemma dictionary_snd_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawTwoTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k) :
+    projModelPointsEquiv W K Q =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawTwoTriple W i j k)))) ∘ biChartPointSnd W i j) := by
+  classical
+  set φQ : chartAway W j →+* K := ψ.comp
+    ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
+      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+        (Algebra.TensorProduct.includeRight
+          (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)) with hφQdef
+  have hQ1 : Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j = Q.1 := by
+    rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc,
+      specMap_pieceAwayι_snd W i j k ψ]
+  have hπ : (Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [hQ1]
+    exact Q.2
+  have hφQ : φQ.comp (algebraMap R (chartAway W j)) = algebraMap R K :=
+    chartHom_compat_of_specPoint W j φQ hπ
+  rw [dictionary_eq_toAffine W j φQ hφQ Q hQ1]
+  congr 1
+  funext m
+  by_cases hm : m = j
+  · subst hm
+    rw [chartPointTriple_self_eq_one]
+    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointSnd W i m m)
+    rw [show biChartPointSnd W i m m = 1 from dif_pos rfl, map_one]
+  · show φQ (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W m)) = _
+    rw [← chartCoordEquiv_mk_X W j ⟨m, hm⟩, hφQdef]
+    show ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
+        (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+          (Algebra.TensorProduct.includeRight
+            (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)
+          (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
+    rw [tensorRightLeg_chartCoord W i j ⟨m, hm⟩]
+    rfl
+
+
+end DictionaryOfPiece
+
 end ChartPointTriple
 
 end ChartNaturality
