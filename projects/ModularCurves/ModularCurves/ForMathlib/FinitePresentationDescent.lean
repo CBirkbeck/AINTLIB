@@ -351,6 +351,38 @@ variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
   {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
   {A : Type u} [CommRing A] [Algebra R A] {u : ∀ i, 𝒮 i →ₐ[R] A}
 
+/-- Finitely many elements of the colimit lift jointly to a common stage. -/
+theorem IsFilteredAlgColimit.exists_common_lift (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {κ : Type*} [Finite κ] (a : κ → A) :
+    ∃ (i : ι) (x : κ → 𝒮 i), ∀ k, u i (x k) = a k := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose idx xk hxk using fun k => H.jointly_surjective (a k)
+  obtain ⟨i, hi⟩ := (Finset.univ.image idx).exists_le
+  exact ⟨i,
+    fun k => t (hi (idx k) (Finset.mem_image_of_mem idx (Finset.mem_univ k))) (xk k),
+    fun k => by rw [H.compat, hxk]⟩
+
+/-- Finitely many stage equalities that hold in the colimit hold at a common later
+stage. -/
+theorem IsFilteredAlgColimit.exists_common_eq (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {κ : Type*} [Finite κ] ⦃i : ι⦄ (x y : κ → 𝒮 i) (hxy : ∀ k, u i (x k) = u i (y k)) :
+    ∃ (j : ι) (h : i ≤ j), ∀ k, t h (x k) = t h (y k) := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose jdx hj he using fun k => H.eq_at_stage (x k) (y k) (hxy k)
+  obtain ⟨j₀, hj₀⟩ := (insert i (Finset.univ.image jdx)).exists_le
+  have hij : i ≤ j₀ := hj₀ i (Finset.mem_insert_self i _)
+  refine ⟨j₀, hij, fun k => ?_⟩
+  have h' : jdx k ≤ j₀ :=
+    hj₀ (jdx k) (Finset.mem_insert_of_mem (Finset.mem_image_of_mem jdx (Finset.mem_univ k)))
+  show t ((hj k).trans h') (x k) = t ((hj k).trans h') (y k)
+  rw [← H.t_trans (hj k) h', ← H.t_trans (hj k) h', he k]
+
 variable (𝒮 t u) in
 /-- **[KL-2] spread data.** A presentation of the `A`-algebra `B` descended to the stage
 `i₀` of a filtered system with colimit `A`: `m` variables, `k` relation polynomials `g`
@@ -374,7 +406,50 @@ colimit of a filtered system descends to spread data at some stage: choose a pre
 at a later stage (`eq_at_stage`). -/
 theorem exists_spreadData (H : IsFilteredAlgColimit R 𝒮 t A u)
     [FinitePresentation A B] : Nonempty (SpreadData 𝒮 u B) := by
-  sorry
+  classical
+  obtain ⟨m, π, hπ, hker⟩ := ‹FinitePresentation A B›.out
+  obtain ⟨G, hG⟩ := hker
+  have hG' : Ideal.span (G : Set (MvPolynomial (Fin m) A)) = RingHom.ker π := hG
+  set k := Fintype.card ↥G with hk
+  set e : ↥G ≃ Fin k := Fintype.equivFin ↥G with he
+  -- jointly lift every coefficient of every generator to a common stage
+  obtain ⟨i₀, x, hx⟩ := H.exists_common_lift
+    (fun d : Σ j : Fin k, ↥((e.symm j : MvPolynomial (Fin m) A).support) =>
+      (e.symm d.1 : MvPolynomial (Fin m) A).coeff d.2)
+  -- reconstruct the generators over the stage
+  set g : Fin k → MvPolynomial (Fin m) (𝒮 i₀) := fun j =>
+    ∑ d ∈ (e.symm j : MvPolynomial (Fin m) A).support.attach,
+      MvPolynomial.monomial d.1 (x ⟨j, d⟩) with hg
+  have hmap : ∀ j, MvPolynomial.map ((u i₀).toRingHom) (g j)
+      = (e.symm j : MvPolynomial (Fin m) A) := by
+    intro j
+    rw [hg]
+    calc (MvPolynomial.map ((u i₀).toRingHom))
+          (∑ d ∈ (e.symm j : MvPolynomial (Fin m) A).support.attach,
+            MvPolynomial.monomial d.1 (x ⟨j, d⟩))
+        = ∑ d ∈ (e.symm j : MvPolynomial (Fin m) A).support.attach,
+            MvPolynomial.monomial d.1
+              ((e.symm j : MvPolynomial (Fin m) A).coeff d.1) := by
+          rw [map_sum]
+          exact Finset.sum_congr rfl fun d _ => by
+            rw [MvPolynomial.map_monomial]
+            exact congrArg _ (hx ⟨j, d⟩)
+      _ = ∑ d ∈ (e.symm j : MvPolynomial (Fin m) A).support,
+            MvPolynomial.monomial d
+              ((e.symm j : MvPolynomial (Fin m) A).coeff d) :=
+          Finset.sum_attach _ (fun d => MvPolynomial.monomial d
+            ((e.symm j : MvPolynomial (Fin m) A).coeff d))
+      _ = (e.symm j : MvPolynomial (Fin m) A) :=
+          MvPolynomial.support_sum_monomial_coeff _
+  have hrange : (Set.range fun j => MvPolynomial.map ((u i₀).toRingHom) (g j))
+      = (G : Set (MvPolynomial (Fin m) A)) := by
+    rw [funext hmap]
+    exact Set.ext fun p =>
+      ⟨fun ⟨j, hj⟩ => hj ▸ (e.symm j).2, fun hp => ⟨e ⟨p, hp⟩, by simp⟩⟩
+  have hspan : Ideal.span (Set.range fun j => MvPolynomial.map ((u i₀).toRingHom) (g j))
+      = RingHom.ker π := by rw [hrange, hG']
+  exact ⟨⟨i₀, m, k, g,
+    ⟨(Ideal.quotientEquivAlgOfEq A hspan).trans (Ideal.quotientKerAlgEquivOfSurjective hπ)⟩⟩⟩
 
 variable {B}
 
@@ -387,7 +462,11 @@ abbrev SpreadData.spreadStage (D : SpreadData 𝒮 u B) ⦃i : ι⦄ (h : D.i₀
 theorem SpreadData.spreadStage_finitePresentation (D : SpreadData 𝒮 u B)
     ⦃i : ι⦄ (h : D.i₀ ≤ i) :
     FinitePresentation (𝒮 i) (D.spreadStage (t := t) h) := by
-  sorry
+  classical
+  have hfg : (Ideal.span (Set.range fun j => MvPolynomial.map (t h).toRingHom (D.g j))).FG :=
+    ⟨Finset.univ.image fun j => MvPolynomial.map (t h).toRingHom (D.g j), by
+      rw [Finset.coe_image, Finset.coe_univ, Set.image_univ]⟩
+  exact FinitePresentation.quotient hfg
 
 /-- **[KL-2b].** Base change of a stage model along a later transition is the later stage
 model: `𝒮 j ⊗[𝒮 i] spreadStage i ≃ spreadStage j` (as `𝒮 j`-algebras). -/
@@ -438,38 +517,6 @@ theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
   sorry
 
 /-! ## [KL-5] Stage factoring, stage agreement, and the assembly -/
-
-/-- Finitely many elements of the colimit lift jointly to a common stage. -/
-theorem IsFilteredAlgColimit.exists_common_lift (H : IsFilteredAlgColimit R 𝒮 t A u)
-    {κ : Type*} [Finite κ] (a : κ → A) :
-    ∃ (i : ι) (x : κ → 𝒮 i), ∀ k, u i (x k) = a k := by
-  classical
-  cases nonempty_fintype κ
-  haveI := H.directed
-  haveI := H.nonempty
-  choose idx xk hxk using fun k => H.jointly_surjective (a k)
-  obtain ⟨i, hi⟩ := (Finset.univ.image idx).exists_le
-  exact ⟨i,
-    fun k => t (hi (idx k) (Finset.mem_image_of_mem idx (Finset.mem_univ k))) (xk k),
-    fun k => by rw [H.compat, hxk]⟩
-
-/-- Finitely many stage equalities that hold in the colimit hold at a common later
-stage. -/
-theorem IsFilteredAlgColimit.exists_common_eq (H : IsFilteredAlgColimit R 𝒮 t A u)
-    {κ : Type*} [Finite κ] ⦃i : ι⦄ (x y : κ → 𝒮 i) (hxy : ∀ k, u i (x k) = u i (y k)) :
-    ∃ (j : ι) (h : i ≤ j), ∀ k, t h (x k) = t h (y k) := by
-  classical
-  cases nonempty_fintype κ
-  haveI := H.directed
-  haveI := H.nonempty
-  choose jdx hj he using fun k => H.eq_at_stage (x k) (y k) (hxy k)
-  obtain ⟨j₀, hj₀⟩ := (insert i (Finset.univ.image jdx)).exists_le
-  have hij : i ≤ j₀ := hj₀ i (Finset.mem_insert_self i _)
-  refine ⟨j₀, hij, fun k => ?_⟩
-  have h' : jdx k ≤ j₀ :=
-    hj₀ (jdx k) (Finset.mem_insert_of_mem (Finset.mem_image_of_mem jdx (Finset.mem_univ k)))
-  show t ((hj k).trans h') (x k) = t ((hj k).trans h') (y k)
-  rw [← H.t_trans (hj k) h', ← H.t_trans (hj k) h', he k]
 
 /-- **[KL-5a] (concrete Stacks 00QO, (1) ⟹ (2) surjectivity).** An `R`-algebra map from a
 finitely presented algebra into the colimit of a filtered system factors through a stage.
