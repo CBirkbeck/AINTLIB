@@ -15245,3 +15245,22 @@ written and type-correct piecewise) but WIP-sorried: the composite's double
 `MonoidHom.comp`-avoidance — state `∀ u, Pic.map (g ≫ f) u = Pic.map g (Pic.map f u)`
 elementwise first, then `MonoidHom.ext`). ONE sorry in the stream (this Prop);
 everything else remains sorry-free.
+
+## Amendments v10.114 (c5β) — T-G4 comm DONE (Over+raw); GLC names freed; 4 transports = whisker-BC-naturality sub-project
+
+STATE (all committed): c6 COMPLETE; all 5 atlas group axioms; mulModelHom_comm (raw, every R);
+mulOver_comm (Over, every R). GLC's 5 premature sorried group-axiom statements REMOVED (zero code
+refs, only downstream-of-c6 provable) — canonical `mulOver_*` names now live in GroupLawAxioms
+`section Transport`; GroupLawDescent + full chain green.
+
+REMAINING (4 Over-level transports, sorried WIP in section Transport): `mulOver_assoc`,
+`oneOver_mulOver`, `mulOver_oneOver`, `invOver_mulOver`. Common blocker = **whisker/associator
+base-change naturality** (`(F ▷/◁ mo_W).left ≫ pullbackMapBaseChangeOf = <cube pullbackMap> ≫
+(F_atlas ▷/◁ mo_atlas).left`), provable by `pullback.hom_ext` + the Over projection lemmas +
+per-factor base-change (`hbc` for mul, `projModelZero_baseChange` EXISTS for the unit,
+**`negModelHom_baseChange` MISSING** — needs a new sub-lemma for inv). Friction: `projModelBaseChangeOf`
+carries an `eqToHom` layer (from its `h : W₀.map f = W`). A dedicated agent spent 489k tokens +
+hit the fleet's shared session limit before cracking it — this is a real infrastructure sub-project
+needing fresh budget, NOT a math gap. Simplification banked: **mulOver_comm is proven**, so one unit
+law derives from the other by commutativity — the core need is {one unit + assoc + inv} + the
+whisker-BC lemmas + negModelHom_baseChange. Template: `mulModelHom_comm` (validated end-to-end).
