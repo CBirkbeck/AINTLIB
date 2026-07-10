@@ -511,3 +511,16 @@ comparisons, or go through `IsPullback.of_isoPullback`. Downstream consumer: per
 `IsClosedImmersion.isAffine_iff`-adjacent / `Scheme.Hom.appTop`-surjectivity:
 `IsClosedImmersion` over affine ⟹ surjective appTop ✓ exists as
 `IsClosedImmersion.surjective_appTop`-ish; verify name).
+
+[HG-C2]-mile addendum (2026-07-10 second attempt): the `pullbackRightPullbackFstIso`-route
+ALSO hits motive-not-type-correct (its domain `pullback (G.ι ≫ E.π) E.π` is defeq-but-not-
+syntactic to `pullback G.π E.π`; even `rw [Category.assoc]` fails on the heterogeneous ≫).
+NEXT ROUTE (fresh session): build the `IsPullback ((ι⊗𝟙).left) (snd G-side) (snd E-side) (𝟙 E)`
+-square?? NO — correct square: `IsPullback ((ι⊗𝟙).left) (pullback.fst G.π E.π)
+(pullback.fst E.π E.π) G.ι` via `IsPullback.of_right` against the two `of_hasPullback`
+squares (paste along the fst-legs; the comm-square is `pullback.lift_fst`-rfl), then
+`MorphismProperty.of_isPullback`. All objects stay in the `G.π`-spelling — no defeq-cast
+crossings. Alternatively: prove the CHART-LEVEL Γ-surjectivity directly in C1's affine
+setting (Spec-side: the chart-restricted actPair between affines; closed-immersion there
+= surjective ring map via `IsClosedImmersion` iff on affines) — may bypass the global
+statement entirely.
