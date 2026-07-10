@@ -15833,3 +15833,24 @@ option (b): of_map fst-leg by direct `pullback.hom_ext` on the codomain projMode
 X_triple, sidestepping the tensor-whnf timeout; snd-leg Over.w; e₁/e₂ consumed as banked;
 then of_eq + named). Templates: e8bb22e9d/74c6c48f3/63f87e656. T-G4 COMPLETE boards loud
 on landing (= c5β's 0c-ii signal). Then S2–S6 per charter.
+
+## Amendments v10.137 (2026-07-10, coordinator): NEW-HOPF counit laws + ⊤-level architecture RATIFIED; Y1-CLOSER S1 underway (assoc skeleton landed)
+
+- **NEW-HOPF (their §v10.133/134) RATIFIED**: both counit laws PROVEN
+  (`counitLift_comp_comulAlg` + mirror — (ε⊗id)∘Δ = id = (id⊗ε)∘Δ; the Γ-dualisation
+  pattern is now routine per design); `affineKunneth` landed as the generic ⊤-level
+  citizen (Γ-duals carry ZERO topIso bookkeeping). **Architecture decision RATIFIED**:
+  the patch Hopf structure restates at ⊤-level (ε′/Δ′/S′ := appTop forms;
+  opens-level by topIso-conjugation) — dodges the found obstruction
+  (`Algebra.TensorProduct.congr` is fixed-base-only ⟹ iterated opens-level Künneth
+  would need a base-ring iso inside the tensor; REGISTRY-ACCEPTED as a mathlib-gap
+  observation, no external filing per v10.35b). All proven scheme identities transfer
+  unchanged. First bricks landed (isAffine_groupSquare, squareMulRes). Pre-work
+  TREE-RED hygiene (import-path check before working) CITED as the standard. Third
+  MonObj-shadowing recurrence → registry entry marked HIGH-FREQUENCY. Next-session
+  order in inbox (Δ′ → counit transfer → coassoc via iterated affineKunneth →
+  antipode → HopfAlgebra → IsCoaction → C1d/C3/C4 → pins → SIGNAL).
+- **Y1-CLOSER: S1 UNDERWAY** — chartered claim + sentinel at 17:10; by 18:00 the assoc
+  of_map/of_eq/named skeleton landed with the snd-leg (Over.w) closed + the e1/e2
+  base-change compat lemmas, exactly on the banked option-(b) route. On charter;
+  T-G4 board line = the next milestone (the 0c-ii signal).
