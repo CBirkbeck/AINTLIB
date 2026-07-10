@@ -14886,3 +14886,45 @@ them by name yet** (the downstream consumers are themselves sorried). Two clean 
   (b) Keep GLC's sorries as WIP forward-decls; prove differently-named general-R versions downstream.
 Coordinator: pick (a) vs (b) — it's a statement-location decision (GLC statement removal). Until then the
 mathematical content of 0c-i (the group law IS verified, at the atlas = the universal case) is DONE.
+
+## Amendments v10.119 (2026-07-10, coordinator): ★ NEW-HOPF C1c-ii closed + the from-scratch Hopf algebra RATIFIED (p2 boundary FYI'd); c5β assoc wall BROKEN (atlas laws committed, 0c-ii approaching); PIC0 G3 collapsing
+
+- **★ NEW-HOPF session absorbed (their §v10.114 → §v10.116) — RATIFIED end-to-end.**
+  (1) `chartCoaction : B →ₐ[R] B ⊗[R] A` complete (already ratified v10.115). (2) The
+  **scope finding extended and the response ratified**: to STATE `IsCoaction`, A needs a
+  bialgebra; p0's `FiniteLocallyFreeSubgroup` carries NO structure maps as data, and
+  p2's Hopf layer is affine-base-only + RelEffCartierDiv-indexed — structurally unable
+  to serve A = Γ(G|_V) at a general patch. Building the missing algebra rather than
+  stopping was the right call, and the execution is rule-5-clean: NEW files only
+  (SubgroupGroupObject, PatchKunneth, PatchHopf), zero touches of p0/p2, v10.50
+  no-bridge doctrine (parallels cited, formulations not unified). p2 boundary-FYI'd
+  (inbox); their divisor-indexed layer stays canonical for their charter's setting.
+  (3) Landed this arc, all green/axiom-clean: the group object (unitHom/invHom/mulHom by
+  ι-cancellation + Over-S lifts + all three laws), the two ACTION DIAGRAMS
+  (`translationAction_unit`/`_assoc` — the scheme-level counit/coassoc sources), generic
+  `patchKunneth` (extracted reusable from C1b's chain), `groupPatchCounit`/`Antipode`/
+  **`groupPatchComul : A ⟶ A ⊗[R] A`**, and the hom-form leg lemmas (the axiom
+  transport tool). **Queue confirmed**: Hopf axioms as Γ-duals (Spec-side first,
+  dualize once) ⟹ `[HopfAlgebra R A]` ⟹ `IsCoaction chartCoaction` (from the two
+  proven diagrams) ⟹ C1d → C3 → C4 ⟹ six pins ⟹ **BOARD-SIGNAL** (NISOG L6 + p0
+  pickup — still armed).
+- **Registry: three lean-ops entries ACCEPTED**, headlined by the Over-monoidal
+  spelling recurrence: the Over-monoidal CHOSEN pullback vs a freshly-synthesized
+  `HasPullback` yield syntactically different `pullback.fst/snd` — state helpers in
+  the Over-monoidal spelling, close with explicit `Category.assoc` terms, never
+  `simp only` across the seam. **Convergence note**: c5β independently hit and broke
+  the same wall-class on T-G3-assoc this hour (their §v10.112: `OverMorphism.ext` +
+  braiding + raw-level reduction, then `IsPullback.hom_ext` two-leg transport). The
+  two banked patterns together are the fleet standard for this wall-class — cite both.
+- **c5β (absorb, no dispatch — the wall broke before the cross-pollination was
+  needed)**: atlas axioms comm + assoc COMMITTED; background agent finishing
+  unit/inverse atlas laws; GLC's 5 sorried group-axiom statements verified
+  ZERO-code-ref (docstrings only) and queued for removal; the full T-G4 general-R
+  transport recipe is worked out in their sentinel (isPullback hom_ext skeleton,
+  BC-leg via mulModelHomBC_baseChange, π-leg automatic). **The 0c-ii BOARD-SIGNAL is
+  approaching** — on it: c5β continues 0h → T-W7.12 → T-W7a; at T-W7a the three
+  pre-staged Y1 sessions fire (A falls-sweep; P3b3 cascade; NEW-Y1 E-track + MASTER).
+- **PIC0 (absorb)**: G3 collapsing — ★ G3-η CLOSED (pullback η iso, presheaf level,
+  axiom-clean), G3-TC + G3-EXT closed (tensorLeft/Right preserve colimits pointwise;
+  iso-at-colimit-point). With G1 ✓ and the closure ledger boarded, [G3] → A → Pic(f)
+  is near. On charter.
