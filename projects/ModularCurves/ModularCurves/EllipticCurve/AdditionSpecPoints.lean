@@ -1509,6 +1509,134 @@ theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
         projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
   sorry
 
+
+/-- [e5c ARM, Z] The complete per-piece assembly at the atlas: sum = P + Q. -/
+lemma specPoints_arm_Z {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u})
+    (i j : Fin 3) [IsDomain (biChartRing universalWeierstrassLocU.{u} i j)] (k : Fin 3)
+    (ψ : Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+      pieceAwayZι universalWeierstrassLocU.{u} i j k)
+    (s : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (hev : s.1 = Spec.map (CommRingCat.ofHom ψ) ≫
+      addOnZPieceMor universalWeierstrassLocU.{u} i j k universalWeierstrassLocU.isUnit_Δ) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K s =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  classical
+
+  have hχ : (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k)))).comp
+      (algebraMap (WeierstrassAtlasRingU.{u})
+      (biChartRing universalWeierstrassLocU.{u} i j)) = algebraMap _ K :=
+    chi_compat_of_pieceZ universalWeierstrassLocU.{u} i j k P Q w ψ hgp
+  have hcurve : ((universalWeierstrassLocU.{u}.map
+      (algebraMap (WeierstrassAtlasRingU.{u})
+        (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map
+      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))) =
+      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective := by
+    show ((universalWeierstrassLocU.{u}.map _).map
+      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))).toProjective = _
+    rw [WeierstrassCurve.map_map, hχ]
+  have hunit : IsUnit ((ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))
+      (lawOneTriple universalWeierstrassLocU.{u} i j k)) := by
+    refine ⟨⟨(ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))
+        (lawOneTriple universalWeierstrassLocU.{u} i j k),
+      ψ (IsLocalization.Away.invSelf (lawOneTriple universalWeierstrassLocU.{u} i j k)),
+      ?_, ?_⟩, rfl⟩ <;>
+    · first
+      | (rw [RingHom.comp_apply, ← map_mul, ← map_one ψ]
+         congr 1
+         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+      | (rw [RingHom.comp_apply, mul_comm, ← map_mul, ← map_one ψ]
+         congr 1
+         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+  have he5a := descended_lawOne_eq_add i j k
+    (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k)))) hunit
+  rw [hcurve] at he5a
+  rw [dictionary_sum_of_pieceZ universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ i j k s ψ hev]
+  rw [he5a]
+  rw [WeierstrassCurve.Projective.Point.toAffine_add
+    (nonsingular_chi_fst universalWeierstrassLocU.{u} i j _ hχ)
+    (nonsingular_chi_snd universalWeierstrassLocU.{u} i j _ hχ)]
+  rw [← dictionary_fst_of_pieceZ universalWeierstrassLocU.{u} i j k P Q w ψ hgp,
+    ← dictionary_snd_of_pieceZ universalWeierstrassLocU.{u} i j k P Q w ψ hgp]
+  rfl
+/-- [e5c ARM, Y] The complete per-piece assembly at the atlas: sum = P + Q. -/
+lemma specPoints_arm_Y {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u})
+    (i j : Fin 3) [IsDomain (biChartRing universalWeierstrassLocU.{u} i j)] (k : Fin 3)
+    (ψ : Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+      pieceAwayι universalWeierstrassLocU.{u} i j k)
+    (s : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (hev : s.1 = Spec.map (CommRingCat.ofHom ψ) ≫
+      addOnYPieceMor universalWeierstrassLocU.{u} i j k universalWeierstrassLocU.isUnit_Δ) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K s =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  classical
+
+  have hχ : (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k)))).comp
+      (algebraMap (WeierstrassAtlasRingU.{u})
+      (biChartRing universalWeierstrassLocU.{u} i j)) = algebraMap _ K :=
+    chi_compat_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp
+  have hcurve : ((universalWeierstrassLocU.{u}.map
+      (algebraMap (WeierstrassAtlasRingU.{u})
+        (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map
+      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))) =
+      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective := by
+    show ((universalWeierstrassLocU.{u}.map _).map
+      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))).toProjective = _
+    rw [WeierstrassCurve.map_map, hχ]
+  have hunit : IsUnit ((ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))
+      (lawTwoTriple universalWeierstrassLocU.{u} i j k)) := by
+    refine ⟨⟨(ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+        (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))
+        (lawTwoTriple universalWeierstrassLocU.{u} i j k),
+      ψ (IsLocalization.Away.invSelf (lawTwoTriple universalWeierstrassLocU.{u} i j k)),
+      ?_, ?_⟩, rfl⟩ <;>
+    · first
+      | (rw [RingHom.comp_apply, ← map_mul, ← map_one ψ]
+         congr 1
+         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+      | (rw [RingHom.comp_apply, mul_comm, ← map_mul, ← map_one ψ]
+         congr 1
+         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+  obtain ⟨c, hc0, he5b⟩ := descended_lawTwo_smul_add i j k
+    (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k)))) hunit
+  rw [hcurve] at he5b
+  rw [dictionary_sum_of_pieceY universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ i j k s ψ hev]
+  rw [he5b, WeierstrassCurve.Projective.Point.toAffine_smul _ (isUnit_iff_ne_zero.mpr hc0)]
+  rw [WeierstrassCurve.Projective.Point.toAffine_add
+    (nonsingular_chi_fst universalWeierstrassLocU.{u} i j _ hχ)
+    (nonsingular_chi_snd universalWeierstrassLocU.{u} i j _ hχ)]
+  rw [← dictionary_fst_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp,
+    ← dictionary_snd_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp]
+  rfl
+
 end AtlasFormula
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
