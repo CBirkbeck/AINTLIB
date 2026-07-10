@@ -609,3 +609,21 @@ S of maps factoring through a mono/open V→S = pullback over V" (grep candidate
 pullback_{S}(X,Y) with X,Y→V: the map to V×_S V = V (open immersion mono ⟹ diagonal iso)
 ...). THEN all three (V, U-over-V, G|_V-over-V) are affine ⟹ `IsAffineOpen.isoSpec`-write
 + `pullbackSpecIso` ⟹ Γ ≅ B ⊗[R] A. Watch the one-spelling rule throughout.
+
+[HG-C1b] leg-3 second-half FULL CHAIN (banked; names verified):
+`pullback G.π (P.U.ι ≫ E.π)`
+  ≅ [`(pullbackLeftPullbackSndIso G.π V.ι (U→V)).symm` after aligning
+     `(U→V) ≫ V.ι = U.ι ≫ E.π` where U→V := `E.π.resLE V U hover`-composite-with-ι-forms
+     (`resLE`-ι-compat lemma; or define U→V as `U.ι ≫ E.π`-corestriction)]
+`pullback (pullback.snd G.π V.ι) (U→V)`
+  ≅ [transport the FIRST leg along `pullbackRestrictIsoRestrict G.π V`
+     (pullback G.π V.ι ≅ (G.π⁻¹ᵁV).toScheme = groupOpen-scheme, snd ↦ G.π-restriction);
+     use `pullback.congrHom`/`Iso`-of-legs-lemmas or `IsPullback.of_iso`]
+`pullback (groupOpen-scheme → V) (U→V)`   -- all V-level, all three affine
+  ≅ [`hV.isoSpec`, `hU.isoSpec`, groupOpen-affine (`IsFinite G.π` ⟹ `IsAffineHom` ⟹
+     `IsAffineOpen (G.π⁻¹ᵁV)` from hV) + `Spec.map`-writing + `pullbackSpecIso`]
+`Spec (chartRing ⊗[baseRing] groupRing)`; then `ΓSpecIso` ⟹
+`kunnethIso : Γ(pullback G.π (U.ι≫E.π), ⊤) ≅ (B ⊗[R] A : CommRingCat)`.
+ρ_U := `coactionToPullback ≫ kunnethIso.hom` — then C1c.
+Also needed: `Mono V.ι` (open immersion ⟹ mono ✓ OpenImmersion.lean:537) and the
+`pullbackIsPullbackOfCompMono`-family (Pullback/Mono.lean:150+) as alternates.
