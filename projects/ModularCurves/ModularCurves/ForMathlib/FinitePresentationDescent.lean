@@ -1004,7 +1004,32 @@ theorem presentedU_algebraMap (H : IsFilteredAlgColimit R 𝒮 t A u)
 
 end Presented
 
-/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
+open TensorProduct in
+/-- Fibre-nontriviality transfer along a base change of presented models: if the fibre of
+`Q` at the smaller base is nontrivial, so is the fibre of the base-changed model at any
+residue extension. -/
+private theorem nontrivial_fibre_transfer
+    {S₁ S₂ Q κ₁ κ₂ : Type u} [CommRing S₁] [CommRing S₂] [CommRing Q]
+    [Field κ₁] [Field κ₂]
+    [Algebra S₁ S₂] [Algebra S₁ Q] [Algebra S₁ κ₁] [Algebra S₂ κ₂] [Algebra S₁ κ₂]
+    [Algebra κ₁ κ₂] [IsScalarTower S₁ S₂ κ₂] [IsScalarTower S₁ κ₁ κ₂]
+    (Q₂ : Type u) [CommRing Q₂] [Algebra S₂ Q₂]
+    (e : Q₂ ≃ₐ[S₂] S₂ ⊗[S₁] Q)
+    [Nontrivial (κ₁ ⊗[S₁] Q)] :
+    Nontrivial (κ₂ ⊗[S₂] Q₂) := by
+  haveI : Nontrivial (κ₂ ⊗[κ₁] (κ₁ ⊗[S₁] Q)) :=
+    Module.FaithfullyFlat.lTensor_nontrivial (R := κ₁) (M := κ₂) (κ₁ ⊗[S₁] Q)
+  have E4 : (κ₂ ⊗[κ₁] (κ₁ ⊗[S₁] Q)) ≃ₗ[κ₂] (κ₂ ⊗[S₁] Q) :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange S₁ κ₁ κ₂ κ₂ Q
+  haveI hN₃ : Nontrivial (κ₂ ⊗[S₁] Q) := E4.toEquiv.symm.nontrivial
+  have E3 : (κ₂ ⊗[S₂] (S₂ ⊗[S₁] Q)) ≃ₗ[κ₂] (κ₂ ⊗[S₁] Q) :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange S₁ S₂ κ₂ κ₂ Q
+  have E2 : (κ₂ ⊗[S₂] Q₂) ≃ₗ[S₂] (κ₂ ⊗[S₂] (S₂ ⊗[S₁] Q)) :=
+    _root_.TensorProduct.congr (LinearEquiv.refl _ _) e.toLinearEquiv
+  exact (E2.trans (E3.restrictScalars S₂)).toEquiv.nontrivial
+
+
+/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -//-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
 
 /-- **[KL-3] (Stacks 02JO = Algebra 10.168.1, scoped).** If the colimit algebra `B` is
 flat over `A`, then some later stage model is flat over its stage base. Internals (own
@@ -1181,7 +1206,36 @@ theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
     refine hsub ⟨PrimeSpectrum.comap (t (hj : j₂ ≤ j)).toRingHom pj, ?_⟩
     rw [← PrimeSpectrum.comap_comp_apply, ← H.t_comp hj₂ hj]
   -- transfer fibre nontriviality from the flat stage up to stage `j` (K2)
-  sorry
+  haveI hN₁ : Nontrivial
+      ((PrimeSpectrum.comap (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom pj).asIdeal.ResidueField
+        ⊗[𝒮 i₁] (D.spreadStage (t := t) h₁)) :=
+    (PrimeSpectrum.nontrivial_iff_mem_rangeComap _).2 hp₁
+  -- instance plumbing along the stage transition and the residue extension
+  letI a1 : Algebra (𝒮 i₁) (𝒮 j) := (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom.toAlgebra
+  obtain ⟨E1⟩ := D.spreadStage_baseChange ((hj₂.trans hj) : i₁ ≤ j) h₁ H
+  letI a2 : Algebra (𝒮 i₁) pj.asIdeal.ResidueField :=
+    ((algebraMap (𝒮 j) pj.asIdeal.ResidueField).comp
+      (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom).toAlgebra
+  haveI tower1 : IsScalarTower (𝒮 i₁) (𝒮 j) pj.asIdeal.ResidueField :=
+    IsScalarTower.of_algebraMap_eq' rfl
+  letI a3 : Algebra
+      ((PrimeSpectrum.comap (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom pj).asIdeal.ResidueField)
+      pj.asIdeal.ResidueField :=
+    (Ideal.ResidueField.map _ pj.asIdeal (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom rfl).toAlgebra
+  haveI tower2 : IsScalarTower (𝒮 i₁)
+      ((PrimeSpectrum.comap (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom pj).asIdeal.ResidueField)
+      pj.asIdeal.ResidueField := by
+    refine IsScalarTower.of_algebraMap_eq' (RingHom.ext fun x => ?_)
+    exact (Ideal.ResidueField.map_algebraMap _ pj.asIdeal
+      (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom rfl x).symm
+  haveI hN₄ : Nontrivial
+      (pj.asIdeal.ResidueField ⊗[𝒮 j] (D.spreadStage (t := t) ((h₁.trans hj₂).trans hj))) :=
+    nontrivial_fibre_transfer
+      (S₁ := 𝒮 i₁) (S₂ := 𝒮 j) (Q := D.spreadStage (t := t) h₁)
+      (κ₁ := (PrimeSpectrum.comap (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom pj).asIdeal.ResidueField)
+      (κ₂ := pj.asIdeal.ResidueField)
+      (D.spreadStage (t := t) ((h₁.trans hj₂).trans hj)) E1.symm
+  exact (PrimeSpectrum.nontrivial_iff_mem_rangeComap pj).1 hN₄
 
 /-- **[KL-2e].** Transport of a filtered colimit presentation along an isomorphism of the
 colimit. -/
