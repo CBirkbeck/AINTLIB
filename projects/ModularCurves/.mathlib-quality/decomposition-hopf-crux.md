@@ -405,3 +405,38 @@ Sub-leaves (file `HopfGaloisTheorem.lean`):
 Name-verification queue (before writing): Algebra.TensorProduct.productMap;
 Descent.lean's injective-descent names; flat-local-property lemma; of_comap_surjective
 exact form; Submodule.eq_bot_of_localization; AlgebraTensorModule.assoc heterobasic.
+
+## Appendix: Wave C scoping (banked 2026-07-10, post-M5)
+
+Substrate map (all p0, READ-ONLY): `GroupScheme/Subgroup.lean` (`FiniteLocallyFreeSubgroup E`:
+fields incl. `ι : G.X ⟶ E.E`, `π : G.X ⟶ S`, group-scheme structure over S),
+`GroupScheme/TranslationAction.lean` (`translationAction G : (Over-mk) ⟶ E.asOver` =
+translation `G ×ₛ E → E`, `actionProj`, `actPair G` (graph map), `translationAction_eq_mul`,
+`isInvariant_iff_coequalizes`, `exists_unique_lift_of_isColimit`),
+`GroupScheme/SubgroupQuotient.lean` (SIX sorried pins = the target),
+`ForMathlib/HopfGaloisQuotient.lean` (`isColimit_of_isHopfGalois` — consumes M5's
+`IsHopfGalois` per chart). p2's Hopf-instance layer NOT yet landed (their sentinel: BB-DELIGNE
+L6c) ⟹ hypothesis-wired `[HopfAlgebra R A]` throughout Wave C (charter's soft edge).
+
+Wave-C leaves (revised post-M5):
+- **[HG-C1] chart co-action**: for a G-stable affine open `U = Spec B ⊆ E` with A := Γ(G)
+  (finite locally free Hopf over Γ(S)-charts; work over affine base S = Spec R first),
+  define `ρ_U := Γ(act|_U) ∘ (Γ(G ×ₛ U) ≅ B ⊗[R] A)` and prove `IsCoaction ρ_U` from the
+  action diagrams under Spec-Γ (mechanical AffineScheme-equivalence plumbing; the Künneth
+  iso for affine `G` over affine base is `Algebra.TensorProduct`-Spec).
+- **[HG-C2] precursor surjectivity**: `actPair G` is a closed immersion (freeness of
+  translation on a group: actPair = (mul, pr₂) is an iso onto graph — actually for
+  E-translation actPair is a MONO + finite ⟹ closed immersion ⟹ Γ-surjective on charts) —
+  gives `Surjective (galoisPrecursor)` per chart. KEY: for a GROUP acting on ITSELF by
+  translation the action is free — actPair is even an isomorphism G×E ≅ G×E?? NO — onto its
+  image E×_{E/G}E; the ring-level surjectivity is what M5 needs; route through
+  `IsClosedImmersion.iff_isFinite_and_mono` (inventory) + mono-of-free-action.
+- **[HG-C3] G-stable affine cover** of E (KM-style: E/S projective + G-orbits finite ⟹
+  stable affine refinement; hardest geometry leaf).
+- **[HG-C4] glue**: per-chart `isColimit_of_isHopfGalois` + GlueData ⟹ global E/G ⟹
+  six pins (via `exists_unique_lift_of_isColimit` + `isInvariant_iff_coequalizes`).
+
+M5's interface consumed per chart: `isHopfGalois_of_surjective_galoisPrecursor R A ρ_U
+(hρ : IsCoaction ρ_U) (hsurj : Surjective (galoisPrecursor R A ρ_U))` with
+`[Module.Free R A] [Module.Finite R A]` from G finite-locally-free (free per chart after
+shrinking — or hypothesis-wire freeness and let C3 provide free charts).
