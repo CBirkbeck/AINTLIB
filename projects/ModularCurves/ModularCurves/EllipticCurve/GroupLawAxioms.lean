@@ -364,6 +364,227 @@ theorem mulOver_assoc_atlas :
       (congrArg (· ≫ mulModelHom universalWeierstrassLocU.{u}) hR0)
   exact hL.trans (keyval.trans hR.symm)
 
+/-- **(T-G3-comm, Over level)** Commutativity as the braided monoid-object equation at the
+atlas — the `Over`-level wrapper of `mulModelHom_comm_atlas`. -/
+theorem mulOver_comm_atlas :
+    (β_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})).hom ≫ mulOver universalWeierstrassLocU.{u} = mulOver universalWeierstrassLocU.{u} := by
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, Over.braiding_hom_left, mulOver_left]
+  exact mulModelHom_comm_atlas
+
+/-- **(T-G3-one-mul)** Left unit law at the atlas. -/
+theorem oneOver_mulOver_atlas :
+    (oneOver universalWeierstrassLocU.{u} ▷ modelOver universalWeierstrassLocU.{u}) ≫ mulOver universalWeierstrassLocU.{u} = (λ_ (modelOver universalWeierstrassLocU.{u})).hom := by
+  classical
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, mulOver_left, Over.leftUnitor_hom_left]
+  haveI : IsReduced ((𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u}))) ⊗
+      modelOver universalWeierstrassLocU.{u}).left) :=
+    ObjectProperty.prop_of_iso (IsReduced ·)
+      ((Over.forget _).mapIso (λ_ (modelOver universalWeierstrassLocU.{u}))).symm
+      (inferInstanceAs (IsReduced (projModel universalWeierstrassLocU.{u})))
+  haveI : (modelOver universalWeierstrassLocU.{u}).left.IsSeparated :=
+    inferInstanceAs ((projModel universalWeierstrassLocU.{u}).IsSeparated)
+  refine hom_ext_of_forall_specPoint fun K _ p => ?_
+  letI : Algebra WeierstrassAtlasRingU.{u} K :=
+    ((Spec.preimage ((p ≫ pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u})) ≫ projModelπ universalWeierstrassLocU.{u})).hom).toAlgebra
+  have hσ : (p ≫ pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u})) ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
+        Spec.preimage ((p ≫ pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+          (projModelπ universalWeierstrassLocU.{u})) ≫ projModelπ universalWeierstrassLocU.{u}) :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hπZ : (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+      projModelZero universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]
+  have hcond : pullback.fst (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u}) ≫
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom =
+      pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u} :=
+    pullback.condition
+  have hfstσ : (p ≫ pullback.fst (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u})) ≫
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
+    (Category.assoc _ _ _).trans ((congrArg (p ≫ ·) hcond).trans
+      ((Category.assoc _ _ _).symm.trans hσ))
+  have hZeval : p ≫ (pullback.fst (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u}) ≫ (oneOver universalWeierstrassLocU.{u}).left) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+        projModelZero universalWeierstrassLocU.{u} := by
+    rw [oneOver_left]
+    exact (Category.assoc _ _ _).symm.trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ projModelZero universalWeierstrassLocU.{u}) hfstσ))
+  have hspec := mulModelHom_specPoints universalWeierstrassLocU.{u} K
+    ⟨Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+      projModelZero universalWeierstrassLocU.{u}, hπZ⟩
+    ⟨p ≫ pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+      (projModelπ universalWeierstrassLocU.{u}), hσ⟩
+  have hkey := congrArg Subtype.val
+    ((projModelPointsEquiv universalWeierstrassLocU.{u} K).injective
+      (hspec.trans ((congrArg (· + projModelPointsEquiv universalWeierstrassLocU.{u} K
+          ⟨p ≫ pullback.snd (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom
+            (projModelπ universalWeierstrassLocU.{u}), hσ⟩)
+          (projModelPointsEquiv_zero universalWeierstrassLocU.{u} K)).trans (zero_add _))))
+  have hL : p ≫ ((oneOver universalWeierstrassLocU.{u} ▷ modelOver universalWeierstrassLocU.{u}).left ≫
+        mulModelHom universalWeierstrassLocU.{u}) =
+      pullback.lift _ _ (hπZ.trans hσ.symm) ≫ mulModelHom universalWeierstrassLocU.{u} := by
+    rw [← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerRight_left_fst (oneOver universalWeierstrassLocU.{u}))).trans
+          (hZeval.trans (pullback.lift_fst _ _ _).symm))
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerRight_left_snd (oneOver universalWeierstrassLocU.{u}))).trans
+          (pullback.lift_snd _ _ _).symm)
+  exact hL.trans hkey
+
+/-- **(T-G3-mul-one)** Right unit law at the atlas. -/
+theorem mulOver_oneOver_atlas :
+    (modelOver universalWeierstrassLocU.{u} ◁ oneOver universalWeierstrassLocU.{u}) ≫ mulOver universalWeierstrassLocU.{u} = (ρ_ (modelOver universalWeierstrassLocU.{u})).hom := by
+  classical
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, mulOver_left, Over.rightUnitor_hom_left]
+  haveI : IsReduced ((modelOver universalWeierstrassLocU.{u} ⊗
+      𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).left) :=
+    ObjectProperty.prop_of_iso (IsReduced ·)
+      ((Over.forget _).mapIso (ρ_ (modelOver universalWeierstrassLocU.{u}))).symm
+      (inferInstanceAs (IsReduced (projModel universalWeierstrassLocU.{u})))
+  haveI : (modelOver universalWeierstrassLocU.{u}).left.IsSeparated :=
+    inferInstanceAs ((projModel universalWeierstrassLocU.{u}).IsSeparated)
+  refine hom_ext_of_forall_specPoint fun K _ p => ?_
+  letI : Algebra WeierstrassAtlasRingU.{u} K :=
+    ((Spec.preimage ((p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
+        projModelπ universalWeierstrassLocU.{u})).hom).toAlgebra
+  have hσ : (p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
+      projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
+        Spec.preimage ((p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+          (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
+            projModelπ universalWeierstrassLocU.{u}) :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hπZ : (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+      projModelZero universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]
+  have hcond : pullback.fst (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
+      projModelπ universalWeierstrassLocU.{u} =
+      pullback.snd (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom :=
+    pullback.condition
+  have hsndσ : (p ≫ pullback.snd (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
+    (Category.assoc _ _ _).trans ((congrArg (p ≫ ·) hcond.symm).trans
+      ((Category.assoc _ _ _).symm.trans hσ))
+  have hZeval : p ≫ (pullback.snd (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
+        (oneOver universalWeierstrassLocU.{u}).left) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+        projModelZero universalWeierstrassLocU.{u} := by
+    rw [oneOver_left]
+    exact (Category.assoc _ _ _).symm.trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ projModelZero universalWeierstrassLocU.{u}) hsndσ))
+  have hspec := mulModelHom_specPoints universalWeierstrassLocU.{u} K
+    ⟨p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom, hσ⟩
+    ⟨Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+      projModelZero universalWeierstrassLocU.{u}, hπZ⟩
+  have hkey := congrArg Subtype.val
+    ((projModelPointsEquiv universalWeierstrassLocU.{u} K).injective
+      (hspec.trans ((congrArg (projModelPointsEquiv universalWeierstrassLocU.{u} K
+          ⟨p ≫ pullback.fst (projModelπ universalWeierstrassLocU.{u})
+            (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom, hσ⟩ + ·)
+          (projModelPointsEquiv_zero universalWeierstrassLocU.{u} K)).trans (add_zero _))))
+  have hL : p ≫ ((modelOver universalWeierstrassLocU.{u} ◁ oneOver universalWeierstrassLocU.{u}).left ≫
+        mulModelHom universalWeierstrassLocU.{u}) =
+      pullback.lift _ _ (hσ.trans hπZ.symm) ≫ mulModelHom universalWeierstrassLocU.{u} := by
+    rw [← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerLeft_left_fst (oneOver universalWeierstrassLocU.{u}))).trans
+          (pullback.lift_fst _ _ _).symm)
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (Over.whiskerLeft_left_snd (oneOver universalWeierstrassLocU.{u}))).trans
+          (hZeval.trans (pullback.lift_snd _ _ _).symm))
+  exact hL.trans hkey
+
+/-- **(T-G3-inv)** Left inverse law at the atlas. -/
+theorem invOver_mulOver_atlas :
+    lift (invOver universalWeierstrassLocU.{u}) (𝟙 (modelOver universalWeierstrassLocU.{u})) ≫ mulOver universalWeierstrassLocU.{u} =
+      toUnit (modelOver universalWeierstrassLocU.{u}) ≫ oneOver universalWeierstrassLocU.{u} := by
+  classical
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, Over.comp_left, mulOver_left, Over.toUnit_left, oneOver_left]
+  haveI : IsReduced (modelOver universalWeierstrassLocU.{u}).left :=
+    inferInstanceAs (IsReduced (projModel universalWeierstrassLocU.{u}))
+  haveI : (modelOver universalWeierstrassLocU.{u}).left.IsSeparated :=
+    inferInstanceAs ((projModel universalWeierstrassLocU.{u}).IsSeparated)
+  refine hom_ext_of_forall_specPoint fun K _ p => ?_
+  letI : Algebra WeierstrassAtlasRingU.{u} K :=
+    ((Spec.preimage (p ≫ projModelπ universalWeierstrassLocU.{u})).hom).toAlgebra
+  have hσ : p ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
+        Spec.preimage (p ≫ projModelπ universalWeierstrassLocU.{u}) :=
+      CommRingCat.ofHom_hom _
+    rw [h1, Spec.map_preimage]
+  have hπneg : (p ≫ negModelHom universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (p ≫ ·) (negModelHom_π universalWeierstrassLocU.{u})).trans hσ)
+  have hπZ : (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+      projModelZero universalWeierstrassLocU.{u}) ≫ projModelπ universalWeierstrassLocU.{u} =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+    rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]
+  have hspec := mulModelHom_specPoints universalWeierstrassLocU.{u} K
+    ⟨p ≫ negModelHom universalWeierstrassLocU.{u}, hπneg⟩ ⟨p, hσ⟩
+  have hneg := negModelHom_specPoints universalWeierstrassLocU.{u} K ⟨p, hσ⟩
+  have hkey := congrArg Subtype.val
+    ((projModelPointsEquiv universalWeierstrassLocU.{u} K).injective
+      ((hspec.trans ((congrArg (· + projModelPointsEquiv universalWeierstrassLocU.{u} K ⟨p, hσ⟩) hneg).trans
+          (neg_add_cancel _))).trans
+        (projModelPointsEquiv_zero universalWeierstrassLocU.{u} K).symm))
+  have hL : p ≫ ((lift (invOver universalWeierstrassLocU.{u})
+        (𝟙 (modelOver universalWeierstrassLocU.{u}))).left ≫
+        mulModelHom universalWeierstrassLocU.{u}) =
+      pullback.lift _ _ (hπneg.trans hσ.symm) ≫ mulModelHom universalWeierstrassLocU.{u} := by
+    rw [Over.lift_left, ← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (pullback.lift_fst _ _ _)).trans
+          ((congrArg (p ≫ ·) (invOver_left universalWeierstrassLocU.{u})).trans
+            (pullback.lift_fst _ _ _).symm))
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (p ≫ ·) (pullback.lift_snd _ _ _)).trans
+          ((congrArg (p ≫ ·) (Over.id_left (modelOver universalWeierstrassLocU.{u}))).trans
+            ((Category.comp_id p).trans (pullback.lift_snd _ _ _).symm)))
+  have hRHS : p ≫ ((modelOver universalWeierstrassLocU.{u}).hom ≫
+      ((𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
+        projModelZero universalWeierstrassLocU.{u})) =
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
+        projModelZero universalWeierstrassLocU.{u} := by
+    rw [Over.tensorUnit_hom, Category.id_comp, ← Category.assoc]
+    exact congrArg (· ≫ projModelZero universalWeierstrassLocU.{u}) hσ
+  exact (hL.trans hkey).trans hRHS.symm
+
 end AtlasEquations
 
 end ModularCurves
