@@ -14595,3 +14595,47 @@ with `_root_`.
 **NEXT**: the two `IsCoaction` diagrams (counit from `unitOver_mulOver_left` restricted to
 the patch; coassoc from `mulOver_assoc`), Γ-dualized once ⟹ `IsCoaction chartCoaction`.
 Then C1d (assembly against C2's closed immersion), C3, C4 ⟹ pins ⟹ **BOARD-SIGNAL**.
+
+## Amendments v10.116 (2026-07-10, coordinator): seat taken; handover relays reconciled against pushed evidence — ATLAS-3 LIVE (existence half LANDED), PIC0 live on [G3-pre], codex PR #5224 OPEN; A's holder-look is the ONE merge gate
+
+- **Seat**: successor coordinator active per COORDINATOR-HANDOVER.md (v10.115). All three
+  §IMMEDIATELY-OPEN owner-relays were already superseded by the workers' own pushed work
+  when checked — the sentinels-over-relayed-reports doctrine, third confirmation running.
+- **★★ [Y1-ATLAS] relay MOOT — NEW-ATLAS-3 IS LIVE AND DEEP** (sentinel claimed on-branch;
+  `dev/modular-curves-y1-atlas` pushed through 1a503ade9, 10:53): top-glue steps 2–3–4
+  COMPLETE — including `gluedHom : Y ⟶ tateEllObj R` with all clauses
+  (`gluedTopMap_isPullback` via per-chart isoIsPullback + Zariski-local-at-target) and
+  **`gluedHom_pullSection` = the EXISTENCE half of `exists_tatePoint`'s ∀-part**; now mid
+  step 5 (T7 uniqueness): 5a + 5b(i–iii) landed (classifyingSpecMap cartesian square,
+  `inducedChart`/`inducedPt` handles + `inducedPt_hord`, BASE PIN + TOP PIN via
+  self-classification). Charter mode — no dispatch; the remaining deliverable (uniqueness
+  assembly → rebase → ONE PR → axioms board) runs.
+- **PIC0 relay MOOT** — session live; sentinel FOCUS = **[G3-pre]** (exactly the
+  handover-corrected target): δ-on-free-pairs generator-chase in
+  PullbackTensorGeneral.lean via corepresentability + the G1 isos. On charter.
+- **[OWNER-FLW]: pushed + PR OPEN** — origin codex tip 4cdd3f8c2; **draft PR #5224 →
+  dev/modular-curves** (the ordered ONE PR: Picard/Dual.lean + EllipticCurve/PoleSheaf.lean
+  + Comparison +202 + the corrected-statement artifact). The body is exemplary: full axiom
+  audit ({propext, Classical.choice, Quot.sound} on every audited decl), the 9-raise
+  heartbeat-debt register (v10.110 ruling: registered debt, NOT a merge blocker), AND the
+  WeierstrassAtlas +73 answer (absorbed-in-substance into `locallyWeierstrass_projModel`;
+  intentional trim). Two post-PR commits continue the stream on the same branch
+  (pole-restriction claim 2fd0c411a; "commute duals with over restriction" 4cdd3f8c2).
+  **Cadence relay (via owner)**: freeze #5224 at the reviewed tip; further stream work →
+  follow-up branch off it, its own small PR; rebase + read the board each session; claim
+  before building. `-pre-rebase` (ca22ffd12) stays preserved — the PIC0-integration
+  map-layer lives only there (v10.109/v10.110 stand).
+- **THE ONE MERGE GATE = beastmode-A's holder-look** (v10.110, dispatch UPDATED at inbox
+  v10.116): the look runs against PR #5224 tip 4cdd3f8c2 (two commits past the briefed
+  7884ee788), and item (2) is now VERIFY-the-PR's-WeierstrassAtlas-claim, not
+  raise-the-question. A is parked (sentinel 00:18) — **opener handed to the owner this
+  activation**. The merge call is the coordinator's, on A's boarded verdict; green-verify
+  at merge time.
+- **Standing, no action**: PR #5223 (P3b3's T-B5D-A + T-DISC, absorbed v10.34) stays open
+  — owner-of-charter dark; its consumers fire at T-W7a; disposition on P3b3's return or
+  when [T-B6′] goes critical-path. NEW-HOPF BOARD-SIGNAL (six pins) not yet — C1c
+  IsCoaction diagrams mid-flight (the scheme-level ACTION DIAGRAMS
+  `translationAction_unit`/`_assoc` landed a835697c1 as this section was written; next =
+  Γ-dualize once through the Künneth chain); D2-L6 + p0-pickup stay armed on the signal.
+  c5β 0c-ii signal pending ([T-G3-assoc] iterating). D2 running [T-SG3-LFP] (LFP-1/2/3
+  landed same-hour). No B2 events; no adjudications required this pass.
