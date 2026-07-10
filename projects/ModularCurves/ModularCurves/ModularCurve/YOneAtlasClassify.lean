@@ -3548,4 +3548,283 @@ end MarkedChartData
 
 end FibrePoint
 
+section OverlapAgreement
+
+/-! ### Overlap agreement of the local classifying maps (recipe step 3)
+
+Two marked charts whose test points agree in the base induce a pointed comparison of
+their fibre models carrying one fibre point to the other; the marked-chart comparison
+ENGINE then forces the two pointed atlas maps to agree.  This is Loeffler's "local
+uniqueness gives global existence" at the affine test-point level. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D₁ D₂ : MarkedChartData R Y)
+  (k : Type u) [CommRing k] [Algebra ↑Γ(Y.base, D₁.U.1) k] [Algebra ↑Γ(Y.base, D₂.U.1) k]
+  (hgeom : D₁.geomPt (D₁.specPt k) = D₂.geomPt (D₂.specPt k))
+
+/-- The two fibre models over an agreeing test point are canonically isomorphic. -/
+noncomputable def fibreModelIso :
+    projModel (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≅
+      projModel (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) :=
+  (D₁.fibreChartIso k).symm ≪≫ pullback.congrHom rfl hgeom ≪≫ D₂.fibreChartIso k
+
+/-- The fibre-model comparison respects the structure maps. -/
+theorem fibreModelIso_π :
+    (fibreModelIso D₁ D₂ k hgeom).hom ≫
+      projModelπ (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) =
+      projModelπ (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) := by
+  have h1 : (D₂.fibreChartIso k).hom ≫
+      projModelπ (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) =
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) :=
+    pullbackChartIso_hom_π D₂.W (D₂.fibreTop_isPullback k)
+  have h2 : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have h3 : (D₁.fibreChartIso k).inv ≫
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) =
+      projModelπ (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) := by
+    rw [Iso.inv_comp_eq]
+    exact (pullbackChartIso_hom_π D₁.W (D₁.fibreTop_isPullback k)).symm
+  rw [fibreModelIso]
+  simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+  refine Eq.trans (congrArg (fun m => (D₁.fibreChartIso k).inv ≫ m) ?_) h3
+  exact Eq.trans (congrArg (fun m => (pullback.congrHom rfl hgeom).hom ≫ m) h1) h2
+
+/-- The fibre-model comparison is pointed. -/
+theorem fibreModelIso_zero :
+    projModelZero (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≫
+      (fibreModelIso D₁ D₂ k hgeom).hom =
+      projModelZero (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) := by
+  have h1 : projModelZero (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≫
+      (D₁.fibreChartIso k).inv =
+      (Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero := by
+    rw [Iso.comp_inv_eq]
+    exact (D₁.fibre_zero_comp k).symm
+  have e1 : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  have e2 : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have hz12 : (Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero ≫
+      (pullback.congrHom rfl hgeom).hom =
+      (Y.curve.baseChange (D₂.geomPt (D₂.specPt k))).zero := by
+    show pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫ _ =
+      pullback.lift (D₂.geomPt (D₂.specPt k) ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp])
+    refine pullback.hom_ext ?_ ?_
+    · calc (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            (pullback.congrHom rfl hgeom).hom) ≫
+            pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k))
+          = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k))) := Category.assoc _ _ _
+        _ = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) :=
+              congrArg (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫ ·) e1
+        _ = D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero := pullback.lift_fst _ _ _
+        _ = D₂.geomPt (D₂.specPt k) ≫ Y.curve.zero := congrArg (· ≫ Y.curve.zero) hgeom
+        _ = pullback.lift (D₂.geomPt (D₂.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) := (pullback.lift_fst _ _ _).symm
+    · calc (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            (pullback.congrHom rfl hgeom).hom) ≫
+            pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k))
+          = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k))) := Category.assoc _ _ _
+        _ = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) :=
+              congrArg (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫ ·) e2
+        _ = 𝟙 _ := pullback.lift_snd _ _ _
+        _ = pullback.lift (D₂.geomPt (D₂.specPt k) ≫ Y.curve.zero) (𝟙 _) _ ≫
+            pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) := (pullback.lift_snd _ _ _).symm
+  rw [fibreModelIso]
+  simp only [Iso.trans_hom, Iso.symm_hom]
+  calc projModelZero (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≫
+      ((D₁.fibreChartIso k).inv ≫ (pullback.congrHom rfl hgeom).hom ≫
+        (D₂.fibreChartIso k).hom)
+      = (projModelZero (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≫
+          (D₁.fibreChartIso k).inv) ≫ (pullback.congrHom rfl hgeom).hom ≫
+          (D₂.fibreChartIso k).hom := (Category.assoc _ _ _).symm
+    _ = (Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero ≫
+          (pullback.congrHom rfl hgeom).hom ≫ (D₂.fibreChartIso k).hom :=
+        congrArg (· ≫ (pullback.congrHom rfl hgeom).hom ≫ (D₂.fibreChartIso k).hom) h1
+    _ = ((Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero ≫
+          (pullback.congrHom rfl hgeom).hom) ≫ (D₂.fibreChartIso k).hom :=
+        (Category.assoc _ _ _).symm
+    _ = (Y.curve.baseChange (D₂.geomPt (D₂.specPt k))).zero ≫ (D₂.fibreChartIso k).hom :=
+        congrArg (· ≫ (D₂.fibreChartIso k).hom) hz12
+    _ = projModelZero (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) := D₂.fibre_zero_comp k
+
+/-- The fibre-model comparison carries the first fibre point to the second. -/
+theorem fibrePt_fibreModelIso (P : Y.curve.Section) :
+    (D₁.fibrePt k P).1 ≫ (fibreModelIso D₁ D₂ k hgeom).hom = (D₂.fibrePt k P).1 := by
+  have e1 : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  have e2 : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have hfs : (D₁.fibreSection k P).1 ≫ (pullback.congrHom rfl hgeom).hom =
+      (D₂.fibreSection k P).1 := by
+    rw [D₁.fibreSection_coe k P, D₂.fibreSection_coe k P]
+    refine pullback.hom_ext ?_ ?_
+    · calc (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            (pullback.congrHom rfl hgeom).hom) ≫
+            pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k))
+          = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k))) := Category.assoc _ _ _
+        _ = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) :=
+              congrArg (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫ ·) e1
+        _ = D₁.geomPt (D₁.specPt k) ≫ P.1 := pullback.lift_fst _ _ _
+        _ = D₂.geomPt (D₂.specPt k) ≫ P.1 := congrArg (· ≫ P.1) hgeom
+        _ = pullback.lift (D₂.geomPt (D₂.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) := (pullback.lift_fst _ _ _).symm
+    · calc (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            (pullback.congrHom rfl hgeom).hom) ≫
+            pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k))
+          = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k))) := Category.assoc _ _ _
+        _ = pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) :=
+              congrArg (pullback.lift (D₁.geomPt (D₁.specPt k) ≫ P.1) (𝟙 _) _ ≫ ·) e2
+        _ = 𝟙 _ := pullback.lift_snd _ _ _
+        _ = pullback.lift (D₂.geomPt (D₂.specPt k) ≫ P.1) (𝟙 _) _ ≫
+            pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) := (pullback.lift_snd _ _ _).symm
+  show ((D₁.fibreSection k P).1 ≫ (D₁.fibreChartIso k).hom) ≫ _ =
+    (D₂.fibreSection k P).1 ≫ (D₂.fibreChartIso k).hom
+  rw [fibreModelIso]
+  simp only [Iso.trans_hom, Iso.symm_hom]
+  calc ((D₁.fibreSection k P).1 ≫ (D₁.fibreChartIso k).hom) ≫
+      ((D₁.fibreChartIso k).inv ≫ (pullback.congrHom rfl hgeom).hom ≫
+        (D₂.fibreChartIso k).hom)
+      = (D₁.fibreSection k P).1 ≫ ((D₁.fibreChartIso k).hom ≫
+          (D₁.fibreChartIso k).inv ≫ (pullback.congrHom rfl hgeom).hom ≫
+          (D₂.fibreChartIso k).hom) := Category.assoc _ _ _
+    _ = (D₁.fibreSection k P).1 ≫ ((pullback.congrHom rfl hgeom).hom ≫
+          (D₂.fibreChartIso k).hom) :=
+        congrArg ((D₁.fibreSection k P).1 ≫ ·) (Iso.hom_inv_id_assoc _ _)
+    _ = ((D₁.fibreSection k P).1 ≫ (pullback.congrHom rfl hgeom).hom) ≫
+          (D₂.fibreChartIso k).hom := (Category.assoc _ _ _).symm
+    _ = (D₂.fibreSection k P).1 ≫ (D₂.fibreChartIso k).hom :=
+        congrArg (· ≫ (D₂.fibreChartIso k).hom) hfs
+
+include hgeom in
+/-- **Overlap agreement of the pointed atlas maps** through the comparison ENGINE. -/
+theorem tateBaseSpecMapOfPoint_fibrePt_agree [Algebra ↑R k]
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    tateBaseSpecMapOfPoint R (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) _ _
+      (zChartEval_equation_self _ (D₁.fibrePt k P)
+        (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP)))
+      (D₁.fibrePt_hord k P hP) =
+    tateBaseSpecMapOfPoint R (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) _ _
+      (zChartEval_equation_self _ (D₂.fibrePt k P)
+        (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP)))
+      (D₂.fibrePt_hord k P hP) :=
+  tateBaseSpecMapOfPoint_eq_of_pointedIso R
+    (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k))
+    (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k))
+    (fibreModelIso D₁ D₂ k hgeom)
+    (fibreModelIso_π D₁ D₂ k hgeom) (fibreModelIso_zero D₁ D₂ k hgeom)
+    (D₁.fibrePt k P) (D₂.fibrePt k P)
+    (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP))
+    (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP))
+    (fibrePt_fibreModelIso D₁ D₂ k hgeom P)
+    (D₁.fibrePt_hord k P hP) (D₂.fibrePt_hord k P hP)
+
+include hgeom in
+/-- **The local classifying base maps agree on affine test points of the overlap.** -/
+theorem specPt_tateBaseSpecMapOfPoint_agree [Algebra ↑R k]
+    [Algebra ↑R ↑Γ(Y.base, D₁.U.1)] [Algebra ↑R ↑Γ(Y.base, D₂.U.1)]
+    (htower₁ : (algebraMap ↑Γ(Y.base, D₁.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) = algebraMap ↑R k)
+    (htower₂ : (algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) = algebraMap ↑R k)
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    D₁.specPt k ≫ (tateBaseSpecMapOfPoint R D₁.W _ _
+        (zChartEval_equation_self D₁.W (D₁.pt P) (D₁.pt_inZChart P hP))
+        (D₁.pt_hord P hP)) =
+      D₂.specPt k ≫ (tateBaseSpecMapOfPoint R D₂.W _ _
+        (zChartEval_equation_self D₂.W (D₂.pt P) (D₂.pt_inZChart P hP))
+        (D₂.pt_hord P hP)) := by
+  have hx₁ := D₁.zChartEval_fibrePt_coordX k P (D₁.pt_inZChart P hP)
+  have hy₁ := D₁.zChartEval_fibrePt_coordY k P (D₁.pt_inZChart P hP)
+  have hx₂ := D₂.zChartEval_fibrePt_coordX k P (D₂.pt_inZChart P hP)
+  have hy₂ := D₂.zChartEval_fibrePt_coordY k P (D₂.pt_inZChart P hP)
+  have hxy₁' : (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)).toAffine.Equation
+      (algebraMap ↑Γ(Y.base, D₁.U.1) k
+        (zChartEval D₁.W (D₁.pt P) (D₁.pt_inZChart P hP) (coordX D₁.W)))
+      (algebraMap ↑Γ(Y.base, D₁.U.1) k
+        (zChartEval D₁.W (D₁.pt P) (D₁.pt_inZChart P hP) (coordY D₁.W))) := by
+    rw [← hx₁, ← hy₁]
+    exact zChartEval_equation_self _ (D₁.fibrePt k P)
+      (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP))
+  have hord₁' : NowhereOrderLEThree (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k))
+      (algebraMap ↑Γ(Y.base, D₁.U.1) k
+        (zChartEval D₁.W (D₁.pt P) (D₁.pt_inZChart P hP) (coordX D₁.W)))
+      (algebraMap ↑Γ(Y.base, D₁.U.1) k
+        (zChartEval D₁.W (D₁.pt P) (D₁.pt_inZChart P hP) (coordY D₁.W))) := by
+    rw [← hx₁, ← hy₁]
+    exact D₁.fibrePt_hord k P hP
+  have hxy₂' : (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)).toAffine.Equation
+      (algebraMap ↑Γ(Y.base, D₂.U.1) k
+        (zChartEval D₂.W (D₂.pt P) (D₂.pt_inZChart P hP) (coordX D₂.W)))
+      (algebraMap ↑Γ(Y.base, D₂.U.1) k
+        (zChartEval D₂.W (D₂.pt P) (D₂.pt_inZChart P hP) (coordY D₂.W))) := by
+    rw [← hx₂, ← hy₂]
+    exact zChartEval_equation_self _ (D₂.fibrePt k P)
+      (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP))
+  have hord₂' : NowhereOrderLEThree (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k))
+      (algebraMap ↑Γ(Y.base, D₂.U.1) k
+        (zChartEval D₂.W (D₂.pt P) (D₂.pt_inZChart P hP) (coordX D₂.W)))
+      (algebraMap ↑Γ(Y.base, D₂.U.1) k
+        (zChartEval D₂.W (D₂.pt P) (D₂.pt_inZChart P hP) (coordY D₂.W))) := by
+    rw [← hx₂, ← hy₂]
+    exact D₂.fibrePt_hord k P hP
+  calc D₁.specPt k ≫ (tateBaseSpecMapOfPoint R D₁.W _ _
+        (zChartEval_equation_self D₁.W (D₁.pt P) (D₁.pt_inZChart P hP)) (D₁.pt_hord P hP))
+      = tateBaseSpecMapOfPoint R (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) _ _
+          hxy₁' hord₁' :=
+        tateBaseSpecMapOfPoint_naturality (algebraMap ↑Γ(Y.base, D₁.U.1) k) R htower₁
+          D₁.W _ _ (zChartEval_equation_self D₁.W (D₁.pt P) (D₁.pt_inZChart P hP))
+          (D₁.pt_hord P hP) hxy₁' hord₁'
+    _ = tateBaseSpecMapOfPoint R (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) _ _
+          (zChartEval_equation_self _ (D₁.fibrePt k P)
+            (D₁.fibrePt_inZChart k P (D₁.pt_inZChart P hP)))
+          (D₁.fibrePt_hord k P hP) :=
+        tateBaseSpecMapOfPoint_congr R _ hx₁.symm hy₁.symm hxy₁' hord₁' _ _
+    _ = tateBaseSpecMapOfPoint R (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) _ _
+          (zChartEval_equation_self _ (D₂.fibrePt k P)
+            (D₂.fibrePt_inZChart k P (D₂.pt_inZChart P hP)))
+          (D₂.fibrePt_hord k P hP) :=
+        tateBaseSpecMapOfPoint_fibrePt_agree D₁ D₂ k hgeom P hP
+    _ = tateBaseSpecMapOfPoint R (D₂.W.map (algebraMap ↑Γ(Y.base, D₂.U.1) k)) _ _
+          hxy₂' hord₂' :=
+        tateBaseSpecMapOfPoint_congr R _ hx₂ hy₂ _ _ hxy₂' hord₂'
+    _ = D₂.specPt k ≫ (tateBaseSpecMapOfPoint R D₂.W _ _
+          (zChartEval_equation_self D₂.W (D₂.pt P) (D₂.pt_inZChart P hP))
+          (D₂.pt_hord P hP)) :=
+        (tateBaseSpecMapOfPoint_naturality (algebraMap ↑Γ(Y.base, D₂.U.1) k) R htower₂
+          D₂.W _ _ (zChartEval_equation_self D₂.W (D₂.pt P) (D₂.pt_inZChart P hP))
+          (D₂.pt_hord P hP) hxy₂' hord₂').symm
+
+end MarkedChartData
+
+end OverlapAgreement
+
 end ModularCurves
