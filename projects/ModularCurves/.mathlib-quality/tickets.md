@@ -11254,3 +11254,13 @@ board files ⟹ stop + board). Purpose: bring the C6 dictionary layer (AdditionS
 GroupLawAxioms / AdditionBaseChange / NegModelBaseChange) onto the [T-B6′] sorry's home
 branch ahead of the T-G4 gate-fire. Then: y1 spine green (single-target YOneTatePoint +
 GeometricFibreComparison), push. Steps 2–4 same-session iff c5β's T-G4 line boards.
+
+## Amendments v10.117-Y1 (2026-07-10, NEW-CASCADE): step-1 merge HELD — dev is tree-broken (upstream regression); y1 tip kept green
+
+The v10.116-Y1 merge was executed with all approved resolutions, but full-spine
+verification surfaced an UPSTREAM regression on dev (commit `40e44a706` clobbered
+`Moduli/Representability.lean` — `EllHom.pullSection`/`gammaOneNaiveProblem` layer
+deleted by name collision; forensics: dev board v10.132-CASCADE). The merge commit is
+preserved intact on `wip/y1-dev-merge-cascade`; this branch's tip is deliberately held
+at the green pre-merge state. Re-merge is minutes once dev is fixed. Parked at the
+double gate (dev fix + c5β T-G4).
