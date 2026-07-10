@@ -135,29 +135,48 @@ structure Index : Type u where
 variable {R A}
 
 /-- The inclusion of variable subtypes along a containment of variable sets. -/
-def Index.incl {P Q : Index R A} (h : P.vars ⊆ Q.vars) :
-    {a // a ∈ P.vars} → {a // a ∈ Q.vars} :=
+def Index.incl {s t : Finset A} (h : s ⊆ t) :
+    {a // a ∈ s} → {a // a ∈ t} :=
   fun x => ⟨x.1, h x.2⟩
 
 /-- The inclusion along a reflexive containment is the identity (structure eta +
 proof irrelevance make this definitional). -/
-theorem Index.incl_rfl {P : Index R A} (h : P.vars ⊆ P.vars) :
-    Index.incl h = _root_.id := rfl
+theorem Index.incl_rfl {s : Finset A} (h : s ⊆ s) :
+    Index.incl h = (_root_.id : {a // a ∈ s} → {a // a ∈ s}) := rfl
 
 /-- Inclusions compose (definitionally, by proof irrelevance). -/
-theorem Index.incl_comp {P Q S : Index R A} (h₁ : P.vars ⊆ Q.vars) (h₂ : Q.vars ⊆ S.vars) :
+theorem Index.incl_comp {s t v : Finset A} (h₁ : s ⊆ t) (h₂ : t ⊆ v) :
     Index.incl (h₁.trans h₂) = Index.incl h₂ ∘ Index.incl h₁ := rfl
 
 /-- The inclusion does not depend on the containment proof. -/
-theorem Index.incl_irrel {P Q : Index R A} (h h' : P.vars ⊆ Q.vars) :
+theorem Index.incl_irrel {s t : Finset A} (h h' : s ⊆ t) :
     Index.incl h = Index.incl h' := rfl
 
 /-- Mapping an ideal along the rename by a reflexive inclusion is the identity. -/
-theorem Index.map_rename_incl_rfl {P : Index R A} (h : P.vars ⊆ P.vars)
-    (I : Ideal (MvPolynomial {a // a ∈ P.vars} R)) :
+theorem Index.map_rename_incl_rfl {s : Finset A} (h : s ⊆ s)
+    (I : Ideal (MvPolynomial {a // a ∈ s} R)) :
     I.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _) = I := by
   rw [Index.incl_rfl, MvPolynomial.rename_id]
   exact (show I.map (AlgHom.id R _) = I.map (RingHom.id _) from rfl).trans (Ideal.map_id I)
+
+/-- The sup of two finitely generated ideals is finitely generated (native `Ideal.FG`
+spelling). -/
+private theorem fg_sup {B' : Type u} [CommRing B'] {I J : Ideal B'}
+    (hI : I.FG) (hJ : J.FG) : (I ⊔ J).FG := by
+  classical
+  obtain ⟨S, rfl⟩ := hI
+  obtain ⟨T, rfl⟩ := hJ
+  exact ⟨S ∪ T, by rw [Finset.coe_union, Ideal.span_union]⟩
+
+/-- The image of a finitely generated ideal along a variable rename is finitely
+generated (native `Ideal.FG` spelling, `AlgHom`-instance `Ideal.map`). -/
+theorem Index.fg_map {s t : Finset A} (h : s ⊆ t)
+    {I : Ideal (MvPolynomial {a // a ∈ s} R)} (hI : I.FG) :
+    (I.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _)).FG := by
+  classical
+  obtain ⟨S, rfl⟩ := hI
+  exact ⟨S.image ⇑(MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _),
+    by rw [Finset.coe_image, Ideal.map_span]⟩
 
 instance : Preorder (Index R A) where
   le P Q := ∃ h : P.vars ⊆ Q.vars,
@@ -173,31 +192,97 @@ instance : Preorder (Index R A) where
     rw [hcomp]
     exact le_trans (Ideal.map_mono hm₁) hm₂
 
+/-- Renamed relation ideals still evaluate to zero: the image of `P.rels` along any
+variable inclusion is contained in the evaluation kernel at the larger variable set. -/
+theorem Index.map_incl_le_ker (P : Index R A) {t : Finset A} (h : P.vars ⊆ t) :
+    P.rels.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _)
+      ≤ RingHom.ker (MvPolynomial.aeval (Subtype.val : {a // a ∈ t} → A) :
+          MvPolynomial {a // a ∈ t} R →ₐ[R] A) := by
+  rw [Ideal.map_le_iff_le_comap]
+  intro x hx
+  have hker : MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A) x = 0 :=
+    RingHom.mem_ker.1 (P.rels_le hx)
+  rw [Ideal.mem_comap, RingHom.mem_ker, MvPolynomial.aeval_rename]
+  exact hker
+
+/-- **[KL-1] union refinement**: the join of two stages — union the variables, sum the
+transported relation ideals. -/
+noncomputable def Index.sup [DecidableEq A] (P Q : Index R A) : Index R A where
+  vars := P.vars ∪ Q.vars
+  rels := P.rels.map (MvPolynomial.rename
+        (Index.incl (Finset.subset_union_left : P.vars ⊆ P.vars ∪ Q.vars)) : _ →ₐ[R] _)
+      ⊔ Q.rels.map (MvPolynomial.rename
+        (Index.incl (Finset.subset_union_right : Q.vars ⊆ P.vars ∪ Q.vars)) : _ →ₐ[R] _)
+  rels_fg := fg_sup (Index.fg_map Finset.subset_union_left P.rels_fg)
+    (Index.fg_map Finset.subset_union_right Q.rels_fg)
+  rels_le := sup_le (P.map_incl_le_ker Finset.subset_union_left)
+    (Q.map_incl_le_ker Finset.subset_union_right)
+
+theorem Index.le_sup_left [DecidableEq A] (P Q : Index R A) : P ≤ Index.sup P Q :=
+  ⟨Finset.subset_union_left, _root_.le_sup_left⟩
+
+theorem Index.le_sup_right [DecidableEq A] (P Q : Index R A) : Q ≤ Index.sup P Q :=
+  ⟨Finset.subset_union_right, _root_.le_sup_right⟩
+
+/-- **[KL-1] one-relation enlargement**: adjoin a single vanishing relation to a stage. -/
+noncomputable def Index.enlarge (P : Index R A) (r : MvPolynomial {a // a ∈ P.vars} R)
+    (hr : r ∈ RingHom.ker (MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A) :
+      MvPolynomial {a // a ∈ P.vars} R →ₐ[R] A)) : Index R A where
+  vars := P.vars
+  rels := P.rels ⊔ Ideal.span {r}
+  rels_fg := fg_sup P.rels_fg ⟨{r}, by rw [Finset.coe_singleton]⟩
+  rels_le := sup_le P.rels_le ((Ideal.span_le).2 (Set.singleton_subset_iff.2 hr))
+
+theorem Index.le_enlarge (P : Index R A) (r : MvPolynomial {a // a ∈ P.vars} R)
+    (hr : r ∈ RingHom.ker (MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A) :
+      MvPolynomial {a // a ∈ P.vars} R →ₐ[R] A)) : P ≤ P.enlarge r hr := by
+  refine ⟨subset_rfl, ?_⟩
+  show P.rels.map (MvPolynomial.rename (Index.incl (subset_rfl : P.vars ⊆ P.vars)) : _ →ₐ[R] _)
+    ≤ P.rels ⊔ Ideal.span {r}
+  rw [Index.map_rename_incl_rfl]
+  exact _root_.le_sup_left
+
+
 variable (R A)
 
 /-- **[KL-1] stages.** The stage algebra at an index: the free algebra on the variables
 modulo the recorded relations. Finitely presented over `R` by construction
 (`stage_finitePresentation`). -/
-def stage (P : Index R A) : Type u :=
+abbrev stage (P : Index R A) : Type u :=
   MvPolynomial {a // a ∈ P.vars} R ⧸ P.rels
-
-noncomputable instance (P : Index R A) : CommRing (stage R A P) :=
-  inferInstanceAs (CommRing (MvPolynomial _ R ⧸ P.rels))
-
-noncomputable instance (P : Index R A) : Algebra R (stage R A P) :=
-  inferInstanceAs (Algebra R (MvPolynomial _ R ⧸ P.rels))
 
 /-- **[KL-1] transitions**: rename along the variable inclusion, descended to quotients.
 (The inclusion function is proof-irrelevant, so functoriality is honest.) -/
 noncomputable def transition ⦃P Q : Index R A⦄ (h : P ≤ Q) :
     stage R A P →ₐ[R] stage R A Q :=
-  Ideal.quotientMapₐ Q.rels (MvPolynomial.rename (Index.incl h.choose))
-    (Ideal.map_le_iff_le_comap.1 h.choose_spec)
+  Ideal.Quotient.liftₐ P.rels
+    ((Ideal.Quotient.mkₐ R Q.rels).comp (MvPolynomial.rename (Index.incl h.choose)))
+    (fun a ha => by
+      have hmem : MvPolynomial.rename (Index.incl h.choose) a
+          ∈ P.rels.map (MvPolynomial.rename (Index.incl h.choose) : _ →ₐ[R] _) :=
+        Ideal.mem_map_of_mem _ ha
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      exact Ideal.Quotient.eq_zero_iff_mem.2 (h.choose_spec hmem))
 
 /-- **[KL-1] cocone**: evaluation of variables in `A`, descended to the stage. -/
 noncomputable def colimMap (P : Index R A) : stage R A P →ₐ[R] A :=
   Ideal.Quotient.liftₐ P.rels (MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A))
     (fun _ ha => (RingHom.mem_ker).1 (P.rels_le ha))
+
+/-- The transition map on residue classes: rename, then project (stated for an arbitrary
+containment proof — the inclusion is proof-irrelevant). -/
+theorem transition_mk ⦃P Q : Index R A⦄ (h : P ≤ Q) (hsub : P.vars ⊆ Q.vars)
+    (p : MvPolynomial {a // a ∈ P.vars} R) :
+    transition R A h (Ideal.Quotient.mk P.rels p)
+      = Ideal.Quotient.mk Q.rels (MvPolynomial.rename (Index.incl hsub) p) := by
+  rw [Index.incl_irrel hsub h.choose]
+  exact Ideal.Quotient.lift_mk P.rels _ _
+
+/-- The cocone map on residue classes: evaluate the variables. -/
+theorem colimMap_mk (P : Index R A) (p : MvPolynomial {a // a ∈ P.vars} R) :
+    colimMap R A P (Ideal.Quotient.mk P.rels p)
+      = MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A) p :=
+  Ideal.Quotient.lift_mk P.rels _ _
 
 /-- **[KL-1a].** Every stage of the canonical presentation system is finitely presented
 over `R` (`MvPolynomial` on a finite type, quotient by an FG ideal). -/
@@ -212,7 +297,48 @@ jointly surjective (`a` is hit by the stage `({a}, ⊥)`), with equality at a la
 (a vanishing lift of a difference is itself a relation — enlarge the relation ideal by it). -/
 theorem isFilteredAlgColimit :
     IsFilteredAlgColimit R (stage R A) (transition R A) A (colimMap R A) := by
-  sorry
+  classical
+  constructor
+  -- directed: union refinement
+  · exact ⟨fun P Q => ⟨Index.sup P Q, Index.le_sup_left P Q, Index.le_sup_right P Q⟩⟩
+  -- nonempty: the empty stage
+  · exact ⟨⟨∅, ⊥, ⟨∅, by simp⟩, bot_le⟩⟩
+  -- functoriality of transitions
+  · intro P Q S hPQ hQS x
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [transition_mk R A hPQ hPQ.choose, transition_mk R A hQS hQS.choose,
+      transition_mk R A (hPQ.trans hQS) (hPQ.choose.trans hQS.choose),
+      MvPolynomial.rename_rename]
+    rfl
+  -- cocone compatibility
+  · intro P Q h x
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [transition_mk R A h h.choose, colimMap_mk, colimMap_mk, MvPolynomial.aeval_rename]
+    rfl
+  -- joint surjectivity: `a` is the class of its own variable at the singleton stage
+  · intro a
+    refine ⟨⟨{a}, ⊥, ⟨∅, by simp⟩, bot_le⟩,
+      Ideal.Quotient.mk _ (MvPolynomial.X ⟨a, Finset.mem_singleton_self a⟩), ?_⟩
+    rw [colimMap_mk, MvPolynomial.aeval_X]
+  -- equality at a later stage: enlarge the relations by the vanishing difference
+  · intro P x y hxy
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [colimMap_mk, colimMap_mk] at hxy
+    have hpq : p - q ∈ RingHom.ker
+        (MvPolynomial.aeval (Subtype.val : {a // a ∈ P.vars} → A) :
+          MvPolynomial {a // a ∈ P.vars} R →ₐ[R] A) := by
+      rw [RingHom.mem_ker, map_sub, sub_eq_zero]
+      exact hxy
+    -- the enlarged stage
+    refine ⟨P.enlarge (p - q) hpq, P.le_enlarge (p - q) hpq, ?_⟩
+    rw [transition_mk R A (P.le_enlarge (p - q) hpq) subset_rfl p,
+      transition_mk R A (P.le_enlarge (p - q) hpq) subset_rfl q, Ideal.Quotient.eq,
+      ← map_sub]
+    show MvPolynomial.rename (Index.incl (subset_rfl : P.vars ⊆ P.vars)) (p - q)
+      ∈ P.rels ⊔ Ideal.span {p - q}
+    rw [Index.incl_rfl, MvPolynomial.rename_id_apply]
+    exact Ideal.mem_sup_right (Ideal.subset_span rfl)
 
 end PresentationSystem
 
@@ -253,17 +379,9 @@ theorem exists_spreadData (H : IsFilteredAlgColimit R 𝒮 t A u)
 variable {B}
 
 /-- **[KL-2] stage models**: the descended presentation instantiated at any later stage. -/
-def SpreadData.spreadStage (D : SpreadData 𝒮 u B) ⦃i : ι⦄ (h : D.i₀ ≤ i) : Type u :=
+abbrev SpreadData.spreadStage (D : SpreadData 𝒮 u B) ⦃i : ι⦄ (h : D.i₀ ≤ i) : Type u :=
   MvPolynomial (Fin D.m) (𝒮 i) ⧸
     Ideal.span (Set.range fun j => MvPolynomial.map (t h).toRingHom (D.g j))
-
-noncomputable instance (D : SpreadData 𝒮 u B) ⦃i : ι⦄ (h : D.i₀ ≤ i) :
-    CommRing (D.spreadStage (t := t) h) :=
-  inferInstanceAs (CommRing (MvPolynomial _ _ ⧸ _))
-
-noncomputable instance (D : SpreadData 𝒮 u B) ⦃i : ι⦄ (h : D.i₀ ≤ i) :
-    Algebra (𝒮 i) (D.spreadStage (t := t) h) :=
-  inferInstanceAs (Algebra (𝒮 i) (MvPolynomial _ _ ⧸ _))
 
 /-- **[KL-2a].** Each stage model is finitely presented over its stage base. -/
 theorem SpreadData.spreadStage_finitePresentation (D : SpreadData 𝒮 u B)
