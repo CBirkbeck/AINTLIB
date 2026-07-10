@@ -14043,3 +14043,35 @@ coassoc from action-associativity, both appLE-functoriality chases against the
 group-object diagrams), then `StableAffineChartData`-assembly consuming C2's
 closed-immersion (Γ-surjectivity on charts). Then [C3] covers, [C4] glue ⟹ pins ⟹
 **BOARD-SIGNAL (NISOG L6 + p0 pickup)** per v10.98 orders.
+
+## Amendments v10.103 (2026-07-10, coordinator): [OWNER-FLW] branch SURVEYED (codex/fibrewise-weierstrass-comparison) — major usable content; PIC0 READ-FIRST directive; integration plan
+
+- **Survey verdict (branch at ca22ffd12, 9 commits, ~4.6k lines, forked ~v10.90b)**: this
+  is the [OWNER-FLW] deliverable in progress, and it is SUBSTANTIAL:
+  (i) `decomposition-fibrewise-locally-weierstrass.md` — the correct comparison theorem
+  identified with a SOURCE-GROUNDED STATEMENT CORRECTION: the old board shorthand
+  (FibrewiseElliptic → LocallyWeierstrass bare) is NOT the KM/Hida/DR theorem —
+  smoothness + properness are load-bearing; the true target is
+  `LocallyWeierstrass ↔ SmoothOfRelativeDimension 1 ∧ IsProper ∧ FibrewiseElliptic`
+  (+ a hypothesis-free converse helper). Fleet consumers (FP4's chartless [a5]
+  compat-hypotheses; [YF-GEOM]; PIC0 eso-upgrade) should aim at THIS form.
+  (ii) `EllipticCurve/PoleSheaf.lean` — 1,808 lines, **ZERO sorries** (the pole-sheaf /
+  zero-section-ideal-invertible route). (iii) `Picard/Dual.lean` — 889 lines, **ZERO
+  sorries** (SheafOfModules duals). (iv) +139 to Comparison.lean (additions, no
+  sorries), +808 to ForMathlib/PullbackTensorMonoidal, +227 to SheafOfModulesMonoidal.
+- **⚠ TIME-CRITICAL — PIC0 READ-FIRST**: the branch's last two commits ("pullback
+  tensor comparison", "unit-sided pullback tensor isomorphisms") plausibly overlap the
+  D-PresPB′ route-G leaves PIC0 just decomposed. **PIC0: before executing B1→A, read
+  the branch's PullbackTensorMonoidal/SheafOfModulesMonoidal diffs
+  (`git diff $(git merge-base dev/modular-curves codex/fibrewise-weierstrass-comparison) codex/fibrewise-weierstrass-comparison -- <files>`)
+  and board a reuse verdict** — cardinal rule; do not duplicate what may already be
+  proven there.
+- **Integration plan (owner-worker executes, coordinator assists)**: (1) rebase the
+  branch onto current dev/modular-curves — its EngineDescent (+26, 3 sorries) and
+  InvertibleSheaf (+195, 2 sorries) copies are STALE vs the landed engine close /
+  PIC0's current state; those edits likely drop or shrink on rebase; (2) verify green;
+  (3) land the self-contained new material first (PoleSheaf, Dual, the artifact, the
+  Comparison additions — with beastmode-A's holder ack on Comparison.lean); (4) the
+  monoidal-cluster additions land AFTER PIC0's reuse verdict (single reconciliation,
+  not two parallel developments). The [OWNER-FLW] reservation continues to cover the
+  equivalence itself.
