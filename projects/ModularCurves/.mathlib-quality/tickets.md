@@ -14356,3 +14356,33 @@ Nonempty-Prop with a 10-iteration failure-mode ledger + three ranked next-attack
 artifact (top candidate: `freeHomEquiv`-adjunction naturality — no elementwise work). The
 leaf-closure `nonempty_freeYoneda_tensor_iso'` chains through it. Chain: B1 ✓ B2 ✓ G1 60% |
 [G1-NAT] → G3 → A. Session boundary (three arcs deep); all pushed.
+
+## Amendments v10.111 (c5β) — ★ [C6] COMPLETE: mulModelHom_specPoints PROVEN; 0c-i decomposed G1–G5
+
+**THE C6 SPEC IS A THEOREM** (76d48c76f, axiom-clean [propext, Classical.choice, Quot.sound]):
+`mulModelHom_specPoints (W) [W.IsElliptic] (K) [Field K] ... : dict(lift P Q ≫ mulModelHom W) =
+dict P + dict Q` — every pair, every ring. Assembly: keystone `dictionary_eq_toAffine` → 4 arms →
+`mulModelHom_specPoints_atlas` (master, feabf40b5) → [D-NAT] `dictionary_baseChange` →
+`mulModelHom_specPoints_of_map` (f-form; explicit-subtype-args — metavar projections
+whnf-explode, explicit args + proof-irrelevance are cheap) → `_of_eq` (subst-friendly h-form) →
+instantiate at `f := classifyRingHomU W`. Theorem RELOCATED GLC → AdditionSpecPoints (statement
+byte-identical; proof lives downstream of descent+keystone; GLC keeps pointer comment). GLC 7→6
+sorries (5 group axioms + vc).
+
+**0c-i (group axioms) decomposition** — route: atlas equation by `hom_ext_of_forall_specPoint` +
+the spec + mathlib Point laws; transport to R by `IsPullback.hom_ext` on the base-change square
+(no mono needed: π-legs by Over-compat, bc-legs by mulModelHom_map naturality); Over-wrap last.
+- **T-G1** ULift 0e instance pack @ uWLU universe u: IsNoetherianRing(ULift), replay
+  geometricallyIntegral (needs isIntegral_projModel at {K : Type u} — restate, proof is
+  universe-polymorphic), IsIntegral/IsReduced E_U^{2,3}, IsSeparated (projModel uWLU) via
+  mathlib `Scheme.IsSeparated (Proj 𝒜)`. Home: AdditionSpecPoints (or new GroupAxioms file).
+- **T-G2** field-point leg API on fibre powers: p : Spec K ⟶ E×E ↔ (P,Q) SpecPoints pairs
+  (lift-reconstruction p = lift(P.1,Q.1); algebra on K via p ≫ π² + Spec.preimage.toAlgebra);
+  triple version; evaluation p ≫ (mul ▷ id) etc. through pullback.lift/map.
+- **T-G3** atlas equations ×5 at uWLU (assoc/one-mul/mul-one/comm/inv) via hom_ext + spec +
+  dictionary (`projModelPointsEquiv_zero` for units; negModelHom_specPoints GLC:714 for inv) +
+  mathlib add_assoc/zero_add/add_zero/add_comm/neg_add_cancel on Point. Equiv.injective closes.
+- **T-G4** transport ×5 to every R: of_eq/subst form + IsPullback.hom_ext legs as above.
+- **T-G5** Over-level fills ×5 (mulOver_assoc etc.) = one-line homMk-ext over T-G4; RELOCATE
+  the five GLC sorries → AdditionSpecPoints (same as c6; GLC keeps pointers). GLC 6→1 (vc).
+Then 0c-ii (BOARD-SIGNAL — sweep/cascade/NEW-Y1 armed) → 0h → T-W7.12 → T-W7a.
