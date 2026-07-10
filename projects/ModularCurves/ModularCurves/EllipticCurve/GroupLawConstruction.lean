@@ -833,19 +833,10 @@ theorem mulModelHom_π (W : WeierstrassCurve R) [W.IsElliptic] :
   mulModelHomBC_projModelπ (classifyRingHomU W) universalWeierstrassLocU
     universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
 
-/-- **(T-W7.0c·c6, the spec)** On field points, `mulModelHom` is mathlib's `Point.add`
-through the dictionary — for EVERY pair (the B–L laws compute the chord–tangent sum wherever
-each is defined, and the two opens cover). This single spec is what every group axiom
-consumes. Source: B–L Thm 2 ("addition law" = computes the sum in `E(K)`); mathlib
-`Affine.Point.add`; §5 formulas vs `Affine.slope`/`addX`/`addY` on the secant locus. -/
-theorem mulModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
-    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
-    (P Q : SpecPoints (projModel W) (projModelπ W) K) :
-    projModelPointsEquiv W K
-        ⟨pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W, by
-          rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst, P.2]⟩ =
-      projModelPointsEquiv W K P + projModelPointsEquiv W K Q := by
-  sorry
+/- **(T-W7.0c·c6, the spec)** `mulModelHom_specPoints` — on field points, `mulModelHom` is
+mathlib's `Point.add` through the dictionary. PROVEN downstream in `AdditionSpecPoints.lean`
+(the evaluation layer needs the two-law descent + atlas keystone machinery built there;
+this file only defines the morphism). -/
 
 /-- **(T-W7.0c·nat)** Base-change naturality of the multiplication morphism: the B–L
 polynomial data has coefficients entering polynomially, so `mulModelHom` commutes with base

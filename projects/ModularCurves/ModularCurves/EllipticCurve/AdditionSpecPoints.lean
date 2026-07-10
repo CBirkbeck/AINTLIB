@@ -1996,6 +1996,38 @@ theorem mulModelHom_specPoints_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
         projModelBaseChange_π f universalWeierstrassLocU.{u}]
     rw [← Category.assoc, Q.2, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
 
+/-- The c6 spec against an equality witness `universalWeierstrassLocU.map f = W`: the
+`subst`-friendly form (`f` and `W` independent, tied only by `h`), so instantiating at
+`f := classifyRingHomU W`, `h := universalWeierstrassLocU_map_classifyRingHomU W` yields
+the spec for EVERY elliptic `W` with no dependent-rewrite pain. -/
+theorem mulModelHom_specPoints_of_eq (f : WeierstrassAtlasRingU.{u} →+* R)
+    (W : WeierstrassCurve R) [W.IsElliptic] (h : universalWeierstrassLocU.{u}.map f = W)
+    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W) :
+    projModelPointsEquiv W K
+        ⟨pullback.lift P.1 Q.1 w ≫ mulModelHom W, by
+          rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv W K P + projModelPointsEquiv W K Q := by
+  subst h
+  exact mulModelHom_specPoints_of_map f K P Q w
+
+/-- **(T-W7.0c·c6, THE SPEC — [C6] COMPLETE)** On field points, `mulModelHom` is mathlib's
+`Point.add` through the dictionary — for EVERY pair over EVERY ring (the B–L laws compute
+the chord–tangent sum wherever each is defined, the two opens cover, and base change
+transports the universal atlas case). This single spec is what every group axiom consumes.
+Source: B–L Thm 2 ("addition law" = computes the sum in `E(K)`); mathlib
+`Affine.Point.add`; §5 formulas vs `Affine.slope`/`addX`/`addY` on the secant locus. -/
+theorem mulModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
+    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K) :
+    projModelPointsEquiv W K
+        ⟨pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W, by
+          rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv W K P + projModelPointsEquiv W K Q :=
+  mulModelHom_specPoints_of_eq (classifyRingHomU W) W
+    (universalWeierstrassLocU_map_classifyRingHomU W) K P Q (P.2.trans Q.2.symm)
+
 end OfMap
 
 end ModularCurves
