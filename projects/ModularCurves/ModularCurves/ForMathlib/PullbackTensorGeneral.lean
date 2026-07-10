@@ -290,6 +290,17 @@ lemma freeTensorμ_inv_freeMk (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ) (z : (F �
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The free presheaf's restriction on generators: `freeMk x ↦ freeMk (F.map f x)`. -/
+@[simp]
+lemma freeObj_map_freeMk {H : Cᵒᵖ ⥤ Type u} {V W : Cᵒᵖ} (f : V ⟶ W) (x : H.obj V) :
+    ((free (T ⋙ forget₂ CommRingCat RingCat)).obj H).map f (ModuleCat.freeMk x) =
+      (ModuleCat.freeMk (H.map f x) :
+        ((free (T ⋙ forget₂ CommRingCat RingCat)).obj H).obj W) := by
+  erw [ModuleCat.freeDesc_apply]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- `ModuleCat.free_hom_ext`, restated at the presheaf-of-modules clothing of the free
 objects (the mathlib form's `(ModuleCat.free R).obj`-spelling reframes goals and poisons
 `kabstract`; the defeq crossing happens once, here, at elaboration). -/
@@ -312,9 +323,18 @@ noncomputable def freeTensorPair (F G : Cᵒᵖ ⥤ Type u) :
       (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
         (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V)))
   naturality {V W} f := by
-    -- [G1-NAT′] the reduced residual: ONE Types-level square (the pairing vs restriction).
-    -- Iteration ledger in decomposition-pullback-monoidal-general.md; stop-line reached.
-    sorry
+    ext z
+    show (ModuleCat.freeMk (((F ⊗ G).map f) z).1 ⊗ₜ
+        ModuleCat.freeMk (((F ⊗ G).map f) z).2 :
+        (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+          (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj W)) =
+      (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).map f)
+        (ModuleCat.freeMk z.1 ⊗ₜ ModuleCat.freeMk z.2)
+    erw [Monoidal.tensorObj_map_tmul]
+    rw [freeObj_map_freeMk T f z.1, freeObj_map_freeMk T f z.2]
+    erw [CategoryTheory.tensor_apply]
+    rfl
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
@@ -385,8 +405,8 @@ theorem nonempty_freeYoneda_tensor_iso (U₁ U₂ : X.Opens) :
     Nonempty (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
         (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂) :
           PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
-      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂))) := by
-  sorry
+      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂))) :=
+  nonempty_freeYoneda_tensor_iso' U₁ U₂
 
 end FreeYonedaTensor
 

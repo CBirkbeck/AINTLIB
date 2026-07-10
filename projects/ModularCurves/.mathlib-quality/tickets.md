@@ -14485,3 +14485,19 @@ Lean-ops: `congrArg (fun f : X ⟶ Y => f.appTop)` needs BOTH source and target 
 (the action-unit and action-associativity diagrams restricted to the patch, dualized
 once). Then C1d (assembly against C2's `isClosedImmersion_actPair_left`), C3 (stable
 covers), C4 (glue) ⟹ six pins ⟹ **BOARD-SIGNAL** (NISOG L6 + p0 pickup).
+
+## Amendments v10.114 (fable-PIC0) — ★ G1 COMPLETE: the lattice miracle PROVED, axiom-clean
+
+Owner-directed continuation past the v10.112 stop-line; the top-ranked attack (a) landed in 4 more
+measured iterations: **term-mode/`ext z` + the evaluated-shape `show` (learned from the funext-term
+run's inferred endpoints) + the closed chain** (`tensorObj_map_tmul` → 2× `freeObj_map_freeMk` →
+`tensor_apply` → `rfl`). The failing piece all along was goal-SHAPE knowledge — the funext-term
+attempt type-checked the per-element proof and thereby revealed the exact evaluated forms the
+`show` needed. New reusable pieces: `freeObj_map_freeMk` (@[simp], generator-restriction) +
+`clothedFree_hom_ext`. **G1 chain now all green + axiom-clean [propext, Classical.choice,
+Quot.sound]:** `meetHomEquiv`/`yonedaMeetIso` (meet half), `freeTensorμ` + generator lemmas,
+`freeTensorPair`/`freeTensorDesc` (universal-property comparison), the IsIso-assembly, and both
+leaf forms `nonempty_freeTensorIsoGeneric` + `nonempty_freeYoneda_tensor_iso`(′) (old skeleton
+closed from the proved one). Remaining sorries in the file: ONLY the packaging leaf (A) +
+the registered general-f Props. **Chain: B1 ✓ B2 ✓ G1 ✓ | G3 (presentation five-lemma) → A →
+Pic(f).**
