@@ -15461,3 +15461,33 @@ Note: commit 2add06cae swept A's file under my message (shared-worktree index) �
   (A's lemma + the eqToHom-free `projModelZero_baseChangeOf`); c5β on the of_map/of_eq
   transport sequence (unit → comm-halve → assoc → inv). **The NEW-CASCADE fire signal
   is expected imminently** — coordinator signals the owner at the T-G4 completion board.
+
+### v10.99b (2026-07-10, fable-FP): ★★★ [02KL-CORE] — the 02KK assembly is PROVEN; gate reduced to the two spreading-out leaves
+
+*Commits through 809ba352a. `ForMathlib/FinitePresentationDescent.lean` ~1600 lines, builds
+green; sorry inventory = exactly {[KL-2b], [KL-2c]} (dead-code candidates, outside the
+dependency cone) ∪ {[KL-3] flat-at-stage, [KL-4] ffl-at-stage}.*
+
+- **PROVEN sorry-free**: [KL-0] retract-of-FP; [KL-1] canonical presentation system
+  (directed sup + enlarge-by-relation, evaluation lemmas, full `IsFilteredAlgColimit`);
+  [KL-2] `exists_spreadData` + stage-FP; [KL-2d] **presented systems over a filtered base
+  are filtered colimits** (the workhorse: polynomial stage-lift/stage-equality
+  coefficientwise, span-representation `eq_at_stage`); [KL-2e] colimit-equiv transport;
+  [KL-5a/b] concrete stage-factoring (FP source) and stage-agreement (FT source);
+  [KL-5c] `concatEquiv` (tensor of presented algebras = concatenated presentation,
+  intertwining `includeLeft/Right`); the doubling maps + naturality; the Amitsur transport
+  (`mem_range_algebraMap_of_double_eq`, consuming the project `FaithfullyFlatEqualizer`);
+  the section-factoring; and the FULL 02KK assembly
+  (`Algebra.FinitePresentation.of_comp_of_faithfullyFlat` + RingHom wrapper
+  `of_comp_of_faithfullyFlat'`, primed pending gate-flip).
+- **Elaboration-budget engineering** (banked patterns extended): `set`-abstraction over
+  nested `MvPolynomial`-quotient types blows `whnf` budgets — use `obtain ⟨x, hx⟩ : ∃ y,
+  y = e := ⟨_, rfl⟩` (opaque local + equation, no goal traversal); fill ALL explicit
+  system arguments (each `_` re-runs unification against the colimit-structure type);
+  split the declaration at a raw-system seam (`of_comp_aux` — equivalences cancel by
+  injectivity so the endgame is `eC`-free).
+- **REMAINING = exactly A's ledger §8 gap**: [KL-3] (Stacks 02JO(1)+(3): ℤ-models,
+  noetherian local criterion, flat-locus openness, quasicompact glue) and [KL-4]
+  (01UA-leg: Chevalley + patch topology + fibre contraction; `PrimeSpectrum.
+  comap_surjective_of_faithfullyFlat` / `Module.FaithfullyFlat.of_comap_surjective`
+  bridges verified present). KL-4 next (bounded); then the KL-3 boss.
