@@ -110,6 +110,38 @@ noncomputable def groupPatchComul :
         rfl rfl).inv.appTop
     ≫ (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.groupRing))).hom
 
+/-! ### `R`-linearity of the structure maps
+
+Each is the `Γ`-dual of the corresponding "is a morphism over `S`" fact, through
+`Scheme.Hom.appLE_comp_appLE`. -/
+
+/-- The `appLE` of an identity morphism is the identity. -/
+theorem appLE_id {X : Scheme.{u}} {U : X.Opens} (e : U ≤ (𝟙 X) ⁻¹ᵁ U) :
+    Scheme.Hom.appLE (𝟙 X) U U e = 𝟙 _ := by
+  rw [Scheme.Hom.appLE, AlgebraicGeometry.Scheme.Hom.id_app]
+  exact (Category.id_comp _).trans (X.presheaf.map_id _)
+
+/-- `appLE` transported along an equality of morphisms. -/
+theorem appLE_congr_hom {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
+    (W : X.Opens) (e : W ≤ f ⁻¹ᵁ U) :
+    f.appLE U W e = g.appLE U W (h ▸ e) := by
+  subst h; rfl
+
+/-- **The counit is `R`-linear**: `ε ∘ (algebraMap R A) = 𝟙 R`, the `Γ`-dual of
+`unitHom ≫ π = 𝟙 S`. -/
+theorem algebraMap_comp_groupPatchCounit :
+    G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupPatchCounit = 𝟙 P.baseRing := by
+  rw [groupPatchCounit, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom G.unitHom_π P.V P.V]
+  exact appLE_id _
+
+/-- **The antipode is `R`-linear**, the `Γ`-dual of `invHom ≫ π = π`. -/
+theorem algebraMap_comp_groupPatchAntipode :
+    G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupPatchAntipode
+      = G.π.appLE P.V P.groupOpen le_rfl := by
+  rw [groupPatchAntipode, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom G.invHom_π P.V P.groupOpen]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
