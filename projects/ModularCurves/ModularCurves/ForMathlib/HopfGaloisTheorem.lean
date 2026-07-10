@@ -345,6 +345,44 @@ theorem span_range_coactionBaseChange_eq_top
   have := hgen (baseChangeAssoc R A ρ C' u)
   rwa [AlgEquiv.symm_apply_apply] at this
 
+/-- **The shifted basis, per prime** (Stacks 03C1 applied over the flat local base change
+with infinite residue field): elements of the base-changed algebra whose co-action images
+form a left basis of the base-changed comodule algebra. -/
+theorem exists_shifted_basis_coactionBaseChange
+    [Module.Free R A] [Module.Finite R A]
+    [Module.Flat (coinvariants ρ) C'] [IsLocalRing C']
+    [Infinite (IsLocalRing.ResidueField C')]
+    (hρ : IsCoaction ρ) (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    ∃ x : Fin (Module.finrank (C' ⊗[coinvariants ρ] B)
+        ((C' ⊗[coinvariants ρ] B) ⊗[R] A)) → C' ⊗[coinvariants ρ] B,
+      ∃ hb : Module.Basis (Fin (Module.finrank (C' ⊗[coinvariants ρ] B)
+        ((C' ⊗[coinvariants ρ] B) ⊗[R] A))) (C' ⊗[coinvariants ρ] B)
+        ((C' ⊗[coinvariants ρ] B) ⊗[R] A),
+      ∀ i, hb i = coactionBaseChange R A ρ C' (x i) := by
+  classical
+  haveI hCC : IsLocalRing (coinvariants (coactionBaseChange R A ρ C')) :=
+    isLocalRing_coinvariants_coactionBaseChange R A ρ C'
+  haveI := infinite_residueField_coinvariants_coactionBaseChange R A ρ C'
+  haveI : Nontrivial (C' ⊗[coinvariants ρ] B) := nontrivial_baseChange_of_flat R A ρ C'
+  have hfin := finite_setOf_isMaximal_of_isLocalRing R A
+    (coactionBaseChange R A ρ C') (isCoaction_coactionBaseChange R A ρ C' hρ)
+  obtain ⟨y, hyN, b, hb⟩ := Submodule.exists_basis_mem_of_span_eq_top
+    (R := coinvariants (coactionBaseChange R A ρ C'))
+    (n := fun j : Fin hfin.toFinset.card =>
+      ((hfin.toFinset.equivFin.symm j : hfin.toFinset) : Ideal (C' ⊗[coinvariants ρ] B)))
+    (fun j => hfin.mem_toFinset.mp (hfin.toFinset.equivFin.symm j).2)
+    (fun P hP => ⟨hfin.toFinset.equivFin ⟨P, hfin.mem_toFinset.mpr hP⟩, by
+      rw [Equiv.symm_apply_apply]⟩)
+    (fun j => maximalIdeal_map_le_of_isMaximal R A _
+      (isCoaction_coactionBaseChange R A ρ C' hρ) _
+      (hfin.mem_toFinset.mp (hfin.toFinset.equivFin.symm j).2))
+    (r := Module.finrank (C' ⊗[coinvariants ρ] B) ((C' ⊗[coinvariants ρ] B) ⊗[R] A))
+    rfl
+    (LinearMap.range (coactionOverCoinvariants (coactionBaseChange R A ρ C')).toLinearMap)
+    (span_range_coactionBaseChange_eq_top R A ρ C' hsurj)
+  choose xf hxf using fun i => LinearMap.mem_range.mp (hyN i)
+  exact ⟨xf, b, fun i => by rw [hb i, ← hxf i]; rfl⟩
+
 end PerPrime
 
 end ModularCurves
