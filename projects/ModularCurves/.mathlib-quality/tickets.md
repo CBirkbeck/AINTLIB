@@ -14460,3 +14460,28 @@ the pairing vs restriction, inside `freeTensorPair`). Landed green + axiom-clean
 `nonempty_freeTensorIsoGeneric` = [G1-NAT′] and nothing else. Full iteration log + 3 ranked next
 attacks in the artifact (top: term-mode naturality proof — never enter the `.toFun`-tactic-goal).
 Chain: B1 ✓ B2 ✓ G1 90% | [G1-NAT′] → G3 → A. All pushed.
+
+### v10.114 (2026-07-10, NEW-HOPF): ★ [CHARTER-HOPF] [HG-C1c-ii] COMPLETE — `chartCoaction : B →ₐ[R] B ⊗[R] A`
+
+*Zero sorries, axiom-clean. Per v10.113's date-fix: this section is 07-10 (v10.107's
+header said 07-11 in error — numbering kept, dates corrected going forward).*
+
+The Γ-level transfer landed exactly as banked: `appLE_comp_coactionRing` (R-linearity)
+= `appTop` of `chartCoactionSpec_over`, unwound with `resLE_app_top` +
+`Scheme.Opens.toSpecΓ_appTop` + **`Scheme.ΓSpecIso_naturality`** (the tail closes in one
+rewrite). Then `coactionAlgLeft` (AlgHom packaging; `commutes'` is the R-linearity read
+elementwise) and **`chartCoaction`** — the comm-swap into comodule convention
+`B →ₐ[R] B ⊗[R] A`, i.e. exactly the shape `IsCoaction`/`StableAffineChartData`/M5
+consume.
+
+So the pins' feed-line is now typed end-to-end: geometry (translation action on a stable
+affine chart) ⟹ `chartCoaction`. What remains is *properties* of it, not construction.
+
+Lean-ops: `congrArg (fun f : X ⟶ Y => f.appTop)` needs BOTH source and target ascribed;
+`CommRingCat` eta (`of ↑R` vs `Γ(X,U)`) blocks `Iso.inv_hom_id` keying — realign with a
+`show ... from rfl` rewrite rather than `simp`.
+
+**NEXT**: `IsCoaction chartCoaction` — counit + coassoc, scheme-level-first per bank
+(the action-unit and action-associativity diagrams restricted to the patch, dualized
+once). Then C1d (assembly against C2's `isClosedImmersion_actPair_left`), C3 (stable
+covers), C4 (glue) ⟹ six pins ⟹ **BOARD-SIGNAL** (NISOG L6 + p0 pickup).
