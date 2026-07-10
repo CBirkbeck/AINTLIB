@@ -234,6 +234,38 @@ theorem algebraMap_comp_groupPatchComul :
     Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl]
   simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
+/-! ### Algebra-map packaging -/
+
+/-- The counit as an `R`-algebra map. -/
+noncomputable def counitAlg : P.groupRing →ₐ[P.baseRing] P.baseRing where
+  toRingHom := P.groupPatchCounit.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRing ⟶ P.baseRing => m.hom r)
+      P.algebraMap_comp_groupPatchCounit
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply] at h
+    exact h
+
+/-- The antipode as an `R`-algebra map. -/
+noncomputable def antipodeAlg : P.groupRing →ₐ[P.baseRing] P.groupRing where
+  toRingHom := P.groupPatchAntipode.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRing ⟶ P.groupRing => m.hom r)
+      P.algebraMap_comp_groupPatchAntipode
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+    exact h
+
+/-- The comultiplication as an `R`-algebra map. -/
+noncomputable def comulAlg :
+    P.groupRing →ₐ[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing) where
+  toRingHom := P.groupPatchComul.hom
+  commutes' := fun r => by
+    have h := congrArg
+      (fun m : P.baseRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing)
+        => m.hom r) P.algebraMap_comp_groupPatchComul
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+
 /-! ### The counit laws, scheme-side -/
 
 /-- The unit section, restricted to the patch. -/
