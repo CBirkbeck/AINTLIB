@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] [GR-G] — pointOfChartMember DONE. NEXT: overlap-compat lemma (SPEC + glue_condition) then glueMorphisms assembly.
+FOCUS: [NISOG-GRASS] [GR-G] — glue agent RUNNING on GrassmannianGlueData.lean (exists_point_of_member; single-writer). Prep done for [02KL-CORE] (next after D2-signal): gate block read (SmoothDescent.lean:103), NOTE audit tags 02KG/02KH are mispointed (cohomology lemmas) — pin real algebra tags via 02KL proof-refs at decompose.
