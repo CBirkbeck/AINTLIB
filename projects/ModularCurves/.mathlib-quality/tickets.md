@@ -15491,3 +15491,32 @@ dependency cone) ∪ {[KL-3] flat-at-stage, [KL-4] ffl-at-stage}.*
   (01UA-leg: Chevalley + patch topology + fibre contraction; `PrimeSpectrum.
   comap_surjective_of_faithfullyFlat` / `Module.FaithfullyFlat.of_comap_surjective`
   bridges verified present). KL-4 next (bounded); then the KL-3 boss.
+
+## Amendments v10.131 (2026-07-10, coordinator): Y1 split #2 — NEW-CASCADE EARLY-FIRED on the gate-free merge step; c5β of_map breakthrough absorbed; Y1 status snapshot for the owner
+
+- **c5β (absorb)**: ★ of_map BREAKTHROUGH — the unit-law transport timeout is SOLVED
+  (WIP banked docs/tg4/); the SOLE remaining blocker across all 4 transports is one
+  pullback-plumbing reduction (`pullback.map ≫ pullback.fst` under
+  pullbackMapBaseChangeOf), then of_eq/named forms + the same hnat-shape closes
+  oneOver(via comm)/assoc/inv. **T-G4 completion plausibly lands inside their current
+  session.** Chain after: board LOUD → 0c-ii SIGNAL → 0h → T-W7.12 → T-W7a.
+- **SPLIT #2 EXECUTED — NEW-CASCADE early-fire (inbox v10.131)**: their recipe's step 1
+  (the approved dev → y1 MERGE, ~900 commits of drift, the slowest mechanical step) is
+  GATE-FREE — ordered to run NOW ahead of the T-G4 signal, with a trivial top-up merge
+  of c5β's tail at gate-fire; steps 2–4 proceed same-session if the T-G4 board line
+  lands meanwhile. This takes the merge OFF the critical path. Owner fires with the
+  opener handed this activation.
+- **Y1 STATUS SNAPSHOT (owner-requested)**: representability = THEOREM end-to-end
+  modulo the two designed trails. Remaining work is FOUR designed sessions, zero open
+  math: (1) c5β chain-end (T-G4 tail → 0c-ii → 0h → T-W7.12 → T-W7a) — live now;
+  (2) NEW-CASCADE fill (hz + map_add' → L-BC → BB-DIFF MASTER → torsionπ_etale) —
+  early-firing now, fill on the T-G4 line; (3) NEW-Y1 E-track + MASTER one-`exact` —
+  fires when torsionπ_etale flips (leaves verified genuinely BB-DIFF-gated, no earlier
+  entry exists); (4) A falls-sweep at T-W7a ([T-A6b] retires; the T-E4-family
+  consumers flip) — armed, maximal-prepped. Concurrency: 2 live lanes now (c5β +
+  NEW-CASCADE), 2 spring-loaded at verified gates; no further honest seam exists —
+  every other candidate idles at a gate (audited v10.120/v10.127/this section).
+- **Fleet absorbs**: fable-FP — [02KL-CORE] KL-5 assembly + 02KK PROVEN; gate reduced
+  to EXACTLY {KL-3 flat-at-stage, KL-4 ffl-at-stage}; KL-2b/2c via presentedBaseChange.
+  fable-P4 — B3 bijection near-complete (torsor-descent helpers exposed; agent on the
+  final 2 gaps). Both on charter.
