@@ -155,4 +155,125 @@ theorem injective_of_forall_lTensor_localPolynomialExtension (F : M →ₗ[C] N)
 
 end FlatCoverInjectivity
 
+section PerPrime
+
+open TensorProduct
+
+variable (R A : Type*) [CommRing R] [CommRing A] [HopfAlgebra R A]
+variable {B : Type*} [CommRing B] [Algebra R B]
+variable (ρ : B →ₐ[R] B ⊗[R] A)
+variable (C' : Type*) [CommRing C'] [Algebra R C']
+variable [Algebra (coinvariants ρ) C'] [IsScalarTower R (coinvariants ρ) C']
+
+/-- The scalars of a base change land in the co-invariants of the base-changed
+co-action. -/
+theorem tmul_one_mem_coinvariants_coactionBaseChange (c' : C') :
+    (c' ⊗ₜ[coinvariants ρ] (1 : B)) ∈ coinvariants (coactionBaseChange R A ρ C') := by
+  rw [mem_coinvariants, coactionBaseChange_tmul, map_one]
+  rw [show (c' ⊗ₜ[coinvariants ρ] (1 : B ⊗[R] A))
+      = (baseChangeAssoc R A ρ C') ((c' ⊗ₜ[coinvariants ρ] (1 : B)) ⊗ₜ[R] (1 : A)) from by
+    rw [baseChangeAssoc_tmul_one, Algebra.TensorProduct.map_tmul]
+    rfl]
+  rw [AlgEquiv.symm_apply_apply]
+
+/-- The scalar map onto the co-invariants of the base-changed co-action. -/
+noncomputable def baseChangeCoinvariantsMap :
+    C' →+* coinvariants (coactionBaseChange R A ρ C') :=
+  (Algebra.TensorProduct.includeLeftRingHom (R := coinvariants ρ) (A := C') (B := B)).codRestrict
+    (coinvariants (coactionBaseChange R A ρ C')).toSubring
+    (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C')
+
+@[simp]
+theorem coe_baseChangeCoinvariantsMap (c' : C') :
+    (baseChangeCoinvariantsMap R A ρ C' c' : C' ⊗[coinvariants ρ] B)
+      = c' ⊗ₜ[coinvariants ρ] (1 : B) := rfl
+
+/-- Over a flat base change, the scalar map onto the base-changed co-invariants is
+surjective (Stacks 03BK(3)). -/
+theorem surjective_baseChangeCoinvariantsMap [Module.Flat (coinvariants ρ) C'] :
+    Function.Surjective (baseChangeCoinvariantsMap R A ρ C') := by
+  rintro ⟨x, hx⟩
+  obtain ⟨c', hc'⟩ := (mem_coinvariants_coactionBaseChange_iff R A ρ C' x).mp hx
+  exact ⟨c', Subtype.ext hc'⟩
+
+omit [HopfAlgebra R A] in
+/-- Over a flat base change, the scalar map into the base-changed algebra is injective
+(tensor the inclusion `C ⊆ B` with the flat module `C'`). -/
+theorem injective_tmul_one_of_flat [Module.Flat (coinvariants ρ) C'] :
+    Function.Injective (fun c' : C' => c' ⊗ₜ[coinvariants ρ] (1 : B)) := by
+  have hval : Function.Injective (Algebra.linearMap (coinvariants ρ) B) :=
+    fun x y h => Subtype.ext h
+  have hlt : Function.Injective
+      ((Algebra.linearMap (coinvariants ρ) B).lTensor C') :=
+    Module.Flat.lTensor_preserves_injective_linearMap _ hval
+  have hcomp : (fun c' : C' => c' ⊗ₜ[coinvariants ρ] (1 : B))
+      = ((Algebra.linearMap (coinvariants ρ) B).lTensor C')
+        ∘ (TensorProduct.rid (coinvariants ρ) C').symm := by
+    funext c'
+    show c' ⊗ₜ[coinvariants ρ] (1 : B)
+      = ((Algebra.linearMap (coinvariants ρ) B).lTensor C')
+          ((TensorProduct.rid (coinvariants ρ) C').symm c')
+    rw [TensorProduct.rid_symm_apply, LinearMap.lTensor_tmul]
+    rw [show (Algebra.linearMap (coinvariants ρ) B) (1 : coinvariants ρ) = (1 : B) from
+      map_one (algebraMap (coinvariants ρ) B)]
+  rw [hcomp]
+  exact hlt.comp (TensorProduct.rid (coinvariants ρ) C').symm.injective
+
+/-- The base-changed algebra is nontrivial when the scalars are. -/
+theorem nontrivial_baseChange_of_flat [Module.Flat (coinvariants ρ) C'] [Nontrivial C'] :
+    Nontrivial (C' ⊗[coinvariants ρ] B) :=
+  ⟨(1 : C') ⊗ₜ[coinvariants ρ] (1 : B), (0 : C') ⊗ₜ[coinvariants ρ] (1 : B),
+    (injective_tmul_one_of_flat R A ρ C').ne one_ne_zero⟩
+
+/-- The co-invariants of a flat local base change form a local ring (surjective image of
+the local scalars). -/
+theorem isLocalRing_coinvariants_coactionBaseChange
+    [Module.Flat (coinvariants ρ) C'] [IsLocalRing C'] :
+    IsLocalRing (coinvariants (coactionBaseChange R A ρ C')) := by
+  haveI : Nontrivial (C' ⊗[coinvariants ρ] B) := nontrivial_baseChange_of_flat R A ρ C'
+  haveI : Nontrivial (coinvariants (coactionBaseChange R A ρ C')) := by
+    refine ⟨1, 0, fun h => ?_⟩
+    have := congrArg (Subtype.val) h
+    exact one_ne_zero this
+  exact IsLocalRing.of_surjective' (baseChangeCoinvariantsMap R A ρ C')
+    (surjective_baseChangeCoinvariantsMap R A ρ C')
+
+/-- The residue field of the base-changed co-invariants is (up to isomorphism) the
+residue field of the scalars, hence inherits infiniteness: the scalar map is a
+surjective local homomorphism of local rings. -/
+theorem infinite_residueField_coinvariants_coactionBaseChange
+    [Module.Flat (coinvariants ρ) C'] [IsLocalRing C']
+    [IsLocalRing (coinvariants (coactionBaseChange R A ρ C'))]
+    [Infinite (IsLocalRing.ResidueField C')] :
+    Infinite (IsLocalRing.ResidueField (coinvariants (coactionBaseChange R A ρ C'))) := by
+  haveI hπloc : IsLocalHom (baseChangeCoinvariantsMap R A ρ C') :=
+    .of_surjective _ (surjective_baseChangeCoinvariantsMap R A ρ C')
+  set φ := (IsLocalRing.residue (coinvariants (coactionBaseChange R A ρ C'))).comp
+    (baseChangeCoinvariantsMap R A ρ C') with hφdef
+  have hφs : Function.Surjective φ :=
+    IsLocalRing.residue_surjective.comp (surjective_baseChangeCoinvariantsMap R A ρ C')
+  have hker : RingHom.ker φ = IsLocalRing.maximalIdeal C' := by
+    refine le_antisymm (IsLocalRing.le_maximalIdeal ?_) ?_
+    · intro htop
+      have h1 : φ 1 = 0 := by
+        rw [← RingHom.mem_ker, htop]
+        trivial
+      rw [map_one] at h1
+      exact one_ne_zero h1
+    · intro x hx
+      have hmem : baseChangeCoinvariantsMap R A ρ C' x
+          ∈ IsLocalRing.maximalIdeal (coinvariants (coactionBaseChange R A ρ C')) := by
+        by_contra hnot
+        have hunit := IsLocalRing.notMem_maximalIdeal.mp hnot
+        exact mem_nonunits_iff.mp ((IsLocalRing.mem_maximalIdeal x).mp hx)
+          (IsUnit.of_map _ x hunit)
+      rw [RingHom.mem_ker, hφdef, RingHom.comp_apply]
+      exact Ideal.Quotient.eq_zero_iff_mem.mpr hmem
+  have hequiv : IsLocalRing.ResidueField C'
+      ≃+* IsLocalRing.ResidueField (coinvariants (coactionBaseChange R A ρ C')) :=
+    (Ideal.quotEquivOfEq hker.symm).trans (RingHom.quotientKerEquivOfSurjective hφs)
+  exact Infinite.of_injective hequiv hequiv.injective
+
+end PerPrime
+
 end ModularCurves
