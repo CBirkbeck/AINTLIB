@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
+import Mathlib.LinearAlgebra.Finsupp.Pi
 import ModularCurves.Picard.Pic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
@@ -250,6 +251,20 @@ noncomputable def pullbackOplaxMonoidal [(pushforward.{u} φ).IsRightAdjoint] :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The unit comparison of the factored pushforward is the ring comparison `φ` on
+elements (the `pushforward₀` unit is the identity and the `restrictScalars` one is
+`φ.app` itself). -/
+lemma pushforwardFactored_ε_app_apply (V : Cᵒᵖ)
+    (r : (𝟙_ (PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))).obj V) :
+    letI := pushforwardFactoredLaxMonoidal φ
+    (Functor.LaxMonoidal.ε (pushforwardFactored φ)).app V r =
+      ((φ.app V).hom r :
+        ((pushforwardFactored φ).obj
+          (𝟙_ (PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat RingCat)))).obj V) :=
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- The tensorator of the factored pushforward is `x ⊗ₜ y ↦ x ⊗ₜ y` on elements (the
 `pushforward₀` tensorator is the identity and the `restrictScalars` one is
 `mapOfCompatibleSMul`). -/
@@ -489,6 +504,90 @@ noncomputable def freeYonedaTensorIso (U₁ U₂ : X.Opens) :
   (freeTensorIso X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)).symm ≪≫
     (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).mapIso (yonedaMeetIso U₁ U₂)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The types-level collapse of the terminal representable: every section maps to `1`.
+The adjunct of the unit–free-yoneda comparison. -/
+noncomputable def unitDescPair :
+    (yoneda.obj (⊤ : X.Opens) : (X.Opens)ᵒᵖ ⥤ Type u) ⟶
+      (𝟙_ (PresheafOfModules.{u}
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).presheaf ⋙ forget _ where
+  app V := ↾fun _ =>
+    (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+  naturality {V W} i := by
+    ext h
+    show (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj W)) =
+      (unit (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).map i
+        (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+    exact (unit_map_one _ i).symm
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The unit–free-yoneda comparison on the terminal open, by the universal property. -/
+noncomputable def unitDesc :
+    ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (⊤ : X.Opens)) :
+      PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
+      𝟙_ (PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :=
+  freeObjDesc (unitDescPair (X := X))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+lemma unitDesc_app_freeMk {V : (X.Opens)ᵒᵖ} (h : V.unop ⟶ (⊤ : X.Opens)) :
+    (unitDesc (X := X)).app V (ModuleCat.freeMk h) =
+      (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V)) := by
+  simp only [unitDesc, freeObjDesc_app]
+  erw [ModuleCat.freeDesc_apply]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+instance : IsIso (unitDesc (X := X)) := by
+  haveI : ∀ V : (X.Opens)ᵒᵖ, IsIso ((unitDesc (X := X)).app V) := by
+    intro V
+    haveI : Unique (V.unop ⟶ (⊤ : X.Opens)) :=
+      { default := homOfLE le_top, uniq := fun _ => Subsingleton.elim _ _ }
+    have happ : (unitDesc (X := X)).app V = (LinearEquiv.toModuleIso
+        (X₁ := ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj
+          (yoneda.obj (⊤ : X.Opens))).obj V)
+        (X₂ := (𝟙_ (PresheafOfModules.{u}
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj V)
+        (Finsupp.uniqueLinearEquiv
+          (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+          (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+          (homOfLE le_top))).hom := by
+      refine clothedFree_hom_ext X.sheaf.obj (fun h => ?_)
+      rw [unitDesc_app_freeMk]
+      show _ = Finsupp.uniqueLinearEquiv
+        (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+        (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))
+        (homOfLE le_top) (ModuleCat.freeMk h)
+      rw [Finsupp.uniqueLinearEquiv_apply]
+      show (1 : (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V))) =
+        Finsupp.single h
+          (1 : (↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V)))
+          (homOfLE le_top)
+      rw [show (homOfLE le_top : V.unop ⟶ (⊤ : X.Opens)) = h from Subsingleton.elim _ _]
+      exact (Finsupp.single_eq_same).symm
+    rw [happ]
+    infer_instance
+  haveI : IsIso ((toPresheaf _).map (unitDesc (X := X))) := by
+    haveI : ∀ V : (X.Opens)ᵒᵖ, IsIso (((toPresheaf _).map (unitDesc (X := X))).app V) :=
+      fun V => inferInstanceAs
+        (IsIso ((forget₂ _ AddCommGrpCat).map ((unitDesc (X := X)).app V)))
+    exact NatIso.isIso_of_isIso_app _
+  exact isIso_of_reflects_iso _ (toPresheaf (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The monoidal unit is the free-yoneda module on the terminal open**: sections of the
+structure presheaf are the free rank-1 module on `Hom(V, ⊤) = {*}`. -/
+noncomputable def unitFreeYonedaIso :
+    ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (⊤ : X.Opens)) :
+      PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
+      𝟙_ (PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :=
+  asIso (unitDesc (X := X))
+
 /-- **[D-PresPB′-general], leaf G1 (the lattice miracle, existence form).** -/
 theorem nonempty_freeYoneda_tensor_iso' (U₁ U₂ : X.Opens) :
     Nonempty (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
@@ -720,7 +819,49 @@ free-yoneda are computed by one generator (`pullbackFreeYonedaIso`). -/
 theorem isIso_pullback_η :
     letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
     IsIso (Functor.OplaxMonoidal.η (pullback.{u} (schemeRingPresheafHom f))) := by
-  sorry
+  letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
+  letI := pushforwardFactoredLaxMonoidal (schemeRingPresheafHom f)
+  have key : Functor.OplaxMonoidal.η (pullback.{u} (schemeRingPresheafHom f)) =
+      ((pullback.{u} (schemeRingPresheafHom f)).mapIso (unitFreeYonedaIso (X := X)).symm ≪≫
+        pullbackFreeYonedaIso (schemeRingPresheafHom f) (⊤ : X.Opens) ≪≫
+        unitFreeYonedaIso (X := Y)).hom := by
+    apply ((pullbackPushforwardFactoredAdjunction
+      (schemeRingPresheafHom f)).homEquiv _ _).injective
+    rw [show Functor.OplaxMonoidal.η (pullback.{u} (schemeRingPresheafHom f)) =
+      ((pullbackPushforwardFactoredAdjunction (schemeRingPresheafHom f)).homEquiv
+        (𝟙_ (PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+        (𝟙_ (PresheafOfModules.{u} (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))).symm
+        (Functor.LaxMonoidal.ε (pushforwardFactored (schemeRingPresheafHom f)))
+      from rfl]
+    rw [Equiv.apply_symm_apply, Iso.trans_hom, Iso.trans_hom, Functor.mapIso_hom,
+      Adjunction.homEquiv_naturality_left, ← Iso.inv_comp_eq]
+    dsimp only [pullbackPushforwardFactoredAdjunction]
+    rw [Adjunction.homEquiv_ofNatIsoRight_apply, homEquiv_pullbackFreeYonedaIso_hom_comp]
+    apply freeYonedaEquiv.injective
+    rw [freeYonedaEquiv_apply, freeYonedaEquiv_apply]
+    rw [comp_app, comp_app, ModuleCat.comp_apply, ModuleCat.comp_apply,
+      corepresentableBy_homEquiv_app_generator, pushforwardIsoFactored_hom_app_app,
+      freeYonedaEquiv_apply]
+    rw [Iso.symm_inv]
+    have h1X : (unitFreeYonedaIso (X := X)).hom.app (Opposite.op (⊤ : X.Opens))
+        (ModuleCat.freeMk (𝟙 (⊤ : X.Opens))) =
+        (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (⊤ : X.Opens)))) :=
+      unitDesc_app_freeMk (X := X) (𝟙 (⊤ : X.Opens))
+    have h1Y : (unitFreeYonedaIso (X := Y)).hom.app (Opposite.op (⊤ : Y.Opens))
+        (ModuleCat.freeMk (𝟙 (⊤ : Y.Opens))) =
+        (1 : ((Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (⊤ : Y.Opens)))) :=
+      unitDesc_app_freeMk (X := Y) (𝟙 (⊤ : Y.Opens))
+    erw [h1X, h1Y]
+    have hε := pushforwardFactored_ε_app_apply (schemeRingPresheafHom f)
+      (Opposite.op (⊤ : X.Opens))
+      (1 : ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+        (Opposite.op (⊤ : X.Opens))))
+    erw [hε]
+    exact map_one ((schemeRingPresheafHom f).app (Opposite.op (⊤ : X.Opens))).hom
+  rw [key]
+  infer_instance
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
