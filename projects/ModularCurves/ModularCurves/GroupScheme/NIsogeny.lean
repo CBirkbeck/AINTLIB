@@ -1559,13 +1559,49 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
     rw [show ((Vx x).1.ι ⟨x, hmem x⟩ : T) = x from rfl] at hrk
     rw [← hrk, ← (hsq x).isoPullback_hom_snd, Scheme.Hom.finrank_comp_left_of_isIso]
     exact hch.2 ⟨x, hmem x⟩
-  · -- the geometric condition ⟹ vanishing (elementwise, via `zero_of_zero_cover`)
+  · -- the geometric condition ⟹ vanishing (elementwise, on an affine cover of `t ⁻¹ᵁ U`)
     rintro ⟨hflat, hrank⟩
-    intro U
-    intro z hz
+    intro U z hz
     rw [RingHom.mem_ker]
-    -- the restriction of `t.app U z` to every affine chart `V ⊆ t⁻¹U` vanishes
-    sorry
+    -- the restriction of `t.app U z` to every affine chart inside `t ⁻¹ᵁ U` vanishes
+    have hvan : ∀ (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1),
+        (T.presheaf.map (homOfLE e).op).hom ((t.app U.1).hom z) = 0 := by
+      intro V e
+      -- the chart pullback is the base change of `pullback.snd f t` along `V.ι`
+      have hsq : IsPullback (pullback.fst (pullback.snd f t) V.1.ι ≫ pullback.fst f t)
+          (pullback.snd (pullback.snd f t) V.1.ι) f (V.1.ι ≫ t) :=
+        (IsPullback.of_hasPullback (pullback.snd f t) V.1.ι).paste_horiz
+          (IsPullback.of_hasPullback f t)
+      have hsnd : pullback.snd f (V.1.ι ≫ t) =
+          hsq.isoPullback.inv ≫ pullback.snd (pullback.snd f t) V.1.ι :=
+        (Iso.eq_inv_comp _).mpr hsq.isoPullback_hom_snd
+      have hcflat : Flat (pullback.snd f (V.1.ι ≫ t)) := by
+        rw [hsnd, MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+        infer_instance
+      have hcrank : ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n := by
+        intro p
+        rw [hsnd, Scheme.Hom.finrank_comp_left_of_isIso,
+          Scheme.Hom.finrank_of_isPullback _ _ _ _
+            (IsPullback.of_hasPullback (pullback.snd f t) V.1.ι) p]
+        exact hrank _
+      have hz0 := (locallyFreeRankLocus_chart_cond f t n hb' U V e).mp ⟨hcflat, hcrank⟩ z hz
+      rwa [show t.appLE U.1 V.1 e = t.app U.1 ≫ T.presheaf.map (homOfLE e).op from rfl,
+        CommRingCat.comp_apply] at hz0
+    -- affine charts cover `t ⁻¹ᵁ U`; a section vanishing on all of them is zero
+    have hcover : ∀ p : {q : T // q ∈ t ⁻¹ᵁ U.1}, ∃ V : T.affineOpens,
+        p.1 ∈ V.1 ∧ V.1 ≤ t ⁻¹ᵁ U.1 := by
+      intro p
+      obtain ⟨V, hV, hpV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        T.isBasis_affineOpens p.2
+      exact ⟨⟨V, hV⟩, hpV, hVle⟩
+    choose Vc hmem hVle using hcover
+    refine T.sheaf.eq_of_locally_eq' (fun p => (Vc p).1) (t ⁻¹ᵁ U.1)
+      (fun p => homOfLE (hVle p)) (fun q hq => ?_) _ 0 (fun p => ?_)
+    · exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨q, hq⟩, hmem ⟨q, hq⟩⟩
+    · show (T.presheaf.map (homOfLE (hVle p)).op).hom ((t.app U.1).hom z)
+        = (T.presheaf.map (homOfLE (hVle p)).op).hom 0
+      rw [map_zero]
+      exact hvan (Vc p) (hVle p)
 
 namespace EllipticCurve
 
