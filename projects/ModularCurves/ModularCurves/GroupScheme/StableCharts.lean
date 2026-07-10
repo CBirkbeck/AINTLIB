@@ -120,6 +120,22 @@ noncomputable def coactionToPullback :
   P.U.topIso.inv ≫ (G.restrictedAction P.hstable).appTop
     ≫ ((G.chartPullbackIso P.U).inv.appTop)
 
+/-- The chart, as a scheme over the base patch. -/
+noncomputable def chartToBase : P.U.toScheme ⟶ P.V.toScheme :=
+  E.π.resLE P.V P.U P.hover
+
+@[reassoc]
+theorem chartToBase_comp_ι : P.chartToBase ≫ P.V.ι = P.U.ι ≫ E.π :=
+  Scheme.Hom.resLE_comp_ι _ _
+
+/-- **The `S`-level fibre product is the `V`-level one** (`[HG-C1b]` leg 3, step 1): the
+chart leg factors through the base patch, so the product only sees the part of `G` over
+`V`. -/
+noncomputable def pullbackToVLevel :
+    pullback G.π (P.U.ι ≫ E.π) ≅ pullback (pullback.snd G.π P.V.ι) P.chartToBase :=
+  (pullback.congrHom rfl P.chartToBase_comp_ι).symm
+    ≪≫ (pullbackLeftPullbackSndIso G.π P.V.ι P.chartToBase).symm
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
