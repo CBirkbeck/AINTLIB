@@ -15200,3 +15200,36 @@ unit law); (2) the hz interface fix + `map_add'` fill in GeometricFibreCompariso
 [PROVEN, Rigidity.lean] → C6 `mulModelHom_specPoints`); (3) `hfib` discharge from the
 filled dictionary + HasseWeil separability; (4) the funnel closes L-BC → MASTER →
 `torsionπ_etale` → six Y1-E leaves open + [T-B6′] retires. Sentinel updated to PARKED.
+
+## Amendments v10.125 (fable-PIC0, 2026-07-10): ★★★ [PIC-P1b-MONO]/[D-PresPB′-general] FULLY DISCHARGED — Pic.map DELIVERED, pullback-monoidal stream SORRY-FREE
+
+**HEADLINE (GME 2.2.2 (2.16), p. 108): `Pic.map (f : Y ⟶ X) : Pic X →* Pic Y` exists,
+sorry-free, axiom-clean** (`PullbackTensorGeneral.lean`; `bce652a10`). The P2 Pic program's
+functoriality chain is complete: `Modules.pullback f` is MONOIDAL
+(`nonempty_pullback_monoidal`, `56db66800`), via the presheaf-level
+`PresheafOfModules.pullbackMonoidal` (δ and η of the doctrinal oplax structure are isos:
+lattice-miracle base case + one-generator chases + generic presentation-extension
+`isIso_pullback_δ_of_freeYoneda`) descended through `functorMonoidalOfComp` +
+`sheafificationCompPullback` (`nonempty_sheafPullback_monoidal`, generic small-sites form).
+
+**All session-5 leaves closed (each committed+pushed, axiom-clean
+`[propext, Classical.choice, Quot.sound]`):** G3-pre (`ef173267d`), G3-η, G3-TC+G3-EXT,
+G3-generic-extension, A-presheaf (`pullbackMonoidal`), A-descent + payoff (`56db66800`),
+Pic.map (`bce652a10`), plus the two REGISTERED general-`f` leaves relocated downstream
+(zero consumers; PTG→PTM import is load-bearing) and CLOSED:
+`nonempty_sheafify_presheafPullback_tensor` (now in PullbackTensorGeneral, `c43b2dcc6`) and
+`nonempty_pullback_tensorObj` (new `Picard/PullbackTensorObj.lean`, `66ef18b58`).
+**`PullbackTensorMonoidal.lean`, `InvertibleSheaf.lean`, `PullbackTensorGeneral.lean`,
+`PullbackTensorObj.lean`, `Pic.lean` — ALL SORRY-FREE.** Downstream owner files
+(Dual, PoleSheaf) rebuilt green.
+
+**Ledger + method notes:** `.mathlib-quality/decomposition-pullback-monoidal-general.md`
+(instances-transparency wart; concrete-erw vs metavariable-erw; congrArg₂-assembly;
+φ₀-consistent-spelling descent; sheafToPresheaf-clothing bridge).
+
+**NEXT for this lane:** (a) [PIC-P2-CMP] — the IsInvertible ↔ Skeleton-unit comparison can
+now consume BOTH `nonempty_pullback_tensorObj` and the landed owner `Picard/Dual.lean`
+(dual-sheaf infra) — coordinate with p2 (never build duality twice); (b) Pic-functoriality
+API (Pic.map_id, Pic.map_comp — from pullbackId/pullbackComp + Skeleton-functoriality);
+(c) /cleanup + /decompose passes on PullbackTensorGeneral.lean (1300+ lines, several
+proofs >50 lines) once the coordinator ratifies the boundary.
