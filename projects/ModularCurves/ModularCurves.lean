@@ -73,4 +73,5 @@ import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
+import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
