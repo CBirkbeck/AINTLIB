@@ -4343,6 +4343,173 @@ theorem fibreMap_topMap_agree
 
 end TwoCharts
 
+/-- **Test-point agreement of the local classifying top maps**: on any scheme mapping to
+the two chart pullbacks compatibly over an affine test point of the overlap, the two
+local top maps agree.  This is the input to the morphism-extension over the `E`-cover. -/
+theorem test_topMap_agree (D₁ D₂ : MarkedChartData R Y)
+    [Algebra ↑R ↑Γ(Y.base, D₁.U.1)] [Algebra ↑R ↑Γ(Y.base, D₂.U.1)]
+    (halg₁ : D₁.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))) =
+      D₁.U.1.ι ≫ Y.structMap)
+    (halg₂ : D₂.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+      D₂.U.1.ι ≫ Y.structMap)
+    (k : Type u) [CommRing k]
+    (c₁ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D₁.U.1)))
+    (c₂ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D₂.U.1)))
+    (hcc : c₁ ≫ D₁.U.2.isoSpec.inv ≫ D₁.U.1.ι = c₂ ≫ D₂.U.2.isoSpec.inv ≫ D₂.U.1.ι)
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    {T : Scheme.{u}} (w : T ⟶ Spec (CommRingCat.of k))
+    (v₁ : T ⟶ pullback Y.curve.π D₁.U.1.ι) (v₂ : T ⟶ pullback Y.curve.π D₂.U.1.ι)
+    (hv₁ : v₁ ≫ pullback.snd Y.curve.π D₁.U.1.ι = w ≫ c₁ ≫ D₁.U.2.isoSpec.inv)
+    (hv₂ : v₂ ≫ pullback.snd Y.curve.π D₂.U.1.ι = w ≫ c₂ ≫ D₂.U.2.isoSpec.inv)
+    (hE : v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι = v₂ ≫ pullback.fst Y.curve.π D₂.U.1.ι) :
+    v₁ ≫ D₁.topMap P hP = v₂ ≫ D₂.topMap P hP := by
+  letI ha₁ : Algebra ↑Γ(Y.base, D₁.U.1) k := (Spec.preimage c₁).hom.toAlgebra
+  letI ha₂ : Algebra ↑Γ(Y.base, D₂.U.1) k := (Spec.preimage c₂).hom.toAlgebra
+  letI haR : Algebra ↑R k :=
+    ((Spec.preimage c₁).hom.comp (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))).toAlgebra
+  have hof₁ : CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k) = Spec.preimage c₁ := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have hof₂ : CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k) = Spec.preimage c₂ := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have hsp₁ : D₁.specPt k = c₁ := by
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k)) = c₁
+    rw [hof₁, Spec.map_preimage]
+  have hsp₂ : D₂.specPt k = c₂ := by
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k)) = c₂
+    rw [hof₂, Spec.map_preimage]
+  have hgeom : D₁.geomPt (D₁.specPt k) = D₂.geomPt (D₂.specPt k) := by
+    rw [geomPt, geomPt, hsp₁, hsp₂]
+    exact hcc
+  have htower₁ : (algebraMap ↑Γ(Y.base, D₁.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) = algebraMap ↑R k := rfl
+  have hbase₁ : Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))) =
+      D₁.U.2.isoSpec.inv ≫ D₁.U.1.ι ≫ Y.structMap := by
+    rw [← halg₁, Iso.inv_hom_id_assoc]
+  have hbase₂ : Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+      D₂.U.2.isoSpec.inv ≫ D₂.U.1.ι ≫ Y.structMap := by
+    rw [← halg₂, Iso.inv_hom_id_assoc]
+  have htower₂ : (algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) = algebraMap ↑R k := by
+    have hspec : Spec.map (CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+        (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R k)) := by
+      rw [show CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+          (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+          CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) ≫
+            CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k) from
+        CommRingCat.ofHom_comp _ _]
+      rw [show CommRingCat.ofHom (algebraMap ↑R k) =
+          CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) ≫
+            CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k) from
+        CommRingCat.ofHom_comp _ _]
+      rw [Spec.map_comp, Spec.map_comp, hof₁, hof₂, Spec.map_preimage, Spec.map_preimage,
+        hbase₁, hbase₂]
+      have hw := congrArg (fun m => m ≫ Y.structMap) hcc
+      simp only [Category.assoc] at hw ⊢
+      exact hw.symm
+    have hring := Spec.map_injective hspec
+    have := congrArg CommRingCat.Hom.hom hring
+    simpa using this
+  -- factor the two test maps through the fibre over the agreeing test point
+  have hcond : (v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι) ≫ Y.curve.π =
+      w ≫ D₁.geomPt (D₁.specPt k) := by
+    rw [geomPt, hsp₁]
+    calc (v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι) ≫ Y.curve.π
+        = v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι ≫ Y.curve.π := Category.assoc _ _ _
+      _ = v₁ ≫ pullback.snd Y.curve.π D₁.U.1.ι ≫ D₁.U.1.ι := by rw [pullback.condition]
+      _ = (v₁ ≫ pullback.snd Y.curve.π D₁.U.1.ι) ≫ D₁.U.1.ι := (Category.assoc _ _ _).symm
+      _ = (w ≫ c₁ ≫ D₁.U.2.isoSpec.inv) ≫ D₁.U.1.ι := by rw [hv₁]
+      _ = w ≫ c₁ ≫ D₁.U.2.isoSpec.inv ≫ D₁.U.1.ι := by simp only [Category.assoc]
+  set ρ : T ⟶ pullback Y.curve.π (D₁.geomPt (D₁.specPt k)) :=
+    pullback.lift (v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι) w hcond with hρdef
+  have hρfst : ρ ≫ pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) =
+      v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι := pullback.lift_fst _ _ _
+  have hρsnd : ρ ≫ pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) = w :=
+    pullback.lift_snd _ _ _
+  have hmf₁ : D₁.fibreMap k ≫ pullback.fst Y.curve.π D₁.U.1.ι =
+      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) ≫ 𝟙 Y.curve.E :=
+    pullback.lift_fst _ _ _
+  have hms₁ : D₁.fibreMap k ≫ pullback.snd Y.curve.π D₁.U.1.ι =
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) ≫
+        (D₁.specPt k ≫ D₁.U.2.isoSpec.inv) :=
+    pullback.lift_snd _ _ _
+  have hρ₁ : ρ ≫ D₁.fibreMap k = v₁ := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc]
+      calc ρ ≫ D₁.fibreMap k ≫ pullback.fst Y.curve.π D₁.U.1.ι
+          = ρ ≫ pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) ≫ 𝟙 Y.curve.E := by
+            rw [hmf₁]
+        _ = (ρ ≫ pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k))) ≫ 𝟙 Y.curve.E :=
+            (Category.assoc _ _ _).symm
+        _ = v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι := by rw [Category.comp_id, hρfst]
+    · rw [Category.assoc]
+      calc ρ ≫ D₁.fibreMap k ≫ pullback.snd Y.curve.π D₁.U.1.ι
+          = ρ ≫ pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) ≫
+              (D₁.specPt k ≫ D₁.U.2.isoSpec.inv) := by rw [hms₁]
+        _ = (ρ ≫ pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k))) ≫
+              (D₁.specPt k ≫ D₁.U.2.isoSpec.inv) := (Category.assoc _ _ _).symm
+        _ = w ≫ c₁ ≫ D₁.U.2.isoSpec.inv := by rw [hρsnd, hsp₁]
+        _ = v₁ ≫ pullback.snd Y.curve.π D₁.U.1.ι := hv₁.symm
+  have hch₁ : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  have hch₂ : (pullback.congrHom rfl hgeom).hom ≫
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
+      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
+    rw [pullback.congrHom_hom]
+    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have hmf₂ : D₂.fibreMap k ≫ pullback.fst Y.curve.π D₂.U.1.ι =
+      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) ≫ 𝟙 Y.curve.E :=
+    pullback.lift_fst _ _ _
+  have hms₂ : D₂.fibreMap k ≫ pullback.snd Y.curve.π D₂.U.1.ι =
+      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) ≫
+        (D₂.specPt k ≫ D₂.U.2.isoSpec.inv) :=
+    pullback.lift_snd _ _ _
+  have hρ₂ : (ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫ D₂.fibreMap k = v₂ := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc]
+      calc (ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫
+            D₂.fibreMap k ≫ pullback.fst Y.curve.π D₂.U.1.ι
+          = (ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫
+              pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) ≫ 𝟙 Y.curve.E := by
+            rw [hmf₂]
+        _ = ρ ≫ ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k))) := by
+            rw [Category.comp_id]
+            exact Category.assoc _ _ _
+        _ = ρ ≫ pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by rw [hch₁]
+        _ = v₁ ≫ pullback.fst Y.curve.π D₁.U.1.ι := hρfst
+        _ = v₂ ≫ pullback.fst Y.curve.π D₂.U.1.ι := hE
+    · rw [Category.assoc]
+      calc (ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫
+            D₂.fibreMap k ≫ pullback.snd Y.curve.π D₂.U.1.ι
+          = (ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫
+              pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) ≫
+                (D₂.specPt k ≫ D₂.U.2.isoSpec.inv) := by rw [hms₂]
+        _ = (ρ ≫ ((pullback.congrHom rfl hgeom).hom ≫
+              pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)))) ≫
+                (D₂.specPt k ≫ D₂.U.2.isoSpec.inv) := by
+            simp only [Category.assoc]
+        _ = (ρ ≫ pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k))) ≫
+              (D₂.specPt k ≫ D₂.U.2.isoSpec.inv) := by rw [hch₂]
+        _ = w ≫ c₂ ≫ D₂.U.2.isoSpec.inv := by rw [hρsnd, hsp₂]
+        _ = v₂ ≫ pullback.snd Y.curve.π D₂.U.1.ι := hv₂.symm
+  have hagree := fibreMap_topMap_agree D₁ D₂ k htower₁ htower₂ hgeom P hP
+  calc v₁ ≫ D₁.topMap P hP
+      = (ρ ≫ D₁.fibreMap k) ≫ D₁.topMap P hP := by rw [hρ₁]
+    _ = ρ ≫ D₁.fibreMap k ≫ D₁.topMap P hP := Category.assoc _ _ _
+    _ = ρ ≫ (pullback.congrHom rfl hgeom).hom ≫ D₂.fibreMap k ≫ D₂.topMap P hP := by
+        rw [hagree]
+    _ = ((ρ ≫ (pullback.congrHom rfl hgeom).hom) ≫ D₂.fibreMap k) ≫ D₂.topMap P hP := by
+        simp only [Category.assoc]
+    _ = v₂ ≫ D₂.topMap P hP := by rw [hρ₂]
+
 end MarkedChartData
 
 end TopRestriction
