@@ -193,6 +193,22 @@ theorem unitOver_mulOver_left :
   simp only [tensorHom_fst_assoc, tensorHom_snd_assoc, Category.id_comp,
     G.unitOver_comp_ιOver, MonObj.comp_one, _root_.one_mul, leftUnitor_hom]
 
+/-- **Commutativity**: `μ ∘ β = μ`. -/
+theorem mulOver_comm :
+    (β_ (Over.mk G.π) (Over.mk G.π)).hom ≫ G.mulOver = G.mulOver := by
+  refine G.over_hom_ext ?_
+  rw [Category.assoc, G.comp_mulOver_comp_ιOver, G.mulOver_comp_ιOver]
+  simp only [← Category.assoc, braiding_hom_fst, braiding_hom_snd]
+  rw [_root_.mul_comm]
+
+/-- **Right unit law**: `μ ∘ (𝟙 ⊗ e) = ρ`. -/
+theorem unitOver_mulOver_right :
+    (𝟙 (Over.mk G.π) ⊗ₘ G.unitOver) ≫ G.mulOver = (ρ_ (Over.mk G.π)).hom := by
+  refine G.over_hom_ext ?_
+  rw [Category.assoc, G.comp_mulOver_comp_ιOver]
+  simp only [tensorHom_fst_assoc, tensorHom_snd_assoc, Category.id_comp,
+    G.unitOver_comp_ιOver, MonObj.comp_one, _root_.mul_one, rightUnitor_hom]
+
 /-- **Left inverse law**: `μ ∘ ⟨S, 𝟙⟩ = e ∘ !`. -/
 theorem invOver_mulOver_left :
     lift G.invOver (𝟙 (Over.mk G.π)) ≫ G.mulOver
@@ -201,6 +217,16 @@ theorem invOver_mulOver_left :
   rw [Category.assoc, G.comp_mulOver_comp_ιOver]
   simp only [lift_fst_assoc, lift_snd_assoc, Category.id_comp,
     G.invOver_comp_ιOver, _root_.inv_mul_cancel, Category.assoc,
+    G.unitOver_comp_ιOver, MonObj.comp_one]
+
+/-- **Right inverse law**: `μ ∘ ⟨𝟙, S⟩ = e ∘ !`. -/
+theorem invOver_mulOver_right :
+    lift (𝟙 (Over.mk G.π)) G.invOver ≫ G.mulOver
+      = toUnit (Over.mk G.π) ≫ G.unitOver := by
+  refine G.over_hom_ext ?_
+  rw [Category.assoc, G.comp_mulOver_comp_ιOver]
+  simp only [lift_fst_assoc, lift_snd_assoc, Category.id_comp,
+    G.invOver_comp_ιOver, _root_.mul_inv_cancel, Category.assoc,
     G.unitOver_comp_ιOver, MonObj.comp_one]
 
 /-! ### The action diagrams
