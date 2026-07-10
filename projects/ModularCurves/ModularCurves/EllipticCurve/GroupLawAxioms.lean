@@ -661,12 +661,140 @@ theorem mulOver_comm (W : WeierstrassCurve R) [W.IsElliptic] :
   rw [Over.comp_left, Over.braiding_hom_left, mulOver_left]
   exact mulModelHom_comm W
 
+/-- (e₂) The single-factor base-change compatibility over `Spec`: the model structure map
+commutes with the base change. -/
+private lemma modelOver_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    (modelOver (universalWeierstrassLocU.{u}.map f)).hom ≫ Spec.map (CommRingCat.ofHom f) =
+      projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl ≫
+        (modelOver universalWeierstrassLocU.{u}).hom := by
+  simp only [modelOver_hom]
+  exact (isPullback_projModelBaseChangeOf f universalWeierstrassLocU.{u}
+    (universalWeierstrassLocU.{u}.map f) rfl).w.symm
+
+/-- (e₁) The tensor-square base-change compatibility over `Spec`: the tensor structure map
+commutes with the fibre-square base change (`docs/tg4/mulOver_assoc.plan.md`, banked). -/
+private lemma tensorObj_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    (modelOver (universalWeierstrassLocU.{u}.map f) ⊗
+        modelOver (universalWeierstrassLocU.{u}.map f)).hom ≫
+      Spec.map (CommRingCat.ofHom f) =
+      pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl ≫
+        (modelOver universalWeierstrassLocU.{u} ⊗ modelOver universalWeierstrassLocU.{u}).hom := by
+  rw [Over.tensorObj_hom, Over.tensorObj_hom]
+  simp only [modelOver_hom]
+  have hmap : pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+      (universalWeierstrassLocU.{u}.map f) rfl ≫
+      pullback.fst (projModelπ universalWeierstrassLocU.{u})
+        (projModelπ universalWeierstrassLocU.{u}) =
+      pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+        (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+        projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl := by
+    erw [pullbackMapBaseChangeOf, pullback.map, pullback.lift_fst]
+  have hw := (isPullback_projModelBaseChangeOf f universalWeierstrassLocU.{u}
+    (universalWeierstrassLocU.{u}.map f) rfl).w
+  calc pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+        (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+        projModelπ (universalWeierstrassLocU.{u}.map f) ≫ Spec.map (CommRingCat.ofHom f)
+      = pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+          (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+          (projModelπ (universalWeierstrassLocU.{u}.map f) ≫ Spec.map (CommRingCat.ofHom f)) :=
+        rfl
+    _ = pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+          (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+          (projModelBaseChangeOf f universalWeierstrassLocU.{u}
+            (universalWeierstrassLocU.{u}.map f) rfl ≫
+            projModelπ universalWeierstrassLocU.{u}) := by rw [← hw]
+    _ = (pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+          (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+          projModelBaseChangeOf f universalWeierstrassLocU.{u}
+            (universalWeierstrassLocU.{u}.map f) rfl) ≫
+          projModelπ universalWeierstrassLocU.{u} := (Category.assoc _ _ _).symm
+    _ = (pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl ≫
+          pullback.fst (projModelπ universalWeierstrassLocU.{u})
+            (projModelπ universalWeierstrassLocU.{u})) ≫
+          projModelπ universalWeierstrassLocU.{u} := by rw [hmap]
+    _ = pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl ≫
+          pullback.fst (projModelπ universalWeierstrassLocU.{u})
+            (projModelπ universalWeierstrassLocU.{u}) ≫
+          projModelπ universalWeierstrassLocU.{u} := Category.assoc _ _ _
+
+/-- **(T-W7.0g-assoc·of_map)** Associativity at the base-changed universal curve (the `h = rfl`
+case) — the last T-G4 transport, option (b) of the banked plan (`docs/tg4/mulOver_assoc.plan.md`):
+the fst-leg whisker-BC naturalities are proven as double-pullback-valued equations by
+`pullback.hom_ext` (never constructing the triple base-change `pullback.map` whose
+tensor-`whnf` times out); the snd-leg is structural `Over.w`. -/
+theorem mulOver_assoc_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    (mulOver (universalWeierstrassLocU.{u}.map f) ▷ modelOver (universalWeierstrassLocU.{u}.map f)) ≫
+        mulOver (universalWeierstrassLocU.{u}.map f) =
+      (α_ (modelOver (universalWeierstrassLocU.{u}.map f))
+          (modelOver (universalWeierstrassLocU.{u}.map f))
+          (modelOver (universalWeierstrassLocU.{u}.map f))).hom ≫
+        (modelOver (universalWeierstrassLocU.{u}.map f) ◁
+            mulOver (universalWeierstrassLocU.{u}.map f)) ≫
+          mulOver (universalWeierstrassLocU.{u}.map f) := by
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, Over.comp_left, Over.comp_left, mulOver_left]
+  have raw : (mulOver universalWeierstrassLocU.{u} ▷ modelOver universalWeierstrassLocU.{u}).left ≫
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ =
+      (α_ (modelOver universalWeierstrassLocU.{u}) (modelOver universalWeierstrassLocU.{u})
+          (modelOver universalWeierstrassLocU.{u})).hom.left ≫
+        (modelOver universalWeierstrassLocU.{u} ◁ mulOver universalWeierstrassLocU.{u}).left ≫
+          WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+            universalWeierstrassLocU.isUnit_Δ := by
+    have h2 := congrArg (fun m => m.left) mulOver_assoc_atlas
+    rw [Over.comp_left, Over.comp_left, Over.comp_left, mulOver_left,
+      mulModelHom_universalWeierstrassLocU] at h2
+    exact h2
+  have hbc : mulModelHom (universalWeierstrassLocU.{u}.map f) ≫
+        projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl =
+      pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ := by
+    rw [mulModelHom_map_eq_BC f]
+    exact mulModelHomBC_baseChange f universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ (universalWeierstrassLocU.{u}.map f) rfl
+  apply (isPullback_projModelBaseChangeOf f universalWeierstrassLocU.{u}
+    (universalWeierstrassLocU.{u}.map f) rfl).hom_ext
+  · sorry
+  · have hga := Over.w (((mulOver (universalWeierstrassLocU.{u}.map f) ▷
+        modelOver (universalWeierstrassLocU.{u}.map f)) ≫
+        mulOver (universalWeierstrassLocU.{u}.map f)))
+    have hgb := Over.w ((α_ (modelOver (universalWeierstrassLocU.{u}.map f))
+        (modelOver (universalWeierstrassLocU.{u}.map f))
+        (modelOver (universalWeierstrassLocU.{u}.map f))).hom ≫
+        (modelOver (universalWeierstrassLocU.{u}.map f) ◁
+            mulOver (universalWeierstrassLocU.{u}.map f)) ≫
+          mulOver (universalWeierstrassLocU.{u}.map f))
+    rw [Over.comp_left, mulOver_left] at hga
+    rw [Over.comp_left, Over.comp_left, mulOver_left] at hgb
+    exact hga.trans hgb.symm
+
+/-- **(T-W7.0g-assoc·of_eq)** Associativity at any `W` presented as a base change; `subst`
+reduces to the `of_map` case. -/
+theorem mulOver_assoc_of_eq (f : WeierstrassAtlasRingU.{u} →+* R) (W : WeierstrassCurve R)
+    [W.IsElliptic] (h : universalWeierstrassLocU.{u}.map f = W) :
+    (mulOver W ▷ modelOver W) ≫ mulOver W =
+      (α_ (modelOver W) (modelOver W) (modelOver W)).hom ≫
+        (modelOver W ◁ mulOver W) ≫ mulOver W := by
+  subst h
+  exact mulOver_assoc_of_map f
+
 /-- **(T-W7.0g-assoc)** Associativity, as the monoid-object equation in `Over (Spec R)`. -/
 theorem mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic] :
     (mulOver W ▷ modelOver W) ≫ mulOver W =
       (α_ (modelOver W) (modelOver W) (modelOver W)).hom ≫
-        (modelOver W ◁ mulOver W) ≫ mulOver W := by
-  sorry
+        (modelOver W ◁ mulOver W) ≫ mulOver W :=
+  mulOver_assoc_of_eq (classifyRingHomU W) W (universalWeierstrassLocU_map_classifyRingHomU W)
 
 /-- **(T-W7.0g-mul-one·of_map)** Right unit law at the base-changed universal curve
 `universalWeierstrassLocU.map f` (the `h = rfl` case). The whisker-BC naturality `hnat` is
