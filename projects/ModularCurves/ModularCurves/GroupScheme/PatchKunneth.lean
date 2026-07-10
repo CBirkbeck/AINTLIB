@@ -184,6 +184,44 @@ theorem topIso_inv_fst_appTop_patchKunnethΓ
     AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
     Category.comp_id]
 
+/-- **The `Γ`-dual of the right leg**: the second projection, transported, is the right
+inclusion into the tensor product. -/
+theorem topIso_inv_snd_appTop_patchKunnethΓ
+    (hV : IsAffineOpen V) (hW₁ : IsAffineOpen W₁) (hW₂ : IsAffineOpen W₂)
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁)) = f.appLE V W₁ e₁)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂)) = g.appLE V W₂ e₂) :
+    W₂.topIso.inv
+        ≫ (pullback.snd (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop
+        ≫ patchKunnethΓ f g hV hW₁ hW₂ h₁ h₂
+      = CommRingCat.ofHom
+          (Algebra.TensorProduct.includeRight (R := Γ(S, V)) (A := Γ(X, W₁))
+            (B := Γ(Y, W₂))).toRingHom := by
+  set ιR := CommRingCat.ofHom
+    (Algebra.TensorProduct.includeRight (R := Γ(S, V)) (A := Γ(X, W₁))
+      (B := Γ(Y, W₂))).toRingHom with hιR
+  have hleg := congrArg (fun m : pullback (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)
+      ⟶ (Spec Γ(Y, W₂) : Scheme) => Scheme.Hom.appTop m)
+    (patchKunneth_hom_comp_includeRight f g hV hW₁ hW₂ h₁ h₂)
+  simp only [Scheme.Hom.comp_appTop] at hleg
+  rw [show (Spec.map ιR).appTop
+      = (Scheme.ΓSpecIso Γ(Y, W₂)).hom ≫ ιR
+        ≫ (Scheme.ΓSpecIso (.of (Γ(X, W₁) ⊗[Γ(S, V)] Γ(Y, W₂)))).inv from by
+    rw [← Category.assoc, Iso.eq_comp_inv]
+    exact Scheme.ΓSpecIso_naturality ιR] at hleg
+  rw [Scheme.Opens.toSpecΓ_appTop] at hleg
+  rw [patchKunnethΓ, ← Category.assoc, ← Category.assoc]
+  rw [show W₂.topIso.inv ≫ (pullback.snd (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop
+      = (Scheme.ΓSpecIso Γ(Y, W₂)).inv
+        ≫ ((Scheme.ΓSpecIso Γ(Y, W₂)).hom ≫ W₂.topIso.inv)
+        ≫ (pullback.snd (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop from by
+    simp]
+  rw [Category.assoc, Category.assoc, ← hleg]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Category.assoc ((patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom.appTop),
+    ← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+    AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
+    Category.comp_id]
+
 end
 
 end AlgebraicGeometry
