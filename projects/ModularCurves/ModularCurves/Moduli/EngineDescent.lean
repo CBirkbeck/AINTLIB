@@ -846,6 +846,368 @@ open scoped Pointwise
 variable {G : Type u} [Group G] {X : Scheme.{u}} {C : EllipticCurveGeom X}
   {σ : SchemeAction G X} {σE : SchemeAction G C.E}
 
+/-- The localized action `MulSemiringAction.awayHom` fixes the image of the localized
+invariants `fixedAwayMap a : (Aᴳ)_a ⟶ A_a` (checked on `algebraMap`-generators). -/
+private theorem awayHom_comp_fixedAwayMap {A : Type u} [CommRing A] [MulSemiringAction G A]
+    (a : FixedPoints.subring A G) (g : G) :
+    (MulSemiringAction.awayHom (fun g' : G => a.2 g') g).comp (fixedAwayMap a)
+      = fixedAwayMap a := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers a) (RingHom.ext fun v => ?_)
+  simp only [RingHom.coe_comp, Function.comp_apply]
+  rw [fixedAwayMap_algebraMap, MulSemiringAction.awayHom_algebraMap, v.2 g]
+
+attribute [local instance] MvPolynomial.gradedAlgebra in
+/-- Mixed-ring functoriality of the projective-model base change (the three-ring form of
+`projModelBaseChange_comp`). -/
+private theorem projModelBaseChange_comp₃ {S₀ S₁ S₂ : Type u} [CommRing S₀] [CommRing S₁]
+    [CommRing S₂] (F : S₁ →+* S₂) (φ : S₀ →+* S₁) (V : WeierstrassCurve S₀) :
+    projModelBaseChange (F.comp φ) V
+      = projModelBaseChange F (V.map φ) ≫ projModelBaseChange φ V := by
+  have bmk : ∀ {T T' : Type u} [CommRing T] [CommRing T'] (ψ : T →+* T')
+      (V' : WeierstrassCurve T) (p : MvPolynomial (Fin 3) T),
+      baseChangeGradedHom ψ V' (Ideal.Quotient.mk (projIdeal V').toIdeal p)
+        = Ideal.Quotient.mk (projIdeal (V'.map ψ)).toIdeal (MvPolynomial.map ψ p) :=
+    fun ψ V' p => HomogeneousIdeal.quotientGradingMap_mk (mvMapGraded ψ) (projIdeal V')
+      (projIdeal (V'.map ψ)) (projIdeal_le_comap ψ V') p
+  have hgraded : baseChangeGradedHom (F.comp φ) V
+      = (baseChangeGradedHom F (V.map φ)).comp (baseChangeGradedHom φ V) := by
+    refine GradedRingHom.ext fun x => ?_
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    show baseChangeGradedHom (F.comp φ) V (Ideal.Quotient.mk _ p)
+      = baseChangeGradedHom F (V.map φ) (baseChangeGradedHom φ V (Ideal.Quotient.mk _ p))
+    rw [bmk, bmk, bmk]
+    exact congrArg (Ideal.Quotient.mk _) (MvPolynomial.map_map φ F p).symm
+  have key := Proj.map_comp (baseChangeGradedHom φ V) (baseChangeGradedHom F (V.map φ))
+    (baseChangeGradedHom_irrelevant_le φ V) (baseChangeGradedHom_irrelevant_le F (V.map φ))
+  refine Eq.trans ?_ key
+  show Proj.map (baseChangeGradedHom (F.comp φ) V)
+      (baseChangeGradedHom_irrelevant_le (F.comp φ) V)
+    = Proj.map ((baseChangeGradedHom F (V.map φ)).comp (baseChangeGradedHom φ V)) _
+  congr 1
+
+/-- Naturality of `projModelBaseChange φ` under an equality of source curves
+(two-ring form). -/
+private theorem projModelBaseChange_natEq₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (φ : S₀ →+* S₁) {V1 V2 : WeierstrassCurve S₀} (hV : V1 = V2) :
+    projModelBaseChange φ V1 ≫ eqToHom (congrArg projModel hV)
+      = eqToHom (congrArg projModel (congrArg (WeierstrassCurve.map · φ) hV))
+        ≫ projModelBaseChange φ V2 := by
+  subst hV
+  simp only [eqToHom_refl, Category.id_comp, Category.comp_id]
+
+/-- Naturality of `(projModelVCIso C V).hom` under equalities of the variable change and the
+curve. -/
+private theorem projModelVCIso_natEq₂ {S : Type u} [CommRing S] {C1 C2 : VariableChange S}
+    {V1 V2 : WeierstrassCurve S} (hC : C1 = C2) (hV : V1 = V2) :
+    (projModelVCIso C1 V1).hom ≫ eqToHom (congrArg projModel hV)
+      = eqToHom (congrArg projModel (by rw [hC, hV])) ≫ (projModelVCIso C2 V2).hom := by
+  subst hC; subst hV
+  simp only [eqToHom_refl, Category.id_comp, Category.comp_id]
+
+/-- Transport of `(projModelVCIso C V).hom` along an equality of variable changes. -/
+private theorem projModelVCIso_congr₂ {S : Type u} [CommRing S] {C1 C2 : VariableChange S}
+    (hC : C1 = C2) (V : WeierstrassCurve S) :
+    (projModelVCIso C1 V).hom
+      = eqToHom (congrArg projModel (by rw [hC])) ≫ (projModelVCIso C2 V).hom := by
+  subst hC; simp
+
+/-- Base-change naturality of the change-of-variables iso, for an arbitrary ring hom `ρ`
+(the two-ring form of `projModelVCIso_map_hom`). -/
+private theorem projModelVCIso_map₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (ρ : S₀ →+* S₁) (C : VariableChange S₀) (V : WeierstrassCurve S₀) :
+    projModelBaseChange ρ (C • V) ≫ (projModelVCIso C V).hom =
+      eqToHom (by rw [map_variableChange]) ≫
+        (projModelVCIso (C.map ρ) (V.map ρ)).hom ≫ projModelBaseChange ρ V := by
+  letI : Algebra S₀ S₁ := ρ.toAlgebra
+  have h := projModelVCIso_map (R' := S₁) C V
+  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
+  rw [he] at h
+  exact h
+
+/-- Two-ring form of `isPullback_projModelBaseChange` (for an arbitrary ring hom, via
+`RingHom.toAlgebra`). -/
+private theorem isPullback_projModelBaseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (ρ : S₀ →+* S₁) (V : WeierstrassCurve S₀) :
+    IsPullback (projModelBaseChange ρ V) (projModelπ (V.map ρ)) (projModelπ V)
+      (Spec.map (CommRingCat.ofHom ρ)) := by
+  letI : Algebra S₀ S₁ := ρ.toAlgebra
+  have h := isPullback_projModelBaseChange (R := S₀) (R' := S₁) V
+  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
+  rw [he] at h
+  exact h
+
+/-- Two-ring form of `projModelZero_baseChange`. -/
+private theorem projModelZero_baseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (ρ : S₀ →+* S₁) (V : WeierstrassCurve S₀) :
+    projModelZero (V.map ρ) ≫ projModelBaseChange ρ V
+      = Spec.map (CommRingCat.ofHom ρ) ≫ projModelZero V := by
+  letI : Algebra S₀ S₁ := ρ.toAlgebra
+  have h := projModelZero_baseChange (R := S₀) (R' := S₁) V
+  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
+  rw [he] at h
+  exact h
+
+/-- Two-ring form of `isIso_projModelBaseChange`. -/
+private theorem isIso_projModelBaseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (ρ : S₀ →+* S₁) [IsIso (Spec.map (CommRingCat.ofHom ρ))] (V : WeierstrassCurve S₀) :
+    IsIso (projModelBaseChange ρ V) := by
+  have hP := isPullback_projModelBaseChange₂ ρ V
+  rw [← hP.isoPullback_hom_fst]
+  infer_instance
+
+/-- Rearranged form of `projModelVCIso_map₂` with no leading `eqToHom`. -/
+private theorem projModelVCIso_map₂' {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
+    (ρ : S₀ →+* S₁) (C : VariableChange S₀) (V : WeierstrassCurve S₀) :
+    (projModelVCIso (C.map ρ) (V.map ρ)).hom ≫ projModelBaseChange ρ V
+      = eqToHom (congrArg projModel (map_variableChange (W := V) (φ := ρ) (C := C)))
+        ≫ projModelBaseChange ρ (C • V) ≫ (projModelVCIso C V).hom := by
+  rw [projModelVCIso_map₂ ρ C V, ← Category.assoc, eqToHom_trans, eqToHom_refl,
+    Category.id_comp]
+
+/-- **The key base-change compatibility of the localized action datum.** If `act` is the
+`Ψ`-composite of the cocycle value `CA` over `A` and `CR = CA.map ρ` is its localization,
+then the localized `Ψ`-composite commutes with `projModelBaseChange ρ` into `act`. -/
+private theorem actLoc_baseChange {A R : Type u} [CommRing A] [CommRing R] (ρ : A →+* R)
+    (τA : A →+* A) (τR : R →+* R) (hcomm : τR.comp ρ = ρ.comp τA)
+    (W₀ : WeierstrassCurve A) (CA : VariableChange A) (CR : VariableChange R)
+    (hCR : CR = CA.map ρ)
+    (hCA : CA • (W₀.map τA) = W₀) (hCR' : CR • ((W₀.map ρ).map τR) = W₀.map ρ)
+    (act : projModel W₀ ⟶ projModel W₀)
+    (hΨA : (projModelVCIso CA (W₀.map τA)).hom ≫ projModelBaseChange τA W₀
+      = eqToHom (congrArg projModel hCA) ≫ act) :
+    (eqToHom (congrArg projModel hCR'.symm) ≫ (projModelVCIso CR ((W₀.map ρ).map τR)).hom
+        ≫ projModelBaseChange τR (W₀.map ρ)) ≫ projModelBaseChange ρ W₀
+      = projModelBaseChange ρ W₀ ≫ act := by
+  have hVeq : (W₀.map ρ).map τR = (W₀.map τA).map ρ := by
+    rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map, hcomm]
+  have hbcc : ∀ {f f' : A →+* R} (p : f = f'),
+      projModelBaseChange f W₀ = eqToHom (by rw [p]) ≫ projModelBaseChange f' W₀ := by
+    intro f f' p
+    subst p
+    simp
+  have hswap : projModelBaseChange τR (W₀.map ρ) ≫ projModelBaseChange ρ W₀
+      = eqToHom (congrArg projModel hVeq) ≫ projModelBaseChange ρ (W₀.map τA)
+        ≫ projModelBaseChange τA W₀ := by
+    rw [← projModelBaseChange_comp₃ τR ρ W₀, ← projModelBaseChange_comp₃ ρ τA W₀,
+      hbcc hcomm]
+    congr 1
+  simp only [Category.assoc]
+  rw [hswap, projModelVCIso_congr₂ hCR ((W₀.map ρ).map τR)]
+  simp only [Category.assoc]
+  rw [reassoc_of% projModelVCIso_natEq₂ (rfl : CA.map ρ = CA.map ρ) hVeq,
+    reassoc_of% projModelVCIso_map₂' ρ CA (W₀.map τA), hΨA,
+    reassoc_of% projModelBaseChange_natEq₂ ρ hCA]
+  simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+
+open scoped Pointwise in
+/-- **The localized action datum on the model of `W₀A ⊗ A_a`.** Packaged for the per-point
+chart: an endomorphism `actR` of the localized model that (i) coequalizes into the
+`descentComparison`, (ii) covers the given action `act g` through the base change to `A`,
+and (iii) fixes the composite `projModelπ ≫ κ` for any `κ` fixed by the localized action. -/
+private theorem exists_actLoc {A : Type u} [CommRing A] [MulSemiringAction G A]
+    (a : FixedPoints.subring A G)
+    [Algebra (Localization.Away a) (Localization.Away ((a : A)))]
+    (halg : algebraMap (Localization.Away a) (Localization.Away ((a : A))) = fixedAwayMap a)
+    (W₀A : WeierstrassCurve A) (Cvc : G → VariableChange A)
+    (hCvc : ∀ g, Cvc g • (W₀A.map (MulSemiringAction.toRingHom G A g)) = W₀A)
+    (act : G → (projModel W₀A ⟶ projModel W₀A))
+    (hΨ : ∀ g, (projModelVCIso (Cvc g) (W₀A.map (MulSemiringAction.toRingHom G A g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G A g) W₀A
+      = eqToHom (congrArg projModel (hCvc g)) ≫ act g)
+    (W₁ : WeierstrassCurve (Localization.Away a))
+    (E : VariableChange (Localization.Away ((a : A))))
+    (hW₁' : W₁.map (algebraMap (Localization.Away a) (Localization.Away ((a : A))))
+      = E⁻¹ • (W₀A.map (algebraMap A (Localization.Away ((a : A))))))
+    (hcob : ∀ g : G, (Cvc g).map (algebraMap A (Localization.Away ((a : A))))
+      = E * (E.map (MulSemiringAction.awayHom (fun g' => a.2 g') g))⁻¹)
+    {T : Scheme.{u}} (κ : Spec (CommRingCat.of (Localization.Away ((a : A)))) ⟶ T)
+    (hκfix : ∀ g : G, Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom
+      (fun g' : G => a.2 g') g)) ≫ κ = κ)
+    (g : G) :
+    ∃ actR : projModel (W₀A.map (algebraMap A (Localization.Away ((a : A)))))
+        ⟶ projModel (W₀A.map (algebraMap A (Localization.Away ((a : A))))),
+      (actR ≫ descentComparison (W₀A.map (algebraMap A (Localization.Away ((a : A)))))
+          W₁ E hW₁' = descentComparison _ W₁ E hW₁') ∧
+      (actR ≫ projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A
+        = projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A ≫ act g) ∧
+      (actR ≫ (projModelπ (W₀A.map (algebraMap A (Localization.Away ((a : A))))) ≫ κ)
+        = projModelπ (W₀A.map (algebraMap A (Localization.Away ((a : A))))) ≫ κ) := by
+  have hfixA : ∀ g' : G, g' • ((a : A)) = (a : A) := fun g' => a.2 g'
+  letI := MulSemiringAction.away hfixA
+  -- ring-level compatibilities of the localized action
+  have hcomm : ∀ g' : G,
+      (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g').comp
+        (algebraMap A (Localization.Away ((a : A))))
+      = (algebraMap A (Localization.Away ((a : A)))).comp
+          (MulSemiringAction.toRingHom G A g') := by
+    intro g'
+    refine RingHom.ext fun r => ?_
+    show g' • (algebraMap A (Localization.Away ((a : A))) r)
+      = algebraMap A (Localization.Away ((a : A))) (g' • r)
+    exact MulSemiringAction.awayHom_algebraMap hfixA g' r
+  -- the localized cocycle
+  have hCvc' : ∀ g' : G, ((Cvc g').map (algebraMap A (Localization.Away ((a : A)))))
+      • ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+          (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))
+      = W₀A.map (algebraMap A (Localization.Away ((a : A)))) := by
+    intro g'
+    rw [WeierstrassCurve.map_map, hcomm g', ← WeierstrassCurve.map_map,
+      WeierstrassCurve.map_variableChange, hCvc g']
+  -- the coboundary identity over the localization
+  have hE : ∀ g' : G, (Cvc g').map (algebraMap A (Localization.Away ((a : A))))
+      = E * (g' • E)⁻¹ := by
+    intro g'
+    have h2 : E.map (MulSemiringAction.awayHom (fun g'' : G => a.2 g'') g') = g' • E :=
+      variableChange_map_awayHom (fun g'' : G => a.2 g'') g' E
+    rw [hcob g', h2]
+  -- the fixed subring maps to fixed elements
+  have hR₀ : ∀ (g' : G) (r₀ : Localization.Away a),
+      g' • (algebraMap (Localization.Away a) (Localization.Away ((a : A))) r₀)
+        = algebraMap (Localization.Away a) (Localization.Away ((a : A))) r₀ := by
+    intro g' r₀
+    rw [halg]
+    show MulSemiringAction.awayHom hfixA g' (fixedAwayMap a r₀) = fixedAwayMap a r₀
+    exact congrArg
+      (fun f : Localization.Away a →+* Localization.Away ((a : A)) => f r₀)
+      (awayHom_comp_fixedAwayMap a g')
+  -- `Spec` of the localized action fixes `κ`
+  have hτfix : ∀ g' : G, Spec.map (CommRingCat.ofHom
+      (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')) ≫ κ = κ := by
+    intro g'
+    have hτ : CommRingCat.ofHom (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
+        = CommRingCat.ofHom (MulSemiringAction.awayHom (fun g'' : G => a.2 g'') g') := rfl
+    rw [hτ]
+    exact hκfix g'
+  have transπ' : ∀ {V V' : WeierstrassCurve (Localization.Away ((a : A)))} (h : V = V'),
+      eqToHom (congrArg projModel h) ≫ projModelπ V' = projModelπ V := by
+    rintro V V' rfl; simp
+  refine ⟨eqToHom (congrArg projModel (hCvc' g).symm)
+    ≫ (projModelVCIso ((Cvc g).map (algebraMap A (Localization.Away ((a : A)))))
+        ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+          (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g))).hom
+    ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g)
+        (W₀A.map (algebraMap A (Localization.Away ((a : A))))), ?_, ?_, ?_⟩
+  · -- (i) coequalizes into the descent comparison
+    refine descentComparison_invariant _ W₁ E hW₁'
+      (fun g' => (Cvc g').map (algebraMap A (Localization.Away ((a : A))))) hCvc' hE hR₀
+      (fun g' => eqToHom (congrArg projModel (hCvc' g').symm)
+        ≫ (projModelVCIso ((Cvc g').map (algebraMap A (Localization.Away ((a : A)))))
+            ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+              (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
+            (W₀A.map (algebraMap A (Localization.Away ((a : A)))))) (fun g' => ?_) g
+    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  · -- (ii) covers the action through the base change
+    exact actLoc_baseChange (algebraMap A (Localization.Away ((a : A))))
+      (MulSemiringAction.toRingHom G A g)
+      (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g) (hcomm g) W₀A
+      (Cvc g) ((Cvc g).map (algebraMap A (Localization.Away ((a : A))))) rfl (hCvc g)
+      (hCvc' g) (act g) (hΨ g)
+  · -- (iii) fixes the `κ`-composite
+    have hπ : (eqToHom (congrArg projModel (hCvc' g).symm)
+        ≫ (projModelVCIso ((Cvc g).map (algebraMap A (Localization.Away ((a : A)))))
+            ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+              (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g)
+            (W₀A.map (algebraMap A (Localization.Away ((a : A))))))
+        ≫ projModelπ (W₀A.map (algebraMap A (Localization.Away ((a : A)))))
+        = projModelπ (W₀A.map (algebraMap A (Localization.Away ((a : A)))))
+          ≫ Spec.map (CommRingCat.ofHom
+              (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g)) := by
+      simp only [Category.assoc]
+      rw [projModelBaseChange_π,
+        reassoc_of% (projModelVCIso_π ((Cvc g).map (algebraMap A (Localization.Away ((a : A)))))
+          ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+            (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g))),
+        reassoc_of% (transπ' (hCvc' g).symm)]
+    rw [← Category.assoc, hπ, Category.assoc, hτfix g]
+
+/-- Ellipticity descends along the localized-invariants inclusion `(Aᴳ)_a ⟶ A_a`: the
+discriminant's inverse is a `G`-fixed unit, hence a fraction with fixed numerator
+(`exists_fixed_smul_mk'_eq`), hence in the image of `fixedAwayMap`; injectivity of
+`fixedAwayMap` (the `mk'`-level argument of `fixedPoints_awayMap_injective`) transports the
+unit equation back. -/
+private theorem isElliptic_of_map_fixedAwayMap {A : Type u} [CommRing A]
+    [MulSemiringAction G A] [Finite G] (a : FixedPoints.subring A G)
+    {W₁ : WeierstrassCurve (Localization.Away a)}
+    (h : (W₁.map (fixedAwayMap a)).IsElliptic) : W₁.IsElliptic := by
+  rw [WeierstrassCurve.isElliptic_iff] at h ⊢
+  rw [WeierstrassCurve.map_Δ] at h
+  -- the localized action on `A_a`
+  have hfixA : ∀ g : G, g • ((a : A)) = (a : A) := fun g => a.2 g
+  letI := MulSemiringAction.away hfixA
+  have hcomp : ∀ (g : G) (r : A),
+      g • (algebraMap A (Localization.Away ((a : A))) r)
+        = algebraMap A (Localization.Away ((a : A))) (g • r) := fun g r =>
+    MulSemiringAction.awayHom_algebraMap hfixA g r
+  have hS : ∀ (g : G), ∀ x ∈ Submonoid.powers ((a : A)), g • x = x := by
+    rintro g x ⟨n, rfl⟩
+    rw [smul_pow', hfixA]
+  -- the image of `fixedAwayMap` is `G`-fixed
+  have hcompim : ∀ g : G, (MulSemiringAction.awayHom hfixA g).comp (fixedAwayMap a)
+      = fixedAwayMap a := by
+    intro g
+    refine IsLocalization.ringHom_ext (Submonoid.powers a) (RingHom.ext fun v => ?_)
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [fixedAwayMap_algebraMap, MulSemiringAction.awayHom_algebraMap, v.2 g]
+  have hfixim : ∀ (g : G) (z : Localization.Away a),
+      g • fixedAwayMap a z = fixedAwayMap a z := by
+    intro g z
+    show MulSemiringAction.awayHom hfixA g (fixedAwayMap a z) = fixedAwayMap a z
+    exact congrArg
+      (fun f : Localization.Away a →+* Localization.Away ((a : A)) => f z) (hcompim g)
+  -- the inverse of the image unit is fixed …
+  obtain ⟨u, hu⟩ := h
+  have hufix : ∀ g : G, g • ((u : Localization.Away ((a : A)))) = (u : _) := by
+    intro g; rw [hu]; exact hfixim g W₁.Δ
+  have hfixinv : ∀ g : G, g • ((↑u⁻¹ : Localization.Away ((a : A)))) = ↑u⁻¹ := by
+    intro g
+    have h₁ : (g • (↑u⁻¹ : Localization.Away ((a : A)))) * u = 1 := by
+      have h0 := congrArg (g • · : Localization.Away ((a : A)) → _) u.inv_mul
+      simp only [smul_mul'] at h0
+      rw [hufix g] at h0
+      simpa using h0
+    calc g • (↑u⁻¹ : Localization.Away ((a : A)))
+        = (g • (↑u⁻¹ : Localization.Away ((a : A)))) * (↑u * ↑u⁻¹) := by
+          rw [u.mul_inv, mul_one]
+      _ = ((g • (↑u⁻¹ : Localization.Away ((a : A)))) * ↑u) * ↑u⁻¹ := by ring
+      _ = ↑u⁻¹ := by rw [h₁, one_mul]
+  -- … hence a fraction with fixed numerator, i.e. in the image of `fixedAwayMap`
+  obtain ⟨b, t, hb, hmk⟩ := exists_fixed_smul_mk'_eq hcomp hS (↑u⁻¹) hfixinv
+  obtain ⟨n, hn⟩ : ∃ n : ℕ, ((a : A)) ^ n = (t : A) := t.2
+  have hmkc : ∀ (b₁ b₂ : A) (s₁ s₂ : Submonoid.powers ((a : A))), b₁ = b₂ →
+      (s₁ : A) = (s₂ : A) → IsLocalization.mk' (Localization.Away ((a : A))) b₁ s₁
+        = IsLocalization.mk' _ b₂ s₂ := by
+    rintro b₁ b₂ s₁ s₂ rfl hs
+    exact congrArg _ (Subtype.ext hs)
+  have hz : fixedAwayMap a (IsLocalization.mk' (Localization.Away a)
+      (⟨b, hb⟩ : FixedPoints.subring A G) (⟨a ^ n, n, rfl⟩ : Submonoid.powers a)) = ↑u⁻¹ := by
+    rw [fixedAwayMap, IsLocalization.map_mk']
+    refine (hmkc _ _ _ _ rfl ?_).trans hmk
+    show ((algebraMap (FixedPoints.subring A G) A) (a ^ n) : A) = (t : A)
+    rw [map_pow, ← hn]
+    rfl
+  -- injectivity of `fixedAwayMap` (mk'-level)
+  have hinj : Function.Injective (fixedAwayMap a) := by
+    rw [injective_iff_map_eq_zero]
+    intro x hx
+    obtain ⟨⟨c, t'⟩, rfl⟩ := IsLocalization.mk'_surjective (Submonoid.powers a) x
+    rw [fixedAwayMap, IsLocalization.map_mk', IsLocalization.mk'_eq_zero_iff] at hx
+    obtain ⟨d, hd⟩ := hx
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, ((a : A)) ^ k = (d : A) := d.2
+    rw [IsLocalization.mk'_eq_zero_iff]
+    refine ⟨⟨a ^ k, k, rfl⟩, Subtype.ext ?_⟩
+    show ((a : A)) ^ k * (c : A) = 0
+    rw [hk]
+    exact hd
+  -- transport the unit equation back
+  have hone : W₁.Δ * IsLocalization.mk' (Localization.Away a)
+      (⟨b, hb⟩ : FixedPoints.subring A G) (⟨a ^ n, n, rfl⟩ : Submonoid.powers a) = 1 := by
+    refine hinj ?_
+    rw [map_mul, map_one, hz, ← hu]
+    exact u.mul_inv
+  exact IsUnit.of_mul_eq_one _ hone
+
 /-- **([a5-W6], the per-point chart — ABSTRACT)** The `LocallyWeierstrass` chart package at a
 point `s` of `Spec Aᴳ`, over an abstract ring `A` (all instances opaque — no `whnf` grind).
 The geometry (the quotient cover `qE`, the model `φA`, the action family, the restricted
@@ -907,7 +1269,382 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
         (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
             (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ e.hom =
           projModelZero W := by
-  sorry
+  classical
+  -- ## Step 1: the chart `U = D(a)` and its ring of sections
+  let iA0 := CommRingCat.ofHom
+    (algebraMap (FixedPoints.subring A G) (Localization.Away a))
+  set iA : Spec (CommRingCat.of (Localization.Away a))
+      ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)) :=
+    Spec.map iA0 with hiA
+  haveI : IsOpenImmersion iA := by
+    rw [hiA]
+    exact IsOpenImmersion.of_isLocalization a
+  have hrange : iA.opensRange = (PrimeSpectrum.basicOpen a :
+      (Spec (CommRingCat.of (FixedPoints.subring A G))).Opens) := by
+    ext1
+    exact PrimeSpectrum.localization_away_comap_range (Localization.Away a) a
+  set U : (Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))).affineOpens :=
+    ⟨iA.opensRange, isAffineOpen_opensRange iA⟩ with hUdef
+  have hsU : s ∈ U.1 := by
+    show s ∈ iA.opensRange
+    rw [hrange]
+    exact (PrimeSpectrum.mem_basicOpen _ _).mpr hap
+  -- the scheme-level chart iso `Spec (Aᴳ)_a ≅ Spec Γ(Spec Aᴳ, U)` through `fromSpec`
+  have hfsRange : Set.range ⇑iA.base = Set.range ⇑U.2.fromSpec.base := by
+    rw [U.2.range_fromSpec]; rfl
+  let kF : Spec (CommRingCat.of (Localization.Away a))
+      ≅ Spec Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    IsOpenImmersion.isoOfRangeEq iA U.2.fromSpec hfsRange
+  have hkF : kF.inv ≫ iA = U.2.fromSpec :=
+    IsOpenImmersion.isoOfRangeEq_inv_fac iA U.2.fromSpec hfsRange
+  -- the ring identification, through `Spec`-full-faithfulness
+  let qp : CommRingCat.of (Localization.Away a)
+      ≅ Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    { hom := Spec.preimage kF.inv
+      inv := Spec.preimage kF.hom
+      hom_inv_id := by
+        apply Spec.map_injective
+        rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, Spec.map_id, Iso.hom_inv_id]
+      inv_hom_id := by
+        apply Spec.map_injective
+        rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, Spec.map_id, Iso.inv_hom_id] }
+  set req : Localization.Away a ≃+*
+      ↑Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    qp.commRingCatIsoToRingEquiv with hreq
+  have hsR : Spec.map (CommRingCat.ofHom req.toRingHom) = kF.inv := by
+    rw [hreq]
+    show Spec.map (CommRingCat.ofHom qp.hom.hom) = kF.inv
+    rw [CommRingCat.ofHom_hom]
+    exact Spec.map_preimage kF.inv
+  have hBridge : Spec.map (CommRingCat.ofHom req.toRingHom) ≫ iA = U.2.fromSpec := by
+    rw [hsR, hkF]
+  -- the descended model over the chart ring
+  set W : WeierstrassCurve ↑Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    W₁.map req.toRingHom with hWdef
+  -- ## Step 2: ellipticity
+  haveI hW₁ell : W₁.IsElliptic := by
+    refine isElliptic_of_map_fixedAwayMap a ?_
+    rw [hW₁]
+    haveI := hW₀A
+    infer_instance
+  haveI hWell : W.IsElliptic := by
+    rw [hWdef]
+    infer_instance
+  refine ⟨U, hsU, W, hWell, ?_⟩
+  -- ## Step 3a: the chart square over `Spec A`
+  set iAA := Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))))
+    with hiAA
+  haveI : IsOpenImmersion iAA := by
+    rw [hiAA]
+    exact IsOpenImmersion.of_isLocalization ((a : A))
+  have hrangeAA : iAA.opensRange = (PrimeSpectrum.basicOpen ((a : A)) :
+      (Spec (CommRingCat.of A)).Opens) := by
+    ext1
+    exact PrimeSpectrum.localization_away_comap_range (Localization.Away ((a : A))) ((a : A))
+  -- the preimage of the chart is the basic open `D((a : A))`
+  have hpreU : invariantsπ G A ℤ ⁻¹ᵁ U.1 = iAA.opensRange := by
+    rw [hrangeAA]
+    ext x
+    show invariantsπ G A ℤ x ∈ iA.opensRange ↔ x ∈ PrimeSpectrum.basicOpen ((a : A))
+    rw [hrange]
+    exact Iff.rfl
+  -- the restricted invariants map `κ` and the chart square
+  set specFam := Spec.map (CommRingCat.ofHom (fixedAwayMap a)) with hspecFam
+  have hRingSq : iA0 ≫ CommRingCat.ofHom (fixedAwayMap a)
+      = CommRingCat.ofHom (algebraMap (FixedPoints.subring A G) A)
+        ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))) := by
+    ext v
+    show fixedAwayMap a (algebraMap _ _ v)
+      = algebraMap A (Localization.Away ((a : A))) (algebraMap _ A v)
+    rw [fixedAwayMap_algebraMap]
+    rfl
+  have hSpecSq : specFam ≫ iA = iAA ≫ invariantsπ G A ℤ := by
+    have h1 : specFam ≫ iA = Spec.map (iA0 ≫ CommRingCat.ofHom (fixedAwayMap a)) :=
+      (Spec.map_comp _ _).symm
+    have h2 : iAA ≫ invariantsπ G A ℤ
+        = Spec.map (CommRingCat.ofHom (algebraMap (FixedPoints.subring A G) A)
+          ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A))))) :=
+      (Spec.map_comp _ _).symm
+    rw [h1, h2, hRingSq]
+  -- `κ` : the restriction of the invariants cover to the chart
+  have hκsub : Set.range ⇑(iAA ≫ invariantsπ G A ℤ).base ⊆ Set.range ⇑U.1.ι.base := by
+    rw [Scheme.Opens.range_ι]
+    rintro y ⟨z, rfl⟩
+    have hz : iAA z ∈ invariantsπ G A ℤ ⁻¹ᵁ U.1 := by
+      rw [hpreU]
+      exact ⟨z, rfl⟩
+    exact hz
+  set κ : Spec (CommRingCat.of (Localization.Away ((a : A)))) ⟶ U.1.toScheme :=
+    IsOpenImmersion.lift U.1.ι (iAA ≫ invariantsπ G A ℤ) hκsub with hκdef
+  have hκι : κ ≫ U.1.ι = iAA ≫ invariantsπ G A ℤ := IsOpenImmersion.lift_fac ..
+  have hAsq : IsPullback iAA κ (invariantsπ G A ℤ) U.1.ι := by
+    refine (IsOpenImmersion.isPullback κ iAA U.1.ι (invariantsπ G A ℤ) ?_ ?_).flip
+    · rw [hκι]
+    · rw [Scheme.Opens.opensRange_ι]
+      exact hpreU
+  haveI hκsur : Surjective κ := MorphismProperty.of_isPullback (P := @Surjective) hAsq hfsur
+  haveI hκfl : Flat κ := MorphismProperty.of_isPullback (P := @Flat) hAsq hffl
+  haveI hκqc : QuasiCompact κ := MorphismProperty.of_isPullback (P := @QuasiCompact) hAsq hfqc
+  -- the chart bridge: `κ` through `isoSpec` is the `Spec`-side composite
+  have hkFhom : kF.hom ≫ U.2.fromSpec = iA :=
+    IsOpenImmersion.isoOfRangeEq_hom_fac iA U.2.fromSpec hfsRange
+  have hκiso : κ ≫ U.2.isoSpec.hom = specFam ≫ kF.hom := by
+    rw [← cancel_mono U.2.fromSpec, Category.assoc, Category.assoc,
+      IsAffineOpen.isoSpec_hom_fromSpec, hκι, hkFhom, hSpecSq]
+  -- ## Step 3b: the model-side squares
+  set W₀R := W₀A.map (algebraMap A (Localization.Away ((a : A)))) with hW₀Rdef
+  have hbcsq : IsPullback (projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A)
+      (projModelπ W₀R) (projModelπ W₀A) iAA := by
+    rw [hiAA]
+    exact isPullback_projModelBaseChange W₀A
+  -- the `descentComparison` and its cartesian square over `specFam`
+  letI : Algebra (Localization.Away a) (Localization.Away ((a : A))) :=
+    (fixedAwayMap a).toAlgebra
+  have halg : algebraMap (Localization.Away a) (Localization.Away ((a : A)))
+      = fixedAwayMap a := RingHom.algebraMap_toAlgebra _
+  have hW₁' : W₁.map (algebraMap (Localization.Away a) (Localization.Away ((a : A))))
+      = E⁻¹ • W₀R := by
+    rw [halg]
+    exact hW₁
+  set ψ₀ : projModel W₀R ⟶ projModel W₁ := descentComparison W₀R W₁ E hW₁' with hψ₀def
+  have hspecAlg : Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) (Localization.Away ((a : A))))) = specFam := by
+    rw [halg, hspecFam]
+  have transπ : ∀ {V V' : WeierstrassCurve (Localization.Away ((a : A)))} (h : V = V'),
+      eqToHom (congrArg projModel h) ≫ projModelπ V' = projModelπ V := by
+    rintro V V' rfl; simp
+  have hψsq : IsPullback ψ₀ (projModelπ W₀R) (projModelπ W₁) specFam := by
+    have hι₀ : IsPullback ((projModelVCIso E⁻¹ W₀R).inv
+        ≫ eqToHom (congrArg projModel hW₁'.symm)) (projModelπ W₀R)
+        (projModelπ (W₁.map (algebraMap (Localization.Away a)
+          (Localization.Away ((a : A)))))) (𝟙 _) := by
+      refine IsPullback.of_horiz_isIso ⟨?_⟩
+      rw [Category.comp_id, Category.assoc, transπ hW₁'.symm, Iso.inv_comp_eq,
+        projModelVCIso_π]
+    have hpaste := hι₀.paste_horiz (isPullback_projModelBaseChange
+      (R := Localization.Away a) (R' := Localization.Away ((a : A))) W₁)
+    rw [Category.id_comp, hspecAlg] at hpaste
+    rw [hψ₀def, descentComparison, ← Category.assoc]
+    exact hpaste
+  -- the `req`-transport square
+  haveI hsRqIso : IsIso (Spec.map (CommRingCat.ofHom req.toRingHom)) := by
+    rw [hsR]
+    infer_instance
+  have hbcW : IsPullback (projModelBaseChange req.toRingHom W₁)
+      (projModelπ W) (projModelπ W₁) kF.inv := by
+    have h := isPullback_projModelBaseChange₂ req.toRingHom W₁
+    rw [hsR] at h
+    exact h
+  haveI hbcRIso : IsIso (projModelBaseChange req.toRingHom W₁) :=
+    isIso_projModelBaseChange₂ req.toRingHom W₁
+  set ν : projModel W₁ ⟶ projModel W := inv (projModelBaseChange req.toRingHom W₁) with hνdef
+  have hνsq : IsPullback ν (projModelπ W₁) (projModelπ W) kF.hom := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [hνdef, ← cancel_epi (projModelBaseChange req.toRingHom W₁), IsIso.hom_inv_id_assoc,
+      ← Category.assoc, hbcW.w, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  -- the pasted comparison square over `bmap := specFam ≫ kF.hom`
+  have hψν : IsPullback (ψ₀ ≫ ν) (projModelπ W₀R) (projModelπ W) (specFam ≫ kF.hom) :=
+    hψsq.paste_horiz hνsq
+  -- ## Step 3c: the two pullback presentations of the chart-restricted total space
+  set j : pullback π'' U.1.ι ⟶ Qe := pullback.fst π'' U.1.ι with hjdef
+  haveI : IsOpenImmersion j := by
+    rw [hjdef]
+    infer_instance
+  set pU : pullback π'' U.1.ι ⟶ U.1.toScheme := pullback.snd π'' U.1.ι with hpUdef
+  set pE : pullback qE j ⟶ EE := pullback.fst qE j with hpEdef
+  set pQ : pullback qE j ⟶ pullback π'' U.1.ι := pullback.snd qE j with hpQdef
+  have hQ'sq : IsPullback j pU π'' U.1.ι := IsPullback.of_hasPullback π'' U.1.ι
+  have hPBsq : IsPullback pE pQ qE j := IsPullback.of_hasPullback qE j
+  -- the `U`-cospan presentation of `pullback qE j`
+  have hbig : IsPullback (pQ ≫ pU) pE U.1.ι (πE ≫ invariantsπ G A ℤ) := by
+    have h1 := hPBsq.flip.paste_horiz hQ'sq.flip
+    rw [hsq.w] at h1
+    exact h1
+  -- the `U`-cospan presentation of the localized model
+  have hs' : IsPullback (projModelπ W₀R)
+      (projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A ≫ φA.inv)
+      iAA πE := by
+    have hφsq : IsPullback (projModelπ W₀A) φA.inv (𝟙 (Spec (CommRingCat.of A))) πE := by
+      refine IsPullback.of_vert_isIso ⟨?_⟩
+      rw [Category.comp_id, Iso.eq_inv_comp, hπφA]
+    have h2 := hbcsq.flip.paste_vert hφsq
+    rw [Category.comp_id] at h2
+    exact h2
+  have hW₀Rsq : IsPullback (projModelπ W₀R ≫ κ)
+      (projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A ≫ φA.inv)
+      U.1.ι (πE ≫ invariantsπ G A ℤ) :=
+    hs'.paste_horiz hAsq.flip
+  -- the comparison iso
+  set θ : (pullback qE j : Scheme) ≅ projModel W₀R :=
+    hbig.isoIsPullback _ _ hW₀Rsq with hθdef
+  have hθfst : θ.hom ≫ (projModelπ W₀R ≫ κ) = pQ ≫ pU :=
+    hbig.isoIsPullback_hom_fst _ _ hW₀Rsq
+  have hθsnd : θ.hom ≫ (projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A
+      ≫ φA.inv) = pE :=
+    hbig.isoIsPullback_hom_snd _ _ hW₀Rsq
+  have hθbc : θ.hom ≫ projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A
+      = pE ≫ φA.hom := by
+    rw [← hθsnd, Category.assoc, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  -- ## Step 4: the comparison morphism and its `G`-invariance
+  -- `Spec` of the localized action fixes `κ`
+  have hκfix : ∀ g : G, Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom
+      (fun g' : G => a.2 g') g)) ≫ κ = κ := by
+    intro g
+    have hringL : CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A))))
+        ≫ CommRingCat.ofHom (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)
+        = CommRingCat.ofHom (MulSemiringAction.toRingHom G A g)
+          ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))) := by
+      ext r
+      exact MulSemiringAction.awayHom_algebraMap (fun g' : G => a.2 g') g r
+    have hL : Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom
+        (fun g' : G => a.2 g') g)) ≫ iAA = iAA ≫ specSMul g := by
+      rw [hiAA, ← Spec.map_comp, hringL, Spec.map_comp]
+      rfl
+    rw [← cancel_mono U.1.ι, Category.assoc, hκι, ← Category.assoc, hL, Category.assoc,
+      specSMul_invariantsπ]
+  -- the localized action family
+  choose actR hactψ hactbc hactπκ using
+    fun g : G => exists_actLoc a halg W₀A Cvc hCvc act hΨ W₁ E hW₁' hcob κ hκfix g
+  have hactψ' : ∀ g : G, actR g ≫ ψ₀ = ψ₀ := fun g => hactψ g
+  have hactπκ' : ∀ g : G, actR g ≫ (projModelπ W₀R ≫ κ) = projModelπ W₀R ≫ κ :=
+    fun g => hactπκ g
+  -- the comparison morphism on the chart-restricted cover
+  set f : (pullback qE j : Scheme.{u}) ⟶ projModel W := θ.hom ≫ ψ₀ ≫ ν with hfdef
+  -- invariance of `f`, for an abstract endomorphism with the two projection properties
+  have hMkey : ∀ (g : G) (M : (pullback qE j : Scheme.{u}) ⟶ pullback qE j),
+      M ≫ pQ = pQ → M ≫ pE = pE ≫ (φA.hom ≫ act g ≫ φA.inv) → M ≫ f = f := by
+    intro g M hMpQ hMpE
+    have hMθ : M ≫ θ.hom = θ.hom ≫ actR g := by
+      refine hW₀Rsq.hom_ext ?_ ?_
+      · simp only [Category.assoc]
+        rw [hactπκ' g, hθfst, ← Category.assoc, hMpQ]
+      · simp only [Category.assoc]
+        rw [reassoc_of% (hactbc g), reassoc_of% hθbc, Iso.hom_inv_id, Category.comp_id,
+          hMpE, reassoc_of% hθbc]
+    rw [hfdef, ← Category.assoc, hMθ, Category.assoc, reassoc_of% (hactψ' g)]
+  -- ## the descended morphism
+  obtain ⟨cmp, hcmp₀⟩ := hlift j f (fun g => hMkey g _
+    (by rw [hpQdef]; simp only [pullback.lift_snd, Category.comp_id])
+    (by rw [hpEdef]; simp only [pullback.lift_fst]))
+  have hcmp : pQ ≫ cmp = f := hcmp₀
+  haveI hpQepi : Epi pQ := by
+    rw [hpQdef]
+    exact hepi j
+  -- the `π`-leg of the comparison
+  have hcmpπ : cmp ≫ projModelπ W = pU ≫ U.2.isoSpec.hom := by
+    rw [← cancel_epi pQ, ← Category.assoc, hcmp, hfdef, Category.assoc, Category.assoc,
+      hνsq.w, reassoc_of% hψsq.w, ← reassoc_of% hθfst, hκiso]
+  -- ## Step 5: `cmp` is an isomorphism (fppf descent of `θ`)
+  have hPBR : IsPullback (θ.hom ≫ projModelπ W₀R) pQ κ pU := by
+    refine IsPullback.of_right ?_ ?_ hAsq
+    · have h1 := hPBsq.paste_horiz hsq.flip
+      rw [hQ'sq.w] at h1
+      have hfst : (θ.hom ≫ projModelπ W₀R) ≫ iAA = pE ≫ πE := by
+        rw [Category.assoc, ← hbcsq.w, reassoc_of% hθbc, hπφA]
+      rw [← hfst] at h1
+      exact h1
+    · rw [Category.assoc]
+      exact hθfst
+  have hs₅ : IsPullback (θ.hom ≫ projModelπ W₀R) pQ (specFam ≫ kF.hom)
+      (pU ≫ U.2.isoSpec.hom) := by
+    have h2 : IsPullback pU (𝟙 (pullback π'' U.1.ι : Scheme.{u})) U.2.isoSpec.hom
+        (pU ≫ U.2.isoSpec.hom) := by
+      refine IsPullback.of_vert_isIso ⟨?_⟩
+      rw [Category.id_comp]
+    have h3 := hPBR.paste_vert h2
+    rw [Category.comp_id, hκiso] at h3
+    exact h3
+  have hspecFamFppf : specFam = κ ≫ U.2.isoSpec.hom ≫ kF.inv := by
+    rw [← Category.assoc, hκiso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  haveI : Surjective specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : Flat specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : QuasiCompact specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : Surjective ψ₀ := MorphismProperty.of_isPullback (P := @Surjective) hψsq.flip ‹_›
+  haveI : Flat ψ₀ := MorphismProperty.of_isPullback (P := @Flat) hψsq.flip ‹_›
+  haveI : QuasiCompact ψ₀ := MorphismProperty.of_isPullback (P := @QuasiCompact) hψsq.flip ‹_›
+  haveI : IsIso cmp := by
+    have hLsq : IsPullback θ.hom pQ (ψ₀ ≫ ν) cmp := by
+      refine IsPullback.of_right ?_ ?_ hψν.flip
+      · rw [← hcmpπ] at hs₅
+        exact hs₅
+      · rw [hcmp, hfdef]
+    exact isIso_of_isPullback_of_fppf hLsq
+  -- ## Step 6: packaging
+  refine ⟨asIso cmp, ?_, ?_⟩
+  · show cmp ≫ projModelπ W = pullback.snd π'' U.1.ι ≫ U.2.isoSpec.hom
+    rw [← hpUdef]
+    exact hcmpπ
+  · -- the zero-section leg, by cancelling the fppf cover
+    show (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ cmp
+      = projModelZero W
+    haveI hpUepi : Epi pU := by
+      have hsplit : (pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+          (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ pU = 𝟙 _ := by
+        rw [hpUdef]
+        exact pullback.lift_snd _ _ _
+      refine ⟨fun {Z} u v huv => ?_⟩
+      rw [← Category.id_comp u, ← hsplit, Category.assoc, huv, ← Category.assoc, hsplit,
+        Category.id_comp]
+    haveI hκepi : Epi κ := by
+      haveI h2 : Epi ((θ.hom ≫ projModelπ W₀R) ≫ κ) := by
+        rw [Category.assoc, hθfst]
+        exact epi_comp pQ pU
+      exact epi_of_epi (θ.hom ≫ projModelπ W₀R) κ
+    haveI hbmapepi : Epi (specFam ≫ kF.hom) := by
+      rw [← hκiso]
+      exact epi_comp κ U.2.isoSpec.hom
+    -- the ingredients of the zero-section chase
+    have hbmapinv : (specFam ≫ kF.hom) ≫ U.2.isoSpec.inv = κ := by
+      rw [← hκiso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have hζw : (iAA ≫ zeroE) ≫ qE = (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ j := by
+      rw [Category.assoc, ← hzeroSq, hjdef, Category.assoc, pullback.lift_fst,
+        reassoc_of% hκι]
+    have hζpQ : pullback.lift (iAA ≫ zeroE) (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) hζw ≫ pQ
+        = κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+          (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp]) := by
+      rw [hpQdef]
+      exact pullback.lift_snd _ _ _
+    have hzφinv : projModelZero W₀A ≫ φA.inv = zeroE := by
+      rw [← hzeroφA, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have hzbc : projModelZero W₀R
+        ≫ projModelBaseChange (algebraMap A (Localization.Away ((a : A)))) W₀A
+        = iAA ≫ projModelZero W₀A := by
+      rw [hiAA]
+      exact projModelZero_baseChange₂ (algebraMap A (Localization.Away ((a : A)))) W₀A
+    have hζθ : pullback.lift (iAA ≫ zeroE) (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) hζw ≫ θ.hom
+        = projModelZero W₀R := by
+      refine hW₀Rsq.hom_ext ?_ ?_
+      · simp only [Category.assoc]
+        rw [hθfst, ← Category.assoc, hζpQ, Category.assoc,
+          reassoc_of% projModelZero_projModelπ]
+        rw [hpUdef, pullback.lift_snd, Category.comp_id]
+      · simp only [Category.assoc]
+        rw [hθsnd, hpEdef, pullback.lift_fst, ← Category.assoc, hzbc, Category.assoc, hzφinv]
+    have hz2 : projModelZero W ≫ projModelBaseChange req.toRingHom W₁
+        = kF.inv ≫ projModelZero W₁ := by
+      have h := projModelZero_baseChange₂ req.toRingHom W₁
+      rw [hsR] at h
+      exact h
+    have hzν : projModelZero W₁ ≫ ν = kF.hom ≫ projModelZero W := by
+      rw [hνdef, ← cancel_mono (projModelBaseChange req.toRingHom W₁), Category.assoc,
+        Category.assoc, IsIso.inv_hom_id, Category.comp_id, hz2, Iso.hom_inv_id_assoc]
+    have hzψ : projModelZero W₀R ≫ ψ₀ = specFam ≫ projModelZero W₁ := by
+      rw [hψ₀def, descentComparison_zero, hspecAlg]
+    -- assemble
+    rw [← cancel_epi (specFam ≫ kF.hom)]
+    simp only [Category.assoc]
+    rw [reassoc_of% hbmapinv, ← reassoc_of% hζpQ, hcmp, hfdef, reassoc_of% hζθ,
+      reassoc_of% hzψ, hzν]
 
 /-- Abstract reduction: `LocallyWeierstrass` transports along an iso of the base (with the total
 space fixed). Stated over opaque schemes so the application never unfolds the heavy quotient/Spec
