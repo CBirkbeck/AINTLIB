@@ -1,7 +1,7 @@
 import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.Dual
 import ModularCurves.Picard.Pic
-import ModularCurves.ForMathlib.PullbackTensorMonoidal
+import ModularCurves.Picard.DualRestrict
+import ModularCurves.Picard.PullbackTensorObj
 import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
@@ -1730,6 +1730,24 @@ noncomputable def sectionPoleSheaf {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) : C.Modules :=
   Scheme.Modules.dualObj (sectionIdealModule π z hz)
 
+/-- The pole sheaf of a section commutes with restriction along an open immersion
+of the base. -/
+noncomputable def sectionPoleSheafRestrictIso
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) [IsOpenImmersion t] :
+    (Scheme.Modules.restrictFunctor (pullback.fst π t)).obj
+        (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (pullback.snd π t) (sectionBaseChange z hz t)
+        (sectionBaseChange_snd z hz t) := by
+  letI : IsOpenImmersion (pullback.fst π t) :=
+    MorphismProperty.pullback_fst π t inferInstance
+  letI : IsSeparated (pullback.snd π t) :=
+    MorphismProperty.pullback_snd π t inferInstance
+  exact Scheme.Modules.dualRestrictIso
+      (sectionIdealModule π z hz) (pullback.fst π t) ≪≫
+    (Scheme.Modules.dualIsoObj
+      (sectionIdealModuleRestrictIso z hz t)).symm
+
 /-- The inclusion of the zero-section ideal into the structure sheaf. -/
 noncomputable def sectionIdealToUnit {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
@@ -1767,6 +1785,54 @@ private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules
       (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
       (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
       (Iso.refl _) M.val N.val
+
+/-- Restriction along an open immersion preserves the localized monoidal unit. -/
+private noncomputable def restrictMonoidalUnitIso
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    (Scheme.Modules.restrictFunctor f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules :=
+  (Scheme.Modules.restrictFunctor f).mapIso (monoidalUnitObjIso Y) ≪≫
+    Scheme.Modules.restrictUnitIso f ≪≫
+      (monoidalUnitObjIso X).symm
+
+/-- Restriction along an open immersion preserves the localized tensor product. -/
+private noncomputable def restrictMonoidalTensorIso
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (M N : Y.Modules) :
+    (Scheme.Modules.restrictFunctor f).obj (M ⊗ N) ≅
+      (Scheme.Modules.restrictFunctor f).obj M ⊗
+        (Scheme.Modules.restrictFunctor f).obj N :=
+  (Scheme.Modules.restrictFunctor f).mapIso (monoidalTensorObjIso M N) ≪≫
+    (Scheme.Modules.restrictFunctorIsoPullback f).app
+      (Scheme.Modules.tensorObj M N) ≪≫
+    (Scheme.Modules.nonempty_pullback_tensorObj f M N).some ≪≫
+    Scheme.Modules.tensorObjCongr
+      ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app M)
+      ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app N) ≪≫
+    (monoidalTensorObjIso _ _).symm
+
+/-- Every tensor power of the pole sheaf commutes with restriction along an open
+immersion of the base. -/
+noncomputable def sectionPoleSheafPowerRestrictIso
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) [IsOpenImmersion t] :
+    ∀ n : ℕ,
+      (Scheme.Modules.restrictFunctor (pullback.fst π t)).obj
+          (sectionPoleSheafPower π z hz n) ≅
+        sectionPoleSheafPower (pullback.snd π t) (sectionBaseChange z hz t)
+          (sectionBaseChange_snd z hz t) n
+  | 0 => by
+      letI : IsOpenImmersion (pullback.fst π t) :=
+        MorphismProperty.pullback_fst π t inferInstance
+      exact restrictMonoidalUnitIso (pullback.fst π t)
+  | n + 1 => by
+      letI : IsOpenImmersion (pullback.fst π t) :=
+        MorphismProperty.pullback_fst π t inferInstance
+      letI : IsSeparated (pullback.snd π t) :=
+        MorphismProperty.pullback_snd π t inferInstance
+      exact restrictMonoidalTensorIso (pullback.fst π t)
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
+        (sectionPoleSheafPowerRestrictIso z hz t n ⊗ᵢ
+          sectionPoleSheafRestrictIso z hz t)
 
 /-- Cover-local invertibility is invariant under isomorphism. -/
 private theorem isInvertible_of_iso {X : Scheme.{u}} {M N : X.Modules}
