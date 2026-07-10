@@ -403,6 +403,16 @@ theorem snd_appTop_affineKunnethΓ
     AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
     Category.comp_id]
 
+/-- **The `Γ`-dual of the base**, affine version: the base algebra map dualises to the
+first projection followed by the structure map to `B`. -/
+theorem base_appTop_affineKunnethΓ
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    f.appTop ≫ (pullback.fst f g).appTop ≫ affineKunnethΓ f g h₁ h₂
+      = CommRingCat.ofHom
+          (algebraMap Γ(B, ⊤) (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤))) := by
+  rw [fst_appTop_affineKunnethΓ, ← h₁, ← CommRingCat.ofHom_comp]
+
 end Affine
 
 end AlgebraicGeometry
