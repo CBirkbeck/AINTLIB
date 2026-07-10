@@ -321,6 +321,17 @@ lemma freeObj_map_freeMk {H : Cᵒᵖ ⥤ Type u} {V W : Cᵒᵖ} (f : V ⟶ W) 
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The free presheaf functor on morphisms, on generators:
+`(free R).map g` sends `freeMk x` to `freeMk (g.app x)`. -/
+@[simp]
+lemma free_map_app_freeMk {F G : Cᵒᵖ ⥤ Type u} (g : F ⟶ G) (V : Cᵒᵖ) (x : F.obj V) :
+    (((free (T ⋙ forget₂ CommRingCat RingCat)).map g).app V) (ModuleCat.freeMk x) =
+      (ModuleCat.freeMk (g.app V x) :
+        ((free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V) := by
+  erw [ModuleCat.free_map_apply]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- `ModuleCat.free_hom_ext`, restated at the presheaf-of-modules clothing of the free
 objects (the mathlib form's `(ModuleCat.free R).obj`-spelling reframes goals and poisons
 `kabstract`; the defeq crossing happens once, here, at elaboration). -/
@@ -508,6 +519,28 @@ lemma homEquiv_pullbackFreeYonedaIso_hom_comp {X : C} {N : PresheafOfModules.{u}
     Equiv.apply_symm_apply _ _]
   rw [← Functor.CorepresentableBy.homEquiv_eq]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Evaluation form of `freeYonedaEquiv`: the value of a map out of a free-yoneda module is
+its value on the generator `freeMk (𝟙 X)`. -/
+lemma freeYonedaEquiv_apply {M : PresheafOfModules.{u} S} {X : C}
+    (g : (free S).obj (yoneda.obj X) ⟶ M) :
+    freeYonedaEquiv g = g.app (Opposite.op X) (ModuleCat.freeMk (𝟙 X)) := by
+  obtain ⟨x, rfl⟩ := freeYonedaEquiv.symm.surjective g
+  rw [Equiv.apply_symm_apply, freeYonedaEquiv_symm_app]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The adjunction unit at a free-yoneda module, through the corepresentability of the
+pullback: the `homEquiv`-transposed inverse of `pullbackFreeYonedaIso`. This is the compute
+rule for units in the [G3-pre]/[G3-η] generator chases. -/
+lemma unit_app_freeYoneda (X : C) :
+    (pullbackPushforwardAdjunction.{u} φ).unit.app ((free S).obj (yoneda.obj X)) =
+      (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv
+        ((pullbackFreeYonedaIso φ X).inv) := by
+  rw [← Adjunction.homEquiv_id, ← Iso.hom_inv_id (pullbackFreeYonedaIso φ X),
+    homEquiv_pullbackFreeYonedaIso_hom_comp]
+
 end PullbackFreeYoneda
 
 section SchemePullbackMonoidal
@@ -528,6 +561,26 @@ noncomputable def schemeRingPresheafHom :
         (Opens ↥X)ᵒᵖ ⥤ RingCat.{u}) ⟶
       (Opens.map f.base).op ⋙ (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat) :=
   Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Generator evaluation of the lattice-miracle isomorphism: the inverse sends the
+generator of `freeY (U₁ ⊓ U₂)` to the tensor of the two restricted generators. -/
+lemma freeYonedaTensorIso_inv_app_generator (U₁ U₂ : X.Opens) :
+    (freeYonedaTensorIso U₁ U₂).inv.app (Opposite.op (U₁ ⊓ U₂))
+        (ModuleCat.freeMk (𝟙 (U₁ ⊓ U₂))) =
+      (ModuleCat.freeMk (homOfLE inf_le_left) ⊗ₜ ModuleCat.freeMk (homOfLE inf_le_right) :
+        (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
+          (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂)).obj
+            (Opposite.op (U₁ ⊓ U₂)))) := by
+  show ((freeTensorIso X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)).hom.app _
+    (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).map
+      (yonedaMeetIso U₁ U₂).inv).app _ (ModuleCat.freeMk (𝟙 (U₁ ⊓ U₂))))) = _
+  rw [free_map_app_freeMk]
+  show (freeTensorDesc X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)).app _ _ = _
+  rw [freeTensorDesc_app]
+  erw [freeTensorμ_inv_freeMk]
+  rfl
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
