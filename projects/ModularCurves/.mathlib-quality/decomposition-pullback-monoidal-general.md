@@ -316,3 +316,45 @@ the ONE generator of freeY(U₁ ⊓ U₂).
 **Chain: B1 ✓ B2 ✓ G1 ✓ G3-pre ✓ │ next: [G3-η] (unit ≅ freeY ⊤ + same chase), then [G3-TC]
 (tensorRight preserves colimits), [G3-EXT] (abstract iso-at-colimit), [G3-P]/[G3-Q] (two passes),
 [A] (ofOplaxMonoidal + functorMonoidalOfComp descent → nonempty_pullback_monoidal → Pic(f)).**
+
+## ★★★ [D-PresPB′-general] FULLY DISCHARGED (2026-07-10, session 5 continuation)
+
+**THE CHAIN IS COMPLETE — every leaf closed, sorry-free, axiom-clean:**
+B1 ✓ B2 ✓ G1 ✓ G3-pre ✓ **G3-η ✓** (`isIso_pullback_η`: unit ≅ freeY(⊤) via `unitDesc`
+universal-property + `Finsupp.uniqueLinearEquiv` componentwise; both sides of the chase = 1,
+`map_one` closes) **G3-TC ✓** (`preservesColimitsOfShape_tensorRight/Left` — pointwise via
+`evaluationJointlyReflectsColimits` + ModuleCat monoidal-closed; `_aux` size-u packagings)
+**G3-EXT ✓** (`isIso_app_of_isColimit`) **G3 ✓** (`isIso_pullback_δ_of_freeYoneda` — GENERIC
+two-pass extension: `isIso_app_of_isIso_app_freeYoneda` reusable core = coproduct layer over
+`Elements` + cokernel-cofork layer; `δRightNat`/`δLeftNat` via `δ_natural_left/right.symm`;
+scheme corollary `isIso_pullback_δ`) **A ✓**:
+- `pullbackMonoidal f : (pullback (schemeRingPresheafHom f)).Monoidal` — **the presheaf
+  pullback of a scheme morphism is MONOIDAL** (Monoidal.ofOplaxMonoidal; NO sheafification).
+- `nonempty_sheafPullback_monoidal` (GENERIC descent, small sites + CommRingCat literal):
+  presheaf-level monoidal ⟹ sheaf-level monoidal via `functorMonoidalOfComp` +
+  `Lifting := ⟨sheafificationCompPullback ⟨φ₀⟩⟩`. KEY ENGINEERING: state over the
+  PRESHEAF-level φ₀ and form ⟨φ₀⟩ internally — one consistent spelling kills the whnf
+  storm; an explicit `letI : (toMonoidalCategory …R-side…).Monoidal := inferInstance` probe
+  is needed (the comp-instance search stalls without it).
+- `nonempty_pullback_monoidal f : Nonempty ((Modules.pullback f).Monoidal)` — the PAYOFF
+  SORRY CLOSED (thin wrapper; the Modules.pullback-vs-literal cast is pure defeq).
+- **`Pic.map (f : Y ⟶ X) : Pic X →* Pic Y`** — THE GME (2.16) PICARD FUNCTOR
+  (`Units.map (Skeleton.monoidHom)`), axiom-clean. **P2 headline delivered.**
+- Registered leaf `nonempty_sheafify_presheafPullback_tensor` RELOCATED PTM→PTG (zero
+  consumers; PTG must import PTM — its instances are load-bearing — so downstream-only
+  closure), respelled at clean clothing, closed from μIso. **PullbackTensorMonoidal.lean
+  is now sorry-free.**
+
+**REMAINING (1 sorry in the stream):** `nonempty_pullback_tensorObj` (InvertibleSheaf:165)
+— cannot import PTG (cycle: PTG → PTM → InvertibleSheaf). Resolution designed: NEW file
+`Picard/PullbackTensorObj.lean` importing {InvertibleSheaf, PTG}, relocate the statement
+(zero consumers), assemble: `sheafificationCompPullback.app (M.val ⊗ N.val)` ≪≫
+`mapIso μIso.symm` ≪≫ double-sheafification collapse (PTM's proven ι-route e-chain at
+340-358 is the template for the last leg). Also [PIC-P2-CMP] can now consume the landed
+owner `Picard/Dual.lean` (dual-sheaf infrastructure) — coordinate with p2.
+
+Method notes: `Monoidal.ofOplaxMonoidal`/`CoreMonoidal.ofOplaxMonoidal` are the mathlib
+packagers (Functor.lean:710/733); `Adjunction.corepresentableBy` exists (Basic.lean:318);
+Sheaf fields are now `.obj`/`.cond`→`.property` (deprecation incoming), Hom field `.hom`;
+legacy `ringCatSheaf.obj`-spelled statements elaborate their ⊗ at
+`(sheafToPresheaf …).obj`-clothing where NO monoidal instance matches — respell, don't fight.
