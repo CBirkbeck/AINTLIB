@@ -14857,3 +14857,32 @@ and freshly-synthesized `HasPullback` give *syntactically different* `pullback.f
   [T-B6′] retire at/after T-W7a + the six E-track leaves + MASTER one-`exact`.
   **Critical path = c5β's chain, unchanged.** P3b3 opener stays pre-staged for the
   T-W7a moment.
+
+## Amendments v10.112 (c5β) — 0c-i atlas group axioms PROVEN; T-G4 transport = ARCHITECTURE NOTE
+
+**Atlas group axioms COMPLETE** in `EllipticCurve/GroupLawAxioms.lean` (new file, downstream of
+AdditionSpecPoints so the c6 spec is in scope), all axiom-clean [propext, Classical.choice, Quot.sound]:
+- **T-G1** 0e instance pack at the ULift atlas (isIntegral_projModel_u, geometricallyIntegral_universalCurveπU,
+  IsReduced of E_U/E_U²/E_U³, isSeparated_projModel).
+- **T-G3-comm** `mulModelHom_comm_atlas` (raw) + `mulOver_comm_atlas` (Over).
+- **T-G3-assoc** `mulOver_assoc_atlas` — THE keystone axiom, field-points extensionality on the fibre
+  cube + c6 spec nested ×2 + add_assoc + dictionary injectivity; Over-monoidal `.left` projections
+  bridged to projModelπ lifts by **term-mode Eq.trans/congrArg** (rw/simp cannot cross the folded-`.hom`
+  vs projModelπ defeq boundary; `.trans` junctions can).
+- **T-G3 unit+inverse** `oneOver_mulOver_atlas`, `mulOver_oneOver_atlas`, `invOver_mulOver_atlas`
+  (zero-section ↦ 0 via projModelPointsEquiv_zero; neg via negModelHom_specPoints; zero_add/add_zero/neg_add_cancel).
+
+**★ ARCHITECTURE FINDING for T-G4 (transport to every R):** the group axioms fundamentally need the
+c6 spec `mulModelHom_specPoints`, which lives in AdditionSpecPoints — **downstream of GLC**. Therefore
+GLC's own `mulOver_assoc / oneOver_mulOver / mulOver_oneOver / mulOver_comm / invOver_mulOver` (currently
+5 sorries at GLC ~910-935) **cannot be filled in-place** (circular import). Confirmed: those 5 GLC theorems
+are referenced ONLY in docstrings/comments (GroupLawDescent §T-W7.6, PatchHopf header) — **no code consumes
+them by name yet** (the downstream consumers are themselves sorried). Two clean resolutions for T-G4:
+  (a) **Recommended**: remove the 5 sorried statements from GLC, prove the general-R versions (same names)
+      in GroupLawAxioms via transport — `IsPullback.hom_ext` on `isPullback_projModelBaseChangeOf` (E_R is
+      the base change of E_atlas along `Spec.map (classifyRingHomU W)`) + `mulModelHom_map` naturality +
+      the atlas axioms; π-legs are automatic (both sides are Over(Spec R)-morphisms from the same source).
+      Then re-point GroupLawDescent/PatchHopf imports to GroupLawAxioms. (Same of_map/D-NAT pattern as c6.)
+  (b) Keep GLC's sorries as WIP forward-decls; prove differently-named general-R versions downstream.
+Coordinator: pick (a) vs (b) — it's a statement-location decision (GLC statement removal). Until then the
+mathematical content of 0c-i (the group law IS verified, at the atlas = the universal case) is DONE.
