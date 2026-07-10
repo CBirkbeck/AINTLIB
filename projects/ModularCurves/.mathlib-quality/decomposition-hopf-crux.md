@@ -565,3 +565,35 @@ attributed-local `Over.cartesianMonoidalCategory` instance-path). FRESH-SESSION 
 pp.explicit-diff the goal's ⊗ₘ-implicits against the lemma's via lean_goal, then align
 by `show`-restatement. WIP file parked at scratchpad/ActPairImmersion-wip.lean (session
 50a95a14); the committed file has shearAuto + actPair_eq_shear green.
+
+## [HG-C1b] leg-3 design (banked 2026-07-10; legs 1-2 COMMITTED)
+
+Status: `chartPullbackIso G U : (pr⁻¹U).toScheme ≅ pullback G.π (U.ι ≫ E.π)` proven
+(StableCharts.lean) — the scheme-level Künneth. Leg 3 = the affine patch datum:
+
+```
+structure AffineChartPatch (G : FiniteLocallyFreeSubgroup E) where
+  V : S.Opens;  hV : IsAffineOpen V          -- affine base patch
+  U : E.E.Opens; hU : IsAffineOpen U         -- stable affine chart
+  hstable : G.IsStableOpen U
+  hover : U ≤ E.π ⁻¹ᵁ V                      -- chart lies over the patch
+```
+Derived: `R := Γ(V)`, `B := Γ(U)`; `G|_V := (G.π)⁻¹ᵁ V`-open of `G.G` is affine
+(G.π = ι ≫ E.π is finite ⟹ IsAffineHom ⟹ affine-preimage-of-affine), `A := Γ(G|_V)`
+with the Hopf structure from p2's layer when landed (hypothesis-wired meanwhile: state
+the C1c/C1d outputs against `[HopfAlgebra R A]`-instances given as arguments/fields).
+Then: `Γ(pullback G.π (U.ι≫E.π))`-restricted-to-the-V-patch ≅ `B ⊗[R] A` via
+`pullbackSpecIso R A B` after `Spec`-writing (`IsAffineOpen.isoSpec`, arrows via
+`Spec.map`-functoriality); `ρ_U := (ΓSpecIso _).hom ∘ (chartPullbackIso ≫ Spec-iso).inv-Γ
+∘ (restrictedAction hstable).appTop`-chain. CAUTION (from C2-mile experience): fix ONE
+spelling per object; prefer direct term-application of the mathlib iso-component lemmas
+over rw/simp keying; keep every pullback in the `G.π`/`E.π`-spelling.
+C1c then proves `IsCoaction ρ_U` by appTop-functoriality chases against the restricted
+group-object diagrams (associativity from `MonObj.mul_assoc` of `E.asOver` restricted;
+counit from the unit-law composed with the zero-section-through-U... NOTE: the counit
+chase needs `0 ∈ U`?? NO — the counit of the HOPF algebra A is the identity-section of
+G (0 ∈ G always: the group-object unit factors through G|_V for V-patches since G is an
+S-GROUP: η : S → G restricted to V lands in G|_V ✓) — the counit-diagram restricts fine
+on ANY stable U (the identity-translation is trivial); coassoc similarly needs the
+μ_G-restriction (G|_V is a V-group: p0's Subgroup-structure carries the group-object
+data — check field names at C1c-time).
