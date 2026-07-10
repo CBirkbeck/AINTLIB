@@ -11204,3 +11204,42 @@ must live (the MASTER consumes D3+F1, both tatePoint-dependent). Generic section
 (killedLocus machinery, all of YOneAssembly < line 600) STAY. Pointer comments at all
 old sites. Reversible (pure moves). Bar unchanged: single-target green + #print axioms
 exists_tatePoint = sorryAx via [T-A6b]+[T-B6′] only, boarded.
+
+## Amendments v10.115-Y1 (2026-07-10, NEW-Y1): ★★ v10.117 INTEGRATION COMPLETE — exists_tatePoint FILLED & DISCHARGED; YOneAssembly code-sorry-free; MASTER closure prepped
+
+**Delivered (tip `ef3851d42`+closure, all single-target builds green):**
+- **`ModularCurve/YOneTatePoint.lean`** (new cap file, imports YOneAtlasClassify,
+  registered in the root module): `exists_tatePoint` **FILLED** — witness
+  `tateMarkedPoint`, first conjunct `tateMarkedPoint_nowhereGeomOrderLEThree`, ∀-clause
+  `:= fun Y P hP => MarkedChartData.tateMarkedPoint_classifies R Y P hP`. The former
+  `sorry` is **DISCHARGED by relocation** (deleted, not deferred). Opaque trio +
+  the `tatePoint`-dependent Y₁ tail (yOneSet → gammaOneNaive_representable_assembly,
+  incl. D-track and E-track skeletons) relocated **statement-byte-identical** per the
+  declared deviation (v10.114-Y1) — the dispatch's 4-decl scope would have broken the
+  64 internal consumers; zero breakage on the executed scope (external grep re-verified:
+  only a prose mention in PullSectionCanonicity.lean:54, A's held file, untouched).
+- **YOneAssembly.lean is now CODE-SORRY-FREE** (792 lines; all remaining `sorry`
+  strings are prose). All Y1 WIP is concentrated in the cap file's six pre-existing
+  E-track leaves (yOneStructMap_locallyOfFinitePresentation crux, yOne_isAffine,
+  yOneStructMap_isAffineHom, yOne_infinitesimal_lifting, yOneStructMap_smooth,
+  representableBy_smooth_isAffineHom).
+- **MASTER prep DONE**: `gammaOneNaive_representable_closure` (YOneTatePoint) —
+  statement byte-identical to the held `gammaOneNaive_representable`
+  (Moduli/Representability.lean), proof = one `exact` of the assembly bridge. When
+  [T-A6b]/[T-B6′] retire at T-W7a and the E-leaves land, the trail collapses with zero
+  wiring; the held statement then relocates here by the v10.111 doctrine.
+
+**BAR (met):** `lake build ModularCurves.ModularCurve.YOneAssembly` (3191 jobs) and
+`...YOneTatePoint` (3197 jobs) green; `#print axioms exists_tatePoint` =
+`[propext, sorryAx, Classical.choice, Quot.sound]` — the `sorryAx` enters exactly
+through the composed designed trails **[T-A6b]** (`abelEnrichment_exists` via
+`tateMarkedPoint`/`tateUniversal`) and **[T-B6′]** (`geomFibrePointAddEquiv.map_add'`
+via the vi-leaf and `tateMarkedPoint_classifies`) — v10.110/v10.113 attributions
+composed, **no non-designed carriers**. `gammaOneNaive_representable_closure` carries
+additionally only the six registered E-leaf sorries of its own file (pre-existing).
+
+**Milestone**: T-E7's representability half is now a THEOREM end-to-end
+(`(gammaOneNaiveProblem R N).Representable` via `yOneEllObj` + `yOne_representableBy`
++ the filled atlas clause) — modulo only the designed trails. Y₁(N) exists and
+represents. Sentinel `beastmode_active.NEW-Y1` cleared; parked per stream card
+(triggers: T-W7a → trails retire + E-track opens via BB-DIFF).

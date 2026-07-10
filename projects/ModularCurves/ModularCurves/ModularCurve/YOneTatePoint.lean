@@ -539,4 +539,18 @@ theorem gammaOneNaive_representable_assembly [NeZero N] (hN : 4 ≤ N)
   ⟨⟨⟨yOneEllObj R N, yOne_representableBy R N hN hinv⟩⟩,
     fun X hX => representableBy_smooth_isAffineHom R N hN hinv X hX⟩
 
+/-- **(T-E7 MASTER closure prep — v10.117)** The held target
+`gammaOneNaive_representable` (`Moduli/Representability.lean`), statement byte-identical,
+closed by the assembly bridge against the relocated interface.  When the designed trails
+retire ([T-A6b]/[T-B6′] at T-W7a) and the E-track leaves above land, this theorem's axiom
+trail collapses to `[propext, Classical.choice, Quot.sound]` with no further wiring; the
+held upstream statement then relocates here by the v10.111 doctrine (coordinator's call),
+exactly as `exists_tatePoint` did today. -/
+theorem gammaOneNaive_representable_closure (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    (gammaOneNaiveProblem R N).Representable ∧
+      ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
+        (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
+  gammaOneNaive_representable_assembly R N hN hinv
+
 end ModularCurves
