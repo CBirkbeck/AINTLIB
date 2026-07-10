@@ -14704,3 +14704,17 @@ Landed ungate-able ingredients: [B0] GlobalModelTransport (bc3417905), [B1] exis
 * **[B3-fill]** representable_of_rigid_of_torsor_of_globalModel := assemble; then the model-free
   representable_of_rigid_of_torsor when [OWNER-FLW] lands. Axiom trail expected:
   [propext, Classical.choice, Quot.sound, sorryAx] with sorryAx = T-W7 only (flips clean on c5β).
+
+## PHASE B — downstream gate map (fable-P4, 2026-07-10)
+Green baseline confirmed: TorsorMap (B1/B2a/b/c'), GlobalModelTransport (B0), QuotientProblem all
+build together (3124 jobs). Downstream of B3:
+* **[B4] representable_iff ⇐** (EllCategory.lean:274, T-E5c/d/e/f, sorry) = the engine
+  (representable_of_rigid_of_torsor / B3) instantiated at (naive level 3, GL₂𝔽₃) [T-E15] and
+  (Legendre, GL₂(ℤ/2)×±1) [T-E14, blocked on T-E-OMEGA], glued over ℤ[1/6] [T-E5f]. GATED on the
+  two universal-curve constructions T-E14/T-E15 (+ T-E-OMEGA) — OTHER LANES' work, not fable-P4's.
+* **[B5] Y(N)/Γ_H** (GammaHRepresentability.lean, "Feeds representable_iff" :1186): consumes the
+  same engine; also gated on its own quotient-problem-data sorries (:252/276/337/367/398/419/539).
+CONCLUSION: fable-P4's Phase-B critical path is B3 (the engine's representability variant). B4/B5
+are gated on other lanes (universal curves) — consume the engine when they're unblocked; do NOT
+duplicate T-E14/T-E15. Once B3 lands (modulo T-W7), the fable-P4 Phase-B mandate is
+mathematically complete pending those external universal-curve inputs.
