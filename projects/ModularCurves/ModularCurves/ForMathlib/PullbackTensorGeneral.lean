@@ -27,7 +27,7 @@ sorry-free). Full route adjudication, verbatim anchors and attack logs:
 `.mathlib-quality/decomposition-pullback-monoidal-general.md`.
 -/
 
-universe v₁ v₂ u₁ u₂ u
+universe v₁ v₂ v₃ u₁ u₂ u₃ u w w'
 
 open CategoryTheory MonoidalCategory Functor
 
@@ -611,6 +611,72 @@ theorem nonempty_freeYoneda_tensor_iso (U₁ U₂ : X.Opens) :
   nonempty_freeYoneda_tensor_iso' U₁ U₂
 
 end FreeYonedaTensor
+
+section IsoAtColimit
+
+open CategoryTheory.Limits
+
+variable {C₁ : Type u₁} [Category.{v₁} C₁] {C₂ : Type u₂} [Category.{v₂} C₂]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3-EXT.** A natural transformation that is an isomorphism
+on the objects of a diagram is an isomorphism at any colimit point of the diagram, provided
+both functors preserve the colimit: the component at the point is the induced comparison of
+colimits of isomorphic diagrams. -/
+lemma isIso_app_of_isColimit {F G : C₁ ⥤ C₂} (α : F ⟶ G) {J : Type u₃} [Category.{v₃} J]
+    {K : J ⥤ C₁} {c : Cocone K}
+    (h₁ : IsColimit (F.mapCocone c)) (h₂ : IsColimit (G.mapCocone c))
+    [∀ j, IsIso (α.app (K.obj j))] : IsIso (α.app c.pt) := by
+  have key : α.app c.pt = (IsColimit.coconePointsIsoOfNatIso h₁ h₂
+      (NatIso.ofComponents (fun j => asIso (α.app (K.obj j)))
+        (fun {j j'} g => α.naturality (K.map g)))).hom := by
+    refine h₁.hom_ext (fun j => ?_)
+    rw [IsColimit.comp_coconePointsIsoOfNatIso_hom]
+    exact α.naturality (c.ι.app j)
+  rw [key]
+  infer_instance
+
+end IsoAtColimit
+
+section TensorColimits
+
+open CategoryTheory.Limits
+
+variable {C : Type u₁} [Category.{v₁} C] {T : Cᵒᵖ ⥤ CommRingCat.{u}}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3-TC (right half).** Tensoring with a fixed presheaf of
+modules preserves colimits (pointwise: evaluation jointly reflects, evaluation preserves,
+and `ModuleCat` tensoring is a left adjoint by monoidal-closedness). -/
+lemma preservesColimitsOfShape_tensorRight
+    (Q : PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat))
+    (J : Type w) [Category.{w'} J] [HasColimitsOfShape J AddCommGrpCat.{u}] :
+    PreservesColimitsOfShape J (MonoidalCategory.tensorRight Q) where
+  preservesColimit {K} := {
+    preserves {c} hc := by
+      refine ⟨evaluationJointlyReflectsColimits _ _ (fun V => ?_)⟩
+      have h1 : IsColimit ((evaluation
+          (T ⋙ forget₂ CommRingCat RingCat) V).mapCocone c) :=
+        isColimitOfPreserves _ hc
+      have h2 := isColimitOfPreserves (MonoidalCategory.tensorRight (Q.obj V)) h1
+      exact h2.ofIsoColimit (Cocones.ext (Iso.refl _) (fun j => by
+        dsimp
+        rw [Category.comp_id])) }
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3-TC (left half).** Symmetric to the right half, by the
+braiding. -/
+lemma preservesColimitsOfShape_tensorLeft
+    (Q : PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat))
+    (J : Type w) [Category.{w'} J] [HasColimitsOfShape J AddCommGrpCat.{u}] :
+    PreservesColimitsOfShape J (MonoidalCategory.tensorLeft Q) :=
+  letI := preservesColimitsOfShape_tensorRight Q J
+  preservesColimitsOfShape_of_natIso (BraidedCategory.tensorLeftIsoTensorRight Q).symm
+
+end TensorColimits
 
 section PullbackFreeYoneda
 
