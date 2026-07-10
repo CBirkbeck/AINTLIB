@@ -222,6 +222,47 @@ theorem topIso_inv_snd_appTop_patchKunnethΓ
     AlgebraicGeometry.Scheme.Hom.id_appTop, Category.id_comp, Iso.inv_hom_id,
     Category.comp_id]
 
+/-- The section-level transport is an isomorphism. -/
+instance isIso_patchKunnethΓ
+    (hV : IsAffineOpen V) (hW₁ : IsAffineOpen W₁) (hW₂ : IsAffineOpen W₂)
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(X, W₁)) = f.appLE V W₁ e₁)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(S, V) Γ(Y, W₂)) = g.appLE V W₂ e₂) :
+    IsIso (patchKunnethΓ f g hV hW₁ hW₂ h₁ h₂) := by
+  rw [patchKunnethΓ]
+  haveI : IsIso ((patchKunneth f g hV hW₁ hW₂ h₁ h₂).inv.appTop) := by
+    refine ⟨(patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom.appTop, ?_, ?_⟩
+    · rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id,
+        AlgebraicGeometry.Scheme.Hom.id_appTop]
+    · rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+        AlgebraicGeometry.Scheme.Hom.id_appTop]
+  infer_instance
+
+/-- **Ext principle for maps out of a tensor product** of `CommRingCat` objects: two ring
+maps agreeing on both inclusions agree. -/
+theorem tensor_hom_ext {R A B C : CommRingCat.{u}} [Algebra R A] [Algebra R B]
+    {φ ψ : CommRingCat.of (A ⊗[R] B) ⟶ C}
+    (hL : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := R) (A := A) (B := B)) ≫ φ
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := R) (A := A) (B := B)) ≫ ψ)
+    (hR : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := R) (A := A) (B := B)).toRingHom ≫ φ
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := R) (A := A) (B := B)).toRingHom ≫ ψ) :
+    φ = ψ := by
+  have hL' : ∀ a : A, φ.hom (a ⊗ₜ[R] 1) = ψ.hom (a ⊗ₜ[R] 1) := fun a =>
+    congrArg (fun m : A ⟶ C => m.hom a) hL
+  have hR' : ∀ b : B, φ.hom (1 ⊗ₜ[R] b) = ψ.hom (1 ⊗ₜ[R] b) := fun b =>
+    congrArg (fun m : B ⟶ C => m.hom b) hR
+  refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
+  induction x using TensorProduct.induction_on with
+  | zero => rw [map_zero, map_zero]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | tmul a b =>
+      rw [show (a ⊗ₜ[R] b : A ⊗[R] B) = (a ⊗ₜ[R] 1) * (1 ⊗ₜ[R] b) from by
+        rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]]
+      rw [map_mul, map_mul, hL' a, hR' b]
+
 end
 
 end AlgebraicGeometry
