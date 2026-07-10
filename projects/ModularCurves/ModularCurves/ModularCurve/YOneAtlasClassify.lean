@@ -4514,4 +4514,204 @@ end MarkedChartData
 
 end TopRestriction
 
+section TopGlue
+
+/-! ### Gluing the local classifying top maps over the curve cover (recipe step 3)
+
+The chart cover of the base pulls back along `Y.curve.π` to an open cover of the total
+space by the chart pullbacks; the local top maps agree on the overlaps (checked over the
+affine cover of the base overlap, pulled back along the projection, via
+`test_topMap_agree`), so they glue to the classifying top map `Y.curve.E ⟶ projModel
+(tateCurveLocOver R)`.  All statements are phrased through the honest pullback
+presentations (never through the cover fields), so every goal stays type-correct at
+instance-transparency; the cover-field forms are recovered by definitional unfolding at
+the gluing call sites. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+variable (Y) in
+/-- The open cover of the total space of the curve by the chart pullbacks (the pullback
+of the chart cover along `Y.curve.π`, re-presented with definitionally transparent
+index/piece/map fields). -/
+noncomputable def curveCover : Y.curve.E.OpenCover :=
+  Scheme.Cover.copy ((chartCover Y).pullback₁ Y.curve.π) ↥Y.base
+    (fun s => pullback Y.curve.π (chartAt Y s).U.1.ι)
+    (fun s => pullback.fst Y.curve.π (chartAt Y s).U.1.ι)
+    (Equiv.refl _) (fun _ => Iso.refl _) (fun _ => (Category.id_comp _).symm)
+
+/-- The local classifying top maps of the curve cover. -/
+noncomputable def coverTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (s : ↥Y.base) :
+    pullback Y.curve.π (chartAt Y s).U.1.ι ⟶ projModel (tateCurveLocOver R) :=
+  letI := (chartAt Y s).chartAlgebra
+  (chartAt Y s).topMap P hP
+
+/-- **Overlap compatibility** of the local classifying top maps. -/
+theorem coverTopMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (i j : ↥Y.base) :
+    pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ coverTopMap P hP i =
+      pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ coverTopMap P hP j := by
+  letI := (chartAt Y i).chartAlgebra
+  letI := (chartAt Y j).chartAlgebra
+  -- the curve-overlap condition
+  have hQ : pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.fst Y.curve.π (chartAt Y i).U.1.ι =
+      pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.fst Y.curve.π (chartAt Y j).U.1.ι := pullback.condition
+  -- the comparison from the curve overlap to the base overlap
+  have hgcond : (pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y i).U.1.ι) ≫ (chartAt Y i).U.1.ι =
+      (pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y j).U.1.ι) ≫ (chartAt Y j).U.1.ι := by
+    have h1 := congrArg (fun m => pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ m)
+      (pullback.condition (f := Y.curve.π) (g := (chartAt Y i).U.1.ι))
+    have h2 := congrArg (fun m => pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ m)
+      (pullback.condition (f := Y.curve.π) (g := (chartAt Y j).U.1.ι))
+    have h3 := congrArg (fun m => m ≫ Y.curve.π) hQ
+    simp only [Category.assoc] at h1 h2 h3 ⊢
+    rw [← h1, h3, h2]
+  set g : pullback (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+      (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ⟶
+      pullback (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι :=
+    pullback.lift
+      (pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y i).U.1.ι)
+      (pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y j).U.1.ι) hgcond with hgdef
+  have hgfst : g ≫ pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι =
+      pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y i).U.1.ι := by
+    rw [hgdef]; exact pullback.lift_fst _ _ _
+  have hgsnd : g ≫ pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι =
+      pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+        pullback.snd Y.curve.π (chartAt Y j).U.1.ι := by
+    rw [hgdef]; exact pullback.lift_snd _ _ _
+  -- morphism-extension over the affine cover of the base overlap, pulled back along `g`
+  set 𝒱 := Scheme.affineCover (pullback (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι) with h𝒱
+  apply Scheme.Cover.hom_ext (𝒱.pullback₁ g)
+  intro z
+  show pullback.fst g (𝒱.f z) ≫
+      pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ coverTopMap P hP i =
+    pullback.fst g (𝒱.f z) ≫
+      pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+        (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ coverTopMap P hP j
+  rw [← Category.assoc, ← Category.assoc]
+  have hTcond : pullback.fst g (𝒱.f z) ≫ g = pullback.snd g (𝒱.f z) ≫ 𝒱.f z :=
+    pullback.condition
+  have hcc : ((Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫
+        pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι ≫
+        (chartAt Y i).U.2.isoSpec.hom) ≫
+        (chartAt Y i).U.2.isoSpec.inv ≫ (chartAt Y i).U.1.ι =
+      ((Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫
+        pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι ≫
+        (chartAt Y j).U.2.isoSpec.hom) ≫
+        (chartAt Y j).U.2.isoSpec.inv ≫ (chartAt Y j).U.1.ι := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    have hw := congrArg (fun m => (Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫ m)
+      (pullback.condition (f := (chartAt Y i).U.1.ι) (g := (chartAt Y j).U.1.ι))
+    simpa only [Category.assoc] using hw
+  refine test_topMap_agree (chartAt Y i) (chartAt Y j)
+    ((chartAt Y i).chartAlgebra_compatible) ((chartAt Y j).chartAlgebra_compatible)
+    ↑Γ(𝒱.X z, ⊤) _ _ hcc P hP
+    (pullback.snd g (𝒱.f z) ≫ (Scheme.isoSpec (𝒱.X z)).hom) _ _ ?_ ?_ ?_
+  · -- hv₁
+    calc (pullback.fst g (𝒱.f z) ≫
+          pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+            (pullback.fst Y.curve.π (chartAt Y j).U.1.ι)) ≫
+          pullback.snd Y.curve.π (chartAt Y i).U.1.ι
+        = pullback.fst g (𝒱.f z) ≫
+            (pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+              (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+              pullback.snd Y.curve.π (chartAt Y i).U.1.ι) := Category.assoc _ _ _
+      _ = pullback.fst g (𝒱.f z) ≫
+            (g ≫ pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι) := by rw [hgfst]
+      _ = (pullback.fst g (𝒱.f z) ≫ g) ≫
+            pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd g (𝒱.f z) ≫ 𝒱.f z) ≫
+            pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι := by rw [hTcond]
+      _ = pullback.snd g (𝒱.f z) ≫ 𝒱.f z ≫
+            pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι := Category.assoc _ _ _
+      _ = (pullback.snd g (𝒱.f z) ≫ (Scheme.isoSpec (𝒱.X z)).hom) ≫
+            ((Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫
+              pullback.fst (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι ≫
+              (chartAt Y i).U.2.isoSpec.hom) ≫ (chartAt Y i).U.2.isoSpec.inv := by
+          simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id,
+            Category.comp_id]
+  · -- hv₂
+    calc (pullback.fst g (𝒱.f z) ≫
+          pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+            (pullback.fst Y.curve.π (chartAt Y j).U.1.ι)) ≫
+          pullback.snd Y.curve.π (chartAt Y j).U.1.ι
+        = pullback.fst g (𝒱.f z) ≫
+            (pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+              (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+              pullback.snd Y.curve.π (chartAt Y j).U.1.ι) := Category.assoc _ _ _
+      _ = pullback.fst g (𝒱.f z) ≫
+            (g ≫ pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι) := by rw [hgsnd]
+      _ = (pullback.fst g (𝒱.f z) ≫ g) ≫
+            pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd g (𝒱.f z) ≫ 𝒱.f z) ≫
+            pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι := by rw [hTcond]
+      _ = pullback.snd g (𝒱.f z) ≫ 𝒱.f z ≫
+            pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι := Category.assoc _ _ _
+      _ = (pullback.snd g (𝒱.f z) ≫ (Scheme.isoSpec (𝒱.X z)).hom) ≫
+            ((Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫
+              pullback.snd (chartAt Y i).U.1.ι (chartAt Y j).U.1.ι ≫
+              (chartAt Y j).U.2.isoSpec.hom) ≫ (chartAt Y j).U.2.isoSpec.inv := by
+          simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id,
+            Category.comp_id]
+  · -- hE: same composite to the total space of the curve
+    calc (pullback.fst g (𝒱.f z) ≫
+          pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+            (pullback.fst Y.curve.π (chartAt Y j).U.1.ι)) ≫
+          pullback.fst Y.curve.π (chartAt Y i).U.1.ι
+        = pullback.fst g (𝒱.f z) ≫
+            (pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+              (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+              pullback.fst Y.curve.π (chartAt Y i).U.1.ι) := Category.assoc _ _ _
+      _ = pullback.fst g (𝒱.f z) ≫
+            (pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+              (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
+              pullback.fst Y.curve.π (chartAt Y j).U.1.ι) := by rw [hQ]
+      _ = (pullback.fst g (𝒱.f z) ≫
+            pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+              (pullback.fst Y.curve.π (chartAt Y j).U.1.ι)) ≫
+            pullback.fst Y.curve.π (chartAt Y j).U.1.ι := (Category.assoc _ _ _).symm
+
+/-- **The glued classifying top map** `Y.curve.E ⟶ projModel (tateCurveLocOver R)`. -/
+noncomputable def gluedTopMap (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    Y.curve.E ⟶ projModel (tateCurveLocOver R) :=
+  (curveCover Y).glueMorphisms (coverTopMap P hP)
+    (fun i j => coverTopMap_compat P hP i j)
+
+@[reassoc (attr := simp)]
+theorem ι_gluedTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (s : ↥Y.base) :
+    pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ gluedTopMap P hP =
+      coverTopMap P hP s :=
+  Scheme.Cover.ι_glueMorphisms (curveCover Y) (coverTopMap P hP)
+    (fun i j => coverTopMap_compat P hP i j) s
+
+end MarkedChartData
+
+end TopGlue
+
 end ModularCurves
