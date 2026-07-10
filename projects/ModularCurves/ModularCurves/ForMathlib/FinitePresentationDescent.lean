@@ -344,6 +344,114 @@ theorem isFilteredAlgColimit :
 
 end PresentationSystem
 
+section BaseChange
+
+open TensorProduct
+
+variable {W₁ W₂ : Type u} [CommRing W₁] [CommRing W₂] [Algebra W₁ W₂]
+variable {σ' κ' : Type} (g' : κ' → MvPolynomial σ' W₁)
+
+/-- The presented algebra mapped into its base change. -/
+noncomputable def presentedBaseChangeAux :
+    (MvPolynomial σ' W₁ ⧸ Ideal.span (Set.range g')) →ₐ[W₁]
+      (MvPolynomial σ' W₂ ⧸ Ideal.span
+        (Set.range fun j => MvPolynomial.map (algebraMap W₁ W₂) (g' j))) :=
+  Ideal.Quotient.liftₐ _ ((Ideal.Quotient.mkₐ W₁ _).comp
+    ((MvPolynomial.mapAlgHom (Algebra.ofId W₁ W₂)).restrictScalars W₁))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem (MvPolynomial.map (algebraMap W₁ W₂)) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      exact Ideal.Quotient.eq_zero_iff_mem.2 h1)
+
+theorem presentedBaseChangeAux_mk (p : MvPolynomial σ' W₁) :
+    presentedBaseChangeAux g' (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap W₁ W₂) p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+/-- Evaluating the tautological tensor-valued point on a base-changed polynomial. -/
+theorem aeval_oneTmul_map (q : MvPolynomial σ' W₁) :
+    (MvPolynomial.aeval fun v => (1 : W₂) ⊗ₜ[W₁]
+      Ideal.Quotient.mk (Ideal.span (Set.range g')) (MvPolynomial.X v))
+      (MvPolynomial.map (algebraMap W₁ W₂) q)
+    = (1 : W₂) ⊗ₜ[W₁] Ideal.Quotient.mk (Ideal.span (Set.range g')) q := by
+  induction q using MvPolynomial.induction_on with
+  | C w =>
+    rw [MvPolynomial.map_C, MvPolynomial.aeval_C]
+    have h1 : Ideal.Quotient.mk (Ideal.span (Set.range g')) (MvPolynomial.C w)
+        = algebraMap W₁ _ w := rfl
+    have h2 : algebraMap W₂
+        (W₂ ⊗[W₁] (MvPolynomial σ' W₁ ⧸ Ideal.span (Set.range g')))
+        (algebraMap W₁ W₂ w) = (algebraMap W₁ W₂ w) ⊗ₜ[W₁] 1 := rfl
+    rw [h1, h2, Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one,
+      TensorProduct.smul_tmul]
+  | add p q hp hq =>
+    rw [map_add, map_add, hp, hq, ← TensorProduct.tmul_add, ← map_add]
+  | mul_X p v hp =>
+    rw [map_mul, MvPolynomial.map_X, map_mul, MvPolynomial.aeval_X, hp, map_mul,
+      Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+
+/-- The base-changed presented algebra mapped back to the tensor product. -/
+noncomputable def presentedBaseChangeInv :
+    (MvPolynomial σ' W₂ ⧸ Ideal.span
+        (Set.range fun j => MvPolynomial.map (algebraMap W₁ W₂) (g' j)))
+      →ₐ[W₂] (W₂ ⊗[W₁] (MvPolynomial σ' W₁ ⧸ Ideal.span (Set.range g'))) :=
+  Ideal.Quotient.liftₐ _ (MvPolynomial.aeval fun v =>
+      (1 : W₂) ⊗ₜ[W₁] Ideal.Quotient.mk (Ideal.span (Set.range g')) (MvPolynomial.X v))
+    (fun p hp => by
+      have hle : Ideal.span (Set.range fun j => MvPolynomial.map (algebraMap W₁ W₂) (g' j))
+          ≤ RingHom.ker (MvPolynomial.aeval fun v =>
+            (1 : W₂) ⊗ₜ[W₁] Ideal.Quotient.mk (Ideal.span (Set.range g'))
+              (MvPolynomial.X v) :
+            MvPolynomial σ' W₂ →ₐ[W₂] _) := by
+        rw [Ideal.span_le]
+        rintro - ⟨j, rfl⟩
+        rw [SetLike.mem_coe, RingHom.mem_ker]
+        have hz : Ideal.Quotient.mk (Ideal.span (Set.range g')) (g' j) = 0 :=
+          Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.subset_span ⟨j, rfl⟩)
+        rw [aeval_oneTmul_map g' (g' j), hz, TensorProduct.tmul_zero]
+      exact RingHom.mem_ker.1 (hle hp))
+
+theorem presentedBaseChangeInv_mk (p : MvPolynomial σ' W₂) :
+    presentedBaseChangeInv g' (Ideal.Quotient.mk _ p)
+      = (MvPolynomial.aeval fun v => (1 : W₂) ⊗ₜ[W₁]
+          Ideal.Quotient.mk (Ideal.span (Set.range g')) (MvPolynomial.X v)) p :=
+  Ideal.Quotient.lift_mk _ _ _
+
+/-- **[KL-2b] (base change of a presented algebra).**
+`W₂ ⊗[W₁] (W₁[σ]/(g)) ≃ₐ[W₂] W₂[σ]/(g pushed forward)`. -/
+noncomputable def presentedBaseChange :
+    (W₂ ⊗[W₁] (MvPolynomial σ' W₁ ⧸ Ideal.span (Set.range g')))
+      ≃ₐ[W₂] (MvPolynomial σ' W₂ ⧸ Ideal.span
+        (Set.range fun j => MvPolynomial.map (algebraMap W₁ W₂) (g' j))) :=
+  AlgEquiv.ofAlgHom
+    (Algebra.TensorProduct.lift (Algebra.ofId W₂ _)
+      (presentedBaseChangeAux g') (fun _ _ => Commute.all _ _))
+    (presentedBaseChangeInv g')
+    (by
+      apply Ideal.Quotient.algHom_ext
+      apply MvPolynomial.algHom_ext
+      intro v
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk, AlgHom.coe_id, id_eq]
+      rw [presentedBaseChangeInv_mk, MvPolynomial.aeval_X, Algebra.TensorProduct.lift_tmul,
+        map_one, one_mul, presentedBaseChangeAux_mk, MvPolynomial.map_X]
+    )
+    (by
+      apply Algebra.TensorProduct.ext'
+      intro w x
+      obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+      rw [AlgHom.comp_apply, AlgHom.id_apply, Algebra.TensorProduct.lift_tmul,
+        presentedBaseChangeAux_mk, map_mul, presentedBaseChangeInv_mk, aeval_oneTmul_map]
+      have hw : (presentedBaseChangeInv g') ((Algebra.ofId W₂ _) w)
+          = w ⊗ₜ[W₁] 1 := by
+        have := (presentedBaseChangeInv g').commutes w
+        simpa [Algebra.ofId_apply] using this
+      rw [hw, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+    )
+
+end BaseChange
+
+
 /-! ## [KL-2] Spreading out a finitely presented algebra over a filtered system -/
 
 section Spread
@@ -352,6 +460,18 @@ variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
   {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
   {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
   {A : Type u} [CommRing A] [Algebra R A] {u : ∀ i, 𝒮 i →ₐ[R] A}
+
+/-- Transition composition, `RingHom` form. -/
+theorem IsFilteredAlgColimit.t_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃i j k : ι⦄ (hij : i ≤ j) (hjk : j ≤ k) :
+    (t hjk).toRingHom.comp (t hij).toRingHom = (t (hij.trans hjk)).toRingHom :=
+  RingHom.ext fun x => H.t_trans hij hjk x
+
+/-- Cocone compatibility, `RingHom` form. -/
+theorem IsFilteredAlgColimit.u_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃i j : ι⦄ (hij : i ≤ j) :
+    (u j).toRingHom.comp (t hij).toRingHom = (u i).toRingHom :=
+  RingHom.ext fun x => H.compat hij x
 
 /-- Finitely many elements of the colimit lift jointly to a common stage. -/
 theorem IsFilteredAlgColimit.exists_common_lift (H : IsFilteredAlgColimit R 𝒮 t A u)
@@ -477,7 +597,12 @@ theorem SpreadData.spreadStage_baseChange (D : SpreadData 𝒮 u B)
     letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
     Nonempty ((𝒮 j ⊗[𝒮 i] D.spreadStage (t := t) h) ≃ₐ[𝒮 j]
       D.spreadStage (t := t) (h.trans hij)) := by
-  sorry
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  exact ⟨(presentedBaseChange (fun j' => MvPolynomial.map (t h).toRingHom (D.g j'))).trans
+    (Ideal.quotientEquivAlgOfEq (𝒮 j)
+      (congrArg (fun f => Ideal.span (Set.range f)) (funext fun j' => by
+        rw [MvPolynomial.map_map]
+        exact congrArg (fun f => MvPolynomial.map f (D.g j')) (H.t_comp h hij))))⟩
 
 /-- **[KL-2c].** Base change of a stage model to the colimit recovers `B`:
 `A ⊗[𝒮 i] spreadStage i ≃ B` (as `A`-algebras). -/
@@ -485,7 +610,13 @@ theorem SpreadData.baseChange_colim (D : SpreadData 𝒮 u B)
     ⦃i : ι⦄ (h : D.i₀ ≤ i) (H : IsFilteredAlgColimit R 𝒮 t A u) :
     letI : Algebra (𝒮 i) A := (u i).toRingHom.toAlgebra
     Nonempty ((A ⊗[𝒮 i] D.spreadStage (t := t) h) ≃ₐ[A] B) := by
-  sorry
+  letI : Algebra (𝒮 i) A := (u i).toRingHom.toAlgebra
+  obtain ⟨eB⟩ := D.equiv
+  exact ⟨((presentedBaseChange (fun j' => MvPolynomial.map (t h).toRingHom (D.g j'))).trans
+    (Ideal.quotientEquivAlgOfEq A
+      (congrArg (fun f => Ideal.span (Set.range f)) (funext fun j' => by
+        rw [MvPolynomial.map_map]
+        exact congrArg (fun f => MvPolynomial.map f (D.g j')) (H.u_comp h))))).trans eB⟩
 
 /-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
 
@@ -597,17 +728,6 @@ theorem IsFilteredAlgColimit.exists_eq_at_stage_of_finiteType
 
 /-! ### Presented systems over a filtered base ([KL-2d]) -/
 
-/-- Transition composition, `RingHom` form. -/
-theorem IsFilteredAlgColimit.t_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
-    ⦃i j k : ι⦄ (hij : i ≤ j) (hjk : j ≤ k) :
-    (t hjk).toRingHom.comp (t hij).toRingHom = (t (hij.trans hjk)).toRingHom :=
-  RingHom.ext fun x => H.t_trans hij hjk x
-
-/-- Cocone compatibility, `RingHom` form. -/
-theorem IsFilteredAlgColimit.u_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
-    ⦃i j : ι⦄ (hij : i ≤ j) :
-    (u j).toRingHom.comp (t hij).toRingHom = (u i).toRingHom :=
-  RingHom.ext fun x => H.compat hij x
 
 section Presented
 
@@ -1300,6 +1420,7 @@ theorem eC_comp_doubleInr {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
   rw [h1, Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.congr_apply,
     Algebra.TensorProduct.map_tmul, map_one]
   rfl
+
 
 variable (t u) in
 /-- **[KL-5] endgame** (split off for elaboration-budget reasons): from a stage `P₂`
