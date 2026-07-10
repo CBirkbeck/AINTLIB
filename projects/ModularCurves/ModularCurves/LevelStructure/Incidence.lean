@@ -287,40 +287,37 @@ theorem localized'_restrictScalars_eq_restrictScalars_map
 
 end SubmoduleVanishing
 
+/-- **([T-SG3-LFP-3], cover form)** For the inclusion of a closed subscheme to be locally
+of finite presentation it suffices that its ideal sheaf is finitely generated on the
+members of a single affine cover: lfp is Zariski-local on the target, and over each
+affine member the inclusion is the `Spec` of a quotient by a finitely generated ideal —
+the converse packaging of KM's "defined locally by finitely many equations". -/
+theorem lfp_subschemeι_of_fg_cover {S : Scheme.{u}} {Z : S.IdealSheafData}
+    {ι : Type u} (U : ι → S.affineOpens) (hU : ⨆ i, (U i).1 = ⊤)
+    (h : ∀ i, (Z.ideal (U i)).FG) :
+    LocallyOfFinitePresentation Z.subschemeι := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun i => (U i).1) hU fun i => ?_
+  haveI : IsAffine (↑(U i).1 : Scheme.{u}) := (U i).2
+  haveI : IsAffine (↑(Z.subschemeι ⁻¹ᵁ (U i).1) : Scheme.{u}) :=
+    (U i).2.preimage Z.subschemeι
+  rw [HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation),
+    ← Scheme.Hom.resLE_eq_morphismRestrict, Scheme.Hom.appTop, Scheme.Hom.resLE_app_top,
+    CommRingCat.hom_comp, RingHom.finitePresentation_respectsIso.cancel_left_isIso,
+    CommRingCat.hom_comp, RingHom.finitePresentation_respectsIso.cancel_right_isIso,
+    ← Scheme.Hom.app_eq_appLE]
+  refine RingHom.FinitePresentation.of_surjective _
+    (Z.subschemeι.app_surjective _ (U i).2) ?_
+  have hker := Scheme.Hom.ker_apply Z.subschemeι (U i)
+  rw [Scheme.IdealSheafData.ker_subschemeι] at hker
+  rw [← hker]
+  exact h i
+
 /-- **([T-SG3-LFP-3])** A closed subscheme whose ideal sheaf is finitely generated on
-every affine is locally of finite presentation over the ambient scheme — the converse
-packaging of KM's "defined locally by finitely many equations". -/
+every affine is locally of finite presentation over the ambient scheme. -/
 theorem lfp_subschemeι_of_fg {S : Scheme.{u}} {Z : S.IdealSheafData}
     (h : ∀ U : S.affineOpens, (Z.ideal U).FG) :
-    LocallyOfFinitePresentation Z.subschemeι := by
-  rw [HasRingHomProperty.iff_appLE (P := @LocallyOfFinitePresentation)]
-  intro U V e
-  -- the affine piece of the immersion is a quotient by a finitely generated ideal
-  have happ : RingHom.FinitePresentation (Z.subschemeι.app U.1).hom := by
-    refine RingHom.FinitePresentation.of_surjective _
-      (Z.subschemeι.app_surjective _ U.2) ?_
-    have hker := Scheme.Hom.ker_apply Z.subschemeι U
-    rw [Scheme.IdealSheafData.ker_subschemeι] at hker
-    rw [← hker]
-    exact h U
-  -- restriction maps between affines are of finite presentation (read off from `𝟙`)
-  have hmap : RingHom.FinitePresentation
-      ((Z.subscheme.presheaf.map (homOfLE e).op).hom) := by
-    have h1 := (HasRingHomProperty.iff_appLE
-      (P := @LocallyOfFinitePresentation)).mp
-      (inferInstance : LocallyOfFinitePresentation (𝟙 Z.subscheme))
-      ⟨_, U.2.preimage Z.subschemeι⟩ V (by simpa using e)
-    have hidapp : Scheme.Hom.appLE (𝟙 Z.subscheme) (Z.subschemeι ⁻¹ᵁ U.1) V.1
-        (by simpa using e) = Z.subscheme.presheaf.map (homOfLE e).op := by
-      show Scheme.Hom.app (𝟙 Z.subscheme) _ ≫ _ = _
-      rw [Scheme.Hom.id_app]
-      exact Category.id_comp _
-    rwa [hidapp] at h1
-  -- assemble: `appLE = app ≫ restriction`
-  rw [show Z.subschemeι.appLE U.1 V.1 e =
-      Z.subschemeι.app U.1 ≫ Z.subscheme.presheaf.map (homOfLE e).op from by
-    rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map], CommRingCat.hom_comp]
-  exact RingHom.finitePresentation_stableUnderComposition _ _ happ hmap
+    LocallyOfFinitePresentation Z.subschemeι :=
+  lfp_subschemeι_of_fg_cover (fun U => U) (iSup_affineOpens_eq_top S) h
 
 section VanishingLocus
 
