@@ -5775,8 +5775,153 @@ theorem projTateMap_inducedPt
     (D.inducedPt_coordY fb ftop hPB hzw P hP hmark)
     (D.inducedPt_hord fb ftop hPB hzw P hP)
 
+include hPB hzw in
+/-- **The chart-level base pin**: on any marked chart, the local classifying base map of
+the section agrees with the restriction of any classifying base map (same-chart ENGINE
+against the induced chart, then the base pin). -/
+theorem chart_baseMap_eq
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap)
+    (hbw : fb ≫ tateStructMap R = Y.structMap)
+    (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    D.baseMap P hP = D.U.1.ι ≫ fb := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  haveI : ((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsElliptic :=
+    inferInstanceAs (((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsElliptic)
+  have hagree := sameU_tateBaseSpecMapOfPoint_agree
+    D.W ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+    D.e (pullbackChartIso (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB))
+    D.heπ
+    (pullbackChartIso_hom_π (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB))
+    D.hez ((D.inducedChart fb ftop hPB hzw).hez)
+    (D.pt P) (D.inducedPt fb ftop hPB hzw P) (D.restrictSection P)
+    (D.pt_coe P) ((D.inducedChart fb ftop hPB hzw).pt_coe P)
+    (D.pt_inZChart P hP) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+    (D.pt_hord P hP) (D.inducedPt_hord fb ftop hPB hzw P hP)
+  show D.U.2.isoSpec.hom ≫ tateBaseSpecMapOfPoint R D.W _ _
+      (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) =
+    D.U.1.ι ≫ fb
+  rw [hagree, D.tateBaseSpecMapOfPoint_inducedPt fb ftop hPB hzw P halg hbw hP hmark,
+    classifyingSpecMap, Iso.hom_inv_id_assoc]
+
+include hPB hzw in
+/-- **The chart-level top pin**: on any marked chart, the local classifying top map of
+the section agrees with the restriction of any classifying top map. -/
+theorem chart_topMap_eq
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap)
+    (hbw : fb ≫ tateStructMap R = Y.structMap)
+    (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    D.topMap P hP =
+      pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R) := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  haveI : ((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsElliptic :=
+    inferInstanceAs (((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsElliptic)
+  have hagree := sameU_projTateMap_agree
+    D.W ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+    D.e (pullbackChartIso (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB))
+    D.heπ
+    (pullbackChartIso_hom_π (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB))
+    D.hez ((D.inducedChart fb ftop hPB hzw).hez)
+    (D.pt P) (D.inducedPt fb ftop hPB hzw P) (D.restrictSection P)
+    (D.pt_coe P) ((D.inducedChart fb ftop hPB hzw).pt_coe P)
+    (D.pt_inZChart P hP) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+    (D.pt_hord P hP) (D.inducedPt_hord fb ftop hPB hzw P hP)
+  show D.e.hom ≫ projTateMap R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP) =
+    pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R)
+  rw [hagree, D.projTateMap_inducedPt fb ftop hPB hzw P halg hbw hP hmark]
+  exact pullbackChartIso_hom_bc (tateCurveLocOver R)
+    (D.classifying_isPullback' fb ftop hPB)
+
 end MarkedChartData
 
 end InducedChartPins
+
+section ClassifyingClause
+
+/-! ### The classifying clause (recipe step 5, assembly)
+
+The components of any classifying morphism agree with the glued ones over both covers,
+so the glued morphism is the *unique* classifying morphism — `exists_tatePoint`'s
+∀-clause. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+/-- **Uniqueness of the classifying components**: any cartesian pointed square over
+`Spec R` pulling the atlas marking back to the section has the glued base and top maps. -/
+theorem components_unique (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (fb : Y.base ⟶ tateBase R) (ftop : Y.curve.E ⟶ (tateUniversal R).E)
+    (hPB : IsPullback ftop Y.curve.π ((tateUniversal R).π) fb)
+    (hzw : Y.curve.zero ≫ ftop = fb ≫ (tateUniversal R).zero)
+    (hbw : fb ≫ tateStructMap R = Y.structMap)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    fb = gluedBaseMap P hP ∧
+      ftop = gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm := by
+  constructor
+  · have hs : ∀ s : ↥Y.base, (chartAt Y s).U.1.ι ≫ fb =
+        (chartAt Y s).U.1.ι ≫ gluedBaseMap P hP := by
+      intro s
+      letI := (chartAt Y s).chartAlgebra
+      rw [ι_gluedBaseMap]
+      have h := (chartAt Y s).chart_baseMap_eq fb ftop hPB hzw P
+        ((chartAt Y s).chartAlgebra_compatible) hbw hP hmark
+      rw [← h]
+      exact rfl
+    apply Scheme.Cover.hom_ext (chartCover Y)
+    intro s
+    exact hs s
+  · have hs : ∀ s : ↥Y.base, pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ ftop =
+        pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫
+          (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm) := by
+      intro s
+      letI := (chartAt Y s).chartAlgebra
+      have h := (chartAt Y s).chart_topMap_eq fb ftop hPB hzw P
+        ((chartAt Y s).chartAlgebra_compatible) hbw hP hmark
+      have h2 := congrArg (fun m => m ≫ eqToHom (tateUniversal_E_eq R).symm) h
+      simp only [Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id] at h2
+      rw [← Category.assoc, ι_gluedTopMap, ← h2]
+      exact rfl
+    apply Scheme.Cover.hom_ext (curveCover Y)
+    intro s
+    exact hs s
+
+/-- **The Tate atlas classifying clause** (`exists_tatePoint`'s ∀-part, Loeffler
+Cor 3.3.5 / Prop 3.3.4): every nowhere-small-order section arises from a unique
+classifying `Ell/R` morphism by pulling back the atlas marking. -/
+theorem tateMarkedPoint_classifies (R : CommRingCat.{u}) (Y : EllObj R)
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    ∃! fc : Y ⟶ tateEllObj R, EllHom.pullSection R fc (tateMarkedPoint R) = P := by
+  refine EllObj.tateClassifyingHom_existsUnique_of_components R Y
+    (gluedBaseMap P hP) (gluedBaseMap_over P hP)
+    (gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm)
+    (gluedTopMapEll_isPullback P hP) (gluedTopMapEll_zero P hP)
+    (tateMarkedPoint R) P ?_ ?_
+  · show P.1 ≫ gluedTopMap P hP ≫ eqToHom (tateUniversal_E_eq R).symm =
+      gluedBaseMap P hP ≫ (tateMarkedPoint R).1
+    have hm : (tateMarkedPoint R).1 =
+        tateP0mor R ≫ eqToHom (tateUniversal_E_eq R).symm := rfl
+    rw [hm, ← Category.assoc, gluedTopMap_marking P hP, Category.assoc]
+  · intro f hf
+    have hmark : P.1 ≫ f.top = f.baseHom ≫ (tateMarkedPoint R).1 :=
+      (congrArg (fun Q : Y.curve.Section => Q.1 ≫ f.top) hf).symm.trans
+        (f.isPullback.lift_fst _ _ _)
+    have h := components_unique P hP f.baseHom f.top f.isPullback f.zero_w f.base_w hmark
+    exact ⟨h.1, h.2⟩
+
+end MarkedChartData
+
+end ClassifyingClause
 
 end ModularCurves
