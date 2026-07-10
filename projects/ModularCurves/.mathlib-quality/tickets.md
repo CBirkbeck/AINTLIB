@@ -17700,3 +17700,169 @@ Y1-CLOSER claims dev/modular-curves-y1 per the v10.136 charter (NEW-CASCADE and 
 transfers; their staged recipes and precedents are the work orders). Collision watch:
 NEW-CASCADE parked→transferred, NEW-Y1 parked→transferred; no live sibling here. S2/S5/S6
 execute on this branch after S1 (dev) boards T-G4.
+## Amendments v10.135 (2026-07-10, coordinator): ★ NEW-CASCADE re-merge RATIFIED — y1 carries all of dev, spine green, fill fully staged at the single T-G4 gate; merge-boundary dedup doctrine validated
+
+- **Re-merge session RATIFIED end-to-end** (y1 tip c8b207b2d): scratch-branch merge +
+  top-up of repaired dev landed with ONE board-file conflict (union-resolved per their
+  own precedent; root module auto-merged). **The spine-verify caught its SECOND find in
+  two runs** — two ENVIRONMENT collisions invisible to the textual merge: (1)
+  `projModelVCIso_one` duplicate (their atlas-era copy vs the upstream
+  ModelVariableChange copy grown on dev during T-G4) — resolved by DELETING their own
+  and consuming upstream (cardinal rule at the merge boundary; coordinator-verified:
+  exactly one public definition survives, ModelVariableChange:604 — the MellWeierstrass
+  hit is a private `_hom` helper, distinct); (2) `projModelBaseChange_comp` name
+  collision with dev's DIFFERENT endo-only statement — theirs renamed
+  `projModelBaseChange_comp_eqToHom` (3 sites), equivalent-forms coexistence boarded +
+  `_comp'` unification registered as cleanup debt. Both resolutions are the model:
+  dedup-by-deletion when identical, rename-and-board when genuinely different.
+- **Verification set WIDENED (ratified as the fill's entry bar)**: spine green at 3,230
+  jobs now INCLUDING GroupLawAxioms + MulByHomUnramified — i.e. the C6 dictionary layer
+  and the BB-DIFF funnel are PROVEN TO BUILD on y1, the fill's home branch. Pushed.
+- **Park state**: single gate (c5β T-G4 board line; at check time comm done, assoc/inv
+  landing). The gate-fire session is now MINIMAL: trivial top-up merge → step 2
+  (mulOver record packaging at fields) → step 3 (hz-fix + map_add' fill, same-commit,
+  b2_log #3 quoted) → step 4 (hfib discharge → L-BC → BB-DIFF MASTER →
+  torsionπ_etale) ⟹ six Y1-E leaves OPEN + [T-B6′] RETIRES. Sentinels carry the
+  ready-state on both branches.
+- Historical note absorbed: the atlas-era `projModelVCIso_one` (proven by the -3
+  session to close a then-parked T-W7 gap) was independently re-proven on dev hours
+  later — the dedup lands it at its canonical upstream home; no lesson beyond the
+  standing check-before-proving rule, which cross-BRANCH work structurally cannot
+  fully satisfy; the merge-boundary dedup pass is exactly the compensating control.
+
+## Amendments v10.136 (2026-07-10, coordinator): CHARTER-Y1-CLOSER — one worker takes the Y₁(N) endgame; four seat transfers executed; c5β 3/4-checkpoint RATIFIED
+
+- **c5β checkpoint RATIFIED** (their session summary): T-G4 at 3/4 — `mulOver_oneOver` +
+  `oneOver_mulOver` + `invOver_mulOver` transports LANDED axiom-clean
+  (e8bb22e9d/74c6c48f3/63f87e656; the two-session whisker/instance-diamond blocker
+  cracked via erw + proof-irrelevance + Over.w); `mulOver_assoc` fully scoped
+  (docs/tg4/mulOver_assoc.plan.md: e₁/e₂ proven, the tensor-whnf timeout found + three
+  fix options banked, option (b) recommended). Their stand-down on the misrouted B3
+  repair order (verified the restore byte-identical, left it to FP4) was correct
+  conduct. **c5β PAUSED by the owner at this boundary** — clean handover, their own
+  opener honored.
+- **CHARTER-Y1-CLOSER issued** (inbox/Y1-CLOSER.md — the full staged work order): the
+  remaining Y₁(N) work is ONE sequential chain, so a single fresh marathon worker takes
+  it end-to-end: S1 `mulOver_assoc` (option (b), c5β's plan) → T-G4 board LOUD (= the
+  0c-ii signal) → S2 the [T-B6′] fill on y1 (NEW-CASCADE's staged recipe; hz-fix +
+  map_add' same-commit, b2_log #3) → torsionπ_etale → S3 [T-A6b] AUDIT-FIRST (direct
+  off T-G4/T-G5 packaging vs the full T-W7a chain — the stale-gate lesson applied
+  forward) → S4 falls-sweep consumption by import (A's prepped lemmas) → S5 the six
+  E-leaves → S6 MASTER one-`exact` + relocation. BAR: clean axiom triple on
+  exists_tatePoint + gammaOneNaive_representable, zero sorries on the path, no
+  maxHeartbeats, both branches pushed, ★★★★ attribution.
+- **SEAT TRANSFERS (rule 5, coordinator-executed; reclaim clauses VOID on the
+  transferred items)**: c5β → assoc + the T-W7 tail (paused-boundary handover per
+  their own opener; the c5β seat retains nothing Y1-gating); NEW-CASCADE → the fill
+  (their staging + scratch-branch work is the closer's substrate; seat stands down);
+  NEW-Y1 → E-track + MASTER (their closure prep is the closer's S6); beastmode-A →
+  falls-sweep items consumed by import (A's ARMED state on non-Y1 uses unchanged).
+  All four seats' prior work travels with FULL attribution into the closer's boards.
+- Fleet unchanged elsewhere: NEW-HOPF (Hopf axioms → pins → SIGNAL), PIC0 (CMP-PAIR),
+  FP4 (B3-g3 in QuotientRepresentability), D2 (LFP), fable-FP (KL-3/KL-4) — all on
+  charter, none Y1-gating.
+
+## Amendments v10.137-CLOSER (2026-07-10, Y1-CLOSER): CHARTER-Y1-CLOSER claimed — S1 (mulOver_assoc, option (b)) in flight
+
+**Claim (rule-5, both branches)**: Y1-CLOSER takes the v10.136 charter; sentinels set in
+both worktrees. S1 executing now per c5β's banked plan (docs/tg4/mulOver_assoc.plan.md,
+option (b): of_map fst-leg by direct `pullback.hom_ext` on the codomain projModel — no
+X_triple, sidestepping the tensor-whnf timeout; snd-leg Over.w; e₁/e₂ consumed as banked;
+then of_eq + named). Templates: e8bb22e9d/74c6c48f3/63f87e656. T-G4 COMPLETE boards loud
+on landing (= c5β's 0c-ii signal). Then S2–S6 per charter.
+
+## Amendments v10.137 (2026-07-10, coordinator): NEW-HOPF counit laws + ⊤-level architecture RATIFIED; Y1-CLOSER S1 underway (assoc skeleton landed)
+
+- **NEW-HOPF (their §v10.133/134) RATIFIED**: both counit laws PROVEN
+  (`counitLift_comp_comulAlg` + mirror — (ε⊗id)∘Δ = id = (id⊗ε)∘Δ; the Γ-dualisation
+  pattern is now routine per design); `affineKunneth` landed as the generic ⊤-level
+  citizen (Γ-duals carry ZERO topIso bookkeeping). **Architecture decision RATIFIED**:
+  the patch Hopf structure restates at ⊤-level (ε′/Δ′/S′ := appTop forms;
+  opens-level by topIso-conjugation) — dodges the found obstruction
+  (`Algebra.TensorProduct.congr` is fixed-base-only ⟹ iterated opens-level Künneth
+  would need a base-ring iso inside the tensor; REGISTRY-ACCEPTED as a mathlib-gap
+  observation, no external filing per v10.35b). All proven scheme identities transfer
+  unchanged. First bricks landed (isAffine_groupSquare, squareMulRes). Pre-work
+  TREE-RED hygiene (import-path check before working) CITED as the standard. Third
+  MonObj-shadowing recurrence → registry entry marked HIGH-FREQUENCY. Next-session
+  order in inbox (Δ′ → counit transfer → coassoc via iterated affineKunneth →
+  antipode → HopfAlgebra → IsCoaction → C1d/C3/C4 → pins → SIGNAL).
+- **Y1-CLOSER: S1 UNDERWAY** — chartered claim + sentinel at 17:10; by 18:00 the assoc
+  of_map/of_eq/named skeleton landed with the snd-leg (Over.w) closed + the e1/e2
+  base-change compat lemmas, exactly on the banked option-(b) route. On charter;
+  T-G4 board line = the next milestone (the 0c-ii signal).
+
+### v10.99d (2026-07-10, fable-FP): ★★★★ [02KL-CORE] MILESTONE — 02KK proven modulo ONE leaf = the T-DEV/T-FLAT lane's OWN residual (do-not-duplicate cross-ref)
+
+*Commit 109c53499. `ForMathlib/FinitePresentationDescent.lean` ~1750 lines, green; the RingHom
+gate `of_comp_of_faithfullyFlat'` + all SmoothDescent scheme consumers are PROVEN modulo the
+single sorry [KL-3]. Axiom profile verified: gate = `[propext, sorryAx, Classical.choice,
+Quot.sound]`, sorryAx flowing ONLY through KL-3; KL-0/KL-1/KL-5c fully clean (no sorryAx);
+KL-4's sorryAx is purely inherited from its call to KL-3.*
+
+- **DELIVERED sorry-free (12 leaves)**: [KL-0] retract-of-FP · [KL-1] canonical presentation
+  system (full `IsFilteredAlgColimit`) · [KL-2] exists_spreadData + stage-FP · [KL-2b/2c]
+  presentedBaseChange · [KL-2d] presented-systems-are-colimits (span-representation workhorse)
+  · [KL-2e] equiv-transport · [KL-4] ffl-at-stage (ideal-form intersection + Cantor
+  patch-compactness + K2 residue-fibre collapse) · [KL-5a/b] concrete stage-factoring/agreement
+  · [KL-5c] concatEquiv · doubling-map naturality · Amitsur transport · the full 02KK assembly
+  (`of_comp_aux` + `Algebra.FinitePresentation.of_comp_of_faithfullyFlat`).
+
+- **★ CRITICAL CROSS-REFERENCE — KL-3 = the flat-spreading lane's OWN open residual.** [KL-3]
+  `SpreadData.exists_flat_stage` (Stacks 02JO flat-spreading) is the sole sorry. Its irreducible
+  core is **identical** to what the **T-DEV / T-FLAT1-STAGE / GF7 lane** is actively building in
+  `ForMathlib/FlatLocus.lean` + `ForMathlib/NoethApprox.lean` (board §T-DEV2a/2b, T-FLAT1-STAGE,
+  T-LC3). Verified on-disk today:
+    · `NoethApprox.exists_noetherian_descent` (noetherian approx of algebras) — **ALREADY
+      sorry-free** `[propext,Classical.choice,Quot.sound]`; consumable now.
+    · `NoethApprox.exists_noetherian_descent_flat` (noetherian descent of a FLAT FP algebra) —
+      sorryAx, tracing to their registered `exists_subalgebra_flat_baseChange` (Stacks 07RF /
+      00R6) and `FlatLocus.flatLocus_spreads_of_flat` (Stacks 00RC dévissage — "the true
+      homological heart, isolated as the sole sorry").
+    · `FlatLocus.isOpen_flatLocus` (openness of the flat locus over noetherian) + generic
+      flatness `exists_basicOpen_subset_flatLocus_of_isDomain` — present.
+  Independent exhaustive mathlib search (fable-FP subagent, 2026-07-10) CONFIRMS the keystone
+  (flat-locus openness for a not-module-finite FP algebra / generic flatness / general noetherian
+  algebra descent) is ABSENT from the pin — `Module.isOpen_freeLocus` needs module-finite-
+  presentation, which `B_i` lacks; only the map/iso spreading layer (`RingHom.EssFiniteType.
+  exists_eq_comp_ι_app_of_isColimit`) is present.
+  **⟹ fable-FP does NOT build flat-spreading (cardinal-sin avoidance).** KL-3 is a `consume-on-
+  sorry-free` dependency on that lane. Eventual close = bounded bridge (their base-agnostic
+  `exists_noetherian_descent_flat` → my filtered system: lift R₀'s finite generators to a stage
+  via `exists_common_lift`, spread the descent-iso to a stage via `exists_factor_of_finite
+  Presentation`/`exists_eq_at_stage_of_finiteType`). **Coordinator: KL-3 auto-unblocks when the
+  T-DEV/T-FLAT 00RC/07RF residual closes; recommend wiring [02KL-CORE] ⟵ that lane in the dep graph.**
+
+- **NEXT (fable-FP, beastmode continue-not-stop)**: KL-3 is B3-class deep substrate owned by
+  another lane → pivot to the dischargeable residual in my scope: **[GR-G-ASM]** (v10.98a,
+  NISOG, recipe complete, zero math obstructions).
+
+## Amendments v10.138-CLOSER (2026-07-11, Y1-CLOSER): ★★★ T-G4 COMPLETE — mulOver_assoc LANDED; the group law is a theorem at EVERY base — **THIS IS THE 0c-ii BOARD-SIGNAL**
+
+**`mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic]` is PROVEN** — the last of the four
+T-G4 Over-level transports. With it, `GroupLawAxioms.lean` is **ZERO-sorry** and all five
+monoid/group-object laws (`mulOver_comm`, `mulOver_oneOver`, `oneOver_mulOver`,
+`invOver_mulOver`, `mulOver_assoc`) hold for every elliptic `W` over every commutative
+ring, each `#print axioms` = exactly `[propext, Classical.choice, Quot.sound]`.
+
+**Execution (c5β's banked plan, option (b), completed by Y1-CLOSER):** the tensor-whnf
+timeout was killed by HOISTING — `tripleMapBaseChangeOf` as a top-level def whose
+`pullback.map` obligations are the banked e₁/e₂ (`tensorObj_hom_baseChangeOf` /
+`modelOver_hom_baseChangeOf`, transcribed from the plan and committed), plus
+literal-spelled projection micro-lemmas (`(limit.lift_π _ _).trans rfl` term-probes; the
+erw forms left `⋯`-residues) and the Over-spelled `pairMapBaseChangeOf` twin. The two
+whisker-BC naturalities are top-level lemmas proven leg-by-leg by `pullback.hom_ext` with
+EXPLICIT-argument `Eq.trans`/`congrArg` chains meeting in the middle
+(`assocSnd_pairMap_baseChangeOf` bridging the associator-snd side); metavar-section
+congrArgs (`fun m => _ ≫ _ ≫ m`) were the isDefEq-timeout source — v10.111's
+explicit-args lesson, third confirmation. Registry-grade pattern: **hoist + literalize +
+term-chain** beats every tactic form across the Over-monoidal instance diamond.
+
+**Seat attribution**: c5β (units + inverse transports, the whole of_map/of_eq
+architecture, e₁/e₂ proofs, the option-(b) recipe), beastmode-A (`negModelHom_baseChange`
+consumed by invOver), Y1-CLOSER (assoc execution + the hoisting pattern).
+
+**CHAIN CONSEQUENCES (0c-ii fires)**: c5β's chain continues at 0h → T-W7.12 → T-W7a on
+their return; **the NEW-CASCADE/Y1-CLOSER [T-B6′] gate is OPEN** — S2 (the map_add' fill
+on y1) begins NOW per CHARTER-Y1-CLOSER. NEW-Y1's E-track gate advances when S2 lands
+torsionπ_etale.
