@@ -654,6 +654,48 @@ lemma chartPointTriple_self_eq_one (W : WeierstrassCurve R) (k : Fin 3)
         Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k)))
   rw [h1, map_one]
 
+
+/-- The φ-triple is the affine chart point pushed through the coordinate equivalence and φ. -/
+lemma chartPointTriple_eq_comp (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] (φ : chartAway W k →+* K) :
+    chartPointTriple W k φ =
+      (φ.comp (chartCoordAlgEquiv W k).toRingHom) ∘ affineChartPoint W k := by
+  funext m
+  by_cases hm : m = k
+  · subst hm
+    rw [chartPointTriple_self_eq_one]
+    show _ = (φ.comp (chartCoordAlgEquiv W m).toRingHom) (affineChartPoint W m m)
+    rw [show affineChartPoint W m m = 1 from dif_pos rfl]
+    simp
+  · show chartPointTriple W k φ m = (φ.comp (chartCoordAlgEquiv W k).toRingHom)
+      (affineChartPoint W k m)
+    rw [show affineChartPoint W k m = Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩)
+      from dif_neg hm]
+    rw [chartPointTriple, RingHom.comp_apply]
+    congr 1
+    exact (chartCoordEquiv_mk_X W k ⟨m, hm⟩).symm
+
+/-- The φ-triple lies on the base-changed curve (the chart relation is killed in `chartAway`). -/
+lemma equation_chartPointTriple (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K] (φ : chartAway W k →+* K)
+    (hφ : φ.comp (algebraMap R (chartAway W k)) = algebraMap R K) :
+    (W.map (algebraMap R K)).toProjective.Equation (chartPointTriple W k φ) := by
+  rw [chartPointTriple_eq_comp]
+  have heq := (equation_affineChartPoint W k).map
+    (φ.comp (chartCoordAlgEquiv W k).toRingHom)
+  rw [show ((W.map (algebraMap R (affineChartRing W k))).toProjective.map
+      (φ.comp (chartCoordAlgEquiv W k).toRingHom)) = (W.map (algebraMap R K)).toProjective
+      from ?_] at heq
+  · exact heq
+  · show (W.map (algebraMap R (affineChartRing W k))).map
+      (φ.comp (chartCoordAlgEquiv W k).toRingHom) = W.map (algebraMap R K)
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [RingHom.comp_assoc]
+    rw [show (chartCoordAlgEquiv W k).toRingHom.comp (algebraMap R (affineChartRing W k)) =
+      algebraMap R (chartAway W k) from (chartCoordAlgEquiv W k).toAlgHom.comp_algebraMap]
+    exact hφ
+
 end ChartPointTriple
 
 end ChartNaturality
