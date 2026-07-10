@@ -15854,3 +15854,48 @@ on landing (= c5β's 0c-ii signal). Then S2–S6 per charter.
   of_map/of_eq/named skeleton landed with the snd-leg (Over.w) closed + the e1/e2
   base-change compat lemmas, exactly on the banked option-(b) route. On charter;
   T-G4 board line = the next milestone (the 0c-ii signal).
+
+### v10.99d (2026-07-10, fable-FP): ★★★★ [02KL-CORE] MILESTONE — 02KK proven modulo ONE leaf = the T-DEV/T-FLAT lane's OWN residual (do-not-duplicate cross-ref)
+
+*Commit 109c53499. `ForMathlib/FinitePresentationDescent.lean` ~1750 lines, green; the RingHom
+gate `of_comp_of_faithfullyFlat'` + all SmoothDescent scheme consumers are PROVEN modulo the
+single sorry [KL-3]. Axiom profile verified: gate = `[propext, sorryAx, Classical.choice,
+Quot.sound]`, sorryAx flowing ONLY through KL-3; KL-0/KL-1/KL-5c fully clean (no sorryAx);
+KL-4's sorryAx is purely inherited from its call to KL-3.*
+
+- **DELIVERED sorry-free (12 leaves)**: [KL-0] retract-of-FP · [KL-1] canonical presentation
+  system (full `IsFilteredAlgColimit`) · [KL-2] exists_spreadData + stage-FP · [KL-2b/2c]
+  presentedBaseChange · [KL-2d] presented-systems-are-colimits (span-representation workhorse)
+  · [KL-2e] equiv-transport · [KL-4] ffl-at-stage (ideal-form intersection + Cantor
+  patch-compactness + K2 residue-fibre collapse) · [KL-5a/b] concrete stage-factoring/agreement
+  · [KL-5c] concatEquiv · doubling-map naturality · Amitsur transport · the full 02KK assembly
+  (`of_comp_aux` + `Algebra.FinitePresentation.of_comp_of_faithfullyFlat`).
+
+- **★ CRITICAL CROSS-REFERENCE — KL-3 = the flat-spreading lane's OWN open residual.** [KL-3]
+  `SpreadData.exists_flat_stage` (Stacks 02JO flat-spreading) is the sole sorry. Its irreducible
+  core is **identical** to what the **T-DEV / T-FLAT1-STAGE / GF7 lane** is actively building in
+  `ForMathlib/FlatLocus.lean` + `ForMathlib/NoethApprox.lean` (board §T-DEV2a/2b, T-FLAT1-STAGE,
+  T-LC3). Verified on-disk today:
+    · `NoethApprox.exists_noetherian_descent` (noetherian approx of algebras) — **ALREADY
+      sorry-free** `[propext,Classical.choice,Quot.sound]`; consumable now.
+    · `NoethApprox.exists_noetherian_descent_flat` (noetherian descent of a FLAT FP algebra) —
+      sorryAx, tracing to their registered `exists_subalgebra_flat_baseChange` (Stacks 07RF /
+      00R6) and `FlatLocus.flatLocus_spreads_of_flat` (Stacks 00RC dévissage — "the true
+      homological heart, isolated as the sole sorry").
+    · `FlatLocus.isOpen_flatLocus` (openness of the flat locus over noetherian) + generic
+      flatness `exists_basicOpen_subset_flatLocus_of_isDomain` — present.
+  Independent exhaustive mathlib search (fable-FP subagent, 2026-07-10) CONFIRMS the keystone
+  (flat-locus openness for a not-module-finite FP algebra / generic flatness / general noetherian
+  algebra descent) is ABSENT from the pin — `Module.isOpen_freeLocus` needs module-finite-
+  presentation, which `B_i` lacks; only the map/iso spreading layer (`RingHom.EssFiniteType.
+  exists_eq_comp_ι_app_of_isColimit`) is present.
+  **⟹ fable-FP does NOT build flat-spreading (cardinal-sin avoidance).** KL-3 is a `consume-on-
+  sorry-free` dependency on that lane. Eventual close = bounded bridge (their base-agnostic
+  `exists_noetherian_descent_flat` → my filtered system: lift R₀'s finite generators to a stage
+  via `exists_common_lift`, spread the descent-iso to a stage via `exists_factor_of_finite
+  Presentation`/`exists_eq_at_stage_of_finiteType`). **Coordinator: KL-3 auto-unblocks when the
+  T-DEV/T-FLAT 00RC/07RF residual closes; recommend wiring [02KL-CORE] ⟵ that lane in the dep graph.**
+
+- **NEXT (fable-FP, beastmode continue-not-stop)**: KL-3 is B3-class deep substrate owned by
+  another lane → pivot to the dischargeable residual in my scope: **[GR-G-ASM]** (v10.98a,
+  NISOG, recipe complete, zero math obstructions).
