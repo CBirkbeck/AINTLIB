@@ -15899,3 +15899,33 @@ KL-4's sorryAx is purely inherited from its call to KL-3.*
 - **NEXT (fable-FP, beastmode continue-not-stop)**: KL-3 is B3-class deep substrate owned by
   another lane → pivot to the dischargeable residual in my scope: **[GR-G-ASM]** (v10.98a,
   NISOG, recipe complete, zero math obstructions).
+
+## Amendments v10.138-CLOSER (2026-07-11, Y1-CLOSER): ★★★ T-G4 COMPLETE — mulOver_assoc LANDED; the group law is a theorem at EVERY base — **THIS IS THE 0c-ii BOARD-SIGNAL**
+
+**`mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic]` is PROVEN** — the last of the four
+T-G4 Over-level transports. With it, `GroupLawAxioms.lean` is **ZERO-sorry** and all five
+monoid/group-object laws (`mulOver_comm`, `mulOver_oneOver`, `oneOver_mulOver`,
+`invOver_mulOver`, `mulOver_assoc`) hold for every elliptic `W` over every commutative
+ring, each `#print axioms` = exactly `[propext, Classical.choice, Quot.sound]`.
+
+**Execution (c5β's banked plan, option (b), completed by Y1-CLOSER):** the tensor-whnf
+timeout was killed by HOISTING — `tripleMapBaseChangeOf` as a top-level def whose
+`pullback.map` obligations are the banked e₁/e₂ (`tensorObj_hom_baseChangeOf` /
+`modelOver_hom_baseChangeOf`, transcribed from the plan and committed), plus
+literal-spelled projection micro-lemmas (`(limit.lift_π _ _).trans rfl` term-probes; the
+erw forms left `⋯`-residues) and the Over-spelled `pairMapBaseChangeOf` twin. The two
+whisker-BC naturalities are top-level lemmas proven leg-by-leg by `pullback.hom_ext` with
+EXPLICIT-argument `Eq.trans`/`congrArg` chains meeting in the middle
+(`assocSnd_pairMap_baseChangeOf` bridging the associator-snd side); metavar-section
+congrArgs (`fun m => _ ≫ _ ≫ m`) were the isDefEq-timeout source — v10.111's
+explicit-args lesson, third confirmation. Registry-grade pattern: **hoist + literalize +
+term-chain** beats every tactic form across the Over-monoidal instance diamond.
+
+**Seat attribution**: c5β (units + inverse transports, the whole of_map/of_eq
+architecture, e₁/e₂ proofs, the option-(b) recipe), beastmode-A (`negModelHom_baseChange`
+consumed by invOver), Y1-CLOSER (assoc execution + the hoisting pattern).
+
+**CHAIN CONSEQUENCES (0c-ii fires)**: c5β's chain continues at 0h → T-W7.12 → T-W7a on
+their return; **the NEW-CASCADE/Y1-CLOSER [T-B6′] gate is OPEN** — S2 (the map_add' fill
+on y1) begins NOW per CHARTER-Y1-CLOSER. NEW-Y1's E-track gate advances when S2 lands
+torsionπ_etale.
