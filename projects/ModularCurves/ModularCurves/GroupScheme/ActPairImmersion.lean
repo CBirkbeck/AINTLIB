@@ -110,6 +110,47 @@ theorem actPair_eq_shear (G : FiniteLocallyFreeSubgroup E) :
   · rw [G.actPair_snd, Category.assoc, E.shearHom_snd, tensorHom_snd, Category.comp_id]
     rfl
 
+/-- **The tensored inclusion is a base change of `ι`**: the square
+
+```
+G ×_S E --fst--> G
+   |(ι⊗𝟙)          |ι
+E ×_S E --fst--> E
+```
+
+is a pullback (paste the defining squares of the two fibre products vertically). -/
+theorem isPullback_tensorHom_left (G : FiniteLocallyFreeSubgroup E) :
+    IsPullback (pullback.fst (Over.mk G.π).hom E.asOver.hom)
+      (G.ιOver ⊗ₘ 𝟙 E.asOver).left G.ι (pullback.fst E.π E.π) := by
+  refine IsPullback.of_bot ?_
+    (Over.tensorHom_left_fst E.π E.π G.ιOver (𝟙 E.asOver)).symm
+    (IsPullback.of_hasPullback E.π E.π)
+  have hsnd : (G.ιOver ⊗ₘ 𝟙 E.asOver).left ≫ pullback.snd E.π E.π
+      = pullback.snd (Over.mk G.π).hom E.asOver.hom := by
+    have h := Over.tensorHom_left_snd E.π E.π G.ιOver (𝟙 E.asOver)
+    rwa [Over.id_left, Category.comp_id] at h
+  exact hsnd.symm ▸ IsPullback.of_hasPullback (Over.mk G.π).hom E.asOver.hom
+
+/-- The tensored inclusion `(ι ⊗ 𝟙).left : G ×_S E ⟶ E ×_S E` is a closed immersion. -/
+theorem isClosedImmersion_tensorHom_left (G : FiniteLocallyFreeSubgroup E) :
+    IsClosedImmersion (G.ιOver ⊗ₘ 𝟙 E.asOver).left :=
+  MorphismProperty.IsStableUnderBaseChange.of_isPullback
+    (P := @IsClosedImmersion) G.isPullback_tensorHom_left G.closedImmersion
+
+/-- **`[HG-C2]`: the action pair is a closed immersion** — the shear decomposition
+composes the base-changed `ι` with the shear automorphism. On a stable affine chart its
+`Γ`-dual is therefore surjective: the `precursorSurjective` input to the Hopf–Galois
+theorem. -/
+theorem isClosedImmersion_actPair_left (G : FiniteLocallyFreeSubgroup E) :
+    IsClosedImmersion G.actPair.left := by
+  rw [G.actPair_eq_shear, show ((G.ιOver ⊗ₘ 𝟙 E.asOver) ≫ E.shearHom).left
+      = (G.ιOver ⊗ₘ 𝟙 E.asOver).left ≫ E.shearHom.left from rfl]
+  haveI h1 := G.isClosedImmersion_tensorHom_left
+  haveI : IsIso E.shearHom := (inferInstance : IsIso E.shearAuto.hom)
+  haveI : IsIso E.shearHom.left :=
+    (inferInstance : IsIso ((Over.forget S).map E.shearHom))
+  infer_instance
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
