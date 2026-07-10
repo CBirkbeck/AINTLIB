@@ -15417,3 +15417,23 @@ reduces to the graded homs commuting (`negGradedQuot_comp_baseChangeGradedHom`),
 commutes with the negation substitution (`aeval_negVec_map`, `negVec_map`). **c5β**: the `invOver`
 T-G4 transport can consume it directly — `import ModularCurves.EllipticCurve.NegModelBaseChange`.
 Zero edits to WeierstrassModel/GroupLaw* endgame files. beastmode-A re-armed on T-W7a / handshake.
+
+## Amendments v10.129 (c5β) — T-G4 whisker-BC logic CRACKED; eqToHom timeout ⟹ of_map restructure (all pieces ready)
+
+Resumed per v10.128. Progress: **`projModelZero_baseChangeOf`** committed (eqToHom-free zero-section
+base change, subst-clean). **beastmode-A's `negModelHom_baseChange` LANDED** (NegModelBaseChange.lean,
+green — inv unblocked). The **whisker/associator-BC-naturality is CLEAN** (no spelling war): `X` :=
+`pullback.map` for the `mo⊗𝟙`/`mo⊗mo` base change, `hnat` reduces via `pullback.map_comp` on both sides
+(using `Over.whiskerLeft_left`/`whiskerRight_left` FULL rfl-form, not the `_fst/_snd` projections), the
+per-leg goals close by `projModelZero_baseChangeOf`/`hbc`/`negModelHom_baseChange` + `oneOver_left` +
+`tensorUnit_hom` + `id_comp`. The unit-law transport is 90% (scratch tone.lean).
+
+**BLOCKER (precise):** constructing that `pullback.map` with a `projModelBaseChangeOf` leg
+**whnf-times-out** — `projModelBaseChangeOf`'s eqToHom layer. **FIX (all pieces committed & ready):**
+the c6 **of_map/of_eq** pattern — prove `_of_map (f : uWLU →+* R)` at `uWLU.map f` where base change is
+`projModelBaseChange` (eqToHom-FREE): `mulModelHom (uWLU.map f) = mulModelHomBC f uWLU …rfl`
+(`mulModelHom_map_eq_BC`, AdditionSpecPoints:1912) + collapse `projModelBaseChangeOf …rfl →
+projModelBaseChange` (`projModelBaseChangeOf_rfl`, AdditionBaseChange:248); then `_of_eq` via `subst h`;
+instantiate at `classifyRingHomU W`. Sequence units (comm halves) → assoc → inv (A's lemma). This is a
+focused restructure for fresh budget — the math + all lemmas are in hand. Full recipe in sentinel.
+Note: commit 2add06cae swept A's file under my message (shared-worktree index) — cosmetic; content green.
