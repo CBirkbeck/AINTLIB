@@ -14207,3 +14207,49 @@ Per the coordinator-ratified build GO. All axiom-clean [propext, Classical.choic
   statement refinement; the oplax δ is what G1/G3 consume).
 **Remaining:** G1 (lattice-miracle free-yoneda ⊗, sorried) → G3 (presentation five-lemma) → A
 (packaging → (Modules.pullback f).Monoidal → Pic(f)). 2 registered general-f Props unchanged.
+
+## Amendments v10.108 (2026-07-10, coordinator): three-lane absorb — PIC0 B1+B2 RATIFIED (READ-FIRST reissued before G1); NEW-GH hold RATIFIED ([02KM] next-session first act); NEW-HOPF Wave C GO
+
+**PIC0 [D-PresPB′-general]** (§v10.100-PIC0, pushed 6188c8249): B1a
+`restrictScalarsLaxMonoidal` + the fused B1+B2 `nonempty_pullback_oplaxMonoidal` LANDED,
+axiom-clean — the comparison δ_{P,Q} : f^*ᵖ(P⊗Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ the G-leaves consume
+now exists as natural, coherent data; all five B1a coherence fields closed by
+elementwise rfl (the banked recipe's payoff). The packaging rule is CITED as fleet
+knowledge: re-typing a lax/monoidal structure across functor-spellings is
+kernel-rejected (autoParam wart, two measured failure modes) and native-spelling direct
+construction hits the instance-flavor wall on F.op-composites — the working escape is
+transport-the-adjunction (`pushforwardFactored` + componentwise-Iso.refl NatIso +
+`Adjunction.ofNatIsoRight`, then `leftAdjointOplaxMonoidal` untouched). RATIFIED.
+**Gate before G1**: their session absorbed only through v10.98 — the v10.103 READ-FIRST
+directive is REISSUED (inbox): diff-read the codex/fibrewise-weierstrass-comparison
+monoidal additions ("pullback tensor comparison" + "unit-sided pullback tensor
+isomorphisms", ~800 lines on PullbackTensorMonoidal/SheafOfModulesMonoidal) and BOARD a
+reuse verdict (consume / adapt / disjoint) BEFORE any G1 proving — G1's meet-equiv +
+pointwise `ModuleCat.free`-μIso and the ~100-line naturality grind is exactly the
+likely-duplicated region. Chain: B1 ✓ B2 ✓ → [read-first verdict] → G1 → G3 → A
+(packaging → `(Modules.pullback f).Monoidal` → Pic(f), GME (2.16)).
+
+**NEW-GH** (hold report): [02KL] landed + pushed (5466cda51); holding at the boundary
+per the dispatch language — RATIFIED, the correct read. Next-session queue CONFIRMED as
+captured: (1) **[02KM]** `Smooth.of_precomp_etale_of_surjective` on the located route
+(f lfp via 02KL + f flat via the proven 29.26.13 leg + formal smoothness via
+`FormallySmooth.iff_subsingleton_and_projective` transported along formally-étale stalk
+maps (Etale/Kaehler) with ff module descent) — completing it closes [YF-QSM];
+(2) MellWeierstrass cadence tail (incl. PIC0's cocycle-golf note); (3) home GH stream
+re-opens — first act [A711-BC] status check (whether fable-FP's substrate moved GHB5's
+gate), then the corrected T-H4/T-H6 wiring on the repointed statements + the
+gate-flipped GH leaves. p0 reclaims at a boundary on return (rule-5 handshake). Fires on
+session open; no re-ask needed.
+
+**NEW-HOPF** (Wave C report): [HG-C1b] COMPLETE (§v10.106 — `coactionRing : B ⟶ A ⊗[R] B`
+on any stable affine chart, zero sorries, axiom-clean; the Künneth chain's
+rfl-matching legs are the appLE-algebra design paying off) + [HG-C1c](i) landed
+(`prOpenToBase` + both restricted action legs over the base patch — feeds the
+R-linearity square). Remaining: C1c-ii (appTop-dualization → counit/coassoc,
+scheme-level-first; R-linearity + IsCoaction) → C1d (chart-data assembly consuming C2's
+closed immersion) → C3 (stable covers, strategy banked) → C4 (glue). GO per the banked
+designs; the BOARD-SIGNAL on pin-discharge for NISOG L6 + p0's pickup stands as ordered.
+**Ratified as the fleet standard for shared-worktree edit-window collisions**: their
+handling of c5β's window on WeierstrassModel.lean (background watch, zero foreign-WIP
+touches, drafted the next two increments meanwhile — both green when the window
+cleared). That is the v10.24/rule-5-consistent pattern; cite this section on recurrence.
