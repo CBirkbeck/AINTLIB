@@ -1512,7 +1512,53 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
   constructor
   · -- vanishing on every affine of `S` ⟹ the geometric condition
     intro hle
-    sorry
+    -- every chart satisfies the geometric condition, through the per-chart bridge
+    have hchart : ∀ (U : S.affineOpens) (V : T.affineOpens) (e : V.1 ≤ t ⁻¹ᵁ U.1),
+        Flat (pullback.snd f (V.1.ι ≫ t)) ∧
+          ∀ p : ↑V.1, (pullback.snd f (V.1.ι ≫ t)).finrank p = n := by
+      intro U V e
+      refine (locallyFreeRankLocus_chart_cond f t n hb' U V e).mpr fun z hz => ?_
+      have h0 : (t.app U.1).hom z = 0 := by
+        have h1 := hle U hz
+        rwa [RingHom.mem_ker] at h1
+      show ((t.app U.1 ≫ T.presheaf.map (homOfLE e).op).hom) z = 0
+      rw [CommRingCat.comp_apply, h0, map_zero]
+    -- an affine chart pair through every point of `T`
+    have hcover : ∀ x : T, ∃ (U : S.affineOpens) (V : T.affineOpens),
+        x ∈ V.1 ∧ V.1 ≤ t ⁻¹ᵁ U.1 := by
+      intro x
+      obtain ⟨U, hU, hxU, -⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        S.isBasis_affineOpens (show t.base x ∈ (⊤ : S.Opens) from trivial)
+      obtain ⟨V, hV, hxV, hVle⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.mp
+        T.isBasis_affineOpens (show x ∈ t ⁻¹ᵁ U from hxU)
+      exact ⟨⟨U, hU⟩, ⟨V, hV⟩, hxV, hVle⟩
+    choose Ux Vx hmem hVle using hcover
+    -- the pasted square: each chart pullback is the base change of `pullback.snd f t`
+    have hsq : ∀ x : T, IsPullback
+        (pullback.fst (pullback.snd f t) (Vx x).1.ι ≫ pullback.fst f t)
+        (pullback.snd (pullback.snd f t) (Vx x).1.ι) f ((Vx x).1.ι ≫ t) := fun x =>
+      (IsPullback.of_hasPullback (pullback.snd f t) (Vx x).1.ι).paste_horiz
+        (IsPullback.of_hasPullback f t)
+    have hVtop : (⨆ x : T, (Vx x).1) = ⊤ := by
+      rw [eq_top_iff]
+      exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hmem x⟩
+    -- flatness is Zariski-local on the target, and holds over each chart
+    haveI hflat : Flat (pullback.snd f t) := by
+      refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun x : T => (Vx x).1) hVtop fun x => ?_
+      have h1 := (isPullback_morphismRestrict (pullback.snd f t) (Vx x).1).flip
+      rw [← h1.isoPullback_hom_snd, ← (hsq x).isoPullback_hom_snd,
+        MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
+        MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+      exact (hchart (Ux x) (Vx x) (hVle x)).1
+    refine ⟨hflat, fun x => ?_⟩
+    -- the rank at `x` is computed on the chart through `x`
+    have hch := hchart (Ux x) (Vx x) (hVle x)
+    haveI := hch.1
+    have hrk := Scheme.Hom.finrank_of_isPullback _ _ _ _
+      (IsPullback.of_hasPullback (pullback.snd f t) (Vx x).1.ι) ⟨x, hmem x⟩
+    rw [show ((Vx x).1.ι ⟨x, hmem x⟩ : T) = x from rfl] at hrk
+    rw [← hrk, ← (hsq x).isoPullback_hom_snd, Scheme.Hom.finrank_comp_left_of_isIso]
+    exact hch.2 ⟨x, hmem x⟩
   · -- the geometric condition ⟹ vanishing (elementwise, via `zero_of_zero_cover`)
     rintro ⟨hflat, hrank⟩
     intro U
