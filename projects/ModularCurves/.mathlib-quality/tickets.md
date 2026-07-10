@@ -11243,3 +11243,14 @@ additionally only the six registered E-leaf sorries of its own file (pre-existin
 + the filled atlas clause) — modulo only the designed trails. Y₁(N) exists and
 represents. Sentinel `beastmode_active.NEW-Y1` cleared; parked per stream card
 (triggers: T-W7a → trails retire + E-track opens via BB-DIFF).
+
+## Amendments v10.116-Y1 (2026-07-10, NEW-CASCADE): claim — v10.131 EARLY-FIRE step 1: the approved dev → y1 merge
+
+**Claim (rule-5)**: NEW-CASCADE claims dev/modular-curves-y1 for the v10.131 work order
+(collision watch: NEW-Y1 parked, sentinel cleared at their v10.115-Y1; y1 tip cecef8030).
+Step 1 (gate-free, executing now): MERGE origin/dev/modular-curves → y1 per the v10.127
+ruling (merge not cherry-pick; tickets.md resolved append-only; any conflict outside
+board files ⟹ stop + board). Purpose: bring the C6 dictionary layer (AdditionSpecPoints /
+GroupLawAxioms / AdditionBaseChange / NegModelBaseChange) onto the [T-B6′] sorry's home
+branch ahead of the T-G4 gate-fire. Then: y1 spine green (single-target YOneTatePoint +
+GeometricFibreComparison), push. Steps 2–4 same-session iff c5β's T-G4 line boards.
