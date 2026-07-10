@@ -360,3 +360,48 @@ no twisted instances, no r=0 edge case:
 
 B6 consumes: L4 ⟹ Free+Finite ⟹ FaithfullyFlat C B (nonempty index when B
 nontrivial via σ-retraction; subsingleton branch separate); L5 = galois half.
+
+## Appendix: [HG-B6] assembly plan (banked 2026-07-10)
+
+Target: `isHopfGalois_of_surjective_galoisPrecursor` — hypotheses `IsCoaction ρ`,
+`[Module.Free R A] [Module.Finite R A]`, and `hsurj : Surjective (productMap ι ρ :
+B⊗[R]B → B⊗[R]A)` (the action-pair/closed-immersion input; rules out the trivial
+co-action). Conclusion `IsHopfGalois ρ` (galois + faithfullyFlat).
+
+Sub-leaves (file `HopfGaloisTheorem.lean`):
+- **[B6-a] generalized galois map**: `bijective_galoisProductMap_of_basis` — for ANY
+  `C₀` with `[Algebra C₀ B] [Algebra C₀ (B⊗[R]A)] [IsScalarTower C₀ B (B⊗[R]A)]`,
+  `hcoinv : ∀ c, ρ (algebraMap C₀ B c) = (algebraMap C₀ B c) ⊗ₜ 1`, and a C₀-basis
+  `(x i)` of `B` with `ρ (x i)` a left-B-basis of `B⊗A`: the productMap
+  `B⊗[C₀]B →ₐ[C₀] B⊗[R]A` (left inclusion ⊗ ρ-as-C₀-hom) is bijective. Proof =
+  verbatim B5-L5 (left-B-linear, basis-to-basis). KILLS the C''-vs-C' juggling: at
+  the per-prime site C₀ := C'ₚ works directly.
+- **[B6-b] flat-cover injectivity**: `f : M →ₗ[C] N` injective ⟸ ∀ p maximal,
+  `C'ₚ ⊗[C] f` injective, where C'ₚ := LocalPolynomialExtension(Localization.AtPrime p)
+  (A3). Chain per p: flat ⟹ ker commutes with ⊗; ff(C_p → C'ₚ) ⟹ ker(f_p) = 0;
+  `Submodule.eq_bot_of_localization`-style glue. cancelBaseChange for the composite
+  C'⊗[C_p](C_p⊗[C]M) ≅ C'⊗[C]M.
+- **[B6-c] per-prime instantiation** (p maximal in C := coinvariants ρ):
+  ρ' := coactionBaseChange (B3) over C'ₚ; IsLocalRing (coinvariants ρ') via
+  `IsLocalRing.of_surjective'` from B3's 03BK(3) iff (flat ✓); π : C' ↠ coinvariants ρ'
+  INJECTIVE too (C ↪ B tensored with flat C' + rid — so π is a RingEquiv-ish);
+  Infinite (ResidueField (coinvariants ρ')) via the max-preimage quotient iso from
+  Infinite (ResidueField C') (A3); GAP-6 (B4) ⟹ enumerate ALL maximals Fin s;
+  hmn = B4 add-on; hN: B'-span of range(ρ'-as-C''-linear) = ⊤ from hsurj base-changed;
+  hr: finrank B' (B'⊗A) = card (hopfBasisIndex) via baseChange basis; A4-03C1 ⟹
+  y i = ρ'(x i) basis ⟹ B5-L4 C''-basis of B' ⟹ convert to C'-basis along π
+  (independence via π injective, span via π surjective) ⟹ B6-a at C₀ := C'.
+- **[B6-d] comparison squares**: C'⊗[C]γ ≅ γ̂ under (assoc + cancelBaseChange) on the
+  source and baseChangeAssoc (B3) on the target; elementwise on c'⊗b₁⊗b₂. ⟹
+  Injective (C'⊗[C]γ) ∀p ⟹ [B6-b] γ injective. Surjectivity of γ: GLOBAL one-liner
+  from hsurj (γ ∘ (B⊗[R]B ↠ B⊗[C]B) = productMap).
+- **[B6-e] faithful flatness**: per-p: B' free over C' (the converted basis) ⟹
+  Flat C' B'; descend along ff C_p → C'ₚ (`Module.Flat.of_flat_tensorProduct`-family)
+  + flat-is-local ⟹ Flat C B. Then Spec-surjectivity = B4's
+  `exists_prime_over_coinvariants` (lying-over, global) ⟹
+  `Module.FaithfullyFlat.of_comap_surjective`-family ⟹ FaithfullyFlat C B.
+- **[B6-f]**: assemble `IsHopfGalois ρ` = ⟨⟨inj, surj⟩, ff⟩. = **M5**.
+
+Name-verification queue (before writing): Algebra.TensorProduct.productMap;
+Descent.lean's injective-descent names; flat-local-property lemma; of_comap_surjective
+exact form; Submodule.eq_bot_of_localization; AlgebraTensorModule.assoc heterobasic.
