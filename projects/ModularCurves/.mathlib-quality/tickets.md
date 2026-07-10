@@ -15326,3 +15326,35 @@ whisker-BC lemmas + negModelHom_baseChange. Template: `mulModelHom_comm` (valida
 - **NEW-CASCADE gate CLARIFIED**: the park-trigger is T-G4 COMPLETION (all four transports + comm),
   not this checkpoint — the coordinator signals the owner at that landing. Chain after: hz-fix +
   map_add′ fill → L-BC → BB-DIFF MASTER → torsionπ_etale → six Y1-E leaves + [T-B6′] retire.
+
+### v10.121 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1c] — counit law SCHEME side + the full commutative group-object law set + the tensor ext tool
+
+*Zero sorries, axiom-clean, four commits.*
+
+- **`SubgroupGroupObject.lean`**: `mulOver_comm` (one `_root_.mul_comm` after
+  `over_hom_ext`), **`unitOver_mulOver_right`**, **`invOver_mulOver_right`** — `G` is now
+  a *commutative* group object with the complete law set (both unit laws, both inverse
+  laws, associativity, commutativity).
+- **`PatchKunneth.lean`**: `isIso_patchKunnethΓ` and **`tensor_hom_ext`** (ring maps out
+  of `A ⊗[R] B` agree iff they agree on `includeLeft`/`includeRight`) — the uniqueness
+  tool that all the coalgebra/Hopf axioms will be dualized through.
+- **`PatchHopf.lean`**: `unitSection` (restricted unit) + `unitSection_comp_groupToBase`
+  (it is a section) + `unitSection_comp_ι`; `leftUnitSection` (the section
+  `⟨e ∘ structure, 𝟙⟩ : G|_V ⟶ G|_V ×_V G|_V`) with both legs; and
+  **`leftUnitSection_comp_squareMul`** — *the counit law at scheme level*, i.e.
+  `⟨e ∘ str, 𝟙⟩ ≫ μ = ι`. Proof: `ι`-cancellation (`cancel_mono G.ι`) + `mulHom_ι` +
+  `Point.restrict_add` — the unit component restricts to the **zero point**
+  (`point_zero_val`), so the sum is the identity component. **No restriction of the
+  global group-object laws was needed** — point-algebra over the patch does it.
+
+**Lean-ops** (registry, sharpened): the Over-monoidal seam bites *inside proofs* too —
+`Category.assoc` and `←Category.assoc` will refuse to key when a subterm's implicit
+object is spelled `(Over.mk G.π).left` rather than `G.G`, or when a `resLE`'s `≤`-proof
+differs syntactically. Three escapes, in order of preference: (1) hoist the fact into a
+named `have` and finish with `exact lemma_assoc _` (term-application beats keyed
+matching); (2) `show` the goal in the clean spelling (`(… : _ ⟶ G.G)`), then `simp only`
+works; (3) reassoc variants (`_assoc`) *plus* an explicit re-normalisation step.
+
+**NEXT**: Γ-dualize the counit law (`appTop` + `patchKunnethΓ` + `tensor_hom_ext`) ⟹
+`rTensor_counit_comp_comul`; mirror for the right counit law; then 1d (coassoc, triple
+Künneth) and 1e (antipode, via `diagonal_SpecMap`). Stop-line policy unchanged.
