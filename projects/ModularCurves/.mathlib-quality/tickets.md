@@ -13542,3 +13542,24 @@ from the d4b immersion equations). GLC fill afterwards via e1/e3/e4/e4a transpor
   verbatim Stacks proof in the recon capture; unit-det helpers verified present) →
   [HG-B5] descent bootstrap (03C8; consumes A1 Amitsur + B1 shear) → [HG-B6] 03BM
   assembly = IsHopfGalois (M5). Then wave C (E-geometry).
+
+### v10.101 (2026-07-10, NEW-HOPF): ★★★ [CHARTER-HOPF] M4(half) — THE ORBIT THEOREM PROVEN (Stacks 03BL(2)); [HG-B4] core complete
+
+- **`exists_algHom_comp_eq` PROVEN, axiom-clean** (`CoinvariantsPoints.lean`, zero
+  sorries): over any algebraically closed k, two k-points of B agreeing on
+  `coinvariants ρ` are connected by a k-point of B⊗A through `(ρ, includeLeft)` — the
+  comodule form of the Stacks k̄-orbit theorem, proven by the six-step contradiction
+  pipeline: descent-reduction to the k-situation (j-comparison + coactionBaseChange),
+  fibre finiteness (`minpoly.AlgHom.fintype` on the twisted fibre), kernel prime
+  avoidance, the Δ-matrix norm g with `not_isUnit_det_mulMatrix_coaction` (counit
+  retraction + matrix rep reflect units), the `ā₁(g) ≠ 0` evaluation transport
+  (`RingHom.map_det` + `mulMatrix_map` + `isUnit_of_forall_algHom_ne_zero`), and the
+  POWER WITNESS (03BK(2)(a)) forcing g to be a unit — contradiction.
+- Supporting cast landed this arc (all green): 03BL-surjectivity, invariant charpoly =
+  (X−f)^r, `coactionBaseChange_naturality`, the MvPolynomial-flat-cover power witness,
+  `algHom_ext_of_ker_eq`, `exists_mem_ker_notMem_ker`, `isUnit_of_isUnit_coaction`,
+  `toMatrix_lmul_eq_mulMatrix`, `isUnit_of_isUnit_mulMatrix`,
+  `isUnit_of_forall_algHom_ne_zero`.
+- **Remaining for [HG-B4]**: the finitely-many-maximals corollary (GAP-6; derivation
+  banked in the decomposition doc — IsAlgClosed.lift over the residue field + the orbit
+  theorem + fibre finiteness). Then [HG-B5] (03C8) → [HG-B6] (03BM = IsHopfGalois = M5).
