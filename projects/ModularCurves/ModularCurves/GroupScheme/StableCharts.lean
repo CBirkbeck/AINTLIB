@@ -53,6 +53,13 @@ noncomputable def restrictedProj (G : FiniteLocallyFreeSubgroup E) (U : E.E.Open
     (G.actionProj.left ⁻¹ᵁ U).toScheme ⟶ U.toScheme :=
   G.actionProj.left.resLE U (G.actionProj.left ⁻¹ᵁ U) le_rfl
 
+/-- The domain of the restricted action, identified with the fibre product
+`(G ×_S E) ×_E U` along the projection (`[HG-C1b]` opener: the first leg of the chart
+Künneth chain `pr⁻¹U ≅ (G ×_S E) ×_E U ≅ G ×_S U`). -/
+noncomputable def restrictedDomainIso (G : FiniteLocallyFreeSubgroup E) (U : E.E.Opens) :
+    (G.actionProj.left ⁻¹ᵁ U).toScheme ≅ pullback G.actionProj.left U.ι :=
+  (pullbackRestrictIsoRestrict G.actionProj.left U).symm
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
