@@ -350,6 +350,44 @@ theorem leftUnitSection_comp_squareMul :
   rw [← Category.assoc k, hk2]
   rfl
 
+/-! ### The counit law, `Γ`-side -/
+
+/-- `appTop` of the restricted unit section. -/
+theorem unitSection_appTop :
+    P.unitSection.appTop
+      = P.groupOpen.topIso.hom ≫ P.groupPatchCounit ≫ P.V.topIso.inv :=
+  Scheme.Hom.resLE_app_top (f := G.unitHom) (U := P.groupOpen) (V := P.V)
+    P.le_preimage_groupOpen_unitHom
+
+/-- `appTop` of the restricted structure map. -/
+theorem groupToBase_appTop :
+    (G.π.resLE P.V P.groupOpen le_rfl).appTop
+      = P.V.topIso.hom ≫ G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupOpen.topIso.inv :=
+  Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl
+
+/-- The Künneth transport for the group square. -/
+noncomputable abbrev squareΓ :
+    Γ(P.groupSquare, ⊤) ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) :=
+  patchKunnethΓ G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+
+/-- The `Γ`-dual of the left unit section. -/
+noncomputable def counitLiftΓ :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.leftUnitSection.appTop ≫ P.groupOpen.topIso.hom
+
+/-- **The counit law, `Γ`-side, in transported form**: `Δ` followed by the dual of the
+left unit section is the identity. -/
+theorem groupPatchComul_comp_counitLiftΓ :
+    P.groupPatchComul ≫ P.counitLiftΓ = 𝟙 P.groupRing := by
+  rw [groupPatchComul_eq, counitLiftΓ, Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp]
+  -- the `appLE`-composite of the scheme identity
+  rw [show P.leftUnitSection.appTop
+      = P.leftUnitSection.appLE ⊤ ⊤ le_top from (appLE_top_top _).symm]
+  rw [← Category.assoc, Scheme.Hom.appLE_comp_appLE,
+    appLE_congr_hom P.leftUnitSection_comp_squareMul P.groupOpen ⊤,
+    ι_appLE_top, Iso.inv_hom_id]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
