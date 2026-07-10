@@ -290,6 +290,75 @@ theorem chartPullbackIso_inv_comp_prOpenToBase :
     reassoc_of% h1, h2]
   exact (reassoc_of% h3) (P.U.ι ≫ E.π)
 
+/-- **(L3)**: the full Spec-writing carries the second projection's patch structure to
+the canonical algebra map of the tensor product. -/
+theorem chartSpecIso_hom_base :
+    P.chartSpecIso.hom
+        ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing)))
+      = pullback.snd G.π (P.U.ι ≫ E.π) ≫ P.chartToBase ≫ P.V.toSpecΓ := by
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_U
+  haveI := P.isIso_toSpecΓ_groupOpen
+  -- the Spec-level base compat, through the fst-side
+  have hbase : (pullbackSpecIso P.baseRing P.groupRing P.chartRing).hom
+        ≫ Spec.map (CommRingCat.ofHom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing)))
+      = pullback.fst (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+          (Spec.map (E.π.appLE P.V P.U P.hover))
+        ≫ Spec.map (G.π.appLE P.V P.groupOpen le_rfl) :=
+    pullbackSpecIso_hom_base _ _ _
+  -- kunnethToSpec carries fst to the group-side toSpecΓ
+  have hkfst : P.kunnethToSpec.hom ≫ pullback.fst _ _
+      = pullback.fst P.groupToBase P.chartToBase ≫ P.groupOpen.toSpecΓ := by
+    rw [kunnethToSpec]
+    exact pullback.lift_fst _ _ _
+  -- the appLE naturality on the group side
+  have hg : P.groupOpen.toSpecΓ ≫ Spec.map (G.π.appLE P.V P.groupOpen le_rfl)
+      = G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.toSpecΓ :=
+    Scheme.Opens.toSpecΓ_SpecMap_appLE G.π P.V P.groupOpen le_rfl
+  -- the patch-level condition swaps to the chart side
+  have hcond : pullback.fst P.groupToBase P.chartToBase ≫ P.groupToBase
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.chartToBase :=
+    pullback.condition
+  -- the Künneth chain carries snd to snd
+  have hsnd : P.chartKunnethSchemeIso.hom ≫ pullback.snd P.groupToBase P.chartToBase
+      = pullback.snd G.π (P.U.ι ≫ E.π) := by
+    rw [chartKunnethSchemeIso, Iso.trans_hom, Category.assoc]
+    rw [show P.pullbackToPatchLevel.hom ≫ pullback.snd P.groupToBase P.chartToBase
+        = pullback.snd (pullback.snd G.π P.V.ι) P.chartToBase from by
+      rw [pullbackToPatchLevel]
+      refine (pullback.lift_snd _ _ _).trans ?_
+      exact Category.comp_id _]
+    rw [pullbackToVLevel, Iso.trans_hom, Iso.symm_hom, Iso.symm_hom, Category.assoc]
+    rw [pullbackLeftPullbackSndIso_inv_snd_snd]
+    rw [show (pullback.congrHom rfl P.chartToBase_comp_ι).inv
+          ≫ pullback.snd G.π (P.chartToBase ≫ P.V.ι)
+        = pullback.snd G.π (P.U.ι ≫ E.π) from by
+      rw [pullback.congrHom_inv]
+      refine (pullback.lift_snd _ _ _).trans ?_
+      exact Category.comp_id _]
+  -- assemble
+  rw [chartSpecIso, Iso.trans_hom, Category.assoc, kunnethSpecIso, Iso.trans_hom,
+    Category.assoc, hbase, reassoc_of% hkfst, hg]
+  rw [show G.π.resLE P.V P.groupOpen le_rfl = P.groupToBase from
+    Scheme.Hom.resLE_eq_morphismRestrict (f := G.π) (U := P.V)]
+  rw [reassoc_of% hcond, reassoc_of% hsnd]
+
+/-- **The chart co-action is a morphism over the base patch** (`[HG-C1c-ii]` over-lemma):
+the Spec-side co-action composed with the patch structure is the canonical algebra map.
+This is the scheme-level content of the `R`-linearity of `coactionRing`. -/
+theorem chartCoactionSpec_over :
+    P.chartCoactionSpec ≫ P.chartToBase ≫ P.V.toSpecΓ
+      = Spec.map (CommRingCat.ofHom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing))) := by
+  rw [chartCoactionSpec, Category.assoc, Category.assoc,
+    ← Category.assoc (G.restrictedAction P.hstable),
+    P.restrictedAction_comp_chartToBase,
+    ← Category.assoc ((G.chartPullbackIso P.U).inv),
+    P.chartPullbackIso_inv_comp_prOpenToBase,
+    Category.assoc, ← P.chartSpecIso_hom_base, Iso.inv_hom_id_assoc]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
