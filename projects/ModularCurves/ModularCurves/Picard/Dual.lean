@@ -417,6 +417,67 @@ theorem dual_val (M : _root_.SheafOfModules R) :
     (dual R M).val = dualPresheaf R M :=
   rfl
 
+set_option maxHeartbeats 4000000 in
+section
+
+private instance overIsMulCommutative (U : C) :
+    ∀ V, IsMulCommutative ((R.over U).obj.obj V) := fun V ↦ by
+  change IsMulCommutative (R.obj.obj (op V.unop.left))
+  infer_instance
+
+private noncomputable def iteratedOverEquivalence (U : C) (V : Over U) :
+    _root_.SheafOfModules ((R.over U).over V) ≌
+      _root_.SheafOfModules (R.over V.left) :=
+  (_root_.SheafOfModules.pushforwardPushforwardEquivalence
+    (Over.iteratedSliceEquiv V)
+    (S := (R.over U).over V) (R := R.over V.left) (𝟙 _) (𝟙 _)
+    (by ext : 2; exact R.1.map_id _) (by ext : 2; exact R.1.map_id _)).symm
+
+private noncomputable def iteratedDualSectionsEquiv
+    (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
+    (((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V))) ≃
+      (M.over V.left ⟶ _root_.SheafOfModules.unit (R.over V.left)) :=
+  (iteratedOverEquivalence R U V).fullyFaithfulFunctor.homEquiv
+
+private noncomputable def iteratedDualSectionsLinearEquiv
+    (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
+    letI : Module (R.obj.obj (op V.left))
+        ((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V)) :=
+      dualSectionsModule (R.over U) (M.over U) V
+    letI := dualSectionsModule R M V.left
+    ((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V))
+      ≃ₗ[R.obj.obj (op V.left)]
+    (M.over V.left ⟶ _root_.SheafOfModules.unit (R.over V.left)) := by
+  letI : Module (R.obj.obj (op V.left))
+      ((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V)) :=
+    dualSectionsModule (R.over U) (M.over U) V
+  letI := dualSectionsModule R M V.left
+  exact
+    { toEquiv := iteratedDualSectionsEquiv R M U V
+      map_add' := by intros; rfl
+      map_smul' := by intros; rfl }
+
+/-- Restricting a dual presheaf to an over-site agrees with taking the dual after
+restriction. -/
+noncomputable def dualOverPresheafIso (M : _root_.SheafOfModules R) (U : C) :
+    ((dual R M).over U).val ≅ (dual (R.over U) (M.over U)).val := by
+  refine PresheafOfModules.isoMk
+    (fun V ↦ (iteratedDualSectionsLinearEquiv R M U V.unop).symm.toModuleIso)
+    (fun {_ _} f ↦ ?_)
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro α
+  rfl
+
+/-- Restricting a sheaf dual to an over-site agrees with taking the dual after
+restriction. -/
+noncomputable def dualOverIso (M : _root_.SheafOfModules R) (U : C) :
+    (dual R M).over U ≅ dual (R.over U) (M.over U) := by
+  exact (_root_.SheafOfModules.fullyFaithfulForget (R.over U)).preimageIso
+    (dualOverPresheafIso R M U)
+
+end
+
 /-- An endomorphism of the unit module over `Over U` is determined by its value at
 `1` over the terminal object. -/
 noncomputable def dualUnitSectionsEquiv (U : C) :
