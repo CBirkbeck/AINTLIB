@@ -591,6 +591,14 @@ section Transport
 
 variable {R : Type u} [CommRing R]
 
+/-- **(T-G4 helper)** `(modelOver W).hom = projModelπ W` as a simp lemma keyed on `modelOver`
+(mathlib's `Over.mk_hom` will not fire on the folded abbrev). Needed to collapse the
+Over-monoidal `.hom`/`.left` spelling to raw `projModelπ`/`projModel` in the transports. -/
+@[simp] lemma modelOver_hom (W : WeierstrassCurve R) : (modelOver W).hom = projModelπ W := rfl
+
+/-- **(T-G4 helper)** `(modelOver W).left = projModel W`, keyed on `modelOver`. -/
+@[simp] lemma modelOver_left (W : WeierstrassCurve R) : (modelOver W).left = projModel W := rfl
+
 /-- **(T-G4 helper)** Of-form base-change naturality of the zero section — the eqToHom-free
 wrapper of `projModelZero_baseChange` (dissolves `projModelBaseChangeOf`'s eqToHom layer by
 `subst`), mirroring `mulModelHomBC_baseChange`. Consumed by the unit-law transports. -/
