@@ -68,6 +68,25 @@ noncomputable def chartPullbackIso (G : FiniteLocallyFreeSubgroup E) (U : E.E.Op
     (G.actionProj.left ⁻¹ᵁ U).toScheme ≅ pullback G.π (U.ι ≫ E.π) :=
   G.restrictedDomainIso U ≪≫ pullbackLeftPullbackSndIso G.π E.π U.ι
 
+/-- **An affine chart patch** for the per-chart Hopf–Galois argument (`[HG-C1b]` leg 3):
+an affine open `V` of the base, together with a `G`-stable affine chart `U` of `E` lying
+over it. On such a patch the restricted translation action dualizes to a co-action of
+`Γ(G|_V)` on `Γ(U)` (the chart co-action), which is the input to the abstract
+Hopf–Galois theorem. Existence of covers by such patches is `[HG-C3]`. -/
+structure AffineChartPatch (G : FiniteLocallyFreeSubgroup E) where
+  /-- The affine base patch. -/
+  V : S.Opens
+  /-- The base patch is affine. -/
+  hV : IsAffineOpen V
+  /-- The stable chart. -/
+  U : E.E.Opens
+  /-- The chart is affine. -/
+  hU : IsAffineOpen U
+  /-- The chart is stable under translation by `G`. -/
+  hstable : G.IsStableOpen U
+  /-- The chart lies over the base patch. -/
+  hover : U ≤ E.π ⁻¹ᵁ V
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
