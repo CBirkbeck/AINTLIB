@@ -454,6 +454,152 @@ theorem bijective_galoisProductMap_coactionBaseChange
   rw [basisOverScalarsOfBasisOverCoinvariants_apply, coinvariantsBasis_apply]
   exact hx i
 
+section ModuleLeftErased
+
+attribute [-instance] Subalgebra.moduleLeft
+
+/-- The canonical Galois map as a `C`-linear map built in the module regime, with
+`Subalgebra.moduleLeft` erased so that the tensor-product module structure on the source
+is the standard one (the `AlgHom`-derived `toLinearMap` would carry the algebra-regime
+instances, which do not match the module-level induction machinery). -/
+noncomputable def canonicalGaloisLinear :
+    (B ⊗[coinvariants ρ] B) →ₗ[coinvariants ρ] B ⊗[R] A where
+  toFun := canonicalGaloisMap ρ
+  map_add' := map_add _
+  map_smul' := fun c y => map_smul (canonicalGaloisMap ρ) c y
+
+@[simp]
+theorem canonicalGaloisLinear_apply (u : B ⊗[coinvariants ρ] B) :
+    canonicalGaloisLinear R A ρ u = canonicalGaloisMap ρ u := rfl
+
+/-- The base-change embedding `B ⊗[R] A → (C' ⊗[C] B) ⊗[R] A`, `x ⊗ a ↦ (1 ⊗ x) ⊗ a`,
+as an `R`-linear map in the module regime. -/
+noncomputable def baseChangeEmbed : (B ⊗[R] A) →ₗ[R]
+    ((C' ⊗[coinvariants ρ] B) ⊗[R] A) :=
+  TensorProduct.map
+    (LinearMap.restrictScalars R (TensorProduct.mk (coinvariants ρ) C' B 1))
+    LinearMap.id
+
+@[simp]
+theorem baseChangeEmbed_tmul (x : B) (a : A) :
+    baseChangeEmbed R A ρ C' (x ⊗ₜ[R] a)
+      = ((1 : C') ⊗ₜ[coinvariants ρ] x) ⊗ₜ[R] a := rfl
+
+/-- The base-changed co-action evaluated on `1 ⊗ c` is the embedded co-action value. -/
+theorem coactionBaseChange_one_tmul_eq_embed (c : B) :
+    coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] c)
+      = baseChangeEmbed R A ρ C' (ρ c) := by
+  rw [coactionBaseChange_tmul]
+  induction ρ c with
+  | zero => rw [TensorProduct.tmul_zero, map_zero, map_zero]
+  | add w₁ w₂ h₁ h₂ =>
+      rw [TensorProduct.tmul_add, map_add, map_add, h₁, h₂]
+  | tmul x a =>
+      rw [baseChangeEmbed_tmul]
+      refine ((baseChangeAssoc R A ρ C').symm_apply_eq).mpr ?_
+      show (1 : C') ⊗ₜ[coinvariants ρ] (x ⊗ₜ[R] a)
+        = (Algebra.TensorProduct.assoc R (coinvariants ρ) C' C' B A)
+            (((1 : C') ⊗ₜ[coinvariants ρ] x) ⊗ₜ[R] a)
+      rw [Algebra.TensorProduct.assoc_tmul]
+
+/-- The heterobasic associator in the module regime. -/
+noncomputable def assocT :
+    ((C' ⊗[coinvariants ρ] B) ⊗[R] A) ≃ₗ[C']
+      C' ⊗[coinvariants ρ] (B ⊗[R] A) :=
+  TensorProduct.AlgebraTensorModule.assoc R (coinvariants ρ) C' C' B A
+
+/-- The module-regime form of the multiplicative heart: a base-changed pure tensor acting
+on a base-changed co-action value. -/
+theorem smul_coactionBaseChange_one_tmul' (c' : C') (b c : B) :
+    ((c' ⊗ₜ[coinvariants ρ] b : C' ⊗[coinvariants ρ] B))
+        • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] c))
+      = (assocT R A ρ C').symm
+          (c' ⊗ₜ[coinvariants ρ] ((b ⊗ₜ[R] (1 : A)) * ρ c)) := by
+  rw [coactionBaseChange_one_tmul_eq_embed]
+  induction ρ c with
+  | zero =>
+      rw [map_zero, smul_zero, mul_zero, TensorProduct.tmul_zero,
+        map_zero (assocT R A ρ C').symm]
+  | add w₁ w₂ h₁ h₂ =>
+      rw [map_add, smul_add, h₁, h₂, mul_add, TensorProduct.tmul_add,
+        map_add (assocT R A ρ C').symm]
+  | tmul x a =>
+      rw [baseChangeEmbed_tmul]
+      rw [show ((c' ⊗ₜ[coinvariants ρ] b : C' ⊗[coinvariants ρ] B))
+          • ((((1 : C') ⊗ₜ[coinvariants ρ] x) ⊗ₜ[R] a) :
+              (C' ⊗[coinvariants ρ] B) ⊗[R] A)
+          = ((c' ⊗ₜ[coinvariants ρ] (b * x)) ⊗ₜ[R] a) from by
+        rw [TensorProduct.smul_tmul', smul_eq_mul,
+          Algebra.TensorProduct.tmul_mul_tmul, mul_one]]
+      rw [show ((b ⊗ₜ[R] (1 : A)) * (x ⊗ₜ[R] a) : B ⊗[R] A)
+          = (b * x) ⊗ₜ[R] a from by
+        rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]]
+      rw [assocT, TensorProduct.AlgebraTensorModule.assoc_symm_tmul]
+
+/-- **The comparison square**: base-changing the canonical Galois map along `C → C'`
+realizes the generalized Galois product map of the base-changed co-action, so its
+injectivity descends per prime. -/
+theorem injective_lTensor_canonicalGaloisMap
+    [Module.Free R A] [Module.Finite R A]
+    [Module.Flat (coinvariants ρ) C'] [IsLocalRing C']
+    [Infinite (IsLocalRing.ResidueField C')]
+    (hρ : IsCoaction ρ) (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    Function.Injective
+      (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)) := by
+  classical
+  set S₁ := (TensorProduct.AlgebraTensorModule.assoc (coinvariants ρ) (coinvariants ρ) C'
+    C' B B).symm with hS₁
+  set S₂ := (TensorProduct.AlgebraTensorModule.cancelBaseChange (coinvariants ρ) C'
+    (C' ⊗[coinvariants ρ] B) (C' ⊗[coinvariants ρ] B) B).symm with hS₂
+  set G := galoisProductMap R A C' (coactionBaseChange R A ρ C')
+    (fun c' => (mem_coinvariants).mp
+      (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c')) with hG
+  have hsq : ∀ u : C' ⊗[coinvariants ρ] (B ⊗[coinvariants ρ] B),
+      (assocT R A ρ C') (G (S₂ (S₁ u)))
+      = (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)) u := by
+    intro u
+    induction u with
+    | zero =>
+        rw [map_zero S₁, map_zero S₂, map_zero G, map_zero (assocT R A ρ C'),
+          map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+    | add u₁ u₂ h₁ h₂ =>
+        rw [map_add S₁, map_add S₂, map_add G, map_add (assocT R A ρ C'), h₁, h₂,
+          ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+    | tmul c' w =>
+        induction w with
+        | zero =>
+            rw [TensorProduct.tmul_zero, map_zero S₁, map_zero S₂, map_zero G,
+              map_zero (assocT R A ρ C'),
+              map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+        | add w₁ w₂ h₁ h₂ =>
+            rw [TensorProduct.tmul_add, map_add S₁, map_add S₂, map_add G,
+              map_add (assocT R A ρ C'), h₁, h₂,
+              ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)),
+              ← TensorProduct.tmul_add]
+        | tmul b₁ b₂ =>
+            rw [hS₁, TensorProduct.AlgebraTensorModule.assoc_symm_tmul, hS₂,
+              TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul, hG,
+              galoisProductMap_tmul, LinearMap.lTensor_tmul]
+            rw [show canonicalGaloisLinear R A ρ (b₁ ⊗ₜ[coinvariants ρ] b₂)
+                = (b₁ ⊗ₜ[R] (1 : A)) * ρ b₂ from canonicalGaloisMap_tmul ρ b₁ b₂]
+            rw [show ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B) ⊗ₜ[R] (1 : A))
+                  * (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂))
+                = ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B))
+                  • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂)) from by
+              rw [Algebra.smul_def]
+              rfl]
+            rw [smul_coactionBaseChange_one_tmul' R A ρ C' c' b₁ b₂,
+              LinearEquiv.apply_symm_apply]
+  intro u v huv
+  have h2 : (assocT R A ρ C') (G (S₂ (S₁ u))) = (assocT R A ρ C') (G (S₂ (S₁ v))) := by
+    rw [hsq u, hsq v, huv]
+  have hGinj : Function.Injective G := by
+    rw [hG]
+    exact (bijective_galoisProductMap_coactionBaseChange R A ρ C' hρ hsurj).injective
+  exact S₁.injective (S₂.injective (hGinj ((assocT R A ρ C').injective h2)))
+
+end ModuleLeftErased
+
 end PerPrime
 
 end ModularCurves
