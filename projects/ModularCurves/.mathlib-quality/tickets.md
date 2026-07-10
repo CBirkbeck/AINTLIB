@@ -15264,3 +15264,49 @@ hit the fleet's shared session limit before cracking it — this is a real infra
 needing fresh budget, NOT a math gap. Simplification banked: **mulOver_comm is proven**, so one unit
 law derives from the other by commutativity — the core need is {one unit + assoc + inv} + the
 whisker-BC lemmas + negModelHom_baseChange. Template: `mulModelHom_comm` (validated end-to-end).
+
+## Amendments v10.127 (2026-07-10, coordinator): ★ NEW-CASCADE audit RATIFIED + B2 EVENT #3 APPROVED (hz-fix); ★★★ PIC0 arc TERMINAL-RATIFIED (Pic.map delivered; codex retarget RETIRED); the Y1 gate-fire is one c5β landing away
+
+- **★ NEW-CASCADE (§v10.123/124-CASCADE) RATIFIED — a model first session.** The gate
+  audit re-verified at source this activation: [T-B6′] `map_add'` is gated by **ONE
+  ingredient — T-G4-at-fields + record packaging — NOT full T-W7a** (the v10.80 gate
+  note is formally superseded). Keystone find: `abelEnrichment_unique_of_isLocallyNoetherian`
+  already proven on y1. Prep branch executed in full: b5da rebased clean over 820
+  commits + re-verified green in a fresh worktree (3,128 jobs); **PR #5223 MERGED**
+  (T-B5D-A/L-A + T-DISC + `NilpotentKerSpecMap` in-tree); **the BB-DIFF MASTER is
+  pre-wired hypothesis-funneled** (`formallyUnramified_torsionπ_of_fibres` +
+  `mulByHom_formallyUnramified_of_fibres`) — at gate-fire the chain L-BC → MASTER →
+  `torsionπ_etale` → six Y1-E leaves discharges mechanically. PARKED at the named gate
+  with the four-step fill recipe pinned.
+- **B2 EVENT #3 APPROVED** (owner-delegate; b2_log.jsonl entry appended):
+  `geomFibrePointAddEquiv`'s hypotheses fail to pin `E.zero`, so the sorried `map_add'`
+  is FALSE as stated (≃+ forces 0 ↦ 0 against `projModelPointsEquiv_zero`; zero-shifted
+  records witness it). Fix = ADD `hz : E.zero ≫ eqToHom hE = projModelZero W`
+  (additive hypothesis; all consumers verified able to supply). EXECUTION: NEW-CASCADE
+  at the fill, same-commit with the `map_add'` proof, log entry quoted; NEW-Y1 (IFACE
+  holder) informed via inbox. The dev → y1 MERGE is approved as fill step 1 (C6 layer
+  absent on y1 — verified; conflicts outside board files ⟹ stop + board).
+- **★★★ PIC0 (§v10.125/126) TERMINAL-RATIFIED**: `Pic.map : Pic X →* Pic Y` (GME 2.16)
+  delivered sorry-free/axiom-clean; pullbackMonoidal (presheaf level, no sheafification)
+  + generic descent; BOTH formerly-registered general-f leaves closed
+  (`nonempty_sheafify_presheafPullback_tensor` relocated+closed;
+  `nonempty_pullback_tensorObj` in new Picard/PullbackTensorObj.lean); map_id/map_val ✓;
+  `Pic.map_comp` = the stream's only sorry, correctly WIP-registered with a banked
+  3-attempt route. **STANDING THREADS RESOLVED**: the v10.109(ii) codex-map-layer
+  retarget is **RETIRED** (the fleet chain is canonical; `-pre-rebase` = reference
+  only; any future landing dedups toward OURS) and the [PIC-P2-CMP] p2-edge is
+  **SATISFIED-BY-CONSUMPTION** (merged Dual.lean provides the module-sheaf duals; not
+  Cartier duality — no p2 debt). Next-session order in inbox: map_comp (stop-lined) →
+  P2-CMP both directions → producer-scope cleanup tail.
+- **Fleet absorbs (on charter)**: fable-P4 — ★★ B3 CAPSTONE landed (X₀ construction +
+  α-descent + packaging; engine strengthened to expose q-invariance); 2 bijection
+  sorries remain in flight. fable-FP — [02KL-CORE] decompose + KL-0/KL-1 (filtered-colimit
+  presentation system) + KL-5a/5b proven; on KL-2 coefficient descent. NEW-HOPF —
+  C1c-1b/1c: ALL THREE Hopf maps R-linear (Δ R-linearity ★), full commutative
+  group-object law set, patchKunnethGamma iso + tensor_hom_ext (the uniqueness tool).
+  D2 — LFP 1/2/3/3-cover/4a green, on 4b. c5β — c6 + all 5 atlas axioms +
+  mulModelHom_comm committed; **T-G4 Over-level transports in flight (bg agent)**.
+- **THE GATE MOMENT (watch item #1)**: when c5β boards T-G4, NEW-CASCADE re-fires
+  (opener pre-staged with the owner) → hz-fix + map_add' fill → L-BC → BB-DIFF MASTER →
+  `torsionπ_etale` → the six Y1-E leaves open → NEW-Y1's E-track + MASTER session
+  becomes fully un-gated. Y₁(N) sorry-free is then two designed sessions away.
