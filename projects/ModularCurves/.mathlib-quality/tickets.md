@@ -14187,3 +14187,23 @@ stands).
 handshake if -3 hasn't fired; otherwise stand down — one session finishes it.
 (Coordinator seat re-seated fresh this morning — the prior coordinator session
 rate-limited at 09:13; continuity = COORDINATOR-HANDOVER.md + board v10.94→v10.106.)
+
+## Amendments v10.100 (fable-PIC0) — [D-PresPB′-general] leaves B1+B2 LANDED (build GO executing)
+
+Per the coordinator-ratified build GO. All axiom-clean [propext, Classical.choice, Quot.sound]:
+- **B1a** `restrictScalarsLaxεApp/μApp` + NatTrans-level + **`restrictScalarsLaxMonoidal`** —
+  presheaf-level restriction of scalars along an arbitrary CommRingCat-presheaf morphism is lax
+  monoidal. Components per the banked recipe (mapOfCompatibleSMul, hint-typed ofHom, rfl-tmul);
+  **all five coherence fields closed by elementwise `rfl`** (everything is tmul↦tmul).
+- **B1+B2 fused** `nonempty_pullback_oplaxMonoidal` — the presheaf pullback carries an oplax
+  monoidal structure (the δ-comparison, natural + coherent). KEY packaging discovery after a
+  6-iteration instance-flavor wall on the direct/native spellings: define `pushforwardFactored :=
+  pushforward₀OfCommRingCat ⋙ restrictScalars` (the spelling where BOTH factors' lax structures
+  fire natively), bridge with a componentwise-`Iso.refl` NatIso (`pushforwardIsoFactored`), and
+  transport the adjunction by **`Adjunction.ofNatIsoRight`** before `leftAdjointOplaxMonoidal` —
+  never re-type a lax STRUCTURE across spellings (kernel autoParam-wart; two measured failure
+  modes banked in-session), transport the ADJUNCTION instead.
+- Skeleton leaf `nonempty_pushforward_laxMonoidal` replaced by the fused oplax form (producer-owned
+  statement refinement; the oplax δ is what G1/G3 consume).
+**Remaining:** G1 (lattice-miracle free-yoneda ⊗, sorried) → G3 (presentation five-lemma) → A
+(packaging → (Modules.pullback f).Monoidal → Pic(f)). 2 registered general-f Props unchanged.
