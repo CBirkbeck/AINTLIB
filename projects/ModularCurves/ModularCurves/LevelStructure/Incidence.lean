@@ -139,6 +139,76 @@ theorem apply_mem_submoduleVanishingIdeal {J : Submodule R M} {g : M} (hg : g �
     (φ : Module.Dual R M) : φ g ∈ submoduleVanishingIdeal R M J :=
   sectionVanishingIdeal_le_submoduleVanishingIdeal hg (Ideal.subset_span ⟨φ, rfl⟩)
 
+/-- **([T-SG3-LFP-1])** Over a finite projective module, the vanishing ideal of a section
+is finitely generated: splitting `M` off a finite free module, it is the ideal of the
+(finitely many) free coordinates of the section. This is the finite-generation half of
+KM's "defined locally by finitely many equations". -/
+theorem sectionVanishingIdeal_fg [Module.Finite R M] [Module.Projective R M] (σ : M) :
+    (sectionVanishingIdeal R M σ).FG := by
+  classical
+  obtain ⟨n, p, hp⟩ := Module.Finite.exists_fin' R M
+  obtain ⟨s, hs⟩ := Module.projective_lifting_property p LinearMap.id hp
+  refine ⟨Finset.univ.image fun i : Fin n => s σ i, ?_⟩
+  apply le_antisymm
+  · refine Ideal.span_le.2 ?_
+    intro x hx
+    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hx)
+    exact Ideal.subset_span ⟨(LinearMap.proj i).comp s, rfl⟩
+  · refine Ideal.span_le.2 ?_
+    rintro _ ⟨φ, rfl⟩
+    show φ σ ∈ _
+    have hφ : φ σ = (φ.comp p) (s σ) := by
+      rw [LinearMap.comp_apply, show p (s σ) = σ from congrArg (· σ) hs]
+    have hexp : φ σ = ∑ i : Fin n, s σ i * (φ.comp p) fun j => if i = j then 1 else 0 := by
+      rw [hφ, LinearMap.pi_apply_eq_sum_univ (φ.comp p) (s σ)]
+      simp only [smul_eq_mul]
+    rw [hexp]
+    refine Ideal.sum_mem _ fun i _ => ?_
+    refine Ideal.mul_mem_right _ _ (Ideal.subset_span ?_)
+    exact Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_univ i))
+
+/-- **([T-SG3-LFP-2])** Over a finite projective module, the vanishing ideal of a
+finitely generated submodule is finitely generated: it is the (finite) supremum of the
+vanishing ideals of the generators. -/
+theorem submoduleVanishingIdeal_fg [Module.Finite R M] [Module.Projective R M]
+    {J : Submodule R M} (hJ : J.FG) : (submoduleVanishingIdeal R M J).FG := by
+  classical
+  obtain ⟨tset, htJ⟩ := hJ
+  have hsup : submoduleVanishingIdeal R M J =
+      tset.sup fun g => sectionVanishingIdeal R M g := by
+    have key : ∀ x ∈ Submodule.span R (tset : Set M), ∀ φ : Module.Dual R M,
+        φ x ∈ tset.sup fun g => sectionVanishingIdeal R M g := by
+      intro x hx
+      induction hx using Submodule.span_induction with
+      | mem y hy =>
+          exact fun φ => (Finset.le_sup (f := fun g => sectionVanishingIdeal R M g) hy)
+            (Ideal.subset_span ⟨φ, rfl⟩)
+      | zero => intro φ; simpa using Submodule.zero_mem _
+      | add y z _ _ hy hz =>
+          intro φ
+          rw [map_add]
+          exact Ideal.add_mem _ (hy φ) (hz φ)
+      | smul r y _ hy =>
+          intro φ
+          rw [map_smul, smul_eq_mul]
+          exact Ideal.mul_mem_left _ _ (hy φ)
+    apply le_antisymm
+    · refine iSup_le fun g => Ideal.span_le.2 ?_
+      rintro _ ⟨φ, rfl⟩
+      exact key g.1 (htJ ▸ g.2) φ
+    · refine Finset.sup_le fun g hg => ?_
+      exact sectionVanishingIdeal_le_submoduleVanishingIdeal
+        (htJ ▸ Submodule.subset_span hg)
+  rw [hsup]
+  clear hsup htJ
+  induction tset using Finset.induction_on with
+  | empty =>
+      rw [Finset.sup_empty]
+      exact Submodule.fg_bot
+  | insert a tset ha ih =>
+      rw [Finset.sup_insert]
+      exact Submodule.FG.sup (sectionVanishingIdeal_fg a) ih
+
 open IsLocalizedModule in
 /-- **(T-D14c-0, gluing keystone)** The vanishing ideal of a submodule commutes with
 localization when the ambient module is finitely presented (so that linear functionals
