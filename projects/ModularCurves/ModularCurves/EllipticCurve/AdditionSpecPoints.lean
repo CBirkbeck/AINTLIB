@@ -1795,10 +1795,7 @@ lemma eqToHom_hom_isLocalizationElem {σ : Type*} {A : Type u} [CommRing A] [Set
   subst h
   rfl
 
-namespace ModularCurves
-open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
-attribute [local instance] MvPolynomial.gradedAlgebra
-variable {U : Type u} [CommRing U] {R : Type u} [CommRing R]
+variable {U : Type u} [CommRing U]
 
 /-- [e4c] `isLocalizationElem` transported along an equality of the numerator generator. -/
 lemma isLocalizationElem_congr_right {σ : Type*} {A : Type u} [CommRing A] [SetLike σ A]
