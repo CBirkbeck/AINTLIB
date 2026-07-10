@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.ForMathlib.SchemeQuotient
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import Mathlib.AlgebraicGeometry.EffectiveEpi
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # G-maps of finite étale G-torsors ([B2a]/[B2b], KM pp. 115–116)
@@ -277,26 +278,28 @@ theorem kernelPair_coequalized_of_invariant {S Z Y : Scheme.{u}} {G : Type u} [G
   rw [hq γ, Category.id_comp]
 
 /-- **([B2c′], torsor morphism-descent — KM p. 114/115)** A `G`-invariant morphism out of a
-finite étale `G`-torsor `f : Z ⟶ S` **over an affine base** descends uniquely through `f`:
-there is a unique `u : S ⟶ Y` with `f ≫ u = q`. (Affine `S`/`Z` is the generality mathlib's
-regular-epi `isRegularEpi_of_flat_of_surjective_of_isAffine` supplies, and covers the engine's
-own invocation `𝕸(𝒫,δ) → 𝕸(𝒫,δ)/G` = `Spec A → Spec Aᴳ`.) -/
+finite étale `G`-torsor `f : Z ⟶ S` descends **uniquely** through `f` (the torsor realizes its
+base `S` as the quotient `Z/G`) — over an **arbitrary** base. The `torsorCompare` presentation
+`∐_G Z ≅ Z ×_S Z` reduces the kernel-pair coequalizing condition to invariance, and a
+quasi-compact + surjective + flat morphism is an fpqc effective epimorphism
+(`AlgebraicGeometry.Sites.Fpqc`); no affineness or finiteness of `G` is needed. -/
 theorem existsUnique_descent_of_torsor {S Z Y : Scheme.{u}} {G : Type u} [Group G]
     {f : Z ⟶ S} (σ : SchemeAction G Z) (hover : ∀ γ, σ.hom γ ≫ f = f)
     (htors : IsIso (torsorCompare f σ hover))
-    [IsAffine S] [IsAffine Z] [Surjective f] [Flat f]
+    [Surjective f] [Flat f] [QuasiCompact f]
     (q : Z ⟶ Y) (hq : ∀ γ, σ.hom γ ≫ q = q) :
     ∃! u : S ⟶ Y, f ≫ u = q := by
-  haveI : IsRegularEpi f := AlgebraicGeometry.isRegularEpi_of_flat_of_surjective_of_isAffine f
-  have hkp : IsKernelPair f (pullback.fst f f) (pullback.snd f f) :=
-    IsPullback.of_hasPullback f f
-  have hcoeq : IsColimit (Cofork.ofπ f hkp.w) := hkp.toCoequalizer'
-  have hqcoeq := kernelPair_coequalized_of_invariant σ hover htors q hq
-  haveI : Epi f := IsRegularEpi.getStruct f |>.epi f
-  have hfac : f ≫ hcoeq.desc (Cofork.ofπ q hqcoeq) = q :=
-    hcoeq.fac (Cofork.ofπ q hqcoeq) WalkingParallelPair.one
-  refine ⟨hcoeq.desc (Cofork.ofπ q hqcoeq), hfac, ?_⟩
-  intro u hu
-  exact (cancel_epi f).mp (hu.trans hfac.symm)
+  have hqcoeq : pullback.fst f f ≫ q = pullback.snd f f ≫ q :=
+    kernelPair_coequalized_of_invariant σ hover htors q hq
+  -- any pair coequalized by `f` is coequalized by `q`, via the kernel-pair lift
+  have h : ∀ {Z' : Scheme.{u}} (g₁ g₂ : Z' ⟶ Z), g₁ ≫ f = g₂ ≫ f → g₁ ≫ q = g₂ ≫ q := by
+    intro Z' g₁ g₂ heq
+    calc g₁ ≫ q
+        = pullback.lift g₁ g₂ heq ≫ pullback.fst f f ≫ q := by
+          rw [← Category.assoc, pullback.lift_fst]
+      _ = pullback.lift g₁ g₂ heq ≫ pullback.snd f f ≫ q := by rw [hqcoeq]
+      _ = g₂ ≫ q := by rw [← Category.assoc, pullback.lift_snd]
+  exact ⟨EffectiveEpi.desc f q h, EffectiveEpi.fac f q h,
+    fun u hu => EffectiveEpi.uniq f q h u hu⟩
 
 end ModularCurves
