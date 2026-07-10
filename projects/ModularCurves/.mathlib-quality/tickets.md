@@ -14680,3 +14680,27 @@ Then C1d (assembly against C2's closed immersion), C3, C4 ⟹ pins ⟹ **BOARD-S
   (charter completed by -3); their inbox reclaim clauses are VOID.
 - Standing reminder: beastmode-A's holder-look opener (v10.116) not yet fired — the
   codex PR #5224 merge still waits on A's verdict. Unrelated to the Y1 path.
+
+## PHASE B — B3 refined sub-structure (fable-P4, 2026-07-10, post-crux)
+Landed ungate-able ingredients: [B0] GlobalModelTransport (bc3417905), [B1] existsUnique_alpha_descent
+(d6998c7e0), [B2a/B2b] TorsorMap iso/cartesian (872d78b24), [B2c'] existsUnique_descent_of_torsor
+(c76036c43, AFFINE base). B3 remaining sub-pieces:
+* **[B3-obj]** the quotient EllObj X₀ from the engine's C' : EllipticCurveGeom (X/G): curve :=
+  C'.toEllipticCurve (⚠ GATE T-W7: toEllipticCurve routes through grpObj sorry, c5β active chain —
+  land MODULO, flip on their landing, T-A3 pattern); structMap : X/G ⟶ Spec R by descending Z's
+  structMap through existsUnique_quotientπ_lift (invariance: action is over Spec R). The q-EllHom
+  XE ⟶ X₀ from the engine's cartesian+zero output.
+* **[B3-descent-genS]** GENERAL-S extension of existsUnique_descent_of_torsor (drop [IsAffine S]
+  [IsAffine Z]): Zariski-glue on S mirroring mathlib's EffectiveEpiConstruction.exists_openCover_exists
+  — a bounded sub-ticket; needed IFF the homEquiv is built at full EllObj generality (arbitrary
+  Y.base). Alternative: a Zariski-sheaf local-to-global reduction of IsRepresentable to affine bases.
+  DECISION at assembly time: try affine-only first (engine's own invocation is affine); escalate to
+  genS only if IsRepresentable genuinely needs arbitrary Y.
+* **[B3-bij]** the homEquiv (Y ⟶ X₀) ≃ P.obj (op Y) natural in Y: fwd = pull back universal class;
+  invFun = classifying map f₀ via the δ-torsor td := (htors Y).some + B2c'-descent of f≫quotientπ;
+  left_inv = existence a) (rigidity + B1 + map_eqv + cancel_epi); right_inv = uniqueness b)
+  (B2a cartesian + B2b torsor-iso + π-epi). Naturality from eqv/nat + homEquiv_comp (mimic
+  simulRepresentableBy's packaging).
+* **[B3-fill]** representable_of_rigid_of_torsor_of_globalModel := assemble; then the model-free
+  representable_of_rigid_of_torsor when [OWNER-FLW] lands. Axiom trail expected:
+  [propext, Classical.choice, Quot.sound, sorryAx] with sorryAx = T-W7 only (flips clean on c5β).
