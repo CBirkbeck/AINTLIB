@@ -153,40 +153,40 @@ theorem injective_of_forall_lTensor_localPolynomialExtension (F : M →ₗ[C] N)
   exact H P (by
     rw [LinearMap.lTensor_tmul, LinearMap.lTensor_tmul, hxy])
 
-/-- **Flat-cover flatness**, abstract form: a module over `C` is flat as soon as its base
-change to some family of faithfully flat extensions `E P` of the localizations at maximal
-ideals is flat. The family is abstract so that consumers can supply the scalar structures
-explicitly (instance search over concrete towers of localizations is prohibitively
-expensive). -/
-theorem flat_of_forall_flat_extension
-    (E : ∀ (P : Ideal C) [P.IsMaximal], Type*)
-    [∀ (P : Ideal C) [P.IsMaximal], CommRing (E P)]
-    [instEC : ∀ (P : Ideal C) [P.IsMaximal], Algebra C (E P)]
-    [instECp : ∀ (P : Ideal C) [P.IsMaximal], Algebra (Localization.AtPrime P) (E P)]
-    [instTower : ∀ (P : Ideal C) [P.IsMaximal],
-      IsScalarTower C (Localization.AtPrime P) (E P)]
-    [instFF : ∀ (P : Ideal C) [P.IsMaximal],
-      Module.FaithfullyFlat (Localization.AtPrime P) (E P)]
-    (H : ∀ (P : Ideal C) [P.IsMaximal], Module.Flat (E P) ((E P) ⊗[C] M)) :
+/-- **Flat-cover flatness, localized glue**: flatness over `C` follows from flatness of
+the localizations at all maximal ideals. -/
+theorem flat_of_forall_flat_localized
+    (H : ∀ (P : Ideal C) [P.IsMaximal],
+      Module.Flat C ((Localization.AtPrime P) ⊗[C] M)) :
     Module.Flat C M := by
   classical
   haveI hloc : ∀ (P : Ideal C) [P.IsMaximal], IsLocalizedModule P.primeCompl
       (TensorProduct.mk C (Localization.AtPrime P) M 1) := fun P _ =>
     (isLocalizedModule_iff_isBaseChange P.primeCompl (Localization.AtPrime P) _).mpr
       (TensorProduct.isBaseChange C M (Localization.AtPrime P))
-  refine Module.flat_of_isLocalized_maximal (R := C) (S := C) (M := M)
+  exact Module.flat_of_isLocalized_maximal (R := C) (S := C) (M := M)
     (fun P _ => (Localization.AtPrime P) ⊗[C] M)
     (fun P _ => TensorProduct.mk C (Localization.AtPrime P) M 1)
-    (fun P _ => ?_)
-  haveI hflat2 : Module.Flat (E P)
-      ((E P) ⊗[Localization.AtPrime P] ((Localization.AtPrime P) ⊗[C] M)) :=
+    (fun P _ => H P)
+
+/-- **Per-prime flatness descent**: flatness of the localized module descends from a
+faithfully flat extension of the localization. The extension is abstract so consumers can
+discharge the scalar structure per prime. -/
+theorem flat_localized_of_flat_extension (P : Ideal C) [P.IsMaximal]
+    (E : Type*) [CommRing E] [Algebra C E] [Algebra (Localization.AtPrime P) E]
+    [IsScalarTower C (Localization.AtPrime P) E]
+    [Module.FaithfullyFlat (Localization.AtPrime P) E]
+    (hE : Module.Flat E (E ⊗[C] M)) :
+    Module.Flat C ((Localization.AtPrime P) ⊗[C] M) := by
+  haveI hflat2 : Module.Flat E
+      (E ⊗[Localization.AtPrime P] ((Localization.AtPrime P) ⊗[C] M)) :=
     (Module.Flat.equiv_iff
       (TensorProduct.AlgebraTensorModule.cancelBaseChange
-        C (Localization.AtPrime P) (E P) (E P) M)).mpr (H P)
+        C (Localization.AtPrime P) E E M)).mpr hE
   haveI hflatCp : Module.Flat (Localization.AtPrime P)
       ((Localization.AtPrime P) ⊗[C] M) :=
     Module.Flat.of_flat_tensorProduct (R := Localization.AtPrime P)
-      (M := (Localization.AtPrime P) ⊗[C] M) (S := E P)
+      (M := (Localization.AtPrime P) ⊗[C] M) (S := E)
   exact (Module.flat_iff_of_isLocalization (Localization.AtPrime P) P.primeCompl
     ((Localization.AtPrime P) ⊗[C] M)).mp hflatCp
 
@@ -707,17 +707,25 @@ variable [Module.Free R A] [Module.Finite R A]
 variable {B : Type*} [CommRing B] [Algebra R B]
 variable (ρ : B →ₐ[R] B ⊗[R] A)
 
+attribute [-instance] Subalgebra.instSMulSubtypeMem in
 /-- **Flatness of `B` over the co-invariants**: per prime, the flat local extension turns
 `B` free; descend along the faithfully flat extension and glue over the maximal ideals. -/
 theorem flat_coinvariants (hρ : IsCoaction ρ)
     (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
     Module.Flat (coinvariants ρ) B := by
-  -- DS-HOPF-1: instance-key alignment for the extension-family tower
-  -- (`IsScalarTower C (Localization.AtPrime P) (LocalPolynomialExtension _)`)
-  -- between the abstract glue and the concrete consumer. All mathematical
-  -- content is proven (`free_baseChange_of_surjective_galoisPrecursor` +
-  -- `flat_of_forall_flat_extension`); this is pure instance plumbing.
-  sorry
+  classical
+  refine flat_of_forall_flat_localized (fun P _ => ?_)
+  haveI hflatCp : Module.Flat (coinvariants ρ) (Localization.AtPrime P) :=
+    IsLocalization.flat _ P.primeCompl
+  haveI hflatCx : Module.Flat (coinvariants ρ)
+      (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) :=
+    Module.Flat.trans (coinvariants ρ) (Localization.AtPrime P)
+      (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+  haveI hfree := free_baseChange_of_surjective_galoisPrecursor R A ρ
+    (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) hρ hsurj
+  exact flat_localized_of_flat_extension P
+    (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+    Module.Flat.of_free
 
 /-- **Faithful flatness of `B` over the co-invariants**: flatness plus surjectivity on
 prime spectra (lying-over along the integral extension). -/
