@@ -13736,3 +13736,26 @@ elaboration-unification is more permissive than keyed matching.
 
 **NEXT**: [C1b] chart Künneth + ρ_U; [C1c] IsCoaction; [C1d] chart-data assembly
 (consumes C2 via IsClosedImmersion-restriction to charts); [C3] stable covers; [C4] glue.
+
+### v10.95k (2026-07-10, fable-FP): ★★★ THE COCYCLE IS PROVEN — every GlueData condition of the Grassmannian atlas is now discharged
+
+- **`tPrimeRing_cocycle` PROVEN** (GrassmannianGlueData.lean sorry-free, axiom-clean;
+  done INLINE after the second agent died on the API session limit): the triple
+  t'-composite is the identity. Architecture as pinned: `cocycle_core` (the triple
+  composite restricted to the ι-chart ring is the canonical base map) via
+  `MvPolynomial.ringHom_ext` — C-case bookkeeping; X-case = the **matrix telescope**:
+  with M₁/K/N₃/N₂ the mapped transition matrices, `N₃ = M₁⁻¹K` and `N₂ = N₃⁻¹M₁⁻¹`
+  (from `map_ringHom_matrix_triple`/`map_ringHom_matrix` + the new
+  `map_nonsing_inv`), so the three transport steps
+  (`comp_ringHom_column` ×3) collapse: `N₂⁻¹ (N₃⁻¹ (M₁⁻¹ base)) = base`. Both tensor
+  branches then assemble via `Algebra.TensorProduct.ringHom_ext` +
+  `IsLocalization.ringHom_ext` + the base-slide (`includeLeft∘alg = includeRight∘alg`).
+- New Transition-file workhorses (all proven): **`map_inv_mulVec`** (ring homs push
+  through `M⁻¹ *ᵥ ·`), **`comp_ringHom_column`** (the uniform transition transport,
+  generalizing the private solution-column lemma), **`map_nonsing_inv`** (ring homs
+  commute with nonsingular inversion).
+- **★ EVERY `Scheme.GlueData` condition is now proven**: U/V/f (open immersions ✓) ·
+  t (`overlapTransition`) ✓ · t_id ✓ · inverse-pair ✓ · t' (`tPrimeScheme`) ✓ · t_fac ✓
+  · **cocycle ✓ (ring level; the Spec-level transport is `Spec.map`-functoriality over
+  the proven ring identity)**. NEXT: assemble the `Scheme.GlueData` structure term +
+  glued scheme, then [GR-G] T-points ⟹ NISOG [L15].

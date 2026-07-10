@@ -66,7 +66,7 @@ lemma overlapTransition_comp (ι ι' : Fin k ↪ Fin n) :
 
 section TPrime
 
-open TensorProduct
+open TensorProduct Matrix
 
 variable (ι ι' ι'' : Fin k ↪ Fin n)
 
@@ -228,15 +228,420 @@ lemma tPrimeScheme_fac :
           Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'') := rfl
   rw [hsplit, Spec.map_comp, pullbackSpecIso_hom_fst_assoc]
 
+private lemma tPrimeRing_comp_includeLeft :
+    (tPrimeRing R ι ι' ι'').comp (Algebra.TensorProduct.includeLeftRingHom :
+      Localization.Away (Transition.det (R := R) ι' ι'') →+* doubleRing R ι' ι'' ι)
+      = tPrimeLegRight R ι ι' ι'' := by
+  refine RingHom.ext fun x => ?_
+  rw [RingHom.comp_apply]
+  rw [show (Algebra.TensorProduct.includeLeftRingHom x : doubleRing R ι' ι'' ι)
+      = x ⊗ₜ 1 from rfl]
+  rw [tPrimeRing_tmul, map_one, mul_one]
+
+private lemma tPrimeRing_comp_includeRight :
+    (tPrimeRing R ι ι' ι'').comp
+      ((Algebra.TensorProduct.includeRight :
+        Localization.Away (Transition.det (R := R) ι' ι) →ₐ[ChartRing R ι']
+          doubleRing R ι' ι'' ι) :
+        Localization.Away (Transition.det (R := R) ι' ι) →+* doubleRing R ι' ι'' ι)
+      = tPrimeLegLeft R ι ι' ι'' := by
+  refine RingHom.ext fun y => ?_
+  rw [RingHom.comp_apply]
+  rw [show (((Algebra.TensorProduct.includeRight :
+      Localization.Away (Transition.det (R := R) ι' ι) →ₐ[ChartRing R ι']
+        doubleRing R ι' ι'' ι) :
+      Localization.Away (Transition.det (R := R) ι' ι) →+* doubleRing R ι' ι'' ι) y :
+      doubleRing R ι' ι'' ι) = (1 : Localization.Away
+        (Transition.det (R := R) ι' ι'')) ⊗ₜ y from rfl]
+  rw [tPrimeRing_tmul, map_one, one_mul]
+
+/-- The two base inclusions agree on the chart ring — the base-element slide at map
+level. -/
+private lemma includeLeft_algebraMap_eq_includeRight_algebraMap :
+    ((Algebra.TensorProduct.includeLeftRingHom :
+      Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'').comp
+        (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι'))))
+    = ((Algebra.TensorProduct.includeRight :
+        Localization.Away (Transition.det (R := R) ι ι'') →ₐ[ChartRing R ι]
+          doubleRing R ι ι' ι'') :
+        Localization.Away (Transition.det (R := R) ι ι'') →+* doubleRing R ι ι' ι'').comp
+        (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι''))) := by
+  refine RingHom.ext fun q => ?_
+  rw [RingHom.comp_apply, RingHom.comp_apply]
+  rw [show ((Algebra.TensorProduct.includeLeftRingHom :
+      Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+      (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι')) q) :
+      doubleRing R ι ι' ι'')
+      = algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι')) q
+        ⊗ₜ 1 from rfl]
+  rw [show (((Algebra.TensorProduct.includeRight :
+      Localization.Away (Transition.det (R := R) ι ι'') →ₐ[ChartRing R ι]
+        doubleRing R ι ι' ι'') :
+      Localization.Away (Transition.det (R := R) ι ι'') →+* doubleRing R ι ι' ι'')
+      (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι'')) q) :
+      doubleRing R ι ι' ι'')
+      = (1 : Localization.Away (Transition.det (R := R) ι ι')) ⊗ₜ
+          algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι'')) q from rfl]
+  rw [← Algebra.TensorProduct.algebraMap_apply, Algebra.TensorProduct.algebraMap_apply']
+
+/-- The core of the cocycle: the triple transition composite restricted to the ι-chart
+ring is the canonical base map. Proven by the matrix telescope `N₂ = N₃⁻¹ · M₁⁻¹`. -/
+private lemma cocycle_core :
+    (((tPrimeRing R ι ι' ι'').comp (tPrimeLegRight R ι' ι'' ι)).comp
+        (Transition.ringHom (R := R) ι'' ι))
+      = (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'').comp
+        (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι'))) := by
+  classical
+  set inclL : Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'' :=
+    Algebra.TensorProduct.includeLeftRingHom with hinclL
+  -- composition specs, all in nested-application form
+  have hF₃alg : ∀ q, tPrimeLegRight R ι ι' ι''
+      (algebraMap (ChartRing R ι')
+        (Localization.Away (Transition.det (R := R) ι' ι'')) q)
+      = inclL (Transition.ringHom (R := R) ι ι' q) := fun q =>
+    IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι ι' ι'') q
+  have hF₂alg : ∀ q, tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+      (algebraMap (ChartRing R ι'')
+        (Localization.Away (Transition.det (R := R) ι'' ι)) q))
+      = tPrimeLegRight R ι ι' ι'' (Transition.ringHom (R := R) ι' ι'' q) := by
+    intro q
+    have hlg : tPrimeLegRight R ι' ι'' ι (algebraMap (ChartRing R ι'')
+        (Localization.Away (Transition.det (R := R) ι'' ι)) q)
+        = tPrimeBase R ι' ι'' ι q :=
+      IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι' ι'' ι) q
+    rw [hlg]
+    have hcl := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι ι' ι'')
+      (Transition.ringHom (R := R) ι' ι'' q)
+    rw [RingHom.comp_apply] at hcl
+    exact hcl
+  -- the telescope matrices (function-literal maps) and their determinant units
+  set M₁ : Matrix (Fin k) (Fin k) (doubleRing R ι ι' ι'') :=
+    (Transition.matrix (R := R) ι ι').map (fun q => inclL (algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι')) q)) with hM₁
+  set K : Matrix (Fin k) (Fin k) (doubleRing R ι ι' ι'') :=
+    (Transition.matrix (R := R) ι ι'').map (fun q => inclL (algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι')) q)) with hK
+  set N₃ : Matrix (Fin k) (Fin k) (doubleRing R ι ι' ι'') :=
+    (Transition.matrix (R := R) ι' ι'').map (fun q => tPrimeLegRight R ι ι' ι''
+      (algebraMap (ChartRing R ι')
+        (Localization.Away (Transition.det (R := R) ι' ι'')) q)) with hN₃
+  set N₂ : Matrix (Fin k) (Fin k) (doubleRing R ι ι' ι'') :=
+    (Transition.matrix (R := R) ι'' ι).map (fun q => tPrimeRing R ι ι' ι''
+      (tPrimeLegRight R ι' ι'' ι (algebraMap (ChartRing R ι'')
+        (Localization.Away (Transition.det (R := R) ι'' ι)) q))) with hN₂
+  have hM₁eq : M₁ = (Transition.matrixAway (R := R) ι ι').map ⇑inclL := by
+    rw [hM₁, Transition.matrixAway, Matrix.map_map]
+    rfl
+  have hM₁det : IsUnit M₁.det := by
+    rw [hM₁eq, ← RingHom.mapMatrix_apply, ← RingHom.map_det]
+    exact (Transition.isUnit_det_matrixAway ι ι').map _
+  have hKdet : IsUnit K.det := by
+    have hKdet' : K.det = inclL (algebraMap (ChartRing R ι)
+        (Localization.Away (Transition.det (R := R) ι ι'))
+        (Transition.det (R := R) ι ι'')) := by
+      rw [hK]
+      rw [show ((Transition.matrix (R := R) ι ι'').map
+          (fun q => inclL (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι')) q)))
+          = (Transition.matrix (R := R) ι ι'').map
+            ⇑(inclL.comp (algebraMap (ChartRing R ι)
+              (Localization.Away (Transition.det (R := R) ι ι')))) from rfl]
+      rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
+      rfl
+    rw [hKdet']
+    have hsw := RingHom.congr_fun
+      (includeLeft_algebraMap_eq_includeRight_algebraMap R ι ι' ι'')
+      (Transition.det (R := R) ι ι'')
+    rw [RingHom.comp_apply, RingHom.comp_apply] at hsw
+    rw [hinclL, hsw]
+    exact (IsLocalization.Away.algebraMap_isUnit
+      (Transition.det (R := R) ι ι'')).map _
+  have hN₃eq : N₃ = M₁⁻¹ * K := by
+    have h1 : N₃ = ((Transition.matrix (R := R) ι' ι'').map
+        ⇑(Transition.ringHom (R := R) ι ι')).map ⇑inclL := by
+      rw [hN₃, Matrix.map_map]
+      exact congrArg (Matrix.map (Transition.matrix (R := R) ι' ι''))
+        (funext fun q => hF₃alg q)
+    have h2 : ((Transition.matrixAway (R := R) ι ι')⁻¹ *
+        (Transition.matrix (R := R) ι ι'').map (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')))).map ⇑inclL
+        = ((Transition.matrixAway (R := R) ι ι')⁻¹.map ⇑inclL) *
+          (((Transition.matrix (R := R) ι ι'').map (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι')))).map ⇑inclL) := by
+      funext i₁ i₂
+      simp [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul]
+    rw [h1, Transition.map_ringHom_matrix_triple, h2,
+      ← Transition.map_nonsing_inv inclL _ (Transition.isUnit_det_matrixAway ι ι'),
+      ← hM₁eq, hK, Matrix.map_map]
+    rfl
+  have hN₃det : IsUnit N₃.det := by
+    rw [hN₃eq, Matrix.det_mul]
+    exact (Matrix.isUnit_det_of_left_inverse
+      (Matrix.mul_nonsing_inv _ hM₁det)).mul hKdet
+  have hN₃away : (Transition.matrixAway (R := R) ι' ι'').map
+      ⇑(tPrimeLegRight R ι ι' ι'') = N₃ := by
+    rw [hN₃, Transition.matrixAway, Matrix.map_map]
+    rfl
+  have hN₂eq : N₂ = N₃⁻¹ * M₁⁻¹ := by
+    have h1 : N₂ = ((Transition.matrix (R := R) ι'' ι).map
+        ⇑(Transition.ringHom (R := R) ι' ι'')).map
+          ⇑(tPrimeLegRight R ι ι' ι'') := by
+      rw [hN₂, Matrix.map_map]
+      exact congrArg (Matrix.map (Transition.matrix (R := R) ι'' ι))
+        (funext fun q => hF₂alg q)
+    have h2 : ((Transition.matrixAway (R := R) ι' ι'')⁻¹ *
+        (Transition.matrix (R := R) ι' ι).map (algebraMap (ChartRing R ι')
+          (Localization.Away (Transition.det (R := R) ι' ι'')))).map
+          ⇑(tPrimeLegRight R ι ι' ι'')
+        = ((Transition.matrixAway (R := R) ι' ι'')⁻¹.map
+            ⇑(tPrimeLegRight R ι ι' ι'')) *
+          (((Transition.matrix (R := R) ι' ι).map (algebraMap (ChartRing R ι')
+            (Localization.Away (Transition.det (R := R) ι' ι'')))).map
+            ⇑(tPrimeLegRight R ι ι' ι'')) := by
+      funext i₁ i₂
+      simp [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul]
+    have h3 : ((Transition.matrix (R := R) ι' ι).map (algebraMap (ChartRing R ι')
+        (Localization.Away (Transition.det (R := R) ι' ι'')))).map
+        ⇑(tPrimeLegRight R ι ι' ι'')
+        = ((Transition.matrix (R := R) ι' ι).map
+          ⇑(Transition.ringHom (R := R) ι ι')).map ⇑inclL := by
+      rw [Matrix.map_map, Matrix.map_map]
+      exact congrArg (Matrix.map (Transition.matrix (R := R) ι' ι))
+        (funext fun q => hF₃alg q)
+    rw [h1, Transition.map_ringHom_matrix_triple, h2,
+      ← Transition.map_nonsing_inv (tPrimeLegRight R ι ι' ι'') _
+        (Transition.isUnit_det_matrixAway ι' ι''), hN₃away, h3,
+      Transition.map_ringHom_matrix,
+      ← Transition.map_nonsing_inv inclL _ (Transition.isUnit_det_matrixAway ι ι'),
+      ← hM₁eq]
+  have hN₂det : IsUnit N₂.det := by
+    rw [hN₂eq, Matrix.det_mul]
+    exact (Matrix.isUnit_det_of_left_inverse
+      (Matrix.mul_nonsing_inv _ hN₃det)).mul
+      (Matrix.isUnit_det_of_left_inverse (Matrix.mul_nonsing_inv _ hM₁det))
+  -- generator check
+  refine MvPolynomial.ringHom_ext (fun a => ?_) (fun p => ?_)
+  · rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply]
+    rw [show Transition.ringHom (R := R) ι'' ι (MvPolynomial.C a)
+        = algebraMap (ChartRing R ι'')
+            (Localization.Away (Transition.det (R := R) ι'' ι))
+            (MvPolynomial.C a) from MvPolynomial.eval₂Hom_C _ _ a]
+    rw [hF₂alg]
+    rw [show Transition.ringHom (R := R) ι' ι'' (MvPolynomial.C a)
+        = algebraMap (ChartRing R ι')
+            (Localization.Away (Transition.det (R := R) ι' ι''))
+            (MvPolynomial.C a) from MvPolynomial.eval₂Hom_C _ _ a]
+    rw [hF₃alg]
+    rw [show Transition.ringHom (R := R) ι ι' (MvPolynomial.C a)
+        = algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι'))
+            (MvPolynomial.C a) from MvPolynomial.eval₂Hom_C _ _ a]
+  · obtain ⟨⟨j, hj⟩, i⟩ := p
+    rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply]
+    have hX : (MvPolynomial.X (⟨j, hj⟩, i) : ChartRing R ι)
+        = Transition.column ι j i :=
+      (congrFun (Transition.column_notMem ι hj) i).symm
+    rw [hX]
+    -- the three transport steps, normalized to nested-application form
+    have h1 := Transition.comp_ringHom_column (R := R) ι'' ι
+      ((tPrimeRing R ι ι' ι'').comp (tPrimeLegRight R ι' ι'' ι))
+      (by
+        rw [show (Transition.matrix (R := R) ι'' ι).map
+            (⇑((tPrimeRing R ι ι' ι'').comp (tPrimeLegRight R ι' ι'' ι)) ∘
+              ⇑(algebraMap (ChartRing R ι'')
+                (Localization.Away (Transition.det (R := R) ι'' ι))))
+            = N₂ from by rw [hN₂]; rfl]
+        exact hN₂det) j
+    simp only [RingHom.coe_comp, Function.comp_apply, Function.comp_def] at h1
+    have h2 := Transition.comp_ringHom_column (R := R) ι' ι''
+      (tPrimeLegRight R ι ι' ι'')
+      (by
+        rw [show (Transition.matrix (R := R) ι' ι'').map
+            (⇑(tPrimeLegRight R ι ι' ι'') ∘ ⇑(algebraMap (ChartRing R ι')
+              (Localization.Away (Transition.det (R := R) ι' ι''))))
+            = N₃ from by rw [hN₃]; rfl]
+        exact hN₃det) j
+    simp only [Function.comp_def] at h2
+    have h3 := Transition.comp_ringHom_column (R := R) ι ι' inclL
+      (by
+        rw [show (Transition.matrix (R := R) ι ι').map
+            (⇑inclL ∘ ⇑(algebraMap (ChartRing R ι)
+              (Localization.Away (Transition.det (R := R) ι ι'))))
+            = M₁ from by rw [hM₁]; rfl]
+        exact hM₁det) j
+    simp only [Function.comp_def] at h3
+    -- assemble the telescoped vector identity
+    have h1' : (fun l => tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+        (Transition.ringHom (R := R) ι'' ι (Transition.column ι j l))))
+        = N₂⁻¹ *ᵥ (fun l => tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+          (algebraMap (ChartRing R ι'')
+            (Localization.Away (Transition.det (R := R) ι'' ι))
+            (Transition.column ι'' j l)))) := by
+      rw [hN₂]
+      exact h1
+    have h12 : (fun l => tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+        (algebraMap (ChartRing R ι'')
+          (Localization.Away (Transition.det (R := R) ι'' ι))
+          (Transition.column ι'' j l))))
+        = fun l => tPrimeLegRight R ι ι' ι''
+            (Transition.ringHom (R := R) ι' ι'' (Transition.column ι'' j l)) :=
+      funext fun l => hF₂alg _
+    have h2' : (fun l => tPrimeLegRight R ι ι' ι''
+        (Transition.ringHom (R := R) ι' ι'' (Transition.column ι'' j l)))
+        = N₃⁻¹ *ᵥ (fun l => tPrimeLegRight R ι ι' ι''
+          (algebraMap (ChartRing R ι')
+            (Localization.Away (Transition.det (R := R) ι' ι''))
+            (Transition.column ι' j l))) := by
+      rw [hN₃]
+      exact h2
+    have h23 : (fun l => tPrimeLegRight R ι ι' ι''
+        (algebraMap (ChartRing R ι')
+          (Localization.Away (Transition.det (R := R) ι' ι''))
+          (Transition.column ι' j l)))
+        = fun l => inclL (Transition.ringHom (R := R) ι ι'
+            (Transition.column ι' j l)) :=
+      funext fun l => hF₃alg _
+    have h3' : (fun l => inclL (Transition.ringHom (R := R) ι ι'
+        (Transition.column ι' j l)))
+        = M₁⁻¹ *ᵥ (fun l => inclL (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι'))
+          (Transition.column ι j l))) := by
+      rw [hM₁]
+      exact h3
+    have hvec : (fun l => tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+        (Transition.ringHom (R := R) ι'' ι (Transition.column ι j l))))
+        = N₂⁻¹ *ᵥ (N₃⁻¹ *ᵥ (M₁⁻¹ *ᵥ
+          fun l => inclL (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι'))
+            (Transition.column ι j l)))) := by
+      rw [h1', h12, h2', h23, h3']
+    have hN₂inv : N₂⁻¹ = M₁ * N₃ := by
+      rw [hN₂eq, Matrix.mul_inv_rev, Matrix.nonsing_inv_nonsing_inv _ hN₃det,
+        Matrix.nonsing_inv_nonsing_inv _ hM₁det]
+    have hfin := congrFun hvec i
+    rw [show tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+        (Transition.ringHom (R := R) ι'' ι (Transition.column ι j i)))
+        = (N₂⁻¹ *ᵥ (N₃⁻¹ *ᵥ (M₁⁻¹ *ᵥ
+          fun l => inclL (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι'))
+            (Transition.column ι j l))))) i from hfin]
+    rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, hN₂inv]
+    rw [show M₁ * N₃ * N₃⁻¹ * M₁⁻¹ = 1 from by
+      rw [Matrix.mul_assoc M₁ N₃, Matrix.mul_nonsing_inv _ hN₃det, Matrix.mul_one,
+        Matrix.mul_nonsing_inv _ hM₁det]]
+    rw [Matrix.one_mulVec]
+
 /-- **[GR-F cocycle, ring level]** The triple composite of t'-maps is the identity —
-the last glue condition. Reduction: `Algebra.TensorProduct.ringHom_ext` +
-`IsLocalization.ringHom_ext` + `MvPolynomial.ringHom_ext` to generator-values, closed
-by the generalized mulVec-cancellation transport through the three transitions. -/
+the last glue condition of the chart atlas. -/
 theorem tPrimeRing_cocycle :
     (tPrimeRing R ι ι' ι'').comp
         ((tPrimeRing R ι' ι'' ι).comp (tPrimeRing R ι'' ι ι'))
       = RingHom.id (doubleRing R ι ι' ι'') := by
-  sorry
+  have hcore := cocycle_core R ι ι' ι''
+  refine Algebra.TensorProduct.ringHom_ext ?_ ?_
+  · refine RingHom.ext fun x => ?_
+    simp only [RingHom.comp_apply, RingHom.id_apply]
+    -- reduce the first transition on the left factor
+    have s1 : tPrimeRing R ι'' ι ι'
+        ((Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+*
+            doubleRing R ι ι' ι'') x)
+        = tPrimeLegRight R ι'' ι ι' x := by
+      have := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι'' ι ι') x
+      rw [RingHom.comp_apply] at this
+      exact this
+    rw [s1]
+    -- both remaining composites out of Away(det ι ι'): compare on the base ring
+    have hAB : ((tPrimeRing R ι ι' ι'').comp ((tPrimeRing R ι' ι'' ι).comp
+        (tPrimeLegRight R ι'' ι ι')))
+        = (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+*
+            doubleRing R ι ι' ι'') := by
+      refine IsLocalization.ringHom_ext
+        (Submonoid.powers (Transition.det (R := R) ι ι')) (RingHom.ext fun q => ?_)
+      simp only [RingHom.comp_apply]
+      have s2 : tPrimeLegRight R ι'' ι ι' (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')) q)
+          = tPrimeBase R ι'' ι ι' q :=
+        IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι'' ι ι') q
+      rw [s2]
+      rw [show (tPrimeBase R ι'' ι ι' q : doubleRing R ι'' ι ι')
+          = Algebra.TensorProduct.includeLeftRingHom
+              (Transition.ringHom (R := R) ι'' ι q) from rfl]
+      have s3 : tPrimeRing R ι' ι'' ι
+          ((Algebra.TensorProduct.includeLeftRingHom :
+            Localization.Away (Transition.det (R := R) ι'' ι) →+*
+              doubleRing R ι'' ι ι')
+            (Transition.ringHom (R := R) ι'' ι q))
+          = tPrimeLegRight R ι' ι'' ι (Transition.ringHom (R := R) ι'' ι q) := by
+        have := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι' ι'' ι)
+          (Transition.ringHom (R := R) ι'' ι q)
+        rw [RingHom.comp_apply] at this
+        exact this
+      rw [s3]
+      have s4 := RingHom.congr_fun hcore q
+      simp only [RingHom.comp_apply] at s4
+      exact s4
+    have := RingHom.congr_fun hAB x
+    simp only [RingHom.comp_apply] at this
+    exact this
+  · refine RingHom.ext fun y => ?_
+    simp only [RingHom.comp_apply, RingHom.id_apply]
+    -- reduce the first transition on the right factor
+    have s1 : tPrimeRing R ι'' ι ι'
+        ((Algebra.TensorProduct.includeRight (R := ChartRing R ι)
+          (A := Localization.Away (Transition.det (R := R) ι ι'))
+          (B := Localization.Away (Transition.det (R := R) ι ι''))).toRingHom y)
+        = tPrimeLegLeft R ι'' ι ι' y := by
+      have := RingHom.congr_fun (tPrimeRing_comp_includeRight R ι'' ι ι') y
+      rw [RingHom.comp_apply] at this
+      exact this
+    rw [s1]
+    have hAB : ((tPrimeRing R ι ι' ι'').comp ((tPrimeRing R ι' ι'' ι).comp
+        (tPrimeLegLeft R ι'' ι ι')))
+        = (Algebra.TensorProduct.includeRight (R := ChartRing R ι)
+          (A := Localization.Away (Transition.det (R := R) ι ι'))
+          (B := Localization.Away (Transition.det (R := R) ι ι''))).toRingHom := by
+      refine IsLocalization.ringHom_ext
+        (Submonoid.powers (Transition.det (R := R) ι ι'')) (RingHom.ext fun q => ?_)
+      simp only [RingHom.comp_apply]
+      have s2 : tPrimeLegLeft R ι'' ι ι' (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι'')) q)
+          = Algebra.TensorProduct.includeLeftRingHom
+              (Transition.ringHomAway (R := R) ι'' ι
+                (algebraMap (ChartRing R ι)
+                  (Localization.Away (Transition.det (R := R) ι ι'')) q)) := by
+        have := RingHom.congr_fun (tPrimeLegLeft_eq R ι'' ι ι')
+          (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι'')) q)
+        rw [RingHom.comp_apply] at this
+        exact this
+      rw [s2, Transition.ringHomAway_algebraMap]
+      have s3 : tPrimeRing R ι' ι'' ι
+          ((Algebra.TensorProduct.includeLeftRingHom :
+            Localization.Away (Transition.det (R := R) ι'' ι) →+*
+              doubleRing R ι'' ι ι')
+            (Transition.ringHom (R := R) ι'' ι q))
+          = tPrimeLegRight R ι' ι'' ι (Transition.ringHom (R := R) ι'' ι q) := by
+        have := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι' ι'' ι)
+          (Transition.ringHom (R := R) ι'' ι q)
+        rw [RingHom.comp_apply] at this
+        exact this
+      rw [s3]
+      have s4 := RingHom.congr_fun hcore q
+      simp only [RingHom.comp_apply] at s4
+      rw [s4]
+      have s5 := RingHom.congr_fun
+        (includeLeft_algebraMap_eq_includeRight_algebraMap R ι ι' ι'') q
+      simp only [RingHom.comp_apply] at s5
+      exact s5
+    have := RingHom.congr_fun hAB y
+    simp only [RingHom.comp_apply] at this
+    exact this
 
 end TPrime
 

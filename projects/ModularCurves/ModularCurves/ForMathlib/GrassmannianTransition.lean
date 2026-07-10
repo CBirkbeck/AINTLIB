@@ -316,6 +316,65 @@ theorem ringHomAway_self :
   rw [RingHom.comp_apply, RingHom.comp_apply, ringHomAway_algebraMap, ringHom_self,
     RingHom.id_apply]
 
+/-- Pure matrix transport: a ring hom pushes through `M⁻¹ *ᵥ ·` when both determinants
+are units — the reusable core of every transition-composite computation. -/
+lemma map_inv_mulVec {S S' : Type u} [CommRing S] [CommRing S'] (F : S →+* S')
+    (M : Matrix (Fin k) (Fin k) S) (hM : IsUnit M.det) (hM' : IsUnit (M.map ⇑F).det)
+    (w : Fin k → S) :
+    (fun i => F ((M⁻¹ *ᵥ w) i)) = (M.map ⇑F)⁻¹ *ᵥ (fun i => F (w i)) := by
+  have hinj : ∀ v v' : Fin k → S',
+      (M.map ⇑F) *ᵥ v = (M.map ⇑F) *ᵥ v' → v = v' := by
+    intro v v' hvv
+    have h2 := congrArg (fun u => (M.map ⇑F)⁻¹ *ᵥ u) hvv
+    simpa [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hM',
+      Matrix.one_mulVec] using h2
+  refine hinj _ _ ?_
+  have hMw : M *ᵥ (M⁻¹ *ᵥ w) = w := by
+    rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hM, Matrix.one_mulVec]
+  have hleft : (M.map ⇑F) *ᵥ (fun i => F ((M⁻¹ *ᵥ w) i)) = fun i => F (w i) := by
+    funext i
+    calc ((M.map ⇑F) *ᵥ fun l => F ((M⁻¹ *ᵥ w) l)) i
+        = F ((M *ᵥ (M⁻¹ *ᵥ w)) i) := (RingHom.map_mulVec _ _ _ i).symm
+      _ = F (w i) := by rw [hMw]
+  rw [hleft, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hM', Matrix.one_mulVec]
+
+/-- The transition rule: composing any ring hom out of the overlap with the transition
+map sends the reverse-chart columns to the mapped-inverse-matrix solution of the
+forward columns — the uniform engine for transition composites (generalizes
+`ringHomAway_solution_column`). -/
+lemma comp_ringHom_column {S : Type u} [CommRing S]
+    (F : Localization.Away (det (R := R) ι ι') →+* S)
+    (hdet : IsUnit ((matrix (R := R) ι ι').map (⇑F ∘ ⇑(algebraMap (ChartRing R ι)
+      (Localization.Away (det (R := R) ι ι'))))).det)
+    (j : Fin n) :
+    (fun i => F (ringHom (R := R) ι ι' (column ι' j i)))
+      = ((matrix (R := R) ι ι').map (⇑F ∘ ⇑(algebraMap (ChartRing R ι)
+          (Localization.Away (det (R := R) ι ι')))))⁻¹ *ᵥ
+        (fun i => F (algebraMap (ChartRing R ι)
+          (Localization.Away (det (R := R) ι ι')) (column ι j i))) := by
+  have hmm : (matrixAway (R := R) ι ι').map ⇑F
+      = (matrix (R := R) ι ι').map (⇑F ∘ ⇑(algebraMap (ChartRing R ι)
+          (Localization.Away (det (R := R) ι ι')))) := by
+    rw [matrixAway, Matrix.map_map]
+  have hstep : (fun i => F (ringHom (R := R) ι ι' (column ι' j i)))
+      = fun i => F (((matrixAway (R := R) ι ι')⁻¹ *ᵥ
+          fun l => algebraMap (ChartRing R ι)
+            (Localization.Away (det (R := R) ι ι')) (column ι j l)) i) := by
+    funext i
+    rw [congrFun (ringHom_comp_column (R := R) ι ι' j) i]
+  rw [hstep, map_inv_mulVec F _ (isUnit_det_matrixAway ι ι') (hmm ▸ hdet), hmm]
+
+/-- Ring homs commute with nonsingular inversion (unit determinant). -/
+lemma map_nonsing_inv {S S' : Type u} [CommRing S] [CommRing S'] (F : S →+* S')
+    (M : Matrix (Fin k) (Fin k) S) (hM : IsUnit M.det) :
+    (M.map ⇑F)⁻¹ = M⁻¹.map ⇑F := by
+  refine Matrix.inv_eq_left_inv ?_
+  have hmul : (M⁻¹.map ⇑F) * (M.map ⇑F) = (M⁻¹ * M).map ⇑F := by
+    funext i₁ i₂
+    simp [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul]
+  rw [hmul, Matrix.nonsing_inv_mul _ hM]
+  exact Matrix.map_one _ (map_zero _) (map_one _)
+
 section Triple
 
 variable (ι'' : Fin k ↪ Fin n)
