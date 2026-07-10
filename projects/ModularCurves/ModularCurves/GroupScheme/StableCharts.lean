@@ -158,6 +158,12 @@ noncomputable def chartKunnethSchemeIso :
     pullback G.π (P.U.ι ≫ E.π) ≅ pullback P.groupToBase P.chartToBase :=
   P.pullbackToVLevel ≪≫ P.pullbackToPatchLevel
 
+/-- The group patch is affine: `G` is finite (hence affine) over `S` and the base patch
+is affine. -/
+theorem isAffineOpen_groupOpen : IsAffineOpen P.groupOpen := by
+  haveI : IsFinite G.π := G.finite
+  exact P.hV.preimage G.π
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
