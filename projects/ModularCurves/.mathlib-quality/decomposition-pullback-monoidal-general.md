@@ -245,3 +245,30 @@ naturality PROOF-TERM built as `funext (fun z => congr-chain)` in term mode (nev
 (`ext; simp [presheaf]` works THERE — diff the two goals to isolate what the ⊗-side adds);
 (c) restate the pairing target through `(toPresheaf _).obj`+`forget` instead of
 `.presheaf ⋙ forget` if the spellings differ. Budget: 3–4 iterations, same stop-line.
+
+## ★ G1 COMPLETE + G3 design upgrade (2026-07-10, session 4 owner-directed continuation)
+
+**G1 CLOSED, axiom-clean.** [G1-NAT′] fell to attack (a) in 4 further iterations: the funext-TERM
+attempt type-checked the per-element proof and thereby REVEALED the exact evaluated goal-shapes;
+`ext z` + that `show` + the closed chain (`tensorObj_map_tmul` → 2× new `freeObj_map_freeMk`
+@[simp] helper → `tensor_apply` → `rfl`) closed it. METHOD NOTE (fleet-grade): when a `show`
+keeps missing a tactic-goal's shape, run the equivalent TERM-mode proof first — its inferred
+endpoint types are the ground truth for the `show`.
+
+**G3 DESIGN UPGRADE (supersedes the hand-rolled two-pass five-lemma).** Mathlib's own pullback
+construction (Presheaf/Pullback.lean:56–100) provides exactly the two tools:
+- `pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X` — **`f^*ᵖ(freeYoneda X)` is
+  corepresented by `freeYoneda (F.obj X)`**, with EXPLICIT homEquiv = `freeYonedaEquiv`-conjugation
+  (the generator-chase substrate for δ-on-frees).
+- `M.isColimitFreeYonedaCoproductsCokernelCofork` — the canonical free-yoneda presentation of any
+  presheaf of modules, packaged as an `IsColimit` (mathlib derives the pullback's existence from it
+  via `leftAdjointObjIsDefined_of_isColimit`).
+**G3 route:** fix Q; `sh_Y ∘ f^*ᵖ(− ⊗ Q)` and `sh_Y ∘ (f^*ᵖ(−) ⊗ f^*ᵖQ)` are cocontinuous; `sh∘δ`
+restricted to the presentation diagram is an iso once **[G3-pre]** (δ-on-free-pairs) is done; conclude
+`IsIso (sh∘δ)_P` by colimit-comparison (`IsColimit.coconePointsIsoOfNatIso` + identify the induced
+map with (sh∘δ)_P by naturality) — repeat in Q. **[G3-pre]:** δ-at-free-pairs is out of
+`f^*ᵖ(freeY U₁ ⊗ freeY U₂) ≅ f^*ᵖ(freeY (U₁⊓U₂)) ≅ freeY (f⁻¹(U₁⊓U₂))` (G1 + corepresentability)
+— determined by ONE generator via `freeYonedaEquiv`; compute δ's value on it from the B2 oplax
+formula (δ := homEquiv.symm (unit ⊗ₘ unit ≫ μ) with μ = tmul↦tmul) and match the canonical iso.
+Object-chain endpoints already agree (G1 both upstairs and downstairs + `f⁻¹(U₁⊓U₂) = f⁻¹U₁ ⊓ f⁻¹U₂`).
+Estimated: [G3-pre] one chunk (generator-chase with the new tools), [G3] one chunk (colimit-comparison).
