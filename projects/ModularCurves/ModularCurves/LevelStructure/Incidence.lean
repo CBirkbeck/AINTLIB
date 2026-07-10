@@ -322,15 +322,15 @@ theorem lfp_subschemeι_of_fg {S : Scheme.{u}} {Z : S.IdealSheafData}
     rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map], CommRingCat.hom_comp]
   exact RingHom.finitePresentation_stableUnderComposition _ _ happ hmap
 
-/-- **([T-SG3-LFP-4c'], staged)** The comap of an ideal sheaf along a closed immersion
-is, on the preimage of an affine, the image ideal under the (surjective) affine piece of
-the immersion: `Γ`-side `(I + J)/J`-arithmetic through the quotient-tensor presentation
-of the fibre product. Feeds the finite-generation of the incidence-locus inputs
-(`D.ideal.comap D'.ideal.subschemeι` is then affine-locally fg once `D.ideal` is). -/
-theorem comap_ideal_of_isClosedImmersion {X Y : Scheme.{u}} (f : X ⟶ Y)
-    [IsClosedImmersion f] (I : Y.IdealSheafData) (U : Y.affineOpens) :
-    (I.comap f).ideal ⟨f ⁻¹ᵁ U.1, U.2.preimage f⟩ =
-      (I.ideal U).map (f.app U.1).hom := by
+/-- **([T-SG3-LFP-4c'], staged)** The comap of an ideal sheaf along the inclusion of a
+closed subscheme is, on the preimage of an affine, the image ideal under the (surjective)
+affine piece of the inclusion — the `Γ`-side `(I + J)/J`. Feeds the finite-generation of
+the incidence-locus inputs (`D.ideal.comap D'.ideal.subschemeι` is then affine-locally fg
+once `D.ideal` is; see the banked Route-A GC design in the D2 sentinel). -/
+theorem comap_ideal_subschemeι {Y : Scheme.{u}} (J : Y.IdealSheafData)
+    (I : Y.IdealSheafData) (U : Y.affineOpens) :
+    (I.comap J.subschemeι).ideal ⟨J.subschemeι ⁻¹ᵁ U.1, U.2.preimage J.subschemeι⟩ =
+      (I.ideal U).map (J.subschemeι.app U.1).hom := by
   sorry
 
 section VanishingLocus
