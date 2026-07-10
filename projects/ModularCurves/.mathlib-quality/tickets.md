@@ -14311,3 +14311,37 @@ Lean-ops: `reassoc_of%` needs parenthesized application `(reassoc_of% h) x`; whe
 have's projection-spelling differs from a lemma's (appLE vs ofHom-algebraMap — rfl-equal),
 respell the HAVE's statement in the consumer's spelling (defeq-ascription) rather than
 rw-ing mid-chain.
+
+## Amendments v10.110 (2026-07-10, coordinator): [OWNER-FLW] rebase VERIFIED — core is duplication-free and STAGED, but NOT YET LANDED (push+PR order relayed); A holder-look dispatched
+
+**Owner asked for a duplication check on the codex move. Findings:**
+- The codex worker executed the v10.103 integration plan correctly: branch REBASED onto
+  5ffe64ffa (dev tip−1, this morning) and trimmed to the self-contained core — 7 files:
+  the corrected-statement artifact (245), `EllipticCurve/PoleSheaf.lean` (1,861, zero
+  sorries), `Picard/Dual.lean` (889, zero sorries), `Comparison.lean` +202 (clean),
+  `CartierDivisor.lean` +11, import line, board claim (+21).
+- **No duplication in the core**: the B-chain doubles PIC0 identified (v10.109) lived in
+  the two monoidal commits, which were DROPPED from the rebased tip; the map-layer +
+  unit-sided isos (the ADAPT-at-integration material) are preserved on
+  `codex/fibrewise-weierstrass-comparison-pre-rebase` (= ca22ffd12) — do NOT delete that
+  branch. G1/G3 remain disjoint; PIC0's GO stands; no import-dependency until
+  [OWNER-FLW] integration (v10.109 (iii) unchanged).
+- **NOT LANDED YET**: origin/codex/… still holds the OLD tip (43660b2bd ≠ local
+  7884ee788); no PR exists; dev/modular-curves contains none of the core. Push +
+  ONE PR → dev/modular-curves ordered via the owner relay.
+- **Hygiene at merge**: PoleSheaf.lean carries 9 `set_option maxHeartbeats` raises
+  (800k ×5: lines 261/484/655/692/845; 1.2M ×4: lines 1227/1396/1490/1635), zero
+  sorries. Ruling: NOT a merge blocker for owner-reserved work — registered as debt at
+  merge (DEBT row + /buzz-decompose targets, same treatment as the map-layer's 4M raise
+  per v10.109). Fleet rule (no raises) unchanged for fleet lanes.
+- **Open question for the PR body**: the old branch's `WeierstrassAtlas.lean` +73
+  (sorry-free per the v10.103 survey) did not survive the rebase — absorbed into
+  Comparison's +139→+202 growth, stale against landed work, or accidental drop? Codex
+  worker to answer in the PR; A to verify.
+- **DISPATCH beastmode-A (holder)**: pre-merge holder's look at the codex branch's
+  `Comparison.lean` +202 — semantic-duplication check against your landed Comparison
+  work (incl. anything since the survey), verdict boarded; verify the WeierstrassAtlas
+  +73 drop is for-cause (salvage if live value); cheap concept-glance PoleSheaf.lean vs
+  the fleet's `PoleFiltration.lean` (name-adjacent; survey says distinct — confirm).
+  Not a stop of your current arc — boundary-fit it; the PR waits on your verdict, not
+  your milestone.
