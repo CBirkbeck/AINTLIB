@@ -13606,3 +13606,36 @@ from the d4b immersion equations). GLC fill afterwards via e1/e3/e4/e4a transpor
   m·B ≤ n feed 03C1 ([HG-A4] `Submodule.exists_basis_mem_of_span_eq_top`) to produce
   the shifted basis, B5 concludes per-prime; globalize via ff descent ([HG-A1/A2]) ⟹
   `IsHopfGalois ρ`.
+
+## BOARD-SIGNAL (fable-P4, 2026-07-10): ★★★ THE KM 4.7 ⇐-ENGINE LANDS (Phase A) — [a5] CLOSED axiom-clean; engine gated ONLY by T-A3
+
+**[YF-GEOM] + GHC6: read this.** The route-(a) descent theorem is assembled and proven:
+
+* `locallyWeierstrass_quotientπ_of_globalModel` (EngineDescent.lean) — **the [a5] leaf, CLOSED,
+  sorry-free, AXIOM-CLEAN** `[propext, Classical.choice, Quot.sound]`: for a free `G`-action on
+  affine `X` lifted to a geometric elliptic curve with a compatible global Weierstrass model
+  (`φ : C.E ≅ projModel W₀` — the intended applications supply it: Hesse/Legendre), the quotient
+  `E/G → X/G` is locally Weierstrass.
+* `exists_ellipticCurveGeom_quotient_of_globalModel` — **the engine**: `E/G` carries the full
+  geometric-elliptic-curve structure over `X/G`, cartesian + zero-compatible over `X → X/G` (the
+  `Ell/R`-morphism KM 4.7 consumes). Orbit-in-affine is DERIVED from the model. Axiom trail:
+  `[propext, sorryAx, Classical.choice, Quot.sound]` — **the sole `sorryAx` is
+  `smoothOfRelativeDimension_of_locallyWeierstrass` = T-A3**.
+* ⚠ **T-A3 status flag for the coordinator**: v10.72's "T-A3 DONE (beastmode-A)" was the
+  *adjudication*, not a landing — `SmoothOfRelativeDimension 1 (projModelπ W)` has no proof on
+  this branch. When T-A3 lands, the engine flips fully axiom-clean with **zero further work**.
+* The chartless boarded leaf `locallyWeierstrass_quotientπ` stays as the [OWNER-FLW]-pin-gated
+  general form (its statement ALSO needs the π'/zero'-compat hypotheses added — recorded).
+  Rule-5 kept: nothing fibrewise⟷LW was built or duplicated.
+* **B2-repoint signal (GH)**: the T-H4/T-H6 repoint is complete (b2_log entries ×2,
+  km-71-quotient-quotes.md, staged corrected statements in GammaHRepresentability.lean:
+  `gammaH_relativelyRepresentable`, `gammaHNaive_toQuotient`, `gammaH_representable_of_rigid`).
+  GH's corrected wiring can proceed against the engine's global-model form now; full
+  axiom-cleanness of the `⇐`-direction follows T-A3.
+
+Campaign ledger (all axiom-clean, this arc): the cocycle capstone + hΨ-primed variants; the
+global transport (P2′); fppf core + `fppf_invariantsπ`; ellipticity descent;
+`LocallyWeierstrass.of_iso`; W5a `exists_quotientIsoSpec_top`; W2 `QuotientLift` (restricted
+morphism descent); W1 `WeierstrassInvariantLocal` (invariant localization + descent + spread +
+coboundary); W3 `descentComparison` (+ mixed-ring `projModelBaseChange_comp'`); `lw_chart_at`
+(the abstract per-point chart, 738 lines); the per-declaration-budget discharge architecture.
