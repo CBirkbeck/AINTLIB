@@ -156,6 +156,32 @@ theorem equation_dblAddXYZ {P Q : Fin 3 → F} (hP : W.Nonsingular P) (hQ : W.No
       rw [hc]
       exact (equation_smul _ (isUnit_iff_ne_zero.mpr hc0)).mpr hNS.left
 
+/-- **(T-W7.0c·c2, field-case non-vanishing — the two laws cover)** Over a field the two
+Bosma–Lenstra laws never both degenerate: for nonsingular `P`, `Q` either law 1 (`addXYZ`) or
+law 2 (`dblAddXYZ`) is a nonzero triple. Off the diagonal `add P Q = addXYZ P Q` is nonsingular
+(`nonsingular_add`) hence nonzero; on it (`P ≈ Q`) `dblAddXYZ` rescales to `u² • dblXYZ Q` with
+`dblXYZ Q = add Q Q` nonsingular. This is the field layer of `blOpenZ ⊔ blOpenY = ⊤`: it forces
+`span (range lawOneTriple ∪ range lawTwoTriple)` to have no common zero, hence to be the unit ideal
+(via `regularityOpen_sup_eq_top_iff` + Jacobson evaluation at maximal ideals). -/
+theorem addXYZ_ne_zero_or_dblAddXYZ_ne_zero {P Q : Fin 3 → F}
+    (hP : W.Nonsingular P) (hQ : W.Nonsingular Q) :
+    W.addXYZ P Q ≠ 0 ∨ W.dblAddXYZ P Q ≠ 0 := by
+  classical
+  by_cases hPQ : P ≈ Q
+  · right
+    rcases hPQ with ⟨u, rfl⟩
+    show W.dblAddXYZ ((u : F) • Q) Q ≠ 0
+    rw [dblAddXYZ_smul_left, dblAddXYZ_self hQ.left]
+    have hdbl : W.dblXYZ Q ≠ 0 := by
+      have h := nonsingular_add hQ hQ
+      rw [add_of_equiv (Setoid.refl Q)] at h
+      exact h.ne_zero
+    exact smul_ne_zero (pow_ne_zero 2 u.ne_zero) hdbl
+  · left
+    have hNS := nonsingular_add hP hQ
+    rw [add_of_not_equiv hPQ] at hNS
+    exact hNS.ne_zero
+
 end Field
 
 end WeierstrassCurve.Projective

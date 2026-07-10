@@ -24,8 +24,8 @@ open MvPolynomial
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
-variable {S : Type} [CommRing S] [Algebra R S]
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+variable {S : Type*} [CommRing S] [Algebra R S]
 
 /-- **(β4(b))** Vanishing minors force the ratios to agree: if `t k` and `s k` are invertible
 (witnesses `u`, `v`) and `s m * t k = s k * t m`, then `s m * v = t m * u`. -/
@@ -75,5 +75,42 @@ theorem chartHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
   refine ratio_eq_of_minor t s u v k m hu hv ?_
   rw [hss, hss, hts, hts, ← map_mul, ← map_mul]
   exact congrArg φ (lawOneTriple_mul_lawTwoTriple W i j m k)
+
+/-- **(β4(b), the two laws glue — `Away`-chart form)** The `chartAway` presentation of
+`chartHomOfTriple_lawOne_eq_lawTwo`: wherever both laws are regular at index `k`, they induce the same
+`chartAway W k`-algebra map. Post-composing the `chartHomOfTriple` agreement with `chartCoordAlgEquiv⁻¹`
+(the presentation `Proj.awayι` consumes). This is the ring-level input the scheme-level `addOn_agree`
+(the two Bosma–Lenstra laws agree on `blOpenZ ⊓ blOpenY`) consumes on each same-index overlap piece. -/
+theorem chartAwayHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
+    (φ : biChartRing W i j →+* S)
+    (t s : Fin 3 → S) (hts : ∀ m, t m = φ (lawTwoTriple W i j m))
+    (hss : ∀ m, s m = φ (lawOneTriple W i j m))
+    (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartAwayHomOfTriple W k s v hv hs = chartAwayHomOfTriple W k t u hu ht :=
+  congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
+    (chartHomOfTriple_lawOne_eq_lawTwo W i j k u v φ t s hts hss hu hv ht hs)
+
+/-- **(β4(b), general form)** Two triples `s`, `t` in `S`, regular at index `k` (witnesses `v`, `u`),
+whose `2×2` minors vanish (`s m * t k = s k * t m` for all `m`), induce the same chart morphism. The
+minor hypothesis is exactly what `ratio_eq_of_minor` needs; `chartHomOfTriple_lawOne_eq_lawTwo` is the
+`lawOne`/`lawTwo` instance. -/
+theorem chartHomOfTriple_cross_eq (k : Fin 3) (u v : S) (t s : Fin 3 → S)
+    (hmin : ∀ m, s m * t k = s k * t m) (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartHomOfTriple W k s v hv hs = chartHomOfTriple W k t u hu ht :=
+  chartHomOfTriple_congr W k t s u v hu hv ht hs
+    fun m => ratio_eq_of_minor t s u v k m hu hv (hmin m)
+
+/-- The `chartAway` form of `chartHomOfTriple_cross_eq`. -/
+theorem chartAwayHomOfTriple_cross_eq (k : Fin 3) (u v : S) (t s : Fin 3 → S)
+    (hmin : ∀ m, s m * t k = s k * t m) (hu : t k * u = 1) (hv : s k * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (hs : (W.map (algebraMap R S)).toProjective.Equation s) :
+    chartAwayHomOfTriple W k s v hv hs = chartAwayHomOfTriple W k t u hu ht :=
+  congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
+    (chartHomOfTriple_cross_eq W k u v t s hmin hu hv ht hs)
 
 end WeierstrassCurve.Projective

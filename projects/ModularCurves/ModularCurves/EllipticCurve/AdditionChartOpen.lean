@@ -20,7 +20,7 @@ open AlgebraicGeometry CategoryTheory ModularCurves
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
 
 /-- The regularity open of the second Bosma–Lenstra law on the `(i,j)` chart-product piece. -/
 noncomputable def blOpenYPiece :
@@ -45,6 +45,20 @@ lemma blOpenZPiece_eq_iSup :
       ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k) := by
   rw [blOpenZPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
+
+/-- **(c3, the two-law overlap on a chart-product piece is same-index)** The overlap of the two laws'
+regularity opens on the `(i,j)` piece is covered by the SAME-index loci `D(lawTwo_k · lawOne_k)` — the
+piece-level form of `regularityOpen_inf_eq_iSup_basicOpen` (the vanishing minors force regularity at the
+same index), pushed through the `chartPieceIso` preimage. -/
+lemma blOpenYPiece_inf_blOpenZPiece_eq_iSup :
+    blOpenYPiece W i j ⊓ blOpenZPiece W i j =
+      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ
+        specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k * lawOneTriple W i j k) :=
+  (congrArg ((chartPieceIso W i j).hom ⁻¹ᵁ ·)
+    (regularityOpen_inf_eq_iSup_basicOpen (lawTwoTriple W i j) (lawOneTriple W i j)
+      (fun m n => lawOneTriple_mul_lawTwoTriple W i j m n))).trans
+    (TopologicalSpace.Opens.map_iSup _ _)
 
 /-- The three `D(t_k)` as opens of the `(i,j)` piece — the cover of `blOpenYPiece`. -/
 noncomputable def blOpenYPieceFamily (k : Fin 3) :

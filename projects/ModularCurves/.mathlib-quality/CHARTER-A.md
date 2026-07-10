@@ -1,5 +1,33 @@
 # CHARTER-A — THE W7 ENDGAME (beastmode-A, v10.32)
 
+## ⏸ STATUS 2026-07-09 — [Y1-D2] transport DISCHARGED + route-a banked; PARKED (coordinator v10.83)
+
+Coordinator pivot (v10.82): from "build all of route-a" → "discharge only the [T-E4-family]
+transport gating [Y1-D2] (standalone lemmas + holder wiring note)." **DELIVERED + RATIFIED (v10.83).**
+
+- **`Moduli/PullSectionCanonicity.lean`** (commit `7dac70553`): the *structural fact of record* — the
+  whole T-E4 family (unrestricted `pullSection_add`, the Γ₁/Γ(N) map-memberships, Y1-D2
+  `isNaiveGammaOne_pullSection_iff`) inherits `[IsLocallyNoetherian]` through a **single** call to
+  `isMonHom_of_one_comp_eq'` inside `transportSection_add`. Extracted the noetherian-free algebra as
+  `transportSection_add_of_isMonHom` (**AXIOM-CLEAN** — lean_verify) + arbitrary-base
+  `pullSection_add_of_finitePresentation`/`_zsmul` (only `sorryAx` = the one primitive) + holder wiring
+  note (docstring). **T-E4 family collapsed to ONE primitive: `isMonHom_of_one_comp_eq'_of_finitePresentation`.**
+- **route-a** (`EllipticCurve/RigiditySpreadingOut.lean`, commit `590984cce`): green skeleton +
+  6-leaf source-faithful decomposition. mathlib has ~80% (AffineTransitionLimit.lean); the one gap =
+  property-descent along limits (Stacks 081D, absent). **BANKED as the fallback** to land the primitive.
+
+**⏸ PARKED at this clean boundary (coordinator directive v10.83). Route-a banked, NOT abandoned.**
+
+**▶ RETURN TRIGGER: `T-W7a` lands (c5β's endgame) → the T-E4-family FALLS-SWEEP:**
+  1. route-(c) wiring: connect `isMonHom_of_one_comp_eq'_of_finitePresentation` to the landed T-W7a
+     canonicity (or supply the group-hom equation by construction);
+  2. the holder wiring (Representability `pullSection_add`:207 + the 2 map-memberships → the FP lemmas;
+     NEW-Y1 assembles Y1-D2 in YOneAssembly.lean per the docstring note);
+  3. Y1-D2, YFULL AFF/FIN, GH1 all go **axiom-clean** in that sweep.
+  Fallback if route-c slips: finish route-a (leaf board = tasks; L4c property-descent is the bulk).
+
+---
+
 ## ✅ STATUS 2026-07-08 — items 1 & 2 COMPLETE (T-W7.1b DONE)
 The faith-infra atomic refactor (item 1) and the T-W7.1b flip (item 2) are **DONE**
 (commits 6f531139 → 3f7fc4fd → 7a81d093 → 7b527d7b). The whnf wall fell to the def-level
@@ -16,17 +44,30 @@ transport_general/bridge). Comparison.lean sorry-free; all 4 leaves axiom-clean 
 - item 5 (endgame T-W7.12 → CLEANUP-ALL-W7 → T-W7.36/T-W7a): BLOCKED on 0h.
 - fallback T-D6b: BLOCKED on P3b3's T-B5D-A (`torsionπ_etale` still sorryAx).
 
-**NEXT-SESSION QUEUE (owner, v10.48):**
+**RESUME 2026-07-09 OUTCOME (board-first):** map_id (`projModelVCIso_one`) DELIVERED axiom-clean
+(commit 4f8d2c1b8) but **MOOT** — PIC0 already closed [U/G] map_id via the (1,1)-`_mul` route;
+kept as named API gain. **T-A3 also MOOT — already DONE**: `projModel_smooth` axiom-clean at
+`WeierstrassModel.lean:1764` since 2026-07-06 (verified). Both dispatched items were pre-completed;
+the redistribution churn lost track. **LESSON REINFORCED: board-first, always** — verify a ticket's
+code state before working it. Remaining live item: **0h** (c5β signal, not fired) + endgame handshake.
+
+**NEXT-SESSION QUEUE (owner, v10.48 + T-A3 addition — MOSTLY MOOT now, see RESUME note above):**
 1. **PIC0 map_id quick favor** — ~3 lines on my private transport machinery (`coordRingCongr`/
-   the projModel transport). Do this FIRST (unblocks PIC0).
+   the projModel transport). Do FIRST (unblocks PIC0).
 2. **0h interrupt** the moment c5β signals 0c-ii → then the **endgame WITH c5β**: T-W7.12 →
    T-W7.36 (**T-W7a** — the group law on the model over every base; `abelEnrichment_exists`
    becomes `rfl`).
-3. If 0h hasn't fired: **[STREAM-GH]** first wave if the B2 repoint has landed; else PR-draft
-   staging + stand by.
+3. **T-A3** (model smooth ⟺ Δ unit) — my lane's original chartwise tickets, now **doubly
+   LOAD-BEARING**: fable-P4's engine (smooth leaf 3) AND Y₁(N)'s smoothness leg both consume it.
+   **PROMOTE ABOVE the 0h wait if c5β's 0c-ii signal is slow (v10.53)** — T-A3 is independent of
+   0h and dispatchable in my own lane, so do NOT idle waiting on 0h when T-A3 is available.
+4. **Drafts / standby.** NOTE: [STREAM-GH] is **no longer mine** — p0/beastmode-B claimed the
+   first wave (GHB1/GHB3/GHA2/GHA4/GH2/GHC4) per v10.50. (v10.52 Y1-vi absorption RETRACTED —
+   a fresh worker took Y1.)
 
-Charter ends at **T-W7a**. Next session resumes on the queue above (map_id favor first, then
-0h on c5β's signal).
+Rebase note (P3b3-relevant, confirmed): T-W7.1b lives on **dev/modular-curves** (my branch),
+NOT `main` (the integration branch). Charter ends at **T-W7a**. Next session resumes on the
+queue above.
 
 ---
 

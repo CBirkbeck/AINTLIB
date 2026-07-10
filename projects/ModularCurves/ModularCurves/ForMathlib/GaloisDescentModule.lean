@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.InvariantTorsor
+import Mathlib.AlgebraicGeometry.Pullbacks
+import Mathlib.Algebra.Category.Ring.Constructions
 
 /-!
 # Galois descent of semilinear modules ([A711-DESC], general form)
@@ -236,6 +238,39 @@ theorem isPushout_fixedPoints
     Algebra.IsPushout (FixedPoints.subalgebra R A G) A
       (FixedPoints.subalgebra (FixedPoints.subalgebra R A G) C G) C :=
   ⟨isBaseChange_semilinearInvariants G R A C hslC hfree⟩
+
+/-- **Galois descent, geometric form ([a3-ii] at chart level)**: the square
+
+    Spec C ──────▶ Spec Cᴳ
+      │              │
+      ▼              ▼
+    Spec A ──────▶ Spec Aᴳ
+
+is **cartesian**: `Spec C ≅ Spec A ×_{Spec Aᴳ} Spec Cᴳ`.
+
+Immediate from `isPushout_fixedPoints` via `CommRingCat.isPushout_of_isPushout` and
+`AlgebraicGeometry.isPullback_SpecMap_of_isPushout`. With `C = Γ(W)` for a `G`-stable affine open
+`W` of the universal curve and `A = Γ(X)`: `W ≅ X ×_{X/G} (W/G)`. This is the cartesianness KM
+obtains from SGA I Exp. VIII 7.8.
+
+Provenance (v10.72): fable-P4's `[a3-ii]` work (commit `b4e69b53`); the v10.71 upstream-misconfig
+rebase reset this declaration to the working tree, re-adopted here by the file holder. -/
+theorem isPullback_Spec_fixedPoints
+    (hslC : ∀ (g : G) (a : A) (c : C), g • (a • c) = (g • a) • (g • c))
+    (hfree : IsFreeAlgebraAction G R A) :
+    CategoryTheory.IsPullback
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom (algebraMap A C)))
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (algebraMap (FixedPoints.subalgebra (FixedPoints.subalgebra R A G) C G) C)))
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (algebraMap (FixedPoints.subalgebra R A G) A)))
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (algebraMap (FixedPoints.subalgebra R A G)
+          (FixedPoints.subalgebra (FixedPoints.subalgebra R A G) C G)))) := by
+  haveI := isPushout_fixedPoints G R A C hslC hfree
+  exact AlgebraicGeometry.isPullback_SpecMap_of_isPushout _ _ _ _
+    (CommRingCat.isPushout_of_isPushout (FixedPoints.subalgebra R A G) A
+      (FixedPoints.subalgebra (FixedPoints.subalgebra R A G) C G) C)
 
 end AlgebraCase
 

@@ -9,6 +9,8 @@ STREAM-GH skeleton (T-H4 corrected + route to T-H6). Decomposition of record:
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.GroupScheme.DeligneOrder
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -103,11 +105,16 @@ structure EquivariantRelRepData {Q : ModuliProblem R} {G : Type*} [Group G] [Fin
   σZ : SchemeAction G Z
   /-- The action lies over the base. -/
   over_base : ∀ γ : G, σZ.hom γ ≫ f = f
-  /-- The representing bijections are `G`-equivariant (diagram KM 7.1.1.1). -/
+  /-- The representing bijections are `G`-equivariant (diagram KM 7.1.1.1). The `γ⁻¹`
+  twist is forced by rigour: the classifying transport `γ ↦ classify(φ γ)` is
+  *anti*-homomorphic (Yoneda is contravariant), so a genuine `SchemeAction`
+  homomorphism (`SchemeAction.ofAut`, via `(·).inv`) realizes `σZ.hom γ` as
+  `classify((φ γ)⁻¹) = classify(φ γ⁻¹)`; consumers see the inverse and reindex freely
+  (`FreeAction` is invariant under `γ ↦ γ⁻¹`). -/
   equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
     (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
     eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
-      (φ γ).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
   /-- The structure map is finite (KM 3.7.1: "a finite etale S-scheme"). -/
   finite : IsFinite f
   /-- The structure map is étale. -/
@@ -167,7 +174,67 @@ theorem RelRepData.exists_equivariant {Q : ModuliProblem R} {G : Type*} [Group G
     [Finite G] (φ : G →* Aut Q) {X : EllObj R} (d : RelRepData Q X)
     (hfin : IsFinite d.f) (het : Etale d.f) :
     Nonempty (EquivariantRelRepData φ X) := by
-  sorry
+  -- The universal element.
+  set univ := d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩ with huniv
+  -- Relative `transportHom`: for `η : Q ⟶ Q`, the over-`f` endo of `Z` classifying `η(univ)`.
+  set rT : (Q ⟶ Q) → { s : d.Z ⟶ d.Z // s ≫ d.f = d.f } :=
+    fun η => (d.eqv d.f).symm (η.app _ univ) with hrT
+  have hrTspec : ∀ η : Q ⟶ Q, d.eqv d.f (rT η) = η.app _ univ := by
+    intro η; rw [hrT]; exact (d.eqv d.f).apply_symm_apply _
+  -- Reconstruction: any classifying map pulls the universal element.
+  have recon : ∀ {T : Scheme.{u}} (k : T ⟶ d.Z),
+      d.eqv (k ≫ d.f) ⟨k, rfl⟩ = Q.map (X.pullbackAlongMap d.f k).op univ := by
+    intro T k
+    have hnat := d.nat d.f k ⟨𝟙 d.Z, Category.id_comp d.f⟩
+    simp only [Category.comp_id] at hnat
+    rw [huniv, ← hnat]
+  -- The characterizing property (relative `homEquiv_comp_transportHom`).
+  have relKey : ∀ {T : Scheme.{u}} (g : T ⟶ X.base) (v1 : T ⟶ d.Z)
+      (hv : v1 ≫ d.f = g) (η : Q ⟶ Q),
+      d.eqv g ⟨v1 ≫ (rT η).1, by rw [Category.assoc, (rT η).2, hv]⟩
+        = η.app _ (d.eqv g ⟨v1, hv⟩) := by
+    intro T g v1 hv η
+    subst hv
+    have hnat := d.nat d.f v1 (rT η)
+    rw [hrTspec] at hnat
+    rw [hnat, ← NatTrans.naturality_apply η (X.pullbackAlongMap d.f v1).op univ, ← recon v1]
+  -- `rT` sends the identity to the identity.
+  have hidT : (rT (𝟙 Q)).1 = 𝟙 d.Z := by
+    have h := hrTspec (𝟙 Q)
+    simp only [NatTrans.id_app, types_id_apply] at h
+    rw [huniv] at h
+    exact congrArg Subtype.val ((d.eqv d.f).injective h)
+  -- `rT` is multiplicative (covariant in composition).
+  have hcompT : ∀ η θ : Q ⟶ Q, (rT (η ≫ θ)).1 = (rT η).1 ≫ (rT θ).1 := by
+    intro η θ
+    have key : d.eqv d.f (rT (η ≫ θ))
+        = d.eqv d.f ⟨(rT η).1 ≫ (rT θ).1,
+            by rw [Category.assoc, (rT θ).2, (rT η).2]⟩ := by
+      rw [hrTspec, relKey d.f (rT η).1 (rT η).2 θ,
+        show (⟨(rT η).1, (rT η).2⟩ : { s : d.Z ⟶ d.Z // s ≫ d.f = d.f }) = rT η from rfl,
+        hrTspec η]
+      rfl
+    exact congrArg Subtype.val ((d.eqv d.f).injective key)
+  refine ⟨{
+    toRelRepData := d
+    σZ :=
+      { hom := fun γ => (rT ((φ γ).inv)).1
+        hom_one := by
+          show (rT ((φ (1 : G)).inv)).1 = 𝟙 d.Z
+          rw [show (φ (1 : G)).inv = 𝟙 Q from by rw [map_one]; rfl, hidT]
+        hom_mul := fun γ₁ γ₂ => by
+          show (rT ((φ (γ₁ * γ₂)).inv)).1
+            = (rT ((φ γ₁).inv)).1 ≫ (rT ((φ γ₂).inv)).1
+          rw [show (φ (γ₁ * γ₂)).inv = (φ γ₁).inv ≫ (φ γ₂).inv from by rw [map_mul]; rfl,
+            hcompT] }
+    over_base := fun γ => (rT ((φ γ).inv)).2
+    equivariant := by
+      intro T g h γ
+      show d.eqv g ⟨h.1 ≫ (rT ((φ γ).inv)).1, _⟩ = (φ γ⁻¹).hom.app _ (d.eqv g h)
+      rw [show (φ γ⁻¹).hom = (φ γ).inv from by rw [map_inv]; rfl]
+      exact relKey g h.1 h.2 ((φ γ).inv)
+    finite := hfin
+    etale := het }⟩
 
 /-- **[GHB2] (scheme-level freeness from moduli freeness)** — the form consumed by the
 quotient-torsor layer (house shape of `simulSchemeAction_free_of_rigid`'s conclusion):
@@ -306,7 +373,23 @@ with no noetherian hypothesis: primary route chart-local (`Aᴳ` is a `B`-module
 summand of the finite `B`-module `A` via the PROVEN projectivity layer; étale via
 summand-flatness + unramified quotient), fallback route by descent along the
 faithfully flat finite `π` (check mathlib property-descent coverage at execution; if
-absent, cut [GH-DESC-GAP]). -/
+absent, cut [GH-DESC-GAP]).
+
+**[GH-DESC-GAP] CONFIRMED (gap-check, NEW-GH 2026-07-09).** This *abstract* statement —
+descend the SECOND factor `f₀` of `π ≫ f₀` along the surjective finite-étale source-cover
+`π` — is NOT provided by the current mathlib pin. What exists: `IsFinite.of_comp` /
+`Etale.of_comp` and `HasOfPostcompProperty @IsFinite @IsSeparated` / `@Etale @Etale` cancel
+the FIRST factor (wrong factor here); the `MorphismProperty.DescendsAlong _ (@Surjective ⊓
+@Flat ⊓ @QuasiCompact)` instances are BASE-CHANGE descent (covers of the base `S`, not the
+source-cover `π`) and cover only `UniversallyClosed/Open/Injective`, `isomorphisms`,
+`IsOpenImmersion`, `Surjective` — not `@IsFinite`/`@Etale`. No `HasOfPrecompProperty` and no
+fppf source-descent for finite/étale. Discharging this abstractly = a from-scratch
+ForMathlib fppf/finite-locally-free descent development (`ForMathlib/FiniteEtaleDescent.lean`),
+which is out of scope for a "NOW" leaf (v10.24: decompose-don't-grind). **Intended
+discharge for the Y(N) pipeline is the PRIMARY chart-local route above** — provable in the
+GHB4/GHB7 quotient context where `Aᴳ ⊆ A` is a projective (hence flat, direct-summand)
+`B`-submodule of the finite `B`-module `A`; it does NOT need this abstract lemma. Left
+gated pending either. -/
 theorem _root_.AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective
     {Z Z₀ S : Scheme.{u}}
     (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S) [IsFinite π] [Etale π] [Surjective π]
@@ -336,6 +419,104 @@ theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
   sorry
 
 end ModuliProblem
+
+open EllipticCurve in
+/-- **[GH2-core] (freeness of the `GL₂(ℤ/N)`-action on full level structures)** Over a
+nonempty base with `N` invertible, a matrix `g` fixing a naive full level structure `L` is the
+identity. At a geometric point `L` pins a basis of `E[N] ≅ (ℤ/N)²`
+(`torsion_geometricFibre_rank_two`) together with the full-level surjectivity (`L.2.2`); the
+resulting finite endomorphism `c ↦ (c 0)•P + (c 1)•Q` is surjective, hence injective
+(`Finite.injective_iff_surjective_of_equiv`), so `g` fixes the basis and equals `1`. The
+route-independent, `GH1`-free engine of `gammaFullNaive_freeAction` ([GH2]) and the
+orbit-distinctness of `gammaHNaiveProblem_not_relativelyRepresentable` ([GHC4]). -/
+theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
+    (hinv : IsUnit ((N : ℕ) : R)) (X : EllObj R) (hne : Nonempty X.base)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : X.curve.FullLevelPt N)
+    (hfix : X.curve.glSmul g L = L) : g = 1 := by
+  -- `N = 1`: `GL₂(ℤ/1)` is trivial.
+  rcases eq_or_ne N 1 with rfl | hN1
+  · exact Subsingleton.elim _ _
+  have hN2 : 2 ≤ N := by have := NeZero.ne N; omega
+  haveI : Fact (1 < N) := ⟨by omega⟩
+  -- Section equations from `(glSmul g L).1 = L.1`.
+  have h1 := congrArg (fun z => z.1.1) hfix
+  have h2 := congrArg (fun z => z.1.2) hfix
+  simp only [ModularCurves.EllipticCurve.glSmul] at h1 h2
+  set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (g : Matrix (Fin 2) (Fin 2) (ZMod N)) with hm
+  -- Geometric point.
+  obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X hne N hinv
+  letI := fk; letI := ak
+  set pp := Point.pull X.curve t L.1.1 with hpp
+  set pq := Point.pull X.curve t L.1.2 with hpq
+  have hppN : (N : ℤ) • pp = 0 := by rw [hpp, ← Point.pull_zsmul, L.2.1.1, Point.pull_zero]
+  have hpqN : (N : ℤ) • pq = 0 := by rw [hpq, ← Point.pull_zsmul, L.2.1.2, Point.pull_zero]
+  -- Pull the section equations to `t`.
+  have hi : ((m 0 0).val : ℤ) • pp + ((m 1 0).val : ℤ) • pq = pp := by
+    have := congrArg (Point.pull X.curve t) h1
+    rwa [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp, ← hpq] at this
+  have hii : ((m 0 1).val : ℤ) • pp + ((m 1 1).val : ℤ) • pq = pq := by
+    have := congrArg (Point.pull X.curve t) h2
+    rwa [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, ← hpp, ← hpq] at this
+  -- The rank-two basis at the geometric point, and the torsion submodule.
+  obtain ⟨e⟩ := X.curve.torsion_geometricFibre_rank_two N k t hk
+  set M := Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ) with hMdef
+  have hppM : pp ∈ M := (Submodule.mem_torsionBy_iff _ _).mpr hppN
+  have hpqM : pq ∈ M := (Submodule.mem_torsionBy_iff _ _).mpr hpqN
+  -- The candidate map `S c = (c 0).val • pp + (c 1).val • pq : M`.
+  have hmem : ∀ c : Fin 2 → ZMod N,
+      ((c 0).val : ℤ) • pp + ((c 1).val : ℤ) • pq ∈ M := fun c =>
+    add_mem (M.smul_mem _ hppM) (M.smul_mem _ hpqM)
+  set S : (Fin 2 → ZMod N) → M :=
+    fun c => ⟨((c 0).val : ℤ) • pp + ((c 1).val : ℤ) • pq, hmem c⟩ with hS
+  -- Surjectivity of `S` from the full-level condition.
+  have hSsurj : Function.Surjective S := by
+    intro w
+    have hwmem : (w : X.curve.Point t) ∈ AddSubgroup.closure {pp, pq} := by
+      have hwN : (N : ℤ) • (w : X.curve.Point t) = 0 := by
+        have := w.2; rwa [Submodule.mem_torsionBy_iff] at this
+      exact L.2.2 k t (w : X.curve.Point t) hwN
+    rw [AddSubgroup.mem_closure_pair] at hwmem
+    obtain ⟨j, l, hjl⟩ := hwmem
+    refine ⟨![(j : ZMod N), (l : ZMod N)], ?_⟩
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    rw [zsmul_eq_of_intCast_eq pp hppN (a := (((j : ZMod N)).val : ℤ)) (b := j)
+          (by simp [ZMod.natCast_val]),
+        zsmul_eq_of_intCast_eq pq hpqN (a := (((l : ZMod N)).val : ℤ)) (b := l)
+          (by simp [ZMod.natCast_val])]
+    exact hjl
+  -- Injectivity via the finite equiv `e`.
+  have hSinj : Function.Injective S :=
+    (Finite.injective_iff_surjective_of_equiv e.symm.toEquiv).mpr hSsurj
+  -- `S ![m00, m10] = ⟨pp,_⟩` and `S ![1,0] = ⟨pp,_⟩`; likewise the second column.
+  have hcol1 : S ![m 0 0, m 1 0] = ⟨pp, hppM⟩ := by
+    apply Subtype.ext
+    simpa only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] using hi
+  have hcol2 : S ![m 0 1, m 1 1] = ⟨pq, hpqM⟩ := by
+    apply Subtype.ext
+    simpa only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] using hii
+  have hval1 : ((1 : ZMod N).val : ℤ) = 1 := by simp [ZMod.val_one]
+  have hval0 : ((0 : ZMod N).val : ℤ) = 0 := by simp
+  have hbase1 : S ![1, 0] = ⟨pp, hppM⟩ := by
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+      one_zsmul, zero_zsmul, add_zero]
+  have hbase2 : S ![0, 1] = ⟨pq, hpqM⟩ := by
+    apply Subtype.ext
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+      one_zsmul, zero_zsmul, zero_add]
+  -- Injectivity forces the columns.
+  have heq1 : (![m 0 0, m 1 0] : Fin 2 → ZMod N) = ![1, 0] := hSinj (hcol1.trans hbase1.symm)
+  have heq2 : (![m 0 1, m 1 1] : Fin 2 → ZMod N) = ![0, 1] := hSinj (hcol2.trans hbase2.symm)
+  have e00 : m 0 0 = 1 := by have := congrFun heq1 0; simpa using this
+  have e10 : m 1 0 = 0 := by have := congrFun heq1 1; simpa using this
+  have e01 : m 0 1 = 0 := by have := congrFun heq2 0; simpa using this
+  have e11 : m 1 1 = 1 := by have := congrFun heq2 1; simpa using this
+  -- Conclude `g = 1`.
+  apply Units.ext
+  rw [Units.val_one, ← hm]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [Matrix.one_apply, e00, e10, e01, e11]
 
 /-! ### PART 0 (instantiation) — the `H`-action on the naive full-level problem -/
 
@@ -377,7 +558,15 @@ theorem gammaFullNaive_freeAction (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) :
     ModuliProblem.FreeAction (gammaHAut R N H) := by
-  sorry
+  intro X hne γ hγ a hfix
+  rw [gammaHAut_app_val] at hfix
+  apply hγ
+  have hg1 : ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 :=
+    glSmul_eq_one_of_eq_self N hinv X hne _ a hfix
+  have hinv1 : (γ⁻¹ : ↥H) = 1 := by
+    apply Subtype.ext
+    rw [hg1, OneMemClass.coe_one]
+  rwa [inv_eq_one] at hinv1
 
 end GammaH
 
@@ -456,7 +645,10 @@ theorem gammaFullNaive_relRepData (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
     (X : EllObj R) :
     ∃ d : ModuliProblem.RelRepData (gammaFullNaiveProblem R N) X,
       IsFinite d.f ∧ Etale d.f := by
-  sorry
+  obtain ⟨eqv, hnat⟩ := YFull.exists_pointsEquiv_family R X N hinv
+  refine ⟨⟨YFull.fullLevelSpace X N, YFull.fullLevelSpaceStruct X N, @eqv, @hnat⟩,
+    YFull.isFinite_fullLevelSpaceStruct X N, ?_⟩
+  exact levelSpaceΓπ_etale X.curve N (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- **[GHA5] (H = 1 data, equivariantly)** Upgrade of [GHA4] along the generic
 transport [GHB1]: the full-level relative data carries the `gammaHAut`-action. -/
@@ -489,6 +681,21 @@ theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
     Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) := by
   sorry
 
+/-- Relative representability transports across a functor isomorphism of moduli problems:
+the representing datum `(Z, f)` is reused and the classifying bijections are post-composed
+with the iso's components; the naturality clause carries by naturality of `e.inv`. -/
+theorem ModuliProblem.relativelyRepresentable_of_iso {R : CommRingCat.{u}}
+    {P Q : ModuliProblem R} (e : P ≅ Q)
+    (hQ : Q.RelativelyRepresentable) : P.RelativelyRepresentable := by
+  intro X
+  obtain ⟨Z, f, eqv, nat⟩ := hQ X
+  refine ⟨Z, f, fun {T} g =>
+    (eqv g).trans (e.app (Opposite.op (X.pullbackAlong g))).toEquiv.symm, ?_⟩
+  intro T T' g k h
+  simp only [Equiv.trans_apply]
+  rw [nat]
+  exact NatTrans.naturality_apply e.inv (X.pullbackAlongMap g k).op (eqv g h)
+
 /-- **[GHC2] (bridge — the held T-H4 statement IS true at `H = ⊥`, and this discharges
 it there)** The full conclusion of the held `gammaHNaive_relativelyRepresentable`
 specialised to `H = ⊥`: `⊥`-orbits are singletons (`gammaHNaive_bot`, held file,
@@ -502,7 +709,14 @@ theorem gammaHNaive_relativelyRepresentable_bot (N : ℕ) [NeZero N]
         ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
           ({ h : T ⟶ Z // h ≫ f = g } ≃
             (gammaHNaiveProblem R N ⊥).obj (Opposite.op (X.pullbackAlong g))) := by
-  sorry
+  obtain ⟨e⟩ := gammaHNaive_bot R N
+  have hQ : (gammaFullNaiveProblem R N).RelativelyRepresentable :=
+    (ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData _).mpr
+      (fun Y => ⟨(gammaFullNaive_relRepData R N hinv Y).choose⟩)
+  refine ⟨ModuliProblem.relativelyRepresentable_of_iso e hQ, fun X => ?_⟩
+  obtain ⟨d, hfin, het⟩ := gammaFullNaive_relRepData R N hinv X
+  exact ⟨d.Z, d.f, hfin, het, fun {T} g => ⟨(d.eqv g).trans
+    (e.app (Opposite.op (X.pullbackAlong g))).toEquiv.symm⟩⟩
 
 /-- **[GHC3] (bridge = Loeffler Fact 3.8.1 as a theorem)** The naive orbit problem
 maps to the quotient problem — `pkg.proj` descends through the global-orbit quotient
@@ -525,6 +739,358 @@ theorem gammaHNaive_toQuotient (N : ℕ) [NeZero N]
           (θ.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
   sorry
 
+/-- Restriction of a point is `ℤ`-linear, derived from additivity (`restrict_add`)
+via `map_zsmul`. Companion to `Point.restrict_add`/`restrict_zero`
+(`GroupScheme/DeligneOrder.lean`); needed by the coproduct-glue construction of the
+`gammaHNaiveProblem` refutation. -/
+theorem EllipticCurve.Point.restrict_zsmul {S : Scheme.{u}} (E : EllipticCurve S)
+    {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (n : ℤ) (P : E.Point g) :
+    EllipticCurve.Point.restrict E k (n • P) = n • EllipticCurve.Point.restrict E k P :=
+  map_zsmul (AddMonoidHom.mk' (EllipticCurve.Point.restrict E k)
+    (EllipticCurve.Point.restrict_add E k)) n P
+
+/-- Glue a `Bool`-family of sections of `X.curve` into a `T`-point over `g`, where
+`T = ∐Bool` and `g` restricts to `𝟙` on each summand (the section-level content of
+the coproduct-glue that produces the second, distinct global orbit in the GHC4
+refutation). -/
+noncomputable def coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) : X.curve.Point g :=
+  ⟨Sigma.desc (fun b => (s b).1), by
+    refine Sigma.hom_ext _ _ (fun b => ?_)
+    rw [← Category.assoc, Sigma.ι_desc, (s b).2, hg b]⟩
+
+lemma coprodPoint_ι {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) (b : Bool) :
+    Sigma.ι (fun _ : Bool => X.base) b ≫ (coprodPoint X g hg s).1 = (s b).1 := by
+  simp only [coprodPoint, Sigma.ι_desc]
+
+open EllipticCurve in
+/-- The glued point is killed by `N` when each component section is (the killing half
+of the coproduct-glue's `IsNaiveFullLevel`). -/
+lemma coprodPoint_nsmul_eq_zero {R : CommRingCat.{u}} (X : EllObj R) (N : ℕ)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (s : Bool → X.curve.Section) (hs : ∀ b, (N : ℤ) • s b = 0) :
+    (N : ℤ) • coprodPoint X g hg s = 0 := by
+  refine Subtype.ext (Sigma.hom_ext _ _ (fun b => ?_))
+  have hL : Sigma.ι (fun _ : Bool => X.base) b ≫ ((N : ℤ) • coprodPoint X g hg s).1
+      = (s b).1 ≫ X.curve.mulByHom N := by
+    rw [point_smul_eq_comp_mulBy, ← Category.assoc, coprodPoint_ι]
+  have hR0 : Point.restrict X.curve (Sigma.ι (fun _ : Bool => X.base) b)
+      (0 : X.curve.Point g) = 0 := Point.restrict_zero X.curve _
+  have hRcoe : Sigma.ι (fun _ : Bool => X.base) b ≫ (0 : X.curve.Point g).1
+      = (0 : X.curve.Point (Sigma.ι (fun _ : Bool => X.base) b ≫ g)).1 :=
+    congrArg Subtype.val hR0
+  rw [hL, hRcoe]
+  have hsz : ((N : ℤ) • s b).1 = (s b).1 ≫ X.curve.mulByHom N :=
+    point_smul_eq_comp_mulBy X.curve _ N (s b)
+  rw [← hsz, hs b]
+  exact (congrArg (fun h : X.base ⟶ X.base => (0 : X.curve.Point h).1) (hg b)).symm
+
+/-- **[GHC4-SEP] (the separated-presheaf half of the refutation)** A relative
+representation datum separates a global value of the represented functor by its
+restrictions to the two components of a `Bool`-coproduct base: the injectivity core
+of the sheaf condition, packaged from `RelRepData`'s naturality clause (`d.nat`), the
+representing bijection's injectivity, and `Sigma.hom_ext`. Axiom-clean; the reusable
+engine of `gammaHNaiveProblem_not_relativelyRepresentable`. -/
+theorem relRepData_sep_coprod {Q : ModuliProblem R} {X : EllObj R}
+    (d : ModuliProblem.RelRepData Q X)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (a b : Q.obj (Opposite.op (X.pullbackAlong g)))
+    (hres : ∀ i : Bool,
+      Q.map (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op a
+        = Q.map (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op b) :
+    a = b := by
+  set va := (d.eqv g).symm a with hva
+  set vb := (d.eqv g).symm b with hvb
+  have hvae : d.eqv g va = a := (d.eqv g).apply_symm_apply a
+  have hvbe : d.eqv g vb = b := (d.eqv g).apply_symm_apply b
+  have hcol : ∀ i : Bool,
+      Sigma.ι (fun _ : Bool => X.base) i ≫ va.1
+        = Sigma.ι (fun _ : Bool => X.base) i ≫ vb.1 := by
+    intro i
+    have hna := d.nat g (Sigma.ι (fun _ : Bool => X.base) i) va
+    have hnb := d.nat g (Sigma.ι (fun _ : Bool => X.base) i) vb
+    rw [hvae] at hna
+    rw [hvbe] at hnb
+    have heq : d.eqv (Sigma.ι (fun _ : Bool => X.base) i ≫ g)
+          ⟨Sigma.ι (fun _ : Bool => X.base) i ≫ va.1, by rw [Category.assoc, va.2]⟩
+        = d.eqv (Sigma.ι (fun _ : Bool => X.base) i ≫ g)
+          ⟨Sigma.ι (fun _ : Bool => X.base) i ≫ vb.1, by rw [Category.assoc, vb.2]⟩ := by
+      rw [hna, hnb, hres i]
+    exact congrArg Subtype.val ((d.eqv _).injective heq)
+  have hv : va.1 = vb.1 := Sigma.hom_ext _ _ hcol
+  rw [← hvae, ← hvbe, Subtype.ext hv]
+
+/-- A morphism from `Spec` of a field into a `Bool`-indexed scheme coproduct factors
+through one of the two summands: the coproduct's space is the disjoint union of the
+summands (`sigmaMk`) and `Spec k` has a single point, so its image lands in one
+summand's (open) range and `IsOpenImmersion.lift` produces the factorisation. -/
+private lemma spec_factors_coprod {k : Type u} [Field k] (Y : Bool → Scheme.{u})
+    (t : Spec (CommRingCat.of k) ⟶ ∐ Y) :
+    ∃ (b : Bool) (s : Spec (CommRingCat.of k) ⟶ Y b), s ≫ Sigma.ι Y b = t := by
+  obtain ⟨b, y, hby⟩ := (sigmaOpenCover Y).exists_eq (t.base default)
+  haveI : IsOpenImmersion (Sigma.ι Y b) := (sigmaOpenCover Y).map_prop b
+  have hsub : Set.range t.base ⊆ Set.range (Sigma.ι Y b).base := by
+    rintro _ ⟨z, rfl⟩
+    rw [Subsingleton.elim z default]
+    exact ⟨y, hby⟩
+  exact ⟨b, IsOpenImmersion.lift (Sigma.ι Y b) t hsub,
+    IsOpenImmersion.lift_fac (Sigma.ι Y b) t hsub⟩
+
+open EllipticCurve in
+/-- `EllHom.pullSection` along the base-change comparison morphism `pullbackAlongMap g k`
+restricts the represented point: `pullSection (pullbackAlongMap g k) (asSection g P)
+= asSection (k ≫ g) (P.restrict k)`. (Re-statement of the identically-named private
+lemma of `ModularCurve/YFullRoute.lean`, needed here for the coproduct-glue restriction
+identity `coprodFullLevel_restrict`.) -/
+private theorem pullSection_asSection_aux {R : CommRingCat.{u}} (X : EllObj R)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
+    EllHom.pullSection R (X.pullbackAlongMap g k) (Point.asSection X.curve g P) =
+      Point.asSection X.curve (k ≫ g) (Point.restrict X.curve k P) := by
+  have htop : (X.pullbackAlongMap g k).top ≫ pullback.fst X.curve.π g =
+      pullback.fst X.curve.π (k ≫ g) := by
+    show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+      Limits.pullback.fst X.curve.π (k ≫ g)
+    rw [Limits.pullback.lift_fst, Category.comp_id]
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
+        (Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
+      (Point.asSection_val_fst X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ pullback.fst X.curve.π g)
+      ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
+    exact (Category.assoc _ _ _).trans
+      (congrArg (k ≫ ·) (Point.asSection_val_fst X.curve g P))
+  · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
+      (Point.asSection X.curve g P)).2.trans
+      (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
+
+open EllipticCurve in
+/-- **[GHC4, the glue]** Glue a `Bool`-family of naive full level structures on
+`X.curve` into a full level structure on the base change `X.curve.baseChange g`, where
+`g` restricts to `𝟙` on each `Bool`-summand. This is the constructor of the "second
+global orbit" separating the naive `Γ_H` orbit presheaf: the killing clause is
+`coprodPoint_nsmul_eq_zero` (through `asSection`); the fibrewise generation clause
+reduces, by factoring a geometric point through one summand (`spec_factors_coprod`), to
+that summand's own generation clause (mirroring `isNaiveFullLevel_pullAlong`). -/
+noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) :
+    (X.curve.baseChange g).FullLevelPt N := by
+  have hzero : Point.asSection X.curve g (0 : X.curve.Point g) = 0 := by
+    have h0 := Point.asSection_zsmul X.curve g 0 (0 : X.curve.Point g)
+    simpa using h0
+  refine ⟨(Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)),
+    Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))), ⟨?_, ?_⟩, ?_⟩
+  · rw [← Point.asSection_zsmul,
+      coprodPoint_nsmul_eq_zero X N g hg _ (fun b => (Lf b).2.1.1)]
+    exact hzero
+  · rw [← Point.asSection_zsmul,
+      coprodPoint_nsmul_eq_zero X N g hg _ (fun b => (Lf b).2.1.2)]
+    exact hzero
+  · intro k _ _ t x hx
+    obtain ⟨b, s, hs⟩ := spec_factors_coprod (fun _ : Bool => X.base) t
+    have htg : t ≫ g = s := by rw [← hs, Category.assoc, hg b, Category.comp_id]
+    have hdx : (N : ℤ) • Point.baseChangeEquiv X.curve g t x = 0 := by
+      rw [← map_zsmul (Point.baseChangeEquiv X.curve g t), hx, map_zero]
+    have hcompatP : Point.baseChangeEquiv X.curve g t
+        (Point.pull (X.curve.baseChange g) t
+          (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))))
+        = Point.pull X.curve (t ≫ g) (Lf b).1.1 := by
+      refine Subtype.ext ?_
+      rw [Point.baseChangeEquiv_apply_coe]
+      show (t ≫ (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))).1)
+            ≫ pullback.fst X.curve.π g = (t ≫ g) ≫ (Lf b).1.1.1
+      rw [htg, Category.assoc, Point.asSection_val_fst, ← hs, Category.assoc, coprodPoint_ι]
+    have hcompatQ : Point.baseChangeEquiv X.curve g t
+        (Point.pull (X.curve.baseChange g) t
+          (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))))
+        = Point.pull X.curve (t ≫ g) (Lf b).1.2 := by
+      refine Subtype.ext ?_
+      rw [Point.baseChangeEquiv_apply_coe]
+      show (t ≫ (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))).1)
+            ≫ pullback.fst X.curve.π g = (t ≫ g) ≫ (Lf b).1.2.1
+      rw [htg, Category.assoc, Point.asSection_val_fst, ← hs, Category.assoc, coprodPoint_ι]
+    have h1 := (Lf b).2.2 k (t ≫ g) (Point.baseChangeEquiv X.curve g t x) hdx
+    rw [← hcompatP, ← hcompatQ] at h1
+    have hKle : AddSubgroup.closure
+        ({Point.baseChangeEquiv X.curve g t (Point.pull (X.curve.baseChange g) t
+            (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)))),
+          Point.baseChangeEquiv X.curve g t (Point.pull (X.curve.baseChange g) t
+            (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2))))} :
+          Set (X.curve.Point (t ≫ g)))
+        ≤ (AddSubgroup.closure
+            {Point.pull (X.curve.baseChange g) t
+                (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))),
+              Point.pull (X.curve.baseChange g) t
+                (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2)))}).map
+          (Point.baseChangeEquiv X.curve g t).toAddMonoidHom := by
+      rw [AddSubgroup.closure_le]
+      rintro z (rfl | rfl)
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert _ _), rfl⟩
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl), rfl⟩
+    obtain ⟨y, hy, hyx⟩ := hKle h1
+    exact ((Point.baseChangeEquiv X.curve g t).injective hyx) ▸ hy
+
+/-- `EllHom.pullSection` is `ℤ`-linear (derived from `pullSection_add` via `map_zsmul`).
+Companion to `EllHom.pullSection_add`. -/
+theorem EllHom.pullSection_zsmul {R : CommRingCat.{u}} {X Y : EllObj R} (f : X ⟶ Y)
+    (n : ℤ) (P : Y.curve.Section) :
+    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f) (EllHom.pullSection_add R f)) n P
+
+open EllipticCurve in
+/-- `baseChangeEquiv` undoes `asSection`: `e (asSection g R) = R.restrict (𝟙)`. The
+section `asSection E g R` is the pullback-lift of `R` and its image under the base-change
+comparison is `R` itself (reindexed along `𝟙 ≫ g`). -/
+lemma baseChangeEquiv_asSection {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (R : E.Point g) :
+    Point.baseChangeEquiv E g (𝟙 T) (Point.asSection E g R) = Point.restrict E (𝟙 T) R := by
+  refine Subtype.ext ?_
+  rw [Point.baseChangeEquiv_apply_coe, Point.asSection_val_fst]
+  show R.1 = 𝟙 T ≫ R.1
+  rw [Category.id_comp]
+
+open EllipticCurve in
+/-- `Point.asSection` is additive. Proven by transporting through the additive
+`baseChangeEquiv` (whose inverse `asSection` is, up to the `𝟙 ≫ g` reindex handled by
+`baseChangeEquiv_asSection`) and `Point.restrict_add`. Addition of points has no direct
+underlying-morphism formula, so the transport route replaces a `pullback.hom_ext`. -/
+theorem Point.asSection_add {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (P Q : E.Point g) :
+    Point.asSection E g (P + Q) = Point.asSection E g P + Point.asSection E g Q := by
+  apply (Point.baseChangeEquiv E g (𝟙 T)).injective
+  rw [map_add, baseChangeEquiv_asSection, baseChangeEquiv_asSection, baseChangeEquiv_asSection,
+    Point.restrict_add]
+
+open EllipticCurve in
+/-- `Point.asSection E g` is injective (compose with the first pullback projection). -/
+lemma asSection_injective {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) : Function.Injective (Point.asSection E g) := by
+  intro P Q h
+  refine Subtype.ext ?_
+  have h1 : (Point.asSection E g P).1 ≫ pullback.fst E.π g
+      = (Point.asSection E g Q).1 ≫ pullback.fst E.π g :=
+    congrArg (· ≫ pullback.fst E.π g) (congrArg Subtype.val h)
+  rwa [Point.asSection_val_fst, Point.asSection_val_fst] at h1
+
+open EllipticCurve in
+/-- Restricting the coproduct-glued point to a `Bool`-summand recovers the summand's
+section, as a point over `Sigma.ι i ≫ g` (`coprodPoint_ι` + `hg`). -/
+lemma restrict_coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (sf : Bool → X.curve.Section) (i : Bool) :
+    Point.restrict X.curve (Sigma.ι (fun _ : Bool => X.base) i) (coprodPoint X g hg sf)
+      = Point.pull X.curve (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (sf i) := by
+  refine Subtype.ext ?_
+  show Sigma.ι (fun _ : Bool => X.base) i ≫ (coprodPoint X g hg sf).1
+    = (Sigma.ι (fun _ : Bool => X.base) i ≫ g) ≫ (sf i).1
+  rw [coprodPoint_ι, hg i, Category.id_comp]
+
+open EllipticCurve in
+/-- `FullLevelPt.pullAlong` commutes with the `GL₂`-action: `pullAlong σ (glSmul γ L)
+= glSmul γ (pullAlong σ L)`. Both sides are `asSection ∘ pull` of the `glSmul`-combination,
+and `pull`/`asSection` are `ℤ`-linear (`pull_add`/`pull_zsmul`/`asSection_add`/`asSection_zsmul`). -/
+lemma pullAlong_glSmul {S : Scheme.{u}} {E : EllipticCurve S} (N : ℕ) [NeZero N]
+    {T : Scheme.{u}} (σ : T ⟶ S) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : E.FullLevelPt N) :
+    FullLevelPt.pullAlong σ (E.glSmul γ L)
+      = (E.baseChange σ).glSmul γ (FullLevelPt.pullAlong σ L) := by
+  have key : ∀ (n k : ℤ) (P Q : E.Section),
+      Point.asSection E σ (Point.pull E σ (n • P + k • Q))
+        = n • Point.asSection E σ (Point.pull E σ P)
+          + k • Point.asSection E σ (Point.pull E σ Q) := by
+    intro n k P Q
+    rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, Point.asSection_add,
+      Point.asSection_zsmul, Point.asSection_zsmul]
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · exact key (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ)
+      (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) L.1.1 L.1.2
+  · exact key (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ)
+      (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) L.1.1 L.1.2
+
+open EllipticCurve in
+/-- `EllHom.pullSection` of the first `glSmul`-transformed section is the corresponding
+`ℤ`-combination of pulled sections (`glSmul` unfold + `pullSection_add`/`_zsmul`). -/
+lemma pullSection_glSmul_fst {R : CommRingCat.{u}} {X Y : EllObj R} (N : ℕ) [NeZero N]
+    (f : X ⟶ Y) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (M : Y.curve.FullLevelPt N) :
+    EllHom.pullSection R f (Y.curve.glSmul γ M).1.1
+      = (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • EllHom.pullSection R f M.1.1
+        + (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • EllHom.pullSection R f M.1.2 := by
+  show EllHom.pullSection R f
+      ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • M.1.1
+        + (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • M.1.2) = _
+  rw [EllHom.pullSection_add, EllHom.pullSection_zsmul, EllHom.pullSection_zsmul]
+
+open EllipticCurve in
+/-- `EllHom.pullSection` of the second `glSmul`-transformed section. -/
+lemma pullSection_glSmul_snd {R : CommRingCat.{u}} {X Y : EllObj R} (N : ℕ) [NeZero N]
+    (f : X ⟶ Y) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (M : Y.curve.FullLevelPt N) :
+    EllHom.pullSection R f (Y.curve.glSmul γ M).1.2
+      = (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • EllHom.pullSection R f M.1.1
+        + (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • EllHom.pullSection R f M.1.2 := by
+  show EllHom.pullSection R f
+      ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • M.1.1
+        + (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • M.1.2) = _
+  rw [EllHom.pullSection_add, EllHom.pullSection_zsmul, EllHom.pullSection_zsmul]
+
+open EllipticCurve in
+/-- Section-level restriction identity (first section): pulling the coproduct glue back
+to summand `i` recovers `Lf i` pulled to the summand base. -/
+lemma coprodFullLevel_restrict_fst {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) (i : Bool) :
+    EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
+        (coprodFullLevel N X g hg Lf).1.1
+      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.1 := by
+  rw [show (coprodFullLevel N X g hg Lf).1.1
+        = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1)) from rfl,
+    pullSection_asSection_aux, restrict_coprodPoint]
+  rfl
+
+open EllipticCurve in
+/-- Section-level restriction identity (second section). -/
+lemma coprodFullLevel_restrict_snd {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) (i : Bool) :
+    EllHom.pullSection R (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i))
+        (coprodFullLevel N X g hg Lf).1.2
+      = (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)).1.2 := by
+  rw [show (coprodFullLevel N X g hg Lf).1.2
+        = Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.2)) from rfl,
+    pullSection_asSection_aux, restrict_coprodPoint]
+  rfl
+
+open EllipticCurve in
+/-- **[GHC4, the restriction identity]** The naive `Γ_H` problem's restriction of a
+coproduct-glued class to a `Bool`-summand `i` is the class of the summand's structure
+`Lf i`, pulled to the summand's base (`= pullAlong (Sigma.ι i ≫ g) (Lf i)`). Computes
+`gammaHNaiveProblem.map` on a `Quotient.mk` via the section-level identities. -/
+lemma coprodFullLevel_restrict {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) (X : EllObj R)
+    (g : (∐ fun _ : Bool => X.base) ⟶ X.base)
+    (hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base)
+    (Lf : Bool → X.curve.FullLevelPt N) (i : Bool) :
+    (gammaHNaiveProblem R N H).map
+        (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) i)).op
+        (Quotient.mk _ (coprodFullLevel N X g hg Lf))
+      = Quotient.mk _
+          (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) i ≫ g) (Lf i)) :=
+  congrArg (Quotient.mk _)
+    (Subtype.ext (Prod.ext (coprodFullLevel_restrict_fst N X g hg Lf i)
+      (coprodFullLevel_restrict_snd N X g hg Lf i)))
+
+open EllipticCurve in
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
@@ -544,7 +1110,75 @@ theorem gammaHNaiveProblem_not_relativelyRepresentable (N : ℕ) [NeZero N]
     (hinv : IsUnit (N : R)) (X : EllObj R) (hne : Nonempty X.base)
     (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
     ¬ (gammaHNaiveProblem R N H).RelativelyRepresentable := by
-  sorry
+  intro hrep
+  -- A nontrivial element `γ ∈ H`.
+  obtain ⟨γ, hγ⟩ := Subgroup.ne_bot_iff_exists_ne_one.mp hH
+  have hγH : (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) ∈ H := γ.2
+  have hγ1 : (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) ≠ 1 := fun h => hγ (Subtype.ext h)
+  -- The codiagonal `T = X.base ⨿ X.base → X.base`.
+  set g : (∐ fun _ : Bool => X.base) ⟶ X.base := Sigma.desc (fun _ => 𝟙 X.base) with hg_def
+  have hg : ∀ b : Bool, Sigma.ι (fun _ : Bool => X.base) b ≫ g = 𝟙 X.base :=
+    fun b => by rw [hg_def]; exact Sigma.ι_desc _ _
+  -- The diagonal glue `(L, L)` and the twisted glue `(L, γ·L)`.
+  set LfA : Bool → X.curve.FullLevelPt N := fun _ => L with hLfA
+  set LfB : Bool → X.curve.FullLevelPt N :=
+    fun b => bif b then X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L else L
+    with hLfB
+  have hLfA_true : LfA true = L := rfl
+  have hLfA_false : LfA false = L := rfl
+  have hLfB_true : LfB true = X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L :=
+    rfl
+  have hLfB_false : LfB false = L := rfl
+  obtain ⟨d⟩ := (ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData
+    (gammaHNaiveProblem R N H)).mp hrep X
+  -- The two global classes restrict equally on both summands, hence are equal (separation).
+  have hsep : (Quotient.mk ((X.pullbackAlong g).curve.hOrbitSetoid H)
+        (coprodFullLevel N X g hg LfA))
+      = Quotient.mk _ (coprodFullLevel N X g hg LfB) := by
+    refine relRepData_sep_coprod R d g _ _ (fun i => ?_)
+    refine (coprodFullLevel_restrict N H X g hg LfA i).trans
+      (Eq.trans ?_ (coprodFullLevel_restrict N H X g hg LfB i).symm)
+    cases i with
+    | false => rw [hLfA_false, hLfB_false]
+    | true =>
+      rw [hLfA_true, hLfB_true]
+      exact Quotient.sound ⟨(γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)), hγH,
+        (pullAlong_glSmul N (Sigma.ι (fun _ : Bool => X.base) true ≫ g)
+          (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L).symm⟩
+  -- Unpack the orbit relation on the coproduct base.
+  obtain ⟨h, hhH, hhAB⟩ := Quotient.exact hsep
+  -- Restricting `glSmul h A = B` to the `false` summand (where `A`, `B` agree) forces `h = 1`.
+  have hh1 : h = 1 := by
+    refine glSmul_eq_one_of_eq_self N hinv (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
+      hne h (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g) L)
+      (Subtype.ext (Prod.ext ?_ ?_))
+    · have hf1 := congrArg (fun M => EllHom.pullSection R
+        (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) false)) M.1.1) hhAB
+      rw [pullSection_glSmul_fst, coprodFullLevel_restrict_fst, coprodFullLevel_restrict_snd,
+        coprodFullLevel_restrict_fst, hLfA_false, hLfB_false] at hf1
+      exact hf1
+    · have hf2 := congrArg (fun M => EllHom.pullSection R
+        (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) false)) M.1.2) hhAB
+      rw [pullSection_glSmul_snd, coprodFullLevel_restrict_fst, coprodFullLevel_restrict_snd,
+        coprodFullLevel_restrict_snd, hLfA_false, hLfB_false] at hf2
+      exact hf2
+  -- With `h = 1`, `A = B`; restricting to `true` forces `γ = 1`, a contradiction.
+  rw [hh1, EllipticCurve.glSmul_one] at hhAB
+  have ht1 := congrArg (fun M => EllHom.pullSection R
+    (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) true)) M.1.1) hhAB
+  have ht2 := congrArg (fun M => EllHom.pullSection R
+    (X.pullbackAlongMap g (Sigma.ι (fun _ : Bool => X.base) true)) M.1.2) hhAB
+  rw [coprodFullLevel_restrict_fst, coprodFullLevel_restrict_fst, hLfA_true, hLfB_true] at ht1
+  rw [coprodFullLevel_restrict_snd, coprodFullLevel_restrict_snd, hLfA_true, hLfB_true] at ht2
+  have hpull : FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g) L
+      = FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g)
+          (X.curve.glSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L) :=
+    Subtype.ext (Prod.ext ht1 ht2)
+  rw [pullAlong_glSmul] at hpull
+  exact hγ1 (glSmul_eq_one_of_eq_self N hinv
+    (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g)) hne
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) true ≫ g) L) hpull.symm)
 
 /-- **[GHC5] (KM 4.7.1's hypothesis shape: "affine and etale over (Ell)")** A quotient
 problem package is affine over `Ell`: finite morphisms are affine, so `relRep`

@@ -30,10 +30,10 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace WeierstrassCurve.Projective
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R) (i j : Fin 3)
 
 /-- The chart ring of the projective model in its `Away` presentation. -/
-noncomputable abbrev chartAway : Type :=
+noncomputable abbrev chartAway : Type _ :=
   HomogeneousLocalization.Away (quotientGrading (projIdeal W))
     ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))
 
