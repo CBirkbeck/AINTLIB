@@ -300,6 +300,38 @@ def affinePreimage (U : S.affineOpens) : W.affineOpens :=
 /-- **(T-D14c-1)** The vanishing locus on `S` of an ideal sheaf `E` on a scheme `W`
 finite locally free over `S`: over an affine `U ⊆ S` it is the vanishing ideal of the
 sections of `E` inside the finite locally free `Γ(S, U)`-module `Γ(W, p⁻¹U)`. This is
+/-- **([T-SG3-LFP-3])** A closed subscheme whose ideal sheaf is finitely generated on
+every affine is locally of finite presentation over the ambient scheme — the converse
+packaging of KM's "defined locally by finitely many equations". -/
+theorem lfp_subschemeι_of_fg {S : Scheme.{u}} {Z : S.IdealSheafData}
+    (h : ∀ U : S.affineOpens, (Z.ideal U).FG) :
+    LocallyOfFinitePresentation Z.subschemeι := by
+  rw [HasRingHomProperty.iff_appLE (P := @LocallyOfFinitePresentation)]
+  intro U V e
+  -- the affine piece of the immersion is a quotient by a finitely generated ideal
+  have happ : RingHom.FinitePresentation (Z.subschemeι.app U.1).hom := by
+    refine RingHom.FinitePresentation.of_surjective _
+      (Z.subschemeι.app_surjective _ U.2) ?_
+    have hker := Scheme.Hom.ker_apply Z.subschemeι U
+    rw [Scheme.IdealSheafData.ker_subschemeι] at hker
+    rw [← hker]
+    exact h U
+  -- restriction maps between affines are of finite presentation (read off from `𝟙`)
+  have hmap : RingHom.FinitePresentation
+      ((Z.subscheme.presheaf.map (homOfLE e).op).hom) := by
+    have h1 := (HasRingHomProperty.iff_appLE
+      (P := @LocallyOfFinitePresentation)).mp
+      (inferInstance : LocallyOfFinitePresentation (𝟙 Z.subscheme))
+      ⟨_, U.2.preimage Z.subschemeι⟩ V (by simpa using e)
+    rwa [show (𝟙 Z.subscheme).appLE (Z.subschemeι ⁻¹ᵁ U.1) V.1 (by simpa using e) =
+        Z.subscheme.presheaf.map (homOfLE e).op from by
+      rw [Scheme.Hom.appLE, Scheme.id_app, Category.id_comp]] at h1
+  -- assemble: `appLE = app ≫ restriction`
+  rw [show Z.subschemeι.appLE U.1 V.1 e =
+      Z.subschemeι.app U.1 ≫ Z.subscheme.presheaf.map (homOfLE e).op from by
+    rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map], CommRingCat.hom_comp]
+  exact RingHom.finitePresentation_stableUnderComposition _ _ happ hmap
+
 KM 1.3.4's locus of "simultaneous vanishing of the coordinates", in the basis-free
 form; its universal property is `vanishingLocus_le_ker_iff` (T-D14c-2). -/
 noncomputable def vanishingLocus : S.IdealSheafData where
