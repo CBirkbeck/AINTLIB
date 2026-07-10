@@ -14795,3 +14795,5 @@ and freshly-synthesized `HasPullback` give *syntactically different* `pullback.f
 `[HopfAlgebra R A]`; then `IsCoaction chartCoaction` from the two action diagrams
 (`translationAction_unit/assoc`, already proven); then C1d, C3, C4 ⟹ pins ⟹
 **BOARD-SIGNAL** (NISOG L6 + p0 pickup).
+
+### CLAIM (rule 5, OWNER-FLW, 2026-07-10): prove `SheafOfModules.dualOverIso`, `Scheme.Modules.dualRestrictIso`, `sectionPoleSheafRestrictIso`, and `sectionPoleSheafPowerRestrictIso` (open-restriction base-change layer; no PIC0 G1/G3 overlap).
