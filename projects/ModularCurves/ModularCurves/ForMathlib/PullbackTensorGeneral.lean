@@ -206,6 +206,28 @@ noncomputable def pushforwardFactoredLaxMonoidal : (pushforwardFactored φ).LaxM
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The transported pullback–pushforward adjunction, against the factored spelling of the
+pushforward (at which the lax monoidal structure lives natively). All doctrinal structure
+maps of `pullbackOplaxMonoidal` are `homEquiv`-images under *this* adjunction. -/
+noncomputable def pullbackPushforwardFactoredAdjunction
+    [(pushforward.{u} φ).IsRightAdjoint] :
+    pullback.{u} φ ⊣ pushforwardFactored φ :=
+  (pullbackPushforwardAdjunction.{u} φ).ofNatIsoRight (pushforwardIsoFactored φ)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaves B1+B2 (data form).** The oplax monoidal structure on the
+presheaf pullback along an arbitrary morphism of `CommRingCat`-derived ring presheaves:
+doctrinal adjunction (`Adjunction.leftAdjointOplaxMonoidal`) applied to the transported
+adjunction. Its `δ_{P,Q} : f^*ᵖ(P⊗Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ` is the comparison map whose
+invertibility is the remaining content (leaves G1/G3). -/
+noncomputable def pullbackOplaxMonoidal [(pushforward.{u} φ).IsRightAdjoint] :
+    (pullback.{u} φ).OplaxMonoidal :=
+  letI := pushforwardFactoredLaxMonoidal φ
+  (pullbackPushforwardFactoredAdjunction φ).leftAdjointOplaxMonoidal
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaves B1+B2 (fused milestone).** The presheaf pullback along an
 arbitrary ring comparison carries an oplax monoidal structure: transport the
 pullback–pushforward adjunction to the factored spelling of the pushforward
@@ -214,10 +236,8 @@ lives natively, and apply doctrinal adjunction (`Adjunction.leftAdjointOplaxMono
 Its `δ_{P,Q} : f^*ᵖ(P⊗Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ` is the comparison map whose sheafified
 invertibility is the remaining content (leaves G1/G3). -/
 theorem nonempty_pullback_oplaxMonoidal [(pushforward.{u} φ).IsRightAdjoint] :
-    Nonempty ((pullback.{u} φ).OplaxMonoidal) := by
-  letI := pushforwardFactoredLaxMonoidal φ
-  exact ⟨((pullbackPushforwardAdjunction.{u} φ).ofNatIsoRight
-    (pushforwardIsoFactored φ)).leftAdjointOplaxMonoidal⟩
+    Nonempty ((pullback.{u} φ).OplaxMonoidal) :=
+  ⟨pullbackOplaxMonoidal φ⟩
 
 end LaxPushforward
 
@@ -348,6 +368,42 @@ noncomputable def freeTensorDesc (F G : Cᵒᵖ ⥤ Type u) :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The free–tensor comparison agrees componentwise with the pointwise
+`finsuppTensorFinsupp'` isomorphism (both send generators to generators). -/
+lemma freeTensorDesc_app (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ) :
+    (freeTensorDesc T F G).app V = (freeTensorμ T F G V).inv := by
+  refine clothedFree_hom_ext T (fun z => ?_)
+  rw [freeTensorμ_inv_freeMk T F G V z]
+  simp only [freeTensorDesc, freeObjDesc_app, freeTensorPair]
+  erw [ModuleCat.freeDesc_apply]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+instance (F G : Cᵒᵖ ⥤ Type u) : IsIso (freeTensorDesc T F G) := by
+  haveI : ∀ V : Cᵒᵖ, IsIso ((freeTensorDesc T F G).app V) := fun V => by
+    rw [freeTensorDesc_app T F G V]; infer_instance
+  haveI : IsIso ((toPresheaf _).map (freeTensorDesc T F G)) := by
+    haveI : ∀ V : Cᵒᵖ, IsIso (((toPresheaf _).map (freeTensorDesc T F G)).app V) := fun V =>
+      inferInstanceAs (IsIso ((forget₂ _ AddCommGrpCat).map ((freeTensorDesc T F G).app V)))
+    exact NatIso.isIso_of_isIso_app _
+  exact isIso_of_reflects_iso _ (toPresheaf (T ⋙ forget₂ CommRingCat RingCat))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G1-NAT (data form).** The free presheaf of modules functor
+is monoidal on tensor products: `free(F ⊗ G) ≅ free(F) ⊗ free(G)`, with hom sending the
+generator `freeMk (x, y)` to `freeMk x ⊗ₜ freeMk y` (see `freeTensorDesc_app` /
+`freeTensorμ_inv_freeMk`). -/
+noncomputable def freeTensorIso (F G : Cᵒᵖ ⥤ Type u) :
+    ((free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G) :
+        PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) ≅
+      (free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G :=
+  asIso (freeTensorDesc T F G)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf G1-NAT (closed via the adjunction route).** The pointwise
 components `freeTensorμ` assemble: `free(F) ⊗ free(G) ≅ free(F ⊗ G)`. The comparison is
 `freeTensorDesc` (naturality from the universal property); each component agrees with
@@ -358,23 +414,8 @@ theorem nonempty_freeTensorIsoGeneric (F G : Cᵒᵖ ⥤ Type u) :
       (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
           (free (T ⋙ forget₂ CommRingCat RingCat)).obj G :
         PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) ≅
-        (free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)) := by
-  have happ : ∀ V : Cᵒᵖ, (freeTensorDesc T F G).app V = (freeTensorμ T F G V).inv := by
-    intro V
-    refine clothedFree_hom_ext T (fun z => ?_)
-    rw [freeTensorμ_inv_freeMk T F G V z]
-    simp only [freeTensorDesc, freeObjDesc_app, freeTensorPair]
-    erw [ModuleCat.freeDesc_apply]
-    rfl
-  haveI : ∀ V : Cᵒᵖ, IsIso ((freeTensorDesc T F G).app V) := fun V => by
-    rw [happ V]; infer_instance
-  haveI : IsIso ((toPresheaf _).map (freeTensorDesc T F G)) := by
-    haveI : ∀ V : Cᵒᵖ, IsIso (((toPresheaf _).map (freeTensorDesc T F G)).app V) := fun V =>
-      inferInstanceAs (IsIso ((forget₂ _ AddCommGrpCat).map ((freeTensorDesc T F G).app V)))
-    exact NatIso.isIso_of_isIso_app _
-  haveI : IsIso (freeTensorDesc T F G) :=
-    isIso_of_reflects_iso _ (toPresheaf (T ⋙ forget₂ CommRingCat RingCat))
-  exact ⟨(asIso (freeTensorDesc T F G)).symm⟩
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)) :=
+  ⟨(freeTensorIso T F G).symm⟩
 
 end FreeTensorGeneric
 
@@ -385,14 +426,21 @@ products of representables), and the free-module functor sends products of types
 products of free modules (`finsuppTensorFinsupp`-style). Together with mathlib's
 `freeFunctorCompPullbackIso` this makes the oplax comparison `δ` an isomorphism on free-yoneda
 pairs — before sheafifying. -/
+noncomputable def freeYonedaTensorIso (U₁ U₂ : X.Opens) :
+    ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
+        (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂) :
+          PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
+      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂)) :=
+  (freeTensorIso X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)).symm ≪≫
+    (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).mapIso (yonedaMeetIso U₁ U₂)
+
+/-- **[D-PresPB′-general], leaf G1 (the lattice miracle, existence form).** -/
 theorem nonempty_freeYoneda_tensor_iso' (U₁ U₂ : X.Opens) :
     Nonempty (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
         (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂) :
           PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
-      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂))) := by
-  obtain ⟨e⟩ := nonempty_freeTensorIsoGeneric X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)
-  exact ⟨e ≪≫
-    (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).mapIso (yonedaMeetIso U₁ U₂)⟩
+      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂))) :=
+  ⟨freeYonedaTensorIso U₁ U₂⟩
 
 /-- **[D-PresPB′-general], leaf G1 (the lattice miracle).** On the Opens-site of a scheme, the
 presheaf tensor of two free-yoneda presheaves of modules is the free-yoneda of the meet:
@@ -409,6 +457,87 @@ theorem nonempty_freeYoneda_tensor_iso (U₁ U₂ : X.Opens) :
   nonempty_freeYoneda_tensor_iso' U₁ U₂
 
 end FreeYonedaTensor
+
+section PullbackFreeYoneda
+
+variable {C D : Type u} [SmallCategory C] [SmallCategory D]
+  {F : C ⥤ D} {R : Dᵒᵖ ⥤ RingCat.{u}} {S : Cᵒᵖ ⥤ RingCat.{u}} (φ : S ⟶ F.op ⋙ R)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], corepresentability workhorse.** The presheaf pullback of a
+free-yoneda module is the free-yoneda module of the image object: both corepresent the
+functor `M ↦ ((push M).obj X ≃ M.obj (F X))`, by the adjunction and by mathlib's
+`pushforwardCompCoyonedaFreeYonedaCorepresentableBy` respectively. -/
+noncomputable def pullbackFreeYonedaIso (X : C) :
+    (pullback.{u} φ).obj ((free S).obj (yoneda.obj X)) ≅
+      (free R).obj (yoneda.obj (F.obj X)) :=
+  ((pullbackPushforwardAdjunction.{u} φ).corepresentableBy
+    ((free S).obj (yoneda.obj X))).uniqueUpToIso
+    (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Characterization of `pullbackFreeYonedaIso`: postcomposition with a map `g` out of the
+corepresenting free-yoneda corresponds, under the adjunction, to the generator image of
+`g` viewed in the pushforward. This is the compute rule for the [G3-pre] δ-chase. -/
+lemma homEquiv_pullbackFreeYonedaIso_hom_comp {X : C} {N : PresheafOfModules.{u} R}
+    (g : (free R).obj (yoneda.obj (F.obj X)) ⟶ N) :
+    (pullbackPushforwardAdjunction.{u} φ).homEquiv _ _
+        ((pullbackFreeYonedaIso φ X).hom ≫ g) =
+      (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv g := by
+  sorry
+
+end PullbackFreeYoneda
+
+section SchemePullbackMonoidal
+
+open AlgebraicGeometry TopologicalSpace
+
+variable {X Y : AlgebraicGeometry.Scheme.{u}} (f : Y ⟶ X)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The comparison morphism of `RingCat`-valued structure presheaves induced by a scheme
+morphism `f : Y ⟶ X`, spelled at the `CommRingCat`-derived clothing
+`X.sheaf.obj ⋙ forget₂ CommRingCat RingCat ⟶ (Opens.map f.base).op ⋙ (Y.sheaf.obj ⋙ …)`
+at which the presheaf-of-modules monoidal structures are found by instance search on both
+sides of the pullback. -/
+noncomputable def schemeRingPresheafHom :
+    (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat :
+        (Opens ↥X)ᵒᵖ ⥤ RingCat.{u}) ⟶
+      (Opens.map f.base).op ⋙ (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat) :=
+  Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3-η.** The unit comparison
+`η : f^*ᵖ(𝒪_X) ⟶ 𝒪_Y` of the doctrinal oplax structure on the presheaf pullback of a
+scheme morphism is an isomorphism *before sheafification*: the presheaf unit is the
+free-yoneda on the terminal open `⊤`, `f⁻¹(⊤) = ⊤`, and maps out of a pulled-back
+free-yoneda are computed by one generator (`pullbackFreeYonedaIso`). -/
+theorem isIso_pullback_η :
+    letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
+    IsIso (Functor.OplaxMonoidal.η (pullback.{u} (schemeRingPresheafHom f))) := by
+  sorry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3-pre (δ on free-yoneda pairs).** The tensor comparison
+`δ : f^*ᵖ(P ⊗ Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ` of the doctrinal oplax structure on the presheaf
+pullback of a scheme morphism is an isomorphism on free-yoneda pairs, *before
+sheafification*: both sides are the free-yoneda on `f⁻¹(U₁ ⊓ U₂) = f⁻¹U₁ ⊓ f⁻¹U₂`
+(the lattice miracle `freeYonedaTensorIso` upstairs and downstairs +
+`pullbackFreeYonedaIso`), and `δ` matches the canonical isomorphism on the one
+generator that determines it. -/
+theorem isIso_pullback_δ_freeYoneda (U₁ U₂ : X.Opens) :
+    letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
+    IsIso (Functor.OplaxMonoidal.δ (pullback.{u} (schemeRingPresheafHom f))
+      ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁))
+      ((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂))) := by
+  sorry
+
+end SchemePullbackMonoidal
 
 end PresheafOfModules
 
