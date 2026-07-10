@@ -1487,29 +1487,6 @@ lemma descended_lawTwo_smul_add (i j : Fin 3)
 
 
 
-/-- **[C6-e5c] The atlas-level specPoints spec** (the c6 core): over the ULift universal atlas the
-glued two-law multiplication computes the group law of the dictionary. Proof plan (v10.94f/g):
-case split via specPoint_factors_blOpenZ_or_blOpenY; per case descend by
-specPoint_addOn{Z,Y}OnImage_factors' + read out by addOn{Z,Y}PieceHom_coord/tensor legs/piece
-projections; identify the triple with `add` by descended_lawOne_eq_add / descended_lawTwo_smul_add;
-finish with toAffine_add + toAffine_smul + projModelPointsEquiv_some/_zero. -/
-theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
-    [Algebra WeierstrassAtlasRingU.{u} K]
-    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
-      (projModelπ universalWeierstrassLocU.{u}) K)
-    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
-      Q.1 ≫ projModelπ universalWeierstrassLocU.{u}) :
-    projModelPointsEquiv universalWeierstrassLocU.{u} K
-        ⟨pullback.lift P.1 Q.1 w ≫
-            WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ, by
-          rw [Category.assoc, WeierstrassCurve.Projective.mulModelHom_projModelπ,
-            ← Category.assoc, pullback.lift_fst, P.2]⟩ =
-      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
-        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
-  sorry
-
-
 /-- [e5c ARM, Z] The complete per-piece assembly at the atlas: sum = P + Q. -/
 lemma specPoints_arm_Z {K : Type u} [Field K] [DecidableEq K]
     [Algebra WeierstrassAtlasRingU.{u} K]
@@ -1636,6 +1613,168 @@ lemma specPoints_arm_Y {K : Type u} [Field K] [DecidableEq K]
   rw [← dictionary_fst_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp,
     ← dictionary_snd_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp]
   rfl
+
+
+/-- **[C6-e5c] The atlas-level specPoints spec** (the c6 core): over the ULift universal atlas the
+glued two-law multiplication computes the group law of the dictionary. Proof plan (v10.94f/g):
+case split via specPoint_factors_blOpenZ_or_blOpenY; per case descend by
+specPoint_addOn{Z,Y}OnImage_factors' + read out by addOn{Z,Y}PieceHom_coord/tensor legs/piece
+projections; identify the triple with `add` by descended_lawOne_eq_add / descended_lawTwo_smul_add;
+finish with toAffine_add + toAffine_smul + projModelPointsEquiv_some/_zero. -/
+theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u}) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K
+        ⟨pullback.lift P.1 Q.1 w ≫
+            WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ, by
+          rw [Category.assoc, WeierstrassCurve.Projective.mulModelHom_projModelπ,
+            ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  classical
+  rcases specPoint_factors_blOpenZ_or_blOpenY universalWeierstrassLocU.{u} K
+    (pullback.lift P.1 Q.1 w) with ⟨h₀, hh₀⟩ | ⟨h₀, hh₀⟩
+  · -- law-1 (Z) case
+    obtain ⟨p, h₁, hfam, heval⟩ := specPoint_addOnZ_family universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ h₀
+    fin_cases p
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
+        universalWeierstrassLocU.{u} 1 1 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayZι universalWeierstrassLocU.{u} 1 1 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Z P Q w 1 1 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
+        universalWeierstrassLocU.{u} 1 2 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayZι universalWeierstrassLocU.{u} 1 2 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Z P Q w 1 2 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
+        universalWeierstrassLocU.{u} 2 1 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayZι universalWeierstrassLocU.{u} 2 1 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Z P Q w 2 1 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
+        universalWeierstrassLocU.{u} 2 2 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayZι universalWeierstrassLocU.{u} 2 2 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Z P Q w 2 2 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+  · -- law-2 (Y) case
+    obtain ⟨p, h₁, hfam, heval⟩ := specPoint_addOnY_family universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ h₀
+    fin_cases p
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
+        universalWeierstrassLocU.{u} 1 1 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayι universalWeierstrassLocU.{u} 1 1 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Y P Q w 1 1 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
+        universalWeierstrassLocU.{u} 1 2 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayι universalWeierstrassLocU.{u} 1 2 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Y P Q w 1 2 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
+        universalWeierstrassLocU.{u} 2 1 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayι universalWeierstrassLocU.{u} 2 1 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Y P Q w 2 1 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
+        universalWeierstrassLocU.{u} 2 2 universalWeierstrassLocU.isUnit_Δ h₁
+      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+          pieceAwayι universalWeierstrassLocU.{u} 2 2 k := by
+        rw [himm, ← hh₀, ← hfam]
+        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
+      refine specPoints_arm_Y P Q w 2 2 k ψ hgp _ ?_
+      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg (h₀ ≫ ·)
+            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ)).trans
+            (heval.trans hev₂)))
+
 
 end AtlasFormula
 
