@@ -1203,6 +1203,84 @@ lemma dictionary_sum_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic]
   rw [htriple]
   exact WeierstrassCurve.Projective.Point.toAffine_smul _ hcu
 
+
+/-- [χ-compat, Z] The pair-ring evaluation is R-compatible (from P's π-condition through the
+committed piece π-compat). -/
+lemma chi_compat_of_pieceZ (W : WeierstrassCurve R) (i j k : Fin 3)
+    {K : Type u} [Field K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    (ψ.comp (algebraMap (biChartRing W i j)
+        (Localization.Away (lawOneTriple W i j k)))).comp
+      (algebraMap R (biChartRing W i j)) = algebraMap R K := by
+  have hπ : Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k ≫
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [← Category.assoc, ← hgp, ← Category.assoc, pullback.lift_fst]
+    exact P.2
+  rw [pieceAwayZι_fst_projModelπ W i j k, ← Spec.map_comp, ← CommRingCat.ofHom_comp] at hπ
+  have h2 := congrArg CommRingCat.Hom.hom (Spec.map_inj.mp hπ)
+  rw [RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq]
+  exact h2
+/-- [χ-compat, Y] The pair-ring evaluation is R-compatible (from P's π-condition through the
+committed piece π-compat). -/
+lemma chi_compat_of_pieceY (W : WeierstrassCurve R) (i j k : Fin 3)
+    {K : Type u} [Field K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawTwoTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k) :
+    (ψ.comp (algebraMap (biChartRing W i j)
+        (Localization.Away (lawTwoTriple W i j k)))).comp
+      (algebraMap R (biChartRing W i j)) = algebraMap R K := by
+  have hπ : Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k ≫
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [← Category.assoc, ← hgp, ← Category.assoc, pullback.lift_fst]
+    exact P.2
+  rw [pieceAwayι_fst_projModelπ W i j k, ← Spec.map_comp, ← CommRingCat.ofHom_comp] at hπ
+  have h2 := congrArg CommRingCat.Hom.hom (Spec.map_inj.mp hπ)
+  rw [RingHom.comp_assoc, ← IsScalarTower.algebraMap_eq]
+  exact h2
+
+/-- The pair images are nonsingular over `K` (coordinate `1` at the chart index). -/
+lemma nonsingular_chi_fst (W : WeierstrassCurve R) [W.IsElliptic] (i j : Fin 3)
+    {K : Type u} [Field K] [Algebra R K] (χ : biChartRing W i j →+* K)
+    (hχ : χ.comp (algebraMap R (biChartRing W i j)) = algebraMap R K) :
+    (W.map (algebraMap R K)).toProjective.Nonsingular (χ ∘ biChartPointFst W i j) := by
+  haveI : ((W.map (algebraMap R K)).toProjective).IsElliptic := by
+    constructor; rw [map_Δ]; exact W.isUnit_Δ.map _
+  have hEq : (W.map (algebraMap R K)).toProjective.Equation (χ ∘ biChartPointFst W i j) := by
+    have h := (equation_biChartPointFst W i j).map χ
+    rwa [show ((W.map (algebraMap R (biChartRing W i j))).toProjective.map χ) =
+      (W.map (algebraMap R K)).toProjective from by
+        show ((W.map (algebraMap R (biChartRing W i j))).map χ).toProjective = _
+        rw [WeierstrassCurve.map_map, hχ]] at h
+  refine WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hEq (fun h0 => ?_)
+  have h1 : χ (biChartPointFst W i j i) = 0 := congrFun h0 i
+  rw [show biChartPointFst W i j i = 1 from dif_pos rfl, map_one] at h1
+  exact one_ne_zero h1
+
+/-- Mirror for the second point. -/
+lemma nonsingular_chi_snd (W : WeierstrassCurve R) [W.IsElliptic] (i j : Fin 3)
+    {K : Type u} [Field K] [Algebra R K] (χ : biChartRing W i j →+* K)
+    (hχ : χ.comp (algebraMap R (biChartRing W i j)) = algebraMap R K) :
+    (W.map (algebraMap R K)).toProjective.Nonsingular (χ ∘ biChartPointSnd W i j) := by
+  haveI : ((W.map (algebraMap R K)).toProjective).IsElliptic := by
+    constructor; rw [map_Δ]; exact W.isUnit_Δ.map _
+  have hEq : (W.map (algebraMap R K)).toProjective.Equation (χ ∘ biChartPointSnd W i j) := by
+    have h := (equation_biChartPointSnd W i j).map χ
+    rwa [show ((W.map (algebraMap R (biChartRing W i j))).toProjective.map χ) =
+      (W.map (algebraMap R K)).toProjective from by
+        show ((W.map (algebraMap R (biChartRing W i j))).map χ).toProjective = _
+        rw [WeierstrassCurve.map_map, hχ]] at h
+  refine WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hEq (fun h0 => ?_)
+  have h1 : χ (biChartPointSnd W i j j) = 0 := congrFun h0 j
+  rw [show biChartPointSnd W i j j = 1 from dif_pos rfl, map_one] at h1
+  exact one_ne_zero h1
+
 end DictionaryOfPiece
 
 end ChartPointTriple
