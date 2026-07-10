@@ -471,10 +471,24 @@ functor `M ↦ ((push M).obj X ≃ M.obj (F X))`, by the adjunction and by mathl
 `pushforwardCompCoyonedaFreeYonedaCorepresentableBy` respectively. -/
 noncomputable def pullbackFreeYonedaIso (X : C) :
     (pullback.{u} φ).obj ((free S).obj (yoneda.obj X)) ≅
-      (free R).obj (yoneda.obj (F.obj X)) :=
-  ((pullbackPushforwardAdjunction.{u} φ).corepresentableBy
-    ((free S).obj (yoneda.obj X))).uniqueUpToIso
-    (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X)
+      (free R).obj (yoneda.obj (F.obj X)) where
+  hom := ((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _).symm
+    ((pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv (𝟙 _))
+  inv := (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv.symm
+    ((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _ (𝟙 _))
+  hom_inv_id := ((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _).injective (by
+    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply]
+    show ((pushforward φ ⋙ coyoneda.obj (Opposite.op ((free S).obj (yoneda.obj X)))).map
+      ((pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv.symm
+        ((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _ (𝟙 _)))
+      ((pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv (𝟙 _))) = _
+    rw [← Functor.CorepresentableBy.homEquiv_eq, Equiv.apply_symm_apply])
+  inv_hom_id := (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv.injective (by
+    rw [Functor.CorepresentableBy.homEquiv_comp, Equiv.apply_symm_apply]
+    show (pullbackPushforwardAdjunction.{u} φ).homEquiv _ _ (𝟙 _) ≫
+      (pushforward φ).map (((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _).symm
+        ((pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv (𝟙 _))) = _
+    rw [← Adjunction.homEquiv_naturality_right, Category.id_comp, Equiv.apply_symm_apply])
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
@@ -486,7 +500,13 @@ lemma homEquiv_pullbackFreeYonedaIso_hom_comp {X : C} {N : PresheafOfModules.{u}
     (pullbackPushforwardAdjunction.{u} φ).homEquiv _ _
         ((pullbackFreeYonedaIso φ X).hom ≫ g) =
       (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv g := by
-  sorry
+  rw [Adjunction.homEquiv_naturality_right]
+  show ((pushforward φ ⋙ coyoneda.obj (Opposite.op ((free S).obj (yoneda.obj X)))).map g
+    ((pullbackPushforwardAdjunction.{u} φ).homEquiv _ _ (pullbackFreeYonedaIso φ X).hom)) = _
+  rw [show (pullbackPushforwardAdjunction.{u} φ).homEquiv _ _ (pullbackFreeYonedaIso φ X).hom =
+      (pushforwardCompCoyonedaFreeYonedaCorepresentableBy φ X).homEquiv (𝟙 _) from
+    Equiv.apply_symm_apply _ _]
+  rw [← Functor.CorepresentableBy.homEquiv_eq]
 
 end PullbackFreeYoneda
 
