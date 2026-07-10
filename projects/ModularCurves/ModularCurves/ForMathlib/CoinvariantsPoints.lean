@@ -641,6 +641,20 @@ theorem finite_setOf_isMaximal_of_isLocalRing (ρ : B →ₐ[R] B ⊗[R] A) (hρ
   · push Not at hex
     refine Set.Finite.subset (Set.finite_empty) (fun n hn => (hex n hn).elim)
 
+/-- Over a local co-invariants base, every maximal ideal of `B` lies over the maximal
+ideal: `m·B ≤ n`. (Contraction is maximal by integrality, hence equals `m`.) -/
+theorem maximalIdeal_map_le_of_isMaximal (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ)
+    [IsLocalRing (coinvariants ρ)] (n : Ideal B) (hn : n.IsMaximal) :
+    (IsLocalRing.maximalIdeal (coinvariants ρ)).map
+      (algebraMap (coinvariants ρ) B) ≤ n := by
+  haveI : Algebra.IsIntegral (coinvariants ρ) B :=
+    isIntegral_algebra_coinvariants R A ρ hρ
+  haveI := hn
+  haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+    (R := coinvariants ρ) (S := B) n
+  rw [Ideal.map_le_iff_le_comap, IsLocalRing.eq_maximalIdeal
+    (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := coinvariants ρ) (S := B) n)]
+
 end Orbit
 
 end ModularCurves
