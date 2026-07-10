@@ -643,6 +643,67 @@ theorem tPrimeRing_cocycle :
     simp only [RingHom.comp_apply] at this
     exact this
 
+/-- The Spec-level cocycle: the triple `tPrimeScheme` composite telescopes to the
+identity through `Spec.map`-functoriality over the ring cocycle. -/
+lemma tPrimeScheme_cocycle :
+    tPrimeScheme R ι ι' ι'' ≫ tPrimeScheme R ι' ι'' ι ≫ tPrimeScheme R ι'' ι ι'
+      = 𝟙 (pullback (overlapι R ι ι') (overlapι R ι ι'')) := by
+  rw [tPrimeScheme, tPrimeScheme, tPrimeScheme]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Spec.map_comp_assoc, ← Spec.map_comp_assoc, ← CommRingCat.ofHom_comp,
+    ← CommRingCat.ofHom_comp]
+  rw [show ((tPrimeRing R ι ι' ι'').comp (tPrimeRing R ι' ι'' ι)).comp
+        (tPrimeRing R ι'' ι ι')
+      = RingHom.id (doubleRing R ι ι' ι'') from by
+    rw [RingHom.comp_assoc]
+    exact tPrimeRing_cocycle R ι ι' ι'']
+  rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp, Iso.hom_inv_id]
+
 end TPrime
+
+/-- The self-overlap immersion is an isomorphism: the self-transition determinant is
+`1`, so the localization is trivial. -/
+instance overlapι_self_isIso (ι : Fin k ↪ Fin n) : IsIso (overlapι R ι ι) := by
+  have hu : IsUnit (Transition.det (R := R) ι ι) := by
+    rw [Transition.det_self]
+    exact isUnit_one
+  have he := IsLocalization.atUnit (ChartRing R ι)
+    (S := Localization.Away (Transition.det (R := R) ι ι))
+    (Transition.det (R := R) ι ι) hu
+  have hfun : ⇑(algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι))) = ⇑he := by
+    funext q
+    exact (he.commutes q).symm
+  have hbij : Function.Bijective (algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι))) := by
+    rw [hfun]
+    exact he.bijective
+  have : IsIso (CommRingCat.ofHom (algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι)))) :=
+    (RingEquiv.toCommRingCatIso (RingEquiv.ofBijective _ hbij)).isIso_hom
+  have hspec : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (ChartRing R ι)
+      (Localization.Away (Transition.det (R := R) ι ι))))) := inferInstance
+  exact hspec
+
+/-- **[GR-F] The Grassmannian chart-atlas glue data**: the affine charts
+`Spec R[X_{j,i}]` glued along the transition maps over the determinant opens — every
+condition proven from the transition ring layer. -/
+noncomputable def glueData (R : Type u) [CommRing R] (k n : ℕ) : Scheme.GlueData.{u} where
+  J := ULift.{u} (Fin k ↪ Fin n)
+  U ι := chartScheme R ι.down
+  V p := overlapScheme R p.1.down p.2.down
+  f ι ι' := overlapι R ι.down ι'.down
+  f_mono _ _ := inferInstance
+  f_id _ := inferInstance
+  t ι ι' := overlapTransition R ι.down ι'.down
+  t_id ι := overlapTransition_self R ι.down
+  t' ι ι' ι'' := tPrimeScheme R ι.down ι'.down ι''.down
+  t_fac ι ι' ι'' := tPrimeScheme_fac R ι.down ι'.down ι''.down
+  cocycle ι ι' ι'' := tPrimeScheme_cocycle R ι.down ι'.down ι''.down
+  f_open ι ι' := inferInstance
+
+/-- **[GR-F] The Grassmannian scheme** `Grass(k, R^n)`: the glued chart atlas. -/
+noncomputable def grassmannianScheme (R : Type u) [CommRing R] (k n : ℕ) : Scheme.{u} :=
+  (glueData R k n).glued
 
 end Module.Grassmannian

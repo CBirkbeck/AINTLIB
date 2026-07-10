@@ -13759,3 +13759,25 @@ elaboration-unification is more permissive than keyed matching.
   · **cocycle ✓ (ring level; the Spec-level transport is `Spec.map`-functoriality over
   the proven ring identity)**. NEXT: assemble the `Scheme.GlueData` structure term +
   glued scheme, then [GR-G] T-points ⟹ NISOG [L15].
+
+### v10.95l (2026-07-10, fable-FP): ★★★★ THE GRASSMANNIAN SCHEME EXISTS — [GR-F] COMPLETE
+
+- **`Module.Grassmannian.glueData R k n : Scheme.GlueData` — EVERY FIELD PROVEN** and
+  **`grassmannianScheme R k n := (glueData R k n).glued : Scheme`** compiles, sorry-free,
+  axiom-clean ([propext, Classical.choice, Quot.sound]). Final pieces this increment:
+  `tPrimeScheme_cocycle` (the Spec-level cocycle — the middle `pullbackSpecIso`s
+  telescope by `Iso.inv_hom_id_assoc`, the `Spec.map`s fold, and the RING cocycle
+  closes it) · `overlapι_self_isIso` (f_id: the self-overlap localizes at
+  `det ι ι = 1`, via `IsLocalization.atUnit` + `RingEquiv.toCommRingCatIso.isIso_hom`) ·
+  universe plumbing (`Scheme.GlueData.{u}` forces `J := ULift (Fin k ↪ Fin n)`).
+- **[GR-F] IS COMPLETE.** mathlib's own `RingTheory/Grassmannian.lean` TODO ("This will
+  correspond to an affine open chart in the Grassmannian… Representability") now has,
+  in AINTLIB: the full chart atlas glued into a scheme, with `glueData.openCover`
+  available from mathlib's glue API for the T-point work.
+- **REMAINING for [NISOG-GRASS]**: [GR-G] the T-point classification
+  (morphisms `T ⟶ grassmannianScheme` over `Spec R` ≃ rank-k locally free quotients of
+  `O_T^n` — via the open cover + waves 1–2.5's covering/chart theorems) ⟹ NISOG [L15]
+  `exists_nIsogSpace` unblocks. The full wave-1→F chain is now proven infrastructure:
+  charts ⇄ retractions ⇄ matrices, covering, congr/pi-normalization, normMap +
+  naturality, overlap criterion, evalAt-spec, transition ring layer (master column
+  identity, inverse pair, triple identities), and the glued scheme.
