@@ -331,3 +331,32 @@ flat base change, integral (Algebra.IsIntegral.tensorProduct): every maximal n o
 agree on C'-scalars = coinvariants ρ' by 03BK(3)); pairwise the orbit theorem connects
 them through the finite ā-fibre S ⟹ the kernel map n ↦ ker χ_n is finite-to-one into a
 finite set ⟹ **finitely many maximals; m·B' ⊆ rad** (all maximals over m by integrality).
+
+## Appendix: [HG-B5] derivation — 03C8 WITHOUT the two-row diagram (banked 2026-07-10)
+
+Stacks 03C8 dictionary check (fetched): hypothesis "B = ⊕ᵢ s♯(A)·t♯(xᵢ)" = ours
+"`hb : Basis ι' B (B⊗[R]A)` (canonical LEFT structure) with `hb i = ρ (x i)`";
+conclusions "A = ⊕ᵢ C·xᵢ" + "B ≅ A⊗_C A" = ours "`Basis ι' C B` on the `x i`" +
+"`canonicalGaloisMap ρ` bijective". The Stacks two-row equalizer comparison is
+REPLACED by an elementwise coassociativity computation — no Amitsur, no ff of ι,
+no twisted instances, no r=0 edge case:
+
+- **L1 `includeLeftBasis`**: `(hb.baseChange D).map cancelBaseChange` (D := B⊗A) is a
+  D-basis of D⊗[R]A with vectors vᵢ = (map ι id)(hb i). [`cancelBaseChange`
+  Tower.lean:436, formula (a•m)⊗n.]
+- **L2 `w-cancellation`**: wᵢ := (map ρ id)(hb i); ∑ dᵢ•wᵢ = 0 ⟹ d = 0. Via
+  Ξ := congr(shearEquiv, refl): map ρ id = Ξ∘(map ι id) (elementwise, Φ∘ι=ρ) and
+  Ξ((d⊗1)z) = (Φd⊗1)Ξ(z), so ∑dᵢ•wᵢ = Ξ(∑ Φ⁻¹(dᵢ)•vᵢ); L1-independence kills.
+- **L3 `coords in C`**: cᵢ := hb.repr (ρ f) i. deltaTilde vs (map ρ id) on the
+  expansion ρf = ∑ ι(cᵢ)·hb i: bridge (`deltaTilde_comp_coaction`) at f AND at each
+  x i; `deltaTilde_tmul_one` gives deltaTilde(ι c) = ι_D(ι c); subtract ⟹
+  ∑(ι cᵢ − ρ cᵢ)•wᵢ = 0 ⟹ [L2] ρ(cᵢ) = ι(cᵢ) ⟹ cᵢ ∈ C (AlgHom.mem_equalizer).
+- **L4 `coinvariantsBasis`**: Basis.mk on x. Independence: apply ρ to ∑gᵢxᵢ=0,
+  gᵢ∈C turns ρ-coeffs into ι-coeffs = B-smul on hb ⟹ zero. Span: f = σ(ρf)
+  = ∑ cᵢxᵢ with cᵢ ∈ C by L3 (σ = counitRetraction, both retraction laws).
+- **L5 `bijective_canonicalGaloisMap_of_basis`**: γ is left-B-linear
+  (γ(b⊗1)=b⊗1); (coinvariantsBasis).baseChange B has vectors 1⊗xᵢ ↦γ ρ(xᵢ) = hb i:
+  basis-to-basis ⟹ bijective (Basis.equiv + Basis.ext + congrFun).
+
+B6 consumes: L4 ⟹ Free+Finite ⟹ FaithfullyFlat C B (nonempty index when B
+nontrivial via σ-retraction; subsingleton branch separate); L5 = galois half.
