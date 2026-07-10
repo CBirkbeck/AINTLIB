@@ -548,3 +548,20 @@ Toolkit verified in-tree: `Scheme.Hom.resLE (f) U V (e : V ≤ f⁻¹ᵁ U) : V 
   budget a session).
 - **[C1d]**: assemble `StableAffineChartData R A B` with C2's chart-Γ-surjectivity
   (actPair| closed immersion of affines ⟹ appTop surjective).
+
+[HG-C2]-mile addendum-2 (third attempt, 90% skeleton): the CORRECT pasting is
+`IsPullback.of_bot` with s := of_hasPullback G.π E.π (transported along
+tensorHom_left_snd), p := (Over.tensorHom_left_fst E.π E.π G.ιOver (𝟙 E.asOver)).symm,
+t := of_hasPullback E.π E.π; conclusion-square IsPullback fstG (ι⊗𝟙).left G.ι fstE; then
+`MorphismProperty.IsStableUnderBaseChange.of_isPullback (P := @IsClosedImmersion) sq
+G.closedImmersion` (NOTE: IsClosedImmersion G.ι is the STRUCTURE FIELD
+`G.closedImmersion`, not an instance!). KEY DISCOVERY: `Over.tensorHom_left_fst/snd`
+(Monoidal/Cartesian/Over.lean:178+) are THE ready component lemmas
+(`(f⊗ₘg).left ≫ pullback.snd fS fU = pullback.snd R.hom T.hom ≫ g.left`), and
+`pullback.lift_fst/snd` are NOT simp-tagged in current mathlib. Blocker at park-time:
+neither rw nor simp-only match tensorHom_left_snd against the of_bot-s-goal (suspect
+`E.asOver`-abbrev vs `Over.mk E.π` unification inside the ⊗ₘ-implicits, or the
+attributed-local `Over.cartesianMonoidalCategory` instance-path). FRESH-SESSION MOVE:
+pp.explicit-diff the goal's ⊗ₘ-implicits against the lemma's via lean_goal, then align
+by `show`-restatement. WIP file parked at scratchpad/ActPairImmersion-wip.lean (session
+50a95a14); the committed file has shearAuto + actPair_eq_shear green.
