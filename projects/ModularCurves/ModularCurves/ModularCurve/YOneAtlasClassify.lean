@@ -5528,4 +5528,255 @@ end MarkedChartData
 
 end InducedChart
 
+section SameChartEngine
+
+/-! ### The comparison ENGINE on a common chart (recipe step 5, T7)
+
+Two marked-chart presentations of the curve over the *same* affine open, carrying the
+same restricted section, classify identically — both halves of the ENGINE, in unbundled
+form so that both the chart fields of a `MarkedChartData` and the honest induced data can
+instantiate it. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} {U : Y.base.affineOpens}
+  [Algebra ↑R ↑Γ(Y.base, U.1)]
+  (W₁ W₂ : WeierstrassCurve ↑Γ(Y.base, U.1)) [W₁.IsElliptic] [W₂.IsElliptic]
+  (e₁ : pullback Y.curve.π U.1.ι ≅ projModel W₁)
+  (e₂ : pullback Y.curve.π U.1.ι ≅ projModel W₂)
+  (heπ₁ : e₁.hom ≫ projModelπ W₁ = pullback.snd Y.curve.π U.1.ι ≫ U.2.isoSpec.hom)
+  (heπ₂ : e₂.hom ≫ projModelπ W₂ = pullback.snd Y.curve.π U.1.ι ≫ U.2.isoSpec.hom)
+  (hez₁ : (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ Y.curve.zero) (𝟙 _)
+    (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp])) ≫
+      e₁.hom = projModelZero W₁)
+  (hez₂ : (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ Y.curve.zero) (𝟙 _)
+    (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp])) ≫
+      e₂.hom = projModelZero W₂)
+  (g₁ : SpecPoints (projModel W₁) (projModelπ W₁) ↑Γ(Y.base, U.1))
+  (g₂ : SpecPoints (projModel W₂) (projModelπ W₂) ↑Γ(Y.base, U.1))
+  (v : U.1.toScheme ⟶ pullback Y.curve.π U.1.ι)
+  (hg₁ : g₁.1 = U.2.isoSpec.inv ≫ v ≫ e₁.hom)
+  (hg₂ : g₂.1 = U.2.isoSpec.inv ≫ v ≫ e₂.hom)
+  (hZ₁ : InZChart W₁ g₁) (hZ₂ : InZChart W₂ g₂)
+  (hord₁ : NowhereOrderLEThree W₁
+    (zChartEval W₁ g₁ hZ₁ (coordX W₁)) (zChartEval W₁ g₁ hZ₁ (coordY W₁)))
+  (hord₂ : NowhereOrderLEThree W₂
+    (zChartEval W₂ g₂ hZ₂ (coordX W₂)) (zChartEval W₂ g₂ hZ₂ (coordY W₂)))
+
+include heπ₁ heπ₂ hez₁ hez₂ hg₁ hg₂ in
+/-- **Same-chart agreement of the pointed atlas maps.** -/
+theorem sameU_tateBaseSpecMapOfPoint_agree :
+    tateBaseSpecMapOfPoint R W₁ _ _ (zChartEval_equation_self W₁ g₁ hZ₁) hord₁ =
+      tateBaseSpecMapOfPoint R W₂ _ _ (zChartEval_equation_self W₂ g₂ hZ₂) hord₂ := by
+  have heπ : (e₁.symm ≪≫ e₂).hom ≫ projModelπ W₂ = projModelπ W₁ := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [Category.assoc, heπ₂, ← heπ₁, Iso.inv_hom_id_assoc]
+  have hez : projModelZero W₁ ≫ (e₁.symm ≪≫ e₂).hom = projModelZero W₂ := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [← hez₁, ← hez₂]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  have hsec : g₁.1 ≫ (e₁.symm ≪≫ e₂).hom = g₂.1 := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [hg₁, hg₂]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  exact tateBaseSpecMapOfPoint_eq_of_pointedIso R W₁ W₂ (e₁.symm ≪≫ e₂) heπ hez
+    g₁ g₂ hZ₁ hZ₂ hsec hord₁ hord₂
+
+include heπ₁ heπ₂ hez₁ hez₂ hg₁ hg₂ in
+/-- **Same-chart agreement of the classifying top maps.** -/
+theorem sameU_projTateMap_agree :
+    e₁.hom ≫ projTateMap R W₁ g₁ hZ₁ hord₁ = e₂.hom ≫ projTateMap R W₂ g₂ hZ₂ hord₂ := by
+  have heπ : (e₁.symm ≪≫ e₂).hom ≫ projModelπ W₂ = projModelπ W₁ := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [Category.assoc, heπ₂, ← heπ₁, Iso.inv_hom_id_assoc]
+  have hez : projModelZero W₁ ≫ (e₁.symm ≪≫ e₂).hom = projModelZero W₂ := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [← hez₁, ← hez₂]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  have hsec : g₁.1 ≫ (e₁.symm ≪≫ e₂).hom = g₂.1 := by
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    rw [hg₁, hg₂]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  have hengine := projTateMap_eq_of_pointedIso R W₁ W₂ (e₁.symm ≪≫ e₂) heπ hez
+    g₁ g₂ hZ₁ hZ₂ hsec hord₁ hord₂
+  rw [← hengine]
+  simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.hom_inv_id_assoc]
+
+end MarkedChartData
+
+end SameChartEngine
+
+section InducedChartPins
+
+/-! ### The classifying pins of the induced chart (recipe step 5, T7) -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  (fb : Y.base ⟶ tateBase R) (ftop : Y.curve.E ⟶ (tateUniversal R).E)
+  (hPB : IsPullback ftop Y.curve.π ((tateUniversal R).π) fb)
+  (hzw : Y.curve.zero ≫ ftop = fb ≫ (tateUniversal R).zero)
+  (P : Y.curve.Section)
+
+/-- The atlas structure map is `Spec` of the atlas algebra. -/
+theorem tateStructMap_eq_algebraMap (R : CommRingCat.{u}) :
+    tateStructMap R = Spec.map (CommRingCat.ofHom (algebraMap ↑R (tateRingOver R))) := by
+  rw [tateStructMap]
+  refine congrArg Spec.map ?_
+  ext r
+  show algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.C r) =
+    algebraMap ↑R (tateRingOver R) r
+  rw [IsScalarTower.algebraMap_eq ↑R (MvPolynomial (Fin 2) ↑R) (tateRingOver R)]
+  simp [MvPolynomial.algebraMap_eq]
+
+/-- The nowhere-small-order condition of the induced point (through the induced chart's
+geometric-fibre machinery, `[T-A6b]`/`[T-B6′]` trails). -/
+theorem inducedPt_hord (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    NowhereOrderLEThree ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      (zChartEval _ (D.inducedPt fb ftop hPB hzw P)
+        (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+        (coordX ((tateCurveLocOver R).map
+          (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))))
+      (zChartEval _ (D.inducedPt fb ftop hPB hzw P)
+        (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+        (coordY ((tateCurveLocOver R).map
+          (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))))) :=
+  (D.inducedChart fb ftop hPB hzw).pt_hord P hP
+
+variable [Algebra ↑R ↑Γ(Y.base, D.U.1)]
+
+/-- The induced atlas algebra is an `R`-algebra tower. -/
+theorem inducedChart_tower
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap)
+    (hbw : fb ≫ tateStructMap R = Y.structMap) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)).comp
+      (algebraMap ↑R (tateRingOver R)) = algebraMap ↑R ↑Γ(Y.base, D.U.1) := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  have hof : CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) =
+      Spec.preimage (D.classifyingSpecMap fb) := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have hbase : Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ Y.structMap := by
+    rw [← halg, Iso.inv_hom_id_assoc]
+  have hspec : Spec.map (CommRingCat.ofHom
+      ((algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)).comp
+        (algebraMap ↑R (tateRingOver R)))) =
+      Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) := by
+    rw [show CommRingCat.ofHom ((algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)).comp
+        (algebraMap ↑R (tateRingOver R))) =
+        CommRingCat.ofHom (algebraMap ↑R (tateRingOver R)) ≫
+          CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) from
+      CommRingCat.ofHom_comp _ _]
+    rw [Spec.map_comp, hof, Spec.map_preimage, ← tateStructMap_eq_algebraMap, hbase]
+    show D.classifyingSpecMap fb ≫ tateStructMap R = _
+    rw [classifyingSpecMap]
+    simp only [Category.assoc]
+    rw [hbw]
+  have hring := Spec.map_injective hspec
+  have := congrArg CommRingCat.Hom.hom hring
+  simpa using this
+
+/-- **The base pin**: the pointed atlas map of the induced point is the classifying test
+map. -/
+theorem tateBaseSpecMapOfPoint_inducedPt
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap)
+    (hbw : fb ≫ tateStructMap R = Y.structMap)
+    (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    tateBaseSpecMapOfPoint R ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))) _ _
+      (zChartEval_equation_self _ (D.inducedPt fb ftop hPB hzw P)
+        (D.inducedPt_inZChart fb ftop hPB hzw P hP))
+      (D.inducedPt_hord fb ftop hPB hzw P hP) =
+      D.classifyingSpecMap fb := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  have htower := D.inducedChart_tower fb halg hbw
+  have hof : CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) =
+      Spec.preimage (D.classifyingSpecMap fb) := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have htn : ((tateCurveLocOver R).map
+      (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsTateNormal :=
+    (tateCurveLocOver_isTateNormal R).map _
+  have hC1 : tateNormalVariableChange
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      _ _ (zChartEval_equation_self _ (D.inducedPt fb ftop hPB hzw P)
+        (D.inducedPt_inZChart fb ftop hPB hzw P hP))
+      (D.inducedPt_hord fb ftop hPB hzw P hP) = 1 := by
+    refine (tateNormalVariableChange_unique _ _ _
+      (zChartEval_equation_self _ (D.inducedPt fb ftop hPB hzw P)
+        (D.inducedPt_inZChart fb ftop hPB hzw P hP))
+      (D.inducedPt_hord fb ftop hPB hzw P hP) 1 ⟨?_, ?_, ?_⟩).symm
+    · rw [one_smul]
+      exact htn
+    · exact (D.inducedPt_coordX fb ftop hPB hzw P hP hmark).symm
+    · exact (D.inducedPt_coordY fb ftop hPB hzw P hP hmark).symm
+  have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)
+      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R ↑Γ(Y.base, D.U.1) r := fun r => by
+    rw [← htower]; rfl
+  have h := tateBaseSpecMap_eq_tateBaseSpecMapOfPoint R
+    ({ toRingHom := algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1), commutes' := hAlg } :
+      tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))
+    ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+    _ _ (zChartEval_equation_self _ (D.inducedPt fb ftop hPB hzw P)
+      (D.inducedPt_inZChart fb ftop hPB hzw P hP))
+    (D.inducedPt_hord fb ftop hPB hzw P hP) ?_ ?_
+  · rw [← h]
+    show Spec.map (CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))) =
+      D.classifyingSpecMap fb
+    rw [hof, Spec.map_preimage]
+  · rw [hC1, one_smul]
+    show algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)
+      (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0)) =
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).a₁
+    rw [WeierstrassCurve.map_a₁, tateCurveLocOver_a₁]
+  · rw [hC1, one_smul]
+    show algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)
+      (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1)) =
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).a₂
+    rw [WeierstrassCurve.map_a₂, tateCurveLocOver_a₂]
+
+/-- **The top pin**: the classifying top map of the induced point is the base-change
+morphism (self-classification). -/
+theorem projTateMap_inducedPt
+    (halg : D.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D.U.1))) =
+      D.U.1.ι ≫ Y.structMap)
+    (hbw : fb ≫ tateStructMap R = Y.structMap)
+    (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (hmark : P.1 ≫ ftop = fb ≫ (tateMarkedPoint R).1) :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    projTateMap R ((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))
+      (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+      (D.inducedPt_hord fb ftop hPB hzw P hP) =
+      projModelBaseChange (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+        (tateCurveLocOver R) := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  exact projTateMap_map_tate R (D.inducedChart_tower fb halg hbw)
+    (D.inducedPt fb ftop hPB hzw P) (D.inducedPt_inZChart fb ftop hPB hzw P hP)
+    (D.inducedPt_coordX fb ftop hPB hzw P hP hmark)
+    (D.inducedPt_coordY fb ftop hPB hzw P hP hmark)
+    (D.inducedPt_hord fb ftop hPB hzw P hP)
+
+end MarkedChartData
+
+end InducedChartPins
+
 end ModularCurves
