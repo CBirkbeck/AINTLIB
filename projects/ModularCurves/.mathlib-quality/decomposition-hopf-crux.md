@@ -492,3 +492,22 @@ lands in E×E not G×E — the retraction must corestrict: (x+t)−x = ι(t) fac
 actPair = shear ∘ (ι ×ₛ id_E) ✓✓ ⟹ actPair = iso ∘ closed-immersion ⟹ CLOSED IMMERSION,
 free ✓ — C2 is EASY given the shear-automorphism of E ×ₛ E (group-scheme shear, mathlib
 `?`; buildable from μ, inv as an iso with explicit inverse (y,x)↦(y−x,x)).
+
+## [HG-C2] last-mile route (banked 2026-07-10; shear+decomposition COMMITTED green)
+
+Remaining: `IsClosedImmersion G.actPair.left`. Route:
+`(ι⊗𝟙).left`-closed-immersion via `pullbackRightPullbackFstIso E.π E.π G.ι :
+pullback G.ι (fst E.π E.π) ≅ pullback (G.ι ≫ E.π) E.π` (note `G.ι ≫ E.π = G.π` rfl) +
+mathlib instance `IsClosedImmersion (pullback.snd G.ι (fst E.π E.π))` (base change of ι)
++ iso-composition; identify `(ι⊗𝟙).left = iso.inv ≫ pullback.snd _ _` by
+`pullback.hom_ext` + the `pullbackRightPullbackFstIso_inv_{fst,snd}` simp-set. Then
+`actPair_eq_shear` + `shearAuto.left`-iso ⟹ done. CAUTION (cost sink discovered):
+`pullback.map` is an *abbrev* for `pullback.lift`; heq-style comparisons flake on
+HasPullback-instance-term mismatches between the Over-monoidal chosen pullbacks and
+fresh synthesis — prefer mathlib's own iso-simp-lemmas over hand-built `pullback.lift`
+comparisons, or go through `IsPullback.of_isoPullback`. Downstream consumer: per-chart
+Γ-surjectivity = `IsClosedImmersion.isAffine`-restriction + surjective-on-sections
+(`IsClosedImmersion` on affines ⟹ `Function.Surjective (Γ-map)` — mathlib
+`IsClosedImmersion.isAffine_iff`-adjacent / `Scheme.Hom.appTop`-surjectivity:
+`IsClosedImmersion` over affine ⟹ surjective appTop ✓ exists as
+`IsClosedImmersion.surjective_appTop`-ish; verify name).
