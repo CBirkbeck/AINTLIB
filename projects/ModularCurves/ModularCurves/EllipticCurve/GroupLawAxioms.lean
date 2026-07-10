@@ -587,4 +587,51 @@ theorem invOver_mulOver_atlas :
 
 end AtlasEquations
 
+section Transport
+
+variable {R : Type u} [CommRing R]
+
+/-- **(T-G4-comm-raw)** Commutativity of `mulModelHom` at the raw scheme level, for every
+elliptic `W` over every `R` — the base-change transport of `mulModelHom_comm_atlas`. -/
+theorem mulModelHom_comm (W : WeierstrassCurve R) [W.IsElliptic] :
+    (pullbackSymmetry (projModelπ W) (projModelπ W)).hom ≫ mulModelHom W = mulModelHom W := by
+  have raw : (pullbackSymmetry (projModelπ universalWeierstrassLocU.{u})
+        (projModelπ universalWeierstrassLocU.{u})).hom ≫
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ =
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ := by
+    rw [← mulModelHom_universalWeierstrassLocU]; exact mulModelHom_comm_atlas
+  have hbc : mulModelHom W ≫ projModelBaseChangeOf (classifyRingHomU W)
+        universalWeierstrassLocU.{u} W (universalWeierstrassLocU_map_classifyRingHomU W) =
+      pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU.{u} W
+        (universalWeierstrassLocU_map_classifyRingHomU W) ≫
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ :=
+    mulModelHomBC_baseChange (classifyRingHomU W) universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ W (universalWeierstrassLocU_map_classifyRingHomU W)
+  have hsym : (pullbackSymmetry (projModelπ W) (projModelπ W)).hom ≫
+      pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU.{u} W
+        (universalWeierstrassLocU_map_classifyRingHomU W) =
+      pullbackMapBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU.{u} W
+        (universalWeierstrassLocU_map_classifyRingHomU W) ≫
+      (pullbackSymmetry (projModelπ universalWeierstrassLocU.{u})
+        (projModelπ universalWeierstrassLocU.{u})).hom := by
+    apply pullback.hom_ext <;>
+      simp only [pullbackMapBaseChangeOf, Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullbackSymmetry_hom_comp_fst, pullbackSymmetry_hom_comp_snd,
+        pullbackSymmetry_hom_comp_fst_assoc, pullbackSymmetry_hom_comp_snd_assoc,
+        pullback.lift_fst_assoc, pullback.lift_snd_assoc]
+  apply (isPullback_projModelBaseChangeOf (classifyRingHomU W) universalWeierstrassLocU.{u} W
+    (universalWeierstrassLocU_map_classifyRingHomU W)).hom_ext
+  · rw [Category.assoc]
+    show _ = mulModelHom W ≫ _
+    rw [hbc, ← Category.assoc, hsym, Category.assoc, raw]
+  · rw [Category.assoc]
+    show _ = mulModelHom W ≫ _
+    rw [mulModelHom_π, ← Category.assoc, pullbackSymmetry_hom_comp_fst]
+    exact (pullback.condition).symm
+
+end Transport
+
 end ModularCurves
