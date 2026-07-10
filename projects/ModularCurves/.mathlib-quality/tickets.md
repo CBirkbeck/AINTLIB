@@ -15711,3 +15711,22 @@ GREEN (3766 jobs). 7 consumers unblocked. Process pin: ls/git-log a path before 
 isPullback_of_fppf_baseChange (TorsorMap.lean, axiom-clean). B3 remaining: gap #3 (coreData_injective
 uniqueness) — blocked on a MISSING CoreData field (q-torsor structure); fix = add hqtors/hqtors_curve
 from SchemeActionFree's isFinite/etale/torsorMul lemmas + the fibre-product/[B2b] proof. Then T-W7.
+
+## PHASE B — B3 gap #3 decomposition (fable-P4, 2026-07-10, post-repair)
+coreData_injective (QuotientRepresentability.lean:559, the LAST B3 real sorry besides T-W7) reduces
+(coreData_hom_eq_of_baseHom_eq, DONE) to `v.baseHom = v'.baseHom`. b3bij agent's finding: BLOCKED on a
+MISSING CoreData field — q.baseHom's finite-étale-G-torsor structure isn't exposed (only categorical
+quotient hqinv/hqepi/hqlift). Sub-pieces:
+* **[B3-g3a] geometric quotientπ-torsor iso** (NEW infra, ungate-able, reusable): build
+  `IsIso (torsorCompare (σ.quotientπ V hVs hVa hVmem) σ <invariance>)` (i.e. `∐_G X ≅ X ×_{X/G} X`)
+  from the ring-level `torsorMul_bijective_of_free` (SchemeActionFree.lean:96) over the quotient charts
+  + `isPullback_quotientπ`. ~100 lines scheme gluing. + the curve-level version on quotientπ_total.
+* **[B3-g3b] CoreData fields**: add `hqtors`/`hqtors_curve` to CoreData; populate in exists_coreData
+  from [B3-g3a] (mechanical).
+* **[B3-g3c] the uniqueness proof** (~150-200 lines): fibre-product `T_v := Y ×_{X₀} 𝕸(P,δ)` (Ell/R
+  pullback along q, a δ-torsor of Y by base-change of hqtors); tautological G-equivariant lift
+  ℓ_v : T_v → 𝕸(P,δ); its δ-value gives G-equivariant T_v → td.Z, iso by [B2b]; classifiers c_v=c_v'
+  (h) ⟹ td.f ≫ v.baseHom = td.f ≫ v'.baseHom ⟹ cancel_epi td.f.
+NOTE: the theorem carries sorryAx from BOTH gap#3 AND T-W7 (toEllipticCurve/grpObj, c5β) — closing
+gap#3 removes one gate; full axiom-cleanness also needs T-W7 (c5β active, of_map breakthrough).
+b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (single source of truth).
