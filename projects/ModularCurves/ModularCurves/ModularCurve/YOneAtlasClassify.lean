@@ -5081,4 +5081,171 @@ end MarkedChartData
 
 end GluedHom
 
+section SelfClassification
+
+/-! ### Self-classification of the pulled-back universal curve (recipe step 5 substrate)
+
+The T-E1 normalisation of the base-changed universal Tate curve at a `(0,0)`-marked point
+is the identity variable change, so its classifying top map is the base-change morphism
+itself.  This is the crux that pins the `top` component of an arbitrary classifying
+morphism against the glued one. -/
+
+variable {A : Type u} [CommRing A]
+
+private lemma projModelVCIso_hom_congrC {C₁ C₂ : WeierstrassCurve.VariableChange A}
+    (h : C₁ = C₂) (W : WeierstrassCurve A) :
+    (projModelVCIso C₁ W).hom =
+      eqToHom (show projModel (C₁ • W) = projModel (C₂ • W) by rw [h]) ≫
+        (projModelVCIso C₂ W).hom := by
+  subst h
+  rw [eqToHom_refl, Category.id_comp]
+
+private lemma projModelVCIso_hom_congrW (C : WeierstrassCurve.VariableChange A)
+    {V V' : WeierstrassCurve A} (h : V = V') :
+    (projModelVCIso C V).hom =
+      eqToHom (show projModel (C • V) = projModel (C • V') by rw [h]) ≫
+        (projModelVCIso C V').hom ≫
+        eqToHom (show projModel V' = projModel V by rw [h]) := by
+  subst h
+  rw [eqToHom_refl, eqToHom_refl, Category.id_comp, Category.comp_id]
+
+/-- The model isomorphism of the identity variable change is the canonical transport. -/
+theorem projModelVCIso_one (W : WeierstrassCurve A) :
+    (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom =
+      eqToHom (congrArg projModel (one_smul _ W)) := by
+  have hmul := projModelVCIso_mul (1 : WeierstrassCurve.VariableChange A) 1 W
+  have hC := projModelVCIso_hom_congrC
+    (show (1 : WeierstrassCurve.VariableChange A) * 1 = 1 from mul_one 1) W
+  have hW := projModelVCIso_hom_congrW (1 : WeierstrassCurve.VariableChange A)
+    (one_smul (WeierstrassCurve.VariableChange A) W)
+  rw [hC, hW] at hmul
+  -- hmul : e₀ ≫ h = e₁ ≫ (e₂ ≫ h ≫ e₃) ≫ h
+  simp only [Category.assoc, eqToHom_trans_assoc] at hmul
+  -- both prefix eqToHoms coincide by proof irrelevance; cancel them
+  have hmul2 := (cancel_epi (eqToHom (show projModel
+      (((1 : WeierstrassCurve.VariableChange A) * 1) • W) =
+      projModel ((1 : WeierstrassCurve.VariableChange A) • W) by rw [mul_one]))).mp hmul
+  -- hmul2 : h = h ≫ e₃ ≫ h
+  have hmul3 : (𝟙 (projModel ((1 : WeierstrassCurve.VariableChange A) • W)) ≫
+      (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom) =
+      ((projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom ≫
+        eqToHom (show projModel W =
+          projModel ((1 : WeierstrassCurve.VariableChange A) • W) by
+            rw [one_smul])) ≫
+        (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom := by
+    rw [Category.id_comp]
+    simpa only [Category.assoc] using hmul2
+  have hmul4 := (cancel_mono
+    (projModelVCIso (1 : WeierstrassCurve.VariableChange A) W).hom).mp hmul3
+  -- hmul4 : 𝟙 = h ≫ e₃
+  have := congrArg (fun m => m ≫ eqToHom (show
+      projModel ((1 : WeierstrassCurve.VariableChange A) • W) = projModel W by
+        rw [one_smul])) hmul4
+  simpa only [Category.id_comp, Category.assoc, eqToHom_trans, eqToHom_refl,
+    Category.comp_id] using this.symm
+
+/-- The atlas curve coefficient `a₁` is the first universal coefficient. -/
+theorem tateCurveLocOver_a₁ (R : CommRingCat.{u}) :
+    (tateCurveLocOver R).a₁ =
+      algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0) := by
+  simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
+  simp
+
+/-- The atlas curve coefficient `a₂` is the second universal coefficient. -/
+theorem tateCurveLocOver_a₂ (R : CommRingCat.{u}) :
+    (tateCurveLocOver R).a₂ =
+      algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1) := by
+  simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
+  simp
+
+/-- The universal Tate-normal curve over `R[A,B]` is Tate-normal. -/
+theorem tateCurveOver_isTateNormal (R : CommRingCat.{u}) :
+    (tateCurveOver R).IsTateNormal := by
+  refine ⟨?_, ?_, ?_⟩ <;>
+    simp [tateCurveOver, tateCurve, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃,
+      WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
+
+/-- The atlas curve is Tate-normal. -/
+theorem tateCurveLocOver_isTateNormal (R : CommRingCat.{u}) :
+    (tateCurveLocOver R).IsTateNormal :=
+  (tateCurveOver_isTateNormal R).map
+    (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R))
+
+variable (R : CommRingCat.{u}) [Algebra ↑R A] [Algebra (tateRingOver R) A]
+
+/-- **Self-classification**: the classifying top map of the base-changed universal Tate
+curve at a `(0,0)`-marked point is the base-change morphism. -/
+theorem projTateMap_map_tate
+    [((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsElliptic]
+    (htower : (algebraMap (tateRingOver R) A).comp (algebraMap ↑R (tateRingOver R)) =
+      algebraMap ↑R A)
+    (g : SpecPoints (projModel ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)))
+      (projModelπ ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) A)
+    (hZ : InZChart ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) g)
+    (hx : zChartEval _ g hZ
+      (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) = 0)
+    (hy : zChartEval _ g hZ
+      (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) = 0)
+    (hord : NowhereOrderLEThree ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ
+        (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))) :
+    projTateMap R ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) g hZ hord =
+      projModelBaseChange (algebraMap (tateRingOver R) A) (tateCurveLocOver R) := by
+  have htn : ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsTateNormal :=
+    (tateCurveLocOver_isTateNormal R).map (algebraMap (tateRingOver R) A)
+  -- the T-E1 normalisation at the (0,0)-marking is the identity variable change
+  have hC1 : tateNormalVariableChange
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval_equation_self _ g hZ) hord = 1 := by
+    refine (tateNormalVariableChange_unique _ _ _
+      (zChartEval_equation_self _ g hZ) hord 1 ⟨?_, ?_, ?_⟩).symm
+    · rw [one_smul]
+      exact htn
+    · exact hx.symm
+    · exact hy.symm
+  -- the pointed atlas algebra map is the algebra map itself
+  have hL : ((tateRingOverAlgLiftOfPoint R
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
+      (zChartEval_equation_self _ g hZ) hord : tateRingOver R →ₐ[R] A) :
+        tateRingOver R →+* A) = algebraMap (tateRingOver R) A := by
+    have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) A
+        (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R A r := fun r => by
+      rw [← htower]; rfl
+    have hext := tateRingOver_algHom_ext R
+      (tateRingOverAlgLiftOfPoint R
+        ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
+        (zChartEval_equation_self _ g hZ) hord)
+      ({ toRingHom := algebraMap (tateRingOver R) A, commutes' := hAlg } :
+        tateRingOver R →ₐ[R] A) ?_ ?_
+    · exact congrArg (fun φ : tateRingOver R →ₐ[R] A => (φ : tateRingOver R →+* A)) hext
+    · rw [tateRingOverAlgLiftOfPoint_X_zero, hC1, one_smul]
+      show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₁ =
+        algebraMap (tateRingOver R) A
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0))
+      rw [WeierstrassCurve.map_a₁, tateCurveLocOver_a₁]
+    · rw [tateRingOverAlgLiftOfPoint_X_one, hC1, one_smul]
+      show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₂ =
+        algebraMap (tateRingOver R) A
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1))
+      rw [WeierstrassCurve.map_a₂, tateCurveLocOver_a₂]
+  rw [projTateMap_unfold R ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+    g hZ hord]
+  have hinv1 := projModelVCIso_inv_congr hC1
+    ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+  have hinv2 : (projModelVCIso (1 : WeierstrassCurve.VariableChange A)
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))).inv =
+      eqToHom (congrArg projModel (one_smul (WeierstrassCurve.VariableChange A)
+        ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)))).symm := by
+    rw [← cancel_epi (projModelVCIso (1 : WeierstrassCurve.VariableChange A)
+        ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))).hom,
+      Iso.hom_inv_id, projModelVCIso_one, eqToHom_trans, eqToHom_refl]
+  have hbcL := projModelBaseChange_ringHom_congr hL (tateCurveLocOver R)
+  rw [hinv1, hinv2, hbcL]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+
+end SelfClassification
+
 end ModularCurves
