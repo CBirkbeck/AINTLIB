@@ -3221,4 +3221,177 @@ end MarkedChartData
 
 end FibreEnrichment
 
+section LocalClassifyingData
+
+/-! ### The local classifying data of a marked chart (recipe step 2)
+
+Composing the chart trivialisation with the landed `projTateMap` package produces, for each
+marked chart, the local Tate-base map and the local top map with their cartesian square,
+zero-compatibility and marking-compatibility — the inputs of the v10.96–v10.100 gluing
+handles. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  [Algebra R ↑Γ(Y.base, D.U.1)]
+  (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+
+/-- The local Tate-base map of a marked chart. -/
+noncomputable def baseMap : D.U.1.toScheme ⟶ tateBase R :=
+  D.U.2.isoSpec.hom ≫ tateBaseSpecMapOfPoint R D.W _ _
+    (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)
+
+/-- The local top map of a marked chart. -/
+noncomputable def topMap : pullback Y.curve.π D.U.1.ι ⟶ projModel (tateCurveLocOver R) :=
+  D.e.hom ≫ projTateMap R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)
+
+/-- The local square is cartesian. -/
+theorem topMap_isPullback :
+    IsPullback (D.topMap P hP) (pullback.snd Y.curve.π D.U.1.ι)
+      (projModelπ (tateCurveLocOver R)) (D.baseMap P hP) :=
+  (IsPullback.of_horiz_isIso ⟨D.heπ⟩).paste_horiz
+    (projTateMap_isPullback R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))
+
+/-- The local square is pointed. -/
+theorem topMap_zero :
+    pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+      (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+      D.topMap P hP = D.baseMap P hP ≫ projModelZero (tateCurveLocOver R) := by
+  have h1 := congrArg (fun m => D.U.2.isoSpec.hom ≫ m) D.hez
+  simp only [Category.assoc, Iso.hom_inv_id_assoc] at h1
+  simp only [topMap, baseMap, Category.assoc]
+  rw [← Category.assoc, h1, Category.assoc,
+    projTateMap_zero R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]
+
+/-- The local square carries the section to the atlas marking. -/
+theorem topMap_marking :
+    D.restrictSection P ≫ D.topMap P hP = D.baseMap P hP ≫ tateP0mor R := by
+  have h1 := congrArg (fun m => D.U.2.isoSpec.hom ≫ m) (D.pt_coe P)
+  simp only [Iso.hom_inv_id_assoc] at h1
+  simp only [topMap, baseMap, Category.assoc]
+  rw [← Category.assoc, ← h1, Category.assoc,
+    projTateMap_marking R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]
+
+end MarkedChartData
+
+end LocalClassifyingData
+
+section TateAtlasNaturality
+
+/-! ### Naturality of the pointed atlas map in the chart ring (recipe step 3 substrate)
+
+`tateBaseSpecMapOfPoint` is natural under change of the chart ring: composing with
+`Spec` of a ring map computes the atlas map of the mapped chart at the mapped point.
+Together with the ENGINE this drives the overlap agreement of the local classifying
+maps on affine test points. -/
+
+variable {A B : Type u} [CommRing A] [CommRing B] (ψ : A →+* B)
+
+/-- Tate-normality is preserved by ring maps. -/
+theorem _root_.WeierstrassCurve.IsTateNormal.map {W : WeierstrassCurve A}
+    (hW : W.IsTateNormal) : (W.map ψ).IsTateNormal := by
+  refine ⟨?_, ?_, ?_⟩ <;>
+    simp only [WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄,
+      WeierstrassCurve.map_a₆, hW.1, hW.2.1, hW.2.2, map_zero]
+
+/-- The nowhere-small-order condition is preserved by ring maps. -/
+theorem NowhereOrderLEThree.map {W : WeierstrassCurve A} {x y : A}
+    (hord : NowhereOrderLEThree W x y) :
+    NowhereOrderLEThree (W.map ψ) (ψ x) (ψ y) := by
+  have h2 : ((W.map ψ).Ψ 2).evalEval (ψ x) (ψ y) = ψ ((W.Ψ 2).evalEval x y) := by
+    rw [WeierstrassCurve.map_Ψ, Polynomial.map_mapRingHom_evalEval]
+  have h3 : ((W.map ψ).Ψ 3).evalEval (ψ x) (ψ y) = ψ ((W.Ψ 3).evalEval x y) := by
+    rw [WeierstrassCurve.map_Ψ, Polynomial.map_mapRingHom_evalEval]
+  show IsUnit _
+  rw [h2, h3, ← map_mul]
+  exact (show IsUnit _ from hord).map ψ
+
+/-- T-E1 normalisation is natural in the chart ring. -/
+theorem tateNormalVariableChange_map (W : WeierstrassCurve A) [W.IsElliptic]
+    [(W.map ψ).IsElliptic] (x y : A) (hxy : W.toAffine.Equation x y)
+    (hord : NowhereOrderLEThree W x y)
+    (hxy' : (W.map ψ).toAffine.Equation (ψ x) (ψ y))
+    (hord' : NowhereOrderLEThree (W.map ψ) (ψ x) (ψ y)) :
+    (tateNormalVariableChange W x y hxy hord).map ψ =
+      tateNormalVariableChange (W.map ψ) (ψ x) (ψ y) hxy' hord' :=
+  tateNormalVariableChange_unique (W.map ψ) (ψ x) (ψ y) hxy' hord' _
+    ⟨by rw [WeierstrassCurve.map_variableChange]
+        exact (tateNormalVariableChange_isTateNormal W x y hxy hord).map ψ,
+     by simp, by simp⟩
+
+/-- The T-E1 normalised curve is natural in the chart ring. -/
+theorem tateNormalVariableChange_smul_map (W : WeierstrassCurve A) [W.IsElliptic]
+    [(W.map ψ).IsElliptic] (x y : A) (hxy : W.toAffine.Equation x y)
+    (hord : NowhereOrderLEThree W x y)
+    (hxy' : (W.map ψ).toAffine.Equation (ψ x) (ψ y))
+    (hord' : NowhereOrderLEThree (W.map ψ) (ψ x) (ψ y)) :
+    tateNormalVariableChange (W.map ψ) (ψ x) (ψ y) hxy' hord' • (W.map ψ) =
+      ((tateNormalVariableChange W x y hxy hord) • W).map ψ := by
+  rw [← tateNormalVariableChange_map ψ W x y hxy hord hxy' hord',
+    WeierstrassCurve.map_variableChange]
+
+/-- The pointed atlas ring map is natural in the chart ring. -/
+theorem tateRingOverLiftOfPoint_comp (R : CommRingCat.{u}) [Algebra ↑R A] [Algebra ↑R B]
+    (hψ : ψ.comp (algebraMap ↑R A) = algebraMap ↑R B)
+    (W : WeierstrassCurve A) [W.IsElliptic] [(W.map ψ).IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (hxy' : (W.map ψ).toAffine.Equation (ψ x) (ψ y))
+    (hord' : NowhereOrderLEThree (W.map ψ) (ψ x) (ψ y)) :
+    ψ.comp (tateRingOverLiftOfPoint R W x y hxy hord) =
+      tateRingOverLiftOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord' := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers (tateCurveOver R).Δ)
+  apply MvPolynomial.ringHom_ext
+  · intro r
+    change ψ (tateRingOverAlgLiftOfPoint R W x y hxy hord
+        (algebraMap ↑R (tateRingOver R) r)) =
+      tateRingOverAlgLiftOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord'
+        (algebraMap ↑R (tateRingOver R) r)
+    rw [AlgHom.commutes, AlgHom.commutes]
+    exact RingHom.congr_fun hψ r
+  · intro i
+    fin_cases i
+    · change ψ (tateRingOverAlgLiftOfPoint R W x y hxy hord
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0))) =
+        tateRingOverAlgLiftOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord'
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0))
+      rw [tateRingOverAlgLiftOfPoint_X_zero, tateRingOverAlgLiftOfPoint_X_zero,
+        tateNormalVariableChange_smul_map ψ W x y hxy hord hxy' hord',
+        WeierstrassCurve.map_a₁]
+    · change ψ (tateRingOverAlgLiftOfPoint R W x y hxy hord
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1))) =
+        tateRingOverAlgLiftOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord'
+          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1))
+      rw [tateRingOverAlgLiftOfPoint_X_one, tateRingOverAlgLiftOfPoint_X_one,
+        tateNormalVariableChange_smul_map ψ W x y hxy hord hxy' hord',
+        WeierstrassCurve.map_a₂]
+
+/-- **Affine naturality of the classifying base map**: composing the pointed atlas map with
+`Spec` of a chart-ring map gives the pointed atlas map of the mapped chart. -/
+theorem tateBaseSpecMapOfPoint_naturality (R : CommRingCat.{u}) [Algebra ↑R A] [Algebra ↑R B]
+    (hψ : ψ.comp (algebraMap ↑R A) = algebraMap ↑R B)
+    (W : WeierstrassCurve A) [W.IsElliptic] [(W.map ψ).IsElliptic]
+    (x y : A) (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (hxy' : (W.map ψ).toAffine.Equation (ψ x) (ψ y))
+    (hord' : NowhereOrderLEThree (W.map ψ) (ψ x) (ψ y)) :
+    Spec.map (CommRingCat.ofHom ψ) ≫ tateBaseSpecMapOfPoint R W x y hxy hord =
+      tateBaseSpecMapOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord' := by
+  show Spec.map (CommRingCat.ofHom ψ) ≫
+    Spec.map (CommRingCat.ofHom (tateRingOverLiftOfPoint R W x y hxy hord)) =
+    Spec.map (CommRingCat.ofHom (tateRingOverLiftOfPoint R (W.map ψ) (ψ x) (ψ y) hxy' hord'))
+  rw [← Spec.map_comp, ← CommRingCat.ofHom_comp,
+    tateRingOverLiftOfPoint_comp ψ R hψ W x y hxy hord hxy' hord']
+
+/-- Congruence for `tateBaseSpecMapOfPoint` in the marked point. -/
+theorem tateBaseSpecMapOfPoint_congr (R : CommRingCat.{u}) [Algebra ↑R A]
+    (W : WeierstrassCurve A) [W.IsElliptic] {x y x' y' : A} (hx : x = x') (hy : y = y')
+    (hxy : W.toAffine.Equation x y) (hord : NowhereOrderLEThree W x y)
+    (hxy' : W.toAffine.Equation x' y') (hord' : NowhereOrderLEThree W x' y') :
+    tateBaseSpecMapOfPoint R W x y hxy hord =
+      tateBaseSpecMapOfPoint R W x' y' hxy' hord' := by
+  subst hx
+  subst hy
+  rfl
+
+end TateAtlasNaturality
+
 end ModularCurves
