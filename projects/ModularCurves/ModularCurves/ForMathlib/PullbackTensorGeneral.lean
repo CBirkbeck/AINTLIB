@@ -676,6 +676,22 @@ lemma preservesColimitsOfShape_tensorLeft
   letI := preservesColimitsOfShape_tensorRight Q J
   preservesColimitsOfShape_of_natIso (BraidedCategory.tensorLeftIsoTensorRight Q).symm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Size-`u` packaging of `preservesColimitsOfShape_tensorRight`. -/
+lemma preservesColimitsOfSize_tensorRight_aux
+    (Q : PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) :
+    PreservesColimitsOfSize.{u, u} (MonoidalCategory.tensorRight Q) :=
+  ⟨fun {J} _ => preservesColimitsOfShape_tensorRight Q J⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Size-`u` packaging of `preservesColimitsOfShape_tensorLeft`. -/
+lemma preservesColimitsOfSize_tensorLeft_aux
+    (Q : PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) :
+    PreservesColimitsOfSize.{u, u} (MonoidalCategory.tensorLeft Q) :=
+  ⟨fun {J} _ => preservesColimitsOfShape_tensorLeft Q J⟩
+
 end TensorColimits
 
 section PullbackFreeYoneda
@@ -808,6 +824,8 @@ end PullbackFreeYoneda
 
 section PullbackFreeYonedaMonoidal
 
+open CategoryTheory.Limits
+
 variable {C D : Type u} [SmallCategory C] [SmallCategory D]
   {F : C ⥤ D} {R : Dᵒᵖ ⥤ CommRingCat.{u}} {S : Cᵒᵖ ⥤ CommRingCat.{u}}
   (φ : S ⋙ forget₂ CommRingCat RingCat ⟶
@@ -833,6 +851,105 @@ lemma factoredUnit_app_freeMk (U : C) {W : C} (h : W ⟶ U) :
   exact (app_freeMk ((pullbackPushforwardAdjunction.{u} φ).unit.app
       ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U))) h).trans
     (congrArg _ (freeYonedaEquiv_unit_app φ U))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The reusable presentation-extension core: a natural transformation out of the category
+of presheaves of modules over a small site that is invertible on free-yoneda modules is
+invertible everywhere, provided both functors preserve colimits (coproduct layer over the
+elements, then the cokernel-cofork layer of the canonical presentation). -/
+lemma isIso_app_of_isIso_app_freeYoneda {E : Type u₃} [Category.{v₃} E]
+    {F₁ F₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat) ⥤ E} (α : F₁ ⟶ F₂)
+    [PreservesColimitsOfSize.{u, u} F₁] [PreservesColimitsOfSize.{u, u} F₂]
+    [PreservesColimitsOfShape WalkingParallelPair F₁]
+    [PreservesColimitsOfShape WalkingParallelPair F₂]
+    (hfree : ∀ X : C, IsIso (α.app
+      ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X))))
+    (M : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)) :
+    IsIso (α.app M) := by
+  have h₀ : ∀ (N : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)),
+      IsIso (α.app N.freeYonedaCoproduct) := by
+    intro N
+    haveI : ∀ j, IsIso (α.app ((Discrete.functor
+        (Elements.freeYoneda (M := N))).obj j)) := fun j => hfree _
+    exact isIso_app_of_isColimit α
+      (isColimitOfPreserves F₁ (colimit.isColimit _))
+      (isColimitOfPreserves F₂ (colimit.isColimit _))
+  haveI : ∀ j, IsIso (α.app ((parallelPair M.toFreeYonedaCoproduct 0).obj j)) := by
+    rintro (_ | _) <;> exact h₀ _
+  exact isIso_app_of_isColimit α
+    (isColimitOfPreserves F₁ M.isColimitFreeYonedaCoproductsCokernelCofork)
+    (isColimitOfPreserves F₂ M.isColimitFreeYonedaCoproductsCokernelCofork)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The doctrinal tensor comparison in the first variable, as a natural transformation. -/
+noncomputable def δRightNat [(pushforward.{u} φ).IsRightAdjoint]
+    (Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)) :
+    (MonoidalCategory.tensorRight Q ⋙ pullback.{u} φ) ⟶
+      pullback.{u} φ ⋙ MonoidalCategory.tensorRight ((pullback.{u} φ).obj Q) :=
+  letI := pullbackOplaxMonoidal φ
+  { app := fun P => Functor.OplaxMonoidal.δ (pullback.{u} φ) P Q
+    naturality := fun {P P'} g =>
+      (Functor.OplaxMonoidal.δ_natural_left (pullback.{u} φ) g Q).symm }
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The doctrinal tensor comparison in the second variable, as a natural transformation. -/
+noncomputable def δLeftNat [(pushforward.{u} φ).IsRightAdjoint]
+    (P : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)) :
+    (MonoidalCategory.tensorLeft P ⋙ pullback.{u} φ) ⟶
+      pullback.{u} φ ⋙ MonoidalCategory.tensorLeft ((pullback.{u} φ).obj P) :=
+  letI := pullbackOplaxMonoidal φ
+  { app := fun Q => Functor.OplaxMonoidal.δ (pullback.{u} φ) P Q
+    naturality := fun {Q Q'} g =>
+      (Functor.OplaxMonoidal.δ_natural_right (pullback.{u} φ) P g).symm }
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3 (generic extension).** If the doctrinal tensor
+comparison of the presheaf pullback is invertible on free-yoneda pairs, it is invertible
+on all pairs: extend along the canonical free-yoneda presentation in each variable in
+turn, using that both sides are compositions of colimit-preserving functors
+(`pullback` is a left adjoint; tensoring preserves colimits pointwise). -/
+theorem isIso_pullback_δ_of_freeYoneda [(pushforward.{u} φ).IsRightAdjoint]
+    (hbase : ∀ X₁ X₂ : C,
+      letI := pullbackOplaxMonoidal φ
+      IsIso (Functor.OplaxMonoidal.δ (pullback.{u} φ)
+        ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₁))
+        ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂))))
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)) :
+    letI := pullbackOplaxMonoidal φ
+    IsIso (Functor.OplaxMonoidal.δ (pullback.{u} φ) P Q) := by
+  letI := pullbackOplaxMonoidal φ
+  haveI hpb : PreservesColimitsOfSize.{u, u} (pullback.{u} φ) :=
+    (pullbackPushforwardAdjunction.{u} φ).leftAdjoint_preservesColimits
+  haveI hpb0 : PreservesColimitsOfShape WalkingParallelPair (pullback.{u} φ) :=
+    ((pullbackPushforwardAdjunction.{u} φ).leftAdjoint_preservesColimits :
+      PreservesColimitsOfSize.{0, 0} (pullback.{u} φ)).preservesColimitsOfShape
+  have pass1 : ∀ (P' : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)) (X₂ : C),
+      IsIso (Functor.OplaxMonoidal.δ (pullback.{u} φ) P'
+        ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂))) := by
+    intro P' X₂
+    haveI := preservesColimitsOfSize_tensorRight_aux
+      ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂))
+    haveI := preservesColimitsOfSize_tensorRight_aux
+      ((pullback.{u} φ).obj ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂)))
+    haveI := preservesColimitsOfShape_tensorRight
+      ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂))
+      WalkingParallelPair
+    haveI := preservesColimitsOfShape_tensorRight
+      ((pullback.{u} φ).obj ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂)))
+      WalkingParallelPair
+    exact isIso_app_of_isIso_app_freeYoneda (δRightNat φ
+      ((free (S ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj X₂)))
+      (fun X₁ => hbase X₁ X₂) P'
+  haveI := preservesColimitsOfSize_tensorLeft_aux P
+  haveI := preservesColimitsOfSize_tensorLeft_aux ((pullback.{u} φ).obj P)
+  haveI := preservesColimitsOfShape_tensorLeft P WalkingParallelPair
+  haveI := preservesColimitsOfShape_tensorLeft ((pullback.{u} φ).obj P)
+    WalkingParallelPair
+  exact isIso_app_of_isIso_app_freeYoneda (δLeftNat φ P) (fun X₂ => pass1 P X₂) Q
 
 end PullbackFreeYonedaMonoidal
 
@@ -1020,6 +1137,35 @@ theorem isIso_pullback_δ_freeYoneda (U₁ U₂ : X.Opens) :
     exact congrArg₂ (fun a b => a ⊗ₜ b) hι₁.symm hι₂.symm
   rw [key]
   infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G3 (scheme form, all pairs).** The doctrinal tensor
+comparison of the presheaf pullback of a scheme morphism is an isomorphism on all pairs:
+the free-yoneda base case is the lattice miracle (`isIso_pullback_δ_freeYoneda`), extended
+along the canonical presentation by `isIso_pullback_δ_of_freeYoneda`. -/
+theorem isIso_pullback_δ
+    (P Q : PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :
+    letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
+    IsIso (Functor.OplaxMonoidal.δ (pullback.{u} (schemeRingPresheafHom f)) P Q) :=
+  isIso_pullback_δ_of_freeYoneda (schemeRingPresheafHom f)
+    (fun U₁ U₂ => isIso_pullback_δ_freeYoneda f U₁ U₂) P Q
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf A (presheaf-level payoff): the presheaf pullback of a
+scheme morphism is a monoidal functor** — `f^*ᵖ(P ⊗ Q) ≅ f^*ᵖP ⊗ f^*ᵖQ` and
+`f^*ᵖ(𝒪_X) ≅ 𝒪_Y`, before sheafification: the doctrinal oplax structure has invertible
+structure maps ([G3-pre] + [G3-η] + the presentation extension). -/
+noncomputable def pullbackMonoidal :
+    (pullback.{u} (schemeRingPresheafHom f)).Monoidal :=
+  letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
+  haveI : IsIso (Functor.OplaxMonoidal.η (pullback.{u} (schemeRingPresheafHom f))) :=
+    isIso_pullback_η f
+  haveI : ∀ P Q, IsIso
+      (Functor.OplaxMonoidal.δ (pullback.{u} (schemeRingPresheafHom f)) P Q) :=
+    fun P Q => isIso_pullback_δ f P Q
+  Functor.Monoidal.ofOplaxMonoidal _
 
 end SchemePullbackMonoidal
 
