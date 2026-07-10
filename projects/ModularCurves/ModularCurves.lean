@@ -39,6 +39,7 @@ import ModularCurves.EllipticCurve.AdditionChartOverlap
 import ModularCurves.EllipticCurve.AdditionChartTransition
 import ModularCurves.EllipticCurve.AdditionChartGlobal
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.ModularCurve.YRho
