@@ -618,6 +618,29 @@ theorem counitLift'_comp_comulAlg :
     CommRingCat.hom_id, RingHom.id_apply] at h2
   exact h2
 
+/-! ### Towards coassociativity: the `⊤`-level presentation -/
+
+/-- The group square is affine (it is the `Spec` of `A ⊗[R] A`). -/
+theorem isAffine_groupSquare : IsAffine P.groupSquare := by
+  haveI : IsIso (patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen
+      P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl).hom :=
+    inferInstance
+  exact IsAffine.of_isIso (patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen
+    P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl).hom
+
+/-- The restricted multiplication, corestricted to the group patch:
+`G|_V ×_V G|_V ⟶ G|_V`. -/
+noncomputable def squareMulRes : P.groupSquare ⟶ P.groupOpen.toScheme :=
+  P.groupSquare.topIso.inv
+    ≫ P.squareMul.resLE P.groupOpen ⊤ P.top_le_preimage_groupOpen_squareMul
+
+/-- The corestricted multiplication recovers `squareMul` after including the patch. -/
+@[reassoc]
+theorem squareMulRes_comp_ι : P.squareMulRes ≫ P.groupOpen.ι = P.squareMul := by
+  rw [squareMulRes, Category.assoc, Scheme.Hom.resLE_comp_ι]
+  rw [show (⊤ : P.groupSquare.Opens).ι = P.groupSquare.topIso.hom from rfl,
+    ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
