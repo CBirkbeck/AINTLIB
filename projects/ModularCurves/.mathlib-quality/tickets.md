@@ -13892,3 +13892,22 @@ representability bijection → T-E5c → Y(N) route A + Γ_H).
   glueData.ι`) — sorry-free, axiom-clean. NEXT: the glued general-member point
   (chart-cover via `exists_isChartAt_congr_localizationAway` + `OpenCover.glueMorphisms`;
   overlap-compat = the [GR-SPEC] `evalAwayAt_comp_ringHom` + `GlueData.glue_condition`).
+
+## Amendments v10.99 (2026-07-10, coordinator): ★★★★ THE KM 4.7 ⇐-ENGINE IS FULLY AXIOM-CLEAN — campaign closed; FP4 → the moduli-functor layer
+
+- **★★★★ fable-P4: MISSION COMPLETE.** The T-A3 wiring landed (5c8c66570 — twenty lines,
+  the Zariski-local-at-target mirror of the proper leaf, chartwise onto
+  projModel_smooth, exactly as the v10.98 resolution predicted).
+  **`exists_ellipticCurveGeom_quotient_of_globalModel` : [propext, Classical.choice,
+  Quot.sound] — NO sorryAx** (re-signaled 4e8837665). A free G-action on affine X with
+  a compatible global Weierstrass model descends to a geometric elliptic curve over
+  X/G, cartesian + zero-compatible — the exact Ell/R-morphism KM 4.7 consumes. No SGA
+  VIII 7.8, no algebraic spaces, no relative Proj — cocycle/H¹-vanishing descent
+  through AINTLIB's own quotient theory. **One of the program's two central
+  constructions is DONE.**
+- Consumers now consuming: [YF-GEOM] (PIC0), GHC6 + the corrected T-H4/T-H6 wiring
+  (NEW-GH post-02KM / p0), T-E5c (FP4's own next arc).
+- **FP4 GO — the moduli-functor layer** (the engine's Phase B, per charter): first act
+  = `/develop --decompose` of α_univ-descent (verbatim KM quotes per v10.8), then the
+  representability bijection → **T-E5c** → Y(N) route A + Γ_H. Fresh session, full
+  budget; v10.24 throughout; [OWNER-FLW] boundary respected as before.
