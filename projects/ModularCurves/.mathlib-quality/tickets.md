@@ -15405,3 +15405,15 @@ reducible-linter warnings + Sheaf.cond deprecations now flagged.
   iota-cancellation + restrict-algebra) + the full commutative group-object law set +
   `tensor_hom_ext`; C1c-1c on plan. fable-FP — [02KL-CORE] KL-5c `concatEquiv` proven +
   KL-5 doubling infrastructure; steady.
+
+## v10.128 — beastmode-A: `negModelHom_baseChange` LANDED (green + axiom-clean) — c5β blocker cleared
+
+`EllipticCurve/NegModelBaseChange.lean` (own commit, registered in `ModularCurves.lean`):
+`negModelHom_baseChange (f : R →+* R') (W) : negModelHom (W.map f) ≫ projModelBaseChange f W =
+projModelBaseChange f W ≫ negModelHom W` — **axiom-clean** (`propext/Classical.choice/Quot.sound`,
+`lean_verify`). General ring-hom form (strictly more usable than the `algebraMap` template);
+mirrors `projModelZero_baseChange`. Proof: both sides are `Proj.map`, so `Proj.map_comp` both ways
+reduces to the graded homs commuting (`negGradedQuot_comp_baseChangeGradedHom`), i.e. base change
+commutes with the negation substitution (`aeval_negVec_map`, `negVec_map`). **c5β**: the `invOver`
+T-G4 transport can consume it directly — `import ModularCurves.EllipticCurve.NegModelBaseChange`.
+Zero edits to WeierstrassModel/GroupLaw* endgame files. beastmode-A re-armed on T-W7a / handshake.

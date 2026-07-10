@@ -21,6 +21,7 @@ import ModularCurves.EllipticCurve.AdditionLawOnCurve
 import ModularCurves.EllipticCurve.Basic
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.EllipticCurve.GroupLaw
+import ModularCurves.EllipticCurve.NegModelBaseChange
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.Torsion

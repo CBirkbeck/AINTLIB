@@ -591,6 +591,18 @@ section Transport
 
 variable {R : Type u} [CommRing R]
 
+/-- **(T-G4 helper)** Of-form base-change naturality of the zero section — the eqToHom-free
+wrapper of `projModelZero_baseChange` (dissolves `projModelBaseChangeOf`'s eqToHom layer by
+`subst`), mirroring `mulModelHomBC_baseChange`. Consumed by the unit-law transports. -/
+lemma projModelZero_baseChangeOf {U : Type u} [CommRing U] (f : U →+* R)
+    (W₀ : WeierstrassCurve U) (W : WeierstrassCurve R) (h : W₀.map f = W) :
+    projModelZero W ≫ projModelBaseChangeOf f W₀ W h =
+      Spec.map (CommRingCat.ofHom f) ≫ projModelZero W₀ := by
+  subst h
+  rw [projModelBaseChangeOf, eqToHom_refl, Category.id_comp]
+  letI : Algebra U R := f.toAlgebra
+  exact projModelZero_baseChange W₀
+
 /-- **(T-G4-comm-raw)** Commutativity of `mulModelHom` at the raw scheme level, for every
 elliptic `W` over every `R` — the base-change transport of `mulModelHom_comm_atlas`. -/
 theorem mulModelHom_comm (W : WeierstrassCurve R) [W.IsElliptic] :
