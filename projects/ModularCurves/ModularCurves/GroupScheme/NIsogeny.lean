@@ -1388,7 +1388,71 @@ theorem exists_locallyFreeRankLocus {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f]
   have hb' : ∀ (U : S.affineOpens) (K : Type u) (_ : Field K) (_ : Algebra Γ(S, U.1) K),
       letI := ((f.app U.1).hom).toAlgebra
       Module.finrank K (K ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) ≤ n := by
-    sorry
+    intro U K fK aK
+    letI := ((f.app U.1).hom).toAlgebra
+    haveI : Module.Finite Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) := f.finite_app U.1 U.2
+    -- the chart point of `U` with residue field `K`
+    let x' : Spec (CommRingCat.of K) ⟶ ↑U.1 :=
+      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, U.1) K)) ≫ U.2.isoSpec.inv
+    letI := ((x'.appTop).hom.comp ((Scheme.Opens.topIso U.1).inv.hom)).toAlgebra
+    letI := (((f ∣_ U.1).appTop).hom).toAlgebra
+    letI := ((x'.appTop).hom).toAlgebra
+    -- the section ring of the chart point is `K` itself, compatibly over `Γ(S, U)`
+    let eK : Γ(Spec (CommRingCat.of K), ⊤) ≃+* K :=
+      (Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv
+    have hcomp : (Scheme.Opens.topIso U.1).inv ≫ x'.appTop ≫
+        (Scheme.ΓSpecIso (CommRingCat.of K)).hom =
+        CommRingCat.ofHom (algebraMap Γ(S, U.1) K) := by
+      show (Scheme.Opens.topIso U.1).inv ≫
+        (Spec.map (CommRingCat.ofHom (algebraMap Γ(S, U.1) K)) ≫ U.2.isoSpec.inv).appTop ≫ _ = _
+      rw [Scheme.Hom.comp_appTop, IsAffineOpen.isoSpec_inv_appTop, Category.assoc,
+        Category.assoc, Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+      exact (Scheme.ΓSpecIso Γ(S, U.1)).inv_hom_id_assoc
+        (CommRingCat.ofHom (algebraMap Γ(S, U.1) K))
+    have he : ∀ r : Γ(S, U.1),
+        eK (algebraMap Γ(S, U.1) Γ(Spec (CommRingCat.of K), ⊤) r) =
+          algebraMap Γ(S, U.1) K r := fun r =>
+      congrArg (fun ψ : Γ(S, U.1) ⟶ CommRingCat.of K => ψ.hom r) hcomp
+    -- fibre dichotomy at the chart point
+    rcases hb K (x' ≫ U.1.ι) with hE | ⟨hF, hR⟩
+    · -- empty fibre: the tensor is trivial, so the empty family spans
+      haveI := locallyFreeRankLocus_sections_subsingleton f U x' hE
+      obtain ⟨eM⟩ := locallyFreeRankLocus_sections_equiv f U x'
+      haveI : Subsingleton
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+        eM.symm.toEquiv.subsingleton
+      have h0 := locallyFreeRankLocus_finrank_le_of_span eK he
+        (∅ : Finset (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)))
+        (Subsingleton.elim _ _)
+      simpa using h0.trans (Nat.zero_le n)
+    · -- nonempty fibre: flat of rank `n`; read through the chart bridge
+      obtain ⟨hflatB, hrankB⟩ := (locallyFreeRankLocus_chart_iff f U x' n).mp ⟨hF, hR⟩
+      -- the section ring is a field via `eK`
+      have hBfield : IsField Γ(Spec (CommRingCat.of K), ⊤) :=
+        ⟨⟨eK.symm 0, eK.symm 1, fun h => zero_ne_one (α := K) (by simpa using congrArg eK h)⟩,
+          mul_comm, fun {a} ha => ⟨eK.symm (eK a)⁻¹, eK.injective (by
+            rw [map_mul, RingEquiv.apply_symm_apply, map_one, mul_inv_cancel₀
+              (fun h0 => ha (by simpa using congrArg eK.symm h0))])⟩⟩
+      letI := hBfield.toField
+      haveI : Module.Finite Γ(Spec (CommRingCat.of K), ⊤)
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) :=
+        Module.Finite.base_change _ _ _
+      -- constant rank `n` over the field means dimension `n`
+      have hn : Module.finrank Γ(Spec (CommRingCat.of K), ⊤)
+          (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)) = n := by
+        have h1 := congrFun (Module.rankAtStalk_eq_finrank_of_free
+          (R := Γ(Spec (CommRingCat.of K), ⊤))
+          (M := Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1)))
+          ⟨⊥, Ideal.isPrime_bot⟩
+        rw [← hrankB ⟨⊥, Ideal.isPrime_bot⟩, h1, Pi.natCast_apply, Nat.cast_id]
+      -- a basis gives a spanning family of size `n`
+      let b := Module.finBasis Γ(Spec (CommRingCat.of K), ⊤)
+        (Γ(Spec (CommRingCat.of K), ⊤) ⊗[Γ(S, U.1)] Γ(W, f ⁻¹ᵁ U.1))
+      refine le_trans (locallyFreeRankLocus_finrank_le_of_span eK he
+        (Finset.univ.image ⇑b) ?_) ?_
+      · rw [Finset.coe_image, Finset.coe_univ, Set.image_univ]
+        exact b.span_eq
+      · exact le_trans Finset.card_image_le (by simp [hn])
   refine ⟨locallyFreeRankLocusSheaf f n hb', fun T t => ?_⟩
   rw [ModularCurves.exists_factor_subschemeι_iff]
   -- [L1-e3] the factoring locus is exactly the flat-of-rank-`n` locus.
