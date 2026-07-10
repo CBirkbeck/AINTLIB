@@ -219,6 +219,7 @@ theorem injective_tmul_one_of_flat [Module.Flat (coinvariants ρ) C'] :
   rw [hcomp]
   exact hlt.comp (TensorProduct.rid (coinvariants ρ) C').symm.injective
 
+omit [Algebra R C'] [IsScalarTower R (coinvariants ρ) C'] in
 /-- The base-changed algebra is nontrivial when the scalars are. -/
 theorem nontrivial_baseChange_of_flat [Module.Flat (coinvariants ρ) C'] [Nontrivial C'] :
     Nontrivial (C' ⊗[coinvariants ρ] B) :=
