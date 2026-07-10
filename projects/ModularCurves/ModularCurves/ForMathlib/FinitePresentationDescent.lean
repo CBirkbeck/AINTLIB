@@ -1029,14 +1029,37 @@ private theorem nontrivial_fibre_transfer
   exact (E2.trans (E3.restrictScalars S₂)).toEquiv.nontrivial
 
 
-/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -//-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
+/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
 
-/-- **[KL-3] (Stacks 02JO = Algebra 10.168.1, scoped).** If the colimit algebra `B` is
-flat over `A`, then some later stage model is flat over its stage base. Internals (own
-sub-decomposition on reach; tickets [KL-3a–d]): reduce to a finite-type-ℤ (noetherian)
-model under `𝒮 i₀` by re-instantiating [KL-1]+[KL-2] over `ℤ`; per-prime flatness at a
-large stage by the noetherian local criterion; openness of the flat(=free) locus at
-noetherian stages; quasicompact glue; transport back along stage factoring. -/
+/-- **[KL-3] (Stacks 02JO = Algebra 10.168.1, scoped) — THE ONE REMAINING GATE.** If the
+colimit algebra `B` is flat over `A`, then some later stage model `B_i` is flat over its
+stage base `𝒮 i` (and hence, by base change, `B_j` is flat over `𝒮 j` for all `j ≥ i`).
+
+This is the sole `sorry` in the [02KL-CORE] tree; everything else — the full Stacks 02KK
+assembly and leaves [KL-0], [KL-1], [KL-2/2b/2c/2d/2e], [KL-4], [KL-5a/b/c] — is proven and
+axiom-clean. The classical proof (Stacks 02JO(1)+(3) / EGA IV 11.2.6) factors through THREE
+facts, each **confirmed absent from the mathlib pin** and each a multi-week upstream
+development in its own right (this is exactly the flat-spreading gap flagged in A's
+`upstream-ledger.md` §8):
+
+* **Noetherian approximation of a finitely-presented algebra** (Stacks 00QO/00R2 region):
+  write `(𝒮 i₀ → B_{i₀})` over a finite-type-ℤ (noetherian) model `(R₀ → B₀)` with
+  `B_{i₀} = 𝒮 i₀ ⊗_{R₀} B₀`. mathlib has no finite-type-ℤ model / noetherian-stage colimit
+  for algebras (`AffineTransitionLimit`/absolute-noetherian-approximation 01ZA is the scheme
+  analogue and is itself absent — ledger §8).
+* **Openness of the flat locus over a noetherian ring** (Stacks 00RC/052A): the locus of
+  primes of the noetherian model where the module is flat is open. mathlib's `FreeLocus`
+  (`RingTheory/Spectrum/Prime/FreeLocus.lean`) only covers **module-finite-presentation**
+  (`isOpen_freeLocus`); `B_i` is finite presentation as an *algebra*, not a module, so it
+  does not apply.
+* **Generic flatness** (Stacks 051R): over a noetherian domain, a finite-type algebra is
+  flat on a dense open. Absent.
+
+Because these are foundational commutative-algebra theorems that belong in mathlib proper
+(not focused project lemmas), this leaf is registered as the campaign's deep residual rather
+than force-built here; the `RingHom` gate `of_comp_of_faithfullyFlat'` and every scheme-level
+consumer in `SmoothDescent.lean` are *proven modulo exactly this one statement*. Consume-on-
+bump is a live option: once mathlib gains flat-locus openness, this closes in a few lines. -/
 theorem SpreadData.exists_flat_stage (D : SpreadData 𝒮 u B)
     (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
     [Module.Flat A B] :
