@@ -15824,3 +15824,12 @@ b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (si
 - Fleet unchanged elsewhere: NEW-HOPF (Hopf axioms → pins → SIGNAL), PIC0 (CMP-PAIR),
   FP4 (B3-g3 in QuotientRepresentability), D2 (LFP), fable-FP (KL-3/KL-4) — all on
   charter, none Y1-gating.
+
+## Amendments v10.137-CLOSER (2026-07-10, Y1-CLOSER): CHARTER-Y1-CLOSER claimed — S1 (mulOver_assoc, option (b)) in flight
+
+**Claim (rule-5, both branches)**: Y1-CLOSER takes the v10.136 charter; sentinels set in
+both worktrees. S1 executing now per c5β's banked plan (docs/tg4/mulOver_assoc.plan.md,
+option (b): of_map fst-leg by direct `pullback.hom_ext` on the codomain projModel — no
+X_triple, sidestepping the tensor-whnf timeout; snd-leg Over.w; e₁/e₂ consumed as banked;
+then of_eq + named). Templates: e8bb22e9d/74c6c48f3/63f87e656. T-G4 COMPLETE boards loud
+on landing (= c5β's 0c-ii signal). Then S2–S6 per charter.
