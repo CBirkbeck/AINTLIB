@@ -196,7 +196,7 @@ theorem surjective_baseChangeCoinvariantsMap [Module.Flat (coinvariants ρ) C'] 
   obtain ⟨c', hc'⟩ := (mem_coinvariants_coactionBaseChange_iff R A ρ C' x).mp hx
   exact ⟨c', Subtype.ext hc'⟩
 
-omit [HopfAlgebra R A] in
+omit [Algebra R C'] [IsScalarTower R (coinvariants ρ) C'] in
 /-- Over a flat base change, the scalar map into the base-changed algebra is injective
 (tensor the inclusion `C ⊆ B` with the flat module `C'`). -/
 theorem injective_tmul_one_of_flat [Module.Flat (coinvariants ρ) C'] :
