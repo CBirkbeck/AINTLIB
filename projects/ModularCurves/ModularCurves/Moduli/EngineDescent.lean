@@ -1859,7 +1859,8 @@ theorem exists_ellipticCurveGeom_quotient_of_globalModel [Finite G] [IsAffine X]
     (hzeroφ : C.zero ≫ φ.hom = X.isoSpec.hom ≫ projModelZero W₀) :
     ∃ (C' : EllipticCurveGeom (σ.quotient V hVs hVa)) (q : C.E ⟶ C'.E),
       IsPullback q C.π C'.π (σ.quotientπ V hVs hVa hVmem) ∧
-        C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero := by
+        C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero ∧
+        ∀ γ : G, σE.hom γ ≫ q = q := by
   -- the `G`-stable affine atlas of `E`, derived from the global model
   have horbit : ∀ e : C.E, ∃ U : (C.E).Opens, IsAffineOpen U ∧
       ∀ γ : G, (σE.hom γ).base e ∈ U := by
@@ -1879,8 +1880,8 @@ theorem exists_ellipticCurveGeom_quotient_of_globalModel [Finite G] [IsAffine X]
     smoothOfRelativeDimension_of_locallyWeierstrass hlw
   refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ',
             smooth := hsmooth, proper := hproper, localModel := hlw },
-    σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
+    σE.quotientπ VE hVEs hVEa hVEmem, ?_, hzero'.symm, ?_⟩
   · exact isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfreeX π' hπ'
-  · exact hzero'.symm
+  · exact fun γ => σE.hom_quotientπ VE hVEs hVEa hVEmem γ
 
 end ModularCurves.RouteA
