@@ -1284,3 +1284,19 @@ theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
     Nonempty ((Modules.pullback f).Monoidal))
 
 end AlgebraicGeometry.Scheme.Modules
+
+namespace AlgebraicGeometry.Scheme
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The Picard functor on morphisms** (GME 2.2.2 (2.16), p. 108): pullback of invertible
+sheaves along `f : Y ⟶ X` induces a group homomorphism `Pic X →* Pic Y` — the underlying
+monoidal functor is `Modules.pullback f` (`nonempty_pullback_monoidal`), inducing a monoid
+homomorphism on the skeleton of iso-classes and hence a group homomorphism on units. -/
+noncomputable def Pic.map {X Y : Scheme.{u}} (f : Y ⟶ X) : Pic X →* Pic Y :=
+  letI := Modules.monoidalCategory X
+  letI := Modules.monoidalCategory Y
+  letI : (Modules.pullback f).Monoidal := (Modules.nonempty_pullback_monoidal f).some
+  Units.map (Skeleton.monoidHom (F := Modules.pullback f))
+
+end AlgebraicGeometry.Scheme
