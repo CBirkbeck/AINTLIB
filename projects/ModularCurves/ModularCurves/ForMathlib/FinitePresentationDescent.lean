@@ -8,6 +8,7 @@ import Mathlib.RingTheory.Spectrum.Prime.Chevalley
 import Mathlib.RingTheory.Spectrum.Prime.RingHom
 import Mathlib.RingTheory.Spectrum.Prime.Topology
 import Mathlib.Topology.Spectral.ConstructibleTopology
+import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.Tactic.Algebraize
 import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
@@ -725,38 +726,6 @@ theorem SpreadData.baseChange_colim (D : SpreadData 𝒮 u B)
         rw [MvPolynomial.map_map]
         exact congrArg (fun f => MvPolynomial.map f (D.g j')) (H.u_comp h))))).trans eB⟩
 
-/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
-
-/-- **[KL-3] (Stacks 02JO = Algebra 10.168.1, scoped).** If the colimit algebra `B` is
-flat over `A`, then some later stage model is flat over its stage base. Internals (own
-sub-decomposition on reach; tickets [KL-3a–d]): reduce to a finite-type-ℤ (noetherian)
-model under `𝒮 i₀` by re-instantiating [KL-1]+[KL-2] over `ℤ`; per-prime flatness at a
-large stage by the noetherian local criterion; openness of the flat(=free) locus at
-noetherian stages; quasicompact glue; transport back along stage factoring. -/
-theorem SpreadData.exists_flat_stage (D : SpreadData 𝒮 u B)
-    (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
-    [Module.Flat A B] :
-    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
-      Module.Flat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
-  sorry
-
-/-! ## [KL-4] Faithful flatness at a large stage (the 01UA leg) -/
-
-/-- **[KL-4].** If moreover `B` is faithfully flat over `A`, some later stage model is
-faithfully flat over its stage base. Route: fibre nonvanishing at stage `i` depends only
-on the contraction of the prime to `𝒮 i₁` (base-change collapse of the fibre); the target
-locus `W = range (comap (𝒮 i₁ → spreadStage i₁))` is constructible (Chevalley;
-`PrimeSpectrum.isConstructible_range_comap`) hence patch-open; the stage images
-`range (comap (𝒮 i₁ → 𝒮 i))` are patch-closed; their directed intersection lies in `W`
-by the 1 ≠ 0-at-a-stage fibre argument and faithful flatness at the colimit; patch
-compactness (`compactSpace_withConstructibleTopology`) gives one stage with image ⊆ `W`,
-which is Spec-surjectivity there; flat + Spec-surjective = faithfully flat. -/
-theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
-    (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
-    [Module.FaithfullyFlat A B] :
-    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
-      Module.FaithfullyFlat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
-  sorry
 
 /-! ## [KL-5] Stage factoring, stage agreement, and the assembly -/
 
@@ -1014,7 +983,205 @@ theorem isFilteredAlgColimit_presented (H : IsFilteredAlgColimit R 𝒮 t A u)
     rw [map_mul, MvPolynomial.map_map, H.t_comp]
     exact Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨j, by rw [MvPolynomial.map_map, H.t_comp]⟩)
 
+/-- Evaluation of the cocone maps on stage scalars. -/
+theorem presentedU_algebraMap (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) (P : {i : ι // i₀ ≤ i}) (s : 𝒮 P.1) :
+    presentedU t u H gen P (algebraMap (𝒮 P.1)
+        (MvPolynomial σ (𝒮 P.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s)
+      = algebraMap A (MvPolynomial σ A ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j)))
+          (u P.1 s) := by
+  have h1 : algebraMap (𝒮 P.1)
+      (MvPolynomial σ (𝒮 P.1) ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s
+      = Ideal.Quotient.mk _ (MvPolynomial.C s) := rfl
+  have h2 : algebraMap A (MvPolynomial σ A ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) (u P.1 s)
+      = Ideal.Quotient.mk _ (MvPolynomial.C (u P.1 s)) := rfl
+  rw [h1, h2, presentedU_mk, MvPolynomial.map_C]
+  rfl
+
 end Presented
+
+/-! ## [KL-3] Flatness at a large stage — THE BOSS (Stacks 02JO(1)+(3)) -/
+
+/-- **[KL-3] (Stacks 02JO = Algebra 10.168.1, scoped).** If the colimit algebra `B` is
+flat over `A`, then some later stage model is flat over its stage base. Internals (own
+sub-decomposition on reach; tickets [KL-3a–d]): reduce to a finite-type-ℤ (noetherian)
+model under `𝒮 i₀` by re-instantiating [KL-1]+[KL-2] over `ℤ`; per-prime flatness at a
+large stage by the noetherian local criterion; openness of the flat(=free) locus at
+noetherian stages; quasicompact glue; transport back along stage factoring. -/
+theorem SpreadData.exists_flat_stage (D : SpreadData 𝒮 u B)
+    (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
+    [Module.Flat A B] :
+    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
+      Module.Flat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
+  sorry
+
+/-! ## [KL-4] Faithful flatness at a large stage (the 01UA leg) -/
+
+/-- **[KL-4].** If moreover `B` is faithfully flat over `A`, some later stage model is
+faithfully flat over its stage base. Route: fibre nonvanishing at stage `i` depends only
+on the contraction of the prime to `𝒮 i₁` (base-change collapse of the fibre); the target
+locus `W = range (comap (𝒮 i₁ → spreadStage i₁))` is constructible (Chevalley;
+`PrimeSpectrum.isConstructible_range_comap`) hence patch-open; the stage images
+`range (comap (𝒮 i₁ → 𝒮 i))` are patch-closed; their directed intersection lies in `W`
+by the 1 ≠ 0-at-a-stage fibre argument and faithful flatness at the colimit; patch
+compactness (`compactSpace_withConstructibleTopology`) gives one stage with image ⊆ `W`,
+which is Spec-surjectivity there; flat + Spec-surjective = faithfully flat. -/
+theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
+    (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
+    [Module.FaithfullyFlat A B] :
+    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
+      Module.FaithfullyFlat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
+  classical
+  obtain ⟨i₁, h₁, hflat⟩ := D.exists_flat_stage H
+  haveI hFPst := D.spreadStage_finitePresentation (t := t) h₁
+  -- the target locus: the image of the flat model's spectrum, constructible by Chevalley
+  have hW : Topology.IsConstructible (Set.range (PrimeSpectrum.comap
+      (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁)))) :=
+    PrimeSpectrum.isConstructible_range_comap
+      (RingHom.finitePresentation_algebraMap.2 hFPst)
+  -- every point of the intersection of the stage images lies in the target locus
+  have hInter : ∀ p : PrimeSpectrum (𝒮 i₁),
+      (∀ ⦃j : ι⦄ (hj : i₁ ≤ j), p ∈ Set.range (PrimeSpectrum.comap (t hj).toRingHom)) →
+      p ∈ Set.range (PrimeSpectrum.comap
+        (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))) := by
+    intro p hp
+    -- (a) `p` is in the image of `Spec A`
+    have hpA : p ∈ Set.range (PrimeSpectrum.comap (u i₁).toRingHom) := by
+      rw [PrimeSpectrum.mem_range_comap_iff]
+      refine le_antisymm ?_ Ideal.le_comap_map
+      intro x hx
+      rw [Ideal.mem_comap] at hx
+      have hx' : (u i₁) x ∈ Ideal.span (⇑(u i₁) '' (p.asIdeal : Set (𝒮 i₁))) := hx
+      obtain ⟨T, hTsub, hxT⟩ := Submodule.mem_span_finite_of_mem_span hx'
+      have hchoice : ∀ τ : ↥T, ∃ y : 𝒮 i₁, y ∈ p.asIdeal ∧ (u i₁) y = (τ : A) := by
+        intro τ
+        obtain ⟨y, hy, hyτ⟩ := hTsub τ.2
+        exact ⟨y, hy, hyτ⟩
+      choose ypre hypre huy using hchoice
+      rw [Submodule.mem_span_finset] at hxT
+      obtain ⟨c, hc⟩ := hxT
+      obtain ⟨j₁, cs, hcs⟩ := H.exists_common_lift (fun τ : ↥T => c (τ : A))
+      haveI := H.directed
+      obtain ⟨j₃, hi₁j₃, hj₁j₃⟩ := directed_of (· ≤ ·) i₁ j₁
+      have hid : u j₃ (t hi₁j₃ x)
+          = u j₃ (∑ τ ∈ T.attach, t hj₁j₃ (cs τ) * t hi₁j₃ (ypre τ)) := by
+        rw [H.compat, map_sum]
+        have hterm : ∀ τ : ↥T, u j₃ (t hj₁j₃ (cs τ) * t hi₁j₃ (ypre τ))
+            = c (τ : A) * (τ : A) := by
+          intro τ
+          rw [map_mul, H.compat, H.compat, hcs, huy]
+        rw [Finset.sum_congr rfl fun τ _ => hterm τ]
+        rw [Finset.sum_attach T (fun a => c a * a),
+          show (∑ a ∈ T, c a * a) = ∑ a ∈ T, c a • a from
+            Finset.sum_congr rfl fun a _ => (smul_eq_mul _ _).symm, hc.2]
+      obtain ⟨j₄, hj₃j₄, heq⟩ := H.eq_at_stage _ _ hid
+      have hxj₄ : t (hi₁j₃.trans hj₃j₄) x
+          ∈ Ideal.map (t (hi₁j₃.trans hj₃j₄)).toRingHom p.asIdeal := by
+        rw [show t (hi₁j₃.trans hj₃j₄) x = t hj₃j₄ (t hi₁j₃ x) from (H.t_trans _ _ x).symm,
+          heq, map_sum]
+        refine sum_mem fun τ _ => ?_
+        rw [map_mul]
+        refine Ideal.mul_mem_left _ _ ?_
+        rw [show t hj₃j₄ (t hi₁j₃ (ypre τ)) = t (hi₁j₃.trans hj₃j₄) (ypre τ)
+          from H.t_trans _ _ _]
+        exact Ideal.mem_map_of_mem _ (hypre τ)
+      have hcontr := (PrimeSpectrum.mem_range_comap_iff _).1 (hp (hi₁j₃.trans hj₃j₄))
+      rw [← hcontr]
+      exact Ideal.mem_comap.2 hxj₄
+    -- (b) lift to `Spec A`, then to `Spec B` by faithful flatness
+    obtain ⟨qA, hqA⟩ := hpA
+    obtain ⟨qB, hqB⟩ := PrimeSpectrum.comap_surjective_of_faithfullyFlat (A := A) (B := B) qA
+    -- (c) the stage-to-`B` map and its square
+    obtain ⟨eB⟩ := D.equiv
+    obtain ⟨ν, hν⟩ : ∃ ν : D.spreadStage (t := t) h₁ →+* B,
+        ν.comp (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))
+          = (algebraMap A B).comp (u i₁).toRingHom := by
+      refine ⟨((eB.restrictScalars R).toAlgHom.comp
+        (presentedU t u H D.g ⟨i₁, h₁⟩)).toRingHom, ?_⟩
+      refine RingHom.ext fun s => ?_
+      show (eB.restrictScalars R) ((presentedU t u H D.g ⟨i₁, h₁⟩)
+        (algebraMap (𝒮 i₁) _ s)) = algebraMap A B ((u i₁) s)
+      rw [presentedU_algebraMap H D.g ⟨i₁, h₁⟩ s]
+      exact eB.commutes _
+    refine ⟨PrimeSpectrum.comap ν qB, ?_⟩
+    rw [← PrimeSpectrum.comap_comp_apply, hν, PrimeSpectrum.comap_comp_apply, hqB, hqA]
+  -- patch compactness: some single stage image is inside the target locus
+  have hstage : ∃ (j₂ : ι) (hj₂ : i₁ ≤ j₂),
+      Set.range (PrimeSpectrum.comap (t hj₂).toRingHom) ⊆
+        Set.range (PrimeSpectrum.comap
+          (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))) := by
+    by_contra hc
+    push_neg at hc
+    have hWpatch := hW.isOpen_isClosed_constructibleTopology
+    haveI hcs : @CompactSpace (PrimeSpectrum (𝒮 i₁)) (constructibleTopology _) :=
+      compactSpace_constructibleTopology
+    haveI ht2 : @T2Space (PrimeSpectrum (𝒮 i₁)) (constructibleTopology _) :=
+      t2Space_constructibleTopology
+    letI := constructibleTopology (PrimeSpectrum (𝒮 i₁))
+    haveI := H.directed
+    -- the directed family of patch-closed nonempty leftovers
+    set K : {j : ι // i₁ ≤ j} → Set (PrimeSpectrum (𝒮 i₁)) := fun j =>
+      Set.range (PrimeSpectrum.comap (t j.2).toRingHom) ∩
+        (Set.range (PrimeSpectrum.comap
+          (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))))ᶜ with hK
+    have hIclosed : ∀ j : {j : ι // i₁ ≤ j},
+        IsClosed (Set.range (PrimeSpectrum.comap (t j.2).toRingHom)) := by
+      intro j
+      haveI hcsj : @CompactSpace (PrimeSpectrum (𝒮 j.1)) (constructibleTopology _) :=
+        compactSpace_constructibleTopology
+      have hcont := continuous_comap_constructibleTopology (t j.2).toRingHom
+      letI := constructibleTopology (PrimeSpectrum (𝒮 j.1))
+      have himg : IsCompact (Set.range (PrimeSpectrum.comap (t j.2).toRingHom)) := by
+        rw [← Set.image_univ]
+        exact IsCompact.image isCompact_univ hcont
+      exact himg.isClosed
+    have hKclosed : ∀ j, IsClosed (K j) := fun j =>
+      (hIclosed j).inter (isClosed_compl_iff.2 hWpatch.1)
+    have hKcompact : ∀ j, IsCompact (K j) := fun j => (hKclosed j).isCompact
+    have hKnonempty : ∀ j : {j : ι // i₁ ≤ j}, (K j).Nonempty := by
+      intro j
+      obtain ⟨p, hp1, hp2⟩ := Set.not_subset.1 (hc j.1 j.2)
+      exact ⟨p, hp1, hp2⟩
+    have hKdirected : Directed (· ⊇ ·) K := by
+      intro j j'
+      obtain ⟨k, hjk, hj'k⟩ := directed_of (· ≤ ·) j.1 j'.1
+      refine ⟨⟨k, j.2.trans hjk⟩, ?_, ?_⟩
+      · intro p hp
+        refine ⟨?_, hp.2⟩
+        obtain ⟨q, hq⟩ := hp.1
+        exact ⟨PrimeSpectrum.comap (t hjk).toRingHom q, by
+          rw [← hq, ← PrimeSpectrum.comap_comp_apply, ← H.t_comp j.2 hjk]⟩
+      · intro p hp
+        refine ⟨?_, hp.2⟩
+        obtain ⟨q, hq⟩ := hp.1
+        exact ⟨PrimeSpectrum.comap (t hj'k).toRingHom q, by
+          rw [← hq, ← PrimeSpectrum.comap_comp_apply, ← H.t_comp j'.2 hj'k]⟩
+    haveI : Nonempty {j : ι // i₁ ≤ j} := ⟨⟨i₁, le_rfl⟩⟩
+    obtain ⟨p, hpmem⟩ := IsCompact.nonempty_iInter_of_directed_nonempty_isCompact_isClosed
+      K hKdirected hKnonempty hKcompact hKclosed
+    have hpall : ∀ ⦃j : ι⦄ (hj : i₁ ≤ j),
+        p ∈ Set.range (PrimeSpectrum.comap (t hj).toRingHom) := by
+      intro j hj
+      exact (Set.mem_iInter.1 hpmem ⟨j, hj⟩).1
+    exact (Set.mem_iInter.1 hpmem ⟨i₁, le_rfl⟩).2 (hInter p hpall)
+  obtain ⟨j₂, hj₂, hsub⟩ := hstage
+  refine ⟨j₂, h₁.trans hj₂, ?_⟩
+  intro j hj
+  haveI : Module.Flat (𝒮 j) (D.spreadStage (t := t) ((h₁.trans hj₂).trans hj)) :=
+    hflat (hj₂.trans hj)
+  refine Module.FaithfullyFlat.of_comap_surjective ?_
+  intro pj
+  have hp₁ : PrimeSpectrum.comap (t ((hj₂.trans hj) : i₁ ≤ j)).toRingHom pj ∈
+      Set.range (PrimeSpectrum.comap
+        (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))) := by
+    refine hsub ⟨PrimeSpectrum.comap (t (hj : j₂ ≤ j)).toRingHom pj, ?_⟩
+    rw [← PrimeSpectrum.comap_comp_apply, ← H.t_comp hj₂ hj]
+  -- transfer fibre nontriviality from the flat stage up to stage `j` (K2)
+  sorry
 
 /-- **[KL-2e].** Transport of a filtered colimit presentation along an isomorphism of the
 colimit. -/
@@ -1360,24 +1527,6 @@ theorem presentedU_comp_doubleInr (H : IsFilteredAlgColimit R 𝒮 t A u)
   rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInr_mk, presentedU_mk, presentedU_mk,
     doubleInr_mk, MvPolynomial.map_rename]
 
-/-- Evaluation of the cocone maps on stage scalars. -/
-theorem presentedU_algebraMap (H : IsFilteredAlgColimit R 𝒮 t A u)
-    (gen : κ → MvPolynomial σ (𝒮 i₀)) (P : {i : ι // i₀ ≤ i}) (s : 𝒮 P.1) :
-    presentedU t u H gen P (algebraMap (𝒮 P.1)
-        (MvPolynomial σ (𝒮 P.1) ⧸
-          Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s)
-      = algebraMap A (MvPolynomial σ A ⧸
-          Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j)))
-          (u P.1 s) := by
-  have h1 : algebraMap (𝒮 P.1)
-      (MvPolynomial σ (𝒮 P.1) ⧸
-        Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s
-      = Ideal.Quotient.mk _ (MvPolynomial.C s) := rfl
-  have h2 : algebraMap A (MvPolynomial σ A ⧸
-      Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) (u P.1 s)
-      = Ideal.Quotient.mk _ (MvPolynomial.C (u P.1 s)) := rfl
-  rw [h1, h2, presentedU_mk, MvPolynomial.map_C]
-  rfl
 
 /-- **Amitsur transport**: an element of a presented model whose two variable-doublings
 agree comes from the base (via `concatEquiv` and the Amitsur equalizer of the faithfully
