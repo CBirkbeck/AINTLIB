@@ -275,6 +275,76 @@ theorem infinite_residueField_coinvariants_coactionBaseChange
     (Ideal.quotEquivOfEq hker.symm).trans (RingHom.quotientKerEquivOfSurjective hφs)
   exact Infinite.of_injective hequiv hequiv.injective
 
+/-- The `R`-level Galois precursor `B ⊗[R] B → B ⊗[R] A`, `b ⊗ b' ↦ (b ⊗ 1)·ρ(b')`.
+Its surjectivity (the action-pair being a closed immersion) is the geometric input of the
+Hopf–Galois theorem. -/
+noncomputable def galoisPrecursor : (B ⊗[R] B) →ₐ[R] B ⊗[R] A :=
+  Algebra.TensorProduct.productMap Algebra.TensorProduct.includeLeft ρ
+
+@[simp]
+theorem galoisPrecursor_tmul (b b' : B) :
+    galoisPrecursor R A ρ (b ⊗ₜ[R] b') = (b ⊗ₜ[R] (1 : A)) * ρ b' := by
+  rw [galoisPrecursor, Algebra.TensorProduct.productMap_apply_tmul,
+    Algebra.TensorProduct.includeLeft_apply]
+
+/-- The multiplicative heart of the span computation: a base-changed pure tensor acting on
+a base-changed co-action value realizes the associated precursor term. -/
+theorem smul_coactionBaseChange_one_tmul (c' : C') (b c : B) :
+    ((c' ⊗ₜ[coinvariants ρ] b : C' ⊗[coinvariants ρ] B))
+        • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] c))
+      = (baseChangeAssoc R A ρ C').symm
+          (c' ⊗ₜ[coinvariants ρ] ((b ⊗ₜ[R] (1 : A)) * ρ c)) := by
+  rw [Algebra.smul_def, coactionBaseChange_tmul]
+  rw [show (algebraMap (C' ⊗[coinvariants ρ] B) ((C' ⊗[coinvariants ρ] B) ⊗[R] A))
+      (c' ⊗ₜ[coinvariants ρ] b) = (c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] (1 : A) from rfl]
+  rw [show ((c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] (1 : A) :
+      (C' ⊗[coinvariants ρ] B) ⊗[R] A)
+      = (baseChangeAssoc R A ρ C').symm
+          ((Algebra.TensorProduct.map (AlgHom.id C' C') (includeLeftOverCoinvariants ρ))
+            (c' ⊗ₜ[coinvariants ρ] b)) from by
+    rw [← baseChangeAssoc_tmul_one, AlgEquiv.symm_apply_apply]]
+  rw [← map_mul, Algebra.TensorProduct.map_tmul]
+  congr 1
+  rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one]
+  rfl
+
+/-- **The span condition** (feeding Stacks 03C1): when the Galois precursor is surjective,
+the range of the base-changed co-action spans `(C' ⊗[C] B) ⊗[R] A` over `C' ⊗[C] B`. -/
+theorem span_range_coactionBaseChange_eq_top
+    (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    Submodule.span (C' ⊗[coinvariants ρ] B)
+      (LinearMap.range (coactionOverCoinvariants
+        (coactionBaseChange R A ρ C')).toLinearMap :
+          Set ((C' ⊗[coinvariants ρ] B) ⊗[R] A)) = ⊤ := by
+  rw [eq_top_iff]
+  rintro u -
+  have hgen : ∀ w : C' ⊗[coinvariants ρ] (B ⊗[R] A),
+      (baseChangeAssoc R A ρ C').symm w ∈ Submodule.span (C' ⊗[coinvariants ρ] B)
+        (LinearMap.range (coactionOverCoinvariants
+          (coactionBaseChange R A ρ C')).toLinearMap :
+            Set ((C' ⊗[coinvariants ρ] B) ⊗[R] A)) := by
+    intro w
+    induction w with
+    | zero => rw [map_zero]; exact Submodule.zero_mem _
+    | add w₁ w₂ h₁ h₂ => rw [map_add]; exact Submodule.add_mem _ h₁ h₂
+    | tmul c' v =>
+        obtain ⟨t, ht⟩ := hsurj v
+        rw [← ht]
+        clear ht
+        induction t with
+        | zero =>
+            rw [map_zero, TensorProduct.tmul_zero, map_zero]
+            exact Submodule.zero_mem _
+        | add t₁ t₂ h₁ h₂ =>
+            rw [map_add, TensorProduct.tmul_add, map_add]
+            exact Submodule.add_mem _ h₁ h₂
+        | tmul b c =>
+            rw [galoisPrecursor_tmul, ← smul_coactionBaseChange_one_tmul]
+            refine Submodule.smul_mem _ _ (Submodule.subset_span ?_)
+            exact ⟨(1 : C') ⊗ₜ[coinvariants ρ] c, rfl⟩
+  have := hgen (baseChangeAssoc R A ρ C' u)
+  rwa [AlgEquiv.symm_apply_apply] at this
+
 end PerPrime
 
 end ModularCurves
