@@ -14005,3 +14005,16 @@ the étale legs land — deferred behind this decompose per dispatch discretion.
   (/develop --decompose first act; prep banked: gate block read, audit-tag mispointing
   flagged — 02KG/02KH are cohomology lemmas; pin the true algebra tags via 02KL's
   proof-references).
+
+## Amendments v10.102 (2026-07-10, coordinator): FP4 session terminal RATIFIED — Phase A closed clean; phase-b-launchpad.md banked; Phase B fires fresh
+
+- **FP4 terminal absorbed**: Phase A of record closed (the ★★★★ engine + the 11-component
+  campaign + the B2 repoint, all zero-sorryAx — ratified v10.99); **phase-b-launchpad.md
+  banked (86e490a68)** — the Phase-B opening orders (/develop --decompose of
+  α_univ-descent, verbatim KM quotes with page offsets recorded), the full Phase-A
+  interface listing, and the proven engineering patterns (per-declaration-budget
+  architecture, opaque-shape lemmas) for the fresh session to reuse. Sentinel released
+  at the genuine terminal (44e9185c9); hygiene exemplary throughout.
+- **Phase B opener (owner fires)**: "Resume CHARTER-FP4 Phase B per v10.99/v10.102:
+  read phase-b-launchpad.md first, then /develop --decompose α_univ-descent → the
+  representability bijection → T-E5c → Y(N) route A + Γ_H."
