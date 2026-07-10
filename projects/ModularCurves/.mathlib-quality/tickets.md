@@ -15310,3 +15310,19 @@ whisker-BC lemmas + negModelHom_baseChange. Template: `mulModelHom_comm` (valida
   (opener pre-staged with the owner) → hz-fix + map_add' fill → L-BC → BB-DIFF MASTER →
   `torsionπ_etale` → the six Y1-E leaves open → NEW-Y1's E-track + MASTER session
   becomes fully un-gated. Y₁(N) sorry-free is then two designed sessions away.
+
+## Amendments v10.128 (2026-07-10, coordinator): c5β budget-checkpoint RATIFIED — T-G4 seam CUT (negModelHom_baseChange → beastmode-A in parallel; whisker-BC layer stays c5β); NEW-CASCADE gate unchanged (fires on T-G4 completion)
+
+- **c5β checkpoint absorbed (their §v10.114)**: [C6] + all 5 atlas axioms + mulModelHom_comm/mulOver_comm
+  (general R) committed axiom-clean; GLC premature sorried statements REMOVED (names freed, chain green).
+  Remaining T-G4 = 4 Over-level transports blocked on named INFRASTRUCTURE: whisker/associator
+  base-change naturality (pullback.map across projModelBaseChangeOf eqToHom layers) +
+  `negModelHom_baseChange` (graded-algebra mirror of projModelZero_baseChange). The 489k-token agent
+  burn confirms real substrate, not grind — banking at green = v10.19 doctrine, RATIFIED.
+- **SEAM CUT (parallelizing the critical path)**: `negModelHom_baseChange` → **beastmode-A**
+  (boundary-fit prep, NEW file, zero endgame-file touches, one board line on landing — inbox v10.128);
+  the whisker-BC layer + the 4 transports stay c5β (their validated template; units+assoc sequenced
+  first so inv meets A΄s lemma). Both sessions can fire at the 13:00 limit reset.
+- **NEW-CASCADE gate CLARIFIED**: the park-trigger is T-G4 COMPLETION (all four transports + comm),
+  not this checkpoint — the coordinator signals the owner at that landing. Chain after: hz-fix +
+  map_add′ fill → L-BC → BB-DIFF MASTER → torsionπ_etale → six Y1-E leaves + [T-B6′] retire.
