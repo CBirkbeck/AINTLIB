@@ -13563,3 +13563,46 @@ from the d4b immersion equations). GLC fill afterwards via e1/e3/e4/e4a transpor
 - **Remaining for [HG-B4]**: the finitely-many-maximals corollary (GAP-6; derivation
   banked in the decomposition doc — IsAlgClosed.lift over the residue field + the orbit
   theorem + fibre finiteness). Then [HG-B5] (03C8) → [HG-B6] (03BM = IsHopfGalois = M5).
+
+### v10.102 (2026-07-10, NEW-HOPF): ★★ [CHARTER-HOPF] M4 — [HG-B4] + [HG-B5] COMPLETE: the orbit corollary and the 03C8 bootstrap (both hard cores done)
+
+*Charter milestone M4. All lake-green, zero sorries, axiom-clean
+({propext, Classical.choice, Quot.sound}) via `lake env lean`.*
+
+- **[HG-B4] finished** (`CoinvariantsPoints.lean`): after the orbit theorem (v10.101),
+  the GAP-6 corollary landed: **`finite_setOf_isMaximal_of_isLocalRing`** — over a
+  local co-invariants base, `B` has finitely many maximal ideals. Each maximal `n`
+  pointifies as `χₙ : B →ₐ[R] k̄(κ)` (`IsAlgClosed.lift` on the integral residue
+  extension `κ → B⧸n`; R-linearity through the residue tower; `ker = n` by
+  maximality — the quotient-Field instance was DELIBERATELY avoided: it
+  shadow-diamonds against the ambient CommRing quotient structure, cf. the
+  IsSimpleRing synth failure; `IsDomain (B⧸n)` from `hn.isPrime` suffices for the
+  lift). All points agree on C (canonical residue map), the orbit theorem connects
+  any two, the connection lives in the finite `ā`-fibre, and the kernel map is
+  injective. Plus **`maximalIdeal_map_le_of_isMaximal`** (m·B ≤ every maximal — 03C1's
+  `hmn` feed).
+- **[HG-B5] COMPLETE in one session** (`HopfGaloisBootstrap.lean`, NEW file): Stacks
+  03C8 in comodule form, and the planned "two-row equalizer comparison" (Lean-
+  treacherous: twisted tensors) was **replanned away** (banked appendix): an
+  elementwise coassociativity computation suffices. Given `hb : Basis ι' B (B⊗A)`
+  with `hb i = ρ (x i)`:
+  - `includeLeftBasis` — base-change `hb` along `includeLeft` + `cancelBaseChange`:
+    a `(B⊗A)`-basis of `(B⊗A)⊗A` with vectors `(ι⊗id)(hb i)`;
+  - `eq_zero_of_sum_smul_map_coaction_eq_zero` — the `(ρ⊗id)(hb i)` admit no
+    nontrivial `(B⊗A)`-relation (they are the `congr(shearEquiv, refl)` twist of
+    `includeLeftBasis`; relations transport through the twist semilinearly);
+  - `repr_coaction_mem_coinvariants` — **the 03C8 heart**: every basis coordinate of
+    `ρ f` is co-invariant (δ̃ vs ρ⊗id on the expansion, bridge at `f` and at each
+    `x i`, subtract, cancel);
+  - `coinvariantsBasis : Basis ι' (coinvariants ρ) B` on the `x i` (independence
+    pushed through ρ; spanning via the counit retraction);
+  - **`bijective_canonicalGaloisMap_of_basis`** — the galois map carries the
+    base-changed C-basis to `hb`: basis-to-basis ⟹ bijective. **The galois half of
+    `IsHopfGalois` is now reduced to producing the shifted basis.**
+- **NO Amitsur equalizer, no ff-of-ι, no twisted module instances** were needed for
+  03C8 — [HG-A1] remains consumed by B6's globalization only.
+- **NEXT** ([HG-B6] = M5, `HopfGaloisTheorem.lean`): per-prime bootstrap — localize C,
+  base-change along the infinite-residue gadget ([HG-A3]), semi-locality (GAP-6) +
+  m·B ≤ n feed 03C1 ([HG-A4] `Submodule.exists_basis_mem_of_span_eq_top`) to produce
+  the shifted basis, B5 concludes per-prime; globalize via ff descent ([HG-A1/A2]) ⟹
+  `IsHopfGalois ρ`.
