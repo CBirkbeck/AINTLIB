@@ -1,1 +1,1 @@
-FOCUS: [NISOG-GRASS] [GR-G] — universal member DONE (chartMatrix = generic matrix). NEXT: pullback-of-universal lemma via chartMatrix_normMap, then the affine T-point equivalence.
+FOCUS: [NISOG-GRASS] [GR-G] — pointOfChartMember DONE. NEXT: overlap-compat lemma (SPEC + glue_condition) then glueMorphisms assembly.

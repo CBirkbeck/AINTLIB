@@ -13884,3 +13884,11 @@ onto the existing `projModel_smooth` via the Zariski-local-at-target chart argum
 [YF-GEOM]/GHC6/PIC0's YFullRoute GEOM leaf: consume freely. GH: the corrected T-H4/T-H6 wiring
 has its engine gate fully open. Next arc (fable-P4): the moduli-functor layer (α_univ descent +
 representability bijection → T-E5c → Y(N) route A + Γ_H).
+
+### v10.95n (2026-07-10, fable-FP): [GR-G] point construction LANDED
+
+- `evalAtR` (R-coefficient chart evaluation) + **`pointOfChartMember`** (chart member
+  over an R-algebra A ⟹ `Spec A ⟶ grassmannianScheme R k n`, via `Spec evalAtR ≫
+  glueData.ι`) — sorry-free, axiom-clean. NEXT: the glued general-member point
+  (chart-cover via `exists_isChartAt_congr_localizationAway` + `OpenCover.glueMorphisms`;
+  overlap-compat = the [GR-SPEC] `evalAwayAt_comp_ringHom` + `GlueData.glue_condition`).

@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.GrassmannianTransition
+import ModularCurves.ForMathlib.GrassmannianChart
 import Mathlib.AlgebraicGeometry.Gluing
 import Mathlib.AlgebraicGeometry.Pullbacks
 
@@ -705,5 +706,27 @@ noncomputable def glueData (R : Type u) [CommRing R] (k n : ℕ) : Scheme.GlueDa
 /-- **[GR-F] The Grassmannian scheme** `Grass(k, R^n)`: the glued chart atlas. -/
 noncomputable def grassmannianScheme (R : Type u) [CommRing R] (k n : ℕ) : Scheme.{u} :=
   (glueData R k n).glued
+
+section Points
+
+open MvPolynomial
+
+variable {R} {A : Type u} [CommRing A] [Algebra R A] {n : ℕ}
+
+/-- Evaluation of the ι-chart coordinate ring (with `R`-coefficients) at a chart member
+over an `R`-algebra `A`. -/
+noncomputable def evalAtR (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    ChartRing R ι →+* A :=
+  eval₂Hom (algebraMap R A) (fun p => chartMatrix n ι N h p.1 p.2)
+
+/-- **[GR-G], point construction**: a chart member over `A` gives an `A`-point of the
+Grassmannian scheme, through its chart. -/
+noncomputable def pointOfChartMember (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    Spec (CommRingCat.of A) ⟶ grassmannianScheme R k n :=
+  Spec.map (CommRingCat.ofHom (evalAtR ι N h)) ≫ (glueData R k n).ι (ULift.up ι)
+
+end Points
 
 end Module.Grassmannian
