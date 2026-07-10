@@ -738,6 +738,71 @@ theorem faithfullyFlat_coinvariants (hρ : IsCoaction ρ)
   obtain ⟨q, hq, hcomap⟩ := exists_prime_over_coinvariants R A ρ hρ p
   exact ⟨⟨q, hq⟩, PrimeSpectrum.ext hcomap⟩
 
+attribute [-instance] Subalgebra.instSMulSubtypeMem in
+/-- **Global injectivity of the canonical Galois map**: check after base change to each
+flat local extension, where the comparison square reduces it to the per-prime Galois
+bijectivity. -/
+theorem injective_canonicalGaloisLinear (hρ : IsCoaction ρ)
+    (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    Function.Injective (canonicalGaloisLinear R A ρ) := by
+  classical
+  refine injective_of_forall_lTensor_localPolynomialExtension
+    (canonicalGaloisLinear R A ρ) (fun P _ => ?_)
+  haveI hflatCp : Module.Flat (coinvariants ρ) (Localization.AtPrime P) :=
+    IsLocalization.flat _ P.primeCompl
+  haveI hflatCx : Module.Flat (coinvariants ρ)
+      (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) :=
+    Module.Flat.trans (coinvariants ρ) (Localization.AtPrime P)
+      (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+  exact injective_lTensor_canonicalGaloisMap R A ρ
+    (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) hρ hsurj
+
+/-- The scalar-collapse map `B ⊗[R] B → B ⊗[C] B`. -/
+noncomputable def collapseScalars :
+    (B ⊗[R] B) →ₐ[R] (B ⊗[coinvariants ρ] B) :=
+  Algebra.TensorProduct.productMap
+    ((Algebra.TensorProduct.includeLeft
+      (R := coinvariants ρ) (S := coinvariants ρ) (A := B) (B := B)).restrictScalars R)
+    ((Algebra.TensorProduct.includeRight
+      (R := coinvariants ρ) (A := B) (B := B)).restrictScalars R)
+
+omit [Module.Free R A] [Module.Finite R A] in
+@[simp]
+theorem collapseScalars_tmul (b b' : B) :
+    collapseScalars R A ρ (b ⊗ₜ[R] b') = b ⊗ₜ[coinvariants ρ] b' := by
+  rw [collapseScalars, Algebra.TensorProduct.productMap_apply_tmul]
+  show (b ⊗ₜ[coinvariants ρ] (1 : B)) * ((1 : B) ⊗ₜ[coinvariants ρ] b') = _
+  rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- **Surjectivity of the canonical Galois map**, directly from the precursor. -/
+theorem surjective_canonicalGaloisMap
+    (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    Function.Surjective (canonicalGaloisMap ρ) := by
+  have hcomp : ∀ t : B ⊗[R] B,
+      canonicalGaloisMap ρ (collapseScalars R A ρ t) = galoisPrecursor R A ρ t := by
+    intro t
+    induction t with
+    | zero => rw [map_zero, map_zero, map_zero]
+    | add t₁ t₂ h₁ h₂ => rw [map_add, map_add, map_add, h₁, h₂]
+    | tmul b b' =>
+        rw [collapseScalars_tmul, galoisPrecursor_tmul, canonicalGaloisMap_tmul]
+  intro y
+  obtain ⟨t, ht⟩ := hsurj y
+  exact ⟨collapseScalars R A ρ t, by rw [hcomp, ht]⟩
+
+/-- **The Hopf–Galois theorem for co-actions of finite free Hopf algebras**
+(Stacks 03BM = SGA 3 Exp. V Théorème 4.1, affine case, comodule form): a co-action
+`ρ : B →ₐ[R] B ⊗[R] A` whose Galois precursor `B ⊗[R] B → B ⊗[R] A` is surjective is
+Hopf–Galois: the canonical Galois map `B ⊗[C] B → B ⊗[R] A` is bijective and `B` is
+faithfully flat over its co-invariants. -/
+theorem isHopfGalois_of_surjective_galoisPrecursor (hρ : IsCoaction ρ)
+    (hsurj : Function.Surjective (galoisPrecursor R A ρ)) :
+    IsHopfGalois ρ where
+  galois := ⟨injective_canonicalGaloisLinear R A ρ hρ hsurj,
+    surjective_canonicalGaloisMap R A ρ hsurj⟩
+  faithfullyFlat := faithfullyFlat_coinvariants R A ρ hρ hsurj
+
 end Globalize
 
 end ModularCurves
