@@ -15520,3 +15520,34 @@ dependency cone) ∪ {[KL-3] flat-at-stage, [KL-4] ffl-at-stage}.*
   to EXACTLY {KL-3 flat-at-stage, KL-4 ffl-at-stage}; KL-2b/2c via presentedBaseChange.
   fable-P4 — B3 bijection near-complete (torsor-descent helpers exposed; agent on the
   final 2 gaps). Both on charter.
+
+### v10.99c (2026-07-10, fable-FP): [02KL-CORE] KL-4 execution map (mid-flight bank)
+
+*T-block landed (4de2f9cf0). KL-4 machine design, for continuation:*
+
+1. `exists_faithfullyFlat_stage` := by classical; obtain flat-cofinal from `exists_flat_stage`
+   (KL-3, sorried — dependency-cone fine); work at base `Spec (𝒮 i₁)`.
+2. `W := range (comap (algebraMap (𝒮 i₁) (spreadStage h₁)))` patch-clopen:
+   `RingHom.finitePresentation_algebraMap.2 (spreadStage_finitePresentation …)` →
+   `PrimeSpectrum.isConstructible_range_comap` → `IsConstructible.isOpen_isClosed_constructibleTopology`.
+3. `I_j := range (comap (t hj).toRingHom)` patch-closed: letI patch-topologies; haveI
+   `compactSpace_constructibleTopology` + `t2Space_constructibleTopology`;
+   `(isCompact_univ.image (continuous_comap_constructibleTopology _)).isClosed` with
+   `Set.image_univ`.
+4. `hInter : (∀ j hj, p ∈ I_j) → p ∈ range (comap (u i₁))` — IDEAL FORM
+   (`PrimeSpectrum.mem_range_comap_iff`, no tensor-colimits): `le_antisymm ? le_comap_map`;
+   `u x ∈ map (u i₁) p` → `Submodule.mem_span_finite_of_mem_span` → finset-combination →
+   lift coefficients (`exists_common_lift`) + preimages of the p-elements → identity at a
+   later stage (`exists_common_eq` / `eq_at_stage`) → `t x ∈ map (t hj'') p` → contract
+   with `(mem_range_comap_iff.1 (hp hj''))` = p.  Then `comap_surjective_of_faithfullyFlat`
+   (A→B) + contraction along ν : spreadStage h₁ →ₐ B (mk-chase + eB.commutes square:
+   ν∘algebraMap-stage = χ∘(u i₁)) lands `p ∈ W`.
+5. Patch compactness: directed family `I_j ∩ Wᶜ` of patch-closeds with empty intersection
+   in patch-compact space → some `I_{j₂} ⊆ W` (`IsCompact.elim_directed_family_closed`-style
+   or nonempty-iInter contrapositive).
+6. Cofinal ffl at `j ≥ j₂`: `pj`'s contraction `p₁ ∈ I_j ⊆ W` → fibre nontrivial at `i₁`
+   (`PrimeSpectrum.nontrivial_iff_mem_rangeComap` ←) → K2-collapse: `κ(pj) ⊗_{𝒮j} Bj ≃
+   κ(pj) ⊗_{𝒮i₁} B_{i₁}` (spreadStage_baseChange + cancelBaseChange) `≃ κ(pj) ⊗_{κ(p₁)}
+   (κ(p₁) ⊗ B_{i₁})` (residue functoriality `Ideal.ResidueField.mapₐ` + cancel) — nontrivial
+   by field-ffl of `κ(p₁) → κ(pj)` → `nontrivial_iff` → surjective →
+   `Module.FaithfullyFlat.of_comap_surjective` with `hflat`.
