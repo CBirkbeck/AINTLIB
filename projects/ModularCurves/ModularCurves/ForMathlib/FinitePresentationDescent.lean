@@ -590,6 +590,218 @@ theorem IsFilteredAlgColimit.exists_eq_at_stage_of_finiteType
     Algebra.adjoin_le fun b hb => he ⟨b, hb⟩
   exact AlgHom.ext fun b => hle (hs ▸ Algebra.mem_top)
 
+
+/-! ### Presented systems over a filtered base ([KL-2d]) -/
+
+/-- Transition composition, `RingHom` form. -/
+theorem IsFilteredAlgColimit.t_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃i j k : ι⦄ (hij : i ≤ j) (hjk : j ≤ k) :
+    (t hjk).toRingHom.comp (t hij).toRingHom = (t (hij.trans hjk)).toRingHom :=
+  RingHom.ext fun x => H.t_trans hij hjk x
+
+/-- Cocone compatibility, `RingHom` form. -/
+theorem IsFilteredAlgColimit.u_comp (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃i j : ι⦄ (hij : i ≤ j) :
+    (u j).toRingHom.comp (t hij).toRingHom = (u i).toRingHom :=
+  RingHom.ext fun x => H.compat hij x
+
+section Presented
+
+variable {σ : Type} [Fintype σ] {κ : Type} [Fintype κ] {i₀ : ι}
+
+/-- Coefficientwise stage-lifting: every polynomial over the colimit is the pushforward
+of a stage polynomial. -/
+theorem IsFilteredAlgColimit.exists_map_poly (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (P : MvPolynomial σ A) :
+    ∃ (i : ι) (P' : MvPolynomial σ (𝒮 i)), MvPolynomial.map (u i).toRingHom P' = P := by
+  classical
+  obtain ⟨i, x, hx⟩ := H.exists_common_lift (fun d : ↥P.support => P.coeff d)
+  refine ⟨i, ∑ d ∈ P.support.attach, MvPolynomial.monomial d.1 (x d), ?_⟩
+  calc (MvPolynomial.map (u i).toRingHom)
+        (∑ d ∈ P.support.attach, MvPolynomial.monomial d.1 (x d))
+      = ∑ d ∈ P.support.attach, MvPolynomial.monomial d.1 (P.coeff d.1) := by
+        rw [map_sum]
+        exact Finset.sum_congr rfl fun d _ => by
+          rw [MvPolynomial.map_monomial]; exact congrArg _ (hx d)
+    _ = ∑ d ∈ P.support, MvPolynomial.monomial d (P.coeff d) :=
+        Finset.sum_attach _ (fun d => MvPolynomial.monomial d (P.coeff d))
+    _ = P := MvPolynomial.support_sum_monomial_coeff P
+
+/-- Coefficientwise stage-equality: stage polynomials with equal pushforwards agree at a
+later stage. -/
+theorem IsFilteredAlgColimit.exists_map_poly_eq (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃i : ι⦄ (P Q : MvPolynomial σ (𝒮 i))
+    (hPQ : MvPolynomial.map (u i).toRingHom P = MvPolynomial.map (u i).toRingHom Q) :
+    ∃ (j : ι) (h : i ≤ j),
+      MvPolynomial.map (t h).toRingHom P = MvPolynomial.map (t h).toRingHom Q := by
+  classical
+  obtain ⟨j, h, he⟩ := H.exists_common_eq
+    (fun d : ↥(P.support ∪ Q.support) => P.coeff d)
+    (fun d : ↥(P.support ∪ Q.support) => Q.coeff d)
+    (fun d => by
+      have hc := congrArg (MvPolynomial.coeff d.1) hPQ
+      rwa [MvPolynomial.coeff_map, MvPolynomial.coeff_map] at hc)
+  refine ⟨j, h, MvPolynomial.ext _ _ fun d => ?_⟩
+  rw [MvPolynomial.coeff_map, MvPolynomial.coeff_map]
+  by_cases hd : d ∈ P.support ∪ Q.support
+  · exact he ⟨d, hd⟩
+  · rw [Finset.mem_union, not_or, MvPolynomial.mem_support_iff, not_not,
+      MvPolynomial.mem_support_iff, not_not] at hd
+    rw [hd.1, hd.2]
+
+variable (t) in
+/-- **[KL-2d] transitions** of a presented system: push the presentation forward along a
+base transition. -/
+noncomputable def presentedT (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) :
+    ∀ ⦃P Q : {i : ι // i₀ ≤ i}⦄, P ≤ Q →
+      ((MvPolynomial σ (𝒮 P.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) →ₐ[R]
+        (MvPolynomial σ (𝒮 Q.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (t Q.2).toRingHom (gen j)))) :=
+  fun P Q hPQ => Ideal.Quotient.liftₐ _
+    ((Ideal.Quotient.mkₐ R _).comp (MvPolynomial.mapAlgHom (t hPQ)))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem (MvPolynomial.map (t hPQ).toRingHom) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      have h2 : (MvPolynomial.map (t hPQ).toRingHom ∘
+            fun j => MvPolynomial.map (t P.2).toRingHom (gen j))
+          = fun j => MvPolynomial.map (t Q.2).toRingHom (gen j) := by
+        funext j
+        rw [Function.comp_apply, MvPolynomial.map_map, H.t_comp]
+      rw [h2] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      have hcoe : MvPolynomial.mapAlgHom (R := R) (σ := σ) (t hPQ) p
+          = MvPolynomial.map (t hPQ).toRingHom p := rfl
+      rw [hcoe]
+      exact Ideal.Quotient.eq_zero_iff_mem.2 h1)
+
+variable (t u) in
+/-- **[KL-2d] cocone maps** of a presented system: push the presentation to the colimit. -/
+noncomputable def presentedU (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) :
+    ∀ P : {i : ι // i₀ ≤ i},
+      (MvPolynomial σ (𝒮 P.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) →ₐ[R]
+        (MvPolynomial σ A ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) :=
+  fun P => Ideal.Quotient.liftₐ _
+    ((Ideal.Quotient.mkₐ R _).comp (MvPolynomial.mapAlgHom (u P.1)))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem (MvPolynomial.map (u P.1).toRingHom) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      have h2 : (MvPolynomial.map (u P.1).toRingHom ∘
+            fun j => MvPolynomial.map (t P.2).toRingHom (gen j))
+          = fun j => MvPolynomial.map (u i₀).toRingHom (gen j) := by
+        funext j
+        rw [Function.comp_apply, MvPolynomial.map_map, H.u_comp]
+      rw [h2] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      have hcoe : MvPolynomial.mapAlgHom (R := R) (σ := σ) (u P.1) p
+          = MvPolynomial.map (u P.1).toRingHom p := rfl
+      rw [hcoe]
+      exact Ideal.Quotient.eq_zero_iff_mem.2 h1)
+
+theorem presentedT_mk (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) ⦃P Q : {i : ι // i₀ ≤ i}⦄ (h : P ≤ Q)
+    (p : MvPolynomial σ (𝒮 P.1)) :
+    presentedT t H gen h (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.map (t h).toRingHom p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+theorem presentedU_mk (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) (P : {i : ι // i₀ ≤ i})
+    (p : MvPolynomial σ (𝒮 P.1)) :
+    presentedU t u H gen P (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.map (u P.1).toRingHom p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+/-- **[KL-2d].** A presented system over a filtered base is itself a filtered colimit
+presentation of the corresponding presented algebra over the colimit. -/
+theorem isFilteredAlgColimit_presented (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) :
+    IsFilteredAlgColimit R
+      (fun P : {i : ι // i₀ ≤ i} => MvPolynomial σ (𝒮 P.1) ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j)))
+      (presentedT t H gen)
+      (MvPolynomial σ A ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j)))
+      (presentedU t u H gen) := by
+  classical
+  haveI := H.directed
+  haveI := H.nonempty
+  constructor
+  -- directedness of the tail
+  · exact ⟨fun P Q => by
+      obtain ⟨k, hPk, hQk⟩ := directed_of (· ≤ ·) P.1 Q.1
+      exact ⟨⟨k, P.2.trans hPk⟩, hPk, hQk⟩⟩
+  · exact ⟨⟨i₀, le_rfl⟩⟩
+  -- functoriality
+  · intro P Q S hPQ hQS x
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [presentedT_mk, presentedT_mk, presentedT_mk, MvPolynomial.map_map, H.t_comp]
+  -- compatibility
+  · intro P Q h x
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [presentedT_mk, presentedU_mk, presentedU_mk, MvPolynomial.map_map, H.u_comp]
+  -- joint surjectivity
+  · intro a
+    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective a
+    obtain ⟨i, P', hP'⟩ := H.exists_map_poly q
+    obtain ⟨k, hik, hi₀k⟩ := directed_of (· ≤ ·) i i₀
+    refine ⟨⟨k, hi₀k⟩, Ideal.Quotient.mk _ (MvPolynomial.map (t hik).toRingHom P'), ?_⟩
+    rw [presentedU_mk, MvPolynomial.map_map, H.u_comp, hP']
+  -- equality at a later stage
+  · intro P x y hxy
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [presentedU_mk, presentedU_mk, Ideal.Quotient.eq, ← map_sub] at hxy
+    rw [Ideal.mem_span_range_iff_exists_fun] at hxy
+    obtain ⟨c, hc⟩ := hxy
+    -- lift the coefficients of the span representation to a stage
+    choose ci cP hcP using fun j => H.exists_map_poly (c j)
+    obtain ⟨i₁, hi₁⟩ := (insert P.1 (Finset.univ.image ci)).exists_le
+    have hPi₁ : P.1 ≤ i₁ := hi₁ P.1 (Finset.mem_insert_self _ _)
+    -- the two sides of the span identity, transported to stage i₁
+    set lhs : MvPolynomial σ (𝒮 i₁) := ∑ j, MvPolynomial.map
+        (t (hi₁ (ci j) (Finset.mem_insert_of_mem
+          (Finset.mem_image_of_mem ci (Finset.mem_univ j))))).toRingHom (cP j)
+        * MvPolynomial.map (t (P.2.trans hPi₁)).toRingHom (gen j) with hlhs
+    have hmaplhs : MvPolynomial.map (u i₁).toRingHom lhs
+        = MvPolynomial.map (u P.1).toRingHom (p - q) := by
+      rw [hlhs, map_sum, ← hc]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [map_mul, MvPolynomial.map_map, MvPolynomial.map_map, H.u_comp, H.u_comp, hcP]
+    -- equality of polynomials at a later stage
+    obtain ⟨i₂, hi₂, he⟩ := H.exists_map_poly_eq lhs
+      (MvPolynomial.map (t hPi₁).toRingHom (p - q))
+      (by rw [hmaplhs, MvPolynomial.map_map, H.u_comp])
+    refine ⟨⟨i₂, P.2.trans (hPi₁.trans hi₂)⟩, hPi₁.trans hi₂, ?_⟩
+    rw [presentedT_mk, presentedT_mk, Ideal.Quotient.eq, ← map_sub]
+    rw [← H.t_comp hPi₁ hi₂, ← MvPolynomial.map_map, ← he, hlhs, map_sum]
+    refine sum_mem fun j _ => ?_
+    rw [map_mul, MvPolynomial.map_map, H.t_comp]
+    exact Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨j, by rw [MvPolynomial.map_map, H.t_comp]⟩)
+
+end Presented
+
+/-- **[KL-2e].** Transport of a filtered colimit presentation along an isomorphism of the
+colimit. -/
+theorem IsFilteredAlgColimit.congr (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {A' : Type u} [CommRing A'] [Algebra R A'] (e : A ≃ₐ[R] A') :
+    IsFilteredAlgColimit R 𝒮 t A' (fun i => (e : A →ₐ[R] A').comp (u i)) where
+  directed := H.directed
+  nonempty := H.nonempty
+  t_trans := H.t_trans
+  compat := by intro i j h x; simp [H.compat h x]
+  jointly_surjective := by
+    intro a
+    obtain ⟨i, x, hx⟩ := H.jointly_surjective (e.symm a)
+    exact ⟨i, x, by simp [hx]⟩
+  eq_at_stage := by
+    intro i x y hxy
+    exact H.eq_at_stage x y (e.injective (by simpa using hxy))
+
 end Spread
 
 /-! ### The target statements -/
