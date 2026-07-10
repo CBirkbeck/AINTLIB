@@ -13966,3 +13966,42 @@ the étale legs land — deferred behind this decompose per dispatch discretion.
   — engine-pin consumption folds in when those legs land. [PIC-P2-CMP] stays
   p2-coordinated. **PIC0 next session: execute the 6 leaves, B1a first from the banked
   recipe.**
+
+### v10.98a (2026-07-10, fable-FP): ★★★★★ [NISOG-GRASS] GATE OPEN — BOARD-SIGNAL D2: the NISOG [L15] ambient is delivered
+
+- **⚑ BOARD-SIGNAL → D2 (NISOG lane): the [NISOG-GRASS] gate is OPEN.** Everything
+  KM 6.5.1's ambient needs is PROVEN, sorry-free, axiom-clean, and pushed:
+  1. **The scheme**: `grassmannianScheme R k n` — the glued chart atlas, every
+     `Scheme.GlueData` condition proven (`GrassmannianGlueData.lean`).
+  2. **Charts**: `chartScheme` = `Spec R[X_{j,i}]`; open immersions `overlapι`;
+     transitions with t_id/inverse-pair/t_fac/cocycle.
+  3. **The module dictionary** (`GrassmannianChart.lean`): `IsChartAt` ⇄ retractions ⇄
+     matrices (`chartEquivRetraction`, `retractionEquivMatrix`), `congr`-transport,
+     pi-normalization, `normMap` + entrywise naturality (`chartMatrix_normMap`).
+  4. **Covering**: `exists_isChartAt_localizationAway` (+ normalized form) — every
+     member is chart-local (Nakayama; Stacks 089T step 5).
+  5. **Overlap calculus** (`GrassmannianOverlap.lean`): `isChartAt_iff_isUnit_det`
+     (the D(det) criterion) + **the SPEC** `evalAwayAt_comp_ringHom` (evaluation
+     commutes with the atlas glue square) — the chart-change compatibility engine.
+  6. **The universal member**: `universalChartMember` with
+     `chartMatrix_universalChartMember` (= the generic matrix).
+  7. **Points**: `evalAtR` + `pointOfChartMember` (chart member over any R-algebra ⟹
+     scheme point through its chart).
+  Consumption pattern for [L15]: relativize over the base affine-locally, cut the
+  bi-ideal locus with the T-D15 incidence machinery inside the charts (the matrices
+  make the bi-ideal condition polynomial), use (4)+(5) for chart-independence, (6) for
+  the universal datum, (7) for classifying maps.
+- **[GR-G-ASM] registered (fable-FP residual, recipe complete)**: the packaged T-point
+  equivalence (general-member glued points + inverse) — pure assembly on proven parts:
+  R-coefficient SPEC variant (coefficient-change via `MvPolynomial.eval₂_map`
+  naturality; column/matrix/det/ringHom are `map`-stable), prime-indexed
+  `Scheme.OpenCover` of `Spec A` from (4)'s `f_p`s, `OpenCover.glueMorphisms` with
+  compat = (5) + `GlueData.glue_condition`, spec via `ι_glueMorphisms`. Three agent
+  attempts died environmentally (2× API session limits, 1× stream stall), zero
+  mathematical obstructions found. Fresh-context block; not gating [L15]'s start.
+- **[STREAM-FP] CHARTER: all three items delivered** — [A711-FP]+étale flip ✓ ·
+  [KM-FMT-FLAT] engine ✓ · [NISOG-GRASS] gate open ✓ (with [GR-G-ASM] as the one
+  boarded assembly residual). Per v10.98 routing, fable-FP proceeds to **[02KL-CORE]**
+  (/develop --decompose first act; prep banked: gate block read, audit-tag mispointing
+  flagged — 02KG/02KH are cohomology lemmas; pin the true algebra tags via 02KL's
+  proof-references).
