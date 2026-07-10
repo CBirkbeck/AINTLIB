@@ -15568,3 +15568,42 @@ dependency cone) ∪ {[KL-3] flat-at-stage, [KL-4] ffl-at-stage}.*
   HOT**; NEW-CASCADE early-fire opener is with the owner (merge overlaps the tail).
 - fable-FP: KL-4 topology glue + hInter/hstage PROVEN (patch-compactness machinery);
   K2 fibre-collapse remains. On charter.
+
+## Amendments v10.132-CASCADE (2026-07-10, NEW-CASCADE): ⛔ HARD-STOP FORENSICS — dev/modular-curves is TREE-BROKEN since 40e44a706 (Representability.lean name-collision clobber); y1 merge executed but HELD on a scratch branch
+
+**THE REGRESSION (verified at source, evidence inline):** commit `40e44a706` ("[B3]
+Representability capstone", 2026-07-10 12:21, fable-P4) created its NEW representability
+engine at the path **`Moduli/Representability.lean` — the SAME PATH as the existing T-E4/
+T-E7 layer file**, clobbering it by name collision (no relocation: at `40e44a706` the old
+declarations exist in NO .lean file). Deleted from the tree with it:
+`EllHom.pullSection` (+ `_id`/`_comp`), `gammaOneNaiveProblem`,
+`gammaOneNaive_representable`, and the rest of the old file (parent had them at :148,
+:212, :250). **Consumers now referencing nonexistent constants** (unknown-constant errors
+reproduce): `Moduli/GammaH.lean` (:383, :392–3, :551), `Moduli/GammaHRepresentability.lean`,
+`Moduli/PullSectionAdd.lean`, `Moduli/PullSectionCanonicity.lean`,
+`LevelStructure/ExactOrder.lean`, `ModularCurve/YOneAssembly.lean`, `YFullRoute.lean`.
+Nobody hit it because the fleet builds single-target and the capstone's own target
+compiles; my v10.131 step-1 full-spine verification surfaced it.
+
+**Blast radius for Y1:** the [T-B6′] fill chain consumes `EllHom.pullSection`-machinery
+and `gammaOneNaiveProblem` downstream (YOneAssembly/YOneTatePoint spine) — the fill
+CANNOT proceed on a tree in this state; NEW-Y1's parked E-track and the eventual MASTER
+also sit on the clobbered layer.
+
+**RESOLUTION IS NOT MINE TO PICK** (touches fable-P4's fresh capstone; naming/relocation
+decision): either restore the old file and land the capstone under a distinct name
+(e.g. `Moduli/RepresentabilityEngine.lean`), or re-home the old layer — coordinator +
+fable-P4 call. Flagging their inboxes is left to the coordinator per external-quiet;
+this section is the loud signal.
+
+**MY STEP-1 STATE (work preserved, tip green):** the approved dev → y1 merge WAS executed
+locally with all resolutions per the v10.127 rules (tickets.md verbatim append-union under
+a marker; root-module import union boarded as the one forced non-board-file resolution) —
+but the spine verification FAILED on the inherited regression, so the merge is **HELD off
+y1's tip**: pushed intact to scratch branch **`wip/y1-dev-merge-cascade`** (v10.52
+preservation); `dev/modular-curves-y1` tip reset to the pre-merge claim (`ec1812b3b`,
+green). At regression-fix: fast-forward-able re-merge = pull scratch + top-up merge of the
+fixed dev tail, re-verify spine, push — minutes, not hours.
+
+**PARK STATE:** double gate — (1) the 40e44a706 regression fix lands on dev, (2) c5β's
+T-G4 completion boards. Sentinels updated (dev + y1 copies).
