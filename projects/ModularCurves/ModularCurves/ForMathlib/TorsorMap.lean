@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.SchemeQuotient
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
+import Mathlib.AlgebraicGeometry.EffectiveEpi
 
 /-!
 # G-maps of finite étale G-torsors ([B2a]/[B2b], KM pp. 115–116)
@@ -17,7 +18,12 @@ import ModularCurves.ForMathlib.PullbackLocalAtTarget
   `f₀ : S ⟶ S'` is cartesian (KM p. 115): the comparison into the pulled-back torsor is a
   `G`-map of torsors, hence an iso.
 
-These are the two torsor facts of the KM 4.7.0 representability argument.
+* `existsUnique_descent_of_torsor` — a `G`-invariant morphism out of a `G`-torsor over an
+  **affine** base descends uniquely through it (the torsor realizes its base as the quotient):
+  the `torsorCompare` presentation reduces the kernel-pair coequalizing condition to invariance,
+  and mathlib's regular-epi `isRegularEpi_of_flat_of_surjective_of_isAffine` supplies the descent.
+
+These are the torsor facts of the KM 4.7.0 representability argument.
 -/
 open AlgebraicGeometry CategoryTheory Limits
 universe u
@@ -253,5 +259,44 @@ theorem isPullback_of_equivariant_of_torsor {S S' Z W : Scheme.{u}} {G : Type u}
       (isIso_torsorCompare_pullback σW hWover hWtors f₀) (pullback.lift u fZ hu) hc hcequiv
   exact IsPullback.of_iso_pullback ⟨hu⟩ (asIso (pullback.lift u fZ hu))
     (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+
+
+/-! ### [B2c′] Torsor morphism-descent (KM p. 114/115) -/
+
+/-- The kernel pair of a `G`-torsor is coequalized by any `G`-invariant morphism: the
+`torsorCompare` presentation `∐_G Z ≅ Z ×_S Z` reduces the check to `σ γ ≫ q = q`. -/
+theorem kernelPair_coequalized_of_invariant {S Z Y : Scheme.{u}} {G : Type u} [Group G]
+    {f : Z ⟶ S} (σ : SchemeAction G Z) (hover : ∀ γ, σ.hom γ ≫ f = f)
+    (htors : IsIso (torsorCompare f σ hover))
+    (q : Z ⟶ Y) (hq : ∀ γ, σ.hom γ ≫ q = q) :
+    pullback.fst f f ≫ q = pullback.snd f f ≫ q := by
+  haveI := htors
+  rw [← cancel_epi (torsorCompare f σ hover)]
+  refine Sigma.hom_ext _ _ fun γ => ?_
+  simp only [← Category.assoc, ι_torsorCompare, pullback.lift_fst, pullback.lift_snd]
+  rw [hq γ, Category.id_comp]
+
+/-- **([B2c′], torsor morphism-descent — KM p. 114/115)** A `G`-invariant morphism out of a
+finite étale `G`-torsor `f : Z ⟶ S` **over an affine base** descends uniquely through `f`:
+there is a unique `u : S ⟶ Y` with `f ≫ u = q`. (Affine `S`/`Z` is the generality mathlib's
+regular-epi `isRegularEpi_of_flat_of_surjective_of_isAffine` supplies, and covers the engine's
+own invocation `𝕸(𝒫,δ) → 𝕸(𝒫,δ)/G` = `Spec A → Spec Aᴳ`.) -/
+theorem existsUnique_descent_of_torsor {S Z Y : Scheme.{u}} {G : Type u} [Group G]
+    {f : Z ⟶ S} (σ : SchemeAction G Z) (hover : ∀ γ, σ.hom γ ≫ f = f)
+    (htors : IsIso (torsorCompare f σ hover))
+    [IsAffine S] [IsAffine Z] [Surjective f] [Flat f]
+    (q : Z ⟶ Y) (hq : ∀ γ, σ.hom γ ≫ q = q) :
+    ∃! u : S ⟶ Y, f ≫ u = q := by
+  haveI : IsRegularEpi f := AlgebraicGeometry.isRegularEpi_of_flat_of_surjective_of_isAffine f
+  have hkp : IsKernelPair f (pullback.fst f f) (pullback.snd f f) :=
+    IsPullback.of_hasPullback f f
+  have hcoeq : IsColimit (Cofork.ofπ f hkp.w) := hkp.toCoequalizer'
+  have hqcoeq := kernelPair_coequalized_of_invariant σ hover htors q hq
+  haveI : Epi f := IsRegularEpi.getStruct f |>.epi f
+  have hfac : f ≫ hcoeq.desc (Cofork.ofπ q hqcoeq) = q :=
+    hcoeq.fac (Cofork.ofπ q hqcoeq) WalkingParallelPair.one
+  refine ⟨hcoeq.desc (Cofork.ofπ q hqcoeq), hfac, ?_⟩
+  intro u hu
+  exact (cancel_epi f).mp (hu.trans hfac.symm)
 
 end ModularCurves
