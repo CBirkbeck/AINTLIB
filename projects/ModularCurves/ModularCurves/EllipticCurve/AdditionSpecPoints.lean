@@ -869,6 +869,18 @@ theorem dictionary_eq_toAffine (W : WeierstrassCurve R) [W.IsElliptic] (k : Fin 
       ((WeierstrassCurve.Projective.nonsingular_of_Z_ne_zero hz).mp hNS)
       (hcoord ⟨0, by decide⟩).symm (hcoord ⟨1, by decide⟩).symm).trans rfl
 
+
+/-- Ring-level compatibility extraction: a chart point that is π-compatible has an R-compatible
+ring map (Spec-faithfulness through `chartι_projModelπ`). -/
+lemma chartHom_compat_of_specPoint (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K] (φ : chartAway W k →+* K)
+    (hπ : (Spec.map (CommRingCat.ofHom φ) ≫ chartι W k) ≫ projModelπ W =
+      Spec.map (CommRingCat.ofHom (algebraMap R K))) :
+    φ.comp (algebraMap R (chartAway W k)) = algebraMap R K := by
+  rw [Category.assoc, chartι_projModelπ, ← Spec.map_comp, ← CommRingCat.ofHom_comp] at hπ
+  have h2 := Spec.map_inj.mp hπ
+  exact congrArg CommRingCat.Hom.hom h2
+
 end ChartPointTriple
 
 end ChartNaturality
