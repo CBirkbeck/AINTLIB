@@ -3,6 +3,7 @@ import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.TensorProduct.Maps
+import Mathlib.RingTheory.FiniteStability
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.Tactic.Algebraize
 import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
@@ -1023,6 +1024,115 @@ noncomputable def concatEquiv :
         rw [h3, map_one, one_mul, concatInr_mk, MvPolynomial.rename_X])
 
 end Concat
+
+/-! ### Variable-doubling maps and their naturality ([KL-5] infrastructure) -/
+
+section Assembly
+
+variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+  {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+  {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+  {A : Type u} [CommRing A] [Algebra R A] {u : ∀ i, 𝒮 i →ₐ[R] A}
+  {σ κ : Type} [Fintype σ] [Fintype κ] {i₀ : ι}
+  (gen : κ → MvPolynomial σ (𝒮 i₀))
+  {W : Type u} [CommRing W] [Algebra R W]
+
+/-- Left variable-doubling on a presented model over any receiving algebra. -/
+noncomputable def doubleInl (w : 𝒮 i₀ →ₐ[R] W) :
+    (MvPolynomial σ W ⧸ Ideal.span (Set.range fun j =>
+        MvPolynomial.map w.toRingHom (gen j))) →ₐ[R]
+      (MvPolynomial (σ ⊕ σ) W ⧸ Ideal.span (Set.range fun j =>
+        MvPolynomial.map w.toRingHom (concatGen gen gen j))) :=
+  Ideal.Quotient.liftₐ _ ((Ideal.Quotient.mkₐ R _).comp
+    ((MvPolynomial.rename (Sum.inl : σ → σ ⊕ σ) : _ →ₐ[W] _).restrictScalars R))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem
+        (MvPolynomial.rename (Sum.inl : σ → σ ⊕ σ) : _ →ₐ[W] _) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      refine Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.span_mono ?_ h1)
+      rintro - ⟨j, rfl⟩
+      refine ⟨Sum.inl j, ?_⟩
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inl (gen j))
+        = MvPolynomial.rename Sum.inl (MvPolynomial.map w.toRingHom (gen j))
+      exact MvPolynomial.map_rename _ _ _)
+
+/-- Right variable-doubling on a presented model over any receiving algebra. -/
+noncomputable def doubleInr (w : 𝒮 i₀ →ₐ[R] W) :
+    (MvPolynomial σ W ⧸ Ideal.span (Set.range fun j =>
+        MvPolynomial.map w.toRingHom (gen j))) →ₐ[R]
+      (MvPolynomial (σ ⊕ σ) W ⧸ Ideal.span (Set.range fun j =>
+        MvPolynomial.map w.toRingHom (concatGen gen gen j))) :=
+  Ideal.Quotient.liftₐ _ ((Ideal.Quotient.mkₐ R _).comp
+    ((MvPolynomial.rename (Sum.inr : σ → σ ⊕ σ) : _ →ₐ[W] _).restrictScalars R))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem
+        (MvPolynomial.rename (Sum.inr : σ → σ ⊕ σ) : _ →ₐ[W] _) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      refine Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.span_mono ?_ h1)
+      rintro - ⟨j, rfl⟩
+      refine ⟨Sum.inr j, ?_⟩
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inr (gen j))
+        = MvPolynomial.rename Sum.inr (MvPolynomial.map w.toRingHom (gen j))
+      exact MvPolynomial.map_rename _ _ _)
+
+theorem doubleInl_mk (w : 𝒮 i₀ →ₐ[R] W) (p : MvPolynomial σ W) :
+    doubleInl gen w (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inl p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+theorem doubleInr_mk (w : 𝒮 i₀ →ₐ[R] W) (p : MvPolynomial σ W) :
+    doubleInr gen w (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inr p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+/-- Naturality of left doubling along stage transitions. -/
+theorem presentedT_comp_doubleInl (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃P Q : {i : ι // i₀ ≤ i}⦄ (h : P ≤ Q) :
+    (presentedT t H (concatGen gen gen) h).comp (doubleInl gen (t P.2))
+      = (doubleInl gen (t Q.2)).comp (presentedT t H gen h) := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInl_mk, presentedT_mk, presentedT_mk,
+    doubleInl_mk, MvPolynomial.map_rename]
+
+/-- Naturality of right doubling along stage transitions. -/
+theorem presentedT_comp_doubleInr (H : IsFilteredAlgColimit R 𝒮 t A u)
+    ⦃P Q : {i : ι // i₀ ≤ i}⦄ (h : P ≤ Q) :
+    (presentedT t H (concatGen gen gen) h).comp (doubleInr gen (t P.2))
+      = (doubleInr gen (t Q.2)).comp (presentedT t H gen h) := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInr_mk, presentedT_mk, presentedT_mk,
+    doubleInr_mk, MvPolynomial.map_rename]
+
+/-- Naturality of left doubling along the cocone maps. -/
+theorem presentedU_comp_doubleInl (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (P : {i : ι // i₀ ≤ i}) :
+    (presentedU t u H (concatGen gen gen) P).comp (doubleInl gen (t P.2))
+      = (doubleInl gen (u i₀)).comp (presentedU t u H gen P) := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInl_mk, presentedU_mk, presentedU_mk,
+    doubleInl_mk, MvPolynomial.map_rename]
+
+/-- Naturality of right doubling along the cocone maps. -/
+theorem presentedU_comp_doubleInr (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (P : {i : ι // i₀ ≤ i}) :
+    (presentedU t u H (concatGen gen gen) P).comp (doubleInr gen (t P.2))
+      = (doubleInr gen (u i₀)).comp (presentedU t u H gen P) := by
+  apply AlgHom.ext
+  intro x
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInr_mk, presentedU_mk, presentedU_mk,
+    doubleInr_mk, MvPolynomial.map_rename]
+
+end Assembly
+
 
 
 /-! ### The target statements -/
