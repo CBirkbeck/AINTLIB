@@ -15701,3 +15701,13 @@ C1d → C3 → C4 ⟹ six pins ⟹ **BOARD-SIGNAL**.
 transfer, then **coassoc** from the restricted `mulOver_assoc` through the *iterated*
 `affineKunneth`), then 1e antipode (`diagonal_SpecMap`), `[HopfAlgebra R A]`,
 `IsCoaction chartCoaction`, C1d → C3 → C4 ⟹ pins ⟹ **BOARD-SIGNAL**.
+
+## BOARD (fable-P4, 2026-07-10, v10.133 repair): tree-red REPAIRED
+40e44a706's path collision fixed (d10e7fc87, pushed): Moduli/Representability.lean RESTORED verbatim
+(T-E1/E2/E4/E7 layer, EllHom.pullSection back); B3 capstone RELOCATED to
+Moduli/QuotientRepresentability.lean. GammaH (broken-consumer certificate) + root module ModularCurves
+GREEN (3766 jobs). 7 consumers unblocked. Process pin: ls/git-log a path before Write-ing a "new" file
+(added to my method notes). Also this repair CLOSED B3 gap #2 (curve cartesian square) via the new
+isPullback_of_fppf_baseChange (TorsorMap.lean, axiom-clean). B3 remaining: gap #3 (coreData_injective
+uniqueness) — blocked on a MISSING CoreData field (q-torsor structure); fix = add hqtors/hqtors_curve
+from SchemeActionFree's isFinite/etale/torsorMul lemmas + the fibre-product/[B2b] proof. Then T-W7.
