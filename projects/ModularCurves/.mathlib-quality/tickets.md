@@ -15073,3 +15073,52 @@ y1 worktree (aintlib-mc-b3; NEW-Y1 parked — no y1 claim unless the fill execut
 crux question per the dispatch: how `E.Point (geomPoint B k)`'s addition is sourced
 (abelEnrichment/mulOver vs dictionary-transported) — i.e. whether the seam is C6-shaped
 or needs the T-W7a canonicity. Verdict + execution plan boarded before any building.
+
+## Amendments v10.123-CASCADE (2026-07-10, NEW-CASCADE): ★ [T-B6′] GATE AUDIT VERDICT — GATED by ONE named ingredient (T-G4-at-fields + record packaging), NOT full T-W7a; interface defect found (forced hz-fix); prep branch executes
+
+**VERDICT: dischargeable-AFTER-ONE-GATE — and the gate is c5β's in-flight T-G4, not T-W7a.**
+
+**The seam, resolved at the source** (GroupLaw.lean:117, GeometricFibreComparison.lean:75):
+`E.Point (geomPoint B k)`'s addition is the RECORD's abstract `grp` via `Hom.commGroup`
+(`pointAddCommGroup`); every live consumer instantiates `E` with `abelEnrichment_exists`-
+chosen (opaque, [T-A6b]-sorried) grp-data. C6's `mulModelHom_specPoints` intertwines
+`mulModelHom` — a different morphism until identified. So `map_add'` ⟺ record-μ =
+`mulModelHom` on Spec-k points.
+
+**The route through LANDED machinery** (all verified at source this audit):
+1. Fibrewise transport: `Point.baseChangeEquiv` (y1, additive, landed) moves the problem
+   to `E_k` over `Spec k` — a locally noetherian base.
+2. **`abelEnrichment_unique_of_isLocallyNoetherian` is PROVEN** (Rigidity.lean:1577, y1,
+   code-sorry-free — the only "sorry" in the file is a docstring word; the full GIT 6.1
+   →6.4 chain incl. `isMonHom_of_one_comp_eq'` is in the tree). Over `Spec k` it forces
+   `E_k` = any record with the same geometry.
+3. C6 `mulModelHom_specPoints` (every field, axiom-clean) + `projModelPointsEquiv` then
+   compute the addition. ⟹ `map_add'` closes once the model over k CARRIES a record.
+
+**THE NAMED MISSING INGREDIENT (the gate):** a mulOver-based `EllipticCurve (Spec k)`
+record on `projModel (W.baseChange k)` for a general field k — i.e. (a) **T-G4**: the five
+atlas group laws transported off the ULift atlas to arbitrary R ⊇ fields — **in flight
+with c5β** (recipe in their sentinel; re-deriving at-fields here = cardinal-rule violation
++ live-charter collision), plus (b) trivial packaging (grp := mulOver-GrpObj +
+`one_eq_zero` from the zero-section unit law) — ~an afternoon once (a) lands. NOT full
+T-W7a: no 0h / T-W7.12 / descent enters this route.
+
+**INTERFACE DEFECT (forced statement fix, discovered):** `geomFibrePointAddEquiv`'s
+hypotheses (hE, hπ) do NOT pin `E.zero` to `projModelZero W`. An `≃+` forces `0 ↦ 0`, and
+the dictionary maps the model zero to `0` (`projModelPointsEquiv_zero`) — with `E.zero`
+unpinned the statement is FALSE (any zero-shifted record satisfies hE/hπ). The fill MUST
+add `hz : E.zero ≫ eqToHom hE = projModelZero W` (or equivalent). Every current consumer
+can supply it (`tateUniversal_geom` / `fibreCurve` pins carry the zero identification).
+Coordinator visibility flagged: statement change to a shared pin — forced, small,
+consumer-compatible.
+
+**Branch-topology execution note:** the C6 layer (AdditionSpecPoints, GroupLawAxioms,
+AdditionBaseChange) exists ONLY on dev — ABSENT from dev/modular-curves-y1 (the sorry's
+home). The fill session must first merge dev → y1 (or cherry-pick the C6 chain).
+
+**EXECUTION PLAN (dispatch ELSE-branch, running now):** (1) rebase dev/modular-curves-b5da
+onto current dev, re-verify green (single targets); (2) land PR #5223 (T-B5D-A + T-DISC);
+(3) pre-wire the BB-DIFF MASTER (`mulByHom_formallyUnramified`, Torsion.lean:228)
+hypothesis-funneled against the named gate; (4) PARK at the gate: **fires when c5β boards
+T-G4 landing** — then: packaging (b) → hz-fix + map_add' fill on y1 → L-BC → MASTER →
+`torsionπ_etale` → six Y1-E leaves open + [T-B6′] retires.
