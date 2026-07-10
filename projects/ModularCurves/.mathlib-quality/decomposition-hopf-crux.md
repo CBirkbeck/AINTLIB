@@ -654,3 +654,19 @@ choose at write-time; the chain-over-V route is canonical.
 homomorphism field). Both need the Künneth-chain NATURALITY (the iso commutes with the
 G-side maps) — the heaviest chases; budget a full session; consider proving the two
 laws first at the SCHEME level (composites of restricted actions) and dualizing ONCE.
+
+## [HG-C1c-ii] R-linearity square decomposition (banked 2026-07-11)
+
+Obligation: `(E.π.appLE V U hover) ≫ coactionRing = ofHom (algebraMap R (A⊗[R]B))` in
+CommRingCat. Strategy: dualize the PROVEN scheme square `restrictedAction ≫ chartToBase
+= prOpenToBase` and conjugate by the chain-isos. Needs exactly ONE new naturality:
+**`chartSpecIso`-base-compat**: `chartSpecIso.hom ≫ Spec.map (ofHom (algebraMap R (A⊗B)))
+= (pullback-to-S-structure)-composite-with V.toSpecΓ` — prove by chaining the six
+constituent isos' second-projection/base compat lemmas:
+`pullbackRestrictIsoRestrict_inv_fst`/`hom_ι`, `pullbackLeftPullbackSndIso_hom_snd`-family,
+`pullback.congrHom`-components, `pullback.map`-lift computations (use `pullback.lift_snd`
+explicitly — NOT simp-tagged), `pullbackSpecIso_inv_fst` (+ its snd-analog; base-compat =
+fst-leg ≫ Spec (R→A)). U-side compat is mathlib (`toSpecΓ_SpecMap_appLE`). Then
+R-linearity = paste (scheme-square-appTop) with the two compats. Fallback if the chase
+swamps: prove R-linearity ELEMENTWISE on sections via `Scheme.Hom.appLE_map`-naturality
+(the composite of the ring maps applied to `algebraMap r` traced through the topIso's).
