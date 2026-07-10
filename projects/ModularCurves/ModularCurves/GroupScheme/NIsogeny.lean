@@ -1969,7 +1969,123 @@ theorem generatorSpace_baseChange (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.�
       e.hom ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t)
           (RelEffCartierDiv.IsSubgroup.baseChange E hD t) =
         pullback.snd (E.generatorSpaceπ N D hD) t := by
-  sorry
+  classical
+  set hD' := RelEffCartierDiv.IsSubgroup.baseChange E hD t with hhD'
+  -- tautological generator data over the fibre product (raw-valued aliases throughout)
+  set q₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ T :=
+    pullback.snd (E.generatorSpaceπ N D hD) t with hq₁
+  set k₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ E.generatorSpace N D hD :=
+    pullback.fst (E.generatorSpaceπ N D hD) t with hk₁
+  set h₁ := k₁ ≫ E.generatorSpaceι N D hD with hh₁
+  have hP₁π : (h₁ ≫ D.ideal.subschemeι) ≫ E.π = q₁ ≫ t := by
+    rw [hh₁, Category.assoc, Category.assoc]
+    exact pullback.condition
+  set P₁ : E.Point (q₁ ≫ t) := ⟨h₁ ≫ D.ideal.subschemeι, hP₁π⟩ with hP₁
+  have hgen₁ := (E.generatorSpace_spec N D hD (q₁ ≫ t) P₁ h₁ rfl).mp ⟨k₁, rfl⟩
+  set v₁ : pullback (E.generatorSpaceπ N D hD) t ⟶ pullback E.π t :=
+    pullback.lift (h₁ ≫ D.ideal.subschemeι) q₁ hP₁π with hv₁
+  set P₁' : (E.baseChange t).Point q₁ := ⟨v₁, pullback.lift_snd _ _ _⟩ with hP₁'
+  have hPP₁' : P₁'.1 ≫ pullback.fst E.π t = P₁.1 := pullback.lift_fst _ _ _
+  have hgen₁' := (generatorSpace_baseChange_isDivisorGenerator_iff E N D hD t q₁
+    P₁ P₁' hPP₁').mpr hgen₁
+  have hker₁ : D.ideal ≤ Scheme.Hom.ker P₁.1 :=
+    (ModularCurves.exists_factor_subschemeι_iff _ _).mp ⟨h₁, rfl⟩
+  have hker₁' : (D.baseChange t).ideal ≤ Scheme.Hom.ker P₁'.1 :=
+    (generatorSpace_baseChange_le_ker_iff E D t P₁'.1).mpr
+      (le_of_le_of_eq hker₁ (congrArg Scheme.Hom.ker hPP₁').symm)
+  obtain ⟨h₁', hcomp₁'⟩ := (ModularCurves.exists_factor_subschemeι_iff
+    (@RelEffCartierDiv.ideal (E.baseChange t).E T (E.baseChange t).π (D.baseChange t))
+    P₁'.1).mpr hker₁'
+  obtain ⟨α, hα⟩ := ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' q₁
+    P₁' h₁' hcomp₁').mpr hgen₁'
+  -- tautological generator data over the base-changed generator scheme
+  set gπ' := (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD' with hgπ'
+  set gι' := (E.baseChange t).generatorSpaceι N (D.baseChange t) hD' with hgι'
+  set Dι' := (@RelEffCartierDiv.ideal (E.baseChange t).E T
+    (E.baseChange t).π (D.baseChange t)).subschemeι with hDι'
+  set v₂ : (E.baseChange t).generatorSpace N (D.baseChange t) hD' ⟶ pullback E.π t :=
+    @CategoryStruct.comp Scheme _ _ _ (pullback E.π t) gι' Dι' with hv₂
+  have hc₁ : h₁' ≫ Dι' = v₁ := hcomp₁'
+  have hc₁r : @CategoryStruct.comp Scheme _ _ _ (pullback E.π t) h₁' Dι' = v₁ := hcomp₁'
+  have hv₂snd : v₂ ≫ pullback.snd E.π t = gπ' := by
+    rw [hv₂, Category.assoc]; rfl
+  set P₂' : (E.baseChange t).Point gπ' := ⟨v₂, hv₂snd⟩ with hP₂'
+  have hgen₂' := ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' gπ'
+    P₂' gι' rfl).mp ⟨𝟙 _, Category.id_comp _⟩
+  have hP₂π : (v₂ ≫ pullback.fst E.π t) ≫ E.π = gπ' ≫ t := by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, hv₂snd]
+  set P₂ : E.Point (gπ' ≫ t) := ⟨v₂ ≫ pullback.fst E.π t, hP₂π⟩ with hP₂
+  have hgen₂ := (generatorSpace_baseChange_isDivisorGenerator_iff E N D hD t gπ'
+    P₂ P₂' rfl).mp hgen₂'
+  have hker₂' : (D.baseChange t).ideal ≤ Scheme.Hom.ker P₂'.1 :=
+    (ModularCurves.exists_factor_subschemeι_iff _ _).mp ⟨gι', rfl⟩
+  have hker₂ : D.ideal ≤ Scheme.Hom.ker P₂.1 :=
+    (generatorSpace_baseChange_le_ker_iff E D t P₂'.1).mp hker₂'
+  obtain ⟨h₂S, hcomp₂S⟩ := (ModularCurves.exists_factor_subschemeι_iff _ _).mpr hker₂
+  obtain ⟨k₂, hk₂⟩ := (E.generatorSpace_spec N D hD (gπ' ≫ t) P₂ h₂S hcomp₂S).mpr hgen₂
+  have hβw : k₂ ≫ E.generatorSpaceπ N D hD = gπ' ≫ t := by
+    show k₂ ≫ E.generatorSpaceι N D hD ≫ D.ideal.subschemeι ≫ E.π = gπ' ≫ t
+    rw [← Category.assoc, hk₂, ← Category.assoc, hcomp₂S]
+    exact hP₂π
+  set β : (E.baseChange t).generatorSpace N (D.baseChange t) hD' ⟶
+      pullback (E.generatorSpaceπ N D hD) t := pullback.lift k₂ gπ' hβw with hβ
+  -- monomorphism instances (through the `choose`-wrapping definitions)
+  haveI hm₁ : Mono (E.generatorSpaceι N D hD) :=
+    show Mono ((E.exists_generatorLocus N D hD).choose.subschemeι) from inferInstance
+  haveI hmD : Mono Dι' := by
+    rw [hDι']; infer_instance
+  haveI hm₂ : Mono ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD') :=
+    show Mono (((E.baseChange t).exists_generatorLocus N
+      (D.baseChange t) hD').choose.subschemeι) from inferInstance
+  -- α is compatible with the structure maps
+  have hαπ : α ≫ gπ' = q₁ := by
+    have h0 : α ≫ gπ' = ((α ≫ gι') ≫ Dι') ≫ pullback.snd E.π t := by
+      rw [Category.assoc, Category.assoc]; rfl
+    rw [h0, hα, hc₁]
+    exact pullback.lift_snd _ _ _
+  refine ⟨⟨α, β, ?_, ?_⟩, hαπ⟩
+  · -- α ≫ β = 𝟙: compare both projections of the fibre product
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.id_comp,
+        show β ≫ pullback.fst (E.generatorSpaceπ N D hD) t = k₂ from
+          pullback.lift_fst _ _ _, ← cancel_mono (E.generatorSpaceι N D hD),
+        ← cancel_mono D.ideal.subschemeι, Category.assoc, Category.assoc,
+        ← Category.assoc k₂, hk₂, hcomp₂S]
+      have hnat : α ≫ P₂'.1 = P₁'.1 := by
+        show α ≫ v₂ = v₁
+        rw [hv₂, ← Category.assoc, hα]
+        exact hc₁r
+      have hαv : α ≫ P₂.1 = P₁.1 := by
+        have h1 : α ≫ P₂.1 = (α ≫ P₂'.1) ≫ pullback.fst E.π t := by
+          rw [← Category.assoc]; rfl
+        rw [h1, hnat, hPP₁']
+      exact hαv
+    · rw [Category.assoc, Category.id_comp,
+        show β ≫ pullback.snd (E.generatorSpaceπ N D hD) t = gπ' from
+          pullback.lift_snd _ _ _]
+      exact hαπ
+  · -- β ≫ α = 𝟙: cancel the two closed immersions of the generator scheme
+    rw [← cancel_mono ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD'),
+      ← cancel_mono Dι', Category.id_comp, Category.assoc, Category.assoc,
+      ← Category.assoc α, ← hgι', hα, hc₁]
+    -- β ≫ v₁ = gι' ≫ Dι' (both the raw value of the tautological point)
+    apply pullback.hom_ext
+    · have hL : @CategoryStruct.comp Scheme _ _ (pullback E.π t) E.E (β ≫ v₁)
+          (pullback.fst E.π t) = v₂ ≫ pullback.fst E.π t := by
+        rw [Category.assoc,
+          show v₁ ≫ pullback.fst E.π t = h₁ ≫ D.ideal.subschemeι from
+            pullback.lift_fst _ _ _, hh₁,
+          show β ≫ (k₁ ≫ E.generatorSpaceι N D hD) ≫ D.ideal.subschemeι =
+            ((β ≫ k₁) ≫ E.generatorSpaceι N D hD) ≫ D.ideal.subschemeι from by
+              simp only [Category.assoc],
+          show β ≫ k₁ = k₂ from pullback.lift_fst _ _ _, hk₂, hcomp₂S]
+      exact hL
+    · have hLs : @CategoryStruct.comp Scheme _ _ (pullback E.π t) T (β ≫ v₁)
+          (pullback.snd E.π t) = gπ' := by
+        rw [Category.assoc,
+          show v₁ ≫ pullback.snd E.π t = q₁ from pullback.lift_snd _ _ _]
+        exact pullback.lift_snd _ _ _
+      exact hLs.trans hv₂snd.symm
 
 /-! ## §2 The Main Theorem on Cyclic Groups (KM 6.1.1)
 
