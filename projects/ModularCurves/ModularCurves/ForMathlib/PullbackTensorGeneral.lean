@@ -225,6 +225,102 @@ section FreeYonedaTensor
 
 variable {X : AlgebraicGeometry.Scheme.{u}}
 
+/-- The meet equivalence of hom-types in a meet-semilattice category (all four types are
+subsingletons). -/
+def meetHomEquiv (U₁ U₂ V : X.Opens) :
+    ((V ⟶ U₁) × (V ⟶ U₂)) ≃ (V ⟶ U₁ ⊓ U₂) where
+  toFun p := homOfLE (le_inf (leOfHom p.1) (leOfHom p.2))
+  invFun h := (homOfLE ((leOfHom h).trans inf_le_left),
+    homOfLE ((leOfHom h).trans inf_le_right))
+  left_inv _ := Subsingleton.elim _ _
+  right_inv _ := Subsingleton.elim _ _
+
+/-- **[D-PresPB′-general], leaf G1 (meet half).** On the Opens-site, the pointwise product of
+two representables is represented by the meet: `Hom(V,U₁) × Hom(V,U₂) ≅ Hom(V, U₁ ⊓ U₂)`. -/
+noncomputable def yonedaMeetIso (U₁ U₂ : X.Opens) :
+    (yoneda.obj U₁ ⊗ yoneda.obj U₂ : (X.Opens)ᵒᵖ ⥤ Type u) ≅ yoneda.obj (U₁ ⊓ U₂) :=
+  NatIso.ofComponents
+    (fun V => Equiv.toIso (meetHomEquiv U₁ U₂ V.unop))
+    (fun {V W} f => by
+      haveI : Subsingleton ((yoneda.obj (U₁ ⊓ U₂)).obj W) :=
+        inferInstanceAs (Subsingleton (W.unop ⟶ U₁ ⊓ U₂))
+      ext p
+      exact Subsingleton.elim _ _)
+
+section FreeTensorGeneric
+
+variable {C : Type u₁} [Category.{v₁} C] (T : Cᵒᵖ ⥤ CommRingCat.{u})
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The pointwise component of the free–tensor comparison, hint-typed at the presheaf
+carriers (`finsuppTensorFinsupp'`; both directions send generators to generators). -/
+noncomputable def freeTensorμ (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ) :
+    (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V) ≅
+      (((free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)).obj V) :=
+  LinearEquiv.toModuleIso
+    (X₁ := ((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V)
+    (X₂ := ((free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)).obj V)
+    (finsuppTensorFinsupp' (↑((T ⋙ forget₂ CommRingCat RingCat).obj V)) (F.obj V) (G.obj V))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+lemma freeTensorμ_hom_freeMk_tmul (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ)
+    (x : F.obj V) (y : G.obj V) :
+    (freeTensorμ T F G V).hom (ModuleCat.freeMk x ⊗ₜ ModuleCat.freeMk y) =
+      (ModuleCat.freeMk ((x, y) : (F ⊗ G).obj V) :
+        ((free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)).obj V) := by
+  dsimp [freeTensorμ, ModuleCat.freeMk]
+  erw [finsuppTensorFinsupp'_single_tmul_single]
+  rw [mul_one]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+lemma freeTensorμ_inv_freeMk (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ) (z : (F ⊗ G).obj V) :
+    (freeTensorμ T F G V).inv (ModuleCat.freeMk z) =
+      (ModuleCat.freeMk z.1 ⊗ₜ ModuleCat.freeMk z.2 :
+        (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+          (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V)) := by
+  dsimp [freeTensorμ, ModuleCat.freeMk]
+  erw [finsuppTensorFinsupp'_symm_single_eq_single_one_tmul]
+
+/-- **[D-PresPB′-general], leaf G1-NAT (the residual).** The pointwise components
+`freeTensorμ` (proved above, with generator-level behaviour `freeTensorμ_hom_freeMk_tmul` /
+`freeTensorμ_inv_freeMk`) assemble into an isomorphism of presheaves of modules
+`free(F) ⊗ free(G) ≅ free(F ⊗ G)`: the remaining content is the naturality square
+(ring-restriction mixed with the tensor of free maps). Iteration ledger and the
+`Finsupp.induction_linear` descent state are banked in
+`.mathlib-quality/decomposition-pullback-monoidal-general.md`. -/
+theorem nonempty_freeTensorIsoGeneric (F G : Cᵒᵖ ⥤ Type u) :
+    Nonempty
+      (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+          (free (T ⋙ forget₂ CommRingCat RingCat)).obj G :
+        PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) ≅
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)) := by
+  sorry
+
+end FreeTensorGeneric
+
+/-- **[D-PresPB′-general], leaf G1 (the lattice miracle).** On the Opens-site of a scheme, the
+presheaf tensor of two free-yoneda presheaves of modules is the free-yoneda of the meet:
+pointwise, `Hom(V,U₁) × Hom(V,U₂) = [V ≤ U₁ ⊓ U₂]` (a meet-semilattice has representable
+products of representables), and the free-module functor sends products of types to tensor
+products of free modules (`finsuppTensorFinsupp`-style). Together with mathlib's
+`freeFunctorCompPullbackIso` this makes the oplax comparison `δ` an isomorphism on free-yoneda
+pairs — before sheafifying. -/
+theorem nonempty_freeYoneda_tensor_iso' (U₁ U₂ : X.Opens) :
+    Nonempty (((free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₁) ⊗
+        (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj U₂) :
+          PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
+      (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (yoneda.obj (U₁ ⊓ U₂))) := by
+  obtain ⟨e⟩ := nonempty_freeTensorIsoGeneric X.sheaf.obj (yoneda.obj U₁) (yoneda.obj U₂)
+  exact ⟨e ≪≫
+    (free (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).mapIso (yonedaMeetIso U₁ U₂)⟩
+
 /-- **[D-PresPB′-general], leaf G1 (the lattice miracle).** On the Opens-site of a scheme, the
 presheaf tensor of two free-yoneda presheaves of modules is the free-yoneda of the meet:
 pointwise, `Hom(V,U₁) × Hom(V,U₂) = [V ≤ U₁ ⊓ U₂]` (a meet-semilattice has representable

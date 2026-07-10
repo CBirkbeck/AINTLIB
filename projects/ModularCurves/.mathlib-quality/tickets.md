@@ -14345,3 +14345,14 @@ rw-ing mid-chain.
   the fleet's `PoleFiltration.lean` (name-adjacent; survey says distinct — confirm).
   Not a stop of your current arc — boundary-fit it; the PR waits on your verdict, not
   your milestone.
+
+## Amendments v10.110 (fable-PIC0) — G1 60% landed (lattice-miracle content PROVED); [G1-NAT] focused residual
+
+Post-verdict G1 build: **GREEN + axiom-clean**: `meetHomEquiv`/`yonedaMeetIso` (the meet half),
+`freeTensorμ` (pointwise free-tensor component, hint-typed `finsuppTensorFinsupp'`) with
+generator-behaviour lemmas — the lattice miracle's mathematical content is proved. Residual =
+**[G1-NAT]**: ONE naturality square (ring-restriction × free-map tensor), sorried as a focused
+Nonempty-Prop with a 10-iteration failure-mode ledger + three ranked next-attacks banked in the
+artifact (top candidate: `freeHomEquiv`-adjunction naturality — no elementwise work). The
+leaf-closure `nonempty_freeYoneda_tensor_iso'` chains through it. Chain: B1 ✓ B2 ✓ G1 60% |
+[G1-NAT] → G3 → A. Session boundary (three arcs deep); all pushed.

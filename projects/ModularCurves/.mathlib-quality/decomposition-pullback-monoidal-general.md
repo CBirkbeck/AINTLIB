@@ -185,3 +185,32 @@ instead** — one componentwise-`Iso.refl` NatIso, then the doctrinal machinery 
 
 **G3 unchanged** (two single-variable presentation passes). **A unchanged** (CoreMonoidal +
 Lifting + functorMonoidalOfComp). Chain state: B1 ✓ B2 ✓ | G1 → G3 → G2/A remaining.
+
+## G1 build ledger (2026-07-10, session 3)
+
+**GREEN (axiom-clean):** `meetHomEquiv` + `yonedaMeetIso` (the meet half — Equiv extracted
+standalone so α/β stay raw before `toIso`; naturality via a Subsingleton-bridge haveI);
+`freeTensorμ` (the pointwise component, hint-typed `LinearEquiv.toModuleIso
+(X₁ :=)(X₂ :=)` of `finsuppTensorFinsupp'`) + its generator-behaviour
+`freeTensorμ_hom_freeMk_tmul` / `freeTensorμ_inv_freeMk` — **the mathematical content of the
+lattice miracle is proved**; the leaf-closure `nonempty_freeYoneda_tensor_iso'` chains through:
+
+**[G1-NAT] — the focused residual (one naturality square), 10-iteration ledger:**
+`free(F)⊗free(G) ⟶ free(F⊗G)` components vs restriction. Measured failure modes, in order:
+(1) casting mathlib's `FreeMonoidal.μIso` into the isoMk-component slot → goal
+"not type-correct under instances transparency", kabstract aborts (the banked B1-rule
+generalizes: NEVER cast a structure/iso across spellings — hint-type it);
+(2) with hint-typed `freeTensorμ`: `ModuleCat.free_hom_ext` REFRAMES the domain to
+`(ModuleCat.free R).obj`-spelling → same type-incorrectness (use plain `ext`, which keeps the
+presheaf spelling);
+(3) `ext` gives a GENERAL Finsupp element → `Finsupp.induction_linear` descent WORKS
+(cases fire; qualify `_root_.map_add/_smul/_zero` against `Functor.map_*` ambiguity);
+(4) the single-case's `rw [hs, 4×map_smul]` then whnf-timeouts at the closed-arg
+`freeTensorμ_inv_freeMk`-rw — the smul-rewrites re-clothe the applied terms.
+**Next-session attack (fresh context):** in the single-case avoid the smul-shuffle — state
+`hs : single a r = r • freeMk a` and instead of rw-chains do
+`simp only [hs, _root_.map_smul]` then `congr 1` then the three closed-arg rewrites; OR
+restate the naturality goal per-generator FIRST via `Finsupp.lhom_ext'`-applied with explicit
+instances at the presheaf carriers; OR prove the square as `freeHomEquiv`-naturality
+(Free.lean's adjunction machinery — `freeHomEquiv_comp` both ways, no elementwise work).
+Estimated: 1 focused session-chunk.
