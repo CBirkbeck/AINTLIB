@@ -17675,3 +17675,21 @@ b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (si
   oneOver_mulOver derives via comm next, then assoc, inv (A's negModelHom_baseChange
   in place). On the T-G4 line: NEW-CASCADE re-merges from `wip/y1-dev-merge-cascade`
   + top-up + spine verify + straight into fill steps 2–4.
+
+## Amendments v10.119-Y1 (2026-07-10, NEW-CASCADE): ★ re-merge COMPLETE — y1 carries dev incl. the d10e7fc87 repair + the C6 layer; spine GREEN; two merge collisions resolved
+
+- Merges: `wip/y1-dev-merge-cascade` (clean) + top-up of `origin/dev/modular-curves`
+  (tickets.md union per precedent, root module auto-merged). y1 now has:
+  AdditionSpecPoints / GroupLawAxioms / AdditionBaseChange / NegModelBaseChange (the C6
+  layer), the repaired Representability.lean, QuotientRepresentability, and the full
+  fleet drift.
+- **Spine verification GREEN, 3,230 jobs** (the v10.132-CASCADE pass, widened):
+  YOneTatePoint + GeometricFibreComparison + GroupLawAxioms + MulByHomUnramified.
+- Environment collisions found + resolved (textual merge was clean; names clashed):
+  (1) `projModelVCIso_one` — dev grew an identical-statement copy
+  (ModelVariableChange:604) during T-G4; YOneAtlasClassify's copy DELETED (pointer
+  left), consumers now use upstream. (2) `projModelBaseChange_comp` — dev's
+  WeierstrassModel copy is endo-only (different statement); YOneAtlasClassify's
+  heterogeneous eqToHom-form RENAMED `projModelBaseChange_comp_eqToHom` (3 sites).
+  CLEANUP-DEBT note: it coexists with AdditionBaseChange's eqToHom-free
+  `projModelBaseChange_comp'` — equivalent forms, unify when the fleet sweeps.
