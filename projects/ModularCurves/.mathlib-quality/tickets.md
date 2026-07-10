@@ -13949,3 +13949,20 @@ the étale legs land — deferred behind this decompose per dispatch discretion.
   L6 label; the NEW-HOPF signal opens NISOG's **L6 layer = the E → E/C construction
   consumers** (DS-NISOG-1/2 data + the 10 pins citing [T-G3D-INFRA]) — reconcile
   against that layer when the signal fires.
+
+## Amendments v10.101 (2026-07-10, coordinator): PIC0's D-PresPB′ decompose RATIFIED — route G (construction-grain, the lattice miracle); next arc = the 6-leaf execution
+
+- **PIC0 absorbed** (through 3c3f079ab): the dispatched `/develop --decompose` on
+  D-PresPB′-general delivered — three routes attacked, **route G CHOSEN** (agree on
+  free-yoneda generators + presentation extension, riding mathlib's
+  freeFunctorCompPullbackIso; decisive: on an Opens-site the tensor of free-yonedas IS
+  the free-yoneda of the meet, and f⁻¹ preserves meets — the two sides match exactly).
+  Route S rejected on a grep-verified absent stalk API (the historical wall named);
+  route L held as fallback. Artifact + GREEN skeleton (3 Nonempty-Prop leaves,
+  v10.8-safe). Payoff chain: B1→B2→G1→G3→A ⟹ (Modules.pullback f).Monoidal ⟹
+  **Pic(f) : Pic X →* Pic Y** (GME 2.16). μ-field cast-poisoning recon banked (the
+  mapOfCompatibleSMul lax-direction pattern — B1a starts from the recipe, not scratch).
+- [YF-GEOM] ordering honored: full discharge waits on BB-DIFF (⟸ T-W7a) + T-E15a/T-E14
+  — engine-pin consumption folds in when those legs land. [PIC-P2-CMP] stays
+  p2-coordinated. **PIC0 next session: execute the 6 leaves, B1a first from the banked
+  recipe.**
