@@ -14386,3 +14386,33 @@ the spec + mathlib Point laws; transport to R by `IsPullback.hom_ext` on the bas
 - **T-G5** Over-level fills ×5 (mulOver_assoc etc.) = one-line homMk-ext over T-G4; RELOCATE
   the five GLC sorries → AdditionSpecPoints (same as c6; GLC keeps pointers). GLC 6→1 (vc).
 Then 0c-ii (BOARD-SIGNAL — sweep/cascade/NEW-Y1 armed) → 0h → T-W7.12 → T-W7a.
+
+## Amendments v10.112 (2026-07-10, coordinator): PIC0 gate + G1-60% RATIFIED ([G1-NAT] next-session first act, adjunction route, hard stop-line); ★★ c5β [C6] absorb; D2 L5 on charter
+
+**PIC0** (report + 5cb20c9d9): the v10.109 READ-FIRST execution is the MODEL for future
+read-first gates — diff-read on the correct ref (found the dropped monoidal commits on
+`-pre-rebase`), verdict with exact decl-level correspondence, operational consequences,
+and zero consumption from the owner-reserved branch. **G1 at 60% RATIFIED**:
+`meetHomEquiv` + `yonedaMeetIso` (the meet half, standalone-Equiv so types stay raw) +
+`freeTensorμ` (hint-typed `finsuppTensorFinsupp'` per the ι-CORE idiom) with both
+generator-behaviour lemmas — the lattice miracle's mathematical content is PROVEN,
+axiom-clean. **Residual [G1-NAT]** (one naturality square: ring-restriction × tensor of
+free maps): sorried as a focused Nonempty-Prop with the full failure-mode ledger banked
+(kabstract abort; free_hom_ext reframe → same; ext + Finsupp.induction_linear fires but
+the smul-case re-clothes) + three ranked attacks. Ten measured iterations is PAST the
+v10.24 stop signal — the ledger discipline redeems it this time; stop earlier next.
+**DISPATCH**: next session FIRST ACT = [G1-NAT] via the top-ranked
+freeHomEquiv-adjunction route (no elementwise work); STOP-LINE = 3–4 measured iterations
+on that route, then hard-stop + board the delta-ledger for a fresh-session or reroute
+ruling. [G1-NAT] alone un-blocks the lattice-miracle leaf. Chain: B1 ✓ B2 ✓ G1 60% →
+[G1-NAT] → G3 → A → Pic(f); the [OWNER-FLW]-integration retarget of G3/A onto the codex
+map-layer (their v10.109 (ii)) stands queued as the coordinator's merge call.
+
+**c5β** (★★ absorb; their §v10.111): [C6] COMPLETE — `mulModelHom_specPoints` proven for
+EVERY elliptic curve (the two-law multiplication computes the group law, atlas +
+of_map layers). 0c-i decomposed T-G1..T-G5 per their section. Chain to T-W7a unchanged:
+0c-i → 0c-ii (board-signal arms A's 0h interrupt) → 0h → T-W7.12 → T-W7a. No dispatch
+needed — charter runs.
+
+**D2**: [L5-a/b/c] absorbed (val transport along the pasting iso; order-divisor pasting
+naturality; IsDivisorGenerator composite-vs-iterated bridge — sorry-free). On charter.
