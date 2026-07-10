@@ -15008,3 +15008,42 @@ overlap; SmoothDescent.lean stays NEW-GH's — consumed read-only). Artifact:
   𝒮_i by Amitsur at base 𝒮_i, section of u_i ⟹ A retract of FP stage ⟹ [KL-0]).
 - Estimated multi-session; commit-early cadence per hygiene; [KL-3] flagged as the deep
   segment (EGA IV 11.2.6-class). All other leaves bounded with named substrate.
+
+## Amendments v10.120 (2026-07-10, coordinator): Y1 parallelization audit — [T-B6′] gate is STALE-SOFT (audit-first P3b3 dispatch); c5β↔A handshake offered; ★★ PIC0 [G3] CLOSED absorbed
+
+- **Owner question adjudicated: is remaining Y1 work single-worker?** Currently yes-in-practice
+  (c5β holds the only live leg; A/P3b3/NEW-Y1 armed behind gates). AUDIT VERDICT: the
+  concentration is PARTLY REAL — [T-A6b] + the falls-sweep genuinely consume c5β's output,
+  and the six Y1-E leaves are genuinely [BB-DIFF]-gated (docstring-verified: E1 clopen-split
+  needs `torsionπ_etale`; E2/E3 ride E1; the lifting/smoothness pair needs the same étale
+  input) — and PARTLY STALE: **the [T-B6′] gate note ("⟸ T-W7a/T-W7.36", v10.80) predates
+  today's C6 landing.** Verified at the source: `geomFibrePointAddEquiv`
+  (GeometricFibreComparison.lean, y1 branch) has its underlying bijection PROVEN
+  (`pointSpecPointsEquiv.trans projModelPointsEquiv`); ONLY `map_add'` — the fibrewise
+  group-law intertwining — is sorried, and c5β's `mulModelHom_specPoints` (every field,
+  every ring, axiom-clean) is precisely a group-law-intertwining statement in the same
+  Spec-k regime. Whether the remaining seam (how `E.Point (geomPoint)`'s addition is
+  sourced) needs full T-W7a or just C6 + the committed atlas laws is now an AUDIT
+  question, not a wait.
+- **DISPATCH — P3b3 (inbox v10.120, opener with the owner): gate-audit-first return.**
+  ≤ half-session audit of `map_add'` vs the landed layer → boarded verdict → IF
+  attackable, execute (the fill closes L-BC ⟹ BB-DIFF MASTER `mulByHom_formallyUnramified`
+  discharges ⟹ `torsionπ_etale` ⟹ six Y1-E leaves open + [T-B6′] retires — most of
+  remaining Y1, parallel to c5β); IF still gated, name the missing ingredient + do the
+  unconditional prep (rebase b5da, land PR #5223 = T-B5D-A + T-DISC in-tree, pre-wire the
+  MASTER assembly hypothesis-funneled) and park at the NAMED gate. Either branch pays for
+  the session.
+- **c5β↔A handshake OFFERED (inbox, zero pressure)**: A is armed and accepting; if c5β
+  judges an endgame seam clean (T-G4/T-G5 transport batch on their own recipe, or
+  0h/T-W7.12 spec prep), the v10.94 provision un-solos exactly that seam. c5β's call;
+  solo stands otherwise.
+- **NEW-Y1 stays parked — correctly**: their remaining work (E-track assembly + MASTER
+  one-`exact`) is genuinely downstream of BB-DIFF/T-W7a; firing early would idle at the
+  gate. Their trigger fires the moment either P3b3's cascade or c5β's T-W7a lands.
+- **★★ PIC0 [G3] CLOSED absorbed** (d47f2d588 + the η/TC/EXT chain + closure ledger):
+  `pullbackMonoidal` — the presheaf pullback of a scheme morphism is MONOIDAL, sorry-free,
+  axiom-clean; G3-η (unit iso), G3-TC (tensor-colimit preservation), G3-EXT all closed
+  same hour. Chain: B1 ✓ B2 ✓ G1 ✓ G3 ✓ → **A packaging → Pic(f)** (GME 2.16). The
+  wart/congrArg2/erw-concrete method notes are accepted into the registry. On charter;
+  the codex map-layer retarget note (v10.109(ii)) applies at A — their inbox v10.118
+  entry already covers the boundary.
