@@ -272,3 +272,47 @@ map with (sh∘δ)_P by naturality) — repeat in Q. **[G3-pre]:** δ-at-free-pa
 formula (δ := homEquiv.symm (unit ⊗ₘ unit ≫ μ) with μ = tmul↦tmul) and match the canonical iso.
 Object-chain endpoints already agree (G1 both upstairs and downstairs + `f⁻¹(U₁⊓U₂) = f⁻¹U₁ ⊓ f⁻¹U₂`).
 Estimated: [G3-pre] one chunk (generator-chase with the new tools), [G3] one chunk (colimit-comparison).
+
+## ★ G3-pre CLOSED (2026-07-10, session 5)
+
+**`isIso_pullback_δ_freeYoneda` proven, axiom-clean** (`ef173267d`). δ of the doctrinal oplax
+structure is an isomorphism on free-yoneda pairs at PRESHEAF level (no sheafification):
+δ = (pullback-map of lattice-miracle ≪≫ pullbackFreeYonedaIso ≪≫ downstairs-lattice-miracle.symm
+≪≫ tensorIso of pullbackFreeYonedaIso.symm's).hom, by adj'-homEquiv injectivity + evaluation on
+the ONE generator of freeY(U₁ ⊓ U₂).
+
+**Infrastructure landed (all sorry-free, generic small-sites unless noted):**
+- `pullbackFreeYonedaIso φ X : (pullback φ).obj (freeY X) ≅ freeY (F X)` — EXPLICIT hom/inv via
+  the two corepresentability homEquivs (uniqueUpToIso abandoned: its simps-internals are
+  preimageIso-opaque); char lemma `homEquiv_pullbackFreeYonedaIso_hom_comp`.
+- `corepresentableBy_homEquiv_app_generator`, `freeYonedaEquiv_apply`, `unit_app_freeYoneda`,
+  `freeYonedaEquiv_unit_app`, `app_freeMk` (morphism-out-of-freeYoneda on ANY generator =
+  restriction of generator image — the one compute rule), `freeObj_map_freeMk'`,
+  `free_map_app_freeMk`, `tensorHom_app_tmul`, `freeYonedaTensorIso_inv_app_generator`.
+- `pushforwardIsoFactored_hom_app_app` (rfl), `factoredAdjunction_unit_app_app` (rfl),
+  `pushforwardFactored_μ_app_tmul` (**rfl!** — push₀-μ is Iso.refl + restrictScalars-μ is
+  mapOfCompatibleSMul), `factoredUnit_app_freeMk` (small+CommRingCat section).
+- Data upgrades: `pullbackOplaxMonoidal` (B2 as def), `freeTensorIso` + `IsIso (freeTensorDesc)`
+  instance + `freeTensorDesc_app`, `freeYonedaTensorIso` (G1 as def), scheme bridge
+  `schemeRingPresheafHom := whiskerRight f.c forget₂` (defeq-accepted; keeps `T ⋙ forget₂`
+  clothing on BOTH pullback sides — Opens.map lives in ?F, not the ring presheaf).
+
+**METHOD NOTES (fleet-grade, new):**
+1. **The instances-transparency wart**: `X.sheaf.obj` (Sheaf = FullSubcategory projection) makes
+   every scheme-level element-goal "not type-correct under instances transparency" — `rw`/kabstract
+   ABORTS even on syntactically-present patterns. `simp only` also misses. **`erw` fires** — but
+   ONLY cheap on FULLY-CONCRETE equations (zero metavariables, e.g. an instantiated `have`);
+   erw with lemma-metas whnf-explodes scanning the pullback machinery.
+2. **congrArg₂-assembly**: when even concrete-erw is risky, `refine Eq.trans (congrArg _
+   (congrArg₂ (fun a b => a ⊗ₜ b) h₁ h₂)) ?_` rewrites under an application with NO goal
+   scanning; terminal cross-defeq (push-map vs pb-map clothing + proof-irrelevant Opens homs)
+   closed by the final `exact`'s single defeq check.
+3. Expected-type-driven elaboration PINS `freeYonedaEquiv`'s implicit (M, X) at the WRONG side
+   across pushforward-defeq — always pin `(X := F.obj U) (M := ...)` explicitly in cross-typed
+   statements; for `Equiv.trans`-composites pin BOTH factors.
+4. `Iso.trans_hom`/`mapIso_hom`/`homEquiv_naturality_left`/`ofNatIsoRight`-simps all fire as
+   plain `rw` even on wart-y goals — the abort depends on the abstraction position.
+
+**Chain: B1 ✓ B2 ✓ G1 ✓ G3-pre ✓ │ next: [G3-η] (unit ≅ freeY ⊤ + same chase), then [G3-TC]
+(tensorRight preserves colimits), [G3-EXT] (abstract iso-at-colimit), [G3-P]/[G3-Q] (two passes),
+[A] (ofOplaxMonoidal + functorMonoidalOfComp descent → nonempty_pullback_monoidal → Pic(f)).**
