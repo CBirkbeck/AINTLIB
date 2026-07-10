@@ -13911,3 +13911,27 @@ representability bijection → T-E5c → Y(N) route A + Γ_H).
   = `/develop --decompose` of α_univ-descent (verbatim KM quotes per v10.8), then the
   representability bijection → **T-E5c** → Y(N) route A + Γ_H. Fresh session, full
   budget; v10.24 throughout; [OWNER-FLW] boundary respected as before.
+
+## Amendments v10.99 (fable-PIC0) — D-PresPB′-general /develop --decompose DONE (Route G, construction-grain)
+
+Per the v10.98 dispatch. Artifact: `.mathlib-quality/decomposition-pullback-monoidal-general.md`;
+skeleton `ForMathlib/PullbackTensorGeneral.lean` (builds green, 3 Nonempty-Prop leaf sorries —
+v10.8-safe, no sorried data). **Route adjudication (adversarial):**
+- Route S (stalks) REJECTED — stalk API for the abstract presheaf pullback absent, unbounded.
+- Route L (Zariski-localize to affine + Tilde) VIABLE FALLBACK — but Tilde has no ⊗/pullback compat
+  (grep-verified); the affine leaf is genuine QCoh content with upstream-collision risk.
+- **Route G CHOSEN** — rides mathlib's own construction-grain: `freeFunctorCompPullbackIso`
+  (pullback of free is free, mathlib verbatim) + Generator.lean presentation machinery + **the
+  lattice miracle**: on an Opens-site, `yoneda U₁ × yoneda U₂` is represented by `U₁ ⊓ U₂`, so the
+  tensor of free-yonedas is the free-yoneda of the meet and `f⁻¹(U₁⊓U₂) = f⁻¹U₁ ⊓ f⁻¹U₂` matches
+  the pullback side — the two composites agree on generators including the ⊗-interaction.
+**Leaves (6, ~400–500 ll total, no absent deep facts):** B1 pushforward-lax (sectionwise, no iso
+hyp) → B2 oplax δ by leftAdjointOplaxMonoidal (one-liner) → G1 free-yoneda-tensor lattice iso +
+δ-on-frees → G3 two single-variable presentation/five-lemma passes in the abelian SheafOfModules →
+G2 cocontinuity bookkeeping → A packaging (CoreMonoidal + Lifting=sheafificationCompPullback +
+functorMonoidalOfComp ⟹ (Modules.pullback f).Monoidal ⟹ Skeleton.monoidHom ⟹ Pic(f)).
+Two named build-time checks (wrappers if absent, not math): categorical free-functor monoidality
+packaging; AB4/coproduct-exactness instance for SheafOfModules. **FEASIBLE, bounded.** Build order:
+B1 → B2 → G1 → G3 → G2/A. [YF-GEOM] ordering note: its full discharge still gates on BB-DIFF
+(P3b3's T-W7a trigger) + T-E15a/T-E14; the engine-pin consumption folds into that discharge when
+the étale legs land — deferred behind this decompose per dispatch discretion.
