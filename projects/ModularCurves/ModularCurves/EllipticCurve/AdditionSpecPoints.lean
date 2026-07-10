@@ -1776,6 +1776,122 @@ theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
             (heval.trans hev₂)))
 
 
+
+section DictionaryNaturality
+
+open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- [e4b] The `eqToHom`-cast of an `Away`-ring along a generator equality carries the
+localization coordinates (proof-irrelevant memberships; `subst`). -/
+lemma eqToHom_hom_isLocalizationElem {σ : Type*} {A : Type u} [CommRing A] [SetLike σ A]
+    [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] {s t : A} (h : s = t)
+    (hs : s ∈ 𝒜 1) (ht : t ∈ 𝒜 1) {g : A} (hg : g ∈ 𝒜 1) :
+    (CommRingCat.Hom.hom (eqToHom (congrArg
+        (fun x => CommRingCat.of (HomogeneousLocalization.Away 𝒜 x)) h)))
+      (HomogeneousLocalization.Away.isLocalizationElem hs hg) =
+      HomogeneousLocalization.Away.isLocalizationElem ht hg := by
+  subst h
+  rfl
+
+namespace ModularCurves
+open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
+attribute [local instance] MvPolynomial.gradedAlgebra
+variable {U : Type u} [CommRing U] {R : Type u} [CommRing R]
+
+/-- [e4c] `isLocalizationElem` transported along an equality of the numerator generator. -/
+lemma isLocalizationElem_congr_right {σ : Type*} {A : Type u} [CommRing A] [SetLike σ A]
+    [AddSubgroupClass σ A] {𝒜 : ℕ → σ} [GradedRing 𝒜] {s : A} (hs : s ∈ 𝒜 1)
+    {g₁ g₂ : A} (h : g₁ = g₂) (hg₁ : g₁ ∈ 𝒜 1) (hg₂ : g₂ ∈ 𝒜 1) :
+    HomogeneousLocalization.Away.isLocalizationElem hs hg₁ =
+      HomogeneousLocalization.Away.isLocalizationElem hs hg₂ := by
+  subst h
+  rfl
+
+/-- **[D-NAT] Dictionary naturality along base change**: the dictionary of a point over the
+base-changed curve equals the dictionary of its push to the base (the affine target curves are
+definitionally equal through `map_map` and the composite algebra). -/
+lemma dictionary_baseChange (f : U →+* R) (W₀ : WeierstrassCurve U)
+    [W₀.IsElliptic] [(W₀.map f).IsElliptic]
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (x : SpecPoints (projModel (W₀.map f)) (projModelπ (W₀.map f)) K) :
+    letI : Algebra U K := ((algebraMap R K).comp f).toAlgebra
+    projModelPointsEquiv (W₀.map f) K x =
+      projModelPointsEquiv W₀ K ⟨x.1 ≫ projModelBaseChange f W₀, by
+        rw [Category.assoc]
+        letI : Algebra U R := f.toAlgebra
+        rw [show projModelBaseChange f W₀ ≫ projModelπ W₀ =
+          projModelπ (W₀.map f) ≫ Spec.map (CommRingCat.ofHom f) from
+          projModelBaseChange_π f W₀]
+        rw [← Category.assoc, x.2, ← Spec.map_comp, ← CommRingCat.ofHom_comp]⟩ := by
+  classical
+  letI : Algebra U K := ((algebraMap R K).comp f).toAlgebra
+  by_cases hZ : InZChart (W₀.map f) x
+  · obtain ⟨h', hh'⟩ := hZ
+    have hx1 : Spec.map (CommRingCat.ofHom (CommRingCat.Hom.hom (Spec.preimage h'))) ≫
+        chartι (W₀.map f) 2 = x.1 := by
+      rw [CommRingCat.ofHom_hom, Spec.map_preimage]
+      exact hh'
+    set φ : chartAway (W₀.map f) 2 →+* K := CommRingCat.Hom.hom (Spec.preimage h') with hφdef
+    have hφc : φ.comp (algebraMap R (chartAway (W₀.map f) 2)) = algebraMap R K :=
+      chartHom_compat_of_specPoint (W₀.map f) 2 φ (by rw [hx1]; exact x.2)
+    rw [dictionary_eq_toAffine (W₀.map f) 2 φ hφc x hx1]
+    have e : CommRingCat.of (HomogeneousLocalization.Away
+        (quotientGrading (projIdeal (W₀.map f)))
+        (baseChangeGradedHom f W₀
+          ((quotientGradingHom (projIdeal W₀)) (MvPolynomial.X 2)))) =
+        CommRingCat.of (chartAway (W₀.map f) 2) := by
+      rw [baseChangeGradedHom_chartGen f W₀ 2]
+    have hpush : Spec.map (CommRingCat.ofHom ((φ.comp
+        (CommRingCat.Hom.hom (eqToHom e))).comp (bcChartAwayMap f W₀ 2))) ≫
+        chartι W₀ 2 = x.1 ≫ projModelBaseChange f W₀ := by
+      rw [← specMap_chartι_comp_baseChange f W₀ 2 φ e, hx1]
+    have hφ₂c : ((φ.comp (CommRingCat.Hom.hom (eqToHom e))).comp
+        (bcChartAwayMap f W₀ 2)).comp (algebraMap U (chartAway W₀ 2)) = algebraMap U K :=
+      chartHom_compat_of_specPoint W₀ 2 _ (by
+        rw [hpush, Category.assoc]
+        letI : Algebra U R := f.toAlgebra
+        rw [show projModelBaseChange f W₀ ≫ projModelπ W₀ =
+          projModelπ (W₀.map f) ≫ Spec.map (CommRingCat.ofHom f) from
+          projModelBaseChange_π f W₀]
+        rw [← Category.assoc, x.2, ← Spec.map_comp, ← CommRingCat.ofHom_comp])
+    rw [dictionary_eq_toAffine W₀ 2 _ hφ₂c _ hpush]
+    congr 1
+    funext m
+    show chartPointTriple (W₀.map f) 2 φ m = ((φ.comp
+      (CommRingCat.Hom.hom (eqToHom e))).comp (bcChartAwayMap f W₀ 2))
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W₀ 2) (mk_X_mem_quotientGrading_one W₀ m))
+    rw [RingHom.comp_apply, bcChartAwayMap_isLocalizationElem f W₀ 2 m,
+      RingHom.comp_apply, eqToHom_hom_isLocalizationElem _
+        (baseChangeGradedHom_chartGen f W₀ 2) _ (mk_X_mem_quotientGrading_one (W₀.map f) 2)]
+    exact (congrArg φ (isLocalizationElem_congr_right
+      (mk_X_mem_quotientGrading_one (W₀.map f) 2)
+      (baseChangeGradedHom_chartGen f W₀ m)
+      ((baseChangeGradedHom f W₀).2 (mk_X_mem_quotientGrading_one W₀ m))
+      (mk_X_mem_quotientGrading_one (W₀.map f) m))).symm
+  · have hx0 := specPoint_eq_zero_of_not_inZ (W₀.map f) K x hZ
+    have hLHS : projModelPointsEquiv (W₀.map f) K x = 0 := by
+      rw [← projModelPointsEquiv_zero (W₀.map f) K]
+      exact congrArg (projModelPointsEquiv (W₀.map f) K) (Subtype.ext hx0)
+    rw [hLHS]
+    have hpz : x.1 ≫ projModelBaseChange f W₀ =
+        Spec.map (CommRingCat.ofHom (algebraMap U K)) ≫ projModelZero W₀ := by
+      rw [hx0, Category.assoc]
+      letI : Algebra U R := f.toAlgebra
+      rw [show projModelZero (W₀.map f) ≫ projModelBaseChange f W₀ =
+        Spec.map (CommRingCat.ofHom f) ≫ projModelZero W₀ from projModelZero_baseChange W₀]
+      rw [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    rw [show (⟨x.1 ≫ projModelBaseChange f W₀, _⟩ :
+        SpecPoints (projModel W₀) (projModelπ W₀) K) =
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap U K)) ≫ projModelZero W₀, by
+        rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ from
+      Subtype.ext hpz]
+    exact (projModelPointsEquiv_zero W₀ K).symm
+
+end DictionaryNaturality
+
 end AtlasFormula
 
 /-- **[C6-U] THE ATLAS BRIDGE** — over the ULift universal atlas, GLC's base-change
