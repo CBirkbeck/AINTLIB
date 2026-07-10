@@ -524,3 +524,27 @@ crossings. Alternatively: prove the CHART-LEVEL Γ-surjectivity directly in C1's
 setting (Spec-side: the chart-restricted actPair between affines; closed-immersion there
 = surjective ring map via `IsClosedImmersion` iff on affines) — may bypass the global
 statement entirely.
+
+## [HG-C1] leaf decomposition (banked 2026-07-10; API verified)
+
+Toolkit verified in-tree: `Scheme.Hom.resLE (f) U V (e : V ≤ f⁻¹ᵁ U) : V ⟶ U` +
+`MorphismProperty.resLE` (local-at-target stability, Morphisms/Basic:312),
+`Scheme.Hom.appLE` (the Γ-side), `⁻¹ᵁ`-preimage-opens algebra (Restrict.lean),
+`pullbackSpecIso R S T : pullback (Spec.map _) (Spec.map _) ≅ Spec (S ⊗[R] T)`
+(Pullbacks.lean:719), `Scheme.ΓSpecIso`.
+
+- **[C1a] stability predicate**: `IsStableOpen G (U : E.E.Opens) : Prop :=
+  G.actionProj.left ⁻¹ᵁ U ≤ G.translationAction.left ⁻¹ᵁ U` ("x ∈ U ⟹ x+t ∈ U").
+  Restricted action := `(G.translationAction.left).resLE U (G.actionProj.left ⁻¹ᵁ U) h`
+  : (pr⁻¹U) ⟶ U; restricted projection similarly (with `le_refl`).
+- **[C1b] the chart Künneth**: for U affine over affine base-patch, identify the OPEN
+  `pr⁻¹U ⊆ G ×ₛ E` with the pullback-scheme `G ×ₛ U` (pullback of the open immersion
+  `U.ι` — `IsOpenImmersion`-pullback lemmas / `pullbackRestrictIsoRestrict`), then
+  `Γ(G ×ₛ U) ≅ B ⊗[R] A` via `pullbackSpecIso` + `ΓSpecIso` (after `Spec`-writing U, G,
+  base). Output: `ρ_U : B →ₐ[R] B ⊗[R] A` := ΓSpecIso ∘ (restricted-act).appLE ∘ iso.
+- **[C1c] IsCoaction ρ_U**: counit from the group-object unit-law restricted (the
+  section 0 ×ₛ U ⟶ pr⁻¹U composed with act| = inclusion), coassoc from μ-associativity
+  restricted; both contravariant appLE-functoriality chases (mechanical but fiddly;
+  budget a session).
+- **[C1d]**: assemble `StableAffineChartData R A B` with C2's chart-Γ-surjectivity
+  (actPair| closed immersion of affines ⟹ appTop surjective).
