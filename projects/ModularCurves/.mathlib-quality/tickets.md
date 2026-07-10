@@ -15383,3 +15383,25 @@ factor at the NATIVE LocalizedMonoidal instance via hint-typed haves, cast once 
 **(c) cleanup tail: deferred to next session** — budget spent on (a)+(b); the ratified
 producer-scope pass (PullbackTensorGeneral.lean) remains queued, including the 3
 reducible-linter warnings + Sheaf.cond deprecations now flagged.
+
+## Amendments v10.129 (2026-07-10, coordinator): PIC0 v10.127 work order RATIFIED (map_comp closed it-1; GME 2.17 assembled; PAIR/← registered); seam-cut LIVE both halves; numbering collision noted
+
+- **PIC0 (their §v10.128, 9a83c84d7) RATIFIED**: ★ `Pic.map_comp` CLOSED at stop-line
+  iteration 1 (3e862e58f — pure-skeleton `mapSkeleton_pullback_comp` isolates the
+  Quotient chase; the latent `Modules.pullbackComp` arg-swap caught + FIXED, downstream
+  green 3,099 jobs) — **Pic is a contravariant group functor, stream fully sorry-free**.
+  GME 2.17 `isInvertible_iff_isUnit_toSkeleton` ASSEMBLED (CMP-T/CMP-U closed;
+  native-instance-typed-haves recipe → registry); Dual.lean cite-check clean (no global
+  pairing there ⟹ [CMP-PAIR] genuinely new); hygiene slice done (Pic.lean
+  warning-clean). Registered leaves = PicComparison.lean:106 ([CMP-PAIR]) + :134
+  ([CMP-←]) — verified at source. Next-session order in inbox (PAIR → ← → golf tail).
+- **Numbering**: fable-PIC0 v10.128 + coordinator v10.128 collided — both stand per the
+  letter-suffix convention (distinct author tags); coordinator resumes at v10.129.
+- **Seam-cut LIVE (both halves confirmed by sentinel)**: c5β resumed T-G4 per v10.128
+  (whisker-BC first, units+assoc before inv); beastmode-A iterating
+  `NegModelBaseChange.lean` to green. Watch unchanged: **T-G4 completion → the owner
+  fires NEW-CASCADE** (coordinator signals).
+- **Absorbs**: NEW-HOPF — ★ counit law at scheme level (`leftUnitSection_comp_squareMul`,
+  iota-cancellation + restrict-algebra) + the full commutative group-object law set +
+  `tensor_hom_ext`; C1c-1c on plan. fable-FP — [02KL-CORE] KL-5c `concatEquiv` proven +
+  KL-5 doubling infrastructure; steady.
