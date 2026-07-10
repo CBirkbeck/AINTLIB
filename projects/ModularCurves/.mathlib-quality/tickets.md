@@ -11121,3 +11121,60 @@ across charts; (3) E-cover glue → `coverTopMap_compat` → `Scheme.Cover.glueM
 `pullSection = P`; (5) T7 uniqueness → `exists_tatePoint`'s ∀-part. Then rebase onto
 `origin/dev/modular-curves-y1`, ONE PR, board `#print axioms` with the designed
 [T-A6b]/[T-B6′] attribution.
+
+## Amendments v10.113-ATLAS (2026-07-10, NEW-ATLAS-3): ★ [Y1-ATLAS] CHARTER COMPLETE — exists_tatePoint's ∀-clause PROVEN
+
+**`MarkedChartData.tateMarkedPoint_classifies`** (YOneAtlasClassify.lean): for every
+`Y : EllObj R` and `P` nowhere of geometric order ≤ 3,
+`∃! f : Y ⟶ tateEllObj R, EllHom.pullSection R f (tateMarkedPoint R) = P` —
+Loeffler Cor 3.3.5 / Prop 3.3.4's general case, the ∀-part of `exists_tatePoint`.
+Integration into `YOneAssembly.exists_tatePoint` is the deferred one-liner (import
+direction: YOneAtlasClassify imports YOneAssembly; coordinator decides the restructure).
+
+**Landed this charter (v10.111 NEXT steps 2–5, all green, single-file additions):**
+- *Step 2*: `fibreMap_topMap` (fibre restriction of `topMap` = classifying map of the
+  fibre model, via step-1 naturality), `fibreMap_topMap_agree` (ENGINE(b) with
+  `fibreModelIso`-data + congrHom transport), `test_topMap_agree` (instance-packaged
+  test form over any scheme, ρ-factoring through the fibre).
+- *Step 3*: `curveCover` (chart cover pulled back along π via `pullback₁`, re-presented
+  by `Scheme.Cover.copy` for definitionally transparent fields), `coverTopMap`,
+  `coverTopMap_compat` (affine cover of the base overlap pulled back along the
+  E-overlap comparison `g`, morphism-ext + `test_topMap_agree`), **`gluedTopMap`** +
+  `ι_gluedTopMap` (`Scheme.Cover.glueMorphisms`).
+- *Step 4*: `gluedTopMap_π`/`_zero`/`_marking` (cover-local); **`gluedTopMap_isPullback`**
+  (comparison χ into `pullback projModelπ gluedBaseMap` is an iso: per chart it is the
+  composite of two `isoIsPullback`s against `topMap_isPullback` + the pasted W-piece
+  square; `MorphismProperty.isomorphisms` is Zariski-local at the target); **`gluedHom`**
+  (via `EllObj.tateClassifyingHom`; eqToHom bridges `tateUniversal_eqToHom_π` +
+  `eqToGeom_zero'`), **`gluedHom_pullSection`** (existence half).
+- *Step 5*: `projModelVCIso_one` (from the `projModelVCIso_mul` cocycle at `C = C' = 1`
+  + eqToHom cancellation — closes the T-W7 gap noted in MellWeierstrass),
+  **`projTateMap_map_tate`** (self-classification: T-E1 normalisation of the mapped
+  atlas curve at a `(0,0)`-marked point is `1`; `tateRingOverAlgLiftOfPoint` =
+  `algebraMap` by `tateRingOver_algHom_ext`), `tateCurveLocOver_a₁/a₂/_isTateNormal`,
+  `tateStructMap_eq_algebraMap`; `classifyingSpecMap` + `classifying_isPullback(')` +
+  **`inducedChart`** (the f-induced marked chart, raw-component `(fb, ftop, hPB, hzw)`
+  form so every statement stays instance-transparent), `inducedPt` (+`_inZChart`,
+  `_comp_bc` marking transport, `_coordX/Y = 0` via `tateP0SpecPoint` eval-transport,
+  `_hord` through the chart machinery), `inducedChart_tower`; **base pin**
+  `tateBaseSpecMapOfPoint_inducedPt = classifyingSpecMap`, **top pin**
+  `projTateMap_inducedPt = projModelBaseChange`; `sameU_tateBaseSpecMapOfPoint_agree` /
+  `sameU_projTateMap_agree` (unbundled same-chart ENGINE corollaries);
+  `chart_baseMap_eq`/`chart_topMap_eq` (chart pins of ANY classifying square),
+  **`components_unique`** (`Cover.hom_ext` on both covers), and the clause.
+
+**Axioms (post-rebase onto `origin/dev/modular-curves-y1` @ `a31862eed`, build green,
+3196 jobs, zero sorries in the file, zero `maxHeartbeats`):**
+- `#print axioms tateMarkedPoint_classifies` / `gluedBaseMap` / `gluedTopMap` /
+  `gluedHom_pullSection` / `components_unique` =
+  `[propext, sorryAx, Classical.choice, Quot.sound]` — the `sorryAx` enters EXACTLY
+  through the two designed trails: **[T-A6b]** `abelEnrichment_exists` (⟶
+  `tateUniversal`/`tateMarkedPoint` and `fibreCurve` inside `pt_hord`) and **[T-B6′]**
+  `geomFibrePointAddEquiv.map_add'` (inside `pt_hord`) — the v10.110-attributed trail,
+  no new sorry-carriers introduced.
+- Axiom-CLEAN (`[propext, Classical.choice, Quot.sound]` only): `projModelVCIso_one`,
+  `projTateMap_map_tate`, `sameU_projTateMap_agree` (and its base half),
+  `test_topMap_agree`-upstream ENGINE pieces.
+
+**Handoff**: PR from `dev/modular-curves-y1-atlas` → `dev/modular-curves-y1` opened at
+completion. Sentinel `beastmode_active.NEW-ATLAS-3` cleared. [Y1-ATLAS] CLOSED.
