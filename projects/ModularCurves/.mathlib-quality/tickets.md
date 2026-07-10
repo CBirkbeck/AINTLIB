@@ -14690,7 +14690,9 @@ Landed ungate-able ingredients: [B0] GlobalModelTransport (bc3417905), [B1] exis
   land MODULO, flip on their landing, T-A3 pattern); structMap : X/G ⟶ Spec R by descending Z's
   structMap through existsUnique_quotientπ_lift (invariance: action is over Spec R). The q-EllHom
   XE ⟶ X₀ from the engine's cartesian+zero output.
-* **[B3-descent-genS]** GENERAL-S extension of existsUnique_descent_of_torsor (drop [IsAffine S]
+* **[B3-descent-genS]** ✅ RESOLVED (c37688589) — subsumed by STRENGTHENING existsUnique_descent_of_torsor
+  to arbitrary base (mathlib Sites.Fpqc effective-epi; no gluing needed). Superseded note below.
+* **[B3-descent-genS-OLD]** (obsolete) GENERAL-S extension of existsUnique_descent_of_torsor (drop [IsAffine S]
   [IsAffine Z]): Zariski-glue on S mirroring mathlib's EffectiveEpiConstruction.exists_openCover_exists
   — a bounded sub-ticket; needed IFF the homEquiv is built at full EllObj generality (arbitrary
   Y.base). Alternative: a Zariski-sheaf local-to-global reduction of IsRepresentable to affine bases.
