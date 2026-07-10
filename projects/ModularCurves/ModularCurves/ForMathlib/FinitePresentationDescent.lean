@@ -498,7 +498,8 @@ noetherian stages; quasicompact glue; transport back along stage factoring. -/
 theorem SpreadData.exists_flat_stage (D : SpreadData 𝒮 u B)
     (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
     [Module.Flat A B] :
-    ∃ (i : ι) (h : D.i₀ ≤ i), Module.Flat (𝒮 i) (D.spreadStage (t := t) h) := by
+    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
+      Module.Flat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
   sorry
 
 /-! ## [KL-4] Faithful flatness at a large stage (the 01UA leg) -/
@@ -515,7 +516,8 @@ which is Spec-surjectivity there; flat + Spec-surjective = faithfully flat. -/
 theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
     (H : IsFilteredAlgColimit R 𝒮 t A u) [Algebra R B] [IsScalarTower R A B]
     [Module.FaithfullyFlat A B] :
-    ∃ (i : ι) (h : D.i₀ ≤ i), Module.FaithfullyFlat (𝒮 i) (D.spreadStage (t := t) h) := by
+    ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
+      Module.FaithfullyFlat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
   sorry
 
 /-! ## [KL-5] Stage factoring, stage agreement, and the assembly -/
@@ -1131,6 +1133,226 @@ theorem presentedU_comp_doubleInr (H : IsFilteredAlgColimit R 𝒮 t A u)
   rw [AlgHom.comp_apply, AlgHom.comp_apply, doubleInr_mk, presentedU_mk, presentedU_mk,
     doubleInr_mk, MvPolynomial.map_rename]
 
+/-- Evaluation of the cocone maps on stage scalars. -/
+theorem presentedU_algebraMap (H : IsFilteredAlgColimit R 𝒮 t A u)
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) (P : {i : ι // i₀ ≤ i}) (s : 𝒮 P.1) :
+    presentedU t u H gen P (algebraMap (𝒮 P.1)
+        (MvPolynomial σ (𝒮 P.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s)
+      = algebraMap A (MvPolynomial σ A ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j)))
+          (u P.1 s) := by
+  have h1 : algebraMap (𝒮 P.1)
+      (MvPolynomial σ (𝒮 P.1) ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (t P.2).toRingHom (gen j))) s
+      = Ideal.Quotient.mk _ (MvPolynomial.C s) := rfl
+  have h2 : algebraMap A (MvPolynomial σ A ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) (u P.1 s)
+      = Ideal.Quotient.mk _ (MvPolynomial.C (u P.1 s)) := rfl
+  rw [h1, h2, presentedU_mk, MvPolynomial.map_C]
+  rfl
+
+/-- **Amitsur transport**: an element of a presented model whose two variable-doublings
+agree comes from the base (via `concatEquiv` and the Amitsur equalizer of the faithfully
+flat model). -/
+theorem mem_range_algebraMap_of_double_eq {W : Type u} [CommRing W] [Algebra R W]
+    (gen : κ → MvPolynomial σ (𝒮 i₀)) (w : 𝒮 i₀ →ₐ[R] W)
+    [Module.FaithfullyFlat W (MvPolynomial σ W ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map w.toRingHom (gen j)))]
+    (x : MvPolynomial σ W ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map w.toRingHom (gen j)))
+    (hx : doubleInl gen w x = doubleInr gen w x) :
+    x ∈ Set.range (algebraMap W (MvPolynomial σ W ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map w.toRingHom (gen j)))) := by
+  classical
+  have hgw : (fun j => MvPolynomial.map w.toRingHom (concatGen gen gen j))
+      = concatGen (fun j => MvPolynomial.map w.toRingHom (gen j))
+          (fun j => MvPolynomial.map w.toRingHom (gen j)) := by
+    funext j
+    cases j with
+    | inl j =>
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inl (gen j))
+        = MvPolynomial.rename Sum.inl (MvPolynomial.map w.toRingHom (gen j))
+      exact MvPolynomial.map_rename _ _ _
+    | inr j =>
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inr (gen j))
+        = MvPolynomial.rename Sum.inr (MvPolynomial.map w.toRingHom (gen j))
+      exact MvPolynomial.map_rename _ _ _
+  have hL : ∀ y, (concatEquiv (fun j => MvPolynomial.map w.toRingHom (gen j))
+        (fun j => MvPolynomial.map w.toRingHom (gen j)))
+          ((Ideal.quotientEquivAlgOfEq W
+            (congrArg (fun f => Ideal.span (Set.range f)) hgw)) (doubleInl gen w y))
+      = y ⊗ₜ[W] 1 := by
+    intro y
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [doubleInl_mk, Ideal.quotientEquivAlgOfEq_mk, ← concatInl_mk]
+    exact AlgHom.congr_fun (concatToTensor_comp_concatInl _ _)
+      (Ideal.Quotient.mk _ p)
+  have hR : ∀ y, (concatEquiv (fun j => MvPolynomial.map w.toRingHom (gen j))
+        (fun j => MvPolynomial.map w.toRingHom (gen j)))
+          ((Ideal.quotientEquivAlgOfEq W
+            (congrArg (fun f => Ideal.span (Set.range f)) hgw)) (doubleInr gen w y))
+      = 1 ⊗ₜ[W] y := by
+    intro y
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [doubleInr_mk, Ideal.quotientEquivAlgOfEq_mk, ← concatInr_mk]
+    exact AlgHom.congr_fun (concatToTensor_comp_concatInr _ _)
+      (Ideal.Quotient.mk _ p)
+  have h2 := (hL x).symm.trans ((congrArg _ (congrArg _ hx)).trans (hR x))
+  exact (Module.FaithfullyFlat.mem_range_algebraMap_iff_tmul_eq W x).2 h2
+
+/-- Factor an algebra map through an injective structure map when its range allows. -/
+theorem exists_algHom_factor_algebraMap {R A' W B' : Type u} [CommRing R] [CommRing A']
+    [CommRing W] [CommRing B'] [Algebra R A'] [Algebra R W] [Algebra R B'] [Algebra W B']
+    [IsScalarTower R W B'] (ε : A' →ₐ[R] B')
+    (hrange : ∀ a, ε a ∈ Set.range (algebraMap W B'))
+    (hinj : Function.Injective (algebraMap W B')) :
+    ∃ σA : A' →ₐ[R] W, (IsScalarTower.toAlgHom R W B').comp σA = ε := by
+  classical
+  choose sfun hsfun using hrange
+  refine ⟨{ toFun := sfun
+            map_one' := hinj (by rw [hsfun, map_one, map_one])
+            map_mul' := fun a b => hinj (by rw [hsfun, map_mul, map_mul, hsfun, hsfun])
+            map_zero' := hinj (by rw [hsfun, map_zero, map_zero])
+            map_add' := fun a b => hinj (by rw [hsfun, map_add, map_add, hsfun, hsfun])
+            commutes' := fun r => hinj (by
+              rw [hsfun, ← IsScalarTower.algebraMap_apply R W B', ← AlgHom.commutes ε r]) },
+    ?_⟩
+  apply AlgHom.ext
+  intro a
+  show algebraMap W B' (sfun a) = ε a
+  exact hsfun a
+
+
+variable (t u) in
+/-- **[KL-5] endgame** (split off for elaboration-budget reasons): from a stage `P₂`
+carrying transported factorizations of `id_B` and `id_{B ⊗ B}` whose doubling squares
+agree in the colimit, produce the retract and conclude. All identifications are at the
+raw presented-system level; the `B`-side equivalence enters only through `eB`. -/
+private theorem of_comp_aux {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
+    [IsScalarTower R A B] [Module.FaithfullyFlat A B] [FinitePresentation R B]
+    (H : IsFilteredAlgColimit R 𝒮 t A u) (gen : κ → MvPolynomial σ (𝒮 i₀))
+    (hFPstage : ∀ i : ι, FinitePresentation R (𝒮 i))
+    (eB : (MvPolynomial σ A ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map (u i₀).toRingHom (gen j))) ≃ₐ[A] B)
+    (P₂ : {i : ι // i₀ ≤ i})
+    (β₂ : B →ₐ[R] (MvPolynomial σ (𝒮 P₂.1) ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map (t P₂.2).toRingHom (gen j))))
+    (γ₂ : (B ⊗[A] B) →ₐ[R] (MvPolynomial (σ ⊕ σ) (𝒮 P₂.1) ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map (t P₂.2).toRingHom (concatGen gen gen j))))
+    (pLim qLim : B →ₐ[R] B ⊗[A] B)
+    (hpqχ : ∀ a : A, pLim (algebraMap A B a) = qLim (algebraMap A B a))
+    (hβ₂colim : ∀ b : B,
+      (eB.restrictScalars R).toAlgHom ((presentedU t u H gen P₂) (β₂ b)) = b)
+    (hLagree : (presentedU t u H (concatGen gen gen) P₂).comp
+        ((doubleInl gen (t P₂.2)).comp β₂)
+      = (presentedU t u H (concatGen gen gen) P₂).comp (γ₂.comp pLim))
+    (hRagree : (presentedU t u H (concatGen gen gen) P₂).comp
+        ((doubleInr gen (t P₂.2)).comp β₂)
+      = (presentedU t u H (concatGen gen gen) P₂).comp (γ₂.comp qLim))
+    (hffl₂ : ∀ ⦃Q : {i : ι // i₀ ≤ i}⦄, P₂ ≤ Q →
+      Module.FaithfullyFlat (𝒮 Q.1) (MvPolynomial σ (𝒮 Q.1) ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (t Q.2).toRingHom (gen j)))) :
+    FinitePresentation R A := by
+  classical
+  have HC0 := isFilteredAlgColimit_presented H (concatGen gen gen)
+  -- fix the two squares at later stages
+  obtain ⟨P₃, hP₃₂, hfixL⟩ := HC0.exists_eq_at_stage_of_finiteType B
+    ((doubleInl gen (t P₂.2)).comp β₂) (γ₂.comp pLim) hLagree
+  obtain ⟨P₄, hP₄₃, hfixR'⟩ := HC0.exists_eq_at_stage_of_finiteType B
+    ((presentedT t H (concatGen gen gen) hP₃₂).comp
+      ((doubleInr gen (t P₂.2)).comp β₂))
+    ((presentedT t H (concatGen gen gen) hP₃₂).comp (γ₂.comp qLim))
+    (by
+      apply AlgHom.ext
+      intro b
+      simp only [AlgHom.comp_apply]
+      rw [HC0.compat hP₃₂, HC0.compat hP₃₂]
+      have h5 := AlgHom.congr_fun hRagree b
+      simp only [AlgHom.comp_apply] at h5
+      exact h5)
+  have hP₄₂ : P₂ ≤ P₄ := hP₃₂.trans hP₄₃
+  obtain ⟨β₄, hβ₄⟩ : ∃ b, b = (presentedT t H gen hP₄₂).comp β₂ := ⟨_, rfl⟩
+  obtain ⟨γ₄, hγ₄⟩ : ∃ c, c = (presentedT t H (concatGen gen gen) hP₄₂).comp γ₂ := ⟨_, rfl⟩
+  have hcollapseC : ∀ ⦃x⦄, presentedT t H (concatGen gen gen) hP₄₂ x
+      = presentedT t H (concatGen gen gen) hP₄₃
+          (presentedT t H (concatGen gen gen) hP₃₂ x) :=
+    fun x => (HC0.t_trans hP₃₂ hP₄₃ x).symm
+  have hfixedL : (doubleInl gen (t P₄.2)).comp β₄ = γ₄.comp pLim := by
+    apply AlgHom.ext
+    intro b
+    simp only [AlgHom.comp_apply]
+    rw [hβ₄, hγ₄]
+    simp only [AlgHom.comp_apply]
+    have hnat := AlgHom.congr_fun (presentedT_comp_doubleInl gen H hP₄₂) (β₂ b)
+    simp only [AlgHom.comp_apply] at hnat
+    rw [← hnat, hcollapseC]
+    have hfix := AlgHom.congr_fun hfixL b
+    simp only [AlgHom.comp_apply] at hfix
+    rw [hfix, ← hcollapseC]
+  have hfixedR : (doubleInr gen (t P₄.2)).comp β₄ = γ₄.comp qLim := by
+    apply AlgHom.ext
+    intro b
+    simp only [AlgHom.comp_apply]
+    rw [hβ₄, hγ₄]
+    simp only [AlgHom.comp_apply]
+    have hnat := AlgHom.congr_fun (presentedT_comp_doubleInr gen H hP₄₂) (β₂ b)
+    simp only [AlgHom.comp_apply] at hnat
+    rw [← hnat, hcollapseC]
+    have hfix := AlgHom.congr_fun hfixR' b
+    simp only [AlgHom.comp_apply] at hfix
+    rw [hfix, ← hcollapseC]
+  -- the candidate section
+  obtain ⟨ε, hε⟩ : ∃ f, f = β₄.comp (IsScalarTower.toAlgHom R A B) := ⟨_, rfl⟩
+  have hεpq : ∀ a : A, (doubleInl gen (t P₄.2)) (ε a) = (doubleInr gen (t P₄.2)) (ε a) := by
+    intro a
+    rw [hε]
+    have hl := AlgHom.congr_fun hfixedL (algebraMap A B a)
+    have hr := AlgHom.congr_fun hfixedR (algebraMap A B a)
+    simp only [AlgHom.comp_apply] at hl hr ⊢
+    show (doubleInl gen (t P₄.2)) (β₄ (algebraMap A B a))
+      = (doubleInr gen (t P₄.2)) (β₄ (algebraMap A B a))
+    rw [hl, hr, hpqχ a]
+  haveI := hffl₂ hP₄₂
+  have hAmitsur : ∀ a : A, ε a ∈ Set.range (algebraMap (𝒮 P₄.1)
+      (MvPolynomial σ (𝒮 P₄.1) ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map (t P₄.2).toRingHom (gen j)))) :=
+    fun a => mem_range_algebraMap_of_double_eq gen (t P₄.2) (ε a) (hεpq a)
+  obtain ⟨σA, hσA⟩ := exists_algHom_factor_algebraMap ε hAmitsur
+    (FaithfulSMul.algebraMap_injective _ _)
+  have hβ₄colim : ∀ b : B,
+      (eB.restrictScalars R).toAlgHom ((presentedU t u H gen P₄) (β₄ b)) = b := by
+    intro b
+    rw [hβ₄]
+    simp only [AlgHom.comp_apply]
+    have h7 : (presentedU t u H gen P₄) ((presentedT t H gen hP₄₂) (β₂ b))
+        = (presentedU t u H gen P₂) (β₂ b) :=
+      (isFilteredAlgColimit_presented H gen).compat hP₄₂ (β₂ b)
+    rw [h7]
+    exact hβ₂colim b
+  have hretract : (u P₄.1).comp σA = AlgHom.id R A := by
+    have hχinj : Function.Injective (algebraMap A B) := FaithfulSMul.algebraMap_injective A B
+    apply AlgHom.ext
+    intro a
+    apply hχinj
+    show algebraMap A B ((u P₄.1) (σA a)) = algebraMap A B a
+    have hsq : ∀ s : 𝒮 P₄.1,
+        (eB.restrictScalars R).toAlgHom ((presentedU t u H gen P₄)
+          (algebraMap (𝒮 P₄.1) _ s))
+        = algebraMap A B (u P₄.1 s) := by
+      intro s
+      rw [presentedU_algebraMap H gen P₄ s]
+      exact eB.commutes _
+    rw [← hsq (σA a)]
+    have hεa : algebraMap (𝒮 P₄.1) _ (σA a) = ε a := AlgHom.congr_fun hσA a
+    rw [hεa, hε]
+    show (eB.restrictScalars R).toAlgHom ((presentedU t u H gen P₄)
+      (β₄ ((IsScalarTower.toAlgHom R A B) a))) = algebraMap A B a
+    rw [hβ₄colim ((IsScalarTower.toAlgHom R A B) a)]
+    rfl
+  haveI := hFPstage P₄.1
+  exact FinitePresentation.of_retract σA (u P₄.1) hretract
+
 end Assembly
 
 
@@ -1154,7 +1376,165 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
     [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
     [Module.FaithfullyFlat A B] [FinitePresentation A B] [FinitePresentation R B] :
     FinitePresentation R A := by
-  sorry
+  classical
+  have H := PresentationSystem.isFilteredAlgColimit R A
+  obtain ⟨D⟩ := exists_spreadData B H
+  obtain ⟨eB⟩ := D.equiv
+  -- the presented systems for `B` and for `B ⊗[A] B`
+  have HB0 := isFilteredAlgColimit_presented H D.g
+  have HC0 := isFilteredAlgColimit_presented H (concatGen D.g D.g)
+  -- pushing the concatenated generators along any receiving map is concatenation
+  have hgenw : ∀ {W : Type u} [CommRing W] [Algebra R W]
+      (w : PresentationSystem.stage R A D.i₀ →ₐ[R] W),
+      (fun j => MvPolynomial.map w.toRingHom (concatGen D.g D.g j))
+        = concatGen (fun j => MvPolynomial.map w.toRingHom (D.g j))
+            (fun j => MvPolynomial.map w.toRingHom (D.g j)) := by
+    intro W _ _ w
+    funext j
+    cases j with
+    | inl j =>
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inl (D.g j))
+        = MvPolynomial.rename Sum.inl (MvPolynomial.map w.toRingHom (D.g j))
+      exact MvPolynomial.map_rename _ _ _
+    | inr j =>
+      show MvPolynomial.map w.toRingHom (MvPolynomial.rename Sum.inr (D.g j))
+        = MvPolynomial.rename Sum.inr (MvPolynomial.map w.toRingHom (D.g j))
+      exact MvPolynomial.map_rename _ _ _
+  -- transports of the colimits to `B` and `B ⊗[A] B`
+  obtain ⟨eB', heB'⟩ : ∃ e, e = eB.restrictScalars R := ⟨_, rfl⟩
+  have HB := HB0.congr eB'
+  have eC : (MvPolynomial (Fin D.m ⊕ Fin D.m) A ⧸
+      Ideal.span (Set.range fun j => MvPolynomial.map
+        ((PresentationSystem.colimMap R A D.i₀).toRingHom) (concatGen D.g D.g j)))
+      ≃ₐ[R] (B ⊗[A] B) :=
+    (((Ideal.quotientEquivAlgOfEq A
+        (congrArg (fun f => Ideal.span (Set.range f))
+          (hgenw (PresentationSystem.colimMap R A D.i₀)))).trans
+      (concatEquiv _ _)).trans
+        (Algebra.TensorProduct.congr eB eB)).restrictScalars R
+  have HC := HC0.congr eC
+  haveI : FinitePresentation R (B ⊗[A] B) := FinitePresentation.trans R B (B ⊗[A] B)
+  -- factor the identities of `B` and `B ⊗[A] B` through stages
+  obtain ⟨Pβ, β, hβ⟩ := HB.exists_factor_of_finitePresentation B (AlgHom.id R B)
+  obtain ⟨Pγ, γ, hγ⟩ := HC.exists_factor_of_finitePresentation (B ⊗[A] B)
+    (AlgHom.id R (B ⊗[A] B))
+  -- the limit-level inclusions
+  obtain ⟨pLim, hpLim⟩ : ∃ f : B →ₐ[R] B ⊗[A] B,
+      f = (Algebra.TensorProduct.includeLeft : B →ₐ[A] B ⊗[A] B).restrictScalars R := ⟨_, rfl⟩
+  obtain ⟨qLim, hqLim⟩ : ∃ f : B →ₐ[R] B ⊗[A] B,
+      f = (Algebra.TensorProduct.includeRight : B →ₐ[A] B ⊗[A] B).restrictScalars R := ⟨_, rfl⟩
+  -- the colimit-level squares
+  have hkeyL : eC.toAlgHom.comp
+      (doubleInl D.g (PresentationSystem.colimMap R A D.i₀))
+      = pLim.comp eB'.toAlgHom := by
+    sorry
+  have hkeyR : eC.toAlgHom.comp
+      (doubleInr D.g (PresentationSystem.colimMap R A D.i₀))
+      = qLim.comp eB'.toAlgHom := by
+    sorry
+  -- the stagewise squares
+  have hsqL : ∀ P : {i // D.i₀ ≤ i},
+      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
+        (doubleInl D.g (PresentationSystem.transition R A P.2))
+      = pLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P)) := by
+    intro P
+    rw [AlgHom.comp_assoc, presentedU_comp_doubleInl D.g H P, ← AlgHom.comp_assoc, hkeyL,
+      AlgHom.comp_assoc]
+  have hsqR : ∀ P : {i // D.i₀ ≤ i},
+      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
+        (doubleInr D.g (PresentationSystem.transition R A P.2))
+      = qLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P)) := by
+    intro P
+    rw [AlgHom.comp_assoc, presentedU_comp_doubleInr D.g H P, ← AlgHom.comp_assoc, hkeyR,
+      AlgHom.comp_assoc]
+  -- faithfully flat at a cofinal stage
+  obtain ⟨iF, hiF, hffl⟩ := D.exists_faithfullyFlat_stage H
+  haveI hdir := HB.directed
+  haveI hne := HB.nonempty
+  -- a common stage dominating the two factorizations and the flat stage
+  obtain ⟨P₁, hP₁β, hP₁F⟩ := directed_of (· ≤ ·) Pβ (⟨iF, hiF⟩ : {i // D.i₀ ≤ i})
+  obtain ⟨P₂, hP₂γ, hP₂₁⟩ := directed_of (· ≤ ·) Pγ P₁
+  have hP₂β : Pβ ≤ P₂ := hP₁β.trans hP₂₁
+  -- transported factorizations
+  obtain ⟨β₂, hβ₂⟩ : ∃ b, b = (presentedT (PresentationSystem.transition R A) H D.g hP₂β).comp β := ⟨_, rfl⟩
+  obtain ⟨γ₂, hγ₂⟩ : ∃ c, c = (presentedT (PresentationSystem.transition R A) H (concatGen D.g D.g) hP₂γ).comp γ := ⟨_, rfl⟩
+  have hβ₂colim : (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P₂)).comp β₂
+      = AlgHom.id R B := by
+    apply AlgHom.ext
+    intro b
+    simp only [AlgHom.comp_apply, AlgHom.id_apply]
+    rw [hβ₂]
+    simp only [AlgHom.comp_apply]
+    rw [HB0.compat hP₂β (β b)]
+    exact AlgHom.congr_fun hβ b
+  have hγ₂colim : (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp γ₂
+      = AlgHom.id R (B ⊗[A] B) := by
+    apply AlgHom.ext
+    intro c
+    simp only [AlgHom.comp_apply, AlgHom.id_apply]
+    rw [hγ₂]
+    simp only [AlgHom.comp_apply]
+    rw [HC0.compat hP₂γ (γ c)]
+    exact AlgHom.congr_fun hγ c
+  -- the two composites into the C-stage agree in the colimit, hence at a later stage
+  have hLagree : (eC.toAlgHom.comp
+        (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        ((doubleInl D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
+      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        (γ₂.comp pLim) := by
+    rw [← AlgHom.comp_assoc, hsqL P₂, AlgHom.comp_assoc, hβ₂colim, AlgHom.comp_id,
+      ← AlgHom.comp_assoc, hγ₂colim, AlgHom.id_comp]
+  have hRagree : (eC.toAlgHom.comp
+        (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        ((doubleInr D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
+      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        (γ₂.comp qLim) := by
+    rw [← AlgHom.comp_assoc, hsqR P₂, AlgHom.comp_assoc, hβ₂colim, AlgHom.comp_id,
+      ← AlgHom.comp_assoc, hγ₂colim, AlgHom.id_comp]
+  -- hand off to the endgame at the raw presented-system level (cancel the equivalences)
+  have hLraw : (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+        H (concatGen D.g D.g) P₂).comp
+        ((doubleInl D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
+      = (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+          H (concatGen D.g D.g) P₂).comp (γ₂.comp pLim) := by
+    apply AlgHom.ext
+    intro b
+    have h8 := AlgHom.congr_fun hLagree b
+    simp only [AlgHom.comp_apply] at h8 ⊢
+    exact eC.injective h8
+  have hRraw : (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+        H (concatGen D.g D.g) P₂).comp
+        ((doubleInr D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
+      = (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+          H (concatGen D.g D.g) P₂).comp (γ₂.comp qLim) := by
+    apply AlgHom.ext
+    intro b
+    have h8 := AlgHom.congr_fun hRagree b
+    simp only [AlgHom.comp_apply] at h8 ⊢
+    exact eC.injective h8
+  have hβ₂colim' : ∀ b : B,
+      (eB.restrictScalars R).toAlgHom
+        ((presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+          H D.g P₂) (β₂ b)) = b := by
+    intro b
+    have h9 := AlgHom.congr_fun hβ₂colim b
+    rw [heB'] at h9
+    exact h9
+  have hffl₂ : ∀ ⦃Q : {i // D.i₀ ≤ i}⦄, P₂ ≤ Q →
+      Module.FaithfullyFlat (PresentationSystem.stage R A Q.1)
+        (MvPolynomial (Fin D.m) (PresentationSystem.stage R A Q.1) ⧸
+          Ideal.span (Set.range fun j => MvPolynomial.map
+            ((PresentationSystem.transition R A Q.2).toRingHom) (D.g j))) := by
+    intro Q hQ
+    exact hffl (hP₁F.trans (hP₂₁.trans hQ))
+  have hpqχ : ∀ a : A, pLim (algebraMap A B a) = qLim (algebraMap A B a) := by
+    intro a
+    rw [hpLim, hqLim]
+    show ((algebraMap A B a) ⊗ₜ[A] (1 : B)) = ((1 : B) ⊗ₜ[A] (algebraMap A B a))
+    rw [Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul]
+  exact of_comp_aux (PresentationSystem.transition R A) (PresentationSystem.colimMap R A)
+    H D.g (fun i => PresentationSystem.stage_finitePresentation R A i) eB P₂ β₂ γ₂
+    pLim qLim hpqχ hβ₂colim' hLraw hRraw hffl₂
 
 end Algebra
 
