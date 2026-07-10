@@ -5248,4 +5248,137 @@ theorem projTateMap_map_tate
 
 end SelfClassification
 
+section InducedChart
+
+/-! ### The chart induced by a classifying square (recipe step 5, T7 substrate)
+
+Any cartesian pointed square from `Y.curve` to the universal Tate curve induces, on each
+affine chart of the base, a second marked chart of `Y.curve`: the model is the universal
+Tate curve base-changed along the affine restriction of the base map, the trivialisation
+is the restricted square.  The data is taken in raw component form (a base map to
+`tateBase R` and a top map to the projective model, with the cartesian/pointedness
+witnesses), so every statement lives in the honest pullback spelling; a classifying
+`Ell/R` morphism `f` instantiates them by its fields at the assembly site. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
+  (fb : Y.base ⟶ tateBase R) (ftop : Y.curve.E ⟶ (tateUniversal R).E)
+
+/-- The affine test map of a chart under a classifying base map. -/
+noncomputable def classifyingSpecMap : Spec (CommRingCat.of ↑Γ(Y.base, D.U.1)) ⟶
+    tateBase R :=
+  D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ fb
+
+variable (hPB : IsPullback ftop Y.curve.π ((tateUniversal R).π) fb)
+
+include hPB in
+/-- The restricted cartesian square of a classifying square over a chart. -/
+theorem classifying_isPullback :
+    IsPullback (pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R))
+      (pullback.snd Y.curve.π D.U.1.ι ≫ D.U.2.isoSpec.hom)
+      (projModelπ (tateCurveLocOver R))
+      (D.classifyingSpecMap fb) := by
+  have h1 : IsPullback (pullback.fst Y.curve.π D.U.1.ι ≫ ftop)
+      (pullback.snd Y.curve.π D.U.1.ι) ((tateUniversal R).π) (D.U.1.ι ≫ fb) :=
+    (IsPullback.of_hasPullback Y.curve.π D.U.1.ι).paste_horiz hPB
+  have h2 : IsPullback (eqToHom (tateUniversal_E_eq R)) ((tateUniversal R).π)
+      (projModelπ (tateCurveLocOver R)) (𝟙 (tateBase R)) :=
+    IsPullback.of_horiz_isIso ⟨by rw [Category.comp_id]; exact (tateUniversal_π_eq R).symm⟩
+  have h3 := h1.paste_horiz h2
+  rw [Category.comp_id] at h3
+  have h4 : IsPullback (D.U.1.ι ≫ fb) (D.U.2.isoSpec.hom) (𝟙 (tateBase R))
+      (D.classifyingSpecMap fb) :=
+    IsPullback.of_vert_isIso ⟨by
+      rw [Category.comp_id, classifyingSpecMap, Iso.hom_inv_id_assoc]⟩
+  have h5 := h3.paste_vert h4
+  rw [Category.comp_id] at h5
+  simpa only [Category.assoc] using h5
+
+include hPB in
+/-- The restricted square with the classifying test map in algebra form. -/
+theorem classifying_isPullback' :
+    letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+      (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+    IsPullback (pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R))
+      (pullback.snd Y.curve.π D.U.1.ι ≫ D.U.2.isoSpec.hom)
+      (projModelπ (tateCurveLocOver R))
+      (Spec.map (CommRingCat.ofHom
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)))) := by
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  have hof : CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) =
+      Spec.preimage (D.classifyingSpecMap fb) := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  rw [hof, Spec.map_preimage]
+  exact D.classifying_isPullback fb ftop hPB
+
+variable (hzw : Y.curve.zero ≫ ftop = fb ≫ (tateUniversal R).zero)
+
+/-- **The induced marked chart** of a classifying square over a chart of the base. -/
+noncomputable def inducedChart : MarkedChartData R Y :=
+  letI : Algebra (tateRingOver R) ↑Γ(Y.base, D.U.1) :=
+    (Spec.preimage (D.classifyingSpecMap fb)).hom.toAlgebra
+  { U := D.U
+    W := (tateCurveLocOver R).map (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))
+    hell := inferInstanceAs
+      (((tateCurveLocOver R).map
+        (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1))).IsElliptic)
+    e := pullbackChartIso (tateCurveLocOver R) (D.classifying_isPullback' fb ftop hPB)
+    heπ := pullbackChartIso_hom_π (tateCurveLocOver R)
+      (D.classifying_isPullback' fb ftop hPB)
+    hez := by
+      refine pullbackChartIso_zero (tateCurveLocOver R)
+        (D.classifying_isPullback' fb ftop hPB) _ ?_ ?_
+      · -- the zero lift splits the chart projection
+        rw [← Category.assoc]
+        have hs : (D.U.2.isoSpec.inv ≫ pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+            (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id,
+              Category.id_comp])) ≫ pullback.snd Y.curve.π D.U.1.ι =
+            D.U.2.isoSpec.inv := by
+          rw [Category.assoc, pullback.lift_snd, Category.comp_id]
+        rw [hs, Iso.inv_hom_id]
+      · -- the zero lift hits the atlas zero through the classifying square
+        have hz : (tateUniversal R).zero =
+            projModelZero (tateCurveLocOver R) ≫ eqToHom (tateUniversal_E_eq R).symm :=
+          eqToGeom_zero' (tateUniversal_geom R)
+        have hof : CommRingCat.ofHom (algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)) =
+            Spec.preimage (D.classifyingSpecMap fb) := by
+          rw [RingHom.algebraMap_toAlgebra]
+          exact CommRingCat.ofHom_hom _
+        rw [hof, Spec.map_preimage]
+        calc (D.U.2.isoSpec.inv ≫ pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+              (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id,
+                Category.id_comp])) ≫
+              (pullback.fst Y.curve.π D.U.1.ι ≫ ftop ≫ eqToHom (tateUniversal_E_eq R))
+            = D.U.2.isoSpec.inv ≫ (pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
+                (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id,
+                  Category.id_comp]) ≫ pullback.fst Y.curve.π D.U.1.ι) ≫
+                ftop ≫ eqToHom (tateUniversal_E_eq R) := by
+              simp only [Category.assoc]
+          _ = D.U.2.isoSpec.inv ≫ (D.U.1.ι ≫ Y.curve.zero) ≫
+                ftop ≫ eqToHom (tateUniversal_E_eq R) := by
+              rw [pullback.lift_fst]
+          _ = D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ (Y.curve.zero ≫ ftop) ≫
+                eqToHom (tateUniversal_E_eq R) := by
+              simp only [Category.assoc]
+          _ = D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ (fb ≫ (tateUniversal R).zero) ≫
+                eqToHom (tateUniversal_E_eq R) := by
+              rw [hzw]
+          _ = (D.U.2.isoSpec.inv ≫ D.U.1.ι ≫ fb) ≫ (tateUniversal R).zero ≫
+                eqToHom (tateUniversal_E_eq R) := by
+              simp only [Category.assoc]
+          _ = D.classifyingSpecMap fb ≫ projModelZero (tateCurveLocOver R) := by
+              rw [hz]
+              simp only [Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+              rfl }
+
+@[simp]
+theorem inducedChart_U : (D.inducedChart fb ftop hPB hzw).U = D.U := rfl
+
+end MarkedChartData
+
+end InducedChart
+
 end ModularCurves
