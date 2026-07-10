@@ -1,4 +1,5 @@
 import ModularCurves.GroupScheme.TranslationAction
+import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # Stable opens for the translation action
@@ -18,6 +19,7 @@ the chart co-action `[HG-C1b]`.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
+open scoped TensorProduct
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
@@ -163,6 +165,57 @@ is affine. -/
 theorem isAffineOpen_groupOpen : IsAffineOpen P.groupOpen := by
   haveI : IsFinite G.π := G.finite
   exact P.hV.preimage G.π
+
+/-- The three patch pieces are affine, so their `toSpecΓ` maps are isomorphisms. -/
+theorem isIso_toSpecΓ_V : IsIso P.V.toSpecΓ :=
+  P.hV.isoSpec_hom ▸ inferInstanceAs (IsIso P.hV.isoSpec.hom)
+
+theorem isIso_toSpecΓ_U : IsIso P.U.toSpecΓ :=
+  P.hU.isoSpec_hom ▸ inferInstanceAs (IsIso P.hU.isoSpec.hom)
+
+theorem isIso_toSpecΓ_groupOpen : IsIso P.groupOpen.toSpecΓ :=
+  P.isAffineOpen_groupOpen.isoSpec_hom ▸
+    inferInstanceAs (IsIso P.isAffineOpen_groupOpen.isoSpec.hom)
+
+/-- **Step 4a of the chart Künneth**: write the patch-level fibre product with
+`Spec`-legs, via the `toSpecΓ` isomorphisms and the `appLE`-naturality squares. -/
+noncomputable def kunnethToSpec :
+    pullback P.groupToBase P.chartToBase
+      ≅ pullback (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+          (Spec.map (E.π.appLE P.V P.U P.hover)) := by
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_U
+  haveI := P.isIso_toSpecΓ_groupOpen
+  exact asIso (pullback.map P.groupToBase P.chartToBase _ _
+    P.groupOpen.toSpecΓ P.U.toSpecΓ P.V.toSpecΓ
+    (by
+      rw [show P.groupToBase = G.π.resLE P.V P.groupOpen le_rfl from
+        (Scheme.Hom.resLE_eq_morphismRestrict (f := G.π) (U := P.V)).symm]
+      exact (Scheme.Opens.toSpecΓ_SpecMap_appLE G.π P.V P.groupOpen le_rfl).symm)
+    (by
+      exact (Scheme.Opens.toSpecΓ_SpecMap_appLE E.π P.V P.U P.hover).symm))
+
+/-- **Step 4b of the chart Künneth**: the patch-level fibre product is the `Spec` of the
+tensor product of the patch rings (the legs align with `pullbackSpecIso`'s by `rfl`:
+the algebra structures were *defined* as the `appLE` maps). -/
+noncomputable def kunnethSpecIso :
+    pullback P.groupToBase P.chartToBase
+      ≅ Spec (.of (P.groupRing ⊗[P.baseRing] P.chartRing)) :=
+  P.kunnethToSpec ≪≫ pullbackSpecIso P.baseRing P.groupRing P.chartRing
+
+/-- The full scheme-level identification, assembled. -/
+noncomputable def chartSpecIso :
+    pullback G.π (P.U.ι ≫ E.π) ≅ Spec (.of (P.groupRing ⊗[P.baseRing] P.chartRing)) :=
+  P.chartKunnethSchemeIso ≪≫ P.kunnethSpecIso
+
+/-- **The chart co-action, ring level**: chart sections pulled back along the restricted
+translation action, landing in the tensor product of the patch rings (`A ⊗[R] B`,
+group-factor first; the comodule-convention swap to `B ⊗[R] A` happens in the
+`StableAffineChartData` assembly `[HG-C1d]`). -/
+noncomputable def coactionRing :
+    P.chartRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.chartRing) :=
+  P.coactionToPullback ≫ P.chartSpecIso.inv.appTop
+    ≫ (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.chartRing))).hom
 
 end AffineChartPatch
 
