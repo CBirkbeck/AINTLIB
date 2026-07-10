@@ -15122,3 +15122,19 @@ onto current dev, re-verify green (single targets); (2) land PR #5223 (T-B5D-A +
 hypothesis-funneled against the named gate; (4) PARK at the gate: **fires when c5β boards
 T-G4 landing** — then: packaging (b) → hz-fix + map_add' fill on y1 → L-BC → MASTER →
 `torsionπ_etale` → six Y1-E leaves open + [T-B6′] retires.
+
+## Amendments v10.113 (c5β) — T-G4 machinery VALIDATED (mulModelHom_comm transported); Over-level in flight
+
+`mulModelHom_comm` (91da1210c, axiom-clean): commutativity of `mulModelHom` for EVERY elliptic W over
+EVERY R, base-changed off the atlas — the first group axiom transported. Validates the whole T-G4
+recipe: `(isPullback_projModelBaseChangeOf classify uWLU W h).hom_ext` with BC-leg =
+`mulModelHomBC_baseChange` + (pbSym ⟷ pullbackMapBaseChangeOf commutation, `hsym`) + raw atlas comm via
+the atlas bridge `mulModelHom_universalWeierstrassLocU`; π-leg = `mulModelHom_π` + `pullbackSymmetry_hom_comp_fst`
++ `pullback.condition`. `mulModelHom W ≫ projModelBaseChangeOf = mulModelHomBC_baseChange` holds by defeq
+(GLC `mulModelHom W` unfolds to `mulModelHomBC …`), so no `mulModelHom` unfold needed — use `show _ = mulModelHom W ≫ _`.
+
+Agent extending to the 5 Over-level canonical axioms (`mulOver_*`) in GroupLawAxioms `section Transport`:
+`OverMorphism.ext` → π-leg automatic (Over-morphisms from same source) + BC-leg via whisker/associator
+base-change naturality (pullback.map/lift commute with base change since all built from the same
+`projModelBaseChangeOf`). Requires removing GLC's 5 sorried statements (verified zero code refs) to free
+the names — the recommended option (a) from v10.112, executed on this frontier (reversible).
