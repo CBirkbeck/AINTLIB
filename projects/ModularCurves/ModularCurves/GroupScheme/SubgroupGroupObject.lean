@@ -135,11 +135,9 @@ theorem over_hom_ext {X : Over S} {f g : X ⟶ Over.mk G.π}
 pointwise group of `Over S`-morphisms into the group object `E.asOver`. This is the shape
 in which the group-object laws are checked. -/
 theorem mulOver_comp_ιOver :
-    letI : CommGroup ((Over.mk G.π ⊗ Over.mk G.π) ⟶ E.asOver) := Hom.commGroup
     G.mulOver ≫ G.ιOver
       = (fst (Over.mk G.π) (Over.mk G.π) ≫ G.ιOver)
         * (snd (Over.mk G.π) (Over.mk G.π) ≫ G.ιOver) := by
-  letI : CommGroup ((Over.mk G.π ⊗ Over.mk G.π) ⟶ E.asOver) := Hom.commGroup
   refine Over.OverMorphism.ext ?_
   show G.mulHom ≫ G.ι = _
   rw [G.mulHom_ι]
@@ -147,9 +145,7 @@ theorem mulOver_comp_ιOver :
 
 /-- The hom-group form of the unit. -/
 theorem unitOver_comp_ιOver :
-    letI : CommGroup ((𝟙_ (Over S)) ⟶ E.asOver) := Hom.commGroup
     G.unitOver ≫ G.ιOver = 1 := by
-  letI : CommGroup ((𝟙_ (Over S)) ⟶ E.asOver) := Hom.commGroup
   refine Over.OverMorphism.ext ?_
   show G.unitHom ≫ G.ι = _
   have h1 : ((1 : (𝟙_ (Over S)) ⟶ E.asOver)).left = E.zero := by
@@ -160,13 +156,52 @@ theorem unitOver_comp_ιOver :
 
 /-- The hom-group form of inversion. -/
 theorem invOver_comp_ιOver :
-    letI : CommGroup (Over.mk G.π ⟶ E.asOver) := Hom.commGroup
     G.invOver ≫ G.ιOver = (G.ιOver)⁻¹ := by
-  letI : CommGroup (Over.mk G.π ⟶ E.asOver) := Hom.commGroup
   refine Over.OverMorphism.ext ?_
   show G.invHom ≫ G.ι = _
   rw [G.invHom_ι]
   rfl
+
+/-! ### The group-object laws, by `ι`-cancellation
+
+The pointwise `CommGroup` on homs into `E.asOver` is the scoped instance
+`MonObj.Hom.commGroup`, active here through the `MonObj` namespace. -/
+
+/-- The general precomposition form of `mulOver_comp_ιOver`. -/
+theorem comp_mulOver_comp_ιOver {X : Over S} (h : X ⟶ Over.mk G.π ⊗ Over.mk G.π) :
+    h ≫ G.mulOver ≫ G.ιOver
+      = (h ≫ fst (Over.mk G.π) (Over.mk G.π) ≫ G.ιOver)
+        * (h ≫ snd (Over.mk G.π) (Over.mk G.π) ≫ G.ιOver) := by
+  rw [G.mulOver_comp_ιOver, MonObj.comp_mul]
+
+/-- **Associativity**: `μ ∘ (𝟙 ⊗ μ) ∘ α = μ ∘ (μ ⊗ 𝟙)`. -/
+theorem mulOver_assoc :
+    (α_ (Over.mk G.π) (Over.mk G.π) (Over.mk G.π)).hom
+        ≫ (𝟙 (Over.mk G.π) ⊗ₘ G.mulOver) ≫ G.mulOver
+      = (G.mulOver ⊗ₘ 𝟙 (Over.mk G.π)) ≫ G.mulOver := by
+  refine G.over_hom_ext ?_
+  simp only [Category.assoc, G.comp_mulOver_comp_ιOver, MonObj.comp_mul,
+    tensorHom_fst_assoc, tensorHom_snd_assoc, associator_hom_fst_assoc,
+    associator_hom_snd_fst_assoc, associator_hom_snd_snd_assoc, Category.id_comp]
+  rw [_root_.mul_assoc]
+
+/-- **Left unit law**: `μ ∘ (e ⊗ 𝟙) = λ`. -/
+theorem unitOver_mulOver_left :
+    (G.unitOver ⊗ₘ 𝟙 (Over.mk G.π)) ≫ G.mulOver = (λ_ (Over.mk G.π)).hom := by
+  refine G.over_hom_ext ?_
+  rw [Category.assoc, G.comp_mulOver_comp_ιOver]
+  simp only [tensorHom_fst_assoc, tensorHom_snd_assoc, Category.id_comp,
+    G.unitOver_comp_ιOver, MonObj.comp_one, _root_.one_mul, leftUnitor_hom]
+
+/-- **Left inverse law**: `μ ∘ ⟨S, 𝟙⟩ = e ∘ !`. -/
+theorem invOver_mulOver_left :
+    lift G.invOver (𝟙 (Over.mk G.π)) ≫ G.mulOver
+      = toUnit (Over.mk G.π) ≫ G.unitOver := by
+  refine G.over_hom_ext ?_
+  rw [Category.assoc, G.comp_mulOver_comp_ιOver]
+  simp only [lift_fst_assoc, lift_snd_assoc, Category.id_comp,
+    G.invOver_comp_ιOver, _root_.inv_mul_cancel, Category.assoc,
+    G.unitOver_comp_ιOver, MonObj.comp_one]
 
 end FiniteLocallyFreeSubgroup
 
