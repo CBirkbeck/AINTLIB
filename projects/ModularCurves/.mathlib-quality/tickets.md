@@ -14018,3 +14018,28 @@ the étale legs land — deferred behind this decompose per dispatch discretion.
 - **Phase B opener (owner fires)**: "Resume CHARTER-FP4 Phase B per v10.99/v10.102:
   read phase-b-launchpad.md first, then /develop --decompose α_univ-descent → the
   representability bijection → T-E5c → Y(N) route A + Γ_H."
+
+### v10.106 (2026-07-10, NEW-HOPF): ★ [CHARTER-HOPF] [HG-C1b] COMPLETE — the chart co-action exists at ring level
+
+*Zero sorries, axiom-clean. `GroupScheme/StableCharts.lean` now carries the full chart
+dictionary:*
+
+- `IsStableOpen` / `restrictedAction` / `AffineChartPatch` (affine base patch `V` +
+  stable affine chart `U` over it) with derived `baseRing R`/`chartRing B`/`groupRing A`
+  (algebra structures := the `appLE` maps — the alignment that makes everything else
+  rfl);
+- the scheme-level Künneth chain: `restrictedDomainIso` (pr⁻¹U ≅ (G×ₛE)×_E U) →
+  `chartPullbackIso` (≅ G ×ₛ U) → `pullbackToVLevel` (S-level = V-level) →
+  `pullbackToPatchLevel` → `chartKunnethSchemeIso` → `kunnethToSpec` (toSpecΓ +
+  `toSpecΓ_SpecMap_appLE` naturality) → `kunnethSpecIso`/`chartSpecIso`
+  (`pullbackSpecIso` — legs match BY RFL because the algebras are the appLE maps);
+- **`coactionRing : B ⟶ CommRingCat.of (A ⊗[R] B)`** — chart sections pulled back along
+  the restricted translation action, through the whole chain.
+
+**NEXT** ([HG-C1c/d]): upgrade to `→ₐ[R]` (R-linearity from over-V-ness of the
+restricted action) + the comodule-convention swap (A⊗B → B⊗A via
+`Algebra.TensorProduct.comm`), then `IsCoaction` (counit from the identity-section,
+coassoc from action-associativity, both appLE-functoriality chases against the
+group-object diagrams), then `StableAffineChartData`-assembly consuming C2's
+closed-immersion (Γ-surjectivity on charts). Then [C3] covers, [C4] glue ⟹ pins ⟹
+**BOARD-SIGNAL (NISOG L6 + p0 pickup)** per v10.98 orders.
