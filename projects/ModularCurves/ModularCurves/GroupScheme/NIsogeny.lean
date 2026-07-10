@@ -1787,6 +1787,89 @@ theorem generatorSpace_spec (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
         E.IsDivisorGenerator N D t (Point.asSection E t P)) :=
   (E.exists_generatorLocus N D hD).choose_spec
 
+/-- Kernels of closed immersions transport along a postcomposed isomorphism (sealed;
+the per-factor step of the order-divisor pasting naturality). -/
+private theorem generatorSpace_baseChange_ker_comap {X Y Z : Scheme.{u}} (v : X ⟶ Y)
+    (e : Y ⟶ Z) [IsClosedImmersion v] [IsIso e] :
+    (Scheme.Hom.ker (v ≫ e)).comap e = v.ker := by
+  rw [← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (v ≫ e) e]
+  have h : IsPullback v (𝟙 X) e (v ≫ e) := IsPullback.of_vert_isIso ⟨by simp⟩
+  rw [show pullback.fst e (v ≫ e) = h.isoPullback.inv ≫ v from
+    (Iso.eq_inv_comp _).mpr h.isoPullback_hom_fst, Scheme.Hom.ker_comp_of_isIso]
+
+/-- Containment of the base-changed divisor ideal in a kernel is containment of the
+divisor ideal in the kernel of the `E`-projected value (sealed; both directions of the
+generator-scheme factoring transport). -/
+private theorem generatorSpace_baseChange_le_ker_iff (D : RelEffCartierDiv E.π)
+    {T Q : Scheme.{u}} (t : T ⟶ S) (v : Q ⟶ pullback E.π t) :
+    (D.baseChange t).ideal ≤ Scheme.Hom.ker v ↔
+      D.ideal ≤ Scheme.Hom.ker (v ≫ pullback.fst E.π t) := by
+  rw [RelEffCartierDiv.baseChange_ideal,
+    show Scheme.Hom.ker (v ≫ pullback.fst E.π t) =
+        (Scheme.Hom.ker v).map (pullback.fst E.π t) from by
+      rw [← Scheme.IdealSheafData.map_bot, ← Scheme.IdealSheafData.map_bot,
+        Scheme.IdealSheafData.map_comp],
+    Scheme.IdealSheafData.le_map_iff_comap_le]
+
+/-- The value of an integer multiple of the original point, pulled back through the
+pasting isomorphism, is the value of the multiple of the transported point (sealed; the
+morphism-level input to the order-divisor pasting naturality — stated with `ψ.inv` so the
+whole equation elaborates at the raw iterated-pullback spelling). -/
+private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶ S)
+    (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
+    (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (m : ℤ) :
+    subgroupLocusAux_val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
+        (pullbackLeftPullbackSndIso E.π t q).inv =
+      subgroupLocusAux_val (E.baseChange t) q
+        (m • EllipticCurve.Point.asSection (E.baseChange t) q P') := by
+  have hsmul' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q)
+        (pullback E.π t)
+        (subgroupLocusAux_val (E.baseChange t) q
+          (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
+        (pullback.fst (pullback.snd E.π t) q) =
+      (P'.1 : Q ⟶ pullback E.π t) ≫ (E.baseChange t).mulByHom m :=
+    exactOrderLocusAux_val_smul_asSection_fst (E.baseChange t) q m P'
+  have hval' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q) Q
+        (subgroupLocusAux_val (E.baseChange t) q
+          (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
+        (pullback.snd (pullback.snd E.π t) q) =
+      𝟙 Q :=
+    subgroupLocusAux_val_snd (E.baseChange t) q _
+  have hmul' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) E.E
+      ((E.baseChange t).mulByHom m) (pullback.fst E.π t) =
+      pullback.fst E.π t ≫ E.mulByHom m :=
+    EllipticCurve.mulByHom_baseChange_fst E t m
+  have hmulsnd' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) T
+      ((E.baseChange t).mulByHom m) (pullback.snd E.π t) = pullback.snd E.π t :=
+    EllipticCurve.mulByHom_baseChange_snd E t m
+  have hP'2 : @CategoryStruct.comp Scheme _ Q (pullback E.π t) T P'.1
+      (pullback.snd E.π t) = q := P'.2
+  have hPP'' : @CategoryStruct.comp Scheme _ Q (pullback E.π t) E.E P'.1
+      (pullback.fst E.π t) = P.1 := hPP'
+  have hkey₁ : @CategoryStruct.comp Scheme _ Q (pullback E.π t) E.E
+      (@CategoryStruct.comp Scheme _ Q (pullback E.π t) (pullback E.π t) P'.1
+        ((E.baseChange t).mulByHom m))
+      (pullback.fst E.π t) = P.1 ≫ E.mulByHom m := by
+    rw [Category.assoc, hmul', ← Category.assoc, hPP'']
+  have hkey₂ : @CategoryStruct.comp Scheme _ Q (pullback E.π t) T
+      (@CategoryStruct.comp Scheme _ Q (pullback E.π t) (pullback E.π t) P'.1
+        ((E.baseChange t).mulByHom m))
+      (pullback.snd E.π t) = q := by
+    rw [Category.assoc, hmulsnd', hP'2]
+  apply pullback.hom_ext
+  · -- the `pullback E.π t`-component: compare both `E`- and `T`-legs
+    rw [Category.assoc, hsmul']
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst,
+        exactOrderLocusAux_val_smul_asSection_fst E (q ≫ t) m P]
+      exact hkey₁.symm
+    · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst_snd,
+        ← Category.assoc, subgroupLocusAux_val_snd, Category.id_comp]
+      exact hkey₂.symm
+  · rw [Category.assoc, pullbackLeftPullbackSndIso_inv_snd_snd, hval',
+      subgroupLocusAux_val_snd]
+
+
 /-- **(KM 6.1, "formation commutes with arbitrary change of base")** The generator scheme
 of the base-changed divisor is the base change of the generator scheme. Dischargeable from
 the universal property (`generatorSpace_spec` on both sides + Yoneda); no new gates. -/
