@@ -1328,4 +1328,40 @@ noncomputable def Pic.map {X Y : Scheme.{u}} (f : Y ⟶ X) : Pic X →* Pic Y :=
   letI : (Modules.pullback f).Monoidal := (Modules.nonempty_pullback_monoidal f).some
   Units.map (Skeleton.monoidHom (F := Modules.pullback f))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The Picard functor preserves identities. -/
+theorem Pic.map_id (X : Scheme.{u}) : Pic.map (𝟙 X) = MonoidHom.id (Pic X) := by
+  letI := Modules.monoidalCategory X
+  refine MonoidHom.ext (fun u => Units.ext ?_)
+  show (Modules.pullback (𝟙 X)).mapSkeleton.obj u.val = u.val
+  exact Quotient.inductionOn u.val (fun M =>
+    (Functor.mapSkeleton_obj_toSkeleton (Modules.pullback (𝟙 X)) M).trans
+      (Quotient.sound ⟨(Modules.pullbackId X).app M⟩))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Value form of the Picard functor: the underlying iso-class map is the skeleton map of
+the pullback. -/
+lemma Pic.map_val {X Y : Scheme.{u}} (f : Y ⟶ X) (u : Pic X) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.monoidalCategory Y
+    (Pic.map f u).val = (Modules.pullback f).mapSkeleton.obj u.val :=
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The Picard functor preserves composition (contravariantly). -/
+theorem Pic.map_comp {X Y Z : Scheme.{u}} (g : Z ⟶ Y) (f : Y ⟶ X) :
+    Pic.map (g ≫ f) = (Pic.map g).comp (Pic.map f) := by
+  letI := Modules.monoidalCategory X
+  letI := Modules.monoidalCategory Y
+  letI := Modules.monoidalCategory Z
+  -- WIP (fable-PIC0, v10.125): the mapSkeleton-route works for `map_id`; here the
+  -- composite's double `.some`-unfold makes the elementwise defeq-check whnf-explode.
+  -- Route banked on the board: `Pic.map_val`-rewrites + `Quotient.inductionOn` +
+  -- `Modules.pullbackComp`-`Quotient.sound`; needs a whnf-tamed spelling
+  -- (`Skeletal.monoidHom`-level ext, or `mapSkeleton_obj_toSkeleton` mirrors).
+  sorry
+
 end AlgebraicGeometry.Scheme
