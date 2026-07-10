@@ -632,6 +632,36 @@ theorem mulModelHom_comm (W : WeierstrassCurve R) [W.IsElliptic] :
     rw [mulModelHom_π, ← Category.assoc, pullbackSymmetry_hom_comp_fst]
     exact (pullback.condition).symm
 
+/-- **(T-W7.0g-comm)** Commutativity of the two-law multiplication, as the braided
+monoid-object equation in `Over (Spec R)`, for every elliptic `W` over every `R`. -/
+theorem mulOver_comm (W : WeierstrassCurve R) [W.IsElliptic] :
+    (β_ (modelOver W) (modelOver W)).hom ≫ mulOver W = mulOver W := by
+  apply Over.OverMorphism.ext
+  rw [Over.comp_left, Over.braiding_hom_left, mulOver_left]
+  exact mulModelHom_comm W
+
+/-- **(T-W7.0g-assoc)** Associativity, as the monoid-object equation in `Over (Spec R)`. -/
+theorem mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic] :
+    (mulOver W ▷ modelOver W) ≫ mulOver W =
+      (α_ (modelOver W) (modelOver W) (modelOver W)).hom ≫
+        (modelOver W ◁ mulOver W) ≫ mulOver W := by
+  sorry
+
+/-- **(T-W7.0g-one-mul)** Left unit law. -/
+theorem oneOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
+    (oneOver W ▷ modelOver W) ≫ mulOver W = (λ_ (modelOver W)).hom := by
+  sorry
+
+/-- **(T-W7.0g-mul-one)** Right unit law. -/
+theorem mulOver_oneOver (W : WeierstrassCurve R) [W.IsElliptic] :
+    (modelOver W ◁ oneOver W) ≫ mulOver W = (ρ_ (modelOver W)).hom := by
+  sorry
+
+/-- **(T-W7.0g-inv-law)** The left inverse law. -/
+theorem invOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
+    lift (invOver W) (𝟙 (modelOver W)) ≫ mulOver W = toUnit (modelOver W) ≫ oneOver W := by
+  sorry
+
 end Transport
 
 end ModularCurves

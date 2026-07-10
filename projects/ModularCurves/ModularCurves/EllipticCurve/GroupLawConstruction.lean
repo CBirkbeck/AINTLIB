@@ -902,37 +902,6 @@ noncomputable def invOver : modelOver W ⟶ modelOver W :=
 theorem invOver_left : (invOver W).left = negModelHom W :=
   rfl
 
-/-- **(T-W7.0g-assoc)** Associativity, as the monoid-object equation in `Over (Spec R)`.
-Proof route: over the universal atlas by field-points extensionality + the dictionary +
-mathlib's `add_assoc` on `Affine.Point`; then for every `R` by instantiating the naturality
-`mulModelHom_map` along the classifying map. Source: reviewer round 1 §Q4/Q5; audit A5/A6;
-GIT-free, cohomology-free. -/
-theorem mulOver_assoc :
-    (mulOver W ▷ modelOver W) ≫ mulOver W =
-      (α_ (modelOver W) (modelOver W) (modelOver W)).hom ≫
-        (modelOver W ◁ mulOver W) ≫ mulOver W := by
-  sorry
-
-/-- **(T-W7.0g-one-mul)** Left unit law. -/
-theorem oneOver_mulOver :
-    (oneOver W ▷ modelOver W) ≫ mulOver W = (λ_ (modelOver W)).hom := by
-  sorry
-
-/-- **(T-W7.0g-mul-one)** Right unit law. -/
-theorem mulOver_oneOver :
-    (modelOver W ◁ oneOver W) ≫ mulOver W = (ρ_ (modelOver W)).hom := by
-  sorry
-
-/-- **(T-W7.0g-comm)** Commutativity. -/
-theorem mulOver_comm :
-    (β_ (modelOver W) (modelOver W)).hom ≫ mulOver W = mulOver W := by
-  sorry
-
-/-- **(T-W7.0g-inv-law)** The left inverse law. -/
-theorem invOver_mulOver :
-    lift (invOver W) (𝟙 (modelOver W)) ≫ mulOver W = toUnit (modelOver W) ≫ oneOver W := by
-  sorry
-
 /-! ## Lane P1 (with P3): variable-change equivariance -/
 
 /-- **(T-W7.0h)** Global variable-change equivariance of the multiplication morphism:
