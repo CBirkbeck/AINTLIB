@@ -103,4 +103,56 @@ theorem bijective_galoisProductMap_of_basis
 
 end GeneralizedGalois
 
+section FlatCoverInjectivity
+
+variable {C : Type*} [CommRing C]
+variable {M : Type*} [AddCommGroup M] [Module C M]
+variable {N : Type*} [AddCommGroup N] [Module C N]
+
+/-- **Flat-cover injectivity**: a linear map over `C` is injective as soon as its base
+change to every flat local extension `IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)`
+(`P` maximal) is injective. The extensions are faithfully flat over each localization,
+so the kernel vanishes locally, hence globally. -/
+theorem injective_of_forall_lTensor_localPolynomialExtension (F : M →ₗ[C] N)
+    (H : ∀ (P : Ideal C) [P.IsMaximal], Function.Injective
+      (LinearMap.lTensor (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) F)) :
+    Function.Injective F := by
+  intro x y hxy
+  haveI hloc : ∀ (P : Ideal C) [P.IsMaximal], IsLocalizedModule P.primeCompl
+      (TensorProduct.mk C (Localization.AtPrime P) M 1) := fun P _ =>
+    (isLocalizedModule_iff_isBaseChange P.primeCompl (Localization.AtPrime P) _).mpr
+      (TensorProduct.isBaseChange C M (Localization.AtPrime P))
+  refine Module.eq_of_localization_maximal
+    (fun P _ => (Localization.AtPrime P) ⊗[C] M)
+    (fun P _ => TensorProduct.mk C (Localization.AtPrime P) M 1)
+    x y (fun P hP => ?_)
+  -- pass from the localization to the flat local extension, where `H` applies
+  have hmkinj : Function.Injective (TensorProduct.mk (Localization.AtPrime P)
+      (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+      ((Localization.AtPrime P) ⊗[C] M) 1) :=
+    Module.FaithfullyFlat.tensorProduct_mk_injective _
+  have hcancelinj := (TensorProduct.AlgebraTensorModule.cancelBaseChange C
+    (Localization.AtPrime P) (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+    (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) M).injective
+  apply hmkinj
+  apply hcancelinj
+  -- compute both composites down to `1 ⊗ₜ[C] _` in the extension
+  have hval : ∀ m : M,
+      (TensorProduct.AlgebraTensorModule.cancelBaseChange C
+        (Localization.AtPrime P) (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+        (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) M)
+      (TensorProduct.mk (Localization.AtPrime P)
+        (IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P))
+        ((Localization.AtPrime P) ⊗[C] M) 1
+        (TensorProduct.mk C (Localization.AtPrime P) M 1 m))
+      = (1 : IsLocalRing.LocalPolynomialExtension (Localization.AtPrime P)) ⊗ₜ[C] m := by
+    intro m
+    rw [TensorProduct.mk_apply, TensorProduct.mk_apply,
+      TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, one_smul]
+  rw [hval x, hval y]
+  exact H P (by
+    rw [LinearMap.lTensor_tmul, LinearMap.lTensor_tmul, hxy])
+
+end FlatCoverInjectivity
+
 end ModularCurves
