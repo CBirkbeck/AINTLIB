@@ -14293,3 +14293,21 @@ my A-packaging's map-derivation; their unit-sided isos are the unitality legs) a
 B-chain doubles (recommend: keep their data-level oplax def as canonical, graft my rfl-coherence
 proofs/transport-packaging where shorter — coordinator's merge call); (iii) until integration I
 consume nothing from the local branch (owner-reserved), so no import-dependency is created.
+
+### v10.107 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-ii] scheme side COMPLETE — the chart co-action is over the base patch
+
+*Zero sorries, axiom-clean.* `chartCoactionSpec_over` (`StableCharts.lean`): the whole
+Künneth chain + restricted action, as one Spec-side morphism, composes with the patch
+structure map to the canonical `algebraMap R (A ⊗[R] B)` — via three bounded pieces:
+the over-V lemmas (both restricted legs), **(L2)** `chartPullbackIso_inv_comp_prOpenToBase`
+(cancel_mono `V.ι` + `pullback.condition` algebra), **(L3)** `chartSpecIso_hom_base`
+(mathlib's `pullbackSpecIso_hom_base` + `toSpecΓ_SpecMap_appLE` + patch-level condition +
+the Künneth snd-compat chase). Remaining for C1c: the Γ-level transfer (appTop of the
+over-lemma + topIso/ΓSpecIso bookkeeping ⟹ `coactionRing` R-linear ⟹ `coactionAlg :
+B →ₐ[R] A⊗[R]B` + comm-swap), then counit/coassoc (scheme-level-first per bank). Then
+C1d/C3/C4 → pins → BOARD-SIGNAL.
+
+Lean-ops: `reassoc_of%` needs parenthesized application `(reassoc_of% h) x`; when a
+have's projection-spelling differs from a lemma's (appLE vs ofHom-algebraMap — rfl-equal),
+respell the HAVE's statement in the consumer's spelling (defeq-ascription) rather than
+rw-ing mid-chain.
