@@ -78,7 +78,42 @@ theorem FinitePresentation.of_retract {R A B : Type u} [CommRing R] [CommRing A]
     [Algebra R A] [Algebra R B] [FinitePresentation R B]
     (σ : A →ₐ[R] B) (ρ : B →ₐ[R] A) (hρσ : ρ.comp σ = AlgHom.id R A) :
     FinitePresentation R A := by
-  sorry
+  classical
+  have hρσ' : ∀ a : A, ρ (σ a) = a := fun a => AlgHom.congr_fun hρσ a
+  have hρ : Function.Surjective ρ := fun a => ⟨σ a, hρσ' a⟩
+  -- a finite algebra generating set of `B`
+  obtain ⟨s, hs⟩ := (Algebra.FiniteType.of_finitePresentation : Algebra.FiniteType R B).out
+  -- the finitely generated candidate for `ker ρ`
+  set J : Ideal B := Ideal.span ((fun b => b - σ (ρ b)) '' ↑s) with hJ
+  have hJfg : J.FG := ⟨s.image fun b => b - σ (ρ b), by rw [hJ, Finset.coe_image]⟩
+  -- `J ≤ ker ρ`
+  have hJle : J ≤ RingHom.ker ρ := by
+    rw [hJ, Ideal.span_le]
+    rintro - ⟨b, -, rfl⟩
+    simp only [SetLike.mem_coe, RingHom.mem_ker, map_sub, hρσ' (ρ b), sub_self]
+  -- `ker ρ ≤ J`: mod `J`, the endomorphism `σ ∘ ρ` is the identity on generators
+  have hker : RingHom.ker ρ = J := by
+    refine le_antisymm (fun x hx => ?_) hJle
+    have hq : (Ideal.Quotient.mkₐ R J).comp (σ.comp ρ) = Ideal.Quotient.mkₐ R J := by
+      have hle : Algebra.adjoin R (↑s : Set B) ≤
+          AlgHom.equalizer ((Ideal.Quotient.mkₐ R J).comp (σ.comp ρ))
+            (Ideal.Quotient.mkₐ R J) := by
+        refine Algebra.adjoin_le fun b hb => ?_
+        show Ideal.Quotient.mkₐ R J (σ (ρ b)) = Ideal.Quotient.mkₐ R J b
+        rw [eq_comm, ← sub_eq_zero, ← map_sub]
+        exact Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.subset_span ⟨b, hb, rfl⟩)
+      refine AlgHom.ext fun b => ?_
+      exact hle (hs ▸ Algebra.mem_top : b ∈ Algebra.adjoin R (↑s : Set B))
+    have hx0 : Ideal.Quotient.mkₐ R J x = 0 := by
+      have := AlgHom.congr_fun hq x
+      simp only [AlgHom.comp_apply] at this
+      rw [← this, RingHom.mem_ker.1 hx, map_zero, map_zero]
+    exact Ideal.Quotient.eq_zero_iff_mem.1 hx0
+  -- conclude: `A ≃ B ⧸ ker ρ = B ⧸ J`, a quotient of an FP algebra by an FG ideal
+  haveI : FinitePresentation R (B ⧸ J) := FinitePresentation.quotient hJfg
+  exact FinitePresentation.equiv
+    ((Ideal.quotientEquivAlgOfEq R hker.symm).trans
+      (Ideal.quotientKerAlgEquivOfSurjective hρ))
 
 /-! ## [KL-1] The canonical presentation system of an algebra -/
 
@@ -104,14 +139,39 @@ def Index.incl {P Q : Index R A} (h : P.vars ⊆ Q.vars) :
     {a // a ∈ P.vars} → {a // a ∈ Q.vars} :=
   fun x => ⟨x.1, h x.2⟩
 
+/-- The inclusion along a reflexive containment is the identity (structure eta +
+proof irrelevance make this definitional). -/
+theorem Index.incl_rfl {P : Index R A} (h : P.vars ⊆ P.vars) :
+    Index.incl h = _root_.id := rfl
+
+/-- Inclusions compose (definitionally, by proof irrelevance). -/
+theorem Index.incl_comp {P Q S : Index R A} (h₁ : P.vars ⊆ Q.vars) (h₂ : Q.vars ⊆ S.vars) :
+    Index.incl (h₁.trans h₂) = Index.incl h₂ ∘ Index.incl h₁ := rfl
+
+/-- The inclusion does not depend on the containment proof. -/
+theorem Index.incl_irrel {P Q : Index R A} (h h' : P.vars ⊆ Q.vars) :
+    Index.incl h = Index.incl h' := rfl
+
+/-- Mapping an ideal along the rename by a reflexive inclusion is the identity. -/
+theorem Index.map_rename_incl_rfl {P : Index R A} (h : P.vars ⊆ P.vars)
+    (I : Ideal (MvPolynomial {a // a ∈ P.vars} R)) :
+    I.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _) = I := by
+  rw [Index.incl_rfl, MvPolynomial.rename_id]
+  exact (show I.map (AlgHom.id R _) = I.map (RingHom.id _) from rfl).trans (Ideal.map_id I)
+
 instance : Preorder (Index R A) where
   le P Q := ∃ h : P.vars ⊆ Q.vars,
-    P.rels.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _).toRingHom ≤ Q.rels
-  le_refl P := by
-    refine ⟨subset_rfl, ?_⟩
-    sorry
-  le_trans P Q S hPQ hQS := by
-    sorry
+    P.rels.map (MvPolynomial.rename (Index.incl h) : _ →ₐ[R] _) ≤ Q.rels
+  le_refl P := ⟨subset_rfl, le_of_eq (Index.map_rename_incl_rfl subset_rfl P.rels)⟩
+  le_trans P Q S := by
+    rintro ⟨h₁, hm₁⟩ ⟨h₂, hm₂⟩
+    refine ⟨h₁.trans h₂, ?_⟩
+    have hcomp : P.rels.map (MvPolynomial.rename (Index.incl (h₁.trans h₂)) : _ →ₐ[R] _)
+        = (P.rels.map (MvPolynomial.rename (Index.incl h₁) : _ →ₐ[R] _)).map
+            (MvPolynomial.rename (Index.incl h₂) : _ →ₐ[R] _) := by
+      rw [Ideal.map_mapₐ, MvPolynomial.rename_comp_rename, ← Index.incl_comp h₁ h₂]
+    rw [hcomp]
+    exact le_trans (Ideal.map_mono hm₁) hm₂
 
 variable (R A)
 
@@ -132,7 +192,7 @@ noncomputable instance (P : Index R A) : Algebra R (stage R A P) :=
 noncomputable def transition ⦃P Q : Index R A⦄ (h : P ≤ Q) :
     stage R A P →ₐ[R] stage R A Q :=
   Ideal.quotientMapₐ Q.rels (MvPolynomial.rename (Index.incl h.choose))
-    (by sorry)
+    (Ideal.map_le_iff_le_comap.1 h.choose_spec)
 
 /-- **[KL-1] cocone**: evaluation of variables in `A`, descended to the stage. -/
 noncomputable def colimMap (P : Index R A) : stage R A P →ₐ[R] A :=
@@ -142,8 +202,9 @@ noncomputable def colimMap (P : Index R A) : stage R A P →ₐ[R] A :=
 /-- **[KL-1a].** Every stage of the canonical presentation system is finitely presented
 over `R` (`MvPolynomial` on a finite type, quotient by an FG ideal). -/
 theorem stage_finitePresentation (P : Index R A) :
-    FinitePresentation R (stage R A P) := by
-  sorry
+    FinitePresentation R (stage R A P) :=
+  show FinitePresentation R (MvPolynomial {a // a ∈ P.vars} R ⧸ P.rels) from
+    FinitePresentation.quotient P.rels_fg
 
 /-- **[KL-1b] (Stacks 10.127.2).** The canonical presentation system is a filtered
 colimit presentation of `A`: directed (union of variables, sum of transported relations),
