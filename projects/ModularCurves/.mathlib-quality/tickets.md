@@ -13797,3 +13797,43 @@ elaboration-unification is more permissive than keyed matching.
   `universalChartMember` (the "pullback of the universal member is the member" lemma,
   via `chartMatrix_normMap` + matrix-uniqueness), then the affine equivalence, then
   `OpenCover.glueMorphisms` for general elements. All tools proven.
+
+## Amendments v10.97 (2026-07-10, coordinator): ★★★ Hopf–Galois crux PROVEN (NEW-HOPF); ★★★ grassmannianScheme EXISTS (fable-FP); [02KL-CORE] registered + routed; iso-leg BUILT (A); seven-lane absorb
+
+- **★★★ NEW-HOPF: the charter crux is PROVEN** — `isHopfGalois_of_surjective_galoisPrecursor`
+  (Stacks 03BM = SGA 3 Exp. V Thm 4.1, affine case, comodule form), zero sorries,
+  axiom-clean, pushed. M4 ([HG-B4] GAP-6 semilocality; [HG-B5] 03C8 bootstrap via
+  elementwise coassociativity — no Amitsur), M5 ([HG-B6] headline; DS-HOPF-1 filed AND
+  resolved same-day), wave C opened ([HG-C2] actPair closed immersion via the shear
+  automorphism; [HG-C1] ~60%). Walls banked for the fleet (Subalgebra.moduleLeft
+  poisoning; AlgHom-vs-module regimes; Prop-instance rw keying). **CONTINUE per the
+  banked appendices: C1b Künneth → C1c IsCoaction → C1d chart assembly → C3 stable
+  covers → C4 glue ⟹ the six SubgroupQuotient pins discharge — board-signal it:
+  NISOG L6 (D2) + p0's return pickup both read from it.**
+- **★★★ fable-FP: `Module.Grassmannian.grassmannianScheme R k n` EXISTS, fully proven**
+  (6199401d5) — every GlueData condition discharged (the cocycle via the matrix
+  telescope), no sorries, axiom-clean. ONE leaf left in the whole charter: **[GR-G]'s
+  body** (T-point classification) — **GO** (agent pool live again) — then NISOG [L15]
+  consumes directly; board-signal D2 on landing.
+- **NEW-GH: [02KL] scheme-level reduction PROVEN** (5ca151de3) modulo ONE named gate:
+  **[02KL-CORE] REGISTERED** (`RingHom.FinitePresentation.of_comp_of_faithfullyFlat`,
+  composite-reflection form — the banked recipe's codescendsAlong cite was pushout-form,
+  caught BEFORE building on it; absent from the pin in every guise; EGA IV
+  8.10.5/11.2.6 spreading-out profile). **ROUTING: [02KL-CORE] → fable-FP**, queued
+  after [GR-G] (the [A711-FP]-class hard-substrate fit; consume beastmode-A's ledger §8
+  gap audit — Stacks 01ZA/081D are exactly this substrate). NEW-GH: boundary RATIFIED;
+  next session = [02KM] on the located route (02KL + flat leg + FormallySmooth stalk
+  transport), then the MellW cadence cleanup tail.
+- **beastmode-A: the T-H8a iso-leg BUILT sorry-free** (3cf961074,
+  LevelStructure/IsoTransport.lean) — hypothesis-funneled exactly as dispatched;
+  exact-order transport needs only hμ (minimal hypotheses); +3 mathlib-shaped lemmas to
+  the draft pool. **The T-W7a falls-sweep is now mechanical END-TO-END.** A stays armed.
+- **D2: [L1-e0] the affine chart bridge COMPLETE** (ed046996d) — KM 6.4.3's geometric
+  heart; L1 at two designed consumer assemblies (hb-translation + e3 locality).
+  Continue per sentinel. **c5β**: GLC/group-axiom marathon mid-flight (keystone
+  scaffold 857ac5565; route pinned v10.94h) — driving, no dispatch needed. **PIC0**:
+  parked clean as ratified. **NEW-Y1**: triggers checked, correctly parked.
+- **Y1 GOAL CHECK (owner-requested)**: the T-W7a chain (c5β) is actively moving; A's
+  sweep is fully prepped; NEW-Y1 correctly trigger-parked. **The ONLY idle critical Y1
+  item is the atlas final assembly — NEW-ATLAS-2's session needs FIRING** (recipe
+  v10.109-ATLAS, dispatched v10.93/94, no report since).
