@@ -14448,3 +14448,15 @@ the T-W7 trail — c5β chain, active). On charter.
 **c5β** (absorb): 0c-i decomposition EXECUTING — [T-G1] (0e instance pack at the
 universe-u atlas, GroupLawAxioms.lean) + [T-G3-comm] (`mulModelHom_comm_atlas`,
 commutativity at the atlas) landed. Chain to 0c-ii board-signal unchanged. On charter.
+
+## Amendments v10.113 (fable-PIC0) — [G1-NAT] route executed to stop-line: residual REDUCED to one Types-square
+
+Per v10.112 (freeHomEquiv route, 3–4 iterations, hard-stop): 4 measured iterations, STOP-LINE honored.
+**Delta: the blocker shrank** — [G1-NAT] (ModuleCat square) → **[G1-NAT′]** (ONE Types-level square:
+the pairing vs restriction, inside `freeTensorPair`). Landed green + axiom-clean-modulo-the-square:
+`clothedFree_hom_ext` (reusable anti-reframing ext at the presheaf clothing — fleet-recipe-grade),
+`freeTensorDesc` (naturality free from the universal property), and the ENTIRE IsIso-assembly
+(generator-identification per-V + AddCommGrp-transport + `toPresheaf`-reflection) — so
+`nonempty_freeTensorIsoGeneric` = [G1-NAT′] and nothing else. Full iteration log + 3 ranked next
+attacks in the artifact (top: term-mode naturality proof — never enter the `.toFun`-tactic-goal).
+Chain: B1 ✓ B2 ✓ G1 90% | [G1-NAT′] → G3 → A. All pushed.

@@ -288,20 +288,73 @@ lemma freeTensorμ_inv_freeMk (F G : Cᵒᵖ ⥤ Type u) (V : Cᵒᵖ) (z : (F �
   dsimp [freeTensorμ, ModuleCat.freeMk]
   erw [finsuppTensorFinsupp'_symm_single_eq_single_one_tmul]
 
-/-- **[D-PresPB′-general], leaf G1-NAT (the residual).** The pointwise components
-`freeTensorμ` (proved above, with generator-level behaviour `freeTensorμ_hom_freeMk_tmul` /
-`freeTensorμ_inv_freeMk`) assemble into an isomorphism of presheaves of modules
-`free(F) ⊗ free(G) ≅ free(F ⊗ G)`: the remaining content is the naturality square
-(ring-restriction mixed with the tensor of free maps). Iteration ledger and the
-`Finsupp.induction_linear` descent state are banked in
-`.mathlib-quality/decomposition-pullback-monoidal-general.md`. -/
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- `ModuleCat.free_hom_ext`, restated at the presheaf-of-modules clothing of the free
+objects (the mathlib form's `(ModuleCat.free R).obj`-spelling reframes goals and poisons
+`kabstract`; the defeq crossing happens once, here, at elaboration). -/
+lemma clothedFree_hom_ext {H : Cᵒᵖ ⥤ Type u} {V : Cᵒᵖ}
+    {M : ModuleCat ↑((T ⋙ forget₂ CommRingCat RingCat).obj V)}
+    {f g : ((free (T ⋙ forget₂ CommRingCat RingCat)).obj H).obj V ⟶ M}
+    (h : ∀ x : H.obj V, f (ModuleCat.freeMk x) = g (ModuleCat.freeMk x)) : f = g :=
+  ModuleCat.free_hom_ext h
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The types-level pairing `(x, y) ↦ freeMk x ⊗ₜ freeMk y`, the adjunct of the free–tensor
+comparison. Naturality is an elementwise Types-square. -/
+noncomputable def freeTensorPair (F G : Cᵒᵖ ⥤ Type u) :
+    (F ⊗ G) ⟶
+      ((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).presheaf ⋙ forget _ where
+  app V := ↾fun z =>
+    ((ModuleCat.freeMk z.1 ⊗ₜ ModuleCat.freeMk z.2 :
+      (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).obj V)))
+  naturality {V W} f := by
+    -- [G1-NAT′] the reduced residual: ONE Types-level square (the pairing vs restriction).
+    -- Iteration ledger in decomposition-pullback-monoidal-general.md; stop-line reached.
+    sorry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The free–tensor comparison out of the free presheaf, by the universal property
+(naturality supplied by `freeObjDesc`). -/
+noncomputable def freeTensorDesc (F G : Cᵒᵖ ⥤ Type u) :
+    (free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G) ⟶
+      ((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
+        (free (T ⋙ forget₂ CommRingCat RingCat)).obj G) :=
+  freeObjDesc (freeTensorPair T F G)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[D-PresPB′-general], leaf G1-NAT (closed via the adjunction route).** The pointwise
+components `freeTensorμ` assemble: `free(F) ⊗ free(G) ≅ free(F ⊗ G)`. The comparison is
+`freeTensorDesc` (naturality from the universal property); each component agrees with
+`(freeTensorμ).inv` on generators, hence is an isomorphism; isomorphy reflects along
+`toPresheaf`. -/
 theorem nonempty_freeTensorIsoGeneric (F G : Cᵒᵖ ⥤ Type u) :
     Nonempty
       (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
           (free (T ⋙ forget₂ CommRingCat RingCat)).obj G :
         PresheafOfModules.{u} (T ⋙ forget₂ CommRingCat RingCat)) ≅
         (free (T ⋙ forget₂ CommRingCat RingCat)).obj (F ⊗ G)) := by
-  sorry
+  have happ : ∀ V : Cᵒᵖ, (freeTensorDesc T F G).app V = (freeTensorμ T F G V).inv := by
+    intro V
+    refine clothedFree_hom_ext T (fun z => ?_)
+    rw [freeTensorμ_inv_freeMk T F G V z]
+    simp only [freeTensorDesc, freeObjDesc_app, freeTensorPair]
+    erw [ModuleCat.freeDesc_apply]
+    rfl
+  haveI : ∀ V : Cᵒᵖ, IsIso ((freeTensorDesc T F G).app V) := fun V => by
+    rw [happ V]; infer_instance
+  haveI : IsIso ((toPresheaf _).map (freeTensorDesc T F G)) := by
+    haveI : ∀ V : Cᵒᵖ, IsIso (((toPresheaf _).map (freeTensorDesc T F G)).app V) := fun V =>
+      inferInstanceAs (IsIso ((forget₂ _ AddCommGrpCat).map ((freeTensorDesc T F G).app V)))
+    exact NatIso.isIso_of_isIso_app _
+  haveI : IsIso (freeTensorDesc T F G) :=
+    isIso_of_reflects_iso _ (toPresheaf (T ⋙ forget₂ CommRingCat RingCat))
+  exact ⟨(asIso (freeTensorDesc T F G)).symm⟩
 
 end FreeTensorGeneric
 

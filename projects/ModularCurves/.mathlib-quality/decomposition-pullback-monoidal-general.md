@@ -214,3 +214,34 @@ restate the naturality goal per-generator FIRST via `Finsupp.lhom_ext'`-applied 
 instances at the presheaf carriers; OR prove the square as `freeHomEquiv`-naturality
 (Free.lean's adjunction machinery — `freeHomEquiv_comp` both ways, no elementwise work).
 Estimated: 1 focused session-chunk.
+
+## [G1-NAT] delta-ledger — freeHomEquiv-adjunction route, 4 measured iterations (2026-07-10, session 4; STOP-LINE honored)
+
+**NET DELTA: the residual REDUCED.** [G1-NAT] (a ModuleCat naturality square mixing ring-restriction
+with the tensor of free maps — the 10-iteration wall) is now **[G1-NAT′]: ONE Types-level square**
+(the pairing `z ↦ freeMk z.1 ⊗ₜ freeMk z.2` vs restriction, inside `freeTensorPair`) — plain
+functions, no module clothing. Everything else on the route LANDED GREEN:
+- `clothedFree_hom_ext` — `ModuleCat.free_hom_ext` restated at the presheaf clothing (the mathlib
+  form's reframing poisoned kabstract twice; the defeq crossing now happens once, at elaboration).
+  **Reusable anti-reframing tool — add to the fleet recipe set.**
+- `freeTensorPair` (modulo the one square) + `freeTensorDesc` (naturality via `freeObjDesc` — the
+  universal property supplies it).
+- The FULL IsIso-assembly: per-V identification `happ : Desc.app V = (freeTensorμ V).inv` (via
+  `clothedFree_hom_ext` + generator-calc + closing `rfl`), per-V iso, transport to the underlying
+  AddCommGrp NatTrans (`NatIso.isIso_of_isIso_app`), reflection along `toPresheaf` — so
+  `nonempty_freeTensorIsoGeneric` is proved MODULO [G1-NAT′] only.
+
+**Iteration log:** (1) show-pattern vs `↾`-composite `.toFun`-form mismatch; (2) clothedFree_hom_ext
+breakthrough — happ reached generator-form; types_comp_apply/forget_map didn't distribute the
+Types-composite; (3) show-retype still not defeq to the `.toFun`-form; (4) `simp [presheaf]`
+(mathlib's own idiom for the unit's square) EXPOSED AddCommGrpCat.ofHom/AddMonoidHom.mk'-internals
+and made the goal type-incorrect-at-instances. **The `.toFun`-composite normalization for
+Types-valued presheaf squares is the one unsolved plumbing question.**
+
+**Ranked next attacks for [G1-NAT′] (fresh session):** (a) prove the square as an equality of
+Types-NatTrans-components via `NatTrans.ext`+`funext` FIRST, i.e. state `freeTensorPair` with a
+naturality PROOF-TERM built as `funext (fun z => congr-chain)` in term mode (never enter the
+`.toFun`-tactic-goal); (b) find/mimic how mathlib's `freeAdjunctionUnit` square elaborates
+(`ext; simp [presheaf]` works THERE — diff the two goals to isolate what the ⊗-side adds);
+(c) restate the pairing target through `(toPresheaf _).obj`+`forget` instead of
+`.presheaf ⋙ forget` if the spellings differ. Budget: 3–4 iterations, same stop-line.
