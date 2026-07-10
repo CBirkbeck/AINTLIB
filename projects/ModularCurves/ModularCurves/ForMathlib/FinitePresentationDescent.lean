@@ -439,7 +439,38 @@ theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
 
 /-! ## [KL-5] Stage factoring, stage agreement, and the assembly -/
 
-variable (𝒮 t u) in
+/-- Finitely many elements of the colimit lift jointly to a common stage. -/
+theorem IsFilteredAlgColimit.exists_common_lift (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {κ : Type*} [Finite κ] (a : κ → A) :
+    ∃ (i : ι) (x : κ → 𝒮 i), ∀ k, u i (x k) = a k := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose idx xk hxk using fun k => H.jointly_surjective (a k)
+  obtain ⟨i, hi⟩ := (Finset.univ.image idx).exists_le
+  exact ⟨i,
+    fun k => t (hi (idx k) (Finset.mem_image_of_mem idx (Finset.mem_univ k))) (xk k),
+    fun k => by rw [H.compat, hxk]⟩
+
+/-- Finitely many stage equalities that hold in the colimit hold at a common later
+stage. -/
+theorem IsFilteredAlgColimit.exists_common_eq (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {κ : Type*} [Finite κ] ⦃i : ι⦄ (x y : κ → 𝒮 i) (hxy : ∀ k, u i (x k) = u i (y k)) :
+    ∃ (j : ι) (h : i ≤ j), ∀ k, t h (x k) = t h (y k) := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose jdx hj he using fun k => H.eq_at_stage (x k) (y k) (hxy k)
+  obtain ⟨j₀, hj₀⟩ := (insert i (Finset.univ.image jdx)).exists_le
+  have hij : i ≤ j₀ := hj₀ i (Finset.mem_insert_self i _)
+  refine ⟨j₀, hij, fun k => ?_⟩
+  have h' : jdx k ≤ j₀ :=
+    hj₀ (jdx k) (Finset.mem_insert_of_mem (Finset.mem_image_of_mem jdx (Finset.mem_univ k)))
+  show t ((hj k).trans h') (x k) = t ((hj k).trans h') (y k)
+  rw [← H.t_trans (hj k) h', ← H.t_trans (hj k) h', he k]
+
 /-- **[KL-5a] (concrete Stacks 00QO, (1) ⟹ (2) surjectivity).** An `R`-algebra map from a
 finitely presented algebra into the colimit of a filtered system factors through a stage.
 (Concrete twin of `RingHom.EssFiniteType.exists_eq_comp_ι_app_of_isColimit`.) -/
@@ -447,9 +478,53 @@ theorem IsFilteredAlgColimit.exists_factor_of_finitePresentation
     (H : IsFilteredAlgColimit R 𝒮 t A u) (B : Type u) [CommRing B] [Algebra R B]
     [FinitePresentation R B] (f : B →ₐ[R] A) :
     ∃ (i : ι) (f' : B →ₐ[R] 𝒮 i), (u i).comp f' = f := by
-  sorry
+  classical
+  obtain ⟨n, π, hπ, hker⟩ := ‹FinitePresentation R B›.out
+  obtain ⟨i₀, x, hx⟩ := H.exists_common_lift fun k => f (π (MvPolynomial.X k))
+  set ψ₀ : MvPolynomial (Fin n) R →ₐ[R] 𝒮 i₀ := MvPolynomial.aeval x with hψ₀
+  have hcomm : (u i₀).comp ψ₀ = f.comp π := by
+    apply MvPolynomial.algHom_ext
+    intro k
+    simp [hψ₀, hx k]
+  obtain ⟨G, hG⟩ := hker
+  have hG' : Ideal.span (G : Set (MvPolynomial (Fin n) R)) = RingHom.ker π := hG
+  obtain ⟨i₁, h₁, hkill⟩ := H.exists_common_eq (fun l : ↥G => ψ₀ (l : MvPolynomial (Fin n) R))
+    (fun _ : ↥G => 0) (fun l => by
+      have hl : (l : MvPolynomial (Fin n) R) ∈ RingHom.ker π := by
+        rw [← hG']; exact Ideal.subset_span l.2
+      have hc := AlgHom.congr_fun hcomm (l : MvPolynomial (Fin n) R)
+      rw [AlgHom.comp_apply, AlgHom.comp_apply] at hc
+      rw [map_zero, hc, RingHom.mem_ker.1 hl, map_zero])
+  have hkerle : ∀ p ∈ RingHom.ker π, ((t h₁).comp ψ₀) p = 0 := by
+    intro p hp
+    rw [← hG'] at hp
+    have hle : Ideal.span (G : Set (MvPolynomial (Fin n) R))
+        ≤ RingHom.ker ((t h₁).comp ψ₀ : MvPolynomial (Fin n) R →ₐ[R] 𝒮 i₁) := by
+      rw [Ideal.span_le]
+      intro g hg
+      rw [SetLike.mem_coe, RingHom.mem_ker]
+      have hkg := hkill ⟨g, hg⟩
+      rw [map_zero] at hkg
+      simpa using hkg
+    exact RingHom.mem_ker.1 (hle hp)
+  refine ⟨i₁, (Ideal.Quotient.liftₐ (RingHom.ker π) ((t h₁).comp ψ₀) hkerle).comp
+    (Ideal.quotientKerAlgEquivOfSurjective hπ).symm.toAlgHom, ?_⟩
+  apply AlgHom.ext
+  intro b
+  obtain ⟨p, rfl⟩ := hπ b
+  have hsymm : (Ideal.quotientKerAlgEquivOfSurjective hπ).symm (π p)
+      = Ideal.Quotient.mk (RingHom.ker π) p := by
+    rw [AlgEquiv.symm_apply_eq, Ideal.quotientKerAlgEquivOfSurjective_mk]
+  simp only [AlgHom.comp_apply, AlgEquiv.coe_toAlgHom]
+  rw [hsymm]
+  have hlift : (Ideal.Quotient.liftₐ (RingHom.ker π) ((t h₁).comp ψ₀) hkerle)
+      (Ideal.Quotient.mk (RingHom.ker π) p) = (t h₁) (ψ₀ p) :=
+    Ideal.Quotient.lift_mk (RingHom.ker π) _ _
+  rw [hlift, H.compat h₁ (ψ₀ p)]
+  have hc := AlgHom.congr_fun hcomm p
+  rw [AlgHom.comp_apply, AlgHom.comp_apply] at hc
+  exact hc
 
-variable (𝒮 t u) in
 /-- **[KL-5b] (concrete Stacks 00QO injectivity).** Two `R`-algebra maps from a
 finite-type algebra into a stage that agree in the colimit agree at a later stage.
 (Concrete twin of `RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`.) -/
@@ -458,7 +533,15 @@ theorem IsFilteredAlgColimit.exists_eq_at_stage_of_finiteType
     [FiniteType R B] ⦃i : ι⦄ (f g : B →ₐ[R] 𝒮 i)
     (hfg : (u i).comp f = (u i).comp g) :
     ∃ (j : ι) (h : i ≤ j), (t h).comp f = (t h).comp g := by
-  sorry
+  classical
+  obtain ⟨s, hs⟩ := (inferInstance : FiniteType R B).out
+  obtain ⟨j, h, he⟩ := H.exists_common_eq (fun b : ↥s => f (b : B)) (fun b : ↥s => g (b : B))
+    (fun b => AlgHom.congr_fun hfg (b : B))
+  refine ⟨j, h, ?_⟩
+  have hle : Algebra.adjoin R (↑s : Set B)
+      ≤ AlgHom.equalizer ((t h).comp f) ((t h).comp g) :=
+    Algebra.adjoin_le fun b hb => he ⟨b, hb⟩
+  exact AlgHom.ext fun b => hle (hs ▸ Algebra.mem_top)
 
 end Spread
 
