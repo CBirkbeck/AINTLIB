@@ -1,1 +1,1 @@
-FOCUS: CHARTER-Y1-CLOSER (y1 side) — claimed; S1 runs on dev; y1 stages S2+ (top-up merge → fill → E-leaves → MASTER)
+FOCUS: Y1-CLOSER S2 — top-up merge dev→y1, spine verify, then record packaging + hz+map_add fill
