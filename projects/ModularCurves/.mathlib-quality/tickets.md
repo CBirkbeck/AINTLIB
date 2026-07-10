@@ -15792,3 +15792,35 @@ b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (si
   later — the dedup lands it at its canonical upstream home; no lesson beyond the
   standing check-before-proving rule, which cross-BRANCH work structurally cannot
   fully satisfy; the merge-boundary dedup pass is exactly the compensating control.
+
+## Amendments v10.136 (2026-07-10, coordinator): CHARTER-Y1-CLOSER — one worker takes the Y₁(N) endgame; four seat transfers executed; c5β 3/4-checkpoint RATIFIED
+
+- **c5β checkpoint RATIFIED** (their session summary): T-G4 at 3/4 — `mulOver_oneOver` +
+  `oneOver_mulOver` + `invOver_mulOver` transports LANDED axiom-clean
+  (e8bb22e9d/74c6c48f3/63f87e656; the two-session whisker/instance-diamond blocker
+  cracked via erw + proof-irrelevance + Over.w); `mulOver_assoc` fully scoped
+  (docs/tg4/mulOver_assoc.plan.md: e₁/e₂ proven, the tensor-whnf timeout found + three
+  fix options banked, option (b) recommended). Their stand-down on the misrouted B3
+  repair order (verified the restore byte-identical, left it to FP4) was correct
+  conduct. **c5β PAUSED by the owner at this boundary** — clean handover, their own
+  opener honored.
+- **CHARTER-Y1-CLOSER issued** (inbox/Y1-CLOSER.md — the full staged work order): the
+  remaining Y₁(N) work is ONE sequential chain, so a single fresh marathon worker takes
+  it end-to-end: S1 `mulOver_assoc` (option (b), c5β's plan) → T-G4 board LOUD (= the
+  0c-ii signal) → S2 the [T-B6′] fill on y1 (NEW-CASCADE's staged recipe; hz-fix +
+  map_add' same-commit, b2_log #3) → torsionπ_etale → S3 [T-A6b] AUDIT-FIRST (direct
+  off T-G4/T-G5 packaging vs the full T-W7a chain — the stale-gate lesson applied
+  forward) → S4 falls-sweep consumption by import (A's prepped lemmas) → S5 the six
+  E-leaves → S6 MASTER one-`exact` + relocation. BAR: clean axiom triple on
+  exists_tatePoint + gammaOneNaive_representable, zero sorries on the path, no
+  maxHeartbeats, both branches pushed, ★★★★ attribution.
+- **SEAT TRANSFERS (rule 5, coordinator-executed; reclaim clauses VOID on the
+  transferred items)**: c5β → assoc + the T-W7 tail (paused-boundary handover per
+  their own opener; the c5β seat retains nothing Y1-gating); NEW-CASCADE → the fill
+  (their staging + scratch-branch work is the closer's substrate; seat stands down);
+  NEW-Y1 → E-track + MASTER (their closure prep is the closer's S6); beastmode-A →
+  falls-sweep items consumed by import (A's ARMED state on non-Y1 uses unchanged).
+  All four seats' prior work travels with FULL attribution into the closer's boards.
+- Fleet unchanged elsewhere: NEW-HOPF (Hopf axioms → pins → SIGNAL), PIC0 (CMP-PAIR),
+  FP4 (B3-g3 in QuotientRepresentability), D2 (LFP), fable-FP (KL-3/KL-4) — all on
+  charter, none Y1-gating.
