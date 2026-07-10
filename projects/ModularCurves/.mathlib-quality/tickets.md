@@ -14556,3 +14556,42 @@ RATIFIED, no re-scoping. Next per sentinel: Over-S lifts (`homMk`) + hom-group f
 successor's brief is `COORDINATOR-HANDOVER.md`, rewritten at this commit; it supersedes
 the 2026-07-09 edition. Open owner-relays at handover: NEW-ATLAS-3 opener; the codex
 push+PR + cadence message; PIC0 opener (now: [G3-pre], not [G1-NAT′]).
+
+### v10.115 (2026-07-10, NEW-HOPF): ★ [CHARTER-HOPF] [HG-C1c-0] — G IS A GROUP OBJECT: structure maps + laws extracted from p0's functor-of-points field
+
+*New file `GroupScheme/SubgroupGroupObject.lean`. Zero sorries, axiom-clean.*
+
+**Discovery at C1c-start** (worth the fleet's attention): `FiniteLocallyFreeSubgroup`
+carries **no** multiplication / unit / inverse **as data** — only the functor-of-points
+`subgroup` field and `pointSubgroup`. Meanwhile p2's Hopf layer
+(`DeligneOrder.subgroupHopfAlgebra`) is **affine-base-only** (`E : EllipticCurve (Spec R)`)
+and `RelEffCartierDiv`-indexed, so it is not directly the `A = Γ(G|_V)` our chart needs.
+Both C1c chases (counit, coassoc) and any Hopf structure on `groupRing` need the structure
+morphisms. They are *derivable*, uniquely:
+
+- `unitHom : S ⟶ G` (from `zero_mem` at `𝟙 S`), `invHom : G ⟶ G` (from `neg_mem` at the
+  universal point `ι`), `mulHom : G ×_S G ⟶ G` (from `add_mem` at the two universal
+  projections) — each `Classical.choose` of a factoring through `ι`, with defining specs
+  `unitHom_ι`, `invHom_ι`, `mulHom_ι`;
+- over-`S` lifts `unitOver`/`invOver`/`mulOver` + `over_hom_ext` (the **ι-cancellation
+  principle**: `ι` closed immersion ⟹ mono ⟹ maps into `G` are determined by their
+  `ι`-images);
+- hom-group forms (`mulOver_comp_ιOver` etc.) and then **all the group-object laws**:
+  `mulOver_assoc`, `unitOver_mulOver_left`, `invOver_mulOver_left` — each is one
+  `over_hom_ext` + hom-group algebra in `E.Point`'s transported `CommGroup`.
+
+So `G` is a commutative group object in `Over S`, obtained *without* touching p0's or p2's
+files. This also opens **our own** route to `[HopfAlgebra R A]` on `groupRing` (comul :=
+Γ(mulHom) through the affine Künneth over the patch, counit := Γ(unitHom), antipode :=
+Γ(invHom)) — no affine-base restriction.
+
+**Lean-ops** (registry): `MonObj.Hom.commGroup` is a **scoped instance** — with `open
+MonObj`, `letI : CommGroup _ := Hom.commGroup` *shadows* it and breaks `rw`/`simp` keying;
+drop the `letI`s. Never `simp only [Category.assoc, ← Category.assoc, …]` in one call
+(loop-guard ⟹ "no progress"): use the `_assoc` reassoc variants instead. With `MonObj`
+open, `mul_assoc`/`one_mul`/`inv_mul_cancel` resolve to the *MonObj* versions — qualify
+with `_root_`.
+
+**NEXT**: the two `IsCoaction` diagrams (counit from `unitOver_mulOver_left` restricted to
+the patch; coassoc from `mulOver_assoc`), Γ-dualized once ⟹ `IsCoaction chartCoaction`.
+Then C1d (assembly against C2's closed immersion), C3, C4 ⟹ pins ⟹ **BOARD-SIGNAL**.
