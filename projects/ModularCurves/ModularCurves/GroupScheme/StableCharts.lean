@@ -136,6 +136,28 @@ noncomputable def pullbackToVLevel :
   (pullback.congrHom rfl P.chartToBase_comp_ι).symm
     ≪≫ (pullbackLeftPullbackSndIso G.π P.V.ι P.chartToBase).symm
 
+/-- The `V`-level structure map of the group patch. -/
+noncomputable def groupToBase : P.groupOpen.toScheme ⟶ P.V.toScheme :=
+  G.π ∣_ P.V
+
+/-- **Step 2 of the chart Künneth**: replace the pullback-presented `G`-leg by the group
+patch, giving the honest `V`-level fibre product of the two affines. -/
+noncomputable def pullbackToPatchLevel :
+    pullback (pullback.snd G.π P.V.ι) P.chartToBase
+      ≅ pullback P.groupToBase P.chartToBase :=
+  asIso (pullback.map (pullback.snd G.π P.V.ι) P.chartToBase P.groupToBase P.chartToBase
+    (pullbackRestrictIsoRestrict G.π P.V).hom (𝟙 _) (𝟙 _)
+    (by
+      rw [Category.comp_id]
+      exact (pullbackRestrictIsoRestrict_hom_morphismRestrict G.π P.V).symm)
+    (by rw [Category.comp_id, Category.id_comp]))
+
+/-- The combined identification: the `S`-level fibre product against the chart is the
+patch-level product of the two affine pieces. -/
+noncomputable def chartKunnethSchemeIso :
+    pullback G.π (P.U.ι ≫ E.π) ≅ pullback P.groupToBase P.chartToBase :=
+  P.pullbackToVLevel ≪≫ P.pullbackToPatchLevel
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
