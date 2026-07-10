@@ -15551,3 +15551,20 @@ dependency cone) ∪ {[KL-3] flat-at-stage, [KL-4] ffl-at-stage}.*
    (κ(p₁) ⊗ B_{i₁})` (residue functoriality `Ideal.ResidueField.mapₐ` + cancel) — nontrivial
    by field-ffl of `κ(p₁) → κ(pj)` → `nontrivial_iff` → surjective →
    `Module.FaithfullyFlat.of_comap_surjective` with `hflat`.
+
+## Amendments v10.132 (2026-07-10, coordinator): NEW-HOPF session terminal RATIFIED (in-proof Over-monoidal registry sharpening accepted); c5β at 95% — T-G4 board expected imminently
+
+- **NEW-HOPF terminal absorbed** (substance already ratified v10.127/v10.129): ε/S/Δ all
+  R-algebra maps; counit law proven scheme-side by direct point-algebra (plumbing-free —
+  ratified as discretion done right); Γ-dual legs placed GENERICALLY in PatchKunneth.lean
+  (serve coassoc + antipode); tensor_hom_ext + isIso_patchKunnethΓ = the uniqueness
+  toolkit. **Registry: the in-proof Over-monoidal seam entry is SHARPENED and accepted**
+  (Category.assoc keying vs (Over.mk G.π).left-spellings; three escapes in preference
+  order — inbox v10.132 has the full text). Next-session work order = their queue:
+  Γ-dualise counit + mirror → 1d coassoc (triple Künneth) → 1e antipode → HopfAlgebra →
+  IsCoaction → C1d → C3 → C4 → pins → SIGNAL.
+- **c5β**: of_map unit-law at 95%, both hard blockers cracked (WIP v2 banked); sentinel
+  in GET-IT-ALL-DONE mode — integrate + board LOUD next. **T-G4 completion watch is
+  HOT**; NEW-CASCADE early-fire opener is with the owner (merge overlaps the tail).
+- fable-FP: KL-4 topology glue + hInter/hstage PROVEN (patch-compactness machinery);
+  K2 fibre-collapse remains. On charter.
