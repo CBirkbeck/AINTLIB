@@ -155,3 +155,33 @@ clothed types from the start —
   `(X :=) (Y :=)` hints — the ChangeOfRings TODO-comment pattern).
 - Then all naturality/coherence proofs are `tensor_ext` + own-rfl-tmul-lemmas (the
   restrictScalarsTensorIso_hom_tmul pattern that worked), never mathlib's dsimp%-forms.
+
+## Build-progress ledger (2026-07-10, session 2)
+
+**LANDED (axiom-clean):** B1a `restrictScalarsLaxMonoidal` (all five coherences by elementwise
+`rfl` — everything tmul↦tmul); B1+B2 fused `nonempty_pullback_oplaxMonoidal` via
+`pushforwardFactored` + componentwise-refl NatIso + **`Adjunction.ofNatIsoRight`** +
+`leftAdjointOplaxMonoidal`. BANKED HARD RULE: never re-type a lax/monoidal STRUCTURE across
+functor-spellings (kernel autoParam-wart — composite-vs-pushforward ascription rejected by the
+kernel in both def- and theorem-form; native-spelling direct construction hit a 6-iteration
+instance-flavor wall on the F.op-composites). **Transport the ADJUNCTION to the good spelling
+instead** — one componentwise-`Iso.refl` NatIso, then the doctrinal machinery runs natively.
+
+**G1 construction plan (banked, next session):**
+- meet-equiv `e V : (V ⟶ U₁) × (V ⟶ U₂) ≃ (V ⟶ U₁ ⊓ U₂)` — Opens-homs are subsingletons;
+  `homOfLE (le_inf ...)` / projections; proofs by `Subsingleton.elim`.
+- component at `V` := `Functor.Monoidal.μIso (ModuleCat.free (R'.obj V)) _ _ ≪≫
+  (ModuleCat.free _).mapIso (crossing ⊗-Type ≡ ×) (e V.unop).toIso` — anchors:
+  `(ModuleCat.free R).Monoidal` (Adjunctions.lean:159), `μIso_hom_freeMk_tmul_freeMk` (:143),
+  `εIso_inv_freeMk` (:129), `freeMk := Finsupp.single x 1` (:48);
+  `PresheafOfModules.freeObj` pointwise (`Free.lean:42`).
+- ⚠ the isoMk **naturality squares mix the ring-restriction with μ** (freeObj.map is
+  `freeDesc (freeMk ∘ F.map f)` ACROSS the restricted ring — not a pure Type-functorial image,
+  so μ-naturality-in-Type-args alone is insufficient). Expect elementwise
+  `tensor_ext` + `Finsupp`-generator chases with `μIso_hom_freeMk_tmul_freeMk` +
+  `restrictScalars_μ`-analogues (~100 ll, several LSP iterations).
+- then δ-on-frees: identify `δ_{freeYoneda,freeYoneda}` with the canonical iso via
+  `freeYonedaEquiv`-universal-element chase; `freeFunctorCompPullbackIso` matches the pullback side.
+
+**G3 unchanged** (two single-variable presentation passes). **A unchanged** (CoreMonoidal +
+Lifting + functorMonoidalOfComp). Chain state: B1 ✓ B2 ✓ | G1 → G3 → G2/A remaining.
