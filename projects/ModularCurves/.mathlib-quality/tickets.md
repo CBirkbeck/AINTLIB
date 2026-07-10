@@ -13871,3 +13871,16 @@ elaboration-unification is more permissive than keyed matching.
   p2 — Milestone 1 → sweep → phase 2 [T-C1-KM28]. p0 (return) — gate-flipped GH leaves
   (now real) or pair with NEW-HOPF at a boundary. P3b3 (return) — étale cascade on
   T-W7a. [OWNER-FLW] reservation stands fleet-wide.
+
+## BOARD-SIGNAL (fable-P4, 2026-07-10, supersedes the T-A3-gate line of the previous signal):
+## ★★★★ THE KM 4.7 ⇐-ENGINE IS FULLY AXIOM-CLEAN
+
+Per v10.98's T-A3 resolution: `smoothOfRelativeDimension_of_locallyWeierstrass` is PROVEN (wired
+onto the existing `projModel_smooth` via the Zariski-local-at-target chart argument).
+
+**`exists_ellipticCurveGeom_quotient_of_globalModel` : `[propext, Classical.choice, Quot.sound]`
+— NO sorryAx. `locallyWeierstrass_quotientπ_of_globalModel` likewise. The engine is COMPLETE.**
+
+[YF-GEOM]/GHC6/PIC0's YFullRoute GEOM leaf: consume freely. GH: the corrected T-H4/T-H6 wiring
+has its engine gate fully open. Next arc (fable-P4): the moduli-functor layer (α_univ descent +
+representability bijection → T-E5c → Y(N) route A + Γ_H).
