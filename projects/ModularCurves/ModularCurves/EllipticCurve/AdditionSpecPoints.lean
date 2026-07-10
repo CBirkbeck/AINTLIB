@@ -1903,4 +1903,99 @@ theorem mulModelHom_universalWeierstrassLocU :
     universalWeierstrassLocU universalWeierstrassLocU.isUnit_Δ
     universalWeierstrassLocU (universalWeierstrassLocU_map_classifyRingHomU _) rfl]
   exact mulModelHomBC_id universalWeierstrassLocU universalWeierstrassLocU.isUnit_Δ
+
+section OfMap
+
+variable {R : Type u} [CommRing R]
+
+/-- The multiplication at a mapped curve is the `f`-form base-change lift (classify collapses). -/
+lemma mulModelHom_map_eq_BC (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    mulModelHom (universalWeierstrassLocU.{u}.map f) =
+      mulModelHomBC f universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ
+        (universalWeierstrassLocU.{u}.map f) rfl := by
+  rw [mulModelHom]
+  refine mulModelHomBC_congr _ f ?_ universalWeierstrassLocU.{u}
+    universalWeierstrassLocU.isUnit_Δ (universalWeierstrassLocU.{u}.map f) _ rfl
+  rw [classifyRingHomU_map f universalWeierstrassLocU.{u},
+    classifyRingHomU_universalWeierstrassLocU, RingHom.comp_id]
+
+/-- The c6 spec at a mapped curve: transported from the atlas by D-NAT + the f-form push. -/
+theorem mulModelHom_specPoints_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic]
+    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel (universalWeierstrassLocU.{u}.map f))
+      (projModelπ (universalWeierstrassLocU.{u}.map f)) K)
+    (w : P.1 ≫ projModelπ (universalWeierstrassLocU.{u}.map f) =
+      Q.1 ≫ projModelπ (universalWeierstrassLocU.{u}.map f)) :
+    projModelPointsEquiv (universalWeierstrassLocU.{u}.map f) K
+        ⟨pullback.lift P.1 Q.1 w ≫ mulModelHom (universalWeierstrassLocU.{u}.map f), by
+          rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv (universalWeierstrassLocU.{u}.map f) K P +
+        projModelPointsEquiv (universalWeierstrassLocU.{u}.map f) K Q := by
+  classical
+  letI : Algebra (WeierstrassAtlasRingU.{u}) K := ((algebraMap R K).comp f).toAlgebra
+  rw [dictionary_baseChange f universalWeierstrassLocU.{u} P,
+    dictionary_baseChange f universalWeierstrassLocU.{u} Q,
+    dictionary_baseChange f universalWeierstrassLocU.{u} _]
+  -- identify the pushed sum with the atlas-level sum of the pushed pair
+  have hw' : (P.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u}) ≫
+      projModelπ universalWeierstrassLocU.{u} =
+      (Q.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u}) ≫
+      projModelπ universalWeierstrassLocU.{u} := by
+    letI : Algebra (WeierstrassAtlasRingU.{u}) R := f.toAlgebra
+    rw [Category.assoc, Category.assoc,
+      show projModelBaseChange f universalWeierstrassLocU.{u} ≫
+        projModelπ universalWeierstrassLocU.{u} =
+        projModelπ (universalWeierstrassLocU.{u}.map f) ≫ Spec.map (CommRingCat.ofHom f) from
+        projModelBaseChange_π f universalWeierstrassLocU.{u},
+      ← Category.assoc, ← Category.assoc, w]
+  have hBC : mulModelHomBC f universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ (universalWeierstrassLocU.{u}.map f) rfl ≫
+      projModelBaseChange f universalWeierstrassLocU.{u} =
+      pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫
+      WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+        universalWeierstrassLocU.isUnit_Δ := by
+    rw [← projModelBaseChangeOf_rfl f universalWeierstrassLocU.{u}]
+    exact mulModelHomBC_baseChange f universalWeierstrassLocU.{u}
+      universalWeierstrassLocU.isUnit_Δ (universalWeierstrassLocU.{u}.map f) rfl
+  have hpush : (pullback.lift P.1 Q.1 w ≫ mulModelHom (universalWeierstrassLocU.{u}.map f)) ≫
+      projModelBaseChange f universalWeierstrassLocU.{u} =
+      pullback.lift (P.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u})
+        (Q.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u}) hw' ≫
+        WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+          universalWeierstrassLocU.isUnit_Δ := by
+    rw [mulModelHom_map_eq_BC f, Category.assoc, hBC, ← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · rw [pullbackMapBaseChangeOf]
+      simp only [Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc]
+      rw [projModelBaseChangeOf_rfl]
+    · rw [pullbackMapBaseChangeOf]
+      simp only [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc]
+      rw [projModelBaseChangeOf_rfl]
+  refine Eq.trans (congrArg (projModelPointsEquiv universalWeierstrassLocU.{u} K)
+    (Subtype.ext ?_))
+    (mulModelHom_specPoints_atlas
+      ⟨P.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u}, ?_⟩
+      ⟨Q.1 ≫ projModelBaseChange f universalWeierstrassLocU.{u}, ?_⟩ hw')
+  · exact hpush
+  · rw [Category.assoc]
+    letI : Algebra (WeierstrassAtlasRingU.{u}) R := f.toAlgebra
+    rw [show projModelBaseChange f universalWeierstrassLocU.{u} ≫
+        projModelπ universalWeierstrassLocU.{u} =
+        projModelπ (universalWeierstrassLocU.{u}.map f) ≫ Spec.map (CommRingCat.ofHom f) from
+        projModelBaseChange_π f universalWeierstrassLocU.{u}]
+    rw [← Category.assoc, P.2, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  · rw [Category.assoc]
+    letI : Algebra (WeierstrassAtlasRingU.{u}) R := f.toAlgebra
+    rw [show projModelBaseChange f universalWeierstrassLocU.{u} ≫
+        projModelπ universalWeierstrassLocU.{u} =
+        projModelπ (universalWeierstrassLocU.{u}.map f) ≫ Spec.map (CommRingCat.ofHom f) from
+        projModelBaseChange_π f universalWeierstrassLocU.{u}]
+    rw [← Category.assoc, Q.2, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
+end OfMap
+
 end ModularCurves
