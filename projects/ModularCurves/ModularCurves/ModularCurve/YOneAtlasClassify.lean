@@ -3403,6 +3403,7 @@ namespace MarkedChartData
 variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
 
 /-- The chart ring as an `R`-algebra through the structure morphism. -/
+@[reducible]
 noncomputable def chartAlgebra : Algebra ↑R ↑Γ(Y.base, D.U.1) :=
   (((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appLE ⊤ D.U.1 (by simp)).hom).toAlgebra
 
@@ -3826,5 +3827,207 @@ theorem specPt_tateBaseSpecMapOfPoint_agree [Algebra ↑R k]
 end MarkedChartData
 
 end OverlapAgreement
+
+section ExistenceGlue
+
+/-! ### Gluing the local classifying maps (recipe step 4)
+
+The chart cover of the base, the overlap agreement in instance-packaged test-point form,
+and the glued base map to the Tate atlas. -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+/-- **Test-point agreement of the local classifying base maps**: two charts and two
+`Spec`-maps into the chart rings whose composites into the base agree yield equal
+composites with the pointed atlas maps. -/
+theorem test_baseMap_agree (D₁ D₂ : MarkedChartData R Y)
+    [Algebra ↑R ↑Γ(Y.base, D₁.U.1)] [Algebra ↑R ↑Γ(Y.base, D₂.U.1)]
+    (halg₁ : D₁.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))) =
+      D₁.U.1.ι ≫ Y.structMap)
+    (halg₂ : D₂.U.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+      D₂.U.1.ι ≫ Y.structMap)
+    (k : Type u) [CommRing k]
+    (c₁ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D₁.U.1)))
+    (c₂ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ↑Γ(Y.base, D₂.U.1)))
+    (hcc : c₁ ≫ D₁.U.2.isoSpec.inv ≫ D₁.U.1.ι = c₂ ≫ D₂.U.2.isoSpec.inv ≫ D₂.U.1.ι)
+    (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    c₁ ≫ (tateBaseSpecMapOfPoint R D₁.W _ _
+        (zChartEval_equation_self D₁.W (D₁.pt P) (D₁.pt_inZChart P hP))
+        (D₁.pt_hord P hP)) =
+      c₂ ≫ (tateBaseSpecMapOfPoint R D₂.W _ _
+        (zChartEval_equation_self D₂.W (D₂.pt P) (D₂.pt_inZChart P hP))
+        (D₂.pt_hord P hP)) := by
+  letI ha₁ : Algebra ↑Γ(Y.base, D₁.U.1) k := (Spec.preimage c₁).hom.toAlgebra
+  letI ha₂ : Algebra ↑Γ(Y.base, D₂.U.1) k := (Spec.preimage c₂).hom.toAlgebra
+  letI haR : Algebra ↑R k :=
+    ((Spec.preimage c₁).hom.comp (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))).toAlgebra
+  have hof₁ : CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k) = Spec.preimage c₁ := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have hof₂ : CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k) = Spec.preimage c₂ := by
+    rw [RingHom.algebraMap_toAlgebra]
+    exact CommRingCat.ofHom_hom _
+  have hsp₁ : D₁.specPt k = c₁ := by
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k)) = c₁
+    rw [hof₁, Spec.map_preimage]
+  have hsp₂ : D₂.specPt k = c₂ := by
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k)) = c₂
+    rw [hof₂, Spec.map_preimage]
+  have hgeom : D₁.geomPt (D₁.specPt k) = D₂.geomPt (D₂.specPt k) := by
+    rw [geomPt, geomPt, hsp₁, hsp₂]
+    exact hcc
+  have htower₁ : (algebraMap ↑Γ(Y.base, D₁.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) = algebraMap ↑R k := rfl
+  have hbase₁ : Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1))) =
+      D₁.U.2.isoSpec.inv ≫ D₁.U.1.ι ≫ Y.structMap := by
+    rw [← halg₁, Iso.inv_hom_id_assoc]
+  have hbase₂ : Spec.map (CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+      D₂.U.2.isoSpec.inv ≫ D₂.U.1.ι ≫ Y.structMap := by
+    rw [← halg₂, Iso.inv_hom_id_assoc]
+  have htower₂ : (algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+      (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) = algebraMap ↑R k := by
+    have hspec : Spec.map (CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+        (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑R k)) := by
+      rw [show CommRingCat.ofHom ((algebraMap ↑Γ(Y.base, D₂.U.1) k).comp
+          (algebraMap ↑R ↑Γ(Y.base, D₂.U.1))) =
+          CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₂.U.1)) ≫
+            CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₂.U.1) k) from
+        CommRingCat.ofHom_comp _ _]
+      rw [show CommRingCat.ofHom (algebraMap ↑R k) =
+          CommRingCat.ofHom (algebraMap ↑R ↑Γ(Y.base, D₁.U.1)) ≫
+            CommRingCat.ofHom (algebraMap ↑Γ(Y.base, D₁.U.1) k) from
+        CommRingCat.ofHom_comp _ _]
+      rw [Spec.map_comp, Spec.map_comp, hof₁, hof₂, Spec.map_preimage, Spec.map_preimage,
+        hbase₁, hbase₂]
+      have hw := congrArg (fun m => m ≫ Y.structMap) hcc
+      simp only [Category.assoc] at hw ⊢
+      exact hw.symm
+    have hring := Spec.map_injective hspec
+    have := congrArg CommRingCat.Hom.hom hring
+    simpa using this
+  have h := specPt_tateBaseSpecMapOfPoint_agree D₁ D₂ k hgeom htower₁ htower₂ P hP
+  rw [hsp₁, hsp₂] at h
+  exact h
+
+variable (Y) in
+/-- The chart at a point of the base. -/
+noncomputable def chartAt (s : ↥Y.base) : MarkedChartData R Y :=
+  (exists_mem Y s).choose
+
+theorem chartAt_mem (s : ↥Y.base) : s ∈ (chartAt Y s).U.1 :=
+  (exists_mem Y s).choose_spec
+
+variable (Y) in
+/-- The open cover of the base by marked charts. -/
+noncomputable def chartCover : Y.base.OpenCover :=
+  Scheme.Cover.mkOfCovers ↥Y.base
+    (fun s => (chartAt Y s).U.1.toScheme)
+    (fun s => (chartAt Y s).U.1.ι)
+    (fun s => ⟨s, ⟨⟨s, chartAt_mem s⟩, rfl⟩⟩)
+
+@[simp]
+theorem chartCover_f (s : ↥Y.base) : (chartCover Y).f s = (chartAt Y s).U.1.ι := rfl
+
+/-- The local classifying base maps of the chart cover. -/
+noncomputable def coverBaseMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (s : ↥Y.base) : (chartCover Y).X s ⟶ tateBase R :=
+  letI := (chartAt Y s).chartAlgebra
+  (chartAt Y s).baseMap P hP
+
+/-- **Overlap compatibility** of the local classifying base maps. -/
+theorem coverBaseMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (i j : (chartCover Y).I₀) :
+    pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫ coverBaseMap P hP i =
+      pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫ coverBaseMap P hP j := by
+  letI := (chartAt Y i).chartAlgebra
+  letI := (chartAt Y j).chartAlgebra
+  apply Scheme.Cover.hom_ext
+    (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j)))
+  intro z
+  set V := (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).X z
+    with hV
+  rw [← cancel_epi (Scheme.isoSpec V).inv]
+  have hcc : ((Scheme.isoSpec V).inv ≫
+        (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+        pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫
+        (chartAt Y i).U.2.isoSpec.hom) ≫
+      (chartAt Y i).U.2.isoSpec.inv ≫ (chartAt Y i).U.1.ι =
+      ((Scheme.isoSpec V).inv ≫
+        (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+        pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫
+        (chartAt Y j).U.2.isoSpec.hom) ≫
+      (chartAt Y j).U.2.isoSpec.inv ≫ (chartAt Y j).U.1.ι := by
+    simp only [Category.assoc]
+    have hw := congrArg (fun m => (Scheme.isoSpec V).inv ≫
+      (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫ m)
+      (pullback.condition (f := (chartCover Y).f i) (g := (chartCover Y).f j))
+    calc (Scheme.isoSpec V).inv ≫
+        (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+        pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫
+        (chartAt Y i).U.2.isoSpec.hom ≫ (chartAt Y i).U.2.isoSpec.inv ≫
+        (chartAt Y i).U.1.ι
+        = (Scheme.isoSpec V).inv ≫
+          (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+          pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫ (chartAt Y i).U.1.ι :=
+        congrArg (fun m => (Scheme.isoSpec V).inv ≫
+          (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+          pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫ m)
+          (Iso.hom_inv_id_assoc (chartAt Y i).U.2.isoSpec (chartAt Y i).U.1.ι)
+      _ = (Scheme.isoSpec V).inv ≫
+          (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+          pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫ (chartAt Y j).U.1.ι :=
+        hw
+      _ = (Scheme.isoSpec V).inv ≫
+          (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+          pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫
+          (chartAt Y j).U.2.isoSpec.hom ≫ (chartAt Y j).U.2.isoSpec.inv ≫
+          (chartAt Y j).U.1.ι :=
+        (congrArg (fun m => (Scheme.isoSpec V).inv ≫
+          (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
+          pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫ m)
+          (Iso.hom_inv_id_assoc (chartAt Y j).U.2.isoSpec (chartAt Y j).U.1.ι)).symm
+  have h := test_baseMap_agree (chartAt Y i) (chartAt Y j)
+    ((chartAt Y i).chartAlgebra_compatible) ((chartAt Y j).chartAlgebra_compatible)
+    ↑Γ(V, ⊤) _ _ hcc P hP
+  show (Scheme.isoSpec V).inv ≫ _ ≫ pullback.fst _ _ ≫
+      ((chartAt Y i).U.2.isoSpec.hom ≫ (tateBaseSpecMapOfPoint R (chartAt Y i).W _ _
+        (zChartEval_equation_self (chartAt Y i).W ((chartAt Y i).pt P)
+          ((chartAt Y i).pt_inZChart P hP)) ((chartAt Y i).pt_hord P hP))) =
+    (Scheme.isoSpec V).inv ≫ _ ≫ pullback.snd _ _ ≫
+      ((chartAt Y j).U.2.isoSpec.hom ≫ (tateBaseSpecMapOfPoint R (chartAt Y j).W _ _
+        (zChartEval_equation_self (chartAt Y j).W ((chartAt Y j).pt P)
+          ((chartAt Y j).pt_inZChart P hP)) ((chartAt Y j).pt_hord P hP)))
+  exact h
+
+/-- **The glued classifying base map** `Y.base ⟶ tateBase R`. -/
+noncomputable def gluedBaseMap (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) : Y.base ⟶ tateBase R :=
+  EllObj.tateBaseMapOfOpenCover R Y (chartCover Y) (coverBaseMap P hP)
+    (coverBaseMap_compat P hP)
+
+@[reassoc (attr := simp)]
+theorem ι_gluedBaseMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
+    (s : ↥Y.base) :
+    (chartAt Y s).U.1.ι ≫ gluedBaseMap P hP = coverBaseMap P hP s :=
+  EllObj.ι_tateBaseMapOfOpenCover R Y (chartCover Y) (coverBaseMap P hP)
+    (coverBaseMap_compat P hP) s
+
+/-- The glued base map lies over `Spec R`. -/
+theorem gluedBaseMap_over (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    gluedBaseMap P hP ≫ tateStructMap R = Y.structMap := by
+  refine EllObj.tateBaseMapOfOpenCover_base_w R Y (chartCover Y) (coverBaseMap P hP)
+    (coverBaseMap_compat P hP) ?_
+  intro s
+  letI := (chartAt Y s).chartAlgebra
+  exact (chartAt Y s).baseMap_over P hP ((chartAt Y s).chartAlgebra_compatible)
+
+end MarkedChartData
+
+end ExistenceGlue
 
 end ModularCurves
