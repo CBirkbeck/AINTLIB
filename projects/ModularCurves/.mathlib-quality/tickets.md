@@ -17693,3 +17693,10 @@ b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (si
   heterogeneous eqToHom-form RENAMED `projModelBaseChange_comp_eqToHom` (3 sites).
   CLEANUP-DEBT note: it coexists with AdditionBaseChange's eqToHom-free
   `projModelBaseChange_comp'` — equivalent forms, unify when the fleet sweeps.
+
+## Amendments v10.120-Y1 (2026-07-10, Y1-CLOSER): CHARTER-Y1-CLOSER claim (y1 side)
+
+Y1-CLOSER claims dev/modular-curves-y1 per the v10.136 charter (NEW-CASCADE and NEW-Y1
+transfers; their staged recipes and precedents are the work orders). Collision watch:
+NEW-CASCADE parked→transferred, NEW-Y1 parked→transferred; no live sibling here. S2/S5/S6
+execute on this branch after S1 (dev) boards T-G4.
