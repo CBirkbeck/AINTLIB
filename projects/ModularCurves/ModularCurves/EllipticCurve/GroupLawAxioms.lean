@@ -724,6 +724,83 @@ private lemma tensorObj_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
             (projModelπ universalWeierstrassLocU.{u}) ≫
           projModelπ universalWeierstrassLocU.{u} := Category.assoc _ _ _
 
+/-- The fibre-square base change projects to the single base change (fst). -/
+private lemma pullbackMapBaseChangeOf_fst (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫
+      pullback.fst (projModelπ universalWeierstrassLocU.{u})
+        (projModelπ universalWeierstrassLocU.{u}) =
+      pullback.fst (projModelπ (universalWeierstrassLocU.{u}.map f))
+        (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+        projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl := by
+  erw [pullbackMapBaseChangeOf, pullback.map, pullback.lift_fst]
+
+/-- The fibre-square base change projects to the single base change (snd). -/
+private lemma pullbackMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+        (universalWeierstrassLocU.{u}.map f) rfl ≫
+      pullback.snd (projModelπ universalWeierstrassLocU.{u})
+        (projModelπ universalWeierstrassLocU.{u}) =
+      pullback.snd (projModelπ (universalWeierstrassLocU.{u}.map f))
+        (projModelπ (universalWeierstrassLocU.{u}.map f)) ≫
+        projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl := by
+  erw [pullbackMapBaseChangeOf, pullback.map, pullback.lift_snd]
+
+/-- The triple-tensor base-change comparison, hoisted to a top-level definition so its
+`pullback.map` obligations (the banked e₁/e₂ compatibilities) elaborate once, outside the
+tensor-heavy proof context (the plan's whnf-timeout sidestep). -/
+private noncomputable def tripleMapBaseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    ((modelOver (universalWeierstrassLocU.{u}.map f) ⊗
+        modelOver (universalWeierstrassLocU.{u}.map f)) ⊗
+      modelOver (universalWeierstrassLocU.{u}.map f)).left ⟶
+      ((modelOver universalWeierstrassLocU.{u} ⊗ modelOver universalWeierstrassLocU.{u}) ⊗
+        modelOver universalWeierstrassLocU.{u}).left :=
+  pullback.map
+    (modelOver (universalWeierstrassLocU.{u}.map f) ⊗
+      modelOver (universalWeierstrassLocU.{u}.map f)).hom
+    (modelOver (universalWeierstrassLocU.{u}.map f)).hom
+    (modelOver universalWeierstrassLocU.{u} ⊗ modelOver universalWeierstrassLocU.{u}).hom
+    (modelOver universalWeierstrassLocU.{u}).hom
+    (pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+      (universalWeierstrassLocU.{u}.map f) rfl)
+    (projModelBaseChangeOf f universalWeierstrassLocU.{u}
+      (universalWeierstrassLocU.{u}.map f) rfl)
+    (Spec.map (CommRingCat.ofHom f))
+    (tensorObj_hom_baseChangeOf f) (modelOver_hom_baseChangeOf f)
+
+/-- The triple base-change comparison projects to the fibre-square base change (fst). -/
+private lemma tripleMapBaseChangeOf_fst (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    tripleMapBaseChangeOf f ≫
+      pullback.fst (modelOver universalWeierstrassLocU.{u} ⊗
+          modelOver universalWeierstrassLocU.{u}).hom
+        (modelOver universalWeierstrassLocU.{u}).hom =
+      pullback.fst (modelOver (universalWeierstrassLocU.{u}.map f) ⊗
+          modelOver (universalWeierstrassLocU.{u}.map f)).hom
+        (modelOver (universalWeierstrassLocU.{u}.map f)).hom ≫
+        pullbackMapBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl :=
+  (limit.lift_π _ _).trans rfl
+
+/-- The triple base-change comparison projects to the single base change (snd). -/
+private lemma tripleMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
+    [(universalWeierstrassLocU.{u}.map f).IsElliptic] :
+    tripleMapBaseChangeOf f ≫
+      pullback.snd (modelOver universalWeierstrassLocU.{u} ⊗
+          modelOver universalWeierstrassLocU.{u}).hom
+        (modelOver universalWeierstrassLocU.{u}).hom =
+      pullback.snd (modelOver (universalWeierstrassLocU.{u}.map f) ⊗
+          modelOver (universalWeierstrassLocU.{u}.map f)).hom
+        (modelOver (universalWeierstrassLocU.{u}.map f)).hom ≫
+        projModelBaseChangeOf f universalWeierstrassLocU.{u}
+          (universalWeierstrassLocU.{u}.map f) rfl :=
+  (limit.lift_π _ _).trans rfl
+
 /-- **(T-W7.0g-assoc·of_map)** Associativity at the base-changed universal curve (the `h = rfl`
 case) — the last T-G4 transport, option (b) of the banked plan (`docs/tg4/mulOver_assoc.plan.md`):
 the fst-leg whisker-BC naturalities are proven as double-pullback-valued equations by
