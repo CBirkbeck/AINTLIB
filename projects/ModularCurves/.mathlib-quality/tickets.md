@@ -13714,3 +13714,25 @@ SubgroupQuotient pins = CHARTER COMPLETE.
 - **NEXT**: [C2-mile] IsClosedImmersion actPair.left (IsPullback.of_right route or
   chart-level bypass); [C1b] chart Künneth + ρ_U; [C1c] IsCoaction ρ_U; [C1d] chart
   data assembly; [C3] covers; [C4] glue = pins = CHARTER COMPLETE.
+
+### v10.105 (2026-07-10, NEW-HOPF): ★ [CHARTER-HOPF] [HG-C2] COMPLETE — the action pair is a closed immersion
+
+*Same session (third landing after M4, M5). Zero sorries, axiom-clean.*
+
+**`isClosedImmersion_actPair_left`** (`GroupScheme/ActPairImmersion.lean`):
+`⟨act, pr⟩ : G ×ₛ E → E ×ₛ E` is a closed immersion — `actPair = (ι ⊗ 𝟙) ≫ shear` with
+`shearAuto` the hom-group shear automorphism and `(ι ⊗ 𝟙).left` the base change of the
+closed immersion `ι` (`isPullback_tensorHom_left`: `IsPullback.of_bot`-pasting of the two
+defining fibre-product squares) + `MorphismProperty.IsStableUnderBaseChange.of_isPullback`
+with the structure field `G.closedImmersion`. This upgrades p0's `actPair_mono`
+(freeness) to the closed-immersion input for per-chart Γ-surjectivity
+(`StableAffineChartData.precursorSurjective`).
+
+**Lean-ops** (fleet registry): `pullback.lift_fst/snd` are NOT simp-tagged in current
+mathlib; `pullback.map` is an abbrev; when rw/simp keying fails on Prop-valued
+instance-args (`HasPullback`-terms differing across elaboration sites), DIRECT
+term-application of the target lemma (`have h := lemma args; rwa [...] at h`) succeeds —
+elaboration-unification is more permissive than keyed matching.
+
+**NEXT**: [C1b] chart Künneth + ρ_U; [C1c] IsCoaction; [C1d] chart-data assembly
+(consumes C2 via IsClosedImmersion-restriction to charts); [C3] stable covers; [C4] glue.
