@@ -82,19 +82,23 @@ theorem groupSquareToSquare_fst :
 noncomputable def squareMul : P.groupSquare ⟶ G.G :=
   P.groupSquareToSquare ≫ G.mulHom
 
-/-- The restricted multiplication lands in the group patch: its composite with the
-structure morphism factors through `V`. -/
+/-- **The restricted multiplication is a morphism over the base patch**: its composite
+with the structure morphism is the square's projection to `V`. -/
+@[reassoc]
+theorem squareMul_π : P.squareMul ≫ G.π
+    = pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      ≫ G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι := by
+  rw [squareMul, Category.assoc, G.mulHom_π]
+  rw [show ((Over.mk G.π ⊗ Over.mk G.π).hom)
+      = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl]
+  rw [P.groupSquareToSquare_fst_assoc, Scheme.Hom.resLE_comp_ι]
+  exact Category.assoc _ _ _
+
+/-- The restricted multiplication lands in the group patch. -/
 theorem top_le_preimage_groupOpen_squareMul :
     (⊤ : P.groupSquare.Opens) ≤ P.squareMul ⁻¹ᵁ P.groupOpen := by
-  have hπ : P.squareMul ≫ G.π
-      = pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
-          (G.π.resLE P.V P.groupOpen le_rfl)
-        ≫ G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι := by
-    rw [squareMul, Category.assoc, G.mulHom_π]
-    rw [show ((Over.mk G.π ⊗ Over.mk G.π).hom)
-        = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl]
-    rw [P.groupSquareToSquare_fst_assoc, Scheme.Hom.resLE_comp_ι]
-    exact Category.assoc _ _ _
+  have hπ := P.squareMul_π
   rw [groupOpen, ← Scheme.Hom.comp_preimage, hπ]
   rw [Scheme.Hom.comp_preimage, Scheme.Hom.comp_preimage,
     Scheme.Opens.ι_preimage_self]
@@ -121,6 +125,17 @@ theorem appLE_id {X : Scheme.{u}} {U : X.Opens} (e : U ≤ (𝟙 X) ⁻¹ᵁ U) 
   rw [Scheme.Hom.appLE, AlgebraicGeometry.Scheme.Hom.id_app]
   exact (Category.id_comp _).trans (X.presheaf.map_id _)
 
+/-- `appLE` between the top opens is `appTop`. -/
+theorem appLE_top_top {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    Scheme.Hom.appLE f ⊤ ⊤ le_top = f.appTop := by
+  simp [Scheme.Hom.appLE, Scheme.Hom.appTop]
+
+/-- The `⊤`-restriction of an open immersion's sections is the section iso. -/
+theorem ι_appLE_top {X : Scheme.{u}} (U : X.Opens) :
+    U.ι.appLE U ⊤ U.ι_preimage_self.ge = U.topIso.inv := by
+  rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso_inv]
+  congr 1
+
 /-- `appLE` transported along an equality of morphisms. -/
 theorem appLE_congr_hom {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
     (W : X.Opens) (e : W ≤ f ⁻¹ᵁ U) :
@@ -141,6 +156,70 @@ theorem algebraMap_comp_groupPatchAntipode :
       = G.π.appLE P.V P.groupOpen le_rfl := by
   rw [groupPatchAntipode, Scheme.Hom.appLE_comp_appLE,
     appLE_congr_hom G.invHom_π P.V P.groupOpen]
+
+/-- The comultiplication, expressed through the generic `Γ`-transport. -/
+theorem groupPatchComul_eq :
+    P.groupPatchComul
+      = P.squareMul.appLE P.groupOpen ⊤ P.top_le_preimage_groupOpen_squareMul
+        ≫ patchKunnethΓ G.π G.π P.hV P.isAffineOpen_groupOpen
+            P.isAffineOpen_groupOpen rfl rfl :=
+  rfl
+
+/-- **The comultiplication is `R`-linear**: `Δ ∘ algebraMap = algebraMap`, the `Γ`-dual of
+`squareMul ≫ π = fst ≫ (structure map to V)`. -/
+theorem algebraMap_comp_groupPatchComul :
+    G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupPatchComul
+      = CommRingCat.ofHom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.groupRing)) := by
+  have halg : CommRingCat.ofHom (algebraMap P.baseRing P.groupRing)
+      = G.π.appLE P.V P.groupOpen le_rfl := rfl
+  -- the target factors through the left inclusion
+  rw [show CommRingCat.ofHom
+        (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.groupRing))
+      = G.π.appLE P.V P.groupOpen le_rfl
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+            (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)) from by
+    rw [← halg, ← CommRingCat.ofHom_comp]]
+  -- the left inclusion is the transported first projection
+  rw [← topIso_inv_fst_appTop_patchKunnethΓ G.π G.π P.hV P.isAffineOpen_groupOpen
+    P.isAffineOpen_groupOpen rfl rfl]
+  rw [groupPatchComul_eq, ← Category.assoc, ← Category.assoc, ← Category.assoc]
+  congr 1
+  -- both sides restrict `π` along the two routes around the square
+  rw [Scheme.Hom.appLE_comp_appLE, appLE_congr_hom P.squareMul_π P.V ⊤]
+  rw [show (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+          (G.π.resLE P.V P.groupOpen le_rfl)
+        ≫ G.π.resLE P.V P.groupOpen le_rfl ≫ P.V.ι).appLE P.V ⊤ _
+      = G.π.appLE P.V P.groupOpen le_rfl
+        ≫ P.groupOpen.topIso.inv
+        ≫ (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+            (G.π.resLE P.V P.groupOpen le_rfl)).appTop from ?_]
+  · exact (Category.assoc _ _ _).symm
+  -- the appLE of the composite, unwound
+  rw [appLE_congr_hom (Category.assoc
+      (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl))
+      (G.π.resLE P.V P.groupOpen le_rfl) P.V.ι).symm P.V ⊤,
+    ← Scheme.Hom.appLE_comp_appLE
+      (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl) ≫ G.π.resLE P.V P.groupOpen le_rfl)
+      P.V.ι P.V ⊤ ⊤ P.V.ι_preimage_self.ge le_top,
+    ι_appLE_top]
+  rw [show (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)
+      ≫ G.π.resLE P.V P.groupOpen le_rfl).appLE ⊤ ⊤ le_top
+      = (G.π.resLE P.V P.groupOpen le_rfl).appTop
+        ≫ (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+            (G.π.resLE P.V P.groupOpen le_rfl)).appTop from
+    (Scheme.Hom.appLE_comp_appLE
+      (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl))
+      (G.π.resLE P.V P.groupOpen le_rfl) ⊤ ⊤ ⊤ le_top le_top).symm.trans
+      (by rw [appLE_top_top, appLE_top_top])]
+  rw [show (G.π.resLE P.V P.groupOpen le_rfl).appTop
+      = P.V.topIso.hom ≫ G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupOpen.topIso.inv from
+    Scheme.Hom.resLE_app_top (f := G.π) (U := P.V) (V := P.groupOpen) le_rfl]
+  simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
 end AffineChartPatch
 
