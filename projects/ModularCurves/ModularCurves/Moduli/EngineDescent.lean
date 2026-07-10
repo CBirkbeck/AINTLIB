@@ -599,7 +599,23 @@ This is the sole leaf standing between the engine and smoothness of the quotient
 theorem smoothOfRelativeDimension_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S}
     {z : S ⟶ E'} {hz : z ≫ p = 𝟙 S} (hlw : LocallyWeierstrass p z hz) :
     SmoothOfRelativeDimension 1 p := by
-  sorry
+  classical
+  choose U hUmem W hW using hlw
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @SmoothOfRelativeDimension 1)
+    (fun s : S => (U s).1) ?_ ?_
+  · refine top_le_iff.mp fun s _ => ?_
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hUmem s⟩
+  · intro s
+    obtain ⟨hell, e, he₁, -⟩ := hW s
+    haveI := hell
+    have hres : p ∣_ (U s).1 =
+        (pullbackRestrictIsoRestrict p (U s).1).inv ≫ pullback.snd p (U s).1.ι := rfl
+    have hsnd : pullback.snd p (U s).1.ι = e.hom ≫ projModelπ (W s) ≫ (U s).2.isoSpec.inv := by
+      rw [← Category.assoc, he₁, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    rw [hres, MorphismProperty.cancel_left_of_respectsIso (P := @SmoothOfRelativeDimension 1),
+      hsnd, MorphismProperty.cancel_left_of_respectsIso (P := @SmoothOfRelativeDimension 1),
+      MorphismProperty.cancel_right_of_respectsIso (P := @SmoothOfRelativeDimension 1)]
+    exact projModel_smooth (W s)
 
 /-- **([a5], the descended Weierstrass model — LEAF)** The quotient curve `E/G ⟶ X/G` admits a
 Zariski-local Weierstrass model.
