@@ -667,11 +667,6 @@ theorem mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic] :
         (modelOver W ◁ mulOver W) ≫ mulOver W := by
   sorry
 
-/-- **(T-W7.0g-one-mul)** Left unit law. -/
-theorem oneOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
-    (oneOver W ▷ modelOver W) ≫ mulOver W = (λ_ (modelOver W)).hom := by
-  sorry
-
 /-- **(T-W7.0g-mul-one·of_map)** Right unit law at the base-changed universal curve
 `universalWeierstrassLocU.map f` (the `h = rfl` case). The whisker-BC naturality `hnat` is
 discharged by `pullback.map_comp` on both sides (the Over-monoidal `HasPullback` instance and
@@ -754,6 +749,14 @@ map `classifyRingHomU W` presents `W` as a base change of the universal curve. -
 theorem mulOver_oneOver (W : WeierstrassCurve R) [W.IsElliptic] :
     (modelOver W ◁ oneOver W) ≫ mulOver W = (ρ_ (modelOver W)).hom :=
   mulOver_oneOver_of_eq (classifyRingHomU W) W (universalWeierstrassLocU_map_classifyRingHomU W)
+
+/-- **(T-W7.0g-one-mul)** Left unit law — derived from the right unit `mulOver_oneOver` and
+commutativity `mulOver_comm` by braiding naturality and the braiding–unitor coherence
+`braiding_rightUnitor`, halving the unit-law work. -/
+theorem oneOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
+    (oneOver W ▷ modelOver W) ≫ mulOver W = (λ_ (modelOver W)).hom := by
+  rw [← mulOver_comm W, ← Category.assoc, BraidedCategory.braiding_naturality_left,
+    Category.assoc, mulOver_oneOver, braiding_rightUnitor]
 
 /-- **(T-W7.0g-inv-law)** The left inverse law. -/
 theorem invOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
