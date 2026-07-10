@@ -144,6 +144,7 @@ set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf B1a.** Presheaf-level restriction of scalars along an
 arbitrary morphism of `CommRingCat`-valued ring presheaves is lax monoidal (sectionwise
 `x ⊗ₜ y ↦ x ⊗ₜ y`; no iso hypothesis). -/
+@[implicit_reducible]
 noncomputable def restrictScalarsLaxMonoidal : (restrictScalars ψ).LaxMonoidal where
   ε := restrictScalarsLaxε ψ
   μ P Q := restrictScalarsLaxμ ψ P Q
@@ -200,6 +201,7 @@ noncomputable def pushforwardIsoFactored :
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf B1 (lax structure on the factored pushforward).** -/
+@[implicit_reducible]
 noncomputable def pushforwardFactoredLaxMonoidal : (pushforwardFactored φ).LaxMonoidal :=
   letI : (restrictScalars (R' := (F.op ⋙ R) ⋙ forget₂ CommRingCat RingCat) φ).LaxMonoidal :=
     restrictScalarsLaxMonoidal (T₂ := F.op ⋙ R) φ
@@ -245,6 +247,7 @@ presheaf pullback along an arbitrary morphism of `CommRingCat`-derived ring pres
 doctrinal adjunction (`Adjunction.leftAdjointOplaxMonoidal`) applied to the transported
 adjunction. Its `δ_{P,Q} : f^*ᵖ(P⊗Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ` is the comparison map whose
 invertibility is the remaining content (leaves G1/G3). -/
+@[implicit_reducible]
 noncomputable def pullbackOplaxMonoidal [(pushforward.{u} φ).IsRightAdjoint] :
     (pullback.{u} φ).OplaxMonoidal :=
   letI := pushforwardFactoredLaxMonoidal φ
@@ -662,7 +665,7 @@ lemma preservesColimitsOfShape_tensorRight
           (T ⋙ forget₂ CommRingCat RingCat) V).mapCocone c) :=
         isColimitOfPreserves _ hc
       have h2 := isColimitOfPreserves (MonoidalCategory.tensorRight (Q.obj V)) h1
-      exact h2.ofIsoColimit (Cocones.ext (Iso.refl _) (fun j => by
+      exact h2.ofIsoColimit (Cocone.ext (Iso.refl _) (fun j => by
         dsimp
         rw [Category.comp_id])) }
 
@@ -1158,6 +1161,7 @@ set_option backward.isDefEq.respectTransparency false in
 scheme morphism is a monoidal functor** — `f^*ᵖ(P ⊗ Q) ≅ f^*ᵖP ⊗ f^*ᵖQ` and
 `f^*ᵖ(𝒪_X) ≅ 𝒪_Y`, before sheafification: the doctrinal oplax structure has invertible
 structure maps ([G3-pre] + [G3-η] + the presentation extension). -/
+@[implicit_reducible]
 noncomputable def pullbackMonoidal :
     (pullback.{u} (schemeRingPresheafHom f)).Monoidal :=
   letI := pullbackOplaxMonoidal (schemeRingPresheafHom f)
@@ -1278,7 +1282,7 @@ theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
   letI := Modules.monoidalCategory Y
   exact (_root_.PresheafOfModules.nonempty_sheafPullback_monoidal
     (F := TopologicalSpace.Opens.map f.base)
-    X.sheaf.obj X.ringCatSheaf.cond Y.sheaf.obj Y.ringCatSheaf.cond
+    X.sheaf.obj X.ringCatSheaf.property Y.sheaf.obj Y.ringCatSheaf.property
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
     (_root_.PresheafOfModules.pullbackMonoidal f) :
     Nonempty ((Modules.pullback f).Monoidal))
@@ -1294,12 +1298,12 @@ sheafification to the (inverse of the) tensorator of the monoidal presheaf pullb
 theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X)
     (P Q : _root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :
     Nonempty ((PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj)).obj
         ((PresheafOfModules.pullback.{u}
           (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj (P ⊗ Q)) ≅
       (PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj)).obj
         ((PresheafOfModules.pullback.{u}
             (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj P ⊗
@@ -1307,7 +1311,7 @@ theorem nonempty_sheafify_presheafPullback_tensor (f : Y ⟶ X)
             (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj Q)) := by
   letI := _root_.PresheafOfModules.pullbackMonoidal f
   exact ⟨(PresheafOfModules.sheafification.{u}
-      (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.cond⟩ :
+      (𝟙 (⟨Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat, Y.ringCatSheaf.property⟩ :
         Sheaf _ RingCat.{u}).obj)).mapIso
     (Functor.Monoidal.μIso (PresheafOfModules.pullback.{u}
       (_root_.PresheafOfModules.schemeRingPresheafHom f)) P Q).symm⟩

@@ -61,6 +61,7 @@ mathlib's `LocalizedMonoidal` applied to the sheafification localization
 (`sheafificationW_isMonoidal`, the [GAP1-W-MONO] leaf). A `def`, not an instance, per the
 `CategoryTheory.Sheaf.monoidalCategory` precedent — activate with
 `attribute [local instance]` or `letI`. -/
+@[implicit_reducible]
 noncomputable def sheafOfModulesMonoidalCategory :
     MonoidalCategory
       (SheafOfModules.{u} (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u})) :=
@@ -73,6 +74,7 @@ noncomputable def sheafOfModulesMonoidalCategory :
 
 /-- The symmetric monoidal structure on sheaves of modules (the braiding descends from
 the symmetric structure on presheaves of modules through the localization). -/
+@[implicit_reducible]
 noncomputable def sheafOfModulesSymmetricCategory :
     letI := sheafOfModulesMonoidalCategory S hS
     SymmetricCategory
@@ -94,14 +96,16 @@ namespace Modules
 `PresheafOfModules.sheafOfModulesMonoidalCategory` across the structure-eta identification
 `X.ringCatSheaf = ⟨X.sheaf.obj ⋙ forget₂, _⟩`). A `def`, not an instance — activate with
 `letI` / `attribute [local instance]`. -/
+@[implicit_reducible]
 noncomputable def monoidalCategory (X : Scheme.{u}) : MonoidalCategory X.Modules :=
-  PresheafOfModules.sheafOfModulesMonoidalCategory X.sheaf.obj X.ringCatSheaf.cond
+  PresheafOfModules.sheafOfModulesMonoidalCategory X.sheaf.obj X.ringCatSheaf.property
 
 /-- The symmetric monoidal structure on `𝒪ₓ`-modules. -/
+@[implicit_reducible]
 noncomputable def symmetricCategory (X : Scheme.{u}) :
     letI := monoidalCategory X
     SymmetricCategory X.Modules :=
-  PresheafOfModules.sheafOfModulesSymmetricCategory X.sheaf.obj X.ringCatSheaf.cond
+  PresheafOfModules.sheafOfModulesSymmetricCategory X.sheaf.obj X.ringCatSheaf.property
 
 end Modules
 

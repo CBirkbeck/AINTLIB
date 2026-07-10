@@ -47,41 +47,41 @@ theorem nonempty_tensorObj_iso_tensor (M N : X.Modules) :
   letI := Modules.monoidalCategory X
   have eM : (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (Iso.refl _)).obj M.val ≅
       (M : LocalizedMonoidal
         (_root_.PresheafOfModules.sheafification.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
             Sheaf _ RingCat.{u}).obj))
         (_root_.PresheafOfModules.sheafificationW.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
             Sheaf _ RingCat.{u}).obj)) (Iso.refl _)) := sheafifyValIso M
   have eN : (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (Iso.refl _)).obj N.val ≅
       (N : LocalizedMonoidal
         (_root_.PresheafOfModules.sheafification.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
             Sheaf _ RingCat.{u}).obj))
         (_root_.PresheafOfModules.sheafificationW.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
             Sheaf _ RingCat.{u}).obj)) (Iso.refl _)) := sheafifyValIso N
   exact ⟨((tensorIso eM.symm eN.symm) ≪≫
     Functor.Monoidal.μIso (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.cond⟩ :
+        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
           Sheaf _ RingCat.{u}).obj))
       (Iso.refl _)) M.val N.val).symm⟩
 
