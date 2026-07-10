@@ -399,6 +399,23 @@ theorem appLE_comp_coactionRing :
       = (Scheme.ΓSpecIso Γ(S, P.V)).hom from rfl]
   rw [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
+/-- **The chart co-action as an `R`-algebra map** into `A ⊗[R] B` (group factor first). -/
+noncomputable def coactionAlgLeft :
+    P.chartRing →ₐ[P.baseRing] (P.groupRing ⊗[P.baseRing] P.chartRing) where
+  toRingHom := P.coactionRing.hom
+  commutes' := fun r => by
+    have h := congrArg (fun f : P.baseRing ⟶ _ => f.hom r) P.appLE_comp_coactionRing
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+
+/-- **The chart co-action in comodule convention** `ρ_U : B →ₐ[R] B ⊗[R] A`: swap the two
+tensor factors of `coactionAlgLeft`. This is the map fed to `IsCoaction` and, through it,
+to the Hopf–Galois theorem. -/
+noncomputable def chartCoaction :
+    P.chartRing →ₐ[P.baseRing] (P.chartRing ⊗[P.baseRing] P.groupRing) :=
+  (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).toAlgHom.comp
+    P.coactionAlgLeft
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
